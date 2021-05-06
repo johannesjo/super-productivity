@@ -8,14 +8,14 @@ const DIRECTION_RIGHT = 4;
 // eslint-disable-next-line no-bitwise
 const DIRECTION_HORIZONTAL = DIRECTION_LEFT | DIRECTION_RIGHT;
 
-@Injectable({providedIn: 'root'})
+@Injectable({ providedIn: 'root' })
 export class MyHammerConfig extends HammerGestureConfig {
   overrides: {
     [key: string]: Record<string, unknown>;
   } = {
-    swipe: {direction: DIRECTION_HORIZONTAL},
-    pan: {direction: 6},
-    pinch: {enable: false},
-    rotate: {enable: false}
+    swipe: { direction: DIRECTION_HORIZONTAL },
+    pan: { direction: 6 },
+    pinch: { enable: false },
+    rotate: { enable: false },
   };
 }

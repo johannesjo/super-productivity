@@ -1,7 +1,7 @@
 import { Pipe, PipeTransform } from '@angular/core';
 
 @Pipe({
-  name: 'durationToString'
+  name: 'durationToString',
 })
 export class DurationToStringPipe implements PipeTransform {
   transform: (value: any, ...args: any[]) => any = durationToString;
@@ -14,13 +14,12 @@ export const durationToString = (momentDuration: any, args?: any): any => {
   if (md) {
     // if moment duration object
     if (md.duration || md._milliseconds) {
-
-      const dd = md.duration && md.duration()._data || md._data;
+      const dd = (md.duration && md.duration()._data) || md._data;
       val = '';
-      val += parseInt(dd.days, 10) > 0 && (dd.days + 'd ') || '';
-      val += parseInt(dd.hours, 10) > 0 && (dd.hours + 'h ') || '';
-      val += parseInt(dd.minutes, 10) > 0 && (dd.minutes + 'm ') || '';
-      val += parseInt(dd.seconds, 10) > 0 && (dd.seconds + 's ') || '';
+      val += (parseInt(dd.days, 10) > 0 && dd.days + 'd ') || '';
+      val += (parseInt(dd.hours, 10) > 0 && dd.hours + 'h ') || '';
+      val += (parseInt(dd.minutes, 10) > 0 && dd.minutes + 'm ') || '';
+      val += (parseInt(dd.seconds, 10) > 0 && dd.seconds + 's ') || '';
       val = val.trim();
 
       // if moment duration string

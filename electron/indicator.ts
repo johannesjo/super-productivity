@@ -7,7 +7,7 @@ import { getWin } from './main-window';
 let tray;
 let isIndicatorRunning = false;
 let DIR: string;
-let shouldUseDarkColors : boolean;
+let shouldUseDarkColors: boolean;
 
 const isGnomeShellExtensionRunning = false;
 
@@ -16,7 +16,7 @@ export const initIndicator = ({
   quitApp,
   app,
   ICONS_FOLDER,
-  forceDarkTray
+  forceDarkTray,
 }: {
   showApp: () => void;
   quitApp: () => void;
@@ -30,9 +30,7 @@ export const initIndicator = ({
   initAppListeners(app);
   initListeners();
 
-  const suf = shouldUseDarkColors
-    ? '-d.png'
-    : '-l.png';
+  const suf = shouldUseDarkColors ? '-d.png' : '-l.png';
   tray = new Tray(DIR + `stopped${suf}`);
   tray.setContextMenu(createContextMenu(showApp, quitApp));
 
@@ -55,10 +53,8 @@ function initAppListeners(app) {
 }
 
 function initListeners() {
-  ipcMain.on(IPC.SET_PROGRESS_BAR, (ev, {progress}) => {
-    const suf = shouldUseDarkColors
-      ? '-d'
-      : '-l';
+  ipcMain.on(IPC.SET_PROGRESS_BAR, (ev, { progress }) => {
+    const suf = shouldUseDarkColors ? '-d' : '-l';
     if (typeof progress === 'number' && progress > 0 && isFinite(progress)) {
       const f = Math.min(Math.round(progress * 15), 15);
       const t = DIR + `running-anim${suf}/${f || 0}.png`;
@@ -86,9 +82,7 @@ function initListeners() {
           tray.setTitle(msg);
         } else {
           tray.setTitle('');
-          const suf = shouldUseDarkColors
-            ? '-d.png'
-            : '-l.png';
+          const suf = shouldUseDarkColors ? '-d.png' : '-l.png';
           setTrayIcon(tray, DIR + `stopped${suf}`);
         }
       }
@@ -133,11 +127,13 @@ function createIndicatorStr(task): string {
 function createContextMenu(showApp, quitApp) {
   return Menu.buildFromTemplate([
     {
-      label: 'Show App', click: showApp
+      label: 'Show App',
+      click: showApp,
     },
     {
-      label: 'Quit', click: quitApp
-    }
+      label: 'Quit',
+      click: quitApp,
+    },
   ]);
 }
 
@@ -146,6 +142,7 @@ export const isRunning = () => {
 };
 
 let curIco: string;
+
 function setTrayIcon(tr: Tray, icoPath: string) {
   if (icoPath !== curIco) {
     curIco = icoPath;

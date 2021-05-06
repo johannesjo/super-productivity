@@ -6,15 +6,7 @@ import { TasksModule } from '../tasks/tasks.module';
 import { RouterModule } from '@angular/router';
 
 @NgModule({
-  imports: [
-    CommonModule,
-    UiModule,
-    TasksModule,
-    RouterModule,
-  ],
-  declarations: [
-    ProcrastinationComponent,
-  ],
+  imports: [CommonModule, UiModule, TasksModule, RouterModule],
+  declarations: [ProcrastinationComponent],
 })
-export class ProcrastinationModule {
-}
+export class ProcrastinationModule {}

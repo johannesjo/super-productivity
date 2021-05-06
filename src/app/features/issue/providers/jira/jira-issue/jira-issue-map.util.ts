@@ -1,33 +1,44 @@
-import { JiraAttachment, JiraAuthor, JiraChangelogEntry, JiraComment, JiraIssue } from './jira-issue.model';
+import {
+  JiraAttachment,
+  JiraAuthor,
+  JiraChangelogEntry,
+  JiraComment,
+  JiraIssue,
+} from './jira-issue.model';
 import {
   JiraIssueOriginal,
   JiraOriginalAttachment,
   JiraOriginalAuthor,
   JiraOriginalChangelog,
-  JiraOriginalComment
+  JiraOriginalComment,
 } from '../jira-api-responses';
 import { JiraCfg } from '../jira.model';
-import { DropPasteIcons, DropPasteInputType } from '../../../../../core/drop-paste-input/drop-paste.model';
+import {
+  DropPasteIcons,
+  DropPasteInputType,
+} from '../../../../../core/drop-paste-input/drop-paste.model';
 import { IssueProviderKey, SearchResultItem } from '../../../issue.model';
 import { TaskAttachment } from '../../../../tasks/task-attachment/task-attachment.model';
 import { dedupeByKey } from '../../../../../util/de-dupe-by-key';
 import { JIRA_TYPE } from '../../../issue.const';
 
 export const mapToSearchResults = (res: any): SearchResultItem[] => {
-  const issues = dedupeByKey(res.response.sections.map((sec: any) => sec.issues).flat(), 'key')
-    .map((issue: any) => {
-      return {
-        title: issue.key + ' ' + issue.summaryText,
-        titleHighlighted: issue.key + ' ' + issue.summary,
-        issueType: JIRA_TYPE as IssueProviderKey,
-        issueData: {
-          ...issue,
-          summary: issue.summaryText,
-          // NOTE: we always use the key, because it allows us to create the right link
-          id: issue.key,
-        },
-      };
-    });
+  const issues = dedupeByKey(
+    res.response.sections.map((sec: any) => sec.issues).flat(),
+    'key',
+  ).map((issue: any) => {
+    return {
+      title: issue.key + ' ' + issue.summaryText,
+      titleHighlighted: issue.key + ' ' + issue.summary,
+      issueType: JIRA_TYPE as IssueProviderKey,
+      issueData: {
+        ...issue,
+        summary: issue.summaryText,
+        // NOTE: we always use the key, because it allows us to create the right link
+        id: issue.key,
+      },
+    };
+  });
   return issues;
 };
 
@@ -39,7 +50,8 @@ export const mapIssuesResponse = (res: any, cfg: JiraCfg): JiraIssue[] => {
 
 export const mapResponse = (res: any): unknown => res.response;
 
-export const mapIssueResponse = (res: any, cfg: JiraCfg): JiraIssue => mapIssue(res.response, cfg);
+export const mapIssueResponse = (res: any, cfg: JiraCfg): JiraIssue =>
+  mapIssue(res.response, cfg);
 
 export const mapIssue = (issue: JiraIssueOriginal, cfg: JiraCfg): JiraIssue => {
   const issueCopy = Object.assign({}, issue);
@@ -56,20 +68,25 @@ export const mapIssue = (issue: JiraIssueOriginal, cfg: JiraCfg): JiraIssue => {
     summary: fields.summary,
     updated: fields.updated,
     status: fields.status,
-    storyPoints: (!!cfg.storyPointFieldId && !!(fields as any)[cfg.storyPointFieldId])
-      ? (fields as any)[cfg.storyPointFieldId] as number
-      : undefined,
+    storyPoints:
+      !!cfg.storyPointFieldId && !!(fields as any)[cfg.storyPointFieldId]
+        ? ((fields as any)[cfg.storyPointFieldId] as number)
+        : undefined,
     attachments: fields.attachment && fields.attachment.map(mapAttachment),
-    comments: (!!fields.comment && !!fields.comment.comments)
-      ? fields.comment.comments.map(mapComments)
-      : [],
+    comments:
+      !!fields.comment && !!fields.comment.comments
+        ? fields.comment.comments.map(mapComments)
+        : [],
     changelog: mapChangelog(issueCopy.changelog as JiraOriginalChangelog),
     assignee: mapAuthor(fields.assignee, true),
     // url: makeIssueUrl(cfg.host, issueCopy.key)
   };
 };
 
-export const mapAuthor = (author: JiraOriginalAuthor, isOptional: boolean = false): JiraAuthor | null => {
+export const mapAuthor = (
+  author: JiraOriginalAuthor,
+  isOptional: boolean = false,
+): JiraAuthor | null => {
   if (!author) {
     return null;
   }
@@ -82,18 +99,20 @@ export const mapAuthor = (author: JiraOriginalAuthor, isOptional: boolean = fals
 export const mapAttachment = (attachment: JiraOriginalAttachment): JiraAttachment => {
   return Object.assign({}, attachment, {
     self: undefined,
-    author: undefined
+    author: undefined,
   });
 };
 export const mapComments = (comment: JiraOriginalComment): JiraComment => {
   return Object.assign({}, comment, {
     self: undefined,
     updateAuthor: undefined,
-    author: mapAuthor(comment.author)
+    author: mapAuthor(comment.author),
   });
 };
 
-export const mapJiraAttachmentToAttachment = (jiraAttachment: JiraAttachment): TaskAttachment => {
+export const mapJiraAttachmentToAttachment = (
+  jiraAttachment: JiraAttachment,
+): TaskAttachment => {
   const type = mapAttachmentType(jiraAttachment.mimeType);
   return {
     id: null,
@@ -101,7 +120,7 @@ export const mapJiraAttachmentToAttachment = (jiraAttachment: JiraAttachment): T
     path: jiraAttachment.thumbnail || jiraAttachment.content,
     originalImgPath: jiraAttachment.content,
     type,
-    icon: DropPasteIcons[type]
+    icon: DropPasteIcons[type],
   };
 };
 
@@ -111,8 +130,8 @@ export const mapChangelog = (changelog: JiraOriginalChangelog): JiraChangelogEnt
     return [];
   }
 
-  changelog.histories.forEach(entry => {
-    entry.items.forEach(item => {
+  changelog.histories.forEach((entry) => {
+    entry.items.forEach((item) => {
       newChangelog.push({
         author: mapAuthor(entry.author, true),
         created: entry.created,
@@ -137,5 +156,4 @@ const mapAttachmentType = (mimeType: string): DropPasteInputType => {
     default:
       return 'LINK';
   }
-
 };

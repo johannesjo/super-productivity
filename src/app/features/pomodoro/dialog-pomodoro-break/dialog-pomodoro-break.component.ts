@@ -9,7 +9,7 @@ import { T } from '../../../t.const';
   selector: 'dialog-pomodoro-break',
   templateUrl: './dialog-pomodoro-break.component.html',
   styleUrls: ['./dialog-pomodoro-break.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class DialogPomodoroBreakComponent {
   T: typeof T = T;
@@ -19,7 +19,7 @@ export class DialogPomodoroBreakComponent {
   );
   isBreakDone$: Observable<boolean> = this.pomodoroService.isManualPause$;
   currentCycle$: Observable<number> = this.pomodoroService.currentCycle$.pipe(
-    map(cycle => cycle + 1)
+    map((cycle) => cycle + 1),
   );
 
   private _subs: Subscription = new Subscription();
@@ -35,14 +35,18 @@ export class DialogPomodoroBreakComponent {
   ) {
     // _matDialogRef.disableClose = true;
 
-    this._subs.add(this.pomodoroService.isBreak$.subscribe((isBreak) => {
-      if (!isBreak) {
-        this.isStopCurrentTime$.next(true);
-      }
-    }));
-    this._subs.add(this._isCloseDialog$.subscribe(() => {
-      this.close();
-    }));
+    this._subs.add(
+      this.pomodoroService.isBreak$.subscribe((isBreak) => {
+        if (!isBreak) {
+          this.isStopCurrentTime$.next(true);
+        }
+      }),
+    );
+    this._subs.add(
+      this._isCloseDialog$.subscribe(() => {
+        this.close();
+      }),
+    );
   }
 
   close() {

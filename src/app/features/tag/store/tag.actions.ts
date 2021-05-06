@@ -3,25 +3,13 @@ import { Update } from '@ngrx/entity';
 import { Tag } from '../tag.model';
 import { WorkContextAdvancedCfgKey } from '../../work-context/work-context.model';
 
-export const addTag = createAction(
-  '[Tag] Add Tag',
-  props<{ tag: Tag }>(),
-);
+export const addTag = createAction('[Tag] Add Tag', props<{ tag: Tag }>());
 
-export const updateTag = createAction(
-  '[Tag] Update Tag',
-  props<{ tag: Update<Tag> }>(),
-);
+export const updateTag = createAction('[Tag] Update Tag', props<{ tag: Update<Tag> }>());
 
-export const upsertTag = createAction(
-  '[Tag] Upsert Tag',
-  props<{ tag: Tag }>(),
-);
+export const upsertTag = createAction('[Tag] Upsert Tag', props<{ tag: Tag }>());
 
-export const deleteTag = createAction(
-  '[Tag] Delete Tag',
-  props<{ id: string }>(),
-);
+export const deleteTag = createAction('[Tag] Delete Tag', props<{ id: string }>());
 
 export const deleteTags = createAction(
   '[Tag] Delete multiple Tags',

@@ -11,11 +11,11 @@ export type GoogleSession = Readonly<{
 const DEFAULT_GOOGLE_SESSION: GoogleSession = {
   accessToken: null,
   refreshToken: null,
-  expiresAt: null
+  expiresAt: null,
 };
 
 export const getGoogleSession = (): GoogleSession => {
-  return loadFromRealLs(LS_GOOGLE_SESSION) as GoogleSession || DEFAULT_GOOGLE_SESSION;
+  return (loadFromRealLs(LS_GOOGLE_SESSION) as GoogleSession) || DEFAULT_GOOGLE_SESSION;
 };
 
 export const updateGoogleSession = (googleSession: Partial<GoogleSession>) => {

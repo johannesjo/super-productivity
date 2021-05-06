@@ -5,7 +5,11 @@ import * as shortid from 'shortid';
 import { DialogEditTaskAttachmentComponent } from './dialog-edit-attachment/dialog-edit-task-attachment.component';
 import { MatDialog } from '@angular/material/dialog';
 import { DropPasteInput } from '../../../core/drop-paste-input/drop-paste.model';
-import { AddTaskAttachment, DeleteTaskAttachment, UpdateTaskAttachment } from './task-attachment.actions';
+import {
+  AddTaskAttachment,
+  DeleteTaskAttachment,
+  UpdateTaskAttachment,
+} from './task-attachment.actions';
 import { TaskState } from '../task.model';
 import { createFromDrop } from 'src/app/core/drop-paste-input/drop-paste-input';
 
@@ -13,12 +17,7 @@ import { createFromDrop } from 'src/app/core/drop-paste-input/drop-paste-input';
   providedIn: 'root',
 })
 export class TaskAttachmentService {
-
-  constructor(
-    private _store$: Store<TaskState>,
-    private _matDialog: MatDialog,
-  ) {
-  }
+  constructor(private _store$: Store<TaskState>, private _matDialog: MatDialog) {}
 
   addAttachment(taskId: string, taskAttachment: TaskAttachment) {
     if (!taskAttachment) {
@@ -26,21 +25,25 @@ export class TaskAttachmentService {
       return;
     }
 
-    this._store$.dispatch(new AddTaskAttachment({
-      taskId,
-      taskAttachment: {
-        ...taskAttachment,
-        id: shortid()
-      }
-    }));
+    this._store$.dispatch(
+      new AddTaskAttachment({
+        taskId,
+        taskAttachment: {
+          ...taskAttachment,
+          id: shortid(),
+        },
+      }),
+    );
   }
 
   deleteAttachment(taskId: string, id: string) {
-    this._store$.dispatch(new DeleteTaskAttachment({taskId, id}));
+    this._store$.dispatch(new DeleteTaskAttachment({ taskId, id }));
   }
 
   updateAttachment(taskId: string, id: string, changes: Partial<TaskAttachment>) {
-    this._store$.dispatch(new UpdateTaskAttachment({taskId, taskAttachment: {id, changes}}));
+    this._store$.dispatch(
+      new UpdateTaskAttachment({ taskId, taskAttachment: { id, changes } }),
+    );
   }
 
   // HANDLE INPUT
@@ -68,12 +71,14 @@ export class TaskAttachmentService {
     ev.preventDefault();
     ev.stopPropagation();
 
-    this._matDialog.open(DialogEditTaskAttachmentComponent, {
-      restoreFocus: true,
-      data: {
-        attachment: {...attachment, taskId},
-      },
-    }).afterClosed()
+    this._matDialog
+      .open(DialogEditTaskAttachmentComponent, {
+        restoreFocus: true,
+        data: {
+          attachment: { ...attachment, taskId },
+        },
+      })
+      .afterClosed()
       .subscribe((attachmentIN) => {
         if (attachmentIN) {
           if (attachmentIN.id) {

@@ -20,5 +20,4 @@ import { CaldavIssueEffects } from './caldav-issue.effects';
   ],
   exports: [CaldavIssueHeaderComponent, CaldavIssueContentComponent],
 })
-export class CaldavIssueModule {
-}
+export class CaldavIssueModule {}

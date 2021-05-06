@@ -7,6 +7,4 @@ export const isOnline$ = merge(
   fromEvent(window, 'offline').pipe(mapTo(false)),
   fromEvent(window, 'online').pipe(mapTo(true)),
   of(navigator.onLine),
-).pipe(
-  shareReplay(1),
-);
+).pipe(shareReplay(1));

@@ -6,10 +6,13 @@ import { BreakNr, BreakTime } from '../work-context/work-context.model';
 import { exists } from '../../util/exists';
 
 // really TaskWithSubTasks?
-export const mapSimpleMetrics = (
-  [breakNr, breakTime, worklog, totalTimeSpent, allTasks]:
-    [BreakNr, BreakTime, Worklog, number, TaskWithSubTasks[]]): SimpleMetrics => {
-
+export const mapSimpleMetrics = ([
+  breakNr,
+  breakTime,
+  worklog,
+  totalTimeSpent,
+  allTasks,
+]: [BreakNr, BreakTime, Worklog, number, TaskWithSubTasks[]]): SimpleMetrics => {
   const s = {
     start: 99999999999999999999999,
     end: getWorklogStr(),
@@ -28,7 +31,7 @@ export const mapSimpleMetrics = (
   };
 
   allTasks.forEach((task) => {
-    if ((task.created < s.start)) {
+    if (task.created < s.start) {
       s.start = task.created;
     }
 
@@ -58,7 +61,7 @@ export const mapSimpleMetrics = (
     avgTasksPerDay: s.nrOfMainTasks / s.daysWorked,
     avgTimeSpentOnDay: s.timeSpent / s.daysWorked,
     avgTimeSpentOnTask: s.timeSpent / s.nrOfMainTasks,
-    avgTimeSpentOnTaskIncludingSubTasks: s.timeSpent / (s.nrOfAllTasks - s.nrOfParentTasks),
-
+    avgTimeSpentOnTaskIncludingSubTasks:
+      s.timeSpent / (s.nrOfAllTasks - s.nrOfParentTasks),
   };
 };

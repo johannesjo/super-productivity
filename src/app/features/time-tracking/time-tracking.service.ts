@@ -22,7 +22,7 @@ export class TimeTrackingService {
       };
     }),
     // important because we want the same interval for everyone
-    share()
+    share(),
   );
 
   constructor() {

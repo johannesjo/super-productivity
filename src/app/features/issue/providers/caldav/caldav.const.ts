@@ -1,5 +1,8 @@
 import { CaldavCfg } from './caldav.model';
-import { ConfigFormSection, LimitedFormlyFieldConfig } from '../../../config/global-config.model';
+import {
+  ConfigFormSection,
+  LimitedFormlyFieldConfig,
+} from '../../../config/global-config.model';
 import { T } from '../../../../t.const';
 
 export const DEFAULT_CALDAV_CFG: CaldavCfg = {
@@ -24,8 +27,8 @@ export const CALDAV_CONFIG_FORM: LimitedFormlyFieldConfig<CaldavCfg>[] = [
     templateOptions: {
       label: T.F.CALDAV.FORM.CALDAV_URL,
       type: 'text',
-      pattern: /((([A-Za-z]{3,9}:(?:\/\/)?)(?:[\-;:&=\+\$,\w]+@)?[A-Za-z0-9\.\-]+|(?:www\.|[\-;:&=\+\$,\w]+@)[A-Za-z0-9\.\-]+)((?:\/[\+~%\/\.\w\-_]*)?\??(?:[\-\+=&;%@\.\w_]*)#?(?:[\.\!\/\\\w]*))?)/
-    }
+      pattern: /((([A-Za-z]{3,9}:(?:\/\/)?)(?:[\-;:&=\+\$,\w]+@)?[A-Za-z0-9\.\-]+|(?:www\.|[\-;:&=\+\$,\w]+@)[A-Za-z0-9\.\-]+)((?:\/[\+~%\/\.\w\-_]*)?\??(?:[\-\+=&;%@\.\w_]*)#?(?:[\.\!\/\\\w]*))?)/,
+    },
   },
   {
     key: 'resourceName',
@@ -64,28 +67,28 @@ export const CALDAV_CONFIG_FORM: LimitedFormlyFieldConfig<CaldavCfg>[] = [
     key: 'isSearchIssuesFromCaldav',
     type: 'checkbox',
     templateOptions: {
-      label: T.F.CALDAV.FORM.IS_SEARCH_ISSUES_FROM_CALDAV
+      label: T.F.CALDAV.FORM.IS_SEARCH_ISSUES_FROM_CALDAV,
     },
   },
   {
     key: 'isAutoPoll',
     type: 'checkbox',
     templateOptions: {
-      label: T.F.CALDAV.FORM.IS_AUTO_POLL
+      label: T.F.CALDAV.FORM.IS_AUTO_POLL,
     },
   },
   {
     key: 'isAutoAddToBacklog',
     type: 'checkbox',
     templateOptions: {
-      label: T.F.CALDAV.FORM.IS_AUTO_ADD_TO_BACKLOG
+      label: T.F.CALDAV.FORM.IS_AUTO_ADD_TO_BACKLOG,
     },
   },
   {
     key: 'isTransitionIssuesEnabled',
     type: 'checkbox',
     templateOptions: {
-      label: T.F.CALDAV.FORM.IS_TRANSITION_ISSUES_ENABLED
+      label: T.F.CALDAV.FORM.IS_TRANSITION_ISSUES_ENABLED,
     },
   },
   {

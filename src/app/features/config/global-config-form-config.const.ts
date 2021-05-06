@@ -16,23 +16,23 @@ import { IS_ELECTRON } from '../../app.constants';
 import { IS_ANDROID_WEB_VIEW } from '../../util/is-android-web-view';
 
 export const GLOBAL_CONFIG_FORM_CONFIG: ConfigFormConfig = [
-  (LANGUAGE_SELECTION_FORM_FORM as GenericConfigFormSection),
-  (MISC_SETTINGS_FORM_CFG as GenericConfigFormSection),
-  (IDLE_FORM_CFG as GenericConfigFormSection),
-  (KEYBOARD_SETTINGS_FORM_CFG as GenericConfigFormSection),
-  (TRACKING_REMINDER_FORM_CFG as GenericConfigFormSection),
-  (SOUND_FORM_CFG as GenericConfigFormSection),
+  LANGUAGE_SELECTION_FORM_FORM as GenericConfigFormSection,
+  MISC_SETTINGS_FORM_CFG as GenericConfigFormSection,
+  IDLE_FORM_CFG as GenericConfigFormSection,
+  KEYBOARD_SETTINGS_FORM_CFG as GenericConfigFormSection,
+  TRACKING_REMINDER_FORM_CFG as GenericConfigFormSection,
+  SOUND_FORM_CFG as GenericConfigFormSection,
 ].filter((cfg) => IS_ELECTRON || !cfg.isElectronOnly);
 
 export const GLOBAL_SYNC_FORM_CONFIG: ConfigFormConfig = [
-  (SYNC_FORM as GenericConfigFormSection),
+  SYNC_FORM as GenericConfigFormSection,
   ...(IS_ANDROID_WEB_VIEW ? [] : [IMEX_FORM as GenericConfigFormSection]),
-  (AUTOMATIC_BACKUPS_FORM as GenericConfigFormSection),
+  AUTOMATIC_BACKUPS_FORM as GenericConfigFormSection,
 ].filter((cfg) => IS_ELECTRON || !cfg.isElectronOnly);
 
 export const GLOBAL_PRODUCTIVITY_FORM_CONFIG: ConfigFormConfig = [
-  (TAKE_A_BREAK_FORM_CFG as GenericConfigFormSection),
-  (POMODORO_FORM_CFG as GenericConfigFormSection),
-  (EVALUATION_SETTINGS_FORM_CFG as GenericConfigFormSection),
-  (SIMPLE_COUNTER_FORM as GenericConfigFormSection),
+  TAKE_A_BREAK_FORM_CFG as GenericConfigFormSection,
+  POMODORO_FORM_CFG as GenericConfigFormSection,
+  EVALUATION_SETTINGS_FORM_CFG as GenericConfigFormSection,
+  SIMPLE_COUNTER_FORM as GenericConfigFormSection,
 ].filter((cfg) => IS_ELECTRON || !cfg.isElectronOnly);

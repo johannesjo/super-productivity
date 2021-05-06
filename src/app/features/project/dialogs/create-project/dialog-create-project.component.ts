@@ -1,4 +1,11 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Inject, OnDestroy, OnInit } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  Inject,
+  OnDestroy,
+  OnInit,
+} from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { Project, ProjectCopy } from '../../project.model';
 import { FormGroup } from '@angular/forms';
@@ -11,10 +18,13 @@ import { IssueIntegrationCfgs } from '../../../issue/issue.model';
 import { DialogJiraInitialSetupComponent } from '../../../issue/providers/jira/jira-view-components/dialog-jira-initial-setup/dialog-jira-initial-setup.component';
 import { SS_PROJECT_TMP } from '../../../../core/persistence/ls-keys.const';
 import { Subscription } from 'rxjs';
-import { loadFromSessionStorage, saveToSessionStorage } from '../../../../core/persistence/local-storage';
+import {
+  loadFromSessionStorage,
+  saveToSessionStorage,
+} from '../../../../core/persistence/local-storage';
 import { GithubCfg } from '../../../issue/providers/github/github.model';
 import { DialogGithubInitialSetupComponent } from '../../../issue/providers/github/github-view-components/dialog-github-initial-setup/dialog-github-initial-setup.component';
-import {CALDAV_TYPE, GITHUB_TYPE, GITLAB_TYPE} from '../../../issue/issue.const';
+import { CALDAV_TYPE, GITHUB_TYPE, GITLAB_TYPE } from '../../../issue/issue.const';
 import { T } from '../../../../t.const';
 import { DEFAULT_JIRA_CFG } from '../../../issue/providers/jira/jira.const';
 import { DEFAULT_GITHUB_CFG } from '../../../issue/providers/github/github.const';
@@ -22,9 +32,9 @@ import { WORK_CONTEXT_THEME_CONFIG_FORM_CONFIG } from '../../../work-context/wor
 import { GitlabCfg } from 'src/app/features/issue/providers/gitlab/gitlab';
 import { DEFAULT_GITLAB_CFG } from 'src/app/features/issue/providers/gitlab/gitlab.const';
 import { DialogGitlabInitialSetupComponent } from 'src/app/features/issue/providers/gitlab/dialog-gitlab-initial-setup/dialog-gitlab-initial-setup.component';
-import {CaldavCfg} from 'src/app/features/issue/providers/caldav/caldav.model';
-import {DEFAULT_CALDAV_CFG} from 'src/app/features/issue/providers/caldav/caldav.const';
-import {DialogCaldavInitialSetupComponent} from 'src/app/features/issue/providers/caldav/dialog-caldav-initial-setup/dialog-caldav-initial-setup.component';
+import { CaldavCfg } from 'src/app/features/issue/providers/caldav/caldav.model';
+import { DEFAULT_CALDAV_CFG } from 'src/app/features/issue/providers/caldav/caldav.const';
+import { DialogCaldavInitialSetupComponent } from 'src/app/features/issue/providers/caldav/dialog-caldav-initial-setup/dialog-caldav-initial-setup.component';
 
 @Component({
   selector: 'dialog-create-project',
@@ -73,8 +83,7 @@ export class DialogCreateProjectComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     if (this._project) {
-      this.projectData = {...this._project};
-
+      this.projectData = { ...this._project };
     } else {
       const ssVal: any = loadFromSessionStorage(SS_PROJECT_TMP);
       if (ssVal) {
@@ -155,59 +164,75 @@ export class DialogCreateProjectComponent implements OnInit, OnDestroy {
   }
 
   openJiraCfg() {
-    this._subs.add(this._matDialog.open(DialogJiraInitialSetupComponent, {
-      restoreFocus: true,
-      data: {
-        jiraCfg: this.jiraCfg,
-      }
-    }).afterClosed().subscribe((jiraCfg: JiraCfg) => {
-
-      if (jiraCfg) {
-        this._saveJiraCfg(jiraCfg);
-      }
-    }));
+    this._subs.add(
+      this._matDialog
+        .open(DialogJiraInitialSetupComponent, {
+          restoreFocus: true,
+          data: {
+            jiraCfg: this.jiraCfg,
+          },
+        })
+        .afterClosed()
+        .subscribe((jiraCfg: JiraCfg) => {
+          if (jiraCfg) {
+            this._saveJiraCfg(jiraCfg);
+          }
+        }),
+    );
   }
 
   openGithubCfg() {
-    this._subs.add(this._matDialog.open(DialogGithubInitialSetupComponent, {
-      restoreFocus: true,
-      data: {
-        githubCfg: this.githubCfg,
-      }
-    }).afterClosed().subscribe((gitCfg: GithubCfg) => {
-
-      if (gitCfg) {
-        this._saveGithubCfg(gitCfg);
-      }
-    }));
+    this._subs.add(
+      this._matDialog
+        .open(DialogGithubInitialSetupComponent, {
+          restoreFocus: true,
+          data: {
+            githubCfg: this.githubCfg,
+          },
+        })
+        .afterClosed()
+        .subscribe((gitCfg: GithubCfg) => {
+          if (gitCfg) {
+            this._saveGithubCfg(gitCfg);
+          }
+        }),
+    );
   }
 
   openGitlabCfg() {
-    this._subs.add(this._matDialog.open(DialogGitlabInitialSetupComponent, {
-      restoreFocus: true,
-      data: {
-        gitlabCfg: this.gitlabCfg,
-      }
-    }).afterClosed().subscribe((gitlabCfg: GitlabCfg) => {
-
-      if (gitlabCfg) {
-        this._saveGitlabCfg(gitlabCfg);
-      }
-    }));
+    this._subs.add(
+      this._matDialog
+        .open(DialogGitlabInitialSetupComponent, {
+          restoreFocus: true,
+          data: {
+            gitlabCfg: this.gitlabCfg,
+          },
+        })
+        .afterClosed()
+        .subscribe((gitlabCfg: GitlabCfg) => {
+          if (gitlabCfg) {
+            this._saveGitlabCfg(gitlabCfg);
+          }
+        }),
+    );
   }
 
   openCaldavCfg() {
-    this._subs.add(this._matDialog.open(DialogCaldavInitialSetupComponent, {
-      restoreFocus: true,
-      data: {
-        caldavCfg: this.caldavCfg,
-      }
-    }).afterClosed().subscribe((caldavCfg: CaldavCfg) => {
-
-      if (caldavCfg) {
-        this._saveCaldavCfg(caldavCfg);
-      }
-    }));
+    this._subs.add(
+      this._matDialog
+        .open(DialogCaldavInitialSetupComponent, {
+          restoreFocus: true,
+          data: {
+            caldavCfg: this.caldavCfg,
+          },
+        })
+        .afterClosed()
+        .subscribe((caldavCfg: CaldavCfg) => {
+          if (caldavCfg) {
+            this._saveCaldavCfg(caldavCfg);
+          }
+        }),
+    );
   }
 
   private _saveJiraCfg(jiraCfg: JiraCfg) {
@@ -216,7 +241,11 @@ export class DialogCreateProjectComponent implements OnInit, OnDestroy {
 
     // if we're editing save right away
     if (this.projectData.id) {
-      this._projectService.updateIssueProviderConfig(this.projectData.id, 'JIRA', this.jiraCfg);
+      this._projectService.updateIssueProviderConfig(
+        this.projectData.id,
+        'JIRA',
+        this.jiraCfg,
+      );
     }
   }
 
@@ -226,7 +255,11 @@ export class DialogCreateProjectComponent implements OnInit, OnDestroy {
 
     // if we're editing save right away
     if (this.projectData.id) {
-      this._projectService.updateIssueProviderConfig(this.projectData.id, GITHUB_TYPE, this.githubCfg);
+      this._projectService.updateIssueProviderConfig(
+        this.projectData.id,
+        GITHUB_TYPE,
+        this.githubCfg,
+      );
     }
   }
 
@@ -236,7 +269,11 @@ export class DialogCreateProjectComponent implements OnInit, OnDestroy {
 
     // if we're editing save right away
     if (this.projectData.id) {
-      this._projectService.updateIssueProviderConfig(this.projectData.id, GITLAB_TYPE, this.gitlabCfg);
+      this._projectService.updateIssueProviderConfig(
+        this.projectData.id,
+        GITLAB_TYPE,
+        this.gitlabCfg,
+      );
     }
   }
 
@@ -246,7 +283,11 @@ export class DialogCreateProjectComponent implements OnInit, OnDestroy {
 
     // if we're editing save right away
     if (this.projectData.id) {
-      this._projectService.updateIssueProviderConfig(this.projectData.id, CALDAV_TYPE, this.caldavCfg);
+      this._projectService.updateIssueProviderConfig(
+        this.projectData.id,
+        CALDAV_TYPE,
+        this.caldavCfg,
+      );
     }
   }
 }

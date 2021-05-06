@@ -11,63 +11,63 @@ export const POMODORO_FORM_CFG: ConfigFormSection<PomodoroConfig> = {
       key: 'isEnabled',
       type: 'checkbox',
       templateOptions: {
-        label: T.GCF.POMODORO.IS_ENABLED
+        label: T.GCF.POMODORO.IS_ENABLED,
       },
     },
     {
       key: 'isStopTrackingOnBreak',
       type: 'checkbox',
       templateOptions: {
-        label: T.GCF.POMODORO.IS_STOP_TRACKING_ON_BREAK
+        label: T.GCF.POMODORO.IS_STOP_TRACKING_ON_BREAK,
       },
     },
     {
       key: 'isManualContinue',
       type: 'checkbox',
       templateOptions: {
-        label: T.GCF.POMODORO.IS_MANUAL_CONTINUE
+        label: T.GCF.POMODORO.IS_MANUAL_CONTINUE,
       },
     },
     {
       key: 'isPlaySound',
       type: 'checkbox',
       templateOptions: {
-        label: T.GCF.POMODORO.IS_PLAY_SOUND
+        label: T.GCF.POMODORO.IS_PLAY_SOUND,
       },
     },
     {
       key: 'isPlaySoundAfterBreak',
       type: 'checkbox',
       templateOptions: {
-        label: T.GCF.POMODORO.IS_PLAY_SOUND_AFTER_BREAK
+        label: T.GCF.POMODORO.IS_PLAY_SOUND_AFTER_BREAK,
       },
     },
     {
       key: 'isPlayTick',
       type: 'checkbox',
       templateOptions: {
-        label: T.GCF.POMODORO.IS_PLAY_TICK
+        label: T.GCF.POMODORO.IS_PLAY_TICK,
       },
     },
     {
       key: 'duration',
       type: 'duration',
       templateOptions: {
-        label: T.GCF.POMODORO.DURATION
+        label: T.GCF.POMODORO.DURATION,
       },
     },
     {
       key: 'breakDuration',
       type: 'duration',
       templateOptions: {
-        label: T.GCF.POMODORO.BREAK_DURATION
+        label: T.GCF.POMODORO.BREAK_DURATION,
       },
     },
     {
       key: 'longerBreakDuration',
       type: 'duration',
       templateOptions: {
-        label: T.GCF.POMODORO.LONGER_BREAK_DURATION
+        label: T.GCF.POMODORO.LONGER_BREAK_DURATION,
       },
     },
     {
@@ -79,6 +79,6 @@ export const POMODORO_FORM_CFG: ConfigFormSection<PomodoroConfig> = {
         min: 1,
       },
     },
-  ]
+  ],
 };
 /* eslint-enable max-len */

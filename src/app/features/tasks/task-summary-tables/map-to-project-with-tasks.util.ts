@@ -17,15 +17,15 @@ export const mapToProjectWithTasks = (
   yesterdayStr?: string,
 ): ProjectWithTasks => {
   // NOTE: this only works, because projectIds is only triggered before assign flatTasks
-  const tasks = flatTasks.filter(task => task.projectId === project.id);
+  const tasks = flatTasks.filter((task) => task.projectId === project.id);
   const timeSpentToday = tasks.reduce((acc: number, task) => {
     return acc + ((!task.parentId && task.timeSpentOnDay[todayStr]) || 0);
   }, 0);
 
   const timeSpentYesterday = yesterdayStr
     ? tasks.reduce((acc: number, task) => {
-      return acc + ((!task.parentId && task.timeSpentOnDay[yesterdayStr]) || 0);
-    }, 0)
+        return acc + ((!task.parentId && task.timeSpentOnDay[yesterdayStr]) || 0);
+      }, 0)
     : undefined;
 
   return {

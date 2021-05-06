@@ -52,5 +52,5 @@ export const IDLE_FORM_CFG: ConfigFormSection<IdleConfig> = {
         label: T.GCF.IDLE.IS_UN_TRACKED_IDLE_RESETS_BREAK_TIMER,
       },
     },
-  ]
+  ],
 };

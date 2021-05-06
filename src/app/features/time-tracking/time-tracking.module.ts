@@ -9,24 +9,12 @@ import { TasksModule } from '../tasks/tasks.module';
 import { DialogTrackingReminderComponent } from './tracking-reminder/dialog-tracking-reminder/dialog-tracking-reminder.component';
 
 @NgModule({
-  imports: [
-    CommonModule,
-    UiModule,
-    FormsModule,
-    TasksModule,
-  ],
-  declarations: [
-    DialogIdleComponent,
-    DialogTrackingReminderComponent
-  ],
-  exports: [
-    TakeABreakModule,
-  ]
+  imports: [CommonModule, UiModule, FormsModule, TasksModule],
+  declarations: [DialogIdleComponent, DialogTrackingReminderComponent],
+  exports: [TakeABreakModule],
 })
 export class TimeTrackingModule {
-  constructor(
-    private readonly _idleService: IdleService,
-  ) {
+  constructor(private readonly _idleService: IdleService) {
     this._idleService.init();
   }
 }

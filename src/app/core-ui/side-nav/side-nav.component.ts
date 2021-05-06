@@ -8,7 +8,7 @@ import {
   Output,
   QueryList,
   ViewChild,
-  ViewChildren
+  ViewChildren,
 } from '@angular/core';
 import { ProjectService } from '../../features/project/project.service';
 import { T } from '../../t.const';
@@ -29,8 +29,10 @@ import { FocusKeyManager } from '@angular/cdk/a11y';
 import { MatMenuItem } from '@angular/material/menu';
 import { LayoutService } from '../layout/layout.service';
 import { TaskService } from '../../features/tasks/task.service';
-import { LS_IS_PROJECT_LIST_EXPANDED, LS_IS_TAG_LIST_EXPANDED } from '../../core/persistence/ls-keys.const';
-
+import {
+  LS_IS_PROJECT_LIST_EXPANDED,
+  LS_IS_TAG_LIST_EXPANDED,
+} from '../../core/persistence/ls-keys.const';
 
 @Component({
   selector: 'side-nav',
@@ -44,33 +46,35 @@ export class SideNavComponent implements OnDestroy {
 
   @ViewChildren('menuEntry') navEntries?: QueryList<MatMenuItem>;
   keyboardFocusTimeout?: number;
-  @ViewChild('projectExpandBtn', {read: ElementRef}) projectExpandBtn?: ElementRef;
+  @ViewChild('projectExpandBtn', { read: ElementRef }) projectExpandBtn?: ElementRef;
   isProjectsExpanded: boolean = this.fetchProjectListState();
-  isProjectsExpanded$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(this.isProjectsExpanded);
-  projectList$: Observable<Project[]> = this.isProjectsExpanded$.pipe(
-    switchMap(isExpanded => isExpanded
-      ? this.projectService.list$
-      : combineLatest([
-        this.projectService.list$,
-        this.workContextService.activeWorkContextId$
-      ]).pipe(
-        map(([projects, id]) => projects.filter(p => p.id === id))
-      )
-    )
+  isProjectsExpanded$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(
+    this.isProjectsExpanded,
   );
-  @ViewChild('tagExpandBtn', {read: ElementRef}) tagExpandBtn?: ElementRef;
+  projectList$: Observable<Project[]> = this.isProjectsExpanded$.pipe(
+    switchMap((isExpanded) =>
+      isExpanded
+        ? this.projectService.list$
+        : combineLatest([
+            this.projectService.list$,
+            this.workContextService.activeWorkContextId$,
+          ]).pipe(map(([projects, id]) => projects.filter((p) => p.id === id))),
+    ),
+  );
+  @ViewChild('tagExpandBtn', { read: ElementRef }) tagExpandBtn?: ElementRef;
   isTagsExpanded: boolean = this.fetchTagListState();
-  isTagsExpanded$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(this.isTagsExpanded);
+  isTagsExpanded$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(
+    this.isTagsExpanded,
+  );
   tagList$: Observable<Tag[]> = this.isTagsExpanded$.pipe(
-    switchMap(isExpanded => isExpanded
-      ? this.tagService.tagsNoMyDay$
-      : combineLatest([
-        this.tagService.tagsNoMyDay$,
-        this.workContextService.activeWorkContextId$
-      ]).pipe(
-        map(([tags, id]) => tags.filter(t => t.id === id))
-      )
-    )
+    switchMap((isExpanded) =>
+      isExpanded
+        ? this.tagService.tagsNoMyDay$
+        : combineLatest([
+            this.tagService.tagsNoMyDay$,
+            this.workContextService.activeWorkContextId$,
+          ]).pipe(map(([tags, id]) => tags.filter((t) => t.id === id))),
+    ),
   );
   T: typeof T = T;
   readonly PROJECTS_SIDE_NAV: string = 'PROJECTS_SIDE_NAV';
@@ -92,32 +96,46 @@ export class SideNavComponent implements OnDestroy {
     this._dragulaService.createGroup(this.PROJECTS_SIDE_NAV, {
       direction: 'vertical',
       moves: (el, container, handle) => {
-        return this.isProjectsExpanded && !!handle && handle.className.indexOf && handle.className.indexOf('drag-handle') > -1;
-      }
+        return (
+          this.isProjectsExpanded &&
+          !!handle &&
+          handle.className.indexOf &&
+          handle.className.indexOf('drag-handle') > -1
+        );
+      },
     });
-    this._subs.add(this.workContextService.activeWorkContextId$.subscribe(id => this.activeWorkContextId = id));
-
-    this._subs.add(this._dragulaService.dropModel(this.PROJECTS_SIDE_NAV)
-      .subscribe(({targetModel}) => {
-        // const {target, source, targetModel, item} = params;
-        const targetNewIds = targetModel.map((project: Project) => project.id);
-        this.projectService.updateOrder(targetNewIds);
-      })
+    this._subs.add(
+      this.workContextService.activeWorkContextId$.subscribe(
+        (id) => (this.activeWorkContextId = id),
+      ),
     );
 
-    this._subs.add(this._layoutService.isShowSideNav$.subscribe((isShow) => {
-      if (this.navEntries && isShow) {
-        this.keyManager = new FocusKeyManager<MatMenuItem>(this.navEntries)
-          .withVerticalOrientation(true);
-        window.clearTimeout(this.keyboardFocusTimeout);
-        this.keyboardFocusTimeout = window.setTimeout(() => {
-          this.keyManager?.setFirstItemActive();
-        }, 100);
-        // this.keyManager.change.subscribe((v) => console.log('this.keyManager.change', v));
-      } else if (!isShow) {
-        this._taskService.focusFirstTaskIfVisible();
-      }
-    }));
+    this._subs.add(
+      this._dragulaService
+        .dropModel(this.PROJECTS_SIDE_NAV)
+        .subscribe(({ targetModel }) => {
+          // const {target, source, targetModel, item} = params;
+          const targetNewIds = targetModel.map((project: Project) => project.id);
+          this.projectService.updateOrder(targetNewIds);
+        }),
+    );
+
+    this._subs.add(
+      this._layoutService.isShowSideNav$.subscribe((isShow) => {
+        if (this.navEntries && isShow) {
+          this.keyManager = new FocusKeyManager<MatMenuItem>(
+            this.navEntries,
+          ).withVerticalOrientation(true);
+          window.clearTimeout(this.keyboardFocusTimeout);
+          this.keyboardFocusTimeout = window.setTimeout(() => {
+            this.keyManager?.setFirstItemActive();
+          }, 100);
+          // this.keyManager.change.subscribe((v) => console.log('this.keyManager.change', v));
+        } else if (!isShow) {
+          this._taskService.focusFirstTaskIfVisible();
+        }
+      }),
+    );
   }
 
   @HostListener('keydown', ['$event'])
@@ -144,10 +162,8 @@ export class SideNavComponent implements OnDestroy {
 
   getThemeColor(color: THEME_COLOR_MAP | string): { [key: string]: string } {
     const standardColor = (THEME_COLOR_MAP as any)[color];
-    const colorToUse = (standardColor)
-      ? standardColor
-      : color;
-    return {background: colorToUse};
+    const colorToUse = standardColor ? standardColor : color;
+    return { background: colorToUse };
   }
 
   onScrollToNotesClick() {
@@ -155,7 +171,7 @@ export class SideNavComponent implements OnDestroy {
   }
 
   fetchProjectListState() {
-    return (localStorage.getItem(LS_IS_PROJECT_LIST_EXPANDED) === 'true');
+    return localStorage.getItem(LS_IS_PROJECT_LIST_EXPANDED) === 'true';
   }
 
   storeProjectListState(isExpanded: boolean) {
@@ -164,7 +180,7 @@ export class SideNavComponent implements OnDestroy {
   }
 
   fetchTagListState() {
-    return (localStorage.getItem(LS_IS_TAG_LIST_EXPANDED) === 'true');
+    return localStorage.getItem(LS_IS_TAG_LIST_EXPANDED) === 'true';
   }
 
   storeTagListState(isExpanded: boolean) {
@@ -179,21 +195,20 @@ export class SideNavComponent implements OnDestroy {
   }
 
   toggleExpandProjectsLeftRight(ev: KeyboardEvent) {
-    if ((ev.key === 'ArrowLeft' && this.isProjectsExpanded)) {
+    if (ev.key === 'ArrowLeft' && this.isProjectsExpanded) {
       this.storeProjectListState(false);
       this.isProjectsExpanded$.next(this.isProjectsExpanded);
-    } else if ((ev.key === 'ArrowRight') && !(this.isProjectsExpanded)) {
+    } else if (ev.key === 'ArrowRight' && !this.isProjectsExpanded) {
       this.storeProjectListState(true);
       this.isProjectsExpanded$.next(this.isProjectsExpanded);
     }
   }
 
   checkFocusProject(ev: KeyboardEvent) {
-    if ((ev.key === 'ArrowLeft') && this.projectExpandBtn?.nativeElement) {
-      const targetIndex = this.navEntries?.toArray()
-        .findIndex((value) => {
-          return value._getHostElement() === this.projectExpandBtn?.nativeElement;
-        });
+    if (ev.key === 'ArrowLeft' && this.projectExpandBtn?.nativeElement) {
+      const targetIndex = this.navEntries?.toArray().findIndex((value) => {
+        return value._getHostElement() === this.projectExpandBtn?.nativeElement;
+      });
       if (targetIndex) {
         this.keyManager?.setActiveItem(targetIndex);
       }
@@ -207,21 +222,20 @@ export class SideNavComponent implements OnDestroy {
   }
 
   toggleExpandTagsLeftRight(ev: KeyboardEvent) {
-    if ((ev.key === 'ArrowLeft' && this.isTagsExpanded)) {
+    if (ev.key === 'ArrowLeft' && this.isTagsExpanded) {
       this.storeTagListState(false);
       this.isTagsExpanded$.next(this.isTagsExpanded);
-    } else if ((ev.key === 'ArrowRight') && !(this.isTagsExpanded)) {
+    } else if (ev.key === 'ArrowRight' && !this.isTagsExpanded) {
       this.storeTagListState(true);
       this.isTagsExpanded$.next(this.isTagsExpanded);
     }
   }
 
   checkFocusTag(ev: KeyboardEvent) {
-    if ((ev.key === 'ArrowLeft') && this.tagExpandBtn?.nativeElement) {
-      const targetIndex = this.navEntries?.toArray()
-        .findIndex((value) => {
-          return value._getHostElement() === this.tagExpandBtn?.nativeElement;
-        });
+    if (ev.key === 'ArrowLeft' && this.tagExpandBtn?.nativeElement) {
+      const targetIndex = this.navEntries?.toArray().findIndex((value) => {
+        return value._getHostElement() === this.tagExpandBtn?.nativeElement;
+      });
       if (targetIndex) {
         this.keyManager?.setActiveItem(targetIndex);
       }

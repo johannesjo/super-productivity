@@ -16,7 +16,7 @@ import { TagComponent } from './tag/tag.component';
     UiModule,
     FormsModule,
     StoreModule.forFeature(TAG_FEATURE_NAME, tagReducer),
-    EffectsModule.forFeature([TagEffects])
+    EffectsModule.forFeature([TagEffects]),
   ],
   declarations: [
     TagListComponent,
@@ -24,11 +24,6 @@ import { TagComponent } from './tag/tag.component';
     TagComponent,
     // FindContrastColorPipe
   ],
-  exports: [
-    DialogEditTagsForTaskComponent,
-    TagListComponent,
-    TagComponent
-  ],
+  exports: [DialogEditTagsForTaskComponent, TagListComponent, TagComponent],
 })
-export class TagModule {
-}
+export class TagModule {}

@@ -7,8 +7,6 @@ export const minValidator = (min: number): ValidatorFn => {
     }
 
     const v: number = +control.value;
-    return v >= +min
-      ? null
-      : {actualValue: v, requiredValue: +min, min: true};
+    return v >= +min ? null : { actualValue: v, requiredValue: +min, min: true };
   };
 };

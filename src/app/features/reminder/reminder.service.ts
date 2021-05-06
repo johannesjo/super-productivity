@@ -23,9 +23,11 @@ import { WorkContextType } from '../work-context/work-context.model';
 export class ReminderService {
   private _onRemindersActive$: Subject<Reminder[]> = new Subject<Reminder[]>();
   onRemindersActive$: Observable<Reminder[]> = this._onRemindersActive$.pipe(
-    skipUntil(this._imexMetaService.isDataImportInProgress$.pipe(
-      filter(isInProgress => !isInProgress),
-    )),
+    skipUntil(
+      this._imexMetaService.isDataImportInProgress$.pipe(
+        filter((isInProgress) => !isInProgress),
+      ),
+    ),
   );
 
   private _reminders$: ReplaySubject<Reminder[]> = new ReplaySubject(1);
@@ -34,7 +36,9 @@ export class ReminderService {
   private _onReloadModel$: Subject<Reminder[]> = new Subject();
   onReloadModel$: Observable<Reminder[]> = this._onReloadModel$.asObservable();
 
-  private _isRemindersLoaded$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
+  private _isRemindersLoaded$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(
+    false,
+  );
   isRemindersLoaded$: Observable<boolean> = this._isRemindersLoaded$.asObservable();
 
   private _w: Worker;
@@ -59,7 +63,7 @@ export class ReminderService {
 
     this._w = new Worker('./reminder.worker', {
       name: 'reminder',
-      type: 'module'
+      type: 'module',
     });
   }
 
@@ -89,26 +93,33 @@ export class ReminderService {
 
   // TODO maybe refactor to observable, because models can differ to sync value for yet unknown reasons
   getById(reminderId: string): ReminderCopy | null {
-    const _foundReminder = this._reminders && this._reminders.find(reminder => reminder.id === reminderId);
-    return !!_foundReminder
-      ? dirtyDeepCopy<ReminderCopy>(_foundReminder)
-      : null;
+    const _foundReminder =
+      this._reminders && this._reminders.find((reminder) => reminder.id === reminderId);
+    return !!_foundReminder ? dirtyDeepCopy<ReminderCopy>(_foundReminder) : null;
   }
 
   getById$(reminderId: string): Observable<ReminderCopy | null> {
     return this.reminders$.pipe(
-      map(reminders => reminders.find(reminder => reminder.id === reminderId) || null),
+      map(
+        (reminders) => reminders.find((reminder) => reminder.id === reminderId) || null,
+      ),
     );
   }
 
   getByRelatedId(relatedId: string): ReminderCopy | null {
-    const _foundReminder = this._reminders && this._reminders.find(reminder => reminder.relatedId === relatedId);
-    return !!_foundReminder
-      ? dirtyDeepCopy<ReminderCopy>(_foundReminder)
-      : null;
+    const _foundReminder =
+      this._reminders &&
+      this._reminders.find((reminder) => reminder.relatedId === relatedId);
+    return !!_foundReminder ? dirtyDeepCopy<ReminderCopy>(_foundReminder) : null;
   }
 
-  addReminder(type: ReminderType, relatedId: string, title: string, remindAt: number, recurringConfig?: RecurringConfig): string {
+  addReminder(
+    type: ReminderType,
+    relatedId: string,
+    title: string,
+    remindAt: number,
+    recurringConfig?: RecurringConfig,
+  ): string {
     const id = shortid();
     if (this.getByRelatedId(relatedId)) {
       throw new Error('A reminder for this ' + type + ' already exists');
@@ -124,7 +135,7 @@ export class ReminderService {
       title,
       remindAt,
       type,
-      recurringConfig
+      recurringConfig,
     });
     this._saveModel(this._reminders);
     return id;
@@ -132,11 +143,11 @@ export class ReminderService {
 
   snooze(reminderId: string, snoozeTime: number) {
     const remindAt = new Date().getTime() + snoozeTime;
-    this.updateReminder(reminderId, {remindAt});
+    this.updateReminder(reminderId, { remindAt });
   }
 
   updateReminder(reminderId: string, reminderChanges: Partial<Reminder>) {
-    const i = this._reminders.findIndex(reminder => reminder.id === reminderId);
+    const i = this._reminders.findIndex((reminder) => reminder.id === reminderId);
     if (i > -1) {
       // TODO find out why we need to do this
       this._reminders = dirtyDeepCopy(this._reminders);
@@ -146,7 +157,7 @@ export class ReminderService {
   }
 
   removeReminder(reminderIdToRemove: string) {
-    const i = this._reminders.findIndex(reminder => reminder.id === reminderIdToRemove);
+    const i = this._reminders.findIndex((reminder) => reminder.id === reminderIdToRemove);
 
     if (i > -1) {
       // TODO find out why we need to do this
@@ -159,16 +170,20 @@ export class ReminderService {
   }
 
   removeReminderByRelatedIdIfSet(relatedId: string) {
-    const reminder = this._reminders.find(reminderIN => reminderIN.relatedId === relatedId);
+    const reminder = this._reminders.find(
+      (reminderIN) => reminderIN.relatedId === relatedId,
+    );
     if (reminder) {
       this.removeReminder(reminder.id);
     }
   }
 
   removeRemindersByWorkContextId(workContextId: string) {
-    const reminders = this._reminders.filter(reminderIN => reminderIN.workContextId === workContextId);
+    const reminders = this._reminders.filter(
+      (reminderIN) => reminderIN.workContextId === workContextId,
+    );
     if (reminders && reminders.length) {
-      reminders.forEach(reminder => {
+      reminders.forEach((reminder) => {
         this.removeReminder(reminder.id);
       });
     }
@@ -176,19 +191,21 @@ export class ReminderService {
 
   private async _onReminderActivated(msg: MessageEvent) {
     const reminders = msg.data as Reminder[];
-    const remindersWithData: Reminder[] = await Promise.all(reminders.map(async (reminder) => {
-      const relatedModel = await this._getRelatedDataForReminder(reminder);
-      // console.log('RelatedModel for Reminder', relatedModel);
-      // only show when not currently syncing and related model still exists
-      if (!relatedModel) {
-        devError('No Reminder Related Data found, removing reminder...');
-        this.removeReminder(reminder.id);
-        return null;
-      } else {
-        return reminder;
-      }
-    })) as Reminder [];
-    const finalReminders = remindersWithData.filter(reminder => !!reminder);
+    const remindersWithData: Reminder[] = (await Promise.all(
+      reminders.map(async (reminder) => {
+        const relatedModel = await this._getRelatedDataForReminder(reminder);
+        // console.log('RelatedModel for Reminder', relatedModel);
+        // only show when not currently syncing and related model still exists
+        if (!relatedModel) {
+          devError('No Reminder Related Data found, removing reminder...');
+          this.removeReminder(reminder.id);
+          return null;
+        } else {
+          return reminder;
+        }
+      }),
+    )) as Reminder[];
+    const finalReminders = remindersWithData.filter((reminder) => !!reminder);
 
     if (finalReminders.length > 0) {
       this._onRemindersActive$.next(finalReminders);
@@ -196,14 +213,12 @@ export class ReminderService {
   }
 
   private async _loadFromDatabase(): Promise<Reminder[]> {
-    return migrateReminders(
-      await this._persistenceService.reminders.loadState() || []
-    );
+    return migrateReminders((await this._persistenceService.reminders.loadState()) || []);
   }
 
   private _saveModel(reminders: Reminder[]) {
     this._updateRemindersInWorker(this._reminders);
-    this._persistenceService.reminders.saveState(reminders, {isSyncModelChange: true});
+    this._persistenceService.reminders.saveState(reminders, { isSyncModelChange: true });
     this._reminders$.next(this._reminders);
   }
 
@@ -213,13 +228,16 @@ export class ReminderService {
 
   private _handleError(err: any) {
     console.error(err);
-    this._snackService.open({type: 'ERROR', msg: T.F.REMINDER.S_REMINDER_ERR});
+    this._snackService.open({ type: 'ERROR', msg: T.F.REMINDER.S_REMINDER_ERR });
   }
 
   private async _getRelatedDataForReminder(reminder: Reminder): Promise<Task | Note> {
     switch (reminder.type) {
       case 'NOTE':
-        return await this._noteService.getByIdFromEverywhere(reminder.relatedId, reminder.workContextId);
+        return await this._noteService.getByIdFromEverywhere(
+          reminder.relatedId,
+          reminder.workContextId,
+        );
       case 'TASK':
         // NOTE: remember we don't want archive tasks to pop up here
         return await this._taskService.getByIdOnce$(reminder.relatedId).toPromise();

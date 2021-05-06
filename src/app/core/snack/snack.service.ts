@@ -16,7 +16,9 @@ import { debounce } from 'helpful-decorators';
 })
 export class SnackService {
   private _ref?: MatSnackBarRef<SnackCustomComponent | SimpleSnackBar>;
-  private _onWorkContextChange$: Observable<unknown> = this._actions$.pipe(ofType(setActiveWorkContext));
+  private _onWorkContextChange$: Observable<unknown> = this._actions$.pipe(
+    ofType(setActiveWorkContext),
+  );
 
   constructor(
     private _store$: Store<any>,
@@ -32,7 +34,7 @@ export class SnackService {
 
   open(params: SnackParams | string) {
     if (typeof params === 'string') {
-      params = {msg: params};
+      params = { msg: params };
     }
     this._openSnack(params);
   }
@@ -61,7 +63,7 @@ export class SnackService {
       translateParams = {},
       showWhile$,
       promise,
-      isSpinner
+      isSpinner,
     } = params;
 
     const cfg = {
@@ -69,9 +71,10 @@ export class SnackService {
       ...config,
       data: {
         ...params,
-        msg: (isSkipTranslate)
+        msg: isSkipTranslate
           ? msg
-          : (typeof (msg as unknown) === 'string') && this._translateService.instant(msg, translateParams),
+          : typeof (msg as unknown) === 'string' &&
+            this._translateService.instant(msg, translateParams),
       },
     };
 
@@ -94,16 +97,18 @@ export class SnackService {
     }
 
     if (actionStr && actionId && this._ref) {
-      this._ref.onAction()
+      this._ref
+        .onAction()
         .pipe(takeUntil(_destroy$))
         .subscribe(() => {
           this._store$.dispatch({
             type: actionId,
-            payload: actionPayload
+            payload: actionPayload,
           });
           destroySubs();
         });
-      this._ref.afterDismissed()
+      this._ref
+        .afterDismissed()
         .pipe(takeUntil(_destroy$))
         .subscribe(() => {
           destroySubs();

@@ -19,12 +19,6 @@ import { CompressionModule } from './compression/compression.module';
     LocalBackupModule,
     CompressionModule,
   ],
-  exports: [
-    PersistenceModule,
-    ChromeExtensionInterfaceModule,
-    SnackModule,
-    BannerModule,
-  ],
+  exports: [PersistenceModule, ChromeExtensionInterfaceModule, SnackModule, BannerModule],
 })
-export class CoreModule {
-}
+export class CoreModule {}

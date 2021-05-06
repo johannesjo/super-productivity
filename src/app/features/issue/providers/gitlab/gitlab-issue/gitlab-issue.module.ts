@@ -18,5 +18,4 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
   ],
   exports: [GitlabIssueHeaderComponent, GitlabIssueContentComponent],
 })
-export class GitlabIssueModule {
-}
+export class GitlabIssueModule {}

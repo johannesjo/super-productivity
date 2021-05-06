@@ -16,31 +16,38 @@ import { WorkContextService } from '../../features/work-context/work-context.ser
 import { combineLatest, Observable } from 'rxjs';
 import { remote } from 'electron';
 
-@Injectable({providedIn: 'root'})
+@Injectable({ providedIn: 'root' })
 export class GlobalThemeService {
-  isDarkTheme$: Observable<boolean> = (IS_ELECTRON && this._electronService.isMacOS)
-    ? new Observable(subscriber => {
-      subscriber.next((this._electronService.remote as typeof remote).nativeTheme.shouldUseDarkColors);
-      (this._electronService.remote as typeof remote)
-        .systemPreferences
-        .subscribeNotification('AppleInterfaceThemeChangedNotification', () => subscriber.next(
-          (this._electronService.remote as typeof remote).nativeTheme.shouldUseDarkColors)
+  isDarkTheme$: Observable<boolean> =
+    IS_ELECTRON && this._electronService.isMacOS
+      ? new Observable((subscriber) => {
+          subscriber.next(
+            (this._electronService.remote as typeof remote).nativeTheme
+              .shouldUseDarkColors,
+          );
+          (this._electronService
+            .remote as typeof remote).systemPreferences.subscribeNotification(
+            'AppleInterfaceThemeChangedNotification',
+            () =>
+              subscriber.next(
+                (this._electronService.remote as typeof remote).nativeTheme
+                  .shouldUseDarkColors,
+              ),
+          );
+        })
+      : this._globalConfigService.misc$.pipe(
+          map((cfg) => cfg.isDarkMode),
+          distinctUntilChanged(),
         );
-    })
-    : this._globalConfigService.misc$.pipe(
-      map(cfg => cfg.isDarkMode),
-      distinctUntilChanged()
-    );
 
   backgroundImg$: Observable<string | null> = combineLatest([
     this._workContextService.currentTheme$,
     this.isDarkTheme$,
   ]).pipe(
-    map(([theme, isDarkMode]) => isDarkMode
-      ? theme.backgroundImageDark
-      : theme.backgroundImageLight
+    map(([theme, isDarkMode]) =>
+      isDarkMode ? theme.backgroundImageDark : theme.backgroundImageLight,
     ),
-    distinctUntilChanged()
+    distinctUntilChanged(),
   );
 
   constructor(
@@ -53,8 +60,7 @@ export class GlobalThemeService {
     private _domSanitizer: DomSanitizer,
     private _chartThemeService: NgChartThemeService,
     private _chromeExtensionInterfaceService: ChromeExtensionInterfaceService,
-  ) {
-  }
+  ) {}
 
   init() {
     // This is here to make web page reloads on non work context pages at least usable
@@ -114,14 +120,16 @@ export class GlobalThemeService {
     icons.forEach(([name, path]) => {
       this._matIconRegistry.addSvgIcon(
         name,
-        this._domSanitizer.bypassSecurityTrustResourceUrl(path)
+        this._domSanitizer.bypassSecurityTrustResourceUrl(path),
       );
     });
   }
 
   private _initThemeWatchers() {
     // init theme watchers
-    this._workContextService.currentTheme$.subscribe((theme: WorkContextThemeCfg) => this._setColorTheme(theme));
+    this._workContextService.currentTheme$.subscribe((theme: WorkContextThemeCfg) =>
+      this._setColorTheme(theme),
+    );
     this.isDarkTheme$.subscribe((isDarkTheme) => this._setDarkTheme(isDarkTheme));
   }
 
@@ -155,22 +163,26 @@ export class GlobalThemeService {
   }
 
   private _setChartTheme(isDarkTheme: boolean) {
-    const overrides = (isDarkTheme)
+    const overrides = isDarkTheme
       ? {
-        legend: {
-          labels: {fontColor: 'white'}
-        },
-        scales: {
-          xAxes: [{
-            ticks: {fontColor: 'white'},
-            gridLines: {color: 'rgba(255,255,255,0.1)'}
-          }],
-          yAxes: [{
-            ticks: {fontColor: 'white'},
-            gridLines: {color: 'rgba(255,255,255,0.1)'}
-          }]
+          legend: {
+            labels: { fontColor: 'white' },
+          },
+          scales: {
+            xAxes: [
+              {
+                ticks: { fontColor: 'white' },
+                gridLines: { color: 'rgba(255,255,255,0.1)' },
+              },
+            ],
+            yAxes: [
+              {
+                ticks: { fontColor: 'white' },
+                gridLines: { color: 'rgba(255,255,255,0.1)' },
+              },
+            ],
+          },
         }
-      }
       : {};
     this._chartThemeService.setColorschemesOptions(overrides);
   }

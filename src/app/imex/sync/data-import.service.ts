@@ -18,7 +18,6 @@ import { TranslateService } from '@ngx-translate/core';
   providedIn: 'root',
 })
 export class DataImportService {
-
   constructor(
     private _persistenceService: PersistenceService,
     private _snackService: SnackService,
@@ -36,13 +35,17 @@ export class DataImportService {
     return await this._persistenceService.loadComplete();
   }
 
-  async importCompleteSyncData(data: AppDataComplete, isBackupReload: boolean = false, isSkipStrayBackupCheck: boolean = false) {
-    this._snackService.open({msg: T.F.SYNC.S.IMPORTING, ico: 'cloud_download'});
+  async importCompleteSyncData(
+    data: AppDataComplete,
+    isBackupReload: boolean = false,
+    isSkipStrayBackupCheck: boolean = false,
+  ) {
+    this._snackService.open({ msg: T.F.SYNC.S.IMPORTING, ico: 'cloud_download' });
     this._imexMetaService.setDataImportInProgress(true);
 
     // get rid of outdated project data
     if (!isBackupReload) {
-      if (!isSkipStrayBackupCheck && await this._isCheckForStrayBackupAndImport()) {
+      if (!isSkipStrayBackupCheck && (await this._isCheckForStrayBackupAndImport())) {
         return;
       }
 
@@ -58,8 +61,7 @@ export class DataImportService {
         await this._loadAllFromDatabaseToStore();
         await this._persistenceService.clearBackup();
         this._imexMetaService.setDataImportInProgress(false);
-        this._snackService.open({type: 'SUCCESS', msg: T.F.SYNC.S.SUCCESS});
-
+        this._snackService.open({ type: 'SUCCESS', msg: T.F.SYNC.S.SUCCESS });
       } catch (e) {
         this._snackService.open({
           type: 'ERROR',
@@ -73,7 +75,7 @@ export class DataImportService {
       const fixedData = this._dataRepairService.repairData(data);
       await this.importCompleteSyncData(fixedData, isBackupReload, true);
     } else {
-      this._snackService.open({type: 'ERROR', msg: T.F.SYNC.S.ERROR_INVALID_DATA});
+      this._snackService.open({ type: 'ERROR', msg: T.F.SYNC.S.ERROR_INVALID_DATA });
       console.error(data);
       this._imexMetaService.setDataImportInProgress(false);
     }

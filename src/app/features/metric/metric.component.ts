@@ -40,6 +40,5 @@ export class MetricComponent {
   constructor(
     public metricService: MetricService,
     public projectMetricsService: ProjectMetricsService,
-  ) {
-  }
+  ) {}
 }

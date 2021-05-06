@@ -12,7 +12,7 @@ import { GlobalConfigService } from '../../../features/config/global-config.serv
 import { GlobalProgressBarService } from '../../../core-ui/global-progress-bar/global-progress-bar.service';
 import { T } from '../../../t.const';
 
-@Injectable({providedIn: 'root'})
+@Injectable({ providedIn: 'root' })
 export class WebDavSyncService implements SyncProviderServiceInterface {
   id: SyncProvider = SyncProvider.WebDAV;
 
@@ -22,7 +22,7 @@ export class WebDavSyncService implements SyncProviderServiceInterface {
   );
 
   private _cfg$: Observable<WebDavConfig> = this._globalConfigService.cfg$.pipe(
-    map((cfg) => cfg?.sync.webDav)
+    map((cfg) => cfg?.sync.webDav),
   );
 
   //
@@ -31,10 +31,11 @@ export class WebDavSyncService implements SyncProviderServiceInterface {
     private _dataInitService: DataInitService,
     private _globalConfigService: GlobalConfigService,
     private _globalProgressBarService: GlobalProgressBarService,
-  ) {
-  }
+  ) {}
 
-  async getRevAndLastClientUpdate(localRev: string): Promise<{ rev: string; clientUpdate: number } | SyncGetRevResult> {
+  async getRevAndLastClientUpdate(
+    localRev: string,
+  ): Promise<{ rev: string; clientUpdate: number } | SyncGetRevResult> {
     const cfg = await this._cfg$.pipe(first()).toPromise();
 
     try {
@@ -58,7 +59,9 @@ export class WebDavSyncService implements SyncProviderServiceInterface {
     }
   }
 
-  async downloadAppData(localRev: string): Promise<{ rev: string; data: AppDataComplete }> {
+  async downloadAppData(
+    localRev: string,
+  ): Promise<{ rev: string; data: AppDataComplete }> {
     this._globalProgressBarService.countUp(T.GPB.WEB_DAV_DOWNLOAD);
     const cfg = await this._cfg$.pipe(first()).toPromise();
     try {
@@ -78,13 +81,17 @@ export class WebDavSyncService implements SyncProviderServiceInterface {
     }
   }
 
-  async uploadAppData(data: AppDataComplete, localRev: string, isForceOverwrite: boolean = false): Promise<string | Error> {
+  async uploadAppData(
+    data: AppDataComplete,
+    localRev: string,
+    isForceOverwrite: boolean = false,
+  ): Promise<string | Error> {
     this._globalProgressBarService.countUp(T.GPB.WEB_DAV_UPLOAD);
     try {
       const r = await this._webDavApiService.upload({
         data,
         localRev,
-        isForceOverwrite
+        isForceOverwrite,
       });
       console.log(r);
       this._globalProgressBarService.countDown();

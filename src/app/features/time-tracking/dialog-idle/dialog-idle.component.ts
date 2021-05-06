@@ -10,11 +10,13 @@ import { T } from '../../../t.const';
   selector: 'dialog-idle',
   templateUrl: './dialog-idle.component.html',
   styleUrls: ['./dialog-idle.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class DialogIdleComponent implements OnInit {
   T: typeof T = T;
-  lastCurrentTask$: Observable<Task> = this._taskService.getByIdOnce$(this.data.lastCurrentTaskId);
+  lastCurrentTask$: Observable<Task> = this._taskService.getByIdOnce$(
+    this.data.lastCurrentTaskId,
+  );
   selectedTask: Task | null = null;
   newTaskTitle?: string;
   isCreate?: boolean;
@@ -36,7 +38,7 @@ export class DialogIdleComponent implements OnInit {
   }
 
   onTaskChange(taskOrTaskTitle: Task | string) {
-    this.isCreate = (typeof taskOrTaskTitle === 'string');
+    this.isCreate = typeof taskOrTaskTitle === 'string';
     if (this.isCreate) {
       this.newTaskTitle = taskOrTaskTitle as string;
       this.selectedTask = null;
@@ -49,7 +51,7 @@ export class DialogIdleComponent implements OnInit {
   skipTrack() {
     this._matDialogRef.close({
       task: null,
-      isResetBreakTimer: true
+      isResetBreakTimer: true,
     });
   }
 

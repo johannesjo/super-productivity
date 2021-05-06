@@ -15,8 +15,7 @@ export class StartPomodoro implements Action {
 export class PausePomodoro implements Action {
   readonly type: string = PomodoroActionTypes.PausePomodoro;
 
-  constructor(public payload: { isBreakEndPause: boolean }) {
-  }
+  constructor(public payload: { isBreakEndPause: boolean }) {}
 }
 
 export class StopPomodoro implements Action {
@@ -32,8 +31,8 @@ export class SkipPomodoroBreak implements Action {
   readonly type: string = PomodoroActionTypes.SkipPomodoroBreak;
 }
 
-export type PomodoroActions
-  = StartPomodoro
+export type PomodoroActions =
+  | StartPomodoro
   | PausePomodoro
   | StopPomodoro
   | SkipPomodoroBreak

@@ -5,10 +5,6 @@ import { UiModule } from '../../ui/ui.module';
 
 @NgModule({
   declarations: [DialogInitialComponent],
-  imports: [
-    CommonModule,
-    UiModule,
-  ]
+  imports: [CommonModule, UiModule],
 })
-export class InitialDialogModule {
-}
+export class InitialDialogModule {}

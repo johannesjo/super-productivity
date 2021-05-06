@@ -29,129 +29,120 @@ export enum ProjectActionTypes {
 export class LoadProjectRelatedDataSuccess implements Action {
   readonly type: string = ProjectActionTypes.LoadProjectRelatedDataSuccess;
 
-  constructor(public payload: { projectId: string }) {
-  }
+  constructor(public payload: { projectId: string }) {}
 }
 
 export class SetCurrentProject implements Action {
   readonly type: string = ProjectActionTypes.SetCurrentProject;
 
-  constructor(public payload: any) {
-  }
+  constructor(public payload: any) {}
 }
 
 export class LoadProjects implements Action {
   readonly type: string = ProjectActionTypes.LoadProjects;
 
-  constructor(public payload: { projects: Project[] }) {
-  }
+  constructor(public payload: { projects: Project[] }) {}
 }
 
 export class AddProject implements Action {
   readonly type: string = ProjectActionTypes.AddProject;
 
-  constructor(public payload: { project: Project }) {
-  }
+  constructor(public payload: { project: Project }) {}
 }
 
 export class AddProjects implements Action {
   readonly type: string = ProjectActionTypes.AddProjects;
 
-  constructor(public payload: { projects: Project[] }) {
-  }
+  constructor(public payload: { projects: Project[] }) {}
 }
 
 export class UpsertProject implements Action {
   readonly type: string = ProjectActionTypes.UpsertProject;
 
-  constructor(public payload: { projects: Project[] }) {
-  }
+  constructor(public payload: { projects: Project[] }) {}
 }
 
 export class UpdateProject implements Action {
   readonly type: string = ProjectActionTypes.UpdateProject;
 
-  constructor(public payload: { project: Update<Project> }) {
-  }
+  constructor(public payload: { project: Update<Project> }) {}
 }
 
 export class UpdateProjectWorkStart implements Action {
   readonly type: string = ProjectActionTypes.UpdateProjectWorkStart;
 
-  constructor(public payload: { id: string; date: string; newVal: number }) {
-  }
+  constructor(public payload: { id: string; date: string; newVal: number }) {}
 }
 
 export class UpdateProjectWorkEnd implements Action {
   readonly type: string = ProjectActionTypes.UpdateProjectWorkEnd;
 
-  constructor(public payload: { id: string; date: string; newVal: number }) {
-  }
+  constructor(public payload: { id: string; date: string; newVal: number }) {}
 }
 
 export class AddToProjectBreakTime implements Action {
   readonly type: string = ProjectActionTypes.AddToProjectBreakTime;
 
-  constructor(public payload: { id: string; date: string; valToAdd: number }) {
-  }
+  constructor(public payload: { id: string; date: string; valToAdd: number }) {}
 }
 
 export class UpdateProjectAdvancedCfg implements Action {
   readonly type: string = ProjectActionTypes.UpdateProjectAdvancedCfg;
 
-  constructor(public payload: { projectId: string; sectionKey: WorkContextAdvancedCfgKey; data: any }) {
-  }
+  constructor(
+    public payload: {
+      projectId: string;
+      sectionKey: WorkContextAdvancedCfgKey;
+      data: any;
+    },
+  ) {}
 }
 
 export class UpdateProjectIssueProviderCfg implements Action {
   readonly type: string = ProjectActionTypes.UpdateProjectIssueProviderCfg;
 
-  constructor(public payload: {
-    projectId: string;
-    issueProviderKey: IssueProviderKey;
-    providerCfg: Partial<IssueIntegrationCfg>;
-    isOverwrite: boolean;
-  }) {
-  }
+  constructor(
+    public payload: {
+      projectId: string;
+      issueProviderKey: IssueProviderKey;
+      providerCfg: Partial<IssueIntegrationCfg>;
+      isOverwrite: boolean;
+    },
+  ) {}
 }
 
 export class DeleteProject implements Action {
   readonly type: string = ProjectActionTypes.DeleteProject;
 
-  constructor(public payload: { id: string }) {
-  }
+  constructor(public payload: { id: string }) {}
 }
 
 export class DeleteProjects implements Action {
   readonly type: string = ProjectActionTypes.DeleteProjects;
 
-  constructor(public payload: { ids: string[] }) {
-  }
+  constructor(public payload: { ids: string[] }) {}
 }
 
 export class UpdateProjectOrder implements Action {
   readonly type: string = ProjectActionTypes.UpdateProjectOrder;
 
-  constructor(public payload: { ids: string[] }) {
-  }
+  constructor(public payload: { ids: string[] }) {}
 }
 
 export class ArchiveProject implements Action {
   readonly type: string = ProjectActionTypes.ArchiveProject;
 
-  constructor(public payload: { id: string }) {
-  }
+  constructor(public payload: { id: string }) {}
 }
 
 export class UnarchiveProject implements Action {
   readonly type: string = ProjectActionTypes.UnarchiveProject;
 
-  constructor(public payload: { id: string }) {
-  }
+  constructor(public payload: { id: string }) {}
 }
 
-export type ProjectActions
-  = LoadProjects
+export type ProjectActions =
+  | LoadProjects
   | LoadProjectRelatedDataSuccess
   | SetCurrentProject
   | AddProject
@@ -167,6 +158,4 @@ export type ProjectActions
   | DeleteProjects
   | UpdateProjectOrder
   | ArchiveProject
-  | UnarchiveProject
-  ;
-
+  | UnarchiveProject;

@@ -10,7 +10,7 @@ import { DEFAULT_GITLAB_CFG, GITLAB_CONFIG_FORM } from '../gitlab.const';
   selector: 'dialog-gitlab-initial-setup',
   templateUrl: './dialog-gitlab-initial-setup.component.html',
   styleUrls: ['./dialog-gitlab-initial-setup.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class DialogGitlabInitialSetupComponent implements OnInit {
   T: typeof T = T;
@@ -25,8 +25,7 @@ export class DialogGitlabInitialSetupComponent implements OnInit {
     this.gitlabCfg = this.data.gitlabCfg || DEFAULT_GITLAB_CFG;
   }
 
-  ngOnInit() {
-  }
+  ngOnInit() {}
 
   saveGitlabCfg(gitlabCfg: GitlabCfg) {
     this._matDialogRef.close(gitlabCfg);

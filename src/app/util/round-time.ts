@@ -1,10 +1,12 @@
 import { RoundTimeOption } from '../features/project/project.model';
 import { Moment } from 'moment';
 
-export const roundTime = (val: number | Date, roundTo: RoundTimeOption, isRoundUp = false): Date => {
-  const value = (typeof val === 'number')
-    ? new Date(val)
-    : val;
+export const roundTime = (
+  val: number | Date,
+  roundTo: RoundTimeOption,
+  isRoundUp = false,
+): Date => {
+  const value = typeof val === 'number' ? new Date(val) : val;
   let rounded;
 
   switch (roundTo) {
@@ -35,7 +37,11 @@ export const roundTime = (val: number | Date, roundTo: RoundTimeOption, isRoundU
   }
 };
 
-export const momentRoundTime = (value: Moment, roundTo: RoundTimeOption, isRoundUp = false): Moment => {
+export const momentRoundTime = (
+  value: Moment,
+  roundTo: RoundTimeOption,
+  isRoundUp = false,
+): Moment => {
   let rounded;
 
   switch (roundTo) {

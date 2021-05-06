@@ -3,7 +3,6 @@ import { NgModule } from '@angular/core';
 @NgModule({
   declarations: [],
   exports: [],
-  imports: []
+  imports: [],
 })
-export class WebDavModule {
-}
+export class WebDavModule {}

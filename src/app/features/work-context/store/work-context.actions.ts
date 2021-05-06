@@ -10,4 +10,3 @@ export const setActiveWorkContext = createAction(
   '[WorkContext] Set Active Work Context',
   props<{ activeId: string; activeType: WorkContextType }>(),
 );
-

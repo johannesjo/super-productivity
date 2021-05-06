@@ -3,7 +3,7 @@ import * as moment from 'moment';
 import { stringToMs } from './string-to-ms.pipe';
 
 @Pipe({
-  name: 'durationFromString'
+  name: 'durationFromString',
 })
 export class DurationFromStringPipe implements PipeTransform {
   transform: (value: any, ...args: any[]) => any = durationFromString;

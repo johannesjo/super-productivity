@@ -6,9 +6,7 @@ export const createFromDrop = (ev: DragEvent): null | DropPasteInput => {
     throw new Error('No drop data');
   }
   const text = ev.dataTransfer.getData('text');
-  return text
-    ? (_createTextBookmark(text))
-    : (_createFileBookmark(ev.dataTransfer));
+  return text ? _createTextBookmark(text) : _createFileBookmark(ev.dataTransfer);
 };
 
 export const createFromPaste = (ev: ClipboardEvent): null | DropPasteInput => {

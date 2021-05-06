@@ -18,6 +18,12 @@ const migrateMetricStatesUtil = (modelName: string) => (metricState: any): any =
   };
 };
 
-export const migrateMetricState: (metricState: MetricState) => MetricState = migrateMetricStatesUtil('Metric');
-export const migrateImprovementState: (improvementState: ImprovementState) => ImprovementState = migrateMetricStatesUtil('Improvement');
-export const migrateObstructionState: (obstructionState: ObstructionState) => ObstructionState = migrateMetricStatesUtil('Obstruction');
+export const migrateMetricState: (
+  metricState: MetricState,
+) => MetricState = migrateMetricStatesUtil('Metric');
+export const migrateImprovementState: (
+  improvementState: ImprovementState,
+) => ImprovementState = migrateMetricStatesUtil('Improvement');
+export const migrateObstructionState: (
+  obstructionState: ObstructionState,
+) => ObstructionState = migrateMetricStatesUtil('Obstruction');

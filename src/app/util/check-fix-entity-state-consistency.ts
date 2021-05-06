@@ -21,11 +21,13 @@ export const checkFixEntityStateConsistency = (data: any, additionalStr = ''): a
 };
 
 export const isEntityStateConsistent = (data: any, additionalStr = ''): boolean => {
-  if (!data
-    || !data.entities
-    || !data.ids
-    || Object.keys(data.entities).length !== data.ids.length
-    || !arrayEquals(Object.keys(data.entities).sort(), [...data.ids].sort())) {
+  if (
+    !data ||
+    !data.entities ||
+    !data.ids ||
+    Object.keys(data.entities).length !== data.ids.length ||
+    !arrayEquals(Object.keys(data.entities).sort(), [...data.ids].sort())
+  ) {
     console.log(data);
     devError(`Inconsistent entity state "${additionalStr}"`);
     return false;

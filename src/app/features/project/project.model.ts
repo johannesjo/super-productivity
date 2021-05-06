@@ -1,5 +1,8 @@
 import { IssueIntegrationCfgs, IssueProviderKey } from '../issue/issue.model';
-import { WorkContextAdvancedCfgKey, WorkContextCommon } from '../work-context/work-context.model';
+import {
+  WorkContextAdvancedCfgKey,
+  WorkContextCommon,
+} from '../work-context/work-context.model';
 
 export type RoundTimeOption = '5M' | 'QUARTER' | 'HALF' | 'HOUR' | null;
 
@@ -24,6 +27,8 @@ export interface ProjectCopy extends ProjectBasicCfg, WorkContextCommon {
 
 export type Project = Readonly<ProjectCopy>;
 
-export type ProjectCfgFormKey = WorkContextAdvancedCfgKey | IssueProviderKey | 'basic' | 'theme';
-
-
+export type ProjectCfgFormKey =
+  | WorkContextAdvancedCfgKey
+  | IssueProviderKey
+  | 'basic'
+  | 'theme';

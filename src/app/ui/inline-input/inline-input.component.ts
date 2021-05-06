@@ -7,14 +7,14 @@ import {
   HostBinding,
   Input,
   Output,
-  ViewChild
+  ViewChild,
 } from '@angular/core';
 
 @Component({
   selector: 'inline-input',
   templateUrl: './inline-input.component.html',
   styleUrls: ['./inline-input.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class InlineInputComponent implements AfterViewInit {
   @Input() type: 'text' | 'duration' = 'text';
@@ -30,19 +30,20 @@ export class InlineInputComponent implements AfterViewInit {
 
   activeInputEl?: HTMLInputElement;
 
-  constructor() {
-  }
+  constructor() {}
 
   ngAfterViewInit() {
-    this.activeInputEl = (this.type === 'duration')
-      ? (this.inputElDuration as ElementRef).nativeElement
-      : (this.inputEl as ElementRef).nativeElement;
+    this.activeInputEl =
+      this.type === 'duration'
+        ? (this.inputElDuration as ElementRef).nativeElement
+        : (this.inputEl as ElementRef).nativeElement;
   }
 
   focusInput() {
-    this.activeInputEl = (this.type === 'duration')
-      ? (this.inputElDuration as ElementRef).nativeElement
-      : (this.inputEl as ElementRef).nativeElement;
+    this.activeInputEl =
+      this.type === 'duration'
+        ? (this.inputElDuration as ElementRef).nativeElement
+        : (this.inputEl as ElementRef).nativeElement;
 
     this.isFocused = true;
     (this.activeInputEl as HTMLElement).focus();
@@ -55,7 +56,10 @@ export class InlineInputComponent implements AfterViewInit {
   blur() {
     this.isFocused = false;
 
-    if ((this.newValue || this.newValue === '' || this.newValue === 0) && this.newValue !== this.value) {
+    if (
+      (this.newValue || this.newValue === '' || this.newValue === 0) &&
+      this.newValue !== this.value
+    ) {
       this.changed.emit(this.newValue);
     }
   }

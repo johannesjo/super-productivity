@@ -38,4 +38,3 @@ export const mapGitlabIssueToSearchResult = (issue: GitlabIssue): SearchResultIt
     issueData: issue,
   };
 };
-

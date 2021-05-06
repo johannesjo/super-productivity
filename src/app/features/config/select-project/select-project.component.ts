@@ -8,16 +8,14 @@ import { T } from 'src/app/t.const';
   selector: 'select-project',
   templateUrl: './select-project.component.html',
   styleUrls: ['./select-project.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SelectProjectComponent extends FieldType {
   // @ViewChild(MatInput) formFieldControl: MatInput;
 
   T: typeof T = T;
 
-  constructor(
-    public projectService: ProjectService,
-  ) {
+  constructor(public projectService: ProjectService) {
     super();
   }
 

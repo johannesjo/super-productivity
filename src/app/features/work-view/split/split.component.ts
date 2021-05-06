@@ -7,7 +7,7 @@ import {
   Input,
   Output,
   Renderer2,
-  ViewChild
+  ViewChild,
 } from '@angular/core';
 import { fromEvent, Subscription } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
@@ -19,7 +19,7 @@ const ANIMATABLE_CLASS = 'isAnimatable';
   selector: 'split',
   templateUrl: './split.component.html',
   styleUrls: ['./split.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SplitComponent implements AfterViewInit {
   @Input() splitTopEl?: ElementRef;
@@ -31,12 +31,11 @@ export class SplitComponent implements AfterViewInit {
 
   pos: number = 100;
   eventSubs?: Subscription;
-  @ViewChild('buttonEl', {static: true}) buttonEl?: ElementRef;
+  @ViewChild('buttonEl', { static: true }) buttonEl?: ElementRef;
   private _isDrag: boolean = false;
   private _isViewInitialized: boolean = false;
 
-  constructor(private _renderer: Renderer2) {
-  }
+  constructor(private _renderer: Renderer2) {}
 
   @Input() set splitPos(pos: number) {
     if (pos !== this.pos) {
@@ -117,7 +116,7 @@ export class SplitComponent implements AfterViewInit {
     const h = this.containerEl.offsetHeight;
     const headerHeight = bounds.top;
 
-    let percentage = (clientY - headerHeight) / h * 100;
+    let percentage = ((clientY - headerHeight) / h) * 100;
     if (percentage > 100) {
       percentage = 100;
     }
@@ -134,16 +133,8 @@ export class SplitComponent implements AfterViewInit {
 
     this.pos = pos;
     if (this.splitTopEl && this.splitBottomEl) {
-      this._renderer.setStyle(
-        this.splitTopEl,
-        'height',
-        `${pos}%`,
-      );
-      this._renderer.setStyle(
-        this.splitBottomEl,
-        'height',
-        `${100 - pos}%`,
-      );
+      this._renderer.setStyle(this.splitTopEl, 'height', `${pos}%`);
+      this._renderer.setStyle(this.splitBottomEl, 'height', `${100 - pos}%`);
       // this._renderer.setStyle(
       //   this._el.nativeElement,
       //   'top',

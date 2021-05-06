@@ -6,12 +6,7 @@ import { TagModule } from '../../features/tag/tag.module';
 
 @NgModule({
   declarations: [SchedulePageComponent],
-  imports: [
-    CommonModule,
-    UiModule,
-    TagModule,
-  ],
-  exports: [SchedulePageComponent]
+  imports: [CommonModule, UiModule, TagModule],
+  exports: [SchedulePageComponent],
 })
-export class SchedulePageModule {
-}
+export class SchedulePageModule {}

@@ -11,18 +11,17 @@ import { Router } from '@angular/router';
   selector: 'file-imex',
   templateUrl: './file-imex.component.html',
   styleUrls: ['./file-imex.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class FileImexComponent {
-  @ViewChild('fileInput', {static: true}) fileInputRef?: ElementRef;
+  @ViewChild('fileInput', { static: true }) fileInputRef?: ElementRef;
   T: typeof T = T;
 
   constructor(
     private _dataImportService: DataImportService,
     private _snackService: SnackService,
     private _router: Router,
-  ) {
-  }
+  ) {}
 
   async handleFileInput(ev: any) {
     const files = ev.target.files;
@@ -36,7 +35,7 @@ export class FileImexComponent {
       try {
         data = oldData = JSON.parse((textData as any).toString());
       } catch (e) {
-        this._snackService.open({type: 'ERROR', msg: T.FILE_IMEX.S_ERR_INVALID_DATA});
+        this._snackService.open({ type: 'ERROR', msg: T.FILE_IMEX.S_ERR_INVALID_DATA });
       }
 
       if (oldData.config && Array.isArray(oldData.tasks)) {

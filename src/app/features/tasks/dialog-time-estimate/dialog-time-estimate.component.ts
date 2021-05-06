@@ -1,4 +1,9 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Inject } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  Inject,
+} from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { Task, TaskCopy, TimeSpentOnDayCopy } from '../task.model';
 import { TaskService } from '../task.service';
@@ -21,18 +26,19 @@ export class DialogTimeEstimateComponent {
   taskCopy: TaskCopy;
   timeSpentOnDayCopy: TimeSpentOnDayCopy;
 
-  constructor(private _matDialogRef: MatDialogRef<DialogTimeEstimateComponent>,
+  constructor(
+    private _matDialogRef: MatDialogRef<DialogTimeEstimateComponent>,
     private _matDialog: MatDialog,
     private _taskService: TaskService,
     private _cd: ChangeDetectorRef,
-    @Inject(MAT_DIALOG_DATA) public data: any) {
+    @Inject(MAT_DIALOG_DATA) public data: any,
+  ) {
     this.task = this.data.task;
     this.todayStr = getTodayStr();
     this._taskService = _taskService;
     this.taskCopy = createTaskCopy(this.task);
     this.timeSpentOnDayCopy = this.taskCopy.timeSpentOnDay || {};
     console.log(this.timeSpentOnDayCopy);
-
   }
 
   submit() {
@@ -47,16 +53,19 @@ export class DialogTimeEstimateComponent {
   }
 
   showAddForAnotherDayForm() {
-    this._matDialog.open(DialogAddTimeEstimateForOtherDayComponent).afterClosed().subscribe((result) => {
-      if (result && result.timeSpent > 0 && result.date) {
-        this.timeSpentOnDayCopy = {
-          ...this.timeSpentOnDayCopy,
-          [getWorklogStr(result.date)]: result.timeSpent,
-        };
-        this.taskCopy.timeSpentOnDay = this.timeSpentOnDayCopy;
-        this._cd.detectChanges();
-      }
-    });
+    this._matDialog
+      .open(DialogAddTimeEstimateForOtherDayComponent)
+      .afterClosed()
+      .subscribe((result) => {
+        if (result && result.timeSpent > 0 && result.date) {
+          this.timeSpentOnDayCopy = {
+            ...this.timeSpentOnDayCopy,
+            [getWorklogStr(result.date)]: result.timeSpent,
+          };
+          this.taskCopy.timeSpentOnDay = this.timeSpentOnDayCopy;
+          this._cd.detectChanges();
+        }
+      });
   }
 
   deleteValue(strDate: string) {

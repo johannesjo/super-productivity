@@ -37,7 +37,7 @@ export const DEFAULT_SIMPLE_COUNTERS: SimpleCounter[] = [
     title: 'Coffee Counter',
     type: SimpleCounterType.ClickCounter,
     icon: 'free_breakfast',
-  }
+  },
 ];
 
 export const SIMPLE_COUNTER_TRIGGER_ACTIONS: string[] = [

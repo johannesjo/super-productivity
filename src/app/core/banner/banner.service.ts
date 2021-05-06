@@ -3,12 +3,12 @@ import { Banner, BannerId } from './banner.model';
 import { Observable, ReplaySubject } from 'rxjs';
 import { map } from 'rxjs/operators';
 
-@Injectable({providedIn: 'root'})
+@Injectable({ providedIn: 'root' })
 export class BannerService {
   private _banners: Banner[] = [];
   private _banners$: ReplaySubject<Banner[]> = new ReplaySubject(1);
   activeBanner$: Observable<Banner | null> = this._banners$.pipe(
-    map((banners) => (banners && banners.length && banners[0]) || null)
+    map((banners) => (banners && banners.length && banners[0]) || null),
   );
 
   constructor() {
@@ -73,7 +73,7 @@ export class BannerService {
   }
 
   open(banner: Banner) {
-    const bannerToUpdate = this._banners.find(bannerIN => bannerIN.id === banner.id);
+    const bannerToUpdate = this._banners.find((bannerIN) => bannerIN.id === banner.id);
     if (bannerToUpdate) {
       Object.assign(bannerToUpdate, banner);
     } else {
@@ -83,7 +83,7 @@ export class BannerService {
   }
 
   dismiss(bannerId: BannerId) {
-    const bannerIndex = this._banners.findIndex(bannerIN => bannerIN.id === bannerId);
+    const bannerIndex = this._banners.findIndex((bannerIN) => bannerIN.id === bannerId);
     if (bannerIndex > -1) {
       // NOTE splice mutates
       this._banners.splice(bannerIndex, 1);
@@ -93,8 +93,8 @@ export class BannerService {
 
   // usually not required, but when we want to be sure
   dismissAll(bannerId: BannerId) {
-    if (this._banners.find(bannerIN => bannerIN.id === bannerId)) {
-      this._banners = this._banners.filter(banner => banner.id !== bannerId);
+    if (this._banners.find((bannerIN) => bannerIN.id === bannerId)) {
+      this._banners = this._banners.filter((banner) => banner.id !== bannerId);
       this._banners$.next(this._banners);
     }
   }

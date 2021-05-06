@@ -12,11 +12,11 @@ const MAP = [
   'September',
   'October',
   'November',
-  'December'
+  'December',
 ];
 
 @Pipe({
-  name: 'numberToMonth'
+  name: 'numberToMonth',
 })
 export class NumberToMonthPipe implements PipeTransform {
   transform(value: any, args?: any): any {

@@ -25,7 +25,6 @@ import { TagSettingsPageModule } from './tag-settings-page/tag-settings-page.mod
     TagTaskPageModule,
     TagSettingsPageModule,
   ],
-  declarations: []
+  declarations: [],
 })
-export class PagesModule {
-}
+export class PagesModule {}

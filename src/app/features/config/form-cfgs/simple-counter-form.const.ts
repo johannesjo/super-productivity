@@ -1,6 +1,6 @@
 /* eslint-disable max-len */
 import { ConfigFormSection } from '../global-config.model';
-import { SimpleCounterConfig, SimpleCounterType } from '../../simple-counter/simple-counter.model';
+import { SimpleCounterConfig, SimpleCounterType, } from '../../simple-counter/simple-counter.model';
 import { T } from '../../../t.const';
 import { SIMPLE_COUNTER_TRIGGER_ACTIONS } from '../../simple-counter/simple-counter.const';
 
@@ -39,8 +39,14 @@ export const SIMPLE_COUNTER_FORM: ConfigFormSection<SimpleCounterConfig> = {
               label: T.F.SIMPLE_COUNTER.FORM.L_TYPE,
               required: true,
               options: [
-                {label: T.F.SIMPLE_COUNTER.FORM.TYPE_STOPWATCH, value: SimpleCounterType.StopWatch},
-                {label: T.F.SIMPLE_COUNTER.FORM.TYPE_CLICK_COUNTER, value: SimpleCounterType.ClickCounter},
+                {
+                  label: T.F.SIMPLE_COUNTER.FORM.TYPE_STOPWATCH,
+                  value: SimpleCounterType.StopWatch,
+                },
+                {
+                  label: T.F.SIMPLE_COUNTER.FORM.TYPE_CLICK_COUNTER,
+                  value: SimpleCounterType.ClickCounter,
+                },
               ],
             },
           },
@@ -54,9 +60,9 @@ export const SIMPLE_COUNTER_FORM: ConfigFormSection<SimpleCounterConfig> = {
           {
             type: 'icon',
             key: 'iconOn',
-            hideExpression: ((model: any) => {
+            hideExpression: (model: any) => {
               return model.type !== SimpleCounterType.StopWatch;
-            }),
+            },
             templateOptions: {
               label: T.F.SIMPLE_COUNTER.FORM.L_ICON_ON,
             },
@@ -64,41 +70,50 @@ export const SIMPLE_COUNTER_FORM: ConfigFormSection<SimpleCounterConfig> = {
           {
             key: 'triggerOnActions',
             type: 'select',
-            hideExpression: ((model: any) => {
+            hideExpression: (model: any) => {
               return model.type !== SimpleCounterType.ClickCounter;
-            }),
+            },
             templateOptions: {
               label: T.F.SIMPLE_COUNTER.FORM.L_AUTO_COUNT_UP,
               multiple: true,
-              options: SIMPLE_COUNTER_TRIGGER_ACTIONS.map(actionStr => ({label: actionStr, value: actionStr})),
-            }
+              options: SIMPLE_COUNTER_TRIGGER_ACTIONS.map((actionStr) => ({
+                label: actionStr,
+                value: actionStr,
+              })),
+            },
           },
           {
             key: 'triggerOnActions',
             type: 'select',
-            hideExpression: ((model: any) => {
+            hideExpression: (model: any) => {
               return model.type !== SimpleCounterType.StopWatch;
-            }),
+            },
             templateOptions: {
               label: T.F.SIMPLE_COUNTER.FORM.L_AUTO_SWITCH_ON,
               multiple: true,
-              options: SIMPLE_COUNTER_TRIGGER_ACTIONS.map(actionStr => ({label: actionStr, value: actionStr})),
-            }
+              options: SIMPLE_COUNTER_TRIGGER_ACTIONS.map((actionStr) => ({
+                label: actionStr,
+                value: actionStr,
+              })),
+            },
           },
           {
             key: 'triggerOffActions',
             type: 'select',
-            hideExpression: ((model: any) => {
+            hideExpression: (model: any) => {
               return model.type !== SimpleCounterType.StopWatch;
-            }),
+            },
             templateOptions: {
               label: T.F.SIMPLE_COUNTER.FORM.L_AUTO_SWITCH_OFF,
               multiple: true,
-              options: SIMPLE_COUNTER_TRIGGER_ACTIONS.map(actionStr => ({label: actionStr, value: actionStr})),
-            }
-          }
+              options: SIMPLE_COUNTER_TRIGGER_ACTIONS.map((actionStr) => ({
+                label: actionStr,
+                value: actionStr,
+              })),
+            },
+          },
         ],
       },
     },
-  ]
+  ],
 };

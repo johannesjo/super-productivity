@@ -1,5 +1,13 @@
 'use strict';
-import { App, app, BrowserWindow, globalShortcut, ipcMain, powerMonitor, protocol } from 'electron';
+import {
+  App,
+  app,
+  BrowserWindow,
+  globalShortcut,
+  ipcMain,
+  powerMonitor,
+  protocol,
+} from 'electron';
 import * as electronDl from 'electron-dl';
 
 import { info } from 'electron-log';
@@ -23,7 +31,7 @@ const ICONS_FOLDER = __dirname + '/assets/icons/';
 const IS_MAC = process.platform === 'darwin';
 const IS_LINUX = process.platform === 'linux';
 const DESKTOP_ENV = process.env.DESKTOP_SESSION;
-const IS_GNOME = (DESKTOP_ENV === 'gnome' || DESKTOP_ENV === 'gnome-xorg');
+const IS_GNOME = DESKTOP_ENV === 'gnome' || DESKTOP_ENV === 'gnome-xorg';
 const IS_DEV = process.env.NODE_ENV === 'DEV';
 
 let isShowDevTools: boolean = IS_DEV;
@@ -72,11 +80,11 @@ const appIN: MyApp = app;
 // NOTE: to get rid of the warning => https://github.com/electron/electron/issues/18397
 appIN.allowRendererProcessReuse = true;
 
-initDebug({showDevTools: isShowDevTools}, IS_DEV);
+initDebug({ showDevTools: isShowDevTools }, IS_DEV);
 
 // NOTE: opening the folder crashes the mas build
 if (!IS_MAC) {
-  electronDl({openFolderWhenDone: true});
+  electronDl({ openFolderWhenDone: true });
 }
 let mainWin: BrowserWindow;
 // keep app active to keep time tracking running
@@ -133,7 +141,9 @@ appIN.on('ready', () => {
   const sendIdleMsgIfOverMin = (idleTime) => {
     // sometimes when starting a second instance we get here although we don't want to
     if (!mainWin) {
-      info('special case occurred when trackTimeFn is called even though, this is a second instance of the app');
+      info(
+        'special case occurred when trackTimeFn is called even though, this is a second instance of the app',
+      );
       return;
     }
 
@@ -229,9 +239,9 @@ ipcMain.on(IPC.LOCK_SCREEN, () => {
   }
 });
 
-ipcMain.on(IPC.SET_PROGRESS_BAR, (ev, {progress, mode}) => {
+ipcMain.on(IPC.SET_PROGRESS_BAR, (ev, { progress, mode }) => {
   if (mainWin) {
-    mainWin.setProgressBar(Math.min(Math.max(progress, 0), 1), {mode});
+    mainWin.setProgressBar(Math.min(Math.max(progress, 0), 1), { mode });
   }
 });
 
@@ -239,9 +249,12 @@ ipcMain.on(IPC.REGISTER_GLOBAL_SHORTCUTS_EVENT, (ev, cfg) => {
   registerShowAppShortCuts(cfg);
 });
 
-ipcMain.on(IPC.JIRA_SETUP_IMG_HEADERS, (ev, {jiraCfg, wonkyCookie}: { jiraCfg: JiraCfg; wonkyCookie?: string }) => {
-  setupRequestHeadersForImages(jiraCfg, wonkyCookie);
-});
+ipcMain.on(
+  IPC.JIRA_SETUP_IMG_HEADERS,
+  (ev, { jiraCfg, wonkyCookie }: { jiraCfg: JiraCfg; wonkyCookie?: string }) => {
+    setupRequestHeadersForImages(jiraCfg, wonkyCookie);
+  },
+);
 
 ipcMain.on(IPC.JIRA_MAKE_REQUEST_EVENT, (ev, request) => {
   sendJiraRequest(request);
@@ -263,7 +276,7 @@ function createIndicator() {
     showApp,
     quitApp,
     ICONS_FOLDER,
-    forceDarkTray
+    forceDarkTray,
   });
 }
 
@@ -290,7 +303,7 @@ function registerShowAppShortCuts(cfg: KeyboardConfig) {
 
   if (cfg) {
     Object.keys(cfg)
-      .filter((key: (keyof KeyboardConfig)) => GLOBAL_KEY_CFG_KEYS.includes(key))
+      .filter((key: keyof KeyboardConfig) => GLOBAL_KEY_CFG_KEYS.includes(key))
       .forEach((key) => {
         let actionFn: () => void;
         const shortcut = cfg[key];
@@ -359,7 +372,9 @@ function showOrFocus(passedWin) {
 
   // sometimes when starting a second instance we get here although we don't want to
   if (!win) {
-    info('special case occurred when showOrFocus is called even though, this is a second instance of the app');
+    info(
+      'special case occurred when showOrFocus is called even though, this is a second instance of the app',
+    );
     return;
   }
 

@@ -128,23 +128,20 @@ export type GlobalConfigState = Readonly<{
 
 export type GlobalConfigSectionKey = keyof GlobalConfigState | 'EMPTY';
 
-export type GlobalSectionConfig
-  = MiscConfig
+export type GlobalSectionConfig =
+  | MiscConfig
   | PomodoroConfig
   | DropboxSyncConfig
   | KeyboardConfig
-  | SyncConfig
-  ;
+  | SyncConfig;
 type Omit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>;
 
-export interface LimitedFormlyFieldConfig<FormModel> extends Omit<FormlyFieldConfig, 'key'> {
+export interface LimitedFormlyFieldConfig<FormModel>
+  extends Omit<FormlyFieldConfig, 'key'> {
   key?: keyof FormModel;
 }
 
-export type CustomCfgSection =
-  'FILE_IMPORT_EXPORT'
-  | 'JIRA_CFG'
-  | 'SIMPLE_COUNTER_CFG';
+export type CustomCfgSection = 'FILE_IMPORT_EXPORT' | 'JIRA_CFG' | 'SIMPLE_COUNTER_CFG';
 
 // Intermediate model
 export interface ConfigFormSection<FormModel> {
@@ -157,10 +154,9 @@ export interface ConfigFormSection<FormModel> {
   isElectronOnly?: boolean;
 }
 
-export interface GenericConfigFormSection extends Omit<ConfigFormSection<unknown>, 'items'> {
+export interface GenericConfigFormSection
+  extends Omit<ConfigFormSection<unknown>, 'items'> {
   items?: FormlyFieldConfig[];
 }
 
 export type ConfigFormConfig = Readonly<GenericConfigFormSection[]>;
-
-

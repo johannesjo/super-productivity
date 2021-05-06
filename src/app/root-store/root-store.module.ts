@@ -2,7 +2,6 @@ import { NgModule } from '@angular/core';
 
 @NgModule({
   imports: [],
-  declarations: []
+  declarations: [],
 })
-export class RootStoreModule {
-}
+export class RootStoreModule {}

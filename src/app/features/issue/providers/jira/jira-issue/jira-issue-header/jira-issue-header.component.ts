@@ -7,12 +7,11 @@ import { Observable } from 'rxjs';
   selector: 'jira-issue-header',
   templateUrl: './jira-issue-header.component.html',
   styleUrls: ['./jira-issue-header.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class JiraIssueHeaderComponent {
   @Input() task?: TaskWithSubTasks;
   isOnline$: Observable<boolean> = isOnline$;
 
-  constructor() {
-  }
+  constructor() {}
 }

@@ -6,12 +6,10 @@ import { expandFadeAnimation } from '../animations/expand.ani';
   templateUrl: './help-section.component.html',
   styleUrls: ['./help-section.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  animations: [expandFadeAnimation]
+  animations: [expandFadeAnimation],
 })
 export class HelpSectionComponent {
   @Input() isShowHelp: boolean = false;
 
-  constructor() {
-  }
-
+  constructor() {}
 }

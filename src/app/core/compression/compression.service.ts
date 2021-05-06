@@ -3,21 +3,19 @@ import { SnackService } from '../snack/snack.service';
 import * as shortid from 'shortid';
 import { T } from '../../t.const';
 
-@Injectable({providedIn: 'root'})
+@Injectable({ providedIn: 'root' })
 export class CompressionService {
   private _w: Worker;
   private _activeInstances: any = {};
 
-  constructor(
-    private readonly _snackService: SnackService,
-  ) {
+  constructor(private readonly _snackService: SnackService) {
     if (typeof (Worker as any) === 'undefined') {
       throw new Error('No web worker support');
     }
     // Create a new
     this._w = new Worker('./lz.worker', {
       name: 'lz',
-      type: 'module'
+      type: 'module',
     });
     this._w.addEventListener('message', this._onData.bind(this));
     this._w.addEventListener('error', this._handleError.bind(this));
@@ -26,40 +24,43 @@ export class CompressionService {
   async compress(strToHandle: string): Promise<string> {
     return this._promisifyWorker({
       type: 'COMPRESS',
-      strToHandle
+      strToHandle,
     });
   }
 
   async decompress(strToHandle: string): Promise<string> {
     return this._promisifyWorker({
       type: 'DECOMPRESS',
-      strToHandle
+      strToHandle,
     });
   }
 
   async compressUTF16(strToHandle: string): Promise<string> {
     return this._promisifyWorker({
       type: 'COMPRESS_UTF16',
-      strToHandle
+      strToHandle,
     });
   }
 
   async decompressUTF16(strToHandle: string): Promise<string> {
     return this._promisifyWorker({
       type: 'DECOMPRESS_UTF16',
-      strToHandle
+      strToHandle,
     });
   }
 
-  private _promisifyWorker(params: { type: string; strToHandle: string }): Promise<string> {
+  private _promisifyWorker(params: {
+    type: string;
+    strToHandle: string;
+  }): Promise<string> {
     const id = shortid();
 
-    const promise = new Promise(((resolve, reject) => {
+    const promise = new Promise((resolve, reject) => {
       this._activeInstances[id] = {
         resolve,
         reject,
       };
-    })) as Promise<string>;
+    }) as Promise<string>;
 
     this._w.postMessage({
       ...params,
@@ -69,7 +70,7 @@ export class CompressionService {
   }
 
   private async _onData(msg: MessageEvent) {
-    const {id, strToHandle, err} = msg.data;
+    const { id, strToHandle, err } = msg.data;
     if (err) {
       this._activeInstances[id].reject(err);
       this._handleError(err);
@@ -81,6 +82,6 @@ export class CompressionService {
 
   private _handleError(err: any) {
     console.error(err);
-    this._snackService.open({type: 'ERROR', msg: T.GLOBAL_SNACK.ERR_COMPRESSION});
+    this._snackService.open({ type: 'ERROR', msg: T.GLOBAL_SNACK.ERR_COMPRESSION });
   }
 }

@@ -38,7 +38,8 @@ describe('PomodoroEffects', () => {
         provideMockActions(() => actions$),
         provideMockStore(),
         {
-          provide: PomodoroService, useValue: {
+          provide: PomodoroService,
+          useValue: {
             sessionProgress$: EMPTY,
             cfg$,
             isBreak$,
@@ -46,18 +47,18 @@ describe('PomodoroEffects', () => {
             isEnabled$,
           },
         },
-        {provide: MatDialog, useValue: {}},
-        {provide: NotifyService, useValue: {}},
-        {provide: ElectronService, useValue: {}},
-        {provide: SnackService, useValue: {}},
-      ]
+        { provide: MatDialog, useValue: {} },
+        { provide: NotifyService, useValue: {} },
+        { provide: ElectronService, useValue: {} },
+        { provide: SnackService, useValue: {} },
+      ],
     });
     effects = TestBed.inject(PomodoroEffects);
   });
 
   it('should start pomodoro when a task is set to current', (done) => {
     actions$ = of(new SetCurrentTask('something'));
-    effects.playPauseOnCurrentUpdate$.subscribe(effectAction => {
+    effects.playPauseOnCurrentUpdate$.subscribe((effectAction) => {
       expect(effectAction.type).toBe(PomodoroActionTypes.StartPomodoro);
       done();
     });
@@ -65,7 +66,7 @@ describe('PomodoroEffects', () => {
 
   it('should pause pomodoro when a task is set none', (done) => {
     actions$ = of(new SetCurrentTask(null));
-    effects.playPauseOnCurrentUpdate$.subscribe(effectAction => {
+    effects.playPauseOnCurrentUpdate$.subscribe((effectAction) => {
       expect(effectAction.type).toBe(PomodoroActionTypes.PausePomodoro);
       done();
     });
@@ -77,10 +78,10 @@ describe('PomodoroEffects', () => {
     actions$ = of(new SetCurrentTask('something'));
 
     const as: Action[] = [];
-    effects.playPauseOnCurrentUpdate$.subscribe(effectAction => {
+    effects.playPauseOnCurrentUpdate$.subscribe((effectAction) => {
       as.push(effectAction);
       if (as.length === 2) {
-        expect(as.map(a => a.type)).toEqual([
+        expect(as.map((a) => a.type)).toEqual([
           PomodoroActionTypes.FinishPomodoroSession,
           PomodoroActionTypes.StartPomodoro,
         ]);

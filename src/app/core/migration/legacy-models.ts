@@ -50,7 +50,9 @@ export interface LegacyAppDataForProjects {
   };
 }
 
-export interface LegacyAppDataComplete extends LegacyAppBaseData, LegacyAppDataForProjects {
+export interface LegacyAppDataComplete
+  extends LegacyAppBaseData,
+    LegacyAppDataForProjects {
   lastActiveTime: number;
 }
 

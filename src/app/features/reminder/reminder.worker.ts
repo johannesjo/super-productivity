@@ -6,7 +6,7 @@ import { lazySetInterval } from '../../../../electron/lazy-set-interval';
 const CHECK_INTERVAL_DURATION = 10000;
 let cancelCheckInterval: (() => void) | undefined;
 
-addEventListener('message', ({data}) => {
+addEventListener('message', ({ data }) => {
   // console.log('REMINDER WORKER', data);
   reInitCheckInterval(data);
 });
@@ -25,10 +25,11 @@ const reInitCheckInterval = (reminders: ReminderCopy[]) => {
     if (dueReminders.length) {
       const oldest = dueReminders[0];
 
-      const remindersToSend = (oldest.type === 'TASK')
-        ? dueReminders.filter(r => r.type === 'TASK')
-        // NOTE: for notes we just send the oldest due reminder
-        : [oldest];
+      const remindersToSend =
+        oldest.type === 'TASK'
+          ? dueReminders.filter((r) => r.type === 'TASK')
+          : // NOTE: for notes we just send the oldest due reminder
+            [oldest];
 
       postMessage(remindersToSend);
       console.log('Worker postMessage', remindersToSend);
@@ -39,6 +40,6 @@ const reInitCheckInterval = (reminders: ReminderCopy[]) => {
 const getDueReminders = (reminders: ReminderCopy[]): ReminderCopy[] => {
   const now = Date.now();
   return reminders
-    .filter(reminder => (reminder.remindAt < now))
+    .filter((reminder) => reminder.remindAt < now)
     .sort((a, b) => a.remindAt - b.remindAt);
 };

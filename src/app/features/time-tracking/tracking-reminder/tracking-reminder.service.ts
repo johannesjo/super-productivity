@@ -3,7 +3,14 @@ import { IdleService } from '../idle.service';
 import { TaskService } from '../../tasks/task.service';
 import { GlobalConfigService } from '../../config/global-config.service';
 import { combineLatest, EMPTY, merge, Observable, of, Subject } from 'rxjs';
-import { distinctUntilChanged, filter, map, shareReplay, switchMap, withLatestFrom } from 'rxjs/operators';
+import {
+  distinctUntilChanged,
+  filter,
+  map,
+  shareReplay,
+  switchMap,
+  withLatestFrom,
+} from 'rxjs/operators';
 import { realTimer$ } from '../../../util/real-timer';
 import { BannerService } from '../../../core/banner/banner.service';
 import { BannerId } from '../../../core/banner/banner.model';
@@ -18,42 +25,39 @@ import { TrackingReminderConfig } from '../../config/global-config.model';
 import { IS_TOUCH_ONLY } from '../../../util/is-touch';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class TrackingReminderService {
-  _cfg$: Observable<TrackingReminderConfig> = this._globalConfigService.cfg$.pipe(map(cfg => cfg?.trackingReminder));
+  _cfg$: Observable<TrackingReminderConfig> = this._globalConfigService.cfg$.pipe(
+    map((cfg) => cfg?.trackingReminder),
+  );
 
   _counter$: Observable<number> = realTimer$(1000);
 
   _manualReset$: Subject<void> = new Subject();
 
-  _resetableCounter$: Observable<number> = merge(
-    of('INITIAL'),
-    this._manualReset$,
-  ).pipe(
+  _resetableCounter$: Observable<number> = merge(of('INITIAL'), this._manualReset$).pipe(
     switchMap(() => this._counter$),
   );
 
   _hideTrigger$: Observable<any> = merge(
-    this._taskService.currentTaskId$.pipe(filter(currentId => !!currentId)),
-    this._idleService.isIdle$.pipe(filter(isIdle => isIdle)),
+    this._taskService.currentTaskId$.pipe(filter((currentId) => !!currentId)),
+    this._idleService.isIdle$.pipe(filter((isIdle) => isIdle)),
   );
 
   remindCounter$: Observable<number> = this._cfg$.pipe(
-    switchMap((cfg) => !cfg.isEnabled || (!cfg.isShowOnMobile && IS_TOUCH_ONLY)
-      ? EMPTY
-      : combineLatest([
-        this._taskService.currentTaskId$,
-        this._idleService.isIdle$,
-      ]).pipe(
-        map(([currentTaskId, isIdle]) => !currentTaskId && !isIdle),
-        distinctUntilChanged(),
-        switchMap((isEnabled) => isEnabled
-          ? this._resetableCounter$
-          : of(0)
-        ),
-        filter(time => time > cfg.minTime),
-      )
+    switchMap((cfg) =>
+      !cfg.isEnabled || (!cfg.isShowOnMobile && IS_TOUCH_ONLY)
+        ? EMPTY
+        : combineLatest([
+            this._taskService.currentTaskId$,
+            this._idleService.isIdle$,
+          ]).pipe(
+            map(([currentTaskId, isIdle]) => !currentTaskId && !isIdle),
+            distinctUntilChanged(),
+            switchMap((isEnabled) => (isEnabled ? this._resetableCounter$ : of(0))),
+            filter((time) => time > cfg.minTime),
+          ),
     ),
     shareReplay(),
   );
@@ -65,8 +69,7 @@ export class TrackingReminderService {
     private _bannerService: BannerService,
     private _matDialog: MatDialog,
     private _translateService: TranslateService,
-  ) {
-  }
+  ) {}
 
   init() {
     this.remindCounter$.subscribe((count) => {
@@ -92,7 +95,9 @@ export class TrackingReminderService {
     this._bannerService.open({
       id: BannerId.StartTrackingReminder,
       ico: 'timer',
-      msg: this._translateService.instant(T.F.TIME_TRACKING.B_TTR.MSG, {time: durationStr}),
+      msg: this._translateService.instant(T.F.TIME_TRACKING.B_TTR.MSG, {
+        time: durationStr,
+      }),
       action: {
         label: T.F.TIME_TRACKING.B_TTR.ADD_TO_TASK,
         fn: () => this._openDialog(),
@@ -105,35 +110,40 @@ export class TrackingReminderService {
   }
 
   private _openDialog() {
-    this._matDialog.open(DialogTrackingReminderComponent, {
-      data: {
-        disableClose: true,
-        remindCounter$: this.remindCounter$,
-      }
-    }).afterClosed()
-      .pipe(
-        withLatestFrom(this.remindCounter$),
-      )
-      .subscribe(async ([{task} = {task: undefined}, remindCounter]: [{ task: Task | string | undefined }, number]): Promise<void> => {
-        this._manualReset$.next();
-        const timeSpent = remindCounter;
+    this._matDialog
+      .open(DialogTrackingReminderComponent, {
+        data: {
+          disableClose: true,
+          remindCounter$: this.remindCounter$,
+        },
+      })
+      .afterClosed()
+      .pipe(withLatestFrom(this.remindCounter$))
+      .subscribe(
+        async ([{ task } = { task: undefined }, remindCounter]: [
+          { task: Task | string | undefined },
+          number,
+        ]): Promise<void> => {
+          this._manualReset$.next();
+          const timeSpent = remindCounter;
 
-        if (task) {
-          if (typeof task === 'string') {
-            const currId = this._taskService.add(task, false, {
-              timeSpent,
-              timeSpentOnDay: {
-                [getWorklogStr()]: timeSpent
-              }
-            });
-            this._taskService.setCurrentId(currId);
-          } else {
-            this._taskService.addTimeSpent(task, timeSpent);
-            this._taskService.setCurrentId(task.id);
+          if (task) {
+            if (typeof task === 'string') {
+              const currId = this._taskService.add(task, false, {
+                timeSpent,
+                timeSpentOnDay: {
+                  [getWorklogStr()]: timeSpent,
+                },
+              });
+              this._taskService.setCurrentId(currId);
+            } else {
+              this._taskService.addTimeSpent(task, timeSpent);
+              this._taskService.setCurrentId(task.id);
+            }
           }
-        }
-        this._dismissBanner();
-      });
+          this._dismissBanner();
+        },
+      );
   }
 
   private _dismissBanner() {

@@ -6,16 +6,15 @@ import { T } from '../../t.const';
   selector: 'dialog-confirm',
   templateUrl: './dialog-confirm.component.html',
   styleUrls: ['./dialog-confirm.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class DialogConfirmComponent {
   T: typeof T = T;
 
   constructor(
     private _matDialogRef: MatDialogRef<DialogConfirmComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: any
-  ) {
-  }
+    @Inject(MAT_DIALOG_DATA) public data: any,
+  ) {}
 
   close(res: any) {
     this._matDialogRef.close(res);

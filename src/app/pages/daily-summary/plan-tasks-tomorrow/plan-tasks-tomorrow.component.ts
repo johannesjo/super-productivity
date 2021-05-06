@@ -5,12 +5,8 @@ import { WorkContextService } from '../../../features/work-context/work-context.
   selector: 'plan-tasks-tomorrow',
   templateUrl: './plan-tasks-tomorrow.component.html',
   styleUrls: ['./plan-tasks-tomorrow.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class PlanTasksTomorrowComponent {
-
-  constructor(
-    public workContextService: WorkContextService,
-  ) {
-  }
+  constructor(public workContextService: WorkContextService) {}
 }

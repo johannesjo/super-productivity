@@ -1,7 +1,10 @@
 // TODO use as a checklist
 import { GithubCfg } from './github.model';
 import { T } from '../../../../t.const';
-import { ConfigFormSection, LimitedFormlyFieldConfig } from '../../../config/global-config.model';
+import {
+  ConfigFormSection,
+  LimitedFormlyFieldConfig,
+} from '../../../config/global-config.model';
 
 export const DEFAULT_GITHUB_CFG: GithubCfg = {
   repo: null,
@@ -36,35 +39,35 @@ export const GITHUB_CONFIG_FORM: LimitedFormlyFieldConfig<GithubCfg>[] = [
     type: 'input',
     templateOptions: {
       label: T.F.GITHUB.FORM.TOKEN,
-      description: T.F.GITHUB.FORM.TOKEN_DESCRIPTION
+      description: T.F.GITHUB.FORM.TOKEN_DESCRIPTION,
     },
   },
   {
     key: 'isSearchIssuesFromGithub',
     type: 'checkbox',
     templateOptions: {
-      label: T.F.GITHUB.FORM.IS_SEARCH_ISSUES_FROM_GITHUB
+      label: T.F.GITHUB.FORM.IS_SEARCH_ISSUES_FROM_GITHUB,
     },
   },
   {
     key: 'isAutoPoll',
     type: 'checkbox',
     templateOptions: {
-      label: T.F.GITHUB.FORM.IS_AUTO_POLL
+      label: T.F.GITHUB.FORM.IS_AUTO_POLL,
     },
   },
   {
     key: 'isAutoAddToBacklog',
     type: 'checkbox',
     templateOptions: {
-      label: T.F.GITHUB.FORM.IS_AUTO_ADD_TO_BACKLOG
+      label: T.F.GITHUB.FORM.IS_AUTO_ADD_TO_BACKLOG,
     },
   },
   {
     key: 'filterUsername',
     type: 'input',
     templateOptions: {
-      label: T.F.GITHUB.FORM.FILTER_USER
+      label: T.F.GITHUB.FORM.FILTER_USER,
     },
   },
 ];

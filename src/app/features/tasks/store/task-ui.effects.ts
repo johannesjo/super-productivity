@@ -19,61 +19,64 @@ import { playDoneSound } from '../util/play-done-sound';
 
 @Injectable()
 export class TaskUiEffects {
-  @Effect({dispatch: false})
+  @Effect({ dispatch: false })
   taskCreatedSnack$: any = this._actions$.pipe(
-    ofType(
-      TaskActionTypes.AddTask,
+    ofType(TaskActionTypes.AddTask),
+    tap((a: AddTask) =>
+      this._snackService.open({
+        type: 'SUCCESS',
+        translateParams: {
+          title: truncate(a.payload.task.title),
+        },
+        msg: T.F.TASK.S.TASK_CREATED,
+        ico: 'add',
+      }),
     ),
-    tap((a: AddTask) => this._snackService.open({
-      type: 'SUCCESS',
-      translateParams: {
-        title: truncate(a.payload.task.title)
-      },
-      msg: T.F.TASK.S.TASK_CREATED,
-      ico: 'add',
-    })),
   );
 
-  @Effect({dispatch: false})
+  @Effect({ dispatch: false })
   snackDelete$: any = this._actions$.pipe(
-    ofType(
-      TaskActionTypes.DeleteTask,
-    ),
+    ofType(TaskActionTypes.DeleteTask),
     tap((actionIN: DeleteTask) => {
       const action = actionIN as DeleteTask;
       this._snackService.open({
         translateParams: {
-          title: truncate(action.payload.task.title)
+          title: truncate(action.payload.task.title),
         },
         msg: T.F.TASK.S.DELETED,
-        config: {duration: 5000},
+        config: { duration: 5000 },
         actionStr: T.G.UNDO,
-        actionId: TaskActionTypes.UndoDeleteTask
+        actionId: TaskActionTypes.UndoDeleteTask,
       });
-    })
+    }),
   );
 
-  @Effect({dispatch: false})
+  @Effect({ dispatch: false })
   timeEstimateExceeded$: any = this._actions$.pipe(
-    ofType(
-      TaskActionTypes.AddTimeSpent,
-    ),
+    ofType(TaskActionTypes.AddTimeSpent),
     // refresh every 10 minute max
     throttleTime(10 * 60 * 1000),
     withLatestFrom(
       this._store$.pipe(select(selectCurrentTask)),
       this._store$.pipe(select(selectConfigFeatureState)),
     ),
-    tap((args) => this._notifyAboutTimeEstimateExceeded(args))
+    tap((args) => this._notifyAboutTimeEstimateExceeded(args)),
   );
 
-  @Effect({dispatch: false})
+  @Effect({ dispatch: false })
   taskDoneSound$: any = this._actions$.pipe(
-    ofType(
-      TaskActionTypes.UpdateTask,
+    ofType(TaskActionTypes.UpdateTask),
+    filter(
+      ({
+        payload: {
+          task: { changes },
+        },
+      }: UpdateTask) => !!changes.isDone,
     ),
-    filter(({payload: {task: {changes}}}: UpdateTask) => !!changes.isDone),
-    withLatestFrom(this._workContextService.flatDoneTodayNr$, this._globalConfigService.sound$),
+    withLatestFrom(
+      this._workContextService.flatDoneTodayNr$,
+      this._globalConfigService.sound$,
+    ),
     filter(([, , soundCfg]) => soundCfg.isPlayDoneSound),
     tap(([, doneToday, soundCfg]) => playDoneSound(soundCfg, doneToday)),
   );
@@ -87,35 +90,41 @@ export class TaskUiEffects {
     private _snackService: SnackService,
     private _globalConfigService: GlobalConfigService,
     private _workContextService: WorkContextService,
-  ) {
-  }
+  ) {}
 
-  private _notifyAboutTimeEstimateExceeded([action, ct, globalCfg]: [Action, any, GlobalConfigState]) {
-    if (globalCfg && globalCfg.misc.isNotifyWhenTimeEstimateExceeded
-      && ct && ct.timeEstimate > 0
-      && ct.timeSpent > ct.timeEstimate) {
+  private _notifyAboutTimeEstimateExceeded([action, ct, globalCfg]: [
+    Action,
+    any,
+    GlobalConfigState,
+  ]) {
+    if (
+      globalCfg &&
+      globalCfg.misc.isNotifyWhenTimeEstimateExceeded &&
+      ct &&
+      ct.timeEstimate > 0 &&
+      ct.timeSpent > ct.timeEstimate
+    ) {
       const title = truncate(ct.title);
 
       this._notifyService.notify({
         title: T.F.TASK.N.ESTIMATE_EXCEEDED,
         body: T.F.TASK.N.ESTIMATE_EXCEEDED_BODY,
-        translateParams: {title},
+        translateParams: { title },
       });
 
       this._bannerService.open({
         msg: T.F.TASK.B.ESTIMATE_EXCEEDED,
         id: BannerId.TimeEstimateExceeded,
         ico: 'timer',
-        translateParams: {title},
+        translateParams: { title },
         action: {
           label: T.F.TASK.B.ADD_HALF_HOUR,
-          fn: () => this._taskService.update(ct.id, {
-            timeEstimate: (ct.timeSpent + 30 * 60000)
-          })
-        }
+          fn: () =>
+            this._taskService.update(ct.id, {
+              timeEstimate: ct.timeSpent + 30 * 60000,
+            }),
+        },
       });
     }
   }
 }
-
-

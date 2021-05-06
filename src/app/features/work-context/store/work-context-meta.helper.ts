@@ -5,13 +5,11 @@ export const moveTaskForWorkContextLikeState = (
   taskId: string,
   newOrderedIds: string[],
   target: DropListModelSource | null,
-  taskIdsBefore: string[]
+  taskIdsBefore: string[],
 ): string[] => {
   const idsFilteredMoving = taskIdsBefore.filter(filterOutId(taskId));
   // NOTE: move to end of complete list for done tasks
-  const emptyListVal = (target === 'DONE')
-    ? idsFilteredMoving.length
-    : 0;
+  const emptyListVal = target === 'DONE' ? idsFilteredMoving.length : 0;
   return moveItemInList(taskId, idsFilteredMoving, newOrderedIds, emptyListVal);
 };
 
@@ -22,7 +20,12 @@ items might be hidden (done sub tasks).
 Please note that the completeList depending on the circumstances might or might not
 include the itemId, while the partialList always should.
 */
-export const moveItemInList = (itemId: string, completeList: string[], partialList: string[], emptyListVal = 0): string[] => {
+export const moveItemInList = (
+  itemId: string,
+  completeList: string[],
+  partialList: string[],
+  emptyListVal = 0,
+): string[] => {
   // console.log(itemId, completeList, partialList);
 
   let newIndex;

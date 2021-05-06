@@ -16,17 +16,13 @@ import { BookmarkLinkDirective } from './bookmark-link/bookmark-link.directive';
     UiModule,
     FormsModule,
     StoreModule.forFeature(BOOKMARK_FEATURE_NAME, bookmarkReducer),
-    EffectsModule.forFeature([BookmarkEffects])
+    EffectsModule.forFeature([BookmarkEffects]),
   ],
   declarations: [
     BookmarkBarComponent,
     DialogEditBookmarkComponent,
-    BookmarkLinkDirective
+    BookmarkLinkDirective,
   ],
-  exports: [
-    BookmarkBarComponent,
-    DialogEditBookmarkComponent
-  ],
+  exports: [BookmarkBarComponent, DialogEditBookmarkComponent],
 })
-export class BookmarkModule {
-}
+export class BookmarkModule {}

@@ -1,5 +1,8 @@
 import { EntityState } from '@ngrx/entity';
-import { WorkContextAdvancedCfgKey, WorkContextCommon } from '../work-context/work-context.model';
+import {
+  WorkContextAdvancedCfgKey,
+  WorkContextCommon,
+} from '../work-context/work-context.model';
 import { MODEL_VERSION_KEY } from '../../app.constants';
 
 export interface TagCopy extends WorkContextCommon {

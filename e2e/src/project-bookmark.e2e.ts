@@ -1,4 +1,4 @@
-import {NBrowser} from '../n-browser-interface';
+import { NBrowser } from '../n-browser-interface';
 
 const TOGGLE_BOOKMARK_BAR_BTN = '.action-nav button:nth-child(2)';
 const BOOKMARK_BAR_OPTS_BTN = 'bookmark-bar .list-controls button:first-of-type';
@@ -15,25 +15,26 @@ const FIRST_BOOKMARK = `${BOOKMARK}:first-of-type`;
 module.exports = {
   '@tags': ['project', 'bookmark'],
 
-  'create a bookmark': (browser: NBrowser) => browser
-    .goToDefaultProject()
+  'create a bookmark': (browser: NBrowser) =>
+    browser
+      .goToDefaultProject()
 
-    .waitForElementVisible(TOGGLE_BOOKMARK_BAR_BTN)
-    .click(TOGGLE_BOOKMARK_BAR_BTN)
+      .waitForElementVisible(TOGGLE_BOOKMARK_BAR_BTN)
+      .click(TOGGLE_BOOKMARK_BAR_BTN)
 
-    .waitForElementVisible(BOOKMARK_BAR_OPTS_BTN)
-    .click(BOOKMARK_BAR_OPTS_BTN)
+      .waitForElementVisible(BOOKMARK_BAR_OPTS_BTN)
+      .click(BOOKMARK_BAR_OPTS_BTN)
 
-    .waitForElementVisible(ADD_BOOKMARK_BTN)
-    .click(ADD_BOOKMARK_BTN)
+      .waitForElementVisible(ADD_BOOKMARK_BTN)
+      .click(ADD_BOOKMARK_BTN)
 
-    .waitForElementVisible(BOOKMARK_TITLE_INP)
-    .setValue(BOOKMARK_TITLE_INP, 'Some bookmark title')
-    .setValue(BOOKMARK_URL_INP, 'bookmark-url')
-    .click(BOOKMARK_SUBMIT_BTN)
+      .waitForElementVisible(BOOKMARK_TITLE_INP)
+      .setValue(BOOKMARK_TITLE_INP, 'Some bookmark title')
+      .setValue(BOOKMARK_URL_INP, 'bookmark-url')
+      .click(BOOKMARK_SUBMIT_BTN)
 
-    .waitForElementVisible(FIRST_BOOKMARK)
-    .assert.elementPresent(FIRST_BOOKMARK)
-    .assert.containsText(FIRST_BOOKMARK, 'Some bookmark title')
-    .end(),
+      .waitForElementVisible(FIRST_BOOKMARK)
+      .assert.elementPresent(FIRST_BOOKMARK)
+      .assert.containsText(FIRST_BOOKMARK, 'Some bookmark title')
+      .end(),
 };

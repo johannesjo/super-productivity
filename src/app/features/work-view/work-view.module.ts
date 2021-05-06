@@ -26,13 +26,7 @@ import { WorkViewComponent } from './work-view.component';
     MatSidenavModule,
     BetterDrawerModule,
   ],
-  declarations: [
-    WorkViewComponent,
-    BacklogComponent,
-  ],
-  exports: [
-    WorkViewComponent,
-  ]
+  declarations: [WorkViewComponent, BacklogComponent],
+  exports: [WorkViewComponent],
 })
-export class WorkViewModule {
-}
+export class WorkViewModule {}

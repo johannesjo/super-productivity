@@ -8,11 +8,7 @@ import { FormsModule } from '@angular/forms';
 import { WorklogWeekComponent } from './worklog-week/worklog-week.component';
 
 @NgModule({
-  imports: [
-    CommonModule,
-    UiModule,
-    FormsModule,
-  ],
+  imports: [CommonModule, UiModule, FormsModule],
   declarations: [
     WorklogComponent,
     DialogWorklogExportComponent,
@@ -26,5 +22,4 @@ import { WorklogWeekComponent } from './worklog-week/worklog-week.component';
     WorklogWeekComponent,
   ],
 })
-export class WorklogModule {
-}
+export class WorklogModule {}

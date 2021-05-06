@@ -5,12 +5,7 @@ import { ProjectModule } from '../../features/project/project.module';
 import { UiModule } from '../../ui/ui.module';
 
 @NgModule({
-  imports: [
-    CommonModule,
-    UiModule,
-    ProjectModule
-  ],
+  imports: [CommonModule, UiModule, ProjectModule],
   declarations: [ProjectOverviewPageComponent],
 })
-export class ProjectOverviewPageModule {
-}
+export class ProjectOverviewPageModule {}

@@ -1,7 +1,14 @@
-import { Directive, EventEmitter, HostListener, Input, OnDestroy, Output } from '@angular/core';
+import {
+  Directive,
+  EventEmitter,
+  HostListener,
+  Input,
+  OnDestroy,
+  Output,
+} from '@angular/core';
 
 @Directive({
-  selector: '[longPress]'
+  selector: '[longPress]',
 })
 export class LongPressDirective implements OnDestroy {
   @Input() longPressDuration: number = 400;

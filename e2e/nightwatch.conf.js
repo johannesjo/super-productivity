@@ -1,20 +1,18 @@
 module.exports = {
   // An array of folders (excluding subfolders) where your tests are located;
   // if this is not specified, the test source must be passed as the second argument to the test runner.
-  src_folders: [
-    '../out-tsc/e2e/src'
-  ],
-  output_folder: "./e2e-test-results",
-  custom_commands_path: "out-tsc/e2e/commands",
+  src_folders: ['../out-tsc/e2e/src'],
+  output_folder: './e2e-test-results',
+  custom_commands_path: 'out-tsc/e2e/commands',
   test_workers: {
     enabled: true,
-    workers: "auto"
+    workers: 'auto',
   },
   webdriver: {
     start_process: true,
     port: 9515,
     server_path: require('chromedriver').path,
-    cli_args: []
+    cli_args: [],
   },
 
   test_settings: {
@@ -34,8 +32,8 @@ module.exports = {
           ],
           w3c: false,
           prefs: {
-            "profile.default_content_setting_values.geolocation": 1,
-            "profile.default_content_setting_values.notifications": 2,
+            'profile.default_content_setting_values.geolocation': 1,
+            'profile.default_content_setting_values.notifications': 2,
           },
         },
       },
@@ -43,13 +41,13 @@ module.exports = {
         enabled: true, // if you want to keep screenshots
         on_failure: true,
         on_error: true,
-        path: './e2e/screenshots' // save screenshots here
+        path: './e2e/screenshots', // save screenshots here
       },
       globals: {
         waitForConditionPollInterval: 500,
         waitForConditionTimeout: 10000,
         retryAssertionTimeout: 1000,
-      }
-    }
-  }
+      },
+    },
+  },
 };

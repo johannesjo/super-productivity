@@ -1,7 +1,11 @@
 import { ChangeDetectionStrategy, Component, Inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { IS_ELECTRON } from '../../../../app.constants';
-import { TaskAttachment, TaskAttachmentCopy, TaskAttachmentType } from '../task-attachment.model';
+import {
+  TaskAttachment,
+  TaskAttachmentCopy,
+  TaskAttachmentType,
+} from '../task-attachment.model';
 import { T } from '../../../../t.const';
 
 interface TaskAttachmentSelectType {
@@ -13,7 +17,7 @@ interface TaskAttachmentSelectType {
   selector: 'dialog-edit-task-attachment',
   templateUrl: './dialog-edit-task-attachment.component.html',
   styleUrls: ['./dialog-edit-task-attachment.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class DialogEditTaskAttachmentComponent {
   types: TaskAttachmentSelectType[];
@@ -22,19 +26,19 @@ export class DialogEditTaskAttachmentComponent {
 
   constructor(
     private _matDialogRef: MatDialogRef<DialogEditTaskAttachmentComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: any
+    @Inject(MAT_DIALOG_DATA) public data: any,
   ) {
-    this.attachmentCopy = {...this.data.attachment} as TaskAttachmentCopy;
+    this.attachmentCopy = { ...this.data.attachment } as TaskAttachmentCopy;
     if (!this.attachmentCopy.type) {
       this.attachmentCopy.type = 'LINK';
     }
 
     this.types = [
-      {type: 'LINK', title: T.F.ATTACHMENT.DIALOG_EDIT.TYPES.LINK},
-      {type: 'IMG', title: T.F.ATTACHMENT.DIALOG_EDIT.TYPES.IMG},
+      { type: 'LINK', title: T.F.ATTACHMENT.DIALOG_EDIT.TYPES.LINK },
+      { type: 'IMG', title: T.F.ATTACHMENT.DIALOG_EDIT.TYPES.IMG },
     ];
     if (IS_ELECTRON) {
-      this.types.push({type: 'FILE', title: T.F.ATTACHMENT.DIALOG_EDIT.TYPES.FILE});
+      this.types.push({ type: 'FILE', title: T.F.ATTACHMENT.DIALOG_EDIT.TYPES.FILE });
     }
   }
 
@@ -48,7 +52,11 @@ export class DialogEditTaskAttachmentComponent {
       return;
     }
 
-    if (this.attachmentCopy.type === 'LINK' && this.attachmentCopy.path && !this.attachmentCopy.path.match(/(https?|ftp|file):\/\//)) {
+    if (
+      this.attachmentCopy.type === 'LINK' &&
+      this.attachmentCopy.path &&
+      !this.attachmentCopy.path.match(/(https?|ftp|file):\/\//)
+    ) {
       this.attachmentCopy.path = 'http://' + this.attachmentCopy.path;
     }
 

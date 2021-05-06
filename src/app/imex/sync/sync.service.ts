@@ -1,5 +1,14 @@
 import { Injectable } from '@angular/core';
-import { EMPTY, fromEvent, merge, Observable, of, ReplaySubject, throwError, timer } from 'rxjs';
+import {
+  EMPTY,
+  fromEvent,
+  merge,
+  Observable,
+  of,
+  ReplaySubject,
+  throwError,
+  timer,
+} from 'rxjs';
 import {
   auditTime,
   catchError,
@@ -16,7 +25,7 @@ import {
   take,
   tap,
   throttleTime,
-  timeout
+  timeout,
 } from 'rxjs/operators';
 import { GlobalConfigService } from '../../features/config/global-config.service';
 import { DataInitService } from '../../core/data-init/data-init.service';
@@ -25,7 +34,7 @@ import { PersistenceService } from '../../core/persistence/persistence.service';
 import {
   SYNC_ACTIVITY_AFTER_SOMETHING_ELSE_THROTTLE_TIME,
   SYNC_BEFORE_GOING_TO_SLEEP_THROTTLE_TIME,
-  SYNC_DEFAULT_AUDIT_TIME
+  SYNC_DEFAULT_AUDIT_TIME,
 } from './sync.const';
 import { IS_TOUCH_ONLY } from '../../util/is-touch';
 import { AllowedDBKeys } from '../../core/persistence/ls-keys.const';
@@ -49,55 +58,62 @@ export class SyncService {
     catchError(() => throwError('Error while trying to get inMemoryComplete$')),
   );
 
-  private _onUpdateLocalDataTrigger$: Observable<{ appDataKey: AllowedDBKeys; data: any; isDataImport: boolean; projectId?: string }> =
-    this._persistenceService.onAfterSave$.pipe(
-      filter(({appDataKey, data, isDataImport, isSyncModelChange}) => !!data && !isDataImport && isSyncModelChange),
-    );
+  private _onUpdateLocalDataTrigger$: Observable<{
+    appDataKey: AllowedDBKeys;
+    data: any;
+    isDataImport: boolean;
+    projectId?: string;
+  }> = this._persistenceService.onAfterSave$.pipe(
+    filter(
+      ({ appDataKey, data, isDataImport, isSyncModelChange }) =>
+        !!data && !isDataImport && isSyncModelChange,
+    ),
+  );
 
   // IMMEDIATE TRIGGERS
   // ----------------------
-  private _mouseMoveAfterIdle$: Observable<string | never> = this._idleService.isIdle$.pipe(
+  private _mouseMoveAfterIdle$: Observable<
+    string | never
+  > = this._idleService.isIdle$.pipe(
     distinctUntilChanged(),
-    switchMap((isIdle) => isIdle
-      ? fromEvent(window, 'mousemove').pipe(
-        take(1),
-        mapTo('I_MOUSE_MOVE_AFTER_IDLE'),
-      )
-      : EMPTY
-    )
+    switchMap((isIdle) =>
+      isIdle
+        ? fromEvent(window, 'mousemove').pipe(take(1), mapTo('I_MOUSE_MOVE_AFTER_IDLE'))
+        : EMPTY,
+    ),
   );
 
   private _activityAfterSomethingElseTriggers$: Observable<string> = merge(
     fromEvent(window, 'focus').pipe(mapTo('I_FOCUS_THROTTLED')),
 
     IS_ELECTRON
-      ? fromEvent((this._electronService.ipcRenderer as IpcRenderer), IPC.RESUME).pipe(mapTo('I_IPC_RESUME'))
+      ? fromEvent(this._electronService.ipcRenderer as IpcRenderer, IPC.RESUME).pipe(
+          mapTo('I_IPC_RESUME'),
+        )
       : EMPTY,
 
     IS_TOUCH_ONLY
       ? merge(
-      fromEvent(window, 'touchstart'),
-      fromEvent(window, 'visibilitychange'),
-      ).pipe(mapTo('I_MOUSE_TOUCH_MOVE_OR_VISIBILITYCHANGE'))
+          fromEvent(window, 'touchstart'),
+          fromEvent(window, 'visibilitychange'),
+        ).pipe(mapTo('I_MOUSE_TOUCH_MOVE_OR_VISIBILITYCHANGE'))
       : EMPTY,
 
-    this._mouseMoveAfterIdle$
-  ).pipe(
-    throttleTime(SYNC_ACTIVITY_AFTER_SOMETHING_ELSE_THROTTLE_TIME),
-  );
+    this._mouseMoveAfterIdle$,
+  ).pipe(throttleTime(SYNC_ACTIVITY_AFTER_SOMETHING_ELSE_THROTTLE_TIME));
 
   private _beforeGoingToSleepTriggers$: Observable<string> = merge(
     IS_ELECTRON
-      ? fromEvent((this._electronService.ipcRenderer as IpcRenderer), IPC.SUSPEND).pipe(mapTo('I_IPC_SUSPEND'))
+      ? fromEvent(this._electronService.ipcRenderer as IpcRenderer, IPC.SUSPEND).pipe(
+          mapTo('I_IPC_SUSPEND'),
+        )
       : EMPTY,
-  ).pipe(
-    throttleTime(SYNC_BEFORE_GOING_TO_SLEEP_THROTTLE_TIME)
-  );
+  ).pipe(throttleTime(SYNC_BEFORE_GOING_TO_SLEEP_THROTTLE_TIME));
 
   private _isOnlineTrigger$: Observable<string> = isOnline$.pipe(
     // skip initial online which always fires on page load
     skip(1),
-    filter(isOnline => isOnline),
+    filter((isOnline) => isOnline),
     mapTo('IS_ONLINE'),
   );
 
@@ -116,16 +132,16 @@ export class SyncService {
   );
 
   // keep it super simple for now
-  private _isInitialSyncDoneManual$: ReplaySubject<boolean> = new ReplaySubject<boolean>(1);
+  private _isInitialSyncDoneManual$: ReplaySubject<boolean> = new ReplaySubject<boolean>(
+    1,
+  );
   private _isInitialSyncDone$: Observable<boolean> = this._isInitialSyncEnabled$.pipe(
     switchMap((isActive) => {
-      return isActive
-        ? this._isInitialSyncDoneManual$.asObservable()
-        : of(true);
+      return isActive ? this._isInitialSyncDoneManual$.asObservable() : of(true);
     }),
   );
   private _afterInitialSyncDoneAndDataLoadedInitially$: Observable<boolean> = this._isInitialSyncDone$.pipe(
-    filter(isDone => isDone),
+    filter((isDone) => isDone),
     take(1),
     // should normally be already loaded, but if there is NO initial sync we need to wait here
     concatMap(() => this._dataInitService.isAllDataLoadedInitially$),
@@ -133,10 +149,7 @@ export class SyncService {
 
   afterInitialSyncDoneAndDataLoadedInitially$: Observable<boolean> = merge(
     this._afterInitialSyncDoneAndDataLoadedInitially$,
-    timer(MAX_WAIT_FOR_INITIAL_SYNC).pipe(mapTo(true),
-    ).pipe(
-      shareReplay(1),
-    )
+    timer(MAX_WAIT_FOR_INITIAL_SYNC).pipe(mapTo(true)).pipe(shareReplay(1)),
   );
 
   constructor(
@@ -149,7 +162,10 @@ export class SyncService {
     // this.getSyncTrigger$(5000).subscribe((v) => console.log('.getSyncTrigger$(5000)', v));
   }
 
-  getSyncTrigger$(syncInterval: number = SYNC_DEFAULT_AUDIT_TIME, minSyncInterval: number = 5000): Observable<unknown> {
+  getSyncTrigger$(
+    syncInterval: number = SYNC_DEFAULT_AUDIT_TIME,
+    minSyncInterval: number = 5000,
+  ): Observable<unknown> {
     return merge(
       this._immediateSyncTrigger$,
 
@@ -157,15 +173,17 @@ export class SyncService {
       this._immediateSyncTrigger$.pipe(
         // NOTE: startWith needs to come before switchMap!
         startWith(false),
-        switchMap(() => this._onUpdateLocalDataTrigger$.pipe(
-          tap((ev) => console.log('__trigger_sync__', ev.appDataKey, ev)),
-          auditTime(Math.max(syncInterval, minSyncInterval)),
-          tap((ev) => console.log('__trigger_sync after auditTime__', ev.appDataKey, ev)),
-        )),
-      )
-    ).pipe(
-      debounceTime(100)
-    );
+        switchMap(() =>
+          this._onUpdateLocalDataTrigger$.pipe(
+            tap((ev) => console.log('__trigger_sync__', ev.appDataKey, ev)),
+            auditTime(Math.max(syncInterval, minSyncInterval)),
+            tap((ev) =>
+              console.log('__trigger_sync after auditTime__', ev.appDataKey, ev),
+            ),
+          ),
+        ),
+      ),
+    ).pipe(debounceTime(100));
   }
 
   setInitialSyncDone(val: boolean) {

@@ -1,4 +1,12 @@
-import { ChangeDetectionStrategy, Component, ElementRef, OnDestroy, OnInit, Renderer2, ViewChild } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  ElementRef,
+  OnDestroy,
+  OnInit,
+  Renderer2,
+  ViewChild,
+} from '@angular/core';
 import { ProjectService } from '../../features/project/project.service';
 import { LayoutService } from '../layout/layout.service';
 import { BookmarkService } from '../../features/bookmark/bookmark.service';
@@ -21,28 +29,35 @@ import { SimpleCounter } from '../../features/simple-counter/simple-counter.mode
   templateUrl: './main-header.component.html',
   styleUrls: ['./main-header.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  animations: [fadeAnimation, expandFadeHorizontalAnimation]
+  animations: [fadeAnimation, expandFadeHorizontalAnimation],
 })
 export class MainHeaderComponent implements OnInit, OnDestroy {
   T: typeof T = T;
   progressCircleRadius: number = 10;
   circumference: number = this.progressCircleRadius * Math.PI * 2;
 
-  @ViewChild('circleSvg', {static: true}) circleSvg?: ElementRef;
+  @ViewChild('circleSvg', { static: true }) circleSvg?: ElementRef;
 
-  currentTaskContext$: Observable<Project | Tag | null> = this.taskService.currentTaskParentOrCurrent$.pipe(
-    filter(ct => !!ct),
-    switchMap((currentTask) => this.workContextService.activeWorkContextId$.pipe(
-      filter((activeWorkContextId) => !!activeWorkContextId),
-      switchMap((activeWorkContextId) => {
-        if (currentTask.projectId === activeWorkContextId || currentTask.tagIds.includes(activeWorkContextId as string)) {
-          return of(null);
-        }
-        return currentTask.projectId
-          ? this.projectService.getByIdOnce$(currentTask.projectId)
-          : this._tagService.getTagById$(currentTask.tagIds[0]).pipe(first());
-      }),
-    )),
+  currentTaskContext$: Observable<
+    Project | Tag | null
+  > = this.taskService.currentTaskParentOrCurrent$.pipe(
+    filter((ct) => !!ct),
+    switchMap((currentTask) =>
+      this.workContextService.activeWorkContextId$.pipe(
+        filter((activeWorkContextId) => !!activeWorkContextId),
+        switchMap((activeWorkContextId) => {
+          if (
+            currentTask.projectId === activeWorkContextId ||
+            currentTask.tagIds.includes(activeWorkContextId as string)
+          ) {
+            return of(null);
+          }
+          return currentTask.projectId
+            ? this.projectService.getByIdOnce$(currentTask.projectId)
+            : this._tagService.getTagById$(currentTask.tagIds[0]).pipe(first());
+        }),
+      ),
+    ),
   );
 
   private _subs: Subscription = new Subscription();
@@ -57,8 +72,7 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
     public readonly simpleCounterService: SimpleCounterService,
     private readonly _tagService: TagService,
     private readonly _renderer: Renderer2,
-  ) {
-  }
+  ) {}
 
   ngOnDestroy(): void {
     this._subs.unsubscribe();
@@ -72,7 +86,11 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
           progress = 1;
         }
         const dashOffset = this.circumference * -1 * progress;
-        this._renderer.setStyle(this.circleSvg.nativeElement, 'stroke-dashoffset', dashOffset);
+        this._renderer.setStyle(
+          this.circleSvg.nativeElement,
+          'stroke-dashoffset',
+          dashOffset,
+        );
       }
     });
   }

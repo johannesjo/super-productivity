@@ -1,4 +1,4 @@
-import { initialProjectState, ProjectState } from '../../features/project/store/project.reducer';
+import { initialProjectState, ProjectState, } from '../../features/project/store/project.reducer';
 import { GlobalConfigState } from '../../features/config/global-config.model';
 import { TaskArchive, TaskState } from '../../features/tasks/task.model';
 import { BookmarkState } from '../../features/bookmark/store/bookmark.reducer';
@@ -57,7 +57,7 @@ export interface LocalSyncMetaModel {
 }
 
 export type AppBaseDataEntityLikeStates =
-  ProjectState
+  | ProjectState
   | TaskState
   | TaskRepeatCfgState
   | TaskArchive
@@ -73,7 +73,9 @@ export interface AppDataForProjects {
   };
 }
 
-export interface AppDataCompleteOptionalSyncModelChange extends AppBaseData, AppDataForProjects {
+export interface AppDataCompleteOptionalSyncModelChange
+  extends AppBaseData,
+    AppDataForProjects {
   lastLocalSyncModelChange?: number;
 }
 

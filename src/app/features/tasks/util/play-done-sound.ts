@@ -15,17 +15,20 @@ export const playDoneSound = (soundCfg: SoundConfig, nrOfDoneTasks: number = 0) 
   // a.play();
 
   const pitchFactor = soundCfg.isIncreaseDoneSoundPitch
-    ? PITCH_OFFSET + (nrOfDoneTasks * 50)
+    ? PITCH_OFFSET + nrOfDoneTasks * 50
     : 0;
 
-  const audioCtx = new ((window as any).AudioContext || (window as any).webkitAudioContext)();
+  const audioCtx = new ((window as any).AudioContext ||
+    (window as any).webkitAudioContext)();
   const source = audioCtx.createBufferSource();
   const request = new XMLHttpRequest();
   request.open('GET', file, true);
   request.responseType = 'arraybuffer';
   request.onload = () => {
     const audioData = request.response;
-    audioCtx.decodeAudioData(audioData, (buffer: AudioBuffer) => {
+    audioCtx.decodeAudioData(
+      audioData,
+      (buffer: AudioBuffer) => {
         source.buffer = buffer;
         source.playbackRate.value = speed;
         // source.detune.value = 100; // value in cents
@@ -42,8 +45,8 @@ export const playDoneSound = (soundCfg: SoundConfig, nrOfDoneTasks: number = 0) 
       },
       (e: DOMException) => {
         throw new Error('Error with decoding audio data SP: ' + e.message);
-      });
-
+      },
+    );
   };
   request.send();
   source.start(0);

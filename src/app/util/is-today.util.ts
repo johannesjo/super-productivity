@@ -7,9 +7,11 @@ export const isToday = (date: number | Date): boolean => {
   const today = new Date();
   // return (today.toDateString() === d.toDateString());
   // return  today.setHours(0, 0, 0, 0) === d.setHours(0, 0, 0, 0);
-  return d.getDate() === today.getDate() &&
+  return (
+    d.getDate() === today.getDate() &&
     d.getMonth() === today.getMonth() &&
-    d.getFullYear() === today.getFullYear();
+    d.getFullYear() === today.getFullYear()
+  );
 };
 
 export const isYesterday = (date: number): boolean => {
@@ -23,7 +25,9 @@ export const isYesterday = (date: number): boolean => {
 
   // return (yesterday.toDateString() === d.toDateString());
   // return  yesterday.setHours(0, 0, 0, 0) === d.setHours(0, 0, 0, 0);
-  return d.getDate() === yesterday.getDate() &&
+  return (
+    d.getDate() === yesterday.getDate() &&
     d.getMonth() === yesterday.getMonth() &&
-    d.getFullYear() === yesterday.getFullYear();
+    d.getFullYear() === yesterday.getFullYear()
+  );
 };

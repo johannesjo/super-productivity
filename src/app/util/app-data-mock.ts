@@ -6,7 +6,7 @@ import { createEmptyEntity } from './create-empty-entity';
 export const createAppDataCompleteMock = (): AppDataComplete => ({
   project: {
     ...createEmptyEntity(),
-    [MODEL_VERSION_KEY]: 5
+    [MODEL_VERSION_KEY]: 5,
   },
   archivedProjects: {},
   globalConfig: DEFAULT_GLOBAL_CONFIG,
@@ -23,7 +23,7 @@ export const createAppDataCompleteMock = (): AppDataComplete => ({
   tag: createEmptyEntity(),
   simpleCounter: {
     ...createEmptyEntity(),
-    ids: []
+    ids: [],
   },
   taskArchive: createEmptyEntity(),
   taskRepeatCfg: createEmptyEntity(),

@@ -45,7 +45,7 @@ export type JiraChangelogEntry = Readonly<{
 // NOTE this is NOT equal to JiraIssueOriginalReduced
 
 export type JiraIssueReduced = Readonly<{
-// copied data
+  // copied data
   key: string;
   id: string;
   summary: string;
@@ -66,7 +66,7 @@ export type JiraIssueReduced = Readonly<{
   storyPoints?: number;
 }>;
 
-export type JiraIssue = JiraIssueReduced & Readonly<{
-  changelog: JiraChangelogEntry[];
-}>;
-
+export type JiraIssue = JiraIssueReduced &
+  Readonly<{
+    changelog: JiraChangelogEntry[];
+  }>;

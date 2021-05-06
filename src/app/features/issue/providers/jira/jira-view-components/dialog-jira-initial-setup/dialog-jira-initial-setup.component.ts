@@ -7,7 +7,7 @@ import { T } from '../../../../../../t.const';
   selector: 'dialog-jira-initial-setup',
   templateUrl: './dialog-jira-initial-setup.component.html',
   styleUrls: ['./dialog-jira-initial-setup.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class DialogJiraInitialSetupComponent {
   T: typeof T = T;

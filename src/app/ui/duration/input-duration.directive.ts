@@ -6,7 +6,7 @@ import {
   forwardRef,
   HostListener,
   Input,
-  Renderer2
+  Renderer2,
 } from '@angular/core';
 import {
   AbstractControl,
@@ -21,19 +21,18 @@ import {
 import { StringToMsPipe } from './string-to-ms.pipe';
 import { MsToStringPipe } from './ms-to-string.pipe';
 
-const noop = () => {
-};
+const noop = () => {};
 /* eslint-disable */
 export const INPUT_DURATION_VALUE_ACCESSOR: any = {
   provide: NG_VALUE_ACCESSOR,
   useExisting: forwardRef(() => InputDurationDirective),
-  multi: true
+  multi: true,
 };
 
 export const INPUT_DURATION_VALIDATORS: any = {
   provide: NG_VALIDATORS,
   useExisting: forwardRef(() => InputDurationDirective),
-  multi: true
+  multi: true,
 };
 
 /* eslint-enable */
@@ -48,8 +47,8 @@ export const INPUT_DURATION_VALIDATORS: any = {
     INPUT_DURATION_VALIDATORS,
   ],
 })
-
-export class InputDurationDirective<D> implements ControlValueAccessor, Validator, AfterViewChecked {
+export class InputDurationDirective<D>
+  implements ControlValueAccessor, Validator, AfterViewChecked {
   @Input() isAllowSeconds: boolean = false;
 
   // by the Control Value Accessor
@@ -70,8 +69,8 @@ export class InputDurationDirective<D> implements ControlValueAccessor, Validato
     private _elementRef: ElementRef,
     private _stringToMs: StringToMsPipe,
     private _msToString: MsToStringPipe,
-    private _renderer: Renderer2) {
-  }
+    private _renderer: Renderer2,
+  ) {}
 
   private _value: string | undefined;
 
@@ -124,7 +123,7 @@ export class InputDurationDirective<D> implements ControlValueAccessor, Validato
 
   // ControlValueAccessor: Validator
   validate(c: AbstractControl): ValidationErrors | null {
-    return (this._validator !== null && this._validator !== undefined)
+    return this._validator !== null && this._validator !== undefined
       ? this._validator(c)
       : null;
   }
@@ -146,6 +145,6 @@ export class InputDurationDirective<D> implements ControlValueAccessor, Validato
     }
     return this._value
       ? null
-      : {inputDurationParse: {text: this._elementRef.nativeElement.value}};
+      : { inputDurationParse: { text: this._elementRef.nativeElement.value } };
   }
 }

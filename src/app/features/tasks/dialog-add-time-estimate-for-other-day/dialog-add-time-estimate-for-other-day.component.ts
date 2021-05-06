@@ -17,10 +17,12 @@ export class DialogAddTimeEstimateForOtherDayComponent {
   T: typeof T = T;
   newEntry: NewTimeEntry;
 
-  constructor(private _matDialogRef: MatDialogRef<DialogAddTimeEstimateForOtherDayComponent>) {
+  constructor(
+    private _matDialogRef: MatDialogRef<DialogAddTimeEstimateForOtherDayComponent>,
+  ) {
     this.newEntry = {
       date: '',
-      timeSpent: 0
+      timeSpent: 0,
     };
   }
 

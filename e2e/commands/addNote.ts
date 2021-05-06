@@ -1,4 +1,4 @@
-import {NightwatchBrowser} from 'nightwatch';
+import { NightwatchBrowser } from 'nightwatch';
 
 const ADD_NOTE_BTN = '#add-note-btn';
 const TEXTAREA = 'dialog-add-note textarea';
@@ -7,8 +7,7 @@ const NOTES_WRAPPER = 'notes';
 
 module.exports = {
   async command(this: NightwatchBrowser, noteName: string) {
-    return this
-      .moveToElement(NOTES_WRAPPER, 10, 50)
+    return this.moveToElement(NOTES_WRAPPER, 10, 50)
       .waitForElementPresent(ADD_NOTE_BTN)
       .click(ADD_NOTE_BTN)
 
@@ -16,7 +15,6 @@ module.exports = {
       .setValue(TEXTAREA, noteName)
 
       .click(ADD_NOTE_SUBMIT_BTN)
-      .moveToElement(NOTES_WRAPPER, 10, 50)
-      ;
-  }
+      .moveToElement(NOTES_WRAPPER, 10, 50);
+  },
 };

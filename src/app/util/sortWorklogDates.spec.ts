@@ -24,13 +24,7 @@ describe('sortWorklogDates', () => {
   });
 
   it('should sort a list of unsorted dates with zeros', () => {
-    const dates = [
-      '2019-10-04',
-      '2019-09-29',
-      '2019-10-02',
-      '2019-09-30',
-      '2019-10-01'
-    ];
+    const dates = ['2019-10-04', '2019-09-29', '2019-10-02', '2019-09-30', '2019-10-01'];
     const result = sortWorklogDates(dates);
 
     expect(result.length).toBe(dates.length);
@@ -39,7 +33,7 @@ describe('sortWorklogDates', () => {
       '2019-09-30',
       '2019-10-01',
       '2019-10-02',
-      '2019-10-04'
+      '2019-10-04',
     ]);
   });
 });

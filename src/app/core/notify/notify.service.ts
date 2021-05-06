@@ -15,8 +15,7 @@ export class NotifyService {
   constructor(
     private _translateService: TranslateService,
     private _uiHelperService: UiHelperService,
-  ) {
-  }
+  ) {}
 
   async notifyDesktop(options: NotifyModel): Promise<Notification | undefined> {
     if (!IS_MOBILE) {
@@ -26,10 +25,16 @@ export class NotifyService {
   }
 
   async notify(options: NotifyModel): Promise<Notification | undefined> {
-    const title = options.title && this._translateService.instant(options.title, options.translateParams);
-    const body = options.body && this._translateService.instant(options.body, options.translateParams);
+    const title =
+      options.title &&
+      this._translateService.instant(options.title, options.translateParams);
+    const body =
+      options.body &&
+      this._translateService.instant(options.body, options.translateParams);
 
-    const svcReg = this._isServiceWorkerAvailable() && await navigator.serviceWorker.getRegistration('ngsw-worker.js');
+    const svcReg =
+      this._isServiceWorkerAvailable() &&
+      (await navigator.serviceWorker.getRegistration('ngsw-worker.js'));
 
     if (svcReg && svcReg.showNotification) {
       // service worker also seems to need to request permission...
@@ -43,7 +48,7 @@ export class NotifyService {
           silent: false,
           data: {
             dateOfArrival: Date.now(),
-            primaryKey: 1
+            primaryKey: 1,
           },
           ...options,
           body,
@@ -62,7 +67,7 @@ export class NotifyService {
           silent: false,
           data: {
             dateOfArrival: Date.now(),
-            primaryKey: 1
+            primaryKey: 1,
           },
           ...options,
           body,
@@ -88,6 +93,10 @@ export class NotifyService {
   }
 
   private _isServiceWorkerAvailable(): boolean {
-    return 'serviceWorker' in navigator && (environment.production || environment.stage) && !IS_ELECTRON;
+    return (
+      'serviceWorker' in navigator &&
+      (environment.production || environment.stage) &&
+      !IS_ELECTRON
+    );
   }
 }

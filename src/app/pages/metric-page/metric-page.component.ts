@@ -5,11 +5,10 @@ import { T } from '../../t.const';
   selector: 'metric-page',
   templateUrl: './metric-page.component.html',
   styleUrls: ['./metric-page.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class MetricPageComponent {
   T: typeof T = T;
 
-  constructor() {
-  }
+  constructor() {}
 }

@@ -11,8 +11,7 @@ import { UiModule } from '../../../ui/ui.module';
     CommonModule,
     FormsModule,
     UiModule,
-    EffectsModule.forFeature([DropboxEffects])
-  ]
+    EffectsModule.forFeature([DropboxEffects]),
+  ],
 })
-export class DropboxModule {
-}
+export class DropboxModule {}

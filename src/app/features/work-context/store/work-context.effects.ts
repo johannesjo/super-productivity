@@ -21,15 +21,16 @@ export class WorkContextEffects {
   //   tap(this._saveToLs.bind(this)),
   // ), {dispatch: false});
 
-  dismissContextScopeBannersOnContextChange: Observable<unknown> = createEffect(() => this._actions$
-    .pipe(
-      ofType(
-        contextActions.setActiveWorkContext,
+  dismissContextScopeBannersOnContextChange: Observable<unknown> = createEffect(
+    () =>
+      this._actions$.pipe(
+        ofType(contextActions.setActiveWorkContext),
+        tap(() => {
+          this._bannerService.dismiss(BannerId.JiraUnblock);
+        }),
       ),
-      tap(() => {
-        this._bannerService.dismiss(BannerId.JiraUnblock);
-      }),
-    ), {dispatch: false});
+    { dispatch: false },
+  );
 
   // EXTERNAL
   // --------
@@ -40,17 +41,18 @@ export class WorkContextEffects {
   //   map(() => new UnsetCurrentTask()),
   // ));
 
-  unselectSelectedTask$: Observable<unknown> = createEffect(() => this._actions$.pipe(
-    ofType(contextActions.setActiveWorkContext),
-    withLatestFrom(this._taskService.isTaskDataLoaded$),
-    filter(([, isDataLoaded]) => isDataLoaded),
-    map(() => new SetSelectedTask({id: null})),
-  ));
+  unselectSelectedTask$: Observable<unknown> = createEffect(() =>
+    this._actions$.pipe(
+      ofType(contextActions.setActiveWorkContext),
+      withLatestFrom(this._taskService.isTaskDataLoaded$),
+      filter(([, isDataLoaded]) => isDataLoaded),
+      map(() => new SetSelectedTask({ id: null })),
+    ),
+  );
 
   constructor(
     private _actions$: Actions,
     private _taskService: TaskService,
     private _bannerService: BannerService,
-  ) {
-  }
+  ) {}
 }

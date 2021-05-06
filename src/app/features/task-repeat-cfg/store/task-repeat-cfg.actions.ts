@@ -14,50 +14,43 @@ export enum TaskRepeatCfgActionTypes {
 export class AddTaskRepeatCfgToTask implements Action {
   readonly type: string = TaskRepeatCfgActionTypes.AddTaskRepeatCfgToTask;
 
-  constructor(public payload: { taskId: string; taskRepeatCfg: TaskRepeatCfg }) {
-  }
+  constructor(public payload: { taskId: string; taskRepeatCfg: TaskRepeatCfg }) {}
 }
 
 export class UpdateTaskRepeatCfg implements Action {
   readonly type: string = TaskRepeatCfgActionTypes.UpdateTaskRepeatCfg;
 
-  constructor(public payload: { taskRepeatCfg: Update<TaskRepeatCfg> }) {
-  }
+  constructor(public payload: { taskRepeatCfg: Update<TaskRepeatCfg> }) {}
 }
 
 export class UpdateTaskRepeatCfgs implements Action {
   readonly type: string = TaskRepeatCfgActionTypes.UpdateTaskRepeatCfgs;
 
-  constructor(public payload: { ids: string[]; changes: Partial<TaskRepeatCfg> }) {
-  }
+  constructor(public payload: { ids: string[]; changes: Partial<TaskRepeatCfg> }) {}
 }
 
 export class UpsertTaskRepeatCfg implements Action {
   readonly type: string = TaskRepeatCfgActionTypes.UpsertTaskRepeatCfg;
 
-  constructor(public payload: { taskRepeatCfg: TaskRepeatCfg }) {
-  }
+  constructor(public payload: { taskRepeatCfg: TaskRepeatCfg }) {}
 }
 
 export class DeleteTaskRepeatCfg implements Action {
   readonly type: string = TaskRepeatCfgActionTypes.DeleteTaskRepeatCfg;
 
-  constructor(public payload: { id: string }) {
-  }
+  constructor(public payload: { id: string }) {}
 }
 
 export class DeleteTaskRepeatCfgs implements Action {
   readonly type: string = TaskRepeatCfgActionTypes.DeleteTaskRepeatCfgs;
 
-  constructor(public payload: { ids: string[] }) {
-  }
+  constructor(public payload: { ids: string[] }) {}
 }
 
-export type TaskRepeatCfgActions
-  = AddTaskRepeatCfgToTask
+export type TaskRepeatCfgActions =
+  | AddTaskRepeatCfgToTask
   | UpdateTaskRepeatCfg
   | UpdateTaskRepeatCfgs
   | UpsertTaskRepeatCfg
   | DeleteTaskRepeatCfg
-  | DeleteTaskRepeatCfgs
-  ;
+  | DeleteTaskRepeatCfgs;

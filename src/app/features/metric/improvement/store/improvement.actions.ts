@@ -17,57 +17,49 @@ export enum ImprovementActionTypes {
 export class AddImprovement implements Action {
   readonly type: string = ImprovementActionTypes.AddImprovement;
 
-  constructor(public payload: { improvement: Improvement }) {
-  }
+  constructor(public payload: { improvement: Improvement }) {}
 }
 
 export class UpdateImprovement implements Action {
   readonly type: string = ImprovementActionTypes.UpdateImprovement;
 
-  constructor(public payload: { improvement: Update<Improvement> }) {
-  }
+  constructor(public payload: { improvement: Update<Improvement> }) {}
 }
 
 export class DeleteImprovement implements Action {
   readonly type: string = ImprovementActionTypes.DeleteImprovement;
 
-  constructor(public payload: { id: string }) {
-  }
+  constructor(public payload: { id: string }) {}
 }
 
 export class DeleteImprovements implements Action {
   readonly type: string = ImprovementActionTypes.DeleteImprovements;
 
-  constructor(public payload: { ids: string[] }) {
-  }
+  constructor(public payload: { ids: string[] }) {}
 }
 
 export class HideImprovement implements Action {
   readonly type: string = ImprovementActionTypes.HideImprovement;
 
-  constructor(public payload: { id: string }) {
-  }
+  constructor(public payload: { id: string }) {}
 }
 
 export class AddImprovementCheckedDay implements Action {
   readonly type: string = ImprovementActionTypes.AddImprovementCheckedDay;
 
-  constructor(public payload: { id: string; checkedDay: string }) {
-  }
+  constructor(public payload: { id: string; checkedDay: string }) {}
 }
 
 export class ToggleImprovementRepeat implements Action {
   readonly type: string = ImprovementActionTypes.ToggleImprovementRepeat;
 
-  constructor(public payload: { id: string }) {
-  }
+  constructor(public payload: { id: string }) {}
 }
 
 export class DisableImprovementRepeat implements Action {
   readonly type: string = ImprovementActionTypes.DisableImprovementRepeat;
 
-  constructor(public payload: { id: string }) {
-  }
+  constructor(public payload: { id: string }) {}
 }
 
 export class ClearHiddenImprovements implements Action {
@@ -75,7 +67,7 @@ export class ClearHiddenImprovements implements Action {
 }
 
 export type ImprovementActions =
-  AddImprovement
+  | AddImprovement
   | UpdateImprovement
   | DeleteImprovement
   | DeleteImprovements
@@ -83,5 +75,4 @@ export type ImprovementActions =
   | ToggleImprovementRepeat
   | DisableImprovementRepeat
   | AddImprovementCheckedDay
-  | ClearHiddenImprovements
-  ;
+  | ClearHiddenImprovements;

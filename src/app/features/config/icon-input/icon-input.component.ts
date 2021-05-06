@@ -8,7 +8,7 @@ import { filter, map, startWith } from 'rxjs/operators';
   selector: 'icon-input',
   templateUrl: './icon-input.component.html',
   styleUrls: ['./icon-input.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class IconInputComponent extends FieldType implements OnInit {
   // @ViewChild(MatInput) formFieldControl: MatInput;
@@ -25,11 +25,11 @@ export class IconInputComponent extends FieldType implements OnInit {
 
     this.filteredIcons$ = this.formControl.valueChanges.pipe(
       startWith(''),
-      filter(searchTerm => !!searchTerm),
+      filter((searchTerm) => !!searchTerm),
       map((searchTerm) => {
         // Note: the outer array signifies the observable stream the other is the value
-        return this.customIcons.filter((icoStr) =>
-          icoStr && icoStr.toLowerCase().includes(searchTerm.toLowerCase())
+        return this.customIcons.filter(
+          (icoStr) => icoStr && icoStr.toLowerCase().includes(searchTerm.toLowerCase()),
         );
       }),
     );

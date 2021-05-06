@@ -90,13 +90,13 @@ export const MISC_SETTINGS_FORM_CFG: ConfigFormSection<MiscConfig> = {
       templateOptions: {
         label: T.GCF.MISC.FIRST_DAY_OF_WEEK,
         options: [
-          {label: T.F.TASK_REPEAT.F.SUNDAY, value: 0},
-          {label: T.F.TASK_REPEAT.F.MONDAY, value: 1},
-          {label: T.F.TASK_REPEAT.F.TUESDAY, value: 2},
-          {label: T.F.TASK_REPEAT.F.WEDNESDAY, value: 3},
-          {label: T.F.TASK_REPEAT.F.THURSDAY, value: 4},
-          {label: T.F.TASK_REPEAT.F.FRIDAY, value: 5},
-          {label: T.F.TASK_REPEAT.F.SATURDAY, value: 6},
+          { label: T.F.TASK_REPEAT.F.SUNDAY, value: 0 },
+          { label: T.F.TASK_REPEAT.F.MONDAY, value: 1 },
+          { label: T.F.TASK_REPEAT.F.TUESDAY, value: 2 },
+          { label: T.F.TASK_REPEAT.F.WEDNESDAY, value: 3 },
+          { label: T.F.TASK_REPEAT.F.THURSDAY, value: 4 },
+          { label: T.F.TASK_REPEAT.F.FRIDAY, value: 5 },
+          { label: T.F.TASK_REPEAT.F.SATURDAY, value: 6 },
         ],
       },
     },
@@ -107,5 +107,5 @@ export const MISC_SETTINGS_FORM_CFG: ConfigFormSection<MiscConfig> = {
         label: T.GCF.MISC.TASK_NOTES_TPL,
       },
     },
-  ]
+  ],
 };

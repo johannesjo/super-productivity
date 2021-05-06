@@ -16,11 +16,11 @@ const getResponseChannels = (channel: string) => {
   return {
     sendChannel: getSendChannel(channel),
     dataChannel: `%better-ipc-response-data-channel-${channel}-${id}`,
-    errorChannel: `%better-ipc-response-error-channel-${channel}-${id}`
+    errorChannel: `%better-ipc-response-error-channel-${channel}-${id}`,
   };
 };
 
-@Injectable({providedIn: 'root'})
+@Injectable({ providedIn: 'root' })
 export class ElectronService {
   ipcRenderer?: typeof ipcRenderer;
   webFrame?: typeof webFrame;
@@ -74,7 +74,7 @@ export class ElectronService {
 
   public callMain(channel: string, data: unknown) {
     return new Promise((resolve, reject) => {
-      const {sendChannel, dataChannel, errorChannel} = getResponseChannels(channel);
+      const { sendChannel, dataChannel, errorChannel } = getResponseChannels(channel);
 
       const cleanup = () => {
         (this.ipcRenderer as typeof ipcRenderer).off(dataChannel, onData);
@@ -98,7 +98,7 @@ export class ElectronService {
       const completeData = {
         dataChannel,
         errorChannel,
-        userData: data
+        userData: data,
       };
 
       (this.ipcRenderer as typeof ipcRenderer).send(sendChannel, completeData);

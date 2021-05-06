@@ -83,7 +83,11 @@ describe('getCompleteStateForWorkContext', () => {
       },
     ]);
     const r = getCompleteStateForWorkContext(TAG_CTX, ts, archiveS);
-    expect(r.completeStateForWorkContext.ids).toEqual(['PT_TODAY', 'PT', 'SUB_B', 'SUB_C']);
+    expect(r.completeStateForWorkContext.ids).toEqual([
+      'PT_TODAY',
+      'PT',
+      'SUB_B',
+      'SUB_C',
+    ]);
   });
 });
-

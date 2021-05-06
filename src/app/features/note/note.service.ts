@@ -2,9 +2,20 @@ import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { Note } from './note.model';
 import { select, Store } from '@ngrx/store';
-import { addNote, deleteNote, loadNoteState, updateNote, updateNoteOrder } from './store/note.actions';
+import {
+  addNote,
+  deleteNote,
+  loadNoteState,
+  updateNote,
+  updateNoteOrder,
+} from './store/note.actions';
 import * as shortid from 'shortid';
-import { initialNoteState, NoteState, selectAllNotes, selectNoteById } from './store/note.reducer';
+import {
+  initialNoteState,
+  NoteState,
+  selectAllNotes,
+  selectNoteById,
+} from './store/note.reducer';
 import { PersistenceService } from '../../core/persistence/persistence.service';
 import { take } from 'rxjs/operators';
 import { createFromDrop } from '../../core/drop-paste-input/drop-paste-input';
@@ -20,11 +31,10 @@ export class NoteService {
   constructor(
     private _store$: Store<any>,
     private _persistenceService: PersistenceService,
-  ) {
-  }
+  ) {}
 
   getById$(id: string): Observable<Note> {
-    return this._store$.pipe(select(selectNoteById, {id}), take(1));
+    return this._store$.pipe(select(selectNoteById, { id }), take(1));
   }
 
   async getByIdFromEverywhere(id: string, projectId: string): Promise<Note> {
@@ -32,43 +42,52 @@ export class NoteService {
   }
 
   public async loadStateForProject(projectId: string) {
-    const notes = await this._persistenceService.note.load(projectId) || initialNoteState;
+    const notes =
+      (await this._persistenceService.note.load(projectId)) || initialNoteState;
     this.loadState(notes);
   }
 
   public loadState(state: NoteState) {
-    this._store$.dispatch(loadNoteState({state}));
+    this._store$.dispatch(loadNoteState({ state }));
   }
 
   public add(note: Partial<Note> = {}, isPreventFocus: boolean = false) {
     const id = shortid();
 
-    this._store$.dispatch(addNote({
-      note: {
-        id,
-        content: '',
-        created: Date.now(),
-        modified: Date.now(),
-        ...note,
-      },
-      isPreventFocus,
-    }));
+    this._store$.dispatch(
+      addNote({
+        note: {
+          id,
+          content: '',
+          created: Date.now(),
+          modified: Date.now(),
+          ...note,
+        },
+        isPreventFocus,
+      }),
+    );
   }
 
   public remove(id: string) {
-    this._store$.dispatch(deleteNote({id}));
+    this._store$.dispatch(deleteNote({ id }));
   }
 
   public update(id: string, note: Partial<Note>) {
-    this._store$.dispatch(updateNote({
-      note: {
-        id,
-        changes: note,
-      }
-    }));
+    this._store$.dispatch(
+      updateNote({
+        note: {
+          id,
+          changes: note,
+        },
+      }),
+    );
   }
 
-  public async updateFromDifferentWorkContext(workContextId: string, id: string, updates: Partial<Note>) {
+  public async updateFromDifferentWorkContext(
+    workContextId: string,
+    id: string,
+    updates: Partial<Note>,
+  ) {
     const noteState = await this._persistenceService.note.load(workContextId);
     const noteToUpdate = noteState.entities[id];
     if (noteToUpdate) {
@@ -76,11 +95,13 @@ export class NoteService {
     } else {
       console.warn('Note not found while trying to update for different project');
     }
-    return await this._persistenceService.note.save(workContextId, noteState, {isSyncModelChange: true});
+    return await this._persistenceService.note.save(workContextId, noteState, {
+      isSyncModelChange: true,
+    });
   }
 
   public updateOrder(ids: string[]) {
-    this._store$.dispatch(updateNoteOrder({ids}));
+    this._store$.dispatch(updateNoteOrder({ ids }));
   }
 
   // REMINDER
@@ -105,7 +126,7 @@ export class NoteService {
       content: drop.path,
     };
 
-    const isImg = isImageUrlSimple(drop.path) || await isImageUrl(drop.path);
+    const isImg = isImageUrlSimple(drop.path) || (await isImageUrl(drop.path));
     if (isImg) {
       note.imgUrl = drop.path;
     }

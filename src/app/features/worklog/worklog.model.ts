@@ -51,7 +51,7 @@ export interface Worklog {
 }
 
 export type WorklogColTypes =
-  'EMPTY'
+  | 'EMPTY'
   | 'DATE'
   | 'START'
   | 'END'
@@ -65,14 +65,13 @@ export type WorklogColTypes =
   | 'TIME_CLOCK'
   | 'ESTIMATE_MS'
   | 'ESTIMATE_STR'
-  | 'ESTIMATE_CLOCK'
-  ;
+  | 'ESTIMATE_CLOCK';
 
 export enum WorklogGrouping {
   DATE = 'DATE',
   PARENT = 'PARENT',
   TASK = 'TASK',
-  WORKLOG = 'WORKLOG'
+  WORKLOG = 'WORKLOG',
 }
 
 export interface WorklogExportSettingsCopy {

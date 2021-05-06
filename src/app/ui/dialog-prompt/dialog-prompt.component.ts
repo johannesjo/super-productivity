@@ -6,7 +6,7 @@ import { T } from '../../t.const';
   selector: 'dialog-prompt',
   templateUrl: './dialog-prompt.component.html',
   styleUrls: ['./dialog-prompt.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class DialogPromptComponent {
   T: typeof T = T;
@@ -14,9 +14,8 @@ export class DialogPromptComponent {
 
   constructor(
     private _matDialogRef: MatDialogRef<DialogPromptComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: any
-  ) {
-  }
+    @Inject(MAT_DIALOG_DATA) public data: any,
+  ) {}
 
   close(isSave: boolean) {
     if (isSave) {

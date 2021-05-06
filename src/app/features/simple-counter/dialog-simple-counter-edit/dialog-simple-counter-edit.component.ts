@@ -9,7 +9,7 @@ import { getWorklogStr } from '../../../util/get-work-log-str';
   selector: 'dialog-simple-counter-edit',
   templateUrl: './dialog-simple-counter-edit.component.html',
   styleUrls: ['./dialog-simple-counter-edit.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class DialogSimpleCounterEditComponent {
   T: typeof T = T;
@@ -22,8 +22,7 @@ export class DialogSimpleCounterEditComponent {
     private _matDialogRef: MatDialogRef<DialogSimpleCounterEditComponent>,
     private _simpleCounterService: SimpleCounterService,
     @Inject(MAT_DIALOG_DATA) public data: { simpleCounter: SimpleCounter },
-  ) {
-  }
+  ) {}
 
   submit() {
     this._simpleCounterService.setCounterToday(this.data.simpleCounter.id, this.val);

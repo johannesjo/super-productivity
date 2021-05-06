@@ -39,20 +39,22 @@ export class ShortcutService {
     private _translateService: TranslateService,
     private _ngZone: NgZone,
   ) {
-    this._activatedRoute.queryParams
-      .subscribe((params) => {
-        if (params && params.backlogPos) {
-          this.backlogPos = +params.backlogPos;
-        }
-      });
+    this._activatedRoute.queryParams.subscribe((params) => {
+      if (params && params.backlogPos) {
+        this.backlogPos = +params.backlogPos;
+      }
+    });
 
     // GLOBAL SHORTCUTS
     if (IS_ELECTRON) {
-      (this._electronService.ipcRenderer as typeof ipcRenderer).on(IPC.TASK_TOGGLE_START, () => {
-        this._ngZone.run(() => {
-          this._taskService.toggleStartTask();
-        });
-      });
+      (this._electronService.ipcRenderer as typeof ipcRenderer).on(
+        IPC.TASK_TOGGLE_START,
+        () => {
+          this._ngZone.run(() => {
+            this._taskService.toggleStartTask();
+          });
+        },
+      );
       (this._electronService.ipcRenderer as typeof ipcRenderer).on(IPC.ADD_TASK, () => {
         this._ngZone.run(() => {
           this._layoutService.showAddTaskBar();
@@ -78,8 +80,13 @@ export class ShortcutService {
     const el = ev.target as HTMLElement;
 
     // don't run when inside input or text area and if no special keys are used
-    if ((el && el.tagName === 'INPUT' || el.tagName === 'TEXTAREA' || el.getAttribute('contenteditable'))
-      && !ev.ctrlKey && !ev.metaKey) {
+    if (
+      ((el && el.tagName === 'INPUT') ||
+        el.tagName === 'TEXTAREA' ||
+        el.getAttribute('contenteditable')) &&
+      !ev.ctrlKey &&
+      !ev.metaKey
+    ) {
       return;
     }
 
@@ -96,15 +103,12 @@ export class ShortcutService {
           backlogPos = 50;
       }
       this._router.navigate(['/active/tasks'], {
-        queryParams: {backlogPos}
+        queryParams: { backlogPos },
       });
-
     } else if (checkKeyCombo(ev, keys.goToWorkView)) {
       this._router.navigate(['/active/tasks']);
-
     } else if (checkKeyCombo(ev, keys.goToSettings)) {
       this._router.navigate(['/config']);
-
     } else if (checkKeyCombo(ev, keys.goToScheduledView)) {
       this._router.navigate(['/active/calendar']);
 
@@ -113,28 +117,29 @@ export class ShortcutService {
       //
       // } else if (checkKeyCombo(ev, keys.goToFocusMode)) {
       //   this._router.navigate(['/focus-view']);
-
     } else if (checkKeyCombo(ev, keys.toggleSideNav)) {
       this._layoutService.toggleSideNav();
       ev.preventDefault();
-
     } else if (checkKeyCombo(ev, keys.addNewTask)) {
       this._layoutService.toggleAddTaskBar();
       ev.preventDefault();
-
     } else if (checkKeyCombo(ev, keys.addNewNote)) {
       if (this._matDialog.openDialogs.length === 0) {
         this._matDialog.open(DialogAddNoteComponent);
         ev.preventDefault();
       }
-
     } else if (checkKeyCombo(ev, keys.openProjectNotes)) {
       ev.preventDefault();
       if (this._workContextService.activeWorkContextType === WorkContextType.PROJECT) {
         this._layoutService.toggleNotes();
       } else {
         this._snackService.open({
-          msg: this._translateService.instant(T.GLOBAL_SNACK.SHORTCUT_WARN_OPEN_NOTES_FROM_TAG, {keyCombo: keys.openProjectNotes}),
+          msg: this._translateService.instant(
+            T.GLOBAL_SNACK.SHORTCUT_WARN_OPEN_NOTES_FROM_TAG,
+            {
+              keyCombo: keys.openProjectNotes,
+            },
+          ),
         });
       }
     } else if (checkKeyCombo(ev, keys.toggleBookmarks)) {
@@ -143,19 +148,26 @@ export class ShortcutService {
         this._bookmarkService.toggleBookmarks();
       } else {
         this._snackService.open({
-          msg: this._translateService.instant(T.GLOBAL_SNACK.SHORTCUT_WARN_OPEN_BOOKMARKS_FROM_TAG, {keyCombo: keys.openProjectNotes}),
+          msg: this._translateService.instant(
+            T.GLOBAL_SNACK.SHORTCUT_WARN_OPEN_BOOKMARKS_FROM_TAG,
+            { keyCombo: keys.openProjectNotes },
+          ),
         });
       }
-    } else if (checkKeyCombo(ev, 'Ctrl+Shift+*')
-      && document.activeElement
-      && document.activeElement.getAttribute('routerlink') === '/procrastination') {
+    } else if (
+      checkKeyCombo(ev, 'Ctrl+Shift+*') &&
+      document.activeElement &&
+      document.activeElement.getAttribute('routerlink') === '/procrastination'
+    ) {
       throw new Error('Intentional Error Fun (dont worry)');
     }
 
     // special hidden dev tools combo to use them for production
     if (IS_ELECTRON) {
       if (checkKeyCombo(ev, 'Ctrl+Shift+J')) {
-        (this._electronService.ipcRenderer as typeof ipcRenderer).send('TOGGLE_DEV_TOOLS');
+        (this._electronService.ipcRenderer as typeof ipcRenderer).send(
+          'TOGGLE_DEV_TOOLS',
+        );
       } else if (checkKeyCombo(ev, keys.zoomIn)) {
         this._uiHelperService.zoomBy(0.05);
       } else if (checkKeyCombo(ev, keys.zoomOut)) {

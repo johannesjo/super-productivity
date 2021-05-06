@@ -5,11 +5,15 @@ import {
   EventEmitter,
   Input,
   OnDestroy,
-  Output
+  Output,
 } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { JiraCfg } from '../../jira.model';
-import { DEFAULT_JIRA_CFG, JIRA_ADVANCED_FORM_CFG, JIRA_CREDENTIALS_FORM_CFG } from '../../jira.const';
+import {
+  DEFAULT_JIRA_CFG,
+  JIRA_ADVANCED_FORM_CFG,
+  JIRA_CREDENTIALS_FORM_CFG,
+} from '../../jira.const';
 import { FormlyFieldConfig } from '@ngx-formly/core';
 import { JiraApiService } from '../../jira-api.service';
 import { JiraOriginalUser } from '../../jira-api-responses';
@@ -24,7 +28,7 @@ import { HANDLED_ERROR_PROP_STR, HelperClasses } from '../../../../../../app.con
   templateUrl: './jira-cfg-stepper.component.html',
   styleUrls: ['./jira-cfg-stepper.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  animations: [expandAnimation]
+  animations: [expandAnimation],
 })
 export class JiraCfgStepperComponent implements OnDestroy {
   T: typeof T = T;
@@ -37,7 +41,7 @@ export class JiraCfgStepperComponent implements OnDestroy {
 
   isTestCredentialsSuccess: boolean = false;
   user?: JiraOriginalUser;
-  jiraCfg: JiraCfg = Object.assign({}, DEFAULT_JIRA_CFG, {isEnabled: true});
+  jiraCfg: JiraCfg = Object.assign({}, DEFAULT_JIRA_CFG, { isEnabled: true });
   @Output() saveCfg: EventEmitter<JiraCfg> = new EventEmitter();
 
   private _subs: Subscription = new Subscription();
@@ -52,7 +56,7 @@ export class JiraCfgStepperComponent implements OnDestroy {
 
   @Input() set cfg(cfg: JiraCfg) {
     if (cfg) {
-      this.jiraCfg = {...cfg};
+      this.jiraCfg = { ...cfg };
     }
   }
 
@@ -71,19 +75,22 @@ export class JiraCfgStepperComponent implements OnDestroy {
   testCredentials() {
     this.isTestCredentialsSuccess = false;
     this._subs.add(
-      this._jiraApiService.getCurrentUser$(this.jiraCfg, true)
-        .pipe(catchError((err) => {
-          this.isTestCredentialsSuccess = false;
-          this.user = undefined;
-          this._changeDetectorRef.detectChanges();
-          return throwError({[HANDLED_ERROR_PROP_STR]: err});
-        }))
+      this._jiraApiService
+        .getCurrentUser$(this.jiraCfg, true)
+        .pipe(
+          catchError((err) => {
+            this.isTestCredentialsSuccess = false;
+            this.user = undefined;
+            this._changeDetectorRef.detectChanges();
+            return throwError({ [HANDLED_ERROR_PROP_STR]: err });
+          }),
+        )
         .subscribe((user: JiraOriginalUser) => {
           this.user = user;
           this.isTestCredentialsSuccess = true;
 
           this._changeDetectorRef.detectChanges();
-        })
+        }),
     );
   }
 }

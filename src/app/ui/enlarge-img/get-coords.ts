@@ -1,4 +1,5 @@
-export const getCoords = (elem: HTMLElement) => { // crossbrowser version
+export const getCoords = (elem: HTMLElement) => {
+  // crossbrowser version
   const box = elem.getBoundingClientRect();
 
   const body = document.body;
@@ -13,5 +14,5 @@ export const getCoords = (elem: HTMLElement) => { // crossbrowser version
   const top = box.top + scrollTop - clientTop;
   const left = box.left + scrollLeft - clientLeft;
 
-  return {top: Math.round(top), left: Math.round(left)};
+  return { top: Math.round(top), left: Math.round(left) };
 };

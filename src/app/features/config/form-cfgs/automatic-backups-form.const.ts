@@ -5,7 +5,9 @@ import { getElectron } from '../../../util/get-electron';
 import { IS_ELECTRON } from '../../../app.constants';
 import * as ElectronRenderer from 'electron/renderer';
 
-const backupPath = IS_ELECTRON && `${(getElectron() as typeof ElectronRenderer).remote.app.getPath('userData')}/backups`;
+const backupPath =
+  IS_ELECTRON &&
+  `${(getElectron() as typeof ElectronRenderer).remote.app.getPath('userData')}/backups`;
 
 export const AUTOMATIC_BACKUPS_FORM: ConfigFormSection<LocalBackupConfig> = {
   isElectronOnly: true,
@@ -36,5 +38,5 @@ export const AUTOMATIC_BACKUPS_FORM: ConfigFormSection<LocalBackupConfig> = {
         label: T.GCF.AUTO_BACKUPS.LABEL_IS_ENABLED,
       },
     },
-  ]
+  ],
 };

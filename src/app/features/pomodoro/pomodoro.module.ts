@@ -16,5 +16,4 @@ import { UiModule } from '../../ui/ui.module';
     EffectsModule.forFeature([PomodoroEffects]),
   ],
 })
-export class PomodoroModule {
-}
+export class PomodoroModule {}

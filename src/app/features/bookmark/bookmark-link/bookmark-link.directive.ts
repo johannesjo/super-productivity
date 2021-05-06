@@ -8,18 +8,16 @@ import { ElectronService } from '../../../core/electron/electron.service';
 import { ipcRenderer, shell } from 'electron';
 
 @Directive({
-  selector: '[bookmarkLink]'
+  selector: '[bookmarkLink]',
 })
 export class BookmarkLinkDirective {
-
   @Input() type?: BookmarkType;
   @Input() href?: BookmarkType;
 
   constructor(
     private _electronService: ElectronService,
     private _snackService: SnackService,
-  ) {
-  }
+  ) {}
 
   @HostListener('click', ['$event']) onClick(ev: Event) {
     if (!this.type || !this.href) {
@@ -39,7 +37,7 @@ export class BookmarkLinkDirective {
       } else if (this.type === 'COMMAND') {
         this._snackService.open({
           msg: T.GLOBAL_SNACK.RUNNING_X,
-          translateParams: {str: this.href},
+          translateParams: { str: this.href },
           ico: 'laptop_windows',
         });
         this._exec(this.href);

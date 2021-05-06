@@ -17,7 +17,7 @@ import { SimpleCounterService } from '../../simple-counter/simple-counter.servic
   templateUrl: './worklog-week.component.html',
   styleUrls: ['./worklog-week.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  animations: [expandAnimation, expandFadeAnimation, fadeAnimation]
+  animations: [expandAnimation, expandFadeAnimation, fadeAnimation],
 })
 export class WorklogWeekComponent {
   visibility: boolean[] = [];
@@ -29,8 +29,7 @@ export class WorklogWeekComponent {
     public readonly simpleCounterService: SimpleCounterService,
     private readonly _matDialog: MatDialog,
     private readonly _taskService: TaskService,
-  ) {
-  }
+  ) {}
 
   sortDays(a: any, b: any) {
     return a.key - b.key;
@@ -42,7 +41,7 @@ export class WorklogWeekComponent {
     const weekNr = getWeekNumber(now);
 
     // get for whole week
-    const {rangeStart, rangeEnd} = getDateRangeForWeek(year, weekNr);
+    const { rangeStart, rangeEnd } = getDateRangeForWeek(year, weekNr);
 
     this._matDialog.open(DialogWorklogExportComponent, {
       restoreFocus: true,
@@ -50,16 +49,20 @@ export class WorklogWeekComponent {
       data: {
         rangeStart,
         rangeEnd,
-      }
+      },
     });
   }
 
-  async updateTimeSpentTodayForTask(task: Task, dateStr: string, newVal: number | string) {
+  async updateTimeSpentTodayForTask(
+    task: Task,
+    dateStr: string,
+    newVal: number | string,
+  ) {
     await this._taskService.updateEverywhere(task.id, {
       timeSpentOnDay: {
         ...task.timeSpentOnDay,
         [dateStr]: +newVal,
-      }
+      },
     });
     this.worklogService.refreshWorklog();
   }

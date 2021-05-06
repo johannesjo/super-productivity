@@ -6,14 +6,10 @@ import { dataRepair } from './data-repair.util';
 import { isDataRepairPossible } from './is-data-repair-possible.util';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class DataRepairService {
-
-  constructor(
-    private _translateService: TranslateService,
-  ) {
-  }
+  constructor(private _translateService: TranslateService) {}
 
   repairData(dataIn: AppDataComplete): AppDataComplete {
     return dataRepair(dataIn);

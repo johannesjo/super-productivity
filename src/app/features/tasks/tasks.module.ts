@@ -83,8 +83,6 @@ import { TaskSummaryTablesComponent } from './task-summary-tables/task-summary-t
     TaskAdditionalInfoComponent,
     TaskAdditionalInfoWrapperComponent,
   ],
-  providers: [TagService]
-
+  providers: [TagService],
 })
-export class TasksModule {
-}
+export class TasksModule {}

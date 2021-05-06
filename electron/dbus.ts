@@ -29,7 +29,7 @@ let iface;
 function init(params) {
   sessionBus = dbus.sessionBus();
 
-// Check the connection was successful
+  // Check the connection was successful
   if (!sessionBus) {
     isDBusError = true;
     errorHandler(`DBus: Could not connect to the DBus session bus.`);
@@ -39,7 +39,9 @@ function init(params) {
     // If there was an error, warn user and fail
     if (e) {
       isDBusError = true;
-      errorHandler(`DBus: Could not request service name ${serviceName}, the error was: ${e}.`);
+      errorHandler(
+        `DBus: Could not request service name ${serviceName}, the error was: ${e}.`,
+      );
     }
 
     // Return code 0x1 means we successfully had the name
@@ -52,11 +54,13 @@ function init(params) {
   */
     } else {
       isDBusError = true;
-      errorHandler(`DBus: Failed to request service name '${serviceName}'.Check what return code '${retCode}' means.`);
+      errorHandler(
+        `DBus: Failed to request service name '${serviceName}'.Check what return code '${retCode}' means.`,
+      );
     }
   });
 
-// Function called when we have successfully got the service name we wanted
+  // Function called when we have successfully got the service name we wanted
   function proceed() {
     // First, we need to create our interface description (here we will only expose method calls)
     ifaceDesc = {
@@ -108,7 +112,7 @@ function init(params) {
       },
       emit: () => {
         // no nothing, as usual
-      }
+      },
     };
 
     // Now we need to actually export our interface on our object
@@ -144,20 +148,22 @@ if (!isDBusError) {
       }
 
       if (iface) {
-        iface.emit('pomodoroUpdate', (isOnBreak ? 1 : 0), currentSessionTime, currentSessionInitialTime);
+        iface.emit(
+          'pomodoroUpdate',
+          isOnBreak ? 1 : 0,
+          currentSessionTime,
+          currentSessionInitialTime,
+        );
       } else {
         errorHandler('DBus: interface not ready yet');
         isErrorShownOnce = true;
       }
-    }
+    },
   };
 } else {
   module.exports = {
-    init: () => {
-    },
-    setTask: () => {
-    },
-    updatePomodoro: () => {
-    }
+    init: () => {},
+    setTask: () => {},
+    updatePomodoro: () => {},
   };
 }

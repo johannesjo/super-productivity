@@ -1,4 +1,7 @@
-import { ConfigFormSection, GenericConfigFormSection } from '../config/global-config.model';
+import {
+  ConfigFormSection,
+  GenericConfigFormSection,
+} from '../config/global-config.model';
 import { T } from '../../t.const';
 import { Project } from './project.model';
 
@@ -14,7 +17,7 @@ export const BASIC_PROJECT_CONFIG_FORM_CONFIG: ConfigFormSection<Project> = {
         label: T.F.PROJECT.FORM_BASIC.L_TITLE,
       },
     },
-  ]
+  ],
 };
 
 export const CREATE_PROJECT_BASIC_CONFIG_FORM_CONFIG: GenericConfigFormSection = {
@@ -40,5 +43,5 @@ export const CREATE_PROJECT_BASIC_CONFIG_FORM_CONFIG: GenericConfigFormSection =
         type: 'color',
       },
     },
-  ]
+  ],
 };

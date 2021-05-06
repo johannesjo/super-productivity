@@ -10,47 +10,47 @@ export const KEYBOARD_SETTINGS_FORM_CFG: ConfigFormSection<KeyboardConfig> = {
   help: T.GCF.KEYBOARD.HELP,
   items: [
     // SYSTEM WIDE
-    ...((IS_ELECTRON)
+    ...((IS_ELECTRON
       ? [
-        {
-          type: 'tpl',
-          className: 'tpl',
-          templateOptions: {
-            tag: 'h3',
-            class: 'sub-section-heading',
-            text: T.GCF.KEYBOARD.SYSTEM_SHORTCUTS,
+          {
+            type: 'tpl',
+            className: 'tpl',
+            templateOptions: {
+              tag: 'h3',
+              class: 'sub-section-heading',
+              text: T.GCF.KEYBOARD.SYSTEM_SHORTCUTS,
+            },
           },
-        },
-        {
-          key: 'globalShowHide',
-          type: 'keyboard',
-          templateOptions: {
-            label: T.GCF.KEYBOARD.GLOBAL_SHOW_HIDE
+          {
+            key: 'globalShowHide',
+            type: 'keyboard',
+            templateOptions: {
+              label: T.GCF.KEYBOARD.GLOBAL_SHOW_HIDE,
+            },
           },
-        },
-        {
-          key: 'globalToggleTaskStart',
-          type: 'keyboard',
-          templateOptions: {
-            label: T.GCF.KEYBOARD.GLOBAL_TOGGLE_TASK_START
+          {
+            key: 'globalToggleTaskStart',
+            type: 'keyboard',
+            templateOptions: {
+              label: T.GCF.KEYBOARD.GLOBAL_TOGGLE_TASK_START,
+            },
           },
-        },
-        {
-          key: 'globalAddNote',
-          type: 'keyboard',
-          templateOptions: {
-            label: T.GCF.KEYBOARD.GLOBAL_ADD_NOTE
+          {
+            key: 'globalAddNote',
+            type: 'keyboard',
+            templateOptions: {
+              label: T.GCF.KEYBOARD.GLOBAL_ADD_NOTE,
+            },
           },
-        },
-        {
-          key: 'globalAddTask',
-          type: 'keyboard',
-          templateOptions: {
-            label: T.GCF.KEYBOARD.GLOBAL_ADD_TASK
+          {
+            key: 'globalAddTask',
+            type: 'keyboard',
+            templateOptions: {
+              label: T.GCF.KEYBOARD.GLOBAL_ADD_TASK,
+            },
           },
-        }
-      ]
-      : []) as LimitedFormlyFieldConfig<KeyboardConfig>[],
+        ]
+      : []) as LimitedFormlyFieldConfig<KeyboardConfig>[]),
     // APP WIDE
     {
       type: 'tpl',
@@ -58,35 +58,35 @@ export const KEYBOARD_SETTINGS_FORM_CFG: ConfigFormSection<KeyboardConfig> = {
       templateOptions: {
         tag: 'h3',
         class: 'sub-section-heading',
-        text: T.GCF.KEYBOARD.APP_WIDE_SHORTCUTS
+        text: T.GCF.KEYBOARD.APP_WIDE_SHORTCUTS,
       },
     },
     {
       key: 'addNewTask',
       type: 'keyboard',
       templateOptions: {
-        label: T.GCF.KEYBOARD.ADD_NEW_TASK
+        label: T.GCF.KEYBOARD.ADD_NEW_TASK,
       },
     },
     {
       key: 'addNewNote',
       type: 'keyboard',
       templateOptions: {
-        label: T.GCF.KEYBOARD.ADD_NEW_NOTE
+        label: T.GCF.KEYBOARD.ADD_NEW_NOTE,
       },
     },
     {
       key: 'toggleSideNav',
       type: 'keyboard',
       templateOptions: {
-        label: T.GCF.KEYBOARD.TOGGLE_SIDE_NAV
+        label: T.GCF.KEYBOARD.TOGGLE_SIDE_NAV,
       },
     },
     {
       key: 'openProjectNotes',
       type: 'keyboard',
       templateOptions: {
-        label: T.GCF.KEYBOARD.OPEN_PROJECT_NOTES
+        label: T.GCF.KEYBOARD.OPEN_PROJECT_NOTES,
       },
     },
     // {
@@ -100,28 +100,28 @@ export const KEYBOARD_SETTINGS_FORM_CFG: ConfigFormSection<KeyboardConfig> = {
       key: 'toggleBookmarks',
       type: 'keyboard',
       templateOptions: {
-        label: T.GCF.KEYBOARD.TOGGLE_BOOKMARKS
+        label: T.GCF.KEYBOARD.TOGGLE_BOOKMARKS,
       },
     },
     {
       key: 'toggleBacklog',
       type: 'keyboard',
       templateOptions: {
-        label: T.GCF.KEYBOARD.TOGGLE_BACKLOG
+        label: T.GCF.KEYBOARD.TOGGLE_BACKLOG,
       },
     },
     {
       key: 'goToWorkView',
       type: 'keyboard',
       templateOptions: {
-        label: T.GCF.KEYBOARD.GO_TO_WORK_VIEW
+        label: T.GCF.KEYBOARD.GO_TO_WORK_VIEW,
       },
     },
     {
       key: 'goToScheduledView',
       type: 'keyboard',
       templateOptions: {
-        label: T.GCF.KEYBOARD.GO_TO_SCHEDULED_VIEW
+        label: T.GCF.KEYBOARD.GO_TO_SCHEDULED_VIEW,
       },
     },
     // {
@@ -142,28 +142,28 @@ export const KEYBOARD_SETTINGS_FORM_CFG: ConfigFormSection<KeyboardConfig> = {
       key: 'goToSettings',
       type: 'keyboard',
       templateOptions: {
-        label: T.GCF.KEYBOARD.GO_TO_SETTINGS
+        label: T.GCF.KEYBOARD.GO_TO_SETTINGS,
       },
     },
     {
       key: 'zoomIn',
       type: 'keyboard',
       templateOptions: {
-        label: T.GCF.KEYBOARD.ZOOM_IN
+        label: T.GCF.KEYBOARD.ZOOM_IN,
       },
     },
     {
       key: 'zoomOut',
       type: 'keyboard',
       templateOptions: {
-        label: T.GCF.KEYBOARD.ZOOM_OUT
+        label: T.GCF.KEYBOARD.ZOOM_OUT,
       },
     },
     {
       key: 'zoomDefault',
       type: 'keyboard',
       templateOptions: {
-        label: T.GCF.KEYBOARD.ZOOM_DEFAULT
+        label: T.GCF.KEYBOARD.ZOOM_DEFAULT,
       },
     },
     // TASKS
@@ -173,7 +173,7 @@ export const KEYBOARD_SETTINGS_FORM_CFG: ConfigFormSection<KeyboardConfig> = {
       templateOptions: {
         tag: 'h3',
         class: 'sub-section-heading',
-        text: T.GCF.KEYBOARD.TASK_SHORTCUTS
+        text: T.GCF.KEYBOARD.TASK_SHORTCUTS,
       },
     },
     {
@@ -181,142 +181,142 @@ export const KEYBOARD_SETTINGS_FORM_CFG: ConfigFormSection<KeyboardConfig> = {
       className: 'tpl',
       templateOptions: {
         tag: 'p',
-        text: T.GCF.KEYBOARD.TASK_SHORTCUTS_INFO
+        text: T.GCF.KEYBOARD.TASK_SHORTCUTS_INFO,
       },
     },
     {
       key: 'taskEditTitle',
       type: 'keyboard',
       templateOptions: {
-        label: T.GCF.KEYBOARD.TASK_EDIT_TITLE
+        label: T.GCF.KEYBOARD.TASK_EDIT_TITLE,
       },
     },
     {
       key: 'taskToggleAdditionalInfoOpen',
       type: 'keyboard',
       templateOptions: {
-        label: T.GCF.KEYBOARD.TASK_TOGGLE_ADDITIONAL_INFO_OPEN
+        label: T.GCF.KEYBOARD.TASK_TOGGLE_ADDITIONAL_INFO_OPEN,
       },
     },
     {
       key: 'taskOpenEstimationDialog',
       type: 'keyboard',
       templateOptions: {
-        label: T.GCF.KEYBOARD.TASK_OPEN_ESTIMATION_DIALOG
+        label: T.GCF.KEYBOARD.TASK_OPEN_ESTIMATION_DIALOG,
       },
     },
     {
       key: 'taskSchedule',
       type: 'keyboard',
       templateOptions: {
-        label: T.GCF.KEYBOARD.TASK_SCHEDULE
+        label: T.GCF.KEYBOARD.TASK_SCHEDULE,
       },
     },
     {
       key: 'taskToggleDone',
       type: 'keyboard',
       templateOptions: {
-        label: T.GCF.KEYBOARD.TASK_TOGGLE_DONE
+        label: T.GCF.KEYBOARD.TASK_TOGGLE_DONE,
       },
     },
     {
       key: 'taskAddSubTask',
       type: 'keyboard',
       templateOptions: {
-        label: T.GCF.KEYBOARD.TASK_ADD_SUB_TASK
+        label: T.GCF.KEYBOARD.TASK_ADD_SUB_TASK,
       },
     },
     {
       key: 'taskDelete',
       type: 'keyboard',
       templateOptions: {
-        label: T.GCF.KEYBOARD.TASK_DELETE
+        label: T.GCF.KEYBOARD.TASK_DELETE,
       },
     },
     {
       key: 'taskMoveToProject',
       type: 'keyboard',
       templateOptions: {
-        label: T.GCF.KEYBOARD.TASK_MOVE_TO_PROJECT
+        label: T.GCF.KEYBOARD.TASK_MOVE_TO_PROJECT,
       },
     },
     {
       key: 'taskOpenContextMenu',
       type: 'keyboard',
       templateOptions: {
-        label: T.GCF.KEYBOARD.TASK_OPEN_CONTEXT_MENU
+        label: T.GCF.KEYBOARD.TASK_OPEN_CONTEXT_MENU,
       },
     },
     {
       key: 'selectPreviousTask',
       type: 'keyboard',
       templateOptions: {
-        label: T.GCF.KEYBOARD.SELECT_PREVIOUS_TASK
+        label: T.GCF.KEYBOARD.SELECT_PREVIOUS_TASK,
       },
     },
     {
       key: 'selectNextTask',
       type: 'keyboard',
       templateOptions: {
-        label: T.GCF.KEYBOARD.SELECT_NEXT_TASK
+        label: T.GCF.KEYBOARD.SELECT_NEXT_TASK,
       },
     },
     {
       key: 'moveTaskUp',
       type: 'keyboard',
       templateOptions: {
-        label: T.GCF.KEYBOARD.MOVE_TASK_UP
+        label: T.GCF.KEYBOARD.MOVE_TASK_UP,
       },
     },
     {
       key: 'moveTaskDown',
       type: 'keyboard',
       templateOptions: {
-        label: T.GCF.KEYBOARD.MOVE_TASK_DOWN
+        label: T.GCF.KEYBOARD.MOVE_TASK_DOWN,
       },
     },
     {
       key: 'moveToBacklog',
       type: 'keyboard',
       templateOptions: {
-        label: T.GCF.KEYBOARD.MOVE_TO_BACKLOG
+        label: T.GCF.KEYBOARD.MOVE_TO_BACKLOG,
       },
     },
     {
       key: 'moveToTodaysTasks',
       type: 'keyboard',
       templateOptions: {
-        label: T.GCF.KEYBOARD.MOVE_TO_TODAYS_TASKS
+        label: T.GCF.KEYBOARD.MOVE_TO_TODAYS_TASKS,
       },
     },
     {
       key: 'expandSubTasks',
       type: 'keyboard',
       templateOptions: {
-        label: T.GCF.KEYBOARD.EXPAND_SUB_TASKS
+        label: T.GCF.KEYBOARD.EXPAND_SUB_TASKS,
       },
     },
     {
       key: 'collapseSubTasks',
       type: 'keyboard',
       templateOptions: {
-        label: T.GCF.KEYBOARD.COLLAPSE_SUB_TASKS
+        label: T.GCF.KEYBOARD.COLLAPSE_SUB_TASKS,
       },
     },
     {
       key: 'togglePlay',
       type: 'keyboard',
       templateOptions: {
-        label: T.GCF.KEYBOARD.TOGGLE_PLAY
+        label: T.GCF.KEYBOARD.TOGGLE_PLAY,
       },
     },
     {
       key: 'taskEditTags',
       type: 'keyboard',
       templateOptions: {
-        label: T.GCF.KEYBOARD.TASK_EDIT_TAGS
+        label: T.GCF.KEYBOARD.TASK_EDIT_TAGS,
       },
     },
-  ]
+  ],
 };
 /* eslint-enable max-len */

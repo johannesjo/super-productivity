@@ -5,4 +5,3 @@ export const loadAllData = createAction(
   '[SP_ALL] Load(import) all data',
   props<{ appDataComplete: AppDataComplete; isOmitTokens: boolean }>(),
 );
-

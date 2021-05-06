@@ -4,16 +4,16 @@ import OpenDevToolsOptions = Electron.OpenDevToolsOptions;
 const electron = require('electron');
 const localShortcut = require('electron-localshortcut');
 
-const {app, BrowserWindow} = electron;
+const { app, BrowserWindow } = electron;
 const isMacOS = process.platform === 'darwin';
 
 const devToolsOptions: OpenDevToolsOptions = {
-  mode: 'bottom'
+  mode: 'bottom',
 };
 
 function toggleDevTools(win = BrowserWindow.getFocusedWindow()) {
   if (win) {
-    const {webContents} = win;
+    const { webContents } = win;
     if (webContents.isDevToolsOpened()) {
       webContents.closeDevTools();
     } else {
@@ -72,11 +72,14 @@ function inspectElements() {
 // };
 
 export const initDebug = (opts, isAddReload) => {
-  opts = Object.assign({
-    enabled: null,
-    showDevTools: true,
-    ...devToolsOptions,
-  }, opts);
+  opts = Object.assign(
+    {
+      enabled: null,
+      showDevTools: true,
+      ...devToolsOptions,
+    },
+    opts,
+  );
   console.log(opts);
 
   if (opts.enabled === false) {
@@ -114,5 +117,3 @@ export const initDebug = (opts, isAddReload) => {
     }
   });
 };
-
-

@@ -1,4 +1,11 @@
-import { ChangeDetectionStrategy, Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  ElementRef,
+  OnDestroy,
+  OnInit,
+  ViewChild,
+} from '@angular/core';
 import { FieldType } from '@ngx-formly/core';
 import { Subscription } from 'rxjs';
 import { TranslateService } from '@ngx-translate/core';
@@ -7,18 +14,17 @@ import { TranslateService } from '@ngx-translate/core';
   selector: 'formly-translated-template',
   templateUrl: './formly-translated-template.component.html',
   styleUrls: ['./formly-translated-template.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class FormlyTranslatedTemplateComponent extends FieldType implements OnInit, OnDestroy {
-
-  @ViewChild('tplWrapper', {static: true}) tplWrapper?: ElementRef;
+export class FormlyTranslatedTemplateComponent
+  extends FieldType
+  implements OnInit, OnDestroy {
+  @ViewChild('tplWrapper', { static: true }) tplWrapper?: ElementRef;
 
   private _el?: HTMLElement;
   private _subs: Subscription = new Subscription();
 
-  constructor(
-    private _translateService: TranslateService,
-  ) {
+  constructor(private _translateService: TranslateService) {
     super();
   }
 
@@ -34,9 +40,11 @@ export class FormlyTranslatedTemplateComponent extends FieldType implements OnIn
       return;
     }
 
-    this._subs.add(this._translateService.stream(translationId).subscribe((translationString) => {
-      (this._el as HTMLElement).innerHTML = translationString;
-    }));
+    this._subs.add(
+      this._translateService.stream(translationId).subscribe((translationString) => {
+        (this._el as HTMLElement).innerHTML = translationString;
+      }),
+    );
   }
 
   ngOnDestroy(): void {

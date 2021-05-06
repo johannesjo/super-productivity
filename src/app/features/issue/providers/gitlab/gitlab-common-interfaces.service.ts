@@ -21,41 +21,48 @@ export class GitlabCommonInterfacesService implements IssueServiceInterface {
     private readonly _gitlabApiService: GitlabApiService,
     private readonly _projectService: ProjectService,
     private readonly _snackService: SnackService,
-  ) {
-  }
+  ) {}
 
   issueLink$(issueId: number, projectId: string): Observable<string> {
     return this._getCfgOnce$(projectId).pipe(
       map((cfg) => {
         if (cfg.gitlabBaseUrl) {
-          const fixedUrl = cfg.gitlabBaseUrl.match(/.*\/$/) ? cfg.gitlabBaseUrl : `${cfg.gitlabBaseUrl}/`;
+          const fixedUrl = cfg.gitlabBaseUrl.match(/.*\/$/)
+            ? cfg.gitlabBaseUrl
+            : `${cfg.gitlabBaseUrl}/`;
           return `${fixedUrl}${cfg.project}issues/${issueId}`;
         } else {
-          return `${GITLAB_BASE_URL}${cfg.project?.replace(/%2F/g, '/')}/issues/${issueId}`;
+          return `${GITLAB_BASE_URL}${cfg.project?.replace(
+            /%2F/g,
+            '/',
+          )}/issues/${issueId}`;
         }
-      })
+      }),
     );
   }
 
   getById$(issueId: number, projectId: string) {
     return this._getCfgOnce$(projectId).pipe(
-      concatMap(gitlabCfg => this._gitlabApiService.getById$(issueId, gitlabCfg)),
+      concatMap((gitlabCfg) => this._gitlabApiService.getById$(issueId, gitlabCfg)),
     );
   }
 
   searchIssues$(searchTerm: string, projectId: string): Observable<SearchResultItem[]> {
     return this._getCfgOnce$(projectId).pipe(
-      switchMap((gitlabCfg) => (gitlabCfg && gitlabCfg.isSearchIssuesFromGitlab)
-        ? this._gitlabApiService.searchIssueInProject$(searchTerm, gitlabCfg).pipe(catchError(() => []))
-        : of([])
-      )
+      switchMap((gitlabCfg) =>
+        gitlabCfg && gitlabCfg.isSearchIssuesFromGitlab
+          ? this._gitlabApiService
+              .searchIssueInProject$(searchTerm, gitlabCfg)
+              .pipe(catchError(() => []))
+          : of([]),
+      ),
     );
   }
 
   async refreshIssue(
     task: Task,
     isNotifySuccess: boolean = true,
-    isNotifyNoUpdateRequired: boolean = false
+    isNotifyNoUpdateRequired: boolean = false,
   ): Promise<{ taskChanges: Partial<Task>; issue: GitlabIssue } | null> {
     if (!task.projectId) {
       throw new Error('No projectId');
@@ -68,14 +75,17 @@ export class GitlabCommonInterfacesService implements IssueServiceInterface {
     const issue = await this._gitlabApiService.getById$(+task.issueId, cfg).toPromise();
 
     const issueUpdate: number = new Date(issue.updated_at).getTime();
-    const commentsByOthers = (cfg.filterUsername && cfg.filterUsername.length > 1)
-      ? issue.comments.filter(comment => comment.author.username !== cfg.filterUsername)
-      : issue.comments;
+    const commentsByOthers =
+      cfg.filterUsername && cfg.filterUsername.length > 1
+        ? issue.comments.filter(
+            (comment) => comment.author.username !== cfg.filterUsername,
+          )
+        : issue.comments;
 
     // TODO: we also need to handle the case when the user himself updated the issue, to also update the issue...
     const updates: number[] = [
-      ...(commentsByOthers.map(comment => new Date(comment.created_at).getTime())),
-      issueUpdate
+      ...commentsByOthers.map((comment) => new Date(comment.created_at).getTime()),
+      issueUpdate,
     ].sort();
     const lastRemoteUpdate = updates[updates.length - 1];
 
@@ -85,7 +95,7 @@ export class GitlabCommonInterfacesService implements IssueServiceInterface {
       this._snackService.open({
         ico: 'cloud_download',
         translateParams: {
-          issueText: this._formatIssueTitleForSnack(issue.number, issue.title)
+          issueText: this._formatIssueTitleForSnack(issue.number, issue.title),
         },
         msg: T.F.GITLAB.S.ISSUE_UPDATE,
       });
@@ -112,7 +122,7 @@ export class GitlabCommonInterfacesService implements IssueServiceInterface {
   async refreshIssues(
     tasks: Task[],
     isNotifySuccess: boolean = true,
-    isNotifyNoUpdateRequired: boolean = false
+    isNotifyNoUpdateRequired: boolean = false,
   ): Promise<{ task: Task; taskChanges: Partial<Task>; issue: GitlabIssue }[]> {
     // First sort the tasks by the issueId
     // because the API returns it in a desc order by issue iid(issueId)
@@ -133,20 +143,29 @@ export class GitlabCommonInterfacesService implements IssueServiceInterface {
       for (let j = 0; j < paramsCount && i < tasks.length; j++, i++) {
         ids.push(tasks[i].issueId);
       }
-      issues.push(...(await this._gitlabApiService.getByIds$(ids as string[], cfg).toPromise()));
+      issues.push(
+        ...(await this._gitlabApiService.getByIds$(ids as string[], cfg).toPromise()),
+      );
     }
 
-    const updatedIssues: { task: Task; taskChanges: Partial<Task>; issue: GitlabIssue }[] = [];
+    const updatedIssues: {
+      task: Task;
+      taskChanges: Partial<Task>;
+      issue: GitlabIssue;
+    }[] = [];
 
     for (i = 0; i < tasks.length; i++) {
       const issueUpdate: number = new Date(issues[i].updated_at).getTime();
-      const commentsByOthers = (cfg.filterUsername && cfg.filterUsername.length > 1)
-        ? issues[i].comments.filter(comment => comment.author.username !== cfg.filterUsername)
-        : issues[i].comments;
+      const commentsByOthers =
+        cfg.filterUsername && cfg.filterUsername.length > 1
+          ? issues[i].comments.filter(
+              (comment) => comment.author.username !== cfg.filterUsername,
+            )
+          : issues[i].comments;
 
       const updates: number[] = [
-        ...(commentsByOthers.map(comment => new Date(comment.created_at).getTime())),
-        issueUpdate
+        ...commentsByOthers.map((comment) => new Date(comment.created_at).getTime()),
+        issueUpdate,
       ].sort();
       const lastRemoteUpdate = updates[updates.length - 1];
       const wasUpdated = lastRemoteUpdate > (tasks[i].issueLastUpdated || 0);
@@ -167,7 +186,7 @@ export class GitlabCommonInterfacesService implements IssueServiceInterface {
         this._snackService.open({
           ico: 'cloud_download',
           translateParams: {
-            issueText: this._formatIssueTitleForSnack(issues[i].number, issues[i].title)
+            issueText: this._formatIssueTitleForSnack(issues[i].number, issues[i].title),
           },
           msg: T.F.GITLAB.S.ISSUE_UPDATE,
         });
@@ -181,12 +200,14 @@ export class GitlabCommonInterfacesService implements IssueServiceInterface {
     return updatedIssues;
   }
 
-  getAddTaskData(issue: GitlabIssue): { title: string; additionalFields: Partial<IssueFieldsForTask> } {
+  getAddTaskData(
+    issue: GitlabIssue,
+  ): { title: string; additionalFields: Partial<IssueFieldsForTask> } {
     return {
       title: this._formatIssueTitle(issue.number, issue.title),
       additionalFields: {
-        issuePoints: issue.weight
-      }
+        issuePoints: issue.weight,
+      },
     };
   }
 

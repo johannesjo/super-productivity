@@ -1,4 +1,4 @@
-import {NightwatchBrowser} from 'nightwatch';
+import { NightwatchBrowser } from 'nightwatch';
 
 export interface AddTaskWithReminderParams {
   title: string;

@@ -15,5 +15,4 @@ import { GoogleDriveSyncEffects } from './store/google-drive-sync.effects';
   declarations: [],
   exports: [],
 })
-export class GoogleModule {
-}
+export class GoogleModule {}

@@ -7,18 +7,14 @@ import { GlobalProgressBarInterceptorService } from './global-progress-bar-inter
 
 @NgModule({
   providers: [
-    {provide: HTTP_INTERCEPTORS, useClass: GlobalProgressBarInterceptorService, multi: true}
+    {
+      provide: HTTP_INTERCEPTORS,
+      useClass: GlobalProgressBarInterceptorService,
+      multi: true,
+    },
   ],
-  declarations: [
-    GlobalProgressBarComponent,
-  ],
-  imports: [
-    CommonModule,
-    UiModule,
-  ],
-  exports: [
-    GlobalProgressBarComponent,
-  ]
+  declarations: [GlobalProgressBarComponent],
+  imports: [CommonModule, UiModule],
+  exports: [GlobalProgressBarComponent],
 })
-export class GlobalProgressBarModule {
-}
+export class GlobalProgressBarModule {}

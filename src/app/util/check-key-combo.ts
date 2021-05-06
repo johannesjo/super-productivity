@@ -1,4 +1,7 @@
-const isSpecialKeyExactlyRight = (isKeyRequired: boolean, isKeyPressed: boolean): boolean => {
+const isSpecialKeyExactlyRight = (
+  isKeyRequired: boolean,
+  isKeyPressed: boolean,
+): boolean => {
   return (isKeyRequired && isKeyPressed) || (!isKeyRequired && !isKeyPressed);
 };
 
@@ -12,11 +15,13 @@ export const checkKeyCombo = (ev: KeyboardEvent, comboToTest: string | null): bo
 
     sk.splice(-1, 1);
 
-    return isSpecialKeyExactlyRight(sk.includes('Ctrl'), ev.ctrlKey)
-      && isSpecialKeyExactlyRight(sk.includes('Alt'), ev.altKey)
-      && isSpecialKeyExactlyRight(sk.includes('Meta'), ev.metaKey)
-      && (!(sk.includes('Shift')) || ev.shiftKey)
-      && (ev.key === standardKey || isPlusKey && ev.key === '+');
+    return (
+      isSpecialKeyExactlyRight(sk.includes('Ctrl'), ev.ctrlKey) &&
+      isSpecialKeyExactlyRight(sk.includes('Alt'), ev.altKey) &&
+      isSpecialKeyExactlyRight(sk.includes('Meta'), ev.metaKey) &&
+      (!sk.includes('Shift') || ev.shiftKey) &&
+      (ev.key === standardKey || (isPlusKey && ev.key === '+'))
+    );
   }
   return false;
 };

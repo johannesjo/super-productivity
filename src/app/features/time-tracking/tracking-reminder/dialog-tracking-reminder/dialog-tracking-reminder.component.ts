@@ -9,11 +9,13 @@ import { T } from '../../../../t.const';
   selector: 'dialog-tracking-reminder',
   templateUrl: './dialog-tracking-reminder.component.html',
   styleUrls: ['./dialog-tracking-reminder.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class DialogTrackingReminderComponent implements OnInit {
   T: typeof T = T;
-  lastCurrentTask$: Observable<Task> = this._taskService.getByIdOnce$(this.data.lastCurrentTaskId);
+  lastCurrentTask$: Observable<Task> = this._taskService.getByIdOnce$(
+    this.data.lastCurrentTaskId,
+  );
   selectedTask: Task | null = null;
   newTaskTitle?: string;
   isCreate?: boolean;
@@ -34,7 +36,7 @@ export class DialogTrackingReminderComponent implements OnInit {
   }
 
   onTaskChange(taskOrTaskTitle: Task | string) {
-    this.isCreate = (typeof taskOrTaskTitle === 'string');
+    this.isCreate = typeof taskOrTaskTitle === 'string';
     if (this.isCreate) {
       this.newTaskTitle = taskOrTaskTitle as string;
       this.selectedTask = null;

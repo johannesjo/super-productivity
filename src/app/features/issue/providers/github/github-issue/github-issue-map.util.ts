@@ -34,7 +34,7 @@ export const mapGithubIssue = (issue: GithubOriginalIssue): GithubIssue => {
     apiUrl: issue.url,
 
     // transformed
-    comments: []
+    comments: [],
   };
 };
 
@@ -45,4 +45,3 @@ export const mapGithubIssueToSearchResult = (issue: GithubIssue): SearchResultIt
     issueData: issue,
   };
 };
-

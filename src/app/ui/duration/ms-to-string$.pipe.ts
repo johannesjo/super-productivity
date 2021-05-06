@@ -4,15 +4,16 @@ import { map } from 'rxjs/operators';
 import { msToString } from './ms-to-string.pipe';
 
 @Pipe({
-  name: 'msToString$'
+  name: 'msToString$',
 })
 export class MsToStringPipe$ implements PipeTransform {
-
   transform(value$: Observable<any> | undefined, showSeconds?: boolean): any {
     if (value$) {
-      value$.pipe(map(value => {
-        return msToString(value, showSeconds);
-      }));
+      value$.pipe(
+        map((value) => {
+          return msToString(value, showSeconds);
+        }),
+      );
     }
   }
 }

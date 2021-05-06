@@ -25,7 +25,7 @@ export class DatabaseService {
   isReady$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
 
   private _afterReady$: Observable<boolean> = this.isReady$.pipe(
-    filter(isReady => isReady),
+    filter((isReady) => isReady),
     shareReplay(1),
   );
 
@@ -35,9 +35,9 @@ export class DatabaseService {
     this._init().then();
   }
 
-  @retry({retries: MAX_RETRY_COUNT, delay: RETRY_DELAY})
+  @retry({ retries: MAX_RETRY_COUNT, delay: RETRY_DELAY })
   async load(key: string): Promise<unknown> {
-    this._lastParams = {a: 'load', key};
+    this._lastParams = { a: 'load', key };
     await this._afterReady();
     try {
       return await (this.db as IDBPDatabase<MyDb>).get(DB_MAIN_NAME, key);
@@ -47,9 +47,9 @@ export class DatabaseService {
     }
   }
 
-  @retry({retries: MAX_RETRY_COUNT, delay: RETRY_DELAY})
+  @retry({ retries: MAX_RETRY_COUNT, delay: RETRY_DELAY })
   async save(key: string, data: unknown): Promise<unknown> {
-    this._lastParams = {a: 'save', key, data};
+    this._lastParams = { a: 'save', key, data };
     await this._afterReady();
     try {
       return await (this.db as IDBPDatabase<MyDb>).put(DB_MAIN_NAME, data, key);
@@ -59,9 +59,9 @@ export class DatabaseService {
     }
   }
 
-  @retry({retries: MAX_RETRY_COUNT, delay: RETRY_DELAY})
+  @retry({ retries: MAX_RETRY_COUNT, delay: RETRY_DELAY })
   async remove(key: string): Promise<unknown> {
-    this._lastParams = {a: 'remove', key};
+    this._lastParams = { a: 'remove', key };
     await this._afterReady();
     try {
       return await (this.db as IDBPDatabase<MyDb>).delete(DB_MAIN_NAME, key);
@@ -71,9 +71,9 @@ export class DatabaseService {
     }
   }
 
-  @retry({retries: MAX_RETRY_COUNT, delay: RETRY_DELAY})
+  @retry({ retries: MAX_RETRY_COUNT, delay: RETRY_DELAY })
   async clearDatabase(): Promise<unknown> {
-    this._lastParams = {a: 'clearDatabase'};
+    this._lastParams = { a: 'clearDatabase' };
     await this._afterReady();
     try {
       return await (this.db as IDBPDatabase<MyDb>).clear(DB_MAIN_NAME);
@@ -83,7 +83,7 @@ export class DatabaseService {
     }
   }
 
-  @retry({retries: MAX_RETRY_COUNT, delay: RETRY_DELAY})
+  @retry({ retries: MAX_RETRY_COUNT, delay: RETRY_DELAY })
   private async _init(): Promise<IDBPDatabase<MyDb>> {
     try {
       this.db = await openDB<MyDb>(DB_NAME, VERSION, {

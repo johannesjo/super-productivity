@@ -7,12 +7,6 @@ import { JiraViewComponentsModule } from '../../features/issue/providers/jira/ji
 
 @NgModule({
   declarations: [ProjectSettingsPageComponent],
-  imports: [
-    CommonModule,
-    ConfigModule,
-    UiModule,
-    JiraViewComponentsModule,
-  ]
+  imports: [CommonModule, ConfigModule, UiModule, JiraViewComponentsModule],
 })
-export class ProjectSettingsPageModule {
-}
+export class ProjectSettingsPageModule {}

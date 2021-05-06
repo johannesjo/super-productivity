@@ -12,14 +12,14 @@ import { map } from 'rxjs/operators';
   selector: 'dialog-add-note',
   templateUrl: './dialog-add-note.component.html',
   styleUrls: ['./dialog-add-note.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class DialogAddNoteComponent {
   T: typeof T = T;
   noteContent: string;
   isSubmitted: boolean = false;
   isInProjectContext$: Observable<boolean> = this._workContextService.activeWorkContextTypeAndId$.pipe(
-    map(({activeType}) => activeType === WorkContextType.PROJECT)
+    map(({ activeType }) => activeType === WorkContextType.PROJECT),
   );
 
   constructor(
@@ -37,12 +37,8 @@ export class DialogAddNoteComponent {
   }
 
   submit() {
-    if (!this.isSubmitted
-      && (this.noteContent && this.noteContent.trim().length > 0)) {
-      this._noteService.add(
-        {content: this.noteContent},
-        true,
-      );
+    if (!this.isSubmitted && this.noteContent && this.noteContent.trim().length > 0) {
+      this._noteService.add({ content: this.noteContent }, true);
 
       this.isSubmitted = true;
       this._clearSessionStorage();

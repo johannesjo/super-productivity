@@ -7,20 +7,8 @@ import { DragulaModule } from 'ng2-dragula';
 import { WorkContextMenuModule } from '../work-context-menu/work-context-menu.module';
 
 @NgModule({
-
-  imports: [
-    UiModule,
-    CommonModule,
-    RouterModule,
-    DragulaModule,
-    WorkContextMenuModule,
-  ],
-  declarations: [
-    SideNavComponent,
-  ],
-  exports: [
-    SideNavComponent,
-  ]
+  imports: [UiModule, CommonModule, RouterModule, DragulaModule, WorkContextMenuModule],
+  declarations: [SideNavComponent],
+  exports: [SideNavComponent],
 })
-export class SideNavModule {
-}
+export class SideNavModule {}

@@ -1,4 +1,8 @@
-import { getDateRangeForWeek, rangeEndWithTime, rangeStartWithTime } from './get-date-range-for-week';
+import {
+  getDateRangeForWeek,
+  rangeEndWithTime,
+  rangeStartWithTime,
+} from './get-date-range-for-week';
 
 describe('sortWorklogDates', () => {
   it('should return a valid range', () => {

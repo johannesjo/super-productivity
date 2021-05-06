@@ -9,9 +9,9 @@ import {
   scan,
   shareReplay,
   switchMap,
-  withLatestFrom
+  withLatestFrom,
 } from 'rxjs/operators';
-import {PomodoroConfig, SoundConfig} from '../config/global-config.model';
+import { PomodoroConfig, SoundConfig } from '../config/global-config.model';
 import { select, Store } from '@ngrx/store';
 import {
   FinishPomodoroSession,
@@ -19,9 +19,9 @@ import {
   PomodoroActionTypes,
   SkipPomodoroBreak,
   StartPomodoro,
-  StopPomodoro
+  StopPomodoro,
 } from './store/pomodoro.actions';
-import { selectCurrentCycle, selectIsBreak, selectIsManualPause } from './store/pomodoro.reducer';
+import { selectCurrentCycle, selectIsBreak, selectIsManualPause, } from './store/pomodoro.reducer';
 import { DEFAULT_GLOBAL_CONFIG } from '../config/default-global-config.const';
 import { Actions, ofType } from '@ngrx/effects';
 import { distinctUntilChangedObject } from '../../util/distinct-until-changed-object';
@@ -34,12 +34,18 @@ const DEFAULT_TICK_SOUND = 'assets/snd/tick.mp3';
   providedIn: 'root',
 })
 export class PomodoroService {
-  onStop$: Observable<any> = this._actions$.pipe(ofType(PomodoroActionTypes.StopPomodoro));
+  onStop$: Observable<any> = this._actions$.pipe(
+    ofType(PomodoroActionTypes.StopPomodoro),
+  );
 
-  cfg$: Observable<PomodoroConfig> = this._configService.cfg$.pipe(map(cfg => cfg && cfg.pomodoro));
-  soundConfig$: Observable<SoundConfig> = this._configService.cfg$.pipe(map (cfg => cfg && cfg.sound));
+  cfg$: Observable<PomodoroConfig> = this._configService.cfg$.pipe(
+    map((cfg) => cfg && cfg.pomodoro),
+  );
+  soundConfig$: Observable<SoundConfig> = this._configService.cfg$.pipe(
+    map((cfg) => cfg && cfg.sound),
+  );
   isEnabled$: Observable<boolean> = this.cfg$.pipe(
-    map(cfg => cfg && cfg.isEnabled),
+    map((cfg) => cfg && cfg.isEnabled),
     shareReplay(1),
   );
 
@@ -51,9 +57,15 @@ export class PomodoroService {
     this.isBreak$,
     this.currentCycle$,
     this.cfg$,
-  ]).pipe(map(([isBreak, currentCycle, cfg]) => {
-    return isBreak && !!cfg.cyclesBeforeLongerBreak && Number.isInteger(((currentCycle + 1) / cfg.cyclesBeforeLongerBreak));
-  }));
+  ]).pipe(
+    map(([isBreak, currentCycle, cfg]) => {
+      return (
+        isBreak &&
+        !!cfg.cyclesBeforeLongerBreak &&
+        Number.isInteger((currentCycle + 1) / cfg.cyclesBeforeLongerBreak)
+      );
+    }),
+  );
 
   isShortBreak$: Observable<boolean> = combineLatest([
     this.isBreak$,
@@ -78,14 +90,9 @@ export class PomodoroService {
     this.cfg$.pipe(distinctUntilChanged(distinctUntilChangedObject)),
     this.onStop$,
   ).pipe(
-    withLatestFrom(
-      this.isLongBreak$,
-      this.isShortBreak$,
-      this.isBreak$,
-      this.cfg$,
-    ),
+    withLatestFrom(this.isLongBreak$, this.isShortBreak$, this.isBreak$, this.cfg$),
     map(([trigger, isLong, isShort, isBreak, cfg]) => {
-      cfg = {...cfg};
+      cfg = { ...cfg };
       // cfg.duration = 5000;
       // cfg.breakDuration = 15000;
       // cfg.longerBreakDuration = 20000;
@@ -94,7 +101,9 @@ export class PomodoroService {
       } else if (isShort) {
         return cfg.breakDuration || DEFAULT_GLOBAL_CONFIG.pomodoro.breakDuration;
       } else if (isLong) {
-        return cfg.longerBreakDuration || DEFAULT_GLOBAL_CONFIG.pomodoro.longerBreakDuration;
+        return (
+          cfg.longerBreakDuration || DEFAULT_GLOBAL_CONFIG.pomodoro.longerBreakDuration
+        );
       } else {
         throw new Error('Pomodoro: nextSession$');
       }
@@ -102,14 +111,9 @@ export class PomodoroService {
     shareReplay(1),
   );
 
-  currentSessionTime$: Observable<number> = merge(
-    this.tick$,
-    this.nextSession$
-  ).pipe(
+  currentSessionTime$: Observable<number> = merge(this.tick$, this.nextSession$).pipe(
     scan((acc, value) => {
-      return (value < 0)
-        ? acc + value
-        : value;
+      return value < 0 ? acc + value : value;
     }),
     shareReplay(1),
   );
@@ -119,7 +123,7 @@ export class PomodoroService {
     withLatestFrom(this.nextSession$),
     map(([currentTime, initialTime]) => {
       return (initialTime - currentTime) / initialTime;
-    })
+    }),
   );
 
   constructor(
@@ -127,11 +131,10 @@ export class PomodoroService {
     private _store$: Store<any>,
     private _actions$: Actions,
   ) {
-
     // NOTE: idle handling is not required, as unsetting the task auto triggers pause
     this.currentSessionTime$
       .pipe(
-        filter(val => (val <= 0)),
+        filter((val) => val <= 0),
         withLatestFrom(this.cfg$, this.isBreak$),
       )
       .subscribe(([val, cfg, isBreak]) => {
@@ -142,15 +145,17 @@ export class PomodoroService {
         }
       });
 
-    this.currentSessionTime$.pipe(
-      withLatestFrom(this.cfg$),
-      filter(([val, cfg]) => cfg.isEnabled && cfg.isPlayTick),
-      map(([val]) => val),
-      distinctUntilChanged(),
-      withLatestFrom(this.soundConfig$),
-    ).subscribe(([val, soundConfig]) => {
-      this._playTickSound(soundConfig.volume);
-    });
+    this.currentSessionTime$
+      .pipe(
+        withLatestFrom(this.cfg$),
+        filter(([val, cfg]) => cfg.isEnabled && cfg.isPlayTick),
+        map(([val]) => val),
+        distinctUntilChanged(),
+        withLatestFrom(this.soundConfig$),
+      )
+      .subscribe(([val, soundConfig]) => {
+        this._playTickSound(soundConfig.volume);
+      });
   }
 
   start() {
@@ -158,7 +163,7 @@ export class PomodoroService {
   }
 
   pause(isBreakEndPause: boolean = false) {
-    this._store$.dispatch(new PausePomodoro({isBreakEndPause}));
+    this._store$.dispatch(new PausePomodoro({ isBreakEndPause }));
   }
 
   stop() {

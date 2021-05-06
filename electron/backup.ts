@@ -1,5 +1,12 @@
 import { app, ipcMain } from 'electron';
-import { existsSync, mkdirSync, readdirSync, readFileSync, statSync, writeFileSync } from 'fs';
+import {
+  existsSync,
+  mkdirSync,
+  readdirSync,
+  readFileSync,
+  statSync,
+  writeFileSync,
+} from 'fs';
 import { IPC } from './ipc-events.const';
 import { answerRenderer } from './better-ipc';
 import { LocalBackupMeta } from '../src/app/imex/local-backup/local-backup.model';
@@ -24,22 +31,27 @@ export function initBackupAdapter(backupDir: string) {
     if (!files.length) {
       return false;
     }
-    const filesWithMeta: LocalBackupMeta[] = files.map((fileName: string): LocalBackupMeta => ({
-      name: fileName,
-      path: path.join(BACKUP_DIR, fileName),
-      folder: BACKUP_DIR,
-      created: statSync(path.join(BACKUP_DIR, fileName)).mtime.getTime()
-    }));
+    const filesWithMeta: LocalBackupMeta[] = files.map(
+      (fileName: string): LocalBackupMeta => ({
+        name: fileName,
+        path: path.join(BACKUP_DIR, fileName),
+        folder: BACKUP_DIR,
+        created: statSync(path.join(BACKUP_DIR, fileName)).mtime.getTime(),
+      }),
+    );
 
     filesWithMeta.sort((a: LocalBackupMeta, b: LocalBackupMeta) => a.created - b.created);
-    console.log('Avilable Backup Files: ', (filesWithMeta?.map && filesWithMeta.map(f => f.path)));
+    console.log(
+      'Avilable Backup Files: ',
+      filesWithMeta?.map && filesWithMeta.map((f) => f.path),
+    );
     return filesWithMeta.reverse()[0];
   });
 
   // RESTORE_BACKUP
   answerRenderer(IPC.BACKUP_LOAD_DATA, (backupPath): string => {
     console.log('Reading backup file: ', backupPath);
-    return readFileSync(backupPath, {encoding: 'utf8'});
+    return readFileSync(backupPath, { encoding: 'utf8' });
   });
 }
 
@@ -64,11 +76,7 @@ function getDateStr(): string {
   const mm = today.getMonth() + 1; // January is 0!
   const yyyy = today.getFullYear();
 
-  const dds = (dd < 10)
-    ? '0' + dd
-    : dd.toString();
-  const mms = (mm < 10)
-    ? '0' + mm
-    : mm.toString();
+  const dds = dd < 10 ? '0' + dd : dd.toString();
+  const mms = mm < 10 ? '0' + mm : mm.toString();
   return `${yyyy}-${mms}-${dds}`;
 }

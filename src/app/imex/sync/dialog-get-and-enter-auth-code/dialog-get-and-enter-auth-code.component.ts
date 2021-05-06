@@ -6,7 +6,7 @@ import { T } from 'src/app/t.const';
   selector: 'dialog-get-and-enter-auth-code',
   templateUrl: './dialog-get-and-enter-auth-code.component.html',
   styleUrls: ['./dialog-get-and-enter-auth-code.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class DialogGetAndEnterAuthCodeComponent {
   T: typeof T = T;
@@ -15,12 +15,12 @@ export class DialogGetAndEnterAuthCodeComponent {
   constructor(
     private _matDialogRef: MatDialogRef<DialogGetAndEnterAuthCodeComponent>,
     // @ts-ignore
-    @Inject(MAT_DIALOG_DATA) public data: {
+    @Inject(MAT_DIALOG_DATA)
+    public data: {
       providerName: string;
       url: string;
-    }
-  ) {
-  }
+    },
+  ) {}
 
   close(token?: string) {
     this._matDialogRef.close(token);

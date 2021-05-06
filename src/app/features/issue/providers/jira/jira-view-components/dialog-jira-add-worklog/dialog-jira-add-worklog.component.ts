@@ -13,7 +13,7 @@ import * as moment from 'moment';
   selector: 'dialog-jira-add-worklog',
   templateUrl: './dialog-jira-add-worklog.component.html',
   styleUrls: ['./dialog-jira-add-worklog.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class DialogJiraAddWorklogComponent {
   T: typeof T = T;
@@ -27,10 +27,11 @@ export class DialogJiraAddWorklogComponent {
     private _matDialogRef: MatDialogRef<DialogJiraAddWorklogComponent>,
     private _snackService: SnackService,
     private _projectService: ProjectService,
-    @Inject(MAT_DIALOG_DATA) public data: {
+    @Inject(MAT_DIALOG_DATA)
+    public data: {
       issue: JiraIssue;
       task: Task;
-    }
+    },
   ) {
     this.timeSpent = this.data.task.timeSpent;
     this.issue = this.data.issue;
@@ -44,21 +45,26 @@ export class DialogJiraAddWorklogComponent {
 
   async submitWorklog() {
     if (this.issue.id && this.started && this.timeSpent && this.data.task.projectId) {
-      const cfg = await this._projectService.getJiraCfgForProject$(this.data.task.projectId).pipe(first()).toPromise();
-      this._jiraApiService.addWorklog$({
-        issueId: this.issue.id,
-        started: this.started,
-        timeSpent: this.timeSpent,
-        comment: this.comment,
-        cfg,
-      }).subscribe(res => {
-        this._snackService.open({
-          type: 'SUCCESS',
-          msg: T.F.JIRA.S.ADDED_WORKLOG_FOR,
-          translateParams: {issueKey: this.issue.key}
+      const cfg = await this._projectService
+        .getJiraCfgForProject$(this.data.task.projectId)
+        .pipe(first())
+        .toPromise();
+      this._jiraApiService
+        .addWorklog$({
+          issueId: this.issue.id,
+          started: this.started,
+          timeSpent: this.timeSpent,
+          comment: this.comment,
+          cfg,
+        })
+        .subscribe((res) => {
+          this._snackService.open({
+            type: 'SUCCESS',
+            msg: T.F.JIRA.S.ADDED_WORKLOG_FOR,
+            translateParams: { issueKey: this.issue.key },
+          });
+          this.close();
         });
-        this.close();
-      });
     }
   }
 

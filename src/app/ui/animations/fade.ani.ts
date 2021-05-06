@@ -4,27 +4,27 @@ import { ANI_ENTER_TIMING, ANI_LEAVE_TIMING } from './animation.const';
 export const fadeAnimation = [
   trigger('fade', [
     transition(':enter', [
-      style({opacity: 0}),
-      animate(ANI_ENTER_TIMING, style({opacity: '*'}))
+      style({ opacity: 0 }),
+      animate(ANI_ENTER_TIMING, style({ opacity: '*' })),
     ]), // void => *
     transition(':leave', [
-      style({opacity: '*'}),
-      animate(ANI_LEAVE_TIMING, style({opacity: 0}))
-    ])
-  ])
+      style({ opacity: '*' }),
+      animate(ANI_LEAVE_TIMING, style({ opacity: 0 })),
+    ]),
+  ]),
 ];
 
 export const fadeInOutBottomAnimation = [
   trigger('fadeInOutBottom', [
     transition(':enter', [
-      style({opacity: 0, transform: 'translateY(100%)'}),
-      animate(ANI_ENTER_TIMING, style({opacity: '*', transform: 'translateY(0)'}))
+      style({ opacity: 0, transform: 'translateY(100%)' }),
+      animate(ANI_ENTER_TIMING, style({ opacity: '*', transform: 'translateY(0)' })),
     ]), // void => *
     transition(':leave', [
-      style({opacity: '*', transform: 'translateY(0)'}),
-      animate(ANI_LEAVE_TIMING, style({opacity: 0, transform: 'translateY(100%)'}))
-    ])
-  ])
+      style({ opacity: '*', transform: 'translateY(0)' }),
+      animate(ANI_LEAVE_TIMING, style({ opacity: 0, transform: 'translateY(100%)' })),
+    ]),
+  ]),
 ];
 
 export const fadeOutAnimation = [
@@ -34,8 +34,8 @@ export const fadeOutAnimation = [
     // animate(ANI_ENTER_TIMING, style({opacity: '*', transform: 'translateY(0)'}))
     // ]), // void => *
     transition(':leave', [
-      style({opacity: '*'}),
-      animate(ANI_LEAVE_TIMING, style({opacity: 0}))
-    ])
-  ])
+      style({ opacity: '*' }),
+      animate(ANI_LEAVE_TIMING, style({ opacity: 0 })),
+    ]),
+  ]),
 ];

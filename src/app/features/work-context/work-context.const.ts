@@ -9,7 +9,7 @@ export const WORKLOG_EXPORT_DEFAULTS: WorklogExportSettings = {
   roundStartTimeTo: null,
   roundEndTimeTo: null,
   separateTasksBy: ' | ',
-  groupBy: WorklogGrouping.DATE
+  groupBy: WorklogGrouping.DATE,
 };
 
 export const DEFAULT_PROJECT_COLOR = '#29a1aa';
@@ -41,16 +41,16 @@ export const WORK_CONTEXT_DEFAULT_COMMON: WorkContextCommon = {
 };
 
 export const HUES = [
-  {value: '50', label: '50'},
-  {value: '100', label: '100'},
-  {value: '200', label: '200'},
-  {value: '300', label: '300'},
-  {value: '400', label: '400'},
-  {value: '500', label: '500'},
-  {value: '600', label: '600'},
-  {value: '700', label: '700'},
-  {value: '800', label: '800'},
-  {value: '900', label: '900'},
+  { value: '50', label: '50' },
+  { value: '100', label: '100' },
+  { value: '200', label: '200' },
+  { value: '300', label: '300' },
+  { value: '400', label: '400' },
+  { value: '500', label: '500' },
+  { value: '600', label: '600' },
+  { value: '700', label: '700' },
+  { value: '800', label: '800' },
+  { value: '900', label: '900' },
 ];
 
 export const WORK_CONTEXT_THEME_CONFIG_FORM_CONFIG: ConfigFormSection<WorkContextThemeCfg> = {
@@ -99,7 +99,7 @@ export const WORK_CONTEXT_THEME_CONFIG_FORM_CONFIG: ConfigFormSection<WorkContex
         options: HUES,
         valueProp: 'value',
         labelProp: 'label',
-        placeholder: T.F.PROJECT.FORM_THEME.L_HUE_PRIMARY
+        placeholder: T.F.PROJECT.FORM_THEME.L_HUE_PRIMARY,
       },
     },
     {
@@ -112,7 +112,7 @@ export const WORK_CONTEXT_THEME_CONFIG_FORM_CONFIG: ConfigFormSection<WorkContex
         options: HUES,
         valueProp: 'value',
         labelProp: 'label',
-        placeholder: T.F.PROJECT.FORM_THEME.L_HUE_ACCENT
+        placeholder: T.F.PROJECT.FORM_THEME.L_HUE_ACCENT,
       },
     },
     {
@@ -125,7 +125,7 @@ export const WORK_CONTEXT_THEME_CONFIG_FORM_CONFIG: ConfigFormSection<WorkContex
         options: HUES,
         valueProp: 'value',
         labelProp: 'label',
-        placeholder: T.F.PROJECT.FORM_THEME.L_HUE_WARN
+        placeholder: T.F.PROJECT.FORM_THEME.L_HUE_WARN,
       },
     },
     {
@@ -151,5 +151,5 @@ export const WORK_CONTEXT_THEME_CONFIG_FORM_CONFIG: ConfigFormSection<WorkContex
         description: '* https://some/cool.jpg, file:///home/user/bg.png',
       },
     },
-  ]
+  ],
 };

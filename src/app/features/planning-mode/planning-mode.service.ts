@@ -4,19 +4,23 @@ import { delay, distinctUntilChanged, filter, map, withLatestFrom } from 'rxjs/o
 import { WorkContextService } from '../work-context/work-context.service';
 import { TaskService } from '../tasks/task.service';
 
-@Injectable({providedIn: 'root'})
+@Injectable({ providedIn: 'root' })
 export class PlanningModeService {
-  private _iPlanningModeEndedUser$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
-  private _manualTriggerCheck$: BehaviorSubject<unknown> = new BehaviorSubject<unknown>(null);
+  private _iPlanningModeEndedUser$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(
+    false,
+  );
+  private _manualTriggerCheck$: BehaviorSubject<unknown> = new BehaviorSubject<unknown>(
+    null,
+  );
   private _isCurrentTask$: Observable<unknown> = this._taskService.currentTaskId$.pipe(
     distinctUntilChanged(),
-    filter(id => !!id),
+    filter((id) => !!id),
   );
   private _triggerCheck$: Observable<unknown> = merge(
     this._manualTriggerCheck$,
     this._isCurrentTask$,
     // TODO fix hacky way of waiting for data to be loaded
-    this._workContextService.onWorkContextChange$.pipe(delay(100))
+    this._workContextService.onWorkContextChange$.pipe(delay(100)),
   );
 
   isPlanningMode$: Observable<boolean> = this._triggerCheck$.pipe(
@@ -24,7 +28,10 @@ export class PlanningModeService {
       this._workContextService.isHasTasksToWorkOn$,
       this._iPlanningModeEndedUser$,
     ),
-    map(([t, isHasTasksToWorkOn, isPlanningEndedByUser]) => !isHasTasksToWorkOn && !isPlanningEndedByUser),
+    map(
+      ([t, isHasTasksToWorkOn, isPlanningEndedByUser]) =>
+        !isHasTasksToWorkOn && !isPlanningEndedByUser,
+    ),
   );
 
   constructor(

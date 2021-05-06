@@ -9,7 +9,7 @@ import { DialogFullscreenMarkdownComponent } from '../../../ui/dialog-fullscreen
   selector: 'note',
   templateUrl: './note.component.html',
   styleUrls: ['./note.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class NoteComponent {
   @Input() note?: Note;
@@ -22,21 +22,20 @@ export class NoteComponent {
   constructor(
     private readonly _matDialog: MatDialog,
     private readonly _noteService: NoteService,
-  ) {
-  }
+  ) {}
 
   toggleLock() {
     if (!this.note) {
       throw new Error('No note');
     }
-    this._noteService.update(this.note.id, {isLock: !this.note.isLock});
+    this._noteService.update(this.note.id, { isLock: !this.note.isLock });
   }
 
   updateContent(newVal: any) {
     if (!this.note) {
       throw new Error('No note');
     }
-    this._noteService.update(this.note.id, {content: newVal});
+    this._noteService.update(this.note.id, { content: newVal });
   }
 
   removeNote() {
@@ -50,20 +49,23 @@ export class NoteComponent {
     if (!this.note) {
       throw new Error('No note');
     }
-    this._matDialog.open(DialogFullscreenMarkdownComponent, {
-      minWidth: '100vw',
-      height: '100vh',
-      restoreFocus: true,
-      data: {
-        content: this.note.content,
-      }
-    }).afterClosed().subscribe((content) => {
-      if (!this.note) {
-        throw new Error('No note');
-      }
-      if (typeof content === 'string') {
-        this._noteService.update(this.note.id, {content});
-      }
-    });
+    this._matDialog
+      .open(DialogFullscreenMarkdownComponent, {
+        minWidth: '100vw',
+        height: '100vh',
+        restoreFocus: true,
+        data: {
+          content: this.note.content,
+        },
+      })
+      .afterClosed()
+      .subscribe((content) => {
+        if (!this.note) {
+          throw new Error('No note');
+        }
+        if (typeof content === 'string') {
+          this._noteService.update(this.note.id, { content });
+        }
+      });
   }
 }

@@ -1,4 +1,9 @@
-export const arrayMove = <T>(arrIN: T[], from: number, to: number, on: number = 1): T[] => {
+export const arrayMove = <T>(
+  arrIN: T[],
+  from: number,
+  to: number,
+  on: number = 1,
+): T[] => {
   const arr = arrIN.slice(0);
   arr.splice(to, 0, ...arr.splice(from, on));
   return arr;

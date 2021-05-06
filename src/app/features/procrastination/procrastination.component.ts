@@ -6,17 +6,12 @@ import { T } from '../../t.const';
   selector: 'procrastination',
   templateUrl: './procrastination.component.html',
   styleUrls: ['./procrastination.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ProcrastinationComponent implements OnInit {
   T: typeof T = T;
 
-  constructor(
-    public taskService: TaskService,
-  ) {
-  }
+  constructor(public taskService: TaskService) {}
 
-  ngOnInit() {
-  }
-
+  ngOnInit() {}
 }

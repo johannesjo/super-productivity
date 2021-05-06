@@ -9,14 +9,16 @@ import { createClient } from 'webdav/web';
 import { AppDataComplete } from '../sync.model';
 import { AxiosResponse } from 'axios';
 
-@Injectable({providedIn: 'root'})
+@Injectable({ providedIn: 'root' })
 export class WebDavApiService {
   private _cfg$: Observable<WebDavConfig> = this._globalConfigService.cfg$.pipe(
-    map((cfg) => cfg?.sync.webDav)
+    map((cfg) => cfg?.sync.webDav),
   );
 
   isAllConfigDataAvailable$: Observable<boolean> = this._cfg$.pipe(
-    map((cfg) => !!(cfg && cfg.userName && cfg.baseUrl && cfg.syncFilePath && cfg.password)),
+    map(
+      (cfg) => !!(cfg && cfg.userName && cfg.baseUrl && cfg.syncFilePath && cfg.password),
+    ),
   );
 
   private _isReady$: Observable<boolean> = this._dataInitService.isAllDataLoadedInitially$.pipe(
@@ -28,10 +30,13 @@ export class WebDavApiService {
   constructor(
     private _globalConfigService: GlobalConfigService,
     private _dataInitService: DataInitService,
-  ) {
-  }
+  ) {}
 
-  async upload({localRev, data, isForceOverwrite = false}: {
+  async upload({
+    localRev,
+    data,
+    isForceOverwrite = false,
+  }: {
     localRev?: string | null;
     data: AppDataComplete;
     isForceOverwrite?: boolean;
@@ -48,7 +53,9 @@ export class WebDavApiService {
     return r;
   }
 
-  async getMetaData(path: string): Promise<{
+  async getMetaData(
+    path: string,
+  ): Promise<{
     basename: string;
     etag: string;
     filename: string;
@@ -68,14 +75,20 @@ export class WebDavApiService {
     return r;
   }
 
-  async download({path, localRev}: { path: string; localRev?: string | null }): Promise<AppDataComplete> {
+  async download({
+    path,
+    localRev,
+  }: {
+    path: string;
+    localRev?: string | null;
+  }): Promise<AppDataComplete> {
     await this._isReady$.toPromise();
     const cfg = await this._cfg$.pipe(first()).toPromise();
     const client = createClient(cfg.baseUrl, {
       username: cfg.userName,
       password: cfg.password,
     });
-    const r = await client.getFileContents(path, {format: 'text'});
+    const r = await client.getFileContents(path, { format: 'text' });
     console.log(r);
     return r;
   }

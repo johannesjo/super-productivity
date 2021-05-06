@@ -6,34 +6,31 @@ import { T } from '../../t.const';
 
 const DELAY = 100;
 
-@Injectable({providedIn: 'root'})
+@Injectable({ providedIn: 'root' })
 export class GlobalProgressBarService {
   nrOfRequests$: BehaviorSubject<number> = new BehaviorSubject(0);
   isShowGlobalProgressBar$: Observable<boolean> = this.nrOfRequests$.pipe(
-    map(nr => nr > 0),
+    map((nr) => nr > 0),
     distinctUntilChanged(),
-    switchMap((isShow) => isShow
-      ? of(true)
-      : of(false).pipe(delay(DELAY))
-    ),
+    switchMap((isShow) => (isShow ? of(true) : of(false).pipe(delay(DELAY)))),
     startWith(false),
     // @see https://blog.angular-university.io/angular-debugging/
     delay(0),
   );
 
-  private _label$: BehaviorSubject<string | null> = new BehaviorSubject<string | null>(null);
+  private _label$: BehaviorSubject<string | null> = new BehaviorSubject<string | null>(
+    null,
+  );
   label$: Observable<string | null> = this._label$.pipe(
     distinctUntilChanged(),
-    switchMap((label: string | null) => !!label
-      ? of(label)
-      : of(null).pipe(delay(DELAY))
+    switchMap((label: string | null) =>
+      !!label ? of(label) : of(null).pipe(delay(DELAY)),
     ),
     // @see https://blog.angular-university.io/angular-debugging/
     delay(0),
   );
 
-  constructor() {
-  }
+  constructor() {}
 
   countUp(url: string) {
     this.nrOfRequests$.next(this.nrOfRequests$.getValue() + 1);
@@ -53,11 +50,10 @@ export class GlobalProgressBarService {
     if (PROGRESS_BAR_LABEL_MAP[url]) {
       return PROGRESS_BAR_LABEL_MAP[url];
     } else {
-      const key = Object.keys(PROGRESS_BAR_LABEL_MAP).find((keyIn) => urlWithoutParams.includes(keyIn));
-      return key
-        ? PROGRESS_BAR_LABEL_MAP[key]
-        : T.GPB.UNKNOWN;
+      const key = Object.keys(PROGRESS_BAR_LABEL_MAP).find((keyIn) =>
+        urlWithoutParams.includes(keyIn),
+      );
+      return key ? PROGRESS_BAR_LABEL_MAP[key] : T.GPB.UNKNOWN;
     }
   }
 }
-

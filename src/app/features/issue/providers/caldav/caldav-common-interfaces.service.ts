@@ -20,20 +20,24 @@ export class CaldavCommonInterfacesService implements IssueServiceInterface {
     private readonly _projectService: ProjectService,
     private readonly _caldavClientService: CaldavClientService,
     private readonly _snackService: SnackService,
-  ) {
-  }
+  ) {}
 
   private static _formatIssueTitleForSnack(title: string): string {
     return truncate(title);
   }
 
-  getAddTaskData(issueData: CaldavIssueReduced): { title: string; additionalFields: Partial<Task> } {
-    return {additionalFields: {issueLastUpdated: issueData.etag_hash}, title: issueData.summary};
+  getAddTaskData(
+    issueData: CaldavIssueReduced,
+  ): { title: string; additionalFields: Partial<Task> } {
+    return {
+      additionalFields: { issueLastUpdated: issueData.etag_hash },
+      title: issueData.summary,
+    };
   }
 
   getById$(id: string | number, projectId: string): Observable<CaldavIssue> {
     return this._getCfgOnce$(projectId).pipe(
-      concatMap(caldavCfg => this._caldavClientService.getById$(id, caldavCfg))
+      concatMap((caldavCfg) => this._caldavClientService.getById$(id, caldavCfg)),
     );
   }
 
@@ -41,11 +45,11 @@ export class CaldavCommonInterfacesService implements IssueServiceInterface {
     return of('');
   }
 
-  async refreshIssue(task: Task,
+  async refreshIssue(
+    task: Task,
     isNotifySuccess: boolean,
-    isNotifyNoUpdateRequired: boolean):
-    Promise<{ taskChanges: Partial<Task>; issue: CaldavIssue } | null> {
-
+    isNotifyNoUpdateRequired: boolean,
+  ): Promise<{ taskChanges: Partial<Task>; issue: CaldavIssue } | null> {
     if (!task.projectId) {
       throw new Error('No projectId');
     }
@@ -62,7 +66,9 @@ export class CaldavCommonInterfacesService implements IssueServiceInterface {
       this._snackService.open({
         ico: 'cloud_download',
         translateParams: {
-          issueText: CaldavCommonInterfacesService._formatIssueTitleForSnack(issue.summary)
+          issueText: CaldavCommonInterfacesService._formatIssueTitleForSnack(
+            issue.summary,
+          ),
         },
         msg: T.F.CALDAV.S.ISSUE_UPDATE,
       });
@@ -89,7 +95,7 @@ export class CaldavCommonInterfacesService implements IssueServiceInterface {
   async refreshIssues(
     tasks: Task[],
     isNotifySuccess: boolean = true,
-    isNotifyNoUpdateRequired: boolean = false
+    isNotifyNoUpdateRequired: boolean = false,
   ): Promise<{ task: Task; taskChanges: Partial<Task>; issue: CaldavIssue }[]> {
     // First sort the tasks by the issueId
     // because the API returns it in a desc order by issue iid(issueId)
@@ -100,25 +106,44 @@ export class CaldavCommonInterfacesService implements IssueServiceInterface {
     }
 
     const cfg = await this._getCfgOnce$(projectId).toPromise();
-    const issues: CaldavIssue[] = await this._caldavClientService.getByIds$(tasks.map(t => t.id), cfg).toPromise();
-    const issueMap = new Map(issues.map(item => [item.id, item]));
+    const issues: CaldavIssue[] = await this._caldavClientService
+      .getByIds$(
+        tasks.map((t) => t.id),
+        cfg,
+      )
+      .toPromise();
+    const issueMap = new Map(issues.map((item) => [item.id, item]));
 
     if (isNotifyNoUpdateRequired) {
-      tasks.filter(task => issueMap.has(task.id) && issueMap.get(task.id)?.etag_hash === task.issueLastUpdated)
-        .forEach(_ => this._snackService.open({
-          msg: T.F.CALDAV.S.ISSUE_NO_UPDATE_REQUIRED,
-          ico: 'cloud_download',
-        }));
+      tasks
+        .filter(
+          (task) =>
+            issueMap.has(task.id) &&
+            issueMap.get(task.id)?.etag_hash === task.issueLastUpdated,
+        )
+        .forEach((_) =>
+          this._snackService.open({
+            msg: T.F.CALDAV.S.ISSUE_NO_UPDATE_REQUIRED,
+            ico: 'cloud_download',
+          }),
+        );
     }
 
-    return tasks.filter(task => issueMap.has(task.id) && issueMap.get(task.id)?.etag_hash !== task.issueLastUpdated)
-      .map(task => {
+    return tasks
+      .filter(
+        (task) =>
+          issueMap.has(task.id) &&
+          issueMap.get(task.id)?.etag_hash !== task.issueLastUpdated,
+      )
+      .map((task) => {
         const issue = issueMap.get(task.id) as CaldavIssue;
         if (isNotifySuccess) {
           this._snackService.open({
             ico: 'cloud_download',
             translateParams: {
-              issueText: CaldavCommonInterfacesService._formatIssueTitleForSnack(issue.summary)
+              issueText: CaldavCommonInterfacesService._formatIssueTitleForSnack(
+                issue.summary,
+              ),
             },
             msg: T.F.CALDAV.S.ISSUE_UPDATE,
           });
@@ -137,15 +162,17 @@ export class CaldavCommonInterfacesService implements IssueServiceInterface {
 
   searchIssues$(searchTerm: string, projectId: string): Observable<SearchResultItem[]> {
     return this._getCfgOnce$(projectId).pipe(
-      switchMap((caldavCfg) => (caldavCfg && caldavCfg.isSearchIssuesFromCaldav)
-        ? this._caldavClientService.searchOpenTasks$(searchTerm, caldavCfg).pipe(catchError(() => []))
-        : of([])
-      )
+      switchMap((caldavCfg) =>
+        caldavCfg && caldavCfg.isSearchIssuesFromCaldav
+          ? this._caldavClientService
+              .searchOpenTasks$(searchTerm, caldavCfg)
+              .pipe(catchError(() => []))
+          : of([]),
+      ),
     );
   }
 
   private _getCfgOnce$(projectId: string): Observable<CaldavCfg> {
     return this._projectService.getCaldavCfgForProject$(projectId).pipe(first());
   }
-
 }

@@ -13,15 +13,23 @@ import {
   LS_TASK_ARCHIVE,
   LS_TASK_ATTACHMENT_STATE,
   LS_TASK_REPEAT_CFG_STATE,
-  LS_TASK_STATE
+  LS_TASK_STATE,
 } from '../persistence/ls-keys.const';
 import { migrateProjectState } from '../../features/project/migrate-projects-state.util';
 import { GlobalConfigState } from '../../features/config/global-config.model';
 import { migrateGlobalConfigState } from '../../features/config/migrate-global-config.util';
-import { Task, TaskArchive, TaskState, TaskWithSubTasks } from 'src/app/features/tasks/task.model';
+import {
+  Task,
+  TaskArchive,
+  TaskState,
+  TaskWithSubTasks,
+} from 'src/app/features/tasks/task.model';
 import { Reminder } from '../../features/reminder/reminder.model';
 import { taskReducer } from '../../features/tasks/store/task.reducer';
-import { TaskRepeatCfg, TaskRepeatCfgState } from '../../features/task-repeat-cfg/task-repeat-cfg.model';
+import {
+  TaskRepeatCfg,
+  TaskRepeatCfgState,
+} from '../../features/task-repeat-cfg/task-repeat-cfg.model';
 import { taskRepeatCfgReducer } from '../../features/task-repeat-cfg/store/task-repeat-cfg.reducer';
 import { EntityState } from '@ngrx/entity';
 import { TaskAttachment } from '../../features/tasks/task-attachment/task-attachment.model';
@@ -30,15 +38,21 @@ import {
   LegacyAppDataComplete,
   LegacyAppDataForProjects,
   LegacyPersistenceBaseModel,
-  LegacyPersistenceForProjectModel
+  LegacyPersistenceForProjectModel,
 } from './legacy-models';
 import { BookmarkState } from '../../features/bookmark/store/bookmark.reducer';
 import { Bookmark } from '../../features/bookmark/bookmark.model';
 import { NoteState } from '../../features/note/store/note.reducer';
 import { Note } from '../../features/note/note.model';
 import { Metric, MetricState } from '../../features/metric/metric.model';
-import { Improvement, ImprovementState } from '../../features/metric/improvement/improvement.model';
-import { Obstruction, ObstructionState } from '../../features/metric/obstruction/obstruction.model';
+import {
+  Improvement,
+  ImprovementState,
+} from '../../features/metric/improvement/improvement.model';
+import {
+  Obstruction,
+  ObstructionState,
+} from '../../features/metric/obstruction/obstruction.model';
 import { DatabaseService } from '../persistence/database.service';
 import { DEFAULT_PROJECT_ID } from '../../features/project/project.const';
 import { Action } from '@ngrx/store';
@@ -48,20 +62,23 @@ import { Injectable } from '@angular/core';
   providedIn: 'root',
 })
 export class LegacyPersistenceService {
-
   // handled as private but needs to be assigned before the creations
-  _baseModels: any [] = [];
-  _projectModels: any [] = [];
+  _baseModels: any[] = [];
+  _projectModels: any[] = [];
 
   // TODO auto generate ls keys from appDataKey where possible
-  project: any = this._cmBase<ProjectState>(LS_PROJECT_META_LIST, 'project', migrateProjectState);
-  globalConfig: any = this._cmBase<GlobalConfigState>(LS_GLOBAL_CFG, 'globalConfig', migrateGlobalConfigState);
-  reminders: any = this._cmBase<Reminder[]>(LS_REMINDER, 'reminders');
-  task: any = this._cmProject<TaskState, Task>(
-    LS_TASK_STATE,
-    'task',
-    taskReducer,
+  project: any = this._cmBase<ProjectState>(
+    LS_PROJECT_META_LIST,
+    'project',
+    migrateProjectState,
   );
+  globalConfig: any = this._cmBase<GlobalConfigState>(
+    LS_GLOBAL_CFG,
+    'globalConfig',
+    migrateGlobalConfigState,
+  );
+  reminders: any = this._cmBase<Reminder[]>(LS_REMINDER, 'reminders');
+  task: any = this._cmProject<TaskState, Task>(LS_TASK_STATE, 'task', taskReducer);
   taskRepeatCfg: any = this._cmProject<TaskRepeatCfgState, TaskRepeatCfg>(
     LS_TASK_REPEAT_CFG_STATE,
     'taskRepeatCfg',
@@ -77,18 +94,14 @@ export class LegacyPersistenceService {
   taskAttachment: any = this._cmProject<EntityState<TaskAttachment>, TaskAttachment>(
     LS_TASK_ATTACHMENT_STATE,
     'taskAttachment',
-    (state) => state
+    (state) => state,
   );
   bookmark: any = this._cmProject<BookmarkState, Bookmark>(
     LS_BOOKMARK_STATE,
     'bookmark',
     (state) => state,
   );
-  note: any = this._cmProject<NoteState, Note>(
-    LS_NOTE_STATE,
-    'note',
-    (state) => state,
-  );
+  note: any = this._cmProject<NoteState, Note>(LS_NOTE_STATE, 'note', (state) => state);
   metric: any = this._cmProject<MetricState, Metric>(
     LS_METRIC_STATE,
     'metric',
@@ -106,9 +119,7 @@ export class LegacyPersistenceService {
   );
   private _isBlockSaving: boolean = false;
 
-  constructor(
-    private _databaseService: DatabaseService,
-  ) {
+  constructor(private _databaseService: DatabaseService) {
     // this.loadComplete().then(d => console.log('XXXXXXXXX', d, JSON.stringify(d).length));
     // this.loadAllRelatedModelDataForProject('DEFAULT').then(d => console.log(d));
   }
@@ -198,9 +209,7 @@ export class LegacyPersistenceService {
   getLastActive(): number {
     const la = localStorage.getItem(LS_LAST_LOCAL_SYNC_MODEL_CHANGE);
     // NOTE: we need to parse because new Date('1570549698000') is "Invalid Date"
-    const laParsed = Number.isNaN(Number(la))
-      ? la
-      : +(la as any);
+    const laParsed = Number.isNaN(Number(la)) ? la : +(la as any);
     // NOTE: to account for legacy string dates
     return new Date(laParsed as any).getTime();
   }
@@ -208,7 +217,7 @@ export class LegacyPersistenceService {
   // NOTE: not including backup
   async loadCompleteLegacy(): Promise<LegacyAppDataComplete> {
     const projectState = await this.project.load();
-    const pids = projectState ? projectState.ids as string[] : [DEFAULT_PROJECT_ID];
+    const pids = projectState ? (projectState.ids as string[]) : [DEFAULT_PROJECT_ID];
 
     return {
       lastActiveTime: this.getLastActive(),
@@ -255,21 +264,29 @@ export class LegacyPersistenceService {
   ): LegacyPersistenceForProjectModel<S, M> {
     const model = {
       appDataKey,
-      load: (projectId: any): Promise<S> => this._loadFromDb(this._makeProjectKey(projectId, lsKey)).then(v => migrateFn(v, projectId)),
-      save: (projectId: any, data: any, isForce: any) => this._saveToDb(this._makeProjectKey(projectId, lsKey), data, isForce),
+      load: (projectId: any): Promise<S> =>
+        this._loadFromDb(this._makeProjectKey(projectId, lsKey)).then((v) =>
+          migrateFn(v, projectId),
+        ),
+      save: (projectId: any, data: any, isForce: any) =>
+        this._saveToDb(this._makeProjectKey(projectId, lsKey), data, isForce),
     };
 
     this._projectModels.push(model);
     return model;
   }
 
-  private async _loadLegacyAppDataForProjects(projectIds: string[]): Promise<LegacyAppDataForProjects> {
-    const forProjectsData = await Promise.all(this._projectModels.map(async (modelCfg) => {
-      const modelState = await this._loadForProjectIds(projectIds, modelCfg.load);
-      return {
-        [modelCfg.appDataKey]: modelState,
-      };
-    }));
+  private async _loadLegacyAppDataForProjects(
+    projectIds: string[],
+  ): Promise<LegacyAppDataForProjects> {
+    const forProjectsData = await Promise.all(
+      this._projectModels.map(async (modelCfg) => {
+        const modelState = await this._loadForProjectIds(projectIds, modelCfg.load);
+        return {
+          [modelCfg.appDataKey]: modelState,
+        };
+      }),
+    );
     return Object.assign({}, ...forProjectsData);
   }
 
@@ -280,18 +297,24 @@ export class LegacyPersistenceService {
       const dataForProject = await getDataFn(projectId);
       return {
         ...prevAcc,
-        [projectId]: dataForProject
+        [projectId]: dataForProject,
       };
     }, Promise.resolve({}));
   }
 
   private _makeProjectKey(projectId: string, subKey: string, additional?: string) {
-    return LS_PROJECT_PREFIX + projectId + '_' + subKey + (additional ? '_' + additional : '');
+    return (
+      LS_PROJECT_PREFIX + projectId + '_' + subKey + (additional ? '_' + additional : '')
+    );
   }
 
   // DATA STORAGE INTERFACE
   // ---------------------
-  private async _saveToDb(key: string, data: any, isForce: boolean = false): Promise<any> {
+  private async _saveToDb(
+    key: string,
+    data: any,
+    isForce: boolean = false,
+  ): Promise<any> {
     if (!this._isBlockSaving || isForce === true) {
       return this._databaseService.save(key, data);
     } else {

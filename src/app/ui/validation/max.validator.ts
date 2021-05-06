@@ -7,8 +7,6 @@ export const maxValidator = (max: number): ValidatorFn => {
     }
 
     const v: number = +control.value;
-    return v <= +max
-      ? null
-      : {actualValue: v, requiredValue: +max, max: true};
+    return v <= +max ? null : { actualValue: v, requiredValue: +max, max: true };
   };
 };

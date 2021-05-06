@@ -10,7 +10,7 @@ import {
   IdleConfig,
   MiscConfig,
   SoundConfig,
-  TakeABreakConfig
+  TakeABreakConfig,
 } from './global-config.model';
 import {
   selectConfigFeatureState,
@@ -18,7 +18,7 @@ import {
   selectIdleConfig,
   selectMiscConfig,
   selectSoundConfig,
-  selectTakeABreakConfig
+  selectTakeABreakConfig,
 } from './store/global-config.reducer';
 import { distinctUntilChanged, shareReplay } from 'rxjs/operators';
 import { distinctUntilChangedObject } from '../../util/distinct-until-changed-object';
@@ -59,14 +59,15 @@ export class GlobalConfigService {
 
   cfg?: GlobalConfigState;
 
-  constructor(
-    private readonly _store: Store<any>,
-  ) {
+  constructor(private readonly _store: Store<any>) {
     // this.cfg$.subscribe((val) => console.log(val));
-    this.cfg$.subscribe((cfg) => this.cfg = cfg);
+    this.cfg$.subscribe((cfg) => (this.cfg = cfg));
   }
 
-  updateSection(sectionKey: GlobalConfigSectionKey, sectionCfg: Partial<GlobalSectionConfig>) {
+  updateSection(
+    sectionKey: GlobalConfigSectionKey,
+    sectionCfg: Partial<GlobalSectionConfig>,
+  ) {
     this._store.dispatch({
       type: GlobalConfigActionTypes.UpdateGlobalConfigSection,
       payload: {

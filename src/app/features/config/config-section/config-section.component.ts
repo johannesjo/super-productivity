@@ -10,10 +10,14 @@ import {
   OnInit,
   Output,
   ViewChild,
-  ViewContainerRef
+  ViewContainerRef,
 } from '@angular/core';
 import { expandAnimation } from '../../../ui/animations/expand.ani';
-import { ConfigFormSection, CustomCfgSection, GlobalConfigSectionKey } from '../global-config.model';
+import {
+  ConfigFormSection,
+  CustomCfgSection,
+  GlobalConfigSectionKey,
+} from '../global-config.model';
 import { ProjectCfgFormKey } from '../../project/project.model';
 import { Subscription } from 'rxjs';
 import { TranslateService } from '@ngx-translate/core';
@@ -31,8 +35,12 @@ import { exists } from '../../../util/exists';
 })
 export class ConfigSectionComponent implements OnInit, OnDestroy {
   @Input() section?: ConfigFormSection<{ [key: string]: any }>;
-  @Output() save: EventEmitter<{ sectionKey: GlobalConfigSectionKey | ProjectCfgFormKey | TagCfgFormKey; config: any }> = new EventEmitter();
-  @ViewChild('customForm', {read: ViewContainerRef, static: true}) customFormRef?: ViewContainerRef;
+  @Output() save: EventEmitter<{
+    sectionKey: GlobalConfigSectionKey | ProjectCfgFormKey | TagCfgFormKey;
+    config: any;
+  }> = new EventEmitter();
+  @ViewChild('customForm', { read: ViewContainerRef, static: true })
+  customFormRef?: ViewContainerRef;
   isExpanded: boolean = false;
   private _subs: Subscription = new Subscription();
   private _instance?: Component;
@@ -43,8 +51,7 @@ export class ConfigSectionComponent implements OnInit, OnDestroy {
     private _componentFactoryResolver: ComponentFactoryResolver,
     private _workContextService: WorkContextService,
     private _translateService: TranslateService,
-  ) {
-  }
+  ) {}
 
   private _cfg: any;
 
@@ -55,7 +62,7 @@ export class ConfigSectionComponent implements OnInit, OnDestroy {
   @Input() set cfg(v: any) {
     this._cfg = v;
     if (v && this._instance) {
-      (this._instance as any).cfg = {...v};
+      (this._instance as any).cfg = { ...v };
     }
   }
 
@@ -65,23 +72,32 @@ export class ConfigSectionComponent implements OnInit, OnDestroy {
     }
 
     // mark for check manually to make translations work with ngx formly
-    this._subs.add(this._translateService.onLangChange.subscribe(() => {
-      this._cd.detectChanges();
-    }));
+    this._subs.add(
+      this._translateService.onLangChange.subscribe(() => {
+        this._cd.detectChanges();
+      }),
+    );
 
     // mark for check manually to make it work with ngx formly
-    this._subs.add(this._workContextService.onWorkContextChange$.subscribe(() => {
-      this._cd.markForCheck();
+    this._subs.add(
+      this._workContextService.onWorkContextChange$.subscribe(() => {
+        this._cd.markForCheck();
 
-      if (this.section && this.section.customSection && this.customFormRef && this.section.customSection) {
-        this.customFormRef.clear();
-        // dirty trick to make sure data is actually there
-        this._viewDestroyTimeout = window.setTimeout(() => {
-          this._loadCustomSection((this.section as any).customSection);
-          this._cd.detectChanges();
-        });
-      }
-    }));
+        if (
+          this.section &&
+          this.section.customSection &&
+          this.customFormRef &&
+          this.section.customSection
+        ) {
+          this.customFormRef.clear();
+          // dirty trick to make sure data is actually there
+          this._viewDestroyTimeout = window.setTimeout(() => {
+            this._loadCustomSection((this.section as any).customSection);
+            this._cd.detectChanges();
+          });
+        }
+      }),
+    );
   }
 
   ngOnDestroy(): void {
@@ -91,7 +107,10 @@ export class ConfigSectionComponent implements OnInit, OnDestroy {
     }
   }
 
-  onSave($event: { sectionKey: GlobalConfigSectionKey | ProjectCfgFormKey | TagCfgFormKey; config: any }) {
+  onSave($event: {
+    sectionKey: GlobalConfigSectionKey | ProjectCfgFormKey | TagCfgFormKey;
+    config: any;
+  }) {
     this.isExpanded = false;
     this.save.emit($event);
   }
@@ -104,7 +123,9 @@ export class ConfigSectionComponent implements OnInit, OnDestroy {
     const componentToRender = customConfigFormSectionComponent(customSection);
 
     if (componentToRender) {
-      const factory: ComponentFactory<any> = this._componentFactoryResolver.resolveComponentFactory(componentToRender as any);
+      const factory: ComponentFactory<any> = this._componentFactoryResolver.resolveComponentFactory(
+        componentToRender as any,
+      );
       const ref = exists<any>(this.customFormRef).createComponent(factory);
 
       // NOTE: important that this is set only if we actually have a value

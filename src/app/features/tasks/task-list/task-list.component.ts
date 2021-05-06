@@ -6,12 +6,18 @@ import {
   Input,
   OnDestroy,
   OnInit,
-  ViewChild
+  ViewChild,
 } from '@angular/core';
 import { Task, TaskWithSubTasks } from '../task.model';
 import { TaskService } from '../task.service';
 import { DragulaService } from 'ng2-dragula';
-import { BehaviorSubject, combineLatest, Observable, ReplaySubject, Subscription } from 'rxjs';
+import {
+  BehaviorSubject,
+  combineLatest,
+  Observable,
+  ReplaySubject,
+  Subscription,
+} from 'rxjs';
 import { standardListAnimation } from '../../../ui/animations/standard-list.ani';
 import { expandFadeFastAnimation } from '../../../ui/animations/expand.ani';
 import { map } from 'rxjs/operators';
@@ -24,7 +30,6 @@ import { T } from '../../../t.const';
   styleUrls: ['./task-list.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   animations: [standardListAnimation, expandFadeFastAnimation],
-
 })
 export class TaskListComponent implements OnDestroy, OnInit {
   T: typeof T = T;
@@ -41,7 +46,7 @@ export class TaskListComponent implements OnDestroy, OnInit {
   @Input() noTasksMsg?: string;
   @Input() isBacklog: boolean = false;
   listId?: string;
-  @ViewChild('listEl', {static: true}) listEl?: ElementRef;
+  @ViewChild('listEl', { static: true }) listEl?: ElementRef;
   isBlockAni: boolean = false;
   doneTasksLength: number = 0;
   undoneTasksLength: number = 0;
@@ -56,7 +61,7 @@ export class TaskListComponent implements OnDestroy, OnInit {
     this._taskService.currentTaskId$,
   ]).pipe(
     map(([tasks, isHideDone, isHideAll, currentId]) =>
-      filterDoneTasks(tasks, currentId, isHideDone, isHideAll)
+      filterDoneTasks(tasks, currentId, isHideDone, isHideAll),
     ),
   );
 
@@ -64,8 +69,7 @@ export class TaskListComponent implements OnDestroy, OnInit {
     private _taskService: TaskService,
     private _dragulaService: DragulaService,
     private _cd: ChangeDetectorRef,
-  ) {
-  }
+  ) {}
 
   @Input('listId') set listIdIn(v: string) {
     this.listId = v;
@@ -83,7 +87,7 @@ export class TaskListComponent implements OnDestroy, OnInit {
     if (!tasks) {
       return;
     }
-    this.doneTasksLength = this.tasksIN.filter(task => task.isDone).length;
+    this.doneTasksLength = this.tasksIN.filter((task) => task.isDone).length;
     this.allTasksLength = this.tasksIN.length;
     this.undoneTasksLength = this.tasksIN.length - this.doneTasksLength;
   }
@@ -99,13 +103,15 @@ export class TaskListComponent implements OnDestroy, OnInit {
   }
 
   ngOnInit() {
-    this._subs.add(this._filteredTasks$.subscribe((tasks) => {
-      this.filteredTasks = tasks;
-    }));
+    this._subs.add(
+      this._filteredTasks$.subscribe((tasks) => {
+        this.filteredTasks = tasks;
+      }),
+    );
 
-    this._subs.add(this._dragulaService.dropModel(this.listId)
-      .subscribe((params: any) => {
-        const {target, source, targetModel, item} = params;
+    this._subs.add(
+      this._dragulaService.dropModel(this.listId).subscribe((params: any) => {
+        const { target, source, targetModel, item } = params;
         if (this.listEl && this.listEl.nativeElement === target) {
           this._blockAnimation();
 
@@ -115,10 +121,12 @@ export class TaskListComponent implements OnDestroy, OnInit {
           const movedTaskId = item.id;
           this._taskService.move(movedTaskId, sourceModelId, targetModelId, targetNewIds);
         }
-      })
+      }),
     );
 
-    this._subs.add(this._taskService.currentTaskId$.subscribe(val => this.currentTaskId = val));
+    this._subs.add(
+      this._taskService.currentTaskId$.subscribe((val) => (this.currentTaskId = val)),
+    );
   }
 
   ngOnDestroy() {

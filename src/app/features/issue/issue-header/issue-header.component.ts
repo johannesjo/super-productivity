@@ -6,7 +6,7 @@ import { CALDAV_TYPE, GITHUB_TYPE, GITLAB_TYPE, JIRA_TYPE } from '../issue.const
   selector: 'issue-header',
   templateUrl: './issue-header.component.html',
   styleUrls: ['./issue-header.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class IssueHeaderComponent {
   @Input() task?: TaskWithSubTasks;
@@ -16,6 +16,5 @@ export class IssueHeaderComponent {
   readonly JIRA_TYPE: string = JIRA_TYPE;
   readonly CALDAV_TYPE: string = CALDAV_TYPE;
 
-  constructor() {
-  }
+  constructor() {}
 }

@@ -10,7 +10,7 @@ import { T } from '../../../../../../t.const';
   selector: 'dialog-github-initial-setup',
   templateUrl: './dialog-github-initial-setup.component.html',
   styleUrls: ['./dialog-github-initial-setup.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class DialogGithubInitialSetupComponent implements OnInit {
   T: typeof T = T;
@@ -25,8 +25,7 @@ export class DialogGithubInitialSetupComponent implements OnInit {
     this.githubCfg = this.data.githubCfg || DEFAULT_GITHUB_CFG;
   }
 
-  ngOnInit() {
-  }
+  ngOnInit() {}
 
   saveGithubCfg(gitCfg: GithubCfg) {
     this._matDialogRef.close(gitCfg);

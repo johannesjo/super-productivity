@@ -5,7 +5,6 @@ import { Pipe, PipeTransform } from '@angular/core';
   pure: false,
 })
 export class ToArrayPipe implements PipeTransform {
-
   transform(obj: any, filterOutKeys?: any): any {
     if (obj === Object(obj)) {
       const keys = Object.keys(obj);
@@ -20,7 +19,7 @@ export class ToArrayPipe implements PipeTransform {
       keys.forEach((key) => {
         newArray.push({
           key,
-          value: obj[key]
+          value: obj[key],
         });
       });
 
@@ -29,5 +28,4 @@ export class ToArrayPipe implements PipeTransform {
 
     return null;
   }
-
 }

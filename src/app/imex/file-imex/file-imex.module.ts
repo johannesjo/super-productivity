@@ -5,17 +5,8 @@ import { UiModule } from '../../ui/ui.module';
 import { FormsModule } from '@angular/forms';
 
 @NgModule({
-  imports: [
-    CommonModule,
-    FormsModule,
-    UiModule,
-  ],
-  declarations: [
-    FileImexComponent,
-  ],
-  exports: [
-    FileImexComponent,
-  ]
+  imports: [CommonModule, FormsModule, UiModule],
+  declarations: [FileImexComponent],
+  exports: [FileImexComponent],
 })
-export class FileImexModule {
-}
+export class FileImexModule {}

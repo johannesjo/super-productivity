@@ -3,7 +3,16 @@ import { Actions, Effect, ofType } from '@ngrx/effects';
 import { SnackService } from '../../../../../core/snack/snack.service';
 import { TaskService } from '../../../../tasks/task.service';
 import { ProjectService } from '../../../../project/project.service';
-import { concatMap, filter, first, map, switchMap, takeUntil, tap, withLatestFrom } from 'rxjs/operators';
+import {
+  concatMap,
+  filter,
+  first,
+  map,
+  switchMap,
+  takeUntil,
+  tap,
+  withLatestFrom,
+} from 'rxjs/operators';
 import { IssueService } from '../../../issue.service';
 import { forkJoin, Observable, timer } from 'rxjs';
 import { Task, TaskWithSubTasks } from 'src/app/features/tasks/task.model';
@@ -20,87 +29,107 @@ import { TaskActionTypes, UpdateTask } from '../../../../tasks/store/task.action
 
 @Injectable()
 export class CaldavIssueEffects {
+  @Effect({ dispatch: false })
+  checkForDoneTransition$: Observable<any> = this._actions$.pipe(
+    ofType(TaskActionTypes.UpdateTask),
+    filter((a: UpdateTask): boolean => 'isDone' in a.payload.task.changes),
+    concatMap((a: UpdateTask) =>
+      this._taskService.getByIdOnce$(a.payload.task.id as string),
+    ),
+    filter((task: Task) => task && task.issueType === CALDAV_TYPE),
+    concatMap((task: Task) => {
+      if (!task.projectId) {
+        throw new Error('No projectId for task');
+      }
+      return this._getCfgOnce$(task.projectId).pipe(
+        map((caldavCfg) => ({ caldavCfg, task })),
+      );
+    }),
+    filter(
+      ({ caldavCfg: caldavCfg, task }) =>
+        isCaldavEnabled(caldavCfg) && caldavCfg.isTransitionIssuesEnabled,
+    ),
+    concatMap(({ caldavCfg: caldavCfg, task }) => {
+      return this._handleTransitionForIssue$(caldavCfg, task);
+    }),
+  );
 
-  @Effect({dispatch: false})
-  checkForDoneTransition$: Observable<any> = this._actions$
-    .pipe(
-      ofType(TaskActionTypes.UpdateTask),
-      filter((a: UpdateTask): boolean => 'isDone' in a.payload.task.changes),
-      concatMap((a: UpdateTask) => this._taskService.getByIdOnce$(a.payload.task.id as string)),
-      filter((task: Task) => (task && task.issueType === CALDAV_TYPE)),
-      concatMap((task: Task) => {
-        if (!task.projectId) {
-          throw new Error('No projectId for task');
-        }
-        return this._getCfgOnce$(task.projectId).pipe(
-          map((caldavCfg) => ({caldavCfg, task})),
-        );
-      }),
-      filter(({caldavCfg: caldavCfg, task}) =>
-        isCaldavEnabled(caldavCfg) && caldavCfg.isTransitionIssuesEnabled
-      ),
-      concatMap(({caldavCfg: caldavCfg, task}) => {
-        return this._handleTransitionForIssue$(caldavCfg, task);
-      })
-    );
+  private _pollTimer$: Observable<any> = timer(
+    CALDAV_INITIAL_POLL_DELAY,
+    CALDAV_POLL_INTERVAL,
+  );
 
-  private _pollTimer$: Observable<any> = timer(CALDAV_INITIAL_POLL_DELAY, CALDAV_POLL_INTERVAL);
-
-  @Effect({dispatch: false})
+  @Effect({ dispatch: false })
   pollNewIssuesToBacklog$: Observable<any> = this._issueEffectHelperService.pollToBacklogTriggerToProjectId$.pipe(
-    switchMap((pId) => this._projectService.getCaldavCfgForProject$(pId).pipe(
-      first(),
-      filter(caldavCfg => isCaldavEnabled(caldavCfg) && caldavCfg.isAutoAddToBacklog),
-      switchMap(caldavCfg => this._pollTimer$.pipe(
-        // NOTE: required otherwise timer stays alive for filtered actions
-        takeUntil(this._issueEffectHelperService.pollToBacklogActions$),
-        tap(() => console.log('CALDAV_POLL_BACKLOG_CHANGES')),
-        withLatestFrom(
-          this._caldavClientService.getOpenTasks$(caldavCfg),
-          this._taskService.getAllIssueIdsForProject(pId, CALDAV_TYPE) as Promise<string[]>
+    switchMap((pId) =>
+      this._projectService.getCaldavCfgForProject$(pId).pipe(
+        first(),
+        filter((caldavCfg) => isCaldavEnabled(caldavCfg) && caldavCfg.isAutoAddToBacklog),
+        switchMap((caldavCfg) =>
+          this._pollTimer$.pipe(
+            // NOTE: required otherwise timer stays alive for filtered actions
+            takeUntil(this._issueEffectHelperService.pollToBacklogActions$),
+            tap(() => console.log('CALDAV_POLL_BACKLOG_CHANGES')),
+            withLatestFrom(
+              this._caldavClientService.getOpenTasks$(caldavCfg),
+              this._taskService.getAllIssueIdsForProject(pId, CALDAV_TYPE) as Promise<
+                string[]
+              >,
+            ),
+            tap(
+              ([, issues, allTaskCaldavIssueIds]: [
+                any,
+                CaldavIssueReduced[],
+                string[],
+              ]) => {
+                const issuesToAdd = issues.filter(
+                  (issue) => !allTaskCaldavIssueIds.includes(issue.id),
+                );
+                console.log('issuesToAdd', issuesToAdd);
+                if (issuesToAdd?.length) {
+                  this._importNewIssuesToBacklog(pId, issuesToAdd);
+                }
+              },
+            ),
+          ),
         ),
-        tap(([, issues, allTaskCaldavIssueIds]: [any, CaldavIssueReduced[], string[]]) => {
-          const issuesToAdd = issues.filter(issue => !allTaskCaldavIssueIds.includes(issue.id));
-          console.log('issuesToAdd', issuesToAdd);
-          if (issuesToAdd?.length) {
-            this._importNewIssuesToBacklog(pId, issuesToAdd);
-          }
-        })
-      )),
-    )),
+      ),
+    ),
   );
   private _updateIssuesForCurrentContext$: Observable<any> = this._workContextService.allTasksForCurrentContext$.pipe(
     first(),
     switchMap((tasks) => {
-      const caldavIssueTasks = tasks.filter(task => task.issueType === CALDAV_TYPE);
-      return forkJoin(caldavIssueTasks.map(task => {
+      const caldavIssueTasks = tasks.filter((task) => task.issueType === CALDAV_TYPE);
+      return forkJoin(
+        caldavIssueTasks.map((task) => {
           if (!task.projectId) {
             throw new Error('No project for task');
           }
           return this._projectService.getCaldavCfgForProject$(task.projectId).pipe(
             first(),
-            map(cfg => ({
+            map((cfg) => ({
               cfg,
               task,
-            }))
+            })),
           );
-        })
+        }),
       );
     }),
-    map((cos) => cos
-      .filter(({cfg, task}: { cfg: CaldavCfg; task: TaskWithSubTasks }): boolean =>
-        isCaldavEnabled(cfg) && cfg.isAutoPoll
-      )
-      .map(({task}: { cfg: CaldavCfg; task: TaskWithSubTasks }) => task)
+    map((cos) =>
+      cos
+        .filter(
+          ({ cfg, task }: { cfg: CaldavCfg; task: TaskWithSubTasks }): boolean =>
+            isCaldavEnabled(cfg) && cfg.isAutoPoll,
+        )
+        .map(({ task }: { cfg: CaldavCfg; task: TaskWithSubTasks }) => task),
     ),
     tap((caldavTasks: TaskWithSubTasks[]) => this._refreshIssues(caldavTasks)),
   );
-  @Effect({dispatch: false})
-  pollIssueChangesForCurrentContext$: Observable<any> = this._issueEffectHelperService.pollIssueTaskUpdatesActions$
-    .pipe(
-      switchMap(() => this._pollTimer$),
-      switchMap(() => this._updateIssuesForCurrentContext$),
-    );
+  @Effect({ dispatch: false })
+  pollIssueChangesForCurrentContext$: Observable<any> = this._issueEffectHelperService.pollIssueTaskUpdatesActions$.pipe(
+    switchMap(() => this._pollTimer$),
+    switchMap(() => this._updateIssuesForCurrentContext$),
+  );
 
   constructor(
     private readonly _actions$: Actions,
@@ -111,8 +140,7 @@ export class CaldavIssueEffects {
     private readonly _taskService: TaskService,
     private readonly _workContextService: WorkContextService,
     private readonly _issueEffectHelperService: IssueEffectHelperService,
-  ) {
-  }
+  ) {}
 
   private _refreshIssues(caldavTasks: TaskWithSubTasks[]) {
     if (caldavTasks && caldavTasks.length > 0) {
@@ -125,7 +153,10 @@ export class CaldavIssueEffects {
     }
   }
 
-  private _importNewIssuesToBacklog(projectId: string, issuesToAdd: CaldavIssueReduced[]) {
+  private _importNewIssuesToBacklog(
+    projectId: string,
+    issuesToAdd: CaldavIssueReduced[],
+  ) {
     issuesToAdd.forEach((issue) => {
       this._issueService.addTaskWithIssue(CALDAV_TYPE, issue, projectId, true);
     });
@@ -134,7 +165,7 @@ export class CaldavIssueEffects {
       this._snackService.open({
         ico: 'cloud_download',
         translateParams: {
-          issueText: issuesToAdd[0].summary
+          issueText: issuesToAdd[0].summary,
         },
         msg: T.F.CALDAV.S.IMPORTED_SINGLE_ISSUE,
       });
@@ -142,7 +173,7 @@ export class CaldavIssueEffects {
       this._snackService.open({
         ico: 'cloud_download',
         translateParams: {
-          issuesLength: issuesToAdd.length
+          issuesLength: issuesToAdd.length,
         },
         msg: T.F.CALDAV.S.IMPORTED_MULTIPLE_ISSUES,
       });
@@ -150,7 +181,8 @@ export class CaldavIssueEffects {
   }
 
   private _handleTransitionForIssue$(caldavCfg: CaldavCfg, task: Task): Observable<any> {
-    return this._caldavClientService.updateCompletedState$(caldavCfg, task.issueId as string, task.isDone)
+    return this._caldavClientService
+      .updateCompletedState$(caldavCfg, task.issueId as string, task.isDone)
       .pipe(concatMap(() => this._issueService.refreshIssue(task, true)));
   }
 
@@ -158,4 +190,3 @@ export class CaldavIssueEffects {
     return this._projectService.getCaldavCfgForProject$(projectId).pipe(first());
   }
 }
-

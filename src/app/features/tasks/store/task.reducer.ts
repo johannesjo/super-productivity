@@ -1,7 +1,6 @@
 import {
   AddSubTask,
   AddTask,
-  ScheduleTask,
   AddTimeSpent,
   ConvertToMainTask,
   DeleteMainTasks,
@@ -12,23 +11,32 @@ import {
   MoveToArchive,
   MoveToOtherProject,
   RemoveTagsForAllTasks,
-  UnScheduleTask,
   RemoveTimeSpent,
+  ReScheduleTask,
   RestoreTask,
   RoundTimeSpentForDay,
-  ReScheduleTask,
+  ScheduleTask,
   SetCurrentTask,
   SetSelectedTask,
   TaskActions,
   TaskActionTypes,
   ToggleTaskShowSubTasks,
+  UnScheduleTask,
   UpdateTask,
   UpdateTaskTags,
-  UpdateTaskUi
+  UpdateTaskUi,
 } from './task.actions';
-import { ShowSubTasksMode, Task, TaskAdditionalInfoTargetPanel, TaskState } from '../task.model';
+import {
+  ShowSubTasksMode,
+  Task,
+  TaskAdditionalInfoTargetPanel,
+  TaskState,
+} from '../task.model';
 import { calcTotalTimeSpent } from '../util/calc-total-time-spent';
-import { AddTaskRepeatCfgToTask, TaskRepeatCfgActionTypes } from '../../task-repeat-cfg/store/task-repeat-cfg.actions';
+import {
+  AddTaskRepeatCfgToTask,
+  TaskRepeatCfgActionTypes,
+} from '../../task-repeat-cfg/store/task-repeat-cfg.actions';
 import {
   deleteTask,
   getTaskById,
@@ -37,7 +45,7 @@ import {
   removeTaskFromParentSideEffects,
   updateDoneOnForTask,
   updateTimeEstimateForTask,
-  updateTimeSpentForTask
+  updateTimeSpentForTask,
 } from './task.reducer.util';
 import { taskAdapter } from './task.adapter';
 import { moveItemInList } from '../../work-context/store/work-context-meta.helper';
@@ -48,7 +56,7 @@ import {
   DeleteTaskAttachment,
   TaskAttachmentActions,
   TaskAttachmentActionTypes,
-  UpdateTaskAttachment
+  UpdateTaskAttachment,
 } from '../task-attachment/task-attachment.actions';
 import { Update } from '@ngrx/entity';
 import { unique } from '../../../util/unique';
@@ -77,7 +85,7 @@ export const initialTaskState: TaskState = taskAdapter.getInitialState({
 // TODO unit test the shit out of this once the model is settled
 export function taskReducer(
   state: TaskState = initialTaskState,
-  action: TaskActions | AddTaskRepeatCfgToTask | TaskAttachmentActions
+  action: TaskActions | AddTaskRepeatCfgToTask | TaskAttachmentActions,
 ): TaskState {
   if (environment.production) {
     console.log(action.type, (action as any)?.payload || action, state);
@@ -85,15 +93,15 @@ export function taskReducer(
 
   // TODO fix this hackyness once we use the new syntax everywhere
   if ((action.type as string) === loadAllData.type) {
-    const {appDataComplete}: { appDataComplete: AppDataComplete } = action as any;
+    const { appDataComplete }: { appDataComplete: AppDataComplete } = action as any;
     return appDataComplete.task
       ? migrateTaskState({
-        ...appDataComplete.task,
-        currentTaskId: null,
-        lastCurrentTaskId: appDataComplete.task.currentTaskId,
-        isDataLoaded: true,
-      }) :
-      state;
+          ...appDataComplete.task,
+          currentTaskId: null,
+          lastCurrentTaskId: appDataComplete.task.currentTaskId,
+          isDataLoaded: true,
+        })
+      : state;
   }
 
   switch (action.type) {
@@ -105,17 +113,18 @@ export function taskReducer(
         let taskToStartId = a.payload;
         if (subTaskIds && subTaskIds.length) {
           const undoneTasks = subTaskIds
-            .map(id => state.entities[id] as Task)
+            .map((id) => state.entities[id] as Task)
             .filter((ta: Task) => !ta.isDone);
-          taskToStartId = undoneTasks.length
-            ? undoneTasks[0].id
-            : subTaskIds[0];
+          taskToStartId = undoneTasks.length ? undoneTasks[0].id : subTaskIds[0];
         }
         return {
-          ...(taskAdapter.updateOne({
-            id: taskToStartId,
-            changes: {isDone: false, doneOn: null}
-          }, state)),
+          ...taskAdapter.updateOne(
+            {
+              id: taskToStartId,
+              changes: { isDone: false, doneOn: null },
+            },
+            state,
+          ),
           currentTaskId: taskToStartId,
           selectedTaskId: state.selectedTaskId && taskToStartId,
         };
@@ -128,19 +137,18 @@ export function taskReducer(
     }
 
     case TaskActionTypes.UnsetCurrentTask: {
-      return {...state, currentTaskId: null, lastCurrentTaskId: state.currentTaskId};
+      return { ...state, currentTaskId: null, lastCurrentTaskId: state.currentTaskId };
     }
 
     case TaskActionTypes.SetSelectedTask: {
-      const {id, taskAdditionalInfoTargetPanel} = (action as SetSelectedTask).payload;
+      const { id, taskAdditionalInfoTargetPanel } = (action as SetSelectedTask).payload;
       return {
         ...state,
-        taskAdditionalInfoTargetPanel: (!id || (id === state.selectedTaskId))
-          ? null
-          : taskAdditionalInfoTargetPanel || null,
-        selectedTaskId: (id === state.selectedTaskId)
-          ? null
-          : id,
+        taskAdditionalInfoTargetPanel:
+          !id || id === state.selectedTaskId
+            ? null
+            : taskAdditionalInfoTargetPanel || null,
+        selectedTaskId: id === state.selectedTaskId ? null : id,
       };
     }
 
@@ -158,7 +166,7 @@ export function taskReducer(
       let stateCopy = state;
       const a: UpdateTask = action as UpdateTask;
       const id = a.payload.task.id as string;
-      const {timeSpentOnDay, timeEstimate} = a.payload.task.changes;
+      const { timeSpentOnDay, timeEstimate } = a.payload.task.changes;
       stateCopy = timeSpentOnDay
         ? updateTimeSpentForTask(id, timeSpentOnDay, stateCopy)
         : stateCopy;
@@ -172,13 +180,16 @@ export function taskReducer(
     }
 
     case TaskActionTypes.UpdateTaskTags: {
-      const {task, newTagIds} = (action as UpdateTaskTags).payload;
-      return taskAdapter.updateOne({
-        id: task.id,
-        changes: {
-          tagIds: newTagIds,
-        }
-      }, state);
+      const { task, newTagIds } = (action as UpdateTaskTags).payload;
+      return taskAdapter.updateOne(
+        {
+          id: task.id,
+          changes: {
+            tagIds: newTagIds,
+          },
+        },
+        state,
+      );
     }
 
     case TaskActionTypes.RemoveTagsForAllTasks: {
@@ -186,20 +197,25 @@ export function taskReducer(
         id: taskId,
         changes: {
           tagIds: (state.entities[taskId] as Task).tagIds.filter(
-            tagId => !(action as RemoveTagsForAllTasks).payload.tagIdsToRemove.includes(tagId)
+            (tagId) =>
+              !(action as RemoveTagsForAllTasks).payload.tagIdsToRemove.includes(tagId),
           ),
-        }
+        },
       }));
       return taskAdapter.updateMany(updates, state);
     }
 
     // TODO simplify
     case TaskActionTypes.ToggleTaskShowSubTasks: {
-      const {taskId, isShowLess, isEndless} = (action as ToggleTaskShowSubTasks).payload;
-      const task = (state.entities[taskId] as Task);
-      const subTasks = task.subTaskIds.map(id => state.entities[id] as Task);
+      const {
+        taskId,
+        isShowLess,
+        isEndless,
+      } = (action as ToggleTaskShowSubTasks).payload;
+      const task = state.entities[taskId] as Task;
+      const subTasks = task.subTaskIds.map((id) => state.entities[id] as Task);
       const doneTasksLength = subTasks.filter((t) => t.isDone).length;
-      const isDoneTaskCaseNeeded = doneTasksLength && (doneTasksLength < subTasks.length);
+      const isDoneTaskCaseNeeded = doneTasksLength && doneTasksLength < subTasks.length;
       const oldVal = +task._showSubTasksMode;
       let newVal;
 
@@ -219,7 +235,6 @@ export function taskReducer(
             newVal = ShowSubTasksMode.HideAll;
           }
         }
-
       } else {
         if (isEndless) {
           if (oldVal === ShowSubTasksMode.Show) {
@@ -229,23 +244,22 @@ export function taskReducer(
             newVal = ShowSubTasksMode.Show;
           }
         } else {
-          newVal = (isShowLess)
-            ? ShowSubTasksMode.HideAll
-            : ShowSubTasksMode.Show;
+          newVal = isShowLess ? ShowSubTasksMode.HideAll : ShowSubTasksMode.Show;
         }
       }
 
       // failsafe
-      newVal = (isNaN(newVal as any))
-        ? ShowSubTasksMode.HideAll
-        : newVal;
+      newVal = isNaN(newVal as any) ? ShowSubTasksMode.HideAll : newVal;
 
-      return taskAdapter.updateOne({
-        id: taskId,
-        changes: {
-          _showSubTasksMode: newVal
-        }
-      }, state);
+      return taskAdapter.updateOne(
+        {
+          id: taskId,
+          changes: {
+            _showSubTasksMode: newVal,
+          },
+        },
+        state,
+      );
     }
 
     case TaskActionTypes.DeleteTask: {
@@ -253,164 +267,186 @@ export function taskReducer(
     }
 
     case TaskActionTypes.DeleteMainTasks: {
-      const allIds = (action as DeleteMainTasks).payload.taskIds.reduce((acc: string[], id: string) => {
-        return [
-          ...acc,
-          id,
-          ...(state.entities[id] as Task).subTaskIds
-        ];
-      }, []);
+      const allIds = (action as DeleteMainTasks).payload.taskIds.reduce(
+        (acc: string[], id: string) => {
+          return [...acc, id, ...(state.entities[id] as Task).subTaskIds];
+        },
+        [],
+      );
       return taskAdapter.removeMany(allIds, state);
     }
 
     case TaskActionTypes.MoveSubTask: {
       let newState = state;
-      const {taskId, srcTaskId, targetTaskId, newOrderedIds} = (action as MoveSubTask).payload;
+      const {
+        taskId,
+        srcTaskId,
+        targetTaskId,
+        newOrderedIds,
+      } = (action as MoveSubTask).payload;
       const oldPar = state.entities[srcTaskId] as Task;
       const newPar = state.entities[targetTaskId] as Task;
 
       // for old parent remove
-      newState = taskAdapter.updateOne({
-        id: oldPar.id,
-        changes: {
-          subTaskIds: oldPar.subTaskIds.filter(filterOutId(taskId))
-        }
-      }, newState);
+      newState = taskAdapter.updateOne(
+        {
+          id: oldPar.id,
+          changes: {
+            subTaskIds: oldPar.subTaskIds.filter(filterOutId(taskId)),
+          },
+        },
+        newState,
+      );
       newState = reCalcTimesForParentIfParent(oldPar.id, newState);
 
       // for new parent add and move
-      newState = taskAdapter.updateOne({
-        id: newPar.id,
-        changes: {
-          subTaskIds: moveItemInList(taskId, newPar.subTaskIds, newOrderedIds),
-        }
-      }, newState);
+      newState = taskAdapter.updateOne(
+        {
+          id: newPar.id,
+          changes: {
+            subTaskIds: moveItemInList(taskId, newPar.subTaskIds, newOrderedIds),
+          },
+        },
+        newState,
+      );
       newState = reCalcTimesForParentIfParent(newPar.id, newState);
 
       // change parent id for moving task
-      newState = taskAdapter.updateOne({
-        id: taskId,
-        changes: {
-          parentId: newPar.id,
-          projectId: newPar.projectId,
-        }
-      }, newState);
+      newState = taskAdapter.updateOne(
+        {
+          id: taskId,
+          changes: {
+            parentId: newPar.id,
+            projectId: newPar.projectId,
+          },
+        },
+        newState,
+      );
 
       return newState;
     }
 
     case TaskActionTypes.MoveSubTaskUp: {
-      const {id, parentId} = (action as MoveSubTaskUp).payload;
+      const { id, parentId } = (action as MoveSubTaskUp).payload;
       const parentSubTaskIds = (state.entities[parentId] as Task).subTaskIds;
-      return taskAdapter.updateOne({
-        id: parentId,
-        changes: {
-          subTaskIds: arrayMoveLeft(parentSubTaskIds, id)
-        }
-      }, state);
+      return taskAdapter.updateOne(
+        {
+          id: parentId,
+          changes: {
+            subTaskIds: arrayMoveLeft(parentSubTaskIds, id),
+          },
+        },
+        state,
+      );
     }
 
     case TaskActionTypes.MoveSubTaskDown: {
-      const {id, parentId} = (action as MoveSubTaskDown).payload;
+      const { id, parentId } = (action as MoveSubTaskDown).payload;
       const parentSubTaskIds = (state.entities[parentId] as Task).subTaskIds;
-      return taskAdapter.updateOne({
-        id: parentId,
-        changes: {
-          subTaskIds: arrayMoveRight(parentSubTaskIds, id)
-        }
-      }, state);
+      return taskAdapter.updateOne(
+        {
+          id: parentId,
+          changes: {
+            subTaskIds: arrayMoveRight(parentSubTaskIds, id),
+          },
+        },
+        state,
+      );
     }
 
     case TaskActionTypes.AddTimeSpent: {
-      const {task, date, duration} = (action as AddTimeSpent).payload;
-      const currentTimeSpentForTickDay = task.timeSpentOnDay && +task.timeSpentOnDay[date] || 0;
+      const { task, date, duration } = (action as AddTimeSpent).payload;
+      const currentTimeSpentForTickDay =
+        (task.timeSpentOnDay && +task.timeSpentOnDay[date]) || 0;
 
       return updateTimeSpentForTask(
-        task.id, {
+        task.id,
+        {
           ...task.timeSpentOnDay,
-          [date]: (currentTimeSpentForTickDay + duration)
+          [date]: currentTimeSpentForTickDay + duration,
         },
-        state
+        state,
       );
     }
 
     case TaskActionTypes.RemoveTimeSpent: {
-      const {id, date, duration} = (action as RemoveTimeSpent).payload;
+      const { id, date, duration } = (action as RemoveTimeSpent).payload;
       const task = getTaskById(id, state) as Task;
-      const currentTimeSpentForTickDay = task.timeSpentOnDay && +task.timeSpentOnDay[date] || 0;
+      const currentTimeSpentForTickDay =
+        (task.timeSpentOnDay && +task.timeSpentOnDay[date]) || 0;
 
       return updateTimeSpentForTask(
-        id, {
+        id,
+        {
           ...task.timeSpentOnDay,
-          [date]: Math.max((currentTimeSpentForTickDay - duration), 0)
+          [date]: Math.max(currentTimeSpentForTickDay - duration, 0),
         },
-        state
+        state,
       );
     }
 
     case TaskActionTypes.AddSubTask: {
-      const {task, parentId} = (action as AddSubTask).payload;
+      const { task, parentId } = (action as AddSubTask).payload;
       const parentTask = state.entities[parentId] as Task;
 
       // add item1
-      const stateCopy = taskAdapter.addOne({
-        ...task,
-        parentId,
-        // update timeSpent if first sub task and non present
-        ...(
-          (parentTask.subTaskIds.length === 0 && Object.keys(task.timeSpentOnDay).length === 0)
+      const stateCopy = taskAdapter.addOne(
+        {
+          ...task,
+          parentId,
+          // update timeSpent if first sub task and non present
+          ...(parentTask.subTaskIds.length === 0 &&
+          Object.keys(task.timeSpentOnDay).length === 0
             ? {
-              timeSpentOnDay: parentTask.timeSpentOnDay,
-              timeSpent: calcTotalTimeSpent(parentTask.timeSpentOnDay)
-            }
-            : {}
-        ),
-        // update timeEstimate if first sub task and non present
-        ...(
-          (parentTask.subTaskIds.length === 0 && !task.timeEstimate)
-            ? {timeEstimate: parentTask.timeEstimate}
-            : {}
-        ),
-        // should always be empty
-        tagIds: [],
-        // should always be the one of the parent
-        projectId: parentTask.projectId
-      }, state);
+                timeSpentOnDay: parentTask.timeSpentOnDay,
+                timeSpent: calcTotalTimeSpent(parentTask.timeSpentOnDay),
+              }
+            : {}),
+          // update timeEstimate if first sub task and non present
+          ...(parentTask.subTaskIds.length === 0 && !task.timeEstimate
+            ? { timeEstimate: parentTask.timeEstimate }
+            : {}),
+          // should always be empty
+          tagIds: [],
+          // should always be the one of the parent
+          projectId: parentTask.projectId,
+        },
+        state,
+      );
 
       return {
         ...stateCopy,
         // update current task to new sub task if parent was current before
-        ...(
-          (state.currentTaskId === parentId)
-            ? {currentTaskId: task.id}
-            : {}
-        ),
+        ...(state.currentTaskId === parentId ? { currentTaskId: task.id } : {}),
         // also add to parent task
         entities: {
           ...stateCopy.entities,
           [parentId]: {
             ...parentTask,
-            subTaskIds: [...parentTask.subTaskIds, task.id]
-          }
-        }
+            subTaskIds: [...parentTask.subTaskIds, task.id],
+          },
+        },
       };
     }
 
     case TaskActionTypes.ConvertToMainTask: {
-      const {task} = (action as ConvertToMainTask).payload;
+      const { task } = (action as ConvertToMainTask).payload;
       const par = state.entities[task.parentId as string];
       if (!par) {
         throw new Error('No parent for sub task');
       }
 
       const stateCopy = removeTaskFromParentSideEffects(state, task);
-      return taskAdapter.updateOne({
-        id: task.id,
-        changes: {
-          parentId: null,
-          tagIds: [...par.tagIds],
-        }
-      }, stateCopy);
+      return taskAdapter.updateOne(
+        {
+          id: task.id,
+          changes: {
+            parentId: null,
+            tagIds: [...par.tagIds],
+          },
+        },
+        stateCopy,
+      );
     }
 
     case TaskActionTypes.ToggleStart: {
@@ -424,53 +460,65 @@ export function taskReducer(
     }
 
     case TaskActionTypes.MoveToOtherProject: {
-      const {targetProjectId, task} = (action as MoveToOtherProject).payload;
-      const updates: Update<Task>[] = [task.id, ...task.subTaskIds].map(id => ({
+      const { targetProjectId, task } = (action as MoveToOtherProject).payload;
+      const updates: Update<Task>[] = [task.id, ...task.subTaskIds].map((id) => ({
         id,
         changes: {
-          projectId: targetProjectId
-        }
+          projectId: targetProjectId,
+        },
       }));
       return taskAdapter.updateMany(updates, state);
     }
 
     case TaskActionTypes.RoundTimeSpentForDay: {
-      const {day, taskIds, isRoundUp, roundTo, projectId} = (action as RoundTimeSpentForDay).payload;
+      const {
+        day,
+        taskIds,
+        isRoundUp,
+        roundTo,
+        projectId,
+      } = (action as RoundTimeSpentForDay).payload;
       const isLimitToProject: boolean = !!projectId || projectId === null;
 
-      const idsToUpdateDirectly: string[] = taskIds.filter(id => {
-          const task: Task = state.entities[id] as Task;
-          return (task.subTaskIds.length === 0 || !!task.parentId)
-            && (!isLimitToProject || task.projectId === projectId);
-        }
+      const idsToUpdateDirectly: string[] = taskIds.filter((id) => {
+        const task: Task = state.entities[id] as Task;
+        return (
+          (task.subTaskIds.length === 0 || !!task.parentId) &&
+          (!isLimitToProject || task.projectId === projectId)
+        );
+      });
+      const subTaskIds: string[] = idsToUpdateDirectly.filter(
+        (id) => !!(state.entities[id] as Task).parentId,
       );
-      const subTaskIds: string[] = idsToUpdateDirectly.filter(id => !!(state.entities[id] as Task).parentId);
-      const parentTaskToReCalcIds: string[] = unique<string>(subTaskIds
-        .map(id => (state.entities[id] as Task).parentId as string)
+      const parentTaskToReCalcIds: string[] = unique<string>(
+        subTaskIds.map((id) => (state.entities[id] as Task).parentId as string),
       );
 
-      const updateSubsAndMainWithoutSubs: Update<Task>[] = idsToUpdateDirectly.map(id => {
-        const spentOnDayBefore = (state.entities[id] as Task).timeSpentOnDay;
-        const timeSpentOnDayUpdated = {
-          ...spentOnDayBefore,
-          [day]: roundDurationVanilla(spentOnDayBefore[day], roundTo, isRoundUp)
-        };
-        return {
-          id,
-          changes: {
-            timeSpentOnDay: timeSpentOnDayUpdated,
-            timeSpent: calcTotalTimeSpent(timeSpentOnDayUpdated),
-          }
-        };
-      });
+      const updateSubsAndMainWithoutSubs: Update<Task>[] = idsToUpdateDirectly.map(
+        (id) => {
+          const spentOnDayBefore = (state.entities[id] as Task).timeSpentOnDay;
+          const timeSpentOnDayUpdated = {
+            ...spentOnDayBefore,
+            [day]: roundDurationVanilla(spentOnDayBefore[day], roundTo, isRoundUp),
+          };
+          return {
+            id,
+            changes: {
+              timeSpentOnDay: timeSpentOnDayUpdated,
+              timeSpent: calcTotalTimeSpent(timeSpentOnDayUpdated),
+            },
+          };
+        },
+      );
 
       // // update subs
       const newState = taskAdapter.updateMany(updateSubsAndMainWithoutSubs, state);
       // reCalc parents
-      return parentTaskToReCalcIds.reduce((acc, parentId) =>
-        reCalcTimeSpentForParentIfParent(parentId, acc), newState);
+      return parentTaskToReCalcIds.reduce(
+        (acc, parentId) => reCalcTimeSpentForParentIfParent(parentId, acc),
+        newState,
+      );
     }
-
 
     // TASK ARCHIVE STUFF
     // ------------------
@@ -481,12 +529,16 @@ export function taskReducer(
         copyState = deleteTask(copyState, task);
       });
       return {
-        ...copyState
+        ...copyState,
       };
     }
 
     case TaskActionTypes.RestoreTask: {
-      const task = {...(action as RestoreTask).payload.task, isDone: false, doneOn: null};
+      const task = {
+        ...(action as RestoreTask).payload.task,
+        isDone: false,
+        doneOn: null,
+      };
       const subTasks = (action as RestoreTask).payload.subTasks || [];
       return taskAdapter.addMany([task, ...subTasks], state);
     }
@@ -494,89 +546,112 @@ export function taskReducer(
     // REPEAT STUFF
     // ------------
     case TaskRepeatCfgActionTypes.AddTaskRepeatCfgToTask: {
-      return taskAdapter.updateOne({
-        id: (action as AddTaskRepeatCfgToTask).payload.taskId,
-        changes: {
-          repeatCfgId: (action as AddTaskRepeatCfgToTask).payload.taskRepeatCfg.id
-        }
-      }, state);
+      return taskAdapter.updateOne(
+        {
+          id: (action as AddTaskRepeatCfgToTask).payload.taskId,
+          changes: {
+            repeatCfgId: (action as AddTaskRepeatCfgToTask).payload.taskRepeatCfg.id,
+          },
+        },
+        state,
+      );
     }
-
 
     // TASK ATTACHMENTS
     // ----------------
     case TaskAttachmentActionTypes.AddTaskAttachment: {
-      const {taskId, taskAttachment} = (action as AddTaskAttachment).payload;
-      return taskAdapter.updateOne({
-        id: taskId,
-        changes: {
-          attachments: [
-            ...(state.entities[taskId] as Task).attachments, taskAttachment
-          ]
-        }
-      }, state);
+      const { taskId, taskAttachment } = (action as AddTaskAttachment).payload;
+      return taskAdapter.updateOne(
+        {
+          id: taskId,
+          changes: {
+            attachments: [
+              ...(state.entities[taskId] as Task).attachments,
+              taskAttachment,
+            ],
+          },
+        },
+        state,
+      );
     }
 
     case TaskAttachmentActionTypes.UpdateTaskAttachment: {
-      const {taskId, taskAttachment} = (action as UpdateTaskAttachment).payload;
+      const { taskId, taskAttachment } = (action as UpdateTaskAttachment).payload;
       const attachments = (state.entities[taskId] as Task).attachments;
-      const updatedAttachments = attachments.map(
-        attachment => attachment.id === taskAttachment.id
-          ? ({
-            ...attachment,
-            ...taskAttachment.changes
-          })
-          : attachment
+      const updatedAttachments = attachments.map((attachment) =>
+        attachment.id === taskAttachment.id
+          ? {
+              ...attachment,
+              ...taskAttachment.changes,
+            }
+          : attachment,
       );
 
-      return taskAdapter.updateOne({
-        id: taskId,
-        changes: {
-          attachments: updatedAttachments,
-        }
-      }, state);
+      return taskAdapter.updateOne(
+        {
+          id: taskId,
+          changes: {
+            attachments: updatedAttachments,
+          },
+        },
+        state,
+      );
     }
 
     case TaskAttachmentActionTypes.DeleteTaskAttachment: {
-      const {taskId, id} = (action as DeleteTaskAttachment).payload;
-      return taskAdapter.updateOne({
-        id: taskId,
-        changes: {
-          attachments: (state.entities[taskId] as Task).attachments.filter(at => at.id !== id)
-        }
-      }, state);
+      const { taskId, id } = (action as DeleteTaskAttachment).payload;
+      return taskAdapter.updateOne(
+        {
+          id: taskId,
+          changes: {
+            attachments: (state.entities[taskId] as Task).attachments.filter(
+              (at) => at.id !== id,
+            ),
+          },
+        },
+        state,
+      );
     }
 
     // REMINDER STUFF
     // --------------
     case TaskActionTypes.ScheduleTask: {
-      const {task, remindAt} = (action as ScheduleTask).payload;
-      return taskAdapter.updateOne({
-        id: task.id,
-        changes: {
-          plannedAt: remindAt,
-        }
-      }, state);
+      const { task, remindAt } = (action as ScheduleTask).payload;
+      return taskAdapter.updateOne(
+        {
+          id: task.id,
+          changes: {
+            plannedAt: remindAt,
+          },
+        },
+        state,
+      );
     }
 
     case TaskActionTypes.ReScheduleTask: {
-      const {id, plannedAt} = (action as ReScheduleTask).payload;
-      return taskAdapter.updateOne({
-        id,
-        changes: {
-          plannedAt,
-        }
-      }, state);
+      const { id, plannedAt } = (action as ReScheduleTask).payload;
+      return taskAdapter.updateOne(
+        {
+          id,
+          changes: {
+            plannedAt,
+          },
+        },
+        state,
+      );
     }
 
     case TaskActionTypes.UnScheduleTask: {
-      const {id} = (action as UnScheduleTask).payload;
-      return taskAdapter.updateOne({
-        id,
-        changes: {
-          plannedAt: null,
-        }
-      }, state);
+      const { id } = (action as UnScheduleTask).payload;
+      return taskAdapter.updateOne(
+        {
+          id,
+          changes: {
+            plannedAt: null,
+          },
+        },
+        state,
+      );
     }
 
     default: {

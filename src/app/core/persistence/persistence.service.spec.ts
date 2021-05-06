@@ -16,51 +16,53 @@ const testScheduler = new TestScheduler((actual, expected) => {
 describe('PersistenceService', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
-        providers: [
-          provideMockStore({initialState: {}}),
-          {
-            provide: SnackService, useValue: {
-              open: () => false,
-            },
+      providers: [
+        provideMockStore({ initialState: {} }),
+        {
+          provide: SnackService,
+          useValue: {
+            open: () => false,
           },
-          {
-            provide: DatabaseService, useValue: {
-              clearDatabase: () => false,
-              save: () => false,
-              remove: () => false,
-              load: () => false,
-            },
+        },
+        {
+          provide: DatabaseService,
+          useValue: {
+            clearDatabase: () => false,
+            save: () => false,
+            remove: () => false,
+            load: () => false,
           },
-          {
-            provide: CompressionService, useValue: {
-              decompress: () => false,
-              compress: () => false,
-            },
+        },
+        {
+          provide: CompressionService,
+          useValue: {
+            decompress: () => false,
+            compress: () => false,
           },
-        ]
-      }
-    );
+        },
+      ],
+    });
   });
 
   it('database update should trigger onAfterSave$', async (done) => {
     const service: PersistenceService = TestBed.inject(PersistenceService);
     // once is required to fill up data
     await service.loadComplete();
-    service.onAfterSave$.subscribe(({data}) => {
+    service.onAfterSave$.subscribe(({ data }) => {
       expect(data).toEqual(createEmptyEntity());
       done();
     });
-    service.tag.saveState(createEmptyEntity(), {isSyncModelChange: true});
+    service.tag.saveState(createEmptyEntity(), { isSyncModelChange: true });
   });
 
   describe('inMemoryComplete$', () => {
     it('should start with loadComplete data', () => {
-      testScheduler.run(({expectObservable}) => {
+      testScheduler.run(({ expectObservable }) => {
         const FAKE_VAL: any = 'VVV';
         const a$ = of(FAKE_VAL);
         spyOn(PersistenceService.prototype, 'loadComplete').and.callFake(() => a$ as any);
         const service: PersistenceService = TestBed.inject(PersistenceService);
-        expectObservable(service.inMemoryComplete$).toBe('a', {a: FAKE_VAL});
+        expectObservable(service.inMemoryComplete$).toBe('a', { a: FAKE_VAL });
       });
     });
 

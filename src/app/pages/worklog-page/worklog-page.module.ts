@@ -6,11 +6,6 @@ import { WorklogModule } from '../../features/worklog/worklog.module';
 
 @NgModule({
   declarations: [WorklogPageComponent],
-  imports: [
-    CommonModule,
-    UiModule,
-    WorklogModule,
-  ]
+  imports: [CommonModule, UiModule, WorklogModule],
 })
-export class WorklogPageModule {
-}
+export class WorklogPageModule {}

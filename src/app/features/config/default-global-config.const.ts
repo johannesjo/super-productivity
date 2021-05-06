@@ -2,12 +2,15 @@ import { GlobalConfigState } from './global-config.model';
 import { IS_MAC } from '../../util/is-mac';
 import { IS_F_DROID_APP } from '../../util/is-android-web-view';
 
-export const IS_USE_DARK_THEME_AS_DEFAULT: boolean = !IS_MAC || !window.matchMedia || window.matchMedia('(prefers-color-scheme: dark)').matches;
+export const IS_USE_DARK_THEME_AS_DEFAULT: boolean =
+  !IS_MAC ||
+  !window.matchMedia ||
+  window.matchMedia('(prefers-color-scheme: dark)').matches;
 
 const minute = 60 * 1000;
 export const DEFAULT_GLOBAL_CONFIG: GlobalConfigState = {
   lang: {
-    lng: null
+    lng: null,
   },
   misc: {
     isDarkMode: IS_USE_DARK_THEME_AS_DEFAULT,
@@ -43,7 +46,8 @@ export const DEFAULT_GLOBAL_CONFIG: GlobalConfigState = {
     isLockScreen: false,
     isFocusWindow: false,
     /* eslint-disable-next-line */
-    takeABreakMessage: 'Take a break! You have been working for ${duration} without one. Go away from the computer! Take a short walk! Makes you more productive in the long run!',
+    takeABreakMessage:
+      'Take a break! You have been working for ${duration} without one. Go away from the computer! Take a short walk! Makes you more productive in the long run!',
     takeABreakMinWorkingTime: 60 * minute,
     motivationalImg: null,
   },
@@ -141,6 +145,6 @@ export const DEFAULT_GLOBAL_CONFIG: GlobalConfigState = {
       userName: null,
       password: null,
       syncFilePath: null,
-    }
+    },
   },
 };

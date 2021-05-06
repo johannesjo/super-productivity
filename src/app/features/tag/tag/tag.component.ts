@@ -11,19 +11,17 @@ export interface TagComponentTag {
   selector: 'tag',
   templateUrl: './tag.component.html',
   styleUrls: ['./tag.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TagComponent {
   tag?: TagComponentTag;
   // @HostBinding('style.background')
   color?: string;
 
-  constructor() {
-  }
+  constructor() {}
 
   @Input('tag') set tagIn(v: TagComponentTag) {
     this.tag = v;
-    this.color = v.color || v.theme && v.theme.primary;
+    this.color = v.color || (v.theme && v.theme.primary);
   }
-
 }

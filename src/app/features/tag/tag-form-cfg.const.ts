@@ -1,4 +1,7 @@
-import { ConfigFormSection, GenericConfigFormSection } from '../config/global-config.model';
+import {
+  ConfigFormSection,
+  GenericConfigFormSection,
+} from '../config/global-config.model';
 import { T } from '../../t.const';
 import { Tag } from './tag.model';
 
@@ -29,7 +32,7 @@ export const BASIC_TAG_CONFIG_FORM_CONFIG: ConfigFormSection<Tag> = {
         type: 'color',
       },
     },
-  ]
+  ],
 };
 
 export const CREATE_TAG_BASIC_CONFIG_FORM_CONFIG: GenericConfigFormSection = {
@@ -55,5 +58,5 @@ export const CREATE_TAG_BASIC_CONFIG_FORM_CONFIG: GenericConfigFormSection = {
         type: 'color',
       },
     },
-  ]
+  ],
 };

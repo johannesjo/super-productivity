@@ -971,5 +971,5 @@ export const MATERIAL_ICONS: string[] = [
   'youtube_searched_for',
   'zoom_in',
   'zoom_out',
-  'zoom_out_map'
+  'zoom_out_map',
 ];

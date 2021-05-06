@@ -6,12 +6,13 @@ describe('BetterDrawerContainerComponent', () => {
   let component: BetterDrawerContainerComponent;
   let fixture: ComponentFixture<BetterDrawerContainerComponent>;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
-      declarations: [BetterDrawerContainerComponent]
-    })
-      .compileComponents();
-  }));
+  beforeEach(
+    waitForAsync(() => {
+      TestBed.configureTestingModule({
+        declarations: [BetterDrawerContainerComponent],
+      }).compileComponents();
+    }),
+  );
 
   beforeEach(() => {
     fixture = TestBed.createComponent(BetterDrawerContainerComponent);

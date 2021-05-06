@@ -4,7 +4,7 @@ import {
   GOOGLE_DEFAULT_FIELDS_FOR_DRIVE,
   GOOGLE_DISCOVERY_DOCS,
   GOOGLE_SETTINGS_ELECTRON,
-  GOOGLE_SETTINGS_WEB
+  GOOGLE_SETTINGS_WEB,
 } from './google.const';
 import * as moment from 'moment';
 import { HANDLED_ERROR_PROP_STR, IS_ELECTRON } from '../../../app.constants';
@@ -12,8 +12,25 @@ import { MultiPartBuilder } from './util/multi-part-builder';
 import { HttpClient, HttpHeaders, HttpParams, HttpRequest } from '@angular/common/http';
 import { SnackService } from '../../../core/snack/snack.service';
 import { SnackType } from '../../../core/snack/snack.model';
-import { catchError, concatMap, filter, map, shareReplay, switchMap, take } from 'rxjs/operators';
-import { BehaviorSubject, EMPTY, from, merge, Observable, of, throwError, timer } from 'rxjs';
+import {
+  catchError,
+  concatMap,
+  filter,
+  map,
+  shareReplay,
+  switchMap,
+  take,
+} from 'rxjs/operators';
+import {
+  BehaviorSubject,
+  EMPTY,
+  from,
+  merge,
+  Observable,
+  of,
+  throwError,
+  timer,
+} from 'rxjs';
 import { BannerService } from '../../../core/banner/banner.service';
 import { BannerId } from '../../../core/banner/banner.model';
 import { T } from '../../../t.const';
@@ -35,19 +52,19 @@ const EXPIRES_SAFETY_MARGIN = 5 * 60 * 1000;
 })
 export class GoogleApiService {
   public isLoggedIn: boolean = false;
-  private _session$: BehaviorSubject<GoogleSession> = new BehaviorSubject(getGoogleSession());
+  private _session$: BehaviorSubject<GoogleSession> = new BehaviorSubject(
+    getGoogleSession(),
+  );
   private _onTokenExpire$: Observable<number> = this._session$.pipe(
     switchMap((session) => {
       if (!session.accessToken) {
         return EMPTY;
       }
 
-      const expiresAt = session && session.expiresAt || 0;
+      const expiresAt = (session && session.expiresAt) || 0;
       const expiresIn = expiresAt - (moment().valueOf() + EXPIRES_SAFETY_MARGIN);
-      return this._isTokenExpired(session)
-        ? timer(expiresIn)
-        : EMPTY;
-    })
+      return this._isTokenExpired(session) ? timer(expiresIn) : EMPTY;
+    }),
   );
   public isLoggedIn$: Observable<boolean> = merge(
     this._session$,
@@ -75,7 +92,7 @@ export class GoogleApiService {
     private readonly _bannerService: BannerService,
     private readonly _matDialog: MatDialog,
   ) {
-    this.isLoggedIn$.subscribe((isLoggedIn) => this.isLoggedIn = isLoggedIn);
+    this.isLoggedIn$.subscribe((isLoggedIn) => (this.isLoggedIn = isLoggedIn));
   }
 
   private get _session(): GoogleSession {
@@ -84,7 +101,7 @@ export class GoogleApiService {
 
   login(isSkipSuccessMsg: boolean = false): Promise<any> {
     const showSuccessMsg = () => {
-      if (!(isSkipSuccessMsg)) {
+      if (!isSkipSuccessMsg) {
         this._snackIt('SUCCESS', T.F.GOOGLE.S_API.SUCCESS_LOGIN);
       }
     };
@@ -97,36 +114,41 @@ export class GoogleApiService {
         this._saveToken({
           access_token: token,
           // TODO check if we can get a real value if existant
-          expires_at: Date.now() + (1000 * 60 * 30),
+          expires_at: Date.now() + 1000 * 60 * 30,
         });
         showSuccessMsg();
       });
     } else {
-      return this._initClientLibraryIfNotDone()
-        .then((user: any) => {
-          // TODO implement offline access
-          // const authInstance = this._gapi.auth2.getAuthInstance();
-          // authInstance.grantOfflineAccess()
-          //   .then((res) => {
-          //     this._updateSession({
-          //       refreshToken: res.code
-          //     });
-          //   });
-          const successHandler = (res: any) => {
-            this._saveToken(res);
-            showSuccessMsg();
-          };
+      return this._initClientLibraryIfNotDone().then((user: any) => {
+        // TODO implement offline access
+        // const authInstance = this._gapi.auth2.getAuthInstance();
+        // authInstance.grantOfflineAccess()
+        //   .then((res) => {
+        //     this._updateSession({
+        //       refreshToken: res.code
+        //     });
+        //   });
+        const successHandler = (res: any) => {
+          this._saveToken(res);
+          showSuccessMsg();
+        };
 
-          if (user && user.Zi && user.Zi.access_token) {
-            successHandler(user);
-          } else {
-            return this._gapi.auth2.getAuthInstance().currentUser.get().reloadAuthResponse().then(successHandler.bind(this))
-              .catch(() => {
-                return this._gapi.auth2.getAuthInstance().signIn()
-                  .then(successHandler.bind(this));
-              });
-          }
-        });
+        if (user && user.Zi && user.Zi.access_token) {
+          successHandler(user);
+        } else {
+          return this._gapi.auth2
+            .getAuthInstance()
+            .currentUser.get()
+            .reloadAuthResponse()
+            .then(successHandler.bind(this))
+            .catch(() => {
+              return this._gapi.auth2
+                .getAuthInstance()
+                .signIn()
+                .then(successHandler.bind(this));
+            });
+        }
+      });
     }
   }
 
@@ -157,7 +179,7 @@ export class GoogleApiService {
   getFileInfo$(fileId: string | null): Observable<GoogleDriveFileMeta> {
     if (!fileId) {
       this._snackIt('ERROR', T.F.GOOGLE.S_API.ERR_NO_FILE_ID);
-      return throwError({[HANDLED_ERROR_PROP_STR]: 'No file id given'});
+      return throwError({ [HANDLED_ERROR_PROP_STR]: 'No file id given' });
     }
 
     return this._mapHttp$({
@@ -166,7 +188,7 @@ export class GoogleApiService {
       params: {
         key: GOOGLE_SETTINGS_WEB.API_KEY,
         supportsTeamDrives: true,
-        fields: GOOGLE_DEFAULT_FIELDS_FOR_DRIVE
+        fields: GOOGLE_DEFAULT_FIELDS_FOR_DRIVE,
       },
     });
   }
@@ -174,7 +196,7 @@ export class GoogleApiService {
   findFile$(fileName: string): Observable<any> {
     if (!fileName) {
       this._snackIt('ERROR', T.F.GOOGLE.S_API.ERR_NO_FILE_NAME);
-      return throwError({[HANDLED_ERROR_PROP_STR]: 'No file name given'});
+      return throwError({ [HANDLED_ERROR_PROP_STR]: 'No file name given' });
     }
 
     return this._mapHttp$({
@@ -189,32 +211,36 @@ export class GoogleApiService {
   }
 
   // NOTE: file will always be returned as text (makes sense)
-  loadFile$(fileId: string | null): Observable<{ backup: string | undefined; meta: GoogleDriveFileMeta }> {
+  loadFile$(
+    fileId: string | null,
+  ): Observable<{ backup: string | undefined; meta: GoogleDriveFileMeta }> {
     if (!fileId) {
       this._snackIt('ERROR', T.F.GOOGLE.S_API.ERR_NO_FILE_ID);
-      return throwError({[HANDLED_ERROR_PROP_STR]: 'No file id given'});
+      return throwError({ [HANDLED_ERROR_PROP_STR]: 'No file id given' });
     }
 
     return this.getFileInfo$(fileId).pipe(
-      concatMap((meta) => this._mapHttp$({
-        method: 'GET',
-        // workaround for: https://issuetracker.google.com/issues/149891169
-        url: `https://www.googleapis.com/drive/v2/files/${encodeURIComponent(fileId)}`,
-        params: {
-          key: GOOGLE_SETTINGS_WEB.API_KEY,
-          supportsTeamDrives: true,
-          alt: 'media',
-        },
-        responseType: 'text',
-      }).pipe(
-        map((res) => {
-          // console.log('GOOGLE RES', res);
-          return {
-            backup: res,
-            meta,
-          };
-        }),
-      )),
+      concatMap((meta) =>
+        this._mapHttp$({
+          method: 'GET',
+          // workaround for: https://issuetracker.google.com/issues/149891169
+          url: `https://www.googleapis.com/drive/v2/files/${encodeURIComponent(fileId)}`,
+          params: {
+            key: GOOGLE_SETTINGS_WEB.API_KEY,
+            supportsTeamDrives: true,
+            alt: 'media',
+          },
+          responseType: 'text',
+        }).pipe(
+          map((res) => {
+            // console.log('GOOGLE RES', res);
+            return {
+              backup: res,
+              meta,
+            };
+          }),
+        ),
+      ),
     );
   }
 
@@ -234,7 +260,7 @@ export class GoogleApiService {
       metadata.mimeType = 'application/json';
     }
 
-    const multipart: any = (new (MultiPartBuilder as any)())
+    const multipart: any = new (MultiPartBuilder as any)()
       .append('application/json', JSON.stringify(metadata))
       .append(metadata.mimeType, content)
       .finish();
@@ -246,12 +272,12 @@ export class GoogleApiService {
         key: GOOGLE_SETTINGS_WEB.API_KEY,
         uploadType: 'multipart',
         supportsTeamDrives: true,
-        fields: GOOGLE_DEFAULT_FIELDS_FOR_DRIVE
+        fields: GOOGLE_DEFAULT_FIELDS_FOR_DRIVE,
       },
       headers: {
-        'Content-Type': multipart.type
+        'Content-Type': multipart.type,
       },
-      data: multipart.body
+      data: multipart.body,
     });
   }
 
@@ -259,9 +285,12 @@ export class GoogleApiService {
     const session = this._session;
     if (this.isLoggedIn && !this._isTokenExpired(session)) {
       return new Promise((resolve) => resolve(true));
-    } else if (session.refreshToken && (!this._session.accessToken || this._isTokenExpired(session))) {
+    } else if (
+      session.refreshToken &&
+      (!this._session.accessToken || this._isTokenExpired(session))
+    ) {
       try {
-        const {data} = await this._getAccessTokenFromRefreshToken(session.refreshToken);
+        const { data } = await this._getAccessTokenFromRefreshToken(session.refreshToken);
         if (data) {
           this._updateSession({
             accessToken: data.access_token,
@@ -275,16 +304,19 @@ export class GoogleApiService {
         return Promise.reject('Token refresh failed');
       }
     } else {
-      const authCode = await this._matDialog.open(DialogGetAndEnterAuthCodeComponent, {
-        restoreFocus: true,
-        data: {
-          providerName: 'Google Drive',
-          url: GOOGLE_AUTH_URL,
-        },
-      }).afterClosed().toPromise();
+      const authCode = await this._matDialog
+        .open(DialogGetAndEnterAuthCodeComponent, {
+          restoreFocus: true,
+          data: {
+            providerName: 'Google Drive',
+            url: GOOGLE_AUTH_URL,
+          },
+        })
+        .afterClosed()
+        .toPromise();
       if (authCode) {
         try {
-          const {data} = await this._getTokenFromAuthCode(authCode);
+          const { data } = await this._getTokenFromAuthCode(authCode);
           if (data) {
             this._updateSession({
               accessToken: data.access_token,
@@ -303,39 +335,51 @@ export class GoogleApiService {
     }
   }
 
-  private _getTokenFromAuthCode(code: string): Promise<AxiosResponse<{
-    access_token: string;
-    expires_in: number;
-    token_type: string;
-    scope: string;
-    refresh_token: string;
-  }>> {
+  private _getTokenFromAuthCode(
+    code: string,
+  ): Promise<
+    AxiosResponse<{
+      access_token: string;
+      expires_in: number;
+      token_type: string;
+      scope: string;
+      refresh_token: string;
+    }>
+  > {
     return axios.request({
-      url: 'https://oauth2.googleapis.com/token?' + querystring.stringify({
-        client_id: GOOGLE_SETTINGS_ELECTRON.CLIENT_ID,
-        client_secret: GOOGLE_SETTINGS_ELECTRON.API_KEY,
-        grant_type: 'authorization_code',
-        redirect_uri: 'urn:ietf:wg:oauth:2.0:oob',
-        code_verifier: GOOGLE_AUTH_CODE_VERIFIER,
-        code,
-      }),
+      url:
+        'https://oauth2.googleapis.com/token?' +
+        querystring.stringify({
+          client_id: GOOGLE_SETTINGS_ELECTRON.CLIENT_ID,
+          client_secret: GOOGLE_SETTINGS_ELECTRON.API_KEY,
+          grant_type: 'authorization_code',
+          redirect_uri: 'urn:ietf:wg:oauth:2.0:oob',
+          code_verifier: GOOGLE_AUTH_CODE_VERIFIER,
+          code,
+        }),
       method: 'POST',
     });
   }
 
-  private _getAccessTokenFromRefreshToken(refreshToken: string): Promise<AxiosResponse<{
-    access_token: string;
-    expires_in: number;
-    token_type: string;
-    scope: string;
-  }>> {
+  private _getAccessTokenFromRefreshToken(
+    refreshToken: string,
+  ): Promise<
+    AxiosResponse<{
+      access_token: string;
+      expires_in: number;
+      token_type: string;
+      scope: string;
+    }>
+  > {
     return axios.request({
-      url: 'https://oauth2.googleapis.com/token?' + querystring.stringify({
-        client_id: GOOGLE_SETTINGS_ELECTRON.CLIENT_ID,
-        client_secret: GOOGLE_SETTINGS_ELECTRON.API_KEY,
-        grant_type: 'refresh_token',
-        refresh_token: refreshToken,
-      }),
+      url:
+        'https://oauth2.googleapis.com/token?' +
+        querystring.stringify({
+          client_id: GOOGLE_SETTINGS_ELECTRON.CLIENT_ID,
+          client_secret: GOOGLE_SETTINGS_ELECTRON.API_KEY,
+          grant_type: 'refresh_token',
+          refresh_token: refreshToken,
+        }),
       method: 'POST',
     });
   }
@@ -353,7 +397,7 @@ export class GoogleApiService {
       apiKey: GOOGLE_SETTINGS_WEB.API_KEY,
       clientId: GOOGLE_SETTINGS_WEB.CLIENT_ID,
       discoveryDocs: GOOGLE_DISCOVERY_DOCS,
-      scope: GOOGLE_API_SCOPES
+      scope: GOOGLE_API_SCOPES,
     });
   }
 
@@ -371,23 +415,25 @@ export class GoogleApiService {
       this._snackService.open({
         type: 'ERROR',
         msg: T.G.NO_CON,
-        ico: 'cloud_off'
+        ico: 'cloud_off',
       });
       return Promise.reject('No internet');
     }
 
     return new Promise((resolve, reject) => {
-      return this._loadJs().then(() => {
-        // eslint-disable-next-line
-        this._gapi = (window as any)['gapi'];
-        this._gapi.load('client:auth2', () => {
-          this.initClient()
-            .then(() => {
-              resolve(getUser());
-            })
-            .catch(reject);
-        });
-      }).catch(reject);
+      return this._loadJs()
+        .then(() => {
+          // eslint-disable-next-line
+          this._gapi = (window as any)['gapi'];
+          this._gapi.load('client:auth2', () => {
+            this.initClient()
+              .then(() => {
+                resolve(getUser());
+              })
+              .catch(reject);
+          });
+        })
+        .catch(reject);
     });
   }
 
@@ -404,16 +450,26 @@ export class GoogleApiService {
     };
   }) {
     const r: any = res;
-    const accessToken = r.accessToken || r.access_token || r.Zi?.access_token || r.uc?.access_token;
-    const expiresAt = +(r.expiresAt || r.expires_at || r.Zi?.expires_at || r.uc?.expires_at || Date.now() + r.expire_in);
+    const accessToken =
+      r.accessToken || r.access_token || r.Zi?.access_token || r.uc?.access_token;
+    const expiresAt = +(
+      r.expiresAt ||
+      r.expires_at ||
+      r.Zi?.expires_at ||
+      r.uc?.expires_at ||
+      Date.now() + r.expire_in
+    );
 
     if (!accessToken) {
       console.log(res);
       throw new Error('No access token in response');
     }
 
-    if (accessToken !== this._session.accessToken || expiresAt !== this._session.expiresAt) {
-      this._updateSession({accessToken, expiresAt});
+    if (
+      accessToken !== this._session.accessToken ||
+      expiresAt !== this._session.expiresAt
+    ) {
+      this._updateSession({ accessToken, expiresAt });
     }
   }
 
@@ -425,8 +481,8 @@ export class GoogleApiService {
       id: BannerId.GoogleLogin,
       action: {
         label: T.G.LOGIN,
-        fn: () => this.login()
-      }
+        fn: () => this.login(),
+      },
     });
     console.error(err);
   }
@@ -448,7 +504,7 @@ export class GoogleApiService {
       this._handleUnAuthenticated(err);
     } else {
       console.warn(err);
-      this._snackIt('ERROR', T.F.GOOGLE.S_API.ERR, {errStr});
+      this._snackIt('ERROR', T.F.GOOGLE.S_API.ERR, { errStr });
     }
   }
 
@@ -470,65 +526,69 @@ export class GoogleApiService {
         } else {
           return of(true);
         }
-      })
+      }),
     );
 
-    return from(loginObs)
-      .pipe(
-        concatMap(() => {
-          const p: any = {
-            ...paramsIN,
-            headers: {
-              ...(paramsIN.headers || {}),
-              Authorization: `Bearer ${this._session.accessToken}`,
-            }
-          };
+    return from(loginObs).pipe(
+      concatMap(() => {
+        const p: any = {
+          ...paramsIN,
+          headers: {
+            ...(paramsIN.headers || {}),
+            Authorization: `Bearer ${this._session.accessToken}`,
+          },
+        };
 
-          const bodyArg = p.data ? [p.data] : [];
-          const allArgs = [...bodyArg, {
+        const bodyArg = p.data ? [p.data] : [];
+        const allArgs = [
+          ...bodyArg,
+          {
             headers: new HttpHeaders(p.headers),
             params: new HttpParams({
               fromObject: {
                 ...p.params,
                 // needed because negative globs are not working as they should
                 // @see https://github.com/angular/angular/issues/21191
-                'ngsw-bypass': true
-              }
+                'ngsw-bypass': true,
+              },
             }),
             reportProgress: false,
             observe: 'response',
             responseType: paramsIN.responseType,
-          }];
-          const req = new HttpRequest(p.method, p.url, ...allArgs);
-          return this._http.request(req);
-        }),
+          },
+        ];
+        const req = new HttpRequest(p.method, p.url, ...allArgs);
+        return this._http.request(req);
+      }),
 
-        // TODO remove type: 0 @see https://brianflove.com/2018/09/03/angular-http-client-observe-response/
-        // tap(res => console.log(res)),
-        filter(res => !(res === Object(res) && res.type === 0)),
-        map((res: any) => (res && res.body) ? res.body : res),
-        catchError((res) => {
-          if (!isOnline()) {
-            this._snackService.open({
-              type: 'ERROR',
-              msg: T.G.NO_CON,
-              ico: 'cloud_off'
-            });
-          } else if (!res) {
-            this._handleError('No response body');
-          } else if (res && res.status === 401) {
-            this._handleUnAuthenticated(res);
-            return throwError({
-              [HANDLED_ERROR_PROP_STR]: 'Auth Error ' + res.status + ': ' + res.message
-            });
-          } else if (res && (res.status >= 300)) {
-            this._handleError(res);
-          } else if (res && (res.status >= 0)) {
-            this._handleError('Could not connect to google. Check your internet connection.');
-          }
-          return throwError({[HANDLED_ERROR_PROP_STR]: res});
-        }),
-      );
+      // TODO remove type: 0 @see https://brianflove.com/2018/09/03/angular-http-client-observe-response/
+      // tap(res => console.log(res)),
+      filter((res) => !(res === Object(res) && res.type === 0)),
+      map((res: any) => (res && res.body ? res.body : res)),
+      catchError((res) => {
+        if (!isOnline()) {
+          this._snackService.open({
+            type: 'ERROR',
+            msg: T.G.NO_CON,
+            ico: 'cloud_off',
+          });
+        } else if (!res) {
+          this._handleError('No response body');
+        } else if (res && res.status === 401) {
+          this._handleUnAuthenticated(res);
+          return throwError({
+            [HANDLED_ERROR_PROP_STR]: 'Auth Error ' + res.status + ': ' + res.message,
+          });
+        } else if (res && res.status >= 300) {
+          this._handleError(res);
+        } else if (res && res.status >= 0) {
+          this._handleError(
+            'Could not connect to google. Check your internet connection.',
+          );
+        }
+        return throwError({ [HANDLED_ERROR_PROP_STR]: res });
+      }),
+    );
   }
 
   private _loadJs(): Promise<unknown> {
@@ -564,11 +624,10 @@ export class GoogleApiService {
       // script['onreadystatechange'] = loadFunction.bind(this);
       document.getElementsByTagName('head')[0].appendChild(script);
     });
-
   }
 
   private _isTokenExpired(session: any): boolean {
-    const expiresAt = session && session.expiresAt || 0;
+    const expiresAt = (session && session.expiresAt) || 0;
     const expiresIn = expiresAt - (moment().valueOf() + EXPIRES_SAFETY_MARGIN);
     return expiresIn <= 0;
   }

@@ -6,7 +6,7 @@ import { T } from '../../t.const';
   selector: 'theme-select',
   templateUrl: './theme-select.component.html',
   styleUrls: ['./theme-select.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ThemeSelectComponent {
   T: typeof T = T;

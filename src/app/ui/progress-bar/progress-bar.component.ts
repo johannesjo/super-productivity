@@ -1,16 +1,21 @@
-import { ChangeDetectionStrategy, Component, ElementRef, HostBinding, Input } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  ElementRef,
+  HostBinding,
+  Input,
+} from '@angular/core';
 
 @Component({
   selector: 'progress-bar',
   template: '',
   styleUrls: ['./progress-bar.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ProgressBarComponent {
   @HostBinding('class') @Input() cssClass: string = 'bg-primary';
 
-  constructor(private _elRef: ElementRef) {
-  }
+  constructor(private _elRef: ElementRef) {}
 
   @Input() set progress(_value: number) {
     let val;

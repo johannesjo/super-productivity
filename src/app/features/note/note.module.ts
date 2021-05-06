@@ -19,12 +19,7 @@ import { DialogAddNoteComponent } from './dialog-add-note/dialog-add-note.compon
     StoreModule.forFeature(NOTE_FEATURE_NAME, fromNote.noteReducer),
     EffectsModule.forFeature([NoteEffects]),
   ],
-  declarations: [
-    NotesComponent,
-    NoteComponent,
-    DialogAddNoteComponent
-  ],
+  declarations: [NotesComponent, NoteComponent, DialogAddNoteComponent],
   exports: [NotesComponent],
 })
-export class NoteModule {
-}
+export class NoteModule {}

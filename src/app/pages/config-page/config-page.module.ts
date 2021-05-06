@@ -6,13 +6,7 @@ import { UiModule } from '../../ui/ui.module';
 import { JiraViewComponentsModule } from '../../features/issue/providers/jira/jira-view-components/jira-view-components.module';
 
 @NgModule({
-  imports: [
-    CommonModule,
-    ConfigModule,
-    UiModule,
-    JiraViewComponentsModule,
-  ],
-  declarations: [ConfigPageComponent]
+  imports: [CommonModule, ConfigModule, UiModule, JiraViewComponentsModule],
+  declarations: [ConfigPageComponent],
 })
-export class ConfigPageModule {
-}
+export class ConfigPageModule {}

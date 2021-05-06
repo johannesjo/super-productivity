@@ -13,5 +13,3 @@ export const loadFromDb = createAction(
   '[Persistence] Load from DB',
   props<{ dbKey: string }>(),
 );
-
-

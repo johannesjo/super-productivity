@@ -11,9 +11,15 @@ import {
   updateNoteOrder,
   updateNotes,
   upsertNote,
-  upsertNotes
+  upsertNotes,
 } from './note.actions';
-import { Action, createFeatureSelector, createReducer, createSelector, on } from '@ngrx/store';
+import {
+  Action,
+  createFeatureSelector,
+  createReducer,
+  createSelector,
+  on,
+} from '@ngrx/store';
 
 export type NoteState = EntityState<Note>;
 
@@ -39,7 +45,7 @@ export const selectNoteById = createSelector(
       throw new Error('No note');
     }
     return n;
-  }
+  },
 );
 
 const _reducer = createReducer<NoteState>(
@@ -52,41 +58,39 @@ const _reducer = createReducer<NoteState>(
 
   on(updateNoteOrder, (state, payload) => ({
     ...state,
-    ids: payload.ids
+    ids: payload.ids,
   })),
 
   on(addNote, (state, payload) => ({
     ...state,
     entities: {
       ...state.entities,
-      [payload.note.id]: payload.note
+      [payload.note.id]: payload.note,
     },
     // add to top rather than bottom
-    ids: [payload.note.id, ...state.ids] as string[] | number[]
+    ids: [payload.note.id, ...state.ids] as string[] | number[],
   })),
 
-  on(upsertNote, (state, {note}) => adapter.upsertOne(note, state)),
+  on(upsertNote, (state, { note }) => adapter.upsertOne(note, state)),
 
-  on(addNotes, (state, {notes}) => adapter.addMany(notes, state)),
+  on(addNotes, (state, { notes }) => adapter.addMany(notes, state)),
 
-  on(upsertNotes, (state, {notes}) => adapter.upsertMany(notes, state)),
+  on(upsertNotes, (state, { notes }) => adapter.upsertMany(notes, state)),
 
-  on(updateNote, (state, {note}) => adapter.updateOne(note, state)),
+  on(updateNote, (state, { note }) => adapter.updateOne(note, state)),
 
-  on(updateNotes, (state, {notes}) => adapter.updateMany(notes, state)),
+  on(updateNotes, (state, { notes }) => adapter.updateMany(notes, state)),
 
-  on(deleteNote, (state, {id}) => adapter.removeOne(id, state)),
+  on(deleteNote, (state, { id }) => adapter.removeOne(id, state)),
 
-  on(deleteNotes, (state, {ids}) => adapter.removeMany(ids, state)),
+  on(deleteNotes, (state, { ids }) => adapter.removeMany(ids, state)),
 
   on(clearNotes, (state) => adapter.removeAll(state)),
 );
 
 export function noteReducer(
   state: NoteState = initialNoteState,
-  action: Action
+  action: Action,
 ): NoteState {
   return _reducer(state, action);
 }
-
-

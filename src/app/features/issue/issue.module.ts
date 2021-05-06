@@ -16,16 +16,7 @@ import { CaldavIssueModule } from './providers/caldav/caldav-issue/caldav-issue.
     GitlabIssueModule,
     CaldavIssueModule,
   ],
-  declarations: [
-    IssueHeaderComponent,
-    IssueContentComponent,
-    IssueIconPipe,
-  ],
-  exports: [
-    IssueHeaderComponent,
-    IssueContentComponent,
-    IssueIconPipe,
-  ],
+  declarations: [IssueHeaderComponent, IssueContentComponent, IssueIconPipe],
+  exports: [IssueHeaderComponent, IssueContentComponent, IssueIconPipe],
 })
-export class IssueModule {
-}
+export class IssueModule {}

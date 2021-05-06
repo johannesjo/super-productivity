@@ -9,22 +9,40 @@ import {
   OnDestroy,
   QueryList,
   ViewChild,
-  ViewChildren
+  ViewChildren,
 } from '@angular/core';
-import { ShowSubTasksMode, TaskAdditionalInfoTargetPanel, TaskWithSubTasks } from '../task.model';
+import {
+  ShowSubTasksMode,
+  TaskAdditionalInfoTargetPanel,
+  TaskWithSubTasks,
+} from '../task.model';
 import { IssueService } from '../../issue/issue.service';
 import { TaskAttachmentService } from '../task-attachment/task-attachment.service';
 import { BehaviorSubject, merge, Observable, of, Subject, Subscription } from 'rxjs';
-import { TaskAttachment, TaskAttachmentCopy } from '../task-attachment/task-attachment.model';
-import { catchError, delay, filter, map, shareReplay, switchMap, withLatestFrom } from 'rxjs/operators';
+import {
+  TaskAttachment,
+  TaskAttachmentCopy,
+} from '../task-attachment/task-attachment.model';
+import {
+  catchError,
+  delay,
+  filter,
+  map,
+  shareReplay,
+  switchMap,
+  withLatestFrom,
+} from 'rxjs/operators';
 import { T } from '../../../t.const';
 import { TaskService } from '../task.service';
-import { expandAnimation, expandFadeInOnlyAnimation } from '../../../ui/animations/expand.ani';
+import {
+  expandAnimation,
+  expandFadeInOnlyAnimation,
+} from '../../../ui/animations/expand.ani';
 import { fadeAnimation } from '../../../ui/animations/fade.ani';
 import { swirlAnimation } from '../../../ui/animations/swirl-in-out.ani';
 import { DialogTimeEstimateComponent } from '../dialog-time-estimate/dialog-time-estimate.component';
 import { MatDialog } from '@angular/material/dialog';
-import { isTouchOnly, IS_TOUCH_ONLY } from '../../../util/is-touch';
+import { IS_TOUCH_ONLY, isTouchOnly } from '../../../util/is-touch';
 import { DialogAddTaskReminderComponent } from '../dialog-add-task-reminder/dialog-add-task-reminder.component';
 import { AddTaskReminderInterface } from '../dialog-add-task-reminder/add-task-reminder-interface';
 import { ReminderCopy } from '../../reminder/reminder.model';
@@ -60,14 +78,22 @@ interface IssueAndType {
   templateUrl: './task-additional-info.component.html',
   styleUrls: ['./task-additional-info.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  animations: [expandAnimation, expandFadeInOnlyAnimation, fadeAnimation, swirlAnimation, taskAdditionalInfoTaskChangeAnimation, noopAnimation]
-
+  animations: [
+    expandAnimation,
+    expandFadeInOnlyAnimation,
+    fadeAnimation,
+    swirlAnimation,
+    taskAdditionalInfoTaskChangeAnimation,
+    noopAnimation,
+  ],
 })
 export class TaskAdditionalInfoComponent implements AfterViewInit, OnDestroy {
   @HostBinding('@noop') alwaysTrue: boolean = true;
 
-  @ViewChildren(TaskAdditionalInfoItemComponent) itemEls?: QueryList<TaskAdditionalInfoItemComponent>;
-  @ViewChild('attachmentPanelElRef') attachmentPanelElRef?: TaskAdditionalInfoItemComponent;
+  @ViewChildren(TaskAdditionalInfoItemComponent)
+  itemEls?: QueryList<TaskAdditionalInfoItemComponent>;
+  @ViewChild('attachmentPanelElRef')
+  attachmentPanelElRef?: TaskAdditionalInfoItemComponent;
 
   IS_TOUCH_ONLY: boolean = IS_TOUCH_ONLY;
   ShowSubTasksMode: typeof ShowSubTasksMode = ShowSubTasksMode;
@@ -79,10 +105,7 @@ export class TaskAdditionalInfoComponent implements AfterViewInit, OnDestroy {
   issueAttachments: TaskAttachment[] = [];
   reminderId$: BehaviorSubject<string | null> = new BehaviorSubject<string | null>(null);
   reminderData$: Observable<ReminderCopy | null> = this.reminderId$.pipe(
-    switchMap(id => id
-      ? this._reminderService.getById$(id)
-      : of(null)
-    ),
+    switchMap((id) => (id ? this._reminderService.getById$(id) : of(null))),
   );
 
   issueIdAndType$: Subject<IssueAndType> = new Subject();
@@ -94,34 +117,42 @@ export class TaskAdditionalInfoComponent implements AfterViewInit, OnDestroy {
 
   issueDataTrigger$: Observable<IssueAndType | null> = merge(
     this.issueIdAndTypeShared$,
-    this.issueDataNullTrigger$
+    this.issueDataNullTrigger$,
   );
   issueData?: IssueData | null | false;
   repeatCfgId$: BehaviorSubject<string | null> = new BehaviorSubject<string | null>(null);
   repeatCfgDays$: Observable<string | null> = this.repeatCfgId$.pipe(
-    switchMap(id => (id)
-      // TODO for some reason this can be undefined, maybe there is a better way
-      ? this._taskRepeatCfgService.getTaskRepeatCfgByIdAllowUndefined$(id).pipe(
-        map(repeatCfg => {
-          if (!repeatCfg) {
-            return null;
-          }
-          const days: (keyof TaskRepeatCfg)[] = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
-          const localWeekDays = moment.weekdaysMin();
-          return days.filter(day => repeatCfg[day])
-            .map((day, index) => localWeekDays[days.indexOf(day)])
-            .join(', ');
-        }),
-      )
-
-      : of(null)
+    switchMap((id) =>
+      id
+        ? // TODO for some reason this can be undefined, maybe there is a better way
+          this._taskRepeatCfgService.getTaskRepeatCfgByIdAllowUndefined$(id).pipe(
+            map((repeatCfg) => {
+              if (!repeatCfg) {
+                return null;
+              }
+              const days: (keyof TaskRepeatCfg)[] = [
+                'sunday',
+                'monday',
+                'tuesday',
+                'wednesday',
+                'thursday',
+                'friday',
+                'saturday',
+              ];
+              const localWeekDays = moment.weekdaysMin();
+              return days
+                .filter((day) => repeatCfg[day])
+                .map((day, index) => localWeekDays[days.indexOf(day)])
+                .join(', ');
+            }),
+          )
+        : of(null),
     ),
   );
   parentId$: BehaviorSubject<string | null> = new BehaviorSubject<string | null>(null);
-  parentTaskData$: Observable<TaskWithSubTasks | null> = this.parentId$.pipe(switchMap((id) => !!id
-    ? this.taskService.getByIdWithSubTaskData$(id)
-    : of(null)
-  ));
+  parentTaskData$: Observable<TaskWithSubTasks | null> = this.parentId$.pipe(
+    switchMap((id) => (!!id ? this.taskService.getByIdWithSubTaskData$(id) : of(null))),
+  );
 
   localAttachments?: TaskAttachment[];
 
@@ -133,12 +164,14 @@ export class TaskAdditionalInfoComponent implements AfterViewInit, OnDestroy {
         if (!this._taskData || !this._taskData.projectId) {
           throw new Error('task data not ready');
         }
-        return this._issueService.getById$(args.type, args.id, this._taskData.projectId).pipe(
-          // NOTE we need this, otherwise the error is going to weird up the observable
-          catchError(() => {
-            return of(false);
-          }),
-        ) as Observable<false | IssueData>;
+        return this._issueService
+          .getById$(args.type, args.id, this._taskData.projectId)
+          .pipe(
+            // NOTE we need this, otherwise the error is going to weird up the observable
+            catchError(() => {
+              return of(false);
+            }),
+          ) as Observable<false | IssueData>;
       }
       return of(null);
     }),
@@ -149,9 +182,9 @@ export class TaskAdditionalInfoComponent implements AfterViewInit, OnDestroy {
   );
   issueAttachments$: Observable<TaskAttachmentCopy[]> = this.issueData$.pipe(
     withLatestFrom(this.issueIdAndTypeShared$),
-    map(([data, {type}]) => (data && type)
-      ? this._issueService.getMappedAttachments(type, data)
-      : [])
+    map(([data, { type }]) =>
+      data && type ? this._issueService.getMappedAttachments(type, data) : [],
+    ),
   );
   IS_MOBILE: boolean = IS_MOBILE;
   defaultTaskNotes: string = '';
@@ -175,32 +208,51 @@ export class TaskAdditionalInfoComponent implements AfterViewInit, OnDestroy {
     private _cd: ChangeDetectorRef,
   ) {
     // NOTE: needs to be assigned here before any setter is called
-    this._subs.add(this.issueAttachments$.subscribe((attachments) => this.issueAttachments = attachments));
-    this._subs.add(this._globalConfigService.misc$.subscribe((misc) => this.defaultTaskNotes = misc.taskNotesTpl));
-    this._subs.add(this.issueData$.subscribe((issueData) => {
-      this.issueData = issueData;
-      this._cd.detectChanges();
-    }));
+    this._subs.add(
+      this.issueAttachments$.subscribe(
+        (attachments) => (this.issueAttachments = attachments),
+      ),
+    );
+    this._subs.add(
+      this._globalConfigService.misc$.subscribe(
+        (misc) => (this.defaultTaskNotes = misc.taskNotesTpl),
+      ),
+    );
+    this._subs.add(
+      this.issueData$.subscribe((issueData) => {
+        this.issueData = issueData;
+        this._cd.detectChanges();
+      }),
+    );
 
     // NOTE: this works as long as there is no other place to display issue attachments for jira
     if (IS_ELECTRON) {
-      this._subs.add(this.issueIdAndTypeShared$.pipe(
-        filter(({id, type}) => type === JIRA_TYPE),
-        // not strictly reactive reactive but should work a 100% as issueIdAndType are triggered after task data
-        switchMap(() => {
-          if (!this._taskData || !this._taskData.projectId) {
-            throw new Error('task data not ready');
-          }
-          return this._projectService.getJiraCfgForProject$(this._taskData.projectId);
-        })
-      ).subscribe((jiraCfg) => {
-        if (jiraCfg.isEnabled) {
-          (this._electronService.ipcRenderer as typeof ipcRenderer).send(IPC.JIRA_SETUP_IMG_HEADERS, {
-            jiraCfg,
-            wonkyCookie: jiraCfg.isWonkyCookieMode && sessionStorage.getItem(SS_JIRA_WONKY_COOKIE)
-          });
-        }
-      }));
+      this._subs.add(
+        this.issueIdAndTypeShared$
+          .pipe(
+            filter(({ id, type }) => type === JIRA_TYPE),
+            // not strictly reactive reactive but should work a 100% as issueIdAndType are triggered after task data
+            switchMap(() => {
+              if (!this._taskData || !this._taskData.projectId) {
+                throw new Error('task data not ready');
+              }
+              return this._projectService.getJiraCfgForProject$(this._taskData.projectId);
+            }),
+          )
+          .subscribe((jiraCfg) => {
+            if (jiraCfg.isEnabled) {
+              (this._electronService.ipcRenderer as typeof ipcRenderer).send(
+                IPC.JIRA_SETUP_IMG_HEADERS,
+                {
+                  jiraCfg,
+                  wonkyCookie:
+                    jiraCfg.isWonkyCookieMode &&
+                    sessionStorage.getItem(SS_JIRA_WONKY_COOKIE),
+                },
+              );
+            }
+          }),
+      );
     }
     // this.issueIdAndType$.subscribe((v) => console.log('issueIdAndType$', v));
     // this.issueDataTrigger$.subscribe((v) => console.log('issueDataTrigger$', v));
@@ -216,37 +268,45 @@ export class TaskAdditionalInfoComponent implements AfterViewInit, OnDestroy {
     this._taskData = newVal;
     this.localAttachments = newVal.attachments;
 
-    if (!prev || !newVal || (prev.id !== newVal.id)) {
+    if (!prev || !newVal || prev.id !== newVal.id) {
       this._focusFirst();
     }
 
     // NOTE: check for task change or issue update
-    if (!prev || (prev.issueId !== newVal.issueId || newVal.issueWasUpdated === true && !prev.issueWasUpdated)) {
+    if (
+      !prev ||
+      prev.issueId !== newVal.issueId ||
+      (newVal.issueWasUpdated === true && !prev.issueWasUpdated)
+    ) {
       this.issueDataNullTrigger$.next(null);
       this.issueIdAndType$.next({
         id: newVal.issueId,
-        type: newVal.issueType
+        type: newVal.issueType,
       });
     }
     if (!newVal.issueId) {
       this.issueDataNullTrigger$.next(null);
     }
 
-    if (!prev || (prev.reminderId !== newVal.reminderId)) {
+    if (!prev || prev.reminderId !== newVal.reminderId) {
       this.reminderId$.next(newVal.reminderId);
     }
 
-    if (!prev || (prev.repeatCfgId !== newVal.repeatCfgId)) {
+    if (!prev || prev.repeatCfgId !== newVal.repeatCfgId) {
       this.repeatCfgId$.next(newVal.repeatCfgId);
     }
 
-    if (!prev || (prev.parentId !== newVal.parentId)) {
+    if (!prev || prev.parentId !== newVal.parentId) {
       this.parentId$.next(newVal.parentId);
     }
   }
 
   get progress() {
-    return this._taskData && this._taskData.timeEstimate && (this._taskData.timeSpent / this._taskData.timeEstimate) * 100;
+    return (
+      this._taskData &&
+      this._taskData.timeEstimate &&
+      (this._taskData.timeSpent / this._taskData.timeEstimate) * 100
+    );
   }
 
   @HostListener('dragenter', ['$event']) onDragEnter(ev: DragEvent) {
@@ -271,24 +331,28 @@ export class TaskAdditionalInfoComponent implements AfterViewInit, OnDestroy {
   }
 
   ngAfterViewInit(): void {
-    this._subs.add(this.taskService.taskAdditionalInfoTargetPanel$.pipe(
-      // hacky but we need a minimal delay to make sure selectedTaskId is ready
-      delay(50),
-      withLatestFrom(this.taskService.selectedTaskId$),
-      filter(([, id]) => !!id),
-      // delay(100),
-    ).subscribe(([v]) => {
-      if (v === TaskAdditionalInfoTargetPanel.Attachments) {
-        if (!this.attachmentPanelElRef) {
-          devError('this.attachmentPanelElRef not ready');
-          this._focusFirst();
-        } else {
-          this.focusItem(this.attachmentPanelElRef);
-        }
-      } else {
-        this._focusFirst();
-      }
-    }));
+    this._subs.add(
+      this.taskService.taskAdditionalInfoTargetPanel$
+        .pipe(
+          // hacky but we need a minimal delay to make sure selectedTaskId is ready
+          delay(50),
+          withLatestFrom(this.taskService.selectedTaskId$),
+          filter(([, id]) => !!id),
+          // delay(100),
+        )
+        .subscribe(([v]) => {
+          if (v === TaskAdditionalInfoTargetPanel.Attachments) {
+            if (!this.attachmentPanelElRef) {
+              devError('this.attachmentPanelElRef not ready');
+              this._focusFirst();
+            } else {
+              this.focusItem(this.attachmentPanelElRef);
+            }
+          } else {
+            this._focusFirst();
+          }
+        }),
+    );
   }
 
   ngOnDestroy(): void {
@@ -296,8 +360,11 @@ export class TaskAdditionalInfoComponent implements AfterViewInit, OnDestroy {
   }
 
   changeTaskNotes($event: string) {
-    if (!this.defaultTaskNotes || ($event && $event.trim() !== this.defaultTaskNotes.trim())) {
-      this.taskService.update(this.task.id, {notes: $event});
+    if (
+      !this.defaultTaskNotes ||
+      ($event && $event.trim() !== this.defaultTaskNotes.trim())
+    ) {
+      this.taskService.update(this.task.id, { notes: $event });
     }
   }
 
@@ -306,11 +373,10 @@ export class TaskAdditionalInfoComponent implements AfterViewInit, OnDestroy {
   }
 
   estimateTime() {
-    this._matDialog
-      .open(DialogTimeEstimateComponent, {
-        data: {task: this.task},
-        autoFocus: !isTouchOnly(),
-      });
+    this._matDialog.open(DialogTimeEstimateComponent, {
+      data: { task: this.task },
+      autoFocus: !isTouchOnly(),
+    });
   }
 
   editReminder() {
@@ -320,7 +386,7 @@ export class TaskAdditionalInfoComponent implements AfterViewInit, OnDestroy {
 
     this._matDialog.open(DialogAddTaskReminderComponent, {
       restoreFocus: true,
-      data: {task: this.task} as AddTaskReminderInterface
+      data: { task: this.task } as AddTaskReminderInterface,
     });
   }
 
@@ -329,7 +395,7 @@ export class TaskAdditionalInfoComponent implements AfterViewInit, OnDestroy {
       restoreFocus: false,
       data: {
         task: this.task,
-      }
+      },
     });
   }
 
@@ -339,7 +405,7 @@ export class TaskAdditionalInfoComponent implements AfterViewInit, OnDestroy {
         data: {},
       })
       .afterClosed()
-      .subscribe(result => {
+      .subscribe((result) => {
         if (result) {
           this.attachmentService.addAttachment(this.task.id, {
             ...result,
@@ -364,10 +430,13 @@ export class TaskAdditionalInfoComponent implements AfterViewInit, OnDestroy {
 
     if (ev.key === 'ArrowUp' && this.selectedItemIndex > 0) {
       this.selectedItemIndex--;
-      (this.itemEls).toArray()[this.selectedItemIndex].focusEl();
-    } else if (ev.key === 'ArrowDown' && (this.itemEls).toArray().length > (this.selectedItemIndex + 1)) {
+      this.itemEls.toArray()[this.selectedItemIndex].focusEl();
+    } else if (
+      ev.key === 'ArrowDown' &&
+      this.itemEls.toArray().length > this.selectedItemIndex + 1
+    ) {
       this.selectedItemIndex++;
-      (this.itemEls).toArray()[this.selectedItemIndex].focusEl();
+      this.itemEls.toArray()[this.selectedItemIndex].focusEl();
     }
   }
 
@@ -378,7 +447,7 @@ export class TaskAdditionalInfoComponent implements AfterViewInit, OnDestroy {
         throw new Error();
       }
 
-      const i = (this.itemEls).toArray().findIndex(el => el === cmpInstance);
+      const i = this.itemEls.toArray().findIndex((el) => el === cmpInstance);
       if (i === -1) {
         this.focusItem(cmpInstance);
       } else {
@@ -394,7 +463,7 @@ export class TaskAdditionalInfoComponent implements AfterViewInit, OnDestroy {
         throw new Error('No task data');
       }
 
-      this.taskService.update(this._taskData.id, {title: newTitle});
+      this.taskService.update(this._taskData.id, { title: newTitle });
     }
   }
 
@@ -403,8 +472,7 @@ export class TaskAdditionalInfoComponent implements AfterViewInit, OnDestroy {
       if (!this.itemEls) {
         throw new Error();
       }
-      this.focusItem((this.itemEls).first, 0);
+      this.focusItem(this.itemEls.first, 0);
     }, 150);
   }
-
 }

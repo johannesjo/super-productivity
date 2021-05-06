@@ -1,4 +1,10 @@
-import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  EventEmitter,
+  Input,
+  Output,
+} from '@angular/core';
 import { T } from '../../t.const';
 import { LS_LAST_REMINDER_DATE } from '../../core/persistence/ls-keys.const';
 import { timestampToDatetimeInputString } from '../../util/timestamp-to-datetime-input-string';
@@ -7,7 +13,7 @@ import { timestampToDatetimeInputString } from '../../util/timestamp-to-datetime
   selector: 'datetime-input',
   templateUrl: './datetime-input.component.html',
   styleUrls: ['./datetime-input.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class DatetimeInputComponent {
   @Input() name: string | undefined;
@@ -94,5 +100,4 @@ export class DatetimeInputComponent {
     }
     return timestampToDatetimeInputString(dateTime);
   }
-
 }

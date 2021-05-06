@@ -17,7 +17,7 @@ import { ipcRenderer } from 'electron';
 
 @Injectable()
 export class TaskElectronEffects {
-  @Effect({dispatch: false})
+  @Effect({ dispatch: false })
   taskChangeElectron$: any = this._actions$.pipe(
     ofType(
       TaskActionTypes.SetCurrentTask,
@@ -27,37 +27,50 @@ export class TaskElectronEffects {
     withLatestFrom(this._store$.pipe(select(selectCurrentTask))),
     tap(([action, current]) => {
       if (IS_ELECTRON) {
-        (this._electronService.ipcRenderer as typeof ipcRenderer).send(IPC.CURRENT_TASK_UPDATED, {current});
-      }
-    })
-  );
-
-  @Effect({dispatch: false})
-  setTaskBarNoProgress$: Observable<any> = this._actions$.pipe(
-    ofType(
-      TaskActionTypes.SetCurrentTask,
-    ),
-    filter(() => IS_ELECTRON),
-    tap((act: SetCurrentTask) => {
-      if (!act.payload) {
-        (this._electronService.ipcRenderer as typeof ipcRenderer).send(IPC.SET_PROGRESS_BAR, {progress: 0});
+        (this._electronService.ipcRenderer as typeof ipcRenderer).send(
+          IPC.CURRENT_TASK_UPDATED,
+          {
+            current,
+          },
+        );
       }
     }),
   );
 
-  @Effect({dispatch: false})
+  @Effect({ dispatch: false })
+  setTaskBarNoProgress$: Observable<any> = this._actions$.pipe(
+    ofType(TaskActionTypes.SetCurrentTask),
+    filter(() => IS_ELECTRON),
+    tap((act: SetCurrentTask) => {
+      if (!act.payload) {
+        (this._electronService.ipcRenderer as typeof ipcRenderer).send(
+          IPC.SET_PROGRESS_BAR,
+          {
+            progress: 0,
+          },
+        );
+      }
+    }),
+  );
+
+  @Effect({ dispatch: false })
   setTaskBarProgress$: Observable<any> = this._actions$.pipe(
-    ofType(
-      TaskActionTypes.AddTimeSpent,
-    ),
+    ofType(TaskActionTypes.AddTimeSpent),
     filter(() => IS_ELECTRON),
     withLatestFrom(this._configService.cfg$),
     // we display pomodoro progress for pomodoro
-    filter(([a, cfg]: [AddTimeSpent, GlobalConfigState]) => !cfg || !cfg.pomodoro.isEnabled),
+    filter(
+      ([a, cfg]: [AddTimeSpent, GlobalConfigState]) => !cfg || !cfg.pomodoro.isEnabled,
+    ),
     map(([act]) => act.payload.task),
     tap((task: Task) => {
       const progress = task.timeSpent / task.timeEstimate;
-      (this._electronService.ipcRenderer as typeof ipcRenderer).send(IPC.SET_PROGRESS_BAR, {progress});
+      (this._electronService.ipcRenderer as typeof ipcRenderer).send(
+        IPC.SET_PROGRESS_BAR,
+        {
+          progress,
+        },
+      );
     }),
   );
 
@@ -66,9 +79,5 @@ export class TaskElectronEffects {
     private _store$: Store<any>,
     private _configService: GlobalConfigService,
     private _electronService: ElectronService,
-  ) {
-  }
-
+  ) {}
 }
-
-

@@ -1,4 +1,11 @@
-import { ChangeDetectionStrategy, Component, ElementRef, HostListener, OnDestroy, ViewChild } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  ElementRef,
+  HostListener,
+  OnDestroy,
+  ViewChild,
+} from '@angular/core';
 import { BookmarkService } from '../bookmark.service';
 import { MatDialog } from '@angular/material/dialog';
 import { DialogEditBookmarkComponent } from '../dialog-edit-bookmark/dialog-edit-bookmark.component';
@@ -14,10 +21,7 @@ import { T } from '../../../t.const';
   templateUrl: './bookmark-bar.component.html',
   styleUrls: ['./bookmark-bar.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  animations: [
-    fadeAnimation,
-    slideAnimation,
-  ],
+  animations: [fadeAnimation, slideAnimation],
 })
 export class BookmarkBarComponent implements OnDestroy {
   isDragOver: boolean = false;
@@ -41,16 +45,16 @@ export class BookmarkBarComponent implements OnDestroy {
     // }
     // });
 
-    this._subs.add(this._dragulaService.dropModel(this.LIST_ID)
-      .subscribe(({targetModel}: any) => {
+    this._subs.add(
+      this._dragulaService.dropModel(this.LIST_ID).subscribe(({ targetModel }: any) => {
         // const {target, source, targetModel, item} = params;
         const newIds = targetModel.map((m: Bookmark) => m.id);
         this.bookmarkService.reorderBookmarks(newIds);
-      })
+      }),
     );
   }
 
-  @ViewChild('bookmarkBar', {read: ElementRef}) set bookmarkBarEl(content: ElementRef) {
+  @ViewChild('bookmarkBar', { read: ElementRef }) set bookmarkBarEl(content: ElementRef) {
     if (content && content.nativeElement) {
       this.bookmarkBarHeight = content.nativeElement.offsetHeight;
     }
@@ -79,12 +83,14 @@ export class BookmarkBarComponent implements OnDestroy {
   }
 
   openEditDialog(bookmark?: Bookmark) {
-    this._matDialog.open(DialogEditBookmarkComponent, {
-      restoreFocus: true,
-      data: {
-        bookmark
-      },
-    }).afterClosed()
+    this._matDialog
+      .open(DialogEditBookmarkComponent, {
+        restoreFocus: true,
+        data: {
+          bookmark,
+        },
+      })
+      .afterClosed()
       .subscribe((bookmarkIN) => {
         if (bookmarkIN) {
           if (bookmarkIN.id) {

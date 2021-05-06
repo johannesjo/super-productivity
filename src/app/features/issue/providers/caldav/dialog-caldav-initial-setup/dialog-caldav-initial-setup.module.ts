@@ -4,12 +4,8 @@ import { UiModule } from '../../../../../ui/ui.module';
 import { DialogCaldavInitialSetupComponent } from './dialog-caldav-initial-setup.component';
 
 @NgModule({
-  imports: [
-    CommonModule,
-    UiModule,
-  ],
+  imports: [CommonModule, UiModule],
   declarations: [DialogCaldavInitialSetupComponent],
   exports: [],
 })
-export class DialogCaldavInitialSetupModule {
-}
+export class DialogCaldavInitialSetupModule {}

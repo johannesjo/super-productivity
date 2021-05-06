@@ -4,13 +4,7 @@ import { TagTaskPageComponent } from './tag-task-page.component';
 import { WorkViewModule } from '../../features/work-view/work-view.module';
 
 @NgModule({
-  declarations: [
-    TagTaskPageComponent,
-  ],
-  imports: [
-    CommonModule,
-    WorkViewModule,
-  ],
+  declarations: [TagTaskPageComponent],
+  imports: [CommonModule, WorkViewModule],
 })
-export class TagTaskPageModule {
-}
+export class TagTaskPageModule {}

@@ -10,7 +10,7 @@ import { TaskService } from '../../../../../tasks/task.service';
   templateUrl: './gitlab-issue-content.component.html',
   styleUrls: ['./gitlab-issue-content.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  animations: [expandAnimation]
+  animations: [expandAnimation],
 })
 export class GitlabIssueContentComponent {
   @Input() issue?: GitlabIssue;
@@ -18,10 +18,7 @@ export class GitlabIssueContentComponent {
 
   T: typeof T = T;
 
-  constructor(
-    private readonly  _taskService: TaskService,
-  ) {
-  }
+  constructor(private readonly _taskService: TaskService) {}
 
   hideUpdates() {
     this._taskService.markIssueUpdatesAsRead((this.task as TaskWithSubTasks).id);

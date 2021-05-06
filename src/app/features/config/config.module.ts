@@ -21,26 +21,31 @@ import { FormlyMatSliderModule } from '@ngx-formly/material/slider';
     FormsModule,
     ReactiveFormsModule,
     FormlyModule.forChild({
-      types: [{
-        name: 'keyboard',
-        component: KeyboardInputComponent,
-        extends: 'input',
-        wrappers: ['form-field'],
-      }, {
-        name: 'icon',
-        component: IconInputComponent,
-        extends: 'input',
-        wrappers: ['form-field'],
-      }, {
-        name: 'project-select',
-        component: SelectProjectComponent,
-        // technically no input, but as the properties get us what we need...
-        extends: 'input',
-        wrappers: ['form-field'],
-      }, {
-        name: 'repeat',
-        component: RepeatSectionTypeComponent,
-      }]
+      types: [
+        {
+          name: 'keyboard',
+          component: KeyboardInputComponent,
+          extends: 'input',
+          wrappers: ['form-field'],
+        },
+        {
+          name: 'icon',
+          component: IconInputComponent,
+          extends: 'input',
+          wrappers: ['form-field'],
+        },
+        {
+          name: 'project-select',
+          component: SelectProjectComponent,
+          // technically no input, but as the properties get us what we need...
+          extends: 'input',
+          wrappers: ['form-field'],
+        },
+        {
+          name: 'repeat',
+          component: RepeatSectionTypeComponent,
+        },
+      ],
     }),
     FormlyMatSliderModule,
     CommonModule,
@@ -57,10 +62,6 @@ import { FormlyMatSliderModule } from '@ngx-formly/material/slider';
     SelectProjectComponent,
     RepeatSectionTypeComponent,
   ],
-  exports: [
-    ConfigSectionComponent,
-    ConfigFormComponent
-  ],
+  exports: [ConfigSectionComponent, ConfigFormComponent],
 })
-export class ConfigModule {
-}
+export class ConfigModule {}

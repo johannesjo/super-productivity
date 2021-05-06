@@ -18,7 +18,7 @@ function handleData(msgData: any) {
   }
 }
 
-addEventListener('message', ({data}) => {
+addEventListener('message', ({ data }) => {
   try {
     const strToHandle = handleData(data);
     postMessage({

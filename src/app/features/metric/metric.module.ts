@@ -27,16 +27,8 @@ import { MigrateMetricService } from './migrate-metric.service';
     EffectsModule.forFeature([MetricEffects]),
     RouterModule,
   ],
-  declarations: [
-    EvaluationSheetComponent,
-    MetricComponent,
-    ImprovementBannerComponent,
-  ],
-  exports: [
-    EvaluationSheetComponent,
-    MetricComponent,
-    ImprovementBannerComponent,
-  ],
+  declarations: [EvaluationSheetComponent, MetricComponent, ImprovementBannerComponent],
+  exports: [EvaluationSheetComponent, MetricComponent, ImprovementBannerComponent],
 })
 export class MetricModule {
   constructor(private _migrateMetricService: MigrateMetricService) {
@@ -83,5 +75,4 @@ export class MetricModule {
   //     });
   //   }, 300);
   // }
-
 }

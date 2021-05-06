@@ -5,7 +5,7 @@ import {
   DeleteObstructions,
   ObstructionActions,
   ObstructionActionTypes,
-  UpdateObstruction
+  UpdateObstruction,
 } from './obstruction.actions';
 import { Obstruction, ObstructionState } from '../obstruction.model';
 import { createFeatureSelector, createSelector } from '@ngrx/store';
@@ -16,10 +16,23 @@ import { migrateObstructionState } from '../../migrate-metric-states.util';
 export const OBSTRUCTION_FEATURE_NAME = 'obstruction';
 
 export const adapter: EntityAdapter<Obstruction> = createEntityAdapter<Obstruction>();
-export const selectObstructionFeatureState = createFeatureSelector<ObstructionState>(OBSTRUCTION_FEATURE_NAME);
-export const {selectIds, selectEntities, selectAll, selectTotal} = adapter.getSelectors();
-export const selectAllObstructions = createSelector(selectObstructionFeatureState, selectAll);
-export const selectAllObstructionIds = createSelector(selectObstructionFeatureState, selectIds);
+export const selectObstructionFeatureState = createFeatureSelector<ObstructionState>(
+  OBSTRUCTION_FEATURE_NAME,
+);
+export const {
+  selectIds,
+  selectEntities,
+  selectAll,
+  selectTotal,
+} = adapter.getSelectors();
+export const selectAllObstructions = createSelector(
+  selectObstructionFeatureState,
+  selectAll,
+);
+export const selectAllObstructionIds = createSelector(
+  selectObstructionFeatureState,
+  selectIds,
+);
 
 export const initialObstructionState: ObstructionState = adapter.getInitialState({
   // additional entity state properties
@@ -27,12 +40,11 @@ export const initialObstructionState: ObstructionState = adapter.getInitialState
 
 export function obstructionReducer(
   state: ObstructionState = initialObstructionState,
-  action: ObstructionActions
+  action: ObstructionActions,
 ): ObstructionState {
-
   // TODO fix this hackyness once we use the new syntax everywhere
   if ((action.type as string) === loadAllData.type) {
-    const {appDataComplete}: { appDataComplete: AppDataComplete } = action as any;
+    const { appDataComplete }: { appDataComplete: AppDataComplete } = action as any;
     return appDataComplete.obstruction?.ids
       ? appDataComplete.obstruction
       : migrateObstructionState(state);
@@ -60,5 +72,3 @@ export function obstructionReducer(
     }
   }
 }
-
-

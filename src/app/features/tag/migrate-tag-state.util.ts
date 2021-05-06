@@ -11,7 +11,7 @@ export const migrateTagState = (tagState: TagState): TagState => {
     return tagState;
   }
 
-  const tagEntities: Dictionary<Tag> = ({...tagState.entities});
+  const tagEntities: Dictionary<Tag> = { ...tagState.entities };
   Object.keys(tagEntities).forEach((key) => {
     if (key === TODAY_TAG.id) {
       tagEntities[key] = _addBackgroundImageForDarkTheme(tagEntities[key] as TagCopy);
@@ -19,7 +19,7 @@ export const migrateTagState = (tagState: TagState): TagState => {
     // tagEntities[key] = _addNewIssueFields(tagEntities[key] as TagCopy);
   });
 
-  return {...tagState, entities: tagEntities, [MODEL_VERSION_KEY]: MODEL_VERSION};
+  return { ...tagState, entities: tagEntities, [MODEL_VERSION_KEY]: MODEL_VERSION };
 };
 
 const _addBackgroundImageForDarkTheme = (tag: Tag): Tag => {
@@ -31,7 +31,7 @@ const _addBackgroundImageForDarkTheme = (tag: Tag): Tag => {
       theme: {
         ...tag.theme,
         backgroundImageDark: TODAY_TAG.theme.backgroundImageDark,
-      }
+      },
     };
   }
 };

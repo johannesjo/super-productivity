@@ -7,7 +7,7 @@ import {
   Menu,
   MenuItemConstructorOptions,
   MessageBoxReturnValue,
-  shell
+  shell,
 } from 'electron';
 import { errorHandler } from './error-handler';
 import { join, normalize } from 'path';
@@ -23,7 +23,7 @@ const mainWinModule: {
   isAppReady: boolean;
 } = {
   win: undefined,
-  isAppReady: false
+  isAppReady: false,
 };
 
 export const getWin = (): BrowserWindow => {
@@ -65,7 +65,7 @@ export const createWindow = ({
 
   const mainWindowState = windowStateKeeper({
     defaultWidth: 800,
-    defaultHeight: 800
+    defaultHeight: 800,
   });
 
   mainWin = new BrowserWindow({
@@ -81,18 +81,18 @@ export const createWindow = ({
       nodeIntegration: true,
       // make remote module work with those two settings
       enableRemoteModule: true,
-      contextIsolation: false
+      contextIsolation: false,
     },
-    icon: ICONS_FOLDER + '/icon_256x256.png'
+    icon: ICONS_FOLDER + '/icon_256x256.png',
   });
 
   mainWindowState.manage(mainWin);
 
   const url = customUrl
     ? customUrl
-    : (IS_DEV)
-      ? 'http://localhost:4200'
-      : format({
+    : IS_DEV
+    ? 'http://localhost:4200'
+    : format({
         pathname: normalize(join(__dirname, '../dist/index.html')),
         protocol: 'file:',
         slashes: true,
@@ -106,7 +106,7 @@ export const createWindow = ({
         console.log('No custom styles detected at ' + CSS_FILE_PATH);
       } else {
         console.log('Loading custom styles from ' + CSS_FILE_PATH);
-        const styles = readFileSync(CSS_FILE_PATH, {encoding: 'utf8'});
+        const styles = readFileSync(CSS_FILE_PATH, { encoding: 'utf8' });
         mainWin.webContents.insertCSS(styles).then(console.log).catch(console.error);
       }
     });
@@ -142,8 +142,7 @@ function initWinEventListeners(app: any) {
     event.preventDefault();
     // needed for mac; especially for jira urls we might have a host like this www.host.de//
     const urlObj = new URL(url);
-    urlObj.pathname = urlObj.pathname
-      .replace('//', '/');
+    urlObj.pathname = urlObj.pathname.replace('//', '/');
     const wellFormedUrl = urlObj.toString();
     const wasOpened = shell.openExternal(wellFormedUrl);
     if (!wasOpened) {
@@ -162,27 +161,30 @@ function initWinEventListeners(app: any) {
 
 function createMenu(quitApp) {
   // Create application menu to enable copy & pasting on MacOS
-  const menuTpl = [{
-    label: 'Application',
-    submenu: [
-      {label: 'About Super Productivity', selector: 'orderFrontStandardAboutPanel:'},
-      {type: 'separator'},
-      {
-        label: 'Quit', click: quitApp
-      }
-    ]
-  }, {
-    label: 'Edit',
-    submenu: [
-      {label: 'Undo', accelerator: 'CmdOrCtrl+Z', selector: 'undo:'},
-      {label: 'Redo', accelerator: 'Shift+CmdOrCtrl+Z', selector: 'redo:'},
-      {type: 'separator'},
-      {label: 'Cut', accelerator: 'CmdOrCtrl+X', selector: 'cut:'},
-      {label: 'Copy', accelerator: 'CmdOrCtrl+C', selector: 'copy:'},
-      {label: 'Paste', accelerator: 'CmdOrCtrl+V', selector: 'paste:'},
-      {label: 'Select All', accelerator: 'CmdOrCtrl+A', selector: 'selectAll:'}
-    ]
-  }
+  const menuTpl = [
+    {
+      label: 'Application',
+      submenu: [
+        { label: 'About Super Productivity', selector: 'orderFrontStandardAboutPanel:' },
+        { type: 'separator' },
+        {
+          label: 'Quit',
+          click: quitApp,
+        },
+      ],
+    },
+    {
+      label: 'Edit',
+      submenu: [
+        { label: 'Undo', accelerator: 'CmdOrCtrl+Z', selector: 'undo:' },
+        { label: 'Redo', accelerator: 'Shift+CmdOrCtrl+Z', selector: 'redo:' },
+        { type: 'separator' },
+        { label: 'Cut', accelerator: 'CmdOrCtrl+X', selector: 'cut:' },
+        { label: 'Copy', accelerator: 'CmdOrCtrl+C', selector: 'copy:' },
+        { label: 'Paste', accelerator: 'CmdOrCtrl+V', selector: 'paste:' },
+        { label: 'Select All', accelerator: 'CmdOrCtrl+A', selector: 'selectAll:' },
+      ],
+    },
   ];
   const menuTplOUT = menuTpl as MenuItemConstructorOptions[];
 
@@ -191,9 +193,7 @@ function createMenu(quitApp) {
 }
 
 // TODO this is ugly as f+ck
-const appCloseHandler = (
-  app: App,
-) => {
+const appCloseHandler = (app: App) => {
   let ids: string[] = [];
 
   const _quitApp = () => {
@@ -201,14 +201,14 @@ const appCloseHandler = (
     mainWin.close();
   };
 
-  ipcMain.on(IPC.REGISTER_BEFORE_CLOSE, (ev, {id}) => {
+  ipcMain.on(IPC.REGISTER_BEFORE_CLOSE, (ev, { id }) => {
     ids.push(id);
   });
-  ipcMain.on(IPC.UNREGISTER_BEFORE_CLOSE, (ev, {id}) => {
-    ids = ids.filter(idIn => idIn !== id);
+  ipcMain.on(IPC.UNREGISTER_BEFORE_CLOSE, (ev, { id }) => {
+    ids = ids.filter((idIn) => idIn !== id);
   });
-  ipcMain.on(IPC.BEFORE_CLOSE_DONE, (ev, {id}) => {
-    ids = ids.filter(idIn => idIn !== id);
+  ipcMain.on(IPC.BEFORE_CLOSE_DONE, (ev, { id }) => {
+    ids = ids.filter((idIn) => idIn !== id);
     console.log(IPC.BEFORE_CLOSE_DONE, id, ids);
     if (ids.length === 0) {
       mainWin.close();
@@ -230,20 +230,21 @@ const appCloseHandler = (
             return;
           }
           if (appCfg && appCfg.misc.isConfirmBeforeExit && !(app as any).isQuiting) {
-            dialog.showMessageBox(mainWin,
-              {
+            dialog
+              .showMessageBox(mainWin, {
                 type: 'question',
                 buttons: ['Yes', 'No'],
                 title: 'Confirm',
-                message: 'Are you sure you want to quit?'
-              }).then((choice: MessageBoxReturnValue) => {
-              if (choice.response === 1) {
-                return;
-              } else if (choice.response === 0) {
-                _quitApp();
-                return;
-              }
-            });
+                message: 'Are you sure you want to quit?',
+              })
+              .then((choice: MessageBoxReturnValue) => {
+                if (choice.response === 1) {
+                  return;
+                } else if (choice.response === 0) {
+                  _quitApp();
+                  return;
+                }
+              });
           } else {
             _quitApp();
           }
@@ -253,9 +254,7 @@ const appCloseHandler = (
   });
 };
 
-const appMinimizeHandler = (
-  app: App,
-) => {
+const appMinimizeHandler = (app: App) => {
   if (!(app as any).isQuiting) {
     mainWin.on('minimize', (event) => {
       getSettings(mainWin, (appCfg) => {

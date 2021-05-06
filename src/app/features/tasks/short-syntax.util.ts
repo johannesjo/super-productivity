@@ -12,16 +12,25 @@ const CH_TAG = '#';
 const CH_DUE = '@';
 const ALL_SPECIAL = `(\\${CH_PRO}|\\${CH_TAG}|\\${CH_DUE})`;
 
-export const SHORT_SYNTAX_PROJECT_REG_EX = new RegExp(`\\${CH_PRO}[^${ALL_SPECIAL}]+`, 'gi');
+export const SHORT_SYNTAX_PROJECT_REG_EX = new RegExp(
+  `\\${CH_PRO}[^${ALL_SPECIAL}]+`,
+  'gi',
+);
 export const SHORT_SYNTAX_TAGS_REG_EX = new RegExp(`\\${CH_TAG}[^${ALL_SPECIAL}]+`, 'gi');
 // export const SHORT_SYNTAX_DUE_REG_EX = new RegExp(`\\${CH_DUE}[^${ALL_SPECIAL}]+`, 'gi');
 
-export const shortSyntax = (task: Task | Partial<Task>, allTags?: Tag[], allProjects?: Project[]): {
-  taskChanges: Partial<Task>;
-  newTagTitles: string[];
-  remindAt: number | null;
-  projectId: string | undefined;
-} | undefined => {
+export const shortSyntax = (
+  task: Task | Partial<Task>,
+  allTags?: Tag[],
+  allProjects?: Project[],
+):
+  | {
+      taskChanges: Partial<Task>;
+      newTagTitles: string[];
+      remindAt: number | null;
+      projectId: string | undefined;
+    }
+  | undefined => {
   if (!task.title) {
     return;
   }
@@ -33,7 +42,10 @@ export const shortSyntax = (task: Task | Partial<Task>, allTags?: Tag[], allProj
   let taskChanges: Partial<TaskCopy>;
 
   taskChanges = parseTimeSpentChanges(task);
-  const changesForProject = parseProjectChanges({...task, title: taskChanges.title || task.title}, allProjects);
+  const changesForProject = parseProjectChanges(
+    { ...task, title: taskChanges.title || task.title },
+    allProjects,
+  );
   if (changesForProject.projectId) {
     taskChanges = {
       ...taskChanges,
@@ -41,14 +53,17 @@ export const shortSyntax = (task: Task | Partial<Task>, allTags?: Tag[], allProj
     };
   }
 
-  const changesForTag = parseTagChanges({...task, title: taskChanges.title || task.title}, allTags);
+  const changesForTag = parseTagChanges(
+    { ...task, title: taskChanges.title || task.title },
+    allTags,
+  );
   taskChanges = {
     ...taskChanges,
-    ...changesForTag.taskChanges
+    ...changesForTag.taskChanges,
   };
   taskChanges = {
     ...taskChanges,
-    ...parseTimeSpentChanges(taskChanges)
+    ...parseTimeSpentChanges(taskChanges),
   };
 
   // const changesForDue = parseDueChanges({...task, title: taskChanges.title || task.title});
@@ -72,7 +87,10 @@ export const shortSyntax = (task: Task | Partial<Task>, allTags?: Tag[], allProj
   };
 };
 
-const parseProjectChanges = (task: Partial<TaskCopy>, allProjects?: Project[]): {
+const parseProjectChanges = (
+  task: Partial<TaskCopy>,
+  allProjects?: Project[],
+): {
   title?: string;
   projectId?: string;
 } => {
@@ -92,14 +110,11 @@ const parseProjectChanges = (task: Partial<TaskCopy>, allProjects?: Project[]): 
   if (rr && rr[0]) {
     const projectTitle: string = rr[0].trim().replace(CH_PRO, '');
     const existingProject = allProjects.find(
-      project => project.title
-        .replace(' ', '')
-        .toLowerCase()
-        .indexOf(
-          projectTitle
-            .replace(' ', '')
-            .toLowerCase()
-        ) === 0
+      (project) =>
+        project.title
+          .replace(' ', '')
+          .toLowerCase()
+          .indexOf(projectTitle.replace(' ', '').toLowerCase()) === 0,
     );
 
     if (existingProject) {
@@ -113,11 +128,14 @@ const parseProjectChanges = (task: Partial<TaskCopy>, allProjects?: Project[]): 
   return {};
 };
 
-const parseTagChanges = (task: Partial<TaskCopy>, allTags?: Tag[]): { taskChanges: Partial<TaskCopy>; newTagTitlesToCreate: string[] } => {
+const parseTagChanges = (
+  task: Partial<TaskCopy>,
+  allTags?: Tag[],
+): { taskChanges: Partial<TaskCopy>; newTagTitlesToCreate: string[] } => {
   const taskChanges: Partial<TaskCopy> = {};
 
   if (task.parentId) {
-    return {taskChanges, newTagTitlesToCreate: []};
+    return { taskChanges, newTagTitlesToCreate: [] };
   }
 
   const newTagTitlesToCreate: string[] = [];
@@ -127,16 +145,19 @@ const parseTagChanges = (task: Partial<TaskCopy>, allTags?: Tag[]): { taskChange
     const regexTagTitles = initialTitle.match(SHORT_SYNTAX_TAGS_REG_EX);
     if (regexTagTitles && regexTagTitles.length) {
       const regexTagTitlesTrimmedAndFiltered: string[] = regexTagTitles
-        .map(title => title.trim().replace(CH_TAG, ''))
-        .filter(newTagTitle =>
-          newTagTitle.length >= 1
-          // NOTE: we check this to not trigger for "#123 blasfs dfasdf"
-          && initialTitle.trim().lastIndexOf(newTagTitle) > 4
+        .map((title) => title.trim().replace(CH_TAG, ''))
+        .filter(
+          (newTagTitle) =>
+            newTagTitle.length >= 1 &&
+            // NOTE: we check this to not trigger for "#123 blasfs dfasdf"
+            initialTitle.trim().lastIndexOf(newTagTitle) > 4,
         );
 
       const tagIdsToAdd: string[] = [];
-      regexTagTitlesTrimmedAndFiltered.forEach(newTagTitle => {
-        const existingTag = allTags.find(tag => newTagTitle.toLowerCase() === tag.title.toLowerCase());
+      regexTagTitlesTrimmedAndFiltered.forEach((newTagTitle) => {
+        const existingTag = allTags.find(
+          (tag) => newTagTitle.toLowerCase() === tag.title.toLowerCase(),
+        );
         if (existingTag) {
           if (!task.tagIds?.includes(existingTag.id)) {
             tagIdsToAdd.push(existingTag.id);
@@ -147,7 +168,7 @@ const parseTagChanges = (task: Partial<TaskCopy>, allTags?: Tag[]): { taskChange
       });
 
       if (tagIdsToAdd.length) {
-        taskChanges.tagIds = [...task.tagIds as string[], ...tagIdsToAdd];
+        taskChanges.tagIds = [...(task.tagIds as string[]), ...tagIdsToAdd];
       }
 
       if (newTagTitlesToCreate.length || tagIdsToAdd.length) {
@@ -170,7 +191,7 @@ const parseTagChanges = (task: Partial<TaskCopy>, allTags?: Tag[]): { taskChange
 
   return {
     taskChanges,
-    newTagTitlesToCreate
+    newTagTitlesToCreate,
   };
 };
 
@@ -187,18 +208,16 @@ const parseTimeSpentChanges = (task: Partial<TaskCopy>): Partial<Task> => {
     const timeEstimate = matches[4];
 
     return {
-      ...(
-        timeSpent
-          ? {
+      ...(timeSpent
+        ? {
             timeSpentOnDay: {
               ...(task.timeSpentOnDay || {}),
-              [getWorklogStr()]: stringToMs(timeSpent)
-            }
+              [getWorklogStr()]: stringToMs(timeSpent),
+            },
           }
-          : {}
-      ),
+        : {}),
       timeEstimate: stringToMs(timeEstimate),
-      title: task.title.replace(full, '')
+      title: task.title.replace(full, ''),
     };
   }
 

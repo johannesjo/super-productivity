@@ -11,32 +11,39 @@ if (environment.production || environment.stage) {
   enableProdMode();
 }
 
-platformBrowserDynamic().bootstrapModule(AppModule).then(() => {
-  // TODO make asset caching work for electron
-  if ('serviceWorker' in navigator && (environment.production || environment.stage) && !IS_ELECTRON) {
-    console.log('Registering Service worker');
-    return navigator.serviceWorker.register('ngsw-worker.js');
-  } else if ('serviceWorker' in navigator && IS_ELECTRON) {
-    navigator.serviceWorker.getRegistrations()
-      .then((registrations) => {
-        for (const registration of registrations) {
-          registration.unregister();
-        }
-      })
-      .catch((e) => {
-        console.error('ERROR when unregistering service worker');
-        console.error(e);
-      });
-  }
-  return;
-}).catch((err: any) => {
-  console.log('Service Worker Registration Error');
-  console.log(err);
-});
+platformBrowserDynamic()
+  .bootstrapModule(AppModule)
+  .then(() => {
+    // TODO make asset caching work for electron
+    if (
+      'serviceWorker' in navigator &&
+      (environment.production || environment.stage) &&
+      !IS_ELECTRON
+    ) {
+      console.log('Registering Service worker');
+      return navigator.serviceWorker.register('ngsw-worker.js');
+    } else if ('serviceWorker' in navigator && IS_ELECTRON) {
+      navigator.serviceWorker
+        .getRegistrations()
+        .then((registrations) => {
+          for (const registration of registrations) {
+            registration.unregister();
+          }
+        })
+        .catch((e) => {
+          console.error('ERROR when unregistering service worker');
+          console.error(e);
+        });
+    }
+    return;
+  })
+  .catch((err: any) => {
+    console.log('Service Worker Registration Error');
+    console.log(err);
+  });
 
 // fix mobile scrolling while dragging
-window.addEventListener('touchmove', () => {
-});
+window.addEventListener('touchmove', () => {});
 
 if (!(environment.production || environment.stage) && IS_ANDROID_WEB_VIEW) {
   setTimeout(() => {

@@ -5,14 +5,20 @@ import { Dictionary } from '@ngrx/entity';
 
 const MODEL_VERSION = 2;
 
-export const migrateSimpleCounterState = (simpleCounterState: SimpleCounterState): SimpleCounterState => {
+export const migrateSimpleCounterState = (
+  simpleCounterState: SimpleCounterState,
+): SimpleCounterState => {
   if (!isMigrateModel(simpleCounterState, MODEL_VERSION, 'SimpleCounter')) {
     return simpleCounterState;
   }
 
-  const simpleCounterEntities: Dictionary<SimpleCounter> = {...simpleCounterState.entities};
+  const simpleCounterEntities: Dictionary<SimpleCounter> = {
+    ...simpleCounterState.entities,
+  };
   Object.keys(simpleCounterEntities).forEach((key) => {
-    simpleCounterEntities[key] = _migrateSimpleCounterEntity(simpleCounterEntities[key] as SimpleCounter);
+    simpleCounterEntities[key] = _migrateSimpleCounterEntity(
+      simpleCounterEntities[key] as SimpleCounter,
+    );
   });
 
   // Update model version after all migrations ran successfully
@@ -26,7 +32,7 @@ export const migrateSimpleCounterState = (simpleCounterState: SimpleCounterState
 
 const _migrateSimpleCounterEntity = (simpleCounter: SimpleCounter): SimpleCounter => {
   if (!simpleCounter.hasOwnProperty('countOnDay')) {
-    const cpy = {...simpleCounter};
+    const cpy = { ...simpleCounter };
     const countOnDay = (cpy as any).totalCountOnDay || {};
 
     // delete unused

@@ -17,7 +17,7 @@ import { Project } from '../../features/project/project.model';
   selector: 'work-context-menu',
   templateUrl: './work-context-menu.component.html',
   styleUrls: ['./work-context-menu.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class WorkContextMenuComponent implements OnDestroy {
   @Input() project!: Project;
@@ -33,14 +33,11 @@ export class WorkContextMenuComponent implements OnDestroy {
     private _tagService: TagService,
     private _workContextService: WorkContextService,
     private _router: Router,
-  ) {
-  }
+  ) {}
 
   @Input('contextType') set contextTypeSet(v: WorkContextType) {
-    this.isForProject = (v === WorkContextType.PROJECT);
-    this.base = (this.isForProject)
-      ? 'project'
-      : 'tag';
+    this.isForProject = v === WorkContextType.PROJECT;
+    this.base = this.isForProject ? 'project' : 'tag';
   }
 
   ngOnDestroy(): void {
@@ -48,19 +45,26 @@ export class WorkContextMenuComponent implements OnDestroy {
   }
 
   deleteTag() {
-    this._subs.add(this._confirmTagDelete().pipe(
-      filter(isDelete => isDelete && !!this.contextId),
-      switchMap(() => this._workContextService.activeWorkContextTypeAndId$.pipe(take(1))),
-      tap(({activeId}) => console.log(activeId, this.contextId)),
-      switchMap(({activeId}) => (activeId === this.contextId)
-        ? from(this._router.navigateByUrl('/'))
-        : of(true)
-      ),
-    ).subscribe(() => {
-      if (this.contextId) {
-        this._tagService.removeTag(this.contextId);
-      }
-    }));
+    this._subs.add(
+      this._confirmTagDelete()
+        .pipe(
+          filter((isDelete) => isDelete && !!this.contextId),
+          switchMap(() =>
+            this._workContextService.activeWorkContextTypeAndId$.pipe(take(1)),
+          ),
+          tap(({ activeId }) => console.log(activeId, this.contextId)),
+          switchMap(({ activeId }) =>
+            activeId === this.contextId
+              ? from(this._router.navigateByUrl('/'))
+              : of(true),
+          ),
+        )
+        .subscribe(() => {
+          if (this.contextId) {
+            this._tagService.removeTag(this.contextId);
+          }
+        }),
+    );
   }
 
   edit(project: Project) {
@@ -77,14 +81,17 @@ export class WorkContextMenuComponent implements OnDestroy {
 
     return this._tagService.getTagById$(this.contextId).pipe(
       first(),
-      concatMap((tag: Tag) => this._matDialog.open(DialogConfirmComponent, {
-        restoreFocus: true,
-        data: {
-          message: T.F.TAG.D_DELETE.CONFIRM_MSG,
-          translateParams: {tagName: tag.title},
-        }
-      }).afterClosed()),
+      concatMap((tag: Tag) =>
+        this._matDialog
+          .open(DialogConfirmComponent, {
+            restoreFocus: true,
+            data: {
+              message: T.F.TAG.D_DELETE.CONFIRM_MSG,
+              translateParams: { tagName: tag.title },
+            },
+          })
+          .afterClosed(),
+      ),
     );
   }
-
 }

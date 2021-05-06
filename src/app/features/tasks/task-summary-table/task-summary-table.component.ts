@@ -1,4 +1,10 @@
-import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  EventEmitter,
+  Input,
+  Output,
+} from '@angular/core';
 import { Task } from '../task.model';
 import { getWorklogStr } from '../../../util/get-work-log-str';
 import { TaskService } from '../task.service';
@@ -17,24 +23,21 @@ export class TaskSummaryTableComponent {
 
   T: typeof T = T;
 
-  constructor(
-    private _taskService: TaskService,
-  ) {
-  }
+  constructor(private _taskService: TaskService) {}
 
   updateTimeSpentTodayForTask(task: Task, newVal: number | string) {
     this._taskService.updateEverywhere(task.id, {
       timeSpentOnDay: {
         ...task.timeSpentOnDay,
         [this.day]: +newVal,
-      }
+      },
     });
     this.updated.emit();
   }
 
   updateTaskTitle(task: Task, newVal: string) {
     this._taskService.updateEverywhere(task.id, {
-      title: newVal
+      title: newVal,
     });
     this.updated.emit();
   }

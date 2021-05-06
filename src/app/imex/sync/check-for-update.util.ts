@@ -9,9 +9,13 @@ export enum UpdateCheckResult {
   ErrorInvalidTimeValues = 'ErrorInvalidTimeValues',
 }
 
-export const checkForUpdate = (params: { remote: number; local: number; lastSync: number }) => {
+export const checkForUpdate = (params: {
+  remote: number;
+  local: number;
+  lastSync: number;
+}) => {
   _logHelper(params);
-  const {remote, local, lastSync} = params;
+  const { remote, local, lastSync } = params;
   const n = Date.now();
 
   if (remote > n || local > n || lastSync > n) {
@@ -21,7 +25,9 @@ export const checkForUpdate = (params: { remote: number; local: number; lastSync
 
   if (lastSync > local) {
     console.error('This should not happen. lastSyncTo > local');
-    alert('Sync Error: last sync value is newer than local, which should never happen if you weren`t manually manipulating the data!');
+    alert(
+      'Sync Error: last sync value is newer than local, which should never happen if you weren`t manually manipulating the data!',
+    );
     return UpdateCheckResult.ErrorLastSyncNewerThanLocal;
   }
 
@@ -38,7 +44,9 @@ export const checkForUpdate = (params: { remote: number; local: number; lastSync
     } else if (lastSync < local) {
       return UpdateCheckResult.RemoteUpdateRequired;
     } else if (lastSync === local) {
-      alert('Sync Warning: Dropbox date not up to date despite seemingly successful sync. (This might happen when: 1. You have conflict changes and decide to take the local version. 2. You open the other instance and also decide to use the local version.)');
+      alert(
+        'Sync Warning: Dropbox date not up to date despite seemingly successful sync. (This might happen when: 1. You have conflict changes and decide to take the local version. 2. You open the other instance and also decide to use the local version.)',
+      );
       return UpdateCheckResult.RemoteNotUpToDateDespiteSync;
     }
   } else if (local < remote) {
@@ -55,13 +63,16 @@ export const checkForUpdate = (params: { remote: number; local: number; lastSync
 
 const _logHelper = (params: { remote: number; local: number; lastSync: number }) => {
   console.log(params);
-  const oldestFirst = Object.keys(params).sort((k1: string, k2: string) => (params as any)[k1] - (params as any)[k2]);
+  const oldestFirst = Object.keys(params).sort(
+    (k1: string, k2: string) => (params as any)[k1] - (params as any)[k2],
+  );
   const keyOfOldest = oldestFirst[0];
-  const zeroed = oldestFirst.reduce((acc, key) =>
-      ({
-        ...acc,
-        [key]: ((params as any)[key] - (params as any)[keyOfOldest]) / 1000,
-      }),
-    {});
+  const zeroed = oldestFirst.reduce(
+    (acc, key) => ({
+      ...acc,
+      [key]: ((params as any)[key] - (params as any)[keyOfOldest]) / 1000,
+    }),
+    {},
+  );
   console.log(zeroed, (Date.now() - (params as any)[keyOfOldest]) / 1000);
 };

@@ -9,18 +9,16 @@ import { MetricState } from '../metric.model';
 
 @Injectable()
 export class MetricEffects {
-
-  @Effect({dispatch: false}) updateMetrics$: any = this._actions$
-    .pipe(
-      ofType(
-        MetricActionTypes.AddMetric,
-        MetricActionTypes.UpdateMetric,
-        MetricActionTypes.DeleteMetric,
-        MetricActionTypes.UpsertMetric,
-      ),
-      switchMap(() => this._store$.pipe(select(selectMetricFeatureState)).pipe(first())),
-      tap((state) => this._saveToLs(state)),
-    );
+  @Effect({ dispatch: false }) updateMetrics$: any = this._actions$.pipe(
+    ofType(
+      MetricActionTypes.AddMetric,
+      MetricActionTypes.UpdateMetric,
+      MetricActionTypes.DeleteMetric,
+      MetricActionTypes.UpsertMetric,
+    ),
+    switchMap(() => this._store$.pipe(select(selectMetricFeatureState)).pipe(first())),
+    tap((state) => this._saveToLs(state)),
+  );
 
   // @Effect({dispatch: false}) saveMetrics$: any = this._actions$
   //   .pipe(
@@ -39,11 +37,9 @@ export class MetricEffects {
     private _actions$: Actions,
     private _store$: Store<any>,
     private _persistenceService: PersistenceService,
-  ) {
-  }
+  ) {}
 
   private _saveToLs(metricState: MetricState) {
-    this._persistenceService.metric.saveState(metricState, {isSyncModelChange: true});
+    this._persistenceService.metric.saveState(metricState, { isSyncModelChange: true });
   }
-
 }

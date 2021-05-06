@@ -11,7 +11,11 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatChipsModule } from '@angular/material/chips';
-import { MatNativeDateModule, MatOptionModule, MatRippleModule } from '@angular/material/core';
+import {
+  MatNativeDateModule,
+  MatOptionModule,
+  MatRippleModule,
+} from '@angular/material/core';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatExpansionModule } from '@angular/material/expansion';
@@ -57,7 +61,10 @@ import { MomentFormatPipe } from './pipes/moment-format.pipe';
 import { InlineInputComponent } from './inline-input/inline-input.component';
 import { ChipListInputComponent } from './chip-list-input/chip-list-input.component';
 import { ValidationModule } from './validation/validation.module';
-import { OwlDateTimeModule, OwlNativeDateTimeModule } from 'ngx-date-time-picker-schedule';
+import {
+  OwlDateTimeModule,
+  OwlNativeDateTimeModule,
+} from 'ngx-date-time-picker-schedule';
 import { FullPageSpinnerComponent } from './full-page-spinner/full-page-spinner.component';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { FormlyMaterialModule } from '@ngx-formly/material';
@@ -163,17 +170,20 @@ const OTHER_3RD_PARTY_MODS_WITHOUT_CFG = [
     FormsModule,
     ReactiveFormsModule,
     FormlyModule.forChild({
-      types: [{
-        name: 'duration',
-        component: InputDurationFormlyComponent,
-        extends: 'input',
-        wrappers: ['form-field'],
-      }, {
-        name: 'tpl',
-        component: FormlyTranslatedTemplateComponent,
-      }],
+      types: [
+        {
+          name: 'duration',
+          component: InputDurationFormlyComponent,
+          extends: 'input',
+          wrappers: ['form-field'],
+        },
+        {
+          name: 'tpl',
+          component: FormlyTranslatedTemplateComponent,
+        },
+      ],
       extras: {
-        immutable: true
+        immutable: true,
       },
     }),
     FormlyMatToggleModule,
@@ -187,10 +197,7 @@ const OTHER_3RD_PARTY_MODS_WITHOUT_CFG = [
     ValidationModule,
     BetterDrawerModule,
   ],
-  declarations: [
-    ...COMPONENT_AND_PIPES,
-    OwlWrapperComponent,
-  ],
+  declarations: [...COMPONENT_AND_PIPES, OwlWrapperComponent],
   exports: [
     ...COMPONENT_AND_PIPES,
     ...MAT_MODULES,
@@ -205,8 +212,8 @@ const OTHER_3RD_PARTY_MODS_WITHOUT_CFG = [
     OwlWrapperComponent,
   ],
   providers: [
-    {provide: ErrorHandler, useClass: GlobalErrorHandler},
-    {provide: HAMMER_GESTURE_CONFIG, useClass: MyHammerConfig},
+    { provide: ErrorHandler, useClass: GlobalErrorHandler },
+    { provide: HAMMER_GESTURE_CONFIG, useClass: MyHammerConfig },
     {
       provide: FORMLY_CONFIG,
       multi: true,
@@ -216,9 +223,7 @@ const OTHER_3RD_PARTY_MODS_WITHOUT_CFG = [
   ],
 })
 export class UiModule {
-  constructor(
-    private _markdownService: MarkdownService,
-  ) {
+  constructor(private _markdownService: MarkdownService) {
     const linkRenderer = this._markdownService.renderer.link;
     this._markdownService.renderer.link = (href, title, text) => {
       const html = linkRenderer.call(this._markdownService.renderer, href, title, text);

@@ -12,18 +12,23 @@ import { loadAllData } from '../../root-store/meta/load-all-data.action';
 import { isValidAppData } from '../../imex/sync/is-valid-app-data.util';
 import { DataRepairService } from '../data-repair/data-repair.service';
 
-@Injectable({providedIn: 'root'})
+@Injectable({ providedIn: 'root' })
 export class DataInitService {
-  isAllDataLoadedInitially$: Observable<boolean> = from(this._persistenceService.project.loadState(true)).pipe(
-    concatMap((projectState: ProjectState) => this._migrationService.migrateIfNecessaryToProjectState$(projectState)),
+  isAllDataLoadedInitially$: Observable<boolean> = from(
+    this._persistenceService.project.loadState(true),
+  ).pipe(
+    concatMap((projectState: ProjectState) =>
+      this._migrationService.migrateIfNecessaryToProjectState$(projectState),
+    ),
     concatMap(() => from(this.reInit())),
     switchMap(() => this._workContextService.isActiveWorkContextProject$),
-    switchMap(isProject => isProject
-      // NOTE: this probably won't work some of the time
-      ? this._projectService.isRelatedDataLoadedForCurrentProject$
-      : of(true)
+    switchMap((isProject) =>
+      isProject
+        ? // NOTE: this probably won't work some of the time
+          this._projectService.isRelatedDataLoadedForCurrentProject$
+        : of(true),
     ),
-    filter(isLoaded => isLoaded),
+    filter((isLoaded) => isLoaded),
     take(1),
     // only ever load once
     shareReplay(1),
@@ -38,9 +43,7 @@ export class DataInitService {
     private _dataRepairService: DataRepairService,
   ) {
     // TODO better construction than this
-    this.isAllDataLoadedInitially$.pipe(
-      take(1)
-    ).subscribe(() => {
+    this.isAllDataLoadedInitially$.pipe(take(1)).subscribe(() => {
       // here because to avoid circular dependencies
       this._store$.dispatch(allDataWasLoaded());
     });
@@ -52,17 +55,18 @@ export class DataInitService {
     const appDataComplete = await this._persistenceService.loadComplete();
     const isValid = isValidAppData(appDataComplete);
     if (isValid) {
-      this._store$.dispatch(loadAllData({appDataComplete, isOmitTokens}));
+      this._store$.dispatch(loadAllData({ appDataComplete, isOmitTokens }));
     } else {
       if (this._dataRepairService.isRepairPossibleAndConfirmed(appDataComplete)) {
         const fixedData = this._dataRepairService.repairData(appDataComplete);
-        this._store$.dispatch(loadAllData({
-          appDataComplete: fixedData,
-          isOmitTokens,
-        }));
+        this._store$.dispatch(
+          loadAllData({
+            appDataComplete: fixedData,
+            isOmitTokens,
+          }),
+        );
         await this._persistenceService.importComplete(fixedData);
       }
     }
   }
-
 }

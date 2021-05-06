@@ -1,6 +1,10 @@
 // NOTE: cuts off at month start and end per default
 
-export const getDateRangeForWeek = (year: number, weekNr: number, month?: number): {
+export const getDateRangeForWeek = (
+  year: number,
+  weekNr: number,
+  month?: number,
+): {
   rangeStart: Date;
   rangeEnd: Date;
 } => {
@@ -15,18 +19,14 @@ export const getDateRangeForWeek = (year: number, weekNr: number, month?: number
     // lastDayOfMonth
     const monthEnd = new Date(year, month, 0);
 
-    rangeStart = (rangeStart < monthStart)
-      ? monthStart
-      : rangeStart;
+    rangeStart = rangeStart < monthStart ? monthStart : rangeStart;
 
-    rangeEnd = (rangeEnd > monthEnd)
-      ? monthEnd
-      : rangeEnd;
+    rangeEnd = rangeEnd > monthEnd ? monthEnd : rangeEnd;
   }
 
   return {
     rangeStart: rangeStartWithTime(rangeStart),
-    rangeEnd: rangeEndWithTime(rangeEnd)
+    rangeEnd: rangeEndWithTime(rangeEnd),
   };
 };
 

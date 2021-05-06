@@ -2,7 +2,7 @@ import { Pipe, PipeTransform } from '@angular/core';
 import { Task } from '../task.model';
 
 @Pipe({
-  name: 'subTaskTotalTimeEstimate'
+  name: 'subTaskTotalTimeEstimate',
 })
 export class SubTaskTotalTimeEstimatePipe implements PipeTransform {
   transform: (value: any, ...args: any[]) => any = getSubTasksTotalTimeEstimate;

@@ -10,7 +10,7 @@ import { CaldavCfg } from '../caldav.model';
   selector: 'dialog-caldav-initial-setup',
   templateUrl: './dialog-caldav-initial-setup.component.html',
   styleUrls: ['./dialog-caldav-initial-setup.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class DialogCaldavInitialSetupComponent {
   T: typeof T = T;

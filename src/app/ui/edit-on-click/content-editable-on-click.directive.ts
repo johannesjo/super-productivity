@@ -1,4 +1,4 @@
-import { Directive, ElementRef, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core';
+import { Directive, ElementRef, EventEmitter, Input, OnDestroy, OnInit, Output, } from '@angular/core';
 
 // HELPER
 // -----------------------------------
@@ -8,7 +8,12 @@ import { Directive, ElementRef, EventEmitter, Input, OnDestroy, OnInit, Output }
 })
 export class ContentEditableOnClickDirective implements OnInit, OnDestroy {
   @Input() isResetAfterEdit: boolean = false;
-  @Output() editFinished: EventEmitter<{ isChanged: boolean; newVal: string; $taskEl: HTMLElement | null; event: Event }> = new EventEmitter();
+  @Output() editFinished: EventEmitter<{
+    isChanged: boolean;
+    newVal: string;
+    $taskEl: HTMLElement | null;
+    event: Event;
+  }> = new EventEmitter();
   private _lastDomValue: string | undefined;
   private _lastOutsideVal: string | undefined;
   private readonly _el: HTMLElement;
@@ -30,7 +35,7 @@ export class ContentEditableOnClickDirective implements OnInit, OnDestroy {
   ngOnInit() {
     const el = this._el;
 
-    if ((el.getAttribute('contenteditable')) === null) {
+    if (el.getAttribute('contenteditable') === null) {
       el.setAttribute('contenteditable', 'true');
     }
 
@@ -85,7 +90,7 @@ export class ContentEditableOnClickDirective implements OnInit, OnDestroy {
     });
 
     el.onpaste = (ev: ClipboardEvent) => {
-      const data = (ev.clipboardData !== null) && ev.clipboardData.getData('text/plain');
+      const data = ev.clipboardData !== null && ev.clipboardData.getData('text/plain');
       if (data && data.length) {
         ev.stopPropagation();
         ev.preventDefault();
@@ -112,7 +117,7 @@ export class ContentEditableOnClickDirective implements OnInit, OnDestroy {
     }
 
     const curVal = this._el.innerText;
-    const isChanged = (this._lastDomValue !== curVal);
+    const isChanged = this._lastDomValue !== curVal;
     this._lastDomValue = curVal;
 
     this.editFinished.emit({
@@ -160,9 +165,10 @@ export class ContentEditableOnClickDirective implements OnInit, OnDestroy {
   }
 
   private _removeTags(str: string) {
-    return str.replace(/<\/?[^`]+?\/?>/gmi, '\n') // replace all tags
-      .replace(/\n/gmi, '') // replace line breaks
-      .replace(/&nbsp;/gmi, '') // replace line breaks
+    return str
+      .replace(/<\/?[^`]+?\/?>/gim, '\n') // replace all tags
+      .replace(/\n/gim, '') // replace line breaks
+      .replace(/&nbsp;/gim, '') // replace line breaks
       .replace('&nbsp;', '') // replace line breaks again because sometimes it doesn't work
       .trim();
   }

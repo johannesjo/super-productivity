@@ -1,16 +1,22 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  OnDestroy,
+  OnInit,
+} from '@angular/core';
 import { GlobalConfigService } from '../../features/config/global-config.service';
 import {
   GLOBAL_CONFIG_FORM_CONFIG,
   GLOBAL_PRODUCTIVITY_FORM_CONFIG,
-  GLOBAL_SYNC_FORM_CONFIG
+  GLOBAL_SYNC_FORM_CONFIG,
 } from '../../features/config/global-config-form-config.const';
 import {
   ConfigFormConfig,
   ConfigFormSection,
   GlobalConfigSectionKey,
   GlobalConfigState,
-  GlobalSectionConfig
+  GlobalSectionConfig,
 } from '../../features/config/global-config.model';
 import { Subscription } from 'rxjs';
 import { ProjectCfgFormKey } from '../../features/project/project.model';
@@ -47,10 +53,12 @@ export class ConfigPageComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
-    this._subs.add(this.configService.cfg$.subscribe((cfg) => {
-      this.globalCfg = cfg;
-      this._cd.detectChanges();
-    }));
+    this._subs.add(
+      this.configService.cfg$.subscribe((cfg) => {
+        this.globalCfg = cfg;
+        this._cd.detectChanges();
+      }),
+    );
   }
 
   ngOnDestroy() {
@@ -61,7 +69,10 @@ export class ConfigPageComponent implements OnInit, OnDestroy {
     return section.key;
   }
 
-  saveGlobalCfg($event: { sectionKey: GlobalConfigSectionKey | ProjectCfgFormKey; config: any }) {
+  saveGlobalCfg($event: {
+    sectionKey: GlobalConfigSectionKey | ProjectCfgFormKey;
+    config: any;
+  }) {
     const config = $event.config;
     const sectionKey = $event.sectionKey as GlobalConfigSectionKey;
 
@@ -73,10 +84,12 @@ export class ConfigPageComponent implements OnInit, OnDestroy {
   }
 
   toggleDarkMode(change: MatSlideToggleChange) {
-    this.configService.updateSection('misc', {isDarkMode: change.checked});
+    this.configService.updateSection('misc', { isDarkMode: change.checked });
   }
 
-  getGlobalCfgSection(sectionKey: GlobalConfigSectionKey | ProjectCfgFormKey): GlobalSectionConfig {
+  getGlobalCfgSection(
+    sectionKey: GlobalConfigSectionKey | ProjectCfgFormKey,
+  ): GlobalSectionConfig {
     return (this.globalCfg as any)[sectionKey];
   }
 }

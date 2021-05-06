@@ -4,7 +4,7 @@ import {
   HostListener,
   OnDestroy,
   ViewChild,
-  ViewContainerRef
+  ViewContainerRef,
 } from '@angular/core';
 import { ChromeExtensionInterfaceService } from './core/chrome-extension-interface/chrome-extension-interface.service';
 import { ShortcutService } from './core-ui/shortcut/shortcut.service';
@@ -49,20 +49,15 @@ const productivityTip: string[] = w.productivityTips && w.productivityTips[w.ran
   selector: 'app-root',
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss'],
-  animations: [
-    blendInOutAnimation,
-    expandAnimation,
-    warpRouteAnimation,
-    fadeAnimation
-  ],
+  animations: [blendInOutAnimation, expandAnimation, warpRouteAnimation, fadeAnimation],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AppComponent implements OnDestroy {
   productivityTipTitle: string = productivityTip && productivityTip[0];
   productivityTipText: string = productivityTip && productivityTip[1];
 
-  @ViewChild('notesElRef', {read: ViewContainerRef}) notesElRef?: ViewContainerRef;
-  @ViewChild('sideNavElRef', {read: ViewContainerRef}) sideNavElRef?: ViewContainerRef;
+  @ViewChild('notesElRef', { read: ViewContainerRef }) notesElRef?: ViewContainerRef;
+  @ViewChild('sideNavElRef', { read: ViewContainerRef }) sideNavElRef?: ViewContainerRef;
 
   isRTL: boolean = false;
 
@@ -119,9 +114,15 @@ export class AppComponent implements OnDestroy {
       this._initElectronErrorHandler();
       this._uiHelperService.initElectron();
 
-      (this._electronService.ipcRenderer as typeof ipcRenderer).on(IPC.TRANSFER_SETTINGS_REQUESTED, () => {
-        (this._electronService.ipcRenderer as typeof ipcRenderer).send(IPC.TRANSFER_SETTINGS_TO_ELECTRON, this._globalConfigService.cfg);
-      });
+      (this._electronService.ipcRenderer as typeof ipcRenderer).on(
+        IPC.TRANSFER_SETTINGS_REQUESTED,
+        () => {
+          (this._electronService.ipcRenderer as typeof ipcRenderer).send(
+            IPC.TRANSFER_SETTINGS_TO_ELECTRON,
+            this._globalConfigService.cfg,
+          );
+        },
+      );
     } else {
       // WEB VERSION
       if (this._swUpdate.isEnabled) {
@@ -164,7 +165,9 @@ export class AppComponent implements OnDestroy {
 
   @HostListener('document:paste', ['$event'])
   async onPaste(ev: ClipboardEvent) {
-    if (await this.workContextService.isActiveWorkContextProject$.pipe(first()).toPromise()) {
+    if (
+      await this.workContextService.isActiveWorkContextProject$.pipe(first()).toPromise()
+    ) {
       this._bookmarkService.createFromPaste(ev);
     }
   }
@@ -184,14 +187,14 @@ export class AppComponent implements OnDestroy {
         label: T.APP.B_INSTALL.INSTALL,
         fn: () => {
           e.prompt();
-        }
+        },
       },
       action2: {
         label: T.APP.B_INSTALL.IGNORE,
         fn: () => {
           sessionStorage.setItem(SS_WEB_APP_INSTALL, 'true');
-        }
-      }
+        },
+      },
     });
   }
 
@@ -200,11 +203,15 @@ export class AppComponent implements OnDestroy {
   }
 
   scrollToNotes() {
-    (this.notesElRef as ViewContainerRef).element.nativeElement.scrollIntoView({behavior: 'smooth'});
+    (this.notesElRef as ViewContainerRef).element.nativeElement.scrollIntoView({
+      behavior: 'smooth',
+    });
   }
 
   scrollToSidenav() {
-    (this.sideNavElRef as ViewContainerRef).element.nativeElement.scrollIntoView({behavior: 'smooth'});
+    (this.sideNavElRef as ViewContainerRef).element.nativeElement.scrollIntoView({
+      behavior: 'smooth',
+    });
   }
 
   ngOnDestroy() {
@@ -212,21 +219,26 @@ export class AppComponent implements OnDestroy {
   }
 
   private _initElectronErrorHandler() {
-    (this._electronService.ipcRenderer as typeof ipcRenderer).on(IPC.ERROR, (ev, data: {
-      error: any;
-      stack: any;
-      errorStr: string | unknown;
-    }) => {
-      const errMsg = (typeof data.errorStr === 'string')
-        ? data.errorStr
-        : ' INVALID ERROR MSG :( ';
+    (this._electronService.ipcRenderer as typeof ipcRenderer).on(
+      IPC.ERROR,
+      (
+        ev,
+        data: {
+          error: any;
+          stack: any;
+          errorStr: string | unknown;
+        },
+      ) => {
+        const errMsg =
+          typeof data.errorStr === 'string' ? data.errorStr : ' INVALID ERROR MSG :( ';
 
-      this._snackService.open({
-        msg: errMsg,
-        type: 'ERROR'
-      });
-      console.error(data);
-    });
+        this._snackService.open({
+          msg: errMsg,
+          type: 'ERROR',
+        });
+        console.error(data);
+      },
+    );
   }
 
   private _initOfflineBanner() {
@@ -246,46 +258,48 @@ export class AppComponent implements OnDestroy {
   private _requestPersistence() {
     if (navigator.storage) {
       // try to avoid data-loss
-      Promise.all([
-        navigator.storage.persisted(),
-      ]).then(([persisted]): any => {
-        if (!persisted) {
-          return navigator.storage.persist()
-            .then(granted => {
+      Promise.all([navigator.storage.persisted()])
+        .then(([persisted]): any => {
+          if (!persisted) {
+            return navigator.storage.persist().then((granted) => {
               if (granted) {
                 console.log('Persistent store granted');
               } else {
                 const msg = T.GLOBAL_SNACK.PERSISTENCE_DISALLOWED;
                 console.warn('Persistence not allowed');
-                this._snackService.open({msg});
+                this._snackService.open({ msg });
               }
             });
-
-        } else {
-          console.log('Persistence already allowed');
-        }
-      }).catch((e) => {
-        console.log(e);
-        const msg = T.GLOBAL_SNACK.PERSISTENCE_DISALLOWED;
-        this._snackService.open({msg});
-      });
+          } else {
+            console.log('Persistence already allowed');
+          }
+        })
+        .catch((e) => {
+          console.log(e);
+          const msg = T.GLOBAL_SNACK.PERSISTENCE_DISALLOWED;
+          this._snackService.open({ msg });
+        });
     }
   }
 
   private _checkAvailableStorage() {
     if (environment.production) {
       if ('storage' in navigator && 'estimate' in navigator.storage) {
-        navigator.storage.estimate().then(({usage, quota}) => {
+        navigator.storage.estimate().then(({ usage, quota }) => {
           const u = usage || 0;
           const q = quota || 0;
 
-          const percentUsed = Math.round(u / q * 100);
+          const percentUsed = Math.round((u / q) * 100);
           const usageInMib = Math.round(u / (1024 * 1024));
           const quotaInMib = Math.round(q / (1024 * 1024));
           const details = `${usageInMib} out of ${quotaInMib} MiB used (${percentUsed}%)`;
           console.log(details);
-          if ((quotaInMib - usageInMib) <= 333) {
-            alert(`There is only very little disk space available (${quotaInMib - usageInMib}mb). This might affect how the app is running.`);
+          if (quotaInMib - usageInMib <= 333) {
+            alert(
+              `There is only very little disk space available (${
+                quotaInMib - usageInMib
+              }mb). This might affect how the app is running.`,
+            );
           }
         });
       }

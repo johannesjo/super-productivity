@@ -16,7 +16,7 @@ import { switchMap } from 'rxjs/operators';
   templateUrl: './jira-issue-content.component.html',
   styleUrls: ['./jira-issue-content.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  animations: [expandAnimation]
+  animations: [expandAnimation],
 })
 export class JiraIssueContentComponent {
   description?: string;
@@ -26,14 +26,18 @@ export class JiraIssueContentComponent {
   task?: TaskWithSubTasks;
   private _task$: ReplaySubject<TaskWithSubTasks> = new ReplaySubject(1);
   issueUrl$: Observable<string> = this._task$.pipe(
-    switchMap((task) => this._jiraCommonInterfacesService.issueLink$(task.issueId as string, task.projectId as string))
+    switchMap((task) =>
+      this._jiraCommonInterfacesService.issueLink$(
+        task.issueId as string,
+        task.projectId as string,
+      ),
+    ),
   );
 
   constructor(
-    private readonly  _taskService: TaskService,
-    private readonly  _jiraCommonInterfacesService: JiraCommonInterfacesService,
-  ) {
-  }
+    private readonly _taskService: TaskService,
+    private readonly _jiraCommonInterfacesService: JiraCommonInterfacesService,
+  ) {}
 
   @Input('issue') set issueIn(i: JiraIssue) {
     this.issue = i;

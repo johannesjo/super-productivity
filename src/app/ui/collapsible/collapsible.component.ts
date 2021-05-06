@@ -1,4 +1,11 @@
-import { ChangeDetectionStrategy, Component, EventEmitter, HostBinding, Input, Output } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  EventEmitter,
+  HostBinding,
+  Input,
+  Output,
+} from '@angular/core';
 import { expandAnimation } from '../animations/expand.ani';
 
 @Component({
@@ -6,7 +13,7 @@ import { expandAnimation } from '../animations/expand.ani';
   templateUrl: './collapsible.component.html',
   styleUrls: ['./collapsible.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  animations: [expandAnimation]
+  animations: [expandAnimation],
 })
 export class CollapsibleComponent {
   @Input() title?: string;
@@ -19,8 +26,7 @@ export class CollapsibleComponent {
 
   @Output() isExpandedChange: EventEmitter<boolean> = new EventEmitter();
 
-  constructor() {
-  }
+  constructor() {}
 
   toggleExpand() {
     this.isExpanded = !this.isExpanded;

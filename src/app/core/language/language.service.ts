@@ -3,13 +3,18 @@ import { TranslateService } from '@ngx-translate/core';
 import { DateTimeAdapter } from 'ngx-date-time-picker-schedule';
 import { DateAdapter } from '@angular/material/core';
 import * as moment from 'moment';
-import { AUTO_SWITCH_LNGS, LanguageCode, LanguageCodeMomentMap, RTL_LANGUAGES } from '../../app.constants';
+import {
+  AUTO_SWITCH_LNGS,
+  LanguageCode,
+  LanguageCodeMomentMap,
+  RTL_LANGUAGES,
+} from '../../app.constants';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { GlobalConfigService } from 'src/app/features/config/global-config.service';
 import { map, startWith } from 'rxjs/operators';
 import { DEFAULT_GLOBAL_CONFIG } from 'src/app/features/config/default-global-config.const';
 
-@Injectable({providedIn: 'root'})
+@Injectable({ providedIn: 'root' })
 export class LanguageService {
   // I think a better approach is to add a field in every [lang].json file to specify the direction of the language
   private isRTL: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
@@ -48,15 +53,16 @@ export class LanguageService {
 
   private _initMonkeyPatchFirstDayOfWeek() {
     let firstDayOfWeek = DEFAULT_GLOBAL_CONFIG.misc.firstDayOfWeek;
-    this._globalConfigService.misc$.pipe(
-      map(cfg => cfg.firstDayOfWeek),
-      startWith(1),
-    ).subscribe((_firstDayOfWeek: number) => {
-      // default should be monday, if we have an invalid value for some reason
-      firstDayOfWeek = (_firstDayOfWeek === 0 || _firstDayOfWeek > 0)
-        ? _firstDayOfWeek
-        : 1;
-    });
+    this._globalConfigService.misc$
+      .pipe(
+        map((cfg) => cfg.firstDayOfWeek),
+        startWith(1),
+      )
+      .subscribe((_firstDayOfWeek: number) => {
+        // default should be monday, if we have an invalid value for some reason
+        firstDayOfWeek =
+          _firstDayOfWeek === 0 || _firstDayOfWeek > 0 ? _firstDayOfWeek : 1;
+      });
     // overwrites default method to make this configurable
     this._dateAdapter.getFirstDayOfWeek = () => firstDayOfWeek;
   }

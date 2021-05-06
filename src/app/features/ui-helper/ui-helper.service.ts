@@ -11,15 +11,14 @@ import { fromEvent } from 'rxjs';
 import { throttleTime } from 'rxjs/operators';
 import { ipcRenderer, webFrame } from 'electron';
 
-@Injectable({providedIn: 'root'})
+@Injectable({ providedIn: 'root' })
 export class UiHelperService {
-  private _webFrame: typeof webFrame = (this._electronService.webFrame as typeof webFrame);
+  private _webFrame: typeof webFrame = this._electronService.webFrame as typeof webFrame;
 
   constructor(
     @Inject(DOCUMENT) private _document: Document,
     private _electronService: ElectronService,
-  ) {
-  }
+  ) {}
 
   initElectron() {
     this._initMousewheelZoomForElectron();
@@ -32,7 +31,7 @@ export class UiHelperService {
     }
 
     this._webFrame.setZoomFactor(zoomFactor);
-    this._updateLocalUiHelperSettings({zoomFactor});
+    this._updateLocalUiHelperSettings({ zoomFactor });
   }
 
   zoomBy(zoomBy: number) {
@@ -44,12 +43,11 @@ export class UiHelperService {
     const zoomFactor = currentZoom + zoomBy;
 
     this._webFrame.setZoomFactor(zoomFactor);
-    this._updateLocalUiHelperSettings({zoomFactor});
+    this._updateLocalUiHelperSettings({ zoomFactor });
   }
 
   focusApp() {
     if (IS_ELECTRON) {
-
       //  otherwise the last focused task get's focused again leading to unintended keyboard events
       if (document.activeElement) {
         (document.activeElement as HTMLElement).blur();
@@ -67,27 +65,30 @@ export class UiHelperService {
     // set initial zoom
     this.zoomTo(this._getLocalUiHelperSettings().zoomFactor);
 
-    fromEvent(this._document, 'mousewheel').pipe(
-      throttleTime(20)
-    ).subscribe((event: any) => {
-      if (event && event.ctrlKey) {
-        // this does not prevent scrolling unfortunately
-        // event.preventDefault();
+    fromEvent(this._document, 'mousewheel')
+      .pipe(throttleTime(20))
+      .subscribe((event: any) => {
+        if (event && event.ctrlKey) {
+          // this does not prevent scrolling unfortunately
+          // event.preventDefault();
 
-        let zoomFactor = this._webFrame.getZoomFactor();
-        if (event.deltaY > 0) {
-          zoomFactor -= ZOOM_DELTA;
-        } else if (event.deltaY < 0) {
-          zoomFactor += ZOOM_DELTA;
+          let zoomFactor = this._webFrame.getZoomFactor();
+          if (event.deltaY > 0) {
+            zoomFactor -= ZOOM_DELTA;
+          } else if (event.deltaY < 0) {
+            zoomFactor += ZOOM_DELTA;
+          }
+          zoomFactor = Math.min(Math.max(zoomFactor, 0.1), 4);
+          this.zoomTo(zoomFactor);
         }
-        zoomFactor = Math.min(Math.max(zoomFactor, 0.1), 4);
-        this.zoomTo(zoomFactor);
-      }
-    });
+      });
   }
 
   private _getLocalUiHelperSettings(): LocalUiHelperSettings {
-    return loadFromRealLs(LS_LOCAL_UI_HELPER) as LocalUiHelperSettings || UI_LOCAL_HELPER_DEFAULT;
+    return (
+      (loadFromRealLs(LS_LOCAL_UI_HELPER) as LocalUiHelperSettings) ||
+      UI_LOCAL_HELPER_DEFAULT
+    );
   }
 
   private _updateLocalUiHelperSettings(newCfg: Partial<LocalUiHelperSettings>) {

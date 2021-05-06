@@ -7,12 +7,6 @@ import { JiraViewComponentsModule } from '../../features/issue/providers/jira/ji
 
 @NgModule({
   declarations: [TagSettingsPageComponent],
-  imports: [
-    CommonModule,
-    ConfigModule,
-    UiModule,
-    JiraViewComponentsModule,
-  ]
+  imports: [CommonModule, ConfigModule, UiModule, JiraViewComponentsModule],
 })
-export class TagSettingsPageModule {
-}
+export class TagSettingsPageModule {}

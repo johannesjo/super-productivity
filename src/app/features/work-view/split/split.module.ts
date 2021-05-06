@@ -5,13 +5,8 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 
 @NgModule({
-  imports: [
-    CommonModule,
-    MatIconModule,
-    MatButtonModule,
-  ],
+  imports: [CommonModule, MatIconModule, MatButtonModule],
   exports: [SplitComponent],
-  declarations: [SplitComponent]
+  declarations: [SplitComponent],
 })
-export class SplitModule {
-}
+export class SplitModule {}

@@ -6,7 +6,7 @@ import {
   OnDestroy,
   OnInit,
   Output,
-  ViewChild
+  ViewChild,
 } from '@angular/core';
 import { NoteService } from '../note.service';
 import { DragulaService } from 'ng2-dragula';
@@ -26,7 +26,6 @@ import { Task } from '../../tasks/task.model';
   styleUrls: ['./notes.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   animations: [standardListAnimation, fadeAnimation],
-
 })
 export class NotesComponent implements OnInit, OnDestroy {
   @Output() scrollToSidenav: EventEmitter<void> = new EventEmitter();
@@ -36,15 +35,14 @@ export class NotesComponent implements OnInit, OnDestroy {
   isDragOver: boolean = false;
   dragEnterTarget?: HTMLElement;
 
-  @ViewChild('buttonEl', {static: true}) buttonEl?: MatButton;
+  @ViewChild('buttonEl', { static: true }) buttonEl?: MatButton;
   private _subs: Subscription = new Subscription();
 
   constructor(
     public noteService: NoteService,
     private _dragulaService: DragulaService,
     private _matDialog: MatDialog,
-  ) {
-  }
+  ) {}
 
   @HostListener('dragenter', ['$event']) onDragEnter(ev: DragEvent) {
     this.dragEnterTarget = ev.target as HTMLElement;
@@ -65,19 +63,23 @@ export class NotesComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
-    this._subs.add(this._dragulaService.dropModel('NOTES')
-      .subscribe(({targetModel}: any) => {
+    this._subs.add(
+      this._dragulaService.dropModel('NOTES').subscribe(({ targetModel }: any) => {
         // const {target, source, targetModel, item} = params;
         const targetNewIds = targetModel.map((task: Task) => task.id);
         this.noteService.updateOrder(targetNewIds);
-      })
+      }),
     );
 
     this._dragulaService.createGroup('NOTES', {
       direction: 'vertical',
       moves: (el, container, handle) => {
-        return !!handle && handle.className.indexOf && handle.className.indexOf('handle-drag') > -1;
-      }
+        return (
+          !!handle &&
+          handle.className.indexOf &&
+          handle.className.indexOf('handle-drag') > -1
+        );
+      },
     });
   }
 

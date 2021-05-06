@@ -18,29 +18,25 @@ export enum BookmarkActionTypes {
 export class LoadBookmarkState implements Action {
   readonly type: string = BookmarkActionTypes.LoadBookmarkState;
 
-  constructor(public payload: { state: BookmarkState }) {
-  }
+  constructor(public payload: { state: BookmarkState }) {}
 }
 
 export class AddBookmark implements Action {
   readonly type: string = BookmarkActionTypes.AddBookmark;
 
-  constructor(public payload: { bookmark: Bookmark }) {
-  }
+  constructor(public payload: { bookmark: Bookmark }) {}
 }
 
 export class UpdateBookmark implements Action {
   readonly type: string = BookmarkActionTypes.UpdateBookmark;
 
-  constructor(public payload: { bookmark: Update<Bookmark> }) {
-  }
+  constructor(public payload: { bookmark: Update<Bookmark> }) {}
 }
 
 export class DeleteBookmark implements Action {
   readonly type: string = BookmarkActionTypes.DeleteBookmark;
 
-  constructor(public payload: { id: string }) {
-  }
+  constructor(public payload: { id: string }) {}
 }
 
 export class ShowBookmarks implements Action {
@@ -58,17 +54,15 @@ export class ToggleBookmarks implements Action {
 export class ReorderBookmarks implements Action {
   readonly type: string = BookmarkActionTypes.ReorderBookmarks;
 
-  constructor(public payload: { ids: string[] }) {
-  }
+  constructor(public payload: { ids: string[] }) {}
 }
 
 export type BookmarkActions =
-  LoadBookmarkState
+  | LoadBookmarkState
   | AddBookmark
   | UpdateBookmark
   | DeleteBookmark
   | ShowBookmarks
   | HideBookmarks
   | ToggleBookmarks
-  | ReorderBookmarks
-  ;
+  | ReorderBookmarks;

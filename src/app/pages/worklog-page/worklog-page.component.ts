@@ -5,11 +5,10 @@ import { T } from '../../t.const';
   selector: 'worklog-page',
   templateUrl: './worklog-page.component.html',
   styleUrls: ['./worklog-page.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class WorklogPageComponent {
   T: typeof T = T;
 
-  constructor() {
-  }
+  constructor() {}
 }

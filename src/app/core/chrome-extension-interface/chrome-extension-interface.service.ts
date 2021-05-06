@@ -27,7 +27,10 @@ export class ChromeExtensionInterfaceService {
     });
   }
 
-  addEventListener(evName: ExtensionInterfaceEventName, cb: (ev: Event, data?: unknown) => void) {
+  addEventListener(
+    evName: ExtensionInterfaceEventName,
+    cb: (ev: Event, data?: unknown) => void,
+  ) {
     interfaceEl.addEventListener(evName, (ev: Event) => {
       const event = ev as CustomEvent;
       cb(event, event.detail);

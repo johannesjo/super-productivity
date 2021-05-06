@@ -21,7 +21,7 @@ import { WorkContextService } from '../work-context/work-context.service';
   templateUrl: './worklog.component.html',
   styleUrls: ['./worklog.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  animations: [expandFadeAnimation, standardListAnimation, fadeAnimation]
+  animations: [expandFadeAnimation, standardListAnimation, fadeAnimation],
 })
 export class WorklogComponent {
   T: typeof T = T;
@@ -34,13 +34,18 @@ export class WorklogComponent {
     private readonly _taskService: TaskService,
     private readonly _matDialog: MatDialog,
     private readonly _router: Router,
-  ) {
-  }
+  ) {}
 
-  exportData(monthData: WorklogMonth, year: number, month: string | number, week?: number) {
-    const {rangeStart, rangeEnd} = (typeof week === 'number')
-      ? getDateRangeForWeek(year, week, +month)
-      : getDateRangeForMonth(year, +month);
+  exportData(
+    monthData: WorklogMonth,
+    year: number,
+    month: string | number,
+    week?: number,
+  ) {
+    const { rangeStart, rangeEnd } =
+      typeof week === 'number'
+        ? getDateRangeForWeek(year, week, +month)
+        : getDateRangeForMonth(year, +month);
 
     this._matDialog.open(DialogWorklogExportComponent, {
       restoreFocus: true,
@@ -48,36 +53,37 @@ export class WorklogComponent {
       data: {
         rangeStart,
         rangeEnd,
-      }
+      },
     });
   }
 
   restoreTask(task: TaskCopy) {
-    this._matDialog.open(DialogConfirmComponent, {
-      restoreFocus: true,
-      data: {
-        okTxt: T.G.DO_IT,
-        message: T.F.WORKLOG.D_CONFIRM_RESTORE,
-        translateParams: {title: task.title}
-      }
-    }).afterClosed()
+    this._matDialog
+      .open(DialogConfirmComponent, {
+        restoreFocus: true,
+        data: {
+          okTxt: T.G.DO_IT,
+          message: T.F.WORKLOG.D_CONFIRM_RESTORE,
+          translateParams: { title: task.title },
+        },
+      })
+      .afterClosed()
       .subscribe(async (isConfirm: boolean) => {
-          // because we navigate away we don't need to worry about updating the worklog itself
-          if (isConfirm) {
-            let subTasks;
-            if (task.subTaskIds && task.subTaskIds.length) {
-              const archiveState = await this._persistenceService.taskArchive.loadState();
-              subTasks = task.subTaskIds
-                .map(id => archiveState.entities[id])
-                .filter(v => !!v);
-            }
-
-            console.log('RESTORE', task, subTasks);
-            this._taskService.restoreTask(task, (subTasks || []) as Task[]);
-            this._router.navigate(['/active/tasks']);
+        // because we navigate away we don't need to worry about updating the worklog itself
+        if (isConfirm) {
+          let subTasks;
+          if (task.subTaskIds && task.subTaskIds.length) {
+            const archiveState = await this._persistenceService.taskArchive.loadState();
+            subTasks = task.subTaskIds
+              .map((id) => archiveState.entities[id])
+              .filter((v) => !!v);
           }
+
+          console.log('RESTORE', task, subTasks);
+          this._taskService.restoreTask(task, (subTasks || []) as Task[]);
+          this._router.navigate(['/active/tasks']);
         }
-      );
+      });
   }
 
   sortWorklogItems(a: any, b: any) {
@@ -100,12 +106,16 @@ export class WorklogComponent {
     return val.weekNr;
   }
 
-  async updateTimeSpentTodayForTask(task: Task, dateStr: string, newVal: number | string) {
+  async updateTimeSpentTodayForTask(
+    task: Task,
+    dateStr: string,
+    newVal: number | string,
+  ) {
     await this._taskService.updateEverywhere(task.id, {
       timeSpentOnDay: {
         ...task.timeSpentOnDay,
         [dateStr]: +newVal,
-      }
+      },
     });
     this.worklogService.refreshWorklog();
   }

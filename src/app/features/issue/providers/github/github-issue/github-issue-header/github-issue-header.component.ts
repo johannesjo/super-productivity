@@ -6,12 +6,11 @@ import { T } from '../../../../../../t.const';
   selector: 'github-issue-header',
   templateUrl: './github-issue-header.component.html',
   styleUrls: ['./github-issue-header.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class GithubIssueHeaderComponent {
   T: typeof T = T;
   @Input() task?: TaskWithSubTasks;
 
-  constructor() {
-  }
+  constructor() {}
 }

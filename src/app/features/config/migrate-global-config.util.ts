@@ -1,4 +1,9 @@
-import { GlobalConfigState, IdleConfig, SyncConfig, TakeABreakConfig } from './global-config.model';
+import {
+  GlobalConfigState,
+  IdleConfig,
+  SyncConfig,
+  TakeABreakConfig,
+} from './global-config.model';
 import { DEFAULT_GLOBAL_CONFIG } from './default-global-config.const';
 import { MODEL_VERSION_KEY } from '../../app.constants';
 import { isMigrateModel } from '../../util/model-version';
@@ -6,7 +11,9 @@ import { SyncProvider } from '../../imex/sync/sync-provider.model';
 
 const MODEL_VERSION = 2.2001;
 
-export const migrateGlobalConfigState = (globalConfigState: GlobalConfigState): GlobalConfigState => {
+export const migrateGlobalConfigState = (
+  globalConfigState: GlobalConfigState,
+): GlobalConfigState => {
   if (!isMigrateModel(globalConfigState, MODEL_VERSION, 'GlobalConfig')) {
     return globalConfigState;
   }
@@ -32,34 +39,38 @@ export const migrateGlobalConfigState = (globalConfigState: GlobalConfigState): 
 };
 
 const _migrateMiscToSeparateKeys = (config: GlobalConfigState): GlobalConfigState => {
-  const idle: IdleConfig = !!(config.idle)
+  const idle: IdleConfig = !!config.idle
     ? config.idle
     : {
-      ...DEFAULT_GLOBAL_CONFIG.idle,
-      // eslint-disable-next-line
-      isOnlyOpenIdleWhenCurrentTask: (config.misc as any)['isOnlyOpenIdleWhenCurrentTask'],
-      // eslint-disable-next-line
-      isEnableIdleTimeTracking: (config.misc as any)['isEnableIdleTimeTracking'],
-      // eslint-disable-next-line
-      minIdleTime: (config.misc as any)['minIdleTime'],
-      // eslint-disable-next-line
-      isUnTrackedIdleResetsBreakTimer: (config.misc as any)['isUnTrackedIdleResetsBreakTimer'],
-    };
+        ...DEFAULT_GLOBAL_CONFIG.idle,
+        // eslint-disable-next-line
+        isOnlyOpenIdleWhenCurrentTask: (config.misc as any)[
+          'isOnlyOpenIdleWhenCurrentTask'
+        ],
+        // eslint-disable-next-line
+        isEnableIdleTimeTracking: (config.misc as any)['isEnableIdleTimeTracking'],
+        // eslint-disable-next-line
+        minIdleTime: (config.misc as any)['minIdleTime'],
+        // eslint-disable-next-line
+        isUnTrackedIdleResetsBreakTimer: (config.misc as any)[
+          'isUnTrackedIdleResetsBreakTimer'
+        ],
+      };
 
-  const takeABreak: TakeABreakConfig = !!(config.takeABreak)
+  const takeABreak: TakeABreakConfig = !!config.takeABreak
     ? config.takeABreak
     : {
-      ...DEFAULT_GLOBAL_CONFIG.takeABreak,
-      // eslint-disable-next-line
-      isTakeABreakEnabled: (config.misc as any)['isTakeABreakEnabled'],
-      // eslint-disable-next-line
-      takeABreakMessage: (config.misc as any)['takeABreakMessage'],
-      // eslint-disable-next-line
-      takeABreakMinWorkingTime: (config.misc as any)['takeABreakMinWorkingTime'],
-    };
+        ...DEFAULT_GLOBAL_CONFIG.takeABreak,
+        // eslint-disable-next-line
+        isTakeABreakEnabled: (config.misc as any)['isTakeABreakEnabled'],
+        // eslint-disable-next-line
+        takeABreakMessage: (config.misc as any)['takeABreakMessage'],
+        // eslint-disable-next-line
+        takeABreakMinWorkingTime: (config.misc as any)['takeABreakMinWorkingTime'],
+      };
 
   // we delete the old keys. worst case is, that the default settings are used for outdated versions of the app
-  const obsoleteMiscKeys: ((keyof TakeABreakConfig) | (keyof IdleConfig))[] = [
+  const obsoleteMiscKeys: (keyof TakeABreakConfig | keyof IdleConfig)[] = [
     'isTakeABreakEnabled',
     'takeABreakMessage',
     'takeABreakMinWorkingTime',
@@ -70,7 +81,7 @@ const _migrateMiscToSeparateKeys = (config: GlobalConfigState): GlobalConfigStat
     'isUnTrackedIdleResetsBreakTimer',
   ];
 
-  obsoleteMiscKeys.forEach(key => {
+  obsoleteMiscKeys.forEach((key) => {
     if ((config as any)[key]) {
       delete (config as any)[key];
     }
@@ -90,7 +101,9 @@ const _extendConfigDefaults = (config: GlobalConfigState): GlobalConfigState => 
   };
 };
 
-const _migrateUndefinedShortcutsToNull = (config: GlobalConfigState): GlobalConfigState => {
+const _migrateUndefinedShortcutsToNull = (
+  config: GlobalConfigState,
+): GlobalConfigState => {
   const keyboardCopy: any = {
     // also add new keys
     ...DEFAULT_GLOBAL_CONFIG.keyboard,
@@ -127,26 +140,26 @@ const _migrateSyncCfg = (config: GlobalConfigState): GlobalConfigState => {
   return {
     ...config,
     sync: !!prevProvider
-      ? {
-        isEnabled: true,
-        syncInterval,
-        syncProvider: prevProvider,
-        dropboxSync: {
-          ...DEFAULT_GLOBAL_CONFIG.sync.dropboxSync,
-          accessToken: (config as any).dropboxSync?.accessToken,
-          authCode: (config as any).dropboxSync?.authCode,
-        },
-        googleDriveSync: {
-          ...DEFAULT_GLOBAL_CONFIG.sync.googleDriveSync,
-          ...(config as any)?.googleDriveSync,
-        },
-        webDav: {
-          password: null,
-          syncFilePath: null,
-          userName: null,
-          baseUrl: null,
-        }
-      } as SyncConfig
+      ? ({
+          isEnabled: true,
+          syncInterval,
+          syncProvider: prevProvider,
+          dropboxSync: {
+            ...DEFAULT_GLOBAL_CONFIG.sync.dropboxSync,
+            accessToken: (config as any).dropboxSync?.accessToken,
+            authCode: (config as any).dropboxSync?.authCode,
+          },
+          googleDriveSync: {
+            ...DEFAULT_GLOBAL_CONFIG.sync.googleDriveSync,
+            ...(config as any)?.googleDriveSync,
+          },
+          webDav: {
+            password: null,
+            syncFilePath: null,
+            userName: null,
+            baseUrl: null,
+          },
+        } as SyncConfig)
       : DEFAULT_GLOBAL_CONFIG.sync,
   };
 };
@@ -158,7 +171,7 @@ const _fixDefaultProjectId = (config: GlobalConfigState): GlobalConfigState => {
       misc: {
         ...config.misc,
         defaultProjectId: null,
-      }
+      },
     };
   }
 
@@ -166,5 +179,3 @@ const _fixDefaultProjectId = (config: GlobalConfigState): GlobalConfigState => {
     ...config,
   };
 };
-
-

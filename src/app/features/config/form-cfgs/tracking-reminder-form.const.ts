@@ -25,8 +25,8 @@ export const TRACKING_REMINDER_FORM_CFG: ConfigFormSection<TrackingReminderConfi
       key: 'minTime',
       type: 'duration',
       templateOptions: {
-        label: T.GCF.TRACKING_REMINDER.L_MIN_TIME
+        label: T.GCF.TRACKING_REMINDER.L_MIN_TIME,
       },
     },
-  ]
+  ],
 };

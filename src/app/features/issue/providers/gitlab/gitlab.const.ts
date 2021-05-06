@@ -1,7 +1,10 @@
 // TODO use as a checklist
 import { GitlabCfg } from './gitlab';
 import { T } from '../../../../t.const';
-import { ConfigFormSection, LimitedFormlyFieldConfig } from '../../../config/global-config.model';
+import {
+  ConfigFormSection,
+  LimitedFormlyFieldConfig,
+} from '../../../config/global-config.model';
 import { GITHUB_INITIAL_POLL_DELAY } from '../github/github.const';
 
 export const DEFAULT_GITLAB_CFG: GitlabCfg = {
@@ -33,8 +36,8 @@ export const GITLAB_CONFIG_FORM: LimitedFormlyFieldConfig<GitlabCfg>[] = [
     templateOptions: {
       label: T.F.GITLAB.FORM.GITLAB_BASE_URL,
       type: 'text',
-      pattern: /((([A-Za-z]{3,9}:(?:\/\/)?)(?:[\-;:&=\+\$,\w]+@)?[A-Za-z0-9\.\-]+|(?:www\.|[\-;:&=\+\$,\w]+@)[A-Za-z0-9\.\-]+)((?:\/[\+~%\/\.\w\-_]*)?\??(?:[\-\+=&;%@\.\w_]*)#?(?:[\.\!\/\\\w]*))?)/
-    }
+      pattern: /((([A-Za-z]{3,9}:(?:\/\/)?)(?:[\-;:&=\+\$,\w]+@)?[A-Za-z0-9\.\-]+|(?:www\.|[\-;:&=\+\$,\w]+@)[A-Za-z0-9\.\-]+)((?:\/[\+~%\/\.\w\-_]*)?\??(?:[\-\+=&;%@\.\w_]*)#?(?:[\.\!\/\\\w]*))?)/,
+    },
   },
   {
     key: 'project',
@@ -65,28 +68,28 @@ export const GITLAB_CONFIG_FORM: LimitedFormlyFieldConfig<GitlabCfg>[] = [
     key: 'isSearchIssuesFromGitlab',
     type: 'checkbox',
     templateOptions: {
-      label: T.F.GITLAB.FORM.IS_SEARCH_ISSUES_FROM_GITLAB
+      label: T.F.GITLAB.FORM.IS_SEARCH_ISSUES_FROM_GITLAB,
     },
   },
   {
     key: 'isAutoPoll',
     type: 'checkbox',
     templateOptions: {
-      label: T.F.GITLAB.FORM.IS_AUTO_POLL
+      label: T.F.GITLAB.FORM.IS_AUTO_POLL,
     },
   },
   {
     key: 'isAutoAddToBacklog',
     type: 'checkbox',
     templateOptions: {
-      label: T.F.GITLAB.FORM.IS_AUTO_ADD_TO_BACKLOG
+      label: T.F.GITLAB.FORM.IS_AUTO_ADD_TO_BACKLOG,
     },
   },
   {
     key: 'filterUsername',
     type: 'input',
     templateOptions: {
-      label: T.F.GITLAB.FORM.FILTER_USER
+      label: T.F.GITLAB.FORM.FILTER_USER,
     },
   },
 ];

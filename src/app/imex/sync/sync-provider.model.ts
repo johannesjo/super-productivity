@@ -17,9 +17,17 @@ export interface SyncProviderServiceInterface {
   isUploadForcePossible?: boolean;
   isReady$: Observable<boolean>;
 
-  getRevAndLastClientUpdate(localRev: string | null): Promise<{ rev: string; clientUpdate?: number } | SyncGetRevResult>;
+  getRevAndLastClientUpdate(
+    localRev: string | null,
+  ): Promise<{ rev: string; clientUpdate?: number } | SyncGetRevResult>;
 
-  uploadAppData(data: AppDataComplete, localRev: string | null, isForceOverwrite?: boolean): Promise<string | Error>;
+  uploadAppData(
+    data: AppDataComplete,
+    localRev: string | null,
+    isForceOverwrite?: boolean,
+  ): Promise<string | Error>;
 
-  downloadAppData(localRev: string | null): Promise<{ rev: string; data: AppDataComplete | undefined }>;
+  downloadAppData(
+    localRev: string | null,
+  ): Promise<{ rev: string; data: AppDataComplete | undefined }>;
 }

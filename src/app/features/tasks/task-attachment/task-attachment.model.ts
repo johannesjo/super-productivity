@@ -1,4 +1,7 @@
-import { DropPasteInput, DropPasteInputType } from '../../../core/drop-paste-input/drop-paste.model';
+import {
+  DropPasteInput,
+  DropPasteInputType,
+} from '../../../core/drop-paste-input/drop-paste.model';
 
 export type TaskAttachmentType = DropPasteInputType;
 

@@ -9,8 +9,8 @@ const START_END_ALL = {
     '1200-05-05': 10713600000,
   },
   workEnd: {
-    '2022-05-08': 1651968000000
-  }
+    '2022-05-08': 1651968000000,
+  },
 };
 
 const fakeTaskStateFromArray = (tasks: TaskCopy[]): EntityState<Task> => {
@@ -32,8 +32,8 @@ describe('mapArchiveToWorklog', () => {
         timeSpentOnDay: {
           '2015-01-15': 9999,
           '2018-02-16': 3333,
-        }
-      }
+        },
+      },
     ]);
 
     const r = mapArchiveToWorklog(ts, [], START_END_ALL);
@@ -69,7 +69,7 @@ describe('mapArchiveToWorklog', () => {
         timeSpentOnDay: {
           '2015-01-15': 9999,
           '2018-02-16': 3333,
-        }
+        },
       },
       {
         ...DEFAULT_TASK,
@@ -78,7 +78,7 @@ describe('mapArchiveToWorklog', () => {
         parentId: 'A',
         timeSpentOnDay: {
           '2015-01-15': 9999,
-        }
+        },
       },
       {
         ...DEFAULT_TASK,
@@ -87,7 +87,7 @@ describe('mapArchiveToWorklog', () => {
         parentId: 'A',
         timeSpentOnDay: {
           '2018-02-16': 3333,
-        }
+        },
       },
     ]);
 
@@ -124,8 +124,8 @@ describe('mapArchiveToWorklog', () => {
         subTaskIds: ['SUB_B', 'SUB_C'],
         timeSpent: 10000,
         timeSpentOnDay: {
-          '2015-01-15': 10000
-        }
+          '2015-01-15': 10000,
+        },
       },
       {
         ...DEFAULT_TASK,
@@ -135,7 +135,7 @@ describe('mapArchiveToWorklog', () => {
         timeSpent: 3333,
         timeSpentOnDay: {
           '2015-01-15': 3333,
-        }
+        },
       },
       {
         ...DEFAULT_TASK,
@@ -145,7 +145,7 @@ describe('mapArchiveToWorklog', () => {
         timeSpent: 4000,
         timeSpentOnDay: {
           '2015-01-15': 4000,
-        }
+        },
       },
       {
         ...DEFAULT_TASK,
@@ -155,7 +155,7 @@ describe('mapArchiveToWorklog', () => {
         timeSpent: 6000,
         timeSpentOnDay: {
           '2015-01-15': 6000,
-        }
+        },
       },
     ]);
 

@@ -1,4 +1,10 @@
-import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  EventEmitter,
+  Input,
+  Output,
+} from '@angular/core';
 import { Observable } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
 import { GlobalConfigService } from 'src/app/features/config/global-config.service';
@@ -8,7 +14,7 @@ import { T } from 'src/app/t.const';
   selector: 'owl-wrapper',
   templateUrl: './owl-wrapper.component.html',
   styleUrls: ['./owl-wrapper.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class OwlWrapperComponent {
   @Input() now: Date = new Date();
@@ -37,12 +43,11 @@ export class OwlWrapperComponent {
   ];
 
   firstDayOfWeek$: Observable<number> = this._globalConfigService.misc$.pipe(
-    map(cfg => cfg.firstDayOfWeek),
+    map((cfg) => cfg.firstDayOfWeek),
     startWith(0),
   );
 
-  constructor(private _globalConfigService: GlobalConfigService) {
-  }
+  constructor(private _globalConfigService: GlobalConfigService) {}
 
   @Input('dateTime')
   set dateTimeSet(v: number) {

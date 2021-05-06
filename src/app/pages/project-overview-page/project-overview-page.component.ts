@@ -34,8 +34,7 @@ export class ProjectOverviewPageComponent implements OnInit, OnDestroy {
     private readonly _dragulaService: DragulaService,
     private readonly _snackService: SnackService,
     private readonly _persistenceService: PersistenceService,
-  ) {
-  }
+  ) {}
 
   openCreateDialog() {
     this._matDialog.open(DialogCreateProjectComponent, {
@@ -44,17 +43,17 @@ export class ProjectOverviewPageComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
-    this._subs.add(this._dragulaService.dropModel('PROJECTS').pipe(
-      withLatestFrom(this.projectService.archived$),
-      ).subscribe(([params, archived]: any) => {
-        const {targetModel} = params;
-        const targetNewIds = targetModel.map((project: Project) => project.id);
+    this._subs.add(
+      this._dragulaService
+        .dropModel('PROJECTS')
+        .pipe(withLatestFrom(this.projectService.archived$))
+        .subscribe(([params, archived]: any) => {
+          const { targetModel } = params;
+          const targetNewIds = targetModel.map((project: Project) => project.id);
 
-        const archivedIds = archived
-          ? archived.map((p: Project) => p.id)
-          : [];
-        this.projectService.updateOrder([...targetNewIds, ...archivedIds]);
-      })
+          const archivedIds = archived ? archived.map((p: Project) => p.id) : [];
+          this.projectService.updateOrder([...targetNewIds, ...archivedIds]);
+        }),
     );
   }
 
@@ -63,7 +62,9 @@ export class ProjectOverviewPageComponent implements OnInit, OnDestroy {
   }
 
   async export(projectId: string, projectTitle: string) {
-    const data: ExportedProject = await this._persistenceService.loadCompleteProject(projectId);
+    const data: ExportedProject = await this._persistenceService.loadCompleteProject(
+      projectId,
+    );
     console.log(data);
     const dataString = JSON.stringify(data);
     download(`${projectTitle}.json`, dataString);
@@ -83,7 +84,7 @@ export class ProjectOverviewPageComponent implements OnInit, OnDestroy {
         this.projectService.importCompleteProject(project);
       } catch (e) {
         console.error(e);
-        this._snackService.open({type: 'ERROR', msg: T.PP.S_INVALID_JSON});
+        this._snackService.open({ type: 'ERROR', msg: T.PP.S_INVALID_JSON });
       }
     };
     reader.readAsText(file);
@@ -97,13 +98,15 @@ export class ProjectOverviewPageComponent implements OnInit, OnDestroy {
   }
 
   archive(projectId: string) {
-    this._matDialog.open(DialogConfirmComponent, {
-      restoreFocus: true,
-      data: {
-        okTxt: T.PP.D_CONFIRM_ARCHIVE.OK,
-        message: T.PP.D_CONFIRM_ARCHIVE.MSG,
-      }
-    }).afterClosed()
+    this._matDialog
+      .open(DialogConfirmComponent, {
+        restoreFocus: true,
+        data: {
+          okTxt: T.PP.D_CONFIRM_ARCHIVE.OK,
+          message: T.PP.D_CONFIRM_ARCHIVE.MSG,
+        },
+      })
+      .afterClosed()
       .subscribe((isConfirm: boolean) => {
         if (isConfirm) {
           this.projectService.archive(projectId);
@@ -112,13 +115,15 @@ export class ProjectOverviewPageComponent implements OnInit, OnDestroy {
   }
 
   unarchive(projectId: string) {
-    this._matDialog.open(DialogConfirmComponent, {
-      restoreFocus: true,
-      data: {
-        okTxt: T.PP.D_CONFIRM_UNARCHIVE.OK,
-        message: T.PP.D_CONFIRM_UNARCHIVE.MSG,
-      }
-    }).afterClosed()
+    this._matDialog
+      .open(DialogConfirmComponent, {
+        restoreFocus: true,
+        data: {
+          okTxt: T.PP.D_CONFIRM_UNARCHIVE.OK,
+          message: T.PP.D_CONFIRM_UNARCHIVE.MSG,
+        },
+      })
+      .afterClosed()
       .subscribe((isConfirm: boolean) => {
         if (isConfirm) {
           this.projectService.unarchive(projectId);
@@ -127,13 +132,15 @@ export class ProjectOverviewPageComponent implements OnInit, OnDestroy {
   }
 
   remove(projectId: string) {
-    this._matDialog.open(DialogConfirmComponent, {
-      restoreFocus: true,
-      data: {
-        okTxt: T.PP.D_CONFIRM_DELETE.OK,
-        message: T.PP.D_CONFIRM_DELETE.MSG,
-      }
-    }).afterClosed()
+    this._matDialog
+      .open(DialogConfirmComponent, {
+        restoreFocus: true,
+        data: {
+          okTxt: T.PP.D_CONFIRM_DELETE.OK,
+          message: T.PP.D_CONFIRM_DELETE.MSG,
+        },
+      })
+      .afterClosed()
       .subscribe((isConfirm: boolean) => {
         if (isConfirm) {
           this.projectService.remove(projectId);
@@ -147,9 +154,7 @@ export class ProjectOverviewPageComponent implements OnInit, OnDestroy {
 
   getThemeColor(color: string): { [key: string]: string } {
     const standardColor = (THEME_COLOR_MAP as any)[color];
-    const colorToUse = (standardColor)
-      ? standardColor
-      : color;
-    return {background: colorToUse};
+    const colorToUse = standardColor ? standardColor : color;
+    return { background: colorToUse };
   }
 }

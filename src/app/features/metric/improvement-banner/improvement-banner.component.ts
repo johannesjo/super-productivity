@@ -11,7 +11,7 @@ import { T } from '../../../t.const';
   templateUrl: './improvement-banner.component.html',
   styleUrls: ['./improvement-banner.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  animations: [improvementBannerAnimation]
+  animations: [improvementBannerAnimation],
 })
 export class ImprovementBannerComponent implements OnDestroy {
   T: typeof T = T;
@@ -19,10 +19,12 @@ export class ImprovementBannerComponent implements OnDestroy {
 
   private _subs: Subscription = new Subscription();
 
-  constructor(
-    public improvementService: ImprovementService,
-  ) {
-    this._subs.add(this.improvementService.improvementBannerImprovements$.subscribe(val => this.improvements = val || []));
+  constructor(public improvementService: ImprovementService) {
+    this._subs.add(
+      this.improvementService.improvementBannerImprovements$.subscribe(
+        (val) => (this.improvements = val || []),
+      ),
+    );
   }
 
   ngOnDestroy(): void {
@@ -41,5 +43,4 @@ export class ImprovementBannerComponent implements OnDestroy {
   trackById(i: number, improvement: Improvement): string {
     return improvement.id;
   }
-
 }

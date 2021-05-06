@@ -8,8 +8,5 @@ import { WorkContextService } from '../../features/work-context/work-context.ser
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TagTaskPageComponent {
-  constructor(
-    public workContextService: WorkContextService,
-  ) {
-  }
+  constructor(public workContextService: WorkContextService) {}
 }

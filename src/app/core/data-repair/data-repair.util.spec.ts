@@ -16,45 +16,55 @@ describe('dataRepair()', () => {
   beforeEach(() => {
     mock = createAppDataCompleteMock();
     mock.project = {
-      ...fakeEntityStateFromArray([{
-        title: 'FAKE_PROJECT',
-        id: FAKE_PROJECT_ID,
-        taskIds: [],
-        backlogTaskIds: [],
-      }] as Partial<Project> [])
+      ...fakeEntityStateFromArray([
+        {
+          title: 'FAKE_PROJECT',
+          id: FAKE_PROJECT_ID,
+          taskIds: [],
+          backlogTaskIds: [],
+        },
+      ] as Partial<Project>[]),
     };
 
     mock.tag = {
-      ...fakeEntityStateFromArray([{
-        ...TODAY_TAG,
-      }] as Partial<Tag> [])
+      ...fakeEntityStateFromArray([
+        {
+          ...TODAY_TAG,
+        },
+      ] as Partial<Tag>[]),
     };
   });
 
   it('should delete tasks with same id in "task" and "taskArchive" from taskArchive', () => {
     const taskState = {
       ...mock.task,
-      ...fakeEntityStateFromArray<Task>([{
-        ...DEFAULT_TASK,
-        id: 'TEST',
-        title: 'TEST',
-        projectId: FAKE_PROJECT_ID,
-      }])
+      ...fakeEntityStateFromArray<Task>([
+        {
+          ...DEFAULT_TASK,
+          id: 'TEST',
+          title: 'TEST',
+          projectId: FAKE_PROJECT_ID,
+        },
+      ]),
     } as any;
-    expect(dataRepair({
-      ...mock,
-      task: taskState,
-      taskArchive: fakeEntityStateFromArray<Task>([{
-        ...DEFAULT_TASK,
-        id: 'TEST',
-        title: 'TEST',
-        projectId: FAKE_PROJECT_ID,
-      }]),
-    } as any)).toEqual({
+    expect(
+      dataRepair({
+        ...mock,
+        task: taskState,
+        taskArchive: fakeEntityStateFromArray<Task>([
+          {
+            ...DEFAULT_TASK,
+            id: 'TEST',
+            title: 'TEST',
+            projectId: FAKE_PROJECT_ID,
+          },
+        ]),
+      } as any),
+    ).toEqual({
       ...mock,
       task: taskState,
       taskArchive: {
-        ...createEmptyEntity()
+        ...createEmptyEntity(),
       },
     });
   });
@@ -62,27 +72,33 @@ describe('dataRepair()', () => {
   it('should delete missing tasks for tags today list', () => {
     const taskState = {
       ...mock.task,
-      ...fakeEntityStateFromArray<Task>([{
-        ...DEFAULT_TASK,
-        id: 'TEST',
-        title: 'TEST',
-        projectId: FAKE_PROJECT_ID,
-      }])
+      ...fakeEntityStateFromArray<Task>([
+        {
+          ...DEFAULT_TASK,
+          id: 'TEST',
+          title: 'TEST',
+          projectId: FAKE_PROJECT_ID,
+        },
+      ]),
     } as any;
 
     const tagState: TagState = {
-      ...fakeEntityStateFromArray([{
-        title: 'TEST_TAG',
-        id: 'TEST_ID_TAG',
-        taskIds: ['goneTag', 'TEST', 'noneExisting'],
-      }] as Partial<Tag> []),
+      ...fakeEntityStateFromArray([
+        {
+          title: 'TEST_TAG',
+          id: 'TEST_ID_TAG',
+          taskIds: ['goneTag', 'TEST', 'noneExisting'],
+        },
+      ] as Partial<Tag>[]),
     };
 
-    expect(dataRepair({
-      ...mock,
-      tag: tagState,
-      task: taskState,
-    })).toEqual({
+    expect(
+      dataRepair({
+        ...mock,
+        tag: tagState,
+        task: taskState,
+      }),
+    ).toEqual({
       ...mock,
       task: taskState as any,
       tag: {
@@ -93,36 +109,42 @@ describe('dataRepair()', () => {
             id: 'TEST_ID_TAG',
             taskIds: ['TEST'],
           },
-        } as any
-      }
+        } as any,
+      },
     });
   });
 
   it('should delete missing tasks for projects today list', () => {
     const taskState = {
       ...mock.task,
-      ...fakeEntityStateFromArray<Task>([{
-        ...DEFAULT_TASK,
-        id: 'TEST',
-        title: 'TEST',
-        projectId: 'TEST_ID_PROJECT',
-      }])
+      ...fakeEntityStateFromArray<Task>([
+        {
+          ...DEFAULT_TASK,
+          id: 'TEST',
+          title: 'TEST',
+          projectId: 'TEST_ID_PROJECT',
+        },
+      ]),
     } as any;
 
     const projectState: ProjectState = {
-      ...fakeEntityStateFromArray([{
-        title: 'TEST_PROJECT',
-        id: 'TEST_ID_PROJECT',
-        taskIds: ['goneProject', 'TEST', 'noneExisting'],
-        backlogTaskIds: [],
-      }] as Partial<Project> []),
+      ...fakeEntityStateFromArray([
+        {
+          title: 'TEST_PROJECT',
+          id: 'TEST_ID_PROJECT',
+          taskIds: ['goneProject', 'TEST', 'noneExisting'],
+          backlogTaskIds: [],
+        },
+      ] as Partial<Project>[]),
     };
 
-    expect(dataRepair({
-      ...mock,
-      project: projectState,
-      task: taskState,
-    })).toEqual({
+    expect(
+      dataRepair({
+        ...mock,
+        project: projectState,
+        task: taskState,
+      }),
+    ).toEqual({
       ...mock,
       task: taskState as any,
       project: {
@@ -134,8 +156,8 @@ describe('dataRepair()', () => {
             taskIds: ['TEST'],
             backlogTaskIds: [],
           },
-        } as any
-      }
+        } as any,
+      },
     });
   });
 
@@ -144,25 +166,29 @@ describe('dataRepair()', () => {
       ...mock.task,
       ids: ['EXISTING'],
       entities: {
-        EXISTING: {...DEFAULT_TASK, id: 'EXISTING', projectId: 'TEST_PROJECT'},
-        nullBacklog: null
-      }
+        EXISTING: { ...DEFAULT_TASK, id: 'EXISTING', projectId: 'TEST_PROJECT' },
+        nullBacklog: null,
+      },
     } as any;
 
     const projectState: ProjectState = {
-      ...fakeEntityStateFromArray([{
-        title: 'TEST_PROJECT',
-        id: 'TEST_ID_PROJECT',
-        taskIds: ['EXISTING', 'goneProject', 'TEST', 'noneExisting'],
-        backlogTaskIds: ['noneExistingBacklog', 'nullBacklog'],
-      }] as Partial<Project> []),
+      ...fakeEntityStateFromArray([
+        {
+          title: 'TEST_PROJECT',
+          id: 'TEST_ID_PROJECT',
+          taskIds: ['EXISTING', 'goneProject', 'TEST', 'noneExisting'],
+          backlogTaskIds: ['noneExistingBacklog', 'nullBacklog'],
+        },
+      ] as Partial<Project>[]),
     };
 
-    expect(dataRepair({
-      ...mock,
-      project: projectState,
-      task: taskState,
-    })).toEqual({
+    expect(
+      dataRepair({
+        ...mock,
+        project: projectState,
+        task: taskState,
+      }),
+    ).toEqual({
       ...mock,
       task: taskState as any,
       project: {
@@ -174,8 +200,8 @@ describe('dataRepair()', () => {
             taskIds: ['EXISTING'],
             backlogTaskIds: [],
           },
-        } as any
-      }
+        } as any,
+      },
     });
   });
 
@@ -184,25 +210,34 @@ describe('dataRepair()', () => {
       ...mock.taskArchive,
       ids: ['PAR_ID', 'SUB_ID'],
       entities: {
-        SUB_ID: {...DEFAULT_TASK, id: 'SUB_ID', projectId: 'TEST_PROJECT', parentId: 'PAR_ID'},
-        PAR_ID: {...DEFAULT_TASK, id: 'PAR_ID', projectId: 'TEST_PROJECT'},
-      }
+        SUB_ID: {
+          ...DEFAULT_TASK,
+          id: 'SUB_ID',
+          projectId: 'TEST_PROJECT',
+          parentId: 'PAR_ID',
+        },
+        PAR_ID: { ...DEFAULT_TASK, id: 'PAR_ID', projectId: 'TEST_PROJECT' },
+      },
     } as any;
 
     const projectState: ProjectState = {
-      ...fakeEntityStateFromArray([{
-        title: 'TEST_PROJECT',
-        id: 'TEST_ID_PROJECT',
-        taskIds: [],
-        backlogTaskIds: ['SUB_ID'],
-      }] as Partial<Project> []),
+      ...fakeEntityStateFromArray([
+        {
+          title: 'TEST_PROJECT',
+          id: 'TEST_ID_PROJECT',
+          taskIds: [],
+          backlogTaskIds: ['SUB_ID'],
+        },
+      ] as Partial<Project>[]),
     };
 
-    expect(dataRepair({
-      ...mock,
-      project: projectState,
-      taskArchive: taskArchiveState,
-    })).toEqual({
+    expect(
+      dataRepair({
+        ...mock,
+        project: projectState,
+        taskArchive: taskArchiveState,
+      }),
+    ).toEqual({
       ...mock,
       taskArchive: taskArchiveState,
       project: {
@@ -214,35 +249,41 @@ describe('dataRepair()', () => {
             taskIds: [],
             backlogTaskIds: [],
           },
-        } as any
-      }
+        } as any,
+      },
     });
   });
 
   it('should delete missing tasks for projects backlog list', () => {
     const taskState = {
       ...mock.task,
-      ...fakeEntityStateFromArray<Task>([{
-        ...DEFAULT_TASK,
-        id: 'TEST',
-        title: 'TEST',
-      }])
+      ...fakeEntityStateFromArray<Task>([
+        {
+          ...DEFAULT_TASK,
+          id: 'TEST',
+          title: 'TEST',
+        },
+      ]),
     } as any;
 
     const projectState: ProjectState = {
-      ...fakeEntityStateFromArray([{
-        title: 'TEST_PROJECT',
-        id: 'TEST_ID_PROJECT',
-        taskIds: [],
-        backlogTaskIds: ['goneProject', 'TEST', 'noneExisting'],
-      }] as Partial<Project> []),
+      ...fakeEntityStateFromArray([
+        {
+          title: 'TEST_PROJECT',
+          id: 'TEST_ID_PROJECT',
+          taskIds: [],
+          backlogTaskIds: ['goneProject', 'TEST', 'noneExisting'],
+        },
+      ] as Partial<Project>[]),
     };
 
-    expect(dataRepair({
-      ...mock,
-      project: projectState,
-      task: taskState,
-    })).toEqual({
+    expect(
+      dataRepair({
+        ...mock,
+        project: projectState,
+        task: taskState,
+      }),
+    ).toEqual({
       ...mock,
       task: taskState as any,
       project: {
@@ -254,90 +295,108 @@ describe('dataRepair()', () => {
             taskIds: [],
             backlogTaskIds: ['TEST'],
           },
-        } as any
-      }
+        } as any,
+      },
     });
   });
 
   describe('should fix duplicate entities for', () => {
     it('task', () => {
-      expect(dataRepair({
+      expect(
+        dataRepair({
+          ...mock,
+          task: {
+            ...mock.task,
+            ...fakeEntityStateFromArray<Task>([
+              {
+                ...DEFAULT_TASK,
+                id: 'DUPE',
+                title: 'DUPE',
+                projectId: FAKE_PROJECT_ID,
+              },
+              {
+                ...DEFAULT_TASK,
+                id: 'DUPE',
+                title: 'DUPE',
+                projectId: FAKE_PROJECT_ID,
+              },
+              {
+                ...DEFAULT_TASK,
+                id: 'NO_DUPE',
+                title: 'NO_DUPE',
+                projectId: FAKE_PROJECT_ID,
+              },
+            ]),
+          } as any,
+        }),
+      ).toEqual({
         ...mock,
         task: {
           ...mock.task,
-          ...fakeEntityStateFromArray<Task>([{
-            ...DEFAULT_TASK,
-            id: 'DUPE',
-            title: 'DUPE',
-            projectId: FAKE_PROJECT_ID,
-          }, {
-            ...DEFAULT_TASK,
-            id: 'DUPE',
-            title: 'DUPE',
-            projectId: FAKE_PROJECT_ID,
-          }, {
-            ...DEFAULT_TASK,
-            id: 'NO_DUPE',
-            title: 'NO_DUPE',
-            projectId: FAKE_PROJECT_ID,
-          }])
-        } as any,
-      })).toEqual({
-        ...mock,
-        task: {
-          ...mock.task,
-          ...fakeEntityStateFromArray<Task>([{
-            ...DEFAULT_TASK,
-            id: 'DUPE',
-            title: 'DUPE',
-            projectId: FAKE_PROJECT_ID,
-          }, {
-            ...DEFAULT_TASK,
-            id: 'NO_DUPE',
-            title: 'NO_DUPE',
-            projectId: FAKE_PROJECT_ID,
-          }])
+          ...fakeEntityStateFromArray<Task>([
+            {
+              ...DEFAULT_TASK,
+              id: 'DUPE',
+              title: 'DUPE',
+              projectId: FAKE_PROJECT_ID,
+            },
+            {
+              ...DEFAULT_TASK,
+              id: 'NO_DUPE',
+              title: 'NO_DUPE',
+              projectId: FAKE_PROJECT_ID,
+            },
+          ]),
         } as any,
       });
     });
 
     it('taskArchive', () => {
-      expect(dataRepair({
+      expect(
+        dataRepair({
+          ...mock,
+          taskArchive: {
+            ...mock.taskArchive,
+            ...fakeEntityStateFromArray<Task>([
+              {
+                ...DEFAULT_TASK,
+                id: 'DUPE',
+                title: 'DUPE',
+                projectId: FAKE_PROJECT_ID,
+              },
+              {
+                ...DEFAULT_TASK,
+                id: 'DUPE',
+                title: 'DUPE',
+                projectId: FAKE_PROJECT_ID,
+              },
+              {
+                ...DEFAULT_TASK,
+                id: 'NO_DUPE',
+                title: 'NO_DUPE',
+                projectId: FAKE_PROJECT_ID,
+              },
+            ]),
+          } as any,
+        }),
+      ).toEqual({
         ...mock,
         taskArchive: {
           ...mock.taskArchive,
-          ...fakeEntityStateFromArray<Task>([{
-            ...DEFAULT_TASK,
-            id: 'DUPE',
-            title: 'DUPE',
-            projectId: FAKE_PROJECT_ID,
-          }, {
-            ...DEFAULT_TASK,
-            id: 'DUPE',
-            title: 'DUPE',
-            projectId: FAKE_PROJECT_ID,
-          }, {
-            ...DEFAULT_TASK,
-            id: 'NO_DUPE',
-            title: 'NO_DUPE',
-            projectId: FAKE_PROJECT_ID,
-          }])
-        } as any,
-      })).toEqual({
-        ...mock,
-        taskArchive: {
-          ...mock.taskArchive,
-          ...fakeEntityStateFromArray<Task>([{
-            ...DEFAULT_TASK,
-            id: 'DUPE',
-            title: 'DUPE',
-            projectId: FAKE_PROJECT_ID,
-          }, {
-            ...DEFAULT_TASK,
-            id: 'NO_DUPE',
-            title: 'NO_DUPE',
-            projectId: FAKE_PROJECT_ID,
-          }])
+          ...fakeEntityStateFromArray<Task>([
+            {
+              ...DEFAULT_TASK,
+              id: 'DUPE',
+              title: 'DUPE',
+              projectId: FAKE_PROJECT_ID,
+            },
+            {
+              ...DEFAULT_TASK,
+              id: 'NO_DUPE',
+              title: 'NO_DUPE',
+              projectId: FAKE_PROJECT_ID,
+            },
+          ]),
         } as any,
       });
     });
@@ -345,44 +404,48 @@ describe('dataRepair()', () => {
 
   describe('should fix inconsistent entity states for', () => {
     it('task', () => {
-      expect(dataRepair({
-        ...mock,
-        task: {
-          ids: ['AAA, XXX', 'YYY'],
-          entities: {
-            AAA: {...DEFAULT_TASK, id: 'AAA', projectId: FAKE_PROJECT_ID},
-            CCC: {...DEFAULT_TASK, id: 'CCC', projectId: FAKE_PROJECT_ID},
-          }
-        } as any,
-      })).toEqual({
+      expect(
+        dataRepair({
+          ...mock,
+          task: {
+            ids: ['AAA, XXX', 'YYY'],
+            entities: {
+              AAA: { ...DEFAULT_TASK, id: 'AAA', projectId: FAKE_PROJECT_ID },
+              CCC: { ...DEFAULT_TASK, id: 'CCC', projectId: FAKE_PROJECT_ID },
+            },
+          } as any,
+        }),
+      ).toEqual({
         ...mock,
         task: {
           ids: ['AAA', 'CCC'],
           entities: {
-            AAA: {...DEFAULT_TASK, id: 'AAA', projectId: FAKE_PROJECT_ID},
-            CCC: {...DEFAULT_TASK, id: 'CCC', projectId: FAKE_PROJECT_ID},
-          }
+            AAA: { ...DEFAULT_TASK, id: 'AAA', projectId: FAKE_PROJECT_ID },
+            CCC: { ...DEFAULT_TASK, id: 'CCC', projectId: FAKE_PROJECT_ID },
+          },
         } as any,
       });
     });
     it('taskArchive', () => {
-      expect(dataRepair({
-        ...mock,
-        taskArchive: {
-          ids: ['AAA, XXX', 'YYY'],
-          entities: {
-            AAA: {...DEFAULT_TASK, id: 'AAA', projectId: FAKE_PROJECT_ID},
-            CCC: {...DEFAULT_TASK, id: 'CCC', projectId: FAKE_PROJECT_ID},
-          }
-        } as any,
-      })).toEqual({
+      expect(
+        dataRepair({
+          ...mock,
+          taskArchive: {
+            ids: ['AAA, XXX', 'YYY'],
+            entities: {
+              AAA: { ...DEFAULT_TASK, id: 'AAA', projectId: FAKE_PROJECT_ID },
+              CCC: { ...DEFAULT_TASK, id: 'CCC', projectId: FAKE_PROJECT_ID },
+            },
+          } as any,
+        }),
+      ).toEqual({
         ...mock,
         taskArchive: {
           ids: ['AAA', 'CCC'],
           entities: {
-            AAA: {...DEFAULT_TASK, id: 'AAA', projectId: FAKE_PROJECT_ID},
-            CCC: {...DEFAULT_TASK, id: 'CCC', projectId: FAKE_PROJECT_ID},
-          }
+            AAA: { ...DEFAULT_TASK, id: 'AAA', projectId: FAKE_PROJECT_ID },
+            CCC: { ...DEFAULT_TASK, id: 'CCC', projectId: FAKE_PROJECT_ID },
+          },
         } as any,
       });
     });
@@ -391,51 +454,61 @@ describe('dataRepair()', () => {
   it('should restore missing tasks from taskArchive if available', () => {
     const taskArchiveState = {
       ...mock.taskArchive,
-      ...fakeEntityStateFromArray<Task>([{
-        ...DEFAULT_TASK,
-        id: 'goneToArchiveToday',
-        title: 'goneToArchiveToday',
-        projectId: 'TEST_ID_PROJECT',
-      }, {
-        ...DEFAULT_TASK,
-        id: 'goneToArchiveBacklog',
-        title: 'goneToArchiveBacklog',
-        projectId: 'TEST_ID_PROJECT',
-      }])
-    } as any;
-
-    const projectState: ProjectState = {
-      ...fakeEntityStateFromArray([{
-        title: 'TEST_PROJECT',
-        id: 'TEST_ID_PROJECT',
-        taskIds: ['goneToArchiveToday', 'GONE'],
-        backlogTaskIds: ['goneToArchiveBacklog', 'GONE'],
-      }] as Partial<Project> []),
-    };
-
-    expect(dataRepair({
-      ...mock,
-      project: projectState,
-      taskArchive: taskArchiveState,
-      task: {
-        ...mock.task,
-        ...createEmptyEntity()
-      } as any,
-    })).toEqual({
-      ...mock,
-      task: {
-        ...mock.task,
-        ...fakeEntityStateFromArray<Task>([{
+      ...fakeEntityStateFromArray<Task>([
+        {
           ...DEFAULT_TASK,
           id: 'goneToArchiveToday',
           title: 'goneToArchiveToday',
           projectId: 'TEST_ID_PROJECT',
-        }, {
+        },
+        {
           ...DEFAULT_TASK,
           id: 'goneToArchiveBacklog',
           title: 'goneToArchiveBacklog',
           projectId: 'TEST_ID_PROJECT',
-        }])
+        },
+      ]),
+    } as any;
+
+    const projectState: ProjectState = {
+      ...fakeEntityStateFromArray([
+        {
+          title: 'TEST_PROJECT',
+          id: 'TEST_ID_PROJECT',
+          taskIds: ['goneToArchiveToday', 'GONE'],
+          backlogTaskIds: ['goneToArchiveBacklog', 'GONE'],
+        },
+      ] as Partial<Project>[]),
+    };
+
+    expect(
+      dataRepair({
+        ...mock,
+        project: projectState,
+        taskArchive: taskArchiveState,
+        task: {
+          ...mock.task,
+          ...createEmptyEntity(),
+        } as any,
+      }),
+    ).toEqual({
+      ...mock,
+      task: {
+        ...mock.task,
+        ...fakeEntityStateFromArray<Task>([
+          {
+            ...DEFAULT_TASK,
+            id: 'goneToArchiveToday',
+            title: 'goneToArchiveToday',
+            projectId: 'TEST_ID_PROJECT',
+          },
+          {
+            ...DEFAULT_TASK,
+            id: 'goneToArchiveBacklog',
+            title: 'goneToArchiveBacklog',
+            projectId: 'TEST_ID_PROJECT',
+          },
+        ]),
       } as any,
       project: {
         ...projectState,
@@ -446,54 +519,63 @@ describe('dataRepair()', () => {
             taskIds: ['goneToArchiveToday'],
             backlogTaskIds: ['goneToArchiveBacklog'],
           },
-        } as any
-      }
+        } as any,
+      },
     });
   });
 
   it('should add orphan tasks to their project list', () => {
     const taskState = {
       ...mock.task,
-      ...fakeEntityStateFromArray<Task>([{
-        ...DEFAULT_TASK,
-        id: 'orphanedTask',
-        title: 'orphanedTask',
-        projectId: 'TEST_ID_PROJECT',
-        parentId: null,
-      }, {
-        ...DEFAULT_TASK,
-        id: 'orphanedTaskOtherProject',
-        title: 'orphanedTaskOtherProject',
-        projectId: 'TEST_ID_PROJECT_OTHER',
-        parentId: null,
-      }, {
-        ...DEFAULT_TASK,
-        id: 'regularTaskOtherProject',
-        title: 'regularTaskOtherProject',
-        projectId: 'TEST_ID_PROJECT_OTHER',
-        parentId: null,
-      }])
+      ...fakeEntityStateFromArray<Task>([
+        {
+          ...DEFAULT_TASK,
+          id: 'orphanedTask',
+          title: 'orphanedTask',
+          projectId: 'TEST_ID_PROJECT',
+          parentId: null,
+        },
+        {
+          ...DEFAULT_TASK,
+          id: 'orphanedTaskOtherProject',
+          title: 'orphanedTaskOtherProject',
+          projectId: 'TEST_ID_PROJECT_OTHER',
+          parentId: null,
+        },
+        {
+          ...DEFAULT_TASK,
+          id: 'regularTaskOtherProject',
+          title: 'regularTaskOtherProject',
+          projectId: 'TEST_ID_PROJECT_OTHER',
+          parentId: null,
+        },
+      ]),
     } as any;
 
     const projectState: ProjectState = {
-      ...fakeEntityStateFromArray([{
-        title: 'TEST_PROJECT',
-        id: 'TEST_ID_PROJECT',
-        taskIds: ['GONE'],
-        backlogTaskIds: [],
-      }, {
-        title: 'TEST_PROJECT_OTHER',
-        id: 'TEST_ID_PROJECT_OTHER',
-        taskIds: ['regularTaskOtherProject'],
-        backlogTaskIds: [],
-      }] as Partial<Project> []),
+      ...fakeEntityStateFromArray([
+        {
+          title: 'TEST_PROJECT',
+          id: 'TEST_ID_PROJECT',
+          taskIds: ['GONE'],
+          backlogTaskIds: [],
+        },
+        {
+          title: 'TEST_PROJECT_OTHER',
+          id: 'TEST_ID_PROJECT_OTHER',
+          taskIds: ['regularTaskOtherProject'],
+          backlogTaskIds: [],
+        },
+      ] as Partial<Project>[]),
     };
 
-    expect(dataRepair({
-      ...mock,
-      project: projectState,
-      task: taskState,
-    })).toEqual({
+    expect(
+      dataRepair({
+        ...mock,
+        project: projectState,
+        task: taskState,
+      }),
+    ).toEqual({
       ...mock,
       task: taskState,
       project: {
@@ -511,73 +593,84 @@ describe('dataRepair()', () => {
             taskIds: ['regularTaskOtherProject', 'orphanedTaskOtherProject'],
             backlogTaskIds: [],
           },
-        } as any
-      }
+        } as any,
+      },
     });
   });
 
   it('should move archived sub tasks back to their unarchived parents', () => {
     const taskStateBefore = {
       ...mock.task,
-      ...fakeEntityStateFromArray<Task>([{
-        ...DEFAULT_TASK,
-        id: 'subTaskUnarchived',
-        title: 'subTaskUnarchived',
-        parentId: 'parent',
-        projectId: FAKE_PROJECT_ID,
-      }, {
-        ...DEFAULT_TASK,
-        id: 'parent',
-        title: 'parent',
-        parentId: null,
-        subTaskIds: ['subTaskUnarchived'],
-        projectId: FAKE_PROJECT_ID,
-      }])
-    } as any;
-
-    const taskArchiveStateBefore = {
-      ...mock.taskArchive,
-      ...fakeEntityStateFromArray<Task>([{
-        ...DEFAULT_TASK,
-        id: 'subTaskArchived',
-        title: 'subTaskArchived',
-        parentId: 'parent',
-        projectId: FAKE_PROJECT_ID,
-      }])
-    } as any;
-
-    expect(dataRepair({
-      ...mock,
-      task: taskStateBefore,
-      taskArchive: taskArchiveStateBefore,
-    })).toEqual({
-      ...mock,
-      task: {
-        ...mock.task,
-        ...fakeEntityStateFromArray<Task>([{
+      ...fakeEntityStateFromArray<Task>([
+        {
           ...DEFAULT_TASK,
           id: 'subTaskUnarchived',
           title: 'subTaskUnarchived',
           parentId: 'parent',
           projectId: FAKE_PROJECT_ID,
-        }, {
+        },
+        {
           ...DEFAULT_TASK,
           id: 'parent',
           title: 'parent',
           parentId: null,
-          subTaskIds: ['subTaskUnarchived', 'subTaskArchived'],
+          subTaskIds: ['subTaskUnarchived'],
           projectId: FAKE_PROJECT_ID,
-        }, {
+        },
+      ]),
+    } as any;
+
+    const taskArchiveStateBefore = {
+      ...mock.taskArchive,
+      ...fakeEntityStateFromArray<Task>([
+        {
           ...DEFAULT_TASK,
           id: 'subTaskArchived',
           title: 'subTaskArchived',
           parentId: 'parent',
           projectId: FAKE_PROJECT_ID,
-        }])
+        },
+      ]),
+    } as any;
+
+    expect(
+      dataRepair({
+        ...mock,
+        task: taskStateBefore,
+        taskArchive: taskArchiveStateBefore,
+      }),
+    ).toEqual({
+      ...mock,
+      task: {
+        ...mock.task,
+        ...fakeEntityStateFromArray<Task>([
+          {
+            ...DEFAULT_TASK,
+            id: 'subTaskUnarchived',
+            title: 'subTaskUnarchived',
+            parentId: 'parent',
+            projectId: FAKE_PROJECT_ID,
+          },
+          {
+            ...DEFAULT_TASK,
+            id: 'parent',
+            title: 'parent',
+            parentId: null,
+            subTaskIds: ['subTaskUnarchived', 'subTaskArchived'],
+            projectId: FAKE_PROJECT_ID,
+          },
+          {
+            ...DEFAULT_TASK,
+            id: 'subTaskArchived',
+            title: 'subTaskArchived',
+            parentId: 'parent',
+            projectId: FAKE_PROJECT_ID,
+          },
+        ]),
       } as any,
       taskArchive: {
         ...mock.taskArchive,
-        ...fakeEntityStateFromArray<Task>([])
+        ...fakeEntityStateFromArray<Task>([]),
       } as any,
     });
   });
@@ -585,63 +678,74 @@ describe('dataRepair()', () => {
   it('should move unarchived sub tasks to their archived parents', () => {
     const taskStateBefore = {
       ...mock.task,
-      ...fakeEntityStateFromArray<Task>([{
-        ...DEFAULT_TASK,
-        id: 'subTaskUnarchived',
-        title: 'subTaskUnarchived',
-        parentId: 'parent',
-      }])
-    } as any;
-
-    const taskArchiveStateBefore = {
-      ...mock.taskArchive,
-      ...fakeEntityStateFromArray<Task>([{
-        ...DEFAULT_TASK,
-        id: 'subTaskArchived',
-        title: 'subTaskArchived',
-        parentId: 'parent',
-      }, {
-        ...DEFAULT_TASK,
-        id: 'parent',
-        title: 'parent',
-        parentId: null,
-        subTaskIds: ['subTaskArchived'],
-        projectId: FAKE_PROJECT_ID,
-      }])
-    } as any;
-
-    expect(dataRepair({
-      ...mock,
-      task: taskStateBefore,
-      taskArchive: taskArchiveStateBefore,
-    })).toEqual({
-      ...mock,
-      task: {
-        ...mock.task,
-        ...fakeEntityStateFromArray<Task>([])
-      } as any,
-      taskArchive: {
-        ...mock.taskArchive,
-        ...fakeEntityStateFromArray<Task>([{
-          ...DEFAULT_TASK,
-          id: 'subTaskArchived',
-          title: 'subTaskArchived',
-          parentId: 'parent',
-          projectId: FAKE_PROJECT_ID,
-        }, {
-          ...DEFAULT_TASK,
-          id: 'parent',
-          title: 'parent',
-          parentId: null,
-          subTaskIds: ['subTaskArchived', 'subTaskUnarchived'],
-          projectId: FAKE_PROJECT_ID,
-        }, {
+      ...fakeEntityStateFromArray<Task>([
+        {
           ...DEFAULT_TASK,
           id: 'subTaskUnarchived',
           title: 'subTaskUnarchived',
           parentId: 'parent',
+        },
+      ]),
+    } as any;
+
+    const taskArchiveStateBefore = {
+      ...mock.taskArchive,
+      ...fakeEntityStateFromArray<Task>([
+        {
+          ...DEFAULT_TASK,
+          id: 'subTaskArchived',
+          title: 'subTaskArchived',
+          parentId: 'parent',
+        },
+        {
+          ...DEFAULT_TASK,
+          id: 'parent',
+          title: 'parent',
+          parentId: null,
+          subTaskIds: ['subTaskArchived'],
           projectId: FAKE_PROJECT_ID,
-        }])
+        },
+      ]),
+    } as any;
+
+    expect(
+      dataRepair({
+        ...mock,
+        task: taskStateBefore,
+        taskArchive: taskArchiveStateBefore,
+      }),
+    ).toEqual({
+      ...mock,
+      task: {
+        ...mock.task,
+        ...fakeEntityStateFromArray<Task>([]),
+      } as any,
+      taskArchive: {
+        ...mock.taskArchive,
+        ...fakeEntityStateFromArray<Task>([
+          {
+            ...DEFAULT_TASK,
+            id: 'subTaskArchived',
+            title: 'subTaskArchived',
+            parentId: 'parent',
+            projectId: FAKE_PROJECT_ID,
+          },
+          {
+            ...DEFAULT_TASK,
+            id: 'parent',
+            title: 'parent',
+            parentId: null,
+            subTaskIds: ['subTaskArchived', 'subTaskUnarchived'],
+            projectId: FAKE_PROJECT_ID,
+          },
+          {
+            ...DEFAULT_TASK,
+            id: 'subTaskUnarchived',
+            title: 'subTaskUnarchived',
+            parentId: 'parent',
+            projectId: FAKE_PROJECT_ID,
+          },
+        ]),
       } as any,
     });
   });
@@ -649,65 +753,77 @@ describe('dataRepair()', () => {
   it('should assign task projectId according to parent', () => {
     const project = {
       ...mock.project,
-      ...fakeEntityStateFromArray<Project>([{
-        ...DEFAULT_PROJECT,
-        id: 'p1',
-      }])
+      ...fakeEntityStateFromArray<Project>([
+        {
+          ...DEFAULT_PROJECT,
+          id: 'p1',
+        },
+      ]),
     } as any;
 
     const taskStateBefore = {
       ...mock.task,
-      ...fakeEntityStateFromArray<Task>([{
-        ...DEFAULT_TASK,
-        id: 'subTask1',
-        title: 'subTask1',
-        projectId: null,
-        parentId: 'parent',
-      }, {
-        ...DEFAULT_TASK,
-        id: 'subTask2',
-        title: 'subTask2',
-        projectId: null,
-        parentId: 'parent',
-      }, {
-        ...DEFAULT_TASK,
-        id: 'parent',
-        title: 'parent',
-        parentId: null,
-        projectId: 'p1',
-        subTaskIds: ['subTask1', 'subTask2'],
-      }])
-    } as any;
-
-    expect(dataRepair({
-      ...mock,
-      project,
-      task: taskStateBefore,
-    })).toEqual({
-      ...mock,
-      project,
-      task: {
-        ...mock.task,
-        ...fakeEntityStateFromArray<Task>([{
+      ...fakeEntityStateFromArray<Task>([
+        {
           ...DEFAULT_TASK,
           id: 'subTask1',
           title: 'subTask1',
+          projectId: null,
           parentId: 'parent',
-          projectId: 'p1',
-        }, {
+        },
+        {
           ...DEFAULT_TASK,
           id: 'subTask2',
           title: 'subTask2',
+          projectId: null,
           parentId: 'parent',
-          projectId: 'p1',
-        }, {
+        },
+        {
           ...DEFAULT_TASK,
           id: 'parent',
           title: 'parent',
           parentId: null,
-          subTaskIds: ['subTask1', 'subTask2'],
           projectId: 'p1',
-        }])
+          subTaskIds: ['subTask1', 'subTask2'],
+        },
+      ]),
+    } as any;
+
+    expect(
+      dataRepair({
+        ...mock,
+        project,
+        task: taskStateBefore,
+      }),
+    ).toEqual({
+      ...mock,
+      project,
+      task: {
+        ...mock.task,
+        ...fakeEntityStateFromArray<Task>([
+          {
+            ...DEFAULT_TASK,
+            id: 'subTask1',
+            title: 'subTask1',
+            parentId: 'parent',
+            projectId: 'p1',
+          },
+          {
+            ...DEFAULT_TASK,
+            id: 'subTask2',
+            title: 'subTask2',
+            parentId: 'parent',
+            projectId: 'p1',
+          },
+          {
+            ...DEFAULT_TASK,
+            id: 'parent',
+            title: 'parent',
+            parentId: null,
+            subTaskIds: ['subTask1', 'subTask2'],
+            projectId: 'p1',
+          },
+        ]),
       } as any,
     });
   });
@@ -715,27 +831,31 @@ describe('dataRepair()', () => {
   it('should delete non-existent project ids for tasks in "task"', () => {
     const taskState = {
       ...mock.task,
-      ...fakeEntityStateFromArray<Task>([{
-        ...DEFAULT_TASK,
-        id: 'TEST',
-        title: 'TEST',
-        projectId: 'NON_EXISTENT'
-      }])
+      ...fakeEntityStateFromArray<Task>([
+        {
+          ...DEFAULT_TASK,
+          id: 'TEST',
+          title: 'TEST',
+          projectId: 'NON_EXISTENT',
+        },
+      ]),
     } as any;
 
-    expect(dataRepair({
-      ...mock,
-      task: taskState,
-    } as any)).toEqual({
+    expect(
+      dataRepair({
+        ...mock,
+        task: taskState,
+      } as any),
+    ).toEqual({
       ...mock,
       task: {
         ...taskState,
         entities: {
           TEST: {
             ...taskState.entities.TEST,
-            projectId: null
-          }
-        }
+            projectId: null,
+          },
+        },
       },
     });
   });
@@ -743,27 +863,31 @@ describe('dataRepair()', () => {
   it('should delete non-existent project ids for tasks in "taskArchive"', () => {
     const taskArchiveState = {
       ...mock.taskArchive,
-      ...fakeEntityStateFromArray<Task>([{
-        ...DEFAULT_TASK,
-        id: 'TEST',
-        title: 'TEST',
-        projectId: 'NON_EXISTENT'
-      }])
+      ...fakeEntityStateFromArray<Task>([
+        {
+          ...DEFAULT_TASK,
+          id: 'TEST',
+          title: 'TEST',
+          projectId: 'NON_EXISTENT',
+        },
+      ]),
     } as any;
 
-    expect(dataRepair({
-      ...mock,
-      taskArchive: taskArchiveState,
-    } as any)).toEqual({
+    expect(
+      dataRepair({
+        ...mock,
+        taskArchive: taskArchiveState,
+      } as any),
+    ).toEqual({
       ...mock,
       taskArchive: {
         ...taskArchiveState,
         entities: {
           TEST: {
             ...taskArchiveState.entities.TEST,
-            projectId: null
-          }
-        }
+            projectId: null,
+          },
+        },
       },
     });
   });
@@ -771,47 +895,58 @@ describe('dataRepair()', () => {
   it('should remove from project list if task has wrong project id', () => {
     const project = {
       ...mock.project,
-      ...fakeEntityStateFromArray<Project>([{
-        ...DEFAULT_PROJECT,
-        id: 'p1',
-        taskIds: ['t1', 't2']
-      }, {
-        ...DEFAULT_PROJECT,
-        id: 'p2',
-        taskIds: ['t1']
-      }])
+      ...fakeEntityStateFromArray<Project>([
+        {
+          ...DEFAULT_PROJECT,
+          id: 'p1',
+          taskIds: ['t1', 't2'],
+        },
+        {
+          ...DEFAULT_PROJECT,
+          id: 'p2',
+          taskIds: ['t1'],
+        },
+      ]),
     } as any;
 
     const task = {
       ...mock.task,
-      ...fakeEntityStateFromArray<Task>([{
-        ...DEFAULT_TASK,
-        id: 't1',
-        projectId: 'p1'
-      }, {
-        ...DEFAULT_TASK,
-        id: 't2',
-        projectId: 'p1'
-      }])
+      ...fakeEntityStateFromArray<Task>([
+        {
+          ...DEFAULT_TASK,
+          id: 't1',
+          projectId: 'p1',
+        },
+        {
+          ...DEFAULT_TASK,
+          id: 't2',
+          projectId: 'p1',
+        },
+      ]),
     } as any;
 
-    expect(dataRepair({
-      ...mock,
-      project,
-      task,
-    })).toEqual({
+    expect(
+      dataRepair({
+        ...mock,
+        project,
+        task,
+      }),
+    ).toEqual({
       ...mock,
       project: {
         ...project,
-        ...fakeEntityStateFromArray<Project>([{
-          ...DEFAULT_PROJECT,
-          id: 'p1',
-          taskIds: ['t1', 't2']
-        }, {
-          ...DEFAULT_PROJECT,
-          id: 'p2',
-          taskIds: []
-        }])
+        ...fakeEntityStateFromArray<Project>([
+          {
+            ...DEFAULT_PROJECT,
+            id: 'p1',
+            taskIds: ['t1', 't2'],
+          },
+          {
+            ...DEFAULT_PROJECT,
+            id: 'p2',
+            taskIds: [],
+          },
+        ]),
       },
       task,
     });
@@ -820,44 +955,54 @@ describe('dataRepair()', () => {
   it('should move to project if task has no projectId', () => {
     const project = {
       ...mock.project,
-      ...fakeEntityStateFromArray<Project>([{
-        ...DEFAULT_PROJECT,
-        id: 'p1',
-        taskIds: ['t1', 't2']
-      }])
+      ...fakeEntityStateFromArray<Project>([
+        {
+          ...DEFAULT_PROJECT,
+          id: 'p1',
+          taskIds: ['t1', 't2'],
+        },
+      ]),
     } as any;
 
     const task = {
       ...mock.task,
-      ...fakeEntityStateFromArray<Task>([{
-        ...DEFAULT_TASK,
-        id: 't1',
-        projectId: 'p1'
-      }, {
-        ...DEFAULT_TASK,
-        id: 't2',
-        projectId: null
-      }])
+      ...fakeEntityStateFromArray<Task>([
+        {
+          ...DEFAULT_TASK,
+          id: 't1',
+          projectId: 'p1',
+        },
+        {
+          ...DEFAULT_TASK,
+          id: 't2',
+          projectId: null,
+        },
+      ]),
     } as any;
 
-    expect(dataRepair({
-      ...mock,
-      project,
-      task,
-    })).toEqual({
+    expect(
+      dataRepair({
+        ...mock,
+        project,
+        task,
+      }),
+    ).toEqual({
       ...mock,
       project,
       task: {
         ...mock.task,
-        ...fakeEntityStateFromArray<Task>([{
-          ...DEFAULT_TASK,
-          id: 't1',
-          projectId: 'p1'
-        }, {
-          ...DEFAULT_TASK,
-          id: 't2',
-          projectId: 'p1'
-        }])
+        ...fakeEntityStateFromArray<Task>([
+          {
+            ...DEFAULT_TASK,
+            id: 't1',
+            projectId: 'p1',
+          },
+          {
+            ...DEFAULT_TASK,
+            id: 't2',
+            projectId: 'p1',
+          },
+        ]),
       } as any,
     });
   });
@@ -865,44 +1010,54 @@ describe('dataRepair()', () => {
   it('should move to project if backlogTask has no projectId', () => {
     const project = {
       ...mock.project,
-      ...fakeEntityStateFromArray<Project>([{
-        ...DEFAULT_PROJECT,
-        id: 'p1',
-        backlogTaskIds: ['t1', 't2']
-      }])
+      ...fakeEntityStateFromArray<Project>([
+        {
+          ...DEFAULT_PROJECT,
+          id: 'p1',
+          backlogTaskIds: ['t1', 't2'],
+        },
+      ]),
     } as any;
 
     const task = {
       ...mock.task,
-      ...fakeEntityStateFromArray<Task>([{
-        ...DEFAULT_TASK,
-        id: 't1',
-        projectId: 'p1'
-      }, {
-        ...DEFAULT_TASK,
-        id: 't2',
-        projectId: null
-      }])
+      ...fakeEntityStateFromArray<Task>([
+        {
+          ...DEFAULT_TASK,
+          id: 't1',
+          projectId: 'p1',
+        },
+        {
+          ...DEFAULT_TASK,
+          id: 't2',
+          projectId: null,
+        },
+      ]),
     } as any;
 
-    expect(dataRepair({
-      ...mock,
-      project,
-      task,
-    })).toEqual({
+    expect(
+      dataRepair({
+        ...mock,
+        project,
+        task,
+      }),
+    ).toEqual({
       ...mock,
       project,
       task: {
         ...mock.task,
-        ...fakeEntityStateFromArray<Task>([{
-          ...DEFAULT_TASK,
-          id: 't1',
-          projectId: 'p1'
-        }, {
-          ...DEFAULT_TASK,
-          id: 't2',
-          projectId: 'p1'
-        }])
+        ...fakeEntityStateFromArray<Task>([
+          {
+            ...DEFAULT_TASK,
+            id: 't1',
+            projectId: 'p1',
+          },
+          {
+            ...DEFAULT_TASK,
+            id: 't2',
+            projectId: 'p1',
+          },
+        ]),
       } as any,
     });
   });
@@ -910,44 +1065,54 @@ describe('dataRepair()', () => {
   it('should add tagId to task if listed, but task does not contain it', () => {
     const tag = {
       ...mock.tag,
-      ...fakeEntityStateFromArray<Tag>([{
-        ...DEFAULT_TAG,
-        id: 'tag1',
-        taskIds: ['task1', 'task2']
-      }])
+      ...fakeEntityStateFromArray<Tag>([
+        {
+          ...DEFAULT_TAG,
+          id: 'tag1',
+          taskIds: ['task1', 'task2'],
+        },
+      ]),
     } as any;
 
     const task = {
       ...mock.task,
-      ...fakeEntityStateFromArray<Task>([{
-        ...DEFAULT_TASK,
-        id: 'task1',
-        tagIds: ['tag1']
-      }, {
-        ...DEFAULT_TASK,
-        id: 'task2',
-        tagIds: []
-      }])
+      ...fakeEntityStateFromArray<Task>([
+        {
+          ...DEFAULT_TASK,
+          id: 'task1',
+          tagIds: ['tag1'],
+        },
+        {
+          ...DEFAULT_TASK,
+          id: 'task2',
+          tagIds: [],
+        },
+      ]),
     } as any;
 
-    expect(dataRepair({
-      ...mock,
-      tag,
-      task,
-    })).toEqual({
+    expect(
+      dataRepair({
+        ...mock,
+        tag,
+        task,
+      }),
+    ).toEqual({
       ...mock,
       tag,
       task: {
         ...mock.task,
-        ...fakeEntityStateFromArray<Task>([{
-          ...DEFAULT_TASK,
-          id: 'task1',
-          tagIds: ['tag1']
-        }, {
-          ...DEFAULT_TASK,
-          id: 'task2',
-          tagIds: ['tag1']
-        }])
+        ...fakeEntityStateFromArray<Task>([
+          {
+            ...DEFAULT_TASK,
+            id: 'task1',
+            tagIds: ['tag1'],
+          },
+          {
+            ...DEFAULT_TASK,
+            id: 'task2',
+            tagIds: ['tag1'],
+          },
+        ]),
       } as any,
     });
   });
@@ -955,128 +1120,156 @@ describe('dataRepair()', () => {
   it('should cleanup orphaned sub tasks', () => {
     const task = {
       ...mock.task,
-      ...fakeEntityStateFromArray<Task>([{
-        ...DEFAULT_TASK,
-        id: 'task1',
-        subTaskIds: ['s1', 's2GONE'],
-        projectId: FAKE_PROJECT_ID,
-      }, {
-        ...DEFAULT_TASK,
-        id: 's1',
-        parentId: 'task1',
-        projectId: FAKE_PROJECT_ID,
-      }]),
-    } as any;
-
-    const taskArchive = {
-      ...mock.taskArchive,
-      ...fakeEntityStateFromArray<Task>([{
-        ...DEFAULT_TASK,
-        id: 'archiveTask1',
-        subTaskIds: ['as1', 'as2GONE'],
-        projectId: FAKE_PROJECT_ID,
-      }, {
-        ...DEFAULT_TASK,
-        id: 'as1',
-        parentId: 'archiveTask1',
-        projectId: FAKE_PROJECT_ID,
-      }]),
-    } as any;
-
-    expect(dataRepair({
-      ...mock,
-      task,
-      taskArchive,
-    })).toEqual({
-      ...mock,
-      task: {
-        ...mock.task,
-        ...fakeEntityStateFromArray<Task>([{
+      ...fakeEntityStateFromArray<Task>([
+        {
           ...DEFAULT_TASK,
           id: 'task1',
-          subTaskIds: ['s1'],
+          subTaskIds: ['s1', 's2GONE'],
           projectId: FAKE_PROJECT_ID,
-        }, {
+        },
+        {
           ...DEFAULT_TASK,
           id: 's1',
           parentId: 'task1',
           projectId: FAKE_PROJECT_ID,
-        }]),
-      } as any,
-      taskArchive: {
-        ...mock.taskArchive,
-        ...fakeEntityStateFromArray<Task>([{
+        },
+      ]),
+    } as any;
+
+    const taskArchive = {
+      ...mock.taskArchive,
+      ...fakeEntityStateFromArray<Task>([
+        {
           ...DEFAULT_TASK,
           id: 'archiveTask1',
-          subTaskIds: ['as1'],
+          subTaskIds: ['as1', 'as2GONE'],
           projectId: FAKE_PROJECT_ID,
-        }, {
+        },
+        {
           ...DEFAULT_TASK,
           id: 'as1',
           parentId: 'archiveTask1',
           projectId: FAKE_PROJECT_ID,
-        }]),
-      } as any
+        },
+      ]),
+    } as any;
+
+    expect(
+      dataRepair({
+        ...mock,
+        task,
+        taskArchive,
+      }),
+    ).toEqual({
+      ...mock,
+      task: {
+        ...mock.task,
+        ...fakeEntityStateFromArray<Task>([
+          {
+            ...DEFAULT_TASK,
+            id: 'task1',
+            subTaskIds: ['s1'],
+            projectId: FAKE_PROJECT_ID,
+          },
+          {
+            ...DEFAULT_TASK,
+            id: 's1',
+            parentId: 'task1',
+            projectId: FAKE_PROJECT_ID,
+          },
+        ]),
+      } as any,
+      taskArchive: {
+        ...mock.taskArchive,
+        ...fakeEntityStateFromArray<Task>([
+          {
+            ...DEFAULT_TASK,
+            id: 'archiveTask1',
+            subTaskIds: ['as1'],
+            projectId: FAKE_PROJECT_ID,
+          },
+          {
+            ...DEFAULT_TASK,
+            id: 'as1',
+            parentId: 'archiveTask1',
+            projectId: FAKE_PROJECT_ID,
+          },
+        ]),
+      } as any,
     });
   });
 
   it('should add today tag if no projectId or no tags', () => {
     const task = {
       ...mock.task,
-      ...fakeEntityStateFromArray<Task>([{
-        ...DEFAULT_TASK,
-        id: 'task1',
-        subTaskIds: ['sub_task']
-      }, {
-        ...DEFAULT_TASK,
-        id: 'task2',
-        projectId: FAKE_PROJECT_ID,
-      }, {
-        ...DEFAULT_TASK,
-        id: 'sub_task',
-        parentId: 'task1'
-      }]),
+      ...fakeEntityStateFromArray<Task>([
+        {
+          ...DEFAULT_TASK,
+          id: 'task1',
+          subTaskIds: ['sub_task'],
+        },
+        {
+          ...DEFAULT_TASK,
+          id: 'task2',
+          projectId: FAKE_PROJECT_ID,
+        },
+        {
+          ...DEFAULT_TASK,
+          id: 'sub_task',
+          parentId: 'task1',
+        },
+      ]),
     } as any;
 
     const taskArchive = {
       ...mock.taskArchive,
-      ...fakeEntityStateFromArray<Task>([{
-        ...DEFAULT_TASK,
-        id: 'archiveTask1',
-      }]),
+      ...fakeEntityStateFromArray<Task>([
+        {
+          ...DEFAULT_TASK,
+          id: 'archiveTask1',
+        },
+      ]),
     } as any;
 
-    expect(dataRepair({
-      ...mock,
-      task,
-      taskArchive,
-    })).toEqual({
+    expect(
+      dataRepair({
+        ...mock,
+        task,
+        taskArchive,
+      }),
+    ).toEqual({
       ...mock,
       task: {
         ...mock.task,
-        ...fakeEntityStateFromArray<Task>([{
-          ...DEFAULT_TASK,
-          id: 'task1',
-          tagIds: [TODAY_TAG.id],
-          subTaskIds: ['sub_task']
-        }, {
-          ...DEFAULT_TASK,
-          id: 'task2',
-          projectId: FAKE_PROJECT_ID,
-        }, {
-          ...DEFAULT_TASK,
-          id: 'sub_task',
-          parentId: 'task1'
-        }]),
+        ...fakeEntityStateFromArray<Task>([
+          {
+            ...DEFAULT_TASK,
+            id: 'task1',
+            tagIds: [TODAY_TAG.id],
+            subTaskIds: ['sub_task'],
+          },
+          {
+            ...DEFAULT_TASK,
+            id: 'task2',
+            projectId: FAKE_PROJECT_ID,
+          },
+          {
+            ...DEFAULT_TASK,
+            id: 'sub_task',
+            parentId: 'task1',
+          },
+        ]),
       } as any,
       taskArchive: {
         ...mock.taskArchive,
-        ...fakeEntityStateFromArray<Task>([{
-          ...DEFAULT_TASK,
-          id: 'archiveTask1',
-          tagIds: [TODAY_TAG.id],
-        }]),
-      } as any
+        ...fakeEntityStateFromArray<Task>([
+          {
+            ...DEFAULT_TASK,
+            id: 'archiveTask1',
+            tagIds: [TODAY_TAG.id],
+          },
+        ]),
+      } as any,
     });
   });
 });

@@ -6,7 +6,7 @@ export const msToMinuteClockString = (value: any): string => {
   let hours = 0;
   let minutes = 0;
   if (+md.days() > 0) {
-    hours = (md.days() * 24);
+    hours = md.days() * 24;
   }
   if (+md.hours() > 0) {
     hours += md.hours();
@@ -17,16 +17,14 @@ export const msToMinuteClockString = (value: any): string => {
     minutes += +md.minutes();
   }
 
-  const parsed = minutes + ':'
-    + ('00' + +md.seconds()).slice(-2);
+  const parsed = minutes + ':' + ('00' + +md.seconds()).slice(-2);
 
   return parsed.trim();
 };
 
 @Pipe({
-  name: 'msToMinuteClockString'
+  name: 'msToMinuteClockString',
 })
 export class MsToMinuteClockStringPipe implements PipeTransform {
   transform: (value: any, ...args: any[]) => any = msToMinuteClockString;
 }
-

@@ -25,5 +25,4 @@ import { SimpleCounterModule } from '../../features/simple-counter/simple-counte
   declarations: [MainHeaderComponent],
   exports: [MainHeaderComponent],
 })
-export class MainHeaderModule {
-}
+export class MainHeaderModule {}

@@ -1,4 +1,4 @@
-import { AddTaskWithReminderParams, NBrowser, } from '../n-browser-interface';
+import { AddTaskWithReminderParams, NBrowser } from '../n-browser-interface';
 
 const TASK = 'task';
 const SCHEDULE_TASK_ITEM = 'task-additional-info-item:nth-child(2)';
@@ -12,22 +12,24 @@ const M = 60 * 1000;
 
 // being slightly longer than a minute prevents the edge case
 // of the wrong minute if the rest before takes to long
-const DEFAULT_DELTA = (1.2 * M);
+const DEFAULT_DELTA = 1.2 * M;
 
 // NOTE: needs to
 // be executed from work view
 module.exports = {
-  async command(this: NBrowser, {
-    title,
-    taskSel = TASK,
-    scheduleTime = Date.now() + DEFAULT_DELTA
-  }: AddTaskWithReminderParams) {
+  async command(
+    this: NBrowser,
+    {
+      title,
+      taskSel = TASK,
+      scheduleTime = Date.now() + DEFAULT_DELTA,
+    }: AddTaskWithReminderParams,
+  ) {
     const d = new Date(scheduleTime);
     const h = d.getHours();
     const m = d.getMinutes();
 
-    return this
-      .addTask(title)
+    return this.addTask(title)
       .openPanelForTask(taskSel)
       .waitForElementVisible(SCHEDULE_TASK_ITEM)
       .click(SCHEDULE_TASK_ITEM)
@@ -43,6 +45,5 @@ module.exports = {
       .waitForElementVisible(DIALOG_SUBMIT)
       .click(DIALOG_SUBMIT)
       .waitForElementNotPresent(DIALOG);
-  }
+  },
 };
-

@@ -17,7 +17,7 @@ interface BookmarkSelectType {
   selector: 'dialog-edit-bookmark',
   templateUrl: './dialog-edit-bookmark.component.html',
   styleUrls: ['./dialog-edit-bookmark.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class DialogEditBookmarkComponent implements OnInit {
   T: typeof T = T;
@@ -30,29 +30,28 @@ export class DialogEditBookmarkComponent implements OnInit {
     map((searchTerm) => {
       // Note: the outer array signifies the observable stream the other is the value
       return this.customIcons.filter((icoStr) =>
-        icoStr.toLowerCase().includes(searchTerm.toLowerCase())
+        icoStr.toLowerCase().includes(searchTerm.toLowerCase()),
       );
     }),
   );
 
   constructor(
     private _matDialogRef: MatDialogRef<DialogEditBookmarkComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: { bookmark: Bookmark }
-  ) {
-  }
+    @Inject(MAT_DIALOG_DATA) public data: { bookmark: Bookmark },
+  ) {}
 
   ngOnInit() {
-    this.bookmarkCopy = {...this.data.bookmark} as BookmarkCopy;
+    this.bookmarkCopy = { ...this.data.bookmark } as BookmarkCopy;
     if (!this.bookmarkCopy.type) {
       this.bookmarkCopy.type = 'LINK';
     }
     this.types = [
-      {type: 'LINK', title: T.F.BOOKMARK.DIALOG_EDIT.TYPES.LINK},
-      {type: 'IMG', title: T.F.BOOKMARK.DIALOG_EDIT.TYPES.IMG},
+      { type: 'LINK', title: T.F.BOOKMARK.DIALOG_EDIT.TYPES.LINK },
+      { type: 'IMG', title: T.F.BOOKMARK.DIALOG_EDIT.TYPES.IMG },
     ];
     if (IS_ELECTRON) {
-      this.types.push({type: 'FILE', title: T.F.BOOKMARK.DIALOG_EDIT.TYPES.FILE});
-      this.types.push({type: 'COMMAND', title: T.F.BOOKMARK.DIALOG_EDIT.TYPES.COMMAND});
+      this.types.push({ type: 'FILE', title: T.F.BOOKMARK.DIALOG_EDIT.TYPES.FILE });
+      this.types.push({ type: 'COMMAND', title: T.F.BOOKMARK.DIALOG_EDIT.TYPES.COMMAND });
     }
   }
 
@@ -68,7 +67,10 @@ export class DialogEditBookmarkComponent implements OnInit {
       return;
     }
 
-    if (this.bookmarkCopy.type === 'LINK' && !this.bookmarkCopy.path.match(/(https?|ftp|file):\/\//)) {
+    if (
+      this.bookmarkCopy.type === 'LINK' &&
+      !this.bookmarkCopy.path.match(/(https?|ftp|file):\/\//)
+    ) {
       this.bookmarkCopy.path = 'http://' + this.bookmarkCopy.path;
     }
     this.close(this.bookmarkCopy);

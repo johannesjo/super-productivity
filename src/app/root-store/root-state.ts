@@ -1,8 +1,14 @@
 import { TASK_FEATURE_NAME } from '../features/tasks/store/task.reducer';
 import { TaskState } from '../features/tasks/task.model';
-import { PROJECT_FEATURE_NAME, ProjectState } from '../features/project/store/project.reducer';
+import {
+  PROJECT_FEATURE_NAME,
+  ProjectState,
+} from '../features/project/store/project.reducer';
 import { NOTE_FEATURE_NAME, NoteState } from '../features/note/store/note.reducer';
-import { BOOKMARK_FEATURE_NAME, BookmarkState } from '../features/bookmark/store/bookmark.reducer';
+import {
+  BOOKMARK_FEATURE_NAME,
+  BookmarkState,
+} from '../features/bookmark/store/bookmark.reducer';
 import { LAYOUT_FEATURE_NAME, LayoutState } from '../core-ui/layout/store/layout.reducer';
 import { CONFIG_FEATURE_NAME } from '../features/config/store/global-config.reducer';
 import { GlobalConfigState } from '../features/config/global-config.model';

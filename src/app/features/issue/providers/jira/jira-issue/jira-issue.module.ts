@@ -15,14 +15,7 @@ import { JiraIssueContentComponent } from './jira-issue-content/jira-issue-conte
     ReactiveFormsModule,
     EffectsModule.forFeature([JiraIssueEffects]),
   ],
-  declarations: [
-    JiraIssueHeaderComponent,
-    JiraIssueContentComponent,
-  ],
-  exports: [
-    JiraIssueHeaderComponent,
-    JiraIssueContentComponent,
-  ],
+  declarations: [JiraIssueHeaderComponent, JiraIssueContentComponent],
+  exports: [JiraIssueHeaderComponent, JiraIssueContentComponent],
 })
-export class JiraIssueModule {
-}
+export class JiraIssueModule {}

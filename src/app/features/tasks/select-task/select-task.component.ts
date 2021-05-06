@@ -1,4 +1,12 @@
-import { ChangeDetectionStrategy, Component, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  EventEmitter,
+  Input,
+  OnDestroy,
+  OnInit,
+  Output,
+} from '@angular/core';
 import { FormControl } from '@angular/forms';
 import { Task } from '../task.model';
 import { map, startWith, takeUntil, withLatestFrom } from 'rxjs/operators';
@@ -11,7 +19,7 @@ import { TaskService } from '../task.service';
   selector: 'select-task',
   templateUrl: './select-task.component.html',
   styleUrls: ['./select-task.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SelectTaskComponent implements OnInit, OnDestroy {
   T: typeof T = T;
@@ -25,11 +33,10 @@ export class SelectTaskComponent implements OnInit, OnDestroy {
   constructor(
     private _workContextService: WorkContextService,
     private _taskService: TaskService,
-  ) {
-  }
+  ) {}
 
   @Input() set initialTask(task: Task) {
-    if (task && !this.taskSelectCtrl.value || this.taskSelectCtrl.value === '') {
+    if ((task && !this.taskSelectCtrl.value) || this.taskSelectCtrl.value === '') {
       this.isCreate = false;
       this.taskSelectCtrl.setValue(task);
     }
@@ -40,19 +47,20 @@ export class SelectTaskComponent implements OnInit, OnDestroy {
       ? this._workContextService.startableTasksForActiveContext$
       : this._taskService.allStartableTasks$;
 
-    this.taskSelectCtrl.valueChanges.pipe(
-      startWith(''),
-      withLatestFrom(tasks$),
-      map(([str, tasks]) =>
-        typeof str === 'string'
-          ? tasks.filter(task => task.title.toLowerCase().includes(str.toLowerCase()))
-          : tasks
-      ),
-      takeUntil(this._destroy$)
-    )
+    this.taskSelectCtrl.valueChanges
+      .pipe(
+        startWith(''),
+        withLatestFrom(tasks$),
+        map(([str, tasks]) =>
+          typeof str === 'string'
+            ? tasks.filter((task) => task.title.toLowerCase().includes(str.toLowerCase()))
+            : tasks,
+        ),
+        takeUntil(this._destroy$),
+      )
       .subscribe((filteredTasks) => {
         const taskOrTitle = this.taskSelectCtrl.value;
-        this.isCreate = (typeof taskOrTitle === 'string');
+        this.isCreate = typeof taskOrTitle === 'string';
         this.filteredTasks = this.isCreate ? filteredTasks : [];
         this.taskChange.emit(taskOrTitle);
       });

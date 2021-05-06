@@ -8,24 +8,32 @@ export interface IssueServiceInterface {
 
   getById$(id: string | number, projectId: string): Observable<IssueData>;
 
-  getAddTaskData(issueData: IssueDataReduced): { title: string; additionalFields: Partial<Task> };
+  getAddTaskData(
+    issueData: IssueDataReduced,
+  ): { title: string; additionalFields: Partial<Task> };
 
   searchIssues$?(searchTerm: string, projectId: string): Observable<SearchResultItem[]>;
 
-  refreshIssue?(task: Task,
+  refreshIssue?(
+    task: Task,
     isNotifySuccess: boolean,
-    isNotifyNoUpdateRequired: boolean): Promise<{
+    isNotifyNoUpdateRequired: boolean,
+  ): Promise<{
     taskChanges: Partial<Task>;
     issue: IssueData;
   } | null>;
 
-  refreshIssues?(tasks: Task[],
+  refreshIssues?(
+    tasks: Task[],
     isNotifySuccess: boolean,
-    isNotifyNoUpdateRequired: boolean): Promise<{
-    task: Task;
-    taskChanges: Partial<Task>;
-    issue: IssueData;
-  }[]>;
+    isNotifyNoUpdateRequired: boolean,
+  ): Promise<
+    {
+      task: Task;
+      taskChanges: Partial<Task>;
+      issue: IssueData;
+    }[]
+  >;
 
   getMappedAttachments?(issueDataIN: IssueData): TaskAttachment[];
 }

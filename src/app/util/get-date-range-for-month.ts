@@ -1,4 +1,7 @@
-export const getDateRangeForMonth = (year: number, monthIN: number): { rangeStart: Date; rangeEnd: Date } => {
+export const getDateRangeForMonth = (
+  year: number,
+  monthIN: number,
+): { rangeStart: Date; rangeEnd: Date } => {
   // denormalize to js month again
   const month = +monthIN;
   // firstDayOfMonth
@@ -10,6 +13,6 @@ export const getDateRangeForMonth = (year: number, monthIN: number): { rangeStar
 
   return {
     rangeStart,
-    rangeEnd
+    rangeEnd,
   };
 };

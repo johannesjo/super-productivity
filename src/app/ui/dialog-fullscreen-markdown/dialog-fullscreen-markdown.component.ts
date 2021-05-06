@@ -8,7 +8,7 @@ import { ESCAPE } from '@angular/cdk/keycodes';
   selector: 'dialog-fullscreen-markdown',
   templateUrl: './dialog-fullscreen-markdown.component.html',
   styleUrls: ['./dialog-fullscreen-markdown.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class DialogFullscreenMarkdownComponent implements OnDestroy {
   T: typeof T = T;
@@ -17,16 +17,18 @@ export class DialogFullscreenMarkdownComponent implements OnDestroy {
 
   constructor(
     private _matDialogRef: MatDialogRef<DialogFullscreenMarkdownComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: any
+    @Inject(MAT_DIALOG_DATA) public data: any,
   ) {
     // we want to save as default
     _matDialogRef.disableClose = true;
-    this._subs.add(_matDialogRef.keydownEvents().subscribe(e => {
-      if ((e as any).keyCode === ESCAPE) {
-        e.preventDefault();
-        this.close();
-      }
-    }));
+    this._subs.add(
+      _matDialogRef.keydownEvents().subscribe((e) => {
+        if ((e as any).keyCode === ESCAPE) {
+          e.preventDefault();
+          this.close();
+        }
+      }),
+    );
   }
 
   ngOnDestroy() {

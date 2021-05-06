@@ -9,6 +9,7 @@ export type CaldavIssueReduced = Readonly<{
   etag_hash: number;
 }>;
 
-export type CaldavIssue = CaldavIssueReduced & Readonly<{
-  note: string;
-}>;
+export type CaldavIssue = CaldavIssueReduced &
+  Readonly<{
+    note: string;
+  }>;

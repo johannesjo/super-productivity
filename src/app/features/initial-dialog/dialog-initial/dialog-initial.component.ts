@@ -8,7 +8,7 @@ import { version } from '../../../../../package.json';
   selector: 'dialog-initial',
   templateUrl: './dialog-initial.component.html',
   styleUrls: ['./dialog-initial.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class DialogInitialComponent {
   T: typeof T = T;
@@ -17,8 +17,7 @@ export class DialogInitialComponent {
   constructor(
     private _matDialogRef: MatDialogRef<DialogInitialComponent>,
     @Inject(MAT_DIALOG_DATA) public data: InitialDialogResponse,
-  ) {
-  }
+  ) {}
 
   close() {
     this._matDialogRef.close();

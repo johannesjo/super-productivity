@@ -21,10 +21,6 @@ import { BetterDrawerModule } from '../../ui/better-drawer/better-drawer.module'
     TasksModule,
     BetterDrawerModule,
   ],
-  declarations: [
-    DailySummaryComponent,
-    PlanTasksTomorrowComponent,
-  ],
+  declarations: [DailySummaryComponent, PlanTasksTomorrowComponent],
 })
-export class DailySummaryModule {
-}
+export class DailySummaryModule {}

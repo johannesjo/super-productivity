@@ -19,7 +19,7 @@ import { Tag } from '../../features/tag/tag.model';
   templateUrl: './schedule-page.component.html',
   styleUrls: ['./schedule-page.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  animations: [standardListAnimation]
+  animations: [standardListAnimation],
 })
 export class SchedulePageComponent {
   T: typeof T = T;
@@ -32,11 +32,12 @@ export class SchedulePageComponent {
     private _taskService: TaskService,
     private _matDialog: MatDialog,
     private _router: Router,
-  ) {
-  }
+  ) {}
 
   startTask(task: TaskWithReminderData) {
-    if (task.reminderData.workContextId === this._workContextService.activeWorkContextId) {
+    if (
+      task.reminderData.workContextId === this._workContextService.activeWorkContextId
+    ) {
       this._startTaskFronCurrentProject(task);
     } else {
       this._startTaskFromOtherProject(task);
@@ -45,10 +46,13 @@ export class SchedulePageComponent {
 
   toggleToday(task: TaskWithReminderData | Task) {
     if (task.tagIds.includes(TODAY_TAG.id)) {
-      this._taskService.updateTags(task, task.tagIds.filter(id => id !== TODAY_TAG.id), task.tagIds);
+      this._taskService.updateTags(
+        task,
+        task.tagIds.filter((id) => id !== TODAY_TAG.id),
+        task.tagIds,
+      );
     } else {
       this._taskService.updateTags(task, [TODAY_TAG.id, ...task.tagIds], task.tagIds);
-
     }
   }
 
@@ -56,19 +60,18 @@ export class SchedulePageComponent {
     if (task.reminderId) {
       this._taskService.unScheduleTask(task.id, task.reminderId);
     }
-
   }
 
   editReminder(task: TaskWithReminderData) {
     this._matDialog.open(DialogAddTaskReminderComponent, {
       restoreFocus: true,
-      data: {task} as AddTaskReminderInterface
+      data: { task } as AddTaskReminderInterface,
     });
   }
 
   updateTaskTitleIfChanged(isChanged: boolean, newTitle: string, task: Task) {
     if (isChanged) {
-      this._taskService.update(task.id, {title: newTitle});
+      this._taskService.update(task.id, { title: newTitle });
     }
     // this.focusSelf();
   }
@@ -91,7 +94,12 @@ export class SchedulePageComponent {
   }
 
   private _startTaskFromOtherProject(task: TaskWithReminderData) {
-    this._taskService.startTaskFromOtherContext$(task.id, task.reminderData.workContextType, task.reminderData.workContextId)
+    this._taskService
+      .startTaskFromOtherContext$(
+        task.id,
+        task.reminderData.workContextType,
+        task.reminderData.workContextId,
+      )
       .pipe(take(1))
       .subscribe(() => {
         this._router.navigate(['/active/tasks']);

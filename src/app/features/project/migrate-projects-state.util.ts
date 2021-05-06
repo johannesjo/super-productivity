@@ -3,7 +3,11 @@ import { Dictionary } from '@ngrx/entity';
 import { Project } from './project.model';
 import { DEFAULT_PROJECT, PROJECT_MODEL_VERSION } from './project.const';
 import { DEFAULT_ISSUE_PROVIDER_CFGS } from '../issue/issue.const';
-import { MODEL_VERSION_KEY, THEME_COLOR_MAP, WORKLOG_DATE_STR_FORMAT } from '../../app.constants';
+import {
+  MODEL_VERSION_KEY,
+  THEME_COLOR_MAP,
+  WORKLOG_DATE_STR_FORMAT,
+} from '../../app.constants';
 import { isMigrateModel } from '../../util/model-version';
 import * as moment from 'moment';
 import { convertToWesternArabic } from '../../util/numeric-converter';
@@ -17,10 +21,12 @@ export const migrateProjectState = (projectState: ProjectState): ProjectState =>
     return projectState;
   }
 
-  const projectEntities: Dictionary<Project> = {...projectState.entities};
+  const projectEntities: Dictionary<Project> = { ...projectState.entities };
   Object.keys(projectEntities).forEach((key) => {
     projectEntities[key] = _updateThemeModel(projectEntities[key] as Project);
-    projectEntities[key] = _convertToWesternArabicDateKeys(projectEntities[key] as Project);
+    projectEntities[key] = _convertToWesternArabicDateKeys(
+      projectEntities[key] as Project,
+    );
 
     // NOTE: absolutely needs to come last as otherwise the previous defaults won't work
     projectEntities[key] = _extendProjectDefaults(projectEntities[key] as Project);
@@ -43,7 +49,7 @@ const _extendProjectDefaults = (project: Project): Project => {
     issueIntegrationCfgs: {
       ...DEFAULT_ISSUE_PROVIDER_CFGS,
       ...project.issueIntegrationCfgs,
-    }
+    },
   };
 };
 
@@ -60,18 +66,20 @@ const __convertToWesternArabicDateKeys = (workStartEnd: {
 }): {
   [key: string]: any;
 } => {
-  return (workStartEnd)
+  return workStartEnd
     ? Object.keys(workStartEnd).reduce((acc, dateKey) => {
-      const date = moment(convertToWesternArabic(dateKey));
-      if (!date.isValid()) {
-        throw new Error('Cannot migrate invalid non western arabic date string ' + dateKey);
-      }
-      const westernArabicKey = date.locale('en').format(WORKLOG_DATE_STR_FORMAT);
-      return {
-        ...acc,
-        [westernArabicKey]: workStartEnd[dateKey]
-      };
-    }, {})
+        const date = moment(convertToWesternArabic(dateKey));
+        if (!date.isValid()) {
+          throw new Error(
+            'Cannot migrate invalid non western arabic date string ' + dateKey,
+          );
+        }
+        const westernArabicKey = date.locale('en').format(WORKLOG_DATE_STR_FORMAT);
+        return {
+          ...acc,
+          [westernArabicKey]: workStartEnd[dateKey],
+        };
+      }, {})
     : workStartEnd;
 };
 
@@ -86,25 +94,23 @@ const _convertToWesternArabicDateKeys = (project: Project) => {
 };
 
 const _updateThemeModel = (project: Project): Project => {
-    return (project.hasOwnProperty('theme') && project.theme.primary)
-      ? project
-      : {
+  return project.hasOwnProperty('theme') && project.theme.primary
+    ? project
+    : {
         ...project,
         theme: {
           ...WORK_CONTEXT_DEFAULT_THEME,
           // eslint-disable-next-line
-          primary: (project.themeColor)
-            // eslint-disable-next-line
-            ? (THEME_COLOR_MAP as any)[project.themeColor]
+          primary: project.themeColor
+            ? // eslint-disable-next-line
+              (THEME_COLOR_MAP as any)[project.themeColor]
             : WORK_CONTEXT_DEFAULT_THEME.primary,
           // eslint-disable-next-line
-        }
+        },
       };
 
-    // TODO delete old theme properties later
-  }
-;
-
+  // TODO delete old theme properties later
+};
 const _fixIds = (projectState: ProjectState): ProjectState => {
   const currentIds = projectState.ids as string[];
   const allIds = Object.keys(projectState.entities);
@@ -120,14 +126,14 @@ const _fixIds = (projectState: ProjectState): ProjectState => {
 
   if (allIds.length !== currentIds.length) {
     let newIds;
-    const allP = allIds.map(id => projectState.entities[id]);
+    const allP = allIds.map((id) => projectState.entities[id]);
 
     const archivedIds = allP
       .filter((p) => (p as Project).isArchived)
-      .map(p => (p as Project).id);
+      .map((p) => (p as Project).id);
     const unarchivedIds = allP
-      .filter(p => !(p as Project).isArchived)
-      .map(p => (p as Project).id);
+      .filter((p) => !(p as Project).isArchived)
+      .map((p) => (p as Project).id);
     if (currentIds.length === unarchivedIds.length) {
       newIds = [...currentIds, ...archivedIds];
     } else if (currentIds.length === unarchivedIds.length) {

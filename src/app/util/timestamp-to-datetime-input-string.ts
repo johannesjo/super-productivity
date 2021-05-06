@@ -1,5 +1,5 @@
 export function timestampToDatetimeInputString(timestamp: number): string {
-  const date = new Date((timestamp + _getTimeZoneOffsetInMs()));
+  const date = new Date(timestamp + _getTimeZoneOffsetInMs());
   return date.toISOString().slice(0, 19);
 }
 

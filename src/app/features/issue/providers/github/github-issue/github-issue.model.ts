@@ -4,7 +4,7 @@ import {
   GithubOriginalMileStone,
   GithubOriginalPullRequest,
   GithubOriginalState,
-  GithubOriginalUser
+  GithubOriginalUser,
 } from '../github-api-responses';
 
 export type GithubState = GithubOriginalState;
@@ -52,7 +52,7 @@ export type GithubIssueReduced = Readonly<{
   // repository: GithubOriginalRepository;
 }>;
 
-export type GithubIssue = GithubIssueReduced & Readonly<{
-  comments: GithubComment[];
-}>;
-
+export type GithubIssue = GithubIssueReduced &
+  Readonly<{
+    comments: GithubComment[];
+  }>;

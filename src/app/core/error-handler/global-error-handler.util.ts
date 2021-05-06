@@ -15,14 +15,14 @@ async function _getStacktrace(err: Error | any): Promise<string> {
 
   // Don't try to send stacktraces of HTTP errors as they are already logged on the server
   if (!isHttpError && isErrorWithStack && !isHandledError(err)) {
-    return StackTrace.fromError(err)
-      .then((stackframes) => {
-        return stackframes
-          .splice(0, 20)
-          .map((sf) => {
-            return sf.toString();
-          }).join('\n');
-      });
+    return StackTrace.fromError(err).then((stackframes) => {
+      return stackframes
+        .splice(0, 20)
+        .map((sf) => {
+          return sf.toString();
+        })
+        .join('\n');
+    });
   } else if (!isHandledError(err)) {
     console.warn('Error without stack', err);
   }
@@ -31,26 +31,31 @@ async function _getStacktrace(err: Error | any): Promise<string> {
 
 const _getStacktraceThrottled = pThrottle(_getStacktrace, 2, 5000);
 
-export const logAdvancedStacktrace = (origErr: unknown, additionalLogFn?: (stack: string) => void) => _getStacktraceThrottled(origErr).then(stack => {
+export const logAdvancedStacktrace = (
+  origErr: unknown,
+  additionalLogFn?: (stack: string) => void,
+) =>
+  _getStacktraceThrottled(origErr)
+    .then((stack) => {
+      if (additionalLogFn) {
+        additionalLogFn(stack);
+      }
+      // append to dialog
+      const stacktraceEl = document.getElementById('stack-trace');
+      if (stacktraceEl) {
+        stacktraceEl.innerText = stack;
+      }
 
-  if (additionalLogFn) {
-    additionalLogFn(stack);
-  }
-  // append to dialog
-  const stacktraceEl = document.getElementById('stack-trace');
-  if (stacktraceEl) {
-    stacktraceEl.innerText = stack;
-  }
+      const githubIssueLink = document.getElementById('github-issue-url');
 
-  const githubIssueLink = document.getElementById('github-issue-url');
+      if (githubIssueLink) {
+        const errEscaped = _cleanHtml(origErr as string);
+        githubIssueLink.setAttribute('href', getGithubUrl(errEscaped, stack));
+      }
 
-  if (githubIssueLink) {
-    const errEscaped = _cleanHtml(origErr as string);
-    githubIssueLink.setAttribute('href', getGithubUrl(errEscaped, stack));
-  }
-
-// NOTE: there is an issue with this sometimes -> https://github.com/stacktracejs/stacktrace.js/issues/202
-}).catch(console.error);
+      // NOTE: there is an issue with this sometimes -> https://github.com/stacktracejs/stacktrace.js/issues/202
+    })
+    .catch(console.error);
 
 const _cleanHtml = (str: string): string => {
   const div = document.createElement('div');
@@ -58,7 +63,12 @@ const _cleanHtml = (str: string): string => {
   return div.textContent || div.innerText || '';
 };
 
-export const createErrorAlert = (eSvc: ElectronService, err: string = '', stackTrace: string, origErr: any) => {
+export const createErrorAlert = (
+  eSvc: ElectronService,
+  err: string = '',
+  stackTrace: string,
+  origErr: any,
+) => {
   if (isWasErrorAlertCreated) {
     return;
   }
@@ -92,7 +102,9 @@ export const createErrorAlert = (eSvc: ElectronService, err: string = '', stackT
     }
   });
   document.body.append(errorAlert);
-  const innerWrapper = document.getElementById('error-alert-inner-wrapper') as HTMLElement;
+  const innerWrapper = document.getElementById(
+    'error-alert-inner-wrapper',
+  ) as HTMLElement;
   innerWrapper.append(btnReload);
   isWasErrorAlertCreated = true;
 
@@ -109,16 +121,25 @@ export const createErrorAlert = (eSvc: ElectronService, err: string = '', stackT
 
 export const getSimpleMeta = (): string => {
   const n = window.navigator;
-  return `META: SP${environment.version} ${IS_ELECTRON ? 'Electron' : 'Browser'} – ${n.language} – ${n.platform} – ${n.userAgent}`;
+  return `META: SP${environment.version} ${IS_ELECTRON ? 'Electron' : 'Browser'} – ${
+    n.language
+  } – ${n.platform} – ${n.userAgent}`;
 };
 
 export const isHandledError = (err: unknown): boolean => {
-  const errStr = (typeof err === 'string')
-    ? err
-    : (typeof err === 'object' && err !== null && typeof (err as any).toString === 'function' && err.toString());
+  const errStr =
+    typeof err === 'string'
+      ? err
+      : typeof err === 'object' &&
+        err !== null &&
+        typeof (err as any).toString === 'function' &&
+        err.toString();
   // NOTE: for some unknown reason sometimes err is undefined while err.toString is not...
   // this is why we also check the string value
-  return (err && (err as any).hasOwnProperty(HANDLED_ERROR_PROP_STR)) || !!((errStr as string).match(HANDLED_ERROR_PROP_STR));
+  return (
+    (err && (err as any).hasOwnProperty(HANDLED_ERROR_PROP_STR)) ||
+    !!(errStr as string).match(HANDLED_ERROR_PROP_STR)
+  );
 };
 
 const getGithubUrl = (errEscaped: string, stackTrace: string): string => {

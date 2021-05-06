@@ -5,9 +5,15 @@ import {
   showAddTaskBar,
   toggleAddTaskBar,
   toggleShowNotes,
-  toggleSideNav
+  toggleSideNav,
 } from './layout.actions';
-import { Action, createFeatureSelector, createReducer, createSelector, on } from '@ngrx/store';
+import {
+  Action,
+  createFeatureSelector,
+  createReducer,
+  createSelector,
+  on,
+} from '@ngrx/store';
 
 export const LAYOUT_FEATURE_NAME = 'layout';
 
@@ -25,35 +31,49 @@ const _initialLayoutState: LayoutState = {
   isShowNotes: false,
 };
 
-export const selectLayoutFeatureState = createFeatureSelector<LayoutState>(LAYOUT_FEATURE_NAME);
+export const selectLayoutFeatureState = createFeatureSelector<LayoutState>(
+  LAYOUT_FEATURE_NAME,
+);
 
-export const selectIsShowAddTaskBar = createSelector(selectLayoutFeatureState, state => state.isShowAddTaskBar);
+export const selectIsShowAddTaskBar = createSelector(
+  selectLayoutFeatureState,
+  (state) => state.isShowAddTaskBar,
+);
 
-export const selectIsShowSideNav = createSelector(selectLayoutFeatureState, state => state.isShowSideNav);
+export const selectIsShowSideNav = createSelector(
+  selectLayoutFeatureState,
+  (state) => state.isShowSideNav,
+);
 
-export const selectIsShowNotes = createSelector(selectLayoutFeatureState, (state) => state.isShowNotes);
+export const selectIsShowNotes = createSelector(
+  selectLayoutFeatureState,
+  (state) => state.isShowNotes,
+);
 
 const _reducer = createReducer<LayoutState>(
   _initialLayoutState,
 
-  on(showAddTaskBar, (state) => ({...state, isShowAddTaskBar: true})),
+  on(showAddTaskBar, (state) => ({ ...state, isShowAddTaskBar: true })),
 
-  on(hideAddTaskBar, (state) => ({...state, isShowAddTaskBar: false})),
+  on(hideAddTaskBar, (state) => ({ ...state, isShowAddTaskBar: false })),
 
-  on(toggleAddTaskBar, (state) => ({...state, isShowAddTaskBar: !state.isShowAddTaskBar})),
+  on(toggleAddTaskBar, (state) => ({
+    ...state,
+    isShowAddTaskBar: !state.isShowAddTaskBar,
+  })),
 
-  on(hideSideNav, (state) => ({...state, isShowSideNav: false})),
+  on(hideSideNav, (state) => ({ ...state, isShowSideNav: false })),
 
-  on(toggleSideNav, (state) => ({...state, isShowSideNav: !state.isShowSideNav})),
+  on(toggleSideNav, (state) => ({ ...state, isShowSideNav: !state.isShowSideNav })),
 
-  on(toggleShowNotes, (state) => ({...state, isShowNotes: !state.isShowNotes})),
+  on(toggleShowNotes, (state) => ({ ...state, isShowNotes: !state.isShowNotes })),
 
-  on(hideNotes, (state) => ({...state, isShowNotes: false})),
+  on(hideNotes, (state) => ({ ...state, isShowNotes: false })),
 );
 
 export function reducer(
   state: LayoutState = _initialLayoutState,
-  action: Action
+  action: Action,
 ): LayoutState {
   return _reducer(state, action);
 }

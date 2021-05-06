@@ -26,14 +26,15 @@ module.exports = () => {
   };
 
   const parsed = parse(tr);
-  const string = `const T = ${JSON.stringify(parsed, null, 2)
-    .replace(/"(\w+)":/g, '$1:')};
+  const string = `const T = ${JSON.stringify(parsed, null, 2).replace(
+    /"(\w+)":/g,
+    '$1:',
+  )};
 export { T };
-`.replace(/"/g, '\'');
-
+`.replace(/"/g, "'");
 
   fs.writeFileSync(__dirname + '/../src/app/t.const.ts', string, {
     overwrite: true,
-    flag: 'w'
+    flag: 'w',
   });
 };

@@ -10,7 +10,7 @@ import { CaldavIssue } from '../caldav-issue.model';
   templateUrl: './caldav-issue-content.component.html',
   styleUrls: ['./caldav-issue-content.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  animations: [expandAnimation]
+  animations: [expandAnimation],
 })
 export class CaldavIssueContentComponent {
   @Input() issue?: CaldavIssue;
@@ -18,10 +18,7 @@ export class CaldavIssueContentComponent {
 
   T: typeof T = T;
 
-  constructor(
-    private readonly  _taskService: TaskService,
-  ) {
-  }
+  constructor(private readonly _taskService: TaskService) {}
 
   hideUpdates() {
     this._taskService.markIssueUpdatesAsRead((this.task as TaskWithSubTasks).id);

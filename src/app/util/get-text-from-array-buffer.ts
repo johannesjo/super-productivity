@@ -1,6 +1,9 @@
 // borrowed
-export const getTextFromArrayBuffer = (arrayBuffer: ArrayBuffer, encoding: string = 'UTF-8'): Promise<string | ArrayBuffer> => {
-  return new Promise((resolve/*, reject*/) => {
+export const getTextFromArrayBuffer = (
+  arrayBuffer: ArrayBuffer,
+  encoding: string = 'UTF-8',
+): Promise<string | ArrayBuffer> => {
+  return new Promise((resolve /*, reject*/) => {
     if (typeof Blob === 'undefined') {
       const buffer = new Buffer(new Uint8Array(arrayBuffer));
       resolve(buffer.toString(encoding));

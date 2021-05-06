@@ -6,11 +6,6 @@ import { MetricModule } from '../../features/metric/metric.module';
 
 @NgModule({
   declarations: [MetricPageComponent],
-  imports: [
-    CommonModule,
-    UiModule,
-    MetricModule,
-  ]
+  imports: [CommonModule, UiModule, MetricModule],
 })
-export class MetricPageModule {
-}
+export class MetricPageModule {}

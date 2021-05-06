@@ -4,12 +4,8 @@ import { UiModule } from '../../../../../ui/ui.module';
 import { DialogGitlabInitialSetupComponent } from './dialog-gitlab-initial-setup.component';
 
 @NgModule({
-  imports: [
-    CommonModule,
-    UiModule,
-  ],
+  imports: [CommonModule, UiModule],
   declarations: [DialogGitlabInitialSetupComponent],
   exports: [],
 })
-export class DialogGitlabInitialSetupModule {
-}
+export class DialogGitlabInitialSetupModule {}

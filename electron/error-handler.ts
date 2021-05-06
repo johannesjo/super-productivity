@@ -42,7 +42,10 @@ function _handleError(e, additionalLogInfo, errObj) {
       stack,
     });
   } else {
-    console.error('ERR', 'Electron Error: Frontend not loaded. Could not send error to renderer.');
+    console.error(
+      'ERR',
+      'Electron Error: Frontend not loaded. Could not send error to renderer.',
+    );
     error('Electron Error: Frontend not loaded. Could not send error to renderer.');
     throw errObj;
   }

@@ -14,16 +14,27 @@ import {
   upsertSimpleCounter,
 } from './store/simple-counter.actions';
 import { Observable } from 'rxjs';
-import { SimpleCounter, SimpleCounterCfgFields, SimpleCounterState } from './simple-counter.model';
+import {
+  SimpleCounter,
+  SimpleCounterCfgFields,
+  SimpleCounterState,
+} from './simple-counter.model';
 import * as shortid from 'shortid';
 import { distinctUntilChanged, map } from 'rxjs/operators';
 
 const FIELDS_TO_COMPARE: (keyof SimpleCounterCfgFields)[] = [
-  'id', 'title', 'isEnabled', 'icon', 'iconOn', 'type', 'triggerOnActions', 'triggerOffActions'
+  'id',
+  'title',
+  'isEnabled',
+  'icon',
+  'iconOn',
+  'type',
+  'triggerOnActions',
+  'triggerOffActions',
 ];
 
 const isEqualSimpleCounterCfg = (a: any, b: any): boolean => {
-  if ((Array.isArray(a) && Array.isArray(b))) {
+  if (Array.isArray(a) && Array.isArray(b)) {
     if (a.length !== b.length) {
       return false;
     }
@@ -48,41 +59,40 @@ const isEqualSimpleCounterCfg = (a: any, b: any): boolean => {
   providedIn: 'root',
 })
 export class SimpleCounterService {
-  simpleCounters$: Observable<SimpleCounter[]> = this._store$.pipe(select(selectAllSimpleCounters));
-  simpleCountersUpdatedOnCfgChange$: Observable<SimpleCounter[]> = this.simpleCounters$.pipe(
-    distinctUntilChanged(isEqualSimpleCounterCfg),
+  simpleCounters$: Observable<SimpleCounter[]> = this._store$.pipe(
+    select(selectAllSimpleCounters),
   );
+  simpleCountersUpdatedOnCfgChange$: Observable<
+    SimpleCounter[]
+  > = this.simpleCounters$.pipe(distinctUntilChanged(isEqualSimpleCounterCfg));
 
-  enabledSimpleCounters$: Observable<SimpleCounter[]> = this._store$.pipe(select(selectAllSimpleCounters)).pipe(
-    map(items => items && items.filter(item => item.isEnabled)),
-  );
-  enabledSimpleCountersUpdatedOnCfgChange$: Observable<SimpleCounter[]> = this.enabledSimpleCounters$.pipe(
-    distinctUntilChanged(isEqualSimpleCounterCfg),
-  );
+  enabledSimpleCounters$: Observable<SimpleCounter[]> = this._store$
+    .pipe(select(selectAllSimpleCounters))
+    .pipe(map((items) => items && items.filter((item) => item.isEnabled)));
+  enabledSimpleCountersUpdatedOnCfgChange$: Observable<
+    SimpleCounter[]
+  > = this.enabledSimpleCounters$.pipe(distinctUntilChanged(isEqualSimpleCounterCfg));
 
-  enabledAndToggledSimpleCounters$: Observable<SimpleCounter[]> = this._store$.pipe(select(selectAllSimpleCounters)).pipe(
-    map(items => items && items.filter(item => item.isEnabled && item.isOn)),
-  );
+  enabledAndToggledSimpleCounters$: Observable<SimpleCounter[]> = this._store$
+    .pipe(select(selectAllSimpleCounters))
+    .pipe(map((items) => items && items.filter((item) => item.isEnabled && item.isOn)));
 
-  constructor(
-    private _store$: Store<SimpleCounterState>,
-  ) {
-  }
+  constructor(private _store$: Store<SimpleCounterState>) {}
 
   updateAll(items: SimpleCounter[]) {
-    this._store$.dispatch(updateAllSimpleCounters({items}));
+    this._store$.dispatch(updateAllSimpleCounters({ items }));
   }
 
   setCounterToday(id: string, newVal: number) {
-    this._store$.dispatch(setSimpleCounterCounterToday({id, newVal}));
+    this._store$.dispatch(setSimpleCounterCounterToday({ id, newVal }));
   }
 
   increaseCounterToday(id: string, increaseBy: number) {
-    this._store$.dispatch(increaseSimpleCounterCounterToday({id, increaseBy}));
+    this._store$.dispatch(increaseSimpleCounterCounterToday({ id, increaseBy }));
   }
 
   toggleCounter(id: string) {
-    this._store$.dispatch(toggleSimpleCounterCounter({id}));
+    this._store$.dispatch(toggleSimpleCounterCounter({ id }));
   }
 
   turnOffAll() {
@@ -90,27 +100,29 @@ export class SimpleCounterService {
   }
 
   addSimpleCounter(simpleCounter: SimpleCounter) {
-    this._store$.dispatch(addSimpleCounter({
-      simpleCounter: {
-        ...simpleCounter,
-        id: shortid()
-      }
-    }));
+    this._store$.dispatch(
+      addSimpleCounter({
+        simpleCounter: {
+          ...simpleCounter,
+          id: shortid(),
+        },
+      }),
+    );
   }
 
   deleteSimpleCounter(id: string) {
-    this._store$.dispatch(deleteSimpleCounter({id}));
+    this._store$.dispatch(deleteSimpleCounter({ id }));
   }
 
   deleteSimpleCounters(ids: string[]) {
-    this._store$.dispatch(deleteSimpleCounters({ids}));
+    this._store$.dispatch(deleteSimpleCounters({ ids }));
   }
 
   updateSimpleCounter(id: string, changes: Partial<SimpleCounter>) {
-    this._store$.dispatch(updateSimpleCounter({simpleCounter: {id, changes}}));
+    this._store$.dispatch(updateSimpleCounter({ simpleCounter: { id, changes } }));
   }
 
   upsertSimpleCounter(simpleCounter: SimpleCounter) {
-    this._store$.dispatch(upsertSimpleCounter({simpleCounter}));
+    this._store$.dispatch(upsertSimpleCounter({ simpleCounter }));
   }
 }

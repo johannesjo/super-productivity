@@ -8,7 +8,7 @@ import { DialogConflictResolutionResult } from '../sync.model';
   selector: 'dialog-sync-conflict',
   templateUrl: './dialog-sync-conflict.component.html',
   styleUrls: ['./dialog-sync-conflict.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class DialogSyncConflictComponent {
   T: typeof T = T;
@@ -26,11 +26,12 @@ export class DialogSyncConflictComponent {
 
   constructor(
     private _matDialogRef: MatDialogRef<DialogSyncConflictComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: {
+    @Inject(MAT_DIALOG_DATA)
+    public data: {
       remote: number;
       local: number;
       lastSync: number;
-    }
+    },
   ) {
     _matDialogRef.disableClose = true;
   }

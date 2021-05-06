@@ -17,12 +17,10 @@ export const getWeeksInMonth = (month: number, year: number): WeeksInMonth[] => 
     end = 7 - firstDate.getDay() + 1;
   }
   while (start <= numDays) {
-    weeks.push({start, end});
+    weeks.push({ start, end });
     start = end + 1;
     end = end + 7;
-    end = (start === 1 && end === 8)
-      ? 1
-      : end;
+    end = start === 1 && end === 8 ? 1 : end;
     if (end > numDays) {
       end = numDays;
     }

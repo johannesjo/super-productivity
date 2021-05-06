@@ -23,5 +23,4 @@ import { GlobalProgressBarModule } from './global-progress-bar/global-progress-b
     GlobalProgressBarModule,
   ],
 })
-export class CoreUiModule {
-}
+export class CoreUiModule {}

@@ -12,34 +12,29 @@ export enum ObstructionActionTypes {
 export class AddObstruction implements Action {
   readonly type: string = ObstructionActionTypes.AddObstruction;
 
-  constructor(public payload: { obstruction: Obstruction }) {
-  }
+  constructor(public payload: { obstruction: Obstruction }) {}
 }
 
 export class UpdateObstruction implements Action {
   readonly type: string = ObstructionActionTypes.UpdateObstruction;
 
-  constructor(public payload: { obstruction: Update<Obstruction> }) {
-  }
+  constructor(public payload: { obstruction: Update<Obstruction> }) {}
 }
 
 export class DeleteObstruction implements Action {
   readonly type: string = ObstructionActionTypes.DeleteObstruction;
 
-  constructor(public payload: { id: string }) {
-  }
+  constructor(public payload: { id: string }) {}
 }
 
 export class DeleteObstructions implements Action {
   readonly type: string = ObstructionActionTypes.DeleteObstructions;
 
-  constructor(public payload: { ids: string[] }) {
-  }
+  constructor(public payload: { ids: string[] }) {}
 }
 
 export type ObstructionActions =
-  AddObstruction
+  | AddObstruction
   | UpdateObstruction
   | DeleteObstruction
-  | DeleteObstructions
-  ;
+  | DeleteObstructions;

@@ -10,7 +10,7 @@ import { TaskService } from '../../../../../tasks/task.service';
   templateUrl: './github-issue-content.component.html',
   styleUrls: ['./github-issue-content.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  animations: [expandAnimation]
+  animations: [expandAnimation],
 })
 export class GithubIssueContentComponent {
   @Input() issue?: GithubIssue;
@@ -18,10 +18,7 @@ export class GithubIssueContentComponent {
 
   T: typeof T = T;
 
-  constructor(
-    private readonly  _taskService: TaskService,
-  ) {
-  }
+  constructor(private readonly _taskService: TaskService) {}
 
   hideUpdates() {
     if (!this.task) {

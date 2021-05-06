@@ -7,7 +7,7 @@ import { IssueData } from '../issue.model';
   selector: 'issue-content',
   templateUrl: './issue-content.component.html',
   styleUrls: ['./issue-content.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class IssueContentComponent {
   @Input() task?: TaskWithSubTasks;
@@ -17,6 +17,5 @@ export class IssueContentComponent {
   readonly JIRA_TYPE: string = JIRA_TYPE;
   readonly CALDAV_TYPE: string = CALDAV_TYPE;
 
-  constructor() {
-  }
+  constructor() {}
 }

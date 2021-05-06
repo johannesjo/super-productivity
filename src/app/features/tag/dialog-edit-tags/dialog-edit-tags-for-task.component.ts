@@ -14,7 +14,7 @@ import { Tag } from '../tag.model';
   selector: 'dialog-edit-tags',
   templateUrl: './dialog-edit-tags-for-task.component.html',
   styleUrls: ['./dialog-edit-tags-for-task.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class DialogEditTagsForTaskComponent implements OnDestroy {
   T: typeof T = T;
@@ -33,10 +33,12 @@ export class DialogEditTagsForTaskComponent implements OnDestroy {
     private _matDialogRef: MatDialogRef<DialogEditTagsForTaskComponent>,
     @Inject(MAT_DIALOG_DATA) public data: DialogEditTagsForTaskPayload,
   ) {
-    this._subs.add(this.task$.subscribe(task => {
-      this.tagIds = task.tagIds;
-      this.task = task;
-    }));
+    this._subs.add(
+      this.task$.subscribe((task) => {
+        this.tagIds = task.tagIds;
+        this.task = task;
+      }),
+    );
   }
 
   ngOnDestroy(): void {
@@ -52,12 +54,12 @@ export class DialogEditTagsForTaskComponent implements OnDestroy {
   }
 
   addNewTag(title: string) {
-    const id = this._tagService.addTag({title});
+    const id = this._tagService.addTag({ title });
     this._updateTags(unique([...this.tagIds, id]));
   }
 
   removeTag(id: string) {
-    const updatedTagIds = this.tagIds.filter(tagId => tagId !== id);
+    const updatedTagIds = this.tagIds.filter((tagId) => tagId !== id);
     this._updateTags(updatedTagIds);
   }
 

@@ -6,14 +6,14 @@ import {
   HostBinding,
   HostListener,
   Input,
-  Output
+  Output,
 } from '@angular/core';
 
 @Component({
   selector: 'task-additional-info-item',
   templateUrl: './task-additional-info-item.component.html',
   styleUrls: ['./task-additional-info-item.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TaskAdditionalInfoItemComponent {
   @Input() type: 'input' | 'panel' = 'input';
@@ -26,10 +26,7 @@ export class TaskAdditionalInfoItemComponent {
 
   @HostBinding('tabindex') readonly tabindex: number = 3;
 
-  constructor(
-    public elementRef: ElementRef
-  ) {
-  }
+  constructor(public elementRef: ElementRef) {}
 
   @HostListener('keydown', ['$event']) onKeyDown(ev: KeyboardEvent) {
     const tagName = (ev.target as HTMLElement).tagName.toLowerCase();

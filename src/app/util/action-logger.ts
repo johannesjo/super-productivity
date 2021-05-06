@@ -1,13 +1,14 @@
 import { loadFromRealLs, saveToRealLs } from '../core/persistence/local-storage';
-import { LS_ACTION_BEFORE_LAST_ERROR_LOG, LS_ACTION_LOG } from '../core/persistence/ls-keys.const';
+import {
+  LS_ACTION_BEFORE_LAST_ERROR_LOG,
+  LS_ACTION_LOG,
+} from '../core/persistence/ls-keys.const';
 
 const NUMBER_OF_ACTIONS_TO_SAVE = 30;
 
 const getActionLog = (): string[] => {
   const current = loadFromRealLs(LS_ACTION_LOG);
-  return Array.isArray(current)
-    ? current
-    : [];
+  return Array.isArray(current) ? current : [];
 };
 
 export const actionLogger = (action: any) => {
@@ -32,7 +33,5 @@ export const saveBeforeLastErrorActionLog = () => {
 
 export const getBeforeLastErrorActionLog = (): string[] => {
   const current = loadFromRealLs(LS_ACTION_BEFORE_LAST_ERROR_LOG);
-  return Array.isArray(current)
-    ? current
-    : [];
+  return Array.isArray(current) ? current : [];
 };

@@ -10,7 +10,7 @@ import { getWorklogStr } from '../../../util/get-work-log-str';
   selector: 'simple-counter-button',
   templateUrl: './simple-counter-button.component.html',
   styleUrls: ['./simple-counter-button.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SimpleCounterButtonComponent {
   T: typeof T = T;
@@ -22,8 +22,7 @@ export class SimpleCounterButtonComponent {
   constructor(
     private _simpleCounterService: SimpleCounterService,
     private _matDialog: MatDialog,
-  ) {
-  }
+  ) {}
 
   toggleStopwatch() {
     if (!this.simpleCounter) {
@@ -54,7 +53,7 @@ export class SimpleCounterButtonComponent {
     this._matDialog.open(DialogSimpleCounterEditComponent, {
       restoreFocus: true,
       data: {
-        simpleCounter: this.simpleCounter
+        simpleCounter: this.simpleCounter,
       },
     });
   }

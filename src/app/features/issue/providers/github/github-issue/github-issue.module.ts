@@ -15,14 +15,7 @@ import { GithubIssueEffects } from './github-issue.effects';
     ReactiveFormsModule,
     EffectsModule.forFeature([GithubIssueEffects]),
   ],
-  declarations: [
-    GithubIssueHeaderComponent,
-    GithubIssueContentComponent,
-  ],
-  exports: [
-    GithubIssueHeaderComponent,
-    GithubIssueContentComponent,
-  ],
+  declarations: [GithubIssueHeaderComponent, GithubIssueContentComponent],
+  exports: [GithubIssueHeaderComponent, GithubIssueContentComponent],
 })
-export class GithubIssueModule {
-}
+export class GithubIssueModule {}

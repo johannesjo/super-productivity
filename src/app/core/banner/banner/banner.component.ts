@@ -11,7 +11,7 @@ import { T } from '../../../t.const';
   templateUrl: './banner.component.html',
   styleUrls: ['./banner.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  animations: [slideAnimation]
+  animations: [slideAnimation],
 })
 export class BannerComponent {
   T: typeof T = T;
@@ -27,22 +27,15 @@ export class BannerComponent {
         }
 
         this._dirtyReference = activeBanner.id;
-        return merge(
-          of(null),
-          timer(500).pipe(mapTo(activeBanner))
-        );
+        return merge(of(null), timer(500).pipe(mapTo(activeBanner)));
       } else {
         this._dirtyReference = null;
         return of(null);
       }
-    })
+    }),
   );
 
-  constructor(
-    public bannerService: BannerService,
-    private _elementRef: ElementRef,
-  ) {
-  }
+  constructor(public bannerService: BannerService, private _elementRef: ElementRef) {}
 
   @ViewChild('wrapperEl') set wrapperEl(content: ElementRef) {
     if (content && content.nativeElement) {

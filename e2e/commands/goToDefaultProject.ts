@@ -1,5 +1,5 @@
-import {NightwatchBrowser} from 'nightwatch';
-import {BASE} from '../e2e.const';
+import { NightwatchBrowser } from 'nightwatch';
+import { BASE } from '../e2e.const';
 
 const BASE_URL = `${BASE}`;
 
@@ -15,14 +15,12 @@ const SPLIT = `split`;
 
 module.exports = {
   async command(this: NightwatchBrowser) {
-    return this
-      .url(BASE_URL)
+    return this.url(BASE_URL)
       .waitForElementVisible(EXPAND_PROJECT_BTN)
       .click(EXPAND_PROJECT_BTN)
       .waitForElementVisible(DEFAULT_PROJECT_BTN)
       .click(DEFAULT_PROJECT_BTN)
       .waitForElementVisible(BACKLOG)
-      .waitForElementVisible(SPLIT)
-      ;
-  }
+      .waitForElementVisible(SPLIT);
+  },
 };

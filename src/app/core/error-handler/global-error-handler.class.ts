@@ -3,7 +3,11 @@ import { isObject } from '../../util/is-object';
 import { getErrorTxt } from '../../util/get-error-text';
 import { IS_ELECTRON } from '../../app.constants';
 import { ElectronService } from '../electron/electron.service';
-import { createErrorAlert, isHandledError, logAdvancedStacktrace } from './global-error-handler.util';
+import {
+  createErrorAlert,
+  isHandledError,
+  logAdvancedStacktrace,
+} from './global-error-handler.util';
 import { remote } from 'electron';
 import { saveBeforeLastErrorActionLog } from '../../util/action-logger';
 
@@ -11,17 +15,17 @@ import { saveBeforeLastErrorActionLog } from '../../util/action-logger';
 export class GlobalErrorHandler implements ErrorHandler {
   private _electronLogger: any;
 
-  constructor(
-    private _electronService: ElectronService,
-  ) {
+  constructor(private _electronService: ElectronService) {
     if (IS_ELECTRON) {
-      this._electronLogger = (this._electronService.remote as typeof remote).require('electron-log');
+      this._electronLogger = (this._electronService.remote as typeof remote).require(
+        'electron-log',
+      );
     }
   }
 
   // TODO Cleanup this mess
   handleError(err: any) {
-    const errStr = (typeof err === 'string') ? err : err.toString();
+    const errStr = typeof err === 'string' ? err : err.toString();
     // eslint-disable-next-line
     const simpleStack = err && err.stack;
     console.error('GLOBAL_ERROR_HANDLER', err);
@@ -33,7 +37,12 @@ export class GlobalErrorHandler implements ErrorHandler {
 
       // NOTE: dom exceptions will break all rendering that's why
       if (err.constructor && err.constructor === DOMException) {
-        createErrorAlert(this._electronService, 'DOMException: ' + errorStr, simpleStack, err);
+        createErrorAlert(
+          this._electronService,
+          'DOMException: ' + errorStr,
+          simpleStack,
+          err,
+        );
       } else {
         createErrorAlert(this._electronService, errorStr, simpleStack, err);
       }
@@ -58,7 +67,7 @@ export class GlobalErrorHandler implements ErrorHandler {
   private _getErrorStr(err: unknown): string {
     if (isObject(err)) {
       const str = getErrorTxt(err);
-      return (typeof str === 'string')
+      return typeof str === 'string'
         ? str
         : 'Unable to parse error string. Please see console error';
     } else {

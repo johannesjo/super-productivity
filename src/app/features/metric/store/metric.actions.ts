@@ -12,34 +12,25 @@ export enum MetricActionTypes {
 export class AddMetric implements Action {
   readonly type: string = MetricActionTypes.AddMetric;
 
-  constructor(public payload: { metric: Metric }) {
-  }
+  constructor(public payload: { metric: Metric }) {}
 }
 
 export class UpdateMetric implements Action {
   readonly type: string = MetricActionTypes.UpdateMetric;
 
-  constructor(public payload: { metric: Update<Metric> }) {
-  }
+  constructor(public payload: { metric: Update<Metric> }) {}
 }
 
 export class UpsertMetric implements Action {
   readonly type: string = MetricActionTypes.UpsertMetric;
 
-  constructor(public payload: { metric: Metric }) {
-  }
+  constructor(public payload: { metric: Metric }) {}
 }
 
 export class DeleteMetric implements Action {
   readonly type: string = MetricActionTypes.DeleteMetric;
 
-  constructor(public payload: { id: string }) {
-  }
+  constructor(public payload: { id: string }) {}
 }
 
-export type MetricActions =
-  AddMetric
-  | UpdateMetric
-  | DeleteMetric
-  | UpsertMetric
-  ;
+export type MetricActions = AddMetric | UpdateMetric | DeleteMetric | UpsertMetric;

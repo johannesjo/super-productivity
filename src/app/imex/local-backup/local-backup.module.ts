@@ -14,5 +14,4 @@ export class LocalBackupModule {
       this._localBackupService.init();
     }
   }
-
 }

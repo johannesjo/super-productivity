@@ -4,7 +4,7 @@ import { getCoords } from './get-coords';
 const LARGE_IMG_ID = 'enlarged-img';
 
 @Directive({
-  selector: '[enlargeImg]'
+  selector: '[enlargeImg]',
 })
 export class EnlargeImgDirective {
   imageEl: HTMLElement;
@@ -17,15 +17,12 @@ export class EnlargeImgDirective {
 
   @Input() enlargeImg?: string;
 
-  constructor(
-    private _renderer: Renderer2,
-    private _el: ElementRef
-  ) {
+  constructor(private _renderer: Renderer2, private _el: ElementRef) {
     this.imageEl = this._el.nativeElement;
   }
 
   @HostListener('click', ['$event']) onClick() {
-    this.isImg = (this.imageEl.tagName.toLowerCase() === 'img');
+    this.isImg = this.imageEl.tagName.toLowerCase() === 'img';
 
     if (this.isImg || this.enlargeImg) {
       this._showImg();
@@ -57,11 +54,15 @@ export class EnlargeImgDirective {
     const startLeft = origImgCoords.left - newImageCoords.left;
     const startTop = origImgCoords.top - newImageCoords.top;
 
-    this._renderer.setStyle(this.newImageEl, 'transform', `translate3d(${startLeft}px, ${startTop}px, 0) scale(${scale})`);
+    this._renderer.setStyle(
+      this.newImageEl,
+      'transform',
+      `translate3d(${startLeft}px, ${startTop}px, 0) scale(${scale})`,
+    );
   }
 
   private _showImg() {
-    const src = this.enlargeImg || this.imageEl.getAttribute('src') as string;
+    const src = this.enlargeImg || (this.imageEl.getAttribute('src') as string);
 
     const img = new Image();
     img.src = src;
@@ -69,15 +70,23 @@ export class EnlargeImgDirective {
       this._setOriginCoordsForImageAni();
       this._waitForImgRender().then(() => {
         this._renderer.addClass(this.enlargedImgWrapperEl, 'ani-enter');
-        this._renderer.setStyle(this.newImageEl, 'transform', `translate3d(0, 0, 0) scale(1)`);
+        this._renderer.setStyle(
+          this.newImageEl,
+          'transform',
+          `translate3d(0, 0, 0) scale(1)`,
+        );
       });
     };
     img.onerror = () => {
       this._hideImg();
     };
 
-    this.enlargedImgWrapperEl = this._htmlToElement(`<div class="enlarged-image-wrapper"></div>`);
-    this.newImageEl = this._htmlToElement(`<img src="${src}" class="enlarged-image" id=${LARGE_IMG_ID}>`);
+    this.enlargedImgWrapperEl = this._htmlToElement(
+      `<div class="enlarged-image-wrapper"></div>`,
+    );
+    this.newImageEl = this._htmlToElement(
+      `<img src="${src}" class="enlarged-image" id=${LARGE_IMG_ID}>`,
+    );
     this._renderer.appendChild(this.enlargedImgWrapperEl, this.newImageEl);
     this._renderer.appendChild(this.lightboxParentEl, this.enlargedImgWrapperEl);
     this.zoomMode = 0;
@@ -115,7 +124,11 @@ export class EnlargeImgDirective {
       throw new Error();
     }
     this._renderer.addClass(this.enlargedImgWrapperEl, 'isZoomed');
-    this._renderer.setStyle((this.newImageEl as HTMLElement), 'transform', `scale(2) translate3d(-25%, -25%, 0)`);
+    this._renderer.setStyle(
+      this.newImageEl as HTMLElement,
+      'transform',
+      `scale(2) translate3d(-25%, -25%, 0)`,
+    );
     this.zoomMoveHandler = this._zoom.bind(this);
     this.enlargedImgWrapperEl.addEventListener('mousemove', this.zoomMoveHandler as any);
   }
@@ -126,7 +139,11 @@ export class EnlargeImgDirective {
     }
     this.enlargedImgWrapperEl.removeEventListener('mousemove', this.zoomMoveHandler);
     this._renderer.removeClass(this.enlargedImgWrapperEl, 'isZoomed');
-    this._renderer.setStyle((this.newImageEl as HTMLElement), 'transform', `scale(1) translate3d(0, 0, 0)`);
+    this._renderer.setStyle(
+      this.newImageEl as HTMLElement,
+      'transform',
+      `scale(1) translate3d(0, 0, 0)`,
+    );
   }
 
   private _htmlToElement(html: string): HTMLElement {
@@ -145,14 +162,18 @@ export class EnlargeImgDirective {
     const zoomer = this.enlargedImgWrapperEl;
     const extra = 1.1;
     const magicSpace = 5;
-    const x = (offsetX / zoomer.offsetWidth * 100 - magicSpace) * -0.5 * extra;
-    const y = (offsetY / zoomer.offsetHeight * 100 - magicSpace) * -0.5 * extra;
-    this._renderer.setStyle((this.newImageEl as HTMLElement), 'transform', `scale(2) translate3d(${x}%, ${y}%, 0)`);
+    const x = ((offsetX / zoomer.offsetWidth) * 100 - magicSpace) * -0.5 * extra;
+    const y = ((offsetY / zoomer.offsetHeight) * 100 - magicSpace) * -0.5 * extra;
+    this._renderer.setStyle(
+      this.newImageEl as HTMLElement,
+      'transform',
+      `scale(2) translate3d(${x}%, ${y}%, 0)`,
+    );
   }
 
   private _waitForImgRender() {
     function rafAsync() {
-      return new Promise(resolve => {
+      return new Promise((resolve) => {
         requestAnimationFrame(resolve);
       });
     }

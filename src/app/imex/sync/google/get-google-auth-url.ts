@@ -2,12 +2,14 @@ import * as querystring from 'querystring';
 import { generatePKCECodes } from '../dropbox/generate-pkce-codes';
 import { GOOGLE_API_SCOPES_ARRAY, GOOGLE_SETTINGS_ELECTRON } from './google.const';
 
-const {codeVerifier} = generatePKCECodes(80);
+const { codeVerifier } = generatePKCECodes(80);
 export const GOOGLE_AUTH_CODE_VERIFIER = codeVerifier;
 
 const _getGoogleAuthUrl = (opts: any = {}) => {
   if (opts.code_challenge_method && !opts.code_challenge) {
-    throw new Error('If a code_challenge_method is provided, code_challenge must be included.');
+    throw new Error(
+      'If a code_challenge_method is provided, code_challenge must be included.',
+    );
   }
   opts.response_type = opts.response_type || 'code';
   opts.client_id = opts.client_id || GOOGLE_SETTINGS_ELECTRON.CLIENT_ID;
@@ -20,13 +22,14 @@ const _getGoogleAuthUrl = (opts: any = {}) => {
   return rootUrl + '?' + querystring.stringify(opts);
 };
 
-export const getGoogleAuthUrl = (opts = {}) => _getGoogleAuthUrl({
-  access_type: 'offline',
-  scope: GOOGLE_API_SCOPES_ARRAY,
-  redirect_uri: 'urn:ietf:wg:oauth:2.0:oob',
-  // TODO make real code challenge work
-  // code_challenge: codeChallenge,
-  code_challenge: codeVerifier,
-});
+export const getGoogleAuthUrl = (opts = {}) =>
+  _getGoogleAuthUrl({
+    access_type: 'offline',
+    scope: GOOGLE_API_SCOPES_ARRAY,
+    redirect_uri: 'urn:ietf:wg:oauth:2.0:oob',
+    // TODO make real code challenge work
+    // code_challenge: codeChallenge,
+    code_challenge: codeVerifier,
+  });
 
 export const GOOGLE_AUTH_URL = getGoogleAuthUrl();

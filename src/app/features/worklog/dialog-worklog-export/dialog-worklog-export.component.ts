@@ -9,7 +9,7 @@ import { WORKLOG_EXPORT_DEFAULTS } from '../../work-context/work-context.const';
   selector: 'dialog-worklog-export',
   templateUrl: './dialog-worklog-export.component.html',
   styleUrls: ['./dialog-worklog-export.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class DialogWorklogExportComponent {
   T: typeof T = T;
@@ -27,7 +27,7 @@ export class DialogWorklogExportComponent {
     this.strStart = moment(data.rangeStart).format('l');
     this.strEnd = moment(data.rangeEnd).format('l');
 
-    this.isSingleDay = (this.strStart === this.strEnd);
+    this.isSingleDay = this.strStart === this.strEnd;
   }
 
   close() {

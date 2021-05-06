@@ -11,5 +11,4 @@ import { LAYOUT_FEATURE_NAME } from './store/layout.reducer';
   ],
   declarations: [],
 })
-export class LayoutModule {
-}
+export class LayoutModule {}

@@ -13,13 +13,16 @@ import { map, withLatestFrom } from 'rxjs/operators';
 import { ProjectService } from '../../project/project.service';
 import { unique } from '../../../util/unique';
 import { TranslateService } from '@ngx-translate/core';
-import { mapToProjectWithTasks, ProjectWithTasks } from './map-to-project-with-tasks.util';
+import {
+  mapToProjectWithTasks,
+  ProjectWithTasks,
+} from './map-to-project-with-tasks.util';
 
 @Component({
   selector: 'task-summary-tables',
   templateUrl: './task-summary-tables.component.html',
   styleUrls: ['./task-summary-tables.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TaskSummaryTablesComponent {
   T: typeof T = T;
@@ -36,10 +39,10 @@ export class TaskSummaryTablesComponent {
     map(([pids, projects]) => {
       // NOTE: the order is like the ones in the menu
       const mappedProjects = projects
-        .filter(project => pids.includes(project.id))
+        .filter((project) => pids.includes(project.id))
         .map((project) => this._mapToProjectWithTasks(project));
 
-      if (this.flatTasks.find(task => !task.projectId)) {
+      if (this.flatTasks.find((task) => !task.projectId)) {
         const noProjectProject: ProjectWithTasks = this._mapToProjectWithTasks({
           id: null,
           title: this._translateService.instant(T.G.WITHOUT_PROJECT),
@@ -47,7 +50,7 @@ export class TaskSummaryTablesComponent {
         return [...mappedProjects, noProjectProject];
       }
       return mappedProjects;
-    })
+    }),
   );
 
   constructor(
@@ -57,12 +60,13 @@ export class TaskSummaryTablesComponent {
     private readonly _matDialog: MatDialog,
     private readonly _worklogService: WorklogService,
     private readonly _projectService: ProjectService,
-  ) {
-  }
+  ) {}
 
   @Input('flatTasks') set flatTasksIn(v: Task[]) {
     this.flatTasks = v;
-    const pids = unique(v.map(t => t.projectId).filter(pid => typeof pid === 'string')) as string[];
+    const pids = unique(
+      v.map((t) => t.projectId).filter((pid) => typeof pid === 'string'),
+    ) as string[];
     this.projectIds$.next(pids);
   }
 
@@ -78,14 +82,22 @@ export class TaskSummaryTablesComponent {
         projectId,
         rangeStart: new Date().setHours(0, 0, 0, 0),
         rangeEnd: new Date().setHours(23, 59, 59),
-      }
+      },
     });
   }
 
-  roundTimeForTasks(projectId: string, roundTo: RoundTimeOption, isRoundUp: boolean = false) {
-    const taskIds = this.flatTasks.map(task => task.id);
+  roundTimeForTasks(
+    projectId: string,
+    roundTo: RoundTimeOption,
+    isRoundUp: boolean = false,
+  ) {
+    const taskIds = this.flatTasks.map((task) => task.id);
     this._taskService.roundTimeSpentForDay({
-      day: this.dayStr, taskIds, roundTo, isRoundUp, projectId
+      day: this.dayStr,
+      taskIds,
+      roundTo,
+      isRoundUp,
+      projectId,
     });
   }
 
@@ -93,7 +105,9 @@ export class TaskSummaryTablesComponent {
     return item.id;
   }
 
-  private _mapToProjectWithTasks(project: Project | { id: string | null; title: string }): ProjectWithTasks {
+  private _mapToProjectWithTasks(
+    project: Project | { id: string | null; title: string },
+  ): ProjectWithTasks {
     let yesterdayStr: string | undefined;
     if (this.isShowYesterday && this.isForToday) {
       const t = new Date();

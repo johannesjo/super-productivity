@@ -20,27 +20,29 @@ export class GithubCommonInterfacesService implements IssueServiceInterface {
     private readonly _githubApiService: GithubApiService,
     private readonly _projectService: ProjectService,
     private readonly _snackService: SnackService,
-  ) {
-  }
+  ) {}
 
   issueLink$(issueId: number, projectId: string): Observable<string> {
     return this._getCfgOnce$(projectId).pipe(
-      map((cfg) => `https://github.com/${cfg.repo}/issues/${issueId}`)
+      map((cfg) => `https://github.com/${cfg.repo}/issues/${issueId}`),
     );
   }
 
   getById$(issueId: number, projectId: string) {
     return this._getCfgOnce$(projectId).pipe(
-      concatMap(githubCfg => this._githubApiService.getById$(issueId, githubCfg))
+      concatMap((githubCfg) => this._githubApiService.getById$(issueId, githubCfg)),
     );
   }
 
   searchIssues$(searchTerm: string, projectId: string): Observable<SearchResultItem[]> {
     return this._getCfgOnce$(projectId).pipe(
-      switchMap((githubCfg) => (githubCfg && githubCfg.isSearchIssuesFromGithub)
-        ? this._githubApiService.searchIssueForRepo$(searchTerm, githubCfg).pipe(catchError(() => []))
-        : of([])
-      )
+      switchMap((githubCfg) =>
+        githubCfg && githubCfg.isSearchIssuesFromGithub
+          ? this._githubApiService
+              .searchIssueForRepo$(searchTerm, githubCfg)
+              .pipe(catchError(() => []))
+          : of([]),
+      ),
     );
   }
 
@@ -61,13 +63,16 @@ export class GithubCommonInterfacesService implements IssueServiceInterface {
 
     // const issueUpdate: number = new Date(issue.updated_at).getTime();
     const filterUserName = cfg.filterUsername && cfg.filterUsername.toLowerCase();
-    const commentsByOthers = (filterUserName && filterUserName.length > 1)
-      ? issue.comments.filter(comment => comment.user.login.toLowerCase() !== cfg.filterUsername)
-      : issue.comments;
+    const commentsByOthers =
+      filterUserName && filterUserName.length > 1
+        ? issue.comments.filter(
+            (comment) => comment.user.login.toLowerCase() !== cfg.filterUsername,
+          )
+        : issue.comments;
 
     // TODO: we also need to handle the case when the user himself updated the issue, to also update the issue...
     const updates: number[] = [
-      ...(commentsByOthers.map(comment => new Date(comment.created_at).getTime())),
+      ...commentsByOthers.map((comment) => new Date(comment.created_at).getTime()),
       // todo check if this can be re-implemented
       // issueUpdate
     ].sort();
@@ -86,7 +91,7 @@ export class GithubCommonInterfacesService implements IssueServiceInterface {
       this._snackService.open({
         ico: 'cloud_download',
         translateParams: {
-          issueText: this._formatIssueTitleForSnack(issue.number, issue.title)
+          issueText: this._formatIssueTitleForSnack(issue.number, issue.title),
         },
         msg: T.F.GITHUB.S.ISSUE_UPDATE,
       });
@@ -110,14 +115,16 @@ export class GithubCommonInterfacesService implements IssueServiceInterface {
     return null;
   }
 
-  getAddTaskData(issue: GithubIssueReduced): { title: string; additionalFields: Partial<Task> } {
+  getAddTaskData(
+    issue: GithubIssueReduced,
+  ): { title: string; additionalFields: Partial<Task> } {
     return {
       title: this._formatIssueTitle(issue.number, issue.title),
       additionalFields: {
         // issueWasUpdated: false,
         // NOTE: we use Date.now() instead to because updated does not account for comments
         // issueLastUpdated: new Date(issue.updated_at).getTime()
-      }
+      },
     };
   }
 

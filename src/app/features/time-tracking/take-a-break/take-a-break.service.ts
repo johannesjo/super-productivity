@@ -13,7 +13,7 @@ import {
   startWith,
   switchMap,
   throttleTime,
-  withLatestFrom
+  withLatestFrom,
 } from 'rxjs/operators';
 import { GlobalConfigService } from '../../config/global-config.service';
 import { msToString } from '../../../ui/duration/ms-to-string.pipe';
@@ -60,25 +60,25 @@ export class TakeABreakService {
 
   private _isIdleResetEnabled$: Observable<boolean> = this._configService.idle$.pipe(
     switchMap((idleCfg) => {
-        const isConfigured = (idleCfg.isEnableIdleTimeTracking && idleCfg.isUnTrackedIdleResetsBreakTimer);
-        if (IS_ELECTRON) {
-          return [isConfigured];
-        } else if (isConfigured) {
-          return this._chromeExtensionInterfaceService.isReady$;
-        } else {
-          return [false];
-        }
+      const isConfigured =
+        idleCfg.isEnableIdleTimeTracking && idleCfg.isUnTrackedIdleResetsBreakTimer;
+      if (IS_ELECTRON) {
+        return [isConfigured];
+      } else if (isConfigured) {
+        return this._chromeExtensionInterfaceService.isReady$;
+      } else {
+        return [false];
       }
-    ),
+    }),
     distinctUntilChanged(),
   );
 
   private _triggerSimpleBreakReset$: Observable<any> = this._timeWithNoCurrentTask$.pipe(
-    filter(timeWithNoTask => timeWithNoTask > BREAK_TRIGGER_DURATION),
+    filter((timeWithNoTask) => timeWithNoTask > BREAK_TRIGGER_DURATION),
   );
 
   private _tick$: Observable<number> = this._timeTrackingService.tick$.pipe(
-    map(tick => tick.duration),
+    map((tick) => tick.duration),
   );
 
   private _triggerSnooze$: Subject<number> = new Subject();
@@ -88,10 +88,7 @@ export class TakeABreakService {
       if (val === false) {
         return [false];
       } else {
-        return timer(+val).pipe(
-          mapTo(false),
-          startWith(true),
-        );
+        return timer(+val).pipe(mapTo(false), startWith(true));
       }
     }),
   );
@@ -109,9 +106,7 @@ export class TakeABreakService {
   private _triggerReset$: Observable<number> = merge(
     this._triggerProgrammaticReset$,
     this._triggerManualReset$,
-  ).pipe(
-    mapTo(0),
-  );
+  ).pipe(mapTo(0));
 
   timeWorkingWithoutABreak$: Observable<number> = merge(
     this._tick$,
@@ -119,47 +114,54 @@ export class TakeABreakService {
     // of(9999999).pipe(delay(4000)),
   ).pipe(
     scan((acc, value) => {
-      return (value > 0)
-        ? acc + value
-        : value;
+      return value > 0 ? acc + value : value;
     }),
     shareReplay(1),
   );
 
   private _triggerLockScreenCounter$: Subject<boolean> = new Subject();
-  private _triggerLockScreenThrottledAndDelayed$: Observable<unknown | never> = this._triggerLockScreenCounter$.pipe(
+  private _triggerLockScreenThrottledAndDelayed$: Observable<
+    unknown | never
+  > = this._triggerLockScreenCounter$.pipe(
     filter(() => IS_ELECTRON),
     distinctUntilChanged(),
-    switchMap((v) => !!(v)
-      ? of(v).pipe(
-        throttleTime(LOCK_SCREEN_THROTTLE),
-        delay(LOCK_SCREEN_DELAY),
-      )
-      : EMPTY,
+    switchMap((v) =>
+      !!v
+        ? of(v).pipe(throttleTime(LOCK_SCREEN_THROTTLE), delay(LOCK_SCREEN_DELAY))
+        : EMPTY,
     ),
   );
 
-  private _triggerBanner$: Observable<[number, GlobalConfigState, boolean, boolean]> = this.timeWorkingWithoutABreak$.pipe(
+  private _triggerBanner$: Observable<
+    [number, GlobalConfigState, boolean, boolean]
+  > = this.timeWorkingWithoutABreak$.pipe(
     withLatestFrom(
       this._configService.cfg$,
       this._idleService.isIdle$,
       this._snoozeActive$,
     ),
-    filter(([timeWithoutBreak, cfg, isIdle, isSnoozeActive]:
-      [number, GlobalConfigState, boolean, boolean]): boolean =>
-      cfg && cfg.takeABreak && cfg.takeABreak.isTakeABreakEnabled
-      && !isSnoozeActive
-      && (timeWithoutBreak > cfg.takeABreak.takeABreakMinWorkingTime)
-      // we don't wanna show if idle to avoid conflicts with the idle modal
-      && (!isIdle || !cfg.idle.isEnableIdleTimeTracking)
+    filter(
+      ([timeWithoutBreak, cfg, isIdle, isSnoozeActive]: [
+        number,
+        GlobalConfigState,
+        boolean,
+        boolean,
+      ]): boolean =>
+        cfg &&
+        cfg.takeABreak &&
+        cfg.takeABreak.isTakeABreakEnabled &&
+        !isSnoozeActive &&
+        timeWithoutBreak > cfg.takeABreak.takeABreakMinWorkingTime &&
+        // we don't wanna show if idle to avoid conflicts with the idle modal
+        (!isIdle || !cfg.idle.isEnableIdleTimeTracking),
     ),
     // throttleTime(5 * 1000),
     throttleTime(PING_UPDATE_BANNER_INTERVAL),
   );
 
-  private _triggerDesktopNotification$: Observable<[number, GlobalConfigState, boolean, boolean]> = this._triggerBanner$.pipe(
-    throttleTime(DESKTOP_NOTIFICATION_THROTTLE)
-  );
+  private _triggerDesktopNotification$: Observable<
+    [number, GlobalConfigState, boolean, boolean]
+  > = this._triggerBanner$.pipe(throttleTime(DESKTOP_NOTIFICATION_THROTTLE));
 
   constructor(
     private _taskService: TaskService,
@@ -173,12 +175,14 @@ export class TakeABreakService {
     private _chromeExtensionInterfaceService: ChromeExtensionInterfaceService,
     private _uiHelperService: UiHelperService,
   ) {
-    this._triggerReset$.pipe(
-      withLatestFrom(this._configService.takeABreak$),
-      filter(([reset, cfg]) => cfg && cfg.isTakeABreakEnabled),
-    ).subscribe(() => {
-      this._bannerService.dismiss(BANNER_ID);
-    });
+    this._triggerReset$
+      .pipe(
+        withLatestFrom(this._configService.takeABreak$),
+        filter(([reset, cfg]) => cfg && cfg.isTakeABreakEnabled),
+      )
+      .subscribe(() => {
+        this._bannerService.dismiss(BANNER_ID);
+      });
 
     this._triggerLockScreenThrottledAndDelayed$.subscribe(() => {
       if (IS_ELECTRON) {
@@ -207,19 +211,18 @@ export class TakeABreakService {
         ico: 'free_breakfast',
         msg,
         translateParams: {
-          time: '15m'
+          time: '15m',
         },
         action: {
           label: T.F.TIME_TRACKING.B.ALREADY_DID,
-          fn: () => this.resetTimerAndCountAsBreak()
+          fn: () => this.resetTimerAndCountAsBreak(),
         },
         action2: {
           label: T.F.TIME_TRACKING.B.SNOOZE,
-          fn: () => this.snooze()
+          fn: () => this.snooze(),
         },
-        img: cfg.takeABreak.motivationalImg || undefined
+        img: cfg.takeABreak.motivationalImg || undefined,
       });
-
     });
   }
 
@@ -243,8 +246,7 @@ export class TakeABreakService {
   private _createMessage(duration: number, cfg: TakeABreakConfig): string | undefined {
     if (cfg && cfg.takeABreakMessage) {
       const durationStr = msToString(duration);
-      return cfg.takeABreakMessage
-        .replace(/\$\{duration\}/gi, durationStr);
+      return cfg.takeABreakMessage.replace(/\$\{duration\}/gi, durationStr);
     }
     return undefined;
   }

@@ -9,7 +9,7 @@ import {
   OnDestroy,
   OnInit,
   Output,
-  ViewChild
+  ViewChild,
 } from '@angular/core';
 import { fadeAnimation } from '../animations/fade.ani';
 import { MarkdownComponent } from 'ngx-markdown';
@@ -29,7 +29,7 @@ const HIDE_OVERFLOW_TIMEOUT_DURATION = 300;
   templateUrl: './inline-markdown.component.html',
   styleUrls: ['./inline-markdown.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  animations: [fadeAnimation]
+  animations: [fadeAnimation],
 })
 export class InlineMarkdownComponent implements OnInit, OnDestroy {
   @Input() isLock: boolean = false;
@@ -39,7 +39,7 @@ export class InlineMarkdownComponent implements OnInit, OnDestroy {
   @Output() focused: EventEmitter<Event> = new EventEmitter();
   @Output() blurred: EventEmitter<Event> = new EventEmitter();
   @Output() keyboardUnToggle: EventEmitter<Event> = new EventEmitter();
-  @ViewChild('wrapperEl', {static: true}) wrapperEl: ElementRef | undefined;
+  @ViewChild('wrapperEl', { static: true }) wrapperEl: ElementRef | undefined;
   @ViewChild('textareaEl') textareaEl: ElementRef | undefined;
   @ViewChild('previewEl') previewEl: MarkdownComponent | undefined;
 
@@ -48,7 +48,7 @@ export class InlineMarkdownComponent implements OnInit, OnDestroy {
   modelCopy: string | undefined;
 
   isTurnOffMarkdownParsing$: Observable<boolean> = this._globalConfigService.misc$.pipe(
-    map(cfg => cfg.isTurnOffMarkdown),
+    map((cfg) => cfg.isTurnOffMarkdown),
     startWith(false),
   );
   private _hideOverFlowTimeout: number | undefined;
@@ -109,7 +109,7 @@ export class InlineMarkdownComponent implements OnInit, OnDestroy {
   keypressHandler(ev: KeyboardEvent) {
     this.resizeTextareaToFit();
 
-    if (ev.key === 'Enter' && ev.ctrlKey || ev.code === 'Escape') {
+    if ((ev.key === 'Enter' && ev.ctrlKey) || ev.code === 'Escape') {
       this.untoggleShowEdit();
       this.keyboardUnToggle.emit(ev);
     }
@@ -157,24 +157,29 @@ export class InlineMarkdownComponent implements OnInit, OnDestroy {
       throw new Error('Wrapper el not visible');
     }
     this.textareaEl.nativeElement.style.height = 'auto';
-    this.textareaEl.nativeElement.style.height = this.textareaEl.nativeElement.scrollHeight + 'px';
-    this.wrapperEl.nativeElement.style.height = this.textareaEl.nativeElement.offsetHeight + 'px';
+    this.textareaEl.nativeElement.style.height =
+      this.textareaEl.nativeElement.scrollHeight + 'px';
+    this.wrapperEl.nativeElement.style.height =
+      this.textareaEl.nativeElement.offsetHeight + 'px';
   }
 
   openFullScreen() {
-    this._matDialog.open(DialogFullscreenMarkdownComponent, {
-      minWidth: '100vw',
-      height: '100vh',
-      restoreFocus: true,
-      data: {
-        content: this.modelCopy
-      }
-    }).afterClosed().subscribe((res) => {
-      if (typeof res === 'string') {
-        this.modelCopy = res;
-        this.changed.emit(res);
-      }
-    });
+    this._matDialog
+      .open(DialogFullscreenMarkdownComponent, {
+        minWidth: '100vw',
+        height: '100vh',
+        restoreFocus: true,
+        data: {
+          content: this.modelCopy,
+        },
+      })
+      .afterClosed()
+      .subscribe((res) => {
+        if (typeof res === 'string') {
+          this.modelCopy = res;
+          this.changed.emit(res);
+        }
+      });
   }
 
   resizeParsedToFit() {
@@ -192,7 +197,8 @@ export class InlineMarkdownComponent implements OnInit, OnDestroy {
       }
       this.previewEl.element.nativeElement.style.height = 'auto';
       // NOTE: somehow this pixel seem to help
-      this.wrapperEl.nativeElement.style.height = this.previewEl.element.nativeElement.offsetHeight + 'px';
+      this.wrapperEl.nativeElement.style.height =
+        this.previewEl.element.nativeElement.offsetHeight + 'px';
       this.previewEl.element.nativeElement.style.height = '';
     });
   }

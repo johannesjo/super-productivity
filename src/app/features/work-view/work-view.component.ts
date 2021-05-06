@@ -6,7 +6,7 @@ import {
   Input,
   OnDestroy,
   OnInit,
-  ViewChild
+  ViewChild,
 } from '@angular/core';
 import { TaskService } from '../tasks/task.service';
 import { expandAnimation, expandFadeAnimation } from '../../ui/animations/expand.ani';
@@ -14,7 +14,15 @@ import { LayoutService } from '../../core-ui/layout/layout.service';
 import { DragulaService } from 'ng2-dragula';
 import { TakeABreakService } from '../time-tracking/take-a-break/take-a-break.service';
 import { ActivatedRoute } from '@angular/router';
-import { from, fromEvent, Observable, ReplaySubject, Subscription, timer, zip } from 'rxjs';
+import {
+  from,
+  fromEvent,
+  Observable,
+  ReplaySubject,
+  Subscription,
+  timer,
+  zip,
+} from 'rxjs';
 import { TaskWithSubTasks } from '../tasks/task.model';
 import { delay, filter, map, switchMap } from 'rxjs/operators';
 import { fadeAnimation } from '../../ui/animations/fade.ani';
@@ -31,7 +39,12 @@ const PARENT = 'PARENT';
   selector: 'work-view',
   templateUrl: './work-view.component.html',
   styleUrls: ['./work-view.component.scss'],
-  animations: [expandFadeAnimation, expandAnimation, fadeAnimation, workViewProjectChangeAnimation],
+  animations: [
+    expandFadeAnimation,
+    expandAnimation,
+    fadeAnimation,
+    workViewProjectChangeAnimation,
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class WorkViewComponent implements OnInit, OnDestroy, AfterContentInit {
@@ -47,19 +60,14 @@ export class WorkViewComponent implements OnInit, OnDestroy, AfterContentInit {
 
   // NOTE: not perfect but good enough for now
   isTriggerBacklogIconAni$: Observable<boolean> = this.workContextService.onMoveToBacklog$.pipe(
-    switchMap(() =>
-      zip(
-        from([true, false]),
-        timer(1, 200),
-      ),
-    ),
-    map(v => v[0]),
+    switchMap(() => zip(from([true, false]), timer(1, 200))),
+    map((v) => v[0]),
   );
   splitTopEl$: ReplaySubject<HTMLElement> = new ReplaySubject(1);
 
   // TODO make this work for tag page without backlog
   upperContainerScroll$: Observable<Event> = this.workContextService.isContextChanging$.pipe(
-    filter(isChanging => !isChanging),
+    filter((isChanging) => !isChanging),
     delay(50),
     switchMap(() => this.splitTopEl$),
     switchMap((el) => fromEvent(el, 'scroll')),
@@ -76,10 +84,9 @@ export class WorkViewComponent implements OnInit, OnDestroy, AfterContentInit {
     public workContextService: WorkContextService,
     private _dragulaService: DragulaService,
     private _activatedRoute: ActivatedRoute,
-  ) {
-  }
+  ) {}
 
-  @ViewChild('splitTopEl', {read: ElementRef}) set splitTopElRef(ref: ElementRef) {
+  @ViewChild('splitTopEl', { read: ElementRef }) set splitTopElRef(ref: ElementRef) {
     if (ref) {
       this.splitTopEl$.next(ref.nativeElement);
     }
@@ -93,39 +100,48 @@ export class WorkViewComponent implements OnInit, OnDestroy, AfterContentInit {
       this._dragulaService.createGroup(SUB, {
         direction: 'vertical',
         moves: (el, container, handle) => {
-          return !!handle && handle.className.indexOf && handle.className.indexOf('handle-sub') > -1;
-        }
+          return (
+            !!handle &&
+            handle.className.indexOf &&
+            handle.className.indexOf('handle-sub') > -1
+          );
+        },
       });
     }
     if (!par) {
       this._dragulaService.createGroup(PARENT, {
         direction: 'vertical',
         moves: (el, container, handle) => {
-          return !!handle && handle.className.indexOf && handle.className.indexOf('handle-par') > -1;
-        }
+          return (
+            !!handle &&
+            handle.className.indexOf &&
+            handle.className.indexOf('handle-par') > -1
+          );
+        },
       });
     }
     // preload
     // TODO check
     // this._subs.add(this.workContextService.backlogTasks$.subscribe());
 
-    this._subs.add(this._activatedRoute.queryParams
-      .subscribe((params) => {
+    this._subs.add(
+      this._activatedRoute.queryParams.subscribe((params) => {
         if (params && params.backlogPos) {
           this.splitInputPos = params.backlogPos;
         }
-      }));
+      }),
+    );
   }
 
   ngAfterContentInit(): void {
     this._subs.add(
-      this.upperContainerScroll$.subscribe(({target}) => {
+      this.upperContainerScroll$.subscribe(({ target }) => {
         if ((target as HTMLElement).scrollTop !== 0) {
           this.layoutService.isScrolled$.next(true);
         } else {
           this.layoutService.isScrolled$.next(false);
         }
-      })
+      }),
     );
   }
 

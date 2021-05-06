@@ -60,4 +60,3 @@ export const setSimpleCounterCounterOn = createAction(
   '[SimpleCounter] Set SimpleCounter Counter On',
   props<{ id: string }>(),
 );
-

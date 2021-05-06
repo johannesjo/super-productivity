@@ -1,4 +1,10 @@
-import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  EventEmitter,
+  Input,
+  Output,
+} from '@angular/core';
 import { FormlyFieldConfig, FormlyFormOptions } from '@ngx-formly/core';
 import { FormGroup } from '@angular/forms';
 import { GlobalConfigSectionKey } from '../global-config.model';
@@ -13,20 +19,21 @@ import { exists } from '../../../util/exists';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ConfigFormComponent {
-
   T: typeof T = T;
   config?: Record<string, unknown>;
   @Input() sectionKey?: GlobalConfigSectionKey | ProjectCfgFormKey;
-  @Output() save: EventEmitter<{ sectionKey: GlobalConfigSectionKey | ProjectCfgFormKey; config: unknown }> = new EventEmitter();
+  @Output() save: EventEmitter<{
+    sectionKey: GlobalConfigSectionKey | ProjectCfgFormKey;
+    config: unknown;
+  }> = new EventEmitter();
   fields?: FormlyFieldConfig[];
   form: FormGroup = new FormGroup({});
   options: FormlyFormOptions = {};
 
-  constructor() {
-  }
+  constructor() {}
 
   @Input() set cfg(cfg: Record<string, unknown>) {
-    this.config = {...cfg};
+    this.config = { ...cfg };
   }
 
   // somehow needed for the form to work

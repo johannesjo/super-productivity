@@ -32,23 +32,25 @@ export const stringToMs = (strValue: string, args?: any): number => {
     }
   });
 
-  if (typeof s === 'number' || typeof m === 'number' || typeof h === 'number' || typeof d === 'number') {
-    s = (typeof s === 'number' && !isNaN(s)) ? s : 0;
-    m = (typeof m === 'number' && !isNaN(m)) ? m : 0;
-    h = (typeof h === 'number' && !isNaN(h)) ? h : 0;
-    d = (typeof d === 'number' && !isNaN(d)) ? d : 0;
+  if (
+    typeof s === 'number' ||
+    typeof m === 'number' ||
+    typeof h === 'number' ||
+    typeof d === 'number'
+  ) {
+    s = typeof s === 'number' && !isNaN(s) ? s : 0;
+    m = typeof m === 'number' && !isNaN(m) ? m : 0;
+    h = typeof h === 'number' && !isNaN(h) ? h : 0;
+    d = typeof d === 'number' && !isNaN(d) ? d : 0;
 
-    return +(s * 1000)
-      + (m * 1000 * 60)
-      + (h * 1000 * 60 * 60)
-      + (d * 1000 * 60 * 60 * 24);
+    return +(s * 1000) + m * 1000 * 60 + h * 1000 * 60 * 60 + d * 1000 * 60 * 60 * 24;
   } else {
     return 0;
   }
 };
 
 @Pipe({
-  name: 'stringToMs'
+  name: 'stringToMs',
 })
 export class StringToMsPipe implements PipeTransform {
   transform: (value: any, ...args: any[]) => any = stringToMs;
