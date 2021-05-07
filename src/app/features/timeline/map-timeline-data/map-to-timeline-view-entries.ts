@@ -100,9 +100,8 @@ export const mapToTimelineViewEntries = (
     }
   }
 
-  // console.log('mapToViewEntriesE', viewEntries, {asString: JSON.stringify(viewEntries)});
   // filter out double entries for start/end
-  return viewEntries.filter((viewEntry, index, arr) => {
+  const cleanedUpExcessWorkDays = viewEntries.filter((viewEntry, index, arr) => {
     if (index > 0) {
       const prev = arr[index - 1];
       const next = arr[index + 2];
@@ -118,6 +117,9 @@ export const mapToTimelineViewEntries = (
     }
     return true;
   });
+
+  // console.log('mapToViewEntriesE', viewEntries, {asString: JSON.stringify(viewEntries)});
+  return cleanedUpExcessWorkDays;
 };
 
 const createViewEntriesForBlock = (blockedBlock: BlockedBlock): TimelineViewEntry[] => {
@@ -142,7 +144,6 @@ const createViewEntriesForBlock = (blockedBlock: BlockedBlock): TimelineViewEntr
         type: TimelineViewEntryType.WorkdayEnd,
         data: workdayCfg,
         isHideTime: true,
-        isHideDate: true,
       });
       viewEntriesForBock.push({
         id: 'DAY_START_' + entry.end,
@@ -150,7 +151,6 @@ const createViewEntriesForBlock = (blockedBlock: BlockedBlock): TimelineViewEntr
         type: TimelineViewEntryType.WorkdayStart,
         data: workdayCfg,
         isHideTime: true,
-        isHideDate: true,
       });
     }
   });

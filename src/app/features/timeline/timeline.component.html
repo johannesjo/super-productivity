@@ -8,7 +8,7 @@
               {{ row.time <= now ? (T.F.TIMELINE.NOW|translate) :
               (row.time|roundDuration|date:'HH:mm')}}
             </div>
-            <div *ngIf="!row.isHideDate && row.time>= tomorrow" class="date">
+            <div *ngIf="row.time>= tomorrow" class="date">
               {{ row.time <= now ? (T.F.TIMELINE.NOW|translate) :
               (row.time|date:'shortDate')}}
             </div>

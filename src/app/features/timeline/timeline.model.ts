@@ -16,7 +16,6 @@ export enum TimelineViewEntryType {
   CustomEvent = 'CustomEvent',
   WorkdayStart = 'WorkdayStart',
   WorkdayEnd = 'WorkdayEnd',
-  WorkdayGap = 'WorkdayGap',
 }
 
 interface TimelineViewEntryBase {
@@ -24,7 +23,6 @@ interface TimelineViewEntryBase {
   type: TimelineViewEntryType;
   time: number;
   isHideTime: boolean;
-  isHideDate?: boolean;
 }
 
 interface TimelineViewEntryTask extends TimelineViewEntryBase {
