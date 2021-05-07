@@ -97,6 +97,13 @@ export const KEYBOARD_SETTINGS_FORM_CFG: ConfigFormSection<KeyboardConfig> = {
     //   },
     // },
     {
+      key: 'showSearchBar',
+      type: 'keyboard',
+      templateOptions: {
+        label: T.GCF.KEYBOARD.SHOW_SEARCH_BAR,
+      },
+    },
+    {
       key: 'toggleBookmarks',
       type: 'keyboard',
       templateOptions: {

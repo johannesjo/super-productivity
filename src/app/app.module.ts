@@ -44,6 +44,7 @@ import { undoTaskDeleteMetaReducer } from './root-store/meta/undo-task-delete.me
 import { InitialDialogModule } from './features/initial-dialog/initial-dialog.module';
 import { actionLoggerReducer } from './root-store/meta/action-logger.reducer';
 import { SyncModule } from './imex/sync/sync.module';
+import { SearchBarModule } from './features/search-bar/search-bar.module';
 
 // NOTE: export required for aot to work
 export const createTranslateLoader = (http: HttpClient) =>
@@ -74,6 +75,7 @@ export const createTranslateLoader = (http: HttpClient) =>
     SyncModule,
     InitialDialogModule,
     MaterialCssVarsModule.forRoot(),
+    SearchBarModule,
 
     // External
     BrowserModule,

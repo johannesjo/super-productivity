@@ -11,11 +11,17 @@
   <add-task-bar
     (blurred)="layoutService.hideAddTaskBar()"
     *ngIf="layoutService.isShowAddTaskBar$|async"
-    [@blendInOut]
     [isElevated]="true"
     class="global"
   ></add-task-bar>
   <div *ngIf="(layoutService.isShowAddTaskBar$|async)" @fade class="backdrop"></div>
+  <search-bar
+    (blurred)="layoutService.hideSearchBar()"
+    *ngIf="layoutService.isShowSearchBar$|async"
+    [isElevated]="true"
+    class="global"
+  ></search-bar>
+  <div *ngIf="(layoutService.isShowSearchBar$|async)" @fade class="backdrop"></div>
   <mat-sidenav-container [dir]="isRTL ? 'rtl' : 'ltr'">
     <mat-sidenav
       (closedStart)="layoutService.hideSideNav()"

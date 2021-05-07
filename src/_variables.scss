@@ -40,7 +40,6 @@ $dark12: rgb(51, 51, 51);
 $dark16: rgb(52, 52, 52);
 $dark24: rgb(56, 56, 56);
 
-
 $dark-theme-bg: $dark0;
 $dark-theme-bg-darker: $dark0;
 $dark-theme-bg-slightly-lighter: $dark4;
@@ -72,7 +71,6 @@ $dark-theme-extra-border-color: rgba(255, 255, 255, 0.12);
 
 $light-theme-separator-color: rgba(18, 18, 18, 0.3);
 $dark-theme-separator-color: rgba(255, 255, 255, 0.3);
-
 
 $c-accent: mat-css-color-accent();
 $c-warn: mat-css-color-warn();
@@ -112,7 +110,6 @@ $component-max-width: 800px;
 $side-nav-width: 200px;
 //$main-header-height: $s*7;
 
-
 $bar-height-large: 56px;
 $bar-height: 48px;
 $bar-height-small: 40px;
@@ -129,7 +126,7 @@ $z-main-header: 10;
 $z-bookmarks: 9;
 $z-backdrop: 222;
 $z-add-task-bar: 10000;
-
+$z-search-bar: 10000;
 
 // COMPONENTS
 // ----------
@@ -138,16 +135,15 @@ $standard-note-fg-light: $light-theme-text-color;
 $standard-note-bg-dark: $dark-theme-bg-lightest;
 $standard-note-fg-dark: #eeeeee;
 
-
 // ANIMATIONS
 // ----------
 // https://github.com/material-components/material-components-web/blob/master/packages/mdc-animation/_variables.scss
-$ani-standard-timing: cubic-bezier(.4, 0, .2, 1) !default;
-$ani-enter-timing: cubic-bezier(0, 0, .2, 1) !default;
-$ani-leave-timing: cubic-bezier(.4, 0, 1, 1) !default;
-$ani-sharp-timing: cubic-bezier(.4, 0, .6, 1) !default;
+$ani-standard-timing: cubic-bezier(0.4, 0, 0.2, 1) !default;
+$ani-enter-timing: cubic-bezier(0, 0, 0.2, 1) !default;
+$ani-leave-timing: cubic-bezier(0.4, 0, 1, 1) !default;
+$ani-sharp-timing: cubic-bezier(0.4, 0, 0.6, 1) !default;
 
-$ease-in-out-quint: cubic-bezier(.38, .04, .35, .96);
+$ease-in-out-quint: cubic-bezier(0.38, 0.04, 0.35, 0.96);
 $transition-duration-xs: 90ms;
 $transition-duration-s: 150ms;
 $transition-duration-m: 225ms;

@@ -76,6 +76,7 @@ export const DEFAULT_GLOBAL_CONFIG: GlobalConfigState = {
     openProjectNotes: 'Shift+N',
     toggleSideNav: 'Shift+D',
     showHelp: '?',
+    showSearchBar: 'Shift+F',
     toggleBookmarks: 'Shift+V',
     toggleBacklog: 'b',
     goToWorkView: 'w',

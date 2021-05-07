@@ -1,0 +1,55 @@
+<form
+  #searchForm
+  @blendInOut
+  (@blendInOut.done)="onAnimationEvent($event)"
+  [class.isElevated]="isElevated"
+  [class.mat-elevation-z3]="!isElevated"
+  [class.mat-elevation-z4]="isElevated"
+  class="search-form"
+>
+  <div class="input-wrapper">
+    <div *ngIf="(isLoading$|async)" class="spinner">
+      <mat-spinner diameter="50"></mat-spinner>
+    </div>
+    <button class="switch-add-to-btn" mat-icon-button type="button">
+      <mat-icon>search</mat-icon>
+    </button>
+    <input
+      #inputEl
+      [tabindex]="tabindex"
+      (blur)="onBlur($event)"
+      [formControl]="taskSuggestionsCtrl"
+      [matAutocomplete]="autoEl"
+      matInput
+    />
+
+    <button
+      (click)="closeBtnClose($event)"
+      *ngIf="isElevated"
+      class="close-btn"
+      mat-icon-button
+      type="button"
+    >
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <div class="info-bar">
+    <div class="info-text">{{T.F.SEARCH_BAR.INFO|translate}}</div>
+  </div>
+
+  <mat-autocomplete
+    #autoEl="matAutocomplete"
+    (optionSelected)="navigateToItem($event?.option?.value)"
+    autoActiveFirstOption
+  >
+    <mat-option
+      *ngFor="let item of (filteredIssueSuggestions$|async); trackBy:trackByFn"
+      [value]="item"
+    >
+      <mat-icon *ngIf="item.issueType" [svgIcon]="item.issueType|issueIcon"></mat-icon>
+      <tag *ngIf="item.ctx" [tag]="item.ctx"></tag>
+      <span>{{item?.titleHighlighted||item?.title}}</span>
+    </mat-option>
+  </mat-autocomplete>
+</form>

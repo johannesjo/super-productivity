@@ -12,6 +12,7 @@ export type KeyboardConfig = Readonly<{
   addNewTask: string | null;
   globalToggleTaskStart: string | null;
   showHelp: string | null;
+  showSearchBar: string | null;
   addNewNote: string | null;
   toggleSideNav: string | null;
   openProjectNotes: string | null;
