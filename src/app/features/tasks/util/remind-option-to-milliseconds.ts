@@ -9,19 +9,24 @@ export const remindOptionToMilliseconds = (
       return plannedAt;
     }
     case TaskReminderOptionId.m5: {
-      return plannedAt - 5 * 60 * 1000;
+      // prettier-ignore
+      return plannedAt - (5 * 60 * 1000);
     }
     case TaskReminderOptionId.m10: {
-      return plannedAt - 10 * 60 * 1000;
+      // prettier-ignore
+      return plannedAt - (10 * 60 * 1000);
     }
     case TaskReminderOptionId.m15: {
-      return plannedAt - 15 * 60 * 1000;
+      // prettier-ignore
+      return plannedAt - (15 * 60 * 1000);
     }
     case TaskReminderOptionId.m30: {
-      return plannedAt - 30 * 60 * 1000;
+      // prettier-ignore
+      return plannedAt - (30 * 60 * 1000);
     }
     case TaskReminderOptionId.h1: {
-      return plannedAt - 60 * 60 * 1000;
+      // prettier-ignore
+      return plannedAt - (60 * 60 * 1000);
     }
   }
   return undefined;

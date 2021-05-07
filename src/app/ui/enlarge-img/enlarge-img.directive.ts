@@ -162,8 +162,11 @@ export class EnlargeImgDirective {
     const zoomer = this.enlargedImgWrapperEl;
     const extra = 1.1;
     const magicSpace = 5;
-    const x = ((offsetX / zoomer.offsetWidth) * 100 - magicSpace) * -0.5 * extra;
-    const y = ((offsetY / zoomer.offsetHeight) * 100 - magicSpace) * -0.5 * extra;
+    // prettier-ignore
+    const x =((offsetX / zoomer.offsetWidth * 100) - magicSpace) * (-0.5 * extra);
+    // prettier-ignore
+    const y = ((offsetY / zoomer.offsetHeight * 100) - magicSpace) * (-0.5 * extra);
+
     this._renderer.setStyle(
       this.newImageEl as HTMLElement,
       'transform',

@@ -43,7 +43,11 @@ export const stringToMs = (strValue: string, args?: any): number => {
     h = typeof h === 'number' && !isNaN(h) ? h : 0;
     d = typeof d === 'number' && !isNaN(d) ? d : 0;
 
-    return +(s * 1000) + m * 1000 * 60 + h * 1000 * 60 * 60 + d * 1000 * 60 * 60 * 24;
+    // prettier-ignore
+    return +(s * 1000)
+      + (m * 1000 * 60)
+      + (h * 1000 * 60 * 60)
+      + (d * 1000 * 60 * 60 * 24);
   } else {
     return 0;
   }

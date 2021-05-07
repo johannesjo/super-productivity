@@ -114,7 +114,8 @@ export class GoogleApiService {
         this._saveToken({
           access_token: token,
           // TODO check if we can get a real value if existant
-          expires_at: Date.now() + 1000 * 60 * 30,
+          // prettier-ignore
+          expires_at: Date.now() + (1000 * 60 * 30),
         });
         showSuccessMsg();
       });

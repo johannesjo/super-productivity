@@ -113,7 +113,8 @@ export class DialogViewTaskRemindersComponent implements OnDestroy {
 
   snooze(task: TaskWithReminderData, snoozeInMinutes: number) {
     this._reminderService.updateReminder(task.reminderData.id, {
-      remindAt: Date.now() + snoozeInMinutes * M,
+      // prettier-ignore
+      remindAt: Date.now() + (snoozeInMinutes * M),
     });
     this._removeFromList(task.reminderId as string);
   }
@@ -152,7 +153,8 @@ export class DialogViewTaskRemindersComponent implements OnDestroy {
     this.isDisableControls = true;
     this.reminders$.getValue().forEach((reminder) => {
       this._reminderService.updateReminder(reminder.id, {
-        remindAt: Date.now() + snoozeInMinutes * M,
+        // prettier-ignore
+        remindAt: Date.now() + (snoozeInMinutes * M),
       });
     });
     this._close();

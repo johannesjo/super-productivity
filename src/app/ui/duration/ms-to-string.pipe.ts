@@ -10,8 +10,10 @@ export const msToString = (
   isHideEmptyPlaceholder?: boolean,
 ): string => {
   const hours = Math.floor(value / H);
-  const minutes = Math.floor((value - hours * H) / M);
-  const seconds = isShowSeconds ? Math.floor((value - hours * H - minutes * M) / S) : 0;
+  // prettier-ignore
+  const minutes = Math.floor((value - (hours * H)) / M);
+  // prettier-ignore
+  const seconds = isShowSeconds ? Math.floor((value - (hours * H) - (minutes * M)) / S) : 0;
 
   const parsed =
     // ((+md.days() > 0) ? (md.days() + 'd ') : '')

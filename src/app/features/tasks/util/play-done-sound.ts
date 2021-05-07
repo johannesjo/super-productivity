@@ -15,7 +15,8 @@ export const playDoneSound = (soundCfg: SoundConfig, nrOfDoneTasks: number = 0) 
   // a.play();
 
   const pitchFactor = soundCfg.isIncreaseDoneSoundPitch
-    ? PITCH_OFFSET + nrOfDoneTasks * 50
+    ? // prettier-ignore
+      PITCH_OFFSET + (nrOfDoneTasks * 50)
     : 0;
 
   const audioCtx = new ((window as any).AudioContext ||

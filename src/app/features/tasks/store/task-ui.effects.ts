@@ -121,7 +121,8 @@ export class TaskUiEffects {
           label: T.F.TASK.B.ADD_HALF_HOUR,
           fn: () =>
             this._taskService.update(ct.id, {
-              timeEstimate: ct.timeSpent + 30 * 60000,
+              // prettier-ignore
+              timeEstimate: ct.timeSpent + (30 * 60000),
             }),
         },
       });
