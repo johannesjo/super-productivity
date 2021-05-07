@@ -35,7 +35,7 @@ describe('createTimelineViewEntriesForNormalTasks()', () => {
         },
         id: 'FAKE_TASK_ID',
         isHideTime: false,
-        time: 30000000,
+        start: 30000000,
         type: 'Task',
       },
       {
@@ -48,7 +48,7 @@ describe('createTimelineViewEntriesForNormalTasks()', () => {
         },
         id: 'FAKE_TASK_ID',
         isHideTime: false,
-        time: 33600000,
+        start: 33600000,
         type: 'Task',
       },
       {
@@ -61,7 +61,7 @@ describe('createTimelineViewEntriesForNormalTasks()', () => {
         },
         id: 'FAKE_TASK_ID',
         isHideTime: false,
-        time: 35400000,
+        start: 35400000,
         type: 'Task',
       },
       {
@@ -74,7 +74,7 @@ describe('createTimelineViewEntriesForNormalTasks()', () => {
         },
         id: 'FAKE_TASK_ID',
         isHideTime: true,
-        time: 35400000,
+        start: 35400000,
         type: 'Task',
       },
       {
@@ -87,7 +87,7 @@ describe('createTimelineViewEntriesForNormalTasks()', () => {
         },
         id: 'FAKE_TASK_ID',
         isHideTime: false,
-        time: 39900000,
+        start: 39900000,
         type: 'Task',
       },
     ] as any);
@@ -110,7 +110,7 @@ describe('createTimelineViewEntriesForNormalTasks()', () => {
         },
         id: 'OTHER_TASK_ID',
         isHideTime: false,
-        time: now,
+        start: now,
         type: 'Task',
       },
     ] as any);
@@ -135,7 +135,7 @@ describe('createTimelineViewEntriesForNormalTasks()', () => {
         },
         id: 'T1',
         isHideTime: false,
-        time: now,
+        start: now,
         type: 'Task',
       },
       {
@@ -148,7 +148,7 @@ describe('createTimelineViewEntriesForNormalTasks()', () => {
         },
         id: 'T2',
         isHideTime: false,
-        time: now + hours(1),
+        start: now + hours(1),
         type: 'Task',
       },
     ] as any);

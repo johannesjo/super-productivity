@@ -5,12 +5,12 @@
         <div class="col time" [class.hasTime]="!row.isHideTime">
           <div *ngIf="!row.isHideTime">
             <div>
-              {{ row.time <= now ? (T.F.TIMELINE.NOW|translate) :
-              (row.time|roundDuration|date:'HH:mm')}}
+              {{ row.start <= now ? (T.F.TIMELINE.NOW|translate) :
+              (row.start|roundDuration|date:'HH:mm')}}
             </div>
-            <div *ngIf="row.time>= tomorrow" class="date">
-              {{ row.time <= now ? (T.F.TIMELINE.NOW|translate) :
-              (row.time|date:'shortDate')}}
+            <div *ngIf="row.start>= tomorrow" class="date">
+              {{ row.start <= now ? (T.F.TIMELINE.NOW|translate) :
+              (row.start|date:'shortDate')}}
             </div>
           </div>
         </div>
@@ -58,11 +58,11 @@
           ></timeline-custom-event>
 
           <div *ngSwitchCase="TimelineViewEntryType.WorkdayStart" class="work-start">
-            Start {{row.time|date:'d.M.'}}
+            Start {{row.start|date:'d.M.'}}
           </div>
 
           <div *ngSwitchCase="TimelineViewEntryType.WorkdayEnd" class="work-end">
-            End {{row.time|date:'d.M.'}}
+            End {{row.start|date:'d.M.'}}
           </div>
 
           <div *ngSwitchDefault>------------------</div>

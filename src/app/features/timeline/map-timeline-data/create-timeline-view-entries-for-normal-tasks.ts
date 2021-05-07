@@ -28,7 +28,7 @@ export const createTimelineViewEntriesForNormalTasks = (
     viewEntries.push({
       id: task.id,
       type: TimelineViewEntryType.Task,
-      time,
+      start: time,
       data: task,
       isHideTime: time === lastTime,
     });

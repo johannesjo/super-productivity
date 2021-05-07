@@ -54,7 +54,7 @@ export const mapToTimelineViewEntries = (
   // CLEANUP
   // -------
   viewEntries.sort((a, b) => {
-    if (a.time - b.time === 0) {
+    if (a.start - b.start === 0) {
       switch (a.type) {
         case TimelineViewEntryType.WorkdayEnd:
           return 1;
@@ -62,7 +62,7 @@ export const mapToTimelineViewEntries = (
           return -1;
       }
     }
-    return a.time - b.time;
+    return a.start - b.start;
   });
 
   // Move current always first and let it appear as now
@@ -70,7 +70,7 @@ export const mapToTimelineViewEntries = (
     const currentIndex = viewEntries.findIndex((ve) => ve.id === currentId);
     // NOTE: might not always be available here
     if (currentIndex !== -1) {
-      viewEntries[currentIndex].time = now - 600000;
+      viewEntries[currentIndex].start = now - 600000;
       viewEntries.splice(0, 0, viewEntries[currentIndex]);
       viewEntries.splice(currentIndex + 1, 1);
     } else {
@@ -129,7 +129,7 @@ const createViewEntriesForBlock = (blockedBlock: BlockedBlock): TimelineViewEntr
       const scheduledTask = entry.data;
       viewEntriesForBock.push({
         id: scheduledTask.id,
-        time: scheduledTask.plannedAt,
+        start: scheduledTask.plannedAt,
         type: TimelineViewEntryType.ScheduledTask,
         data: scheduledTask,
         isHideTime: false,
@@ -140,21 +140,21 @@ const createViewEntriesForBlock = (blockedBlock: BlockedBlock): TimelineViewEntr
       const workdayCfg = entry.data;
       viewEntriesForBock.push({
         id: 'DAY_END_' + entry.start,
-        time: entry.start,
+        start: entry.start,
         type: TimelineViewEntryType.WorkdayEnd,
         data: workdayCfg,
         isHideTime: true,
       });
       viewEntriesForBock.push({
         id: 'DAY_START_' + entry.end,
-        time: entry.end,
+        start: entry.end,
         type: TimelineViewEntryType.WorkdayStart,
         data: workdayCfg,
         isHideTime: true,
       });
     }
   });
-  viewEntriesForBock.sort((a, b) => a.time - b.time);
+  viewEntriesForBock.sort((a, b) => a.start - b.start);
 
   return viewEntriesForBock;
 };
@@ -172,7 +172,7 @@ const insertBlockedBlocksViewEntries = (
   console.log(
     viewEntries.map((viewEntry) => ({
       viewEntry,
-      timeD: moment(viewEntry.time).format('H:mm'),
+      timeD: moment(viewEntry.start).format('H:mm'),
       durationH: getTimeLeftForTask(viewEntry.data as any) / 60000 / 60,
     })),
   );
@@ -187,7 +187,7 @@ const insertBlockedBlocksViewEntries = (
     if (blockedBlock.start <= now) {
       const timeToGoForBlock = blockedBlock.end - now;
       viewEntriesForUnScheduled.forEach((viewEntry) => {
-        viewEntry.time = viewEntry.time + timeToGoForBlock;
+        viewEntry.start = viewEntry.start + timeToGoForBlock;
       });
 
       // add entries
@@ -199,8 +199,8 @@ const insertBlockedBlocksViewEntries = (
       | TimelineViewEntry
       | undefined = viewEntriesForUnScheduled.find(
       (viewEntry) =>
-        viewEntry.time !== 0 &&
-        viewEntry.time + getTimeLeftForTask(viewEntry.data as TaskWithoutReminder) >=
+        viewEntry.start !== 0 &&
+        viewEntry.start + getTimeLeftForTask(viewEntry.data as TaskWithoutReminder) >=
           blockedBlock.start,
     );
     // console.log(blockedBlock.start);
@@ -214,7 +214,7 @@ const insertBlockedBlocksViewEntries = (
       const timeLeftForCompleteSplitTask = getTimeLeftForTask(splitTask);
 
       const timePlannedForSplitTaskBefore =
-        blockedBlock.start - viewEntryForSplitTask.time;
+        blockedBlock.start - viewEntryForSplitTask.start;
       const timePlannedForSplitTaskContinued =
         viewEntryForSplitTask.type === TimelineViewEntryType.SplitTaskContinuedLast
           ? timeLeftForCompleteSplitTask
@@ -237,7 +237,7 @@ const insertBlockedBlocksViewEntries = (
       const splitIndex = splitInstances.length;
       const splitContinuedEntry: TimelineViewEntry = {
         id: `${splitTask.id}__${splitIndex}`,
-        time: blockedBlock.end,
+        start: blockedBlock.end,
         type: TimelineViewEntryType.SplitTaskContinuedLast,
         data: {
           title: (splitTask as TaskWithoutReminder).title,
@@ -254,8 +254,8 @@ const insertBlockedBlocksViewEntries = (
     if (viewEntryForSplitTask) {
       const blockedBlockDuration = blockedBlock.end - blockedBlock.start;
       viewEntriesForUnScheduled.forEach((viewEntry) => {
-        if (viewEntry.time > blockedBlock.start && viewEntry !== viewEntryForSplitTask) {
-          viewEntry.time = viewEntry.time + blockedBlockDuration;
+        if (viewEntry.start > blockedBlock.start && viewEntry !== viewEntryForSplitTask) {
+          viewEntry.start = viewEntry.start + blockedBlockDuration;
         }
       });
     }

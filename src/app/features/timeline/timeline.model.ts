@@ -21,7 +21,7 @@ export enum TimelineViewEntryType {
 interface TimelineViewEntryBase {
   id: string;
   type: TimelineViewEntryType;
-  time: number;
+  start: number;
   isHideTime: boolean;
 }
 
