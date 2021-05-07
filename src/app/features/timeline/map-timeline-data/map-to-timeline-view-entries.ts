@@ -79,10 +79,12 @@ export const mapToTimelineViewEntries = (
     }
   }
 
+  // filter out first entry if dayEnd
   if (viewEntries[0]?.type === TimelineViewEntryType.WorkdayEnd) {
     viewEntries.splice(0, 1);
   }
 
+  // remove dayStartEnd entries if last
   let isWorkdayTypeLast = true;
   while (isWorkdayTypeLast) {
     const last = viewEntries[viewEntries.length - 1];
@@ -100,7 +102,7 @@ export const mapToTimelineViewEntries = (
     }
   }
 
-  // filter out double entries for start/end
+  // filter out excess entries for start/end
   const cleanedUpExcessWorkDays = viewEntries.filter((viewEntry, index, arr) => {
     if (index > 0) {
       const prev = arr[index - 1];
