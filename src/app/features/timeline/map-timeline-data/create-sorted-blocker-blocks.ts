@@ -12,6 +12,9 @@ export const createSortedBlockerBlocks = (
   workStartEndCfg?: TimelineWorkStartEndCfg,
   now?: number,
 ): BlockedBlock[] => {
+  if (typeof now !== 'number') {
+    throw new Error('No valid now given');
+  }
   let blockedBlocks: BlockedBlock[] = [
     ...createBlockerBlocksForScheduledTasks(scheduledTasks),
     ...createBlockerBlocksForWorkStartEnd(now as number, workStartEndCfg),
@@ -19,6 +22,14 @@ export const createSortedBlockerBlocks = (
 
   blockedBlocks = mergeBlocksRecursively(blockedBlocks);
   blockedBlocks.sort((a, b) => a.start - b.start);
+  // console.log(
+  //   blockedBlocks.map(({ start, end }) => ({
+  //     // start,
+  //     // end,
+  //     s: new Date(start),
+  //     e: new Date(end),
+  //   })),
+  // );
   return blockedBlocks;
 };
 
@@ -104,9 +115,11 @@ const createBlockerBlocksForScheduledTasks = (scheduledTasks: TaskWithReminder[]
   return blockedBlocks;
 };
 
+// NOTE: we recursively merge all overlapping blocks
+// TODO find more effective algorithm
 const mergeBlocksRecursively = (blockedBlocks: BlockedBlock[]): BlockedBlock[] => {
   for (const blockedBlock of blockedBlocks) {
-    // let wasMergedInner = false;
+    let wasMergedInner = false;
     for (const blockedBlockInner of blockedBlocks) {
       if (
         blockedBlockInner !== blockedBlock &&
@@ -115,15 +128,14 @@ const mergeBlocksRecursively = (blockedBlocks: BlockedBlock[]): BlockedBlock[] =
         blockedBlock.start = Math.min(blockedBlockInner.start, blockedBlock.start);
         blockedBlock.end = Math.max(blockedBlockInner.end, blockedBlock.end);
         blockedBlock.entries = blockedBlock.entries.concat(blockedBlockInner.entries);
-        // blockedBlock.entries = [...blockedBlock.entries, ...blockedBlockInner.entries];
         blockedBlocks.splice(blockedBlocks.indexOf(blockedBlockInner), 1);
-        // wasMergedInner = true;
+        wasMergedInner = true;
         break;
       }
     }
-    // if (wasMergedInner) {
-    //   break;
-    // }
+    if (wasMergedInner) {
+      return mergeBlocksRecursively(blockedBlocks);
+    }
   }
   return blockedBlocks;
 };
