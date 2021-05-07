@@ -39,13 +39,15 @@ export class TimelineComponent {
     this._taskService.allScheduledWithReminder$,
     this._taskService.currentTaskId$,
   ]).pipe(
+    // map(([startableTasks, scheduledTasks, currentId]) =>
+    //   mapToTimelineViewEntries(startableTasks, scheduledTasks, currentId, undefined),
+    // ),
     map(([startableTasks, scheduledTasks, currentId]) =>
-      mapToTimelineViewEntries(startableTasks, scheduledTasks, currentId, undefined),
+      mapToTimelineViewEntries(startableTasks, scheduledTasks, currentId, {
+        startTime: '9:00',
+        endTime: '17:00',
+      }),
     ),
-    // map(([tasks, currentId]) => mapToTimelineViewEntries(tasks, currentId, {
-    //   startTime: '9:00',
-    //   endTime: '17:00',
-    // })),
     // NOTE: this doesn't require cd.detect changes because view is already re-checked with obs
     tap(() => (this.now = Date.now())),
   );

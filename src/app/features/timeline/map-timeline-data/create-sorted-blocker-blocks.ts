@@ -31,7 +31,7 @@ const createBlockerBlocksForWorkStartEnd = (
   if (!workStartEndCfg) {
     return blockedBlocks;
   }
-  const daysAmount = 2;
+  const daysAmount = 8;
   let i: number = 0;
   while (i < daysAmount) {
     const start = getDateTimeFromClockString(

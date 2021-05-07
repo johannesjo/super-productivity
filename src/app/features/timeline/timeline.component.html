@@ -8,7 +8,7 @@
               {{ row.time <= now ? (T.F.TIMELINE.NOW|translate) :
               (row.time|roundDuration|date:'HH:mm')}}
             </div>
-            <div *ngIf="row.time>= tomorrow" class="date">
+            <div *ngIf="!row.isHideDate && row.time>= tomorrow" class="date">
               {{ row.time <= now ? (T.F.TIMELINE.NOW|translate) :
               (row.time|date:'shortDate')}}
             </div>
@@ -58,11 +58,11 @@
           ></timeline-custom-event>
 
           <div *ngSwitchCase="TimelineViewEntryType.WorkdayStart" class="work-start">
-            {{row.time|date:'shortTime'}} start ({{row.time|date:'shortDate'}})
+            Start {{row.time|date:'d.M.'}}
           </div>
 
           <div *ngSwitchCase="TimelineViewEntryType.WorkdayEnd" class="work-end">
-            {{row.time|date:'shortTime'}} end ({{row.time|date:'shortDate'}})
+            End {{row.time|date:'d.M.'}}
           </div>
 
           <div *ngSwitchDefault>------------------</div>
