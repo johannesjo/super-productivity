@@ -31,16 +31,18 @@ const createBlockerBlocksForWorkStartEnd = (
   if (!workStartEndCfg) {
     return blockedBlocks;
   }
-  const daysAmount = 8;
+  const daysAmount = 30;
   let i: number = 0;
   while (i < daysAmount) {
     const start = getDateTimeFromClockString(
       workStartEndCfg.endTime,
-      now + i * 24 * 60 * 60 * 1000,
+      // prettier-ignore
+      now + (i * 24 * 60 * 60 * 1000),
     );
     const end = getDateTimeFromClockString(
       workStartEndCfg.startTime,
-      now + (i + 1) * 24 * 60 * 60 * 1000,
+      // prettier-ignore
+      now + ((i + 1) * 24 * 60 * 60 * 1000),
     );
     blockedBlocks.push({
       start,

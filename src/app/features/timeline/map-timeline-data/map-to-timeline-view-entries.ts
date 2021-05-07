@@ -101,7 +101,23 @@ export const mapToTimelineViewEntries = (
   }
 
   // console.log('mapToViewEntriesE', viewEntries, {asString: JSON.stringify(viewEntries)});
-  return viewEntries;
+  // filter out double entries for start/end
+  return viewEntries.filter((viewEntry, index, arr) => {
+    if (index > 0) {
+      const prev = arr[index - 1];
+      const next = arr[index + 2];
+      if (
+        (prev.type === TimelineViewEntryType.WorkdayStart &&
+          viewEntry.type === TimelineViewEntryType.WorkdayEnd) ||
+        (next &&
+          next.type === TimelineViewEntryType.WorkdayStart &&
+          viewEntry.type === TimelineViewEntryType.WorkdayStart)
+      ) {
+        return false;
+      }
+    }
+    return true;
+  });
 };
 
 const createViewEntriesForBlock = (blockedBlock: BlockedBlock): TimelineViewEntry[] => {
