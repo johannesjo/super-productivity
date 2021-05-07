@@ -14,10 +14,10 @@
   border-bottom: 1px solid transparent;
 
   @include lightTheme() {
-    border-color: rgba(0, 0, 0, .15);
+    border-color: rgba(0, 0, 0, 0.15);
   }
   @include darkTheme() {
-    border-color: rgba(255, 255, 255, .15);
+    border-color: rgba(255, 255, 255, 0.15);
   }
 
   &.isNotScrolled {
@@ -56,6 +56,10 @@ add-task-bar {
   z-index: $z-add-task-bar;
 }
 
+search-bar {
+  z-index: $z-search-bar;
+}
+
 main-header {
   position: relative;
   z-index: $z-main-header;
@@ -65,7 +69,6 @@ bookmark-bar {
   position: relative;
   z-index: $z-bookmarks;
 }
-
 
 .additional-info-panel {
   min-width: 300px;
@@ -84,7 +87,6 @@ bookmark-bar {
   }
 }
 
-
 // SIDENAV
 // -------
 :host ::ng-deep .mat-drawer-content {
@@ -101,7 +103,6 @@ mat-sidenav,
 mat-sidenav-container {
   height: 100%;
 }
-
 
 // sidebars
 mat-sidenav ::ng-deep .mat-drawer-inner-container {

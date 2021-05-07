@@ -6,26 +6,26 @@ export const blendInOutAnimation = [
     transition(':enter', [
       style({
         opacity: 0,
-        transform: 'scaleY(0) translateX(-50%)',
+        transform: 'scaleY(0)',
       }),
       animate(
         ANI_STANDARD_TIMING,
         style({
           opacity: 1,
-          transform: 'scaleY(1) translateX(-50%)',
+          transform: 'scaleY(1)',
         }),
       ),
     ]), // void => *
     transition(':leave', [
       style({
         opacity: 1,
-        transform: 'scaleY(1) translateX(-50%)',
+        transform: 'scaleY(1)',
       }),
       animate(
         ANI_STANDARD_TIMING,
         style({
           opacity: 0,
-          transform: 'scaleY(0) translateX(-50%)',
+          transform: 'scaleY(0)',
         }),
       ),
     ]),

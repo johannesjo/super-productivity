@@ -41,6 +41,15 @@
 
   <nav class="action-nav">
     <button
+      (click)="layoutService.showSearchBar()"
+      [matTooltip]="T.MH.SHOW_SEARCH_BAR|translate"
+      class="hide-xs"
+      mat-icon-button
+    >
+      <mat-icon>search</mat-icon>
+    </button>
+
+    <button
       (click)="layoutService.showAddTaskBar()"
       [matTooltip]="T.MH.ADD_NEW_TASK|translate"
       class="hide-xs"

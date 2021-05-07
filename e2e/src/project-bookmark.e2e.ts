@@ -1,6 +1,6 @@
 import { NBrowser } from '../n-browser-interface';
 
-const TOGGLE_BOOKMARK_BAR_BTN = '.action-nav button:nth-child(2)';
+const TOGGLE_BOOKMARK_BAR_BTN = '.action-nav button:nth-child(3)';
 const BOOKMARK_BAR_OPTS_BTN = 'bookmark-bar .list-controls button:first-of-type';
 const ADD_BOOKMARK_BTN = '.mat-menu-panel .mat-menu-item:first-of-type';
 

@@ -1,0 +1,191 @@
+@import '../../../variables';
+
+:host {
+  display: block;
+  //overflow: hidden;
+  text-align: start;
+
+  &.global {
+    position: fixed;
+    top: $s;
+    left: $s;
+    right: $s;
+    overflow: visible;
+    transform-origin: left top;
+
+    @include mq(xs, max) {
+      transform: translateX(0) !important;
+    }
+
+    @include mq(xs) {
+      margin-top: 20px;
+      max-width: 632px;
+      width: 80%;
+      top: $s * 6;
+      left: 50%;
+      right: auto;
+      transform: translateX(-50%);
+    }
+  }
+}
+
+:host-context(.isTouchOnly).global {
+  top: auto;
+  bottom: $s;
+}
+
+$short-syntax-bar-height: 28px;
+.search-form {
+  width: 100%;
+  position: relative;
+  color: #000000;
+  border-radius: $card-border-radius;
+  overflow: hidden;
+
+  @include darkTheme {
+    color: #eeeeee;
+  }
+
+  .input-wrapper {
+    position: relative;
+  }
+
+  input {
+    padding-bottom: $short-syntax-bar-height;
+
+    display: block;
+    width: 100%;
+    font-size: 16px;
+    box-sizing: border-box;
+    border-style: solid;
+    border-width: 0;
+    outline: 0;
+    border-color: $c-primary;
+
+    padding-right: 48px !important;
+    padding-left: 48px !important;
+    line-height: 42px;
+
+    color: #000000;
+    background: #ffffff;
+  }
+
+  input {
+    @include darkTheme {
+      background-color: $dark-theme-bg-lighter;
+      color: $dark-theme-text-color-most-intense;
+    }
+  }
+
+  &.isElevated input {
+    @include darkTheme {
+      background-color: $dark-theme-bg-lightest;
+      color: $dark-theme-text-color-most-intense;
+    }
+  }
+}
+
+.spinner {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 2;
+}
+
+.is-loading {
+  padding: $s;
+
+  ::ng-deep .mat-option-text {
+    display: flex;
+    justify-content: center;
+  }
+}
+
+.switch-add-to-btn {
+  position: absolute;
+  left: $s;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 2;
+  opacity: 0.4;
+  margin-top: -0.5 * $short-syntax-bar-height;
+
+  &:hover {
+    opacity: 1;
+  }
+}
+
+.close-btn {
+  position: absolute;
+  right: $s/2;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 2;
+  opacity: 0.4;
+  margin-top: -0.5 * $short-syntax-bar-height;
+
+  &:hover {
+    opacity: 1;
+  }
+
+  @include mq(xs) {
+  }
+}
+
+.info-bar {
+  padding: 0 1.75 * $s;
+  height: $short-syntax-bar-height;
+  line-height: $short-syntax-bar-height;
+  margin-top: -1 * $short-syntax-bar-height;
+  color: $light-theme-text-color-muted;
+  background: #ffffff;
+  border-top: 1px dashed $light-theme-extra-border-color;
+  position: relative;
+  z-index: 1;
+  //border-bottom-left-radius: $card-border-radius;
+  //border-bottom-right-radius: $card-border-radius;
+  pointer-events: none;
+
+  @include darkTheme {
+    background-color: $dark-theme-bg-lightest;
+    border-color: $dark-theme-extra-border-color;
+    color: $dark-theme-text-color-muted;
+  }
+}
+
+.info-text {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.shake-form {
+  animation: shake 0.82s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+  transform: translate3d(0, 0, 0);
+  backface-visibility: hidden;
+  perspective: 1000px;
+}
+
+@keyframes shake {
+  10%,
+  90% {
+    transform: translate3d(-1px, 0, 0);
+  }
+
+  20%,
+  80% {
+    transform: translate3d(2px, 0, 0);
+  }
+
+  30%,
+  50%,
+  70% {
+    transform: translate3d(-4px, 0, 0);
+  }
+
+  40%,
+  60% {
+    transform: translate3d(4px, 0, 0);
+  }
+}

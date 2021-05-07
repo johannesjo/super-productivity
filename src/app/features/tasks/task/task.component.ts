@@ -44,6 +44,7 @@ import { DialogEditTagsForTaskComponent } from '../../tag/dialog-edit-tags/dialo
 import { WorkContextService } from '../../work-context/work-context.service';
 import { environment } from '../../../../environments/environment';
 import { throttle } from 'helpful-decorators';
+import { ActivatedRoute } from '@angular/router';
 
 @Component({
   selector: 'task',
@@ -136,6 +137,7 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
     private readonly _cd: ChangeDetectorRef,
     private readonly _projectService: ProjectService,
     public readonly workContextService: WorkContextService,
+    private _route: ActivatedRoute,
     @Attribute('showParentTitle') private showParentTitle: string,
   ) {}
 
@@ -219,6 +221,14 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
     if (this.task.parentId && Date.now() - 100 < this.task.created) {
       setTimeout(() => {
         this.focusTitleForEdit();
+      });
+    } else {
+      this._route.queryParams.subscribe((params) => {
+        window.setTimeout(() => {
+          if (params.highlightItem === this.task.id) {
+            this.focusSelfElement();
+          }
+        }, 200);
       });
     }
   }

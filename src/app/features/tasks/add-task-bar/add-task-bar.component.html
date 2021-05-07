@@ -1,5 +1,6 @@
 <form
   (submit)="addTask()"
+  @blendInOut
   [class.isElevated]="isElevated"
   [class.mat-elevation-z3]="!isElevated"
   [class.mat-elevation-z4]="isElevated"

@@ -9,7 +9,6 @@ import {
 import { ChromeExtensionInterfaceService } from './core/chrome-extension-interface/chrome-extension-interface.service';
 import { ShortcutService } from './core-ui/shortcut/shortcut.service';
 import { GlobalConfigService } from './features/config/global-config.service';
-import { blendInOutAnimation } from './ui/animations/blend-in-out.ani';
 import { LayoutService } from './core-ui/layout/layout.service';
 import { IPC } from '../../electron/ipc-events.const';
 import { SnackService } from './core/snack/snack.service';
@@ -49,7 +48,7 @@ const productivityTip: string[] = w.productivityTips && w.productivityTips[w.ran
   selector: 'app-root',
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss'],
-  animations: [blendInOutAnimation, expandAnimation, warpRouteAnimation, fadeAnimation],
+  animations: [expandAnimation, warpRouteAnimation, fadeAnimation],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AppComponent implements OnDestroy {

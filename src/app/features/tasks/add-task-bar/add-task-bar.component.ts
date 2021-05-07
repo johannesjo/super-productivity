@@ -40,6 +40,7 @@ import { Tag } from '../../tag/tag.model';
 import { Project } from '../../project/project.model';
 import { shortSyntaxToTags } from './short-syntax-to-tags.util';
 import { slideAnimation } from '../../../ui/animations/slide.ani';
+import { blendInOutAnimation } from 'src/app/ui/animations/blend-in-out.ani';
 import { fadeAnimation } from '../../../ui/animations/fade.ani';
 import { SS_TODO_TMP } from '../../../core/persistence/ls-keys.const';
 
@@ -48,7 +49,7 @@ import { SS_TODO_TMP } from '../../../core/persistence/ls-keys.const';
   templateUrl: './add-task-bar.component.html',
   styleUrls: ['./add-task-bar.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  animations: [slideAnimation, fadeAnimation],
+  animations: [blendInOutAnimation, slideAnimation, fadeAnimation],
 })
 export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
   @Input() isAddToBacklog: boolean = false;

@@ -2,9 +2,12 @@ import { Injectable } from '@angular/core';
 import {
   hideAddTaskBar,
   hideNotes,
+  hideSearchBar,
   hideSideNav,
   showAddTaskBar,
+  showSearchBar,
   toggleAddTaskBar,
+  toggleSearchBar,
   toggleShowNotes,
   toggleSideNav,
 } from './store/layout.actions';
@@ -13,6 +16,7 @@ import { select, Store } from '@ngrx/store';
 import {
   LayoutState,
   selectIsShowAddTaskBar,
+  selectIsShowSearchBar,
   selectIsShowSideNav,
 } from './store/layout.reducer';
 import { filter, map, switchMap, withLatestFrom } from 'rxjs/operators';
@@ -35,6 +39,9 @@ export class LayoutService {
 
   isShowAddTaskBar$: Observable<boolean> = this._store$.pipe(
     select(selectIsShowAddTaskBar),
+  );
+  isShowSearchBar$: Observable<boolean> = this._store$.pipe(
+    select(selectIsShowSearchBar),
   );
   isNavAlwaysVisible$: Observable<boolean> = this._breakPointObserver
     .observe([`(min-width: ${NAV_ALWAYS_VISIBLE}px)`])
@@ -100,6 +107,18 @@ export class LayoutService {
 
   toggleAddTaskBar() {
     this._store$.dispatch(toggleAddTaskBar());
+  }
+
+  showSearchBar() {
+    this._store$.dispatch(showSearchBar());
+  }
+
+  hideSearchBar() {
+    this._store$.dispatch(hideSearchBar());
+  }
+
+  toggleSearchBar() {
+    this._store$.dispatch(toggleSearchBar());
   }
 
   toggleSideNav() {
