@@ -11,7 +11,6 @@ import { ANI_FAST_TIMING } from '../../../ui/animations/animation.const';
 
 const ANI = [
   query(':enter', style({ opacity: 0, width: 0 }), { optional: true }),
-
   query(
     ':enter',
     stagger('40ms', [
@@ -26,7 +25,6 @@ const ANI = [
     ]),
     { optional: true },
   ),
-
   query(
     ':leave',
     stagger('-40ms', [

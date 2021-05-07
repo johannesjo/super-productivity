@@ -1,6 +1,9 @@
 /* eslint-disable max-len */
 import { ConfigFormSection } from '../global-config.model';
-import { SimpleCounterConfig, SimpleCounterType, } from '../../simple-counter/simple-counter.model';
+import {
+  SimpleCounterConfig,
+  SimpleCounterType,
+} from '../../simple-counter/simple-counter.model';
 import { T } from '../../../t.const';
 import { SIMPLE_COUNTER_TRIGGER_ACTIONS } from '../../simple-counter/simple-counter.const';
 

@@ -71,7 +71,6 @@ const _migrateMiscToSeparateKeys = (config: GlobalConfigState): GlobalConfigStat
     'isTakeABreakEnabled',
     'takeABreakMessage',
     'takeABreakMinWorkingTime',
-
     'isOnlyOpenIdleWhenCurrentTask',
     'isEnableIdleTimeTracking',
     'minIdleTime',

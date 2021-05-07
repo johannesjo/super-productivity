@@ -19,7 +19,6 @@ import { DialogGetAndEnterAuthCodeComponent } from './dialog-get-and-enter-auth-
     ConfigModule,
     EffectsModule.forFeature([SyncEffects]),
     CommonModule,
-
     DropboxModule,
     GoogleModule,
     WebDavModule,

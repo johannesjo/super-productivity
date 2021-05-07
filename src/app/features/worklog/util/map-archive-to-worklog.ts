@@ -3,7 +3,13 @@ import { Task } from '../../tasks/task.model';
 import { getWeeksInMonth } from '../../../util/get-weeks-in-month';
 import { getWeekNumber } from '../../../util/get-week-number';
 import * as moment from 'moment';
-import { Worklog, WorklogDay, WorklogMonth, WorklogWeek, WorklogYear, } from '../worklog.model';
+import {
+  Worklog,
+  WorklogDay,
+  WorklogMonth,
+  WorklogWeek,
+  WorklogYear,
+} from '../worklog.model';
 import { getWorklogStr } from '../../../util/get-work-log-str';
 import { WorkStartEnd } from '../../work-context/work-context.model';
 

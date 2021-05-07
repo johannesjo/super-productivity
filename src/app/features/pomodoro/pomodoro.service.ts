@@ -21,7 +21,11 @@ import {
   StartPomodoro,
   StopPomodoro,
 } from './store/pomodoro.actions';
-import { selectCurrentCycle, selectIsBreak, selectIsManualPause, } from './store/pomodoro.reducer';
+import {
+  selectCurrentCycle,
+  selectIsBreak,
+  selectIsManualPause,
+} from './store/pomodoro.reducer';
 import { DEFAULT_GLOBAL_CONFIG } from '../config/default-global-config.const';
 import { Actions, ofType } from '@ngrx/effects';
 import { distinctUntilChangedObject } from '../../util/distinct-until-changed-object';

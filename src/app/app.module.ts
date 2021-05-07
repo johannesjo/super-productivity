@@ -1,4 +1,8 @@
-import { BrowserModule, HAMMER_GESTURE_CONFIG, HammerModule, } from '@angular/platform-browser';
+import {
+  BrowserModule,
+  HAMMER_GESTURE_CONFIG,
+  HammerModule,
+} from '@angular/platform-browser';
 import { ErrorHandler, NgModule } from '@angular/core';
 import { AppComponent } from './app.component';
 import { ServiceWorkerModule } from '@angular/service-worker';
