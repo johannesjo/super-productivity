@@ -150,11 +150,14 @@
   font-size: 13px;
 }
 
-$split-border-radius: 28px;
+$sb-radius: 28px;
+$sb-radius-small: 4px;
 
-.split-task::ng-deep .box {
-  border-top-left-radius: $split-border-radius !important;
-  border-top-right-radius: $split-border-radius !important;
+task.split-task::ng-deep .box {
+  border-top-left-radius: $sb-radius !important;
+  border-top-right-radius: $sb-radius !important;
+  border-bottom-left-radius: $sb-radius-small;
+  border-bottom-right-radius: $sb-radius-small;
 }
 
 .task-continued {
@@ -162,16 +165,13 @@ $split-border-radius: 28px;
   padding-left: 56px;
   padding-top: $s;
   padding-bottom: $s;
-  border-radius: $task-border-radius;
-  border-bottom-left-radius: $split-border-radius;
-  border-top-right-radius: $split-border-radius;
+  border-radius: $sb-radius-small $sb-radius $sb-radius-small $sb-radius;
 
   display: flex;
   position: relative;
 
   &.last {
-    border-top-right-radius: $task-border-radius;
-    border-bottom-right-radius: $split-border-radius;
+    border-radius: $sb-radius-small $sb-radius-small $sb-radius $sb-radius;
   }
 
   @include lightTheme {
