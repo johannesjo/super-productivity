@@ -18,21 +18,21 @@ describe('mapToViewEntries()', () => {
   describe('basic', () => {
     it('should work for simple task list', () => {
       const now = 33;
-      const fakeTasks = [{ ...FAKE_TASK, timeEstimate: 5000 }, { ...FAKE_TASK }];
-      const r = mapToTimelineViewEntries(fakeTasks, null, undefined, now);
+      const nonScheduledTasks = [{ ...FAKE_TASK, timeEstimate: 5000 }, { ...FAKE_TASK }];
+      const r = mapToTimelineViewEntries(nonScheduledTasks, [], null, undefined, now);
       expect(r).toEqual([
         {
-          id: fakeTasks[0].id,
+          id: nonScheduledTasks[0].id,
           type: TimelineViewEntryType.Task,
           time: now,
-          data: fakeTasks[0],
+          data: nonScheduledTasks[0],
           isHideTime: false,
         },
         {
-          id: fakeTasks[1].id,
+          id: nonScheduledTasks[1].id,
           type: TimelineViewEntryType.Task,
           time: 5033,
-          data: fakeTasks[1],
+          data: nonScheduledTasks[1],
           isHideTime: false,
         },
       ]);
@@ -40,7 +40,7 @@ describe('mapToViewEntries()', () => {
 
     it('should work for simple task list 2', () => {
       const now = getDateTimeFromClockString('7:23', 0);
-      const fakeTasks = [
+      const nonScheduledTasks = [
         { ...FAKE_TASK, timeEstimate: hours(1) },
         { ...FAKE_TASK, timeEstimate: hours(1) },
         { ...FAKE_TASK, timeEstimate: hours(1), timeSpent: hours(0.5) },
@@ -48,48 +48,48 @@ describe('mapToViewEntries()', () => {
         { ...FAKE_TASK, timeEstimate: hours(1.5), timeSpent: hours(0.25) },
         { ...FAKE_TASK },
       ];
-      const r = mapToTimelineViewEntries(fakeTasks, null, undefined, now);
+      const r = mapToTimelineViewEntries(nonScheduledTasks, [], null, undefined, now);
       expect(r).toEqual([
         {
           id: FID,
           type: TimelineViewEntryType.Task,
           time: now,
-          data: fakeTasks[0],
+          data: nonScheduledTasks[0],
           isHideTime: false,
         },
         {
           id: FID,
           type: TimelineViewEntryType.Task,
           time: now + hours(1),
-          data: fakeTasks[1],
+          data: nonScheduledTasks[1],
           isHideTime: false,
         },
         {
           id: FID,
           type: TimelineViewEntryType.Task,
           time: now + hours(2),
-          data: fakeTasks[2],
+          data: nonScheduledTasks[2],
           isHideTime: false,
         },
         {
           id: FID,
           type: TimelineViewEntryType.Task,
           time: now + hours(2.5),
-          data: fakeTasks[3],
+          data: nonScheduledTasks[3],
           isHideTime: false,
         },
         {
           id: FID,
           type: TimelineViewEntryType.Task,
           time: now + hours(2.5),
-          data: fakeTasks[4],
+          data: nonScheduledTasks[4],
           isHideTime: true,
         },
         {
           id: FID,
           type: TimelineViewEntryType.Task,
           time: now + hours(3.75),
-          data: fakeTasks[5],
+          data: nonScheduledTasks[5],
           isHideTime: false,
         },
       ]);
@@ -97,7 +97,7 @@ describe('mapToViewEntries()', () => {
 
     it('should work for simple task list 3', () => {
       const now = getDateTimeFromClockString('7:23', 0);
-      const fakeTasks = [
+      const nonScheduledTasks = [
         { ...FAKE_TASK, timeEstimate: 5000 },
         { ...FAKE_TASK, timeEstimate: 8000 },
         { ...FAKE_TASK, timeEstimate: 5000, timeSpent: 5000 },
@@ -105,48 +105,48 @@ describe('mapToViewEntries()', () => {
         { ...FAKE_TASK, timeEstimate: 3000, timeSpent: 1000 },
         { ...FAKE_TASK },
       ];
-      const r = mapToTimelineViewEntries(fakeTasks, null, undefined, now);
+      const r = mapToTimelineViewEntries(nonScheduledTasks, [], null, undefined, now);
       expect(r).toEqual([
         {
           id: FID,
           type: TimelineViewEntryType.Task,
           time: now,
-          data: fakeTasks[0],
+          data: nonScheduledTasks[0],
           isHideTime: false,
         },
         {
           id: FID,
           type: TimelineViewEntryType.Task,
           time: now + 5000,
-          data: fakeTasks[1],
+          data: nonScheduledTasks[1],
           isHideTime: false,
         },
         {
           id: FID,
           type: TimelineViewEntryType.Task,
           time: now + 13000,
-          data: fakeTasks[2],
+          data: nonScheduledTasks[2],
           isHideTime: false,
         },
         {
           id: FID,
           type: TimelineViewEntryType.Task,
           time: now + 13000,
-          data: fakeTasks[3],
+          data: nonScheduledTasks[3],
           isHideTime: true,
         },
         {
           id: FID,
           type: TimelineViewEntryType.Task,
           time: now + 13000,
-          data: fakeTasks[4],
+          data: nonScheduledTasks[4],
           isHideTime: true,
         },
         {
           id: FID,
           type: TimelineViewEntryType.Task,
           time: now + 15000,
-          data: fakeTasks[5],
+          data: nonScheduledTasks[5],
           isHideTime: false,
         },
       ]);
@@ -155,24 +155,24 @@ describe('mapToViewEntries()', () => {
     it('should work for simple task list 4', () => {
       // const now = getDateTimeFromClockString('7:23', 0);
       const now = 1619983090852;
-      const fakeTasks = [
+      const nonScheduledTasks = [
         { ...FAKE_TASK, timeSpent: 21014, timeEstimate: 900000 },
         { ...FAKE_TASK, timeEstimate: 1800000, timeSpent: 148998 },
       ];
-      const r = mapToTimelineViewEntries(fakeTasks, null, undefined, now);
+      const r = mapToTimelineViewEntries(nonScheduledTasks, [], null, undefined, now);
       expect(r).toEqual([
         {
           id: FID,
           type: TimelineViewEntryType.Task,
           time: now,
-          data: fakeTasks[0],
+          data: nonScheduledTasks[0],
           isHideTime: false,
         },
         {
           id: FID,
           type: TimelineViewEntryType.Task,
           time: 1619983969838,
-          data: fakeTasks[1],
+          data: nonScheduledTasks[1],
           isHideTime: false,
         },
       ]);
@@ -180,11 +180,26 @@ describe('mapToViewEntries()', () => {
   });
 
   describe('scheduledTasks', () => {
+    it('should filter out scheduled tasks from normal tasks', () => {
+      const now = getDateTimeFromClockString('9:20', 0);
+      const nonScheduledTasks = [
+        { ...FAKE_TASK, timeEstimate: hours(1) },
+        {
+          ...FAKE_TASK,
+          id: 'S_ID',
+          timeEstimate: hours(1),
+          reminderId: 'R:ID',
+          plannedAt: getDateTimeFromClockString('10:25', 0),
+        },
+      ];
+      const r = mapToTimelineViewEntries(nonScheduledTasks, [], null, undefined, now);
+      expect(r.length).toBe(1);
+    });
+
     it('should split tasks as required', () => {
       const now = getDateTimeFromClockString('9:20', 0);
       const plannedTaskStartTime = getDateTimeFromClockString('10:25', 0);
-      const fakeTasks = [
-        { ...FAKE_TASK, timeEstimate: hours(1) },
+      const scheduledTasks = [
         {
           ...FAKE_TASK,
           id: 'S_ID',
@@ -192,32 +207,41 @@ describe('mapToViewEntries()', () => {
           reminderId: 'R:ID',
           plannedAt: plannedTaskStartTime,
         },
+      ];
+      const nonScheduledTasks = [
+        { ...FAKE_TASK, timeEstimate: hours(1) },
         { ...FAKE_TASK, timeEstimate: hours(1), timeSpent: hours(0.5) },
         { ...FAKE_TASK },
         { ...FAKE_TASK, timeEstimate: hours(1.5), timeSpent: hours(0.25) },
         { ...FAKE_TASK },
       ];
-      const r = mapToTimelineViewEntries(fakeTasks, null, undefined, now);
+      const r = mapToTimelineViewEntries(
+        nonScheduledTasks,
+        scheduledTasks,
+        null,
+        undefined,
+        now,
+      );
       expect(r).toEqual([
         {
           id: FID,
           type: TimelineViewEntryType.Task,
           time: now,
-          data: fakeTasks[0],
+          data: nonScheduledTasks[0],
           isHideTime: false,
         },
         {
           id: FID,
           type: TimelineViewEntryType.SplitTask,
           time: now + hours(1),
-          data: fakeTasks[2],
+          data: nonScheduledTasks[1],
           isHideTime: false,
         },
         {
           id: 'S_ID',
           type: TimelineViewEntryType.ScheduledTask,
           time: plannedTaskStartTime,
-          data: fakeTasks[1],
+          data: scheduledTasks[0],
           isHideTime: false,
         },
         {
@@ -236,21 +260,21 @@ describe('mapToViewEntries()', () => {
           id: FID,
           type: TimelineViewEntryType.Task,
           time: now + hours(2.5),
-          data: fakeTasks[3],
+          data: nonScheduledTasks[2],
           isHideTime: false,
         },
         {
           id: FID,
           type: TimelineViewEntryType.Task,
           time: now + hours(2.5),
-          data: fakeTasks[4],
+          data: nonScheduledTasks[3],
           isHideTime: true,
         },
         {
           id: FID,
           type: TimelineViewEntryType.Task,
           time: now + hours(3.75),
-          data: fakeTasks[5],
+          data: nonScheduledTasks[4],
           isHideTime: false,
         },
       ]);
@@ -260,7 +284,10 @@ describe('mapToViewEntries()', () => {
       const now = getDateTimeFromClockString('9:30', 0);
       const plannedTaskStartTime = getDateTimeFromClockString('12:26', 0);
 
-      const fakeTasks = [
+      const nonScheduledTasks = [
+        { ...FAKE_TASK, timeEstimate: hours(1), id: 'OTHER_TASK_ID' },
+      ];
+      const scheduledTasks = [
         {
           ...FAKE_TASK,
           id: 'ScheduledTask:ID',
@@ -268,22 +295,28 @@ describe('mapToViewEntries()', () => {
           reminderId: 'R:ID',
           plannedAt: plannedTaskStartTime,
         },
-        { ...FAKE_TASK, timeEstimate: hours(1), id: 'OTHER_TASK_ID' },
       ];
-      const r = mapToTimelineViewEntries(fakeTasks, null, undefined, now);
+
+      const r = mapToTimelineViewEntries(
+        nonScheduledTasks,
+        scheduledTasks,
+        null,
+        undefined,
+        now,
+      );
 
       expect(r[0]).toEqual({
         id: 'OTHER_TASK_ID',
         type: TimelineViewEntryType.Task,
         time: now,
-        data: fakeTasks.find((t) => t.id === 'OTHER_TASK_ID') as any,
+        data: nonScheduledTasks.find((t) => t.id === 'OTHER_TASK_ID') as any,
         isHideTime: false,
       });
       expect(r[1]).toEqual({
         id: 'ScheduledTask:ID',
         type: TimelineViewEntryType.ScheduledTask,
         time: plannedTaskStartTime,
-        data: fakeTasks.find((t) => t.id === 'ScheduledTask:ID') as any,
+        data: scheduledTasks.find((t) => t.id === 'ScheduledTask:ID') as any,
         isHideTime: false,
       });
     });
@@ -296,7 +329,7 @@ describe('mapToViewEntries()', () => {
         '12:25',
         25 * 60 * 60 * 1000,
       );
-      const fakeTasks = [
+      const scheduledTasks = [
         {
           ...FAKE_TASK,
           id: 'ScheduledTask:ID',
@@ -304,23 +337,31 @@ describe('mapToViewEntries()', () => {
           reminderId: 'R:ID',
           plannedAt: plannedTaskStartTime,
         },
+      ];
+      const nonScheduledTasks = [
         { ...FAKE_TASK, timeEstimate: hours(1), id: 'OTHER_TASK_ID' },
         { ...FAKE_TASK, timeEstimate: hours(1), timeSpent: hours(0.5) },
         { ...FAKE_TASK },
       ];
-      const r = mapToTimelineViewEntries(fakeTasks, null, undefined, now);
+      const r = mapToTimelineViewEntries(
+        nonScheduledTasks,
+        scheduledTasks,
+        null,
+        undefined,
+        now,
+      );
       expect(r[0]).toEqual({
         id: 'OTHER_TASK_ID',
         type: TimelineViewEntryType.Task,
         time: now,
-        data: fakeTasks.find((t) => t.id === 'OTHER_TASK_ID') as any,
+        data: nonScheduledTasks.find((t) => t.id === 'OTHER_TASK_ID') as any,
         isHideTime: false,
       });
     });
 
     it('should work for sophisticated scenarios', () => {
       const now = getDateTimeFromClockString('11:00', 0);
-      const fakeTasks: TaskCopy[] = [
+      const scheduledTasks = [
         {
           id: 'S4_NO_DURATION',
           timeSpent: 0,
@@ -328,14 +369,6 @@ describe('mapToViewEntries()', () => {
           title: 'Scheduled 4 (no duration) 16:00',
           reminderId: 'xxx',
           plannedAt: getDateTimeFromClockString('16:00', 0),
-        },
-        {
-          id: 'S3',
-          timeSpent: 0,
-          timeEstimate: hours(2),
-          title: 'Scheduled 3 17:00',
-          reminderId: 'xxx',
-          plannedAt: getDateTimeFromClockString('17:00', 0),
         },
         {
           id: 'S_NO_OVERLAP',
@@ -346,20 +379,12 @@ describe('mapToViewEntries()', () => {
           plannedAt: getDateTimeFromClockString('23:00', 0),
         },
         {
-          id: 'SOME_TASK_1_ID',
+          id: 'S3',
           timeSpent: 0,
-          timeEstimate: hours(4),
-          title: 'Some task 1',
-          reminderId: null,
-          plannedAt: null,
-        },
-        {
-          id: 'SOME_TASK_2_ID',
-          timeSpent: 0,
-          timeEstimate: hours(3),
-          title: 'Some task 2',
-          reminderId: null,
-          plannedAt: null,
+          timeEstimate: hours(2),
+          title: 'Scheduled 3 17:00',
+          reminderId: 'xxx',
+          plannedAt: getDateTimeFromClockString('17:00', 0),
         },
         {
           id: 'S1',
@@ -378,19 +403,43 @@ describe('mapToViewEntries()', () => {
           plannedAt: getDateTimeFromClockString('15:30', 0),
         },
       ] as any;
-      const r = mapToTimelineViewEntries(fakeTasks, null, undefined, now);
+      const nonScheduledTasks: TaskCopy[] = [
+        {
+          id: 'SOME_TASK_1_ID',
+          timeSpent: 0,
+          timeEstimate: hours(4),
+          title: 'Some task 1',
+          reminderId: null,
+          plannedAt: null,
+        },
+        {
+          id: 'SOME_TASK_2_ID',
+          timeSpent: 0,
+          timeEstimate: hours(3),
+          title: 'Some task 2',
+          reminderId: null,
+          plannedAt: null,
+        },
+      ] as any;
+      const r = mapToTimelineViewEntries(
+        nonScheduledTasks,
+        scheduledTasks,
+        null,
+        undefined,
+        now,
+      );
       expect(r[0]).toEqual({
         id: 'SOME_TASK_1_ID',
         type: TimelineViewEntryType.Task,
         time: now,
-        data: fakeTasks.find((t) => t.id === 'SOME_TASK_1_ID') as any,
+        data: nonScheduledTasks.find((t) => t.id === 'SOME_TASK_1_ID') as any,
         isHideTime: false,
       });
       expect(r[1]).toEqual({
         id: 'SOME_TASK_2_ID',
         type: TimelineViewEntryType.SplitTask,
         time: now + hours(4),
-        data: fakeTasks.find((t) => t.id === 'SOME_TASK_2_ID') as any,
+        data: nonScheduledTasks.find((t) => t.id === 'SOME_TASK_2_ID') as any,
         isHideTime: false,
       });
       expect(r[4].type).toEqual(TimelineViewEntryType.ScheduledTask);
@@ -398,7 +447,7 @@ describe('mapToViewEntries()', () => {
 
     it('should work for super sophisticated scenarios', () => {
       const now = 1620125839764;
-      const fakeTasks: TaskCopy[] = [
+      const scheduledTasks = [
         {
           id: 'X6NWaoxQ-',
           timeSpent: 0,
@@ -414,17 +463,6 @@ describe('mapToViewEntries()', () => {
           title: 'Sched no overlap 23:00',
           reminderId: 'K-1LvnNU5',
           plannedAt: 1620162000000,
-        },
-        {
-          id: 'uDGzrv9JO',
-          timeSpentOnDay: {
-            '2021-05-03': 0,
-          },
-          timeSpent: 0,
-          timeEstimate: 3600000,
-          title: 'Some task 1',
-          reminderId: null,
-          plannedAt: null,
         },
         {
           id: '0LtuSnH8s',
@@ -459,6 +497,16 @@ describe('mapToViewEntries()', () => {
           reminderId: 'BNaRpF_SX',
           plannedAt: 1620144000000,
         },
+      ] as any;
+      const nonScheduledTasks: TaskCopy[] = [
+        {
+          id: 'uDGzrv9JO',
+          timeSpent: 0,
+          timeEstimate: 3600000,
+          title: 'Some task 1',
+          reminderId: null,
+          plannedAt: null,
+        },
         {
           id: 'mhsGdyzc_',
           timeSpent: 0,
@@ -476,7 +524,13 @@ describe('mapToViewEntries()', () => {
           plannedAt: null,
         },
       ] as any;
-      const r = mapToTimelineViewEntries(fakeTasks, null, undefined, now);
+      const r = mapToTimelineViewEntries(
+        nonScheduledTasks,
+        scheduledTasks,
+        null,
+        undefined,
+        now,
+      );
       expect(r).toEqual([
         {
           data: {
@@ -499,7 +553,6 @@ describe('mapToViewEntries()', () => {
             reminderId: null,
             timeEstimate: 3600000,
             timeSpent: 0,
-            timeSpentOnDay: { '2021-05-03': 0 },
             title: 'Some task 1',
           },
           id: 'uDGzrv9JO',
@@ -632,8 +685,13 @@ describe('mapToViewEntries()', () => {
         reminderId: 'X',
         plannedAt: getDateTimeFromClockString('10:00', 0),
       };
-      const fakeTasks = [normalTask, scheduledTask];
-      const r = mapToTimelineViewEntries(fakeTasks, null, undefined, now);
+      const r = mapToTimelineViewEntries(
+        [normalTask],
+        [scheduledTask],
+        null,
+        undefined,
+        now,
+      );
       expect(r.length).toEqual(3);
       expect(r).toEqual([
         {
@@ -680,8 +738,15 @@ describe('mapToViewEntries()', () => {
         reminderId: 'X',
         plannedAt: getDateTimeFromClockString('12:00', 0),
       };
-      const fakeTasks = [normalTask, scheduledTask, scheduledTask2];
-      const r = mapToTimelineViewEntries(fakeTasks, null, undefined, now);
+      const nonScheduledTasks = [normalTask];
+      const scheduledTasks = [scheduledTask, scheduledTask2];
+      const r = mapToTimelineViewEntries(
+        nonScheduledTasks,
+        scheduledTasks,
+        null,
+        undefined,
+        now,
+      );
       expect(r.length).toEqual(5);
       expect(r).toEqual([
         {
@@ -740,7 +805,7 @@ describe('mapToViewEntries()', () => {
   //     const now = getDateTimeFromClockString('7:23', 0);
   //     const workStartTimeString = '9:00';
   //     const workStartTime = getDateTimeFromClockString(workStartTimeString, 0);
-  //     const fakeTasks = [
+  //     const nonScheduledTasks = [
   //       {...FAKE_TASK, timeEstimate: 5000},
   //       {...FAKE_TASK},
   //     ];
@@ -748,7 +813,7 @@ describe('mapToViewEntries()', () => {
   //       startTime: workStartTimeString,
   //       endTime: '17:00',
   //     };
-  //     const r = mapToViewEntries(fakeTasks, null, workStartEndCfg, now);
+  //     const r = mapToViewEntries(nonScheduledTasks, null, workStartEndCfg, now);
   //     expect(r).toEqual([{
   //       id: 'START_TODAY',
   //       type: TimelineViewEntryType.WorkdayStart,
@@ -756,16 +821,16 @@ describe('mapToViewEntries()', () => {
   //       data: workStartEndCfg,
   //       isHideTime: true,
   //     }, {
-  //       id: fakeTasks[0].id,
+  //       id: nonScheduledTasks[0].id,
   //       type: TimelineViewEntryType.Task,
   //       time: workStartTime,
-  //       data: fakeTasks[0],
+  //       data: nonScheduledTasks[0],
   //       isHideTime: false,
   //     }, {
-  //       id: fakeTasks[1].id,
+  //       id: nonScheduledTasks[1].id,
   //       type: TimelineViewEntryType.Task,
   //       time: workStartTime + 5000,
-  //       data: fakeTasks[1],
+  //       data: nonScheduledTasks[1],
   //       isHideTime: false,
   //     }]);
   //   });
@@ -773,7 +838,7 @@ describe('mapToViewEntries()', () => {
   //   it('should not add work start entry if now is before start and there is a current task', () => {
   //     const now = getDateTimeFromClockString('7:23', 0);
   //     const workStartTimeString = '9:00';
-  //     const fakeTasks = [
+  //     const nonScheduledTasks = [
   //       {...FAKE_TASK, timeEstimate: 5000, id: 'CURRENT_TASK_ID'},
   //       {...FAKE_TASK},
   //     ];
@@ -781,18 +846,18 @@ describe('mapToViewEntries()', () => {
   //       startTime: workStartTimeString,
   //       endTime: '17:00',
   //     };
-  //     const r = mapToViewEntries(fakeTasks, 'CURRENT_TASK_ID', workStartEndCfg, now);
+  //     const r = mapToViewEntries(nonScheduledTasks, 'CURRENT_TASK_ID', workStartEndCfg, now);
   //     expect(r).toEqual([{
-  //       id: fakeTasks[0].id,
+  //       id: nonScheduledTasks[0].id,
   //       type: TimelineViewEntryType.Task,
   //       time: now,
-  //       data: fakeTasks[0],
+  //       data: nonScheduledTasks[0],
   //       isHideTime: false,
   //     }, {
-  //       id: fakeTasks[1].id,
+  //       id: nonScheduledTasks[1].id,
   //       type: TimelineViewEntryType.Task,
   //       time: now + 5000,
-  //       data: fakeTasks[1],
+  //       data: nonScheduledTasks[1],
   //       isHideTime: false,
   //     }]);
   //   });
@@ -800,7 +865,7 @@ describe('mapToViewEntries()', () => {
   //   it('should not add work end entry if tasks take longer than that', () => {
   //     const now = getDateTimeFromClockString('16:23', 0);
   //     const workEndTimeString = '18:00';
-  //     const fakeTasks = [
+  //     const nonScheduledTasks = [
   //       {...FAKE_TASK, timeEstimate: hours(2), title: 'Some task title'},
   //       {...FAKE_TASK},
   //     ];
@@ -808,10 +873,10 @@ describe('mapToViewEntries()', () => {
   //       startTime: '9:00',
   //       endTime: workEndTimeString,
   //     };
-  //     const r = mapToViewEntries(fakeTasks, null, workStartEndCfg, now);
+  //     const r = mapToViewEntries(nonScheduledTasks, null, workStartEndCfg, now);
   //     expect(r).toEqual([
   //       {
-  //         data: fakeTasks[0],
+  //         data: nonScheduledTasks[0],
   //         id: 'FAKE_TASK_ID',
   //         isHideTime: false,
   //         time: 55380000,
@@ -839,7 +904,7 @@ describe('mapToViewEntries()', () => {
   //         type: TimelineViewEntryType.SplitTaskContinued
   //       } as any,
   //       {
-  //         data: fakeTasks[1],
+  //         data: nonScheduledTasks[1],
   //         id: 'FAKE_TASK_ID',
   //         isHideTime: false,
   //         time: 1620026580000,

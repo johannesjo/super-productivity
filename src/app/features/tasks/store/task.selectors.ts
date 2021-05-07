@@ -1,6 +1,6 @@
 import { createFeatureSelector, createSelector } from '@ngrx/store';
 import { TASK_FEATURE_NAME } from './task.reducer';
-import { Task, TaskState, TaskWithSubTasks } from '../task.model';
+import { Task, TaskState, TaskWithReminder, TaskWithSubTasks } from '../task.model';
 import { taskAdapter } from './task.adapter';
 import { devError } from '../../../util/dev-error';
 import { TODAY_TAG } from '../../tag/tag.const';
@@ -174,6 +174,12 @@ export const selectPlannedTasks = createSelector(selectTaskFeatureState, (s): Ta
   });
   return allTasks;
 });
+
+export const selectScheduledTasksWithReminder = createSelector(
+  selectPlannedTasks,
+  (tasks: Task[]): TaskWithReminder[] =>
+    tasks.filter((task) => !!task.reminderId) as TaskWithReminder[],
+);
 
 export const selectAllTasks = createSelector(selectTaskFeatureState, selectAll);
 export const selectScheduledTasks = createSelector(selectAllTasks, (tasks) =>

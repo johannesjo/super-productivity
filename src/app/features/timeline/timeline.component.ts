@@ -7,6 +7,7 @@ import { combineLatest, Observable } from 'rxjs';
 import { mapToTimelineViewEntries } from './map-timeline-data/map-to-timeline-view-entries';
 import { T } from 'src/app/t.const';
 import { standardListAnimation } from '../../ui/animations/standard-list.ani';
+import { getTomorrow } from '../../util/get-tomorrow';
 
 // const d = new Date();
 // d.setTime(13);
@@ -35,9 +36,12 @@ export class TimelineComponent {
   // timelineEntries$ = this._workContextService.todaysTasks$.pipe(
   timelineEntries$: Observable<TimelineViewEntry[]> = combineLatest([
     this._workContextService.startableTasksForActiveContext$,
+    this._taskService.allScheduledWithReminder$,
     this._taskService.currentTaskId$,
   ]).pipe(
-    map(([tasks, currentId]) => mapToTimelineViewEntries(tasks, currentId, undefined)),
+    map(([startableTasks, scheduledTasks, currentId]) =>
+      mapToTimelineViewEntries(startableTasks, scheduledTasks, currentId, undefined),
+    ),
     // map(([tasks, currentId]) => mapToTimelineViewEntries(tasks, currentId, {
     //   startTime: '9:00',
     //   endTime: '17:00',
@@ -45,7 +49,8 @@ export class TimelineComponent {
     // NOTE: this doesn't require cd.detect changes because view is already re-checked with obs
     tap(() => (this.now = Date.now())),
   );
-  now = Date.now();
+  now: number = Date.now();
+  tomorrow: number = getTomorrow(0).getTime();
 
   constructor(
     private _workContextService: WorkContextService,

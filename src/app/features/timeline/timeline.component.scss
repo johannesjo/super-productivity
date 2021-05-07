@@ -1,7 +1,6 @@
 @import '../../../variables';
 @import '../tasks/task/task.component.mixins';
 
-
 :host {
   overflow: hidden !important;
 }
@@ -16,10 +15,9 @@
   }
 }
 
-
 .wrapper {
-  padding-top: $s*2;
-  padding-bottom: $s*2;
+  padding-top: $s * 2;
+  padding-bottom: $s * 2;
   display: block;
   position: absolute;
   top: 0;
@@ -64,8 +62,8 @@
     position: relative;
     min-width: 80px;
     text-align: center;
-    margin-top: -$s*.5;
-    margin-bottom: -$s*.5;
+    margin-top: -$s * 0.5;
+    margin-bottom: -$s * 0.5;
 
     @include lightTheme() {
       border-color: $light-theme-separator-color;
@@ -115,7 +113,7 @@
     .row:last-child & {
       &:before {
         color: $dark-theme-separator-color;
-        content: "ᐯ";
+        content: 'ᐯ';
         position: absolute;
         top: 100%;
         margin-top: -10px;
@@ -135,7 +133,7 @@
   }
 
   &.right {
-    padding-left: $s*2;
+    padding-left: $s * 2;
     padding-right: $s;
     flex: 1;
     display: flex;
@@ -146,6 +144,10 @@
       flex: 1;
     }
   }
+}
+
+.time .date {
+  font-size: 13px;
 }
 
 $split-border-radius: 28px;
@@ -185,7 +187,7 @@ $split-border-radius: 28px;
     position: absolute;
     top: 50%;
     left: 0;
-    margin-top: -.5*$s;
+    margin-top: -0.5 * $s;
     transform: translateY(-50%);
     text-align: center;
     width: 56px;
@@ -199,14 +201,13 @@ $split-border-radius: 28px;
   .time-to-go {
     margin-left: auto;
     padding-left: $s;
-    padding-right: $s*2;
+    padding-right: $s * 2;
     font-style: italic;
     opacity: 0.5;
     font-size: 14px;
     font-weight: 300;
   }
 }
-
 
 .work-start,
 .work-end {

@@ -20,6 +20,7 @@ import {
   TaskArchive,
   TaskReminderOptionId,
   TaskState,
+  TaskWithReminder,
   TaskWithSubTasks,
 } from './task.model';
 import { select, Store } from '@ngrx/store';
@@ -62,7 +63,7 @@ import {
   selectCurrentTaskParentOrCurrent,
   selectIsTaskDataLoaded,
   selectMainTasksWithoutTag,
-  selectPlannedTasks,
+  selectScheduledTasksWithReminder,
   selectSelectedTask,
   selectSelectedTaskId,
   selectStartableTasks,
@@ -153,7 +154,9 @@ export class TaskService {
 
   allStartableTasks$: Observable<Task[]> = this._store.pipe(select(selectStartableTasks));
 
-  plannedTasks$: Observable<Task[]> = this._store.pipe(select(selectPlannedTasks));
+  allScheduledWithReminder$: Observable<TaskWithReminder[]> = this._store.pipe(
+    select(selectScheduledTasksWithReminder),
+  );
 
   // META FIELDS
   // -----------

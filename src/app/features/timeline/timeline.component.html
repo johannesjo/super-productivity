@@ -4,8 +4,14 @@
       <div class="row" *ngFor="let row of timelineEntries; trackBy: trackByFn">
         <div class="col time" [class.hasTime]="!row.isHideTime">
           <div *ngIf="!row.isHideTime">
-            {{ row.time <= now ? (T.F.TIMELINE.NOW|translate) :
-            (row.time|roundDuration|date:'HH:mm')}}
+            <div>
+              {{ row.time <= now ? (T.F.TIMELINE.NOW|translate) :
+              (row.time|roundDuration|date:'HH:mm')}}
+            </div>
+            <div *ngIf="row.time>= tomorrow" class="date">
+              {{ row.time <= now ? (T.F.TIMELINE.NOW|translate) :
+              (row.time|date:'shortDate')}}
+            </div>
           </div>
         </div>
         <div class="col right" [ngSwitch]="row.type">

@@ -14,6 +14,7 @@ import * as moment from 'moment';
 
 export const mapToTimelineViewEntries = (
   tasks: Task[],
+  scheduledTasks: TaskWithReminder[],
   currentId: string | null,
   workStartEndCfg?: TimelineWorkStartEndCfg,
   now: number = Date.now(),
@@ -37,9 +38,10 @@ export const mapToTimelineViewEntries = (
     ? resortTasksWithCurrentFirst(currentId, tasks)
     : tasks;
 
-  const [scheduledTasks, nonScheduledTasks] = createSplitScheduledAndNotScheduled(
-    initialTasks,
-  );
+  const nonScheduledTasks: TaskWithoutReminder[] = initialTasks.filter(
+    (task) => !(task.reminderId && task.plannedAt),
+  ) as TaskWithoutReminder[];
+
   const viewEntries = createTimelineViewEntriesForNormalTasks(
     startTime,
     nonScheduledTasks,
@@ -100,21 +102,6 @@ export const mapToTimelineViewEntries = (
 
   // console.log('mapToViewEntriesE', viewEntries, {asString: JSON.stringify(viewEntries)});
   return viewEntries;
-};
-
-const createSplitScheduledAndNotScheduled = (
-  tasks: Task[],
-): [TaskWithReminder[], TaskWithoutReminder[]] => {
-  const scheduledTasks: TaskWithReminder[] = [];
-  const nonScheduledTasks: TaskWithoutReminder[] = [];
-  tasks.forEach((task, index, arr) => {
-    if (task.reminderId && task.plannedAt) {
-      scheduledTasks.push(task as TaskWithReminder);
-    } else {
-      nonScheduledTasks.push(task as TaskWithoutReminder);
-    }
-  });
-  return [scheduledTasks, nonScheduledTasks];
 };
 
 const createViewEntriesForBlock = (blockedBlock: BlockedBlock): TimelineViewEntry[] => {
