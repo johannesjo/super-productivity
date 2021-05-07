@@ -174,7 +174,7 @@
     "karma-cli": "^2.0.0",
     "karma-coverage-istanbul-reporter": "~3.0.2",
     "karma-jasmine": "~4.0.1",
-    "karma-jasmine-html-reporter": "^1.5.0",
+    "karma-jasmine-html-reporter": "^1.6.0",
     "lz-string": "^1.4.4",
     "moment": "2.29.1",
     "moment-duration-format": "^2.2.2",
