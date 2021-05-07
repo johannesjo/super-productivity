@@ -268,6 +268,7 @@ export class CaldavClientService {
   }
 
   private _getXhrProvider(cfg: CaldavCfg) {
+    // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
     function xhrProvider(): XMLHttpRequest {
       const xhr = new XMLHttpRequest();
       const oldOpen = xhr.open;

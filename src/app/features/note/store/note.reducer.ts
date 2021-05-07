@@ -88,9 +88,7 @@ const _reducer = createReducer<NoteState>(
   on(clearNotes, (state) => adapter.removeAll(state)),
 );
 
-export function noteReducer(
+export const noteReducer = (
   state: NoteState = initialNoteState,
   action: Action,
-): NoteState {
-  return _reducer(state, action);
-}
+): NoteState => _reducer(state, action);

@@ -55,9 +55,7 @@ const _reducer = createReducer<WorkContextState>(
   })),
 );
 
-export function workContextReducer(
+export const workContextReducer = (
   state: WorkContextState = initialContextState,
   action: Action,
-): WorkContextState {
-  return _reducer(state, action);
-}
+): WorkContextState => _reducer(state, action);

@@ -147,7 +147,7 @@ export const initialProjectState: ProjectState = projectAdapter.getInitialState(
 
 // REDUCER
 // -------
-export function projectReducer(
+export const projectReducer = (
   state: ProjectState = initialProjectState,
   action:
     | ProjectActions
@@ -156,7 +156,7 @@ export function projectReducer(
     | MoveToOtherProject
     | MoveToArchive
     | RestoreTask,
-): ProjectState {
+): ProjectState => {
   // eslint-disable-next-line
   const payload = action['payload'];
 
@@ -718,4 +718,4 @@ export function projectReducer(
       return state;
     }
   }
-}
+};

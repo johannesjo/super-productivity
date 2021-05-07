@@ -38,10 +38,10 @@ export const initialObstructionState: ObstructionState = adapter.getInitialState
   // additional entity state properties
 });
 
-export function obstructionReducer(
+export const obstructionReducer = (
   state: ObstructionState = initialObstructionState,
   action: ObstructionActions,
-): ObstructionState {
+): ObstructionState => {
   // TODO fix this hackyness once we use the new syntax everywhere
   if ((action.type as string) === loadAllData.type) {
     const { appDataComplete }: { appDataComplete: AppDataComplete } = action as any;
@@ -71,4 +71,4 @@ export function obstructionReducer(
       return state;
     }
   }
-}
+};

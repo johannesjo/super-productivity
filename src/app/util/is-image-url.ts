@@ -1,9 +1,8 @@
-export function isImageUrlSimple(url: string): boolean {
-  return url.match(/\.(jpeg|jpg|gif|png)$/i) !== null;
-}
+export const isImageUrlSimple = (url: string): boolean =>
+  url.match(/\.(jpeg|jpg|gif|png)$/i) !== null;
 
-export function isImageUrl(url: string): Promise<boolean> {
-  return new Promise((resolve) => {
+export const isImageUrl = (url: string): Promise<boolean> =>
+  new Promise((resolve) => {
     const timeout = 5000;
     const img = new Image();
     let timedOut = false;
@@ -29,4 +28,3 @@ export function isImageUrl(url: string): Promise<boolean> {
       resolve(false);
     }, timeout);
   });
-}

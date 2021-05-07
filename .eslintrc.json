@@ -73,7 +73,7 @@
         "@typescript-eslint/no-shadow": ["error"],
         "comma-dangle": ["error", "always-multiline"],
 
-        "prefer-arrow/prefer-arrow-functions": "off",
+        "prefer-arrow/prefer-arrow-functions": "error",
         "@angular-eslint/directive-selector": [
           "error",
           {

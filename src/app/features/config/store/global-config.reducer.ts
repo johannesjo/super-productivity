@@ -40,10 +40,10 @@ export const selectTakeABreakConfig = createSelector(
 
 export const initialState: GlobalConfigState = DEFAULT_GLOBAL_CONFIG;
 
-export function globalConfigReducer(
+export const globalConfigReducer = (
   state: GlobalConfigState = initialState,
   action: GlobalConfigActions,
-): GlobalConfigState {
+): GlobalConfigState => {
   // console.log(action, state);
 
   // TODO fix this hackyness once we use the new syntax everywhere
@@ -71,4 +71,4 @@ export function globalConfigReducer(
     default:
       return state;
   }
-}
+};

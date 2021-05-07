@@ -182,9 +182,7 @@ const _reducer = createReducer<SimpleCounterState>(
   }),
 );
 
-export function simpleCounterReducer(
+export const simpleCounterReducer = (
   state: SimpleCounterState = initialSimpleCounterState,
   action: Action,
-): SimpleCounterState {
-  return _reducer(state, action);
-}
+): SimpleCounterState => _reducer(state, action);

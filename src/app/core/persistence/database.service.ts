@@ -88,16 +88,20 @@ export class DatabaseService {
     try {
       this.db = await openDB<MyDb>(DB_NAME, VERSION, {
         // upgrade(db: IDBPDatabase<MyDb>, oldVersion: number, newVersion: number | null, transaction: IDBPTransaction<MyDb>) {
+        // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
         upgrade(db: IDBPDatabase<MyDb>, oldVersion: number, newVersion: number | null) {
           console.log('IDB UPGRADE', oldVersion, newVersion);
           db.createObjectStore(DB_MAIN_NAME);
         },
+        // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
         blocked() {
           alert('IDB BLOCKED');
         },
+        // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
         blocking() {
           alert('IDB BLOCKING');
         },
+        // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
         terminated() {
           alert('IDB TERMINATED');
         },

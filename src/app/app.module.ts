@@ -46,9 +46,8 @@ import { actionLoggerReducer } from './root-store/meta/action-logger.reducer';
 import { SyncModule } from './imex/sync/sync.module';
 
 // NOTE: export required for aot to work
-export function createTranslateLoader(http: HttpClient) {
-  return new TranslateHttpLoader(http, './assets/i18n/', '.json');
-}
+export const createTranslateLoader = (http: HttpClient) =>
+  new TranslateHttpLoader(http, './assets/i18n/', '.json');
 
 @NgModule({
   declarations: [AppComponent],

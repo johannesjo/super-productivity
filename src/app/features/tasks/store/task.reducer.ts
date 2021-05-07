@@ -83,10 +83,10 @@ export const initialTaskState: TaskState = taskAdapter.getInitialState({
 }) as TaskState;
 
 // TODO unit test the shit out of this once the model is settled
-export function taskReducer(
+export const taskReducer = (
   state: TaskState = initialTaskState,
   action: TaskActions | AddTaskRepeatCfgToTask | TaskAttachmentActions,
-): TaskState {
+): TaskState => {
   if (environment.production) {
     console.log(action.type, (action as any)?.payload || action, state);
   }
@@ -658,4 +658,4 @@ export function taskReducer(
       return state;
     }
   }
-}
+};

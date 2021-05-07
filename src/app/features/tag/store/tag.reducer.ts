@@ -269,7 +269,10 @@ const _reducer = createReducer<TagState>(
   ),
 );
 
-export function tagReducer(state: TagState = initialTagState, action: Action): TagState {
+export const tagReducer = (
+  state: TagState = initialTagState,
+  action: Action,
+): TagState => {
   switch (action.type) {
     // TASK STUFF
     // ---------
@@ -391,4 +394,4 @@ export function tagReducer(state: TagState = initialTagState, action: Action): T
     default:
       return _reducer(state, action);
   }
-}
+};

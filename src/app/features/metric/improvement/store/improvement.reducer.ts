@@ -67,10 +67,10 @@ export const initialImprovementState: ImprovementState = adapter.getInitialState
   hiddenImprovementBannerItems: [],
 });
 
-export function improvementReducer(
+export const improvementReducer = (
   state: ImprovementState = initialImprovementState,
   action: ImprovementActions,
-): ImprovementState {
+): ImprovementState => {
   // TODO fix this hackyness once we use the new syntax everywhere
   if ((action.type as string) === loadAllData.type) {
     const { appDataComplete }: { appDataComplete: AppDataComplete } = action as any;
@@ -154,4 +154,4 @@ export function improvementReducer(
       return state;
     }
   }
-}
+};

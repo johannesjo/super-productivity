@@ -39,10 +39,10 @@ export const initialBookmarkState: BookmarkState = adapter.getInitialState({
   isShowBookmarks: false,
 });
 
-export function bookmarkReducer(
+export const bookmarkReducer = (
   state: BookmarkState = initialBookmarkState,
   action: BookmarkActions,
-): BookmarkState {
+): BookmarkState => {
   switch (action.type) {
     case BookmarkActionTypes.AddBookmark: {
       return adapter.addOne((action as AddBookmark).payload.bookmark, state);
@@ -88,4 +88,4 @@ export function bookmarkReducer(
       return state;
     }
   }
-}
+};

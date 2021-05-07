@@ -172,20 +172,19 @@ export class EnlargeImgDirective {
   }
 
   private _waitForImgRender() {
-    function rafAsync() {
-      return new Promise((resolve) => {
+    const rafAsync = () =>
+      new Promise((resolve) => {
         requestAnimationFrame(resolve);
       });
-    }
 
-    function checkElement(id: string): Promise<any> {
+    const checkElement = (id: string): Promise<any> => {
       const el = document.getElementById(id);
       if (el === null || !(el.offsetHeight > 1)) {
         return rafAsync().then(() => checkElement(id));
       } else {
         return Promise.resolve(true);
       }
-    }
+    };
 
     return checkElement(LARGE_IMG_ID);
   }

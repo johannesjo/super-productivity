@@ -19,10 +19,10 @@ export const initialMetricState: MetricState = metricAdapter.getInitialState({
   // additional entity state properties
 });
 
-export function metricReducer(
+export const metricReducer = (
   state: MetricState = initialMetricState,
   action: MetricActions,
-): MetricState {
+): MetricState => {
   // TODO fix this hackyness once we use the new syntax everywhere
   if ((action.type as string) === loadAllData.type) {
     const { appDataComplete }: { appDataComplete: AppDataComplete } = action as any;
@@ -52,4 +52,4 @@ export function metricReducer(
       return state;
     }
   }
-}
+};

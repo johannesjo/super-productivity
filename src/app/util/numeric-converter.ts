@@ -11,13 +11,11 @@ const arabicNumberMap = {
   '٠': '0',
 };
 
-export function convertToWesternArabic(data: string): string {
-  const converted = _replaceHinduArabic(data);
-  return converted;
-}
+export const convertToWesternArabic = (data: string): string => {
+  return _replaceHinduArabic(data);
+};
 
-function _replaceHinduArabic(val: string): string {
-  return val.replace(/[١٢٣٤٥٦٧٨٩٠]/g, (match) => {
+const _replaceHinduArabic = (val: string): string =>
+  val.replace(/[١٢٣٤٥٦٧٨٩٠]/g, (match) => {
     return (arabicNumberMap as any)[match];
   });
-}

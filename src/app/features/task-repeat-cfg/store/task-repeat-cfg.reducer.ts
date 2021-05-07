@@ -51,10 +51,10 @@ export const initialTaskRepeatCfgState: TaskRepeatCfgState = adapter.getInitialS
   // additional entity state properties
 });
 
-export function taskRepeatCfgReducer(
+export const taskRepeatCfgReducer = (
   state: TaskRepeatCfgState = initialTaskRepeatCfgState,
   action: TaskRepeatCfgActions,
-): TaskRepeatCfgState {
+): TaskRepeatCfgState => {
   // TODO fix this hackyness once we use the new syntax everywhere
   if ((action.type as string) === loadAllData.type) {
     const { appDataComplete }: { appDataComplete: AppDataComplete } = action as any;
@@ -108,4 +108,4 @@ export function taskRepeatCfgReducer(
       return state;
     }
   }
-}
+};

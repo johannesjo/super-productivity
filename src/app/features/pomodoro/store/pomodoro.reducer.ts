@@ -32,10 +32,10 @@ export const selectCurrentCycle = createSelector(
   (state) => state.currentCycle,
 );
 
-export function pomodoroReducer(
+export const pomodoroReducer = (
   state: PomodoroState = initialPomodoroState,
   action: PomodoroActions,
-): PomodoroState {
+): PomodoroState => {
   switch (action.type) {
     case PomodoroActionTypes.StartPomodoro: {
       return {
@@ -71,4 +71,4 @@ export function pomodoroReducer(
     default:
       return state;
   }
-}
+};

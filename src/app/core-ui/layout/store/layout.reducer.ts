@@ -71,9 +71,7 @@ const _reducer = createReducer<LayoutState>(
   on(hideNotes, (state) => ({ ...state, isShowNotes: false })),
 );
 
-export function reducer(
+export const layoutReducer = (
   state: LayoutState = _initialLayoutState,
   action: Action,
-): LayoutState {
-  return _reducer(state, action);
-}
+): LayoutState => _reducer(state, action);

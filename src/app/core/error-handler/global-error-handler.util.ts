@@ -9,7 +9,7 @@ import { getBeforeLastErrorActionLog } from '../../util/action-logger';
 
 let isWasErrorAlertCreated = false;
 
-async function _getStacktrace(err: Error | any): Promise<string> {
+const _getStacktrace = async (err: Error | any): Promise<string> => {
   const isHttpError = err && (err.url || err.headers);
   const isErrorWithStack = err && err.stack;
 
@@ -27,7 +27,7 @@ async function _getStacktrace(err: Error | any): Promise<string> {
     console.warn('Error without stack', err);
   }
   return Promise.resolve('');
-}
+};
 
 const _getStacktraceThrottled = pThrottle(_getStacktrace, 2, 5000);
 

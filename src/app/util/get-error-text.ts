@@ -1,6 +1,6 @@
 import { isObject } from './is-object';
 
-export function getErrorTxt(err: any): unknown {
+export const getErrorTxt = (err: any): unknown => {
   if (err && isObject(err.error)) {
     return (
       err.error.message ||
@@ -14,4 +14,4 @@ export function getErrorTxt(err: any): unknown {
   } else {
     return err;
   }
-}
+};
