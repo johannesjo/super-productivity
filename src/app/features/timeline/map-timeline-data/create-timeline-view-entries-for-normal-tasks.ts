@@ -1,6 +1,7 @@
 import { TaskWithoutReminder } from '../../tasks/task.model';
-import { TimelineViewEntry, TimelineViewEntryType } from '../timeline.model';
+import { TimelineViewEntry } from '../timeline.model';
 import { getTimeLeftForTask } from '../../../util/get-time-left-for-task';
+import { TimelineViewEntryType } from '../timeline.const';
 
 export const createTimelineViewEntriesForNormalTasks = (
   startTime: number,

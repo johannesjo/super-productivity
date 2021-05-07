@@ -1,7 +1,7 @@
 import { mapToTimelineViewEntries } from './map-to-timeline-view-entries';
 import { TaskCopy } from '../../tasks/task.model';
-import { TimelineViewEntryType } from '../timeline.model';
 import { getDateTimeFromClockString } from '../../../util/get-date-time-from-clock-string';
+import { TimelineViewEntryType } from '../timeline.const';
 
 const FID = 'FAKE_TASK_ID';
 const FAKE_TASK: TaskCopy = {
@@ -177,6 +177,10 @@ describe('mapToViewEntries()', () => {
         },
       ]);
     });
+  });
+
+  describe('sortingEntries', () => {
+    // it('should sort entries according to map if they have the same time', () => {});
   });
 
   describe('scheduledTasks', () => {

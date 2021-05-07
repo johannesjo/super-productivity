@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { TimelineViewEntry, TimelineViewEntryType } from './timeline.model';
+import { TimelineViewEntry } from './timeline.model';
 import { WorkContextService } from '../work-context/work-context.service';
 import { map, tap } from 'rxjs/operators';
 import { TaskService } from '../tasks/task.service';

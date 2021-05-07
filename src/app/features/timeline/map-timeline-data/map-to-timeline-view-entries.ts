@@ -3,7 +3,6 @@ import {
   BlockedBlock,
   BlockedBlockType,
   TimelineViewEntry,
-  TimelineViewEntryType,
   TimelineWorkStartEndCfg,
 } from '../timeline.model';
 import { getDateTimeFromClockString } from '../../../util/get-date-time-from-clock-string';
@@ -11,6 +10,7 @@ import { createSortedBlockerBlocks } from './create-sorted-blocker-blocks';
 import { getTimeLeftForTask } from '../../../util/get-time-left-for-task';
 import { createTimelineViewEntriesForNormalTasks } from './create-timeline-view-entries-for-normal-tasks';
 import * as moment from 'moment';
+import { TimelineViewEntryType, TimelineViewTypeOrder } from '../timeline.const';
 
 export const mapToTimelineViewEntries = (
   tasks: Task[],
@@ -55,12 +55,7 @@ export const mapToTimelineViewEntries = (
   // -------
   viewEntries.sort((a, b) => {
     if (a.start - b.start === 0) {
-      switch (a.type) {
-        case TimelineViewEntryType.WorkdayEnd:
-          return 1;
-        case TimelineViewEntryType.WorkdayStart:
-          return -1;
-      }
+      return TimelineViewTypeOrder[a.type] - TimelineViewTypeOrder[b.type];
     }
     return a.start - b.start;
   });

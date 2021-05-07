@@ -1,22 +1,5 @@
 import { TaskCopy, TaskWithReminder } from '../tasks/task.model';
-
-// export enum TimelineEntryType {
-//   Task,
-//   Event,
-//   Break,
-//   DayEnd,
-// }
-
-export enum TimelineViewEntryType {
-  Task = 'Task',
-  ScheduledTask = 'ScheduledTask',
-  SplitTask = 'SplitTask',
-  SplitTaskContinued = 'SplitTaskContinued',
-  SplitTaskContinuedLast = 'SplitTaskContinuedLast',
-  CustomEvent = 'CustomEvent',
-  WorkdayStart = 'WorkdayStart',
-  WorkdayEnd = 'WorkdayEnd',
-}
+import { TimelineViewEntryType } from './timeline.const';
 
 interface TimelineViewEntryBase {
   id: string;
