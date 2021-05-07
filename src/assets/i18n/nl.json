@@ -93,7 +93,7 @@
         "IS_TRANSITION_ISSUES_ENABLED": "Voltooi automatisch CalDav-taken na voltooiing van de taak"
       },
       "FORM_SECTION": {
-        "HELP": "<p>Hier kunt u SuperProductivity configureren om niet-voltooide CalDav-taken voor een specifiek project weer te geven in het taakaanmaakpaneel in de dagelijkse planningsweergave. Ze worden vermeld als suggesties en bieden een link naar de taak en meer informatie erover.</p> <p>Bovendien kunt u automatisch alle niet-voltooide taken toevoegen aan en synchroniseren met uw taakachterstand.</p>",
+        "HELP": "<p>Hier kunt u SuperProductivity configureren om niet-voltooide CalDav-taken voor een specifiek project weer te geven in het taakaanmaakpaneel in de dagelijkse planningsweergave. Ze worden vermeld als suggesties en bieden een link naar de taak en meer informatie erover.</p> <p>Bovendien kunt u automatisch alle niet-voltooide taken toevoegen aan en synchroniseren met uw backlog.</p>",
         "TITLE": "CalDav"
       },
       "ISSUE_CONTENT": {
@@ -136,7 +136,7 @@
       },
       "FORM": {
         "FILTER_USER": "Gebruikersnaam (bijv. Om wijzigingen zelf uit te filteren)",
-        "IS_AUTO_ADD_TO_BACKLOG": "Voeg automatisch onopgeloste problemen van GitHub toe aan de achterstand",
+        "IS_AUTO_ADD_TO_BACKLOG": "Voeg automatisch onopgeloste problemen van GitHub toe aan de backlog",
         "IS_AUTO_POLL": "Poll automatisch geïmporteerde git-problemen voor wijzigingen",
         "IS_SEARCH_ISSUES_FROM_GITHUB": "Toon problemen van git als suggesties bij het toevoegen van nieuwe taken",
         "REPO": "\"gebruikersnaam/repositoryName\" voor de git repository die je wilt volgen",
@@ -144,7 +144,7 @@
         "TOKEN_DESCRIPTION": "Vereist voor toegang tot privérepository"
       },
       "FORM_SECTION": {
-        "HELP": "<p>Hier kunt u SuperProductivity configureren om openstaande GitHub-problemen voor een specifieke repository weer te geven in het paneel voor het maken van taken in de dagelijkse planningsweergave. Ze worden vermeld als suggesties en bieden een link naar het probleem en meer informatie erover.</p> <p>Daarnaast kunt u automatisch alle openstaande problemen toevoegen en synchroniseren met uw taakachterstand.</p>",
+        "HELP": "<p>Hier kunt u SuperProductivity configureren om openstaande GitHub-problemen voor een specifieke repository weer te geven in het paneel voor het maken van taken in de dagelijkse planningsweergave. Ze worden vermeld als suggesties en bieden een link naar het probleem en meer informatie erover.</p> <p>Daarnaast kunt u automatisch alle openstaande problemen toevoegen en synchroniseren met uw backlog.</p>",
         "TITLE": "GitHub"
       },
       "ISSUE_CONTENT": {
@@ -162,7 +162,7 @@
         "ERR_NOT_CONFIGURED": "GitHub: is niet correct geconfigureerd",
         "ERR_UNKNOWN": "GitHub: onbekende fout {{statusCode}} {{errorMsg}}. API-limiet overschreden?",
         "IMPORTED_MULTIPLE_ISSUES": "GitHub: {{issuesLength}} nieuwe problemen geïmporteerd van git naar backlog",
-        "IMPORTED_SINGLE_ISSUE": "GitHub: geïmporteerd probleem \"{{issueText}}\" van git naar achterstand",
+        "IMPORTED_SINGLE_ISSUE": "GitHub: geïmporteerd probleem \"{{issueText}}\" van git naar backlog",
         "ISSUE_DELETED_OR_CLOSED": "GitHub: Probleem \"{{issueText}}\" lijkt te zijn verwijderd of gesloten op git",
         "ISSUE_NO_UPDATE_REQUIRED": "GitHub: geen update vereist",
         "ISSUE_UPDATE": "GitHub: bijgewerkte gegevens voor \"{{issueText}}\"",
@@ -180,14 +180,14 @@
       "FORM": {
         "FILTER_USER": "Gebruikersnaam (bijv. Om wijzigingen zelf uit te filteren)",
         "GITLAB_BASE_URL": "Aangepaste GitLab base URL",
-        "IS_AUTO_ADD_TO_BACKLOG": "Voeg automatisch onopgeloste problemen van GitLab toe aan de achterstand",
+        "IS_AUTO_ADD_TO_BACKLOG": "Voeg automatisch onopgeloste problemen van GitLab toe aan de backlog",
         "IS_AUTO_POLL": "Poll automatisch geïmporteerde git-problemen voor wijzigingen",
         "IS_SEARCH_ISSUES_FROM_GITLAB": "Toon problemen van git als suggesties bij het toevoegen van nieuwe taken",
         "PROJECT": "Volledig pad of gebruikersnaam / project",
         "TOKEN": "Toegangstoken"
       },
       "FORM_SECTION": {
-        "HELP": "<p> Hier kunt u SuperProductivity configureren om open GitLab (ofwel de online versie of een zelf-gehoste instantie) problemen voor een specifiek project in het taakcreatiepaneel in de dagelijkse planningsweergave op te sommen. Ze worden vermeld als suggesties en bevatten een link naar het probleem en meer informatie erover. </p> <p> Daarnaast kunt u automatisch alle openstaande problemen toevoegen aan en synchroniseren met uw taakachterstand. </p>",
+        "HELP": "<p> Hier kunt u SuperProductivity configureren om open GitLab (ofwel de online versie of een zelf-gehoste instantie) problemen voor een specifiek project in het taakcreatiepaneel in de dagelijkse planningsweergave op te sommen. Ze worden vermeld als suggesties en bevatten een link naar het probleem en meer informatie erover. </p> <p> Daarnaast kunt u automatisch alle openstaande problemen toevoegen aan en synchroniseren met uw backlog. </p>",
         "TITLE": "GitLab"
       },
       "ISSUE_CONTENT": {
@@ -205,7 +205,7 @@
         "ERR_NOT_CONFIGURED": "GitLab: is niet correct geconfigureerd",
         "ERR_UNKNOWN": "GitLab: onbekende fout {{statusCode}} {{errorMsg}}",
         "IMPORTED_MULTIPLE_ISSUES": "GitLab: {{issuesLength}} nieuwe problemen geïmporteerd van git naar backlog",
-        "IMPORTED_SINGLE_ISSUE": "GitLab: geïmporteerd probleem \"{{issueText}}\" van git naar achterstand",
+        "IMPORTED_SINGLE_ISSUE": "GitLab: geïmporteerd probleem \"{{issueText}}\" van git naar backlog",
         "ISSUE_DELETED_OR_CLOSED": "GitLab: Probleem \"{{issueText}}\" lijkt te zijn verwijderd of gesloten op git",
         "ISSUE_NO_UPDATE_REQUIRED": "GitLab: geen update vereist",
         "ISSUE_UPDATE": "GitLab: bijgewerkte gegevens voor \"{{issueText}}\"",
@@ -279,15 +279,15 @@
         "TITLE": "Jira: Werklogboek indienen"
       },
       "FORM": {
-        "IS_AUTO_ADD_TO_BACKLOG": "Voeg automatisch onopgeloste problemen van GitHub toe aan de achterstand",
+        "IS_AUTO_ADD_TO_BACKLOG": "Voeg automatisch onopgeloste problemen van GitHub toe aan de backlog",
         "IS_AUTO_POLL": "Poll automatisch geïmporteerde git-problemen voor wijzigingen",
         "IS_SEARCH_ISSUES_FROM_GITHUB": "Toon problemen van git als suggesties bij het toevoegen van nieuwe taken",
         "REPO": "\"gebruikersnaam/repositoryName\" voor de git repository die je wilt volgen"
       },
       "FORM_ADV": {
-        "AUTO_ADD_BACKLOG_JQL_QUERY": "JQL gebruikt voor het automatisch toevoegen van taken aan achterstand",
+        "AUTO_ADD_BACKLOG_JQL_QUERY": "JQL gebruikt voor het automatisch toevoegen van taken aan backlog",
         "IS_ADD_WORKLOG_ON_SUB_TASK_DONE": "Open dialoogvenster om werklog naar jira te sturen wanneer de subtaak is voltooid",
-        "IS_AUTO_ADD_TO_BACKLOG": "Voeg automatisch problemen toe aan de Jira-achterstand",
+        "IS_AUTO_ADD_TO_BACKLOG": "Voeg automatisch problemen toe aan de Jira-backlog",
         "IS_AUTO_POLL_TICKETS": "Controleer geïmporteerde problemen automatisch op wijzigingen en stel ze op de hoogte",
         "IS_CHECK_TO_RE_ASSIGN_TICKET_ON_TASK_START": "Controleer of het probleem waaraan momenteel is gewerkt, is toegewezen aan de huidige gebruiker",
         "IS_WORKLOG_ENABLED": "Open dialoogvenster om werklog naar jira te sturen wanneer de taak is voltooid",
@@ -337,8 +337,8 @@
       "S": {
         "ADDED_WORKLOG_FOR": "Jira: Worklog toegevoegd voor {{issueKey}}",
         "EXTENSION_NOT_LOADED": "Super Productivity-extensie niet geladen. Het kan helpen om de pagina opnieuw te laden",
-        "IMPORTED_MULTIPLE_ISSUES": "Jira: {{issuesLength}} nieuwe problemen geïmporteerd van jira naar achterstand",
-        "IMPORTED_SINGLE_ISSUE": "Jira: geïmporteerd probleem \"{{issueText}}\" van jira naar achterstand",
+        "IMPORTED_MULTIPLE_ISSUES": "Jira: {{issuesLength}} nieuwe problemen geïmporteerd van jira naar backlog",
+        "IMPORTED_SINGLE_ISSUE": "Jira: geïmporteerd probleem \"{{issueText}}\" van jira naar backlog",
         "INSUFFICIENT_SETTINGS": "Er zijn onvoldoende instellingen voor Jira",
         "ISSUE_NO_UPDATE_REQUIRED": "Jira: \"{{issueText}}\" is al up-to-date",
         "ISSUE_UPDATE": "Jira: bijgewerkte gegevens voor \"{{issueText}}\"",
@@ -659,7 +659,7 @@
         "ADD_EXISTING_TASK": "Voeg bestaande taak \"{{taskTitle}}\" toe",
         "ADD_ISSUE_TASK": "Voeg probleem #{{issueNr}} van {{issueType}}toe",
         "ADD_TASK": "Voeg taak toe",
-        "ADD_TASK_TO_BACKLOG": "Taak toevoegen aan achterstand",
+        "ADD_TASK_TO_BACKLOG": "Taak toevoegen aan backlog",
         "CREATE_TASK": "Maak een nieuwe taak",
         "EXAMPLE": "Voorbeeld: \"Een taaktitel + projectnaam # een tag # een andere tag 10 m / 3 uur\"",
         "START": "Druk nogmaals op Enter om te beginnen"
@@ -700,7 +700,7 @@
       "D_REMINDER_ADD": {
         "DATETIME_FOR": "Datetime voor herinnering",
         "EDIT": "Herinnering bewerken",
-        "MOVE_TO_BACKLOG": "Verplaats taak naar achterstand tot gepland",
+        "MOVE_TO_BACKLOG": "Verplaats taak naar backlog tot gepland",
         "SCHEDULE": "Schema",
         "UNSCHEDULE": "Ongepland"
       },
@@ -742,7 +742,7 @@
       },
       "S": {
         "DELETED": "Taak \"{{title}}\" verwijderd",
-        "FOUND_MOVE_FROM_BACKLOG": "Taak <strong>{{title}}</strong> verplaatst van achterstand naar de takenlijst van vandaag",
+        "FOUND_MOVE_FROM_BACKLOG": "Taak <strong>{{title}}</strong> verplaatst van backlog naar de takenlijst van vandaag",
         "FOUND_MOVE_FROM_OTHER_LIST": "Taak <strong>{{title}}</strong> van <strong>{{contextTitle}}</strong> toegevoegd aan huidige lijst",
         "FOUND_RESTORE_FROM_ARCHIVE": "Herstelde taak <strong>{{title}}</strong> gerelateerd aan probleem uit archief",
         "LAST_TAG_DELETION_WARNING": "U probeert de laatste tag van een niet-projecttaak te verwijderen. Dit mag niet!",
@@ -941,7 +941,7 @@
       "HELP": "<p>Hier kunt u alle sneltoetsen configureren.</p> <p>Klik op de tekstinvoer en voer de gewenste toetsenbordcombinatie in. Druk op enter om op te slaan en op Escape om af te breken.</p> <p>Er zijn drie soorten sneltoetsen:</p> <ul> <li><strong>Wereldwijde snelkoppelingen:</strong> wanneer de app wordt uitgevoerd, wordt de actie vanuit elke andere app geactiveerd.</li> <li><strong>Sneltoetsen op applicatieniveau:</strong> wordt geactiveerd vanuit elk scherm van de applicatie, maar niet als u momenteel een tekstveld bewerkt.</li> <li><strong>Sneltoetsen op taakniveau:</strong> Ze worden alleen geactiveerd als u een taak via muis of toetsenbord hebt geselecteerd en activeren meestal een actie die specifiek betrekking heeft op die ene taak.</li> </ul>",
       "MOVE_TASK_DOWN": "Verplaats taak naar beneden in lijst",
       "MOVE_TASK_UP": "Verplaats taak omhoog in lijst",
-      "MOVE_TO_BACKLOG": "Verplaats taak naar taakachterstand",
+      "MOVE_TO_BACKLOG": "Verplaats taak naar backlog",
       "MOVE_TO_TODAYS_TASKS": "Verplaats taak naar de takenlijst van vandaag",
       "OPEN_PROJECT_NOTES": "Projectnotities tonen / verbergen",
       "SELECT_NEXT_TASK": "Selecteer de volgende taak",
@@ -959,7 +959,7 @@
       "TASK_TOGGLE_ADDITIONAL_INFO_OPEN": "Extra taakinformatie tonen / verbergen",
       "TASK_TOGGLE_DONE": "Toggle Gereed",
       "TITLE": "Toetsenbord sneltoetsen",
-      "TOGGLE_BACKLOG": "Taakachterstand weergeven / verbergen",
+      "TOGGLE_BACKLOG": "Backlog weergeven / verbergen",
       "TOGGLE_BOOKMARKS": "Bladwijzerbalk tonen / verbergen",
       "TOGGLE_PLAY": "Taak starten / stoppen",
       "TOGGLE_SIDE_NAV": "Show & Focus / Hide Sidenav",
