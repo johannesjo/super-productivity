@@ -233,7 +233,6 @@ const insertBlockedBlocksViewEntries = (
         viewEntries.splice(veIndex, 0, ...viewEntriesToAdd);
         veIndex += viewEntriesToAdd.length;
         console.log('AAA');
-
         break;
       }
       // block starts before task and lasts until after it starts
@@ -258,41 +257,40 @@ const insertBlockedBlocksViewEntries = (
 
           if (isTaskDataType(viewEntry)) {
             console.log('CCC a) ' + viewEntry.type);
-            const ve: TimelineViewEntryTask = viewEntry as any;
-            const splitTask: TaskWithoutReminder = ve.data as TaskWithoutReminder;
-            // const timeLeftOnTask = getTimeLeftForTask(splitTask);
+            const currentViewEntry: TimelineViewEntryTask = viewEntry as any;
+            const splitTask: TaskWithoutReminder = currentViewEntry.data as TaskWithoutReminder;
+
             const timeLeftOnTask = timeLeft;
-            const timePlannedForSplitStart = blockedBlock.start - ve.start;
+            const timePlannedForSplitStart = blockedBlock.start - currentViewEntry.start;
             const timePlannedForSplitContinued =
               timeLeftOnTask - timePlannedForSplitStart;
 
-            // update type
-            ve.type = TimelineViewEntryType.SplitTask;
+            // update type of current
+            currentViewEntry.type = TimelineViewEntryType.SplitTask;
 
-            const splitContinuedEntry: TimelineViewEntry = {
-              id: `${splitTask.id}__0`,
+            const newSplitContinuedEntry: TimelineViewEntry = createSplitTask({
               start: blockedBlock.end,
-              type: TimelineViewEntryType.SplitTaskContinuedLast,
-              data: {
-                title: (splitTask as TaskWithoutReminder).title,
-                timeToGo: timePlannedForSplitContinued,
-                taskId: splitTask.id,
-                index: 0,
-              },
-              isHideTime: false,
-            };
+              taskId: splitTask.id,
+              timeToGo: timePlannedForSplitContinued,
+              splitIndex: 0,
+              title: splitTask.title,
+            });
 
+            // move entries
             const blockedBlockDuration = blockedBlock.end - blockedBlock.start;
             moveEntries(viewEntries, blockedBlockDuration, veIndex + 1);
-            viewEntries.splice(veIndex, 0, ...viewEntriesToAdd, splitContinuedEntry);
-            // veIndex += viewEntriesToAdd.length - 1;
+
+            // insert new entries
+            viewEntries.splice(veIndex, 0, ...viewEntriesToAdd, newSplitContinuedEntry);
+            // NOTE: we're not including a step for the current viewEntry as it might be split again
             veIndex += viewEntriesToAdd.length;
             break;
           } else if (isContinuedTaskType(viewEntry)) {
             console.log('CCC b) ' + viewEntry.type);
-            const ve: TimelineViewEntrySplitTaskContinued = viewEntry as any;
+            const currentViewEntry: TimelineViewEntrySplitTaskContinued = viewEntry as any;
             const timeLeftForCompleteSplitTask = timeLeft;
-            const timePlannedForSplitTaskBefore = blockedBlock.start - ve.start;
+            const timePlannedForSplitTaskBefore =
+              blockedBlock.start - currentViewEntry.start;
             const timePlannedForSplitTaskContinued =
               timeLeftForCompleteSplitTask - timePlannedForSplitTaskBefore;
 
@@ -300,29 +298,28 @@ const insertBlockedBlocksViewEntries = (
               (entry) =>
                 (entry.type === TimelineViewEntryType.SplitTaskContinuedLast ||
                   entry.type === TimelineViewEntryType.SplitTaskContinued) &&
-                entry.data.taskId === ve.data.taskId,
+                entry.data.taskId === currentViewEntry.data.taskId,
             );
-            // update type
-            ve.type = TimelineViewEntryType.SplitTaskContinued;
+            // update type of current
+            currentViewEntry.type = TimelineViewEntryType.SplitTaskContinued;
 
             const splitIndex = splitInstances.length;
-            const splitContinuedEntry: TimelineViewEntry = {
-              id: `${ve.data.taskId}__${splitIndex}`,
+            const newSplitContinuedEntry: TimelineViewEntry = createSplitTask({
               start: blockedBlock.end,
-              type: TimelineViewEntryType.SplitTaskContinuedLast,
-              data: {
-                title: ve.data.title,
-                timeToGo: timePlannedForSplitTaskContinued,
-                taskId: ve.data.taskId,
-                index: splitIndex,
-              },
-              isHideTime: false,
-            };
+              taskId: currentViewEntry.data.taskId,
+              timeToGo: timePlannedForSplitTaskContinued,
+              splitIndex,
+              title: currentViewEntry.data.title,
+            });
 
+            // TODO find out why???
+            // move entries
             // const blockedBlockDuration = blockedBlock.end - blockedBlock.start;
             // moveEntries(viewEntries, blockedBlockDuration, veIndex + 1);
-            viewEntries.splice(veIndex, 0, ...viewEntriesToAdd, splitContinuedEntry);
-            // veIndex += viewEntriesToAdd.length - 1;
+
+            // insert new entries
+            viewEntries.splice(veIndex, 0, ...viewEntriesToAdd, newSplitContinuedEntry);
+            // NOTE: we're not including a step for the current viewEntry as it might be split again
             veIndex += viewEntriesToAdd.length;
             break;
           } else {
@@ -341,6 +338,33 @@ const insertBlockedBlocksViewEntries = (
   console.log(
     '################__insertBlockedBlocksViewEntries()_END__#################',
   );
+};
+
+const createSplitTask = ({
+  start,
+  taskId,
+  title,
+  splitIndex,
+  timeToGo,
+}: {
+  start: number;
+  taskId: string;
+  title: string;
+  splitIndex: number;
+  timeToGo: number;
+}): TimelineViewEntrySplitTaskContinued => {
+  return {
+    id: `${taskId}__${splitIndex}`,
+    start,
+    type: TimelineViewEntryType.SplitTaskContinuedLast,
+    data: {
+      title,
+      timeToGo,
+      taskId,
+      index: splitIndex,
+    },
+    isHideTime: false,
+  };
 };
 
 const getTimeLeftForViewEntry = (viewEntry: TimelineViewEntry): number => {
