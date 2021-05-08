@@ -260,11 +260,11 @@ const insertBlockedBlocksViewEntries = (
             console.log('CCC a) ' + viewEntry.type);
             const ve: TimelineViewEntryTask = viewEntry as any;
             const splitTask: TaskWithoutReminder = ve.data as TaskWithoutReminder;
-            const timeLeftOnTask = getTimeLeftForTask(splitTask);
-            // const timeLeftOnTask = timeLeft;
-            const timePlannedForSplitTaskBefore = blockedBlock.start - ve.start;
-            const timePlannedForSplitTaskContinued =
-              timeLeftOnTask - timePlannedForSplitTaskBefore;
+            // const timeLeftOnTask = getTimeLeftForTask(splitTask);
+            const timeLeftOnTask = timeLeft;
+            const timePlannedForSplitStart = blockedBlock.start - ve.start;
+            const timePlannedForSplitContinued =
+              timeLeftOnTask - timePlannedForSplitStart;
 
             // update type
             ve.type = TimelineViewEntryType.SplitTask;
@@ -275,7 +275,7 @@ const insertBlockedBlocksViewEntries = (
               type: TimelineViewEntryType.SplitTaskContinuedLast,
               data: {
                 title: (splitTask as TaskWithoutReminder).title,
-                timeToGo: timePlannedForSplitTaskContinued,
+                timeToGo: timePlannedForSplitContinued,
                 taskId: splitTask.id,
                 index: 0,
               },

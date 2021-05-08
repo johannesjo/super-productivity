@@ -800,6 +800,53 @@ describe('mapToViewEntries()', () => {
         },
       ]);
     });
+
+    it('should calculate the right time', () => {
+      const now = getDateTimeFromClockString('18:00', 0);
+      const normalTask = { ...FAKE_TASK, timeEstimate: hours(30) };
+      const scheduledTask = {
+        ...FAKE_TASK,
+        timeEstimate: hours(1),
+        reminderId: 'X',
+        plannedAt: getDateTimeFromClockString('19:00', 0),
+      };
+      const r = mapToTimelineViewEntries(
+        [normalTask],
+        [scheduledTask],
+        null,
+        undefined,
+        now,
+      );
+      expect(r.length).toEqual(3);
+      expect(r).toEqual([
+        {
+          id: normalTask.id,
+          type: TimelineViewEntryType.SplitTask,
+          start: now,
+          data: normalTask,
+          isHideTime: false,
+        },
+        {
+          id: scheduledTask.id,
+          type: TimelineViewEntryType.ScheduledTask,
+          start: scheduledTask.plannedAt,
+          data: scheduledTask,
+          isHideTime: false,
+        },
+        {
+          id: normalTask.id + '__0',
+          type: TimelineViewEntryType.SplitTaskContinuedLast,
+          start: now + hours(2),
+          data: {
+            taskId: normalTask.id,
+            title: normalTask.title,
+            timeToGo: hours(29),
+            index: 0,
+          },
+          isHideTime: false,
+        },
+      ]);
+    });
   });
 
   describe('workStartEnd', () => {
