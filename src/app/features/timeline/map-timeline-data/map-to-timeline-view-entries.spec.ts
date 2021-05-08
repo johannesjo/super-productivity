@@ -792,9 +792,7 @@ describe('mapToViewEntries()', () => {
           start: getDateTimeFromClockString('13:00', 0),
           data: {
             title: normalTask.title,
-            // TODO fix
-            // timeToGo: hours(2),
-            timeToGo: 0,
+            timeToGo: hours(1),
             taskId: normalTask.id,
             index: 1,
           },

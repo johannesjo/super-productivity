@@ -40,15 +40,15 @@ export class TimelineComponent {
     this._taskService.allScheduledWithReminder$,
     this._taskService.currentTaskId$,
   ]).pipe(
-    // map(([startableTasks, scheduledTasks, currentId]) =>
-    //   mapToTimelineViewEntries(startableTasks, scheduledTasks, currentId, undefined),
-    // ),
     map(([startableTasks, scheduledTasks, currentId]) =>
-      mapToTimelineViewEntries(startableTasks, scheduledTasks, currentId, {
-        startTime: '9:00',
-        endTime: '17:00',
-      }),
+      mapToTimelineViewEntries(startableTasks, scheduledTasks, currentId, undefined),
     ),
+    // map(([startableTasks, scheduledTasks, currentId]) =>
+    //   mapToTimelineViewEntries(startableTasks, scheduledTasks, currentId, {
+    //     startTime: '9:00',
+    //     endTime: '17:00',
+    //   }),
+    // ),
     // map(([startableTxasks, scheduxledTasks, currentId]) => {
     //   const v: any = {
     //     tasks: [

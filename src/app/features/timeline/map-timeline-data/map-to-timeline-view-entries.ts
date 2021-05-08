@@ -173,15 +173,14 @@ const insertBlockedBlocksViewEntries = (
   blockedBlocks: BlockedBlock[],
   now: number,
 ) => {
-  // const viewEntriesForUnScheduled: TimelineViewEntryTask[] = viewEntriesIn.slice(0);
   const viewEntries: TimelineViewEntry[] = viewEntriesIn;
-  console.log(
-    viewEntries.map((viewEntry) => ({
-      viewEntry,
-      timeD: moment(viewEntry.start).format('H:mm'),
-      durationH: getTimeLeftForTask(viewEntry.data as any) / 60000 / 60,
-    })),
-  );
+  // console.log(
+  //   viewEntries.map((viewEntry) => ({
+  //     viewEntry,
+  //     timeD: moment(viewEntry.start).format('H:mm'),
+  //     durationH: getTimeLeftForTask(viewEntry.data as any) / 60000 / 60,
+  //   })),
+  // );
   // console.log(blockedBlocks.map(block => ({
   //   block,
   //   startD: moment(block.start).format('H:mm'),
@@ -189,12 +188,19 @@ const insertBlockedBlocksViewEntries = (
   // })));
 
   let veIndex: number = 0;
-  console.log('############################');
-  console.log(blockedBlocks.length);
+  console.log(
+    '################__insertBlockedBlocksViewEntries()_START__################',
+  );
+  console.log(blockedBlocks.length + ' BLOCKS');
 
   blockedBlocks.forEach((blockedBlock, blockIndex) => {
+    console.log(`**********BB:${blockIndex}***********`);
+
     const viewEntriesToAdd: TimelineViewEntry[] = createViewEntriesForBlock(blockedBlock);
 
+    if (veIndex > viewEntries.length) {
+      throw new Error('INDEX TOO LARGE');
+    }
     // we don't have any tasks to split any more so we just insert
     if (veIndex === viewEntries.length) {
       console.log('JUST INSERT');
@@ -204,7 +210,7 @@ const insertBlockedBlocksViewEntries = (
 
     for (; veIndex < viewEntries.length; ) {
       const viewEntry = viewEntries[veIndex];
-      console.log('-----------------------------');
+      console.log(`------------ve:${veIndex}-------------`);
       console.log(
         {
           BIndex: blockIndex,
@@ -251,6 +257,7 @@ const insertBlockedBlocksViewEntries = (
           console.log('SPLIT', viewEntry.type, '---', (viewEntry.data as any)?.title);
 
           if (isTaskDataType(viewEntry)) {
+            console.log('CCC a) ' + viewEntry.type);
             const ve: TimelineViewEntryTask = viewEntry as any;
             const splitTask: TaskWithoutReminder = ve.data as TaskWithoutReminder;
             const timeLeftOnTask = getTimeLeftForTask(splitTask);
@@ -280,9 +287,9 @@ const insertBlockedBlocksViewEntries = (
             viewEntries.splice(veIndex, 0, ...viewEntriesToAdd, splitContinuedEntry);
             // veIndex += viewEntriesToAdd.length - 1;
             veIndex += viewEntriesToAdd.length;
-            console.log('CCC a)');
             break;
           } else if (isContinuedTaskType(viewEntry)) {
+            console.log('CCC b) ' + viewEntry.type);
             const ve: TimelineViewEntrySplitTaskContinued = viewEntry as any;
             const timeLeftForCompleteSplitTask = timeLeft;
             const timePlannedForSplitTaskBefore = blockedBlock.start - ve.start;
@@ -317,98 +324,23 @@ const insertBlockedBlocksViewEntries = (
             viewEntries.splice(veIndex, 0, ...viewEntriesToAdd, splitContinuedEntry);
             // veIndex += viewEntriesToAdd.length - 1;
             veIndex += viewEntriesToAdd.length;
-            console.log('CCC b)');
             break;
           } else {
             throw new Error('Invalid type given ' + viewEntry.type);
           }
+        } else if (veIndex + 1 === viewEntries.length) {
+          viewEntries.splice(veIndex, 0, ...viewEntriesToAdd);
+          veIndex += viewEntriesToAdd.length + 1;
         } else {
-          console.log('DDD');
+          console.log('DDD', veIndex, viewEntries.length);
           veIndex++;
         }
       }
     }
-
-    // if (blockedBlock.start <= now) {
-    //   const timeToGoForBlock = blockedBlock.end - now;
-    //   viewEntriesForUnScheduled.forEach((viewEntry) => {
-    //     viewEntry.start = viewEntry.start + timeToGoForBlock;
-    //   });
-    //
-    //   // add entries
-    //   viewEntries.splice(viewEntries.length, 0, ...viewEntriesToAdd);
-    //   return;
-    // }
-    //
-    // const viewEntryForSplitTask:
-    //   | TimelineViewEntry
-    //   | undefined = viewEntriesForUnScheduled.find(
-    //   (viewEntry) =>
-    //     viewEntry.start !== 0 &&
-    //     viewEntry.start + getTimeLeftForTask(viewEntry.data as TaskWithoutReminder) >=
-    //       blockedBlock.start,
-    // );
-    // // console.log(blockedBlock.start);
-    // // console.log(blockedBlock.end);
-    // // console.log(viewEntriesForUnScheduled[0].time);
-    // // console.log(viewEntriesForUnScheduled[0].time + getTimeLeftForTask(viewEntriesForUnScheduled[0].data as any));
-    // // console.log(viewEntryForSplitTask);
-    //
-    // if (viewEntryForSplitTask) {
-    //   const splitTask: TaskWithoutReminder = viewEntryForSplitTask.data as TaskWithoutReminder;
-    //   const timeLeftForCompleteSplitTask = getTimeLeftForTask(splitTask);
-    //
-    //   const timePlannedForSplitTaskBefore =
-    //     blockedBlock.start - viewEntryForSplitTask.start;
-    //   const timePlannedForSplitTaskContinued =
-    //     timeLeftForCompleteSplitTask - timePlannedForSplitTaskBefore;
-    //   // viewEntryForSplitTask.type === TimelineViewEntryType.SplitTaskContinuedLast
-    //   //   ? timeLeftForCompleteSplitTask
-    //   //   : timeLeftForCompleteSplitTask - timePlannedForSplitTaskBefore;
-    //
-    //   // update type
-    //   viewEntryForSplitTask.type = TimelineViewEntryType.SplitTask;
-    //
-    //   const splitInstances = viewEntries.filter(
-    //     (entry) =>
-    //       (entry.type === TimelineViewEntryType.SplitTaskContinuedLast ||
-    //         entry.type === TimelineViewEntryType.SplitTaskContinued) &&
-    //       entry.data.taskId === splitTask.id,
-    //   );
-    //   splitInstances.forEach(
-    //     (splitInstance) =>
-    //       (splitInstance.type = TimelineViewEntryType.SplitTaskContinued),
-    //   );
-    //
-    //   const splitIndex = splitInstances.length;
-    //   const splitContinuedEntry: TimelineViewEntry = {
-    //     id: `${splitTask.id}__${splitIndex}`,
-    //     start: blockedBlock.end,
-    //     type: TimelineViewEntryType.SplitTaskContinuedLast,
-    //     data: {
-    //       title: (splitTask as TaskWithoutReminder).title,
-    //       timeToGo: timePlannedForSplitTaskContinued,
-    //       taskId: splitTask.id,
-    //       index: splitIndex,
-    //     },
-    //     isHideTime: false,
-    //   };
-    //
-    //   viewEntriesToAdd.push(splitContinuedEntry);
-    // }
-    //
-    // if (viewEntryForSplitTask) {
-    //   const blockedBlockDuration = blockedBlock.end - blockedBlock.start;
-    //   viewEntriesForUnScheduled.forEach((viewEntry) => {
-    //     if (viewEntry.start > blockedBlock.start && viewEntry !== viewEntryForSplitTask) {
-    //       viewEntry.start = viewEntry.start + blockedBlockDuration;
-    //     }
-    //   });
-    // }
-    //
-    // // add entries
-    // viewEntries.splice(viewEntries.length, 0, ...viewEntriesToAdd);
   });
+  console.log(
+    '################__insertBlockedBlocksViewEntries()_END__#################',
+  );
 };
 
 const getTimeLeftForViewEntry = (viewEntry: TimelineViewEntry): number => {
