@@ -5,12 +5,11 @@
 
 version: 2
 updates:
-  - package-ecosystem: "npm" # See documentation for possible values
-    directory: "/" # Location of package manifests
+  - package-ecosystem: 'npm' # See documentation for possible values
+    directory: '/' # Location of package manifests
     schedule:
-      interval: "daily"
-      
-  - package-ecosystem: "npm" # See documentation for possible values
-    directory: "/tools/schematics/" # Location of package manifests
-    schedule:
-      interval: "daily"
+      interval: 'monthly'
+#  - package-ecosystem: "npm" # See documentation for possible values
+#    directory: "/tools/schematics/" # Location of package manifests
+#    schedule:
+#      interval: "monthly"
