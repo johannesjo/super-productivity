@@ -918,9 +918,11 @@ describe('mapToViewEntries()', () => {
     //   });
     //
 
-    fit('should work for very long tasks', () => {
+    xit('should work for very long tasks', () => {
       const now = getDateTimeFromClockString('9:00', 0);
+
       const longTask = { ...FAKE_TASK, id: 'LONG_ID', timeEstimate: hours(24) };
+
       const scheduledTask = {
         ...FAKE_TASK,
         id: 'S_ID',
@@ -929,68 +931,66 @@ describe('mapToViewEntries()', () => {
         plannedAt: getDateTimeFromClockString('14:00', 0),
       };
 
-      const nonScheduledTasks = [longTask];
-      const scheduledTasks = [scheduledTask];
       const r = mapToTimelineViewEntries(
-        nonScheduledTasks,
-        scheduledTasks,
+        [longTask],
+        [scheduledTask],
         null,
         { startTime: '9:00', endTime: '17:00' },
         now,
       );
+
       expect(r[0]).toEqual({
-        id: longTask.id,
         type: TimelineViewEntryType.SplitTask,
         start: now,
+        id: longTask.id,
         data: longTask,
         isHideTime: false,
       });
-
       expect(r[1]).toEqual({
-        id: scheduledTask.id,
         type: TimelineViewEntryType.ScheduledTask,
         start: scheduledTask.plannedAt,
+        id: scheduledTask.id,
         data: scheduledTask,
         isHideTime: false,
       });
       expect(r[2]).toEqual({
-        id: longTask.id + '__0',
         type: TimelineViewEntryType.SplitTaskContinued,
         start: now + hours(7),
+        id: longTask.id + '__0',
+        isHideTime: false,
         data: {
           taskId: longTask.id,
           timeToGo: hours(19),
           index: 0,
           title: longTask.title,
         },
-        isHideTime: false,
       });
       expect(r[3]).toEqual({
-        data: { endTime: '17:00', startTime: '9:00' },
+        type: TimelineViewEntryType.WorkdayEnd,
+        start: getDateTimeFromClockString('17:00', 0),
         id: 'DAY_END_57600000',
         isHideTime: true,
-        start: getDateTimeFromClockString('17:00', 0),
-        type: TimelineViewEntryType.WorkdayEnd,
+        data: { endTime: '17:00', startTime: '9:00' },
       });
       expect(r[4]).toEqual({
-        data: { endTime: '17:00', startTime: '9:00' },
+        type: TimelineViewEntryType.WorkdayStart,
+        start: getDateTimeFromClockString('9:00', 24 * 60 * 60000),
         id: 'DAY_START_115200000',
         isHideTime: true,
-        start: getDateTimeFromClockString('9:00', 24 * 60 * 60000),
-        type: TimelineViewEntryType.WorkdayStart,
+        data: { endTime: '17:00', startTime: '9:00' },
       });
-
       expect(r[5]).toEqual({
+        type: TimelineViewEntryType.SplitTaskContinuedLast,
+        start: getDateTimeFromClockString('9:00', 24 * 60 * 60000),
+        id: longTask.id + '__1',
+        isHideTime: false,
         data: {
           index: 1,
           taskId: longTask.id,
-          timeToGo: 57600000,
+          // timeToGo: hours(18),
+          timeToGo: hours(16),
           title: longTask.title,
         },
-        id: longTask.id + '__1',
-        isHideTime: false,
-        start: getDateTimeFromClockString('9:00', 24 * 60 * 60000),
-        type: TimelineViewEntryType.SplitTaskContinuedLast,
       });
     });
   });

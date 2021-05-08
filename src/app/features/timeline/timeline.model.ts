@@ -8,7 +8,7 @@ interface TimelineViewEntryBase {
   isHideTime: boolean;
 }
 
-interface TimelineViewEntryTask extends TimelineViewEntryBase {
+export interface TimelineViewEntryTask extends TimelineViewEntryBase {
   type:
     | TimelineViewEntryType.Task
     | TimelineViewEntryType.ScheduledTask
@@ -16,7 +16,7 @@ interface TimelineViewEntryTask extends TimelineViewEntryBase {
   data: TaskCopy;
 }
 
-interface TimelineViewEntrySplitTaskContinued extends TimelineViewEntryBase {
+export interface TimelineViewEntrySplitTaskContinued extends TimelineViewEntryBase {
   type:
     | TimelineViewEntryType.SplitTaskContinued
     | TimelineViewEntryType.SplitTaskContinuedLast;

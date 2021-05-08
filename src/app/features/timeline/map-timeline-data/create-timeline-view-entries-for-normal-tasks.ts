@@ -1,16 +1,16 @@
 import { TaskWithoutReminder } from '../../tasks/task.model';
-import { TimelineViewEntry } from '../timeline.model';
+import { TimelineViewEntryTask } from '../timeline.model';
 import { getTimeLeftForTask } from '../../../util/get-time-left-for-task';
 import { TimelineViewEntryType } from '../timeline.const';
 
 export const createTimelineViewEntriesForNormalTasks = (
   startTime: number,
   tasks: TaskWithoutReminder[],
-): TimelineViewEntry[] => {
+): TimelineViewEntryTask[] => {
   let lastTime: number;
   let prevTask: TaskWithoutReminder;
 
-  const viewEntries: TimelineViewEntry[] = [];
+  const viewEntries: TimelineViewEntryTask[] = [];
   tasks.forEach((task, index, arr) => {
     prevTask = arr[index - 1];
 

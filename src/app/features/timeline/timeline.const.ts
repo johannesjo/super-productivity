@@ -9,7 +9,7 @@ export enum TimelineViewEntryType {
   WorkdayEnd = 'WorkdayEnd',
 }
 
-export const TimelineViewTypeOrder: {
+export const TIMELINE_VIEW_TYPE_ORDER: {
   [key: string]: number;
 } = {
   [TimelineViewEntryType.WorkdayStart]: 1,
@@ -21,3 +21,10 @@ export const TimelineViewTypeOrder: {
   [TimelineViewEntryType.SplitTaskContinuedLast]: 6,
   [TimelineViewEntryType.WorkdayEnd]: 7,
 };
+
+export const TIMELINE_MOVEABLE_TYPES: TimelineViewEntryType[] = [
+  TimelineViewEntryType.Task,
+  TimelineViewEntryType.SplitTask,
+  TimelineViewEntryType.SplitTaskContinued,
+  TimelineViewEntryType.SplitTaskContinuedLast,
+];
