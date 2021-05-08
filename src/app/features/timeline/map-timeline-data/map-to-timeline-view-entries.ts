@@ -17,7 +17,6 @@ import {
   TIMELINE_VIEW_TYPE_ORDER,
   TimelineViewEntryType,
 } from '../timeline.const';
-import { dirtyDeepCopy } from '../../../util/dirtyDeepCopy';
 
 export const mapToTimelineViewEntries = (
   tasks: Task[],
@@ -236,13 +235,7 @@ const insertBlockedBlocksViewEntries = (
       else if (blockedBlock.start <= viewEntry.start) {
         const currentListTaskStart = viewEntry.start;
         moveEntries(viewEntries, blockedBlock.end - currentListTaskStart, veIndex);
-        // console.log(viewEntries.slice(0));
-        console.log(dirtyDeepCopy(viewEntries));
-
         viewEntries.splice(veIndex, 0, ...viewEntriesToAdd);
-        console.log(dirtyDeepCopy(viewEntries));
-
-        // console.log(viewEntries.slice(0));
         veIndex += viewEntriesToAdd.length;
         console.log('BBB');
         break;
@@ -260,11 +253,11 @@ const insertBlockedBlocksViewEntries = (
           if (isTaskDataType(viewEntry)) {
             const ve: TimelineViewEntryTask = viewEntry as any;
             const splitTask: TaskWithoutReminder = ve.data as TaskWithoutReminder;
-            // const timeLeftForCompleteSplitTask = getTimeLeftForTask(splitTask);
-            const timeLeftForCompleteSplitTask = timeLeft;
+            const timeLeftOnTask = getTimeLeftForTask(splitTask);
+            // const timeLeftOnTask = timeLeft;
             const timePlannedForSplitTaskBefore = blockedBlock.start - ve.start;
             const timePlannedForSplitTaskContinued =
-              timeLeftForCompleteSplitTask - timePlannedForSplitTaskBefore;
+              timeLeftOnTask - timePlannedForSplitTaskBefore;
 
             // update type
             ve.type = TimelineViewEntryType.SplitTask;
@@ -319,8 +312,8 @@ const insertBlockedBlocksViewEntries = (
               isHideTime: false,
             };
 
-            const blockedBlockDuration = blockedBlock.end - blockedBlock.start;
-            moveEntries(viewEntries, blockedBlockDuration, veIndex + 1);
+            // const blockedBlockDuration = blockedBlock.end - blockedBlock.start;
+            // moveEntries(viewEntries, blockedBlockDuration, veIndex + 1);
             viewEntries.splice(veIndex, 0, ...viewEntriesToAdd, splitContinuedEntry);
             // veIndex += viewEntriesToAdd.length - 1;
             veIndex += viewEntriesToAdd.length;
