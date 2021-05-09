@@ -2,12 +2,12 @@ appId: superProductivity
 afterSign: electron-builder-notarize
 files:
   - electron/**/*
-  - "!electron/**/*.ts"
-  - "!electron/**/*.js.map"
+  - '!electron/**/*.ts'
+  - '!electron/**/*.js.map'
   - dist/**/*
   - 'embedded.provisionprofile'
 directories:
-  output: "./app-builds"
+  output: './app-builds'
 
 win:
   target:
@@ -27,6 +27,7 @@ linux:
     - AppImage
     - deb
     - snap
+    - rpm
   publish:
     - github
 snap:
@@ -56,8 +57,6 @@ dmg:
 
 pkg:
   publish: never
-
-
 # HERE: electron-builder.mas.yaml
 #mas:
 #  type: distribution
