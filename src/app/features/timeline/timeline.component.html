@@ -58,11 +58,11 @@
           ></timeline-custom-event>
 
           <div *ngSwitchCase="TimelineViewEntryType.WorkdayStart" class="work-start">
-            Start {{row.start|date:'d.M.'}}
+            Start {{row.start|date:'d.M. (EEE)'}}
           </div>
 
           <div *ngSwitchCase="TimelineViewEntryType.WorkdayEnd" class="work-end">
-            End {{row.start|date:'d.M.'}}
+            End {{row.start|date:'d.M. (EEE)'}}
           </div>
 
           <div *ngSwitchDefault>------------------</div>
