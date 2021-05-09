@@ -302,6 +302,7 @@ const insertBlockedBlocksViewEntries = (
             );
             // update type of current
             currentViewEntry.type = TimelineViewEntryType.SplitTaskContinued;
+            currentViewEntry.data.timeToGo -= timePlannedForSplitTaskContinued;
 
             const splitIndex = splitInstances.length;
             const newSplitContinuedEntry: TimelineViewEntry = createSplitTask({

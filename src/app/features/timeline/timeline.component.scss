@@ -149,8 +149,8 @@
 .time .date {
   font-size: 13px;
 }
-
 $sb-radius: 28px;
+$sb-radius-continued: 56px;
 $sb-radius-small: 4px;
 
 task.split-task::ng-deep .box {
@@ -165,13 +165,15 @@ task.split-task::ng-deep .box {
   padding-left: 56px;
   padding-top: $s;
   padding-bottom: $s;
-  border-radius: $sb-radius-small $sb-radius $sb-radius-small $sb-radius;
+  border-radius: $sb-radius-small $sb-radius-continued $sb-radius-small
+    $sb-radius-continued;
 
   display: flex;
   position: relative;
 
   &.last {
-    border-radius: $sb-radius-small $sb-radius-small $sb-radius $sb-radius;
+    border-radius: $sb-radius-small $sb-radius-small $sb-radius-continued
+      $sb-radius-continued;
   }
 
   @include lightTheme {
