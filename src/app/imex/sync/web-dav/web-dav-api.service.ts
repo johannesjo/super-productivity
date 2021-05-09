@@ -48,8 +48,10 @@ export class WebDavApiService {
       password: cfg.password,
     });
 
-    const r = await client.putFileContents('/' + cfg.syncFilePath, JSON.stringify(data));
-    console.log(r);
+    const r = await client.putFileContents('/' + cfg.syncFilePath, JSON.stringify(data), {
+      contentLength: false,
+      //, overwrite: isForceOverwrite
+    });
     return r;
   }
 
