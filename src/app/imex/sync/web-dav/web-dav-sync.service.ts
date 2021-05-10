@@ -88,14 +88,14 @@ export class WebDavSyncService implements SyncProviderServiceInterface {
   ): Promise<string | Error> {
     this._globalProgressBarService.countUp(T.GPB.WEB_DAV_UPLOAD);
     try {
-      const r = await this._webDavApiService.upload({
+      const headers = await this._webDavApiService.upload({
         data,
         localRev,
         isForceOverwrite,
       });
-      console.log(r);
+      console.log(headers);
       this._globalProgressBarService.countDown();
-      return r.headers.etag;
+      return headers.etag;
     } catch (e) {
       console.error(e);
       this._globalProgressBarService.countDown();
