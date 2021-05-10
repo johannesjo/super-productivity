@@ -7,7 +7,6 @@ import { WebDavConfig } from '../../../features/config/global-config.model';
 // @ts-ignore
 import { createClient } from 'webdav/web';
 import { AppDataComplete } from '../sync.model';
-import { AxiosResponse } from 'axios';
 
 @Injectable({ providedIn: 'root' })
 export class WebDavApiService {
@@ -40,7 +39,15 @@ export class WebDavApiService {
     localRev?: string | null;
     data: AppDataComplete;
     isForceOverwrite?: boolean;
-  }): Promise<AxiosResponse> {
+  }): Promise<{
+    basename: string;
+    etag: string;
+    filename: string;
+    lastmod: string;
+    mime: string;
+    size: number;
+    type: string;
+  }> {
     await this._isReady$.toPromise();
     const cfg = await this._cfg$.pipe(first()).toPromise();
     const client = createClient(cfg.baseUrl, {
