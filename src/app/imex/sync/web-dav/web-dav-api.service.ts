@@ -82,7 +82,7 @@ export class WebDavApiService {
     });
     const r = await client.customRequest(path, { method: 'HEAD' });
     console.log(r);
-    return r;
+    return r.headers;
   }
 
   async download({
