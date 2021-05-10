@@ -10,6 +10,9 @@ import { standardListAnimation } from '../../ui/animations/standard-list.ani';
 import { getTomorrow } from '../../util/get-tomorrow';
 import { TimelineViewEntryType } from './timeline.const';
 import { GlobalConfigService } from '../config/global-config.service';
+import { MatDialog } from '@angular/material/dialog';
+import { LS_WAS_TIMELINE_INITIAL_DIALOG_SHOWN } from '../../core/persistence/ls-keys.const';
+import { DialogTimelineInitialSetupComponent } from './dialog-timeline-initial-setup/dialog-timeline-initial-setup.component';
 
 // const d = new Date();
 // d.setTime(13);
@@ -65,7 +68,12 @@ export class TimelineComponent {
     private _workContextService: WorkContextService,
     private _taskService: TaskService,
     private _globalConfigService: GlobalConfigService,
-  ) {}
+    private _matDialog: MatDialog,
+  ) {
+    if (!localStorage.getItem(LS_WAS_TIMELINE_INITIAL_DIALOG_SHOWN)) {
+      this._matDialog.open(DialogTimelineInitialSetupComponent);
+    }
+  }
 
   trackByFn(i: number, item: any) {
     return item.id;

@@ -1,0 +1,34 @@
+<h1 mat-dialog-title>
+  <mat-icon>timeline</mat-icon>
+  <span style="margin-left: 8px">{{T.F.TIMELINE.D_INITIAL.TITLE|translate}}</span>
+</h1>
+
+<form (submit)="saveAndClose()" [formGroup]="formGroup">
+  <mat-dialog-content>
+    <div class="text" [innerHTML]="T.F.TIMELINE.D_INITIAL.TEXT|translate"></div>
+
+    <formly-form
+      (modelChange)="timelineCfg=$event"
+      [fields]="formConfig"
+      [form]="formGroup"
+      [model]="timelineCfg"
+    >
+    </formly-form>
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end">
+    <button (click)="close()" color="primary" mat-button type="button">
+      {{T.G.CANCEL|translate}}
+    </button>
+
+    <button
+      [disabled]="!formGroup.valid"
+      color="primary"
+      mat-stroked-button
+      type="submit"
+    >
+      <mat-icon>save</mat-icon>
+      {{T.G.OK|translate}}
+    </button>
+  </mat-dialog-actions>
+</form>

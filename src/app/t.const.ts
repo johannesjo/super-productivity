@@ -793,6 +793,10 @@ const T = {
     TIMELINE: {
       MENU_TITLE: 'F.TIMELINE.MENU_TITLE',
       NOW: 'F.TIMELINE.NOW',
+      D_INITIAL: {
+        TITLE: 'F.TIMELINE.D_INITIAL.TITLE',
+        TEXT: 'F.TIMELINE.D_INITIAL.TEXT',
+      },
     },
     TIME_TRACKING: {
       B: {
