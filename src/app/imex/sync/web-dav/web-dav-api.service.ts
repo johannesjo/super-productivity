@@ -52,6 +52,7 @@ export class WebDavApiService {
       contentLength: false,
       //, overwrite: isForceOverwrite
     });
+    const r = await this.getMetaData('/' + cfg.syncFilePath);
     return r;
   }
 
