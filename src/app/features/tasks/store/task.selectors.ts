@@ -1,9 +1,8 @@
 import { createFeatureSelector, createSelector } from '@ngrx/store';
 import { TASK_FEATURE_NAME } from './task.reducer';
-import { Task, TaskState, TaskWithReminder, TaskWithSubTasks } from '../task.model';
+import { Task, TaskPlanned, TaskState, TaskWithSubTasks } from '../task.model';
 import { taskAdapter } from './task.adapter';
 import { devError } from '../../../util/dev-error';
-import { TODAY_TAG } from '../../tag/tag.const';
 
 // TODO fix null stuff here
 
@@ -148,38 +147,41 @@ export const selectCurrentTaskParentOrCurrent = createSelector(
     s.entities[s.currentTaskId],
 );
 
-export const selectPlannedTasks = createSelector(selectTaskFeatureState, (s): Task[] => {
-  const allTasks: Task[] = [];
-  const allParent = s.ids
-    .map((id) => s.entities[id] as Task)
-    .filter(
-      (task) => !task.parentId && (task.plannedAt || task.tagIds.includes(TODAY_TAG.id)),
-    );
+export const selectPlannedTimelineTasks = createSelector(
+  selectTaskFeatureState,
+  (s): TaskPlanned[] => {
+    const allTasks: TaskPlanned[] = [];
+    const allParent: TaskPlanned[] = s.ids
+      .map((id) => s.entities[id] as TaskPlanned)
+      // TODO remove reminderId check later
+      .filter((task) => !task.parentId && task.plannedAt && task.reminderId);
 
-  allParent.forEach((pt) => {
-    if (pt.subTaskIds.length) {
-      pt.subTaskIds.forEach((subId) => {
-        const st = s.entities[subId] as Task;
-        // const par: Task = s.entities[st.parentId as string] as Task;
-        allTasks.push({
-          ...st,
-          plannedAt:
-            st.plannedAt ||
-            (!st.isDone ? (s.entities[st.parentId as string] as Task).plannedAt : null),
+    allParent.forEach((pt) => {
+      if (pt.subTaskIds.length) {
+        pt.subTaskIds.forEach((subId) => {
+          const st = s.entities[subId] as Task;
+          if (!st.isDone) {
+            allTasks.push({
+              ...st,
+              plannedAt:
+                st.plannedAt ||
+                ((s.entities[st.parentId as string] as Task).plannedAt as number),
+            });
+          }
         });
-      });
-    } else {
-      allTasks.push(pt);
-    }
-  });
-  return allTasks;
-});
-
-export const selectScheduledTasksWithReminder = createSelector(
-  selectPlannedTasks,
-  (tasks: Task[]): TaskWithReminder[] =>
-    tasks.filter((task) => !!task.reminderId) as TaskWithReminder[],
+      } else {
+        allTasks.push(pt);
+      }
+    });
+    return allTasks;
+  },
 );
+
+// export const selectScheduledTasksWithReminder = createSelector(
+//   selectPlannedTasks,
+//   (tasks: Task[]): TaskWithReminder[] =>
+//     tasks.filter((task) => !!task.reminderId) as TaskWithReminder[],
+// );
 
 export const selectAllTasks = createSelector(selectTaskFeatureState, selectAll);
 export const selectScheduledTasks = createSelector(selectAllTasks, (tasks) =>

@@ -37,7 +37,7 @@ export class TimelineComponent {
   // timelineEntries$ = this._workContextService.todaysTasks$.pipe(
   timelineEntries$: Observable<TimelineViewEntry[]> = combineLatest([
     this._workContextService.startableTasksForActiveContext$,
-    this._taskService.allScheduledWithReminder$,
+    this._taskService.plannedTasksForTimeline$,
     this._taskService.currentTaskId$,
   ]).pipe(
     // map(([startableTasks, scheduledTasks, currentId]) =>

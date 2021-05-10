@@ -1,4 +1,4 @@
-import { TaskCopy, TaskWithReminder } from '../tasks/task.model';
+import { TaskCopy, TaskPlanned } from '../tasks/task.model';
 import { TimelineViewEntryType } from './timeline.const';
 
 interface TimelineViewEntryBase {
@@ -73,7 +73,7 @@ export interface BlockedBlockEntryScheduledTask {
   start: number;
   end: number;
   type: BlockedBlockType.ScheduledTask;
-  data: TaskWithReminder;
+  data: TaskPlanned;
 }
 
 export interface BlockedBlockEntryWorkdayStartEnd {

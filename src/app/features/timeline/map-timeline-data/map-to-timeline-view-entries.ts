@@ -1,4 +1,4 @@
-import { Task, TaskWithoutReminder, TaskWithReminder } from '../../tasks/task.model';
+import { Task, TaskPlanned, TaskWithoutReminder } from '../../tasks/task.model';
 import {
   BlockedBlock,
   BlockedBlockType,
@@ -20,7 +20,7 @@ import {
 
 export const mapToTimelineViewEntries = (
   tasks: Task[],
-  scheduledTasks: TaskWithReminder[],
+  scheduledTasks: TaskPlanned[],
   currentId: string | null,
   workStartEndCfg?: TimelineWorkStartEndCfg,
   now: number = Date.now(),

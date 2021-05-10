@@ -1,4 +1,4 @@
-import { TaskWithReminder } from '../../tasks/task.model';
+import { TaskPlanned } from '../../tasks/task.model';
 import {
   BlockedBlock,
   BlockedBlockType,
@@ -8,7 +8,7 @@ import { getTimeLeftForTask } from '../../../util/get-time-left-for-task';
 import { getDateTimeFromClockString } from '../../../util/get-date-time-from-clock-string';
 
 export const createSortedBlockerBlocks = (
-  scheduledTasks: TaskWithReminder[],
+  scheduledTasks: TaskPlanned[],
   workStartEndCfg?: TimelineWorkStartEndCfg,
   now?: number,
 ): BlockedBlock[] => {
@@ -73,7 +73,7 @@ const createBlockerBlocksForWorkStartEnd = (
   return blockedBlocks;
 };
 
-const createBlockerBlocksForScheduledTasks = (scheduledTasks: TaskWithReminder[]) => {
+const createBlockerBlocksForScheduledTasks = (scheduledTasks: TaskPlanned[]) => {
   const blockedBlocks: BlockedBlock[] = [];
   scheduledTasks.forEach((task) => {
     const start = task.plannedAt;

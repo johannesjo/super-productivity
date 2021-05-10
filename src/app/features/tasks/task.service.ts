@@ -18,9 +18,9 @@ import {
   Task,
   TaskAdditionalInfoTargetPanel,
   TaskArchive,
+  TaskPlanned,
   TaskReminderOptionId,
   TaskState,
-  TaskWithReminder,
   TaskWithSubTasks,
 } from './task.model';
 import { select, Store } from '@ngrx/store';
@@ -63,7 +63,7 @@ import {
   selectCurrentTaskParentOrCurrent,
   selectIsTaskDataLoaded,
   selectMainTasksWithoutTag,
-  selectScheduledTasksWithReminder,
+  selectPlannedTimelineTasks,
   selectSelectedTask,
   selectSelectedTaskId,
   selectStartableTasks,
@@ -154,8 +154,8 @@ export class TaskService {
 
   allStartableTasks$: Observable<Task[]> = this._store.pipe(select(selectStartableTasks));
 
-  allScheduledWithReminder$: Observable<TaskWithReminder[]> = this._store.pipe(
-    select(selectScheduledTasksWithReminder),
+  plannedTasksForTimeline$: Observable<TaskPlanned[]> = this._store.pipe(
+    select(selectPlannedTimelineTasks),
   );
 
   // META FIELDS
