@@ -72,7 +72,7 @@ export class WebDavApiService {
       username: cfg.userName,
       password: cfg.password,
     });
-    const r = await client.stat(path);
+    const r = await client.customRequest(path, { method: 'HEAD' });
     console.log(r);
     return r;
   }
