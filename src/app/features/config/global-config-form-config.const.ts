@@ -14,6 +14,7 @@ import { TRACKING_REMINDER_FORM_CFG } from './form-cfgs/tracking-reminder-form.c
 import { SYNC_FORM } from './form-cfgs/sync-form.const';
 import { IS_ELECTRON } from '../../app.constants';
 import { IS_ANDROID_WEB_VIEW } from '../../util/is-android-web-view';
+import { TIMELINE_FORM_CFG } from './form-cfgs/timeline-form.const';
 
 export const GLOBAL_CONFIG_FORM_CONFIG: ConfigFormConfig = [
   LANGUAGE_SELECTION_FORM_FORM as GenericConfigFormSection,
@@ -21,6 +22,7 @@ export const GLOBAL_CONFIG_FORM_CONFIG: ConfigFormConfig = [
   IDLE_FORM_CFG as GenericConfigFormSection,
   KEYBOARD_SETTINGS_FORM_CFG as GenericConfigFormSection,
   TRACKING_REMINDER_FORM_CFG as GenericConfigFormSection,
+  TIMELINE_FORM_CFG as GenericConfigFormSection,
   SOUND_FORM_CFG as GenericConfigFormSection,
 ].filter((cfg) => IS_ELECTRON || !cfg.isElectronOnly);
 

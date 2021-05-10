@@ -9,7 +9,7 @@ import { MODEL_VERSION_KEY } from '../../app.constants';
 import { isMigrateModel } from '../../util/model-version';
 import { SyncProvider } from '../../imex/sync/sync-provider.model';
 
-const MODEL_VERSION = 2.2001;
+const MODEL_VERSION = 2.2002;
 
 export const migrateGlobalConfigState = (
   globalConfigState: GlobalConfigState,

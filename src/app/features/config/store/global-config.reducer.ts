@@ -7,6 +7,7 @@ import {
   MiscConfig,
   SoundConfig,
   TakeABreakConfig,
+  TimelineConfig,
 } from '../global-config.model';
 import { DEFAULT_GLOBAL_CONFIG } from '../default-global-config.const';
 import { loadAllData } from '../../../root-store/meta/load-all-data.action';
@@ -36,6 +37,10 @@ export const selectIdleConfig = createSelector(
 export const selectTakeABreakConfig = createSelector(
   selectConfigFeatureState,
   (cfg): TakeABreakConfig => cfg.takeABreak,
+);
+export const selectTimelineConfig = createSelector(
+  selectConfigFeatureState,
+  (cfg): TimelineConfig => cfg.timeline,
 );
 
 export const initialState: GlobalConfigState = DEFAULT_GLOBAL_CONFIG;

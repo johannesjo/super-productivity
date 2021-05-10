@@ -120,6 +120,11 @@ export const DEFAULT_GLOBAL_CONFIG: GlobalConfigState = {
     isShowOnMobile: false,
     minTime: minute * 2,
   },
+  timeline: {
+    isWorkStartEndEnabled: true,
+    workStart: '9:00',
+    workEnd: '17:00',
+  },
 
   sync: {
     isEnabled: false,

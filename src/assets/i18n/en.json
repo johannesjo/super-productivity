@@ -1042,6 +1042,14 @@
       "MOTIVATIONAL_IMG": "Motivational image (web url)",
       "TITLE": "Break Reminder"
     },
+    "TIMELINE": {
+      "HELP": "The timeline feature should provide you with a quick overview over how your planned tasks play out over time. You can find it in the left hand menu under <a href='#/timeline'>'Timeline'</a>. ",
+      "L_IS_WORK_START_END_ENABLED": "Limit unscheduled task flow to specific work times",
+      "L_WORK_END": "Work Day End",
+      "L_WORK_START": "Work Day Start",
+      "TITLE": "Timeline",
+      "WORK_START_END_DESCRIPTION": "e.g. 17:00"
+    },
     "TRACKING_REMINDER": {
       "HELP": "Configure a banner to show up in case you forgot to start time tracking.",
       "L_IS_ENABLED": "Enabled",

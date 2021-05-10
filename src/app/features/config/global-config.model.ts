@@ -103,6 +103,12 @@ export type SyncConfig = Readonly<{
   webDav: WebDavConfig;
 }>;
 
+export type TimelineConfig = Readonly<{
+  isWorkStartEndEnabled: boolean;
+  workStart: string;
+  workEnd: string;
+}>;
+
 export type TrackingReminderConfig = Readonly<{
   isEnabled: boolean;
   isShowOnMobile: boolean;
@@ -120,6 +126,7 @@ export type GlobalConfigState = Readonly<{
   localBackup: LocalBackupConfig;
   sound: SoundConfig;
   trackingReminder: TrackingReminderConfig;
+  timeline: TimelineConfig;
 
   sync: SyncConfig;
 
