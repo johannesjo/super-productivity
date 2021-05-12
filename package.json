@@ -10,21 +10,26 @@
     "type": "git",
     "url": "git://github.com/johannesjo/super-productivity.git"
   },
-  "browserslist": [
-    "> 0.5%"
-    "last 2 versions"
-    "not dead"
-    "not IE 9-11"
-    "not edge < 79"
-    "not baidu < 10"
-    "not ie_mob < 12"
-    "not kaios < 5"
-    "not op_mini all"
-    "not op_mob < 60"
-    "not bb < 14"
-    "not and_uc < 13"
-    "not and_qq < 2"
-  ],
+  "browserslist": {
+    "production": [
+      "> 0.5%",
+      "last 2 versions",
+      "not dead",
+      "not IE 9-11",
+      "not edge < 79",
+      "not baidu < 10",
+      "not ie_mob < 12",
+      "not kaios < 5",
+      "not op_mini all",
+      "not op_mob < 60",
+      "not bb < 14",
+      "not and_uc < 13",
+      "not and_qq < 2"
+    ],
+    "modern": [
+      "supports es6-module"
+    ]
+  },
   "keywords": [
     "ToDo",
     "Task Management",
@@ -42,6 +47,7 @@
     "start": "yarn electron:build && cross-env NODE_ENV=DEV electron .",
     "startFrontend": "ng serve",
     "serveProd": "ng serve --prod",
+    "buildFrontend:prod:es6": "cross-env BROWSERSLIST_ENV='modern' ng build --prod",
     "buildFrontend:prod": "ng build --prod",
     "buildFrontend:prodWeb": "ng build --prod --configuration productionWeb",
     "buildFrontend:stage": "ng build --prod --configuration stage",
