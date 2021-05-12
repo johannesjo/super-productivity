@@ -106,8 +106,10 @@
     "electron-dl": "^3.2.1",
     "electron-localshortcut": "^3.1.0",
     "electron-window-state": "^5.0.3",
-    "googleapis": "^73.0.0",
-    "node-fetch": "^2.6.1",
+    "node-fetch": "^2.6.1"
+  },
+  "optionalDependencies": {
+    "googleapis": "^73.0.0"
   },
   "devDependencies": {
     "stacktrace-js": "^2.0.1",
