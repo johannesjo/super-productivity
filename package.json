@@ -10,6 +10,21 @@
     "type": "git",
     "url": "git://github.com/johannesjo/super-productivity.git"
   },
+  "browserslist": [
+    "> 0.5%"
+    "last 2 versions"
+    "not dead"
+    "not IE 9-11"
+    "not edge < 79"
+    "not baidu < 10"
+    "not ie_mob < 12"
+    "not kaios < 5"
+    "not op_mini all"
+    "not op_mob < 60"
+    "not bb < 14"
+    "not and_uc < 13"
+    "not and_qq < 2"
+  ],
   "keywords": [
     "ToDo",
     "Task Management",
