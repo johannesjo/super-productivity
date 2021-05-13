@@ -13,9 +13,15 @@ const FAKE_TASK: TaskCopy = {
 const minutes = (n: number): number => n * 60 * 1000;
 const hours = (n: number): number => 60 * minutes(n);
 
+// NOTE: needs to be corrected for timezone, as otherwise won't work on non berlin/paris servers
+// eslint-disable-next-line no-mixed-operators
+const timezoneOffset = new Date().getTimezoneOffset() * 60000 + hours(2);
+const getFromClockStr = (clockString: string, date: number | Date): number =>
+  getDateTimeFromClockString(clockString, date) + timezoneOffset;
+
 describe('createTimelineViewEntriesForNormalTasks()', () => {
   it('should work', () => {
-    const now = getDateTimeFromClockString('9:20', 0);
+    const now = getFromClockStr('9:20', 0) - timezoneOffset;
     const fakeTasks = [
       { ...FAKE_TASK, timeEstimate: hours(1) },
       { ...FAKE_TASK, timeEstimate: hours(1), timeSpent: hours(0.5) },
@@ -94,7 +100,7 @@ describe('createTimelineViewEntriesForNormalTasks()', () => {
   });
 
   it('should work for non ordered scheduled tasks', () => {
-    const now = getDateTimeFromClockString('9:30', 0);
+    const now = getFromClockStr('9:30', 0);
     const fakeTasks = [
       { ...FAKE_TASK, timeEstimate: hours(1), id: 'OTHER_TASK_ID' },
     ] as TaskWithoutReminder[];
@@ -117,7 +123,7 @@ describe('createTimelineViewEntriesForNormalTasks()', () => {
   });
 
   it('should not mess up when there is a scheduled task in between tasks', () => {
-    const now = getDateTimeFromClockString('9:30', 0);
+    const now = getFromClockStr('9:30', 0);
 
     const fakeTasks = [
       { ...FAKE_TASK, timeEstimate: hours(1), id: 'T1' },
