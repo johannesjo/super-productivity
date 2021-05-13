@@ -48,6 +48,7 @@ export const isValidAppData = (
       (isSkipInconsistentTaskStateError ||
         (_isAllTasksAvailableAndListConsistent(d) && _isNoLonelySubTasks(d))) &&
       _isAllProjectsAvailable(d) &&
+      _isAllTagsAvailable(d) &&
       _isAllTasksHaveAProjectOrTag(d)
     : typeof dAny === 'object';
   // console.timeEnd('time isValidAppData');
@@ -71,6 +72,31 @@ const _isAllProjectsAvailable = (data: AppDataComplete): boolean => {
     if (t.projectId && !pids.includes(t.projectId)) {
       console.log(t);
       devError(`projectId ${t.projectId} from archive task not existing`);
+      isValid = false;
+    }
+  });
+
+  return isValid;
+};
+
+const _isAllTagsAvailable = (data: AppDataComplete): boolean => {
+  let isValid: boolean = true;
+  const allTagIds = data.tag.ids as string[];
+  data.task.ids.forEach((id: string) => {
+    const t: Task = data.task.entities[id] as Task;
+    const missingTagId = t.tagIds.find((tagId) => !allTagIds.includes(tagId));
+    if (missingTagId) {
+      console.log(t);
+      devError(`tagId "${missingTagId}" from task not existing`);
+      isValid = false;
+    }
+  });
+  data.taskArchive.ids.forEach((id: string) => {
+    const t: Task = data.task.entities[id] as Task;
+    const missingTagId = t.tagIds.find((tagId) => !allTagIds.includes(tagId));
+    if (missingTagId) {
+      console.log(t);
+      devError(`tagId "${missingTagId}" from task archive not existing`);
       isValid = false;
     }
   });
