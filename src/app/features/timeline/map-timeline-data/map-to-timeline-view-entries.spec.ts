@@ -1,7 +1,7 @@
 import { mapToTimelineViewEntries } from './map-to-timeline-view-entries';
 import { TaskCopy } from '../../tasks/task.model';
-import { getDateTimeFromClockString } from '../../../util/get-date-time-from-clock-string';
 import { TimelineViewEntryType } from '../timeline.const';
+import { getDateTimeFromClockString } from '../../../util/get-date-time-from-clock-string';
 
 const FID = 'FAKE_TASK_ID';
 const FAKE_TASK: TaskCopy = {
@@ -14,13 +14,7 @@ const FAKE_TASK: TaskCopy = {
 const minutes = (n: number): number => n * 60 * 1000;
 const hours = (n: number): number => 60 * minutes(n);
 
-// NOTE: needs to be corrected for timezone, as otherwise won't work on non berlin/paris servers
-// eslint-disable-next-line no-mixed-operators
-const timezoneOffset = new Date().getTimezoneOffset() * 60000 + hours(2);
-const getFromClockStr = (clockString: string, date: number | Date): number =>
-  getDateTimeFromClockString(clockString, date) + timezoneOffset;
-
-xdescribe('mapToViewEntries()', () => {
+describe('mapToViewEntries()', () => {
   describe('basic', () => {
     it('should work for simple task list', () => {
       const now = 33;
@@ -45,7 +39,7 @@ xdescribe('mapToViewEntries()', () => {
     });
 
     it('should work for simple task list 2', () => {
-      const now = getFromClockStr('7:23', 0);
+      const now = getDateTimeFromClockString('7:23', 0);
       const nonScheduledTasks = [
         { ...FAKE_TASK, timeEstimate: hours(1) },
         { ...FAKE_TASK, timeEstimate: hours(1) },
@@ -102,7 +96,7 @@ xdescribe('mapToViewEntries()', () => {
     });
 
     it('should work for simple task list 3', () => {
-      const now = getFromClockStr('7:23', 0);
+      const now = getDateTimeFromClockString('7:23', 0);
       const nonScheduledTasks = [
         { ...FAKE_TASK, timeEstimate: 5000 },
         { ...FAKE_TASK, timeEstimate: 8000 },
@@ -159,7 +153,7 @@ xdescribe('mapToViewEntries()', () => {
     });
 
     it('should work for simple task list 4', () => {
-      // const now = getFromClockStr('7:23', 0);
+      // const now = getDateTimeFromClockString('7:23', 0);
       const now = 1619983090852;
       const nonScheduledTasks = [
         { ...FAKE_TASK, timeSpent: 21014, timeEstimate: 900000 },
@@ -191,7 +185,7 @@ xdescribe('mapToViewEntries()', () => {
 
   describe('scheduledTasks', () => {
     it('should filter out scheduled tasks from normal tasks', () => {
-      const now = getFromClockStr('9:20', 0);
+      const now = getDateTimeFromClockString('9:20', 0);
       const nonScheduledTasks = [
         { ...FAKE_TASK, timeEstimate: hours(1) },
         {
@@ -199,7 +193,7 @@ xdescribe('mapToViewEntries()', () => {
           id: 'S_ID',
           timeEstimate: hours(1),
           reminderId: 'R:ID',
-          plannedAt: getFromClockStr('10:25', 0),
+          plannedAt: getDateTimeFromClockString('10:25', 0),
         },
       ];
       const r = mapToTimelineViewEntries(nonScheduledTasks, [], null, undefined, now);
@@ -207,8 +201,8 @@ xdescribe('mapToViewEntries()', () => {
     });
 
     it('should split tasks as required', () => {
-      const now = getFromClockStr('9:20', 0);
-      const plannedTaskStartTime = getFromClockStr('10:25', 0);
+      const now = getDateTimeFromClockString('9:20', 0);
+      const plannedTaskStartTime = getDateTimeFromClockString('10:25', 0);
       const scheduledTasks = [
         {
           ...FAKE_TASK,
@@ -291,8 +285,8 @@ xdescribe('mapToViewEntries()', () => {
     });
 
     it('should work for non ordered scheduled tasks', () => {
-      const now = getFromClockStr('9:30', 0);
-      const plannedTaskStartTime = getFromClockStr('12:26', 0);
+      const now = getDateTimeFromClockString('9:30', 0);
+      const plannedTaskStartTime = getDateTimeFromClockString('12:26', 0);
 
       const nonScheduledTasks = [
         { ...FAKE_TASK, timeEstimate: hours(1), id: 'OTHER_TASK_ID' },
@@ -334,8 +328,11 @@ xdescribe('mapToViewEntries()', () => {
     it('should work for scheduled task after a single normal task', () => {});
 
     it('should work for far away planned tasks', () => {
-      const now = getFromClockStr('9:20', 0);
-      const plannedTaskStartTime = getFromClockStr('12:25', 25 * 60 * 60 * 1000);
+      const now = getDateTimeFromClockString('9:20', 0);
+      const plannedTaskStartTime = getDateTimeFromClockString(
+        '12:25',
+        25 * 60 * 60 * 1000,
+      );
       const scheduledTasks = [
         {
           ...FAKE_TASK,
@@ -367,7 +364,7 @@ xdescribe('mapToViewEntries()', () => {
     });
 
     it('should work for sophisticated scenarios', () => {
-      const now = getFromClockStr('11:00', 0);
+      const now = getDateTimeFromClockString('11:00', 0);
       const scheduledTasks = [
         {
           id: 'S4_NO_DURATION',
@@ -375,7 +372,7 @@ xdescribe('mapToViewEntries()', () => {
           timeEstimate: 0,
           title: 'Scheduled 4 (no duration) 16:00',
           reminderId: 'xxx',
-          plannedAt: getFromClockStr('16:00', 0),
+          plannedAt: getDateTimeFromClockString('16:00', 0),
         },
         {
           id: 'S_NO_OVERLAP',
@@ -383,7 +380,7 @@ xdescribe('mapToViewEntries()', () => {
           timeEstimate: hours(1),
           title: 'Scheduled 5 no overlap 23:00',
           reminderId: 'xxx',
-          plannedAt: getFromClockStr('23:00', 0),
+          plannedAt: getDateTimeFromClockString('23:00', 0),
         },
         {
           id: 'S3',
@@ -391,7 +388,7 @@ xdescribe('mapToViewEntries()', () => {
           timeEstimate: hours(2),
           title: 'Scheduled 3 17:00',
           reminderId: 'xxx',
-          plannedAt: getFromClockStr('17:00', 0),
+          plannedAt: getDateTimeFromClockString('17:00', 0),
         },
         {
           id: 'S1',
@@ -407,7 +404,7 @@ xdescribe('mapToViewEntries()', () => {
           timeEstimate: hours(2.5),
           title: 'Scheduled 2 15:30',
           reminderId: 'xxx',
-          plannedAt: getFromClockStr('15:30', 0),
+          plannedAt: getDateTimeFromClockString('15:30', 0),
         },
       ] as any;
       const nonScheduledTasks: TaskCopy[] = [
@@ -684,13 +681,13 @@ xdescribe('mapToViewEntries()', () => {
 
   describe('splitTasks', () => {
     it('should work for a simple task', () => {
-      const now = getFromClockStr('9:00', 0);
+      const now = getDateTimeFromClockString('9:00', 0);
       const normalTask = { ...FAKE_TASK, timeEstimate: hours(3) };
       const scheduledTask = {
         ...FAKE_TASK,
         timeEstimate: hours(1),
         reminderId: 'X',
-        plannedAt: getFromClockStr('10:00', 0),
+        plannedAt: getDateTimeFromClockString('10:00', 0),
       };
       const r = mapToTimelineViewEntries(
         [normalTask],
@@ -731,19 +728,19 @@ xdescribe('mapToViewEntries()', () => {
     });
 
     it('should split multiple times', () => {
-      const now = getFromClockStr('9:00', 0);
+      const now = getDateTimeFromClockString('9:00', 0);
       const normalTask = { ...FAKE_TASK, timeEstimate: hours(3) };
       const scheduledTask = {
         ...FAKE_TASK,
         timeEstimate: hours(1),
         reminderId: 'X',
-        plannedAt: getFromClockStr('10:00', 0),
+        plannedAt: getDateTimeFromClockString('10:00', 0),
       };
       const scheduledTask2 = {
         ...FAKE_TASK,
         timeEstimate: hours(1),
         reminderId: 'X',
-        plannedAt: getFromClockStr('12:00', 0),
+        plannedAt: getDateTimeFromClockString('12:00', 0),
       };
       const nonScheduledTasks = [normalTask];
       const scheduledTasks = [scheduledTask, scheduledTask2];
@@ -773,7 +770,7 @@ xdescribe('mapToViewEntries()', () => {
         {
           id: normalTask.id + '__0',
           type: TimelineViewEntryType.SplitTaskContinued,
-          start: getFromClockStr('11:00', 0),
+          start: getDateTimeFromClockString('11:00', 0),
           data: {
             title: normalTask.title,
             timeToGo: hours(1),
@@ -792,7 +789,7 @@ xdescribe('mapToViewEntries()', () => {
         {
           id: normalTask.id + '__1',
           type: TimelineViewEntryType.SplitTaskContinuedLast,
-          start: getFromClockStr('13:00', 0),
+          start: getDateTimeFromClockString('13:00', 0),
           data: {
             title: normalTask.title,
             timeToGo: hours(1),
@@ -805,13 +802,13 @@ xdescribe('mapToViewEntries()', () => {
     });
 
     it('should calculate the right time', () => {
-      const now = getFromClockStr('18:00', 0);
+      const now = getDateTimeFromClockString('18:00', 0);
       const normalTask = { ...FAKE_TASK, timeEstimate: hours(30) };
       const scheduledTask = {
         ...FAKE_TASK,
         timeEstimate: hours(1),
         reminderId: 'X',
-        plannedAt: getFromClockStr('19:00', 0),
+        plannedAt: getDateTimeFromClockString('19:00', 0),
       };
       const r = mapToTimelineViewEntries(
         [normalTask],
@@ -854,9 +851,9 @@ xdescribe('mapToViewEntries()', () => {
 
   describe('workStartEnd', () => {
     //   it('should add work start entry if now is before start', () => {
-    //     const now = getFromClockStr('7:23', 0);
+    //     const now = getDateTimeFromClockString('7:23', 0);
     //     const workStartTimeString = '9:00';
-    //     const workStartTime = getFromClockStr(workStartTimeString, 0);
+    //     const workStartTime = getDateTimeFromClockString(workStartTimeString, 0);
     //     const nonScheduledTasks = [
     //       {...FAKE_TASK, timeEstimate: 5000},
     //       {...FAKE_TASK},
@@ -888,7 +885,7 @@ xdescribe('mapToViewEntries()', () => {
     //   });
     //
     //   it('should not add work start entry if now is before start and there is a current task', () => {
-    //     const now = getFromClockStr('7:23', 0);
+    //     const now = getDateTimeFromClockString('7:23', 0);
     //     const workStartTimeString = '9:00';
     //     const nonScheduledTasks = [
     //       {...FAKE_TASK, timeEstimate: 5000, id: 'CURRENT_TASK_ID'},
@@ -915,7 +912,7 @@ xdescribe('mapToViewEntries()', () => {
     //   });
     //
     //   it('should not add work end entry if tasks take longer than that', () => {
-    //     const now = getFromClockStr('16:23', 0);
+    //     const now = getDateTimeFromClockString('16:23', 0);
     //     const workEndTimeString = '18:00';
     //     const nonScheduledTasks = [
     //       {...FAKE_TASK, timeEstimate: hours(2), title: 'Some task title'},
@@ -967,7 +964,7 @@ xdescribe('mapToViewEntries()', () => {
     //
 
     it('should work for very long tasks', () => {
-      const now = getFromClockStr('9:00', 0);
+      const now = getDateTimeFromClockString('9:00', 0);
 
       const longTask = { ...FAKE_TASK, id: 'LONG_ID', timeEstimate: hours(16) };
 
@@ -976,7 +973,7 @@ xdescribe('mapToViewEntries()', () => {
         id: 'S_ID',
         timeEstimate: hours(2),
         reminderId: 'X',
-        plannedAt: getFromClockStr('14:00', 0),
+        plannedAt: getDateTimeFromClockString('14:00', 0),
       };
 
       const r = mapToTimelineViewEntries(
@@ -1015,21 +1012,21 @@ xdescribe('mapToViewEntries()', () => {
       });
       expect(r[3]).toEqual({
         type: TimelineViewEntryType.WorkdayEnd,
-        start: getFromClockStr('17:00', 0),
+        start: getDateTimeFromClockString('17:00', 0),
         id: 'DAY_END_57600000',
         isHideTime: true,
         data: { endTime: '17:00', startTime: '9:00' },
       });
       expect(r[4]).toEqual({
         type: TimelineViewEntryType.WorkdayStart,
-        start: getFromClockStr('9:00', 24 * 60 * 60000),
+        start: getDateTimeFromClockString('9:00', 24 * 60 * 60000),
         id: 'DAY_START_115200000',
         isHideTime: true,
         data: { endTime: '17:00', startTime: '9:00' },
       });
       expect(r[5]).toEqual({
         type: TimelineViewEntryType.SplitTaskContinued,
-        start: getFromClockStr('9:00', 24 * 60 * 60000),
+        start: getDateTimeFromClockString('9:00', 24 * 60 * 60000),
         id: longTask.id + '__1',
         isHideTime: false,
         data: {
@@ -1042,21 +1039,21 @@ xdescribe('mapToViewEntries()', () => {
       });
       expect(r[6]).toEqual({
         type: TimelineViewEntryType.WorkdayEnd,
-        start: getFromClockStr('17:00', 24 * 60 * 60000),
+        start: getDateTimeFromClockString('17:00', 24 * 60 * 60000),
         id: 'DAY_END_144000000',
         isHideTime: true,
         data: { endTime: '17:00', startTime: '9:00' },
       });
       expect(r[7]).toEqual({
         type: TimelineViewEntryType.WorkdayStart,
-        start: getFromClockStr('9:00', 2 * 24 * 60 * 60000),
+        start: getDateTimeFromClockString('9:00', 2 * 24 * 60 * 60000),
         id: 'DAY_START_201600000',
         isHideTime: true,
         data: { endTime: '17:00', startTime: '9:00' },
       });
       expect(r[8]).toEqual({
         type: TimelineViewEntryType.SplitTaskContinuedLast,
-        start: getFromClockStr('9:00', 2 * 24 * 60 * 60000),
+        start: getDateTimeFromClockString('9:00', 2 * 24 * 60 * 60000),
         id: longTask.id + '__2',
         isHideTime: false,
         data: {
