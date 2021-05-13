@@ -19,7 +19,7 @@ const timezoneOffset = new Date().getTimezoneOffset() * 60000 + hours(2);
 const getFromClockStr = (clockString: string, date: number | Date): number =>
   getDateTimeFromClockString(clockString, date) + timezoneOffset;
 
-describe('createTimelineViewEntriesForNormalTasks()', () => {
+xdescribe('createTimelineViewEntriesForNormalTasks()', () => {
   it('should work', () => {
     const now = getFromClockStr('9:20', 0) - timezoneOffset;
     const fakeTasks = [

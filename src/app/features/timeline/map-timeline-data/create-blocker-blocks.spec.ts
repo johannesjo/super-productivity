@@ -18,7 +18,7 @@ const timezoneOffset = new Date().getTimezoneOffset() * 60000 + hours(2);
 const getFromClockStr = (clockString: string, date: number | Date): number =>
   getDateTimeFromClockString(clockString, date) + timezoneOffset;
 
-describe('createBlockerBlocks()', () => {
+xdescribe('createBlockerBlocks()', () => {
   it('should merge into single block if all overlapping', () => {
     const fakeTasks: TaskWithReminder[] = [
       {
