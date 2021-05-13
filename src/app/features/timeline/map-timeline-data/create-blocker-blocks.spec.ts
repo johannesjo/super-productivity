@@ -1,7 +1,11 @@
 import { createSortedBlockerBlocks } from './create-sorted-blocker-blocks';
 import { TaskWithReminder } from '../../tasks/task.model';
 import { getDateTimeFromClockString } from '../../../util/get-date-time-from-clock-string';
-
+// import * as timezoneMock from 'timezone-mock';
+// beforeEach(() => {
+//   // timezoneMock.register('US/Pacific');
+//   timezoneMock.register('UTC');
+// });
 const minutes = (n: number): number => n * 60 * 1000;
 const hours = (n: number): number => 60 * minutes(n);
 
@@ -12,13 +16,7 @@ const BASE_REMINDER_TASK = (startTime: string, note?: string): any => ({
   title: startTime + ' ' + (note ? note : ' – reminderTask'),
 });
 
-// NOTE: needs to be corrected for timezone, as otherwise won't work on non berlin/paris servers
-// eslint-disable-next-line no-mixed-operators
-const timezoneOffset = new Date().getTimezoneOffset() * 60000 + hours(2);
-const getFromClockStr = (clockString: string, date: number | Date): number =>
-  getDateTimeFromClockString(clockString, date) + timezoneOffset;
-
-xdescribe('createBlockerBlocks()', () => {
+describe('createBlockerBlocks()', () => {
   it('should merge into single block if all overlapping', () => {
     const fakeTasks: TaskWithReminder[] = [
       {
@@ -27,7 +25,7 @@ xdescribe('createBlockerBlocks()', () => {
         timeEstimate: hours(2),
         title: 'Scheduled 1 15:00',
         reminderId: 'rhCi_JJyP',
-        plannedAt: getFromClockStr('9:20', 0),
+        plannedAt: getDateTimeFromClockString('9:20', 0),
       },
       {
         id: 'S3',
@@ -35,7 +33,7 @@ xdescribe('createBlockerBlocks()', () => {
         timeEstimate: hours(3),
         title: 'Scheduled 3 17:00',
         reminderId: 'FeKPSsB_L',
-        plannedAt: getFromClockStr('10:20', 0),
+        plannedAt: getDateTimeFromClockString('10:20', 0),
       },
       {
         id: 'S2',
@@ -43,13 +41,13 @@ xdescribe('createBlockerBlocks()', () => {
         timeEstimate: hours(2),
         title: 'Scheduled 2 15:30',
         reminderId: 'xlg47DKt6',
-        plannedAt: getFromClockStr('12:30', 0),
+        plannedAt: getDateTimeFromClockString('12:30', 0),
       },
     ] as any;
     const r = createSortedBlockerBlocks(fakeTasks, undefined, 0);
     expect(r.length).toEqual(1);
-    expect(r[0].start).toEqual(getFromClockStr('9:20', 0));
-    expect(r[0].end).toEqual(getFromClockStr('14:30', 0));
+    expect(r[0].start).toEqual(getDateTimeFromClockString('9:20', 0));
+    expect(r[0].end).toEqual(getDateTimeFromClockString('14:30', 0));
   });
 
   it('should merge into multiple blocks if not overlapping', () => {
@@ -60,7 +58,7 @@ xdescribe('createBlockerBlocks()', () => {
         timeEstimate: hours(2),
         title: 'Scheduled 1 15:00',
         reminderId: 'rhCi_JJyP',
-        plannedAt: getFromClockStr('9:20', 0),
+        plannedAt: getDateTimeFromClockString('9:20', 0),
       },
       {
         id: 'S3',
@@ -68,7 +66,7 @@ xdescribe('createBlockerBlocks()', () => {
         timeEstimate: hours(3),
         title: 'Scheduled 3 17:00',
         reminderId: 'FeKPSsB_L',
-        plannedAt: getFromClockStr('10:20', 0),
+        plannedAt: getDateTimeFromClockString('10:20', 0),
       },
       {
         id: 'S2',
@@ -76,7 +74,7 @@ xdescribe('createBlockerBlocks()', () => {
         timeEstimate: hours(1),
         title: 'Scheduled 2 15:30',
         reminderId: 'xlg47DKt6',
-        plannedAt: getFromClockStr('12:30', 0),
+        plannedAt: getDateTimeFromClockString('12:30', 0),
       },
       {
         id: 'S2',
@@ -84,7 +82,7 @@ xdescribe('createBlockerBlocks()', () => {
         timeEstimate: hours(2),
         title: 'Scheduled 2 15:30',
         reminderId: 'xlg47DKt6',
-        plannedAt: getFromClockStr('12:00', 0),
+        plannedAt: getDateTimeFromClockString('12:00', 0),
       },
       {
         id: 'S4',
@@ -92,16 +90,16 @@ xdescribe('createBlockerBlocks()', () => {
         timeEstimate: hours(2),
         title: 'Scheduled 2 17:30',
         reminderId: 'xlg47DKt6',
-        plannedAt: getFromClockStr('17:30', 0),
+        plannedAt: getDateTimeFromClockString('17:30', 0),
       },
     ] as any;
     const r = createSortedBlockerBlocks(fakeTasks, undefined, 0);
     expect(r.length).toEqual(2);
-    expect(r[0].start).toEqual(getFromClockStr('9:20', 0));
-    expect(r[0].end).toEqual(getFromClockStr('14:00', 0));
+    expect(r[0].start).toEqual(getDateTimeFromClockString('9:20', 0));
+    expect(r[0].end).toEqual(getDateTimeFromClockString('14:00', 0));
 
-    expect(r[1].start).toEqual(getFromClockStr('17:30', 0));
-    expect(r[1].end).toEqual(getFromClockStr('19:30', 0));
+    expect(r[1].start).toEqual(getDateTimeFromClockString('17:30', 0));
+    expect(r[1].end).toEqual(getDateTimeFromClockString('19:30', 0));
   });
 
   it('should work for advanced scenario', () => {
@@ -112,7 +110,7 @@ xdescribe('createBlockerBlocks()', () => {
         timeEstimate: hours(1),
         title: 'Scheduled 1 15:00',
         reminderId: 'xxx',
-        plannedAt: getFromClockStr('15:00', 0),
+        plannedAt: getDateTimeFromClockString('15:00', 0),
       },
       {
         id: 'S2',
@@ -120,7 +118,7 @@ xdescribe('createBlockerBlocks()', () => {
         timeEstimate: minutes(185),
         title: 'Scheduled 2 15:30',
         reminderId: 'xxx',
-        plannedAt: getFromClockStr('15:30', 0),
+        plannedAt: getDateTimeFromClockString('15:30', 0),
       },
       {
         id: 'S3',
@@ -128,13 +126,13 @@ xdescribe('createBlockerBlocks()', () => {
         timeEstimate: hours(2),
         title: 'Scheduled 3 17:00',
         reminderId: 'xxx',
-        plannedAt: getFromClockStr('17:00', 0),
+        plannedAt: getDateTimeFromClockString('17:00', 0),
       },
     ] as any;
     const r = createSortedBlockerBlocks(fakeTasks, undefined, 0);
     expect(r.length).toEqual(1);
-    expect(r[0].start).toEqual(getFromClockStr('15:00', 0));
-    expect(r[0].end).toEqual(getFromClockStr('19:00', 0));
+    expect(r[0].start).toEqual(getDateTimeFromClockString('15:00', 0));
+    expect(r[0].end).toEqual(getDateTimeFromClockString('19:00', 0));
   });
 
   it('should merge multiple times', () => {
@@ -166,73 +164,43 @@ xdescribe('createBlockerBlocks()', () => {
     expect(r.length).toEqual(2);
     expect(r).toEqual([
       {
-        start: getFromClockStr('15:00', 0),
-        end: getFromClockStr('19:00', 0),
+        start: getDateTimeFromClockString('15:00', 0),
+        end: getDateTimeFromClockString('19:00', 0),
         entries: [
           {
-            data: {
-              plannedAt: 54000000,
-              reminderId: 'xxx',
-              timeEstimate: 0,
-              timeSpent: 0,
-              title: '16:00 no duration',
-            },
-            end: 54000000,
-            start: 54000000,
+            data: fakeTasks[0],
+            end: fakeTasks[0].plannedAt,
+            start: fakeTasks[0].plannedAt,
             type: 'ScheduledTask',
           },
           {
-            data: {
-              plannedAt: 50400000,
-              reminderId: 'xxx',
-              timeEstimate: 3600000,
-              timeSpent: 0,
-              title: '15:00  – reminderTask',
-            },
-            end: 54000000,
-            start: 50400000,
+            data: fakeTasks[3],
+            end: fakeTasks[3].plannedAt + hours(1),
+            start: fakeTasks[3].plannedAt,
             type: 'ScheduledTask',
           },
           {
-            data: {
-              plannedAt: 52200000,
-              reminderId: 'xxx',
-              timeEstimate: 9000000,
-              timeSpent: 0,
-              title: '15:30  – reminderTask',
-            },
-            end: 61200000,
-            start: 52200000,
+            data: fakeTasks[4],
+            end: fakeTasks[4].plannedAt + hours(2.5),
+            start: fakeTasks[4].plannedAt,
             type: 'ScheduledTask',
           },
           {
-            data: {
-              plannedAt: 57600000,
-              reminderId: 'xxx',
-              timeEstimate: 7200000,
-              timeSpent: 0,
-              title: '17:00  – reminderTask',
-            },
-            end: 64800000,
-            start: 57600000,
+            data: fakeTasks[1],
+            end: fakeTasks[1].plannedAt + hours(2),
+            start: fakeTasks[1].plannedAt,
             type: 'ScheduledTask',
           },
         ],
       },
       {
-        start: getFromClockStr('23:00', 0),
-        end: getFromClockStr('23:00', 0) + hours(1),
+        start: getDateTimeFromClockString('23:00', 0),
+        end: getDateTimeFromClockString('23:00', 0) + hours(1),
         entries: [
           {
-            data: {
-              plannedAt: 79200000,
-              reminderId: 'xxx',
-              timeEstimate: hours(1),
-              timeSpent: 0,
-              title: '23:00 standalone',
-            },
-            end: 82800000,
-            start: 79200000,
+            data: fakeTasks[2],
+            end: fakeTasks[2].plannedAt + hours(1),
+            start: fakeTasks[2].plannedAt,
             type: 'ScheduledTask',
           },
         ],
@@ -260,7 +228,7 @@ xdescribe('createBlockerBlocks()', () => {
       },
       {
         ...BASE_REMINDER_TASK('15:30', 'TOMORROW'),
-        plannedAt: getFromClockStr('15:30', hours(24)),
+        plannedAt: getDateTimeFromClockString('15:30', hours(24)),
         timeEstimate: hours(2.5),
       },
     ] as any;
@@ -269,16 +237,16 @@ xdescribe('createBlockerBlocks()', () => {
 
     expect(r.length).toEqual(3);
 
-    expect(r[0].start).toEqual(getFromClockStr('15:00', 0));
-    expect(r[0].end).toEqual(getFromClockStr('19:00', 0));
+    expect(r[0].start).toEqual(getDateTimeFromClockString('15:00', 0));
+    expect(r[0].end).toEqual(getDateTimeFromClockString('19:00', 0));
     expect(r[0].entries.length).toEqual(3);
 
-    expect(r[1].start).toEqual(getFromClockStr('23:00', 0));
-    expect(r[1].end).toEqual(getFromClockStr('23:00', 0) + hours(1));
+    expect(r[1].start).toEqual(getDateTimeFromClockString('23:00', 0));
+    expect(r[1].end).toEqual(getDateTimeFromClockString('23:00', 0) + hours(1));
     expect(r[1].entries.length).toEqual(1);
 
-    expect(r[2].start).toEqual(getFromClockStr('15:30', hours(24)));
-    expect(r[2].end).toEqual(getFromClockStr('15:30', hours(24)) + hours(2.5));
+    expect(r[2].start).toEqual(getDateTimeFromClockString('15:30', hours(24)));
+    expect(r[2].end).toEqual(getDateTimeFromClockString('15:30', hours(24)) + hours(2.5));
     expect(r[2].entries.length).toEqual(1);
   });
 
@@ -366,8 +334,12 @@ xdescribe('createBlockerBlocks()', () => {
     const r = createSortedBlockerBlocks(fakeTasks, undefined, 0);
 
     expect(r.length).toEqual(1);
-    expect(r[0].start).toEqual(getFromClockStr('15:00', new Date(1620048600000)));
-    expect(r[0].end).toEqual(getFromClockStr('19:00', new Date(1620048600000)));
+    expect(r[0].start).toEqual(
+      getDateTimeFromClockString('15:00', new Date(1620048600000)),
+    );
+    expect(r[0].end).toEqual(
+      getDateTimeFromClockString('19:00', new Date(1620048600000)),
+    );
   });
 
   describe('workStartEnd', () => {
