@@ -53,4 +53,7 @@ module.exports = function (config) {
     },
     browserNoActivityTimeout: 120000,
   });
+  // NOTE: necessary to fix some of the unit tests with a timezone in them
+  // NOTE2: won't work for wallaby, but that's maybe ok for now
+  process.env.TZ = 'Europe/Berlin';
 };
