@@ -13,7 +13,7 @@ const FAKE_TASK: TaskCopy = {
 const minutes = (n: number): number => n * 60 * 1000;
 const hours = (n: number): number => 60 * minutes(n);
 
-describe('createTimelineViewEntriesForNormalTasks()', () => {
+xdescribe('createTimelineViewEntriesForNormalTasks()', () => {
   it('should work', () => {
     const now = getDateTimeFromClockString('9:20', 0);
     const fakeTasks = [
