@@ -963,10 +963,10 @@ describe('mapToViewEntries()', () => {
     //   });
     //
 
-    xit('should work for very long tasks', () => {
+    it('should work for very long tasks', () => {
       const now = getDateTimeFromClockString('9:00', 0);
 
-      const longTask = { ...FAKE_TASK, id: 'LONG_ID', timeEstimate: hours(24) };
+      const longTask = { ...FAKE_TASK, id: 'LONG_ID', timeEstimate: hours(16) };
 
       const scheduledTask = {
         ...FAKE_TASK,
@@ -1005,7 +1005,7 @@ describe('mapToViewEntries()', () => {
         isHideTime: false,
         data: {
           taskId: longTask.id,
-          timeToGo: hours(19),
+          timeToGo: hours(1),
           index: 0,
           title: longTask.title,
         },
@@ -1025,7 +1025,7 @@ describe('mapToViewEntries()', () => {
         data: { endTime: '17:00', startTime: '9:00' },
       });
       expect(r[5]).toEqual({
-        type: TimelineViewEntryType.SplitTaskContinuedLast,
+        type: TimelineViewEntryType.SplitTaskContinued,
         start: getDateTimeFromClockString('9:00', 24 * 60 * 60000),
         id: longTask.id + '__1',
         isHideTime: false,
@@ -1033,7 +1033,34 @@ describe('mapToViewEntries()', () => {
           index: 1,
           taskId: longTask.id,
           // timeToGo: hours(18),
-          timeToGo: hours(16),
+          timeToGo: hours(8),
+          title: longTask.title,
+        },
+      });
+      expect(r[6]).toEqual({
+        type: TimelineViewEntryType.WorkdayEnd,
+        start: getDateTimeFromClockString('17:00', 24 * 60 * 60000),
+        id: 'DAY_END_144000000',
+        isHideTime: true,
+        data: { endTime: '17:00', startTime: '9:00' },
+      });
+      expect(r[7]).toEqual({
+        type: TimelineViewEntryType.WorkdayStart,
+        start: getDateTimeFromClockString('9:00', 2 * 24 * 60 * 60000),
+        id: 'DAY_START_201600000',
+        isHideTime: true,
+        data: { endTime: '17:00', startTime: '9:00' },
+      });
+      expect(r[8]).toEqual({
+        type: TimelineViewEntryType.SplitTaskContinuedLast,
+        start: getDateTimeFromClockString('9:00', 2 * 24 * 60 * 60000),
+        id: longTask.id + '__2',
+        isHideTime: false,
+        data: {
+          index: 2,
+          taskId: longTask.id,
+          // timeToGo: hours(18),
+          timeToGo: hours(2),
           title: longTask.title,
         },
       });
