@@ -1,7 +1,6 @@
 import { createSortedBlockerBlocks } from './create-sorted-blocker-blocks';
 import { TaskWithReminder } from '../../tasks/task.model';
 import { getDateTimeFromClockString } from '../../../util/get-date-time-from-clock-string';
-// import * as timezoneMock from 'timezone-mock';
 
 const minutes = (n: number): number => n * 60 * 1000;
 const hours = (n: number): number => 60 * minutes(n);
@@ -14,10 +13,6 @@ const BASE_REMINDER_TASK = (startTime: string, note?: string): any => ({
 });
 
 describe('createBlockerBlocks()', () => {
-  // beforeEach(() => {
-  //   // timezoneMock.register('US/Pacific');
-  //   timezoneMock.register('UTC');
-  // });
   it('should merge into single block if all overlapping', () => {
     const fakeTasks: TaskWithReminder[] = [
       {
