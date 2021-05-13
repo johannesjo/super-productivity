@@ -1,4 +1,7 @@
-export const getDateTimeFromClockString = (clockString: string, date: number | Date): number => {
+export const getDateTimeFromClockString = (
+  clockString: string,
+  date: number | Date,
+): number => {
   const [h, m] = clockString.split(':');
 
   if (clockString.length > 5 || isNaN(+h) || isNaN(+m)) {

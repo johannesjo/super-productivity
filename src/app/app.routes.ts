@@ -30,7 +30,7 @@ export const APP_ROUTES: Routes = [
   {
     path: 'timeline',
     component: TimelinePageComponent,
-    data: {page: 'timeline'},
+    data: { page: 'timeline' },
   },
   {
     path: 'tag/:id/tasks',

@@ -121,7 +121,7 @@ export const KEYBOARD_SETTINGS_FORM_CFG: ConfigFormSection<KeyboardConfig> = {
       key: 'goToTimeline',
       type: 'keyboard',
       templateOptions: {
-        label: T.GCF.KEYBOARD.GO_TO_TIMELINE
+        label: T.GCF.KEYBOARD.GO_TO_TIMELINE,
       },
     },
     {

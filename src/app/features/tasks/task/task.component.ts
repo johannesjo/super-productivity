@@ -109,12 +109,12 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
 
   projectColor$: Observable<string> = this.showParentTitle
     ? this._task$.pipe(
-      take(1),
-      switchMap((task) => task.projectId
-        ? this._projectService.getByIdOnce$(task.projectId)
-        : EMPTY),
-      map(project => project.theme.primary),
-    )
+        take(1),
+        switchMap((task) =>
+          task.projectId ? this._projectService.getByIdOnce$(task.projectId) : EMPTY,
+        ),
+        map((project) => project.theme.primary),
+      )
     : EMPTY;
 
   private _dragEnterTarget?: HTMLElement;
