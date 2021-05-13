@@ -12,7 +12,7 @@ const BASE_REMINDER_TASK = (startTime: string, note?: string): any => ({
   title: startTime + ' ' + (note ? note : ' – reminderTask'),
 });
 
-xdescribe('createBlockerBlocks()', () => {
+describe('createBlockerBlocks()', () => {
   it('should merge into single block if all overlapping', () => {
     const fakeTasks: TaskWithReminder[] = [
       {

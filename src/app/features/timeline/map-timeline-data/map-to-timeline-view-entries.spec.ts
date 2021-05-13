@@ -14,7 +14,7 @@ const FAKE_TASK: TaskCopy = {
 const minutes = (n: number): number => n * 60 * 1000;
 const hours = (n: number): number => 60 * minutes(n);
 
-xdescribe('mapToViewEntries()', () => {
+describe('mapToViewEntries()', () => {
   describe('basic', () => {
     it('should work for simple task list', () => {
       const now = 33;
