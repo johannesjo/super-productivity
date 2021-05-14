@@ -11,7 +11,6 @@ import {
 } from '../../tasks/store/task.selectors';
 import { Task, TaskPlanned } from '../../tasks/task.model';
 import { devError } from '../../../util/dev-error';
-import { TODAY_TAG } from '../../tag/tag.const';
 
 export const WORK_CONTEXT_FEATURE_NAME = 'context';
 
@@ -94,42 +93,42 @@ export const selectStartableTasksForActiveContext = createSelector(
   },
 );
 
-export const selectTimelineTasks = createSelector(selectTaskFeatureState, (s): {
-  planned: TaskPlanned[];
-  unPlanned: Task[];
-} => {
-  const allPlannedTasks: TaskPlanned[] = [];
-  const allUnPlannedTasks: Task[] = [];
-  s.ids
-    .map((id) => s.entities[id] as Task)
-    .forEach((t) => {
-      if (!t.isDone) {
-        if (
-          !!t.parentId &&
-          (s.entities[t.parentId] as Task).plannedAt &&
-          (s.entities[t.parentId] as Task).reminderId
-        ) {
-          allPlannedTasks.push({
-            ...t,
-            plannedAt:
-              t.plannedAt ||
-              ((s.entities[t.parentId as string] as Task).plannedAt as number),
-          });
-        } else if (t.subTaskIds.length === 0 && t.plannedAt && t.reminderId) {
-          allPlannedTasks.push(t as TaskPlanned);
-        } else if (
-          (!!t.parentId || t.subTaskIds.length === 0) &&
-          (t.tagIds.includes(TODAY_TAG.id) ||
-            (t.parentId &&
-              (s.entities[t.parentId as string] as Task).tagIds.includes(TODAY_TAG.id)))
-        ) {
-          allUnPlannedTasks.push(t);
+export const selectTimelineTasks = createSelector(
+  selectStartableTasksForActiveContext,
+  selectTaskFeatureState,
+  (
+    startableTasks,
+    s,
+  ): {
+    planned: TaskPlanned[];
+    unPlanned: Task[];
+  } => {
+    const allPlannedTasks: TaskPlanned[] = [];
+    s.ids
+      .map((id) => s.entities[id] as Task)
+      .forEach((t) => {
+        if (!t.isDone) {
+          if (
+            !!t.parentId &&
+            (s.entities[t.parentId] as Task).plannedAt &&
+            (s.entities[t.parentId] as Task).reminderId
+          ) {
+            allPlannedTasks.push({
+              ...t,
+              plannedAt:
+                t.plannedAt ||
+                ((s.entities[t.parentId as string] as Task).plannedAt as number),
+            });
+          } else if (t.subTaskIds.length === 0 && t.plannedAt && t.reminderId) {
+            allPlannedTasks.push(t as TaskPlanned);
+          }
         }
-      }
-    });
+      });
+    const allPlannedIds = allPlannedTasks.map((t) => t.id);
 
-  return {
-    planned: allPlannedTasks,
-    unPlanned: allUnPlannedTasks,
-  };
-});
+    return {
+      planned: allPlannedTasks,
+      unPlanned: startableTasks.filter((t) => !t.isDone && !allPlannedIds.includes(t.id)),
+    };
+  },
+);

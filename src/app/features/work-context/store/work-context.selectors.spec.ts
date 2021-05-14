@@ -94,8 +94,8 @@ describe('workContext selectors', () => {
     });
   });
 
-  xdescribe('selectTimelineTasks', () => {
-    it('should split into planned and unplanned tasks', () => {
+  describe('selectTimelineTasks', () => {
+    it('should return planned and unplanned tasks', () => {
       const P1 = {
         id: 'P1',
         tagIds: [TODAY_TAG.id],
@@ -108,8 +108,8 @@ describe('workContext selectors', () => {
         plannedAt: 1234,
         reminderId: 'asd',
       };
-      const initialState = fakeEntityStateFromArray([P1, P2]) as any;
-      const result = selectTimelineTasks.projector(initialState);
+      const taskState = fakeEntityStateFromArray([P1, P2]) as any;
+      const result = selectTimelineTasks.projector([P1], taskState);
       expect(result).toEqual({
         unPlanned: [P1],
         planned: [P2],
@@ -137,8 +137,8 @@ describe('workContext selectors', () => {
         tagIds: [],
       };
 
-      const initialState = fakeEntityStateFromArray([P, SUB1, SUB_S]) as any;
-      const result = selectTimelineTasks.projector(initialState);
+      const taskState = fakeEntityStateFromArray([P, SUB1, SUB_S]) as any;
+      const result = selectTimelineTasks.projector([SUB1], taskState);
       expect(result).toEqual({
         unPlanned: [SUB1],
         planned: [SUB_S],
@@ -168,8 +168,8 @@ describe('workContext selectors', () => {
         tagIds: [],
       };
 
-      const initialState = fakeEntityStateFromArray([P, SUB1, SUB_S]) as any;
-      const result = selectTimelineTasks.projector(initialState);
+      const taskState = fakeEntityStateFromArray([P, SUB1, SUB_S]) as any;
+      const result = selectTimelineTasks.projector([SUB1, SUB_S], taskState);
       expect(result).toEqual({
         unPlanned: [],
         planned: [{ ...SUB1, plannedAt: P.plannedAt }, SUB_S],
@@ -199,8 +199,8 @@ describe('workContext selectors', () => {
         isDone: true,
       };
 
-      const initialState = fakeEntityStateFromArray([P, SUB1, SUB_S]) as any;
-      const result = selectTimelineTasks.projector(initialState);
+      const taskState = fakeEntityStateFromArray([P, SUB1, SUB_S]) as any;
+      const result = selectTimelineTasks.projector([SUB1, SUB_S], taskState);
       expect(result).toEqual({
         unPlanned: [],
         planned: [],
