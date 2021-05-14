@@ -11,7 +11,6 @@ import { getDateTimeFromClockString } from '../../../util/get-date-time-from-clo
 import { createSortedBlockerBlocks } from './create-sorted-blocker-blocks';
 import { getTimeLeftForTask } from '../../../util/get-time-left-for-task';
 import { createTimelineViewEntriesForNormalTasks } from './create-timeline-view-entries-for-normal-tasks';
-import * as moment from 'moment';
 import {
   TIMELINE_MOVEABLE_TYPES,
   TIMELINE_VIEW_TYPE_ORDER,
@@ -174,27 +173,14 @@ const insertBlockedBlocksViewEntries = (
   now: number,
 ) => {
   const viewEntries: TimelineViewEntry[] = viewEntriesIn;
-  // console.log(
-  //   viewEntries.map((viewEntry) => ({
-  //     viewEntry,
-  //     timeD: moment(viewEntry.start).format('H:mm'),
-  //     durationH: getTimeLeftForTask(viewEntry.data as any) / 60000 / 60,
-  //   })),
-  // );
-  // console.log(blockedBlocks.map(block => ({
-  //   block,
-  //   startD: moment(block.start).format('H:mm'),
-  //   endD: moment(block.end).format('H:mm'),
-  // })));
-
   let veIndex: number = 0;
-  console.log(
-    '################__insertBlockedBlocksViewEntries()_START__################',
-  );
-  console.log(blockedBlocks.length + ' BLOCKS');
+  // console.log(
+  //   '################__insertBlockedBlocksViewEntries()_START__################',
+  // );
+  // console.log(blockedBlocks.length + ' BLOCKS');
 
   blockedBlocks.forEach((blockedBlock, blockIndex) => {
-    console.log(`**********BB:${blockIndex}***********`);
+    // console.log(`**********BB:${blockIndex}***********`);
 
     const viewEntriesToAdd: TimelineViewEntry[] = createViewEntriesForBlock(blockedBlock);
 
@@ -203,36 +189,36 @@ const insertBlockedBlocksViewEntries = (
     }
     // we don't have any tasks to split any more so we just insert
     if (veIndex === viewEntries.length) {
-      console.log('JUST INSERT');
+      // console.log('JUST INSERT');
       viewEntries.splice(veIndex, 0, ...viewEntriesToAdd);
       veIndex += viewEntriesToAdd.length;
     }
 
     for (; veIndex < viewEntries.length; ) {
       const viewEntry = viewEntries[veIndex];
-      console.log(`------------ve:${veIndex}-------------`);
-      console.log(
-        {
-          BIndex: blockIndex,
-          BStart: moment(blockedBlock.start).format('DD/MM H:mm'),
-          BEnd: moment(blockedBlock.end).format('DD/MM H:mm'),
-          BTypes: blockedBlock.entries.map((v) => v.type).join(', '),
-          blockedBlock,
-        },
-        { veIndex, veStart: moment(viewEntry.start).format('DD/MM H:mm'), viewEntry },
-        { viewEntriesLength: viewEntries.length },
-        {
-          viewEntries,
-        },
-      );
-      console.log(viewEntry.type);
+      // console.log(`------------ve:${veIndex}-------------`);
+      // console.log(
+      //   {
+      //     BIndex: blockIndex,
+      //     BStart: moment(blockedBlock.start).format('DD/MM H:mm'),
+      //     BEnd: moment(blockedBlock.end).format('DD/MM H:mm'),
+      //     BTypes: blockedBlock.entries.map((v) => v.type).join(', '),
+      //     blockedBlock,
+      //   },
+      //   { veIndex, veStart: moment(viewEntry.start).format('DD/MM H:mm'), viewEntry },
+      //   { viewEntriesLength: viewEntries.length },
+      //   {
+      //     viewEntries,
+      //   },
+      // );
+      // console.log(viewEntry.type);
 
       // block before all tasks
       // => just insert
       if (blockedBlock.end <= viewEntry.start) {
         viewEntries.splice(veIndex, 0, ...viewEntriesToAdd);
         veIndex += viewEntriesToAdd.length;
-        console.log('AAA');
+        // console.log('AAA');
         break;
       }
       // block starts before task and lasts until after it starts
@@ -242,7 +228,7 @@ const insertBlockedBlocksViewEntries = (
         moveEntries(viewEntries, blockedBlock.end - currentListTaskStart, veIndex);
         viewEntries.splice(veIndex, 0, ...viewEntriesToAdd);
         veIndex += viewEntriesToAdd.length;
-        console.log('BBB');
+        // console.log('BBB');
         break;
       } else {
         const timeLeft = getTimeLeftForViewEntry(viewEntry);
@@ -252,11 +238,11 @@ const insertBlockedBlocksViewEntries = (
         // NOTE: blockedBlock.start > viewEntry.start is implicated by above checks
         // if (blockedBlock.start > viewEntry.start && blockedBlock.start < veEnd) {
         if (blockedBlock.start < veEnd) {
-          console.log('CCC split');
-          console.log('SPLIT', viewEntry.type, '---', (viewEntry.data as any)?.title);
+          // console.log('CCC split');
+          // console.log('SPLIT', viewEntry.type, '---', (viewEntry.data as any)?.title);
 
           if (isTaskDataType(viewEntry)) {
-            console.log('CCC a) ' + viewEntry.type);
+            // console.log('CCC a) ' + viewEntry.type);
             const currentViewEntry: TimelineViewEntryTask = viewEntry as any;
             const splitTask: TaskWithoutReminder = currentViewEntry.data as TaskWithoutReminder;
 
@@ -286,7 +272,7 @@ const insertBlockedBlocksViewEntries = (
             veIndex += viewEntriesToAdd.length;
             break;
           } else if (isContinuedTaskType(viewEntry)) {
-            console.log('CCC b) ' + viewEntry.type);
+            // console.log('CCC b) ' + viewEntry.type);
             const currentViewEntry: TimelineViewEntrySplitTaskContinued = viewEntry as any;
             const timeLeftForCompleteSplitTask = timeLeft;
             const timePlannedForSplitTaskBefore =
@@ -330,15 +316,15 @@ const insertBlockedBlocksViewEntries = (
           viewEntries.splice(veIndex, 0, ...viewEntriesToAdd);
           veIndex += viewEntriesToAdd.length + 1;
         } else {
-          console.log('DDD', veIndex, viewEntries.length);
+          // console.log('DDD', veIndex, viewEntries.length);
           veIndex++;
         }
       }
     }
   });
-  console.log(
-    '################__insertBlockedBlocksViewEntries()_END__#################',
-  );
+  // console.log(
+  //   '################__insertBlockedBlocksViewEntries()_END__#################',
+  // );
 };
 
 const createSplitTask = ({
