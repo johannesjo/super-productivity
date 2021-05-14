@@ -61,12 +61,20 @@
             [event]="row.data"
           ></timeline-custom-event>
 
-          <div *ngSwitchCase="TimelineViewEntryType.WorkdayStart" class="work-start">
-            Start {{row.start|date:'d.M. (EEE)'}}
+          <div
+            *ngSwitchCase="TimelineViewEntryType.WorkdayStart"
+            [title]="row.start|date:'medium'"
+            class="work-start"
+          >
+            {{T.F.TIMELINE.START|translate}} {{row.start|date:'d.M. (EEE)'}}
           </div>
 
-          <div *ngSwitchCase="TimelineViewEntryType.WorkdayEnd" class="work-end">
-            End {{row.start|date:'d.M. (EEE)'}}
+          <div
+            *ngSwitchCase="TimelineViewEntryType.WorkdayEnd"
+            [title]="row.start|date:'medium'"
+            class="work-end"
+          >
+            {{T.F.TIMELINE.END|translate}} {{row.start|date:'d.M. (EEE)'}}
           </div>
 
           <div *ngSwitchDefault>------------------</div>

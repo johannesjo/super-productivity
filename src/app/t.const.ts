@@ -798,6 +798,9 @@ const T = {
         TITLE: 'F.TIMELINE.D_INITIAL.TITLE',
         TEXT: 'F.TIMELINE.D_INITIAL.TEXT',
       },
+      START: 'F.TIMELINE.START',
+      CONTINUED: 'F.TIMELINE.CONTINUED',
+      END: 'F.TIMELINE.END',
     },
     TIME_TRACKING: {
       B: {
