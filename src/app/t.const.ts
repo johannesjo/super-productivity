@@ -792,6 +792,7 @@ const T = {
     },
     TIMELINE: {
       MENU_TITLE: 'F.TIMELINE.MENU_TITLE',
+      NO_TASKS: 'F.TIMELINE.NO_TASKS',
       NOW: 'F.TIMELINE.NOW',
       D_INITIAL: {
         TITLE: 'F.TIMELINE.D_INITIAL.TITLE',

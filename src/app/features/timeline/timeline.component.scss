@@ -241,3 +241,8 @@ task.split-task::ng-deep .box {
     }
   }
 }
+
+.no-tasks-msg {
+  margin-top: $s * 3;
+  text-align: center;
+}

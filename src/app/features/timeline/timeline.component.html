@@ -1,6 +1,10 @@
 <task-additional-info-wrapper>
   <div *ngIf="timelineEntries$|async as timelineEntries" class="wrapper">
     <div class="inner-wrapper" [@standardList]="timelineEntries.length">
+      <div *ngIf="!timelineEntries.length" class="no-tasks-msg">
+        {{T.F.TIMELINE.NO_TASKS|translate}}
+      </div>
+
       <div class="row" *ngFor="let row of timelineEntries; trackBy: trackByFn">
         <div class="col time" [class.hasTime]="!row.isHideTime">
           <div *ngIf="!row.isHideTime">

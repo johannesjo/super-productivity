@@ -788,6 +788,7 @@
     },
     "TIMELINE": {
       "MENU_TITLE": "Timeline",
+      "NO_TASKS": "Currently there are no tasks. Please add some tasks via the + Button in the top bar.",
       "NOW": "Now",
       "D_INITIAL": {
         "TITLE": "Timeline",
