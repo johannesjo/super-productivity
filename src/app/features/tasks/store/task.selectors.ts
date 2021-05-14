@@ -168,7 +168,7 @@ export const selectTimelineTasks = createSelector(selectTaskFeatureState, (s): {
             t.plannedAt ||
             ((s.entities[t.parentId as string] as Task).plannedAt as number),
         });
-      } else if (t.plannedAt && t.reminderId) {
+      } else if (t.subTaskIds.length === 0 && t.plannedAt && t.reminderId) {
         allPlannedTasks.push(t as TaskPlanned);
       } else if (
         !t.isDone &&
