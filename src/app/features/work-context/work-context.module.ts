@@ -3,10 +3,8 @@ import { CommonModule } from '@angular/common';
 import { StoreModule } from '@ngrx/store';
 import { EffectsModule } from '@ngrx/effects';
 import { WorkContextEffects } from './store/work-context.effects';
-import {
-  WORK_CONTEXT_FEATURE_NAME,
-  workContextReducer,
-} from './store/work-context.reducer';
+import { workContextReducer } from './store/work-context.reducer';
+import { WORK_CONTEXT_FEATURE_NAME } from './store/work-context.selectors';
 
 @NgModule({
   imports: [

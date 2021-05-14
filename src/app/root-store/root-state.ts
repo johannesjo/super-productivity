@@ -12,10 +12,10 @@ import {
 import { LAYOUT_FEATURE_NAME, LayoutState } from '../core-ui/layout/store/layout.reducer';
 import { CONFIG_FEATURE_NAME } from '../features/config/store/global-config.reducer';
 import { GlobalConfigState } from '../features/config/global-config.model';
-import { WORK_CONTEXT_FEATURE_NAME } from '../features/work-context/store/work-context.reducer';
 import { WorkContextState } from '../features/work-context/work-context.model';
 import { TAG_FEATURE_NAME } from '../features/tag/store/tag.reducer';
 import { TagState } from '../features/tag/tag.model';
+import { WORK_CONTEXT_FEATURE_NAME } from '../features/work-context/store/work-context.selectors';
 
 export interface RootState {
   [TASK_FEATURE_NAME]: TaskState;

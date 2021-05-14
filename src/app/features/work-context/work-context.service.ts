@@ -10,11 +10,6 @@ import {
   WorkContextType,
 } from './work-context.model';
 import { setActiveWorkContext } from './store/work-context.actions';
-import {
-  selectActiveContextId,
-  selectActiveContextTypeAndId,
-  selectActiveWorkContext,
-} from './store/work-context.reducer';
 import { NavigationEnd, Router } from '@angular/router';
 import {
   concatMap,
@@ -57,6 +52,11 @@ import {
 } from '../tag/store/tag.actions';
 import { allDataWasLoaded } from '../../root-store/meta/all-data-was-loaded.actions';
 import { devError } from '../../util/dev-error';
+import {
+  selectActiveContextId,
+  selectActiveContextTypeAndId,
+  selectActiveWorkContext,
+} from './store/work-context.selectors';
 
 @Injectable({
   providedIn: 'root',
