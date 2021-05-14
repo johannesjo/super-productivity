@@ -32,7 +32,6 @@ import { getWorklogStr } from '../../util/get-work-log-str';
 import { hasTasksToWorkOn, mapEstimateRemainingFromTasks } from './work-context.util';
 import {
   flattenTasks,
-  selectTaskEntities,
   selectTasksWithSubTasksByIds,
 } from '../tasks/store/task.selectors';
 import { Actions, ofType } from '@ngrx/effects';
@@ -51,11 +50,11 @@ import {
   updateWorkStartForTag,
 } from '../tag/store/tag.actions';
 import { allDataWasLoaded } from '../../root-store/meta/all-data-was-loaded.actions';
-import { devError } from '../../util/dev-error';
 import {
   selectActiveContextId,
   selectActiveContextTypeAndId,
   selectActiveWorkContext,
+  selectStartableTasksForActiveContext,
 } from './store/work-context.selectors';
 
 @Injectable({
@@ -196,29 +195,10 @@ export class WorkContextService {
     this.backlogTasks$,
   ]).pipe(map(([today, backlog]) => [...today, ...backlog]));
 
-  startableTasksForActiveContext$: Observable<Task[]> = combineLatest([
-    this.activeWorkContext$,
-    this._store$.pipe(select(selectTaskEntities)),
-  ]).pipe(
-    map(([activeContext, entities]) => {
-      let startableTasks: Task[] = [];
-      activeContext.taskIds.forEach((id) => {
-        const task: Task | undefined = entities[id];
-        if (!task) {
-          // NOTE: there is the rare chance that activeWorkContext$ and selectTaskEntities
-          // are out of sync, due to activeWorkContext taking an extra step, this is why we
-          // only use devError
-          devError('Task not found');
-        } else if (task.subTaskIds && task.subTaskIds.length) {
-          startableTasks = startableTasks.concat(
-            task.subTaskIds.map((sid) => entities[sid] as Task),
-          );
-        } else {
-          startableTasks.push(task);
-        }
-      });
-      return startableTasks.filter((task) => !task.isDone);
-    }),
+  startableTasksForActiveContext$: Observable<Task[]> = this._afterDataLoaded$.pipe(
+    switchMap(() => this._store$),
+    select(selectStartableTasksForActiveContext),
+    shareReplay(1),
   );
 
   workingToday$: Observable<any> = this.getTimeWorkedForDay$(getWorklogStr());

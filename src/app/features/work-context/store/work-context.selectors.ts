@@ -5,6 +5,9 @@ import {
   selectProjectFeatureState,
 } from '../../project/store/project.reducer';
 import { selectTagById, selectTagFeatureState } from '../../tag/store/tag.reducer';
+import { selectTaskEntities } from '../../tasks/store/task.selectors';
+import { Task } from '../../tasks/task.model';
+import { devError } from '../../../util/dev-error';
 
 export const WORK_CONTEXT_FEATURE_NAME = 'context';
 
@@ -32,6 +35,7 @@ export const selectActiveContextTypeAndId = createSelector(
     activeId: state.activeId as string,
   }),
 );
+
 export const selectActiveWorkContext = createSelector(
   selectActiveContextTypeAndId,
   selectProjectFeatureState,
@@ -59,5 +63,29 @@ export const selectActiveWorkContext = createSelector(
     throw new Error(
       'Unable to select active work context: ' + activeType + ' ' + activeId,
     );
+  },
+);
+
+export const selectStartableTasksForActiveContext = createSelector(
+  selectActiveWorkContext,
+  selectTaskEntities,
+  (activeContext, entities): Task[] => {
+    let startableTasks: Task[] = [];
+    activeContext.taskIds.forEach((id) => {
+      const task: Task | undefined = entities[id];
+      if (!task) {
+        // NOTE: there is the rare chance that activeWorkContext$ and selectTaskEntities
+        // are out of sync, due to activeWorkContext taking an extra step, this is why we
+        // only use devError
+        devError('Task not found');
+      } else if (task.subTaskIds && task.subTaskIds.length) {
+        startableTasks = startableTasks.concat(
+          task.subTaskIds.map((sid) => entities[sid] as Task),
+        );
+      } else {
+        startableTasks.push(task);
+      }
+    });
+    return startableTasks.filter((task) => !task.isDone);
   },
 );
