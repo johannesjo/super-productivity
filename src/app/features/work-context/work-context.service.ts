@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { select, Store } from '@ngrx/store';
-import { combineLatest, EMPTY, interval, Observable, of, timer } from 'rxjs';
+import { combineLatest, interval, Observable, of, timer } from 'rxjs';
 import {
   WorkContext,
   WorkContextAdvancedCfg,
@@ -13,6 +13,7 @@ import { setActiveWorkContext } from './store/work-context.actions';
 import {
   selectActiveContextId,
   selectActiveContextTypeAndId,
+  selectActiveWorkContext,
 } from './store/work-context.reducer';
 import { NavigationEnd, Router } from '@angular/router';
 import {
@@ -41,7 +42,6 @@ import {
 } from '../tasks/store/task.selectors';
 import { Actions, ofType } from '@ngrx/effects';
 import { moveTaskToBacklogList } from './store/work-context-meta.actions';
-import { selectProjectById } from '../project/store/project.reducer';
 import { WorklogExportSettings } from '../worklog/worklog.model';
 import {
   AddToProjectBreakTime,
@@ -68,6 +68,12 @@ export class WorkContextService {
     ofType(allDataWasLoaded),
     mapTo(true),
     startWith(false),
+    shareReplay(1),
+  );
+
+  // should be treated as private
+  _afterDataLoaded$: Observable<any> = this._isAllDataLoaded$.pipe(
+    filter((v) => v === true),
     shareReplay(1),
   );
 
@@ -113,43 +119,11 @@ export class WorkContextService {
   activeWorkContextId?: string;
   activeWorkContextType?: WorkContextType;
 
-  activeWorkContext$: Observable<WorkContext> = this.activeWorkContextTypeAndId$.pipe(
-    switchMap(({ activeId, activeType }) => {
-      if (activeType === WorkContextType.TAG) {
-        return this._tagService.getTagById$(activeId).pipe(
-          // TODO find out why this is sometimes undefined
-          filter((p) => !!p),
-          map((tag) => ({
-            ...tag,
-            type: WorkContextType.TAG,
-            routerLink: `tag/${tag.id}`,
-          })),
-        );
-      }
-      if (activeType === WorkContextType.PROJECT) {
-        // return this._projectService.getByIdLive$(activeId).pipe(
-        // NOTE: temporary work around to be able to sync current id
-        return this._store$.pipe(select(selectProjectById, { id: activeId })).pipe(
-          // TODO find out why this is sometimes undefined
-          filter((p) => !!p),
-          map((project) => ({
-            ...project,
-            icon: null,
-            taskIds: project.taskIds || [],
-            backlogTaskIds: project.backlogTaskIds || [],
-            type: WorkContextType.PROJECT,
-            routerLink: `project/${project.id}`,
-          })),
-        );
-      }
-      // return nothing until defined
-      return EMPTY;
-    }),
-    // TODO find out why this is sometimes undefined
-    filter((ctx) => !!ctx),
+  activeWorkContext$: Observable<WorkContext> = this._afterDataLoaded$.pipe(
+    switchMap(() => this._store$),
+    select(selectActiveWorkContext),
     shareReplay(1),
   );
-
   mainWorkContexts$: Observable<WorkContext[]> = this._isAllDataLoaded$.pipe(
     concatMap(() => this._tagService.getTagById$(TODAY_TAG.id)),
     switchMap((myDayTag) =>
