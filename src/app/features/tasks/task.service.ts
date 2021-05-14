@@ -63,7 +63,6 @@ import {
   selectCurrentTaskParentOrCurrent,
   selectIsTaskDataLoaded,
   selectMainTasksWithoutTag,
-  selectPlannedTimelineTasks,
   selectSelectedTask,
   selectSelectedTaskId,
   selectStartableTasks,
@@ -75,6 +74,7 @@ import {
   selectTasksByRepeatConfigId,
   selectTasksByTag,
   selectTaskWithSubTasksByRepeatConfigId,
+  selectTimelineTasks,
 } from './store/task.selectors';
 import { getWorklogStr } from '../../util/get-work-log-str';
 import { RoundTimeOption } from '../project/project.model';
@@ -154,9 +154,10 @@ export class TaskService {
 
   allStartableTasks$: Observable<Task[]> = this._store.pipe(select(selectStartableTasks));
 
-  plannedTasksForTimeline$: Observable<TaskPlanned[]> = this._store.pipe(
-    select(selectPlannedTimelineTasks),
-  );
+  timelineTasks$: Observable<{
+    planned: TaskPlanned[];
+    unPlanned: Task[];
+  }> = this._store.pipe(select(selectTimelineTasks));
 
   // META FIELDS
   // -----------

@@ -26,11 +26,11 @@ export const mapToTimelineViewEntries = (
   now: number = Date.now(),
 ): TimelineViewEntry[] => {
   let startTime = now;
-  if (!tasks.length) {
+  if (!tasks.length && !scheduledTasks.length) {
     return [];
   }
 
-  const params: any = { tasks, currentId, workStartEndCfg, now };
+  const params: any = { tasks, currentId, scheduledTasks, workStartEndCfg, now };
   console.log('mapToViewEntries', params, { asString: JSON.stringify(params) });
 
   if (workStartEndCfg) {

@@ -1,6 +1,5 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { TimelineViewEntry } from './timeline.model';
-import { WorkContextService } from '../work-context/work-context.service';
 import { map, tap } from 'rxjs/operators';
 import { TaskService } from '../tasks/task.service';
 import { combineLatest, Observable } from 'rxjs';
@@ -38,17 +37,15 @@ import { DialogTimelineInitialSetupComponent } from './dialog-timeline-initial-s
 export class TimelineComponent {
   T: typeof T = T;
   TimelineViewEntryType: typeof TimelineViewEntryType = TimelineViewEntryType;
-  // timelineEntries$ = this._workContextService.todaysTasks$.pipe(
   timelineEntries$: Observable<TimelineViewEntry[]> = combineLatest([
-    this._workContextService.startableTasksForActiveContext$,
-    this._taskService.plannedTasksForTimeline$,
+    this._taskService.timelineTasks$,
     this._taskService.currentTaskId$,
     this._globalConfigService.timelineCfg$,
   ]).pipe(
-    map(([startableTasks, scheduledTasks, currentId, timelineCfg]) =>
+    map(([{ planned, unPlanned }, currentId, timelineCfg]) =>
       mapToTimelineViewEntries(
-        startableTasks,
-        scheduledTasks,
+        unPlanned,
+        planned,
         currentId,
         timelineCfg?.isWorkStartEndEnabled
           ? {
@@ -65,7 +62,6 @@ export class TimelineComponent {
   tomorrow: number = getTomorrow(0).getTime();
 
   constructor(
-    private _workContextService: WorkContextService,
     private _taskService: TaskService,
     private _globalConfigService: GlobalConfigService,
     private _matDialog: MatDialog,

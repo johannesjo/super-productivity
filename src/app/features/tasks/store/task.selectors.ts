@@ -3,6 +3,7 @@ import { TASK_FEATURE_NAME } from './task.reducer';
 import { Task, TaskPlanned, TaskState, TaskWithSubTasks } from '../task.model';
 import { taskAdapter } from './task.adapter';
 import { devError } from '../../../util/dev-error';
+import { TODAY_TAG } from '../../tag/tag.const';
 
 // TODO fix null stuff here
 
@@ -147,35 +148,44 @@ export const selectCurrentTaskParentOrCurrent = createSelector(
     s.entities[s.currentTaskId],
 );
 
-export const selectPlannedTimelineTasks = createSelector(
-  selectTaskFeatureState,
-  (s): TaskPlanned[] => {
-    const allTasks: TaskPlanned[] = [];
-    const allParent: TaskPlanned[] = s.ids
-      .map((id) => s.entities[id] as TaskPlanned)
-      // TODO remove reminderId check later
-      .filter((task) => !task.parentId && task.plannedAt && task.reminderId);
-
-    allParent.forEach((pt) => {
-      if (pt.subTaskIds.length) {
-        pt.subTaskIds.forEach((subId) => {
-          const st = s.entities[subId] as Task;
-          if (!st.isDone) {
-            allTasks.push({
-              ...st,
-              plannedAt:
-                st.plannedAt ||
-                ((s.entities[st.parentId as string] as Task).plannedAt as number),
-            });
-          }
+export const selectTimelineTasks = createSelector(selectTaskFeatureState, (s): {
+  planned: TaskPlanned[];
+  unPlanned: Task[];
+} => {
+  const allPlannedTasks: TaskPlanned[] = [];
+  const allUnPlannedTasks: Task[] = [];
+  s.ids
+    .map((id) => s.entities[id] as Task)
+    .forEach((t) => {
+      if (
+        !!t.parentId &&
+        (s.entities[t.parentId] as Task).plannedAt &&
+        (s.entities[t.parentId] as Task).reminderId
+      ) {
+        allPlannedTasks.push({
+          ...t,
+          plannedAt:
+            t.plannedAt ||
+            ((s.entities[t.parentId as string] as Task).plannedAt as number),
         });
-      } else {
-        allTasks.push(pt);
+      } else if (t.plannedAt && t.reminderId) {
+        allPlannedTasks.push(t as TaskPlanned);
+      } else if (
+        !t.isDone &&
+        (!!t.parentId || t.subTaskIds.length === 0) &&
+        (t.tagIds.includes(TODAY_TAG.id) ||
+          (t.parentId &&
+            (s.entities[t.parentId as string] as Task).tagIds.includes(TODAY_TAG.id)))
+      ) {
+        allUnPlannedTasks.push(t);
       }
     });
-    return allTasks;
-  },
-);
+
+  return {
+    planned: allPlannedTasks,
+    unPlanned: allUnPlannedTasks,
+  };
+});
 
 // export const selectScheduledTasksWithReminder = createSelector(
 //   selectPlannedTasks,

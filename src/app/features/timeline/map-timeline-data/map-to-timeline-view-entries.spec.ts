@@ -184,6 +184,37 @@ describe('mapToViewEntries()', () => {
   });
 
   describe('scheduledTasks', () => {
+    it('should work for just a scheduled task', () => {
+      const now = getDateTimeFromClockString('9:20', 0);
+      const scheduledTasks = [
+        {
+          ...FAKE_TASK,
+          id: 'S_ID',
+          timeEstimate: hours(1),
+          reminderId: 'R:ID',
+          plannedAt: getDateTimeFromClockString('10:25', 0),
+        },
+      ];
+      const r = mapToTimelineViewEntries([], scheduledTasks, null, undefined, now);
+      expect(r.length).toBe(1);
+    });
+
+    it('should work for scheduled sub tasks', () => {
+      const now = getDateTimeFromClockString('9:20', 0);
+      const scheduledTasks = [
+        {
+          ...FAKE_TASK,
+          id: 'S_ID',
+          timeEstimate: hours(1),
+          reminderId: 'R:ID',
+          parentId: 'SOME_PARENT_ID',
+          plannedAt: getDateTimeFromClockString('10:25', 0),
+        },
+      ];
+      const r = mapToTimelineViewEntries([], scheduledTasks, null, undefined, now);
+      expect(r.length).toBe(1);
+    });
+
     it('should filter out scheduled tasks from normal tasks', () => {
       const now = getDateTimeFromClockString('9:20', 0);
       const nonScheduledTasks = [
