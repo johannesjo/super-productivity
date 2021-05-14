@@ -92,7 +92,7 @@ const _isAllTagsAvailable = (data: AppDataComplete): boolean => {
     }
   });
   data.taskArchive.ids.forEach((id: string) => {
-    const t: Task = data.task.entities[id] as Task;
+    const t: Task = data.taskArchive.entities[id] as Task;
     const missingTagId = t.tagIds.find((tagId) => !allTagIds.includes(tagId));
     if (missingTagId) {
       console.log(t);
