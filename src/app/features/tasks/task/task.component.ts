@@ -53,9 +53,10 @@ import { throttle } from 'helpful-decorators';
   animations: [expandAnimation, fadeAnimation, swirlAnimation],
 })
 export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
-  task!: TaskWithSubTasks;
   @Input() isBacklog: boolean = false;
+  isShowParentTitle: boolean = !!this.showParentTitle;
 
+  task!: TaskWithSubTasks;
   T: typeof T = T;
   IS_TOUCH_ONLY: boolean = IS_TOUCH_ONLY;
   isDragOver: boolean = false;
@@ -99,7 +100,7 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
     switchMap((pid) => this._projectService.getProjectsWithoutId$(pid)),
   );
 
-  parentTitle$: Observable<string> = this.showParentTitle
+  parentTitle$: Observable<string> = this.isShowParentTitle
     ? this._task$.pipe(
         take(1),
         switchMap((task) => this._taskService.getByIdLive$(task.parentId as string)),
@@ -107,7 +108,7 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
       )
     : EMPTY;
 
-  projectColor$: Observable<string> = this.showParentTitle
+  projectColor$: Observable<string> = this.isShowParentTitle
     ? this._task$.pipe(
         take(1),
         switchMap((task) =>
@@ -133,7 +134,7 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
     private readonly _cd: ChangeDetectorRef,
     private readonly _projectService: ProjectService,
     public readonly workContextService: WorkContextService,
-    @Attribute('showParentTitle') public showParentTitle: string,
+    @Attribute('showParentTitle') private showParentTitle: string,
   ) {}
 
   @Input('task') set taskSet(v: TaskWithSubTasks) {

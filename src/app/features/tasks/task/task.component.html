@@ -88,7 +88,7 @@
         (click)="IS_TOUCH_ONLY && toggleShowAdditionalInfoOpen()"
         class="title-and-tags-wrapper"
       >
-        <div class="parent-title" *ngIf="showParentTitle && task.parentId">
+        <div class="parent-title" *ngIf="isShowParentTitle && task.parentId">
           <div
             class="dot"
             *ngIf="(projectColor$|async) as projectColor"
