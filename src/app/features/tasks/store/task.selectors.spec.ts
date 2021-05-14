@@ -84,5 +84,36 @@ describe('taskSelectors', () => {
         planned: [{ ...SUB1, plannedAt: P.plannedAt }, SUB_S],
       } as any);
     });
+
+    it('should not show done tasks', () => {
+      const P = {
+        id: 'P',
+        subTaskIds: ['SUB1', 'SUB_S'],
+        tagIds: [],
+      };
+      const SUB1 = {
+        id: 'SUB1',
+        subTaskIds: [],
+        tagIds: [],
+        parentId: P.id,
+        isDone: true,
+      };
+      const SUB_S = {
+        id: 'SUB_S',
+        plannedAt: 1234,
+        reminderId: 'HA',
+        parentId: P.id,
+        subTaskIds: [],
+        tagIds: [],
+        isDone: true,
+      };
+
+      const initialState = fakeEntityStateFromArray([P, SUB1, SUB_S]) as any;
+      const result = selectTimelineTasks.projector(initialState);
+      expect(result).toEqual({
+        unPlanned: [],
+        planned: [],
+      } as any);
+    });
   });
 });
