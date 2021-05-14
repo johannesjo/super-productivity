@@ -12,20 +12,7 @@ import { GlobalConfigService } from '../config/global-config.service';
 import { MatDialog } from '@angular/material/dialog';
 import { LS_WAS_TIMELINE_INITIAL_DIALOG_SHOWN } from '../../core/persistence/ls-keys.const';
 import { DialogTimelineInitialSetupComponent } from './dialog-timeline-initial-setup/dialog-timeline-initial-setup.component';
-
-// const d = new Date();
-// d.setTime(13);
-// const FAKE_TIMELINE_EVENTS: TimelineCustomEvent[] = [{
-//   title: 'Mittagspause',
-//   duration: 60000 * 60,
-//   start: d.getTime(),
-//   icon: 'restaurant'
-// }, {
-//   title: 'Spazieren am Nachmittag',
-//   duration: 60000 * 60 * .25,
-//   start: Date.now() + 60000 * 60 * 2,
-//   icon: 'nature',
-// }];
+import { WorkContextService } from '../work-context/work-context.service';
 
 @Component({
   selector: 'timeline',
@@ -38,7 +25,7 @@ export class TimelineComponent {
   T: typeof T = T;
   TimelineViewEntryType: typeof TimelineViewEntryType = TimelineViewEntryType;
   timelineEntries$: Observable<TimelineViewEntry[]> = combineLatest([
-    this._taskService.timelineTasks$,
+    this._workContextService.timelineTasks$,
     this._taskService.currentTaskId$,
     this._globalConfigService.timelineCfg$,
   ]).pipe(
@@ -63,6 +50,7 @@ export class TimelineComponent {
 
   constructor(
     private _taskService: TaskService,
+    private _workContextService: WorkContextService,
     private _globalConfigService: GlobalConfigService,
     private _matDialog: MatDialog,
   ) {

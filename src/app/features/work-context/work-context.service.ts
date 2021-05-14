@@ -26,7 +26,7 @@ import {
 } from 'rxjs/operators';
 import { TODAY_TAG } from '../tag/tag.const';
 import { TagService } from '../tag/tag.service';
-import { Task, TaskWithSubTasks } from '../tasks/task.model';
+import { Task, TaskPlanned, TaskWithSubTasks } from '../tasks/task.model';
 import { distinctUntilChangedObject } from '../../util/distinct-until-changed-object';
 import { getWorklogStr } from '../../util/get-work-log-str';
 import { hasTasksToWorkOn, mapEstimateRemainingFromTasks } from './work-context.util';
@@ -55,6 +55,7 @@ import {
   selectActiveContextTypeAndId,
   selectActiveWorkContext,
   selectStartableTasksForActiveContext,
+  selectTimelineTasks,
 } from './store/work-context.selectors';
 
 @Injectable({
@@ -200,6 +201,11 @@ export class WorkContextService {
     select(selectStartableTasksForActiveContext),
     shareReplay(1),
   );
+
+  timelineTasks$: Observable<{
+    planned: TaskPlanned[];
+    unPlanned: Task[];
+  }> = this._store$.pipe(select(selectTimelineTasks));
 
   workingToday$: Observable<any> = this.getTimeWorkedForDay$(getWorklogStr());
 

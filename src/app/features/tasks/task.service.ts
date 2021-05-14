@@ -18,7 +18,6 @@ import {
   Task,
   TaskAdditionalInfoTargetPanel,
   TaskArchive,
-  TaskPlanned,
   TaskReminderOptionId,
   TaskState,
   TaskWithSubTasks,
@@ -74,7 +73,6 @@ import {
   selectTasksByRepeatConfigId,
   selectTasksByTag,
   selectTaskWithSubTasksByRepeatConfigId,
-  selectTimelineTasks,
 } from './store/task.selectors';
 import { getWorklogStr } from '../../util/get-work-log-str';
 import { RoundTimeOption } from '../project/project.model';
@@ -153,11 +151,6 @@ export class TaskService {
   allTasks$: Observable<Task[]> = this._store.pipe(select(selectAllTasks));
 
   allStartableTasks$: Observable<Task[]> = this._store.pipe(select(selectStartableTasks));
-
-  timelineTasks$: Observable<{
-    planned: TaskPlanned[];
-    unPlanned: Task[];
-  }> = this._store.pipe(select(selectTimelineTasks));
 
   // META FIELDS
   // -----------

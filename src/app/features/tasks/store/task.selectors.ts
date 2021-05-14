@@ -1,9 +1,8 @@
 import { createFeatureSelector, createSelector } from '@ngrx/store';
 import { TASK_FEATURE_NAME } from './task.reducer';
-import { Task, TaskPlanned, TaskState, TaskWithSubTasks } from '../task.model';
+import { Task, TaskState, TaskWithSubTasks } from '../task.model';
 import { taskAdapter } from './task.adapter';
 import { devError } from '../../../util/dev-error';
-import { TODAY_TAG } from '../../tag/tag.const';
 
 // TODO fix null stuff here
 
@@ -147,46 +146,6 @@ export const selectCurrentTaskParentOrCurrent = createSelector(
     // @ts-ignore
     s.entities[s.currentTaskId],
 );
-
-export const selectTimelineTasks = createSelector(selectTaskFeatureState, (s): {
-  planned: TaskPlanned[];
-  unPlanned: Task[];
-} => {
-  const allPlannedTasks: TaskPlanned[] = [];
-  const allUnPlannedTasks: Task[] = [];
-  s.ids
-    .map((id) => s.entities[id] as Task)
-    .forEach((t) => {
-      if (!t.isDone) {
-        if (
-          !!t.parentId &&
-          (s.entities[t.parentId] as Task).plannedAt &&
-          (s.entities[t.parentId] as Task).reminderId
-        ) {
-          allPlannedTasks.push({
-            ...t,
-            plannedAt:
-              t.plannedAt ||
-              ((s.entities[t.parentId as string] as Task).plannedAt as number),
-          });
-        } else if (t.subTaskIds.length === 0 && t.plannedAt && t.reminderId) {
-          allPlannedTasks.push(t as TaskPlanned);
-        } else if (
-          (!!t.parentId || t.subTaskIds.length === 0) &&
-          (t.tagIds.includes(TODAY_TAG.id) ||
-            (t.parentId &&
-              (s.entities[t.parentId as string] as Task).tagIds.includes(TODAY_TAG.id)))
-        ) {
-          allUnPlannedTasks.push(t);
-        }
-      }
-    });
-
-  return {
-    planned: allPlannedTasks,
-    unPlanned: allUnPlannedTasks,
-  };
-});
 
 // export const selectScheduledTasksWithReminder = createSelector(
 //   selectPlannedTasks,

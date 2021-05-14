@@ -5,9 +5,13 @@ import {
   selectProjectFeatureState,
 } from '../../project/store/project.reducer';
 import { selectTagById, selectTagFeatureState } from '../../tag/store/tag.reducer';
-import { selectTaskEntities } from '../../tasks/store/task.selectors';
-import { Task } from '../../tasks/task.model';
+import {
+  selectTaskEntities,
+  selectTaskFeatureState,
+} from '../../tasks/store/task.selectors';
+import { Task, TaskPlanned } from '../../tasks/task.model';
 import { devError } from '../../../util/dev-error';
+import { TODAY_TAG } from '../../tag/tag.const';
 
 export const WORK_CONTEXT_FEATURE_NAME = 'context';
 
@@ -89,3 +93,43 @@ export const selectStartableTasksForActiveContext = createSelector(
     return startableTasks.filter((task) => !task.isDone);
   },
 );
+
+export const selectTimelineTasks = createSelector(selectTaskFeatureState, (s): {
+  planned: TaskPlanned[];
+  unPlanned: Task[];
+} => {
+  const allPlannedTasks: TaskPlanned[] = [];
+  const allUnPlannedTasks: Task[] = [];
+  s.ids
+    .map((id) => s.entities[id] as Task)
+    .forEach((t) => {
+      if (!t.isDone) {
+        if (
+          !!t.parentId &&
+          (s.entities[t.parentId] as Task).plannedAt &&
+          (s.entities[t.parentId] as Task).reminderId
+        ) {
+          allPlannedTasks.push({
+            ...t,
+            plannedAt:
+              t.plannedAt ||
+              ((s.entities[t.parentId as string] as Task).plannedAt as number),
+          });
+        } else if (t.subTaskIds.length === 0 && t.plannedAt && t.reminderId) {
+          allPlannedTasks.push(t as TaskPlanned);
+        } else if (
+          (!!t.parentId || t.subTaskIds.length === 0) &&
+          (t.tagIds.includes(TODAY_TAG.id) ||
+            (t.parentId &&
+              (s.entities[t.parentId as string] as Task).tagIds.includes(TODAY_TAG.id)))
+        ) {
+          allUnPlannedTasks.push(t);
+        }
+      }
+    });
+
+  return {
+    planned: allPlannedTasks,
+    unPlanned: allUnPlannedTasks,
+  };
+});
