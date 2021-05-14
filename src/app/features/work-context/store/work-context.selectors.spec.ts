@@ -1,9 +1,100 @@
 import { TODAY_TAG } from '../../tag/tag.const';
 import { fakeEntityStateFromArray } from '../../../util/fake-entity-state-from-array';
-import { selectTimelineTasks } from './work-context.selectors';
+import {
+  selectActiveWorkContext,
+  selectStartableTasksForActiveContext,
+  selectTimelineTasks,
+} from './work-context.selectors';
+import { WorkContext, WorkContextType } from '../work-context.model';
 
 describe('workContext selectors', () => {
-  describe('selectTimelineTasks', () => {
+  describe('selectActiveWorkContext', () => {
+    it('should select today tag', () => {
+      const result = selectActiveWorkContext.projector(
+        {
+          activeId: TODAY_TAG.id,
+          activeType: WorkContextType.TAG,
+        },
+        fakeEntityStateFromArray([]),
+        fakeEntityStateFromArray([TODAY_TAG]),
+      );
+      expect(result).toEqual(
+        jasmine.objectContaining({
+          advancedCfg: {
+            worklogExportSettings: {
+              cols: ['DATE', 'START', 'END', 'TIME_CLOCK', 'TITLES_INCLUDING_SUB'],
+              groupBy: 'DATE',
+              roundEndTimeTo: null,
+              roundStartTimeTo: null,
+              roundWorkTimeTo: null,
+              separateTasksBy: ' | ',
+            },
+          },
+          breakNr: {},
+          breakTime: {},
+          color: null,
+          // created: 1620997370531,
+          icon: 'wb_sunny',
+          id: 'TODAY',
+          // modified: 1620997370531,
+          routerLink: 'tag/TODAY',
+          taskIds: [],
+          theme: {
+            accent: '#ff4081',
+            backgroundImageDark: 'assets/bg/NIGHT_manuel-will.jpg',
+            backgroundImageLight: null,
+            hueAccent: '500',
+            huePrimary: '500',
+            hueWarn: '500',
+            isAutoContrast: true,
+            isDisableBackgroundGradient: false,
+            primary: '#6495ED',
+            warn: '#e11826',
+          },
+          title: 'Today',
+          type: 'TAG',
+          workEnd: {},
+          workStart: {},
+        }),
+      );
+    });
+  });
+  describe('selectStartableTasksForActiveContext', () => {
+    it('should select tasks for project', () => {
+      const M1 = {
+        id: 'M1',
+        tagIds: [TODAY_TAG.id],
+        subTaskIds: [],
+      };
+      const M2 = {
+        id: 'M2',
+        subTaskIds: [],
+        tagIds: [TODAY_TAG.id],
+        plannedAt: 1234,
+        reminderId: 'asd',
+      };
+      const ctx: Partial<WorkContext> = {
+        id: TODAY_TAG.id,
+        taskIds: [M1.id, M2.id],
+      };
+      const result = selectStartableTasksForActiveContext.projector(
+        ctx,
+        fakeEntityStateFromArray([M2, M1]).entities,
+      );
+      expect(result).toEqual([
+        { id: 'M1', subTaskIds: [], tagIds: ['TODAY'] },
+        {
+          id: 'M2',
+          plannedAt: 1234,
+          reminderId: 'asd',
+          subTaskIds: [],
+          tagIds: ['TODAY'],
+        },
+      ] as any[]);
+    });
+  });
+
+  xdescribe('selectTimelineTasks', () => {
     it('should split into planned and unplanned tasks', () => {
       const P1 = {
         id: 'P1',
