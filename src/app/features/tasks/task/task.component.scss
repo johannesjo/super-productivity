@@ -2,7 +2,6 @@
 @import '~angular-material-css-vars/public-util';
 @import './task.component.mixins';
 
-
 // TASK BOX STYLES
 // ---------------
 // NOTE: needs to come first to be overwritten by :host.isCurrent
@@ -39,7 +38,6 @@
     outline: none;
   }
 }
-
 
 .inner-wrapper {
   position: relative;
@@ -79,7 +77,6 @@
     background: $task-c-drag-drop-bg-dark !important;
   }
 
-
   // NOTE: also applies to child tasks
   :host-context(.isLightTheme).isSelected.isSelected & {
     background: $task-c-selected-bg-light;
@@ -111,7 +108,10 @@
       border-bottom-left-radius: $task-border-radius;
     }
 
-    @at-root :host-context(.isDarkTheme).isSelected.isSelected.isSelected .sub-tasks ::ng-deep .box {
+    @at-root :host-context(.isDarkTheme).isSelected.isSelected.isSelected
+        .sub-tasks
+        ::ng-deep
+        .box {
       background: $sub-task-c-bg-dark-in-selected;
     }
   }
@@ -167,7 +167,6 @@
     box-shadow: $task-current-shadow-dark;
   }
 
-
   :host:first-child > .inner-wrapper > & {
     border-top-left-radius: $task-border-radius;
     border-top-right-radius: $task-border-radius;
@@ -180,17 +179,17 @@
 }
 
 .sub-tasks {
-  margin: $s $s $s $s*3;
+  margin: $s $s $s $s * 3;
   position: relative;
 
   @include smallMainContainer {
-    margin: $s $s $s $s*3;
+    margin: $s $s $s $s * 3;
     position: relative;
   }
 
   @include mq(xs) {
     //margin: $s $s*2 $s $s*3;
-    margin: $s $s $s $s*5;
+    margin: $s $s $s $s * 5;
   }
 
   ::ng-deep .box {
@@ -210,7 +209,6 @@
 :host-context(.isDarkTheme) ::ng-deep .isDone.isDone .box {
   background: $sub-task-c-bg-dark-done;
 }
-
 
 .first-line {
   position: relative;
@@ -232,7 +230,6 @@
   //  justify-content: flex-end;
   //}
 }
-
 
 .title-and-left-btns-wrapper {
   display: flex;
@@ -309,7 +306,6 @@
   }
 }
 
-
 .hover-controls {
   transform-origin: right center;
   position: absolute;
@@ -320,7 +316,7 @@
   display: none;
   border-radius: $card-border-radius;
 
-  :host-context([dir=rtl]) & {
+  :host-context([dir='rtl']) & {
     position: absolute;
     transform-origin: left center;
     left: 100%;
@@ -376,14 +372,14 @@
   // extra hitarea
   &:after {
     position: absolute;
-    top: -$s*1.5;
+    top: -$s * 1.5;
     right: 0;
-    left: -$s*1.5;
-    bottom: -$s*1.5;
+    left: -$s * 1.5;
+    bottom: -$s * 1.5;
     content: '';
 
-    :host-context([dir=rtl]) & {
-      right: -$s*1.5;
+    :host-context([dir='rtl']) & {
+      right: -$s * 1.5;
       left: 0;
     }
   }
@@ -399,13 +395,12 @@
       top: 5%;
       opacity: 0.5;
 
-      :host-context([dir=rtl]) & {
+      :host-context([dir='rtl']) & {
         right: 0;
       }
     }
   }
 }
-
 
 // OTHER UI ELEMENTS
 // -----------------
@@ -423,7 +418,6 @@
 .task-title {
   @include taskTitle;
 }
-
 
 @mixin timeWrapperMinimalStyles() {
   &:after {
@@ -445,7 +439,6 @@
     display: none;
   }
 }
-
 
 // TIME
 .time-wrapper {
@@ -508,11 +501,11 @@
   }
 
   @include mq(xs, max) {
-    @at-root  .time-wrapper {
+    @at-root .time-wrapper {
       @include timeWrapperMinimalStyles;
 
       @include isDoneForFirstLine {
-        opacity: $task-is-done-dim-opacity +0.1;
+        opacity: $task-is-done-dim-opacity + 0.1;
       }
     }
   }
@@ -531,13 +524,11 @@
   }
 }
 
-
 .additional-info {
   display: block;
   // required as sort of a clearfix (fixes padding issue)
   overflow: hidden;
 }
-
 
 .drag-over-msg {
   pointer-events: none;
@@ -553,7 +544,6 @@
   display: flex;
   z-index: $z-drag-over-msg;
 }
-
 
 .check-done {
   opacity: 0.5;
@@ -597,7 +587,6 @@
   }
 }
 
-
 // SWIPE BLOCKS
 .block-left,
 .block-right {
@@ -624,7 +613,6 @@
   }
 }
 
-
 .block-left {
   left: 0;
 }
@@ -636,7 +624,6 @@
 progress-bar {
   z-index: $z-progress-bar;
 }
-
 
 // BUTTON STYLES AND DRAG HANDLE
 // -----------------------------
@@ -673,7 +660,6 @@ progress-bar {
   }
 }
 
-
 .drag-handle {
   margin-left: $s;
   margin-right: 0;
@@ -686,7 +672,6 @@ progress-bar {
   //align-items: center;
   position: relative;
 
-
   // fixes drag and drop on mobile
   touch-action: none;
 
@@ -698,7 +683,6 @@ progress-bar {
     top: 50%;
     transform: translate(-50%, -50%);
   }
-
 
   .type-ico-wrapper {
     width: 40px;
@@ -738,7 +722,6 @@ progress-bar {
     }
   }
 
-
   &:active {
     cursor: grabbing;
   }
@@ -747,16 +730,16 @@ progress-bar {
   &:after {
     content: '';
     position: absolute;
-    top: -$s*0.25;
-    bottom: -$s*0.25;
-    left: -$s*0.25;
-    right: -$s*0.25;
+    top: -$s * 0.25;
+    bottom: -$s * 0.25;
+    left: -$s * 0.25;
+    right: -$s * 0.25;
 
     @include mq(xs) {
-      top: -$s*1;
-      bottom: -$s*1;
-      left: -$s*1;
-      right: -$s*0.5;
+      top: -$s * 1;
+      bottom: -$s * 1;
+      left: -$s * 1;
+      right: -$s * 0.5;
     }
   }
 }
@@ -787,7 +770,6 @@ $this-play-size: 22px;
     display: none;
   }
 }
-
 
 .ico-btn {
   color: inherit;
@@ -864,7 +846,6 @@ $this-play-size: 22px;
   left: 50%;
 }
 
-
 .start-task-btn {
   :host-context(.isHidePlayBtn) & {
     display: none !important;
@@ -893,7 +874,7 @@ $this-play-size: 22px;
   }
 }
 
-$min-badge-size: $s*2.25;
+$min-badge-size: $s * 2.25;
 .mini-badge {
   line-height: $min-badge-size;
   width: $min-badge-size;
@@ -923,5 +904,32 @@ $min-badge-size: $s*2.25;
   .title {
     font-size: 12px;
     text-overflow: ellipsis;
+  }
+}
+
+.schedule-btn {
+  position: relative;
+}
+
+.time-badge {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: 2px;
+  font-size: 13px;
+  z-index: 10;
+  line-height: 1;
+  text-align: center;
+  padding: 1px 2px 0;
+  border: 1px solid $light-theme-extra-border-color;
+  background: #fff;
+  border-radius: $card-border-radius;
+
+  // avoid affecting drag handle
+  pointer-events: none;
+
+  @include darkTheme() {
+    border-color: $dark-theme-extra-border-color;
+    background: $dark-theme-bg-lighter;
   }
 }

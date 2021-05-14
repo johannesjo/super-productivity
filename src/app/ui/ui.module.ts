@@ -1,5 +1,5 @@
 import { ErrorHandler, NgModule } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, DatePipe } from '@angular/common';
 import { InputDurationDirective } from './duration/input-duration.directive';
 import { DurationFromStringPipe } from './duration/duration-from-string.pipe';
 import { DurationToStringPipe } from './duration/duration-to-string.pipe';
@@ -83,6 +83,7 @@ import { FormlyMatToggleModule } from '@ngx-formly/material/toggle';
 import { OwlWrapperComponent } from './owl-wrapper/owl-wrapper.component';
 import { DialogPromptComponent } from './dialog-prompt/dialog-prompt.component';
 import { RoundDurationPipe } from './pipes/round-duration.pipe';
+import { ShortPlannedAtPipe } from './pipes/short-planned-at.pipe';
 
 const DIALOG_COMPONENTS = [
   DialogConfirmComponent,
@@ -124,6 +125,7 @@ const COMPONENT_AND_PIPES = [
   ToArrayPipe,
   SortPipe,
   RoundDurationPipe,
+  ShortPlannedAtPipe,
 ];
 
 const MAT_MODULES = [
@@ -222,6 +224,7 @@ const OTHER_3RD_PARTY_MODS_WITHOUT_CFG = [
       useFactory: registerTranslateExtension,
       deps: [TranslateService],
     },
+    DatePipe,
   ],
 })
 export class UiModule {
