@@ -63,7 +63,7 @@
         [class.handle-sub]="task?.parentId"
         class="drag-handle"
       >
-        <mat-icon class="drag-handle-ico" svgIcon="drag_handle"> </mat-icon>
+        <mat-icon class="drag-handle-ico" svgIcon="drag_handle"></mat-icon>
         <mat-icon *ngIf="isCurrent" class="play-icon-indicator">play_arrow </mat-icon>
 
         <div class="type-ico-wrapper">
@@ -332,7 +332,7 @@
 
           <button
             (click)="moveToBacklog();"
-            *ngIf="!task?.parentId && !isBacklog && (workContextService.isActiveWorkContextProject$|async)"
+            *ngIf="!task?.parentId && !isBacklog && task?.projectId"
             mat-menu-item
           >
             <mat-icon>arrow_downward</mat-icon>
@@ -341,7 +341,7 @@
 
           <button
             (click)="moveToToday();"
-            *ngIf="!task?.parentId && isBacklog && (workContextService.isActiveWorkContextProject$|async)"
+            *ngIf="!task?.parentId && isBacklog &&  task?.projectId"
             mat-menu-item
           >
             <mat-icon>arrow_upward</mat-icon>

@@ -583,6 +583,9 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
 
   moveToBacklog() {
     this._taskService.moveToBacklog(this.task.id);
+    if (this.task.tagIds.includes(TODAY_TAG.id)) {
+      this.removeFromMyDay();
+    }
   }
 
   moveToToday() {
