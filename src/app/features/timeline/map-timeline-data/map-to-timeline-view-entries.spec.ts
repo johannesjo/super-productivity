@@ -933,14 +933,14 @@ describe('mapToViewEntries()', () => {
         isHideTime: true,
         data: { endTime: '17:00', startTime: '9:00' },
       });
-      expect(r[4]).toEqual({
+      expect(r[5]).toEqual({
         type: TimelineViewEntryType.WorkdayStart,
         start: getDateTimeFromClockString('9:00', 24 * 60 * 60000),
         id: 'DAY_START_115200000',
         isHideTime: true,
         data: { endTime: '17:00', startTime: '9:00' },
       });
-      expect(r[5]).toEqual({
+      expect(r[6]).toEqual({
         type: TimelineViewEntryType.SplitTaskContinued,
         start: getDateTimeFromClockString('9:00', 24 * 60 * 60000),
         id: longTask.id + '__1',
@@ -953,21 +953,21 @@ describe('mapToViewEntries()', () => {
           title: longTask.title,
         },
       });
-      expect(r[6]).toEqual({
+      expect(r[7]).toEqual({
         type: TimelineViewEntryType.WorkdayEnd,
         start: getDateTimeFromClockString('17:00', 24 * 60 * 60000),
         id: 'DAY_END_144000000',
         isHideTime: true,
         data: { endTime: '17:00', startTime: '9:00' },
       });
-      expect(r[7]).toEqual({
+      expect(r[9]).toEqual({
         type: TimelineViewEntryType.WorkdayStart,
         start: getDateTimeFromClockString('9:00', 2 * 24 * 60 * 60000),
         id: 'DAY_START_201600000',
         isHideTime: true,
         data: { endTime: '17:00', startTime: '9:00' },
       });
-      expect(r[8]).toEqual({
+      expect(r[10]).toEqual({
         type: TimelineViewEntryType.SplitTaskContinuedLast,
         start: getDateTimeFromClockString('9:00', 2 * 24 * 60 * 60000),
         id: longTask.id + '__2',
@@ -1027,97 +1027,16 @@ describe('mapToViewEntries()', () => {
         d.now,
       );
 
-      expect(r.length).toEqual(8);
+      expect(r.length).toEqual(9);
       expect(r[0].type).toEqual(TimelineViewEntryType.SplitTask);
       expect(r[1].type).toEqual(TimelineViewEntryType.ScheduledTask);
       expect(r[2].type).toEqual(TimelineViewEntryType.SplitTaskContinued);
       expect(r[3].type).toEqual(TimelineViewEntryType.WorkdayEnd);
       expect(r[4].type).toEqual(TimelineViewEntryType.ScheduledTask);
-      expect(r[5].type).toEqual(TimelineViewEntryType.WorkdayStart);
-      expect(r[6].type).toEqual(TimelineViewEntryType.SplitTaskContinuedLast);
-      expect(r[7].type).toEqual(TimelineViewEntryType.Task);
-      expect(r).toEqual([
-        {
-          data: {
-            plannedAt: null,
-            reminderId: null,
-            timeEstimate: 14400000,
-            timeSpent: 0,
-            title: 'Split Task',
-          },
-          id: undefined,
-          isHideTime: false,
-          start: 50400000,
-          type: 'SplitTask',
-        },
-        {
-          data: {
-            plannedAt: 54000000,
-            reminderId: 'XXX',
-            timeEstimate: 600000,
-            timeSpent: 0,
-            title: 'Scheduled Split Trigger Before Day End',
-          },
-          id: undefined,
-          isHideTime: false,
-          start: 54000000,
-          type: 'ScheduledTask',
-        },
-        {
-          data: { index: 0, taskId: undefined, timeToGo: 3000000, title: 'Split Task' },
-          id: 'undefined__0',
-          isHideTime: false,
-          start: 54600000,
-          type: 'SplitTaskContinued',
-        },
-        {
-          data: { endTime: '17:00', startTime: '9:00' },
-          id: 'DAY_END_57600000',
-          isHideTime: true,
-          start: 57600000,
-          type: 'WorkdayEnd',
-        },
-        {
-          data: {
-            plannedAt: 64800000,
-            reminderId: 'XXX',
-            timeEstimate: 3600000,
-            timeSpent: 0,
-            title: 'Scheduled Inside Block',
-          },
-          id: undefined,
-          isHideTime: false,
-          start: 64800000,
-          type: 'ScheduledTask',
-        },
-        {
-          data: { endTime: '17:00', startTime: '9:00' },
-          id: 'DAY_START_115200000',
-          isHideTime: true,
-          start: 115200000,
-          type: 'WorkdayStart',
-        },
-        {
-          data: { index: 1, taskId: undefined, timeToGo: 7800000, title: 'Split Task' },
-          id: 'undefined__1',
-          isHideTime: false,
-          start: 115200000,
-          type: 'SplitTaskContinuedLast',
-        },
-        {
-          data: {
-            plannedAt: null,
-            reminderId: null,
-            timeEstimate: 0,
-            timeSpent: 0,
-            title: 'Task at a wrong place',
-          },
-          id: undefined,
-          isHideTime: false,
-          start: 123000000,
-          type: 'Task',
-        },
-      ] as any);
+      expect(r[5].type).toEqual(TimelineViewEntryType.DayCrossing);
+      expect(r[6].type).toEqual(TimelineViewEntryType.WorkdayStart);
+      expect(r[7].type).toEqual(TimelineViewEntryType.SplitTaskContinuedLast);
+      expect(r[8].type).toEqual(TimelineViewEntryType.Task);
     });
   });
 });

@@ -7,6 +7,7 @@ export enum TimelineViewEntryType {
   CustomEvent = 'CustomEvent',
   WorkdayStart = 'WorkdayStart',
   WorkdayEnd = 'WorkdayEnd',
+  DayCrossing = 'DayCrossing',
 }
 
 export const TIMELINE_VIEW_TYPE_ORDER: {

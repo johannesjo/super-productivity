@@ -217,19 +217,23 @@ task.split-task::ng-deep .box {
   //border-bottom: 1px dashed;
   padding-top: $s;
   padding-bottom: $s;
-  font-weight: bold;
+  //font-weight: bold;
 }
 
-.work-end {
-  //border-top: 1px dashed;
+.day-crossing {
+  text-align: center;
+  padding-top: $s;
+  padding-bottom: $s;
+  font-weight: bold;
   border-bottom: 0;
   position: relative;
+  font-size: 17px;
 
   &:after {
     position: absolute;
     left: -11 * $s;
     right: -1 * $s;
-    bottom: -6px;
+    top: 50%;
     border-bottom: 2px dashed;
     content: '';
 

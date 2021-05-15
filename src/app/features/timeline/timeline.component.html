@@ -12,10 +12,10 @@
               {{ row.start <= now ? (T.F.TIMELINE.NOW|translate) :
               (row.start|roundDuration|date:'HH:mm')}}
             </div>
-            <div *ngIf="row.start>= tomorrow" class="date">
-              {{ row.start <= now ? (T.F.TIMELINE.NOW|translate) :
-              (row.start|date:'shortDate')}}
-            </div>
+            <!--            <div *ngIf="row.start>= tomorrow" class="date">-->
+            <!--              {{ row.start <= now ? (T.F.TIMELINE.NOW|translate) :-->
+            <!--              (row.start|date:'shortDate')}}-->
+            <!--            </div>-->
           </div>
         </div>
         <div class="col right" [ngSwitch]="row.type">
@@ -66,7 +66,7 @@
             [title]="row.start|date:'medium'"
             class="work-start"
           >
-            {{T.F.TIMELINE.START|translate}} {{row.start|date:'d.M. (EEE)'}}
+            {{T.F.TIMELINE.START|translate}} {{row.start|date:'(EEE)'}}
           </div>
 
           <div
@@ -74,7 +74,11 @@
             [title]="row.start|date:'medium'"
             class="work-end"
           >
-            {{T.F.TIMELINE.END|translate}} {{row.start|date:'d.M. (EEE)'}}
+            {{T.F.TIMELINE.END|translate}} {{row.start|date:'(EEE)'}}
+          </div>
+
+          <div *ngSwitchCase="TimelineViewEntryType.DayCrossing" class="day-crossing">
+            {{row.start|date:'d.M.'}}
           </div>
 
           <div *ngSwitchDefault>------------------</div>

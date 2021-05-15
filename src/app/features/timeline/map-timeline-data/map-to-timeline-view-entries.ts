@@ -137,7 +137,50 @@ export const mapToTimelineViewEntries = (
   debug('mapToViewEntriesE', cleanedUpExcessWorkDays, {
     asString: JSON.stringify(cleanedUpExcessWorkDays),
   });
+
+  // add day split entries
+
+  for (let i = 0; i < cleanedUpExcessWorkDays.length; i++) {
+    const entry = cleanedUpExcessWorkDays[i];
+    const prev = cleanedUpExcessWorkDays[i - 1];
+    console.log(prev && !isSameDay(entry.start, prev.start), prev?.type, prev);
+    if (prev && !isSameDay(entry.start, prev.start)) {
+      const start = getDateTimeFromClockString('0:00', entry.start);
+      cleanedUpExcessWorkDays.splice(
+        cleanedUpExcessWorkDays.findIndex((innerEntry) => innerEntry === entry),
+        0,
+        {
+          type: TimelineViewEntryType.DayCrossing,
+          start,
+          isHideTime: true,
+          id: start.toString(),
+        },
+      );
+      i++;
+    }
+  }
+
+  if (!isSameDay(now, cleanedUpExcessWorkDays[0].start)) {
+    const start = getDateTimeFromClockString('0:00', cleanedUpExcessWorkDays[0].start);
+    cleanedUpExcessWorkDays.unshift({
+      type: TimelineViewEntryType.DayCrossing,
+      start,
+      isHideTime: true,
+      id: start.toString(),
+    });
+  }
+
   return cleanedUpExcessWorkDays;
+};
+
+const isSameDay = (dt1: number, dt2: number) => {
+  const d1 = new Date(dt1);
+  const d2 = new Date(dt2);
+  return (
+    d1.getFullYear() === d2.getFullYear() &&
+    d1.getMonth() === d2.getMonth() &&
+    d1.getDate() === d2.getDate()
+  );
 };
 
 const createViewEntriesForBlock = (blockedBlock: BlockedBlock): TimelineViewEntry[] => {
@@ -219,7 +262,7 @@ const insertBlockedBlocksViewEntries = (
           viewEntries,
         },
       );
-      debug(viewEntry.type + ': ' + (viewEntry.data as any)?.title);
+      debug(viewEntry.type + ': ' + (viewEntry as any)?.data?.title);
 
       // block before all tasks
       // => just insert
@@ -247,7 +290,7 @@ const insertBlockedBlocksViewEntries = (
         // if (blockedBlock.start > viewEntry.start && blockedBlock.start < veEnd) {
         if (blockedBlock.start < veEnd) {
           debug('CCC split');
-          debug('SPLIT', viewEntry.type, '---', (viewEntry.data as any)?.title);
+          debug('SPLIT', viewEntry.type, '---', (viewEntry as any)?.data?.title);
 
           if (isTaskDataType(viewEntry)) {
             debug('CCC a) ' + viewEntry.type);
@@ -366,7 +409,7 @@ const createSplitTask = ({
 
 const getTimeLeftForViewEntry = (viewEntry: TimelineViewEntry): number => {
   if (isTaskDataType(viewEntry)) {
-    return getTimeLeftForTask(viewEntry.data as Task);
+    return getTimeLeftForTask((viewEntry as any).data as Task);
   } else if (isContinuedTaskType(viewEntry)) {
     return (viewEntry as TimelineViewEntrySplitTaskContinued).data.timeToGo;
     // } else if(viewEntry.type===TimelineViewEntryType.WorkdayEnd) {

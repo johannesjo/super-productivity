@@ -55,12 +55,17 @@ interface TimelineViewEntryWorkEnd extends TimelineViewEntryBase {
   data: TimelineWorkStartEndCfg;
 }
 
+export interface TimelineDayCrossing extends TimelineViewEntryBase {
+  type: TimelineViewEntryType.DayCrossing;
+}
+
 export type TimelineViewEntry =
   | TimelineViewEntryTask
   | TimelineViewEntrySplitTaskContinued
   | TimelineViewEntryCustomEvent
   | TimelineViewEntryWorkStart
-  | TimelineViewEntryWorkEnd;
+  | TimelineViewEntryWorkEnd
+  | TimelineDayCrossing;
 
 // -----------------
 // BlockedBlocks
