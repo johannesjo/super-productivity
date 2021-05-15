@@ -18,6 +18,9 @@ import {
 } from '../timeline.const';
 import * as moment from 'moment';
 
+// const debug = (...args: any) => console.log(...args);
+const debug = (...args: any) => undefined;
+
 export const mapToTimelineViewEntries = (
   tasks: Task[],
   scheduledTasks: TaskPlanned[],
@@ -79,7 +82,7 @@ export const mapToTimelineViewEntries = (
       viewEntries.splice(0, 0, viewEntries[currentIndex]);
       viewEntries.splice(currentIndex + 1, 1);
     } else {
-      console.log(viewEntries);
+      debug(viewEntries);
       console.warn('View Entry for current not available');
     }
   }
@@ -125,7 +128,7 @@ export const mapToTimelineViewEntries = (
     return true;
   });
 
-  console.log('mapToViewEntriesE', cleanedUpExcessWorkDays, {
+  debug('mapToViewEntriesE', cleanedUpExcessWorkDays, {
     asString: JSON.stringify(cleanedUpExcessWorkDays),
   });
   return cleanedUpExcessWorkDays;
@@ -175,13 +178,11 @@ const insertBlockedBlocksViewEntries = (
 ) => {
   const viewEntries: TimelineViewEntry[] = viewEntriesIn;
   let veIndex: number = 0;
-  console.log(
-    '################__insertBlockedBlocksViewEntries()_START__################',
-  );
-  console.log(blockedBlocks.length + ' BLOCKS');
+  debug('################__insertBlockedBlocksViewEntries()_START__################');
+  debug(blockedBlocks.length + ' BLOCKS');
 
   blockedBlocks.forEach((blockedBlock, blockIndex) => {
-    console.log(`**********BB:${blockIndex}***********`);
+    debug(`**********BB:${blockIndex}***********`);
 
     const viewEntriesToAdd: TimelineViewEntry[] = createViewEntriesForBlock(blockedBlock);
 
@@ -190,15 +191,15 @@ const insertBlockedBlocksViewEntries = (
     }
     // we don't have any tasks to split any more so we just insert
     if (veIndex === viewEntries.length) {
-      console.log('JUST INSERT');
+      debug('JUST INSERT');
       viewEntries.splice(veIndex, 0, ...viewEntriesToAdd);
       veIndex += viewEntriesToAdd.length;
     }
 
     for (; veIndex < viewEntries.length; ) {
       const viewEntry = viewEntries[veIndex];
-      console.log(`------------ve:${veIndex}-------------`);
-      console.log(
+      debug(`------------ve:${veIndex}-------------`);
+      debug(
         {
           BIndex: blockIndex,
           BStart: moment(blockedBlock.start).format('DD/MM H:mm'),
@@ -212,14 +213,14 @@ const insertBlockedBlocksViewEntries = (
           viewEntries,
         },
       );
-      console.log(viewEntry.type + ': ' + (viewEntry.data as any)?.title);
+      debug(viewEntry.type + ': ' + (viewEntry.data as any)?.title);
 
       // block before all tasks
       // => just insert
       if (blockedBlock.end <= viewEntry.start) {
         viewEntries.splice(veIndex, 0, ...viewEntriesToAdd);
         veIndex += viewEntriesToAdd.length;
-        console.log('AAA');
+        debug('AAA');
         break;
       }
       // block starts before task and lasts until after it starts
@@ -229,21 +230,21 @@ const insertBlockedBlocksViewEntries = (
         moveEntries(viewEntries, blockedBlock.end - currentListTaskStart, veIndex);
         viewEntries.splice(veIndex, 0, ...viewEntriesToAdd);
         veIndex += viewEntriesToAdd.length;
-        console.log('BBB');
+        debug('BBB');
         break;
       } else {
         const timeLeft = getTimeLeftForViewEntry(viewEntry);
         const veEnd = viewEntry.start + getTimeLeftForViewEntry(viewEntry);
-        console.log(blockedBlock.start < veEnd, blockedBlock.start, veEnd);
+        debug(blockedBlock.start < veEnd, blockedBlock.start, veEnd);
 
         // NOTE: blockedBlock.start > viewEntry.start is implicated by above checks
         // if (blockedBlock.start > viewEntry.start && blockedBlock.start < veEnd) {
         if (blockedBlock.start < veEnd) {
-          console.log('CCC split');
-          console.log('SPLIT', viewEntry.type, '---', (viewEntry.data as any)?.title);
+          debug('CCC split');
+          debug('SPLIT', viewEntry.type, '---', (viewEntry.data as any)?.title);
 
           if (isTaskDataType(viewEntry)) {
-            console.log('CCC a) ' + viewEntry.type);
+            debug('CCC a) ' + viewEntry.type);
             const currentViewEntry: TimelineViewEntryTask = viewEntry as any;
             const splitTask: TaskWithoutReminder = currentViewEntry.data as TaskWithoutReminder;
 
@@ -273,7 +274,7 @@ const insertBlockedBlocksViewEntries = (
             veIndex += viewEntriesToAdd.length;
             break;
           } else if (isContinuedTaskType(viewEntry)) {
-            console.log('CCC b) ' + viewEntry.type);
+            debug('CCC b) ' + viewEntry.type);
             const currentViewEntry: TimelineViewEntrySplitTaskContinued = viewEntry as any;
             const timeLeftForCompleteSplitTask = timeLeft;
             const timePlannedForSplitTaskBefore =
@@ -321,15 +322,13 @@ const insertBlockedBlocksViewEntries = (
           viewEntries.splice(veIndex, 0, ...viewEntriesToAdd);
           veIndex += viewEntriesToAdd.length + 1;
         } else {
-          console.log('DDD', veIndex, viewEntries.length);
+          debug('DDD', veIndex, viewEntries.length);
           veIndex++;
         }
       }
     }
   });
-  // console.log(
-  //   '################__insertBlockedBlocksViewEntries()_END__#################',
-  // );
+  debug('################__insertBlockedBlocksViewEntries()_END__#################');
 };
 
 const createSplitTask = ({
@@ -377,7 +376,7 @@ const moveAllEntriesAfterTime = (
 ) => {
   viewEntries.forEach((viewEntry: any) => {
     if (viewEntry.start >= startTime && isMoveableViewEntry(viewEntry)) {
-      console.log(
+      debug(
         'MOVE_ENTRY2',
         viewEntry.data?.title,
         moment(viewEntry.start).format('DD/MM H:mm'),
@@ -396,7 +395,7 @@ const moveEntries = (
   for (let i = startIndex; i < viewEntries.length; i++) {
     const viewEntry: any = viewEntries[i];
     if (isMoveableViewEntry(viewEntry)) {
-      console.log(
+      debug(
         i,
         'MOVE_ENTRY',
         viewEntry.data?.title,
