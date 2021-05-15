@@ -930,14 +930,14 @@ describe('mapToViewEntries()', () => {
         type: TimelineViewEntryType.WorkdayEnd,
         start: getDateTimeFromClockString('17:00', 0),
         id: 'DAY_END_57600000',
-        isHideTime: true,
+        isHideTime: false,
         data: { endTime: '17:00', startTime: '9:00' },
       });
       expect(r[5]).toEqual({
         type: TimelineViewEntryType.WorkdayStart,
         start: getDateTimeFromClockString('9:00', 24 * 60 * 60000),
         id: 'DAY_START_115200000',
-        isHideTime: true,
+        isHideTime: false,
         data: { endTime: '17:00', startTime: '9:00' },
       });
       expect(r[6]).toEqual({
@@ -957,14 +957,14 @@ describe('mapToViewEntries()', () => {
         type: TimelineViewEntryType.WorkdayEnd,
         start: getDateTimeFromClockString('17:00', 24 * 60 * 60000),
         id: 'DAY_END_144000000',
-        isHideTime: true,
+        isHideTime: false,
         data: { endTime: '17:00', startTime: '9:00' },
       });
       expect(r[9]).toEqual({
         type: TimelineViewEntryType.WorkdayStart,
         start: getDateTimeFromClockString('9:00', 2 * 24 * 60 * 60000),
         id: 'DAY_START_201600000',
-        isHideTime: true,
+        isHideTime: false,
         data: { endTime: '17:00', startTime: '9:00' },
       });
       expect(r[10]).toEqual({

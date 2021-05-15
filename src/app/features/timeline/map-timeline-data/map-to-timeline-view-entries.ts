@@ -204,14 +204,14 @@ const createViewEntriesForBlock = (blockedBlock: BlockedBlock): TimelineViewEntr
         start: entry.start,
         type: TimelineViewEntryType.WorkdayEnd,
         data: workdayCfg,
-        isHideTime: true,
+        isHideTime: false,
       });
       viewEntriesForBock.push({
         id: 'DAY_START_' + entry.end,
         start: entry.end,
         type: TimelineViewEntryType.WorkdayStart,
         data: workdayCfg,
-        isHideTime: true,
+        isHideTime: false,
       });
     }
   });
