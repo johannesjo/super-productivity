@@ -212,6 +212,17 @@
         </div>
 
         <button
+          (click)="toggleShowAttachments()"
+          *ngIf="task?.attachments?.length || task?.issueAttachmentNr"
+          [title]="T.F.TASK.CMP.TOGGLE_ATTACHMENTS|translate"
+          class="ico-btn attachment-btn"
+          color=""
+          mat-icon-button
+        >
+          <mat-icon>attach_file</mat-icon>
+        </button>
+
+        <button
           (click)="editReminder()"
           *ngIf="task?.reminderId"
           [title]="T.F.TASK.CMP.EDIT_REMINDER|translate"
@@ -221,17 +232,6 @@
         >
           <mat-icon>alarm</mat-icon>
           <div class="time-badge">{{task.plannedAt|shortPlannedAt}}</div>
-        </button>
-
-        <button
-          (click)="toggleShowAttachments()"
-          *ngIf="task?.attachments?.length || task?.issueAttachmentNr"
-          [title]="T.F.TASK.CMP.TOGGLE_ATTACHMENTS|translate"
-          class="ico-btn attachment-btn"
-          color=""
-          mat-icon-button
-        >
-          <mat-icon>attach_file</mat-icon>
         </button>
 
         <div>
