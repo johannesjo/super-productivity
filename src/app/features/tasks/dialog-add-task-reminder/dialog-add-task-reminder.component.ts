@@ -35,27 +35,27 @@ export class DialogAddTaskReminderComponent {
       // title: 'Dont show reminder',
       // }, {
       id: TaskReminderOptionId.AtStart,
-      title: 'when it starts',
+      title: T.F.TASK.D_REMINDER_ADD.RO_START,
     },
     {
       id: TaskReminderOptionId.m5,
-      title: '5 minutes before it starts',
+      title: T.F.TASK.D_REMINDER_ADD.RO_5M,
     },
     {
       id: TaskReminderOptionId.m10,
-      title: '10 minutes before it starts',
+      title: T.F.TASK.D_REMINDER_ADD.RO_10M,
     },
     {
       id: TaskReminderOptionId.m15,
-      title: '15 minutes before it starts',
+      title: T.F.TASK.D_REMINDER_ADD.RO_15M,
     },
     {
       id: TaskReminderOptionId.m30,
-      title: '30 minutes before it starts',
+      title: T.F.TASK.D_REMINDER_ADD.RO_30M,
     },
     {
       id: TaskReminderOptionId.h1,
-      title: '1 hour before it starts',
+      title: T.F.TASK.D_REMINDER_ADD.RO_1H,
     },
   ];
   reminderCfgId: TaskReminderOptionId;

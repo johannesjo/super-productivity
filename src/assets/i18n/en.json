@@ -702,7 +702,13 @@
         "EDIT": "Edit Reminder",
         "MOVE_TO_BACKLOG": "Move task to backlog until scheduled",
         "SCHEDULE": "Schedule",
-        "UNSCHEDULE": "Unschedule"
+        "UNSCHEDULE": "Unschedule",
+        "RO_START": "when it starts",
+        "RO_5M": "5 minutes before it starts",
+        "RO_10M": "10 minutes before it starts",
+        "RO_15M": "15 minutes before it starts",
+        "RO_30M": "30 minutes before it starts",
+        "RO_1H": "1 hour before it starts"
       },
       "D_REMINDER_VIEW": {
         "ADD_ALL_TO_TODAY": "Add all to today",
