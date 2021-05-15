@@ -506,7 +506,6 @@ describe('mapToViewEntries()', () => {
           title: 'Scheduled 3 17:00',
           reminderId: 'NnqlBieeB',
           plannedAt: 1620140400000,
-          _showSubTasksMode: 2,
         },
         {
           id: '68K0kYJ2s',
@@ -639,7 +638,6 @@ describe('mapToViewEntries()', () => {
         },
         {
           data: {
-            _showSubTasksMode: 2,
             id: '0LtuSnH8s',
             plannedAt: 1620140400000,
             reminderId: 'NnqlBieeB',
@@ -881,119 +879,6 @@ describe('mapToViewEntries()', () => {
   });
 
   describe('workStartEnd', () => {
-    //   it('should add work start entry if now is before start', () => {
-    //     const now = getDateTimeFromClockString('7:23', 0);
-    //     const workStartTimeString = '9:00';
-    //     const workStartTime = getDateTimeFromClockString(workStartTimeString, 0);
-    //     const nonScheduledTasks = [
-    //       {...FAKE_TASK, timeEstimate: 5000},
-    //       {...FAKE_TASK},
-    //     ];
-    //     const workStartEndCfg: TimelineWorkStartEndCfg = {
-    //       startTime: workStartTimeString,
-    //       endTime: '17:00',
-    //     };
-    //     const r = mapToViewEntries(nonScheduledTasks, null, workStartEndCfg, now);
-    //     expect(r).toEqual([{
-    //       id: 'START_TODAY',
-    //       type: TimelineViewEntryType.WorkdayStart,
-    //       start: workStartTime,
-    //       data: workStartEndCfg,
-    //       isHideTime: true,
-    //     }, {
-    //       id: nonScheduledTasks[0].id,
-    //       type: TimelineViewEntryType.Task,
-    //       start: workStartTime,
-    //       data: nonScheduledTasks[0],
-    //       isHideTime: false,
-    //     }, {
-    //       id: nonScheduledTasks[1].id,
-    //       type: TimelineViewEntryType.Task,
-    //       start: workStartTime + 5000,
-    //       data: nonScheduledTasks[1],
-    //       isHideTime: false,
-    //     }]);
-    //   });
-    //
-    //   it('should not add work start entry if now is before start and there is a current task', () => {
-    //     const now = getDateTimeFromClockString('7:23', 0);
-    //     const workStartTimeString = '9:00';
-    //     const nonScheduledTasks = [
-    //       {...FAKE_TASK, timeEstimate: 5000, id: 'CURRENT_TASK_ID'},
-    //       {...FAKE_TASK},
-    //     ];
-    //     const workStartEndCfg: TimelineWorkStartEndCfg = {
-    //       startTime: workStartTimeString,
-    //       endTime: '17:00',
-    //     };
-    //     const r = mapToViewEntries(nonScheduledTasks, 'CURRENT_TASK_ID', workStartEndCfg, now);
-    //     expect(r).toEqual([{
-    //       id: nonScheduledTasks[0].id,
-    //       type: TimelineViewEntryType.Task,
-    //       start: now,
-    //       data: nonScheduledTasks[0],
-    //       isHideTime: false,
-    //     }, {
-    //       id: nonScheduledTasks[1].id,
-    //       type: TimelineViewEntryType.Task,
-    //       start: now + 5000,
-    //       data: nonScheduledTasks[1],
-    //       isHideTime: false,
-    //     }]);
-    //   });
-    //
-    //   it('should not add work end entry if tasks take longer than that', () => {
-    //     const now = getDateTimeFromClockString('16:23', 0);
-    //     const workEndTimeString = '18:00';
-    //     const nonScheduledTasks = [
-    //       {...FAKE_TASK, timeEstimate: hours(2), title: 'Some task title'},
-    //       {...FAKE_TASK},
-    //     ];
-    //     const workStartEndCfg: TimelineWorkStartEndCfg = {
-    //       startTime: '9:00',
-    //       endTime: workEndTimeString,
-    //     };
-    //     const r = mapToViewEntries(nonScheduledTasks, null, workStartEndCfg, now);
-    //     expect(r).toEqual([
-    //       {
-    //         data: nonScheduledTasks[0],
-    //         id: 'FAKE_TASK_ID',
-    //         isHideTime: false,
-    //         start: 55380000,
-    //         type: TimelineViewEntryType.SplitTask
-    //       },
-    //       {
-    //         data: workStartEndCfg,
-    //         id: 'END_TODAY',
-    //         isHideTime: true,
-    //         start: 61200000,
-    //         type: TimelineViewEntryType.WorkdayEnd
-    //       },
-    //       {
-    //         data: workStartEndCfg,
-    //         id: 'START_TOMORROW',
-    //         isHideTime: true,
-    //         start: 1620025200000,
-    //         type: TimelineViewEntryType.WorkdayStart
-    //       },
-    //       {
-    //         data: {timeToGo: 1380000, title: 'Some task title'},
-    //         id: 'FAKE_TASK_ID__1',
-    //         isHideTime: false,
-    //         start: 1620025200000,
-    //         type: TimelineViewEntryType.SplitTaskContinued
-    //       } as any,
-    //       {
-    //         data: nonScheduledTasks[1],
-    //         id: 'FAKE_TASK_ID',
-    //         isHideTime: false,
-    //         start: 1620026580000,
-    //         type: TimelineViewEntryType.Task
-    //       },
-    //     ]);
-    //   });
-    //
-
     it('should work for very long tasks', () => {
       const now = getDateTimeFromClockString('9:00', 0);
 
@@ -1095,6 +980,56 @@ describe('mapToViewEntries()', () => {
           title: longTask.title,
         },
       });
+    });
+
+    it('should work for special case', () => {
+      const d = {
+        tasks: [
+          {
+            timeSpent: 0,
+            timeEstimate: hours(4),
+            title: 'Split Task',
+            reminderId: null,
+            plannedAt: null,
+          },
+          {
+            timeSpent: 0,
+            timeEstimate: 0,
+            title: 'Task at a wrong place',
+            reminderId: null,
+            plannedAt: null,
+          },
+        ],
+        scheduledTasks: [
+          {
+            timeSpent: 0,
+            timeEstimate: hours(1),
+            title: 'Scheduled Inside Block',
+            reminderId: 'XXX',
+            plannedAt: getDateTimeFromClockString('19:00', 0),
+          },
+          {
+            timeSpent: 0,
+            timeEstimate: minutes(10),
+            title: 'Scheduled Split Trigger Before Day End',
+            reminderId: 'XXX',
+            plannedAt: getDateTimeFromClockString('16:00', 0),
+          },
+        ],
+        workStartEndCfg: { startTime: '9:00', endTime: '17:00' },
+        now: getDateTimeFromClockString('15:00', 0),
+      } as any;
+      const r = mapToTimelineViewEntries(
+        d.tasks,
+        d.scheduledTasks,
+        null,
+        d.workStartEndCfg,
+        d.now,
+      );
+
+      expect(r.length).toEqual(8);
+      expect(r[5].type).toEqual(TimelineViewEntryType.Task);
+      // expect(r).toEqual();
     });
   });
 });
