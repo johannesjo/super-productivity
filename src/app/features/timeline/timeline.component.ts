@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { TimelineViewEntry } from './timeline.model';
-import { map, tap } from 'rxjs/operators';
+import { debounceTime, map, tap } from 'rxjs/operators';
 import { TaskService } from '../tasks/task.service';
 import { combineLatest, Observable } from 'rxjs';
 import { mapToTimelineViewEntries } from './map-timeline-data/map-to-timeline-view-entries';
@@ -29,6 +29,7 @@ export class TimelineComponent {
     this._taskService.currentTaskId$,
     this._globalConfigService.timelineCfg$,
   ]).pipe(
+    debounceTime(32),
     map(([{ planned, unPlanned }, currentId, timelineCfg]) =>
       mapToTimelineViewEntries(
         unPlanned,

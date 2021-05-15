@@ -134,16 +134,15 @@ export const mapToTimelineViewEntries = (
     cleanedUpExcessWorkDays.push(viewEntry);
   });
 
-  debug('mapToViewEntriesE', cleanedUpExcessWorkDays, {
-    asString: JSON.stringify(cleanedUpExcessWorkDays),
-  });
+  // debug('mapToViewEntriesE', cleanedUpExcessWorkDays, {
+  //   asString: JSON.stringify(cleanedUpExcessWorkDays),
+  // });
 
   // add day split entries
 
   for (let i = 0; i < cleanedUpExcessWorkDays.length; i++) {
     const entry = cleanedUpExcessWorkDays[i];
     const prev = cleanedUpExcessWorkDays[i - 1];
-    console.log(prev && !isSameDay(entry.start, prev.start), prev?.type, prev);
     if (prev && !isSameDay(entry.start, prev.start)) {
       const start = getDateTimeFromClockString('0:00', entry.start);
       cleanedUpExcessWorkDays.splice(
