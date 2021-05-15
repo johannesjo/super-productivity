@@ -111,21 +111,27 @@ export const mapToTimelineViewEntries = (
   }
 
   // filter out excess entries for start/end
-  const cleanedUpExcessWorkDays = viewEntries.filter((viewEntry, index, arr) => {
+  // NOTE: not pretty but works
+  const cleanedUpExcessWorkDays: TimelineViewEntry[] = [];
+  let prevWasSkipped = false;
+  viewEntries.forEach((viewEntry, index, arr) => {
+    if (prevWasSkipped) {
+      prevWasSkipped = false;
+      return;
+    }
+
     if (index > 0) {
-      const prev = arr[index - 1];
-      const next = arr[index + 2];
+      const next = arr[index + 1];
       if (
-        (prev.type === TimelineViewEntryType.WorkdayStart &&
-          viewEntry.type === TimelineViewEntryType.WorkdayEnd) ||
-        (next &&
-          next.type === TimelineViewEntryType.WorkdayStart &&
-          viewEntry.type === TimelineViewEntryType.WorkdayStart)
+        next &&
+        viewEntry.type === TimelineViewEntryType.WorkdayStart &&
+        next.type === TimelineViewEntryType.WorkdayEnd
       ) {
-        return false;
+        prevWasSkipped = true;
+        return;
       }
     }
-    return true;
+    cleanedUpExcessWorkDays.push(viewEntry);
   });
 
   debug('mapToViewEntriesE', cleanedUpExcessWorkDays, {
@@ -424,6 +430,13 @@ const resortTasksWithCurrentFirst = (currentId: string, tasks: Task[]): Task[] =
 //   );
 // };
 //
+// const isWorkStarEndType = (viewEntry: TimelineViewEntry): boolean => {
+//   return (
+//     viewEntry.type === TimelineViewEntryType.WorkdayStart ||
+//     viewEntry.type === TimelineViewEntryType.WorkdayEnd
+//   );
+// };
+
 const isTaskDataType = (viewEntry: TimelineViewEntry): boolean => {
   return (
     viewEntry.type === TimelineViewEntryType.Task ||
