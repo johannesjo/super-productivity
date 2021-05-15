@@ -1,3 +1,11 @@
+# [7.0.0-rc2](https://github.com/johannesjo/super-productivity/compare/v7.0.0-rc1...v7.0.0-rc2) (2021-05-15)
+
+### Features
+
+- **task:** make time badge position consistent ([fc0ac7f](https://github.com/johannesjo/super-productivity/commit/fc0ac7f46192304e56d3b516d53c351f4a1604a3))
+- **task:** move scheduled alarm clock always to the right ([c74c7fd](https://github.com/johannesjo/super-productivity/commit/c74c7fd724b8cbb8442dedf1bf918261bdb23ccd))
+- hide scheduled from the menu for now ([15e2e89](https://github.com/johannesjo/super-productivity/commit/15e2e8981b72dd8d89ff14126a699feb1b5824cc))
+
 # [7.0.0-rc1](https://github.com/johannesjo/super-productivity/compare/v6.5.2...v7.0.0-rc1) (2021-05-15)
 
 ### Bug Fixes
