@@ -701,6 +701,12 @@
         "DATETIME_FOR": "Data e hora para lembrete",
         "EDIT": "Editar lembrete",
         "MOVE_TO_BACKLOG": "Mova a tarefa para backlog até que seja agendada",
+        "RO_10M": "10 minutos antes de começar",
+        "RO_15M": "15 minutos antes de começar",
+        "RO_1H": "1 hora antes de começar",
+        "RO_30M": "30 minutos antes de começar",
+        "RO_5M": "5 minutos antes de começar",
+        "RO_START": "quando começa",
         "SCHEDULE": "Agendar",
         "UNSCHEDULE": "Cancelar agendamento"
       },
@@ -785,6 +791,18 @@
         "TUESDAY": "Terça-feira",
         "WEDNESDAY": "Quarta-feira"
       }
+    },
+    "TIMELINE": {
+      "CONTINUED": "Contínuo",
+      "D_INITIAL": {
+        "TEXT": "<p>A ideia da linha do tempo é fornecer uma imagem melhor de como as tarefas planejadas de alguém funcionam ao longo do tempo. Ele é gerado automaticamente a partir de suas tarefas e distingue duas coisas diferentes: <strong>Tarefas agendadas</strong>, que são mostradas no tempo planejado e <strong>Tarefas regulares</strong> que devem fluir em torno desses eventos fixos. Todas as tarefas consideram as estimativas de tempo que você atribuiu a elas.</p><p>Além disso, você também pode fornecer os horários de início e término do trabalho. Se configuradas, as tarefas regulares nunca aparecerão fora delas. Observe que o cronograma inclui apenas os próximos 30 dias.</p>",
+        "TITLE": "Timeline"
+      },
+      "END": "Fim do trabalho",
+      "MENU_TITLE": "Timeline",
+      "NOW": "agora",
+      "NO_TASKS": "Atualmente não há tarefas. Adicione algumas tarefas através do botão + na barra superior.",
+      "START": "Início do Trabalho"
     },
     "TIME_TRACKING": {
       "B": {
@@ -937,6 +955,7 @@
       "GO_TO_FOCUS_MODE": "Ir para modo de foco",
       "GO_TO_SCHEDULED_VIEW": "Vá para Tarefas agendadas",
       "GO_TO_SETTINGS": "Ir para as configurações",
+      "GO_TO_TIMELINE": "Vá para a linha do tempo",
       "GO_TO_WORK_VIEW": "Ir para modo de trabalho",
       "HELP": "<p>Aqui você pode configurar todos os atalhos do teclado.</p> <p>Clique na entrada de texto e insira a combinação de teclado desejada. Pressione Enter para salvar e Esc para abortar.</p> <p>Existem três tipos de atalhos:</p> <ul> <li> <strong>Atalhos globais:</strong> Quando o aplicativo está sendo executado, ele acionará a ação de todos os outros aplicativos. </li> <li> <strong>Atalhos no nível do aplicativo:</strong> Será acionado em todas as telas do aplicativo, mas não se você estiver editando um campo de texto. </li> <li> <strong>Atalhos no nível da tarefa:</strong> Eles serão acionados apenas se você tiver selecionado uma tarefa via mouse ou teclado e, normalmente, acionarão uma ação especificamente relacionada a essa tarefa. </li> </ul>",
       "MOVE_TASK_DOWN": "Mover tarefa para baixo na lista",
@@ -949,6 +968,7 @@
       "SYSTEM_SHORTCUTS": "Atalhos globais (todo o sistema)",
       "TASK_ADD_SUB_TASK": "Adicionar subtarefa",
       "TASK_DELETE": "Excluir tarefa",
+      "TASK_EDIT_TAGS": "Editar etiquetas",
       "TASK_EDIT_TITLE": "Editar título",
       "TASK_MOVE_TO_PROJECT": "Abrir tarefa de mover para o menu do projeto",
       "TASK_OPEN_CONTEXT_MENU": "Abra o menu de contexto de tarefas",
@@ -1035,6 +1055,14 @@
       "MIN_WORKING_TIME": "Acionar notificação de pausa após trabalhar X sem uma",
       "MOTIVATIONAL_IMG": "Imagem motivacional (URL da Web)",
       "TITLE": "Lembrete de Pausa"
+    },
+    "TIMELINE": {
+      "HELP": "O recurso de linha do tempo deve fornecer uma visão geral rápida sobre como suas tarefas planejadas se desenrolam ao longo do tempo. Você pode encontrá-lo no menu à esquerda em <a href='#/timeline'>'Linha do tempo'</a>.",
+      "L_IS_WORK_START_END_ENABLED": "Limite o fluxo de tarefas não programadas a horários de trabalho específicos",
+      "L_WORK_END": "Fim do dia de trabalho",
+      "L_WORK_START": "Início do dia de trabalho",
+      "TITLE": "Timeline",
+      "WORK_START_END_DESCRIPTION": "por exemplo. 17:00"
     },
     "TRACKING_REMINDER": {
       "HELP": "Configure um banner para ser exibido no caso de você se esquecer de iniciar o rastreamento de tempo.",

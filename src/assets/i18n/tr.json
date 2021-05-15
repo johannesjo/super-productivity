@@ -701,6 +701,12 @@
         "DATETIME_FOR": "Hatırlatıcı için Datetime",
         "EDIT": "Hatırlatıcıyı düzenle",
         "MOVE_TO_BACKLOG": "Zamanlanana kadar görevi günlüğe kaydetme",
+        "RO_10M": "Başlamadan 10 dakika önce",
+        "RO_15M": "Başlamadan 15 dakika önce",
+        "RO_1H": "Başlamadan 1 saat önce",
+        "RO_30M": "Başlamadan 30 dakika önce",
+        "RO_5M": "Başlamadan 5 dakika önce",
+        "RO_START": "başladığında",
         "SCHEDULE": "program",
         "UNSCHEDULE": "Unschedule"
       },
@@ -785,6 +791,18 @@
         "TUESDAY": "Salı",
         "WEDNESDAY": "Çarşamba"
       }
+    },
+    "TIMELINE": {
+      "CONTINUED": "devam etti",
+      "D_INITIAL": {
+        "TEXT": "<p>Zaman Çizelgesi'nin amacı, planlanan görevlerin zaman içinde nasıl sonuçlanacağına dair daha iyi bir resim sağlamaktır. Görevlerinizden otomatik olarak oluşturulur ve iki farklı şeyi ayırt eder: Planlandıkları zamanda gösterilen <strong>Zamanlanmış Görevler</strong>ve bu sabit olayların etrafında akması gereken <strong>Normal Görevler</strong> . Tüm görevler, onlara atadığınız zaman tahminlerini dikkate alır.</p><p>Buna ek olarak, bir iş başlangıç ve bitiş zamanı da sağlayabilirsiniz. Yapılandırılmışsa, normal görevler asla bunların dışında görünmez. Zaman çizelgesinin yalnızca önümüzdeki 30 günü içerdiğini lütfen unutmayın.</p>",
+        "TITLE": "Zaman çizelgesi"
+      },
+      "END": "İş Bitişi",
+      "MENU_TITLE": "Zaman çizelgesi",
+      "NOW": "şimdi",
+      "NO_TASKS": "Şu anda görev yok. Lütfen üst çubuktaki + Düğmesi aracılığıyla bazı görevler ekleyin.",
+      "START": "İş Başlangıcı"
     },
     "TIME_TRACKING": {
       "B": {
@@ -937,6 +955,7 @@
       "GO_TO_FOCUS_MODE": "Odak Moduna Git",
       "GO_TO_SCHEDULED_VIEW": "Planlanmış Görevlere git",
       "GO_TO_SETTINGS": "Ayarlara git",
+      "GO_TO_TIMELINE": "Zaman Çizelgesine git",
       "GO_TO_WORK_VIEW": "İş Görünümüne Git",
       "HELP": "<p>Burada tüm klavye kısayollarını yapılandırabilirsiniz.</p> <p>Metin girişine tıklayın ve istediğiniz klavye kombinasyonunu girin. Kaydetmek için Enter'a, iptal etmek için Escape'e basın.</p> <p>Üç tür kısayol vardır:</p> <ul> <li> <strong>Genel kısayollar:</strong> Uygulama çalışırken, uygulama diğer tüm uygulamalardan eylemi tetikler. </li> <li> <strong>Uygulama düzeyinde kısayollar:</strong> Uygulamanın her ekranından tetiklenir, ancak şu anda bir metin alanı düzenliyorsanız değil. </li> <li> <strong>Görev seviyesi kısayolları:</strong> Yalnızca fare veya klavye yoluyla bir görev seçtiyseniz tetiklenirler ve genellikle bu görevle ilgili bir eylemi tetiklerler. </li> </ul>",
       "MOVE_TASK_DOWN": "Görevi Listede Aşağı Taşı",
@@ -949,6 +968,7 @@
       "SYSTEM_SHORTCUTS": "Global Kısayollar (sistem genelinde)",
       "TASK_ADD_SUB_TASK": "Alt Görev ekle",
       "TASK_DELETE": "Görevi Sil",
+      "TASK_EDIT_TAGS": "Etiketleri düzenle",
       "TASK_EDIT_TITLE": "Başlığı Düzenle",
       "TASK_MOVE_TO_PROJECT": "Görevi proje menüsüne taşı",
       "TASK_OPEN_CONTEXT_MENU": "Görev bağlam menüsünü aç",
@@ -1035,6 +1055,14 @@
       "MIN_WORKING_TIME": "Tetiksiz, X'in bir olmadan çalıştıktan sonra bir mola bildirimi almasını sağlar",
       "MOTIVATIONAL_IMG": "Motivasyonel resim (web url'si)",
       "TITLE": "Hatırlatma Arası"
+    },
+    "TIMELINE": {
+      "HELP": "Zaman çizelgesi özelliği, planlanan görevlerinizin zaman içinde nasıl oynandığına dair size hızlı bir genel bakış sağlamalıdır. Bunu sol taraftaki menüde <a href='#/timeline'>\"Zaman çizelgesi\"</a>altında bulabilirsiniz.",
+      "L_IS_WORK_START_END_ENABLED": "Planlanmamış görev akışını belirli çalışma süreleriyle sınırlandırın",
+      "L_WORK_END": "İş Günü Sonu",
+      "L_WORK_START": "İş Günü Başlangıcı",
+      "TITLE": "Zaman çizelgesi",
+      "WORK_START_END_DESCRIPTION": "Örneğin. 17:00"
     },
     "TRACKING_REMINDER": {
       "HELP": "Zaman izlemeyi başlatmayı unutmanız durumunda görünecek bir başlık yapılandırın.",

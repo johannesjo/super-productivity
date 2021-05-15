@@ -701,6 +701,12 @@
         "DATETIME_FOR": "Date et heure du rappel",
         "EDIT": "Modifier le rappel",
         "MOVE_TO_BACKLOG": "Déplacer la tâche dans le backlog en atendant la planification",
+        "RO_10M": "10 minutes avant le début",
+        "RO_15M": "15 minutes avant le début",
+        "RO_1H": "1 heure avant le début",
+        "RO_30M": "30 minutes avant le début",
+        "RO_5M": "5 minutes avant le début",
+        "RO_START": "quand ça commence",
         "SCHEDULE": "Planifier",
         "UNSCHEDULE": "Dé-planifier"
       },
@@ -785,6 +791,18 @@
         "TUESDAY": "mardi",
         "WEDNESDAY": "mercredi"
       }
+    },
+    "TIMELINE": {
+      "CONTINUED": "A continué",
+      "D_INITIAL": {
+        "TEXT": "<p>L'idée de la chronologie est de fournir une meilleure image de la façon dont les tâches planifiées se déroulent au fil du temps. Il est automatiquement généré à partir de vos tâches et distingue deux choses différentes: <strong>les tâches planifiées</strong>, qui s'affichent à l'heure prévue et les <strong>tâches régulières</strong> qui doivent s'articuler autour de ces événements fixes. Toutes les tâches tiennent compte des estimations de temps que vous leur avez assignées.</p><p>En plus de cela, vous pouvez également fournir une heure de début et de fin du travail. Si elles sont configurées, les tâches régulières n'apparaîtront jamais en dehors de celles-ci. Veuillez noter que la chronologie ne comprend que les 30 jours à venir.</p>",
+        "TITLE": "Chronologie"
+      },
+      "END": "Fin de travail",
+      "MENU_TITLE": "Chronologie",
+      "NOW": "À présent",
+      "NO_TASKS": "Il n'y a actuellement aucune tâche. Veuillez ajouter quelques tâches via le bouton + dans la barre supérieure.",
+      "START": "Début des travaux"
     },
     "TIME_TRACKING": {
       "B": {
@@ -937,6 +955,7 @@
       "GO_TO_FOCUS_MODE": "Aller au mode Concentration",
       "GO_TO_SCHEDULED_VIEW": "Accéder aux tâches planifiées",
       "GO_TO_SETTINGS": "Aller aux paramètres",
+      "GO_TO_TIMELINE": "Aller à la chronologie",
       "GO_TO_WORK_VIEW": "Aller à la vue de travail",
       "HELP": "<p>Vous pouvez configurer ici tous les raccourcis clavier.</p> <p>Cliquez sur le champ texte et entrez la combinaison de touches souhaitée. Appuyez sur Entrée pour enregistrer et sur Échap pour annuler.</p> <p>Il existe trois types de raccourcis:</p> <ul> <li> <strong>Raccourcis globaux:</strong> lorsque l'application est en cours d'exécution, elle déclenche l'action depuis n'importe quelle autre applications. </li> <li> <strong>Raccourcis au niveau de l'application:</strong> se déclenchera à partir de n'importe quel écran de l'application, mais pas si vous modifiez actuellement un champ de texte. </li> <li> <strong>Raccourcis au niveau des tâches:</strong> ils ne se déclenchent que si vous avez sélectionné une tâche à l'aide de la souris ou du clavier et déclenchent généralement une action spécifiquement liée à cette tâche. </li> </ul>",
       "MOVE_TASK_DOWN": "Descendre la tâche dans la liste",
@@ -949,6 +968,7 @@
       "SYSTEM_SHORTCUTS": "Raccourcis globaux (à l'échelle du système)",
       "TASK_ADD_SUB_TASK": "Ajouter une sous-tâche",
       "TASK_DELETE": "Supprimer la tâche",
+      "TASK_EDIT_TAGS": "Étiquettes d'édition",
       "TASK_EDIT_TITLE": "Modifier le titre",
       "TASK_MOVE_TO_PROJECT": "Ouvrir la tâche de déplacement vers le menu du projet",
       "TASK_OPEN_CONTEXT_MENU": "Ouvrir le menu contextuel de la tâche",
@@ -1035,6 +1055,14 @@
       "MIN_WORKING_TIME": "Déclencher l'invitation à prendre une pause après avoir travaillé X sans pause",
       "MOTIVATIONAL_IMG": "Image de motivation (URL Web)",
       "TITLE": "Rappel de pause"
+    },
+    "TIMELINE": {
+      "HELP": "La fonction de chronologie devrait vous fournir un aperçu rapide de la façon dont vos tâches planifiées se déroulent au fil du temps. Vous pouvez le trouver dans le menu de gauche sous <a href='#/timeline'>\"Chronologie\"</a>.",
+      "L_IS_WORK_START_END_ENABLED": "Limitez le flux de tâches non planifiées à des heures de travail spécifiques",
+      "L_WORK_END": "Fin de la journée de travail",
+      "L_WORK_START": "Début de la journée de travail",
+      "TITLE": "Chronologie",
+      "WORK_START_END_DESCRIPTION": "par exemple. 17h00"
     },
     "TRACKING_REMINDER": {
       "HELP": "Configurez une bannière pour qu'elle s'affiche au cas où vous auriez oublié de démarrer le suivi du temps.",

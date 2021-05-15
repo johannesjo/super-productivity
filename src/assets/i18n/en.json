@@ -701,14 +701,14 @@
         "DATETIME_FOR": "Datetime for reminder",
         "EDIT": "Edit Reminder",
         "MOVE_TO_BACKLOG": "Move task to backlog until scheduled",
-        "SCHEDULE": "Schedule",
-        "UNSCHEDULE": "Unschedule",
-        "RO_START": "when it starts",
-        "RO_5M": "5 minutes before it starts",
         "RO_10M": "10 minutes before it starts",
         "RO_15M": "15 minutes before it starts",
+        "RO_1H": "1 hour before it starts",
         "RO_30M": "30 minutes before it starts",
-        "RO_1H": "1 hour before it starts"
+        "RO_5M": "5 minutes before it starts",
+        "RO_START": "when it starts",
+        "SCHEDULE": "Schedule",
+        "UNSCHEDULE": "Unschedule"
       },
       "D_REMINDER_VIEW": {
         "ADD_ALL_TO_TODAY": "Add all to today",
@@ -793,16 +793,16 @@
       }
     },
     "TIMELINE": {
-      "MENU_TITLE": "Timeline",
-      "NO_TASKS": "Currently there are no tasks. Please add some tasks via the + Button in the top bar.",
-      "NOW": "Now",
-      "D_INITIAL": {
-        "TITLE": "Timeline",
-        "TEXT": "<p>The idea of the Timeline is to provide a better picture of how one's planned tasks play out over time. It is automatically generated from your Tasks and distinguishes two different things: <strong>Scheduled Tasks</strong>, which are shown at their planned time and <strong>Regular Tasks</strong> which should flow around those fixed events. All tasks consider the time estimates you have assigned to them.</p><p>In addition to this you can also provide a work start and end time. If configured regular tasks will never show up outside of these. Please note that the timeline only includes the upcoming 30 days.</p>"
-      },
-      "START": "Work Start",
       "CONTINUED": "continued",
-      "END": "Work End"
+      "D_INITIAL": {
+        "TEXT": "<p>The idea of the Timeline is to provide a better picture of how one's planned tasks play out over time. It is automatically generated from your Tasks and distinguishes two different things: <strong>Scheduled Tasks</strong>, which are shown at their planned time and <strong>Regular Tasks</strong> which should flow around those fixed events. All tasks consider the time estimates you have assigned to them.</p><p>In addition to this you can also provide a work start and end time. If configured regular tasks will never show up outside of these. Please note that the timeline only includes the upcoming 30 days.</p>",
+        "TITLE": "Timeline"
+      },
+      "END": "Work End",
+      "MENU_TITLE": "Timeline",
+      "NOW": "Now",
+      "NO_TASKS": "Currently there are no tasks. Please add some tasks via the + Button in the top bar.",
+      "START": "Work Start"
     },
     "TIME_TRACKING": {
       "B": {
@@ -968,6 +968,7 @@
       "SYSTEM_SHORTCUTS": "Global Shortcuts (system wide)",
       "TASK_ADD_SUB_TASK": "Add sub Task",
       "TASK_DELETE": "Delete Task",
+      "TASK_EDIT_TAGS": "Edit Tags",
       "TASK_EDIT_TITLE": "Edit Title",
       "TASK_MOVE_TO_PROJECT": "Open move task to project menu",
       "TASK_OPEN_CONTEXT_MENU": "Open task context menu",
@@ -981,7 +982,6 @@
       "TOGGLE_BACKLOG": "Show/Hide Task Backlog",
       "TOGGLE_BOOKMARKS": "Show/Hide Bookmark Bar",
       "TOGGLE_PLAY": "Start/Stop Task",
-      "TASK_EDIT_TAGS": "Edit Tags",
       "TOGGLE_SIDE_NAV": "Show & Focus/Hide Sidenav",
       "ZOOM_DEFAULT": "Zoom default (Desktop only)",
       "ZOOM_IN": "Zoom in (Desktop only)",
