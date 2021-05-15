@@ -914,8 +914,9 @@ $min-badge-size: $s * 2.25;
 .time-badge {
   position: absolute;
   left: 50%;
-  transform: translateX(-50%);
-  bottom: 2px;
+  transform: translate(-50%, -50%);
+  top: 50%;
+  margin-top: 10px;
   font-size: 13px;
   z-index: 10;
   line-height: 1;
