@@ -45,16 +45,16 @@
     <span class="text">{{T.F.TIMELINE.MENU_TITLE|translate}}</span>
   </button>
 
-  <!--  <button-->
-  <!--    #menuEntry-->
-  <!--    class="route-link"-->
-  <!--    mat-menu-item-->
-  <!--    routerLink="schedule"-->
-  <!--    routerLinkActive="isActiveRoute"-->
-  <!--  >-->
-  <!--    <mat-icon>access_alarms</mat-icon>-->
-  <!--    <span class="text">{{T.MH.SCHEDULED|translate}}</span>-->
-  <!--  </button>-->
+  <button
+    #menuEntry
+    class="route-link"
+    mat-menu-item
+    routerLink="schedule"
+    routerLinkActive="isActiveRoute"
+  >
+    <mat-icon>access_alarms</mat-icon>
+    <span class="text">{{T.MH.SCHEDULED|translate}}</span>
+  </button>
 </section>
 
 <section *ngIf="projectList$|async as projectList" class="projects">
