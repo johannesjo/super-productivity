@@ -1,3 +1,13 @@
+# [7.0.0-rc6](https://github.com/johannesjo/super-productivity/compare/v7.0.0-rc5...v7.0.0-rc6) (2021-05-16)
+
+### Features
+
+- **reminder:** properly reset plannedAt whenever it makes sense ([7cb38b0](https://github.com/johannesjo/super-productivity/commit/7cb38b04b4283754fc199a213d9fa5fe681cc360))
+- **timeline:** make resorting for current work better ([e132c94](https://github.com/johannesjo/super-productivity/commit/e132c9406c6b05ca539ab080eb1eb7afea85c358))
+- add more debug info ([f2bab63](https://github.com/johannesjo/super-productivity/commit/f2bab63041abb966ab299a98ce6780e46c7a2122))
+- **scheduled:** bring back scheduled page for now ([97d619e](https://github.com/johannesjo/super-productivity/commit/97d619e0897850408b7fde3985554833bb1efd4f))
+- **timeline:** show time only for first entry with time ([5193522](https://github.com/johannesjo/super-productivity/commit/519352261523bc1609806e08dbc875115aa2f0f7))
+
 # [7.0.0-rc5](https://github.com/johannesjo/super-productivity/compare/v7.0.0-rc4...v7.0.0-rc5) (2021-05-16)
 
 # [7.0.0-rc4](https://github.com/johannesjo/super-productivity/compare/v7.0.0-rc3...v7.0.0-rc4) (2021-05-15)
