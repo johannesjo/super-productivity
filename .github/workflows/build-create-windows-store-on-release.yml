@@ -9,9 +9,15 @@ jobs:
   windows-store-artifact:
     runs-on: windows-latest
 
-    if: "!github.event.release.prerelease"
+    if: '!github.event.release.prerelease'
 
     steps:
+      # required because setting via env.TZ does not work on windows
+      - name: Set timezone to Berlin/Europe
+        uses: actions/set-timezone-action@v1.1
+        with:
+          timezoneWindows: 'Europe/Berlin'
+
       - name: Check out Git repository
         uses: actions/checkout@v1
 
