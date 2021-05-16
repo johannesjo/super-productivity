@@ -13,10 +13,10 @@ jobs:
 
     steps:
       # required because setting via env.TZ does not work on windows
-      - name: Set timezone to Berlin/Europe
+      - name: Set timezone to Europe Standard Time
         uses: szenius/set-timezone@v1.0
         with:
-          timezoneWindows: 'Europe/Berlin'
+          timezoneWindows: 'Europe Standard Time'
 
       - name: Check out Git repository
         uses: actions/checkout@v1
