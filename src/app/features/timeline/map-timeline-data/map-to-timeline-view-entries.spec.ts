@@ -1038,5 +1038,42 @@ describe('mapToViewEntries()', () => {
       expect(r[7].type).toEqual(TimelineViewEntryType.SplitTaskContinuedLast);
       expect(r[8].type).toEqual(TimelineViewEntryType.Task);
     });
+
+    it('should work if a task scheduled for tomorrow is current task', () => {
+      const d = {
+        tasks: [
+          {
+            timeSpent: 0,
+            timeEstimate: hours(5),
+            title: 'Task',
+            reminderId: null,
+            plannedAt: null,
+          },
+        ],
+        scheduledTasks: [
+          {
+            id: 'SCHEDULED_CURRENT_ID',
+            timeSpent: 0,
+            timeEstimate: hours(0.5),
+            title: 'Scheduled Tomorrow',
+            reminderId: 'XXX',
+            plannedAt: getDateTimeFromClockString('19:00', 24 * 60 * 60 * 1000),
+          },
+        ],
+        workStartEndCfg: { startTime: '14:00', endTime: '20:00' },
+        now: getDateTimeFromClockString('12:00', 0),
+      } as any;
+      const r = mapToTimelineViewEntries(
+        d.tasks,
+        d.scheduledTasks,
+        'SCHEDULED_CURRENT_ID',
+        d.workStartEndCfg,
+        d.now,
+      );
+
+      expect(r[0].type).toEqual(TimelineViewEntryType.ScheduledTask);
+      expect(r[1].type).toEqual(TimelineViewEntryType.Task);
+      expect(r[1].start).toEqual(getDateTimeFromClockString('14:00', 0));
+    });
   });
 });
