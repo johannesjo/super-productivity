@@ -38,11 +38,11 @@ export const mapToTimelineViewEntries = (
 
   if (workStartEndCfg) {
     const startTimeToday = getDateTimeFromClockString(workStartEndCfg.startTime, now);
-    if (startTimeToday > now && !currentId) {
+    if (startTimeToday > now) {
       startTime = startTimeToday;
     }
   }
-  // TODO check for scheduled is current
+
   const initialTasks: Task[] = currentId
     ? resortTasksWithCurrentFirst(currentId, tasks)
     : tasks;
