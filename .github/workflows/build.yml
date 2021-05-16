@@ -118,7 +118,7 @@ jobs:
     steps:
       # required because setting via env.TZ does not work on windows
       - name: Set timezone to Berlin/Europe
-        uses: actions/set-timezone-action@v1.1
+        uses: szenius/set-timezone@v1.0
         with:
           timezoneWindows: 'Europe/Berlin'
 
