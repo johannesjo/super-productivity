@@ -723,7 +723,7 @@
         "FROM_TAG": "Da tag: \"{{title}}\"",
         "SNOOZE": "Soneca",
         "SNOOZE_ALL": "Suspender tudo",
-        "SNOOZE_UNTIL_TOMORROW": "Até amanhã",
+        "RESCHEDULE_UNTIL_TOMORROW": "Até amanhã",
         "START": "Iniciar tarefa",
         "SWITCH_CONTEXT_START": "Alternar contexto e iniciar"
       },

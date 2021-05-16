@@ -723,7 +723,7 @@
         "FROM_TAG": "Из тега: \"{{title}}\"",
         "SNOOZE": "Отложить",
         "SNOOZE_ALL": "Отложить все",
-        "SNOOZE_UNTIL_TOMORROW": "До завтра",
+        "RESCHEDULE_UNTIL_TOMORROW": "До завтра",
         "START": "Начать задание",
         "SWITCH_CONTEXT_START": "Переключить контекст и начать"
       },

@@ -65,12 +65,12 @@
               {{T.G.MINUTES|translate:{m: 60} }}
             </button>
             <button
-              (click)="snoozeUntilTomorrow(task)"
+              (click)="rescheduleUntilTomorrow(task)"
               [disabled]="isDisableControls"
               mat-menu-item
             >
-              <mat-icon>snooze</mat-icon>
-              {{T.F.TASK.D_REMINDER_VIEW.SNOOZE_UNTIL_TOMORROW|translate}}
+              <mat-icon>schedule</mat-icon>
+              {{T.F.TASK.D_REMINDER_VIEW.RESCHEDULE_UNTIL_TOMORROW|translate}}
             </button>
             <button (click)="dismiss(task)" mat-menu-item>
               <mat-icon>alarm_off</mat-icon>
@@ -142,12 +142,12 @@
       {{T.G.MINUTES|translate:{m: 60} }}
     </button>
     <button
-      (click)="snoozeAllUntilTomorrow()"
+      (click)="rescheduleAllUntilTomorrow()"
       [disabled]="isDisableControls"
       mat-menu-item
     >
-      <mat-icon>snooze</mat-icon>
-      {{T.F.TASK.D_REMINDER_VIEW.SNOOZE_UNTIL_TOMORROW|translate}}
+      <mat-icon>schedule</mat-icon>
+      {{T.F.TASK.D_REMINDER_VIEW.RESCHEDULE_UNTIL_TOMORROW|translate}}
     </button>
     <button (click)="editReminder(tasks[0], true)" *ngIf="!isMultiple" mat-menu-item>
       <mat-icon>edit</mat-icon>

@@ -723,7 +723,7 @@
         "FROM_TAG": "태그에서 : \"{{title}}\"",
         "SNOOZE": "다시 알림",
         "SNOOZE_ALL": "모두 다시 알림",
-        "SNOOZE_UNTIL_TOMORROW": "내일까지",
+        "RESCHEDULE_UNTIL_TOMORROW": "내일까지",
         "START": "작업 시작",
         "SWITCH_CONTEXT_START": "상황 전환 및 시작"
       },

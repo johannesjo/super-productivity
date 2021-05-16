@@ -723,7 +723,7 @@
         "FROM_TAG": "タグから：「{{title}}」",
         "SNOOZE": "スヌーズ",
         "SNOOZE_ALL": "すべてスヌーズ",
-        "SNOOZE_UNTIL_TOMORROW": "明日まで",
+        "RESCHEDULE_UNTIL_TOMORROW": "明日まで",
         "START": "開始タスク",
         "SWITCH_CONTEXT_START": "コンテキストの切り替えと開始"
       },

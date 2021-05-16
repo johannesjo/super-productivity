@@ -723,7 +723,7 @@
         "FROM_TAG": "De la etiqueta: \"{{title}}\"",
         "SNOOZE": "Posponer",
         "SNOOZE_ALL": "Posponer todo",
-        "SNOOZE_UNTIL_TOMORROW": "Hasta mañana",
+        "RESCHEDULE_UNTIL_TOMORROW": "Hasta mañana",
         "START": "Iniciar tarea",
         "SWITCH_CONTEXT_START": "Cambiar contexto e inicio"
       },

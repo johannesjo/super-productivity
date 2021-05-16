@@ -723,7 +723,7 @@
         "FROM_TAG": "From Tag: \"{{title}}\"",
         "SNOOZE": "Snooze",
         "SNOOZE_ALL": "Snooze all",
-        "SNOOZE_UNTIL_TOMORROW": "Until tomorrow",
+        "RESCHEDULE_UNTIL_TOMORROW": "Re-schedule for tomorrow",
         "START": "Start",
         "SWITCH_CONTEXT_START": "Switch Context & Start"
       },

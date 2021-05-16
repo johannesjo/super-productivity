@@ -723,7 +723,7 @@
         "FROM_TAG": "از برچسب: \"{{title}}\"",
         "SNOOZE": "Snooze",
         "SNOOZE_ALL": "تعویق همه",
-        "SNOOZE_UNTIL_TOMORROW": "تا فردا",
+        "RESCHEDULE_UNTIL_TOMORROW": "تا فردا",
         "START": "Start Task",
         "SWITCH_CONTEXT_START": "تغییر متن و شروع"
       },

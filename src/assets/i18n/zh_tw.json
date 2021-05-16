@@ -667,7 +667,7 @@
         "FROM_TAG": "來自標籤：\"{{title}}\"",
         "SNOOZE": "暫停",
         "SNOOZE_ALL": "全部暫停",
-        "SNOOZE_UNTIL_TOMORROW": "明天重新開始",
+        "RESCHEDULE_UNTIL_TOMORROW": "明天重新開始",
         "START": "開始任務",
         "SWITCH_CONTEXT_START": "切換內容上下文並開始"
       },

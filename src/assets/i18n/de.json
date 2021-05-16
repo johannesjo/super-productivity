@@ -723,7 +723,7 @@
         "FROM_TAG": "Vom Tag: \"{{title}}\"",
         "SNOOZE": "Snooze",
         "SNOOZE_ALL": "Schlummer alle",
-        "SNOOZE_UNTIL_TOMORROW": "Bis morgen",
+        "RESCHEDULE_UNTIL_TOMORROW": "Bis morgen",
         "START": "Task starten",
         "SWITCH_CONTEXT_START": "Kontext wechseln & starten"
       },

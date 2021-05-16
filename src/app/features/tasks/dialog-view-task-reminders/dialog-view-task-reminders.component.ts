@@ -106,6 +106,7 @@ export class DialogViewTaskRemindersComponent implements OnDestroy {
   dismiss(task: TaskWithReminderData) {
     this._taskService.update(task.id, {
       reminderId: null,
+      plannedAt: null,
     });
     this._reminderService.removeReminder(task.reminderData.id);
     this._removeFromList(task.reminderId as string);
@@ -119,9 +120,13 @@ export class DialogViewTaskRemindersComponent implements OnDestroy {
     this._removeFromList(task.reminderId as string);
   }
 
-  snoozeUntilTomorrow(task: TaskWithReminderData) {
+  rescheduleUntilTomorrow(task: TaskWithReminderData) {
+    const remindTime = getTomorrow().getTime();
     this._reminderService.updateReminder(task.reminderData.id, {
       remindAt: getTomorrow().getTime(),
+    });
+    this._taskService.update(task.id, {
+      plannedAt: remindTime,
     });
     this._removeFromList(task.reminderId as string);
   }
@@ -160,15 +165,14 @@ export class DialogViewTaskRemindersComponent implements OnDestroy {
     this._close();
   }
 
-  snoozeAllUntilTomorrow() {
+  rescheduleAllUntilTomorrow() {
     this.isDisableControls = true;
-    const tomorrow = getTomorrow().getTime();
-    this.reminders$.getValue().forEach((reminder) => {
-      this._reminderService.updateReminder(reminder.id, {
-        remindAt: tomorrow,
-      });
-    });
-    this._close();
+    this._subs.add(
+      this.tasks$.subscribe((tasks) => {
+        tasks.forEach((t) => this.rescheduleUntilTomorrow(t));
+        this._close();
+      }),
+    );
   }
 
   async addAllToToday() {

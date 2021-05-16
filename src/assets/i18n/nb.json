@@ -681,7 +681,7 @@
         "FROM_TAG": "Fra tag: \"{{title}}\"",
         "SNOOZE": "Slumre",
         "SNOOZE_ALL": "Utsett alle",
-        "SNOOZE_UNTIL_TOMORROW": "Til i morgen",
+        "RESCHEDULE_UNTIL_TOMORROW": "Til i morgen",
         "START": "Start",
         "SWITCH_CONTEXT_START": "Bytt kontekst og start"
       },

@@ -723,7 +723,7 @@
         "FROM_TAG": "Da etichetta: \"{{title}}\"",
         "SNOOZE": "Silenzia",
         "SNOOZE_ALL": "Posticipa tutto",
-        "SNOOZE_UNTIL_TOMORROW": "Fino a domani",
+        "RESCHEDULE_UNTIL_TOMORROW": "Fino a domani",
         "START": "Inizia task",
         "SWITCH_CONTEXT_START": "Cambia progetto & inizia task"
       },

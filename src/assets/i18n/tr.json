@@ -723,7 +723,7 @@
         "FROM_TAG": "Etiketten: \"{{title}}\"",
         "SNOOZE": "Erteleme",
         "SNOOZE_ALL": "Tümünü ertele",
-        "SNOOZE_UNTIL_TOMORROW": "Yarına kadar",
+        "RESCHEDULE_UNTIL_TOMORROW": "Yarına kadar",
         "START": "Görevi Başlat",
         "SWITCH_CONTEXT_START": "Bağlam Değiştir ve Başlat"
       },

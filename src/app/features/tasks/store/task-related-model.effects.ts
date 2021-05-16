@@ -299,6 +299,7 @@ export class TaskRelatedModelEffects {
         ...task,
         reminderId: null,
         isDone: true,
+        plannedAt: null,
       })),
       currentArchive,
     );

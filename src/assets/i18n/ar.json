@@ -723,7 +723,7 @@
         "FROM_TAG": "من العلامة: \"{{title}}\"",
         "SNOOZE": "قيلولة بعد الظهر",
         "SNOOZE_ALL": "تأجيل الكل",
-        "SNOOZE_UNTIL_TOMORROW": "حتى الغد",
+        "RESCHEDULE_UNTIL_TOMORROW": "حتى الغد",
         "START": "بدء المهمة",
         "SWITCH_CONTEXT_START": "تبديل السياق والبدء"
       },
