@@ -159,6 +159,14 @@ export const mapToTimelineViewEntries = (
     }
   }
 
+  // only show time for first with the time
+  cleanedUpExcessWorkDays.forEach((entry, i, arr) => {
+    const prev = arr[i - 1];
+    if (prev && prev.start === entry.start) {
+      entry.isHideTime = true;
+    }
+  });
+
   if (!isSameDay(now, cleanedUpExcessWorkDays[0].start)) {
     const start = getDateTimeFromClockString('0:00', cleanedUpExcessWorkDays[0].start);
     cleanedUpExcessWorkDays.unshift({

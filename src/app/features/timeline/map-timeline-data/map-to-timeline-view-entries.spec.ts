@@ -944,7 +944,7 @@ describe('mapToViewEntries()', () => {
         type: TimelineViewEntryType.SplitTaskContinued,
         start: getDateTimeFromClockString('9:00', 24 * 60 * 60000),
         id: longTask.id + '__1',
-        isHideTime: false,
+        isHideTime: true,
         data: {
           index: 1,
           taskId: longTask.id,
@@ -971,7 +971,7 @@ describe('mapToViewEntries()', () => {
         type: TimelineViewEntryType.SplitTaskContinuedLast,
         start: getDateTimeFromClockString('9:00', 2 * 24 * 60 * 60000),
         id: longTask.id + '__2',
-        isHideTime: false,
+        isHideTime: true,
         data: {
           index: 2,
           taskId: longTask.id,
