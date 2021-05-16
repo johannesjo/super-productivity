@@ -27,7 +27,7 @@ linux:
     - AppImage
     - deb
     - snap
-    - rpm
+  #    - rpm
   publish:
     - github
 snap:
