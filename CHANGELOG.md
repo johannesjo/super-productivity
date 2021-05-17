@@ -1,3 +1,17 @@
+# [7.0.0-rc11](https://github.com/johannesjo/super-productivity/compare/v7.0.0-rc10...v7.0.0-rc11) (2021-05-17)
+
+### Bug Fixes
+
+- **caldav:** issues imported multiple times [#1021](https://github.com/johannesjo/super-productivity/issues/1021) ([550f730](https://github.com/johannesjo/super-productivity/commit/550f73052d39aca177f13fe981ae740acf9e3b2e))
+- **github:** issues imported multiple times [#1021](https://github.com/johannesjo/super-productivity/issues/1021) ([fc6356e](https://github.com/johannesjo/super-productivity/commit/fc6356e988576b1428ba63d6f7f71ee8d5ba0b52))
+- **repeat:** cannot save repeating task config after deleting default estimate ([73c16af](https://github.com/johannesjo/super-productivity/commit/73c16afb9a1fa7136f086c023e4ee1aef503307b))
+
+### Features
+
+- log to file for production ([67e2752](https://github.com/johannesjo/super-productivity/commit/67e2752303227a0a67692b18ae52328effd9cce4))
+- **github:** import issues ordered ([043786a](https://github.com/johannesjo/super-productivity/commit/043786a65c550b764bcd1d9202370b2917a41113))
+- improve and simplify banner animation ([b62c61b](https://github.com/johannesjo/super-productivity/commit/b62c61bba46cfc991a043d290f5e990582a030e6))
+
 # [7.0.0-rc10](https://github.com/johannesjo/super-productivity/compare/v7.0.0-rc9...v7.0.0-rc10) (2021-05-16)
 
 # [7.0.0-rc9](https://github.com/johannesjo/super-productivity/compare/v7.0.0-rc8...v7.0.0-rc9) (2021-05-16)
