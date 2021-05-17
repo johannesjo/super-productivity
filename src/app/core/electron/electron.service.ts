@@ -5,6 +5,7 @@ import { ipcRenderer, remote, shell, webFrame } from 'electron';
 import { IS_ELECTRON } from '../../app.constants';
 import { getElectron } from '../../util/get-electron';
 import * as ElectronRenderer from 'electron/renderer';
+import { environment } from '../../../environments/environment';
 
 // TODO make available for both
 export const getSendChannel = (channel: string) => `%better-ipc-send-channel-${channel}`;
@@ -38,6 +39,12 @@ export class ElectronService {
       this.remote = electron.remote;
       // NOTE: works for non-sandboxed electron only
       this.shell = (electron as any).shell;
+
+      // log to file for production
+      if (environment.production || environment.stage) {
+        const log = (this.remote as typeof remote).require('electron-log');
+        console.log = log.log;
+      }
     }
 
     // NOTE: useful in case we want to disable the node integration
