@@ -4,15 +4,7 @@ import { GithubApiService } from '../github-api.service';
 import { SnackService } from '../../../../../core/snack/snack.service';
 import { TaskService } from '../../../../tasks/task.service';
 import { ProjectService } from '../../../../project/project.service';
-import {
-  filter,
-  first,
-  map,
-  switchMap,
-  takeUntil,
-  tap,
-  withLatestFrom,
-} from 'rxjs/operators';
+import { filter, first, map, switchMap, takeUntil, tap } from 'rxjs/operators';
 import { IssueService } from '../../../issue.service';
 import { forkJoin, Observable, timer } from 'rxjs';
 import { GITHUB_INITIAL_POLL_DELAY, GITHUB_POLL_INTERVAL } from '../github.const';
@@ -42,27 +34,22 @@ export class GithubIssueEffects {
             // NOTE: required otherwise timer stays alive for filtered actions
             takeUntil(this._issueEffectHelperService.pollToBacklogActions$),
             tap(() => console.log('GITHUB_POLL_BACKLOG_CHANGES')),
-            withLatestFrom(
-              this._githubApiService.getLast100IssuesForRepo$(githubCfg),
-              this._taskService.getAllIssueIdsForProject(pId, GITHUB_TYPE) as Promise<
-                number[]
-              >,
+            switchMap(() =>
+              forkJoin([
+                this._githubApiService.getLast100IssuesForRepo$(githubCfg),
+                this._taskService.getAllIssueIdsForProject(pId, GITHUB_TYPE) as Promise<
+                  number[]
+                >,
+              ]),
             ),
-            tap(
-              ([, issues, allTaskGithubIssueIds]: [
-                any,
-                GithubIssueReduced[],
-                number[],
-              ]) => {
-                const issuesToAdd = issues.filter(
-                  (issue) => !allTaskGithubIssueIds.includes(issue.id),
-                );
-                console.log('issuesToAdd', issuesToAdd);
-                if (issuesToAdd?.length) {
-                  this._importNewIssuesToBacklog(pId, issuesToAdd);
-                }
-              },
-            ),
+            tap(([issues, allTaskGithubIssueIds]: [GithubIssueReduced[], number[]]) => {
+              const issuesToAdd = issues.filter(
+                (issue) => !allTaskGithubIssueIds.includes(issue.id),
+              );
+              if (issuesToAdd?.length) {
+                this._importNewIssuesToBacklog(pId, issuesToAdd);
+              }
+            }),
           ),
         ),
       ),
