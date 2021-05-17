@@ -43,9 +43,9 @@ export class GithubIssueEffects {
               ]),
             ),
             tap(([issues, allTaskGithubIssueIds]: [GithubIssueReduced[], number[]]) => {
-              const issuesToAdd = issues.filter(
-                (issue) => !allTaskGithubIssueIds.includes(issue.id),
-              );
+              const issuesToAdd = issues
+                .filter((issue) => !allTaskGithubIssueIds.includes(issue.id))
+                .sort((a, b) => a.id - b.id);
               if (issuesToAdd?.length) {
                 this._importNewIssuesToBacklog(pId, issuesToAdd);
               }
