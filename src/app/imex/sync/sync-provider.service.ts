@@ -40,7 +40,7 @@ export class SyncProviderService {
     map((cfg: SyncConfig): SyncProvider | null => cfg.syncProvider),
     distinctUntilChanged(),
     map((syncProvider: SyncProvider | null): SyncProviderServiceInterface | null => {
-      console.log('Activated SyncProvider:', syncProvider);
+      // console.log('Activated SyncProvider:', syncProvider);
       switch (syncProvider) {
         case SyncProvider.Dropbox:
           return this._dropboxSyncService;

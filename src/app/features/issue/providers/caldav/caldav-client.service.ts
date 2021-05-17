@@ -238,7 +238,6 @@ export class CaldavClientService {
   }
 
   getById$(id: string | number, caldavCfg: CaldavCfg): Observable<CaldavIssue> {
-    console.log(id);
     if (typeof id === 'number') {
       id = id.toString(10);
     }

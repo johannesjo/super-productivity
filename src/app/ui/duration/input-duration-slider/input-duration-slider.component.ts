@@ -160,7 +160,6 @@ export class InputDurationSliderComponent implements OnInit, OnDestroy {
     if (hours > 12) {
       hours = 12;
     }
-    console.log(hours);
 
     this.dots = new Array(hours);
   }
@@ -226,7 +225,6 @@ export class InputDurationSliderComponent implements OnInit, OnDestroy {
   }
 
   setRotationFromValue(val: number = this._model) {
-    console.log(val);
     const momentVal = moment.duration({
       milliseconds: val,
     });

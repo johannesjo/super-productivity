@@ -208,8 +208,6 @@ export class InlineMarkdownComponent implements OnInit, OnDestroy {
   }
 
   setBlur(ev: Event) {
-    console.log('SET BLUR');
-
     this.blurred.emit(ev);
   }
 

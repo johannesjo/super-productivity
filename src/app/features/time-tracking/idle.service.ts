@@ -74,7 +74,6 @@ export class IdleService {
   }
 
   handleIdle(idleTime: number) {
-    console.log('IDLE_TIME', idleTime, new Date());
     const gCfg = this._configService.cfg;
     if (!gCfg) {
       throw new Error();
