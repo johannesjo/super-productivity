@@ -34,6 +34,7 @@ export const TAKE_A_BREAK_FORM_CFG: ConfigFormSection<TakeABreakConfig> = {
       hideExpression: '!model.isTakeABreakEnabled',
       templateOptions: {
         label: T.GCF.TAKE_A_BREAK.MIN_WORKING_TIME,
+        required: true,
       },
     },
     {

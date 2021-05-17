@@ -22,6 +22,7 @@ export const SYNC_FORM: ConfigFormSection<SyncConfig> = {
       // NOTE: we don't hide because model updates don't seem to work properly for this
       // hideExpression: ((model: DropboxSyncConfig) => !model.accessToken),
       templateOptions: {
+        required: true,
         isAllowSeconds: true,
         label: T.F.SYNC.FORM.L_SYNC_INTERVAL,
       },
