@@ -6,7 +6,7 @@ module.exports = {
   custom_commands_path: 'out-tsc/e2e/commands',
   test_workers: {
     enabled: true,
-    workers: 'auto',
+    workers: 5,
   },
   webdriver: {
     start_process: true,
