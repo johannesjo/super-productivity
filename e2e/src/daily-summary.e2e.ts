@@ -2,7 +2,7 @@ import { BASE } from '../e2e.const';
 import { NBrowser } from '../n-browser-interface';
 
 const URL = `${BASE}/#/tag/TODAY/daily-summary`;
-const ADD_TASK_BTN_SEL = '.action-nav > button:nth-child(2)';
+const ADD_TASK_BTN_SEL = '.action-nav > button:first-child';
 const ADD_TASK_GLOBAL_SEL = 'add-task-bar.global input';
 
 module.exports = {

@@ -4,7 +4,7 @@ import { NBrowser } from '../n-browser-interface';
 const ADD_TASK_INITIAL = 'add-task-bar:not(.global) input';
 const ADD_TASK_GLOBAL = 'add-task-bar.global input';
 const TASK = 'task';
-const ADD_TASK_BTN = '.action-nav > button:nth-child(2)';
+const ADD_TASK_BTN = '.action-nav > button:first-child';
 const WORK_VIEW_URL = `${BASE}/`;
 const READY_TO_WORK_BTN = '.ready-to-work-btn';
 
