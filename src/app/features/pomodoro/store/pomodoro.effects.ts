@@ -259,12 +259,15 @@ export class PomodoroEffects {
         switchMap((isEnabledI) =>
           !isEnabledI ? EMPTY : this._pomodoroService.sessionProgress$,
         ),
+        withLatestFrom(this._pomodoroService.isManualPause$),
         // we display pomodoro progress for pomodoro
-        tap((progress) => {
+        tap(([progress, isPause]: [number, boolean]) => {
+          const progressBarMode: 'normal' | 'pause' = isPause ? 'pause' : 'normal';
           (this._electronService.ipcRenderer as typeof ipcRenderer).send(
             IPC.SET_PROGRESS_BAR,
             {
               progress,
+              progressBarMode,
             },
           );
         }),
