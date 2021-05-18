@@ -5,7 +5,7 @@ module.exports = {
   output_folder: './e2e-test-results',
   custom_commands_path: 'out-tsc/e2e/commands',
   test_workers: {
-    enabled: true,
+    enabled: false,
     workers: 5,
   },
   webdriver: {
