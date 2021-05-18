@@ -41,6 +41,9 @@ export class WebDavSyncService implements SyncProviderServiceInterface {
     try {
       const r = await this._webDavApiService.getMetaData('/' + cfg.syncFilePath);
       const d = new Date(r.lastmod);
+      if (typeof r?.etag !== 'string') {
+        throw new Error('WebDAV: No etag');
+      }
       return {
         clientUpdate: d.getTime(),
         rev: r.etag,
@@ -71,6 +74,10 @@ export class WebDavSyncService implements SyncProviderServiceInterface {
       });
       const meta = await this._webDavApiService.getMetaData('/' + cfg.syncFilePath);
       this._globalProgressBarService.countDown();
+      if (typeof meta?.etag !== 'string') {
+        throw new Error('WebDAV: No etag');
+      }
+
       return {
         rev: meta.etag,
         data: r,
@@ -95,6 +102,9 @@ export class WebDavSyncService implements SyncProviderServiceInterface {
       });
       console.log(headers);
       this._globalProgressBarService.countDown();
+      if (typeof headers?.etag !== 'string') {
+        throw new Error('WebDAV: No etag');
+      }
       return headers.etag;
     } catch (e) {
       console.error(e);
