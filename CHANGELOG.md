@@ -1,3 +1,5 @@
+# [7.0.0-rc12](https://github.com/johannesjo/super-productivity/compare/v7.0.0-rc11...v7.0.0-rc12) (2021-05-18)
+
 # [7.0.0-rc11](https://github.com/johannesjo/super-productivity/compare/v7.0.0-rc10...v7.0.0-rc11) (2021-05-17)
 
 ### Bug Fixes
