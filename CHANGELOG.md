@@ -1,3 +1,9 @@
+# [7.0.0-rc13](https://github.com/johannesjo/super-productivity/compare/v7.0.0-rc12...v7.0.0-rc13) (2021-05-18)
+
+### Features
+
+- **pomodoro:** Added pause status for windows taskbar ([7fb8087](https://github.com/johannesjo/super-productivity/commit/7fb80878e8e1948704e3aee8ef2e2f43a7c792f4))
+
 # [7.0.0-rc12](https://github.com/johannesjo/super-productivity/compare/v7.0.0-rc11...v7.0.0-rc12) (2021-05-18)
 
 # [7.0.0-rc11](https://github.com/johannesjo/super-productivity/compare/v7.0.0-rc10...v7.0.0-rc11) (2021-05-17)
