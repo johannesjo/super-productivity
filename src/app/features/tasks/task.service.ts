@@ -758,6 +758,13 @@ export class TaskService {
     ) as Task[];
   }
 
+  async getArchivedTasks(): Promise<Task[]> {
+    const archiveTaskState: TaskArchive = await this._persistenceService.taskArchive.loadState();
+    const ids = (archiveTaskState && (archiveTaskState.ids as string[])) || [];
+    const archiveTasks = ids.map((id) => archiveTaskState.entities[id]) as Task[];
+    return archiveTasks;
+  }
+
   async getAllTaskByIssueTypeForProject$(
     projectId: string,
     issueProviderKey: IssueProviderKey,

@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { AfterViewInit, ChangeDetectionStrategy, Component } from '@angular/core';
 import { PersistenceService } from '../../core/persistence/persistence.service';
 import { expandFadeAnimation } from '../../ui/animations/expand.ani';
 import { WorklogDataForDay, WorklogMonth, WorklogWeek } from './worklog.model';
@@ -7,7 +7,7 @@ import { Task, TaskCopy } from '../tasks/task.model';
 import { TaskService } from '../tasks/task.service';
 import { DialogWorklogExportComponent } from './dialog-worklog-export/dialog-worklog-export.component';
 import { DialogConfirmComponent } from '../../ui/dialog-confirm/dialog-confirm.component';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { standardListAnimation } from '../../ui/animations/standard-list.ani';
 import { WorklogService } from './worklog.service';
 import { getDateRangeForMonth } from '../../util/get-date-range-for-month';
@@ -15,6 +15,7 @@ import { getDateRangeForWeek } from '../../util/get-date-range-for-week';
 import { fadeAnimation } from '../../ui/animations/fade.ani';
 import { T } from '../../t.const';
 import { WorkContextService } from '../work-context/work-context.service';
+import { SearchQueryParams } from '../search-bar/search-bar.model';
 
 @Component({
   selector: 'worklog',
@@ -23,7 +24,7 @@ import { WorkContextService } from '../work-context/work-context.service';
   changeDetection: ChangeDetectionStrategy.OnPush,
   animations: [expandFadeAnimation, standardListAnimation, fadeAnimation],
 })
-export class WorklogComponent {
+export class WorklogComponent implements AfterViewInit {
   T: typeof T = T;
   expanded: { [key: string]: boolean } = {};
 
@@ -34,7 +35,32 @@ export class WorklogComponent {
     private readonly _taskService: TaskService,
     private readonly _matDialog: MatDialog,
     private readonly _router: Router,
+    private readonly _route: ActivatedRoute,
   ) {}
+
+  ngAfterViewInit(): void {
+    this._route.queryParams.subscribe((params) => {
+      const { dateStr, focusItem } = params as SearchQueryParams;
+      if (!!dateStr) {
+        this.expanded[dateStr] = true;
+        this.focusTask(focusItem);
+      }
+    });
+  }
+
+  focusTask(id: string) {
+    let counter = 0;
+    const timerId = setInterval(() => {
+      counter += 1;
+      const el = document.getElementById(`t-${id}`);
+      if (el) {
+        el.focus();
+        clearInterval(timerId);
+      } else if (counter === 5) {
+        clearInterval(timerId);
+      }
+    }, 300);
+  }
 
   exportData(
     monthData: WorklogMonth,
