@@ -14,7 +14,7 @@ import { FormControl } from '@angular/forms';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { tap, map, take, debounceTime, startWith } from 'rxjs/operators';
 import { TaskService } from '../tasks/task.service';
-import { Params, Router } from '@angular/router';
+import { Router } from '@angular/router';
 import { TODAY_TAG } from '../tag/tag.const';
 import { Project } from '../project/project.model';
 import { Tag } from '../tag/tag.model';
@@ -23,7 +23,8 @@ import { TagService } from '../tag/tag.service';
 import { Task } from '../tasks/task.model';
 import { blendInOutAnimation } from 'src/app/ui/animations/blend-in-out.ani';
 import { AnimationEvent } from '@angular/animations';
-import { SearchItem } from './search-bar.model';
+import { SearchItem, SearchQueryParams } from './search-bar.model';
+import { getWorklogStr } from '../../util/get-work-log-str';
 
 @Component({
   selector: 'search-bar',
@@ -34,7 +35,6 @@ import { SearchItem } from './search-bar.model';
 })
 export class SearchBarComponent implements AfterViewInit, OnDestroy {
   @Input() isElevated: boolean = false;
-  @Input() tabindex: number = 0;
   @Output() blurred: EventEmitter<any> = new EventEmitter();
 
   @ViewChild('inputEl') inputEl!: ElementRef;
@@ -44,6 +44,8 @@ export class SearchBarComponent implements AfterViewInit, OnDestroy {
   isLoading$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
   taskSuggestionsCtrl: FormControl = new FormControl();
   filteredIssueSuggestions$: Observable<SearchItem[]> = new Observable();
+  isArchivedTasks: boolean = false;
+  tooManyResults: boolean = false;
 
   private _attachKeyDownHandlerTimeout?: number;
   private _tasks: Task[] = [];
@@ -61,37 +63,45 @@ export class SearchBarComponent implements AfterViewInit, OnDestroy {
     this._projectService.list$.pipe(take(1)).subscribe((p) => (this._projects = p));
     this._tagService.tags$.pipe(take(1)).subscribe((t) => (this._tags = t));
 
+    this._mapTasksToSearchItems();
+  }
+
+  private _mapTasksToSearchItems(): void {
     this._searchableItems = this._tasks.map((task) => {
-      const context = this._getCtxForTaskSuggestion(task);
       const item: SearchItem = {
         id: task.id,
         title: task.title.toLowerCase(),
-        taskNotes: task.notes.toLowerCase(),
-        location: SearchBarComponent._getLocation(task),
+        taskNotes: task.notes ? task.notes.toLowerCase() : '',
+        projectId: task.projectId,
+        parentId: task.parentId,
+        tagIds: task.tagIds,
+        timeSpentOnDay: task.timeSpentOnDay,
+        createdOn: task.created,
         issueType: task.issueType,
-        isInBacklog: this._isInBacklog(task),
-        ctx: {
-          ...context,
-          icon: (context as Tag).icon || (task.projectId && 'list'),
-        },
+        ctx: this._getContextIcon(task),
       };
       return item;
     });
   }
 
+  private _getContextIcon(task: Task) {
+    const context = this._getCtxForTaskSuggestion(task);
+    return {
+      ...context,
+      icon: (context as Tag).icon || (task.projectId && 'list'),
+    };
+  }
+
   ngAfterViewInit(): void {
-    this.filteredIssueSuggestions$ = this.taskSuggestionsCtrl.valueChanges.pipe(
-      debounceTime(100),
-      startWith(''),
-      tap(() => this.isLoading$.next(true)),
-      map((searchTerm) => this._filter(searchTerm)),
-      tap(() => this.isLoading$.next(false)),
-    );
+    this._setUpFilter();
 
     this._attachKeyDownHandlerTimeout = window.setTimeout(() => {
       this.inputEl.nativeElement.addEventListener('keydown', (ev: KeyboardEvent) => {
         if (ev.key === 'Escape') {
           this.blurred.emit();
+        } else if (ev.key === '1' && ev.ctrlKey) {
+          this.switchTaskSource();
+          ev.preventDefault();
         } else if (
           ev.key === 'Enter' &&
           (!this.taskSuggestionsCtrl.value ||
@@ -104,17 +114,40 @@ export class SearchBarComponent implements AfterViewInit, OnDestroy {
     });
   }
 
-  private static _getLocation(task: Task): string {
-    if (task.projectId) {
-      return `project/${task.projectId}/tasks`;
-    } else if (task.tagIds.includes(TODAY_TAG.id)) {
-      return '/tag/TODAY/tasks';
-    } else if (task.tagIds[0]) {
-      return `/tag/${task.tagIds[0]}/tasks`;
+  private _triggerFilter(): void {
+    this.taskSuggestionsCtrl.setValue(this.inputEl.nativeElement.value);
+  }
+
+  private _setUpFilter(): void {
+    this.filteredIssueSuggestions$ = this.taskSuggestionsCtrl.valueChanges.pipe(
+      debounceTime(100),
+      startWith(''),
+      tap(() => this.isLoading$.next(true)),
+      map((searchTerm) => this._filter(searchTerm)),
+      tap(() => this.isLoading$.next(false)),
+    );
+  }
+
+  private _getLocation(item: SearchItem): string {
+    const tasksOrWorklog = !this.isArchivedTasks ? 'tasks' : 'worklog';
+    if (item.projectId) {
+      return `/project/${item.projectId}/${tasksOrWorklog}`;
+    } else if (item.tagIds.includes(TODAY_TAG.id)) {
+      return `/tag/TODAY/${tasksOrWorklog}`;
+    } else if (item.tagIds[0]) {
+      return `/tag/${item.tagIds[0]}/${tasksOrWorklog}`;
     } else {
       console.warn("Couldn't find task location");
-      return '/';
+      return '';
     }
+  }
+
+  private _getArchivedDate(item: SearchItem): string {
+    if (Object.keys(item.timeSpentOnDay)[0]) return Object.keys(item.timeSpentOnDay)[0];
+    if (item.createdOn) return getWorklogStr(item.createdOn);
+    const parentTask = this._tasks.find((t) => t.id === item.id);
+    if (parentTask?.created) return getWorklogStr(parentTask.created);
+    return '';
   }
 
   private _getCtxForTaskSuggestion(task: Task): Tag | Project {
@@ -128,18 +161,27 @@ export class SearchBarComponent implements AfterViewInit, OnDestroy {
     }
   }
 
-  private _isInBacklog(task: Task): boolean {
-    if (!task.projectId) return false;
-    const project = this._projects.find((p) => p.id === task.projectId);
-    return project ? project.backlogTaskIds.includes(task.id) : false;
+  private _isInBacklog(item: SearchItem): boolean {
+    if (!item.projectId) return false;
+    const project = this._projects.find((p) => p.id === item.projectId);
+    return project ? project.backlogTaskIds.includes(item.id) : false;
   }
 
   private _filter(searchTerm: string): SearchItem[] {
-    return this._searchableItems.filter(
+    let result = this._searchableItems.filter(
       (task) =>
         task.title.includes(searchTerm.toLowerCase()) ||
         task.taskNotes.includes(searchTerm.toLowerCase()),
     );
+
+    if (result.length > 200) {
+      this.tooManyResults = true;
+      result = result.slice(0, 200);
+    } else {
+      this.tooManyResults = false;
+    }
+
+    return result;
   }
 
   private _shakeSearchForm(): void {
@@ -147,6 +189,18 @@ export class SearchBarComponent implements AfterViewInit, OnDestroy {
     this.searchForm.nativeElement.onanimationend = () => {
       this.searchForm.nativeElement.classList.toggle('shake-form');
     };
+  }
+
+  async switchTaskSource(event?: MouseEvent) {
+    // trigger on mousedown to keep inputEl in focus
+    event?.preventDefault();
+    this.isLoading$.next(true);
+    this.isArchivedTasks = !this.isArchivedTasks;
+    this._tasks = this.isArchivedTasks
+      ? await this._taskService.getArchivedTasks()
+      : await this._taskService.allTasks$.pipe(take(1)).toPromise();
+    this._mapTasksToSearchItems();
+    this._triggerFilter();
   }
 
   onAnimationEvent(event: AnimationEvent) {
@@ -157,21 +211,25 @@ export class SearchBarComponent implements AfterViewInit, OnDestroy {
 
   navigateToItem(item: SearchItem) {
     if (!item) return;
-    const params: Params = {
-      queryParams: {
-        highlightItem: item.id,
-        isInBacklog: item.isInBacklog,
-      },
-    };
-    this._router.navigate([item.location], params);
+
+    const focusItem = item.id;
+    let queryParams: SearchQueryParams;
+    if (!this.isArchivedTasks) {
+      const isInBacklog = this._isInBacklog(item);
+      queryParams = { focusItem, isInBacklog };
+    } else {
+      const dateStr = this._getArchivedDate(item);
+      queryParams = { focusItem, dateStr };
+    }
+
+    const location = this._getLocation(item);
+    this._router.navigate([location], { queryParams });
     this.blurred.emit();
   }
 
   onBlur(ev: FocusEvent) {
     const relatedTarget: HTMLElement = ev.relatedTarget as HTMLElement;
-    if (relatedTarget?.className.includes('switch-add-to-btn')) {
-      this.inputEl.nativeElement.focus();
-    } else if (!relatedTarget?.className.includes('mat-option')) {
+    if (!relatedTarget?.className.includes('mat-option')) {
       this.blurred.emit(ev);
     }
   }

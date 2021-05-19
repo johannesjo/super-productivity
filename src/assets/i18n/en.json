@@ -888,7 +888,10 @@
       }
     },
     "SEARCH_BAR": {
-      "INFO": "Search for task or task description"
+      "TOO_MANY_RESULTS": "Too many results, please narrow your search",
+      "PLACEHOLDER": "Search for task or task description",
+      "PLACEHOLDER_ARCHIVED": "Search for archived tasks",
+      "INFO": "Click on the list icon to search for archived tasks"
     }
   },
   "FILE_IMEX": {

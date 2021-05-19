@@ -45,6 +45,7 @@ import { WorkContextService } from '../../work-context/work-context.service';
 import { environment } from '../../../../environments/environment';
 import { throttle } from 'helpful-decorators';
 import { ActivatedRoute } from '@angular/router';
+import { SearchQueryParams } from '../../search-bar/search-bar.model';
 
 @Component({
   selector: 'task',
@@ -224,11 +225,12 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
       });
     } else {
       this._route.queryParams.subscribe((params) => {
-        window.setTimeout(() => {
-          if (params.highlightItem === this.task.id) {
+        const { focusItem } = params as SearchQueryParams;
+        if (focusItem === this.task.id) {
+          setTimeout(() => {
             this.focusSelfElement();
-          }
-        }, 200);
+          }, 200);
+        }
       });
     }
   }

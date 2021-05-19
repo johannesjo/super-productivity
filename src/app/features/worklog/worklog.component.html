@@ -116,6 +116,8 @@
                           <table class="task-summary-table">
                             <tr
                               *ngFor="let logEntry of worklogForDay.value.logEntries; trackBy: trackByForLogEntry;"
+                              [id]="'t-' + logEntry.task.id"
+                              tabindex="0"
                             >
                               <td
                                 [class.isSubTask]="logEntry.task.parentId"
