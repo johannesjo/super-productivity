@@ -111,6 +111,41 @@
             [tabindex]="1"
             [isDoubleEnterMode]="true"
           ></add-task-bar>
+
+          <!-- NOTE workContextService.isToday should work as we only need the initial value -->
+          <ng-container
+            *ngIf="workContextService.isToday && (taskService.allPlannedForTodayNotOnToday$|async) as plannedForToday"
+          >
+            <button
+              *ngIf="plannedForToday?.length"
+              (click)="addAllPlannedForToday(plannedForToday)"
+              class="add-scheduled"
+              color=""
+              mat-stroked-button
+              tabindex="1"
+            >
+              <mat-icon>playlist_add</mat-icon>
+              {{T.WW.ADD_SCHEDULED_FOR_TODAY|translate:{nr: plannedForToday.length} }}
+            </button>
+
+            <ng-container
+              *ngIf="plannedForToday.length === 0 &&(taskService.allPlannedForTomorrowNotOnToday$|async) as plannedForTomorrow"
+            >
+              <button
+                *ngIf="plannedForTomorrow?.length"
+                (click)="addAllPlannedForToday(plannedForTomorrow)"
+                class="add-scheduled"
+                color=""
+                mat-stroked-button
+                tabindex="1"
+              >
+                <mat-icon>playlist_add</mat-icon>
+                {{T.WW.ADD_SCHEDULED_FOR_TOMORROW|translate:{nr:
+                plannedForTomorrow.length} }}
+              </button>
+            </ng-container>
+          </ng-container>
+
           <button
             (click)="startWork()"
             class="ready-to-work-btn"

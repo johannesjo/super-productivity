@@ -74,6 +74,11 @@ export const selectTagsByIds = createSelector(
         }),
 );
 
+// export const selectTodayTag = createSelector(
+//   selectTagFeatureState,
+//   (s): Tag => s.entities[TODAY_TAG.id] as Tag,
+// );
+
 const _addMyDayTagIfNecessary = (state: TagState): TagState => {
   const ids = state.ids as string[];
   if (ids && !ids.includes(TODAY_TAG.id)) {

@@ -60,5 +60,6 @@ export class FileImexComponent {
   async downloadBackup() {
     const data = await this._dataImportService.getCompleteSyncData();
     download('super-productivity-backup.json', JSON.stringify(data));
+    // download('super-productivity-backup.json', privacyExport(data));
   }
 }

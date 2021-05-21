@@ -149,6 +149,7 @@
 .time .date {
   font-size: 13px;
 }
+
 $sb-radius: 28px;
 $sb-radius-continued: 56px;
 $sb-radius-small: 4px;
@@ -228,14 +229,15 @@ task.split-task::ng-deep .box {
   border-bottom: 0;
   position: relative;
   font-size: 17px;
+  display: flex;
+  align-items: center;
 
-  &:after {
-    position: absolute;
-    left: -11 * $s;
-    right: -1 * $s;
-    top: 50%;
-    border-bottom: 2px dashed;
+  &::before,
+  &::after {
     content: '';
+    flex: 1;
+    border-bottom: 1px solid #000;
+    border-bottom: 1px dashed;
 
     @include lightTheme() {
       border-color: $light-theme-separator-color;
@@ -243,6 +245,22 @@ task.split-task::ng-deep .box {
     @include darkTheme() {
       border-color: $dark-theme-separator-color;
     }
+  }
+  &::before {
+    margin-left: -88px;
+    padding-left: 88px;
+  }
+
+  &:not(:empty)::before {
+    margin-right: 0.25em;
+  }
+
+  &:not(:empty)::after {
+    margin-left: 0.25em;
+  }
+
+  .day {
+    font-weight: normal;
   }
 }
 

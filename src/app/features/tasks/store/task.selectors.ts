@@ -1,8 +1,9 @@
 import { createFeatureSelector, createSelector } from '@ngrx/store';
 import { TASK_FEATURE_NAME } from './task.reducer';
-import { Task, TaskState, TaskWithSubTasks } from '../task.model';
+import { Task, TaskPlanned, TaskState, TaskWithSubTasks } from '../task.model';
 import { taskAdapter } from './task.adapter';
 import { devError } from '../../../util/dev-error';
+import { TODAY_TAG } from '../../tag/tag.const';
 
 // TODO fix null stuff here
 
@@ -222,6 +223,34 @@ export const selectTasksWorkedOnOrDoneFlat = createSelector(
     );
   },
 );
+
+export const selectTasksPlannedForRange = createSelector(
+  selectAllTasks,
+  (tasks: Task[], { start, end }: { start: number; end: number }): TaskPlanned[] => {
+    return tasks.filter(
+      (task) =>
+        !task.isDone &&
+        typeof task.plannedAt === 'number' &&
+        task.plannedAt >= start &&
+        task.plannedAt <= end,
+    ) as TaskPlanned[];
+  },
+);
+
+export const selectTasksPlannedForRangeNotOnToday = createSelector(
+  selectAllTasks,
+  (tasks: Task[], { start, end }: { start: number; end: number }): TaskPlanned[] => {
+    return tasks.filter(
+      (task) =>
+        !task.isDone &&
+        typeof task.plannedAt === 'number' &&
+        task.plannedAt >= start &&
+        task.plannedAt <= end &&
+        !task.tagIds.includes(TODAY_TAG.id),
+    ) as TaskPlanned[];
+  },
+);
+// export const selectTasksPlannedForRange
 
 // REPEATABLE TASKS
 // ----------------

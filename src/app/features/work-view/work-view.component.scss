@@ -4,9 +4,8 @@
   overflow: hidden !important;
 }
 
-
 add-task-bar {
-  margin: 0 auto $s*2;
+  margin: 0 auto $s * 2;
   max-width: 628px;
 
   ::ng-deep input {
@@ -15,7 +14,7 @@ add-task-bar {
 }
 
 h1 {
-  margin: $s*2 0;
+  margin: $s * 2 0;
   text-align: center;
 }
 
@@ -39,7 +38,7 @@ h2 {
 }
 
 .work-view-header {
-  padding: 0.5*$s;
+  padding: 0.5 * $s;
 
   position: relative;
   min-height: $bar-height-small;
@@ -47,7 +46,7 @@ h2 {
   justify-content: center;
   align-items: center;
   @include mq(xs) {
-    padding: 2*$s 0;
+    padding: 2 * $s 0;
   }
 
   @include smallMainContainer() {
@@ -72,7 +71,7 @@ h2 {
 
 .completed-tasks-heading {
   margin: $s;
-  margin-top: $s*2;
+  margin-top: $s * 2;
 }
 
 .backlog-heading {
@@ -88,7 +87,7 @@ h2 {
   user-select: none;
 
   .item {
-    margin: 0 1.5*$s;
+    margin: 0 1.5 * $s;
     text-align: center;
     position: relative;
   }
@@ -142,7 +141,7 @@ h2 {
 
 .finish-day-button-wrapper {
   text-align: center;
-  margin: $s*2 0 $s;
+  margin: $s * 2 0 $s;
   white-space: nowrap;
 
   button {
@@ -207,7 +206,7 @@ h2 {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding-bottom: 2*$s;
+  padding-bottom: 2 * $s;
   margin: $s;
 
   @include mq('xs') {
@@ -230,7 +229,7 @@ h2 {
     flex-wrap: wrap;
 
     button {
-      width: 160px;
+      min-width: 160px;
       overflow: hidden;
       text-overflow: ellipsis;
       margin-left: $s;
@@ -243,11 +242,15 @@ h2 {
   }
 }
 
+.add-scheduled {
+  margin-top: $s;
+}
+
 .ready-to-work-btn {
-  margin-top: $s*2;
+  margin-top: $s * 2;
 
   @include mq(xs) {
-    margin-top: $s*3;
+    margin-top: $s * 3;
   }
 }
 
@@ -255,11 +258,11 @@ h2 {
   z-index: 45;
   position: fixed;
   right: 50%;
-  bottom: $s*2;
+  bottom: $s * 2;
   transform: translateX(50%);
 
   &.isRight {
     transform: none;
-    right: $s*2;
+    right: $s * 2;
   }
 }
