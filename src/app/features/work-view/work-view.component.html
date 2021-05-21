@@ -120,12 +120,28 @@
               (click)="addAllPlannedForToday(plannedForToday)"
               class="add-scheduled"
               color=""
-              mat-flat-button
+              mat-stroked-button
               tabindex="1"
             >
               <mat-icon>playlist_add</mat-icon>
-              Add planned tasks for today ({{plannedForToday.length}})
+              Add tasks planned for today ({{plannedForToday.length}})
             </button>
+
+            <ng-container
+              *ngIf="plannedForToday.length === 0 &&(taskService.allPlannedForTomorrowNotOnToday$|async) as plannedForTomorrow"
+            >
+              <button
+                *ngIf="plannedForTomorrow?.length"
+                (click)="addAllPlannedForToday(plannedForTomorrow)"
+                class="add-scheduled"
+                color=""
+                mat-stroked-button
+                tabindex="1"
+              >
+                <mat-icon>playlist_add</mat-icon>
+                Add tasks planned for tomorrow ({{plannedForTomorrow.length}})
+              </button>
+            </ng-container>
           </ng-container>
 
           <button

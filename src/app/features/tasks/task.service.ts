@@ -100,6 +100,7 @@ import { SnackService } from '../../core/snack/snack.service';
 import { T } from '../../t.const';
 import { ImexMetaService } from '../../imex/imex-meta/imex-meta.service';
 import { remindOptionToMilliseconds } from './util/remind-option-to-milliseconds';
+import { getDateRangeForDay } from '../../util/get-date-range-for-day';
 
 @Injectable({
   providedIn: 'root',
@@ -155,11 +156,15 @@ export class TaskService {
   allStartableTasks$: Observable<Task[]> = this._store.pipe(select(selectStartableTasks));
 
   allPlannedForTodayNotOnToday$: Observable<TaskPlanned[]> = this._store.pipe(
-    select(selectTasksPlannedForRangeNotOnToday, {
-      start: Date.now(),
+    select(selectTasksPlannedForRangeNotOnToday, getDateRangeForDay(Date.now())),
+  );
+
+  allPlannedForTomorrowNotOnToday$: Observable<TaskPlanned[]> = this._store.pipe(
+    select(
+      selectTasksPlannedForRangeNotOnToday,
       // eslint-disable-next-line no-mixed-operators
-      end: Date.now() + 24 * 60 * 60 * 1000,
-    }),
+      getDateRangeForDay(Date.now() + 24 * 60 * 60 * 1000),
+    ),
   );
 
   // META FIELDS
