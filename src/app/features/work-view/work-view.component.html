@@ -124,7 +124,7 @@
               tabindex="1"
             >
               <mat-icon>playlist_add</mat-icon>
-              Add tasks planned for today ({{plannedForToday.length}})
+              {{T.WW.ADD_SCHEDULED_FOR_TODAY|translate:{nr: plannedForToday.length} }}
             </button>
 
             <ng-container
@@ -139,7 +139,8 @@
                 tabindex="1"
               >
                 <mat-icon>playlist_add</mat-icon>
-                Add tasks planned for tomorrow ({{plannedForTomorrow.length}})
+                {{T.WW.ADD_SCHEDULED_FOR_TOMORROW|translate:{nr:
+                plannedForTomorrow.length} }}
               </button>
             </ng-container>
           </ng-container>
