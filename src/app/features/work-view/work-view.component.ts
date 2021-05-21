@@ -23,7 +23,7 @@ import {
   timer,
   zip,
 } from 'rxjs';
-import { TaskWithSubTasks } from '../tasks/task.model';
+import { TaskPlanned, TaskWithSubTasks } from '../tasks/task.model';
 import { delay, filter, map, switchMap } from 'rxjs/operators';
 import { fadeAnimation } from '../../ui/animations/fade.ani';
 import { PlanningModeService } from '../planning-mode/planning-mode.service';
@@ -31,6 +31,7 @@ import { T } from '../../t.const';
 import { ImprovementService } from '../metric/improvement/improvement.service';
 import { workViewProjectChangeAnimation } from '../../ui/animations/work-view-project-change.ani';
 import { WorkContextService } from '../work-context/work-context.service';
+import { TODAY_TAG } from '../tag/tag.const';
 
 const SUB = 'SUB';
 const PARENT = 'PARENT';
@@ -158,6 +159,13 @@ export class WorkViewComponent implements OnInit, OnDestroy, AfterContentInit {
 
   startWork() {
     this.planningModeService.leavePlanningMode();
+  }
+
+  addAllPlannedForToday(plannedTasks: TaskPlanned[]) {
+    plannedTasks.forEach((t) => {
+      this.taskService.moveToToday(t.id);
+      this.taskService.updateTags(t, [...t.tagIds, TODAY_TAG.id], t.tagIds);
+    });
   }
 
   resetBreakTimer() {

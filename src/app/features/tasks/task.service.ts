@@ -18,6 +18,7 @@ import {
   Task,
   TaskAdditionalInfoTargetPanel,
   TaskArchive,
+  TaskPlanned,
   TaskReminderOptionId,
   TaskState,
   TaskWithSubTasks,
@@ -72,6 +73,7 @@ import {
   selectTasksById,
   selectTasksByRepeatConfigId,
   selectTasksByTag,
+  selectTasksPlannedForRangeNotOnToday,
   selectTaskWithSubTasksByRepeatConfigId,
 } from './store/task.selectors';
 import { getWorklogStr } from '../../util/get-work-log-str';
@@ -151,6 +153,14 @@ export class TaskService {
   allTasks$: Observable<Task[]> = this._store.pipe(select(selectAllTasks));
 
   allStartableTasks$: Observable<Task[]> = this._store.pipe(select(selectStartableTasks));
+
+  allPlannedForTodayNotOnToday$: Observable<TaskPlanned[]> = this._store.pipe(
+    select(selectTasksPlannedForRangeNotOnToday, {
+      start: Date.now(),
+      // eslint-disable-next-line no-mixed-operators
+      end: Date.now() + 24 * 60 * 60 * 1000,
+    }),
+  );
 
   // META FIELDS
   // -----------
