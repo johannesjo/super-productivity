@@ -7,7 +7,7 @@ import {
   transition,
   trigger,
 } from '@angular/animations';
-import { ANI_FAST_TIMING } from './animation.const';
+import { ANI_FAST_TIMING } from '../../../ui/animations/animation.const';
 
 const ANI = [
   query(':enter', style({ opacity: 0, height: 0 }), { optional: true }),
@@ -35,8 +35,21 @@ const ANI = [
     ]),
     { optional: true },
   ),
+
+  query(
+    '.gu-transit',
+    style({
+      display: 'none',
+      opacity: 0,
+      height: 0,
+      visibility: 'hidden',
+    }),
+    { optional: true },
+  ),
 ];
 
-export const standardListAnimation = trigger('standardList', [
+export const taskListAnimation = trigger('taskList', [
   transition(':increment, :decrement', ANI),
+  transition('* <=> ALWAYS', ANI),
+  transition('* <=> BLOCK', []),
 ]);

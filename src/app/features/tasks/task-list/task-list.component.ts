@@ -18,18 +18,18 @@ import {
   ReplaySubject,
   Subscription,
 } from 'rxjs';
-import { standardListAnimation } from '../../../ui/animations/standard-list.ani';
 import { expandFadeFastAnimation } from '../../../ui/animations/expand.ani';
 import { map } from 'rxjs/operators';
 import { filterDoneTasks } from '../filter-done-tasks.pipe';
 import { T } from '../../../t.const';
+import { taskListAnimation } from './task-list-ani';
 
 @Component({
   selector: 'task-list',
   templateUrl: './task-list.component.html',
   styleUrls: ['./task-list.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  animations: [standardListAnimation, expandFadeFastAnimation],
+  animations: [taskListAnimation, expandFadeFastAnimation],
 })
 export class TaskListComponent implements OnDestroy, OnInit {
   T: typeof T = T;
