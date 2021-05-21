@@ -211,7 +211,7 @@ export class TakeABreakService {
         ico: 'free_breakfast',
         msg,
         translateParams: {
-          time: '15m',
+          time: msToString(cfg.takeABreak.takeABreakSnoozeTime),
         },
         action: {
           label: T.F.TIME_TRACKING.B.ALREADY_DID,
@@ -219,13 +219,16 @@ export class TakeABreakService {
         },
         action2: {
           label: T.F.TIME_TRACKING.B.SNOOZE,
-          fn: () => this.snooze(),
+          fn: () => this.snooze(cfg.takeABreak.takeABreakSnoozeTime * 60 * 1000),
         },
         img: cfg.takeABreak.motivationalImg || undefined,
       });
     });
   }
 
+  /**
+   * TODO: Speculate whether a default number is required here anymore
+   */
   snooze(snoozeTime: number = 15 * 60 * 1000) {
     this._triggerSnooze$.next(snoozeTime);
     this._triggerLockScreenCounter$.next(false);
