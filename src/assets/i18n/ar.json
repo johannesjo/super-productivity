@@ -1052,7 +1052,7 @@
       "IS_FOCUS_WINDOW": "التركيز على نافذة التطبيق عندما يكون التذكير نشطًا (سطح المكتب فقط)",
       "IS_LOCK_SCREEN": "قفل الشاشة عند الاستراحة (سطح المكتب فقط)",
       "MESSAGE": "خذ رسالة استراحة",
-      "SNOOZE_TIME": "Snooze time when prompted to take a break",
+      "SNOOZE_TIME": "[TRANSLATION REQUIRED] Snooze time when prompted to take a break",
       "MIN_WORKING_TIME": "يأخذ الزناد إشعار استراحة بعد عمل X بدون إشعار",
       "MOTIVATIONAL_IMG": "صورة تحفيزية (رابط الويب)",
       "TITLE": "التذكير بالاستراحة"
