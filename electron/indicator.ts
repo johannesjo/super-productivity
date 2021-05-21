@@ -4,10 +4,11 @@ import { IPC } from './ipc-events.const';
 import { getSettings } from './get-settings';
 import { getWin } from './main-window';
 
-let tray;
+let tray: Tray;
 let isIndicatorRunning = false;
 let DIR: string;
 let shouldUseDarkColors: boolean;
+const IS_MAC = process.platform === 'darwin';
 
 const isGnomeShellExtensionRunning = false;
 
@@ -33,6 +34,7 @@ export const initIndicator = ({
   const suf = shouldUseDarkColors ? '-d.png' : '-l.png';
   tray = new Tray(DIR + `stopped${suf}`);
   tray.setContextMenu(createContextMenu(showApp, quitApp));
+  tray.setToolTip('XXXXXXXXXXXXXXXXXXXx');
 
   tray.on('click', () => {
     showApp();
@@ -80,8 +82,16 @@ function initListeners() {
         // tray handling
         if (currentTask && currentTask.title) {
           tray.setTitle(msg);
+          if (!IS_MAC) {
+            // NOTE apparently this has no effect for gnome
+            tray.setToolTip(msg);
+          }
         } else {
           tray.setTitle('');
+          if (!IS_MAC) {
+            // NOTE apparently this has no effect for gnome
+            tray.setToolTip(msg);
+          }
           const suf = shouldUseDarkColors ? '-d.png' : '-l.png';
           setTrayIcon(tray, DIR + `stopped${suf}`);
         }

@@ -1,7 +1,6 @@
 /* eslint-disable max-len */
 import { ConfigFormSection, MiscConfig } from '../global-config.model';
 import { T } from '../../../t.const';
-import { IS_MAC } from '../../../util/is-mac';
 
 export const MISC_SETTINGS_FORM_CFG: ConfigFormSection<MiscConfig> = {
   title: T.GCF.MISC.TITLE,
@@ -71,17 +70,13 @@ export const MISC_SETTINGS_FORM_CFG: ConfigFormSection<MiscConfig> = {
         label: T.GCF.MISC.IS_MINIMIZE_TO_TRAY,
       },
     },
-    ...(IS_MAC
-      ? [
-          {
-            key: 'isTrayShowCurrentTask',
-            type: 'checkbox',
-            templateOptions: {
-              label: T.GCF.MISC.IS_TRAY_SHOW_CURRENT_TASK,
-            },
-          },
-        ]
-      : ([] as any)),
+    {
+      key: 'isTrayShowCurrentTask',
+      type: 'checkbox',
+      templateOptions: {
+        label: T.GCF.MISC.IS_TRAY_SHOW_CURRENT_TASK,
+      },
+    },
     {
       key: 'defaultProjectId',
       type: 'project-select',
