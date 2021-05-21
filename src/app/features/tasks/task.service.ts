@@ -155,10 +155,14 @@ export class TaskService {
 
   allStartableTasks$: Observable<Task[]> = this._store.pipe(select(selectStartableTasks));
 
+  // NOTE: this should work fine as long as the user restarts the app every day
+  // if not worst case is, that the buttons don't appear or today is shown as tomorrow
   allPlannedForTodayNotOnToday$: Observable<TaskPlanned[]> = this._store.pipe(
     select(selectTasksPlannedForRangeNotOnToday, getDateRangeForDay(Date.now())),
   );
 
+  // NOTE: this should work fine as long as the user restarts the app every day
+  // if not worst case is, that the buttons don't appear or today is shown as tomorrow
   allPlannedForTomorrowNotOnToday$: Observable<TaskPlanned[]> = this._store.pipe(
     select(
       selectTasksPlannedForRangeNotOnToday,
