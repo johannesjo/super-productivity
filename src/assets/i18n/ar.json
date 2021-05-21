@@ -721,9 +721,9 @@
         "FOR_OTHER": "المهمة مستحقة. هل تريد أن تبدأ العمل على ذلك؟",
         "FROM_PROJECT": "من المشروع",
         "FROM_TAG": "من العلامة: \"{{title}}\"",
+        "RESCHEDULE_UNTIL_TOMORROW": "حتى الغد",
         "SNOOZE": "قيلولة بعد الظهر",
         "SNOOZE_ALL": "تأجيل الكل",
-        "RESCHEDULE_UNTIL_TOMORROW": "حتى الغد",
         "START": "بدء المهمة",
         "SWITCH_CONTEXT_START": "تبديل السياق والبدء"
       },
@@ -1225,6 +1225,8 @@
   },
   "WW": {
     "ADD_MORE": "أضف المزيد",
+    "ADD_SCHEDULED_FOR_TODAY": "إضافة المهام المخطط لها اليوم ({{nr}})",
+    "ADD_SCHEDULED_FOR_TOMORROW": "إضافة المهام المخطط لها غدًا ({{nr}})",
     "ADD_SOME_TASKS": "أضف بعض المهام للتخطيط ليومك!",
     "COMPLETED_TASKS": "المهام المنجزة",
     "ESTIMATE_REMAINING": "الباقى من الوقت المتوقع:",

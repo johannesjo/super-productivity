@@ -721,9 +721,9 @@
         "FOR_OTHER": "Task is due. Do you want to start working on it?",
         "FROM_PROJECT": "From Project: \"{{title}}\"",
         "FROM_TAG": "From Tag: \"{{title}}\"",
+        "RESCHEDULE_UNTIL_TOMORROW": "Re-schedule for tomorrow",
         "SNOOZE": "Snooze",
         "SNOOZE_ALL": "Snooze all",
-        "RESCHEDULE_UNTIL_TOMORROW": "Re-schedule for tomorrow",
         "START": "Start",
         "SWITCH_CONTEXT_START": "Switch Context & Start"
       },

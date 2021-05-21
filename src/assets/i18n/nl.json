@@ -721,9 +721,9 @@
         "FOR_OTHER": "Taak is verschuldigd. Wil je eraan beginnen te werken?",
         "FROM_PROJECT": "Van project: \"{{title}}\"",
         "FROM_TAG": "Van tag: \"{{title}}\"",
+        "RESCHEDULE_UNTIL_TOMORROW": "Tot morgen",
         "SNOOZE": "Snooze",
         "SNOOZE_ALL": "Snooze All",
-        "RESCHEDULE_UNTIL_TOMORROW": "Tot morgen",
         "START": "Begin",
         "SWITCH_CONTEXT_START": "Wissel van context en start"
       },
@@ -1225,6 +1225,8 @@
   },
   "WW": {
     "ADD_MORE": "Voeg meer toe",
+    "ADD_SCHEDULED_FOR_TODAY": "Voeg taken toe die voor vandaag zijn gepland ({{nr}})",
+    "ADD_SCHEDULED_FOR_TOMORROW": "Voeg taken toe die voor morgen zijn gepland ({{nr}})",
     "ADD_SOME_TASKS": "Voeg wat taken toe om je dag te plannen!",
     "COMPLETED_TASKS": "Voltooide taken",
     "ESTIMATE_REMAINING": "Resterende schatting:",

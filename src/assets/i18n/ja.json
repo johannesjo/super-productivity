@@ -721,9 +721,9 @@
         "FOR_OTHER": "タスクは期限が来ています。あなたはそれに取り組み始めますか？",
         "FROM_PROJECT": "プロジェクトから",
         "FROM_TAG": "タグから：「{{title}}」",
+        "RESCHEDULE_UNTIL_TOMORROW": "明日まで",
         "SNOOZE": "スヌーズ",
         "SNOOZE_ALL": "すべてスヌーズ",
-        "RESCHEDULE_UNTIL_TOMORROW": "明日まで",
         "START": "開始タスク",
         "SWITCH_CONTEXT_START": "コンテキストの切り替えと開始"
       },
@@ -1225,6 +1225,8 @@
   },
   "WW": {
     "ADD_MORE": "さらに追加",
+    "ADD_SCHEDULED_FOR_TODAY": "今日予定されているタスクを追加します（{{nr}}）",
+    "ADD_SCHEDULED_FOR_TOMORROW": "明日予定されているタスクを追加します（{{nr}}）",
     "ADD_SOME_TASKS": "一日を計画するためタスクをいくつか追加しましょう！",
     "COMPLETED_TASKS": "完了したタスク",
     "ESTIMATE_REMAINING": "推定残り：",

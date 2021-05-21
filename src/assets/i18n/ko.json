@@ -721,9 +721,9 @@
         "FOR_OTHER": "작업이 완료되었습니다. 그것에 착수하고 싶니?",
         "FROM_PROJECT": "프로젝트에서",
         "FROM_TAG": "태그에서 : \"{{title}}\"",
+        "RESCHEDULE_UNTIL_TOMORROW": "내일까지",
         "SNOOZE": "다시 알림",
         "SNOOZE_ALL": "모두 다시 알림",
-        "RESCHEDULE_UNTIL_TOMORROW": "내일까지",
         "START": "작업 시작",
         "SWITCH_CONTEXT_START": "상황 전환 및 시작"
       },
@@ -1225,6 +1225,8 @@
   },
   "WW": {
     "ADD_MORE": "더 추가하기",
+    "ADD_SCHEDULED_FOR_TODAY": "오늘 계획된 작업 추가 ({{nr}})",
+    "ADD_SCHEDULED_FOR_TOMORROW": "내일 예정된 작업 추가 ({{nr}})",
     "ADD_SOME_TASKS": "하루 계획을 세우십시오!",
     "COMPLETED_TASKS": "완료된 작업",
     "ESTIMATE_REMAINING": "예상 남은 시간 :",

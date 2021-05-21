@@ -721,9 +721,9 @@
         "FOR_OTHER": "Aufgabe ist fällig. Möchten Sie anfangen, daran zu arbeiten?",
         "FROM_PROJECT": "Aus dem Projekt",
         "FROM_TAG": "Vom Tag: \"{{title}}\"",
+        "RESCHEDULE_UNTIL_TOMORROW": "Bis morgen",
         "SNOOZE": "Snooze",
         "SNOOZE_ALL": "Schlummer alle",
-        "RESCHEDULE_UNTIL_TOMORROW": "Bis morgen",
         "START": "Task starten",
         "SWITCH_CONTEXT_START": "Kontext wechseln & starten"
       },
@@ -1225,6 +1225,8 @@
   },
   "WW": {
     "ADD_MORE": "Weitere hinzufügen",
+    "ADD_SCHEDULED_FOR_TODAY": "Für heute geplante Aufgaben hinzufügen ({{nr}})",
+    "ADD_SCHEDULED_FOR_TOMORROW": "Für morgen geplante Aufgaben hinzufügen ({{nr}})",
     "ADD_SOME_TASKS": "Füge einige Aufgaben hinzu, um deinen Tag zu planen!",
     "COMPLETED_TASKS": "Abgeschlossene Aufgaben",
     "ESTIMATE_REMAINING": "Schätzung verbleibend:",

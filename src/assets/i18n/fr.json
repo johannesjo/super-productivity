@@ -721,9 +721,9 @@
         "FOR_OTHER": "La tâche est due. Voulez-vous commencer à travailler dessus ?",
         "FROM_PROJECT": "Depuis le projet",
         "FROM_TAG": "De la balise: \"{{title}}\"",
+        "RESCHEDULE_UNTIL_TOMORROW": "Jusqu'à demain",
         "SNOOZE": "Snooze",
         "SNOOZE_ALL": "Répéter tout",
-        "RESCHEDULE_UNTIL_TOMORROW": "Jusqu'à demain",
         "START": "Démarrer la tâche",
         "SWITCH_CONTEXT_START": "Changer de contexte et démarrer"
       },
@@ -1225,6 +1225,8 @@
   },
   "WW": {
     "ADD_MORE": "Ajouter plus",
+    "ADD_SCHEDULED_FOR_TODAY": "Ajouter des tâches prévues pour aujourd'hui ({{nr}})",
+    "ADD_SCHEDULED_FOR_TOMORROW": "Ajouter des tâches prévues pour demain ({{nr}})",
     "ADD_SOME_TASKS": "Ajoutez quelques tâches pour planifier votre journée!",
     "COMPLETED_TASKS": "Tâches terminées",
     "ESTIMATE_REMAINING": "Tps. restant:",
