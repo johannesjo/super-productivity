@@ -29,7 +29,7 @@ export class TimelineComponent {
     this._taskService.currentTaskId$,
     this._globalConfigService.timelineCfg$,
   ]).pipe(
-    debounceTime(32),
+    debounceTime(50),
     map(([{ planned, unPlanned }, currentId, timelineCfg]) =>
       mapToTimelineViewEntries(
         unPlanned,
