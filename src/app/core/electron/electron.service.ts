@@ -43,7 +43,7 @@ export class ElectronService {
       // log to file for production
       if (environment.production || environment.stage) {
         const log = (this.remote as typeof remote).require('electron-log');
-        console.log = log.log;
+        console.error = log.error;
       }
     }
 
