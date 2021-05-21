@@ -38,6 +38,7 @@ export type TakeABreakConfig = Readonly<{
   isFocusWindow: boolean;
   takeABreakMessage: string;
   takeABreakMinWorkingTime: number;
+  takeABreakSnoozeTime: number;
   motivationalImg: string | null;
 }>;
 
