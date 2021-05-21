@@ -1052,6 +1052,7 @@
       "IS_FOCUS_WINDOW": "Focus app window when reminder is active (desktop only)",
       "IS_LOCK_SCREEN": "Lock screen when a break is due (desktop only)",
       "MESSAGE": "Take a break message",
+      "SNOOZE_TIME": "[TRANSLATION REQUIRED] Snooze time when prompted to take a break",
       "MIN_WORKING_TIME": "Trigger take a break notification after X working without one",
       "MOTIVATIONAL_IMG": "تصویر انگیزشی (آدرس اینترنتی)",
       "TITLE": "یادآوری استراحت"
