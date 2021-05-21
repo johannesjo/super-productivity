@@ -95,17 +95,19 @@ export class WebDavSyncService implements SyncProviderServiceInterface {
   ): Promise<string | Error> {
     this._globalProgressBarService.countUp(T.GPB.WEB_DAV_UPLOAD);
     try {
-      const headers = await this._webDavApiService.upload({
+      await this._webDavApiService.upload({
         data,
         localRev,
         isForceOverwrite,
       });
-      console.log(headers);
+
+      const cfg = await this._cfg$.pipe(first()).toPromise();
+      const meta = await this._webDavApiService.getMetaData('/' + cfg.syncFilePath);
       this._globalProgressBarService.countDown();
-      if (typeof headers?.etag !== 'string') {
+      if (typeof meta?.etag !== 'string') {
         throw new Error('WebDAV: No etag');
       }
-      return headers.etag;
+      return meta.etag;
     } catch (e) {
       console.error(e);
       this._globalProgressBarService.countDown();

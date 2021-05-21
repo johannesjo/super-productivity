@@ -7,6 +7,7 @@ import { first, map, switchMap, tap } from 'rxjs/operators';
 import { createClient } from 'webdav/web';
 import { AppDataComplete } from '../sync.model';
 
+// TODO throws compile error :(
 // import { FileStat } from 'webdav/web/types';
 interface FileStat {
   filename: string;
@@ -62,14 +63,12 @@ export class WebDavApiService {
   ) {}
 
   async upload({
-    localRev,
     data,
-    isForceOverwrite = false,
   }: {
     localRev?: string | null;
     data: AppDataComplete;
     isForceOverwrite?: boolean;
-  }): Promise<FileStat> {
+  }): Promise<void> {
     await this._isReady$.toPromise();
     const cfg = await this._cfg$.pipe(first()).toPromise();
     const client = createClient(cfg.baseUrl, {
@@ -77,13 +76,9 @@ export class WebDavApiService {
       password: cfg.password,
     });
 
-    const r = await client.putFileContents('/' + cfg.syncFilePath, JSON.stringify(data), {
+    return await client.putFileContents('/' + cfg.syncFilePath, JSON.stringify(data), {
       contentLength: false,
     });
-    const s = (await client.stat('/' + cfg.syncFilePath)) as FileStat;
-    console.log(r);
-    console.log(s);
-    return s;
   }
 
   async getMetaData(path: string): Promise<FileStat> {
@@ -94,9 +89,10 @@ export class WebDavApiService {
       password: cfg.password,
     });
     const r = await client.customRequest(path, { method: 'HEAD' });
-    // const r = (await client.stat(path)) as FileStat;
-    console.log(r);
     return r.headers;
+    // const r = (await client.stat(path)) as FileStat;
+    // console.log(r);
+    // return r;
   }
 
   async download({
