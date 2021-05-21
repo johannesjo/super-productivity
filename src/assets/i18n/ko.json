@@ -1052,6 +1052,7 @@
       "IS_FOCUS_WINDOW": "알림이 활성화되면 앱 응용 프로그램 창에 집중 (데스크톱에만 해당)",
       "IS_LOCK_SCREEN": "휴식 시간에 화면 잠금 (데스크톱에만 해당)",
       "MESSAGE": "휴식 메시지 받기",
+      "SNOOZE_TIME": "[TRANSLATION REQUIRED] Snooze time when prompted to take a break",
       "MIN_WORKING_TIME": "트리거가없는 X 작업 후 휴식 알림을받습니다.",
       "MOTIVATIONAL_IMG": "동기 부여 이미지 (웹 URL)",
       "TITLE": "휴식 알림"
