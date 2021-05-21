@@ -1,10 +1,9 @@
 <div
   *ngIf="(tags && tags.length) || (projectTag)"
-  @expandFade
   [class.isDisableEdit]="isDisableEdit"
   class="tags-container"
 >
-  <div [@standardList]="tags.length" class="tags">
+  <div class="tags">
     <tag (click)="editTags()" *ngIf=" projectTag" [tag]="projectTag"></tag>
     <tag
       (click)="editTags()"
