@@ -1052,7 +1052,6 @@
       "IS_FOCUS_WINDOW": "Hatırlatıcı aktifken uygulama penceresine odaklan (yalnızca masaüstü)",
       "IS_LOCK_SCREEN": "Bir mola verilmesi gerektiğinde ekranı kilitle (yalnızca masaüstü)",
       "MESSAGE": "Bir ara mesajı al",
-      "SNOOZE_TIME": "",
       "MIN_WORKING_TIME": "Tetiksiz, X'in bir olmadan çalıştıktan sonra bir mola bildirimi almasını sağlar",
       "MOTIVATIONAL_IMG": "Motivasyonel resim (web url'si)",
       "TITLE": "Hatırlatma Arası"
