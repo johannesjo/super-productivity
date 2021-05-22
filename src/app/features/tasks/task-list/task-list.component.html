@@ -8,7 +8,7 @@
 
 <div
   #listEl
-  [@standardList]="isBlockAni ? 'BLOCK' : filteredTasks?.length"
+  [@taskList]="isBlockAni ? 'BLOCK' : filteredTasks?.length"
   [attr.data-id]="listModelId"
   [dragulaModel]="filteredTasks"
   [dragula]="listId"

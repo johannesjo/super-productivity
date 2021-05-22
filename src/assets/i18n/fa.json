@@ -721,9 +721,9 @@
         "FOR_OTHER": "Task is due. Do you want to start working on it?",
         "FROM_PROJECT": "From Project",
         "FROM_TAG": "از برچسب: \"{{title}}\"",
+        "RESCHEDULE_UNTIL_TOMORROW": "تا فردا",
         "SNOOZE": "Snooze",
         "SNOOZE_ALL": "تعویق همه",
-        "RESCHEDULE_UNTIL_TOMORROW": "تا فردا",
         "START": "Start Task",
         "SWITCH_CONTEXT_START": "تغییر متن و شروع"
       },
@@ -1226,6 +1226,8 @@
   },
   "WW": {
     "ADD_MORE": "اضافه کردن موارد بیشتر",
+    "ADD_SCHEDULED_FOR_TODAY": "وظایف برنامه ریزی شده برای امروز را اضافه کنید ({{nr}})",
+    "ADD_SCHEDULED_FOR_TOMORROW": "اضافه کردن کارهایی که برای فردا برنامه ریزی شده است ({{nr}})",
     "ADD_SOME_TASKS": "برای برنامه ریزی کارهای امروز، کار اضافه کنید!",
     "COMPLETED_TASKS": "کارهای انجام شده",
     "ESTIMATE_REMAINING": "تخمین باقی مانده:",

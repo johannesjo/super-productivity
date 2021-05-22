@@ -721,9 +721,9 @@
         "FOR_OTHER": "任务到期了。你想开始工作吗？",
         "FROM_PROJECT": "来自项目",
         "FROM_TAG": "来自标签：“{{title}}”",
+        "RESCHEDULE_UNTIL_TOMORROW": "明天重新开始",
         "SNOOZE": "暂停",
         "SNOOZE_ALL": "全部暂停",
-        "RESCHEDULE_UNTIL_TOMORROW": "明天重新开始",
         "START": "开始任务",
         "SWITCH_CONTEXT_START": "切换内容上下文并开始"
       },
@@ -1226,6 +1226,8 @@
   },
   "WW": {
     "ADD_MORE": "添加更多",
+    "ADD_SCHEDULED_FOR_TODAY": "添加今天计划的任务（{{nr}}）",
+    "ADD_SCHEDULED_FOR_TOMORROW": "添加计划在明天执行的任务（{{nr}}）",
     "ADD_SOME_TASKS": "添加一些任务来规划你的一天！",
     "COMPLETED_TASKS": "完成的任务",
     "ESTIMATE_REMAINING": "预估剩余时间：",

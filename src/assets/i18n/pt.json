@@ -721,9 +721,9 @@
         "FOR_OTHER": "A tarefa está vencida. Deseja começar a trabalhar nela?",
         "FROM_PROJECT": "Do projeto",
         "FROM_TAG": "Da tag: \"{{title}}\"",
+        "RESCHEDULE_UNTIL_TOMORROW": "Até amanhã",
         "SNOOZE": "Soneca",
         "SNOOZE_ALL": "Suspender tudo",
-        "RESCHEDULE_UNTIL_TOMORROW": "Até amanhã",
         "START": "Iniciar tarefa",
         "SWITCH_CONTEXT_START": "Alternar contexto e iniciar"
       },
@@ -1226,6 +1226,8 @@
   },
   "WW": {
     "ADD_MORE": "Adicione mais",
+    "ADD_SCHEDULED_FOR_TODAY": "Adicionar tarefas planejadas para hoje ({{nr}})",
+    "ADD_SCHEDULED_FOR_TOMORROW": "Adicionar tarefas planejadas para amanhã ({{nr}})",
     "ADD_SOME_TASKS": "Adicione algumas tarefas para planejar o seu dia!",
     "COMPLETED_TASKS": "Tarefas concluídas",
     "ESTIMATE_REMAINING": "Estimativa restante:",

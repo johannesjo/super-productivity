@@ -721,9 +721,9 @@
         "FOR_OTHER": "Görev kaynaklanmaktadır. Üzerinde çalışmaya başlamak ister misiniz?",
         "FROM_PROJECT": "Projeden",
         "FROM_TAG": "Etiketten: \"{{title}}\"",
+        "RESCHEDULE_UNTIL_TOMORROW": "Yarına kadar",
         "SNOOZE": "Erteleme",
         "SNOOZE_ALL": "Tümünü ertele",
-        "RESCHEDULE_UNTIL_TOMORROW": "Yarına kadar",
         "START": "Görevi Başlat",
         "SWITCH_CONTEXT_START": "Bağlam Değiştir ve Başlat"
       },
@@ -1226,6 +1226,8 @@
   },
   "WW": {
     "ADD_MORE": "Daha ekle",
+    "ADD_SCHEDULED_FOR_TODAY": "Bugün için planlanan görevleri ekleyin ({{nr}})",
+    "ADD_SCHEDULED_FOR_TOMORROW": "Yarın için planlanan görevleri ekleyin ({{nr}})",
     "ADD_SOME_TASKS": "Gününüzü planlamak için bazı görevler ekleyin!",
     "COMPLETED_TASKS": "Tamamlanan Görevler",
     "ESTIMATE_REMAINING": "Kalan tahmini:",

@@ -1,3 +1,27 @@
+# [7.0.0-rc14](https://github.com/johannesjo/super-productivity/compare/v7.0.0-rc13...v7.0.0-rc14) (2021-05-21)
+
+### Bug Fixes
+
+- **timeline:** prevent tag initial animation ([a3d83ef](https://github.com/johannesjo/super-productivity/commit/a3d83efbd30c8b28264a163e2ffc5a728eaafd85))
+- hide mac only option for non mac systems [#1223](https://github.com/johannesjo/super-productivity/issues/1223) ([d7c1c22](https://github.com/johannesjo/super-productivity/commit/d7c1c223c279ff9d1484ea3ecd9ee064564934d4))
+
+### Features
+
+- **i18n:** update basic translations ([5dc8f96](https://github.com/johannesjo/super-productivity/commit/5dc8f96dd8c388a24ae26502fe4370c0a5f01f89))
+- **tags:** disable animations for better performance ([97d8555](https://github.com/johannesjo/super-productivity/commit/97d85555eb284b4013d018fd8cde227e92c0f8fd))
+- **webDav:** slightly improve ([bd04dc6](https://github.com/johannesjo/super-productivity/commit/bd04dc6c2a63fc3c93df4b058ef3b8a1a483a87f))
+- add real types for webdav lib ([06e3524](https://github.com/johannesjo/super-productivity/commit/06e3524be983eeb0474397404a6833498e1cef4a))
+- **logs:** disable electron log from frontend completely ([c341d88](https://github.com/johannesjo/super-productivity/commit/c341d88261db5356a542016a9b9dd15a003cfc4d))
+- **logs:** only log errors via electron logger for now ([6062bc7](https://github.com/johannesjo/super-productivity/commit/6062bc7c55efcf8a08f32665ec4367795876d16f))
+- prepare privacy export ([bc3d2d7](https://github.com/johannesjo/super-productivity/commit/bc3d2d784074e5506c6a0f6e59471e04f8394bb4))
+- **timeline:** beautify day crossing and move week day indication ([c1abb5e](https://github.com/johannesjo/super-productivity/commit/c1abb5e5690047108fdb6cb3f53f96fcac65aea6))
+- **timeline:** improve animation by increasing debounceTime ([ca768e2](https://github.com/johannesjo/super-productivity/commit/ca768e294120256c0924275aa2ffd91ce928fb15))
+- **workView:** add basic add all scheduled for today button ([74d5930](https://github.com/johannesjo/super-productivity/commit/74d593061b9d39f08f473c1d5829018ba0ad1c08))
+- **workView:** add planned for tomorrow button as well ([75e0a66](https://github.com/johannesjo/super-productivity/commit/75e0a6626a843ddc67520469cb9dfcebeaa5c291))
+- **workView:** add translations ([9a493b7](https://github.com/johannesjo/super-productivity/commit/9a493b7c03405d39bdbe8a144b011d0876d0b86d))
+- **workView:** limit add planned tasks to today work context ([52e8be3](https://github.com/johannesjo/super-productivity/commit/52e8be3cd9c317c671275e7b200bae516ae41d56))
+- use tooltip for non mac systems [#1223](https://github.com/johannesjo/super-productivity/issues/1223) ([e24cb84](https://github.com/johannesjo/super-productivity/commit/e24cb84b5d4798e19e2d6b3875f5946c9c3c90f7))
+
 # [7.0.0-rc13](https://github.com/johannesjo/super-productivity/compare/v7.0.0-rc12...v7.0.0-rc13) (2021-05-18)
 
 ### Features

@@ -721,9 +721,9 @@
         "FOR_OTHER": "Tarea programada. ¿Quieres empezar a trabajar en ello?",
         "FROM_PROJECT": "Del proyecto",
         "FROM_TAG": "De la etiqueta: \"{{title}}\"",
+        "RESCHEDULE_UNTIL_TOMORROW": "Hasta mañana",
         "SNOOZE": "Posponer",
         "SNOOZE_ALL": "Posponer todo",
-        "RESCHEDULE_UNTIL_TOMORROW": "Hasta mañana",
         "START": "Iniciar tarea",
         "SWITCH_CONTEXT_START": "Cambiar contexto e inicio"
       },
@@ -1226,6 +1226,8 @@
   },
   "WW": {
     "ADD_MORE": "Agregar más",
+    "ADD_SCHEDULED_FOR_TODAY": "Agregar tareas planificadas para hoy ({{nr}})",
+    "ADD_SCHEDULED_FOR_TOMORROW": "Agregar tareas planificadas para mañana ({{nr}})",
     "ADD_SOME_TASKS": "¡Agrega algunas tareas para planificar tu día!",
     "COMPLETED_TASKS": "Tareas completadas",
     "ESTIMATE_REMAINING": "Estimación restante:",

@@ -721,9 +721,9 @@
         "FOR_OTHER": "Задача должна быть выполнена. Вы хотите начать работать над ней?",
         "FROM_PROJECT": "Из проекта",
         "FROM_TAG": "Из тега: \"{{title}}\"",
+        "RESCHEDULE_UNTIL_TOMORROW": "До завтра",
         "SNOOZE": "Отложить",
         "SNOOZE_ALL": "Отложить все",
-        "RESCHEDULE_UNTIL_TOMORROW": "До завтра",
         "START": "Начать задание",
         "SWITCH_CONTEXT_START": "Переключить контекст и начать"
       },
@@ -1226,6 +1226,8 @@
   },
   "WW": {
     "ADD_MORE": "Добавить больше",
+    "ADD_SCHEDULED_FOR_TODAY": "Добавить задачи, запланированные на сегодня ({{nr}})",
+    "ADD_SCHEDULED_FOR_TOMORROW": "Добавить задачи, запланированные на завтра ({{nr}})",
     "ADD_SOME_TASKS": "Добавьте несколько задач, чтобы спланировать свой день!",
     "COMPLETED_TASKS": "выполненные задачи",
     "ESTIMATE_REMAINING": "Осталось примерно:",

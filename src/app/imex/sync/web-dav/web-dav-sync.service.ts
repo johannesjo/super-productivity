@@ -41,6 +41,9 @@ export class WebDavSyncService implements SyncProviderServiceInterface {
     try {
       const r = await this._webDavApiService.getMetaData('/' + cfg.syncFilePath);
       const d = new Date(r.lastmod);
+      if (typeof r?.etag !== 'string') {
+        throw new Error('WebDAV: No etag');
+      }
       return {
         clientUpdate: d.getTime(),
         rev: r.etag,
@@ -71,6 +74,10 @@ export class WebDavSyncService implements SyncProviderServiceInterface {
       });
       const meta = await this._webDavApiService.getMetaData('/' + cfg.syncFilePath);
       this._globalProgressBarService.countDown();
+      if (typeof meta?.etag !== 'string') {
+        throw new Error('WebDAV: No etag');
+      }
+
       return {
         rev: meta.etag,
         data: r,
@@ -88,14 +95,19 @@ export class WebDavSyncService implements SyncProviderServiceInterface {
   ): Promise<string | Error> {
     this._globalProgressBarService.countUp(T.GPB.WEB_DAV_UPLOAD);
     try {
-      const headers = await this._webDavApiService.upload({
+      await this._webDavApiService.upload({
         data,
         localRev,
         isForceOverwrite,
       });
-      console.log(headers);
+
+      const cfg = await this._cfg$.pipe(first()).toPromise();
+      const meta = await this._webDavApiService.getMetaData('/' + cfg.syncFilePath);
       this._globalProgressBarService.countDown();
-      return headers.etag;
+      if (typeof meta?.etag !== 'string') {
+        throw new Error('WebDAV: No etag');
+      }
+      return meta.etag;
     } catch (e) {
       console.error(e);
       this._globalProgressBarService.countDown();
