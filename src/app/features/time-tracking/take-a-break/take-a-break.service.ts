@@ -226,9 +226,6 @@ export class TakeABreakService {
     });
   }
 
-  /**
-   * TODO: Speculate whether a default number is required here anymore
-   */
   snooze(snoozeTime: number = 15 * 60 * 1000) {
     this._triggerSnooze$.next(snoozeTime);
     this._triggerLockScreenCounter$.next(false);
