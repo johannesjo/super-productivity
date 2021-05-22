@@ -63,6 +63,12 @@ export const APP_ROUTES: Routes = [
     data: { page: 'daily-summary' },
     canActivate: [ValidTagIdGuard],
   },
+  {
+    path: 'tag/:id/metrics',
+    component: MetricPageComponent,
+    data: { page: 'metrics' },
+    canActivate: [ValidTagIdGuard],
+  },
 
   {
     path: 'project/:id/tasks',

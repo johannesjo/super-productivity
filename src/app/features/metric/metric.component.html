@@ -1,5 +1,11 @@
-<div *ngIf="projectMetricsService.simpleMetrics$|async as sm" [@fade] class="wrapper">
-  <section class="basic-stats">
+<div class="wrapper">
+  <section
+    class="basic-stats"
+    *ngIf="projectMetricsService.simpleMetrics$|async as sm"
+    [@fade]
+  >
+    <h1 class="mat-h1" style="text-align: center">{{T.PM.TITLE|translate}}</h1>
+
     <!--  <h2>Basic Metrics</h2>-->
     <p><i>{{sm.start}} – {{sm.end}}</i></p>
     <div class="material-table">
