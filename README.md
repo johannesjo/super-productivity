@@ -1,5 +1,3 @@
-## [Please help us improve the app's usability!](https://github.com/johannesjo/super-productivity/discussions/1011)
-
 <a href="https://super-productivity.com/">
   <img align="center" alt="Banner" src="screens/banner-bw.png" />
 </a>
