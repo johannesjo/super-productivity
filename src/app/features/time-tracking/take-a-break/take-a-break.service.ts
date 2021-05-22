@@ -219,7 +219,7 @@ export class TakeABreakService {
         },
         action2: {
           label: T.F.TIME_TRACKING.B.SNOOZE,
-          fn: () => this.snooze(cfg.takeABreak.takeABreakSnoozeTime * 60 * 1000),
+          fn: () => this.snooze(cfg.takeABreak.takeABreakSnoozeTime),
         },
         img: cfg.takeABreak.motivationalImg || undefined,
       });
