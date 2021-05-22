@@ -9,7 +9,7 @@ import { MODEL_VERSION_KEY } from '../../app.constants';
 import { isMigrateModel } from '../../util/model-version';
 import { SyncProvider } from '../../imex/sync/sync-provider.model';
 
-const MODEL_VERSION = 2.2002;
+const MODEL_VERSION = 2.2003;
 
 export const migrateGlobalConfigState = (
   globalConfigState: GlobalConfigState,
@@ -29,6 +29,7 @@ export const migrateGlobalConfigState = (
   globalConfigState = _fixDefaultProjectId(globalConfigState);
 
   // NOTE: absolutely needs to come last as otherwise the previous defaults won't work
+  // NOTE2: mutates
   globalConfigState = _extendConfigDefaults(globalConfigState);
 
   return {
@@ -91,10 +92,31 @@ const _migrateMiscToSeparateKeys = (config: GlobalConfigState): GlobalConfigStat
 };
 
 const _extendConfigDefaults = (config: GlobalConfigState): GlobalConfigState => {
-  return {
-    ...DEFAULT_GLOBAL_CONFIG,
-    ...config,
-  };
+  const newCfg: Partial<GlobalConfigState> = { ...config };
+  for (const key in DEFAULT_GLOBAL_CONFIG) {
+    if (!newCfg.hasOwnProperty(key)) {
+      // @ts-ignore
+      newCfg[key] = DEFAULT_GLOBAL_CONFIG[key];
+    } else if (
+      // @ts-ignore
+      typeof DEFAULT_GLOBAL_CONFIG[key] === 'object' &&
+      // @ts-ignore
+      DEFAULT_GLOBAL_CONFIG[key] !== null
+    ) {
+      // @ts-ignore
+      for (const entryKey in DEFAULT_GLOBAL_CONFIG[key]) {
+        // @ts-ignore
+        if (!newCfg[key].hasOwnProperty(entryKey)) {
+          // @ts-ignore
+          const defaultVal = DEFAULT_GLOBAL_CONFIG[key][entryKey];
+          console.log('EXTEND globalConfig', key, entryKey, defaultVal);
+          // @ts-ignore
+          newCfg[key][entryKey] = defaultVal;
+        }
+      }
+    }
+  }
+  return newCfg as GlobalConfigState;
 };
 
 const _migrateUndefinedShortcutsToNull = (

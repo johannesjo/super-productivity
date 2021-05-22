@@ -115,6 +115,7 @@ export type TrackingReminderConfig = Readonly<{
   minTime: number;
 }>;
 
+// NOTE: config properties being undefined always means that they should be overwritten with the default value
 export type GlobalConfigState = Readonly<{
   lang: LanguageConfig;
   misc: MiscConfig;
