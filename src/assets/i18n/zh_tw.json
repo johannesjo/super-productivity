@@ -978,7 +978,7 @@
       "IS_FOCUS_WINDOW": "有提醒時激活本應用視窗（僅限桌面）",
       "IS_LOCK_SCREEN": "休息時間到時鎖定螢幕（僅限桌面）",
       "MESSAGE": "休息一下",
-      "SNOOZE_TIME": "[TRANSLATION REQUIRED] Snooze time when prompted to take a break",
+      "SNOOZE_TIME": "",
       "MIN_WORKING_TIME": "觸發休息提醒的工作時長",
       "MOTIVATIONAL_IMG": "勵志圖片（網址）",
       "TITLE": "休息提醒"

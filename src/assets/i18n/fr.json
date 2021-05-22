@@ -1052,7 +1052,7 @@
       "IS_FOCUS_WINDOW": "Mettre le focus sur l'application lorsque le rappel est actif (bureau uniquement)",
       "IS_LOCK_SCREEN": "Verrouiller l'écran lorsqu'une pause est due (bureau uniquement)",
       "MESSAGE": "Message invitant à prendre une pause",
-      "SNOOZE_TIME": "[TRANSLATION REQUIRED] Snooze time when prompted to take a break",
+      "SNOOZE_TIME": "",
       "MIN_WORKING_TIME": "Déclencher l'invitation à prendre une pause après avoir travaillé X sans pause",
       "MOTIVATIONAL_IMG": "Image de motivation (URL Web)",
       "TITLE": "Rappel de pause"

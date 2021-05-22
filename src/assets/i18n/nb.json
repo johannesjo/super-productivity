@@ -990,7 +990,7 @@
       "IS_FOCUS_WINDOW": "Fokuser appvinduet når påminnelsen er aktiv (kun på skrivebordet)",
       "IS_LOCK_SCREEN": "Låseskjerm når en pause er forfalt (kun på skrivebordet)",
       "MESSAGE": "Ta en pause-melding",
-      "SNOOZE_TIME": "[TRANSLATION REQUIRED] Snooze time when prompted to take a break",
+      "SNOOZE_TIME": "",
       "MIN_WORKING_TIME": "Trigger ta en pause varsel etter X arbeider uten en",
       "MOTIVATIONAL_IMG": "Motiverende bilde (nettadresse)",
       "TITLE": "Pausepåminnelse"

@@ -1052,7 +1052,7 @@
       "IS_FOCUS_WINDOW": "Enfocar la ventana de la aplicación cuando el recordatorio está activo (solo para escritorio)",
       "IS_LOCK_SCREEN": "Bloquear la pantalla cuando se debe tomar un descanso (solo para escritorio)",
       "MESSAGE": "Tomar un mensaje de descanso",
-      "SNOOZE_TIME": "[TRANSLATION REQUIRED] Snooze time when prompted to take a break",
+      "SNOOZE_TIME": "",
       "MIN_WORKING_TIME": "Mostrar una notificación de descanso después de X tiempo trabajando sin una",
       "MOTIVATIONAL_IMG": "Imagen motivacional (url web)",
       "TITLE": "Recordatorio de descanso"
