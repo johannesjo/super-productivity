@@ -1052,7 +1052,7 @@
       "IS_FOCUS_WINDOW": "Porta in evidenza la finestra dell'app quando il promemoria è attivo(solo Desktop)",
       "IS_LOCK_SCREEN": "Blocca lo schermo quando è l'ora di una pausa (solo Desktop)",
       "MESSAGE": "Messaggio per prenderti una pausa",
-      "SNOOZE_TIME": "[TRANSLATION REQUIRED] Snooze time when prompted to take a break",
+      "SNOOZE_TIME": "",
       "MIN_WORKING_TIME": "Innesca la notifica di prendersi una pausa dopo X tempo lavorato senza fare pausa",
       "MOTIVATIONAL_IMG": "Immagine motivazionale (URL web)",
       "TITLE": "Promemoria pausa"

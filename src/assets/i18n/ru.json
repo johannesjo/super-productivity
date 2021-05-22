@@ -1052,7 +1052,7 @@
       "IS_FOCUS_WINDOW": "Фокус окна приложения, когда напоминание активно (только на рабочем столе)",
       "IS_LOCK_SCREEN": "Блокировка экрана при перерыве (только на рабочем столе)",
       "MESSAGE": "Сделать перерыв сообщение",
-      "SNOOZE_TIME": "[TRANSLATION REQUIRED] Snooze time when prompted to take a break",
+      "SNOOZE_TIME": "",
       "MIN_WORKING_TIME": "Уведомить о перерыве после X работы без перерыва",
       "MOTIVATIONAL_IMG": "Мотивационное изображение (веб-URL)",
       "TITLE": "Напоминание о перерыве "
