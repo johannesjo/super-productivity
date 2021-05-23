@@ -6,7 +6,7 @@ import * as moment from 'moment';
 import { convertToWesternArabic } from '../../util/numeric-converter';
 import { isMigrateModel } from '../../util/model-version';
 
-const MODEL_VERSION = 3.3336;
+const MODEL_VERSION = 3.3337;
 export const LEGACY_GITHUB_TYPE = 'GIT';
 
 export const migrateTaskState = (taskState: TaskState, modelType = 'Task'): TaskState => {
@@ -36,7 +36,12 @@ const _taskEntityMigrations = (task: TaskCopy): TaskCopy => {
   task = _addTagIds(task);
   task = _deleteUnusedFields(task);
   task = _convertToWesternArabicDateKeys(task);
+  task = _updateUndefinedNoteFields(task);
   return task;
+};
+
+const _updateUndefinedNoteFields = (task: Task): Task => {
+  return task.notes !== undefined ? task : { ...task, notes: '' };
 };
 
 const _addTagIds = (task: Task): Task => {
