@@ -82,7 +82,7 @@ export class DialogAddTaskReminderComponent {
     const lastIsMoveToBacklog =
       lsLastIsMoveToBacklog && JSON.parse(lsLastIsMoveToBacklog);
     this.isMoveToBacklog =
-      typeof lastIsMoveToBacklog === 'boolean'
+      this.isShowMoveToBacklog && typeof lastIsMoveToBacklog === 'boolean'
         ? lastIsMoveToBacklog
         : this.isShowMoveToBacklog;
   }
