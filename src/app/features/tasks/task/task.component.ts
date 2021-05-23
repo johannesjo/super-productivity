@@ -264,14 +264,19 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
     this._taskService.setSelectedId(this.task.id);
   }
 
-  deleteTask() {
+  deleteTask(isClick: boolean = false) {
+    // NOTE: prevents attempts to delete the same task multiple times
     if (this._isTaskDeleteTriggered) {
       return;
     }
 
     this._isTaskDeleteTriggered = true;
     this._taskService.remove(this.task);
-    this.focusNext(true);
+    // NOTE: in case we want the focus behaviour on click we could use:
+    // this.focusSelf();
+    if (!isClick) {
+      this.focusNext(true);
+    }
   }
 
   startTask() {
