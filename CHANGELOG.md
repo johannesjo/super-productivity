@@ -1,3 +1,19 @@
+# [7.0.0-rc15](https://github.com/johannesjo/super-productivity/compare/v7.0.0-rc14...v7.0.0-rc15) (2021-05-23)
+
+### Bug Fixes
+
+- **task:** delete focus behaviour ([96e2d70](https://github.com/johannesjo/super-productivity/commit/96e2d70b1d16a46173cc534663bc97ec2deba244))
+- error for special schedule task case ([904f0f9](https://github.com/johannesjo/super-productivity/commit/904f0f946d02455fefd3fb4135a3a80e2300b810))
+
+### Features
+
+- **dailySummary:** hide add note for evaluation sheet from today ([a29cd46](https://github.com/johannesjo/super-productivity/commit/a29cd46d17a2a5f53886fae2dfdb466d3ecfeaab))
+- add new motivational message ([4a68767](https://github.com/johannesjo/super-productivity/commit/4a687677695f6ca2a5184fe606d3e3a784fefd72))
+- also add planned task buttons to daily summary ([3f7e499](https://github.com/johannesjo/super-productivity/commit/3f7e499600d1bb28b9ea9335246a090b5ad2fe1d))
+- improve text ([45549cd](https://github.com/johannesjo/super-productivity/commit/45549cd56f98e2acfc9f5e8352fec7c8ebf9d09b))
+- **metrics:** make it work for today tag and add link ([dd0f9e4](https://github.com/johannesjo/super-productivity/commit/dd0f9e437274e8872a51ee92c17f92e75869ef14))
+- improve config migrate script ([8a58030](https://github.com/johannesjo/super-productivity/commit/8a580308d35c757b8e07ff9fec05e8a41df89647))
+
 # [7.0.0-rc14](https://github.com/johannesjo/super-productivity/compare/v7.0.0-rc13...v7.0.0-rc14) (2021-05-21)
 
 ### Bug Fixes
