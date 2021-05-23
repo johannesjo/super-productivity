@@ -211,7 +211,7 @@ export class TakeABreakService {
         ico: 'free_breakfast',
         msg,
         translateParams: {
-          time: '15m',
+          time: msToString(cfg.takeABreak.takeABreakSnoozeTime),
         },
         action: {
           label: T.F.TIME_TRACKING.B.ALREADY_DID,
@@ -219,7 +219,7 @@ export class TakeABreakService {
         },
         action2: {
           label: T.F.TIME_TRACKING.B.SNOOZE,
-          fn: () => this.snooze(),
+          fn: () => this.snooze(cfg.takeABreak.takeABreakSnoozeTime),
         },
         img: cfg.takeABreak.motivationalImg || undefined,
       });

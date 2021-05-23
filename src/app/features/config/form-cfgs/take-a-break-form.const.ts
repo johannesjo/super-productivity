@@ -38,6 +38,15 @@ export const TAKE_A_BREAK_FORM_CFG: ConfigFormSection<TakeABreakConfig> = {
       },
     },
     {
+      key: 'takeABreakSnoozeTime',
+      type: 'duration',
+      hideExpression: '!model.isTakeABreakEnabled',
+      templateOptions: {
+        label: T.GCF.TAKE_A_BREAK.SNOOZE_TIME,
+        required: true,
+      },
+    },
+    {
       key: 'takeABreakMessage',
       type: 'textarea',
       hideExpression: '!model.isTakeABreakEnabled',
