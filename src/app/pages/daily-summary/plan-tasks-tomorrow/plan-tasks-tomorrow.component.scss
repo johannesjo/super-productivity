@@ -1,7 +1,7 @@
 @import '../../../../variables';
 
 .add-task-bar-wrapper {
-  margin: $s*1.5 auto $s*1.5;
+  margin: $s * 1.5 auto $s * 1.5;
   max-width: 628px;
 }
 
@@ -10,4 +10,8 @@
   .start-task-btn {
     display: none !important;
   }
+}
+
+.wrap-add-planned {
+  margin-top: 2 * $s;
 }

@@ -118,7 +118,7 @@
           >
             <button
               *ngIf="plannedForToday?.length"
-              (click)="addAllPlannedForToday(plannedForToday)"
+              (click)="addAllPlannedToToday(plannedForToday)"
               class="add-scheduled"
               color=""
               mat-stroked-button
@@ -133,7 +133,7 @@
             >
               <button
                 *ngIf="plannedForTomorrow?.length"
-                (click)="addAllPlannedForToday(plannedForTomorrow)"
+                (click)="addAllPlannedToToday(plannedForTomorrow)"
                 class="add-scheduled"
                 color=""
                 mat-stroked-button

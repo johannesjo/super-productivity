@@ -1,6 +1,40 @@
 <div class="task-list-wrapper">
   <section class="add-task-bar-wrapper">
     <add-task-bar [isAddToBottom]="true" [isDisableAutoFocus]="true"></add-task-bar>
+
+    <!-- NOTE workContextService.isToday should work as we only need the initial value -->
+    <div
+      class="wrap-add-planned"
+      *ngIf="workContextService.isToday && (taskService.allPlannedForTodayNotOnToday$|async) as plannedForToday"
+    >
+      <button
+        *ngIf="plannedForToday?.length"
+        (click)="addAllPlannedToToday(plannedForToday)"
+        class="add-scheduled"
+        color=""
+        mat-stroked-button
+        tabindex="1"
+      >
+        <mat-icon>playlist_add</mat-icon>
+        {{T.WW.ADD_SCHEDULED_FOR_TODAY|translate:{nr: plannedForToday.length} }}
+      </button>
+
+      <ng-container
+        *ngIf="plannedForToday.length === 0 &&(taskService.allPlannedForTomorrowNotOnToday$|async) as plannedForTomorrow"
+      >
+        <button
+          *ngIf="plannedForTomorrow?.length"
+          (click)="addAllPlannedToToday(plannedForTomorrow)"
+          class="add-scheduled"
+          color=""
+          mat-stroked-button
+          tabindex="1"
+        >
+          <mat-icon>playlist_add</mat-icon>
+          {{T.WW.ADD_SCHEDULED_FOR_TOMORROW|translate:{nr: plannedForTomorrow.length} }}
+        </button>
+      </ng-container>
+    </div>
   </section>
 
   <task-list
