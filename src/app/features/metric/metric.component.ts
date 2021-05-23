@@ -7,6 +7,7 @@ import { LineChartData } from './metric.model';
 import { fadeAnimation } from '../../ui/animations/fade.ani';
 import { T } from '../../t.const';
 import { ProjectMetricsService } from './project-metrics.service';
+import { WorkContextService } from '../work-context/work-context.service';
 
 @Component({
   selector: 'metric',
@@ -38,6 +39,7 @@ export class MetricComponent {
   lineChartPlugins: any[] = [];
 
   constructor(
+    public workContextService: WorkContextService,
     public metricService: MetricService,
     public projectMetricsService: ProjectMetricsService,
   ) {}
