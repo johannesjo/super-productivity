@@ -85,7 +85,10 @@
     ></chip-list-input>
   </form>
 </div>
-<div style="text-align: center; margin-top: 8px; margin-bottom: 16px">
+<div
+  *ngIf="(workContextService.isActiveWorkContextProject$|async)"
+  style="text-align: center; margin-top: 8px; margin-bottom: 16px"
+>
   <button (click)="addNote()" mat-button>
     <mat-icon>add</mat-icon>
     {{T.F.METRIC.EVAL_FORM.ADD_NOTE_FOR_TOMORROW|translate}}

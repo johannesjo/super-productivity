@@ -18,6 +18,7 @@ import { switchMap } from 'rxjs/operators';
 import { T } from '../../../t.const';
 import { DialogAddNoteComponent } from '../../note/dialog-add-note/dialog-add-note.component';
 import { MatDialog } from '@angular/material/dialog';
+import { WorkContextService } from '../../work-context/work-context.service';
 
 @Component({
   selector: 'evaluation-sheet',
@@ -41,6 +42,7 @@ export class EvaluationSheetComponent implements OnDestroy, OnInit {
   constructor(
     public obstructionService: ObstructionService,
     public improvementService: ImprovementService,
+    public workContextService: WorkContextService,
     private _metricService: MetricService,
     private _matDialog: MatDialog,
     private _cd: ChangeDetectorRef,
