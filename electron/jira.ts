@@ -6,6 +6,7 @@ import { JiraCfg } from '../src/app/features/issue/providers/jira/jira.model';
 // const rp = require('request-promise');
 import fetch from 'node-fetch';
 import { Agent } from 'https';
+import { log, error } from 'electron-log';
 
 export const sendJiraRequest = ({
   requestId,
@@ -19,9 +20,9 @@ export const sendJiraRequest = ({
   jiraCfg: JiraCfg;
 }) => {
   const mainWin = getWin();
-  // console.log('--------------------------------------------------------------------');
-  // console.log(url);
-  // console.log('--------------------------------------------------------------------');
+  // log('--------------------------------------------------------------------');
+  // log(url);
+  // log('--------------------------------------------------------------------');
 
   fetch(url, {
     ...requestInit,
@@ -35,11 +36,11 @@ export const sendJiraRequest = ({
       : {}),
   })
     .then((response) => {
-      // console.log('JIRA_RAW_RESPONSE', response);
+      // log('JIRA_RAW_RESPONSE', response);
       if (!response.ok) {
-        console.log('Jira Error Error Response ELECTRON: ', response);
+        error('Jira Error Error Response ELECTRON: ', response);
         try {
-          console.log(JSON.stringify(response));
+          log(JSON.stringify(response));
         } catch (e) {}
         throw Error(response.statusText);
       }
@@ -53,10 +54,9 @@ export const sendJiraRequest = ({
         requestId,
       });
     })
-    .catch((error) => {
-      // console.error('JIRA_ERR_ERR_ELECTRON', error);
+    .catch((err) => {
       mainWin.webContents.send(IPC.JIRA_CB_EVENT, {
-        error,
+        error: err,
         requestId,
       });
     });
@@ -127,6 +127,6 @@ const parseHostAndPort = (
     protocol = 'https';
   }
 
-  // console.log({host, protocol, port});
+  // log({host, protocol, port});
   return { host, protocol, port };
 };

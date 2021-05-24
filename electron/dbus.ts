@@ -1,8 +1,9 @@
 'use strict';
 
 import { IPC } from './ipc-events.const';
+import { error, log } from 'electron-log';
 
-const errorHandler = require('./error-handler');
+const errorHandler = require('./error-handler-with-frontend-inform');
 const mainWinMod = require('./main-window');
 
 // only optionally require dbus
@@ -11,8 +12,8 @@ let dbus;
 try {
   dbus = require('dbus-native');
 } catch (e) {
-  console.log('NOTE: Continuing without DBUS');
-  console.error(e);
+  log('NOTE: Continuing without DBUS');
+  error(e);
   isDBusError = true;
 }
 
@@ -26,6 +27,7 @@ let sessionBus;
 let ifaceDesc;
 let iface;
 
+// eslint-disable-next-line prefer-arrow/prefer-arrow-functions
 function init(params) {
   sessionBus = dbus.sessionBus();
 
@@ -46,7 +48,7 @@ function init(params) {
 
     // Return code 0x1 means we successfully had the name
     if (retCode === 1) {
-      console.log(`Successfully requested service name '${serviceName}'!`);
+      log(`Successfully requested service name '${serviceName}'!`);
       proceed();
       /* Other return codes means various errors, check here
   (https://dbus.freedesktop.org/doc/api/html/group__DBusShared.html#ga37a9bc7c6eb11d212bf8d5e5ff3b50f9) for more
@@ -61,6 +63,7 @@ function init(params) {
   });
 
   // Function called when we have successfully got the service name we wanted
+  // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
   function proceed() {
     // First, we need to create our interface description (here we will only expose method calls)
     ifaceDesc = {
@@ -80,6 +83,7 @@ function init(params) {
       },
     };
 
+    // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
     function checkMainWin() {
       const mainWin = mainWinMod.getWin();
       if (!mainWin) {
@@ -119,7 +123,7 @@ function init(params) {
     sessionBus.exportInterface(iface, objectPath, ifaceDesc);
 
     // Say our service is ready to receive function calls (you can use `gdbus call` to make function calls)
-    console.log('Interface exposed to DBus, ready to receive function calls!');
+    log('Interface exposed to DBus, ready to receive function calls!');
   }
 }
 

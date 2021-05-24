@@ -1,10 +1,13 @@
 import { getIsAppReady, getWin } from './main-window';
 import { IPC } from './ipc-events.const';
-import { error } from 'electron-log';
+import { error, log } from 'electron-log';
 
 const WAIT_FOR_WIN_TIMEOUT_DURATION = 4000;
 
-export const errorHandler = (e = 'UNDEFINED ERROR', additionalLogInfo?) => {
+export const errorHandlerWithFrontendInform = (
+  e = 'UNDEFINED ERROR',
+  additionalLogInfo?,
+) => {
   const errObj = new Error(e);
 
   if (_isReadyForFrontEndError()) {
@@ -17,22 +20,24 @@ export const errorHandler = (e = 'UNDEFINED ERROR', additionalLogInfo?) => {
   }
 };
 
+// eslint-disable-next-line prefer-arrow/prefer-arrow-functions
 function _isReadyForFrontEndError() {
   const mainWin = getWin();
   const isAppReady = getIsAppReady();
   return mainWin && mainWin.webContents && isAppReady;
 }
 
+// eslint-disable-next-line prefer-arrow/prefer-arrow-functions
 function _handleError(e, additionalLogInfo, errObj) {
   const mainWin = getWin();
   const stack = errObj.stack;
 
   console.error('ERR', e);
-  console.log(stack);
+  log(stack);
   error(e, stack);
 
   if (additionalLogInfo) {
-    console.log('Additional Error info: ', additionalLogInfo);
+    log('Additional Error info: ', additionalLogInfo);
   }
 
   if (_isReadyForFrontEndError()) {
@@ -42,10 +47,6 @@ function _handleError(e, additionalLogInfo, errObj) {
       stack,
     });
   } else {
-    console.error(
-      'ERR',
-      'Electron Error: Frontend not loaded. Could not send error to renderer.',
-    );
     error('Electron Error: Frontend not loaded. Could not send error to renderer.');
     throw errObj;
   }

@@ -10,7 +10,7 @@ import {
 } from 'electron';
 import * as electronDl from 'electron-dl';
 
-import { info } from 'electron-log';
+import { info, log } from 'electron-log';
 import { CONFIG } from './CONFIG';
 
 import { initIndicator } from './indicator';
@@ -18,7 +18,7 @@ import { createWindow } from './main-window';
 
 import { sendJiraRequest, setupRequestHeadersForImages } from './jira';
 import { getGitLog } from './git-log';
-import { errorHandler } from './error-handler';
+import { errorHandlerWithFrontendInform } from './error-handler-with-frontend-inform';
 import { initDebug } from './debug';
 import { IPC } from './ipc-events.const';
 import { initBackupAdapter } from './backup';
@@ -40,30 +40,30 @@ let isDisableTray = false;
 let forceDarkTray = false;
 
 if (IS_DEV) {
-  console.log('Starting in DEV Mode!!!');
+  log('Starting in DEV Mode!!!');
 }
 
 // NOTE: needs to be executed before everything else
 process.argv.forEach((val) => {
   if (val && val.includes('--disable-tray')) {
     isDisableTray = true;
-    console.log('Disable tray icon');
+    log('Disable tray icon');
   }
 
   if (val && val.includes('--force-dark-tray')) {
     forceDarkTray = true;
-    console.log('Force dark mode for tray icon');
+    log('Force dark mode for tray icon');
   }
 
   if (val && val.includes('--user-data-dir=')) {
     const customUserDir = val.replace('--user-data-dir=', '').trim();
-    console.log('Using custom directory for user data', customUserDir);
+    log('Using custom directory for user data', customUserDir);
     app.setPath('userData', customUserDir);
   }
 
   if (val && val.includes('--custom-url=')) {
     customUrl = val.replace('--custom-url=', '').trim();
-    console.log('Using custom url', customUrl);
+    log('Using custom url', customUrl);
   }
 
   if (val && val.includes('--dev-tools')) {
@@ -110,8 +110,8 @@ if (!IS_MAC) {
 }
 
 // Allow invalid certificates for jira requests
-appIN.on('certificate-error', (event, webContents, url, error, certificate, callback) => {
-  console.log(error);
+appIN.on('certificate-error', (event, webContents, url, err, certificate, callback) => {
+  log(err);
   event.preventDefault();
   callback(true);
 });
@@ -194,7 +194,7 @@ appIN.on('will-quit', () => {
 });
 
 appIN.on('window-all-closed', (event) => {
-  console.log('Quit after all windows being closed');
+  log('Quit after all windows being closed');
   // if (!IS_MAC) {
   app.quit();
   // }
@@ -212,7 +212,7 @@ appIN.on('window-all-closed', (event) => {
 // });
 //
 // autoUpdater.on('update-downloaded', (ev, info) => {
-//  console.log(ev);
+//  log(ev);
 //  // Wait 5 seconds, then quit and install
 //  // In your application, you don't need to wait 5 seconds.
 //  // You could call autoUpdater.quitAndInstall(); immediately
@@ -235,7 +235,7 @@ ipcMain.on(IPC.LOCK_SCREEN, () => {
   try {
     lockscreen();
   } catch (e) {
-    errorHandler(e);
+    errorHandlerWithFrontendInform(e);
   }
 });
 
@@ -270,6 +270,7 @@ ipcMain.on(IPC.SHOW_OR_FOCUS, () => {
 
 // HELPER FUNCTIONS
 // ----------------
+// eslint-disable-next-line prefer-arrow/prefer-arrow-functions
 function createIndicator() {
   initIndicator({
     app,
@@ -280,6 +281,7 @@ function createIndicator() {
   });
 }
 
+// eslint-disable-next-line prefer-arrow/prefer-arrow-functions
 function createMainWin() {
   mainWin = createWindow({
     app,
@@ -291,6 +293,7 @@ function createMainWin() {
   });
 }
 
+// eslint-disable-next-line prefer-arrow/prefer-arrow-functions
 function registerShowAppShortCuts(cfg: KeyboardConfig) {
   // unregister all previous
   globalShortcut.unregisterAll();
@@ -349,23 +352,29 @@ function registerShowAppShortCuts(cfg: KeyboardConfig) {
         if (shortcut && shortcut.length > 0) {
           const ret = globalShortcut.register(shortcut, actionFn) as unknown;
           if (!ret) {
-            errorHandler('Global Shortcut registration failed: ' + shortcut, shortcut);
+            errorHandlerWithFrontendInform(
+              'Global Shortcut registration failed: ' + shortcut,
+              shortcut,
+            );
           }
         }
       });
   }
 }
 
+// eslint-disable-next-line prefer-arrow/prefer-arrow-functions
 function showApp() {
   showOrFocus(mainWin);
 }
 
+// eslint-disable-next-line prefer-arrow/prefer-arrow-functions
 function quitApp() {
   // tslint:disable-next-line
   appIN.isQuiting = true;
   appIN.quit();
 }
 
+// eslint-disable-next-line prefer-arrow/prefer-arrow-functions
 function showOrFocus(passedWin) {
   // default to main winpc
   const win = passedWin || mainWin;
@@ -390,12 +399,13 @@ function showOrFocus(passedWin) {
   }, 60);
 }
 
+// eslint-disable-next-line prefer-arrow/prefer-arrow-functions
 function exec(ev, command) {
-  console.log('running command ' + command);
+  log('running command ' + command);
   const execIN = require('child_process').exec;
-  execIN(command, (error) => {
-    if (error) {
-      errorHandler(error);
+  execIN(command, (err) => {
+    if (err) {
+      errorHandlerWithFrontendInform(err);
     }
   });
 }
@@ -404,7 +414,7 @@ function exec(ev, command) {
 // @see: https://github.com/electron/electron/issues/5708
 process.on('exit', () => {
   setTimeout(() => {
-    console.log('Quit after process exit');
+    log('Quit after process exit');
     app.quit();
   }, 100);
 });

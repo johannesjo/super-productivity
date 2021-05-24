@@ -11,12 +11,15 @@ import { IPC } from './ipc-events.const';
 import { answerRenderer } from './better-ipc';
 import { LocalBackupMeta } from '../src/app/imex/local-backup/local-backup.model';
 import * as path from 'path';
+import { error, log } from 'electron-log';
 
 let BACKUP_DIR = `${app.getPath('userData')}/backups`;
 
+// eslint-disable-next-line prefer-arrow/prefer-arrow-functions
 export function initBackupAdapter(backupDir: string) {
   BACKUP_DIR = backupDir;
   console.log('Saving backups to', BACKUP_DIR);
+  log('Saving backups to', BACKUP_DIR);
 
   // BACKUP
   ipcMain.on(IPC.BACKUP, backupData);
@@ -41,7 +44,7 @@ export function initBackupAdapter(backupDir: string) {
     );
 
     filesWithMeta.sort((a: LocalBackupMeta, b: LocalBackupMeta) => a.created - b.created);
-    console.log(
+    log(
       'Avilable Backup Files: ',
       filesWithMeta?.map && filesWithMeta.map((f) => f.path),
     );
@@ -50,11 +53,12 @@ export function initBackupAdapter(backupDir: string) {
 
   // RESTORE_BACKUP
   answerRenderer(IPC.BACKUP_LOAD_DATA, (backupPath): string => {
-    console.log('Reading backup file: ', backupPath);
+    log('Reading backup file: ', backupPath);
     return readFileSync(backupPath, { encoding: 'utf8' });
   });
 }
 
+// eslint-disable-next-line prefer-arrow/prefer-arrow-functions
 function backupData(ev, data) {
   if (!existsSync(BACKUP_DIR)) {
     mkdirSync(BACKUP_DIR);
@@ -65,11 +69,12 @@ function backupData(ev, data) {
     const backup = JSON.stringify(data);
     writeFileSync(filePath, backup);
   } catch (e) {
-    console.log('Error while backing up');
-    console.error(e);
+    log('Error while backing up');
+    error(e);
   }
 }
 
+// eslint-disable-next-line prefer-arrow/prefer-arrow-functions
 function getDateStr(): string {
   const today = new Date();
   const dd = today.getDate();

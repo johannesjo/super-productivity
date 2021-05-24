@@ -1,5 +1,6 @@
 'use strict';
-import OpenDevToolsOptions = Electron.OpenDevToolsOptions;
+import { log } from 'electron-log';
+import { OpenDevToolsOptions } from 'electron';
 
 const electron = require('electron');
 const localShortcut = require('electron-localshortcut');
@@ -11,6 +12,7 @@ const devToolsOptions: OpenDevToolsOptions = {
   mode: 'bottom',
 };
 
+// eslint-disable-next-line prefer-arrow/prefer-arrow-functions
 function toggleDevTools(win = BrowserWindow.getFocusedWindow()) {
   if (win) {
     const { webContents } = win;
@@ -22,24 +24,28 @@ function toggleDevTools(win = BrowserWindow.getFocusedWindow()) {
   }
 }
 
+// eslint-disable-next-line prefer-arrow/prefer-arrow-functions
 function devTools(win = BrowserWindow.getFocusedWindow()) {
   if (win) {
     toggleDevTools(win);
   }
 }
 
+// eslint-disable-next-line prefer-arrow/prefer-arrow-functions
 function openDevTools(win = BrowserWindow.getFocusedWindow()) {
   if (win) {
     win.webContents.openDevTools(devToolsOptions);
   }
 }
 
+// eslint-disable-next-line prefer-arrow/prefer-arrow-functions
 function refresh(win = BrowserWindow.getFocusedWindow()) {
   if (win) {
     win.webContents.reloadIgnoringCache();
   }
 }
 
+// eslint-disable-next-line prefer-arrow/prefer-arrow-functions
 function inspectElements() {
   const win = BrowserWindow.getFocusedWindow();
   const inspect = () => {
@@ -80,7 +86,7 @@ export const initDebug = (opts, isAddReload) => {
     },
     opts,
   );
-  console.log(opts);
+  log(opts);
 
   if (opts.enabled === false) {
     return;

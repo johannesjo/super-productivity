@@ -9,12 +9,13 @@ import {
   MessageBoxReturnValue,
   shell,
 } from 'electron';
-import { errorHandler } from './error-handler';
+import { errorHandlerWithFrontendInform } from './error-handler-with-frontend-inform';
 import { join, normalize } from 'path';
 import { format } from 'url';
 import { IPC } from './ipc-events.const';
 import { getSettings } from './get-settings';
 import { readFileSync, stat } from 'fs';
+import { error, log } from 'electron-log';
 
 let mainWin: BrowserWindow;
 
@@ -54,7 +55,7 @@ export const createWindow = ({
 }): BrowserWindow => {
   // make sure the main window isn't already created
   if (mainWin) {
-    errorHandler('Main window already exists');
+    errorHandlerWithFrontendInform('Main window already exists');
     return mainWin;
   }
 
@@ -103,11 +104,11 @@ export const createWindow = ({
     const CSS_FILE_PATH = app.getPath('userData') + '/styles.css';
     stat(app.getPath('userData') + '/styles.css', (err) => {
       if (err) {
-        console.log('No custom styles detected at ' + CSS_FILE_PATH);
+        log('No custom styles detected at ' + CSS_FILE_PATH);
       } else {
-        console.log('Loading custom styles from ' + CSS_FILE_PATH);
+        log('Loading custom styles from ' + CSS_FILE_PATH);
         const styles = readFileSync(CSS_FILE_PATH, { encoding: 'utf8' });
-        mainWin.webContents.insertCSS(styles).then(console.log).catch(console.error);
+        mainWin.webContents.insertCSS(styles).then(log).catch(error);
       }
     });
   });
@@ -137,6 +138,7 @@ export const createWindow = ({
   return mainWin;
 };
 
+// eslint-disable-next-line prefer-arrow/prefer-arrow-functions
 function initWinEventListeners(app: any) {
   const handleRedirect = (event, url) => {
     event.preventDefault();
@@ -159,6 +161,7 @@ function initWinEventListeners(app: any) {
   appMinimizeHandler(app);
 }
 
+// eslint-disable-next-line prefer-arrow/prefer-arrow-functions
 function createMenu(quitApp) {
   // Create application menu to enable copy & pasting on MacOS
   const menuTpl = [
@@ -209,7 +212,7 @@ const appCloseHandler = (app: App) => {
   });
   ipcMain.on(IPC.BEFORE_CLOSE_DONE, (ev, { id }) => {
     ids = ids.filter((idIn) => idIn !== id);
-    console.log(IPC.BEFORE_CLOSE_DONE, id, ids);
+    log(IPC.BEFORE_CLOSE_DONE, id, ids);
     if (ids.length === 0) {
       mainWin.close();
     }
@@ -217,11 +220,11 @@ const appCloseHandler = (app: App) => {
 
   mainWin.on('close', (event) => {
     // NOTE: this might not work if we run a second instance of the app
-    console.log('close, isQuiting:', (app as any).isQuiting);
+    log('close, isQuiting:', (app as any).isQuiting);
     if (!(app as any).isQuiting) {
       event.preventDefault();
       if (ids.length > 0) {
-        console.log('Actions to wait for ', ids);
+        log('Actions to wait for ', ids);
         mainWin.webContents.send(IPC.NOTIFY_ON_CLOSE, ids);
       } else {
         getSettings(mainWin, (appCfg) => {
