@@ -96,7 +96,7 @@ const _extendConfigDefaults = (config: GlobalConfigState): GlobalConfigState => 
   for (const key in DEFAULT_GLOBAL_CONFIG) {
     if (!newCfg.hasOwnProperty(key)) {
       // @ts-ignore
-      newCfg[key] = DEFAULT_GLOBAL_CONFIG[key];
+      newCfg[key] = { ...DEFAULT_GLOBAL_CONFIG[key] };
     } else if (
       // @ts-ignore
       typeof DEFAULT_GLOBAL_CONFIG[key] === 'object' &&
@@ -111,7 +111,7 @@ const _extendConfigDefaults = (config: GlobalConfigState): GlobalConfigState => 
           const defaultVal = DEFAULT_GLOBAL_CONFIG[key][entryKey];
           console.log('EXTEND globalConfig', key, entryKey, defaultVal);
           // @ts-ignore
-          newCfg[key][entryKey] = defaultVal;
+          newCfg[key] = { ...newCfg[key], [entryKey]: defaultVal };
         }
       }
     }
