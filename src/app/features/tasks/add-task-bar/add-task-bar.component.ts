@@ -210,6 +210,7 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
     if (this._lastAddedTaskId) {
       this._taskService.focusTaskIfPossible(this._lastAddedTaskId);
     }
+    this._subs.unsubscribe();
   }
 
   closeBtnClose(ev: Event) {
