@@ -1,16 +1,16 @@
 import { Dictionary } from '@ngrx/entity';
-import { ArchiveTask, Task, TaskArchive, TaskCopy, TaskState } from './task.model';
+import { Task, TaskArchive, TaskCopy, TaskState } from './task.model';
 import { GITHUB_TYPE } from '../issue/issue.const';
 import { MODEL_VERSION_KEY, WORKLOG_DATE_STR_FORMAT } from '../../app.constants';
 import * as moment from 'moment';
 import { convertToWesternArabic } from '../../util/numeric-converter';
 import { isMigrateModel } from '../../util/model-version';
 
-const MODEL_VERSION = 3.3334;
+const MODEL_VERSION = 3.3336;
 export const LEGACY_GITHUB_TYPE = 'GIT';
 
-export const migrateTaskState = (taskState: TaskState): TaskState => {
-  if (!isMigrateModel(taskState, MODEL_VERSION, 'Task')) {
+export const migrateTaskState = (taskState: TaskState, modelType = 'Task'): TaskState => {
+  if (!isMigrateModel(taskState, MODEL_VERSION, modelType)) {
     return taskState;
   }
 
@@ -19,35 +19,24 @@ export const migrateTaskState = (taskState: TaskState): TaskState => {
   });
 
   Object.keys(taskEntities).forEach((key) => {
-    taskEntities[key] = _addNewIssueFields(taskEntities[key] as TaskCopy);
-    taskEntities[key] = _makeNullAndArraysConsistent(taskEntities[key] as TaskCopy);
-    taskEntities[key] = _replaceLegacyGitType(taskEntities[key] as TaskCopy);
-    taskEntities[key] = _addTagIds(taskEntities[key] as TaskCopy);
-    taskEntities[key] = _deleteUnusedFields(taskEntities[key] as TaskCopy);
-    taskEntities[key] = _convertToWesternArabicDateKeys(taskEntities[key] as TaskCopy);
+    taskEntities[key] = _taskEntityMigrations(taskEntities[key] as TaskCopy);
   });
 
   return { ...taskState, entities: taskEntities, [MODEL_VERSION_KEY]: MODEL_VERSION };
 };
 
 export const migrateTaskArchiveState = (taskArchiveState: TaskArchive): TaskArchive => {
-  if (
-    !taskArchiveState ||
-    (taskArchiveState && taskArchiveState[MODEL_VERSION_KEY] === MODEL_VERSION)
-  ) {
-    return taskArchiveState;
-  }
+  return migrateTaskState(taskArchiveState as TaskState, 'Task Archive') as TaskArchive;
+};
 
-  const taskEntities: Dictionary<Task> = { ...taskArchiveState.entities };
-  Object.keys(taskEntities).forEach((key) => {
-    taskEntities[key] = _addNewIssueFields(taskEntities[key] as ArchiveTask);
-    taskEntities[key] = _replaceLegacyGitType(taskEntities[key] as ArchiveTask);
-    taskEntities[key] = _deleteUnusedFields(taskEntities[key] as ArchiveTask);
-    taskEntities[key] = _convertToWesternArabicDateKeys(taskEntities[key] as ArchiveTask);
-  });
-
-  taskArchiveState[MODEL_VERSION_KEY] = MODEL_VERSION;
-  return { ...taskArchiveState, entities: taskEntities as Dictionary<ArchiveTask> };
+const _taskEntityMigrations = (task: TaskCopy): TaskCopy => {
+  task = _addNewIssueFields(task);
+  task = _makeNullAndArraysConsistent(task);
+  task = _replaceLegacyGitType(task);
+  task = _addTagIds(task);
+  task = _deleteUnusedFields(task);
+  task = _convertToWesternArabicDateKeys(task);
+  return task;
 };
 
 const _addTagIds = (task: Task): Task => {
