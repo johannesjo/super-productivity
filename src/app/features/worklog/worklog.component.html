@@ -1,6 +1,6 @@
-<full-page-spinner *ngIf="!(worklogService.worklogData$|async)"></full-page-spinner>
+<ng-template #spinner><full-page-spinner></full-page-spinner></ng-template>
 
-<div *ngIf="worklogService.worklogData$|async as wData" [@fade]>
+<div *ngIf="worklogService.worklogData$|async as wData; else spinner" [@fade]>
   <h1 class="mat-headline total-time">
     {{T.F.WORKLOG.CMP.TOTAL_TIME|translate }} <br /><strong
       >{{wData.totalTimeSpent|msToString}}</strong
