@@ -1,3 +1,15 @@
+# [7.0.0-rc16](https://github.com/johannesjo/super-productivity/compare/v7.0.0-rc15...v7.0.0-rc16) (2021-05-25)
+
+### Bug Fixes
+
+- migration script not working as intended ([6bbc7bc](https://github.com/johannesjo/super-productivity/commit/6bbc7bc94770380d9ae003a075caa44ea34be375))
+- missing migrations for task archive ([9512aac](https://github.com/johannesjo/super-productivity/commit/9512aac6b1f00e64b3992c411c16409f7807e73b))
+
+### Features
+
+- **electron:** improve logging ([afca80f](https://github.com/johannesjo/super-productivity/commit/afca80f0b7d5b1f65aafc3a4a42aa414f7803d0a))
+- **idle:** Flash taskbar when idle dialog pops out ([7f18245](https://github.com/johannesjo/super-productivity/commit/7f182456ce385421299743a6d05f0bad0fbeaee7))
+
 # [7.0.0-rc15](https://github.com/johannesjo/super-productivity/compare/v7.0.0-rc14...v7.0.0-rc15) (2021-05-23)
 
 ### Bug Fixes
