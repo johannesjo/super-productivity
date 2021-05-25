@@ -41,8 +41,11 @@ export class ElectronService {
 
       // log to file for production
       // if (environment.production || environment.stage) {
-      //   const log = (this.remote as typeof remote).require('electron-log');
-      //   console.error = log.error;
+      // const log = (this.remote as typeof remote).require('electron-log');
+      // log.transports.maxSize = 1024 * 1024 * 20;
+      // console.error = log.error;
+      // console.log = log.log;
+      // console.warn = log.warn;
       // }
     }
 

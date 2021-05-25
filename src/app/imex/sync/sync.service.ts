@@ -175,11 +175,12 @@ export class SyncService {
         startWith(false),
         switchMap(() =>
           this._onUpdateLocalDataTrigger$.pipe(
-            tap((ev) => console.log('__trigger_sync__', ev.appDataKey, ev)),
+            // tap((ev) => console.log('__trigger_sync__', ev.appDataKey, ev)),
+            tap((ev) => console.log('__trigger_sync__', ev.appDataKey)),
             auditTime(Math.max(syncInterval, minSyncInterval)),
-            tap((ev) =>
-              console.log('__trigger_sync after auditTime__', ev.appDataKey, ev),
-            ),
+            // tap((ev) =>
+            //   console.log('__trigger_sync after auditTime__', ev.appDataKey, ev),
+            // ),
           ),
         ),
       ),

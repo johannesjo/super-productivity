@@ -88,7 +88,7 @@ export const taskReducer = (
   action: TaskActions | AddTaskRepeatCfgToTask | TaskAttachmentActions,
 ): TaskState => {
   if (environment.production) {
-    console.log(action.type, (action as any)?.payload || action, state);
+    console.log(action.type, (action as any)?.payload || action);
   }
 
   // TODO fix this hackyness once we use the new syntax everywhere
