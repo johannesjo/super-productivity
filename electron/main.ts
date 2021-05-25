@@ -245,6 +245,16 @@ ipcMain.on(IPC.SET_PROGRESS_BAR, (ev, { progress, mode }) => {
   }
 });
 
+ipcMain.on(IPC.FLASH_PROGRESS_BAR, (ev) => {
+  if (mainWin) {
+    mainWin.flashFrame(true);
+
+    mainWin.once('focus', () => {
+      mainWin.flashFrame(false);
+    });
+  }
+});
+
 ipcMain.on(IPC.REGISTER_GLOBAL_SHORTCUTS_EVENT, (ev, cfg) => {
   registerShowAppShortCuts(cfg);
 });
