@@ -43,6 +43,8 @@
     (panleft)="onPanLeft($event)"
     (panright)="onPanRight($event)"
     (panstart)="onPanStart($event)"
+    (mouseenter)="isFirstLineHover=true"
+    (mouseleave)="isFirstLineHover=false"
     [class.isPreventPointerEventsWhilePanning]="isPreventPointerEventsWhilePanning"
     class="first-line"
   >
@@ -142,7 +144,7 @@
       </div>
 
       <div class="controls">
-        <div class="hover-controls">
+        <div *ngIf="isFirstLineHover" class="hover-controls">
           <button
             (click)="startTask()"
             *ngIf="!task?.isDone && !isCurrent && !task?.subTasks?.length"

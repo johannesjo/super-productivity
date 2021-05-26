@@ -118,6 +118,8 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
       )
     : EMPTY;
 
+  isFirstLineHover: boolean = false;
+
   private _dragEnterTarget?: HTMLElement;
   private _destroy$: Subject<boolean> = new Subject<boolean>();
   private _currentPanTimeout?: number;
