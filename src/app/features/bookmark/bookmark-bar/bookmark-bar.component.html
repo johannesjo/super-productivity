@@ -26,14 +26,16 @@
       </button>
 
       <mat-menu #menu="matMenu">
-        <button (click)="openEditDialog()" color="" mat-menu-item>
-          <mat-icon>add</mat-icon>
-          {{T.F.BOOKMARK.BAR.ADD|translate}}
-        </button>
-        <button (click)="isEditMode=!isEditMode" color="" mat-menu-item>
-          <mat-icon>edit</mat-icon>
-          {{T.F.BOOKMARK.BAR.EDIT|translate}}
-        </button>
+        <ng-template matMenuContent>
+          <button (click)="openEditDialog()" color="" mat-menu-item>
+            <mat-icon>add</mat-icon>
+            {{T.F.BOOKMARK.BAR.ADD|translate}}
+          </button>
+          <button (click)="isEditMode=!isEditMode" color="" mat-menu-item>
+            <mat-icon>edit</mat-icon>
+            {{T.F.BOOKMARK.BAR.EDIT|translate}}
+          </button>
+        </ng-template>
       </mat-menu>
     </div>
 

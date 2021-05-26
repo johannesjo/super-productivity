@@ -29,11 +29,13 @@
     </button>
 
     <mat-menu #activeWorkContextMenu="matMenu">
-      <work-context-menu
-        [contextId]="activeWorkContext?.id"
-        [project]="projectService.currentProject$|async"
-        [contextType]="activeWorkContext?.type"
-      ></work-context-menu>
+      <ng-template matMenuContent>
+        <work-context-menu
+          [contextId]="activeWorkContext?.id"
+          [project]="projectService.currentProject$|async"
+          [contextType]="activeWorkContext?.type"
+        ></work-context-menu>
+      </ng-template>
     </mat-menu>
   </ng-container>
 

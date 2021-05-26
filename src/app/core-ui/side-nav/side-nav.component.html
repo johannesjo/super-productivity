@@ -27,10 +27,12 @@
     </button>
 
     <mat-menu #tagMenu="matMenu">
-      <work-context-menu
-        [contextId]="context.id"
-        [contextType]="context.type"
-      ></work-context-menu>
+      <ng-template matMenuContent>
+        <work-context-menu
+          [contextId]="context.id"
+          [contextType]="context.type"
+        ></work-context-menu>
+      </ng-template>
     </mat-menu>
   </div>
 
@@ -104,11 +106,13 @@
         <mat-icon>more_vert</mat-icon>
       </button>
       <mat-menu #projectMenu="matMenu">
-        <work-context-menu
-          [contextId]="project.id"
-          [project]="project"
-          [contextType]="WorkContextType.PROJECT"
-        ></work-context-menu>
+        <ng-template matMenuContent>
+          <work-context-menu
+            [contextId]="project.id"
+            [project]="project"
+            [contextType]="WorkContextType.PROJECT"
+          ></work-context-menu>
+        </ng-template>
       </mat-menu>
     </div>
   </div>
@@ -173,10 +177,12 @@
       </button>
 
       <mat-menu #tagMenu="matMenu">
-        <work-context-menu
-          [contextId]="tag.id"
-          [contextType]="WorkContextType.TAG"
-        ></work-context-menu>
+        <ng-template matMenuContent>
+          <work-context-menu
+            [contextId]="tag.id"
+            [contextType]="WorkContextType.TAG"
+          ></work-context-menu>
+        </ng-template>
       </mat-menu>
     </div>
   </div>

@@ -28,23 +28,25 @@
     </button>
 
     <mat-menu #menu="matMenu">
-      <button (click)="editFullscreen()" mat-menu-item>
-        <mat-icon>fullscreen</mat-icon>
-        {{T.F.NOTE.EDIT_FULLSCREEN|translate}}
-      </button>
+      <ng-template matMenuContent>
+        <button (click)="editFullscreen()" mat-menu-item>
+          <mat-icon>fullscreen</mat-icon>
+          {{T.F.NOTE.EDIT_FULLSCREEN|translate}}
+        </button>
 
-      <button (click)="toggleLock()" *ngIf="!note.imgUrl" mat-menu-item>
-        <mat-icon *ngIf="note.isLock">lock</mat-icon>
-        <mat-icon *ngIf="!note.isLock">lock_open</mat-icon>
+        <button (click)="toggleLock()" *ngIf="!note.imgUrl" mat-menu-item>
+          <mat-icon *ngIf="note.isLock">lock</mat-icon>
+          <mat-icon *ngIf="!note.isLock">lock_open</mat-icon>
 
-        {{note.isLock ? (T.F.NOTE.NOTE_CMP.ENABLE_PARSE|translate) :
-        (T.F.NOTE.NOTE_CMP.DISABLE_PARSE|translate)}}
-      </button>
+          {{note.isLock ? (T.F.NOTE.NOTE_CMP.ENABLE_PARSE|translate) :
+          (T.F.NOTE.NOTE_CMP.DISABLE_PARSE|translate)}}
+        </button>
 
-      <button (click)="removeNote()" mat-menu-item>
-        <mat-icon style="color: #e15d63">delete_forever</mat-icon>
-        {{T.G.DELETE|translate}}
-      </button>
+        <button (click)="removeNote()" mat-menu-item>
+          <mat-icon style="color: #e15d63">delete_forever</mat-icon>
+          {{T.G.DELETE|translate}}
+        </button>
+      </ng-template>
     </mat-menu>
   </div>
 </div>
