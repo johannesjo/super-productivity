@@ -6,7 +6,8 @@ import { issueProviderIconMap } from '../issue.const';
   name: 'issueIcon',
 })
 export class IssueIconPipe implements PipeTransform {
-  transform(value: IssueProviderKey, args?: any): any {
-    return issueProviderIconMap[value];
+  // NOTE: null is only accepted to make view more performant
+  transform(value: IssueProviderKey | null, args?: any): any {
+    return issueProviderIconMap[value as IssueProviderKey];
   }
 }

@@ -115,6 +115,7 @@ export interface TaskWithoutReminder extends Task {
 }
 
 export interface TaskWithSubTasks extends Task {
+  // TODO make sub tasks not optional (and remove from task component)
   readonly subTasks?: Task[];
 }
 
