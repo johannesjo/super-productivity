@@ -5,11 +5,12 @@
   </div>
 
   <div #blockRightEl class="block-right bg-400">
-    <ng-container *ngIf="(workContextService.isToday$|async)">
+    <!--NOTE: non observable should be enough as we only need the initial value-->
+    <ng-container *ngIf="workContextService.isToday">
       <mat-icon *ngIf="!(task?.repeatCfgId)">alarm</mat-icon>
       <mat-icon *ngIf="(task?.repeatCfgId)" svgIcon="repeat"></mat-icon>
     </ng-container>
-    <ng-container *ngIf="!(workContextService.isToday$|async)">
+    <ng-container *ngIf="!workContextService.isToday">
       <mat-icon *ngIf="!task?.tagIds.includes(TODAY_TAG_ID)">wb_sunny</mat-icon>
       <mat-icon
         *ngIf="task?.tagIds.includes(TODAY_TAG_ID) && (task?.projectId || task?.tagIds?.length > 1)"
