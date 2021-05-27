@@ -1,4 +1,9 @@
-import { AfterViewInit, ChangeDetectionStrategy, Component } from '@angular/core';
+import {
+  AfterViewInit,
+  ChangeDetectionStrategy,
+  Component,
+  OnDestroy,
+} from '@angular/core';
 import { PersistenceService } from '../../core/persistence/persistence.service';
 import { expandFadeAnimation } from '../../ui/animations/expand.ani';
 import { WorklogDataForDay, WorklogMonth, WorklogWeek } from './worklog.model';
@@ -16,6 +21,7 @@ import { fadeAnimation } from '../../ui/animations/fade.ani';
 import { T } from '../../t.const';
 import { WorkContextService } from '../work-context/work-context.service';
 import { SearchQueryParams } from '../search-bar/search-bar.model';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'worklog',
@@ -24,10 +30,11 @@ import { SearchQueryParams } from '../search-bar/search-bar.model';
   changeDetection: ChangeDetectionStrategy.OnPush,
   animations: [expandFadeAnimation, standardListAnimation, fadeAnimation],
 })
-export class WorklogComponent implements AfterViewInit {
+export class WorklogComponent implements AfterViewInit, OnDestroy {
   T: typeof T = T;
   expanded: { [key: string]: boolean } = {};
 
+  private _subs: Subscription = new Subscription();
   constructor(
     public readonly worklogService: WorklogService,
     public readonly workContextService: WorkContextService,
@@ -39,27 +46,14 @@ export class WorklogComponent implements AfterViewInit {
   ) {}
 
   ngAfterViewInit(): void {
-    this._route.queryParams.subscribe((params) => {
-      const { dateStr, focusItem } = params as SearchQueryParams;
-      if (!!dateStr) {
-        this.expanded[dateStr] = true;
-        this.focusTask(focusItem);
-      }
-    });
-  }
-
-  focusTask(id: string) {
-    let counter = 0;
-    const timerId = setInterval(() => {
-      counter += 1;
-      const el = document.getElementById(`t-${id}`);
-      if (el) {
-        el.focus();
-        clearInterval(timerId);
-      } else if (counter === 5) {
-        clearInterval(timerId);
-      }
-    }, 300);
+    this._subs.add(
+      this._route.queryParams.subscribe((params) => {
+        const { dateStr } = params as SearchQueryParams;
+        if (!!dateStr) {
+          this.expanded[dateStr] = true;
+        }
+      }),
+    );
   }
 
   exportData(
@@ -144,5 +138,9 @@ export class WorklogComponent implements AfterViewInit {
       },
     });
     this.worklogService.refreshWorklog();
+  }
+
+  ngOnDestroy(): void {
+    this._subs.unsubscribe();
   }
 }

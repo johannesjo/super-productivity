@@ -11,8 +11,15 @@ import {
 } from '@angular/core';
 import { T } from '../../t.const';
 import { FormControl } from '@angular/forms';
-import { BehaviorSubject, Observable } from 'rxjs';
-import { tap, map, take, debounceTime, startWith } from 'rxjs/operators';
+import { BehaviorSubject, combineLatest, from, Observable } from 'rxjs';
+import {
+  tap,
+  map,
+  debounceTime,
+  switchMap,
+  withLatestFrom,
+  startWith,
+} from 'rxjs/operators';
 import { TaskService } from '../tasks/task.service';
 import { Router } from '@angular/router';
 import { TODAY_TAG } from '../tag/tag.const';
@@ -25,6 +32,7 @@ import { blendInOutAnimation } from 'src/app/ui/animations/blend-in-out.ani';
 import { AnimationEvent } from '@angular/animations';
 import { SearchItem, SearchQueryParams } from './search-bar.model';
 import { getWorklogStr } from '../../util/get-work-log-str';
+import { devError } from 'src/app/util/dev-error';
 
 @Component({
   selector: 'search-bar',
@@ -41,33 +49,45 @@ export class SearchBarComponent implements AfterViewInit, OnDestroy {
   @ViewChild('searchForm') searchForm!: ElementRef;
 
   T: typeof T = T;
-  isLoading$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
+  isLoading$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(true);
   taskSuggestionsCtrl: FormControl = new FormControl();
   filteredIssueSuggestions$: Observable<SearchItem[]> = new Observable();
   isArchivedTasks: boolean = false;
+  isArchivedTasks$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
   tooManyResults: boolean = false;
 
   private _attachKeyDownHandlerTimeout?: number;
   private _tasks: Task[] = [];
   private _projects: Project[] = [];
   private _tags: Tag[] = [];
-  private _searchableItems: SearchItem[] = [];
+  private searchableItems$: Observable<SearchItem[]> = this.isArchivedTasks$.pipe(
+    switchMap((isArchivedTasks) => this._loadTasks$(isArchivedTasks)),
+    withLatestFrom(this._projectService.list$, this._tagService.tags$),
+    tap(([tasks, projects, tags]) => this._keepForLater(tasks, projects, tags)),
+    map(([tasks]) => this._mapTasksToSearchItems(tasks)),
+  );
 
   constructor(
     private _taskService: TaskService,
     private _projectService: ProjectService,
     private _tagService: TagService,
     private _router: Router,
-  ) {
-    this._taskService.allTasks$.pipe(take(1)).subscribe((t) => (this._tasks = t));
-    this._projectService.list$.pipe(take(1)).subscribe((p) => (this._projects = p));
-    this._tagService.tags$.pipe(take(1)).subscribe((t) => (this._tags = t));
+  ) {}
 
-    this._mapTasksToSearchItems();
+  private _loadTasks$(isArchivedTasks: boolean): Observable<Task[]> {
+    return !isArchivedTasks
+      ? this._taskService.allTasks$
+      : from(this._taskService.getArchivedTasks());
   }
 
-  private _mapTasksToSearchItems(): void {
-    this._searchableItems = this._tasks.map((task) => {
+  private _keepForLater(tasks: Task[], projects: Project[], tags: Tag[]): void {
+    this._tasks = tasks;
+    this._projects = projects;
+    this._tags = tags;
+  }
+
+  private _mapTasksToSearchItems(tasks: Task[]): SearchItem[] {
+    return tasks.map((task) => {
       const item: SearchItem = {
         id: task.id,
         title: task.title.toLowerCase(),
@@ -76,7 +96,7 @@ export class SearchBarComponent implements AfterViewInit, OnDestroy {
         parentId: task.parentId,
         tagIds: task.tagIds,
         timeSpentOnDay: task.timeSpentOnDay,
-        createdOn: task.created,
+        created: task.created,
         issueType: task.issueType,
         ctx: this._getContextIcon(task),
       };
@@ -84,8 +104,11 @@ export class SearchBarComponent implements AfterViewInit, OnDestroy {
     });
   }
 
-  private _getContextIcon(task: Task) {
-    const context = this._getCtxForTaskSuggestion(task);
+  private _getContextIcon(task: Task): Tag | Project {
+    const context = task.projectId
+      ? (this._projects.find((project) => project.id === task.projectId) as Project)
+      : (this._tags.find((tag) => tag.id === task.tagIds[0]) as Tag);
+
     return {
       ...context,
       icon: (context as Tag).icon || (task.projectId && 'list'),
@@ -93,7 +116,15 @@ export class SearchBarComponent implements AfterViewInit, OnDestroy {
   }
 
   ngAfterViewInit(): void {
-    this._setUpFilter();
+    this.filteredIssueSuggestions$ = combineLatest([
+      this.searchableItems$,
+      this.taskSuggestionsCtrl.valueChanges.pipe(startWith('')),
+    ]).pipe(
+      debounceTime(100),
+      tap(() => this.isLoading$.next(true)),
+      map(([searchableItems, searchTerm]) => this._filter(searchableItems, searchTerm)),
+      tap(() => this.isLoading$.next(false)),
+    );
 
     this._attachKeyDownHandlerTimeout = window.setTimeout(() => {
       this.inputEl.nativeElement.addEventListener('keydown', (ev: KeyboardEvent) => {
@@ -114,20 +145,6 @@ export class SearchBarComponent implements AfterViewInit, OnDestroy {
     });
   }
 
-  private _triggerFilter(): void {
-    this.taskSuggestionsCtrl.setValue(this.inputEl.nativeElement.value);
-  }
-
-  private _setUpFilter(): void {
-    this.filteredIssueSuggestions$ = this.taskSuggestionsCtrl.valueChanges.pipe(
-      debounceTime(100),
-      startWith(''),
-      tap(() => this.isLoading$.next(true)),
-      map((searchTerm) => this._filter(searchTerm)),
-      tap(() => this.isLoading$.next(false)),
-    );
-  }
-
   private _getLocation(item: SearchItem): string {
     const tasksOrWorklog = !this.isArchivedTasks ? 'tasks' : 'worklog';
     if (item.projectId) {
@@ -137,38 +154,32 @@ export class SearchBarComponent implements AfterViewInit, OnDestroy {
     } else if (item.tagIds[0]) {
       return `/tag/${item.tagIds[0]}/${tasksOrWorklog}`;
     } else {
-      console.warn("Couldn't find task location");
+      devError("Couldn't find task location");
       return '';
     }
   }
 
-  private _getArchivedDate(item: SearchItem): string {
-    if (Object.keys(item.timeSpentOnDay)[0]) return Object.keys(item.timeSpentOnDay)[0];
-    if (item.createdOn) return getWorklogStr(item.createdOn);
-    const parentTask = this._tasks.find((t) => t.id === item.id);
-    if (parentTask?.created) return getWorklogStr(parentTask.created);
-    return '';
-  }
-
-  private _getCtxForTaskSuggestion(task: Task): Tag | Project {
-    if (task.projectId) {
-      return this._projects.find((project) => project.id === task.projectId) as Project;
-    } else {
-      if (!task.tagIds[0]) {
-        throw new Error('No first tag');
-      }
-      return this._tags.find((tag) => tag.id === task.tagIds[0]) as Tag;
+  private _getArchivedDate(item: SearchItem, tasks: Task[]): string {
+    if (item.parentId) {
+      const parentTask = tasks.find((task) => task.id === item.parentId) as Task;
+      return this._getTimeSpentDate(parentTask);
     }
+    return this._getTimeSpentDate(item);
   }
 
-  private _isInBacklog(item: SearchItem): boolean {
+  private _getTimeSpentDate(item: SearchItem | Task): string {
+    if (Object.keys(item.timeSpentOnDay)[0]) return Object.keys(item.timeSpentOnDay)[0];
+    return getWorklogStr(item.created);
+  }
+
+  private _isInBacklog(item: SearchItem, projects: Project[]): boolean {
     if (!item.projectId) return false;
-    const project = this._projects.find((p) => p.id === item.projectId);
+    const project = projects.find((p) => p.id === item.projectId);
     return project ? project.backlogTaskIds.includes(item.id) : false;
   }
 
-  private _filter(searchTerm: string): SearchItem[] {
-    let result = this._searchableItems.filter(
+  private _filter(searchableItems: SearchItem[], searchTerm: string): SearchItem[] {
+    let result = searchableItems.filter(
       (task) =>
         task.title.includes(searchTerm.toLowerCase()) ||
         task.taskNotes.includes(searchTerm.toLowerCase()),
@@ -191,16 +202,12 @@ export class SearchBarComponent implements AfterViewInit, OnDestroy {
     };
   }
 
-  async switchTaskSource(event?: MouseEvent) {
+  switchTaskSource(event?: MouseEvent) {
     // trigger on mousedown to keep inputEl in focus
     event?.preventDefault();
     this.isLoading$.next(true);
     this.isArchivedTasks = !this.isArchivedTasks;
-    this._tasks = this.isArchivedTasks
-      ? await this._taskService.getArchivedTasks()
-      : await this._taskService.allTasks$.pipe(take(1)).toPromise();
-    this._mapTasksToSearchItems();
-    this._triggerFilter();
+    this.isArchivedTasks$.next(this.isArchivedTasks);
   }
 
   onAnimationEvent(event: AnimationEvent) {
@@ -213,14 +220,9 @@ export class SearchBarComponent implements AfterViewInit, OnDestroy {
     if (!item) return;
 
     const focusItem = item.id;
-    let queryParams: SearchQueryParams;
-    if (!this.isArchivedTasks) {
-      const isInBacklog = this._isInBacklog(item);
-      queryParams = { focusItem, isInBacklog };
-    } else {
-      const dateStr = this._getArchivedDate(item);
-      queryParams = { focusItem, dateStr };
-    }
+    const queryParams: SearchQueryParams = !this.isArchivedTasks
+      ? { focusItem, isInBacklog: this._isInBacklog(item, this._projects) }
+      : { focusItem, dateStr: this._getArchivedDate(item, this._tasks) };
 
     const location = this._getLocation(item);
     this._router.navigate([location], { queryParams });

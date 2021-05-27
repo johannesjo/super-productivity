@@ -52,7 +52,7 @@
 
   <mat-autocomplete
     #autoEl="matAutocomplete"
-    (optionSelected)="navigateToItem($event?.option?.value)"
+    (optionSelected)="navigateToItem($event.option.value)"
     autoActiveFirstOption
   >
     <mat-option

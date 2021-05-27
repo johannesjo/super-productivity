@@ -128,6 +128,8 @@ export class WorkViewComponent implements OnInit, OnDestroy, AfterContentInit {
       this._activatedRoute.queryParams.subscribe((params) => {
         if (params && params.backlogPos) {
           this.splitInputPos = params.backlogPos;
+        } else if (params.isInBacklog === 'true') {
+          this.splitInputPos = 50;
         }
       }),
     );
