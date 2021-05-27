@@ -9,7 +9,6 @@ import {
   Renderer2,
   ViewChild,
 } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
 import { fromEvent, Subscription } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { isTouchOnly } from '../../../util/is-touch';
@@ -36,7 +35,7 @@ export class SplitComponent implements AfterViewInit {
   private _isDrag: boolean = false;
   private _isViewInitialized: boolean = false;
 
-  constructor(private _renderer: Renderer2, private route: ActivatedRoute) {}
+  constructor(private _renderer: Renderer2) {}
 
   @Input() set splitPos(pos: number) {
     if (pos !== this.pos) {
@@ -54,14 +53,6 @@ export class SplitComponent implements AfterViewInit {
     this._updatePos(this.pos, false);
     this._renderer.addClass(this.splitTopEl, ANIMATABLE_CLASS);
     this._renderer.addClass(this.splitBottomEl, ANIMATABLE_CLASS);
-
-    this.route.queryParams.subscribe((params) => {
-      window.setTimeout(() => {
-        if (params.isInBacklog === 'true') {
-          this._show();
-        }
-      });
-    });
   }
 
   toggle() {
@@ -133,10 +124,6 @@ export class SplitComponent implements AfterViewInit {
       percentage = 0;
     }
     this._updatePos(percentage);
-  }
-
-  private _show() {
-    this._updatePos(50);
   }
 
   private _updatePos(pos: number | undefined, isWasOutsideChange: boolean = false) {

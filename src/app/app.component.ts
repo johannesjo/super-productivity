@@ -36,7 +36,7 @@ import { isOnline, isOnline$ } from './util/is-online';
 import { InitialDialogService } from './features/initial-dialog/initial-dialog.service';
 import { SyncService } from './imex/sync/sync.service';
 import { environment } from '../environments/environment';
-import { RouterOutlet } from '@angular/router';
+import { ActivatedRoute, RouterOutlet } from '@angular/router';
 import { ipcRenderer } from 'electron';
 import { TrackingReminderService } from './features/time-tracking/tracking-reminder/tracking-reminder.service';
 import { first } from 'rxjs/operators';
@@ -61,6 +61,7 @@ export class AppComponent implements OnDestroy {
   isRTL: boolean = false;
 
   private _subs: Subscription = new Subscription();
+  private _intervalTimer?: NodeJS.Timeout;
 
   constructor(
     private _globalConfigService: GlobalConfigService,
@@ -78,6 +79,7 @@ export class AppComponent implements OnDestroy {
     private _initialDialogService: InitialDialogService,
     private _bookmarkService: BookmarkService,
     private _startTrackingReminderService: TrackingReminderService,
+    private _activatedRoute: ActivatedRoute,
     public readonly syncService: SyncService,
     public readonly imexMetaService: ImexMetaService,
     public readonly workContextService: WorkContextService,
@@ -88,6 +90,14 @@ export class AppComponent implements OnDestroy {
       this.isRTL = val;
       document.dir = this.isRTL ? 'rtl' : 'ltr';
     });
+
+    this._subs.add(
+      this._activatedRoute.queryParams.subscribe((params) => {
+        if (!!params.focusItem) {
+          this._focusElement(params.focusItem);
+        }
+      }),
+    );
 
     // check for dialog
     this._initialDialogService.showDialogIfNecessary$().subscribe();
@@ -215,6 +225,7 @@ export class AppComponent implements OnDestroy {
 
   ngOnDestroy() {
     this._subs.unsubscribe();
+    if (this._intervalTimer) clearInterval(this._intervalTimer);
   }
 
   private _initElectronErrorHandler() {
@@ -303,5 +314,23 @@ export class AppComponent implements OnDestroy {
         });
       }
     }
+  }
+
+  /**
+   * since page load and animation time are not always equal
+   * an interval seemed to feel the most responsive
+   */
+  private _focusElement(id: string) {
+    let counter = 0;
+    this._intervalTimer = setInterval(() => {
+      counter += 1;
+
+      const el = document.getElementById(`t-${id}`);
+      el?.focus();
+
+      if ((el || counter === 6) && this._intervalTimer) {
+        clearInterval(this._intervalTimer);
+      }
+    }, 300);
   }
 }

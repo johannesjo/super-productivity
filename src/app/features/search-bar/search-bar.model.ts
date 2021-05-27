@@ -12,7 +12,7 @@ export interface SearchItem {
   projectId: string | null;
   parentId: string | null;
   timeSpentOnDay: TimeSpentOnDay;
-  createdOn: number;
+  created: number;
   tagIds: string[];
 
   // for the icons
