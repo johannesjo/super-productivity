@@ -6,19 +6,7 @@ import { first, map, switchMap, tap } from 'rxjs/operators';
 // @ts-ignore
 import { createClient } from 'webdav/web';
 import { AppDataComplete } from '../sync.model';
-
-// TODO throws compile error :(
-// import { FileStat } from 'webdav/web/types';
-interface FileStat {
-  filename: string;
-  basename: string;
-  lastmod: string;
-  size: number;
-  type: 'file' | 'directory';
-  etag: string | null;
-  mime?: string;
-  props?: unknown;
-}
+import { WebDavHeadResponse } from './web-dav.model';
 
 // const createClient = (...args: any) => ({
 //   stat: async (a: any): Promise<any> => undefined,
@@ -81,7 +69,7 @@ export class WebDavApiService {
     });
   }
 
-  async getMetaData(path: string): Promise<FileStat> {
+  async getMetaData(path: string): Promise<WebDavHeadResponse> {
     await this._isReady$.toPromise();
     const cfg = await this._cfg$.pipe(first()).toPromise();
     const client = createClient(cfg.baseUrl, {
@@ -89,6 +77,7 @@ export class WebDavApiService {
       password: cfg.password,
     });
     const r = await client.customRequest(path, { method: 'HEAD' });
+    console.log(r);
     return r.headers;
     // const r = (await client.stat(path)) as FileStat;
     // console.log(r);

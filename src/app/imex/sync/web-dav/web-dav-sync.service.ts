@@ -11,6 +11,7 @@ import { WebDavConfig } from '../../../features/config/global-config.model';
 import { GlobalConfigService } from '../../../features/config/global-config.service';
 import { GlobalProgressBarService } from '../../../core-ui/global-progress-bar/global-progress-bar.service';
 import { T } from '../../../t.const';
+import { WebDavHeadResponse } from './web-dav.model';
 
 @Injectable({ providedIn: 'root' })
 export class WebDavSyncService implements SyncProviderServiceInterface {
@@ -39,14 +40,12 @@ export class WebDavSyncService implements SyncProviderServiceInterface {
     const cfg = await this._cfg$.pipe(first()).toPromise();
 
     try {
-      const r = await this._webDavApiService.getMetaData('/' + cfg.syncFilePath);
-      const d = new Date(r.lastmod);
-      if (typeof r?.etag !== 'string') {
-        throw new Error('WebDAV: No etag');
-      }
+      const meta = await this._webDavApiService.getMetaData('/' + cfg.syncFilePath);
+      // @ts-ignore
+      const d = new Date(meta['last-modified']);
       return {
         clientUpdate: d.getTime(),
-        rev: r.etag,
+        rev: this._getRevFromMeta(meta),
       };
     } catch (e) {
       const isAxiosError = !!(e && e.response && e.response.status);
@@ -74,12 +73,8 @@ export class WebDavSyncService implements SyncProviderServiceInterface {
       });
       const meta = await this._webDavApiService.getMetaData('/' + cfg.syncFilePath);
       this._globalProgressBarService.countDown();
-      if (typeof meta?.etag !== 'string') {
-        throw new Error('WebDAV: No etag');
-      }
-
       return {
-        rev: meta.etag,
+        rev: this._getRevFromMeta(meta),
         data: r,
       };
     } catch (e) {
@@ -104,14 +99,22 @@ export class WebDavSyncService implements SyncProviderServiceInterface {
       const cfg = await this._cfg$.pipe(first()).toPromise();
       const meta = await this._webDavApiService.getMetaData('/' + cfg.syncFilePath);
       this._globalProgressBarService.countDown();
-      if (typeof meta?.etag !== 'string') {
-        throw new Error('WebDAV: No etag');
-      }
-      return meta.etag;
+      return this._getRevFromMeta(meta);
     } catch (e) {
       console.error(e);
       this._globalProgressBarService.countDown();
       return e;
     }
+  }
+
+  private _getRevFromMeta(meta: WebDavHeadResponse): string {
+    if (typeof meta?.etag !== 'string') {
+      console.warn('No etag for WebDAV');
+    }
+    const rev = meta.etag || meta['oc-etag'] || meta['last-modified'];
+    if (!rev) {
+      throw new Error('Not able to get rev for WebDAV');
+    }
+    return rev;
   }
 }
