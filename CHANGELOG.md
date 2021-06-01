@@ -1,3 +1,20 @@
+# [7.0.0](https://github.com/johannesjo/super-productivity/compare/v7.0.0-rc16...v7.0.0) (2021-06-01)
+
+### Bug Fixes
+
+- **webdav:** remove no etag error and make rev generation more flexible [#1246](https://github.com/johannesjo/super-productivity/issues/1246) ([3197cc8](https://github.com/johannesjo/super-productivity/commit/3197cc826ad7e40270492a71edf7fa35fbd0fbc1))
+- missing unsubscribe ([a5347da](https://github.com/johannesjo/super-productivity/commit/a5347da345beaaa64d59ad4f79f63c1bda914611))
+
+### Features
+
+- **log:** adjust ([0eea36b](https://github.com/johannesjo/super-productivity/commit/0eea36b715a3840775984d66e176cbd1a7d78c62))
+- **perf:** get rid of unncessary subscription ([0f86513](https://github.com/johannesjo/super-productivity/commit/0f86513d34780d6239575783a81092bd1b502682))
+- **task:** additional performance tweak ([84fa489](https://github.com/johannesjo/super-productivity/commit/84fa489cc5071be58b850e03db82f48cb7548e8c))
+- **task:** improve mat-menu performance ([2ba1735](https://github.com/johannesjo/super-productivity/commit/2ba1735a1793f2b9880686323a974e9f1360f9e8))
+- **task:** only render hover controls when hovered ([0ba5374](https://github.com/johannesjo/super-productivity/commit/0ba5374635b4a8e25e658398c61692612bcc6b5b))
+- **task:** remove not needed optional chaining ([9e7dfce](https://github.com/johannesjo/super-productivity/commit/9e7dfce5901adc26fae83d00dd3fcdeeb4741986))
+- improve mat-menu performance everywhere ([d6d243d](https://github.com/johannesjo/super-productivity/commit/d6d243db4edfa31eebb7f3062dc503462c3c1b41))
+
 # [7.0.0-rc16](https://github.com/johannesjo/super-productivity/compare/v7.0.0-rc15...v7.0.0-rc16) (2021-05-25)
 
 ### Bug Fixes
