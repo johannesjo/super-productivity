@@ -39,7 +39,10 @@
   align-items: stretch;
   justify-content: center;
   padding-bottom: $s;
-
+  flex-direction: column;
+  @include mq(xxs) {
+    flex-direction: row;
+  }
   // TODO check if we might want this
   //&:first-child {
   //  top: 0;
@@ -58,36 +61,47 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    border-right: 2px solid;
     position: relative;
     min-width: 80px;
     text-align: center;
-    margin-top: -$s * 0.5;
-    margin-bottom: -$s * 0.5;
 
-    @include lightTheme() {
-      border-color: $light-theme-separator-color;
-    }
-    @include darkTheme() {
-      border-color: $dark-theme-separator-color;
+    &.hasTime {
+      padding: $s * 2 0 $s;
+      font-weight: bold;
+      @include mq(xxs) {
+        padding: 0;
+        font-weight: normal;
+      }
     }
 
-    &.hasTime:after {
-      display: block;
-      content: '';
-      width: 8px;
-      height: 2px;
-      right: -5px;
-      position: absolute;
-      top: 50%;
-      transform: translateY(-50%);
-      //border-radius: 50%;
+    @include mq(xxs) {
+      margin-top: -$s * 0.5;
+      margin-bottom: -$s * 0.5;
+      border-right: 2px solid;
 
       @include lightTheme() {
-        background: $light-theme-separator-color;
+        border-color: $light-theme-separator-color;
       }
       @include darkTheme() {
-        background: $dark-theme-text-color;
+        border-color: $dark-theme-separator-color;
+      }
+
+      &.hasTime:after {
+        display: block;
+        content: '';
+        width: 8px;
+        height: 2px;
+        right: -5px;
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+
+        @include lightTheme() {
+          background: $light-theme-separator-color;
+        }
+        @include darkTheme() {
+          background: $dark-theme-text-color;
+        }
       }
     }
 
@@ -246,6 +260,7 @@ task.split-task::ng-deep .box {
       border-color: $dark-theme-separator-color;
     }
   }
+
   &::before {
     margin-left: -88px;
     padding-left: 88px;
