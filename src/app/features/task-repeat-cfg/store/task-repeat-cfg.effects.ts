@@ -20,7 +20,12 @@ import {
 import { selectTaskRepeatCfgFeatureState } from './task-repeat-cfg.reducer';
 import { PersistenceService } from '../../../core/persistence/persistence.service';
 import { Task, TaskArchive, TaskWithSubTasks } from '../../tasks/task.model';
-import { AddTask, UnScheduleTask, UpdateTask } from '../../tasks/store/task.actions';
+import {
+  AddTask,
+  ScheduleTask,
+  UnScheduleTask,
+  UpdateTask,
+} from '../../tasks/store/task.actions';
 import { TaskService } from '../../tasks/task.service';
 import { TaskRepeatCfgService } from '../task-repeat-cfg.service';
 import {
@@ -28,13 +33,15 @@ import {
   TaskRepeatCfg,
   TaskRepeatCfgState,
 } from '../task-repeat-cfg.model';
-import { from, merge } from 'rxjs';
+import { EMPTY, from, merge } from 'rxjs';
 import { isToday } from '../../../util/is-today.util';
 import { WorkContextService } from '../../work-context/work-context.service';
 import { setActiveWorkContext } from '../../work-context/store/work-context.actions';
 import { SyncService } from '../../../imex/sync/sync.service';
 import { WorkContextType } from '../../work-context/work-context.model';
 import { TODAY_TAG } from '../../tag/tag.const';
+import { isValidSplitTime } from '../../../util/is-valid-split-time';
+import { getDateTimeFromClockString } from '../../../util/get-date-time-from-clock-string';
 
 @Injectable()
 export class TaskRepeatCfgEffects {
@@ -88,67 +95,91 @@ export class TaskRepeatCfgEffects {
             .pipe(
               take(1),
               concatMap((existingTaskInstances: Task[]) => {
-                const isCreateNew =
-                  existingTaskInstances.filter((task) => isToday(task.created)).length ===
-                  0;
-
-                const markAsDoneActions: UpdateTask[] = isCreateNew
-                  ? existingTaskInstances
-                      .filter((task) => !task.isDone && !isToday(task.created))
-                      .map(
-                        (task) =>
-                          new UpdateTask({
-                            task: {
-                              id: task.id,
-                              changes: {
-                                isDone: true,
-                              },
-                            },
-                          }),
-                      )
-                  : [];
-
                 if (!taskRepeatCfg.id) {
                   throw new Error('No taskRepeatCfg.id');
                 }
 
+                const isCreateNew =
+                  existingTaskInstances.filter((taskI) => isToday(taskI.created)).length === 0;
+
+                if (!isCreateNew) {
+                  return EMPTY;
+                }
+
+                // move all current left over instances to archive right away
+                const markAsDoneActions: (
+                  | UpdateTask
+                  | AddTask
+                  | UpdateTaskRepeatCfg
+                )[] = existingTaskInstances
+                  .filter((taskI) => !task.isDone && !isToday(taskI.created))
+                  .map(
+                    (taskI) =>
+                      new UpdateTask({
+                        task: {
+                          id: taskI.id,
+                          changes: {
+                            isDone: true,
+                          },
+                        },
+                      }),
+                  );
+
                 const isAddToTodayAsFallback =
                   !taskRepeatCfg.projectId && !taskRepeatCfg.tagIds.length;
 
-                return from([
-                  ...markAsDoneActions,
-                  ...(isCreateNew
-                    ? [
-                        new AddTask({
-                          task: this._taskService.createNewTaskWithDefaults({
-                            title: taskRepeatCfg.title,
-                            additional: {
-                              repeatCfgId: taskRepeatCfg.id,
-                              timeEstimate: taskRepeatCfg.defaultEstimate,
-                              projectId: taskRepeatCfg.projectId,
-                              tagIds: isAddToTodayAsFallback
-                                ? [TODAY_TAG.id]
-                                : taskRepeatCfg.tagIds || [],
-                            },
-                          }),
-                          workContextType: this._workContextService
-                            .activeWorkContextType as WorkContextType,
-                          workContextId: this._workContextService
-                            .activeWorkContextId as string,
-                          isAddToBacklog: false,
-                          isAddToBottom: taskRepeatCfg.isAddToBottom || false,
-                        }),
-                        new UpdateTaskRepeatCfg({
-                          taskRepeatCfg: {
-                            id: taskRepeatCfg.id,
-                            changes: {
-                              lastTaskCreation: Date.now(),
-                            },
-                          },
-                        }),
-                      ]
-                    : []),
-                ]);
+                const task = this._taskService.createNewTaskWithDefaults({
+                  title: taskRepeatCfg.title,
+                  additional: {
+                    repeatCfgId: taskRepeatCfg.id,
+                    timeEstimate: taskRepeatCfg.defaultEstimate,
+                    projectId: taskRepeatCfg.projectId,
+                    tagIds: isAddToTodayAsFallback
+                      ? [TODAY_TAG.id]
+                      : taskRepeatCfg.tagIds || [],
+                  },
+                });
+
+                const createNewActions: (
+                  | AddTask
+                  | UpdateTaskRepeatCfg
+                  | ScheduleTask
+                )[] = [
+                  new AddTask({
+                    task,
+                    workContextType: this._workContextService
+                      .activeWorkContextType as WorkContextType,
+                    workContextId: this._workContextService.activeWorkContextId as string,
+                    isAddToBacklog: false,
+                    isAddToBottom: taskRepeatCfg.isAddToBottom || false,
+                  }),
+                  new UpdateTaskRepeatCfg({
+                    taskRepeatCfg: {
+                      id: taskRepeatCfg.id,
+                      changes: {
+                        lastTaskCreation: Date.now(),
+                      },
+                    },
+                  }),
+                ];
+
+                // Schedule if given
+                if (isValidSplitTime(taskRepeatCfg.startTime)) {
+                  const dateTime = getDateTimeFromClockString(
+                    taskRepeatCfg.startTime as string,
+                    new Date(),
+                  );
+                  createNewActions.push(
+                    new ScheduleTask({
+                      task,
+                      plannedAt: dateTime,
+                      remindAt: dateTime,
+                      isMoveToBacklog: false,
+                    }),
+                  );
+                }
+
+                return from([...markAsDoneActions, ...createNewActions]);
               }),
             ),
         ),
