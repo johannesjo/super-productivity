@@ -17,6 +17,8 @@ export interface TaskRepeatCfgCopy {
   lastTaskCreation: number;
   title: string | null;
   defaultEstimate: number | undefined;
+  // TODO migrate all existing to undefined
+  startTime: string | undefined;
   monday: boolean;
   tuesday: boolean;
   wednesday: boolean;
@@ -43,6 +45,8 @@ export const DEFAULT_TASK_REPEAT_CFG: Omit<TaskRepeatCfgCopy, 'id'> = {
   // id: undefined,
   projectId: null,
   // lastTaskCreation: Date.now() - 24 * 60 * 60 * 1000,
+
+  startTime: undefined,
 
   monday: true,
   tuesday: true,

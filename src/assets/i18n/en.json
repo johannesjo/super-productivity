@@ -786,6 +786,8 @@
         "IS_ADD_TO_BOTTOM": "Move task to bottom of list",
         "MONDAY": "Monday",
         "SATURDAY": "Saturday",
+        "START_TIME": "Scheduled start time",
+        "START_TIME_DESCRIPTION": "E.g. 15:00. Leave blank for an all day task",
         "SUNDAY": "Sunday",
         "THURSDAY": "Thursday",
         "TITLE": "Title for task",
