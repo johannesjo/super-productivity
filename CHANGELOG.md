@@ -1,3 +1,15 @@
+## [7.0.1](https://github.com/johannesjo/super-productivity/compare/v7.0.0...v7.0.1) (2021-06-04)
+
+### Bug Fixes
+
+- indicator throwing error when task is not found ([55551ae](https://github.com/johannesjo/super-productivity/commit/55551ae5f4bf6ccf725b2f47c81b836b170422d8))
+- indicator throwing error when task is not found ([bb5122a](https://github.com/johannesjo/super-productivity/commit/bb5122a1a2d25e7ff9d295dfd994e5bfb831b6ea))
+- tag deletion not working anymore [#1264](https://github.com/johannesjo/super-productivity/issues/1264) ([bd13e26](https://github.com/johannesjo/super-productivity/commit/bd13e26d1ebbab6859e1860bd149032f55bb6872))
+
+### Features
+
+- **timeline:** improve mobile styles ([026c165](https://github.com/johannesjo/super-productivity/commit/026c165ce9d3567daa983dd235cc0e086df2c0f2))
+
 # [7.0.0](https://github.com/johannesjo/super-productivity/compare/v7.0.0-rc16...v7.0.0) (2021-06-01)
 
 ### Bug Fixes
