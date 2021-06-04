@@ -1,5 +1,4 @@
 import { App, ipcMain, Menu, nativeTheme, Tray } from 'electron';
-// const dbus = require('./dbus');
 import { IPC } from './ipc-events.const';
 import { getSettings } from './get-settings';
 import { getWin } from './main-window';
@@ -9,8 +8,6 @@ let isIndicatorRunning = false;
 let DIR: string;
 let shouldUseDarkColors: boolean;
 const IS_MAC = process.platform === 'darwin';
-
-const isGnomeShellExtensionRunning = false;
 
 export const initIndicator = ({
   showApp,
@@ -41,9 +38,9 @@ export const initIndicator = ({
   });
   isIndicatorRunning = true;
   return tray;
-  // }
 };
 
+// eslint-disable-next-line prefer-arrow/prefer-arrow-functions
 function initAppListeners(app) {
   if (tray) {
     app.on('before-quit', () => {
@@ -54,6 +51,7 @@ function initAppListeners(app) {
   }
 }
 
+// eslint-disable-next-line prefer-arrow/prefer-arrow-functions
 function initListeners() {
   ipcMain.on(IPC.SET_PROGRESS_BAR, (ev, { progress }) => {
     const suf = shouldUseDarkColors ? '-d' : '-l';
@@ -109,6 +107,7 @@ function initListeners() {
   // });
 }
 
+// eslint-disable-next-line prefer-arrow/prefer-arrow-functions
 function createIndicatorStr(task): string {
   if (task && task.title) {
     let title = task.title;
@@ -132,8 +131,12 @@ function createIndicatorStr(task): string {
     // msg = title + ' | ' + timeStr + 'm ';
     // return msg;
   }
+
+  // NOTE: we need to make sure that this is always a string
+  return '';
 }
 
+// eslint-disable-next-line prefer-arrow/prefer-arrow-functions
 function createContextMenu(showApp, quitApp) {
   return Menu.buildFromTemplate([
     {
@@ -147,12 +150,9 @@ function createContextMenu(showApp, quitApp) {
   ]);
 }
 
-export const isRunning = () => {
-  return isIndicatorRunning || isGnomeShellExtensionRunning;
-};
-
 let curIco: string;
 
+// eslint-disable-next-line prefer-arrow/prefer-arrow-functions
 function setTrayIcon(tr: Tray, icoPath: string) {
   if (icoPath !== curIco) {
     curIco = icoPath;
