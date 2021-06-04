@@ -71,10 +71,8 @@ function initListeners() {
     getSettings(mainWin, (settings) => {
       const isTrayShowCurrentTask = settings.misc.isTrayShowCurrentTask;
 
-      let msg = '';
-      if (isTrayShowCurrentTask && currentTask) {
-        msg = createIndicatorStr(currentTask);
-      }
+      const msg =
+        isTrayShowCurrentTask && currentTask ? createIndicatorStr(currentTask) : '';
 
       if (tray) {
         // tray handling
