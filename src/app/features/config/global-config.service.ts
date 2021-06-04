@@ -66,9 +66,7 @@ export class GlobalConfigService {
   cfg?: GlobalConfigState;
 
   constructor(private readonly _store: Store<any>) {
-    // this.cfg$.subscribe((val) => console.log(val));
     this.cfg$.subscribe((cfg) => (this.cfg = cfg));
-    this.timelineCfg$.subscribe((v) => console.log(`timelineCfg$`, v));
   }
 
   updateSection(
