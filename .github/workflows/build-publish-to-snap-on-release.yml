@@ -1,4 +1,4 @@
-name: Win Store File on Release
+name: Publish to snap store on release
 on:
   release:
     types: [published]
@@ -9,7 +9,7 @@ jobs:
   snap-release:
     runs-on: ubuntu-latest
 
-    if: "!github.event.release.prerelease"
+    if: '!github.event.release.prerelease'
 
     steps:
       - name: Check out Git repository
