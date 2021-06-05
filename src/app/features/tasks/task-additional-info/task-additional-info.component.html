@@ -107,7 +107,6 @@
     (collapseParent)="collapseParent()"
     (editActionTriggered)="editReminder()"
     (keyPress)="onItemKeyPress($event)"
-    *ngIf="!task.repeatCfgId"
     [inputIcon]="task.reminderId ? 'edit': 'add'"
     class="input-item"
   >
