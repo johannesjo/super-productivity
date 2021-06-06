@@ -58,7 +58,7 @@ export class DialogAddTaskReminderComponent {
       title: T.F.TASK.D_REMINDER_ADD.RO_1H,
     },
   ];
-  reminderCfgId: TaskReminderOptionId;
+  selectedReminderCfgId: TaskReminderOptionId;
 
   constructor(
     private _taskService: TaskService,
@@ -67,12 +67,12 @@ export class DialogAddTaskReminderComponent {
     @Inject(MAT_DIALOG_DATA) public data: AddTaskReminderInterface,
   ) {
     if (this.isEdit) {
-      this.reminderCfgId = millisecondsDiffToRemindOption(
+      this.selectedReminderCfgId = millisecondsDiffToRemindOption(
         this.task.plannedAt as number,
         this.reminder?.remindAt,
       );
     } else {
-      this.reminderCfgId = TaskReminderOptionId.AtStart;
+      this.selectedReminderCfgId = TaskReminderOptionId.AtStart;
     }
 
     const lsLastIsMoveToBacklog = localStorage.getItem(
@@ -101,7 +101,7 @@ export class DialogAddTaskReminderComponent {
         taskId: this.task.id,
         reminderId: this.task.reminderId as string,
         plannedAt: timestamp,
-        remindCfg: this.reminderCfgId,
+        remindCfg: this.selectedReminderCfgId,
         title: this.task.title,
       });
       this.close();
@@ -109,7 +109,7 @@ export class DialogAddTaskReminderComponent {
       this._taskService.scheduleTask(
         this.task,
         timestamp,
-        this.reminderCfgId,
+        this.selectedReminderCfgId,
         this.isMoveToBacklog,
       );
       localStorage.setItem(
