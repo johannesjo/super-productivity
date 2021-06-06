@@ -12,7 +12,6 @@ import {
 } from 'rxjs/operators';
 import { Action, select, Store } from '@ngrx/store';
 import {
-  AddTaskRepeatCfgToTask,
   DeleteTaskRepeatCfg,
   TaskRepeatCfgActionTypes,
   UpdateTaskRepeatCfg,
@@ -23,7 +22,6 @@ import { Task, TaskArchive, TaskWithSubTasks } from '../../tasks/task.model';
 import {
   AddTask,
   ScheduleTask,
-  UnScheduleTask,
   UpdateTask,
 } from '../../tasks/store/task.actions';
 import { TaskService } from '../../tasks/task.service';
@@ -215,20 +213,20 @@ export class TaskRepeatCfgEffects {
     }),
   );
 
-  @Effect() removeRemindersOnCreation$: any = this._actions$.pipe(
-    ofType(TaskRepeatCfgActionTypes.AddTaskRepeatCfgToTask),
-    concatMap((a: AddTaskRepeatCfgToTask) =>
-      this._taskService.getByIdOnce$(a.payload.taskId).pipe(take(1)),
-    ),
-    filter((task: TaskWithSubTasks) => typeof task.reminderId === 'string'),
-    map(
-      (task: TaskWithSubTasks) =>
-        new UnScheduleTask({
-          id: task.id,
-          reminderId: task.reminderId as string,
-        }),
-    ),
-  );
+  // @Effect() removeRemindersOnCreation$: any = this._actions$.pipe(
+  //   ofType(TaskRepeatCfgActionTypes.AddTaskRepeatCfgToTask),
+  //   concatMap((a: AddTaskRepeatCfgToTask) =>
+  //     this._taskService.getByIdOnce$(a.payload.taskId).pipe(take(1)),
+  //   ),
+  //   filter((task: TaskWithSubTasks) => typeof task.reminderId === 'string'),
+  //   map(
+  //     (task: TaskWithSubTasks) =>
+  //       new UnScheduleTask({
+  //         id: task.id,
+  //         reminderId: task.reminderId as string,
+  //       }),
+  //   ),
+  // );
 
   constructor(
     private _actions$: Actions,
