@@ -701,6 +701,7 @@
         "DATETIME_FOR": "Datetime for reminder",
         "EDIT": "Edit Reminder",
         "MOVE_TO_BACKLOG": "Move task to backlog until scheduled",
+        "REMIND_AT": "Remind at",
         "RO_10M": "10 minutes before it starts",
         "RO_15M": "15 minutes before it starts",
         "RO_1H": "1 hour before it starts",
