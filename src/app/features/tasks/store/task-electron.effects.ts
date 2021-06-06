@@ -65,7 +65,7 @@ export class TaskElectronEffects {
     map(([act]) => act.payload.task),
     tap((task: Task) => {
       const progress = task.timeSpent / task.timeEstimate;
-      const mode = task.timeEstimate == 0 ? 'indeterminate' : 'normal';
+      const mode = task.timeEstimate === 0 ? 'indeterminate' : 'normal';
       (this._electronService.ipcRenderer as typeof ipcRenderer).send(
         IPC.SET_PROGRESS_BAR,
         {
