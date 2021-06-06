@@ -698,6 +698,8 @@
         "UPDATE_ISSUE_DATA": "Update issue data"
       },
       "D_REMINDER_ADD": {
+        "CONFIRM_REPEAT_TXT": "You're trying to schedule this repeated task to another day. Repeated tasks are usually meant to be re-created on specified days and only scheduled on that day. Do you want to proceed anyway?",
+        "CONFIRM_REPEAT_OK": "Schedule",
         "DATETIME_FOR": "Datetime for reminder",
         "EDIT": "Edit Reminder",
         "MOVE_TO_BACKLOG": "Move task to backlog until scheduled",
