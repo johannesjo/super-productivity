@@ -777,7 +777,7 @@
         "EDIT": "Edit Repeat Task Config",
         "HELP1": "Repeating tasks are meant for daily chores, e.g.: \"Organization\", \"Daily Meeting\", \"Code Review\", \"Checking emails\" or similar tasks which are likely to occur again and again.",
         "HELP2": "Once configured a repeating task will be recreated on every day selected below as soon as you open your project and will be automatically marked as completed at the end of the day. They will be handled as different instances. So you can freely add sub tasks etc.",
-        "HELP3": "Tasks imported from Jira or Git Issues cannot be repeated. All reminders will also be deleted on a repeating task.",
+        "HELP3": "Tasks imported from Jira or Git Issues cannot be repeated.",
         "TAG_LABEL": "Tags to add"
       },
       "F": {

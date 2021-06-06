@@ -380,10 +380,6 @@ export class TaskAdditionalInfoComponent implements AfterViewInit, OnDestroy {
   }
 
   editReminder() {
-    if (this.task.repeatCfgId) {
-      return;
-    }
-
     this._matDialog.open(DialogAddTaskReminderComponent, {
       restoreFocus: true,
       data: { task: this.task } as AddTaskReminderInterface,
