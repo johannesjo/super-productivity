@@ -1,5 +1,5 @@
 <ng-container *ngIf="type==='input'">
-  <section (click)="onInputItemClick()" class="input-item">
+  <section (click)="onInputItemClick()" class="input-item" mat-ripple>
     <div class="input-item__title">
       <ng-content select="[input-title]"></ng-content>
     </div>
