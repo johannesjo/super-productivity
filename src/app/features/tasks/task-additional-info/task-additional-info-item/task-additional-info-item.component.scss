@@ -18,11 +18,11 @@
   border-style: solid;
   border-radius: 0;
   margin: 8px;
-  border-radius: $card-border-radius* 1;
+  border-radius: $card-border-radius * 1;
   //overflow: visible;
   border-color: transparent;
 
-  :host:focus & {
+  :host-context(.isNoTouchOnly):focus & {
     border: 1px solid $c-focus-border;
     border-color: $c-focus-border !important;
   }
@@ -52,15 +52,15 @@ mat-expansion-panel::ng-deep .mat-expansion-panel-header:not(.mat-expanded),
 .input-item {
   &:hover,
   &:focus {
-    @include lightTheme() {
+    :host-context(.isNoTouchOnly.isLightTheme) & {
       background: #eee;
     }
-    @include darkTheme() {
+
+    :host-context(.isNoTouchOnly.isDarkTheme) & {
       background: $dark-theme-bg-lightest;
     }
   }
 }
-
 
 // PANEL
 // -----
@@ -95,12 +95,10 @@ mat-expansion-panel::ng-deep .mat-expansion-panel-header:not(.mat-expanded),
   }
 }
 
-
 .panel-content-wrapper {
   margin: 0 $s $s;
   display: block;
   @include standardThemeTextColorLessIntense();
-
 
   &::ng-deep inline-markdown {
     &.isFocused {
@@ -109,7 +107,7 @@ mat-expansion-panel::ng-deep .mat-expansion-panel-header:not(.mat-expanded),
 
     .markdown-wrapper {
       min-height: 60px;
-      border-radius: $card-border-radius* 1;
+      border-radius: $card-border-radius * 1;
       overflow: visible !important;
       transition: $transition-standard;
 
@@ -147,7 +145,6 @@ mat-expansion-panel::ng-deep .mat-expansion-panel-header:not(.mat-expanded),
   white-space: nowrap;
 }
 
-
 // Input-Item
 // ----------
 .input-item {
@@ -176,7 +173,7 @@ mat-expansion-panel::ng-deep .mat-expansion-panel-header:not(.mat-expanded),
 .input-item__title {
   display: flex;
   align-items: center;
-  margin: 0 $s*3;
+  margin: 0 $s * 3;
   overflow: hidden;
   text-overflow: ellipsis;
   min-width: 90px;
@@ -208,7 +205,10 @@ mat-expansion-panel::ng-deep .mat-expansion-panel-header:not(.mat-expanded),
   }
 
   @include lightTheme() {
-    color: rgba(var(--palette-foreground-secondary-text), var(--palette-foreground-secondary-text-alpha, 1));
+    color: rgba(
+      var(--palette-foreground-secondary-text),
+      var(--palette-foreground-secondary-text-alpha, 1)
+    );
   }
 
   @include darkTheme() {
@@ -231,5 +231,3 @@ mat-expansion-panel::ng-deep .mat-expansion-panel-header:not(.mat-expanded),
     opacity: 1;
   }
 }
-
-
