@@ -636,8 +636,6 @@ export class TaskService {
   }
 
   unScheduleTask(taskId: string, reminderId?: string) {
-    console.log('unschedzle', { reminderId });
-
     if (!taskId) {
       throw new Error('No task id');
     }

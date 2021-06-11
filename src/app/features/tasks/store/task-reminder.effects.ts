@@ -9,7 +9,7 @@ import {
   UpdateTask,
   UpdateTaskTags,
 } from './task.actions';
-import { filter, map, mergeMap, tap } from 'rxjs/operators';
+import { concatMap, filter, map, mergeMap, tap } from 'rxjs/operators';
 import { ReminderService } from '../../reminder/reminder.service';
 import { truncate } from '../../../util/truncate';
 import { T } from '../../../t.const';
@@ -17,6 +17,7 @@ import { SnackService } from '../../../core/snack/snack.service';
 import { moveTaskToBacklogListAuto } from '../../work-context/store/work-context-meta.actions';
 import { TODAY_TAG } from '../../tag/tag.const';
 import { EMPTY } from 'rxjs';
+import { TaskService } from '../task.service';
 
 @Injectable()
 export class TaskReminderEffects {
@@ -139,9 +140,22 @@ export class TaskReminderEffects {
     }),
   );
 
+  @Effect({ dispatch: false })
+  unscheduleDoneTask$: any = this._actions$.pipe(
+    ofType(TaskActionTypes.UpdateTask),
+    filter(({ payload }) => (payload as any).task.changes.isDone),
+    concatMap(({ payload }) => this._taskService.getByIdOnce$((payload as any).task.id)),
+    tap((task) => {
+      if (task.reminderId) {
+        this._taskService.unScheduleTask(task.id, task.reminderId);
+      }
+    }),
+  );
+
   constructor(
     private _actions$: Actions,
     private _reminderService: ReminderService,
     private _snackService: SnackService,
+    private _taskService: TaskService,
   ) {}
 }
