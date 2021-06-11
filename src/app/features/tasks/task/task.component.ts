@@ -596,7 +596,7 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   moveToToday() {
-    this._taskService.moveToToday(this.task.id);
+    this._taskService.moveToProjectTodayList(this.task.id);
   }
 
   trackByProjectId(i: number, project: Project) {
@@ -733,7 +733,7 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
     if (checkKeyCombo(ev, keys.moveToTodaysTasks)) {
       if (!this.task.parentId) {
         this.focusNext(true);
-        this._taskService.moveToToday(this.task.id);
+        this._taskService.moveToProjectTodayList(this.task.id);
       }
     }
 

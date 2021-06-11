@@ -163,7 +163,7 @@ export class WorkViewComponent implements OnInit, OnDestroy, AfterContentInit {
 
   addAllPlannedToToday(plannedTasks: TaskPlanned[]) {
     plannedTasks.forEach((t) => {
-      this.taskService.moveToToday(t.id);
+      this.taskService.moveToProjectTodayList(t.id);
       this.taskService.updateTags(t, [...t.tagIds, TODAY_TAG.id], t.tagIds);
     });
   }

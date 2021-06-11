@@ -468,7 +468,7 @@ export class TaskService {
     }
   }
 
-  moveToToday(id: string, isMoveToTop: boolean = false) {
+  moveToProjectTodayList(id: string, isMoveToTop: boolean = false) {
     const workContextId = this._workContextService.activeWorkContextId as string;
     const workContextType = this._workContextService
       .activeWorkContextType as WorkContextType;
@@ -563,9 +563,9 @@ export class TaskService {
           throw new Error('Startable task not found');
         }
         if (task.parentId) {
-          this.moveToToday(task.parentId, true);
+          this.moveToProjectTodayList(task.parentId, true);
         } else {
-          this.moveToToday(task.id, true);
+          this.moveToProjectTodayList(task.id, true);
         }
         this.setCurrentId(task.id);
       });

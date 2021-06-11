@@ -303,7 +303,7 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
       // so that backlog issues are found first
     } else if (item.taskId) {
       this._lastAddedTaskId = item.taskId;
-      this._taskService.moveToToday(item.taskId);
+      this._taskService.moveToProjectTodayList(item.taskId);
       this._snackService.open({
         ico: 'arrow_upward',
         msg: T.F.TASK.S.FOUND_MOVE_FROM_BACKLOG,
@@ -335,7 +335,7 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
         });
       } else {
         this._lastAddedTaskId = res.task.id;
-        this._taskService.moveToToday(res.task.id);
+        this._taskService.moveToProjectTodayList(res.task.id);
         this._snackService.open({
           ico: 'arrow_upward',
           msg: T.F.TASK.S.FOUND_MOVE_FROM_BACKLOG,
