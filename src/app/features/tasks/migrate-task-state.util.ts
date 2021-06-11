@@ -107,7 +107,9 @@ const _convertToWesternArabicDateKeys = (task: Task) => {
 const _deleteUnusedFields = (task: Task): Task => {
   const {
     // legacy
+    // eslint-disable-next-line no-unused-vars
     _isAdditionalInfoOpen,
+    // eslint-disable-next-line no-unused-vars
     _currentTab,
     // the rest
     ...cleanTask

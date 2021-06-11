@@ -12,19 +12,12 @@
     "strictNullChecks": true,
     "forceConsistentCasingInFileNames": true,
     "noImplicitReturns": true,
-    "noUnusedLocals": true,
+    "noUnusedLocals": false,
     "strictPropertyInitialization": true,
     "target": "ES2015",
     "resolveJsonModule": true,
-    "typeRoots": [
-      "node_modules/@types"
-    ],
-    "types": [
-      "@types/moment-duration-format"
-    ],
-    "lib": [
-      "es2017",
-      "dom"
-    ]
+    "typeRoots": ["node_modules/@types"],
+    "types": ["@types/moment-duration-format"],
+    "lib": ["es2017", "dom"]
   }
 }

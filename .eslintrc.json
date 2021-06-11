@@ -18,6 +18,7 @@
       "rules": {
         "prettier/prettier": "error",
         "@angular-eslint/component-selector": ["off"],
+        "no-unused-vars": [2, { "args": "none" }],
         "@typescript-eslint/explicit-member-accessibility": [
           "off",
           {

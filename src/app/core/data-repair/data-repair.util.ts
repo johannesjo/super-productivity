@@ -209,7 +209,7 @@ const _removeMissingTasksFromListsOrRestoreFromArchive = (
   return data;
 };
 
-const _resetEntityIdsFromObjects = <T>(
+const _resetEntityIdsFromObjects = (
   data: AppBaseDataEntityLikeStates,
 ): AppBaseDataEntityLikeStates => {
   return {
