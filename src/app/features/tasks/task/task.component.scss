@@ -116,17 +116,13 @@
     }
   }
 
-  @include isHostFocus('.inner-wrapper') {
+  :host:focus > .inner-wrapper > & {
     border-radius: $task-border-radius;
-    // because of the border, this looks better
-    //top: 2px;
-    //bottom: 2px;
-
-    @include mq(xs) {
-      // NOTE: somehow ng build messes up, if we don't include it like that
-      border-color: $task-c-focus;
-      border-width: 1px;
-      border-style: solid !important;
+    // we don't want focus borders for touch only devices
+    @include noTouchOnly() {
+       border-color: $task-c-focus;
+       border-width: 1px;
+       border-style: solid !important;
     }
   }
 

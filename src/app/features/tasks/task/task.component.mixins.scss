@@ -56,19 +56,6 @@ $task-c-drag-drop-bg-dark: $dark12;
 $task-c-selected-bg-light: $light-theme-selected-task-bg-color;
 $task-c-selected-bg-dark: $dark4;
 
-
-@mixin isHostFocus($direct-parent-only-sel: false) {
-  @if $direct-parent-only-sel {
-    :host-context(.isNoTouchOnly):focus > #{$direct-parent-only-sel} > & {
-      @content;
-    }
-  } @else {
-    :host-context(.isNoTouchOnly):focus & {
-      @content;
-    }
-  }
-}
-
 @mixin isDone($direct-parent-only-sel: false) {
   @if $direct-parent-only-sel {
     .inner-wrapper.isDone > #{$direct-parent-only-sel} > & {
@@ -86,7 +73,6 @@ $task-c-selected-bg-dark: $dark4;
     @content;
   }
 }
-
 
 @mixin standardTaskOpacityChange {
   opacity: $task-icon-default-opacity;
@@ -130,7 +116,6 @@ $task-c-selected-bg-dark: $dark4;
     // text-transform: uppercase;
   }
 
-
   &:after {
     transition: $transition-leave;
     position: absolute;
@@ -147,7 +132,6 @@ $task-c-selected-bg-dark: $dark4;
 
     @include inlineEditElevation();
   }
-
 
   &:focus {
     z-index: $z-task-title-focus;
