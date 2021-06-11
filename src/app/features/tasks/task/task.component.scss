@@ -118,9 +118,12 @@
 
   :host:focus > .inner-wrapper > & {
     border-radius: $task-border-radius;
-    border-color: $task-c-focus;
-    border-width: 1px;
-    border-style: solid !important;
+    // we don't want focus borders for touch only devices
+    @include noTouchOnly() {
+       border-color: $task-c-focus;
+       border-width: 1px;
+       border-style: solid !important;
+    }
   }
 
   :host.isCurrent.isCurrent.isCurrent.isCurrent.isCurrent & {
