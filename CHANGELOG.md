@@ -1,3 +1,21 @@
+## [7.0.2](https://github.com/johannesjo/super-productivity/compare/v7.0.1...v7.0.2) (2021-06-11)
+
+### Bug Fixes
+
+- **task:** don't show task focus border on touch devices ([9f4abf9](https://github.com/johannesjo/super-productivity/commit/9f4abf9ae0df73df35c43cb885c65ce5fb682fb7))
+- crash when sub task is added via "planned-for-tomorrow" button ([bbb41c2](https://github.com/johannesjo/super-productivity/commit/bbb41c2ee1748c0c87b29d09dc66d9d280ec8d95))
+- duplicate tasks when child and parent are scheduled ([2cad17a](https://github.com/johannesjo/super-productivity/commit/2cad17ad62e92a6c1961229ba4a259f77f08c108))
+- initial sync error showing up when sync is disabled ([f067893](https://github.com/johannesjo/super-productivity/commit/f0678934f864435a2a2fca3b8463a852cd21ab3d))
+- wrong label for remind at ([725cb35](https://github.com/johannesjo/super-productivity/commit/725cb353b3506ad15d6a5d94c8854804dfc02ff1))
+
+### Features
+
+- add ripple effects to task info panel ([78df119](https://github.com/johannesjo/super-productivity/commit/78df1196ec25c07ab380e28bd35bb732037de16b))
+- hide more hover/focus styles for mobile ([3e34581](https://github.com/johannesjo/super-productivity/commit/3e34581c954b57aa468575b859021035b88ab183))
+- migrate tslint noUnusedLocals to eslint rule as it is annoying ([d23d69f](https://github.com/johannesjo/super-productivity/commit/d23d69fd0d888689018edd38123d8b2eb4b98cd1))
+- unschedule when task is marked as done ([cf1b470](https://github.com/johannesjo/super-productivity/commit/cf1b470b0b73ceddd886775a74e345366af5bbe3))
+- **TaskBar:** Add indeterminate state for tasks with no time estimate ([0321055](https://github.com/johannesjo/super-productivity/commit/0321055efe4d3d947afcec522781989839e26c64))
+
 ## [7.0.1](https://github.com/johannesjo/super-productivity/compare/v7.0.0...v7.0.1) (2021-06-04)
 
 ### Bug Fixes
