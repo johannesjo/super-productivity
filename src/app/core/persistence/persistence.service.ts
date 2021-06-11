@@ -230,7 +230,7 @@ export class PersistenceService {
     this.onAfterImport$,
     this.onAfterSave$.pipe(
       // wait for all updates if fired in short succession (which happens for relational data)
-      debounceTime(50),
+      debounceTime(100),
       concatMap(() => this.loadComplete()),
       // TODO maybe not necessary
       skipWhile((complete) => !isValidAppData(complete)),
