@@ -13,6 +13,7 @@ import { TODAY_TAG } from '../../tag/tag.const';
 import { standardListAnimation } from '../../../ui/animations/standard-list.ani';
 import { unique } from '../../../util/unique';
 import { getTomorrow } from '../../../util/get-tomorrow';
+import { uniqueByProp } from '../../../util/unique-by-prop';
 
 const M = 1000 * 60;
 
@@ -189,7 +190,9 @@ export class DialogViewTaskRemindersComponent implements OnDestroy {
         this._taskService.getByIdOnce$(parentId).pipe(first()).toPromise(),
       ),
     );
-    const updateTagTasks = [...parents, ...mainTasks];
+
+    // We need to make sure the uniqueness as both the parent as well as multiple child task can be scheduled
+    const updateTagTasks = uniqueByProp<Task>([...parents, ...mainTasks], 'id');
 
     updateTagTasks.forEach((task) => {
       this._taskService.updateTags(task, [TODAY_TAG.id, ...task.tagIds], task.tagIds);
