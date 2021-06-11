@@ -400,7 +400,7 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   addToMyDay() {
-    this.onTagsUpdated([TODAY_TAG.id, ...this.task.tagIds]);
+    this._taskService.addTodayTag(this.task);
   }
 
   removeFromMyDay() {

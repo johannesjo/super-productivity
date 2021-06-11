@@ -31,7 +31,6 @@ import { T } from '../../t.const';
 import { ImprovementService } from '../metric/improvement/improvement.service';
 import { workViewProjectChangeAnimation } from '../../ui/animations/work-view-project-change.ani';
 import { WorkContextService } from '../work-context/work-context.service';
-import { TODAY_TAG } from '../tag/tag.const';
 
 const SUB = 'SUB';
 const PARENT = 'PARENT';
@@ -163,8 +162,17 @@ export class WorkViewComponent implements OnInit, OnDestroy, AfterContentInit {
 
   addAllPlannedToToday(plannedTasks: TaskPlanned[]) {
     plannedTasks.forEach((t) => {
-      this.taskService.moveToProjectTodayList(t.id);
-      this.taskService.updateTags(t, [...t.tagIds, TODAY_TAG.id], t.tagIds);
+      if (t.parentId) {
+        this.taskService.moveToProjectTodayList(t.parentId);
+        this._subs.add(
+          this.taskService.getByIdOnce$(t.parentId).subscribe((parentTask) => {
+            this.taskService.addTodayTag(parentTask);
+          }),
+        );
+      } else {
+        this.taskService.moveToProjectTodayList(t.id);
+        this.taskService.addTodayTag(t);
+      }
     });
   }
 
