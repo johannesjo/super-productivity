@@ -14,11 +14,12 @@
         "plugin:@angular-eslint/template/process-inline-templates",
         "prettier"
       ],
-      "plugins": ["prettier"],
+      "plugins": ["prettier", "unused-imports"],
       "rules": {
         "prettier/prettier": "error",
         "@angular-eslint/component-selector": ["off"],
         "no-unused-vars": [2, { "args": "none" }],
+        "unused-imports/no-unused-imports": "error",
         "@typescript-eslint/explicit-member-accessibility": [
           "off",
           {
