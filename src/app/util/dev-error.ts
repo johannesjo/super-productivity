@@ -8,7 +8,7 @@ export const devError = (errStr: any) => {
     // TODO add super simple snack message if possible
   } else {
     if (isShowAlert) {
-      alert('Critical devError ' + errStr);
+      alert('devERR: ' + errStr);
       isShowAlert = false;
     }
     throw new Error(errStr);
