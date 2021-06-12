@@ -160,15 +160,15 @@ export class SearchBarComponent implements AfterViewInit, OnDestroy {
   }
 
   private _getArchivedDate(item: SearchItem, tasks: Task[]): string {
+    let dateStr = Object.keys(item.timeSpentOnDay)[0];
+    if (dateStr) return dateStr;
+
     if (item.parentId) {
       const parentTask = tasks.find((task) => task.id === item.parentId) as Task;
-      return this._getTimeSpentDate(parentTask);
+      dateStr = Object.keys(parentTask.timeSpentOnDay)[0];
+      return dateStr ?? getWorklogStr(parentTask.created);
     }
-    return this._getTimeSpentDate(item);
-  }
 
-  private _getTimeSpentDate(item: SearchItem | Task): string {
-    if (Object.keys(item.timeSpentOnDay)[0]) return Object.keys(item.timeSpentOnDay)[0];
     return getWorklogStr(item.created);
   }
 
@@ -218,10 +218,9 @@ export class SearchBarComponent implements AfterViewInit, OnDestroy {
 
   navigateToItem(item: SearchItem) {
     if (!item) return;
-
+    this.isLoading$.next(true);
     const location = this._getLocation(item);
     const queryParams: SearchQueryParams = { focusItem: item.id };
-
     if (!this.isArchivedTasks) {
       this._subs.add(
         this._projectService.list$.subscribe((projects) => {
@@ -239,6 +238,10 @@ export class SearchBarComponent implements AfterViewInit, OnDestroy {
         }),
       );
     }
+  }
+
+  getOptionText(item: SearchItem) {
+    return item?.title;
   }
 
   onBlur(ev: FocusEvent) {
