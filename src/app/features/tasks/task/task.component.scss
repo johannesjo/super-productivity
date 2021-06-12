@@ -120,10 +120,16 @@
     border-radius: $task-border-radius;
     // we don't want focus borders for touch only devices
     @include noTouchOnly() {
-       border-color: $task-c-focus;
-       border-width: 1px;
-       border-style: solid !important;
+      border-color: $task-c-focus;
+      border-width: 1px;
+      border-style: solid !important;
     }
+  }
+
+  :host:focus.mobile-highlight > .inner-wrapper > & {
+    border-color: $task-c-focus;
+    border-width: 1px;
+    border-style: solid !important;
   }
 
   :host.isCurrent.isCurrent.isCurrent.isCurrent.isCurrent & {

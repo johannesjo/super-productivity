@@ -40,6 +40,7 @@ import { ActivatedRoute, RouterOutlet } from '@angular/router';
 import { ipcRenderer } from 'electron';
 import { TrackingReminderService } from './features/time-tracking/tracking-reminder/tracking-reminder.service';
 import { first } from 'rxjs/operators';
+import { IS_MOBILE } from './util/is-mobile';
 
 const w = window as any;
 const productivityTip: string[] = w.productivityTips && w.productivityTips[w.randomIndex];
@@ -328,9 +329,14 @@ export class AppComponent implements OnDestroy {
       const el = document.getElementById(`t-${id}`);
       el?.focus();
 
-      if ((el || counter === 6) && this._intervalTimer) {
+      if (el && IS_MOBILE) {
+        el.classList.add('mobile-highlight');
+        el.addEventListener('blur', () => el.classList.remove('mobile-highlight'));
+      }
+
+      if ((el || counter === 4) && this._intervalTimer) {
         clearInterval(this._intervalTimer);
       }
-    }, 300);
+    }, 400);
   }
 }
