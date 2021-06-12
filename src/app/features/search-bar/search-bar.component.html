@@ -54,6 +54,7 @@
     #autoEl="matAutocomplete"
     (optionSelected)="navigateToItem($event.option.value)"
     autoActiveFirstOption
+    [displayWith]="getOptionText"
   >
     <mat-option
       *ngFor="let item of (filteredIssueSuggestions$|async); trackBy:trackByFn"
