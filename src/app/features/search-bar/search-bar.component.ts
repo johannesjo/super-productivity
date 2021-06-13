@@ -34,6 +34,8 @@ import { AnimationEvent } from '@angular/animations';
 import { SearchItem, SearchQueryParams } from './search-bar.model';
 import { getWorklogStr } from '../../util/get-work-log-str';
 import { devError } from 'src/app/util/dev-error';
+import { MatAutocompleteTrigger } from '@angular/material/autocomplete';
+import { IS_MOBILE } from 'src/app/util/is-mobile';
 
 @Component({
   selector: 'search-bar',
@@ -48,6 +50,7 @@ export class SearchBarComponent implements AfterViewInit, OnDestroy {
 
   @ViewChild('inputEl') inputEl!: ElementRef;
   @ViewChild('searchForm') searchForm!: ElementRef;
+  @ViewChild(MatAutocompleteTrigger) autocomplete!: MatAutocompleteTrigger;
 
   T: typeof T = T;
   isLoading$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(true);
@@ -59,6 +62,7 @@ export class SearchBarComponent implements AfterViewInit, OnDestroy {
 
   private _subs: Subscription = new Subscription();
   private _attachKeyDownHandlerTimeout?: number;
+  private _openPanelTimeout?: number;
   private _tasks$: Observable<Task[]> = this.isArchivedTasks$.pipe(
     switchMap((isArchivedTasks) => this._loadTasks$(isArchivedTasks)),
   );
@@ -208,6 +212,9 @@ export class SearchBarComponent implements AfterViewInit, OnDestroy {
     this.isLoading$.next(true);
     this.isArchivedTasks = !this.isArchivedTasks;
     this.isArchivedTasks$.next(this.isArchivedTasks);
+    if (IS_MOBILE) {
+      this._openPanelTimeout = window.setTimeout(() => this.autocomplete.openPanel());
+    }
   }
 
   onAnimationEvent(event: AnimationEvent) {
@@ -264,5 +271,6 @@ export class SearchBarComponent implements AfterViewInit, OnDestroy {
     if (this._attachKeyDownHandlerTimeout) {
       window.clearTimeout(this._attachKeyDownHandlerTimeout);
     }
+    if (this._openPanelTimeout) window.clearTimeout(this._openPanelTimeout);
   }
 }
