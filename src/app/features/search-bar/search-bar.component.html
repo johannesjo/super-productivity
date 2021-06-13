@@ -45,8 +45,8 @@
 
   <div class="info-bar">
     <div class="info-text">
-      {{ (!tooManyResults ? T.F.SEARCH_BAR.INFO :
-      T.F.SEARCH_BAR.TOO_MANY_RESULTS)|translate }}
+      {{ (!tooManyResults ? !isArchivedTasks ? T.F.SEARCH_BAR.INFO :
+      T.F.SEARCH_BAR.INFO_ARCHIVED : T.F.SEARCH_BAR.TOO_MANY_RESULTS)|translate }}
     </div>
   </div>
 

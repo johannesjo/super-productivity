@@ -891,7 +891,8 @@
       "TOO_MANY_RESULTS": "Too many results, please narrow your search",
       "PLACEHOLDER": "Search for task or task description",
       "PLACEHOLDER_ARCHIVED": "Search for archived tasks",
-      "INFO": "Click on the list icon to search for archived tasks"
+      "INFO": "Click on the list icon to search for archived tasks",
+      "INFO_ARCHIVED": "Click on the archive icon to search for normal tasks"
     }
   },
   "FILE_IMEX": {
