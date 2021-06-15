@@ -90,7 +90,7 @@ describe('PersistenceService', () => {
       setTimeout(() => {
         service.onAfterSave$.next('' as any);
       }, 1);
-      tick(51);
+      tick(101);
     }));
 
     // it('should refresh onAfterSave$', () => {
