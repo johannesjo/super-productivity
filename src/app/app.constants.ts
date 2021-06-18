@@ -20,6 +20,7 @@ import '@angular/common/locales/global/it';
 import '@angular/common/locales/global/pt';
 import '@angular/common/locales/global/nl';
 import '@angular/common/locales/global/nb';
+import '@angular/common/locales/global/pl';
 
 export const DAY_STARTS_AT: string = '9:00';
 
@@ -58,6 +59,7 @@ export enum LanguageCode {
   pt = 'pt',
   nl = 'nl',
   nb = 'nb',
+	pl = 'pl',
 }
 
 export enum LanguageCodeMomentMap {
@@ -77,6 +79,7 @@ export enum LanguageCodeMomentMap {
   nb = 'nb',
   zh = 'zh-cn',
   zh_tw = 'zh-tw',
+	pl = 'pl',
 }
 
 export enum BodyClass {
