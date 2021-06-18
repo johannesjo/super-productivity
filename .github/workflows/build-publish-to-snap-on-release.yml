@@ -13,15 +13,9 @@ jobs:
 
     steps:
       - name: Check out Git repository
-        uses: actions/checkout@v1
-
-      - uses: actions/cache@v2
-        with:
-          path: '**/node_modules'
-          key: ${{ runner.os }}-modulesTWO-${{ hashFiles('**/yarn.lock') }}
+        uses: actions/checkout@v2
 
       - name: Install Yarn Packages
-        if: steps.yarn-cache.outputs.cache-hit != 'true'
         run: yarn install
 
       - name: Lint

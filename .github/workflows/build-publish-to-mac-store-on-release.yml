@@ -1,7 +1,7 @@
 name: Mac Store Release on Release
 on:
   release:
-    types: [ published ]
+    types: [published]
   workflow_dispatch:
     inputs: null
 
@@ -9,19 +9,13 @@ jobs:
   mac-store-release:
     runs-on: macos-latest
 
-    if: "!github.event.release.prerelease"
+    if: '!github.event.release.prerelease'
 
     steps:
       - name: Check out Git repository
-        uses: actions/checkout@v1
-
-      - uses: actions/cache@v2
-        with:
-          path: '**/node_modules'
-          key: ${{ runner.os }}-modulesTWO-${{ hashFiles('**/yarn.lock') }}
+        uses: actions/checkout@v2
 
       - name: Install Yarn Packages
-        if: steps.yarn-cache.outputs.cache-hit != 'true'
         run: yarn install
 
       - run: 'echo "$PROVISION_PROFILE" | base64 --decode > embedded.provisionprofile'
@@ -35,8 +29,8 @@ jobs:
       - name: Test Unit
         run: yarn test
 
-#      - name: Test E2E
-#        run: yarn e2e
+      #      - name: Test E2E
+      #        run: yarn e2e
 
       - name: Build Frontend & Electron
         run: yarn build

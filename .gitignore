@@ -8,6 +8,16 @@
 
 # dependencies
 /node_modules
+.yarn/*
+!.yarn/cache
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/sdks
+!.yarn/versions
+npm-debug.log
+yarn-error.log
+# package-lock.json (shouldn't be here!)
 
 # IDEs and editors
 /.idea
@@ -35,14 +45,11 @@
 /connect.lock
 /coverage
 /libpeerconnection.log
-npm-debug.log
-yarn-error.log
 testem.log
 /typings
 chromedriver.log
 e2e-test-results
 e2e/screenshots
-package-lock.json
 
 # System Files
 .DS_Store
