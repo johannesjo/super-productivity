@@ -4,7 +4,6 @@ import {
   concatMap,
   delay,
   filter,
-  map,
   mergeMap,
   take,
   tap,
@@ -22,11 +21,7 @@ import { Task, TaskArchive, TaskWithSubTasks } from '../../tasks/task.model';
 import { AddTask, ScheduleTask, UpdateTask } from '../../tasks/store/task.actions';
 import { TaskService } from '../../tasks/task.service';
 import { TaskRepeatCfgService } from '../task-repeat-cfg.service';
-import {
-  TASK_REPEAT_WEEKDAY_MAP,
-  TaskRepeatCfg,
-  TaskRepeatCfgState,
-} from '../task-repeat-cfg.model';
+import { TaskRepeatCfg, TaskRepeatCfgState } from '../task-repeat-cfg.model';
 import { EMPTY, from, merge } from 'rxjs';
 import { isToday } from '../../../util/is-today.util';
 import { WorkContextService } from '../../work-context/work-context.service';
@@ -61,21 +56,10 @@ export class TaskRepeatCfgEffects {
   );
 
   @Effect() createRepeatableTasks: any = this.triggerRepeatableTaskCreation$.pipe(
-    concatMap(() => this._taskRepeatCfgService.taskRepeatCfgs$.pipe(take(1))),
-    // filter out the configs which have been created today already
-    // and those which are not scheduled for the current week day
-    map((taskRepeatCfgs: TaskRepeatCfg[]): TaskRepeatCfg[] => {
-      const day = new Date().getDay();
-      const dayStr: keyof TaskRepeatCfg = TASK_REPEAT_WEEKDAY_MAP[day];
-      return (
-        taskRepeatCfgs &&
-        taskRepeatCfgs.filter(
-          (taskRepeatCfg: TaskRepeatCfg) =>
-            taskRepeatCfg[dayStr] && !isToday(taskRepeatCfg.lastTaskCreation),
-        )
-      );
-    }),
-    // ===> taskRepeatCfgs scheduled for today and not yet created already
+    concatMap(
+      () => this._taskRepeatCfgService.getRepeatTableTasksDueForDayOnce$(Date.now()),
+      // ===> taskRepeatCfgs scheduled for today and not yet created already
+    ),
     filter((taskRepeatCfgs) => taskRepeatCfgs && !!taskRepeatCfgs.length),
 
     // existing tasks with sub tasks are loaded, because need to move them to the archive

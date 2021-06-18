@@ -4,6 +4,7 @@ import {
   selectAllTaskRepeatCfgs,
   selectTaskRepeatCfgById,
   selectTaskRepeatCfgByIdAllowUndefined,
+  selectTaskRepeatCfgsDueOnDay,
 } from './store/task-repeat-cfg.reducer';
 import {
   AddTaskRepeatCfgToTask,
@@ -23,6 +24,7 @@ import * as shortid from 'shortid';
 import { DialogConfirmComponent } from '../../ui/dialog-confirm/dialog-confirm.component';
 import { MatDialog } from '@angular/material/dialog';
 import { T } from '../../t.const';
+import { first } from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root',
@@ -36,6 +38,13 @@ export class TaskRepeatCfgService {
     private _store$: Store<TaskRepeatCfgState>,
     private _matDialog: MatDialog,
   ) {}
+
+  getRepeatTableTasksDueForDayOnce$(dayDate: number) {
+    // ===> taskRepeatCfgs scheduled for today and not yet created already
+    return this._store$
+      .pipe(select(selectTaskRepeatCfgsDueOnDay, { dayDate }))
+      .pipe(first());
+  }
 
   getTaskRepeatCfgById$(id: string): Observable<TaskRepeatCfg> {
     return this._store$.pipe(select(selectTaskRepeatCfgById, { id }));
