@@ -121,7 +121,7 @@ describe('mapArchiveToWorklog', () => {
         ...DEFAULT_TASK,
         title: 'PT1',
         id: 'PT1',
-        subTaskIds: ['SUB_B', 'SUB_C'],
+        subTaskIds: ['SUB_A', 'SUB_B'],
         timeSpent: 10000,
         timeSpentOnDay: {
           '2015-01-15': 10000,
@@ -171,5 +171,89 @@ describe('mapArchiveToWorklog', () => {
     expect(w[2015].ent[1].ent[15].logEntries[0].task.id).toBe('PT1');
     expect(w[2015].ent[1].ent[15].logEntries[1].task.id).toBe('SUB_A');
     expect(w[2015].ent[1].ent[15].logEntries[2].task.id).toBe('SUB_B');
+  });
+
+  it('should work for sub tasks and parents spanning over multiple days', () => {
+    const ts = fakeTaskStateFromArray([
+      {
+        ...DEFAULT_TASK,
+        title: 'PT1',
+        id: 'PT1',
+        subTaskIds: ['SUB_A', 'SUB_B', 'SUB_C'],
+        timeSpent: 48106885,
+        timeSpentOnDay: {
+          '2021-06-06': 6000,
+          '2021-06-07': 7000,
+          '2021-06-08': 8366,
+        },
+        doneOn: 21366,
+        isDone: true,
+      },
+      {
+        ...DEFAULT_TASK,
+        title: 'SUB_A',
+        id: 'SUB_A',
+        parentId: 'PT1',
+        timeSpent: 21000,
+        timeSpentOnDay: {
+          '2021-06-06': 6000,
+          '2021-06-07': 7000,
+          '2021-06-08': 8000,
+        },
+        doneOn: 1623170868065,
+        isDone: true,
+      },
+      {
+        ...DEFAULT_TASK,
+        title: 'SUB_B',
+        id: 'SUB_B',
+        parentId: 'PT1',
+        timeSpentOnDay: {
+          '2021-06-08': 300,
+        },
+        timeSpent: 300,
+        timeEstimate: 0,
+        isDone: true,
+        doneOn: 1623170868065,
+      },
+      {
+        ...DEFAULT_TASK,
+        title: 'SUB_C',
+        id: 'SUB_C',
+        parentId: 'PT1',
+        subTaskIds: [],
+        timeSpentOnDay: {
+          '2021-06-08': 66,
+        },
+        timeSpent: 66,
+        timeEstimate: 0,
+        isDone: true,
+        doneOn: 1623171125611,
+      },
+    ]);
+
+    const r = mapArchiveToWorklog(ts, [], START_END_ALL);
+    const w: Worklog = r.worklog;
+
+    expect(r.totalTimeSpent).toBe(21366);
+    expect(w[2021].timeSpent).toBe(21366);
+    expect(w[2021].ent[6].timeSpent).toBe(21366);
+
+    expect(w[2021].ent[6].ent[6].timeSpent).toBe(6000);
+    expect(w[2021].ent[6].ent[6].logEntries.length).toBe(2);
+    expect(w[2021].ent[6].ent[6].logEntries[0].task.id).toBe('PT1');
+    expect(w[2021].ent[6].ent[6].logEntries[1].task.id).toBe('SUB_A');
+
+    expect(w[2021].ent[6].ent[7].timeSpent).toBe(7000);
+    expect(w[2021].ent[6].ent[7].logEntries.length).toBe(2);
+    expect(w[2021].ent[6].ent[7].logEntries[0].task.id).toBe('PT1');
+    expect(w[2021].ent[6].ent[7].logEntries[1].task.id).toBe('SUB_A');
+
+    expect(w[2021].ent[6].ent[8].timeSpent).toBe(8366);
+    expect(w[2021].ent[6].ent[8].logEntries.length).toBe(4);
+    expect(w[2021].ent[6].ent[8].logEntries[0].task.id).toBe('PT1');
+    expect(w[2021].ent[6].ent[8].logEntries[1].task.id).toBe('SUB_A');
+    expect(w[2021].ent[6].ent[8].logEntries[2].task.id).toBe('SUB_C');
+    expect(w[2021].ent[6].ent[8].logEntries[3].task.id).toBe('SUB_B');
   });
 });
