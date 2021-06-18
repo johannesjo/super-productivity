@@ -33,7 +33,7 @@ import {
   TaskRepeatCfg,
   TaskRepeatCfgState,
 } from '../task-repeat-cfg.model';
-import { from } from 'rxjs';
+import { from, merge } from 'rxjs';
 import { isToday } from '../../../util/is-today.util';
 import { WorkContextService } from '../../work-context/work-context.service';
 import { setActiveWorkContext } from '../../work-context/store/work-context.actions';
@@ -55,10 +55,17 @@ export class TaskRepeatCfgEffects {
     tap(this._saveToLs.bind(this)),
   );
 
-  @Effect() createRepeatableTasks: any = this._actions$.pipe(
-    ofType(setActiveWorkContext),
-    concatMap(() => this._syncService.afterInitialSyncDoneAndDataLoadedInitially$),
-    delay(1000),
+  private triggerRepeatableTaskCreation$ = merge(
+    this._syncService.afterInitialSyncDoneAndDataLoadedInitially$.pipe(delay(5000)),
+    this._actions$.pipe(
+      ofType(setActiveWorkContext),
+      concatMap(() => this._syncService.afterInitialSyncDoneAndDataLoadedInitially$),
+      delay(1000),
+    ),
+  );
+
+  @Effect() createRepeatableTasks: any = this.triggerRepeatableTaskCreation$.pipe(
+    tap((v) => console.log('XXX', v)),
     concatMap(() => this._taskRepeatCfgService.taskRepeatCfgs$.pipe(take(1))),
     // filter out the configs which have been created today already
     // and those which are not scheduled for the current week day
