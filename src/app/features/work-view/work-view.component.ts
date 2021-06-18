@@ -31,6 +31,8 @@ import { T } from '../../t.const';
 import { ImprovementService } from '../metric/improvement/improvement.service';
 import { workViewProjectChangeAnimation } from '../../ui/animations/work-view-project-change.ani';
 import { WorkContextService } from '../work-context/work-context.service';
+import { TaskRepeatCfgService } from '../task-repeat-cfg/task-repeat-cfg.service';
+import { TaskRepeatCfg } from '../task-repeat-cfg/task-repeat-cfg.model';
 
 const SUB = 'SUB';
 const PARENT = 'PARENT';
@@ -72,6 +74,15 @@ export class WorkViewComponent implements OnInit, OnDestroy, AfterContentInit {
     switchMap(() => this.splitTopEl$),
     switchMap((el) => fromEvent(el, 'scroll')),
   );
+
+  repeatableScheduledForTomorrow$: Observable<
+    TaskRepeatCfg[]
+  > = this._taskRepeatCfgService.getRepeatTableTasksDueForDayOnce$(
+    // tomorrow
+    // eslint-disable-next-line no-mixed-operators
+    Date.now() + 24 * 60 * 60 * 1000,
+  );
+
   private _subs: Subscription = new Subscription();
   private _switchListAnimationTimeout?: number;
 
@@ -82,6 +93,7 @@ export class WorkViewComponent implements OnInit, OnDestroy, AfterContentInit {
     public improvementService: ImprovementService,
     public layoutService: LayoutService,
     public workContextService: WorkContextService,
+    private _taskRepeatCfgService: TaskRepeatCfgService,
     private _dragulaService: DragulaService,
     private _activatedRoute: ActivatedRoute,
   ) {}
@@ -176,6 +188,20 @@ export class WorkViewComponent implements OnInit, OnDestroy, AfterContentInit {
         this.taskService.addTodayTag(t);
       }
     });
+  }
+
+  addAllPlannedToDayAndCreateRepeatable(
+    plannedTasks: TaskPlanned[],
+    repeatableScheduledForTomorrow: TaskRepeatCfg[],
+  ) {
+    if (plannedTasks.length) {
+      this.addAllPlannedToToday(plannedTasks);
+    }
+    if (repeatableScheduledForTomorrow.length) {
+      repeatableScheduledForTomorrow.forEach((repeatCfg) => {
+        this._taskRepeatCfgService.createRepeatableTask(repeatCfg);
+      });
+    }
   }
 
   resetBreakTimer() {

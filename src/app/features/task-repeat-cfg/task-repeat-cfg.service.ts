@@ -25,6 +25,9 @@ import { DialogConfirmComponent } from '../../ui/dialog-confirm/dialog-confirm.c
 import { MatDialog } from '@angular/material/dialog';
 import { T } from '../../t.const';
 import { first } from 'rxjs/operators';
+import { TaskService } from '../tasks/task.service';
+import { TODAY_TAG } from '../tag/tag.const';
+import { Task } from '../tasks/task.model';
 
 @Injectable({
   providedIn: 'root',
@@ -37,9 +40,10 @@ export class TaskRepeatCfgService {
   constructor(
     private _store$: Store<TaskRepeatCfgState>,
     private _matDialog: MatDialog,
+    private _taskService: TaskService,
   ) {}
 
-  getRepeatTableTasksDueForDayOnce$(dayDate: number) {
+  getRepeatTableTasksDueForDayOnce$(dayDate: number): Observable<TaskRepeatCfg[]> {
     // ===> taskRepeatCfgs scheduled for today and not yet created already
     return this._store$
       .pipe(select(selectTaskRepeatCfgsDueOnDay, { dayDate }))
@@ -89,6 +93,38 @@ export class TaskRepeatCfgService {
 
   upsertTaskRepeatCfg(taskRepeatCfg: TaskRepeatCfg) {
     this._store$.dispatch(new UpsertTaskRepeatCfg({ taskRepeatCfg }));
+  }
+
+  createRepeatableTask(taskRepeatCfg: TaskRepeatCfg) {
+    const { task, isAddToBottom } = this.getTaskRepeatTemplate(taskRepeatCfg);
+    this._taskService.add(
+      task.title,
+      false,
+      {
+        ...task,
+      },
+      isAddToBottom,
+    );
+    // TODO also schedule here
+  }
+
+  getTaskRepeatTemplate(
+    taskRepeatCfg: TaskRepeatCfg,
+  ): { task: Task; isAddToBottom: boolean } {
+    const isAddToTodayAsFallback =
+      !taskRepeatCfg.projectId && !taskRepeatCfg.tagIds.length;
+    return {
+      task: this._taskService.createNewTaskWithDefaults({
+        title: taskRepeatCfg.title,
+        additional: {
+          repeatCfgId: taskRepeatCfg.id,
+          timeEstimate: taskRepeatCfg.defaultEstimate,
+          projectId: taskRepeatCfg.projectId,
+          tagIds: isAddToTodayAsFallback ? [TODAY_TAG.id] : taskRepeatCfg.tagIds || [],
+        },
+      }),
+      isAddToBottom: taskRepeatCfg.isAddToBottom || false,
+    };
   }
 
   deleteTaskRepeatCfgWithDialog(id: string) {

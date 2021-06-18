@@ -28,7 +28,6 @@ import { WorkContextService } from '../../work-context/work-context.service';
 import { setActiveWorkContext } from '../../work-context/store/work-context.actions';
 import { SyncService } from '../../../imex/sync/sync.service';
 import { WorkContextType } from '../../work-context/work-context.model';
-import { TODAY_TAG } from '../../tag/tag.const';
 import { isValidSplitTime } from '../../../util/is-valid-split-time';
 import { getDateTimeFromClockString } from '../../../util/get-date-time-from-clock-string';
 
@@ -104,20 +103,10 @@ export class TaskRepeatCfgEffects {
                       }),
                   );
 
-                const isAddToTodayAsFallback =
-                  !taskRepeatCfg.projectId && !taskRepeatCfg.tagIds.length;
-
-                const task = this._taskService.createNewTaskWithDefaults({
-                  title: taskRepeatCfg.title,
-                  additional: {
-                    repeatCfgId: taskRepeatCfg.id,
-                    timeEstimate: taskRepeatCfg.defaultEstimate,
-                    projectId: taskRepeatCfg.projectId,
-                    tagIds: isAddToTodayAsFallback
-                      ? [TODAY_TAG.id]
-                      : taskRepeatCfg.tagIds || [],
-                  },
-                });
+                const {
+                  task,
+                  isAddToBottom,
+                } = this._taskRepeatCfgService.getTaskRepeatTemplate(taskRepeatCfg);
 
                 const createNewActions: (
                   | AddTask
@@ -130,7 +119,7 @@ export class TaskRepeatCfgEffects {
                       .activeWorkContextType as WorkContextType,
                     workContextId: this._workContextService.activeWorkContextId as string,
                     isAddToBacklog: false,
-                    isAddToBottom: taskRepeatCfg.isAddToBottom || false,
+                    isAddToBottom,
                   }),
                   new UpdateTaskRepeatCfg({
                     taskRepeatCfg: {
