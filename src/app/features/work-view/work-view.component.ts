@@ -75,13 +75,11 @@ export class WorkViewComponent implements OnInit, OnDestroy, AfterContentInit {
     switchMap((el) => fromEvent(el, 'scroll')),
   );
 
+  // eslint-disable-next-line no-mixed-operators
+  private _tomorrow: number = Date.now() + 24 * 60 * 60 * 1000;
   repeatableScheduledForTomorrow$: Observable<
     TaskRepeatCfg[]
-  > = this._taskRepeatCfgService.getRepeatTableTasksDueForDayOnce$(
-    // tomorrow
-    // eslint-disable-next-line no-mixed-operators
-    Date.now() + 24 * 60 * 60 * 1000,
-  );
+  > = this._taskRepeatCfgService.getRepeatTableTasksDueForDay$(this._tomorrow);
 
   private _subs: Subscription = new Subscription();
   private _switchListAnimationTimeout?: number;
@@ -105,6 +103,8 @@ export class WorkViewComponent implements OnInit, OnDestroy, AfterContentInit {
   }
 
   ngOnInit() {
+    // eslint-disable-next-line no-mixed-operators
+    this._tomorrow = Date.now() + 24 * 60 * 60 * 1000;
     const sub = this._dragulaService.find(SUB);
     const par = this._dragulaService.find(PARENT);
 
@@ -199,7 +199,7 @@ export class WorkViewComponent implements OnInit, OnDestroy, AfterContentInit {
     }
     if (repeatableScheduledForTomorrow.length) {
       repeatableScheduledForTomorrow.forEach((repeatCfg) => {
-        this._taskRepeatCfgService.createRepeatableTask(repeatCfg);
+        this._taskRepeatCfgService.createRepeatableTask(repeatCfg, this._tomorrow);
       });
     }
   }

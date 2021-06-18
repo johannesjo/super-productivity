@@ -24,16 +24,16 @@ import * as shortid from 'shortid';
 import { DialogConfirmComponent } from '../../ui/dialog-confirm/dialog-confirm.component';
 import { MatDialog } from '@angular/material/dialog';
 import { T } from '../../t.const';
-import { first, take } from 'rxjs/operators';
+import { take } from 'rxjs/operators';
 import { TaskService } from '../tasks/task.service';
 import { TODAY_TAG } from '../tag/tag.const';
 import { Task } from '../tasks/task.model';
 import { AddTask, ScheduleTask, UpdateTask } from '../tasks/store/task.actions';
 import { WorkContextService } from '../work-context/work-context.service';
-import { isToday } from '../../util/is-today.util';
 import { WorkContextType } from '../work-context/work-context.model';
 import { isValidSplitTime } from '../../util/is-valid-split-time';
 import { getDateTimeFromClockString } from '../../util/get-date-time-from-clock-string';
+import { isSameDay } from '../../util/is-same-day';
 
 @Injectable({
   providedIn: 'root',
@@ -50,11 +50,9 @@ export class TaskRepeatCfgService {
     private _workContextService: WorkContextService,
   ) {}
 
-  getRepeatTableTasksDueForDayOnce$(dayDate: number): Observable<TaskRepeatCfg[]> {
+  getRepeatTableTasksDueForDay$(dayDate: number): Observable<TaskRepeatCfg[]> {
     // ===> taskRepeatCfgs scheduled for today and not yet created already
-    return this._store$
-      .pipe(select(selectTaskRepeatCfgsDueOnDay, { dayDate }))
-      .pipe(first());
+    return this._store$.pipe(select(selectTaskRepeatCfgsDueOnDay, { dayDate }));
   }
 
   getTaskRepeatCfgById$(id: string): Observable<TaskRepeatCfg> {
@@ -102,8 +100,11 @@ export class TaskRepeatCfgService {
     this._store$.dispatch(new UpsertTaskRepeatCfg({ taskRepeatCfg }));
   }
 
-  async createRepeatableTask(taskRepeatCfg: TaskRepeatCfg) {
-    const actionsForRepeatCfg = await this.getActionsForTaskRepeatCfg(taskRepeatCfg);
+  async createRepeatableTask(taskRepeatCfg: TaskRepeatCfg, targetDayDate: number) {
+    const actionsForRepeatCfg = await this.getActionsForTaskRepeatCfg(
+      taskRepeatCfg,
+      targetDayDate,
+    );
     actionsForRepeatCfg.forEach((act) => {
       this._store$.dispatch(act);
     });
@@ -128,6 +129,7 @@ export class TaskRepeatCfgService {
 
   async getActionsForTaskRepeatCfg(
     taskRepeatCfg: TaskRepeatCfg,
+    targetDayDate: number = Date.now(),
   ): Promise<(UpdateTask | AddTask | UpdateTaskRepeatCfg | ScheduleTask)[]> {
     // NOTE: there might be multiple configs in case something went wrong
     // we want to move all of them to the archive
@@ -141,7 +143,8 @@ export class TaskRepeatCfgService {
     }
 
     const isCreateNew =
-      existingTaskInstances.filter((taskI) => isToday(taskI.created)).length === 0;
+      existingTaskInstances.filter((taskI) => isSameDay(targetDayDate, taskI.created))
+        .length === 0;
 
     if (!isCreateNew) {
       return [];
@@ -153,7 +156,7 @@ export class TaskRepeatCfgService {
       | AddTask
       | UpdateTaskRepeatCfg
     )[] = existingTaskInstances
-      .filter((taskI) => !task.isDone && !isToday(taskI.created))
+      .filter((taskI) => !taskI.isDone && !isSameDay(targetDayDate, taskI.created))
       .map(
         (taskI) =>
           new UpdateTask({
@@ -181,7 +184,7 @@ export class TaskRepeatCfgService {
         taskRepeatCfg: {
           id: taskRepeatCfg.id,
           changes: {
-            lastTaskCreation: Date.now(),
+            lastTaskCreation: targetDayDate,
           },
         },
       }),

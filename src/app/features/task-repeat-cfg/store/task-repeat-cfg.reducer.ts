@@ -61,7 +61,10 @@ export const selectTaskRepeatCfgsDueOnDay = createSelector(
       taskRepeatCfgs &&
       taskRepeatCfgs.filter(
         (taskRepeatCfg: TaskRepeatCfg) =>
-          taskRepeatCfg[dayStr] && !isSameDay(taskRepeatCfg.lastTaskCreation, dayDate),
+          taskRepeatCfg[dayStr] &&
+          !isSameDay(taskRepeatCfg.lastTaskCreation, dayDate) &&
+          // also check for if future instance was already created via the work-view button
+          dayDate >= taskRepeatCfg.lastTaskCreation,
       )
     );
   },

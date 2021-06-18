@@ -4,6 +4,7 @@ import {
   concatMap,
   delay,
   filter,
+  first,
   mergeMap,
   take,
   tap,
@@ -48,7 +49,10 @@ export class TaskRepeatCfgEffects {
 
   @Effect() createRepeatableTasks: any = this.triggerRepeatableTaskCreation$.pipe(
     concatMap(
-      () => this._taskRepeatCfgService.getRepeatTableTasksDueForDayOnce$(Date.now()),
+      () =>
+        this._taskRepeatCfgService
+          .getRepeatTableTasksDueForDay$(Date.now())
+          .pipe(first()),
       // ===> taskRepeatCfgs scheduled for today and not yet created already
     ),
     filter((taskRepeatCfgs) => taskRepeatCfgs && !!taskRepeatCfgs.length),
