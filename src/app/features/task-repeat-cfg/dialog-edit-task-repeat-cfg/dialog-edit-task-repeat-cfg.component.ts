@@ -19,6 +19,7 @@ import { TagService } from '../../tag/tag.service';
 import { unique } from '../../../util/unique';
 import { Tag } from '../../tag/tag.model';
 import { exists } from '../../../util/exists';
+import { TODAY_TAG } from '../../tag/tag.const';
 
 // TASK_REPEAT_CFG_FORM_CFG
 @Component({
@@ -34,7 +35,8 @@ export class DialogEditTaskRepeatCfgComponent implements OnInit, OnDestroy {
   taskRepeatCfg: Omit<TaskRepeatCfgCopy, 'id'> = {
     ...DEFAULT_TASK_REPEAT_CFG,
     title: this.task.title,
-    tagIds: [...this.task.tagIds],
+    // NOTE: always add today tag, as that's likely what we want
+    tagIds: unique([TODAY_TAG.id, ...this.task.tagIds]),
   };
 
   taskRepeatCfgId: string | null = this.task.repeatCfgId;
