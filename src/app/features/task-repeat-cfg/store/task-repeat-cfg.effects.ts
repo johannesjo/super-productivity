@@ -19,11 +19,7 @@ import {
 import { selectTaskRepeatCfgFeatureState } from './task-repeat-cfg.reducer';
 import { PersistenceService } from '../../../core/persistence/persistence.service';
 import { Task, TaskArchive, TaskWithSubTasks } from '../../tasks/task.model';
-import {
-  AddTask,
-  ScheduleTask,
-  UpdateTask,
-} from '../../tasks/store/task.actions';
+import { AddTask, ScheduleTask, UpdateTask } from '../../tasks/store/task.actions';
 import { TaskService } from '../../tasks/task.service';
 import { TaskRepeatCfgService } from '../task-repeat-cfg.service';
 import {
@@ -98,7 +94,8 @@ export class TaskRepeatCfgEffects {
                 }
 
                 const isCreateNew =
-                  existingTaskInstances.filter((taskI) => isToday(taskI.created)).length === 0;
+                  existingTaskInstances.filter((taskI) => isToday(taskI.created))
+                    .length === 0;
 
                 if (!isCreateNew) {
                   return EMPTY;
