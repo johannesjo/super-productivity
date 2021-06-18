@@ -194,7 +194,7 @@ export class TaskRepeatCfgService {
     if (isValidSplitTime(taskRepeatCfg.startTime)) {
       const dateTime = getDateTimeFromClockString(
         taskRepeatCfg.startTime as string,
-        new Date(),
+        targetDayDate,
       );
       createNewActions.push(
         new ScheduleTask({
