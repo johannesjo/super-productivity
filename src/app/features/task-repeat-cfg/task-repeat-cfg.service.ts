@@ -24,10 +24,16 @@ import * as shortid from 'shortid';
 import { DialogConfirmComponent } from '../../ui/dialog-confirm/dialog-confirm.component';
 import { MatDialog } from '@angular/material/dialog';
 import { T } from '../../t.const';
-import { first } from 'rxjs/operators';
+import { first, take } from 'rxjs/operators';
 import { TaskService } from '../tasks/task.service';
 import { TODAY_TAG } from '../tag/tag.const';
 import { Task } from '../tasks/task.model';
+import { AddTask, ScheduleTask, UpdateTask } from '../tasks/store/task.actions';
+import { WorkContextService } from '../work-context/work-context.service';
+import { isToday } from '../../util/is-today.util';
+import { WorkContextType } from '../work-context/work-context.model';
+import { isValidSplitTime } from '../../util/is-valid-split-time';
+import { getDateTimeFromClockString } from '../../util/get-date-time-from-clock-string';
 
 @Injectable({
   providedIn: 'root',
@@ -41,6 +47,7 @@ export class TaskRepeatCfgService {
     private _store$: Store<TaskRepeatCfgState>,
     private _matDialog: MatDialog,
     private _taskService: TaskService,
+    private _workContextService: WorkContextService,
   ) {}
 
   getRepeatTableTasksDueForDayOnce$(dayDate: number): Observable<TaskRepeatCfg[]> {
@@ -95,36 +102,11 @@ export class TaskRepeatCfgService {
     this._store$.dispatch(new UpsertTaskRepeatCfg({ taskRepeatCfg }));
   }
 
-  createRepeatableTask(taskRepeatCfg: TaskRepeatCfg) {
-    const { task, isAddToBottom } = this.getTaskRepeatTemplate(taskRepeatCfg);
-    this._taskService.add(
-      task.title,
-      false,
-      {
-        ...task,
-      },
-      isAddToBottom,
-    );
-    // TODO also schedule here
-  }
-
-  getTaskRepeatTemplate(
-    taskRepeatCfg: TaskRepeatCfg,
-  ): { task: Task; isAddToBottom: boolean } {
-    const isAddToTodayAsFallback =
-      !taskRepeatCfg.projectId && !taskRepeatCfg.tagIds.length;
-    return {
-      task: this._taskService.createNewTaskWithDefaults({
-        title: taskRepeatCfg.title,
-        additional: {
-          repeatCfgId: taskRepeatCfg.id,
-          timeEstimate: taskRepeatCfg.defaultEstimate,
-          projectId: taskRepeatCfg.projectId,
-          tagIds: isAddToTodayAsFallback ? [TODAY_TAG.id] : taskRepeatCfg.tagIds || [],
-        },
-      }),
-      isAddToBottom: taskRepeatCfg.isAddToBottom || false,
-    };
+  async createRepeatableTask(taskRepeatCfg: TaskRepeatCfg) {
+    const actionsForRepeatCfg = await this.getActionsForTaskRepeatCfg(taskRepeatCfg);
+    actionsForRepeatCfg.forEach((act) => {
+      this._store$.dispatch(act);
+    });
   }
 
   deleteTaskRepeatCfgWithDialog(id: string) {
@@ -142,5 +124,104 @@ export class TaskRepeatCfgService {
           this.deleteTaskRepeatCfg(id);
         }
       });
+  }
+
+  async getActionsForTaskRepeatCfg(
+    taskRepeatCfg: TaskRepeatCfg,
+  ): Promise<(UpdateTask | AddTask | UpdateTaskRepeatCfg | ScheduleTask)[]> {
+    // NOTE: there might be multiple configs in case something went wrong
+    // we want to move all of them to the archive
+    const existingTaskInstances: Task[] = await this._taskService
+      .getTasksWithSubTasksByRepeatCfgId$(taskRepeatCfg.id as string)
+      .pipe(take(1))
+      .toPromise();
+
+    if (!taskRepeatCfg.id) {
+      throw new Error('No taskRepeatCfg.id');
+    }
+
+    const isCreateNew =
+      existingTaskInstances.filter((taskI) => isToday(taskI.created)).length === 0;
+
+    if (!isCreateNew) {
+      return [];
+    }
+
+    // move all current left over instances to archive right away
+    const markAsDoneActions: (
+      | UpdateTask
+      | AddTask
+      | UpdateTaskRepeatCfg
+    )[] = existingTaskInstances
+      .filter((taskI) => !task.isDone && !isToday(taskI.created))
+      .map(
+        (taskI) =>
+          new UpdateTask({
+            task: {
+              id: taskI.id,
+              changes: {
+                isDone: true,
+              },
+            },
+          }),
+      );
+
+    const { task, isAddToBottom } = this._getTaskRepeatTemplate(taskRepeatCfg);
+
+    const createNewActions: (AddTask | UpdateTaskRepeatCfg | ScheduleTask)[] = [
+      new AddTask({
+        task,
+        workContextType: this._workContextService
+          .activeWorkContextType as WorkContextType,
+        workContextId: this._workContextService.activeWorkContextId as string,
+        isAddToBacklog: false,
+        isAddToBottom,
+      }),
+      new UpdateTaskRepeatCfg({
+        taskRepeatCfg: {
+          id: taskRepeatCfg.id,
+          changes: {
+            lastTaskCreation: Date.now(),
+          },
+        },
+      }),
+    ];
+
+    // Schedule if given
+    if (isValidSplitTime(taskRepeatCfg.startTime)) {
+      const dateTime = getDateTimeFromClockString(
+        taskRepeatCfg.startTime as string,
+        new Date(),
+      );
+      createNewActions.push(
+        new ScheduleTask({
+          task,
+          plannedAt: dateTime,
+          remindAt: dateTime,
+          isMoveToBacklog: false,
+        }),
+      );
+    }
+
+    return [...markAsDoneActions, ...createNewActions];
+  }
+
+  private _getTaskRepeatTemplate(
+    taskRepeatCfg: TaskRepeatCfg,
+  ): { task: Task; isAddToBottom: boolean } {
+    const isAddToTodayAsFallback =
+      !taskRepeatCfg.projectId && !taskRepeatCfg.tagIds.length;
+    return {
+      task: this._taskService.createNewTaskWithDefaults({
+        title: taskRepeatCfg.title,
+        additional: {
+          repeatCfgId: taskRepeatCfg.id,
+          timeEstimate: taskRepeatCfg.defaultEstimate,
+          projectId: taskRepeatCfg.projectId,
+          tagIds: isAddToTodayAsFallback ? [TODAY_TAG.id] : taskRepeatCfg.tagIds || [],
+        },
+      }),
+      isAddToBottom: taskRepeatCfg.isAddToBottom || false,
+    };
   }
 }

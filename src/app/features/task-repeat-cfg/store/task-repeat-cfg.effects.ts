@@ -10,26 +10,18 @@ import {
   withLatestFrom,
 } from 'rxjs/operators';
 import { Action, select, Store } from '@ngrx/store';
-import {
-  DeleteTaskRepeatCfg,
-  TaskRepeatCfgActionTypes,
-  UpdateTaskRepeatCfg,
-} from './task-repeat-cfg.actions';
+import { DeleteTaskRepeatCfg, TaskRepeatCfgActionTypes } from './task-repeat-cfg.actions';
 import { selectTaskRepeatCfgFeatureState } from './task-repeat-cfg.reducer';
 import { PersistenceService } from '../../../core/persistence/persistence.service';
 import { Task, TaskArchive, TaskWithSubTasks } from '../../tasks/task.model';
-import { AddTask, ScheduleTask, UpdateTask } from '../../tasks/store/task.actions';
+import { UpdateTask } from '../../tasks/store/task.actions';
 import { TaskService } from '../../tasks/task.service';
 import { TaskRepeatCfgService } from '../task-repeat-cfg.service';
 import { TaskRepeatCfg, TaskRepeatCfgState } from '../task-repeat-cfg.model';
-import { EMPTY, from, merge } from 'rxjs';
-import { isToday } from '../../../util/is-today.util';
+import { from, merge } from 'rxjs';
 import { WorkContextService } from '../../work-context/work-context.service';
 import { setActiveWorkContext } from '../../work-context/store/work-context.actions';
 import { SyncService } from '../../../imex/sync/sync.service';
-import { WorkContextType } from '../../work-context/work-context.model';
-import { isValidSplitTime } from '../../../util/is-valid-split-time';
-import { getDateTimeFromClockString } from '../../../util/get-date-time-from-clock-string';
 
 @Injectable()
 export class TaskRepeatCfgEffects {
@@ -65,92 +57,12 @@ export class TaskRepeatCfgEffects {
     mergeMap((taskRepeatCfgs) =>
       from(taskRepeatCfgs).pipe(
         mergeMap((taskRepeatCfg: TaskRepeatCfg) =>
-          // NOTE: there might be multiple configs in case something went wrong
-          // we want to move all of them to the archive
-          this._taskService
-            .getTasksWithSubTasksByRepeatCfgId$(taskRepeatCfg.id as string)
-            .pipe(
-              take(1),
-              concatMap((existingTaskInstances: Task[]) => {
-                if (!taskRepeatCfg.id) {
-                  throw new Error('No taskRepeatCfg.id');
-                }
-
-                const isCreateNew =
-                  existingTaskInstances.filter((taskI) => isToday(taskI.created))
-                    .length === 0;
-
-                if (!isCreateNew) {
-                  return EMPTY;
-                }
-
-                // move all current left over instances to archive right away
-                const markAsDoneActions: (
-                  | UpdateTask
-                  | AddTask
-                  | UpdateTaskRepeatCfg
-                )[] = existingTaskInstances
-                  .filter((taskI) => !task.isDone && !isToday(taskI.created))
-                  .map(
-                    (taskI) =>
-                      new UpdateTask({
-                        task: {
-                          id: taskI.id,
-                          changes: {
-                            isDone: true,
-                          },
-                        },
-                      }),
-                  );
-
-                const {
-                  task,
-                  isAddToBottom,
-                } = this._taskRepeatCfgService.getTaskRepeatTemplate(taskRepeatCfg);
-
-                const createNewActions: (
-                  | AddTask
-                  | UpdateTaskRepeatCfg
-                  | ScheduleTask
-                )[] = [
-                  new AddTask({
-                    task,
-                    workContextType: this._workContextService
-                      .activeWorkContextType as WorkContextType,
-                    workContextId: this._workContextService.activeWorkContextId as string,
-                    isAddToBacklog: false,
-                    isAddToBottom,
-                  }),
-                  new UpdateTaskRepeatCfg({
-                    taskRepeatCfg: {
-                      id: taskRepeatCfg.id,
-                      changes: {
-                        lastTaskCreation: Date.now(),
-                      },
-                    },
-                  }),
-                ];
-
-                // Schedule if given
-                if (isValidSplitTime(taskRepeatCfg.startTime)) {
-                  const dateTime = getDateTimeFromClockString(
-                    taskRepeatCfg.startTime as string,
-                    new Date(),
-                  );
-                  createNewActions.push(
-                    new ScheduleTask({
-                      task,
-                      plannedAt: dateTime,
-                      remindAt: dateTime,
-                      isMoveToBacklog: false,
-                    }),
-                  );
-                }
-
-                return from([...markAsDoneActions, ...createNewActions]);
-              }),
-            ),
+          this._taskRepeatCfgService.getActionsForTaskRepeatCfg(taskRepeatCfg),
         ),
+        tap((actionsForRepeatCfg) =>
+          console.log('actionsForRepeatCfg', actionsForRepeatCfg),
+        ),
+        concatMap((actionsForRepeatCfg) => from(actionsForRepeatCfg)),
       ),
     ),
     tap((v) => console.log('IMP Create Repeatable Tasks', v)),
