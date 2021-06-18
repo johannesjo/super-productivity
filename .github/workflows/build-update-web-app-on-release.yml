@@ -9,21 +9,21 @@ jobs:
   upload-to-app-super-productivity:
     runs-on: ubuntu-latest
 
-    if: "!github.event.release.prerelease"
+    if: '!github.event.release.prerelease'
 
     steps:
       - name: Check out Git repository
-        uses: actions/checkout@v1
+        uses: actions/checkout@v2
 
       - name: Install Node.js, NPM and Yarn
-        uses: actions/setup-node@v1
+        uses: actions/setup-node@v2
         with:
           node-version: 12
 
       - uses: actions/cache@v2
         with:
           path: '**/node_modules'
-          key: ${{ runner.os }}-modulesTWO-${{ hashFiles('**/yarn.lock') }}
+          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
 
       - name: Install Yarn Packages
         if: steps.yarn-cache.outputs.cache-hit != 'true'
@@ -46,8 +46,7 @@ jobs:
         env:
           SSH_PRIVATE_KEY: ${{ secrets.WEB_SERVER_SSH_KEY }}
           ARGS: '-rltgoDzvO --delete --exclude "news.json"'
-          SOURCE: "dist/"
+          SOURCE: 'dist/'
           REMOTE_HOST: ${{ secrets.WEB_REMOTE_HOST }}
           REMOTE_USER: ${{ secrets.WEB_REMOTE_USER }}
           TARGET: ${{ secrets.WEB_REMOTE_TARGET }}
-
