@@ -11,6 +11,7 @@ import { millisecondsDiffToRemindOption } from '../util/remind-option-to-millise
 import { LS_LAST_IS_MOVE_SCHEDULED_TO_BACKLOG } from '../../../core/persistence/ls-keys.const';
 import { isToday } from '../../../util/is-today.util';
 import { DialogConfirmComponent } from '../../../ui/dialog-confirm/dialog-confirm.component';
+import { taskReminderOptions } from './task-reminder-options.const';
 
 @Component({
   selector: 'dialog-add-task-reminder',
@@ -31,35 +32,7 @@ export class DialogAddTaskReminderComponent {
     !!this.task.projectId && this.task.parentId === null && !this.task.repeatCfgId;
   isMoveToBacklog: boolean;
   // TODO make translatable
-  remindAvailableOptions: TaskReminderOption[] = [
-    {
-      // id: TaskReminderOptionId.DoNotRemind,
-      // title: 'Dont show reminder',
-      // }, {
-      id: TaskReminderOptionId.AtStart,
-      title: T.F.TASK.D_REMINDER_ADD.RO_START,
-    },
-    {
-      id: TaskReminderOptionId.m5,
-      title: T.F.TASK.D_REMINDER_ADD.RO_5M,
-    },
-    {
-      id: TaskReminderOptionId.m10,
-      title: T.F.TASK.D_REMINDER_ADD.RO_10M,
-    },
-    {
-      id: TaskReminderOptionId.m15,
-      title: T.F.TASK.D_REMINDER_ADD.RO_15M,
-    },
-    {
-      id: TaskReminderOptionId.m30,
-      title: T.F.TASK.D_REMINDER_ADD.RO_30M,
-    },
-    {
-      id: TaskReminderOptionId.h1,
-      title: T.F.TASK.D_REMINDER_ADD.RO_1H,
-    },
-  ];
+  remindAvailableOptions: TaskReminderOption[] = taskReminderOptions;
   selectedReminderCfgId: TaskReminderOptionId;
 
   constructor(
