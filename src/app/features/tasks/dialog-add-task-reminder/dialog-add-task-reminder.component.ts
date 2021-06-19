@@ -11,7 +11,7 @@ import { millisecondsDiffToRemindOption } from '../util/remind-option-to-millise
 import { LS_LAST_IS_MOVE_SCHEDULED_TO_BACKLOG } from '../../../core/persistence/ls-keys.const';
 import { isToday } from '../../../util/is-today.util';
 import { DialogConfirmComponent } from '../../../ui/dialog-confirm/dialog-confirm.component';
-import { taskReminderOptions } from './task-reminder-options.const';
+import { TASK_REMINDER_OPTIONS } from './task-reminder-options.const';
 
 @Component({
   selector: 'dialog-add-task-reminder',
@@ -32,7 +32,7 @@ export class DialogAddTaskReminderComponent {
     !!this.task.projectId && this.task.parentId === null && !this.task.repeatCfgId;
   isMoveToBacklog: boolean;
   // TODO make translatable
-  remindAvailableOptions: TaskReminderOption[] = taskReminderOptions;
+  remindAvailableOptions: TaskReminderOption[] = TASK_REMINDER_OPTIONS;
   selectedReminderCfgId: TaskReminderOptionId;
 
   constructor(

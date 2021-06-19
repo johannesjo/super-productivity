@@ -1,32 +1,32 @@
 import { TaskReminderOption, TaskReminderOptionId } from '../task.model';
 import { T } from '../../../t.const';
 
-export const taskReminderOptions: TaskReminderOption[] = [
+export const TASK_REMINDER_OPTIONS: TaskReminderOption[] = [
   {
     // id: TaskReminderOptionId.DoNotRemind,
     // title: 'Dont show reminder',
     // }, {
-    id: TaskReminderOptionId.AtStart,
-    title: T.F.TASK.D_REMINDER_ADD.RO_START,
+    value: TaskReminderOptionId.AtStart,
+    label: T.F.TASK.D_REMINDER_ADD.RO_START,
   },
   {
-    id: TaskReminderOptionId.m5,
-    title: T.F.TASK.D_REMINDER_ADD.RO_5M,
+    value: TaskReminderOptionId.m5,
+    label: T.F.TASK.D_REMINDER_ADD.RO_5M,
   },
   {
-    id: TaskReminderOptionId.m10,
-    title: T.F.TASK.D_REMINDER_ADD.RO_10M,
+    value: TaskReminderOptionId.m10,
+    label: T.F.TASK.D_REMINDER_ADD.RO_10M,
   },
   {
-    id: TaskReminderOptionId.m15,
-    title: T.F.TASK.D_REMINDER_ADD.RO_15M,
+    value: TaskReminderOptionId.m15,
+    label: T.F.TASK.D_REMINDER_ADD.RO_15M,
   },
   {
-    id: TaskReminderOptionId.m30,
-    title: T.F.TASK.D_REMINDER_ADD.RO_30M,
+    value: TaskReminderOptionId.m30,
+    label: T.F.TASK.D_REMINDER_ADD.RO_30M,
   },
   {
-    id: TaskReminderOptionId.h1,
-    title: T.F.TASK.D_REMINDER_ADD.RO_1H,
+    value: TaskReminderOptionId.h1,
+    label: T.F.TASK.D_REMINDER_ADD.RO_1H,
   },
 ];

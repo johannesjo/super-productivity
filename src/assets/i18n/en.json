@@ -788,6 +788,8 @@
         "IS_ADD_TO_BOTTOM": "Move task to bottom of list",
         "MONDAY": "Monday",
         "SATURDAY": "Saturday",
+        "REMIND_AT": "Remind at",
+        "REMIND_AT_PLACEHOLDER": "Select when to remind",
         "START_TIME": "Scheduled start time",
         "START_TIME_DESCRIPTION": "E.g. 15:00. Leave blank for an all day task",
         "SUNDAY": "Sunday",

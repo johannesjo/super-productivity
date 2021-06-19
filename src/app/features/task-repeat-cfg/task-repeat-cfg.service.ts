@@ -34,6 +34,7 @@ import { WorkContextType } from '../work-context/work-context.model';
 import { isValidSplitTime } from '../../util/is-valid-split-time';
 import { getDateTimeFromClockString } from '../../util/get-date-time-from-clock-string';
 import { isSameDay } from '../../util/is-same-day';
+import { remindOptionToMilliseconds } from '../tasks/util/remind-option-to-milliseconds';
 
 @Injectable({
   providedIn: 'root',
@@ -191,7 +192,7 @@ export class TaskRepeatCfgService {
     ];
 
     // Schedule if given
-    if (isValidSplitTime(taskRepeatCfg.startTime)) {
+    if (isValidSplitTime(taskRepeatCfg.startTime) && taskRepeatCfg.remindAt) {
       const dateTime = getDateTimeFromClockString(
         taskRepeatCfg.startTime as string,
         targetDayDate,
@@ -200,7 +201,7 @@ export class TaskRepeatCfgService {
         new ScheduleTask({
           task,
           plannedAt: dateTime,
-          remindAt: dateTime,
+          remindAt: remindOptionToMilliseconds(dateTime, taskRepeatCfg.remindAt),
           isMoveToBacklog: false,
         }),
       );

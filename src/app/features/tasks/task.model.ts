@@ -30,8 +30,8 @@ export enum TaskReminderOptionId {
 }
 
 export interface TaskReminderOption {
-  id: TaskReminderOptionId;
-  title: string;
+  value: TaskReminderOptionId;
+  label: string;
 }
 
 export interface TimeSpentOnDayCopy {
