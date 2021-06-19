@@ -613,12 +613,12 @@ export const taskReducer = (
     // REMINDER STUFF
     // --------------
     case TaskActionTypes.ScheduleTask: {
-      const { task, remindAt } = (action as ScheduleTask).payload;
+      const { task, plannedAt } = (action as ScheduleTask).payload;
       return taskAdapter.updateOne(
         {
           id: task.id,
           changes: {
-            plannedAt: remindAt,
+            plannedAt,
           },
         },
         state,
