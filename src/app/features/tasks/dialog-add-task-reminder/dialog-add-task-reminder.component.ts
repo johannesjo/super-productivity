@@ -26,7 +26,7 @@ export class DialogAddTaskReminderComponent {
 
   dateTime?: number = this.task.plannedAt || undefined;
   isShowMoveToBacklog: boolean =
-    !this.isEdit && !!this.task.projectId && this.task.parentId === null;
+    !!this.task.projectId && this.task.parentId === null && !this.task.repeatCfgId;
   isMoveToBacklog: boolean;
   // TODO make translatable
   remindAvailableOptions: TaskReminderOption[] = [
@@ -75,16 +75,22 @@ export class DialogAddTaskReminderComponent {
       this.selectedReminderCfgId = TaskReminderOptionId.AtStart;
     }
 
+    // default move to backlog setting
+    // -------------------------------
     const lsLastIsMoveToBacklog = localStorage.getItem(
       LS_LAST_IS_MOVE_SCHEDULED_TO_BACKLOG,
     );
     // NOTE: JSON.parse is good for parsing string booleans
     const lastIsMoveToBacklog =
       lsLastIsMoveToBacklog && JSON.parse(lsLastIsMoveToBacklog);
-    this.isMoveToBacklog =
-      this.isShowMoveToBacklog && typeof lastIsMoveToBacklog === 'boolean'
-        ? lastIsMoveToBacklog
-        : this.isShowMoveToBacklog;
+    if (this.isEdit) {
+      this.isMoveToBacklog = false;
+    } else {
+      this.isMoveToBacklog =
+        this.isShowMoveToBacklog && typeof lastIsMoveToBacklog === 'boolean'
+          ? lastIsMoveToBacklog
+          : this.isShowMoveToBacklog;
+    }
   }
 
   // NOTE: throttle is used as quick way to prevent multiple submits

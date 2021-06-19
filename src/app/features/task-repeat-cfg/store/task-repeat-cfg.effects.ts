@@ -20,12 +20,7 @@ import {
 import { selectTaskRepeatCfgFeatureState } from './task-repeat-cfg.reducer';
 import { PersistenceService } from '../../../core/persistence/persistence.service';
 import { Task, TaskArchive, TaskWithSubTasks } from '../../tasks/task.model';
-import {
-  AddTask,
-  MoveToArchive,
-  UnScheduleTask,
-  UpdateTask,
-} from '../../tasks/store/task.actions';
+import { AddTask, UnScheduleTask, UpdateTask } from '../../tasks/store/task.actions';
 import { TaskService } from '../../tasks/task.service';
 import { TaskRepeatCfgService } from '../task-repeat-cfg.service';
 import {
@@ -33,7 +28,7 @@ import {
   TaskRepeatCfg,
   TaskRepeatCfgState,
 } from '../task-repeat-cfg.model';
-import { from } from 'rxjs';
+import { from, merge } from 'rxjs';
 import { isToday } from '../../../util/is-today.util';
 import { WorkContextService } from '../../work-context/work-context.service';
 import { setActiveWorkContext } from '../../work-context/store/work-context.actions';
@@ -55,10 +50,16 @@ export class TaskRepeatCfgEffects {
     tap(this._saveToLs.bind(this)),
   );
 
-  @Effect() createRepeatableTasks: any = this._actions$.pipe(
-    ofType(setActiveWorkContext),
-    concatMap(() => this._syncService.afterInitialSyncDoneAndDataLoadedInitially$),
-    delay(1000),
+  private triggerRepeatableTaskCreation$ = merge(
+    this._syncService.afterInitialSyncDoneAndDataLoadedInitially$.pipe(delay(1000)),
+    this._actions$.pipe(
+      ofType(setActiveWorkContext),
+      concatMap(() => this._syncService.afterInitialSyncDoneAndDataLoadedInitially$),
+      delay(1000),
+    ),
+  );
+
+  @Effect() createRepeatableTasks: any = this.triggerRepeatableTaskCreation$.pipe(
     concatMap(() => this._taskRepeatCfgService.taskRepeatCfgs$.pipe(take(1))),
     // filter out the configs which have been created today already
     // and those which are not scheduled for the current week day
@@ -73,6 +74,7 @@ export class TaskRepeatCfgEffects {
         )
       );
     }),
+    // ===> taskRepeatCfgs scheduled for today and not yet created already
     filter((taskRepeatCfgs) => taskRepeatCfgs && !!taskRepeatCfgs.length),
 
     // existing tasks with sub tasks are loaded, because need to move them to the archive
@@ -85,17 +87,25 @@ export class TaskRepeatCfgEffects {
             .getTasksWithSubTasksByRepeatCfgId$(taskRepeatCfg.id as string)
             .pipe(
               take(1),
-              concatMap((tasks: Task[]) => {
+              concatMap((existingTaskInstances: Task[]) => {
                 const isCreateNew =
-                  tasks.filter((task) => isToday(task.created)).length === 0;
-                const moveToArchiveActions: (
-                  | MoveToArchive
-                  | AddTask
-                  | UpdateTaskRepeatCfg
-                )[] = isCreateNew
-                  ? tasks
-                      .filter((task) => isToday(task.created))
-                      .map((task) => new MoveToArchive({ tasks: [task] }))
+                  existingTaskInstances.filter((task) => isToday(task.created)).length ===
+                  0;
+
+                const markAsDoneActions: UpdateTask[] = isCreateNew
+                  ? existingTaskInstances
+                      .filter((task) => !task.isDone && !isToday(task.created))
+                      .map(
+                        (task) =>
+                          new UpdateTask({
+                            task: {
+                              id: task.id,
+                              changes: {
+                                isDone: true,
+                              },
+                            },
+                          }),
+                      )
                   : [];
 
                 if (!taskRepeatCfg.id) {
@@ -106,7 +116,7 @@ export class TaskRepeatCfgEffects {
                   !taskRepeatCfg.projectId && !taskRepeatCfg.tagIds.length;
 
                 return from([
-                  ...moveToArchiveActions,
+                  ...markAsDoneActions,
                   ...(isCreateNew
                     ? [
                         new AddTask({

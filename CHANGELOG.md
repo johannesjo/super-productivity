@@ -1,3 +1,28 @@
+# [7.1.0](https://github.com/johannesjo/super-productivity/compare/v7.0.4...v7.1.0) (2021-06-19)
+
+## [7.0.4](https://github.com/johannesjo/super-productivity/compare/v7.0.2...v7.0.4) (2021-06-18)
+
+### Bug Fixes
+
+- change automatic translation of the 'Remote' word ([55f8b5a](https://github.com/johannesjo/super-productivity/commit/55f8b5a0e6e9892506771576df2306e12c129566))
+- **search:** add info text ([2b4b06e](https://github.com/johannesjo/super-productivity/commit/2b4b06e7d203efd95c41fcb3024d309ff9e2a0b6))
+- **search:** fix \_getArchivedDate() ([b53c0f9](https://github.com/johannesjo/super-productivity/commit/b53c0f97056e5bb1cb00b4270c6172febe064e9e))
+- **search:** fix mobile autocomplete list ([da67484](https://github.com/johannesjo/super-productivity/commit/da67484f31dd7003f28dfbb5a64ecbea281875df))
+- **search:** fix mobile highlighting ([3634323](https://github.com/johannesjo/super-productivity/commit/3634323f2185d64e4cf9cfe0ff748bd7c2bcb950))
+- **search:** fix search icon and config version ([11ae5e4](https://github.com/johannesjo/super-productivity/commit/11ae5e4502671eb04f13e9497af73b99a6b75106))
+- **search:** minor changes ([91aace2](https://github.com/johannesjo/super-productivity/commit/91aace26ec1e91e60d9089c5af8481a74cb3a7b4))
+
+### Features
+
+- **repeat:** always add today tag per default to repeating tasks ([988f03f](https://github.com/johannesjo/super-productivity/commit/988f03fdfd4b5dea54b8c02cc0994a84ddfbc6a7))
+- **repeat:** create repeatable tasks right away [#1297](https://github.com/johannesjo/super-productivity/issues/1297) ([7df2202](https://github.com/johannesjo/super-productivity/commit/7df2202df25184db671e1b143f6b2136164d9038))
+- **repeat:** mark existing task instances as done rather than copying them to the archive [#1297](https://github.com/johannesjo/super-productivity/issues/1297) ([a6bfcd9](https://github.com/johannesjo/super-productivity/commit/a6bfcd9f3dd03964e30d42b38591064dce2cd3df))
+- double inMemoryComplete debounceTime ([5f22df2](https://github.com/johannesjo/super-productivity/commit/5f22df2396a2dea55c01b4f5e690ff56416c718a))
+- shorten error model string ([c643eb7](https://github.com/johannesjo/super-productivity/commit/c643eb763bd026a73be63e6cc3fc1bba51a65dc9))
+- update migration for task archive ([cae3353](https://github.com/johannesjo/super-productivity/commit/cae3353473b2b3bfc59279b14c5fd58e033d2077))
+- **search:** add search bar [#547](https://github.com/johannesjo/super-productivity/issues/547) ([36ff649](https://github.com/johannesjo/super-productivity/commit/36ff649bb589dc39becdae2b4e588175265c70dc))
+- **search:** allow switching to archived tasks ([c50c7bf](https://github.com/johannesjo/super-productivity/commit/c50c7bf0d5cc9784c1bda774cdf6deff490dbee8))
+
 ## [7.0.3](https://github.com/johannesjo/super-productivity/compare/v7.0.2...v7.0.3) (2021-06-11)
 
 ## [7.0.2](https://github.com/johannesjo/super-productivity/compare/v7.0.1...v7.0.2) (2021-06-11)
