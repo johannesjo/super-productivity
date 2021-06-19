@@ -61,10 +61,10 @@
             [event]="row.data"
           ></timeline-custom-event>
 
-          <timeline-custom-event
+          <timeline-task-repeat-projection
             *ngSwitchCase="TimelineViewEntryType.ScheduledRepeatTaskProjection"
-            [event]="row.data"
-          ></timeline-custom-event>
+            [repeatCfg]="row.data"
+          ></timeline-task-repeat-projection>
 
           <div
             *ngSwitchCase="TimelineViewEntryType.WorkdayStart"
