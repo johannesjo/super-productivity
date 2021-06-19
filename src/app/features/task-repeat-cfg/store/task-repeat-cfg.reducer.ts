@@ -47,6 +47,13 @@ export const selectTaskRepeatCfgById = createSelector(
   },
 );
 
+export const selectTaskRepeatCfgsWithStartTime = createSelector(
+  selectAllTaskRepeatCfgs,
+  (taskRepeatCfgs: TaskRepeatCfg[]): TaskRepeatCfg[] => {
+    return taskRepeatCfgs.filter((cfg) => !!cfg.startTime);
+  },
+);
+
 // filter out the configs which have been created today already
 // and those which are not scheduled for the current week day
 export const selectTaskRepeatCfgsDueOnDay = createSelector(

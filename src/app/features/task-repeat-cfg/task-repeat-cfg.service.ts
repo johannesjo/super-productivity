@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { select, Store } from '@ngrx/store';
 import {
   selectAllTaskRepeatCfgs,
+  selectTaskRepeatCfgsWithStartTime,
   selectTaskRepeatCfgById,
   selectTaskRepeatCfgByIdAllowUndefined,
   selectTaskRepeatCfgsDueOnDay,
@@ -42,6 +43,10 @@ import { remindOptionToMilliseconds } from '../tasks/util/remind-option-to-milli
 export class TaskRepeatCfgService {
   taskRepeatCfgs$: Observable<TaskRepeatCfg[]> = this._store$.pipe(
     select(selectAllTaskRepeatCfgs),
+  );
+
+  taskRepeatCfgsWithStartTime$: Observable<TaskRepeatCfg[]> = this._store$.pipe(
+    select(selectTaskRepeatCfgsWithStartTime),
   );
 
   constructor(
