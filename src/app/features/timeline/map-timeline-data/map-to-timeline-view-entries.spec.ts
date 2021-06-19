@@ -1,5 +1,5 @@
 import { mapToTimelineViewEntries } from './map-to-timeline-view-entries';
-import { TaskCopy } from '../../tasks/task.model';
+import { TaskCopy, TaskReminderOptionId } from '../../tasks/task.model';
 import { TimelineViewEntryType } from '../timeline.const';
 import { getDateTimeFromClockString } from '../../../util/get-date-time-from-clock-string';
 
@@ -1085,6 +1085,64 @@ describe('mapToViewEntries()', () => {
       expect(r[0].type).toEqual(TimelineViewEntryType.ScheduledTask);
       expect(r[1].type).toEqual(TimelineViewEntryType.Task);
       expect(r[1].start).toEqual(getDateTimeFromClockString('14:00', 0));
+    });
+  });
+
+  describe('repeatTaskProjections', () => {
+    it('should work for repeat task projections', () => {
+      const d = {
+        tasks: [
+          {
+            timeSpent: 0,
+            timeEstimate: hours(5),
+            title: 'Task',
+            reminderId: null,
+            plannedAt: null,
+          },
+        ],
+        scheduledTasks: [],
+        repeatTaskProjections: [
+          {
+            id: 'R1',
+            title: 'Repeat 1 10:00',
+            startTime: '10:00',
+            lastTaskCreation: 0,
+            defaultEstimate: hours(1),
+            monday: false,
+            tuesday: false,
+            wednesday: false,
+            thursday: false,
+            friday: true,
+            saturday: false,
+            sunday: false,
+
+            projectId: null,
+            remindAt: TaskReminderOptionId.AtStart,
+            isAddToBottom: true,
+            tagIds: [],
+          },
+        ],
+        workStartEndCfg: { startTime: '14:00', endTime: '20:00' },
+        now: getDateTimeFromClockString('12:00', 0),
+      } as any;
+      const r = mapToTimelineViewEntries(
+        d.tasks,
+        d.scheduledTasks,
+        d.repeatTaskProjections,
+        'SCHEDULED_CURRENT_ID',
+        d.workStartEndCfg,
+        d.now,
+      );
+
+      expect(r[0].type).toEqual(TimelineViewEntryType.Task);
+      expect(r[1].type).toEqual(TimelineViewEntryType.WorkdayEnd);
+      expect(r[2].type).toEqual(TimelineViewEntryType.DayCrossing);
+      expect(r[3].type).toEqual(TimelineViewEntryType.ScheduledRepeatTaskProjection);
+      expect(r[4].type).toEqual(TimelineViewEntryType.DayCrossing);
+
+      expect(r[3].start).toEqual(
+        getDateTimeFromClockString('10:00', 24 * 60 * 60 * 1000),
+      );
     });
   });
 });
