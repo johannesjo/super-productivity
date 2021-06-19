@@ -11,7 +11,7 @@ import {
   TaskRepeatCfg,
 } from '../../task-repeat-cfg/task-repeat-cfg.model';
 
-const PROJECTION_DAYS: number = 30;
+const PROJECTION_DAYS: number = 29;
 
 export const createSortedBlockerBlocks = (
   scheduledTasks: TaskPlanned[],

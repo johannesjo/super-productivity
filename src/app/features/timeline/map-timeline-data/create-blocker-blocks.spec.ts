@@ -40,7 +40,7 @@ describe('createBlockerBlocks()', () => {
         plannedAt: getDateTimeFromClockString('12:30', 0),
       },
     ] as any;
-    const r = createSortedBlockerBlocks(fakeTasks, undefined, 0);
+    const r = createSortedBlockerBlocks(fakeTasks, [], undefined, 0);
     expect(r.length).toEqual(1);
     expect(r[0].start).toEqual(getDateTimeFromClockString('9:20', 0));
     expect(r[0].end).toEqual(getDateTimeFromClockString('14:30', 0));
@@ -89,7 +89,7 @@ describe('createBlockerBlocks()', () => {
         plannedAt: getDateTimeFromClockString('17:30', 0),
       },
     ] as any;
-    const r = createSortedBlockerBlocks(fakeTasks, undefined, 0);
+    const r = createSortedBlockerBlocks(fakeTasks, [], undefined, 0);
     expect(r.length).toEqual(2);
     expect(r[0].start).toEqual(getDateTimeFromClockString('9:20', 0));
     expect(r[0].end).toEqual(getDateTimeFromClockString('14:00', 0));
@@ -125,7 +125,7 @@ describe('createBlockerBlocks()', () => {
         plannedAt: getDateTimeFromClockString('17:00', 0),
       },
     ] as any;
-    const r = createSortedBlockerBlocks(fakeTasks, undefined, 0);
+    const r = createSortedBlockerBlocks(fakeTasks, [], undefined, 0);
     expect(r.length).toEqual(1);
     expect(r[0].start).toEqual(getDateTimeFromClockString('15:00', 0));
     expect(r[0].end).toEqual(getDateTimeFromClockString('19:00', 0));
@@ -155,7 +155,7 @@ describe('createBlockerBlocks()', () => {
       },
     ] as any;
 
-    const r = createSortedBlockerBlocks(fakeTasks, undefined, 0);
+    const r = createSortedBlockerBlocks(fakeTasks, [], undefined, 0);
 
     expect(r.length).toEqual(2);
     expect(r).toEqual([
@@ -229,7 +229,7 @@ describe('createBlockerBlocks()', () => {
       },
     ] as any;
 
-    const r = createSortedBlockerBlocks(fakeTasks, undefined, 0);
+    const r = createSortedBlockerBlocks(fakeTasks, [], undefined, 0);
 
     expect(r.length).toEqual(3);
 
@@ -327,7 +327,7 @@ describe('createBlockerBlocks()', () => {
         issueWasUpdated: null,
       },
     ] as any;
-    const r = createSortedBlockerBlocks(fakeTasks, undefined, 0);
+    const r = createSortedBlockerBlocks(fakeTasks, [], undefined, 0);
 
     expect(r.length).toEqual(1);
     expect(r[0].start).toEqual(
@@ -423,6 +423,7 @@ describe('createBlockerBlocks()', () => {
 
       const r = createSortedBlockerBlocks(
         fakeTasks,
+        [],
         {
           startTime: '9:00',
           endTime: '17:00',

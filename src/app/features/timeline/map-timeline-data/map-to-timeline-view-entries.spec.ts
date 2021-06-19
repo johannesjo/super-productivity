@@ -19,7 +19,7 @@ describe('mapToViewEntries()', () => {
     it('should work for simple task list', () => {
       const now = 33;
       const nonScheduledTasks = [{ ...FAKE_TASK, timeEstimate: 5000 }, { ...FAKE_TASK }];
-      const r = mapToTimelineViewEntries(nonScheduledTasks, [], null, undefined, now);
+      const r = mapToTimelineViewEntries(nonScheduledTasks, [], [], null, undefined, now);
       expect(r).toEqual([
         {
           id: nonScheduledTasks[0].id,
@@ -48,7 +48,7 @@ describe('mapToViewEntries()', () => {
         { ...FAKE_TASK, timeEstimate: hours(1.5), timeSpent: hours(0.25) },
         { ...FAKE_TASK },
       ];
-      const r = mapToTimelineViewEntries(nonScheduledTasks, [], null, undefined, now);
+      const r = mapToTimelineViewEntries(nonScheduledTasks, [], [], null, undefined, now);
       expect(r).toEqual([
         {
           id: FID,
@@ -105,7 +105,7 @@ describe('mapToViewEntries()', () => {
         { ...FAKE_TASK, timeEstimate: 3000, timeSpent: 1000 },
         { ...FAKE_TASK },
       ];
-      const r = mapToTimelineViewEntries(nonScheduledTasks, [], null, undefined, now);
+      const r = mapToTimelineViewEntries(nonScheduledTasks, [], [], null, undefined, now);
       expect(r).toEqual([
         {
           id: FID,
@@ -159,7 +159,7 @@ describe('mapToViewEntries()', () => {
         { ...FAKE_TASK, timeSpent: 21014, timeEstimate: 900000 },
         { ...FAKE_TASK, timeEstimate: 1800000, timeSpent: 148998 },
       ];
-      const r = mapToTimelineViewEntries(nonScheduledTasks, [], null, undefined, now);
+      const r = mapToTimelineViewEntries(nonScheduledTasks, [], [], null, undefined, now);
       expect(r).toEqual([
         {
           id: FID,
@@ -195,7 +195,7 @@ describe('mapToViewEntries()', () => {
           plannedAt: getDateTimeFromClockString('10:25', 0),
         },
       ];
-      const r = mapToTimelineViewEntries([], scheduledTasks, null, undefined, now);
+      const r = mapToTimelineViewEntries([], scheduledTasks, [], null, undefined, now);
       expect(r.length).toBe(1);
     });
 
@@ -211,7 +211,7 @@ describe('mapToViewEntries()', () => {
           plannedAt: getDateTimeFromClockString('10:25', 0),
         },
       ];
-      const r = mapToTimelineViewEntries([], scheduledTasks, null, undefined, now);
+      const r = mapToTimelineViewEntries([], scheduledTasks, [], null, undefined, now);
       expect(r.length).toBe(1);
     });
 
@@ -227,7 +227,7 @@ describe('mapToViewEntries()', () => {
           plannedAt: getDateTimeFromClockString('10:25', 0),
         },
       ];
-      const r = mapToTimelineViewEntries(nonScheduledTasks, [], null, undefined, now);
+      const r = mapToTimelineViewEntries(nonScheduledTasks, [], [], null, undefined, now);
       expect(r.length).toBe(1);
     });
 
@@ -253,6 +253,7 @@ describe('mapToViewEntries()', () => {
       const r = mapToTimelineViewEntries(
         nonScheduledTasks,
         scheduledTasks,
+        [],
         null,
         undefined,
         now,
@@ -335,6 +336,7 @@ describe('mapToViewEntries()', () => {
       const r = mapToTimelineViewEntries(
         nonScheduledTasks,
         scheduledTasks,
+        [],
         null,
         undefined,
         now,
@@ -381,6 +383,7 @@ describe('mapToViewEntries()', () => {
       const r = mapToTimelineViewEntries(
         nonScheduledTasks,
         scheduledTasks,
+        [],
         null,
         undefined,
         now,
@@ -459,6 +462,7 @@ describe('mapToViewEntries()', () => {
       const r = mapToTimelineViewEntries(
         nonScheduledTasks,
         scheduledTasks,
+        [],
         null,
         undefined,
         now,
@@ -561,6 +565,7 @@ describe('mapToViewEntries()', () => {
       const r = mapToTimelineViewEntries(
         nonScheduledTasks,
         scheduledTasks,
+        [],
         null,
         undefined,
         now,
@@ -721,6 +726,7 @@ describe('mapToViewEntries()', () => {
       const r = mapToTimelineViewEntries(
         [normalTask],
         [scheduledTask],
+        [],
         null,
         undefined,
         now,
@@ -776,6 +782,7 @@ describe('mapToViewEntries()', () => {
       const r = mapToTimelineViewEntries(
         nonScheduledTasks,
         scheduledTasks,
+        [],
         null,
         undefined,
         now,
@@ -842,6 +849,7 @@ describe('mapToViewEntries()', () => {
       const r = mapToTimelineViewEntries(
         [normalTask],
         [scheduledTask],
+        [],
         null,
         undefined,
         now,
@@ -895,6 +903,7 @@ describe('mapToViewEntries()', () => {
       const r = mapToTimelineViewEntries(
         [longTask],
         [scheduledTask],
+        [],
         null,
         { startTime: '9:00', endTime: '17:00' },
         now,
@@ -1022,6 +1031,7 @@ describe('mapToViewEntries()', () => {
       const r = mapToTimelineViewEntries(
         d.tasks,
         d.scheduledTasks,
+        [],
         null,
         d.workStartEndCfg,
         d.now,
@@ -1066,6 +1076,7 @@ describe('mapToViewEntries()', () => {
       const r = mapToTimelineViewEntries(
         d.tasks,
         d.scheduledTasks,
+        [],
         'SCHEDULED_CURRENT_ID',
         d.workStartEndCfg,
         d.now,
