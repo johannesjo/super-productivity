@@ -3258,7 +3258,7 @@ cdav-library@nextcloud/cdav-library:
   version "0.0.1"
   resolved "https://codeload.github.com/nextcloud/cdav-library/tar.gz/8a8d42fad2a9bc9567b353c49559438347d110ee"
   dependencies:
-    core-js "^3.14.0"
+    core-js "^3.10.0"
     regenerator-runtime "^0.13.7"
 
 chai-nightwatch@^0.4.0:
@@ -12658,10 +12658,10 @@ wcwidth@^1.0.1:
   dependencies:
     defaults "^1.0.3"
 
-webdav@^4.3.0:
-  version "4.6.0"
-  resolved "https://registry.yarnpkg.com/webdav/-/webdav-4.6.0.tgz#b12d3631562ed4a7d665dd1757349682dfc8f441"
-  integrity sha512-amL/NeZ73xe8cNC+uqAF3mOC/j5dNoNWlZswYCd7DKxhnZM7dViAVSv6gdCYeGAETjPEZVubcKDDRwGKz9ShQQ==
+webdav@~4.3.0:
+  version "4.3.0"
+  resolved "https://registry.yarnpkg.com/webdav/-/webdav-4.3.0.tgz#518f69a7c0ddf2e05f34b8160135bddb10bbf919"
+  integrity sha512-Fa8mw2OmdxCEWO4EO8po7h5t1Av4Mjbn4S4CwTT4TPwF1I58V1eF/lZfr8M2Cc+pYted45Y5ku0S7d1HUVcEgQ==
   dependencies:
     axios "^0.21.1"
     base-64 "^1.0.0"
