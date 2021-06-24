@@ -133,10 +133,11 @@ export class TaskService {
     // NOTE: we can't use share here, as we need the last emitted value
   );
 
-  taskAdditionalInfoTargetPanel$: Observable<TaskAdditionalInfoTargetPanel | null> = this._store.pipe(
-    select(selectTaskAdditionalInfoTargetPanel),
-    // NOTE: we can't use share here, as we need the last emitted value
-  );
+  taskAdditionalInfoTargetPanel$: Observable<TaskAdditionalInfoTargetPanel | null> =
+    this._store.pipe(
+      select(selectTaskAdditionalInfoTargetPanel),
+      // NOTE: we can't use share here, as we need the last emitted value
+    );
 
   currentTaskOrCurrentParent$: Observable<TaskWithSubTasks | null> = this._store.pipe(
     select(selectCurrentTaskOrParentWithData),
@@ -750,7 +751,8 @@ export class TaskService {
 
   async getAllTasksForProject(projectId: string): Promise<Task[]> {
     const allTasks = await this._allTasksWithSubTaskData$.pipe(first()).toPromise();
-    const archiveTaskState: TaskArchive = await this._persistenceService.taskArchive.loadState();
+    const archiveTaskState: TaskArchive =
+      await this._persistenceService.taskArchive.loadState();
     const ids = (archiveTaskState && (archiveTaskState.ids as string[])) || [];
     const archiveTasks = ids.map((id) => archiveTaskState.entities[id]);
     return [...allTasks, ...archiveTasks].filter(
@@ -759,9 +761,8 @@ export class TaskService {
   }
 
   async getArchivedTasks(): Promise<Task[]> {
-    const archiveTaskState: TaskArchive = await this._persistenceService.taskArchive.loadState(
-      true,
-    );
+    const archiveTaskState: TaskArchive =
+      await this._persistenceService.taskArchive.loadState(true);
     const ids = (archiveTaskState && (archiveTaskState.ids as string[])) || [];
     const archiveTasks = ids.map((id) => archiveTaskState.entities[id]) as Task[];
     return archiveTasks;
@@ -816,7 +817,8 @@ export class TaskService {
         subTasks: null,
       };
     } else {
-      const archiveTaskState: TaskArchive = await this._persistenceService.taskArchive.loadState();
+      const archiveTaskState: TaskArchive =
+        await this._persistenceService.taskArchive.loadState();
       const ids = archiveTaskState && (archiveTaskState.ids as string[]);
       if (ids) {
         const archiveTaskWithSameIssue = ids

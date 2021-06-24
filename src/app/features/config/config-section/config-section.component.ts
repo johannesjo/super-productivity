@@ -123,9 +123,8 @@ export class ConfigSectionComponent implements OnInit, OnDestroy {
     const componentToRender = customConfigFormSectionComponent(customSection);
 
     if (componentToRender) {
-      const factory: ComponentFactory<any> = this._componentFactoryResolver.resolveComponentFactory(
-        componentToRender as any,
-      );
+      const factory: ComponentFactory<any> =
+        this._componentFactoryResolver.resolveComponentFactory(componentToRender as any);
       const ref = exists<any>(this.customFormRef).createComponent(factory);
 
       // NOTE: important that this is set only if we actually have a value

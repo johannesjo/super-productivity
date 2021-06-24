@@ -55,35 +55,36 @@ export class GithubIssueEffects {
       ),
     ),
   );
-  private _updateIssuesForCurrentContext$: Observable<any> = this._workContextService.allTasksForCurrentContext$.pipe(
-    first(),
-    switchMap((tasks) => {
-      const gitIssueTasks = tasks.filter((task) => task.issueType === GITHUB_TYPE);
-      return forkJoin(
-        gitIssueTasks.map((task) => {
-          if (!task.projectId) {
-            throw new Error('No project for task');
-          }
-          return this._projectService.getGithubCfgForProject$(task.projectId).pipe(
-            first(),
-            map((cfg) => ({
-              cfg,
-              task,
-            })),
-          );
-        }),
-      );
-    }),
-    map((cos) =>
-      cos
-        .filter(
-          ({ cfg, task }: { cfg: GithubCfg; task: TaskWithSubTasks }): boolean =>
-            isGithubEnabled(cfg) && cfg.isAutoPoll,
-        )
-        .map(({ task }: { cfg: GithubCfg; task: TaskWithSubTasks }) => task),
-    ),
-    tap((githubTasks: TaskWithSubTasks[]) => this._refreshIssues(githubTasks)),
-  );
+  private _updateIssuesForCurrentContext$: Observable<any> =
+    this._workContextService.allTasksForCurrentContext$.pipe(
+      first(),
+      switchMap((tasks) => {
+        const gitIssueTasks = tasks.filter((task) => task.issueType === GITHUB_TYPE);
+        return forkJoin(
+          gitIssueTasks.map((task) => {
+            if (!task.projectId) {
+              throw new Error('No project for task');
+            }
+            return this._projectService.getGithubCfgForProject$(task.projectId).pipe(
+              first(),
+              map((cfg) => ({
+                cfg,
+                task,
+              })),
+            );
+          }),
+        );
+      }),
+      map((cos) =>
+        cos
+          .filter(
+            ({ cfg, task }: { cfg: GithubCfg; task: TaskWithSubTasks }): boolean =>
+              isGithubEnabled(cfg) && cfg.isAutoPoll,
+          )
+          .map(({ task }: { cfg: GithubCfg; task: TaskWithSubTasks }) => task),
+      ),
+      tap((githubTasks: TaskWithSubTasks[]) => this._refreshIssues(githubTasks)),
+    );
   @Effect({ dispatch: false })
   pollIssueChangesForCurrentContext$: Observable<any> = this._issueEffectHelperService.pollIssueTaskUpdatesActions$.pipe(
     switchMap(() => this._pollTimer$),

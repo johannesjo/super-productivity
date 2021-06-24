@@ -2,10 +2,10 @@ import { Injectable } from '@angular/core';
 import { select, Store } from '@ngrx/store';
 import {
   selectAllTaskRepeatCfgs,
-  selectTaskRepeatCfgsWithStartTime,
   selectTaskRepeatCfgById,
   selectTaskRepeatCfgByIdAllowUndefined,
   selectTaskRepeatCfgsDueOnDay,
+  selectTaskRepeatCfgsWithStartTime,
 } from './store/task-repeat-cfg.reducer';
 import {
   AddTaskRepeatCfgToTask,
@@ -157,23 +157,20 @@ export class TaskRepeatCfgService {
     }
 
     // move all current left over instances to archive right away
-    const markAsDoneActions: (
-      | UpdateTask
-      | AddTask
-      | UpdateTaskRepeatCfg
-    )[] = existingTaskInstances
-      .filter((taskI) => !taskI.isDone && !isSameDay(targetDayDate, taskI.created))
-      .map(
-        (taskI) =>
-          new UpdateTask({
-            task: {
-              id: taskI.id,
-              changes: {
-                isDone: true,
+    const markAsDoneActions: (UpdateTask | AddTask | UpdateTaskRepeatCfg)[] =
+      existingTaskInstances
+        .filter((taskI) => !taskI.isDone && !isSameDay(targetDayDate, taskI.created))
+        .map(
+          (taskI) =>
+            new UpdateTask({
+              task: {
+                id: taskI.id,
+                changes: {
+                  isDone: true,
+                },
               },
-            },
-          }),
-      );
+            }),
+        );
 
     const { task, isAddToBottom } = this._getTaskRepeatTemplate(taskRepeatCfg);
 
@@ -215,9 +212,10 @@ export class TaskRepeatCfgService {
     return [...markAsDoneActions, ...createNewActions];
   }
 
-  private _getTaskRepeatTemplate(
-    taskRepeatCfg: TaskRepeatCfg,
-  ): { task: Task; isAddToBottom: boolean } {
+  private _getTaskRepeatTemplate(taskRepeatCfg: TaskRepeatCfg): {
+    task: Task;
+    isAddToBottom: boolean;
+  } {
     const isAddToTodayAsFallback =
       !taskRepeatCfg.projectId && !taskRepeatCfg.tagIds.length;
     return {

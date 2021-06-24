@@ -90,24 +90,25 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
     map((tasks) => tasks && tasks.length),
   );
 
-  estimatedOnTasksWorkedOn$: Observable<number> = this.tasksWorkedOnOrDoneOrRepeatableFlat$.pipe(
-    withLatestFrom(this.dayStr$),
-    map(
-      ([tasks, dayStr]: [Task[], string]): number =>
-        tasks?.length &&
-        tasks.reduce((acc, task) => {
-          if (
-            task.subTaskIds.length ||
-            (!task.timeSpentOnDay && !(task.timeSpentOnDay[dayStr] > 0))
-          ) {
-            return acc;
-          }
-          const remainingEstimate =
-            task.timeEstimate + task.timeSpentOnDay[dayStr] - task.timeSpent;
-          return remainingEstimate > 0 ? acc + remainingEstimate : acc;
-        }, 0),
-    ),
-  );
+  estimatedOnTasksWorkedOn$: Observable<number> =
+    this.tasksWorkedOnOrDoneOrRepeatableFlat$.pipe(
+      withLatestFrom(this.dayStr$),
+      map(
+        ([tasks, dayStr]: [Task[], string]): number =>
+          tasks?.length &&
+          tasks.reduce((acc, task) => {
+            if (
+              task.subTaskIds.length ||
+              (!task.timeSpentOnDay && !(task.timeSpentOnDay[dayStr] > 0))
+            ) {
+              return acc;
+            }
+            const remainingEstimate =
+              task.timeEstimate + task.timeSpentOnDay[dayStr] - task.timeSpent;
+            return remainingEstimate > 0 ? acc + remainingEstimate : acc;
+          }, 0),
+      ),
+    );
 
   timeWorked$: Observable<number> = this.tasksWorkedOnOrDoneOrRepeatableFlat$.pipe(
     withLatestFrom(this.dayStr$),
@@ -323,9 +324,9 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
       } else {
         filteredTasks = archiveTasksI.filter((task) =>
           !!(task as Task).parentId
-            ? (taskState.entities[
-                (task as Task).parentId as string
-              ] as Task).tagIds.includes(activeId)
+            ? (
+                taskState.entities[(task as Task).parentId as string] as Task
+              ).tagIds.includes(activeId)
             : (task as Task).tagIds.includes(activeId),
         ) as Task[];
       }
@@ -390,13 +391,12 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
       map(_mapFilterToFlatToday),
     );
 
-    const todayTasks: Observable<
-      TaskWithSubTasks[]
-    > = this._taskService.taskFeatureState$.pipe(
-      withLatestFrom(this.workContextService.activeWorkContextTypeAndId$),
-      map(_mapEntities),
-      map(_mapFilterToFlatOrRepeatToday),
-    );
+    const todayTasks: Observable<TaskWithSubTasks[]> =
+      this._taskService.taskFeatureState$.pipe(
+        withLatestFrom(this.workContextService.activeWorkContextTypeAndId$),
+        map(_mapEntities),
+        map(_mapFilterToFlatOrRepeatToday),
+      );
 
     return combineLatest([todayTasks, archiveTasks]).pipe(
       map(([t1, t2]) => t1.concat(t2)),

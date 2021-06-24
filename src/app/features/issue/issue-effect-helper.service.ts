@@ -17,17 +17,20 @@ export class IssueEffectHelperService {
   pollToBacklogActions$: Observable<unknown> = this._actions$.pipe(
     ofType(setActiveWorkContext, ProjectActionTypes.UpdateProjectIssueProviderCfg),
   );
-  pollToBacklogTriggerToProjectId$: Observable<string> = this._syncService.afterInitialSyncDoneAndDataLoadedInitially$.pipe(
-    concatMap(() => this.pollToBacklogActions$),
-    switchMap(() => this._workContextService.isActiveWorkContextProject$.pipe(first())),
-    // NOTE: it's important that the filter is on top level otherwise the subscription is not canceled
-    filter((isProject) => isProject),
-    switchMap(
-      () =>
-        this._workContextService.activeWorkContextId$.pipe(first()) as Observable<string>,
-    ),
-    filter((projectId) => !!projectId),
-  );
+  pollToBacklogTriggerToProjectId$: Observable<string> =
+    this._syncService.afterInitialSyncDoneAndDataLoadedInitially$.pipe(
+      concatMap(() => this.pollToBacklogActions$),
+      switchMap(() => this._workContextService.isActiveWorkContextProject$.pipe(first())),
+      // NOTE: it's important that the filter is on top level otherwise the subscription is not canceled
+      filter((isProject) => isProject),
+      switchMap(
+        () =>
+          this._workContextService.activeWorkContextId$.pipe(
+            first(),
+          ) as Observable<string>,
+      ),
+      filter((projectId) => !!projectId),
+    );
 
   constructor(
     private _actions$: Actions,

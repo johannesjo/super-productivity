@@ -390,7 +390,8 @@ export class ProjectEffects {
   private async _removeAllArchiveTasksForProject(
     projectIdToDelete: string,
   ): Promise<any> {
-    const taskArchiveState: TaskArchive = await this._persistenceService.taskArchive.loadState();
+    const taskArchiveState: TaskArchive =
+      await this._persistenceService.taskArchive.loadState();
     // NOTE: task archive might not if there never was a day completed
     const archiveTaskIdsToDelete = !!taskArchiveState
       ? (taskArchiveState.ids as string[]).filter((id) => {
@@ -416,9 +417,8 @@ export class ProjectEffects {
   private async _removeAllRepeatingTasksForProject(
     projectIdToDelete: string,
   ): Promise<any> {
-    const taskRepeatCfgs: TaskRepeatCfg[] = await this._taskRepeatCfgService.taskRepeatCfgs$
-      .pipe(first())
-      .toPromise();
+    const taskRepeatCfgs: TaskRepeatCfg[] =
+      await this._taskRepeatCfgService.taskRepeatCfgs$.pipe(first()).toPromise();
     const allCfgIdsForProject = taskRepeatCfgs.filter(
       (cfg) => cfg.projectId === projectIdToDelete,
     );

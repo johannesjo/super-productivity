@@ -27,7 +27,8 @@ export const GITLAB_BASE_URL = 'https://gitlab.com/';
 
 export const GITLAB_API_BASE_URL = `${GITLAB_BASE_URL}api/v4/projects`;
 
-export const GITLAB_PROJECT_REGEX = /(^[1-9][0-9]*$)|((\w-?|\.-?)+((\/|%2F)(\w-?|\.-?)+)+$)/i;
+export const GITLAB_PROJECT_REGEX =
+  /(^[1-9][0-9]*$)|((\w-?|\.-?)+((\/|%2F)(\w-?|\.-?)+)+$)/i;
 
 export const GITLAB_CONFIG_FORM: LimitedFormlyFieldConfig<GitlabCfg>[] = [
   {
@@ -36,7 +37,8 @@ export const GITLAB_CONFIG_FORM: LimitedFormlyFieldConfig<GitlabCfg>[] = [
     templateOptions: {
       label: T.F.GITLAB.FORM.GITLAB_BASE_URL,
       type: 'text',
-      pattern: /((([A-Za-z]{3,9}:(?:\/\/)?)(?:[\-;:&=\+\$,\w]+@)?[A-Za-z0-9\.\-]+|(?:www\.|[\-;:&=\+\$,\w]+@)[A-Za-z0-9\.\-]+)((?:\/[\+~%\/\.\w\-_]*)?\??(?:[\-\+=&;%@\.\w_]*)#?(?:[\.\!\/\\\w]*))?)/,
+      pattern:
+        /((([A-Za-z]{3,9}:(?:\/\/)?)(?:[\-;:&=\+\$,\w]+@)?[A-Za-z0-9\.\-]+|(?:www\.|[\-;:&=\+\$,\w]+@)[A-Za-z0-9\.\-]+)((?:\/[\+~%\/\.\w\-_]*)?\??(?:[\-\+=&;%@\.\w_]*)#?(?:[\.\!\/\\\w]*))?)/,
     },
   },
   {
@@ -45,7 +47,8 @@ export const GITLAB_CONFIG_FORM: LimitedFormlyFieldConfig<GitlabCfg>[] = [
     templateOptions: {
       label: T.F.GITLAB.FORM.PROJECT,
       type: 'text',
-      pattern: /(^[1-9][0-9]*$)|((\w-?|\.-?)+((\/|%2F)(\w-?|\.-?)+)+$)|(^(\w-?|\.-?)+((\/|%2F)(\w-?|\.-?)+)+$)/i,
+      pattern:
+        /(^[1-9][0-9]*$)|((\w-?|\.-?)+((\/|%2F)(\w-?|\.-?)+)+$)|(^(\w-?|\.-?)+((\/|%2F)(\w-?|\.-?)+)+$)/i,
     },
   },
   {

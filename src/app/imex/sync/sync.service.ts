@@ -53,10 +53,11 @@ const MAX_WAIT_FOR_INITIAL_SYNC = 25000;
   providedIn: 'root',
 })
 export class SyncService {
-  inMemoryComplete$: Observable<AppDataComplete> = this._persistenceService.inMemoryComplete$.pipe(
-    timeout(5000),
-    catchError(() => throwError('Error while trying to get inMemoryComplete$')),
-  );
+  inMemoryComplete$: Observable<AppDataComplete> =
+    this._persistenceService.inMemoryComplete$.pipe(
+      timeout(5000),
+      catchError(() => throwError('Error while trying to get inMemoryComplete$')),
+    );
 
   private _onUpdateLocalDataTrigger$: Observable<{
     appDataKey: AllowedDBKeys;
@@ -72,16 +73,15 @@ export class SyncService {
 
   // IMMEDIATE TRIGGERS
   // ----------------------
-  private _mouseMoveAfterIdle$: Observable<
-    string | never
-  > = this._idleService.isIdle$.pipe(
-    distinctUntilChanged(),
-    switchMap((isIdle) =>
-      isIdle
-        ? fromEvent(window, 'mousemove').pipe(take(1), mapTo('I_MOUSE_MOVE_AFTER_IDLE'))
-        : EMPTY,
-    ),
-  );
+  private _mouseMoveAfterIdle$: Observable<string | never> =
+    this._idleService.isIdle$.pipe(
+      distinctUntilChanged(),
+      switchMap((isIdle) =>
+        isIdle
+          ? fromEvent(window, 'mousemove').pipe(take(1), mapTo('I_MOUSE_MOVE_AFTER_IDLE'))
+          : EMPTY,
+      ),
+    );
 
   private _activityAfterSomethingElseTriggers$: Observable<string> = merge(
     fromEvent(window, 'focus').pipe(mapTo('I_FOCUS_THROTTLED')),
@@ -125,11 +125,12 @@ export class SyncService {
   );
   // ------------------------
 
-  private _isInitialSyncEnabled$: Observable<boolean> = this._dataInitService.isAllDataLoadedInitially$.pipe(
-    switchMap(() => this._globalConfigService.cfg$),
-    map((cfg: GlobalConfigState) => cfg.sync.isEnabled),
-    distinctUntilChanged(),
-  );
+  private _isInitialSyncEnabled$: Observable<boolean> =
+    this._dataInitService.isAllDataLoadedInitially$.pipe(
+      switchMap(() => this._globalConfigService.cfg$),
+      map((cfg: GlobalConfigState) => cfg.sync.isEnabled),
+      distinctUntilChanged(),
+    );
 
   // keep it super simple for now
   private _isInitialSyncDoneManual$: ReplaySubject<boolean> = new ReplaySubject<boolean>(
@@ -140,12 +141,13 @@ export class SyncService {
       return isActive ? this._isInitialSyncDoneManual$.asObservable() : of(true);
     }),
   );
-  private _afterInitialSyncDoneAndDataLoadedInitially$: Observable<boolean> = this._isInitialSyncDone$.pipe(
-    filter((isDone) => isDone),
-    take(1),
-    // should normally be already loaded, but if there is NO initial sync we need to wait here
-    concatMap(() => this._dataInitService.isAllDataLoadedInitially$),
-  );
+  private _afterInitialSyncDoneAndDataLoadedInitially$: Observable<boolean> =
+    this._isInitialSyncDone$.pipe(
+      filter((isDone) => isDone),
+      take(1),
+      // should normally be already loaded, but if there is NO initial sync we need to wait here
+      concatMap(() => this._dataInitService.isAllDataLoadedInitially$),
+    );
 
   afterInitialSyncDoneAndDataLoadedInitially$: Observable<boolean> = merge(
     this._afterInitialSyncDoneAndDataLoadedInitially$,

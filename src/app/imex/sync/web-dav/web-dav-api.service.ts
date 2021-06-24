@@ -39,11 +39,12 @@ export class WebDavApiService {
     ),
   );
 
-  private _isReady$: Observable<boolean> = this._dataInitService.isAllDataLoadedInitially$.pipe(
-    switchMap(() => this.isAllConfigDataAvailable$),
-    tap((isTokenAvailable) => !isTokenAvailable && new Error('WebDAV API not ready')),
-    first(),
-  );
+  private _isReady$: Observable<boolean> =
+    this._dataInitService.isAllDataLoadedInitially$.pipe(
+      switchMap(() => this.isAllConfigDataAvailable$),
+      tap((isTokenAvailable) => !isTokenAvailable && new Error('WebDAV API not ready')),
+      first(),
+    );
 
   constructor(
     private _globalConfigService: GlobalConfigService,

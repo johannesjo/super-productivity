@@ -66,9 +66,8 @@ export const projectAdapter: EntityAdapter<Project> = createEntityAdapter<Projec
 
 // SELECTORS
 // ---------
-export const selectProjectFeatureState = createFeatureSelector<ProjectState>(
-  PROJECT_FEATURE_NAME,
-);
+export const selectProjectFeatureState =
+  createFeatureSelector<ProjectState>(PROJECT_FEATURE_NAME);
 const { selectAll } = projectAdapter.getSelectors();
 export const selectAllProjects = createSelector(selectProjectFeatureState, selectAll);
 export const selectUnarchivedProjects = createSelector(selectAllProjects, (projects) =>
@@ -169,13 +168,8 @@ export const projectReducer = (
   }
 
   if ((action.type as string) === moveTaskInTodayList.type) {
-    const {
-      taskId,
-      newOrderedIds,
-      target,
-      workContextType,
-      workContextId,
-    } = action as any;
+    const { taskId, newOrderedIds, target, workContextType, workContextId } =
+      action as any;
 
     if (workContextType !== WORK_CONTEXT_TYPE) {
       return state;
@@ -484,9 +478,9 @@ export const projectReducer = (
             taskIds: (state.entities[srcProjectId] as Project).taskIds.filter(
               (id) => id !== task.id,
             ),
-            backlogTaskIds: (state.entities[
-              srcProjectId
-            ] as Project).backlogTaskIds.filter((id) => id !== task.id),
+            backlogTaskIds: (
+              state.entities[srcProjectId] as Project
+            ).backlogTaskIds.filter((id) => id !== task.id),
           },
         });
       }

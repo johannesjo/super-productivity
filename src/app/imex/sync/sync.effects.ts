@@ -71,14 +71,15 @@ export class SyncEffects {
         ),
       );
   // private _wasJustEnabled$: Observable<boolean> = of(false);
-  private _wasJustEnabled$: Observable<boolean> = this._dataInitService.isAllDataLoadedInitially$.pipe(
-    // NOTE: it is important that we don't use distinct until changed here
-    switchMap(() => this._syncProviderService.isEnabledAndReady$),
-    pairwise(),
-    map(([a, b]) => !a && !!b),
-    filter((wasJustEnabled) => wasJustEnabled),
-    shareReplay(),
-  );
+  private _wasJustEnabled$: Observable<boolean> =
+    this._dataInitService.isAllDataLoadedInitially$.pipe(
+      // NOTE: it is important that we don't use distinct until changed here
+      switchMap(() => this._syncProviderService.isEnabledAndReady$),
+      pairwise(),
+      map(([a, b]) => !a && !!b),
+      filter((wasJustEnabled) => wasJustEnabled),
+      shareReplay(),
+    );
   @Effect({ dispatch: false })
   triggerSync$: any = this._dataInitService.isAllDataLoadedInitially$.pipe(
     switchMap(() =>

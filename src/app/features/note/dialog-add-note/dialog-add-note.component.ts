@@ -18,9 +18,10 @@ export class DialogAddNoteComponent {
   T: typeof T = T;
   noteContent: string;
   isSubmitted: boolean = false;
-  isInProjectContext$: Observable<boolean> = this._workContextService.activeWorkContextTypeAndId$.pipe(
-    map(({ activeType }) => activeType === WorkContextType.PROJECT),
-  );
+  isInProjectContext$: Observable<boolean> =
+    this._workContextService.activeWorkContextTypeAndId$.pipe(
+      map(({ activeType }) => activeType === WorkContextType.PROJECT),
+    );
 
   constructor(
     private _matDialogRef: MatDialogRef<DialogAddNoteComponent>,

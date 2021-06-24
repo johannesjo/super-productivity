@@ -26,12 +26,8 @@ export const adapter: EntityAdapter<TaskRepeatCfg> = createEntityAdapter<TaskRep
 export const selectTaskRepeatCfgFeatureState = createFeatureSelector<TaskRepeatCfgState>(
   TASK_REPEAT_CFG_FEATURE_NAME,
 );
-export const {
-  selectIds,
-  selectEntities,
-  selectAll,
-  selectTotal,
-} = adapter.getSelectors();
+export const { selectIds, selectEntities, selectAll, selectTotal } =
+  adapter.getSelectors();
 export const selectAllTaskRepeatCfgs = createSelector(
   selectTaskRepeatCfgFeatureState,
   selectAll,

@@ -30,22 +30,23 @@ export class WorklogService {
   archiveUpdateManualTrigger$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(
     true,
   );
-  _archiveUpdateTrigger$: Observable<any> = this._dataInitService.isAllDataLoadedInitially$.pipe(
-    concatMap(() =>
-      merge(
-        // this._workContextService.activeWorkContextOnceOnContextChange$,
-        this.archiveUpdateManualTrigger$,
-        this._router.events.pipe(
-          filter((event: any) => event instanceof NavigationEnd),
-          filter(
-            ({ urlAfterRedirects }: NavigationEnd) =>
-              urlAfterRedirects.includes('worklog') ||
-              urlAfterRedirects.includes('daily-summary'),
+  _archiveUpdateTrigger$: Observable<any> =
+    this._dataInitService.isAllDataLoadedInitially$.pipe(
+      concatMap(() =>
+        merge(
+          // this._workContextService.activeWorkContextOnceOnContextChange$,
+          this.archiveUpdateManualTrigger$,
+          this._router.events.pipe(
+            filter((event: any) => event instanceof NavigationEnd),
+            filter(
+              ({ urlAfterRedirects }: NavigationEnd) =>
+                urlAfterRedirects.includes('worklog') ||
+                urlAfterRedirects.includes('daily-summary'),
+            ),
           ),
         ),
       ),
-    ),
-  );
+    );
 
   // NOTE: task updates are not reflected
   // TODO improve to reflect task updates or load when route is changed to worklog or daily summary
@@ -150,23 +151,21 @@ export class WorklogService {
         });
 
         if (isFilterOutTimeSpentOnOtherDays) {
-          tasks = tasks.map(
-            (task): WorklogTask => {
-              const timeSpentOnDay: any = {};
-              Object.keys(task.timeSpentOnDay).forEach((dateStr) => {
-                const date = new Date(dateStr);
+          tasks = tasks.map((task): WorklogTask => {
+            const timeSpentOnDay: any = {};
+            Object.keys(task.timeSpentOnDay).forEach((dateStr) => {
+              const date = new Date(dateStr);
 
-                if (date >= rangeStart && date <= rangeEnd) {
-                  timeSpentOnDay[dateStr] = task.timeSpentOnDay[dateStr];
-                }
-              });
+              if (date >= rangeStart && date <= rangeEnd) {
+                timeSpentOnDay[dateStr] = task.timeSpentOnDay[dateStr];
+              }
+            });
 
-              return {
-                ...task,
-                timeSpentOnDay,
-              };
-            },
-          );
+            return {
+              ...task,
+              timeSpentOnDay,
+            };
+          });
         }
 
         return dedupeByKey(tasks, 'id');

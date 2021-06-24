@@ -18,7 +18,8 @@ import { TranslateService } from '@ngx-translate/core';
 })
 export class FormlyTranslatedTemplateComponent
   extends FieldType
-  implements OnInit, OnDestroy {
+  implements OnInit, OnDestroy
+{
   @ViewChild('tplWrapper', { static: true }) tplWrapper?: ElementRef;
 
   private _el?: HTMLElement;

@@ -61,35 +61,35 @@ export class JiraCfgComponent implements OnInit, OnDestroy {
   fields?: FormlyFieldConfig[];
   form: FormGroup = new FormGroup({});
   options: FormlyFormOptions = {};
-  filteredIssueSuggestions$: Observable<
-    SearchResultItem[]
-  > = this.issueSuggestionsCtrl.valueChanges.pipe(
-    debounceTime(300),
-    tap(() => this.isLoading$.next(true)),
-    switchMap((searchTerm: string) => {
-      return searchTerm && searchTerm.length > 1
-        ? this._projectService
-            .getJiraCfgForProject$(this._workContextService.activeWorkContextId as string)
-            .pipe(
-              first(),
-              switchMap((cfg) => this._jiraApiService.issuePicker$(searchTerm, cfg)),
-              catchError(() => {
-                return [];
-              }),
-            )
-        : // Note: the outer array signifies the observable stream the other is the value
-          [[]];
-      // TODO fix type
-    }),
-    tap((suggestions) => {
-      this.isLoading$.next(false);
-    }),
-  );
-  filteredCustomFieldSuggestions$: Observable<
-    any[]
-  > = this.customFieldSuggestionsCtrl.valueChanges.pipe(
-    map((value) => this._filterCustomFieldSuggestions(value)),
-  );
+  filteredIssueSuggestions$: Observable<SearchResultItem[]> =
+    this.issueSuggestionsCtrl.valueChanges.pipe(
+      debounceTime(300),
+      tap(() => this.isLoading$.next(true)),
+      switchMap((searchTerm: string) => {
+        return searchTerm && searchTerm.length > 1
+          ? this._projectService
+              .getJiraCfgForProject$(
+                this._workContextService.activeWorkContextId as string,
+              )
+              .pipe(
+                first(),
+                switchMap((cfg) => this._jiraApiService.issuePicker$(searchTerm, cfg)),
+                catchError(() => {
+                  return [];
+                }),
+              )
+          : // Note: the outer array signifies the observable stream the other is the value
+            [[]];
+        // TODO fix type
+      }),
+      tap((suggestions) => {
+        this.isLoading$.next(false);
+      }),
+    );
+  filteredCustomFieldSuggestions$: Observable<any[]> =
+    this.customFieldSuggestionsCtrl.valueChanges.pipe(
+      map((value) => this._filterCustomFieldSuggestions(value)),
+    );
   transitionConfigOpts: {
     key: keyof JiraTransitionConfig;
     val: JiraTransitionOption;

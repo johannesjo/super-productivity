@@ -39,11 +39,12 @@ export class SimpleCounterCfgComponent implements OnDestroy {
   form: FormGroup = new FormGroup({});
   options: FormlyFormOptions = {};
 
-  simpleCounterCfg$: Observable<SimpleCounterConfig> = this.simpleCounterService.simpleCountersUpdatedOnCfgChange$.pipe(
-    map((items) => ({
-      counters: items,
-    })),
-  );
+  simpleCounterCfg$: Observable<SimpleCounterConfig> =
+    this.simpleCounterService.simpleCountersUpdatedOnCfgChange$.pipe(
+      map((items) => ({
+        counters: items,
+      })),
+    );
 
   editModel?: SimpleCounterConfig;
 

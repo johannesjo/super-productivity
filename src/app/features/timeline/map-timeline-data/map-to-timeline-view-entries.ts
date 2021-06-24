@@ -318,7 +318,8 @@ const insertBlockedBlocksViewEntries = (
           if (isTaskDataType(viewEntry)) {
             debug('CCC a) ' + viewEntry.type);
             const currentViewEntry: TimelineViewEntryTask = viewEntry as any;
-            const splitTask: TaskWithoutReminder = currentViewEntry.data as TaskWithoutReminder;
+            const splitTask: TaskWithoutReminder =
+              currentViewEntry.data as TaskWithoutReminder;
 
             const timeLeftOnTask = timeLeft;
             const timePlannedForSplitStart = blockedBlock.start - currentViewEntry.start;
@@ -347,7 +348,8 @@ const insertBlockedBlocksViewEntries = (
             break;
           } else if (isContinuedTaskType(viewEntry)) {
             debug('CCC b) ' + viewEntry.type);
-            const currentViewEntry: TimelineViewEntrySplitTaskContinued = viewEntry as any;
+            const currentViewEntry: TimelineViewEntrySplitTaskContinued =
+              viewEntry as any;
             const timeLeftForCompleteSplitTask = timeLeft;
             const timePlannedForSplitTaskBefore =
               blockedBlock.start - currentViewEntry.start;

@@ -62,7 +62,7 @@
     >
       <mat-icon *ngIf="item.issueType" [svgIcon]="item.issueType|issueIcon"></mat-icon>
       <tag *ngIf="item.ctx" [tag]="item.ctx"></tag>
-      <span>{{item?.titleHighlighted||item?.title}}</span>
+      <span>{{item?.titleHighlighted || item?.title}}</span>
     </mat-option>
   </mat-autocomplete>
 </form>

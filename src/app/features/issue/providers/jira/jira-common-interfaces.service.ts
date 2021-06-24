@@ -101,9 +101,10 @@ export class JiraCommonInterfacesService implements IssueServiceInterface {
     return null;
   }
 
-  getAddTaskData(
-    issue: JiraIssueReduced,
-  ): { title: string; additionalFields: Partial<Task> } {
+  getAddTaskData(issue: JiraIssueReduced): {
+    title: string;
+    additionalFields: Partial<Task>;
+  } {
     return {
       title: `${issue.key} ${issue.summary}`,
       additionalFields: {

@@ -207,11 +207,8 @@ export const taskReducer = (
 
     // TODO simplify
     case TaskActionTypes.ToggleTaskShowSubTasks: {
-      const {
-        taskId,
-        isShowLess,
-        isEndless,
-      } = (action as ToggleTaskShowSubTasks).payload;
+      const { taskId, isShowLess, isEndless } = (action as ToggleTaskShowSubTasks)
+        .payload;
       const task = getTaskById(taskId, state);
       const subTasks = task.subTaskIds.map((id) => getTaskById(id, state));
       const doneTasksLength = subTasks.filter((t) => t.isDone).length;
@@ -278,12 +275,8 @@ export const taskReducer = (
 
     case TaskActionTypes.MoveSubTask: {
       let newState = state;
-      const {
-        taskId,
-        srcTaskId,
-        targetTaskId,
-        newOrderedIds,
-      } = (action as MoveSubTask).payload;
+      const { taskId, srcTaskId, targetTaskId, newOrderedIds } = (action as MoveSubTask)
+        .payload;
       const oldPar = getTaskById(srcTaskId, state);
       const newPar = getTaskById(targetTaskId, state);
 
@@ -471,13 +464,9 @@ export const taskReducer = (
     }
 
     case TaskActionTypes.RoundTimeSpentForDay: {
-      const {
-        day,
-        taskIds,
-        isRoundUp,
-        roundTo,
-        projectId,
-      } = (action as RoundTimeSpentForDay).payload;
+      const { day, taskIds, isRoundUp, roundTo, projectId } = (
+        action as RoundTimeSpentForDay
+      ).payload;
       const isLimitToProject: boolean = !!projectId || projectId === null;
 
       const idsToUpdateDirectly: string[] = taskIds.filter((id) => {

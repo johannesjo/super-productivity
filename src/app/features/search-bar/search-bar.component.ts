@@ -1,4 +1,6 @@
 import {
+  AfterViewInit,
+  ChangeDetectionStrategy,
   Component,
   ElementRef,
   EventEmitter,
@@ -6,20 +8,18 @@ import {
   OnDestroy,
   Output,
   ViewChild,
-  AfterViewInit,
-  ChangeDetectionStrategy,
 } from '@angular/core';
 import { T } from '../../t.const';
 import { FormControl } from '@angular/forms';
 import { BehaviorSubject, combineLatest, from, Observable, Subscription } from 'rxjs';
 import {
-  tap,
-  map,
   debounceTime,
-  switchMap,
-  withLatestFrom,
-  startWith,
   filter,
+  map,
+  startWith,
+  switchMap,
+  tap,
+  withLatestFrom,
 } from 'rxjs/operators';
 import { TaskService } from '../tasks/task.service';
 import { Router } from '@angular/router';

@@ -15,9 +15,8 @@ import { AppDataComplete } from '../../../imex/sync/sync.model';
 import { migrateGlobalConfigState } from '../migrate-global-config.util';
 
 export const CONFIG_FEATURE_NAME = 'globalConfig';
-export const selectConfigFeatureState = createFeatureSelector<GlobalConfigState>(
-  CONFIG_FEATURE_NAME,
-);
+export const selectConfigFeatureState =
+  createFeatureSelector<GlobalConfigState>(CONFIG_FEATURE_NAME);
 export const selectMiscConfig = createSelector(
   selectConfigFeatureState,
   (cfg): MiscConfig => cfg.misc,

@@ -30,7 +30,8 @@ const VERY_SMALL_CONTAINER_WIDTH = 450;
   animations: [fadeAnimation],
 })
 export class BetterDrawerContainerComponent
-  implements OnInit, AfterContentInit, OnDestroy {
+  implements OnInit, AfterContentInit, OnDestroy
+{
   @Input() sideWidth: number = 0;
   @Output() wasClosed: EventEmitter<void> = new EventEmitter<void>();
   contentEl$: ReplaySubject<HTMLElement> = new ReplaySubject<HTMLElement>(1);

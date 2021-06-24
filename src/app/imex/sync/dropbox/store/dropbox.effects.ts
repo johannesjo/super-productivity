@@ -24,13 +24,14 @@ import { SyncProvider } from '../../sync-provider.model';
 
 @Injectable()
 export class DropboxEffects {
-  private _isChangedAuthCode$: Observable<boolean> = this._dataInitService.isAllDataLoadedInitially$.pipe(
-    // NOTE: it is important that we don't use distinct until changed here
-    switchMap(() => this._dropboxApiService.authCode$),
-    pairwise(),
-    map(([a, b]) => a !== b),
-    shareReplay(),
-  );
+  private _isChangedAuthCode$: Observable<boolean> =
+    this._dataInitService.isAllDataLoadedInitially$.pipe(
+      // NOTE: it is important that we don't use distinct until changed here
+      switchMap(() => this._dropboxApiService.authCode$),
+      pairwise(),
+      map(([a, b]) => a !== b),
+      shareReplay(),
+    );
 
   @Effect() getAuthTokenFromAccessCode: any = this._actions$.pipe(
     ofType(GlobalConfigActionTypes.UpdateGlobalConfigSection),

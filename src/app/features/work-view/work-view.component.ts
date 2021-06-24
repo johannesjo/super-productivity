@@ -61,25 +61,26 @@ export class WorkViewComponent implements OnInit, OnDestroy, AfterContentInit {
   T: typeof T = T;
 
   // NOTE: not perfect but good enough for now
-  isTriggerBacklogIconAni$: Observable<boolean> = this.workContextService.onMoveToBacklog$.pipe(
-    switchMap(() => zip(from([true, false]), timer(1, 200))),
-    map((v) => v[0]),
-  );
+  isTriggerBacklogIconAni$: Observable<boolean> =
+    this.workContextService.onMoveToBacklog$.pipe(
+      switchMap(() => zip(from([true, false]), timer(1, 200))),
+      map((v) => v[0]),
+    );
   splitTopEl$: ReplaySubject<HTMLElement> = new ReplaySubject(1);
 
   // TODO make this work for tag page without backlog
-  upperContainerScroll$: Observable<Event> = this.workContextService.isContextChanging$.pipe(
-    filter((isChanging) => !isChanging),
-    delay(50),
-    switchMap(() => this.splitTopEl$),
-    switchMap((el) => fromEvent(el, 'scroll')),
-  );
+  upperContainerScroll$: Observable<Event> =
+    this.workContextService.isContextChanging$.pipe(
+      filter((isChanging) => !isChanging),
+      delay(50),
+      switchMap(() => this.splitTopEl$),
+      switchMap((el) => fromEvent(el, 'scroll')),
+    );
 
   // eslint-disable-next-line no-mixed-operators
   private _tomorrow: number = Date.now() + 24 * 60 * 60 * 1000;
-  repeatableScheduledForTomorrow$: Observable<
-    TaskRepeatCfg[]
-  > = this._taskRepeatCfgService.getRepeatTableTasksDueForDay$(this._tomorrow);
+  repeatableScheduledForTomorrow$: Observable<TaskRepeatCfg[]> =
+    this._taskRepeatCfgService.getRepeatTableTasksDueForDay$(this._tomorrow);
 
   private _subs: Subscription = new Subscription();
   private _switchListAnimationTimeout?: number;

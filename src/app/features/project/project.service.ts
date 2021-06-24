@@ -40,28 +40,30 @@ export class ProjectService {
 
   archived$: Observable<Project[]> = this._store$.pipe(select(selectArchivedProjects));
 
-  currentProject$: Observable<Project | null> = this._workContextService.activeWorkContextTypeAndId$.pipe(
-    switchMap(({ activeId, activeType }) =>
-      activeType === WorkContextType.PROJECT ? this.getByIdLive$(activeId) : of(null),
-    ),
-    shareReplay(1),
-  );
+  currentProject$: Observable<Project | null> =
+    this._workContextService.activeWorkContextTypeAndId$.pipe(
+      switchMap(({ activeId, activeType }) =>
+        activeType === WorkContextType.PROJECT ? this.getByIdLive$(activeId) : of(null),
+      ),
+      shareReplay(1),
+    );
 
   /* @deprecated  todo fix */
-  isRelatedDataLoadedForCurrentProject$: Observable<boolean> = this._workContextService.isActiveWorkContextProject$.pipe(
-    switchMap((isProject) =>
-      isProject
-        ? this._workContextService.activeWorkContextIdIfProject$.pipe(
-            switchMap((activeId) =>
-              this._actions$.pipe(
-                ofType(ProjectActionTypes.LoadProjectRelatedDataSuccess),
-                map(({ payload: { projectId } }) => projectId === activeId),
+  isRelatedDataLoadedForCurrentProject$: Observable<boolean> =
+    this._workContextService.isActiveWorkContextProject$.pipe(
+      switchMap((isProject) =>
+        isProject
+          ? this._workContextService.activeWorkContextIdIfProject$.pipe(
+              switchMap((activeId) =>
+                this._actions$.pipe(
+                  ofType(ProjectActionTypes.LoadProjectRelatedDataSuccess),
+                  map(({ payload: { projectId } }) => projectId === activeId),
+                ),
               ),
-            ),
-          )
-        : of(false),
-    ),
-  );
+            )
+          : of(false),
+      ),
+    );
 
   // DYNAMIC
 

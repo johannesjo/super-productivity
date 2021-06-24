@@ -96,24 +96,26 @@ export class WorkContextService {
     distinctUntilChanged(distinctUntilChangedObject),
     shareReplay(1),
   );
-  isActiveWorkContextProject$: Observable<boolean> = this.activeWorkContextTypeAndId$.pipe(
-    map(({ activeType }) => activeType === WorkContextType.PROJECT),
-    shareReplay(1),
-  );
+  isActiveWorkContextProject$: Observable<boolean> =
+    this.activeWorkContextTypeAndId$.pipe(
+      map(({ activeType }) => activeType === WorkContextType.PROJECT),
+      shareReplay(1),
+    );
 
   isActiveWorkContextTodayList$: Observable<boolean> = this.activeWorkContextId$.pipe(
     map((id) => id === TODAY_TAG.id),
     shareReplay(1),
   );
 
-  activeWorkContextIdIfProject$: Observable<string> = this.activeWorkContextTypeAndId$.pipe(
-    map(({ activeType, activeId }) => {
-      if (activeType !== WorkContextType.PROJECT) {
-        throw Error('Not in project context');
-      }
-      return activeId;
-    }),
-  );
+  activeWorkContextIdIfProject$: Observable<string> =
+    this.activeWorkContextTypeAndId$.pipe(
+      map(({ activeType, activeId }) => {
+        if (activeType !== WorkContextType.PROJECT) {
+          throw Error('Not in project context');
+        }
+        return activeId;
+      }),
+    );
 
   // for convenience...
   activeWorkContextId?: string;

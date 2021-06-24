@@ -23,12 +23,8 @@ export const adapter: EntityAdapter<Improvement> = createEntityAdapter<Improveme
 export const selectImprovementFeatureState = createFeatureSelector<ImprovementState>(
   IMPROVEMENT_FEATURE_NAME,
 );
-export const {
-  selectIds,
-  selectEntities,
-  selectAll,
-  selectTotal,
-} = adapter.getSelectors();
+export const { selectIds, selectEntities, selectAll, selectTotal } =
+  adapter.getSelectors();
 export const selectAllImprovements = createSelector(
   selectImprovementFeatureState,
   selectAll,
