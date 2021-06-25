@@ -3258,7 +3258,7 @@ cdav-library@nextcloud/cdav-library:
   version "0.0.1"
   resolved "https://codeload.github.com/nextcloud/cdav-library/tar.gz/8a8d42fad2a9bc9567b353c49559438347d110ee"
   dependencies:
-    core-js "^3.10.0"
+    core-js "^3.14.0"
     regenerator-runtime "^0.13.7"
 
 chai-nightwatch@^0.4.0:
@@ -4935,9 +4935,9 @@ electron-reload@^1.2.5:
     chokidar "^3.0.2"
 
 electron-to-chromium@^1.3.723:
-  version "1.3.756"
-  resolved "https://registry.yarnpkg.com/electron-to-chromium/-/electron-to-chromium-1.3.756.tgz#942cee59cd64d19f576d8d5804eef09cb423740c"
-  integrity sha512-WsmJym1TMeHVndjPjczTFbnRR/c4sbzg8fBFtuhlb2Sru3i/S1VGpzDSrv/It8ctMU2bj8G7g7/O3FzYMGw6eA==
+  version "1.3.757"
+  resolved "https://registry.yarnpkg.com/electron-to-chromium/-/electron-to-chromium-1.3.757.tgz#ff99436c99ca0fc5d120e11030a868401396e0e1"
+  integrity sha512-kP0ooyrvavDC+Y9UG6G/pUVxfRNM2VTJwtLQLvgsJeyf1V+7shMCb68Wj0/TETmfx8dWv9pToGkVT39udE87wQ==
 
 electron-window-state@^5.0.3:
   version "5.0.3"
@@ -8706,7 +8706,7 @@ nice-try@^1.0.4:
   resolved "https://registry.yarnpkg.com/nice-try/-/nice-try-1.0.5.tgz#a3378a7696ce7d223e88fc9b764bd7ef1089e366"
   integrity sha512-1nh45deeb5olNY7eX82BkPO7SSxR5SSYJiPTrTdFUVYwAl8CKMA5N9PjTYkHiRjisVcxcQ1HXdLhx2qxxJzLNQ==
 
-nightwatch@^1.6.3:
+nightwatch@^1.7.6:
   version "1.7.6"
   resolved "https://registry.yarnpkg.com/nightwatch/-/nightwatch-1.7.6.tgz#6b76be0893a354f373b40bdbbb126254f8f9b7de"
   integrity sha512-hObbZqPJ/OmPXnY2fSolJu2Ocb00uw4DflJb1HvNOzkVHG2beFxil6UwXJUUgvCWavwujBiH3XWYDbjKv1/2/Q==
@@ -11510,7 +11510,7 @@ stacktrace-js@^2.0.1:
     stack-generator "^2.0.5"
     stacktrace-gps "^3.0.4"
 
-start-server-and-test@^1.12.3:
+start-server-and-test@^1.12.5:
   version "1.12.5"
   resolved "https://registry.yarnpkg.com/start-server-and-test/-/start-server-and-test-1.12.5.tgz#d19d2c19d6db6b30df5add68ec26a1ab204525d6"
   integrity sha512-8Wl0J1xwTDhvWoFeXLIP1VyT9GS5i0XG2440gbMQDNgyCBpb+t2XhahY3ysHIs2g5sDsiom6Iyvh3uQtNrAg5g==
