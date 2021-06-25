@@ -13,7 +13,7 @@ export class CompressionService {
       throw new Error('No web worker support');
     }
     // Create a new
-    this._w = new Worker('./lz.worker', {
+    this._w = new Worker(new URL('./lz.worker', import.meta.url), {
       name: 'lz',
       type: 'module',
     });
