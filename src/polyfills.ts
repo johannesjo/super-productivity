@@ -79,3 +79,4 @@ import 'zone.js'; // Included with Angular CLI.
 // fix ical.js
 // @see https://github.com/mozilla-comm/ical.js/issues/329
 (window as any).ICAL = {};
+(window as any).global = window;

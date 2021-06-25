@@ -10,9 +10,9 @@ import {
 import { Observable, of } from 'rxjs';
 import { DialogInitialComponent } from './dialog-initial/dialog-initial.component';
 import { DataInitService } from '../../core/data-init/data-init.service';
-import { version } from '../../../../package.json';
 import { lt } from 'semver';
 import { GlobalConfigService } from '../config/global-config.service';
+import { environment } from '../../../environments/environment';
 
 const URL =
   'https://app.super-productivity.com/news.json?ngsw-bypass=true&no-cache=' + Date.now();
@@ -53,7 +53,7 @@ export class InitialDialogService {
             return of(null);
           } else if (
             res.showStartingWithVersion &&
-            lt(version, res.showStartingWithVersion)
+            lt(environment.version, res.showStartingWithVersion)
           ) {
             return of(null);
           } else {
