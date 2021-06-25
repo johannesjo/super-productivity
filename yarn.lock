@@ -1386,43 +1386,43 @@
   dependencies:
     cross-spawn "^7.0.1"
 
-"@ngrx/data@^11.1.0":
-  version "11.1.1"
-  resolved "https://registry.yarnpkg.com/@ngrx/data/-/data-11.1.1.tgz#b767dbdb153ef8a4d5bd915a46cc799968b37e3d"
-  integrity sha512-qOTqwDUFONORN59qIUrdGZc+lveL730s3/jXb70Np7eI3mtK94g2OnrQKmcnG8yPBEd/lLtUDJL8J0UuttGRXw==
+"@ngrx/data@^12.1.0":
+  version "12.1.0"
+  resolved "https://registry.yarnpkg.com/@ngrx/data/-/data-12.1.0.tgz#bd4927ceb238d1a81cff45509d1470d7471e3f9a"
+  integrity sha512-TxrmdzuMXe9wqFtvoNVSD1n2E62wJ4+GsJ7+x1wOm25LZQl5/UsUO9g2DVaFlzc+pNixKFZon/sLDqE4YSAg7g==
   dependencies:
     tslib "^2.0.0"
 
-"@ngrx/effects@^11.1.0":
-  version "11.1.1"
-  resolved "https://registry.yarnpkg.com/@ngrx/effects/-/effects-11.1.1.tgz#82abd97df8c1cdf1d9bd0bf720289591230d260c"
-  integrity sha512-KLfGSjlmlPUMlMEQkdD6tnJCs/dLSBJC6hZhCnobpDrBR9YMpoDDjM1t0Veg+Z50dL6AGO/T4dllRjd3BJuWiw==
+"@ngrx/effects@^12.1.0":
+  version "12.1.0"
+  resolved "https://registry.yarnpkg.com/@ngrx/effects/-/effects-12.1.0.tgz#316e60950a5e2c8ca2ecb3119397281affe3a286"
+  integrity sha512-DcVovaJB9hZ8qo5UNjRS0KqLaMX8YreuR3EtRPUysB0aePBuoWQiN8HUic8DgmI2cN3KcZxOsRKj/1VaVArLJw==
   dependencies:
     tslib "^2.0.0"
 
-"@ngrx/entity@^11.1.0":
-  version "11.1.1"
-  resolved "https://registry.yarnpkg.com/@ngrx/entity/-/entity-11.1.1.tgz#7b464f538f475d76851495c2146d1d1b7254fb96"
-  integrity sha512-GuGwVq3bsL9nwU3FN1trKJKEV58nX/1k+4VMzpsLiYN/Dp5kS1opGCJAqP1SsNL6yqxtXqxJfovsoTM3vTpshw==
+"@ngrx/entity@^12.1.0":
+  version "12.1.0"
+  resolved "https://registry.yarnpkg.com/@ngrx/entity/-/entity-12.1.0.tgz#01c76487ab6043aea21d9d787ead238107ff45e8"
+  integrity sha512-2EsWBMUyXsdXqFsB3kwtr+i2aSwbXKjdao7fLh9337Zzfx/LF7FDcqS+CU0aN0dJzTluJV+HbH7W7e88dS1c3Q==
   dependencies:
     tslib "^2.0.0"
 
-"@ngrx/schematics@^11.1.1":
-  version "11.1.1"
-  resolved "https://registry.yarnpkg.com/@ngrx/schematics/-/schematics-11.1.1.tgz#6ed9a60e4d6cad1d6d2825bf07c57bc272b13c07"
-  integrity sha512-xUtfASTmY5KMHpphM1o/HkwMzQ2joZWBWlee+vjGl+lCfMArt0s+hiCudfjT11lgMiv5ghNNL6KnbN/Nk7lE1Q==
+"@ngrx/schematics@^12.1.0":
+  version "12.1.0"
+  resolved "https://registry.yarnpkg.com/@ngrx/schematics/-/schematics-12.1.0.tgz#6478fc376840a9f9c4d44a40d513e8aa3463779c"
+  integrity sha512-cUL+pzy5jtFUq81B+kETJmca9/KqWatMxNXofdML2dyGGpk/yfs6bV8L/NQWyUxsyc01J+WswocWmFjNde0FYQ==
 
-"@ngrx/store-devtools@^11.1.0":
-  version "11.1.1"
-  resolved "https://registry.yarnpkg.com/@ngrx/store-devtools/-/store-devtools-11.1.1.tgz#bdefc5c03dcac6fc21fcc9e33a4a3a3464f3e2d6"
-  integrity sha512-YvTMy8HUMUiiyrzKn4KhrQzkAg2yBfLgd1PHR0yPjyzj7RCaYZHwhq6sP0+AiFMBi1Lat8Wczy7SwwLTa6aZ3w==
+"@ngrx/store-devtools@^12.1.0":
+  version "12.1.0"
+  resolved "https://registry.yarnpkg.com/@ngrx/store-devtools/-/store-devtools-12.1.0.tgz#b547edb6ff9fd3ade4fd303088dbed627484b41d"
+  integrity sha512-O+GfUsYPUrlbGHHcCH0WNkfnWD2TLQmXm2xhR1CkMTr+7YkdOKUZ1a0RwPM4VWuCu5QNVHS8bRS5V3IviiP9tQ==
   dependencies:
     tslib "^2.0.0"
 
-"@ngrx/store@11.1.0":
-  version "11.1.0"
-  resolved "https://registry.yarnpkg.com/@ngrx/store/-/store-11.1.0.tgz#5cf2792022052bdc84111e9eaa67cd2fc32d2f11"
-  integrity sha512-mAnaZuZU1Y82VlJT/58zYS26y1sTrdtWyh6es+D57LOhv8iOI6mkv3ehlVNzaFyyc/XQehUMnJXTxItXJvCghg==
+"@ngrx/store@12.1.0":
+  version "12.1.0"
+  resolved "https://registry.yarnpkg.com/@ngrx/store/-/store-12.1.0.tgz#5e3516f0e6333c7ef49a560df786d4aa87b44a22"
+  integrity sha512-HrNs7bs/MNkLxFnvGx7uPIvEP3RWqGMewVaFjqUxq6sDefn6D6TQ/Sv/8KsNNxuG7r7pKGw+U/tClunJhmRfpw==
   dependencies:
     tslib "^2.0.0"
 
@@ -4017,7 +4017,7 @@ core-js@3.8.3:
   resolved "https://registry.yarnpkg.com/core-js/-/core-js-3.8.3.tgz#c21906e1f14f3689f93abcc6e26883550dd92dd0"
   integrity sha512-KPYXeVZYemC2TkNEkX/01I+7yd+nX3KddKwZ1Ww7SKWdI2wQprSgLmrTddT8nw92AjEklTsPBoSdQBhbI1bQ6Q==
 
-core-js@^3.14.0, core-js@^3.6.5:
+core-js@^3.10.0, core-js@^3.6.5:
   version "3.15.1"
   resolved "https://registry.yarnpkg.com/core-js/-/core-js-3.15.1.tgz#6c08ab88abdf56545045ccf5fd81f47f407e7f1a"
   integrity sha512-h8VbZYnc9pDzueiS2610IULDkpFFPunHwIpl8yRwFahAEEdSpHlTy3h3z3rKq5h11CaUdBEeRViu9AYvbxiMeg==
