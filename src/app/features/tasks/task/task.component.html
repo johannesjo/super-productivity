@@ -292,7 +292,7 @@
               {{T.F.TASK.CMP.OPEN_TIME|translate}}
             </button>
 
-            <button (click)="editReminder()" *ngIf="!task.repeatCfgId" mat-menu-item>
+            <button (click)="editReminder()" mat-menu-item>
               <ng-container *ngIf="!task.reminderId">
                 <mat-icon>alarm_add</mat-icon>
                 {{T.F.TASK.CMP.SCHEDULE|translate}}

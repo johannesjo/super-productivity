@@ -19,15 +19,10 @@ export interface BookmarkState extends EntityState<Bookmark> {
 }
 
 export const adapter: EntityAdapter<Bookmark> = createEntityAdapter<Bookmark>();
-export const selectBookmarkFeatureState = createFeatureSelector<BookmarkState>(
-  BOOKMARK_FEATURE_NAME,
-);
-export const {
-  selectIds,
-  selectEntities,
-  selectAll,
-  selectTotal,
-} = adapter.getSelectors();
+export const selectBookmarkFeatureState =
+  createFeatureSelector<BookmarkState>(BOOKMARK_FEATURE_NAME);
+export const { selectIds, selectEntities, selectAll, selectTotal } =
+  adapter.getSelectors();
 export const selectAllBookmarks = createSelector(selectBookmarkFeatureState, selectAll);
 export const selectIsShowBookmarkBar = createSelector(
   selectBookmarkFeatureState,

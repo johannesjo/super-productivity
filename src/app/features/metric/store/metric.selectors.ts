@@ -15,15 +15,10 @@ import {
 import { ObstructionState } from '../obstruction/obstruction.model';
 import { unique } from '../../../util/unique';
 
-export const selectMetricFeatureState = createFeatureSelector<MetricState>(
-  METRIC_FEATURE_NAME,
-);
-export const {
-  selectIds,
-  selectEntities,
-  selectAll,
-  selectTotal,
-} = metricAdapter.getSelectors();
+export const selectMetricFeatureState =
+  createFeatureSelector<MetricState>(METRIC_FEATURE_NAME);
+export const { selectIds, selectEntities, selectAll, selectTotal } =
+  metricAdapter.getSelectors();
 export const selectAllMetrics = createSelector(selectMetricFeatureState, selectAll);
 export const selectLastTrackedMetric = createSelector(
   selectMetricFeatureState,

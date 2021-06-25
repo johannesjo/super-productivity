@@ -262,9 +262,8 @@ export class JiraIssueEffects {
   );
 
   // HOOKS
-  private _isInitialRequestForProjectDone$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(
-    false,
-  );
+  private _isInitialRequestForProjectDone$: BehaviorSubject<boolean> =
+    new BehaviorSubject<boolean>(false);
 
   @Effect({ dispatch: false })
   checkConnection$: Observable<any> = this._actions$.pipe(

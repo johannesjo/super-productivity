@@ -4,37 +4,25 @@ import {
   concatMap,
   delay,
   filter,
-  map,
+  first,
   mergeMap,
   take,
   tap,
   withLatestFrom,
 } from 'rxjs/operators';
 import { Action, select, Store } from '@ngrx/store';
-import {
-  AddTaskRepeatCfgToTask,
-  DeleteTaskRepeatCfg,
-  TaskRepeatCfgActionTypes,
-  UpdateTaskRepeatCfg,
-} from './task-repeat-cfg.actions';
+import { DeleteTaskRepeatCfg, TaskRepeatCfgActionTypes } from './task-repeat-cfg.actions';
 import { selectTaskRepeatCfgFeatureState } from './task-repeat-cfg.reducer';
 import { PersistenceService } from '../../../core/persistence/persistence.service';
 import { Task, TaskArchive, TaskWithSubTasks } from '../../tasks/task.model';
-import { AddTask, UnScheduleTask, UpdateTask } from '../../tasks/store/task.actions';
+import { UpdateTask } from '../../tasks/store/task.actions';
 import { TaskService } from '../../tasks/task.service';
 import { TaskRepeatCfgService } from '../task-repeat-cfg.service';
-import {
-  TASK_REPEAT_WEEKDAY_MAP,
-  TaskRepeatCfg,
-  TaskRepeatCfgState,
-} from '../task-repeat-cfg.model';
+import { TaskRepeatCfg, TaskRepeatCfgState } from '../task-repeat-cfg.model';
 import { from, merge } from 'rxjs';
-import { isToday } from '../../../util/is-today.util';
 import { WorkContextService } from '../../work-context/work-context.service';
 import { setActiveWorkContext } from '../../work-context/store/work-context.actions';
 import { SyncService } from '../../../imex/sync/sync.service';
-import { WorkContextType } from '../../work-context/work-context.model';
-import { TODAY_TAG } from '../../tag/tag.const';
 
 @Injectable()
 export class TaskRepeatCfgEffects {
@@ -60,98 +48,25 @@ export class TaskRepeatCfgEffects {
   );
 
   @Effect() createRepeatableTasks: any = this.triggerRepeatableTaskCreation$.pipe(
-    concatMap(() => this._taskRepeatCfgService.taskRepeatCfgs$.pipe(take(1))),
-    // filter out the configs which have been created today already
-    // and those which are not scheduled for the current week day
-    map((taskRepeatCfgs: TaskRepeatCfg[]): TaskRepeatCfg[] => {
-      const day = new Date().getDay();
-      const dayStr: keyof TaskRepeatCfg = TASK_REPEAT_WEEKDAY_MAP[day];
-      return (
-        taskRepeatCfgs &&
-        taskRepeatCfgs.filter(
-          (taskRepeatCfg: TaskRepeatCfg) =>
-            taskRepeatCfg[dayStr] && !isToday(taskRepeatCfg.lastTaskCreation),
-        )
-      );
-    }),
-    // ===> taskRepeatCfgs scheduled for today and not yet created already
+    concatMap(
+      () =>
+        this._taskRepeatCfgService
+          .getRepeatTableTasksDueForDay$(Date.now())
+          .pipe(first()),
+      // ===> taskRepeatCfgs scheduled for today and not yet created already
+    ),
     filter((taskRepeatCfgs) => taskRepeatCfgs && !!taskRepeatCfgs.length),
 
     // existing tasks with sub tasks are loaded, because need to move them to the archive
     mergeMap((taskRepeatCfgs) =>
       from(taskRepeatCfgs).pipe(
         mergeMap((taskRepeatCfg: TaskRepeatCfg) =>
-          // NOTE: there might be multiple configs in case something went wrong
-          // we want to move all of them to the archive
-          this._taskService
-            .getTasksWithSubTasksByRepeatCfgId$(taskRepeatCfg.id as string)
-            .pipe(
-              take(1),
-              concatMap((existingTaskInstances: Task[]) => {
-                const isCreateNew =
-                  existingTaskInstances.filter((task) => isToday(task.created)).length ===
-                  0;
-
-                const markAsDoneActions: UpdateTask[] = isCreateNew
-                  ? existingTaskInstances
-                      .filter((task) => !task.isDone && !isToday(task.created))
-                      .map(
-                        (task) =>
-                          new UpdateTask({
-                            task: {
-                              id: task.id,
-                              changes: {
-                                isDone: true,
-                              },
-                            },
-                          }),
-                      )
-                  : [];
-
-                if (!taskRepeatCfg.id) {
-                  throw new Error('No taskRepeatCfg.id');
-                }
-
-                const isAddToTodayAsFallback =
-                  !taskRepeatCfg.projectId && !taskRepeatCfg.tagIds.length;
-
-                return from([
-                  ...markAsDoneActions,
-                  ...(isCreateNew
-                    ? [
-                        new AddTask({
-                          task: this._taskService.createNewTaskWithDefaults({
-                            title: taskRepeatCfg.title,
-                            additional: {
-                              repeatCfgId: taskRepeatCfg.id,
-                              timeEstimate: taskRepeatCfg.defaultEstimate,
-                              projectId: taskRepeatCfg.projectId,
-                              tagIds: isAddToTodayAsFallback
-                                ? [TODAY_TAG.id]
-                                : taskRepeatCfg.tagIds || [],
-                            },
-                          }),
-                          workContextType: this._workContextService
-                            .activeWorkContextType as WorkContextType,
-                          workContextId: this._workContextService
-                            .activeWorkContextId as string,
-                          isAddToBacklog: false,
-                          isAddToBottom: taskRepeatCfg.isAddToBottom || false,
-                        }),
-                        new UpdateTaskRepeatCfg({
-                          taskRepeatCfg: {
-                            id: taskRepeatCfg.id,
-                            changes: {
-                              lastTaskCreation: Date.now(),
-                            },
-                          },
-                        }),
-                      ]
-                    : []),
-                ]);
-              }),
-            ),
+          this._taskRepeatCfgService.getActionsForTaskRepeatCfg(taskRepeatCfg),
         ),
+        tap((actionsForRepeatCfg) =>
+          console.log('actionsForRepeatCfg', actionsForRepeatCfg),
+        ),
+        concatMap((actionsForRepeatCfg) => from(actionsForRepeatCfg)),
       ),
     ),
     tap((v) => console.log('IMP Create Repeatable Tasks', v)),
@@ -184,20 +99,20 @@ export class TaskRepeatCfgEffects {
     }),
   );
 
-  @Effect() removeRemindersOnCreation$: any = this._actions$.pipe(
-    ofType(TaskRepeatCfgActionTypes.AddTaskRepeatCfgToTask),
-    concatMap((a: AddTaskRepeatCfgToTask) =>
-      this._taskService.getByIdOnce$(a.payload.taskId).pipe(take(1)),
-    ),
-    filter((task: TaskWithSubTasks) => typeof task.reminderId === 'string'),
-    map(
-      (task: TaskWithSubTasks) =>
-        new UnScheduleTask({
-          id: task.id,
-          reminderId: task.reminderId as string,
-        }),
-    ),
-  );
+  // @Effect() removeRemindersOnCreation$: any = this._actions$.pipe(
+  //   ofType(TaskRepeatCfgActionTypes.AddTaskRepeatCfgToTask),
+  //   concatMap((a: AddTaskRepeatCfgToTask) =>
+  //     this._taskService.getByIdOnce$(a.payload.taskId).pipe(take(1)),
+  //   ),
+  //   filter((task: TaskWithSubTasks) => typeof task.reminderId === 'string'),
+  //   map(
+  //     (task: TaskWithSubTasks) =>
+  //       new UnScheduleTask({
+  //         id: task.id,
+  //         reminderId: task.reminderId as string,
+  //       }),
+  //   ),
+  // );
 
   constructor(
     private _actions$: Actions,

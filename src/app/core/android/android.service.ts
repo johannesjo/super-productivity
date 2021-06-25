@@ -18,55 +18,56 @@ interface TaskWithCategoryText extends Task {
 
 @Injectable({ providedIn: 'root' })
 export class AndroidService {
-  private _todayTagTasksFlat$: Observable<
-    TaskWithCategoryText[]
-  > = this._dataInitService.isAllDataLoadedInitially$.pipe(
-    switchMap(() => this._tagService.getTagById$(TODAY_TAG.id)),
-    switchMap((tag) => this._taskService.getByIdsLive$(tag.taskIds)),
-    map(
-      (tasks) =>
-        tasks && tasks.sort((a, b) => (a.isDone === b.isDone ? 0 : a.isDone ? 1 : -1)),
-    ),
-    switchMap((tasks) =>
-      combineLatest([this._tagService.tags$, this._projectService.list$]).pipe(
-        map(([tags, projects]) => {
-          return tasks
-            .filter((task) => !!task)
-            .map((task) => ({
-              ...task,
-              category: [
-                ...(task.projectId
-                  ? [(projects.find((p) => p.id === task.projectId) as Project).title]
-                  : []),
-                ...(task.tagIds.length
-                  ? tags
-                      .filter(
-                        (tag) => tag.id !== TODAY_TAG.id && task.tagIds.includes(tag.id),
-                      )
-                      .map((tag) => tag.title)
-                  : []),
-              ].join(', '),
-              categoryHtml: [
-                ...(task.projectId
-                  ? [
-                      this._getCategoryHtml(
-                        projects.find((p) => p.id === task.projectId) as Project,
-                      ),
-                    ]
-                  : []),
-                ...(task.tagIds.length
-                  ? tags
-                      .filter(
-                        (tag) => tag.id !== TODAY_TAG.id && task.tagIds.includes(tag.id),
-                      )
-                      .map((tag) => this._getCategoryHtml(tag))
-                  : []),
-              ].join(' '),
-            }));
-        }),
+  private _todayTagTasksFlat$: Observable<TaskWithCategoryText[]> =
+    this._dataInitService.isAllDataLoadedInitially$.pipe(
+      switchMap(() => this._tagService.getTagById$(TODAY_TAG.id)),
+      switchMap((tag) => this._taskService.getByIdsLive$(tag.taskIds)),
+      map(
+        (tasks) =>
+          tasks && tasks.sort((a, b) => (a.isDone === b.isDone ? 0 : a.isDone ? 1 : -1)),
       ),
-    ),
-  );
+      switchMap((tasks) =>
+        combineLatest([this._tagService.tags$, this._projectService.list$]).pipe(
+          map(([tags, projects]) => {
+            return tasks
+              .filter((task) => !!task)
+              .map((task) => ({
+                ...task,
+                category: [
+                  ...(task.projectId
+                    ? [(projects.find((p) => p.id === task.projectId) as Project).title]
+                    : []),
+                  ...(task.tagIds.length
+                    ? tags
+                        .filter(
+                          (tag) =>
+                            tag.id !== TODAY_TAG.id && task.tagIds.includes(tag.id),
+                        )
+                        .map((tag) => tag.title)
+                    : []),
+                ].join(', '),
+                categoryHtml: [
+                  ...(task.projectId
+                    ? [
+                        this._getCategoryHtml(
+                          projects.find((p) => p.id === task.projectId) as Project,
+                        ),
+                      ]
+                    : []),
+                  ...(task.tagIds.length
+                    ? tags
+                        .filter(
+                          (tag) =>
+                            tag.id !== TODAY_TAG.id && task.tagIds.includes(tag.id),
+                        )
+                        .map((tag) => this._getCategoryHtml(tag))
+                    : []),
+                ].join(' '),
+              }));
+          }),
+        ),
+      ),
+    );
 
   constructor(
     private _dataInitService: DataInitService,

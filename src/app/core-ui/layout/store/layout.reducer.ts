@@ -36,9 +36,8 @@ const _initialLayoutState: LayoutState = {
   isShowNotes: false,
 };
 
-export const selectLayoutFeatureState = createFeatureSelector<LayoutState>(
-  LAYOUT_FEATURE_NAME,
-);
+export const selectLayoutFeatureState =
+  createFeatureSelector<LayoutState>(LAYOUT_FEATURE_NAME);
 
 export const selectIsShowAddTaskBar = createSelector(
   selectLayoutFeatureState,

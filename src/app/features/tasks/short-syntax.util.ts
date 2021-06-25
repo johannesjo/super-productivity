@@ -4,7 +4,8 @@ import { stringToMs } from '../../ui/duration/string-to-ms.pipe';
 import { Tag } from '../tag/tag.model';
 import { Project } from '../project/project.model';
 
-export const SHORT_SYNTAX_TIME_REG_EX = / t?(([0-9]+(m|h|d)+)? *\/ *)?([0-9]+(m|h|d)+) *$/i;
+export const SHORT_SYNTAX_TIME_REG_EX =
+  / t?(([0-9]+(m|h|d)+)? *\/ *)?([0-9]+(m|h|d)+) *$/i;
 // NOTE: should come after the time reg ex is executed so we don't have to deal with those strings too
 
 const CH_PRO = '+';

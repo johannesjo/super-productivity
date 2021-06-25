@@ -16,9 +16,8 @@ export const initialPomodoroState: PomodoroState = {
 };
 
 // SELECTORS
-export const selectPomodoroFeatureState = createFeatureSelector<PomodoroState>(
-  POMODORO_FEATURE_NAME,
-);
+export const selectPomodoroFeatureState =
+  createFeatureSelector<PomodoroState>(POMODORO_FEATURE_NAME);
 export const selectIsManualPause = createSelector(
   selectPomodoroFeatureState,
   (state) => state.isManualPause,

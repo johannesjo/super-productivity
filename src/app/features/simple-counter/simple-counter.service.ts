@@ -62,16 +62,14 @@ export class SimpleCounterService {
   simpleCounters$: Observable<SimpleCounter[]> = this._store$.pipe(
     select(selectAllSimpleCounters),
   );
-  simpleCountersUpdatedOnCfgChange$: Observable<
-    SimpleCounter[]
-  > = this.simpleCounters$.pipe(distinctUntilChanged(isEqualSimpleCounterCfg));
+  simpleCountersUpdatedOnCfgChange$: Observable<SimpleCounter[]> =
+    this.simpleCounters$.pipe(distinctUntilChanged(isEqualSimpleCounterCfg));
 
   enabledSimpleCounters$: Observable<SimpleCounter[]> = this._store$
     .pipe(select(selectAllSimpleCounters))
     .pipe(map((items) => items && items.filter((item) => item.isEnabled)));
-  enabledSimpleCountersUpdatedOnCfgChange$: Observable<
-    SimpleCounter[]
-  > = this.enabledSimpleCounters$.pipe(distinctUntilChanged(isEqualSimpleCounterCfg));
+  enabledSimpleCountersUpdatedOnCfgChange$: Observable<SimpleCounter[]> =
+    this.enabledSimpleCounters$.pipe(distinctUntilChanged(isEqualSimpleCounterCfg));
 
   enabledAndToggledSimpleCounters$: Observable<SimpleCounter[]> = this._store$
     .pipe(select(selectAllSimpleCounters))

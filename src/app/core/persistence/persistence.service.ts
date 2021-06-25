@@ -132,38 +132,32 @@ export class PersistenceService {
     'tag',
     tagReducer,
   );
-  simpleCounter: PersistenceBaseEntityModel<
-    SimpleCounterState,
-    SimpleCounter
-  > = this._cmBaseEntity<SimpleCounterState, SimpleCounter>(
-    LS_SIMPLE_COUNTER_STATE,
-    'simpleCounter',
-    simpleCounterReducer,
-  );
+  simpleCounter: PersistenceBaseEntityModel<SimpleCounterState, SimpleCounter> =
+    this._cmBaseEntity<SimpleCounterState, SimpleCounter>(
+      LS_SIMPLE_COUNTER_STATE,
+      'simpleCounter',
+      simpleCounterReducer,
+    );
 
   // METRIC MODELS
   metric: PersistenceBaseEntityModel<MetricState, Metric> = this._cmBaseEntity<
     MetricState,
     Metric
   >(LS_METRIC_STATE, 'metric', metricReducer as any, migrateMetricState);
-  improvement: PersistenceBaseEntityModel<
-    ImprovementState,
-    Improvement
-  > = this._cmBaseEntity<ImprovementState, Improvement>(
-    LS_IMPROVEMENT_STATE,
-    'improvement',
-    improvementReducer,
-    migrateImprovementState,
-  );
-  obstruction: PersistenceBaseEntityModel<
-    ObstructionState,
-    Obstruction
-  > = this._cmBaseEntity<ObstructionState, Obstruction>(
-    LS_OBSTRUCTION_STATE,
-    'obstruction',
-    obstructionReducer as any,
-    migrateObstructionState,
-  );
+  improvement: PersistenceBaseEntityModel<ImprovementState, Improvement> =
+    this._cmBaseEntity<ImprovementState, Improvement>(
+      LS_IMPROVEMENT_STATE,
+      'improvement',
+      improvementReducer,
+      migrateImprovementState,
+    );
+  obstruction: PersistenceBaseEntityModel<ObstructionState, Obstruction> =
+    this._cmBaseEntity<ObstructionState, Obstruction>(
+      LS_OBSTRUCTION_STATE,
+      'obstruction',
+      obstructionReducer as any,
+      migrateObstructionState,
+    );
 
   // MAIN TASK MODELS
   task: PersistenceBaseEntityModel<TaskState, Task> = this._cmBaseEntity<TaskState, Task>(
@@ -176,15 +170,13 @@ export class PersistenceService {
     TaskArchive,
     ArchiveTask
   >(LS_TASK_ARCHIVE, 'taskArchive', taskReducer as any, migrateTaskArchiveState);
-  taskRepeatCfg: PersistenceBaseEntityModel<
-    TaskRepeatCfgState,
-    TaskRepeatCfg
-  > = this._cmBaseEntity<TaskRepeatCfgState, TaskRepeatCfg>(
-    LS_TASK_REPEAT_CFG_STATE,
-    'taskRepeatCfg',
-    taskRepeatCfgReducer as any,
-    migrateTaskRepeatCfgState,
-  );
+  taskRepeatCfg: PersistenceBaseEntityModel<TaskRepeatCfgState, TaskRepeatCfg> =
+    this._cmBaseEntity<TaskRepeatCfgState, TaskRepeatCfg>(
+      LS_TASK_REPEAT_CFG_STATE,
+      'taskRepeatCfg',
+      taskRepeatCfgReducer as any,
+      migrateTaskRepeatCfgState,
+    );
 
   // PROJECT MODELS
   bookmark: PersistenceForProjectModel<BookmarkState, Bookmark> = this._cmProject<
@@ -201,20 +193,16 @@ export class PersistenceService {
     MetricState,
     Metric
   >(LS_METRIC_STATE, 'metric' as any);
-  legacyImprovement: PersistenceForProjectModel<
-    ImprovementState,
-    Improvement
-  > = this._cmProjectLegacy<ImprovementState, Improvement>(
-    LS_IMPROVEMENT_STATE,
-    'improvement' as any,
-  );
-  legacyObstruction: PersistenceForProjectModel<
-    ObstructionState,
-    Obstruction
-  > = this._cmProjectLegacy<ObstructionState, Obstruction>(
-    LS_OBSTRUCTION_STATE,
-    'obstruction' as any,
-  );
+  legacyImprovement: PersistenceForProjectModel<ImprovementState, Improvement> =
+    this._cmProjectLegacy<ImprovementState, Improvement>(
+      LS_IMPROVEMENT_STATE,
+      'improvement' as any,
+    );
+  legacyObstruction: PersistenceForProjectModel<ObstructionState, Obstruction> =
+    this._cmProjectLegacy<ObstructionState, Obstruction>(
+      LS_OBSTRUCTION_STATE,
+      'obstruction' as any,
+    );
 
   onAfterSave$: Subject<{
     appDataKey: AllowedDBKeys;

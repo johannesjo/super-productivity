@@ -163,7 +163,7 @@ export class EnlargeImgDirective {
     const extra = 1.1;
     const magicSpace = 5;
     // prettier-ignore
-    const x =((offsetX / zoomer.offsetWidth * 100) - magicSpace) * (-0.5 * extra);
+    const x = ((offsetX / zoomer.offsetWidth * 100) - magicSpace) * (-0.5 * extra);
     // prettier-ignore
     const y = ((offsetY / zoomer.offsetHeight * 100) - magicSpace) * (-0.5 * extra);
 

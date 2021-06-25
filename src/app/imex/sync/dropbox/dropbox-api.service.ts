@@ -23,11 +23,12 @@ export class DropboxApiService {
     map((token) => !!token),
   );
 
-  private _isReady$: Observable<boolean> = this._dataInitService.isAllDataLoadedInitially$.pipe(
-    switchMap(() => this.isTokenAvailable$),
-    tap((isTokenAvailable) => !isTokenAvailable && new Error('Dropbox API not ready')),
-    first(),
-  );
+  private _isReady$: Observable<boolean> =
+    this._dataInitService.isAllDataLoadedInitially$.pipe(
+      switchMap(() => this.isTokenAvailable$),
+      tap((isTokenAvailable) => !isTokenAvailable && new Error('Dropbox API not ready')),
+      first(),
+    );
 
   constructor(
     private _globalConfigService: GlobalConfigService,

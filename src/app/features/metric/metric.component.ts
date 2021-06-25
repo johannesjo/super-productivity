@@ -19,7 +19,8 @@ import { WorkContextService } from '../work-context/work-context.service';
 export class MetricComponent {
   T: typeof T = T;
 
-  productivityHappiness$: Observable<LineChartData> = this.metricService.getProductivityHappinessChartData$();
+  productivityHappiness$: Observable<LineChartData> =
+    this.metricService.getProductivityHappinessChartData$();
 
   pieChartOptions: ChartOptions = {
     responsive: true,

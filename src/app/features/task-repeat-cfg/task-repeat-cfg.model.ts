@@ -1,5 +1,6 @@
 import { EntityState } from '@ngrx/entity';
 import { MODEL_VERSION_KEY } from '../../app.constants';
+import { TaskReminderOptionId } from '../tasks/task.model';
 
 export const TASK_REPEAT_WEEKDAY_MAP: (keyof TaskRepeatCfg)[] = [
   'sunday',
@@ -17,6 +18,9 @@ export interface TaskRepeatCfgCopy {
   lastTaskCreation: number;
   title: string | null;
   defaultEstimate: number | undefined;
+  // TODO migrate all existing to undefined
+  startTime: string | undefined;
+  remindAt: TaskReminderOptionId | undefined;
   monday: boolean;
   tuesday: boolean;
   wednesday: boolean;
@@ -43,6 +47,9 @@ export const DEFAULT_TASK_REPEAT_CFG: Omit<TaskRepeatCfgCopy, 'id'> = {
   // id: undefined,
   projectId: null,
   // lastTaskCreation: Date.now() - 24 * 60 * 60 * 1000,
+
+  startTime: undefined,
+  remindAt: undefined,
 
   monday: true,
   tuesday: true,

@@ -191,9 +191,8 @@ export class TaskInternalEffects {
       if (isLastSelectable) {
         nextId = state.lastCurrentTaskId;
       } else {
-        const selectable = flattenToSelectable(todaysTaskIds).find(
-          filterUndoneNotCurrent,
-        );
+        const selectable =
+          flattenToSelectable(todaysTaskIds).find(filterUndoneNotCurrent);
         nextId = Array.isArray(selectable) ? selectable[0] : selectable;
       }
     }

@@ -25,8 +25,9 @@ export class GlobalThemeService {
             (this._electronService.remote as typeof remote).nativeTheme
               .shouldUseDarkColors,
           );
-          (this._electronService
-            .remote as typeof remote).systemPreferences.subscribeNotification(
+          (
+            this._electronService.remote as typeof remote
+          ).systemPreferences.subscribeNotification(
             'AppleInterfaceThemeChangedNotification',
             () =>
               subscriber.next(

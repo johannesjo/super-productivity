@@ -12,8 +12,8 @@
         >
           <mat-option
             *ngFor="let remindOption of remindAvailableOptions; trackBy: trackByIndex"
-            [innerHtml]="(remindOption.title|translate)"
-            [value]="remindOption.id"
+            [innerHtml]="(remindOption.label|translate)"
+            [value]="remindOption.value"
           >
           </mat-option>
         </mat-select>

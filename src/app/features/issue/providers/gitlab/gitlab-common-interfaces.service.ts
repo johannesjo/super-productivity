@@ -200,9 +200,10 @@ export class GitlabCommonInterfacesService implements IssueServiceInterface {
     return updatedIssues;
   }
 
-  getAddTaskData(
-    issue: GitlabIssue,
-  ): { title: string; additionalFields: Partial<IssueFieldsForTask> } {
+  getAddTaskData(issue: GitlabIssue): {
+    title: string;
+    additionalFields: Partial<IssueFieldsForTask>;
+  } {
     return {
       title: this._formatIssueTitle(issue.number, issue.title),
       additionalFields: {

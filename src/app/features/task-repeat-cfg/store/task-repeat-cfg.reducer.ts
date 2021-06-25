@@ -9,11 +9,16 @@ import {
   UpdateTaskRepeatCfgs,
   UpsertTaskRepeatCfg,
 } from './task-repeat-cfg.actions';
-import { TaskRepeatCfg, TaskRepeatCfgState } from '../task-repeat-cfg.model';
+import {
+  TASK_REPEAT_WEEKDAY_MAP,
+  TaskRepeatCfg,
+  TaskRepeatCfgState,
+} from '../task-repeat-cfg.model';
 import { createFeatureSelector, createSelector } from '@ngrx/store';
 import { loadAllData } from '../../../root-store/meta/load-all-data.action';
 import { AppDataComplete } from '../../../imex/sync/sync.model';
 import { migrateTaskRepeatCfgState } from '../migrate-task-repeat-cfg-state.util';
+import { isSameDay } from '../../../util/is-same-day';
 
 export const TASK_REPEAT_CFG_FEATURE_NAME = 'taskRepeatCfg';
 
@@ -21,12 +26,8 @@ export const adapter: EntityAdapter<TaskRepeatCfg> = createEntityAdapter<TaskRep
 export const selectTaskRepeatCfgFeatureState = createFeatureSelector<TaskRepeatCfgState>(
   TASK_REPEAT_CFG_FEATURE_NAME,
 );
-export const {
-  selectIds,
-  selectEntities,
-  selectAll,
-  selectTotal,
-} = adapter.getSelectors();
+export const { selectIds, selectEntities, selectAll, selectTotal } =
+  adapter.getSelectors();
 export const selectAllTaskRepeatCfgs = createSelector(
   selectTaskRepeatCfgFeatureState,
   selectAll,
@@ -39,6 +40,36 @@ export const selectTaskRepeatCfgById = createSelector(
       throw new Error('Missing taskRepeatCfg');
     }
     return cfg;
+  },
+);
+
+export const selectTaskRepeatCfgsWithStartTime = createSelector(
+  selectAllTaskRepeatCfgs,
+  (taskRepeatCfgs: TaskRepeatCfg[]): TaskRepeatCfg[] => {
+    return taskRepeatCfgs.filter((cfg) => !!cfg.startTime);
+  },
+);
+
+// filter out the configs which have been created today already
+// and those which are not scheduled for the current week day
+export const selectTaskRepeatCfgsDueOnDay = createSelector(
+  selectAllTaskRepeatCfgs,
+  (
+    taskRepeatCfgs: TaskRepeatCfg[],
+    { dayDate }: { dayDate: number },
+  ): TaskRepeatCfg[] => {
+    const day = new Date(dayDate).getDay();
+    const dayStr: keyof TaskRepeatCfg = TASK_REPEAT_WEEKDAY_MAP[day];
+    return (
+      taskRepeatCfgs &&
+      taskRepeatCfgs.filter(
+        (taskRepeatCfg: TaskRepeatCfg) =>
+          taskRepeatCfg[dayStr] &&
+          !isSameDay(taskRepeatCfg.lastTaskCreation, dayDate) &&
+          // also check for if future instance was already created via the work-view button
+          dayDate >= taskRepeatCfg.lastTaskCreation,
+      )
+    );
   },
 );
 export const selectTaskRepeatCfgByIdAllowUndefined = createSelector(

@@ -69,40 +69,40 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
 
   taskSuggestionsCtrl: FormControl = new FormControl();
 
-  filteredIssueSuggestions$: Observable<
-    AddTaskSuggestion[]
-  > = this.taskSuggestionsCtrl.valueChanges.pipe(
-    debounceTime(300),
-    tap(() => this.isLoading$.next(true)),
-    withLatestFrom(this._workContextService.activeWorkContextTypeAndId$),
-    switchMap(([searchTerm, { activeType, activeId }]) =>
-      activeType === WorkContextType.PROJECT
-        ? this._searchForProject$(searchTerm)
-        : this._searchForTag$(searchTerm, activeId),
-    ) as any,
-    // don't show issues twice
-    // NOTE: this only works because backlog items come first
-    map((items: AddTaskSuggestion[]) =>
-      items.reduce((unique: AddTaskSuggestion[], item: AddTaskSuggestion) => {
-        return item.issueData &&
-          unique.find(
-            // NOTE: we check defined because we don't want to run into
-            // false == false or similar
-            (u) =>
-              !!u.taskIssueId && !!item.issueData && u.taskIssueId === item.issueData.id,
-          )
-          ? unique
-          : [...unique, item];
-      }, []),
-    ),
-    tap(() => {
-      this.isLoading$.next(false);
-    }),
-  );
+  filteredIssueSuggestions$: Observable<AddTaskSuggestion[]> =
+    this.taskSuggestionsCtrl.valueChanges.pipe(
+      debounceTime(300),
+      tap(() => this.isLoading$.next(true)),
+      withLatestFrom(this._workContextService.activeWorkContextTypeAndId$),
+      switchMap(([searchTerm, { activeType, activeId }]) =>
+        activeType === WorkContextType.PROJECT
+          ? this._searchForProject$(searchTerm)
+          : this._searchForTag$(searchTerm, activeId),
+      ) as any,
+      // don't show issues twice
+      // NOTE: this only works because backlog items come first
+      map((items: AddTaskSuggestion[]) =>
+        items.reduce((unique: AddTaskSuggestion[], item: AddTaskSuggestion) => {
+          return item.issueData &&
+            unique.find(
+              // NOTE: we check defined because we don't want to run into
+              // false == false or similar
+              (u) =>
+                !!u.taskIssueId &&
+                !!item.issueData &&
+                u.taskIssueId === item.issueData.id,
+            )
+            ? unique
+            : [...unique, item];
+        }, []),
+      ),
+      tap(() => {
+        this.isLoading$.next(false);
+      }),
+    );
 
-  activatedIssueTask$: BehaviorSubject<AddTaskSuggestion | null> = new BehaviorSubject<AddTaskSuggestion | null>(
-    null,
-  );
+  activatedIssueTask$: BehaviorSubject<AddTaskSuggestion | null> =
+    new BehaviorSubject<AddTaskSuggestion | null>(null);
   activatedIssueTask: AddTaskSuggestion | null = null;
 
   shortSyntaxTags: {
@@ -414,20 +414,18 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
         map((tasks) =>
           tasks
             .filter((task) => this._filterBacklog(searchTerm, task))
-            .map(
-              (task): AddTaskSuggestion => {
-                return {
-                  title: task.title,
-                  taskId: task.id,
-                  taskIssueId: task.issueId || undefined,
-                  issueType: task.issueType || undefined,
-                  projectId: task.projectId || undefined,
+            .map((task): AddTaskSuggestion => {
+              return {
+                title: task.title,
+                taskId: task.id,
+                taskIssueId: task.issueId || undefined,
+                issueType: task.issueType || undefined,
+                projectId: task.projectId || undefined,
 
-                  isFromOtherContextAndTagOnlySearch: true,
-                  tagIds: task.tagIds,
-                };
-              },
-            ),
+                isFromOtherContextAndTagOnlySearch: true,
+                tagIds: task.tagIds,
+              };
+            }),
         ),
         switchMap((tasks) =>
           !!tasks.length

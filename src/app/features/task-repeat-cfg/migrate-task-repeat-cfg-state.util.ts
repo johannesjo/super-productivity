@@ -3,7 +3,7 @@ import { MODEL_VERSION_KEY } from '../../app.constants';
 import { isMigrateModel } from '../../util/model-version';
 import { TaskRepeatCfg, TaskRepeatCfgState } from './task-repeat-cfg.model';
 
-const MODEL_VERSION = 1;
+const MODEL_VERSION = 1.1;
 
 export const migrateTaskRepeatCfgState = (
   taskRepeatState: TaskRepeatCfgState,
@@ -32,5 +32,6 @@ const _addNewFieldsToTaskRepeatCfgs = (taskRepeat: TaskRepeatCfg): TaskRepeatCfg
   return {
     ...taskRepeat,
     tagIds: taskRepeat.tagIds || [],
+    startTime: undefined,
   };
 };

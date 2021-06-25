@@ -38,27 +38,26 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
 
   @ViewChild('circleSvg', { static: true }) circleSvg?: ElementRef;
 
-  currentTaskContext$: Observable<
-    Project | Tag | null
-  > = this.taskService.currentTaskParentOrCurrent$.pipe(
-    filter((ct) => !!ct),
-    switchMap((currentTask) =>
-      this.workContextService.activeWorkContextId$.pipe(
-        filter((activeWorkContextId) => !!activeWorkContextId),
-        switchMap((activeWorkContextId) => {
-          if (
-            currentTask.projectId === activeWorkContextId ||
-            currentTask.tagIds.includes(activeWorkContextId as string)
-          ) {
-            return of(null);
-          }
-          return currentTask.projectId
-            ? this.projectService.getByIdOnce$(currentTask.projectId)
-            : this._tagService.getTagById$(currentTask.tagIds[0]).pipe(first());
-        }),
+  currentTaskContext$: Observable<Project | Tag | null> =
+    this.taskService.currentTaskParentOrCurrent$.pipe(
+      filter((ct) => !!ct),
+      switchMap((currentTask) =>
+        this.workContextService.activeWorkContextId$.pipe(
+          filter((activeWorkContextId) => !!activeWorkContextId),
+          switchMap((activeWorkContextId) => {
+            if (
+              currentTask.projectId === activeWorkContextId ||
+              currentTask.tagIds.includes(activeWorkContextId as string)
+            ) {
+              return of(null);
+            }
+            return currentTask.projectId
+              ? this.projectService.getByIdOnce$(currentTask.projectId)
+              : this._tagService.getTagById$(currentTask.tagIds[0]).pipe(first());
+          }),
+        ),
       ),
-    ),
-  );
+    );
 
   private _subs: Subscription = new Subscription();
 

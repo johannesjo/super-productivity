@@ -8,7 +8,7 @@ import { Update } from '@ngrx/entity';
 
 export const getTaskById = (taskId: string, state: TaskState): Task => {
   if (!state.entities[taskId]) {
-    throw new Error('Task not found');
+    throw new Error('Task not found: ' + taskId);
   } else {
     return state.entities[taskId] as Task;
   }

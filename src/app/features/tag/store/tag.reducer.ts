@@ -38,12 +38,8 @@ const WORK_CONTEXT_TYPE: WorkContextType = WorkContextType.TAG;
 
 export const tagAdapter: EntityAdapter<Tag> = createEntityAdapter<Tag>();
 export const selectTagFeatureState = createFeatureSelector<TagState>(TAG_FEATURE_NAME);
-export const {
-  selectIds,
-  selectEntities,
-  selectAll,
-  selectTotal,
-} = tagAdapter.getSelectors();
+export const { selectIds, selectEntities, selectAll, selectTotal } =
+  tagAdapter.getSelectors();
 export const selectAllTags = createSelector(selectTagFeatureState, selectAll);
 export const selectAllTagsWithoutMyDay = createSelector(
   selectAllTags,

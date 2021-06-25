@@ -26,12 +26,8 @@ export const adapter: EntityAdapter<SimpleCounter> = createEntityAdapter<SimpleC
 export const selectSimpleCounterFeatureState = createFeatureSelector<SimpleCounterState>(
   SIMPLE_COUNTER_FEATURE_NAME,
 );
-export const {
-  selectIds,
-  selectEntities,
-  selectAll,
-  selectTotal,
-} = adapter.getSelectors();
+export const { selectIds, selectEntities, selectAll, selectTotal } =
+  adapter.getSelectors();
 export const selectAllSimpleCounters = createSelector(
   selectSimpleCounterFeatureState,
   selectAll,
@@ -41,12 +37,11 @@ export const selectSimpleCounterById = createSelector(
   (state: SimpleCounterState, props: { id: string }) => state.entities[props.id],
 );
 
-export const initialSimpleCounterState: SimpleCounterState = adapter.getInitialState<SimpleCounterState>(
-  {
+export const initialSimpleCounterState: SimpleCounterState =
+  adapter.getInitialState<SimpleCounterState>({
     ids: DEFAULT_SIMPLE_COUNTERS.map((value) => value.id),
     entities: arrayToDictionary<SimpleCounter>(DEFAULT_SIMPLE_COUNTERS),
-  },
-);
+  });
 
 const disableIsOnForAll = (state: SimpleCounterState): SimpleCounterState => {
   return {

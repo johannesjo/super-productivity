@@ -75,3 +75,7 @@ import 'zone.js/dist/zone'; // Included with Angular CLI.
 /***************************************************************************************************
  * APPLICATION IMPORTS
  */
+
+// fix ical.js
+// @see https://github.com/mozilla-comm/ical.js/issues/329
+(window as any).ICAL = {};

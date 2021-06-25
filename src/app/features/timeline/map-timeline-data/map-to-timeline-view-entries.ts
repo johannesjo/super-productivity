@@ -17,6 +17,7 @@ import {
   TimelineViewEntryType,
 } from '../timeline.const';
 import * as moment from 'moment';
+import { TaskRepeatCfg } from '../../task-repeat-cfg/task-repeat-cfg.model';
 
 // const debug = (...args: any) => console.log(...args);
 const debug = (...args: any) => undefined;
@@ -24,6 +25,7 @@ const debug = (...args: any) => undefined;
 export const mapToTimelineViewEntries = (
   tasks: Task[],
   scheduledTasks: TaskPlanned[],
+  scheduledTaskRepeatCfgs: TaskRepeatCfg[],
   currentId: string | null,
   workStartEndCfg?: TimelineWorkStartEndCfg,
   now: number = Date.now(),
@@ -56,7 +58,12 @@ export const mapToTimelineViewEntries = (
     nonScheduledTasks,
   );
 
-  const blockedBlocks = createSortedBlockerBlocks(scheduledTasks, workStartEndCfg, now);
+  const blockedBlocks = createSortedBlockerBlocks(
+    scheduledTasks,
+    scheduledTaskRepeatCfgs,
+    workStartEndCfg,
+    now,
+  );
 
   insertBlockedBlocksViewEntries(
     viewEntries as TimelineViewEntryTask[],
@@ -202,6 +209,15 @@ const createViewEntriesForBlock = (blockedBlock: BlockedBlock): TimelineViewEntr
         data: scheduledTask,
         isHideTime: false,
       });
+    } else if (entry.type === BlockedBlockType.ScheduledRepeatProjection) {
+      const repeatCfg = entry.data;
+      viewEntriesForBock.push({
+        id: repeatCfg.id,
+        start: entry.start,
+        type: TimelineViewEntryType.ScheduledRepeatTaskProjection,
+        data: repeatCfg,
+        isHideTime: false,
+      });
     } else if (entry.type === BlockedBlockType.WorkdayStartEnd) {
       // NOTE: day start and end are mixed up, because it is the opposite as the blocked range
 
@@ -302,7 +318,8 @@ const insertBlockedBlocksViewEntries = (
           if (isTaskDataType(viewEntry)) {
             debug('CCC a) ' + viewEntry.type);
             const currentViewEntry: TimelineViewEntryTask = viewEntry as any;
-            const splitTask: TaskWithoutReminder = currentViewEntry.data as TaskWithoutReminder;
+            const splitTask: TaskWithoutReminder =
+              currentViewEntry.data as TaskWithoutReminder;
 
             const timeLeftOnTask = timeLeft;
             const timePlannedForSplitStart = blockedBlock.start - currentViewEntry.start;
@@ -331,7 +348,8 @@ const insertBlockedBlocksViewEntries = (
             break;
           } else if (isContinuedTaskType(viewEntry)) {
             debug('CCC b) ' + viewEntry.type);
-            const currentViewEntry: TimelineViewEntrySplitTaskContinued = viewEntry as any;
+            const currentViewEntry: TimelineViewEntrySplitTaskContinued =
+              viewEntry as any;
             const timeLeftForCompleteSplitTask = timeLeft;
             const timePlannedForSplitTaskBefore =
               blockedBlock.start - currentViewEntry.start;

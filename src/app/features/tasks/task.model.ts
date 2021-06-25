@@ -17,6 +17,8 @@ export enum TaskAdditionalInfoTargetPanel {
 
 export type DropListModelSource = 'UNDONE' | 'DONE' | 'BACKLOG';
 
+// NOTE: do not change these, as they are used inside task repeat model directly
+// (new can be added though)
 export enum TaskReminderOptionId {
   DoNotRemind = 'DoNotRemind',
   AtStart = 'AtStart',
@@ -28,8 +30,8 @@ export enum TaskReminderOptionId {
 }
 
 export interface TaskReminderOption {
-  id: TaskReminderOptionId;
-  title: string;
+  value: TaskReminderOptionId;
+  label: string;
 }
 
 export interface TimeSpentOnDayCopy {

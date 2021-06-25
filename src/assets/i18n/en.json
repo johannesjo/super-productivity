@@ -698,6 +698,8 @@
         "UPDATE_ISSUE_DATA": "Update issue data"
       },
       "D_REMINDER_ADD": {
+        "CONFIRM_REPEAT_TXT": "You're trying to schedule this repeated task to another day. Repeated tasks are usually meant to be re-created on specified days and only scheduled on that day. Do you want to proceed anyway?",
+        "CONFIRM_REPEAT_OK": "Schedule",
         "DATETIME_FOR": "Datetime for reminder",
         "EDIT": "Edit Reminder",
         "MOVE_TO_BACKLOG": "Move task to backlog until scheduled",
@@ -777,7 +779,7 @@
         "EDIT": "Edit Repeat Task Config",
         "HELP1": "Repeating tasks are meant for daily chores, e.g.: \"Organization\", \"Daily Meeting\", \"Code Review\", \"Checking emails\" or similar tasks which are likely to occur again and again.",
         "HELP2": "Once configured a repeating task will be recreated on every day selected below as soon as you open your project and will be automatically marked as completed at the end of the day. They will be handled as different instances. So you can freely add sub tasks etc.",
-        "HELP3": "Tasks imported from Jira or Git Issues cannot be repeated. All reminders will also be deleted on a repeating task.",
+        "HELP3": "Tasks imported from Jira or Git Issues cannot be repeated.",
         "TAG_LABEL": "Tags to add"
       },
       "F": {
@@ -786,6 +788,10 @@
         "IS_ADD_TO_BOTTOM": "Move task to bottom of list",
         "MONDAY": "Monday",
         "SATURDAY": "Saturday",
+        "REMIND_AT": "Remind at",
+        "REMIND_AT_PLACEHOLDER": "Select when to remind",
+        "START_TIME": "Scheduled start time",
+        "START_TIME_DESCRIPTION": "E.g. 15:00. Leave blank for an all day task",
         "SUNDAY": "Sunday",
         "THURSDAY": "Thursday",
         "TITLE": "Title for task",

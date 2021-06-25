@@ -31,6 +31,8 @@ import { T } from '../../t.const';
 import { ImprovementService } from '../metric/improvement/improvement.service';
 import { workViewProjectChangeAnimation } from '../../ui/animations/work-view-project-change.ani';
 import { WorkContextService } from '../work-context/work-context.service';
+import { TaskRepeatCfgService } from '../task-repeat-cfg/task-repeat-cfg.service';
+import { TaskRepeatCfg } from '../task-repeat-cfg/task-repeat-cfg.model';
 
 const SUB = 'SUB';
 const PARENT = 'PARENT';
@@ -59,19 +61,27 @@ export class WorkViewComponent implements OnInit, OnDestroy, AfterContentInit {
   T: typeof T = T;
 
   // NOTE: not perfect but good enough for now
-  isTriggerBacklogIconAni$: Observable<boolean> = this.workContextService.onMoveToBacklog$.pipe(
-    switchMap(() => zip(from([true, false]), timer(1, 200))),
-    map((v) => v[0]),
-  );
+  isTriggerBacklogIconAni$: Observable<boolean> =
+    this.workContextService.onMoveToBacklog$.pipe(
+      switchMap(() => zip(from([true, false]), timer(1, 200))),
+      map((v) => v[0]),
+    );
   splitTopEl$: ReplaySubject<HTMLElement> = new ReplaySubject(1);
 
   // TODO make this work for tag page without backlog
-  upperContainerScroll$: Observable<Event> = this.workContextService.isContextChanging$.pipe(
-    filter((isChanging) => !isChanging),
-    delay(50),
-    switchMap(() => this.splitTopEl$),
-    switchMap((el) => fromEvent(el, 'scroll')),
-  );
+  upperContainerScroll$: Observable<Event> =
+    this.workContextService.isContextChanging$.pipe(
+      filter((isChanging) => !isChanging),
+      delay(50),
+      switchMap(() => this.splitTopEl$),
+      switchMap((el) => fromEvent(el, 'scroll')),
+    );
+
+  // eslint-disable-next-line no-mixed-operators
+  private _tomorrow: number = Date.now() + 24 * 60 * 60 * 1000;
+  repeatableScheduledForTomorrow$: Observable<TaskRepeatCfg[]> =
+    this._taskRepeatCfgService.getRepeatTableTasksDueForDay$(this._tomorrow);
+
   private _subs: Subscription = new Subscription();
   private _switchListAnimationTimeout?: number;
 
@@ -82,6 +92,7 @@ export class WorkViewComponent implements OnInit, OnDestroy, AfterContentInit {
     public improvementService: ImprovementService,
     public layoutService: LayoutService,
     public workContextService: WorkContextService,
+    private _taskRepeatCfgService: TaskRepeatCfgService,
     private _dragulaService: DragulaService,
     private _activatedRoute: ActivatedRoute,
   ) {}
@@ -93,6 +104,8 @@ export class WorkViewComponent implements OnInit, OnDestroy, AfterContentInit {
   }
 
   ngOnInit() {
+    // eslint-disable-next-line no-mixed-operators
+    this._tomorrow = Date.now() + 24 * 60 * 60 * 1000;
     const sub = this._dragulaService.find(SUB);
     const par = this._dragulaService.find(PARENT);
 
@@ -176,6 +189,20 @@ export class WorkViewComponent implements OnInit, OnDestroy, AfterContentInit {
         this.taskService.addTodayTag(t);
       }
     });
+  }
+
+  addAllPlannedToDayAndCreateRepeatable(
+    plannedTasks: TaskPlanned[],
+    repeatableScheduledForTomorrow: TaskRepeatCfg[],
+  ) {
+    if (plannedTasks.length) {
+      this.addAllPlannedToToday(plannedTasks);
+    }
+    if (repeatableScheduledForTomorrow.length) {
+      repeatableScheduledForTomorrow.forEach((repeatCfg) => {
+        this._taskRepeatCfgService.createRepeatableTask(repeatCfg, this._tomorrow);
+      });
+    }
   }
 
   resetBreakTimer() {

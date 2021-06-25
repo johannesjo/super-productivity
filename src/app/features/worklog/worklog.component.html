@@ -1,4 +1,6 @@
-<ng-template #spinner><full-page-spinner></full-page-spinner></ng-template>
+<ng-template #spinner>
+  <full-page-spinner></full-page-spinner>
+</ng-template>
 
 <div *ngIf="worklogService.worklogData$|async as wData; else spinner" [@fade]>
   <h1 class="mat-headline total-time">
@@ -98,11 +100,11 @@
                       </td>
                       <td mat-ripple>
                         <mat-icon *ngIf="!expanded[worklogForDay.value.dateStr]"
-                          >list</mat-icon
-                        >
+                          >list
+                        </mat-icon>
                         <mat-icon *ngIf="expanded[worklogForDay.value.dateStr]"
-                          >close</mat-icon
-                        >
+                          >close
+                        </mat-icon>
                       </td>
                     </tr>
 

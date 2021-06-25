@@ -336,9 +336,7 @@ export class GoogleApiService {
     }
   }
 
-  private _getTokenFromAuthCode(
-    code: string,
-  ): Promise<
+  private _getTokenFromAuthCode(code: string): Promise<
     AxiosResponse<{
       access_token: string;
       expires_in: number;
@@ -362,9 +360,7 @@ export class GoogleApiService {
     });
   }
 
-  private _getAccessTokenFromRefreshToken(
-    refreshToken: string,
-  ): Promise<
+  private _getAccessTokenFromRefreshToken(refreshToken: string): Promise<
     AxiosResponse<{
       access_token: string;
       expires_in: number;

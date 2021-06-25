@@ -35,6 +35,7 @@ export class WorklogComponent implements AfterViewInit, OnDestroy {
   expanded: { [key: string]: boolean } = {};
 
   private _subs: Subscription = new Subscription();
+
   constructor(
     public readonly worklogService: WorklogService,
     public readonly workContextService: WorkContextService,

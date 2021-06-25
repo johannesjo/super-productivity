@@ -61,6 +61,11 @@
             [event]="row.data"
           ></timeline-custom-event>
 
+          <timeline-task-repeat-projection
+            *ngSwitchCase="TimelineViewEntryType.ScheduledRepeatTaskProjection"
+            [repeatCfg]="row.data"
+          ></timeline-task-repeat-projection>
+
           <div
             *ngSwitchCase="TimelineViewEntryType.WorkdayStart"
             [title]="row.start|date:'medium'"

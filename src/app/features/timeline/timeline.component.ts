@@ -13,6 +13,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { LS_WAS_TIMELINE_INITIAL_DIALOG_SHOWN } from '../../core/persistence/ls-keys.const';
 import { DialogTimelineInitialSetupComponent } from './dialog-timeline-initial-setup/dialog-timeline-initial-setup.component';
 import { WorkContextService } from '../work-context/work-context.service';
+import { TaskRepeatCfgService } from '../task-repeat-cfg/task-repeat-cfg.service';
 
 @Component({
   selector: 'timeline',
@@ -26,14 +27,16 @@ export class TimelineComponent {
   TimelineViewEntryType: typeof TimelineViewEntryType = TimelineViewEntryType;
   timelineEntries$: Observable<TimelineViewEntry[]> = combineLatest([
     this._workContextService.timelineTasks$,
+    this._taskRepeatCfgService.taskRepeatCfgsWithStartTime$,
     this._taskService.currentTaskId$,
     this._globalConfigService.timelineCfg$,
   ]).pipe(
     debounceTime(50),
-    map(([{ planned, unPlanned }, currentId, timelineCfg]) =>
+    map(([{ planned, unPlanned }, taskRepeatCfgs, currentId, timelineCfg]) =>
       mapToTimelineViewEntries(
         unPlanned,
         planned,
+        taskRepeatCfgs,
         currentId,
         timelineCfg?.isWorkStartEndEnabled
           ? {
@@ -51,6 +54,7 @@ export class TimelineComponent {
 
   constructor(
     private _taskService: TaskService,
+    private _taskRepeatCfgService: TaskRepeatCfgService,
     private _workContextService: WorkContextService,
     private _globalConfigService: GlobalConfigService,
     private _matDialog: MatDialog,

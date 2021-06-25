@@ -340,9 +340,8 @@ const _fixInconsistentProjectId = (data: AppDataComplete): AppDataComplete => {
         } else if (task?.projectId !== projectItem.id) {
           // if the task has another projectId leave it there and remove from list
           if (task.projectId) {
-            (projectItem as ProjectCopy).backlogTaskIds = projectItem.backlogTaskIds.filter(
-              (cid) => cid !== task.id,
-            );
+            (projectItem as ProjectCopy).backlogTaskIds =
+              projectItem.backlogTaskIds.filter((cid) => cid !== task.id);
           } else {
             // if the task has no project id at all, then move it to the project
             (task as TaskCopy).projectId = projectItem.id;

@@ -6,9 +6,8 @@ import { TaskService } from '../tasks/task.service';
 
 @Injectable({ providedIn: 'root' })
 export class PlanningModeService {
-  private _iPlanningModeEndedUser$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(
-    false,
-  );
+  private _iPlanningModeEndedUser$: BehaviorSubject<boolean> =
+    new BehaviorSubject<boolean>(false);
   private _manualTriggerCheck$: BehaviorSubject<unknown> = new BehaviorSubject<unknown>(
     null,
   );

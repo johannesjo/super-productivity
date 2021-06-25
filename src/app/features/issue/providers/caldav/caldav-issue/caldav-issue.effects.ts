@@ -83,35 +83,36 @@ export class CaldavIssueEffects {
       ),
     ),
   );
-  private _updateIssuesForCurrentContext$: Observable<any> = this._workContextService.allTasksForCurrentContext$.pipe(
-    first(),
-    switchMap((tasks) => {
-      const caldavIssueTasks = tasks.filter((task) => task.issueType === CALDAV_TYPE);
-      return forkJoin(
-        caldavIssueTasks.map((task) => {
-          if (!task.projectId) {
-            throw new Error('No project for task');
-          }
-          return this._projectService.getCaldavCfgForProject$(task.projectId).pipe(
-            first(),
-            map((cfg) => ({
-              cfg,
-              task,
-            })),
-          );
-        }),
-      );
-    }),
-    map((cos) =>
-      cos
-        .filter(
-          ({ cfg, task }: { cfg: CaldavCfg; task: TaskWithSubTasks }): boolean =>
-            isCaldavEnabled(cfg) && cfg.isAutoPoll,
-        )
-        .map(({ task }: { cfg: CaldavCfg; task: TaskWithSubTasks }) => task),
-    ),
-    tap((caldavTasks: TaskWithSubTasks[]) => this._refreshIssues(caldavTasks)),
-  );
+  private _updateIssuesForCurrentContext$: Observable<any> =
+    this._workContextService.allTasksForCurrentContext$.pipe(
+      first(),
+      switchMap((tasks) => {
+        const caldavIssueTasks = tasks.filter((task) => task.issueType === CALDAV_TYPE);
+        return forkJoin(
+          caldavIssueTasks.map((task) => {
+            if (!task.projectId) {
+              throw new Error('No project for task');
+            }
+            return this._projectService.getCaldavCfgForProject$(task.projectId).pipe(
+              first(),
+              map((cfg) => ({
+                cfg,
+                task,
+              })),
+            );
+          }),
+        );
+      }),
+      map((cos) =>
+        cos
+          .filter(
+            ({ cfg, task }: { cfg: CaldavCfg; task: TaskWithSubTasks }): boolean =>
+              isCaldavEnabled(cfg) && cfg.isAutoPoll,
+          )
+          .map(({ task }: { cfg: CaldavCfg; task: TaskWithSubTasks }) => task),
+      ),
+      tap((caldavTasks: TaskWithSubTasks[]) => this._refreshIssues(caldavTasks)),
+    );
   @Effect({ dispatch: false })
   pollIssueChangesForCurrentContext$: Observable<any> = this._issueEffectHelperService.pollIssueTaskUpdatesActions$.pipe(
     switchMap(() => this._pollTimer$),

@@ -115,9 +115,10 @@ export class GithubCommonInterfacesService implements IssueServiceInterface {
     return null;
   }
 
-  getAddTaskData(
-    issue: GithubIssueReduced,
-  ): { title: string; additionalFields: Partial<Task> } {
+  getAddTaskData(issue: GithubIssueReduced): {
+    title: string;
+    additionalFields: Partial<Task>;
+  } {
     return {
       title: this._formatIssueTitle(issue.number, issue.title),
       additionalFields: {

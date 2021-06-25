@@ -1,5 +1,6 @@
 import { TaskCopy, TaskPlanned } from '../tasks/task.model';
 import { TimelineViewEntryType } from './timeline.const';
+import { TaskRepeatCfg } from '../task-repeat-cfg/task-repeat-cfg.model';
 
 interface TimelineViewEntryBase {
   id: string;
@@ -14,6 +15,12 @@ export interface TimelineViewEntryTask extends TimelineViewEntryBase {
     | TimelineViewEntryType.ScheduledTask
     | TimelineViewEntryType.SplitTask;
   data: TaskCopy;
+}
+
+export interface TimelineViewEntryTaskScheduledRepeatProjection
+  extends TimelineViewEntryBase {
+  type: TimelineViewEntryType.ScheduledRepeatTaskProjection;
+  data: TaskRepeatCfg;
 }
 
 export interface TimelineViewEntrySplitTaskContinued extends TimelineViewEntryBase {
@@ -61,6 +68,7 @@ export interface TimelineDayCrossing extends TimelineViewEntryBase {
 
 export type TimelineViewEntry =
   | TimelineViewEntryTask
+  | TimelineViewEntryTaskScheduledRepeatProjection
   | TimelineViewEntrySplitTaskContinued
   | TimelineViewEntryCustomEvent
   | TimelineViewEntryWorkStart
@@ -71,6 +79,7 @@ export type TimelineViewEntry =
 // BlockedBlocks
 export enum BlockedBlockType {
   ScheduledTask = 'ScheduledTask',
+  ScheduledRepeatProjection = 'ScheduledRepeatProjection',
   WorkdayStartEnd = 'WorkdayStartEnd',
 }
 
@@ -79,6 +88,13 @@ export interface BlockedBlockEntryScheduledTask {
   end: number;
   type: BlockedBlockType.ScheduledTask;
   data: TaskPlanned;
+}
+
+export interface BlockedBlockEntryScheduledRepeatProjection {
+  start: number;
+  end: number;
+  type: BlockedBlockType.ScheduledRepeatProjection;
+  data: TaskRepeatCfg;
 }
 
 export interface BlockedBlockEntryWorkdayStartEnd {
@@ -90,6 +106,7 @@ export interface BlockedBlockEntryWorkdayStartEnd {
 
 export type BlockedBlockEntry =
   | BlockedBlockEntryScheduledTask
+  | BlockedBlockEntryScheduledRepeatProjection
   | BlockedBlockEntryWorkdayStartEnd;
 
 export interface BlockedBlock {

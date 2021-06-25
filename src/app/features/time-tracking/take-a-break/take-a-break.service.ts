@@ -49,14 +49,15 @@ const BANNER_ID: BannerId = BannerId.TakeABreak;
   providedIn: 'root',
 })
 export class TakeABreakService {
-  private _timeWithNoCurrentTask$: Observable<number> = this._taskService.currentTaskId$.pipe(
-    switchMap((currentId) => {
-      return currentId
-        ? from([0])
-        : this._timeTrackingService.tick$.pipe(scan(reduceBreak, 0));
-    }),
-    shareReplay(1),
-  );
+  private _timeWithNoCurrentTask$: Observable<number> =
+    this._taskService.currentTaskId$.pipe(
+      switchMap((currentId) => {
+        return currentId
+          ? from([0])
+          : this._timeTrackingService.tick$.pipe(scan(reduceBreak, 0));
+      }),
+      shareReplay(1),
+    );
 
   private _isIdleResetEnabled$: Observable<boolean> = this._configService.idle$.pipe(
     switchMap((idleCfg) => {
@@ -120,44 +121,42 @@ export class TakeABreakService {
   );
 
   private _triggerLockScreenCounter$: Subject<boolean> = new Subject();
-  private _triggerLockScreenThrottledAndDelayed$: Observable<
-    unknown | never
-  > = this._triggerLockScreenCounter$.pipe(
-    filter(() => IS_ELECTRON),
-    distinctUntilChanged(),
-    switchMap((v) =>
-      !!v
-        ? of(v).pipe(throttleTime(LOCK_SCREEN_THROTTLE), delay(LOCK_SCREEN_DELAY))
-        : EMPTY,
-    ),
-  );
+  private _triggerLockScreenThrottledAndDelayed$: Observable<unknown | never> =
+    this._triggerLockScreenCounter$.pipe(
+      filter(() => IS_ELECTRON),
+      distinctUntilChanged(),
+      switchMap((v) =>
+        !!v
+          ? of(v).pipe(throttleTime(LOCK_SCREEN_THROTTLE), delay(LOCK_SCREEN_DELAY))
+          : EMPTY,
+      ),
+    );
 
-  private _triggerBanner$: Observable<
-    [number, GlobalConfigState, boolean, boolean]
-  > = this.timeWorkingWithoutABreak$.pipe(
-    withLatestFrom(
-      this._configService.cfg$,
-      this._idleService.isIdle$,
-      this._snoozeActive$,
-    ),
-    filter(
-      ([timeWithoutBreak, cfg, isIdle, isSnoozeActive]: [
-        number,
-        GlobalConfigState,
-        boolean,
-        boolean,
-      ]): boolean =>
-        cfg &&
-        cfg.takeABreak &&
-        cfg.takeABreak.isTakeABreakEnabled &&
-        !isSnoozeActive &&
-        timeWithoutBreak > cfg.takeABreak.takeABreakMinWorkingTime &&
-        // we don't wanna show if idle to avoid conflicts with the idle modal
-        (!isIdle || !cfg.idle.isEnableIdleTimeTracking),
-    ),
-    // throttleTime(5 * 1000),
-    throttleTime(PING_UPDATE_BANNER_INTERVAL),
-  );
+  private _triggerBanner$: Observable<[number, GlobalConfigState, boolean, boolean]> =
+    this.timeWorkingWithoutABreak$.pipe(
+      withLatestFrom(
+        this._configService.cfg$,
+        this._idleService.isIdle$,
+        this._snoozeActive$,
+      ),
+      filter(
+        ([timeWithoutBreak, cfg, isIdle, isSnoozeActive]: [
+          number,
+          GlobalConfigState,
+          boolean,
+          boolean,
+        ]): boolean =>
+          cfg &&
+          cfg.takeABreak &&
+          cfg.takeABreak.isTakeABreakEnabled &&
+          !isSnoozeActive &&
+          timeWithoutBreak > cfg.takeABreak.takeABreakMinWorkingTime &&
+          // we don't wanna show if idle to avoid conflicts with the idle modal
+          (!isIdle || !cfg.idle.isEnableIdleTimeTracking),
+      ),
+      // throttleTime(5 * 1000),
+      throttleTime(PING_UPDATE_BANNER_INTERVAL),
+    );
 
   private _triggerDesktopNotification$: Observable<
     [number, GlobalConfigState, boolean, boolean]

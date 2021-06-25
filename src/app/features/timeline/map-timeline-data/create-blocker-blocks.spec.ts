@@ -1,6 +1,7 @@
 import { createSortedBlockerBlocks } from './create-sorted-blocker-blocks';
-import { TaskWithReminder } from '../../tasks/task.model';
+import { TaskReminderOptionId, TaskWithReminder } from '../../tasks/task.model';
 import { getDateTimeFromClockString } from '../../../util/get-date-time-from-clock-string';
+import { TaskRepeatCfg } from '../../task-repeat-cfg/task-repeat-cfg.model';
 
 const minutes = (n: number): number => n * 60 * 1000;
 const hours = (n: number): number => 60 * minutes(n);
@@ -40,7 +41,7 @@ describe('createBlockerBlocks()', () => {
         plannedAt: getDateTimeFromClockString('12:30', 0),
       },
     ] as any;
-    const r = createSortedBlockerBlocks(fakeTasks, undefined, 0);
+    const r = createSortedBlockerBlocks(fakeTasks, [], undefined, 0);
     expect(r.length).toEqual(1);
     expect(r[0].start).toEqual(getDateTimeFromClockString('9:20', 0));
     expect(r[0].end).toEqual(getDateTimeFromClockString('14:30', 0));
@@ -89,7 +90,7 @@ describe('createBlockerBlocks()', () => {
         plannedAt: getDateTimeFromClockString('17:30', 0),
       },
     ] as any;
-    const r = createSortedBlockerBlocks(fakeTasks, undefined, 0);
+    const r = createSortedBlockerBlocks(fakeTasks, [], undefined, 0);
     expect(r.length).toEqual(2);
     expect(r[0].start).toEqual(getDateTimeFromClockString('9:20', 0));
     expect(r[0].end).toEqual(getDateTimeFromClockString('14:00', 0));
@@ -125,7 +126,7 @@ describe('createBlockerBlocks()', () => {
         plannedAt: getDateTimeFromClockString('17:00', 0),
       },
     ] as any;
-    const r = createSortedBlockerBlocks(fakeTasks, undefined, 0);
+    const r = createSortedBlockerBlocks(fakeTasks, [], undefined, 0);
     expect(r.length).toEqual(1);
     expect(r[0].start).toEqual(getDateTimeFromClockString('15:00', 0));
     expect(r[0].end).toEqual(getDateTimeFromClockString('19:00', 0));
@@ -155,7 +156,7 @@ describe('createBlockerBlocks()', () => {
       },
     ] as any;
 
-    const r = createSortedBlockerBlocks(fakeTasks, undefined, 0);
+    const r = createSortedBlockerBlocks(fakeTasks, [], undefined, 0);
 
     expect(r.length).toEqual(2);
     expect(r).toEqual([
@@ -229,7 +230,7 @@ describe('createBlockerBlocks()', () => {
       },
     ] as any;
 
-    const r = createSortedBlockerBlocks(fakeTasks, undefined, 0);
+    const r = createSortedBlockerBlocks(fakeTasks, [], undefined, 0);
 
     expect(r.length).toEqual(3);
 
@@ -327,7 +328,7 @@ describe('createBlockerBlocks()', () => {
         issueWasUpdated: null,
       },
     ] as any;
-    const r = createSortedBlockerBlocks(fakeTasks, undefined, 0);
+    const r = createSortedBlockerBlocks(fakeTasks, [], undefined, 0);
 
     expect(r.length).toEqual(1);
     expect(r[0].start).toEqual(
@@ -423,6 +424,7 @@ describe('createBlockerBlocks()', () => {
 
       const r = createSortedBlockerBlocks(
         fakeTasks,
+        [],
         {
           startTime: '9:00',
           endTime: '17:00',
@@ -886,6 +888,103 @@ describe('createBlockerBlocks()', () => {
           start: 1622732400000,
         },
       ] as any);
+    });
+  });
+
+  describe('repeatTaskProjections', () => {
+    it('should work for a scheduled repeatable task', () => {
+      const fakeRepeatTaskCfgs: TaskRepeatCfg[] = [
+        {
+          id: 'R1',
+          title: 'Repeat 1 15:00',
+          startTime: '10:00',
+          lastTaskCreation: 0,
+          defaultEstimate: hours(1),
+          monday: false,
+          tuesday: false,
+          wednesday: false,
+          thursday: false,
+          friday: true,
+          saturday: false,
+          sunday: false,
+
+          projectId: null,
+          remindAt: TaskReminderOptionId.AtStart,
+          isAddToBottom: true,
+          tagIds: [],
+        },
+      ];
+      const r = createSortedBlockerBlocks([], fakeRepeatTaskCfgs, undefined, 0);
+      expect(r.length).toEqual(5);
+      expect(r[0].start).toEqual(
+        getDateTimeFromClockString('10:00', 24 * 60 * 60 * 1000),
+      );
+      expect(r[0].end).toEqual(getDateTimeFromClockString('11:00', 24 * 60 * 60 * 1000));
+    });
+
+    it('should work for different types of repeatable tasks', () => {
+      const fakeRepeatTaskCfgs: TaskRepeatCfg[] = [
+        {
+          id: 'R1',
+          title: 'Repeat 1',
+          projectId: null,
+          startTime: '10:00',
+          lastTaskCreation: 0,
+          defaultEstimate: hours(1),
+          remindAt: TaskReminderOptionId.AtStart,
+          monday: false,
+          tuesday: false,
+          wednesday: false,
+          thursday: false,
+          friday: false,
+          saturday: false,
+          sunday: true,
+          isAddToBottom: true,
+          tagIds: [],
+        },
+        {
+          id: 'R2',
+          title: 'Repeat 2',
+          projectId: null,
+          startTime: '14:00',
+          lastTaskCreation: getDateTimeFromClockString('22:20', 0),
+          defaultEstimate: hours(1),
+          remindAt: TaskReminderOptionId.AtStart,
+          monday: true,
+          tuesday: true,
+          wednesday: true,
+          thursday: true,
+          friday: true,
+          saturday: true,
+          sunday: true,
+          isAddToBottom: true,
+          tagIds: [],
+        },
+        {
+          id: 'R3',
+          title: 'Repeat 3 No Time',
+          projectId: null,
+          startTime: '10:00',
+          lastTaskCreation: 0,
+          defaultEstimate: hours(1),
+          remindAt: TaskReminderOptionId.AtStart,
+          monday: true,
+          tuesday: true,
+          wednesday: true,
+          thursday: true,
+          friday: true,
+          saturday: true,
+          sunday: true,
+          isAddToBottom: true,
+          tagIds: [],
+        },
+      ];
+      const r = createSortedBlockerBlocks([], fakeRepeatTaskCfgs, undefined, 0);
+      expect(r.length).toEqual(58);
+      expect(r[2].start).toEqual(205200000);
+      expect(r[2].end).toEqual(208800000);
+      expect(r[2].entries.length).toEqual(1);
+      expect(r[4].entries.length).toEqual(2);
     });
   });
 });

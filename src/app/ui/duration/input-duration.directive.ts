@@ -48,7 +48,8 @@ export const INPUT_DURATION_VALIDATORS: any = {
   ],
 })
 export class InputDurationDirective
-  implements ControlValueAccessor, Validator, AfterViewChecked {
+  implements ControlValueAccessor, Validator, AfterViewChecked
+{
   @Input() isAllowSeconds: boolean = false;
   @Input() isValidate: boolean = true;
 
