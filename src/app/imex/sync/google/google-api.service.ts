@@ -43,7 +43,8 @@ import axios, { AxiosResponse } from 'axios';
 import * as querystring from 'querystring';
 import { MatDialog } from '@angular/material/dialog';
 import { DialogGetAndEnterAuthCodeComponent } from '../dialog-get-and-enter-auth-code/dialog-get-and-enter-auth-code.component';
-import { GOOGLE_AUTH_CODE_VERIFIER, GOOGLE_AUTH_URL } from './get-google-auth-url';
+import { getGoogleAuthUrl } from './get-google-auth-url';
+import { generatePKCECodes } from '../dropbox/generate-pkce-codes';
 
 const EXPIRES_SAFETY_MARGIN = 5 * 60 * 1000;
 
@@ -305,19 +306,21 @@ export class GoogleApiService {
         return Promise.reject('Token refresh failed');
       }
     } else {
+      const { codeVerifier, codeChallenge } = await generatePKCECodes(80);
+
       const authCode = await this._matDialog
         .open(DialogGetAndEnterAuthCodeComponent, {
           restoreFocus: true,
           data: {
             providerName: 'Google Drive',
-            url: GOOGLE_AUTH_URL,
+            url: getGoogleAuthUrl(codeChallenge),
           },
         })
         .afterClosed()
         .toPromise();
       if (authCode) {
         try {
-          const { data } = await this._getTokenFromAuthCode(authCode);
+          const { data } = await this._getTokenFromAuthCode(authCode, codeVerifier);
           if (data) {
             this._updateSession({
               accessToken: data.access_token,
@@ -336,7 +339,10 @@ export class GoogleApiService {
     }
   }
 
-  private _getTokenFromAuthCode(code: string): Promise<
+  private _getTokenFromAuthCode(
+    code: string,
+    codeVerifier: string,
+  ): Promise<
     AxiosResponse<{
       access_token: string;
       expires_in: number;
@@ -353,7 +359,7 @@ export class GoogleApiService {
           client_secret: GOOGLE_SETTINGS_ELECTRON.API_KEY,
           grant_type: 'authorization_code',
           redirect_uri: 'urn:ietf:wg:oauth:2.0:oob',
-          code_verifier: GOOGLE_AUTH_CODE_VERIFIER,
+          code_verifier: codeVerifier,
           code,
         }),
       method: 'POST',
