@@ -6,6 +6,7 @@ import {
   IdleConfig,
   MiscConfig,
   SoundConfig,
+  SyncConfig,
   TakeABreakConfig,
   TimelineConfig,
 } from '../global-config.model';
@@ -32,6 +33,10 @@ export const selectEvaluationConfig = createSelector(
 export const selectIdleConfig = createSelector(
   selectConfigFeatureState,
   (cfg): IdleConfig => cfg.idle,
+);
+export const selectSyncConfig = createSelector(
+  selectConfigFeatureState,
+  (cfg): SyncConfig => cfg.sync,
 );
 export const selectTakeABreakConfig = createSelector(
   selectConfigFeatureState,

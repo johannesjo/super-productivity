@@ -1,6 +1,6 @@
 /* eslint-disable max-len */
 import { T } from '../../../t.const';
-import { ConfigFormSection, SyncConfig } from '../global-config.model';
+import { ConfigFormSection, DropboxSyncConfig, SyncConfig } from '../global-config.model';
 import { SyncProvider } from '../../../imex/sync/sync-provider.model';
 import { IS_F_DROID_APP } from '../../../util/is-android-web-view';
 
@@ -47,7 +47,16 @@ export const SYNC_FORM: ConfigFormSection<SyncConfig> = {
         field?.parent?.model.syncProvider !== SyncProvider.Dropbox,
       key: 'dropboxSync',
       templateOptions: { label: 'Address' },
-      fieldGroup: [],
+      fieldGroup: [
+        {
+          key: 'accessToken',
+          type: 'input',
+          hideExpression: (model: DropboxSyncConfig) => !model.accessToken,
+          templateOptions: {
+            label: T.F.SYNC.FORM.DROPBOX.L_ACCESS_TOKEN,
+          },
+        },
+      ],
     },
     {
       hideExpression: (m, v, field) =>

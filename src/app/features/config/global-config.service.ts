@@ -10,6 +10,7 @@ import {
   IdleConfig,
   MiscConfig,
   SoundConfig,
+  SyncConfig,
   TakeABreakConfig,
   TimelineConfig,
 } from './global-config.model';
@@ -19,6 +20,7 @@ import {
   selectIdleConfig,
   selectMiscConfig,
   selectSoundConfig,
+  selectSyncConfig,
   selectTakeABreakConfig,
   selectTimelineConfig,
 } from './store/global-config.reducer';
@@ -51,6 +53,11 @@ export class GlobalConfigService {
 
   idle$: Observable<IdleConfig> = this._store.pipe(
     select(selectIdleConfig),
+    shareReplay(1),
+  );
+
+  sync$: Observable<SyncConfig> = this._store.pipe(
+    select(selectSyncConfig),
     shareReplay(1),
   );
 
