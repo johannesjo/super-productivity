@@ -223,5 +223,8 @@
     "utils-decorators": "^1.8.1",
     "webdav": "~4.3.0",
     "zone.js": "~0.11.4"
+  },
+  "resolutions": {
+    "sass": "1.32.6"
   }
 }
