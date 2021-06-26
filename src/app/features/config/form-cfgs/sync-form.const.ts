@@ -1,8 +1,7 @@
 /* eslint-disable max-len */
 import { T } from '../../../t.const';
-import { ConfigFormSection, DropboxSyncConfig, SyncConfig } from '../global-config.model';
+import { ConfigFormSection, SyncConfig } from '../global-config.model';
 import { SyncProvider } from '../../../imex/sync/sync-provider.model';
-import { DROPBOX_AUTH_CODE_URL } from '../../../imex/sync/dropbox/dropbox.const';
 import { IS_F_DROID_APP } from '../../../util/is-android-web-view';
 
 export const SYNC_FORM: ConfigFormSection<SyncConfig> = {
@@ -48,48 +47,7 @@ export const SYNC_FORM: ConfigFormSection<SyncConfig> = {
         field?.parent?.model.syncProvider !== SyncProvider.Dropbox,
       key: 'dropboxSync',
       templateOptions: { label: 'Address' },
-      fieldGroup: [
-        {
-          type: 'tpl',
-          templateOptions: {
-            tag: 'p',
-            // text: `<p>Please open the following link and copy the auth code provided there</p>`,
-            text: T.F.SYNC.FORM.DROPBOX.FOLLOW_LINK,
-          },
-        },
-        {
-          type: 'tpl',
-          templateOptions: {
-            tag: 'p',
-            text: `<a href="${DROPBOX_AUTH_CODE_URL}" target="_blank">https://www.dropbox.com/oauth2/authorize?response_type=code</a>`,
-          },
-        },
-        {
-          key: 'authCode',
-          type: 'input',
-          templateOptions: {
-            label: T.F.SYNC.FORM.DROPBOX.L_AUTH_CODE,
-          },
-        },
-        {
-          type: 'tpl',
-          hideExpression: (model: DropboxSyncConfig) =>
-            !!model.accessToken || !model.authCode,
-          templateOptions: {
-            tag: 'button',
-            class: 'mat-raised-button',
-            text: T.F.SYNC.FORM.DROPBOX.B_GENERATE_TOKEN,
-          },
-        },
-        {
-          key: 'accessToken',
-          type: 'input',
-          hideExpression: (model: DropboxSyncConfig) => !model.accessToken,
-          templateOptions: {
-            label: T.F.SYNC.FORM.DROPBOX.L_ACCESS_TOKEN,
-          },
-        },
-      ],
+      fieldGroup: [],
     },
     {
       hideExpression: (m, v, field) =>

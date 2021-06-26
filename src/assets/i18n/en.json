@@ -584,12 +584,7 @@
         "USE_REMOTE": "Use remote"
       },
       "FORM": {
-        "DROPBOX": {
-          "B_GENERATE_TOKEN": "Generate Token",
-          "FOLLOW_LINK": "Please open the following link and copy the auth code provided there into the the input field.",
-          "L_ACCESS_TOKEN": "Access Token (generated from Auth Code)",
-          "L_AUTH_CODE": "Auth Code"
-        },
+        "DROPBOX": {},
         "GOOGLE": {
           "L_IS_COMPRESS_DATA": "Compress data",
           "L_SYNC_FILE_NAME": "Sync File Name"

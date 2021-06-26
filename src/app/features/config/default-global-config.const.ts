@@ -134,8 +134,6 @@ export const DEFAULT_GLOBAL_CONFIG: GlobalConfigState = {
     syncInterval: minute,
 
     dropboxSync: {
-      // TODO remove / migrate
-      authCode: null,
       accessToken: null,
       // isCompressData: true,
     },
