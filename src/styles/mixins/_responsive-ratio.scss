@@ -1,5 +1,7 @@
-@mixin responsiveRatio($x,$y, $pseudo: false) {
-  $padding: unquote(( $y / $x ) * 100 + '%');
+@import '../functions/_ddivide';
+
+@mixin responsiveRatio($x, $y, $pseudo: false) {
+  $padding: unquote((ddivide($y / $x)) * 100 + '%');
   @if $pseudo {
     &:before {
       @include pseudo($pos: relative);

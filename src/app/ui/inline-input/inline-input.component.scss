@@ -31,7 +31,6 @@
   position: relative;
 }
 
-
 input {
   position: absolute;
   left: 50%;
@@ -41,13 +40,12 @@ input {
   //transition: $transition-fast;
   background: #fff;
   color: $light-theme-text-color;
-  padding: $s/2 $s/2;
+  padding: $s * 0.5 $s * 0.5;
   text-align: center;
   font-size: 14px;
   min-height: 100%;
 
   @include inlineEditElevation();
-
 
   &.duration-input {
     width: 100%;
@@ -61,5 +59,4 @@ input {
     transform: translate(-50%, -50%) scaleX(1);
     visibility: visible;
   }
-
 }

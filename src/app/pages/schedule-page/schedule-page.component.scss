@@ -3,7 +3,7 @@
 
 .scheduled-task {
   margin-bottom: $s;
-  padding: $s/2 $s*2;
+  padding: $s * 0.5 $s * 2;
   @include dividerBorderColor(1px);
   box-shadow: none;
 }
@@ -73,7 +73,7 @@
     opacity: 0.9;
 
     @include mq(xs) {
-      margin: 0 $s*2;
+      margin: 0 $s * 2;
       margin-right: $s;
       flex-direction: row;
     }
@@ -103,7 +103,7 @@
       display: none;
       @include mq(xs) {
         display: block;
-        opacity: .8;
+        opacity: 0.8;
       }
     }
 
@@ -114,7 +114,7 @@
 }
 
 .project {
-  margin-top: $s/2;
+  margin-top: $s * 0.5;
   // to align with task title
   margin-left: $s;
   font-size: 11px;
@@ -124,10 +124,9 @@
 
 .no-scheduled-tasks {
   margin: $s;
-  margin-top: $s*2;
+  margin-top: $s * 2;
   text-align: center;
 }
-
 
 .task-title {
   @include taskTitle;
@@ -140,7 +139,7 @@
   display: block;
 
   :host-context(.isNoTouchOnly) & {
-    opacity: .7;
+    opacity: 0.7;
 
     &:hover {
       opacity: 1;

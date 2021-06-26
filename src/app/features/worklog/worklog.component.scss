@@ -93,7 +93,7 @@ $this-table-outer-padding-left-right: $s * 6;
       > tr.week-row > {
         th,
         td {
-          padding: $s/2 $s;
+          padding: $s * 0.5 $s;
           white-space: nowrap;
           vertical-align: middle;
 

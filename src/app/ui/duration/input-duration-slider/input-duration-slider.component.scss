@@ -2,7 +2,7 @@
 
 $this-size: 130px;
 $this-handle-size: 20px;
-$this-extra-touch-space: $this-handle-size/2;
+$this-extra-touch-space: $this-handle-size * 0.5;
 $this-margin: $this-extra-touch-space;
 $this-handle-scale: 2;
 $this-handle-color: $c-accent;
@@ -14,16 +14,16 @@ $this-dot-size: 14px;
   position: absolute;
   top: 50%;
   left: 50%;
-  margin: -($item-size / 2);
+  margin: -($item-size * 0.5);
   width: $item-size;
   height: $item-size;
 
-  $angle: (360 / $item-count);
+  $angle: ddivide(360, $item-count);
   $rot: $start-rotation;
 
   @for $i from 1 through $item-count {
     &:nth-of-type(#{$i}) {
-      transform: rotate($rot * 1deg) translate($circle-size / 2);
+      transform: rotate($rot * 1deg) translate($circle-size * 0.5);
     }
 
     $rot: $rot + $angle;
@@ -34,7 +34,7 @@ $this-dot-size: 14px;
   overflow: hidden;
   display: block;
   user-select: none;
-  width: $this-size+$this-margin*2;
+  width: $this-size + $this-margin * 2;
   @include standardThemeTextColor();
 
   &.is-dragging .circle {
@@ -115,7 +115,6 @@ $this-dot-size: 14px;
   }
 }
 
-
 $this-handle-border-width: 4px;
 
 .handle-wrapper {
@@ -139,7 +138,6 @@ $this-handle-border-width: 4px;
   }
 }
 
-
 $this-stroke-width: 4px;
 
 .handle {
@@ -147,7 +145,7 @@ $this-stroke-width: 4px;
   background: $this-handle-color;
   left: 50%;
   width: 0;
-  height: $this-handle-size+5;
+  height: $this-handle-size + 5;
   position: absolute;
   transform-origin: 50% 100%;
   cursor: grabbing;
@@ -156,10 +154,10 @@ $this-stroke-width: 4px;
   &:after {
     box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
     content: '';
-    top: -$this-handle-size/2 +$this-circle-width/2;
+    top: -$this-handle-size * 0.5 + $this-circle-width * 0.5;
     background: $this-handle-color;
     left: 50%;
-    margin-left: - #{$this-handle-size/2};
+    margin-left: -#{$this-handle-size * 0.5};
     position: absolute;
     transform-origin: 50% 100%;
     height: $this-handle-size;
@@ -178,7 +176,6 @@ $this-stroke-width: 4px;
   text-align: center;
   transform: translate3d(-50%, -50%, 0);
 }
-
 
 .value {
   width: 100%;
@@ -219,7 +216,7 @@ $this-stroke-width: 4px;
       opacity: 1;
     }
 
-    @media(max-width: $layout-xs) {
+    @media (max-width: $layout-xs) {
       transform: scale(1.05);
     }
   }

@@ -1,4 +1,4 @@
-@import "../../../../variables";
+@import '../../../../variables';
 
 :host {
   display: block;
@@ -21,7 +21,7 @@
       margin-top: 20px;
       max-width: 632px;
       width: 80%;
-      top: $s*6;
+      top: $s * 6;
       left: 50%;
       right: auto;
       transform: translateX(-50%);
@@ -109,7 +109,7 @@ $short-syntax-bar-height: 28px;
   transform: translateY(-50%);
   z-index: 2;
   opacity: 0.4;
-  margin-top: -.5*$short-syntax-bar-height;
+  margin-top: -0.5 * $short-syntax-bar-height;
 
   &:hover {
     opacity: 1;
@@ -118,12 +118,12 @@ $short-syntax-bar-height: 28px;
 
 .close-btn {
   position: absolute;
-  right: $s/2;
+  right: $s * 0.5;
   top: 50%;
   transform: translateY(-50%);
   z-index: 2;
   opacity: 0.4;
-  margin-top: -.5*$short-syntax-bar-height;
+  margin-top: -0.5 * $short-syntax-bar-height;
 
   &:hover {
     opacity: 1;
@@ -134,10 +134,10 @@ $short-syntax-bar-height: 28px;
 }
 
 .info-bar {
-  padding: 0 1.75*$s;
+  padding: 0 1.75 * $s;
   height: $short-syntax-bar-height;
   line-height: $short-syntax-bar-height;
-  margin-top: -1*$short-syntax-bar-height;
+  margin-top: -1 * $short-syntax-bar-height;
   color: $light-theme-text-color-muted;
   background: #ffffff;
   border-top: 1px dashed $light-theme-extra-border-color;

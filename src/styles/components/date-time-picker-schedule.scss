@@ -816,7 +816,7 @@ $ico-size-real: 20px;
 
 .owl-enter-message {
   position: absolute;
-  top: $s/2;
+  top: $s * 0.5;
   left: 50%;
   max-width: 96%;
   width: 280px;

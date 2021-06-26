@@ -30,18 +30,17 @@ $summary-point-inner-margin: $s;
   }
 }
 
-
 .back-btn {
-  margin-top: $s*2;
+  margin-top: $s * 2;
 }
 
 .done-headline {
-  margin-top: $s*4;
-  margin-bottom: $s*3 - $summary-point-inner-margin;
+  margin-top: $s * 4;
+  margin-bottom: $s * 3 - $summary-point-inner-margin;
 }
 
 .daily-summary-summary {
-  margin-bottom: $s*2;
+  margin-bottom: $s * 2;
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
@@ -78,8 +77,8 @@ $summary-point-inner-margin: $s;
 }
 
 .tabs {
-  margin-left: -2*$s;
-  margin-right: -2*$s;
+  margin-left: -2 * $s;
+  margin-right: -2 * $s;
 
   @include mq(xs) {
     margin: 0;
@@ -90,7 +89,7 @@ $summary-point-inner-margin: $s;
   margin-top: 30px;
 
   button {
-    margin: 0 $s/2;
+    margin: 0 $s * 0.5;
 
     mat-icon + mat-icon {
       //margin-left: -$s;
@@ -141,7 +140,6 @@ $summary-point-inner-margin: $s;
   max-width: 100%;
 }
 
-
 @keyframes success-animation-sun {
   0% {
     transform: scale(0) rotate(-180deg);
@@ -184,7 +182,6 @@ $summary-point-inner-margin: $s;
   }
 }
 
-
 $particles: 30;
 $width: 500;
 $height: 500;
@@ -194,8 +191,15 @@ $box-shadow: ();
 $box-shadow2: ();
 @for $i from 0 through $particles {
   $box-shadow: $box-shadow,
-  random($width)-$width / 2 + px random($height)-$height / 1.2 + px hsl(random(360%), 100%, 50%);
-  $box-shadow2: $box-shadow2, 0 0 #fff
+    random($width)-$width *
+      0.5 +
+      px
+      random($height) -
+      $height *
+      0.8333 +
+      px
+      hsl(random(360%), 100%, 50%);
+  $box-shadow2: $box-shadow2, 0 0 #fff;
 }
 
 .pyro {
@@ -218,7 +222,8 @@ $box-shadow2: ();
     height: 5px;
     //border-radius: 50%;
     box-shadow: $box-shadow2;
-    animation: 1s bang ease-out infinite backwards, 1s gravity ease-in infinite backwards, 5s position linear infinite backwards;
+    animation: 1s bang ease-out infinite backwards, 1s gravity ease-in infinite backwards,
+      5s position linear infinite backwards;
     opacity: 0;
   }
 
@@ -227,7 +232,6 @@ $box-shadow2: ();
     animation-duration: 1.25s, 1.25s, 6.25s;
   }
 }
-
 
 @keyframes bang {
   to {
@@ -241,7 +245,7 @@ $box-shadow2: ();
   }
 
   10% {
-    opacity: 1
+    opacity: 1;
   }
 
   100% {
@@ -251,28 +255,32 @@ $box-shadow2: ();
 }
 
 @keyframes position {
-  0%, 19.9% {
+  0%,
+  19.9% {
     margin-top: 10%;
     margin-left: 40%;
   }
-  20%, 39.9% {
+  20%,
+  39.9% {
     margin-top: 40%;
     margin-left: 30%;
   }
-  40%, 59.9% {
+  40%,
+  59.9% {
     margin-top: 20%;
-    margin-left: 70%
+    margin-left: 70%;
   }
-  60%, 79.9% {
+  60%,
+  79.9% {
     margin-top: 30%;
     margin-left: 20%;
   }
-  80%, 99.9% {
+  80%,
+  99.9% {
     margin-top: 30%;
     margin-left: 80%;
   }
 }
-
 
 @keyframes fadeIn {
   0% {
@@ -285,4 +293,3 @@ $box-shadow2: ();
     opacity: 1;
   }
 }
-

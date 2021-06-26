@@ -31,7 +31,6 @@ section {
   flex-direction: column;
 }
 
-
 .main {
   margin-bottom: $spacer;
   padding-bottom: $spacer;
@@ -63,8 +62,8 @@ section {
     @include dividerBorderColor();
     content: '';
     position: absolute;
-    left: $s*2;
-    right: $s*2;
+    left: $s * 2;
+    right: $s * 2;
     height: 0;
   }
 }
@@ -141,7 +140,6 @@ section {
   }
 }
 
-
 // color bar left styles
 .tag,
 .project,
@@ -154,7 +152,7 @@ section {
     left: 0;
     top: 0;
     bottom: 0;
-    width: $s/2;
+    width: $s * 0.5;
     background-color: $c-primary;
   }
 
@@ -173,7 +171,6 @@ section {
   }
 }
 
-
 .tag-settings-btn,
 .tag button:first-of-type,
 .project-settings-btn,
@@ -184,7 +181,10 @@ section {
     font-weight: bold;
 
     @include lightTheme {
-      background: rgba(var(--palette-background-hover), var(--palette-background-hover-alpha, 1));
+      background: rgba(
+        var(--palette-background-hover),
+        var(--palette-background-hover-alpha, 1)
+      );
     }
     @include darkTheme {
       background: rgba(255, 255, 255, 0.1);
@@ -231,7 +231,10 @@ section {
       background: rgba(255, 255, 255, 0.1);
     }
     @include lightTheme {
-      background: rgba(var(--palette-background-hover), var(--palette-background-hover-alpha, 1));
+      background: rgba(
+        var(--palette-background-hover),
+        var(--palette-background-hover-alpha, 1)
+      );
     }
   }
 
@@ -257,8 +260,8 @@ section {
   }
 }
 
-
-.drag-handle { /* Firefox 1.5-26 */
+.drag-handle {
+  /* Firefox 1.5-26 */
   position: relative;
   @include grabCursor();
 
@@ -271,4 +274,3 @@ section {
     bottom: -$s;
   }
 }
-

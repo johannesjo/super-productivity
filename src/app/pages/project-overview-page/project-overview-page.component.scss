@@ -21,14 +21,14 @@
 .project-list {
 }
 
-$project-color-width: $s*3;
+$project-color-width: $s * 3;
 
 .project {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: $s/2 2*$s;
-  padding-left: 2*$s+$project-color-width;
+  padding: $s * 0.5 2 * $s;
+  padding-left: 2 * $s + $project-color-width;
   margin-bottom: $s;
   position: relative;
   overflow: hidden;
@@ -36,7 +36,6 @@ $project-color-width: $s*3;
   > * {
     flex-basis: 33.333%;
   }
-
 
   .project-color {
     left: 0;
@@ -51,7 +50,6 @@ $project-color-width: $s*3;
       top: 50%;
       transform: translate(-50%, -50%);
     }
-
   }
 
   .drag-handle {
@@ -68,8 +66,8 @@ $project-color-width: $s*3;
   }
 
   .issue-providers {
-    margin-left: 2*$s;
-    margin-right: 2*$s;
+    margin-left: 2 * $s;
+    margin-right: 2 * $s;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -77,7 +75,7 @@ $project-color-width: $s*3;
 }
 
 .add-new-project-wrapper {
-  margin-top: $s*2;
+  margin-top: $s * 2;
   text-align: center;
 
   > button {

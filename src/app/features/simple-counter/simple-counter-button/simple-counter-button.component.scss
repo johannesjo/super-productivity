@@ -1,8 +1,10 @@
+@use "sass:math";
+
 @import '../../../../variables';
 
 .wrapper {
   position: relative;
-  margin-left: $s*0.5;
+  margin-left: $s * 0.5;
 
   @include mq(xs) {
     margin-left: $s;
@@ -38,7 +40,7 @@
   border-radius: 8px;
   z-index: 4;
   pointer-events: none;
-  bottom: $s/-4;
+  bottom: $s * -0.25;
 
   @include darkTheme {
     background: $dark-theme-bg-lighter;
@@ -49,7 +51,6 @@
     opacity: 0;
   }
 }
-
 
 .controls {
   transition: $transition-standard;
@@ -65,10 +66,10 @@
   &:after {
     content: '';
     position: absolute;
-    top: $s*-1.25;
-    left: $s*-1.25;
-    right: $s*-1.25;
-    bottom: $s*-1.25;
+    top: $s * -1.25;
+    left: $s * -1.25;
+    right: $s * -1.25;
+    bottom: $s * -1.25;
   }
 }
 
@@ -87,7 +88,7 @@
   opacity: 0;
   position: relative;
   z-index: 2;
-  margin-top: $s/2;
+  margin-top: $s * 0.5;
   margin-left: 0;
 
   &:nth-child(2) {

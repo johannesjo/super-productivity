@@ -1,8 +1,8 @@
-@import "../../../../variables";
+@import '../../../../variables';
 
 .project-section {
   margin-top: $s;
-  margin-bottom: $s*3;
+  margin-bottom: $s * 3;
 }
 
 .project-title {
@@ -20,7 +20,7 @@
   }
 
   mat-icon {
-    margin: 0 $s/2;
+    margin: 0 $s * 0.5;
   }
 
   h2,
