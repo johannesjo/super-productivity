@@ -49,9 +49,24 @@ export const isValidAppData = (
         (_isAllTasksAvailableAndListConsistent(d) && _isNoLonelySubTasks(d))) &&
       _isAllProjectsAvailable(d) &&
       _isAllTagsAvailable(d) &&
+      _isAllRemindersAvailable(d) &&
       _isAllTasksHaveAProjectOrTag(d)
     : typeof dAny === 'object';
   // console.timeEnd('time isValidAppData');
+
+  return isValid;
+};
+
+const _isAllRemindersAvailable = ({ reminders, task }: AppDataComplete): boolean => {
+  let isValid: boolean = true;
+  task.ids.forEach((id: string) => {
+    const t: Task = task.entities[id] as Task;
+    if (t.reminderId && !reminders.find((r) => r.id === t.reminderId)) {
+      console.log(t, reminders);
+      devError(`Missing reminder ${t.reminderId} from task not existing`);
+      isValid = false;
+    }
+  });
 
   return isValid;
 };
