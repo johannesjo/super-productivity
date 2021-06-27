@@ -1,4 +1,4 @@
-name: "Lint & Test PRs"
+name: 'Lint & Test PRs'
 
 on: [pull_request]
 
@@ -13,7 +13,7 @@ jobs:
       - name: Install Node.js, NPM and Yarn
         uses: actions/setup-node@v1
         with:
-          node-version: 12
+          node-version: 14
 
       - uses: actions/cache@v2
         with:
@@ -27,5 +27,3 @@ jobs:
       - run: yarn lint
       - run: yarn test
       - run: yarn e2e
-
-

@@ -9,7 +9,7 @@ jobs:
   upload-to-app-super-productivity:
     runs-on: ubuntu-latest
 
-    if: "!github.event.release.prerelease"
+    if: '!github.event.release.prerelease'
 
     steps:
       - name: Check out Git repository
@@ -18,7 +18,7 @@ jobs:
       - name: Install Node.js, NPM and Yarn
         uses: actions/setup-node@v1
         with:
-          node-version: 12
+          node-version: 14
 
       - uses: actions/cache@v2
         with:
@@ -46,8 +46,7 @@ jobs:
         env:
           SSH_PRIVATE_KEY: ${{ secrets.WEB_SERVER_SSH_KEY }}
           ARGS: '-rltgoDzvO --delete --exclude "news.json"'
-          SOURCE: "dist/"
+          SOURCE: 'dist/'
           REMOTE_HOST: ${{ secrets.WEB_REMOTE_HOST }}
           REMOTE_USER: ${{ secrets.WEB_REMOTE_USER }}
           TARGET: ${{ secrets.WEB_REMOTE_TARGET }}
-
