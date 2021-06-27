@@ -1,3 +1,32 @@
+# [7.2.0](https://github.com/johannesjo/super-productivity/compare/v7.1.0...v7.2.0) (2021-06-27)
+
+### Bug Fixes
+
+- **repeat:** code formatting ([c3aa707](https://github.com/johannesjo/super-productivity/commit/c3aa70769c4844e24f1b3b77ade646db52ad8c5c))
+- **repeat:** don't remove reminders on repeated task creation ([2a44197](https://github.com/johannesjo/super-productivity/commit/2a44197ae0981c8c3443ad085d32d5d7f106805d))
+- **repeat:** schedule date for repeating tasks scheduled in the future ([f85fe69](https://github.com/johannesjo/super-productivity/commit/f85fe69a92dcf55a0f8bc4d24a50679104dd09c3))
+- **repeat:** schedule from additional info ([be862da](https://github.com/johannesjo/super-productivity/commit/be862dae9ee789870b14836c7023515f15f4f2fe))
+- **schedule:** plannedAt shown wrongly ([4d05ffa](https://github.com/johannesjo/super-productivity/commit/4d05ffa0c2ce841b4a6432a7e219e948703f7f6e))
+
+### Features
+
+- **dropbox:** get token via dialog ([6712bfb](https://github.com/johannesjo/super-productivity/commit/6712bfbf8b30bb16fb1360215620141faa6b0737))
+- **dropbox:** improve getting token via dialog ([4b802ff](https://github.com/johannesjo/super-productivity/commit/4b802ffc3a4d12cc07bcb9ac564312fb59a7ffe0))
+- **repeat:** add confirm dialog when trying to schedule repeated task for another day ([68147e0](https://github.com/johannesjo/super-productivity/commit/68147e02817081f299397cacc9f014011fc554d9))
+- **repeat:** add model migration ([bafb6d7](https://github.com/johannesjo/super-productivity/commit/bafb6d76f02110e48c8f8b549e1fc7baa61baf15))
+- **repeat:** add start time field to form ([1a39817](https://github.com/johannesjo/super-productivity/commit/1a398175b8558afcd82636d2990d85d26cca6a5d))
+- **repeat:** allow creation of repeatable tasks for tomorrow via button ([2cace33](https://github.com/johannesjo/super-productivity/commit/2cace33a06516218691a64e8f2728ff6a6e1c59e))
+- **repeat:** allow for editing reminder on repeatable task ([23ab3c6](https://github.com/johannesjo/super-productivity/commit/23ab3c6b9ca0d2992777378e7d0375ec43cb6178))
+- **repeat:** also make remind at configurable ([f3ffc81](https://github.com/johannesjo/super-productivity/commit/f3ffc81586e95f1be1273361c6ed2ad3f431ff93))
+- **repeat:** make create for tomorrow work for repeatable tasks ([b964436](https://github.com/johannesjo/super-productivity/commit/b9644365d560cef9524139c4a03f4ce058a0272e))
+- **repeat:** make creating repeating tasks with reminder work ([1258f75](https://github.com/johannesjo/super-productivity/commit/1258f75b0ff984821c208e5fb41613f3fcb47ad3))
+- **schedule:** also allow for move to backlog when editing task reminder [#1283](https://github.com/johannesjo/super-productivity/issues/1283) ([ae166ad](https://github.com/johannesjo/super-productivity/commit/ae166ad101a51a1317cbb956521c0503d89ff36c))
+- **task:** improve error handling for reducer ([29646cd](https://github.com/johannesjo/super-productivity/commit/29646cdcc33d855c4f35fdddeecd6d2ad7be8c25))
+- **task:** remove redundant restore task button ([5660ceb](https://github.com/johannesjo/super-productivity/commit/5660ceb248fd2cdf68e7e995d737962da6a990e1))
+- **timeline:** add selector for task repeat for timeline ([236213c](https://github.com/johannesjo/super-productivity/commit/236213c8247fb006fad88f25bf97c0c590f71846))
+- **timeline:** improve styling for repeat task projection ([b9bc165](https://github.com/johannesjo/super-productivity/commit/b9bc16596667ecd7878584b33ac579a1470fc9fb))
+- **timeline:** make projections work for repeatable tasks ([b801891](https://github.com/johannesjo/super-productivity/commit/b801891fbd91db3e682b2ad73d3c245bc59c9a95))
+
 # [7.1.0](https://github.com/johannesjo/super-productivity/compare/v7.0.4...v7.1.0) (2021-06-19)
 
 ## [7.0.4](https://github.com/johannesjo/super-productivity/compare/v7.0.2...v7.0.4) (2021-06-18)
