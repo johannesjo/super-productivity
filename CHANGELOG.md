@@ -1,3 +1,10 @@
+## [7.2.1](https://github.com/johannesjo/super-productivity/compare/v7.2.0...v7.2.1) (2021-06-27)
+
+### Features
+
+- **data:** add repair script for missing reminder data ([9825abc](https://github.com/johannesjo/super-productivity/commit/9825abccd16ff7def49189895ae895b3e68a6ea4))
+- **data:** check if reminder data exists ([cf0d98c](https://github.com/johannesjo/super-productivity/commit/cf0d98c5d6d3a31307e0142921e20136d54891bd))
+
 # [7.2.0](https://github.com/johannesjo/super-productivity/compare/v7.1.0...v7.2.0) (2021-06-27)
 
 ### Bug Fixes
