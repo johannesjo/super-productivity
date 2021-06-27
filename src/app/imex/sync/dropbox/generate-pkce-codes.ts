@@ -2,12 +2,11 @@
 
 // Generate a secure random string using the browser crypto functions
 const generateRandomString = (length: number): string => {
-  const array = new Uint32Array(length);
+  const array = new Uint32Array(length / 2);
   window.crypto.getRandomValues(array);
   return Array.from(array, (dec) => ('0' + dec.toString(16)).substr(-2)).join('');
 };
 
-console.log(generateRandomString(128).length);
 // Calculate the SHA256 hash of the input text.
 // Returns a promise that resolves to an ArrayBuffer
 const sha256 = (plain: string): Promise<ArrayBuffer> => {
