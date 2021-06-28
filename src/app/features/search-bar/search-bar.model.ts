@@ -13,7 +13,7 @@ export interface SearchItem {
   parentId: string | null;
   timeSpentOnDay: TimeSpentOnDay;
   created: number;
-  tagIds: string[];
+  tagId: string;
 
   // for the icons
   issueType: IssueProviderKey | null;

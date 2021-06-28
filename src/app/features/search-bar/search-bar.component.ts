@@ -23,7 +23,7 @@ import {
 } from 'rxjs/operators';
 import { TaskService } from '../tasks/task.service';
 import { Router } from '@angular/router';
-import { TODAY_TAG } from '../tag/tag.const';
+import { DEFAULT_TAG, TODAY_TAG } from '../tag/tag.const';
 import { Project } from '../project/project.model';
 import { Tag } from '../tag/tag.model';
 import { ProjectService } from '../project/project.service';
@@ -91,26 +91,42 @@ export class SearchBarComponent implements AfterViewInit, OnDestroy {
     tags: Tag[],
   ): SearchItem[] {
     return tasks.map((task) => {
-      const item: SearchItem = {
+      // By design subtasks cannot have tags.
+      // If a subtask does not belong to a project, it will neither have a project nor a tag.
+      // Therefore, we need to use the parent's tag.
+      const tagId = task.parentId
+        ? (tasks.find((t) => t.id === task.parentId) as Task).tagIds[0]
+        : task.tagIds[0];
+
+      return {
         id: task.id,
         title: task.title.toLowerCase(),
         taskNotes: task.notes.toLowerCase(),
         projectId: task.projectId,
         parentId: task.parentId,
-        tagIds: task.tagIds,
+        tagId,
         timeSpentOnDay: task.timeSpentOnDay,
         created: task.created,
         issueType: task.issueType,
-        ctx: this._getContextIcon(task, projects, tags),
+        ctx: this._getContextIcon(task, projects, tags, tagId),
       };
-      return item;
     });
   }
 
-  private _getContextIcon(task: Task, projects: Project[], tags: Tag[]): Tag | Project {
-    const context = task.projectId
+  private _getContextIcon(
+    task: Task,
+    projects: Project[],
+    tags: Tag[],
+    tagId: string,
+  ): Tag | Project {
+    let context = task.projectId
       ? (projects.find((project) => project.id === task.projectId) as Project)
-      : (tags.find((tag) => tag.id === task.tagIds[0]) as Tag);
+      : (tags.find((tag) => tag.id === tagId) as Tag);
+
+    if (!context) {
+      console.warn(`Could not find context for task: ${task.title}`);
+      context = { ...DEFAULT_TAG, icon: 'help_outline', color: 'black' };
+    }
 
     return {
       ...context,
@@ -153,10 +169,10 @@ export class SearchBarComponent implements AfterViewInit, OnDestroy {
     const tasksOrWorklog = !this.isArchivedTasks ? 'tasks' : 'worklog';
     if (item.projectId) {
       return `/project/${item.projectId}/${tasksOrWorklog}`;
-    } else if (item.tagIds.includes(TODAY_TAG.id)) {
+    } else if (item.tagId === TODAY_TAG.id) {
       return `/tag/TODAY/${tasksOrWorklog}`;
-    } else if (item.tagIds[0]) {
-      return `/tag/${item.tagIds[0]}/${tasksOrWorklog}`;
+    } else if (item.tagId) {
+      return `/tag/${item.tagId}/${tasksOrWorklog}`;
     } else {
       devError("Couldn't find task location");
       return '';
