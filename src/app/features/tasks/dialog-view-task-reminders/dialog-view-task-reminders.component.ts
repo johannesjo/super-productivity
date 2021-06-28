@@ -169,9 +169,20 @@ export class DialogViewTaskRemindersComponent implements OnDestroy {
   rescheduleAllUntilTomorrow() {
     this.isDisableControls = true;
     this._subs.add(
-      this.tasks$.subscribe((tasks) => {
+      this.tasks$.pipe(first()).subscribe((tasks) => {
         tasks.forEach((t) => this.rescheduleUntilTomorrow(t));
         this._close();
+      }),
+    );
+  }
+
+  markAsDone() {
+    this._subs.add(
+      this.tasks$.pipe(first()).subscribe((tasks) => {
+        if (tasks.length === 1) {
+          this._taskService.setDone(tasks[0].id);
+          this._close();
+        }
       }),
     );
   }

@@ -102,6 +102,18 @@
       </button>
 
       <button
+        (click)="markAsDone()"
+        *ngIf="!isMultiple && (isSingleOnToday$|async)"
+        [disabled]="isDisableControls"
+        color="primary"
+        mat-stroked-button
+        type="button"
+      >
+        <mat-icon>check</mat-icon>
+        {{T.F.TASK.D_REMINDER_VIEW.DONE|translate }}
+      </button>
+
+      <button
         (click)="addAllToToday()"
         *ngIf="!(isSingleOnToday$|async)"
         [disabled]="isDisableControls"
