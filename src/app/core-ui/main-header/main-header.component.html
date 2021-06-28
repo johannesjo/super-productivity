@@ -58,6 +58,14 @@
     </button>
 
     <button
+      *ngIf="IS_TOUCH_ONLY && (syncProviderService.isEnabledAndReady$|async)"
+      (click)="syncProviderService.sync()"
+      mat-icon-button
+    >
+      <mat-icon>sync</mat-icon>
+    </button>
+
+    <button
       (click)="bookmarkService.toggleBookmarks()"
       *ngIf="(workContextService.isActiveWorkContextProject$|async)"
       [class.isOpen]="bookmarkService.isShowBookmarks$|async"

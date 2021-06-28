@@ -23,6 +23,8 @@ import { Project } from '../../features/project/project.model';
 import { expandFadeHorizontalAnimation } from '../../ui/animations/expand.ani';
 import { SimpleCounterService } from '../../features/simple-counter/simple-counter.service';
 import { SimpleCounter } from '../../features/simple-counter/simple-counter.model';
+import { SyncProviderService } from '../../imex/sync/sync-provider.service';
+import { IS_TOUCH_ONLY } from 'src/app/util/is-touch';
 
 @Component({
   selector: 'main-header',
@@ -35,6 +37,7 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
   T: typeof T = T;
   progressCircleRadius: number = 10;
   circumference: number = this.progressCircleRadius * Math.PI * 2;
+  IS_TOUCH_ONLY: boolean = IS_TOUCH_ONLY;
 
   @ViewChild('circleSvg', { static: true }) circleSvg?: ElementRef;
 
@@ -69,6 +72,7 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
     public readonly pomodoroService: PomodoroService,
     public readonly layoutService: LayoutService,
     public readonly simpleCounterService: SimpleCounterService,
+    public readonly syncProviderService: SyncProviderService,
     private readonly _tagService: TagService,
     private readonly _renderer: Renderer2,
   ) {}
