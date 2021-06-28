@@ -68,7 +68,6 @@ export interface GoogleDriveSyncConfig {
 }
 
 export interface DropboxSyncConfig {
-  authCode: string | null;
   accessToken: string | null;
 }
 
@@ -140,7 +139,6 @@ export type GlobalConfigSectionKey = keyof GlobalConfigState | 'EMPTY';
 export type GlobalSectionConfig =
   | MiscConfig
   | PomodoroConfig
-  | DropboxSyncConfig
   | KeyboardConfig
   | TimelineConfig
   | SyncConfig;

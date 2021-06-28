@@ -191,14 +191,14 @@
           </button>
 
           <button
+            *ngIf="!task.isDone"
             (click)="toggleTaskDone()"
             [title]="T.F.TASK.CMP.TOGGLE_DONE|translate"
             class="ico-btn task-done-btn"
             color=""
             mat-icon-button
           >
-            <mat-icon *ngIf="task.isDone">undo</mat-icon>
-            <mat-icon *ngIf="!task.isDone">check</mat-icon>
+            <mat-icon>check</mat-icon>
           </button>
 
           <button

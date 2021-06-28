@@ -1272,4 +1272,52 @@ describe('dataRepair()', () => {
       } as any,
     });
   });
+
+  it('should remove missing reminders from tasks', () => {
+    const taskState = {
+      ...mock.task,
+      ...fakeEntityStateFromArray<Task>([
+        {
+          ...DEFAULT_TASK,
+          id: 'TEST',
+          title: 'TEST',
+          reminderId: 'R1',
+          plannedAt: 12321,
+        },
+        {
+          ...DEFAULT_TASK,
+          id: 'TEST2',
+          title: 'TEST2',
+          reminderId: 'R2_MISSING',
+          plannedAt: 12321,
+        },
+      ]),
+    } as any;
+
+    expect(
+      dataRepair({
+        ...mock,
+        task: taskState,
+        reminders: [{ id: 'R1' }],
+      } as any),
+    ).toEqual({
+      ...mock,
+      reminders: [{ id: 'R1' } as any],
+      task: {
+        ...taskState,
+        entities: {
+          TEST: {
+            ...taskState.entities.TEST,
+            reminderId: 'R1',
+            plannedAt: 12321,
+          },
+          TEST2: {
+            ...taskState.entities.TEST2,
+            reminderId: null,
+            plannedAt: null,
+          },
+        },
+      },
+    });
+  });
 });

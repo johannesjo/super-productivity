@@ -9,6 +9,8 @@ import { SnackService } from '../../../core/snack/snack.service';
 import { environment } from '../../../../environments/environment';
 import { T } from '../../../t.const';
 import { SyncProvider, SyncProviderServiceInterface } from '../sync-provider.model';
+import { Store } from '@ngrx/store';
+import { triggerDropboxAuthDialog } from './store/dropbox.actions';
 
 @Injectable({ providedIn: 'root' })
 export class DropboxSyncService implements SyncProviderServiceInterface {
@@ -24,6 +26,7 @@ export class DropboxSyncService implements SyncProviderServiceInterface {
     private _dropboxApiService: DropboxApiService,
     private _dataInitService: DataInitService,
     private _snackService: SnackService,
+    private _store: Store,
   ) {}
 
   // TODO refactor in a way that it doesn't need to trigger uploadAppData itself
@@ -47,7 +50,12 @@ export class DropboxSyncService implements SyncProviderServiceInterface {
       ) {
         return 'NO_REMOTE_DATA';
       } else if (isAxiosError && e.response.status === 401) {
-        this._snackService.open({ msg: T.F.DROPBOX.S.AUTH_ERROR, type: 'ERROR' });
+        this._snackService.open({
+          msg: T.F.DROPBOX.S.AUTH_ERROR,
+          type: 'ERROR',
+          actionStr: T.F.DROPBOX.S.AUTH_ERROR_ACTION,
+          actionFn: () => this._store.dispatch(triggerDropboxAuthDialog()),
+        });
         return 'HANDLED_ERROR';
       } else {
         console.error(e);

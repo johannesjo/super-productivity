@@ -126,6 +126,7 @@
         "ACCESS_TOKEN_ERROR": "Dropbox: Unable to generate Access Token from Auth Code",
         "ACCESS_TOKEN_GENERATED": "Dropbox: Access Token generated from Auth Code",
         "AUTH_ERROR": "Dropbox: Invalid access token provided",
+        "AUTH_ERROR_ACTION": "Change Token",
         "OFFLINE": "Dropbox: Unable to sync, because offline",
         "SYNC_ERROR": "Dropbox: Error while syncing"
       }
@@ -585,10 +586,7 @@
       },
       "FORM": {
         "DROPBOX": {
-          "B_GENERATE_TOKEN": "Generate Token",
-          "FOLLOW_LINK": "Please open the following link and copy the auth code provided there into the the input field.",
-          "L_ACCESS_TOKEN": "Access Token (generated from Auth Code)",
-          "L_AUTH_CODE": "Auth Code"
+          "L_ACCESS_TOKEN": "Access Token (generated from Auth Code)"
         },
         "GOOGLE": {
           "L_IS_COMPRESS_DATA": "Compress data",

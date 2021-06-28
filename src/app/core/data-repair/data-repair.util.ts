@@ -2,7 +2,7 @@ import { AppBaseDataEntityLikeStates, AppDataComplete } from '../../imex/sync/sy
 import { Tag, TagCopy } from '../../features/tag/tag.model';
 import { ProjectCopy } from '../../features/project/project.model';
 import { isDataRepairPossible } from './is-data-repair-possible.util';
-import { TaskArchive, TaskCopy, TaskState } from '../../features/tasks/task.model';
+import { Task, TaskArchive, TaskCopy, TaskState } from '../../features/tasks/task.model';
 import { unique } from '../../util/unique';
 import { TODAY_TAG } from '../../features/tag/tag.const';
 
@@ -36,6 +36,7 @@ export const dataRepair = (data: AppDataComplete): AppDataComplete => {
   dataOut = _setTaskProjectIdAccordingToParent(dataOut);
   dataOut = _addTodayTagIfNoProjectIdOrTagId(dataOut);
   dataOut = _removeDuplicatesFromArchive(dataOut);
+  dataOut = _removeMissingReminderIds(dataOut);
 
   // console.timeEnd('dataRepair');
   return dataOut;
@@ -67,6 +68,20 @@ const _removeDuplicatesFromArchive = (data: AppDataComplete): AppDataComplete =>
       console.log(duplicateIds.length + ' duplicates removed from archive.');
     }
   }
+  return data;
+};
+
+const _removeMissingReminderIds = (data: AppDataComplete): AppDataComplete => {
+  data.task.ids.forEach((id: string) => {
+    const t: Task = data.task.entities[id] as Task;
+    if (t.reminderId && !data.reminders.find((r) => r.id === t.reminderId)) {
+      data.task.entities[id] = {
+        ...t,
+        reminderId: null,
+        plannedAt: null,
+      };
+    }
+  });
   return data;
 };
 

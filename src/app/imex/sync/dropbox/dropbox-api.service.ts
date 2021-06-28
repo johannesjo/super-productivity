@@ -1,5 +1,9 @@
 import { Injectable } from '@angular/core';
-import { DROPBOX_APP_KEY, DROPBOX_CODE_VERIFIER } from './dropbox.const';
+import {
+  DROPBOX_APP_KEY,
+  DROPBOX_AUTH_CODE_URL,
+  DROPBOX_CODE_VERIFIER,
+} from './dropbox.const';
 import { GlobalConfigService } from '../../../features/config/global-config.service';
 import { first, map, switchMap, tap } from 'rxjs/operators';
 import { DataInitService } from '../../../core/data-init/data-init.service';
@@ -8,13 +12,13 @@ import axios, { AxiosResponse, Method } from 'axios';
 import { stringify } from 'query-string';
 import { DropboxFileMetadata } from './dropbox.model';
 import { toDropboxIsoString } from './iso-date-without-ms.util.';
+import { DialogGetAndEnterAuthCodeComponent } from '../dialog-get-and-enter-auth-code/dialog-get-and-enter-auth-code.component';
+import { MatDialog } from '@angular/material/dialog';
+import { T } from '../../../t.const';
+import { SnackService } from '../../../core/snack/snack.service';
 
 @Injectable({ providedIn: 'root' })
 export class DropboxApiService {
-  authCode$: Observable<string | null> = this._globalConfigService.cfg$.pipe(
-    map((cfg) => cfg?.sync.dropboxSync.authCode),
-  );
-
   private _accessToken$: Observable<string | null> = this._globalConfigService.cfg$.pipe(
     map((cfg) => cfg?.sync.dropboxSync.accessToken),
   );
@@ -33,6 +37,8 @@ export class DropboxApiService {
   constructor(
     private _globalConfigService: GlobalConfigService,
     private _dataInitService: DataInitService,
+    private _matDialog: MatDialog,
+    private _snackService: SnackService,
   ) {}
 
   async getMetaData(path: string): Promise<DropboxFileMetadata> {
@@ -154,6 +160,20 @@ export class DropboxApiService {
     });
   }
 
+  async getAccessTokenViaDialog(): Promise<string> {
+    const authCode = await this._matDialog
+      .open(DialogGetAndEnterAuthCodeComponent, {
+        restoreFocus: true,
+        data: {
+          providerName: 'Dropbox',
+          url: DROPBOX_AUTH_CODE_URL,
+        },
+      })
+      .afterClosed()
+      .toPromise();
+    return this.getAccessTokenFromAuthCode(authCode);
+  }
+
   async getAccessTokenFromAuthCode(authCode: string): Promise<string> {
     return axios
       .request({
@@ -170,10 +190,20 @@ export class DropboxApiService {
         }),
       })
       .then((res) => {
+        this._snackService.open({
+          type: 'SUCCESS',
+          msg: T.F.DROPBOX.S.ACCESS_TOKEN_GENERATED,
+        });
         return res.data.access_token;
         // Not necessary as it is highly unlikely that we get a wrong on
         // const accessToken = res.data.access_token;
         // return this.checkUser(accessToken).then(() => accessToken);
+      })
+      .catch(() => {
+        this._snackService.open({
+          type: 'ERROR',
+          msg: T.F.DROPBOX.S.ACCESS_TOKEN_ERROR,
+        });
       });
   }
 }

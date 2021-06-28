@@ -109,6 +109,26 @@ describe('isValidAppData()', () => {
       ).toThrowError(`Missing task data (tid: gone) for Project TEST_T`);
     });
 
+    it('missing reminder data', () => {
+      expect(() =>
+        isValidAppData({
+          ...mock,
+          // NOTE: it's empty
+          task: {
+            ...mock.task,
+            ids: ['t1'],
+            entities: {
+              t1: {
+                ...DEFAULT_TASK,
+                id: 't1',
+                reminderId: 'rid',
+              },
+            },
+          },
+        }),
+      ).toThrowError(`Missing reminder rid from task not existing`);
+    });
+
     it('missing backlog task data for projects', () => {
       expect(() =>
         isValidAppData({
