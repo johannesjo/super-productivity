@@ -223,15 +223,16 @@ const appCloseHandler = (app: App) => {
     log('close, isQuiting:', (app as any).isQuiting);
     if (!(app as any).isQuiting) {
       event.preventDefault();
-      if (ids.length > 0) {
-        log('Actions to wait for ', ids);
-        mainWin.webContents.send(IPC.NOTIFY_ON_CLOSE, ids);
-      } else {
-        getSettings(mainWin, (appCfg) => {
-          if (appCfg && appCfg.misc.isMinimizeToTray && !(app as any).isQuiting) {
-            mainWin.hide();
-            return;
-          }
+      getSettings(mainWin, (appCfg) => {
+        if (appCfg && appCfg.misc.isMinimizeToTray && !(app as any).isQuiting) {
+          mainWin.hide();
+          return;
+        }
+
+        if (ids.length > 0) {
+          log('Actions to wait for ', ids);
+          mainWin.webContents.send(IPC.NOTIFY_ON_CLOSE, ids);
+        } else {
           if (appCfg && appCfg.misc.isConfirmBeforeExit && !(app as any).isQuiting) {
             dialog
               .showMessageBox(mainWin, {
@@ -251,8 +252,8 @@ const appCloseHandler = (app: App) => {
           } else {
             _quitApp();
           }
-        });
-      }
+        }
+      });
     }
   });
 };
