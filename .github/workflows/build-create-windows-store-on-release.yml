@@ -19,7 +19,7 @@ jobs:
           timezoneWindows: 'W. Europe Standard Time'
 
       - name: Check out Git repository
-        uses: actions/checkout@v1
+        uses: actions/checkout@v2
 
       - name: Load Electron Builder Windows Store Config
         run: echo $WIN_STORE_ELECTRON_BUILDER_YML | base64 --decode > electron-builder.yaml
@@ -30,7 +30,7 @@ jobs:
       - uses: actions/cache@v2
         with:
           path: '**/node_modules'
-          key: ${{ runner.os }}-modulesTWO-${{ hashFiles('**/yarn.lock') }}
+          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
 
       - name: Install Yarn Packages
         if: steps.yarn-cache.outputs.cache-hit != 'true'

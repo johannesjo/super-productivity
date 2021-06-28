@@ -13,17 +13,17 @@ jobs:
 
     steps:
       - name: Check out Git repository
-        uses: actions/checkout@v1
+        uses: actions/checkout@v2
 
       - name: Install Node.js, NPM and Yarn
-        uses: actions/setup-node@v1
+        uses: actions/setup-node@v2
         with:
           node-version: 14
 
       - uses: actions/cache@v2
         with:
           path: '**/node_modules'
-          key: ${{ runner.os }}-modulesTWO-${{ hashFiles('**/yarn.lock') }}
+          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
 
       - name: Install Yarn Packages
         if: steps.yarn-cache.outputs.cache-hit != 'true'
@@ -42,7 +42,7 @@ jobs:
         run: yarn buildFrontend:prodWeb
 
       - name: Deploy to Web Server
-        uses: easingthemes/ssh-deploy@v2.1.5
+        uses: easingthemes/ssh-deploy@v2.2.11
         env:
           SSH_PRIVATE_KEY: ${{ secrets.WEB_SERVER_SSH_KEY }}
           ARGS: '-rltgoDzvO --delete --exclude "news.json"'
