@@ -62,7 +62,7 @@
       (click)="syncProviderService.sync()"
       mat-icon-button
     >
-      <mat-icon>sync</mat-icon>
+      <mat-icon [class.spin]="(syncProviderService.isSyncing$|async)">sync</mat-icon>
     </button>
 
     <button

@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { combineLatest, Observable } from 'rxjs';
+import { BehaviorSubject, combineLatest, Observable } from 'rxjs';
 import { DropboxSyncService } from './dropbox/dropbox-sync.service';
 import { SyncProvider, SyncProviderServiceInterface } from './sync-provider.model';
 import { GlobalConfigService } from '../../features/config/global-config.service';
@@ -62,6 +62,7 @@ export class SyncProviderService {
     this.currentProvider$.pipe(switchMap((currentProvider) => currentProvider.isReady$)),
     this.syncCfg$.pipe(map((cfg) => cfg.isEnabled)),
   ]).pipe(map(([isReady, isEnabled]) => isReady && isEnabled));
+  isSyncing$ = new BehaviorSubject<boolean>(false);
 
   constructor(
     private _dropboxSyncService: DropboxSyncService,
@@ -81,7 +82,10 @@ export class SyncProviderService {
     if (!currentProvider) {
       throw new Error('No Sync Provider for sync()');
     }
-    return this._sync(currentProvider);
+    this.isSyncing$.next(true);
+    const r = await this._sync(currentProvider);
+    this.isSyncing$.next(false);
+    return r;
   }
 
   private async _sync(cp: SyncProviderServiceInterface): Promise<unknown> {

@@ -2,7 +2,7 @@
 
 $mobileHorizontalPadding: 8px;
 $navVerticalPadding: 4px;
-$macExtraPadding: (-8px+$mac-title-bar-padding);
+$macExtraPadding: (-8px + $mac-title-bar-padding);
 
 :host {
   display: block;
@@ -28,7 +28,6 @@ $macExtraPadding: (-8px+$mac-title-bar-padding);
     -webkit-app-region: no-drag;
   }
 }
-
 
 .wrapper {
   background: transparent;
@@ -56,14 +55,14 @@ $macExtraPadding: (-8px+$mac-title-bar-padding);
   max-width: 220px;
   cursor: pointer;
   border-radius: $card-border-radius;
-  padding: $s 2*$s $s $s;
+  padding: $s 2 * $s $s $s;
 
   @include mq(xs) {
     padding-right: $s;
   }
 
   &:focus {
-    outline: none
+    outline: none;
   }
 }
 
@@ -73,7 +72,7 @@ $macExtraPadding: (-8px+$mac-title-bar-padding);
     display: block;
     transition: $transition-standard;
     opacity: 0;
-    margin-right: 2*$s;
+    margin-right: 2 * $s;
     margin-left: -$s;
     position: relative;
     z-index: 1;
@@ -84,7 +83,6 @@ $macExtraPadding: (-8px+$mac-title-bar-padding);
     opacity: 1;
   }
 }
-
 
 a,
 button {
@@ -97,13 +95,13 @@ button {
   display: flex;
   align-items: center;
 
-  :host-context([dir=rtl]) & {
+  :host-context([dir='rtl']) & {
     margin-left: 0px;
     margin-right: auto;
   }
 
   button {
-    margin-left: $s*0.5;
+    margin-left: $s * 0.5;
 
     @include mq(xs) {
       margin-left: $s;
@@ -136,7 +134,7 @@ button {
 
 .play-btn-wrapper {
   position: relative;
-  margin-left: $s*0.5;
+  margin-left: $s * 0.5;
 
   @include mq(xs) {
     margin-left: $s;
@@ -201,10 +199,10 @@ button {
     &:after {
       content: '';
       position: absolute;
-      top: $s*-1.25;
-      left: $s*-1.25;
-      right: $s*-1.25;
-      bottom: $s*-1.25;
+      top: $s * -1.25;
+      left: $s * -1.25;
+      right: $s * -1.25;
+      bottom: $s * -1.25;
     }
   }
 
@@ -240,9 +238,9 @@ button {
   border-radius: 12px;
   min-width: 50px;
   white-space: nowrap;
-  padding: $s/2 2*$s;
-  padding-right: $s*2.5;
-  margin-right: -$s*2;
+  padding: $s/2 2 * $s;
+  padding-right: $s * 2.5;
+  margin-right: -$s * 2;
   top: 50%;
   transform: translateY(-50%);
   background: #fff;
@@ -270,5 +268,16 @@ button {
 
   :host:hover & {
     opacity: 0;
+  }
+}
+
+.spin {
+  animation: spin 1.5s linear infinite;
+}
+
+@keyframes spin {
+  100% {
+    -webkit-transform: rotate(360deg);
+    transform: rotate(360deg);
   }
 }
