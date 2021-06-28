@@ -62,6 +62,7 @@
           ></timeline-custom-event>
 
           <timeline-task-repeat-projection
+            [title]="T.F.TIMELINE.TASK_PROJECTION_INFO|translate"
             *ngSwitchCase="TimelineViewEntryType.ScheduledRepeatTaskProjection"
             [repeatCfg]="row.data"
           ></timeline-task-repeat-projection>
