@@ -58,7 +58,7 @@
     </button>
 
     <button
-      *ngIf="IS_TOUCH_ONLY && (syncProviderService.isEnabledAndReady$|async)"
+      *ngIf="IS_TOUCH_ONLY && (syncProviderService.isEnabled$|async)"
       (click)="syncProviderService.sync()"
       mat-icon-button
     >
