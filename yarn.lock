@@ -171,16 +171,7 @@
   resolved "https://registry.yarnpkg.com/@angular-eslint/builder/-/builder-4.3.0.tgz#368659e9c7539a1b61ec636b0918ca90a352decd"
   integrity sha512-OzCA4jyELbHt8pyRuW6asib26rc+Ihr2SDjp+uoMivfpqjWVPOw0CvvEZj4SbpGvYOHtcAezyS526D2q2tKHvg==
 
-"@angular-eslint/eslint-plugin-template@4.2.0":
-  version "4.2.0"
-  resolved "https://registry.yarnpkg.com/@angular-eslint/eslint-plugin-template/-/eslint-plugin-template-4.2.0.tgz#2716583530bf2b20069076994816630e299ab67c"
-  integrity sha512-LC8qqqqVmA/OJAsUt6fQCXLmWP5BL30XFvVsPtrORdxMFt0HI1gvkuz5EVak7PeAXEmerdVarNZr5zmCXIWf3g==
-  dependencies:
-    "@typescript-eslint/experimental-utils" "4.16.1"
-    aria-query "^4.2.2"
-    axobject-query "^2.2.0"
-
-"@angular-eslint/eslint-plugin-template@^4.2.0":
+"@angular-eslint/eslint-plugin-template@4.3.0", "@angular-eslint/eslint-plugin-template@^4.2.0":
   version "4.3.0"
   resolved "https://registry.yarnpkg.com/@angular-eslint/eslint-plugin-template/-/eslint-plugin-template-4.3.0.tgz#2a73fe6a48990eb07252e9637d05d7db1c7ba91e"
   integrity sha512-5DuCvEa3cYx0G2mZtECAwgJ19xJWAFZ8Fu8mIkKDiof1dcUISs1PvECJ6NhdzfxEJp0McPQn1jtOK0IDRX1eJw==
@@ -189,27 +180,20 @@
     aria-query "^4.2.2"
     axobject-query "^2.2.0"
 
-"@angular-eslint/eslint-plugin@4.2.0":
-  version "4.2.0"
-  resolved "https://registry.yarnpkg.com/@angular-eslint/eslint-plugin/-/eslint-plugin-4.2.0.tgz#134203c3ac340ae4ae76703434f636dc0a110d7d"
-  integrity sha512-G8D8Pso6GcHW8vFkUSvgoKPIOtGTqO+eb5aytGtpogMgzxBRyr0juU/9Uz5dAhO6TOERIj1gPpJQ61R/n/Aaew==
-  dependencies:
-    "@typescript-eslint/experimental-utils" "4.16.1"
-
-"@angular-eslint/eslint-plugin@^4.2.0":
+"@angular-eslint/eslint-plugin@4.3.0", "@angular-eslint/eslint-plugin@^4.2.0":
   version "4.3.0"
   resolved "https://registry.yarnpkg.com/@angular-eslint/eslint-plugin/-/eslint-plugin-4.3.0.tgz#7855f2f697e1a832be63f91c9f4f8f6afa63239d"
   integrity sha512-an0fyKzPmpWp9OnstZYXFSCvKnc14F8xfl+HXqvynOiBK63cWTZLlzO+7Z4t3pQiSuiXsEYleRPktWkNWGv0tQ==
   dependencies:
     "@typescript-eslint/experimental-utils" "4.16.1"
 
-"@angular-eslint/schematics@4.2.0":
-  version "4.2.0"
-  resolved "https://registry.yarnpkg.com/@angular-eslint/schematics/-/schematics-4.2.0.tgz#28bb9c67f0cc6c03219cf92220f74c171a613897"
-  integrity sha512-aohGcfYUqN2hFLWaZoOqkLDyYVDFoLC3LwgIknoaDqWkvFG/RUTg1X1pCFjddLQYP5ist8+OppHH+gnYMbftEw==
+"@angular-eslint/schematics@4.3.0":
+  version "4.3.0"
+  resolved "https://registry.yarnpkg.com/@angular-eslint/schematics/-/schematics-4.3.0.tgz#ad466d0855a5cd04152a61543f84ba946f7d2e45"
+  integrity sha512-zHEpvWoT0mdylQw/K7+RccBK2rJq0to6ZbIp9i65+RZZTHbscaJaDISFvBHm5RNwEhoWI7sJ14ci66pnpAxx3g==
   dependencies:
-    "@angular-eslint/eslint-plugin" "4.2.0"
-    "@angular-eslint/eslint-plugin-template" "4.2.0"
+    "@angular-eslint/eslint-plugin" "4.3.0"
+    "@angular-eslint/eslint-plugin-template" "4.3.0"
     ignore "5.1.8"
     strip-json-comments "3.1.1"
     tmp "0.2.1"
