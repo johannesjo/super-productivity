@@ -139,7 +139,7 @@
     "@ngrx/entity": "^11.1.0",
     "@ngrx/schematics": "^11.1.1",
     "@ngrx/store": "11.1.0",
-    "@ngrx/store-devtools": "^11.1.0",
+    "@ngrx/store-devtools": "^12.2.0",
     "@ngx-formly/core": "5.10.3",
     "@ngx-formly/material": "5.10.3",
     "@ngx-translate/core": "^13.0.0",

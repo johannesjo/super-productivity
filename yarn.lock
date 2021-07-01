@@ -1413,10 +1413,10 @@
   resolved "https://registry.yarnpkg.com/@ngrx/schematics/-/schematics-11.1.1.tgz#6ed9a60e4d6cad1d6d2825bf07c57bc272b13c07"
   integrity sha512-xUtfASTmY5KMHpphM1o/HkwMzQ2joZWBWlee+vjGl+lCfMArt0s+hiCudfjT11lgMiv5ghNNL6KnbN/Nk7lE1Q==
 
-"@ngrx/store-devtools@^11.1.0":
-  version "11.1.1"
-  resolved "https://registry.yarnpkg.com/@ngrx/store-devtools/-/store-devtools-11.1.1.tgz#bdefc5c03dcac6fc21fcc9e33a4a3a3464f3e2d6"
-  integrity sha512-YvTMy8HUMUiiyrzKn4KhrQzkAg2yBfLgd1PHR0yPjyzj7RCaYZHwhq6sP0+AiFMBi1Lat8Wczy7SwwLTa6aZ3w==
+"@ngrx/store-devtools@^12.2.0":
+  version "12.2.0"
+  resolved "https://registry.yarnpkg.com/@ngrx/store-devtools/-/store-devtools-12.2.0.tgz#dc0a32458e0f69080d05e881ce03a9768b92c599"
+  integrity sha512-R8GBVk1zki/IRl022v2LRWEx1yCS4xQdP1mpK5sbfY+yuxDouY3wkgT02Wb225TJthm9DE6xJOaXu5maHqgUHg==
   dependencies:
     tslib "^2.0.0"
 
