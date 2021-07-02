@@ -107,7 +107,7 @@ import { getDateRangeForDay } from '../../util/get-date-range-for-day';
 })
 export class TaskService {
   // Currently used in idle service TODO remove
-  currentTaskId: string | null | undefined;
+  currentTaskId: string | null = null;
   currentTaskId$: Observable<string | null> = this._store.pipe(
     select(selectCurrentTaskId),
     // NOTE: we can't use share here, as we need the last emitted value

@@ -56,12 +56,17 @@ export class TaskRepeatCfgEffects {
       // ===> taskRepeatCfgs scheduled for today and not yet created already
     ),
     filter((taskRepeatCfgs) => taskRepeatCfgs && !!taskRepeatCfgs.length),
+    withLatestFrom(this._taskService.currentTaskId$),
 
     // existing tasks with sub tasks are loaded, because need to move them to the archive
-    mergeMap((taskRepeatCfgs) =>
+    mergeMap(([taskRepeatCfgs, currentTaskId]) =>
       from(taskRepeatCfgs).pipe(
         mergeMap((taskRepeatCfg: TaskRepeatCfg) =>
-          this._taskRepeatCfgService.getActionsForTaskRepeatCfg(taskRepeatCfg),
+          this._taskRepeatCfgService.getActionsForTaskRepeatCfg(
+            taskRepeatCfg,
+            currentTaskId,
+            Date.now(),
+          ),
         ),
         tap((actionsForRepeatCfg) =>
           console.log('actionsForRepeatCfg', actionsForRepeatCfg),

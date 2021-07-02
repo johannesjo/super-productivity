@@ -200,7 +200,11 @@ export class WorkViewComponent implements OnInit, OnDestroy, AfterContentInit {
     }
     if (repeatableScheduledForTomorrow.length) {
       repeatableScheduledForTomorrow.forEach((repeatCfg) => {
-        this._taskRepeatCfgService.createRepeatableTask(repeatCfg, this._tomorrow);
+        this._taskRepeatCfgService.createRepeatableTask(
+          repeatCfg,
+          this._tomorrow,
+          this.taskService.currentTaskId,
+        );
       });
     }
   }

@@ -106,9 +106,14 @@ export class TaskRepeatCfgService {
     this._store$.dispatch(new UpsertTaskRepeatCfg({ taskRepeatCfg }));
   }
 
-  async createRepeatableTask(taskRepeatCfg: TaskRepeatCfg, targetDayDate: number) {
+  async createRepeatableTask(
+    taskRepeatCfg: TaskRepeatCfg,
+    targetDayDate: number,
+    currentTaskId: string | null,
+  ) {
     const actionsForRepeatCfg = await this.getActionsForTaskRepeatCfg(
       taskRepeatCfg,
+      currentTaskId,
       targetDayDate,
     );
     actionsForRepeatCfg.forEach((act) => {
@@ -135,6 +140,7 @@ export class TaskRepeatCfgService {
 
   async getActionsForTaskRepeatCfg(
     taskRepeatCfg: TaskRepeatCfg,
+    currentTaskId: string | null,
     targetDayDate: number = Date.now(),
   ): Promise<(UpdateTask | AddTask | UpdateTaskRepeatCfg | ScheduleTask)[]> {
     // NOTE: there might be multiple configs in case something went wrong
@@ -159,7 +165,12 @@ export class TaskRepeatCfgService {
     // move all current left over instances to archive right away
     const markAsDoneActions: (UpdateTask | AddTask | UpdateTaskRepeatCfg)[] =
       existingTaskInstances
-        .filter((taskI) => !taskI.isDone && !isSameDay(targetDayDate, taskI.created))
+        .filter(
+          (taskI) =>
+            !taskI.isDone &&
+            !isSameDay(targetDayDate, taskI.created) &&
+            taskI.id !== currentTaskId,
+        )
         .map(
           (taskI) =>
             new UpdateTask({
