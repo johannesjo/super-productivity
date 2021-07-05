@@ -124,7 +124,7 @@
     "@angular/compiler-cli": "^12.1.0",
     "@angular/core": "^12.1.0",
     "@angular/forms": "^12.1.0",
-    "@angular/language-service": "^12.1.0",
+    "@angular/language-service": "^12.1.1",
     "@angular/material": "^11.2.9",
     "@angular/material-moment-adapter": "^11.2.9",
     "@angular/platform-browser": "^12.1.0",
