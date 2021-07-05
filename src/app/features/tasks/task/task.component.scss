@@ -495,7 +495,7 @@
   }
 
   .separator {
-    padding: 0 $s/2;
+    padding: 0 $s * 0.5;
   }
 
   @include smallMainContainer {
@@ -893,14 +893,14 @@ $min-badge-size: $s * 2.25;
   display: flex;
   align-items: center;
   padding-left: $s;
-  padding-top: $s/2;
+  padding-top: $s * 0.5;
   margin-bottom: -2px;
 
   .dot {
     height: 8px;
     width: 8px;
     border-radius: 50%;
-    margin-right: $s/2;
+    margin-right: $s * 0.5;
   }
 
   .title {

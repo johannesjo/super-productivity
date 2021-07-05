@@ -114,10 +114,7 @@ export class IssueService {
       isNotifyNoUpdateRequired,
     );
     if (update) {
-      if (
-        this.ISSUE_SERVICE_MAP[task.issueType].getById$ &&
-        this.ISSUE_REFRESH_MAP[task.issueType][task.issueId]
-      ) {
+      if (this.ISSUE_REFRESH_MAP[task.issueType][task.issueId]) {
         this.ISSUE_REFRESH_MAP[task.issueType][task.issueId].next(update.issue);
       }
       this._taskService.update(task.id, update.taskChanges);

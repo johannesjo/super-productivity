@@ -61,7 +61,7 @@ export class ReminderService {
       throw new Error('No service workers supported :(');
     }
 
-    this._w = new Worker('./reminder.worker', {
+    this._w = new Worker(new URL('./reminder.worker', import.meta.url), {
       name: 'reminder',
       type: 'module',
     });

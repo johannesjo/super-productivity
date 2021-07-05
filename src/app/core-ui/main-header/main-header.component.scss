@@ -177,7 +177,7 @@ button {
     border-radius: 8px;
     z-index: 4;
     pointer-events: none;
-    bottom: $s/-4;
+    bottom: $s * -0.25;
 
     @include darkTheme {
       background: $dark-theme-bg-lighter;
@@ -221,7 +221,7 @@ button {
     opacity: 0;
     position: relative;
     z-index: 2;
-    margin-top: $s/2;
+    margin-top: $s * 0.5;
     margin-left: 0;
 
     &:nth-child(2) {
@@ -238,7 +238,7 @@ button {
   border-radius: 12px;
   min-width: 50px;
   white-space: nowrap;
-  padding: $s/2 2 * $s;
+  padding: $s * 0.5 2 * $s;
   padding-right: $s * 2.5;
   margin-right: -$s * 2;
   top: 50%;

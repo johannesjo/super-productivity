@@ -1,4 +1,4 @@
-@import "../../../../variables";
+@import '../../../../variables';
 
 :host {
   display: block;
@@ -40,7 +40,7 @@ $this-border-radius: 8px;
   user-select: none;
 
   .spacer {
-    width: $s*1.5;
+    width: $s * 1.5;
   }
 
   em,
@@ -57,12 +57,12 @@ $this-border-radius: 8px;
     flex-basis: 20%;
 
     &:first-child {
-      padding-left: $s*2;
+      padding-left: $s * 2;
       text-align: left;
     }
 
     &:last-child {
-      padding-right: $s*2;
+      padding-right: $s * 2;
       text-align: right;
     }
   }
@@ -108,7 +108,7 @@ $this-border-radius: 8px;
     text-align: left;
     white-space: normal;
     line-height: 16px;
-    padding: $s $s*1.5;
+    padding: $s $s * 1.5;
     vertical-align: middle;
 
     &.with-icon {
@@ -116,7 +116,7 @@ $this-border-radius: 8px;
     }
 
     &.title {
-      padding-left: $s*2;
+      padding-left: $s * 2;
       padding-right: 0;
       width: 100%;
     }
@@ -127,14 +127,14 @@ $this-border-radius: 8px;
       padding: 0;
 
       ::ng-deep .inline-input-wrapper {
-        padding: $s $s*1.5;
+        padding: $s $s * 1.5;
       }
     }
 
     &.isSubTask {
       .task-title {
         font-style: italic;
-        padding-left: $s*2;
+        padding-left: $s * 2;
         position: relative;
         display: inline-block;
 
@@ -157,13 +157,13 @@ $this-border-radius: 8px;
   align-items: center;
   // NOTE: give them a bit of extra space
   // MAGIC NUMBER ALERT!!!
-  margin-left: -4*$s;
-  margin-right: -4*$s;
+  margin-left: -4 * $s;
+  margin-right: -4 * $s;
   //margin-top: $s;
 }
 
 .simple-counter-item {
-  margin: 0 $s/2;
+  margin: 0 $s * 0.5;
   display: inline-flex;
   flex-direction: row;
   align-items: center;

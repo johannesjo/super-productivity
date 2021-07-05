@@ -83,14 +83,14 @@ export class DatetimeInputComponent {
     } else if (typeof v === 'string') {
       v = new Date(v).getTime();
     }
-    this.nrValue = v;
-    this.modelChange.emit(v);
+    this.nrValue = v as number;
+    this.modelChange.emit(v as number);
 
     if (isFromInput) {
       localStorage.setItem(LS_LAST_REMINDER_DATE, v.toString());
     } else {
       // required to update view value
-      this.strValue = this._convertToIsoString(v);
+      this.strValue = this._convertToIsoString(v as number);
     }
   }
 

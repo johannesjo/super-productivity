@@ -1,9 +1,5 @@
 import { Injectable } from '@angular/core';
-import {
-  DROPBOX_APP_KEY,
-  DROPBOX_AUTH_CODE_URL,
-  DROPBOX_CODE_VERIFIER,
-} from './dropbox.const';
+import { DROPBOX_APP_KEY } from './dropbox.const';
 import { GlobalConfigService } from '../../../features/config/global-config.service';
 import { first, map, switchMap, tap } from 'rxjs/operators';
 import { DataInitService } from '../../../core/data-init/data-init.service';
@@ -16,6 +12,7 @@ import { DialogGetAndEnterAuthCodeComponent } from '../dialog-get-and-enter-auth
 import { MatDialog } from '@angular/material/dialog';
 import { T } from '../../../t.const';
 import { SnackService } from '../../../core/snack/snack.service';
+import { generatePKCECodes } from './generate-pkce-codes';
 
 @Injectable({ providedIn: 'root' })
 export class DropboxApiService {
@@ -161,6 +158,13 @@ export class DropboxApiService {
   }
 
   async getAccessTokenViaDialog(): Promise<string> {
+    const { codeVerifier, codeChallenge } = await generatePKCECodes(128);
+    const DROPBOX_AUTH_CODE_URL =
+      `https://www.dropbox.com/oauth2/authorize` +
+      `?response_type=code&client_id=${DROPBOX_APP_KEY}` +
+      '&code_challenge_method=S256' +
+      `&code_challenge=${codeChallenge}`;
+
     const authCode = await this._matDialog
       .open(DialogGetAndEnterAuthCodeComponent, {
         restoreFocus: true,
@@ -171,10 +175,13 @@ export class DropboxApiService {
       })
       .afterClosed()
       .toPromise();
-    return this.getAccessTokenFromAuthCode(authCode);
+    return this.getAccessTokenFromAuthCode(authCode, codeVerifier);
   }
 
-  async getAccessTokenFromAuthCode(authCode: string): Promise<string> {
+  async getAccessTokenFromAuthCode(
+    authCode: string,
+    codeVerifier: string,
+  ): Promise<string> {
     return axios
       .request({
         url: 'https://api.dropboxapi.com/oauth2/token',
@@ -186,7 +193,7 @@ export class DropboxApiService {
           code: authCode,
           grant_type: 'authorization_code',
           client_id: DROPBOX_APP_KEY,
-          code_verifier: DROPBOX_CODE_VERIFIER,
+          code_verifier: codeVerifier,
         }),
       })
       .then((res) => {

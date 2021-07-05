@@ -1,7 +1,9 @@
+@use "sass:math";
+
 @import '../../../../variables';
 
-$sTopBottom: $s/1.5;
-$sLeftRight: $sTopBottom/2;
+$sTopBottom: $s * 0.666666;
+$sLeftRight: $sTopBottom * 0.5;
 $dragHandleWidth: 24px;
 $listControlsWidth: 36px;
 $bookmarkMinWidth: 56px;
@@ -14,7 +16,6 @@ $bookmarkMinWidth: 56px;
     background: transparent;
   }
 }
-
 
 .global-bookmark-list-outer {
   padding-bottom: $sTopBottom;
@@ -70,7 +71,7 @@ $bookmarkMinWidth: 56px;
   align-content: center;
   align-self: center;
   padding: $s;
-  padding-top: $s+$sTopBottom;
+  padding-top: $s + $sTopBottom;
 }
 
 .list-controls button,
@@ -136,7 +137,6 @@ $bookmarkMinWidth: 56px;
   box-shadow: $whiteframe-shadow-8dp !important;
 }
 
-
 .controls {
   position: absolute;
   top: 0;
@@ -189,7 +189,6 @@ $bookmarkMinWidth: 56px;
     transform: translate(100%);
   }
 }
-
 
 .drag-over-msg {
   pointer-events: none;

@@ -3,12 +3,10 @@
   "compilerOptions": {
     "outDir": "../out-tsc/app",
     "types": [],
-    "strict": true
+    "strict": true,
+    "allowSyntheticDefaultImports": true
   },
-  "files": [
-    "main.ts",
-    "polyfills.ts"
-  ],
+  "files": ["main.ts", "polyfills.ts"],
   "angularCompilerOptions": {
     "fullTemplateTypeCheck": true,
     "strictInjectionParameters": true
