@@ -178,7 +178,7 @@
     "eslint-plugin-jsdoc": "33.1.0",
     "eslint-plugin-prefer-arrow": "1.2.3",
     "eslint-plugin-prettier": "^3.4.0",
-    "eslint-plugin-unused-imports": "^1.1.1",
+    "eslint-plugin-unused-imports": "^1.1.2",
     "file-saver": "^2.0.2",
     "glob": "^7.1.7",
     "hammerjs": "^2.0.8",
