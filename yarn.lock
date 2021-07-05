@@ -2285,10 +2285,10 @@ angular-material-css-vars@^1.2.0:
     "@ctrl/tinycolor" "^2.6.0"
     tslib "^2.0.0"
 
-angular2-promise-buttons@^4.0.10:
-  version "4.0.10"
-  resolved "https://registry.yarnpkg.com/angular2-promise-buttons/-/angular2-promise-buttons-4.0.10.tgz#7f27905e31406274049235bcec143840f3a458c5"
-  integrity sha512-UPuH9V7HDoZ75SdYVr4/7dIllvZaSCJScU7JtbdQX6BmzX/8PV9OnHZyTgBPnAD+Tmj/HEOwqqCae3wmru0AuQ==
+angular2-promise-buttons@^5.0.2:
+  version "5.0.2"
+  resolved "https://registry.yarnpkg.com/angular2-promise-buttons/-/angular2-promise-buttons-5.0.2.tgz#10bf90e5d1cc11e642cd8e019775d515b5f232ef"
+  integrity sha512-SL9t7cMx9gKNXTg+sh5DuVDh5bKA4fGKdsgxIwoWtj+7x7wP9tG5UdKGPYBxlzOzXWrPIuND8rnztz94/RIcLQ==
   dependencies:
     tslib "^2.0.0"
 
