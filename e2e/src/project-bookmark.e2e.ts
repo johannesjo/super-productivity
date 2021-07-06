@@ -30,7 +30,8 @@ module.exports = {
 
       .waitForElementVisible(BOOKMARK_TITLE_INP)
       .setValue(BOOKMARK_TITLE_INP, 'Some bookmark title')
-      .setValue(BOOKMARK_URL_INP, 'bookmark-url')
+      .waitForElementVisible(BOOKMARK_URL_INP)
+      .setValue(BOOKMARK_URL_INP, 'bookmark-url.de')
       .click(BOOKMARK_SUBMIT_BTN)
 
       .waitForElementVisible(FIRST_BOOKMARK)
