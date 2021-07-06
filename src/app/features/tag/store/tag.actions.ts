@@ -16,6 +16,11 @@ export const deleteTags = createAction(
   props<{ ids: string[] }>(),
 );
 
+export const updateTagOrder = createAction(
+  '[Tag] Update Tag Order',
+  props<{ ids: string[] }>(),
+);
+
 export const updateAdvancedConfigForTag = createAction(
   '[Tag] Update Advanced Config',
   props<{ tagId: string; sectionKey: WorkContextAdvancedCfgKey; data: any }>(),

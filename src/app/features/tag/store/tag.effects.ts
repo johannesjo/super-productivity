@@ -13,6 +13,7 @@ import {
   deleteTags,
   updateAdvancedConfigForTag,
   updateTag,
+  updateTagOrder,
   updateWorkEndForTag,
   updateWorkStartForTag,
   upsertTag,
@@ -65,6 +66,8 @@ export class TagEffects {
           upsertTag,
           deleteTag,
           deleteTags,
+
+          updateTagOrder,
 
           updateAdvancedConfigForTag,
           updateWorkStartForTag,

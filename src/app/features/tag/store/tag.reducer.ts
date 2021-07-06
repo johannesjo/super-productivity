@@ -195,6 +195,17 @@ const _reducer = createReducer<TagState>(
     tagAdapter.removeMany(ids, state),
   ),
 
+  on(tagActions.updateTagOrder, (state: TagState, { ids }) => {
+    if (ids.length !== state.ids.length) {
+      console.log({ state, ids });
+      throw new Error('Tag length should not change on re-order');
+    }
+    return {
+      ...state,
+      ids,
+    };
+  }),
+
   on(tagActions.updateWorkStartForTag, (state: TagState, { id, newVal, date }) =>
     tagAdapter.updateOne(
       {

@@ -33,6 +33,7 @@ import {
   LS_IS_PROJECT_LIST_EXPANDED,
   LS_IS_TAG_LIST_EXPANDED,
 } from '../../core/persistence/ls-keys.const';
+import { TODAY_TAG } from '../../features/tag/tag.const';
 
 @Component({
   selector: 'side-nav',
@@ -118,6 +119,15 @@ export class SideNavComponent implements OnDestroy {
           const targetNewIds = targetModel.map((project: Project) => project.id);
           this.projectService.updateOrder(targetNewIds);
         }),
+    );
+
+    this._subs.add(
+      this._dragulaService.dropModel(this.TAG_SIDE_NAV).subscribe(({ targetModel }) => {
+        // const {target, source, targetModel, item} = params;
+        const targetNewIds = targetModel.map((project: Project) => project.id);
+        // NOTE: the today tag is filtered out, that's why we re-add here
+        this.tagService.updateOrder([TODAY_TAG.id, ...targetNewIds]);
+      }),
     );
 
     this._subs.add(
