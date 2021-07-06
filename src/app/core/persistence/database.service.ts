@@ -56,8 +56,7 @@ export class DatabaseService {
     } catch (e) {
       console.warn('DB Save Error: Last Params,', this._lastParams);
       if (
-        e.error &&
-        e.error.name === 'InvalidStateError' &&
+        e?.error?.name === 'InvalidStateError' &&
         confirm(
           'Unable to save your data. Is there enough free disk space? Press confirm to reload the app.',
         )
