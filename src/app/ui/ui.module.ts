@@ -195,7 +195,8 @@ const OTHER_3RD_PARTY_MODS_WITHOUT_CFG = [
     Angular2PromiseButtonModule.forRoot({
       // handleCurrentBtnOnly: true,
     }),
-    DragulaModule.forRoot(),
+    // fix https://stackoverflow.com/questions/62755093/angular-error-generic-type-modulewithproviderst-requires-1-type-arguments
+    (DragulaModule as any).forRoot(),
 
     // my modules
     ValidationModule,
