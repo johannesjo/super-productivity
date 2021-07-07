@@ -25,7 +25,6 @@ import {
   DeleteMainTasks,
   DeleteTask,
   MoveToArchive,
-  MoveToOtherProject,
   RemoveTagsForAllTasks,
   RestoreTask,
   TaskActionTypes,
@@ -92,9 +91,7 @@ export class TagEffects {
           TaskActionTypes.MoveToArchive,
         ),
         switchMap(
-          (
-            a: AddTask | DeleteTask | MoveToOtherProject | MoveToArchive | RestoreTask,
-          ) => {
+          (a: AddTask | ConvertToMainTask | DeleteTask | RestoreTask | MoveToArchive) => {
             let isChange = false;
             switch (a.type) {
               case TaskActionTypes.AddTask:
