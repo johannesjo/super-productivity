@@ -25,6 +25,7 @@ import { SimpleCounterService } from '../../features/simple-counter/simple-count
 import { SimpleCounter } from '../../features/simple-counter/simple-counter.model';
 import { SyncProviderService } from '../../imex/sync/sync-provider.service';
 import { IS_TOUCH_ONLY } from 'src/app/util/is-touch';
+import { SnackService } from '../../core/snack/snack.service';
 
 @Component({
   selector: 'main-header',
@@ -75,6 +76,7 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
     public readonly syncProviderService: SyncProviderService,
     private readonly _tagService: TagService,
     private readonly _renderer: Renderer2,
+    private readonly _snackService: SnackService,
   ) {}
 
   ngOnDestroy(): void {
@@ -100,5 +102,13 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
 
   trackById(i: number, item: SimpleCounter) {
     return item.id;
+  }
+
+  sync() {
+    this.syncProviderService
+      .sync()
+      .then(() =>
+        this._snackService.open({ type: 'SUCCESS', msg: T.F.SYNC.S.SUCCESS_VIA_BUTTON }),
+      );
   }
 }
