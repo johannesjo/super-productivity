@@ -612,7 +612,7 @@
         "IMPORTING": "导入数据",
         "INCOMPLETE_CFG": "同步身份验证失败。请检查您的配置！",
         "INITIAL_SYNC_ERROR": "初始同步失败",
-        "SUCCESS": "数据已导入",
+        "SUCCESS_IMPORT": "数据已导入",
         "UNKNOWN_ERROR": "同步时发生未知错误。请检查控制台。",
         "UPLOAD_ERROR": "未知的上载错误（设置正确吗？）： {{err}}"
       }

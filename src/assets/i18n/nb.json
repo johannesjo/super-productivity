@@ -241,7 +241,7 @@
         "MULTIPLE_SYNC_FILES_WITH_SAME_NAME": "Flere filer med navnet \"{{newFileName}}\" funnet. Slett alle unntatt en, eller velg et annet navn.",
         "NO_UPDATE_REQUIRED": "Google Drive: Ingen oppdatering nødvendig",
         "REMOTE_UP_TO_DATE": "Google Drive: Eksterne data er allerede oppdatert",
-        "SUCCESS": "Google Drive: Lagret sikkerhetskopi",
+        "SUCCESS_IMPORT": "Google Drive: Lagret sikkerhetskopi",
         "SYNCING": "Google Drive: Synkronisering"
       },
       "SYNC_CFG": {
@@ -1122,7 +1122,7 @@
       "ERROR_FALLBACK_TO_BACKUP": "Noe gikk galt under dataimporten. Faller tilbake til lokal sikkerhetskopi.",
       "ERROR_INVALID_DATA": "Feil under synkronisering. Ugyldig data",
       "IMPORTING": "Importerer data",
-      "SUCCESS": "Data importert"
+      "SUCCESS_IMPORT": "Data importert"
     }
   },
   "SCHEDULE": {

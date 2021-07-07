@@ -612,7 +612,7 @@
         "IMPORTING": "Importando dados",
         "INCOMPLETE_CFG": "A autenticação para sincronização falhou. Por favor, verifique o seu Config!",
         "INITIAL_SYNC_ERROR": "A sincronização inicial falhou",
-        "SUCCESS": "Dados importados",
+        "SUCCESS_IMPORT": "Dados importados",
         "UNKNOWN_ERROR": "Erro desconhecido durante a sincronização. Verifique o console.",
         "UPLOAD_ERROR": "Erro de upload desconhecido (configurações corretas?): {{err}}"
       }

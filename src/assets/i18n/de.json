@@ -612,7 +612,7 @@
         "IMPORTING": "Daten importieren",
         "INCOMPLETE_CFG": "Die Authentifizierung für die Synchronisierung ist fehlgeschlagen. Bitte überprüfen Sie Ihre Konfiguration!",
         "INITIAL_SYNC_ERROR": "Die anfängliche Synchronisierung ist fehlgeschlagen",
-        "SUCCESS": "Daten importiert",
+        "SUCCESS_IMPORT": "Daten importiert",
         "UNKNOWN_ERROR": "Unbekannter Fehler beim Synchronisieren. Bitte überprüfen Sie die Konsole.",
         "UPLOAD_ERROR": "Unbekannter Upload-Fehler (Einstellungen korrekt?): {{err}}"
       }

@@ -612,7 +612,7 @@
         "IMPORTING": "Importer des données",
         "INCOMPLETE_CFG": "L'authentification pour la synchronisation a échoué. Veuillez vérifier votre configuration!",
         "INITIAL_SYNC_ERROR": "Échec de la synchronisation initiale",
-        "SUCCESS": "Données importées",
+        "SUCCESS_IMPORT": "Données importées",
         "UNKNOWN_ERROR": "Erreur inconnue lors de la synchronisation. Veuillez vérifier la console.",
         "UPLOAD_ERROR": "Erreur de téléversement inconnue (paramètres corrects?): {{err}}"
       }

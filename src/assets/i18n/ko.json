@@ -612,7 +612,7 @@
         "IMPORTING": "데이터 가져 오기",
         "INCOMPLETE_CFG": "동기화 인증에 실패했습니다. 구성을 확인하십시오!",
         "INITIAL_SYNC_ERROR": "초기 동기화 실패",
-        "SUCCESS": "가져온 데이터",
+        "SUCCESS_IMPORT": "가져온 데이터",
         "UNKNOWN_ERROR": "동기화하는 동안 알 수없는 오류가 발생했습니다. 콘솔을 확인하십시오.",
         "UPLOAD_ERROR": "알 수없는 업로드 오류 (설정이 맞습니까?) : {{err}}"
       }

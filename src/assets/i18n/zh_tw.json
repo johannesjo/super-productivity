@@ -562,7 +562,7 @@
         "ERROR_FALLBACK_TO_BACKUP": "導入數據時出錯了。回到本地備份。",
         "ERROR_INVALID_DATA": "同步時出錯。無效數據",
         "IMPORTING": "導入數據",
-        "SUCCESS": "數據已導入",
+        "SUCCESS_IMPORT": "數據已導入",
         "UNKNOWN_ERROR": "同步時發生未知錯誤：{{err}}",
         "UPLOAD_ERROR": "未知的上傳錯誤（設置正確嗎？）： {{err}}"
       }

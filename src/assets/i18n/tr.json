@@ -612,7 +612,7 @@
         "IMPORTING": "Veri alınıyor",
         "INCOMPLETE_CFG": "Senkronizasyon için kimlik doğrulama başarısız oldu. Lütfen Yapılandırmanızı kontrol edin!",
         "INITIAL_SYNC_ERROR": "İlk Senkronizasyon başarısız oldu",
-        "SUCCESS": "Alınan veri",
+        "SUCCESS_IMPORT": "Alınan veri",
         "UNKNOWN_ERROR": "Senkronizasyon sırasında bilinmeyen hata. Lütfen konsolu kontrol edin.",
         "UPLOAD_ERROR": "Bilinmeyen Yükleme Hatası (Ayarlar doğru mu?): {{err}}"
       }

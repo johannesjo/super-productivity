@@ -61,7 +61,7 @@ export class DataImportService {
         await this._loadAllFromDatabaseToStore();
         await this._persistenceService.clearBackup();
         this._imexMetaService.setDataImportInProgress(false);
-        this._snackService.open({ type: 'SUCCESS', msg: T.F.SYNC.S.SUCCESS });
+        this._snackService.open({ type: 'SUCCESS', msg: T.F.SYNC.S.SUCCESS_IMPORT });
       } catch (e) {
         this._snackService.open({
           type: 'ERROR',

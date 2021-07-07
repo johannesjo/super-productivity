@@ -612,7 +612,7 @@
         "IMPORTING": "Importando datos",
         "INCOMPLETE_CFG": "Error de autenticación para sincronización. Por favor, compruebe su configuración.",
         "INITIAL_SYNC_ERROR": "Error de sincronización inicial",
-        "SUCCESS": "Datos importados",
+        "SUCCESS_IMPORT": "Datos importados",
         "UNKNOWN_ERROR": "Error desconocido durante la sincronización. Compruebe la consola.",
         "UPLOAD_ERROR": "Error de carga desconocido (¿la configuración es correcta?): {{err}}"
       }

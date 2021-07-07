@@ -612,7 +612,7 @@
         "IMPORTING": "Gegevens importeren",
         "INCOMPLETE_CFG": "Verificatie voor synchronisatie is mislukt. Controleer uw configuratie!",
         "INITIAL_SYNC_ERROR": "Initiële synchronisatie mislukt",
-        "SUCCESS": "Gegevens geïmporteerd",
+        "SUCCESS_IMPORT": "Gegevens geïmporteerd",
         "UNKNOWN_ERROR": "Onbekende fout tijdens het synchroniseren. Controleer de console.",
         "UPLOAD_ERROR": "Onbekende uploadfout (instellingen correct?): {{err}}"
       }
