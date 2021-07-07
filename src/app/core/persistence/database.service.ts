@@ -55,15 +55,6 @@ export class DatabaseService {
       return await (this.db as IDBPDatabase<MyDb>).put(DB_MAIN_NAME, data, key);
     } catch (e) {
       console.warn('DB Save Error: Last Params,', this._lastParams);
-      if (
-        e?.error?.name === 'InvalidStateError' &&
-        confirm(
-          'Unable to save your data. Is there enough free disk space? Press confirm to reload the app.',
-        )
-      ) {
-        window.location.reload();
-      }
-
       throw new Error(e);
     }
   }
@@ -113,6 +104,13 @@ export class DatabaseService {
         // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
         terminated() {
           alert('IDB TERMINATED');
+          if (
+            confirm(
+              'App database was terminated :( Is there enough free disk space or some process messing with the data? Press OK to reload the app.',
+            )
+          ) {
+            window.location.reload();
+          }
         },
       });
     } catch (e) {
