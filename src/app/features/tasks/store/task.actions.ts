@@ -208,7 +208,7 @@ export class UnScheduleTask implements Action {
 export class RestoreTask implements Action {
   readonly type: string = TaskActionTypes.RestoreTask;
 
-  constructor(public payload: { task: TaskWithSubTasks; subTasks: Task[] }) {}
+  constructor(public payload: { task: Task | TaskWithSubTasks; subTasks: Task[] }) {}
 }
 
 export class AddSubTask implements Action {

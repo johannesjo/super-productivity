@@ -44,7 +44,8 @@ export const flattenTasks = (tasksIN: TaskWithSubTasks[]): TaskWithSubTasks[] =>
   tasksIN.forEach((task) => {
     flatTasks.push(task);
     if (task.subTasks) {
-      flatTasks = flatTasks.concat(task.subTasks);
+      // NOTE: in order for the model to be identical we add an empty subTasks array
+      flatTasks = flatTasks.concat(task.subTasks.map((t) => ({ ...t, subTasks: [] })));
     }
   });
   return flatTasks;

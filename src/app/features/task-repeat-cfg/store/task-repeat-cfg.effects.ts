@@ -14,7 +14,7 @@ import { Action, select, Store } from '@ngrx/store';
 import { DeleteTaskRepeatCfg, TaskRepeatCfgActionTypes } from './task-repeat-cfg.actions';
 import { selectTaskRepeatCfgFeatureState } from './task-repeat-cfg.reducer';
 import { PersistenceService } from '../../../core/persistence/persistence.service';
-import { Task, TaskArchive, TaskWithSubTasks } from '../../tasks/task.model';
+import { Task, TaskArchive } from '../../tasks/task.model';
 import { UpdateTask } from '../../tasks/store/task.actions';
 import { TaskService } from '../../tasks/task.service';
 import { TaskRepeatCfgService } from '../task-repeat-cfg.service';
@@ -147,7 +147,7 @@ export class TaskRepeatCfgEffects {
 
       const tasksWithRepeatCfgId = ids
         .map((id) => newState.entities[id] as Task)
-        .filter((task: TaskWithSubTasks) => task.repeatCfgId === repeatConfigId);
+        .filter((task) => task.repeatCfgId === repeatConfigId);
 
       if (tasksWithRepeatCfgId && tasksWithRepeatCfgId.length) {
         tasksWithRepeatCfgId.forEach((task: any) => (task.repeatCfgId = null));

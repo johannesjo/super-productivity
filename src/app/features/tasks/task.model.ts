@@ -117,8 +117,7 @@ export interface TaskWithoutReminder extends Task {
 }
 
 export interface TaskWithSubTasks extends Task {
-  // TODO make sub tasks not optional (and remove from task component)
-  readonly subTasks?: Task[];
+  readonly subTasks: Task[];
 }
 
 export const DEFAULT_TASK: Task = {

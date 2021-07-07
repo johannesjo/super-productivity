@@ -180,9 +180,7 @@ export class TaskService {
     ),
   );
 
-  private _allTasksWithSubTaskData$: Observable<TaskWithSubTasks[]> = this._store.pipe(
-    select(selectAllTasks),
-  );
+  private _allTasks$: Observable<Task[]> = this._store.pipe(select(selectAllTasks));
 
   constructor(
     private readonly _store: Store<any>,
@@ -750,7 +748,7 @@ export class TaskService {
   }
 
   async getAllTasksForProject(projectId: string): Promise<Task[]> {
-    const allTasks = await this._allTasksWithSubTaskData$.pipe(first()).toPromise();
+    const allTasks = await this._allTasks$.pipe(first()).toPromise();
     const archiveTaskState: TaskArchive =
       await this._persistenceService.taskArchive.loadState();
     const ids = (archiveTaskState && (archiveTaskState.ids as string[])) || [];
@@ -805,9 +803,7 @@ export class TaskService {
       task.issueId === issueId &&
       task.issueType === issueProviderKey &&
       task.projectId === projectId;
-    const allTasks = (await this._allTasksWithSubTaskData$
-      .pipe(first())
-      .toPromise()) as Task[];
+    const allTasks = (await this._allTasks$.pipe(first()).toPromise()) as Task[];
     const taskWithSameIssue: Task = allTasks.find(findTaskFn) as Task;
 
     if (taskWithSameIssue) {

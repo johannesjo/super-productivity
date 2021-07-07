@@ -346,14 +346,14 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
         ) as TaskWithSubTasks[];
     };
 
-    const _mapFilterToFlatToday = (tasks: TaskWithSubTasks[]): Task[] => {
-      let flatTasks: Task[] = [];
+    const _mapFilterToFlatToday = (tasks: TaskWithSubTasks[]): TaskWithSubTasks[] => {
+      let flatTasks: TaskWithSubTasks[] = [];
       tasks.forEach((pt: TaskWithSubTasks) => {
         if (pt.subTasks && pt.subTasks.length) {
           const subTasks = pt.subTasks.filter((st) => _isWorkedOnOrDoneToday(st));
           if (subTasks.length) {
             flatTasks.push(pt);
-            flatTasks = flatTasks.concat(subTasks);
+            flatTasks = flatTasks.concat(subTasks as TaskWithSubTasks[]);
           }
         } else if (_isWorkedOnOrDoneToday(pt)) {
           flatTasks.push(pt);
@@ -362,11 +362,15 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
       return flatTasks;
     };
 
-    const _mapFilterToFlatOrRepeatToday = (tasks: TaskWithSubTasks[]): Task[] => {
-      let flatTasks: Task[] = [];
+    const _mapFilterToFlatOrRepeatToday = (
+      tasks: TaskWithSubTasks[],
+    ): TaskWithSubTasks[] => {
+      let flatTasks: TaskWithSubTasks[] = [];
       tasks.forEach((pt: TaskWithSubTasks) => {
         if (pt.subTasks && pt.subTasks.length) {
-          const subTasks = pt.subTasks.filter((st) => _isWorkedOnOrDoneToday(st));
+          const subTasks: TaskWithSubTasks[] = pt.subTasks
+            .filter((st) => _isWorkedOnOrDoneToday(st))
+            .map((t) => ({ ...t, subTasks: [] }));
           if (subTasks.length) {
             flatTasks.push(pt);
             flatTasks = flatTasks.concat(subTasks);
