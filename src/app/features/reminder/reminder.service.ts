@@ -216,9 +216,11 @@ export class ReminderService {
     return migrateReminders((await this._persistenceService.reminders.loadState()) || []);
   }
 
-  private _saveModel(reminders: Reminder[]) {
+  private async _saveModel(reminders: Reminder[]) {
+    await this._persistenceService.reminders.saveState(reminders, {
+      isSyncModelChange: true,
+    });
     this._updateRemindersInWorker(this._reminders);
-    this._persistenceService.reminders.saveState(reminders, { isSyncModelChange: true });
     this._reminders$.next(this._reminders);
   }
 

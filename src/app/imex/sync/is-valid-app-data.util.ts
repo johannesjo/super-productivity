@@ -62,7 +62,7 @@ const _isAllRemindersAvailable = ({ reminders, task }: AppDataComplete): boolean
   task.ids.forEach((id: string) => {
     const t: Task = task.entities[id] as Task;
     if (t.reminderId && !reminders.find((r) => r.id === t.reminderId)) {
-      console.log(t, reminders);
+      console.log({ task: t, reminders });
       devError(`Missing reminder ${t.reminderId} from task not existing`);
       isValid = false;
     }
