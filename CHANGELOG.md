@@ -1,3 +1,34 @@
+# [7.3.0-rc.0](https://github.com/johannesjo/super-productivity/compare/v7.2.1...v7.3.0-rc.0) (2021-07-08)
+
+### Bug Fixes
+
+- lint ([4b70606](https://github.com/johannesjo/super-productivity/commit/4b70606da30135598533f9e0d36a5feaf345384d))
+- type error ([212c466](https://github.com/johannesjo/super-productivity/commit/212c4667caac2ea3f8fdcb86eecbbf3a378da763))
+- typing issue ([2d97e98](https://github.com/johannesjo/super-productivity/commit/2d97e98ba64ceeb2534db7dd2d2e56b79162d73c))
+- **electron:** minimize to tray stopping time tracking [#887](https://github.com/johannesjo/super-productivity/issues/887) ([a93bf8e](https://github.com/johannesjo/super-productivity/commit/a93bf8ef83ad3f2fd07864eaa70118bad2d5fa66))
+- **search:** can't read property 'icon' of undefined [#1325](https://github.com/johannesjo/super-productivity/issues/1325) ([0a8a80e](https://github.com/johannesjo/super-productivity/commit/0a8a80e4496f7bfed538577896256ac6e9203012))
+- **sync:** seeing "trying to upload invalid data" to often ([7488c27](https://github.com/johannesjo/super-productivity/commit/7488c279424a2613f231b6193307b4de4e18cd0a))
+
+### Features
+
+- **sync:** add success snack for sync button ([c0e5eab](https://github.com/johannesjo/super-productivity/commit/c0e5eab18a0069aa8c2dbf749cf439d12d31c582))
+- improve handling for InvalidStateError [#1323](https://github.com/johannesjo/super-productivity/issues/1323) [#398](https://github.com/johannesjo/super-productivity/issues/398) ([05fc3b7](https://github.com/johannesjo/super-productivity/commit/05fc3b7aabf2bab5e858b5a249fe7fedc746b3c5))
+- improve invalid state error handling ([ac29711](https://github.com/johannesjo/super-productivity/commit/ac29711c48b52f3ed663b450492ded30411fd4b0))
+- improve reminder handling ([fd69dec](https://github.com/johannesjo/super-productivity/commit/fd69dec94ec13ab9cd40fd8c6d8f96a2c4f20861))
+- **caldav:** add info about whitelisting [#1192](https://github.com/johannesjo/super-productivity/issues/1192) ([850c518](https://github.com/johannesjo/super-productivity/commit/850c5183e6f0eea5fd32e77cf8722c6cf4f530af))
+- **mobile:** add spinning animation for sync button ([80443b9](https://github.com/johannesjo/super-productivity/commit/80443b9de09f256f2af358414f28e53ddb46c174))
+- **mobile:** add sync now button ([f0c1f17](https://github.com/johannesjo/super-productivity/commit/f0c1f17676e4157f830a54e38e03762088c3fc8f))
+- **repeat:** don't mark repeatable task as done, if it is the current task ([9eae207](https://github.com/johannesjo/super-productivity/commit/9eae20744c882bf3dd982308ac874f8a1a0f8f5f))
+- **schedule:** add mark as done in task reminder dialog ([3e68ce5](https://github.com/johannesjo/super-productivity/commit/3e68ce573dc68c32c51a998e7a489404d3fb289d))
+- **schedule:** show sync button as soon as sync is enabled ([b0697a1](https://github.com/johannesjo/super-productivity/commit/b0697a13ab58d8eb96a0c55d5788ca4d9e07ea7e))
+- **tag:** save tag order when sorting via drag and rop [#1360](https://github.com/johannesjo/super-productivity/issues/1360) ([b726fa1](https://github.com/johannesjo/super-productivity/commit/b726fa1ef6df6b3227cdebfe3b75cbe52e299b46))
+- extend is touch only with android web view ([06b9142](https://github.com/johannesjo/super-productivity/commit/06b9142384af91b2b7863e76b0cb595e432b1a55))
+- make new pkce work for dropbox ([4ba785f](https://github.com/johannesjo/super-productivity/commit/4ba785fe44499f455830f881c9cb1f72c6e50fb1))
+- make new pkce work for dropbox and google ([a65401f](https://github.com/johannesjo/super-productivity/commit/a65401f44848e4c02fe075437d4f8153307290b5))
+- pkce1 ([dfc414d](https://github.com/johannesjo/super-productivity/commit/dfc414d3a206f4db3109360428306eb9cc4f152f))
+- prepare sass migration ([797ae89](https://github.com/johannesjo/super-productivity/commit/797ae894faf1c426a978b712e2c6e816121923d6))
+- **timeline:** add explanation for repeat task projections ([c1be58f](https://github.com/johannesjo/super-productivity/commit/c1be58f9df8fe40aa3f4e0fe9f68297971882a1f))
+
 ## [7.2.1](https://github.com/johannesjo/super-productivity/compare/v7.2.0...v7.2.1) (2021-06-27)
 
 ### Features
