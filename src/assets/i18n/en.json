@@ -287,11 +287,11 @@
       },
       "FORM_ADV": {
         "AUTO_ADD_BACKLOG_JQL_QUERY": "JQL used for adding tasks automatically to backlog",
-        "IS_ADD_WORKLOG_ON_SUB_TASK_DONE": "Open dialog to submit worklog to jira when sub task is done",
-        "IS_AUTO_ADD_TO_BACKLOG": "Automatically add issues to Jira backlog",
+        "IS_ADD_WORKLOG_ON_SUB_TASK_DONE": "Open dialog to submit worklog to Jira when sub task is done",
+        "IS_AUTO_ADD_TO_BACKLOG": "Automatically add issues from Jira to backlog",
         "IS_AUTO_POLL_TICKETS": "Check imported issues for changes automatically and notify",
         "IS_CHECK_TO_RE_ASSIGN_TICKET_ON_TASK_START": "Check if the currently worked on issue is assigned to current user",
-        "IS_WORKLOG_ENABLED": "Open dialog to submit worklog to jira when task is done",
+        "IS_WORKLOG_ENABLED": "Open dialog to submit worklog to Jira when task is done",
         "SEARCH_JQL_QUERY": "JQL Query for limiting searching tasks"
       },
       "FORM_CRED": {
@@ -308,7 +308,7 @@
           "H1": "Basic configuration",
           "H2": "Worklog settings",
           "H3": "Default transitions",
-          "P1_1": "Please provide a login name (can be found on your profile page) and an <a target=\"_blank\" href=\"https://confluence.atlassian.com/cloud/api-tokens-938839638.html\" target=\"_blank\">API token</a> or password if you can't generate one for some reason. Please not that newer versions of jira sometimes only work with the token. ",
+          "P1_1": "Please provide a login name (can be found on your profile page) and an <a target=\"_blank\" href=\"https://confluence.atlassian.com/cloud/api-tokens-938839638.html\" target=\"_blank\">API token</a> or password if you can't generate one for some reason. Please not that newer versions of Jira sometimes only work with the token. ",
           "P1_2": "You also need to specify a JQL query which is used for the suggestions to add tasks from Jira. If you need help check out this link <a target=\"_blank\" href=\"https://confluence.atlassian.com/jirasoftwarecloud/advanced-searching-764478330.html\" target=\"_blank\">https://confluence.atlassian.com/jirasoftwarecloud/advanced-searching-764478330.html</a>.",
           "P1_3": "You can also configure, if you want to automatically (e.g. every time you visit the planning view), to add all new tasks specified by a custom JQL query to the backlog.",
           "P1_4": "Another option is \"Check if current ticket is assigned to current user\". If enabled and you're starting, a check will be made if you're currently assigned to that ticket on Jira, if not an Dialog appears in which you can chose to assign the ticket to yourself.",
@@ -338,8 +338,8 @@
       "S": {
         "ADDED_WORKLOG_FOR": "Jira: Added worklog for {{issueKey}}",
         "EXTENSION_NOT_LOADED": "Super Productivity Extension not loaded. Reloading the page might help",
-        "IMPORTED_MULTIPLE_ISSUES": "Jira: Imported {{issuesLength}} new issues from jira to backlog",
-        "IMPORTED_SINGLE_ISSUE": "Jira: Imported issue \"{{issueText}}\" from jira to backlog",
+        "IMPORTED_MULTIPLE_ISSUES": "Jira: Imported {{issuesLength}} new issues from Jira to backlog",
+        "IMPORTED_SINGLE_ISSUE": "Jira: Imported issue \"{{issueText}}\" from Jira to backlog",
         "INSUFFICIENT_SETTINGS": "Insufficient Settings provided for Jira",
         "ISSUE_NO_UPDATE_REQUIRED": "Jira: \"{{issueText}}\" already up to date",
         "ISSUE_UPDATE": "Jira: Updated data for \"{{issueText}}\"",
