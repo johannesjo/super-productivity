@@ -9,6 +9,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
 import android.webkit.ValueCallback;
 import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
@@ -67,11 +68,22 @@ public class FullscreenActivity extends AppCompatActivity {
             wv.clearCache(true);
             wv.clearHistory();
 
+            if (Build.VERSION.SDK_INT >= 19) {
+                wv.setLayerType(View.LAYER_TYPE_HARDWARE, null);
+            } else {
+                wv.setLayerType(View.LAYER_TYPE_SOFTWARE, null);
+            }
+
+
+            // additional web view settings
             WebSettings wSettings = wv.getSettings();
 
             wSettings.setJavaScriptEnabled(true);
             wSettings.setCacheMode(WebSettings.LOAD_DEFAULT);
             wSettings.setLoadsImagesAutomatically(true);
+            if (Build.VERSION.SDK_INT < 18) {
+                wSettings.setRenderPriority(WebSettings.RenderPriority.HIGH);
+            }
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ECLAIR_MR1) {
                 wSettings.setDomStorageEnabled(true);
             }
