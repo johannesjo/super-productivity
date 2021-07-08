@@ -12,6 +12,8 @@ const generateRandomString = (length: number): string => {
 const sha256 = (plain: string): Promise<ArrayBuffer> => {
   const encoder = new TextEncoder();
   const data = encoder.encode(plain);
+  // NOTE: crypto.subtle is supposed to be undefined in insecure contexts
+  // @see https://www.chromium.org/blink/webcrypto
   return window.crypto.subtle.digest('SHA-256', data);
 };
 
