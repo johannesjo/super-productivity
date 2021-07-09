@@ -34,7 +34,7 @@ import { AndroidService } from './core/android/android.service';
 import { IS_ANDROID_WEB_VIEW } from './util/is-android-web-view';
 import { isOnline, isOnline$ } from './util/is-online';
 import { InitialDialogService } from './features/initial-dialog/initial-dialog.service';
-import { SyncService } from './imex/sync/sync.service';
+import { SyncTriggerService } from './imex/sync/sync-trigger.service';
 import { environment } from '../environments/environment';
 import { ActivatedRoute, RouterOutlet } from '@angular/router';
 import { ipcRenderer } from 'electron';
@@ -81,7 +81,7 @@ export class AppComponent implements OnDestroy {
     private _bookmarkService: BookmarkService,
     private _startTrackingReminderService: TrackingReminderService,
     private _activatedRoute: ActivatedRoute,
-    public readonly syncService: SyncService,
+    public readonly syncTriggerService: SyncTriggerService,
     public readonly imexMetaService: ImexMetaService,
     public readonly workContextService: WorkContextService,
     public readonly layoutService: LayoutService,

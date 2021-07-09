@@ -22,7 +22,7 @@ import { TaskRepeatCfg, TaskRepeatCfgState } from '../task-repeat-cfg.model';
 import { from, merge } from 'rxjs';
 import { WorkContextService } from '../../work-context/work-context.service';
 import { setActiveWorkContext } from '../../work-context/store/work-context.actions';
-import { SyncService } from '../../../imex/sync/sync.service';
+import { SyncTriggerService } from '../../../imex/sync/sync-trigger.service';
 import { SyncProviderService } from '../../../imex/sync/sync-provider.service';
 
 @Injectable()
@@ -40,7 +40,7 @@ export class TaskRepeatCfgEffects {
   );
 
   private triggerRepeatableTaskCreation$ = merge(
-    this._syncService.afterInitialSyncDoneAndDataLoadedInitially$,
+    this._syncTriggerService.afterInitialSyncDoneAndDataLoadedInitially$,
     this._actions$.pipe(
       ofType(setActiveWorkContext),
       concatMap(() => this._syncProviderService.afterCurrentSyncDoneOrSyncDisabled$),
@@ -129,7 +129,7 @@ export class TaskRepeatCfgEffects {
     private _persistenceService: PersistenceService,
     private _workContextService: WorkContextService,
     private _taskRepeatCfgService: TaskRepeatCfgService,
-    private _syncService: SyncService,
+    private _syncTriggerService: SyncTriggerService,
     private _syncProviderService: SyncProviderService,
   ) {}
 

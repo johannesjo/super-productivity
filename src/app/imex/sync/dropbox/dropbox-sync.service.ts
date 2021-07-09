@@ -13,7 +13,7 @@ import { Store } from '@ngrx/store';
 import { triggerDropboxAuthDialog } from './store/dropbox.actions';
 
 @Injectable({ providedIn: 'root' })
-export class DropboxSyncService implements SyncProviderServiceInterface {
+export class DropboxsyncTriggerService implements SyncProviderServiceInterface {
   id: SyncProvider = SyncProvider.Dropbox;
   isUploadForcePossible: boolean = true;
 

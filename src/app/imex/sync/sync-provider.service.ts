@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, combineLatest, Observable, of } from 'rxjs';
-import { DropboxSyncService } from './dropbox/dropbox-sync.service';
+import { DropboxsyncTriggerService } from './dropbox/dropbox-sync.service';
 import { SyncProvider, SyncProviderServiceInterface } from './sync-provider.model';
 import { GlobalConfigService } from '../../features/config/global-config.service';
 import {
@@ -13,16 +13,16 @@ import {
   take,
 } from 'rxjs/operators';
 import { SyncConfig } from '../../features/config/global-config.model';
-import { GoogleDriveSyncService } from './google/google-drive-sync.service';
+import { GoogleDrivesyncTriggerService } from './google/google-drive-sync.service';
 import { AppDataComplete, DialogConflictResolutionResult } from './sync.model';
 import { T } from '../../t.const';
 import { checkForUpdate, UpdateCheckResult } from './check-for-update.util';
 import { DialogSyncConflictComponent } from './dialog-dbx-sync-conflict/dialog-sync-conflict.component';
 import { TranslateService } from '@ngx-translate/core';
-import { SyncService } from './sync.service';
+import { SyncTriggerService } from './sync-trigger.service';
 import { MatDialog } from '@angular/material/dialog';
 import { DataImportService } from './data-import.service';
-import { WebDavSyncService } from './web-dav/web-dav-sync.service';
+import { WebDavsyncTriggerService } from './web-dav/web-dav-sync.service';
 import { SnackService } from '../../core/snack/snack.service';
 import { isValidAppData } from './is-valid-app-data.util';
 import { truncate } from '../../util/truncate';
@@ -43,11 +43,11 @@ export class SyncProviderService {
       // console.log('Activated SyncProvider:', syncProvider);
       switch (syncProvider) {
         case SyncProvider.Dropbox:
-          return this._dropboxSyncService;
+          return this._dropboxsyncTriggerService;
         case SyncProvider.GoogleDrive:
-          return this._googleDriveSyncService;
+          return this._googleDrivesyncTriggerService;
         case SyncProvider.WebDAV:
-          return this._webDavSyncService;
+          return this._webDavsyncTriggerService;
         default:
           return null;
       }
@@ -75,14 +75,14 @@ export class SyncProviderService {
   );
 
   constructor(
-    private _dropboxSyncService: DropboxSyncService,
+    private _dropboxsyncTriggerService: DropboxsyncTriggerService,
     private _dataImportService: DataImportService,
-    private _googleDriveSyncService: GoogleDriveSyncService,
-    private _webDavSyncService: WebDavSyncService,
+    private _googleDrivesyncTriggerService: GoogleDrivesyncTriggerService,
+    private _webDavsyncTriggerService: WebDavsyncTriggerService,
     private _globalConfigService: GlobalConfigService,
     private _persistenceLocalService: PersistenceLocalService,
     private _translateService: TranslateService,
-    private _syncService: SyncService,
+    private _syncTriggerService: SyncTriggerService,
     private _snackService: SnackService,
     private _matDialog: MatDialog,
   ) {}
@@ -128,7 +128,7 @@ export class SyncProviderService {
     if (typeof revRes === 'string') {
       if (revRes === 'NO_REMOTE_DATA' && this._c(T.F.SYNC.C.NO_REMOTE_DATA)) {
         this._log(cp, '↑ Update Remote after no getRevAndLastClientUpdate()');
-        const localLocal = await this._syncService.inMemoryComplete$
+        const localLocal = await this._syncTriggerService.inMemoryComplete$
           .pipe(take(1))
           .toPromise();
         return await this._uploadAppData(cp, localLocal);
@@ -150,7 +150,7 @@ export class SyncProviderService {
     if (rev && rev === localRev) {
       this._log(cp, 'PRE1: ↔ Same Rev', rev);
       // NOTE: same rev, doesn't mean. that we can't have local changes
-      local = await this._syncService.inMemoryComplete$.pipe(take(1)).toPromise();
+      local = await this._syncTriggerService.inMemoryComplete$.pipe(take(1)).toPromise();
       if (lastSync === local.lastLocalSyncModelChange) {
         this._log(cp, 'PRE1: No local changes to sync');
         return;
@@ -162,7 +162,8 @@ export class SyncProviderService {
     // ------------------------------------
     // if not defined yet
     local =
-      local || (await this._syncService.inMemoryComplete$.pipe(take(1)).toPromise());
+      local ||
+      (await this._syncTriggerService.inMemoryComplete$.pipe(take(1)).toPromise());
 
     if (!local.lastLocalSyncModelChange || local.lastLocalSyncModelChange === 0) {
       if (!this._c(T.F.SYNC.C.EMPTY_SYNC)) {

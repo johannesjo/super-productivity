@@ -11,7 +11,7 @@ import { ImprovementState } from './improvement/improvement.model';
 import { DataImportService } from '../../imex/sync/data-import.service';
 import { MODEL_VERSION_KEY } from '../../app.constants';
 import { METRIC_MODEL_VERSION } from './metric.const';
-import { SyncService } from '../../imex/sync/sync.service';
+import { SyncTriggerService } from '../../imex/sync/sync-trigger.service';
 import { unique } from '../../util/unique';
 
 @Injectable({
@@ -22,12 +22,12 @@ export class MigrateMetricService {
     private _metricService: MetricService,
     private _persistenceService: PersistenceService,
     private _dataImportService: DataImportService,
-    private _syncService: SyncService,
+    private _syncTriggerService: SyncTriggerService,
   ) {}
 
   checkMigrate() {
     // TODO check for model version number instead
-    this._syncService.afterInitialSyncDoneAndDataLoadedInitially$
+    this._syncTriggerService.afterInitialSyncDoneAndDataLoadedInitially$
       .pipe(
         first(),
         concatMap(() => this._metricService.state$),

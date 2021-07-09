@@ -16,7 +16,7 @@ import {
   withLatestFrom,
 } from 'rxjs/operators';
 import { DataInitService } from '../../core/data-init/data-init.service';
-import { SyncService } from '../../imex/sync/sync.service';
+import { SyncTriggerService } from './sync-trigger.service';
 import {
   SYNC_BEFORE_CLOSE_ID,
   SYNC_INITIAL_SYNC_TRIGGER,
@@ -91,7 +91,7 @@ export class SyncEffects {
         ]).pipe(
           switchMap(([isEnabledAndReady, syncInterval]) =>
             isEnabledAndReady
-              ? this._syncService.getSyncTrigger$(syncInterval, SYNC_MIN_INTERVAL)
+              ? this._syncTriggerService.getSyncTrigger$(syncInterval, SYNC_MIN_INTERVAL)
               : EMPTY,
           ),
         ),
@@ -110,7 +110,7 @@ export class SyncEffects {
                   type: 'ERROR',
                 });
               }
-              this._syncService.setInitialSyncDone(true);
+              this._syncTriggerService.setInitialSyncDone(true);
               return EMPTY;
             }
           }),
@@ -127,7 +127,7 @@ export class SyncEffects {
       if (!isOnline) {
         // this._snackService.open({msg: T.F.DROPBOX.S.OFFLINE, type: 'ERROR'});
         if (trigger === SYNC_INITIAL_SYNC_TRIGGER) {
-          this._syncService.setInitialSyncDone(true);
+          this._syncTriggerService.setInitialSyncDone(true);
         }
         // we need to return something
         return of(null);
@@ -136,11 +136,11 @@ export class SyncEffects {
         .sync()
         .then(() => {
           if (trigger === SYNC_INITIAL_SYNC_TRIGGER) {
-            this._syncService.setInitialSyncDone(true);
+            this._syncTriggerService.setInitialSyncDone(true);
           }
         })
         .catch((err: unknown) => {
-          this._syncService.setInitialSyncDone(true);
+          this._syncTriggerService.setInitialSyncDone(true);
           this._snackService.open({
             msg: T.F.SYNC.S.UNKNOWN_ERROR,
             translateParams: {
@@ -154,7 +154,7 @@ export class SyncEffects {
 
   constructor(
     private _syncProviderService: SyncProviderService,
-    private _syncService: SyncService,
+    private _syncTriggerService: SyncTriggerService,
     private _snackService: SnackService,
     private _taskService: TaskService,
     private _simpleCounterService: SimpleCounterService,

@@ -52,7 +52,7 @@ const MAX_WAIT_FOR_INITIAL_SYNC = 25000;
 @Injectable({
   providedIn: 'root',
 })
-export class SyncService {
+export class SyncTriggerService {
   inMemoryComplete$: Observable<AppDataComplete> =
     this._persistenceService.inMemoryComplete$.pipe(
       timeout(5000),

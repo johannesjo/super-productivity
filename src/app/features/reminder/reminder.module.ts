@@ -12,7 +12,7 @@ import { NotifyService } from '../../core/notify/notify.service';
 import { DialogViewTaskRemindersComponent } from '../tasks/dialog-view-task-reminders/dialog-view-task-reminders.component';
 import { DataInitService } from '../../core/data-init/data-init.service';
 import { throttle } from 'helpful-decorators';
-import { SyncService } from '../../imex/sync/sync.service';
+import { SyncTriggerService } from '../../imex/sync/sync-trigger.service';
 
 @NgModule({
   declarations: [],
@@ -25,13 +25,13 @@ export class ReminderModule {
     private readonly _uiHelperService: UiHelperService,
     private readonly _notifyService: NotifyService,
     private readonly _dataInitService: DataInitService,
-    private readonly _syncService: SyncService,
+    private readonly _syncTriggerService: SyncTriggerService,
   ) {
     this._dataInitService.isAllDataLoadedInitially$
       .pipe(
         concatMap(() =>
           // we do this to wait for syncing and the like
-          this._syncService.afterInitialSyncDoneAndDataLoadedInitially$.pipe(
+          this._syncTriggerService.afterInitialSyncDoneAndDataLoadedInitially$.pipe(
             first(),
             delay(1000),
           ),
