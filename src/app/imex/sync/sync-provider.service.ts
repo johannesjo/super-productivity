@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, combineLatest, Observable } from 'rxjs';
+import { BehaviorSubject, combineLatest, Observable, of } from 'rxjs';
 import { DropboxSyncService } from './dropbox/dropbox-sync.service';
 import { SyncProvider, SyncProviderServiceInterface } from './sync-provider.model';
 import { GlobalConfigService } from '../../features/config/global-config.service';
@@ -64,6 +64,16 @@ export class SyncProviderService {
   ]).pipe(map(([isReady, isEnabled]) => isReady && isEnabled));
   isSyncing$ = new BehaviorSubject<boolean>(false);
 
+  _afterCurrentSyncDoneIfAny$: Observable<unknown> = this.isSyncing$.pipe(
+    filter((isSyncing) => !isSyncing),
+  );
+
+  afterCurrentSyncDoneOrSyncDisabled$: Observable<unknown> = this.isEnabled$.pipe(
+    switchMap((isEnabled) =>
+      isEnabled ? this._afterCurrentSyncDoneIfAny$ : of(undefined),
+    ),
+  );
+
   constructor(
     private _dropboxSyncService: DropboxSyncService,
     private _dataImportService: DataImportService,
@@ -83,9 +93,16 @@ export class SyncProviderService {
       throw new Error('No Sync Provider for sync()');
     }
     this.isSyncing$.next(true);
-    const r = await this._sync(currentProvider);
-    this.isSyncing$.next(false);
-    return r;
+    try {
+      const r = await this._sync(currentProvider);
+      this.isSyncing$.next(false);
+      return r;
+    } catch (e) {
+      console.log('__error during sync__');
+      console.error(e);
+      this.isSyncing$.next(false);
+    }
+    return undefined;
   }
 
   private async _sync(cp: SyncProviderServiceInterface): Promise<unknown> {

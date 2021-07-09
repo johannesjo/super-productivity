@@ -23,6 +23,7 @@ import { from, merge } from 'rxjs';
 import { WorkContextService } from '../../work-context/work-context.service';
 import { setActiveWorkContext } from '../../work-context/store/work-context.actions';
 import { SyncService } from '../../../imex/sync/sync.service';
+import { SyncProviderService } from '../../../imex/sync/sync-provider.service';
 
 @Injectable()
 export class TaskRepeatCfgEffects {
@@ -39,12 +40,14 @@ export class TaskRepeatCfgEffects {
   );
 
   private triggerRepeatableTaskCreation$ = merge(
-    this._syncService.afterInitialSyncDoneAndDataLoadedInitially$.pipe(delay(1000)),
+    this._syncService.afterInitialSyncDoneAndDataLoadedInitially$,
     this._actions$.pipe(
       ofType(setActiveWorkContext),
-      concatMap(() => this._syncService.afterInitialSyncDoneAndDataLoadedInitially$),
-      delay(1000),
+      concatMap(() => this._syncProviderService.afterCurrentSyncDoneOrSyncDisabled$),
     ),
+  ).pipe(
+    // make sure everything has settled
+    delay(1000),
   );
 
   @Effect() createRepeatableTasks: any = this.triggerRepeatableTaskCreation$.pipe(
@@ -127,6 +130,7 @@ export class TaskRepeatCfgEffects {
     private _workContextService: WorkContextService,
     private _taskRepeatCfgService: TaskRepeatCfgService,
     private _syncService: SyncService,
+    private _syncProviderService: SyncProviderService,
   ) {}
 
   private _saveToLs([action, taskRepeatCfgState]: [Action, TaskRepeatCfgState]) {
