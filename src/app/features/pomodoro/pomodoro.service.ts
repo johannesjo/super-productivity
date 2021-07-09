@@ -30,7 +30,7 @@ import { DEFAULT_GLOBAL_CONFIG } from '../config/default-global-config.const';
 import { Actions, ofType } from '@ngrx/effects';
 import { distinctUntilChangedObject } from '../../util/distinct-until-changed-object';
 
-// Tick Duration
+const TICK_DURATION = 500;
 const DEFAULT_SOUND = 'assets/snd/positive.ogg';
 const DEFAULT_TICK_SOUND = 'assets/snd/tick.mp3';
 
@@ -76,7 +76,7 @@ export class PomodoroService {
     this.isLongBreak$,
   ]).pipe(map(([isBreak, isLongBreak]) => isBreak && !isLongBreak));
 
-  _timer$: Observable<number> = interval(500).pipe(
+  _timer$: Observable<number> = interval(TICK_DURATION).pipe(
     switchMap(() => of(Date.now())),
     pairwise(),
     map(([a, b]) => b - a),
@@ -158,6 +158,7 @@ export class PomodoroService {
         filter(([val, cfg]) => cfg.isEnabled && cfg.isPlayTick),
         map(([val]) => val),
         distinctUntilChanged(),
+        filter((v, index) => index % (1000 / TICK_DURATION) === 0),
         withLatestFrom(this.soundConfig$),
       )
       .subscribe(([val, soundConfig]) => {
