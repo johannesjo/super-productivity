@@ -175,15 +175,16 @@ export class WorkViewComponent implements OnInit, OnDestroy, AfterContentInit {
     this.planningModeService.leavePlanningMode();
   }
 
+  // NOTE: there is a duplicate of this in plan-tasks-tomorrow.component
   addAllPlannedToToday(plannedTasks: TaskPlanned[]) {
     plannedTasks.forEach((t) => {
       if (t.parentId) {
         this.taskService.moveToProjectTodayList(t.parentId);
-        this._subs.add(
-          this.taskService.getByIdOnce$(t.parentId).subscribe((parentTask) => {
-            this.taskService.addTodayTag(parentTask);
-          }),
-        );
+        // NOTE: no unsubscribe on purpose as we always want this to run until done
+
+        this.taskService.getByIdOnce$(t.parentId).subscribe((parentTask) => {
+          this.taskService.addTodayTag(parentTask);
+        });
       } else {
         this.taskService.moveToProjectTodayList(t.id);
         this.taskService.addTodayTag(t);
@@ -191,6 +192,7 @@ export class WorkViewComponent implements OnInit, OnDestroy, AfterContentInit {
     });
   }
 
+  // NOTE: there is a duplicate of this in plan-tasks-tomorrow.component
   addAllPlannedToDayAndCreateRepeatable(
     plannedTasks: TaskPlanned[],
     repeatableScheduledForTomorrow: TaskRepeatCfg[],

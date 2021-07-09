@@ -217,6 +217,7 @@ export class ReminderService {
   }
 
   private async _saveModel(reminders: Reminder[]) {
+    console.log('saveReminders', reminders);
     await this._persistenceService.reminders.saveState(reminders, {
       isSyncModelChange: true,
     });
