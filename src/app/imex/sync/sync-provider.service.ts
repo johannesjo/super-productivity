@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, combineLatest, Observable, of, throwError } from 'rxjs';
-import { DropboxsyncTriggerService } from './dropbox/dropbox-sync.service';
+import { DropboxSyncService } from './dropbox/dropbox-sync.service';
 import { SyncProvider, SyncProviderServiceInterface } from './sync-provider.model';
 import { GlobalConfigService } from '../../features/config/global-config.service';
 import {
@@ -15,7 +15,7 @@ import {
   timeout,
 } from 'rxjs/operators';
 import { SyncConfig } from '../../features/config/global-config.model';
-import { GoogleDrivesyncTriggerService } from './google/google-drive-sync.service';
+import { GoogleDriveSyncService } from './google/google-drive-sync.service';
 import { AppDataComplete, DialogConflictResolutionResult } from './sync.model';
 import { T } from '../../t.const';
 import { checkForUpdate, UpdateCheckResult } from './check-for-update.util';
@@ -24,7 +24,7 @@ import { TranslateService } from '@ngx-translate/core';
 import { SyncTriggerService } from './sync-trigger.service';
 import { MatDialog } from '@angular/material/dialog';
 import { DataImportService } from './data-import.service';
-import { WebDavsyncTriggerService } from './web-dav/web-dav-sync.service';
+import { WebDavSyncService } from './web-dav/web-dav-sync.service';
 import { SnackService } from '../../core/snack/snack.service';
 import { isValidAppData } from './is-valid-app-data.util';
 import { truncate } from '../../util/truncate';
@@ -46,11 +46,11 @@ export class SyncProviderService {
       // console.log('Activated SyncProvider:', syncProvider);
       switch (syncProvider) {
         case SyncProvider.Dropbox:
-          return this._dropboxsyncTriggerService;
+          return this._dropboxSyncService;
         case SyncProvider.GoogleDrive:
-          return this._googleDrivesyncTriggerService;
+          return this._googleDriveSyncService;
         case SyncProvider.WebDAV:
-          return this._webDavsyncTriggerService;
+          return this._webDavSyncService;
         default:
           return null;
       }
@@ -84,10 +84,10 @@ export class SyncProviderService {
     );
 
   constructor(
-    private _dropboxsyncTriggerService: DropboxsyncTriggerService,
+    private _dropboxSyncService: DropboxSyncService,
     private _dataImportService: DataImportService,
-    private _googleDrivesyncTriggerService: GoogleDrivesyncTriggerService,
-    private _webDavsyncTriggerService: WebDavsyncTriggerService,
+    private _googleDriveSyncService: GoogleDriveSyncService,
+    private _webDavSyncService: WebDavSyncService,
     private _globalConfigService: GlobalConfigService,
     private _persistenceLocalService: PersistenceLocalService,
     private _translateService: TranslateService,

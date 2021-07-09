@@ -13,7 +13,7 @@ import { IS_F_DROID_APP } from '../../../util/is-android-web-view';
 @Injectable({
   providedIn: 'root',
 })
-export class GoogleDrivesyncTriggerService implements SyncProviderServiceInterface {
+export class GoogleDriveSyncService implements SyncProviderServiceInterface {
   id: SyncProvider = SyncProvider.GoogleDrive;
 
   cfg$: Observable<GoogleDriveSyncConfig> = this._globalConfigService.cfg$.pipe(

@@ -1,12 +1,12 @@
 // import { TestBed } from '@angular/core/testing';
 //
-// import { DropboxsyncTriggerService } from './dropbox-sync.service';
+// import { DropboxSyncService } from './dropbox-sync.service';
 //
-// describe('DropboxsyncTriggerService', () => {
+// describe('DropboxSyncService', () => {
 //   beforeEach(() => TestBed.configureTestingModule({}));
 //
 //   it('should be created', () => {
-//     const service: DropboxsyncTriggerService = TestBed.inject(DropboxsyncTriggerService);
+//     const service: DropboxSyncService = TestBed.inject(DropboxSyncService);
 //     expect(service).toBeTruthy();
 //   });
 // });

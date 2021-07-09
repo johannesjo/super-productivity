@@ -14,7 +14,7 @@ import { T } from '../../../t.const';
 import { WebDavHeadResponse } from './web-dav.model';
 
 @Injectable({ providedIn: 'root' })
-export class WebDavsyncTriggerService implements SyncProviderServiceInterface {
+export class WebDavSyncService implements SyncProviderServiceInterface {
   id: SyncProvider = SyncProvider.WebDAV;
 
   isReady$: Observable<boolean> = this._dataInitService.isAllDataLoadedInitially$.pipe(

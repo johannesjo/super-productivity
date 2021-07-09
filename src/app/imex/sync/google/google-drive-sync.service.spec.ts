@@ -1,12 +1,12 @@
 // import { TestBed } from '@angular/core/testing';
 //
-// import { GoogleDrivesyncTriggerService } from './google-drive-sync.service';
+// import { GoogleDriveSyncService } from './google-drive-sync.service';
 //
-// describe('GoogleDrivesyncTriggerService', () => {
+// describe('GoogleDriveSyncService', () => {
 //   beforeEach(() => TestBed.configureTestingModule({}));
 //
 //   it('should be created', () => {
-//     const service: GoogleDrivesyncTriggerService = TestBed.inject(GoogleDrivesyncTriggerService);
+//     const service: GoogleDriveSyncService = TestBed.inject(GoogleDriveSyncService);
 //     expect(service).toBeTruthy();
 //   });
 // });
