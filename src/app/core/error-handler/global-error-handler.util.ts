@@ -6,6 +6,8 @@ import * as pThrottle from 'p-throttle';
 import * as newGithubIssueUrl from 'new-github-issue-url';
 import { remote } from 'electron';
 import { getBeforeLastErrorActionLog } from '../../util/action-logger';
+import { download } from '../../util/download';
+import { AppDataComplete } from '../../imex/sync/sync.model';
 
 let isWasErrorAlertCreated = false;
 
@@ -68,6 +70,7 @@ export const createErrorAlert = (
   err: string = '',
   stackTrace: string,
   origErr: any,
+  userData?: AppDataComplete | undefined,
 ) => {
   if (isWasErrorAlertCreated) {
     return;
@@ -92,6 +95,12 @@ export const createErrorAlert = (
     <pre style="line-height: 1.3; font-size: 12px;">${getSimpleMeta()}</pre>
     </div>
   `;
+
+  document.body.append(errorAlert);
+  const innerWrapper = document.getElementById(
+    'error-alert-inner-wrapper',
+  ) as HTMLElement;
+
   const btnReload = document.createElement('BUTTON');
   btnReload.innerText = 'Reload App';
   btnReload.addEventListener('click', () => {
@@ -101,11 +110,30 @@ export const createErrorAlert = (
       window.location.reload();
     }
   });
-  document.body.append(errorAlert);
-  const innerWrapper = document.getElementById(
-    'error-alert-inner-wrapper',
-  ) as HTMLElement;
   innerWrapper.append(btnReload);
+
+  console.log(userData);
+
+  if (userData) {
+    const btnExport = document.createElement('BUTTON');
+    btnExport.innerText = 'Export data';
+    btnExport.addEventListener('click', () => {
+      download(
+        'super-productivity-crash-user-data-export.json',
+        JSON.stringify(userData),
+      );
+    });
+    innerWrapper.append(btnExport);
+  }
+
+  const tagReport = document.createElement('A');
+  const btnReport = document.createElement('BUTTON');
+  btnReport.innerText = 'Report';
+  tagReport.append(btnReport);
+  tagReport.setAttribute('href', githubUrl);
+  tagReport.setAttribute('target', '_blank');
+  innerWrapper.append(tagReport);
+
   isWasErrorAlertCreated = true;
 
   innerWrapper.style.visibility = 'hidden';

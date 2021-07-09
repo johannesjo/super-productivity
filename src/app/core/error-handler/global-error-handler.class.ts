@@ -1,4 +1,4 @@
-import { ErrorHandler, Injectable } from '@angular/core';
+import { ErrorHandler, Inject, Injectable, Injector } from '@angular/core';
 import { isObject } from '../../util/is-object';
 import { getErrorTxt } from '../../util/get-error-text';
 import { IS_ELECTRON } from '../../app.constants';
@@ -10,12 +10,17 @@ import {
 } from './global-error-handler.util';
 import { remote } from 'electron';
 import { saveBeforeLastErrorActionLog } from '../../util/action-logger';
+import { AppDataComplete } from '../../imex/sync/sync.model';
+import { PersistenceService } from '../persistence/persistence.service';
 
 @Injectable()
 export class GlobalErrorHandler implements ErrorHandler {
   private _electronLogger: any;
 
-  constructor(private _electronService: ElectronService) {
+  constructor(
+    private _electronService: ElectronService,
+    @Inject(Injector) private injector: Injector,
+  ) {
     if (IS_ELECTRON) {
       this._electronLogger = (this._electronService.remote as typeof remote).require(
         'electron-log',
@@ -24,7 +29,7 @@ export class GlobalErrorHandler implements ErrorHandler {
   }
 
   // TODO Cleanup this mess
-  handleError(err: any) {
+  async handleError(err: any): Promise<void> {
     const errStr = typeof err === 'string' ? err : err.toString();
     // eslint-disable-next-line
     const simpleStack = err && err.stack;
@@ -34,18 +39,13 @@ export class GlobalErrorHandler implements ErrorHandler {
     if (!isHandledError(err)) {
       const errorStr = this._getErrorStr(err) || errStr;
       saveBeforeLastErrorActionLog();
-
-      // NOTE: dom exceptions will break all rendering that's why
-      if (err.constructor && err.constructor === DOMException) {
-        createErrorAlert(
-          this._electronService,
-          'DOMException: ' + errorStr,
-          simpleStack,
-          err,
-        );
-      } else {
-        createErrorAlert(this._electronService, errorStr, simpleStack, err);
-      }
+      createErrorAlert(
+        this._electronService,
+        errorStr,
+        simpleStack,
+        err,
+        await this._getUserData(),
+      );
     }
 
     if (IS_ELECTRON) {
@@ -72,6 +72,17 @@ export class GlobalErrorHandler implements ErrorHandler {
         : 'Unable to parse error string. Please see console error';
     } else {
       return (err as any).toString();
+    }
+  }
+
+  private async _getUserData(): Promise<AppDataComplete | undefined> {
+    try {
+      console.log(this.injector.get(PersistenceService));
+      return this.injector.get(PersistenceService).loadComplete();
+    } catch (e) {
+      console.log('Cannot load data');
+      console.error(e);
+      return undefined;
     }
   }
 }
