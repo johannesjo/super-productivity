@@ -1,17 +1,7 @@
 import { Injectable } from '@angular/core';
-import {
-  EMPTY,
-  fromEvent,
-  merge,
-  Observable,
-  of,
-  ReplaySubject,
-  throwError,
-  timer,
-} from 'rxjs';
+import { EMPTY, fromEvent, merge, Observable, of, ReplaySubject, timer } from 'rxjs';
 import {
   auditTime,
-  catchError,
   concatMap,
   debounceTime,
   distinctUntilChanged,
@@ -25,7 +15,6 @@ import {
   take,
   tap,
   throttleTime,
-  timeout,
 } from 'rxjs/operators';
 import { GlobalConfigService } from '../../features/config/global-config.service';
 import { DataInitService } from '../../core/data-init/data-init.service';
@@ -39,7 +28,6 @@ import {
 import { IS_TOUCH_ONLY } from '../../util/is-touch';
 import { AllowedDBKeys } from '../../core/persistence/ls-keys.const';
 import { IdleService } from '../../features/time-tracking/idle.service';
-import { AppDataComplete } from './sync.model';
 import { IS_ELECTRON } from '../../app.constants';
 import { ElectronService } from '../../core/electron/electron.service';
 import { IpcRenderer } from 'electron';
@@ -53,12 +41,6 @@ const MAX_WAIT_FOR_INITIAL_SYNC = 25000;
   providedIn: 'root',
 })
 export class SyncTriggerService {
-  inMemoryComplete$: Observable<AppDataComplete> =
-    this._persistenceService.inMemoryComplete$.pipe(
-      timeout(5000),
-      catchError(() => throwError('Error while trying to get inMemoryComplete$')),
-    );
-
   private _onUpdateLocalDataTrigger$: Observable<{
     appDataKey: AllowedDBKeys;
     data: any;

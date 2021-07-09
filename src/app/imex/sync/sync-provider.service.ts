@@ -1,9 +1,10 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, combineLatest, Observable, of } from 'rxjs';
+import { BehaviorSubject, combineLatest, Observable, of, throwError } from 'rxjs';
 import { DropboxsyncTriggerService } from './dropbox/dropbox-sync.service';
 import { SyncProvider, SyncProviderServiceInterface } from './sync-provider.model';
 import { GlobalConfigService } from '../../features/config/global-config.service';
 import {
+  catchError,
   distinctUntilChanged,
   filter,
   first,
@@ -11,6 +12,7 @@ import {
   shareReplay,
   switchMap,
   take,
+  timeout,
 } from 'rxjs/operators';
 import { SyncConfig } from '../../features/config/global-config.model';
 import { GoogleDrivesyncTriggerService } from './google/google-drive-sync.service';
@@ -28,6 +30,7 @@ import { isValidAppData } from './is-valid-app-data.util';
 import { truncate } from '../../util/truncate';
 import { PersistenceLocalService } from '../../core/persistence/persistence-local.service';
 import { getSyncErrorStr } from './get-sync-error-str';
+import { PersistenceService } from '../../core/persistence/persistence.service';
 
 @Injectable({
   providedIn: 'root',
@@ -74,6 +77,12 @@ export class SyncProviderService {
     ),
   );
 
+  private _inMemoryComplete$: Observable<AppDataComplete> =
+    this._persistenceService.inMemoryComplete$.pipe(
+      timeout(5000),
+      catchError(() => throwError('Error while trying to get inMemoryComplete$')),
+    );
+
   constructor(
     private _dropboxsyncTriggerService: DropboxsyncTriggerService,
     private _dataImportService: DataImportService,
@@ -83,6 +92,7 @@ export class SyncProviderService {
     private _persistenceLocalService: PersistenceLocalService,
     private _translateService: TranslateService,
     private _syncTriggerService: SyncTriggerService,
+    private _persistenceService: PersistenceService,
     private _snackService: SnackService,
     private _matDialog: MatDialog,
   ) {}
@@ -128,9 +138,7 @@ export class SyncProviderService {
     if (typeof revRes === 'string') {
       if (revRes === 'NO_REMOTE_DATA' && this._c(T.F.SYNC.C.NO_REMOTE_DATA)) {
         this._log(cp, '↑ Update Remote after no getRevAndLastClientUpdate()');
-        const localLocal = await this._syncTriggerService.inMemoryComplete$
-          .pipe(take(1))
-          .toPromise();
+        const localLocal = await this._inMemoryComplete$.pipe(take(1)).toPromise();
         return await this._uploadAppData(cp, localLocal);
       }
       // NOTE: includes HANDLED_ERROR
@@ -150,7 +158,7 @@ export class SyncProviderService {
     if (rev && rev === localRev) {
       this._log(cp, 'PRE1: ↔ Same Rev', rev);
       // NOTE: same rev, doesn't mean. that we can't have local changes
-      local = await this._syncTriggerService.inMemoryComplete$.pipe(take(1)).toPromise();
+      local = await this._inMemoryComplete$.pipe(take(1)).toPromise();
       if (lastSync === local.lastLocalSyncModelChange) {
         this._log(cp, 'PRE1: No local changes to sync');
         return;
@@ -161,9 +169,7 @@ export class SyncProviderService {
     // simple check based on local meta
     // ------------------------------------
     // if not defined yet
-    local =
-      local ||
-      (await this._syncTriggerService.inMemoryComplete$.pipe(take(1)).toPromise());
+    local = local || (await this._inMemoryComplete$.pipe(take(1)).toPromise());
 
     if (!local.lastLocalSyncModelChange || local.lastLocalSyncModelChange === 0) {
       if (!this._c(T.F.SYNC.C.EMPTY_SYNC)) {
