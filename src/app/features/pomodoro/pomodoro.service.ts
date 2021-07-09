@@ -96,9 +96,12 @@ export class PomodoroService {
   ).pipe(
     withLatestFrom(this.isLongBreak$, this.isShortBreak$, this.isBreak$, this.cfg$),
     map(([trigger, isLong, isShort, isBreak, cfg]) => {
-      cfg = { ...cfg };
+      // cfg = { ...cfg };
+      // // @ts-ignore
       // cfg.duration = 5000;
+      // // @ts-ignore
       // cfg.breakDuration = 15000;
+      // // @ts-ignore
       // cfg.longerBreakDuration = 20000;
       if (!isBreak) {
         return cfg.duration || DEFAULT_GLOBAL_CONFIG.pomodoro.duration;
