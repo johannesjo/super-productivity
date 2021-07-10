@@ -294,7 +294,7 @@ export const tagReducer = (
       const updates: Update<Tag>[] = task.tagIds.map((tagId) => ({
         id: tagId,
         changes: {
-          taskIds: isAddToBottom
+          taskIds: isAddToBottom // TODO comment this and make it work with the new button for #1221
             ? [...(state.entities[tagId] as Tag).taskIds, task.id]
             : [task.id, ...(state.entities[tagId] as Tag).taskIds],
         },
