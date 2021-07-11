@@ -42,6 +42,18 @@ public class FullscreenActivity extends AppCompatActivity {
             wv = WebHelper.getWebView();
             frameLayout = findViewById(R.id.webview_wrapper);
             frameLayout.addView(wv);
+
+            // init JS here, as it needs an activity to work
+            boolean IS_DEBUG = 0 != (getApplicationInfo().flags & ApplicationInfo.FLAG_DEBUGGABLE);
+            jsi = new JavaScriptInterface(this, wv, IS_DEBUG);
+            wv.addJavascriptInterface(jsi, "SUPAndroid");
+            if (BuildConfig.FLAVOR.equals("fdroid")) {
+                wv.addJavascriptInterface(jsi, "SUPFDroid");
+            }
+
+            // In case we want to make sure the most recent version is loaded
+            // wv.clearCache(true);
+            // wv.clearHistory();
         }
     }
 
@@ -60,16 +72,11 @@ public class FullscreenActivity extends AppCompatActivity {
         wv.post(new Runnable() {
             @Override
             public void run() {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-                    wv.evaluateJavascript(script, new ValueCallback<String>() {
-                        @Override
-                        public void onReceiveValue(String value) {
-
-                        }
-                    });
-                } else {
-                    wv.loadUrl("javascript:" + script);
-                }
+                wv.evaluateJavascript(script, new ValueCallback<String>() {
+                    @Override
+                    public void onReceiveValue(String value) {
+                    }
+                });
             }
         });
     }

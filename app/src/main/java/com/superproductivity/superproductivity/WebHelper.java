@@ -2,27 +2,21 @@ package com.superproductivity.superproductivity;
 
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.ApplicationInfo;
-import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Build;
 import android.util.Log;
 import android.view.View;
-import android.webkit.JsPromptResult;
-import android.webkit.JsResult;
 import android.webkit.WebChromeClient;
-import android.webkit.WebResourceRequest;
-import android.webkit.WebResourceResponse;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.LinearLayout;
 
-import androidx.annotation.Nullable;
-
 
 public class WebHelper {
     private static final String TAG = WebHelper.class.getSimpleName();
+
+    // should be correct as they only ever get's assigned once?
     private static WebView wv;
 
 
@@ -62,18 +56,6 @@ public class WebHelper {
         String cacheDirPath = context.getExternalCacheDir().getAbsolutePath();
         wSettings.setAppCachePath(cacheDirPath);
         Log.i(TAG, "cache path：：" + cacheDirPath);
-
-//        wv.clearCache(true);
-//        wv.clearHistory();
-
-//        boolean IS_DEBUG = 0 != (getApplicationInfo().flags & ApplicationInfo.FLAG_DEBUGGABLE);
-//
-//        jsi = new JavaScriptInterface(this, wv, IS_DEBUG);
-//        wv.addJavascriptInterface(jsi, "SUPAndroid");
-//
-//        if (BuildConfig.FLAVOR.equals("fdroid")) {
-//            wv.addJavascriptInterface(jsi, "SUPFDroid");
-//        }
 
         initClient();
     }
