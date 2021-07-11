@@ -38,6 +38,7 @@ public class WebHelper {
         wSettings.setDomStorageEnabled(true);
         wSettings.setLoadWithOverviewMode(true);
         wSettings.setDatabaseEnabled(true);
+        wSettings.setAllowFileAccess(true);
         wSettings.setGeolocationEnabled(true);
         wSettings.setAppCacheEnabled(true);
         wSettings.setMediaPlaybackRequiresUserGesture(false);
