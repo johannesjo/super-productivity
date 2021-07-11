@@ -56,30 +56,6 @@ public class WebHelper {
         String cacheDirPath = context.getExternalCacheDir().getAbsolutePath();
         wSettings.setAppCachePath(cacheDirPath);
         Log.i(TAG, "cache path：：" + cacheDirPath);
-
-        initClient();
-    }
-
-    private static void initClient() {
-        Log.v("TW", "onCreate");
-
-        wv.setWebViewClient(new WebViewClient() {
-            @Override
-            public boolean shouldOverrideUrlLoading(WebView view, String url) {
-                if (url != null && (url.startsWith("http://") || url.startsWith("https://"))) {
-                    if (url.contains("super-productivity.com") || url.contains("localhost")) {
-                        return false;
-                    } else {
-                        view.getContext().startActivity(
-                                new Intent(Intent.ACTION_VIEW, Uri.parse(url)));
-                        return true;
-                    }
-                } else {
-                    return false;
-                }
-            }
-        });
-        wv.setWebChromeClient(new WebChromeClient());
     }
 
     public static WebView getWebView() {

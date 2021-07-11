@@ -51,6 +51,27 @@ public class FullscreenActivity extends AppCompatActivity {
                 wv.addJavascriptInterface(jsi, "SUPFDroid");
             }
 
+            // also needs to be done here, because new Intent otherwise will crash the app
+            wv.setWebViewClient(new WebViewClient() {
+                @Override
+                public boolean shouldOverrideUrlLoading(WebView view, String url) {
+                    Log.v("TW", url);
+
+                    if (url != null && (url.startsWith("http://") || url.startsWith("https://"))) {
+                        if (url.contains("super-productivity.com") || url.contains("localhost")) {
+                            return false;
+                        } else {
+                            FullscreenActivity.this.startActivity(
+                                    new Intent(Intent.ACTION_VIEW, Uri.parse(url)));
+                            return true;
+                        }
+                    } else {
+                        return false;
+                    }
+                }
+            });
+            wv.setWebChromeClient(new WebChromeClient());
+
             // In case we want to make sure the most recent version is loaded
             // wv.clearCache(true);
             // wv.clearHistory();
