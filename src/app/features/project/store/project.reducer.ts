@@ -381,8 +381,8 @@ export const projectReducer = (
               id: task.projectId,
               changes: {
                 [prop]: isAddToBottom
-                  ? [task.id, ...affectedEntity[prop]]
-                  : [...affectedEntity[prop], task.id],
+                  ? [...affectedEntity[prop], task.id]
+                  : [task.id, ...affectedEntity[prop]],
               },
             },
             state,
