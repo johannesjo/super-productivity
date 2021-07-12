@@ -382,8 +382,8 @@ export const projectReducer = (
       if (isAddToBottom) {
         changes[prop] = [...affectedProject[prop], task.id];
       } else {
-        // TODO get the currentTaskId from a different part of the state tree
-        // const currentTaskId = this._taskService.currentTaskId
+        // TODO #1382 get the currentTaskId from a different part of the state tree or via payload or _taskService
+        // const currentTaskId = payload.currentTaskId || this._taskService.currentTaskId
         // const isAfterRunningTask = prop==='taskIds' && currentTaskId
         // console.log('isAfterRunningTask?',isAfterRunningTask,'currentTaskId',currentTaskId);
         // if (isAfterRunningTask) add the new task in the list after currentTaskId
