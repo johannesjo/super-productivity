@@ -7,11 +7,20 @@ import { TestScheduler } from 'rxjs/testing';
 import { of } from 'rxjs';
 import { createEmptyEntity } from '../../util/create-empty-entity';
 import { provideMockStore } from '@ngrx/store/testing';
+import { AppDataComplete, DEFAULT_APP_BASE_DATA } from '../../imex/sync/sync.model';
+import { skip } from 'rxjs/operators';
 
 const testScheduler = new TestScheduler((actual, expected) => {
   // asserting the two objects are equal
   expect(actual).toEqual(expected);
 });
+
+export const FAKE_APP_DATA: AppDataComplete = {
+  ...DEFAULT_APP_BASE_DATA,
+  note: {},
+  bookmark: {},
+  lastLocalSyncModelChange: 1234,
+};
 
 describe('PersistenceService', () => {
   beforeEach(() => {
@@ -58,7 +67,7 @@ describe('PersistenceService', () => {
   describe('inMemoryComplete$', () => {
     it('should start with loadComplete data', () => {
       testScheduler.run(({ expectObservable }) => {
-        const FAKE_VAL: any = 'VVV';
+        const FAKE_VAL: any = DEFAULT_APP_BASE_DATA;
         const a$ = of(FAKE_VAL);
         spyOn(PersistenceService.prototype, 'loadComplete').and.callFake(() => a$ as any);
         const service: PersistenceService = TestBed.inject(PersistenceService);
@@ -90,7 +99,31 @@ describe('PersistenceService', () => {
       setTimeout(() => {
         service.onAfterSave$.next('' as any);
       }, 1);
-      tick(101);
+      tick(51);
+    }));
+
+    it('should only propagate valid data', fakeAsync(() => {
+      const service: PersistenceService = TestBed.inject(PersistenceService);
+      let i = 0;
+      spyOn(service, 'loadComplete').and.callFake(() => {
+        i++;
+        switch (i) {
+          case 1:
+            return Promise.resolve('BROKEN_FAKE_APP_DATA' as any);
+          case 2:
+            return Promise.resolve(FAKE_APP_DATA);
+        }
+        throw new Error('Broken test');
+      });
+
+      service.inMemoryComplete$.pipe(skip(1)).subscribe((data) => {
+        expect(data).toEqual(FAKE_APP_DATA);
+      });
+
+      service.onAfterSave$.next('' as any);
+      tick(50);
+      service.onAfterSave$.next('' as any);
+      tick(50);
     }));
 
     // it('should refresh onAfterSave$', () => {
