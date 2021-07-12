@@ -1,3 +1,9 @@
+## [7.3.1](https://github.com/johannesjo/super-productivity/compare/v7.3.0...v7.3.1) (2021-07-12)
+
+### Bug Fixes
+
+- **sync:** syncing only broken data bug ([72334d2](https://github.com/johannesjo/super-productivity/commit/72334d2064dd1d4a3848b6d01f957d898808ca23))
+
 # [7.3.0](https://github.com/johannesjo/super-productivity/compare/v7.3.0-rc.0...v7.3.0) (2021-07-12)
 
 ### Bug Fixes
