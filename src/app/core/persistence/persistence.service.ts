@@ -89,7 +89,7 @@ import {
 } from '../../features/simple-counter/simple-counter.model';
 import { simpleCounterReducer } from '../../features/simple-counter/store/simple-counter.reducer';
 import { from, merge, Observable, Subject } from 'rxjs';
-import { concatMap, debounceTime, filter, shareReplay } from 'rxjs/operators';
+import { concatMap, debounceTime, filter, shareReplay, switchMap } from 'rxjs/operators';
 import { devError } from '../../util/dev-error';
 import { isValidAppData } from '../../imex/sync/is-valid-app-data.util';
 import { removeFromDb, saveToDb } from './persistence.actions';
@@ -218,10 +218,11 @@ export class PersistenceService {
     this.onAfterImport$,
     this.onAfterSave$.pipe(
       // wait for all updates if fired in short succession (which happens for relational data)
-      debounceTime(100),
-      concatMap(() => this.loadComplete()),
+      debounceTime(50),
+      switchMap(() => this.loadComplete()),
       // TODO maybe not necessary ??
-      filter((complete) => !isValidAppData(complete)),
+      // only propagate data if it is valid
+      filter((complete) => isValidAppData(complete)),
     ),
   ).pipe(shareReplay(1));
 
