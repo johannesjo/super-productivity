@@ -1093,6 +1093,7 @@
     "COPY_TO_CLIPPBOARD": "Copied to clipboard",
     "ERR_COMPRESSION": "Error for compression interface",
     "PERSISTENCE_DISALLOWED": "Data will be not persisted permanently. Be aware that this can lead to data loss!!",
+    "PERSISTENCE_ERROR": "Error when requesting to persist data: {{err}}",
     "RUNNING_X": "Running \"{{str}}\".",
     "SHORTCUT_WARN_OPEN_BOOKMARKS_FROM_TAG": "{{keyCombo}} pressed, but open bookmarks shortcut is only available when in project context.",
     "SHORTCUT_WARN_OPEN_NOTES_FROM_TAG": "{{keyCombo}} pressed, but open notes shortcut is only available when in project context."

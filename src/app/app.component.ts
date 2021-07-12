@@ -287,8 +287,15 @@ export class AppComponent implements OnDestroy {
         })
         .catch((e) => {
           console.log(e);
-          const msg = T.GLOBAL_SNACK.PERSISTENCE_DISALLOWED;
-          this._snackService.open({ msg });
+          const err = e && e.toString ? e.toString() : 'UNKNOWN';
+          const msg = T.GLOBAL_SNACK.PERSISTENCE_ERROR;
+          this._snackService.open({
+            type: 'ERROR',
+            msg,
+            translateParams: {
+              err,
+            },
+          });
         });
     }
   }

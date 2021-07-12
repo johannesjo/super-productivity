@@ -54,6 +54,8 @@ export const isValidAppData = (
     : typeof dAny === 'object';
   // console.timeEnd('time isValidAppData');
 
+  console.log({ isValid, d });
+
   return isValid;
 };
 
