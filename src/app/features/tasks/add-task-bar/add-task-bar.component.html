@@ -42,6 +42,7 @@
     >
       <mat-icon>close</mat-icon>
     </button> -->
+
     <button
       (click)="isAddToBottom=!isAddToBottom"
       class="switch-add-to-bot-btn"
@@ -49,7 +50,8 @@
       type="button"
     >
       <mat-icon *ngIf="isAddToBottom">low_priority</mat-icon>
-      <mat-icon *ngIf="!isAddToBottom">keyboard_tab</mat-icon>
+      <mat-icon *ngIf="!isAddToBottom">vertical_align_top</mat-icon>
+      <!-- #1382 consider: <mat-icon *ngIf="!isAddToBottom">keyboard_tab</mat-icon> -->
     </button>
   </div>
 
