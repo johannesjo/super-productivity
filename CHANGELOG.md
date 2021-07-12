@@ -1,3 +1,19 @@
+# [7.3.0](https://github.com/johannesjo/super-productivity/compare/v7.3.0-rc.0...v7.3.0) (2021-07-12)
+
+### Bug Fixes
+
+- **pomodoro:** tick sound every half second rather than every second ([067e515](https://github.com/johannesjo/super-productivity/commit/067e51539c162c74ffc07b7d89e53dad415900c5))
+- **sync:** prevent repeat task creation while syncing ([9350907](https://github.com/johannesjo/super-productivity/commit/935090764f0b7e4c13ecdb30f5111872a0891adf))
+- wrong text ([494d9a5](https://github.com/johannesjo/super-productivity/commit/494d9a582ba29f851bd999bf5b77d7fff7c004f4))
+- **sync:** google sync file creation triggered even when syncing is disabled ([dfc666e](https://github.com/johannesjo/super-productivity/commit/dfc666e271e1b36a60b5ac4efca50d03bef37db5))
+
+### Features
+
+- improve persistence error handling ([cb2a8cf](https://github.com/johannesjo/super-productivity/commit/cb2a8cf4f443965f03aca823dc1c8fe4d1f30e33))
+- **dailySummary:** add all planned to tomorrow buttons to plan section ([ecda0c5](https://github.com/johannesjo/super-productivity/commit/ecda0c5b2268b3a58f45c4a45df57ae3d23d49b8))
+- **error:** allow to directly export user data from error dialog ([49ba469](https://github.com/johannesjo/super-productivity/commit/49ba4697c50e89ec3627ea1ad64d805c90093023))
+- hide import project button for now ([de6e3a9](https://github.com/johannesjo/super-productivity/commit/de6e3a962bfc5320597978310df6d10351a10354))
+
 # [7.3.0-rc.0](https://github.com/johannesjo/super-productivity/compare/v7.2.1...v7.3.0-rc.0) (2021-07-08)
 
 ### Bug Fixes
