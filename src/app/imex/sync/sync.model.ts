@@ -79,11 +79,11 @@ export interface AppDataForProjects {
 export interface AppDataCompleteOptionalSyncModelChange
   extends AppBaseData,
     AppDataForProjects {
-  lastLocalSyncModelChange?: number;
+  lastLocalSyncModelChange?: number | null;
 }
 
 export interface AppDataComplete extends AppBaseData, AppDataForProjects {
-  lastLocalSyncModelChange: number;
+  lastLocalSyncModelChange: number | null;
 }
 
 export const DEFAULT_APP_BASE_DATA: AppBaseData = {

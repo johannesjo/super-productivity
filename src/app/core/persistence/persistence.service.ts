@@ -452,9 +452,13 @@ export class PersistenceService {
       }),
     );
 
+    if (typeof data.lastLocalSyncModelChange !== 'number') {
+      throw new Error('lastLocalSyncModelChange');
+    }
+
     return await Promise.all([forBase, forProject])
       .then(() => {
-        this.updateLastLocalSyncModelChange(data.lastLocalSyncModelChange);
+        this.updateLastLocalSyncModelChange(data.lastLocalSyncModelChange as number);
         this._inMemoryComplete = data;
         this.onAfterImport$.next(data);
       })

@@ -204,7 +204,11 @@ export class SyncProviderService {
     // check if there is no data or no valid remote data
     // -------------------------------------------------
     const remote = r.data;
-    if (!remote || !remote.lastLocalSyncModelChange) {
+    if (
+      !remote ||
+      typeof remote.lastLocalSyncModelChange !== 'number' ||
+      !remote.lastLocalSyncModelChange
+    ) {
       if (this._c(T.F.SYNC.C.NO_REMOTE_DATA)) {
         this._log(cp, '↑ PRE4: Update Remote');
         return await this._uploadAppData(cp, local);
@@ -292,6 +296,12 @@ export class SyncProviderService {
       alert('The data you are trying to upload is invalid');
       throw new Error('The data you are trying to upload is invalid');
     }
+    if (typeof data.lastLocalSyncModelChange !== 'number') {
+      console.log(data);
+      alert('Error: lastLocalSyncModelChange is not defined');
+      throw new Error('lastLocalSyncModelChange is not defined');
+    }
+
     const localRev = await this._getLocalRev(cp);
     const successRev = await cp.uploadAppData(data, localRev, isForceOverwrite);
     if (typeof successRev === 'string') {
@@ -331,7 +341,11 @@ export class SyncProviderService {
       rev = r.rev;
     }
     if (!rev) {
-      throw new Error('No rev given');
+      throw new Error('No rev given during import');
+    }
+
+    if (!data.lastLocalSyncModelChange) {
+      throw new Error('No valid lastLocalSyncModelChange given during import');
     }
 
     await this._dataImportService.importCompleteSyncData(data);
@@ -405,8 +419,8 @@ export class SyncProviderService {
     local,
     lastSync,
   }: {
-    remote: number;
-    local: number;
+    remote: number | null;
+    local: number | null;
     lastSync: number;
   }): Observable<DialogConflictResolutionResult> {
     return this._matDialog

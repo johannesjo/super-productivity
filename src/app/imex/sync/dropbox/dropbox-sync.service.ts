@@ -90,7 +90,7 @@ export class DropboxSyncService implements SyncProviderServiceInterface {
       const r = await this._dropboxApiService.upload({
         path: DROPBOX_SYNC_FILE_PATH,
         data,
-        clientModified: data.lastLocalSyncModelChange,
+        clientModified: data.lastLocalSyncModelChange as number,
         localRev,
         isForceOverwrite,
       });
