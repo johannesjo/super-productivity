@@ -167,22 +167,17 @@ export class SyncProviderService {
 
     // PRE CHECK 2
     // simple check based on local meta
+    // simple check if lastLocalSyncModelChange
     // ------------------------------------
-    // if not defined yet
     local = local || (await this._inMemoryComplete$.pipe(take(1)).toPromise());
-
-    if (!local.lastLocalSyncModelChange || local.lastLocalSyncModelChange === 0) {
+    // NOTE: should never be the case, but we need to make sure it is
+    if (typeof local.lastLocalSyncModelChange !== 'number') {
+      throw new Error('No lastLocalSyncModelChange');
+    } else if (local.lastLocalSyncModelChange === 0) {
       if (!this._c(T.F.SYNC.C.EMPTY_SYNC)) {
         this._log(cp, 'PRE2: Abort');
         return;
       }
-    }
-
-    // PRE CHECK 3
-    // simple check if lastLocalSyncModelChange
-    // ------------------------------------
-    if (!local.lastLocalSyncModelChange) {
-      throw new Error('No lastLocalSyncModelChange');
     }
 
     // PRE CHECK 3
