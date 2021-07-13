@@ -172,7 +172,9 @@ export class SyncProviderService {
     local = local || (await this._inMemoryComplete$.pipe(take(1)).toPromise());
     // NOTE: should never be the case, but we need to make sure it is
     if (typeof local.lastLocalSyncModelChange !== 'number') {
-      throw new Error('No lastLocalSyncModelChange');
+      console.log(local);
+      alert('Error during sync: No lastLocalSyncModelChange');
+      throw new Error('Sync failed: No lastLocalSyncModelChange');
     } else if (local.lastLocalSyncModelChange === 0) {
       if (!this._c(T.F.SYNC.C.EMPTY_SYNC)) {
         this._log(cp, 'PRE2: Abort');
