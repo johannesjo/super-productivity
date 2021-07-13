@@ -1,3 +1,9 @@
+## [7.3.2](https://github.com/johannesjo/super-productivity/compare/v7.3.1...v7.3.2) (2021-07-13)
+
+### Bug Fixes
+
+- lint ([48da7d8](https://github.com/johannesjo/super-productivity/commit/48da7d89abce214886b89565c1b09c364728dc7d))
+
 ## [7.3.1](https://github.com/johannesjo/super-productivity/compare/v7.3.0...v7.3.1) (2021-07-12)
 
 ### Bug Fixes
