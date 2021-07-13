@@ -116,6 +116,23 @@ $short-syntax-bar-height: 28px;
   }
 }
 
+.switch-add-to-bot-btn {
+  position: absolute;
+  right: $s * 0.5;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 2;
+  opacity: 0.4;
+  margin-top: -0.5 * $short-syntax-bar-height;
+
+  &:hover {
+    opacity: 1;
+  }
+
+  @include mq(xs) {
+  }
+}
+
 .close-btn {
   position: absolute;
   right: $s * 0.5;
