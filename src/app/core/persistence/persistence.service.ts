@@ -89,7 +89,7 @@ import {
 } from '../../features/simple-counter/simple-counter.model';
 import { simpleCounterReducer } from '../../features/simple-counter/store/simple-counter.reducer';
 import { from, merge, Observable, Subject } from 'rxjs';
-import { concatMap, debounceTime, filter, shareReplay, switchMap } from 'rxjs/operators';
+import { debounceTime, filter, shareReplay, switchMap } from 'rxjs/operators';
 import { devError } from '../../util/dev-error';
 import { isValidAppData } from '../../imex/sync/is-valid-app-data.util';
 import { removeFromDb, saveToDb } from './persistence.actions';
