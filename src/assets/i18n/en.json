@@ -108,7 +108,7 @@
         "CALENDAR_READ_ONLY": "CalDav: Calendar \"{{calendarName}}\" is readonly",
         "ERR_NETWORK": "CalDav: Request failed because of a client side network error",
         "ERR_NOT_CONFIGURED": "CalDav: Not properly configured",
-        "IMPORTED_MULTIPLE_ISSUES": "calDav: Imported {{issuesLength}} new issues from git to backlog",
+        "IMPORTED_MULTIPLE_ISSUES": "CalDav: Imported {{issuesLength}} new issues from git to backlog",
         "IMPORTED_SINGLE_ISSUE": "CalDav: Imported issue \"{{issueText}}\" from to backlog",
         "ISSUE_NOT_FOUND": "CalDav: Todo \"{{issueId}}\" seems to be deleted on server.",
         "ISSUE_NO_UPDATE_REQUIRED": "CalDav: No update required.",
