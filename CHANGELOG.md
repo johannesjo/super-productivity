@@ -1,3 +1,15 @@
+## [7.3.3](https://github.com/johannesjo/super-productivity/compare/v7.3.1...v7.3.3) (2021-07-13)
+
+### Bug Fixes
+
+- **sync:** pre sync check for missing lastLocalSyncModelChange ([8905964](https://github.com/johannesjo/super-productivity/commit/89059641baa6a354615beeb0e094d1cb8fcd49b5))
+- lint ([48da7d8](https://github.com/johannesjo/super-productivity/commit/48da7d89abce214886b89565c1b09c364728dc7d))
+
+### Features
+
+- **sync:** add visible error for "No lastLocalSyncModelChange" ([c75adf4](https://github.com/johannesjo/super-productivity/commit/c75adf40a488e6a0f31d840cc706ead47d33fcfc))
+- **sync:** correcter model for lastLocalSyncModelChange ([a8e4a03](https://github.com/johannesjo/super-productivity/commit/a8e4a035dd57bac4d21760eee4c86ea8b1f08858))
+
 ## [7.3.2](https://github.com/johannesjo/super-productivity/compare/v7.3.1...v7.3.2) (2021-07-13)
 
 ### Bug Fixes
