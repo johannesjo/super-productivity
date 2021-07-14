@@ -18,6 +18,8 @@ import { moveTaskToBacklogListAuto } from '../../work-context/store/work-context
 import { TODAY_TAG } from '../../tag/tag.const';
 import { EMPTY } from 'rxjs';
 import { TaskService } from '../task.service';
+import { getDateTimeFromClockString } from '../../../util/get-date-time-from-clock-string';
+import { DEFAULT_DAY_START } from '../../config/default-global-config.const';
 
 @Injectable()
 export class TaskReminderEffects {
@@ -145,11 +147,29 @@ export class TaskReminderEffects {
   @Effect({ dispatch: false })
   unscheduleDoneTask$: any = this._actions$.pipe(
     ofType(TaskActionTypes.UpdateTask),
-    filter(({ payload }) => (payload as any).task.changes.isDone),
+    filter(({ payload }: UpdateTask) => !!payload.task.changes.isDone),
     concatMap(({ payload }) => this._taskService.getByIdOnce$((payload as any).task.id)),
     tap((task) => {
       if (task.reminderId) {
         this._taskService.unScheduleTask(task.id, task.reminderId);
+      }
+    }),
+  );
+
+  @Effect({ dispatch: false })
+  unscheduleScheduledForDayWhenAddedToToday$: any = this._actions$.pipe(
+    ofType(TaskActionTypes.UpdateTaskTags),
+    filter(
+      ({ payload }: UpdateTaskTags) =>
+        !!payload.newTagIds && payload.newTagIds.includes(TODAY_TAG.id),
+    ),
+    tap(({ payload: { task } }: UpdateTaskTags) => {
+      if (
+        task.reminderId &&
+        task.plannedAt &&
+        task.plannedAt === getDateTimeFromClockString(DEFAULT_DAY_START, task.plannedAt)
+      ) {
+        this._taskService.unScheduleTask(task.id, task.reminderId, true);
       }
     }),
   );

@@ -9,6 +9,7 @@ import { Observable } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
 import { GlobalConfigService } from 'src/app/features/config/global-config.service';
 import { T } from 'src/app/t.const';
+import { DEFAULT_DAY_START } from '../../features/config/default-global-config.const';
 
 @Component({
   selector: 'owl-wrapper',
@@ -33,7 +34,7 @@ export class OwlWrapperComponent {
   date?: Date;
 
   laterTodaySlots: string[] = [
-    '9:00',
+    DEFAULT_DAY_START,
     '15:00',
     '17:00',
     '19:00',

@@ -8,6 +8,8 @@ export const IS_USE_DARK_THEME_AS_DEFAULT: boolean =
   window.matchMedia('(prefers-color-scheme: dark)').matches;
 
 const minute = 60 * 1000;
+
+export const DEFAULT_DAY_START = '9:00';
 export const DEFAULT_GLOBAL_CONFIG: GlobalConfigState = {
   lang: {
     lng: null,
@@ -124,7 +126,7 @@ export const DEFAULT_GLOBAL_CONFIG: GlobalConfigState = {
   },
   timeline: {
     isWorkStartEndEnabled: true,
-    workStart: '9:00',
+    workStart: DEFAULT_DAY_START,
     workEnd: '17:00',
   },
 
