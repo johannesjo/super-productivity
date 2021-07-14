@@ -28,7 +28,7 @@ import { T } from '../../t.const';
 import { take } from 'rxjs/operators';
 import { TaskService } from '../tasks/task.service';
 import { TODAY_TAG } from '../tag/tag.const';
-import { Task } from '../tasks/task.model';
+import { Task, TaskPlanned } from '../tasks/task.model';
 import { AddTask, ScheduleTask, UpdateTask } from '../tasks/store/task.actions';
 import { WorkContextService } from '../work-context/work-context.service';
 import { WorkContextType } from '../work-context/work-context.model';
@@ -136,6 +136,24 @@ export class TaskRepeatCfgService {
           this.deleteTaskRepeatCfg(id);
         }
       });
+  }
+
+  // NOTE: there is a duplicate of this in plan-tasks-tomorrow.component
+  async addAllPlannedToDayAndCreateRepeatable(
+    plannedTasks: TaskPlanned[],
+    repeatableScheduledForTomorrow: TaskRepeatCfg[],
+    currentTaskId: string | null,
+    targetDay: number,
+  ): Promise<void> {
+    if (plannedTasks.length) {
+      await this._taskService.movePlannedTasksToToday(plannedTasks);
+    }
+    if (repeatableScheduledForTomorrow.length) {
+      const promises = repeatableScheduledForTomorrow.map((repeatCfg) => {
+        return this.createRepeatableTask(repeatCfg, targetDay, currentTaskId);
+      });
+      await Promise.all(promises);
+    }
   }
 
   async getActionsForTaskRepeatCfg(

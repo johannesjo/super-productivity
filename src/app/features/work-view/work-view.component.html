@@ -118,7 +118,7 @@
           >
             <button
               *ngIf="plannedForToday?.length"
-              (click)="addAllPlannedToToday(plannedForToday)"
+              (click)="taskService.movePlannedTasksToToday(plannedForToday)"
               class="add-scheduled"
               color=""
               mat-stroked-button

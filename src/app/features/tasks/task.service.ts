@@ -837,6 +837,23 @@ export class TaskService {
     }
   }
 
+  // NOTE: there is a duplicate of this in plan-tasks-tomorrow.component
+  async movePlannedTasksToToday(plannedTasks: TaskPlanned[]) {
+    return Promise.all(
+      plannedTasks.map(async (t) => {
+        if (t.parentId) {
+          this.moveToProjectTodayList(t.parentId);
+          // NOTE: no unsubscribe on purpose as we always want this to run until done
+          const parentTask = await this.getByIdOnce$(t.parentId).toPromise();
+          this.addTodayTag(parentTask);
+        } else {
+          this.moveToProjectTodayList(t.id);
+          this.addTodayTag(t);
+        }
+      }),
+    );
+  }
+
   createNewTaskWithDefaults({
     title,
     additional = {},

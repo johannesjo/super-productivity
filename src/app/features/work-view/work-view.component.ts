@@ -176,39 +176,16 @@ export class WorkViewComponent implements OnInit, OnDestroy, AfterContentInit {
   }
 
   // NOTE: there is a duplicate of this in plan-tasks-tomorrow.component
-  addAllPlannedToToday(plannedTasks: TaskPlanned[]) {
-    plannedTasks.forEach((t) => {
-      if (t.parentId) {
-        this.taskService.moveToProjectTodayList(t.parentId);
-        // NOTE: no unsubscribe on purpose as we always want this to run until done
-
-        this.taskService.getByIdOnce$(t.parentId).subscribe((parentTask) => {
-          this.taskService.addTodayTag(parentTask);
-        });
-      } else {
-        this.taskService.moveToProjectTodayList(t.id);
-        this.taskService.addTodayTag(t);
-      }
-    });
-  }
-
-  // NOTE: there is a duplicate of this in plan-tasks-tomorrow.component
   addAllPlannedToDayAndCreateRepeatable(
     plannedTasks: TaskPlanned[],
     repeatableScheduledForTomorrow: TaskRepeatCfg[],
   ) {
-    if (plannedTasks.length) {
-      this.addAllPlannedToToday(plannedTasks);
-    }
-    if (repeatableScheduledForTomorrow.length) {
-      repeatableScheduledForTomorrow.forEach((repeatCfg) => {
-        this._taskRepeatCfgService.createRepeatableTask(
-          repeatCfg,
-          this._tomorrow,
-          this.taskService.currentTaskId,
-        );
-      });
-    }
+    this._taskRepeatCfgService.addAllPlannedToDayAndCreateRepeatable(
+      plannedTasks,
+      repeatableScheduledForTomorrow,
+      this.taskService.currentTaskId,
+      this._tomorrow,
+    );
   }
 
   resetBreakTimer() {
