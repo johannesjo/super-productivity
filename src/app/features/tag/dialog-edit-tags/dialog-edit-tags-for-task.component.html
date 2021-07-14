@@ -11,7 +11,7 @@
       (addItem)="addTag($event)"
       (addNewItem)="addNewTag($event)"
       (removeItem)="removeTag($event)"
-      [isAutoFocus]="true"
+      autoFocus
       [label]="T.F.TAG.D_EDIT.LABEL|translate"
       [model]="tagIds"
       [suggestions]="(tagSuggestions$|async)"

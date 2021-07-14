@@ -1,9 +1,11 @@
 import {
+  Attribute,
   ChangeDetectionStrategy,
   Component,
   ElementRef,
   EventEmitter,
   Input,
+  OnDestroy,
   Output,
   ViewChild,
 } from '@angular/core';
@@ -31,7 +33,7 @@ interface Suggestion {
   styleUrls: ['./chip-list-input.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class ChipListInputComponent {
+export class ChipListInputComponent implements OnDestroy {
   T: typeof T = T;
 
   @Input() label?: string;
@@ -39,7 +41,6 @@ export class ChipListInputComponent {
   @Input() additionalActionTooltip?: string;
   @Input() additionalActionTooltipUnToggle?: string;
   @Input() toggledItems?: string[];
-  @Input() isAutoFocus?: boolean;
 
   @Output() addItem: EventEmitter<string> = new EventEmitter<string>();
   @Output() addNewItem: EventEmitter<string> = new EventEmitter<string>();
@@ -50,6 +51,7 @@ export class ChipListInputComponent {
   modelItems: Suggestion[] = [];
   inputCtrl: FormControl = new FormControl();
   separatorKeysCodes: number[] = [ENTER, COMMA];
+  isAutoFocus = false;
   @ViewChild('inputElRef', { static: true }) inputEl?: ElementRef<HTMLInputElement>;
   @ViewChild('autoElRef', { static: true }) matAutocomplete?: MatAutocomplete;
   private _modelIds: string[] = [];
@@ -65,7 +67,23 @@ export class ChipListInputComponent {
     ),
   );
 
-  constructor() {}
+  private _autoFocusTimeout?: number;
+
+  constructor(@Attribute('autoFocus') public autoFocus: Attribute) {
+    if (typeof autoFocus === 'string') {
+      this.isAutoFocus = true;
+      this._autoFocusTimeout = window.setTimeout(() => {
+        this.inputEl?.nativeElement.focus();
+        // NOTE: we need to wait a little for the tag dialog to be there
+      }, 300);
+    }
+  }
+
+  ngOnDestroy() {
+    if (this._autoFocusTimeout) {
+      window.clearTimeout(this._autoFocusTimeout);
+    }
+  }
 
   @Input() set suggestions(val: Suggestion[]) {
     this.suggestionsIn = val.sort((a, b) => a.title.localeCompare(b.title));
