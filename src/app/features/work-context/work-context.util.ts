@@ -22,7 +22,6 @@ export const hasTasksToWorkOn = (tasks: TaskWithSubTasks[]): boolean => {
   const _tasksToWorkOn = tasks.filter((t) => {
     return (
       !t.isDone &&
-      !t.repeatCfgId &&
       (!t.subTasks ||
         t.subTasks.length === 0 ||
         t.subTasks.filter((st) => !st.isDone).length > 0)
