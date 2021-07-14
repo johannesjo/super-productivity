@@ -6,10 +6,7 @@ import { Tag } from '../../features/tag/tag.model';
 import { Project } from '../../features/project/project.model';
 import { Task } from '../../features/tasks/task.model';
 
-export const isValidAppData = (
-  d: AppDataComplete,
-  isSkipInconsistentTaskStateError = false,
-): boolean => {
+export const isValidAppData = (d: AppDataComplete): boolean => {
   const dAny: any = d;
   // TODO remove this later on
   const isCapableModelVersion =
@@ -45,8 +42,8 @@ export const isValidAppData = (
       dAny.project !== null &&
       Array.isArray(d.reminders) &&
       _isEntityStatesConsistent(d) &&
-      (isSkipInconsistentTaskStateError ||
-        (_isAllTasksAvailableAndListConsistent(d) && _isNoLonelySubTasks(d))) &&
+      _isAllTasksAvailableAndListConsistent(d) &&
+      _isNoLonelySubTasks(d) &&
       _isAllProjectsAvailable(d) &&
       _isAllTagsAvailable(d) &&
       _isAllRemindersAvailable(d) &&
