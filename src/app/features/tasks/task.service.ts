@@ -634,11 +634,11 @@ export class TaskService {
     );
   }
 
-  unScheduleTask(taskId: string, reminderId?: string) {
+  unScheduleTask(taskId: string, reminderId?: string, isSkipToast?: boolean) {
     if (!taskId) {
       throw new Error('No task id');
     }
-    this._store.dispatch(new UnScheduleTask({ id: taskId, reminderId }));
+    this._store.dispatch(new UnScheduleTask({ id: taskId, reminderId, isSkipToast }));
   }
 
   // HELPER

@@ -202,7 +202,9 @@ export class ReScheduleTask implements Action {
 export class UnScheduleTask implements Action {
   readonly type: string = TaskActionTypes.UnScheduleTask;
 
-  constructor(public payload: { id: string; reminderId?: string }) {}
+  constructor(
+    public payload: { id: string; reminderId?: string; isSkipToast?: boolean },
+  ) {}
 }
 
 export class RestoreTask implements Action {

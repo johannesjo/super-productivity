@@ -109,6 +109,15 @@ export class TaskReminderEffects {
   removeTaskReminder$: any = this._actions$.pipe(
     ofType(TaskActionTypes.UnScheduleTask),
     filter(({ payload }: UnScheduleTask) => !!payload.reminderId),
+    tap(({ payload }: UnScheduleTask) => {
+      if (!payload.isSkipToast) {
+        this._snackService.open({
+          type: 'SUCCESS',
+          msg: T.F.TASK.S.REMINDER_DELETED,
+          ico: 'schedule',
+        });
+      }
+    }),
     map((a: UnScheduleTask) => {
       const { id, reminderId } = a.payload;
       this._reminderService.removeReminder(reminderId as string);
@@ -120,13 +129,6 @@ export class TaskReminderEffects {
         },
       });
     }),
-    tap(() =>
-      this._snackService.open({
-        type: 'SUCCESS',
-        msg: T.F.TASK.S.REMINDER_DELETED,
-        ico: 'schedule',
-      }),
-    ),
   );
 
   @Effect({ dispatch: false })
