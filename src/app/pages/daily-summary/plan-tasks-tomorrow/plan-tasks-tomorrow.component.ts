@@ -6,12 +6,14 @@ import { TaskPlanned } from '../../../features/tasks/task.model';
 import { Observable } from 'rxjs';
 import { TaskRepeatCfg } from '../../../features/task-repeat-cfg/task-repeat-cfg.model';
 import { TaskRepeatCfgService } from '../../../features/task-repeat-cfg/task-repeat-cfg.service';
+import { expandAnimation } from '../../../ui/animations/expand.ani';
 
 @Component({
   selector: 'plan-tasks-tomorrow',
   templateUrl: './plan-tasks-tomorrow.component.html',
   styleUrls: ['./plan-tasks-tomorrow.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  animations: [expandAnimation],
 })
 export class PlanTasksTomorrowComponent {
   T: typeof T = T;

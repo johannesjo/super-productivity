@@ -15,3 +15,24 @@
 .wrap-add-planned {
   margin-top: 2 * $s;
 }
+
+.estimate-total {
+  display: flex;
+  align-items: center;
+  flex-direction: row;
+  justify-content: center;
+  padding: 5px 0;
+  user-select: none;
+  vertical-align: middle;
+
+  .label {
+    margin-right: $s;
+  }
+  .no-wrap {
+    display: inline-block;
+    white-space: nowrap;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+}

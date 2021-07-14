@@ -1147,6 +1147,7 @@
       "OK": "Aye aye! Shutdown!"
     },
     "EVALUATION": "Evaluation",
+    "ESTIMATE_TOTAL": "Total estimate:",
     "EXPORT_TASK_LIST": "Export Task List",
     "NO_TASKS": "There are no tasks for this day",
     "PLAN": "Plan",
