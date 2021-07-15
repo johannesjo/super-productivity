@@ -5,7 +5,15 @@ import { NoteModule } from '../note/note.module';
 import { MatDialog } from '@angular/material/dialog';
 import { IS_ELECTRON } from '../../app.constants';
 import { TasksModule } from '../tasks/tasks.module';
-import { concatMap, delay, filter, first } from 'rxjs/operators';
+import {
+  concatMap,
+  delay,
+  filter,
+  first,
+  mapTo,
+  switchMap,
+  withLatestFrom,
+} from 'rxjs/operators';
 import { Reminder } from './reminder.model';
 import { UiHelperService } from '../ui-helper/ui-helper.service';
 import { NotifyService } from '../../core/notify/notify.service';
@@ -13,6 +21,8 @@ import { DialogViewTaskRemindersComponent } from '../tasks/dialog-view-task-remi
 import { DataInitService } from '../../core/data-init/data-init.service';
 import { throttle } from 'helpful-decorators';
 import { SyncTriggerService } from '../../imex/sync/sync-trigger.service';
+import { LayoutService } from '../../core-ui/layout/layout.service';
+import { merge, of, timer } from 'rxjs';
 
 @NgModule({
   declarations: [],
@@ -24,18 +34,18 @@ export class ReminderModule {
     private readonly _matDialog: MatDialog,
     private readonly _uiHelperService: UiHelperService,
     private readonly _notifyService: NotifyService,
+    private readonly _layoutService: LayoutService,
     private readonly _dataInitService: DataInitService,
     private readonly _syncTriggerService: SyncTriggerService,
   ) {
     this._dataInitService.isAllDataLoadedInitially$
       .pipe(
-        concatMap(() =>
-          // we do this to wait for syncing and the like
-          this._syncTriggerService.afterInitialSyncDoneAndDataLoadedInitially$.pipe(
-            first(),
-            delay(1000),
-          ),
+        // we do this to wait for syncing and the like
+        concatMap(
+          () => this._syncTriggerService.afterInitialSyncDoneAndDataLoadedInitially$,
         ),
+        first(),
+        delay(1000),
       )
       .subscribe(async () => {
         _reminderService.init();
@@ -47,6 +57,19 @@ export class ReminderModule {
         filter(
           (reminder) =>
             this._matDialog.openDialogs.length === 0 && !!reminder && reminder.length > 0,
+        ),
+        withLatestFrom(this._layoutService.isShowAddTaskBar$),
+        // don't show reminders while add task bar is open
+        switchMap(([reminders, isShowAddTaskBar]: [Reminder[], boolean]) =>
+          isShowAddTaskBar
+            ? merge([
+                this._layoutService.isShowAddTaskBar$.pipe(
+                  filter((isShowAddTaskBarLive) => !isShowAddTaskBarLive),
+                ),
+                // in case someone just forgot to close it
+                timer(10000),
+              ]).pipe(first(), mapTo(reminders), delay(1000))
+            : of(reminders),
         ),
       )
       .subscribe((reminders: Reminder[]) => {
