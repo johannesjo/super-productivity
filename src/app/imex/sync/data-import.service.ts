@@ -53,6 +53,8 @@ export class DataImportService {
       await this._persistenceService.clearDatabaseExceptBackup();
     }
 
+    console.log(isValidAppData(data), data);
+
     if (isValidAppData(data)) {
       try {
         const migratedData = this._migrationService.migrateIfNecessary(data);

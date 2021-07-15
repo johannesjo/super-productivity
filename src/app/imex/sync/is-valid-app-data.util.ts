@@ -1,5 +1,4 @@
 import { AppBaseData, AppDataComplete, AppDataForProjects } from './sync.model';
-import { MODEL_VERSION_KEY } from '../../app.constants';
 import { isEntityStateConsistent } from '../../util/check-fix-entity-state-consistency';
 import { devError } from '../../util/dev-error';
 import { Tag } from '../../features/tag/tag.model';
@@ -8,48 +7,37 @@ import { Task } from '../../features/tasks/task.model';
 
 export const isValidAppData = (d: AppDataComplete): boolean => {
   const dAny: any = d;
-  // TODO remove this later on
-  const isCapableModelVersion =
+  const isValid =
     typeof dAny === 'object' &&
-    d.project &&
-    d.project[MODEL_VERSION_KEY] &&
-    typeof d.project[MODEL_VERSION_KEY] === 'number' &&
-    (d.project[MODEL_VERSION_KEY] as number) >= 5;
-
-  // console.time('time isValidAppData');
-  const isValid = isCapableModelVersion
-    ? typeof dAny === 'object' &&
-      dAny !== null &&
-      typeof dAny.note === 'object' &&
-      dAny.note !== null &&
-      typeof dAny.bookmark === 'object' &&
-      dAny.bookmark !== null &&
-      typeof dAny.improvement === 'object' &&
-      dAny.improvement !== null &&
-      typeof dAny.obstruction === 'object' &&
-      dAny.obstruction !== null &&
-      typeof dAny.metric === 'object' &&
-      dAny.metric !== null &&
-      typeof dAny.task === 'object' &&
-      dAny.task !== null &&
-      typeof dAny.tag === 'object' &&
-      dAny.tag !== null &&
-      typeof dAny.globalConfig === 'object' &&
-      dAny.globalConfig !== null &&
-      typeof dAny.taskArchive === 'object' &&
-      dAny.taskArchive !== null &&
-      typeof dAny.project === 'object' &&
-      dAny.project !== null &&
-      Array.isArray(d.reminders) &&
-      _isEntityStatesConsistent(d) &&
-      _isAllTasksAvailableAndListConsistent(d) &&
-      _isNoLonelySubTasks(d) &&
-      _isAllProjectsAvailable(d) &&
-      _isAllTagsAvailable(d) &&
-      _isAllRemindersAvailable(d) &&
-      _isAllTasksHaveAProjectOrTag(d)
-    : typeof dAny === 'object';
-  // console.timeEnd('time isValidAppData');
+    dAny !== null &&
+    typeof dAny.note === 'object' &&
+    dAny.note !== null &&
+    typeof dAny.bookmark === 'object' &&
+    dAny.bookmark !== null &&
+    typeof dAny.improvement === 'object' &&
+    dAny.improvement !== null &&
+    typeof dAny.obstruction === 'object' &&
+    dAny.obstruction !== null &&
+    typeof dAny.metric === 'object' &&
+    dAny.metric !== null &&
+    typeof dAny.task === 'object' &&
+    dAny.task !== null &&
+    typeof dAny.tag === 'object' &&
+    dAny.tag !== null &&
+    typeof dAny.globalConfig === 'object' &&
+    dAny.globalConfig !== null &&
+    typeof dAny.taskArchive === 'object' &&
+    dAny.taskArchive !== null &&
+    typeof dAny.project === 'object' &&
+    dAny.project !== null &&
+    Array.isArray(d.reminders) &&
+    _isEntityStatesConsistent(d) &&
+    _isAllTasksAvailableAndListConsistent(d) &&
+    _isNoLonelySubTasks(d) &&
+    _isAllProjectsAvailable(d) &&
+    _isAllTagsAvailable(d) &&
+    _isAllRemindersAvailable(d) &&
+    _isAllTasksHaveAProjectOrTag(d);
 
   console.log({ isValid, d });
 
