@@ -14,6 +14,7 @@ import { LS_WAS_TIMELINE_INITIAL_DIALOG_SHOWN } from '../../core/persistence/ls-
 import { DialogTimelineInitialSetupComponent } from './dialog-timeline-initial-setup/dialog-timeline-initial-setup.component';
 import { WorkContextService } from '../work-context/work-context.service';
 import { TaskRepeatCfgService } from '../task-repeat-cfg/task-repeat-cfg.service';
+import { Task } from '../tasks/task.model';
 
 @Component({
   selector: 'timeline',
@@ -28,7 +29,7 @@ export class TimelineComponent {
   timelineEntries$: Observable<TimelineViewEntry[]> = combineLatest([
     this._workContextService.timelineTasks$,
     this._taskRepeatCfgService.taskRepeatCfgsWithStartTime$,
-    this._taskService.currentTaskId$,
+    this.taskService.currentTaskId$,
     this._globalConfigService.timelineCfg$,
   ]).pipe(
     debounceTime(50),
@@ -53,7 +54,7 @@ export class TimelineComponent {
   tomorrow: number = getTomorrow(0).getTime();
 
   constructor(
-    private _taskService: TaskService,
+    public taskService: TaskService,
     private _taskRepeatCfgService: TaskRepeatCfgService,
     private _workContextService: WorkContextService,
     private _globalConfigService: GlobalConfigService,
@@ -66,5 +67,13 @@ export class TimelineComponent {
 
   trackByFn(i: number, item: any) {
     return item.id;
+  }
+
+  moveUp(task: Task) {
+    this.taskService.moveUp(task.id, task.parentId, false);
+  }
+
+  moveDown(task: Task) {
+    this.taskService.moveDown(task.id, task.parentId, false);
   }
 }

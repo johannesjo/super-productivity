@@ -283,3 +283,16 @@ task.split-task::ng-deep .box {
   margin-top: $s * 3;
   text-align: center;
 }
+
+.up-down {
+  position: absolute;
+  flex-direction: column;
+  display: none;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+
+  .row:hover & {
+    display: flex;
+  }
+}

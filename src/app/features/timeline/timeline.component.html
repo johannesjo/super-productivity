@@ -17,6 +17,17 @@
             <!--              (row.start|date:'shortDate')}}-->
             <!--            </div>-->
           </div>
+          <div
+            *ngIf="(row.type ===TimelineViewEntryType.Task || row.type ===TimelineViewEntryType.SplitTask) && row.data.id !== (taskService.currentTaskId$|async)"
+            class="up-down"
+          >
+            <button mat-icon-button (click)="moveUp(row.data)">
+              <mat-icon>arrow_upward</mat-icon>
+            </button>
+            <button mat-icon-button (click)="moveDown(row.data)">
+              <mat-icon>arrow_downward</mat-icon>
+            </button>
+          </div>
         </div>
         <div class="col right" [ngSwitch]="row.type">
           <task
