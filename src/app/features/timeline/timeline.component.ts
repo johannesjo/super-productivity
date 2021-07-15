@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnDestroy } from '@angular/core';
 import { TimelineViewEntry } from './timeline.model';
 import { debounceTime, map, tap } from 'rxjs/operators';
 import { TaskService } from '../tasks/task.service';
@@ -23,7 +23,7 @@ import { Task } from '../tasks/task.model';
   changeDetection: ChangeDetectionStrategy.OnPush,
   animations: [standardListAnimation],
 })
-export class TimelineComponent {
+export class TimelineComponent implements OnDestroy {
   T: typeof T = T;
   TimelineViewEntryType: typeof TimelineViewEntryType = TimelineViewEntryType;
   timelineEntries$: Observable<TimelineViewEntry[]> = combineLatest([
@@ -53,6 +53,9 @@ export class TimelineComponent {
   now: number = Date.now();
   tomorrow: number = getTomorrow(0).getTime();
 
+  private _moveUpTimeout?: number;
+  private _moveDownTimeout?: number;
+
   constructor(
     public taskService: TaskService,
     private _taskRepeatCfgService: TaskRepeatCfgService,
@@ -65,15 +68,24 @@ export class TimelineComponent {
     }
   }
 
+  ngOnDestroy() {
+    window.clearTimeout(this._moveUpTimeout);
+    window.clearTimeout(this._moveDownTimeout);
+  }
+
   trackByFn(i: number, item: any) {
     return item.id;
   }
 
   moveUp(task: Task) {
     this.taskService.moveUp(task.id, task.parentId, false);
+    window.clearTimeout(this._moveUpTimeout);
+    window.setTimeout(() => this.taskService.focusTask(task.id), 50);
   }
 
   moveDown(task: Task) {
     this.taskService.moveDown(task.id, task.parentId, false);
+    window.clearTimeout(this._moveDownTimeout);
+    window.setTimeout(() => this.taskService.focusTask(task.id), 50);
   }
 }
