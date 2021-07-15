@@ -293,6 +293,16 @@ task.split-task::ng-deep .box {
   transform: translate(-50%, -50%);
 
   .row:hover & {
+    animation: fadeIn $transition-duration--enter $ani-enter-timing;
     display: flex;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
   }
 }
