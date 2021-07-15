@@ -787,7 +787,7 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
       ev.stopPropagation();
       ev.preventDefault();
       // timeout required to let changes take place @TODO hacky
-      setTimeout(this.focusSelf.bind(this));
+      setTimeout(this.focusSelf.bind(this), 50);
     }
     if (checkKeyCombo(ev, keys.moveTaskDown)) {
       this._taskService.moveDown(this.task.id, this.task.parentId, this.isBacklog);
