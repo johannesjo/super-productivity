@@ -54,6 +54,8 @@ import {
   selectActiveContextId,
   selectActiveContextTypeAndId,
   selectActiveWorkContext,
+  selectDoneBacklogTaskIdsForActiveContext,
+  selectDoneTaskIdsForActiveContext,
   selectStartableTasksForActiveContext,
   selectTimelineTasks,
 } from './store/work-context.selectors';
@@ -187,6 +189,12 @@ export class WorkContextService {
 
   doneTasks$: Observable<TaskWithSubTasks[]> = this.todaysTasks$.pipe(
     map((tasks) => tasks.filter((task) => task && task.isDone)),
+  );
+  doneTaskIds$: Observable<string[]> = this._store$.select(
+    selectDoneTaskIdsForActiveContext,
+  );
+  doneBacklogTaskIds$: Observable<string[] | undefined> = this._store$.select(
+    selectDoneBacklogTaskIdsForActiveContext,
   );
 
   backlogTasks$: Observable<TaskWithSubTasks[]> = this.backlogTaskIds$.pipe(

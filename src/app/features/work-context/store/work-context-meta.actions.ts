@@ -16,7 +16,12 @@ export const moveTaskInTodayList = createAction(
 );
 export const moveTaskUpInTodayList = createAction(
   '[WorkContextMeta] Move Task Up in Today',
-  props<{ taskId: string; workContextId: string; workContextType: WorkContextType }>(),
+  props<{
+    taskId: string;
+    workContextId: string;
+    doneTaskIds: string[];
+    workContextType: WorkContextType;
+  }>(),
 );
 
 export const moveTaskDownInTodayList = createAction(

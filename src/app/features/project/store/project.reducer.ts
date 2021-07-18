@@ -35,7 +35,11 @@ import {
   moveItemInList,
   moveTaskForWorkContextLikeState,
 } from '../../work-context/store/work-context-meta.helper';
-import { arrayMoveLeft, arrayMoveRight } from '../../../util/array-move';
+import {
+  arrayMoveLeft,
+  arrayMoveLeftUntil,
+  arrayMoveRight,
+} from '../../../util/array-move';
 import { filterOutId } from '../../../util/filter-out-id';
 import { unique } from '../../../util/unique';
 import {
@@ -258,15 +262,16 @@ export const projectReducer = (
 
   // up down today
   if ((action.type as string) === moveTaskUpInTodayList.type) {
-    const { taskId, workContextType, workContextId } = action as any;
+    const { taskId, workContextType, workContextId, doneTaskIds } = action as any;
     return workContextType === WORK_CONTEXT_TYPE
       ? projectAdapter.updateOne(
           {
             id: workContextId,
             changes: {
-              taskIds: arrayMoveLeft(
+              taskIds: arrayMoveLeftUntil(
                 (state.entities[workContextId] as Project).taskIds,
                 taskId,
+                (id) => !doneTaskIds.includes(id),
               ),
             },
           },

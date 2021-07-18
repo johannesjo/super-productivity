@@ -36,3 +36,23 @@ export const arrayMoveRight = <T>(arr: T[], val: T): T[] => {
   }
   return arr;
 };
+
+export const arrayMoveLeftUntil = <T>(
+  arr: T[],
+  val: T,
+  skipDoneConditionFn: (item: T) => boolean,
+): T[] => {
+  if (!arr.includes(val)) {
+    return arr;
+  }
+  const oldIndex = arr.indexOf(val);
+  let newIndex: number = oldIndex - 1;
+  while (skipDoneConditionFn(arr[newIndex]) && newIndex > 0) {
+    newIndex--;
+  }
+
+  if (newIndex >= 0) {
+    return arrayMove(arr, oldIndex, newIndex);
+  }
+  return arr;
+};

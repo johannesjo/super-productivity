@@ -409,9 +409,16 @@ export class TaskService {
       if (isBacklog) {
         this._store.dispatch(moveTaskUpInBacklogList({ taskId: id, workContextId }));
       } else {
-        this._store.dispatch(
-          moveTaskUpInTodayList({ taskId: id, workContextType, workContextId }),
-        );
+        this._workContextService.doneTaskIds$.pipe(take(1)).subscribe((doneTaskIds) => {
+          this._store.dispatch(
+            moveTaskUpInTodayList({
+              taskId: id,
+              workContextType,
+              workContextId,
+              doneTaskIds,
+            }),
+          );
+        });
       }
     }
   }
@@ -424,6 +431,7 @@ export class TaskService {
       const workContextType = this._workContextService
         .activeWorkContextType as WorkContextType;
 
+      // this.
       if (isBacklog) {
         this._store.dispatch(moveTaskDownInBacklogList({ taskId: id, workContextId }));
       } else {

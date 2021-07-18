@@ -93,6 +93,40 @@ export const selectStartableTasksForActiveContext = createSelector(
   },
 );
 
+export const selectDoneTaskIdsForActiveContext = createSelector(
+  selectActiveWorkContext,
+  selectTaskEntities,
+  (activeContext, entities): string[] => {
+    return activeContext.taskIds.filter((id: string) => {
+      const task: Task | undefined = entities[id];
+      if (!task) {
+        // NOTE: there is the rare chance that activeWorkContext$ and selectTaskEntities
+        // are out of sync, due to activeWorkContext taking an extra step, this is why we
+        // only use devError
+        devError('Task not found');
+      }
+      return !task?.isDone;
+    });
+  },
+);
+
+export const selectDoneBacklogTaskIdsForActiveContext = createSelector(
+  selectActiveWorkContext,
+  selectTaskEntities,
+  (activeContext, entities): string[] | undefined => {
+    return activeContext.backlogTaskIds?.filter((id: string) => {
+      const task: Task | undefined = entities[id];
+      if (!task) {
+        // NOTE: there is the rare chance that activeWorkContext$ and selectTaskEntities
+        // are out of sync, due to activeWorkContext taking an extra step, this is why we
+        // only use devError
+        devError('Task not found');
+      }
+      return !task?.isDone;
+    });
+  },
+);
+
 export const selectTimelineTasks = createSelector(
   selectStartableTasksForActiveContext,
   selectTaskFeatureState,
