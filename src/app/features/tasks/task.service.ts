@@ -435,9 +435,16 @@ export class TaskService {
       if (isBacklog) {
         this._store.dispatch(moveTaskDownInBacklogList({ taskId: id, workContextId }));
       } else {
-        this._store.dispatch(
-          moveTaskDownInTodayList({ taskId: id, workContextType, workContextId }),
-        );
+        this._workContextService.doneTaskIds$.pipe(take(1)).subscribe((doneTaskIds) => {
+          this._store.dispatch(
+            moveTaskDownInTodayList({
+              taskId: id,
+              workContextType,
+              workContextId,
+              doneTaskIds,
+            }),
+          );
+        });
       }
     }
   }

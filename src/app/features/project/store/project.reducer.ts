@@ -39,6 +39,7 @@ import {
   arrayMoveLeft,
   arrayMoveLeftUntil,
   arrayMoveRight,
+  arrayMoveRightUntil,
 } from '../../../util/array-move';
 import { filterOutId } from '../../../util/filter-out-id';
 import { unique } from '../../../util/unique';
@@ -281,15 +282,16 @@ export const projectReducer = (
   }
 
   if ((action.type as string) === moveTaskDownInTodayList.type) {
-    const { taskId, workContextType, workContextId } = action as any;
+    const { taskId, workContextType, workContextId, doneTaskIds } = action as any;
     return workContextType === WORK_CONTEXT_TYPE
       ? projectAdapter.updateOne(
           {
             id: workContextId,
             changes: {
-              taskIds: arrayMoveRight(
+              taskIds: arrayMoveRightUntil(
                 (state.entities[workContextId] as Project).taskIds,
                 taskId,
+                (id) => !doneTaskIds.includes(id),
               ),
             },
           },
