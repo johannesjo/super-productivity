@@ -407,7 +407,16 @@ export class TaskService {
         .activeWorkContextType as WorkContextType;
 
       if (isBacklog) {
-        this._store.dispatch(moveTaskUpInBacklogList({ taskId: id, workContextId }));
+        this._workContextService.doneBacklogTaskIds$
+          .pipe(take(1))
+          .subscribe((doneBacklogTaskIds) => {
+            if (!doneBacklogTaskIds) {
+              throw new Error('No doneBacklogTaskIds found');
+            }
+            this._store.dispatch(
+              moveTaskUpInBacklogList({ taskId: id, workContextId, doneBacklogTaskIds }),
+            );
+          });
       } else {
         this._workContextService.doneTaskIds$.pipe(take(1)).subscribe((doneTaskIds) => {
           this._store.dispatch(
@@ -433,7 +442,20 @@ export class TaskService {
 
       // this.
       if (isBacklog) {
-        this._store.dispatch(moveTaskDownInBacklogList({ taskId: id, workContextId }));
+        this._workContextService.doneBacklogTaskIds$
+          .pipe(take(1))
+          .subscribe((doneBacklogTaskIds) => {
+            if (!doneBacklogTaskIds) {
+              throw new Error('No doneBacklogTaskIds found');
+            }
+            this._store.dispatch(
+              moveTaskDownInBacklogList({
+                taskId: id,
+                workContextId,
+                doneBacklogTaskIds,
+              }),
+            );
+          });
       } else {
         this._workContextService.doneTaskIds$.pipe(take(1)).subscribe((doneTaskIds) => {
           this._store.dispatch(

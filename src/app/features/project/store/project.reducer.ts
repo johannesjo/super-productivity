@@ -35,12 +35,7 @@ import {
   moveItemInList,
   moveTaskForWorkContextLikeState,
 } from '../../work-context/store/work-context-meta.helper';
-import {
-  arrayMoveLeft,
-  arrayMoveLeftUntil,
-  arrayMoveRight,
-  arrayMoveRightUntil,
-} from '../../../util/array-move';
+import { arrayMoveLeftUntil, arrayMoveRightUntil } from '../../../util/array-move';
 import { filterOutId } from '../../../util/filter-out-id';
 import { unique } from '../../../util/unique';
 import {
@@ -302,14 +297,15 @@ export const projectReducer = (
 
   // up down backlog
   if ((action.type as string) === moveTaskUpInBacklogList.type) {
-    const { taskId, workContextId } = action as any;
+    const { taskId, workContextId, doneTaskIds } = action as any;
     return projectAdapter.updateOne(
       {
         id: workContextId,
         changes: {
-          backlogTaskIds: arrayMoveLeft(
+          backlogTaskIds: arrayMoveLeftUntil(
             (state.entities[workContextId] as Project).backlogTaskIds,
             taskId,
+            (id) => !doneTaskIds.includes(id),
           ),
         },
       },
@@ -318,14 +314,15 @@ export const projectReducer = (
   }
 
   if ((action.type as string) === moveTaskDownInBacklogList.type) {
-    const { taskId, workContextId } = action as any;
+    const { taskId, workContextId, doneTaskIds } = action as any;
     return projectAdapter.updateOne(
       {
         id: workContextId,
         changes: {
-          backlogTaskIds: arrayMoveRight(
+          backlogTaskIds: arrayMoveRightUntil(
             (state.entities[workContextId] as Project).backlogTaskIds,
             taskId,
+            (id) => !doneTaskIds.includes(id),
           ),
         },
       },
