@@ -44,7 +44,7 @@ export class CaldavClientService {
     );
   }
 
-  private static _getCalendarUriFromUrl(url: string) {
+  private static _getCalendarUriFromUrl(url: string): string {
     if (url.endsWith('/')) {
       url = url.substring(0, url.length - 1);
     }
@@ -52,7 +52,7 @@ export class CaldavClientService {
     return url.substring(url.lastIndexOf('/') + 1);
   }
 
-  private static async _getAllTodos(calendar: any, filterOpen: boolean) {
+  private static async _getAllTodos(calendar: any, filterOpen: boolean): Promise<any> {
     const query = {
       name: [NS.IETF_CALDAV, 'comp-filter'],
       attributes: [['name', 'VCALENDAR']],
@@ -82,7 +82,7 @@ export class CaldavClientService {
     return await calendar.calendarQuery([query]);
   }
 
-  private static async _findTaskByUid(calendar: any, taskUid: string) {
+  private static async _findTaskByUid(calendar: any, taskUid: string): Promise<any> {
     const query = {
       name: [NS.IETF_CALDAV, 'comp-filter'],
       attributes: [['name', 'VCALENDAR']],
@@ -180,7 +180,7 @@ export class CaldavClientService {
     }
   }
 
-  async _getCalendar(cfg: CaldavCfg) {
+  async _getCalendar(cfg: CaldavCfg): Promise<any> {
     const clientCache = await this._get_client(cfg);
     const resource = cfg.resourceName as string;
 
@@ -266,13 +266,14 @@ export class CaldavClientService {
     );
   }
 
-  private _getXhrProvider(cfg: CaldavCfg) {
+  private _getXhrProvider(cfg: CaldavCfg): any {
     // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
     function xhrProvider(): XMLHttpRequest {
       const xhr = new XMLHttpRequest();
       const oldOpen = xhr.open;
 
       // override open() method to add headers
+      // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
       xhr.open = function () {
         // @ts-ignore
         const result = oldOpen.apply(this, arguments);
@@ -290,7 +291,7 @@ export class CaldavClientService {
     return xhrProvider;
   }
 
-  private _handleNetErr(err: any) {
+  private _handleNetErr(err: any): void {
     this._snackService.open({
       type: 'ERROR',
       msg: T.F.CALDAV.S.ERR_NETWORK,
@@ -298,7 +299,7 @@ export class CaldavClientService {
     throw new Error('CALDAV NETWORK ERROR: ' + err);
   }
 
-  private _checkSettings(cfg: CaldavCfg) {
+  private _checkSettings(cfg: CaldavCfg): void {
     if (!CaldavClientService._isValidSettings(cfg)) {
       this._snackService.open({
         type: 'ERROR',
@@ -342,7 +343,11 @@ export class CaldavClientService {
     return CaldavClientService._mapTask(task[0]);
   }
 
-  private async _updateCompletedState(cfg: CaldavCfg, uid: string, completed: boolean) {
+  private async _updateCompletedState(
+    cfg: CaldavCfg,
+    uid: string,
+    completed: boolean,
+  ): Promise<any> {
     const cal = await this._getCalendar(cfg);
 
     if (cal.readOnly) {
