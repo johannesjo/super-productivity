@@ -19,7 +19,7 @@ export class DialogInitialComponent {
     @Inject(MAT_DIALOG_DATA) public data: InitialDialogResponse,
   ) {}
 
-  close() {
+  close(): void {
     this._matDialogRef.close();
   }
 }

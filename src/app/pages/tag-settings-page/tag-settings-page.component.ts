@@ -68,7 +68,7 @@ export class TagSettingsPageComponent implements OnInit, OnDestroy {
     );
   }
 
-  ngOnDestroy() {
+  ngOnDestroy(): void {
     this._subs.unsubscribe();
   }
 

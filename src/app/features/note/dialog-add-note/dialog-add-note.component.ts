@@ -37,7 +37,7 @@ export class DialogAddNoteComponent {
     }
   }
 
-  submit() {
+  submit(): void {
     if (!this.isSubmitted && this.noteContent && this.noteContent.trim().length > 0) {
       this._noteService.add({ content: this.noteContent }, true);
 
@@ -47,7 +47,7 @@ export class DialogAddNoteComponent {
     }
   }
 
-  close() {
+  close(): void {
     this._matDialogRef.close();
   }
 
@@ -55,7 +55,7 @@ export class DialogAddNoteComponent {
     sessionStorage.setItem(SS_NOTE_TMP, val);
   }
 
-  private _clearSessionStorage() {
+  private _clearSessionStorage(): void {
     sessionStorage.setItem(SS_NOTE_TMP, '');
   }
 }

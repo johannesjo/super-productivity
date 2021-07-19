@@ -301,11 +301,12 @@ export class TaskAdditionalInfoComponent implements AfterViewInit, OnDestroy {
     }
   }
 
-  get progress() {
+  get progress(): number {
     return (
-      this._taskData &&
-      this._taskData.timeEstimate &&
-      (this._taskData.timeSpent / this._taskData.timeEstimate) * 100
+      (this._taskData &&
+        this._taskData.timeEstimate &&
+        (this._taskData.timeSpent / this._taskData.timeEstimate) * 100) ||
+      0
     );
   }
 
@@ -368,18 +369,18 @@ export class TaskAdditionalInfoComponent implements AfterViewInit, OnDestroy {
     }
   }
 
-  close() {
+  close(): void {
     this.taskService.setSelectedId(null);
   }
 
-  estimateTime() {
+  estimateTime(): void {
     this._matDialog.open(DialogTimeEstimateComponent, {
       data: { task: this.task },
       autoFocus: !isTouchOnly(),
     });
   }
 
-  editReminder() {
+  editReminder(): void {
     this._matDialog.open(DialogAddTaskReminderComponent, {
       restoreFocus: true,
       data: { task: this.task } as AddTaskReminderInterface,

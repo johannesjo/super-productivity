@@ -41,7 +41,7 @@ export class DialogTimeEstimateComponent {
     console.log(this.timeSpentOnDayCopy);
   }
 
-  submit() {
+  submit(): void {
     this._taskService.update(this.taskCopy.id, {
       timeEstimate: this.taskCopy.timeEstimate,
       timeSpentOnDay: this.timeSpentOnDayCopy,
@@ -52,7 +52,7 @@ export class DialogTimeEstimateComponent {
     });
   }
 
-  showAddForAnotherDayForm() {
+  showAddForAnotherDayForm(): void {
     this._matDialog
       .open(DialogAddTimeEstimateForOtherDayComponent)
       .afterClosed()

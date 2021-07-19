@@ -25,7 +25,7 @@ export class MigrateMetricService {
     private _syncTriggerService: SyncTriggerService,
   ) {}
 
-  checkMigrate() {
+  checkMigrate(): void {
     // TODO check for model version number instead
     this._syncTriggerService.afterInitialSyncDoneAndDataLoadedInitially$
       .pipe(

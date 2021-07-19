@@ -49,7 +49,7 @@ export class DialogPomodoroBreakComponent {
     );
   }
 
-  close() {
+  close(): void {
     this._matDialogRef.close(null);
   }
 

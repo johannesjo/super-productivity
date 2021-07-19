@@ -53,11 +53,11 @@ export class BetterDrawerContainerComponent
 
   constructor(private _elementRef: ElementRef, private _domSanitizer: DomSanitizer) {}
 
-  @HostBinding('class.isOpen') get isOpenGet() {
+  @HostBinding('class.isOpen') get isOpenGet(): boolean {
     return this._isOpen;
   }
 
-  @HostBinding('class.isOver') get isOverGet() {
+  @HostBinding('class.isOver') get isOverGet(): boolean {
     return this._isOver;
   }
 
@@ -109,7 +109,7 @@ export class BetterDrawerContainerComponent
     this._subs.unsubscribe();
   }
 
-  close() {
+  close(): void {
     // FORCE blur because otherwise task notes won't save
     if (IS_TOUCH_ONLY) {
       document.querySelectorAll('input,textarea').forEach((element) => {
@@ -121,7 +121,7 @@ export class BetterDrawerContainerComponent
     this.wasClosed.emit();
   }
 
-  private _updateStyle() {
+  private _updateStyle(): void {
     const widthStyle = ` width: ${this.sideWidth}%;`;
     const style = this.isOverGet
       ? this.isOpenGet

@@ -230,11 +230,11 @@ export class TakeABreakService {
     this._triggerLockScreenCounter$.next(false);
   }
 
-  resetTimer() {
+  resetTimer(): void {
     this._triggerManualReset$.next(0);
   }
 
-  resetTimerAndCountAsBreak() {
+  resetTimerAndCountAsBreak(): void {
     const min5 = 1000 * 60 * 5;
     this._workContextService.addToBreakTimeForActiveContext(undefined, min5);
     this.resetTimer();

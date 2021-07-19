@@ -194,7 +194,7 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
     );
   }
 
-  ngOnDestroy() {
+  ngOnDestroy(): void {
     this._subs.unsubscribe();
     // should not happen, but just in case
     if (this._successAnimationTimeout) {

@@ -31,7 +31,7 @@ export class DialogFullscreenMarkdownComponent implements OnDestroy {
     );
   }
 
-  ngOnDestroy() {
+  ngOnDestroy(): void {
     this._subs.unsubscribe();
   }
 

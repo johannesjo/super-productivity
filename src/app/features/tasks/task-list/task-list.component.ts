@@ -129,7 +129,7 @@ export class TaskListComponent implements OnDestroy, OnInit {
     );
   }
 
-  ngOnDestroy() {
+  ngOnDestroy(): void {
     this._subs.unsubscribe();
     if (this._blockAnimationTimeout) {
       clearTimeout(this._blockAnimationTimeout);
@@ -140,7 +140,7 @@ export class TaskListComponent implements OnDestroy, OnInit {
     return task.id;
   }
 
-  expandDoneTasks() {
+  expandDoneTasks(): void {
     if (!this.parentId) {
       throw new Error();
     }
@@ -149,7 +149,7 @@ export class TaskListComponent implements OnDestroy, OnInit {
     this._taskService.focusTask(this.parentId);
   }
 
-  private _blockAnimation() {
+  private _blockAnimation(): void {
     this.isBlockAni = true;
     this._cd.detectChanges();
     this._blockAnimationTimeout = window.setTimeout(() => {

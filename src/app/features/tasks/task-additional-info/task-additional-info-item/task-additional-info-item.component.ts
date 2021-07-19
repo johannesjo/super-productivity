@@ -56,11 +56,11 @@ export class TaskAdditionalInfoItemComponent {
     }
   }
 
-  focusEl() {
+  focusEl(): void {
     this.elementRef.nativeElement.focus();
   }
 
-  onInputItemClick() {
+  onInputItemClick(): void {
     this.editActionTriggered.emit();
     this.focusEl();
   }

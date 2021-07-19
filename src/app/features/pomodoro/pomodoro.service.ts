@@ -166,7 +166,7 @@ export class PomodoroService {
       });
   }
 
-  start() {
+  start(): void {
     this._store$.dispatch(new StartPomodoro());
   }
 
@@ -174,20 +174,20 @@ export class PomodoroService {
     this._store$.dispatch(new PausePomodoro({ isBreakEndPause }));
   }
 
-  stop() {
+  stop(): void {
     this._store$.dispatch(new StopPomodoro());
   }
 
-  finishPomodoroSession() {
+  finishPomodoroSession(): void {
     this._store$.dispatch(new FinishPomodoroSession());
   }
 
-  skipBreak() {
+  skipBreak(): void {
     this._store$.dispatch(new SkipPomodoroBreak());
   }
 
   // NON STORE ACTIONS
-  playSessionDoneSound() {
+  playSessionDoneSound(): void {
     new Audio(DEFAULT_SOUND).play();
   }
 

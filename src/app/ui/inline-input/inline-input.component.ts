@@ -32,14 +32,14 @@ export class InlineInputComponent implements AfterViewInit {
 
   constructor() {}
 
-  ngAfterViewInit() {
+  ngAfterViewInit(): void {
     this.activeInputEl =
       this.type === 'duration'
         ? (this.inputElDuration as ElementRef).nativeElement
         : (this.inputEl as ElementRef).nativeElement;
   }
 
-  focusInput() {
+  focusInput(): void {
     this.activeInputEl =
       this.type === 'duration'
         ? (this.inputElDuration as ElementRef).nativeElement
@@ -53,7 +53,7 @@ export class InlineInputComponent implements AfterViewInit {
     // }
   }
 
-  blur() {
+  blur(): void {
     this.isFocused = false;
 
     if (
@@ -64,11 +64,11 @@ export class InlineInputComponent implements AfterViewInit {
     }
   }
 
-  onChange(v: string | number) {
+  onChange(v: string | number): void {
     this.newValue = v;
   }
 
-  keypressHandler(ev: KeyboardEvent) {
+  keypressHandler(ev: KeyboardEvent): void {
     if (ev.key === 'Escape') {
       this.newValue = undefined;
       (this.activeInputEl as HTMLElement).blur();

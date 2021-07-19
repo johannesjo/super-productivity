@@ -102,7 +102,7 @@ export class TagListComponent implements OnDestroy {
     this._subs.unsubscribe();
   }
 
-  editTags() {
+  editTags(): void {
     this._matDialog.open(DialogEditTagsForTaskComponent, {
       restoreFocus: true,
       data: {

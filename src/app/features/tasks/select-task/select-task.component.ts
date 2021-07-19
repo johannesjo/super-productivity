@@ -66,7 +66,7 @@ export class SelectTaskComponent implements OnInit, OnDestroy {
       });
   }
 
-  ngOnDestroy() {
+  ngOnDestroy(): void {
     this._destroy$.next(true);
     this._destroy$.unsubscribe();
   }

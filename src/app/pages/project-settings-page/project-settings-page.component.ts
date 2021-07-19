@@ -97,7 +97,7 @@ export class ProjectSettingsPageComponent implements OnInit, OnDestroy {
     );
   }
 
-  ngOnDestroy() {
+  ngOnDestroy(): void {
     this._subs.unsubscribe();
   }
 

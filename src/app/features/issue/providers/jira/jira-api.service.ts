@@ -116,7 +116,7 @@ export class JiraApiService {
     });
   }
 
-  unblockAccess() {
+  unblockAccess(): void {
     this._isBlockAccess = false;
     sessionStorage.removeItem(BLOCK_ACCESS_KEY);
   }
@@ -591,7 +591,7 @@ export class JiraApiService {
     }
   }
 
-  private _blockAccess() {
+  private _blockAccess(): void {
     // TODO also shut down all existing requests
     this._isBlockAccess = true;
     sessionStorage.setItem(BLOCK_ACCESS_KEY, 'true');

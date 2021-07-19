@@ -55,7 +55,7 @@ export class SplitComponent implements AfterViewInit {
     this._renderer.addClass(this.splitBottomEl, ANIMATABLE_CLASS);
   }
 
-  toggle() {
+  toggle(): void {
     this._renderer.addClass(this.splitTopEl, ANIMATABLE_CLASS);
     this._renderer.addClass(this.splitBottomEl, ANIMATABLE_CLASS);
     let newPos = 50;
@@ -65,7 +65,7 @@ export class SplitComponent implements AfterViewInit {
     this._updatePos(newPos);
   }
 
-  onTouchStart() {
+  onTouchStart(): void {
     this._isDrag = false;
     const touchend$ = fromEvent(document, 'touchend');
     this.eventSubs = touchend$.subscribe(() => this.onMoveEnd());
@@ -77,7 +77,7 @@ export class SplitComponent implements AfterViewInit {
     this.eventSubs.add(touchmove$);
   }
 
-  onMouseDown() {
+  onMouseDown(): void {
     this._isDrag = false;
     const mouseup$ = fromEvent(document, 'mouseup');
     this.eventSubs = mouseup$.subscribe(() => this.onMoveEnd());

@@ -46,7 +46,7 @@ export class DialogEditTaskAttachmentComponent {
     this._matDialogRef.close(attachment);
   }
 
-  submit() {
+  submit(): void {
     // don't submit invalid data
     if (!this.attachmentCopy.path || !this.attachmentCopy.type) {
       return;

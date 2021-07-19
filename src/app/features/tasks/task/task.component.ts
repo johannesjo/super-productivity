@@ -204,7 +204,7 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
     });
   }
 
-  ngAfterViewInit() {
+  ngAfterViewInit(): void {
     // this._taskService.focusTaskId$
     //   .pipe(
     //     takeUntil(this._destroy$),
@@ -223,7 +223,7 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
     }
   }
 
-  ngOnDestroy() {
+  ngOnDestroy(): void {
     this._destroy$.next(true);
     this._destroy$.unsubscribe();
 

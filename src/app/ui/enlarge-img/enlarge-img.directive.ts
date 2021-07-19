@@ -21,7 +21,7 @@ export class EnlargeImgDirective {
     this.imageEl = this._el.nativeElement;
   }
 
-  @HostListener('click', ['$event']) onClick() {
+  @HostListener('click', ['$event']) onClick(): void {
     this.isImg = this.imageEl.tagName.toLowerCase() === 'img';
 
     if (this.isImg || this.enlargeImg) {
@@ -29,7 +29,7 @@ export class EnlargeImgDirective {
     }
   }
 
-  private _hideImg() {
+  private _hideImg(): void {
     this._setOriginCoordsForImageAni();
     this._renderer.addClass(this.enlargedImgWrapperEl, 'ani-remove');
     this._renderer.removeClass(this.enlargedImgWrapperEl, 'ani-enter');
@@ -44,7 +44,7 @@ export class EnlargeImgDirective {
     });
   }
 
-  private _setOriginCoordsForImageAni() {
+  private _setOriginCoordsForImageAni(): void {
     if (!this.newImageEl) {
       throw new Error();
     }
@@ -61,7 +61,7 @@ export class EnlargeImgDirective {
     );
   }
 
-  private _showImg() {
+  private _showImg(): void {
     const src = this.enlargeImg || (this.imageEl.getAttribute('src') as string);
 
     const img = new Image();
@@ -119,7 +119,7 @@ export class EnlargeImgDirective {
     });
   }
 
-  private _zoomImg() {
+  private _zoomImg(): void {
     if (!this.enlargedImgWrapperEl) {
       throw new Error();
     }
@@ -133,7 +133,7 @@ export class EnlargeImgDirective {
     this.enlargedImgWrapperEl.addEventListener('mousemove', this.zoomMoveHandler as any);
   }
 
-  private _zoomOutImg() {
+  private _zoomOutImg(): void {
     if (!this.enlargedImgWrapperEl || !this.zoomMoveHandler) {
       throw new Error();
     }
@@ -174,7 +174,7 @@ export class EnlargeImgDirective {
     );
   }
 
-  private _waitForImgRender() {
+  private _waitForImgRender(): Promise<any> {
     const rafAsync = () =>
       new Promise((resolve) => {
         requestAnimationFrame(resolve);

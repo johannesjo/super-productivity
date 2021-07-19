@@ -160,18 +160,18 @@ export class WorkViewComponent implements OnInit, OnDestroy, AfterContentInit {
     );
   }
 
-  ngOnDestroy() {
+  ngOnDestroy(): void {
     if (this._switchListAnimationTimeout) {
       window.clearTimeout(this._switchListAnimationTimeout);
     }
     this.layoutService.isScrolled$.next(false);
   }
 
-  planMore() {
+  planMore(): void {
     this.planningModeService.enterPlanningMode();
   }
 
-  startWork() {
+  startWork(): void {
     this.planningModeService.leavePlanningMode();
   }
 
@@ -188,7 +188,7 @@ export class WorkViewComponent implements OnInit, OnDestroy, AfterContentInit {
     );
   }
 
-  resetBreakTimer() {
+  resetBreakTimer(): void {
     this.takeABreakService.resetTimer();
   }
 }

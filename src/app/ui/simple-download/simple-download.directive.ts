@@ -10,7 +10,7 @@ export class SimpleDownloadDirective {
 
   constructor(private _el: ElementRef) {}
 
-  @HostListener('click') onClick() {
+  @HostListener('click') onClick(): void {
     if (!this._el.nativeElement.getAttribute('download')) {
       const fileName = this.simpleDownload as string;
       download(fileName, this.simpleDownloadData as string);

@@ -74,7 +74,7 @@ export class DialogEditTaskRepeatCfgComponent implements OnInit, OnDestroy {
     this._subs.unsubscribe();
   }
 
-  save() {
+  save(): void {
     if (this.isEdit) {
       this._taskRepeatCfgService.updateTaskRepeatCfg(
         exists(this.taskRepeatCfgId),
@@ -91,14 +91,14 @@ export class DialogEditTaskRepeatCfgComponent implements OnInit, OnDestroy {
     }
   }
 
-  remove() {
+  remove(): void {
     this._taskRepeatCfgService.deleteTaskRepeatCfgWithDialog(
       exists(this.task.repeatCfgId),
     );
     this.close();
   }
 
-  close() {
+  close(): void {
     this._matDialogRef.close();
   }
 

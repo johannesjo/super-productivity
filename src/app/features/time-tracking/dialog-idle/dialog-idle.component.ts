@@ -59,14 +59,14 @@ export class DialogIdleComponent implements OnInit {
     }
   }
 
-  skipTrack() {
+  skipTrack(): void {
     this._matDialogRef.close({
       task: null,
       isResetBreakTimer: true,
     });
   }
 
-  trackAsBreak() {
+  trackAsBreak(): void {
     this._matDialogRef.close({
       task: null,
       isResetBreakTimer: true,

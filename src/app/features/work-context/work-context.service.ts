@@ -341,7 +341,7 @@ export class WorkContextService {
     return this.activeWorkContext$.pipe(map((ctx) => ctx.breakNr[day]));
   }
 
-  async load() {
+  async load(): Promise<void> {
     // NOTE: currently route has prevalence over everything else and as there is not state apart from
     // activeContextId, and activeContextType, we don't need to load it
     // const state = await this._persistenceService.context.loadState() || initialContextState;

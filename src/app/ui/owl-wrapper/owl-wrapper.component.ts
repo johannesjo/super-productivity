@@ -59,11 +59,11 @@ export class OwlWrapperComponent {
     }
   }
 
-  submit() {
+  submit(): void {
     this.triggerSubmit.emit(this.dateTime);
   }
 
-  updateDateFromCal(date: any) {
+  updateDateFromCal(date: any): void {
     this.dateTime = new Date(date).getTime();
     this.dateTimeChange.emit(this.dateTime);
   }

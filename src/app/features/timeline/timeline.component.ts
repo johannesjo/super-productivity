@@ -68,7 +68,7 @@ export class TimelineComponent implements OnDestroy {
     }
   }
 
-  ngOnDestroy() {
+  ngOnDestroy(): void {
     window.clearTimeout(this._moveUpTimeout);
     window.clearTimeout(this._moveDownTimeout);
   }

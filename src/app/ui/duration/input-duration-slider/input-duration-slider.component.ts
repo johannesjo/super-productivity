@@ -133,7 +133,7 @@ export class InputDurationSliderComponent implements OnInit, OnDestroy {
     this.setRotationFromValue();
   }
 
-  ngOnDestroy() {
+  ngOnDestroy(): void {
     if (!this.endHandler || !this.moveHandler || !this.startHandler || !this.circleEl) {
       throw new Error();
     }

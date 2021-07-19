@@ -33,7 +33,7 @@ export class DialogTimelineInitialSetupComponent implements OnDestroy {
     );
   }
 
-  ngOnDestroy() {
+  ngOnDestroy(): void {
     this._subs.unsubscribe();
   }
 

@@ -24,7 +24,7 @@ export class DialogSimpleCounterEditComponent {
     @Inject(MAT_DIALOG_DATA) public data: { simpleCounter: SimpleCounter },
   ) {}
 
-  submit() {
+  submit(): void {
     this._simpleCounterService.setCounterToday(this.data.simpleCounter.id, this.val);
     this.close();
   }

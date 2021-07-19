@@ -228,7 +228,7 @@ export class TaskService {
     this._store.dispatch(new SetSelectedTask({ id, taskAdditionalInfoTargetPanel }));
   }
 
-  startFirstStartable() {
+  startFirstStartable(): void {
     this._workContextService.startableTasksForActiveContext$
       .pipe(take(1))
       .subscribe((tasks) => {
@@ -238,7 +238,7 @@ export class TaskService {
       });
   }
 
-  pauseCurrent() {
+  pauseCurrent(): void {
     this._store.dispatch(new UnsetCurrentTask());
   }
 

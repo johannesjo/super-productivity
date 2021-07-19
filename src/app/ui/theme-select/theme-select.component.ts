@@ -12,7 +12,7 @@ export class ThemeSelectComponent {
   T: typeof T = T;
   themes: string[] = ALL_THEMES;
 
-  trackBy(i: number, theme: string) {
+  trackBy(i: number, theme: string): number {
     return i;
   }
 }

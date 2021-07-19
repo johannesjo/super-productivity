@@ -204,15 +204,15 @@ export class WorklogExportComponent implements OnInit, OnDestroy {
     });
   }
 
-  ngOnDestroy() {
+  ngOnDestroy(): void {
     this._subs.unsubscribe();
   }
 
-  onCloseClick() {
+  onCloseClick(): void {
     this.cancel.emit();
   }
 
-  onOptionsChange() {
+  onOptionsChange(): void {
     this.options.cols = this.options.cols.filter((col) => !!col);
     this._workContextService.updateWorklogExportSettingsForCurrentContext(this.options);
   }

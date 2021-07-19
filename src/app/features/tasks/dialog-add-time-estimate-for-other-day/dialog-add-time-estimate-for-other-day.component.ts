@@ -26,7 +26,7 @@ export class DialogAddTimeEstimateForOtherDayComponent {
     };
   }
 
-  submit() {
+  submit(): void {
     this._matDialogRef.close(this.newEntry);
   }
 }

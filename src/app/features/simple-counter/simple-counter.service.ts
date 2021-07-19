@@ -93,7 +93,7 @@ export class SimpleCounterService {
     this._store$.dispatch(toggleSimpleCounterCounter({ id }));
   }
 
-  turnOffAll() {
+  turnOffAll(): void {
     this._store$.dispatch(turnOffAllSimpleCounterCounters());
   }
 

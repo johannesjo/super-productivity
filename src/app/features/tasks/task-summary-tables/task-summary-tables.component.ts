@@ -70,7 +70,7 @@ export class TaskSummaryTablesComponent {
     this.projectIds$.next(pids);
   }
 
-  onTaskSummaryEdit() {
+  onTaskSummaryEdit(): void {
     this._worklogService.refreshWorklog();
   }
 

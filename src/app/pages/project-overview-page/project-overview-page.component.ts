@@ -36,7 +36,7 @@ export class ProjectOverviewPageComponent implements OnInit, OnDestroy {
     private readonly _persistenceService: PersistenceService,
   ) {}
 
-  openCreateDialog() {
+  openCreateDialog(): void {
     this._matDialog.open(DialogCreateProjectComponent, {
       restoreFocus: true,
     });

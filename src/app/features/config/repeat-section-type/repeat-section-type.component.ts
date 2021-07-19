@@ -23,7 +23,7 @@ export class RepeatSectionTypeComponent extends FieldArrayType {
     super.remove(i);
   }
 
-  addItem() {
+  addItem(): void {
     // if we need this later we can use defaultOptions for configuring this
     super.add(undefined, {
       ...EMPTY_SIMPLE_COUNTER,

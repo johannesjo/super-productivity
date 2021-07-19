@@ -83,7 +83,7 @@ export class NotesComponent implements OnInit, OnDestroy {
     });
   }
 
-  ngOnDestroy() {
+  ngOnDestroy(): void {
     this._subs.unsubscribe();
     this._dragulaService.destroy('NOTES');
   }

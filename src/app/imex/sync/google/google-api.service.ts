@@ -101,7 +101,7 @@ export class GoogleApiService {
   }
 
   login(isSkipSuccessMsg: boolean = false): Promise<any> {
-    const showSuccessMsg = () => {
+    const showSuccessMsg = (): void => {
       if (!isSkipSuccessMsg) {
         this._snackIt('SUCCESS', T.F.GOOGLE.S_API.SUCCESS_LOGIN);
       }
@@ -130,7 +130,7 @@ export class GoogleApiService {
         //       refreshToken: res.code
         //     });
         //   });
-        const successHandler = (res: any) => {
+        const successHandler = (res: any): void => {
           this._saveToken(res);
           showSuccessMsg();
         };
@@ -387,7 +387,7 @@ export class GoogleApiService {
     });
   }
 
-  private _updateSession(sessionData: Partial<GoogleSession>) {
+  private _updateSession(sessionData: Partial<GoogleSession>): void {
     if (!sessionData.accessToken) {
       console.warn('GoogleApiService: Logged out willingly???');
     }
@@ -395,7 +395,7 @@ export class GoogleApiService {
     this._session$.next(getGoogleSession());
   }
 
-  private initClient() {
+  private initClient(): Promise<unknown> {
     return this._gapi.client.init({
       apiKey: GOOGLE_SETTINGS_WEB.API_KEY,
       clientId: GOOGLE_SETTINGS_WEB.CLIENT_ID,
@@ -404,8 +404,8 @@ export class GoogleApiService {
     });
   }
 
-  private _initClientLibraryIfNotDone() {
-    const getUser = () => {
+  private _initClientLibraryIfNotDone(): Promise<any> {
+    const getUser = (): Promise<any> => {
       const GoogleAuth = this._gapi.auth2.getAuthInstance();
       this._isGapiInitialized = true;
       // used to determine and handle if user is already signed in
@@ -451,7 +451,7 @@ export class GoogleApiService {
       access_token?: string;
       expires_at?: string | number;
     };
-  }) {
+  }): void {
     const r: any = res;
     const accessToken =
       r.accessToken || r.access_token || r.Zi?.access_token || r.uc?.access_token;
@@ -476,7 +476,7 @@ export class GoogleApiService {
     }
   }
 
-  private _handleUnAuthenticated(err: any) {
+  private _handleUnAuthenticated(err: any): void {
     this.logout();
     this._bannerService.open({
       msg: T.F.GOOGLE.BANNER.AUTH_FAIL,
@@ -490,7 +490,7 @@ export class GoogleApiService {
     console.error(err);
   }
 
-  private _handleError(err: any) {
+  private _handleError(err: any): void {
     let errStr = '';
 
     if (typeof err === 'string') {
@@ -511,7 +511,7 @@ export class GoogleApiService {
     }
   }
 
-  private _snackIt(type: SnackType, msg: string, translateParams: any = null) {
+  private _snackIt(type: SnackType, msg: string, translateParams: any = null): void {
     this._snackService.open({
       msg,
       type,
@@ -600,7 +600,7 @@ export class GoogleApiService {
         resolve(undefined);
       }
 
-      const loadFunction = () => {
+      const loadFunction = (): void => {
         if (this._isScriptLoaded) {
           resolve(undefined);
         }
@@ -608,7 +608,7 @@ export class GoogleApiService {
         resolve(undefined);
       };
 
-      const errorFunction = (e: unknown) => {
+      const errorFunction = (e: unknown): void => {
         console.log('ERROR FB');
         reject(e);
       };

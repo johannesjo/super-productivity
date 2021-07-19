@@ -160,21 +160,21 @@ export class AppComponent implements OnDestroy {
     }
   }
 
-  @HostListener('document:keydown', ['$event']) onKeyDown(ev: KeyboardEvent) {
+  @HostListener('document:keydown', ['$event']) onKeyDown(ev: KeyboardEvent): void {
     this._shortcutService.handleKeyDown(ev);
   }
 
   // prevent page reloads on missed drops
-  @HostListener('document:dragover', ['$event']) onDragOver(ev: DragEvent) {
+  @HostListener('document:dragover', ['$event']) onDragOver(ev: DragEvent): void {
     ev.preventDefault();
   }
 
-  @HostListener('document:drop', ['$event']) onDrop(ev: DragEvent) {
+  @HostListener('document:drop', ['$event']) onDrop(ev: DragEvent): void {
     ev.preventDefault();
   }
 
   @HostListener('document:paste', ['$event'])
-  async onPaste(ev: ClipboardEvent) {
+  async onPaste(ev: ClipboardEvent): Promise<void> {
     if (
       await this.workContextService.isActiveWorkContextProject$.pipe(first()).toPromise()
     ) {
@@ -182,7 +182,9 @@ export class AppComponent implements OnDestroy {
     }
   }
 
-  @HostListener('window:beforeinstallprompt', ['$event']) onBeforeInstallPrompt(e: any) {
+  @HostListener('window:beforeinstallprompt', ['$event']) onBeforeInstallPrompt(
+    e: any,
+  ): void {
     if (IS_ELECTRON || sessionStorage.getItem(SS_WEB_APP_INSTALL)) {
       return;
     }
@@ -208,28 +210,28 @@ export class AppComponent implements OnDestroy {
     });
   }
 
-  getPage(outlet: RouterOutlet) {
+  getPage(outlet: RouterOutlet): string {
     return outlet.activatedRouteData.page || 'one';
   }
 
-  scrollToNotes() {
+  scrollToNotes(): void {
     (this.notesElRef as ViewContainerRef).element.nativeElement.scrollIntoView({
       behavior: 'smooth',
     });
   }
 
-  scrollToSidenav() {
+  scrollToSidenav(): void {
     (this.sideNavElRef as ViewContainerRef).element.nativeElement.scrollIntoView({
       behavior: 'smooth',
     });
   }
 
-  ngOnDestroy() {
+  ngOnDestroy(): void {
     this._subs.unsubscribe();
     if (this._intervalTimer) clearInterval(this._intervalTimer);
   }
 
-  private _initElectronErrorHandler() {
+  private _initElectronErrorHandler(): void {
     (this._electronService.ipcRenderer as typeof ipcRenderer).on(
       IPC.ERROR,
       (
@@ -252,7 +254,7 @@ export class AppComponent implements OnDestroy {
     );
   }
 
-  private _initOfflineBanner() {
+  private _initOfflineBanner(): void {
     isOnline$.subscribe((isOnlineIn) => {
       if (!isOnlineIn) {
         this._bannerService.open({
@@ -266,7 +268,7 @@ export class AppComponent implements OnDestroy {
     });
   }
 
-  private _requestPersistence() {
+  private _requestPersistence(): void {
     if (navigator.storage) {
       // try to avoid data-loss
       Promise.all([navigator.storage.persisted()])
@@ -300,7 +302,7 @@ export class AppComponent implements OnDestroy {
     }
   }
 
-  private _checkAvailableStorage() {
+  private _checkAvailableStorage(): void {
     if (environment.production) {
       if ('storage' in navigator && 'estimate' in navigator.storage) {
         navigator.storage.estimate().then(({ usage, quota }) => {
@@ -328,7 +330,7 @@ export class AppComponent implements OnDestroy {
    * since page load and animation time are not always equal
    * an interval seemed to feel the most responsive
    */
-  private _focusElement(id: string) {
+  private _focusElement(id: string): void {
     let counter = 0;
     this._intervalTimer = setInterval(() => {
       counter += 1;

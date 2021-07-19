@@ -467,13 +467,13 @@ export class PersistenceService {
       });
   }
 
-  async cleanDatabase() {
+  async cleanDatabase(): Promise<void> {
     const completeData: AppDataComplete = await this.loadComplete();
     await this._databaseService.clearDatabase();
     await this.importComplete(completeData);
   }
 
-  async clearDatabaseExceptBackup() {
+  async clearDatabaseExceptBackup(): Promise<void> {
     const backup: AppDataComplete = await this.loadBackup();
     await this._databaseService.clearDatabase();
     if (backup) {

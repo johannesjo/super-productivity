@@ -91,7 +91,7 @@ export class ImprovementService {
     this._store$.dispatch(new DisableImprovementRepeat({ id }));
   }
 
-  clearHiddenImprovements() {
+  clearHiddenImprovements(): void {
     this._store$.dispatch(new ClearHiddenImprovements());
   }
 }

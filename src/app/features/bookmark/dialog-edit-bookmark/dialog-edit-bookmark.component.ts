@@ -59,7 +59,7 @@ export class DialogEditBookmarkComponent implements OnInit {
     this._matDialogRef.close(bookmark);
   }
 
-  submit() {
+  submit(): void {
     if (!this.bookmarkCopy) {
       throw new Error();
     }

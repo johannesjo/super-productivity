@@ -31,11 +31,11 @@ export class WorklogWeekComponent {
     private readonly _taskService: TaskService,
   ) {}
 
-  sortDays(a: any, b: any) {
+  sortDays(a: any, b: any): number {
     return a.key - b.key;
   }
 
-  async exportData() {
+  async exportData(): Promise<void> {
     const now = new Date();
     const year = now.getFullYear();
     const weekNr = getWeekNumber(now);
@@ -57,7 +57,7 @@ export class WorklogWeekComponent {
     task: Task,
     dateStr: string,
     newVal: number | string,
-  ) {
+  ): Promise<void> {
     await this._taskService.updateEverywhere(task.id, {
       timeSpentOnDay: {
         ...task.timeSpentOnDay,
@@ -67,11 +67,11 @@ export class WorklogWeekComponent {
     this.worklogService.refreshWorklog();
   }
 
-  trackByDay(i: number, day: any) {
+  trackByDay(i: number, day: any): string {
     return day.key;
   }
 
-  trackByLogEntry(i: number, logEntry: WorklogDataForDay) {
+  trackByLogEntry(i: number, logEntry: WorklogDataForDay): string {
     return logEntry.task.id;
   }
 }

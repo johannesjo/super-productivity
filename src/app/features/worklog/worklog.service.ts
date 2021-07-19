@@ -126,7 +126,7 @@ export class WorklogService {
     private readonly _router: Router,
   ) {}
 
-  refreshWorklog() {
+  refreshWorklog(): void {
     this.archiveUpdateManualTrigger$.next(true);
   }
 

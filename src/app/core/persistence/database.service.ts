@@ -94,15 +94,15 @@ export class DatabaseService {
           db.createObjectStore(DB_MAIN_NAME);
         },
         // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
-        blocked() {
+        blocked(): void {
           alert('IDB BLOCKED');
         },
         // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
-        blocking() {
+        blocking(): void {
           alert('IDB BLOCKING');
         },
         // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
-        terminated() {
+        terminated(): void {
           alert('IDB TERMINATED');
           if (
             confirm(

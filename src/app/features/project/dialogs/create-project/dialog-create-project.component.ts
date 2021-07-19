@@ -134,7 +134,7 @@ export class DialogCreateProjectComponent implements OnInit, OnDestroy {
     this._subs.unsubscribe();
   }
 
-  submit() {
+  submit(): void {
     const issueIntegrationCfgs: IssueIntegrationCfgs = {
       ...this.projectData.issueIntegrationCfgs,
       JIRA: this.jiraCfg || DEFAULT_JIRA_CFG,
@@ -159,11 +159,11 @@ export class DialogCreateProjectComponent implements OnInit, OnDestroy {
     this._matDialogRef.close();
   }
 
-  cancelEdit() {
+  cancelEdit(): void {
     this._matDialogRef.close();
   }
 
-  openJiraCfg() {
+  openJiraCfg(): void {
     this._subs.add(
       this._matDialog
         .open(DialogJiraInitialSetupComponent, {
@@ -181,7 +181,7 @@ export class DialogCreateProjectComponent implements OnInit, OnDestroy {
     );
   }
 
-  openGithubCfg() {
+  openGithubCfg(): void {
     this._subs.add(
       this._matDialog
         .open(DialogGithubInitialSetupComponent, {
@@ -199,7 +199,7 @@ export class DialogCreateProjectComponent implements OnInit, OnDestroy {
     );
   }
 
-  openGitlabCfg() {
+  openGitlabCfg(): void {
     this._subs.add(
       this._matDialog
         .open(DialogGitlabInitialSetupComponent, {
@@ -217,7 +217,7 @@ export class DialogCreateProjectComponent implements OnInit, OnDestroy {
     );
   }
 
-  openCaldavCfg() {
+  openCaldavCfg(): void {
     this._subs.add(
       this._matDialog
         .open(DialogCaldavInitialSetupComponent, {

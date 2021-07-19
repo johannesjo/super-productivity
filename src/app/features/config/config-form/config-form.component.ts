@@ -41,7 +41,7 @@ export class ConfigFormComponent {
     this.fields = val && [...val];
   }
 
-  submit() {
+  submit(): void {
     if (!this.config) {
       throw new Error('No config for ' + this.sectionKey);
     } else {

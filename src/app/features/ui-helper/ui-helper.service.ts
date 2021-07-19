@@ -20,7 +20,7 @@ export class UiHelperService {
     private _electronService: ElectronService,
   ) {}
 
-  initElectron() {
+  initElectron(): void {
     this._initMousewheelZoomForElectron();
   }
 
@@ -46,7 +46,7 @@ export class UiHelperService {
     this._updateLocalUiHelperSettings({ zoomFactor });
   }
 
-  focusApp() {
+  focusApp(): void {
     if (IS_ELECTRON) {
       //  otherwise the last focused task get's focused again leading to unintended keyboard events
       if (document.activeElement) {

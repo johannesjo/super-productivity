@@ -166,7 +166,7 @@ export class JiraCfgComponent implements OnInit, OnDestroy {
     });
   }
 
-  submit() {
+  submit(): void {
     if (!this.cfg) {
       throw new Error(
         'No config for ' + (this.section as ConfigFormSection<JiraCfg>).key,

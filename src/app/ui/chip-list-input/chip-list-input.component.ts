@@ -79,7 +79,7 @@ export class ChipListInputComponent implements OnDestroy {
     }
   }
 
-  ngOnDestroy() {
+  ngOnDestroy(): void {
     if (this._autoFocusTimeout) {
       window.clearTimeout(this._autoFocusTimeout);
     }

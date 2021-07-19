@@ -72,7 +72,7 @@ export class SimpleCounterCfgComponent implements OnDestroy {
     this.editModel = { ...changes };
   }
 
-  submit() {
+  submit(): void {
     if (!this._inModelCopy || !this.editModel) {
       throw new Error('Model not ready');
     }
