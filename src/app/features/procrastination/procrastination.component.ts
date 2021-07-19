@@ -13,5 +13,5 @@ export class ProcrastinationComponent implements OnInit {
 
   constructor(public taskService: TaskService) {}
 
-  ngOnInit() {}
+  ngOnInit(): void {}
 }

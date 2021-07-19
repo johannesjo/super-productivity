@@ -42,7 +42,7 @@ export class ProjectOverviewPageComponent implements OnInit, OnDestroy {
     });
   }
 
-  ngOnInit() {
+  ngOnInit(): void {
     this._subs.add(
       this._dragulaService
         .dropModel('PROJECTS')

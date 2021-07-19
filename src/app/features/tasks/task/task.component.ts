@@ -193,7 +193,7 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
     this.isDragOver = false;
   }
 
-  ngOnInit() {
+  ngOnInit(): void {
     this._taskService.currentTaskId$.pipe(takeUntil(this._destroy$)).subscribe((id) => {
       this.isCurrent = this.task && id === this.task.id;
       this._cd.markForCheck();

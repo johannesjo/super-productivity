@@ -81,7 +81,7 @@ export class DialogCreateProjectComponent implements OnInit, OnDestroy {
     this.themeFormCfg = WORK_CONTEXT_THEME_CONFIG_FORM_CONFIG.items as any;
   }
 
-  ngOnInit() {
+  ngOnInit(): void {
     if (this._project) {
       this.projectData = { ...this._project };
     } else {

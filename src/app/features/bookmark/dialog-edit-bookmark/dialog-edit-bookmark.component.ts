@@ -40,7 +40,7 @@ export class DialogEditBookmarkComponent implements OnInit {
     @Inject(MAT_DIALOG_DATA) public data: { bookmark: Bookmark },
   ) {}
 
-  ngOnInit() {
+  ngOnInit(): void {
     this.bookmarkCopy = { ...this.data.bookmark } as BookmarkCopy;
     if (!this.bookmarkCopy.type) {
       this.bookmarkCopy.type = 'LINK';

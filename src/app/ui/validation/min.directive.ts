@@ -26,13 +26,13 @@ export class MinDirective implements Validator, OnInit, OnChanges {
   private _validator?: ValidatorFn;
   private _onChange?: () => void;
 
-  ngOnInit() {
+  ngOnInit(): void {
     if (typeof this.min === 'number') {
       this._validator = minValidator(this.min);
     }
   }
 
-  ngOnChanges(changes: SimpleChanges) {
+  ngOnChanges(changes: SimpleChanges): void {
     for (const key in changes) {
       if (key === 'min') {
         this._validator = minValidator(changes[key].currentValue);

@@ -171,7 +171,7 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
     this.isIncludeYesterday = Date.now() - todayStart.getTime() <= MAGIC_YESTERDAY_MARGIN;
   }
 
-  ngOnInit() {
+  ngOnInit(): void {
     // we need to wait, otherwise data would get overwritten
     this._subs.add(
       this._taskService.currentTaskId$

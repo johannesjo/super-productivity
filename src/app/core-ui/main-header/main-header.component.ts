@@ -83,7 +83,7 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
     this._subs.unsubscribe();
   }
 
-  ngOnInit() {
+  ngOnInit(): void {
     this.taskService.currentTaskProgress$.subscribe((progressIN) => {
       if (this.circleSvg) {
         let progress = progressIN || 1;

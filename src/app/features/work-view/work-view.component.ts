@@ -103,7 +103,7 @@ export class WorkViewComponent implements OnInit, OnDestroy, AfterContentInit {
     }
   }
 
-  ngOnInit() {
+  ngOnInit(): void {
     // eslint-disable-next-line no-mixed-operators
     this._tomorrow = Date.now() + 24 * 60 * 60 * 1000;
     const sub = this._dragulaService.find(SUB);

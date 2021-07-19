@@ -40,7 +40,7 @@ export class ContentEditableOnClickDirective implements OnInit, OnDestroy {
     this._refreshView();
   }
 
-  ngOnInit() {
+  ngOnInit(): void {
     const el = this._el;
 
     if (el.getAttribute('contenteditable') === null) {

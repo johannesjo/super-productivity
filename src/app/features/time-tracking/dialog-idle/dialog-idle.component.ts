@@ -35,7 +35,7 @@ export class DialogIdleComponent implements OnInit {
     _matDialogRef.disableClose = true;
   }
 
-  ngOnInit() {
+  ngOnInit(): void {
     this.lastCurrentTask$.subscribe((task) => {
       this.selectedTask = task;
       this.isCreate = false;

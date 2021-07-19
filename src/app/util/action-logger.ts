@@ -11,7 +11,7 @@ const getActionLog = (): string[] => {
   return Array.isArray(current) ? current : [];
 };
 
-export const actionLogger = (action: any) => {
+export const actionLogger = (action: any): void => {
   if (action.type.indexOf('@ngrx') === 0) {
     return;
   }
@@ -25,7 +25,7 @@ export const actionLogger = (action: any) => {
   saveToRealLs(LS_ACTION_LOG, current);
 };
 
-export const saveBeforeLastErrorActionLog = () => {
+export const saveBeforeLastErrorActionLog = (): void => {
   const current = getActionLog();
   console.log('Last actions before error:', current);
   saveToRealLs(LS_ACTION_BEFORE_LAST_ERROR_LOG, current);

@@ -42,7 +42,7 @@ export class SelectTaskComponent implements OnInit, OnDestroy {
     }
   }
 
-  ngOnInit() {
+  ngOnInit(): void {
     const tasks$: Observable<Task[]> = this.isLimitToProject
       ? this._workContextService.startableTasksForActiveContext$
       : this._taskService.allStartableTasks$;

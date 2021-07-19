@@ -2,7 +2,7 @@ import { environment } from '../../environments/environment';
 
 let isShowAlert = true;
 
-export const devError = (errStr: any) => {
+export const devError = (errStr: any): void => {
   if (environment.production) {
     console.error(errStr);
     // TODO add super simple snack message if possible

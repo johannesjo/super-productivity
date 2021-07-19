@@ -26,13 +26,13 @@ export class MaxDirective implements Validator, OnInit, OnChanges {
   private _validator?: ValidatorFn;
   private _onChange?: () => void;
 
-  ngOnInit() {
+  ngOnInit(): void {
     if (typeof this.max === 'number') {
       this._validator = maxValidator(this.max);
     }
   }
 
-  ngOnChanges(changes: SimpleChanges) {
+  ngOnChanges(changes: SimpleChanges): void {
     for (const key in changes) {
       if (key === 'max') {
         this._validator = maxValidator(changes[key].currentValue);

@@ -52,7 +52,7 @@ export class ConfigPageComponent implements OnInit, OnDestroy {
     this.globalProductivityConfigFormCfg = GLOBAL_PRODUCTIVITY_FORM_CONFIG;
   }
 
-  ngOnInit() {
+  ngOnInit(): void {
     this._subs.add(
       this.configService.cfg$.subscribe((cfg) => {
         this.globalCfg = cfg;

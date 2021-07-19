@@ -99,7 +99,7 @@ export class WorklogExportComponent implements OnInit, OnDestroy {
     private _tagService: TagService,
   ) {}
 
-  ngOnInit() {
+  ngOnInit(): void {
     if (!this.rangeStart || !this.rangeEnd) {
       throw new Error('Worklog: Invalid date range');
     }

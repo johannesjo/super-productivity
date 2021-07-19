@@ -51,7 +51,7 @@ export class InputDurationSliderComponent implements OnInit, OnDestroy {
     }
   }
 
-  ngOnInit() {
+  ngOnInit(): void {
     this.startHandler = (ev) => {
       if (!this.endHandler || !this.moveHandler || !this.circleEl) {
         throw new Error();

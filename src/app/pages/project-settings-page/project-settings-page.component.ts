@@ -67,7 +67,7 @@ export class ProjectSettingsPageComponent implements OnInit, OnDestroy {
     );
   }
 
-  ngOnInit() {
+  ngOnInit(): void {
     this._subs.add(
       this.projectService.currentProject$.subscribe((project: Project | null) => {
         if (!project) {

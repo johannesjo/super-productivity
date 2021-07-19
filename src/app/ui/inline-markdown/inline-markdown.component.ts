@@ -62,13 +62,13 @@ export class InlineMarkdownComponent implements OnInit, OnDestroy {
     this.resizeParsedToFit();
   }
 
-  @HostBinding('class.isFocused') get isFocused() {
+  @HostBinding('class.isFocused') get isFocused(): boolean {
     return this.isShowEdit;
   }
 
   private _model: string | undefined;
 
-  get model() {
+  get model(): string | undefined {
     return this._model;
   }
 
@@ -89,7 +89,7 @@ export class InlineMarkdownComponent implements OnInit, OnDestroy {
     }
   }
 
-  ngOnInit() {
+  ngOnInit(): void {
     if (this.isLock) {
       this.toggleShowEdit();
     } else {
@@ -106,7 +106,7 @@ export class InlineMarkdownComponent implements OnInit, OnDestroy {
     }
   }
 
-  keypressHandler(ev: KeyboardEvent) {
+  keypressHandler(ev: KeyboardEvent): void {
     this.resizeTextareaToFit();
 
     if ((ev.key === 'Enter' && ev.ctrlKey) || ev.code === 'Escape') {
@@ -115,7 +115,7 @@ export class InlineMarkdownComponent implements OnInit, OnDestroy {
     }
   }
 
-  toggleShowEdit($event?: MouseEvent) {
+  toggleShowEdit($event?: MouseEvent): void {
     // check if anchor link was clicked
     if (!$event || ($event.target as HTMLElement).tagName !== 'A') {
       this.isShowEdit = true;
@@ -132,7 +132,7 @@ export class InlineMarkdownComponent implements OnInit, OnDestroy {
     }
   }
 
-  untoggleShowEdit() {
+  untoggleShowEdit(): void {
     if (!this.isLock) {
       this.resizeParsedToFit();
       this.isShowEdit = false;
@@ -148,7 +148,7 @@ export class InlineMarkdownComponent implements OnInit, OnDestroy {
     }
   }
 
-  resizeTextareaToFit() {
+  resizeTextareaToFit(): void {
     this._hideOverflow();
     if (!this.textareaEl) {
       throw new Error('Textarea not visible');
@@ -163,7 +163,7 @@ export class InlineMarkdownComponent implements OnInit, OnDestroy {
       this.textareaEl.nativeElement.offsetHeight + 'px';
   }
 
-  openFullScreen() {
+  openFullScreen(): void {
     this._matDialog
       .open(DialogFullscreenMarkdownComponent, {
         minWidth: '100vw',
@@ -182,7 +182,7 @@ export class InlineMarkdownComponent implements OnInit, OnDestroy {
       });
   }
 
-  resizeParsedToFit() {
+  resizeParsedToFit(): void {
     this._hideOverflow();
 
     setTimeout(() => {
@@ -203,15 +203,15 @@ export class InlineMarkdownComponent implements OnInit, OnDestroy {
     });
   }
 
-  setFocus(ev: Event) {
+  setFocus(ev: Event): void {
     this.focused.emit(ev);
   }
 
-  setBlur(ev: Event) {
+  setBlur(ev: Event): void {
     this.blurred.emit(ev);
   }
 
-  private _hideOverflow() {
+  private _hideOverflow(): void {
     this.isHideOverflow = true;
     if (this._hideOverFlowTimeout) {
       window.clearTimeout(this._hideOverFlowTimeout);
@@ -223,7 +223,7 @@ export class InlineMarkdownComponent implements OnInit, OnDestroy {
     }, HIDE_OVERFLOW_TIMEOUT_DURATION);
   }
 
-  private _makeLinksWorkForElectron() {
+  private _makeLinksWorkForElectron(): void {
     if (!this.wrapperEl) {
       throw new Error('Wrapper el not visible');
     }

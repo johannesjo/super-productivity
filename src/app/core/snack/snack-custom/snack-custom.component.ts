@@ -24,7 +24,7 @@ export class SnackCustomComponent implements OnInit, OnDestroy {
     public snackBarRef: MatSnackBarRef<SnackCustomComponent>,
   ) {}
 
-  ngOnInit() {
+  ngOnInit(): void {
     if (this.data.promise) {
       this.data.promise.finally(() => {
         this.snackBarRef.dismiss();

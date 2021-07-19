@@ -57,7 +57,7 @@ export class TagSettingsPageComponent implements OnInit, OnDestroy {
     );
   }
 
-  ngOnInit() {
+  ngOnInit(): void {
     this._subs.add(
       this.workContextService.activeWorkContext$.subscribe((ac) => {
         this.activeWorkContext = ac;

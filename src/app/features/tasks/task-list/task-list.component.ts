@@ -102,7 +102,7 @@ export class TaskListComponent implements OnDestroy, OnInit {
     this.isHideAll$.next(val);
   }
 
-  ngOnInit() {
+  ngOnInit(): void {
     this._subs.add(
       this._filteredTasks$.subscribe((tasks) => {
         this.filteredTasks = tasks;
