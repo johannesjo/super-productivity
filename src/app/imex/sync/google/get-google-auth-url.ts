@@ -23,7 +23,6 @@ export const getGoogleAuthUrl = (codeChallenge: string): string =>
     access_type: 'offline',
     scope: GOOGLE_API_SCOPES_ARRAY,
     redirect_uri: 'urn:ietf:wg:oauth:2.0:oob',
-    // TODO make real code challenge work
-    // code_challenge: codeChallenge,
     code_challenge: codeChallenge,
+    code_challenge_method: 'S256',
   });

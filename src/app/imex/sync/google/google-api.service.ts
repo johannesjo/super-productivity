@@ -306,8 +306,7 @@ export class GoogleApiService {
         return Promise.reject('Token refresh failed');
       }
     } else {
-      const { codeVerifier, codeChallenge } = await generatePKCECodes(80);
-
+      const { codeVerifier, codeChallenge } = await generatePKCECodes(128);
       const authCode = await this._matDialog
         .open(DialogGetAndEnterAuthCodeComponent, {
           restoreFocus: true,
