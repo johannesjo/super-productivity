@@ -17,7 +17,7 @@ export class DialogPromptComponent {
     @Inject(MAT_DIALOG_DATA) public data: any,
   ) {}
 
-  close(isSave: boolean) {
+  close(isSave: boolean): void {
     if (isSave) {
       this._matDialogRef.close(this.txtVal);
     } else {

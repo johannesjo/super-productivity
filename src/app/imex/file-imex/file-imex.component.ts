@@ -23,7 +23,8 @@ export class FileImexComponent {
     private _router: Router,
   ) {}
 
-  async handleFileInput(ev: any) {
+  // NOTE: after promise done the file is NOT yet read
+  async handleFileInput(ev: any): Promise<void> {
     const files = ev.target.files;
     const file = files.item(0);
     const reader = new FileReader();

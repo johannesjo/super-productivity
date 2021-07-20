@@ -310,14 +310,14 @@ export class TaskAdditionalInfoComponent implements AfterViewInit, OnDestroy {
     );
   }
 
-  @HostListener('dragenter', ['$event']) onDragEnter(ev: DragEvent) {
+  @HostListener('dragenter', ['$event']) onDragEnter(ev: DragEvent): void {
     this._dragEnterTarget = ev.target as HTMLElement;
     ev.preventDefault();
     ev.stopPropagation();
     this.isDragOver = true;
   }
 
-  @HostListener('dragleave', ['$event']) onDragLeave(ev: DragEvent) {
+  @HostListener('dragleave', ['$event']) onDragLeave(ev: DragEvent): void {
     if (this._dragEnterTarget === (ev.target as HTMLElement)) {
       ev.preventDefault();
       ev.stopPropagation();
@@ -325,7 +325,7 @@ export class TaskAdditionalInfoComponent implements AfterViewInit, OnDestroy {
     }
   }
 
-  @HostListener('drop', ['$event']) onDrop(ev: DragEvent) {
+  @HostListener('drop', ['$event']) onDrop(ev: DragEvent): void {
     this._attachmentService.createFromDrop(ev, this.task.id);
     ev.stopPropagation();
     this.isDragOver = false;
@@ -420,7 +420,7 @@ export class TaskAdditionalInfoComponent implements AfterViewInit, OnDestroy {
     this.taskService.focusTask(this.task.id);
   }
 
-  onItemKeyPress(ev: KeyboardEvent) {
+  onItemKeyPress(ev: KeyboardEvent): void {
     if (!this.itemEls) {
       throw new Error();
     }

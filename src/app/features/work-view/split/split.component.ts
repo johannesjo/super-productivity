@@ -100,7 +100,7 @@ export class SplitComponent implements AfterViewInit {
     }
   }
 
-  onMove(ev: TouchEvent | MouseEvent) {
+  onMove(ev: TouchEvent | MouseEvent): void {
     if (!this.containerEl) {
       throw new Error('No container el');
     }

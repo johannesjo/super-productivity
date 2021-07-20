@@ -217,11 +217,11 @@ export class WorklogExportComponent implements OnInit, OnDestroy {
     this._workContextService.updateWorklogExportSettingsForCurrentContext(this.options);
   }
 
-  addCol(colOpt: WorklogColTypes) {
+  addCol(colOpt: WorklogColTypes): void {
     this.options.cols.push(colOpt);
   }
 
-  trackByIndex(i: number, p: any) {
+  trackByIndex(i: number, p: any): number {
     return i;
   }
 }

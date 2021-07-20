@@ -27,7 +27,7 @@ export class GithubIssueContentComponent {
     this._taskService.markIssueUpdatesAsRead(this.task.id);
   }
 
-  trackByIndex(i: number, p: any) {
+  trackByIndex(i: number, p: any): number {
     return i;
   }
 }

@@ -69,7 +69,7 @@ export class CompressionService {
     return promise;
   }
 
-  private async _onData(msg: MessageEvent) {
+  private async _onData(msg: MessageEvent): Promise<void> {
     const { id, strToHandle, err } = msg.data;
     if (err) {
       this._activeInstances[id].reject(err);
@@ -80,7 +80,7 @@ export class CompressionService {
     delete this._activeInstances[id];
   }
 
-  private _handleError(err: any) {
+  private _handleError(err: any): void {
     console.error(err);
     this._snackService.open({ type: 'ERROR', msg: T.GLOBAL_SNACK.ERR_COMPRESSION });
   }

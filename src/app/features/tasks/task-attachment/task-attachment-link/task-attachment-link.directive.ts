@@ -19,7 +19,7 @@ export class TaskAttachmentLinkDirective {
     private _snackService: SnackService,
   ) {}
 
-  @HostListener('click', ['$event']) onClick(ev: Event) {
+  @HostListener('click', ['$event']) onClick(ev: Event): void {
     if (!this.href) {
       throw new Error('No href');
     }

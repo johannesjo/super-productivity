@@ -222,7 +222,7 @@ export class SearchBarComponent implements AfterViewInit, OnDestroy {
     };
   }
 
-  switchTaskSource(event?: MouseEvent) {
+  switchTaskSource(event?: MouseEvent): void {
     // trigger on mousedown to keep inputEl in focus
     event?.preventDefault();
     this.isLoading$.next(true);
@@ -233,7 +233,7 @@ export class SearchBarComponent implements AfterViewInit, OnDestroy {
     }
   }
 
-  onAnimationEvent(event: AnimationEvent) {
+  onAnimationEvent(event: AnimationEvent): void {
     if (event.fromState) {
       this.inputEl.nativeElement.focus();
     }
@@ -267,7 +267,7 @@ export class SearchBarComponent implements AfterViewInit, OnDestroy {
     return item?.title;
   }
 
-  onBlur(ev: FocusEvent) {
+  onBlur(ev: FocusEvent): void {
     const relatedTarget: HTMLElement = ev.relatedTarget as HTMLElement;
     if (!relatedTarget?.className.includes('mat-option')) {
       this.blurred.emit(ev);
@@ -278,7 +278,7 @@ export class SearchBarComponent implements AfterViewInit, OnDestroy {
     return item.id;
   }
 
-  closeBtnClose(ev: Event) {
+  closeBtnClose(ev: Event): void {
     this.blurred.emit(ev);
   }
 

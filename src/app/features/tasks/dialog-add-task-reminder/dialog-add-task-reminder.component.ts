@@ -144,7 +144,7 @@ export class DialogAddTaskReminderComponent {
     this._matDialogRef.close();
   }
 
-  trackByIndex(i: number, p: any) {
+  trackByIndex(i: number, p: any): number {
     return i;
   }
 }

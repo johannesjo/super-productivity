@@ -117,7 +117,7 @@ export class ContentEditableOnClickDirective implements OnInit, OnDestroy {
     this._el.innerText = this._value || '';
   }
 
-  private _onEditDone(event: Event) {
+  private _onEditDone(event: Event): void {
     // deselect all text
     const sel = window.getSelection();
     if (sel !== null) {
@@ -145,7 +145,7 @@ export class ContentEditableOnClickDirective implements OnInit, OnDestroy {
     this._value = this._removeTags(this._el.innerText);
   }
 
-  private _insertAtCursor(el: HTMLElement, newText: string) {
+  private _insertAtCursor(el: HTMLElement, newText: string): void {
     const sel = window.getSelection();
     if (sel === null) {
       return;
@@ -172,7 +172,7 @@ export class ContentEditableOnClickDirective implements OnInit, OnDestroy {
     }
   }
 
-  private _removeTags(str: string) {
+  private _removeTags(str: string): string {
     return str
       .replace(/<\/?[^`]+?\/?>/gim, '\n') // replace all tags
       .replace(/\n/gim, '') // replace line breaks

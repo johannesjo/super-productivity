@@ -86,7 +86,7 @@ export class InputDurationSliderComponent implements OnInit, OnDestroy {
       // prevent touchmove
       ev.preventDefault();
 
-      const convertThetaToCssDegrees = (thetaIN: number) => 90 - thetaIN;
+      const convertThetaToCssDegrees = (thetaIN: number): number => 90 - thetaIN;
 
       const centerX = this.circleEl.nativeElement.offsetWidth / 2;
       const centerY = this.circleEl.nativeElement.offsetHeight / 2;
@@ -149,14 +149,14 @@ export class InputDurationSliderComponent implements OnInit, OnDestroy {
     document.removeEventListener('touchend', this.endHandler);
   }
 
-  setCircleRotation(cssDegrees: number) {
+  setCircleRotation(cssDegrees: number): void {
     if (!this.circleEl) {
       throw new Error();
     }
     this.circleEl.nativeElement.style.transform = 'rotate(' + cssDegrees + 'deg)';
   }
 
-  setDots(hours: number = 0) {
+  setDots(hours: number = 0): void {
     if (hours > 12) {
       hours = 12;
     }
@@ -164,7 +164,7 @@ export class InputDurationSliderComponent implements OnInit, OnDestroy {
     this.dots = new Array(hours);
   }
 
-  setValueFromRotation(degrees: number) {
+  setValueFromRotation(degrees: number): void {
     const THRESHOLD = 40;
 
     let minutesFromDegrees;
@@ -218,13 +218,13 @@ export class InputDurationSliderComponent implements OnInit, OnDestroy {
     this._cd.detectChanges();
   }
 
-  onInputChange($event: number) {
+  onInputChange($event: number): void {
     this._model = $event;
     this.modelChange.emit(this._model);
     this.setRotationFromValue();
   }
 
-  setRotationFromValue(val: number = this._model) {
+  setRotationFromValue(val: number = this._model): void {
     const momentVal = moment.duration({
       milliseconds: val,
     });
@@ -237,7 +237,7 @@ export class InputDurationSliderComponent implements OnInit, OnDestroy {
     this._cd.detectChanges();
   }
 
-  trackByIndex(i: number, p: any) {
+  trackByIndex(i: number, p: any): number {
     return i;
   }
 }

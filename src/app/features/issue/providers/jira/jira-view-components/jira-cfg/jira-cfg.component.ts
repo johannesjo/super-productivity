@@ -179,7 +179,7 @@ export class JiraCfgComponent implements OnInit, OnDestroy {
     }
   }
 
-  trackByCustomFieldId(i: number, field: any) {
+  trackByCustomFieldId(i: number, field: any): string {
     return field.id;
   }
 

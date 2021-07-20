@@ -24,7 +24,7 @@ export class CaldavIssueContentComponent {
     this._taskService.markIssueUpdatesAsRead((this.task as TaskWithSubTasks).id);
   }
 
-  trackByIndex(i: number, p: any) {
+  trackByIndex(i: number, p: any): number {
     return i;
   }
 }

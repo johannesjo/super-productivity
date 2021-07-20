@@ -32,7 +32,7 @@ export class RepeatSectionTypeComponent extends FieldArrayType {
     });
   }
 
-  trackByFn(i: number, item: any) {
+  trackByFn(i: number, item: any): number | string {
     return item ? item.id : i;
   }
 }

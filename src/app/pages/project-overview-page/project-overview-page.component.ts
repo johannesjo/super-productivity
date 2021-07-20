@@ -70,7 +70,7 @@ export class ProjectOverviewPageComponent implements OnInit, OnDestroy {
     download(`${projectTitle}.json`, dataString);
   }
 
-  handleFileInput(ev: any) {
+  handleFileInput(ev: any): void {
     const files = ev.target.files;
     const file = files.item(0);
     const reader = new FileReader();
@@ -90,14 +90,14 @@ export class ProjectOverviewPageComponent implements OnInit, OnDestroy {
     reader.readAsText(file);
   }
 
-  edit(project: Project) {
+  edit(project: Project): void {
     this._matDialog.open(DialogCreateProjectComponent, {
       restoreFocus: true,
       data: Object.assign({}, project),
     });
   }
 
-  archive(projectId: string) {
+  archive(projectId: string): void {
     this._matDialog
       .open(DialogConfirmComponent, {
         restoreFocus: true,
@@ -114,7 +114,7 @@ export class ProjectOverviewPageComponent implements OnInit, OnDestroy {
       });
   }
 
-  unarchive(projectId: string) {
+  unarchive(projectId: string): void {
     this._matDialog
       .open(DialogConfirmComponent, {
         restoreFocus: true,
@@ -131,7 +131,7 @@ export class ProjectOverviewPageComponent implements OnInit, OnDestroy {
       });
   }
 
-  remove(projectId: string) {
+  remove(projectId: string): void {
     this._matDialog
       .open(DialogConfirmComponent, {
         restoreFocus: true,

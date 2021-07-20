@@ -153,7 +153,7 @@ export class EnlargeImgDirective {
     return template.content.firstChild as HTMLElement;
   }
 
-  private _zoom(e: MouseEvent) {
+  private _zoom(e: MouseEvent): void {
     if (!this.enlargedImgWrapperEl) {
       throw new Error();
     }
@@ -174,18 +174,18 @@ export class EnlargeImgDirective {
     );
   }
 
-  private _waitForImgRender(): Promise<any> {
-    const rafAsync = () =>
+  private _waitForImgRender(): Promise<void> {
+    const rafAsync = (): Promise<void> =>
       new Promise((resolve) => {
-        requestAnimationFrame(resolve);
+        requestAnimationFrame(() => resolve());
       });
 
-    const checkElement = (id: string): Promise<any> => {
+    const checkElement = (id: string): Promise<void> => {
       const el = document.getElementById(id);
       if (el === null || !(el.offsetHeight > 1)) {
         return rafAsync().then(() => checkElement(id));
       } else {
-        return Promise.resolve(true);
+        return Promise.resolve();
       }
     };
 

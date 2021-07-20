@@ -107,23 +107,23 @@ export class WorklogComponent implements AfterViewInit, OnDestroy {
       });
   }
 
-  sortWorklogItems(a: any, b: any) {
+  sortWorklogItems(a: any, b: any): number {
     return b.key - a.key;
   }
 
-  sortWorklogItemsReverse(a: any, b: any) {
+  sortWorklogItemsReverse(a: any, b: any): number {
     return a.key - b.key;
   }
 
-  trackByKey(i: number, val: { key: any; val: any }) {
+  trackByKey(i: number, val: { key: any; val: any }): number {
     return val.key;
   }
 
-  trackByForLogEntry(i: number, val: WorklogDataForDay) {
+  trackByForLogEntry(i: number, val: WorklogDataForDay): string {
     return val.task.id;
   }
 
-  trackByForWeek(i: number, val: WorklogWeek) {
+  trackByForWeek(i: number, val: WorklogWeek): number {
     return val.weekNr;
   }
 
@@ -131,7 +131,7 @@ export class WorklogComponent implements AfterViewInit, OnDestroy {
     task: Task,
     dateStr: string,
     newVal: number | string,
-  ) {
+  ): Promise<void> {
     await this._taskService.updateEverywhere(task.id, {
       timeSpentOnDay: {
         ...task.timeSpentOnDay,

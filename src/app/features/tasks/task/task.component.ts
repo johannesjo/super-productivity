@@ -149,18 +149,18 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   // methods come last
-  @HostListener('keydown', ['$event']) onKeyDown(ev: KeyboardEvent) {
+  @HostListener('keydown', ['$event']) onKeyDown(ev: KeyboardEvent): void {
     this._handleKeyboardShortcuts(ev);
   }
 
-  // @HostListener('focus', ['$event']) onFocus(ev: Event) {
+  // @HostListener('focus', ['$event']) onFocus(ev: Event): void {
   //   if (this._currentFocusId !== this.task.id && ev.target === this._elementRef.nativeElement) {
   //     this._taskService.focusTask(this.task.id);
   //     this._currentFocusId = this.task.id;
   //   }
   // }
   //
-  // @HostListener('blur', ['$event']) onBlur(ev: Event) {
+  // @HostListener('blur', ['$event']) onBlur(ev: Event): void {
   //   // console.log('BLUR', this._currentFocusId, this.task.id);
   //
   //   //  @TODO replace: hacky way to wait for last update
@@ -172,14 +172,14 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
   //   });
   // }
 
-  @HostListener('dragenter', ['$event']) onDragEnter(ev: DragEvent) {
+  @HostListener('dragenter', ['$event']) onDragEnter(ev: DragEvent): void {
     this._dragEnterTarget = ev.target as HTMLElement;
     ev.preventDefault();
     ev.stopPropagation();
     this.isDragOver = true;
   }
 
-  @HostListener('dragleave', ['$event']) onDragLeave(ev: DragEvent) {
+  @HostListener('dragleave', ['$event']) onDragLeave(ev: DragEvent): void {
     if (this._dragEnterTarget === (ev.target as HTMLElement)) {
       ev.preventDefault();
       ev.stopPropagation();
@@ -187,7 +187,7 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
     }
   }
 
-  @HostListener('drop', ['$event']) onDrop(ev: DragEvent) {
+  @HostListener('drop', ['$event']) onDrop(ev: DragEvent): void {
     this._attachmentService.createFromDrop(ev, this.task.id);
     ev.stopPropagation();
     this.isDragOver = false;
@@ -484,11 +484,11 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
     this.contextMenu.openMenu();
   }
 
-  onTagsUpdated(tagIds: string[]) {
+  onTagsUpdated(tagIds: string[]): void {
     this._taskService.updateTags(this.task, tagIds, this.task.tagIds);
   }
 
-  onPanStart(ev: any) {
+  onPanStart(ev: any): void {
     if (!IS_TOUCH_ONLY) {
       return;
     }
@@ -572,15 +572,15 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
     }
   }
 
-  onPanLeft(ev: any) {
+  onPanLeft(ev: any): void {
     this._handlePan(ev);
   }
 
-  onPanRight(ev: any) {
+  onPanRight(ev: any): void {
     this._handlePan(ev);
   }
 
-  moveTaskToProject(projectId: string) {
+  moveTaskToProject(projectId: string): void {
     this._taskService.moveToProject(this.task, projectId);
   }
 
@@ -595,7 +595,7 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
     this._taskService.moveToProjectTodayList(this.task.id);
   }
 
-  trackByProjectId(i: number, project: Project) {
+  trackByProjectId(i: number, project: Project): string {
     return project.id;
   }
 
@@ -660,7 +660,7 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
     this._renderer.setStyle(this.innerWrapperElRef.nativeElement, 'transform', ``);
   }
 
-  private _handleKeyboardShortcuts(ev: KeyboardEvent) {
+  private _handleKeyboardShortcuts(ev: KeyboardEvent): void {
     if (ev.target !== this._elementRef.nativeElement) {
       return;
     }

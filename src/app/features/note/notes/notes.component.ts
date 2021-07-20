@@ -44,20 +44,20 @@ export class NotesComponent implements OnInit, OnDestroy {
     private _matDialog: MatDialog,
   ) {}
 
-  @HostListener('dragenter', ['$event']) onDragEnter(ev: DragEvent) {
+  @HostListener('dragenter', ['$event']) onDragEnter(ev: DragEvent): void {
     this.dragEnterTarget = ev.target as HTMLElement;
     ev.preventDefault();
     this.isDragOver = true;
   }
 
-  @HostListener('dragleave', ['$event']) onDragLeave(ev: DragEvent) {
+  @HostListener('dragleave', ['$event']) onDragLeave(ev: DragEvent): void {
     if (this.dragEnterTarget === (ev.target as HTMLElement)) {
       ev.preventDefault();
       this.isDragOver = false;
     }
   }
 
-  @HostListener('drop', ['$event']) onDrop(ev: DragEvent) {
+  @HostListener('drop', ['$event']) onDrop(ev: DragEvent): void {
     this.isDragOver = false;
     this.noteService.createFromDrop(ev);
   }

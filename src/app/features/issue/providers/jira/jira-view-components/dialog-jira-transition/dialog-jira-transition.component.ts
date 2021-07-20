@@ -80,7 +80,7 @@ export class DialogJiraTransitionComponent {
     }
   }
 
-  trackByIndex(i: number, p: any) {
+  trackByIndex(i: number, p: any): number {
     return i;
   }
 }

@@ -31,7 +31,7 @@ export class NoteComponent {
     this._noteService.update(this.note.id, { isLock: !this.note.isLock });
   }
 
-  updateContent(newVal: any) {
+  updateContent(newVal: any): void {
     if (!this.note) {
       throw new Error('No note');
     }

@@ -73,7 +73,7 @@ export class TimelineComponent implements OnDestroy {
     window.clearTimeout(this._moveDownTimeout);
   }
 
-  trackByFn(i: number, item: any) {
+  trackByFn(i: number, item: any): string {
     return item.id;
   }
 

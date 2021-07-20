@@ -106,11 +106,11 @@ export class NoteService {
 
   // REMINDER
   // --------
-  createFromDrop(ev: DragEvent) {
+  createFromDrop(ev: DragEvent): void {
     this._handleInput(createFromDrop(ev) as DropPasteInput, ev);
   }
 
-  private async _handleInput(drop: DropPasteInput, ev: Event) {
+  private async _handleInput(drop: DropPasteInput, ev: Event): Promise<void> {
     // properly not intentional so we leave
     if (!drop || !drop.path || drop.type === 'FILE') {
       return;

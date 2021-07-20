@@ -31,7 +31,7 @@ export class DialogAddNoteComponent {
     this.noteContent = sessionStorage.getItem(SS_NOTE_TMP) || '';
   }
 
-  keydownHandler(ev: KeyboardEvent) {
+  keydownHandler(ev: KeyboardEvent): void {
     if (ev.key === 'Enter' && ev.ctrlKey) {
       this.submit();
     }

@@ -114,12 +114,12 @@ export class InputDurationDirective
   }
 
   // ControlValueAccessor interface
-  registerOnChange(fn: any) {
+  registerOnChange(fn: any): void {
     this._onChangeCallback = fn;
   }
 
   // ControlValueAccessor interface
-  registerOnTouched(fn: any) {
+  registerOnTouched(fn: any): void {
     this._onTouchedCallback = fn;
   }
 

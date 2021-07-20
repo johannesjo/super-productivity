@@ -45,7 +45,7 @@ export class SimpleCounterButtonComponent {
     this._simpleCounterService.setCounterToday(this.simpleCounter.id, 0);
   }
 
-  edit(ev?: Event) {
+  edit(ev?: Event): void {
     if (ev) {
       ev.preventDefault();
     }

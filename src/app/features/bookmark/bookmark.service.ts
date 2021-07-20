@@ -89,15 +89,15 @@ export class BookmarkService {
 
   // HANDLE INPUT
   // ------------
-  createFromDrop(ev: DragEvent) {
+  createFromDrop(ev: DragEvent): void {
     this._handleInput(createFromDrop(ev) as DropPasteInput, ev);
   }
 
-  createFromPaste(ev: ClipboardEvent) {
+  createFromPaste(ev: ClipboardEvent): void {
     this._handleInput(createFromPaste(ev) as DropPasteInput, ev);
   }
 
-  private _handleInput(bookmark: DropPasteInput, ev: Event) {
+  private _handleInput(bookmark: DropPasteInput, ev: Event): void {
     // properly not intentional so we leave
     if (!bookmark || !bookmark.path) {
       return;

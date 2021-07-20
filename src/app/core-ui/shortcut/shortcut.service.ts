@@ -70,7 +70,7 @@ export class ShortcutService {
     }
   }
 
-  handleKeyDown(ev: KeyboardEvent) {
+  handleKeyDown(ev: KeyboardEvent): void {
     const cfg = this._configService.cfg;
     if (!cfg) {
       throw new Error();
