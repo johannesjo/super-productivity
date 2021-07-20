@@ -95,7 +95,7 @@ export const DEFAULT_APP_BASE_DATA: AppBaseData = {
   task: initialTaskState,
   tag: initialTagState,
   simpleCounter: initialSimpleCounterState,
-  taskArchive: createEmptyEntity(),
+  taskArchive: createEmptyEntity() as TaskArchive,
   taskRepeatCfg: initialTaskRepeatCfgState,
 
   // metric
