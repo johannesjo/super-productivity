@@ -72,7 +72,7 @@ export class BannerService {
     // });
   }
 
-  open(banner: Banner) {
+  open(banner: Banner): void {
     const bannerToUpdate = this._banners.find((bannerIN) => bannerIN.id === banner.id);
     if (bannerToUpdate) {
       Object.assign(bannerToUpdate, banner);
@@ -82,7 +82,7 @@ export class BannerService {
     this._banners$.next(this._banners);
   }
 
-  dismiss(bannerId: BannerId) {
+  dismiss(bannerId: BannerId): void {
     const bannerIndex = this._banners.findIndex((bannerIN) => bannerIN.id === bannerId);
     if (bannerIndex > -1) {
       // NOTE splice mutates
@@ -92,7 +92,7 @@ export class BannerService {
   }
 
   // usually not required, but when we want to be sure
-  dismissAll(bannerId: BannerId) {
+  dismissAll(bannerId: BannerId): void {
     if (this._banners.find((bannerIN) => bannerIN.id === bannerId)) {
       this._banners = this._banners.filter((banner) => banner.id !== bannerId);
       this._banners$.next(this._banners);

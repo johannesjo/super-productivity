@@ -18,10 +18,9 @@ export const getGoogleSession = (): GoogleSession => {
   return (loadFromRealLs(LS_GOOGLE_SESSION) as GoogleSession) || DEFAULT_GOOGLE_SESSION;
 };
 
-export const updateGoogleSession = (googleSession: Partial<GoogleSession>) => {
+export const updateGoogleSession = (googleSession: Partial<GoogleSession>): void => {
   const current = getGoogleSession();
-
-  return saveToRealLs(LS_GOOGLE_SESSION, {
+  saveToRealLs(LS_GOOGLE_SESSION, {
     ...current,
     ...googleSession,
   });

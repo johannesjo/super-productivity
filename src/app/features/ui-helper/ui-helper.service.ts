@@ -91,7 +91,7 @@ export class UiHelperService {
     );
   }
 
-  private _updateLocalUiHelperSettings(newCfg: Partial<LocalUiHelperSettings>) {
+  private _updateLocalUiHelperSettings(newCfg: Partial<LocalUiHelperSettings>): void {
     saveToRealLs(LS_LOCAL_UI_HELPER, {
       ...this._getLocalUiHelperSettings(),
       ...newCfg,

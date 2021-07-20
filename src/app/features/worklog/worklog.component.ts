@@ -62,7 +62,7 @@ export class WorklogComponent implements AfterViewInit, OnDestroy {
     year: number,
     month: string | number,
     week?: number,
-  ) {
+  ): void {
     const { rangeStart, rangeEnd } =
       typeof week === 'number'
         ? getDateRangeForWeek(year, week, +month)
@@ -78,7 +78,7 @@ export class WorklogComponent implements AfterViewInit, OnDestroy {
     });
   }
 
-  restoreTask(task: TaskCopy) {
+  restoreTask(task: TaskCopy): void {
     this._matDialog
       .open(DialogConfirmComponent, {
         restoreFocus: true,

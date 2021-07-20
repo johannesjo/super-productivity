@@ -81,21 +81,21 @@ export class ElectronService {
     return this.remote ? this.remote.process : null;
   }
 
-  public callMain(channel: string, data: unknown) {
+  public callMain(channel: string, data: unknown): Promise<unknown> {
     return new Promise((resolve, reject) => {
       const { sendChannel, dataChannel, errorChannel } = getResponseChannels(channel);
 
-      const cleanup = () => {
+      const cleanup = (): void => {
         (this.ipcRenderer as typeof ipcRenderer).off(dataChannel, onData);
         (this.ipcRenderer as typeof ipcRenderer).off(errorChannel, onError);
       };
 
-      const onData = (event: unknown, result: unknown) => {
+      const onData = (event: unknown, result: unknown): void => {
         cleanup();
         resolve(result);
       };
 
-      const onError = (event: unknown, error: unknown) => {
+      const onError = (event: unknown, error: unknown): void => {
         cleanup();
         // reject(deserializeError(error));
         reject(error);

@@ -33,7 +33,7 @@ export class LocalBackupEffects {
     private _translateService: TranslateService,
   ) {}
 
-  private async _checkForBackupIfEmpty(appDataComplete: AppDataComplete) {
+  private async _checkForBackupIfEmpty(appDataComplete: AppDataComplete): Promise<void> {
     if (IS_ELECTRON) {
       if (
         appDataComplete.task.ids.length === 0 &&
@@ -59,7 +59,7 @@ export class LocalBackupEffects {
     }
   }
 
-  private _formatDate(date: Date | string | number) {
+  private _formatDate(date: Date | string | number): string {
     return moment(date).format('DD-MM-YYYY, hh:mm:ss');
   }
 }

@@ -22,7 +22,7 @@ import { initialMetricState } from '../../features/metric/store/metric.reducer';
 import { initialImprovementState } from '../../features/metric/improvement/store/improvement.reducer';
 import { initialObstructionState } from '../../features/metric/obstruction/store/obstruction.reducer';
 
-const EMTPY_ENTITY = () => ({ ids: [], entities: {} });
+const EMTPY_ENTITY = (): Dictionary<any> => ({ ids: [], entities: {} });
 
 @Injectable({ providedIn: 'root' })
 export class MigrationService {
@@ -213,7 +213,7 @@ export class MigrationService {
       pids,
       legacyAppDataComplete.taskArchive as any,
     ) as TaskArchive[];
-    return this._mergeEntities(taskStates, EMTPY_ENTITY()) as TaskArchive;
+    return this._mergeEntities(taskStates, EMTPY_ENTITY() as TaskArchive) as TaskArchive;
   }
 
   private _mTaskAttachmentsToTaskStates(

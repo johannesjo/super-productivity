@@ -289,7 +289,7 @@ export class PersistenceService {
   async saveArchivedProject(
     projectId: string,
     archivedProject: ProjectArchivedRelatedData,
-  ) {
+  ): Promise<unknown> {
     const current = (await this.loadProjectArchive()) || {};
     const jsonStr = JSON.stringify(archivedProject);
     const compressedData = await this._compressionService.compress(jsonStr);
@@ -363,7 +363,7 @@ export class PersistenceService {
 
   // BACKUP AND SYNC RELATED
   // -----------------------
-  updateLastLocalSyncModelChange(date: number = Date.now()) {
+  updateLastLocalSyncModelChange(date: number = Date.now()): void {
     if (!environment || !environment.production) {
       console.log('Save Last Local Sync Model Change', date);
     }
@@ -429,7 +429,7 @@ export class PersistenceService {
     };
   }
 
-  async importComplete(data: AppDataComplete) {
+  async importComplete(data: AppDataComplete): Promise<unknown> {
     console.log('IMPORT--->', data);
     this._isBlockSaving = true;
 
@@ -765,7 +765,7 @@ export class PersistenceService {
     appDataKey: AllowedDBKeys;
     projectId?: string;
     data: any;
-  }) {
+  }): void {
     if (!this._inMemoryComplete) {
       throw new Error('No in memory copy yet');
     }

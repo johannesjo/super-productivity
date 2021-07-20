@@ -61,7 +61,7 @@ export class WorkContextMenuComponent {
       });
   }
 
-  edit(project: Project) {
+  edit(project: Project): void {
     this._matDialog.open(DialogCreateProjectComponent, {
       restoreFocus: true,
       data: Object.assign({}, project),

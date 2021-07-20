@@ -95,7 +95,10 @@ export class GitlabIssueEffects {
     private readonly _issueEffectHelperService: IssueEffectHelperService,
   ) {}
 
-  private async _importNewIssuesToBacklog(projectId: string, gitlabCfg: GitlabCfg) {
+  private async _importNewIssuesToBacklog(
+    projectId: string,
+    gitlabCfg: GitlabCfg,
+  ): Promise<void> {
     const issues = await this._gitlabApiService.getProjectData$(gitlabCfg).toPromise();
     const allTaskGitlabIssueIds = (await this._taskService.getAllIssueIdsForProject(
       projectId,

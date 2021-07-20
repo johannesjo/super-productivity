@@ -259,7 +259,7 @@ export class TaskRelatedModelEffects {
     private _persistenceService: PersistenceService,
   ) {}
 
-  private async _removeFromArchive(action: RestoreTask) {
+  private async _removeFromArchive(action: RestoreTask): Promise<unknown> {
     const task = action.payload.task;
     const taskIds = [task.id, ...task.subTaskIds];
     const currentArchive: TaskArchive =
@@ -283,7 +283,7 @@ export class TaskRelatedModelEffects {
     );
   }
 
-  private async _moveToArchive(action: MoveToArchive) {
+  private async _moveToArchive(action: MoveToArchive): Promise<unknown> {
     const flatTasks = flattenTasks(action.payload.tasks);
     if (!flatTasks.length) {
       return;
@@ -316,7 +316,7 @@ export class TaskRelatedModelEffects {
     });
   }
 
-  private _moveToOtherProject(action: MoveToOtherProject) {
+  private _moveToOtherProject(action: MoveToOtherProject): void {
     const mainTasks = action.payload.task as TaskWithSubTasks;
     const workContextId = action.payload.targetProjectId;
 

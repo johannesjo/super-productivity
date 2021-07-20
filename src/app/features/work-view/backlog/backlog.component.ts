@@ -37,11 +37,11 @@ export class BacklogComponent {
 
   constructor(public taskService: TaskService) {}
 
-  trackByFn(i: number, task: TaskWithReminderData) {
+  trackByFn(i: number, task: TaskWithReminderData): string {
     return task.id;
   }
 
-  removeReminder(task: TaskWithReminderData) {
+  removeReminder(task: TaskWithReminderData): void {
     if (!task.reminderId) {
       throw new Error('Task without reminder');
     }

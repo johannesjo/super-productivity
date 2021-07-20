@@ -36,7 +36,7 @@ export class BookmarkEffects {
     private _workContextService: WorkContextService,
   ) {}
 
-  private _saveToLs(currentProjectId: string, bookmarkState: BookmarkState) {
+  private _saveToLs(currentProjectId: string, bookmarkState: BookmarkState): void {
     if (currentProjectId) {
       this._persistenceService.bookmark.save(currentProjectId, bookmarkState, {
         isSyncModelChange: true,

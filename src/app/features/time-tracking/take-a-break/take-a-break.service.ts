@@ -39,7 +39,7 @@ const LOCK_SCREEN_THROTTLE = 5 * 60 * 1000;
 const LOCK_SCREEN_DELAY = 30 * 1000;
 
 // required because typescript freaks out
-const reduceBreak = (acc: number, tick: Tick) => {
+const reduceBreak = (acc: number, tick: Tick): number => {
   return acc + tick.duration;
 };
 
@@ -225,7 +225,7 @@ export class TakeABreakService {
     });
   }
 
-  snooze(snoozeTime: number = 15 * 60 * 1000) {
+  snooze(snoozeTime: number = 15 * 60 * 1000): void {
     this._triggerSnooze$.next(snoozeTime);
     this._triggerLockScreenCounter$.next(false);
   }

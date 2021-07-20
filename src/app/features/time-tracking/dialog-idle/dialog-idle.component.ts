@@ -48,7 +48,7 @@ export class DialogIdleComponent implements OnInit {
     }
   }
 
-  onTaskChange(taskOrTaskTitle: Task | string) {
+  onTaskChange(taskOrTaskTitle: Task | string): void {
     this.isCreate = typeof taskOrTaskTitle === 'string';
     if (this.isCreate) {
       this.newTaskTitle = taskOrTaskTitle as string;

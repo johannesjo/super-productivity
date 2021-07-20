@@ -78,7 +78,7 @@ export class GlobalThemeService {
     // this._materialCssVarsService.setDarkTheme(false);
   }
 
-  private _setColorTheme(theme: WorkContextThemeCfg) {
+  private _setColorTheme(theme: WorkContextThemeCfg): void {
     this._materialCssVarsService.setAutoContrastEnabled(theme.isAutoContrast);
     this._setBackgroundGradient(theme.isDisableBackgroundGradient);
 

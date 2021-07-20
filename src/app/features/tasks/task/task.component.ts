@@ -294,7 +294,7 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
     newVal: string;
     $taskEl: HTMLElement | null;
     event: Event;
-  }) {
+  }): void {
     if (isChanged) {
       this._taskService.update(this.task.id, { title: newVal });
     }
@@ -599,7 +599,7 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
     return project.id;
   }
 
-  private _handlePan(ev: any) {
+  private _handlePan(ev: any): void {
     if (
       !IS_TOUCH_ONLY ||
       (!this.isLockPanLeft && !this.isLockPanRight) ||

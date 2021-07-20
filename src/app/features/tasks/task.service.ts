@@ -206,14 +206,14 @@ export class TaskService {
       });
   }
 
-  getAllParentWithoutTag$(tagId: string) {
+  getAllParentWithoutTag$(tagId: string): Observable<Task[]> {
     return this._store.pipe(select(selectMainTasksWithoutTag, { tagId }));
   }
 
   // META
 
   // ----
-  setCurrentId(id: string | null) {
+  setCurrentId(id: string | null): void {
     if (id) {
       this._store.dispatch(new SetCurrentTask(id));
     } else {
@@ -224,7 +224,7 @@ export class TaskService {
   setSelectedId(
     id: string | null,
     taskAdditionalInfoTargetPanel: TaskAdditionalInfoTargetPanel = TaskAdditionalInfoTargetPanel.Default,
-  ) {
+  ): void {
     this._store.dispatch(new SetSelectedTask({ id, taskAdditionalInfoTargetPanel }));
   }
 
@@ -272,7 +272,7 @@ export class TaskService {
     return task && task.id;
   }
 
-  remove(task: TaskWithSubTasks) {
+  remove(task: TaskWithSubTasks): void {
     this._store.dispatch(new DeleteTask({ task }));
   }
 
@@ -280,7 +280,7 @@ export class TaskService {
     this._store.dispatch(new DeleteMainTasks({ taskIds }));
   }
 
-  update(id: string, changedFields: Partial<Task>) {
+  update(id: string, changedFields: Partial<Task>): void {
     this._store.dispatch(
       new UpdateTask({
         task: { id, changes: changedFields },
@@ -288,7 +288,7 @@ export class TaskService {
     );
   }
 
-  addTodayTag(t: Task) {
+  addTodayTag(t: Task): void {
     if (t.parentId) {
       throw new Error('Sub task cannot be added a today tag');
     }
@@ -343,7 +343,7 @@ export class TaskService {
     });
   }
 
-  updateUi(id: string, changes: Partial<Task>) {
+  updateUi(id: string, changes: Partial<Task>): void {
     this._store.dispatch(
       new UpdateTaskUi({
         task: { id, changes },
@@ -356,7 +356,7 @@ export class TaskService {
     src: DropListModelSource,
     target: DropListModelSource,
     newOrderedIds: string[],
-  ) {
+  ): void {
     const isSrcTodayList = src === 'DONE' || src === 'UNDONE';
     const isTargetTodayList = target === 'DONE' || target === 'UNDONE';
     const workContextId = this._workContextService.activeWorkContextId as string;
@@ -480,11 +480,11 @@ export class TaskService {
     );
   }
 
-  addTimeSpent(task: Task, duration: number, date: string = getWorklogStr()) {
+  addTimeSpent(task: Task, duration: number, date: string = getWorklogStr()): void {
     this._store.dispatch(new AddTimeSpent({ task, date, duration }));
   }
 
-  removeTimeSpent(id: string, duration: number, date: string = getWorklogStr()) {
+  removeTimeSpent(id: string, duration: number, date: string = getWorklogStr()): void {
     this._store.dispatch(new RemoveTimeSpent({ id, date, duration }));
   }
 
@@ -531,7 +531,7 @@ export class TaskService {
     }
   }
 
-  moveToArchive(tasks: TaskWithSubTasks | TaskWithSubTasks[]) {
+  moveToArchive(tasks: TaskWithSubTasks | TaskWithSubTasks[]): void {
     if (!Array.isArray(tasks)) {
       tasks = [tasks];
     }
@@ -549,7 +549,7 @@ export class TaskService {
     this._store.dispatch(new ToggleStart());
   }
 
-  restoreTask(task: Task, subTasks: Task[]) {
+  restoreTask(task: Task, subTasks: Task[]): void {
     this._store.dispatch(new RestoreTask({ task, subTasks }));
   }
 
@@ -565,7 +565,7 @@ export class TaskService {
     roundTo: RoundTimeOption;
     isRoundUp: boolean;
     projectId?: string | null;
-  }) {
+  }): void {
     this._store.dispatch(
       new RoundTimeSpentForDay({ day, taskIds, roundTo, isRoundUp, projectId }),
     );
@@ -630,7 +630,7 @@ export class TaskService {
     plannedAt: number,
     remindCfg: TaskReminderOptionId,
     isMoveToBacklog: boolean = false,
-  ) {
+  ): void {
     console.log(remindOptionToMilliseconds(plannedAt, remindCfg), plannedAt);
     console.log((remindOptionToMilliseconds(plannedAt, remindCfg) as number) - plannedAt);
     console.log({
@@ -659,7 +659,7 @@ export class TaskService {
     title: string;
     reminderId?: string;
     remindCfg: TaskReminderOptionId;
-  }) {
+  }): void {
     this._store.dispatch(
       new ReScheduleTask({
         id: taskId,
@@ -738,7 +738,7 @@ export class TaskService {
     taskId: string,
     isShowLess: boolean = true,
     isEndless: boolean = false,
-  ) {
+  ): void {
     this._store.dispatch(new ToggleTaskShowSubTasks({ taskId, isShowLess, isEndless }));
   }
 
@@ -746,7 +746,7 @@ export class TaskService {
     this.updateUi(id, { _showSubTasksMode: ShowSubTasksMode.HideAll });
   }
 
-  async convertToMainTask(task: Task) {
+  async convertToMainTask(task: Task): Promise<void> {
     const parent = await this.getByIdOnce$(task.parentId as string).toPromise();
     this._store.dispatch(new ConvertToMainTask({ task, parentTagIds: parent.tagIds }));
   }
@@ -755,7 +755,7 @@ export class TaskService {
   // -----------------------
 
   // BEWARE: does only work for task model updates, but not for related models
-  async updateEverywhere(id: string, changedFields: Partial<Task>) {
+  async updateEverywhere(id: string, changedFields: Partial<Task>): Promise<void> {
     const state = await this.taskFeatureState$.pipe(first()).toPromise();
     const { entities } = state;
     if (entities[id]) {
@@ -766,8 +766,8 @@ export class TaskService {
   }
 
   // BEWARE: does only work for task model updates, but not the meta models
-  async updateArchiveTask(id: string, changedFields: Partial<Task>): Promise<any> {
-    return await this._persistenceService.taskArchive.execAction(
+  async updateArchiveTask(id: string, changedFields: Partial<Task>): Promise<void> {
+    await this._persistenceService.taskArchive.execAction(
       new UpdateTask({
         task: {
           id,
@@ -835,8 +835,8 @@ export class TaskService {
       throw new Error('No project id');
     }
 
-    const findTaskFn = (task: Task | ArchiveTask | undefined) =>
-      task &&
+    const findTaskFn = (task: Task | ArchiveTask | undefined): boolean =>
+      !!task &&
       task.issueId === issueId &&
       task.issueType === issueProviderKey &&
       task.projectId === projectId;
@@ -875,7 +875,7 @@ export class TaskService {
   }
 
   // NOTE: there is a duplicate of this in plan-tasks-tomorrow.component
-  async movePlannedTasksToToday(plannedTasks: TaskPlanned[]) {
+  async movePlannedTasksToToday(plannedTasks: TaskPlanned[]): Promise<unknown> {
     return Promise.all(
       plannedTasks.map(async (t) => {
         if (t.parentId) {

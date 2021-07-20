@@ -77,7 +77,7 @@ export class TimelineComponent implements OnDestroy {
     return item.id;
   }
 
-  async moveUp(task: Task) {
+  async moveUp(task: Task): Promise<void> {
     if (task.parentId) {
       const parentTask = await this.taskService.getByIdOnce$(task.parentId).toPromise();
       if (parentTask.subTaskIds[0] === task.id) {
@@ -92,7 +92,7 @@ export class TimelineComponent implements OnDestroy {
     window.setTimeout(() => this.taskService.focusTask(task.id), 50);
   }
 
-  async moveDown(task: Task) {
+  async moveDown(task: Task): Promise<void> {
     if (task.parentId) {
       const parentTask = await this.taskService.getByIdOnce$(task.parentId).toPromise();
       if (parentTask.subTaskIds[parentTask.subTaskIds.length - 1] === task.id) {

@@ -36,15 +36,15 @@ export class DialogSyncConflictComponent {
     _matDialogRef.disableClose = true;
   }
 
-  close(res?: DialogConflictResolutionResult) {
+  close(res?: DialogConflictResolutionResult): void {
     this._matDialogRef.close(res);
   }
 
-  private _formatDate(date: Date | string | number) {
+  private _formatDate(date: Date | string | number): string {
     return moment(date).format('DD-MM-YYYY');
   }
 
-  private _formatTime(date: Date | string | number) {
+  private _formatTime(date: Date | string | number): string {
     return moment(date).format('hh:mm:ss');
   }
 }

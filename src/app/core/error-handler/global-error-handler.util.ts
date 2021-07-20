@@ -36,7 +36,7 @@ const _getStacktraceThrottled = pThrottle(_getStacktrace, 2, 5000);
 export const logAdvancedStacktrace = (
   origErr: unknown,
   additionalLogFn?: (stack: string) => void,
-) =>
+): Promise<unknown> =>
   _getStacktraceThrottled(origErr)
     .then((stack) => {
       if (additionalLogFn) {
@@ -71,7 +71,7 @@ export const createErrorAlert = (
   stackTrace: string,
   origErr: any,
   userData?: AppDataComplete | undefined,
-) => {
+): void => {
   if (isWasErrorAlertCreated) {
     return;
   }

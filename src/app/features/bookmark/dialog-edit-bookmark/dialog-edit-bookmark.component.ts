@@ -55,7 +55,7 @@ export class DialogEditBookmarkComponent implements OnInit {
     }
   }
 
-  close(bookmark?: Bookmark) {
+  close(bookmark?: Bookmark): void {
     this._matDialogRef.close(bookmark);
   }
 
@@ -76,7 +76,7 @@ export class DialogEditBookmarkComponent implements OnInit {
     this.close(this.bookmarkCopy);
   }
 
-  mapTypeToLabel(type: BookmarkType) {
+  mapTypeToLabel(type: BookmarkType): string {
     switch (type) {
       case 'FILE':
         return T.F.BOOKMARK.DIALOG_EDIT.LABELS.LINK;
@@ -90,7 +90,7 @@ export class DialogEditBookmarkComponent implements OnInit {
     }
   }
 
-  trackByIndex(i: number, p: unknown) {
+  trackByIndex(i: number, p: unknown): number {
     return i;
   }
 }

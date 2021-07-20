@@ -32,7 +32,7 @@ export class SnackService {
     });
   }
 
-  open(params: SnackParams | string) {
+  open(params: SnackParams | string): void {
     if (typeof params === 'string') {
       params = { msg: params };
     }
@@ -46,7 +46,7 @@ export class SnackService {
   }
 
   @debounce(100)
-  private _openSnack(params: SnackParams) {
+  private _openSnack(params: SnackParams): void {
     const _destroy$: Subject<boolean> = new Subject<boolean>();
     const destroySubs = () => {
       _destroy$.next(true);

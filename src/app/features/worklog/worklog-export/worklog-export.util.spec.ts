@@ -7,6 +7,7 @@ import { DEFAULT_PROJECT } from '../../project/project.const';
 import { DEFAULT_TAG } from '../../tag/tag.const';
 import { Project } from 'src/app/features/project/project.model';
 import { WorklogExportData, WorkTimes } from './worklog-export.model';
+import { Tag } from '../../tag/tag.model';
 
 const startTime1 = new Date('5/2/2021 10:00:00').getTime();
 const endTime1 = new Date('5/2/2021 12:00:00').getTime();
@@ -31,12 +32,15 @@ const createTask = (partialTask: Partial<WorklogTask>): WorklogTask => {
   };
 };
 
-const createSubTask = (partialTask: Partial<WorklogTask>, parentTask: WorklogTask) => {
+const createSubTask = (
+  partialTask: Partial<WorklogTask>,
+  parentTask: WorklogTask,
+): WorklogTask => {
   parentTask.subTaskIds.push(partialTask.id as string);
   return createTask({ ...partialTask, parentId: parentTask.id });
 };
 
-const createTag = (tagId: string, ...tasks: WorklogTask[]) => {
+const createTag = (tagId: string, ...tasks: WorklogTask[]): Tag => {
   const taskIds: string[] = [];
   tasks.forEach((task) => {
     taskIds.push(task.id);

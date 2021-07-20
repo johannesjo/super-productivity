@@ -32,7 +32,7 @@ export class LanguageService {
     this._initMonkeyPatchFirstDayOfWeek();
   }
 
-  setLng(lng: LanguageCode) {
+  setLng(lng: LanguageCode): void {
     if (lng) {
       this._setFn(lng);
     } else {
@@ -40,7 +40,7 @@ export class LanguageService {
     }
   }
 
-  setDefault(lng: LanguageCode) {
+  setDefault(lng: LanguageCode): void {
     this._translateService.setDefaultLang(lng);
   }
 
@@ -67,7 +67,7 @@ export class LanguageService {
     this._dateAdapter.getFirstDayOfWeek = () => firstDayOfWeek;
   }
 
-  private _setFn(lng: LanguageCode) {
+  private _setFn(lng: LanguageCode): void {
     const momLng = LanguageCodeMomentMap[lng];
 
     this.isRTL.next(this._isRTL(lng));
@@ -79,7 +79,7 @@ export class LanguageService {
     this._dateTimeAdapter.setLocale(momLng);
   }
 
-  private _isRTL(lng: LanguageCode) {
+  private _isRTL(lng: LanguageCode): boolean {
     return this.rtlLanguages.indexOf(lng) !== -1;
   }
 }

@@ -348,7 +348,7 @@ export class WorkContextService {
     // this._store$.dispatch(loadWorkContextState({state}));
   }
 
-  updateWorklogExportSettingsForCurrentContext(data: WorklogExportSettings) {
+  updateWorklogExportSettingsForCurrentContext(data: WorklogExportSettings): void {
     this._updateAdvancedCfgForCurrentContext('worklogExportSettings', {
       ...data,
     });
@@ -396,7 +396,7 @@ export class WorkContextService {
   private _updateAdvancedCfgForCurrentContext(
     sectionKey: WorkContextAdvancedCfgKey,
     data: any,
-  ) {
+  ): void {
     if (this.activeWorkContextType === WorkContextType.PROJECT) {
       this._store$.dispatch(
         new UpdateProjectAdvancedCfg({
@@ -425,7 +425,7 @@ export class WorkContextService {
   }
 
   // NOTE: NEVER call this from some place other than the route change stuff
-  private async _setActiveContext(activeId: string, activeType: WorkContextType) {
+  private _setActiveContext(activeId: string, activeType: WorkContextType): void {
     this._store$.dispatch(setActiveWorkContext({ activeId, activeType }));
   }
 }

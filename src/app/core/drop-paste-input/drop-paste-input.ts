@@ -58,7 +58,7 @@ const _createFileBookmark = (dataTransfer: DataTransfer): null | DropPasteInput 
   return null;
 };
 
-const _baseName = (passedStr: string) => {
+const _baseName = (passedStr: string): string => {
   const str = passedStr.trim();
   let base;
   if (str[str.length - 1] === '/') {

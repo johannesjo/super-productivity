@@ -3,7 +3,9 @@ import { JiraCfgComponent } from '../issue/providers/jira/jira-view-components/j
 import { SimpleCounterCfgComponent } from '../simple-counter/simple-counter-cfg/simple-counter-cfg.component';
 import { CustomCfgSection } from './global-config.model';
 
-export const customConfigFormSectionComponent = (customSection: CustomCfgSection) => {
+export const customConfigFormSectionComponent = (
+  customSection: CustomCfgSection,
+): unknown => {
   switch (customSection) {
     case 'FILE_IMPORT_EXPORT':
       return FileImexComponent;

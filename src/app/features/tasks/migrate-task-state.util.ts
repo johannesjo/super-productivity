@@ -79,7 +79,7 @@ const _replaceLegacyGitType = (task: Task) => {
   return issueType === LEGACY_GITHUB_TYPE ? { ...task, issueType: GITHUB_TYPE } : task;
 };
 
-const _convertToWesternArabicDateKeys = (task: Task) => {
+const _convertToWesternArabicDateKeys = (task: Task): Task => {
   return task.timeSpentOnDay
     ? {
         ...task,

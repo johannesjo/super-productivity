@@ -47,7 +47,7 @@ import { SyncModule } from './imex/sync/sync.module';
 import { SearchBarModule } from './features/search-bar/search-bar.module';
 
 // NOTE: export required for aot to work
-export const createTranslateLoader = (http: HttpClient) =>
+export const createTranslateLoader = (http: HttpClient): TranslateHttpLoader =>
   new TranslateHttpLoader(http, './assets/i18n/', '.json');
 
 @NgModule({

@@ -1,7 +1,7 @@
 import * as querystring from 'querystring';
 import { GOOGLE_API_SCOPES_ARRAY, GOOGLE_SETTINGS_ELECTRON } from './google.const';
 
-const _getGoogleAuthUrl = (opts: any = {}) => {
+const _getGoogleAuthUrl = (opts: any = {}): string => {
   if (opts.code_challenge_method && !opts.code_challenge) {
     throw new Error(
       'If a code_challenge_method is provided, code_challenge must be included.',

@@ -1,6 +1,6 @@
 import { SoundConfig } from '../../config/global-config.model';
 
-export const playDoneSound = (soundCfg: SoundConfig, nrOfDoneTasks: number = 0) => {
+export const playDoneSound = (soundCfg: SoundConfig, nrOfDoneTasks: number = 0): void => {
   const speed = 1;
   const BASE = './assets/snd';
   const PITCH_OFFSET = -400;

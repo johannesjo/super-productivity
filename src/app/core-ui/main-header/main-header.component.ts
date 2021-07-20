@@ -100,7 +100,7 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
     });
   }
 
-  trackById(i: number, item: SimpleCounter) {
+  trackById(i: number, item: SimpleCounter): string {
     return item.id;
   }
 
