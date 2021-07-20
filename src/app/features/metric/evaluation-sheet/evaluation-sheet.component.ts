@@ -151,7 +151,7 @@ export class EvaluationSheetComponent implements OnDestroy, OnInit {
     this._matDialog.open(DialogAddNoteComponent);
   }
 
-  private _update(updateData: Partial<MetricCopy>) {
+  private _update(updateData: Partial<MetricCopy>): void {
     this.metricForDay = {
       ...(this.metricForDay as MetricCopy),
       ...updateData,

@@ -196,7 +196,7 @@ export class TagEffects {
         new RemoveTagsForAllTasks({ tagIdsToRemove }),
       );
 
-      const isOrphanedParentTask = (t: Task) =>
+      const isOrphanedParentTask = (t: Task): boolean =>
         !t.projectId && !t.tagIds.length && !t.parentId;
 
       // remove orphaned

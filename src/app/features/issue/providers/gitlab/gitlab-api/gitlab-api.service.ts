@@ -150,7 +150,11 @@ export class GitlabApiService {
     );
   }
 
-  private _getIssueComments$(issueid: number, pageNumber: number, cfg: GitlabCfg) {
+  private _getIssueComments$(
+    issueid: number,
+    pageNumber: number,
+    cfg: GitlabCfg,
+  ): Observable<GitlabOriginalComment[]> {
     if (!this._isValidSettings(cfg)) {
       return EMPTY;
     }

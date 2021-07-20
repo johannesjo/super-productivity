@@ -150,9 +150,9 @@ export class TaskInternalEffects {
     let nextId: string | null = null;
     const { entities } = state;
 
-    const filterUndoneNotCurrent = (id: string) =>
+    const filterUndoneNotCurrent = (id: string): boolean =>
       !(entities[id] as Task).isDone && id !== oldCurrentId;
-    const flattenToSelectable = (arr: string[]) =>
+    const flattenToSelectable = (arr: string[]): string[] =>
       arr.reduce((acc: string[], next: string) => {
         return (entities[next] as Task).subTaskIds.length > 0
           ? acc.concat((entities[next] as Task).subTaskIds)

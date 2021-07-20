@@ -441,8 +441,8 @@ export class JiraIssueEffects {
     }
   }
 
-  private _openWorklogDialog(task: Task, issueId: string, jiraCfg: JiraCfg) {
-    return this._jiraApiService
+  private _openWorklogDialog(task: Task, issueId: string, jiraCfg: JiraCfg): void {
+    this._jiraApiService
       .getReducedIssueById$(issueId, jiraCfg)
       .pipe(take(1))
       .subscribe((issue) => {
@@ -473,7 +473,7 @@ export class JiraIssueEffects {
       .afterClosed();
   }
 
-  private _importNewIssuesToBacklog(projectId: string, cfg: JiraCfg) {
+  private _importNewIssuesToBacklog(projectId: string, cfg: JiraCfg): void {
     this._jiraApiService
       .findAutoImportIssues$(cfg)
       .subscribe(async (issues: JiraIssueReduced[]) => {

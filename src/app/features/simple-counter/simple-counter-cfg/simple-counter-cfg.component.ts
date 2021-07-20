@@ -67,7 +67,7 @@ export class SimpleCounterCfgComponent implements OnDestroy {
     this._subs.unsubscribe();
   }
 
-  onModelChange(changes: SimpleCounterConfig) {
+  onModelChange(changes: SimpleCounterConfig): void {
     // NOTE: it's important to create a new object, otherwise only 1 update happens
     this.editModel = { ...changes };
   }

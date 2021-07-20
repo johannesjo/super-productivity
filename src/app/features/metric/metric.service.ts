@@ -89,15 +89,15 @@ export class MetricService {
     this._store$.dispatch(new DeleteMetric({ id }));
   }
 
-  updateMetric(id: string, changes: Partial<Metric>) {
+  updateMetric(id: string, changes: Partial<Metric>): void {
     this._store$.dispatch(new UpdateMetric({ metric: { id, changes } }));
   }
 
-  upsertMetric(metric: Metric) {
+  upsertMetric(metric: Metric): void {
     this._store$.dispatch(new UpsertMetric({ metric }));
   }
 
-  upsertTodayMetric(metricIn: Partial<Metric>) {
+  upsertTodayMetric(metricIn: Partial<Metric>): void {
     const day = getWorklogStr();
     const metric = {
       id: day,

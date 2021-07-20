@@ -27,7 +27,7 @@ export class DialogGitlabInitialSetupComponent implements OnInit {
 
   ngOnInit(): void {}
 
-  saveGitlabCfg(gitlabCfg: GitlabCfg) {
+  saveGitlabCfg(gitlabCfg: GitlabCfg): void {
     this._matDialogRef.close(gitlabCfg);
   }
 

@@ -27,7 +27,7 @@ export class DialogGithubInitialSetupComponent implements OnInit {
 
   ngOnInit(): void {}
 
-  saveGithubCfg(gitCfg: GithubCfg) {
+  saveGithubCfg(gitCfg: GithubCfg): void {
     this._matDialogRef.close(gitCfg);
   }
 

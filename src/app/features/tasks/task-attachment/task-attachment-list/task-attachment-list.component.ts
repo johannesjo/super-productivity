@@ -26,7 +26,7 @@ export class TaskAttachmentListComponent {
     private readonly _matDialog: MatDialog,
   ) {}
 
-  openEditDialog(attachment?: TaskAttachment) {
+  openEditDialog(attachment?: TaskAttachment): void {
     if (!this.taskId) {
       throw new Error('No task id given');
     }
@@ -64,7 +64,7 @@ export class TaskAttachmentListComponent {
     this.attachmentService.deleteAttachment(this.taskId, id);
   }
 
-  trackByFn(i: number, attachment: TaskAttachment) {
+  trackByFn(i: number, attachment: TaskAttachment): string | number | null {
     return attachment ? attachment.id : i;
   }
 }

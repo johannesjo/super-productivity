@@ -42,7 +42,7 @@ export class ObstructionService {
     this._store$.dispatch(new DeleteObstructions({ ids }));
   }
 
-  updateObstruction(id: string, changes: Partial<Obstruction>) {
+  updateObstruction(id: string, changes: Partial<Obstruction>): void {
     this._store$.dispatch(new UpdateObstruction({ obstruction: { id, changes } }));
   }
 }

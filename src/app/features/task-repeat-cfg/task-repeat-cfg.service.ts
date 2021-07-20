@@ -73,7 +73,7 @@ export class TaskRepeatCfgService {
     taskId: string,
     projectId: string | null,
     taskRepeatCfg: Omit<TaskRepeatCfgCopy, 'id'>,
-  ) {
+  ): void {
     this._store$.dispatch(
       new AddTaskRepeatCfgToTask({
         taskRepeatCfg: {
@@ -94,15 +94,15 @@ export class TaskRepeatCfgService {
     this._store$.dispatch(new DeleteTaskRepeatCfgs({ ids }));
   }
 
-  updateTaskRepeatCfg(id: string, changes: Partial<TaskRepeatCfg>) {
+  updateTaskRepeatCfg(id: string, changes: Partial<TaskRepeatCfg>): void {
     this._store$.dispatch(new UpdateTaskRepeatCfg({ taskRepeatCfg: { id, changes } }));
   }
 
-  updateTaskRepeatCfgs(ids: string[], changes: Partial<TaskRepeatCfg>) {
+  updateTaskRepeatCfgs(ids: string[], changes: Partial<TaskRepeatCfg>): void {
     this._store$.dispatch(new UpdateTaskRepeatCfgs({ ids, changes }));
   }
 
-  upsertTaskRepeatCfg(taskRepeatCfg: TaskRepeatCfg) {
+  upsertTaskRepeatCfg(taskRepeatCfg: TaskRepeatCfg): void {
     this._store$.dispatch(new UpsertTaskRepeatCfg({ taskRepeatCfg }));
   }
 
@@ -110,7 +110,7 @@ export class TaskRepeatCfgService {
     taskRepeatCfg: TaskRepeatCfg,
     targetDayDate: number,
     currentTaskId: string | null,
-  ) {
+  ): Promise<void> {
     const actionsForRepeatCfg = await this.getActionsForTaskRepeatCfg(
       taskRepeatCfg,
       currentTaskId,

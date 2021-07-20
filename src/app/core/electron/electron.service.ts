@@ -7,11 +7,18 @@ import { getElectron } from '../../util/get-electron';
 import * as ElectronRenderer from 'electron/renderer';
 
 // TODO make available for both
-export const getSendChannel = (channel: string) => `%better-ipc-send-channel-${channel}`;
-const getUniqueId = () => `${Date.now()}-${Math.random()}`;
+export const getSendChannel = (channel: string): string =>
+  `%better-ipc-send-channel-${channel}`;
+const getUniqueId = (): string => `${Date.now()}-${Math.random()}`;
 
 // const getRendererSendChannel = (windowId, channel) => `%better-ipc-send-channel-${windowId}-${channel}`;
-const getResponseChannels = (channel: string) => {
+const getResponseChannels = (
+  channel: string,
+): {
+  sendChannel: string;
+  dataChannel: string;
+  errorChannel: string;
+} => {
   const id = getUniqueId();
   return {
     sendChannel: getSendChannel(channel),

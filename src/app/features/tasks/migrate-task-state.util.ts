@@ -74,7 +74,7 @@ const _addNewIssueFields = (task: Task): Task => {
   }
 };
 
-const _replaceLegacyGitType = (task: Task) => {
+const _replaceLegacyGitType = (task: Task): Task => {
   const issueType = task.issueType as string;
   return issueType === LEGACY_GITHUB_TYPE ? { ...task, issueType: GITHUB_TYPE } : task;
 };

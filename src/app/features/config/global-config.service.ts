@@ -79,7 +79,7 @@ export class GlobalConfigService {
   updateSection(
     sectionKey: GlobalConfigSectionKey,
     sectionCfg: Partial<GlobalSectionConfig>,
-  ) {
+  ): void {
     this._store.dispatch({
       type: GlobalConfigActionTypes.UpdateGlobalConfigSection,
       payload: {

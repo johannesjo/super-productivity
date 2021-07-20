@@ -101,7 +101,7 @@ export class GithubIssueEffects {
     private readonly _issueEffectHelperService: IssueEffectHelperService,
   ) {}
 
-  private _refreshIssues(githubTasks: TaskWithSubTasks[]) {
+  private _refreshIssues(githubTasks: TaskWithSubTasks[]): void {
     if (githubTasks && githubTasks.length > 0) {
       this._snackService.open({
         msg: T.F.GITHUB.S.POLLING,
@@ -115,7 +115,7 @@ export class GithubIssueEffects {
   private _importNewIssuesToBacklog(
     projectId: string,
     issuesToAdd: GithubIssueReduced[],
-  ) {
+  ): void {
     issuesToAdd.forEach((issue) => {
       this._issueService.addTaskWithIssue(GITHUB_TYPE, issue, projectId, true);
     });

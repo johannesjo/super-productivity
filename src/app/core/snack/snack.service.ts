@@ -48,7 +48,7 @@ export class SnackService {
   @debounce(100)
   private _openSnack(params: SnackParams): void {
     const _destroy$: Subject<boolean> = new Subject<boolean>();
-    const destroySubs = () => {
+    const destroySubs = (): void => {
       _destroy$.next(true);
       _destroy$.unsubscribe();
     };

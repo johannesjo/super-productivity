@@ -42,7 +42,7 @@ export class DialogEditTaskAttachmentComponent {
     }
   }
 
-  close(attachment?: TaskAttachment) {
+  close(attachment?: TaskAttachment): void {
     this._matDialogRef.close(attachment);
   }
 

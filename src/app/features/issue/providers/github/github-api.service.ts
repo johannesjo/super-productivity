@@ -106,7 +106,7 @@ export class GithubApiService {
     );
   }
 
-  private _checkSettings(cfg: GithubCfg) {
+  private _checkSettings(cfg: GithubCfg): void {
     if (!this._isValidSettings(cfg)) {
       this._snackService.open({
         type: 'ERROR',

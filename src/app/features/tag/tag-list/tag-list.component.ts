@@ -111,7 +111,7 @@ export class TagListComponent implements OnDestroy {
     });
   }
 
-  trackByFn(i: number, tag: Tag) {
+  trackByFn(i: number, tag: Tag): number | string {
     return tag ? tag.id : i;
   }
 }

@@ -147,7 +147,7 @@ export class ProjectService {
     return this._store$.pipe(select(selectProjectById, { id }));
   }
 
-  add(project: Partial<Project>) {
+  add(project: Partial<Project>): void {
     this._store$.dispatch({
       type: ProjectActionTypes.AddProject,
       payload: {
@@ -158,7 +158,7 @@ export class ProjectService {
     });
   }
 
-  upsert(project: Partial<Project>) {
+  upsert(project: Partial<Project>): void {
     this._store$.dispatch({
       type: ProjectActionTypes.AddProject,
       payload: {
@@ -177,7 +177,7 @@ export class ProjectService {
     });
   }
 
-  update(projectId: string, changedFields: Partial<Project>) {
+  update(projectId: string, changedFields: Partial<Project>): void {
     this._store$.dispatch({
       type: ProjectActionTypes.UpdateProject,
       payload: {
@@ -194,7 +194,7 @@ export class ProjectService {
     issueProviderKey: IssueProviderKey,
     providerCfg: Partial<IssueIntegrationCfg>,
     isOverwrite: boolean = false,
-  ) {
+  ): void {
     this._store$.dispatch({
       type: ProjectActionTypes.UpdateProjectIssueProviderCfg,
       payload: {

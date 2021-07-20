@@ -25,7 +25,7 @@ export class DialogCaldavInitialSetupComponent {
     this.caldavCfg = this.data.caldavCfg || DEFAULT_CALDAV_CFG;
   }
 
-  saveCaldavCfg(caldavCfg: CaldavCfg) {
+  saveCaldavCfg(caldavCfg: CaldavCfg): void {
     this._matDialogRef.close(caldavCfg);
   }
 

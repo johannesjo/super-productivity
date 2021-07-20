@@ -11,7 +11,7 @@ addEventListener('message', ({ data }) => {
   reInitCheckInterval(data);
 });
 
-const reInitCheckInterval = (reminders: ReminderCopy[]) => {
+const reInitCheckInterval = (reminders: ReminderCopy[]): void => {
   if (cancelCheckInterval) {
     cancelCheckInterval();
     cancelCheckInterval = undefined;

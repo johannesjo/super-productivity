@@ -25,7 +25,7 @@ export class TaskSummaryTableComponent {
 
   constructor(private _taskService: TaskService) {}
 
-  updateTimeSpentTodayForTask(task: Task, newVal: number | string) {
+  updateTimeSpentTodayForTask(task: Task, newVal: number | string): void {
     this._taskService.updateEverywhere(task.id, {
       timeSpentOnDay: {
         ...task.timeSpentOnDay,
@@ -42,7 +42,7 @@ export class TaskSummaryTableComponent {
     this.updated.emit();
   }
 
-  toggleTaskDone(task: Task) {
+  toggleTaskDone(task: Task): void {
     this._taskService.updateEverywhere(task.id, {
       isDone: !task.isDone,
     });

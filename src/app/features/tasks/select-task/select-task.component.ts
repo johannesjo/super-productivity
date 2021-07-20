@@ -71,11 +71,11 @@ export class SelectTaskComponent implements OnInit, OnDestroy {
     this._destroy$.unsubscribe();
   }
 
-  displayWith(task: Task) {
-    return task && task.title;
+  displayWith(task: Task): string {
+    return task.title;
   }
 
-  trackById(i: number, task: Task) {
+  trackById(i: number, task: Task): string {
     return task.id;
   }
 }

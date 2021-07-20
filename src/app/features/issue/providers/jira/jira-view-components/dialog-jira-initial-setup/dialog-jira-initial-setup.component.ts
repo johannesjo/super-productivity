@@ -20,7 +20,7 @@ export class DialogJiraInitialSetupComponent {
     this.jiraCfg = this.data.jiraCfg;
   }
 
-  saveJiraCfg(cfg: JiraCfg) {
+  saveJiraCfg(cfg: JiraCfg): void {
     this._matDialogRef.close({
       ...cfg,
       isEnabled: !!(cfg && cfg.host && cfg.userName && cfg.password),

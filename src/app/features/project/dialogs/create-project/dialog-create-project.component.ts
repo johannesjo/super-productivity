@@ -235,7 +235,7 @@ export class DialogCreateProjectComponent implements OnInit, OnDestroy {
     );
   }
 
-  private _saveJiraCfg(jiraCfg: JiraCfg) {
+  private _saveJiraCfg(jiraCfg: JiraCfg): void {
     this.jiraCfg = jiraCfg;
     this._cd.markForCheck();
 
@@ -249,7 +249,7 @@ export class DialogCreateProjectComponent implements OnInit, OnDestroy {
     }
   }
 
-  private _saveGithubCfg(githubCfg: GithubCfg) {
+  private _saveGithubCfg(githubCfg: GithubCfg): void {
     this.githubCfg = githubCfg;
     this._cd.markForCheck();
 
@@ -263,7 +263,7 @@ export class DialogCreateProjectComponent implements OnInit, OnDestroy {
     }
   }
 
-  private _saveGitlabCfg(gitlabCfg: GitlabCfg) {
+  private _saveGitlabCfg(gitlabCfg: GitlabCfg): void {
     this.gitlabCfg = gitlabCfg;
     this._cd.markForCheck();
 
@@ -277,7 +277,7 @@ export class DialogCreateProjectComponent implements OnInit, OnDestroy {
     }
   }
 
-  private _saveCaldavCfg(caldavCfg: CaldavCfg) {
+  private _saveCaldavCfg(caldavCfg: CaldavCfg): void {
     this.caldavCfg = caldavCfg;
     this._cd.markForCheck();
 

@@ -130,7 +130,7 @@ export class CaldavIssueEffects {
     private readonly _issueEffectHelperService: IssueEffectHelperService,
   ) {}
 
-  private _refreshIssues(caldavTasks: TaskWithSubTasks[]) {
+  private _refreshIssues(caldavTasks: TaskWithSubTasks[]): void {
     if (caldavTasks && caldavTasks.length > 0) {
       this._snackService.open({
         msg: T.F.CALDAV.S.POLLING,
@@ -144,7 +144,7 @@ export class CaldavIssueEffects {
   private _importNewIssuesToBacklog(
     projectId: string,
     issuesToAdd: CaldavIssueReduced[],
-  ) {
+  ): void {
     issuesToAdd.forEach((issue) => {
       this._issueService.addTaskWithIssue(CALDAV_TYPE, issue, projectId, true);
     });

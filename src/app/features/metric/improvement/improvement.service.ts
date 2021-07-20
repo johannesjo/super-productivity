@@ -58,7 +58,7 @@ export class ImprovementService {
     return id;
   }
 
-  addCheckedDay(id: string, checkedDay: string = getWorklogStr()) {
+  addCheckedDay(id: string, checkedDay: string = getWorklogStr()): void {
     this._store$.dispatch(
       new AddImprovementCheckedDay({
         id,
@@ -75,7 +75,7 @@ export class ImprovementService {
     this._store$.dispatch(new DeleteImprovements({ ids }));
   }
 
-  updateImprovement(id: string, changes: Partial<Improvement>) {
+  updateImprovement(id: string, changes: Partial<Improvement>): void {
     this._store$.dispatch(new UpdateImprovement({ improvement: { id, changes } }));
   }
 

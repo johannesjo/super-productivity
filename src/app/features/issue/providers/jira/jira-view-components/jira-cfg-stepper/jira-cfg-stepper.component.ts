@@ -68,7 +68,7 @@ export class JiraCfgStepperComponent implements OnDestroy {
     this.saveCfg.emit(this.jiraCfg);
   }
 
-  saveStepForm(cfg: JiraCfg) {
+  saveStepForm(cfg: JiraCfg): void {
     this.jiraCfg = cfg;
   }
 

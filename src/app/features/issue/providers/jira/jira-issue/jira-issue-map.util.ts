@@ -144,7 +144,7 @@ export const mapChangelog = (changelog: JiraOriginalChangelog): JiraChangelogEnt
   return newChangelog;
 };
 
-export const mapTransitionResponse = (res: any) => res.response.transitions;
+export const mapTransitionResponse = (res: any): unknown => res.response.transitions;
 
 const mapAttachmentType = (mimeType: string): DropPasteInputType => {
   switch (mimeType) {

@@ -136,7 +136,7 @@ export class TaskListComponent implements OnDestroy, OnInit {
     }
   }
 
-  trackByFn(i: number, task: Task) {
+  trackByFn(i: number, task: Task): string {
     return task.id;
   }
 

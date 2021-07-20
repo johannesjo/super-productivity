@@ -39,7 +39,7 @@ export class ObstructionEffects {
     private _persistenceService: PersistenceService,
   ) {}
 
-  private _saveToLs(obstructionState: ObstructionState) {
+  private _saveToLs(obstructionState: ObstructionState): void {
     this._persistenceService.obstruction.saveState(obstructionState, {
       isSyncModelChange: true,
     });

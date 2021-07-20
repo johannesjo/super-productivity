@@ -179,7 +179,7 @@ export class WorkViewComponent implements OnInit, OnDestroy, AfterContentInit {
   addAllPlannedToDayAndCreateRepeatable(
     plannedTasks: TaskPlanned[],
     repeatableScheduledForTomorrow: TaskRepeatCfg[],
-  ) {
+  ): void {
     this._taskRepeatCfgService.addAllPlannedToDayAndCreateRepeatable(
       plannedTasks,
       repeatableScheduledForTomorrow,

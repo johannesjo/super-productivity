@@ -77,7 +77,7 @@ export class SimpleCounterService {
 
   constructor(private _store$: Store<SimpleCounterState>) {}
 
-  updateAll(items: SimpleCounter[]) {
+  updateAll(items: SimpleCounter[]): void {
     this._store$.dispatch(updateAllSimpleCounters({ items }));
   }
 
@@ -97,7 +97,7 @@ export class SimpleCounterService {
     this._store$.dispatch(turnOffAllSimpleCounterCounters());
   }
 
-  addSimpleCounter(simpleCounter: SimpleCounter) {
+  addSimpleCounter(simpleCounter: SimpleCounter): void {
     this._store$.dispatch(
       addSimpleCounter({
         simpleCounter: {
@@ -116,11 +116,11 @@ export class SimpleCounterService {
     this._store$.dispatch(deleteSimpleCounters({ ids }));
   }
 
-  updateSimpleCounter(id: string, changes: Partial<SimpleCounter>) {
+  updateSimpleCounter(id: string, changes: Partial<SimpleCounter>): void {
     this._store$.dispatch(updateSimpleCounter({ simpleCounter: { id, changes } }));
   }
 
-  upsertSimpleCounter(simpleCounter: SimpleCounter) {
+  upsertSimpleCounter(simpleCounter: SimpleCounter): void {
     this._store$.dispatch(upsertSimpleCounter({ simpleCounter }));
   }
 }

@@ -133,7 +133,7 @@ export class TaskRepeatCfgEffects {
     private _syncProviderService: SyncProviderService,
   ) {}
 
-  private _saveToLs([action, taskRepeatCfgState]: [Action, TaskRepeatCfgState]) {
+  private _saveToLs([action, taskRepeatCfgState]: [Action, TaskRepeatCfgState]): void {
     this._persistenceService.taskRepeatCfg.saveState(taskRepeatCfgState, {
       isSyncModelChange: true,
     });

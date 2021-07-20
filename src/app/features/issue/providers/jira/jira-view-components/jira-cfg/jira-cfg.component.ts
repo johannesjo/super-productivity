@@ -152,7 +152,10 @@ export class JiraCfgComponent implements OnInit, OnDestroy {
     return this.cfg.transitionConfig[key];
   }
 
-  setTransition(key: keyof JiraTransitionConfig, value: JiraTransitionOption) {
+  setTransition(
+    key: keyof JiraTransitionConfig,
+    value: JiraTransitionOption,
+  ): JiraTransitionOption {
     return (this.cfg.transitionConfig[key] = value);
   }
 
@@ -183,11 +186,11 @@ export class JiraCfgComponent implements OnInit, OnDestroy {
     return field.id;
   }
 
-  displayIssueWith(issue: JiraIssue) {
-    return issue && issue.summary;
+  displayIssueWith(issue: JiraIssue): string {
+    return issue.summary;
   }
 
-  trackByIssueId(i: number, issue: JiraIssue) {
+  trackByIssueId(i: number, issue: JiraIssue): string {
     return issue.id;
   }
 

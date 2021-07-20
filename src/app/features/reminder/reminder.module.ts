@@ -95,7 +95,7 @@ export class ReminderModule {
   }
 
   @throttle(60000)
-  private _showNotification(reminders: Reminder[]) {
+  private _showNotification(reminders: Reminder[]): void {
     const isMultiple = reminders.length > 1;
     const title = isMultiple
       ? '"' +

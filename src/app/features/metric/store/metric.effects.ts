@@ -39,7 +39,7 @@ export class MetricEffects {
     private _persistenceService: PersistenceService,
   ) {}
 
-  private _saveToLs(metricState: MetricState) {
+  private _saveToLs(metricState: MetricState): void {
     this._persistenceService.metric.saveState(metricState, { isSyncModelChange: true });
   }
 }

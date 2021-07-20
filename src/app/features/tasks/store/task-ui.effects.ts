@@ -96,7 +96,7 @@ export class TaskUiEffects {
     Action,
     any,
     GlobalConfigState,
-  ]) {
+  ]): void {
     if (
       globalCfg &&
       globalCfg.misc.isNotifyWhenTimeEstimateExceeded &&

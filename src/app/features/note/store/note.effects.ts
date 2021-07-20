@@ -32,7 +32,7 @@ export class NoteEffects {
     private _workContextService: WorkContextService,
   ) {}
 
-  private async _saveToLs(currentProjectId: string, noteState: NoteState) {
+  private _saveToLs(currentProjectId: string, noteState: NoteState): void {
     if (currentProjectId) {
       this._persistenceService.note.save(currentProjectId, noteState, {
         isSyncModelChange: true,

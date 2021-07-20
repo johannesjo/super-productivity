@@ -239,7 +239,7 @@ export class SearchBarComponent implements AfterViewInit, OnDestroy {
     }
   }
 
-  navigateToItem(item: SearchItem) {
+  navigateToItem(item: SearchItem): void {
     if (!item) return;
     this.isLoading$.next(true);
     const location = this._getLocation(item);
@@ -263,7 +263,7 @@ export class SearchBarComponent implements AfterViewInit, OnDestroy {
     }
   }
 
-  getOptionText(item: SearchItem) {
+  getOptionText(item: SearchItem): string {
     return item?.title;
   }
 
@@ -274,7 +274,7 @@ export class SearchBarComponent implements AfterViewInit, OnDestroy {
     }
   }
 
-  trackByFn(i: number, item: SearchItem) {
+  trackByFn(i: number, item: SearchItem): string {
     return item.id;
   }
 

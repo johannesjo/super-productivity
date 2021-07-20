@@ -26,7 +26,7 @@ import { DropPasteInput } from '../../core/drop-paste-input/drop-paste.model';
   providedIn: 'root',
 })
 export class NoteService {
-  public notes$: Observable<Note[]> = this._store$.pipe(select(selectAllNotes));
+  notes$: Observable<Note[]> = this._store$.pipe(select(selectAllNotes));
 
   constructor(
     private _store$: Store<any>,
@@ -41,17 +41,17 @@ export class NoteService {
     return await this._persistenceService.note.ent.getById(projectId, id);
   }
 
-  public async loadStateForProject(projectId: string): Promise<void> {
+  async loadStateForProject(projectId: string): Promise<void> {
     const notes =
       (await this._persistenceService.note.load(projectId)) || initialNoteState;
     this.loadState(notes);
   }
 
-  public loadState(state: NoteState) {
+  loadState(state: NoteState): void {
     this._store$.dispatch(loadNoteState({ state }));
   }
 
-  public add(note: Partial<Note> = {}, isPreventFocus: boolean = false): void {
+  add(note: Partial<Note> = {}, isPreventFocus: boolean = false): void {
     const id = shortid();
 
     this._store$.dispatch(
@@ -68,11 +68,11 @@ export class NoteService {
     );
   }
 
-  public remove(id: string): void {
+  remove(id: string): void {
     this._store$.dispatch(deleteNote({ id }));
   }
 
-  public update(id: string, note: Partial<Note>) {
+  update(id: string, note: Partial<Note>): void {
     this._store$.dispatch(
       updateNote({
         note: {
@@ -83,11 +83,11 @@ export class NoteService {
     );
   }
 
-  public async updateFromDifferentWorkContext(
+  async updateFromDifferentWorkContext(
     workContextId: string,
     id: string,
     updates: Partial<Note>,
-  ) {
+  ): Promise<unknown> {
     const noteState = await this._persistenceService.note.load(workContextId);
     const noteToUpdate = noteState.entities[id];
     if (noteToUpdate) {
@@ -100,7 +100,7 @@ export class NoteService {
     });
   }
 
-  public updateOrder(ids: string[]): void {
+  updateOrder(ids: string[]): void {
     this._store$.dispatch(updateNoteOrder({ ids }));
   }
 

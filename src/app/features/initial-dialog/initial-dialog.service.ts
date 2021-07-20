@@ -86,7 +86,7 @@ export class InitialDialogService {
     return v ? +v : 0;
   }
 
-  private _saveDialogNr(nr: number = 0) {
+  private _saveDialogNr(nr: number = 0): void {
     localStorage.setItem(LS_INITIAL_DIALOG_NR, nr.toString());
   }
 }

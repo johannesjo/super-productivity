@@ -19,7 +19,7 @@ import { createFromDrop } from 'src/app/core/drop-paste-input/drop-paste-input';
 export class TaskAttachmentService {
   constructor(private _store$: Store<TaskState>, private _matDialog: MatDialog) {}
 
-  addAttachment(taskId: string, taskAttachment: TaskAttachment) {
+  addAttachment(taskId: string, taskAttachment: TaskAttachment): void {
     if (!taskAttachment) {
       console.error('No valid attachment passed');
       return;
@@ -40,7 +40,7 @@ export class TaskAttachmentService {
     this._store$.dispatch(new DeleteTaskAttachment({ taskId, id }));
   }
 
-  updateAttachment(taskId: string, id: string, changes: Partial<TaskAttachment>) {
+  updateAttachment(taskId: string, id: string, changes: Partial<TaskAttachment>): void {
     this._store$.dispatch(
       new UpdateTaskAttachment({ taskId, taskAttachment: { id, changes } }),
     );

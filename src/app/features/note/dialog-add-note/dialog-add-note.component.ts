@@ -51,7 +51,7 @@ export class DialogAddNoteComponent {
     this._matDialogRef.close();
   }
 
-  saveTmp(val: string = this.noteContent || '') {
+  saveTmp(val: string = this.noteContent || ''): void {
     sessionStorage.setItem(SS_NOTE_TMP, val);
   }
 

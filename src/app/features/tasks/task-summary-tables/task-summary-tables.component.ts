@@ -74,7 +74,7 @@ export class TaskSummaryTablesComponent {
     this._worklogService.refreshWorklog();
   }
 
-  showExportModal(projectId?: string | null) {
+  showExportModal(projectId?: string | null): void {
     this._matDialog.open(DialogWorklogExportComponent, {
       restoreFocus: true,
       panelClass: 'big',
@@ -90,7 +90,7 @@ export class TaskSummaryTablesComponent {
     projectId: string,
     roundTo: RoundTimeOption,
     isRoundUp: boolean = false,
-  ) {
+  ): void {
     const taskIds = this.flatTasks.map((task) => task.id);
     this._taskService.roundTimeSpentForDay({
       day: this.dayStr,
@@ -101,7 +101,7 @@ export class TaskSummaryTablesComponent {
     });
   }
 
-  trackById(i: number, item: Project) {
+  trackById(i: number, item: Project): string {
     return item.id;
   }
 
