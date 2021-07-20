@@ -31,7 +31,7 @@ export class ImprovementBannerComponent implements OnDestroy {
     this._subs.unsubscribe();
   }
 
-  dismiss(improvement: Improvement) {
+  dismiss(improvement: Improvement): void {
     this.improvementService.hideImprovement(improvement.id);
   }
 

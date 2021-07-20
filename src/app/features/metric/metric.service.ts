@@ -74,7 +74,7 @@ export class MetricService {
     );
   }
 
-  addMetric(metric: Metric) {
+  addMetric(metric: Metric): void {
     this._store$.dispatch(
       new AddMetric({
         metric: {

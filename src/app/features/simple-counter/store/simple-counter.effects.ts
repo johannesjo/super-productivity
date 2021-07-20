@@ -162,7 +162,7 @@ export class SimpleCounterEffects {
     private _snackService: SnackService,
   ) {}
 
-  private _saveToLs(simpleCounterState: SimpleCounterState) {
+  private _saveToLs(simpleCounterState: SimpleCounterState): void {
     this._persistenceService.simpleCounter.saveState(simpleCounterState, {
       isSyncModelChange: true,
     });

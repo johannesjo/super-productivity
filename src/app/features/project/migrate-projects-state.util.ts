@@ -83,7 +83,7 @@ const __convertToWesternArabicDateKeys = (workStartEnd: {
     : workStartEnd;
 };
 
-const _convertToWesternArabicDateKeys = (project: Project) => {
+const _convertToWesternArabicDateKeys = (project: Project): Project => {
   return {
     ...project,
     workStart: __convertToWesternArabicDateKeys(project.workStart),

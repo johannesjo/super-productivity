@@ -437,7 +437,10 @@ export class TaskAdditionalInfoComponent implements AfterViewInit, OnDestroy {
     }
   }
 
-  focusItem(cmpInstance: TaskAdditionalInfoItemComponent, timeoutDuration: number = 150) {
+  focusItem(
+    cmpInstance: TaskAdditionalInfoItemComponent,
+    timeoutDuration: number = 150,
+  ): void {
     window.clearTimeout(this._focusTimeout);
     this._focusTimeout = window.setTimeout(() => {
       if (!this.itemEls) {

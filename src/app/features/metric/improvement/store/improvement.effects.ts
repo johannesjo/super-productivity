@@ -54,7 +54,7 @@ export class ImprovementEffects {
     private _persistenceService: PersistenceService,
   ) {}
 
-  private _saveToLs(improvementState: ImprovementState) {
+  private _saveToLs(improvementState: ImprovementState): void {
     this._persistenceService.improvement.saveState(improvementState, {
       isSyncModelChange: true,
     });
