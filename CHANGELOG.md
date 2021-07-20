@@ -1,3 +1,30 @@
+# [7.4.0](https://github.com/johannesjo/super-productivity/compare/v7.3.3...v7.4.0) (2021-07-20)
+
+### Bug Fixes
+
+- **sync:** missing code_challenge_method for google sync [#1394](https://github.com/johannesjo/super-productivity/issues/1394) ([3ef6429](https://github.com/johannesjo/super-productivity/commit/3ef6429c74e6c2a12c5959e0421795572181f0e5))
+- type error ([58f3b0d](https://github.com/johannesjo/super-productivity/commit/58f3b0df0bb8fb530fa43746098b368fa82b94fa))
+- type error ([d769da7](https://github.com/johannesjo/super-productivity/commit/d769da77d421a41b2f1bffb08473261db62f0426))
+
+### Features
+
+- **jira:** improve invalid data handling [#1393](https://github.com/johannesjo/super-productivity/issues/1393) ([6c83e62](https://github.com/johannesjo/super-productivity/commit/6c83e62d1e38b707a9670e9c03509b543929f515))
+- **timeline:** move parent task when sub task is moved to top for timeline ([7a26247](https://github.com/johannesjo/super-productivity/commit/7a262472411d6655b664bea45694027fcd9fd4f4))
+- auto focus edit tag dialog ([6cc3e01](https://github.com/johannesjo/super-productivity/commit/6cc3e019473ff984d0508cd29460d197bacdf6f6))
+- check import data always [#1390](https://github.com/johannesjo/super-productivity/issues/1390) ([d77ed33](https://github.com/johannesjo/super-productivity/commit/d77ed33ca43568f069d159e1aea57d02dd811747))
+- don't go to planning mode, if there are any tasks left ([a7d43c1](https://github.com/johannesjo/super-productivity/commit/a7d43c1ad3ed85d0320695cda7280f40482d2e88))
+- don't show reminder dialog while add task bar is open ([308b201](https://github.com/johannesjo/super-productivity/commit/308b201f3d4de0d4465b1e8d26c7ba8ad7500d9d))
+- make move task down work better when there are done tasks ([03c95a9](https://github.com/johannesjo/super-productivity/commit/03c95a9777ea99e3a25f1fcffac092c902afc7d3))
+- make move task up work better when there are done tasks ([6b9d728](https://github.com/johannesjo/super-productivity/commit/6b9d728c42f35dfbcfeaca83470478170c91c5f2))
+- make move task up/down in backlog work better when there are done tasks ([21b4df3](https://github.com/johannesjo/super-productivity/commit/21b4df3ab58996b3e13fa30c47f221492f0e59ba))
+- **dailySummary:** add total estimate to daily summary plan ([12dec18](https://github.com/johannesjo/super-productivity/commit/12dec189375fd955e384bb42f5785726ef9d24d8))
+- **reminder:** allow for unschedule toasts to be skipable ([2622e8f](https://github.com/johannesjo/super-productivity/commit/2622e8f5598ebc942e890ce0296d4a0a9469de7f))
+- **reminder:** remove reminder if set to standard schedule time on add for tomorrow button ([4db08ba](https://github.com/johannesjo/super-productivity/commit/4db08ba613be999b2dabba6fec947b1a21832e83))
+- **task:** make task move up via keyboard more reliable ([5c90e41](https://github.com/johannesjo/super-productivity/commit/5c90e412c0c2e45c011332c2704a5cec877b5f5d))
+- **timeline:** add minimal fade in ani ([141258f](https://github.com/johannesjo/super-productivity/commit/141258fc3cb877c18d27c541204be4900c58f799))
+- **timeline:** focus task after moving it ([78213dd](https://github.com/johannesjo/super-productivity/commit/78213dd25dfd9f5a1659db74ef204c0e9346d898))
+- **timeline:** make first simple up and down buttons work ([ef14f66](https://github.com/johannesjo/super-productivity/commit/ef14f6688c7183b4937837886c5bbc490b34d34c))
+
 ## [7.3.3](https://github.com/johannesjo/super-productivity/compare/v7.3.1...v7.3.3) (2021-07-13)
 
 ### Bug Fixes
