@@ -579,7 +579,18 @@ export class JiraApiService {
       } else {
         // console.log('JIRA_RESPONSE', res);
         if (currentRequest.transform) {
-          currentRequest.resolve(currentRequest.transform(res, currentRequest.jiraCfg));
+          // data can be invalid, that's why we check
+          try {
+            currentRequest.resolve(currentRequest.transform(res, currentRequest.jiraCfg));
+          } catch (e) {
+            console.log(res);
+            console.log(currentRequest);
+            console.error(e);
+            this._snackService.open({
+              type: 'ERROR',
+              msg: T.F.JIRA.S.INVALID_RESPONSE,
+            });
+          }
         } else {
           currentRequest.resolve(res);
         }
