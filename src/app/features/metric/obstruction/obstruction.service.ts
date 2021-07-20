@@ -34,7 +34,7 @@ export class ObstructionService {
     return id;
   }
 
-  deleteObstruction(id: string) {
+  deleteObstruction(id: string): void {
     this._store$.dispatch(new DeleteObstruction({ id }));
   }
 

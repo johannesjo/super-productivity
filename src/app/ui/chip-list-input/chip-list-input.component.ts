@@ -131,11 +131,11 @@ export class ChipListInputComponent implements OnDestroy {
     return item.id;
   }
 
-  isToggled(id: string) {
-    return this.toggledItems && this.toggledItems.includes(id);
+  isToggled(id: string): boolean {
+    return !!this.toggledItems && this.toggledItems.includes(id);
   }
 
-  private _updateModelItems(modelIds: string[]) {
+  private _updateModelItems(modelIds: string[]): void {
     this.modelItems = this.suggestionsIn.length
       ? (modelIds.map((id) =>
           this.suggestionsIn.find((suggestion) => suggestion.id === id),
@@ -143,18 +143,18 @@ export class ChipListInputComponent implements OnDestroy {
       : [];
   }
 
-  private _getExistingSuggestionByTitle(v: string) {
+  private _getExistingSuggestionByTitle(v: string): Suggestion | undefined {
     return this.suggestionsIn.find((suggestion) => suggestion.title === v);
   }
 
-  private _add(id: string) {
+  private _add(id: string): void {
     // prevent double items
     if (!this._modelIds.includes(id)) {
       this.addItem.emit(id);
     }
   }
 
-  private _addByTitle(v: string) {
+  private _addByTitle(v: string): void {
     const existing = this._getExistingSuggestionByTitle(v);
     if (existing) {
       this._add(existing.id);

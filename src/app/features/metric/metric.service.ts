@@ -85,7 +85,7 @@ export class MetricService {
     );
   }
 
-  deleteMetric(id: string) {
+  deleteMetric(id: string): void {
     this._store$.dispatch(new DeleteMetric({ id }));
   }
 

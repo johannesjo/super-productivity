@@ -24,7 +24,7 @@ export class JiraCommonInterfacesService implements IssueServiceInterface {
   ) {}
 
   // NOTE: we're using the issueKey instead of the real issueId
-  getById$(issueId: string | number, projectId: string) {
+  getById$(issueId: string | number, projectId: string): Observable<JiraIssue> {
     return this._getCfgOnce$(projectId).pipe(
       switchMap((jiraCfg) =>
         this._jiraApiService.getIssueById$(issueId as string, jiraCfg),

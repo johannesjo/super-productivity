@@ -67,7 +67,7 @@ export class ImprovementService {
     );
   }
 
-  deleteImprovement(id: string) {
+  deleteImprovement(id: string): void {
     this._store$.dispatch(new DeleteImprovement({ id }));
   }
 
@@ -79,15 +79,15 @@ export class ImprovementService {
     this._store$.dispatch(new UpdateImprovement({ improvement: { id, changes } }));
   }
 
-  hideImprovement(id: string) {
+  hideImprovement(id: string): void {
     this._store$.dispatch(new HideImprovement({ id }));
   }
 
-  toggleImprovementRepeat(id: string) {
+  toggleImprovementRepeat(id: string): void {
     this._store$.dispatch(new ToggleImprovementRepeat({ id }));
   }
 
-  disableImprovementRepeat(id: string) {
+  disableImprovementRepeat(id: string): void {
     this._store$.dispatch(new DisableImprovementRepeat({ id }));
   }
 

@@ -41,7 +41,7 @@ export class GitlabCommonInterfacesService implements IssueServiceInterface {
     );
   }
 
-  getById$(issueId: number, projectId: string) {
+  getById$(issueId: number, projectId: string): Observable<GitlabIssue> {
     return this._getCfgOnce$(projectId).pipe(
       concatMap((gitlabCfg) => this._gitlabApiService.getById$(issueId, gitlabCfg)),
     );

@@ -73,20 +73,20 @@ export class EvaluationSheetComponent implements OnDestroy, OnInit {
     this._update({ productivity });
   }
 
-  addObstruction(v: string) {
+  addObstruction(v: string): void {
     this._update({
       obstructions: [...(this.metricForDay as MetricCopy).obstructions, v],
     });
   }
 
-  addNewObstruction(v: string) {
+  addNewObstruction(v: string): void {
     const id = this.obstructionService.addObstruction(v);
     this._update({
       obstructions: [...(this.metricForDay as MetricCopy).obstructions, id],
     });
   }
 
-  removeObstruction(idToRemove: string) {
+  removeObstruction(idToRemove: string): void {
     this._update({
       obstructions: (this.metricForDay as MetricCopy).obstructions.filter(
         (id) => id !== idToRemove,
@@ -94,20 +94,20 @@ export class EvaluationSheetComponent implements OnDestroy, OnInit {
     });
   }
 
-  addImprovement(v: string) {
+  addImprovement(v: string): void {
     this._update({
       improvements: [...(this.metricForDay as MetricCopy).improvements, v],
     });
   }
 
-  addNewImprovement(v: string) {
+  addNewImprovement(v: string): void {
     const id = this.improvementService.addImprovement(v);
     this._update({
       improvements: [...(this.metricForDay as MetricCopy).improvements, id],
     });
   }
 
-  removeImprovement(idToRemove: string) {
+  removeImprovement(idToRemove: string): void {
     this._update({
       improvements: (this.metricForDay as MetricCopy).improvements.filter(
         (id) => id !== idToRemove,
@@ -115,7 +115,7 @@ export class EvaluationSheetComponent implements OnDestroy, OnInit {
     });
   }
 
-  addImprovementTomorrow(v: string) {
+  addImprovementTomorrow(v: string): void {
     this._update({
       improvementsTomorrow: [
         ...(this.metricForDay as MetricCopy).improvementsTomorrow,
@@ -124,7 +124,7 @@ export class EvaluationSheetComponent implements OnDestroy, OnInit {
     });
   }
 
-  addNewImprovementTomorrow(v: string) {
+  addNewImprovementTomorrow(v: string): void {
     const id = this.improvementService.addImprovement(v);
     this._update({
       improvementsTomorrow: [
@@ -134,7 +134,7 @@ export class EvaluationSheetComponent implements OnDestroy, OnInit {
     });
   }
 
-  removeImprovementTomorrow(idToRemove: string) {
+  removeImprovementTomorrow(idToRemove: string): void {
     this._update({
       improvementsTomorrow: (this.metricForDay as MetricCopy).improvementsTomorrow.filter(
         (id) => id !== idToRemove,
@@ -143,7 +143,7 @@ export class EvaluationSheetComponent implements OnDestroy, OnInit {
     // this.improvementService.disableImprovementRepeat(idToRemove);
   }
 
-  toggleImprovementRepeat(improvementId: string) {
+  toggleImprovementRepeat(improvementId: string): void {
     this.improvementService.toggleImprovementRepeat(improvementId);
   }
 

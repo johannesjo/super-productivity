@@ -57,7 +57,7 @@ export class TaskAttachmentListComponent {
       });
   }
 
-  remove(id: string) {
+  remove(id: string): void {
     if (!this.taskId) {
       throw new Error('No taskId');
     }

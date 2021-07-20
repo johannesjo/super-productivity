@@ -35,7 +35,7 @@ export class TaskSummaryTableComponent {
     this.updated.emit();
   }
 
-  updateTaskTitle(task: Task, newVal: string) {
+  updateTaskTitle(task: Task, newVal: string): void {
     this._taskService.updateEverywhere(task.id, {
       title: newVal,
     });

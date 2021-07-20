@@ -20,6 +20,16 @@
         "@angular-eslint/component-selector": ["off"],
         "no-unused-vars": [2, { "args": "none" }],
         "unused-imports/no-unused-imports": "error",
+        "@typescript-eslint/explicit-function-return-type": [
+          "error",
+          {
+            "allowExpressions": true,
+            "allowTypedFunctionExpressions": true,
+            "allowHigherOrderFunctions": true,
+            "allowDirectConstAssertionInArrowFunctions": true,
+            "allowConciseArrowFunctionExpressionsStartingWithVoid": true
+          }
+        ],
         "@typescript-eslint/explicit-member-accessibility": [
           "off",
           {

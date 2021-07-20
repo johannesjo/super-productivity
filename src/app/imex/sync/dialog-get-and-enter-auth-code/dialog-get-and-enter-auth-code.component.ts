@@ -22,7 +22,7 @@ export class DialogGetAndEnterAuthCodeComponent {
     },
   ) {}
 
-  close(token?: string) {
+  close(token?: string): void {
     this._matDialogRef.close(token);
   }
 }

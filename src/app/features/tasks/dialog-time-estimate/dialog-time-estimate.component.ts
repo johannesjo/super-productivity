@@ -68,7 +68,7 @@ export class DialogTimeEstimateComponent {
       });
   }
 
-  deleteValue(strDate: string) {
+  deleteValue(strDate: string): void {
     delete this.timeSpentOnDayCopy[strDate];
   }
 

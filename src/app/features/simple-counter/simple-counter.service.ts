@@ -89,7 +89,7 @@ export class SimpleCounterService {
     this._store$.dispatch(increaseSimpleCounterCounterToday({ id, increaseBy }));
   }
 
-  toggleCounter(id: string) {
+  toggleCounter(id: string): void {
     this._store$.dispatch(toggleSimpleCounterCounter({ id }));
   }
 
@@ -108,7 +108,7 @@ export class SimpleCounterService {
     );
   }
 
-  deleteSimpleCounter(id: string) {
+  deleteSimpleCounter(id: string): void {
     this._store$.dispatch(deleteSimpleCounter({ id }));
   }
 

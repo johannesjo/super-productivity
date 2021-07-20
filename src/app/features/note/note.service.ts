@@ -41,7 +41,7 @@ export class NoteService {
     return await this._persistenceService.note.ent.getById(projectId, id);
   }
 
-  public async loadStateForProject(projectId: string) {
+  public async loadStateForProject(projectId: string): Promise<void> {
     const notes =
       (await this._persistenceService.note.load(projectId)) || initialNoteState;
     this.loadState(notes);
@@ -68,7 +68,7 @@ export class NoteService {
     );
   }
 
-  public remove(id: string) {
+  public remove(id: string): void {
     this._store$.dispatch(deleteNote({ id }));
   }
 

@@ -36,7 +36,7 @@ export class TaskAttachmentService {
     );
   }
 
-  deleteAttachment(taskId: string, id: string) {
+  deleteAttachment(taskId: string, id: string): void {
     this._store$.dispatch(new DeleteTaskAttachment({ taskId, id }));
   }
 
@@ -48,15 +48,15 @@ export class TaskAttachmentService {
 
   // HANDLE INPUT
   // ------------
-  createFromDrop(ev: DragEvent, taskId: string) {
+  createFromDrop(ev: DragEvent, taskId: string): void {
     this._handleInput(createFromDrop(ev) as DropPasteInput, ev, taskId);
   }
 
-  // createFromPaste(ev, taskId: string) {
+  // createFromPaste(ev, taskId: string): void {
   //   this._handleInput(createFromPaste(ev), ev, taskId);
   // }
 
-  private _handleInput(attachment: DropPasteInput, ev: Event, taskId: string) {
+  private _handleInput(attachment: DropPasteInput, ev: Event, taskId: string): void {
     // properly not intentional so we leave
     if (!attachment || !attachment.path) {
       return;

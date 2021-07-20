@@ -471,7 +471,7 @@ export class TaskService {
     }
   }
 
-  addSubTaskTo(parentId: string) {
+  addSubTaskTo(parentId: string): void {
     this._store.dispatch(
       new AddSubTask({
         task: this.createNewTaskWithDefaults({ title: '' }),
@@ -488,7 +488,7 @@ export class TaskService {
     this._store.dispatch(new RemoveTimeSpent({ id, date, duration }));
   }
 
-  focusTask(id: string) {
+  focusTask(id: string): void {
     const el = document.getElementById('t-' + id);
     if (!el) {
       throw new Error('Cannot find focus el');
@@ -496,7 +496,7 @@ export class TaskService {
     el.focus();
   }
 
-  focusTaskIfPossible(id: string) {
+  focusTaskIfPossible(id: string): void {
     const tEl = document.getElementById('t-' + id);
 
     if (tEl) {
@@ -522,7 +522,7 @@ export class TaskService {
     }
   }
 
-  moveToBacklog(id: string) {
+  moveToBacklog(id: string): void {
     const workContextId = this._workContextService.activeWorkContextId as string;
     const workContextType = this._workContextService
       .activeWorkContextType as WorkContextType;
@@ -538,7 +538,7 @@ export class TaskService {
     this._store.dispatch(new MoveToArchive({ tasks }));
   }
 
-  moveToProject(task: TaskWithSubTasks, projectId: string) {
+  moveToProject(task: TaskWithSubTasks, projectId: string): void {
     if (!!task.parentId || !!task.issueId) {
       throw new Error('Wrong task model');
     }
@@ -718,19 +718,19 @@ export class TaskService {
     return this._store.pipe(select(selectTasksByTag, { tagId }));
   }
 
-  setDone(id: string) {
+  setDone(id: string): void {
     this.update(id, { isDone: true });
   }
 
-  markIssueUpdatesAsRead(id: string) {
+  markIssueUpdatesAsRead(id: string): void {
     this.update(id, { issueWasUpdated: false });
   }
 
-  setUnDone(id: string) {
+  setUnDone(id: string): void {
     this.update(id, { isDone: false });
   }
 
-  showSubTasks(id: string) {
+  showSubTasks(id: string): void {
     this.updateUi(id, { _showSubTasksMode: ShowSubTasksMode.Show });
   }
 
@@ -742,7 +742,7 @@ export class TaskService {
     this._store.dispatch(new ToggleTaskShowSubTasks({ taskId, isShowLess, isEndless }));
   }
 
-  hideSubTasks(id: string) {
+  hideSubTasks(id: string): void {
     this.updateUi(id, { _showSubTasksMode: ShowSubTasksMode.HideAll });
   }
 

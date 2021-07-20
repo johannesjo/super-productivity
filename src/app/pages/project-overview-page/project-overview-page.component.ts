@@ -61,7 +61,7 @@ export class ProjectOverviewPageComponent implements OnInit, OnDestroy {
     this._subs.unsubscribe();
   }
 
-  async export(projectId: string, projectTitle: string) {
+  async export(projectId: string, projectTitle: string): Promise<void> {
     const data: ExportedProject = await this._persistenceService.loadCompleteProject(
       projectId,
     );

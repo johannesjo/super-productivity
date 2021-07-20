@@ -122,14 +122,14 @@ export class ProjectService {
     }
   }
 
-  archive(projectId: string) {
+  archive(projectId: string): void {
     this._store$.dispatch({
       type: ProjectActionTypes.ArchiveProject,
       payload: { id: projectId },
     });
   }
 
-  unarchive(projectId: string) {
+  unarchive(projectId: string): void {
     this._store$.dispatch({
       type: ProjectActionTypes.UnarchiveProject,
       payload: { id: projectId },
@@ -170,7 +170,7 @@ export class ProjectService {
     });
   }
 
-  remove(projectId: string) {
+  remove(projectId: string): void {
     this._store$.dispatch({
       type: ProjectActionTypes.DeleteProject,
       payload: { id: projectId },

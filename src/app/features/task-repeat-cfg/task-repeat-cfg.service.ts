@@ -86,7 +86,7 @@ export class TaskRepeatCfgService {
     );
   }
 
-  deleteTaskRepeatCfg(id: string) {
+  deleteTaskRepeatCfg(id: string): void {
     this._store$.dispatch(new DeleteTaskRepeatCfg({ id }));
   }
 
@@ -121,7 +121,7 @@ export class TaskRepeatCfgService {
     });
   }
 
-  deleteTaskRepeatCfgWithDialog(id: string) {
+  deleteTaskRepeatCfgWithDialog(id: string): void {
     this._matDialog
       .open(DialogConfirmComponent, {
         restoreFocus: true,

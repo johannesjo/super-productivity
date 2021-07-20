@@ -102,16 +102,16 @@ export class DialogEditTaskRepeatCfgComponent implements OnInit, OnDestroy {
     this._matDialogRef.close();
   }
 
-  addTag(id: string) {
+  addTag(id: string): void {
     this._updateTags(unique([...this.taskRepeatCfg.tagIds, id]));
   }
 
-  addNewTag(title: string) {
+  addNewTag(title: string): void {
     const id = this._tagService.addTag({ title });
     this._updateTags(unique([...this.taskRepeatCfg.tagIds, id]));
   }
 
-  removeTag(id: string) {
+  removeTag(id: string): void {
     const updatedTagIds = this.taskRepeatCfg.tagIds.filter((tagId) => tagId !== id);
     this._updateTags(updatedTagIds);
   }

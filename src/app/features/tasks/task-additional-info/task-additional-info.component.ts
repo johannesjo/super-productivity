@@ -360,7 +360,7 @@ export class TaskAdditionalInfoComponent implements AfterViewInit, OnDestroy {
     window.clearTimeout(this._focusTimeout);
   }
 
-  changeTaskNotes($event: string) {
+  changeTaskNotes($event: string): void {
     if (
       !this.defaultTaskNotes ||
       ($event && $event.trim() !== this.defaultTaskNotes.trim())
@@ -454,7 +454,7 @@ export class TaskAdditionalInfoComponent implements AfterViewInit, OnDestroy {
     }, timeoutDuration);
   }
 
-  updateTaskTitleIfChanged(isChanged: boolean, newTitle: string) {
+  updateTaskTitleIfChanged(isChanged: boolean, newTitle: string): void {
     if (isChanged) {
       if (!this._taskData) {
         throw new Error('No task data');

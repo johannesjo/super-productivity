@@ -139,7 +139,7 @@ export class TaskRepeatCfgEffects {
     });
   }
 
-  private _removeRepeatCfgFromArchiveTasks(repeatConfigId: string) {
+  private _removeRepeatCfgFromArchiveTasks(repeatConfigId: string): void {
     this._persistenceService.taskArchive.loadState().then((taskArchive: TaskArchive) => {
       // if not yet initialized for project
       if (!taskArchive) {

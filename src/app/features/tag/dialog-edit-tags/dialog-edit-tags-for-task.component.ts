@@ -49,16 +49,16 @@ export class DialogEditTagsForTaskComponent implements OnDestroy {
     this._matDialogRef.close();
   }
 
-  addTag(id: string) {
+  addTag(id: string): void {
     this._updateTags(unique([...this.tagIds, id]));
   }
 
-  addNewTag(title: string) {
+  addNewTag(title: string): void {
     const id = this._tagService.addTag({ title });
     this._updateTags(unique([...this.tagIds, id]));
   }
 
-  removeTag(id: string) {
+  removeTag(id: string): void {
     const updatedTagIds = this.tagIds.filter((tagId) => tagId !== id);
     this._updateTags(updatedTagIds);
   }

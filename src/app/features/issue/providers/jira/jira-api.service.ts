@@ -312,8 +312,8 @@ export class JiraApiService {
   // Complex Functions
 
   // --------
-  private _isMinimalSettings(settings: JiraCfg) {
-    return (
+  private _isMinimalSettings(settings: JiraCfg): boolean {
+    return !!(
       settings &&
       settings.host &&
       settings.userName &&
@@ -554,7 +554,7 @@ export class JiraApiService {
     };
   }
 
-  private _handleResponse(res: { requestId?: string; error?: any }) {
+  private _handleResponse(res: { requestId?: string; error?: any }): void {
     // check if proper id is given in callback and if exists in requestLog
     if (res.requestId && this._requestsLog[res.requestId]) {
       const currentRequest = this._requestsLog[res.requestId];
@@ -598,7 +598,7 @@ export class JiraApiService {
     sessionStorage.removeItem(SS_JIRA_WONKY_COOKIE);
   }
 
-  private _b64EncodeUnicode(str: string) {
+  private _b64EncodeUnicode(str: string): string {
     if (typeof (btoa as any) === 'function') {
       return btoa(str);
     }
