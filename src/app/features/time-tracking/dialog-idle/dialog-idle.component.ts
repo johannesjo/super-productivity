@@ -74,7 +74,7 @@ export class DialogIdleComponent implements OnInit {
     });
   }
 
-  track(isTrackAsBreak: boolean = false) {
+  track(isTrackAsBreak: boolean = false): void {
     this._matDialogRef.close({
       task: this.selectedTask || this.newTaskTitle,
       isTrackAsBreak,

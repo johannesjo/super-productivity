@@ -126,7 +126,7 @@ export class SplitComponent implements AfterViewInit {
     this._updatePos(percentage);
   }
 
-  private _updatePos(pos: number | undefined, isWasOutsideChange: boolean = false) {
+  private _updatePos(pos: number | undefined, isWasOutsideChange: boolean = false): void {
     if (typeof pos !== 'number') {
       throw new Error('Invalid pos');
     }

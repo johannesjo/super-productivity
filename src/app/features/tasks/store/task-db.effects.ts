@@ -66,7 +66,7 @@ export class TaskDbEffects {
   ) {}
 
   // @debounce(50)
-  private _saveToLs(taskState: TaskState, isSyncModelChange: boolean = false) {
+  private _saveToLs(taskState: TaskState, isSyncModelChange: boolean = false): void {
     this._persistenceService.task.saveState(
       {
         ...taskState,

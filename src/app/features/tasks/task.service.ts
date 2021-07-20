@@ -511,7 +511,7 @@ export class TaskService {
     }
   }
 
-  moveToProjectTodayList(id: string, isMoveToTop: boolean = false) {
+  moveToProjectTodayList(id: string, isMoveToTop: boolean = false): void {
     const workContextId = this._workContextService.activeWorkContextId as string;
     const workContextType = this._workContextService
       .activeWorkContextType as WorkContextType;

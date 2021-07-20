@@ -262,7 +262,7 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
     this._taskService.setSelectedId(this.task.id);
   }
 
-  deleteTask(isClick: boolean = false) {
+  deleteTask(isClick: boolean = false): void {
     // NOTE: prevents attempts to delete the same task multiple times
     if (this._isTaskDeleteTriggered) {
       return;
@@ -407,7 +407,7 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
     this._taskService.convertToMainTask(this.task);
   }
 
-  focusPrevious(isFocusReverseIfNotPossible: boolean = false) {
+  focusPrevious(isFocusReverseIfNotPossible: boolean = false): void {
     if (IS_TOUCH_ONLY) {
       return;
     }
@@ -429,7 +429,7 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
     }
   }
 
-  focusNext(isFocusReverseIfNotPossible: boolean = false) {
+  focusNext(isFocusReverseIfNotPossible: boolean = false): void {
     if (IS_TOUCH_ONLY) {
       return;
     }

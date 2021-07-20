@@ -53,7 +53,7 @@ export class DialogPomodoroBreakComponent {
     this._matDialogRef.close(null);
   }
 
-  nextSession(isSkipBreak: boolean = false) {
+  nextSession(isSkipBreak: boolean = false): void {
     this.isStopCurrentTime$.next(true);
     if (isSkipBreak) {
       this.pomodoroService.skipBreak();

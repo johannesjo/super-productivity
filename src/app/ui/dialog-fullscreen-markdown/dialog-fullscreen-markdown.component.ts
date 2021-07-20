@@ -35,7 +35,7 @@ export class DialogFullscreenMarkdownComponent implements OnDestroy {
     this._subs.unsubscribe();
   }
 
-  close(isSkipSave: boolean = false) {
+  close(isSkipSave: boolean = false): void {
     this._matDialogRef.close(isSkipSave || this.data.content);
   }
 }

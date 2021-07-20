@@ -51,7 +51,7 @@ export class NoteService {
     this._store$.dispatch(loadNoteState({ state }));
   }
 
-  public add(note: Partial<Note> = {}, isPreventFocus: boolean = false) {
+  public add(note: Partial<Note> = {}, isPreventFocus: boolean = false): void {
     const id = shortid();
 
     this._store$.dispatch(
