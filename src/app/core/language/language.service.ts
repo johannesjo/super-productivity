@@ -44,14 +44,14 @@ export class LanguageService {
     this._translateService.setDefaultLang(lng);
   }
 
-  setFromBrowserLngIfAutoSwitchLng() {
+  setFromBrowserLngIfAutoSwitchLng(): void {
     const browserLng = this._translateService.getBrowserLang() as LanguageCode;
     if (AUTO_SWITCH_LNGS.includes(browserLng)) {
       this._setFn(browserLng);
     }
   }
 
-  private _initMonkeyPatchFirstDayOfWeek() {
+  private _initMonkeyPatchFirstDayOfWeek(): void {
     let firstDayOfWeek = DEFAULT_GLOBAL_CONFIG.misc.firstDayOfWeek;
     this._globalConfigService.misc$
       .pipe(

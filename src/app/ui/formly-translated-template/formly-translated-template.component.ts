@@ -52,7 +52,7 @@ export class FormlyTranslatedTemplateComponent
     this._subs.unsubscribe();
   }
 
-  private _createTag() {
+  private _createTag(): void {
     if (!this.field.templateOptions || !this.tplWrapper) {
       throw new Error();
     }

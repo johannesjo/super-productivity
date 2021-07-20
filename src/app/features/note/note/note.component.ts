@@ -24,7 +24,7 @@ export class NoteComponent {
     private readonly _noteService: NoteService,
   ) {}
 
-  toggleLock() {
+  toggleLock(): void {
     if (!this.note) {
       throw new Error('No note');
     }
@@ -38,14 +38,14 @@ export class NoteComponent {
     this._noteService.update(this.note.id, { content: newVal });
   }
 
-  removeNote() {
+  removeNote(): void {
     if (!this.note) {
       throw new Error('No note');
     }
     this._noteService.remove(this.note.id);
   }
 
-  editFullscreen() {
+  editFullscreen(): void {
     if (!this.note) {
       throw new Error('No note');
     }

@@ -10,11 +10,11 @@ import { FieldType } from '@ngx-formly/material';
 export class KeyboardInputComponent extends FieldType {
   // @ViewChild(MatInput, {static: true}) formFieldControl: MatInput;
 
-  get type() {
+  get type(): string {
     return this.to.type || 'text';
   }
 
-  onKeyDown(ev: KeyboardEvent) {
+  onKeyDown(ev: KeyboardEvent): void {
     const keyCode = ev.keyCode;
 
     // the tab key should continue to behave normally

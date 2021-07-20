@@ -45,14 +45,14 @@ export class SnackCustomComponent implements OnInit, OnDestroy {
     this._subs.unsubscribe();
   }
 
-  actionClick() {
+  actionClick(): void {
     if (this.data.actionFn) {
       this.data.actionFn();
     }
     this.snackBarRef.dismissWithAction();
   }
 
-  close() {
+  close(): void {
     this.snackBarRef.dismissWithAction();
   }
 }

@@ -387,7 +387,7 @@ export class TaskAdditionalInfoComponent implements AfterViewInit, OnDestroy {
     });
   }
 
-  editTaskRepeatCfg() {
+  editTaskRepeatCfg(): void {
     this._matDialog.open(DialogEditTaskRepeatCfgComponent, {
       restoreFocus: false,
       data: {
@@ -396,7 +396,7 @@ export class TaskAdditionalInfoComponent implements AfterViewInit, OnDestroy {
     });
   }
 
-  addAttachment() {
+  addAttachment(): void {
     this._matDialog
       .open(DialogEditTaskAttachmentComponent, {
         data: {},
@@ -411,11 +411,11 @@ export class TaskAdditionalInfoComponent implements AfterViewInit, OnDestroy {
       });
   }
 
-  addSubTask() {
+  addSubTask(): void {
     this.taskService.addSubTaskTo(this.task.parentId || this.task.id);
   }
 
-  collapseParent() {
+  collapseParent(): void {
     this.taskService.setSelectedId(null);
     this.taskService.focusTask(this.task.id);
   }
@@ -464,7 +464,7 @@ export class TaskAdditionalInfoComponent implements AfterViewInit, OnDestroy {
     }
   }
 
-  private _focusFirst() {
+  private _focusFirst(): void {
     this._focusTimeout = window.setTimeout(() => {
       if (!this.itemEls) {
         throw new Error();

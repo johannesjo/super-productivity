@@ -274,7 +274,7 @@ export class CaldavClientService {
 
       // override open() method to add headers
       // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-      xhr.open = function () {
+      xhr.open = function (): void {
         // @ts-ignore
         const result = oldOpen.apply(this, arguments);
         // @ts-ignore

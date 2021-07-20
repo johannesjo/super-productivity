@@ -33,7 +33,7 @@ export class DialogSimpleCounterEditComponent {
     this.val = $event;
   }
 
-  close() {
+  close(): void {
     this._matDialogRef.close();
   }
 }

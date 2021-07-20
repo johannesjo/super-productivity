@@ -97,43 +97,43 @@ export class LayoutService {
       });
   }
 
-  showAddTaskBar() {
+  showAddTaskBar(): void {
     this._store$.dispatch(showAddTaskBar());
   }
 
-  hideAddTaskBar() {
+  hideAddTaskBar(): void {
     this._store$.dispatch(hideAddTaskBar());
   }
 
-  toggleAddTaskBar() {
+  toggleAddTaskBar(): void {
     this._store$.dispatch(toggleAddTaskBar());
   }
 
-  showSearchBar() {
+  showSearchBar(): void {
     this._store$.dispatch(showSearchBar());
   }
 
-  hideSearchBar() {
+  hideSearchBar(): void {
     this._store$.dispatch(hideSearchBar());
   }
 
-  toggleSearchBar() {
+  toggleSearchBar(): void {
     this._store$.dispatch(toggleSearchBar());
   }
 
-  toggleSideNav() {
+  toggleSideNav(): void {
     this._store$.dispatch(toggleSideNav());
   }
 
-  hideSideNav() {
+  hideSideNav(): void {
     this._store$.dispatch(hideSideNav());
   }
 
-  public toggleNotes() {
+  public toggleNotes(): void {
     this._store$.dispatch(toggleShowNotes());
   }
 
-  public hideNotes() {
+  public hideNotes(): void {
     this._store$.dispatch(hideNotes());
   }
 }

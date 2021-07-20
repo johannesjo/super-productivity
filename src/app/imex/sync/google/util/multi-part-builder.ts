@@ -3,7 +3,7 @@
 /**
  * Helper for building multipart requests for uploading to Drive.
  */
-export const MultiPartBuilder = function (this: any) {
+export const MultiPartBuilder = function (this: any): void {
   this.boundary = Math.random().toString(36).slice(2);
   this.mimeType = 'multipart/mixed; boundary="' + this.boundary + '"';
   this.parts = [];
@@ -34,7 +34,7 @@ MultiPartBuilder.prototype.append = function (mimeType: string, content: any) {
  * the request. Once finalized, appending additional parts will result in an
  * error.
  */
-MultiPartBuilder.prototype.finish = function () {
+MultiPartBuilder.prototype.finish = function (): { type: string; body: string } {
   if (this.parts.length === 0) {
     throw new Error('No parts have been added.');
   }

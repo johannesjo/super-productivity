@@ -45,7 +45,7 @@ export class DialogEditTagsForTaskComponent implements OnDestroy {
     this._subs.unsubscribe();
   }
 
-  close() {
+  close(): void {
     this._matDialogRef.close();
   }
 

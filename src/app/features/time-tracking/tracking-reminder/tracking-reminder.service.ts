@@ -71,7 +71,7 @@ export class TrackingReminderService {
     private _translateService: TranslateService,
   ) {}
 
-  init() {
+  init(): void {
     this.remindCounter$.subscribe((count) => {
       this._triggerBanner(count);
     });
@@ -81,7 +81,7 @@ export class TrackingReminderService {
     });
   }
 
-  private _hideBanner() {
+  private _hideBanner(): void {
     this._bannerService.dismiss(BannerId.StartTrackingReminder);
   }
 
@@ -109,7 +109,7 @@ export class TrackingReminderService {
     });
   }
 
-  private _openDialog() {
+  private _openDialog(): void {
     this._matDialog
       .open(DialogTrackingReminderComponent, {
         data: {
@@ -146,7 +146,7 @@ export class TrackingReminderService {
       );
   }
 
-  private _dismissBanner() {
+  private _dismissBanner(): void {
     this._bannerService.dismiss(BannerId.StartTrackingReminder);
     this._manualReset$.next();
   }

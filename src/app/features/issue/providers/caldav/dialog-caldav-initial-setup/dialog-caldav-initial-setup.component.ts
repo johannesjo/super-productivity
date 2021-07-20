@@ -29,7 +29,7 @@ export class DialogCaldavInitialSetupComponent {
     this._matDialogRef.close(caldavCfg);
   }
 
-  close() {
+  close(): void {
     this._matDialogRef.close();
   }
 }

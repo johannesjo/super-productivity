@@ -37,7 +37,7 @@ export class GlobalProgressBarService {
     this._label$.next(this._urlToLabel(url));
   }
 
-  countDown() {
+  countDown(): void {
     this.nrOfRequests$.next(Math.max(this.nrOfRequests$.getValue() - 1, 0));
     if (this.nrOfRequests$.getValue() - 1 <= 0) {
       this._label$.next(null);

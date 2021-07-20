@@ -64,7 +64,7 @@ export class JiraCfgStepperComponent implements OnDestroy {
     this._subs.unsubscribe();
   }
 
-  saveConfig() {
+  saveConfig(): void {
     this.saveCfg.emit(this.jiraCfg);
   }
 
@@ -72,7 +72,7 @@ export class JiraCfgStepperComponent implements OnDestroy {
     this.jiraCfg = cfg;
   }
 
-  testCredentials() {
+  testCredentials(): void {
     this.isTestCredentialsSuccess = false;
     this._subs.add(
       this._jiraApiService

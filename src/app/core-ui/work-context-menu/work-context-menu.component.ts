@@ -40,7 +40,7 @@ export class WorkContextMenuComponent {
   }
 
   // TODO move flow to dialog as async wont't work here
-  deleteTag() {
+  deleteTag(): void {
     // NOTE: in this particular case we don't want to unsubscribe, since this all should still
     // happen after the menu is hidden
     this._confirmTagDelete()

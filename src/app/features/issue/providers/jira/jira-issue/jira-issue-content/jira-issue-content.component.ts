@@ -49,7 +49,7 @@ export class JiraIssueContentComponent {
     this._task$.next(v);
   }
 
-  hideUpdates() {
+  hideUpdates(): void {
     if (!this.task) {
       throw new Error('No task');
     }

@@ -214,15 +214,15 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
     this._subs.unsubscribe();
   }
 
-  closeBtnClose(ev: Event) {
+  closeBtnClose(ev: Event): void {
     this.blurred.emit(ev);
   }
 
-  onOptionActivated(val: any) {
+  onOptionActivated(val: any): void {
     this.activatedIssueTask$.next(val);
   }
 
-  onBlur(ev: FocusEvent) {
+  onBlur(ev: FocusEvent): void {
     const relatedTarget: HTMLElement = ev.relatedTarget as HTMLElement;
     if (
       !relatedTarget ||
@@ -248,11 +248,11 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
     }
   }
 
-  displayWith(issue: JiraIssue) {
+  displayWith(issue: JiraIssue): string {
     return issue && issue.summary;
   }
 
-  trackByFn(i: number, item: AddTaskSuggestion) {
+  trackByFn(i: number, item: AddTaskSuggestion): string | number | undefined {
     return item.taskId || (item.issueData && item.issueData.id);
   }
 
@@ -260,7 +260,7 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
     return item.id;
   }
 
-  async addTask() {
+  async addTask(): Promise<void> {
     this._isAddInProgress = true;
     const item: AddTaskSuggestion | string = this.taskSuggestionsCtrl.value;
 
@@ -364,9 +364,9 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
     }
   }
 
-  private _filterBacklog(searchText: string, task: Task) {
+  private _filterBacklog(searchText: string, task: Task): boolean {
     try {
-      return task.title.toLowerCase().match(searchText.toLowerCase());
+      return !!task.title.toLowerCase().match(searchText.toLowerCase());
     } catch (e) {
       console.warn('RegEx Error', e);
       return false;

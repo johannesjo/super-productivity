@@ -6,7 +6,7 @@ import { T } from '../../t.const';
 export class TranslateExtension {
   constructor(private translate: TranslateService) {}
 
-  prePopulate(field: FormlyFieldConfig) {
+  prePopulate(field: FormlyFieldConfig): void {
     const to = field.templateOptions || {};
     if (Array.isArray(to.options)) {
       const options = to.options;

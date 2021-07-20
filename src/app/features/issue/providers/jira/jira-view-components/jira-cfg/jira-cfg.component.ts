@@ -191,7 +191,7 @@ export class JiraCfgComponent implements OnInit, OnDestroy {
     return issue.id;
   }
 
-  loadCustomFields() {
+  loadCustomFields(): void {
     this.customFieldsPromise = this._projectService
       .getJiraCfgForProject$(this._workContextService.activeWorkContextId as string)
       .pipe(
@@ -206,7 +206,7 @@ export class JiraCfgComponent implements OnInit, OnDestroy {
     });
   }
 
-  updateTransitionOptions() {
+  updateTransitionOptions(): void {
     const searchResultItem = this.issueSuggestionsCtrl.value as SearchResultItem;
     if (!searchResultItem || typeof (searchResultItem as any) === 'string') {
       this.issueSuggestionsCtrl.setValue('');

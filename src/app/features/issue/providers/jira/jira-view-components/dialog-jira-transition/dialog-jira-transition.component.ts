@@ -53,11 +53,11 @@ export class DialogJiraTransitionComponent {
     }
   }
 
-  close() {
+  close(): void {
     this._matDialogRef.close();
   }
 
-  transitionIssue() {
+  transitionIssue(): void {
     if (this.chosenTransition && this.chosenTransition.id) {
       const trans: JiraOriginalTransition = this.chosenTransition;
 

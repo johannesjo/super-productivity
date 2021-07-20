@@ -71,15 +71,15 @@ export class BookmarkService {
     this._store$.dispatch(new UpdateBookmark({ bookmark: { id, changes } }));
   }
 
-  showBookmarks() {
+  showBookmarks(): void {
     this._store$.dispatch(new ShowBookmarks());
   }
 
-  hideBookmarks() {
+  hideBookmarks(): void {
     this._store$.dispatch(new HideBookmarks());
   }
 
-  toggleBookmarks() {
+  toggleBookmarks(): void {
     this._store$.dispatch(new ToggleBookmarks());
   }
 

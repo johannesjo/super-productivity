@@ -202,11 +202,11 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
     }
   }
 
-  onEvaluationSave() {
+  onEvaluationSave(): void {
     this.selectedTabIndex = 1;
   }
 
-  async finishDay() {
+  async finishDay(): Promise<void> {
     const doneTasks = await this.workContextService.doneTasks$.pipe(take(1)).toPromise();
 
     this._taskService.moveToArchive(doneTasks);
@@ -242,25 +242,25 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
     }
   }
 
-  updateWorkStart(ev: string) {
+  updateWorkStart(ev: string): void {
     const startTime = moment(this.dayStr + ' ' + ev).unix() * 1000;
     if (startTime) {
       this.workContextService.updateWorkStartForActiveContext(this.dayStr, startTime);
     }
   }
 
-  updateWorkEnd(ev: string) {
+  updateWorkEnd(ev: string): void {
     const endTime = moment(this.dayStr + ' ' + ev).unix() * 1000;
     if (endTime) {
       this.workContextService.updateWorkEndForActiveContext(this.dayStr, endTime);
     }
   }
 
-  onTabIndexChange(i: number) {
+  onTabIndexChange(i: number): void {
     this.selectedTabIndex = i;
   }
 
-  private async _finishDayForGood(cb?: any) {
+  private async _finishDayForGood(cb?: any): Promise<void> {
     const syncCfg = this.configService.cfg?.sync;
     if (syncCfg?.isEnabled) {
       await this._syncProviderService.sync();
@@ -268,7 +268,7 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
     this._initSuccessAnimation(cb);
   }
 
-  private _initSuccessAnimation(cb?: any) {
+  private _initSuccessAnimation(cb?: any): void {
     this.showSuccessAnimation = true;
     this._cd.detectChanges();
     this._successAnimationTimeout = window.setTimeout(() => {

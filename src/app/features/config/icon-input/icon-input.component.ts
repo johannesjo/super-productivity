@@ -16,7 +16,7 @@ export class IconInputComponent extends FieldType implements OnInit {
   customIcons: string[] = MATERIAL_ICONS;
   filteredIcons$?: Observable<string[]>;
 
-  get type() {
+  get type(): string {
     return this.to.type || 'text';
   }
 
@@ -35,7 +35,7 @@ export class IconInputComponent extends FieldType implements OnInit {
     );
   }
 
-  trackByIndex(i: number, p: any) {
+  trackByIndex(i: number, p: any): number {
     return i;
   }
 }

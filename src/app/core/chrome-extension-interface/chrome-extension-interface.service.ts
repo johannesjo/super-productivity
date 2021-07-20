@@ -16,7 +16,7 @@ export class ChromeExtensionInterfaceService {
   // we only every one to catch a single event
   private _isInterfaceReady: boolean = false;
 
-  init() {
+  init(): void {
     interfaceEl.addEventListener('SP_EXTENSION_READY', () => {
       // we only want to show the notification once
       if (!this._isInterfaceReady) {

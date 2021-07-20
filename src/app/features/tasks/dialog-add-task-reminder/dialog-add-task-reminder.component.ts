@@ -71,7 +71,7 @@ export class DialogAddTaskReminderComponent {
 
   // NOTE: throttle is used as quick way to prevent multiple submits
   @throttle(2000, { leading: true, trailing: false })
-  save() {
+  save(): void {
     const timestamp = this.dateTime;
 
     if (!timestamp) {
@@ -131,7 +131,7 @@ export class DialogAddTaskReminderComponent {
 
   // NOTE: throttle is used as quick way to prevent multiple submits
   @throttle(2000, { leading: true, trailing: false })
-  remove() {
+  remove(): void {
     if (!this.reminder || !this.reminder.id) {
       console.log(this.reminder, this.task);
       throw new Error('No reminder or id');
@@ -140,7 +140,7 @@ export class DialogAddTaskReminderComponent {
     this.close();
   }
 
-  close() {
+  close(): void {
     this._matDialogRef.close();
   }
 

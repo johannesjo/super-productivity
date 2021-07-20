@@ -30,7 +30,7 @@ export class DialogWorklogExportComponent {
     this.isSingleDay = this.strStart === this.strEnd;
   }
 
-  close() {
+  close(): void {
     this._matDialogRef.close();
   }
 }

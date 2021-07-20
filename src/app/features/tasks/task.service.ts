@@ -504,7 +504,7 @@ export class TaskService {
     }
   }
 
-  focusFirstTaskIfVisible() {
+  focusFirstTaskIfVisible(): void {
     const tEl = document.getElementsByTagName('task');
     if (tEl && tEl[0]) {
       (tEl[0] as HTMLElement).focus();
@@ -545,7 +545,7 @@ export class TaskService {
     this._store.dispatch(new MoveToOtherProject({ task, targetProjectId: projectId }));
   }
 
-  toggleStartTask() {
+  toggleStartTask(): void {
     this._store.dispatch(new ToggleStart());
   }
 

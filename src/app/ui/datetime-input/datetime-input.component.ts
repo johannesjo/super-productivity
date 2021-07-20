@@ -32,7 +32,7 @@ export class DatetimeInputComponent {
     }
   }
 
-  get model() {
+  get model(): number {
     return this.nrValue || 0;
   }
 
@@ -41,11 +41,11 @@ export class DatetimeInputComponent {
     this._updateValues(v);
   }
 
-  updateFromInput(v: number) {
+  updateFromInput(v: number): void {
     this._updateValues(v, true);
   }
 
-  setCommonVal(type: string) {
+  setCommonVal(type: string): void {
     const date = new Date();
     date.setSeconds(0, 0);
 
@@ -71,13 +71,13 @@ export class DatetimeInputComponent {
     this._updateValues(date.getTime(), false);
   }
 
-  setLastVal() {
+  setLastVal(): void {
     if (this.lastVal) {
       this._updateValues(this.lastVal, false);
     }
   }
 
-  private _updateValues(v: number | Date | string, isFromInput: boolean = false) {
+  private _updateValues(v: number | Date | string, isFromInput: boolean = false): void {
     if (v instanceof Date) {
       v = v.getTime();
     } else if (typeof v === 'string') {

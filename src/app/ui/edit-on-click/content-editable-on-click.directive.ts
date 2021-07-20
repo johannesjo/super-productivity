@@ -113,7 +113,7 @@ export class ContentEditableOnClickDirective implements OnInit, OnDestroy {
     window.clearTimeout(this._redrawTimeout);
   }
 
-  private _refreshView() {
+  private _refreshView(): void {
     this._el.innerText = this._value || '';
   }
 
@@ -141,7 +141,7 @@ export class ContentEditableOnClickDirective implements OnInit, OnDestroy {
     }
   }
 
-  private _setValueFromElement() {
+  private _setValueFromElement(): void {
     this._value = this._removeTags(this._el.innerText);
   }
 
@@ -181,7 +181,7 @@ export class ContentEditableOnClickDirective implements OnInit, OnDestroy {
       .trim();
   }
 
-  private _moveCursorToEnd() {
+  private _moveCursorToEnd(): void {
     // NOTE: keep in mind that we're in a contenteditable
     try {
       document.execCommand('selectAll', false, undefined);

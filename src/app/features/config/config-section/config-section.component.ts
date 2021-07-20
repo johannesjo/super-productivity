@@ -55,7 +55,7 @@ export class ConfigSectionComponent implements OnInit, OnDestroy {
 
   private _cfg: any;
 
-  get cfg() {
+  get cfg(): any | undefined {
     return this._cfg;
   }
 
@@ -110,16 +110,16 @@ export class ConfigSectionComponent implements OnInit, OnDestroy {
   onSave($event: {
     sectionKey: GlobalConfigSectionKey | ProjectCfgFormKey | TagCfgFormKey;
     config: any;
-  }) {
+  }): void {
     this.isExpanded = false;
     this.save.emit($event);
   }
 
-  trackByIndex(i: number, p: any) {
+  trackByIndex(i: number, p: any): number {
     return i;
   }
 
-  private _loadCustomSection(customSection: CustomCfgSection) {
+  private _loadCustomSection(customSection: CustomCfgSection): void {
     const componentToRender = customConfigFormSectionComponent(customSection);
 
     if (componentToRender) {

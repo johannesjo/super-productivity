@@ -63,7 +63,7 @@ export class GlobalThemeService {
     private _chromeExtensionInterfaceService: ChromeExtensionInterfaceService,
   ) {}
 
-  init() {
+  init(): void {
     // This is here to make web page reloads on non work context pages at least usable
     this._setBackgroundGradient(true);
     this._initIcons();
@@ -103,7 +103,7 @@ export class GlobalThemeService {
     }
   }
 
-  private _initIcons() {
+  private _initIcons(): void {
     const icons = [
       ['sp', 'assets/icons/sp.svg'],
       ['play', 'assets/icons/play.svg'],
@@ -126,7 +126,7 @@ export class GlobalThemeService {
     });
   }
 
-  private _initThemeWatchers() {
+  private _initThemeWatchers(): void {
     // init theme watchers
     this._workContextService.currentTheme$.subscribe((theme: WorkContextThemeCfg) =>
       this._setColorTheme(theme),
@@ -134,7 +134,7 @@ export class GlobalThemeService {
     this.isDarkTheme$.subscribe((isDarkTheme) => this._setDarkTheme(isDarkTheme));
   }
 
-  private _initHandlersForInitialBodyClasses() {
+  private _initHandlersForInitialBodyClasses(): void {
     this.document.body.classList.add(BodyClass.isNoAdvancedFeatures);
 
     if (IS_MAC) {

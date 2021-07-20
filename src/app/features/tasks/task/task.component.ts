@@ -232,7 +232,7 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
     }
   }
 
-  editReminder() {
+  editReminder(): void {
     this._matDialog
       .open(DialogAddTaskReminderComponent, {
         data: { task: this.task } as AddTaskReminderInterface,
@@ -242,11 +242,11 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
       .subscribe(() => this.focusSelf());
   }
 
-  updateIssueData() {
+  updateIssueData(): void {
     this._issueService.refreshIssue(this.task, true, true);
   }
 
-  editTaskRepeatCfg() {
+  editTaskRepeatCfg(): void {
     this._matDialog
       .open(DialogEditTaskRepeatCfgComponent, {
         data: {
@@ -258,7 +258,7 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
       .subscribe(() => this.focusSelf());
   }
 
-  handleUpdateBtnClick() {
+  handleUpdateBtnClick(): void {
     this._taskService.setSelectedId(this.task.id);
   }
 
@@ -277,12 +277,12 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
     }
   }
 
-  startTask() {
+  startTask(): void {
     this._taskService.setCurrentId(this.task.id);
     this.focusSelf();
   }
 
-  pauseTask() {
+  pauseTask(): void {
     this._taskService.pauseCurrent();
   }
 
@@ -301,7 +301,7 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
     this.focusSelf();
   }
 
-  estimateTime() {
+  estimateTime(): void {
     this._matDialog
       .open(DialogTimeEstimateComponent, {
         data: { task: this.task },
@@ -312,7 +312,7 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
       .subscribe(() => this.focusSelf());
   }
 
-  addAttachment() {
+  addAttachment(): void {
     this._matDialog
       .open(DialogEditTaskAttachmentComponent, {
         data: {},
@@ -327,19 +327,19 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
       });
   }
 
-  addSubTask() {
+  addSubTask(): void {
     this._taskService.addSubTaskTo(this.task.parentId || this.task.id);
   }
 
   @throttle(200, { leading: true, trailing: false })
-  toggleDoneKeyboard() {
+  toggleDoneKeyboard(): void {
     this.toggleTaskDone();
     if (!this.task.parentId) {
       this.focusNext(true);
     }
   }
 
-  toggleTaskDone() {
+  toggleTaskDone(): void {
     if (this.task.parentId) {
       this.focusNext(true);
     }
@@ -351,17 +351,17 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
     }
   }
 
-  showAdditionalInfos() {
+  showAdditionalInfos(): void {
     this._taskService.setSelectedId(this.task.id);
     this.focusSelf();
   }
 
-  hideAdditionalInfos() {
+  hideAdditionalInfos(): void {
     this._taskService.setSelectedId(this.task.id);
     this.focusSelf();
   }
 
-  toggleShowAdditionalInfoOpen() {
+  toggleShowAdditionalInfoOpen(): void {
     if (this.isSelected) {
       this._taskService.setSelectedId(null);
     } else {
@@ -370,7 +370,7 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
     // this.focusSelf();
   }
 
-  toggleShowAttachments() {
+  toggleShowAttachments(): void {
     this._taskService.setSelectedId(
       this.task.id,
       TaskAdditionalInfoTargetPanel.Attachments,
@@ -378,12 +378,12 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
     this.focusSelf();
   }
 
-  toggleSubTaskMode() {
+  toggleSubTaskMode(): void {
     this._taskService.toggleSubTaskMode(this.task.id, true, true);
     this.focusSelf();
   }
 
-  editTags() {
+  editTags(): void {
     this._matDialog
       .open(DialogEditTagsForTaskComponent, {
         data: {
@@ -395,15 +395,15 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
       .subscribe(() => this.focusSelf());
   }
 
-  addToMyDay() {
+  addToMyDay(): void {
     this._taskService.addTodayTag(this.task);
   }
 
-  removeFromMyDay() {
+  removeFromMyDay(): void {
     this.onTagsUpdated(this.task.tagIds.filter((tagId) => tagId !== TODAY_TAG.id));
   }
 
-  convertToMainTask() {
+  convertToMainTask(): void {
     this._taskService.convertToMainTask(this.task);
   }
 
@@ -451,7 +451,7 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
     }
   }
 
-  focusSelf() {
+  focusSelf(): void {
     if (IS_TOUCH_ONLY) {
       return;
     }
@@ -460,18 +460,18 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
     // this._taskService.focusTask(this.task.id);
   }
 
-  focusSelfElement() {
+  focusSelfElement(): void {
     this._elementRef.nativeElement.focus();
   }
 
-  focusTitleForEdit() {
+  focusTitleForEdit(): void {
     if (!this.contentEditableOnClickEl) {
       throw new Error('No el');
     }
     this.contentEditableOnClickEl.nativeElement.focus();
   }
 
-  openContextMenu(event: MouseEvent) {
+  openContextMenu(event: MouseEvent): void {
     if (!this.contentEditableOnClickEl || !this.contextMenu) {
       throw new Error('No el');
     }
@@ -513,7 +513,7 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
     }
   }
 
-  onPanEnd() {
+  onPanEnd(): void {
     if (!IS_TOUCH_ONLY || (!this.isLockPanLeft && !this.isLockPanRight)) {
       return;
     }
@@ -584,14 +584,14 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
     this._taskService.moveToProject(this.task, projectId);
   }
 
-  moveToBacklog() {
+  moveToBacklog(): void {
     this._taskService.moveToBacklog(this.task.id);
     if (this.task.tagIds.includes(TODAY_TAG.id)) {
       this.removeFromMyDay();
     }
   }
 
-  moveToToday() {
+  moveToToday(): void {
     this._taskService.moveToProjectTodayList(this.task.id);
   }
 
@@ -638,7 +638,7 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
     }
   }
 
-  private _resetAfterPan() {
+  private _resetAfterPan(): void {
     if (
       !this.contentEditableOnClickEl ||
       !this.blockLeftElRef ||

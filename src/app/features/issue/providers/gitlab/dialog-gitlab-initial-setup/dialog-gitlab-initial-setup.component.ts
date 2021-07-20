@@ -31,7 +31,7 @@ export class DialogGitlabInitialSetupComponent implements OnInit {
     this._matDialogRef.close(gitlabCfg);
   }
 
-  close() {
+  close(): void {
     this._matDialogRef.close();
   }
 }

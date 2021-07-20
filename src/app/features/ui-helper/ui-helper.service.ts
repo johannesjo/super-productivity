@@ -59,7 +59,7 @@ export class UiHelperService {
     }
   }
 
-  private _initMousewheelZoomForElectron() {
+  private _initMousewheelZoomForElectron(): void {
     const ZOOM_DELTA = 0.025;
 
     // set initial zoom

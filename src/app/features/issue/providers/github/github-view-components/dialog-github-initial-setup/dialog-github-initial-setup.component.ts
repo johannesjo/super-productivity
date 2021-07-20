@@ -31,7 +31,7 @@ export class DialogGithubInitialSetupComponent implements OnInit {
     this._matDialogRef.close(gitCfg);
   }
 
-  close() {
+  close(): void {
     this._matDialogRef.close();
   }
 }

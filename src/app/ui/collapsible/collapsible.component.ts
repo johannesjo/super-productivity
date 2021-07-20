@@ -28,7 +28,7 @@ export class CollapsibleComponent {
 
   constructor() {}
 
-  toggleExpand() {
+  toggleExpand(): void {
     this.isExpanded = !this.isExpanded;
     this.isExpandedChange.emit(this.isExpanded);
   }

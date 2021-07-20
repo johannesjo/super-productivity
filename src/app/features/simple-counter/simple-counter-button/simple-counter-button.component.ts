@@ -24,21 +24,21 @@ export class SimpleCounterButtonComponent {
     private _matDialog: MatDialog,
   ) {}
 
-  toggleStopwatch() {
+  toggleStopwatch(): void {
     if (!this.simpleCounter) {
       throw new Error('No simple counter model');
     }
     this._simpleCounterService.toggleCounter(this.simpleCounter.id);
   }
 
-  toggleCounter() {
+  toggleCounter(): void {
     if (!this.simpleCounter) {
       throw new Error('No simple counter model');
     }
     this._simpleCounterService.increaseCounterToday(this.simpleCounter.id, 1);
   }
 
-  reset() {
+  reset(): void {
     if (!this.simpleCounter) {
       throw new Error('No simple counter model');
     }

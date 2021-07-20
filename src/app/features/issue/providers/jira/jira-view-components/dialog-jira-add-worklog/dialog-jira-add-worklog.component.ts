@@ -39,11 +39,11 @@ export class DialogJiraAddWorklogComponent {
     this.comment = this.data.task.title;
   }
 
-  close() {
+  close(): void {
     this._matDialogRef.close();
   }
 
-  async submitWorklog() {
+  async submitWorklog(): Promise<void> {
     if (this.issue.id && this.started && this.timeSpent && this.data.task.projectId) {
       const cfg = await this._projectService
         .getJiraCfgForProject$(this.data.task.projectId)

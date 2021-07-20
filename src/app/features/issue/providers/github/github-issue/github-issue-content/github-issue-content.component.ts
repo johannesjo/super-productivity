@@ -20,7 +20,7 @@ export class GithubIssueContentComponent {
 
   constructor(private readonly _taskService: TaskService) {}
 
-  hideUpdates() {
+  hideUpdates(): void {
     if (!this.task) {
       throw new Error('No task');
     }

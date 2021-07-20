@@ -79,7 +79,7 @@ export class AndroidService {
     // this._todayTagTasksFlat$.subscribe((tasks) => console.log(tasks.map((value, index) => value.isDone)));
   }
 
-  init() {
+  init(): void {
     this._todayTagTasksFlat$.subscribe((tasks) => {
       androidInterface.updateTaskData(JSON.stringify(tasks));
     });

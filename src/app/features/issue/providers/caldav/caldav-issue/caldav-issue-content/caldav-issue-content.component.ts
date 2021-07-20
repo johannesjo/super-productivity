@@ -20,7 +20,7 @@ export class CaldavIssueContentComponent {
 
   constructor(private readonly _taskService: TaskService) {}
 
-  hideUpdates() {
+  hideUpdates(): void {
     this._taskService.markIssueUpdatesAsRead((this.task as TaskWithSubTasks).id);
   }
 

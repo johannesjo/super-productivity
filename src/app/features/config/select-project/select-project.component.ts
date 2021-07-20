@@ -11,19 +11,17 @@ import { T } from 'src/app/t.const';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SelectProjectComponent extends FieldType {
-  // @ViewChild(MatInput) formFieldControl: MatInput;
-
   T: typeof T = T;
 
   constructor(public projectService: ProjectService) {
     super();
   }
 
-  get type() {
+  get type(): string {
     return this.to.type || 'text';
   }
 
-  trackById(i: number, item: Project) {
+  trackById(i: number, item: Project): string {
     return item.id;
   }
 }

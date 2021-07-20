@@ -30,7 +30,7 @@ export class LocalBackupService {
     private _electronService: ElectronService,
   ) {}
 
-  init() {
+  init(): void {
     this._triggerBackups.subscribe();
   }
 
@@ -47,7 +47,7 @@ export class LocalBackupService {
     ) as Promise<string>;
   }
 
-  private async _backup() {
+  private async _backup(): Promise<void> {
     const data = await this._persistenceService.loadComplete();
     (this._electronService.ipcRenderer as typeof ipcRenderer).send(IPC.BACKUP, data);
   }

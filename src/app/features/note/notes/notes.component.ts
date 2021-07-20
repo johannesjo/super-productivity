@@ -92,11 +92,11 @@ export class NotesComponent implements OnInit, OnDestroy {
     return note.id;
   }
 
-  addNote() {
+  addNote(): void {
     this._matDialog.open(DialogAddNoteComponent);
   }
 
-  onScrollToSidenavClick() {
+  onScrollToSidenavClick(): void {
     this.scrollToSidenav.emit();
   }
 }

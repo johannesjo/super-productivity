@@ -49,7 +49,7 @@ export class IdleService {
     private _uiHelperService: UiHelperService,
   ) {}
 
-  init() {
+  init(): void {
     if (IS_ELECTRON) {
       (this._electronService.ipcRenderer as typeof ipcRenderer).on(
         IPC.IDLE_TIME,
@@ -175,7 +175,7 @@ export class IdleService {
     }, IDLE_POLL_INTERVAL);
   }
 
-  cancelIdlePoll() {
+  cancelIdlePoll(): void {
     if (this.clearIdlePollInterval) {
       this.clearIdlePollInterval();
       this.clearIdlePollInterval = undefined;

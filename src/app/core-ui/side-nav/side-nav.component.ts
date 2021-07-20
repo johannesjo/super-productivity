@@ -149,7 +149,7 @@ export class SideNavComponent implements OnDestroy {
   }
 
   @HostListener('keydown', ['$event'])
-  onKeydown(event: KeyboardEvent) {
+  onKeydown(event: KeyboardEvent): void {
     this.keyManager?.onKeydown(event);
   }
 
@@ -160,13 +160,13 @@ export class SideNavComponent implements OnDestroy {
     window.clearTimeout(this.keyboardFocusTimeout);
   }
 
-  addProject() {
+  addProject(): void {
     this._matDialog.open(DialogCreateProjectComponent, {
       restoreFocus: true,
     });
   }
 
-  trackById(i: number, project: Project) {
+  trackById(i: number, project: Project): string {
     return project.id;
   }
 
@@ -176,35 +176,35 @@ export class SideNavComponent implements OnDestroy {
     return { background: colorToUse };
   }
 
-  onScrollToNotesClick() {
+  onScrollToNotesClick(): void {
     this.scrollToNotes.emit();
   }
 
-  fetchProjectListState() {
+  fetchProjectListState(): boolean {
     return localStorage.getItem(LS_IS_PROJECT_LIST_EXPANDED) === 'true';
   }
 
-  storeProjectListState(isExpanded: boolean) {
+  storeProjectListState(isExpanded: boolean): void {
     this.isProjectsExpanded = isExpanded;
     localStorage.setItem(LS_IS_PROJECT_LIST_EXPANDED, isExpanded.toString());
   }
 
-  fetchTagListState() {
+  fetchTagListState(): boolean {
     return localStorage.getItem(LS_IS_TAG_LIST_EXPANDED) === 'true';
   }
 
-  storeTagListState(isExpanded: boolean) {
+  storeTagListState(isExpanded: boolean): void {
     this.isTagsExpanded = isExpanded;
     localStorage.setItem(LS_IS_TAG_LIST_EXPANDED, isExpanded.toString());
   }
 
-  toggleExpandProjects() {
+  toggleExpandProjects(): void {
     const newState: boolean = !this.isProjectsExpanded;
     this.storeProjectListState(newState);
     this.isProjectsExpanded$.next(newState);
   }
 
-  toggleExpandProjectsLeftRight(ev: KeyboardEvent) {
+  toggleExpandProjectsLeftRight(ev: KeyboardEvent): void {
     if (ev.key === 'ArrowLeft' && this.isProjectsExpanded) {
       this.storeProjectListState(false);
       this.isProjectsExpanded$.next(this.isProjectsExpanded);
@@ -214,7 +214,7 @@ export class SideNavComponent implements OnDestroy {
     }
   }
 
-  checkFocusProject(ev: KeyboardEvent) {
+  checkFocusProject(ev: KeyboardEvent): void {
     if (ev.key === 'ArrowLeft' && this.projectExpandBtn?.nativeElement) {
       const targetIndex = this.navEntries?.toArray().findIndex((value) => {
         return value._getHostElement() === this.projectExpandBtn?.nativeElement;
@@ -225,13 +225,13 @@ export class SideNavComponent implements OnDestroy {
     }
   }
 
-  toggleExpandTags() {
+  toggleExpandTags(): void {
     const newState: boolean = !this.isTagsExpanded;
     this.storeTagListState(newState);
     this.isTagsExpanded$.next(newState);
   }
 
-  toggleExpandTagsLeftRight(ev: KeyboardEvent) {
+  toggleExpandTagsLeftRight(ev: KeyboardEvent): void {
     if (ev.key === 'ArrowLeft' && this.isTagsExpanded) {
       this.storeTagListState(false);
       this.isTagsExpanded$.next(this.isTagsExpanded);
@@ -241,7 +241,7 @@ export class SideNavComponent implements OnDestroy {
     }
   }
 
-  checkFocusTag(ev: KeyboardEvent) {
+  checkFocusTag(ev: KeyboardEvent): void {
     if (ev.key === 'ArrowLeft' && this.tagExpandBtn?.nativeElement) {
       const targetIndex = this.navEntries?.toArray().findIndex((value) => {
         return value._getHostElement() === this.tagExpandBtn?.nativeElement;
@@ -251,11 +251,4 @@ export class SideNavComponent implements OnDestroy {
       }
     }
   }
-
-  // addTag() {
-  // }
-  //
-  // switchTag(a, b) {
-  //
-  // }
 }

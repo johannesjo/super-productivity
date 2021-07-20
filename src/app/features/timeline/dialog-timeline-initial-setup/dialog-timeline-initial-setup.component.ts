@@ -37,7 +37,7 @@ export class DialogTimelineInitialSetupComponent implements OnDestroy {
     this._subs.unsubscribe();
   }
 
-  saveAndClose() {
+  saveAndClose(): void {
     localStorage.setItem(LS_WAS_TIMELINE_INITIAL_DIALOG_SHOWN, 'true');
     this._matDialogRef.close();
     if (this.timelineCfg) {
@@ -45,7 +45,7 @@ export class DialogTimelineInitialSetupComponent implements OnDestroy {
     }
   }
 
-  close() {
+  close(): void {
     this._matDialogRef.close();
   }
 }

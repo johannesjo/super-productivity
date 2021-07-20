@@ -46,11 +46,11 @@ export class DialogTrackingReminderComponent implements OnInit {
     }
   }
 
-  cancel() {
+  cancel(): void {
     this._matDialogRef.close();
   }
 
-  track() {
+  track(): void {
     this._matDialogRef.close({
       task: this.selectedTask || this.newTaskTitle,
     });

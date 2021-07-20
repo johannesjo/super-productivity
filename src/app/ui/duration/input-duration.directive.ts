@@ -102,7 +102,7 @@ export class InputDurationDirective
     this._onChangeCallback(this._msValue);
   }
 
-  ngAfterViewChecked() {
+  ngAfterViewChecked(): void {
     this._validator = Validators.compose([this._parseValidator]);
   }
 

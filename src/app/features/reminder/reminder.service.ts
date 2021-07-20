@@ -67,14 +67,14 @@ export class ReminderService {
     });
   }
 
-  async init() {
+  async init(): Promise<void> {
     this._w.addEventListener('message', this._onReminderActivated.bind(this));
     this._w.addEventListener('error', this._handleError.bind(this));
     await this.reloadFromDatabase();
     this._isRemindersLoaded$.next(true);
   }
 
-  async reloadFromDatabase() {
+  async reloadFromDatabase(): Promise<void> {
     const fromDb = await this._loadFromDatabase();
     if (!fromDb || !Array.isArray(fromDb)) {
       this._saveModel([]);
@@ -141,12 +141,12 @@ export class ReminderService {
     return id;
   }
 
-  snooze(reminderId: string, snoozeTime: number) {
+  snooze(reminderId: string, snoozeTime: number): void {
     const remindAt = new Date().getTime() + snoozeTime;
     this.updateReminder(reminderId, { remindAt });
   }
 
-  updateReminder(reminderId: string, reminderChanges: Partial<Reminder>) {
+  updateReminder(reminderId: string, reminderChanges: Partial<Reminder>): void {
     const i = this._reminders.findIndex((reminder) => reminder.id === reminderId);
     if (i > -1) {
       // TODO find out why we need to do this
@@ -156,7 +156,7 @@ export class ReminderService {
     this._saveModel(this._reminders);
   }
 
-  removeReminder(reminderIdToRemove: string) {
+  removeReminder(reminderIdToRemove: string): void {
     const i = this._reminders.findIndex((reminder) => reminder.id === reminderIdToRemove);
 
     if (i > -1) {
@@ -169,7 +169,7 @@ export class ReminderService {
     }
   }
 
-  removeReminderByRelatedIdIfSet(relatedId: string) {
+  removeReminderByRelatedIdIfSet(relatedId: string): void {
     const reminder = this._reminders.find(
       (reminderIN) => reminderIN.relatedId === relatedId,
     );
@@ -178,7 +178,7 @@ export class ReminderService {
     }
   }
 
-  removeRemindersByWorkContextId(workContextId: string) {
+  removeRemindersByWorkContextId(workContextId: string): void {
     const reminders = this._reminders.filter(
       (reminderIN) => reminderIN.workContextId === workContextId,
     );
@@ -189,7 +189,7 @@ export class ReminderService {
     }
   }
 
-  private async _onReminderActivated(msg: MessageEvent) {
+  private async _onReminderActivated(msg: MessageEvent): Promise<void> {
     const reminders = msg.data as Reminder[];
     const remindersWithData: Reminder[] = (await Promise.all(
       reminders.map(async (reminder) => {
@@ -216,7 +216,7 @@ export class ReminderService {
     return migrateReminders((await this._persistenceService.reminders.loadState()) || []);
   }
 
-  private async _saveModel(reminders: Reminder[]) {
+  private async _saveModel(reminders: Reminder[]): Promise<void> {
     console.log('saveReminders', reminders);
     await this._persistenceService.reminders.saveState(reminders, {
       isSyncModelChange: true,
@@ -225,11 +225,11 @@ export class ReminderService {
     this._reminders$.next(this._reminders);
   }
 
-  private _updateRemindersInWorker(reminders: Reminder[]) {
+  private _updateRemindersInWorker(reminders: Reminder[]): void {
     this._w.postMessage(reminders);
   }
 
-  private _handleError(err: any) {
+  private _handleError(err: any): void {
     console.error(err);
     this._snackService.open({ type: 'ERROR', msg: T.F.REMINDER.S_REMINDER_ERR });
   }

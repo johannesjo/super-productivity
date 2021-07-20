@@ -20,7 +20,7 @@ export class LongPressDirective implements OnDestroy {
 
   @HostListener('touchstart', ['$event'])
   @HostListener('mousedown', ['$event'])
-  onMouseDown(event: MouseEvent) {
+  onMouseDown(event: MouseEvent): void {
     this.longPressTimeout = window.setTimeout(() => {
       this.longPress.emit();
     }, this.longPressDuration);
@@ -29,7 +29,7 @@ export class LongPressDirective implements OnDestroy {
   @HostListener('touchend')
   @HostListener('mouseup')
   @HostListener('mouseleave')
-  longPressInterupt() {
+  longPressInterupt(): void {
     window.clearTimeout(this.longPressTimeout);
   }
 

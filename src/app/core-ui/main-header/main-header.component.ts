@@ -104,7 +104,7 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
     return item.id;
   }
 
-  sync() {
+  sync(): void {
     this.syncProviderService
       .sync()
       .then(() =>

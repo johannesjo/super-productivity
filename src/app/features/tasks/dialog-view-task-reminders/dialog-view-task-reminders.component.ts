@@ -85,7 +85,7 @@ export class DialogViewTaskRemindersComponent implements OnDestroy {
     this._subs.unsubscribe();
   }
 
-  async addToToday(task: TaskWithReminderData) {
+  async addToToday(task: TaskWithReminderData): Promise<void> {
     // NOTE: we need to account for the parent task as well
     if (task.parentId) {
       const parent = await this._taskService
@@ -104,7 +104,7 @@ export class DialogViewTaskRemindersComponent implements OnDestroy {
     }
   }
 
-  dismiss(task: TaskWithReminderData) {
+  dismiss(task: TaskWithReminderData): void {
     this._taskService.update(task.id, {
       reminderId: null,
       plannedAt: null,
@@ -113,7 +113,7 @@ export class DialogViewTaskRemindersComponent implements OnDestroy {
     this._removeFromList(task.reminderId as string);
   }
 
-  snooze(task: TaskWithReminderData, snoozeInMinutes: number) {
+  snooze(task: TaskWithReminderData, snoozeInMinutes: number): void {
     this._reminderService.updateReminder(task.reminderData.id, {
       // prettier-ignore
       remindAt: Date.now() + (snoozeInMinutes * M),
@@ -121,7 +121,7 @@ export class DialogViewTaskRemindersComponent implements OnDestroy {
     this._removeFromList(task.reminderId as string);
   }
 
-  rescheduleUntilTomorrow(task: TaskWithReminderData) {
+  rescheduleUntilTomorrow(task: TaskWithReminderData): void {
     const remindTime = getTomorrow().getTime();
     this._reminderService.updateReminder(task.reminderData.id, {
       remindAt: getTomorrow().getTime(),
@@ -132,7 +132,7 @@ export class DialogViewTaskRemindersComponent implements OnDestroy {
     this._removeFromList(task.reminderId as string);
   }
 
-  editReminder(task: TaskWithReminderData, isCloseAfter: boolean = false) {
+  editReminder(task: TaskWithReminderData, isCloseAfter: boolean = false): void {
     this._subs.add(
       this._matDialog
         .open(DialogAddTaskReminderComponent, {
@@ -149,13 +149,13 @@ export class DialogViewTaskRemindersComponent implements OnDestroy {
     );
   }
 
-  trackById(i: number, task: Task) {
+  trackById(i: number, task: Task): string {
     return task.id;
   }
 
   // ALL ACTIONS
   // ------------
-  snoozeAll(snoozeInMinutes: number) {
+  snoozeAll(snoozeInMinutes: number): void {
     this.isDisableControls = true;
     this.reminders$.getValue().forEach((reminder) => {
       this._reminderService.updateReminder(reminder.id, {
@@ -166,7 +166,7 @@ export class DialogViewTaskRemindersComponent implements OnDestroy {
     this._close();
   }
 
-  rescheduleAllUntilTomorrow() {
+  rescheduleAllUntilTomorrow(): void {
     this.isDisableControls = true;
     this._subs.add(
       this.tasks$.pipe(first()).subscribe((tasks) => {
@@ -176,7 +176,7 @@ export class DialogViewTaskRemindersComponent implements OnDestroy {
     );
   }
 
-  markAsDone() {
+  markAsDone(): void {
     this._subs.add(
       this.tasks$.pipe(first()).subscribe((tasks) => {
         if (tasks.length === 1) {
@@ -187,7 +187,7 @@ export class DialogViewTaskRemindersComponent implements OnDestroy {
     );
   }
 
-  async addAllToToday() {
+  async addAllToToday(): Promise<void> {
     this.isDisableControls = true;
     const tasksToDismiss = (await this.tasks$
       .pipe(first())
@@ -215,7 +215,7 @@ export class DialogViewTaskRemindersComponent implements OnDestroy {
     this._close();
   }
 
-  async dismissAll() {
+  async dismissAll(): Promise<void> {
     this.isDisableControls = true;
     const tasks = await this.tasks$.pipe(first()).toPromise();
     tasks.forEach((task) => {
@@ -224,7 +224,7 @@ export class DialogViewTaskRemindersComponent implements OnDestroy {
     this._close();
   }
 
-  async play() {
+  async play(): Promise<void> {
     const tasks = await this.tasks$.pipe(first()).toPromise();
     if (tasks.length !== 1) {
       throw new Error('More or less than one task');
@@ -241,11 +241,11 @@ export class DialogViewTaskRemindersComponent implements OnDestroy {
     this.dismiss(task);
   }
 
-  private _close() {
+  private _close(): void {
     this._matDialogRef.close();
   }
 
-  private _removeFromList(reminderId: string) {
+  private _removeFromList(reminderId: string): void {
     const newReminders = this.reminders$
       .getValue()
       .filter((reminder) => reminder.id !== reminderId);

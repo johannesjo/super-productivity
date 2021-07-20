@@ -39,7 +39,7 @@ export class SnackService {
     this._openSnack(params);
   }
 
-  close() {
+  close(): void {
     if (this._ref) {
       this._ref.dismiss();
     }
