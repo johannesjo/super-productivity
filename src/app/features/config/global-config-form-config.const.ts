@@ -29,7 +29,9 @@ export const GLOBAL_CONFIG_FORM_CONFIG: ConfigFormConfig = [
 export const GLOBAL_SYNC_FORM_CONFIG: ConfigFormConfig = [
   SYNC_FORM as GenericConfigFormSection,
   ...(IS_ANDROID_WEB_VIEW ? [] : [IMEX_FORM as GenericConfigFormSection]),
-  AUTOMATIC_BACKUPS_FORM as GenericConfigFormSection,
+  ...(IS_ANDROID_WEB_VIEW || IS_ELECTRON || true
+    ? [AUTOMATIC_BACKUPS_FORM as GenericConfigFormSection]
+    : []),
 ].filter((cfg) => IS_ELECTRON || !cfg.isElectronOnly);
 
 export const GLOBAL_PRODUCTIVITY_FORM_CONFIG: ConfigFormConfig = [

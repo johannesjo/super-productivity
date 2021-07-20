@@ -8,6 +8,9 @@ import { ElectronService } from '../../core/electron/electron.service';
 import { ipcRenderer } from 'electron';
 import { PersistenceService } from '../../core/persistence/persistence.service';
 import { LocalBackupMeta } from './local-backup.model';
+import { IS_ANDROID_WEB_VIEW } from '../../util/is-android-web-view';
+import { IS_ELECTRON } from '../../app.constants';
+import { androidInterface } from '../../core/android/android-interface';
 
 const DEFAULT_BACKUP_INTERVAL = 2 * 60 * 1000;
 
@@ -34,21 +37,30 @@ export class LocalBackupService {
     this._triggerBackups$.subscribe();
   }
 
-  isBackupAvailable(): Promise<false | LocalBackupMeta> {
-    return this._electronService.callMain(IPC.BACKUP_IS_AVAILABLE, null) as Promise<
-      false | LocalBackupMeta
-    >;
+  isBackupAvailable(): Promise<boolean | LocalBackupMeta> {
+    return IS_ANDROID_WEB_VIEW
+      ? androidInterface.isBackupAvailable()
+      : (this._electronService.callMain(IPC.BACKUP_IS_AVAILABLE, null) as Promise<
+          false | LocalBackupMeta
+        >);
   }
 
   loadBackup(backupPath: string): Promise<string> {
-    return this._electronService.callMain(
-      IPC.BACKUP_LOAD_DATA,
-      backupPath,
-    ) as Promise<string>;
+    return IS_ANDROID_WEB_VIEW
+      ? androidInterface.getBackupData()
+      : (this._electronService.callMain(
+          IPC.BACKUP_LOAD_DATA,
+          backupPath,
+        ) as Promise<string>);
   }
 
   private async _backup(): Promise<void> {
     const data = await this._persistenceService.loadComplete();
-    (this._electronService.ipcRenderer as typeof ipcRenderer).send(IPC.BACKUP, data);
+    if (IS_ELECTRON) {
+      (this._electronService.ipcRenderer as typeof ipcRenderer).send(IPC.BACKUP, data);
+    }
+    if (IS_ANDROID_WEB_VIEW) {
+      await androidInterface.saveBackupData();
+    }
   }
 }

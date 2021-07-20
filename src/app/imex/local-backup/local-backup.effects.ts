@@ -9,11 +9,12 @@ import { DataImportService } from '../sync/data-import.service';
 import { TranslateService } from '@ngx-translate/core';
 import { T } from '../../t.const';
 import * as moment from 'moment';
+import { IS_ANDROID_WEB_VIEW } from '../../util/is-android-web-view';
 
 @Injectable()
 export class LocalBackupEffects {
   checkForBackupIfNoTasks$: any =
-    IS_ELECTRON &&
+    (IS_ELECTRON || IS_ANDROID_WEB_VIEW) &&
     createEffect(
       () =>
         this._actions$.pipe(
@@ -34,26 +35,24 @@ export class LocalBackupEffects {
   ) {}
 
   private async _checkForBackupIfEmpty(appDataComplete: AppDataComplete): Promise<void> {
-    if (IS_ELECTRON) {
-      if (
-        appDataComplete.task.ids.length === 0 &&
-        appDataComplete.taskArchive.ids.length === 0 &&
-        !appDataComplete.lastLocalSyncModelChange
-      ) {
-        const backupMeta = await this._localBackupService.isBackupAvailable();
-        if (backupMeta) {
-          if (
-            confirm(
-              this._translateService.instant(T.CONFIRM.RESTORE_FILE_BACKUP, {
-                dir: backupMeta.folder,
-                from: this._formatDate(backupMeta.created),
-              }),
-            )
-          ) {
-            const backupData = await this._localBackupService.loadBackup(backupMeta.path);
-            console.log('backupData', backupData);
-            await this._dataImportService.importCompleteSyncData(JSON.parse(backupData));
-          }
+    if (
+      appDataComplete.task.ids.length === 0 &&
+      appDataComplete.taskArchive.ids.length === 0 &&
+      !appDataComplete.lastLocalSyncModelChange
+    ) {
+      const backupMeta = await this._localBackupService.isBackupAvailable();
+      if (typeof backupMeta !== 'boolean') {
+        if (
+          confirm(
+            this._translateService.instant(T.CONFIRM.RESTORE_FILE_BACKUP, {
+              dir: backupMeta.folder,
+              from: this._formatDate(backupMeta.created),
+            }),
+          )
+        ) {
+          const backupData = await this._localBackupService.loadBackup(backupMeta.path);
+          console.log('backupData', backupData);
+          await this._dataImportService.importCompleteSyncData(JSON.parse(backupData));
         }
       }
     }

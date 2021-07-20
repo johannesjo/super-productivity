@@ -10,6 +10,12 @@ export interface AndroidInterface {
   triggerGetGoogleToken(): void;
 
   getGoogleToken(): Promise<string>;
+
+  getBackupData(): Promise<string>;
+
+  saveBackupData(): Promise<void>;
+
+  isBackupAvailable(): Promise<boolean>;
 }
 
 export const androidInterface: AndroidInterface = (window as any).SUPAndroid;

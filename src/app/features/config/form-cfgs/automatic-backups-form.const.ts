@@ -10,27 +10,30 @@ const backupPath =
   `${(getElectron() as typeof ElectronRenderer).remote.app.getPath('userData')}/backups`;
 
 export const AUTOMATIC_BACKUPS_FORM: ConfigFormSection<LocalBackupConfig> = {
-  isElectronOnly: true,
   title: T.GCF.AUTO_BACKUPS.TITLE,
   key: 'localBackup',
   help: T.GCF.AUTO_BACKUPS.HELP,
   items: [
-    {
-      type: 'tpl',
-      className: `tpl`,
-      templateOptions: {
-        tag: 'p',
-        text: T.GCF.AUTO_BACKUPS.LOCATION_INFO,
-      },
-    },
-    {
-      type: 'tpl',
-      className: `tpl`,
-      templateOptions: {
-        tag: 'p',
-        text: backupPath,
-      },
-    },
+    ...(IS_ELECTRON
+      ? [
+          {
+            type: 'tpl',
+            className: `tpl`,
+            templateOptions: {
+              tag: 'p',
+              text: T.GCF.AUTO_BACKUPS.LOCATION_INFO,
+            },
+          },
+          {
+            type: 'tpl',
+            className: `tpl`,
+            templateOptions: {
+              tag: 'p',
+              text: backupPath,
+            },
+          },
+        ]
+      : []),
     {
       key: 'isEnabled',
       type: 'checkbox',
