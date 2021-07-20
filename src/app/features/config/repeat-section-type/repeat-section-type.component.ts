@@ -19,7 +19,7 @@ export class RepeatSectionTypeComponent extends FieldArrayType {
     super();
   }
 
-  removeItem(i: number) {
+  removeItem(i: number): void {
     super.remove(i);
   }
 

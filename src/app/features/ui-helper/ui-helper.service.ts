@@ -24,7 +24,7 @@ export class UiHelperService {
     this._initMousewheelZoomForElectron();
   }
 
-  zoomTo(zoomFactor: number) {
+  zoomTo(zoomFactor: number): void {
     if (Number.isNaN(zoomFactor)) {
       console.error('Invalid zoom factor', zoomFactor);
       return;
@@ -34,7 +34,7 @@ export class UiHelperService {
     this._updateLocalUiHelperSettings({ zoomFactor });
   }
 
-  zoomBy(zoomBy: number) {
+  zoomBy(zoomBy: number): void {
     if (Number.isNaN(zoomBy)) {
       console.error('Invalid zoom factor', zoomBy);
       return;

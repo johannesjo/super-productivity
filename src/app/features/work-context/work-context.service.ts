@@ -354,7 +354,7 @@ export class WorkContextService {
     });
   }
 
-  updateWorkStartForActiveContext(date: string, newVal: number) {
+  updateWorkStartForActiveContext(date: string, newVal: number): void {
     const payload: { id: string; date: string; newVal: number } = {
       id: this.activeWorkContextId as string,
       date,
@@ -367,7 +367,7 @@ export class WorkContextService {
     this._store$.dispatch(action);
   }
 
-  updateWorkEndForActiveContext(date: string, newVal: number) {
+  updateWorkEndForActiveContext(date: string, newVal: number): void {
     const payload: { id: string; date: string; newVal: number } = {
       id: this.activeWorkContextId as string,
       date,
@@ -380,7 +380,7 @@ export class WorkContextService {
     this._store$.dispatch(action);
   }
 
-  addToBreakTimeForActiveContext(date: string = getWorklogStr(), valToAdd: number) {
+  addToBreakTimeForActiveContext(date: string = getWorklogStr(), valToAdd: number): void {
     const payload: { id: string; date: string; valToAdd: number } = {
       id: this.activeWorkContextId as string,
       date,

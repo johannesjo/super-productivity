@@ -74,7 +74,7 @@ export class IdleService {
     // }, 700);
   }
 
-  handleIdle(idleTime: number) {
+  handleIdle(idleTime: number): void {
     const gCfg = this._configService.cfg;
     if (!gCfg) {
       throw new Error();
@@ -165,7 +165,7 @@ export class IdleService {
     }
   }
 
-  initIdlePoll(initialIdleTime: number) {
+  initIdlePoll(initialIdleTime: number): void {
     const idleStart = Date.now();
     this._idleTime$.next(initialIdleTime);
 

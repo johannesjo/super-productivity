@@ -65,11 +65,11 @@ export class EvaluationSheetComponent implements OnDestroy, OnInit {
     this._subs.unsubscribe();
   }
 
-  updateMood(mood: number) {
+  updateMood(mood: number): void {
     this._update({ mood });
   }
 
-  updateProductivity(productivity: number) {
+  updateProductivity(productivity: number): void {
     this._update({ productivity });
   }
 

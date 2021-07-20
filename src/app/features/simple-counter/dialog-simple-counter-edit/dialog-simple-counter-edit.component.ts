@@ -29,7 +29,7 @@ export class DialogSimpleCounterEditComponent {
     this.close();
   }
 
-  onModelChange($event: number) {
+  onModelChange($event: number): void {
     this.val = $event;
   }
 

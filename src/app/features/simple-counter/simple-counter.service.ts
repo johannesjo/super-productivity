@@ -81,11 +81,11 @@ export class SimpleCounterService {
     this._store$.dispatch(updateAllSimpleCounters({ items }));
   }
 
-  setCounterToday(id: string, newVal: number) {
+  setCounterToday(id: string, newVal: number): void {
     this._store$.dispatch(setSimpleCounterCounterToday({ id, newVal }));
   }
 
-  increaseCounterToday(id: string, increaseBy: number) {
+  increaseCounterToday(id: string, increaseBy: number): void {
     this._store$.dispatch(increaseSimpleCounterCounterToday({ id, increaseBy }));
   }
 

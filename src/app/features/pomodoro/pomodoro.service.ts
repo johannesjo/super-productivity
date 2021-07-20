@@ -191,7 +191,7 @@ export class PomodoroService {
     new Audio(DEFAULT_SOUND).play();
   }
 
-  private _playTickSound(volume: number) {
+  private _playTickSound(volume: number): void {
     const tickAudio = new Audio(DEFAULT_TICK_SOUND);
     tickAudio.volume = volume / 100;
     tickAudio.play();

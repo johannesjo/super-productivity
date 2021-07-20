@@ -85,7 +85,7 @@ export class TrackingReminderService {
     this._bannerService.dismiss(BannerId.StartTrackingReminder);
   }
 
-  private _triggerBanner(duration: number) {
+  private _triggerBanner(duration: number): void {
     // don't update if this or other dialogs are open
     if (this._matDialog.openDialogs.length !== 0) {
       return;
