@@ -398,7 +398,7 @@ export class TaskService {
     }
   }
 
-  moveUp(id: string, parentId: string | null = null, isBacklog: boolean) {
+  moveUp(id: string, parentId: string | null = null, isBacklog: boolean): void {
     if (parentId) {
       this._store.dispatch(new MoveSubTaskUp({ id, parentId }));
     } else {
@@ -432,7 +432,7 @@ export class TaskService {
     }
   }
 
-  moveDown(id: string, parentId: string | null = null, isBacklog: boolean) {
+  moveDown(id: string, parentId: string | null = null, isBacklog: boolean): void {
     if (parentId) {
       this._store.dispatch(new MoveSubTaskDown({ id, parentId }));
     } else {
@@ -671,7 +671,7 @@ export class TaskService {
     );
   }
 
-  unScheduleTask(taskId: string, reminderId?: string, isSkipToast?: boolean) {
+  unScheduleTask(taskId: string, reminderId?: string, isSkipToast?: boolean): void {
     if (!taskId) {
       throw new Error('No task id');
     }

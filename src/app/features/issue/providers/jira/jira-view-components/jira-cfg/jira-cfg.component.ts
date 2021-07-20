@@ -156,7 +156,7 @@ export class JiraCfgComponent implements OnInit, OnDestroy {
     return (this.cfg.transitionConfig[key] = value);
   }
 
-  toggleEnabled(isEnabled: boolean) {
+  toggleEnabled(isEnabled: boolean): void {
     if (this._workContextService.activeWorkContextType !== WorkContextType.PROJECT) {
       throw new Error('Should only be called when in project context');
     }

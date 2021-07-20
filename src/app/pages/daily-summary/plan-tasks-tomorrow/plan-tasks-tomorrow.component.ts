@@ -32,7 +32,7 @@ export class PlanTasksTomorrowComponent {
   addAllPlannedToDayAndCreateRepeatable(
     plannedTasks: TaskPlanned[],
     repeatableScheduledForTomorrow: TaskRepeatCfg[],
-  ) {
+  ): void {
     this._taskRepeatCfgService.addAllPlannedToDayAndCreateRepeatable(
       plannedTasks,
       repeatableScheduledForTomorrow,

@@ -34,7 +34,7 @@ export class SchedulePageComponent {
     private _router: Router,
   ) {}
 
-  startTask(task: TaskWithReminderData) {
+  startTask(task: TaskWithReminderData): void {
     if (
       task.reminderData.workContextId === this._workContextService.activeWorkContextId
     ) {
@@ -44,7 +44,7 @@ export class SchedulePageComponent {
     }
   }
 
-  toggleToday(task: TaskWithReminderData | Task) {
+  toggleToday(task: TaskWithReminderData | Task): void {
     if (task.tagIds.includes(TODAY_TAG.id)) {
       this._taskService.updateTags(
         task,
@@ -56,31 +56,31 @@ export class SchedulePageComponent {
     }
   }
 
-  removeReminder(task: TaskWithReminderData) {
+  removeReminder(task: TaskWithReminderData): void {
     if (task.reminderId) {
       this._taskService.unScheduleTask(task.id, task.reminderId);
     }
   }
 
-  editReminder(task: TaskWithReminderData) {
+  editReminder(task: TaskWithReminderData): void {
     this._matDialog.open(DialogAddTaskReminderComponent, {
       restoreFocus: true,
       data: { task } as AddTaskReminderInterface,
     });
   }
 
-  updateTaskTitleIfChanged(isChanged: boolean, newTitle: string, task: Task) {
+  updateTaskTitleIfChanged(isChanged: boolean, newTitle: string, task: Task): void {
     if (isChanged) {
       this._taskService.update(task.id, { title: newTitle });
     }
     // this.focusSelf();
   }
 
-  trackByFn(i: number, task: TaskWithReminderData) {
+  trackByFn(i: number, task: TaskWithReminderData): string {
     return task.id;
   }
 
-  private _startTaskFronCurrentProject(task: TaskWithReminderData) {
+  private _startTaskFronCurrentProject(task: TaskWithReminderData): void {
     if (!!task.parentId) {
       this._taskService.moveToProjectTodayList(task.parentId, true);
     } else {
@@ -93,7 +93,7 @@ export class SchedulePageComponent {
     this._router.navigate(['/active/tasks']);
   }
 
-  private _startTaskFromOtherProject(task: TaskWithReminderData) {
+  private _startTaskFromOtherProject(task: TaskWithReminderData): void {
     this._taskService
       .startTaskFromOtherContext$(
         task.id,

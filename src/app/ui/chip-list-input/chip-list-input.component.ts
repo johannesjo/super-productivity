@@ -127,7 +127,7 @@ export class ChipListInputComponent implements OnDestroy {
     this.inputCtrl.setValue(null);
   }
 
-  trackById(i: number, item: Suggestion) {
+  trackById(i: number, item: Suggestion): string {
     return item.id;
   }
 

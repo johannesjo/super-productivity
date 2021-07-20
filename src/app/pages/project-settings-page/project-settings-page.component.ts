@@ -101,14 +101,17 @@ export class ProjectSettingsPageComponent implements OnInit, OnDestroy {
     this._subs.unsubscribe();
   }
 
-  trackBySectionKey(i: number, section: ConfigFormSection<{ [key: string]: any }>) {
+  trackBySectionKey(
+    i: number,
+    section: ConfigFormSection<{ [key: string]: any }>,
+  ): string {
     return section.key;
   }
 
   saveProjectThemCfg($event: {
     sectionKey: GlobalConfigSectionKey | ProjectCfgFormKey;
     config: WorkContextThemeCfg;
-  }) {
+  }): void {
     if (!$event.config || !this.currentProject) {
       throw new Error('Not enough data');
     } else {
@@ -123,7 +126,7 @@ export class ProjectSettingsPageComponent implements OnInit, OnDestroy {
   saveBasicSettings($event: {
     sectionKey: GlobalConfigSectionKey | ProjectCfgFormKey;
     config: Project;
-  }) {
+  }): void {
     if (!$event.config || !this.currentProject) {
       throw new Error('Not enough data');
     } else {
@@ -136,7 +139,7 @@ export class ProjectSettingsPageComponent implements OnInit, OnDestroy {
   saveIssueProviderCfg($event: {
     sectionKey: GlobalConfigSectionKey | ProjectCfgFormKey;
     config: IssueIntegrationCfg;
-  }) {
+  }): void {
     if (!$event.config || !this.currentProject) {
       throw new Error('Not enough data');
     }

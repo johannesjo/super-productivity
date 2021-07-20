@@ -171,7 +171,7 @@ export class SyncTriggerService {
     ).pipe(debounceTime(100));
   }
 
-  setInitialSyncDone(val: boolean) {
+  setInitialSyncDone(val: boolean): void {
     this._isInitialSyncDoneManual$.next(val);
   }
 }

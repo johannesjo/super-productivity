@@ -65,14 +65,17 @@ export class ConfigPageComponent implements OnInit, OnDestroy {
     this._subs.unsubscribe();
   }
 
-  trackBySectionKey(i: number, section: ConfigFormSection<{ [key: string]: any }>) {
+  trackBySectionKey(
+    i: number,
+    section: ConfigFormSection<{ [key: string]: any }>,
+  ): string {
     return section.key;
   }
 
   saveGlobalCfg($event: {
     sectionKey: GlobalConfigSectionKey | ProjectCfgFormKey;
     config: any;
-  }) {
+  }): void {
     const config = $event.config;
     const sectionKey = $event.sectionKey as GlobalConfigSectionKey;
 
@@ -83,7 +86,7 @@ export class ConfigPageComponent implements OnInit, OnDestroy {
     }
   }
 
-  toggleDarkMode(change: MatSlideToggleChange) {
+  toggleDarkMode(change: MatSlideToggleChange): void {
     this.configService.updateSection('misc', { isDarkMode: change.checked });
   }
 

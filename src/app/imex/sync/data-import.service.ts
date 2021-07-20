@@ -39,7 +39,7 @@ export class DataImportService {
     data: AppDataComplete,
     isBackupReload: boolean = false,
     isSkipStrayBackupCheck: boolean = false,
-  ) {
+  ): Promise<void> {
     this._snackService.open({ msg: T.F.SYNC.S.IMPORTING, ico: 'cloud_download' });
     this._imexMetaService.setDataImportInProgress(true);
 

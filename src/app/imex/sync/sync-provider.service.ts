@@ -399,7 +399,7 @@ export class SyncProviderService {
       lastSync: number;
       rev: string;
     },
-  ) {
+  ): Promise<unknown> {
     const dr = await this._openConflictDialog$({
       local: local.lastLocalSyncModelChange,
       lastSync,
@@ -442,7 +442,7 @@ export class SyncProviderService {
     return confirm(this._translateService.instant(str));
   }
 
-  private _log(cp: SyncProviderServiceInterface, ...args: any | any[]) {
-    return console.log(cp.id, ...args);
+  private _log(cp: SyncProviderServiceInterface, ...args: any | any[]): void {
+    console.log(cp.id, ...args);
   }
 }

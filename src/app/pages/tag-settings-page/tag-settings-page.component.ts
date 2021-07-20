@@ -75,7 +75,7 @@ export class TagSettingsPageComponent implements OnInit, OnDestroy {
   saveTagThemCfg($event: {
     sectionKey: GlobalConfigSectionKey | ProjectCfgFormKey | TagCfgFormKey;
     config: WorkContextThemeCfg;
-  }) {
+  }): void {
     if (!$event.config || this.activeWorkContext === null) {
       throw new Error('Not enough data');
     } else {
@@ -90,7 +90,7 @@ export class TagSettingsPageComponent implements OnInit, OnDestroy {
   saveBasicSettings($event: {
     sectionKey: GlobalConfigSectionKey | ProjectCfgFormKey | TagCfgFormKey;
     config: Tag;
-  }) {
+  }): void {
     if (!$event.config || this.activeWorkContext === null) {
       throw new Error('Not enough data');
     } else {

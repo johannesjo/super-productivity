@@ -71,7 +71,7 @@ export class GlobalThemeService {
     this._initThemeWatchers();
   }
 
-  private _setDarkTheme(isDarkTheme: boolean) {
+  private _setDarkTheme(isDarkTheme: boolean): void {
     this._materialCssVarsService.setDarkTheme(isDarkTheme);
     this._setChartTheme(isDarkTheme);
     // this._materialCssVarsService.setDarkTheme(true);
@@ -93,7 +93,7 @@ export class GlobalThemeService {
     this._materialCssVarsService.setWarnColor(theme.warn);
   }
 
-  private _setBackgroundGradient(isDisableBackgroundGradient: boolean) {
+  private _setBackgroundGradient(isDisableBackgroundGradient: boolean): void {
     if (isDisableBackgroundGradient) {
       this.document.body.classList.add(BodyClass.isDisableBackgroundGradient);
       this.document.body.classList.remove(BodyClass.isEnabledBackgroundGradient);
@@ -163,7 +163,7 @@ export class GlobalThemeService {
     }
   }
 
-  private _setChartTheme(isDarkTheme: boolean) {
+  private _setChartTheme(isDarkTheme: boolean): void {
     const overrides = isDarkTheme
       ? {
           legend: {
