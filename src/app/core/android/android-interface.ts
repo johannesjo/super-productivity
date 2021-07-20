@@ -16,9 +16,16 @@ export interface AndroidInterface {
   saveBackupData(): Promise<void>;
 
   isBackupAvailable(): Promise<boolean>;
+
+  isBackupCapable?: boolean;
 }
 
-export const androidInterface: AndroidInterface = (window as any).SUPAndroid;
+export const androidInterface: AndroidInterface = {
+  ...(window as any).SUPAndroid,
+  isBackupCapable:
+    (window as any).SUPAndroid &&
+    typeof (window as any).SUPAndroid.isBackupCapable === 'function',
+};
 
 if (IS_ANDROID_WEB_VIEW) {
   androidInterface.getGoogleToken = () => {
