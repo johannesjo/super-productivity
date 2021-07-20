@@ -21,7 +21,7 @@ import {
 import { StringToMsPipe } from './string-to-ms.pipe';
 import { MsToStringPipe } from './ms-to-string.pipe';
 
-const noop = () => {};
+const noop = (): void => {};
 /* eslint-disable */
 export const INPUT_DURATION_VALUE_ACCESSOR: any = {
   provide: NG_VALUE_ACCESSOR,
@@ -96,7 +96,7 @@ export class InputDurationDirective
     }
   }
 
-  @HostListener('input', ['$event.target.value']) _onInput(value: string) {
+  @HostListener('input', ['$event.target.value']) _onInput(value: string): void {
     this._msValue = this._stringToMs.transform(value);
     this._value = this._msToString.transform(this._msValue, false, true);
     this._onChangeCallback(this._msValue);

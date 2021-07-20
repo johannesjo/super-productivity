@@ -32,7 +32,7 @@ export class GlobalProgressBarService {
 
   constructor() {}
 
-  countUp(url: string) {
+  countUp(url: string): void {
     this.nrOfRequests$.next(this.nrOfRequests$.getValue() + 1);
     this._label$.next(this._urlToLabel(url));
   }

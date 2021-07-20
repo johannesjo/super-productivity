@@ -47,7 +47,7 @@ export class BookmarkLinkDirective {
     }
   }
 
-  private _openExternalUrl(rawUrl: string) {
+  private _openExternalUrl(rawUrl: string): void {
     // try to account for jira(?) adding a second http to the url
     const url = rawUrl
       .replace('https://https://', 'https://')
@@ -63,7 +63,7 @@ export class BookmarkLinkDirective {
     }
   }
 
-  private _exec(command: string) {
+  private _exec(command: string): void {
     (this._electronService.ipcRenderer as typeof ipcRenderer).send(IPC.EXEC, command);
   }
 }

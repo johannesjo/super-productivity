@@ -660,7 +660,11 @@ export class PersistenceService {
     return await Promise.all(promises);
   }
 
-  private _makeProjectKey(projectId: string, subKey: string, additional?: string) {
+  private _makeProjectKey(
+    projectId: string,
+    subKey: string,
+    additional?: string,
+  ): string {
     return (
       LS_PROJECT_PREFIX + projectId + '_' + subKey + (additional ? '_' + additional : '')
     );
@@ -668,7 +672,7 @@ export class PersistenceService {
 
   // DATA STORAGE INTERFACE
   // ---------------------
-  private _getIDBKey(dbKey: AllowedDBKeys, projectId?: string) {
+  private _getIDBKey(dbKey: AllowedDBKeys, projectId?: string): string {
     return projectId ? 'p__' + projectId + '__' + dbKey : dbKey;
   }
 

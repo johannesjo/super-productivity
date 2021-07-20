@@ -36,11 +36,11 @@ export class BannerComponent {
 
   constructor(public bannerService: BannerService) {}
 
-  dismiss(bannerId: string) {
+  dismiss(bannerId: string): void {
     this.bannerService.dismiss(bannerId as BannerId);
   }
 
-  action(bannerId: string, bannerAction: BannerAction) {
+  action(bannerId: string, bannerAction: BannerAction): void {
     this.dismiss(bannerId);
     bannerAction.fn();
   }

@@ -82,7 +82,7 @@ export class BookmarkBarComponent implements OnDestroy {
     this.isDragOver = false;
   }
 
-  openEditDialog(bookmark?: Bookmark) {
+  openEditDialog(bookmark?: Bookmark): void {
     this._matDialog
       .open(DialogEditBookmarkComponent, {
         restoreFocus: true,
@@ -102,11 +102,11 @@ export class BookmarkBarComponent implements OnDestroy {
       });
   }
 
-  remove(id: string) {
+  remove(id: string): void {
     this.bookmarkService.deleteBookmark(id);
   }
 
-  trackByFn(i: number, bookmark: Bookmark) {
+  trackByFn(i: number, bookmark: Bookmark): string {
     return bookmark.id;
   }
 }

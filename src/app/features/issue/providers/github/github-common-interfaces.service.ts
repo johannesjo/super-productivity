@@ -28,7 +28,7 @@ export class GithubCommonInterfacesService implements IssueServiceInterface {
     );
   }
 
-  getById$(issueId: number, projectId: string) {
+  getById$(issueId: number, projectId: string): Observable<GithubIssue> {
     return this._getCfgOnce$(projectId).pipe(
       concatMap((githubCfg) => this._githubApiService.getById$(issueId, githubCfg)),
     );

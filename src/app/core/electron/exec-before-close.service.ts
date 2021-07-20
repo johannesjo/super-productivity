@@ -16,15 +16,15 @@ export class ExecBeforeCloseService {
 
   constructor(private _electronService: ElectronService) {}
 
-  schedule(id: string) {
+  schedule(id: string): void {
     this.ipcRenderer.send(IPC.REGISTER_BEFORE_CLOSE, { id });
   }
 
-  unschedule(id: string) {
+  unschedule(id: string): void {
     this.ipcRenderer.send(IPC.UNREGISTER_BEFORE_CLOSE, { id });
   }
 
-  setDone(id: string) {
+  setDone(id: string): void {
     this.ipcRenderer.send(IPC.BEFORE_CLOSE_DONE, { id });
   }
 }

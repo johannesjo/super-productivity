@@ -302,7 +302,11 @@ export class LegacyPersistenceService {
     }, Promise.resolve({}));
   }
 
-  private _makeProjectKey(projectId: string, subKey: string, additional?: string) {
+  private _makeProjectKey(
+    projectId: string,
+    subKey: string,
+    additional?: string,
+  ): string {
     return (
       LS_PROJECT_PREFIX + projectId + '_' + subKey + (additional ? '_' + additional : '')
     );

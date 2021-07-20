@@ -43,16 +43,16 @@ export class BookmarkService {
     private _persistenceService: PersistenceService,
   ) {}
 
-  async loadStateForProject(projectId: string) {
+  async loadStateForProject(projectId: string): Promise<void> {
     const lsBookmarkState = await this._persistenceService.bookmark.load(projectId);
     this.loadState(lsBookmarkState || initialBookmarkState);
   }
 
-  loadState(state: BookmarkState) {
+  loadState(state: BookmarkState): void {
     this._store$.dispatch(new LoadBookmarkState({ state }));
   }
 
-  addBookmark(bookmark: Bookmark) {
+  addBookmark(bookmark: Bookmark): void {
     this._store$.dispatch(
       new AddBookmark({
         bookmark: {
@@ -63,11 +63,11 @@ export class BookmarkService {
     );
   }
 
-  deleteBookmark(id: string) {
+  deleteBookmark(id: string): void {
     this._store$.dispatch(new DeleteBookmark({ id }));
   }
 
-  updateBookmark(id: string, changes: Partial<Bookmark>) {
+  updateBookmark(id: string, changes: Partial<Bookmark>): void {
     this._store$.dispatch(new UpdateBookmark({ bookmark: { id, changes } }));
   }
 
@@ -83,7 +83,7 @@ export class BookmarkService {
     this._store$.dispatch(new ToggleBookmarks());
   }
 
-  reorderBookmarks(ids: string[]) {
+  reorderBookmarks(ids: string[]): void {
     this._store$.dispatch(new ReorderBookmarks({ ids }));
   }
 

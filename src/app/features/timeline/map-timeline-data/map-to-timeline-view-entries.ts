@@ -187,7 +187,7 @@ export const mapToTimelineViewEntries = (
   return cleanedUpExcessWorkDays;
 };
 
-const isSameDay = (dt1: number, dt2: number) => {
+const isSameDay = (dt1: number, dt2: number): boolean => {
   const d1 = new Date(dt1);
   const d2 = new Date(dt2);
   return (
@@ -247,7 +247,7 @@ const insertBlockedBlocksViewEntries = (
   viewEntriesIn: TimelineViewEntryTask[],
   blockedBlocks: BlockedBlock[],
   now: number,
-) => {
+): void => {
   const viewEntries: TimelineViewEntry[] = viewEntriesIn;
   let veIndex: number = 0;
   debug('################__insertBlockedBlocksViewEntries()_START__################');
@@ -447,7 +447,7 @@ const moveAllEntriesAfterTime = (
   viewEntries: TimelineViewEntry[],
   moveBy: number,
   startTime: number = 0,
-) => {
+): void => {
   viewEntries.forEach((viewEntry: any) => {
     if (viewEntry.start >= startTime && isMoveableViewEntry(viewEntry)) {
       debug(
@@ -465,7 +465,7 @@ const moveEntries = (
   viewEntries: TimelineViewEntry[],
   moveBy: number,
   startIndex: number = 0,
-) => {
+): void => {
   for (let i = startIndex; i < viewEntries.length; i++) {
     const viewEntry: any = viewEntries[i];
     if (isMoveableViewEntry(viewEntry)) {

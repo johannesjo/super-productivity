@@ -31,7 +31,7 @@ export class IssueCacheService {
     return realContent;
   }
 
-  async removeProjectCache(pId: string, type: string) {
+  async removeProjectCache(pId: string, type: string): Promise<void> {
     const key = `SUP_p_${type}_${pId}`;
     removeFromRealLs(key);
   }

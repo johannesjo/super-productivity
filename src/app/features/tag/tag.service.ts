@@ -43,31 +43,31 @@ export class TagService {
     return id;
   }
 
-  deleteTag(id: string) {
+  deleteTag(id: string): void {
     this._store$.dispatch(deleteTag({ id }));
   }
 
-  removeTag(id: string) {
+  removeTag(id: string): void {
     this._store$.dispatch(deleteTag({ id }));
   }
 
-  updateColor(id: string, color: string) {
+  updateColor(id: string, color: string): void {
     this._store$.dispatch(updateTag({ tag: { id, changes: { color } } }));
   }
 
-  updateOrder(ids: string[]) {
+  updateOrder(ids: string[]): void {
     this._store$.dispatch(updateTagOrder({ ids }));
   }
 
-  deleteTags(ids: string[]) {
+  deleteTags(ids: string[]): void {
     this._store$.dispatch(deleteTags({ ids }));
   }
 
-  updateTag(id: string, changes: Partial<Tag>) {
+  updateTag(id: string, changes: Partial<Tag>): void {
     this._store$.dispatch(updateTag({ tag: { id, changes } }));
   }
 
-  upsertTag(tag: Tag) {
+  upsertTag(tag: Tag): void {
     this._store$.dispatch(upsertTag({ tag }));
   }
 
