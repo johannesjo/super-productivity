@@ -71,7 +71,7 @@ export class ImprovementService {
     this._store$.dispatch(new DeleteImprovement({ id }));
   }
 
-  deleteImprovements(ids: string[]) {
+  deleteImprovements(ids: string[]): void {
     this._store$.dispatch(new DeleteImprovements({ ids }));
   }
 

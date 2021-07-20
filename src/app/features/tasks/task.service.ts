@@ -276,7 +276,7 @@ export class TaskService {
     this._store.dispatch(new DeleteTask({ task }));
   }
 
-  removeMultipleMainTasks(taskIds: string[]) {
+  removeMultipleMainTasks(taskIds: string[]): void {
     this._store.dispatch(new DeleteMainTasks({ taskIds }));
   }
 
@@ -295,7 +295,7 @@ export class TaskService {
     this.updateTags(t, [TODAY_TAG.id, ...t.tagIds], t.tagIds);
   }
 
-  updateTags(task: Task, newTagIds: string[], oldTagIds: string[]) {
+  updateTags(task: Task, newTagIds: string[], oldTagIds: string[]): void {
     if (task.parentId) {
       throw new Error('Editing sub task tags should not be possible.');
     }
@@ -316,7 +316,7 @@ export class TaskService {
     }
   }
 
-  removeTagsForAllTask(tagsToRemove: string[]) {
+  removeTagsForAllTask(tagsToRemove: string[]): void {
     this._store.dispatch(
       new RemoveTagsForAllTasks({
         tagIdsToRemove: tagsToRemove,
@@ -326,7 +326,7 @@ export class TaskService {
 
   // TODO: Move logic away from service class (to actions)?
   // TODO: Should this reside in tagService?
-  purgeUnusedTags(tagIds: string[]) {
+  purgeUnusedTags(tagIds: string[]): void {
     tagIds.forEach((tagId) => {
       this.getTasksByTag(tagId)
         .pipe(take(1))

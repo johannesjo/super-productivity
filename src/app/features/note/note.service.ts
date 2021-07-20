@@ -100,7 +100,7 @@ export class NoteService {
     });
   }
 
-  public updateOrder(ids: string[]) {
+  public updateOrder(ids: string[]): void {
     this._store$.dispatch(updateNoteOrder({ ids }));
   }
 

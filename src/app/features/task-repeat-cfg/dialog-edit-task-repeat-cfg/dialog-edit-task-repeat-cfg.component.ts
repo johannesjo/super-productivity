@@ -116,7 +116,7 @@ export class DialogEditTaskRepeatCfgComponent implements OnInit, OnDestroy {
     this._updateTags(updatedTagIds);
   }
 
-  private _updateTags(newTagIds: string[]) {
+  private _updateTags(newTagIds: string[]): void {
     this.taskRepeatCfg = {
       ...this.taskRepeatCfg,
       tagIds: newTagIds,

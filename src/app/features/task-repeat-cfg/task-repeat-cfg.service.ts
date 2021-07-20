@@ -90,7 +90,7 @@ export class TaskRepeatCfgService {
     this._store$.dispatch(new DeleteTaskRepeatCfg({ id }));
   }
 
-  deleteTaskRepeatCfgsNoTaskCleanup(ids: string[]) {
+  deleteTaskRepeatCfgsNoTaskCleanup(ids: string[]): void {
     this._store$.dispatch(new DeleteTaskRepeatCfgs({ ids }));
   }
 

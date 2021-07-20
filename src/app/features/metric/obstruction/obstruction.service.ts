@@ -38,7 +38,7 @@ export class ObstructionService {
     this._store$.dispatch(new DeleteObstruction({ id }));
   }
 
-  deleteObstructions(ids: string[]) {
+  deleteObstructions(ids: string[]): void {
     this._store$.dispatch(new DeleteObstructions({ ids }));
   }
 

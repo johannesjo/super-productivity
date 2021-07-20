@@ -206,7 +206,7 @@ export class ProjectService {
     });
   }
 
-  updateOrder(ids: string[]) {
+  updateOrder(ids: string[]): void {
     this._store$.dispatch(new UpdateProjectOrder({ ids }));
   }
 

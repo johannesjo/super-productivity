@@ -112,7 +112,7 @@ export class SimpleCounterService {
     this._store$.dispatch(deleteSimpleCounter({ id }));
   }
 
-  deleteSimpleCounters(ids: string[]) {
+  deleteSimpleCounters(ids: string[]): void {
     this._store$.dispatch(deleteSimpleCounters({ ids }));
   }
 
