@@ -1,6 +1,10 @@
-import { Dictionary } from '@ngrx/entity';
+import { EntityState } from '@ngrx/entity';
 
-export const createEmptyEntity = (): Dictionary<any> => {
+interface EntityStateString extends EntityState<any> {
+  ids: string[];
+}
+
+export const createEmptyEntity = (): EntityStateString => {
   return {
     ids: [],
     entities: {},
