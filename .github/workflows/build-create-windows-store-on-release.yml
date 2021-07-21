@@ -41,7 +41,7 @@ jobs:
 
       - name: Install npm Packages
         if: steps.npm-cache.outputs.cache-hit != 'true'
-        run: npmi
+        run: npm i
 
       - name: Lint
         run: npm run lint
