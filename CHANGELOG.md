@@ -1,3 +1,16 @@
+## [7.4.1](https://github.com/johannesjo/super-productivity/compare/v7.4.0...v7.4.1) (2021-07-21)
+
+### Bug Fixes
+
+- potential displayWidth error ([eb9b57c](https://github.com/johannesjo/super-productivity/commit/eb9b57c3557e364185a1ba7bf4b1c16c23fa409e))
+
+### Features
+
+- **backup:** account for different android app versions ([fde0eaa](https://github.com/johannesjo/super-productivity/commit/fde0eaae14664dc37b4b55238721112d87cb0311))
+- **backup:** make frontend work for android backups ([9b6f867](https://github.com/johannesjo/super-productivity/commit/9b6f867967026666d1f1410a04d58c48709675d6))
+- **backup:** make loading data work ([3526a1d](https://github.com/johannesjo/super-productivity/commit/3526a1ddb74e76c0aa6bb749ac8f534f99d7b966))
+- **backup:** make saving data work ([1f1ec1e](https://github.com/johannesjo/super-productivity/commit/1f1ec1eef71740ae16004b582721873585a83b0b))
+
 # [7.4.0](https://github.com/johannesjo/super-productivity/compare/v7.3.3...v7.4.0) (2021-07-20)
 
 ### Bug Fixes
