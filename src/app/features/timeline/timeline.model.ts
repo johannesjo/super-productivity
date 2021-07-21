@@ -35,10 +35,15 @@ export interface TimelineViewEntrySplitTaskContinued extends TimelineViewEntryBa
   };
 }
 
-export interface TimelineCustomEvent {
+export interface TimelineFromCalendarEvent {
   title: string;
   start: number;
   duration: number;
+  // TODO check
+  isReoccurring?: boolean;
+}
+
+export interface TimelineCustomEvent extends TimelineFromCalendarEvent {
   icon: string;
 }
 
