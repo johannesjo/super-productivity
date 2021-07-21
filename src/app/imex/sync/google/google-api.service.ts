@@ -44,7 +44,7 @@ import * as querystring from 'querystring';
 import { MatDialog } from '@angular/material/dialog';
 import { DialogGetAndEnterAuthCodeComponent } from '../dialog-get-and-enter-auth-code/dialog-get-and-enter-auth-code.component';
 import { getGoogleAuthUrl } from './get-google-auth-url';
-import { generatePKCECodes } from '../dropbox/generate-pkce-codes';
+import { generatePKCECodes } from '../generate-pkce-codes';
 
 const EXPIRES_SAFETY_MARGIN = 5 * 60 * 1000;
 

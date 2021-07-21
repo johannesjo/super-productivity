@@ -12,7 +12,7 @@ import { DialogGetAndEnterAuthCodeComponent } from '../dialog-get-and-enter-auth
 import { MatDialog } from '@angular/material/dialog';
 import { T } from '../../../t.const';
 import { SnackService } from '../../../core/snack/snack.service';
-import { generatePKCECodes } from './generate-pkce-codes';
+import { generatePKCECodes } from '../generate-pkce-codes';
 
 @Injectable({ providedIn: 'root' })
 export class DropboxApiService {
