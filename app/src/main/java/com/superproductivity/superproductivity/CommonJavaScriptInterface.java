@@ -6,17 +6,27 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.database.sqlite.SQLiteDatabase;
 import android.graphics.BitmapFactory;
 import android.os.Build;
 import android.util.Log;
 import android.webkit.JavascriptInterface;
 import android.webkit.WebView;
 import android.widget.Toast;
+
 import androidx.core.app.NotificationCompat;
+
+import com.google.android.gms.auth.api.signin.GoogleSignIn;
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
+import com.google.android.gms.tasks.Task;
+
+import static java.security.AccessController.getContext;
 
 public class CommonJavaScriptInterface {
     protected FullscreenActivity mContext;
-    private WebView webView;
+    private final WebView webView;
+    private final KeyValStore dbHelper;
+    private final int RC_SAVE_DATA = 1234;
 
     /**
      * Instantiate the interface and set the context
@@ -24,10 +34,13 @@ public class CommonJavaScriptInterface {
     CommonJavaScriptInterface(FullscreenActivity c, WebView wv) {
         mContext = c;
         webView = wv;
+        dbHelper = new KeyValStore(c);
     }
 
     void onActivityResult(int requestCode, int resultCode, Intent data) {
-//        Toast.makeText(mContext, "JavaScriptInterface onActivityResult", Toast.LENGTH_SHORT).show();
+        if (requestCode == RC_SAVE_DATA) {
+
+        }
     }
 
     @SuppressWarnings("unused")
@@ -46,6 +59,25 @@ public class CommonJavaScriptInterface {
 
         TaskListDataService.getInstance().setData(str);
         mContext.sendBroadcast(intent);
+    }
+
+    @SuppressWarnings("unused")
+    @JavascriptInterface
+    public void triggerGetGoogleToken() {
+    }
+
+    @SuppressWarnings("unused")
+    @JavascriptInterface
+    public void saveToDb(final String key, final String value) {
+        KeyValStore.set(mContext, key, value);
+        _callJavaScriptFunction("window.saveToDbCallback()");
+    }
+
+    @SuppressWarnings("unused")
+    @JavascriptInterface
+    public void loadFromDb(final String key) {
+        String r = KeyValStore.get(mContext, key, "");
+        _callJavaScriptFunction("window.loadFromDbCallback(" + key + "," + r + ")");
     }
 
     @SuppressWarnings("unused")
@@ -91,10 +123,6 @@ public class CommonJavaScriptInterface {
     }
 
     @SuppressWarnings("unused")
-    @JavascriptInterface
-    public void triggerGetGoogleToken() {
-    }
-
     private void _callJavaScriptFunction(final String script) {
         mContext.callJavaScriptFunction(script);
     }
