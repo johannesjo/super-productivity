@@ -248,8 +248,8 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
     }
   }
 
-  displayWith(issue: JiraIssue): string {
-    return issue && issue.summary;
+  displayWith(issue?: JiraIssue): string | undefined {
+    return issue?.summary;
   }
 
   trackByFn(i: number, item: AddTaskSuggestion): string | number | undefined {

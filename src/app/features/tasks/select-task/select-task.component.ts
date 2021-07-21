@@ -71,8 +71,8 @@ export class SelectTaskComponent implements OnInit, OnDestroy {
     this._destroy$.unsubscribe();
   }
 
-  displayWith(task: Task): string {
-    return task.title;
+  displayWith(task?: Task): string | undefined {
+    return task?.title;
   }
 
   trackById(i: number, task: Task): string {
