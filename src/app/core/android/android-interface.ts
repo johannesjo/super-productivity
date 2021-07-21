@@ -25,8 +25,6 @@ export const IS_ANDROID_BACKUP_READY =
   IS_ANDROID_WEB_VIEW && typeof androidInterface?.saveToDb === 'function';
 
 if (IS_ANDROID_WEB_VIEW) {
-  console.log(androidInterface);
-
   androidInterface.saveToDbWrapped = (key: string, value: string): Promise<void> => {
     androidInterface.saveToDb(key, value);
     return new Promise((resolve, reject) => {
