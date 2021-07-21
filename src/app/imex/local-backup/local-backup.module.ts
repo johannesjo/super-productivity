@@ -3,8 +3,7 @@ import { LocalBackupService } from './local-backup.service';
 import { IS_ELECTRON } from '../../app.constants';
 import { EffectsModule } from '@ngrx/effects';
 import { LocalBackupEffects } from './local-backup.effects';
-import { IS_ANDROID_WEB_VIEW } from '../../util/is-android-web-view';
-import { androidInterface } from '../../core/android/android-interface';
+import { IS_ANDROID_BACKUP_READY } from '../../core/android/android-interface';
 
 @NgModule({
   providers: [LocalBackupService],
@@ -12,7 +11,7 @@ import { androidInterface } from '../../core/android/android-interface';
 })
 export class LocalBackupModule {
   constructor(private _localBackupService: LocalBackupService) {
-    if (IS_ELECTRON || (IS_ANDROID_WEB_VIEW && androidInterface.isBackupCapable)) {
+    if (IS_ELECTRON || IS_ANDROID_BACKUP_READY) {
       this._localBackupService.init();
     }
   }

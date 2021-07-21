@@ -11,23 +11,42 @@ export interface AndroidInterface {
 
   getGoogleToken(): Promise<string>;
 
-  getBackupData(): Promise<string>;
+  saveToDb(key: string, value: string): void;
 
-  saveBackupData(): Promise<void>;
+  saveToDbWrapped(key: string, value: string): Promise<void>;
 
-  isBackupAvailable(): Promise<boolean>;
+  loadFromDb(key: string): void;
 
-  isBackupCapable?: boolean;
+  loadFromDbWrapped(key: string): Promise<string | null>;
 }
 
-export const androidInterface: AndroidInterface = {
-  ...(window as any).SUPAndroid,
-  isBackupCapable:
-    (window as any).SUPAndroid &&
-    typeof (window as any).SUPAndroid.isBackupCapable === 'function',
-};
+export const androidInterface: AndroidInterface = (window as any).SUPAndroid;
+export const IS_ANDROID_BACKUP_READY =
+  IS_ANDROID_WEB_VIEW && typeof androidInterface?.saveToDb === 'function';
 
 if (IS_ANDROID_WEB_VIEW) {
+  console.log(androidInterface);
+
+  androidInterface.saveToDbWrapped = (key: string, value: string): Promise<void> => {
+    androidInterface.saveToDb(key, value);
+    return new Promise((resolve, reject) => {
+      // NOTE currently there is no error handling
+      (window as any).saveToDbCallback = () => {
+        resolve();
+      };
+    });
+  };
+
+  androidInterface.loadFromDbWrapped = (key: string): Promise<string | null> => {
+    androidInterface.loadFromDb(key);
+    return new Promise((resolve, reject) => {
+      // NOTE currently there is no error handling
+      (window as any).loadFromDbCallback = (k: string, result?: string) => {
+        resolve(result || null);
+      };
+    });
+  };
+
   androidInterface.getGoogleToken = () => {
     androidInterface.triggerGetGoogleToken();
 

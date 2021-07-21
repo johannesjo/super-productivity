@@ -9,13 +9,12 @@ import { DataImportService } from '../sync/data-import.service';
 import { TranslateService } from '@ngx-translate/core';
 import { T } from '../../t.const';
 import * as moment from 'moment';
-import { IS_ANDROID_WEB_VIEW } from '../../util/is-android-web-view';
-import { androidInterface } from '../../core/android/android-interface';
+import { IS_ANDROID_BACKUP_READY } from '../../core/android/android-interface';
 
 @Injectable()
 export class LocalBackupEffects {
   checkForBackupIfNoTasks$: any =
-    (IS_ELECTRON || (IS_ANDROID_WEB_VIEW && androidInterface.isBackupCapable)) &&
+    (IS_ELECTRON || IS_ANDROID_BACKUP_READY) &&
     createEffect(
       () =>
         this._actions$.pipe(

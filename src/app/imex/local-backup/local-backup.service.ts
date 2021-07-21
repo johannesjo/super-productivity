@@ -12,7 +12,10 @@ import { IS_ANDROID_WEB_VIEW } from '../../util/is-android-web-view';
 import { IS_ELECTRON } from '../../app.constants';
 import { androidInterface } from '../../core/android/android-interface';
 
-const DEFAULT_BACKUP_INTERVAL = 2 * 60 * 1000;
+// const DEFAULT_BACKUP_INTERVAL = 2 * 60 * 1000;
+// TODO change back
+const DEFAULT_BACKUP_INTERVAL = 15 * 1000;
+const ANDROID_DB_KEY = 'backup';
 
 // const DEFAULT_BACKUP_INTERVAL = 6 * 1000;
 
@@ -39,7 +42,7 @@ export class LocalBackupService {
 
   isBackupAvailable(): Promise<boolean | LocalBackupMeta> {
     return IS_ANDROID_WEB_VIEW
-      ? androidInterface.isBackupAvailable()
+      ? androidInterface.loadFromDbWrapped(ANDROID_DB_KEY).then((r) => !!r)
       : (this._electronService.callMain(IPC.BACKUP_IS_AVAILABLE, null) as Promise<
           false | LocalBackupMeta
         >);
@@ -47,7 +50,7 @@ export class LocalBackupService {
 
   loadBackup(backupPath: string): Promise<string> {
     return IS_ANDROID_WEB_VIEW
-      ? androidInterface.getBackupData()
+      ? androidInterface.loadFromDbWrapped(ANDROID_DB_KEY).then((r) => r as string)
       : (this._electronService.callMain(
           IPC.BACKUP_LOAD_DATA,
           backupPath,
@@ -60,7 +63,10 @@ export class LocalBackupService {
       (this._electronService.ipcRenderer as typeof ipcRenderer).send(IPC.BACKUP, data);
     }
     if (IS_ANDROID_WEB_VIEW) {
-      await androidInterface.saveBackupData();
+      androidInterface.saveToDbWrapped(ANDROID_DB_KEY, JSON.stringify(data));
+      androidInterface
+        .loadFromDbWrapped(ANDROID_DB_KEY)
+        .then((r) => console.log('REEEESUÖLT', r));
     }
   }
 }
