@@ -15,15 +15,22 @@ jobs:
         with:
           node-version: 14
 
+      - name: Get npm cache directory
+        id: npm-cache-dir
+        run: |
+          echo "::set-output name=dir::$(npm config get cache)"
       - uses: actions/cache@v2
+        id: npm-cache # use this to check for `cache-hit` ==> if: steps.npm-cache.outputs.cache-hit != 'true'
         with:
-          path: '**/node_modules'
-          key: ${{ runner.os }}-modulesTWO-${{ hashFiles('**/yarn.lock') }}
+          path: ${{ steps.npm-cache-dir.outputs.dir }}
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
 
-      - name: Install Yarn Packages
-        if: steps.yarn-cache.outputs.cache-hit != 'true'
-        run: yarn install
+      - name: Install npm Packages
+        if: steps.npm-cache.outputs.cache-hit != 'true'
+        run: npmi
 
-      - run: yarn lint
-      - run: yarn test
-      - run: yarn e2e
+      - run: npm run lint
+      - run: npm run test
+      - run: npm run e2e

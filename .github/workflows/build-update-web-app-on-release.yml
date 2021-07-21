@@ -20,26 +20,33 @@ jobs:
         with:
           node-version: 14
 
+      - name: Get npm cache directory
+        id: npm-cache-dir
+        run: |
+          echo "::set-output name=dir::$(npm config get cache)"
       - uses: actions/cache@v2
+        id: npm-cache # use this to check for `cache-hit` ==> if: steps.npm-cache.outputs.cache-hit != 'true'
         with:
-          path: '**/node_modules'
-          key: ${{ runner.os }}-modulesTWO-${{ hashFiles('**/yarn.lock') }}
+          path: ${{ steps.npm-cache-dir.outputs.dir }}
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
 
-      - name: Install Yarn Packages
-        if: steps.yarn-cache.outputs.cache-hit != 'true'
-        run: yarn install
+      - name: Install npm Packages
+        if: steps.npm-cache.outputs.cache-hit != 'true'
+        run: npmi
 
       - name: Lint
-        run: yarn lint
+        run: npm run lint
 
       - name: Test Unit
-        run: yarn test
+        run: npm run test
 
       - name: Test E2E
-        run: yarn e2e
+        run: npm run e2e
 
       - name: Build Frontend & Electron
-        run: yarn buildFrontend:prodWeb
+        run: npm run buildFrontend:prodWeb
 
       - name: Deploy to Web Server
         uses: easingthemes/ssh-deploy@v2.1.5

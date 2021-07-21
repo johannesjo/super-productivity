@@ -9,7 +9,7 @@ jobs:
   aur-release:
     runs-on: ubuntu-latest
 
-    if: "!github.event.release.prerelease"
+    if: '!github.event.release.prerelease'
 
     steps:
       - uses: actions/checkout@v2
