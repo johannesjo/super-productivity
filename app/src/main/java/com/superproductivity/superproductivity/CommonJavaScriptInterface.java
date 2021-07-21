@@ -77,7 +77,8 @@ public class CommonJavaScriptInterface {
     @JavascriptInterface
     public void loadFromDb(final String key) {
         String r = KeyValStore.get(mContext, key, "");
-        _callJavaScriptFunction("window.loadFromDbCallback(" + key + "," + r + ")");
+        // NOTE: ' are important as otherwise the json messes up
+        _callJavaScriptFunction("window.loadFromDbCallback('" + key + "', '" + r + "')");
     }
 
     @SuppressWarnings("unused")

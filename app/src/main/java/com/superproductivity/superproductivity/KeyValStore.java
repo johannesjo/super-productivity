@@ -19,13 +19,13 @@ public class KeyValStore extends SQLiteOpenHelper {
     private static final String KEY_CREATED_AT = "KEY_CREATED_AT";
 
 
-//    private static final String CREATE_TABLE = "CREATE TABLE "
-//            + DATABASE_TABLE + "(" + KEY + " TEXT PRIMARY KEY," + VALUE
-//            + " TEXT," + KEY_CREATED_AT
-//            + " DATETIME" + ")";
+    private static final String CREATE_TABLE = "CREATE TABLE "
+            + DATABASE_TABLE + "(" + KEY + " TEXT PRIMARY KEY," + VALUE
+            + " TEXT," + KEY_CREATED_AT
+            + " DATETIME" + ")";
 
 
-    private static final String CREATE_TABLE = "CREATE TABLE supKeyValStore(TEXT PRIMARY KEY,VALUE TEXT,KEY_CREATED_AT DATETIME)";
+//    private static final String CREATE_TABLE = "CREATE TABLE supKeyValStore(TEXT PRIMARY KEY,VALUE TEXT,KEY_CREATED_AT DATETIME)";
 
     private static synchronized KeyValStore getInstance(Context context) {
         // Use the application context, which will ensure that you
