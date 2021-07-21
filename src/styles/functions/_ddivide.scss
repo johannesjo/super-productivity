@@ -1,4 +1,6 @@
+@use "sass:math";
+
 // because of the stupid upcoming sass migration
 @function ddivide($a, $b) {
-  @return $a / $b;
+  @return math.div($a, $b);
 }
