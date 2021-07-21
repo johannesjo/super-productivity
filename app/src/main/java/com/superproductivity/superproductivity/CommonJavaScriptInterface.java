@@ -26,7 +26,6 @@ public class CommonJavaScriptInterface {
     protected FullscreenActivity mContext;
     private final WebView webView;
     private final KeyValStore dbHelper;
-    private final int RC_SAVE_DATA = 1234;
 
     /**
      * Instantiate the interface and set the context
@@ -38,9 +37,6 @@ public class CommonJavaScriptInterface {
     }
 
     void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == RC_SAVE_DATA) {
-
-        }
     }
 
     @SuppressWarnings("unused")
@@ -109,7 +105,7 @@ public class CommonJavaScriptInterface {
         NotificationManager mNotificationManager =
                 (NotificationManager) mContext.getSystemService(Context.NOTIFICATION_SERVICE);
 
-// === Removed some obsoletes
+        // === Removed some obsoletes
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             String channelId = "SUP_CHANNEL_ID";
             NotificationChannel channel = new NotificationChannel(
