@@ -1,3 +1,5 @@
+# [7.5.0-rc.0](https://github.com/johannesjo/super-productivity/compare/v7.4.1...v7.5.0-rc.0) (2021-07-21)
+
 ## [7.4.1](https://github.com/johannesjo/super-productivity/compare/v7.4.0...v7.4.1) (2021-07-21)
 
 ### Bug Fixes
