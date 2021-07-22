@@ -16,7 +16,7 @@ export class LocalFileSyncService implements SyncProviderServiceInterface {
   isReady$: Observable<boolean> = of(IS_ELECTRON);
 
   private _filePath$: Observable<string | undefined> = of(
-    'TEST_PAAAAAAAAAAAAAAAAATH/asd/sync.json',
+    '/home/xzy/Downloads/sp_sync.json',
   );
   private _filePathOnce$: Observable<string | undefined> = this._filePath$.pipe(first());
 
@@ -26,13 +26,18 @@ export class LocalFileSyncService implements SyncProviderServiceInterface {
     localRev: string | null,
   ): Promise<{ rev: string; clientUpdate?: number } | SyncGetRevResult> {
     const filePath = await this._filePathOnce$.toPromise();
-    return this._electronService.callMain(IPC.FILE_SYNC_GET_REV_AND_CLIENT_UPDATE, {
-      filePath,
-      localRev,
-    }) as Promise<{
-      rev: string;
-      clientUpdate?: number;
-    }>;
+    try {
+      const r = await this._electronService.callMain(
+        IPC.FILE_SYNC_GET_REV_AND_CLIENT_UPDATE,
+        {
+          filePath,
+          localRev,
+        },
+      );
+      return r as any;
+    } catch (e) {
+      throw new Error(e);
+    }
   }
 
   async uploadAppData(
@@ -41,20 +46,30 @@ export class LocalFileSyncService implements SyncProviderServiceInterface {
     isForceOverwrite?: boolean,
   ): Promise<string | Error> {
     const filePath = await this._filePathOnce$.toPromise();
-    return this._electronService.callMain(IPC.FILE_SYNC_SAVE, {
-      localRev,
-      filePath,
-      data,
-    }) as Promise<string | Error>;
+    try {
+      const r = (await this._electronService.callMain(IPC.FILE_SYNC_SAVE, {
+        localRev,
+        filePath,
+        data,
+      })) as Promise<string | Error>;
+      return r as any;
+    } catch (e) {
+      throw new Error(e);
+    }
   }
 
   async downloadAppData(
     localRev: string | null,
   ): Promise<{ rev: string; data: AppDataComplete | undefined }> {
     const filePath = await this._filePathOnce$.toPromise();
-    return this._electronService.callMain(IPC.FILE_SYNC_LOAD, {
-      localRev,
-      filePath,
-    }) as Promise<{ rev: string; data: AppDataComplete | undefined }>;
+    try {
+      const r = (await this._electronService.callMain(IPC.FILE_SYNC_LOAD, {
+        localRev,
+        filePath,
+      })) as Promise<{ rev: string; data: AppDataComplete | undefined }>;
+      return r as any;
+    } catch (e) {
+      throw new Error(e);
+    }
   }
 }

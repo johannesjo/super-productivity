@@ -31,6 +31,7 @@ import { truncate } from '../../util/truncate';
 import { PersistenceLocalService } from '../../core/persistence/persistence-local.service';
 import { getSyncErrorStr } from './get-sync-error-str';
 import { PersistenceService } from '../../core/persistence/persistence.service';
+import { LocalFileSyncService } from './local-file-sync/local-file-sync.service';
 
 @Injectable({
   providedIn: 'root',
@@ -51,6 +52,8 @@ export class SyncProviderService {
           return this._googleDriveSyncService;
         case SyncProvider.WebDAV:
           return this._webDavSyncService;
+        case SyncProvider.LocalFile:
+          return this._localFileSyncService;
         default:
           return null;
       }
@@ -88,6 +91,7 @@ export class SyncProviderService {
     private _dataImportService: DataImportService,
     private _googleDriveSyncService: GoogleDriveSyncService,
     private _webDavSyncService: WebDavSyncService,
+    private _localFileSyncService: LocalFileSyncService,
     private _globalConfigService: GlobalConfigService,
     private _persistenceLocalService: PersistenceLocalService,
     private _translateService: TranslateService,
@@ -97,7 +101,7 @@ export class SyncProviderService {
     private _matDialog: MatDialog,
   ) {}
 
-  async sync(): Promise<unknown> {
+  async sync(): Promise<unknown | Error> {
     const currentProvider = await this.currentProvider$.pipe(take(1)).toPromise();
     if (!currentProvider) {
       throw new Error('No Sync Provider for sync()');
@@ -111,8 +115,8 @@ export class SyncProviderService {
       console.log('__error during sync__');
       console.error(e);
       this.isSyncing$.next(false);
+      return new Error(e);
     }
-    return undefined;
   }
 
   private async _sync(cp: SyncProviderServiceInterface): Promise<unknown> {
@@ -154,6 +158,8 @@ export class SyncProviderService {
     }
 
     const { rev, clientUpdate } = revRes as { rev: string; clientUpdate: number };
+
+    console.log({ rev, localRev });
 
     if (rev && rev === localRev) {
       this._log(cp, 'PRE1: ↔ Same Rev', rev);
