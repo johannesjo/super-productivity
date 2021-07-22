@@ -1,7 +1,11 @@
 import { ProjectDataLsKey } from './persistence.model';
 import { AppDataComplete } from '../../imex/sync/sync.model';
 
-export type AllowedDBKeys = keyof AppDataComplete | 'SUP_COMPLETE_BACKUP';
+export type AllowedDBKeys = keyof AppDataComplete | 'SUP_COMPLETE_BACKUP' | 'PRIVATE_LOCAL';
+
+export const PRIVATE_LOCAL_FIELDS: string[] = [
+  'globalConfig.sync.webDav.password'
+];
 
 export const LS_PREFIX = 'SUP_';
 export const LS_PROJECT_PREFIX = LS_PREFIX + 'P_';

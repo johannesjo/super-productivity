@@ -397,6 +397,9 @@ export class PersistenceService {
   }
 
   // NOTE: not including backup
+  // async loadCompleteWithPrivate(): Promise<AppDataComplete> {
+  // }
+
   async loadComplete(): Promise<AppDataComplete> {
     let r;
     if (!this._inMemoryComplete) {
@@ -535,6 +538,24 @@ export class PersistenceService {
     }
     return model;
   }
+
+  // private _extendWithPrivateLocalData(appData: unknown): unknown {
+  // }
+
+  // private _saveAndCleanPrivateLocalFields(appData: unknown): unknown {
+  // const setPath = (object: any, path: string, value: any) => path
+  //   .split('.')
+  //   .reduce((o, p, i) => o[p] = path.split('.').length === ++i ? value : o[p] || {}, object);
+  //
+  // const globalConfig = {...state};
+  // GLOBAL_CONFIG_PRIVATE_LOCAL_FIELDS.forEach((fieldStr) => {
+  //   // const val = fieldStr.split('.').reduce((p, c) => p && p[c] || null, globalConfig);
+  //   setPath(globalConfig, fieldStr, 'SECRET_PRIVATE');
+  //
+  //   // TODO delete and save to LS (or someplace else)
+  // });
+  // return globalConfig;
+  // }
 
   private _cmBaseEntity<S, M>(
     lsKey: string,
