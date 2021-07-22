@@ -41,4 +41,7 @@ export const DEFAULT_APP_BASE_DATA: AppBaseData = {
 export const GLOBAL_CONFIG_LOCAL_ONLY_FIELDS: string[][] = [
   ['misc', 'isDarkMode'],
   ['sync', 'localFileSync', 'syncFilePath'],
+  ['sync', 'webDav', 'password'],
+  ['sync', 'googleDriveSync', 'authCode'],
+  ['sync', 'dropboxSync', 'accessToken'],
 ];
