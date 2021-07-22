@@ -9,7 +9,7 @@ import { MODEL_VERSION_KEY } from '../../app.constants';
 import { isMigrateModel } from '../../util/model-version';
 import { SyncProvider } from '../../imex/sync/sync-provider.model';
 
-const MODEL_VERSION = 2.2003;
+const MODEL_VERSION = 2.2005;
 
 export const migrateGlobalConfigState = (
   globalConfigState: GlobalConfigState,
@@ -166,16 +166,27 @@ const _migrateSyncCfg = (config: GlobalConfigState): GlobalConfigState => {
             ...DEFAULT_GLOBAL_CONFIG.sync.dropboxSync,
             accessToken: (config as any).dropboxSync?.accessToken,
             authCode: (config as any).dropboxSync?.authCode,
+            // copy existing values if any
+            ...(config.sync as any)?.dropboxSync,
           },
           googleDriveSync: {
             ...DEFAULT_GLOBAL_CONFIG.sync.googleDriveSync,
             ...(config as any)?.googleDriveSync,
+            // copy existing values if any
+            ...(config.sync as any)?.googleDriveSync,
           },
           webDav: {
             password: null,
             syncFilePath: null,
             userName: null,
             baseUrl: null,
+            // copy existing values if any
+            ...(config.sync as any)?.webDav,
+          },
+          localFileSync: {
+            syncFilePath: null,
+            // copy existing values if any
+            ...(config.sync as any)?.localFileSync,
           },
         } as SyncConfig)
       : DEFAULT_GLOBAL_CONFIG.sync,

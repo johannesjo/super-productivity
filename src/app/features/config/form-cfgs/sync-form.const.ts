@@ -67,7 +67,6 @@ export const SYNC_FORM: ConfigFormSection<SyncConfig> = {
       hideExpression: (m, v, field) =>
         field?.parent?.model.syncProvider !== SyncProvider.GoogleDrive,
       key: 'googleDriveSync',
-      // templateOptions: {label: 'Address'},
       fieldGroup: [
         {
           key: 'syncFileName',
@@ -88,9 +87,24 @@ export const SYNC_FORM: ConfigFormSection<SyncConfig> = {
     },
     {
       hideExpression: (m, v, field) =>
+        field?.parent?.model.syncProvider !== SyncProvider.LocalFile,
+      key: 'localFileSync',
+      fieldGroup: [
+        {
+          key: 'syncFilePath',
+          type: 'input',
+          templateOptions: {
+            required: true,
+            label: T.F.SYNC.FORM.LOCAL_FILE.L_SYNC_FILE_PATH,
+            description: T.F.SYNC.FORM.LOCAL_FILE.L_SYNC_FILE_PATH_DESCRIPTION,
+          },
+        },
+      ],
+    },
+    {
+      hideExpression: (m, v, field) =>
         field?.parent?.model.syncProvider !== SyncProvider.WebDAV,
       key: 'webDav',
-      // templateOptions: {label: 'Address'},
       fieldGroup: [
         {
           type: 'tpl',

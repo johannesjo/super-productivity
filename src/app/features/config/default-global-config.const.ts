@@ -154,5 +154,9 @@ export const DEFAULT_GLOBAL_CONFIG: GlobalConfigState = {
       password: null,
       syncFilePath: null,
     },
+
+    localFileSync: {
+      syncFilePath: null,
+    },
   },
 };

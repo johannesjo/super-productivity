@@ -346,6 +346,7 @@
         "ISSUE_UPDATE": "Jira: Updated data for \"{{issueText}}\"",
         "MANUAL_UPDATE_ISSUE_SUCCESS": "Jira: Updated data for \"{{issueText}}\"",
         "MISSING_ISSUE_DATA": "Jira: Tasks with missing issue data found. Reloading.",
+        "NO_AUTO_IMPORT_JQL": "Jira: No search query defined for auto import",
         "NO_VALID_TRANSITION": "Jira: No valid transition configured",
         "POLLING": "Jira: Polling Changes for issues",
         "TIMED_OUT": "Jira: Request timed out",
@@ -591,6 +592,10 @@
         "GOOGLE": {
           "L_IS_COMPRESS_DATA": "Compress data",
           "L_SYNC_FILE_NAME": "Sync File Name"
+        },
+        "LOCAL_FILE": {
+          "L_SYNC_FILE_PATH": "Sync file path",
+          "L_SYNC_FILE_PATH_DESCRIPTION": "Absolute path to the file that should be used for syncing (will be created)."
         },
         "L_ENABLE_SYNCING": "Enable Syncing",
         "L_SYNC_INTERVAL": "Sync Interval",

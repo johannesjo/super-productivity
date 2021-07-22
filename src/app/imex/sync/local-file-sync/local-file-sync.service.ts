@@ -5,7 +5,8 @@ import { IS_ELECTRON } from '../../../app.constants';
 import { AppDataComplete, SyncGetRevResult } from '../sync.model';
 import { IPC } from '../../../../../electron/ipc-events.const';
 import { ElectronService } from '../../../core/electron/electron.service';
-import { first } from 'rxjs/operators';
+import { concatMap, first, map } from 'rxjs/operators';
+import { GlobalConfigService } from '../../../features/config/global-config.service';
 
 @Injectable({
   providedIn: 'root',
@@ -13,14 +14,20 @@ import { first } from 'rxjs/operators';
 export class LocalFileSyncService implements SyncProviderServiceInterface {
   id: SyncProvider = SyncProvider.LocalFile;
   isUploadForcePossible?: boolean;
-  isReady$: Observable<boolean> = of(IS_ELECTRON);
-
-  private _filePath$: Observable<string | undefined> = of(
-    '/home/xzy/Downloads/sp_sync.json',
+  isReady$: Observable<boolean> = of(IS_ELECTRON).pipe(
+    concatMap(() => this._filePath$),
+    map((v) => !!v),
   );
-  private _filePathOnce$: Observable<string | undefined> = this._filePath$.pipe(first());
 
-  constructor(private _electronService: ElectronService) {}
+  private _filePath$: Observable<string | null> = this._globalConfigService.sync$.pipe(
+    map((sync) => sync.localFileSync.syncFilePath),
+  );
+  private _filePathOnce$: Observable<string | null> = this._filePath$.pipe(first());
+
+  constructor(
+    private _electronService: ElectronService,
+    private _globalConfigService: GlobalConfigService,
+  ) {}
 
   async getRevAndLastClientUpdate(
     localRev: string | null,

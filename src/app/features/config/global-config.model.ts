@@ -78,6 +78,10 @@ export interface WebDavConfig {
   syncFilePath: string | null;
 }
 
+export interface LocalFileSyncConfig {
+  syncFilePath: string | null;
+}
+
 export type LocalBackupConfig = Readonly<{
   isEnabled: boolean;
 }>;
@@ -101,6 +105,7 @@ export type SyncConfig = Readonly<{
   dropboxSync: DropboxSyncConfig;
   googleDriveSync: GoogleDriveSyncConfig;
   webDav: WebDavConfig;
+  localFileSync: LocalFileSyncConfig;
 }>;
 
 export type TimelineConfig = Readonly<{
