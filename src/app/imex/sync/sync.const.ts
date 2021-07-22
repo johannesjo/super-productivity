@@ -37,3 +37,8 @@ export const DEFAULT_APP_BASE_DATA: AppBaseData = {
   improvement: initialImprovementState,
   obstruction: initialObstructionState,
 };
+
+export const GLOBAL_CONFIG_LOCAL_ONLY_FIELDS: string[][] = [
+  ['misc', 'isDarkMode'],
+  ['sync', 'localFileSync', 'syncFilePath'],
+];

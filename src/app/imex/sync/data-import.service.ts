@@ -11,6 +11,8 @@ import { isValidAppData } from './is-valid-app-data.util';
 import { DataRepairService } from '../../core/data-repair/data-repair.service';
 import { LS_CHECK_STRAY_PERSISTENCE_BACKUP } from '../../core/persistence/ls-keys.const';
 import { TranslateService } from '@ngx-translate/core';
+import { GLOBAL_CONFIG_LOCAL_ONLY_FIELDS } from './sync.const';
+import { get, set } from 'object-path';
 
 // TODO some of this can be done in a background script
 
@@ -64,13 +66,16 @@ export class DataImportService {
       await this._persistenceService.clearDatabaseExceptBackup();
     }
 
-    console.log(isValidAppData(data), data);
+    console.log('isValidAppData', isValidAppData(data), data);
 
     if (isValidAppData(data)) {
       try {
         const migratedData = this._migrationService.migrateIfNecessary(data);
+        const mergedData = isOmitLocalFields
+          ? await this._mergeWithLocalOmittedFields(data)
+          : migratedData;
         // save data to database first then load to store from there
-        await this._persistenceService.importComplete(migratedData);
+        await this._persistenceService.importComplete(mergedData);
         await this._loadAllFromDatabaseToStore();
         await this._persistenceService.clearBackup();
         this._imexMetaService.setDataImportInProgress(false);
@@ -95,6 +100,20 @@ export class DataImportService {
       console.error(data);
       this._imexMetaService.setDataImportInProgress(false);
     }
+  }
+
+  private async _mergeWithLocalOmittedFields(
+    newData: AppDataComplete,
+  ): Promise<AppDataComplete> {
+    const oldLocalData: AppDataComplete = await this._persistenceService.loadComplete();
+    const mergedData = { ...newData };
+    GLOBAL_CONFIG_LOCAL_ONLY_FIELDS.forEach((op) => {
+      const oldLocalValue = get(oldLocalData.globalConfig, op);
+      if (oldLocalValue) {
+        set(mergedData.globalConfig, op, oldLocalValue);
+      }
+    });
+    return mergedData;
   }
 
   private async _loadAllFromDatabaseToStore(): Promise<any> {

@@ -39,8 +39,7 @@ export const isValidAppData = (d: AppDataComplete): boolean => {
     _isAllRemindersAvailable(d) &&
     _isAllTasksHaveAProjectOrTag(d);
 
-  console.log({ isValid, d });
-
+  // console.log({ isValid, d });
   return isValid;
 };
 

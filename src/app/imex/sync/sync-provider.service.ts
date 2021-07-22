@@ -372,7 +372,9 @@ export class SyncProviderService {
       throw new Error('No valid lastLocalSyncModelChange given during import');
     }
 
-    await this._dataImportService.importCompleteSyncData(data);
+    await this._dataImportService.importCompleteSyncData(data, {
+      isOmitLocalFields: true,
+    });
     await this._setLocalRevAndLastSync(cp, rev, data.lastLocalSyncModelChange);
   }
 
