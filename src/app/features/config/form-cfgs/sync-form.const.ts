@@ -3,6 +3,7 @@ import { T } from '../../../t.const';
 import { ConfigFormSection, DropboxSyncConfig, SyncConfig } from '../global-config.model';
 import { SyncProvider } from '../../../imex/sync/sync-provider.model';
 import { IS_F_DROID_APP } from '../../../util/is-android-web-view';
+import { IS_ELECTRON } from '../../../app.constants';
 
 export const SYNC_FORM: ConfigFormSection<SyncConfig> = {
   title: T.F.SYNC.FORM.TITLE,
@@ -38,6 +39,10 @@ export const SYNC_FORM: ConfigFormSection<SyncConfig> = {
             ? []
             : [{ label: SyncProvider.GoogleDrive, value: SyncProvider.GoogleDrive }]),
           { label: SyncProvider.WebDAV, value: SyncProvider.WebDAV },
+
+          ...(IS_ELECTRON
+            ? [{ label: SyncProvider.LocalFile, value: SyncProvider.LocalFile }]
+            : []),
         ],
       },
     },

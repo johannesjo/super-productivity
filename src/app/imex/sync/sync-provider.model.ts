@@ -8,6 +8,7 @@ export enum SyncProvider {
   'GoogleDrive' = 'GoogleDrive',
   'Dropbox' = 'Dropbox',
   'WebDAV' = 'WebDAV',
+  'LocalFile' = 'LocalFile',
 }
 
 export type SyncFileMeta = DropboxFileMetadata | GoogleDriveFileMeta;

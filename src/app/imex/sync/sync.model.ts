@@ -57,6 +57,7 @@ export interface LocalSyncMetaModel {
   [SyncProvider.GoogleDrive]: LocalSyncMetaForProvider;
   [SyncProvider.WebDAV]: LocalSyncMetaForProvider;
   [SyncProvider.Dropbox]: LocalSyncMetaForProvider;
+  [SyncProvider.LocalFile]: LocalSyncMetaForProvider;
 }
 
 export type AppBaseDataEntityLikeStates =

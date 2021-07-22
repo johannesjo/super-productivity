@@ -24,7 +24,8 @@ export class PersistenceLocalService {
       r &&
       r[SyncProvider.Dropbox] &&
       r[SyncProvider.GoogleDrive] &&
-      r[SyncProvider.WebDAV]
+      r[SyncProvider.WebDAV] &&
+      r[SyncProvider.LocalFile]
     ) {
       return r;
     }
@@ -41,6 +42,12 @@ export class PersistenceLocalService {
         rev: this._getLegacyLocalRev(SyncProvider.WebDAV) || null,
         lastSync: this._getLegacyLocalLastSync(SyncProvider.WebDAV) || 0,
       },
+      [SyncProvider.LocalFile]: {
+        rev: this._getLegacyLocalRev(SyncProvider.LocalFile) || null,
+        lastSync: this._getLegacyLocalLastSync(SyncProvider.LocalFile) || 0,
+      },
+      // Overwrite with existing if given
+      ...(r as any),
     };
   }
 
