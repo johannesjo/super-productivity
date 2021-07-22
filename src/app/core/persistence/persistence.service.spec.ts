@@ -7,8 +7,9 @@ import { TestScheduler } from 'rxjs/testing';
 import { of } from 'rxjs';
 import { createEmptyEntity } from '../../util/create-empty-entity';
 import { provideMockStore } from '@ngrx/store/testing';
-import { AppDataComplete, DEFAULT_APP_BASE_DATA } from '../../imex/sync/sync.model';
+import { AppDataComplete } from '../../imex/sync/sync.model';
 import { skip } from 'rxjs/operators';
+import { DEFAULT_APP_BASE_DATA } from '../../imex/sync/sync.const';
 
 const testScheduler = new TestScheduler((actual, expected) => {
   // asserting the two objects are equal

@@ -1,4 +1,3 @@
-import { ProjectState } from '../../features/project/store/project.reducer';
 import {
   LS_BOOKMARK_STATE,
   LS_GLOBAL_CFG,
@@ -40,10 +39,8 @@ import {
   LegacyPersistenceBaseModel,
   LegacyPersistenceForProjectModel,
 } from './legacy-models';
-import { BookmarkState } from '../../features/bookmark/store/bookmark.reducer';
-import { Bookmark } from '../../features/bookmark/bookmark.model';
-import { NoteState } from '../../features/note/store/note.reducer';
-import { Note } from '../../features/note/note.model';
+import { Bookmark, BookmarkState } from '../../features/bookmark/bookmark.model';
+import { Note, NoteState } from '../../features/note/note.model';
 import { Metric, MetricState } from '../../features/metric/metric.model';
 import {
   Improvement,
@@ -57,6 +54,7 @@ import { DatabaseService } from '../persistence/database.service';
 import { DEFAULT_PROJECT_ID } from '../../features/project/project.const';
 import { Action } from '@ngrx/store';
 import { Injectable } from '@angular/core';
+import { ProjectState } from '../../features/project/project.model';
 
 @Injectable({
   providedIn: 'root',

@@ -1,4 +1,4 @@
-import { createEntityAdapter, EntityAdapter, EntityState } from '@ngrx/entity';
+import { createEntityAdapter, EntityAdapter } from '@ngrx/entity';
 import {
   AddBookmark,
   BookmarkActions,
@@ -8,15 +8,10 @@ import {
   ReorderBookmarks,
   UpdateBookmark,
 } from './bookmark.actions';
-import { Bookmark } from '../bookmark.model';
+import { Bookmark, BookmarkState } from '../bookmark.model';
 import { createFeatureSelector, createSelector } from '@ngrx/store';
 
 export const BOOKMARK_FEATURE_NAME = 'bookmark';
-
-export interface BookmarkState extends EntityState<Bookmark> {
-  // additional entities state properties
-  isShowBookmarks: boolean;
-}
 
 export const adapter: EntityAdapter<Bookmark> = createEntityAdapter<Bookmark>();
 export const selectBookmarkFeatureState =

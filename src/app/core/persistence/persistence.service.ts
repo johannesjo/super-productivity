@@ -20,10 +20,7 @@ import {
   LS_TASK_STATE,
 } from './ls-keys.const';
 import { GlobalConfigState } from '../../features/config/global-config.model';
-import {
-  projectReducer,
-  ProjectState,
-} from '../../features/project/store/project.reducer';
+import { projectReducer } from '../../features/project/store/project.reducer';
 import {
   ArchiveTask,
   Task,
@@ -35,10 +32,7 @@ import {
   AppDataComplete,
   AppDataCompleteOptionalSyncModelChange,
   AppDataForProjects,
-  DEFAULT_APP_BASE_DATA,
 } from '../../imex/sync/sync.model';
-import { BookmarkState } from '../../features/bookmark/store/bookmark.reducer';
-import { NoteState } from '../../features/note/store/note.reducer';
 import { Reminder } from '../../features/reminder/reminder.model';
 import { DatabaseService } from './database.service';
 import { DEFAULT_PROJECT_ID } from '../../features/project/project.const';
@@ -47,7 +41,7 @@ import {
   ProjectArchive,
   ProjectArchivedRelatedData,
 } from '../../features/project/project-archive.model';
-import { Project } from '../../features/project/project.model';
+import { Project, ProjectState } from '../../features/project/project.model';
 import { CompressionService } from '../compression/compression.service';
 import {
   PersistenceBaseEntityModel,
@@ -67,8 +61,8 @@ import {
   TaskRepeatCfg,
   TaskRepeatCfgState,
 } from '../../features/task-repeat-cfg/task-repeat-cfg.model';
-import { Bookmark } from '../../features/bookmark/bookmark.model';
-import { Note } from '../../features/note/note.model';
+import { Bookmark, BookmarkState } from '../../features/bookmark/bookmark.model';
+import { Note, NoteState } from '../../features/note/note.model';
 import { Action, Store } from '@ngrx/store';
 import { taskRepeatCfgReducer } from '../../features/task-repeat-cfg/store/task-repeat-cfg.reducer';
 import { Tag, TagState } from '../../features/tag/tag.model';
@@ -102,6 +96,7 @@ import {
   migrateMetricState,
   migrateObstructionState,
 } from '../../features/metric/migrate-metric-states.util';
+import { DEFAULT_APP_BASE_DATA } from '../../imex/sync/sync.const';
 
 @Injectable({
   providedIn: 'root',

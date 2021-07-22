@@ -1,5 +1,5 @@
-import { createEntityAdapter, EntityAdapter, EntityState } from '@ngrx/entity';
-import { Note } from '../note.model';
+import { createEntityAdapter, EntityAdapter } from '@ngrx/entity';
+import { Note, NoteState } from '../note.model';
 import {
   addNote,
   addNotes,
@@ -20,8 +20,6 @@ import {
   createSelector,
   on,
 } from '@ngrx/store';
-
-export type NoteState = EntityState<Note>;
 
 export const adapter: EntityAdapter<Note> = createEntityAdapter<Note>();
 

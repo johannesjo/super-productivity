@@ -1,7 +1,6 @@
 import { Action } from '@ngrx/store';
 import { Update } from '@ngrx/entity';
-import { Bookmark } from '../bookmark.model';
-import { BookmarkState } from './bookmark.reducer';
+import { Bookmark, BookmarkState } from '../bookmark.model';
 
 export enum BookmarkActionTypes {
   'LoadBookmarkState' = '[Bookmark] Load Bookmark State',

@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { Note } from './note.model';
+import { Note, NoteState } from './note.model';
 import { select, Store } from '@ngrx/store';
 import {
   addNote,
@@ -10,12 +10,7 @@ import {
   updateNoteOrder,
 } from './store/note.actions';
 import * as shortid from 'shortid';
-import {
-  initialNoteState,
-  NoteState,
-  selectAllNotes,
-  selectNoteById,
-} from './store/note.reducer';
+import { initialNoteState, selectAllNotes, selectNoteById } from './store/note.reducer';
 import { PersistenceService } from '../../core/persistence/persistence.service';
 import { take } from 'rxjs/operators';
 import { createFromDrop } from '../../core/drop-paste-input/drop-paste-input';

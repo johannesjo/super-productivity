@@ -3,6 +3,8 @@ import {
   WorkContextAdvancedCfgKey,
   WorkContextCommon,
 } from '../work-context/work-context.model';
+import { EntityState } from '@ngrx/entity';
+import { MODEL_VERSION_KEY } from '../../app.constants';
 
 export type RoundTimeOption = '5M' | 'QUARTER' | 'HALF' | 'HOUR' | null;
 
@@ -32,3 +34,7 @@ export type ProjectCfgFormKey =
   | IssueProviderKey
   | 'basic'
   | 'theme';
+
+export interface ProjectState extends EntityState<Project> {
+  [MODEL_VERSION_KEY]?: number;
+}

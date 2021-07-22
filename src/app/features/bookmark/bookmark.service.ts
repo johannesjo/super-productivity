@@ -1,7 +1,6 @@
 import { Injectable } from '@angular/core';
 import { select, Store } from '@ngrx/store';
 import {
-  BookmarkState,
   initialBookmarkState,
   selectAllBookmarks,
   selectIsShowBookmarkBar,
@@ -17,7 +16,7 @@ import {
   UpdateBookmark,
 } from './store/bookmark.actions';
 import { Observable } from 'rxjs';
-import { Bookmark } from './bookmark.model';
+import { Bookmark, BookmarkState } from './bookmark.model';
 import * as shortid from 'shortid';
 import { DialogEditBookmarkComponent } from './dialog-edit-bookmark/dialog-edit-bookmark.component';
 import { MatDialog } from '@angular/material/dialog';

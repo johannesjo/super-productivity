@@ -1,5 +1,3 @@
-import { NoteState } from '../note/store/note.reducer';
-import { BookmarkState } from '../bookmark/store/bookmark.reducer';
 import { Task, TaskState } from '../tasks/task.model';
 import { EntityState } from '@ngrx/entity';
 import { TaskAttachment } from '../tasks/task-attachment/task-attachment.model';
@@ -8,6 +6,8 @@ import { MetricState } from '../metric/metric.model';
 import { ImprovementState } from '../metric/improvement/improvement.model';
 import { ObstructionState } from '../metric/obstruction/obstruction.model';
 import { Project } from './project.model';
+import { BookmarkState } from '../bookmark/bookmark.model';
+import { NoteState } from '../note/note.model';
 
 export interface ProjectArchivedRelatedData {
   note?: NoteState;

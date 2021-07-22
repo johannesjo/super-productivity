@@ -1,6 +1,5 @@
 import { Injectable } from '@angular/core';
 import { PersistenceService } from '../persistence/persistence.service';
-import { ProjectState } from '../../features/project/store/project.reducer';
 import { EMPTY, from, Observable, of } from 'rxjs';
 import { TaskArchive, TaskState } from 'src/app/features/tasks/task.model';
 import { Dictionary, EntityState } from '@ngrx/entity';
@@ -14,7 +13,7 @@ import { LegacyPersistenceService } from './legacy-persistence.sevice';
 import { AppDataComplete } from '../../imex/sync/sync.model';
 import { initialTaskState } from '../../features/tasks/store/task.reducer';
 import { initialTagState } from '../../features/tag/store/tag.reducer';
-import { Project } from '../../features/project/project.model';
+import { Project, ProjectState } from '../../features/project/project.model';
 import { concatMap, map } from 'rxjs/operators';
 import { migrateTaskState } from '../../features/tasks/migrate-task-state.util';
 import { initialSimpleCounterState } from '../../features/simple-counter/store/simple-counter.reducer';

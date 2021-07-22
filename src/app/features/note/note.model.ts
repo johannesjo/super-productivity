@@ -1,3 +1,5 @@
+import { EntityState } from '@ngrx/entity';
+
 export interface Note {
   id: string;
   content: string;
@@ -7,3 +9,5 @@ export interface Note {
   created: number;
   modified: number;
 }
+
+export type NoteState = EntityState<Note>;

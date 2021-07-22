@@ -4,9 +4,10 @@ import { PersistenceService } from '../../../core/persistence/persistence.servic
 import { select, Store } from '@ngrx/store';
 import { first, switchMap, tap } from 'rxjs/operators';
 import { addNote, deleteNote, updateNote, updateNoteOrder } from './note.actions';
-import { NoteState, selectNoteFeatureState } from './note.reducer';
+import { selectNoteFeatureState } from './note.reducer';
 import { WorkContextService } from '../../work-context/work-context.service';
 import { combineLatest, Observable } from 'rxjs';
+import { NoteState } from '../note.model';
 
 @Injectable()
 export class NoteEffects {

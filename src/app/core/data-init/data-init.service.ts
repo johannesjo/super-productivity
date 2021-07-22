@@ -6,11 +6,11 @@ import { WorkContextService } from '../../features/work-context/work-context.ser
 import { Store } from '@ngrx/store';
 import { allDataWasLoaded } from '../../root-store/meta/all-data-was-loaded.actions';
 import { PersistenceService } from '../persistence/persistence.service';
-import { ProjectState } from '../../features/project/store/project.reducer';
 import { MigrationService } from '../migration/migration.service';
 import { loadAllData } from '../../root-store/meta/load-all-data.action';
 import { isValidAppData } from '../../imex/sync/is-valid-app-data.util';
 import { DataRepairService } from '../data-repair/data-repair.service';
+import { ProjectState } from '../../features/project/project.model';
 
 @Injectable({ providedIn: 'root' })
 export class DataInitService {

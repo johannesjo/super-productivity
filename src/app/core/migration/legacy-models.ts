@@ -1,8 +1,5 @@
-import { ProjectState } from '../../features/project/store/project.reducer';
 import { GlobalConfigState } from '../../features/config/global-config.model';
 import { TaskArchive, TaskState } from '../../features/tasks/task.model';
-import { BookmarkState } from '../../features/bookmark/store/bookmark.reducer';
-import { NoteState } from '../../features/note/store/note.reducer';
 import { Reminder } from '../../features/reminder/reminder.model';
 import { MetricState } from '../../features/metric/metric.model';
 import { ImprovementState } from '../../features/metric/improvement/improvement.model';
@@ -11,6 +8,9 @@ import { TaskRepeatCfgState } from '../../features/task-repeat-cfg/task-repeat-c
 import { EntityState } from '@ngrx/entity';
 import { TaskAttachment } from '../../features/tasks/task-attachment/task-attachment.model';
 import { ProjectArchive } from '../../features/project/project-archive.model';
+import { ProjectState } from '../../features/project/project.model';
+import { BookmarkState } from '../../features/bookmark/bookmark.model';
+import { NoteState } from '../../features/note/note.model';
 
 export interface LegacyAppBaseData {
   project: ProjectState;

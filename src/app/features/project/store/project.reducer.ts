@@ -1,5 +1,5 @@
-import { createEntityAdapter, EntityAdapter, EntityState, Update } from '@ngrx/entity';
-import { Project } from '../project.model';
+import { createEntityAdapter, EntityAdapter, Update } from '@ngrx/entity';
+import { Project, ProjectState } from '../project.model';
 import { ProjectActions, ProjectActionTypes } from './project.actions';
 import { createFeatureSelector, createSelector } from '@ngrx/store';
 import { FIRST_PROJECT, PROJECT_MODEL_VERSION } from '../project.const';
@@ -57,10 +57,6 @@ import { CaldavCfg } from '../../issue/providers/caldav/caldav.model';
 
 export const PROJECT_FEATURE_NAME = 'projects';
 const WORK_CONTEXT_TYPE: WorkContextType = WorkContextType.PROJECT;
-
-export interface ProjectState extends EntityState<Project> {
-  [MODEL_VERSION_KEY]?: number;
-}
 
 export const projectAdapter: EntityAdapter<Project> = createEntityAdapter<Project>();
 

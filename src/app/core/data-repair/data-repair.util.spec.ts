@@ -5,8 +5,7 @@ import { fakeEntityStateFromArray } from '../../util/fake-entity-state-from-arra
 import { DEFAULT_TASK, Task } from '../../features/tasks/task.model';
 import { createEmptyEntity } from '../../util/create-empty-entity';
 import { Tag, TagState } from '../../features/tag/tag.model';
-import { ProjectState } from '../../features/project/store/project.reducer';
-import { Project } from '../../features/project/project.model';
+import { Project, ProjectState } from '../../features/project/project.model';
 import { DEFAULT_PROJECT } from '../../features/project/project.const';
 import { DEFAULT_TAG, TODAY_TAG } from '../../features/tag/tag.const';
 

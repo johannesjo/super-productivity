@@ -1,6 +1,5 @@
-import { ProjectState } from './store/project.reducer';
 import { Dictionary } from '@ngrx/entity';
-import { Project } from './project.model';
+import { Project, ProjectState } from './project.model';
 import { DEFAULT_PROJECT, PROJECT_MODEL_VERSION } from './project.const';
 import { DEFAULT_ISSUE_PROVIDER_CFGS } from '../issue/issue.const';
 import {
