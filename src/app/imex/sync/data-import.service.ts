@@ -37,8 +37,19 @@ export class DataImportService {
 
   async importCompleteSyncData(
     data: AppDataComplete,
-    isBackupReload: boolean = false,
-    isSkipStrayBackupCheck: boolean = false,
+    {
+      isBackupReload = false,
+      isSkipStrayBackupCheck = false,
+      isOmitLocalFields = false,
+    }: {
+      isBackupReload?: boolean;
+      isSkipStrayBackupCheck?: boolean;
+      isOmitLocalFields?: boolean;
+    } = {
+      isBackupReload: false,
+      isSkipStrayBackupCheck: false,
+      isOmitLocalFields: false,
+    },
   ): Promise<void> {
     this._snackService.open({ msg: T.F.SYNC.S.IMPORTING, ico: 'cloud_download' });
     this._imexMetaService.setDataImportInProgress(true);
@@ -75,7 +86,10 @@ export class DataImportService {
       }
     } else if (this._dataRepairService.isRepairPossibleAndConfirmed(data)) {
       const fixedData = this._dataRepairService.repairData(data);
-      await this.importCompleteSyncData(fixedData, isBackupReload, true);
+      await this.importCompleteSyncData(fixedData, {
+        isBackupReload,
+        isSkipStrayBackupCheck: true,
+      });
     } else {
       this._snackService.open({ type: 'ERROR', msg: T.F.SYNC.S.ERROR_INVALID_DATA });
       console.error(data);
@@ -93,7 +107,7 @@ export class DataImportService {
 
   private async _importBackup(): Promise<any> {
     const data = await this._persistenceService.loadBackup();
-    return this.importCompleteSyncData(data, true);
+    return this.importCompleteSyncData(data, { isBackupReload: true });
   }
 
   private async _isCheckForStrayBackupAndImport(): Promise<boolean> {
