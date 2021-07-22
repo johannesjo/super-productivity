@@ -26,7 +26,7 @@ jobs:
             ${{ runner.os }}-node-
 
       - name: Install npm Packages
-        if: steps.npm-cache.outputs.cache-hit != 'true'
+        #  if: steps.npm-cache.outputs.cache-hit != 'true'
         run: npm i
 
       - name: Lint
@@ -86,7 +86,7 @@ jobs:
             ${{ runner.os }}-node-
 
       - name: Install npm Packages
-        if: steps.npm-cache.outputs.cache-hit != 'true'
+        #  if: steps.npm-cache.outputs.cache-hit != 'true'
         run: npm i
 
       - run: 'echo "$PROVISION_PROFILE" | base64 --decode > embedded.provisionprofile'
@@ -152,7 +152,7 @@ jobs:
             ${{ runner.os }}-node-
 
       - name: Install npm Packages
-        if: steps.npm-cache.outputs.cache-hit != 'true'
+        #  if: steps.npm-cache.outputs.cache-hit != 'true'
         run: npm i
 
       - name: Lint

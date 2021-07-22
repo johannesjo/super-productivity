@@ -28,7 +28,7 @@ jobs:
             ${{ runner.os }}-node-
 
       - name: Install npm Packages
-        if: steps.npm-cache.outputs.cache-hit != 'true'
+        #  if: steps.npm-cache.outputs.cache-hit != 'true'
         run: npm i
 
       - run: npm run lint
