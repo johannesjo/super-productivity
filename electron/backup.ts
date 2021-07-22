@@ -16,7 +16,7 @@ import { error, log } from 'electron-log';
 let BACKUP_DIR = `${app.getPath('userData')}/backups`;
 
 // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
-export function initBackupAdapter(backupDir: string) {
+export function initBackupAdapter(backupDir: string): void {
   BACKUP_DIR = backupDir;
   console.log('Saving backups to', BACKUP_DIR);
   log('Saving backups to', BACKUP_DIR);
@@ -59,7 +59,7 @@ export function initBackupAdapter(backupDir: string) {
 }
 
 // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
-function backupData(ev, data) {
+function backupData(ev, data): void {
   if (!existsSync(BACKUP_DIR)) {
     mkdirSync(BACKUP_DIR);
   }

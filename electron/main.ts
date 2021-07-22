@@ -22,6 +22,7 @@ import { errorHandlerWithFrontendInform } from './error-handler-with-frontend-in
 import { initDebug } from './debug';
 import { IPC } from './ipc-events.const';
 import { initBackupAdapter } from './backup';
+import { initLocalFileSyncAdapter } from './local-file-sync';
 import { JiraCfg } from '../src/app/features/issue/providers/jira/jira.model';
 import lockscreen from './lockscreen';
 import { lazySetInterval } from './lazy-set-interval';
@@ -120,6 +121,8 @@ appIN.on('certificate-error', (event, webContents, url, err, certificate, callba
 // -------------------
 appIN.on('ready', createMainWin);
 appIN.on('ready', () => initBackupAdapter(BACKUP_DIR));
+appIN.on('ready', () => initLocalFileSyncAdapter());
+
 if (!isDisableTray) {
   appIN.on('ready', createIndicator);
 }
