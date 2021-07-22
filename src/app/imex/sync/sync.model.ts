@@ -78,3 +78,11 @@ export interface AppDataComplete extends AppBaseData, AppDataForProjects {
 export type DialogConflictResolutionResult = 'USE_LOCAL' | 'USE_REMOTE' | false;
 
 export type SyncGetRevResult = 'NO_REMOTE_DATA' | 'HANDLED_ERROR' | Error;
+
+export type SyncResult =
+  | 'SUCCESS'
+  | 'NO_UPDATE_REQUIRED'
+  | 'USER_ABORT'
+  | 'ERROR'
+  | 'SPECIAL'
+  | 'CONFLICT_DIALOG';

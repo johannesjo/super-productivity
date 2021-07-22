@@ -105,10 +105,10 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
   }
 
   sync(): void {
-    this.syncProviderService
-      .sync()
-      .then(() =>
-        this._snackService.open({ type: 'SUCCESS', msg: T.F.SYNC.S.SUCCESS_VIA_BUTTON }),
-      );
+    this.syncProviderService.sync().then((r) => {
+      if (r === 'SUCCESS' || r === 'NO_UPDATE_REQUIRED') {
+        this._snackService.open({ type: 'SUCCESS', msg: T.F.SYNC.S.SUCCESS_VIA_BUTTON });
+      }
+    });
   }
 }
