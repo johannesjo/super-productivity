@@ -13,7 +13,7 @@ const devToolsOptions: OpenDevToolsOptions = {
 };
 
 // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
-function toggleDevTools(win = BrowserWindow.getFocusedWindow()) {
+function toggleDevTools(win = BrowserWindow.getFocusedWindow()): void {
   if (win) {
     const { webContents } = win;
     if (webContents.isDevToolsOpened()) {
@@ -25,30 +25,30 @@ function toggleDevTools(win = BrowserWindow.getFocusedWindow()) {
 }
 
 // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
-function devTools(win = BrowserWindow.getFocusedWindow()) {
+function devTools(win = BrowserWindow.getFocusedWindow()): void {
   if (win) {
     toggleDevTools(win);
   }
 }
 
 // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
-function openDevTools(win = BrowserWindow.getFocusedWindow()) {
+function openDevTools(win = BrowserWindow.getFocusedWindow()): void {
   if (win) {
     win.webContents.openDevTools(devToolsOptions);
   }
 }
 
 // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
-function refresh(win = BrowserWindow.getFocusedWindow()) {
+function refresh(win = BrowserWindow.getFocusedWindow()): void {
   if (win) {
     win.webContents.reloadIgnoringCache();
   }
 }
 
 // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
-function inspectElements() {
+function inspectElements(): void {
   const win = BrowserWindow.getFocusedWindow();
-  const inspect = () => {
+  const inspect = (): void => {
     // TODO check
     // win.devToolsWebContents.executeJavaScript('DevToolsAPI.enterInspectElementMode()');
   };
@@ -77,7 +77,7 @@ function inspectElements() {
 //   }
 // };
 
-export const initDebug = (opts, isAddReload) => {
+export const initDebug = (opts, isAddReload): void => {
   opts = Object.assign(
     {
       enabled: null,

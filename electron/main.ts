@@ -30,9 +30,8 @@ import { KeyboardConfig } from '../src/app/features/config/keyboard-config.model
 
 const ICONS_FOLDER = __dirname + '/assets/icons/';
 const IS_MAC = process.platform === 'darwin';
-const IS_LINUX = process.platform === 'linux';
-const DESKTOP_ENV = process.env.DESKTOP_SESSION;
-const IS_GNOME = DESKTOP_ENV === 'gnome' || DESKTOP_ENV === 'gnome-xorg';
+// const DESKTOP_ENV = process.env.DESKTOP_SESSION;
+// const IS_GNOME = DESKTOP_ENV === 'gnome' || DESKTOP_ENV === 'gnome-xorg';
 const IS_DEV = process.env.NODE_ENV === 'DEV';
 
 let isShowDevTools: boolean = IS_DEV;
@@ -141,7 +140,7 @@ let isLocked = false;
 
 appIN.on('ready', () => {
   let suspendStart;
-  const sendIdleMsgIfOverMin = (idleTime) => {
+  const sendIdleMsgIfOverMin = (idleTime): void => {
     // sometimes when starting a second instance we get here although we don't want to
     if (!mainWin) {
       info(
@@ -156,7 +155,8 @@ appIN.on('ready', () => {
     }
   };
 
-  const checkIdle = () => sendIdleMsgIfOverMin(powerMonitor.getSystemIdleTime() * 1000);
+  const checkIdle = (): void =>
+    sendIdleMsgIfOverMin(powerMonitor.getSystemIdleTime() * 1000);
 
   // init time tracking interval
   lazySetInterval(checkIdle, CONFIG.IDLE_PING_INTERVAL);
@@ -284,7 +284,7 @@ ipcMain.on(IPC.SHOW_OR_FOCUS, () => {
 // HELPER FUNCTIONS
 // ----------------
 // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
-function createIndicator() {
+function createIndicator(): void {
   initIndicator({
     app,
     showApp,
@@ -295,7 +295,7 @@ function createIndicator() {
 }
 
 // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
-function createMainWin() {
+function createMainWin(): void {
   mainWin = createWindow({
     app,
     IS_DEV,
@@ -307,7 +307,7 @@ function createMainWin() {
 }
 
 // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
-function registerShowAppShortCuts(cfg: KeyboardConfig) {
+function registerShowAppShortCuts(cfg: KeyboardConfig): void {
   // unregister all previous
   globalShortcut.unregisterAll();
   const GLOBAL_KEY_CFG_KEYS: (keyof KeyboardConfig)[] = [
@@ -376,19 +376,19 @@ function registerShowAppShortCuts(cfg: KeyboardConfig) {
 }
 
 // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
-function showApp() {
+function showApp(): void {
   showOrFocus(mainWin);
 }
 
 // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
-function quitApp() {
+function quitApp(): void {
   // tslint:disable-next-line
   appIN.isQuiting = true;
   appIN.quit();
 }
 
 // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
-function showOrFocus(passedWin) {
+function showOrFocus(passedWin): void {
   // default to main winpc
   const win = passedWin || mainWin;
 
@@ -413,7 +413,7 @@ function showOrFocus(passedWin) {
 }
 
 // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
-function exec(ev, command) {
+function exec(ev, command): void {
   log('running command ' + command);
   const execIN = require('child_process').exec;
   execIN(command, (err) => {

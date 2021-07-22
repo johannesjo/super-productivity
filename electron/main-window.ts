@@ -34,7 +34,7 @@ export const getWin = (): BrowserWindow => {
   return mainWinModule.win;
 };
 
-export const getIsAppReady = () => {
+export const getIsAppReady = (): boolean => {
   return mainWinModule.isAppReady;
 };
 
@@ -139,8 +139,8 @@ export const createWindow = ({
 };
 
 // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
-function initWinEventListeners(app: any) {
-  const handleRedirect = (event, url) => {
+function initWinEventListeners(app: any): void {
+  const handleRedirect = (event, url): void => {
     event.preventDefault();
     // needed for mac; especially for jira urls we might have a host like this www.host.de//
     const urlObj = new URL(url);
@@ -162,7 +162,7 @@ function initWinEventListeners(app: any) {
 }
 
 // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
-function createMenu(quitApp) {
+function createMenu(quitApp): void {
   // Create application menu to enable copy & pasting on MacOS
   const menuTpl = [
     {
@@ -196,10 +196,10 @@ function createMenu(quitApp) {
 }
 
 // TODO this is ugly as f+ck
-const appCloseHandler = (app: App) => {
+const appCloseHandler = (app: App): void => {
   let ids: string[] = [];
 
-  const _quitApp = () => {
+  const _quitApp = (): void => {
     (app as any).isQuiting = true;
     mainWin.close();
   };
@@ -258,7 +258,7 @@ const appCloseHandler = (app: App) => {
   });
 };
 
-const appMinimizeHandler = (app: App) => {
+const appMinimizeHandler = (app: App): void => {
   if (!(app as any).isQuiting) {
     mainWin.on('minimize', (event) => {
       getSettings(mainWin, (appCfg) => {

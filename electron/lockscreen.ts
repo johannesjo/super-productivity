@@ -1,6 +1,6 @@
 import { exec } from 'child_process';
 
-export default (cb?, customCommands?) => {
+export default (cb?, customCommands?): void => {
   const lockCommands = customCommands || {
     darwin:
       '/System/Library/CoreServices/"Menu Extras"/User.menu/Contents/Resources/CGSession -suspend',

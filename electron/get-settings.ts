@@ -3,7 +3,7 @@ import { IPC } from './ipc-events.const';
 import { warn } from 'electron-log';
 
 let cbs = [];
-export const getSettings = (win, cbIN) => {
+export const getSettings = (win, cbIN): void => {
   cbs.push(cbIN);
   win.webContents.send(IPC.TRANSFER_SETTINGS_REQUESTED);
 };
@@ -11,7 +11,7 @@ export const getSettings = (win, cbIN) => {
 ipcMain.on(IPC.TRANSFER_SETTINGS_TO_ELECTRON, getSettingsCb);
 
 // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
-function getSettingsCb(ev, settings) {
+function getSettingsCb(ev, settings): void {
   if (cbs.length) {
     cbs.forEach((cb) => cb(settings));
     cbs = [];

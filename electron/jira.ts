@@ -18,7 +18,7 @@ export const sendJiraRequest = ({
   requestInit: RequestInit;
   url: string;
   jiraCfg: JiraCfg;
-}) => {
+}): void => {
   const mainWin = getWin();
   // log('--------------------------------------------------------------------');
   // log(url);
@@ -63,11 +63,14 @@ export const sendJiraRequest = ({
 };
 
 // TODO simplify and do encoding in frontend service
-export const setupRequestHeadersForImages = (jiraCfg: JiraCfg, wonkyCookie?: string) => {
+export const setupRequestHeadersForImages = (
+  jiraCfg: JiraCfg,
+  wonkyCookie?: string,
+): void => {
   const { host, protocol } = parseHostAndPort(jiraCfg);
 
   // TODO export to util fn
-  const _b64EncodeUnicode = (str) => {
+  const _b64EncodeUnicode = (str): string => {
     return Buffer.from(str || '').toString('base64');
   };
   const encoded = _b64EncodeUnicode(`${jiraCfg.userName}:${jiraCfg.password}`);

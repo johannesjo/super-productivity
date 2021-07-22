@@ -4,7 +4,6 @@ import { getSettings } from './get-settings';
 import { getWin } from './main-window';
 
 let tray: Tray;
-let isIndicatorRunning = false;
 let DIR: string;
 let shouldUseDarkColors: boolean;
 const IS_MAC = process.platform === 'darwin';
@@ -21,7 +20,7 @@ export const initIndicator = ({
   app: App;
   ICONS_FOLDER: string;
   forceDarkTray: boolean;
-}) => {
+}): Tray => {
   DIR = ICONS_FOLDER + 'indicator/';
   shouldUseDarkColors = forceDarkTray || nativeTheme.shouldUseDarkColors;
 
@@ -36,12 +35,11 @@ export const initIndicator = ({
   tray.on('click', () => {
     showApp();
   });
-  isIndicatorRunning = true;
   return tray;
 };
 
 // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
-function initAppListeners(app) {
+function initAppListeners(app): void {
   if (tray) {
     app.on('before-quit', () => {
       if (tray) {
@@ -52,7 +50,7 @@ function initAppListeners(app) {
 }
 
 // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
-function initListeners() {
+function initListeners(): void {
   ipcMain.on(IPC.SET_PROGRESS_BAR, (ev, { progress }) => {
     const suf = shouldUseDarkColors ? '-d' : '-l';
     if (typeof progress === 'number' && progress > 0 && isFinite(progress)) {
@@ -135,7 +133,7 @@ function createIndicatorStr(task): string {
 }
 
 // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
-function createContextMenu(showApp, quitApp) {
+function createContextMenu(showApp, quitApp): Menu {
   return Menu.buildFromTemplate([
     {
       label: 'Show App',
@@ -151,7 +149,7 @@ function createContextMenu(showApp, quitApp) {
 let curIco: string;
 
 // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
-function setTrayIcon(tr: Tray, icoPath: string) {
+function setTrayIcon(tr: Tray, icoPath: string): void {
   if (icoPath !== curIco) {
     curIco = icoPath;
     tr.setImage(icoPath);

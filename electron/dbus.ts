@@ -28,7 +28,7 @@ let ifaceDesc;
 let iface;
 
 // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
-function init(params) {
+function init(params): void {
   sessionBus = dbus.sessionBus();
 
   // Check the connection was successful
@@ -64,7 +64,7 @@ function init(params) {
 
   // Function called when we have successfully got the service name we wanted
   // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
-  function proceed() {
+  function proceed(): void {
     // First, we need to create our interface description (here we will only expose method calls)
     ifaceDesc = {
       name: interfaceName,
@@ -84,7 +84,7 @@ function init(params) {
     };
 
     // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
-    function checkMainWin() {
+    function checkMainWin(): void {
       const mainWin = mainWinMod.getWin();
       if (!mainWin) {
         errorHandler('DBus: mainWin not ready');

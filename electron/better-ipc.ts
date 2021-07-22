@@ -1,14 +1,14 @@
 import { BrowserWindow, ipcMain, IpcMainEvent } from 'electron';
 
 // TODO make available for both
-const getSendChannel = (channel) => `%better-ipc-send-channel-${channel}`;
+const getSendChannel = (channel: string): string => `%better-ipc-send-channel-${channel}`;
 
 // TODO add all typing
 export const answerRenderer = (
   browserWindowOrChannel,
   channelOrCallback,
   callbackOrNothing?,
-) => {
+): (() => void) => {
   let window;
   let channel;
   let callback;
@@ -28,7 +28,7 @@ export const answerRenderer = (
 
   const sendChannel = getSendChannel(channel);
 
-  const listener = async (event: IpcMainEvent, data) => {
+  const listener = async (event: IpcMainEvent, data): Promise<void> => {
     const browserWindow: BrowserWindow | null = BrowserWindow.fromWebContents(
       event.sender,
     );
@@ -37,7 +37,7 @@ export const answerRenderer = (
       return;
     }
 
-    const send = (channelI, dataI) => {
+    const send = (channelI, dataI): void => {
       if (!(browserWindow && browserWindow.isDestroyed())) {
         event.sender.send(channelI, dataI);
       }
@@ -55,7 +55,7 @@ export const answerRenderer = (
 
   ipcMain.on(sendChannel, listener);
 
-  return () => {
+  return (): void => {
     ipcMain.off(sendChannel, listener);
   };
 };

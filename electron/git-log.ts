@@ -1,7 +1,7 @@
 import { getWin } from './main-window';
 import { IPC } from './ipc-events.const';
 
-export const getGitLog = (data) => {
+export const getGitLog = (data): void => {
   const exec = require('child_process').exec;
   const cmd =
     "git --no-pager log --graph --pretty=format:'%s (%cr) <%an>' --abbrev-commit --since=4am";

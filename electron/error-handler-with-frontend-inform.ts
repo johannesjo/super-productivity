@@ -7,7 +7,7 @@ const WAIT_FOR_WIN_TIMEOUT_DURATION = 4000;
 export const errorHandlerWithFrontendInform = (
   e = 'UNDEFINED ERROR',
   additionalLogInfo?,
-) => {
+): void => {
   const errObj = new Error(e);
 
   if (_isReadyForFrontEndError()) {
@@ -21,14 +21,14 @@ export const errorHandlerWithFrontendInform = (
 };
 
 // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
-function _isReadyForFrontEndError() {
+function _isReadyForFrontEndError(): boolean {
   const mainWin = getWin();
   const isAppReady = getIsAppReady();
   return mainWin && mainWin.webContents && isAppReady;
 }
 
 // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
-function _handleError(e, additionalLogInfo, errObj) {
+function _handleError(e, additionalLogInfo, errObj): void {
   const mainWin = getWin();
   const stack = errObj.stack;
 
