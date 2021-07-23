@@ -101,21 +101,17 @@ export class WorklogService {
       switchMap((curCtx) =>
         from(this._loadQuickHistoryForWorkContext(curCtx)).pipe(startWith(null)),
       ),
-      shareReplay({ bufferSize: 1, refCount: true }),
     );
 
-  quickHistoryWeeks$: Observable<WorklogWeekSimple[]> = this._quickHistoryData$.pipe(
-    filter((data) => !!data),
-    map((worklogYearsWithWeeks) => {
-      const now = new Date();
-      const year = now.getFullYear();
-      console.log(worklogYearsWithWeeks);
-
-      return (worklogYearsWithWeeks as WorklogYearsWithWeeks)[year]
-        .filter((v) => !!v)
-        .reverse();
-    }),
-  );
+  quickHistoryWeeks$: Observable<WorklogWeekSimple[] | null> =
+    this._quickHistoryData$.pipe(
+      map((worklogYearsWithWeeks) => {
+        const now = new Date();
+        const year = now.getFullYear();
+        const dataForYear = worklogYearsWithWeeks && worklogYearsWithWeeks[year];
+        return dataForYear ? dataForYear.filter((v) => !!v).reverse() : null;
+      }),
+    );
 
   worklogTasks$: Observable<WorklogTask[]> = this.worklog$.pipe(
     map((worklog) => {
