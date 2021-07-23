@@ -18,7 +18,7 @@ export interface WorklogDay {
   workEnd: number;
 }
 
-export interface WorklogWeek extends WeeksInMonth {
+export interface WorklogWeekSimple {
   weekNr: number;
   timeSpent: number;
   daysWorked: number;
@@ -26,6 +26,8 @@ export interface WorklogWeek extends WeeksInMonth {
     [key: number]: WorklogDay;
   };
 }
+
+export interface WorklogWeek extends WeeksInMonth, WorklogWeekSimple {}
 
 export interface WorklogMonth {
   timeSpent: number;
@@ -44,6 +46,10 @@ export interface WorklogYear {
   ent: {
     [key: number]: WorklogMonth;
   };
+}
+
+export interface WorklogYearsWithWeeks {
+  [key: number]: WorklogWeekSimple[];
 }
 
 export interface Worklog {
