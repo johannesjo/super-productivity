@@ -48,7 +48,8 @@ export class WorklogService {
             filter(
               ({ urlAfterRedirects }: NavigationEnd) =>
                 urlAfterRedirects.includes('worklog') ||
-                urlAfterRedirects.includes('daily-summary'),
+                urlAfterRedirects.includes('daily-summary') ||
+                urlAfterRedirects.includes('quick-history'),
             ),
           ),
         ),
