@@ -843,6 +843,10 @@
         "UNTRACKED_TIME": "Untracked time:"
       }
     },
+    "QUICK_HISTORY": {
+      "NO_DATA": "No data for current year",
+      "PAGE_TITLE": "Quick History"
+    },
     "WORKLOG": {
       "CMP": {
         "DAYS_WORKED": "Days, worked:",

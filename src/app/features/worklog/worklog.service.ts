@@ -109,8 +109,13 @@ export class WorklogService {
       map((worklogYearsWithWeeks) => {
         const now = new Date();
         const year = now.getFullYear();
-        const dataForYear = worklogYearsWithWeeks && worklogYearsWithWeeks[year];
-        return dataForYear ? dataForYear.filter((v) => !!v).reverse() : null;
+        if (!worklogYearsWithWeeks) {
+          return null;
+        }
+        if (!worklogYearsWithWeeks[year]) {
+          return [];
+        }
+        return worklogYearsWithWeeks[year].filter((v) => !!v).reverse();
       }),
     );
 

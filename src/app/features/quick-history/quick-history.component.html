@@ -1,8 +1,10 @@
-<!--<pre><code>{{(worklogService.currentWeek$|async|json)}}</code></pre>-->
+<h1>{{T.F.QUICK_HISTORY.PAGE_TITLE|translate}}</h1>
 
-<h1>Quick History</h1>
+<div *ngIf="(worklogService.quickHistoryWeeks$|async) as weeks else spinner" [@fade]>
+  <div class="no-data" *ngIf="weeks?.length===0">
+    {{T.F.QUICK_HISTORY.NO_DATA|translate}}
+  </div>
 
-<ng-container *ngIf="(worklogService.quickHistoryWeeks$|async) as weeks else noData">
   <div *ngFor="let week of weeks; let j = index;">
     <h2>Week {{week.weekNr}} ({{week.timeSpent|msToString}})</h2>
 
@@ -88,8 +90,8 @@
       </div>
     </div>
   </div>
-</ng-container>
+</div>
 
-<ng-template #noData>
-  <div class="no-data">{{T.F.WORKLOG.WEEK.NO_DATA|translate}}</div>
+<ng-template #spinner>
+  <full-page-spinner></full-page-spinner>
 </ng-template>
