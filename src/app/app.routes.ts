@@ -17,6 +17,7 @@ import {
 import { TagSettingsPageComponent } from './pages/tag-settings-page/tag-settings-page.component';
 import { TODAY_TAG } from './features/tag/tag.const';
 import { TimelinePageComponent } from './pages/timeline-page/timeline-page.component';
+import { QuickHistoryComponent } from './features/quick-history/quick-history.component';
 
 export const APP_ROUTES: Routes = [
   { path: 'config', component: ConfigPageComponent, data: { page: 'config' } },
@@ -48,6 +49,12 @@ export const APP_ROUTES: Routes = [
     path: 'tag/:id/worklog',
     component: WorklogComponent,
     data: { page: 'worklog' },
+    canActivate: [ValidTagIdGuard],
+  },
+  {
+    path: 'tag/:id/quick-history',
+    component: QuickHistoryComponent,
+    data: { page: 'quick-history' },
     canActivate: [ValidTagIdGuard],
   },
   // {path: 'tag/:id/metrics', component: MetricPageComponent, data: {page: 'metrics'}, canActivate: [ValidContextIdGuard]},
@@ -86,6 +93,12 @@ export const APP_ROUTES: Routes = [
     path: 'project/:id/worklog',
     component: WorklogComponent,
     data: { page: 'worklog' },
+    canActivate: [ValidProjectIdGuard],
+  },
+  {
+    path: 'project/:id/quick-history',
+    component: QuickHistoryComponent,
+    data: { page: 'quick-history' },
     canActivate: [ValidProjectIdGuard],
   },
   {

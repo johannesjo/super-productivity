@@ -1139,6 +1139,7 @@
     "TOGGLE_SHOW_NOTES": "Show/Hide Project Notes",
     "TOGGLE_TRACK_TIME": "Start/Stop tracking time",
     "WORKLOG": "Worklog",
+    "QUICK_HISTORY": "Quick History",
     "SHOW_SEARCH_BAR": "Show Search Bar"
   },
   "PDS": {

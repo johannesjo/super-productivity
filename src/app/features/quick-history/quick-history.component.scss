@@ -1,0 +1,187 @@
+@import '../../../variables';
+
+:host {
+  display: block;
+  padding-bottom: $s * 5;
+
+  h1,
+  h2 {
+    text-align: center;
+  }
+
+  h2 {
+    margin-top: $s * 3;
+    margin-bottom: $s;
+  }
+}
+
+$this-border-radius: 8px;
+
+.days {
+  text-align: center;
+  vertical-align: top;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.day {
+  vertical-align: top;
+  display: inline-block;
+  width: 280px;
+  margin: $s;
+
+  .material-table {
+    border-radius: $this-border-radius;
+  }
+}
+
+.scroll-wrapper {
+  //max-height: 280px;
+  //@include scrollY;
+}
+
+.caption {
+  border-top-left-radius: $this-border-radius;
+  border-top-right-radius: $this-border-radius;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  user-select: none;
+
+  .spacer {
+    width: $s * 1.5;
+  }
+
+  em,
+  strong,
+  span,
+  mat-icon {
+    vertical-align: middle;
+    display: inline-block;
+  }
+
+  > div {
+    padding: $s 0;
+    font-weight: bold;
+    flex-basis: 20%;
+
+    &:first-child {
+      padding-left: $s * 2;
+      text-align: left;
+    }
+
+    &:last-child {
+      padding-right: $s * 2;
+      text-align: right;
+    }
+  }
+
+  .title {
+    text-align: center;
+    flex-basis: 60%;
+    font-weight: normal;
+
+    h3 {
+      font-weight: normal;
+      margin-bottom: 0;
+    }
+  }
+
+  .icon-indicator-bar {
+  }
+
+  .center-box {
+    flex-grow: 1;
+  }
+}
+
+.task-summary-table {
+  display: block;
+  width: 100%;
+  border: none;
+  box-shadow: none;
+
+  > table {
+    width: 100%;
+    box-shadow: none;
+    text-align: left;
+    border-collapse: collapse;
+
+    > tbody {
+      width: 100%;
+    }
+  }
+
+  th,
+  td {
+    text-align: left;
+    white-space: normal;
+    line-height: 16px;
+    padding: $s $s * 1.5;
+    vertical-align: middle;
+
+    &.with-icon {
+      text-align: center;
+    }
+
+    &.title {
+      padding-left: $s * 2;
+      padding-right: 0;
+      width: 100%;
+    }
+
+    &.worked {
+      white-space: nowrap;
+      text-align: center;
+      padding: 0;
+
+      ::ng-deep .inline-input-wrapper {
+        padding: $s $s * 1.5;
+      }
+    }
+
+    &.isSubTask {
+      .task-title {
+        font-style: italic;
+        padding-left: $s * 2;
+        position: relative;
+        display: inline-block;
+
+        &:before {
+          content: '•';
+          position: absolute;
+          top: 50%;
+          left: 0;
+          transform: translateY(-50%);
+        }
+      }
+    }
+  }
+}
+
+.simple-counter-items {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  // NOTE: give them a bit of extra space
+  // MAGIC NUMBER ALERT!!!
+  margin-left: -4 * $s;
+  margin-right: -4 * $s;
+  //margin-top: $s;
+}
+
+.simple-counter-item {
+  margin: 0 $s * 0.5;
+  display: inline-flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+
+  mat-icon {
+    font-size: 18px;
+    margin-right: 2px;
+  }
+}

@@ -10,6 +10,7 @@ import { ProjectSettingsPageModule } from './project-settings-page/project-setti
 import { TagTaskPageModule } from './tag-task-page/tag-task-page.module';
 import { TagSettingsPageModule } from './tag-settings-page/tag-settings-page.module';
 import { TimelinePageModule } from './timeline-page/timeline-page.module';
+import { QuickHistoryModule } from '../features/quick-history/quick-history.module';
 
 @NgModule({
   imports: [
@@ -24,6 +25,7 @@ import { TimelinePageModule } from './timeline-page/timeline-page.module';
     TagTaskPageModule,
     TagSettingsPageModule,
     TimelinePageModule,
+    QuickHistoryModule,
   ],
   declarations: [],
 })

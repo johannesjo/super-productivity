@@ -3,6 +3,11 @@
   <span class="text">{{T.PP.EDIT_PROJECT|translate}}</span>
 </button>
 
+<button [routerLink]="[base,contextId,'quick-history']" mat-menu-item>
+  <mat-icon>history</mat-icon>
+  <span class="text">{{T.MH.QUICK_HISTORY|translate}}</span>
+</button>
+
 <button [routerLink]="[base,contextId,'worklog']" mat-menu-item>
   <mat-icon>date_range</mat-icon>
   <span class="text">{{T.MH.WORKLOG|translate}}</span>

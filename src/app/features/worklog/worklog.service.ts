@@ -87,6 +87,36 @@ export class WorklogService {
       return null;
     }),
   );
+  quickHistoryWeeks$: Observable<WorklogWeek[]> = this.worklog$.pipe(
+    map((worklog) => {
+      let worklogWeeks: WorklogWeek[] = [];
+      const now = new Date();
+      const year = now.getFullYear();
+      const month = now.getMonth() + 1;
+      // current months
+      if (worklog[year] && worklog[year].ent[month] && worklog[year].ent[month].weeks) {
+        worklogWeeks = worklogWeeks.concat(worklog[year].ent[month].weeks);
+        worklogWeeks = worklogWeeks.reverse();
+      }
+
+      // last month
+      const lastMonthDate = new Date();
+      lastMonthDate.setMonth(lastMonthDate.getMonth() - 1);
+      const lastMonthDateYear = lastMonthDate.getFullYear();
+      const lastMonthMonth = lastMonthDate.getMonth() + 1;
+      if (
+        worklog[lastMonthDateYear] &&
+        worklog[lastMonthDateYear].ent[lastMonthMonth] &&
+        worklog[lastMonthDateYear].ent[lastMonthMonth].weeks
+      ) {
+        worklogWeeks = worklogWeeks.concat(
+          worklog[lastMonthDateYear].ent[lastMonthMonth].weeks.reverse(),
+        );
+      }
+
+      return worklogWeeks;
+    }),
+  );
 
   worklogTasks$: Observable<WorklogTask[]> = this.worklog$.pipe(
     map((worklog) => {
