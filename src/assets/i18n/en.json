@@ -845,7 +845,8 @@
     },
     "QUICK_HISTORY": {
       "NO_DATA": "No data for current year",
-      "PAGE_TITLE": "Quick History"
+      "PAGE_TITLE": "Quick History",
+      "WEEK_TITLE": "Week {{nr}} ({{timeSpent}})"
     },
     "WORKLOG": {
       "CMP": {

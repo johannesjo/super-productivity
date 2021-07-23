@@ -6,7 +6,10 @@
   </div>
 
   <div *ngFor="let week of weeks; let j = index;">
-    <h2>Week {{week.weekNr}} ({{week.timeSpent|msToString}})</h2>
+    <h2>
+      {{T.F.QUICK_HISTORY.WEEK_TITLE|translate:{ nr: week.weekNr, timeSpent:
+      (week.timeSpent|msToString) } }}
+    </h2>
 
     <div class="days">
       <div
