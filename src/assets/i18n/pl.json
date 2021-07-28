@@ -70,38 +70,38 @@
         "SELECT_ICON": "Wybierz ikonę",
         "SELECT_TYPE": "Wybierz typ",
         "TYPES": {
-          "COMMAND": "Command (custom shell command)",
-          "FILE": "File (opened by default system app)",
-          "IMG": "Image (shown as thumbnail)",
-          "LINK": "Link (opens in browser)"
+          "COMMAND": "Komenda (niestandardowe polecenie powłoki)",
+          "FILE": "Plik (otierany przy pomocy systemowej aplikacji)",
+          "IMG": "Zdjęcie (miniaturka)",
+          "LINK": "Link (otwiera w przeglądarce)"
         }
       }
     },
     "CALDAV": {
       "DIALOG_INITIAL": {
-        "TITLE": "Setup CalDav for Project"
+        "TITLE": "Ustaiwenia synchronizacji kalendarza (CalDav) dla projektu"
       },
       "FORM": {
-        "CALDAV_CATEGORY_FILTER": "Category to filter issues for (leave empty for none)",
-        "CALDAV_PASSWORD": "Your CalDav password",
-        "CALDAV_RESOURCE": "The name of the CalDav resource (the calendar)",
-        "CALDAV_URL": "CalDav URL (the base URL)",
-        "CALDAV_USER": "Your CalDav username",
-        "IS_AUTO_ADD_TO_BACKLOG": "Automatically add uncompleted CalDav todos to your backlog",
-        "IS_AUTO_POLL": "Automatically poll imported tasks for changes",
-        "IS_SEARCH_ISSUES_FROM_CALDAV": "Show uncompleted CalDav todos as suggestion when adding new tasks",
-        "IS_TRANSITION_ISSUES_ENABLED": "Automatically complete CalDav todos on task completion"
+        "CALDAV_CATEGORY_FILTER": "Kategoria do filtrowania zadań CalDav dla (zostaw puste dla żadnego)",
+        "CALDAV_PASSWORD": "Twoje hasło CalDav",
+        "CALDAV_RESOURCE": "Nazwa zasobu CalDav do synchronizacji (kalendarz)",
+        "CALDAV_URL": "CalDav URL (podstawowy URL)",
+        "CALDAV_USER": "Twój użytkownik CalDav",
+        "IS_AUTO_ADD_TO_BACKLOG": "Automatycznie dodaj niezrobione zadania CalDav do backlogu",
+        "IS_AUTO_POLL": "Automatycznie odpytuj importowane zadania CalDav pod kątem zmian",
+        "IS_SEARCH_ISSUES_FROM_CALDAV": "Pokaż niedokończone zadania CalDav jako sugestie podczas dodawania nowych zadań",
+        "IS_TRANSITION_ISSUES_ENABLED": "Automatycznie wypełniaj zadania CalDav po zakończeniu zadania"
       },
       "FORM_SECTION": {
         "HELP": "<p>Here you can configure SuperProductivity to list uncompleted CalDav todos for a specific project in the task creation panel in the daily planning view. They will be listed as suggestions and will provide a link to the todo as well as more information about it.</p> <p>In addition you can automatically add and sync all uncompleted todos to your task backlog.</p>",
         "TITLE": "CalDav"
       },
       "ISSUE_CONTENT": {
-        "DESCRIPTION": "Description",
-        "LABELS": "Categories",
-        "MARK_AS_CHECKED": "Mark updates as checked",
+        "DESCRIPTION": "Opis",
+        "LABELS": "Kategorie",
+        "MARK_AS_CHECKED": "Zaznacz aktualizacje",
         "STATUS": "Status",
-        "SUMMARY": "Summary"
+        "SUMMARY": "Podsumowanie"
       },
       "S": {
         "CALENDAR_NOT_FOUND": "CalDav: Calendar \"{{calendarName}}\" not found",
@@ -712,7 +712,7 @@
         "UNSCHEDULE": "Unschedule"
       },
       "D_REMINDER_VIEW": {
-        "ADD_ALL_TO_TODAY": "Add all to today",
+        "ADD_ALL_TO_TODAY": "Dodaj wszystkie do dzisiaj",
         "ADD_TO_TODAY": "Add to today",
         "DISMISS": "Dismiss Reminder",
         "DISMISS_ALL": "Dismiss all",
@@ -807,40 +807,40 @@
     },
     "TIME_TRACKING": {
       "B": {
-        "ALREADY_DID": "I already did",
-        "SNOOZE": "Snooze {{time}}"
+        "ALREADY_DID": "Już zrobiłem!",
+        "SNOOZE": "Przełóż na {{time}}"
       },
       "B_TTR": {
-        "ADD_TO_TASK": "Add to Task",
-        "MSG": "You have not been tracking time for {{time}}"
+        "ADD_TO_TASK": "Dodaj do Zadania",
+        "MSG": "Nie zliczałeś czasu od {{time}}"
       },
       "D_IDLE": {
-        "BREAK": "Break",
-        "CREATE_AND_TRACK": "<em>Create</em> and track to",
-        "IDLE_FOR": "You have been idle for:",
-        "SKIP": "Skip",
-        "TASK": "Task",
-        "TASK_BREAK": "Task+Break",
-        "TRACK_TO": "Track to"
+        "BREAK": "Przerwa",
+        "CREATE_AND_TRACK": "<em>Stwórz</em> i przypisz do",
+        "IDLE_FOR": "Nie pracowałeś przez:",
+        "SKIP": "Pomiń",
+        "TASK": "Zadanie",
+        "TASK_BREAK": "Zadanie+Przerwa",
+        "TRACK_TO": "Przypisz do"
       },
       "D_TRACKING_REMINDER": {
-        "CREATE_AND_TRACK": "<em>Create</em> and track to",
-        "IDLE_FOR": "You have been idle for:",
-        "TASK": "Task",
-        "TRACK_TO": "Track to:",
-        "UNTRACKED_TIME": "Untracked time:"
+        "CREATE_AND_TRACK": "<em>Stwórz</em> i przypisz do",
+        "IDLE_FOR": "Nie pracowałeś przez:",
+        "TASK": "Zadanie",
+        "TRACK_TO": "Przypisz do:",
+        "UNTRACKED_TIME": "Czas nie przypisany:"
       }
     },
     "WORKLOG": {
       "CMP": {
         "DAYS_WORKED": "Days, worked:",
         "MONTH_WORKED": "Month worked:",
-        "REPEATING_TASK": "Repeating task",
-        "RESTORE_TASK_FROM_ARCHIVE": "Restore Task From Archive",
-        "TASKS": "Tasks",
-        "TOTAL_TIME": "Time spent total:",
-        "WEEK_NR": "Week {{nr}}",
-        "WORKED": "Worked"
+        "REPEATING_TASK": "Powtarzające zadanie",
+        "RESTORE_TASK_FROM_ARCHIVE": "Przywróć Zarchiwizowane Zadanie",
+        "TASKS": "Zadania",
+        "TOTAL_TIME": "Całkowity czas spędzony:",
+        "WEEK_NR": "Tydzień {{nr}}",
+        "WORKED": "Pracowano"
       },
       "D_CONFIRM_RESTORE": "Are you sure you want to move the task <strong>\"{{title}}\"</strong> into your todays task list?",
       "D_EXPORT_TITLE": "Worklog Export {{start}}–{{end}}",
@@ -982,46 +982,46 @@
       "TASK_MOVE_TO_PROJECT": "Open move task to project menu",
       "TASK_OPEN_CONTEXT_MENU": "Open task context menu",
       "TASK_OPEN_ESTIMATION_DIALOG": "Edit estimation / time spent",
-      "TASK_SCHEDULE": "Schedule Task",
-      "TASK_SHORTCUTS": "Tasks",
+      "TASK_SCHEDULE": "Zaplanuj Zadanie",
+      "TASK_SHORTCUTS": "Zadania",
       "TASK_SHORTCUTS_INFO": "The following shortcuts apply for the currently selected task (selected via tab or mouse).",
       "TASK_TOGGLE_ADDITIONAL_INFO_OPEN": "Show/Hide additional task info",
       "TASK_TOGGLE_DONE": "Toggle Done",
-      "TITLE": "Keyboard Shortcuts",
-      "TOGGLE_BACKLOG": "Show/Hide Task Backlog",
-      "TOGGLE_BOOKMARKS": "Show/Hide Bookmark Bar",
-      "TOGGLE_PLAY": "Start/Stop Task",
-      "TOGGLE_SIDE_NAV": "Show & Focus/Hide Sidenav",
+      "TITLE": "Skróty klawiszowe",
+      "TOGGLE_BACKLOG": "Pokaż/Ukryj Zadanie Backlogu",
+      "TOGGLE_BOOKMARKS": "Pokaż/Ukryj Pasek Zakładek",
+      "TOGGLE_PLAY": "Start/Stop Zadania",
+      "TOGGLE_SIDE_NAV": "Pokaż i Zaznacz/Ukryj Panel boczny",
       "ZOOM_DEFAULT": "Zoom default (Desktop only)",
       "ZOOM_IN": "Zoom in (Desktop only)",
       "ZOOM_OUT": "Zoom out (Desktop only)"
     },
     "LANG": {
-      "AR": "Arabic",
-      "DE": "German",
-      "EN": "English",
-      "ES": "Spanish",
+      "AR": "Arabski",
+      "DE": "Niemiecki",
+      "EN": "Angielski",
+      "ES": "Hiszpański",
       "FA": "Farsi",
-      "FR": "French",
-      "IT": "Italian",
-      "JA": "Japanese",
-      "KO": "Korean",
-      "LABEL": "Please select a language",
-      "NB": "Norwegian Bokmål",
-      "NL": "Dutch",
-      "PT": "Portuguese",
-      "RU": "Russian",
-      "TITLE": "Language",
-      "TR": "Turkish",
-      "ZH": "Simplified Chinese",
-      "ZH_TW": "Traditional Chinese"
+      "FR": "Francuski",
+      "IT": "Włoski",
+      "JA": "Japoński",
+      "KO": "Koreański",
+      "LABEL": "Proszę wybrać język",
+      "NB": "Norweski Bokmål",
+      "NL": "Duński",
+      "PT": "Portugalski",
+      "RU": "Rosyjski",
+      "TITLE": "Język",
+      "TR": "Turecki",
+      "ZH": "Chiński (uproszczony)",
+      "ZH_TW": "Chiński (tradycyjny)"
     },
     "MISC": {
-      "DEFAULT_PROJECT": "Default project to use for tasks if none is specified",
-      "FIRST_DAY_OF_WEEK": "First day of the week",
-      "HELP": "<p><strong>Not seeing Desktop Notifications?</strong> For windows you might want to check System > Notifications & actions and check if the required notifications have been enabled.</p>",
-      "IS_AUTO_ADD_WORKED_ON_TO_TODAY": "Automatically add today tag to worked on tasks",
-      "IS_AUTO_MARK_PARENT_AS_DONE": "Mark parent task as done, when all sub tasks are done",
+      "DEFAULT_PROJECT": "Domyślny projekt dla niezdefiniowanych zadań",
+      "FIRST_DAY_OF_WEEK": "Pierwszy dzień tygodnia",
+      "HELP": "<p><strong>Nie widzisz powidomień na pulpicie?</strong> Dla windowsa sprawdź czy w Ustawienia > System > Powiadomienia i akcje zaznaczone zostały odpowiednie opcje.</p>",
+      "IS_AUTO_ADD_WORKED_ON_TO_TODAY": "Dodaj automatycznie tag dzisiejszy do zadania",
+      "IS_AUTO_MARK_PARENT_AS_DONE": "Zaznacz zadanie główne jako ukończone, jeżeli wszystkie podrzędne zostały ukończone",
       "IS_AUTO_START_NEXT_TASK": "Start tracking next task when marking current as done",
       "IS_CONFIRM_BEFORE_EXIT": "Confirm before exiting the app",
       "IS_DARK_MODE": "Dark Mode",
@@ -1032,7 +1032,7 @@
       "IS_TRAY_SHOW_CURRENT_TASK": "Show current task in the tray / status menu (desktop mac/windows only)",
       "IS_TURN_OFF_MARKDOWN": "Turn off markdown parsing for notes",
       "TASK_NOTES_TPL": "Task description template",
-      "TITLE": "Misc Settings"
+      "TITLE": "Ustawienia różne"
     },
     "POMODORO": {
       "BREAK_DURATION": "Duration of short breaks",
@@ -1049,11 +1049,11 @@
       "TITLE": "Pomodoro Timer"
     },
     "SOUND": {
-      "DONE_SOUND": "Task done sound",
-      "IS_INCREASE_DONE_PITCH": "Increase pitch for every task done",
-      "IS_PLAY_DONE_SOUND": "Play sound when task is marked done",
-      "TITLE": "Sound",
-      "VOLUME": "Volume"
+      "DONE_SOUND": "Dźwięk zrobionego zadania",
+      "IS_INCREASE_DONE_PITCH": "Zwiększaj tonację dla każdego wykonanego zadania",
+      "IS_PLAY_DONE_SOUND": "Odtwórz dźwięk kiedy zadanie zostanie zrobione",
+      "TITLE": "Dźwięk",
+      "VOLUME": "Głośność"
     },
     "TAKE_A_BREAK": {
       "HELP": "<div> <p>Allows you to configure a reoccurring reminder when you have worked for a specified amount of time without taking a break.</p> <p>You can modify the message displayed. ${duration} will be replaced with the time spent without a break.</p> </div>",
@@ -1083,10 +1083,10 @@
     }
   },
   "GLOBAL_SNACK": {
-    "COPY_TO_CLIPPBOARD": "Copied to clipboard",
-    "ERR_COMPRESSION": "Error for compression interface",
-    "PERSISTENCE_DISALLOWED": "Data will be not persisted permanently. Be aware that this can lead to data loss!!",
-    "RUNNING_X": "Running \"{{str}}\".",
+    "COPY_TO_CLIPPBOARD": "Skopiowano do schowka",
+    "ERR_COMPRESSION": "Błąd kompresji interfejsu",
+    "PERSISTENCE_DISALLOWED": "Dane nie będą trzymane na stałe. Bądź świadom, że może to prowadzić do utraty danych!!",
+    "RUNNING_X": "Uruchomiono \"{{str}}\".",
     "SHORTCUT_WARN_OPEN_BOOKMARKS_FROM_TAG": "{{keyCombo}} pressed, but open bookmarks shortcut is only available when in project context.",
     "SHORTCUT_WARN_OPEN_NOTES_FROM_TAG": "{{keyCombo}} pressed, but open notes shortcut is only available when in project context."
   },
@@ -1105,106 +1105,106 @@
     "WEB_DAV_UPLOAD": "WebDAV: Uploading data..."
   },
   "MH": {
-    "ADD_NEW_TASK": "Add new Task",
-    "CREATE_PROJECT": "Create Project",
-    "CREATE_TAG": "Create Tag",
-    "DELETE_TAG": "Delete Tag",
-    "GO_TO_TASK_LIST": "Go to task list",
-    "MANAGE_PROJECTS": "Manage Projects",
-    "METRICS": "Metrics",
-    "NOTES": "Notes",
-    "PROCRASTINATE": "Procrastinate",
-    "PROJECTS": "Projects",
-    "PROJECT_MENU": "Project Menu",
-    "PROJECT_SETTINGS": "Project Settings",
-    "SCHEDULED": "Scheduled",
-    "SETTINGS": "Settings",
-    "TAGS": "Tags",
-    "TASKS": "Tasks",
-    "TASK_LIST": "Task List",
-    "TOGGLE_SHOW_BOOKMARKS": "Show/Hide Bookmarks",
-    "TOGGLE_SHOW_NOTES": "Show/Hide Project Notes",
-    "TOGGLE_TRACK_TIME": "Start/Stop tracking time",
-    "WORKLOG": "Worklog",
-    "SHOW_SEARCH_BAR": "Show Search Bar"
+    "ADD_NEW_TASK": "Dodaj nowe Zadanie",
+    "CREATE_PROJECT": "Stwórz Projekt",
+    "CREATE_TAG": "Stwórz Tag",
+    "DELETE_TAG": "Usuń Tag",
+    "GO_TO_TASK_LIST": "Idź do listy zadań",
+    "MANAGE_PROJECTS": "Zarządzaj projektami",
+    "METRICS": "Metryki",
+    "NOTES": "Notatki",
+    "PROCRASTINATE": "Odwlekanie",
+    "PROJECTS": "Projekty",
+    "PROJECT_MENU": "Menu projektu",
+    "PROJECT_SETTINGS": "Ustawienia projektów",
+    "SCHEDULED": "Zaplanowane",
+    "SETTINGS": "Ustawienia",
+    "TAGS": "Tagi",
+    "TASKS": "Zadania",
+    "TASK_LIST": "Lista zadań",
+    "TOGGLE_SHOW_BOOKMARKS": "Pokaż/Ukryj Zakładki",
+    "TOGGLE_SHOW_NOTES": "Pokaż/Ukryj Notatki Projektu",
+    "TOGGLE_TRACK_TIME": "Start/Stop zliczania czasu",
+    "WORKLOG": "Czas pracy",
+    "SHOW_SEARCH_BAR": "Pokaż pasek wyszukiwania"
   },
   "PDS": {
-    "BACK": "Wait I forgot something!",
-    "BREAK_LABEL": "Breaks (nr / time)",
-    "CELEBRATE": "Take a moment to <i>celebrate!</i>",
-    "CLEAR_ALL_CONTINUE": "Clear all done and continue",
+    "BACK": "Poczekaj! Zapomniałem czegoś...",
+    "BREAK_LABEL": "Przewy (nr / czas)",
+    "CELEBRATE": "Czas na <i>świętowanie!</i>",
+    "CLEAR_ALL_CONTINUE": "Wyczyść wszystkie zakończone i kontynuuj",
     "D_CONFIRM_APP_CLOSE": {
-      "CANCEL": "No, just clear the tasks",
-      "MSG": "Your work is done. Time to go home!",
-      "OK": "Aye aye! Shutdown!"
+      "CANCEL": "Nie, tylko wyczyść zadania",
+      "MSG": "Twoja praca skończona, czas wracać do domu!",
+      "OK": "Tak, tak! Spadamy!"
     },
-    "EVALUATION": "Evaluation",
-    "EXPORT_TASK_LIST": "Export Task List",
-    "NO_TASKS": "There are no tasks for this day",
+    "EVALUATION": "Ocena",
+    "EXPORT_TASK_LIST": "Eksportuj listę Zadań",
+    "NO_TASKS": "Nie ma żadnych zadań na dziś",
     "PLAN": "Plan",
-    "ROUND_15M": "Round all tasks to 15 minutes",
-    "ROUND_30M": "Round all tasks to 30 minutes",
-    "ROUND_5M": "Round all tasks to 5 minutes",
-    "ROUND_TIME_SPENT": "Round Time Spent",
-    "ROUND_TIME_SPENT_TITLE": "Round time spent on all tasks. Be careful! You cannot undo this!",
-    "ROUND_TIME_WARNING": "!!! Be careful this cannot be undone !!!",
-    "ROUND_UP_15M": "Round UP all tasks to 15 minutes",
-    "ROUND_UP_30M": "Round UP all tasks to 30 minutes",
-    "ROUND_UP_5M": "Round UP all tasks to 5 minutes",
-    "SAVE_AND_GO_HOME": "Save and go home",
-    "START_END": "Start – End",
-    "SUMMARY_FOR": "Daily Summary for {{dayStr}}",
-    "TASKS_COMPLETED": "Tasks Completed",
-    "TASK_LIST": "Task List",
-    "TIME_SPENT_AND_ESTIMATE_LABEL": "Time Spent / Estimated",
-    "TIME_SPENT_ESTIMATE_TITLE": "Time Spent: Total time spent today. Archived tasks not included. – Time Estimated: Time estimated for tasks worked on today minus the time already spent with them on other days.",
-    "TODAY": "Today",
-    "WEEK": "Week"
+    "ROUND_15M": "Zaokrągl czas zadań do 15 minut",
+    "ROUND_30M": "Zaokrągl czas zadań do 30 minut",
+    "ROUND_5M": "Zaokrągl czas zadań do 5 minut",
+    "ROUND_TIME_SPENT": "Zaokrągl Spęczony Czas",
+    "ROUND_TIME_SPENT_TITLE": "Zaokrągl czas dla wszystkich zadań. Bądź ostroży, bo tego nie zofniesz!",
+    "ROUND_TIME_WARNING": "!!! Uważaj, bo tego nie da się odwrócić !!!",
+    "ROUND_UP_15M": "Zaokrągl czas zadań W GÓRĘ do 15 minut",
+    "ROUND_UP_30M": "Zaokrągl czas zadań W GÓRĘ do 30 minut",
+    "ROUND_UP_5M": "Zaokrągl czas zadań W GÓRĘ do 5 minut",
+    "SAVE_AND_GO_HOME": "Zapisz i idź do domu",
+    "START_END": "Start – Koniec",
+    "SUMMARY_FOR": "Dzienne Podsumiwanie {{dayStr}}",
+    "TASKS_COMPLETED": "Zadania ukończone",
+    "TASK_LIST": "Lista zadań",
+    "TIME_SPENT_AND_ESTIMATE_LABEL": "Czas spędzony / Estymacja",
+    "TIME_SPENT_ESTIMATE_TITLE": "Czas spędzony: Całkowity czas spędzony. Nie liczymy zadań zarchiwowanych. – Estymacja: Czas zaplanowany na wykonane zadania bez czasu pracy wykonanym w innych dniach.",
+    "TODAY": "Dziś",
+    "WEEK": "Tydzień"
   },
   "PM": {
-    "TITLE": "Project Metrics"
+    "TITLE": "Metryki Projektu"
   },
   "PP": {
-    "ARCHIVED_PROJECTS": "Archived Projects",
-    "ARCHIVE_PROJECT": "Archive Project",
-    "CREATE_NEW": "Create New",
-    "DELETE_PROJECT": "Delete Project",
+    "ARCHIVED_PROJECTS": "Zarchiwizowane projekty",
+    "ARCHIVE_PROJECT": "Archiwizuj Projekt",
+    "CREATE_NEW": "Stwórz Nowy",
+    "DELETE_PROJECT": "Usuń Projekt",
     "D_CONFIRM_ARCHIVE": {
-      "MSG": "Are you sure you want to archive this project? Archived Projects will not be shown in the menu any more and you can't access any of their data without restoring them. It's recommended that you backup your data before you do this.",
-      "OK": "Archive"
+      "MSG": "Jesteś pewien że chcesz zarchiwizować projekt? Nie bedzie się pojawiał na liście projektów dopóki nie zostanie przywrócony. Polecamy zrobić kopię zapasową przed wykonaniem akcji.",
+      "OK": "Zarchiwizuj"
     },
     "D_CONFIRM_DELETE": {
-      "MSG": "Are you sure you want to delete this project? It's recommended to backup your data before you do this.",
-      "OK": "Delete"
+      "MSG": "Jesteś pewien że chcesz go usunąć? Polecamy najpierw zrobić kopię zapasową.",
+      "OK": "Usuń"
     },
     "D_CONFIRM_UNARCHIVE": {
-      "MSG": "Are you sure you want to unarchive this project?",
-      "OK": "Unarchive"
+      "MSG": "Jesteś pewien że chcesz przywrócić projekt?",
+      "OK": "Przywróć"
     },
-    "EDIT_PROJECT": "Edit Project",
-    "EXPORT_PROJECT": "Export Project",
-    "GITHUB_CONFIGURED": "GitHub Integration Configured",
-    "GITLAB_CONFIGURED": "GitLab Integration Configured",
-    "IMPORT_FROM_FILE": "Import from file",
-    "JIRA_CONFIGURED": "Jira Integration Configured",
-    "S_INVALID_JSON": "Invalid json for project file",
-    "TITLE": "Project Overview",
-    "UN_ARCHIVE_PROJECT": "Unarchive Project"
+    "EDIT_PROJECT": "Edytuj Projekt",
+    "EXPORT_PROJECT": "Wyeksportuj projekt",
+    "GITHUB_CONFIGURED": "Integracja z GitHub Skonfigutowana",
+    "GITLAB_CONFIGURED": "Integracja z GitLab Skonfigutowana",
+    "IMPORT_FROM_FILE": "Importuj z pliku",
+    "JIRA_CONFIGURED": "Integracja z Jira Skonfigutowana",
+    "S_INVALID_JSON": "Niepoprawny plik JSON projektu",
+    "TITLE": "Podgląd Projektu",
+    "UN_ARCHIVE_PROJECT": "Przywróć Projekt"
   },
   "PS": {
-    "GLOBAL_SETTINGS": "Global Settings",
-    "ISSUE_INTEGRATION": "Issue Integration",
-    "PRIVACY_POLICY": "Privacy Policy",
-    "PRODUCTIVITY_HELPER": "Productivity Helper",
-    "PROJECT_SETTINGS": "Project Specific Settings",
-    "PROVIDE_FEEDBACK": "Provide Feedback",
-    "SYNC_EXPORT": "Sync & Export",
-    "TAG_SETTINGS": "Tag Specific Settings",
-    "TOGGLE_DARK_MODE": "Toggle Dark Mode"
+    "GLOBAL_SETTINGS": "Ustawienia Globalne",
+    "ISSUE_INTEGRATION": "Intergracja Błędów",
+    "PRIVACY_POLICY": "Polityka Prywatności",
+    "PRODUCTIVITY_HELPER": "Pomocnik Produktywności",
+    "PROJECT_SETTINGS": "Ustawienia dla Projektu",
+    "PROVIDE_FEEDBACK": "Prześlij Opinię",
+    "SYNC_EXPORT": "Synchronizacja i Eksport",
+    "TAG_SETTINGS": "Taguj Określone Ustawienie",
+    "TOGGLE_DARK_MODE": "Włącz ciemny motyw"
   },
   "SCHEDULE": {
-    "NO_SCHEDULED": "There are currently no scheduled tasks. You can schedule a task by choosing \"Schedule Task\" in the task context menu. To open it click on the 3 little dots on the right of a task.",
-    "START_TASK": "Start task and remove reminder"
+    "NO_SCHEDULED": "Żadne zadanie nie zostało zaplanowane. Możesz zaplanować wybierając \"Zaplanuj Zadanie\" z menu kontekstowego zadania. Aby je otworzyć kliknij trzy kropki po prawej na zadaniu.",
+    "START_TASK": "Ropoczni zadanie i wyłącz przypomnienie"
   },
   "THEMES": {
     "SELECT_THEME": "Select Theme",
@@ -1236,19 +1236,19 @@
   },
   "WW": {
     "ADD_MORE": "Dodaj więcej",
-    "ADD_SCHEDULED_FOR_TODAY": "Add tasks planned for today ({{nr}})",
-    "ADD_SCHEDULED_FOR_TOMORROW": "Add tasks planned for tomorrow ({{nr}})",
-    "ADD_SOME_TASKS": "Add some tasks to plan your day!",
-    "COMPLETED_TASKS": "Completed Tasks",
-    "ESTIMATE_REMAINING": "Estimate remaining:",
-    "FINISH_DAY": "Finish Day",
+    "ADD_SCHEDULED_FOR_TODAY": "Dodaj zaplanowane zadania na dzisiaj ({{nr}})",
+    "ADD_SCHEDULED_FOR_TOMORROW": "Dodaj zaplanowane zadania na jutro ({{nr}})",
+    "ADD_SOME_TASKS": "Dodaj zadania do dzisiejzego planu!",
+    "COMPLETED_TASKS": "Zakończone Zadania",
+    "ESTIMATE_REMAINING": "Pozostało zaplanowanego czasu:",
+    "FINISH_DAY": "Zakończ Dzień",
     "HELP_PROCRASTINATION": "Help I'm procrastinating!",
-    "NO_COMPLETED_TASKS": "There are currently no completed tasks",
-    "NO_PLANNED_TASKS": "No planned tasks",
-    "READY_TO_WORK": "Ready to work!",
-    "RESET_BREAK_TIMER": "Reset without break timer",
-    "TIME_ESTIMATED": "Time Estimated:",
-    "WITHOUT_BREAK": "Without break:",
-    "WORKING_TODAY": "Working today:"
+    "NO_COMPLETED_TASKS": "Aktualnie nie ma ukończonych zadań",
+    "NO_PLANNED_TASKS": "Nie zaplaniwano zadań",
+    "READY_TO_WORK": "Gotowy do Pracy!",
+    "RESET_BREAK_TIMER": "Zresetuj bez czasu przerwy",
+    "TIME_ESTIMATED": "Zaplanowany Czas:",
+    "WITHOUT_BREAK": "Bez Przerwy:",
+    "WORKING_TODAY": "Czas pracy:"
   }
 }
