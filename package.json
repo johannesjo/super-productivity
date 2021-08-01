@@ -157,7 +157,7 @@
     "@types/semver": "^7.3.5",
     "@types/shortid": "^0.0.29",
     "@typescript-eslint/eslint-plugin": "4.28.2",
-    "@typescript-eslint/parser": "4.28.2",
+    "@typescript-eslint/parser": "4.28.5",
     "angular-material-css-vars": "^1.2.0",
     "angular2-promise-buttons": "^5.0.2",
     "axios": "^0.21.1",
