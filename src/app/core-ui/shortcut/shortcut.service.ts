@@ -155,7 +155,7 @@ export class ShortcutService {
         this._snackService.open({
           msg: this._translateService.instant(
             T.GLOBAL_SNACK.SHORTCUT_WARN_OPEN_BOOKMARKS_FROM_TAG,
-            { keyCombo: keys.openProjectNotes },
+            { keyCombo: keys.toggleBookmarks },
           ),
         });
       }
