@@ -32,6 +32,8 @@ import {
 import { WORK_CONTEXT_THEME_CONFIG_FORM_CONFIG } from '../../features/work-context/work-context.const';
 import { WorkContextService } from '../../features/work-context/work-context.service';
 import { DEFAULT_GITLAB_CFG } from 'src/app/features/issue/providers/gitlab/gitlab.const';
+import { distinctUntilChanged } from 'rxjs/operators';
+import { isObject } from '../../util/is-object';
 
 @Component({
   selector: 'project-settings',
@@ -69,31 +71,50 @@ export class ProjectSettingsPageComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this._subs.add(
-      this.projectService.currentProject$.subscribe((project: Project | null) => {
-        if (!project) {
-          throw new Error();
-        }
+      this.projectService.currentProject$
+        .pipe(
+          distinctUntilChanged((a: Project | null, b: Project | null): boolean => {
+            // needed because otherwise this wouldn't work while tracking time; see: #1428
+            // NOTE: we don't need to worry about missing model changes since we only update single fields
+            // (see save methods below)
+            if (isObject(a) && isObject(b) && a !== null && b !== null) {
+              return (
+                a.title === b.title &&
+                JSON.stringify(a.advancedCfg) === JSON.stringify(b.advancedCfg) &&
+                JSON.stringify(a.theme) === JSON.stringify(b.theme) &&
+                JSON.stringify(a.issueIntegrationCfgs) ===
+                  JSON.stringify(b.issueIntegrationCfgs)
+              );
+            } else {
+              return a === b;
+            }
+          }),
+        )
+        .subscribe((project: Project | null) => {
+          if (!project) {
+            throw new Error();
+          }
 
-        this.currentProject = project as Project;
-        this.projectCfg = project.advancedCfg;
-        this.currentProjectTheme = project.theme;
+          this.currentProject = project as Project;
+          this.projectCfg = project.advancedCfg;
+          this.currentProjectTheme = project.theme;
 
-        // in case there are new ones...
-        this.issueIntegrationCfgs = { ...project.issueIntegrationCfgs };
+          // in case there are new ones...
+          this.issueIntegrationCfgs = { ...project.issueIntegrationCfgs };
 
-        // Unfortunately needed, to make sure we have no empty configs
-        // TODO maybe think of a better solution for the defaults
-        if (!this.issueIntegrationCfgs.JIRA) {
-          this.issueIntegrationCfgs.JIRA = DEFAULT_JIRA_CFG;
-        }
-        if (!this.issueIntegrationCfgs.GITHUB) {
-          this.issueIntegrationCfgs.GITHUB = DEFAULT_GITHUB_CFG;
-        }
-        if (!this.issueIntegrationCfgs.GITLAB) {
-          this.issueIntegrationCfgs.GITLAB = DEFAULT_GITLAB_CFG;
-        }
-        this._cd.detectChanges();
-      }),
+          // Unfortunately needed, to make sure we have no empty configs
+          // TODO maybe think of a better solution for the defaults
+          if (!this.issueIntegrationCfgs.JIRA) {
+            this.issueIntegrationCfgs.JIRA = DEFAULT_JIRA_CFG;
+          }
+          if (!this.issueIntegrationCfgs.GITHUB) {
+            this.issueIntegrationCfgs.GITHUB = DEFAULT_GITHUB_CFG;
+          }
+          if (!this.issueIntegrationCfgs.GITLAB) {
+            this.issueIntegrationCfgs.GITLAB = DEFAULT_GITLAB_CFG;
+          }
+          this._cd.detectChanges();
+        }),
     );
   }
 

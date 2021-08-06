@@ -65,10 +65,13 @@ export class TagSettingsPageComponent implements OnInit, OnDestroy {
         .pipe(
           distinctUntilChanged((a: WorkContext, b: WorkContext): boolean => {
             // needed because otherwise this wouldn't work while tracking time; see: #1428
+            // NOTE: we don't need to worry about missing model changes since we only update single fields
+            // (see save methods below)
             if (isObject(a) && isObject(b)) {
               return (
-                a.title === a.title &&
-                a.icon === a.icon &&
+                a.title === b.title &&
+                a.icon === b.icon &&
+                JSON.stringify(a.theme) === JSON.stringify(b.theme) &&
                 JSON.stringify(a.advancedCfg) === JSON.stringify(b.advancedCfg)
               );
             } else {
