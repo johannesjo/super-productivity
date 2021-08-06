@@ -46,8 +46,8 @@ module.exports = {
 
       .waitForElementVisible(TASK)
       .assert.visible(TASK)
-      .assert.containsText(TASK + ':nth-child(1)', '2 test task hihi')
-      .assert.containsText(TASK + ':nth-child(2)', '3 some other task')
+      .assert.containsText(TASK + ':nth-child(1)', '3 some other task')
+      .assert.containsText(TASK + ':nth-child(2)', '2 test task hihi')
       .end(),
 
   'should add multiple tasks from header button': (browser: NBrowser) =>
