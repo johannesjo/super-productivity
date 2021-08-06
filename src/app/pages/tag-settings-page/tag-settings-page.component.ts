@@ -25,6 +25,8 @@ import { TagService } from '../../features/tag/tag.service';
 import { ProjectCfgFormKey } from '../../features/project/project.model';
 import { WORK_CONTEXT_THEME_CONFIG_FORM_CONFIG } from '../../features/work-context/work-context.const';
 import { BASIC_TAG_CONFIG_FORM_CONFIG } from '../../features/tag/tag-form-cfg.const';
+import { distinctUntilChanged } from 'rxjs/operators';
+import { isObject } from '../../util/is-object';
 
 @Component({
   selector: 'project-settings',
@@ -59,12 +61,27 @@ export class TagSettingsPageComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this._subs.add(
-      this.workContextService.activeWorkContext$.subscribe((ac) => {
-        this.activeWorkContext = ac;
-        this.workContextAdvCfg = ac.advancedCfg;
-        this.currentWorkContextTheme = ac.theme;
-        this._cd.detectChanges();
-      }),
+      this.workContextService.activeWorkContext$
+        .pipe(
+          distinctUntilChanged((a: WorkContext, b: WorkContext): boolean => {
+            // needed because otherwise this wouldn't work while tracking time; see: #1428
+            if (isObject(a) && isObject(b)) {
+              return (
+                a.title === a.title &&
+                a.icon === a.icon &&
+                JSON.stringify(a.advancedCfg) === JSON.stringify(b.advancedCfg)
+              );
+            } else {
+              return a === b;
+            }
+          }),
+        )
+        .subscribe((ac) => {
+          this.activeWorkContext = ac;
+          this.workContextAdvCfg = ac.advancedCfg;
+          this.currentWorkContextTheme = ac.theme;
+          this._cd.detectChanges();
+        }),
     );
   }
 
