@@ -296,7 +296,7 @@ export const tagReducer = (
       const updates: Update<Tag>[] = task.tagIds.map((tagId) => ({
         id: tagId,
         changes: {
-          taskIds: isAddToBottom
+          taskIds: isAddToBottom // create an ordered list with the new task id in the correct position
             ? [...(state.entities[tagId] as Tag).taskIds, task.id]
             : [task.id, ...(state.entities[tagId] as Tag).taskIds],
         },

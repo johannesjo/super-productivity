@@ -224,18 +224,24 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
 
   onBlur(ev: FocusEvent): void {
     const relatedTarget: HTMLElement = ev.relatedTarget as HTMLElement;
+    let isUIelement = false;
+    if (relatedTarget) {
+      const { className } = relatedTarget;
+      isUIelement =
+        className.includes('switch-add-to-btn') ||
+        className.includes('switch-add-to-bot-btn');
+    }
+
     if (
       !relatedTarget ||
-      (relatedTarget &&
-        !relatedTarget.className.includes('close-btn') &&
-        !relatedTarget.className.includes('switch-add-to-btn'))
+      (relatedTarget && !relatedTarget.className.includes('close-btn') && !isUIelement)
     ) {
       sessionStorage.setItem(
         SS_TODO_TMP,
         (this.inputEl as ElementRef).nativeElement.value,
       );
     }
-    if (relatedTarget && relatedTarget.className.includes('switch-add-to-btn')) {
+    if (relatedTarget && isUIelement) {
       (this.inputEl as ElementRef).nativeElement.focus();
     } else if (relatedTarget && relatedTarget.className.includes('mat-option')) {
       this._blurTimeout = window.setTimeout(() => {
