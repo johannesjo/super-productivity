@@ -10,7 +10,6 @@ export interface TagCopy extends WorkContextCommon {
   icon: string | null;
   title: string;
   created: number;
-  modified: number;
   color: string | null;
   taskIds: string[];
 }

@@ -124,8 +124,7 @@ export class WorkContextService {
   activeWorkContextType?: WorkContextType;
 
   activeWorkContext$: Observable<WorkContext> = this._afterDataLoaded$.pipe(
-    switchMap(() => this._store$),
-    select(selectActiveWorkContext),
+    switchMap(() => this._store$.select(selectActiveWorkContext)),
     shareReplay(1),
   );
   mainWorkContexts$: Observable<WorkContext[]> = this._isAllDataLoaded$.pipe(

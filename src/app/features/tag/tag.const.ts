@@ -14,7 +14,6 @@ export const TODAY_TAG: Tag = {
   title: 'Today',
   color: null,
   created: Date.now(),
-  modified: Date.now(),
   taskIds: [],
   ...WORK_CONTEXT_DEFAULT_COMMON,
   theme: {
@@ -36,7 +35,6 @@ export const DEFAULT_TAG: Tag = {
   title: '',
   color: null,
   created: Date.now(),
-  modified: Date.now(),
   taskIds: [],
   ...WORK_CONTEXT_DEFAULT_COMMON,
   theme: {

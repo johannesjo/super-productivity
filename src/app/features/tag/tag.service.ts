@@ -81,7 +81,6 @@ export class TagService {
           id,
           title: tag.title || 'EMPTY',
           created: Date.now(),
-          modified: Date.now(),
           icon: null,
           color: tag.color || null,
           taskIds: [],
