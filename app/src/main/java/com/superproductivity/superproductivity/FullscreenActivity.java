@@ -3,6 +3,8 @@ package com.superproductivity.superproductivity;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.net.Uri;
@@ -10,6 +12,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.webkit.JsResult;
 import android.webkit.ValueCallback;
 import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
@@ -52,25 +55,34 @@ public class FullscreenActivity extends AppCompatActivity {
             }
 
             // also needs to be done here, because new Intent otherwise will crash the app
-            wv.setWebViewClient(new WebViewClient() {
+            wv.setWebChromeClient(new WebChromeClient() {
                 @Override
-                public boolean shouldOverrideUrlLoading(WebView view, String url) {
-                    Log.v("TW", url);
+                public boolean onJsAlert(WebView view, String url, String message, JsResult result) {
+                    return super.onJsAlert(view, url, message, result);
+                }
 
-                    if (url != null && (url.startsWith("http://") || url.startsWith("https://"))) {
-                        if (url.contains("super-productivity.com") || url.contains("localhost")) {
-                            return false;
-                        } else {
-                            FullscreenActivity.this.startActivity(
-                                    new Intent(Intent.ACTION_VIEW, Uri.parse(url)));
-                            return true;
-                        }
-                    } else {
-                        return false;
-                    }
+                @Override
+                public boolean onJsConfirm(WebView view, String url, String message, final JsResult result) {
+                    new AlertDialog.Builder(FullscreenActivity.this)
+                            .setMessage(message)
+                            .setPositiveButton(android.R.string.ok,
+                                    new DialogInterface.OnClickListener() {
+                                        public void onClick(DialogInterface dialog, int which) {
+                                            result.confirm();
+                                        }
+                                    })
+                            .setNegativeButton(android.R.string.cancel,
+                                    new DialogInterface.OnClickListener() {
+                                        public void onClick(DialogInterface dialog, int which) {
+                                            result.cancel();
+                                        }
+                                    })
+                            .create()
+                            .show();
+
+                    return true;
                 }
             });
-            wv.setWebChromeClient(new WebChromeClient());
 
             // In case we want to make sure the most recent version is loaded
             // wv.clearCache(true);
