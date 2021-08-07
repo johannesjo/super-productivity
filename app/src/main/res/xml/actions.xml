@@ -1,1 +1,5 @@
-<action intentName="custom.actions.intent.TRIGGER_SYNC"></action>
+<action intentName="custom.actions.intent.TRIGGER_SYNC" queryPatterns="$org.schema.type.Text">
+    <fulfillment
+            urlTemplate="intent:#Intent;package=com.superproductivity.superproductivity;action=custom.actions.intent.TRIGGER_SYN{;S.dropoff};end">
+    </fulfillment>
+</action>
