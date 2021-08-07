@@ -30,7 +30,7 @@ export class DataImportService {
     private _dataRepairService: DataRepairService,
     private _translateService: TranslateService,
   ) {
-    this._isCheckForStrayBackupAndImport();
+    this._isCheckForStrayLocalDBBackupAndImport();
   }
 
   async getCompleteSyncData(): Promise<AppDataComplete> {
@@ -58,7 +58,10 @@ export class DataImportService {
 
     // get rid of outdated project data
     if (!isBackupReload) {
-      if (!isSkipStrayBackupCheck && (await this._isCheckForStrayBackupAndImport())) {
+      if (
+        !isSkipStrayBackupCheck &&
+        (await this._isCheckForStrayLocalDBBackupAndImport())
+      ) {
         return;
       }
 
@@ -86,7 +89,7 @@ export class DataImportService {
           msg: T.F.SYNC.S.ERROR_FALLBACK_TO_BACKUP,
         });
         console.error(e);
-        await this._importBackup();
+        await this._importLocalDBBackup();
         this._imexMetaService.setDataImportInProgress(false);
       }
     } else if (this._dataRepairService.isRepairPossibleAndConfirmed(data)) {
@@ -124,12 +127,12 @@ export class DataImportService {
     ]);
   }
 
-  private async _importBackup(): Promise<any> {
+  private async _importLocalDBBackup(): Promise<any> {
     const data = await this._persistenceService.loadBackup();
     return this.importCompleteSyncData(data, { isBackupReload: true });
   }
 
-  private async _isCheckForStrayBackupAndImport(): Promise<boolean> {
+  private async _isCheckForStrayLocalDBBackupAndImport(): Promise<boolean> {
     const backup = await this._persistenceService.loadBackup();
     if (!localStorage.getItem(LS_CHECK_STRAY_PERSISTENCE_BACKUP)) {
       if (backup) {
@@ -140,7 +143,7 @@ export class DataImportService {
 
     if (backup) {
       if (confirm(this._translateService.instant(T.CONFIRM.RESTORE_STRAY_BACKUP))) {
-        await this._importBackup();
+        await this._importLocalDBBackup();
         return true;
       } else {
         if (confirm(this._translateService.instant(T.CONFIRM.DELETE_STRAY_BACKUP))) {
