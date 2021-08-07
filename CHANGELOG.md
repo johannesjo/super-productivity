@@ -1,3 +1,35 @@
+# [7.5.0](https://github.com/johannesjo/super-productivity/compare/v7.5.0-rc.0...v7.5.0) (2021-08-07)
+
+### Bug Fixes
+
+- **project:** unable to edit tag while tracking time [#1428](https://github.com/johannesjo/super-productivity/issues/1428) ([a73b2a9](https://github.com/johannesjo/super-productivity/commit/a73b2a92c2f2fb411d5b2667e56ccce0be9cc6ea))
+- **quickHistory:** data not reloading issue ([0d58f85](https://github.com/johannesjo/super-productivity/commit/0d58f85522c7896c8296fc59111bd56e74c1c53d))
+- **tag:** unable to edit tag while tracking time [#1428](https://github.com/johannesjo/super-productivity/issues/1428) ([423df64](https://github.com/johannesjo/super-productivity/commit/423df644be7bb42e31452d21066e43960ba1267e))
+
+### Features
+
+- [#1221](https://github.com/johannesjo/super-productivity/issues/1221) remove isAddToBottom defaults ([5a67475](https://github.com/johannesjo/super-productivity/commit/5a674751d66439510b78a0df7eeca8ac65387eb6))
+- [#1221](https://github.com/johannesjo/super-productivity/issues/1221) reverse isAddToBottom in project ([9c67831](https://github.com/johannesjo/super-productivity/commit/9c678312445f6ecac710f2b8a9d006358b37975c))
+- [#1221](https://github.com/johannesjo/super-productivity/issues/1221) setup for add after currentTaskId ([55a4b2e](https://github.com/johannesjo/super-productivity/commit/55a4b2e19d35fd21de5eab895e91a7be9ccfa2ca))
+- [#1221](https://github.com/johannesjo/super-productivity/issues/1221) top icon instead of inline ([fbef9ca](https://github.com/johannesjo/super-productivity/commit/fbef9cab2ca6a5aa4dca6670d15f44aa0c4b9a65))
+- [#1221](https://github.com/johannesjo/super-productivity/issues/1221) WIP toggle button for isAddToBottom ([5e28833](https://github.com/johannesjo/super-productivity/commit/5e28833f21920ef509c68f3ee27fa512c4304202))
+- add more no sync fields ([862c159](https://github.com/johannesjo/super-productivity/commit/862c159f3973e650ce26054700f545537cbfd1cb))
+- **android:** add more initial logging info ([dedb3ca](https://github.com/johannesjo/super-productivity/commit/dedb3caa756ac0e54b4311e8575dff2cbdb07083))
+- closes [#1221](https://github.com/johannesjo/super-productivity/issues/1221) finishing comments ([2845eac](https://github.com/johannesjo/super-productivity/commit/2845eacbd26174fa9ed51db67544820fcf61691c))
+- **localSync:** add frontend boilerplate [#690](https://github.com/johannesjo/super-productivity/issues/690) ([845c037](https://github.com/johannesjo/super-productivity/commit/845c037e460bc31147e6cc66557ab69ae5f4e444))
+- **localSync:** make file sync through local files work [#690](https://github.com/johannesjo/super-productivity/issues/690) ([48644c4](https://github.com/johannesjo/super-productivity/commit/48644c498a049160c8791629e32d1b6f324721e3))
+- **localSync:** make sync file path configurable [#690](https://github.com/johannesjo/super-productivity/issues/690) ([a4c8ca0](https://github.com/johannesjo/super-productivity/commit/a4c8ca058b7e92d5a02a6a8e72736591e1dedcec))
+- **localSync:** prepare electron interface [#690](https://github.com/johannesjo/super-productivity/issues/690) ([9f2bcd7](https://github.com/johannesjo/super-productivity/commit/9f2bcd751cf0309968196e389ee0c4ff115b4c68))
+- make icon consistent ([33bbd96](https://github.com/johannesjo/super-productivity/commit/33bbd9643d75a6099845c494237a6134d42d4648))
+- make local only fields work ([2fb3957](https://github.com/johannesjo/super-productivity/commit/2fb39576b79fe7393c893b5b6eba4f561f2f2595))
+- **privateLocalData:** outline how to implement [#662](https://github.com/johannesjo/super-productivity/issues/662) ([f27d914](https://github.com/johannesjo/super-productivity/commit/f27d91424916c00d09db1093b5bcf158e0e14bcb))
+- **quickHistory:** add boilerplate and make most basic version work ([03ac581](https://github.com/johannesjo/super-productivity/commit/03ac581d3c41d57e6fecbdd9fb84e4ed1e6db49f))
+- **quickHistory:** improve data mapping 2 ([c11db92](https://github.com/johannesjo/super-productivity/commit/c11db9238f1f8d005b67082f0208708eff758ca0))
+- **quickHistory:** improve data mapping and load larger dataset ([9878b65](https://github.com/johannesjo/super-productivity/commit/9878b65264c2f50a426b45336dd3b4d70a4acbc3))
+- **quickHistory:** polish ([ac7d478](https://github.com/johannesjo/super-productivity/commit/ac7d478e987bb44d4e4ddb71fd388df7a13e89e1))
+- **quickHistory:** polish 2 ([8a851a7](https://github.com/johannesjo/super-productivity/commit/8a851a771e0c6a6bf1eb62ebd5f62ef1482fd71f))
+- **sync:** improve sync return value ([cbd6cb4](https://github.com/johannesjo/super-productivity/commit/cbd6cb4cb3d2cdea81c80f7d6252274f335168da))
+
 # [7.5.0-rc.0](https://github.com/johannesjo/super-productivity/compare/v7.4.1...v7.5.0-rc.0) (2021-07-21)
 
 ## [7.4.1](https://github.com/johannesjo/super-productivity/compare/v7.4.0...v7.4.1) (2021-07-21)
