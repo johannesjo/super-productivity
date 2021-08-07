@@ -22,7 +22,7 @@ export class LocalBackupService {
   private _cfg$: Observable<LocalBackupConfig> = this._configService.cfg$.pipe(
     map((cfg) => cfg.localBackup),
   );
-  private _triggerBackups$: Observable<unknown> = this._cfg$.pipe(
+  private _triggerBackupSave$: Observable<unknown> = this._cfg$.pipe(
     filter((cfg) => cfg.isEnabled),
     switchMap(() => interval(DEFAULT_BACKUP_INTERVAL)),
     tap(() => this._backup()),
@@ -35,7 +35,7 @@ export class LocalBackupService {
   ) {}
 
   init(): void {
-    this._triggerBackups$.subscribe();
+    this._triggerBackupSave$.subscribe();
   }
 
   isBackupAvailable(): Promise<boolean | LocalBackupMeta> {
