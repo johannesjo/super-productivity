@@ -58,4 +58,6 @@ if (IS_ANDROID_WEB_VIEW) {
       };
     });
   };
+
+  console.log('Android Web View interfaces initialized', androidInterface);
 }
