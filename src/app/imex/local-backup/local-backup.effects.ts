@@ -69,7 +69,11 @@ export class LocalBackupEffects {
         ) {
           const backupData = await this._localBackupService.loadBackupAndroid();
           console.log('backupData', backupData);
-          await this._dataImportService.importCompleteSyncData(JSON.parse(backupData));
+          const lineBreaksReplaced = backupData.replace(/\n/g, '\\n');
+          console.log('lineBreaksReplaced', lineBreaksReplaced);
+          await this._dataImportService.importCompleteSyncData(
+            JSON.parse(lineBreaksReplaced),
+          );
         }
       }
     }
