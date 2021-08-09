@@ -10,6 +10,7 @@ import { TranslateService } from '@ngx-translate/core';
 import { T } from '../../t.const';
 import * as moment from 'moment';
 import { IS_ANDROID_BACKUP_READY } from '../../core/android/android-interface';
+import { IS_ANDROID_WEB_VIEW } from '../../util/is-android-web-view';
 
 @Injectable()
 export class LocalBackupEffects {
@@ -41,7 +42,10 @@ export class LocalBackupEffects {
       !appDataComplete.lastLocalSyncModelChange
     ) {
       const backupMeta = await this._localBackupService.isBackupAvailable();
-      if (typeof backupMeta !== 'boolean') {
+
+      // ELECTRON
+      // --------
+      if (IS_ELECTRON && typeof backupMeta !== 'boolean') {
         if (
           confirm(
             this._translateService.instant(T.CONFIRM.RESTORE_FILE_BACKUP, {
@@ -50,7 +54,20 @@ export class LocalBackupEffects {
             }),
           )
         ) {
-          const backupData = await this._localBackupService.loadBackup(backupMeta.path);
+          const backupData = await this._localBackupService.loadBackupElectron(
+            backupMeta.path,
+          );
+          console.log('backupData', backupData);
+          await this._dataImportService.importCompleteSyncData(JSON.parse(backupData));
+        }
+
+        // ANDROID
+        // -------
+      } else if (IS_ANDROID_WEB_VIEW && backupMeta === true) {
+        if (
+          confirm(this._translateService.instant(T.CONFIRM.RESTORE_FILE_BACKUP_ANDROID))
+        ) {
+          const backupData = await this._localBackupService.loadBackupAndroid();
           console.log('backupData', backupData);
           await this._dataImportService.importCompleteSyncData(JSON.parse(backupData));
         }

@@ -46,13 +46,15 @@ export class LocalBackupService {
         >);
   }
 
-  loadBackup(backupPath: string): Promise<string> {
-    return IS_ANDROID_WEB_VIEW
-      ? androidInterface.loadFromDbWrapped(ANDROID_DB_KEY).then((r) => r as string)
-      : (this._electronService.callMain(
-          IPC.BACKUP_LOAD_DATA,
-          backupPath,
-        ) as Promise<string>);
+  loadBackupElectron(backupPath: string): Promise<string> {
+    return this._electronService.callMain(
+      IPC.BACKUP_LOAD_DATA,
+      backupPath,
+    ) as Promise<string>;
+  }
+
+  loadBackupAndroid(): Promise<string> {
+    return androidInterface.loadFromDbWrapped(ANDROID_DB_KEY).then((r) => r as string);
   }
 
   private async _backup(): Promise<void> {
