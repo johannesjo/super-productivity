@@ -89,6 +89,7 @@ export class ReminderService {
     this._updateRemindersInWorker(this._reminders);
     this._onReloadModel$.next(this._reminders);
     this._reminders$.next(this._reminders);
+    console.log('loaded reminders from database', this._reminders);
   }
 
   // TODO maybe refactor to observable, because models can differ to sync value for yet unknown reasons
