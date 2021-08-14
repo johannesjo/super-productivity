@@ -1,7 +1,7 @@
-<a (click)="downloadBackup()" color="primary" mat-stroked-button>
+<button (click)="downloadBackup()" color="primary" mat-stroked-button type="button">
   <mat-icon>file_upload</mat-icon>
   {{T.FILE_IMEX.EXPORT_DATA|translate}}
-</a>
+</button>
 
 <button (click)="fileInput.click()" color="primary" mat-stroked-button type="button">
   <mat-icon>file_download</mat-icon>
