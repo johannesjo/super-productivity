@@ -1,3 +1,11 @@
+## [7.5.1](https://github.com/johannesjo/super-productivity/compare/v7.5.0...v7.5.1) (2021-08-16)
+
+### Bug Fixes
+
+- displayWith issue [#1441](https://github.com/johannesjo/super-productivity/issues/1441) [#1445](https://github.com/johannesjo/super-productivity/issues/1445) [#1458](https://github.com/johannesjo/super-productivity/issues/1458) ([50e1ea4](https://github.com/johannesjo/super-productivity/commit/50e1ea4700674f7aba629deec516ab132c7b2f1c))
+- **localBackup:** android backup not loading ([3bd0ef6](https://github.com/johannesjo/super-productivity/commit/3bd0ef67af6c3765c1b9bdc42585aad26fd2f27b))
+- **localBackup:** android backup not loading 2 ([88dde3a](https://github.com/johannesjo/super-productivity/commit/88dde3aa585f7d668bb5cbb0d158980c01a939dc))
+
 # [7.5.0](https://github.com/johannesjo/super-productivity/compare/v7.5.0-rc.0...v7.5.0) (2021-08-07)
 
 ### Bug Fixes
