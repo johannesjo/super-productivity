@@ -19,7 +19,7 @@ Mac access required!
 
 1. Go to https://developer.apple.com/account/resources/profiles/list
 2. Create new "Mac App Store" (store) and "Developer ID" (dmg) Profile
-3. Download and move to tools/mac-profiles
+3. Download and move to tools/mac-profiles (HINT: take care that the IDE or editor does not mess up the white-spaces)
 4. Use `base64 -i dl.provisionprofile -o dmg-profile.txt` and `base64 -i mas.provisionprofile -o MAS-profile.txt` to get string for CI
 5. Update `DL_PROVISION_PROFILE` and `MAS_PROVISION_PROFILE`
 
