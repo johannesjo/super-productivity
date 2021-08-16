@@ -72,6 +72,7 @@ export class SelectTaskComponent implements OnInit, OnDestroy {
   }
 
   displayWith(task?: Task): string | undefined {
+    // NOTE: apparently task can be undefined for displayWith
     return task?.title;
   }
 

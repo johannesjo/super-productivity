@@ -264,6 +264,7 @@ export class SearchBarComponent implements AfterViewInit, OnDestroy {
   }
 
   getOptionText(item: SearchItem): string {
+    // NOTE: apparently item can be undefined for displayWith
     return item?.title;
   }
 

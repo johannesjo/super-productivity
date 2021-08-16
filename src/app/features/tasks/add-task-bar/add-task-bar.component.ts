@@ -255,6 +255,7 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
   }
 
   displayWith(issue?: JiraIssue): string | undefined {
+    // NOTE: apparently issue can be undefined for displayWith
     return issue?.summary;
   }
 

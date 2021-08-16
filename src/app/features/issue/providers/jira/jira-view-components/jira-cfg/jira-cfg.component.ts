@@ -186,8 +186,9 @@ export class JiraCfgComponent implements OnInit, OnDestroy {
     return field.id;
   }
 
-  displayIssueWith(issue: JiraIssue): string {
-    return issue.summary;
+  displayIssueWith(issue?: JiraIssue): string | undefined {
+    // NOTE: apparently issue can be undefined for displayWith
+    return issue?.summary;
   }
 
   trackByIssueId(i: number, issue: JiraIssue): string {
