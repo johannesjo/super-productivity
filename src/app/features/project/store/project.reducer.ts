@@ -1,13 +1,11 @@
 import { createEntityAdapter, EntityAdapter, Update } from '@ngrx/entity';
 import { Project, ProjectState } from '../project.model';
-import { ProjectActions, ProjectActionTypes } from './project.actions';
-import { createFeatureSelector, createSelector } from '@ngrx/store';
+import { createFeatureSelector, createReducer, createSelector, on } from '@ngrx/store';
 import { FIRST_PROJECT, PROJECT_MODEL_VERSION } from '../project.const';
 import { JiraCfg } from '../../issue/providers/jira/jira.model';
 import { GithubCfg } from '../../issue/providers/github/github.model';
 import {
   WorkContextAdvancedCfg,
-  WorkContextAdvancedCfgKey,
   WorkContextType,
 } from '../../work-context/work-context.model';
 import {
@@ -46,14 +44,29 @@ import {
 } from '../../issue/issue.const';
 import { GitlabCfg } from '../../issue/providers/gitlab/gitlab';
 import { loadAllData } from '../../../root-store/meta/load-all-data.action';
-import { AppDataComplete } from '../../../imex/sync/sync.model';
 import { migrateProjectState } from '../migrate-projects-state.util';
 import { MODEL_VERSION_KEY } from '../../../app.constants';
 import { exists } from '../../../util/exists';
 import { Task } from '../../tasks/task.model';
-import { IssueIntegrationCfg, IssueProviderKey } from '../../issue/issue.model';
 import { devError } from '../../../util/dev-error';
 import { CaldavCfg } from '../../issue/providers/caldav/caldav.model';
+import {
+  addProject,
+  addProjects,
+  addToProjectBreakTime,
+  archiveProject,
+  deleteProject,
+  deleteProjects,
+  loadProjects,
+  unarchiveProject,
+  updateProject,
+  updateProjectAdvancedCfg,
+  updateProjectIssueProviderCfg,
+  updateProjectOrder,
+  updateProjectWorkEnd,
+  updateProjectWorkStart,
+  upsertProject,
+} from './project.actions';
 
 export const PROJECT_FEATURE_NAME = 'projects';
 const WORK_CONTEXT_TYPE: WorkContextType = WorkContextType.PROJECT;
@@ -140,58 +153,44 @@ export const initialProjectState: ProjectState = projectAdapter.getInitialState(
   [MODEL_VERSION_KEY]: PROJECT_MODEL_VERSION,
 });
 
-// REDUCER
-// -------
-export const projectReducer = (
-  state: ProjectState = initialProjectState,
-  action:
-    | ProjectActions
-    | AddTask
-    | DeleteTask
-    | MoveToOtherProject
-    | MoveToArchive
-    | RestoreTask,
-): ProjectState => {
-  // eslint-disable-next-line
-  const payload = action['payload'];
+const _reducer = createReducer<ProjectState>(
+  initialProjectState,
 
-  // TODO fix this hackyness once we use the new syntax everywhere
-  if ((action.type as string) === loadAllData.type) {
-    const { appDataComplete }: { appDataComplete: AppDataComplete } = action as any;
-    return appDataComplete.project
+  // META ACTIONS
+  // ------------
+  on(loadAllData, (oldState, { appDataComplete }) =>
+    appDataComplete.project
       ? migrateProjectState({ ...appDataComplete.project })
-      : state;
-  }
+      : oldState,
+  ),
 
-  if ((action.type as string) === moveTaskInTodayList.type) {
-    const { taskId, newOrderedIds, target, workContextType, workContextId } =
-      action as any;
+  on(
+    moveTaskInTodayList,
+    (state, { taskId, newOrderedIds, target, workContextType, workContextId }) => {
+      if (workContextType !== WORK_CONTEXT_TYPE) {
+        return state;
+      }
 
-    if (workContextType !== WORK_CONTEXT_TYPE) {
-      return state;
-    }
-
-    const taskIdsBefore = (state.entities[workContextId] as Project).taskIds;
-    const taskIds = moveTaskForWorkContextLikeState(
-      taskId,
-      newOrderedIds,
-      target,
-      taskIdsBefore,
-    );
-    return projectAdapter.updateOne(
-      {
-        id: workContextId,
-        changes: {
-          taskIds,
+      const taskIdsBefore = (state.entities[workContextId] as Project).taskIds;
+      const taskIds = moveTaskForWorkContextLikeState(
+        taskId,
+        newOrderedIds,
+        target,
+        taskIdsBefore,
+      );
+      return projectAdapter.updateOne(
+        {
+          id: workContextId,
+          changes: {
+            taskIds,
+          },
         },
-      },
-      state,
-    );
-  }
+        state,
+      );
+    },
+  ),
 
-  if ((action.type as string) === moveTaskInBacklogList.type) {
-    const { taskId, newOrderedIds, workContextId } = action as any;
-
+  on(moveTaskInBacklogList, (state, { taskId, newOrderedIds, workContextId }) => {
     const taskIdsBefore = (state.entities[workContextId] as Project).backlogTaskIds;
     const backlogTaskIds = moveTaskForWorkContextLikeState(
       taskId,
@@ -208,11 +207,9 @@ export const projectReducer = (
       },
       state,
     );
-  }
+  }),
 
-  if ((action.type as string) === moveTaskToBacklogList.type) {
-    const { taskId, newOrderedIds, workContextId } = action as any;
-
+  on(moveTaskToBacklogList, (state, { taskId, newOrderedIds, workContextId }) => {
     const todaysTaskIdsBefore = (state.entities[workContextId] as Project).taskIds;
     const backlogIdsBefore = (state.entities[workContextId] as Project).backlogTaskIds;
 
@@ -229,11 +226,9 @@ export const projectReducer = (
       },
       state,
     );
-  }
+  }),
 
-  if ((action.type as string) === moveTaskToTodayList.type) {
-    const { taskId, newOrderedIds, workContextId } = action as any;
-
+  on(moveTaskToTodayList, (state, { taskId, newOrderedIds, workContextId }) => {
     const backlogIdsBefore = (state.entities[workContextId] as Project).backlogTaskIds;
     const todaysTaskIdsBefore = (state.entities[workContextId] as Project).taskIds;
 
@@ -250,50 +245,51 @@ export const projectReducer = (
       },
       state,
     );
-  }
+  }),
 
-  // up down today
-  if ((action.type as string) === moveTaskUpInTodayList.type) {
-    const { taskId, workContextType, workContextId, doneTaskIds } = action as any;
-    return workContextType === WORK_CONTEXT_TYPE
-      ? projectAdapter.updateOne(
-          {
-            id: workContextId,
-            changes: {
-              taskIds: arrayMoveLeftUntil(
-                (state.entities[workContextId] as Project).taskIds,
-                taskId,
-                (id) => !doneTaskIds.includes(id),
-              ),
+  on(
+    moveTaskUpInTodayList,
+    (state, { taskId, workContextType, workContextId, doneTaskIds }) => {
+      return workContextType === WORK_CONTEXT_TYPE
+        ? projectAdapter.updateOne(
+            {
+              id: workContextId,
+              changes: {
+                taskIds: arrayMoveLeftUntil(
+                  (state.entities[workContextId] as Project).taskIds,
+                  taskId,
+                  (id) => !doneTaskIds.includes(id),
+                ),
+              },
             },
-          },
-          state,
-        )
-      : state;
-  }
+            state,
+          )
+        : state;
+    },
+  ),
 
-  if ((action.type as string) === moveTaskDownInTodayList.type) {
-    const { taskId, workContextType, workContextId, doneTaskIds } = action as any;
-    return workContextType === WORK_CONTEXT_TYPE
-      ? projectAdapter.updateOne(
-          {
-            id: workContextId,
-            changes: {
-              taskIds: arrayMoveRightUntil(
-                (state.entities[workContextId] as Project).taskIds,
-                taskId,
-                (id) => !doneTaskIds.includes(id),
-              ),
+  on(
+    moveTaskDownInTodayList,
+    (state, { taskId, workContextType, workContextId, doneTaskIds }) => {
+      return workContextType === WORK_CONTEXT_TYPE
+        ? projectAdapter.updateOne(
+            {
+              id: workContextId,
+              changes: {
+                taskIds: arrayMoveRightUntil(
+                  (state.entities[workContextId] as Project).taskIds,
+                  taskId,
+                  (id) => !doneTaskIds.includes(id),
+                ),
+              },
             },
-          },
-          state,
-        )
-      : state;
-  }
+            state,
+          )
+        : state;
+    },
+  ),
 
-  // up down backlog
-  if ((action.type as string) === moveTaskUpInBacklogList.type) {
-    const { taskId, workContextId, doneTaskIds } = action as any;
+  on(moveTaskUpInBacklogList, (state, { taskId, workContextId, doneBacklogTaskIds }) => {
     return projectAdapter.updateOne(
       {
         id: workContextId,
@@ -301,34 +297,34 @@ export const projectReducer = (
           backlogTaskIds: arrayMoveLeftUntil(
             (state.entities[workContextId] as Project).backlogTaskIds,
             taskId,
-            (id) => !doneTaskIds.includes(id),
+            (id) => !doneBacklogTaskIds.includes(id),
           ),
         },
       },
       state,
     );
-  }
+  }),
 
-  if ((action.type as string) === moveTaskDownInBacklogList.type) {
-    const { taskId, workContextId, doneTaskIds } = action as any;
-    return projectAdapter.updateOne(
-      {
-        id: workContextId,
-        changes: {
-          backlogTaskIds: arrayMoveRightUntil(
-            (state.entities[workContextId] as Project).backlogTaskIds,
-            taskId,
-            (id) => !doneTaskIds.includes(id),
-          ),
+  on(
+    moveTaskDownInBacklogList,
+    (state, { taskId, workContextId, doneBacklogTaskIds }) => {
+      return projectAdapter.updateOne(
+        {
+          id: workContextId,
+          changes: {
+            backlogTaskIds: arrayMoveRightUntil(
+              (state.entities[workContextId] as Project).backlogTaskIds,
+              taskId,
+              (id) => !doneBacklogTaskIds.includes(id),
+            ),
+          },
         },
-      },
-      state,
-    );
-  }
+        state,
+      );
+    },
+  ),
 
-  // AUTO move backlog/today
-  if ((action.type as string) === moveTaskToBacklogListAuto.type) {
-    const { taskId, workContextId } = action as any;
+  on(moveTaskToBacklogListAuto, (state, { taskId, workContextId }) => {
     const todaysTaskIdsBefore = (state.entities[workContextId] as Project).taskIds;
     const backlogIdsBefore = (state.entities[workContextId] as Project).backlogTaskIds;
     return backlogIdsBefore.includes(taskId)
@@ -343,10 +339,9 @@ export const projectReducer = (
           },
           state,
         );
-  }
+  }),
 
-  if ((action.type as string) === moveTaskToTodayListAuto.type) {
-    const { taskId, workContextId, isMoveToTop } = action as any;
+  on(moveTaskToTodayListAuto, (state, { taskId, workContextId, isMoveToTop }) => {
     const todaysTaskIdsBefore = (state.entities[workContextId] as Project).taskIds;
     const backlogIdsBefore = (state.entities[workContextId] as Project).backlogTaskIds;
     return todaysTaskIdsBefore.includes(taskId)
@@ -363,13 +358,195 @@ export const projectReducer = (
           },
           state,
         );
-  }
+  }),
 
+  // Project Actions
+  // ------------
+  on(addProject, (state, { project }) => projectAdapter.addOne(project, state)),
+  on(upsertProject, (state, { project }) => projectAdapter.upsertOne(project, state)),
+  on(addProjects, (state, { projects }) => projectAdapter.addMany(projects, state)),
+
+  on(updateProject, (state, { project }) => projectAdapter.updateOne(project, state)),
+
+  on(deleteProject, (state, { id }) => projectAdapter.removeOne(id, state)),
+  on(deleteProjects, (state, { ids }) => projectAdapter.removeMany(ids, state)),
+  on(loadProjects, (state, { projects }) => projectAdapter.setAll(projects, state)),
+
+  on(archiveProject, (state, { id }) =>
+    projectAdapter.updateOne(
+      {
+        id,
+        changes: {
+          isArchived: true,
+        },
+      },
+      state,
+    ),
+  ),
+
+  on(unarchiveProject, (state, { id }) =>
+    projectAdapter.updateOne(
+      {
+        id,
+        changes: {
+          isArchived: false,
+        },
+      },
+      state,
+    ),
+  ),
+
+  on(updateProjectWorkStart, (state, { id, date, newVal }) => {
+    const oldP = state.entities[id] as Project;
+    return projectAdapter.updateOne(
+      {
+        id,
+        changes: {
+          workStart: {
+            ...oldP.workStart,
+            [date]: newVal,
+          },
+        },
+      },
+      state,
+    );
+  }),
+  on(updateProjectWorkEnd, (state, { id, date, newVal }) => {
+    const oldP = state.entities[id] as Project;
+    return projectAdapter.updateOne(
+      {
+        id,
+        changes: {
+          workEnd: {
+            ...oldP.workEnd,
+            [date]: newVal,
+          },
+        },
+      },
+      state,
+    );
+  }),
+
+  on(addToProjectBreakTime, (state, { id, date, valToAdd }) => {
+    const oldP = state.entities[id] as Project;
+    const oldBreakTime = oldP.breakTime[date] || 0;
+    const oldBreakNr = oldP.breakNr[date] || 0;
+
+    return projectAdapter.updateOne(
+      {
+        id,
+        changes: {
+          breakNr: {
+            ...oldP.breakNr,
+            [date]: oldBreakNr + 1,
+          },
+          breakTime: {
+            ...oldP.breakTime,
+            [date]: oldBreakTime + valToAdd,
+          },
+        },
+      },
+      state,
+    );
+  }),
+
+  on(updateProjectAdvancedCfg, (state, { projectId, sectionKey, data }) => {
+    const currentProject = state.entities[projectId] as Project;
+    const advancedCfg: WorkContextAdvancedCfg = Object.assign(
+      {},
+      currentProject.advancedCfg,
+    );
+    return projectAdapter.updateOne(
+      {
+        id: projectId,
+        changes: {
+          advancedCfg: {
+            ...advancedCfg,
+            [sectionKey]: {
+              ...advancedCfg[sectionKey],
+              ...data,
+            },
+          },
+        },
+      },
+      state,
+    );
+  }),
+
+  on(
+    updateProjectIssueProviderCfg,
+    (state, { projectId, providerCfg, issueProviderKey, isOverwrite }) => {
+      const currentProject = state.entities[projectId] as Project;
+      return projectAdapter.updateOne(
+        {
+          id: projectId,
+          changes: {
+            issueIntegrationCfgs: {
+              ...currentProject.issueIntegrationCfgs,
+              [issueProviderKey]: {
+                ...(isOverwrite
+                  ? {}
+                  : currentProject.issueIntegrationCfgs[issueProviderKey]),
+                ...providerCfg,
+              },
+            },
+          },
+        },
+        state,
+      );
+    },
+  ),
+  on(updateProjectOrder, (state, { ids }) => {
+    const currentIds = state.ids as string[];
+    let newIds: string[] = ids;
+    if (ids.length !== currentIds.length) {
+      const allP = currentIds.map((id) => state.entities[id]) as Project[];
+      const archivedIds = allP.filter((p) => p.isArchived).map((p) => p.id);
+      const unarchivedIds = allP.filter((p) => !p.isArchived).map((p) => p.id);
+      if (
+        ids.length === unarchivedIds.length &&
+        ids.length > 0 &&
+        unarchivedIds.includes(ids[0])
+      ) {
+        newIds = [...ids, ...archivedIds];
+      } else if (
+        ids.length === archivedIds.length &&
+        ids.length > 0 &&
+        archivedIds.includes(ids[0])
+      ) {
+        newIds = [...unarchivedIds, ...ids];
+      } else {
+        throw new Error('Invalid param given to UpdateProjectOrder');
+      }
+    }
+
+    if (!newIds) {
+      throw new Error('Project ids are undefined');
+    }
+
+    return { ...state, ids: newIds };
+  }),
+  // on(AAA, (state, {AAA})=> {  }),
+);
+
+// REDUCER
+// -------
+export const projectReducer = (
+  state: ProjectState = initialProjectState,
+  action:
+    | AddTask
+    | DeleteTask
+    | MoveToOtherProject
+    | MoveToArchive
+    | RestoreTask
+    | ConvertToMainTask,
+): ProjectState => {
   switch (action.type) {
-    // Meta Actions
+    // Meta Actions (all task related)
     // ------------
     case TaskActionTypes.AddTask: {
-      const { task, isAddToBottom, isAddToBacklog } = payload;
+      const a = action as AddTask;
+      const { task, isAddToBottom, isAddToBacklog } = a.payload;
 
       const affectedProject = task.projectId && state.entities[task.projectId];
       if (!affectedProject) return state; // if there is no projectId, no changes are needed
@@ -393,7 +570,7 @@ export const projectReducer = (
       }
       return projectAdapter.updateOne(
         {
-          id: task.projectId,
+          id: task.projectId as string,
           changes,
         },
         state,
@@ -418,12 +595,13 @@ export const projectReducer = (
     }
 
     case TaskActionTypes.DeleteTask: {
-      const { task } = action.payload;
-      const project = state.entities[task.projectId] as Project;
-      return task.projectId
+      const a = action as DeleteTask;
+      const { task } = a.payload;
+      const project = task.projectId && (state.entities[task.projectId] as Project);
+      return project
         ? projectAdapter.updateOne(
             {
-              id: task.projectId,
+              id: task.projectId as string,
               changes: {
                 taskIds: project.taskIds.filter((ptId) => ptId !== task.id),
                 backlogTaskIds: project.backlogTaskIds.filter((ptId) => ptId !== task.id),
@@ -435,10 +613,12 @@ export const projectReducer = (
     }
 
     case TaskActionTypes.MoveToArchive: {
-      const { tasks } = action.payload;
+      const { tasks } = (action as MoveToArchive).payload;
       const taskIdsToMoveToArchive = tasks.map((t: Task) => t.id);
       const projectIds = unique<string>(
-        tasks.map((t: Task) => t.projectId).filter((pid: string) => !!pid),
+        tasks
+          .map((t: Task) => t.projectId)
+          .filter((pid: string | null) => !!pid) as string[],
       );
       const updates: Update<Project>[] = projectIds.map((pid: string) => ({
         id: pid,
@@ -455,7 +635,7 @@ export const projectReducer = (
     }
 
     case TaskActionTypes.RestoreTask: {
-      const { task } = action.payload;
+      const { task } = (action as RestoreTask).payload;
       if (!task.projectId) {
         return state;
       }
@@ -472,7 +652,7 @@ export const projectReducer = (
     }
 
     case TaskActionTypes.MoveToOtherProject: {
-      const { task, targetProjectId } = action.payload;
+      const { task, targetProjectId } = (action as MoveToOtherProject).payload;
       const srcProjectId = task.projectId;
       const updates: Update<Project>[] = [];
 
@@ -506,220 +686,8 @@ export const projectReducer = (
       return projectAdapter.updateMany(updates, state);
     }
 
-    // Project Actions
-    // ------------
-    case ProjectActionTypes.LoadProjectRelatedDataSuccess: {
-      return state;
-    }
-
-    case ProjectActionTypes.AddProject: {
-      return projectAdapter.addOne(payload.project, state);
-    }
-
-    case ProjectActionTypes.UpsertProject: {
-      return projectAdapter.upsertOne(payload.project, state);
-    }
-
-    case ProjectActionTypes.AddProjects: {
-      return projectAdapter.addMany(payload.projects, state);
-    }
-
-    case ProjectActionTypes.UpdateProject: {
-      return projectAdapter.updateOne(payload.project, state);
-    }
-
-    case ProjectActionTypes.UpdateProjectWorkStart: {
-      const { id, date, newVal } = action.payload;
-      const oldP = state.entities[id] as Project;
-      return projectAdapter.updateOne(
-        {
-          id,
-          changes: {
-            workStart: {
-              ...oldP.workStart,
-              [date]: newVal,
-            },
-          },
-        },
-        state,
-      );
-    }
-
-    case ProjectActionTypes.UpdateProjectWorkEnd: {
-      const { id, date, newVal } = action.payload;
-      const oldP = state.entities[id] as Project;
-      return projectAdapter.updateOne(
-        {
-          id,
-          changes: {
-            workEnd: {
-              ...oldP.workEnd,
-              [date]: newVal,
-            },
-          },
-        },
-        state,
-      );
-    }
-
-    case ProjectActionTypes.AddToProjectBreakTime: {
-      const { id, date, valToAdd } = action.payload;
-      const oldP = state.entities[id] as Project;
-      const oldBreakTime = oldP.breakTime[date] || 0;
-      const oldBreakNr = oldP.breakNr[date] || 0;
-
-      return projectAdapter.updateOne(
-        {
-          id,
-          changes: {
-            breakNr: {
-              ...oldP.breakNr,
-              [date]: oldBreakNr + 1,
-            },
-            breakTime: {
-              ...oldP.breakTime,
-              [date]: oldBreakTime + valToAdd,
-            },
-          },
-        },
-        state,
-      );
-    }
-
-    case ProjectActionTypes.DeleteProject: {
-      return projectAdapter.removeOne(payload.id, state);
-    }
-
-    case ProjectActionTypes.DeleteProjects: {
-      return projectAdapter.removeMany(payload.ids, state);
-    }
-
-    case ProjectActionTypes.LoadProjects: {
-      return projectAdapter.setAll(payload.projects, state);
-    }
-
-    case ProjectActionTypes.UpdateProjectAdvancedCfg: {
-      const {
-        projectId,
-        sectionKey,
-        data,
-      }: {
-        projectId: string;
-        sectionKey: WorkContextAdvancedCfgKey;
-        data: any;
-      } = payload;
-      const currentProject = state.entities[projectId] as Project;
-      const advancedCfg: WorkContextAdvancedCfg = Object.assign(
-        {},
-        currentProject.advancedCfg,
-      );
-      return projectAdapter.updateOne(
-        {
-          id: projectId,
-          changes: {
-            advancedCfg: {
-              ...advancedCfg,
-              [sectionKey]: {
-                ...advancedCfg[sectionKey],
-                ...data,
-              },
-            },
-          },
-        },
-        state,
-      );
-    }
-
-    case ProjectActionTypes.UpdateProjectIssueProviderCfg: {
-      const {
-        projectId,
-        providerCfg,
-        issueProviderKey,
-        isOverwrite,
-      }: {
-        projectId: string;
-        issueProviderKey: IssueProviderKey;
-        providerCfg: Partial<IssueIntegrationCfg>;
-        isOverwrite: boolean;
-      } = action.payload;
-      const currentProject = state.entities[projectId] as Project;
-      return projectAdapter.updateOne(
-        {
-          id: projectId,
-          changes: {
-            issueIntegrationCfgs: {
-              ...currentProject.issueIntegrationCfgs,
-              [issueProviderKey]: {
-                ...(isOverwrite
-                  ? {}
-                  : currentProject.issueIntegrationCfgs[issueProviderKey]),
-                ...providerCfg,
-              },
-            },
-          },
-        },
-        state,
-      );
-    }
-
-    case ProjectActionTypes.UpdateProjectOrder: {
-      const { ids } = action.payload;
-      const currentIds = state.ids as string[];
-      let newIds: string[] = ids;
-      if (ids.length !== currentIds.length) {
-        const allP = currentIds.map((id) => state.entities[id]) as Project[];
-        const archivedIds = allP.filter((p) => p.isArchived).map((p) => p.id);
-        const unarchivedIds = allP.filter((p) => !p.isArchived).map((p) => p.id);
-        if (
-          ids.length === unarchivedIds.length &&
-          ids.length > 0 &&
-          unarchivedIds.includes(ids[0])
-        ) {
-          newIds = [...ids, ...archivedIds];
-        } else if (
-          ids.length === archivedIds.length &&
-          ids.length > 0 &&
-          archivedIds.includes(ids[0])
-        ) {
-          newIds = [...unarchivedIds, ...ids];
-        } else {
-          throw new Error('Invalid param given to UpdateProjectOrder');
-        }
-      }
-
-      if (!newIds) {
-        throw new Error('Project ids are undefined');
-      }
-
-      return { ...state, ids: newIds };
-    }
-
-    case ProjectActionTypes.ArchiveProject: {
-      return projectAdapter.updateOne(
-        {
-          id: action.payload.id,
-          changes: {
-            isArchived: true,
-          },
-        },
-        state,
-      );
-    }
-
-    case ProjectActionTypes.UnarchiveProject: {
-      return projectAdapter.updateOne(
-        {
-          id: action.payload.id,
-          changes: {
-            isArchived: false,
-          },
-        },
-        state,
-      );
-    }
-
     default: {
-      return state;
+      return _reducer(state, action);
     }
   }
 };

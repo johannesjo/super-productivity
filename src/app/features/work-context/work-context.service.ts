@@ -38,10 +38,10 @@ import { Actions, ofType } from '@ngrx/effects';
 import { moveTaskToBacklogList } from './store/work-context-meta.actions';
 import { WorklogExportSettings } from '../worklog/worklog.model';
 import {
-  AddToProjectBreakTime,
-  UpdateProjectAdvancedCfg,
-  UpdateProjectWorkEnd,
-  UpdateProjectWorkStart,
+  addToProjectBreakTime,
+  updateProjectAdvancedCfg,
+  updateProjectWorkEnd,
+  updateProjectWorkStart,
 } from '../project/store/project.actions';
 import {
   addToBreakTimeForTag,
@@ -361,7 +361,7 @@ export class WorkContextService {
     };
     const action =
       this.activeWorkContextType === WorkContextType.PROJECT
-        ? new UpdateProjectWorkStart(payload)
+        ? updateProjectWorkStart(payload)
         : updateWorkStartForTag(payload);
     this._store$.dispatch(action);
   }
@@ -374,7 +374,7 @@ export class WorkContextService {
     };
     const action =
       this.activeWorkContextType === WorkContextType.PROJECT
-        ? new UpdateProjectWorkEnd(payload)
+        ? updateProjectWorkEnd(payload)
         : updateWorkEndForTag(payload);
     this._store$.dispatch(action);
   }
@@ -387,7 +387,7 @@ export class WorkContextService {
     };
     const action =
       this.activeWorkContextType === WorkContextType.PROJECT
-        ? new AddToProjectBreakTime(payload)
+        ? addToProjectBreakTime(payload)
         : addToBreakTimeForTag(payload);
     this._store$.dispatch(action);
   }
@@ -398,7 +398,7 @@ export class WorkContextService {
   ): void {
     if (this.activeWorkContextType === WorkContextType.PROJECT) {
       this._store$.dispatch(
-        new UpdateProjectAdvancedCfg({
+        updateProjectAdvancedCfg({
           projectId: this.activeWorkContextId as string,
           sectionKey,
           data,

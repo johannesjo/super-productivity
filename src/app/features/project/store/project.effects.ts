@@ -3,16 +3,20 @@ import { Actions, Effect, ofType } from '@ngrx/effects';
 import { Action, select, Store } from '@ngrx/store';
 import { concatMap, filter, first, map, switchMap, take, tap } from 'rxjs/operators';
 import {
-  AddProject,
-  ArchiveProject,
-  DeleteProject,
-  LoadProjectRelatedDataSuccess,
-  ProjectActionTypes,
-  UnarchiveProject,
-  UpdateProject,
-  UpdateProjectIssueProviderCfg,
-  UpdateProjectWorkEnd,
-  UpdateProjectWorkStart,
+  addProject,
+  addProjects,
+  addToProjectBreakTime,
+  archiveProject,
+  deleteProject,
+  loadProjectRelatedDataSuccess,
+  unarchiveProject,
+  updateProject,
+  updateProjectAdvancedCfg,
+  updateProjectIssueProviderCfg,
+  updateProjectOrder,
+  updateProjectWorkEnd,
+  updateProjectWorkStart,
+  upsertProject,
 } from './project.actions';
 import { selectProjectFeatureState } from './project.reducer';
 import { PersistenceService } from '../../../core/persistence/persistence.service';
@@ -64,17 +68,19 @@ export class ProjectEffects {
   @Effect({ dispatch: false })
   syncProjectToLs$: Observable<unknown> = this._actions$.pipe(
     ofType(
-      ProjectActionTypes.AddProject,
-      ProjectActionTypes.DeleteProject,
-      ProjectActionTypes.UpdateProject,
-      ProjectActionTypes.UpdateProjectAdvancedCfg,
-      ProjectActionTypes.UpdateProjectIssueProviderCfg,
-      ProjectActionTypes.UpdateProjectWorkStart,
-      ProjectActionTypes.UpdateProjectWorkEnd,
-      ProjectActionTypes.AddToProjectBreakTime,
-      ProjectActionTypes.UpdateProjectOrder,
-      ProjectActionTypes.ArchiveProject,
-      ProjectActionTypes.UnarchiveProject,
+      addProject.type,
+      addProjects.type,
+      upsertProject.type,
+      deleteProject.type,
+      updateProject.type,
+      updateProjectAdvancedCfg.type,
+      updateProjectIssueProviderCfg.type,
+      updateProjectWorkStart.type,
+      updateProjectWorkEnd.type,
+      addToProjectBreakTime.type,
+      updateProjectOrder.type,
+      archiveProject.type,
+      unarchiveProject.type,
 
       moveTaskInBacklogList.type,
       moveTaskToBacklogList.type,
@@ -87,10 +93,7 @@ export class ProjectEffects {
     switchMap((a) => {
       // exclude ui only actions
       if (
-        [
-          ProjectActionTypes.UpdateProjectWorkStart,
-          ProjectActionTypes.UpdateProjectWorkEnd,
-        ].includes(a.type as any)
+        [updateProjectWorkStart.type, updateProjectWorkEnd.type].includes(a.type as any)
       ) {
         return this.saveToLs$(false);
       } else {
@@ -164,7 +167,7 @@ export class ProjectEffects {
     ),
     filter((project: Project) => !project.workStart[getWorklogStr()]),
     map((project) => {
-      return new UpdateProjectWorkStart({
+      return updateProjectWorkStart({
         id: project.id,
         date: getWorklogStr(),
         newVal: Date.now(),
@@ -177,7 +180,7 @@ export class ProjectEffects {
     ofType(TaskActionTypes.AddTimeSpent),
     filter((action: AddTimeSpent) => !!action.payload.task.projectId),
     map((action: AddTimeSpent) => {
-      return new UpdateProjectWorkEnd({
+      return updateProjectWorkEnd({
         id: action.payload.task.projectId as string,
         date: getWorklogStr(),
         newVal: Date.now(),
@@ -197,26 +200,24 @@ export class ProjectEffects {
       ]).then(() => projectId);
     }),
     map((projectId) => {
-      return new LoadProjectRelatedDataSuccess({ projectId });
+      return loadProjectRelatedDataSuccess({ projectId });
     }),
   );
 
   // TODO a solution for orphaned tasks might be needed
   @Effect({ dispatch: false })
   deleteProjectRelatedData: Observable<unknown> = this._actions$.pipe(
-    ofType(ProjectActionTypes.DeleteProject),
-    tap(async (action: DeleteProject) => {
-      await this._persistenceService.removeCompleteRelatedDataForProject(
-        action.payload.id,
-      );
-      this._reminderService.removeRemindersByWorkContextId(action.payload.id);
-      this._removeAllTasksForProject(action.payload.id);
-      this._removeAllArchiveTasksForProject(action.payload.id);
-      this._removeAllRepeatingTasksForProject(action.payload.id);
+    ofType(deleteProject.type),
+    tap(async ({ id }) => {
+      await this._persistenceService.removeCompleteRelatedDataForProject(id);
+      this._reminderService.removeRemindersByWorkContextId(id);
+      this._removeAllTasksForProject(id);
+      this._removeAllArchiveTasksForProject(id);
+      this._removeAllRepeatingTasksForProject(id);
 
       // we also might need to account for this unlikely but very nasty scenario
       const misc = await this._globalConfigService.misc$.pipe(take(1)).toPromise();
-      if (action.payload.id === misc.defaultProjectId) {
+      if (id === misc.defaultProjectId) {
         this._globalConfigService.updateSection('misc', { defaultProjectId: null });
       }
     }),
@@ -224,10 +225,10 @@ export class ProjectEffects {
 
   @Effect({ dispatch: false })
   archiveProject: Observable<unknown> = this._actions$.pipe(
-    ofType(ProjectActionTypes.ArchiveProject),
-    tap(async (action: ArchiveProject) => {
-      await this._persistenceService.archiveProject(action.payload.id);
-      this._reminderService.removeRemindersByWorkContextId(action.payload.id);
+    ofType(archiveProject.type),
+    tap(async ({ id }) => {
+      await this._persistenceService.archiveProject(id);
+      this._reminderService.removeRemindersByWorkContextId(id);
       this._snackService.open({
         ico: 'archive',
         msg: T.F.PROJECT.S.ARCHIVED,
@@ -237,9 +238,9 @@ export class ProjectEffects {
 
   @Effect({ dispatch: false })
   unarchiveProject: Observable<unknown> = this._actions$.pipe(
-    ofType(ProjectActionTypes.UnarchiveProject),
-    tap(async (action: UnarchiveProject) => {
-      await this._persistenceService.unarchiveProject(action.payload.id);
+    ofType(unarchiveProject.type),
+    tap(async ({ id }) => {
+      await this._persistenceService.unarchiveProject(id);
 
       this._snackService.open({
         ico: 'unarchive',
@@ -252,13 +253,13 @@ export class ProjectEffects {
   // -----------
   @Effect({ dispatch: false })
   snackUpdateIssueProvider$: Observable<unknown> = this._actions$.pipe(
-    ofType(ProjectActionTypes.UpdateProjectIssueProviderCfg),
-    tap((action: UpdateProjectIssueProviderCfg) => {
+    ofType(updateProjectIssueProviderCfg.type),
+    tap(({ issueProviderKey }) => {
       this._snackService.open({
         type: 'SUCCESS',
         msg: T.F.PROJECT.S.ISSUE_PROVIDER_UPDATED,
         translateParams: {
-          issueProviderKey: action.payload.issueProviderKey,
+          issueProviderKey,
         },
       });
     }),
@@ -266,8 +267,8 @@ export class ProjectEffects {
 
   @Effect({ dispatch: false })
   snackUpdateBaseSettings$: Observable<unknown> = this._actions$.pipe(
-    ofType(ProjectActionTypes.UpdateProject),
-    tap((action: UpdateProject) => {
+    ofType(updateProject.type),
+    tap(() => {
       this._snackService.open({
         type: 'SUCCESS',
         msg: T.F.PROJECT.S.UPDATED,
@@ -277,21 +278,21 @@ export class ProjectEffects {
 
   @Effect({ dispatch: false })
   onProjectCreatedSnack: Observable<unknown> = this._actions$.pipe(
-    ofType(ProjectActionTypes.AddProject),
-    tap((action: AddProject) => {
+    ofType(addProject.type),
+    tap(({ project }) => {
       this._snackService.open({
         ico: 'add',
         type: 'SUCCESS',
         msg: T.F.PROJECT.S.CREATED,
-        translateParams: { title: action.payload.project.title },
+        translateParams: { title: (project as Project).title },
       });
     }),
   );
 
   @Effect({ dispatch: false })
   showDeletionSnack: Observable<unknown> = this._actions$.pipe(
-    ofType(ProjectActionTypes.DeleteProject),
-    tap((action: DeleteProject) => {
+    ofType(deleteProject.type),
+    tap(() => {
       this._snackService.open({
         ico: 'delete_forever',
         msg: T.F.PROJECT.S.DELETED,

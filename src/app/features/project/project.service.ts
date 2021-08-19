@@ -3,7 +3,6 @@ import { Observable, of } from 'rxjs';
 import { Project } from './project.model';
 import { PersistenceService } from '../../core/persistence/persistence.service';
 import { select, Store } from '@ngrx/store';
-import { ProjectActionTypes, UpdateProjectOrder } from './store/project.actions';
 import * as shortid from 'shortid';
 import {
   selectArchivedProjects,
@@ -31,6 +30,18 @@ import { GITHUB_TYPE, GITLAB_TYPE, JIRA_TYPE } from '../issue/issue.const';
 import { GitlabCfg } from '../issue/providers/gitlab/gitlab';
 import { ExportedProject } from './project-archive.model';
 import { CaldavCfg } from '../issue/providers/caldav/caldav.model';
+import {
+  addProject,
+  archiveProject,
+  deleteProject,
+  loadProjectRelatedDataSuccess,
+  unarchiveProject,
+  updateProject,
+  updateProjectIssueProviderCfg,
+  updateProjectOrder,
+  upsertProject,
+} from './store/project.actions';
+import { DEFAULT_PROJECT } from './project.const';
 
 @Injectable({
   providedIn: 'root',
@@ -56,7 +67,7 @@ export class ProjectService {
           ? this._workContextService.activeWorkContextIdIfProject$.pipe(
               switchMap((activeId) =>
                 this._actions$.pipe(
-                  ofType(ProjectActionTypes.LoadProjectRelatedDataSuccess),
+                  ofType(loadProjectRelatedDataSuccess.type),
                   map(({ payload: { projectId } }) => projectId === activeId),
                 ),
               ),
@@ -123,17 +134,11 @@ export class ProjectService {
   }
 
   archive(projectId: string): void {
-    this._store$.dispatch({
-      type: ProjectActionTypes.ArchiveProject,
-      payload: { id: projectId },
-    });
+    this._store$.dispatch(archiveProject({ id: projectId }));
   }
 
   unarchive(projectId: string): void {
-    this._store$.dispatch({
-      type: ProjectActionTypes.UnarchiveProject,
-      payload: { id: projectId },
-    });
+    this._store$.dispatch(unarchiveProject({ id: projectId }));
   }
 
   getByIdOnce$(id: string): Observable<Project> {
@@ -148,45 +153,41 @@ export class ProjectService {
   }
 
   add(project: Partial<Project>): void {
-    this._store$.dispatch({
-      type: ProjectActionTypes.AddProject,
-      payload: {
-        project: Object.assign(project, {
+    this._store$.dispatch(
+      addProject({
+        project: {
+          ...DEFAULT_PROJECT,
+          ...project,
           id: shortid(),
-        }),
-      },
-    });
+        },
+      }),
+    );
   }
 
   upsert(project: Partial<Project>): void {
-    this._store$.dispatch({
-      type: ProjectActionTypes.AddProject,
-      payload: {
+    this._store$.dispatch(
+      upsertProject({
         project: {
-          id: project.id || shortid(),
           ...project,
-        },
-      },
-    });
+          id: project.id || shortid(),
+        } as Project,
+      }),
+    );
   }
 
   remove(projectId: string): void {
-    this._store$.dispatch({
-      type: ProjectActionTypes.DeleteProject,
-      payload: { id: projectId },
-    });
+    this._store$.dispatch(deleteProject({ id: projectId }));
   }
 
   update(projectId: string, changedFields: Partial<Project>): void {
-    this._store$.dispatch({
-      type: ProjectActionTypes.UpdateProject,
-      payload: {
+    this._store$.dispatch(
+      updateProject({
         project: {
           id: projectId,
           changes: changedFields,
         },
-      },
-    });
+      }),
+    );
   }
 
   updateIssueProviderConfig(
@@ -195,19 +196,18 @@ export class ProjectService {
     providerCfg: Partial<IssueIntegrationCfg>,
     isOverwrite: boolean = false,
   ): void {
-    this._store$.dispatch({
-      type: ProjectActionTypes.UpdateProjectIssueProviderCfg,
-      payload: {
+    this._store$.dispatch(
+      updateProjectIssueProviderCfg({
         projectId,
         issueProviderKey,
         providerCfg,
         isOverwrite,
-      },
-    });
+      }),
+    );
   }
 
   updateOrder(ids: string[]): void {
-    this._store$.dispatch(new UpdateProjectOrder({ ids }));
+    this._store$.dispatch(updateProjectOrder({ ids }));
   }
 
   // DB INTERFACE

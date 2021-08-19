@@ -1,161 +1,99 @@
-import { Action } from '@ngrx/store';
+import { createAction, props } from '@ngrx/store';
 import { Update } from '@ngrx/entity';
 import { Project } from '../project.model';
 import { IssueIntegrationCfg, IssueProviderKey } from '../../issue/issue.model';
 import { WorkContextAdvancedCfgKey } from '../../work-context/work-context.model';
 
-export enum ProjectActionTypes {
-  'LoadProjectRelatedDataSuccess' = '[Project] Load Project related Data Success',
-  'SetCurrentProject' = '[Project] SetCurrentProject',
+export const loadProjectRelatedDataSuccess = createAction(
+  '[Project] Load Project related Data Success',
+  props<{ projectId: string }>(),
+);
 
-  // Project Actions
-  'LoadProjects' = '[Project] Load Projects',
-  'AddProject' = '[Project] Add Project',
-  'AddProjects' = '[Project] Add Projects',
-  'UpsertProject' = '[Project] Upsert Project',
-  'UpdateProject' = '[Project] Update Project',
-  'UpdateProjectWorkStart' = '[Project] Update Work Start',
-  'UpdateProjectWorkEnd' = '[Project] Update Work End',
-  'AddToProjectBreakTime' = '[Project] Add to Break Time',
-  'UpdateProjectAdvancedCfg' = '[Project] Update Project Advanced Cfg',
-  'UpdateProjectIssueProviderCfg' = '[Project] Update Project Issue Provider Cfg',
-  'DeleteProject' = '[Project] Delete Project',
-  'DeleteProjects' = '[Project] Delete Projects',
-  'ArchiveProject' = '[Project] Archive Project',
-  'UnarchiveProject' = '[Project] Unarchive Project',
-  'UpdateProjectOrder' = '[Project] Update Project Order',
-}
+export const setCurrentProject = createAction(
+  '[Project] SetCurrentProject',
+  props<any>(),
+);
 
-export class LoadProjectRelatedDataSuccess implements Action {
-  readonly type: string = ProjectActionTypes.LoadProjectRelatedDataSuccess;
+export const loadProjects = createAction(
+  '[Project] Load Projects',
+  props<{ projects: Project[] }>(),
+);
 
-  constructor(public payload: { projectId: string }) {}
-}
+export const addProject = createAction(
+  '[Project] Add Project',
+  props<{ project: Project }>(),
+);
 
-export class SetCurrentProject implements Action {
-  readonly type: string = ProjectActionTypes.SetCurrentProject;
+export const upsertProject = createAction(
+  '[Project] Upsert Project',
+  props<{ project: Project }>(),
+);
 
-  constructor(public payload: any) {}
-}
+export const addProjects = createAction(
+  '[Project] Add Projects',
+  props<{ projects: Project[] }>(),
+);
 
-export class LoadProjects implements Action {
-  readonly type: string = ProjectActionTypes.LoadProjects;
+export const updateProject = createAction(
+  '[Project] Update Project',
+  props<{ project: Update<Project> }>(),
+);
 
-  constructor(public payload: { projects: Project[] }) {}
-}
+export const updateProjectWorkStart = createAction(
+  '[Project] Update Work Start',
+  props<{ id: string; date: string; newVal: number }>(),
+);
 
-export class AddProject implements Action {
-  readonly type: string = ProjectActionTypes.AddProject;
+export const updateProjectWorkEnd = createAction(
+  '[Project] Update Work End',
+  props<{ id: string; date: string; newVal: number }>(),
+);
 
-  constructor(public payload: { project: Project }) {}
-}
+export const addToProjectBreakTime = createAction(
+  '[Project] Add to Break Time',
+  props<{ id: string; date: string; valToAdd: number }>(),
+);
 
-export class AddProjects implements Action {
-  readonly type: string = ProjectActionTypes.AddProjects;
+export const updateProjectAdvancedCfg = createAction(
+  '[Project] Update Project Advanced Cfg',
+  props<{
+    projectId: string;
+    sectionKey: WorkContextAdvancedCfgKey;
+    data: any;
+  }>(),
+);
 
-  constructor(public payload: { projects: Project[] }) {}
-}
+export const updateProjectIssueProviderCfg = createAction(
+  '[Project] Update Project Issue Provider Cfg',
+  props<{
+    projectId: string;
+    issueProviderKey: IssueProviderKey;
+    providerCfg: Partial<IssueIntegrationCfg>;
+    isOverwrite: boolean;
+  }>(),
+);
 
-export class UpsertProject implements Action {
-  readonly type: string = ProjectActionTypes.UpsertProject;
+export const deleteProject = createAction(
+  '[Project] Delete Project',
+  props<{ id: string }>(),
+);
 
-  constructor(public payload: { projects: Project[] }) {}
-}
+export const deleteProjects = createAction(
+  '[Project] Delete Projects',
+  props<{ ids: string[] }>(),
+);
 
-export class UpdateProject implements Action {
-  readonly type: string = ProjectActionTypes.UpdateProject;
+export const updateProjectOrder = createAction(
+  '[Project] Update Project Order',
+  props<{ ids: string[] }>(),
+);
 
-  constructor(public payload: { project: Update<Project> }) {}
-}
+export const archiveProject = createAction(
+  '[Project] Archive Project',
+  props<{ id: string }>(),
+);
 
-export class UpdateProjectWorkStart implements Action {
-  readonly type: string = ProjectActionTypes.UpdateProjectWorkStart;
-
-  constructor(public payload: { id: string; date: string; newVal: number }) {}
-}
-
-export class UpdateProjectWorkEnd implements Action {
-  readonly type: string = ProjectActionTypes.UpdateProjectWorkEnd;
-
-  constructor(public payload: { id: string; date: string; newVal: number }) {}
-}
-
-export class AddToProjectBreakTime implements Action {
-  readonly type: string = ProjectActionTypes.AddToProjectBreakTime;
-
-  constructor(public payload: { id: string; date: string; valToAdd: number }) {}
-}
-
-export class UpdateProjectAdvancedCfg implements Action {
-  readonly type: string = ProjectActionTypes.UpdateProjectAdvancedCfg;
-
-  constructor(
-    public payload: {
-      projectId: string;
-      sectionKey: WorkContextAdvancedCfgKey;
-      data: any;
-    },
-  ) {}
-}
-
-export class UpdateProjectIssueProviderCfg implements Action {
-  readonly type: string = ProjectActionTypes.UpdateProjectIssueProviderCfg;
-
-  constructor(
-    public payload: {
-      projectId: string;
-      issueProviderKey: IssueProviderKey;
-      providerCfg: Partial<IssueIntegrationCfg>;
-      isOverwrite: boolean;
-    },
-  ) {}
-}
-
-export class DeleteProject implements Action {
-  readonly type: string = ProjectActionTypes.DeleteProject;
-
-  constructor(public payload: { id: string }) {}
-}
-
-export class DeleteProjects implements Action {
-  readonly type: string = ProjectActionTypes.DeleteProjects;
-
-  constructor(public payload: { ids: string[] }) {}
-}
-
-export class UpdateProjectOrder implements Action {
-  readonly type: string = ProjectActionTypes.UpdateProjectOrder;
-
-  constructor(public payload: { ids: string[] }) {}
-}
-
-export class ArchiveProject implements Action {
-  readonly type: string = ProjectActionTypes.ArchiveProject;
-
-  constructor(public payload: { id: string }) {}
-}
-
-export class UnarchiveProject implements Action {
-  readonly type: string = ProjectActionTypes.UnarchiveProject;
-
-  constructor(public payload: { id: string }) {}
-}
-
-export type ProjectActions =
-  | LoadProjects
-  | LoadProjectRelatedDataSuccess
-  | SetCurrentProject
-  | AddProject
-  | AddProjects
-  | UpsertProject
-  | UpdateProject
-  | UpdateProjectWorkStart
-  | UpdateProjectWorkEnd
-  | AddToProjectBreakTime
-  | UpdateProjectAdvancedCfg
-  | UpdateProjectIssueProviderCfg
-  | DeleteProject
-  | DeleteProjects
-  | UpdateProjectOrder
-  | ArchiveProject
-  | UnarchiveProject;
+export const unarchiveProject = createAction(
+  '[Project] Unarchive Project',
+  props<{ id: string }>(),
+);

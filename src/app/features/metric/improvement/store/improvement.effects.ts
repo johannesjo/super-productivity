@@ -13,9 +13,9 @@ import {
 } from './improvement.reducer';
 import { PersistenceService } from '../../../../core/persistence/persistence.service';
 import { selectUnusedImprovementIds } from '../../store/metric.selectors';
-import { ProjectActionTypes } from '../../../project/store/project.actions';
 import { getWorklogStr } from '../../../../util/get-work-log-str';
 import { ImprovementState } from '../improvement.model';
+import { loadProjectRelatedDataSuccess } from '../../../project/store/project.actions';
 
 @Injectable()
 export class ImprovementEffects {
@@ -36,14 +36,14 @@ export class ImprovementEffects {
   );
 
   @Effect() clearImprovements$: any = this._actions$.pipe(
-    ofType(ProjectActionTypes.LoadProjectRelatedDataSuccess),
+    ofType(loadProjectRelatedDataSuccess.type),
     withLatestFrom(this._store$.pipe(select(selectImprovementHideDay))),
     filter(([, hideDay]) => hideDay !== getWorklogStr()),
     map(() => new ClearHiddenImprovements()),
   );
 
   @Effect() clearUnusedImprovements$: any = this._actions$.pipe(
-    ofType(ProjectActionTypes.LoadProjectRelatedDataSuccess),
+    ofType(loadProjectRelatedDataSuccess.type),
     withLatestFrom(this._store$.pipe(select(selectUnusedImprovementIds))),
     map(([a, unusedIds]) => new DeleteImprovements({ ids: unusedIds })),
   );

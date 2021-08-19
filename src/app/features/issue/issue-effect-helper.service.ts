@@ -1,22 +1,23 @@
 import { Injectable } from '@angular/core';
 import { Actions, ofType } from '@ngrx/effects';
 import { setActiveWorkContext } from '../work-context/store/work-context.actions';
-import { ProjectActionTypes } from '../project/store/project.actions';
 import { concatMap, filter, first, switchMap } from 'rxjs/operators';
 import { WorkContextService } from '../work-context/work-context.service';
 import { Observable } from 'rxjs';
 import { SyncTriggerService } from '../../imex/sync/sync-trigger.service';
+import { updateProjectIssueProviderCfg } from '../project/store/project.actions';
 
 @Injectable({
   providedIn: 'root',
 })
 export class IssueEffectHelperService {
   pollIssueTaskUpdatesActions$: Observable<unknown> = this._actions$.pipe(
-    ofType(setActiveWorkContext, ProjectActionTypes.UpdateProjectIssueProviderCfg),
+    ofType(setActiveWorkContext, updateProjectIssueProviderCfg.type),
   );
   pollToBacklogActions$: Observable<unknown> = this._actions$.pipe(
-    ofType(setActiveWorkContext, ProjectActionTypes.UpdateProjectIssueProviderCfg),
+    ofType(setActiveWorkContext, updateProjectIssueProviderCfg.type),
   );
+
   pollToBacklogTriggerToProjectId$: Observable<string> =
     this._syncTriggerService.afterInitialSyncDoneAndDataLoadedInitially$.pipe(
       concatMap(() => this.pollToBacklogActions$),
