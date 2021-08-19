@@ -310,8 +310,11 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
       // NOTE: it's important that this comes before the issue check
       // so that backlog issues are found first
     } else if (item.taskId) {
+      if (!item.projectId) {
+        throw new Error('Weird add task case1');
+      }
       this._lastAddedTaskId = item.taskId;
-      this._projectService.moveTaskToTodayList(item.taskId);
+      this._projectService.moveTaskToTodayList(item.taskId, item.projectId);
       this._snackService.open({
         ico: 'arrow_upward',
         msg: T.F.TASK.S.FOUND_MOVE_FROM_BACKLOG,
@@ -341,14 +344,16 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
           msg: T.F.TASK.S.FOUND_RESTORE_FROM_ARCHIVE,
           translateParams: { title: res.task.title },
         });
-      } else {
+      } else if (res.task.projectId) {
         this._lastAddedTaskId = res.task.id;
-        this._projectService.moveTaskToTodayList(res.task.id);
+        this._projectService.moveTaskToTodayList(res.task.id, res.task.projectId);
         this._snackService.open({
           ico: 'arrow_upward',
           msg: T.F.TASK.S.FOUND_MOVE_FROM_BACKLOG,
           translateParams: { title: res.task.title },
         });
+      } else {
+        throw new Error('Weird add task case2');
       }
     }
 

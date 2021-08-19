@@ -585,10 +585,13 @@ export class TaskService {
           });
           throw new Error('Startable task not found');
         }
-        if (task.parentId) {
-          this._projectService.moveTaskToTodayList(task.parentId, true);
-        } else {
-          this._projectService.moveTaskToTodayList(task.id, true);
+
+        if (task.projectId) {
+          if (task.parentId) {
+            this._projectService.moveTaskToTodayList(task.parentId, task.projectId, true);
+          } else {
+            this._projectService.moveTaskToTodayList(task.id, task.projectId, true);
+          }
         }
         this.setCurrentId(task.id);
       });
@@ -859,12 +862,16 @@ export class TaskService {
     return Promise.all(
       plannedTasks.map(async (t) => {
         if (t.parentId) {
-          this._projectService.moveTaskToTodayList(t.parentId);
+          if (t.projectId) {
+            this._projectService.moveTaskToTodayList(t.parentId, t.projectId);
+          }
           // NOTE: no unsubscribe on purpose as we always want this to run until done
           const parentTask = await this.getByIdOnce$(t.parentId).toPromise();
           this.addTodayTag(parentTask);
         } else {
-          this._projectService.moveTaskToTodayList(t.id);
+          if (t.projectId) {
+            this._projectService.moveTaskToTodayList(t.id, t.projectId);
+          }
           this.addTodayTag(t);
         }
       }),

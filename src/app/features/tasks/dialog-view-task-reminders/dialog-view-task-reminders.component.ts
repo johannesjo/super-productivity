@@ -234,10 +234,12 @@ export class DialogViewTaskRemindersComponent implements OnDestroy {
     this.isDisableControls = true;
 
     const task = tasks[0];
-    if (task.parentId) {
-      this._projectService.moveTaskToTodayList(task.parentId, true);
-    } else {
-      this._projectService.moveTaskToTodayList(task.id, true);
+    if (task.projectId) {
+      if (task.parentId) {
+        this._projectService.moveTaskToTodayList(task.parentId, task.projectId, true);
+      } else {
+        this._projectService.moveTaskToTodayList(task.id, task.projectId, true);
+      }
     }
     this._taskService.setCurrentId(task.id);
     this.dismiss(task);

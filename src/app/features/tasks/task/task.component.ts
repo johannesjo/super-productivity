@@ -44,6 +44,7 @@ import { DialogEditTagsForTaskComponent } from '../../tag/dialog-edit-tags/dialo
 import { WorkContextService } from '../../work-context/work-context.service';
 import { environment } from '../../../../environments/environment';
 import { throttle } from 'helpful-decorators';
+import { WorkContextType } from '../../work-context/work-context.model';
 
 @Component({
   selector: 'task',
@@ -588,14 +589,26 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   moveToBacklog(): void {
-    this._projectService.moveTaskToBacklog(this.task.id);
-    if (this.task.tagIds.includes(TODAY_TAG.id)) {
-      this.removeFromMyDay();
+    if (
+      this.task.projectId &&
+      !this.task.parentId &&
+      this.workContextService.activeWorkContextType === WorkContextType.PROJECT
+    ) {
+      this._projectService.moveTaskToBacklog(this.task.id, this.task.projectId);
+      if (this.task.tagIds.includes(TODAY_TAG.id)) {
+        this.removeFromMyDay();
+      }
     }
   }
 
   moveToToday(): void {
-    this._projectService.moveTaskToTodayList(this.task.id);
+    if (
+      this.task.projectId &&
+      !this.task.parentId &&
+      this.workContextService.activeWorkContextType === WorkContextType.PROJECT
+    ) {
+      this._projectService.moveTaskToTodayList(this.task.id, this.task.projectId);
+    }
   }
 
   trackByProjectId(i: number, project: Project): string {
@@ -722,17 +735,25 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
       this.deleteTask();
     }
 
-    if (checkKeyCombo(ev, keys.moveToBacklog)) {
+    if (
+      checkKeyCombo(ev, keys.moveToBacklog) &&
+      this.task.projectId &&
+      this.workContextService.activeWorkContextType === WorkContextType.PROJECT
+    ) {
       if (!this.task.parentId) {
         this.focusPrevious(true);
-        this._projectService.moveTaskToBacklog(this.task.id);
+        this.moveToBacklog();
       }
     }
 
-    if (checkKeyCombo(ev, keys.moveToTodaysTasks)) {
+    if (
+      checkKeyCombo(ev, keys.moveToTodaysTasks) &&
+      this.task.projectId &&
+      this.workContextService.activeWorkContextType === WorkContextType.PROJECT
+    ) {
       if (!this.task.parentId) {
         this.focusNext(true);
-        this._projectService.moveTaskToTodayList(this.task.id);
+        this.moveToToday();
       }
     }
 
