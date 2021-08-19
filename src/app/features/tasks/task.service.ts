@@ -99,10 +99,7 @@ import { T } from '../../t.const';
 import { ImexMetaService } from '../../imex/imex-meta/imex-meta.service';
 import { remindOptionToMilliseconds } from './util/remind-option-to-milliseconds';
 import { getDateRangeForDay } from '../../util/get-date-range-for-day';
-import {
-  moveProjectTaskToBacklogListAuto,
-  moveProjectTaskToTodayListAuto,
-} from '../project/store/project.actions';
+import { ProjectService } from '../project/project.service';
 
 @Injectable({
   providedIn: 'root',
@@ -191,6 +188,7 @@ export class TaskService {
     private readonly _workContextService: WorkContextService,
     private readonly _imexMetaService: ImexMetaService,
     private readonly _snackService: SnackService,
+    private readonly _projectService: ProjectService,
     private readonly _timeTrackingService: TimeTrackingService,
     private readonly _router: Router,
   ) {
@@ -513,32 +511,6 @@ export class TaskService {
     }
   }
 
-  moveToProjectTodayList(id: string, isMoveToTop: boolean = false): void {
-    const workContextId = this._workContextService.activeWorkContextId as string;
-    const workContextType = this._workContextService
-      .activeWorkContextType as WorkContextType;
-    if (workContextType === WorkContextType.PROJECT) {
-      this._store.dispatch(
-        moveProjectTaskToTodayListAuto({
-          taskId: id,
-          isMoveToTop,
-          projectId: workContextId,
-        }),
-      );
-    }
-  }
-
-  moveToProjectBacklog(id: string): void {
-    const workContextId = this._workContextService.activeWorkContextId as string;
-    const workContextType = this._workContextService
-      .activeWorkContextType as WorkContextType;
-    if (workContextType === WorkContextType.PROJECT) {
-      this._store.dispatch(
-        moveProjectTaskToBacklogListAuto({ taskId: id, projectId: workContextId }),
-      );
-    }
-  }
-
   moveToArchive(tasks: TaskWithSubTasks | TaskWithSubTasks[]): void {
     if (!Array.isArray(tasks)) {
       tasks = [tasks];
@@ -614,9 +586,9 @@ export class TaskService {
           throw new Error('Startable task not found');
         }
         if (task.parentId) {
-          this.moveToProjectTodayList(task.parentId, true);
+          this._projectService.moveTaskToTodayList(task.parentId, true);
         } else {
-          this.moveToProjectTodayList(task.id, true);
+          this._projectService.moveTaskToTodayList(task.id, true);
         }
         this.setCurrentId(task.id);
       });
@@ -887,12 +859,12 @@ export class TaskService {
     return Promise.all(
       plannedTasks.map(async (t) => {
         if (t.parentId) {
-          this.moveToProjectTodayList(t.parentId);
+          this._projectService.moveTaskToTodayList(t.parentId);
           // NOTE: no unsubscribe on purpose as we always want this to run until done
           const parentTask = await this.getByIdOnce$(t.parentId).toPromise();
           this.addTodayTag(parentTask);
         } else {
-          this.moveToProjectTodayList(t.id);
+          this._projectService.moveTaskToTodayList(t.id);
           this.addTodayTag(t);
         }
       }),

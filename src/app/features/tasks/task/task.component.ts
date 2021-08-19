@@ -588,14 +588,14 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   moveToBacklog(): void {
-    this._taskService.moveToProjectBacklog(this.task.id);
+    this._projectService.moveTaskToBacklog(this.task.id);
     if (this.task.tagIds.includes(TODAY_TAG.id)) {
       this.removeFromMyDay();
     }
   }
 
   moveToToday(): void {
-    this._taskService.moveToProjectTodayList(this.task.id);
+    this._projectService.moveTaskToTodayList(this.task.id);
   }
 
   trackByProjectId(i: number, project: Project): string {
@@ -725,14 +725,14 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
     if (checkKeyCombo(ev, keys.moveToBacklog)) {
       if (!this.task.parentId) {
         this.focusPrevious(true);
-        this._taskService.moveToProjectBacklog(this.task.id);
+        this._projectService.moveTaskToBacklog(this.task.id);
       }
     }
 
     if (checkKeyCombo(ev, keys.moveToTodaysTasks)) {
       if (!this.task.parentId) {
         this.focusNext(true);
-        this._taskService.moveToProjectTodayList(this.task.id);
+        this._projectService.moveTaskToTodayList(this.task.id);
       }
     }
 

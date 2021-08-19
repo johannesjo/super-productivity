@@ -23,6 +23,8 @@ import {
   archiveProject,
   deleteProject,
   loadProjectRelatedDataSuccess,
+  moveProjectTaskToBacklogListAuto,
+  moveProjectTaskToTodayListAuto,
   unarchiveProject,
   updateProject,
   updateProjectIssueProviderCfg,
@@ -188,6 +190,32 @@ export class ProjectService {
         },
       }),
     );
+  }
+
+  moveTaskToTodayList(id: string, isMoveToTop: boolean = false): void {
+    const workContextId = this._workContextService.activeWorkContextId as string;
+    const workContextType = this._workContextService
+      .activeWorkContextType as WorkContextType;
+    if (workContextType === WorkContextType.PROJECT) {
+      this._store$.dispatch(
+        moveProjectTaskToTodayListAuto({
+          taskId: id,
+          isMoveToTop,
+          projectId: workContextId,
+        }),
+      );
+    }
+  }
+
+  moveTaskToBacklog(id: string): void {
+    const workContextId = this._workContextService.activeWorkContextId as string;
+    const workContextType = this._workContextService
+      .activeWorkContextType as WorkContextType;
+    if (workContextType === WorkContextType.PROJECT) {
+      this._store$.dispatch(
+        moveProjectTaskToBacklogListAuto({ taskId: id, projectId: workContextId }),
+      );
+    }
   }
 
   updateIssueProviderConfig(

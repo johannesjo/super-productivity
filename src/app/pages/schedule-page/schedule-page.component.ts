@@ -13,6 +13,7 @@ import { AddTaskReminderInterface } from '../../features/tasks/dialog-add-task-r
 import { WorkContextService } from '../../features/work-context/work-context.service';
 import { TODAY_TAG } from '../../features/tag/tag.const';
 import { Tag } from '../../features/tag/tag.model';
+import { ProjectService } from '../../features/project/project.service';
 
 @Component({
   selector: 'schedule-page',
@@ -30,6 +31,7 @@ export class SchedulePageComponent {
     public reminderService: ReminderService,
     private _workContextService: WorkContextService,
     private _taskService: TaskService,
+    private _projectService: ProjectService,
     private _matDialog: MatDialog,
     private _router: Router,
   ) {}
@@ -82,9 +84,9 @@ export class SchedulePageComponent {
 
   private _startTaskFronCurrentProject(task: TaskWithReminderData): void {
     if (!!task.parentId) {
-      this._taskService.moveToProjectTodayList(task.parentId, true);
+      this._projectService.moveTaskToTodayList(task.parentId, true);
     } else {
-      this._taskService.moveToProjectTodayList(task.id, true);
+      this._projectService.moveTaskToTodayList(task.id, true);
     }
     if (!!task.reminderId) {
       this._taskService.unScheduleTask(task.id, task.reminderId);

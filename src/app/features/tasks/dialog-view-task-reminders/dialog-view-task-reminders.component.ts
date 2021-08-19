@@ -14,6 +14,7 @@ import { standardListAnimation } from '../../../ui/animations/standard-list.ani'
 import { unique } from '../../../util/unique';
 import { getTomorrow } from '../../../util/get-tomorrow';
 import { uniqueByProp } from '../../../util/unique-by-prop';
+import { ProjectService } from '../../project/project.service';
 
 const M = 1000 * 60;
 
@@ -61,6 +62,7 @@ export class DialogViewTaskRemindersComponent implements OnDestroy {
   constructor(
     private _matDialogRef: MatDialogRef<DialogViewTaskRemindersComponent>,
     private _taskService: TaskService,
+    private _projectService: ProjectService,
     private _matDialog: MatDialog,
     private _reminderService: ReminderService,
     @Inject(MAT_DIALOG_DATA) public data: { reminders: Reminder[] },
@@ -233,9 +235,9 @@ export class DialogViewTaskRemindersComponent implements OnDestroy {
 
     const task = tasks[0];
     if (task.parentId) {
-      this._taskService.moveToProjectTodayList(task.parentId, true);
+      this._projectService.moveTaskToTodayList(task.parentId, true);
     } else {
-      this._taskService.moveToProjectTodayList(task.id, true);
+      this._projectService.moveTaskToTodayList(task.id, true);
     }
     this._taskService.setCurrentId(task.id);
     this.dismiss(task);
