@@ -14,12 +14,12 @@ import { ReminderService } from '../../reminder/reminder.service';
 import { truncate } from '../../../util/truncate';
 import { T } from '../../../t.const';
 import { SnackService } from '../../../core/snack/snack.service';
-import { moveTaskToBacklogListAuto } from '../../work-context/store/work-context-meta.actions';
 import { TODAY_TAG } from '../../tag/tag.const';
 import { EMPTY } from 'rxjs';
 import { TaskService } from '../task.service';
 import { getDateTimeFromClockString } from '../../../util/get-date-time-from-clock-string';
 import { DEFAULT_DAY_START } from '../../config/default-global-config.const';
+import { moveProjectTaskToBacklogListAuto } from '../../project/store/project.actions';
 
 @Injectable()
 export class TaskReminderEffects {
@@ -61,9 +61,9 @@ export class TaskReminderEffects {
         }),
         ...(isMoveToBacklog
           ? [
-              moveTaskToBacklogListAuto({
+              moveProjectTaskToBacklogListAuto({
                 taskId: task.id,
-                workContextId: task.projectId as string,
+                projectId: task.projectId as string,
               }),
             ]
           : []),

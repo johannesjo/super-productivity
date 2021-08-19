@@ -97,3 +97,13 @@ export const unarchiveProject = createAction(
   '[Project] Unarchive Project',
   props<{ id: string }>(),
 );
+
+export const moveProjectTaskToBacklogListAuto = createAction(
+  '[WorkContextMeta] Auto Move Task from today to backlog',
+  props<{ taskId: string; projectId: string }>(),
+);
+
+export const moveProjectTaskToTodayListAuto = createAction(
+  '[WorkContextMeta] Auto Move Task from backlog to today',
+  props<{ taskId: string; projectId: string; isMoveToTop: boolean }>(),
+);

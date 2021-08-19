@@ -588,7 +588,7 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   moveToBacklog(): void {
-    this._taskService.moveToBacklog(this.task.id);
+    this._taskService.moveToProjectBacklog(this.task.id);
     if (this.task.tagIds.includes(TODAY_TAG.id)) {
       this.removeFromMyDay();
     }
@@ -725,7 +725,7 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
     if (checkKeyCombo(ev, keys.moveToBacklog)) {
       if (!this.task.parentId) {
         this.focusPrevious(true);
-        this._taskService.moveToBacklog(this.task.id);
+        this._taskService.moveToProjectBacklog(this.task.id);
       }
     }
 

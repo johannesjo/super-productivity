@@ -9,6 +9,8 @@ import {
   archiveProject,
   deleteProject,
   loadProjectRelatedDataSuccess,
+  moveProjectTaskToBacklogListAuto,
+  moveProjectTaskToTodayListAuto,
   unarchiveProject,
   updateProject,
   updateProjectAdvancedCfg,
@@ -45,9 +47,7 @@ import {
   moveTaskInBacklogList,
   moveTaskInTodayList,
   moveTaskToBacklogList,
-  moveTaskToBacklogListAuto,
   moveTaskToTodayList,
-  moveTaskToTodayListAuto,
   moveTaskUpInBacklogList,
   moveTaskUpInTodayList,
 } from '../../work-context/store/work-context-meta.actions';
@@ -87,8 +87,8 @@ export class ProjectEffects {
       moveTaskToTodayList.type,
       moveTaskUpInBacklogList.type,
       moveTaskDownInBacklogList.type,
-      moveTaskToBacklogListAuto.type,
-      moveTaskToTodayListAuto.type,
+      moveProjectTaskToBacklogListAuto.type,
+      moveProjectTaskToTodayListAuto.type,
     ),
     switchMap((a) => {
       // exclude ui only actions
@@ -318,8 +318,8 @@ export class ProjectEffects {
     ),
     filter(({ project }) => !project.taskIds.includes(TODAY_TAG.id)),
     map(({ p, project }) =>
-      moveTaskToTodayListAuto({
-        workContextId: project.id,
+      moveProjectTaskToTodayListAuto({
+        projectId: project.id,
         taskId: p.task.id,
         isMoveToTop: false,
       }),

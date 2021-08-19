@@ -21,9 +21,7 @@ import {
   moveTaskInBacklogList,
   moveTaskInTodayList,
   moveTaskToBacklogList,
-  moveTaskToBacklogListAuto,
   moveTaskToTodayList,
-  moveTaskToTodayListAuto,
   moveTaskUpInBacklogList,
   moveTaskUpInTodayList,
 } from '../../work-context/store/work-context-meta.actions';
@@ -48,6 +46,8 @@ import {
   deleteProject,
   deleteProjects,
   loadProjects,
+  moveProjectTaskToBacklogListAuto,
+  moveProjectTaskToTodayListAuto,
   unarchiveProject,
   updateProject,
   updateProjectAdvancedCfg,
@@ -244,42 +244,6 @@ const _reducer = createReducer<ProjectState>(
     },
   ),
 
-  on(moveTaskToBacklogListAuto, (state, { taskId, workContextId }) => {
-    const todaysTaskIdsBefore = (state.entities[workContextId] as Project).taskIds;
-    const backlogIdsBefore = (state.entities[workContextId] as Project).backlogTaskIds;
-    return backlogIdsBefore.includes(taskId)
-      ? state
-      : projectAdapter.updateOne(
-          {
-            id: workContextId,
-            changes: {
-              taskIds: todaysTaskIdsBefore.filter(filterOutId(taskId)),
-              backlogTaskIds: [taskId, ...backlogIdsBefore],
-            },
-          },
-          state,
-        );
-  }),
-
-  on(moveTaskToTodayListAuto, (state, { taskId, workContextId, isMoveToTop }) => {
-    const todaysTaskIdsBefore = (state.entities[workContextId] as Project).taskIds;
-    const backlogIdsBefore = (state.entities[workContextId] as Project).backlogTaskIds;
-    return todaysTaskIdsBefore.includes(taskId)
-      ? state
-      : projectAdapter.updateOne(
-          {
-            id: workContextId,
-            changes: {
-              backlogTaskIds: backlogIdsBefore.filter(filterOutId(taskId)),
-              taskIds: isMoveToTop
-                ? [taskId, ...todaysTaskIdsBefore]
-                : [...todaysTaskIdsBefore, taskId],
-            },
-          },
-          state,
-        );
-  }),
-
   // Project Actions
   // ------------
   on(addProject, (state, { project }) => projectAdapter.addOne(project, state)),
@@ -446,6 +410,43 @@ const _reducer = createReducer<ProjectState>(
 
     return { ...state, ids: newIds };
   }),
+
+  on(moveProjectTaskToBacklogListAuto, (state, { taskId, projectId }) => {
+    const todaysTaskIdsBefore = (state.entities[projectId] as Project).taskIds;
+    const backlogIdsBefore = (state.entities[projectId] as Project).backlogTaskIds;
+    return backlogIdsBefore.includes(taskId)
+      ? state
+      : projectAdapter.updateOne(
+          {
+            id: projectId,
+            changes: {
+              taskIds: todaysTaskIdsBefore.filter(filterOutId(taskId)),
+              backlogTaskIds: [taskId, ...backlogIdsBefore],
+            },
+          },
+          state,
+        );
+  }),
+
+  on(moveProjectTaskToTodayListAuto, (state, { taskId, projectId, isMoveToTop }) => {
+    const todaysTaskIdsBefore = (state.entities[projectId] as Project).taskIds;
+    const backlogIdsBefore = (state.entities[projectId] as Project).backlogTaskIds;
+    return todaysTaskIdsBefore.includes(taskId)
+      ? state
+      : projectAdapter.updateOne(
+          {
+            id: projectId,
+            changes: {
+              backlogTaskIds: backlogIdsBefore.filter(filterOutId(taskId)),
+              taskIds: isMoveToTop
+                ? [taskId, ...todaysTaskIdsBefore]
+                : [...todaysTaskIdsBefore, taskId],
+            },
+          },
+          state,
+        );
+  }),
+
   // on(AAA, (state, {AAA})=> {  }),
 );
 

@@ -88,9 +88,7 @@ import {
   moveTaskInBacklogList,
   moveTaskInTodayList,
   moveTaskToBacklogList,
-  moveTaskToBacklogListAuto,
   moveTaskToTodayList,
-  moveTaskToTodayListAuto,
   moveTaskUpInBacklogList,
   moveTaskUpInTodayList,
 } from '../work-context/store/work-context-meta.actions';
@@ -101,6 +99,10 @@ import { T } from '../../t.const';
 import { ImexMetaService } from '../../imex/imex-meta/imex-meta.service';
 import { remindOptionToMilliseconds } from './util/remind-option-to-milliseconds';
 import { getDateRangeForDay } from '../../util/get-date-range-for-day';
+import {
+  moveProjectTaskToBacklogListAuto,
+  moveProjectTaskToTodayListAuto,
+} from '../project/store/project.actions';
 
 @Injectable({
   providedIn: 'root',
@@ -517,17 +519,23 @@ export class TaskService {
       .activeWorkContextType as WorkContextType;
     if (workContextType === WorkContextType.PROJECT) {
       this._store.dispatch(
-        moveTaskToTodayListAuto({ taskId: id, isMoveToTop, workContextId }),
+        moveProjectTaskToTodayListAuto({
+          taskId: id,
+          isMoveToTop,
+          projectId: workContextId,
+        }),
       );
     }
   }
 
-  moveToBacklog(id: string): void {
+  moveToProjectBacklog(id: string): void {
     const workContextId = this._workContextService.activeWorkContextId as string;
     const workContextType = this._workContextService
       .activeWorkContextType as WorkContextType;
     if (workContextType === WorkContextType.PROJECT) {
-      this._store.dispatch(moveTaskToBacklogListAuto({ taskId: id, workContextId }));
+      this._store.dispatch(
+        moveProjectTaskToBacklogListAuto({ taskId: id, projectId: workContextId }),
+      );
     }
   }
 
