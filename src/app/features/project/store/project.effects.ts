@@ -18,7 +18,6 @@ import {
   updateProjectWorkStart,
   upsertProject,
 } from './project.actions';
-import { selectProjectFeatureState } from './project.reducer';
 import { PersistenceService } from '../../../core/persistence/persistence.service';
 import { BookmarkService } from '../../bookmark/bookmark.service';
 import { NoteService } from '../../note/note.service';
@@ -62,6 +61,7 @@ import { TaskRepeatCfgService } from '../../task-repeat-cfg/task-repeat-cfg.serv
 import { TODAY_TAG } from '../../tag/tag.const';
 import { EMPTY, Observable, of } from 'rxjs';
 import { TaskRepeatCfg } from '../../task-repeat-cfg/task-repeat-cfg.model';
+import { projectSelectors } from './project.selectors';
 
 @Injectable()
 export class ProjectEffects {
@@ -442,7 +442,7 @@ export class ProjectEffects {
   private saveToLs$(isSyncModelChange: boolean): Observable<unknown> {
     return this._store$.pipe(
       // tap(() => console.log('SAVE')),
-      select(selectProjectFeatureState),
+      select(projectSelectors),
       take(1),
       switchMap((projectState) =>
         this._persistenceService.project.saveState(projectState, { isSyncModelChange }),

@@ -1,9 +1,7 @@
 import { createEntityAdapter, EntityAdapter, Update } from '@ngrx/entity';
 import { Project, ProjectState } from '../project.model';
-import { createFeatureSelector, createReducer, createSelector, on } from '@ngrx/store';
+import { createReducer, on } from '@ngrx/store';
 import { FIRST_PROJECT, PROJECT_MODEL_VERSION } from '../project.const';
-import { JiraCfg } from '../../issue/providers/jira/jira.model';
-import { GithubCfg } from '../../issue/providers/github/github.model';
 import {
   WorkContextAdvancedCfg,
   WorkContextType,
@@ -36,20 +34,12 @@ import {
 import { arrayMoveLeftUntil, arrayMoveRightUntil } from '../../../util/array-move';
 import { filterOutId } from '../../../util/filter-out-id';
 import { unique } from '../../../util/unique';
-import {
-  CALDAV_TYPE,
-  GITHUB_TYPE,
-  GITLAB_TYPE,
-  JIRA_TYPE,
-} from '../../issue/issue.const';
-import { GitlabCfg } from '../../issue/providers/gitlab/gitlab';
+
 import { loadAllData } from '../../../root-store/meta/load-all-data.action';
 import { migrateProjectState } from '../migrate-projects-state.util';
 import { MODEL_VERSION_KEY } from '../../../app.constants';
-import { exists } from '../../../util/exists';
 import { Task } from '../../tasks/task.model';
 import { devError } from '../../../util/dev-error';
-import { CaldavCfg } from '../../issue/providers/caldav/caldav.model';
 import {
   addProject,
   addProjects,
@@ -72,76 +62,6 @@ export const PROJECT_FEATURE_NAME = 'projects';
 const WORK_CONTEXT_TYPE: WorkContextType = WorkContextType.PROJECT;
 
 export const projectAdapter: EntityAdapter<Project> = createEntityAdapter<Project>();
-
-// SELECTORS
-// ---------
-export const selectProjectFeatureState =
-  createFeatureSelector<ProjectState>(PROJECT_FEATURE_NAME);
-const { selectAll } = projectAdapter.getSelectors();
-export const selectAllProjects = createSelector(selectProjectFeatureState, selectAll);
-export const selectUnarchivedProjects = createSelector(selectAllProjects, (projects) =>
-  projects.filter((p) => !p.isArchived),
-);
-
-export const selectArchivedProjects = createSelector(selectAllProjects, (projects) =>
-  projects.filter((p) => p.isArchived),
-);
-
-// DYNAMIC SELECTORS
-// -----------------
-export const selectProjectById = createSelector(
-  selectProjectFeatureState,
-  (state: ProjectState, props: { id: string }): Project => {
-    const p = state.entities[props.id];
-    if (!props.id) {
-      throw new Error('No project id given');
-    }
-    if (!p) {
-      throw new Error(`Project ${props.id} not found`);
-    }
-    return p;
-  },
-);
-
-export const selectJiraCfgByProjectId = createSelector(
-  selectProjectById,
-  (p: Project): JiraCfg => p.issueIntegrationCfgs[JIRA_TYPE] as JiraCfg,
-);
-
-export const selectGithubCfgByProjectId = createSelector(
-  selectProjectById,
-  (p: Project): GithubCfg => p.issueIntegrationCfgs[GITHUB_TYPE] as GithubCfg,
-);
-
-export const selectGitlabCfgByProjectId = createSelector(
-  selectProjectById,
-  (p: Project): GitlabCfg => p.issueIntegrationCfgs[GITLAB_TYPE] as GitlabCfg,
-);
-
-export const selectCaldavCfgByProjectId = createSelector(
-  selectProjectById,
-  (p: Project): CaldavCfg => p.issueIntegrationCfgs[CALDAV_TYPE] as CaldavCfg,
-);
-
-export const selectUnarchivedProjectsWithoutCurrent = createSelector(
-  selectProjectFeatureState,
-  (s: ProjectState, props: { currentId: string | null }) => {
-    const ids = s.ids as string[];
-    return ids
-      .filter((id) => id !== props.currentId)
-      .map((id) => exists(s.entities[id]) as Project)
-      .filter((p) => !p.isArchived && p.id);
-  },
-);
-
-export const selectProjectBreakTimeForProject = createSelector(
-  selectProjectById,
-  (project) => project.breakTime,
-);
-export const selectProjectBreakNrForProject = createSelector(
-  selectProjectById,
-  (project) => project.breakNr,
-);
 
 // DEFAULT
 // -------

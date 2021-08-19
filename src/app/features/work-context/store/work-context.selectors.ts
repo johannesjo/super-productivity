@@ -1,9 +1,5 @@
 import { createFeatureSelector, createSelector } from '@ngrx/store';
 import { WorkContext, WorkContextState, WorkContextType } from '../work-context.model';
-import {
-  selectProjectById,
-  selectProjectFeatureState,
-} from '../../project/store/project.reducer';
 import { selectTagById, selectTagFeatureState } from '../../tag/store/tag.reducer';
 import {
   selectTaskEntities,
@@ -11,6 +7,10 @@ import {
 } from '../../tasks/store/task.selectors';
 import { Task, TaskPlanned } from '../../tasks/task.model';
 import { devError } from '../../../util/dev-error';
+import {
+  selectProjectById,
+  projectSelectors,
+} from '../../project/store/project.selectors';
 
 export const WORK_CONTEXT_FEATURE_NAME = 'context';
 
@@ -41,7 +41,7 @@ export const selectActiveContextTypeAndId = createSelector(
 
 export const selectActiveWorkContext = createSelector(
   selectActiveContextTypeAndId,
-  selectProjectFeatureState,
+  projectSelectors,
   selectTagFeatureState,
   ({ activeId, activeType }, projectState, tagState): WorkContext => {
     if (activeType === WorkContextType.TAG) {

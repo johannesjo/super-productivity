@@ -4,18 +4,6 @@ import { Project } from './project.model';
 import { PersistenceService } from '../../core/persistence/persistence.service';
 import { select, Store } from '@ngrx/store';
 import * as shortid from 'shortid';
-import {
-  selectArchivedProjects,
-  selectCaldavCfgByProjectId,
-  selectGithubCfgByProjectId,
-  selectGitlabCfgByProjectId,
-  selectJiraCfgByProjectId,
-  selectProjectBreakNrForProject,
-  selectProjectBreakTimeForProject,
-  selectProjectById,
-  selectUnarchivedProjects,
-  selectUnarchivedProjectsWithoutCurrent,
-} from './store/project.reducer';
 import { IssueIntegrationCfg, IssueProviderKey } from '../issue/issue.model';
 import { JiraCfg } from '../issue/providers/jira/jira.model';
 import { GithubCfg } from '../issue/providers/github/github.model';
@@ -42,6 +30,18 @@ import {
   upsertProject,
 } from './store/project.actions';
 import { DEFAULT_PROJECT } from './project.const';
+import {
+  selectArchivedProjects,
+  selectCaldavCfgByProjectId,
+  selectGithubCfgByProjectId,
+  selectGitlabCfgByProjectId,
+  selectJiraCfgByProjectId,
+  selectProjectBreakNrForProject,
+  selectProjectBreakTimeForProject,
+  selectProjectById,
+  selectUnarchivedProjects,
+  selectUnarchivedProjectsWithoutCurrent,
+} from './store/project.selectors';
 
 @Injectable({
   providedIn: 'root',
