@@ -383,11 +383,14 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
     this.focusSelf();
   }
 
-  editTags(): void {
+  async editTags(): Promise<void> {
+    const taskToEdit = this.task.parentId
+      ? await this._taskService.getByIdOnce$(this.task.parentId).toPromise()
+      : this.task;
     this._matDialog
       .open(DialogEditTagsForTaskComponent, {
         data: {
-          task: this.task,
+          task: taskToEdit,
         },
       })
       .afterClosed()
