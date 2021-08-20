@@ -11,9 +11,9 @@ import { SnackService } from '../../../core/snack/snack.service';
 import { PomodoroService } from '../pomodoro.service';
 import { setCurrentTask, unsetCurrentTask } from '../../tasks/store/task.actions';
 import { PomodoroConfig } from '../../config/global-config.model';
-import { PomodoroActionTypes } from './pomodoro.actions';
 import { DEFAULT_GLOBAL_CONFIG } from '../../config/default-global-config.const';
 import { Action } from '@ngrx/store';
+import { finishPomodoroSession, pausePomodoro, startPomodoro } from './pomodoro.actions';
 
 describe('PomodoroEffects', () => {
   let actions$: Observable<any>;
@@ -59,7 +59,7 @@ describe('PomodoroEffects', () => {
   it('should start pomodoro when a task is set to current', (done) => {
     actions$ = of(setCurrentTask({ id: 'something' }));
     effects.playPauseOnCurrentUpdate$.subscribe((effectAction) => {
-      expect(effectAction.type).toBe(PomodoroActionTypes.StartPomodoro);
+      expect(effectAction.type).toBe(startPomodoro.type);
       done();
     });
   });
@@ -67,7 +67,7 @@ describe('PomodoroEffects', () => {
   it('should pause pomodoro when a task is set none', (done) => {
     actions$ = of(unsetCurrentTask());
     effects.playPauseOnCurrentUpdate$.subscribe((effectAction) => {
-      expect(effectAction.type).toBe(PomodoroActionTypes.PausePomodoro);
+      expect(effectAction.type).toBe(pausePomodoro.type);
       done();
     });
   });
@@ -82,8 +82,8 @@ describe('PomodoroEffects', () => {
       as.push(effectAction);
       if (as.length === 2) {
         expect(as.map((a) => a.type)).toEqual([
-          PomodoroActionTypes.FinishPomodoroSession,
-          PomodoroActionTypes.StartPomodoro,
+          finishPomodoroSession.type,
+          startPomodoro.type,
         ]);
         done();
       }
