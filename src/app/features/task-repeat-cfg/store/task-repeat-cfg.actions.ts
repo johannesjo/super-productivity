@@ -1,56 +1,33 @@
-import { Action } from '@ngrx/store';
+import { createAction, props } from '@ngrx/store';
 import { Update } from '@ngrx/entity';
 import { TaskRepeatCfg } from '../task-repeat-cfg.model';
 
-export enum TaskRepeatCfgActionTypes {
-  'AddTaskRepeatCfgToTask' = '[TaskRepeatCfg][Task] Add TaskRepeatCfg to Task',
-  'UpdateTaskRepeatCfg' = '[TaskRepeatCfg] Update TaskRepeatCfg',
-  'UpdateTaskRepeatCfgs' = '[TaskRepeatCfg] Update multiple TaskRepeatCfgs',
-  'UpsertTaskRepeatCfg' = '[TaskRepeatCfg] Upsert TaskRepeatCfg',
-  'DeleteTaskRepeatCfg' = '[TaskRepeatCfg] Delete TaskRepeatCfg',
-  'DeleteTaskRepeatCfgs' = '[TaskRepeatCfg] Delete multiple TaskRepeatCfgs',
-}
+export const addTaskRepeatCfgToTask = createAction(
+  '[TaskRepeatCfg][Task] Add TaskRepeatCfg to Task',
+  props<{ taskId: string; taskRepeatCfg: TaskRepeatCfg }>(),
+);
 
-export class AddTaskRepeatCfgToTask implements Action {
-  readonly type: string = TaskRepeatCfgActionTypes.AddTaskRepeatCfgToTask;
+export const updateTaskRepeatCfg = createAction(
+  '[TaskRepeatCfg] Update TaskRepeatCfg',
+  props<{ taskRepeatCfg: Update<TaskRepeatCfg> }>(),
+);
 
-  constructor(public payload: { taskId: string; taskRepeatCfg: TaskRepeatCfg }) {}
-}
+export const updateTaskRepeatCfgs = createAction(
+  '[TaskRepeatCfg] Update multiple TaskRepeatCfgs',
+  props<{ ids: string[]; changes: Partial<TaskRepeatCfg> }>(),
+);
 
-export class UpdateTaskRepeatCfg implements Action {
-  readonly type: string = TaskRepeatCfgActionTypes.UpdateTaskRepeatCfg;
+export const upsertTaskRepeatCfg = createAction(
+  '[TaskRepeatCfg] Upsert TaskRepeatCfg',
+  props<{ taskRepeatCfg: TaskRepeatCfg }>(),
+);
 
-  constructor(public payload: { taskRepeatCfg: Update<TaskRepeatCfg> }) {}
-}
+export const deleteTaskRepeatCfg = createAction(
+  '[TaskRepeatCfg] Delete TaskRepeatCfg',
+  props<{ id: string }>(),
+);
 
-export class UpdateTaskRepeatCfgs implements Action {
-  readonly type: string = TaskRepeatCfgActionTypes.UpdateTaskRepeatCfgs;
-
-  constructor(public payload: { ids: string[]; changes: Partial<TaskRepeatCfg> }) {}
-}
-
-export class UpsertTaskRepeatCfg implements Action {
-  readonly type: string = TaskRepeatCfgActionTypes.UpsertTaskRepeatCfg;
-
-  constructor(public payload: { taskRepeatCfg: TaskRepeatCfg }) {}
-}
-
-export class DeleteTaskRepeatCfg implements Action {
-  readonly type: string = TaskRepeatCfgActionTypes.DeleteTaskRepeatCfg;
-
-  constructor(public payload: { id: string }) {}
-}
-
-export class DeleteTaskRepeatCfgs implements Action {
-  readonly type: string = TaskRepeatCfgActionTypes.DeleteTaskRepeatCfgs;
-
-  constructor(public payload: { ids: string[] }) {}
-}
-
-export type TaskRepeatCfgActions =
-  | AddTaskRepeatCfgToTask
-  | UpdateTaskRepeatCfg
-  | UpdateTaskRepeatCfgs
-  | UpsertTaskRepeatCfg
-  | DeleteTaskRepeatCfg
-  | DeleteTaskRepeatCfgs;
+export const deleteTaskRepeatCfgs = createAction(
+  '[TaskRepeatCfg] Delete multiple TaskRepeatCfgs',
+  props<{ ids: string[] }>(),
+);

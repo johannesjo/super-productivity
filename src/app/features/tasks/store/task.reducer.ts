@@ -33,10 +33,7 @@ import {
   TaskState,
 } from '../task.model';
 import { calcTotalTimeSpent } from '../util/calc-total-time-spent';
-import {
-  AddTaskRepeatCfgToTask,
-  TaskRepeatCfgActionTypes,
-} from '../../task-repeat-cfg/store/task-repeat-cfg.actions';
+import { addTaskRepeatCfgToTask } from '../../task-repeat-cfg/store/task-repeat-cfg.actions';
 import {
   deleteTask,
   getTaskById,
@@ -85,7 +82,7 @@ export const initialTaskState: TaskState = taskAdapter.getInitialState({
 // TODO unit test the shit out of this once the model is settled
 export const taskReducer = (
   state: TaskState = initialTaskState,
-  action: TaskActions | AddTaskRepeatCfgToTask | TaskAttachmentActions,
+  action: TaskActions | TaskAttachmentActions,
 ): TaskState => {
   if (environment.production) {
     console.log(action.type, (action as any)?.payload || action);
@@ -534,16 +531,19 @@ export const taskReducer = (
 
     // REPEAT STUFF
     // ------------
-    case TaskRepeatCfgActionTypes.AddTaskRepeatCfgToTask: {
-      return taskAdapter.updateOne(
-        {
-          id: (action as AddTaskRepeatCfgToTask).payload.taskId,
-          changes: {
-            repeatCfgId: (action as AddTaskRepeatCfgToTask).payload.taskRepeatCfg.id,
-          },
-        },
-        state,
-      );
+    case addTaskRepeatCfgToTask.type: {
+      console.log(action);
+
+      return state;
+      // return taskAdapter.updateOne(
+      //   {
+      //     id: action.payload.taskId,
+      //     changes: {
+      //       repeatCfgId: (action as addTaskRepeatCfgToTask).payload.taskRepeatCfg.id,
+      //     },
+      //   },
+      //   state,
+      // );
     }
 
     // TASK ATTACHMENTS

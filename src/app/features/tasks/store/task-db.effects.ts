@@ -5,10 +5,10 @@ import { select, Store } from '@ngrx/store';
 import { tap, withLatestFrom } from 'rxjs/operators';
 import { PersistenceService } from '../../../core/persistence/persistence.service';
 import { selectTaskFeatureState } from './task.selectors';
-import { TaskRepeatCfgActionTypes } from '../../task-repeat-cfg/store/task-repeat-cfg.actions';
 import { TaskAttachmentActionTypes } from '../task-attachment/task-attachment.actions';
 import { TaskState } from '../task.model';
 import { environment } from '../../../../environments/environment';
+import { addTaskRepeatCfgToTask } from '../../task-repeat-cfg/store/task-repeat-cfg.actions';
 
 @Injectable()
 export class TaskDbEffects {
@@ -47,7 +47,7 @@ export class TaskDbEffects {
       TaskAttachmentActionTypes.UpdateTaskAttachment,
 
       // RELATED ACTIONS
-      TaskRepeatCfgActionTypes.AddTaskRepeatCfgToTask,
+      addTaskRepeatCfgToTask,
     ),
     withLatestFrom(this._store$.pipe(select(selectTaskFeatureState))),
     tap(([, taskState]) => this._saveToLs(taskState, true)),

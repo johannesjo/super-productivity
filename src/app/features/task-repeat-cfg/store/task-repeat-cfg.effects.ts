@@ -11,7 +11,13 @@ import {
   withLatestFrom,
 } from 'rxjs/operators';
 import { Action, select, Store } from '@ngrx/store';
-import { DeleteTaskRepeatCfg, TaskRepeatCfgActionTypes } from './task-repeat-cfg.actions';
+import {
+  addTaskRepeatCfgToTask,
+  deleteTaskRepeatCfg,
+  deleteTaskRepeatCfgs,
+  updateTaskRepeatCfg,
+  upsertTaskRepeatCfg,
+} from './task-repeat-cfg.actions';
 import { selectTaskRepeatCfgFeatureState } from './task-repeat-cfg.reducer';
 import { PersistenceService } from '../../../core/persistence/persistence.service';
 import { Task, TaskArchive } from '../../tasks/task.model';
@@ -29,11 +35,11 @@ import { SyncProviderService } from '../../../imex/sync/sync-provider.service';
 export class TaskRepeatCfgEffects {
   @Effect({ dispatch: false }) updateTaskRepeatCfgs$: any = this._actions$.pipe(
     ofType(
-      TaskRepeatCfgActionTypes.AddTaskRepeatCfgToTask,
-      TaskRepeatCfgActionTypes.UpdateTaskRepeatCfg,
-      TaskRepeatCfgActionTypes.UpsertTaskRepeatCfg,
-      TaskRepeatCfgActionTypes.DeleteTaskRepeatCfg,
-      TaskRepeatCfgActionTypes.DeleteTaskRepeatCfgs,
+      addTaskRepeatCfgToTask,
+      updateTaskRepeatCfg,
+      upsertTaskRepeatCfg,
+      deleteTaskRepeatCfg,
+      deleteTaskRepeatCfgs,
     ),
     withLatestFrom(this._store$.pipe(select(selectTaskRepeatCfgFeatureState))),
     tap(this._saveToLs.bind(this)),
@@ -81,10 +87,8 @@ export class TaskRepeatCfgEffects {
   );
 
   @Effect() removeConfigIdFromTaskStateTasks$: any = this._actions$.pipe(
-    ofType(TaskRepeatCfgActionTypes.DeleteTaskRepeatCfg),
-    concatMap((action: DeleteTaskRepeatCfg) =>
-      this._taskService.getTasksByRepeatCfgId$(action.payload.id).pipe(take(1)),
-    ),
+    ofType(deleteTaskRepeatCfg),
+    concatMap(({ id }) => this._taskService.getTasksByRepeatCfgId$(id).pipe(take(1))),
     filter((tasks) => tasks && !!tasks.length),
     mergeMap((tasks: Task[]) =>
       tasks.map(
@@ -101,26 +105,11 @@ export class TaskRepeatCfgEffects {
 
   @Effect({ dispatch: false })
   removeConfigIdFromTaskArchiveTasks$: any = this._actions$.pipe(
-    ofType(TaskRepeatCfgActionTypes.DeleteTaskRepeatCfg),
-    tap((a: DeleteTaskRepeatCfg) => {
-      this._removeRepeatCfgFromArchiveTasks(a.payload.id);
+    ofType(deleteTaskRepeatCfg),
+    tap(({ id }) => {
+      this._removeRepeatCfgFromArchiveTasks(id);
     }),
   );
-
-  // @Effect() removeRemindersOnCreation$: any = this._actions$.pipe(
-  //   ofType(TaskRepeatCfgActionTypes.AddTaskRepeatCfgToTask),
-  //   concatMap((a: AddTaskRepeatCfgToTask) =>
-  //     this._taskService.getByIdOnce$(a.payload.taskId).pipe(take(1)),
-  //   ),
-  //   filter((task: TaskWithSubTasks) => typeof task.reminderId === 'string'),
-  //   map(
-  //     (task: TaskWithSubTasks) =>
-  //       new UnScheduleTask({
-  //         id: task.id,
-  //         reminderId: task.reminderId as string,
-  //       }),
-  //   ),
-  // );
 
   constructor(
     private _actions$: Actions,

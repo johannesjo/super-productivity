@@ -8,12 +8,12 @@ import {
   selectTaskRepeatCfgsWithStartTime,
 } from './store/task-repeat-cfg.reducer';
 import {
-  AddTaskRepeatCfgToTask,
-  DeleteTaskRepeatCfg,
-  DeleteTaskRepeatCfgs,
-  UpdateTaskRepeatCfg,
-  UpdateTaskRepeatCfgs,
-  UpsertTaskRepeatCfg,
+  addTaskRepeatCfgToTask,
+  deleteTaskRepeatCfg,
+  deleteTaskRepeatCfgs,
+  updateTaskRepeatCfg,
+  updateTaskRepeatCfgs,
+  upsertTaskRepeatCfg,
 } from './store/task-repeat-cfg.actions';
 import { Observable } from 'rxjs';
 import {
@@ -36,6 +36,8 @@ import { isValidSplitTime } from '../../util/is-valid-split-time';
 import { getDateTimeFromClockString } from '../../util/get-date-time-from-clock-string';
 import { isSameDay } from '../../util/is-same-day';
 import { remindOptionToMilliseconds } from '../tasks/util/remind-option-to-milliseconds';
+import { Update } from '@ngrx/entity/src/models';
+import { TypedAction } from '@ngrx/store/src/models';
 
 @Injectable({
   providedIn: 'root',
@@ -75,7 +77,7 @@ export class TaskRepeatCfgService {
     taskRepeatCfg: Omit<TaskRepeatCfgCopy, 'id'>,
   ): void {
     this._store$.dispatch(
-      new AddTaskRepeatCfgToTask({
+      addTaskRepeatCfgToTask({
         taskRepeatCfg: {
           ...taskRepeatCfg,
           projectId,
@@ -87,23 +89,23 @@ export class TaskRepeatCfgService {
   }
 
   deleteTaskRepeatCfg(id: string): void {
-    this._store$.dispatch(new DeleteTaskRepeatCfg({ id }));
+    this._store$.dispatch(deleteTaskRepeatCfg({ id }));
   }
 
   deleteTaskRepeatCfgsNoTaskCleanup(ids: string[]): void {
-    this._store$.dispatch(new DeleteTaskRepeatCfgs({ ids }));
+    this._store$.dispatch(deleteTaskRepeatCfgs({ ids }));
   }
 
   updateTaskRepeatCfg(id: string, changes: Partial<TaskRepeatCfg>): void {
-    this._store$.dispatch(new UpdateTaskRepeatCfg({ taskRepeatCfg: { id, changes } }));
+    this._store$.dispatch(updateTaskRepeatCfg({ taskRepeatCfg: { id, changes } }));
   }
 
   updateTaskRepeatCfgs(ids: string[], changes: Partial<TaskRepeatCfg>): void {
-    this._store$.dispatch(new UpdateTaskRepeatCfgs({ ids, changes }));
+    this._store$.dispatch(updateTaskRepeatCfgs({ ids, changes }));
   }
 
   upsertTaskRepeatCfg(taskRepeatCfg: TaskRepeatCfg): void {
-    this._store$.dispatch(new UpsertTaskRepeatCfg({ taskRepeatCfg }));
+    this._store$.dispatch(upsertTaskRepeatCfg({ taskRepeatCfg }));
   }
 
   async createRepeatableTask(
@@ -160,7 +162,17 @@ export class TaskRepeatCfgService {
     taskRepeatCfg: TaskRepeatCfg,
     currentTaskId: string | null,
     targetDayDate: number = Date.now(),
-  ): Promise<(UpdateTask | AddTask | UpdateTaskRepeatCfg | ScheduleTask)[]> {
+  ): // NOTE: updateTaskRepeatCfg missing as there is no way to declare it as action type
+  Promise<
+    (
+      | UpdateTask
+      | AddTask
+      | ScheduleTask
+      | ({
+          taskRepeatCfg: Update<Readonly<TaskRepeatCfgCopy>>;
+        } & TypedAction<'[TaskRepeatCfg] Update TaskRepeatCfg'>)
+    )[]
+  > {
     // NOTE: there might be multiple configs in case something went wrong
     // we want to move all of them to the archive
     const existingTaskInstances: Task[] = await this._taskService
@@ -181,29 +193,34 @@ export class TaskRepeatCfgService {
     }
 
     // move all current left over instances to archive right away
-    const markAsDoneActions: (UpdateTask | AddTask | UpdateTaskRepeatCfg)[] =
-      existingTaskInstances
-        .filter(
-          (taskI) =>
-            !taskI.isDone &&
-            !isSameDay(targetDayDate, taskI.created) &&
-            taskI.id !== currentTaskId,
-        )
-        .map(
-          (taskI) =>
-            new UpdateTask({
-              task: {
-                id: taskI.id,
-                changes: {
-                  isDone: true,
-                },
+    const markAsDoneActions: (UpdateTask | AddTask)[] = existingTaskInstances
+      .filter(
+        (taskI) =>
+          !taskI.isDone &&
+          !isSameDay(targetDayDate, taskI.created) &&
+          taskI.id !== currentTaskId,
+      )
+      .map(
+        (taskI) =>
+          new UpdateTask({
+            task: {
+              id: taskI.id,
+              changes: {
+                isDone: true,
               },
-            }),
-        );
+            },
+          }),
+      );
 
     const { task, isAddToBottom } = this._getTaskRepeatTemplate(taskRepeatCfg);
 
-    const createNewActions: (AddTask | UpdateTaskRepeatCfg | ScheduleTask)[] = [
+    const createNewActions: (
+      | AddTask
+      | ScheduleTask
+      | ({
+          taskRepeatCfg: Update<Readonly<TaskRepeatCfgCopy>>;
+        } & TypedAction<'[TaskRepeatCfg] Update TaskRepeatCfg'>)
+    )[] = [
       new AddTask({
         task,
         workContextType: this._workContextService
@@ -212,13 +229,14 @@ export class TaskRepeatCfgService {
         isAddToBacklog: false,
         isAddToBottom,
       }),
-      new UpdateTaskRepeatCfg({
+      updateTaskRepeatCfg({
         taskRepeatCfg: {
           id: taskRepeatCfg.id,
           changes: {
             lastTaskCreation: targetDayDate,
           },
         },
+        // TODO fix type
       }),
     ];
 

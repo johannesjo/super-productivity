@@ -1,22 +1,19 @@
 import { createEntityAdapter, EntityAdapter } from '@ngrx/entity';
 import {
-  AddTaskRepeatCfgToTask,
-  DeleteTaskRepeatCfg,
-  DeleteTaskRepeatCfgs,
-  TaskRepeatCfgActions,
-  TaskRepeatCfgActionTypes,
-  UpdateTaskRepeatCfg,
-  UpdateTaskRepeatCfgs,
-  UpsertTaskRepeatCfg,
+  addTaskRepeatCfgToTask,
+  deleteTaskRepeatCfg,
+  deleteTaskRepeatCfgs,
+  updateTaskRepeatCfg,
+  updateTaskRepeatCfgs,
+  upsertTaskRepeatCfg,
 } from './task-repeat-cfg.actions';
 import {
   TASK_REPEAT_WEEKDAY_MAP,
   TaskRepeatCfg,
   TaskRepeatCfgState,
 } from '../task-repeat-cfg.model';
-import { createFeatureSelector, createSelector } from '@ngrx/store';
+import { createFeatureSelector, createReducer, createSelector, on } from '@ngrx/store';
 import { loadAllData } from '../../../root-store/meta/load-all-data.action';
-import { AppDataComplete } from '../../../imex/sync/sync.model';
 import { migrateTaskRepeatCfgState } from '../migrate-task-repeat-cfg-state.util';
 import { isSameDay } from '../../../util/is-same-day';
 
@@ -82,61 +79,34 @@ export const initialTaskRepeatCfgState: TaskRepeatCfgState = adapter.getInitialS
   // additional entity state properties
 });
 
-export const taskRepeatCfgReducer = (
-  state: TaskRepeatCfgState = initialTaskRepeatCfgState,
-  action: TaskRepeatCfgActions,
-): TaskRepeatCfgState => {
-  // TODO fix this hackyness once we use the new syntax everywhere
-  if ((action.type as string) === loadAllData.type) {
-    const { appDataComplete }: { appDataComplete: AppDataComplete } = action as any;
-    return appDataComplete.taskRepeatCfg
+export const taskRepeatCfgReducer = createReducer<TaskRepeatCfgState>(
+  initialTaskRepeatCfgState,
+
+  on(loadAllData, (oldState, { appDataComplete }) =>
+    appDataComplete.taskRepeatCfg
       ? migrateTaskRepeatCfgState({ ...appDataComplete.taskRepeatCfg })
-      : state;
-  }
+      : oldState,
+  ),
 
-  switch (action.type) {
-    case TaskRepeatCfgActionTypes.AddTaskRepeatCfgToTask: {
-      return adapter.addOne(
-        (action as AddTaskRepeatCfgToTask).payload.taskRepeatCfg,
-        state,
-      );
-    }
-
-    case TaskRepeatCfgActionTypes.UpdateTaskRepeatCfg: {
-      return adapter.updateOne(
-        (action as UpdateTaskRepeatCfg).payload.taskRepeatCfg,
-        state,
-      );
-    }
-
-    case TaskRepeatCfgActionTypes.UpdateTaskRepeatCfgs: {
-      const { ids, changes } = (action as UpdateTaskRepeatCfgs).payload;
-      return adapter.updateMany(
-        ids.map((id) => ({
-          id,
-          changes,
-        })),
-        state,
-      );
-    }
-
-    case TaskRepeatCfgActionTypes.UpsertTaskRepeatCfg: {
-      return adapter.upsertOne(
-        (action as UpsertTaskRepeatCfg).payload.taskRepeatCfg,
-        state,
-      );
-    }
-
-    case TaskRepeatCfgActionTypes.DeleteTaskRepeatCfg: {
-      return adapter.removeOne((action as DeleteTaskRepeatCfg).payload.id, state);
-    }
-
-    case TaskRepeatCfgActionTypes.DeleteTaskRepeatCfgs: {
-      return adapter.removeMany((action as DeleteTaskRepeatCfgs).payload.ids, state);
-    }
-
-    default: {
-      return state;
-    }
-  }
-};
+  on(addTaskRepeatCfgToTask, (state, { taskRepeatCfg }) =>
+    adapter.addOne(taskRepeatCfg, state),
+  ),
+  on(updateTaskRepeatCfg, (state, { taskRepeatCfg }) =>
+    adapter.updateOne(taskRepeatCfg, state),
+  ),
+  on(upsertTaskRepeatCfg, (state, { taskRepeatCfg }) =>
+    adapter.upsertOne(taskRepeatCfg, state),
+  ),
+  on(deleteTaskRepeatCfg, (state, { id }) => adapter.removeOne(id, state)),
+  on(deleteTaskRepeatCfgs, (state, { ids }) => adapter.removeMany(ids, state)),
+  on(updateTaskRepeatCfgs, (state, { ids, changes }) =>
+    adapter.updateMany(
+      ids.map((id) => ({
+        id,
+        changes,
+      })),
+      state,
+    ),
+  ),
+  on(deleteTaskRepeatCfg, (state, { id }) => adapter.removeOne(id, state)),
+);
