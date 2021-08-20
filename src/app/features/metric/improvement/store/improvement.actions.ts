@@ -1,8 +1,8 @@
-import { Action } from '@ngrx/store';
+import { createAction, props } from '@ngrx/store';
 import { Update } from '@ngrx/entity';
 import { Improvement } from '../improvement.model';
 
-export enum ImprovementActionTypes {
+enum ImprovementActionTypes {
   'AddImprovement' = '[Improvement] Add Improvement',
   'UpdateImprovement' = '[Improvement] Update Improvement',
   'DeleteImprovement' = '[Improvement] Delete Improvement',
@@ -14,65 +14,46 @@ export enum ImprovementActionTypes {
   'AddImprovementCheckedDay' = '[Improvement] Add checked day',
 }
 
-export class AddImprovement implements Action {
-  readonly type: string = ImprovementActionTypes.AddImprovement;
+export const addImprovement = createAction(
+  ImprovementActionTypes.AddImprovement,
+  props<{ improvement: Improvement }>(),
+);
 
-  constructor(public payload: { improvement: Improvement }) {}
-}
+export const updateImprovement = createAction(
+  ImprovementActionTypes.UpdateImprovement,
+  props<{ improvement: Update<Improvement> }>(),
+);
 
-export class UpdateImprovement implements Action {
-  readonly type: string = ImprovementActionTypes.UpdateImprovement;
+export const deleteImprovement = createAction(
+  ImprovementActionTypes.DeleteImprovement,
+  props<{ id: string }>(),
+);
 
-  constructor(public payload: { improvement: Update<Improvement> }) {}
-}
+export const deleteImprovements = createAction(
+  ImprovementActionTypes.DeleteImprovements,
+  props<{ ids: string[] }>(),
+);
 
-export class DeleteImprovement implements Action {
-  readonly type: string = ImprovementActionTypes.DeleteImprovement;
+export const hideImprovement = createAction(
+  ImprovementActionTypes.HideImprovement,
+  props<{ id: string }>(),
+);
 
-  constructor(public payload: { id: string }) {}
-}
+export const addImprovementCheckedDay = createAction(
+  ImprovementActionTypes.AddImprovementCheckedDay,
+  props<{ id: string; checkedDay: string }>(),
+);
 
-export class DeleteImprovements implements Action {
-  readonly type: string = ImprovementActionTypes.DeleteImprovements;
+export const toggleImprovementRepeat = createAction(
+  ImprovementActionTypes.ToggleImprovementRepeat,
+  props<{ id: string }>(),
+);
 
-  constructor(public payload: { ids: string[] }) {}
-}
+export const disableImprovementRepeat = createAction(
+  ImprovementActionTypes.DisableImprovementRepeat,
+  props<{ id: string }>(),
+);
 
-export class HideImprovement implements Action {
-  readonly type: string = ImprovementActionTypes.HideImprovement;
-
-  constructor(public payload: { id: string }) {}
-}
-
-export class AddImprovementCheckedDay implements Action {
-  readonly type: string = ImprovementActionTypes.AddImprovementCheckedDay;
-
-  constructor(public payload: { id: string; checkedDay: string }) {}
-}
-
-export class ToggleImprovementRepeat implements Action {
-  readonly type: string = ImprovementActionTypes.ToggleImprovementRepeat;
-
-  constructor(public payload: { id: string }) {}
-}
-
-export class DisableImprovementRepeat implements Action {
-  readonly type: string = ImprovementActionTypes.DisableImprovementRepeat;
-
-  constructor(public payload: { id: string }) {}
-}
-
-export class ClearHiddenImprovements implements Action {
-  readonly type: string = ImprovementActionTypes.ClearHiddenImprovements;
-}
-
-export type ImprovementActions =
-  | AddImprovement
-  | UpdateImprovement
-  | DeleteImprovement
-  | DeleteImprovements
-  | HideImprovement
-  | ToggleImprovementRepeat
-  | DisableImprovementRepeat
-  | AddImprovementCheckedDay
-  | ClearHiddenImprovements;
+export const clearHiddenImprovements = createAction(
+  ImprovementActionTypes.ClearHiddenImprovements,
+);

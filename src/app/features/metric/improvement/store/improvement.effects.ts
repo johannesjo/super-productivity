@@ -3,9 +3,15 @@ import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { filter, first, map, switchMap, tap, withLatestFrom } from 'rxjs/operators';
 import { select, Store } from '@ngrx/store';
 import {
-  ClearHiddenImprovements,
-  DeleteImprovements,
-  ImprovementActionTypes,
+  addImprovement,
+  addImprovementCheckedDay,
+  clearHiddenImprovements,
+  deleteImprovement,
+  deleteImprovements,
+  disableImprovementRepeat,
+  hideImprovement,
+  toggleImprovementRepeat,
+  updateImprovement,
 } from './improvement.actions';
 import {
   selectImprovementFeatureState,
@@ -23,13 +29,13 @@ export class ImprovementEffects {
     () =>
       this._actions$.pipe(
         ofType(
-          ImprovementActionTypes.AddImprovement,
-          ImprovementActionTypes.UpdateImprovement,
-          ImprovementActionTypes.ToggleImprovementRepeat,
-          ImprovementActionTypes.DisableImprovementRepeat,
-          ImprovementActionTypes.HideImprovement,
-          ImprovementActionTypes.DeleteImprovement,
-          ImprovementActionTypes.AddImprovementCheckedDay,
+          addImprovement,
+          updateImprovement,
+          toggleImprovementRepeat,
+          disableImprovementRepeat,
+          hideImprovement,
+          deleteImprovement,
+          addImprovementCheckedDay,
         ),
         switchMap(() =>
           this._store$.pipe(select(selectImprovementFeatureState)).pipe(first()),
@@ -44,7 +50,7 @@ export class ImprovementEffects {
       ofType(loadProjectRelatedDataSuccess.type),
       withLatestFrom(this._store$.pipe(select(selectImprovementHideDay))),
       filter(([, hideDay]) => hideDay !== getWorklogStr()),
-      map(() => new ClearHiddenImprovements()),
+      map(() => clearHiddenImprovements()),
     ),
   );
 
@@ -52,7 +58,7 @@ export class ImprovementEffects {
     this._actions$.pipe(
       ofType(loadProjectRelatedDataSuccess.type),
       withLatestFrom(this._store$.pipe(select(selectUnusedImprovementIds))),
-      map(([a, unusedIds]) => new DeleteImprovements({ ids: unusedIds })),
+      map(([a, unusedIds]) => deleteImprovements({ ids: unusedIds })),
     ),
   );
 

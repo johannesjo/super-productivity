@@ -1,20 +1,19 @@
 import { createEntityAdapter, EntityAdapter } from '@ngrx/entity';
 import {
-  AddImprovement,
-  AddImprovementCheckedDay,
-  DeleteImprovement,
-  DisableImprovementRepeat,
-  HideImprovement,
-  ImprovementActions,
-  ImprovementActionTypes,
-  ToggleImprovementRepeat,
-  UpdateImprovement,
+  addImprovement,
+  addImprovementCheckedDay,
+  clearHiddenImprovements,
+  deleteImprovement,
+  deleteImprovements,
+  disableImprovementRepeat,
+  hideImprovement,
+  toggleImprovementRepeat,
+  updateImprovement,
 } from './improvement.actions';
 import { Improvement, ImprovementState } from '../improvement.model';
-import { createFeatureSelector, createSelector } from '@ngrx/store';
+import { createFeatureSelector, createReducer, createSelector, on } from '@ngrx/store';
 import { getWorklogStr } from '../../../../util/get-work-log-str';
 import { loadAllData } from '../../../../root-store/meta/load-all-data.action';
-import { AppDataComplete } from '../../../../imex/sync/sync.model';
 import { migrateImprovementState } from '../../migrate-metric-states.util';
 
 export const IMPROVEMENT_FEATURE_NAME = 'improvement';
@@ -63,91 +62,83 @@ export const initialImprovementState: ImprovementState = adapter.getInitialState
   hiddenImprovementBannerItems: [],
 });
 
-export const improvementReducer = (
-  state: ImprovementState = initialImprovementState,
-  action: ImprovementActions,
-): ImprovementState => {
-  // TODO fix this hackyness once we use the new syntax everywhere
-  if ((action.type as string) === loadAllData.type) {
-    const { appDataComplete }: { appDataComplete: AppDataComplete } = action as any;
-    return appDataComplete.improvement?.ids
+export const improvementReducer = createReducer<ImprovementState>(
+  initialImprovementState,
+
+  on(loadAllData, (state, { appDataComplete }) =>
+    appDataComplete.improvement?.ids
       ? appDataComplete.improvement
-      : migrateImprovementState(state);
-  }
+      : migrateImprovementState(state),
+  ),
 
-  switch (action.type) {
-    case ImprovementActionTypes.AddImprovement: {
-      return adapter.addOne((action as AddImprovement).payload.improvement, state);
-    }
+  on(addImprovement, (state, { improvement }) => {
+    return adapter.addOne(improvement, state);
+  }),
 
-    case ImprovementActionTypes.UpdateImprovement: {
-      return adapter.updateOne((action as UpdateImprovement).payload.improvement, state);
-    }
+  on(updateImprovement, (state, { improvement }) => {
+    return adapter.updateOne(improvement, state);
+  }),
 
-    case ImprovementActionTypes.DeleteImprovement: {
-      return adapter.removeOne((action as DeleteImprovement).payload.id, state);
-    }
+  on(deleteImprovement, (state, { id }) => {
+    return adapter.removeOne(id, state);
+  }),
 
-    // case ImprovementActionTypes.DeleteImprovements: {
-    //   return adapter.removeMany((action as AddImprovement).payload.ids, state);
-    // }
+  on(deleteImprovements, (state, { ids }) => {
+    return adapter.removeMany(ids, state);
+  }),
 
-    case ImprovementActionTypes.HideImprovement:
-      const items = state.hiddenImprovementBannerItems || [];
-      return {
-        ...state,
-        hideDay: getWorklogStr(),
-        hiddenImprovementBannerItems: [...items, (action as HideImprovement).payload.id],
-      };
-
-    case ImprovementActionTypes.ToggleImprovementRepeat:
-      const itemI = state.entities[(action as ToggleImprovementRepeat).payload.id];
-      return adapter.updateOne(
-        {
-          id: (action as ToggleImprovementRepeat).payload.id,
-          changes: {
-            isRepeat: !(itemI as Improvement).isRepeat,
-          },
+  on(hideImprovement, (state, { id }) => {
+    const items = state.hiddenImprovementBannerItems || [];
+    return {
+      ...state,
+      hideDay: getWorklogStr(),
+      hiddenImprovementBannerItems: [...items, id],
+    };
+  }),
+  on(toggleImprovementRepeat, (state, { id }) => {
+    const itemI = state.entities[id];
+    return adapter.updateOne(
+      {
+        id,
+        changes: {
+          isRepeat: !(itemI as Improvement).isRepeat,
         },
-        state,
-      );
+      },
+      state,
+    );
+  }),
 
-    case ImprovementActionTypes.DisableImprovementRepeat:
-      return adapter.updateOne(
-        {
-          id: (action as DisableImprovementRepeat).payload.id,
-          changes: {
-            isRepeat: false,
-          },
+  on(disableImprovementRepeat, (state, { id }) => {
+    return adapter.updateOne(
+      {
+        id,
+        changes: {
+          isRepeat: false,
         },
-        state,
-      );
+      },
+      state,
+    );
+  }),
 
-    case ImprovementActionTypes.ClearHiddenImprovements:
-      return {
-        ...state,
-        hiddenImprovementBannerItems: [],
-      };
+  on(clearHiddenImprovements, (state) => {
+    return {
+      ...state,
+      hiddenImprovementBannerItems: [],
+    };
+  }),
 
-    case ImprovementActionTypes.AddImprovementCheckedDay: {
-      const { id, checkedDay } = (action as AddImprovementCheckedDay).payload;
-      const allCheckedDays = (state.entities[id] as Improvement).checkedDays || [];
-
-      return allCheckedDays.includes(checkedDay) && checkedDay
-        ? state
-        : adapter.updateOne(
-            {
-              id,
-              changes: {
-                checkedDays: [...allCheckedDays, checkedDay],
-              },
+  on(addImprovementCheckedDay, (state, { id, checkedDay }) => {
+    const allCheckedDays = (state.entities[id] as Improvement).checkedDays || [];
+    return allCheckedDays.includes(checkedDay) && checkedDay
+      ? state
+      : adapter.updateOne(
+          {
+            id,
+            changes: {
+              checkedDays: [...allCheckedDays, checkedDay],
             },
-            state,
-          );
-    }
-
-    default: {
-      return state;
-    }
-  }
-};
+          },
+          state,
+        );
+  }),
+);

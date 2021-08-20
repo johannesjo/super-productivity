@@ -5,15 +5,15 @@ import {
   selectRepeatedImprovementIds,
 } from './store/improvement.reducer';
 import {
-  AddImprovement,
-  AddImprovementCheckedDay,
-  ClearHiddenImprovements,
-  DeleteImprovement,
-  DeleteImprovements,
-  DisableImprovementRepeat,
-  HideImprovement,
-  ToggleImprovementRepeat,
-  UpdateImprovement,
+  addImprovement,
+  addImprovementCheckedDay,
+  clearHiddenImprovements,
+  deleteImprovement,
+  deleteImprovements,
+  disableImprovementRepeat,
+  hideImprovement,
+  toggleImprovementRepeat,
+  updateImprovement,
 } from './store/improvement.actions';
 import { Observable } from 'rxjs';
 import { Improvement, ImprovementState } from './improvement.model';
@@ -46,7 +46,7 @@ export class ImprovementService {
   addImprovement(title: string): string {
     const id = shortid();
     this._store$.dispatch(
-      new AddImprovement({
+      addImprovement({
         improvement: {
           title,
           id,
@@ -60,7 +60,7 @@ export class ImprovementService {
 
   addCheckedDay(id: string, checkedDay: string = getWorklogStr()): void {
     this._store$.dispatch(
-      new AddImprovementCheckedDay({
+      addImprovementCheckedDay({
         id,
         checkedDay,
       }),
@@ -68,30 +68,30 @@ export class ImprovementService {
   }
 
   deleteImprovement(id: string): void {
-    this._store$.dispatch(new DeleteImprovement({ id }));
+    this._store$.dispatch(deleteImprovement({ id }));
   }
 
   deleteImprovements(ids: string[]): void {
-    this._store$.dispatch(new DeleteImprovements({ ids }));
+    this._store$.dispatch(deleteImprovements({ ids }));
   }
 
   updateImprovement(id: string, changes: Partial<Improvement>): void {
-    this._store$.dispatch(new UpdateImprovement({ improvement: { id, changes } }));
+    this._store$.dispatch(updateImprovement({ improvement: { id, changes } }));
   }
 
   hideImprovement(id: string): void {
-    this._store$.dispatch(new HideImprovement({ id }));
+    this._store$.dispatch(hideImprovement({ id }));
   }
 
   toggleImprovementRepeat(id: string): void {
-    this._store$.dispatch(new ToggleImprovementRepeat({ id }));
+    this._store$.dispatch(toggleImprovementRepeat({ id }));
   }
 
   disableImprovementRepeat(id: string): void {
-    this._store$.dispatch(new DisableImprovementRepeat({ id }));
+    this._store$.dispatch(disableImprovementRepeat({ id }));
   }
 
   clearHiddenImprovements(): void {
-    this._store$.dispatch(new ClearHiddenImprovements());
+    this._store$.dispatch(clearHiddenImprovements());
   }
 }
