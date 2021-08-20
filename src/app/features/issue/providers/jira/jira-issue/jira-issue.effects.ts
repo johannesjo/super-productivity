@@ -122,8 +122,7 @@ export class JiraIssueEffects {
       this._actions$.pipe(
         ofType(setCurrentTask),
         // only if a task is started
-        // TODO check this
-        filter((a) => !!a.payload),
+        filter(({ id }) => !!id),
         withLatestFrom(this._store$.pipe(select(selectCurrentTaskParentOrCurrent))),
         filter(
           ([, currentTaskOrParent]) =>
@@ -208,8 +207,7 @@ export class JiraIssueEffects {
       this._actions$.pipe(
         ofType(setCurrentTask),
         // only if a task is started
-        // TODO check this
-        filter((a) => !!a.payload),
+        filter(({ id }) => !!id),
         withLatestFrom(this._store$.pipe(select(selectCurrentTaskParentOrCurrent))),
         filter(
           ([, currentTaskOrParent]) =>

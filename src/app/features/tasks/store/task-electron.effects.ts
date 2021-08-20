@@ -39,8 +39,8 @@ export class TaskElectronEffects {
       this._actions$.pipe(
         ofType(setCurrentTask),
         filter(() => IS_ELECTRON),
-        tap((act) => {
-          if (!act.payload) {
+        tap(({ id }) => {
+          if (!id) {
             (this._electronService.ipcRenderer as typeof ipcRenderer).send(
               IPC.SET_PROGRESS_BAR,
               {

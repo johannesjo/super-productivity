@@ -44,7 +44,12 @@ enum TaskActionTypes {
   'RoundTimeSpentForDay' = '[Task] RoundTimeSpentForDay',
 }
 
-export const setCurrentTask = createAction(TaskActionTypes.SetCurrentTask, (v: any) => v);
+export const setCurrentTask = createAction(
+  TaskActionTypes.SetCurrentTask,
+  props<{
+    id: string | null;
+  }>(),
+);
 
 export const setSelectedTask = createAction(
   TaskActionTypes.SetSelectedTask,

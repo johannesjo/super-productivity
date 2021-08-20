@@ -133,7 +133,7 @@ export class TaskInternalEffects {
           return EMPTY;
         } else {
           if (nextId) {
-            return of(setCurrentTask(nextId));
+            return of(setCurrentTask({ id: nextId }));
           } else {
             return of(unsetCurrentTask());
           }

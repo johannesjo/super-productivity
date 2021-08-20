@@ -209,7 +209,7 @@ export class TaskService {
   // ----
   setCurrentId(id: string | null): void {
     if (id) {
-      this._store.dispatch(setCurrentTask(id));
+      this._store.dispatch(setCurrentTask({ id }));
     } else {
       this._store.dispatch(unsetCurrentTask());
     }

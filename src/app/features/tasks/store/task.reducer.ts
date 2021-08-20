@@ -93,14 +93,14 @@ export const taskReducer = createReducer<TaskState>(
   ),
 
   // TODO check if working
-  on(setCurrentTask, (state, payload) => {
-    if (payload) {
-      const task = getTaskById(payload, state);
+  on(setCurrentTask, (state, { id }) => {
+    if (id) {
+      const task = getTaskById(id, state);
       const subTaskIds = task.subTaskIds;
-      let taskToStartId = payload;
+      let taskToStartId = id;
       if (subTaskIds && subTaskIds.length) {
         const undoneTasks = subTaskIds
-          .map((id) => getTaskById(id, state))
+          .map((tid) => getTaskById(tid, state))
           .filter((ta: Task) => !ta.isDone);
         taskToStartId = undoneTasks.length ? undoneTasks[0].id : subTaskIds[0];
       }
@@ -118,7 +118,7 @@ export const taskReducer = createReducer<TaskState>(
     } else {
       return {
         ...state,
-        currentTaskId: payload,
+        currentTaskId: null,
       };
     }
   }),
