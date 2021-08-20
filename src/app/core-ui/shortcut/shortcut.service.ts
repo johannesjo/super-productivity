@@ -90,7 +90,10 @@ export class ShortcutService {
       return;
     }
 
-    if (checkKeyCombo(ev, keys.toggleBacklog)) {
+    if (
+      checkKeyCombo(ev, keys.toggleBacklog) &&
+      this._workContextService.activeWorkContextType === WorkContextType.PROJECT
+    ) {
       let backlogPos = 0;
       switch (this.backlogPos) {
         case 50:

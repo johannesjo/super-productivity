@@ -28,7 +28,9 @@ export class ActiveWorkContextGuard implements CanActivate {
         const { subPageType, param } = next.params;
         const base = activeType === WorkContextType.TAG ? 'tag' : 'project';
         const url = `/${base}/${activeId}/${subPageType}${param ? '/' + param : ''}`;
-        return of(this._router.parseUrl(url));
+        const urlTree = this._router.parseUrl(url);
+        urlTree.queryParams = next.queryParams;
+        return of(urlTree);
       }),
     );
   }
