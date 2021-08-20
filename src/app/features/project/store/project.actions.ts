@@ -3,6 +3,7 @@ import { Update } from '@ngrx/entity';
 import { Project } from '../project.model';
 import { IssueIntegrationCfg, IssueProviderKey } from '../../issue/issue.model';
 import { WorkContextAdvancedCfgKey } from '../../work-context/work-context.model';
+import { DropListModelSource } from '../../tasks/task.model';
 
 export const loadProjectRelatedDataSuccess = createAction(
   '[Project] Load Project related Data Success',
@@ -98,12 +99,45 @@ export const unarchiveProject = createAction(
   props<{ id: string }>(),
 );
 
+// MOVE TASK ACTIONS
+// -----------------
 export const moveProjectTaskToBacklogListAuto = createAction(
-  '[WorkContextMeta] Auto Move Task from today to backlog',
+  '[Project] Auto Move Task from today to backlog',
   props<{ taskId: string; projectId: string }>(),
 );
 
 export const moveProjectTaskToTodayListAuto = createAction(
-  '[WorkContextMeta] Auto Move Task from backlog to today',
+  '[Project] Auto Move Task from backlog to today',
   props<{ taskId: string; projectId: string; isMoveToTop: boolean }>(),
+);
+
+export const moveProjectTaskUpInBacklogList = createAction(
+  '[Project] Move Task Up in Backlog',
+  props<{ taskId: string; workContextId: string; doneBacklogTaskIds: string[] }>(),
+);
+
+export const moveProjectTaskDownInBacklogList = createAction(
+  '[Project] Move Task Down in Backlog',
+  props<{ taskId: string; workContextId: string; doneBacklogTaskIds: string[] }>(),
+);
+
+export const moveProjectTaskInBacklogList = createAction(
+  '[Project] Move Task in Backlog',
+  props<{ taskId: string; newOrderedIds: string[]; workContextId: string }>(),
+);
+
+export const moveProjectTaskToBacklogList = createAction(
+  '[Project] Move Task from today to backlog',
+  props<{ taskId: string; newOrderedIds: string[]; workContextId: string }>(),
+);
+
+export const moveProjectTaskToTodayList = createAction(
+  '[Project] Move Task from backlog to today',
+  props<{
+    taskId: string;
+    newOrderedIds: string[];
+    workContextId: string;
+    src: DropListModelSource;
+    target: DropListModelSource;
+  }>(),
 );

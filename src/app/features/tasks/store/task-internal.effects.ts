@@ -13,9 +13,11 @@ import { selectMiscConfig } from '../../config/store/global-config.reducer';
 import { Task, TaskState } from '../task.model';
 import { EMPTY, of } from 'rxjs';
 import { MiscConfig } from '../../config/global-config.model';
-import { moveTaskToBacklogList } from '../../work-context/store/work-context-meta.actions';
 import { WorkContextService } from '../../work-context/work-context.service';
-import { moveProjectTaskToBacklogListAuto } from '../../project/store/project.actions';
+import {
+  moveProjectTaskToBacklogList,
+  moveProjectTaskToBacklogListAuto,
+} from '../../project/store/project.actions';
 
 @Injectable()
 export class TaskInternalEffects {
@@ -64,7 +66,7 @@ export class TaskInternalEffects {
       TaskActionTypes.DeleteTask,
       TaskActionTypes.MoveToArchive,
 
-      moveTaskToBacklogList.type,
+      moveProjectTaskToBacklogList.type,
       moveProjectTaskToBacklogListAuto.type,
     ),
     withLatestFrom(
@@ -101,7 +103,7 @@ export class TaskInternalEffects {
           break;
         }
 
-        case moveTaskToBacklogList.type:
+        case moveProjectTaskToBacklogList.type:
         case moveProjectTaskToBacklogListAuto.type: {
           const isCurrent = currentId === (action as any).taskId;
           nextId = isCurrent ? null : 'NO_UPDATE';

@@ -23,6 +23,7 @@ import {
   archiveProject,
   deleteProject,
   loadProjectRelatedDataSuccess,
+  moveProjectTaskToBacklogList,
   moveProjectTaskToBacklogListAuto,
   moveProjectTaskToTodayListAuto,
   unarchiveProject,
@@ -77,6 +78,10 @@ export class ProjectService {
           : of(false),
       ),
     );
+
+  onMoveToBacklog$: Observable<any> = this._actions$.pipe(
+    ofType(moveProjectTaskToBacklogList),
+  );
 
   // DYNAMIC
 

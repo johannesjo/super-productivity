@@ -33,6 +33,7 @@ import { workViewProjectChangeAnimation } from '../../ui/animations/work-view-pr
 import { WorkContextService } from '../work-context/work-context.service';
 import { TaskRepeatCfgService } from '../task-repeat-cfg/task-repeat-cfg.service';
 import { TaskRepeatCfg } from '../task-repeat-cfg/task-repeat-cfg.model';
+import { ProjectService } from '../project/project.service';
 
 const SUB = 'SUB';
 const PARENT = 'PARENT';
@@ -62,7 +63,7 @@ export class WorkViewComponent implements OnInit, OnDestroy, AfterContentInit {
 
   // NOTE: not perfect but good enough for now
   isTriggerBacklogIconAni$: Observable<boolean> =
-    this.workContextService.onMoveToBacklog$.pipe(
+    this._projectService.onMoveToBacklog$.pipe(
       switchMap(() => zip(from([true, false]), timer(1, 200))),
       map((v) => v[0]),
     );
@@ -95,6 +96,7 @@ export class WorkViewComponent implements OnInit, OnDestroy, AfterContentInit {
     private _taskRepeatCfgService: TaskRepeatCfgService,
     private _dragulaService: DragulaService,
     private _activatedRoute: ActivatedRoute,
+    private _projectService: ProjectService,
   ) {}
 
   @ViewChild('splitTopEl', { read: ElementRef }) set splitTopElRef(ref: ElementRef) {

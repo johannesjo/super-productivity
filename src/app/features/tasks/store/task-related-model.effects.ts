@@ -25,10 +25,7 @@ import {
 import { PersistenceService } from '../../../core/persistence/persistence.service';
 import { Task, TaskArchive, TaskWithSubTasks } from '../task.model';
 import { ReminderService } from '../../reminder/reminder.service';
-import {
-  moveTaskInTodayList,
-  moveTaskToTodayList,
-} from '../../work-context/store/work-context-meta.actions';
+import { moveTaskInTodayList } from '../../work-context/store/work-context-meta.actions';
 import { taskAdapter } from './task.adapter';
 import { flattenTasks } from './task.selectors';
 import { GlobalConfigService } from '../../config/global-config.service';
@@ -41,6 +38,7 @@ import { ProjectService } from '../../project/project.service';
 import { TagService } from '../../tag/tag.service';
 import { shortSyntax } from '../short-syntax.util';
 import { environment } from '../../../../environments/environment';
+import { moveProjectTaskToTodayList } from '../../project/store/project.actions';
 
 @Injectable()
 export class TaskRelatedModelEffects {
@@ -98,7 +96,7 @@ export class TaskRelatedModelEffects {
   // -------------------
   @Effect()
   moveTaskToUnDone$: any = this._actions$.pipe(
-    ofType(moveTaskInTodayList, moveTaskToTodayList),
+    ofType(moveTaskInTodayList, moveProjectTaskToTodayList),
     filter(
       ({ src, target }) => (src === 'DONE' || src === 'BACKLOG') && target === 'UNDONE',
     ),
@@ -117,7 +115,7 @@ export class TaskRelatedModelEffects {
 
   @Effect()
   moveTaskToDone$: any = this._actions$.pipe(
-    ofType(moveTaskInTodayList, moveTaskToTodayList),
+    ofType(moveTaskInTodayList, moveProjectTaskToTodayList),
     filter(
       ({ src, target }) => (src === 'UNDONE' || src === 'BACKLOG') && target === 'DONE',
     ),

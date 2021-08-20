@@ -35,7 +35,6 @@ import {
   selectTasksWithSubTasksByIds,
 } from '../tasks/store/task.selectors';
 import { Actions, ofType } from '@ngrx/effects';
-import { moveTaskToBacklogList } from './store/work-context-meta.actions';
 import { WorklogExportSettings } from '../worklog/worklog.model';
 import {
   addToProjectBreakTime,
@@ -217,8 +216,6 @@ export class WorkContextService {
   }> = this._store$.pipe(select(selectTimelineTasks));
 
   workingToday$: Observable<any> = this.getTimeWorkedForDay$(getWorklogStr());
-
-  onMoveToBacklog$: Observable<any> = this._actions$.pipe(ofType(moveTaskToBacklogList));
 
   isHasTasksToWorkOn$: Observable<boolean> = this.todaysTasks$.pipe(
     map(hasTasksToWorkOn),

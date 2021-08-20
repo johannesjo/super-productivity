@@ -9,8 +9,13 @@ import {
   archiveProject,
   deleteProject,
   loadProjectRelatedDataSuccess,
+  moveProjectTaskDownInBacklogList,
+  moveProjectTaskInBacklogList,
+  moveProjectTaskToBacklogList,
   moveProjectTaskToBacklogListAuto,
+  moveProjectTaskToTodayList,
   moveProjectTaskToTodayListAuto,
+  moveProjectTaskUpInBacklogList,
   unarchiveProject,
   updateProject,
   updateProjectAdvancedCfg,
@@ -42,13 +47,8 @@ import { ProjectService } from '../project.service';
 import { GlobalConfigService } from '../../config/global-config.service';
 import { T } from '../../../t.const';
 import {
-  moveTaskDownInBacklogList,
   moveTaskDownInTodayList,
-  moveTaskInBacklogList,
   moveTaskInTodayList,
-  moveTaskToBacklogList,
-  moveTaskToTodayList,
-  moveTaskUpInBacklogList,
   moveTaskUpInTodayList,
 } from '../../work-context/store/work-context-meta.actions';
 import { WorkContextType } from '../../work-context/work-context.model';
@@ -82,11 +82,11 @@ export class ProjectEffects {
       archiveProject.type,
       unarchiveProject.type,
 
-      moveTaskInBacklogList.type,
-      moveTaskToBacklogList.type,
-      moveTaskToTodayList.type,
-      moveTaskUpInBacklogList.type,
-      moveTaskDownInBacklogList.type,
+      moveProjectTaskInBacklogList.type,
+      moveProjectTaskToBacklogList.type,
+      moveProjectTaskToTodayList.type,
+      moveProjectTaskUpInBacklogList.type,
+      moveProjectTaskDownInBacklogList.type,
       moveProjectTaskToBacklogListAuto.type,
       moveProjectTaskToTodayListAuto.type,
     ),

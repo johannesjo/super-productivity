@@ -83,13 +83,8 @@ import { TODAY_TAG } from '../tag/tag.const';
 import { WorkContextService } from '../work-context/work-context.service';
 import { WorkContextType } from '../work-context/work-context.model';
 import {
-  moveTaskDownInBacklogList,
   moveTaskDownInTodayList,
-  moveTaskInBacklogList,
   moveTaskInTodayList,
-  moveTaskToBacklogList,
-  moveTaskToTodayList,
-  moveTaskUpInBacklogList,
   moveTaskUpInTodayList,
 } from '../work-context/store/work-context-meta.actions';
 import { Router } from '@angular/router';
@@ -100,6 +95,13 @@ import { ImexMetaService } from '../../imex/imex-meta/imex-meta.service';
 import { remindOptionToMilliseconds } from './util/remind-option-to-milliseconds';
 import { getDateRangeForDay } from '../../util/get-date-range-for-day';
 import { ProjectService } from '../project/project.service';
+import {
+  moveProjectTaskDownInBacklogList,
+  moveProjectTaskInBacklogList,
+  moveProjectTaskToBacklogList,
+  moveProjectTaskToTodayList,
+  moveProjectTaskUpInBacklogList,
+} from '../project/store/project.actions';
 
 @Injectable({
   providedIn: 'root',
@@ -378,17 +380,17 @@ export class TaskService {
     } else if (src === 'BACKLOG' && target === 'BACKLOG') {
       // move inside backlog
       this._store.dispatch(
-        moveTaskInBacklogList({ taskId, newOrderedIds, workContextId }),
+        moveProjectTaskInBacklogList({ taskId, newOrderedIds, workContextId }),
       );
     } else if (src === 'BACKLOG' && isTargetTodayList) {
       // move from backlog to today
       this._store.dispatch(
-        moveTaskToTodayList({ taskId, newOrderedIds, src, target, workContextId }),
+        moveProjectTaskToTodayList({ taskId, newOrderedIds, src, target, workContextId }),
       );
     } else if (isSrcTodayList && target === 'BACKLOG') {
       // move from today to backlog
       this._store.dispatch(
-        moveTaskToBacklogList({ taskId, newOrderedIds, workContextId }),
+        moveProjectTaskToBacklogList({ taskId, newOrderedIds, workContextId }),
       );
     } else {
       // move sub task
@@ -414,7 +416,11 @@ export class TaskService {
               throw new Error('No doneBacklogTaskIds found');
             }
             this._store.dispatch(
-              moveTaskUpInBacklogList({ taskId: id, workContextId, doneBacklogTaskIds }),
+              moveProjectTaskUpInBacklogList({
+                taskId: id,
+                workContextId,
+                doneBacklogTaskIds,
+              }),
             );
           });
       } else {
@@ -449,7 +455,7 @@ export class TaskService {
               throw new Error('No doneBacklogTaskIds found');
             }
             this._store.dispatch(
-              moveTaskDownInBacklogList({
+              moveProjectTaskDownInBacklogList({
                 taskId: id,
                 workContextId,
                 doneBacklogTaskIds,

@@ -16,13 +16,8 @@ import {
   TaskActionTypes,
 } from '../../tasks/store/task.actions';
 import {
-  moveTaskDownInBacklogList,
   moveTaskDownInTodayList,
-  moveTaskInBacklogList,
   moveTaskInTodayList,
-  moveTaskToBacklogList,
-  moveTaskToTodayList,
-  moveTaskUpInBacklogList,
   moveTaskUpInTodayList,
 } from '../../work-context/store/work-context-meta.actions';
 import {
@@ -46,8 +41,13 @@ import {
   deleteProject,
   deleteProjects,
   loadProjects,
+  moveProjectTaskDownInBacklogList,
+  moveProjectTaskInBacklogList,
+  moveProjectTaskToBacklogList,
   moveProjectTaskToBacklogListAuto,
+  moveProjectTaskToTodayList,
   moveProjectTaskToTodayListAuto,
+  moveProjectTaskUpInBacklogList,
   unarchiveProject,
   updateProject,
   updateProjectAdvancedCfg,
@@ -110,7 +110,7 @@ const _reducer = createReducer<ProjectState>(
     },
   ),
 
-  on(moveTaskInBacklogList, (state, { taskId, newOrderedIds, workContextId }) => {
+  on(moveProjectTaskInBacklogList, (state, { taskId, newOrderedIds, workContextId }) => {
     const taskIdsBefore = (state.entities[workContextId] as Project).backlogTaskIds;
     const backlogTaskIds = moveTaskForWorkContextLikeState(
       taskId,
@@ -128,121 +128,6 @@ const _reducer = createReducer<ProjectState>(
       state,
     );
   }),
-
-  on(moveTaskToBacklogList, (state, { taskId, newOrderedIds, workContextId }) => {
-    const todaysTaskIdsBefore = (state.entities[workContextId] as Project).taskIds;
-    const backlogIdsBefore = (state.entities[workContextId] as Project).backlogTaskIds;
-
-    const filteredToday = todaysTaskIdsBefore.filter(filterOutId(taskId));
-    const backlogTaskIds = moveItemInList(taskId, backlogIdsBefore, newOrderedIds);
-
-    return projectAdapter.updateOne(
-      {
-        id: workContextId,
-        changes: {
-          taskIds: filteredToday,
-          backlogTaskIds,
-        },
-      },
-      state,
-    );
-  }),
-
-  on(moveTaskToTodayList, (state, { taskId, newOrderedIds, workContextId }) => {
-    const backlogIdsBefore = (state.entities[workContextId] as Project).backlogTaskIds;
-    const todaysTaskIdsBefore = (state.entities[workContextId] as Project).taskIds;
-
-    const filteredBacklog = backlogIdsBefore.filter(filterOutId(taskId));
-    const newTodaysTaskIds = moveItemInList(taskId, todaysTaskIdsBefore, newOrderedIds);
-
-    return projectAdapter.updateOne(
-      {
-        id: workContextId,
-        changes: {
-          taskIds: newTodaysTaskIds,
-          backlogTaskIds: filteredBacklog,
-        },
-      },
-      state,
-    );
-  }),
-
-  on(
-    moveTaskUpInTodayList,
-    (state, { taskId, workContextType, workContextId, doneTaskIds }) => {
-      return workContextType === WORK_CONTEXT_TYPE
-        ? projectAdapter.updateOne(
-            {
-              id: workContextId,
-              changes: {
-                taskIds: arrayMoveLeftUntil(
-                  (state.entities[workContextId] as Project).taskIds,
-                  taskId,
-                  (id) => !doneTaskIds.includes(id),
-                ),
-              },
-            },
-            state,
-          )
-        : state;
-    },
-  ),
-
-  on(
-    moveTaskDownInTodayList,
-    (state, { taskId, workContextType, workContextId, doneTaskIds }) => {
-      return workContextType === WORK_CONTEXT_TYPE
-        ? projectAdapter.updateOne(
-            {
-              id: workContextId,
-              changes: {
-                taskIds: arrayMoveRightUntil(
-                  (state.entities[workContextId] as Project).taskIds,
-                  taskId,
-                  (id) => !doneTaskIds.includes(id),
-                ),
-              },
-            },
-            state,
-          )
-        : state;
-    },
-  ),
-
-  on(moveTaskUpInBacklogList, (state, { taskId, workContextId, doneBacklogTaskIds }) => {
-    return projectAdapter.updateOne(
-      {
-        id: workContextId,
-        changes: {
-          backlogTaskIds: arrayMoveLeftUntil(
-            (state.entities[workContextId] as Project).backlogTaskIds,
-            taskId,
-            (id) => !doneBacklogTaskIds.includes(id),
-          ),
-        },
-      },
-      state,
-    );
-  }),
-
-  on(
-    moveTaskDownInBacklogList,
-    (state, { taskId, workContextId, doneBacklogTaskIds }) => {
-      return projectAdapter.updateOne(
-        {
-          id: workContextId,
-          changes: {
-            backlogTaskIds: arrayMoveRightUntil(
-              (state.entities[workContextId] as Project).backlogTaskIds,
-              taskId,
-              (id) => !doneBacklogTaskIds.includes(id),
-            ),
-          },
-        },
-        state,
-      );
-    },
-  ),
 
   // Project Actions
   // ------------
@@ -410,6 +295,126 @@ const _reducer = createReducer<ProjectState>(
 
     return { ...state, ids: newIds };
   }),
+
+  // MOVE TASK ACTIONS
+  // -----------------
+  on(moveProjectTaskToBacklogList, (state, { taskId, newOrderedIds, workContextId }) => {
+    const todaysTaskIdsBefore = (state.entities[workContextId] as Project).taskIds;
+    const backlogIdsBefore = (state.entities[workContextId] as Project).backlogTaskIds;
+
+    const filteredToday = todaysTaskIdsBefore.filter(filterOutId(taskId));
+    const backlogTaskIds = moveItemInList(taskId, backlogIdsBefore, newOrderedIds);
+
+    return projectAdapter.updateOne(
+      {
+        id: workContextId,
+        changes: {
+          taskIds: filteredToday,
+          backlogTaskIds,
+        },
+      },
+      state,
+    );
+  }),
+
+  on(moveProjectTaskToTodayList, (state, { taskId, newOrderedIds, workContextId }) => {
+    const backlogIdsBefore = (state.entities[workContextId] as Project).backlogTaskIds;
+    const todaysTaskIdsBefore = (state.entities[workContextId] as Project).taskIds;
+
+    const filteredBacklog = backlogIdsBefore.filter(filterOutId(taskId));
+    const newTodaysTaskIds = moveItemInList(taskId, todaysTaskIdsBefore, newOrderedIds);
+
+    return projectAdapter.updateOne(
+      {
+        id: workContextId,
+        changes: {
+          taskIds: newTodaysTaskIds,
+          backlogTaskIds: filteredBacklog,
+        },
+      },
+      state,
+    );
+  }),
+
+  on(
+    moveTaskUpInTodayList,
+    (state, { taskId, workContextType, workContextId, doneTaskIds }) => {
+      return workContextType === WORK_CONTEXT_TYPE
+        ? projectAdapter.updateOne(
+            {
+              id: workContextId,
+              changes: {
+                taskIds: arrayMoveLeftUntil(
+                  (state.entities[workContextId] as Project).taskIds,
+                  taskId,
+                  (id) => !doneTaskIds.includes(id),
+                ),
+              },
+            },
+            state,
+          )
+        : state;
+    },
+  ),
+
+  on(
+    moveTaskDownInTodayList,
+    (state, { taskId, workContextType, workContextId, doneTaskIds }) => {
+      return workContextType === WORK_CONTEXT_TYPE
+        ? projectAdapter.updateOne(
+            {
+              id: workContextId,
+              changes: {
+                taskIds: arrayMoveRightUntil(
+                  (state.entities[workContextId] as Project).taskIds,
+                  taskId,
+                  (id) => !doneTaskIds.includes(id),
+                ),
+              },
+            },
+            state,
+          )
+        : state;
+    },
+  ),
+
+  on(
+    moveProjectTaskUpInBacklogList,
+    (state, { taskId, workContextId, doneBacklogTaskIds }) => {
+      return projectAdapter.updateOne(
+        {
+          id: workContextId,
+          changes: {
+            backlogTaskIds: arrayMoveLeftUntil(
+              (state.entities[workContextId] as Project).backlogTaskIds,
+              taskId,
+              (id) => !doneBacklogTaskIds.includes(id),
+            ),
+          },
+        },
+        state,
+      );
+    },
+  ),
+
+  on(
+    moveProjectTaskDownInBacklogList,
+    (state, { taskId, workContextId, doneBacklogTaskIds }) => {
+      return projectAdapter.updateOne(
+        {
+          id: workContextId,
+          changes: {
+            backlogTaskIds: arrayMoveRightUntil(
+              (state.entities[workContextId] as Project).backlogTaskIds,
+              taskId,
+              (id) => !doneBacklogTaskIds.includes(id),
+            ),
+          },
+        },
+        state,
+      );
+    },
+  ),
 
   on(moveProjectTaskToBacklogListAuto, (state, { taskId, projectId }) => {
     const todaysTaskIdsBefore = (state.entities[projectId] as Project).taskIds;
