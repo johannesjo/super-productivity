@@ -5,9 +5,9 @@ import { select, Store } from '@ngrx/store';
 import { DeleteObstructions, ObstructionActionTypes } from './obstruction.actions';
 import { selectObstructionFeatureState } from './obstruction.reducer';
 import { PersistenceService } from '../../../../core/persistence/persistence.service';
-import { MetricActionTypes } from '../../store/metric.actions';
-import { selectUnusedObstructionIds } from '../../store/metric.selectors';
+import { addMetric, updateMetric, upsertMetric } from '../../store/metric.actions';
 import { ObstructionState } from '../obstruction.model';
+import { selectUnusedObstructionIds } from '../../store/metric.selectors';
 
 @Injectable()
 export class ObstructionEffects {
@@ -29,11 +29,7 @@ export class ObstructionEffects {
 
   clearUnusedObstructions$: any = createEffect(() =>
     this._actions$.pipe(
-      ofType(
-        MetricActionTypes.AddMetric,
-        MetricActionTypes.UpsertMetric,
-        MetricActionTypes.UpdateMetric,
-      ),
+      ofType(addMetric, upsertMetric, updateMetric),
       withLatestFrom(this._store$.pipe(select(selectUnusedObstructionIds))),
       map(([a, unusedIds]) => new DeleteObstructions({ ids: unusedIds })),
     ),

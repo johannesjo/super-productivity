@@ -2,22 +2,17 @@ import { Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { first, switchMap, tap } from 'rxjs/operators';
 import { select, Store } from '@ngrx/store';
-import { MetricActionTypes } from './metric.actions';
 import { PersistenceService } from '../../../core/persistence/persistence.service';
 import { selectMetricFeatureState } from './metric.selectors';
 import { MetricState } from '../metric.model';
+import { addMetric, deleteMetric, updateMetric, upsertMetric } from './metric.actions';
 
 @Injectable()
 export class MetricEffects {
   updateMetrics$: any = createEffect(
     () =>
       this._actions$.pipe(
-        ofType(
-          MetricActionTypes.AddMetric,
-          MetricActionTypes.UpdateMetric,
-          MetricActionTypes.DeleteMetric,
-          MetricActionTypes.UpsertMetric,
-        ),
+        ofType(addMetric, updateMetric, deleteMetric, upsertMetric),
         switchMap(() =>
           this._store$.pipe(select(selectMetricFeatureState)).pipe(first()),
         ),

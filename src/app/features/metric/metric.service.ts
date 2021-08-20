@@ -1,10 +1,10 @@
 import { Injectable } from '@angular/core';
 import { select, Store } from '@ngrx/store';
 import {
-  AddMetric,
-  DeleteMetric,
-  UpdateMetric,
-  UpsertMetric,
+  addMetric,
+  deleteMetric,
+  updateMetric,
+  upsertMetric,
 } from './store/metric.actions';
 import { combineLatest, Observable, of } from 'rxjs';
 import { LineChartData, Metric, MetricState, PieChartData } from './metric.model';
@@ -76,7 +76,7 @@ export class MetricService {
 
   addMetric(metric: Metric): void {
     this._store$.dispatch(
-      new AddMetric({
+      addMetric({
         metric: {
           ...metric,
           id: metric.id || getWorklogStr(),
@@ -86,15 +86,15 @@ export class MetricService {
   }
 
   deleteMetric(id: string): void {
-    this._store$.dispatch(new DeleteMetric({ id }));
+    this._store$.dispatch(deleteMetric({ id }));
   }
 
   updateMetric(id: string, changes: Partial<Metric>): void {
-    this._store$.dispatch(new UpdateMetric({ metric: { id, changes } }));
+    this._store$.dispatch(updateMetric({ metric: { id, changes } }));
   }
 
   upsertMetric(metric: Metric): void {
-    this._store$.dispatch(new UpsertMetric({ metric }));
+    this._store$.dispatch(upsertMetric({ metric }));
   }
 
   upsertTodayMetric(metricIn: Partial<Metric>): void {
@@ -104,7 +104,7 @@ export class MetricService {
       ...DEFAULT_METRIC_FOR_DAY,
       ...metricIn,
     } as Metric;
-    this._store$.dispatch(new UpsertMetric({ metric }));
+    this._store$.dispatch(upsertMetric({ metric }));
   }
 
   // STATISTICS

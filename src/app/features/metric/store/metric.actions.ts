@@ -1,36 +1,30 @@
-import { Action } from '@ngrx/store';
+import { createAction, props } from '@ngrx/store';
 import { Update } from '@ngrx/entity';
 import { Metric } from '../metric.model';
 
-export enum MetricActionTypes {
+enum MetricActionTypes {
   'AddMetric' = '[Metric] Add Metric',
   'UpdateMetric' = '[Metric] Update Metric',
   'UpsertMetric' = '[Metric] Upsert Metric',
   'DeleteMetric' = '[Metric] Delete Metric',
 }
 
-export class AddMetric implements Action {
-  readonly type: string = MetricActionTypes.AddMetric;
+export const addMetric = createAction(
+  MetricActionTypes.AddMetric,
+  props<{ metric: Metric }>(),
+);
 
-  constructor(public payload: { metric: Metric }) {}
-}
+export const updateMetric = createAction(
+  MetricActionTypes.UpdateMetric,
+  props<{ metric: Update<Metric> }>(),
+);
 
-export class UpdateMetric implements Action {
-  readonly type: string = MetricActionTypes.UpdateMetric;
+export const upsertMetric = createAction(
+  MetricActionTypes.UpsertMetric,
+  props<{ metric: Metric }>(),
+);
 
-  constructor(public payload: { metric: Update<Metric> }) {}
-}
-
-export class UpsertMetric implements Action {
-  readonly type: string = MetricActionTypes.UpsertMetric;
-
-  constructor(public payload: { metric: Metric }) {}
-}
-
-export class DeleteMetric implements Action {
-  readonly type: string = MetricActionTypes.DeleteMetric;
-
-  constructor(public payload: { id: string }) {}
-}
-
-export type MetricActions = AddMetric | UpdateMetric | DeleteMetric | UpsertMetric;
+export const deleteMetric = createAction(
+  MetricActionTypes.DeleteMetric,
+  props<{ id: string }>(),
+);
