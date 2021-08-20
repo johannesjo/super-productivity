@@ -37,43 +37,43 @@ export class PomodoroEffects {
 
   playPauseOnCurrentUpdate$: Observable<Action> = createEffect(() =>
     this._pomodoroService.isEnabled$.pipe(
+      switchMap((isEnabledI) => of(isEnabledI)),
+      filter((isEnabled) => !!isEnabled),
       switchMap((isEnabledI) =>
-        !isEnabledI
-          ? EMPTY
-          : this._actions$.pipe(
-              ofType(TaskActionTypes.SetCurrentTask, TaskActionTypes.UnsetCurrentTask),
-              withLatestFrom(
-                this._pomodoroService.cfg$,
-                this._pomodoroService.isBreak$,
-                this._pomodoroService.currentSessionTime$,
-              ),
-              // don't update when on break and stop time tracking is active
-              filter(
-                ([action, cfg, isBreak, currentSessionTime]: [
-                  SetCurrentTask | UnsetCurrentTask,
-                  PomodoroConfig,
-                  boolean,
-                  number,
-                ]) =>
-                  !isBreak ||
-                  !cfg.isStopTrackingOnBreak ||
-                  (isBreak &&
-                    currentSessionTime <= 0 &&
-                    action.type === TaskActionTypes.SetCurrentTask),
-              ),
-              concatMap(([action, , isBreak, currentSessionTime]) => {
-                const payload = (action as any).payload;
+        this._actions$.pipe(
+          ofType(TaskActionTypes.SetCurrentTask, TaskActionTypes.UnsetCurrentTask),
+          withLatestFrom(
+            this._pomodoroService.cfg$,
+            this._pomodoroService.isBreak$,
+            this._pomodoroService.currentSessionTime$,
+          ),
+          // don't update when on break and stop time tracking is active
+          filter(
+            ([action, cfg, isBreak, currentSessionTime]: [
+              SetCurrentTask | UnsetCurrentTask,
+              PomodoroConfig,
+              boolean,
+              number,
+            ]) =>
+              !isBreak ||
+              !cfg.isStopTrackingOnBreak ||
+              (isBreak &&
+                currentSessionTime <= 0 &&
+                action.type === TaskActionTypes.SetCurrentTask),
+          ),
+          concatMap(([action, , isBreak, currentSessionTime]) => {
+            const payload = (action as any).payload;
 
-                if (payload && action.type !== TaskActionTypes.UnsetCurrentTask) {
-                  if (isBreak && currentSessionTime <= 0) {
-                    return of(new FinishPomodoroSession(), new StartPomodoro());
-                  }
-                  return of(new StartPomodoro());
-                } else {
-                  return of(new PausePomodoro({ isBreakEndPause: false }));
-                }
-              }),
-            ),
+            if (payload && action.type !== TaskActionTypes.UnsetCurrentTask) {
+              if (isBreak && currentSessionTime <= 0) {
+                return of(new FinishPomodoroSession(), new StartPomodoro());
+              }
+              return of(new StartPomodoro());
+            } else {
+              return of(new PausePomodoro({ isBreakEndPause: false }));
+            }
+          }),
+        ),
       ),
     ),
   );
@@ -270,29 +270,29 @@ export class PomodoroEffects {
     { dispatch: false },
   );
 
-  setTaskBarIconProgress$: Observable<unknown> = createEffect(
-    () =>
-      IS_ELECTRON
-        ? this._pomodoroService.isEnabled$.pipe(
-            switchMap((isEnabledI) =>
-              !isEnabledI ? EMPTY : this._pomodoroService.sessionProgress$,
-            ),
-            withLatestFrom(this._pomodoroService.isManualPause$),
-            // we display pomodoro progress for pomodoro
-            tap(([progress, isPause]: [number, boolean]) => {
-              const progressBarMode: 'normal' | 'pause' = isPause ? 'pause' : 'normal';
-              (this._electronService.ipcRenderer as typeof ipcRenderer).send(
-                IPC.SET_PROGRESS_BAR,
-                {
-                  progress,
-                  progressBarMode,
-                },
-              );
-            }),
-          )
-        : EMPTY,
-    { dispatch: false },
-  );
+  setTaskBarIconProgress$: any =
+    IS_ELECTRON &&
+    createEffect(
+      () =>
+        this._pomodoroService.isEnabled$.pipe(
+          switchMap((isEnabledI) =>
+            !isEnabledI ? EMPTY : this._pomodoroService.sessionProgress$,
+          ),
+          withLatestFrom(this._pomodoroService.isManualPause$),
+          // we display pomodoro progress for pomodoro
+          tap(([progress, isPause]: [number, boolean]) => {
+            const progressBarMode: 'normal' | 'pause' = isPause ? 'pause' : 'normal';
+            (this._electronService.ipcRenderer as typeof ipcRenderer).send(
+              IPC.SET_PROGRESS_BAR,
+              {
+                progress,
+                progressBarMode,
+              },
+            );
+          }),
+        ),
+      { dispatch: false },
+    );
 
   constructor(
     private _pomodoroService: PomodoroService,
