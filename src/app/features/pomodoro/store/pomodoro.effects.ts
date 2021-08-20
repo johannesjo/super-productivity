@@ -54,9 +54,7 @@ export class PomodoroEffects {
               (isBreak && currentSessionTime <= 0 && action.type === setCurrentTask.type),
           ),
           concatMap(([action, , isBreak, currentSessionTime]) => {
-            const payload = (action as any).payload;
-
-            if (payload && action.type !== unsetCurrentTask.type) {
+            if ((action as any)?.id && action.type !== unsetCurrentTask.type) {
               if (isBreak && currentSessionTime <= 0) {
                 return of(new FinishPomodoroSession(), new StartPomodoro());
               }

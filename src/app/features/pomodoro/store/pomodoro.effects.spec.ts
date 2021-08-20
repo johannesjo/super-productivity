@@ -9,7 +9,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { ElectronService } from '../../../core/electron/electron.service';
 import { SnackService } from '../../../core/snack/snack.service';
 import { PomodoroService } from '../pomodoro.service';
-import { setCurrentTask } from '../../tasks/store/task.actions';
+import { setCurrentTask, unsetCurrentTask } from '../../tasks/store/task.actions';
 import { PomodoroConfig } from '../../config/global-config.model';
 import { PomodoroActionTypes } from './pomodoro.actions';
 import { DEFAULT_GLOBAL_CONFIG } from '../../config/default-global-config.const';
@@ -57,7 +57,7 @@ describe('PomodoroEffects', () => {
   });
 
   it('should start pomodoro when a task is set to current', (done) => {
-    actions$ = of(setCurrentTask('something'));
+    actions$ = of(setCurrentTask({ id: 'something' }));
     effects.playPauseOnCurrentUpdate$.subscribe((effectAction) => {
       expect(effectAction.type).toBe(PomodoroActionTypes.StartPomodoro);
       done();
@@ -65,7 +65,7 @@ describe('PomodoroEffects', () => {
   });
 
   it('should pause pomodoro when a task is set none', (done) => {
-    actions$ = of(setCurrentTask(null));
+    actions$ = of(unsetCurrentTask());
     effects.playPauseOnCurrentUpdate$.subscribe((effectAction) => {
       expect(effectAction.type).toBe(PomodoroActionTypes.PausePomodoro);
       done();
@@ -75,7 +75,7 @@ describe('PomodoroEffects', () => {
   it('should start pomodoro if starting a task on break', (done) => {
     isBreak$.next(true);
     currentSessionTime$.next(0);
-    actions$ = of(setCurrentTask('something'));
+    actions$ = of(setCurrentTask({ id: 'something' }));
 
     const as: Action[] = [];
     effects.playPauseOnCurrentUpdate$.subscribe((effectAction) => {
