@@ -15,6 +15,7 @@
       [label]="T.F.TAG.D_EDIT.LABEL|translate"
       [model]="tagIds"
       [suggestions]="(tagSuggestions$|async)"
+      (ctrlEnterSubmit)="close()"
     ></chip-list-input>
   </div>
 </mat-dialog-content>

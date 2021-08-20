@@ -31,6 +31,7 @@
       [matChipInputFor]="chipListElRef"
       [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
       [placeholder]="label"
+      (keydown)="triggerCtrlEnterSubmit($event)"
     />
   </mat-chip-list>
   <mat-autocomplete #autoElRef="matAutocomplete" (optionSelected)="selected($event)">

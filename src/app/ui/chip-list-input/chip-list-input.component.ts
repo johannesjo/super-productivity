@@ -46,6 +46,7 @@ export class ChipListInputComponent implements OnDestroy {
   @Output() addNewItem: EventEmitter<string> = new EventEmitter<string>();
   @Output() removeItem: EventEmitter<string> = new EventEmitter<string>();
   @Output() additionalAction: EventEmitter<string> = new EventEmitter<string>();
+  @Output() ctrlEnterSubmit: EventEmitter<void> = new EventEmitter<void>();
 
   suggestionsIn: Suggestion[] = [];
   modelItems: Suggestion[] = [];
@@ -133,6 +134,12 @@ export class ChipListInputComponent implements OnDestroy {
 
   isToggled(id: string): boolean {
     return !!this.toggledItems && this.toggledItems.includes(id);
+  }
+
+  triggerCtrlEnterSubmit(ev: KeyboardEvent): void {
+    if (ev.code === 'Enter' && ev.ctrlKey) {
+      this.ctrlEnterSubmit.next();
+    }
   }
 
   private _updateModelItems(modelIds: string[]): void {
