@@ -1,7 +1,7 @@
 import { projectReducer } from './project.reducer';
 import { fakeEntityStateFromArray } from '../../../util/fake-entity-state-from-array';
 import { Project } from '../project.model';
-import { UpdateProjectOrder } from './project.actions';
+import { updateProjectOrder } from './project.actions';
 
 describe('projectReducer', () => {
   describe('UpdateProjectOrder', () => {
@@ -13,7 +13,7 @@ describe('projectReducer', () => {
       ] as Partial<Project>[]);
 
       const ids = ['B', 'A'];
-      const r = projectReducer(s as any, new UpdateProjectOrder({ ids }));
+      const r = projectReducer(s as any, updateProjectOrder({ ids }) as any);
       expect(r.ids).toEqual(['B', 'A', 'C']);
     });
 
@@ -25,7 +25,7 @@ describe('projectReducer', () => {
       ] as Partial<Project>[]);
       const ids = ['B', 'A'];
       expect(() => {
-        projectReducer(s as any, new UpdateProjectOrder({ ids }));
+        projectReducer(s as any, updateProjectOrder({ ids }) as any);
       }).toThrowError('Invalid param given to UpdateProjectOrder');
     });
 
@@ -36,7 +36,7 @@ describe('projectReducer', () => {
         { id: 'C', isArchived: true },
       ] as Partial<Project>[]);
       const ids = ['B', 'A', 'C'];
-      const r = projectReducer(s as any, new UpdateProjectOrder({ ids }));
+      const r = projectReducer(s as any, updateProjectOrder({ ids }) as any);
       expect(r.ids).toEqual(['B', 'A', 'C']);
     });
 
@@ -48,7 +48,7 @@ describe('projectReducer', () => {
       ] as Partial<Project>[]);
 
       const ids = ['B', 'A', 'C'];
-      const r = projectReducer(s as any, new UpdateProjectOrder({ ids }));
+      const r = projectReducer(s as any, updateProjectOrder({ ids }) as any);
       expect(r.ids).toEqual(['B', 'A', 'C']);
     });
 
@@ -61,7 +61,7 @@ describe('projectReducer', () => {
       ] as Partial<Project>[]);
 
       const ids = ['D', 'C'];
-      const r = projectReducer(s as any, new UpdateProjectOrder({ ids }));
+      const r = projectReducer(s as any, updateProjectOrder({ ids }) as any);
       expect(r.ids).toEqual(['A', 'B', 'D', 'C']);
     });
   });
