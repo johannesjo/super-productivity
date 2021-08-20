@@ -1,11 +1,11 @@
-import { Action } from '@ngrx/store';
+import { createAction, props } from '@ngrx/store';
 import { Update } from '@ngrx/entity';
 import { Task, TaskAdditionalInfoTargetPanel, TaskWithSubTasks } from '../task.model';
 import { IssueDataReduced } from '../../issue/issue.model';
 import { RoundTimeOption } from '../../project/project.model';
 import { WorkContextType } from '../../work-context/work-context.model';
 
-export enum TaskActionTypes {
+enum TaskActionTypes {
   'SetCurrentTask' = '[Task] SetCurrentTask',
   'SetSelectedTask' = '[Task] SetSelectedTask',
   'UnsetCurrentTask' = '[Task] UnsetCurrentTask',
@@ -44,243 +44,176 @@ export enum TaskActionTypes {
   'RoundTimeSpentForDay' = '[Task] RoundTimeSpentForDay',
 }
 
-export class SetCurrentTask implements Action {
-  readonly type: string = TaskActionTypes.SetCurrentTask;
+export const setCurrentTask = createAction(TaskActionTypes.SetCurrentTask, (v: any) => v);
 
-  constructor(public payload: string | null) {}
-}
+export const setSelectedTask = createAction(
+  TaskActionTypes.SetSelectedTask,
+  props<{
+    id: string | null;
+    taskAdditionalInfoTargetPanel?: TaskAdditionalInfoTargetPanel;
+  }>(),
+);
 
-export class SetSelectedTask implements Action {
-  readonly type: string = TaskActionTypes.SetSelectedTask;
+export const unsetCurrentTask = createAction(TaskActionTypes.UnsetCurrentTask);
 
-  constructor(
-    public payload: {
-      id: string | null;
-      taskAdditionalInfoTargetPanel?: TaskAdditionalInfoTargetPanel;
-    },
-  ) {}
-}
+export const addTask = createAction(
+  TaskActionTypes.AddTask,
+  props<{
+    task: Task;
+    issue?: IssueDataReduced;
+    workContextId: string;
+    workContextType: WorkContextType;
+    isAddToBacklog: boolean;
+    isAddToBottom: boolean;
+  }>(),
+);
 
-export class UnsetCurrentTask implements Action {
-  readonly type: string = TaskActionTypes.UnsetCurrentTask;
-}
+export const updateTask = createAction(
+  TaskActionTypes.UpdateTask,
+  props<{ task: Update<Task> }>(),
+);
 
-export class AddTask implements Action {
-  readonly type: string = TaskActionTypes.AddTask;
+export const updateTaskUi = createAction(
+  TaskActionTypes.UpdateTaskUi,
+  props<{ task: Update<Task> }>(),
+);
 
-  constructor(
-    public payload: {
-      task: Task;
-      issue?: IssueDataReduced;
-      workContextId: string;
-      workContextType: WorkContextType;
-      isAddToBacklog: boolean;
-      isAddToBottom: boolean;
-    },
-  ) {}
-}
+export const updateTaskTags = createAction(
+  TaskActionTypes.UpdateTaskTags,
+  props<{ task: Task; newTagIds: string[]; oldTagIds: string[] }>(),
+);
 
-export class UpdateTask implements Action {
-  readonly type: string = TaskActionTypes.UpdateTask;
+export const removeTagsForAllTasks = createAction(
+  TaskActionTypes.RemoveTagsForAllTasks,
+  props<{ tagIdsToRemove: string[] }>(),
+);
 
-  constructor(public payload: { task: Update<Task> }) {}
-}
+export const toggleTaskShowSubTasks = createAction(
+  TaskActionTypes.ToggleTaskShowSubTasks,
+  props<{ taskId: string; isShowLess: boolean; isEndless: boolean }>(),
+);
 
-export class UpdateTaskUi implements Action {
-  readonly type: string = TaskActionTypes.UpdateTaskUi;
+export const updateTasks = createAction(
+  TaskActionTypes.UpdateTasks,
+  props<{ tasks: Update<Task>[] }>(),
+);
 
-  constructor(public payload: { task: Update<Task> }) {}
-}
+export const deleteTask = createAction(
+  TaskActionTypes.DeleteTask,
+  props<{ task: TaskWithSubTasks }>(),
+);
 
-export class UpdateTaskTags implements Action {
-  readonly type: string = TaskActionTypes.UpdateTaskTags;
+export const deleteMainTasks = createAction(
+  TaskActionTypes.DeleteMainTasks,
+  props<{ taskIds: string[] }>(),
+);
 
-  constructor(public payload: { task: Task; newTagIds: string[]; oldTagIds: string[] }) {}
-}
+export const undoDeleteTask = createAction(TaskActionTypes.UndoDeleteTask);
 
-export class RemoveTagsForAllTasks implements Action {
-  readonly type: string = TaskActionTypes.RemoveTagsForAllTasks;
+export const moveSubTask = createAction(
+  TaskActionTypes.MoveSubTask,
+  props<{
+    taskId: string;
+    srcTaskId: string;
+    targetTaskId: string;
+    newOrderedIds: string[];
+  }>(),
+);
 
-  constructor(public payload: { tagIdsToRemove: string[] }) {}
-}
+export const moveSubTaskUp = createAction(
+  TaskActionTypes.MoveSubTaskUp,
 
-export class ToggleTaskShowSubTasks implements Action {
-  readonly type: string = TaskActionTypes.ToggleTaskShowSubTasks;
+  props<{ id: string; parentId: string }>(),
+);
 
-  constructor(
-    public payload: { taskId: string; isShowLess: boolean; isEndless: boolean },
-  ) {}
-}
+export const moveSubTaskDown = createAction(
+  TaskActionTypes.MoveSubTaskDown,
 
-export class UpdateTasks implements Action {
-  readonly type: string = TaskActionTypes.UpdateTasks;
+  props<{ id: string; parentId: string }>(),
+);
 
-  constructor(public payload: { tasks: Update<Task>[] }) {}
-}
+export const addTimeSpent = createAction(
+  TaskActionTypes.AddTimeSpent,
 
-export class DeleteTask implements Action {
-  readonly type: string = TaskActionTypes.DeleteTask;
+  props<{ task: Task; date: string; duration: number }>(),
+);
 
-  constructor(public payload: { task: TaskWithSubTasks }) {}
-}
+export const removeTimeSpent = createAction(
+  TaskActionTypes.RemoveTimeSpent,
 
-export class DeleteMainTasks implements Action {
-  readonly type: string = TaskActionTypes.DeleteMainTasks;
-
-  constructor(public payload: { taskIds: string[] }) {}
-}
-
-export class UndoDeleteTask implements Action {
-  readonly type: string = TaskActionTypes.UndoDeleteTask;
-}
-
-export class MoveSubTask implements Action {
-  readonly type: string = TaskActionTypes.MoveSubTask;
-
-  constructor(
-    public payload: {
-      taskId: string;
-      srcTaskId: string;
-      targetTaskId: string;
-      newOrderedIds: string[];
-    },
-  ) {}
-}
-
-export class MoveSubTaskUp implements Action {
-  readonly type: string = TaskActionTypes.MoveSubTaskUp;
-
-  constructor(public payload: { id: string; parentId: string }) {}
-}
-
-export class MoveSubTaskDown implements Action {
-  readonly type: string = TaskActionTypes.MoveSubTaskDown;
-
-  constructor(public payload: { id: string; parentId: string }) {}
-}
-
-export class AddTimeSpent implements Action {
-  readonly type: string = TaskActionTypes.AddTimeSpent;
-
-  constructor(public payload: { task: Task; date: string; duration: number }) {}
-}
-
-export class RemoveTimeSpent implements Action {
-  readonly type: string = TaskActionTypes.RemoveTimeSpent;
-
-  constructor(public payload: { id: string; date: string; duration: number }) {}
-}
+  props<{ id: string; date: string; duration: number }>(),
+);
 
 // Reminder Actions
-export class ScheduleTask implements Action {
-  readonly type: string = TaskActionTypes.ScheduleTask;
+export const scheduleTask = createAction(
+  TaskActionTypes.ScheduleTask,
 
-  constructor(
-    public payload: {
-      task: Task;
-      plannedAt: number;
-      remindAt?: number;
-      isMoveToBacklog: boolean;
-    },
-  ) {}
-}
+  props<{
+    task: Task;
+    plannedAt: number;
+    remindAt?: number;
+    isMoveToBacklog: boolean;
+  }>(),
+);
 
-export class ReScheduleTask implements Action {
-  readonly type: string = TaskActionTypes.ReScheduleTask;
+export const reScheduleTask = createAction(
+  TaskActionTypes.ReScheduleTask,
 
-  constructor(
-    public payload: {
-      id: string;
-      title: string;
-      plannedAt: number;
-      reminderId?: string;
-      remindAt?: number;
-    },
-  ) {}
-}
+  props<{
+    id: string;
+    title: string;
+    plannedAt: number;
+    reminderId?: string;
+    remindAt?: number;
+  }>(),
+);
 
-export class UnScheduleTask implements Action {
-  readonly type: string = TaskActionTypes.UnScheduleTask;
+export const unScheduleTask = createAction(
+  TaskActionTypes.UnScheduleTask,
 
-  constructor(
-    public payload: { id: string; reminderId?: string; isSkipToast?: boolean },
-  ) {}
-}
+  props<{ id: string; reminderId?: string; isSkipToast?: boolean }>(),
+);
 
-export class RestoreTask implements Action {
-  readonly type: string = TaskActionTypes.RestoreTask;
+export const restoreTask = createAction(
+  TaskActionTypes.RestoreTask,
 
-  constructor(public payload: { task: Task | TaskWithSubTasks; subTasks: Task[] }) {}
-}
+  props<{ task: Task | TaskWithSubTasks; subTasks: Task[] }>(),
+);
 
-export class AddSubTask implements Action {
-  readonly type: string = TaskActionTypes.AddSubTask;
+export const addSubTask = createAction(
+  TaskActionTypes.AddSubTask,
 
-  constructor(public payload: { task: Task; parentId: string }) {}
-}
+  props<{ task: Task; parentId: string }>(),
+);
 
-export class ConvertToMainTask implements Action {
-  readonly type: string = TaskActionTypes.ConvertToMainTask;
+export const convertToMainTask = createAction(
+  TaskActionTypes.ConvertToMainTask,
 
-  constructor(public payload: { task: Task; parentTagIds: string[] }) {}
-}
+  props<{ task: Task; parentTagIds: string[] }>(),
+);
 
-export class MoveToArchive implements Action {
-  readonly type: string = TaskActionTypes.MoveToArchive;
+export const moveToArchive = createAction(
+  TaskActionTypes.MoveToArchive,
 
-  constructor(public payload: { tasks: TaskWithSubTasks[] }) {}
-}
+  props<{ tasks: TaskWithSubTasks[] }>(),
+);
 
-export class MoveToOtherProject implements Action {
-  readonly type: string = TaskActionTypes.MoveToOtherProject;
+export const moveToOtherProject = createAction(
+  TaskActionTypes.MoveToOtherProject,
 
-  constructor(public payload: { task: TaskWithSubTasks; targetProjectId: string }) {}
-}
+  props<{ task: TaskWithSubTasks; targetProjectId: string }>(),
+);
 
-export class ToggleStart implements Action {
-  readonly type: string = TaskActionTypes.ToggleStart;
-}
+export const toggleStart = createAction(TaskActionTypes.ToggleStart);
 
-export class RoundTimeSpentForDay implements Action {
-  readonly type: string = TaskActionTypes.RoundTimeSpentForDay;
+export const roundTimeSpentForDay = createAction(
+  TaskActionTypes.RoundTimeSpentForDay,
 
-  constructor(
-    public payload: {
-      day: string;
-      taskIds: string[];
-      roundTo: RoundTimeOption;
-      isRoundUp: boolean;
-      projectId?: string | null;
-    },
-  ) {}
-}
-
-export type TaskActions =
-  | SetCurrentTask
-  | SetSelectedTask
-  | UnsetCurrentTask
-  | AddTask
-  | UpdateTaskUi
-  | ToggleTaskShowSubTasks
-  | UpdateTask
-  | UpdateTasks
-  | UpdateTaskTags
-  | RemoveTagsForAllTasks
-  | DeleteTask
-  | DeleteMainTasks
-  | UndoDeleteTask
-  | MoveSubTask
-  | MoveSubTaskUp
-  | MoveSubTaskDown
-  | AddTimeSpent
-  | RemoveTimeSpent
-  | ScheduleTask
-  | ReScheduleTask
-  | UnScheduleTask
-  | RestoreTask
-  | AddSubTask
-  | ConvertToMainTask
-  | ToggleStart
-  | RoundTimeSpentForDay
-  | MoveToOtherProject
-  | MoveToArchive;
+  props<{
+    day: string;
+    taskIds: string[];
+    roundTo: RoundTimeOption;
+    isRoundUp: boolean;
+    projectId?: string | null;
+  }>(),
+);

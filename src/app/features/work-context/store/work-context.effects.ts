@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { filter, map, tap, withLatestFrom } from 'rxjs/operators';
 import * as contextActions from './work-context.actions';
-import { SetSelectedTask } from '../../tasks/store/task.actions';
+import { setSelectedTask } from '../../tasks/store/task.actions';
 import { TaskService } from '../../tasks/task.service';
 import { BannerId } from '../../../core/banner/banner.model';
 import { BannerService } from '../../../core/banner/banner.service';
@@ -46,7 +46,7 @@ export class WorkContextEffects {
       ofType(contextActions.setActiveWorkContext),
       withLatestFrom(this._taskService.isTaskDataLoaded$),
       filter(([, isDataLoaded]) => isDataLoaded),
-      map(() => new SetSelectedTask({ id: null })),
+      map(() => setSelectedTask({ id: null })),
     ),
   );
 

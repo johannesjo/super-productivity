@@ -1,30 +1,30 @@
 import {
-  AddSubTask,
-  AddTask,
-  AddTimeSpent,
-  ConvertToMainTask,
-  DeleteMainTasks,
-  DeleteTask,
-  MoveSubTask,
-  MoveSubTaskDown,
-  MoveSubTaskUp,
-  MoveToArchive,
-  MoveToOtherProject,
-  RemoveTagsForAllTasks,
-  RemoveTimeSpent,
-  ReScheduleTask,
-  RestoreTask,
-  RoundTimeSpentForDay,
-  ScheduleTask,
-  SetCurrentTask,
-  SetSelectedTask,
-  TaskActions,
-  TaskActionTypes,
-  ToggleTaskShowSubTasks,
-  UnScheduleTask,
-  UpdateTask,
-  UpdateTaskTags,
-  UpdateTaskUi,
+  addSubTask,
+  addTask,
+  addTimeSpent,
+  convertToMainTask,
+  deleteMainTasks,
+  deleteTask,
+  moveSubTask,
+  moveSubTaskDown,
+  moveSubTaskUp,
+  moveToArchive,
+  moveToOtherProject,
+  removeTagsForAllTasks,
+  removeTimeSpent,
+  reScheduleTask,
+  restoreTask,
+  roundTimeSpentForDay,
+  scheduleTask,
+  setCurrentTask,
+  setSelectedTask,
+  toggleStart,
+  toggleTaskShowSubTasks,
+  unScheduleTask,
+  unsetCurrentTask,
+  updateTask,
+  updateTaskTags,
+  updateTaskUi,
 } from './task.actions';
 import {
   ShowSubTasksMode,
@@ -35,7 +35,7 @@ import {
 import { calcTotalTimeSpent } from '../util/calc-total-time-spent';
 import { addTaskRepeatCfgToTask } from '../../task-repeat-cfg/store/task-repeat-cfg.actions';
 import {
-  deleteTask,
+  deleteTaskHelper,
   getTaskById,
   reCalcTimesForParentIfParent,
   reCalcTimeSpentForParentIfParent,
@@ -57,9 +57,8 @@ import { Update } from '@ngrx/entity';
 import { unique } from '../../../util/unique';
 import { roundDurationVanilla } from '../../../util/round-duration';
 import { loadAllData } from '../../../root-store/meta/load-all-data.action';
-import { AppDataComplete } from '../../../imex/sync/sync.model';
 import { migrateTaskState } from '../migrate-task-state.util';
-import { environment } from '../../../../environments/environment';
+import { createReducer, on } from '@ngrx/store';
 
 export const TASK_FEATURE_NAME = 'tasks';
 
@@ -77,572 +76,521 @@ export const initialTaskState: TaskState = taskAdapter.getInitialState({
   isDataLoaded: false,
 }) as TaskState;
 
-// TODO unit test the shit out of this once the model is settled
-export const taskReducer = (
-  state: TaskState = initialTaskState,
-  action: TaskActions,
-): TaskState => {
-  if (environment.production) {
-    console.log(action.type, (action as any)?.payload || action);
-  }
+export const taskReducer = createReducer<TaskState>(
+  initialTaskState,
 
-  // TODO fix this hackyness once we use the new syntax everywhere
-  if ((action.type as string) === loadAllData.type) {
-    const { appDataComplete }: { appDataComplete: AppDataComplete } = action as any;
-    return appDataComplete.task
+  // META ACTIONS
+  // ------------
+  on(loadAllData, (state, { appDataComplete }) =>
+    appDataComplete.task
       ? migrateTaskState({
           ...appDataComplete.task,
           currentTaskId: null,
           lastCurrentTaskId: appDataComplete.task.currentTaskId,
           isDataLoaded: true,
         })
-      : state;
-  }
+      : state,
+  ),
 
-  switch (action.type) {
-    case TaskActionTypes.SetCurrentTask: {
-      const a: SetCurrentTask = action as SetCurrentTask;
-      if (a.payload) {
-        const task = getTaskById(a.payload, state);
-        const subTaskIds = task.subTaskIds;
-        let taskToStartId = a.payload;
-        if (subTaskIds && subTaskIds.length) {
-          const undoneTasks = subTaskIds
-            .map((id) => getTaskById(id, state))
-            .filter((ta: Task) => !ta.isDone);
-          taskToStartId = undoneTasks.length ? undoneTasks[0].id : subTaskIds[0];
-        }
-        return {
-          ...taskAdapter.updateOne(
-            {
-              id: taskToStartId,
-              changes: { isDone: false, doneOn: null },
-            },
-            state,
-          ),
-          currentTaskId: taskToStartId,
-          selectedTaskId: state.selectedTaskId && taskToStartId,
-        };
-      } else {
-        return {
-          ...state,
-          currentTaskId: a.payload,
-        };
+  // TODO check if working
+  on(setCurrentTask, (state, payload) => {
+    if (payload) {
+      const task = getTaskById(payload, state);
+      const subTaskIds = task.subTaskIds;
+      let taskToStartId = payload;
+      if (subTaskIds && subTaskIds.length) {
+        const undoneTasks = subTaskIds
+          .map((id) => getTaskById(id, state))
+          .filter((ta: Task) => !ta.isDone);
+        taskToStartId = undoneTasks.length ? undoneTasks[0].id : subTaskIds[0];
       }
-    }
-
-    case TaskActionTypes.UnsetCurrentTask: {
-      return { ...state, currentTaskId: null, lastCurrentTaskId: state.currentTaskId };
-    }
-
-    case TaskActionTypes.SetSelectedTask: {
-      const { id, taskAdditionalInfoTargetPanel } = (action as SetSelectedTask).payload;
+      return {
+        ...taskAdapter.updateOne(
+          {
+            id: taskToStartId,
+            changes: { isDone: false, doneOn: null },
+          },
+          state,
+        ),
+        currentTaskId: taskToStartId,
+        selectedTaskId: state.selectedTaskId && taskToStartId,
+      };
+    } else {
       return {
         ...state,
-        taskAdditionalInfoTargetPanel:
-          !id || id === state.selectedTaskId
-            ? null
-            : taskAdditionalInfoTargetPanel || null,
-        selectedTaskId: id === state.selectedTaskId ? null : id,
+        currentTaskId: payload,
       };
     }
+  }),
 
-    // Task Actions
-    // ------------
-    case TaskActionTypes.AddTask: {
-      const task = {
-        ...(action as AddTask).payload.task,
-        timeSpent: calcTotalTimeSpent((action as AddTask).payload.task.timeSpentOnDay),
-      };
-      return taskAdapter.addOne(task, state);
-    }
+  on(unsetCurrentTask, (state) => {
+    return { ...state, currentTaskId: null, lastCurrentTaskId: state.currentTaskId };
+  }),
 
-    case TaskActionTypes.UpdateTask: {
-      let stateCopy = state;
-      const a: UpdateTask = action as UpdateTask;
-      const id = a.payload.task.id as string;
-      const { timeSpentOnDay, timeEstimate } = a.payload.task.changes;
-      stateCopy = timeSpentOnDay
-        ? updateTimeSpentForTask(id, timeSpentOnDay, stateCopy)
-        : stateCopy;
-      stateCopy = updateTimeEstimateForTask(id, timeEstimate, stateCopy);
-      stateCopy = updateDoneOnForTask(a.payload.task, stateCopy);
-      return taskAdapter.updateOne(a.payload.task, stateCopy);
-    }
+  on(setSelectedTask, (state, { id, taskAdditionalInfoTargetPanel }) => {
+    return {
+      ...state,
+      taskAdditionalInfoTargetPanel:
+        !id || id === state.selectedTaskId ? null : taskAdditionalInfoTargetPanel || null,
+      selectedTaskId: id === state.selectedTaskId ? null : id,
+    };
+  }),
 
-    case TaskActionTypes.UpdateTaskUi: {
-      return taskAdapter.updateOne((action as UpdateTaskUi).payload.task, state);
-    }
+  // Task Actions
+  // ------------
+  on(addTask, (state, { task }) => {
+    const newTask = {
+      ...task,
+      timeSpent: calcTotalTimeSpent(task.timeSpentOnDay),
+    };
+    return taskAdapter.addOne(newTask, state);
+  }),
 
-    case TaskActionTypes.UpdateTaskTags: {
-      const { task, newTagIds } = (action as UpdateTaskTags).payload;
-      return taskAdapter.updateOne(
-        {
-          id: task.id,
-          changes: {
-            tagIds: newTagIds,
-          },
-        },
-        state,
-      );
-    }
+  on(updateTask, (state, { task }) => {
+    let stateCopy = state;
+    const id = task.id as string;
+    const { timeSpentOnDay, timeEstimate } = task.changes;
+    stateCopy = timeSpentOnDay
+      ? updateTimeSpentForTask(id, timeSpentOnDay, stateCopy)
+      : stateCopy;
+    stateCopy = updateTimeEstimateForTask(id, timeEstimate, stateCopy);
+    stateCopy = updateDoneOnForTask(task, stateCopy);
+    return taskAdapter.updateOne(task, stateCopy);
+  }),
 
-    case TaskActionTypes.RemoveTagsForAllTasks: {
-      const updates: Update<Task>[] = state.ids.map((taskId) => ({
-        id: taskId,
+  on(updateTaskUi, (state, { task }) => {
+    return taskAdapter.updateOne(task, state);
+  }),
+
+  on(updateTaskTags, (state, { task, newTagIds }) => {
+    return taskAdapter.updateOne(
+      {
+        id: task.id,
         changes: {
-          tagIds: getTaskById(taskId, state).tagIds.filter(
-            (tagId) =>
-              !(action as RemoveTagsForAllTasks).payload.tagIdsToRemove.includes(tagId),
-          ),
+          tagIds: newTagIds,
         },
-      }));
-      return taskAdapter.updateMany(updates, state);
-    }
+      },
+      state,
+    );
+  }),
 
-    // TODO simplify
-    case TaskActionTypes.ToggleTaskShowSubTasks: {
-      const { taskId, isShowLess, isEndless } = (action as ToggleTaskShowSubTasks)
-        .payload;
-      const task = getTaskById(taskId, state);
-      const subTasks = task.subTaskIds.map((id) => getTaskById(id, state));
-      const doneTasksLength = subTasks.filter((t) => t.isDone).length;
-      const isDoneTaskCaseNeeded = doneTasksLength && doneTasksLength < subTasks.length;
-      const oldVal = +task._showSubTasksMode;
-      let newVal;
+  on(removeTagsForAllTasks, (state, { tagIdsToRemove }) => {
+    const updates: Update<Task>[] = state.ids.map((taskId) => ({
+      id: taskId,
+      changes: {
+        tagIds: getTaskById(taskId, state).tagIds.filter(
+          (tagId) => !tagIdsToRemove.includes(tagId),
+        ),
+      },
+    }));
+    return taskAdapter.updateMany(updates, state);
+  }),
 
-      if (isDoneTaskCaseNeeded) {
-        newVal = oldVal + (isShowLess ? -1 : 1);
-        if (isEndless) {
-          if (newVal > ShowSubTasksMode.Show) {
-            newVal = ShowSubTasksMode.HideAll;
-          } else if (newVal < ShowSubTasksMode.HideAll) {
-            newVal = ShowSubTasksMode.Show;
-          }
-        } else {
-          if (newVal > ShowSubTasksMode.Show) {
-            newVal = ShowSubTasksMode.Show;
-          }
-          if (newVal < ShowSubTasksMode.HideAll) {
-            newVal = ShowSubTasksMode.HideAll;
-          }
+  // TODO simplify
+  on(toggleTaskShowSubTasks, (state, { taskId, isShowLess, isEndless }) => {
+    const task = getTaskById(taskId, state);
+    const subTasks = task.subTaskIds.map((id) => getTaskById(id, state));
+    const doneTasksLength = subTasks.filter((t) => t.isDone).length;
+    const isDoneTaskCaseNeeded = doneTasksLength && doneTasksLength < subTasks.length;
+    const oldVal = +task._showSubTasksMode;
+    let newVal;
+
+    if (isDoneTaskCaseNeeded) {
+      newVal = oldVal + (isShowLess ? -1 : 1);
+      if (isEndless) {
+        if (newVal > ShowSubTasksMode.Show) {
+          newVal = ShowSubTasksMode.HideAll;
+        } else if (newVal < ShowSubTasksMode.HideAll) {
+          newVal = ShowSubTasksMode.Show;
         }
       } else {
-        if (isEndless) {
-          if (oldVal === ShowSubTasksMode.Show) {
-            newVal = ShowSubTasksMode.HideAll;
-          }
-          if (oldVal !== ShowSubTasksMode.Show) {
-            newVal = ShowSubTasksMode.Show;
-          }
-        } else {
-          newVal = isShowLess ? ShowSubTasksMode.HideAll : ShowSubTasksMode.Show;
+        if (newVal > ShowSubTasksMode.Show) {
+          newVal = ShowSubTasksMode.Show;
+        }
+        if (newVal < ShowSubTasksMode.HideAll) {
+          newVal = ShowSubTasksMode.HideAll;
         }
       }
-
-      // failsafe
-      newVal = isNaN(newVal as any) ? ShowSubTasksMode.HideAll : newVal;
-
-      return taskAdapter.updateOne(
-        {
-          id: taskId,
-          changes: {
-            _showSubTasksMode: newVal,
-          },
-        },
-        state,
-      );
+    } else {
+      if (isEndless) {
+        if (oldVal === ShowSubTasksMode.Show) {
+          newVal = ShowSubTasksMode.HideAll;
+        }
+        if (oldVal !== ShowSubTasksMode.Show) {
+          newVal = ShowSubTasksMode.Show;
+        }
+      } else {
+        newVal = isShowLess ? ShowSubTasksMode.HideAll : ShowSubTasksMode.Show;
+      }
     }
 
-    case TaskActionTypes.DeleteTask: {
-      return deleteTask(state, (action as DeleteTask).payload.task);
+    // failsafe
+    newVal = isNaN(newVal as any) ? ShowSubTasksMode.HideAll : newVal;
+
+    return taskAdapter.updateOne(
+      {
+        id: taskId,
+        changes: {
+          _showSubTasksMode: newVal,
+        },
+      },
+      state,
+    );
+  }),
+
+  on(deleteTask, (state, { task }) => {
+    return deleteTaskHelper(state, task);
+  }),
+
+  on(deleteMainTasks, (state, { taskIds }) => {
+    const allIds = taskIds.reduce((acc: string[], id: string) => {
+      return [...acc, id, ...getTaskById(id, state).subTaskIds];
+    }, []);
+    return taskAdapter.removeMany(allIds, state);
+  }),
+
+  on(moveSubTask, (state, { taskId, srcTaskId, targetTaskId, newOrderedIds }) => {
+    let newState = state;
+    const oldPar = getTaskById(srcTaskId, state);
+    const newPar = getTaskById(targetTaskId, state);
+
+    // for old parent remove
+    newState = taskAdapter.updateOne(
+      {
+        id: oldPar.id,
+        changes: {
+          subTaskIds: oldPar.subTaskIds.filter(filterOutId(taskId)),
+        },
+      },
+      newState,
+    );
+    newState = reCalcTimesForParentIfParent(oldPar.id, newState);
+
+    // for new parent add and move
+    newState = taskAdapter.updateOne(
+      {
+        id: newPar.id,
+        changes: {
+          subTaskIds: moveItemInList(taskId, newPar.subTaskIds, newOrderedIds),
+        },
+      },
+      newState,
+    );
+    newState = reCalcTimesForParentIfParent(newPar.id, newState);
+
+    // change parent id for moving task
+    newState = taskAdapter.updateOne(
+      {
+        id: taskId,
+        changes: {
+          parentId: newPar.id,
+          projectId: newPar.projectId,
+        },
+      },
+      newState,
+    );
+
+    return newState;
+  }),
+
+  on(moveSubTaskUp, (state, { id, parentId }) => {
+    const parentSubTaskIds = getTaskById(parentId, state).subTaskIds;
+    return taskAdapter.updateOne(
+      {
+        id: parentId,
+        changes: {
+          subTaskIds: arrayMoveLeft(parentSubTaskIds, id),
+        },
+      },
+      state,
+    );
+  }),
+
+  on(moveSubTaskDown, (state, { id, parentId }) => {
+    const parentSubTaskIds = getTaskById(parentId, state).subTaskIds;
+    return taskAdapter.updateOne(
+      {
+        id: parentId,
+        changes: {
+          subTaskIds: arrayMoveRight(parentSubTaskIds, id),
+        },
+      },
+      state,
+    );
+  }),
+
+  on(addTimeSpent, (state, { task, date, duration }) => {
+    const currentTimeSpentForTickDay =
+      (task.timeSpentOnDay && +task.timeSpentOnDay[date]) || 0;
+    return updateTimeSpentForTask(
+      task.id,
+      {
+        ...task.timeSpentOnDay,
+        [date]: currentTimeSpentForTickDay + duration,
+      },
+      state,
+    );
+  }),
+
+  on(removeTimeSpent, (state, { id, date, duration }) => {
+    const task = getTaskById(id, state);
+    const currentTimeSpentForTickDay =
+      (task.timeSpentOnDay && +task.timeSpentOnDay[date]) || 0;
+
+    return updateTimeSpentForTask(
+      id,
+      {
+        ...task.timeSpentOnDay,
+        [date]: Math.max(currentTimeSpentForTickDay - duration, 0),
+      },
+      state,
+    );
+  }),
+
+  on(addSubTask, (state, { task, parentId }) => {
+    const parentTask = getTaskById(parentId, state);
+
+    // add item1
+    const stateCopy = taskAdapter.addOne(
+      {
+        ...task,
+        parentId,
+        // update timeSpent if first sub task and non present
+        ...(parentTask.subTaskIds.length === 0 &&
+        Object.keys(task.timeSpentOnDay).length === 0
+          ? {
+              timeSpentOnDay: parentTask.timeSpentOnDay,
+              timeSpent: calcTotalTimeSpent(parentTask.timeSpentOnDay),
+            }
+          : {}),
+        // update timeEstimate if first sub task and non present
+        ...(parentTask.subTaskIds.length === 0 && !task.timeEstimate
+          ? { timeEstimate: parentTask.timeEstimate }
+          : {}),
+        // should always be empty
+        tagIds: [],
+        // should always be the one of the parent
+        projectId: parentTask.projectId,
+      },
+      state,
+    );
+
+    return {
+      ...stateCopy,
+      // update current task to new sub task if parent was current before
+      ...(state.currentTaskId === parentId ? { currentTaskId: task.id } : {}),
+      // also add to parent task
+      entities: {
+        ...stateCopy.entities,
+        [parentId]: {
+          ...parentTask,
+          subTaskIds: [...parentTask.subTaskIds, task.id],
+        },
+      },
+    };
+  }),
+
+  on(convertToMainTask, (state, { task }) => {
+    const par = state.entities[task.parentId as string];
+    if (!par) {
+      throw new Error('No parent for sub task');
     }
 
-    case TaskActionTypes.DeleteMainTasks: {
-      const allIds = (action as DeleteMainTasks).payload.taskIds.reduce(
-        (acc: string[], id: string) => {
-          return [...acc, id, ...getTaskById(id, state).subTaskIds];
+    const stateCopy = removeTaskFromParentSideEffects(state, task);
+    return taskAdapter.updateOne(
+      {
+        id: task.id,
+        changes: {
+          parentId: null,
+          tagIds: [...par.tagIds],
         },
-        [],
-      );
-      return taskAdapter.removeMany(allIds, state);
-    }
+      },
+      stateCopy,
+    );
+  }),
 
-    case TaskActionTypes.MoveSubTask: {
-      let newState = state;
-      const { taskId, srcTaskId, targetTaskId, newOrderedIds } = (action as MoveSubTask)
-        .payload;
-      const oldPar = getTaskById(srcTaskId, state);
-      const newPar = getTaskById(targetTaskId, state);
-
-      // for old parent remove
-      newState = taskAdapter.updateOne(
-        {
-          id: oldPar.id,
-          changes: {
-            subTaskIds: oldPar.subTaskIds.filter(filterOutId(taskId)),
-          },
-        },
-        newState,
-      );
-      newState = reCalcTimesForParentIfParent(oldPar.id, newState);
-
-      // for new parent add and move
-      newState = taskAdapter.updateOne(
-        {
-          id: newPar.id,
-          changes: {
-            subTaskIds: moveItemInList(taskId, newPar.subTaskIds, newOrderedIds),
-          },
-        },
-        newState,
-      );
-      newState = reCalcTimesForParentIfParent(newPar.id, newState);
-
-      // change parent id for moving task
-      newState = taskAdapter.updateOne(
-        {
-          id: taskId,
-          changes: {
-            parentId: newPar.id,
-            projectId: newPar.projectId,
-          },
-        },
-        newState,
-      );
-
-      return newState;
-    }
-
-    case TaskActionTypes.MoveSubTaskUp: {
-      const { id, parentId } = (action as MoveSubTaskUp).payload;
-      const parentSubTaskIds = getTaskById(parentId, state).subTaskIds;
-      return taskAdapter.updateOne(
-        {
-          id: parentId,
-          changes: {
-            subTaskIds: arrayMoveLeft(parentSubTaskIds, id),
-          },
-        },
-        state,
-      );
-    }
-
-    case TaskActionTypes.MoveSubTaskDown: {
-      const { id, parentId } = (action as MoveSubTaskDown).payload;
-      const parentSubTaskIds = getTaskById(parentId, state).subTaskIds;
-      return taskAdapter.updateOne(
-        {
-          id: parentId,
-          changes: {
-            subTaskIds: arrayMoveRight(parentSubTaskIds, id),
-          },
-        },
-        state,
-      );
-    }
-
-    case TaskActionTypes.AddTimeSpent: {
-      const { task, date, duration } = (action as AddTimeSpent).payload;
-      const currentTimeSpentForTickDay =
-        (task.timeSpentOnDay && +task.timeSpentOnDay[date]) || 0;
-
-      return updateTimeSpentForTask(
-        task.id,
-        {
-          ...task.timeSpentOnDay,
-          [date]: currentTimeSpentForTickDay + duration,
-        },
-        state,
-      );
-    }
-
-    case TaskActionTypes.RemoveTimeSpent: {
-      const { id, date, duration } = (action as RemoveTimeSpent).payload;
-      const task = getTaskById(id, state);
-      const currentTimeSpentForTickDay =
-        (task.timeSpentOnDay && +task.timeSpentOnDay[date]) || 0;
-
-      return updateTimeSpentForTask(
-        id,
-        {
-          ...task.timeSpentOnDay,
-          [date]: Math.max(currentTimeSpentForTickDay - duration, 0),
-        },
-        state,
-      );
-    }
-
-    case TaskActionTypes.AddSubTask: {
-      const { task, parentId } = (action as AddSubTask).payload;
-      const parentTask = getTaskById(parentId, state);
-
-      // add item1
-      const stateCopy = taskAdapter.addOne(
-        {
-          ...task,
-          parentId,
-          // update timeSpent if first sub task and non present
-          ...(parentTask.subTaskIds.length === 0 &&
-          Object.keys(task.timeSpentOnDay).length === 0
-            ? {
-                timeSpentOnDay: parentTask.timeSpentOnDay,
-                timeSpent: calcTotalTimeSpent(parentTask.timeSpentOnDay),
-              }
-            : {}),
-          // update timeEstimate if first sub task and non present
-          ...(parentTask.subTaskIds.length === 0 && !task.timeEstimate
-            ? { timeEstimate: parentTask.timeEstimate }
-            : {}),
-          // should always be empty
-          tagIds: [],
-          // should always be the one of the parent
-          projectId: parentTask.projectId,
-        },
-        state,
-      );
-
+  on(toggleStart, (state) => {
+    if (state.currentTaskId) {
       return {
-        ...stateCopy,
-        // update current task to new sub task if parent was current before
-        ...(state.currentTaskId === parentId ? { currentTaskId: task.id } : {}),
-        // also add to parent task
-        entities: {
-          ...stateCopy.entities,
-          [parentId]: {
-            ...parentTask,
-            subTaskIds: [...parentTask.subTaskIds, task.id],
-          },
-        },
+        ...state,
+        lastCurrentTaskId: state.currentTaskId,
       };
     }
+    return state;
+  }),
 
-    case TaskActionTypes.ConvertToMainTask: {
-      const { task } = (action as ConvertToMainTask).payload;
-      const par = state.entities[task.parentId as string];
-      if (!par) {
-        throw new Error('No parent for sub task');
-      }
+  on(moveToOtherProject, (state, { targetProjectId, task }) => {
+    const updates: Update<Task>[] = [task.id, ...task.subTaskIds].map((id) => ({
+      id,
+      changes: {
+        projectId: targetProjectId,
+      },
+    }));
+    return taskAdapter.updateMany(updates, state);
+  }),
 
-      const stateCopy = removeTaskFromParentSideEffects(state, task);
-      return taskAdapter.updateOne(
-        {
-          id: task.id,
-          changes: {
-            parentId: null,
-            tagIds: [...par.tagIds],
-          },
-        },
-        stateCopy,
+  on(roundTimeSpentForDay, (state, { day, taskIds, isRoundUp, roundTo, projectId }) => {
+    const isLimitToProject: boolean = !!projectId || projectId === null;
+
+    const idsToUpdateDirectly: string[] = taskIds.filter((id) => {
+      const task: Task = getTaskById(id, state);
+      return (
+        (task.subTaskIds.length === 0 || !!task.parentId) &&
+        (!isLimitToProject || task.projectId === projectId)
       );
-    }
+    });
+    const subTaskIds: string[] = idsToUpdateDirectly.filter(
+      (id) => !!getTaskById(id, state).parentId,
+    );
+    const parentTaskToReCalcIds: string[] = unique<string>(
+      subTaskIds.map((id) => getTaskById(id, state).parentId as string),
+    );
 
-    case TaskActionTypes.ToggleStart: {
-      if (state.currentTaskId) {
-        return {
-          ...state,
-          lastCurrentTaskId: state.currentTaskId,
-        };
-      }
-      return state;
-    }
-
-    case TaskActionTypes.MoveToOtherProject: {
-      const { targetProjectId, task } = (action as MoveToOtherProject).payload;
-      const updates: Update<Task>[] = [task.id, ...task.subTaskIds].map((id) => ({
+    const updateSubsAndMainWithoutSubs: Update<Task>[] = idsToUpdateDirectly.map((id) => {
+      const spentOnDayBefore = getTaskById(id, state).timeSpentOnDay;
+      const timeSpentOnDayUpdated = {
+        ...spentOnDayBefore,
+        [day]: roundDurationVanilla(spentOnDayBefore[day], roundTo, isRoundUp),
+      };
+      return {
         id,
         changes: {
-          projectId: targetProjectId,
+          timeSpentOnDay: timeSpentOnDayUpdated,
+          timeSpent: calcTotalTimeSpent(timeSpentOnDayUpdated),
         },
-      }));
-      return taskAdapter.updateMany(updates, state);
-    }
-
-    case TaskActionTypes.RoundTimeSpentForDay: {
-      const { day, taskIds, isRoundUp, roundTo, projectId } = (
-        action as RoundTimeSpentForDay
-      ).payload;
-      const isLimitToProject: boolean = !!projectId || projectId === null;
-
-      const idsToUpdateDirectly: string[] = taskIds.filter((id) => {
-        const task: Task = getTaskById(id, state);
-        return (
-          (task.subTaskIds.length === 0 || !!task.parentId) &&
-          (!isLimitToProject || task.projectId === projectId)
-        );
-      });
-      const subTaskIds: string[] = idsToUpdateDirectly.filter(
-        (id) => !!getTaskById(id, state).parentId,
-      );
-      const parentTaskToReCalcIds: string[] = unique<string>(
-        subTaskIds.map((id) => getTaskById(id, state).parentId as string),
-      );
-
-      const updateSubsAndMainWithoutSubs: Update<Task>[] = idsToUpdateDirectly.map(
-        (id) => {
-          const spentOnDayBefore = getTaskById(id, state).timeSpentOnDay;
-          const timeSpentOnDayUpdated = {
-            ...spentOnDayBefore,
-            [day]: roundDurationVanilla(spentOnDayBefore[day], roundTo, isRoundUp),
-          };
-          return {
-            id,
-            changes: {
-              timeSpentOnDay: timeSpentOnDayUpdated,
-              timeSpent: calcTotalTimeSpent(timeSpentOnDayUpdated),
-            },
-          };
-        },
-      );
-
-      // // update subs
-      const newState = taskAdapter.updateMany(updateSubsAndMainWithoutSubs, state);
-      // reCalc parents
-      return parentTaskToReCalcIds.reduce(
-        (acc, parentId) => reCalcTimeSpentForParentIfParent(parentId, acc),
-        newState,
-      );
-    }
-
-    // TASK ARCHIVE STUFF
-    // ------------------
-    // TODO fix
-    case TaskActionTypes.MoveToArchive: {
-      let copyState = state;
-      (action as MoveToArchive).payload.tasks.forEach((task) => {
-        copyState = deleteTask(copyState, task);
-      });
-      return {
-        ...copyState,
       };
-    }
+    });
 
-    case TaskActionTypes.RestoreTask: {
-      const task = {
-        ...(action as RestoreTask).payload.task,
-        isDone: false,
-        doneOn: null,
-      };
-      const subTasks = (action as RestoreTask).payload.subTasks || [];
-      return taskAdapter.addMany([task, ...subTasks], state);
-    }
+    // // update subs
+    const newState = taskAdapter.updateMany(updateSubsAndMainWithoutSubs, state);
+    // reCalc parents
+    return parentTaskToReCalcIds.reduce(
+      (acc, parentId) => reCalcTimeSpentForParentIfParent(parentId, acc),
+      newState,
+    );
+  }),
 
-    // REPEAT STUFF
-    // ------------
-    case addTaskRepeatCfgToTask.type: {
-      console.log(action);
+  // TASK ARCHIVE STUFF
+  // ------------------
+  // TODO fix
+  on(moveToArchive, (state, { tasks }) => {
+    let copyState = state;
+    tasks.forEach((task) => {
+      copyState = deleteTaskHelper(copyState, task);
+    });
+    return {
+      ...copyState,
+    };
+  }),
 
-      return state;
-      // return taskAdapter.updateOne(
-      //   {
-      //     id: action.payload.taskId,
-      //     changes: {
-      //       repeatCfgId: (action as addTaskRepeatCfgToTask).payload.taskRepeatCfg.id,
-      //     },
-      //   },
-      //   state,
-      // );
-    }
+  on(restoreTask, (state, { task, subTasks = [] }) => {
+    const updatedTask = {
+      ...task,
+      isDone: false,
+      doneOn: null,
+    };
+    return taskAdapter.addMany([updatedTask, ...subTasks], state);
+  }),
 
-    // TASK ATTACHMENTS
-    // ----------------
-    case addTaskAttachment.type: {
-      // TODO remove as any once tasks are migrated to new style as well
-      const { taskId, taskAttachment } = action as any;
-      return taskAdapter.updateOne(
-        {
-          id: taskId,
-          changes: {
-            attachments: [...getTaskById(taskId, state).attachments, taskAttachment],
-          },
+  // REPEAT STUFF
+  // ------------
+  on(addTaskRepeatCfgToTask, (state, { taskRepeatCfg, taskId }) => {
+    return taskAdapter.updateOne(
+      {
+        id: taskId,
+        changes: {
+          repeatCfgId: taskRepeatCfg.id,
         },
-        state,
-      );
-    }
+      },
+      state,
+    );
+  }),
 
-    case updateTaskAttachment.type: {
-      // TODO remove as any once tasks are migrated to new style as well
-      const { taskId, taskAttachment } = action as any;
-      const attachments = getTaskById(taskId, state).attachments;
-      const updatedAttachments = attachments.map((attachment) =>
-        attachment.id === taskAttachment.id
-          ? {
-              ...attachment,
-              ...taskAttachment.changes,
-            }
-          : attachment,
-      );
-
-      return taskAdapter.updateOne(
-        {
-          id: taskId,
-          changes: {
-            attachments: updatedAttachments,
-          },
+  // TASK ATTACHMENTS
+  // ----------------
+  on(addTaskAttachment, (state, { taskId, taskAttachment }) => {
+    return taskAdapter.updateOne(
+      {
+        id: taskId,
+        changes: {
+          attachments: [...getTaskById(taskId, state).attachments, taskAttachment],
         },
-        state,
-      );
-    }
+      },
+      state,
+    );
+  }),
 
-    case deleteTaskAttachment.type: {
-      // TODO remove as any once tasks are migrated to new style as well
-      const { taskId, id } = action as any;
-      return taskAdapter.updateOne(
-        {
-          id: taskId,
-          changes: {
-            attachments: getTaskById(taskId, state).attachments.filter(
-              (at) => at.id !== id,
-            ),
-          },
+  on(updateTaskAttachment, (state, { taskId, taskAttachment }) => {
+    const attachments = getTaskById(taskId, state).attachments;
+    const updatedAttachments = attachments.map((attachment) =>
+      attachment.id === taskAttachment.id
+        ? {
+            ...attachment,
+            ...taskAttachment.changes,
+          }
+        : attachment,
+    );
+
+    return taskAdapter.updateOne(
+      {
+        id: taskId,
+        changes: {
+          attachments: updatedAttachments,
         },
-        state,
-      );
-    }
+      },
+      state,
+    );
+  }),
 
-    // REMINDER STUFF
-    // --------------
-    case TaskActionTypes.ScheduleTask: {
-      const { task, plannedAt } = (action as ScheduleTask).payload;
-      return taskAdapter.updateOne(
-        {
-          id: task.id,
-          changes: {
-            plannedAt,
-          },
+  on(deleteTaskAttachment, (state, { taskId, id }) => {
+    return taskAdapter.updateOne(
+      {
+        id: taskId,
+        changes: {
+          attachments: getTaskById(taskId, state).attachments.filter(
+            (at) => at.id !== id,
+          ),
         },
-        state,
-      );
-    }
+      },
+      state,
+    );
+  }),
 
-    case TaskActionTypes.ReScheduleTask: {
-      const { id, plannedAt } = (action as ReScheduleTask).payload;
-      return taskAdapter.updateOne(
-        {
-          id,
-          changes: {
-            plannedAt,
-          },
+  // REMINDER STUFF
+  // --------------
+  on(scheduleTask, (state, { task, plannedAt }) => {
+    return taskAdapter.updateOne(
+      {
+        id: task.id,
+        changes: {
+          plannedAt,
         },
-        state,
-      );
-    }
+      },
+      state,
+    );
+  }),
 
-    case TaskActionTypes.UnScheduleTask: {
-      const { id } = (action as UnScheduleTask).payload;
-      return taskAdapter.updateOne(
-        {
-          id,
-          changes: {
-            plannedAt: null,
-          },
+  on(reScheduleTask, (state, { id, plannedAt }) => {
+    return taskAdapter.updateOne(
+      {
+        id,
+        changes: {
+          plannedAt,
         },
-        state,
-      );
-    }
+      },
+      state,
+    );
+  }),
 
-    default: {
-      return state;
-    }
-  }
-};
+  on(unScheduleTask, (state, { id }) => {
+    return taskAdapter.updateOne(
+      {
+        id,
+        changes: {
+          plannedAt: null,
+        },
+      },
+      state,
+    );
+  }),
+);

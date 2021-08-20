@@ -16,18 +16,17 @@ import { isCaldavEnabled } from '../is-caldav-enabled.util';
 import { CaldavClientService } from '../caldav-client.service';
 import { CaldavIssueReduced } from './caldav-issue.model';
 import { CaldavCfg } from '../caldav.model';
-import { TaskActionTypes, UpdateTask } from '../../../../tasks/store/task.actions';
+import { updateTask } from '../../../../tasks/store/task.actions';
 
 @Injectable()
 export class CaldavIssueEffects {
+  // TODO only check if there are active issue tasks for current list
   checkForDoneTransition$: Observable<any> = createEffect(
     () =>
       this._actions$.pipe(
-        ofType(TaskActionTypes.UpdateTask),
-        filter((a: UpdateTask): boolean => 'isDone' in a.payload.task.changes),
-        concatMap((a: UpdateTask) =>
-          this._taskService.getByIdOnce$(a.payload.task.id as string),
-        ),
+        ofType(updateTask),
+        filter(({ task }): boolean => 'isDone' in task.changes),
+        concatMap(({ task }) => this._taskService.getByIdOnce$(task.id as string)),
         filter((task: Task) => task && task.issueType === CALDAV_TYPE),
         concatMap((task: Task) => {
           if (!task.projectId) {

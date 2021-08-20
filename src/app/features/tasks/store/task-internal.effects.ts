@@ -1,10 +1,12 @@
 import { Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import {
-  SetCurrentTask,
-  TaskActionTypes,
-  UnsetCurrentTask,
-  UpdateTask,
+  deleteTask,
+  moveToArchive,
+  setCurrentTask,
+  toggleStart,
+  unsetCurrentTask,
+  updateTask,
 } from './task.actions';
 import { select, Store } from '@ngrx/store';
 import { filter, map, mergeMap, withLatestFrom } from 'rxjs/operators';
@@ -12,7 +14,6 @@ import { selectTaskFeatureState } from './task.selectors';
 import { selectMiscConfig } from '../../config/store/global-config.reducer';
 import { Task, TaskState } from '../task.model';
 import { EMPTY, of } from 'rxjs';
-import { MiscConfig } from '../../config/global-config.model';
 import { WorkContextService } from '../../work-context/work-context.service';
 import {
   moveProjectTaskToBacklogList,
@@ -23,21 +24,21 @@ import {
 export class TaskInternalEffects {
   onAllSubTasksDone$: any = createEffect(() =>
     this._actions$.pipe(
-      ofType(TaskActionTypes.UpdateTask),
+      ofType(updateTask),
       withLatestFrom(
         this._store$.pipe(select(selectMiscConfig)),
         this._store$.pipe(select(selectTaskFeatureState)),
       ),
       filter(
-        ([action, miscCfg, state]: [UpdateTask, MiscConfig, TaskState]) =>
+        ([{ task }, miscCfg, state]) =>
           !!miscCfg &&
           miscCfg.isAutMarkParentAsDone &&
-          !!action.payload.task.changes.isDone &&
+          !!task.changes.isDone &&
           // @ts-ignore
-          !!state.entities[action.payload.task.id].parentId,
+          !!state.entities[task.id].parentId,
       ),
       filter(([action, miscCfg, state]) => {
-        const task = state.entities[action.payload.task.id];
+        const task = state.entities[action.task.id];
         if (!task || !task.parentId) {
           throw new Error('!task || !task.parentId');
         }
@@ -47,14 +48,13 @@ export class TaskInternalEffects {
         );
         return undoneSubTasks.length === 0;
       }),
-      map(
-        ([action, miscCfg, state]) =>
-          new UpdateTask({
-            task: {
-              id: (state.entities[action.payload.task.id] as Task).parentId as string,
-              changes: { isDone: true },
-            },
-          }),
+      map(([action, miscCfg, state]) =>
+        updateTask({
+          task: {
+            id: (state.entities[action.task.id] as Task).parentId as string,
+            changes: { isDone: true },
+          },
+        }),
       ),
     ),
   );
@@ -62,10 +62,10 @@ export class TaskInternalEffects {
   autoSetNextTask$: any = createEffect(() =>
     this._actions$.pipe(
       ofType(
-        TaskActionTypes.ToggleStart,
-        TaskActionTypes.UpdateTask,
-        TaskActionTypes.DeleteTask,
-        TaskActionTypes.MoveToArchive,
+        toggleStart,
+        updateTask,
+        deleteTask,
+        moveToArchive,
 
         moveProjectTaskToBacklogList.type,
         moveProjectTaskToBacklogListAuto.type,
@@ -86,16 +86,18 @@ export class TaskInternalEffects {
         let nextId: 'NO_UPDATE' | string | null;
 
         switch (action.type) {
-          case TaskActionTypes.ToggleStart: {
+          case toggleStart.type: {
             nextId = state.currentTaskId
               ? null
               : this._findNextTask(state, todaysTaskIds);
             break;
           }
 
-          case TaskActionTypes.UpdateTask: {
-            const { isDone } = (action as UpdateTask).payload.task.changes;
-            const oldId = (action as UpdateTask).payload.task.id;
+          case updateTask.type: {
+            // TODO fix typing here
+            const a = action as any;
+            const { isDone } = a.task.changes;
+            const oldId = a.task.id;
             const isCurrent = oldId === currentId;
             nextId =
               isDone && isCurrent
@@ -115,7 +117,7 @@ export class TaskInternalEffects {
 
           // QUICK FIX FOR THE ISSUE
           // TODO better solution
-          case TaskActionTypes.DeleteTask: {
+          case deleteTask: {
             nextId = state.currentTaskId;
             break;
           }
@@ -124,16 +126,16 @@ export class TaskInternalEffects {
 
           // NOTE: currently no solution for this, but we're probably fine, as the current task
           // gets unset every time we go to the finish day view
-          // case TaskActionTypes.MoveToArchive: {}
+          // case moveToArchive: {}
         }
 
         if (nextId === 'NO_UPDATE') {
           return EMPTY;
         } else {
           if (nextId) {
-            return of(new SetCurrentTask(nextId));
+            return of(setCurrentTask(nextId));
           } else {
-            return of(new UnsetCurrentTask());
+            return of(unsetCurrentTask());
           }
         }
       }),

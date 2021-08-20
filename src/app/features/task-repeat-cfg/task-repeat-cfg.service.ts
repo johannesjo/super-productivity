@@ -29,7 +29,7 @@ import { take } from 'rxjs/operators';
 import { TaskService } from '../tasks/task.service';
 import { TODAY_TAG } from '../tag/tag.const';
 import { Task, TaskPlanned } from '../tasks/task.model';
-import { AddTask, ScheduleTask, UpdateTask } from '../tasks/store/task.actions';
+import { addTask, scheduleTask, updateTask } from '../tasks/store/task.actions';
 import { WorkContextService } from '../work-context/work-context.service';
 import { WorkContextType } from '../work-context/work-context.model';
 import { isValidSplitTime } from '../../util/is-valid-split-time';
@@ -183,29 +183,28 @@ export class TaskRepeatCfgService {
     }
 
     // move all current left over instances to archive right away
-    const markAsDoneActions: (UpdateTask | AddTask)[] = existingTaskInstances
+    const markAsDoneActions: Action[] = existingTaskInstances
       .filter(
         (taskI) =>
           !taskI.isDone &&
           !isSameDay(targetDayDate, taskI.created) &&
           taskI.id !== currentTaskId,
       )
-      .map(
-        (taskI) =>
-          new UpdateTask({
-            task: {
-              id: taskI.id,
-              changes: {
-                isDone: true,
-              },
+      .map((taskI) =>
+        updateTask({
+          task: {
+            id: taskI.id,
+            changes: {
+              isDone: true,
             },
-          }),
+          },
+        }),
       );
 
     const { task, isAddToBottom } = this._getTaskRepeatTemplate(taskRepeatCfg);
 
     const createNewActions: Action[] = [
-      new AddTask({
+      addTask({
         task,
         workContextType: this._workContextService
           .activeWorkContextType as WorkContextType,
@@ -231,7 +230,7 @@ export class TaskRepeatCfgService {
         targetDayDate,
       );
       createNewActions.push(
-        new ScheduleTask({
+        scheduleTask({
           task,
           plannedAt: dateTime,
           remindAt: remindOptionToMilliseconds(dateTime, taskRepeatCfg.remindAt),

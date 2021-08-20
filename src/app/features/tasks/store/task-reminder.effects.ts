@@ -1,13 +1,12 @@
 import { Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import {
-  DeleteTask,
-  ReScheduleTask,
-  ScheduleTask,
-  TaskActionTypes,
-  UnScheduleTask,
-  UpdateTask,
-  UpdateTaskTags,
+  deleteTask,
+  reScheduleTask,
+  scheduleTask,
+  unScheduleTask,
+  updateTask,
+  updateTaskTags,
 } from './task.actions';
 import { concatMap, filter, map, mergeMap, tap } from 'rxjs/operators';
 import { ReminderService } from '../../reminder/reminder.service';
@@ -25,21 +24,18 @@ import { moveProjectTaskToBacklogListAuto } from '../../project/store/project.ac
 export class TaskReminderEffects {
   addTaskReminder$: any = createEffect(() =>
     this._actions$.pipe(
-      ofType(TaskActionTypes.ScheduleTask),
-      tap((a: ScheduleTask) =>
+      ofType(scheduleTask),
+      tap(({ task }) =>
         this._snackService.open({
           type: 'SUCCESS',
           translateParams: {
-            title: truncate(a.payload.task.title),
+            title: truncate(task.title),
           },
           msg: T.F.TASK.S.REMINDER_ADDED,
           ico: 'schedule',
         }),
       ),
-      mergeMap((a: ScheduleTask) => {
-        console.log(a);
-
-        const { task, remindAt, isMoveToBacklog } = a.payload;
+      mergeMap(({ task, remindAt, isMoveToBacklog }) => {
         if (isMoveToBacklog && !task.projectId) {
           throw new Error('Move to backlog not possible for non project tasks');
         }
@@ -56,7 +52,7 @@ export class TaskReminderEffects {
         const isRemoveFromToday = isMoveToBacklog && task.tagIds.includes(TODAY_TAG.id);
 
         return [
-          new UpdateTask({
+          updateTask({
             task: { id: task.id, changes: { reminderId } },
           }),
           ...(isMoveToBacklog
@@ -69,7 +65,7 @@ export class TaskReminderEffects {
             : []),
           ...(isRemoveFromToday
             ? [
-                new UpdateTaskTags({
+                updateTaskTags({
                   task,
                   newTagIds: task.tagIds.filter((tagId) => tagId !== TODAY_TAG.id),
                   oldTagIds: task.tagIds,
@@ -84,24 +80,21 @@ export class TaskReminderEffects {
   updateTaskReminder$: any = createEffect(
     () =>
       this._actions$.pipe(
-        ofType(TaskActionTypes.ReScheduleTask),
+        ofType(reScheduleTask),
         filter(
-          ({ payload }: ReScheduleTask) =>
-            typeof payload.remindAt === 'number' && !!payload.reminderId,
+          ({ reminderId, remindAt }) => typeof remindAt === 'number' && !!reminderId,
         ),
-        tap((a: ReScheduleTask) => {
-          console.log(a);
-          const { title, remindAt, reminderId } = a.payload;
+        tap(({ title, remindAt, reminderId }) => {
           this._reminderService.updateReminder(reminderId as string, {
             remindAt,
             title,
           });
         }),
-        tap((a: ReScheduleTask) =>
+        tap(({ title }) =>
           this._snackService.open({
             type: 'SUCCESS',
             translateParams: {
-              title: truncate(a.payload.title),
+              title: truncate(title),
             },
             msg: T.F.TASK.S.REMINDER_UPDATED,
             ico: 'schedule',
@@ -113,10 +106,10 @@ export class TaskReminderEffects {
 
   removeTaskReminder$: any = createEffect(() =>
     this._actions$.pipe(
-      ofType(TaskActionTypes.UnScheduleTask),
-      filter(({ payload }: UnScheduleTask) => !!payload.reminderId),
-      tap(({ payload }: UnScheduleTask) => {
-        if (!payload.isSkipToast) {
+      ofType(unScheduleTask),
+      filter(({ reminderId }) => !!reminderId),
+      tap(({ isSkipToast }) => {
+        if (!isSkipToast) {
           this._snackService.open({
             type: 'SUCCESS',
             msg: T.F.TASK.S.REMINDER_DELETED,
@@ -124,11 +117,9 @@ export class TaskReminderEffects {
           });
         }
       }),
-      map((a: UnScheduleTask) => {
-        const { id, reminderId } = a.payload;
+      map(({ id, reminderId }) => {
         this._reminderService.removeReminder(reminderId as string);
-
-        return new UpdateTask({
+        return updateTask({
           task: {
             id,
             changes: { reminderId: null, plannedAt: null },
@@ -141,9 +132,9 @@ export class TaskReminderEffects {
   clearReminders: any = createEffect(
     () =>
       this._actions$.pipe(
-        ofType(TaskActionTypes.DeleteTask),
-        tap((a: DeleteTask) => {
-          const deletedTaskIds = [a.payload.task.id, ...a.payload.task.subTaskIds];
+        ofType(deleteTask),
+        tap(({ task }) => {
+          const deletedTaskIds = [task.id, ...task.subTaskIds];
           deletedTaskIds.forEach((id) => {
             this._reminderService.removeReminderByRelatedIdIfSet(id);
           });
@@ -155,11 +146,9 @@ export class TaskReminderEffects {
   unscheduleDoneTask$: any = createEffect(
     () =>
       this._actions$.pipe(
-        ofType(TaskActionTypes.UpdateTask),
-        filter(({ payload }: UpdateTask) => !!payload.task.changes.isDone),
-        concatMap(({ payload }) =>
-          this._taskService.getByIdOnce$((payload as any).task.id),
-        ),
+        ofType(updateTask),
+        filter(({ task }) => !!task.changes.isDone),
+        concatMap(({ task }) => this._taskService.getByIdOnce$(task.id as string)),
         tap((task) => {
           if (task.reminderId) {
             this._taskService.unScheduleTask(task.id, task.reminderId);
@@ -172,12 +161,9 @@ export class TaskReminderEffects {
   unscheduleScheduledForDayWhenAddedToToday$: any = createEffect(
     () =>
       this._actions$.pipe(
-        ofType(TaskActionTypes.UpdateTaskTags),
-        filter(
-          ({ payload }: UpdateTaskTags) =>
-            !!payload.newTagIds && payload.newTagIds.includes(TODAY_TAG.id),
-        ),
-        tap(({ payload: { task } }: UpdateTaskTags) => {
+        ofType(updateTaskTags),
+        filter(({ newTagIds }) => !!newTagIds && newTagIds.includes(TODAY_TAG.id)),
+        tap(({ task }) => {
           if (
             task.reminderId &&
             task.plannedAt &&

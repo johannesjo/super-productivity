@@ -1,6 +1,30 @@
 import { Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
-import { TaskActionTypes } from './task.actions';
+import {
+  addSubTask,
+  addTask,
+  addTimeSpent,
+  convertToMainTask,
+  deleteMainTasks,
+  deleteTask,
+  moveSubTask,
+  moveSubTaskDown,
+  moveSubTaskUp,
+  moveToArchive,
+  moveToOtherProject,
+  removeTagsForAllTasks,
+  reScheduleTask,
+  restoreTask,
+  roundTimeSpentForDay,
+  scheduleTask,
+  toggleStart,
+  toggleTaskShowSubTasks,
+  undoDeleteTask,
+  unScheduleTask,
+  updateTask,
+  updateTaskTags,
+  updateTaskUi,
+} from './task.actions';
 import { select, Store } from '@ngrx/store';
 import { tap, withLatestFrom } from 'rxjs/operators';
 import { PersistenceService } from '../../../core/persistence/persistence.service';
@@ -20,32 +44,32 @@ export class TaskDbEffects {
     () =>
       this._actions$.pipe(
         ofType(
-          TaskActionTypes.AddTask,
-          TaskActionTypes.RestoreTask,
-          TaskActionTypes.AddTimeSpent,
-          TaskActionTypes.UnScheduleTask,
-          TaskActionTypes.DeleteTask,
-          TaskActionTypes.DeleteMainTasks,
-          TaskActionTypes.UndoDeleteTask,
-          TaskActionTypes.AddSubTask,
-          TaskActionTypes.ConvertToMainTask,
-          // TaskActionTypes.SetCurrentTask,
-          // TaskActionTypes.UnsetCurrentTask,
-          TaskActionTypes.UpdateTask,
-          TaskActionTypes.UpdateTaskTags,
-          TaskActionTypes.RemoveTagsForAllTasks,
-          TaskActionTypes.MoveSubTask,
-          TaskActionTypes.MoveSubTaskUp,
-          TaskActionTypes.MoveSubTaskDown,
-          TaskActionTypes.MoveToArchive,
-          TaskActionTypes.MoveToOtherProject,
-          TaskActionTypes.ToggleStart,
-          TaskActionTypes.RoundTimeSpentForDay,
+          addTask,
+          restoreTask,
+          addTimeSpent,
+          unScheduleTask,
+          deleteTask,
+          deleteMainTasks,
+          undoDeleteTask,
+          addSubTask,
+          convertToMainTask,
+          // setCurrentTask,
+          // unsetCurrentTask,
+          updateTask,
+          updateTaskTags,
+          removeTagsForAllTasks,
+          moveSubTask,
+          moveSubTaskUp,
+          moveSubTaskDown,
+          moveToArchive,
+          moveToOtherProject,
+          toggleStart,
+          roundTimeSpentForDay,
 
           // REMINDER
-          TaskActionTypes.ScheduleTask,
-          TaskActionTypes.ReScheduleTask,
-          TaskActionTypes.UnScheduleTask,
+          scheduleTask,
+          reScheduleTask,
+          unScheduleTask,
 
           // ATTACHMENT ACTIONS
           addTaskAttachment,
@@ -64,7 +88,7 @@ export class TaskDbEffects {
   updateTaskUi$: any = createEffect(
     () =>
       this._actions$.pipe(
-        ofType(TaskActionTypes.UpdateTaskUi, TaskActionTypes.ToggleTaskShowSubTasks),
+        ofType(updateTaskUi, toggleTaskShowSubTasks),
         withLatestFrom(this._store$.pipe(select(selectTaskFeatureState))),
         tap(([, taskState]) => this._saveToLs(taskState)),
       ),

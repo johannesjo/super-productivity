@@ -1,10 +1,9 @@
 import { Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import {
-  SetCurrentTask,
-  TaskActionTypes,
-  ToggleStart,
-  UnsetCurrentTask,
+  setCurrentTask,
+  toggleStart,
+  unsetCurrentTask,
 } from '../../tasks/store/task.actions';
 import { concatMap, filter, mapTo, switchMap, tap, withLatestFrom } from 'rxjs/operators';
 import { PomodoroService } from '../pomodoro.service';
@@ -41,7 +40,7 @@ export class PomodoroEffects {
       filter((isEnabled) => !!isEnabled),
       switchMap((isEnabledI) =>
         this._actions$.pipe(
-          ofType(TaskActionTypes.SetCurrentTask, TaskActionTypes.UnsetCurrentTask),
+          ofType(setCurrentTask, unsetCurrentTask),
           withLatestFrom(
             this._pomodoroService.cfg$,
             this._pomodoroService.isBreak$,
@@ -49,22 +48,15 @@ export class PomodoroEffects {
           ),
           // don't update when on break and stop time tracking is active
           filter(
-            ([action, cfg, isBreak, currentSessionTime]: [
-              SetCurrentTask | UnsetCurrentTask,
-              PomodoroConfig,
-              boolean,
-              number,
-            ]) =>
+            ([action, cfg, isBreak, currentSessionTime]) =>
               !isBreak ||
               !cfg.isStopTrackingOnBreak ||
-              (isBreak &&
-                currentSessionTime <= 0 &&
-                action.type === TaskActionTypes.SetCurrentTask),
+              (isBreak && currentSessionTime <= 0 && action.type === setCurrentTask.type),
           ),
           concatMap(([action, , isBreak, currentSessionTime]) => {
             const payload = (action as any).payload;
 
-            if (payload && action.type !== TaskActionTypes.UnsetCurrentTask) {
+            if (payload && action.type !== unsetCurrentTask.type) {
               if (isBreak && currentSessionTime <= 0) {
                 return of(new FinishPomodoroSession(), new StartPomodoro());
               }
@@ -96,7 +88,7 @@ export class PomodoroEffects {
                   string | null,
                 ]) => !isBreak && !currentTaskId,
               ),
-              mapTo(new ToggleStart()),
+              mapTo(toggleStart()),
             ),
       ),
     ),
@@ -109,7 +101,7 @@ export class PomodoroEffects {
           ? EMPTY
           : this._actions$.pipe(
               ofType(PomodoroActionTypes.StopPomodoro),
-              mapTo(new UnsetCurrentTask()),
+              mapTo(unsetCurrentTask()),
             ),
       ),
     ),
@@ -130,7 +122,7 @@ export class PomodoroEffects {
                   boolean,
                 ]) => cfg.isStopTrackingOnBreak && isBreak,
               ),
-              mapTo(new UnsetCurrentTask()),
+              mapTo(unsetCurrentTask()),
             ),
       ),
     ),
@@ -185,7 +177,7 @@ export class PomodoroEffects {
               ofType(PomodoroActionTypes.PausePomodoro),
               withLatestFrom(this.currentTaskId$),
               filter(([act, currentTaskId]) => !!currentTaskId),
-              mapTo(new UnsetCurrentTask()),
+              mapTo(unsetCurrentTask()),
             ),
       ),
     ),

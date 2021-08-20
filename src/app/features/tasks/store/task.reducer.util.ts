@@ -157,7 +157,7 @@ export const updateTimeEstimateForTask = (
     : stateAfterUpdate;
 };
 
-export const deleteTask = (
+export const deleteTaskHelper = (
   state: TaskState,
   taskToDelete: TaskWithSubTasks | Task,
 ): TaskState => {

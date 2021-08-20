@@ -1,14 +1,13 @@
 import { Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import {
-  AddTask,
-  AddTimeSpent,
-  MoveToArchive,
-  MoveToOtherProject,
-  RestoreTask,
-  TaskActionTypes,
-  UpdateTask,
-  UpdateTaskTags,
+  addTask,
+  addTimeSpent,
+  moveToArchive,
+  moveToOtherProject,
+  restoreTask,
+  updateTask,
+  updateTaskTags,
 } from './task.actions';
 import {
   concatMap,
@@ -48,8 +47,8 @@ export class TaskRelatedModelEffects {
   moveToArchive$: any = createEffect(
     () =>
       this._actions$.pipe(
-        ofType(TaskActionTypes.MoveToArchive),
-        tap(this._moveToArchive.bind(this)),
+        ofType(moveToArchive),
+        tap(({ tasks }) => this._moveToArchive(tasks)),
       ),
     { dispatch: false },
   );
@@ -59,8 +58,10 @@ export class TaskRelatedModelEffects {
   moveToOtherProject: any = createEffect(
     () =>
       this._actions$.pipe(
-        ofType(TaskActionTypes.MoveToOtherProject),
-        tap(this._moveToOtherProject.bind(this)),
+        ofType(moveToOtherProject),
+        tap(({ task, targetProjectId }) =>
+          this._moveToOtherProject(task, targetProjectId),
+        ),
       ),
     { dispatch: false },
   );
@@ -68,19 +69,17 @@ export class TaskRelatedModelEffects {
   restoreTask$: any = createEffect(
     () =>
       this._actions$.pipe(
-        ofType(TaskActionTypes.RestoreTask),
-        tap(this._removeFromArchive.bind(this)),
+        ofType(restoreTask),
+        tap(({ task }) => this._removeFromArchive(task)),
       ),
     { dispatch: false },
   );
 
   autoAddTodayTag: any = createEffect(() =>
     this._actions$.pipe(
-      ofType(TaskActionTypes.AddTimeSpent),
-      switchMap((a: AddTimeSpent) =>
-        a.payload.task.parentId
-          ? this._taskService.getByIdOnce$(a.payload.task.parentId)
-          : of(a.payload.task),
+      ofType(addTimeSpent),
+      switchMap(({ task }) =>
+        task.parentId ? this._taskService.getByIdOnce$(task.parentId) : of(task),
       ),
       filter((task: Task) => !task.tagIds.includes(TODAY_TAG.id)),
       concatMap((task: Task) =>
@@ -93,13 +92,12 @@ export class TaskRelatedModelEffects {
         ),
       ),
       filter(({ miscCfg, task }) => miscCfg.isAutoAddWorkedOnToToday),
-      map(
-        ({ miscCfg, task }) =>
-          new UpdateTaskTags({
-            task,
-            newTagIds: unique([...task.tagIds, TODAY_TAG.id]),
-            oldTagIds: task.tagIds,
-          }),
+      map(({ miscCfg, task }) =>
+        updateTaskTags({
+          task,
+          newTagIds: unique([...task.tagIds, TODAY_TAG.id]),
+          oldTagIds: task.tagIds,
+        }),
       ),
     ),
   );
@@ -113,16 +111,15 @@ export class TaskRelatedModelEffects {
       filter(
         ({ src, target }) => (src === 'DONE' || src === 'BACKLOG') && target === 'UNDONE',
       ),
-      map(
-        ({ taskId }) =>
-          new UpdateTask({
-            task: {
-              id: taskId,
-              changes: {
-                isDone: false,
-              },
+      map(({ taskId }) =>
+        updateTask({
+          task: {
+            id: taskId,
+            changes: {
+              isDone: false,
             },
-          }),
+          },
+        }),
       ),
     ),
   );
@@ -133,24 +130,23 @@ export class TaskRelatedModelEffects {
       filter(
         ({ src, target }) => (src === 'UNDONE' || src === 'BACKLOG') && target === 'DONE',
       ),
-      map(
-        ({ taskId }) =>
-          new UpdateTask({
-            task: {
-              id: taskId,
-              changes: {
-                isDone: true,
-              },
+      map(({ taskId }) =>
+        updateTask({
+          task: {
+            id: taskId,
+            changes: {
+              isDone: true,
             },
-          }),
+          },
+        }),
       ),
     ),
   );
 
   setDefaultProjectId$: any = createEffect(() =>
     this._actions$.pipe(
-      ofType(TaskActionTypes.AddTask),
-      concatMap((act: AddTask) =>
+      ofType(addTask),
+      concatMap(({ task }) =>
         this._globalConfigService.misc$.pipe(
           first(),
           // error handling
@@ -169,7 +165,7 @@ export class TaskRelatedModelEffects {
           // error handling end
           map((miscCfg) => ({
             defaultProjectId: miscCfg.defaultProjectId,
-            task: act.payload.task,
+            task,
           })),
         ),
       ),
@@ -177,31 +173,30 @@ export class TaskRelatedModelEffects {
         ({ defaultProjectId, task }) =>
           !!defaultProjectId && !task.projectId && !task.parentId,
       ),
-      map(
-        ({ task, defaultProjectId }) =>
-          new MoveToOtherProject({
-            task: task as TaskWithSubTasks,
-            targetProjectId: defaultProjectId as string,
-          }),
+      map(({ task, defaultProjectId }) =>
+        moveToOtherProject({
+          task: task as TaskWithSubTasks,
+          targetProjectId: defaultProjectId as string,
+        }),
       ),
     ),
   );
 
   shortSyntax$: any = createEffect(() =>
     this._actions$.pipe(
-      ofType(TaskActionTypes.AddTask, TaskActionTypes.UpdateTask),
-      filter((action: AddTask | UpdateTask): boolean => {
-        if (action.type !== TaskActionTypes.UpdateTask) {
+      ofType(addTask, updateTask),
+      filter((action): boolean => {
+        if (action.type !== updateTask.type) {
           return true;
         }
-        const changeProps = Object.keys((action as UpdateTask).payload.task.changes);
+        const changeProps = Object.keys(action.task.changes);
         // we only want to execute this for task title updates
         return changeProps.length === 1 && changeProps[0] === 'title';
       }),
       // dirty fix to execute this after setDefaultProjectId$ effect
       delay(20),
-      concatMap((action: AddTask | UpdateTask): Observable<any> => {
-        return this._taskService.getByIdOnce$(action.payload.task.id as string);
+      concatMap((action): Observable<any> => {
+        return this._taskService.getByIdOnce$(action.task.id as string);
       }),
       withLatestFrom(this._tagService.tags$, this._projectService.list$),
       mergeMap(([task, tags, projects]) => {
@@ -217,7 +212,7 @@ export class TaskRelatedModelEffects {
         const tagIds: string[] = [...(r.taskChanges.tagIds || task.tagIds)];
 
         actions.push(
-          new UpdateTask({
+          updateTask({
             task: {
               id: task.id,
               changes: r.taskChanges,
@@ -226,7 +221,7 @@ export class TaskRelatedModelEffects {
         );
         if (r.projectId && r.projectId !== task.projectId) {
           actions.push(
-            new MoveToOtherProject({
+            moveToOtherProject({
               task,
               targetProjectId: r.projectId,
             }),
@@ -250,7 +245,7 @@ export class TaskRelatedModelEffects {
           }
           if (!isEqualTags) {
             actions.push(
-              new UpdateTaskTags({
+              updateTaskTags({
                 task,
                 newTagIds: unique(tagIds),
                 oldTagIds: task.tagIds,
@@ -274,8 +269,7 @@ export class TaskRelatedModelEffects {
     private _persistenceService: PersistenceService,
   ) {}
 
-  private async _removeFromArchive(action: RestoreTask): Promise<unknown> {
-    const task = action.payload.task;
+  private async _removeFromArchive(task: Task): Promise<unknown> {
     const taskIds = [task.id, ...task.subTaskIds];
     const currentArchive: TaskArchive =
       (await this._persistenceService.taskArchive.loadState()) || createEmptyEntity();
@@ -298,8 +292,8 @@ export class TaskRelatedModelEffects {
     );
   }
 
-  private async _moveToArchive(action: MoveToArchive): Promise<unknown> {
-    const flatTasks = flattenTasks(action.payload.tasks);
+  private async _moveToArchive(tasks: TaskWithSubTasks[]): Promise<unknown> {
+    const flatTasks = flattenTasks(tasks);
     if (!flatTasks.length) {
       return;
     }
@@ -331,9 +325,11 @@ export class TaskRelatedModelEffects {
     });
   }
 
-  private _moveToOtherProject(action: MoveToOtherProject): void {
-    const mainTasks = action.payload.task as TaskWithSubTasks;
-    const workContextId = action.payload.targetProjectId;
+  private _moveToOtherProject(
+    mainTasks: TaskWithSubTasks,
+    targetProjectId: string,
+  ): void {
+    const workContextId = targetProjectId;
 
     if (mainTasks.reminderId) {
       this._reminderService.updateReminder(mainTasks.reminderId, { workContextId });

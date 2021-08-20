@@ -19,15 +19,15 @@ import {
   upsertTag,
 } from './tag.actions';
 import {
-  AddTask,
-  AddTimeSpent,
-  ConvertToMainTask,
-  DeleteMainTasks,
-  DeleteTask,
-  MoveToArchive,
-  RemoveTagsForAllTasks,
-  RestoreTask,
-  TaskActionTypes,
+  addTask,
+  addTimeSpent,
+  convertToMainTask,
+  deleteMainTasks,
+  deleteTask,
+  moveToArchive,
+  removeTagsForAllTasks,
+  restoreTask,
+  updateTaskTags,
 } from '../../tasks/store/task.actions';
 import { TagService } from '../tag.service';
 import { TaskService } from '../../tasks/task.service';
@@ -73,8 +73,9 @@ export class TagEffects {
           updateWorkEndForTag,
           addToBreakTimeForTag,
 
-          TaskActionTypes.DeleteMainTasks,
-          TaskActionTypes.UpdateTaskTags,
+          // TASK Actions
+          deleteMainTasks,
+          updateTaskTags,
         ),
         switchMap(() => this.saveToLs$),
       ),
@@ -83,38 +84,28 @@ export class TagEffects {
   updateProjectStorageConditionalTask$: Observable<unknown> = createEffect(
     () =>
       this._actions$.pipe(
-        ofType(
-          TaskActionTypes.AddTask,
-          TaskActionTypes.ConvertToMainTask,
-          TaskActionTypes.DeleteTask,
-          TaskActionTypes.RestoreTask,
-          TaskActionTypes.MoveToArchive,
-        ),
-        switchMap(
-          (a: AddTask | ConvertToMainTask | DeleteTask | RestoreTask | MoveToArchive) => {
-            let isChange = false;
-            switch (a.type) {
-              case TaskActionTypes.AddTask:
-                isChange = !!(a as AddTask).payload.task.tagIds.length;
-                break;
-              case TaskActionTypes.DeleteTask:
-                isChange = !!(a as DeleteTask).payload.task.tagIds.length;
-                break;
-              case TaskActionTypes.MoveToArchive:
-                isChange = !!(a as MoveToArchive).payload.tasks.find(
-                  (task) => task.tagIds.length,
-                );
-                break;
-              case TaskActionTypes.RestoreTask:
-                isChange = !!(a as RestoreTask).payload.task.tagIds.length;
-                break;
-              case TaskActionTypes.ConvertToMainTask:
-                isChange = !!(a as ConvertToMainTask).payload.parentTagIds.length;
-                break;
-            }
-            return isChange ? of(a) : EMPTY;
-          },
-        ),
+        ofType(addTask, convertToMainTask, deleteTask, restoreTask, moveToArchive),
+        switchMap((a) => {
+          let isChange = false;
+          switch (a.type) {
+            case addTask.type:
+              isChange = !!a.task.tagIds.length;
+              break;
+            case deleteTask.type:
+              isChange = !!a.task.tagIds.length;
+              break;
+            case moveToArchive.type:
+              isChange = !!a.tasks.find((task) => task.tagIds.length);
+              break;
+            case restoreTask.type:
+              isChange = !!a.task.tagIds.length;
+              break;
+            case convertToMainTask.type:
+              isChange = !!a.parentTagIds.length;
+              break;
+          }
+          return isChange ? of(a) : EMPTY;
+        }),
         switchMap(() => this.saveToLs$),
       ),
     { dispatch: false },
@@ -145,11 +136,11 @@ export class TagEffects {
 
   updateWorkStart$: any = createEffect(() =>
     this._actions$.pipe(
-      ofType(TaskActionTypes.AddTimeSpent),
-      concatMap(({ payload }: AddTimeSpent) =>
-        payload.task.parentId
-          ? this._taskService.getByIdOnce$(payload.task.parentId).pipe(first())
-          : of(payload.task),
+      ofType(addTimeSpent),
+      concatMap(({ task }) =>
+        task.parentId
+          ? this._taskService.getByIdOnce$(task.parentId).pipe(first())
+          : of(task),
       ),
       filter((task: Task) => task.tagIds && !!task.tagIds.length),
       concatMap((task: Task) =>
@@ -172,11 +163,11 @@ export class TagEffects {
 
   updateWorkEnd$: Observable<unknown> = createEffect(() =>
     this._actions$.pipe(
-      ofType(TaskActionTypes.AddTimeSpent),
-      concatMap(({ payload }: AddTimeSpent) =>
-        payload.task.parentId
-          ? this._taskService.getByIdOnce$(payload.task.parentId).pipe(first())
-          : of(payload.task),
+      ofType(addTimeSpent),
+      concatMap(({ task }) =>
+        task.parentId
+          ? this._taskService.getByIdOnce$(task.parentId).pipe(first())
+          : of(task),
       ),
       filter((task: Task) => task.tagIds && !!task.tagIds.length),
       concatMap((task: Task) =>
@@ -204,7 +195,7 @@ export class TagEffects {
           this._taskService.removeTagsForAllTask(tagIdsToRemove);
           // remove from archive
           await this._persistenceService.taskArchive.execAction(
-            new RemoveTagsForAllTasks({ tagIdsToRemove }),
+            removeTagsForAllTasks({ tagIdsToRemove }),
           );
 
           const isOrphanedParentTask = (t: Task): boolean =>
@@ -228,7 +219,7 @@ export class TagEffects {
             },
           );
           await this._persistenceService.taskArchive.execAction(
-            new DeleteMainTasks({ taskIds: archiveTaskIdsToDelete }),
+            deleteMainTasks({ taskIds: archiveTaskIdsToDelete }),
           );
 
           // remove from task repeat

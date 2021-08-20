@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
-import { Action, select, Store } from '@ngrx/store';
+import { select, Store } from '@ngrx/store';
 import { concatMap, filter, first, map, switchMap, take, tap } from 'rxjs/operators';
 import {
   addProject,
@@ -31,16 +31,15 @@ import { NoteService } from '../../note/note.service';
 import { SnackService } from '../../../core/snack/snack.service';
 import { getWorklogStr } from '../../../util/get-work-log-str';
 import {
-  AddTask,
-  AddTimeSpent,
-  ConvertToMainTask,
-  DeleteMainTasks,
-  DeleteTask,
-  MoveToArchive,
-  MoveToOtherProject,
-  RestoreTask,
-  TaskActionTypes,
-  UpdateTaskTags,
+  addTask,
+  addTimeSpent,
+  convertToMainTask,
+  deleteMainTasks,
+  deleteTask,
+  moveToArchive,
+  moveToOtherProject,
+  restoreTask,
+  updateTaskTags,
 } from '../../tasks/store/task.actions';
 import { ReminderService } from '../../reminder/reminder.service';
 import { ProjectService } from '../project.service';
@@ -111,50 +110,37 @@ export class ProjectEffects {
     () =>
       this._actions$.pipe(
         ofType(
-          TaskActionTypes.AddTask,
-          TaskActionTypes.DeleteTask,
-          TaskActionTypes.MoveToOtherProject,
-          TaskActionTypes.RestoreTask,
-          TaskActionTypes.MoveToArchive,
-          TaskActionTypes.ConvertToMainTask,
+          addTask,
+          deleteTask,
+          moveToOtherProject,
+          restoreTask,
+          moveToArchive,
+          convertToMainTask,
         ),
-        switchMap(
-          (
-            a:
-              | AddTask
-              | DeleteTask
-              | MoveToOtherProject
-              | MoveToArchive
-              | RestoreTask
-              | ConvertToMainTask
-              | Action,
-          ) => {
-            let isChange = false;
-            switch (a.type) {
-              case TaskActionTypes.AddTask:
-                isChange = !!(a as AddTask).payload.task.projectId;
-                break;
-              case TaskActionTypes.DeleteTask:
-                isChange = !!(a as DeleteTask).payload.task.projectId;
-                break;
-              case TaskActionTypes.MoveToOtherProject:
-                isChange = !!(a as MoveToOtherProject).payload.task.projectId;
-                break;
-              case TaskActionTypes.MoveToArchive:
-                isChange = !!(a as MoveToArchive).payload.tasks.find(
-                  (task) => !!task.projectId,
-                );
-                break;
-              case TaskActionTypes.RestoreTask:
-                isChange = !!(a as RestoreTask).payload.task.projectId;
-                break;
-              case TaskActionTypes.ConvertToMainTask:
-                isChange = !!(a as ConvertToMainTask).payload.task.projectId;
-                break;
-            }
-            return isChange ? of(a) : EMPTY;
-          },
-        ),
+        switchMap((a) => {
+          let isChange = false;
+          switch (a.type) {
+            case addTask.type:
+              isChange = !!a.task.projectId;
+              break;
+            case deleteTask.type:
+              isChange = !!a.task.projectId;
+              break;
+            case moveToOtherProject.type:
+              isChange = !!a.task.projectId;
+              break;
+            case moveToArchive.type:
+              isChange = !!a.tasks.find((task) => !!task.projectId);
+              break;
+            case restoreTask.type:
+              isChange = !!a.task.projectId;
+              break;
+            case convertToMainTask.type:
+              isChange = !!a.task.projectId;
+              break;
+          }
+          return isChange ? of(a) : EMPTY;
+        }),
         switchMap(() => this.saveToLs$(true)),
       ),
     { dispatch: false },
@@ -172,12 +158,10 @@ export class ProjectEffects {
 
   updateWorkStart$: any = createEffect(() =>
     this._actions$.pipe(
-      ofType(TaskActionTypes.AddTimeSpent),
-      filter((action: AddTimeSpent) => !!action.payload.task.projectId),
-      concatMap((action: AddTimeSpent) =>
-        this._projectService
-          .getByIdOnce$(action.payload.task.projectId as string)
-          .pipe(first()),
+      ofType(addTimeSpent),
+      filter(({ task }) => !!task.projectId),
+      concatMap(({ task }) =>
+        this._projectService.getByIdOnce$(task.projectId as string).pipe(first()),
       ),
       filter((project: Project) => !project.workStart[getWorklogStr()]),
       map((project) => {
@@ -192,11 +176,11 @@ export class ProjectEffects {
 
   updateWorkEnd$: Observable<unknown> = createEffect(() =>
     this._actions$.pipe(
-      ofType(TaskActionTypes.AddTimeSpent),
-      filter((action: AddTimeSpent) => !!action.payload.task.projectId),
-      map((action: AddTimeSpent) => {
+      ofType(addTimeSpent),
+      filter(({ task }) => !!task.projectId),
+      map(({ task }) => {
         return updateProjectWorkEnd({
-          id: action.payload.task.projectId as string,
+          id: task.projectId as string,
           date: getWorklogStr(),
           newVal: Date.now(),
         });
@@ -342,25 +326,24 @@ export class ProjectEffects {
 
   moveToTodayListOnAddTodayTag: Observable<unknown> = createEffect(() =>
     this._actions$.pipe(
-      ofType(TaskActionTypes.UpdateTaskTags),
+      ofType(updateTaskTags),
       filter(
-        (action: UpdateTaskTags) =>
-          !!action.payload.task.projectId &&
-          action.payload.newTagIds.includes(TODAY_TAG.id),
+        ({ task, newTagIds }) => !!task.projectId && newTagIds.includes(TODAY_TAG.id),
       ),
-      concatMap((action) =>
-        this._projectService.getByIdOnce$(action.payload.task.projectId as string).pipe(
+      concatMap(({ task, newTagIds }) =>
+        this._projectService.getByIdOnce$(task.projectId as string).pipe(
           map((project) => ({
             project,
-            p: action.payload,
+            task,
+            newTagIds,
           })),
         ),
       ),
       filter(({ project }) => !project.taskIds.includes(TODAY_TAG.id)),
-      map(({ p, project }) =>
+      map(({ task, newTagIds, project }) =>
         moveProjectTaskToTodayListAuto({
           projectId: project.id,
-          taskId: p.task.id,
+          taskId: task.id,
           isMoveToTop: false,
         }),
       ),
@@ -369,12 +352,12 @@ export class ProjectEffects {
 
   // @Effect()
   // moveToBacklogOnRemoveTodayTag: Observable<unknown> = this._actions$.pipe(
-  //   ofType(TaskActionTypes.UpdateTaskTags),
+  //   ofType(updateTaskTags),
   //   filter((action: UpdateTaskTags) =>
-  //     action.payload.task.projectId &&
-  //     action.payload.oldTagIds.includes(TODAY_TAG.id)
+  //     task.projectId &&
+  //     oldTagIds.includes(TODAY_TAG.id)
   //   ),
-  //   concatMap((action) => this._projectService.getByIdOnce$(action.payload.task.projectId).pipe(
+  //   concatMap((action) => this._projectService.getByIdOnce$(task.projectId).pipe(
   //     map((project) => ({
   //       project,
   //       p: action.payload,
@@ -452,7 +435,7 @@ export class ProjectEffects {
     );
     // remove archive
     await this._persistenceService.taskArchive.execAction(
-      new DeleteMainTasks({ taskIds: archiveTaskIdsToDelete }),
+      deleteMainTasks({ taskIds: archiveTaskIdsToDelete }),
     );
   }
 

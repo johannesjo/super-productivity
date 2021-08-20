@@ -1,7 +1,7 @@
 import { RootState } from '../root-state';
 import { Dictionary } from '@ngrx/entity';
 import { Task, TaskWithSubTasks } from '../../features/tasks/task.model';
-import { TaskActionTypes } from '../../features/tasks/store/task.actions';
+import { deleteTask, undoDeleteTask } from '../../features/tasks/store/task.actions';
 import {
   PROJECT_FEATURE_NAME,
   projectAdapter,
@@ -31,11 +31,11 @@ let U_STORE: UndoTaskDeleteState;
 export const undoTaskDeleteMetaReducer = (reducer: any): any => {
   return (state: RootState, action: any) => {
     switch (action.type) {
-      case TaskActionTypes.DeleteTask:
+      case deleteTask.type:
         U_STORE = _createTaskDeleteState(state, action.payload.task);
         return reducer(state, action);
 
-      case TaskActionTypes.UndoDeleteTask:
+      case undoDeleteTask.type:
         let updatedState = state;
         const tasksToRestore: Task[] = Object.keys(U_STORE.deletedTaskEntities)
           .map((id: string) => U_STORE.deletedTaskEntities[id])

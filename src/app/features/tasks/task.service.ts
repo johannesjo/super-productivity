@@ -17,32 +17,32 @@ import {
 } from './task.model';
 import { select, Store } from '@ngrx/store';
 import {
-  AddSubTask,
-  AddTask,
-  AddTimeSpent,
-  ConvertToMainTask,
-  DeleteMainTasks,
-  DeleteTask,
-  MoveSubTask,
-  MoveSubTaskDown,
-  MoveSubTaskUp,
-  MoveToArchive,
-  MoveToOtherProject,
-  RemoveTagsForAllTasks,
-  RemoveTimeSpent,
-  ReScheduleTask,
-  RestoreTask,
-  RoundTimeSpentForDay,
-  ScheduleTask,
-  SetCurrentTask,
-  SetSelectedTask,
-  ToggleStart,
-  ToggleTaskShowSubTasks,
-  UnScheduleTask,
-  UnsetCurrentTask,
-  UpdateTask,
-  UpdateTaskTags,
-  UpdateTaskUi,
+  addSubTask,
+  addTask,
+  addTimeSpent,
+  convertToMainTask,
+  deleteMainTasks,
+  deleteTask,
+  moveSubTask,
+  moveSubTaskDown,
+  moveSubTaskUp,
+  moveToArchive,
+  moveToOtherProject,
+  removeTagsForAllTasks,
+  removeTimeSpent,
+  reScheduleTask,
+  restoreTask,
+  roundTimeSpentForDay,
+  scheduleTask,
+  setCurrentTask,
+  setSelectedTask,
+  toggleStart,
+  toggleTaskShowSubTasks,
+  unScheduleTask,
+  unsetCurrentTask,
+  updateTask,
+  updateTaskTags,
+  updateTaskUi,
 } from './store/task.actions';
 import { PersistenceService } from '../../core/persistence/persistence.service';
 import { IssueProviderKey } from '../issue/issue.model';
@@ -209,9 +209,9 @@ export class TaskService {
   // ----
   setCurrentId(id: string | null): void {
     if (id) {
-      this._store.dispatch(new SetCurrentTask(id));
+      this._store.dispatch(setCurrentTask(id));
     } else {
-      this._store.dispatch(new UnsetCurrentTask());
+      this._store.dispatch(unsetCurrentTask());
     }
   }
 
@@ -219,7 +219,7 @@ export class TaskService {
     id: string | null,
     taskAdditionalInfoTargetPanel: TaskAdditionalInfoTargetPanel = TaskAdditionalInfoTargetPanel.Default,
   ): void {
-    this._store.dispatch(new SetSelectedTask({ id, taskAdditionalInfoTargetPanel }));
+    this._store.dispatch(setSelectedTask({ id, taskAdditionalInfoTargetPanel }));
   }
 
   startFirstStartable(): void {
@@ -233,7 +233,7 @@ export class TaskService {
   }
 
   pauseCurrent(): void {
-    this._store.dispatch(new UnsetCurrentTask());
+    this._store.dispatch(unsetCurrentTask());
   }
 
   // Tasks
@@ -255,7 +255,7 @@ export class TaskService {
     });
 
     this._store.dispatch(
-      new AddTask({
+      addTask({
         task,
         workContextId,
         workContextType,
@@ -267,16 +267,16 @@ export class TaskService {
   }
 
   remove(task: TaskWithSubTasks): void {
-    this._store.dispatch(new DeleteTask({ task }));
+    this._store.dispatch(deleteTask({ task }));
   }
 
   removeMultipleMainTasks(taskIds: string[]): void {
-    this._store.dispatch(new DeleteMainTasks({ taskIds }));
+    this._store.dispatch(deleteMainTasks({ taskIds }));
   }
 
   update(id: string, changedFields: Partial<Task>): void {
     this._store.dispatch(
-      new UpdateTask({
+      updateTask({
         task: { id, changes: changedFields },
       }),
     );
@@ -301,7 +301,7 @@ export class TaskService {
       });
     } else {
       this._store.dispatch(
-        new UpdateTaskTags({
+        updateTaskTags({
           task,
           newTagIds: unique(newTagIds),
           oldTagIds,
@@ -312,7 +312,7 @@ export class TaskService {
 
   removeTagsForAllTask(tagsToRemove: string[]): void {
     this._store.dispatch(
-      new RemoveTagsForAllTasks({
+      removeTagsForAllTasks({
         tagIdsToRemove: tagsToRemove,
       }),
     );
@@ -339,7 +339,7 @@ export class TaskService {
 
   updateUi(id: string, changes: Partial<Task>): void {
     this._store.dispatch(
-      new UpdateTaskUi({
+      updateTaskUi({
         task: { id, changes },
       }),
     );
@@ -387,14 +387,14 @@ export class TaskService {
     } else {
       // move sub task
       this._store.dispatch(
-        new MoveSubTask({ taskId, srcTaskId: src, targetTaskId: target, newOrderedIds }),
+        moveSubTask({ taskId, srcTaskId: src, targetTaskId: target, newOrderedIds }),
       );
     }
   }
 
   moveUp(id: string, parentId: string | null = null, isBacklog: boolean): void {
     if (parentId) {
-      this._store.dispatch(new MoveSubTaskUp({ id, parentId }));
+      this._store.dispatch(moveSubTaskUp({ id, parentId }));
     } else {
       const workContextId = this._workContextService.activeWorkContextId as string;
       const workContextType = this._workContextService
@@ -432,7 +432,7 @@ export class TaskService {
 
   moveDown(id: string, parentId: string | null = null, isBacklog: boolean): void {
     if (parentId) {
-      this._store.dispatch(new MoveSubTaskDown({ id, parentId }));
+      this._store.dispatch(moveSubTaskDown({ id, parentId }));
     } else {
       const workContextId = this._workContextService.activeWorkContextId as string;
       const workContextType = this._workContextService
@@ -471,7 +471,7 @@ export class TaskService {
 
   addSubTaskTo(parentId: string): void {
     this._store.dispatch(
-      new AddSubTask({
+      addSubTask({
         task: this.createNewTaskWithDefaults({ title: '' }),
         parentId,
       }),
@@ -479,11 +479,11 @@ export class TaskService {
   }
 
   addTimeSpent(task: Task, duration: number, date: string = getWorklogStr()): void {
-    this._store.dispatch(new AddTimeSpent({ task, date, duration }));
+    this._store.dispatch(addTimeSpent({ task, date, duration }));
   }
 
   removeTimeSpent(id: string, duration: number, date: string = getWorklogStr()): void {
-    this._store.dispatch(new RemoveTimeSpent({ id, date, duration }));
+    this._store.dispatch(removeTimeSpent({ id, date, duration }));
   }
 
   focusTask(id: string): void {
@@ -513,22 +513,22 @@ export class TaskService {
     if (!Array.isArray(tasks)) {
       tasks = [tasks];
     }
-    this._store.dispatch(new MoveToArchive({ tasks }));
+    this._store.dispatch(moveToArchive({ tasks }));
   }
 
   moveToProject(task: TaskWithSubTasks, projectId: string): void {
     if (!!task.parentId || !!task.issueId) {
       throw new Error('Wrong task model');
     }
-    this._store.dispatch(new MoveToOtherProject({ task, targetProjectId: projectId }));
+    this._store.dispatch(moveToOtherProject({ task, targetProjectId: projectId }));
   }
 
   toggleStartTask(): void {
-    this._store.dispatch(new ToggleStart());
+    this._store.dispatch(toggleStart());
   }
 
   restoreTask(task: Task, subTasks: Task[]): void {
-    this._store.dispatch(new RestoreTask({ task, subTasks }));
+    this._store.dispatch(restoreTask({ task, subTasks }));
   }
 
   roundTimeSpentForDay({
@@ -545,7 +545,7 @@ export class TaskService {
     projectId?: string | null;
   }): void {
     this._store.dispatch(
-      new RoundTimeSpentForDay({ day, taskIds, roundTo, isRoundUp, projectId }),
+      roundTimeSpentForDay({ day, taskIds, roundTo, isRoundUp, projectId }),
     );
   }
 
@@ -564,7 +564,7 @@ export class TaskService {
       remindCfg,
     });
     this._store.dispatch(
-      new ScheduleTask({
+      scheduleTask({
         task,
         plannedAt,
         remindAt: remindOptionToMilliseconds(plannedAt, remindCfg),
@@ -587,7 +587,7 @@ export class TaskService {
     remindCfg: TaskReminderOptionId;
   }): void {
     this._store.dispatch(
-      new ReScheduleTask({
+      reScheduleTask({
         id: taskId,
         plannedAt,
         reminderId,
@@ -601,7 +601,7 @@ export class TaskService {
     if (!taskId) {
       throw new Error('No task id');
     }
-    this._store.dispatch(new UnScheduleTask({ id: taskId, reminderId, isSkipToast }));
+    this._store.dispatch(unScheduleTask({ id: taskId, reminderId, isSkipToast }));
   }
 
   // HELPER
@@ -665,7 +665,7 @@ export class TaskService {
     isShowLess: boolean = true,
     isEndless: boolean = false,
   ): void {
-    this._store.dispatch(new ToggleTaskShowSubTasks({ taskId, isShowLess, isEndless }));
+    this._store.dispatch(toggleTaskShowSubTasks({ taskId, isShowLess, isEndless }));
   }
 
   hideSubTasks(id: string): void {
@@ -674,7 +674,7 @@ export class TaskService {
 
   async convertToMainTask(task: Task): Promise<void> {
     const parent = await this.getByIdOnce$(task.parentId as string).toPromise();
-    this._store.dispatch(new ConvertToMainTask({ task, parentTagIds: parent.tagIds }));
+    this._store.dispatch(convertToMainTask({ task, parentTagIds: parent.tagIds }));
   }
 
   // GLOBAL TASK MODEL STUFF
@@ -694,7 +694,7 @@ export class TaskService {
   // BEWARE: does only work for task model updates, but not the meta models
   async updateArchiveTask(id: string, changedFields: Partial<Task>): Promise<void> {
     await this._persistenceService.taskArchive.execAction(
-      new UpdateTask({
+      updateTask({
         task: {
           id,
           changes: changedFields,

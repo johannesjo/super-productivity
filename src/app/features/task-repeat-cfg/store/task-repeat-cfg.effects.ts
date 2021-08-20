@@ -21,7 +21,7 @@ import {
 import { selectTaskRepeatCfgFeatureState } from './task-repeat-cfg.reducer';
 import { PersistenceService } from '../../../core/persistence/persistence.service';
 import { Task, TaskArchive } from '../../tasks/task.model';
-import { UpdateTask } from '../../tasks/store/task.actions';
+import { updateTask } from '../../tasks/store/task.actions';
 import { TaskService } from '../../tasks/task.service';
 import { TaskRepeatCfgService } from '../task-repeat-cfg.service';
 import { TaskRepeatCfg, TaskRepeatCfgState } from '../task-repeat-cfg.model';
@@ -98,14 +98,13 @@ export class TaskRepeatCfgEffects {
       concatMap(({ id }) => this._taskService.getTasksByRepeatCfgId$(id).pipe(take(1))),
       filter((tasks) => tasks && !!tasks.length),
       mergeMap((tasks: Task[]) =>
-        tasks.map(
-          (task) =>
-            new UpdateTask({
-              task: {
-                id: task.id,
-                changes: { repeatCfgId: null },
-              },
-            }),
+        tasks.map((task) =>
+          updateTask({
+            task: {
+              id: task.id,
+              changes: { repeatCfgId: null },
+            },
+          }),
         ),
       ),
     ),

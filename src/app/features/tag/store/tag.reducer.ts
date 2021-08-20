@@ -1,22 +1,15 @@
 import { createEntityAdapter, EntityAdapter } from '@ngrx/entity';
 import * as tagActions from './tag.actions';
 import { Tag, TagState } from '../tag.model';
+import { createFeatureSelector, createReducer, createSelector, on } from '@ngrx/store';
 import {
-  Action,
-  createFeatureSelector,
-  createReducer,
-  createSelector,
-  on,
-} from '@ngrx/store';
-import {
-  AddTask,
-  ConvertToMainTask,
-  DeleteMainTasks,
-  DeleteTask,
-  MoveToArchive,
-  RestoreTask,
-  TaskActionTypes,
-  UpdateTaskTags,
+  addTask,
+  convertToMainTask,
+  deleteMainTasks,
+  deleteTask,
+  moveToArchive,
+  restoreTask,
+  updateTaskTags,
 } from '../../tasks/store/task.actions';
 import { TODAY_TAG } from '../tag.const';
 import { WorkContextType } from '../../work-context/work-context.model';
@@ -96,7 +89,7 @@ export const initialTagState: TagState = _addMyDayTagIfNecessary(
   }),
 );
 
-const _reducer = createReducer<TagState>(
+export const tagReducer = createReducer<TagState>(
   initialTagState,
 
   // META ACTIONS
@@ -281,131 +274,103 @@ const _reducer = createReducer<TagState>(
       );
     },
   ),
+
+  // TASK STUFF
+  // ---------
+  on(addTask, (state, { task, isAddToBottom }) => {
+    const updates: Update<Tag>[] = task.tagIds.map((tagId) => ({
+      id: tagId,
+      changes: {
+        taskIds: isAddToBottom // create an ordered list with the new task id in the correct position
+          ? [...(state.entities[tagId] as Tag).taskIds, task.id]
+          : [task.id, ...(state.entities[tagId] as Tag).taskIds],
+      },
+    }));
+    return tagAdapter.updateMany(updates, state);
+  }),
+
+  on(convertToMainTask, (state, { task, parentTagIds }) => {
+    const updates: Update<Tag>[] = parentTagIds.map((tagId) => ({
+      id: tagId,
+      changes: {
+        taskIds: [task.id, ...(state.entities[tagId] as Tag).taskIds],
+      },
+    }));
+    return tagAdapter.updateMany(updates, state);
+  }),
+
+  on(deleteTask, (state, { task }) => {
+    const updates: Update<Tag>[] = task.tagIds.map((tagId) => ({
+      id: tagId,
+      changes: {
+        taskIds: (state.entities[tagId] as Tag).taskIds.filter(
+          (taskIdForTag) => taskIdForTag !== task.id,
+        ),
+      },
+    }));
+    return tagAdapter.updateMany(updates, state);
+  }),
+
+  on(moveToArchive, (state, { tasks }) => {
+    const taskIdsToMoveToArchive = tasks.map((t) => t.id);
+    const tagIds = unique(
+      tasks.reduce((acc: string[], t: TaskWithSubTasks) => [...acc, ...t.tagIds], []),
+    );
+    const updates: Update<Tag>[] = tagIds.map((pid: string) => ({
+      id: pid,
+      changes: {
+        taskIds: (state.entities[pid] as Tag).taskIds.filter(
+          (taskId) => !taskIdsToMoveToArchive.includes(taskId),
+        ),
+      },
+    }));
+    return tagAdapter.updateMany(updates, state);
+  }),
+
+  // cleans up all occurrences
+  on(deleteMainTasks, (state, { taskIds }) => {
+    const updates: Update<Tag>[] = (state.ids as string[]).map((tagId) => ({
+      id: tagId,
+      changes: {
+        taskIds: (state.entities[tagId] as Tag).taskIds.filter(
+          (taskId) => !taskIds.includes(taskId),
+        ),
+      },
+    }));
+    return tagAdapter.updateMany(updates, state);
+  }),
+
+  on(restoreTask, (state, { task }) => {
+    return tagAdapter.updateMany(
+      task.tagIds
+        // NOTE: if the tag model is gone we don't update
+        .filter((tagId) => !!(state.entities[tagId] as Tag))
+        .map((tagId) => ({
+          id: tagId,
+          changes: {
+            taskIds: [...(state.entities[tagId] as Tag).taskIds, task.id],
+          },
+        })),
+      state,
+    );
+  }),
+
+  on(updateTaskTags, (state, { newTagIds = [], oldTagIds = [], task }) => {
+    const taskId = task.id;
+    const removedFrom: string[] = oldTagIds.filter((oldId) => !newTagIds.includes(oldId));
+    const addedTo: string[] = newTagIds.filter((newId) => !oldTagIds.includes(newId));
+    const removeFrom: Update<Tag>[] = removedFrom.map((tagId) => ({
+      id: tagId,
+      changes: {
+        taskIds: (state.entities[tagId] as Tag).taskIds.filter((id) => id !== taskId),
+      },
+    }));
+    const addTo: Update<Tag>[] = addedTo.map((tagId) => ({
+      id: tagId,
+      changes: {
+        taskIds: [taskId, ...(state.entities[tagId] as Tag).taskIds],
+      },
+    }));
+    return tagAdapter.updateMany([...removeFrom, ...addTo], state);
+  }),
 );
-
-export const tagReducer = (
-  state: TagState = initialTagState,
-  action: Action,
-): TagState => {
-  switch (action.type) {
-    // TASK STUFF
-    // ---------
-    case TaskActionTypes.AddTask: {
-      const { payload } = action as AddTask;
-      const { task, isAddToBottom } = payload;
-      const updates: Update<Tag>[] = task.tagIds.map((tagId) => ({
-        id: tagId,
-        changes: {
-          taskIds: isAddToBottom // create an ordered list with the new task id in the correct position
-            ? [...(state.entities[tagId] as Tag).taskIds, task.id]
-            : [task.id, ...(state.entities[tagId] as Tag).taskIds],
-        },
-      }));
-      return tagAdapter.updateMany(updates, state);
-    }
-
-    case TaskActionTypes.ConvertToMainTask: {
-      const { payload } = action as ConvertToMainTask;
-      const { task, parentTagIds } = payload;
-      console.log(task);
-
-      const updates: Update<Tag>[] = parentTagIds.map((tagId) => ({
-        id: tagId,
-        changes: {
-          taskIds: [task.id, ...(state.entities[tagId] as Tag).taskIds],
-        },
-      }));
-      return tagAdapter.updateMany(updates, state);
-    }
-
-    case TaskActionTypes.DeleteTask: {
-      const { payload } = action as DeleteTask;
-      const { task } = payload;
-      const updates: Update<Tag>[] = task.tagIds.map((tagId) => ({
-        id: tagId,
-        changes: {
-          taskIds: (state.entities[tagId] as Tag).taskIds.filter(
-            (taskIdForTag) => taskIdForTag !== task.id,
-          ),
-        },
-      }));
-      return tagAdapter.updateMany(updates, state);
-    }
-
-    case TaskActionTypes.MoveToArchive: {
-      const { payload } = action as MoveToArchive;
-      const { tasks } = payload;
-      const taskIdsToMoveToArchive = tasks.map((t) => t.id);
-      const tagIds = unique(
-        tasks.reduce((acc: string[], t: TaskWithSubTasks) => [...acc, ...t.tagIds], []),
-      );
-      const updates: Update<Tag>[] = tagIds.map((pid: string) => ({
-        id: pid,
-        changes: {
-          taskIds: (state.entities[pid] as Tag).taskIds.filter(
-            (taskId) => !taskIdsToMoveToArchive.includes(taskId),
-          ),
-        },
-      }));
-      return tagAdapter.updateMany(updates, state);
-    }
-
-    // cleans up all occurrences
-    case TaskActionTypes.DeleteMainTasks: {
-      const { payload } = action as DeleteMainTasks;
-      const { taskIds } = payload;
-      const updates: Update<Tag>[] = (state.ids as string[]).map((tagId) => ({
-        id: tagId,
-        changes: {
-          taskIds: (state.entities[tagId] as Tag).taskIds.filter(
-            (taskId) => !taskIds.includes(taskId),
-          ),
-        },
-      }));
-      return tagAdapter.updateMany(updates, state);
-    }
-
-    case TaskActionTypes.RestoreTask: {
-      const { payload } = action as RestoreTask;
-      const { task } = payload;
-
-      return tagAdapter.updateMany(
-        task.tagIds
-          // NOTE: if the tag model is gone we don't update
-          .filter((tagId) => !!(state.entities[tagId] as Tag))
-          .map((tagId) => ({
-            id: tagId,
-            changes: {
-              taskIds: [...(state.entities[tagId] as Tag).taskIds, task.id],
-            },
-          })),
-        state,
-      );
-    }
-
-    case TaskActionTypes.UpdateTaskTags: {
-      const { payload } = action as UpdateTaskTags;
-      const { newTagIds = [], oldTagIds = [], task } = payload;
-      const taskId = task.id;
-      const removedFrom: string[] = oldTagIds.filter(
-        (oldId) => !newTagIds.includes(oldId),
-      );
-      const addedTo: string[] = newTagIds.filter((newId) => !oldTagIds.includes(newId));
-      const removeFrom: Update<Tag>[] = removedFrom.map((tagId) => ({
-        id: tagId,
-        changes: {
-          taskIds: (state.entities[tagId] as Tag).taskIds.filter((id) => id !== taskId),
-        },
-      }));
-      const addTo: Update<Tag>[] = addedTo.map((tagId) => ({
-        id: tagId,
-        changes: {
-          taskIds: [taskId, ...(state.entities[tagId] as Tag).taskIds],
-        },
-      }));
-      return tagAdapter.updateMany([...removeFrom, ...addTo], state);
-    }
-    default:
-      return _reducer(state, action);
-  }
-};

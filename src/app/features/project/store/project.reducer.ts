@@ -7,13 +7,12 @@ import {
   WorkContextType,
 } from '../../work-context/work-context.model';
 import {
-  AddTask,
-  ConvertToMainTask,
-  DeleteTask,
-  MoveToArchive,
-  MoveToOtherProject,
-  RestoreTask,
-  TaskActionTypes,
+  addTask,
+  convertToMainTask,
+  deleteTask,
+  moveToArchive,
+  moveToOtherProject,
+  restoreTask,
 } from '../../tasks/store/task.actions';
 import {
   moveTaskDownInTodayList,
@@ -73,7 +72,7 @@ export const initialProjectState: ProjectState = projectAdapter.getInitialState(
   [MODEL_VERSION_KEY]: PROJECT_MODEL_VERSION,
 });
 
-const _reducer = createReducer<ProjectState>(
+export const projectReducer = createReducer<ProjectState>(
   initialProjectState,
 
   // META ACTIONS
@@ -452,168 +451,136 @@ const _reducer = createReducer<ProjectState>(
         );
   }),
 
+  // Task Actions
+  // ------------
+  on(addTask, (state, { task, isAddToBottom, isAddToBacklog }) => {
+    const affectedProject = task.projectId && state.entities[task.projectId];
+    if (!affectedProject) return state; // if there is no projectId, no changes are needed
+
+    const prop: 'backlogTaskIds' | 'taskIds' = isAddToBacklog
+      ? 'backlogTaskIds'
+      : 'taskIds';
+
+    const changes: { [x: string]: any[] } = {};
+    if (isAddToBottom) {
+      changes[prop] = [...affectedProject[prop], task.id];
+    } else {
+      // TODO #1382 get the currentTaskId from a different part of the state tree or via payload or _taskService
+      // const currentTaskId = payload.currentTaskId || this._taskService.currentTaskId
+      // const isAfterRunningTask = prop==='taskIds' && currentTaskId
+      // console.log('isAfterRunningTask?',isAfterRunningTask,'currentTaskId',currentTaskId);
+      // if (isAfterRunningTask) add the new task in the list after currentTaskId
+      // else { // add to the top
+      changes[prop] = [task.id, ...affectedProject[prop]];
+      //}
+    }
+    return projectAdapter.updateOne(
+      {
+        id: task.projectId as string,
+        changes,
+      },
+      state,
+    );
+  }),
+
+  on(convertToMainTask, (state, { task }) => {
+    const affectedEntity = task.projectId && state.entities[task.projectId];
+    return affectedEntity
+      ? projectAdapter.updateOne(
+          {
+            id: task.projectId as string,
+            changes: {
+              taskIds: [task.id, ...affectedEntity.taskIds],
+            },
+          },
+          state,
+        )
+      : state;
+  }),
+
+  on(deleteTask, (state, { task }) => {
+    const project = task.projectId && (state.entities[task.projectId] as Project);
+    return project
+      ? projectAdapter.updateOne(
+          {
+            id: task.projectId as string,
+            changes: {
+              taskIds: project.taskIds.filter((ptId) => ptId !== task.id),
+              backlogTaskIds: project.backlogTaskIds.filter((ptId) => ptId !== task.id),
+            },
+          },
+          state,
+        )
+      : state;
+  }),
+
+  on(moveToArchive, (state, { tasks }) => {
+    const taskIdsToMoveToArchive = tasks.map((t: Task) => t.id);
+    const projectIds = unique<string>(
+      tasks
+        .map((t: Task) => t.projectId)
+        .filter((pid: string | null) => !!pid) as string[],
+    );
+    const updates: Update<Project>[] = projectIds.map((pid: string) => ({
+      id: pid,
+      changes: {
+        taskIds: (state.entities[pid] as Project).taskIds.filter(
+          (taskId) => !taskIdsToMoveToArchive.includes(taskId),
+        ),
+        backlogTaskIds: (state.entities[pid] as Project).backlogTaskIds.filter(
+          (taskId) => !taskIdsToMoveToArchive.includes(taskId),
+        ),
+      },
+    }));
+    return projectAdapter.updateMany(updates, state);
+  }),
+  on(restoreTask, (state, { task }) => {
+    if (!task.projectId) {
+      return state;
+    }
+
+    return projectAdapter.updateOne(
+      {
+        id: task.projectId,
+        changes: {
+          taskIds: [...(state.entities[task.projectId] as Project).taskIds, task.id],
+        },
+      },
+      state,
+    );
+  }),
+  on(moveToOtherProject, (state, { task, targetProjectId }) => {
+    const srcProjectId = task.projectId;
+    const updates: Update<Project>[] = [];
+
+    if (srcProjectId === targetProjectId) {
+      devError('Moving task from same project to same project.');
+      return state;
+    }
+
+    if (srcProjectId) {
+      updates.push({
+        id: srcProjectId,
+        changes: {
+          taskIds: (state.entities[srcProjectId] as Project).taskIds.filter(
+            (id) => id !== task.id,
+          ),
+          backlogTaskIds: (state.entities[srcProjectId] as Project).backlogTaskIds.filter(
+            (id) => id !== task.id,
+          ),
+        },
+      });
+    }
+    if (targetProjectId) {
+      updates.push({
+        id: targetProjectId,
+        changes: {
+          taskIds: [...(state.entities[targetProjectId] as Project).taskIds, task.id],
+        },
+      });
+    }
+
+    return projectAdapter.updateMany(updates, state);
+  }),
   // on(AAA, (state, {AAA})=> {  }),
 );
-
-// REDUCER
-// -------
-export const projectReducer = (
-  state: ProjectState = initialProjectState,
-  action:
-    | AddTask
-    | DeleteTask
-    | MoveToOtherProject
-    | MoveToArchive
-    | RestoreTask
-    | ConvertToMainTask,
-): ProjectState => {
-  switch (action.type) {
-    // Meta Actions (all task related)
-    // ------------
-    case TaskActionTypes.AddTask: {
-      const a = action as AddTask;
-      const { task, isAddToBottom, isAddToBacklog } = a.payload;
-
-      const affectedProject = task.projectId && state.entities[task.projectId];
-      if (!affectedProject) return state; // if there is no projectId, no changes are needed
-
-      const prop: 'backlogTaskIds' | 'taskIds' = isAddToBacklog
-        ? 'backlogTaskIds'
-        : 'taskIds';
-
-      const changes: { [x: string]: any[] } = {};
-      if (isAddToBottom) {
-        changes[prop] = [...affectedProject[prop], task.id];
-      } else {
-        // TODO #1382 get the currentTaskId from a different part of the state tree or via payload or _taskService
-        // const currentTaskId = payload.currentTaskId || this._taskService.currentTaskId
-        // const isAfterRunningTask = prop==='taskIds' && currentTaskId
-        // console.log('isAfterRunningTask?',isAfterRunningTask,'currentTaskId',currentTaskId);
-        // if (isAfterRunningTask) add the new task in the list after currentTaskId
-        // else { // add to the top
-        changes[prop] = [task.id, ...affectedProject[prop]];
-        //}
-      }
-      return projectAdapter.updateOne(
-        {
-          id: task.projectId as string,
-          changes,
-        },
-        state,
-      );
-    }
-
-    case TaskActionTypes.ConvertToMainTask: {
-      const a = action as ConvertToMainTask;
-      const { task } = a.payload;
-      const affectedEntity = task.projectId && state.entities[task.projectId];
-      return affectedEntity
-        ? projectAdapter.updateOne(
-            {
-              id: task.projectId as string,
-              changes: {
-                taskIds: [task.id, ...affectedEntity.taskIds],
-              },
-            },
-            state,
-          )
-        : state;
-    }
-
-    case TaskActionTypes.DeleteTask: {
-      const a = action as DeleteTask;
-      const { task } = a.payload;
-      const project = task.projectId && (state.entities[task.projectId] as Project);
-      return project
-        ? projectAdapter.updateOne(
-            {
-              id: task.projectId as string,
-              changes: {
-                taskIds: project.taskIds.filter((ptId) => ptId !== task.id),
-                backlogTaskIds: project.backlogTaskIds.filter((ptId) => ptId !== task.id),
-              },
-            },
-            state,
-          )
-        : state;
-    }
-
-    case TaskActionTypes.MoveToArchive: {
-      const { tasks } = (action as MoveToArchive).payload;
-      const taskIdsToMoveToArchive = tasks.map((t: Task) => t.id);
-      const projectIds = unique<string>(
-        tasks
-          .map((t: Task) => t.projectId)
-          .filter((pid: string | null) => !!pid) as string[],
-      );
-      const updates: Update<Project>[] = projectIds.map((pid: string) => ({
-        id: pid,
-        changes: {
-          taskIds: (state.entities[pid] as Project).taskIds.filter(
-            (taskId) => !taskIdsToMoveToArchive.includes(taskId),
-          ),
-          backlogTaskIds: (state.entities[pid] as Project).backlogTaskIds.filter(
-            (taskId) => !taskIdsToMoveToArchive.includes(taskId),
-          ),
-        },
-      }));
-      return projectAdapter.updateMany(updates, state);
-    }
-
-    case TaskActionTypes.RestoreTask: {
-      const { task } = (action as RestoreTask).payload;
-      if (!task.projectId) {
-        return state;
-      }
-
-      return projectAdapter.updateOne(
-        {
-          id: task.projectId,
-          changes: {
-            taskIds: [...(state.entities[task.projectId] as Project).taskIds, task.id],
-          },
-        },
-        state,
-      );
-    }
-
-    case TaskActionTypes.MoveToOtherProject: {
-      const { task, targetProjectId } = (action as MoveToOtherProject).payload;
-      const srcProjectId = task.projectId;
-      const updates: Update<Project>[] = [];
-
-      if (srcProjectId === targetProjectId) {
-        devError('Moving task from same project to same project.');
-        return state;
-      }
-
-      if (srcProjectId) {
-        updates.push({
-          id: srcProjectId,
-          changes: {
-            taskIds: (state.entities[srcProjectId] as Project).taskIds.filter(
-              (id) => id !== task.id,
-            ),
-            backlogTaskIds: (
-              state.entities[srcProjectId] as Project
-            ).backlogTaskIds.filter((id) => id !== task.id),
-          },
-        });
-      }
-      if (targetProjectId) {
-        updates.push({
-          id: targetProjectId,
-          changes: {
-            taskIds: [...(state.entities[targetProjectId] as Project).taskIds, task.id],
-          },
-        });
-      }
-
-      return projectAdapter.updateMany(updates, state);
-    }
-
-    default: {
-      return _reducer(state, action);
-    }
-  }
-};

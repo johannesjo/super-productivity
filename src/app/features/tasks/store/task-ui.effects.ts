@@ -1,6 +1,12 @@
 import { Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
-import { AddTask, DeleteTask, TaskActionTypes, UpdateTask } from './task.actions';
+import {
+  addTask,
+  addTimeSpent,
+  deleteTask,
+  undoDeleteTask,
+  updateTask,
+} from './task.actions';
 import { Action, select, Store } from '@ngrx/store';
 import { filter, tap, throttleTime, withLatestFrom } from 'rxjs/operators';
 import { selectCurrentTask } from './task.selectors';
@@ -22,12 +28,12 @@ export class TaskUiEffects {
   taskCreatedSnack$: any = createEffect(
     () =>
       this._actions$.pipe(
-        ofType(TaskActionTypes.AddTask),
-        tap((a: AddTask) =>
+        ofType(addTask),
+        tap(({ task }) =>
           this._snackService.open({
             type: 'SUCCESS',
             translateParams: {
-              title: truncate(a.payload.task.title),
+              title: truncate(task.title),
             },
             msg: T.F.TASK.S.TASK_CREATED,
             ico: 'add',
@@ -40,17 +46,16 @@ export class TaskUiEffects {
   snackDelete$: any = createEffect(
     () =>
       this._actions$.pipe(
-        ofType(TaskActionTypes.DeleteTask),
-        tap((actionIN: DeleteTask) => {
-          const action = actionIN as DeleteTask;
+        ofType(deleteTask),
+        tap(({ task }) => {
           this._snackService.open({
             translateParams: {
-              title: truncate(action.payload.task.title),
+              title: truncate(task.title),
             },
             msg: T.F.TASK.S.DELETED,
             config: { duration: 5000 },
             actionStr: T.G.UNDO,
-            actionId: TaskActionTypes.UndoDeleteTask,
+            actionId: undoDeleteTask.type,
           });
         }),
       ),
@@ -60,7 +65,7 @@ export class TaskUiEffects {
   timeEstimateExceeded$: any = createEffect(
     () =>
       this._actions$.pipe(
-        ofType(TaskActionTypes.AddTimeSpent),
+        ofType(addTimeSpent),
         // refresh every 10 minute max
         throttleTime(10 * 60 * 1000),
         withLatestFrom(
@@ -75,14 +80,8 @@ export class TaskUiEffects {
   taskDoneSound$: any = createEffect(
     () =>
       this._actions$.pipe(
-        ofType(TaskActionTypes.UpdateTask),
-        filter(
-          ({
-            payload: {
-              task: { changes },
-            },
-          }: UpdateTask) => !!changes.isDone,
-        ),
+        ofType(updateTask),
+        filter(({ task: { changes } }) => !!changes.isDone),
         withLatestFrom(
           this._workContextService.flatDoneTodayNr$,
           this._globalConfigService.sound$,

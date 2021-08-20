@@ -40,17 +40,12 @@ import { truncate } from '../../../../../util/truncate';
 import { WorkContextService } from '../../../../work-context/work-context.service';
 import { JiraCfg, JiraTransitionOption } from '../jira.model';
 import { IssueEffectHelperService } from '../../../issue-effect-helper.service';
-import {
-  SetCurrentTask,
-  TaskActionTypes,
-  UpdateTask,
-} from '../../../../tasks/store/task.actions';
+import { setCurrentTask, updateTask } from '../../../../tasks/store/task.actions';
 import { DialogJiraAddWorklogComponent } from '../jira-view-components/dialog-jira-add-worklog/dialog-jira-add-worklog.component';
 import {
   selectCurrentTaskParentOrCurrent,
   selectTaskEntities,
 } from '../../../../tasks/store/task.selectors';
-import { Dictionary } from '@ngrx/entity';
 import { HANDLED_ERROR_PROP_STR } from '../../../../../app.constants';
 import { DialogConfirmComponent } from '../../../../../ui/dialog-confirm/dialog-confirm.component';
 import { setActiveWorkContext } from '../../../../work-context/store/work-context.actions';
@@ -64,8 +59,8 @@ export class JiraIssueEffects {
   addWorklog$: any = createEffect(
     () =>
       this._actions$.pipe(
-        ofType(TaskActionTypes.UpdateTask),
-        filter((act: UpdateTask) => act.payload.task.changes.isDone === true),
+        ofType(updateTask),
+        filter(({ task }) => task.changes.isDone === true),
         withLatestFrom(
           this._workContextService.isActiveWorkContextProject$,
           this._workContextService.activeWorkContextId$,
@@ -82,40 +77,31 @@ export class JiraIssueEffects {
         ),
         filter(({ jiraCfg }) => isJiraEnabled(jiraCfg)),
         withLatestFrom(this._store$.pipe(select(selectTaskEntities))),
-        tap(
-          ([{ act, projectId, jiraCfg }, taskEntities]: [
-            {
-              act: UpdateTask;
-              projectId: string | null;
-              jiraCfg: JiraCfg;
-            },
-            Dictionary<Task>,
-          ]) => {
-            const taskId = act.payload.task.id;
-            const task = taskEntities[taskId];
-            if (!task) {
-              throw new Error('No task');
-            }
+        tap(([{ act, projectId, jiraCfg }, taskEntities]) => {
+          const taskId = act.task.id;
+          const task = taskEntities[taskId];
+          if (!task) {
+            throw new Error('No task');
+          }
 
-            if (jiraCfg.isAddWorklogOnSubTaskDone && jiraCfg.isWorklogEnabled) {
-              if (
-                task &&
-                task.issueType === JIRA_TYPE &&
-                task.issueId &&
-                !(jiraCfg.isAddWorklogOnSubTaskDone && task.subTaskIds.length > 0)
-              ) {
-                this._openWorklogDialog(task, task.issueId, jiraCfg);
-              } else if (task.parentId) {
-                const parent = taskEntities[task.parentId];
-                if (parent && parent.issueId && parent.issueType === JIRA_TYPE) {
-                  // NOTE we're still sending the sub task for the meta data we need
-                  this._openWorklogDialog(task, parent.issueId, jiraCfg);
-                }
+          if (jiraCfg.isAddWorklogOnSubTaskDone && jiraCfg.isWorklogEnabled) {
+            if (
+              task &&
+              task.issueType === JIRA_TYPE &&
+              task.issueId &&
+              !(jiraCfg.isAddWorklogOnSubTaskDone && task.subTaskIds.length > 0)
+            ) {
+              this._openWorklogDialog(task, task.issueId, jiraCfg);
+            } else if (task.parentId) {
+              const parent = taskEntities[task.parentId];
+              if (parent && parent.issueId && parent.issueType === JIRA_TYPE) {
+                // NOTE we're still sending the sub task for the meta data we need
+                this._openWorklogDialog(task, parent.issueId, jiraCfg);
               }
             }
-            return undefined;
-          },
-        ),
+          }
+          return undefined;
+        }),
       ),
     { dispatch: false },
   );
@@ -134,9 +120,10 @@ export class JiraIssueEffects {
   checkForReassignment: any = createEffect(
     () =>
       this._actions$.pipe(
-        ofType(TaskActionTypes.SetCurrentTask),
+        ofType(setCurrentTask),
         // only if a task is started
-        filter((a: SetCurrentTask) => !!a.payload),
+        // TODO check this
+        filter((a) => !!a.payload),
         withLatestFrom(this._store$.pipe(select(selectCurrentTaskParentOrCurrent))),
         filter(
           ([, currentTaskOrParent]) =>
@@ -219,9 +206,10 @@ export class JiraIssueEffects {
   checkForStartTransition$: Observable<any> = createEffect(
     () =>
       this._actions$.pipe(
-        ofType(TaskActionTypes.SetCurrentTask),
+        ofType(setCurrentTask),
         // only if a task is started
-        filter((a: SetCurrentTask) => !!a.payload),
+        // TODO check this
+        filter((a) => !!a.payload),
         withLatestFrom(this._store$.pipe(select(selectCurrentTaskParentOrCurrent))),
         filter(
           ([, currentTaskOrParent]) =>
@@ -253,11 +241,10 @@ export class JiraIssueEffects {
   checkForDoneTransition$: Observable<any> = createEffect(
     () =>
       this._actions$.pipe(
-        ofType(TaskActionTypes.UpdateTask),
-        filter((a: UpdateTask): boolean => !!a.payload.task.changes.isDone),
-        concatMap((a: UpdateTask) =>
-          this._taskService.getByIdOnce$(a.payload.task.id as string),
-        ),
+        ofType(updateTask),
+        filter(({ task }): boolean => !!task.changes.isDone),
+        // NOTE: as this is only a partial object we need to get the full one
+        concatMap(({ task }) => this._taskService.getByIdOnce$(task.id as string)),
         filter((task: Task) => task && task.issueType === JIRA_TYPE),
         concatMap((task: Task) => {
           if (!task.projectId) {
