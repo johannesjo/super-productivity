@@ -1,13 +1,5 @@
 import * as shortid from 'shortid';
-import {
-  delay,
-  filter,
-  first,
-  map,
-  switchMap,
-  take,
-  withLatestFrom,
-} from 'rxjs/operators';
+import { first, map, take, withLatestFrom } from 'rxjs/operators';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import {
@@ -555,61 +547,6 @@ export class TaskService {
     this._store.dispatch(
       new RoundTimeSpentForDay({ day, taskIds, roundTo, isRoundUp, projectId }),
     );
-  }
-
-  startTaskFromOtherContext$(
-    taskId: string,
-    workContextType: WorkContextType,
-    workContextId: string,
-  ): Observable<any> {
-    const base = workContextType === WorkContextType.TAG ? 'tag' : 'project';
-    this._router.navigate([`/${base}/${workContextId}/tasks`]);
-    // NOTE: route is the only mechanism to trigger this
-    // this._workContextService._setActiveContext(workContextId, workContextType);
-
-    const contextChanged$ = this._workContextService.activeWorkContextId$.pipe(
-      filter((id) => id === workContextId),
-      // wait for actual data to be loaded
-      switchMap(() => this._workContextService.activeWorkContext$),
-      // dirty dirty fix
-      delay(50),
-      first(),
-    );
-    const task$ = contextChanged$.pipe(
-      switchMap(() => this.getByIdOnce$(taskId)),
-      take(1),
-    );
-
-    if (workContextType === WorkContextType.PROJECT) {
-      task$.subscribe((task) => {
-        if (!task) {
-          console.log({
-            taskId,
-            workContextType,
-            workContextId,
-            activeWCId: this._workContextService.activeWorkContextId,
-          });
-          throw new Error('Startable task not found');
-        }
-
-        if (task.projectId) {
-          if (task.parentId) {
-            this._projectService.moveTaskToTodayList(task.parentId, task.projectId, true);
-          } else {
-            this._projectService.moveTaskToTodayList(task.id, task.projectId, true);
-          }
-        }
-        this.setCurrentId(task.id);
-      });
-      return task$;
-    } else if (workContextType === WorkContextType.TAG) {
-      task$.subscribe((task) => {
-        this.setCurrentId(task.id);
-      });
-    } else {
-      throw new Error('Äh no');
-    }
-    return task$;
   }
 
   // REMINDER

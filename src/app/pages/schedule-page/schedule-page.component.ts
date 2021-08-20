@@ -8,7 +8,6 @@ import { Task, TaskWithReminderData } from '../../features/tasks/task.model';
 import { DialogAddTaskReminderComponent } from '../../features/tasks/dialog-add-task-reminder/dialog-add-task-reminder.component';
 import { standardListAnimation } from '../../ui/animations/standard-list.ani';
 import { Router } from '@angular/router';
-import { take } from 'rxjs/operators';
 import { AddTaskReminderInterface } from '../../features/tasks/dialog-add-task-reminder/add-task-reminder-interface';
 import { WorkContextService } from '../../features/work-context/work-context.service';
 import { TODAY_TAG } from '../../features/tag/tag.const';
@@ -37,13 +36,7 @@ export class SchedulePageComponent {
   ) {}
 
   startTask(task: TaskWithReminderData): void {
-    if (
-      task.reminderData.workContextId === this._workContextService.activeWorkContextId
-    ) {
-      this._startTaskFronCurrentProject(task);
-    } else {
-      this._startTaskFromOtherProject(task);
-    }
+    this._startTask(task);
   }
 
   toggleToday(task: TaskWithReminderData | Task): void {
@@ -82,7 +75,7 @@ export class SchedulePageComponent {
     return task.id;
   }
 
-  private _startTaskFronCurrentProject(task: TaskWithReminderData): void {
+  private _startTask(task: TaskWithReminderData): void {
     // NOTE: reminder needs to be deleted first to avoid problems with "Missing reminder" devError
     if (!!task.reminderId) {
       this._taskService.unScheduleTask(task.id, task.reminderId);
@@ -96,18 +89,5 @@ export class SchedulePageComponent {
     }
     this._taskService.setCurrentId(task.id);
     this._router.navigate(['/active/tasks']);
-  }
-
-  private _startTaskFromOtherProject(task: TaskWithReminderData): void {
-    this._taskService
-      .startTaskFromOtherContext$(
-        task.id,
-        task.reminderData.workContextType,
-        task.reminderData.workContextId,
-      )
-      .pipe(take(1))
-      .subscribe(() => {
-        this._router.navigate(['/active/tasks']);
-      });
   }
 }
