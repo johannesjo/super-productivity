@@ -12,7 +12,7 @@ export const initialMetricState: MetricState = metricAdapter.getInitialState({
   // additional entity state properties
 });
 
-export const metricReducer = createReducer(
+export const metricReducer = createReducer<MetricState>(
   initialMetricState,
 
   on(loadAllData, (state, { appDataComplete }) =>

@@ -1,40 +1,30 @@
-import { Action } from '@ngrx/store';
+import { createAction, props } from '@ngrx/store';
 import { Update } from '@ngrx/entity';
 import { Obstruction } from '../obstruction.model';
 
-export enum ObstructionActionTypes {
+enum ObstructionActionTypes {
   'AddObstruction' = '[Obstruction] Add Obstruction',
   'UpdateObstruction' = '[Obstruction] Update Obstruction',
   'DeleteObstruction' = '[Obstruction] Delete Obstruction',
   'DeleteObstructions' = '[Obstruction] Delete multiple Obstructions',
 }
 
-export class AddObstruction implements Action {
-  readonly type: string = ObstructionActionTypes.AddObstruction;
+export const addObstruction = createAction(
+  ObstructionActionTypes.AddObstruction,
+  props<{ obstruction: Obstruction }>(),
+);
 
-  constructor(public payload: { obstruction: Obstruction }) {}
-}
+export const updateObstruction = createAction(
+  ObstructionActionTypes.UpdateObstruction,
+  props<{ obstruction: Update<Obstruction> }>(),
+);
 
-export class UpdateObstruction implements Action {
-  readonly type: string = ObstructionActionTypes.UpdateObstruction;
+export const deleteObstruction = createAction(
+  ObstructionActionTypes.DeleteObstruction,
+  props<{ id: string }>(),
+);
 
-  constructor(public payload: { obstruction: Update<Obstruction> }) {}
-}
-
-export class DeleteObstruction implements Action {
-  readonly type: string = ObstructionActionTypes.DeleteObstruction;
-
-  constructor(public payload: { id: string }) {}
-}
-
-export class DeleteObstructions implements Action {
-  readonly type: string = ObstructionActionTypes.DeleteObstructions;
-
-  constructor(public payload: { ids: string[] }) {}
-}
-
-export type ObstructionActions =
-  | AddObstruction
-  | UpdateObstruction
-  | DeleteObstruction
-  | DeleteObstructions;
+export const deleteObstructions = createAction(
+  ObstructionActionTypes.DeleteObstructions,
+  props<{ ids: string[] }>(),
+);

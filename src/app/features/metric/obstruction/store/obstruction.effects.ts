@@ -2,7 +2,12 @@ import { Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { first, map, switchMap, tap, withLatestFrom } from 'rxjs/operators';
 import { select, Store } from '@ngrx/store';
-import { DeleteObstructions, ObstructionActionTypes } from './obstruction.actions';
+import {
+  addObstruction,
+  deleteObstruction,
+  deleteObstructions,
+  updateObstruction,
+} from './obstruction.actions';
 import { selectObstructionFeatureState } from './obstruction.reducer';
 import { PersistenceService } from '../../../../core/persistence/persistence.service';
 import { addMetric, updateMetric, upsertMetric } from '../../store/metric.actions';
@@ -14,11 +19,7 @@ export class ObstructionEffects {
   updateObstructions$: any = createEffect(
     () =>
       this._actions$.pipe(
-        ofType(
-          ObstructionActionTypes.AddObstruction,
-          ObstructionActionTypes.UpdateObstruction,
-          ObstructionActionTypes.DeleteObstruction,
-        ),
+        ofType(addObstruction, updateObstruction, deleteObstruction),
         switchMap(() =>
           this._store$.pipe(select(selectObstructionFeatureState)).pipe(first()),
         ),
@@ -31,7 +32,7 @@ export class ObstructionEffects {
     this._actions$.pipe(
       ofType(addMetric, upsertMetric, updateMetric),
       withLatestFrom(this._store$.pipe(select(selectUnusedObstructionIds))),
-      map(([a, unusedIds]) => new DeleteObstructions({ ids: unusedIds })),
+      map(([a, unusedIds]) => deleteObstructions({ ids: unusedIds })),
     ),
   );
 

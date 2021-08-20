@@ -2,10 +2,10 @@ import { Injectable } from '@angular/core';
 import { select, Store } from '@ngrx/store';
 import { selectAllObstructions } from './store/obstruction.reducer';
 import {
-  AddObstruction,
-  DeleteObstruction,
-  DeleteObstructions,
-  UpdateObstruction,
+  addObstruction,
+  deleteObstruction,
+  deleteObstructions,
+  updateObstruction,
 } from './store/obstruction.actions';
 import { Observable } from 'rxjs';
 import { Obstruction, ObstructionState } from './obstruction.model';
@@ -24,7 +24,7 @@ export class ObstructionService {
   addObstruction(title: string): string {
     const id = shortid();
     this._store$.dispatch(
-      new AddObstruction({
+      addObstruction({
         obstruction: {
           title,
           id,
@@ -35,14 +35,14 @@ export class ObstructionService {
   }
 
   deleteObstruction(id: string): void {
-    this._store$.dispatch(new DeleteObstruction({ id }));
+    this._store$.dispatch(deleteObstruction({ id }));
   }
 
   deleteObstructions(ids: string[]): void {
-    this._store$.dispatch(new DeleteObstructions({ ids }));
+    this._store$.dispatch(deleteObstructions({ ids }));
   }
 
   updateObstruction(id: string, changes: Partial<Obstruction>): void {
-    this._store$.dispatch(new UpdateObstruction({ obstruction: { id, changes } }));
+    this._store$.dispatch(updateObstruction({ obstruction: { id, changes } }));
   }
 }
