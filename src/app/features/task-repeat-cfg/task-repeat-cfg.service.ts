@@ -36,8 +36,7 @@ import { isValidSplitTime } from '../../util/is-valid-split-time';
 import { getDateTimeFromClockString } from '../../util/get-date-time-from-clock-string';
 import { isSameDay } from '../../util/is-same-day';
 import { remindOptionToMilliseconds } from '../tasks/util/remind-option-to-milliseconds';
-import { Update } from '@ngrx/entity/src/models';
-import { TypedAction } from '@ngrx/store/src/models';
+import { Action } from '@ngrx/store/src/models';
 
 @Injectable({
   providedIn: 'root',
@@ -163,16 +162,7 @@ export class TaskRepeatCfgService {
     currentTaskId: string | null,
     targetDayDate: number = Date.now(),
   ): // NOTE: updateTaskRepeatCfg missing as there is no way to declare it as action type
-  Promise<
-    (
-      | UpdateTask
-      | AddTask
-      | ScheduleTask
-      | ({
-          taskRepeatCfg: Update<Readonly<TaskRepeatCfgCopy>>;
-        } & TypedAction<'[TaskRepeatCfg] Update TaskRepeatCfg'>)
-    )[]
-  > {
+  Promise<Action[]> {
     // NOTE: there might be multiple configs in case something went wrong
     // we want to move all of them to the archive
     const existingTaskInstances: Task[] = await this._taskService
@@ -214,13 +204,7 @@ export class TaskRepeatCfgService {
 
     const { task, isAddToBottom } = this._getTaskRepeatTemplate(taskRepeatCfg);
 
-    const createNewActions: (
-      | AddTask
-      | ScheduleTask
-      | ({
-          taskRepeatCfg: Update<Readonly<TaskRepeatCfgCopy>>;
-        } & TypedAction<'[TaskRepeatCfg] Update TaskRepeatCfg'>)
-    )[] = [
+    const createNewActions: Action[] = [
       new AddTask({
         task,
         workContextType: this._workContextService
