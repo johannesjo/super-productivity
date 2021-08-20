@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Actions, Effect, ofType } from '@ngrx/effects';
+import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { AddTask, DeleteTask, TaskActionTypes, UpdateTask } from './task.actions';
 import { Action, select, Store } from '@ngrx/store';
 import { filter, tap, throttleTime, withLatestFrom } from 'rxjs/operators';
@@ -19,66 +19,78 @@ import { playDoneSound } from '../util/play-done-sound';
 
 @Injectable()
 export class TaskUiEffects {
-  @Effect({ dispatch: false })
-  taskCreatedSnack$: any = this._actions$.pipe(
-    ofType(TaskActionTypes.AddTask),
-    tap((a: AddTask) =>
-      this._snackService.open({
-        type: 'SUCCESS',
-        translateParams: {
-          title: truncate(a.payload.task.title),
-        },
-        msg: T.F.TASK.S.TASK_CREATED,
-        ico: 'add',
-      }),
-    ),
+  taskCreatedSnack$: any = createEffect(
+    () =>
+      this._actions$.pipe(
+        ofType(TaskActionTypes.AddTask),
+        tap((a: AddTask) =>
+          this._snackService.open({
+            type: 'SUCCESS',
+            translateParams: {
+              title: truncate(a.payload.task.title),
+            },
+            msg: T.F.TASK.S.TASK_CREATED,
+            ico: 'add',
+          }),
+        ),
+      ),
+    { dispatch: false },
   );
 
-  @Effect({ dispatch: false })
-  snackDelete$: any = this._actions$.pipe(
-    ofType(TaskActionTypes.DeleteTask),
-    tap((actionIN: DeleteTask) => {
-      const action = actionIN as DeleteTask;
-      this._snackService.open({
-        translateParams: {
-          title: truncate(action.payload.task.title),
-        },
-        msg: T.F.TASK.S.DELETED,
-        config: { duration: 5000 },
-        actionStr: T.G.UNDO,
-        actionId: TaskActionTypes.UndoDeleteTask,
-      });
-    }),
+  snackDelete$: any = createEffect(
+    () =>
+      this._actions$.pipe(
+        ofType(TaskActionTypes.DeleteTask),
+        tap((actionIN: DeleteTask) => {
+          const action = actionIN as DeleteTask;
+          this._snackService.open({
+            translateParams: {
+              title: truncate(action.payload.task.title),
+            },
+            msg: T.F.TASK.S.DELETED,
+            config: { duration: 5000 },
+            actionStr: T.G.UNDO,
+            actionId: TaskActionTypes.UndoDeleteTask,
+          });
+        }),
+      ),
+    { dispatch: false },
   );
 
-  @Effect({ dispatch: false })
-  timeEstimateExceeded$: any = this._actions$.pipe(
-    ofType(TaskActionTypes.AddTimeSpent),
-    // refresh every 10 minute max
-    throttleTime(10 * 60 * 1000),
-    withLatestFrom(
-      this._store$.pipe(select(selectCurrentTask)),
-      this._store$.pipe(select(selectConfigFeatureState)),
-    ),
-    tap((args) => this._notifyAboutTimeEstimateExceeded(args)),
+  timeEstimateExceeded$: any = createEffect(
+    () =>
+      this._actions$.pipe(
+        ofType(TaskActionTypes.AddTimeSpent),
+        // refresh every 10 minute max
+        throttleTime(10 * 60 * 1000),
+        withLatestFrom(
+          this._store$.pipe(select(selectCurrentTask)),
+          this._store$.pipe(select(selectConfigFeatureState)),
+        ),
+        tap((args) => this._notifyAboutTimeEstimateExceeded(args)),
+      ),
+    { dispatch: false },
   );
 
-  @Effect({ dispatch: false })
-  taskDoneSound$: any = this._actions$.pipe(
-    ofType(TaskActionTypes.UpdateTask),
-    filter(
-      ({
-        payload: {
-          task: { changes },
-        },
-      }: UpdateTask) => !!changes.isDone,
-    ),
-    withLatestFrom(
-      this._workContextService.flatDoneTodayNr$,
-      this._globalConfigService.sound$,
-    ),
-    filter(([, , soundCfg]) => soundCfg.isPlayDoneSound),
-    tap(([, doneToday, soundCfg]) => playDoneSound(soundCfg, doneToday)),
+  taskDoneSound$: any = createEffect(
+    () =>
+      this._actions$.pipe(
+        ofType(TaskActionTypes.UpdateTask),
+        filter(
+          ({
+            payload: {
+              task: { changes },
+            },
+          }: UpdateTask) => !!changes.isDone,
+        ),
+        withLatestFrom(
+          this._workContextService.flatDoneTodayNr$,
+          this._globalConfigService.sound$,
+        ),
+        filter(([, , soundCfg]) => soundCfg.isPlayDoneSound),
+        tap(([, doneToday, soundCfg]) => playDoneSound(soundCfg, doneToday)),
+      ),
+    { dispatch: false },
   );
 
   constructor(

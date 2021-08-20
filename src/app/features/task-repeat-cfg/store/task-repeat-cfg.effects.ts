@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Actions, Effect, ofType } from '@ngrx/effects';
+import { Actions, createEffect, ofType } from '@ngrx/effects';
 import {
   concatMap,
   delay,
@@ -33,16 +33,20 @@ import { SyncProviderService } from '../../../imex/sync/sync-provider.service';
 
 @Injectable()
 export class TaskRepeatCfgEffects {
-  @Effect({ dispatch: false }) updateTaskRepeatCfgs$: any = this._actions$.pipe(
-    ofType(
-      addTaskRepeatCfgToTask,
-      updateTaskRepeatCfg,
-      upsertTaskRepeatCfg,
-      deleteTaskRepeatCfg,
-      deleteTaskRepeatCfgs,
-    ),
-    withLatestFrom(this._store$.pipe(select(selectTaskRepeatCfgFeatureState))),
-    tap(this._saveToLs.bind(this)),
+  updateTaskRepeatCfgs$: any = createEffect(
+    () =>
+      this._actions$.pipe(
+        ofType(
+          addTaskRepeatCfgToTask,
+          updateTaskRepeatCfg,
+          upsertTaskRepeatCfg,
+          deleteTaskRepeatCfg,
+          deleteTaskRepeatCfgs,
+        ),
+        withLatestFrom(this._store$.pipe(select(selectTaskRepeatCfgFeatureState))),
+        tap(this._saveToLs.bind(this)),
+      ),
+    { dispatch: false },
   );
 
   private triggerRepeatableTaskCreation$ = merge(
@@ -56,59 +60,66 @@ export class TaskRepeatCfgEffects {
     delay(1000),
   );
 
-  @Effect() createRepeatableTasks: any = this.triggerRepeatableTaskCreation$.pipe(
-    concatMap(
-      () =>
-        this._taskRepeatCfgService
-          .getRepeatTableTasksDueForDay$(Date.now())
-          .pipe(first()),
-      // ===> taskRepeatCfgs scheduled for today and not yet created already
-    ),
-    filter((taskRepeatCfgs) => taskRepeatCfgs && !!taskRepeatCfgs.length),
-    withLatestFrom(this._taskService.currentTaskId$),
+  createRepeatableTasks: any = createEffect(() =>
+    this.triggerRepeatableTaskCreation$.pipe(
+      concatMap(
+        () =>
+          this._taskRepeatCfgService
+            .getRepeatTableTasksDueForDay$(Date.now())
+            .pipe(first()),
+        // ===> taskRepeatCfgs scheduled for today and not yet created already
+      ),
+      filter((taskRepeatCfgs) => taskRepeatCfgs && !!taskRepeatCfgs.length),
+      withLatestFrom(this._taskService.currentTaskId$),
 
-    // existing tasks with sub tasks are loaded, because need to move them to the archive
-    mergeMap(([taskRepeatCfgs, currentTaskId]) =>
-      from(taskRepeatCfgs).pipe(
-        mergeMap((taskRepeatCfg: TaskRepeatCfg) =>
-          this._taskRepeatCfgService.getActionsForTaskRepeatCfg(
-            taskRepeatCfg,
-            currentTaskId,
-            Date.now(),
+      // existing tasks with sub tasks are loaded, because need to move them to the archive
+      mergeMap(([taskRepeatCfgs, currentTaskId]) =>
+        from(taskRepeatCfgs).pipe(
+          mergeMap((taskRepeatCfg: TaskRepeatCfg) =>
+            this._taskRepeatCfgService.getActionsForTaskRepeatCfg(
+              taskRepeatCfg,
+              currentTaskId,
+              Date.now(),
+            ),
           ),
+          tap((actionsForRepeatCfg) =>
+            console.log('actionsForRepeatCfg', actionsForRepeatCfg),
+          ),
+          concatMap((actionsForRepeatCfg) => from(actionsForRepeatCfg)),
         ),
-        tap((actionsForRepeatCfg) =>
-          console.log('actionsForRepeatCfg', actionsForRepeatCfg),
-        ),
-        concatMap((actionsForRepeatCfg) => from(actionsForRepeatCfg)),
       ),
-    ),
-    tap((v) => console.log('IMP Create Repeatable Tasks', v)),
-  );
-
-  @Effect() removeConfigIdFromTaskStateTasks$: any = this._actions$.pipe(
-    ofType(deleteTaskRepeatCfg),
-    concatMap(({ id }) => this._taskService.getTasksByRepeatCfgId$(id).pipe(take(1))),
-    filter((tasks) => tasks && !!tasks.length),
-    mergeMap((tasks: Task[]) =>
-      tasks.map(
-        (task) =>
-          new UpdateTask({
-            task: {
-              id: task.id,
-              changes: { repeatCfgId: null },
-            },
-          }),
-      ),
+      tap((v) => console.log('IMP Create Repeatable Tasks', v)),
     ),
   );
 
-  @Effect({ dispatch: false })
-  removeConfigIdFromTaskArchiveTasks$: any = this._actions$.pipe(
-    ofType(deleteTaskRepeatCfg),
-    tap(({ id }) => {
-      this._removeRepeatCfgFromArchiveTasks(id);
-    }),
+  removeConfigIdFromTaskStateTasks$: any = createEffect(() =>
+    this._actions$.pipe(
+      ofType(deleteTaskRepeatCfg),
+      concatMap(({ id }) => this._taskService.getTasksByRepeatCfgId$(id).pipe(take(1))),
+      filter((tasks) => tasks && !!tasks.length),
+      mergeMap((tasks: Task[]) =>
+        tasks.map(
+          (task) =>
+            new UpdateTask({
+              task: {
+                id: task.id,
+                changes: { repeatCfgId: null },
+              },
+            }),
+        ),
+      ),
+    ),
+  );
+
+  removeConfigIdFromTaskArchiveTasks$: any = createEffect(
+    () =>
+      this._actions$.pipe(
+        ofType(deleteTaskRepeatCfg),
+        tap(({ id }) => {
+          this._removeRepeatCfgFromArchiveTasks(id);
+        }),
+      ),
+    { dispatch: false },
   );
 
   constructor(

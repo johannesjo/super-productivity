@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Effect } from '@ngrx/effects';
+import { createEffect } from '@ngrx/effects';
 import { GitlabApiService } from '../gitlab-api/gitlab-api.service';
 import { SnackService } from '../../../../../core/snack/snack.service';
 import { TaskService } from '../../../../tasks/task.service';
@@ -62,27 +62,36 @@ export class GitlabIssueEffects {
     GITLAB_POLL_INTERVAL,
   );
 
-  @Effect({ dispatch: false })
-  pollNewIssuesToBacklog$: Observable<any> = this._issueEffectHelperService.pollToBacklogTriggerToProjectId$.pipe(
-    switchMap((pId) =>
-      this._projectService.getGitlabCfgForProject$(pId).pipe(
-        first(),
-        filter((gitlabCfg) => isGitlabEnabled(gitlabCfg) && gitlabCfg.isAutoAddToBacklog),
-        switchMap((gitlabCfg) =>
-          this._pollTimer$.pipe(
-            // NOTE: required otherwise timer stays alive for filtered actions
-            takeUntil(this._issueEffectHelperService.pollToBacklogActions$),
-            tap(() => console.log('GITLAB!_POLL_BACKLOG_CHANGES')),
-            tap(() => this._importNewIssuesToBacklog(pId, gitlabCfg)),
+  pollNewIssuesToBacklog$: Observable<any> = createEffect(
+    () =>
+      this._issueEffectHelperService.pollToBacklogTriggerToProjectId$.pipe(
+        switchMap((pId) =>
+          this._projectService.getGitlabCfgForProject$(pId).pipe(
+            first(),
+            filter(
+              (gitlabCfg) => isGitlabEnabled(gitlabCfg) && gitlabCfg.isAutoAddToBacklog,
+            ),
+            switchMap((gitlabCfg) =>
+              this._pollTimer$.pipe(
+                // NOTE: required otherwise timer stays alive for filtered actions
+                takeUntil(this._issueEffectHelperService.pollToBacklogActions$),
+                tap(() => console.log('GITLAB!_POLL_BACKLOG_CHANGES')),
+                tap(() => this._importNewIssuesToBacklog(pId, gitlabCfg)),
+              ),
+            ),
           ),
         ),
       ),
-    ),
+    { dispatch: false },
   );
-  @Effect({ dispatch: false })
-  pollIssueChangesForCurrentContext$: Observable<any> = this._issueEffectHelperService.pollIssueTaskUpdatesActions$.pipe(
-    switchMap(() => this._pollTimer$),
-    switchMap(() => this._updateIssuesForCurrentContext$),
+
+  pollIssueChangesForCurrentContext$: Observable<any> = createEffect(
+    () =>
+      this._issueEffectHelperService.pollIssueTaskUpdatesActions$.pipe(
+        switchMap(() => this._pollTimer$),
+        switchMap(() => this._updateIssuesForCurrentContext$),
+      ),
+    { dispatch: false },
   );
 
   constructor(

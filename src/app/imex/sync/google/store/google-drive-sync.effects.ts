@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { EMPTY, Observable, of, throwError } from 'rxjs';
 import { catchError, concatMap, filter, map, switchMap, tap } from 'rxjs/operators';
-import { Actions, Effect, ofType } from '@ngrx/effects';
+import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { SyncConfig } from '../../../../features/config/global-config.model';
 import { SnackService } from '../../../../core/snack/snack.service';
 import { T } from '../../../../t.const';
@@ -15,128 +15,130 @@ import { updateGlobalConfigSection } from '../../../../features/config/store/glo
 
 @Injectable()
 export class GoogleDriveSyncEffects {
-  @Effect() createSyncFile$: any = this._actions$.pipe(
-    ofType(updateGlobalConfigSection),
-    filter(({ sectionKey }): boolean => sectionKey === 'sync'),
-    filter(({ sectionCfg }) => {
-      const syncConfig: SyncConfig = sectionCfg as SyncConfig;
-      return (
-        syncConfig.isEnabled &&
-        syncConfig.syncProvider === SyncProvider.GoogleDrive &&
-        (syncConfig.googleDriveSync.syncFileName !==
-          syncConfig.googleDriveSync._syncFileNameForBackupDocId ||
-          !syncConfig.googleDriveSync._backupDocId) &&
-        syncConfig.googleDriveSync.syncFileName.length > 0
-      );
-    }),
-    switchMap(
-      ({
-        sectionCfg,
-      }): Observable<
-        | {
-            syncFileName: string;
-            _backupDocId: string;
-            _syncFileNameForBackupDocId: string;
-            sync: SyncConfig;
-          }
-        | never
-      > => {
+  createSyncFile$: any = createEffect(() =>
+    this._actions$.pipe(
+      ofType(updateGlobalConfigSection),
+      filter(({ sectionKey }): boolean => sectionKey === 'sync'),
+      filter(({ sectionCfg }) => {
         const syncConfig: SyncConfig = sectionCfg as SyncConfig;
-        const newFileName =
-          syncConfig.googleDriveSync.syncFileName || DEFAULT_SYNC_FILE_NAME;
-        return this._googleApiService.findFile$(newFileName).pipe(
-          concatMap((res: any): any => {
-            const filesFound = res.items;
-            if (filesFound.length && filesFound.length > 1) {
+        return (
+          syncConfig.isEnabled &&
+          syncConfig.syncProvider === SyncProvider.GoogleDrive &&
+          (syncConfig.googleDriveSync.syncFileName !==
+            syncConfig.googleDriveSync._syncFileNameForBackupDocId ||
+            !syncConfig.googleDriveSync._backupDocId) &&
+          syncConfig.googleDriveSync.syncFileName.length > 0
+        );
+      }),
+      switchMap(
+        ({
+          sectionCfg,
+        }): Observable<
+          | {
+              syncFileName: string;
+              _backupDocId: string;
+              _syncFileNameForBackupDocId: string;
+              sync: SyncConfig;
+            }
+          | never
+        > => {
+          const syncConfig: SyncConfig = sectionCfg as SyncConfig;
+          const newFileName =
+            syncConfig.googleDriveSync.syncFileName || DEFAULT_SYNC_FILE_NAME;
+          return this._googleApiService.findFile$(newFileName).pipe(
+            concatMap((res: any): any => {
+              const filesFound = res.items;
+              if (filesFound.length && filesFound.length > 1) {
+                this._snackService.open({
+                  type: 'ERROR',
+                  msg: T.F.GOOGLE.S.MULTIPLE_SYNC_FILES_WITH_SAME_NAME,
+                  translateParams: { newFileName },
+                });
+                return EMPTY;
+              } else if (!filesFound || filesFound.length === 0) {
+                return this._confirmSaveNewFile$(newFileName).pipe(
+                  concatMap((isSave) => {
+                    return !isSave
+                      ? EMPTY
+                      : this._googleApiService.saveFile$('', {
+                          title: newFileName,
+                          editable: true,
+                        });
+                  }),
+                  map((res2: any) => ({
+                    syncFileName: res2.title,
+                    _syncFileNameForBackupDocId: res2.title,
+                    _backupDocId: res2.id,
+                    sync: syncConfig,
+                  })),
+                );
+              } else if (filesFound.length === 1) {
+                return this._confirmUsingExistingFileDialog$(newFileName).pipe(
+                  concatMap((isConfirmUseExisting) => {
+                    const fileToUpdate = filesFound[0];
+                    return isConfirmUseExisting
+                      ? of({
+                          syncFileName: newFileName,
+                          _syncFileNameForBackupDocId: newFileName,
+                          _backupDocId: fileToUpdate.id,
+                          sync: syncConfig,
+                        })
+                      : EMPTY;
+                  }),
+                );
+              }
+              return EMPTY;
+            }),
+            map((v) => v as any),
+            catchError((err: any) => {
               this._snackService.open({
                 type: 'ERROR',
-                msg: T.F.GOOGLE.S.MULTIPLE_SYNC_FILES_WITH_SAME_NAME,
-                translateParams: { newFileName },
+                msg: T.F.GOOGLE.S.SYNC_FILE_CREATION_ERROR,
+                translateParams: { err: this._getApiErrorString(err) },
               });
-              return EMPTY;
-            } else if (!filesFound || filesFound.length === 0) {
-              return this._confirmSaveNewFile$(newFileName).pipe(
-                concatMap((isSave) => {
-                  return !isSave
-                    ? EMPTY
-                    : this._googleApiService.saveFile$('', {
-                        title: newFileName,
-                        editable: true,
-                      });
-                }),
-                map((res2: any) => ({
-                  syncFileName: res2.title,
-                  _syncFileNameForBackupDocId: res2.title,
-                  _backupDocId: res2.id,
-                  sync: syncConfig,
-                })),
-              );
-            } else if (filesFound.length === 1) {
-              return this._confirmUsingExistingFileDialog$(newFileName).pipe(
-                concatMap((isConfirmUseExisting) => {
-                  const fileToUpdate = filesFound[0];
-                  return isConfirmUseExisting
-                    ? of({
-                        syncFileName: newFileName,
-                        _syncFileNameForBackupDocId: newFileName,
-                        _backupDocId: fileToUpdate.id,
-                        sync: syncConfig,
-                      })
-                    : EMPTY;
-                }),
-              );
-            }
-            return EMPTY;
-          }),
-          map((v) => v as any),
-          catchError((err: any) => {
-            this._snackService.open({
-              type: 'ERROR',
-              msg: T.F.GOOGLE.S.SYNC_FILE_CREATION_ERROR,
-              translateParams: { err: this._getApiErrorString(err) },
-            });
-            return throwError({
-              [HANDLED_ERROR_PROP_STR]:
-                'GD File creation: ' + this._getApiErrorString(err),
-            });
-          }),
-        );
-      },
-    ),
-    tap((): any =>
-      setTimeout(
-        () =>
-          this._snackService.open({
-            type: 'SUCCESS',
-            msg: T.F.GOOGLE.S.UPDATED_SYNC_FILE_NAME,
-          }),
-        200,
+              return throwError({
+                [HANDLED_ERROR_PROP_STR]:
+                  'GD File creation: ' + this._getApiErrorString(err),
+              });
+            }),
+          );
+        },
       ),
-    ),
-    map(
-      ({
-        syncFileName,
-        _backupDocId,
-        _syncFileNameForBackupDocId,
-        sync,
-      }: {
-        syncFileName: string;
-        _backupDocId: string;
-        _syncFileNameForBackupDocId: string;
-        sync: SyncConfig;
-      }) =>
-        updateGlobalConfigSection({
-          sectionKey: 'sync',
-          sectionCfg: {
-            ...sync,
-            googleDriveSync: {
-              ...sync.googleDriveSync,
-              _backupDocId,
-              _syncFileNameForBackupDocId,
-              syncFileName,
-            },
-          } as SyncConfig,
-        }),
+      tap((): any =>
+        setTimeout(
+          () =>
+            this._snackService.open({
+              type: 'SUCCESS',
+              msg: T.F.GOOGLE.S.UPDATED_SYNC_FILE_NAME,
+            }),
+          200,
+        ),
+      ),
+      map(
+        ({
+          syncFileName,
+          _backupDocId,
+          _syncFileNameForBackupDocId,
+          sync,
+        }: {
+          syncFileName: string;
+          _backupDocId: string;
+          _syncFileNameForBackupDocId: string;
+          sync: SyncConfig;
+        }) =>
+          updateGlobalConfigSection({
+            sectionKey: 'sync',
+            sectionCfg: {
+              ...sync,
+              googleDriveSync: {
+                ...sync.googleDriveSync,
+                _backupDocId,
+                _syncFileNameForBackupDocId,
+                syncFileName,
+              },
+            } as SyncConfig,
+          }),
+      ),
     ),
   );
 

@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Actions, Effect, ofType } from '@ngrx/effects';
+import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { first, map, switchMap, tap, withLatestFrom } from 'rxjs/operators';
 import { select, Store } from '@ngrx/store';
 import { DeleteObstructions, ObstructionActionTypes } from './obstruction.actions';
@@ -11,26 +11,32 @@ import { ObstructionState } from '../obstruction.model';
 
 @Injectable()
 export class ObstructionEffects {
-  @Effect({ dispatch: false }) updateObstructions$: any = this._actions$.pipe(
-    ofType(
-      ObstructionActionTypes.AddObstruction,
-      ObstructionActionTypes.UpdateObstruction,
-      ObstructionActionTypes.DeleteObstruction,
-    ),
-    switchMap(() =>
-      this._store$.pipe(select(selectObstructionFeatureState)).pipe(first()),
-    ),
-    tap((state) => this._saveToLs(state)),
+  updateObstructions$: any = createEffect(
+    () =>
+      this._actions$.pipe(
+        ofType(
+          ObstructionActionTypes.AddObstruction,
+          ObstructionActionTypes.UpdateObstruction,
+          ObstructionActionTypes.DeleteObstruction,
+        ),
+        switchMap(() =>
+          this._store$.pipe(select(selectObstructionFeatureState)).pipe(first()),
+        ),
+        tap((state) => this._saveToLs(state)),
+      ),
+    { dispatch: false },
   );
 
-  @Effect() clearUnusedObstructions$: any = this._actions$.pipe(
-    ofType(
-      MetricActionTypes.AddMetric,
-      MetricActionTypes.UpsertMetric,
-      MetricActionTypes.UpdateMetric,
+  clearUnusedObstructions$: any = createEffect(() =>
+    this._actions$.pipe(
+      ofType(
+        MetricActionTypes.AddMetric,
+        MetricActionTypes.UpsertMetric,
+        MetricActionTypes.UpdateMetric,
+      ),
+      withLatestFrom(this._store$.pipe(select(selectUnusedObstructionIds))),
+      map(([a, unusedIds]) => new DeleteObstructions({ ids: unusedIds })),
     ),
-    withLatestFrom(this._store$.pipe(select(selectUnusedObstructionIds))),
-    map(([a, unusedIds]) => new DeleteObstructions({ ids: unusedIds })),
   );
 
   constructor(

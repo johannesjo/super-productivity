@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Actions, Effect, ofType } from '@ngrx/effects';
+import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { filter, first, map, switchMap, tap, withLatestFrom } from 'rxjs/operators';
 import { select, Store } from '@ngrx/store';
 import {
@@ -19,33 +19,41 @@ import { loadProjectRelatedDataSuccess } from '../../../project/store/project.ac
 
 @Injectable()
 export class ImprovementEffects {
-  @Effect({ dispatch: false }) updateImprovements$: any = this._actions$.pipe(
-    ofType(
-      ImprovementActionTypes.AddImprovement,
-      ImprovementActionTypes.UpdateImprovement,
-      ImprovementActionTypes.ToggleImprovementRepeat,
-      ImprovementActionTypes.DisableImprovementRepeat,
-      ImprovementActionTypes.HideImprovement,
-      ImprovementActionTypes.DeleteImprovement,
-      ImprovementActionTypes.AddImprovementCheckedDay,
-    ),
-    switchMap(() =>
-      this._store$.pipe(select(selectImprovementFeatureState)).pipe(first()),
-    ),
-    tap((state) => this._saveToLs(state)),
+  updateImprovements$: any = createEffect(
+    () =>
+      this._actions$.pipe(
+        ofType(
+          ImprovementActionTypes.AddImprovement,
+          ImprovementActionTypes.UpdateImprovement,
+          ImprovementActionTypes.ToggleImprovementRepeat,
+          ImprovementActionTypes.DisableImprovementRepeat,
+          ImprovementActionTypes.HideImprovement,
+          ImprovementActionTypes.DeleteImprovement,
+          ImprovementActionTypes.AddImprovementCheckedDay,
+        ),
+        switchMap(() =>
+          this._store$.pipe(select(selectImprovementFeatureState)).pipe(first()),
+        ),
+        tap((state) => this._saveToLs(state)),
+      ),
+    { dispatch: false },
   );
 
-  @Effect() clearImprovements$: any = this._actions$.pipe(
-    ofType(loadProjectRelatedDataSuccess.type),
-    withLatestFrom(this._store$.pipe(select(selectImprovementHideDay))),
-    filter(([, hideDay]) => hideDay !== getWorklogStr()),
-    map(() => new ClearHiddenImprovements()),
+  clearImprovements$: any = createEffect(() =>
+    this._actions$.pipe(
+      ofType(loadProjectRelatedDataSuccess.type),
+      withLatestFrom(this._store$.pipe(select(selectImprovementHideDay))),
+      filter(([, hideDay]) => hideDay !== getWorklogStr()),
+      map(() => new ClearHiddenImprovements()),
+    ),
   );
 
-  @Effect() clearUnusedImprovements$: any = this._actions$.pipe(
-    ofType(loadProjectRelatedDataSuccess.type),
-    withLatestFrom(this._store$.pipe(select(selectUnusedImprovementIds))),
-    map(([a, unusedIds]) => new DeleteImprovements({ ids: unusedIds })),
+  clearUnusedImprovements$: any = createEffect(() =>
+    this._actions$.pipe(
+      ofType(loadProjectRelatedDataSuccess.type),
+      withLatestFrom(this._store$.pipe(select(selectUnusedImprovementIds))),
+      map(([a, unusedIds]) => new DeleteImprovements({ ids: unusedIds })),
+    ),
   );
 
   constructor(

@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Actions, Effect, ofType } from '@ngrx/effects';
+import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { TaskActionTypes } from './task.actions';
 import { select, Store } from '@ngrx/store';
 import { tap, withLatestFrom } from 'rxjs/operators';
@@ -16,51 +16,59 @@ import {
 
 @Injectable()
 export class TaskDbEffects {
-  @Effect({ dispatch: false }) updateTask$: any = this._actions$.pipe(
-    ofType(
-      TaskActionTypes.AddTask,
-      TaskActionTypes.RestoreTask,
-      TaskActionTypes.AddTimeSpent,
-      TaskActionTypes.UnScheduleTask,
-      TaskActionTypes.DeleteTask,
-      TaskActionTypes.DeleteMainTasks,
-      TaskActionTypes.UndoDeleteTask,
-      TaskActionTypes.AddSubTask,
-      TaskActionTypes.ConvertToMainTask,
-      // TaskActionTypes.SetCurrentTask,
-      // TaskActionTypes.UnsetCurrentTask,
-      TaskActionTypes.UpdateTask,
-      TaskActionTypes.UpdateTaskTags,
-      TaskActionTypes.RemoveTagsForAllTasks,
-      TaskActionTypes.MoveSubTask,
-      TaskActionTypes.MoveSubTaskUp,
-      TaskActionTypes.MoveSubTaskDown,
-      TaskActionTypes.MoveToArchive,
-      TaskActionTypes.MoveToOtherProject,
-      TaskActionTypes.ToggleStart,
-      TaskActionTypes.RoundTimeSpentForDay,
+  updateTask$: any = createEffect(
+    () =>
+      this._actions$.pipe(
+        ofType(
+          TaskActionTypes.AddTask,
+          TaskActionTypes.RestoreTask,
+          TaskActionTypes.AddTimeSpent,
+          TaskActionTypes.UnScheduleTask,
+          TaskActionTypes.DeleteTask,
+          TaskActionTypes.DeleteMainTasks,
+          TaskActionTypes.UndoDeleteTask,
+          TaskActionTypes.AddSubTask,
+          TaskActionTypes.ConvertToMainTask,
+          // TaskActionTypes.SetCurrentTask,
+          // TaskActionTypes.UnsetCurrentTask,
+          TaskActionTypes.UpdateTask,
+          TaskActionTypes.UpdateTaskTags,
+          TaskActionTypes.RemoveTagsForAllTasks,
+          TaskActionTypes.MoveSubTask,
+          TaskActionTypes.MoveSubTaskUp,
+          TaskActionTypes.MoveSubTaskDown,
+          TaskActionTypes.MoveToArchive,
+          TaskActionTypes.MoveToOtherProject,
+          TaskActionTypes.ToggleStart,
+          TaskActionTypes.RoundTimeSpentForDay,
 
-      // REMINDER
-      TaskActionTypes.ScheduleTask,
-      TaskActionTypes.ReScheduleTask,
-      TaskActionTypes.UnScheduleTask,
+          // REMINDER
+          TaskActionTypes.ScheduleTask,
+          TaskActionTypes.ReScheduleTask,
+          TaskActionTypes.UnScheduleTask,
 
-      // ATTACHMENT ACTIONS
-      addTaskAttachment,
-      deleteTaskAttachment,
-      updateTaskAttachment,
+          // ATTACHMENT ACTIONS
+          addTaskAttachment,
+          deleteTaskAttachment,
+          updateTaskAttachment,
 
-      // RELATED ACTIONS
-      addTaskRepeatCfgToTask,
-    ),
-    withLatestFrom(this._store$.pipe(select(selectTaskFeatureState))),
-    tap(([, taskState]) => this._saveToLs(taskState, true)),
+          // RELATED ACTIONS
+          addTaskRepeatCfgToTask,
+        ),
+        withLatestFrom(this._store$.pipe(select(selectTaskFeatureState))),
+        tap(([, taskState]) => this._saveToLs(taskState, true)),
+      ),
+    { dispatch: false },
   );
 
-  @Effect({ dispatch: false }) updateTaskUi$: any = this._actions$.pipe(
-    ofType(TaskActionTypes.UpdateTaskUi, TaskActionTypes.ToggleTaskShowSubTasks),
-    withLatestFrom(this._store$.pipe(select(selectTaskFeatureState))),
-    tap(([, taskState]) => this._saveToLs(taskState)),
+  updateTaskUi$: any = createEffect(
+    () =>
+      this._actions$.pipe(
+        ofType(TaskActionTypes.UpdateTaskUi, TaskActionTypes.ToggleTaskShowSubTasks),
+        withLatestFrom(this._store$.pipe(select(selectTaskFeatureState))),
+        tap(([, taskState]) => this._saveToLs(taskState)),
+      ),
+    { dispatch: false },
   );
 
   constructor(

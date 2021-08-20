@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Actions, Effect, ofType } from '@ngrx/effects';
+import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { filter, tap, withLatestFrom } from 'rxjs/operators';
 import { Store } from '@ngrx/store';
 import { CONFIG_FEATURE_NAME } from './global-config.reducer';
@@ -18,75 +18,98 @@ import { updateGlobalConfigSection } from './global-config.actions';
 
 @Injectable()
 export class GlobalConfigEffects {
-  @Effect({ dispatch: false }) updateConfig$: any = this._actions$.pipe(
-    ofType(updateGlobalConfigSection),
-    withLatestFrom(this._store),
-    tap(this._saveToLs.bind(this)),
+  updateConfig$: any = createEffect(
+    () =>
+      this._actions$.pipe(
+        ofType(updateGlobalConfigSection),
+        withLatestFrom(this._store),
+        tap(this._saveToLs.bind(this)),
+      ),
+    { dispatch: false },
   );
 
-  @Effect({ dispatch: false }) snackUpdate$: any = this._actions$.pipe(
-    ofType(updateGlobalConfigSection),
-    tap(({ sectionKey, sectionCfg }) => {
-      const isPublicSection = sectionKey.charAt(0) !== '_';
-      const isPublicPropUpdated = Object.keys(sectionCfg).find(
-        (key) => key.charAt(0) !== '_',
-      );
-      if (isPublicPropUpdated && isPublicSection) {
-        this._snackService.open({
-          type: 'SUCCESS',
-          msg: T.F.CONFIG.S.UPDATE_SECTION,
-          translateParams: { sectionKey },
-        });
-      }
-    }),
+  snackUpdate$: any = createEffect(
+    () =>
+      this._actions$.pipe(
+        ofType(updateGlobalConfigSection),
+        tap(({ sectionKey, sectionCfg }) => {
+          const isPublicSection = sectionKey.charAt(0) !== '_';
+          const isPublicPropUpdated = Object.keys(sectionCfg).find(
+            (key) => key.charAt(0) !== '_',
+          );
+          if (isPublicPropUpdated && isPublicSection) {
+            this._snackService.open({
+              type: 'SUCCESS',
+              msg: T.F.CONFIG.S.UPDATE_SECTION,
+              translateParams: { sectionKey },
+            });
+          }
+        }),
+      ),
+    { dispatch: false },
   );
 
-  @Effect({ dispatch: false }) updateGlobalShortcut$: any = this._actions$.pipe(
-    ofType(updateGlobalConfigSection),
-    filter(({ sectionKey, sectionCfg }) => IS_ELECTRON && sectionKey === 'keyboard'),
-    tap(({ sectionKey, sectionCfg }) => {
-      const keyboardCfg: KeyboardConfig = sectionCfg as KeyboardConfig;
-      (this._electronService.ipcRenderer as typeof ipcRenderer).send(
-        IPC.REGISTER_GLOBAL_SHORTCUTS_EVENT,
-        keyboardCfg,
-      );
-    }),
+  updateGlobalShortcut$: any = createEffect(
+    () =>
+      this._actions$.pipe(
+        ofType(updateGlobalConfigSection),
+        filter(({ sectionKey, sectionCfg }) => IS_ELECTRON && sectionKey === 'keyboard'),
+        tap(({ sectionKey, sectionCfg }) => {
+          const keyboardCfg: KeyboardConfig = sectionCfg as KeyboardConfig;
+          (this._electronService.ipcRenderer as typeof ipcRenderer).send(
+            IPC.REGISTER_GLOBAL_SHORTCUTS_EVENT,
+            keyboardCfg,
+          );
+        }),
+      ),
+    { dispatch: false },
   );
 
-  @Effect({ dispatch: false })
-  registerGlobalShortcutInitially$: any = this._actions$.pipe(
-    ofType(loadAllData),
-    filter(() => IS_ELECTRON),
-    tap((action) => {
-      const appDataComplete = action.appDataComplete;
-      const keyboardCfg: KeyboardConfig = (
-        appDataComplete.globalConfig || DEFAULT_GLOBAL_CONFIG
-      ).keyboard;
-      (this._electronService.ipcRenderer as typeof ipcRenderer).send(
-        IPC.REGISTER_GLOBAL_SHORTCUTS_EVENT,
-        keyboardCfg,
-      );
-    }),
+  registerGlobalShortcutInitially$: any = createEffect(
+    () =>
+      this._actions$.pipe(
+        ofType(loadAllData),
+        filter(() => IS_ELECTRON),
+        tap((action) => {
+          const appDataComplete = action.appDataComplete;
+          const keyboardCfg: KeyboardConfig = (
+            appDataComplete.globalConfig || DEFAULT_GLOBAL_CONFIG
+          ).keyboard;
+          (this._electronService.ipcRenderer as typeof ipcRenderer).send(
+            IPC.REGISTER_GLOBAL_SHORTCUTS_EVENT,
+            keyboardCfg,
+          );
+        }),
+      ),
+    { dispatch: false },
   );
 
-  @Effect({ dispatch: false }) selectLanguageOnChange: any = this._actions$.pipe(
-    ofType(updateGlobalConfigSection),
-    filter(({ sectionKey, sectionCfg }) => sectionKey === 'lang'),
-    // eslint-disable-next-line
-    filter(({ sectionKey, sectionCfg }) => sectionCfg && (sectionCfg as any).lng),
-    tap(({ sectionKey, sectionCfg }) => {
-      // eslint-disable-next-line
-      this._languageService.setLng((sectionCfg as any)['lng']);
-    }),
+  selectLanguageOnChange: any = createEffect(
+    () =>
+      this._actions$.pipe(
+        ofType(updateGlobalConfigSection),
+        filter(({ sectionKey, sectionCfg }) => sectionKey === 'lang'),
+        // eslint-disable-next-line
+        filter(({ sectionKey, sectionCfg }) => sectionCfg && (sectionCfg as any).lng),
+        tap(({ sectionKey, sectionCfg }) => {
+          // eslint-disable-next-line
+          this._languageService.setLng((sectionCfg as any)['lng']);
+        }),
+      ),
+    { dispatch: false },
   );
 
-  @Effect({ dispatch: false }) selectLanguageOnLoad: any = this._actions$.pipe(
-    ofType(loadAllData),
-    tap(({ appDataComplete }) => {
-      const cfg = appDataComplete.globalConfig || DEFAULT_GLOBAL_CONFIG;
-      const lng = cfg && cfg.lang && cfg.lang.lng;
-      this._languageService.setLng(lng as LanguageCode);
-    }),
+  selectLanguageOnLoad: any = createEffect(
+    () =>
+      this._actions$.pipe(
+        ofType(loadAllData),
+        tap(({ appDataComplete }) => {
+          const cfg = appDataComplete.globalConfig || DEFAULT_GLOBAL_CONFIG;
+          const lng = cfg && cfg.lang && cfg.lang.lng;
+          this._languageService.setLng(lng as LanguageCode);
+        }),
+      ),
+    { dispatch: false },
   );
 
   constructor(

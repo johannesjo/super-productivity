@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Actions, Effect, ofType } from '@ngrx/effects';
+import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { first, switchMap, tap } from 'rxjs/operators';
 import { select, Store } from '@ngrx/store';
 import { selectBookmarkFeatureState } from './bookmark.reducer';
@@ -18,23 +18,26 @@ import {
 
 @Injectable()
 export class BookmarkEffects {
-  @Effect({ dispatch: false })
-  updateBookmarks$: Observable<unknown> = this._actions$.pipe(
-    ofType(
-      addBookmark,
-      updateBookmark,
-      deleteBookmark,
-      showBookmarks,
-      hideBookmarks,
-      toggleBookmarks,
-    ),
-    switchMap(() =>
-      combineLatest([
-        this._workContextService.activeWorkContextIdIfProject$,
-        this._store$.pipe(select(selectBookmarkFeatureState)),
-      ]).pipe(first()),
-    ),
-    tap(([projectId, state]) => this._saveToLs(projectId, state)),
+  updateBookmarks$: Observable<unknown> = createEffect(
+    () =>
+      this._actions$.pipe(
+        ofType(
+          addBookmark,
+          updateBookmark,
+          deleteBookmark,
+          showBookmarks,
+          hideBookmarks,
+          toggleBookmarks,
+        ),
+        switchMap(() =>
+          combineLatest([
+            this._workContextService.activeWorkContextIdIfProject$,
+            this._store$.pipe(select(selectBookmarkFeatureState)),
+          ]).pipe(first()),
+        ),
+        tap(([projectId, state]) => this._saveToLs(projectId, state)),
+      ),
+    { dispatch: false },
   );
 
   constructor(

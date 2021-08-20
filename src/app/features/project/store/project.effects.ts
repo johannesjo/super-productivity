@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Actions, Effect, ofType } from '@ngrx/effects';
+import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { Action, select, Store } from '@ngrx/store';
 import { concatMap, filter, first, map, switchMap, take, tap } from 'rxjs/operators';
 import {
@@ -65,264 +65,305 @@ import { projectSelectors } from './project.selectors';
 
 @Injectable()
 export class ProjectEffects {
-  @Effect({ dispatch: false })
-  syncProjectToLs$: Observable<unknown> = this._actions$.pipe(
-    ofType(
-      addProject.type,
-      addProjects.type,
-      upsertProject.type,
-      deleteProject.type,
-      updateProject.type,
-      updateProjectAdvancedCfg.type,
-      updateProjectIssueProviderCfg.type,
-      updateProjectWorkStart.type,
-      updateProjectWorkEnd.type,
-      addToProjectBreakTime.type,
-      updateProjectOrder.type,
-      archiveProject.type,
-      unarchiveProject.type,
+  syncProjectToLs$: Observable<unknown> = createEffect(
+    () =>
+      this._actions$.pipe(
+        ofType(
+          addProject.type,
+          addProjects.type,
+          upsertProject.type,
+          deleteProject.type,
+          updateProject.type,
+          updateProjectAdvancedCfg.type,
+          updateProjectIssueProviderCfg.type,
+          updateProjectWorkStart.type,
+          updateProjectWorkEnd.type,
+          addToProjectBreakTime.type,
+          updateProjectOrder.type,
+          archiveProject.type,
+          unarchiveProject.type,
 
-      moveProjectTaskInBacklogList.type,
-      moveProjectTaskToBacklogList.type,
-      moveProjectTaskToTodayList.type,
-      moveProjectTaskUpInBacklogList.type,
-      moveProjectTaskDownInBacklogList.type,
-      moveProjectTaskToBacklogListAuto.type,
-      moveProjectTaskToTodayListAuto.type,
-    ),
-    switchMap((a) => {
-      // exclude ui only actions
-      if (
-        [updateProjectWorkStart.type, updateProjectWorkEnd.type].includes(a.type as any)
-      ) {
-        return this.saveToLs$(false);
-      } else {
-        return this.saveToLs$(true);
-      }
-    }),
-  );
-  @Effect({ dispatch: false })
-  updateProjectStorageConditionalTask$: Observable<unknown> = this._actions$.pipe(
-    ofType(
-      TaskActionTypes.AddTask,
-      TaskActionTypes.DeleteTask,
-      TaskActionTypes.MoveToOtherProject,
-      TaskActionTypes.RestoreTask,
-      TaskActionTypes.MoveToArchive,
-      TaskActionTypes.ConvertToMainTask,
-    ),
-    switchMap(
-      (
-        a:
-          | AddTask
-          | DeleteTask
-          | MoveToOtherProject
-          | MoveToArchive
-          | RestoreTask
-          | ConvertToMainTask
-          | Action,
-      ) => {
-        let isChange = false;
-        switch (a.type) {
-          case TaskActionTypes.AddTask:
-            isChange = !!(a as AddTask).payload.task.projectId;
-            break;
-          case TaskActionTypes.DeleteTask:
-            isChange = !!(a as DeleteTask).payload.task.projectId;
-            break;
-          case TaskActionTypes.MoveToOtherProject:
-            isChange = !!(a as MoveToOtherProject).payload.task.projectId;
-            break;
-          case TaskActionTypes.MoveToArchive:
-            isChange = !!(a as MoveToArchive).payload.tasks.find(
-              (task) => !!task.projectId,
-            );
-            break;
-          case TaskActionTypes.RestoreTask:
-            isChange = !!(a as RestoreTask).payload.task.projectId;
-            break;
-          case TaskActionTypes.ConvertToMainTask:
-            isChange = !!(a as ConvertToMainTask).payload.task.projectId;
-            break;
-        }
-        return isChange ? of(a) : EMPTY;
-      },
-    ),
-    switchMap(() => this.saveToLs$(true)),
-  );
-  @Effect({ dispatch: false })
-  updateProjectStorageConditional$: Observable<unknown> = this._actions$.pipe(
-    ofType(moveTaskInTodayList, moveTaskUpInTodayList, moveTaskDownInTodayList),
-    filter((p) => p.workContextType === WorkContextType.PROJECT),
-    switchMap(() => this.saveToLs$(true)),
-  );
-  @Effect()
-  updateWorkStart$: any = this._actions$.pipe(
-    ofType(TaskActionTypes.AddTimeSpent),
-    filter((action: AddTimeSpent) => !!action.payload.task.projectId),
-    concatMap((action: AddTimeSpent) =>
-      this._projectService
-        .getByIdOnce$(action.payload.task.projectId as string)
-        .pipe(first()),
-    ),
-    filter((project: Project) => !project.workStart[getWorklogStr()]),
-    map((project) => {
-      return updateProjectWorkStart({
-        id: project.id,
-        date: getWorklogStr(),
-        newVal: Date.now(),
-      });
-    }),
+          moveProjectTaskInBacklogList.type,
+          moveProjectTaskToBacklogList.type,
+          moveProjectTaskToTodayList.type,
+          moveProjectTaskUpInBacklogList.type,
+          moveProjectTaskDownInBacklogList.type,
+          moveProjectTaskToBacklogListAuto.type,
+          moveProjectTaskToTodayListAuto.type,
+        ),
+        switchMap((a) => {
+          // exclude ui only actions
+          if (
+            [updateProjectWorkStart.type, updateProjectWorkEnd.type].includes(
+              a.type as any,
+            )
+          ) {
+            return this.saveToLs$(false);
+          } else {
+            return this.saveToLs$(true);
+          }
+        }),
+      ),
+    { dispatch: false },
   );
 
-  @Effect()
-  updateWorkEnd$: Observable<unknown> = this._actions$.pipe(
-    ofType(TaskActionTypes.AddTimeSpent),
-    filter((action: AddTimeSpent) => !!action.payload.task.projectId),
-    map((action: AddTimeSpent) => {
-      return updateProjectWorkEnd({
-        id: action.payload.task.projectId as string,
-        date: getWorklogStr(),
-        newVal: Date.now(),
-      });
-    }),
+  updateProjectStorageConditionalTask$: Observable<unknown> = createEffect(
+    () =>
+      this._actions$.pipe(
+        ofType(
+          TaskActionTypes.AddTask,
+          TaskActionTypes.DeleteTask,
+          TaskActionTypes.MoveToOtherProject,
+          TaskActionTypes.RestoreTask,
+          TaskActionTypes.MoveToArchive,
+          TaskActionTypes.ConvertToMainTask,
+        ),
+        switchMap(
+          (
+            a:
+              | AddTask
+              | DeleteTask
+              | MoveToOtherProject
+              | MoveToArchive
+              | RestoreTask
+              | ConvertToMainTask
+              | Action,
+          ) => {
+            let isChange = false;
+            switch (a.type) {
+              case TaskActionTypes.AddTask:
+                isChange = !!(a as AddTask).payload.task.projectId;
+                break;
+              case TaskActionTypes.DeleteTask:
+                isChange = !!(a as DeleteTask).payload.task.projectId;
+                break;
+              case TaskActionTypes.MoveToOtherProject:
+                isChange = !!(a as MoveToOtherProject).payload.task.projectId;
+                break;
+              case TaskActionTypes.MoveToArchive:
+                isChange = !!(a as MoveToArchive).payload.tasks.find(
+                  (task) => !!task.projectId,
+                );
+                break;
+              case TaskActionTypes.RestoreTask:
+                isChange = !!(a as RestoreTask).payload.task.projectId;
+                break;
+              case TaskActionTypes.ConvertToMainTask:
+                isChange = !!(a as ConvertToMainTask).payload.task.projectId;
+                break;
+            }
+            return isChange ? of(a) : EMPTY;
+          },
+        ),
+        switchMap(() => this.saveToLs$(true)),
+      ),
+    { dispatch: false },
   );
 
-  @Effect()
-  onProjectIdChange$: Observable<unknown> = this._actions$.pipe(
-    ofType(setActiveWorkContext),
-    filter(({ activeType }) => activeType === WorkContextType.PROJECT),
-    switchMap((action) => {
-      const projectId = action.activeId;
-      return Promise.all([
-        this._noteService.loadStateForProject(projectId),
-        this._bookmarkService.loadStateForProject(projectId),
-      ]).then(() => projectId);
-    }),
-    map((projectId) => {
-      return loadProjectRelatedDataSuccess({ projectId });
-    }),
+  updateProjectStorageConditional$: Observable<unknown> = createEffect(
+    () =>
+      this._actions$.pipe(
+        ofType(moveTaskInTodayList, moveTaskUpInTodayList, moveTaskDownInTodayList),
+        filter((p) => p.workContextType === WorkContextType.PROJECT),
+        switchMap(() => this.saveToLs$(true)),
+      ),
+    { dispatch: false },
+  );
+
+  updateWorkStart$: any = createEffect(() =>
+    this._actions$.pipe(
+      ofType(TaskActionTypes.AddTimeSpent),
+      filter((action: AddTimeSpent) => !!action.payload.task.projectId),
+      concatMap((action: AddTimeSpent) =>
+        this._projectService
+          .getByIdOnce$(action.payload.task.projectId as string)
+          .pipe(first()),
+      ),
+      filter((project: Project) => !project.workStart[getWorklogStr()]),
+      map((project) => {
+        return updateProjectWorkStart({
+          id: project.id,
+          date: getWorklogStr(),
+          newVal: Date.now(),
+        });
+      }),
+    ),
+  );
+
+  updateWorkEnd$: Observable<unknown> = createEffect(() =>
+    this._actions$.pipe(
+      ofType(TaskActionTypes.AddTimeSpent),
+      filter((action: AddTimeSpent) => !!action.payload.task.projectId),
+      map((action: AddTimeSpent) => {
+        return updateProjectWorkEnd({
+          id: action.payload.task.projectId as string,
+          date: getWorklogStr(),
+          newVal: Date.now(),
+        });
+      }),
+    ),
+  );
+
+  onProjectIdChange$: Observable<unknown> = createEffect(() =>
+    this._actions$.pipe(
+      ofType(setActiveWorkContext),
+      filter(({ activeType }) => activeType === WorkContextType.PROJECT),
+      switchMap((action) => {
+        const projectId = action.activeId;
+        return Promise.all([
+          this._noteService.loadStateForProject(projectId),
+          this._bookmarkService.loadStateForProject(projectId),
+        ]).then(() => projectId);
+      }),
+      map((projectId) => {
+        return loadProjectRelatedDataSuccess({ projectId });
+      }),
+    ),
   );
 
   // TODO a solution for orphaned tasks might be needed
-  @Effect({ dispatch: false })
-  deleteProjectRelatedData: Observable<unknown> = this._actions$.pipe(
-    ofType(deleteProject.type),
-    tap(async ({ id }) => {
-      await this._persistenceService.removeCompleteRelatedDataForProject(id);
-      this._reminderService.removeRemindersByWorkContextId(id);
-      this._removeAllTasksForProject(id);
-      this._removeAllArchiveTasksForProject(id);
-      this._removeAllRepeatingTasksForProject(id);
 
-      // we also might need to account for this unlikely but very nasty scenario
-      const misc = await this._globalConfigService.misc$.pipe(take(1)).toPromise();
-      if (id === misc.defaultProjectId) {
-        this._globalConfigService.updateSection('misc', { defaultProjectId: null });
-      }
-    }),
+  deleteProjectRelatedData: Observable<unknown> = createEffect(
+    () =>
+      this._actions$.pipe(
+        ofType(deleteProject.type),
+        tap(async ({ id }) => {
+          await this._persistenceService.removeCompleteRelatedDataForProject(id);
+          this._reminderService.removeRemindersByWorkContextId(id);
+          this._removeAllTasksForProject(id);
+          this._removeAllArchiveTasksForProject(id);
+          this._removeAllRepeatingTasksForProject(id);
+
+          // we also might need to account for this unlikely but very nasty scenario
+          const misc = await this._globalConfigService.misc$.pipe(take(1)).toPromise();
+          if (id === misc.defaultProjectId) {
+            this._globalConfigService.updateSection('misc', { defaultProjectId: null });
+          }
+        }),
+      ),
+    { dispatch: false },
   );
 
-  @Effect({ dispatch: false })
-  archiveProject: Observable<unknown> = this._actions$.pipe(
-    ofType(archiveProject.type),
-    tap(async ({ id }) => {
-      await this._persistenceService.archiveProject(id);
-      this._reminderService.removeRemindersByWorkContextId(id);
-      this._snackService.open({
-        ico: 'archive',
-        msg: T.F.PROJECT.S.ARCHIVED,
-      });
-    }),
+  archiveProject: Observable<unknown> = createEffect(
+    () =>
+      this._actions$.pipe(
+        ofType(archiveProject.type),
+        tap(async ({ id }) => {
+          await this._persistenceService.archiveProject(id);
+          this._reminderService.removeRemindersByWorkContextId(id);
+          this._snackService.open({
+            ico: 'archive',
+            msg: T.F.PROJECT.S.ARCHIVED,
+          });
+        }),
+      ),
+    { dispatch: false },
   );
 
-  @Effect({ dispatch: false })
-  unarchiveProject: Observable<unknown> = this._actions$.pipe(
-    ofType(unarchiveProject.type),
-    tap(async ({ id }) => {
-      await this._persistenceService.unarchiveProject(id);
+  unarchiveProject: Observable<unknown> = createEffect(
+    () =>
+      this._actions$.pipe(
+        ofType(unarchiveProject.type),
+        tap(async ({ id }) => {
+          await this._persistenceService.unarchiveProject(id);
 
-      this._snackService.open({
-        ico: 'unarchive',
-        msg: T.F.PROJECT.S.UNARCHIVED,
-      });
-    }),
+          this._snackService.open({
+            ico: 'unarchive',
+            msg: T.F.PROJECT.S.UNARCHIVED,
+          });
+        }),
+      ),
+    { dispatch: false },
   );
 
   // PURE SNACKS
   // -----------
-  @Effect({ dispatch: false })
-  snackUpdateIssueProvider$: Observable<unknown> = this._actions$.pipe(
-    ofType(updateProjectIssueProviderCfg.type),
-    tap(({ issueProviderKey }) => {
-      this._snackService.open({
-        type: 'SUCCESS',
-        msg: T.F.PROJECT.S.ISSUE_PROVIDER_UPDATED,
-        translateParams: {
-          issueProviderKey,
-        },
-      });
-    }),
-  );
 
-  @Effect({ dispatch: false })
-  snackUpdateBaseSettings$: Observable<unknown> = this._actions$.pipe(
-    ofType(updateProject.type),
-    tap(() => {
-      this._snackService.open({
-        type: 'SUCCESS',
-        msg: T.F.PROJECT.S.UPDATED,
-      });
-    }),
-  );
-
-  @Effect({ dispatch: false })
-  onProjectCreatedSnack: Observable<unknown> = this._actions$.pipe(
-    ofType(addProject.type),
-    tap(({ project }) => {
-      this._snackService.open({
-        ico: 'add',
-        type: 'SUCCESS',
-        msg: T.F.PROJECT.S.CREATED,
-        translateParams: { title: (project as Project).title },
-      });
-    }),
-  );
-
-  @Effect({ dispatch: false })
-  showDeletionSnack: Observable<unknown> = this._actions$.pipe(
-    ofType(deleteProject.type),
-    tap(() => {
-      this._snackService.open({
-        ico: 'delete_forever',
-        msg: T.F.PROJECT.S.DELETED,
-      });
-    }),
-  );
-
-  @Effect()
-  moveToTodayListOnAddTodayTag: Observable<unknown> = this._actions$.pipe(
-    ofType(TaskActionTypes.UpdateTaskTags),
-    filter(
-      (action: UpdateTaskTags) =>
-        !!action.payload.task.projectId &&
-        action.payload.newTagIds.includes(TODAY_TAG.id),
-    ),
-    concatMap((action) =>
-      this._projectService.getByIdOnce$(action.payload.task.projectId as string).pipe(
-        map((project) => ({
-          project,
-          p: action.payload,
-        })),
+  snackUpdateIssueProvider$: Observable<unknown> = createEffect(
+    () =>
+      this._actions$.pipe(
+        ofType(updateProjectIssueProviderCfg.type),
+        tap(({ issueProviderKey }) => {
+          this._snackService.open({
+            type: 'SUCCESS',
+            msg: T.F.PROJECT.S.ISSUE_PROVIDER_UPDATED,
+            translateParams: {
+              issueProviderKey,
+            },
+          });
+        }),
       ),
-    ),
-    filter(({ project }) => !project.taskIds.includes(TODAY_TAG.id)),
-    map(({ p, project }) =>
-      moveProjectTaskToTodayListAuto({
-        projectId: project.id,
-        taskId: p.task.id,
-        isMoveToTop: false,
-      }),
+    { dispatch: false },
+  );
+
+  snackUpdateBaseSettings$: Observable<unknown> = createEffect(
+    () =>
+      this._actions$.pipe(
+        ofType(updateProject.type),
+        tap(() => {
+          this._snackService.open({
+            type: 'SUCCESS',
+            msg: T.F.PROJECT.S.UPDATED,
+          });
+        }),
+      ),
+    { dispatch: false },
+  );
+
+  onProjectCreatedSnack: Observable<unknown> = createEffect(
+    () =>
+      this._actions$.pipe(
+        ofType(addProject.type),
+        tap(({ project }) => {
+          this._snackService.open({
+            ico: 'add',
+            type: 'SUCCESS',
+            msg: T.F.PROJECT.S.CREATED,
+            translateParams: { title: (project as Project).title },
+          });
+        }),
+      ),
+    { dispatch: false },
+  );
+
+  showDeletionSnack: Observable<unknown> = createEffect(
+    () =>
+      this._actions$.pipe(
+        ofType(deleteProject.type),
+        tap(() => {
+          this._snackService.open({
+            ico: 'delete_forever',
+            msg: T.F.PROJECT.S.DELETED,
+          });
+        }),
+      ),
+    { dispatch: false },
+  );
+
+  moveToTodayListOnAddTodayTag: Observable<unknown> = createEffect(() =>
+    this._actions$.pipe(
+      ofType(TaskActionTypes.UpdateTaskTags),
+      filter(
+        (action: UpdateTaskTags) =>
+          !!action.payload.task.projectId &&
+          action.payload.newTagIds.includes(TODAY_TAG.id),
+      ),
+      concatMap((action) =>
+        this._projectService.getByIdOnce$(action.payload.task.projectId as string).pipe(
+          map((project) => ({
+            project,
+            p: action.payload,
+          })),
+        ),
+      ),
+      filter(({ project }) => !project.taskIds.includes(TODAY_TAG.id)),
+      map(({ p, project }) =>
+        moveProjectTaskToTodayListAuto({
+          projectId: project.id,
+          taskId: p.task.id,
+          isMoveToTop: false,
+        }),
+      ),
     ),
   );
 

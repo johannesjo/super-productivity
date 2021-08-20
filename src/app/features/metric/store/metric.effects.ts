@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Actions, Effect, ofType } from '@ngrx/effects';
+import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { first, switchMap, tap } from 'rxjs/operators';
 import { select, Store } from '@ngrx/store';
 import { MetricActionTypes } from './metric.actions';
@@ -9,15 +9,21 @@ import { MetricState } from '../metric.model';
 
 @Injectable()
 export class MetricEffects {
-  @Effect({ dispatch: false }) updateMetrics$: any = this._actions$.pipe(
-    ofType(
-      MetricActionTypes.AddMetric,
-      MetricActionTypes.UpdateMetric,
-      MetricActionTypes.DeleteMetric,
-      MetricActionTypes.UpsertMetric,
-    ),
-    switchMap(() => this._store$.pipe(select(selectMetricFeatureState)).pipe(first())),
-    tap((state) => this._saveToLs(state)),
+  updateMetrics$: any = createEffect(
+    () =>
+      this._actions$.pipe(
+        ofType(
+          MetricActionTypes.AddMetric,
+          MetricActionTypes.UpdateMetric,
+          MetricActionTypes.DeleteMetric,
+          MetricActionTypes.UpsertMetric,
+        ),
+        switchMap(() =>
+          this._store$.pipe(select(selectMetricFeatureState)).pipe(first()),
+        ),
+        tap((state) => this._saveToLs(state)),
+      ),
+    { dispatch: false },
   );
 
   // @Effect({dispatch: false}) saveMetrics$: any = this._actions$

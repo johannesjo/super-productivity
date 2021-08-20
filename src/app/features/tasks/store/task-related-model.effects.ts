@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Actions, Effect, ofType } from '@ngrx/effects';
+import { Actions, createEffect, ofType } from '@ngrx/effects';
 import {
   AddTask,
   AddTimeSpent,
@@ -44,207 +44,224 @@ import { moveProjectTaskToTodayList } from '../../project/store/project.actions'
 export class TaskRelatedModelEffects {
   // EFFECTS ===> EXTERNAL
   // ---------------------
-  @Effect({ dispatch: false })
-  moveToArchive$: any = this._actions$.pipe(
-    ofType(TaskActionTypes.MoveToArchive),
-    tap(this._moveToArchive.bind(this)),
+
+  moveToArchive$: any = createEffect(
+    () =>
+      this._actions$.pipe(
+        ofType(TaskActionTypes.MoveToArchive),
+        tap(this._moveToArchive.bind(this)),
+      ),
+    { dispatch: false },
   );
 
   // TODO remove once reminder is changed
-  @Effect({ dispatch: false })
-  moveToOtherProject: any = this._actions$.pipe(
-    ofType(TaskActionTypes.MoveToOtherProject),
-    tap(this._moveToOtherProject.bind(this)),
-  );
 
-  @Effect({ dispatch: false })
-  restoreTask$: any = this._actions$.pipe(
-    ofType(TaskActionTypes.RestoreTask),
-    tap(this._removeFromArchive.bind(this)),
-  );
-
-  @Effect()
-  autoAddTodayTag: any = this._actions$.pipe(
-    ofType(TaskActionTypes.AddTimeSpent),
-    switchMap((a: AddTimeSpent) =>
-      a.payload.task.parentId
-        ? this._taskService.getByIdOnce$(a.payload.task.parentId)
-        : of(a.payload.task),
-    ),
-    filter((task: Task) => !task.tagIds.includes(TODAY_TAG.id)),
-    concatMap((task: Task) =>
-      this._globalConfigService.misc$.pipe(
-        first(),
-        map((miscCfg) => ({
-          miscCfg,
-          task,
-        })),
+  moveToOtherProject: any = createEffect(
+    () =>
+      this._actions$.pipe(
+        ofType(TaskActionTypes.MoveToOtherProject),
+        tap(this._moveToOtherProject.bind(this)),
       ),
-    ),
-    filter(({ miscCfg, task }) => miscCfg.isAutoAddWorkedOnToToday),
-    map(
-      ({ miscCfg, task }) =>
-        new UpdateTaskTags({
-          task,
-          newTagIds: unique([...task.tagIds, TODAY_TAG.id]),
-          oldTagIds: task.tagIds,
-        }),
+    { dispatch: false },
+  );
+
+  restoreTask$: any = createEffect(
+    () =>
+      this._actions$.pipe(
+        ofType(TaskActionTypes.RestoreTask),
+        tap(this._removeFromArchive.bind(this)),
+      ),
+    { dispatch: false },
+  );
+
+  autoAddTodayTag: any = createEffect(() =>
+    this._actions$.pipe(
+      ofType(TaskActionTypes.AddTimeSpent),
+      switchMap((a: AddTimeSpent) =>
+        a.payload.task.parentId
+          ? this._taskService.getByIdOnce$(a.payload.task.parentId)
+          : of(a.payload.task),
+      ),
+      filter((task: Task) => !task.tagIds.includes(TODAY_TAG.id)),
+      concatMap((task: Task) =>
+        this._globalConfigService.misc$.pipe(
+          first(),
+          map((miscCfg) => ({
+            miscCfg,
+            task,
+          })),
+        ),
+      ),
+      filter(({ miscCfg, task }) => miscCfg.isAutoAddWorkedOnToToday),
+      map(
+        ({ miscCfg, task }) =>
+          new UpdateTaskTags({
+            task,
+            newTagIds: unique([...task.tagIds, TODAY_TAG.id]),
+            oldTagIds: task.tagIds,
+          }),
+      ),
     ),
   );
 
   // EXTERNAL ===> TASKS
   // -------------------
-  @Effect()
-  moveTaskToUnDone$: any = this._actions$.pipe(
-    ofType(moveTaskInTodayList, moveProjectTaskToTodayList),
-    filter(
-      ({ src, target }) => (src === 'DONE' || src === 'BACKLOG') && target === 'UNDONE',
-    ),
-    map(
-      ({ taskId }) =>
-        new UpdateTask({
-          task: {
-            id: taskId,
-            changes: {
-              isDone: false,
-            },
-          },
-        }),
-    ),
-  );
 
-  @Effect()
-  moveTaskToDone$: any = this._actions$.pipe(
-    ofType(moveTaskInTodayList, moveProjectTaskToTodayList),
-    filter(
-      ({ src, target }) => (src === 'UNDONE' || src === 'BACKLOG') && target === 'DONE',
-    ),
-    map(
-      ({ taskId }) =>
-        new UpdateTask({
-          task: {
-            id: taskId,
-            changes: {
-              isDone: true,
+  moveTaskToUnDone$: any = createEffect(() =>
+    this._actions$.pipe(
+      ofType(moveTaskInTodayList, moveProjectTaskToTodayList),
+      filter(
+        ({ src, target }) => (src === 'DONE' || src === 'BACKLOG') && target === 'UNDONE',
+      ),
+      map(
+        ({ taskId }) =>
+          new UpdateTask({
+            task: {
+              id: taskId,
+              changes: {
+                isDone: false,
+              },
             },
-          },
-        }),
-    ),
-  );
-
-  @Effect()
-  setDefaultProjectId$: any = this._actions$.pipe(
-    ofType(TaskActionTypes.AddTask),
-    concatMap((act: AddTask) =>
-      this._globalConfigService.misc$.pipe(
-        first(),
-        // error handling
-        switchMap((miscConfig) =>
-          !!miscConfig.defaultProjectId
-            ? this._projectService.getByIdOnce$(miscConfig.defaultProjectId).pipe(
-                tap((project) => {
-                  if (!project) {
-                    throw new Error('Default Project not found');
-                  }
-                }),
-                mapTo(miscConfig),
-              )
-            : of(miscConfig),
-        ),
-        // error handling end
-        map((miscCfg) => ({
-          defaultProjectId: miscCfg.defaultProjectId,
-          task: act.payload.task,
-        })),
+          }),
       ),
     ),
-    filter(
-      ({ defaultProjectId, task }) =>
-        !!defaultProjectId && !task.projectId && !task.parentId,
-    ),
-    map(
-      ({ task, defaultProjectId }) =>
-        new MoveToOtherProject({
-          task: task as TaskWithSubTasks,
-          targetProjectId: defaultProjectId as string,
-        }),
+  );
+
+  moveTaskToDone$: any = createEffect(() =>
+    this._actions$.pipe(
+      ofType(moveTaskInTodayList, moveProjectTaskToTodayList),
+      filter(
+        ({ src, target }) => (src === 'UNDONE' || src === 'BACKLOG') && target === 'DONE',
+      ),
+      map(
+        ({ taskId }) =>
+          new UpdateTask({
+            task: {
+              id: taskId,
+              changes: {
+                isDone: true,
+              },
+            },
+          }),
+      ),
     ),
   );
 
-  @Effect()
-  shortSyntax$: any = this._actions$.pipe(
-    ofType(TaskActionTypes.AddTask, TaskActionTypes.UpdateTask),
-    filter((action: AddTask | UpdateTask): boolean => {
-      if (action.type !== TaskActionTypes.UpdateTask) {
-        return true;
-      }
-      const changeProps = Object.keys((action as UpdateTask).payload.task.changes);
-      // we only want to execute this for task title updates
-      return changeProps.length === 1 && changeProps[0] === 'title';
-    }),
-    // dirty fix to execute this after setDefaultProjectId$ effect
-    delay(20),
-    concatMap((action: AddTask | UpdateTask): Observable<any> => {
-      return this._taskService.getByIdOnce$(action.payload.task.id as string);
-    }),
-    withLatestFrom(this._tagService.tags$, this._projectService.list$),
-    mergeMap(([task, tags, projects]) => {
-      const r = shortSyntax(task, tags, projects);
-      if (environment.production) {
-        console.log('shortSyntax', r);
-      }
-      if (!r) {
-        return EMPTY;
-      }
-
-      const actions: any[] = [];
-      const tagIds: string[] = [...(r.taskChanges.tagIds || task.tagIds)];
-
-      actions.push(
-        new UpdateTask({
-          task: {
-            id: task.id,
-            changes: r.taskChanges,
-          },
-        }),
-      );
-      if (r.projectId && r.projectId !== task.projectId) {
-        actions.push(
+  setDefaultProjectId$: any = createEffect(() =>
+    this._actions$.pipe(
+      ofType(TaskActionTypes.AddTask),
+      concatMap((act: AddTask) =>
+        this._globalConfigService.misc$.pipe(
+          first(),
+          // error handling
+          switchMap((miscConfig) =>
+            !!miscConfig.defaultProjectId
+              ? this._projectService.getByIdOnce$(miscConfig.defaultProjectId).pipe(
+                  tap((project) => {
+                    if (!project) {
+                      throw new Error('Default Project not found');
+                    }
+                  }),
+                  mapTo(miscConfig),
+                )
+              : of(miscConfig),
+          ),
+          // error handling end
+          map((miscCfg) => ({
+            defaultProjectId: miscCfg.defaultProjectId,
+            task: act.payload.task,
+          })),
+        ),
+      ),
+      filter(
+        ({ defaultProjectId, task }) =>
+          !!defaultProjectId && !task.projectId && !task.parentId,
+      ),
+      map(
+        ({ task, defaultProjectId }) =>
           new MoveToOtherProject({
-            task,
-            targetProjectId: r.projectId,
+            task: task as TaskWithSubTasks,
+            targetProjectId: defaultProjectId as string,
+          }),
+      ),
+    ),
+  );
+
+  shortSyntax$: any = createEffect(() =>
+    this._actions$.pipe(
+      ofType(TaskActionTypes.AddTask, TaskActionTypes.UpdateTask),
+      filter((action: AddTask | UpdateTask): boolean => {
+        if (action.type !== TaskActionTypes.UpdateTask) {
+          return true;
+        }
+        const changeProps = Object.keys((action as UpdateTask).payload.task.changes);
+        // we only want to execute this for task title updates
+        return changeProps.length === 1 && changeProps[0] === 'title';
+      }),
+      // dirty fix to execute this after setDefaultProjectId$ effect
+      delay(20),
+      concatMap((action: AddTask | UpdateTask): Observable<any> => {
+        return this._taskService.getByIdOnce$(action.payload.task.id as string);
+      }),
+      withLatestFrom(this._tagService.tags$, this._projectService.list$),
+      mergeMap(([task, tags, projects]) => {
+        const r = shortSyntax(task, tags, projects);
+        if (environment.production) {
+          console.log('shortSyntax', r);
+        }
+        if (!r) {
+          return EMPTY;
+        }
+
+        const actions: any[] = [];
+        const tagIds: string[] = [...(r.taskChanges.tagIds || task.tagIds)];
+
+        actions.push(
+          new UpdateTask({
+            task: {
+              id: task.id,
+              changes: r.taskChanges,
+            },
           }),
         );
-      }
-
-      if (r.newTagTitles.length) {
-        r.newTagTitles.forEach((newTagTitle) => {
-          const { action, id } = this._tagService.getAddTagActionAndId({
-            title: newTagTitle,
-          });
-          tagIds.push(id);
-          actions.push(action);
-        });
-      }
-
-      if (tagIds && tagIds.length) {
-        const isEqualTags = JSON.stringify(tagIds) === JSON.stringify(task.tagIds);
-        if (!task.tagIds) {
-          throw new Error('Task Old TagIds need to be passed');
-        }
-        if (!isEqualTags) {
+        if (r.projectId && r.projectId !== task.projectId) {
           actions.push(
-            new UpdateTaskTags({
+            new MoveToOtherProject({
               task,
-              newTagIds: unique(tagIds),
-              oldTagIds: task.tagIds,
+              targetProjectId: r.projectId,
             }),
           );
         }
-      }
 
-      return actions;
-    }),
+        if (r.newTagTitles.length) {
+          r.newTagTitles.forEach((newTagTitle) => {
+            const { action, id } = this._tagService.getAddTagActionAndId({
+              title: newTagTitle,
+            });
+            tagIds.push(id);
+            actions.push(action);
+          });
+        }
+
+        if (tagIds && tagIds.length) {
+          const isEqualTags = JSON.stringify(tagIds) === JSON.stringify(task.tagIds);
+          if (!task.tagIds) {
+            throw new Error('Task Old TagIds need to be passed');
+          }
+          if (!isEqualTags) {
+            actions.push(
+              new UpdateTaskTags({
+                task,
+                newTagIds: unique(tagIds),
+                oldTagIds: task.tagIds,
+              }),
+            );
+          }
+        }
+
+        return actions;
+      }),
+    ),
   );
 
   constructor(

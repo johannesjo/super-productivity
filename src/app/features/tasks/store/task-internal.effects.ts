@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Actions, Effect, ofType } from '@ngrx/effects';
+import { Actions, createEffect, ofType } from '@ngrx/effects';
 import {
   SetCurrentTask,
   TaskActionTypes,
@@ -21,119 +21,123 @@ import {
 
 @Injectable()
 export class TaskInternalEffects {
-  @Effect()
-  onAllSubTasksDone$: any = this._actions$.pipe(
-    ofType(TaskActionTypes.UpdateTask),
-    withLatestFrom(
-      this._store$.pipe(select(selectMiscConfig)),
-      this._store$.pipe(select(selectTaskFeatureState)),
-    ),
-    filter(
-      ([action, miscCfg, state]: [UpdateTask, MiscConfig, TaskState]) =>
-        !!miscCfg &&
-        miscCfg.isAutMarkParentAsDone &&
-        !!action.payload.task.changes.isDone &&
-        // @ts-ignore
-        !!state.entities[action.payload.task.id].parentId,
-    ),
-    filter(([action, miscCfg, state]) => {
-      const task = state.entities[action.payload.task.id];
-      if (!task || !task.parentId) {
-        throw new Error('!task || !task.parentId');
-      }
-      const parent = state.entities[task.parentId] as Task;
-      const undoneSubTasks = parent.subTaskIds.filter(
-        (id) => !(state.entities[id] as Task).isDone,
-      );
-      return undoneSubTasks.length === 0;
-    }),
-    map(
-      ([action, miscCfg, state]) =>
-        new UpdateTask({
-          task: {
-            id: (state.entities[action.payload.task.id] as Task).parentId as string,
-            changes: { isDone: true },
-          },
-        }),
+  onAllSubTasksDone$: any = createEffect(() =>
+    this._actions$.pipe(
+      ofType(TaskActionTypes.UpdateTask),
+      withLatestFrom(
+        this._store$.pipe(select(selectMiscConfig)),
+        this._store$.pipe(select(selectTaskFeatureState)),
+      ),
+      filter(
+        ([action, miscCfg, state]: [UpdateTask, MiscConfig, TaskState]) =>
+          !!miscCfg &&
+          miscCfg.isAutMarkParentAsDone &&
+          !!action.payload.task.changes.isDone &&
+          // @ts-ignore
+          !!state.entities[action.payload.task.id].parentId,
+      ),
+      filter(([action, miscCfg, state]) => {
+        const task = state.entities[action.payload.task.id];
+        if (!task || !task.parentId) {
+          throw new Error('!task || !task.parentId');
+        }
+        const parent = state.entities[task.parentId] as Task;
+        const undoneSubTasks = parent.subTaskIds.filter(
+          (id) => !(state.entities[id] as Task).isDone,
+        );
+        return undoneSubTasks.length === 0;
+      }),
+      map(
+        ([action, miscCfg, state]) =>
+          new UpdateTask({
+            task: {
+              id: (state.entities[action.payload.task.id] as Task).parentId as string,
+              changes: { isDone: true },
+            },
+          }),
+      ),
     ),
   );
 
-  @Effect()
-  autoSetNextTask$: any = this._actions$.pipe(
-    ofType(
-      TaskActionTypes.ToggleStart,
-      TaskActionTypes.UpdateTask,
-      TaskActionTypes.DeleteTask,
-      TaskActionTypes.MoveToArchive,
+  autoSetNextTask$: any = createEffect(() =>
+    this._actions$.pipe(
+      ofType(
+        TaskActionTypes.ToggleStart,
+        TaskActionTypes.UpdateTask,
+        TaskActionTypes.DeleteTask,
+        TaskActionTypes.MoveToArchive,
 
-      moveProjectTaskToBacklogList.type,
-      moveProjectTaskToBacklogListAuto.type,
-    ),
-    withLatestFrom(
-      this._store$.pipe(select(selectMiscConfig)),
-      this._store$.pipe(select(selectTaskFeatureState)),
-      this._workContextSession.todaysTaskIds$,
-      (action, miscCfg, state, todaysTaskIds) => ({
-        action,
-        state,
-        isAutoStartNextTask: miscCfg.isAutoStartNextTask,
-        todaysTaskIds,
+        moveProjectTaskToBacklogList.type,
+        moveProjectTaskToBacklogListAuto.type,
+      ),
+      withLatestFrom(
+        this._store$.pipe(select(selectMiscConfig)),
+        this._store$.pipe(select(selectTaskFeatureState)),
+        this._workContextSession.todaysTaskIds$,
+        (action, miscCfg, state, todaysTaskIds) => ({
+          action,
+          state,
+          isAutoStartNextTask: miscCfg.isAutoStartNextTask,
+          todaysTaskIds,
+        }),
+      ),
+      mergeMap(({ action, state, isAutoStartNextTask, todaysTaskIds }) => {
+        const currentId = state.currentTaskId;
+        let nextId: 'NO_UPDATE' | string | null;
+
+        switch (action.type) {
+          case TaskActionTypes.ToggleStart: {
+            nextId = state.currentTaskId
+              ? null
+              : this._findNextTask(state, todaysTaskIds);
+            break;
+          }
+
+          case TaskActionTypes.UpdateTask: {
+            const { isDone } = (action as UpdateTask).payload.task.changes;
+            const oldId = (action as UpdateTask).payload.task.id;
+            const isCurrent = oldId === currentId;
+            nextId =
+              isDone && isCurrent
+                ? isAutoStartNextTask
+                  ? this._findNextTask(state, todaysTaskIds, oldId as string)
+                  : null
+                : 'NO_UPDATE';
+            break;
+          }
+
+          case moveProjectTaskToBacklogList.type:
+          case moveProjectTaskToBacklogListAuto.type: {
+            const isCurrent = currentId === (action as any).taskId;
+            nextId = isCurrent ? null : 'NO_UPDATE';
+            break;
+          }
+
+          // QUICK FIX FOR THE ISSUE
+          // TODO better solution
+          case TaskActionTypes.DeleteTask: {
+            nextId = state.currentTaskId;
+            break;
+          }
+          default:
+            nextId = null;
+
+          // NOTE: currently no solution for this, but we're probably fine, as the current task
+          // gets unset every time we go to the finish day view
+          // case TaskActionTypes.MoveToArchive: {}
+        }
+
+        if (nextId === 'NO_UPDATE') {
+          return EMPTY;
+        } else {
+          if (nextId) {
+            return of(new SetCurrentTask(nextId));
+          } else {
+            return of(new UnsetCurrentTask());
+          }
+        }
       }),
     ),
-    mergeMap(({ action, state, isAutoStartNextTask, todaysTaskIds }) => {
-      const currentId = state.currentTaskId;
-      let nextId: 'NO_UPDATE' | string | null;
-
-      switch (action.type) {
-        case TaskActionTypes.ToggleStart: {
-          nextId = state.currentTaskId ? null : this._findNextTask(state, todaysTaskIds);
-          break;
-        }
-
-        case TaskActionTypes.UpdateTask: {
-          const { isDone } = (action as UpdateTask).payload.task.changes;
-          const oldId = (action as UpdateTask).payload.task.id;
-          const isCurrent = oldId === currentId;
-          nextId =
-            isDone && isCurrent
-              ? isAutoStartNextTask
-                ? this._findNextTask(state, todaysTaskIds, oldId as string)
-                : null
-              : 'NO_UPDATE';
-          break;
-        }
-
-        case moveProjectTaskToBacklogList.type:
-        case moveProjectTaskToBacklogListAuto.type: {
-          const isCurrent = currentId === (action as any).taskId;
-          nextId = isCurrent ? null : 'NO_UPDATE';
-          break;
-        }
-
-        // QUICK FIX FOR THE ISSUE
-        // TODO better solution
-        case TaskActionTypes.DeleteTask: {
-          nextId = state.currentTaskId;
-          break;
-        }
-        default:
-          nextId = null;
-
-        // NOTE: currently no solution for this, but we're probably fine, as the current task
-        // gets unset every time we go to the finish day view
-        // case TaskActionTypes.MoveToArchive: {}
-      }
-
-      if (nextId === 'NO_UPDATE') {
-        return EMPTY;
-      } else {
-        if (nextId) {
-          return of(new SetCurrentTask(nextId));
-        } else {
-          return of(new UnsetCurrentTask());
-        }
-      }
-    }),
   );
 
   constructor(

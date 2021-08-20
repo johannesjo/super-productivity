@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Actions, Effect, ofType } from '@ngrx/effects';
+import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { SnackService } from '../../../../../core/snack/snack.service';
 import { TaskService } from '../../../../tasks/task.service';
 import { ProjectService } from '../../../../project/project.service';
@@ -20,29 +20,32 @@ import { TaskActionTypes, UpdateTask } from '../../../../tasks/store/task.action
 
 @Injectable()
 export class CaldavIssueEffects {
-  @Effect({ dispatch: false })
-  checkForDoneTransition$: Observable<any> = this._actions$.pipe(
-    ofType(TaskActionTypes.UpdateTask),
-    filter((a: UpdateTask): boolean => 'isDone' in a.payload.task.changes),
-    concatMap((a: UpdateTask) =>
-      this._taskService.getByIdOnce$(a.payload.task.id as string),
-    ),
-    filter((task: Task) => task && task.issueType === CALDAV_TYPE),
-    concatMap((task: Task) => {
-      if (!task.projectId) {
-        throw new Error('No projectId for task');
-      }
-      return this._getCfgOnce$(task.projectId).pipe(
-        map((caldavCfg) => ({ caldavCfg, task })),
-      );
-    }),
-    filter(
-      ({ caldavCfg: caldavCfg, task }) =>
-        isCaldavEnabled(caldavCfg) && caldavCfg.isTransitionIssuesEnabled,
-    ),
-    concatMap(({ caldavCfg: caldavCfg, task }) => {
-      return this._handleTransitionForIssue$(caldavCfg, task);
-    }),
+  checkForDoneTransition$: Observable<any> = createEffect(
+    () =>
+      this._actions$.pipe(
+        ofType(TaskActionTypes.UpdateTask),
+        filter((a: UpdateTask): boolean => 'isDone' in a.payload.task.changes),
+        concatMap((a: UpdateTask) =>
+          this._taskService.getByIdOnce$(a.payload.task.id as string),
+        ),
+        filter((task: Task) => task && task.issueType === CALDAV_TYPE),
+        concatMap((task: Task) => {
+          if (!task.projectId) {
+            throw new Error('No projectId for task');
+          }
+          return this._getCfgOnce$(task.projectId).pipe(
+            map((caldavCfg) => ({ caldavCfg, task })),
+          );
+        }),
+        filter(
+          ({ caldavCfg: caldavCfg, task }) =>
+            isCaldavEnabled(caldavCfg) && caldavCfg.isTransitionIssuesEnabled,
+        ),
+        concatMap(({ caldavCfg: caldavCfg, task }) => {
+          return this._handleTransitionForIssue$(caldavCfg, task);
+        }),
+      ),
+    { dispatch: false },
   );
 
   private _pollTimer$: Observable<any> = timer(
@@ -50,38 +53,46 @@ export class CaldavIssueEffects {
     CALDAV_POLL_INTERVAL,
   );
 
-  @Effect({ dispatch: false })
-  pollNewIssuesToBacklog$: Observable<any> = this._issueEffectHelperService.pollToBacklogTriggerToProjectId$.pipe(
-    switchMap((pId) =>
-      this._projectService.getCaldavCfgForProject$(pId).pipe(
-        first(),
-        filter((caldavCfg) => isCaldavEnabled(caldavCfg) && caldavCfg.isAutoAddToBacklog),
-        switchMap((caldavCfg) =>
-          this._pollTimer$.pipe(
-            // NOTE: required otherwise timer stays alive for filtered actions
-            takeUntil(this._issueEffectHelperService.pollToBacklogActions$),
-            tap(() => console.log('CALDAV_POLL_BACKLOG_CHANGES')),
-            switchMap(() =>
-              forkJoin([
-                this._caldavClientService.getOpenTasks$(caldavCfg),
-                this._taskService.getAllIssueIdsForProject(pId, CALDAV_TYPE) as Promise<
-                  string[]
-                >,
-              ]),
+  pollNewIssuesToBacklog$: Observable<any> = createEffect(
+    () =>
+      this._issueEffectHelperService.pollToBacklogTriggerToProjectId$.pipe(
+        switchMap((pId) =>
+          this._projectService.getCaldavCfgForProject$(pId).pipe(
+            first(),
+            filter(
+              (caldavCfg) => isCaldavEnabled(caldavCfg) && caldavCfg.isAutoAddToBacklog,
             ),
-            tap(([issues, allTaskCaldavIssueIds]: [CaldavIssueReduced[], string[]]) => {
-              const issuesToAdd = issues.filter(
-                (issue) => !allTaskCaldavIssueIds.includes(issue.id),
-              );
-              console.log('issuesToAdd', issuesToAdd);
-              if (issuesToAdd?.length) {
-                this._importNewIssuesToBacklog(pId, issuesToAdd);
-              }
-            }),
+            switchMap((caldavCfg) =>
+              this._pollTimer$.pipe(
+                // NOTE: required otherwise timer stays alive for filtered actions
+                takeUntil(this._issueEffectHelperService.pollToBacklogActions$),
+                tap(() => console.log('CALDAV_POLL_BACKLOG_CHANGES')),
+                switchMap(() =>
+                  forkJoin([
+                    this._caldavClientService.getOpenTasks$(caldavCfg),
+                    this._taskService.getAllIssueIdsForProject(
+                      pId,
+                      CALDAV_TYPE,
+                    ) as Promise<string[]>,
+                  ]),
+                ),
+                tap(
+                  ([issues, allTaskCaldavIssueIds]: [CaldavIssueReduced[], string[]]) => {
+                    const issuesToAdd = issues.filter(
+                      (issue) => !allTaskCaldavIssueIds.includes(issue.id),
+                    );
+                    console.log('issuesToAdd', issuesToAdd);
+                    if (issuesToAdd?.length) {
+                      this._importNewIssuesToBacklog(pId, issuesToAdd);
+                    }
+                  },
+                ),
+              ),
+            ),
           ),
         ),
       ),
-    ),
+    { dispatch: false },
   );
   private _updateIssuesForCurrentContext$: Observable<any> =
     this._workContextService.allTasksForCurrentContext$.pipe(
@@ -113,10 +124,14 @@ export class CaldavIssueEffects {
       ),
       tap((caldavTasks: TaskWithSubTasks[]) => this._refreshIssues(caldavTasks)),
     );
-  @Effect({ dispatch: false })
-  pollIssueChangesForCurrentContext$: Observable<any> = this._issueEffectHelperService.pollIssueTaskUpdatesActions$.pipe(
-    switchMap(() => this._pollTimer$),
-    switchMap(() => this._updateIssuesForCurrentContext$),
+
+  pollIssueChangesForCurrentContext$: Observable<any> = createEffect(
+    () =>
+      this._issueEffectHelperService.pollIssueTaskUpdatesActions$.pipe(
+        switchMap(() => this._pollTimer$),
+        switchMap(() => this._updateIssuesForCurrentContext$),
+      ),
+    { dispatch: false },
   );
 
   constructor(
