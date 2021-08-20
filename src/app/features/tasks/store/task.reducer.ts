@@ -49,11 +49,9 @@ import { moveItemInList } from '../../work-context/store/work-context-meta.helpe
 import { arrayMoveLeft, arrayMoveRight } from '../../../util/array-move';
 import { filterOutId } from '../../../util/filter-out-id';
 import {
-  AddTaskAttachment,
-  DeleteTaskAttachment,
-  TaskAttachmentActions,
-  TaskAttachmentActionTypes,
-  UpdateTaskAttachment,
+  addTaskAttachment,
+  deleteTaskAttachment,
+  updateTaskAttachment,
 } from '../task-attachment/task-attachment.actions';
 import { Update } from '@ngrx/entity';
 import { unique } from '../../../util/unique';
@@ -82,7 +80,7 @@ export const initialTaskState: TaskState = taskAdapter.getInitialState({
 // TODO unit test the shit out of this once the model is settled
 export const taskReducer = (
   state: TaskState = initialTaskState,
-  action: TaskActions | TaskAttachmentActions,
+  action: TaskActions,
 ): TaskState => {
   if (environment.production) {
     console.log(action.type, (action as any)?.payload || action);
@@ -548,8 +546,9 @@ export const taskReducer = (
 
     // TASK ATTACHMENTS
     // ----------------
-    case TaskAttachmentActionTypes.AddTaskAttachment: {
-      const { taskId, taskAttachment } = (action as AddTaskAttachment).payload;
+    case addTaskAttachment.type: {
+      // TODO remove as any once tasks are migrated to new style as well
+      const { taskId, taskAttachment } = action as any;
       return taskAdapter.updateOne(
         {
           id: taskId,
@@ -561,8 +560,9 @@ export const taskReducer = (
       );
     }
 
-    case TaskAttachmentActionTypes.UpdateTaskAttachment: {
-      const { taskId, taskAttachment } = (action as UpdateTaskAttachment).payload;
+    case updateTaskAttachment.type: {
+      // TODO remove as any once tasks are migrated to new style as well
+      const { taskId, taskAttachment } = action as any;
       const attachments = getTaskById(taskId, state).attachments;
       const updatedAttachments = attachments.map((attachment) =>
         attachment.id === taskAttachment.id
@@ -584,8 +584,9 @@ export const taskReducer = (
       );
     }
 
-    case TaskAttachmentActionTypes.DeleteTaskAttachment: {
-      const { taskId, id } = (action as DeleteTaskAttachment).payload;
+    case deleteTaskAttachment.type: {
+      // TODO remove as any once tasks are migrated to new style as well
+      const { taskId, id } = action as any;
       return taskAdapter.updateOne(
         {
           id: taskId,

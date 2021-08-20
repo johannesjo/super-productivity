@@ -1,35 +1,19 @@
-import { Action } from '@ngrx/store';
 import { Update } from '@ngrx/entity';
 import { TaskAttachment } from './task-attachment.model';
+import { createAction, props } from '@ngrx/store';
 
 // NOTE: all is handled in task reducer too
-export enum TaskAttachmentActionTypes {
-  'AddTaskAttachment' = '[TaskAttachment] Add TaskAttachment',
-  'UpdateTaskAttachment' = '[TaskAttachment] Update TaskAttachment',
-  'DeleteTaskAttachment' = '[TaskAttachment] Delete TaskAttachment',
-}
+export const addTaskAttachment = createAction(
+  '[TaskAttachment] Add TaskAttachment',
+  props<{ taskId: string; taskAttachment: TaskAttachment }>(),
+);
 
-export class AddTaskAttachment implements Action {
-  readonly type: string = TaskAttachmentActionTypes.AddTaskAttachment;
+export const updateTaskAttachment = createAction(
+  '[TaskAttachment] Update TaskAttachment',
+  props<{ taskId: string; taskAttachment: Update<TaskAttachment> }>(),
+);
 
-  constructor(public payload: { taskId: string; taskAttachment: TaskAttachment }) {}
-}
-
-export class UpdateTaskAttachment implements Action {
-  readonly type: string = TaskAttachmentActionTypes.UpdateTaskAttachment;
-
-  constructor(
-    public payload: { taskId: string; taskAttachment: Update<TaskAttachment> },
-  ) {}
-}
-
-export class DeleteTaskAttachment implements Action {
-  readonly type: string = TaskAttachmentActionTypes.DeleteTaskAttachment;
-
-  constructor(public payload: { taskId: string; id: string }) {}
-}
-
-export type TaskAttachmentActions =
-  | AddTaskAttachment
-  | UpdateTaskAttachment
-  | DeleteTaskAttachment;
+export const deleteTaskAttachment = createAction(
+  '[TaskAttachment] Delete TaskAttachment',
+  props<{ taskId: string; id: string }>(),
+);

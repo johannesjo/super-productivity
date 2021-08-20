@@ -6,9 +6,9 @@ import { DialogEditTaskAttachmentComponent } from './dialog-edit-attachment/dial
 import { MatDialog } from '@angular/material/dialog';
 import { DropPasteInput } from '../../../core/drop-paste-input/drop-paste.model';
 import {
-  AddTaskAttachment,
-  DeleteTaskAttachment,
-  UpdateTaskAttachment,
+  addTaskAttachment,
+  deleteTaskAttachment,
+  updateTaskAttachment,
 } from './task-attachment.actions';
 import { TaskState } from '../task.model';
 import { createFromDrop } from 'src/app/core/drop-paste-input/drop-paste-input';
@@ -26,7 +26,7 @@ export class TaskAttachmentService {
     }
 
     this._store$.dispatch(
-      new AddTaskAttachment({
+      addTaskAttachment({
         taskId,
         taskAttachment: {
           ...taskAttachment,
@@ -37,12 +37,12 @@ export class TaskAttachmentService {
   }
 
   deleteAttachment(taskId: string, id: string): void {
-    this._store$.dispatch(new DeleteTaskAttachment({ taskId, id }));
+    this._store$.dispatch(deleteTaskAttachment({ taskId, id }));
   }
 
   updateAttachment(taskId: string, id: string, changes: Partial<TaskAttachment>): void {
     this._store$.dispatch(
-      new UpdateTaskAttachment({ taskId, taskAttachment: { id, changes } }),
+      updateTaskAttachment({ taskId, taskAttachment: { id, changes } }),
     );
   }
 

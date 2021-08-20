@@ -5,10 +5,14 @@ import { select, Store } from '@ngrx/store';
 import { tap, withLatestFrom } from 'rxjs/operators';
 import { PersistenceService } from '../../../core/persistence/persistence.service';
 import { selectTaskFeatureState } from './task.selectors';
-import { TaskAttachmentActionTypes } from '../task-attachment/task-attachment.actions';
 import { TaskState } from '../task.model';
 import { environment } from '../../../../environments/environment';
 import { addTaskRepeatCfgToTask } from '../../task-repeat-cfg/store/task-repeat-cfg.actions';
+import {
+  addTaskAttachment,
+  deleteTaskAttachment,
+  updateTaskAttachment,
+} from '../task-attachment/task-attachment.actions';
 
 @Injectable()
 export class TaskDbEffects {
@@ -41,10 +45,10 @@ export class TaskDbEffects {
       TaskActionTypes.ReScheduleTask,
       TaskActionTypes.UnScheduleTask,
 
-      // SUB ACTIONS
-      TaskAttachmentActionTypes.AddTaskAttachment,
-      TaskAttachmentActionTypes.DeleteTaskAttachment,
-      TaskAttachmentActionTypes.UpdateTaskAttachment,
+      // ATTACHMENT ACTIONS
+      addTaskAttachment,
+      deleteTaskAttachment,
+      updateTaskAttachment,
 
       // RELATED ACTIONS
       addTaskRepeatCfgToTask,
