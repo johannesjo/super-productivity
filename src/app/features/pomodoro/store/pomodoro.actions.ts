@@ -1,6 +1,6 @@
-import { Action } from '@ngrx/store';
+import { createAction, props } from '@ngrx/store';
 
-export enum PomodoroActionTypes {
+enum PomodoroActionTypes {
   'StartPomodoro' = '[Pomodoro] Start Pomodoro',
   'PausePomodoro' = '[Pomodoro] Pause Pomodoro',
   'StopPomodoro' = '[Pomodoro] Stop Pomodoro',
@@ -8,32 +8,15 @@ export enum PomodoroActionTypes {
   'SkipPomodoroBreak' = '[Pomodoro] Skip Break',
 }
 
-export class StartPomodoro implements Action {
-  readonly type: string = PomodoroActionTypes.StartPomodoro;
-}
+export const startPomodoro = createAction(PomodoroActionTypes.StartPomodoro);
+export const pausePomodoro = createAction(
+  PomodoroActionTypes.PausePomodoro,
+  props<{ isBreakEndPause: boolean }>(),
+);
 
-export class PausePomodoro implements Action {
-  readonly type: string = PomodoroActionTypes.PausePomodoro;
-
-  constructor(public payload: { isBreakEndPause: boolean }) {}
-}
-
-export class StopPomodoro implements Action {
-  readonly type: string = PomodoroActionTypes.StopPomodoro;
-}
-
-export class FinishPomodoroSession implements Action {
-  readonly type: string = PomodoroActionTypes.FinishPomodoroSession;
-}
-
+export const stopPomodoro = createAction(PomodoroActionTypes.StopPomodoro);
+export const finishPomodoroSession = createAction(
+  PomodoroActionTypes.FinishPomodoroSession,
+);
 // currently only used to notify simple counters
-export class SkipPomodoroBreak implements Action {
-  readonly type: string = PomodoroActionTypes.SkipPomodoroBreak;
-}
-
-export type PomodoroActions =
-  | StartPomodoro
-  | PausePomodoro
-  | StopPomodoro
-  | SkipPomodoroBreak
-  | FinishPomodoroSession;
+export const skipPomodoroBreak = createAction(PomodoroActionTypes.SkipPomodoroBreak);

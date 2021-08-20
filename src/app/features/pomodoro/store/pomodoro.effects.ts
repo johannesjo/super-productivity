@@ -7,13 +7,12 @@ import {
 } from '../../tasks/store/task.actions';
 import { concatMap, filter, mapTo, switchMap, tap, withLatestFrom } from 'rxjs/operators';
 import { PomodoroService } from '../pomodoro.service';
-import { PomodoroConfig } from '../../config/global-config.model';
 import {
-  FinishPomodoroSession,
-  PausePomodoro,
-  PomodoroActionTypes,
-  SkipPomodoroBreak,
-  StartPomodoro,
+  finishPomodoroSession,
+  pausePomodoro,
+  skipPomodoroBreak,
+  startPomodoro,
+  stopPomodoro,
 } from './pomodoro.actions';
 import { MatDialog } from '@angular/material/dialog';
 import { DialogPomodoroBreakComponent } from '../dialog-pomodoro-break/dialog-pomodoro-break.component';
@@ -56,11 +55,11 @@ export class PomodoroEffects {
           concatMap(([action, , isBreak, currentSessionTime]) => {
             if ((action as any)?.id && action.type !== unsetCurrentTask.type) {
               if (isBreak && currentSessionTime <= 0) {
-                return of(new FinishPomodoroSession(), new StartPomodoro());
+                return of(finishPomodoroSession(), startPomodoro());
               }
-              return of(new StartPomodoro());
+              return of(startPomodoro());
             } else {
-              return of(new PausePomodoro({ isBreakEndPause: false }));
+              return of(pausePomodoro({ isBreakEndPause: false }));
             }
           }),
         ),
@@ -74,18 +73,9 @@ export class PomodoroEffects {
         !isEnabledI
           ? EMPTY
           : this._actions$.pipe(
-              ofType(
-                PomodoroActionTypes.FinishPomodoroSession,
-                PomodoroActionTypes.SkipPomodoroBreak,
-              ),
+              ofType(finishPomodoroSession, skipPomodoroBreak),
               withLatestFrom(this._pomodoroService.isBreak$, this.currentTaskId$),
-              filter(
-                ([action, isBreak, currentTaskId]: [
-                  FinishPomodoroSession,
-                  boolean,
-                  string | null,
-                ]) => !isBreak && !currentTaskId,
-              ),
+              filter(([action, isBreak, currentTaskId]) => !isBreak && !currentTaskId),
               mapTo(toggleStart()),
             ),
       ),
@@ -97,10 +87,7 @@ export class PomodoroEffects {
       switchMap((isEnabledI) =>
         !isEnabledI
           ? EMPTY
-          : this._actions$.pipe(
-              ofType(PomodoroActionTypes.StopPomodoro),
-              mapTo(unsetCurrentTask()),
-            ),
+          : this._actions$.pipe(ofType(stopPomodoro), mapTo(unsetCurrentTask())),
       ),
     ),
   );
@@ -111,15 +98,9 @@ export class PomodoroEffects {
         !isEnabledI
           ? EMPTY
           : this._actions$.pipe(
-              ofType(PomodoroActionTypes.FinishPomodoroSession),
+              ofType(finishPomodoroSession),
               withLatestFrom(this._pomodoroService.cfg$, this._pomodoroService.isBreak$),
-              filter(
-                ([action, cfg, isBreak]: [
-                  FinishPomodoroSession,
-                  PomodoroConfig,
-                  boolean,
-                ]) => cfg.isStopTrackingOnBreak && isBreak,
-              ),
+              filter(([action, cfg, isBreak]) => cfg.isStopTrackingOnBreak && isBreak),
               mapTo(unsetCurrentTask()),
             ),
       ),
@@ -133,32 +114,21 @@ export class PomodoroEffects {
           !isEnabledI
             ? EMPTY
             : this._actions$.pipe(
-                ofType(
-                  PomodoroActionTypes.PausePomodoro,
-                  PomodoroActionTypes.FinishPomodoroSession,
-                  PomodoroActionTypes.SkipPomodoroBreak,
-                ),
+                ofType(pausePomodoro, finishPomodoroSession, skipPomodoroBreak),
                 withLatestFrom(
                   this._pomodoroService.cfg$,
                   this._pomodoroService.isBreak$,
                 ),
-                filter(
-                  ([action, cfg, isBreak]: [
-                    FinishPomodoroSession | PausePomodoro | SkipPomodoroBreak,
-                    PomodoroConfig,
-                    boolean,
-                  ]) => {
-                    return (
-                      ((action.type === PomodoroActionTypes.FinishPomodoroSession ||
-                        action.type === PomodoroActionTypes.SkipPomodoroBreak) &&
-                        cfg.isPlaySound &&
-                        isBreak) ||
-                      (cfg.isPlaySoundAfterBreak && !cfg.isManualContinue && !isBreak) ||
-                      (action.type === PomodoroActionTypes.PausePomodoro &&
-                        (action as PausePomodoro).payload.isBreakEndPause)
-                    );
-                  },
-                ),
+                filter(([a, cfg, isBreak]) => {
+                  return (
+                    ((a.type === finishPomodoroSession.type ||
+                      a.type === skipPomodoroBreak.type) &&
+                      cfg.isPlaySound &&
+                      isBreak) ||
+                    (cfg.isPlaySoundAfterBreak && !cfg.isManualContinue && !isBreak) ||
+                    (a.type === pausePomodoro.type && a.isBreakEndPause)
+                  );
+                }),
                 tap(() => this._pomodoroService.playSessionDoneSound()),
               ),
         ),
@@ -172,9 +142,9 @@ export class PomodoroEffects {
         !isEnabledI
           ? EMPTY
           : this._actions$.pipe(
-              ofType(PomodoroActionTypes.PausePomodoro),
+              ofType(pausePomodoro),
               withLatestFrom(this.currentTaskId$),
-              filter(([act, currentTaskId]) => !!currentTaskId),
+              filter(([, currentTaskId]) => !!currentTaskId),
               mapTo(unsetCurrentTask()),
             ),
       ),
@@ -188,9 +158,9 @@ export class PomodoroEffects {
           !isEnabledI
             ? EMPTY
             : this._actions$.pipe(
-                ofType(PomodoroActionTypes.FinishPomodoroSession),
+                ofType(finishPomodoroSession),
                 withLatestFrom(this._pomodoroService.isBreak$),
-                tap(([action, isBreak]: [FinishPomodoroSession, boolean]) => {
+                tap(([action, isBreak]) => {
                   if (isBreak) {
                     this._matDialog.open(DialogPomodoroBreakComponent);
                   }
@@ -208,52 +178,31 @@ export class PomodoroEffects {
           !isEnabledI
             ? EMPTY
             : this._actions$.pipe(
-                ofType(
-                  PomodoroActionTypes.FinishPomodoroSession,
-                  PomodoroActionTypes.SkipPomodoroBreak,
-                ),
+                ofType(finishPomodoroSession, skipPomodoroBreak),
                 withLatestFrom(
                   this._pomodoroService.isBreak$,
                   this._pomodoroService.isManualPause$,
                   this._pomodoroService.currentCycle$,
                 ),
-                tap(
-                  ([action, isBreak, isPause, currentCycle]: [
-                    FinishPomodoroSession,
-                    boolean,
-                    boolean,
-                    number,
-                  ]) =>
-                    // TODO only notify if window is not currently focused
-                    this._notifyService.notifyDesktop({
-                      title: isBreak
-                        ? T.F.POMODORO.NOTIFICATION.BREAK_X_START
-                        : T.F.POMODORO.NOTIFICATION.SESSION_X_START,
-                      translateParams: { nr: `${currentCycle + 1}` },
-                    }),
+                tap(([action, isBreak, isPause, currentCycle]) =>
+                  // TODO only notify if window is not currently focused
+                  this._notifyService.notifyDesktop({
+                    title: isBreak
+                      ? T.F.POMODORO.NOTIFICATION.BREAK_X_START
+                      : T.F.POMODORO.NOTIFICATION.SESSION_X_START,
+                    translateParams: { nr: `${currentCycle + 1}` },
+                  }),
                 ),
                 filter(
-                  ([action, isBreak, isPause, currentCycle]: [
-                    FinishPomodoroSession,
-                    boolean,
-                    boolean,
-                    number,
-                  ]) => !isBreak && !isPause,
+                  ([action, isBreak, isPause, currentCycle]) => !isBreak && !isPause,
                 ),
-                tap(
-                  ([action, isBreak, isPause, currentCycle]: [
-                    FinishPomodoroSession,
-                    boolean,
-                    boolean,
-                    number,
-                  ]) => {
-                    this._snackService.open({
-                      ico: 'timer',
-                      msg: T.F.POMODORO.NOTIFICATION.SESSION_X_START,
-                      translateParams: { nr: `${currentCycle + 1}` },
-                    });
-                  },
-                ),
+                tap(([action, isBreak, isPause, currentCycle]) => {
+                  this._snackService.open({
+                    ico: 'timer',
+                    msg: T.F.POMODORO.NOTIFICATION.SESSION_X_START,
+                    translateParams: { nr: `${currentCycle + 1}` },
+                  });
+                }),
               ),
         ),
       ),

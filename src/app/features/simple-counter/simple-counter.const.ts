@@ -1,6 +1,11 @@
 import { SimpleCounter, SimpleCounterType } from './simple-counter.model';
 import { loadAllData } from '../../root-store/meta/load-all-data.action';
-import { PomodoroActionTypes } from '../pomodoro/store/pomodoro.actions';
+import {
+  finishPomodoroSession,
+  pausePomodoro,
+  startPomodoro,
+  stopPomodoro,
+} from '../pomodoro/store/pomodoro.actions';
 import { setCurrentTask, unsetCurrentTask } from '../tasks/store/task.actions';
 
 export const EMPTY_SIMPLE_COUNTER: SimpleCounter = {
@@ -44,10 +49,8 @@ export const SIMPLE_COUNTER_TRIGGER_ACTIONS: string[] = [
   loadAllData.type,
   setCurrentTask.type,
   unsetCurrentTask.type,
-  PomodoroActionTypes.StartPomodoro,
-  PomodoroActionTypes.PausePomodoro,
-  PomodoroActionTypes.StopPomodoro,
-  PomodoroActionTypes.FinishPomodoroSession,
-
-  // TaskActionTypes.
+  startPomodoro.type,
+  pausePomodoro.type,
+  stopPomodoro.type,
+  finishPomodoroSession.type,
 ];

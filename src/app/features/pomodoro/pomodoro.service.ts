@@ -14,12 +14,11 @@ import {
 import { PomodoroConfig, SoundConfig } from '../config/global-config.model';
 import { select, Store } from '@ngrx/store';
 import {
-  FinishPomodoroSession,
-  PausePomodoro,
-  PomodoroActionTypes,
-  SkipPomodoroBreak,
-  StartPomodoro,
-  StopPomodoro,
+  finishPomodoroSession,
+  pausePomodoro,
+  skipPomodoroBreak,
+  startPomodoro,
+  stopPomodoro,
 } from './store/pomodoro.actions';
 import {
   selectCurrentCycle,
@@ -38,9 +37,7 @@ const DEFAULT_TICK_SOUND = 'assets/snd/tick.mp3';
   providedIn: 'root',
 })
 export class PomodoroService {
-  onStop$: Observable<any> = this._actions$.pipe(
-    ofType(PomodoroActionTypes.StopPomodoro),
-  );
+  onStop$: Observable<any> = this._actions$.pipe(ofType(stopPomodoro));
 
   cfg$: Observable<PomodoroConfig> = this._configService.cfg$.pipe(
     map((cfg) => cfg && cfg.pomodoro),
@@ -167,23 +164,23 @@ export class PomodoroService {
   }
 
   start(): void {
-    this._store$.dispatch(new StartPomodoro());
+    this._store$.dispatch(startPomodoro());
   }
 
   pause(isBreakEndPause: boolean = false): void {
-    this._store$.dispatch(new PausePomodoro({ isBreakEndPause }));
+    this._store$.dispatch(pausePomodoro({ isBreakEndPause }));
   }
 
   stop(): void {
-    this._store$.dispatch(new StopPomodoro());
+    this._store$.dispatch(stopPomodoro());
   }
 
   finishPomodoroSession(): void {
-    this._store$.dispatch(new FinishPomodoroSession());
+    this._store$.dispatch(finishPomodoroSession());
   }
 
   skipBreak(): void {
-    this._store$.dispatch(new SkipPomodoroBreak());
+    this._store$.dispatch(skipPomodoroBreak());
   }
 
   // NON STORE ACTIONS

@@ -1,5 +1,11 @@
-import { PomodoroActions, PomodoroActionTypes } from './pomodoro.actions';
-import { createFeatureSelector, createSelector } from '@ngrx/store';
+import { createFeatureSelector, createReducer, createSelector, on } from '@ngrx/store';
+import {
+  finishPomodoroSession,
+  pausePomodoro,
+  skipPomodoroBreak,
+  startPomodoro,
+  stopPomodoro,
+} from './pomodoro.actions';
 
 export const POMODORO_FEATURE_NAME = 'pomodoro';
 
@@ -31,43 +37,35 @@ export const selectCurrentCycle = createSelector(
   (state) => state.currentCycle,
 );
 
-export const pomodoroReducer = (
-  state: PomodoroState = initialPomodoroState,
-  action: PomodoroActions,
-): PomodoroState => {
-  switch (action.type) {
-    case PomodoroActionTypes.StartPomodoro: {
-      return {
-        ...state,
-        isManualPause: false,
-      };
-    }
+export const pomodoroReducer = createReducer<PomodoroState>(
+  initialPomodoroState,
+  on(startPomodoro, (state) => {
+    return {
+      ...state,
+      isManualPause: false,
+    };
+  }),
 
-    case PomodoroActionTypes.PausePomodoro: {
-      return {
-        ...state,
-        isManualPause: true,
-      };
-    }
+  on(pausePomodoro, (state) => {
+    return {
+      ...state,
+      isManualPause: true,
+    };
+  }),
 
-    case PomodoroActionTypes.StopPomodoro: {
-      return {
-        isManualPause: true,
-        isBreak: false,
-        currentCycle: 0,
-      };
-    }
+  on(stopPomodoro, () => {
+    return {
+      isManualPause: true,
+      isBreak: false,
+      currentCycle: 0,
+    };
+  }),
 
-    case PomodoroActionTypes.SkipPomodoroBreak:
-    case PomodoroActionTypes.FinishPomodoroSession: {
-      return {
-        ...state,
-        isBreak: !state.isBreak,
-        currentCycle: state.isBreak ? state.currentCycle + 1 : state.currentCycle,
-      };
-    }
-
-    default:
-      return state;
-  }
-};
+  on(finishPomodoroSession, skipPomodoroBreak, (state) => {
+    return {
+      ...state,
+      isBreak: !state.isBreak,
+      currentCycle: state.isBreak ? state.currentCycle + 1 : state.currentCycle,
+    };
+  }),
+);
