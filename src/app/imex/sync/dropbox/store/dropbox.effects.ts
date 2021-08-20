@@ -6,14 +6,11 @@ import { DataInitService } from '../../../../core/data-init/data-init.service';
 import { SnackService } from '../../../../core/snack/snack.service';
 import { EMPTY, from, Observable, of } from 'rxjs';
 import { filter, map, mergeMap, switchMap, withLatestFrom } from 'rxjs/operators';
-import {
-  GlobalConfigActionTypes,
-  UpdateGlobalConfigSection,
-} from '../../../../features/config/store/global-config.actions';
 import { SyncConfig } from '../../../../features/config/global-config.model';
 import { SyncProvider } from '../../sync-provider.model';
 import { triggerDropboxAuthDialog } from './dropbox.actions';
 import { GlobalConfigService } from '../../../../features/config/global-config.service';
+import { updateGlobalConfigSection } from '../../../../features/config/store/global-config.actions';
 
 @Injectable()
 export class DropboxEffects {
@@ -26,7 +23,7 @@ export class DropboxEffects {
           mergeMap((accessToken) =>
             accessToken
               ? of(
-                  new UpdateGlobalConfigSection({
+                  updateGlobalConfigSection({
                     sectionKey: 'sync',
                     sectionCfg: {
                       ...sync,
@@ -46,11 +43,11 @@ export class DropboxEffects {
 
   triggerTokenDialog$: Observable<unknown> = createEffect(() =>
     this._actions$.pipe(
-      ofType(GlobalConfigActionTypes.UpdateGlobalConfigSection),
+      ofType(updateGlobalConfigSection),
       filter(
-        ({ payload }: UpdateGlobalConfigSection): boolean =>
-          payload.sectionKey === 'sync' &&
-          (payload.sectionCfg as SyncConfig).syncProvider === SyncProvider.Dropbox,
+        ({ sectionKey, sectionCfg }): boolean =>
+          sectionKey === 'sync' &&
+          (sectionCfg as SyncConfig).syncProvider === SyncProvider.Dropbox,
       ),
       withLatestFrom(this._dropboxApiService.isTokenAvailable$),
       filter(([, isTokenAvailable]) => !isTokenAvailable),

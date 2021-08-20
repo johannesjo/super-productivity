@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { select, Store } from '@ngrx/store';
-import { GlobalConfigActionTypes } from './store/global-config.actions';
+import { updateGlobalConfigSection } from './store/global-config.actions';
 import { Observable } from 'rxjs';
 import {
   EvaluationConfig,
@@ -80,12 +80,11 @@ export class GlobalConfigService {
     sectionKey: GlobalConfigSectionKey,
     sectionCfg: Partial<GlobalSectionConfig>,
   ): void {
-    this._store.dispatch({
-      type: GlobalConfigActionTypes.UpdateGlobalConfigSection,
-      payload: {
+    this._store.dispatch(
+      updateGlobalConfigSection({
         sectionKey,
         sectionCfg,
-      },
-    });
+      }),
+    );
   }
 }

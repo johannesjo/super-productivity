@@ -2,10 +2,6 @@ import { Injectable } from '@angular/core';
 import { EMPTY, Observable, of, throwError } from 'rxjs';
 import { catchError, concatMap, filter, map, switchMap, tap } from 'rxjs/operators';
 import { Actions, Effect, ofType } from '@ngrx/effects';
-import {
-  GlobalConfigActionTypes,
-  UpdateGlobalConfigSection,
-} from '../../../../features/config/store/global-config.actions';
 import { SyncConfig } from '../../../../features/config/global-config.model';
 import { SnackService } from '../../../../core/snack/snack.service';
 import { T } from '../../../../t.const';
@@ -15,16 +11,15 @@ import { MatDialog } from '@angular/material/dialog';
 import { DEFAULT_SYNC_FILE_NAME } from '../google.const';
 import { SyncProvider } from '../../sync-provider.model';
 import { HANDLED_ERROR_PROP_STR } from '../../../../app.constants';
+import { updateGlobalConfigSection } from '../../../../features/config/store/global-config.actions';
 
 @Injectable()
 export class GoogleDriveSyncEffects {
   @Effect() createSyncFile$: any = this._actions$.pipe(
-    ofType(GlobalConfigActionTypes.UpdateGlobalConfigSection),
-    filter(
-      ({ payload }: UpdateGlobalConfigSection): boolean => payload.sectionKey === 'sync',
-    ),
-    map(({ payload }) => payload.sectionCfg as SyncConfig),
-    filter((syncConfig: SyncConfig) => {
+    ofType(updateGlobalConfigSection),
+    filter(({ sectionKey }): boolean => sectionKey === 'sync'),
+    filter(({ sectionCfg }) => {
+      const syncConfig: SyncConfig = sectionCfg as SyncConfig;
       return (
         syncConfig.isEnabled &&
         syncConfig.syncProvider === SyncProvider.GoogleDrive &&
@@ -35,9 +30,9 @@ export class GoogleDriveSyncEffects {
       );
     }),
     switchMap(
-      (
-        syncConfig: SyncConfig,
-      ): Observable<
+      ({
+        sectionCfg,
+      }): Observable<
         | {
             syncFileName: string;
             _backupDocId: string;
@@ -46,6 +41,7 @@ export class GoogleDriveSyncEffects {
           }
         | never
       > => {
+        const syncConfig: SyncConfig = sectionCfg as SyncConfig;
         const newFileName =
           syncConfig.googleDriveSync.syncFileName || DEFAULT_SYNC_FILE_NAME;
         return this._googleApiService.findFile$(newFileName).pipe(
@@ -129,7 +125,7 @@ export class GoogleDriveSyncEffects {
         _syncFileNameForBackupDocId: string;
         sync: SyncConfig;
       }) =>
-        new UpdateGlobalConfigSection({
+        updateGlobalConfigSection({
           sectionKey: 'sync',
           sectionCfg: {
             ...sync,

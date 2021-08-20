@@ -1,19 +1,10 @@
-import { Action } from '@ngrx/store';
+import { createAction, props } from '@ngrx/store';
 import { GlobalConfigSectionKey, GlobalSectionConfig } from '../global-config.model';
 
-export enum GlobalConfigActionTypes {
-  'UpdateGlobalConfigSection' = '[Global Config] Update Global Config Section',
-}
-
-export class UpdateGlobalConfigSection implements Action {
-  readonly type: string = GlobalConfigActionTypes.UpdateGlobalConfigSection;
-
-  constructor(
-    public payload: {
-      sectionKey: GlobalConfigSectionKey;
-      sectionCfg: Partial<GlobalSectionConfig>;
-    },
-  ) {}
-}
-
-export type GlobalConfigActions = UpdateGlobalConfigSection;
+export const updateGlobalConfigSection = createAction(
+  '[Global Config] Update Global Config Section',
+  props<{
+    sectionKey: GlobalConfigSectionKey;
+    sectionCfg: Partial<GlobalSectionConfig>;
+  }>(),
+);

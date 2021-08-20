@@ -1,5 +1,5 @@
-import { GlobalConfigActions, GlobalConfigActionTypes } from './global-config.actions';
-import { createFeatureSelector, createSelector } from '@ngrx/store';
+import { updateGlobalConfigSection } from './global-config.actions';
+import { createFeatureSelector, createReducer, createSelector, on } from '@ngrx/store';
 import {
   EvaluationConfig,
   GlobalConfigState,
@@ -12,7 +12,6 @@ import {
 } from '../global-config.model';
 import { DEFAULT_GLOBAL_CONFIG } from '../default-global-config.const';
 import { loadAllData } from '../../../root-store/meta/load-all-data.action';
-import { AppDataComplete } from '../../../imex/sync/sync.model';
 import { migrateGlobalConfigState } from '../migrate-global-config.util';
 
 export const CONFIG_FEATURE_NAME = 'globalConfig';
@@ -47,37 +46,23 @@ export const selectTimelineConfig = createSelector(
   (cfg): TimelineConfig => cfg.timeline,
 );
 
-export const initialState: GlobalConfigState = DEFAULT_GLOBAL_CONFIG;
+const initialState: GlobalConfigState = DEFAULT_GLOBAL_CONFIG;
 
-export const globalConfigReducer = (
-  state: GlobalConfigState = initialState,
-  action: GlobalConfigActions,
-): GlobalConfigState => {
-  // console.log(action, state);
+export const globalConfigReducer = createReducer<GlobalConfigState>(
+  initialState,
 
-  // TODO fix this hackyness once we use the new syntax everywhere
-  if ((action.type as string) === loadAllData.type) {
-    const {
-      appDataComplete,
-    }: { appDataComplete: AppDataComplete; isOmitTokens: boolean } = action as any;
-    return appDataComplete.globalConfig
+  on(loadAllData, (oldState, { appDataComplete }) =>
+    appDataComplete.globalConfig
       ? migrateGlobalConfigState({ ...appDataComplete.globalConfig })
-      : state;
-  }
+      : oldState,
+  ),
 
-  switch (action.type) {
-    case GlobalConfigActionTypes.UpdateGlobalConfigSection:
-      const { sectionKey, sectionCfg } = action.payload;
-      return {
-        ...state,
-        [sectionKey]: {
-          // @ts-ignore
-          ...state[sectionKey],
-          ...sectionCfg,
-        },
-      };
-
-    default:
-      return state;
-  }
-};
+  on(updateGlobalConfigSection, (state, { sectionKey, sectionCfg }) => ({
+    ...state,
+    [sectionKey]: {
+      // @ts-ignore
+      ...state[sectionKey],
+      ...sectionCfg,
+    },
+  })),
+);
