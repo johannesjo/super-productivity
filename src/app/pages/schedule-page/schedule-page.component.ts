@@ -83,15 +83,16 @@ export class SchedulePageComponent {
   }
 
   private _startTaskFronCurrentProject(task: TaskWithReminderData): void {
+    // NOTE: reminder needs to be deleted first to avoid problems with "Missing reminder" devError
+    if (!!task.reminderId) {
+      this._taskService.unScheduleTask(task.id, task.reminderId);
+    }
     if (task.projectId) {
       if (!!task.parentId) {
         this._projectService.moveTaskToTodayList(task.parentId, task.projectId, true);
       } else {
         this._projectService.moveTaskToTodayList(task.id, task.projectId, true);
       }
-    }
-    if (!!task.reminderId) {
-      this._taskService.unScheduleTask(task.id, task.reminderId);
     }
     this._taskService.setCurrentId(task.id);
     this._router.navigate(['/active/tasks']);
