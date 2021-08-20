@@ -148,6 +148,7 @@ export class WorkViewComponent implements OnInit, OnDestroy, AfterContentInit {
         } else if (params.isInBacklog === 'true') {
           this.splitInputPos = 50;
         }
+        // NOTE: otherwise this is not triggered right away
         this._cd.detectChanges();
       }),
     );
