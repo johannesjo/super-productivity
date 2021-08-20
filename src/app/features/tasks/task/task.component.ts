@@ -741,6 +741,9 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
       this.workContextService.activeWorkContextType === WorkContextType.PROJECT
     ) {
       if (!this.task.parentId) {
+        ev.preventDefault();
+        // same default shortcut as timeline so we stop propagation
+        ev.stopPropagation();
         this.focusPrevious(true);
         this.moveToBacklog();
       }
@@ -752,6 +755,9 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
       this.workContextService.activeWorkContextType === WorkContextType.PROJECT
     ) {
       if (!this.task.parentId) {
+        ev.preventDefault();
+        // same default shortcut as timeline so we stop propagation
+        ev.stopPropagation();
         this.focusNext(true);
         this.moveToToday();
       }
