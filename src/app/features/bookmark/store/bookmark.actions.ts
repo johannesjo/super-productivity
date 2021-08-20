@@ -1,67 +1,34 @@
-import { Action } from '@ngrx/store';
+import { createAction, props } from '@ngrx/store';
 import { Update } from '@ngrx/entity';
 import { Bookmark, BookmarkState } from '../bookmark.model';
 
-export enum BookmarkActionTypes {
-  'LoadBookmarkState' = '[Bookmark] Load Bookmark State',
-  'AddBookmark' = '[Bookmark] Add Bookmark',
-  'UpdateBookmark' = '[Bookmark] Update Bookmark',
-  'DeleteBookmark' = '[Bookmark] Delete Bookmark',
+export const loadBookmarkState = createAction(
+  '[Bookmark] Load Bookmark State',
+  props<{ state: BookmarkState }>(),
+);
 
-  'ShowBookmarks' = '[Bookmark] Show Bookmarks',
-  'HideBookmarks' = '[Bookmark] Hide Bookmarks',
-  'ToggleBookmarks' = '[Bookmark] Toggle Bookmarks',
-  'ReorderBookmarks' = '[Bookmark] Reorder Bookmarks',
-}
+export const addBookmark = createAction(
+  '[Bookmark] Add Bookmark',
+  props<{ bookmark: Bookmark }>(),
+);
 
-export class LoadBookmarkState implements Action {
-  readonly type: string = BookmarkActionTypes.LoadBookmarkState;
+export const updateBookmark = createAction(
+  '[Bookmark] Update Bookmark',
+  props<{ bookmark: Update<Bookmark> }>(),
+);
 
-  constructor(public payload: { state: BookmarkState }) {}
-}
+export const deleteBookmark = createAction(
+  '[Bookmark] Delete Bookmark',
+  props<{ id: string }>(),
+);
 
-export class AddBookmark implements Action {
-  readonly type: string = BookmarkActionTypes.AddBookmark;
+export const showBookmarks = createAction('[Bookmark] Show Bookmarks');
 
-  constructor(public payload: { bookmark: Bookmark }) {}
-}
+export const hideBookmarks = createAction('[Bookmark] Hide Bookmarks');
 
-export class UpdateBookmark implements Action {
-  readonly type: string = BookmarkActionTypes.UpdateBookmark;
+export const toggleBookmarks = createAction('[Bookmark] Toggle Bookmarks');
 
-  constructor(public payload: { bookmark: Update<Bookmark> }) {}
-}
-
-export class DeleteBookmark implements Action {
-  readonly type: string = BookmarkActionTypes.DeleteBookmark;
-
-  constructor(public payload: { id: string }) {}
-}
-
-export class ShowBookmarks implements Action {
-  readonly type: string = BookmarkActionTypes.ShowBookmarks;
-}
-
-export class HideBookmarks implements Action {
-  readonly type: string = BookmarkActionTypes.HideBookmarks;
-}
-
-export class ToggleBookmarks implements Action {
-  readonly type: string = BookmarkActionTypes.ToggleBookmarks;
-}
-
-export class ReorderBookmarks implements Action {
-  readonly type: string = BookmarkActionTypes.ReorderBookmarks;
-
-  constructor(public payload: { ids: string[] }) {}
-}
-
-export type BookmarkActions =
-  | LoadBookmarkState
-  | AddBookmark
-  | UpdateBookmark
-  | DeleteBookmark
-  | ShowBookmarks
-  | HideBookmarks
-  | ToggleBookmarks
-  | ReorderBookmarks;
+export const reorderBookmarks = createAction(
+  '[Bookmark] Reorder Bookmarks',
+  props<{ ids: string[] }>(),
+);

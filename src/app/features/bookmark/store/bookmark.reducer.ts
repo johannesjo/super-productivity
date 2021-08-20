@@ -1,15 +1,16 @@
 import { createEntityAdapter, EntityAdapter } from '@ngrx/entity';
 import {
-  AddBookmark,
-  BookmarkActions,
-  BookmarkActionTypes,
-  DeleteBookmark,
-  LoadBookmarkState,
-  ReorderBookmarks,
-  UpdateBookmark,
+  addBookmark,
+  deleteBookmark,
+  hideBookmarks,
+  loadBookmarkState,
+  reorderBookmarks,
+  showBookmarks,
+  toggleBookmarks,
+  updateBookmark,
 } from './bookmark.actions';
 import { Bookmark, BookmarkState } from '../bookmark.model';
-import { createFeatureSelector, createSelector } from '@ngrx/store';
+import { createFeatureSelector, createReducer, createSelector, on } from '@ngrx/store';
 
 export const BOOKMARK_FEATURE_NAME = 'bookmark';
 
@@ -29,53 +30,32 @@ export const initialBookmarkState: BookmarkState = adapter.getInitialState({
   isShowBookmarks: false,
 });
 
-export const bookmarkReducer = (
-  state: BookmarkState = initialBookmarkState,
-  action: BookmarkActions,
-): BookmarkState => {
-  switch (action.type) {
-    case BookmarkActionTypes.AddBookmark: {
-      return adapter.addOne((action as AddBookmark).payload.bookmark, state);
-    }
+export const bookmarkReducer = createReducer<BookmarkState>(
+  initialBookmarkState,
 
-    case BookmarkActionTypes.UpdateBookmark: {
-      return adapter.updateOne((action as UpdateBookmark).payload.bookmark, state);
-    }
+  on(loadBookmarkState, (oldState, { state }) => state),
 
-    case BookmarkActionTypes.DeleteBookmark: {
-      return adapter.removeOne((action as DeleteBookmark).payload.id, state);
-    }
+  on(addBookmark, (state, { bookmark }) => adapter.addOne(bookmark, state)),
+  on(updateBookmark, (state, { bookmark }) => adapter.updateOne(bookmark, state)),
+  on(deleteBookmark, (state, { id }) => adapter.removeOne(id, state)),
 
-    case BookmarkActionTypes.LoadBookmarkState:
-      return { ...(action as LoadBookmarkState).payload.state };
+  on(showBookmarks, (state) => ({ ...state, isShowBookmarks: true })),
+  on(hideBookmarks, (state) => ({ ...state, isShowBookmarks: false })),
+  on(toggleBookmarks, (state) => ({ ...state, isShowBookmarks: !state.isShowBookmarks })),
 
-    case BookmarkActionTypes.ShowBookmarks:
-      return { ...state, isShowBookmarks: true };
-
-    case BookmarkActionTypes.HideBookmarks:
-      return { ...state, isShowBookmarks: false };
-
-    case BookmarkActionTypes.ToggleBookmarks:
-      return { ...state, isShowBookmarks: !state.isShowBookmarks };
-
-    case BookmarkActionTypes.ReorderBookmarks: {
-      const oldIds = state.ids as string[];
-      const newIds = (action as ReorderBookmarks).payload.ids as string[];
-      if (!oldIds || !newIds) {
-        return state;
-      }
-
-      // check if we have the same values inside the arrays
-      if (oldIds.slice(0).sort().join(',') === newIds.slice(0).sort().join(',')) {
-        return { ...state, ids: newIds };
-      } else {
-        console.error('Bookmark lost while reordering. Not executing reorder');
-        return state;
-      }
-    }
-
-    default: {
+  on(reorderBookmarks, (state, { ids }) => {
+    const oldIds = state.ids as string[];
+    const newIds = ids;
+    if (!oldIds || !newIds) {
       return state;
     }
-  }
-};
+
+    // check if we have the same values inside the arrays
+    if (oldIds.slice(0).sort().join(',') === newIds.slice(0).sort().join(',')) {
+      return { ...state, ids: newIds };
+    } else {
+      console.error('Bookmark lost while reordering. Not executing reorder');
+      return state;
+    }
+  }),
+);

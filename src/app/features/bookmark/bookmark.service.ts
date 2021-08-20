@@ -6,14 +6,14 @@ import {
   selectIsShowBookmarkBar,
 } from './store/bookmark.reducer';
 import {
-  AddBookmark,
-  DeleteBookmark,
-  HideBookmarks,
-  LoadBookmarkState,
-  ReorderBookmarks,
-  ShowBookmarks,
-  ToggleBookmarks,
-  UpdateBookmark,
+  addBookmark,
+  deleteBookmark,
+  hideBookmarks,
+  loadBookmarkState,
+  reorderBookmarks,
+  showBookmarks,
+  toggleBookmarks,
+  updateBookmark,
 } from './store/bookmark.actions';
 import { Observable } from 'rxjs';
 import { Bookmark, BookmarkState } from './bookmark.model';
@@ -48,12 +48,12 @@ export class BookmarkService {
   }
 
   loadState(state: BookmarkState): void {
-    this._store$.dispatch(new LoadBookmarkState({ state }));
+    this._store$.dispatch(loadBookmarkState({ state }));
   }
 
   addBookmark(bookmark: Bookmark): void {
     this._store$.dispatch(
-      new AddBookmark({
+      addBookmark({
         bookmark: {
           ...bookmark,
           id: shortid(),
@@ -63,27 +63,27 @@ export class BookmarkService {
   }
 
   deleteBookmark(id: string): void {
-    this._store$.dispatch(new DeleteBookmark({ id }));
+    this._store$.dispatch(deleteBookmark({ id }));
   }
 
   updateBookmark(id: string, changes: Partial<Bookmark>): void {
-    this._store$.dispatch(new UpdateBookmark({ bookmark: { id, changes } }));
+    this._store$.dispatch(updateBookmark({ bookmark: { id, changes } }));
   }
 
   showBookmarks(): void {
-    this._store$.dispatch(new ShowBookmarks());
+    this._store$.dispatch(showBookmarks());
   }
 
   hideBookmarks(): void {
-    this._store$.dispatch(new HideBookmarks());
+    this._store$.dispatch(hideBookmarks());
   }
 
   toggleBookmarks(): void {
-    this._store$.dispatch(new ToggleBookmarks());
+    this._store$.dispatch(toggleBookmarks());
   }
 
   reorderBookmarks(ids: string[]): void {
-    this._store$.dispatch(new ReorderBookmarks({ ids }));
+    this._store$.dispatch(reorderBookmarks({ ids }));
   }
 
   // HANDLE INPUT
