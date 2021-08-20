@@ -1,6 +1,7 @@
 import {
   AfterContentInit,
   ChangeDetectionStrategy,
+  ChangeDetectorRef,
   Component,
   ElementRef,
   Input,
@@ -97,6 +98,7 @@ export class WorkViewComponent implements OnInit, OnDestroy, AfterContentInit {
     private _dragulaService: DragulaService,
     private _activatedRoute: ActivatedRoute,
     private _projectService: ProjectService,
+    private _cd: ChangeDetectorRef,
   ) {}
 
   @ViewChild('splitTopEl', { read: ElementRef }) set splitTopElRef(ref: ElementRef) {
@@ -146,6 +148,7 @@ export class WorkViewComponent implements OnInit, OnDestroy, AfterContentInit {
         } else if (params.isInBacklog === 'true') {
           this.splitInputPos = 50;
         }
+        this._cd.detectChanges();
       }),
     );
   }
