@@ -1,4 +1,5 @@
 import {
+  AfterViewInit,
   ChangeDetectionStrategy,
   Component,
   EventEmitter,
@@ -12,6 +13,8 @@ import {
 } from '../../../features/tasks/task.model';
 import { standardListAnimation } from '../../../ui/animations/standard-list.ani';
 import { T } from '../../../t.const';
+import { Subject, timer } from 'rxjs';
+import { mapTo, switchMap } from 'rxjs/operators';
 
 @Component({
   selector: 'backlog',
@@ -20,8 +23,14 @@ import { T } from '../../../t.const';
   changeDetection: ChangeDetectionStrategy.OnPush,
   animations: [standardListAnimation],
 })
-export class BacklogComponent {
+export class BacklogComponent implements AfterViewInit {
   @Input() backlogTasks: TaskWithSubTasks[] = [];
+
+  private _readyTimerDuration$ = new Subject<number>();
+  ready$ = this._readyTimerDuration$.pipe(
+    switchMap((duration) => timer(duration)),
+    mapTo(true),
+  );
 
   @Output() closeBacklog: EventEmitter<any> = new EventEmitter<any>();
 
@@ -36,6 +45,18 @@ export class BacklogComponent {
   // backlogTasks$: Observable<TaskWithSubTasks[]> = this.taskService.backlogTasks$;
 
   constructor(public taskService: TaskService) {}
+
+  ngAfterViewInit(): void {
+    let initialDelay = 0;
+    if (this.backlogTasks.length > 99) {
+      initialDelay = 700;
+    } else if (this.backlogTasks.length > 30) {
+      initialDelay = 500;
+    } else if (this.backlogTasks.length > 15) {
+      initialDelay = 300;
+    }
+    this._readyTimerDuration$.next(initialDelay);
+  }
 
   trackByFn(i: number, task: TaskWithReminderData): string {
     return task.id;

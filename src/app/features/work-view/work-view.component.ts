@@ -59,7 +59,6 @@ export class WorkViewComponent implements OnInit, OnDestroy, AfterContentInit {
 
   isShowTimeWorkedWithoutBreak: boolean = true;
   splitInputPos: number = 100;
-  isPreloadBacklog: boolean = false;
   T: typeof T = T;
 
   // NOTE: not perfect but good enough for now

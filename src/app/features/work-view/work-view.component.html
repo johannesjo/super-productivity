@@ -198,8 +198,6 @@
       class="backlog"
     >
       <split
-        (mouseenter)="isPreloadBacklog=true"
-        (mouseleave)="isPreloadBacklog=false"
         (posChanged)="splitInputPos=$event"
         [containerEl]="containerEl"
         [counter]="backlogTasks?.length"
@@ -208,11 +206,7 @@
         [splitPos]="splitInputPos"
         [splitTopEl]="splitTopEl"
       ></split>
-      <div
-        *ngIf="isPreloadBacklog || splitInputPos!==100"
-        class="inner-wrapper"
-        style="user-select: none"
-      >
+      <div *ngIf="splitInputPos!==100" class="inner-wrapper" style="user-select: none">
         <backlog
           (closeBacklog)="splitInputPos=100"
           [backlogTasks]="backlogTasks"

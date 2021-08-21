@@ -1,5 +1,5 @@
 <div class="wrapper">
-  <div class="task-list-wrapper">
+  <div class="task-list-wrapper" *ngIf="(ready$|async) else spinner">
     <task-list
       [isBacklog]="true"
       [noTasksMsg]="T.BL.NO_TASKS|translate"
@@ -9,4 +9,7 @@
       listModelId="BACKLOG"
     ></task-list>
   </div>
+  <ng-template #spinner>
+    <full-page-spinner></full-page-spinner>
+  </ng-template>
 </div>
