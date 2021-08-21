@@ -10,6 +10,7 @@ import { TASK_FEATURE_NAME } from '../../features/tasks/store/task.reducer';
 import { TAG_FEATURE_NAME, tagAdapter } from '../../features/tag/store/tag.reducer';
 import { taskAdapter } from '../../features/tasks/store/task.adapter';
 import { Project } from '../../features/project/project.model';
+import { Action, ActionReducer } from '@ngrx/store/src/models';
 
 export interface UndoTaskDeleteState {
   projectId: string | null;
@@ -28,11 +29,13 @@ export interface UndoTaskDeleteState {
 
 let U_STORE: UndoTaskDeleteState;
 
-export const undoTaskDeleteMetaReducer = (reducer: any): any => {
-  return (state: RootState, action: any) => {
+export const undoTaskDeleteMetaReducer = (
+  reducer: ActionReducer<any, any>,
+): ActionReducer<any, any> => {
+  return (state: RootState, action: Action) => {
     switch (action.type) {
       case deleteTask.type:
-        U_STORE = _createTaskDeleteState(state, action.payload.task);
+        U_STORE = _createTaskDeleteState(state, (action as any).task);
         return reducer(state, action);
 
       case undoDeleteTask.type:
