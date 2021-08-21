@@ -291,10 +291,25 @@ task.split-task::ng-deep .box {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
+  z-index: 5;
 
   .row:hover & {
     animation: fadeIn $transition-duration--enter $ani-enter-timing;
     display: flex;
+  }
+}
+
+.scheduled-extra-btn {
+  position: absolute;
+  display: none;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+
+  .row:hover & {
+    animation: fadeIn $transition-duration--enter $ani-enter-timing;
+    display: block;
+    //transform: translate(-50%, -50%) scale(1.5);
   }
 }
 

@@ -15,6 +15,8 @@ import { DialogTimelineInitialSetupComponent } from './dialog-timeline-initial-s
 import { WorkContextService } from '../work-context/work-context.service';
 import { TaskRepeatCfgService } from '../task-repeat-cfg/task-repeat-cfg.service';
 import { Task } from '../tasks/task.model';
+import { DialogAddTaskReminderComponent } from '../tasks/dialog-add-task-reminder/dialog-add-task-reminder.component';
+import { AddTaskReminderInterface } from '../tasks/dialog-add-task-reminder/add-task-reminder-interface';
 
 @Component({
   selector: 'timeline',
@@ -106,5 +108,12 @@ export class TimelineComponent implements OnDestroy {
     this.taskService.moveDown(task.id, task.parentId, false);
     window.clearTimeout(this._moveDownTimeout);
     window.setTimeout(() => this.taskService.focusTask(task.id), 50);
+  }
+
+  editTaskReminder(task: Task): void {
+    // NOTE: this also might schedule an unscheduled sub task of a scheduled parent
+    this._matDialog.open(DialogAddTaskReminderComponent, {
+      data: { task } as AddTaskReminderInterface,
+    });
   }
 }
