@@ -9,7 +9,7 @@ const WORK_VIEW_URL = `${BASE}/`;
 const READY_TO_WORK_BTN = '.ready-to-work-btn';
 
 module.exports = {
-  '@tags': ['work-view', 'task'],
+  '@tags': ['work-view', 'task', 'task-standard'],
 
   'should add task via key combo': (browser: NBrowser) =>
     browser
@@ -81,4 +81,37 @@ module.exports = {
       .assert.visible(TASK)
       .assert.containsText(TASK, '0 test task lolo')
       .end(),
+
+  'should add 3 tasks from initial bar and remove 2 of them via the default keyboard shortcut':
+    (browser: NBrowser) =>
+      browser
+        .url(WORK_VIEW_URL)
+        .waitForElementVisible(ADD_TASK_INITIAL)
+
+        .setValue(ADD_TASK_INITIAL, '1 test task hihi')
+        .setValue(ADD_TASK_INITIAL, browser.Keys.ENTER)
+        .setValue(ADD_TASK_INITIAL, '2 some other task')
+        .setValue(ADD_TASK_INITIAL, browser.Keys.ENTER)
+        .setValue(ADD_TASK_INITIAL, '3 hihi some other task')
+        .setValue(ADD_TASK_INITIAL, browser.Keys.ENTER)
+
+        .waitForElementVisible(TASK)
+        .assert.visible(TASK)
+
+        // focus
+        .click(TASK + ':nth-child(3)')
+        // escape to cancel in case task title edit mode is triggered
+        .keys(browser.Keys.ESCAPE)
+        .keys(browser.Keys.BACK_SPACE)
+        .waitForElementNotPresent(TASK + ':nth-child(3)')
+
+        // focus
+        .click(TASK + ':nth-child(2)')
+        // escape to cancel in case task title edit mode is triggered
+        .keys(browser.Keys.ESCAPE)
+        .keys(browser.Keys.BACK_SPACE)
+        .waitForElementNotPresent(TASK + ':nth-child(2)')
+
+        .assert.containsText(TASK + ':nth-child(1)', '3 hihi some other task')
+        .end(),
 };
