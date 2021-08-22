@@ -11,7 +11,7 @@ body .mat-dialog-content {
   width: 100% !important;
   max-width: none !important;
   @include mq(xs) {
-    margin: $s*2;
+    margin: $s * 2;
     max-height: 95vh !important;
   }
 
@@ -29,7 +29,7 @@ body .mat-dialog-content {
 
 // overwrite mat typography
 .mat-dialog-title.mat-dialog-title {
-  font: 500 20px/32px Roboto, "Helvetica Neue", sans-serif;
+  font: 500 20px/32px Roboto, 'Helvetica Neue', sans-serif;
 }
 
 // NOTE: not really an overwrite but helpful
@@ -87,7 +87,6 @@ body .mat-form-field {
   background-color: rgba(var(--palette-accent-500), 1);
 }
 
-
 // BUTTONS
 // -------
 .mat-button-base,
@@ -118,7 +117,6 @@ body .mat-form-field {
   }
 }
 
-
 // CARD BG
 .isDarkTheme .mat-card {
   background: $dark-theme-card-bg;
@@ -128,21 +126,20 @@ body .mat-form-field {
   box-shadow: none;
 
   @include flatBox(true);
-
 }
-
 
 // HEADINGS
 body .mat-h1 {
-  margin-top: $s*1.5;
+  margin-top: $s * 1.5;
 }
 
 // BACKDROP FIX
-.mat-drawer-backdrop {
+.mat-drawer-backdrop.mat-drawer-backdrop.mat-drawer-backdrop {
   @include lightTheme(true) {
     background-color: $c-backdrop-light-theme;
   }
   @include darkTheme(true) {
-    background-color: $c-backdrop-dark-theme;
+    // NOTE: we use the light theme backdrop as a light backdrop doesn't make too much sense
+    background-color: $c-backdrop-light-theme;
   }
 }
