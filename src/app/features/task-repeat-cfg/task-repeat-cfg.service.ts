@@ -36,7 +36,6 @@ import { isValidSplitTime } from '../../util/is-valid-split-time';
 import { getDateTimeFromClockString } from '../../util/get-date-time-from-clock-string';
 import { isSameDay } from '../../util/is-same-day';
 import { remindOptionToMilliseconds } from '../tasks/util/remind-option-to-milliseconds';
-import { Action } from '@ngrx/store/src/models';
 
 @Injectable({
   providedIn: 'root',
@@ -162,7 +161,14 @@ export class TaskRepeatCfgService {
     currentTaskId: string | null,
     targetDayDate: number = Date.now(),
   ): // NOTE: updateTaskRepeatCfg missing as there is no way to declare it as action type
-  Promise<Action[]> {
+  Promise<
+    (
+      | ReturnType<typeof updateTask>
+      | ReturnType<typeof addTask>
+      | ReturnType<typeof updateTaskRepeatCfg>
+      | ReturnType<typeof scheduleTask>
+    )[]
+  > {
     // NOTE: there might be multiple configs in case something went wrong
     // we want to move all of them to the archive
     const existingTaskInstances: Task[] = await this._taskService
@@ -183,7 +189,7 @@ export class TaskRepeatCfgService {
     }
 
     // move all current left over instances to archive right away
-    const markAsDoneActions: Action[] = existingTaskInstances
+    const markAsDoneActions: ReturnType<typeof updateTask>[] = existingTaskInstances
       .filter(
         (taskI) =>
           !taskI.isDone &&
@@ -203,7 +209,11 @@ export class TaskRepeatCfgService {
 
     const { task, isAddToBottom } = this._getTaskRepeatTemplate(taskRepeatCfg);
 
-    const createNewActions: Action[] = [
+    const createNewActions: (
+      | ReturnType<typeof addTask>
+      | ReturnType<typeof updateTaskRepeatCfg>
+      | ReturnType<typeof scheduleTask>
+    )[] = [
       addTask({
         task,
         workContextType: this._workContextService

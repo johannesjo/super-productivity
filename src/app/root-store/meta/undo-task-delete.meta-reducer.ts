@@ -35,7 +35,10 @@ export const undoTaskDeleteMetaReducer = (
   return (state: RootState, action: Action) => {
     switch (action.type) {
       case deleteTask.type:
-        U_STORE = _createTaskDeleteState(state, (action as any).task);
+        U_STORE = _createTaskDeleteState(
+          state,
+          (action as ReturnType<typeof deleteTask>).task,
+        );
         return reducer(state, action);
 
       case undoDeleteTask.type:
