@@ -1,3 +1,33 @@
+## [7.5.2](https://github.com/johannesjo/super-productivity/compare/v7.5.1...v7.5.2) (2021-08-27)
+
+### Bug Fixes
+
+- Cannot redefine property: **@ngrx/effects_create** ([45ed9b5](https://github.com/johannesjo/super-productivity/commit/45ed9b54f5d761ec9be8aa68b62ebef8dda2e747))
+- devError for reminder ([3d98506](https://github.com/johannesjo/super-productivity/commit/3d98506afe24041a6892b9427807c3eb02436e8d))
+- move to today list shortcut not working ([3458b20](https://github.com/johannesjo/super-productivity/commit/3458b2077b6f281f595c13f9d9d209b89fb10bbf))
+- open backlog shortcut not working [#1455](https://github.com/johannesjo/super-productivity/issues/1455) ([04000ae](https://github.com/johannesjo/super-productivity/commit/04000ae5f402a6db3644c073905e3c882861a542))
+- **pomodoro:** setCurrentTask not working correctly here ([d364eea](https://github.com/johannesjo/super-productivity/commit/d364eea47d8104fcef2a32ad8b5a97d25c4b773b))
+- prevent "Editing sub task tags should not be possible" [#1462](https://github.com/johannesjo/super-productivity/issues/1462) ([6d2269f](https://github.com/johannesjo/super-productivity/commit/6d2269f278d14f9e48e63c42383335e8b14deee0))
+- problematic project move to today from invalid context [#1461](https://github.com/johannesjo/super-productivity/issues/1461) ([1fa64e2](https://github.com/johannesjo/super-productivity/commit/1fa64e2a49f8d884a0639ec198316ddd0702e634))
+- speed up backlog opening [#1455](https://github.com/johannesjo/super-productivity/issues/1455) ([cac285f](https://github.com/johannesjo/super-productivity/commit/cac285f41da5e756bd9f42f46a928aea2e6c66e1))
+- task delete/restore not working anymore ([a8bd75b](https://github.com/johannesjo/super-productivity/commit/a8bd75b04637c6bee0a45e5c0f00da6367953e33))
+- user-select none not working on safari [#1467](https://github.com/johannesjo/super-productivity/issues/1467) ([9fb4c7e](https://github.com/johannesjo/super-productivity/commit/9fb4c7e052d1e075101bd9b7e7361cf929a8ad3e))
+- weird task case error for add task bar ([3c9e36e](https://github.com/johannesjo/super-productivity/commit/3c9e36ec84143b280eec4468925c6ff5883c4274))
+
+### Features
+
+- add possibility to close edit tags dialog with ctrl+enter ([41d868d](https://github.com/johannesjo/super-productivity/commit/41d868dc1c0e396900a9cde1896409cd4fb42655))
+- **addTask:** add keyboard shortcut for add to top/bottom ([8c5b08d](https://github.com/johannesjo/super-productivity/commit/8c5b08d73cd352a1835edb45c59a29e363eb9b86))
+- **addTask:** improve context message ([83f2f64](https://github.com/johannesjo/super-productivity/commit/83f2f64211aa0675c167bd7aadd690e3ed20320a))
+- change timeline icon ([40f2564](https://github.com/johannesjo/super-productivity/commit/40f256456dbf92f276e70d7bbc88cef11ecb6a33))
+- **data:** add check for missing sub task data [#1426](https://github.com/johannesjo/super-productivity/issues/1426) ([51f6a5d](https://github.com/johannesjo/super-productivity/commit/51f6a5da022214ee548aa53d64cf731689aba3f6))
+- **electron:** improve file download experience [#1470](https://github.com/johannesjo/super-productivity/issues/1470) ([1615de4](https://github.com/johannesjo/super-productivity/commit/1615de4b7a792f8e53f69f64d4786d6017430674))
+- improve backlog handling ([f690dfd](https://github.com/johannesjo/super-productivity/commit/f690dfd5181c001d75d71e99bd1cba5f9b6b9c73))
+- improve side nav background ([deccaae](https://github.com/johannesjo/super-productivity/commit/deccaae1fff6938d7b6e2f9b02398386f64de411))
+- remove storage persistence warning for android ([14b5e9e](https://github.com/johannesjo/super-productivity/commit/14b5e9e1a8b32ce6985d630392935af1c87068de))
+- **timeline:** add clock instead of arrows to scheduled tasks for timeline ([d06ffe6](https://github.com/johannesjo/super-productivity/commit/d06ffe6c8a468a170fe29c2ca813f700a7f97e5e))
+- update text for loading story points [#1469](https://github.com/johannesjo/super-productivity/issues/1469) ([072a468](https://github.com/johannesjo/super-productivity/commit/072a468d01c778f0ebbf6dcfa14c91d6351c1512))
+
 ## [7.5.1](https://github.com/johannesjo/super-productivity/compare/v7.5.0...v7.5.1) (2021-08-16)
 
 ### Bug Fixes
