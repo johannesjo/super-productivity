@@ -14,14 +14,14 @@ WORKDIR /app
 # add `/app/node_modules/.bin` to $PATH
 ENV PATH /app/node_modules/.bin:$PATH
 
-RUN yarn
-RUN yarn global add @angular/cli
+RUN npm i
+RUN npm i -g @angular/cli
 
 # run linter
-RUN yarn lint
+RUN npm run lint
 
 # generate build
-RUN yarn buildFrontend:prodWeb
+RUN npm run buildFrontend:prodWeb
 
 ### serve ###
 
