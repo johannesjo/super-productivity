@@ -62,6 +62,7 @@
 .enlarged-image {
   z-index: 10;
   user-select: none;
+  -webkit-user-select: none; /* Safari */
   max-width: 100%;
   max-height: 100%;
   transform-origin: top left;
@@ -91,7 +92,6 @@
     transition: $transition-leave;
   }
 }
-
 
 @keyframes fadeIn {
   0% {

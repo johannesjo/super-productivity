@@ -101,6 +101,7 @@ $task-c-selected-bg-dark: $dark4;
   position: relative;
   overflow: visible;
   user-select: none;
+  -webkit-user-select: none; /* Safari */
   caret-color: #000000;
   z-index: $z-task-title;
 
@@ -136,6 +137,7 @@ $task-c-selected-bg-dark: $dark4;
   &:focus {
     z-index: $z-task-title-focus;
     user-select: all;
+    -webkit-user-select: all; /* Safari */
     // thee magic number is 16/14 so we scale to whole pixels
     transform: scale(1.142857143);
     transition: $transition-standard;

@@ -26,8 +26,8 @@
 
 mat-chip {
   user-select: none;
+  -webkit-user-select: none; /* Safari */
 }
-
 
 //mat-chip {
 .additional {

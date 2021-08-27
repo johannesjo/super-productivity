@@ -6,6 +6,7 @@ $summary-point-inner-margin: $s;
   ::ng-deep .mat-tab-labels {
     justify-content: center !important;
     user-select: none;
+    -webkit-user-select: none; /* Safari */
   }
 }
 

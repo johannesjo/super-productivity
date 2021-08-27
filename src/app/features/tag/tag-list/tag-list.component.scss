@@ -1,4 +1,4 @@
-@import "../../../../variables";
+@import '../../../../variables';
 
 :host {
   display: block;
@@ -9,7 +9,8 @@
   //margin-left: 50px;
   // Magic number to align icon with task text
   user-select: none;
-  margin: 0 0 ($s*.5) 4px;
+  -webkit-user-select: none; /* Safari */
+  margin: 0 0 ($s * 0.5) 4px;
 
   &.isDisableEdit {
     pointer-events: none;

@@ -26,6 +26,7 @@ $weird-task-list-f: 5px;
   align-items: center;
   border-radius: 16px;
   user-select: none;
+  -webkit-user-select: none; /* Safari */
   display: flex;
   font-weight: 500;
   font-size: 14px;
@@ -37,7 +38,6 @@ $weird-task-list-f: 5px;
   overflow: hidden;
   transition: $transition-fast;
   background: transparent;
-
 
   @include lightTheme() {
     border: 1px solid #333;
@@ -78,12 +78,14 @@ $weird-task-list-f: 5px;
     transform-origin: center center;
 
     @include lightTheme() {
-      color: rgba(var(--palette-foreground-text), var(--palette-foreground-text-alpha, 1));
+      color: rgba(
+        var(--palette-foreground-text),
+        var(--palette-foreground-text-alpha, 1)
+      );
     }
     @include darkTheme() {
       color: white;
     }
-
 
     &.dismiss {
       transform: translateX(-11px);
@@ -100,7 +102,6 @@ $weird-task-list-f: 5px;
       max-height: 32px;
     }
   }
-
 
   &:hover {
     button {

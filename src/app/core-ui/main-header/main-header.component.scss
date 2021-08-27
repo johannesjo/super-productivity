@@ -8,6 +8,7 @@ $macExtraPadding: (-8px + $mac-title-bar-padding);
   display: block;
   position: relative;
   user-select: none;
+  -webkit-user-select: none; /* Safari */
 }
 
 :host-context(.isMac.isElectron) {

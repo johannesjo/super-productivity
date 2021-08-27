@@ -218,6 +218,7 @@
   align-items: stretch;
   flex-wrap: nowrap;
   user-select: none;
+  -webkit-user-select: none; /* Safari */
   justify-content: space-between;
   min-height: $task-first-line-min-height;
   touch-action: pan-y;
@@ -871,6 +872,7 @@ $this-play-size: 22px;
 .isPreventPointerEventsWhilePanning {
   * {
     user-select: none !important;
+    -webkit-user-select: none !important; /* Safari */
     pointer-events: none !important;
     transition: none !important;
   }

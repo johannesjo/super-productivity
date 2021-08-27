@@ -7,9 +7,9 @@
 .collapsible-header {
   cursor: pointer;
   user-select: none;
+  -webkit-user-select: none; /* Safari */
   display: flex;
   flex-direction: row;
-
 
   &:focus {
     outline: none;
@@ -50,4 +50,3 @@
   padding: 0 !important;
   margin: 0 !important;
 }
-
