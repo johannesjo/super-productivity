@@ -277,7 +277,9 @@ export class AppComponent implements OnDestroy {
             return navigator.storage.persist().then((granted) => {
               if (granted) {
                 console.log('Persistent store granted');
-              } else {
+              }
+              // NOTE: we never execute for android web view, because it is always true
+              else if (!IS_ANDROID_WEB_VIEW) {
                 const msg = T.GLOBAL_SNACK.PERSISTENCE_DISALLOWED;
                 console.warn('Persistence not allowed');
                 this._snackService.open({ msg });
