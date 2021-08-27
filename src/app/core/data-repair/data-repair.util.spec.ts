@@ -1116,6 +1116,7 @@ describe('dataRepair()', () => {
     });
   });
 
+  // !!! NOTE: does not test, what it is supposed to
   it('should cleanup orphaned sub tasks', () => {
     const task = {
       ...mock.task,
@@ -1191,6 +1192,64 @@ describe('dataRepair()', () => {
             ...DEFAULT_TASK,
             id: 'as1',
             parentId: 'archiveTask1',
+            projectId: FAKE_PROJECT_ID,
+          },
+        ]),
+      } as any,
+    });
+  });
+
+  it('should cleanup missing sub tasks from their parent', () => {
+    const task = {
+      ...mock.task,
+      ...fakeEntityStateFromArray<Task>([
+        {
+          ...DEFAULT_TASK,
+          id: 'task1',
+          subTaskIds: ['s2GONE'],
+          projectId: FAKE_PROJECT_ID,
+        },
+      ]),
+    } as any;
+
+    const taskArchive = {
+      ...mock.taskArchive,
+      ...fakeEntityStateFromArray<Task>([
+        {
+          ...DEFAULT_TASK,
+          id: 'archiveTask1',
+          subTaskIds: ['as2GONE', 'other gone'],
+          projectId: FAKE_PROJECT_ID,
+        },
+      ]),
+    } as any;
+
+    expect(
+      dataRepair({
+        ...mock,
+        task,
+        taskArchive,
+      }),
+    ).toEqual({
+      ...mock,
+      task: {
+        ...mock.task,
+        ...fakeEntityStateFromArray<Task>([
+          {
+            ...DEFAULT_TASK,
+            id: 'task1',
+            subTaskIds: [],
+            projectId: FAKE_PROJECT_ID,
+          },
+        ]),
+      } as any,
+      taskArchive: {
+        ...mock.taskArchive,
+        ...fakeEntityStateFromArray<Task>([
+          {
+            ...DEFAULT_TASK,
+            id: 'archiveTask1',
+            subTaskIds: [],
             projectId: FAKE_PROJECT_ID,
           },
         ]),
