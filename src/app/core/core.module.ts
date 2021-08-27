@@ -7,6 +7,8 @@ import { RouterModule } from '@angular/router';
 import { LocalBackupModule } from '../imex/local-backup/local-backup.module';
 import { BannerModule } from './banner/banner.module';
 import { CompressionModule } from './compression/compression.module';
+import { EffectsModule } from '@ngrx/effects';
+import { ElectronEffects } from './electron/electron.effects';
 
 @NgModule({
   imports: [
@@ -18,6 +20,7 @@ import { CompressionModule } from './compression/compression.module';
     BannerModule,
     LocalBackupModule,
     CompressionModule,
+    EffectsModule.forFeature([ElectronEffects]),
   ],
   exports: [PersistenceModule, ChromeExtensionInterfaceModule, SnackModule, BannerModule],
 })

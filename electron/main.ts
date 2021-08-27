@@ -84,7 +84,14 @@ initDebug({ showDevTools: isShowDevTools }, IS_DEV);
 
 // NOTE: opening the folder crashes the mas build
 if (!IS_MAC) {
-  electronDl({ openFolderWhenDone: true });
+  electronDl({
+    openFolderWhenDone: true,
+    onCompleted: (file) => {
+      if (mainWin) {
+        mainWin.webContents.send(IPC.ANY_FILE_DOWNLOADED, file);
+      }
+    },
+  });
 }
 let mainWin: BrowserWindow;
 // keep app active to keep time tracking running
