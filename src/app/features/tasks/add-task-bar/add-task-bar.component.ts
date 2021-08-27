@@ -178,6 +178,10 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
             this.isAddToBacklog = !this.isAddToBacklog;
             this._cd.detectChanges();
             ev.preventDefault();
+          } else if (ev.key === '2' && ev.ctrlKey) {
+            this.isAddToBottom = !this.isAddToBottom;
+            this._cd.detectChanges();
+            ev.preventDefault();
           }
         },
       );
