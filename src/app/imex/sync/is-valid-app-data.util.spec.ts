@@ -211,7 +211,9 @@ describe('isValidAppData()', () => {
           task: taskState,
           taskArchive: taskArchiveState,
         }),
-      ).toThrowError(`Inconsistent Task State: Lonely Sub Task in Archive`);
+      ).toThrowError(
+        `Inconsistent Task State: Lonely Sub Task in Archive subTaskArchived`,
+      );
     });
 
     it('orphaned today sub tasks', () => {
@@ -253,7 +255,9 @@ describe('isValidAppData()', () => {
           task: taskState,
           taskArchive: taskArchiveState,
         }),
-      ).toThrowError(`Inconsistent Task State: Lonely Sub Task in Today`);
+      ).toThrowError(
+        `Inconsistent Task State: Lonely Sub Task in Today subTaskUnarchived`,
+      );
     });
 
     it('missing today sub tasks data', () => {
