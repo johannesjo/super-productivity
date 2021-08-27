@@ -76,7 +76,7 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
       withLatestFrom(this._workContextService.activeWorkContextTypeAndId$),
       switchMap(([searchTerm, { activeType, activeId }]) =>
         activeType === WorkContextType.PROJECT
-          ? this._searchForProject$(searchTerm)
+          ? this._searchForProject$(searchTerm, activeId)
           : this._searchForTag$(searchTerm, activeId),
       ) as any,
       // don't show issues twice
@@ -311,6 +311,7 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
       // so that backlog issues are found first
     } else if (item.taskId) {
       if (!item.projectId) {
+        console.log(item);
         throw new Error('Weird add task case1');
       }
       this._lastAddedTaskId = item.taskId;
@@ -388,6 +389,7 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
   // TODO improve typing
   private _searchForProject$(
     searchTerm: string,
+    projectId: string,
   ): Observable<(AddTaskSuggestion | SearchResultItem)[]> {
     if (searchTerm && searchTerm.length > 0) {
       const backlog$ = this._workContextService.backlogTasks$.pipe(
@@ -398,6 +400,7 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
               (task): AddTaskSuggestion => ({
                 title: task.title,
                 taskId: task.id,
+                projectId,
                 taskIssueId: task.issueId || undefined,
                 issueType: task.issueType || undefined,
               }),
