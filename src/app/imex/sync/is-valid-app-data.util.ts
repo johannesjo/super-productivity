@@ -34,6 +34,7 @@ export const isValidAppData = (d: AppDataComplete): boolean => {
     _isEntityStatesConsistent(d) &&
     _isAllTasksAvailableAndListConsistent(d) &&
     _isNoLonelySubTasks(d) &&
+    _isNoMissingSubTasks(d) &&
     _isAllProjectsAvailable(d) &&
     _isAllTagsAvailable(d) &&
     _isAllRemindersAvailable(d) &&
@@ -236,6 +237,37 @@ const _isNoLonelySubTasks = (data: AppDataComplete): boolean => {
       console.log(t);
       devError(`Inconsistent Task State: Lonely Sub Task in Archive`);
       isValid = false;
+    }
+  });
+
+  return isValid;
+};
+
+const _isNoMissingSubTasks = (data: AppDataComplete): boolean => {
+  let isValid: boolean = true;
+  data.task.ids.forEach((id: string) => {
+    const t: Task = data.task.entities[id] as Task;
+    if (t.subTaskIds.length) {
+      t.subTaskIds.forEach((subId) => {
+        if (!data.task.entities[subId]) {
+          console.log(t);
+          devError(`Inconsistent Task State: Missing sub task data in today ${subId}`);
+          isValid = false;
+        }
+      });
+    }
+  });
+
+  data.taskArchive.ids.forEach((id: string) => {
+    const t: Task = data.taskArchive.entities[id] as Task;
+    if (t.subTaskIds.length) {
+      t.subTaskIds.forEach((subId) => {
+        if (!data.taskArchive.entities[subId]) {
+          console.log(t);
+          devError(`Inconsistent Task State: Missing sub task data in archive ${subId}`);
+          isValid = false;
+        }
+      });
     }
   });
 

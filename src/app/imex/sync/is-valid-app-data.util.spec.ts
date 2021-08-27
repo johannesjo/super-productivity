@@ -256,6 +256,52 @@ describe('isValidAppData()', () => {
       ).toThrowError(`Inconsistent Task State: Lonely Sub Task in Today`);
     });
 
+    it('missing today sub tasks data', () => {
+      const taskState = {
+        ...mock.task,
+        ...fakeEntityStateFromArray<Task>([
+          {
+            ...DEFAULT_TASK,
+            id: 'subTaskUnarchived',
+            title: 'subTaskUnarchived',
+            subTaskIds: ['NOOT_THERE'],
+          },
+        ]),
+      } as any;
+      expect(() =>
+        isValidAppData({
+          ...mock,
+          // NOTE: it's empty
+          task: taskState,
+        }),
+      ).toThrowError(
+        `Inconsistent Task State: Missing sub task data in today NOOT_THERE`,
+      );
+    });
+
+    it('missing archive sub tasks data', () => {
+      const taskArchiveState = {
+        ...mock.taskArchive,
+        ...fakeEntityStateFromArray<Task>([
+          {
+            ...DEFAULT_TASK,
+            id: 'subTaskUnarchived',
+            title: 'subTaskUnarchived',
+            subTaskIds: ['NOOT_THERE'],
+          },
+        ]),
+      } as any;
+      expect(() =>
+        isValidAppData({
+          ...mock,
+          // NOTE: it's empty
+          taskArchive: taskArchiveState,
+        }),
+      ).toThrowError(
+        `Inconsistent Task State: Missing sub task data in archive NOOT_THERE`,
+      );
+    });
+
     it('missing tag for task', () => {
       expect(() =>
         isValidAppData({
