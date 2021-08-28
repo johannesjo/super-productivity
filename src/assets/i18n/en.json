@@ -381,6 +381,9 @@
         "MOOD_PRODUCTIVITY_OVER_TIME": "Mood and productivity over time",
         "NO_ADDITIONAL_DATA_YET": "No additional data collected yet. Use the form on the daily summary \"Evaluation\" panel to do so.",
         "OBSTRUCTION_SELECTION_COUNT": "Number of times an obstructing factor was selected",
+        "SIMPLE_COUNTERS": "Simple Counters",
+        "SIMPLE_CLICK_COUNTERS_OVER_TIME": "Click Counters over time",
+        "SIMPLE_STOPWATCH_COUNTERS_OVER_TIME": "Stopwatch Counters over time",
         "TASKS_DONE_CREATED": "Tasks (done/created)",
         "TIME_ESTIMATED": "Time Estimated",
         "TIME_SPENT": "Time Spent"

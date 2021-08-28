@@ -22,6 +22,12 @@ export class MetricComponent {
   productivityHappiness$: Observable<LineChartData> =
     this.metricService.getProductivityHappinessChartData$();
 
+  simpleClickCounterData$: Observable<LineChartData> =
+    this.metricService.getSimpleClickCounterMetrics$();
+
+  simpleCounterStopWatchData$: Observable<LineChartData> =
+    this.metricService.getSimpleCounterStopwatchMetrics$();
+
   pieChartOptions: ChartOptions = {
     responsive: true,
     legend: {

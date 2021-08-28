@@ -16,6 +16,8 @@ import {
   selectMetricHasData,
   selectObstructionCountsPieChartData,
   selectProductivityHappinessLineChartData,
+  selectSimpleCounterClickCounterLineChartData,
+  selectSimpleCounterStopWatchLineChartData,
 } from './store/metric.selectors';
 import { map, switchMap } from 'rxjs/operators';
 import { DEFAULT_METRIC_FOR_DAY } from './metric.const';
@@ -23,6 +25,7 @@ import {
   selectCheckedImprovementIdsForDay,
   selectRepeatedImprovementIds,
 } from './improvement/store/improvement.reducer';
+import { selectHasSimpleCounterData } from '../simple-counter/store/simple-counter.reducer';
 
 @Injectable({
   providedIn: 'root',
@@ -30,6 +33,9 @@ import {
 export class MetricService {
   // metrics$: Observable<Metric[]> = this._store$.pipe(select(selectAllMetrics));
   hasData$: Observable<boolean> = this._store$.pipe(select(selectMetricHasData));
+  hasSimpleCounterData$: Observable<boolean> = this._store$.pipe(
+    select(selectHasSimpleCounterData),
+  );
   state$: Observable<MetricState> = this._store$.pipe(select(selectMetricFeatureState));
   // lastTrackedMetric$: Observable<Metric> = this._store$.pipe(select(selectLastTrackedMetric));
   improvementCountsPieChartData$: Observable<PieChartData | null> = this._store$.pipe(
@@ -109,8 +115,14 @@ export class MetricService {
 
   // STATISTICS
   getProductivityHappinessChartData$(howMany: number = 20): Observable<LineChartData> {
-    return this._store$.pipe(
-      select(selectProductivityHappinessLineChartData, { howMany }),
-    );
+    return this._store$.select(selectProductivityHappinessLineChartData, { howMany });
+  }
+
+  getSimpleClickCounterMetrics$(howMany: number = 20): Observable<LineChartData> {
+    return this._store$.select(selectSimpleCounterClickCounterLineChartData, { howMany });
+  }
+
+  getSimpleCounterStopwatchMetrics$(howMany: number = 20): Observable<LineChartData> {
+    return this._store$.select(selectSimpleCounterStopWatchLineChartData, { howMany });
   }
 }

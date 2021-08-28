@@ -14,6 +14,11 @@ import {
 } from '../obstruction/store/obstruction.reducer';
 import { ObstructionState } from '../obstruction/obstruction.model';
 import { unique } from '../../../util/unique';
+import { selectAllSimpleCounters } from '../../simple-counter/store/simple-counter.reducer';
+import {
+  SimpleCounter,
+  SimpleCounterType,
+} from '../../simple-counter/simple-counter.model';
 
 export const selectMetricFeatureState =
   createFeatureSelector<MetricState>(METRIC_FEATURE_NAME);
@@ -221,6 +226,70 @@ export const selectProductivityHappinessLineChartData = createSelector(
         { data: (chart.data[0] as any).data.slice(f), label: chart.data[0].label },
         { data: (chart.data[1] as any).data.slice(f), label: chart.data[1].label },
       ],
+    };
+  },
+);
+
+export const selectSimpleCounterClickCounterLineChartData = createSelector(
+  selectAllSimpleCounters,
+  (simpleCounterItems: SimpleCounter[], props: { howMany: number }): LineChartData => {
+    const f = -1 * props.howMany;
+    const chart: LineChartData = {
+      labels: [],
+      data: [],
+    };
+    simpleCounterItems
+      .filter((item) => item.type === SimpleCounterType.ClickCounter)
+      .forEach((item, i) => {
+        const dateKeys = Object.keys(item.countOnDay);
+        const sorted = sortWorklogDates(dateKeys);
+        chart.data[i] = { data: [], label: item.title };
+        sorted.forEach((dateKey) => {
+          chart.labels.push(dateKey);
+          (chart as any).data[i].data.push(item.countOnDay[dateKey] as number);
+        });
+      });
+
+    return {
+      labels: sortWorklogDates(chart.labels as string[]).slice(f),
+      data: chart.data.map((item) => {
+        return {
+          ...item,
+          data: item.data?.slice(f),
+        };
+      }),
+    };
+  },
+);
+
+export const selectSimpleCounterStopWatchLineChartData = createSelector(
+  selectAllSimpleCounters,
+  (simpleCounterItems: SimpleCounter[], props: { howMany: number }): LineChartData => {
+    const f = -1 * props.howMany;
+    const chart: LineChartData = {
+      labels: [],
+      data: [],
+    };
+    simpleCounterItems
+      .filter((item) => item.type === SimpleCounterType.StopWatch)
+      .forEach((item, i) => {
+        const dateKeys = Object.keys(item.countOnDay);
+        const sorted = sortWorklogDates(dateKeys);
+        chart.data[i] = { data: [], label: item.title };
+        sorted.forEach((dateKey) => {
+          chart.labels.push(dateKey);
+          (chart as any).data[i].data.push((item.countOnDay[dateKey] as number) / 60000);
+        });
+      });
+
+    return {
+      labels: sortWorklogDates(chart.labels as string[]).slice(f),
+      data: chart.data.map((item) => {
+        return {
+          ...item,
+          data: item.data?.slice(f),
+        };
+      }),
     };
   },
 );

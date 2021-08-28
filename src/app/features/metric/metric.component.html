@@ -118,4 +118,46 @@
       </section>
     </section>
   </section>
+
+  <section *ngIf="(metricService.hasData$|async)" class="metric-metrics">
+    <h2>{{T.F.METRIC.CMP.SIMPLE_COUNTERS|translate}}</h2>
+    <section class="line-charts">
+      <section *ngIf="(simpleClickCounterData$|async) as simpleCounterClickData">
+        <h3>{{T.F.METRIC.CMP.SIMPLE_CLICK_COUNTERS_OVER_TIME|translate}}</h3>
+        <div class="chart-wrapper">
+          <div class="inner-chart-wrapper">
+            <canvas
+              [chartType]="lineChartType"
+              [colors]="lineChartColors"
+              [datasets]="simpleCounterClickData.data"
+              [labels]="simpleCounterClickData.labels"
+              [legend]="lineChartLegend"
+              [options]="lineChartOptions"
+              [plugins]="lineChartPlugins"
+              baseChart
+            >
+            </canvas>
+          </div>
+        </div>
+      </section>
+      <section *ngIf="(simpleCounterStopWatchData$|async) as simpleCounterStopWatchData">
+        <h3>{{T.F.METRIC.CMP.SIMPLE_STOPWATCH_COUNTERS_OVER_TIME|translate}}</h3>
+        <div class="chart-wrapper">
+          <div class="inner-chart-wrapper">
+            <canvas
+              [chartType]="lineChartType"
+              [colors]="lineChartColors"
+              [datasets]="simpleCounterStopWatchData.data"
+              [labels]="simpleCounterStopWatchData.labels"
+              [legend]="lineChartLegend"
+              [options]="lineChartOptions"
+              [plugins]="lineChartPlugins"
+              baseChart
+            >
+            </canvas>
+          </div>
+        </div>
+      </section>
+    </section>
+  </section>
 </div>

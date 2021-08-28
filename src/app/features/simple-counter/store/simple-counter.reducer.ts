@@ -37,6 +37,11 @@ export const selectSimpleCounterById = createSelector(
   (state: SimpleCounterState, props: { id: string }) => state.entities[props.id],
 );
 
+export const selectHasSimpleCounterData = createSelector(
+  selectSimpleCounterFeatureState,
+  (state: SimpleCounterState): boolean => state.ids.length > 0,
+);
+
 export const initialSimpleCounterState: SimpleCounterState =
   adapter.getInitialState<SimpleCounterState>({
     ids: DEFAULT_SIMPLE_COUNTERS.map((value) => value.id),
