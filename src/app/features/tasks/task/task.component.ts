@@ -475,7 +475,7 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
     this.contentEditableOnClickEl.nativeElement.focus();
   }
 
-  openContextMenu(event: MouseEvent): void {
+  openContextMenu(event: TouchEvent | MouseEvent): void {
     if (!this.contentEditableOnClickEl || !this.contextMenu) {
       throw new Error('No el');
     }
@@ -483,8 +483,10 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
     event.stopPropagation();
     event.stopImmediatePropagation();
     this.contentEditableOnClickEl.nativeElement.blur();
-    this.contextMenuPosition.x = event.clientX + 'px';
-    this.contextMenuPosition.y = event.clientY + 'px';
+    this.contextMenuPosition.x =
+      ('touches' in event ? event.touches[0].clientX : event.clientX) + 'px';
+    this.contextMenuPosition.y =
+      ('touches' in event ? event.touches[0].clientY : event.clientY) + 'px';
     this.contextMenu.openMenu();
   }
 
