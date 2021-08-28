@@ -238,27 +238,24 @@ export const selectSimpleCounterClickCounterLineChartData = createSelector(
       labels: [],
       data: [],
     };
-    simpleCounterItems
-      .filter((item) => item.type === SimpleCounterType.ClickCounter)
-      .forEach((item, i) => {
-        const dateKeys = Object.keys(item.countOnDay);
-        const sorted = sortWorklogDates(dateKeys);
-        chart.data[i] = { data: [], label: item.title };
-        sorted.forEach((dateKey) => {
-          chart.labels.push(dateKey);
-          (chart as any).data[i].data.push(item.countOnDay[dateKey] as number);
-        });
-      });
+    const stopwatchItems = simpleCounterItems.filter(
+      (item) => item.type === SimpleCounterType.ClickCounter,
+    );
+    let allDays: string[] = [];
+    stopwatchItems.forEach((item, i) => {
+      allDays = allDays.concat(Object.keys(item.countOnDay));
+    });
+    const allDaysSorted = sortWorklogDates(unique(allDays)).slice(f);
+    chart.labels = allDaysSorted;
 
-    return {
-      labels: sortWorklogDates(chart.labels as string[]).slice(f),
-      data: chart.data.map((item) => {
-        return {
-          ...item,
-          data: item.data?.slice(f),
-        };
-      }),
-    };
+    stopwatchItems.forEach((item, j) => {
+      chart.data[j] = { data: [], label: item.title };
+      allDaysSorted.forEach((day) => {
+        const valueForDay = item.countOnDay[day];
+        (chart as any).data[j].data.push(valueForDay ? valueForDay : undefined);
+      });
+    });
+    return chart;
   },
 );
 
@@ -270,26 +267,23 @@ export const selectSimpleCounterStopWatchLineChartData = createSelector(
       labels: [],
       data: [],
     };
-    simpleCounterItems
-      .filter((item) => item.type === SimpleCounterType.StopWatch)
-      .forEach((item, i) => {
-        const dateKeys = Object.keys(item.countOnDay);
-        const sorted = sortWorklogDates(dateKeys);
-        chart.data[i] = { data: [], label: item.title };
-        sorted.forEach((dateKey) => {
-          chart.labels.push(dateKey);
-          (chart as any).data[i].data.push((item.countOnDay[dateKey] as number) / 60000);
-        });
-      });
+    const stopwatchItems = simpleCounterItems.filter(
+      (item) => item.type === SimpleCounterType.StopWatch,
+    );
+    let allDays: string[] = [];
+    stopwatchItems.forEach((item, i) => {
+      allDays = allDays.concat(Object.keys(item.countOnDay));
+    });
+    const allDaysSorted = sortWorklogDates(unique(allDays)).slice(f);
+    chart.labels = allDaysSorted;
 
-    return {
-      labels: sortWorklogDates(chart.labels as string[]).slice(f),
-      data: chart.data.map((item) => {
-        return {
-          ...item,
-          data: item.data?.slice(f),
-        };
-      }),
-    };
+    stopwatchItems.forEach((item, j) => {
+      chart.data[j] = { data: [], label: item.title };
+      allDaysSorted.forEach((day) => {
+        const valueForDay = item.countOnDay[day];
+        (chart as any).data[j].data.push(valueForDay ? valueForDay / 60000 : undefined);
+      });
+    });
+    return chart;
   },
 );
