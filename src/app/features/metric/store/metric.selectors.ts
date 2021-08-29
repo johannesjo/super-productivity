@@ -209,8 +209,8 @@ export const selectProductivityHappinessLineChartDataComplete = createSelector(
     sorted.forEach((id) => {
       const metric = state.entities[id] as Metric;
       v.labels.push(metric.id);
-      v.data[0].data.push(metric.mood);
-      v.data[1].data.push(metric.productivity);
+      v.data[0].data.push(metric.mood ? metric.mood - 5 : undefined);
+      v.data[1].data.push(metric.productivity ? metric.productivity - 5 : undefined);
     });
     return v;
   },
