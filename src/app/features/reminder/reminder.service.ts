@@ -218,6 +218,9 @@ export class ReminderService {
   }
 
   private async _saveModel(reminders: Reminder[]): Promise<void> {
+    if (!this._isRemindersLoaded$.getValue()) {
+      throw new Error('Reminders not loaded initially when trying to save model');
+    }
     console.log('saveReminders', reminders);
     await this._persistenceService.reminders.saveState(reminders, {
       isSyncModelChange: true,

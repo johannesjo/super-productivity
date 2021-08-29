@@ -22,7 +22,7 @@ import { DataInitService } from '../../core/data-init/data-init.service';
 import { throttle } from 'helpful-decorators';
 import { SyncTriggerService } from '../../imex/sync/sync-trigger.service';
 import { LayoutService } from '../../core-ui/layout/layout.service';
-import { merge, of, timer } from 'rxjs';
+import { from, merge, of, timer } from 'rxjs';
 
 @NgModule({
   declarations: [],
@@ -38,7 +38,7 @@ export class ReminderModule {
     private readonly _dataInitService: DataInitService,
     private readonly _syncTriggerService: SyncTriggerService,
   ) {
-    this._dataInitService.isAllDataLoadedInitially$
+    from(this._reminderService.init())
       .pipe(
         // we do this to wait for syncing and the like
         concatMap(
@@ -46,30 +46,29 @@ export class ReminderModule {
         ),
         first(),
         delay(1000),
-      )
-      .subscribe(async () => {
-        _reminderService.init();
-      });
-
-    this._reminderService.onRemindersActive$
-      .pipe(
-        // NOTE: we simply filter for open dialogs, as reminders are re-queried quite often
-        filter(
-          (reminder) =>
-            this._matDialog.openDialogs.length === 0 && !!reminder && reminder.length > 0,
-        ),
-        withLatestFrom(this._layoutService.isShowAddTaskBar$),
-        // don't show reminders while add task bar is open
-        switchMap(([reminders, isShowAddTaskBar]: [Reminder[], boolean]) =>
-          isShowAddTaskBar
-            ? merge([
-                this._layoutService.isShowAddTaskBar$.pipe(
-                  filter((isShowAddTaskBarLive) => !isShowAddTaskBarLive),
-                ),
-                // in case someone just forgot to close it
-                timer(10000),
-              ]).pipe(first(), mapTo(reminders), delay(1000))
-            : of(reminders),
+        concatMap(() =>
+          this._reminderService.onRemindersActive$.pipe(
+            // NOTE: we simply filter for open dialogs, as reminders are re-queried quite often
+            filter(
+              (reminder) =>
+                this._matDialog.openDialogs.length === 0 &&
+                !!reminder &&
+                reminder.length > 0,
+            ),
+            withLatestFrom(this._layoutService.isShowAddTaskBar$),
+            // don't show reminders while add task bar is open
+            switchMap(([reminders, isShowAddTaskBar]: [Reminder[], boolean]) =>
+              isShowAddTaskBar
+                ? merge([
+                    this._layoutService.isShowAddTaskBar$.pipe(
+                      filter((isShowAddTaskBarLive) => !isShowAddTaskBarLive),
+                    ),
+                    // in case someone just forgot to close it
+                    timer(10000),
+                  ]).pipe(first(), mapTo(reminders), delay(1000))
+                : of(reminders),
+            ),
+          ),
         ),
       )
       .subscribe((reminders: Reminder[]) => {
