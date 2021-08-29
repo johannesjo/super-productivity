@@ -281,7 +281,9 @@ export const selectSimpleCounterStopWatchLineChartData = createSelector(
       chart.data[j] = { data: [], label: item.title };
       allDaysSorted.forEach((day) => {
         const valueForDay = item.countOnDay[day];
-        (chart as any).data[j].data.push(valueForDay ? valueForDay / 60000 : undefined);
+        (chart as any).data[j].data.push(
+          valueForDay ? Math.round(valueForDay / 60000) : undefined,
+        );
       });
     });
     return chart;
