@@ -71,6 +71,7 @@ export class OpenProjectIssueEffects {
       ),
     { dispatch: false },
   );
+
   private _updateIssuesForCurrentContext$: Observable<any> =
     this._workContextService.allTasksForCurrentContext$.pipe(
       first(),

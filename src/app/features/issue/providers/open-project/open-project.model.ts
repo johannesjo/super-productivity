@@ -3,6 +3,7 @@ export interface OpenProjectCfg {
   isAutoAddToBacklog: boolean;
   isAutoPoll: boolean;
   filterUsername: string | null;
-  repo: string | null;
+  host: string | null;
+  projectId: string | null;
   token: string | null;
 }

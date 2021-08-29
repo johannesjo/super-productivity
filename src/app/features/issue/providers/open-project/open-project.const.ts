@@ -7,7 +7,8 @@ import {
 } from '../../../config/global-config.model';
 
 export const DEFAULT_OPEN_PROJECT_CFG: OpenProjectCfg = {
-  repo: null,
+  host: null,
+  projectId: null,
   token: null,
   isSearchIssuesFromOpenProject: false,
   isAutoPoll: false,
@@ -15,23 +16,18 @@ export const DEFAULT_OPEN_PROJECT_CFG: OpenProjectCfg = {
   filterUsername: null,
 };
 
-// NOTE: we need a high limit because git has low usage limits :(
-// export const OPEN_PROJECT_POLL_INTERVAL = 10 * 60 * 1000;
-// export const OPEN_PROJECT_INITIAL_POLL_DELAY = 8 * 1000;
 export const OPEN_PROJECT_POLL_INTERVAL = 10 * 60 * 1000;
 export const OPEN_PROJECT_INITIAL_POLL_DELAY = 8 * 1000;
 
-// export const OPEN_PROJECT_POLL_INTERVAL = 15 * 1000;
-export const OPEN_PROJECT_API_BASE_URL = 'https://api.openProject.com/';
-
 export const OPEN_PROJECT_CONFIG_FORM: LimitedFormlyFieldConfig<OpenProjectCfg>[] = [
   {
-    key: 'repo',
+    key: 'host',
     type: 'input',
     templateOptions: {
-      label: T.F.OPEN_PROJECT.FORM.REPO,
+      label: T.F.OPEN_PROJECT.FORM.HOST,
       type: 'text',
       pattern: /^.+\/.+?$/i,
+      required: true,
     },
   },
   {
@@ -39,7 +35,16 @@ export const OPEN_PROJECT_CONFIG_FORM: LimitedFormlyFieldConfig<OpenProjectCfg>[
     type: 'input',
     templateOptions: {
       label: T.F.OPEN_PROJECT.FORM.TOKEN,
-      description: T.F.OPEN_PROJECT.FORM.TOKEN_DESCRIPTION,
+      required: true,
+    },
+  },
+  {
+    key: 'projectId',
+    type: 'input',
+    templateOptions: {
+      label: T.F.OPEN_PROJECT.FORM.PROJECT_ID,
+      type: 'text',
+      required: true,
     },
   },
   {
@@ -73,7 +78,7 @@ export const OPEN_PROJECT_CONFIG_FORM: LimitedFormlyFieldConfig<OpenProjectCfg>[
 ];
 
 export const OPEN_PROJECT_CONFIG_FORM_SECTION: ConfigFormSection<OpenProjectCfg> = {
-  title: 'GitHub',
+  title: 'Open Project',
   key: 'OPEN_PROJECT',
   items: OPEN_PROJECT_CONFIG_FORM,
   help: T.F.OPEN_PROJECT.FORM_SECTION.HELP,

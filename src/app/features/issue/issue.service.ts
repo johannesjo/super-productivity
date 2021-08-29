@@ -7,7 +7,13 @@ import {
 } from './issue.model';
 import { TaskAttachment } from '../tasks/task-attachment/task-attachment.model';
 import { from, merge, Observable, of, Subject, zip } from 'rxjs';
-import { CALDAV_TYPE, GITHUB_TYPE, GITLAB_TYPE, JIRA_TYPE } from './issue.const';
+import {
+  CALDAV_TYPE,
+  GITHUB_TYPE,
+  GITLAB_TYPE,
+  JIRA_TYPE,
+  OPEN_PROJECT_TYPE,
+} from './issue.const';
 import { TaskService } from '../tasks/task.service';
 import { Task } from '../tasks/task.model';
 import { IssueServiceInterface } from './issue-service-interface';
@@ -16,6 +22,7 @@ import { GithubCommonInterfacesService } from './providers/github/github-common-
 import { switchMap } from 'rxjs/operators';
 import { GitlabCommonInterfacesService } from './providers/gitlab/gitlab-common-interfaces.service';
 import { CaldavCommonInterfacesService } from './providers/caldav/caldav-common-interfaces.service';
+import { OpenProjectCommonInterfacesService } from './providers/open-project/open-project-common-interfaces.service';
 
 @Injectable({
   providedIn: 'root',
@@ -26,6 +33,7 @@ export class IssueService {
     [GITHUB_TYPE]: this._githubCommonInterfacesService,
     [JIRA_TYPE]: this._jiraCommonInterfacesService,
     [CALDAV_TYPE]: this._caldavCommonInterfaceService,
+    [OPEN_PROJECT_TYPE]: this._openProjectInterfaceService,
   };
 
   // NOTE: in theory we might need to clean this up on project change, but it's unlikely to matter
@@ -34,6 +42,7 @@ export class IssueService {
     [GITHUB_TYPE]: {},
     [JIRA_TYPE]: {},
     [CALDAV_TYPE]: {},
+    [OPEN_PROJECT_TYPE]: {},
   };
 
   constructor(
@@ -42,6 +51,7 @@ export class IssueService {
     private _githubCommonInterfacesService: GithubCommonInterfacesService,
     private _gitlabCommonInterfacesService: GitlabCommonInterfacesService,
     private _caldavCommonInterfaceService: CaldavCommonInterfacesService,
+    private _openProjectInterfaceService: OpenProjectCommonInterfacesService,
   ) {}
 
   getById$(

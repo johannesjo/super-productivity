@@ -446,15 +446,16 @@
       },
       "FORM": {
         "FILTER_USER": "Username (e.g. to filter out changes by yourself)",
+        "HOST": "Host (e.g.: https://www.openproject.org/)",
         "IS_AUTO_ADD_TO_BACKLOG": "Automatically add unresolved work packages from Open Project to backlog",
         "IS_AUTO_POLL": "Automatically poll imported open project work packages for changes",
         "IS_SEARCH_ISSUES_FROM_OPEN_PROJECT": "Show work packages as suggestions when adding new tasks",
-        "REPO": "\"username/repositoryName\" for the git repository you want to track",
+        "PROJECT_ID": "Project ID",
         "TOKEN": "Access Token",
         "TOKEN_DESCRIPTION": "Required for private repository access"
       },
       "FORM_SECTION": {
-        "HELP": "<p>Here you can configure SuperProductivity to list open Open Project work packages for a specific repository in the task creation panel in the daily planning view. They will be listed as suggestions and will provide a link to the work package as well as more information about it.</p> <p>In addition you can automatically add and sync all open work packages to your task backlog.</p><p>To get by usage limits and to access you can provide a an access token. <a href='https://docs.github.com/en/free-pro-team@latest/developers/apps/scopes-for-oauth-apps'>More info about its scopes can be found here</a>.",
+        "HELP": "<p>Here you can configure SuperProductivity to list open Open Project work packages.</p>",
         "TITLE": "Open Project"
       },
       "ISSUE_CONTENT": {

@@ -8,19 +8,17 @@ import {
   HttpParams,
   HttpRequest,
 } from '@angular/common/http';
-import { OPEN_PROJECT_API_BASE_URL } from './open-project.const';
-import { Observable, ObservableInput, of, throwError } from 'rxjs';
+import { Observable, ObservableInput, throwError } from 'rxjs';
 import {
   OpenProjectIssueSearchResult,
   OpenProjectOriginalIssue,
 } from './open-project-api-responses';
-import { catchError, filter, map, switchMap } from 'rxjs/operators';
+import { catchError, filter, map } from 'rxjs/operators';
 import {
   mapOpenProjectIssue,
   mapOpenProjectIssueToSearchResult,
 } from './open-project-issue/open-project-issue-map.util';
 import {
-  OpenProjectComment,
   OpenProjectIssue,
   OpenProjectIssueReduced,
 } from './open-project-issue/open-project-issue.model';
@@ -28,8 +26,6 @@ import { SearchResultItem } from '../../issue.model';
 import { HANDLED_ERROR_PROP_STR } from '../../../../app.constants';
 import { T } from '../../../../t.const';
 import { throwHandledError } from '../../../../util/throw-handled-error';
-
-const BASE = OPEN_PROJECT_API_BASE_URL;
 
 @Injectable({
   providedIn: 'root',
@@ -44,30 +40,11 @@ export class OpenProjectApiService {
   ): Observable<OpenProjectIssue> {
     return this._sendRequest$(
       {
-        url: `${BASE}repos/${cfg.repo}/issues/${issueId}`,
+        // url: `${cfg.host}/api/v3/projects/${cfg.projectId}/${issueId}`,
+        url: `${cfg.host}/api/v3/work_packages/${issueId}`,
       },
       cfg,
-    ).pipe(
-      switchMap((issue) =>
-        isGetComments
-          ? this.getCommentListForIssue$(issueId, cfg).pipe(
-              map((comments) => ({ ...issue, comments })),
-            )
-          : of(issue),
-      ),
     );
-  }
-
-  getCommentListForIssue$(
-    issueId: number,
-    cfg: OpenProjectCfg,
-  ): Observable<OpenProjectComment[]> {
-    return this._sendRequest$(
-      {
-        url: `${BASE}repos/${cfg.repo}/issues/${issueId}/comments`,
-      },
-      cfg,
-    ).pipe();
   }
 
   searchIssueForRepo$(
@@ -75,11 +52,12 @@ export class OpenProjectApiService {
     cfg: OpenProjectCfg,
     isSearchAllOpenProject: boolean = false,
   ): Observable<SearchResultItem[]> {
-    const repoQuery = isSearchAllOpenProject ? '' : `+repo:${cfg.repo}`;
+    // const repoQuery = isSearchAllOpenProject ? '' : `+repo:${cfg.host}`;
+    console.log(searchText);
 
     return this._sendRequest$(
       {
-        url: `${BASE}search/issues?q=${encodeURIComponent(searchText + repoQuery)}`,
+        url: `${cfg.host}/api/v3/projects/${cfg.projectId}/work_packages`,
       },
       cfg,
     ).pipe(
@@ -92,19 +70,10 @@ export class OpenProjectApiService {
   }
 
   getLast100IssuesForRepo$(cfg: OpenProjectCfg): Observable<OpenProjectIssueReduced[]> {
-    const repo = cfg.repo;
-    // NOTE: alternate approach (but no caching :( )
-    // return this._sendRequest$({
-    //   url: `${BASE}search/issues?q=${encodeURI(`+repo:${cfg.repo}`)}`
-    // }).pipe(
-    //   tap(console.log),
-    //   map((res: OpenProjectIssueSearchResult) => res && res.items
-    //     ? res && res.items.map(mapOpenProjectIssue)
-    //     : []),
-    // );
+    const host = cfg.host;
     return this._sendRequest$(
       {
-        url: `${BASE}repos/${repo}/issues?per_page=100&sort=updated`,
+        url: `${host}/issues?per_page=100&sort=updated`,
       },
       cfg,
     ).pipe(
@@ -125,7 +94,13 @@ export class OpenProjectApiService {
   }
 
   private _isValidSettings(cfg: OpenProjectCfg): boolean {
-    return !!cfg && !!cfg.repo && cfg.repo.length > 0;
+    return (
+      !!cfg &&
+      !!cfg.host &&
+      cfg.host.length > 0 &&
+      !!cfg.projectId &&
+      cfg.projectId.length > 0
+    );
   }
 
   private _sendRequest$(

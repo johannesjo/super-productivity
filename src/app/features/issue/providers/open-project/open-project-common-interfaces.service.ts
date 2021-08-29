@@ -27,7 +27,7 @@ export class OpenProjectCommonInterfacesService implements IssueServiceInterface
 
   issueLink$(issueId: number, projectId: string): Observable<string> {
     return this._getCfgOnce$(projectId).pipe(
-      map((cfg) => `https://open-project.com/${cfg.repo}/issues/${issueId}`),
+      map((cfg) => `https://open-project.com/${cfg.host}/issues/${issueId}`),
     );
   }
 
@@ -40,6 +40,8 @@ export class OpenProjectCommonInterfacesService implements IssueServiceInterface
   }
 
   searchIssues$(searchTerm: string, projectId: string): Observable<SearchResultItem[]> {
+    console.log('I am here!');
+
     return this._getCfgOnce$(projectId).pipe(
       switchMap((openProjectCfg) =>
         openProjectCfg && openProjectCfg.isSearchIssuesFromOpenProject
