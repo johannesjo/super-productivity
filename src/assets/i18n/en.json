@@ -440,6 +440,50 @@
       },
       "SKIP_BREAK": "Skip break"
     },
+    "OPEN_PROJECT": {
+      "DIALOG_INITIAL": {
+        "TITLE": "Setup Open Project for Project"
+      },
+      "FORM": {
+        "FILTER_USER": "Username (e.g. to filter out changes by yourself)",
+        "IS_AUTO_ADD_TO_BACKLOG": "Automatically add unresolved work packages from Open Project to backlog",
+        "IS_AUTO_POLL": "Automatically poll imported open project work packages for changes",
+        "IS_SEARCH_ISSUES_FROM_OPEN_PROJECT": "Show work packages as suggestions when adding new tasks",
+        "REPO": "\"username/repositoryName\" for the git repository you want to track",
+        "TOKEN": "Access Token",
+        "TOKEN_DESCRIPTION": "Required for private repository access"
+      },
+      "FORM_SECTION": {
+        "HELP": "<p>Here you can configure SuperProductivity to list open Open Project work packages for a specific repository in the task creation panel in the daily planning view. They will be listed as suggestions and will provide a link to the work package as well as more information about it.</p> <p>In addition you can automatically add and sync all open work packages to your task backlog.</p><p>To get by usage limits and to access you can provide a an access token. <a href='https://docs.github.com/en/free-pro-team@latest/developers/apps/scopes-for-oauth-apps'>More info about its scopes can be found here</a>.",
+        "TITLE": "Open Project"
+      },
+      "ISSUE_CONTENT": {
+        "ASSIGNEE": "Assignee",
+        "AT": "at",
+        "DESCRIPTION": "Description",
+        "LABELS": "Labels",
+        "MARK_AS_CHECKED": "Mark updates as checked",
+        "STATUS": "Status",
+        "SUMMARY": "Summary",
+        "WRITE_A_COMMENT": "Write a comment"
+      },
+      "S": {
+        "ERR_NETWORK": "Open Project: Request failed because of a client side network error",
+        "ERR_NOT_CONFIGURED": "Open Project: Is not properly configured",
+        "ERR_UNKNOWN": "Open Project: Unknown error {{statusCode}} {{errorMsg}}. Api Rate limit exceeded?",
+        "IMPORTED_MULTIPLE_ISSUES": "Open Project: Imported {{issuesLength}} new work packages to backlog",
+        "IMPORTED_SINGLE_ISSUE": "Open Project: Imported work package \"{{issueText}}\" to backlog",
+        "ISSUE_DELETED_OR_CLOSED": "Open Project: Work package \"{{issueText}}\" seems to be deleted or closed on",
+        "ISSUE_NO_UPDATE_REQUIRED": "Open Project: No update required",
+        "ISSUE_UPDATE": "Open Project: Updated data for \"{{issueText}}\"",
+        "MANUAL_UPDATE_ISSUE_SUCCESS": "Open Project: Updated data for \"{{issueText}}\"",
+        "MISSING_ISSUE_DATA": "Open Project: Tasks with missing work package data found. Reloading.",
+        "NEW_COMMENT": "Open Project: New comment for \"{{issueText}}\"",
+        "POLLING": "Open Project: Polling Changes for work packages",
+        "SHOW_ISSUE_BTN": "Show me"
+      }
+    },
+
     "PROCRASTINATION": {
       "BACK_TO_WORK": "Back to work!",
       "COMP": {
