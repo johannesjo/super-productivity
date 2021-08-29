@@ -114,15 +114,15 @@ export class MetricService {
   }
 
   // STATISTICS
-  getProductivityHappinessChartData$(howMany: number = 20): Observable<LineChartData> {
+  getProductivityHappinessChartData$(howMany: number = 60): Observable<LineChartData> {
     return this._store$.select(selectProductivityHappinessLineChartData, { howMany });
   }
 
-  getSimpleClickCounterMetrics$(howMany: number = 20): Observable<LineChartData> {
+  getSimpleClickCounterMetrics$(howMany: number = 60): Observable<LineChartData> {
     return this._store$.select(selectSimpleCounterClickCounterLineChartData, { howMany });
   }
 
-  getSimpleCounterStopwatchMetrics$(howMany: number = 20): Observable<LineChartData> {
+  getSimpleCounterStopwatchMetrics$(howMany: number = 60): Observable<LineChartData> {
     return this._store$.select(selectSimpleCounterStopWatchLineChartData, { howMany });
   }
 }
