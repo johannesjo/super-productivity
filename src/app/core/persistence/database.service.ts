@@ -4,6 +4,8 @@ import { IDBPDatabase } from 'idb/build/esm/entry';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { filter, shareReplay, take } from 'rxjs/operators';
 import { retry } from 'utils-decorators';
+import { ElectronService } from '../electron/electron.service';
+import { IS_ELECTRON } from '../../app.constants';
 
 const DB_NAME = 'SUP';
 const DB_MAIN_NAME = 'SUP_STORE';
@@ -31,7 +33,7 @@ export class DatabaseService {
 
   private _lastParams?: { a: string; key?: string; data?: unknown };
 
-  constructor() {
+  constructor(private _electronService: ElectronService) {
     this._init().then();
   }
 
@@ -86,6 +88,7 @@ export class DatabaseService {
   @retry({ retries: MAX_RETRY_COUNT, delay: RETRY_DELAY })
   private async _init(): Promise<IDBPDatabase<MyDb>> {
     try {
+      const that = this;
       this.db = await openDB<MyDb>(DB_NAME, VERSION, {
         // upgrade(db: IDBPDatabase<MyDb>, oldVersion: number, newVersion: number | null, transaction: IDBPTransaction<MyDb>) {
         // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
@@ -109,7 +112,12 @@ export class DatabaseService {
               'App database was terminated :( Is there enough free disk space or some process messing with the data? Press OK to reload the app.',
             )
           ) {
-            window.location.reload();
+            if (IS_ELECTRON) {
+              that._electronService.remote?.app.relaunch();
+              that._electronService.remote?.app.exit();
+            } else {
+              window.location.reload();
+            }
           }
         },
       });
