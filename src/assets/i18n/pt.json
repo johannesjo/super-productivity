@@ -267,7 +267,8 @@
         "CURRENT_ASSIGNEE": "Responsável atual:",
         "CURRENT_STATUS": "Status atual:",
         "TITLE": "Jira: Atualizar status",
-        "UPDATE_STATUS": "Atualizar status"
+        "UPDATE_STATUS": "Atualizar status",
+        "TASK_NAME": "Nome da Tarefa:"
       },
       "DIALOG_WORKLOG": {
         "CURRENTLY_LOGGED": "Hora atualmente registrada:",

@@ -269,7 +269,8 @@
         "CURRENT_ASSIGNEE": "Current Assignee:",
         "CURRENT_STATUS": "Current Status:",
         "TITLE": "Jira: Update Status",
-        "UPDATE_STATUS": "Update Status"
+        "UPDATE_STATUS": "Update Status",
+        "TASK_NAME": "Task name:"
       },
       "DIALOG_WORKLOG": {
         "CURRENTLY_LOGGED": "Currently logged time: ",
