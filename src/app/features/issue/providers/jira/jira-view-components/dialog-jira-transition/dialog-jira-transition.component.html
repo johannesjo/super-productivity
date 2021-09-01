@@ -6,6 +6,10 @@
 <mat-dialog-content>
   <table>
     <tr>
+      <th>{{T.F.JIRA.DIALOG_TRANSITION.TASK_NAME|translate}}</th>
+      <td>{{data.task ? data.task?.title : '–'}}</td>
+    </tr>
+    <tr>
       <th>{{T.F.JIRA.DIALOG_TRANSITION.CURRENT_STATUS|translate}}</th>
       <td>{{data.issue?.status ? data.issue?.status?.name : '–'}}</td>
     </tr>
