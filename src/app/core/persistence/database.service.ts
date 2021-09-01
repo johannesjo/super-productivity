@@ -33,6 +33,8 @@ export class DatabaseService {
 
   private _lastParams?: { a: string; key?: string; data?: unknown };
 
+  private _completeReInitCount: number = 0;
+
   constructor(private _electronService: ElectronService) {
     this._init().then();
   }
@@ -106,8 +108,14 @@ export class DatabaseService {
         },
         // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
         terminated(): void {
+          // TODO move down
           alert('IDB TERMINATED');
-          if (
+
+          if (that._completeReInitCount < MAX_RETRY_COUNT) {
+            console.log('... Reinitializing IndexedDB after unexpected failure ...');
+            that._init();
+            that._completeReInitCount++;
+          } else if (
             confirm(
               'App database was terminated :( Is there enough free disk space or some process messing with the data? Press OK to reload the app.',
             )
