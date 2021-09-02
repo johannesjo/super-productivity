@@ -99,19 +99,19 @@ module.exports = {
         .assert.visible(TASK)
 
         // focus
-        .click(TASK + ':nth-child(3)')
-        // escape to cancel in case task title edit mode is triggered
-        .keys(browser.Keys.ESCAPE)
+        .pause(200)
+        .keys(browser.Keys.TAB)
+        .keys(browser.Keys.TAB)
+        .pause(200)
+
         .keys(browser.Keys.BACK_SPACE)
+        .pause(200)
         .waitForElementNotPresent(TASK + ':nth-child(3)')
 
-        // focus
-        .click(TASK + ':nth-child(2)')
-        // escape to cancel in case task title edit mode is triggered
-        .keys(browser.Keys.ESCAPE)
         .keys(browser.Keys.BACK_SPACE)
+        .pause(200)
         .waitForElementNotPresent(TASK + ':nth-child(2)')
 
-        .assert.containsText(TASK + ':nth-child(1)', '3 hihi some other task')
+        .assert.containsText(TASK + ':nth-child(1)', '1 test task hihi')
         .end(),
 };
