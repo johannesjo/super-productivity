@@ -16,6 +16,7 @@ export const DEFAULT_JIRA_CFG: JiraCfg = {
   userName: null,
   password: null,
   isWonkyCookieMode: false,
+  usePAT: false,
 
   isAutoPollTickets: true,
   searchJqlQuery: '',
@@ -124,6 +125,14 @@ export const JIRA_CREDENTIALS_FORM_CFG: LimitedFormlyFieldConfig<JiraCfg>[] = [
     type: 'checkbox',
     templateOptions: {
       label: T.F.JIRA.FORM_CRED.WONKY_COOKIE_MODE,
+    },
+  },
+  {
+    key: 'usePAT',
+    type: 'checkbox',
+    templateOptions: {
+      required: false,
+      label: T.F.JIRA.FORM_CRED.USE_PAT,
     },
   },
 ];
