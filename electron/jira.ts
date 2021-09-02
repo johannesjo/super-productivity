@@ -89,6 +89,8 @@ export const setupRequestHeadersForImages = (
   session.defaultSession.webRequest.onBeforeSendHeaders(filter, (details, callback) => {
     if (wonkyCookie && jiraCfg.isWonkyCookieMode) {
       details.requestHeaders.Cookie = wonkyCookie;
+    } else if (jiraCfg.usePAT) {
+      details.requestHeaders.authorization = `Bearer ${jiraCfg.password}`;
     } else {
       details.requestHeaders.authorization = `Basic ${encoded}`;
     }

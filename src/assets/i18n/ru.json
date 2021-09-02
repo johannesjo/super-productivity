@@ -298,7 +298,8 @@
         "HOST": "Хост (например, http://my-host.de:1234)",
         "PASSWORD": "Токен / Пароль",
         "USER_NAME": "Адрес электронной почты / Имя пользователя",
-        "WONKY_COOKIE_MODE": "Wonky Cookie Fallback Authentication (только настольное приложение)"
+        "WONKY_COOKIE_MODE": "Wonky Cookie Fallback Authentication (только настольное приложение)",
+        "USE_PAT": "Использовать Personal Access Token вместо пароля"
       },
       "FORM_SECTION": {
         "ADV_CFG": "Расширенный настройки",

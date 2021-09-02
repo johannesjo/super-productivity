@@ -301,7 +301,8 @@
         "HOST": "Host (e.g.: http://my-host.de:1234)",
         "PASSWORD": "Token / Password",
         "USER_NAME": "Email / Username",
-        "WONKY_COOKIE_MODE": "Wonky Cookie Fallback Authentication (desktop app only)"
+        "WONKY_COOKIE_MODE": "Wonky Cookie Fallback Authentication (desktop app only)",
+        "USE_PAT": "Use Personal Access Token instead of password"
       },
       "FORM_SECTION": {
         "ADV_CFG": "Advanced Config",
