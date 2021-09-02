@@ -56,7 +56,7 @@
     "buildAllElectron:prod": "npm run preCheck && npm run buildFrontend:prod:es6 && npm run electron:build",
     "buildAllElectron:stage": "npm run preCheck && npm run buildFrontend:stage:es6 && npm run electron:build",
     "buildAllElectron:noTests:prod": "npm run lint && npm run buildFrontend:prod:es6 && npm run electron:build",
-    "build": "npm run buildAllElectron:noTests:prod",
+    "build": "npm run buildFrontend:prod:es6",
     "test": "cross-env TZ='Europe/Berlin' ng test --watch=false",
     "test:watch": "cross-env TZ='Europe/Berlin' ng test --browsers ChromeHeadless",
     "lint": "ng lint",
