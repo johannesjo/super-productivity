@@ -23,6 +23,7 @@ import { ProjectCfgFormKey } from '../../features/project/project.model';
 import { environment } from '../../../environments/environment';
 import { T } from '../../t.const';
 import { MatSlideToggleChange } from '@angular/material/slide-toggle';
+import { versions } from '../../../environments/versions';
 
 @Component({
   selector: 'config-page',
@@ -39,6 +40,7 @@ export class ConfigPageComponent implements OnInit, OnDestroy {
   globalCfg?: GlobalConfigState;
 
   appVersion: string = environment.version;
+  versions?: any = versions;
 
   private _subs: Subscription = new Subscription();
 
