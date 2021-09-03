@@ -9,7 +9,7 @@
     "D_INITIAL": {
       "TITLE": "Bienvenue dans v{{nr}}"
     },
-    "UPDATE_MAIN_MODEL": "Super Productivity a obtenu une mise à jour majeure! Certaines migrations pour vos données sont nécessaires. Veuillez noter que cela rend vos données incompatibles avec les anciennes versions de l'application.",
+    "UPDATE_MAIN_MODEL": "Super Productivity a obtenu une mise à jour majeure ! Certaines migrations pour vos données sont nécessaires. Veuillez noter que cela rend vos données incompatibles avec les anciennes versions de l'application.",
     "UPDATE_MAIN_MODEL_NO_UPDATE": "Aucune mise à jour de modèle choisie. Veuillez noter que vous devez soit rétrograder vers la dernière version, si vous ne souhaitez pas effectuer la mise à niveau du modèle.",
     "UPDATE_WEB_APP": "Une nouvelle version est disponible. Charger la nouvelle version ?"
   },
@@ -17,10 +17,11 @@
     "NO_TASKS": "Il n'y a actuellement aucune tâche dans votre backlog"
   },
   "CONFIRM": {
-    "AUTO_FIX": "Vos données semblent endommagées. Voulez-vous essayer de le réparer automatiquement? Cela peut entraîner une perte de données partielle.",
-    "DELETE_STRAY_BACKUP": "Voulez-vous supprimer le verso pour éviter de voir cette boîte de dialogue?",
-    "RESTORE_FILE_BACKUP": "Il ne semble pas y avoir de DONNÉES, mais des sauvegardes sont disponibles sur \"{{dir}}\". Voulez-vous restaurer la dernière sauvegarde de {{from}}?",
-    "RESTORE_STRAY_BACKUP": "Lors de la dernière synchronisation, une erreur s'est peut-être produite. Voulez-vous restaurer la dernière sauvegarde?"
+    "AUTO_FIX": "Vos données semblent endommagées. Voulez-vous essayer de les réparer automatiquement ? Cela peut entraîner une perte de données partielle.",
+    "DELETE_STRAY_BACKUP": "Voulez-vous supprimer la sauvegarde pour éviter de voir cette boîte de dialogue ?",
+    "RESTORE_FILE_BACKUP": "Il ne semble pas y avoir de DONNÉES, mais des sauvegardes sont disponibles sur \"{{dir}}\". Voulez-vous restaurer la dernière sauvegarde depuis {{from}} ?",
+    "RESTORE_FILE_BACKUP_ANDROID": "Il ne semble pas y avoir de DONNÉES, mais une sauvegarde est disponible. Voulez-vous la charger ?",
+    "RESTORE_STRAY_BACKUP": "Lors de la dernière synchronisation, une erreur s'est peut-être produite. Voulez-vous restaurer la dernière sauvegarde ?"
   },
   "DATETIME_INPUT": {
     "IN": "dans {{time}}",
@@ -28,10 +29,10 @@
   },
   "DATETIME_SCHEDULE": {
     "LATER_TODAY": "Plus tard aujourd'hui",
-    "NEXT_WEEK": "Prochaine semaine",
+    "NEXT_WEEK": "La semaine prochaine",
     "PLACEHOLDER": "Veuillez choisir une date",
     "PRESS_ENTER_AGAIN": "Appuyez à nouveau sur Entrée pour enregistrer",
-    "TOMORROW": "demain"
+    "TOMORROW": "Demain"
   },
   "F": {
     "ATTACHMENT": {
@@ -54,13 +55,13 @@
     "BOOKMARK": {
       "BAR": {
         "ADD": "Ajouter un marque-page",
-        "DROP": "Déposer ici pour ajouter aux favoris",
-        "EDIT": "Modifier les favoris",
-        "NO_BOOKMARKS": "Vous n'avez aucun projet favoris. Ajoutez-en un via glisser-déposer ou en cliquant sur le bouton 'plus'."
+        "DROP": "Déposer ici pour ajouter aux marque-pages",
+        "EDIT": "Modifier les marque-pages",
+        "NO_BOOKMARKS": "Vous n'avez aucun marque-page de projet. Ajoutez-en un via glisser-déposer ou en cliquant sur le bouton 'plus'."
       },
       "DIALOG_EDIT": {
-        "ADD_BOOKMARK": "Ajouter aux favoris",
-        "EDIT_BOOKMARK": "Modifier le favori",
+        "ADD_BOOKMARK": "Ajouter aux marque-pages",
+        "EDIT_BOOKMARK": "Modifier le marque-page",
         "LABELS": {
           "COMMAND": "Commande",
           "FILE": "Chemin du fichier",
@@ -82,38 +83,38 @@
         "TITLE": "Configurer CalDav pour le projet"
       },
       "FORM": {
-        "CALDAV_CATEGORY_FILTER": "Catégorie pour laquelle filtrer les problèmes (laissez vide pour aucun)",
+        "CALDAV_CATEGORY_FILTER": "Catégorie pour laquelle filtrer les problèmes (laisser vide pour aucun)",
         "CALDAV_PASSWORD": "Votre mot de passe CalDav",
         "CALDAV_RESOURCE": "Le nom de la ressource CalDav (le calendrier)",
         "CALDAV_URL": "URL CalDav (l'URL de base)",
         "CALDAV_USER": "Votre nom d'utilisateur CalDav",
         "IS_AUTO_ADD_TO_BACKLOG": "Ajoutez automatiquement les tâches CalDav incomplètes à votre backlog",
-        "IS_AUTO_POLL": "Interroger automatiquement les tâches importées pour les modifications",
+        "IS_AUTO_POLL": "Détecter automatiquement les modifications des tâches importées",
         "IS_SEARCH_ISSUES_FROM_CALDAV": "Afficher les tâches CalDav incomplètes comme suggestion lors de l'ajout de nouvelles tâches",
         "IS_TRANSITION_ISSUES_ENABLED": "Compléter automatiquement les tâches CalDav à la fin de la tâche"
       },
       "FORM_SECTION": {
-        "HELP": "<p>Ici, vous pouvez configurer SuperProductivity pour répertorier les tâches CalDav inachevées pour un projet spécifique dans le panneau de création de tâches de la vue de planification quotidienne. Ils seront listés comme des suggestions et fourniront un lien vers le todo ainsi que plus d'informations à ce sujet.</p> <p>En outre, vous pouvez automatiquement ajouter et synchroniser toutes les tâches inachevées dans votre backlog de tâches.</p>",
+        "HELP": "<p>Ici, vous pouvez configurer SuperProductivity pour répertorier dans le panneau de création de tâches de la vue de planification quotidienne les tâches CalDav inachevées d'un projet spécifique. Elles seront listées comme des suggestions et fourniront un lien vers la tâche ainsi que plus d'informations à son sujet.</p> <p>En outre, vous pouvez automatiquement ajouter et synchroniser toutes les tâches inachevées dans votre backlog de tâches.</p> <p>Pour que cela fonctionne sur mobile et le web, vous pourriez avoir à ajouter \"https://app.super-productivity.com\" à votre liste blanche via l'app nextcloud <a href='https://apps.nextcloud.com/apps/webapppassword'>webapppassword<a>.</p>",
         "TITLE": "CalDav"
       },
       "ISSUE_CONTENT": {
-        "DESCRIPTION": "La description",
-        "LABELS": "catégories",
+        "DESCRIPTION": "Description",
+        "LABELS": "Catégories",
         "MARK_AS_CHECKED": "Marquer les mises à jour comme cochées",
         "STATUS": "Statut",
         "SUMMARY": "Résumé"
       },
       "S": {
-        "CALENDAR_NOT_FOUND": "CalDav: calendrier \"{{calendarName}}\" introuvable",
-        "CALENDAR_READ_ONLY": "CalDav: l'agenda \"{{calendarName}}\" est en lecture seule",
-        "ERR_NETWORK": "CalDav: la demande a échoué en raison d'une erreur réseau côté client",
-        "ERR_NOT_CONFIGURED": "CalDav: pas correctement configuré",
-        "IMPORTED_MULTIPLE_ISSUES": "calDav: importation de {{issuesLength}} nouveaux problèmes de git dans le backlog",
-        "IMPORTED_SINGLE_ISSUE": "CalDav: problème importé \"{{issueText}}\" depuis le backlog",
-        "ISSUE_NOT_FOUND": "CalDav: Todo \"{{issueId}}\" semble être supprimé sur le serveur.",
-        "ISSUE_NO_UPDATE_REQUIRED": "CalDav: aucune mise à jour requise.",
-        "ISSUE_UPDATE": "Caldav: données actualisées pour \"{{issueText}}\"",
-        "POLLING": "Caldav: Changements d'interrogation pour todos"
+        "CALENDAR_NOT_FOUND": "CalDav : Calendrier \"{{calendarName}}\" introuvable",
+        "CALENDAR_READ_ONLY": "CalDav : Le calendrier \"{{calendarName}}\" est en lecture seule",
+        "ERR_NETWORK": "CalDav : La requête a échoué en raison d'une erreur réseau côté client",
+        "ERR_NOT_CONFIGURED": "CalDav : Pas correctement configuré",
+        "IMPORTED_MULTIPLE_ISSUES": "CalDav : Importation de {{issuesLength}} nouveaux problèmes de git dans le backlog",
+        "IMPORTED_SINGLE_ISSUE": "CalDav : Problème importé \"{{issueText}}\" depuis le backlog",
+        "ISSUE_NOT_FOUND": "CalDav  : La tâche \"{{issueId}}\" semble être supprimée sur le serveur.",
+        "ISSUE_NO_UPDATE_REQUIRED": "CalDav : Aucune mise à jour requise.",
+        "ISSUE_UPDATE": "Caldav : Données actualisées pour \"{{issueText}}\"",
+        "POLLING": "Caldav : Détection des modifications des tâches"
       }
     },
     "CONFIG": {
@@ -123,11 +124,12 @@
     },
     "DROPBOX": {
       "S": {
-        "ACCESS_TOKEN_ERROR": "Dropbox: impossible de générer un jeton d'accès à partir du code d'authentification",
-        "ACCESS_TOKEN_GENERATED": "Dropbox: jeton d'accès généré à partir du code d'authentification",
-        "AUTH_ERROR": "Dropbox: jeton d'accès non valide fourni",
-        "OFFLINE": "Dropbox: impossible de synchroniser, car hors ligne",
-        "SYNC_ERROR": "Dropbox: erreur lors de la synchronisation"
+        "ACCESS_TOKEN_ERROR": "Dropbox : Impossible de générer un jeton d'accès à partir du code d'authentification",
+        "ACCESS_TOKEN_GENERATED": "Dropbox : Jeton d'accès généré à partir du code d'authentification",
+        "AUTH_ERROR": "Dropbox : Jeton d'accès fourni invalide",
+        "AUTH_ERROR_ACTION": "Changer le jeton",
+        "OFFLINE": "Dropbox : Impossible de synchroniser, car hors ligne",
+        "SYNC_ERROR": "Dropbox : Erreur lors de la synchronisation"
       }
     },
     "GITHUB": {
@@ -135,16 +137,16 @@
         "TITLE": "Configurer GitHub pour le projet"
       },
       "FORM": {
-        "FILTER_USER": "Nom d'utilisateur (e.g. pour filtrer vos propres modifications)",
-        "IS_AUTO_ADD_TO_BACKLOG": "Ajouter automatiquement les Issues non résolus de GitHub au backlog",
-        "IS_AUTO_POLL": "Surveiller automatiquement les issues git importées pour avoir les modifications",
+        "FILTER_USER": "Nom d'utilisateur (par ex. pour filtrer vos propres modifications)",
+        "IS_AUTO_ADD_TO_BACKLOG": "Ajouter automatiquement les issues non résolues de GitHub au backlog",
+        "IS_AUTO_POLL": "Détecter automatiquement les modifications des issues git importées",
         "IS_SEARCH_ISSUES_FROM_GITHUB": "Afficher les issues de git sous forme de suggestions lors de l'ajout de nouvelles tâches",
-        "REPO": "\"nom d'utilisateur / nom du repository\" pour le repository git que vous souhaitez suivre",
+        "REPO": "\"nom d'utilisateur / nom du dépôt\" pour le dépôt git que vous souhaitez suivre",
         "TOKEN": "Jeton d'accès",
-        "TOKEN_DESCRIPTION": "Requis pour l'accès au référentiel privé"
+        "TOKEN_DESCRIPTION": "Requis pour l'accès au dépôt privé"
       },
       "FORM_SECTION": {
-        "HELP": "<p>Ici, vous pouvez configurer SuperProductivity pour répertorier les issues GitHub ouvertes pour un repository spécifique dans le panneau de création de tâches de la vue Planification quotidienne. Ils seront listés en tant que suggestions et fourniront un lien vers l'issue, ainsi que plus d'informations à son sujet.</p> <p>De plus, vous pouvez ajouter et synchroniser automatiquement toutes les issues ouvertes dans votre backlog.</p>",
+        "HELP": "<p>Ici, vous pouvez configurer SuperProductivity pour répertorier les issues GitHub ouvertes pour un dépôt spécifique dans le panneau de création de tâches de la vue Planification quotidienne. Ils seront listés en tant que suggestions et fourniront un lien vers l'issue, ainsi que plus d'informations à son sujet.</p> <p>De plus, vous pouvez ajouter et synchroniser automatiquement toutes les issues ouvertes dans votre backlog.</p>",
         "TITLE": "GitHub"
       },
       "ISSUE_CONTENT": {
@@ -163,8 +165,8 @@
         "ERR_UNKNOWN": "GitHub: erreur inconnue {{statusCode}} {{errorMsg}}",
         "IMPORTED_MULTIPLE_ISSUES": "GitHub : {{issuesLength}} nouvelles issues de git dans le backlog",
         "IMPORTED_SINGLE_ISSUE": "GitHub : Issue \"{{issueText}}\" importée de git dans le backlog",
-        "ISSUE_DELETED_OR_CLOSED": "GitHub : l'issue' \"{{issueText}}\" semble être supprimée ou fermé sur git",
-        "ISSUE_NO_UPDATE_REQUIRED": "GitHub: aucune mise à jour requise",
+        "ISSUE_DELETED_OR_CLOSED": "GitHub : l'issue' \"{{issueText}}\" semble être supprimée ou fermée sur git",
+        "ISSUE_NO_UPDATE_REQUIRED": "GitHub : aucune mise à jour requise",
         "ISSUE_UPDATE": "GitHub : données mises à jour pour \"{{issueText}}\"",
         "MANUAL_UPDATE_ISSUE_SUCCESS": "GitHub : données mises à jour pour \"{{issueText}}\"",
         "MISSING_ISSUE_DATA": "GitHub : Tâches avec données d'issue manquantes trouvées. Rechargement.",
@@ -180,8 +182,8 @@
       "FORM": {
         "FILTER_USER": "Nom d'utilisateur (e.g. pour filtrer vos propres modifications)",
         "GITLAB_BASE_URL": "URL de base GitLab personnalisée",
-        "IS_AUTO_ADD_TO_BACKLOG": "Ajouter automatiquement les Issues non résolus de GitLab au backlog",
-        "IS_AUTO_POLL": "Surveiller automatiquement les issues git importées pour avoir les modifications",
+        "IS_AUTO_ADD_TO_BACKLOG": "Ajouter automatiquement les Issues non résolues de GitLab au backlog",
+        "IS_AUTO_POLL": "Détecter automatiquement les modifications des issues git importées",
         "IS_SEARCH_ISSUES_FROM_GITLAB": "Afficher les issues de git sous forme de suggestions lors de l'ajout de nouvelles tâches",
         "PROJECT": "Chemin complet ou nom d'utilisateur / projet",
         "TOKEN": "Jeton d'accès"
@@ -218,11 +220,11 @@
     },
     "GOOGLE": {
       "BANNER": {
-        "AUTH_FAIL": "GoogleApi : Échec de l'authentification, essayez de vous reconnecter!"
+        "AUTH_FAIL": "GoogleApi : Échec de l'authentification, essayez de vous reconnecter !"
       },
       "DIALOG": {
-        "CREATE_SYNC_FILE": "Google Drive : Aucun fichier nommé <strong>\"{{fileName}}\"</strong> n'a été trouvé. <strong>créer</strong> un fichier de synchronisation sur Google Drive?",
-        "USE_EXISTING_SYNC_FILE": "Google Drive : utiliser le <strong>fichier</strong> existant <strong>\"{{fileName}}\"</strong> comme fichier de synchronisation? Sinon, veuillez changer le nom du fichier de synchronisation."
+        "CREATE_SYNC_FILE": "Google Drive : Aucun fichier nommé <strong>\"{{fileName}}\"</strong> n'a été trouvé. <strong>créer</strong> un fichier de synchronisation sur Google Drive ?",
+        "USE_EXISTING_SYNC_FILE": "Google Drive : utiliser le <strong>fichier</strong> existant <strong>\"{{fileName}}\"</strong> comme fichier de synchronisation ? Sinon, veuillez changer le nom du fichier de synchronisation."
       },
       "S": {
         "MULTIPLE_SYNC_FILES_WITH_SAME_NAME": "Plusieurs fichiers portant le nom \"{{newFileName}}\" ont été trouvés. Veuillez les supprimer tous sauf un ou choisir un nom différent.",
@@ -251,27 +253,28 @@
         "LOAD_SUGGESTIONS": "Charger les suggestions",
         "MAP_CUSTOM_FIELDS": "Mapper les champs personnalisés",
         "MAP_CUSTOM_FIELDS_INFO": "Malheureusement, certaines données de Jira sont enregistrées dans des champs personnalisés, qui sont différents pour chaque installation. Si vous souhaitez inclure ces données, vous devez sélectionner le champ personnalisé approprié.",
-        "OPEN": "Statut pour les tâche en pause",
-        "SELECT_ISSUE_FOR_TRANSITIONS": "Sélectionnez le ticket pour charger les transistions disponibles",
+        "OPEN": "Statut pour les tâches en pause",
+        "SELECT_ISSUE_FOR_TRANSITIONS": "Sélectionnez le ticket pour charger les transitions disponibles",
         "STORY_POINTS": "Story points"
       },
       "DIALOG_CONFIRM_ASSIGNMENT": {
         "MSG": "<strong>{{summary}}</strong> est actuellement affecté à <strong>{{assignee}}</strong>. Voulez-vous vous l'attribuer ?",
-        "OK": "Oui!"
+        "OK": "Oui !"
       },
       "DIALOG_INITIAL": {
         "TITLE": "Configurer Jira pour le projet"
       },
       "DIALOG_TRANSITION": {
         "CHOOSE_STATUS": "Choisissez le statut à attribuer",
-        "CURRENT_ASSIGNEE": "Responsable actuel:",
-        "CURRENT_STATUS": "Statut actuel:",
-        "TITLE": "Jira: Mettre à jour le statut",
+        "CURRENT_ASSIGNEE": "Responsable actuel :",
+        "CURRENT_STATUS": "Statut actuel :",
+        "TITLE": "Jira : Mettre à jour le statut",
         "UPDATE_STATUS": "Mettre à jour le statut"
+        "TASK_NAME": "Nom de tâche :"
       },
       "DIALOG_WORKLOG": {
-        "CURRENTLY_LOGGED": "Temps de travail actuel:",
-        "INVALID_DATE": "La valeur entrée n'est pas une date!",
+        "CURRENTLY_LOGGED": "Temps de travail actuel :",
+        "INVALID_DATE": "La valeur saisie n'est pas une date !",
         "SAVE_WORKLOG": "Enregistrer le temps de travail",
         "STARTED": "Commencé",
         "SUBMIT_WORKLOG_FOR": "Soumettre à Jira le temps de travail pour",
@@ -279,18 +282,18 @@
         "TITLE": "Jira: Soumettre le temps de travail"
       },
       "FORM": {
-        "IS_AUTO_ADD_TO_BACKLOG": "Ajouter automatiquement les issues non résolus de GitHub au backlog",
-        "IS_AUTO_POLL": "Surveiller periodiquement les issues git importés pour avoir les modifications",
+        "IS_AUTO_ADD_TO_BACKLOG": "Ajouter automatiquement les issues non résolues de GitHub au backlog",
+        "IS_AUTO_POLL": "Détecteur automatiquement les modifications des issues git importées",
         "IS_SEARCH_ISSUES_FROM_GITHUB": "Afficher les issues de git sous forme de suggestions lors de l'ajout de nouvelles tâches",
-        "REPO": "\"nom d'utilisateur / nom du repository\" pour le repository git que vous souhaitez suivre"
+        "REPO": "\"nom d'utilisateur / nom du dépôt\" pour le dépôt git que vous souhaitez suivre"
       },
       "FORM_ADV": {
         "AUTO_ADD_BACKLOG_JQL_QUERY": "JQL utilisé pour ajouter des tâches automatiquement au backlog",
         "IS_ADD_WORKLOG_ON_SUB_TASK_DONE": "Ouvrir la boîte de dialogue pour soumettre à Jira le temps de travail lorsque la sous-tâche est terminée",
         "IS_AUTO_ADD_TO_BACKLOG": "Ajouter automatiquement les tickets au backlog de Jira",
-        "IS_AUTO_POLL_TICKETS": "Surveiller periodiquement les modifications apportées aux tickets importés et m'en informer",
+        "IS_AUTO_POLL_TICKETS": "Surveiller les modifications apportées aux tickets importés et m'en informer",
         "IS_CHECK_TO_RE_ASSIGN_TICKET_ON_TASK_START": "Vérifier si le ticket actuellement traité est affecté à l'utilisateur actuel",
-        "IS_WORKLOG_ENABLED": "Ouvrir la boîte de dialogue pour soumettre à jira le temps de travail lorsque la tâche est terminée",
+        "IS_WORKLOG_ENABLED": "Ouvrir une boîte de dialogue pour soumettre à Jira le temps de travail lorsque la tâche est terminée",
         "SEARCH_JQL_QUERY": "Requête JQL pour limiter la recherche des tâches"
       },
       "FORM_CRED": {
@@ -298,16 +301,17 @@
         "HOST": "Hôte (par exemple: http://my-host.de:1234)",
         "PASSWORD": "Jeton / mot de passe",
         "USER_NAME": "Email / Nom d'utilisateur",
-        "WONKY_COOKIE_MODE": "Authentification de secours Wonky Cookie (application de bureau uniquement)"
+        "WONKY_COOKIE_MODE": "Authentification de secours Wonky Cookie (application de bureau uniquement)",
+        "USE_PAT": "Se servir d'un jeton d'accès personnel au lieu d'un mot de passe"
       },
       "FORM_SECTION": {
         "ADV_CFG": "Configuration avancée",
         "CREDENTIALS": "Identifiants",
         "HELP_ARR": {
-          "H1": "configuration de base",
+          "H1": "Configuration de base",
           "H2": "Paramètres du backlog",
           "H3": "Transitions par défaut",
-          "P1_1": "Veuillez fournir un login (qui se trouve sur votre page de profil) et un <a target=\"_blank\" href=\"https://confluence.atlassian.com/cloud/api-tokens-938839638.html\" target=\"_blank\">jeton d'API</a> ou un mot de passe si vous ne pouvez pas en générer un pour une raison quelconque. Veuillez noter que les versions les plus récentes de jira ne fonctionnent parfois qu'avec le jeton.",
+          "P1_1": "Veuillez fournir un identifiant (qui se trouve sur votre page de profil) et un <a target=\"_blank\" href=\"https://confluence.atlassian.com/cloud/api-tokens-938839638.html\" target=\"_blank\">jeton d'API</a> ou un mot de passe si vous ne pouvez pas en générer un pour une raison quelconque. Veuillez noter que les versions les plus récentes de jira ne fonctionnent parfois qu'avec le jeton.",
           "P1_2": "Vous devez également spécifier une requête JQL utilisée pour les suggestions permettant d'ajouter des tâches à partir de Jira. Si vous avez besoin d’aide, consultez ce lien <a target=\"_blank\" href=\"https://confluence.atlassian.com/jirasoftwarecloud/advanced-searching-764478330.html\" target=\"_blank\">https://confluence.atlassian.com/jirasoftwarecloud/advanced-searching-764478330.html</a>.",
           "P1_3": "Vous pouvez également configurer si vous souhaitez ajouter automatiquement (par exemple, chaque fois que vous consultez la vue Planification), toutes les nouvelles tâches spécifiées par une requête JQL personnalisée au backlog.",
           "P1_4": "Une autre option est \"Vérifier si le ticket actuel est attribué à l'utilisateur actuel\". Si activé et que vous démarrez un ticket, il sera vérifié que vous êtes actuellement affecté à ce ticket sur Jira. Sinon, un dialogue apparaît dans lequel vous pouvez choisir de vous attribuer le ticket.",
@@ -322,8 +326,8 @@
         "AT": "à",
         "ATTACHMENTS": "Pièces jointes",
         "CHANGED": "Modifié",
-        "COMMENTS": "commentaires",
-        "COMPONENTS": "composants",
+        "COMMENTS": "Commentaires",
+        "COMPONENTS": "Composants",
         "DESCRIPTION": "Description",
         "LIST_OF_CHANGES": "Liste des modifications",
         "MARK_AS_CHECKED": "Marquer les mises à jour comme cochées",
@@ -356,9 +360,9 @@
       "STEPPER": {
         "CREDENTIALS": "Identifiants",
         "DONE": "Vous êtes paré!",
-        "LOGIN_SUCCESS": "Connexion réussie!",
+        "LOGIN_SUCCESS": "Connexion réussie !",
         "TEST_CREDENTIALS": "Tester les identifiants",
-        "WELCOME_USER": "Bienvenue {{user}}!"
+        "WELCOME_USER": "Bienvenue {{user}} !"
       }
     },
     "METRIC": {
@@ -392,7 +396,7 @@
         "HELP_P2": "Ceci est n'est pas destiné à calculer des métriques exactes ou à devenir efficace comme une machine dans tous vos travaux mais plutôt à améliorer votre perception de votre travail. Il peut être utile d’évaluer les points négatifs dans votre routine quotidienne et de rechercher des facteurs qui vous aident. En étant un peu systématiques à ce sujet, nous espérons pouvoir mieux les maîtriser et améliorer ce que vous pouvez.",
         "IMPROVEMENTS": "Qu'est-ce qui a amélioré votre productivité ?",
         "IMPROVEMENTS_TOMORROW": "Que pourriez-vous faire pour améliorer demain ?",
-        "MOOD": "Comment vous sentez-vous?",
+        "MOOD": "Comment vous sentez-vous ?",
         "MOOD_HINT": "1: Horrible - 10: Magnifique",
         "NOTES": "Notes pour demain",
         "OBSTRUCTIONS": "Qu'est-ce qui a nui à votre productivité ?",
@@ -453,37 +457,37 @@
     "PROCRASTINATION": {
       "BACK_TO_WORK": "Au travail !",
       "COMP": {
-        "INTRO": "Faire preuve d'indulgence est toujours une bonne idée. Ça améliore l'estime de soi, favorise les émotions positives et peut vous aider à surmonter la procrastination, bien sûr. Essayez un petit exercice:",
+        "INTRO": "Faire preuve d'indulgence est toujours une bonne idée. Ça améliore l'estime de soi, favorise les émotions positives et peut vous aider à surmonter la procrastination, bien sûr. Essayez un petit exercice :",
         "L1": "Asseyez-vous quelques instants et étirez-vous, en d'autres termes, détendez-vous",
         "L2": "Essayez d'écouter les pensées et les sentiments qui émergent",
         "L3": "Agissez-vous avec vous-même de la même manière que vous agiriez avec un ami ?",
-        "L4": "Si la réponse est non, imaginez votre ami dans votre situation. Que lui diriez-vous? Que feriez-vous pour eux ?",
+        "L4": "Si la réponse est non, imaginez votre ami dans votre situation. Que lui diriez-vous ? Que feriez-vous pour eux ?",
         "OUTRO": "Vous trouverez plus d'exercices <a target=\"_blank\" href=\"https://drsoph.com/blog/2018/9/17/3-exercises-in-self-compassion\" target=\"_blank\">ici</a> ou sur <a target=\"_blank\" href=\"https://www.google.com/search?q=self+compassion+exercises&oq=self+compassion+excers&aqs=chrome.1.69i57j0l5.4303j0j7&sourceid=chrome&ie=UTF-8\" target=\"_blank\">google</a>.",
         "TITLE": "Indulgence avec soi-même"
       },
       "CUR": {
-        "INTRO": "La procrastination est intéressante, n'est-ce pas? Cela n'a pas de sens de le faire. Pas du tout dans votre intérêt à long terme. Mais tout le monde le fait quand même. Profitez et explorez!",
-        "L1": "Quels sentiments suscitent votre tentation de procrastiner?",
-        "L2": "Où les sens-tu dans ton corps?",
-        "L3": "Qu'est-ce qu'ils vous rappellent?",
-        "L4": "Qu'advient-il de l'envie de procrastiner quand vous l'observez? Ça l'intensifie? La dissipe? Ça cause d'autres émotions?",
-        "L5": "Comment les sensations dans votre corps changent-elles pendant que vous continuez à concentrer votre conscience sur elles?",
+        "INTRO": "La procrastination est intéressante, n'est-ce pas ? Cela n'a pas de sens de le faire. Pas du tout dans votre intérêt à long terme. Mais tout le monde le fait quand même. Profitez et explorez !",
+        "L1": "Quels sentiments suscitent votre tentation de procrastiner ?",
+        "L2": "Où les sens-tu dans ton corps ?",
+        "L3": "Qu'est-ce qu'ils vous rappellent ?",
+        "L4": "Qu'advient-il de l'envie de procrastiner quand vous l'observez ? Ça l'intensifie ? La dissipe ? Ça cause d'autres émotions ?",
+        "L5": "Comment les sensations dans votre corps changent-elles pendant que vous continuez à concentrer votre conscience sur elles ?",
         "TITLE": "Curiosité"
       },
       "H1": "Prenez du temps!",
-      "P1": "Tout d'abord détendez-vous! Tout le monde le fait de temps en temps. Et si vous ne faites pas ce que vous devriez, vous devriez au moins en profiter! Ensuite, consultez les sections ci-dessous pour quelque chose d'utile.",
-      "P2": "Si vous voulez en savoir plus sur la science qui se cache derrière tout cela, je peux recommander <a target=\"_blank\" href=\"https://www.nytimes.com/2019/03/25/smarter-living/why-you-procrastinate-it-has-nothing-to-do-with-self-control.html\" target=\"_blank\">cet article</a> d'ou viennent certains des exercices.",
+      "P1": "Tout d'abord détendez-vous ! Tout le monde le fait de temps en temps. Et si vous ne faites pas ce que vous devriez, vous devriez au moins en profiter ! Ensuite, consultez les sections ci-dessous pour quelque chose d'utile.",
+      "P2": "Si vous voulez en savoir plus sur la science qui se cache derrière tout cela, je peux recommander <a target=\"_blank\" href=\"https://www.nytimes.com/2019/03/25/smarter-living/why-you-procrastinate-it-has-nothing-to-do-with-self-control.html\" target=\"_blank\">cet article</a> d'où viennent certains des exercices.",
       "P3": "Rappelez-vous: la procrastination est un problème de régulation des émotions, pas un problème de gestion du temps.",
       "REFRAME": {
         "INTRO": "Pensez à ce qui pourrait être positif à propos de la tâche malgré elle.",
         "TITLE": "Recadrage",
-        "TL1": "Qu'est-ce qui pourrait être intéressant?",
-        "TL2": "Quel est l'avantage de la compléter?",
-        "TL3": "Comment vous sentirez-vous si vous la complétez?"
+        "TL1": "Qu'est-ce qui pourrait être intéressant ?",
+        "TL2": "Quel est l'avantage de la terminer ?",
+        "TL3": "Comment vous sentirez-vous si vous la terminiez ?"
       },
       "SPLIT_UP": {
         "INTRO": "Divisez la tâche en autant de petits morceaux que vous pouvez.",
-        "OUTRO": "Terminé? Alors réfléchis-y. Quelle serait - strictement théorique - la première chose que vous feriez <i>si</i> vous commenciez à travailler sur la tâche? Pensez-y bien ...",
+        "OUTRO": "Terminé ? Alors réfléchis-y. Quelle serait - strictement théorique - la première chose que vous feriez <i>si</i> vous commenciez à travailler sur la tâche ? Pensez-y bien ...",
         "TITLE": "Découpez-la!"
       }
     },
@@ -534,7 +538,7 @@
     },
     "SIMPLE_COUNTER": {
       "D_CONFIRM_REMOVE": {
-        "MSG": "La suppression d'un simple compteur supprimera également toutes les données antérieures qui y sont suivies. Êtes-vous sur de vouloir continuer?",
+        "MSG": "La suppression d'un simple compteur supprimera également toutes les données antérieures qui y sont suivies. Êtes-vous sur de vouloir continuer ?",
         "OK": "Fais le!"
       },
       "D_EDIT": {
@@ -559,12 +563,12 @@
     },
     "SYNC": {
       "C": {
-        "EMPTY_SYNC": "Vous essayez de synchroniser un objet de données vide. Est-ce votre toute première synchronisation d'une application (presque) vierge?",
-        "FORCE_IMPORT": "Importer quand même des données distantes?",
-        "FORCE_UPLOAD": "Télécharger quand même des données locales?",
-        "FORCE_UPLOAD_AFTER_ERROR": "Une erreur s'est produite lors du téléchargement de vos données locales. Essayez de forcer la mise à jour?",
-        "NO_REMOTE_DATA": "Aucune donnée distante trouvée. Télécharger local vers distant?",
-        "TRY_LOAD_REMOTE_AGAIN": "Essayez à nouveau de recharger les données depuis la télécommande?"
+        "EMPTY_SYNC": "Vous essayez de synchroniser un objet de données vide. Est-ce votre toute première synchronisation d'une application (presque) vierge ?",
+        "FORCE_IMPORT": "Importer quand même des données distantes ?",
+        "FORCE_UPLOAD": "Télécharger quand même des données locales ?",
+        "FORCE_UPLOAD_AFTER_ERROR": "Une erreur s'est produite lors du téléchargement de vos données locales. Essayez de forcer la mise à jour ?",
+        "NO_REMOTE_DATA": "Aucune donnée distante trouvée. Télécharger local vers distant ?",
+        "TRY_LOAD_REMOTE_AGAIN": "Essayez à nouveau de recharger les données depuis la télécommande ?"
       },
       "D_AUTH_CODE": {
         "FOLLOW_LINK": "Veuillez ouvrir le lien suivant et copier le code d'authentification qui y est fourni dans le champ de saisie ci-dessous.",
@@ -599,7 +603,7 @@
         "L_SYNC_PROVIDER": "Fournisseur de synchronisation",
         "TITLE": "Sync",
         "WEB_DAV": {
-          "CORS_INFO": "<strong>Expérimental !!</strong> Pour que cela fonctionne, vous devez désactiver ou limiter CORS pour votre instance Nextcloud, ce qui peut avoir des implications négatives sur la sécurité! Veuillez <a href='https://github.com/nextcloud/server/issues/3131'>consulter ce fil de discussion</a> pour plus d'informations. À utiliser à vos risques et périls!",
+          "CORS_INFO": "<strong>Expérimental !!</strong> Pour que cela fonctionne, vous devez désactiver ou limiter CORS pour votre instance Nextcloud, ce qui peut avoir des implications négatives sur la sécurité ! Veuillez <a href='https://github.com/nextcloud/server/issues/3131'>consulter ce fil de discussion</a> pour plus d'informations. À utiliser à vos risques et périls !",
           "L_BASE_URL": "URL de base",
           "L_PASSWORD": "Mot de passe",
           "L_SYNC_FILE_PATH": "Chemin du fichier de synchronisation",
@@ -610,11 +614,11 @@
         "ERROR_FALLBACK_TO_BACKUP": "Quelque chose s'est mal passé lors de l'importation des données. Retour à la sauvegarde locale.",
         "ERROR_INVALID_DATA": "Erreur lors de la synchronisation. Données invalides",
         "IMPORTING": "Importer des données",
-        "INCOMPLETE_CFG": "L'authentification pour la synchronisation a échoué. Veuillez vérifier votre configuration!",
+        "INCOMPLETE_CFG": "L'authentification pour la synchronisation a échoué. Veuillez vérifier votre configuration !",
         "INITIAL_SYNC_ERROR": "Échec de la synchronisation initiale",
         "SUCCESS_IMPORT": "Données importées",
         "UNKNOWN_ERROR": "Erreur inconnue lors de la synchronisation. Veuillez vérifier la console.",
-        "UPLOAD_ERROR": "Erreur de téléversement inconnue (paramètres corrects?): {{err}}"
+        "UPLOAD_ERROR": "Erreur de téléversement inconnue (paramètres corrects ?): {{err}}"
       }
     },
     "TAG": {
@@ -623,7 +627,7 @@
         "EDIT": "Modifier la balise"
       },
       "D_DELETE": {
-        "CONFIRM_MSG": "Voulez-vous vraiment supprimer la balise \"{{tagName}}\"? Il sera supprimé de toutes les tâches. Ça ne peut pas être annulé."
+        "CONFIRM_MSG": "Voulez-vous vraiment supprimer la balise \"{{tagName}}\" ? Il sera supprimé de toutes les tâches. Ça ne peut pas être annulé."
       },
       "D_EDIT": {
         "ADD": "Ajouter des balises pour \"{{title}}\"",
@@ -751,7 +755,7 @@
         "FOUND_MOVE_FROM_BACKLOG": "Déplacement de la tâche existante <strong>{{title}}</strong> vers la liste des tâches du jour",
         "FOUND_MOVE_FROM_OTHER_LIST": "Tâche <strong>{{title}}</strong> ajoutée de <strong>{{contextTitle}}</strong> à la liste actuelle",
         "FOUND_RESTORE_FROM_ARCHIVE": "Tâche <strong>{{title}}</strong> restaurée en lien avec le ticket de l'archive",
-        "LAST_TAG_DELETION_WARNING": "Vous essayez de supprimer la dernière balise d'une tâche non liée à un projet. Ce n'est pas permis!",
+        "LAST_TAG_DELETION_WARNING": "Vous essayez de supprimer la dernière balise d'une tâche non liée à un projet. Ce n'est pas permis !",
         "REMINDER_ADDED": "Tâche planifiée \"{{title}}\"",
         "REMINDER_DELETED": "Rappel supprimé pour la tâche",
         "REMINDER_UPDATED": "Rappel mis à jour pour la tâche \"{{title}}\"",
@@ -824,16 +828,16 @@
       },
       "D_TRACKING_REMINDER": {
         "CREATE_AND_TRACK": "<em>Créer</em> et suivre vers",
-        "IDLE_FOR": "Vous avez été inactif pour:",
+        "IDLE_FOR": "Vous avez été inactif pour :",
         "TASK": "Tâche",
-        "TRACK_TO": "Suivre à:",
-        "UNTRACKED_TIME": "Temps non suivi:"
+        "TRACK_TO": "Suivre à :",
+        "UNTRACKED_TIME": "Temps non suivi :"
       }
     },
     "WORKLOG": {
       "CMP": {
-        "DAYS_WORKED": "Jours travaillés : ",
-        "MONTH_WORKED": "Mois travaillé : ",
+        "DAYS_WORKED": "Jours travaillés :",
+        "MONTH_WORKED": "Mois travaillé :",
         "REPEATING_TASK": "Tâche récurrente",
         "RESTORE_TASK_FROM_ARCHIVE": "Restaurer la tâche à partir de l'archive",
         "TASKS": "Tâches",
@@ -853,7 +857,7 @@
         "O": {
           "DATE": "Date",
           "ENDED_WORKING": "Terminé le travail",
-          "ESTIMATE_AS_CLOCK": "Estimation format horaire (par exemple 5:23)",
+          "ESTIMATE_AS_CLOCK": "Estimation au format horaire (par exemple 5:23)",
           "ESTIMATE_AS_MILLISECONDS": "Estimation en millisecondes",
           "ESTIMATE_AS_STRING": "Estimation littérale (par exemple 5h 23m)",
           "FULL_HALF_HOURS": "demi heures pleines",
@@ -866,7 +870,7 @@
           "STARTED_WORKING": "Commencé à travailler",
           "TAGS": "Mots clés",
           "TASK_SUBTASK": "Tâche / Sous-tâche",
-          "TIME_AS_CLOCK": "Heure format horaire (par exemple 5:23)",
+          "TIME_AS_CLOCK": "Heure au format horaire (par exemple 5:23)",
           "TIME_AS_MILLISECONDS": "Temps en millisecondes",
           "TIME_AS_STRING": "Temps au format littéral (par exemple 5h 23m)",
           "TITLES_AND_SUB_TASK_TITLES": "Titres et sous-titres de tâches",
@@ -885,20 +889,26 @@
         "NO_DATA": "Pas encore de tâche cette semaine.",
         "TITLE": "Titre"
       }
+    },
+    "SEARCH_BAR": {
+      "TOO_MANY_RESULTS": "Trop de résultats, veuillez affiner votre recherche",
+      "PLACEHOLDER": "Chercher une tâche ou une description de tâche",
+      "PLACEHOLDER_ARCHIVED": "Chercher des tâches archivées",
+      "INFO_ARCHIVED": "Cliquez sur l'icône d'archive pour chercher des tâches normales"
     }
   },
   "FILE_IMEX": {
-    "EXPORT_DATA": "Exporter des données",
+    "EXPORT_DATA": "Exporter les données",
     "IMPORT_FROM_FILE": "Importer depuis un fichier",
     "S_ERR_INVALID_DATA": "Échec de l'importation: JSON non valide"
   },
   "G": {
-    "CANCEL": "annuler",
+    "CANCEL": "Annuler",
     "CLICK_TO_EDIT": "cliquer pour modifier",
     "CLOSE": "Fermer",
     "DELETE": "Effacer",
     "DISMISS": "Rejeter",
-    "DO_IT": "Fais le !",
+    "DO_IT": "Le faire !",
     "EDIT": "modifier",
     "EXTENSION_INFO": "Veuillez <a target=\"_blank\" href=\"https://chrome.google.com/webstore/detail/super-productivity/ljkbjodfmekklcoibdnhahlaalhihmlb\"> télécharger l'extension chrome</a> afin de permettre la communication avec l'Api Jira et la gestion du temps d'inactivité. Notez que cela ne fonctionne pas sur mobile.",
     "LOGIN": "S'identifier",
@@ -908,12 +918,12 @@
     "NONE": "Aucun",
     "NO_CON": "Vous êtes actuellement hors ligne. Veuillez vous reconnecter à Internet.",
     "OK": "Ok",
-    "PREVIOUS": "précédent",
+    "PREVIOUS": "Précédent",
     "REMOVE": "Retirer",
     "RESET": "Réinitialiser",
-    "SAVE": "sauvegarder",
+    "SAVE": "Sauvegarder",
     "TITLE": "Titre",
-    "UNDO": "annuler",
+    "UNDO": "Annuler",
     "UPDATE": "Mettre à jour",
     "WITHOUT_PROJECT": "Sans projet",
     "YESTERDAY": "Hier"
@@ -922,7 +932,7 @@
     "AUTO_BACKUPS": {
       "HELP": "Sauvegardez automatiquement toutes les données dans votre dossier d'applications afin de les retrouver en cas de problème.",
       "LABEL_IS_ENABLED": "Activer les sauvegardes automatiques",
-      "LOCATION_INFO": "Les sauvegardes sont enregistrées dans:",
+      "LOCATION_INFO": "Les sauvegardes sont enregistrées dans :",
       "TITLE": "Sauvegardes automatiques"
     },
     "EVALUATION": {
@@ -988,24 +998,24 @@
       "ZOOM_OUT": "Zoom arrière (bureau uniquement)"
     },
     "LANG": {
-      "AR": "Arabe",
-      "DE": "Allemand",
-      "EN": "Anglais",
-      "ES": "Espanol",
-      "FA": "Farsi",
+      "AR": "arabe",
+      "DE": "allemand",
+      "EN": "anglais",
+      "ES": "espagnol",
+      "FA": "farsi",
       "FR": "français",
-      "IT": "Italien",
+      "IT": "italien",
       "JA": "japonais",
       "KO": "coréen",
       "LABEL": "Veuillez sélectionner une langue",
-      "NB": "Norvégien bokmål",
-      "NL": "Néerlandais",
-      "PT": "Portugais",
+      "NB": "norvégien bokmål",
+      "NL": "néerlandais",
+      "PT": "portugais",
       "RU": "russe",
       "TITLE": "Langue",
-      "TR": "Turc",
-      "ZH": "Chinois simplifié",
-      "ZH_TW": "Chinois traditionnel"
+      "TR": "turc",
+      "ZH": "chinois simplifié",
+      "ZH_TW": "chinois traditionnel"
     },
     "MISC": {
       "DEFAULT_PROJECT": "Projet par défaut à utiliser pour les tâches si aucun n'est spécifié",
@@ -1114,7 +1124,7 @@
     "TASK_LIST": "Liste de tâches",
     "TOGGLE_SHOW_BOOKMARKS": "Afficher / masquer les favoris",
     "TOGGLE_SHOW_NOTES": "Afficher / masquer les notes de projet",
-    "TOGGLE_TRACK_TIME": "Démarrer / Arrêter le suivi du temps",
+    "TOGGLE_TRACK_TIME": "Démarrer / arrêter le suivi du temps",
     "WORKLOG": "Journal de travail"
   },
   "PDS": {
@@ -1124,7 +1134,7 @@
     "CLEAR_ALL_CONTINUE": "Effacer tout et continuer",
     "D_CONFIRM_APP_CLOSE": {
       "CANCEL": "Non, effacer seulement les tâches",
-      "MSG": "Votre journée de travail est terminée. Il est temps de rentrer à la maison!",
+      "MSG": "Votre journée de travail est terminée. Il est temps de rentrer à la maison !",
       "OK": "Aye Aye ! Fermer !"
     },
     "EVALUATION": "évaluation",
@@ -1146,7 +1156,7 @@
     "TASKS_COMPLETED": "Tâches terminées",
     "TASK_LIST": "Liste de tâches",
     "TIME_SPENT_AND_ESTIMATE_LABEL": "Temps passé / estimé",
-    "TIME_SPENT_ESTIMATE_TITLE": "Temps passé: Temps total passé aujourd'hui. Tâches archivées non incluses. - Temps estimé: temps estimé pour les tâches effectuées aujourd'hui moins le temps déjà passé dessus les autres jours.",
+    "TIME_SPENT_ESTIMATE_TITLE": "Temps passé : Temps total passé aujourd'hui. Tâches archivées non incluses. - Temps estimé : temps estimé pour les tâches effectuées aujourd'hui moins le temps déjà passé dessus les autres jours.",
     "TODAY": "Aujourd'hui",
     "WEEK": "La semaine"
   },
@@ -1163,11 +1173,11 @@
       "OK": "Archiver"
     },
     "D_CONFIRM_DELETE": {
-      "MSG": "Êtes-vous sûr de vouloir supprimer ce projet? Il est recommandé de sauvegarder vos données avant de procéder.",
+      "MSG": "Êtes-vous sûr de vouloir supprimer ce projet ? Il est recommandé de sauvegarder vos données avant de procéder.",
       "OK": "Supprimer"
     },
     "D_CONFIRM_UNARCHIVE": {
-      "MSG": "Êtes-vous sûr de vouloir désarchiver ce projet?",
+      "MSG": "Êtes-vous sûr de vouloir désarchiver ce projet ?",
       "OK": "Désarchiver"
     },
     "EDIT_PROJECT": "Modifier le projet",
@@ -1198,20 +1208,20 @@
   "THEMES": {
     "SELECT_THEME": "Sélectionner un thème",
     "amber": "ambre",
-    "blue": "Bleu",
-    "blue-grey": "Bleu gris",
-    "cyan": "Cyan",
+    "blue": "bleu",
+    "blue-grey": "bleu gris",
+    "cyan": "cyan",
     "deep-orange": "orange foncé",
-    "deep-purple": "Violet foncé",
-    "green": "Vert",
-    "indigo": "Indigo",
-    "light-blue": "Bleu clair",
-    "light-green": "Vert clair",
-    "lime": "Vert citron",
+    "deep-purple": "violet foncé",
+    "green": "vert",
+    "indigo": "indigo",
+    "light-blue": "bleu clair",
+    "light-green": "vert clair",
+    "lime": "vert citron",
     "pink": "rose",
-    "purple": "Violet",
-    "teal": "Turquoise",
-    "yellow": "Jaune"
+    "purple": "violet",
+    "teal": "turquoise",
+    "yellow": "jaune"
   },
   "V": {
     "E_1TO10": "Veuillez entrer une valeur entre 1 et 10",
@@ -1227,11 +1237,11 @@
     "ADD_MORE": "Ajouter plus",
     "ADD_SCHEDULED_FOR_TODAY": "Ajouter des tâches prévues pour aujourd'hui ({{nr}})",
     "ADD_SCHEDULED_FOR_TOMORROW": "Ajouter des tâches prévues pour demain ({{nr}})",
-    "ADD_SOME_TASKS": "Ajoutez quelques tâches pour planifier votre journée!",
+    "ADD_SOME_TASKS": "Ajoutez quelques tâches pour planifier votre journée !",
     "COMPLETED_TASKS": "Tâches terminées",
-    "ESTIMATE_REMAINING": "Tps. restant:",
+    "ESTIMATE_REMAINING": "Tps. restant :",
     "FINISH_DAY": "Fin de journée",
-    "HELP_PROCRASTINATION": "A l'aide je procrastine !",
+    "HELP_PROCRASTINATION": "À l'aide, je procrastine !",
     "NO_COMPLETED_TASKS": "Il n'y a actuellement aucune tâche terminée",
     "NO_PLANNED_TASKS": "Aucune tâche planifiée",
     "READY_TO_WORK": "Prêt à travailler !",
