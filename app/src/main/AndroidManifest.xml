@@ -48,8 +48,6 @@
         <!--        </activity>-->
 
 
-        <meta-data android:name="com.google.android.actions" android:resource="@xml/actions" />
-
 
         <!-- App in WebFrame -->
         <activity
@@ -63,7 +61,7 @@
             <!-- This intent-filter adds the Trusted Web Activity to the Android Launcher -->
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-                <action android:name="custom.actions.intent.TRIGGER_SYNC" />
+<!--                <action android:name="custom.actions.intent.TRIGGER_SYNC" />-->
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
 
