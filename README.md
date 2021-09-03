@@ -151,7 +151,7 @@ There are several ways to help.
 
 3. **[Report bugs](https://github.com/johannesjo/super-productivity/issues/new)**
 
-4. **Contribute**: You don't have to be programmer to help. Some of the icons really need improvement and many of the translations could use some love.
+4. **Contribute**: You don't have to be programmer to help. Some of the icons really need improvement and many of the [translations could use some love](https://github.com/johannesjo/super-productivity/discussions/1493).
 
 5. **[Sponsor the project](https://github.com/sponsors/johannesjo)**
 
