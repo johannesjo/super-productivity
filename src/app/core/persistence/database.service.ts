@@ -3,15 +3,15 @@ import { DBSchema, openDB } from 'idb';
 import { IDBPDatabase } from 'idb/build/esm/entry';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { filter, shareReplay, take } from 'rxjs/operators';
-import { retry } from 'utils-decorators';
 import { ElectronService } from '../electron/electron.service';
 import { IS_ELECTRON } from '../../app.constants';
+import { devError } from '../../util/dev-error';
+import { TranslateService } from '@ngx-translate/core';
+import { T } from '../../t.const';
 
 const DB_NAME = 'SUP';
 const DB_MAIN_NAME = 'SUP_STORE';
 const VERSION = 2;
-const MAX_RETRY_COUNT = 3;
-const RETRY_DELAY = 30;
 
 interface MyDb extends DBSchema {
   [DB_MAIN_NAME]: any;
@@ -33,13 +33,13 @@ export class DatabaseService {
 
   private _lastParams?: { a: string; key?: string; data?: unknown };
 
-  private _completeReInitCount: number = 0;
-
-  constructor(private _electronService: ElectronService) {
+  constructor(
+    private _electronService: ElectronService,
+    private _translateService: TranslateService,
+  ) {
     this._init().then();
   }
 
-  @retry({ retries: MAX_RETRY_COUNT, delay: RETRY_DELAY })
   async load(key: string): Promise<unknown> {
     this._lastParams = { a: 'load', key };
     await this._afterReady();
@@ -47,11 +47,10 @@ export class DatabaseService {
       return await (this.db as IDBPDatabase<MyDb>).get(DB_MAIN_NAME, key);
     } catch (e) {
       console.warn('DB Load Error: Last Params,', this._lastParams);
-      throw new Error(e);
+      return this._errorHandler(e, this.load, [key]);
     }
   }
 
-  @retry({ retries: MAX_RETRY_COUNT, delay: RETRY_DELAY })
   async save(key: string, data: unknown): Promise<unknown> {
     this._lastParams = { a: 'save', key, data };
     await this._afterReady();
@@ -59,11 +58,10 @@ export class DatabaseService {
       return await (this.db as IDBPDatabase<MyDb>).put(DB_MAIN_NAME, data, key);
     } catch (e) {
       console.warn('DB Save Error: Last Params,', this._lastParams);
-      throw new Error(e);
+      return this._errorHandler(e, this.save, [key, data]);
     }
   }
 
-  @retry({ retries: MAX_RETRY_COUNT, delay: RETRY_DELAY })
   async remove(key: string): Promise<unknown> {
     this._lastParams = { a: 'remove', key };
     await this._afterReady();
@@ -71,11 +69,10 @@ export class DatabaseService {
       return await (this.db as IDBPDatabase<MyDb>).delete(DB_MAIN_NAME, key);
     } catch (e) {
       console.warn('DB Remove Error: Last Params,', this._lastParams);
-      throw new Error(e);
+      return this._errorHandler(e, this.remove, [key]);
     }
   }
 
-  @retry({ retries: MAX_RETRY_COUNT, delay: RETRY_DELAY })
   async clearDatabase(): Promise<unknown> {
     this._lastParams = { a: 'clearDatabase' };
     await this._afterReady();
@@ -83,14 +80,12 @@ export class DatabaseService {
       return await (this.db as IDBPDatabase<MyDb>).clear(DB_MAIN_NAME);
     } catch (e) {
       console.warn('DB Clear Error: Last Params,', this._lastParams);
-      throw new Error(e);
+      return this._errorHandler(e, this.clearDatabase, []);
     }
   }
 
-  @retry({ retries: MAX_RETRY_COUNT, delay: RETRY_DELAY })
   private async _init(): Promise<IDBPDatabase<MyDb>> {
     try {
-      const that = this;
       this.db = await openDB<MyDb>(DB_NAME, VERSION, {
         // upgrade(db: IDBPDatabase<MyDb>, oldVersion: number, newVersion: number | null, transaction: IDBPTransaction<MyDb>) {
         // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
@@ -108,25 +103,7 @@ export class DatabaseService {
         },
         // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
         terminated(): void {
-          // TODO move down
           alert('IDB TERMINATED');
-
-          if (that._completeReInitCount < MAX_RETRY_COUNT) {
-            console.log('... Reinitializing IndexedDB after unexpected failure ...');
-            that._init();
-            that._completeReInitCount++;
-          } else if (
-            confirm(
-              'App database was terminated :( Is there enough free disk space or some process messing with the data? Press OK to reload the app.',
-            )
-          ) {
-            if (IS_ELECTRON) {
-              that._electronService.remote?.app.relaunch();
-              that._electronService.remote?.app.exit();
-            } else {
-              window.location.reload();
-            }
-          }
         },
       });
     } catch (e) {
@@ -138,6 +115,28 @@ export class DatabaseService {
 
     this.isReady$.next(true);
     return this.db;
+  }
+
+  // eslint-disable-next-line @typescript-eslint/ban-types
+  private async _errorHandler(e: Error, fn: Function, args: any[]): Promise<void> {
+    devError(e);
+    if (confirm(this._translateService.instant(T.CONFIRM.RELOAD_AFTER_IDB_ERROR))) {
+      this._restartApp();
+    } else {
+      this.db?.close();
+      await this._init();
+      // retry after init
+      return fn(...args);
+    }
+  }
+
+  private _restartApp(): void {
+    if (IS_ELECTRON) {
+      this._electronService.remote?.app.relaunch();
+      this._electronService.remote?.app.exit(0);
+    } else {
+      window.location.reload();
+    }
   }
 
   private async _afterReady(): Promise<boolean> {
