@@ -344,7 +344,7 @@
         "IMPORTED_MULTIPLE_ISSUES": "Jira : {{issuesLength}} nouveaux tickets importés depuis Jira vers l'arriéré",
         "IMPORTED_SINGLE_ISSUE": "Jira : ticket \"{{issueText}}\" importé de Jira dans l'arriéré",
         "INSUFFICIENT_SETTINGS": "Réglages insuffisants pour Jira",
-        "INVALID_RESPONSE": "Jira : "La réponse contient des données invalides",
+        "INVALID_RESPONSE": "Jira : La réponse contient des données invalides",
         "ISSUE_NO_UPDATE_REQUIRED": "Jira : \"{{issueText}}\" déjà à jour",
         "ISSUE_UPDATE": "Jira : données mises à jour pour \"{{issueText}}\"",
         "MANUAL_UPDATE_ISSUE_SUCCESS": "Jira : données mises à jour pour \"{{issueText}}\"",
