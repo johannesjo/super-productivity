@@ -363,7 +363,8 @@ export class TaskAdditionalInfoComponent implements AfterViewInit, OnDestroy {
   changeTaskNotes($event: string): void {
     if (
       !this.defaultTaskNotes ||
-      ($event && $event.trim() !== this.defaultTaskNotes.trim())
+      !$event ||
+      $event.trim() !== this.defaultTaskNotes.trim()
     ) {
       this.taskService.update(this.task.id, { notes: $event });
     }
