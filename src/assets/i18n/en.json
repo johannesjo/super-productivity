@@ -413,22 +413,10 @@
       }
     },
     "NOTE": {
-      "ADD_REMINDER": "Add reminder",
       "D_ADD": {
-        "DATETIME_LABEL": "Datetime for reminder (optional)",
         "NOTE_LABEL": "Enter some text to save as note..."
       },
-      "D_ADD_REMINDER": {
-        "E_ENTER_TITLE": "You need to enter a title",
-        "L_DATETIME": "Datetime for reminder",
-        "L_TITLE": "Title for notification"
-      },
-      "D_VIEW_REMINDER": {
-        "SNOOZE": "Snooze",
-        "TITLE": "Note"
-      },
       "EDIT_FULLSCREEN": "Edit in fullscreen",
-      "EDIT_REMINDER": "Edit reminder",
       "NOTES_CMP": {
         "ADD_BTN": "Add new Note",
         "DROP_TO_ADD": "Drop here to add new note"
@@ -436,14 +424,7 @@
       "NOTE_CMP": {
         "DISABLE_PARSE": "Disable markdown parsing",
         "ENABLE_PARSE": "Enable markdown parse"
-      },
-      "REMOVE_REMINDER": "Remove reminder",
-      "S": {
-        "ADDED_REMINDER": "Added reminder for note",
-        "DELETED_REMINDER": "Deleted reminder for note",
-        "UPDATED_REMINDER": "Updated reminder for note"
-      },
-      "UPDATE_REMINDER": "Update reminder"
+      }
     },
     "POMODORO": {
       "BACK_TO_WORK": "Back to work!",
