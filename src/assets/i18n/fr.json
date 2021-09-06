@@ -94,7 +94,7 @@
         "IS_TRANSITION_ISSUES_ENABLED": "Compléter automatiquement les tâches CalDav à la fin de la tâche"
       },
       "FORM_SECTION": {
-        "HELP": "<p>Ici, vous pouvez configurer SuperProductivity pour répertorier les tâches CalDav inachevées pour un projet spécifique dans le panneau de création de tâches de la vue de planification quotidienne. ls seront listés comme des suggestions et fourniront un lien vers le todo ainsi que plus d'informations à ce sujet.</p> <p>En outre, vous pouvez automatiquement ajouter et synchroniser toutes les tâches inachevées dans votre arrière de travail.</p>",
+        "HELP": "<p>Ici, vous pouvez configurer SuperProductivity pour répertorier les tâches CalDav inachevées pour un projet spécifique dans le panneau de création de tâches de la vue de planification quotidienne. ls seront listés comme des suggestions et fourniront un lien vers le todo ainsi que plus d'informations à ce sujet.</p> <p>En outre, vous pouvez automatiquement ajouter et synchroniser toutes les tâches inachevées dans votre arriéré de travail.</p>",
         "TITLE": "CalDav"
       },
       "ISSUE_CONTENT": {
@@ -109,7 +109,7 @@
         "CALENDAR_READ_ONLY": "CalDav : le calendrier \"{{calendarName}}\" est en lecture seule",
         "ERR_NETWORK": "CalDav : la requête a échoué en raison d'une erreur réseau côté client",
         "ERR_NOT_CONFIGURED": "CalDav : pas correctement configuré",
-        "IMPORTED_MULTIPLE_ISSUES": "CalDav : importation de {{issuesLength}} nouveaux tickets depuis git vers l'arrière",
+        "IMPORTED_MULTIPLE_ISSUES": "CalDav : importation de {{issuesLength}} nouveaux tickets depuis git vers l'arriéré",
         "IMPORTED_SINGLE_ISSUE": "CalDav : ticket importé \"{{issueText}}\" depuis l'arriéré",
         "ISSUE_NOT_FOUND": "CalDav : le ticket \"{{issueId}}\" semble être supprimé sur le serveur.",
         "ISSUE_NO_UPDATE_REQUIRED": "CalDav : aucune mise à jour requise.",
