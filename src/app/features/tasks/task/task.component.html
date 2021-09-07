@@ -40,7 +40,7 @@
   <!-- TODO only bind pan, longPress etc when touch is available-->
   <div
     (contextmenu)="openContextMenu($event)"
-    (longPress)="openContextMenu($event)"
+    (longPress)="IS_TOUCH_ONLY && openContextMenu($event)"
     (panend)="onPanEnd()"
     (panleft)="onPanLeft($event)"
     (panright)="onPanRight($event)"
