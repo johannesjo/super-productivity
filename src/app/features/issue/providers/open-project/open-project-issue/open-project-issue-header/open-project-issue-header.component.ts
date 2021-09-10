@@ -3,7 +3,7 @@ import { TaskWithSubTasks } from '../../../../../tasks/task.model';
 import { T } from '../../../../../../t.const';
 
 @Component({
-  selector: 'openProject-issue-header',
+  selector: 'open-project-issue-header',
   templateUrl: './open-project-issue-header.component.html',
   styleUrls: ['./open-project-issue-header.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,

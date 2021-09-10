@@ -9,11 +9,10 @@ import { SearchResultItem } from '../../issue.model';
 import { OpenProjectCfg } from './open-project.model';
 import { SnackService } from '../../../../core/snack/snack.service';
 import {
-  OpenProjectIssue,
-  OpenProjectIssueReduced,
+  OpenProjectWorkPackage,
+  OpenProjectWorkPackageReduced,
 } from './open-project-issue/open-project-issue.model';
 import { truncate } from '../../../../util/truncate';
-import { T } from '../../../../t.const';
 
 @Injectable({
   providedIn: 'root',
@@ -31,7 +30,7 @@ export class OpenProjectCommonInterfacesService implements IssueServiceInterface
     );
   }
 
-  getById$(issueId: number, projectId: string): Observable<OpenProjectIssue> {
+  getById$(issueId: number, projectId: string): Observable<OpenProjectWorkPackage> {
     return this._getCfgOnce$(projectId).pipe(
       concatMap((openProjectCfg) =>
         this._openProjectApiService.getById$(issueId, openProjectCfg),
@@ -57,79 +56,79 @@ export class OpenProjectCommonInterfacesService implements IssueServiceInterface
     task: Task,
     isNotifySuccess: boolean = true,
     isNotifyNoUpdateRequired: boolean = false,
-  ): Promise<{ taskChanges: Partial<Task>; issue: OpenProjectIssue } | null> {
+  ): Promise<{ taskChanges: Partial<Task>; issue: OpenProjectWorkPackage } | null> {
     if (!task.projectId) {
       throw new Error('No projectId');
     }
     if (!task.issueId) {
       throw new Error('No issueId');
     }
-
-    const cfg = await this._getCfgOnce$(task.projectId).toPromise();
-    const issue = await this._openProjectApiService
-      .getById$(+task.issueId, cfg)
-      .toPromise();
-
-    // const issueUpdate: number = new Date(issue.updated_at).getTime();
-    const filterUserName = cfg.filterUsername && cfg.filterUsername.toLowerCase();
-    const commentsByOthers =
-      filterUserName && filterUserName.length > 1
-        ? issue.comments.filter(
-            (comment) => comment.user.login.toLowerCase() !== cfg.filterUsername,
-          )
-        : issue.comments;
-
-    // TODO: we also need to handle the case when the user himself updated the issue, to also update the issue...
-    const updates: number[] = [
-      ...commentsByOthers.map((comment) => new Date(comment.created_at).getTime()),
-      // todo check if this can be re-implemented
-      // issueUpdate
-    ].sort();
-    const lastRemoteUpdate = updates[updates.length - 1];
-
-    const wasUpdated = lastRemoteUpdate > (task.issueLastUpdated || 0);
-
-    // console.log('---------openProject issue update debugging--------');
-    // console.log('wasUpdated', wasUpdated, ' lastRemoteUpdate', lastRemoteUpdate, 'task.issueLastUpdated', task.issueLastUpdated);
-    // console.log(commentsByOthers, updates);
-    // console.log('cfg', cfg);
-    // console.log('issue', issue);
-    // console.log('--------end-------');
-
-    if (wasUpdated && isNotifySuccess) {
-      this._snackService.open({
-        ico: 'cloud_download',
-        translateParams: {
-          issueText: this._formatIssueTitleForSnack(issue.number, issue.title),
-        },
-        msg: T.F.OPEN_PROJECT.S.ISSUE_UPDATE,
-      });
-    } else if (isNotifyNoUpdateRequired) {
-      this._snackService.open({
-        msg: T.F.OPEN_PROJECT.S.ISSUE_NO_UPDATE_REQUIRED,
-        ico: 'cloud_download',
-      });
-    }
-
-    if (wasUpdated) {
-      return {
-        taskChanges: {
-          issueWasUpdated: true,
-          issueLastUpdated: lastRemoteUpdate,
-          title: `#${issue.number} ${issue.title}`,
-        },
-        issue,
-      };
-    }
+    //
+    // const cfg = await this._getCfgOnce$(task.projectId).toPromise();
+    // const issue = await this._openProjectApiService
+    //   .getById$(+task.issueId, cfg)
+    //   .toPromise();
+    //
+    // // const issueUpdate: number = new Date(issue.updated_at).getTime();
+    // const filterUserName = cfg.filterUsername && cfg.filterUsername.toLowerCase();
+    // const commentsByOthers =
+    //   filterUserName && filterUserName.length > 1
+    //     ? issue.comments.filter(
+    //         (comment) => comment.user.login.toLowerCase() !== cfg.filterUsername,
+    //       )
+    //     : issue.comments;
+    //
+    // // TODO: we also need to handle the case when the user himself updated the issue, to also update the issue...
+    // const updates: number[] = [
+    //   ...commentsByOthers.map((comment) => new Date(comment.created_at).getTime()),
+    //   // todo check if this can be re-implemented
+    //   // issueUpdate
+    // ].sort();
+    // const lastRemoteUpdate = updates[updates.length - 1];
+    //
+    // const wasUpdated = lastRemoteUpdate > (task.issueLastUpdated || 0);
+    //
+    // // console.log('---------openProject issue update debugging--------');
+    // // console.log('wasUpdated', wasUpdated, ' lastRemoteUpdate', lastRemoteUpdate, 'task.issueLastUpdated', task.issueLastUpdated);
+    // // console.log(commentsByOthers, updates);
+    // // console.log('cfg', cfg);
+    // // console.log('issue', issue);
+    // // console.log('--------end-------');
+    //
+    // if (wasUpdated && isNotifySuccess) {
+    //   this._snackService.open({
+    //     ico: 'cloud_download',
+    //     translateParams: {
+    //       issueText: this._formatIssueTitleForSnack(issue.number, issue.title),
+    //     },
+    //     msg: T.F.OPEN_PROJECT.S.ISSUE_UPDATE,
+    //   });
+    // } else if (isNotifyNoUpdateRequired) {
+    //   this._snackService.open({
+    //     msg: T.F.OPEN_PROJECT.S.ISSUE_NO_UPDATE_REQUIRED,
+    //     ico: 'cloud_download',
+    //   });
+    // }
+    //
+    // if (wasUpdated) {
+    //   return {
+    //     taskChanges: {
+    //       issueWasUpdated: true,
+    //       issueLastUpdated: lastRemoteUpdate,
+    //       title: `#${issue.number} ${issue.title}`,
+    //     },
+    //     issue,
+    //   };
+    // }
     return null;
   }
 
-  getAddTaskData(issue: OpenProjectIssueReduced): {
+  getAddTaskData(issue: OpenProjectWorkPackageReduced): {
     title: string;
     additionalFields: Partial<Task>;
   } {
     return {
-      title: this._formatIssueTitle(issue.number, issue.title),
+      title: this._formatIssueTitle(issue.id, issue.subject),
       additionalFields: {
         // issueWasUpdated: false,
         // NOTE: we use Date.now() instead to because updated does not account for comments
@@ -138,8 +137,8 @@ export class OpenProjectCommonInterfacesService implements IssueServiceInterface
     };
   }
 
-  private _formatIssueTitle(id: number, title: string): string {
-    return `#${id} ${title}`;
+  private _formatIssueTitle(id: number, subject: string): string {
+    return `#${id} ${subject}`;
   }
 
   private _formatIssueTitleForSnack(id: number, title: string): string {

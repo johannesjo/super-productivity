@@ -7,6 +7,7 @@ import { GithubIssueModule } from './providers/github/github-issue/github-issue.
 import { IssueIconPipe } from './issue-icon/issue-icon.pipe';
 import { GitlabIssueModule } from './providers/gitlab/gitlab-issue/gitlab-issue.module';
 import { CaldavIssueModule } from './providers/caldav/caldav-issue/caldav-issue.module';
+import { OpenProjectIssueModule } from './providers/open-project/open-project-issue/open-project-issue.module';
 
 @NgModule({
   imports: [
@@ -15,6 +16,7 @@ import { CaldavIssueModule } from './providers/caldav/caldav-issue/caldav-issue.
     GithubIssueModule,
     GitlabIssueModule,
     CaldavIssueModule,
+    OpenProjectIssueModule,
   ],
   declarations: [IssueHeaderComponent, IssueContentComponent, IssueIconPipe],
   exports: [IssueHeaderComponent, IssueContentComponent, IssueIconPipe],

@@ -1,19 +1,19 @@
 import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
 import { TaskWithSubTasks } from '../../../../../tasks/task.model';
-import { OpenProjectIssue } from '../open-project-issue.model';
+import { OpenProjectWorkPackage } from '../open-project-issue.model';
 import { expandAnimation } from '../../../../../../ui/animations/expand.ani';
 import { T } from '../../../../../../t.const';
 import { TaskService } from '../../../../../tasks/task.service';
 
 @Component({
-  selector: 'openProject-issue-content',
+  selector: 'open-project-issue-content',
   templateUrl: './open-project-issue-content.component.html',
   styleUrls: ['./open-project-issue-content.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   animations: [expandAnimation],
 })
 export class OpenProjectIssueContentComponent {
-  @Input() issue?: OpenProjectIssue;
+  @Input() issue?: OpenProjectWorkPackage;
   @Input() task?: TaskWithSubTasks;
 
   T: typeof T = T;

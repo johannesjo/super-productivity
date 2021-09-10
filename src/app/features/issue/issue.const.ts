@@ -40,7 +40,7 @@ export const issueProviderIconMap = {
   [GITHUB_TYPE]: 'github',
   [GITLAB_TYPE]: 'gitlab',
   [CALDAV_TYPE]: 'caldav',
-  [OPEN_PROJECT_TYPE]: 'openProject',
+  [OPEN_PROJECT_TYPE]: 'open_project',
 };
 
 export const DEFAULT_ISSUE_PROVIDER_CFGS = {

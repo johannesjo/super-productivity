@@ -1,6 +1,12 @@
 import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
 import { TaskWithSubTasks } from '../../tasks/task.model';
-import { CALDAV_TYPE, GITHUB_TYPE, GITLAB_TYPE, JIRA_TYPE } from '../issue.const';
+import {
+  CALDAV_TYPE,
+  GITHUB_TYPE,
+  GITLAB_TYPE,
+  JIRA_TYPE,
+  OPEN_PROJECT_TYPE,
+} from '../issue.const';
 import { IssueData } from '../issue.model';
 
 @Component({
@@ -16,6 +22,7 @@ export class IssueContentComponent {
   readonly GITHUB_TYPE: string = GITHUB_TYPE;
   readonly JIRA_TYPE: string = JIRA_TYPE;
   readonly CALDAV_TYPE: string = CALDAV_TYPE;
+  readonly OPEN_PROJECT_TYPE: string = OPEN_PROJECT_TYPE;
 
   constructor() {}
 }

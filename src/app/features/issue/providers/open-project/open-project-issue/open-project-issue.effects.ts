@@ -17,7 +17,7 @@ import { WorkContextService } from '../../../../work-context/work-context.servic
 import { OPEN_PROJECT_TYPE } from '../../../issue.const';
 import { OpenProjectCfg } from '../open-project.model';
 import { isOpenProjectEnabled } from '../is-open-project-enabled.util';
-import { OpenProjectIssueReduced } from './open-project-issue.model';
+import { OpenProjectWorkPackageReduced } from './open-project-issue.model';
 import { IssueEffectHelperService } from '../../../issue-effect-helper.service';
 
 @Injectable()
@@ -53,7 +53,7 @@ export class OpenProjectIssueEffects {
                 ),
                 tap(
                   ([issues, allTaskOpenProjectIssueIds]: [
-                    OpenProjectIssueReduced[],
+                    OpenProjectWorkPackageReduced[],
                     number[],
                   ]) => {
                     const issuesToAdd = issues
@@ -141,7 +141,7 @@ export class OpenProjectIssueEffects {
 
   private _importNewIssuesToBacklog(
     projectId: string,
-    issuesToAdd: OpenProjectIssueReduced[],
+    issuesToAdd: OpenProjectWorkPackageReduced[],
   ): void {
     issuesToAdd.forEach((issue) => {
       this._issueService.addTaskWithIssue(OPEN_PROJECT_TYPE, issue, projectId, true);
@@ -151,7 +151,7 @@ export class OpenProjectIssueEffects {
       this._snackService.open({
         ico: 'cloud_download',
         translateParams: {
-          issueText: `#${issuesToAdd[0].number} ${issuesToAdd[0].title}`,
+          issueText: `#${issuesToAdd[0].id} ${issuesToAdd[0].subject}`,
         },
         msg: T.F.OPEN_PROJECT.S.IMPORTED_SINGLE_ISSUE,
       });

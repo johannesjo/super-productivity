@@ -10,8 +10,8 @@ import {
 } from '@angular/common/http';
 import { Observable, ObservableInput, throwError } from 'rxjs';
 import {
-  OpenProjectIssueSearchResult,
-  OpenProjectOriginalIssue,
+  OpenProjectOriginalWorkPackage,
+  OpenProjectWorkPackageSearchResult,
 } from './open-project-api-responses';
 import { catchError, filter, map } from 'rxjs/operators';
 import {
@@ -19,8 +19,8 @@ import {
   mapOpenProjectIssueToSearchResult,
 } from './open-project-issue/open-project-issue-map.util';
 import {
-  OpenProjectIssue,
-  OpenProjectIssueReduced,
+  OpenProjectWorkPackage,
+  OpenProjectWorkPackageReduced,
 } from './open-project-issue/open-project-issue.model';
 import { SearchResultItem } from '../../issue.model';
 import { HANDLED_ERROR_PROP_STR } from '../../../../app.constants';
@@ -37,7 +37,7 @@ export class OpenProjectApiService {
     issueId: number,
     cfg: OpenProjectCfg,
     isGetComments: boolean = true,
-  ): Observable<OpenProjectIssue> {
+  ): Observable<OpenProjectWorkPackage> {
     return this._sendRequest$(
       {
         // url: `${cfg.host}/api/v3/projects/${cfg.projectId}/${issueId}`,
@@ -52,24 +52,29 @@ export class OpenProjectApiService {
     cfg: OpenProjectCfg,
     isSearchAllOpenProject: boolean = false,
   ): Observable<SearchResultItem[]> {
-    // const repoQuery = isSearchAllOpenProject ? '' : `+repo:${cfg.host}`;
-    console.log(searchText);
-
     return this._sendRequest$(
       {
         url: `${cfg.host}/api/v3/projects/${cfg.projectId}/work_packages`,
       },
       cfg,
     ).pipe(
-      map((res: OpenProjectIssueSearchResult) => {
-        return res && res.items
-          ? res.items.map(mapOpenProjectIssue).map(mapOpenProjectIssueToSearchResult)
+      map((res: OpenProjectWorkPackageSearchResult) => {
+        return res && res._embedded.elements
+          ? res._embedded.elements
+              .map(mapOpenProjectIssue)
+              // TODO add better search and caching
+              .filter((workPackage: OpenProjectWorkPackage) =>
+                workPackage.subject.match(searchText),
+              )
+              .map(mapOpenProjectIssueToSearchResult)
           : [];
       }),
     );
   }
 
-  getLast100IssuesForRepo$(cfg: OpenProjectCfg): Observable<OpenProjectIssueReduced[]> {
+  getLast100IssuesForRepo$(
+    cfg: OpenProjectCfg,
+  ): Observable<OpenProjectWorkPackageReduced[]> {
     const host = cfg.host;
     return this._sendRequest$(
       {
@@ -77,7 +82,7 @@ export class OpenProjectApiService {
       },
       cfg,
     ).pipe(
-      map((issues: OpenProjectOriginalIssue[]) =>
+      map((issues: OpenProjectOriginalWorkPackage[]) =>
         issues ? issues.map(mapOpenProjectIssue) : [],
       ),
     );
