@@ -24,25 +24,26 @@ export interface OpenProjectFormattable {
 // NOTE unknown currently means we haven't evaluated the possible values
 export type OpenProjectOriginalWorkPackage = Readonly<{
   createdAt: string;
-  derivedDueDate: null;
-  derivedEstimatedTime: null;
-  derivedStartDate: null;
+  derivedDueDate: unknown | null;
+  derivedEstimatedTime: unknown | null;
+  derivedStartDate: unknown | null;
   description: {
     format: 'markdown';
     html: string;
     raw: null;
   };
   dueDate: string;
-  estimatedTime: unknown;
+  estimatedTime: unknown | null;
   lockVersion: number;
   percentageDone: number;
   position: number;
-  remainingTime: unknown;
+  remainingTime: unknown | null;
   scheduleManually: boolean;
   startDate: string;
   storyPoints: number | null;
   subject: string;
   updatedAt: string;
+  // NOTE: there is more data here, which we would need to fetch via extra requests
   _links: {
     [key: string]: { href: string };
   };

@@ -13,7 +13,7 @@ import {
   OpenProjectOriginalWorkPackage,
   OpenProjectWorkPackageSearchResult,
 } from './open-project-api-responses';
-import { catchError, filter, map } from 'rxjs/operators';
+import { catchError, filter, map, tap } from 'rxjs/operators';
 import {
   mapOpenProjectIssue,
   mapOpenProjectIssueToSearchResult,
@@ -69,6 +69,8 @@ export class OpenProjectApiService {
               .map(mapOpenProjectIssueToSearchResult)
           : [];
       }),
+      // TODO remove
+      tap(console.log),
     );
   }
 

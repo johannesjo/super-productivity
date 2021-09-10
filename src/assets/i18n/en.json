@@ -460,13 +460,10 @@
       },
       "ISSUE_CONTENT": {
         "ASSIGNEE": "Assignee",
-        "AT": "at",
         "DESCRIPTION": "Description",
-        "LABELS": "Labels",
         "MARK_AS_CHECKED": "Mark updates as checked",
         "STATUS": "Status",
-        "SUMMARY": "Summary",
-        "WRITE_A_COMMENT": "Write a comment"
+        "SUMMARY": "Summary"
       },
       "S": {
         "ERR_NETWORK": "Open Project: Request failed because of a client side network error",
