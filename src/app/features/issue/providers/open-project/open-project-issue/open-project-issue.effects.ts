@@ -44,7 +44,9 @@ export class OpenProjectIssueEffects {
                 tap(() => console.log('OPEN_PROJECT_POLL_BACKLOG_CHANGES')),
                 switchMap(() =>
                   forkJoin([
-                    this._openProjectApiService.getLast100IssuesForRepo$(openProjectCfg),
+                    this._openProjectApiService.getLast100WorkPackagesForCurrentOpenProjectProject$(
+                      openProjectCfg,
+                    ),
                     this._taskService.getAllIssueIdsForProject(
                       pId,
                       OPEN_PROJECT_TYPE,

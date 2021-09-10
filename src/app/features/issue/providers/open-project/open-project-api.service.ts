@@ -46,11 +46,17 @@ export class OpenProjectApiService {
   searchIssueForRepo$(
     searchText: string,
     cfg: OpenProjectCfg,
-    isSearchAllOpenProject: boolean = false,
   ): Observable<SearchResultItem[]> {
     return this._sendRequest$(
       {
+        // see https://www.openproject.org/docs/api/endpoints/work-packages/
         url: `${cfg.host}/api/v3/projects/${cfg.projectId}/work_packages`,
+        params: {
+          pageSize: 100,
+          filters: `[{"subjectOrId":{"operator":"**","values":["${searchText}"]}}]`,
+          // Default: [["id", "asc"]]
+          sortBy: '[["updatedAt","desc"]]',
+        },
       },
       cfg,
     ).pipe(
@@ -60,16 +66,6 @@ export class OpenProjectApiService {
               .map((workPackage: OpenProjectOriginalWorkPackageReduced) =>
                 mapOpenProjectIssueReduced(workPackage, cfg),
               )
-              // TODO add better search and caching
-              .filter(
-                (workPackage: OpenProjectWorkPackage) =>
-                  '#' +
-                  workPackage.id +
-                  ' ' +
-                  workPackage.subject
-                    .toLocaleLowerCase()
-                    .match(searchText.toLocaleLowerCase()),
-              )
               .map(mapOpenProjectIssueToSearchResult)
           : [];
       }),
@@ -78,23 +74,32 @@ export class OpenProjectApiService {
     );
   }
 
-  getLast100IssuesForRepo$(
+  getLast100WorkPackagesForCurrentOpenProjectProject$(
     cfg: OpenProjectCfg,
   ): Observable<OpenProjectWorkPackageReduced[]> {
-    const host = cfg.host;
     return this._sendRequest$(
       {
-        url: `${host}/issues?per_page=100&sort=updated`,
+        // see https://www.openproject.org/docs/api/endpoints/work-packages/
+        url: `${cfg.host}/api/v3/projects/${cfg.projectId}/work_packages`,
+        params: {
+          pageSize: 100,
+          sortBy: '[["updatedAt","desc"]]',
+        },
       },
       cfg,
     ).pipe(
-      map((issues: OpenProjectOriginalWorkPackageReduced[]) =>
-        issues
-          ? issues.map((workPackage: OpenProjectOriginalWorkPackageReduced) =>
-              mapOpenProjectIssueReduced(workPackage, cfg),
-            )
-          : [],
-      ),
+      // TODO remove
+      tap(console.log),
+      map((res: OpenProjectWorkPackageSearchResult) => {
+        return res && res._embedded.elements
+          ? res._embedded.elements
+              .map((workPackage: OpenProjectOriginalWorkPackageReduced) =>
+                mapOpenProjectIssueReduced(workPackage, cfg),
+              )
+              // TODO add better search and caching
+              .map(mapOpenProjectIssueToSearchResult)
+          : [];
+      }),
     );
   }
 
