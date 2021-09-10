@@ -463,7 +463,8 @@
         "DESCRIPTION": "Description",
         "MARK_AS_CHECKED": "Mark updates as checked",
         "STATUS": "Status",
-        "SUMMARY": "Summary"
+        "SUMMARY": "Summary",
+        "TYPE": "Type"
       },
       "S": {
         "ERR_NETWORK": "Open Project: Request failed because of a client side network error",
