@@ -13,6 +13,7 @@ import {
   OpenProjectWorkPackageReduced,
 } from './open-project-issue/open-project-issue.model';
 import { truncate } from '../../../../util/truncate';
+import { T } from '../../../../t.const';
 
 @Injectable({
   providedIn: 'root',
@@ -61,12 +62,11 @@ export class OpenProjectCommonInterfacesService implements IssueServiceInterface
     if (!task.issueId) {
       throw new Error('No issueId');
     }
-    //
-    // const cfg = await this._getCfgOnce$(task.projectId).toPromise();
-    // const issue = await this._openProjectApiService
-    //   .getById$(+task.issueId, cfg)
-    //   .toPromise();
-    //
+    const cfg = await this._getCfgOnce$(task.projectId).toPromise();
+    const issue = await this._openProjectApiService
+      .getById$(+task.issueId, cfg)
+      .toPromise();
+
     // // const issueUpdate: number = new Date(issue.updated_at).getTime();
     // const filterUserName = cfg.filterUsername && cfg.filterUsername.toLowerCase();
     // const commentsByOthers =
@@ -75,49 +75,49 @@ export class OpenProjectCommonInterfacesService implements IssueServiceInterface
     //         (comment) => comment.user.login.toLowerCase() !== cfg.filterUsername,
     //       )
     //     : issue.comments;
-    //
-    // // TODO: we also need to handle the case when the user himself updated the issue, to also update the issue...
+    // TODO: we also need to handle the case when the user himself updated the issue, to also update the issue...
     // const updates: number[] = [
-    //   ...commentsByOthers.map((comment) => new Date(comment.created_at).getTime()),
-    //   // todo check if this can be re-implemented
-    //   // issueUpdate
+    // ...commentsByOthers.map((comment) => new Date(comment.created_at).getTime()),
+    // issueUpdate
     // ].sort();
     // const lastRemoteUpdate = updates[updates.length - 1];
-    //
     // const wasUpdated = lastRemoteUpdate > (task.issueLastUpdated || 0);
-    //
-    // // console.log('---------openProject issue update debugging--------');
-    // // console.log('wasUpdated', wasUpdated, ' lastRemoteUpdate', lastRemoteUpdate, 'task.issueLastUpdated', task.issueLastUpdated);
-    // // console.log(commentsByOthers, updates);
-    // // console.log('cfg', cfg);
-    // // console.log('issue', issue);
-    // // console.log('--------end-------');
-    //
-    // if (wasUpdated && isNotifySuccess) {
-    //   this._snackService.open({
-    //     ico: 'cloud_download',
-    //     translateParams: {
-    //       issueText: this._formatIssueTitleForSnack(issue.number, issue.title),
-    //     },
-    //     msg: T.F.OPEN_PROJECT.S.ISSUE_UPDATE,
-    //   });
-    // } else if (isNotifyNoUpdateRequired) {
-    //   this._snackService.open({
-    //     msg: T.F.OPEN_PROJECT.S.ISSUE_NO_UPDATE_REQUIRED,
-    //     ico: 'cloud_download',
-    //   });
-    // }
-    //
-    // if (wasUpdated) {
-    //   return {
-    //     taskChanges: {
-    //       issueWasUpdated: true,
-    //       issueLastUpdated: lastRemoteUpdate,
-    //       title: `#${issue.number} ${issue.title}`,
-    //     },
-    //     issue,
-    //   };
-    // }
+
+    const lastRemoteUpdate = new Date(issue.updatedAt).getTime();
+    const wasUpdated = lastRemoteUpdate > (task.issueLastUpdated || 0);
+
+    // console.log('---------openProject issue update debugging--------');
+    // console.log('wasUpdated', wasUpdated, ' lastRemoteUpdate', lastRemoteUpdate, 'task.issueLastUpdated', task.issueLastUpdated);
+    // console.log(commentsByOthers, updates);
+    // console.log('cfg', cfg);
+    // console.log('issue', issue);
+    // console.log('--------end-------');
+
+    if (wasUpdated && isNotifySuccess) {
+      this._snackService.open({
+        ico: 'cloud_download',
+        translateParams: {
+          issueText: this._formatIssueTitleForSnack(issue.id, issue.subject),
+        },
+        msg: T.F.OPEN_PROJECT.S.ISSUE_UPDATE,
+      });
+    } else if (isNotifyNoUpdateRequired) {
+      this._snackService.open({
+        msg: T.F.OPEN_PROJECT.S.ISSUE_NO_UPDATE_REQUIRED,
+        ico: 'cloud_download',
+      });
+    }
+
+    if (wasUpdated) {
+      return {
+        taskChanges: {
+          issueWasUpdated: true,
+          issueLastUpdated: lastRemoteUpdate,
+          title: this._formatIssueTitle(issue.id, issue.subject),
+        },
+        issue,
+      };
+    }
     return null;
   }
 

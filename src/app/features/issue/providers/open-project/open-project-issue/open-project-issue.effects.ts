@@ -96,16 +96,18 @@ export class OpenProjectIssueEffects {
           }),
         );
       }),
-      map((cos) =>
-        cos
+      tap(console.log),
+      map((eachTaskAndProjectOpenProjectCfg) =>
+        // NOTE: this is necessary because for tag task lists every task could have a different config in place
+        eachTaskAndProjectOpenProjectCfg
           .filter(
-            ({ cfg, task }: { cfg: OpenProjectCfg; task: TaskWithSubTasks }): boolean =>
+            ({ cfg }: { cfg: OpenProjectCfg; task: TaskWithSubTasks }): boolean =>
               isOpenProjectEnabled(cfg) && cfg.isAutoPoll,
           )
           .map(({ task }: { cfg: OpenProjectCfg; task: TaskWithSubTasks }) => task),
       ),
-      tap((openProjectTasks: TaskWithSubTasks[]) =>
-        this._refreshIssues(openProjectTasks),
+      tap((openProjectTasksToCheck: TaskWithSubTasks[]) =>
+        this._refreshIssues(openProjectTasksToCheck),
       ),
     );
 
@@ -134,7 +136,7 @@ export class OpenProjectIssueEffects {
     if (openProjectTasks && openProjectTasks.length > 0) {
       this._snackService.open({
         msg: T.F.OPEN_PROJECT.S.POLLING,
-        svgIco: 'openProject',
+        svgIco: 'open_project',
         isSpinner: true,
       });
       openProjectTasks.forEach((task) =>

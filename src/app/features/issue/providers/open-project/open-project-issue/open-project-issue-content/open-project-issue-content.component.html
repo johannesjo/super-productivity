@@ -16,7 +16,7 @@
         </td>
       </tr>
 
-      <tr *ngIf="issue?._embedded.type.name">
+      <tr *ngIf="issue?._embedded.type?.name">
         <th>{{T.F.OPEN_PROJECT.ISSUE_CONTENT.TYPE|translate}}</th>
         <td>{{issue?._embedded.type.name}}</td>
       </tr>
@@ -29,12 +29,12 @@
         </td>
       </tr>
 
-      <tr *ngIf="issue?._embedded.assignee.name">
+      <tr *ngIf="issue?._embedded.assignee?.name">
         <th>{{T.F.OPEN_PROJECT.ISSUE_CONTENT.ASSIGNEE|translate}}</th>
         <td>{{issue?._embedded.assignee.name}}</td>
       </tr>
 
-      <tr *ngIf="issue?.description.raw || issue?.description.html">
+      <tr *ngIf="issue?.description?.raw || issue?.description?.html">
         <th>{{T.F.OPEN_PROJECT.ISSUE_CONTENT.DESCRIPTION|translate}}</th>
         <td class="issue-description">
           <div
