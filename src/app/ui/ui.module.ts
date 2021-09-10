@@ -78,12 +78,13 @@ import { DialogFullscreenMarkdownComponent } from './dialog-fullscreen-markdown/
 import { JiraToMarkdownPipe } from './pipes/jira-to-markdown.pipe';
 import { BetterDrawerModule } from './better-drawer/better-drawer.module';
 import { SortPipe } from './pipes/sort.pipe';
-import { LongPressDirective } from './longpress/longpress.component';
+import { LongPressDirective } from './longpress/longpress.directive';
 import { FormlyMatToggleModule } from '@ngx-formly/material/toggle';
 import { OwlWrapperComponent } from './owl-wrapper/owl-wrapper.component';
 import { DialogPromptComponent } from './dialog-prompt/dialog-prompt.component';
 import { RoundDurationPipe } from './pipes/round-duration.pipe';
 import { ShortPlannedAtPipe } from './pipes/short-planned-at.pipe';
+import { LongPressIOSDirective } from './longpress/longpress-ios.directive';
 
 const DIALOG_COMPONENTS = [
   DialogConfirmComponent,
@@ -112,6 +113,7 @@ const COMPONENT_AND_PIPES = [
   JiraToMarkdownPipe,
   KeysPipe,
   LongPressDirective,
+  LongPressIOSDirective,
   MomentFormatPipe,
   MsToClockStringPipe,
   MsToMinuteClockStringPipe,

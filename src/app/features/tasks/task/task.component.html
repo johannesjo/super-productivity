@@ -39,6 +39,7 @@
 
   <!-- TODO only bind pan, longPress etc when touch is available-->
   <div
+    (longPressIOS)="openContextMenu($event)"
     (contextmenu)="openContextMenu($event)"
     (panend)="onPanEnd()"
     (panleft)="onPanLeft($event)"
