@@ -173,6 +173,7 @@ export class OpenProjectApiService {
         msg: 'OpenProject: ' + error.error.message,
       });
     } else {
+      console.log(error);
       // The backend returned an unsuccessful response code.
       this._snackService.open({
         type: 'ERROR',

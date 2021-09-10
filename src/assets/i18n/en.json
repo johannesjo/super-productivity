@@ -469,7 +469,7 @@
       "S": {
         "ERR_NETWORK": "Open Project: Request failed because of a client side network error",
         "ERR_NOT_CONFIGURED": "Open Project: Is not properly configured",
-        "ERR_UNKNOWN": "Open Project: Unknown error {{statusCode}} {{errorMsg}}. Api Rate limit exceeded?",
+        "ERR_UNKNOWN": "Open Project: Unknown error {{statusCode}} {{errorMsg}}. Is CORS properly configured for the server?",
         "IMPORTED_MULTIPLE_ISSUES": "Open Project: Imported {{issuesLength}} new work packages to backlog",
         "IMPORTED_SINGLE_ISSUE": "Open Project: Imported work package \"{{issueText}}\" to backlog",
         "ISSUE_DELETED_OR_CLOSED": "Open Project: Work package \"{{issueText}}\" seems to be deleted or closed on",
