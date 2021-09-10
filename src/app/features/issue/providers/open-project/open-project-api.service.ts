@@ -15,6 +15,7 @@ import {
 } from './open-project-api-responses';
 import { catchError, filter, map, tap } from 'rxjs/operators';
 import {
+  mapOpenProjectIssueFull,
   mapOpenProjectIssueReduced,
   mapOpenProjectIssueToSearchResult,
 } from './open-project-issue/open-project-issue-map.util';
@@ -33,18 +34,13 @@ import { throwHandledError } from '../../../../util/throw-handled-error';
 export class OpenProjectApiService {
   constructor(private _snackService: SnackService, private _http: HttpClient) {}
 
-  getById$(
-    issueId: number,
-    cfg: OpenProjectCfg,
-    isGetComments: boolean = true,
-  ): Observable<OpenProjectWorkPackage> {
+  getById$(issueId: number, cfg: OpenProjectCfg): Observable<OpenProjectWorkPackage> {
     return this._sendRequest$(
       {
-        // url: `${cfg.host}/api/v3/projects/${cfg.projectId}/${issueId}`,
         url: `${cfg.host}/api/v3/work_packages/${issueId}`,
       },
       cfg,
-    );
+    ).pipe(map((workPackage) => mapOpenProjectIssueFull(workPackage, cfg)));
   }
 
   searchIssueForRepo$(

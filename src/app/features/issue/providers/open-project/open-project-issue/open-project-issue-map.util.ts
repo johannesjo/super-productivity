@@ -2,7 +2,10 @@ import {
   OpenProjectWorkPackage,
   OpenProjectWorkPackageReduced,
 } from './open-project-issue.model';
-import { OpenProjectOriginalWorkPackageReduced } from '../open-project-api-responses';
+import {
+  OpenProjectOriginalWorkPackageFull,
+  OpenProjectOriginalWorkPackageReduced,
+} from '../open-project-api-responses';
 import { SearchResultItem } from '../../../issue.model';
 import { OpenProjectCfg } from '../open-project.model';
 import { OPEN_PROJECT_TYPE } from '../../../issue.const';
@@ -17,15 +20,15 @@ export const mapOpenProjectIssueReduced = (
   };
 };
 
-// export const mapOpenProjectIssueFull = (
-//   issue: OpenProjectOriginalWorkPackageFull,
-//   cfg: OpenProjectCfg,
-// ): OpenProjectWorkPackage => {
-//   return mapOpenProjectIssueReduced(
-//     issue as OpenProjectOriginalWorkPackageReduced,
-//     cfg,
-//   ) as OpenProjectWorkPackage;
-// };
+export const mapOpenProjectIssueFull = (
+  issue: OpenProjectOriginalWorkPackageFull,
+  cfg: OpenProjectCfg,
+): OpenProjectWorkPackage => {
+  return mapOpenProjectIssueReduced(
+    issue as OpenProjectOriginalWorkPackageReduced,
+    cfg,
+  ) as OpenProjectWorkPackage;
+};
 
 export const mapOpenProjectIssueToSearchResult = (
   issue: OpenProjectWorkPackage,
