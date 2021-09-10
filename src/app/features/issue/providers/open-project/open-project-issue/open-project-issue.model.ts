@@ -1,6 +1,9 @@
-import { OpenProjectOriginalWorkPackage } from '../open-project-api-responses';
+import {
+  OpenProjectOriginalWorkPackageFull,
+  OpenProjectOriginalWorkPackageReduced,
+} from '../open-project-api-responses';
 
-export type OpenProjectWorkPackageReduced = OpenProjectOriginalWorkPackage &
+export type OpenProjectWorkPackageReduced = OpenProjectOriginalWorkPackageReduced &
   Readonly<{
     // added
     // transformed
@@ -8,4 +11,5 @@ export type OpenProjectWorkPackageReduced = OpenProjectOriginalWorkPackage &
     // removed
   }>;
 
-export type OpenProjectWorkPackage = OpenProjectWorkPackageReduced;
+export type OpenProjectWorkPackage = OpenProjectWorkPackageReduced &
+  OpenProjectOriginalWorkPackageFull;

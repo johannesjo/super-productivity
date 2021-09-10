@@ -18,7 +18,9 @@ export class OpenProjectIssueContentComponent {
 
   T: typeof T = T;
 
-  constructor(private readonly _taskService: TaskService) {}
+  constructor(private readonly _taskService: TaskService) {
+    setTimeout(() => console.log(this.issue), 200);
+  }
 
   hideUpdates(): void {
     if (!this.task) {

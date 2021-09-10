@@ -39,8 +39,6 @@ export class OpenProjectCommonInterfacesService implements IssueServiceInterface
   }
 
   searchIssues$(searchTerm: string, projectId: string): Observable<SearchResultItem[]> {
-    console.log('I am here!');
-
     return this._getCfgOnce$(projectId).pipe(
       switchMap((openProjectCfg) =>
         openProjectCfg && openProjectCfg.isSearchIssuesFromOpenProject
@@ -127,12 +125,15 @@ export class OpenProjectCommonInterfacesService implements IssueServiceInterface
     title: string;
     additionalFields: Partial<Task>;
   } {
+    console.log(issue);
+
     return {
       title: this._formatIssueTitle(issue.id, issue.subject),
       additionalFields: {
-        // issueWasUpdated: false,
+        issuePoints: issue.storyPoints,
+        issueWasUpdated: false,
         // NOTE: we use Date.now() instead to because updated does not account for comments
-        // issueLastUpdated: new Date(issue.updated_at).getTime()
+        issueLastUpdated: new Date(issue.updatedAt).getTime(),
       },
     };
   }

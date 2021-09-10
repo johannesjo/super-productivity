@@ -1,24 +1,38 @@
-import { OpenProjectWorkPackage } from './open-project-issue.model';
-import { OpenProjectOriginalWorkPackage } from '../open-project-api-responses';
-import { IssueProviderKey, SearchResultItem } from '../../../issue.model';
+import {
+  OpenProjectWorkPackage,
+  OpenProjectWorkPackageReduced,
+} from './open-project-issue.model';
+import { OpenProjectOriginalWorkPackageReduced } from '../open-project-api-responses';
+import { SearchResultItem } from '../../../issue.model';
 import { OpenProjectCfg } from '../open-project.model';
+import { OPEN_PROJECT_TYPE } from '../../../issue.const';
 
-export const mapOpenProjectIssue = (
-  issue: OpenProjectOriginalWorkPackage,
+export const mapOpenProjectIssueReduced = (
+  issue: OpenProjectOriginalWorkPackageReduced,
   cfg: OpenProjectCfg,
-): OpenProjectWorkPackage => {
+): OpenProjectWorkPackageReduced => {
   return {
     ...issue,
     url: `${cfg.host}/projects/${cfg.projectId}/work_packages/${issue.id}`,
   };
 };
 
+// export const mapOpenProjectIssueFull = (
+//   issue: OpenProjectOriginalWorkPackageFull,
+//   cfg: OpenProjectCfg,
+// ): OpenProjectWorkPackage => {
+//   return mapOpenProjectIssueReduced(
+//     issue as OpenProjectOriginalWorkPackageReduced,
+//     cfg,
+//   ) as OpenProjectWorkPackage;
+// };
+
 export const mapOpenProjectIssueToSearchResult = (
   issue: OpenProjectWorkPackage,
 ): SearchResultItem => {
   return {
     title: '#' + issue.id + ' ' + issue.subject,
-    issueType: 'OPEN_PROJECT' as IssueProviderKey,
+    issueType: OPEN_PROJECT_TYPE,
     issueData: issue,
   };
 };

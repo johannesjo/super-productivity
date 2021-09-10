@@ -10,12 +10,12 @@ import {
 } from '@angular/common/http';
 import { Observable, ObservableInput, throwError } from 'rxjs';
 import {
-  OpenProjectOriginalWorkPackage,
+  OpenProjectOriginalWorkPackageReduced,
   OpenProjectWorkPackageSearchResult,
 } from './open-project-api-responses';
 import { catchError, filter, map, tap } from 'rxjs/operators';
 import {
-  mapOpenProjectIssue,
+  mapOpenProjectIssueReduced,
   mapOpenProjectIssueToSearchResult,
 } from './open-project-issue/open-project-issue-map.util';
 import {
@@ -61,8 +61,8 @@ export class OpenProjectApiService {
       map((res: OpenProjectWorkPackageSearchResult) => {
         return res && res._embedded.elements
           ? res._embedded.elements
-              .map((workPackage: OpenProjectOriginalWorkPackage) =>
-                mapOpenProjectIssue(workPackage, cfg),
+              .map((workPackage: OpenProjectOriginalWorkPackageReduced) =>
+                mapOpenProjectIssueReduced(workPackage, cfg),
               )
               // TODO add better search and caching
               .filter((workPackage: OpenProjectWorkPackage) =>
@@ -86,10 +86,10 @@ export class OpenProjectApiService {
       },
       cfg,
     ).pipe(
-      map((issues: OpenProjectOriginalWorkPackage[]) =>
+      map((issues: OpenProjectOriginalWorkPackageReduced[]) =>
         issues
-          ? issues.map((workPackage: OpenProjectOriginalWorkPackage) =>
-              mapOpenProjectIssue(workPackage, cfg),
+          ? issues.map((workPackage: OpenProjectOriginalWorkPackageReduced) =>
+              mapOpenProjectIssueReduced(workPackage, cfg),
             )
           : [],
       ),
