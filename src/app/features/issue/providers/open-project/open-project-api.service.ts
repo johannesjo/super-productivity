@@ -92,12 +92,10 @@ export class OpenProjectApiService {
       tap(console.log),
       map((res: OpenProjectWorkPackageSearchResult) => {
         return res && res._embedded.elements
-          ? res._embedded.elements
-              .map((workPackage: OpenProjectOriginalWorkPackageReduced) =>
+          ? res._embedded.elements.map(
+              (workPackage: OpenProjectOriginalWorkPackageReduced) =>
                 mapOpenProjectIssueReduced(workPackage, cfg),
-              )
-              // TODO add better search and caching
-              .map(mapOpenProjectIssueToSearchResult)
+            )
           : [];
       }),
     );

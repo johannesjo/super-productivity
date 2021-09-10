@@ -129,6 +129,8 @@ export class OpenProjectIssueEffects {
   ) {}
 
   private _refreshIssues(openProjectTasks: TaskWithSubTasks[]): void {
+    console.log('____REFRESHHHHHH', openProjectTasks);
+
     if (openProjectTasks && openProjectTasks.length > 0) {
       this._snackService.open({
         msg: T.F.OPEN_PROJECT.S.POLLING,

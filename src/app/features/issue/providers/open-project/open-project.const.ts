@@ -16,7 +16,7 @@ export const DEFAULT_OPEN_PROJECT_CFG: OpenProjectCfg = {
   filterUsername: null,
 };
 
-export const OPEN_PROJECT_POLL_INTERVAL = 10 * 60 * 1000;
+export const OPEN_PROJECT_POLL_INTERVAL = 5 * 60 * 1000;
 export const OPEN_PROJECT_INITIAL_POLL_DELAY = 8 * 1000;
 
 export const OPEN_PROJECT_CONFIG_FORM: LimitedFormlyFieldConfig<OpenProjectCfg>[] = [
