@@ -13,7 +13,7 @@ import {
   OpenProjectOriginalWorkPackageReduced,
   OpenProjectWorkPackageSearchResult,
 } from './open-project-api-responses';
-import { catchError, filter, map, tap } from 'rxjs/operators';
+import { catchError, filter, map } from 'rxjs/operators';
 import {
   mapOpenProjectIssueFull,
   mapOpenProjectIssueReduced,
@@ -69,8 +69,6 @@ export class OpenProjectApiService {
               .map(mapOpenProjectIssueToSearchResult)
           : [];
       }),
-      // TODO remove
-      tap(console.log),
     );
   }
 
@@ -88,8 +86,6 @@ export class OpenProjectApiService {
       },
       cfg,
     ).pipe(
-      // TODO remove
-      tap(console.log),
       map((res: OpenProjectWorkPackageSearchResult) => {
         return res && res._embedded.elements
           ? res._embedded.elements.map(
@@ -161,6 +157,7 @@ export class OpenProjectApiService {
     error: HttpErrorResponse,
     caught: Observable<unknown>,
   ): ObservableInput<unknown> {
+    console.log(error);
     if (error.error instanceof ErrorEvent) {
       // A client-side or network error occurred. Handle it accordingly.
       this._snackService.open({
@@ -173,7 +170,6 @@ export class OpenProjectApiService {
         msg: 'OpenProject: ' + error.error.message,
       });
     } else {
-      console.log(error);
       // The backend returned an unsuccessful response code.
       this._snackService.open({
         type: 'ERROR',

@@ -451,11 +451,11 @@
         "IS_AUTO_POLL": "Automatically poll imported open project work packages for changes",
         "IS_SEARCH_ISSUES_FROM_OPEN_PROJECT": "Show work packages as suggestions when adding new tasks",
         "PROJECT_ID": "Project ID",
-        "TOKEN": "Access Token",
-        "TOKEN_DESCRIPTION": "Required for private repository access"
+        "PROJECT_ID_DESCRIPTION": "Can be found as part of the url, when viewing the project in the Browser.",
+        "TOKEN": "Access Token"
       },
       "FORM_SECTION": {
-        "HELP": "<p>Here you can configure SuperProductivity to list open Open Project work packages.</p>",
+        "HELP": "<p>Here you can configure SuperProductivity to list open Open Project work packages. Please Note that for this to work in the browser you need to probably configure CORS for your open project server, to allow access from app.super-productivity.com</p>",
         "TITLE": "Open Project"
       },
       "ISSUE_CONTENT": {

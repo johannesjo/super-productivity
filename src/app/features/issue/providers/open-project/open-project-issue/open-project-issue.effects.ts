@@ -96,7 +96,6 @@ export class OpenProjectIssueEffects {
           }),
         );
       }),
-      tap(console.log),
       map((eachTaskAndProjectOpenProjectCfg) =>
         // NOTE: this is necessary because for tag task lists every task could have a different config in place
         eachTaskAndProjectOpenProjectCfg
@@ -131,8 +130,6 @@ export class OpenProjectIssueEffects {
   ) {}
 
   private _refreshIssues(openProjectTasks: TaskWithSubTasks[]): void {
-    console.log('____REFRESHHHHHH', openProjectTasks);
-
     if (openProjectTasks && openProjectTasks.length > 0) {
       this._snackService.open({
         msg: T.F.OPEN_PROJECT.S.POLLING,

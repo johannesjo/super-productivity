@@ -45,6 +45,7 @@ export const OPEN_PROJECT_CONFIG_FORM: LimitedFormlyFieldConfig<OpenProjectCfg>[
       label: T.F.OPEN_PROJECT.FORM.PROJECT_ID,
       type: 'text',
       required: true,
+      description: T.F.OPEN_PROJECT.FORM.PROJECT_ID_DESCRIPTION,
     },
   },
   {
@@ -68,13 +69,14 @@ export const OPEN_PROJECT_CONFIG_FORM: LimitedFormlyFieldConfig<OpenProjectCfg>[
       label: T.F.OPEN_PROJECT.FORM.IS_AUTO_ADD_TO_BACKLOG,
     },
   },
-  {
-    key: 'filterUsername',
-    type: 'input',
-    templateOptions: {
-      label: T.F.OPEN_PROJECT.FORM.FILTER_USER,
-    },
-  },
+  // TODO also remove translation and model if removing it for good
+  // {
+  //   key: 'filterUsername',
+  //   type: 'input',
+  //   templateOptions: {
+  //     label: T.F.OPEN_PROJECT.FORM.FILTER_USER,
+  //   },
+  // },
 ];
 
 export const OPEN_PROJECT_CONFIG_FORM_SECTION: ConfigFormSection<OpenProjectCfg> = {
