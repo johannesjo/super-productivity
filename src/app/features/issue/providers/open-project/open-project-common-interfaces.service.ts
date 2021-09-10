@@ -26,7 +26,7 @@ export class OpenProjectCommonInterfacesService implements IssueServiceInterface
 
   issueLink$(issueId: number, projectId: string): Observable<string> {
     return this._getCfgOnce$(projectId).pipe(
-      map((cfg) => `https://open-project.com/${cfg.host}/issues/${issueId}`),
+      map((cfg) => `${cfg.host}/projects/${cfg.projectId}/work_packages/${issueId}`),
     );
   }
 

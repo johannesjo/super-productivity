@@ -61,7 +61,9 @@ export class OpenProjectApiService {
       map((res: OpenProjectWorkPackageSearchResult) => {
         return res && res._embedded.elements
           ? res._embedded.elements
-              .map(mapOpenProjectIssue)
+              .map((workPackage: OpenProjectOriginalWorkPackage) =>
+                mapOpenProjectIssue(workPackage, cfg),
+              )
               // TODO add better search and caching
               .filter((workPackage: OpenProjectWorkPackage) =>
                 workPackage.subject.match(searchText),
@@ -85,7 +87,11 @@ export class OpenProjectApiService {
       cfg,
     ).pipe(
       map((issues: OpenProjectOriginalWorkPackage[]) =>
-        issues ? issues.map(mapOpenProjectIssue) : [],
+        issues
+          ? issues.map((workPackage: OpenProjectOriginalWorkPackage) =>
+              mapOpenProjectIssue(workPackage, cfg),
+            )
+          : [],
       ),
     );
   }
