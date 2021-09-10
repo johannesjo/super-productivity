@@ -65,8 +65,14 @@ export class OpenProjectApiService {
                 mapOpenProjectIssueReduced(workPackage, cfg),
               )
               // TODO add better search and caching
-              .filter((workPackage: OpenProjectWorkPackage) =>
-                workPackage.subject.match(searchText),
+              .filter(
+                (workPackage: OpenProjectWorkPackage) =>
+                  '#' +
+                  workPackage.id +
+                  ' ' +
+                  workPackage.subject
+                    .toLocaleLowerCase()
+                    .match(searchText.toLocaleLowerCase()),
               )
               .map(mapOpenProjectIssueToSearchResult)
           : [];
