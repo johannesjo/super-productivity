@@ -125,8 +125,6 @@ export class OpenProjectCommonInterfacesService implements IssueServiceInterface
     title: string;
     additionalFields: Partial<Task>;
   } {
-    console.log(issue);
-
     return {
       title: this._formatIssueTitle(issue.id, issue.subject),
       additionalFields: {
