@@ -1,6 +1,10 @@
 import { Injectable } from '@angular/core';
 import { select, Store } from '@ngrx/store';
-import { selectAllSimpleCounters } from './store/simple-counter.reducer';
+import {
+  selectAllSimpleCounters,
+  selectEnabledAndToggledSimpleCounters,
+  selectEnabledSimpleCounters,
+} from './store/simple-counter.reducer';
 import {
   addSimpleCounter,
   deleteSimpleCounter,
@@ -20,7 +24,7 @@ import {
   SimpleCounterState,
 } from './simple-counter.model';
 import * as shortid from 'shortid';
-import { distinctUntilChanged, map } from 'rxjs/operators';
+import { distinctUntilChanged } from 'rxjs/operators';
 
 const FIELDS_TO_COMPARE: (keyof SimpleCounterCfgFields)[] = [
   'id',
@@ -65,15 +69,16 @@ export class SimpleCounterService {
   simpleCountersUpdatedOnCfgChange$: Observable<SimpleCounter[]> =
     this.simpleCounters$.pipe(distinctUntilChanged(isEqualSimpleCounterCfg));
 
-  enabledSimpleCounters$: Observable<SimpleCounter[]> = this._store$
-    .pipe(select(selectAllSimpleCounters))
-    .pipe(map((items) => items && items.filter((item) => item.isEnabled)));
+  enabledSimpleCounters$: Observable<SimpleCounter[]> = this._store$.select(
+    selectEnabledSimpleCounters,
+  );
+
   enabledSimpleCountersUpdatedOnCfgChange$: Observable<SimpleCounter[]> =
     this.enabledSimpleCounters$.pipe(distinctUntilChanged(isEqualSimpleCounterCfg));
 
-  enabledAndToggledSimpleCounters$: Observable<SimpleCounter[]> = this._store$
-    .pipe(select(selectAllSimpleCounters))
-    .pipe(map((items) => items && items.filter((item) => item.isEnabled && item.isOn)));
+  enabledAndToggledSimpleCounters$: Observable<SimpleCounter[]> = this._store$.select(
+    selectEnabledAndToggledSimpleCounters,
+  );
 
   constructor(private _store$: Store<SimpleCounterState>) {}
 
