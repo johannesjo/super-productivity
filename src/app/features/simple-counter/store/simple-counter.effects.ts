@@ -10,6 +10,7 @@ import {
   setSimpleCounterCounterOff,
   setSimpleCounterCounterOn,
   setSimpleCounterCounterToday,
+  turnOffAllSimpleCounterCounters,
   updateAllSimpleCounters,
   updateSimpleCounter,
   upsertSimpleCounter,
@@ -35,6 +36,7 @@ import { T } from '../../../t.const';
 import { SnackService } from '../../../core/snack/snack.service';
 import { loadAllData } from '../../../root-store/meta/load-all-data.action';
 import { ImexMetaService } from '../../../imex/imex-meta/imex-meta.service';
+import { IdleService } from '../../time-tracking/idle.service';
 
 @Injectable()
 export class SimpleCounterEffects {
@@ -152,6 +154,13 @@ export class SimpleCounterEffects {
     { dispatch: false },
   );
 
+  disableOnIdle$: Observable<unknown> = createEffect(() =>
+    this._idleService.isIdle$.pipe(
+      filter((isIdle) => isIdle),
+      map(() => turnOffAllSimpleCounterCounters()),
+    ),
+  );
+
   constructor(
     private _actions$: Actions,
     private _store$: Store<any>,
@@ -160,6 +169,7 @@ export class SimpleCounterEffects {
     private _simpleCounterService: SimpleCounterService,
     private _imexMetaService: ImexMetaService,
     private _snackService: SnackService,
+    private _idleService: IdleService,
   ) {}
 
   private _saveToLs(simpleCounterState: SimpleCounterState): void {
