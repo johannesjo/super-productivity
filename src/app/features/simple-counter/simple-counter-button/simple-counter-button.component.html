@@ -9,7 +9,9 @@
       mat-mini-fab
     >
       <mat-icon *ngIf="!simpleCounter.isOn">{{simpleCounter.icon}}</mat-icon>
-      <mat-icon *ngIf="simpleCounter.isOn">{{simpleCounter.iconOn}}</mat-icon>
+      <mat-icon *ngIf="simpleCounter.isOn"
+        >{{simpleCounter.iconOn||simpleCounter.icon}}</mat-icon
+      >
     </button>
     <div *ngIf="simpleCounter.countOnDay[todayStr]" class="label">
       {{simpleCounter.countOnDay[todayStr]|msToMinuteClockString}}
