@@ -12,4 +12,14 @@
 
 * {
   box-shadow: none !important;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+
+p,
+input,
+textarea,
+[contenteditable] {
+  user-select: auto;
+  -webkit-touch-callout: default;
 }
