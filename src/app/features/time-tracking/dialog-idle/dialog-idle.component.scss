@@ -1,8 +1,9 @@
-@import "../../../../variables";
+@import '../../../../variables';
 
 .dialog-content {
   p,
   .track-to-label,
+  .simple-counter-section,
   .time {
     text-align: center;
   }
@@ -16,6 +17,6 @@
 
 .track-to-label {
   margin-bottom: $s;
-  font-size: $s*2;
+  font-size: $s * 2;
   font-weight: bold;
 }

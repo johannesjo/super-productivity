@@ -17,6 +17,19 @@
         [innerHTML]="T.F.TIME_TRACKING.D_IDLE.CREATE_AND_TRACK|translate"
       ></span>
     </div>
+    <section class="simple-counter-section">
+      <button
+        mat-mini-fab
+        class="simple-counter"
+        type="button"
+        *ngFor="let simpleCounterBtn of simpleCounterToggleBtns"
+        (click)="simpleCounterBtn.isTrackTo=!simpleCounterBtn.isTrackTo"
+        [matTooltip]="(simpleCounterBtn.isTrackTo ? T.F.TIME_TRACKING.D_IDLE.SIMPLE_COUNTER_TOOLTIP_DISABLE : T.F.TIME_TRACKING.D_IDLE.SIMPLE_COUNTER_TOOLTIP)|translate:{ title: simpleCounterBtn.title }"
+        [color]="simpleCounterBtn.isTrackTo ? 'primary' : ''"
+      >
+        <mat-icon>{{simpleCounterBtn.icon}}</mat-icon>
+      </button>
+    </section>
   </div>
 
   <div align="center" mat-dialog-actions>

@@ -4,6 +4,7 @@ import {
   selectAllSimpleCounters,
   selectEnabledAndToggledSimpleCounters,
   selectEnabledSimpleCounters,
+  selectEnabledSimpleStopWatchCounters,
 } from './store/simple-counter.reducer';
 import {
   addSimpleCounter,
@@ -71,6 +72,10 @@ export class SimpleCounterService {
 
   enabledSimpleCounters$: Observable<SimpleCounter[]> = this._store$.select(
     selectEnabledSimpleCounters,
+  );
+
+  enabledSimpleStopWatchCounters$: Observable<SimpleCounter[]> = this._store$.select(
+    selectEnabledSimpleStopWatchCounters,
   );
 
   enabledSimpleCountersUpdatedOnCfgChange$: Observable<SimpleCounter[]> =

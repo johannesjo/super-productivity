@@ -53,6 +53,12 @@ export const selectEnabledAndToggledSimpleCounters = createSelector(
   (items) => items && items.filter((item) => item.isEnabled && item.isOn),
 );
 
+export const selectEnabledSimpleStopWatchCounters = createSelector(
+  selectEnabledSimpleCounters,
+  (items): SimpleCounter[] =>
+    items.filter((item) => item.type === SimpleCounterType.StopWatch),
+);
+
 export const initialSimpleCounterState: SimpleCounterState =
   adapter.getInitialState<SimpleCounterState>({
     ids: DEFAULT_SIMPLE_COUNTERS.map((value) => value.id),
