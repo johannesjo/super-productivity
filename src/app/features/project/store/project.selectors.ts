@@ -7,11 +7,13 @@ import {
   GITHUB_TYPE,
   GITLAB_TYPE,
   JIRA_TYPE,
+  OPEN_PROJECT_TYPE,
 } from '../../issue/issue.const';
 import { GitlabCfg } from '../../issue/providers/gitlab/gitlab';
 import { exists } from '../../../util/exists';
 import { CaldavCfg } from '../../issue/providers/caldav/caldav.model';
 import { PROJECT_FEATURE_NAME, projectAdapter } from './project.reducer';
+import { OpenProjectCfg } from '../../issue/providers/open-project/open-project.model';
 
 export const projectSelectors = createFeatureSelector<ProjectState>(PROJECT_FEATURE_NAME);
 const { selectAll } = projectAdapter.getSelectors();
@@ -58,6 +60,12 @@ export const selectGitlabCfgByProjectId = createSelector(
 export const selectCaldavCfgByProjectId = createSelector(
   selectProjectById,
   (p: Project): CaldavCfg => p.issueIntegrationCfgs[CALDAV_TYPE] as CaldavCfg,
+);
+
+export const selectOpenProjectCfgByProjectId = createSelector(
+  selectProjectById,
+  (p: Project): OpenProjectCfg =>
+    p.issueIntegrationCfgs[OPEN_PROJECT_TYPE] as OpenProjectCfg,
 );
 
 export const selectUnarchivedProjectsWithoutCurrent = createSelector(

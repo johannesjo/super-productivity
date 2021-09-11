@@ -15,8 +15,13 @@ import {
   CaldavIssueReduced,
 } from './providers/caldav/caldav-issue/caldav-issue.model';
 import { CaldavCfg } from './providers/caldav/caldav.model';
+import { OpenProjectCfg } from './providers/open-project/open-project.model';
+import {
+  OpenProjectWorkPackage,
+  OpenProjectWorkPackageReduced,
+} from './providers/open-project/open-project-issue/open-project-issue.model';
 
-export type IssueProviderKey = 'JIRA' | 'GITHUB' | 'GITLAB' | 'CALDAV';
+export type IssueProviderKey = 'JIRA' | 'GITHUB' | 'GITLAB' | 'CALDAV' | 'OPEN_PROJECT';
 export type IssueIntegrationCfg = JiraCfg | GithubCfg | GitlabCfg;
 
 export enum IssueLocalState {
@@ -31,13 +36,21 @@ export interface IssueIntegrationCfgs {
   GITHUB?: GithubCfg;
   GITLAB?: GitlabCfg;
   CALDAV?: CaldavCfg;
+  OPEN_PROJECT?: OpenProjectCfg;
 }
 
-export type IssueData = JiraIssue | GithubIssue | GitlabIssue | CaldavIssue;
+export type IssueData =
+  | JiraIssue
+  | GithubIssue
+  | GitlabIssue
+  | CaldavIssue
+  | OpenProjectWorkPackage;
+
 export type IssueDataReduced =
   | GithubIssueReduced
   | JiraIssueReduced
   | GitlabIssue
+  | OpenProjectWorkPackageReduced
   | CaldavIssueReduced;
 
 export interface SearchResultItem {

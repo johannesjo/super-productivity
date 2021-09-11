@@ -1,0 +1,35 @@
+import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
+import { TaskWithSubTasks } from '../../../../../tasks/task.model';
+import { OpenProjectWorkPackage } from '../open-project-issue.model';
+import { expandAnimation } from '../../../../../../ui/animations/expand.ani';
+import { T } from '../../../../../../t.const';
+import { TaskService } from '../../../../../tasks/task.service';
+
+@Component({
+  selector: 'open-project-issue-content',
+  templateUrl: './open-project-issue-content.component.html',
+  styleUrls: ['./open-project-issue-content.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  animations: [expandAnimation],
+})
+export class OpenProjectIssueContentComponent {
+  @Input() issue?: OpenProjectWorkPackage;
+  @Input() task?: TaskWithSubTasks;
+
+  T: typeof T = T;
+
+  constructor(private readonly _taskService: TaskService) {
+    setTimeout(() => console.log(this.issue), 200);
+  }
+
+  hideUpdates(): void {
+    if (!this.task) {
+      throw new Error('No task');
+    }
+    this._taskService.markIssueUpdatesAsRead(this.task.id);
+  }
+
+  trackByIndex(i: number, p: any): number {
+    return i;
+  }
+}

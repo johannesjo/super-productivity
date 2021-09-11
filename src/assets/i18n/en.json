@@ -440,6 +440,49 @@
       },
       "SKIP_BREAK": "Skip break"
     },
+    "OPEN_PROJECT": {
+      "DIALOG_INITIAL": {
+        "TITLE": "Setup Open Project for Project"
+      },
+      "FORM": {
+        "FILTER_USER": "Username (e.g. to filter out changes by yourself)",
+        "HOST": "Host (e.g.: https://www.openproject.org/)",
+        "IS_AUTO_ADD_TO_BACKLOG": "Automatically add unresolved work packages from Open Project to backlog",
+        "IS_AUTO_POLL": "Automatically poll imported open project work packages for changes",
+        "IS_SEARCH_ISSUES_FROM_OPEN_PROJECT": "Show work packages as suggestions when adding new tasks",
+        "PROJECT_ID": "Project ID",
+        "PROJECT_ID_DESCRIPTION": "Can be found as part of the url, when viewing the project in the Browser.",
+        "TOKEN": "Access Token"
+      },
+      "FORM_SECTION": {
+        "HELP": "<p>Here you can configure SuperProductivity to list open Open Project work packages. Please Note that for this to work in the browser you need to probably configure CORS for your open project server, to allow access from app.super-productivity.com</p>",
+        "TITLE": "Open Project"
+      },
+      "ISSUE_CONTENT": {
+        "ASSIGNEE": "Assignee",
+        "DESCRIPTION": "Description",
+        "MARK_AS_CHECKED": "Mark updates as checked",
+        "STATUS": "Status",
+        "SUMMARY": "Summary",
+        "TYPE": "Type"
+      },
+      "S": {
+        "ERR_NETWORK": "Open Project: Request failed because of a client side network error",
+        "ERR_NOT_CONFIGURED": "Open Project: Is not properly configured",
+        "ERR_UNKNOWN": "Open Project: Unknown error {{statusCode}} {{errorMsg}}. Is CORS properly configured for the server?",
+        "IMPORTED_MULTIPLE_ISSUES": "Open Project: Imported {{issuesLength}} new work packages to backlog",
+        "IMPORTED_SINGLE_ISSUE": "Open Project: Imported work package \"{{issueText}}\" to backlog",
+        "ISSUE_DELETED_OR_CLOSED": "Open Project: Work package \"{{issueText}}\" seems to be deleted or closed on",
+        "ISSUE_NO_UPDATE_REQUIRED": "Open Project: No update required",
+        "ISSUE_UPDATE": "Open Project: Updated data for \"{{issueText}}\"",
+        "MANUAL_UPDATE_ISSUE_SUCCESS": "Open Project: Updated data for \"{{issueText}}\"",
+        "MISSING_ISSUE_DATA": "Open Project: Tasks with missing work package data found. Reloading.",
+        "NEW_COMMENT": "Open Project: New comment for \"{{issueText}}\"",
+        "POLLING": "Open Project: Polling Changes for work packages",
+        "SHOW_ISSUE_BTN": "Show me"
+      }
+    },
+
     "PROCRASTINATION": {
       "BACK_TO_WORK": "Back to work!",
       "COMP": {

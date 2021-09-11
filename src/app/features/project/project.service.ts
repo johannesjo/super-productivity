@@ -39,12 +39,14 @@ import {
   selectGithubCfgByProjectId,
   selectGitlabCfgByProjectId,
   selectJiraCfgByProjectId,
+  selectOpenProjectCfgByProjectId,
   selectProjectBreakNrForProject,
   selectProjectBreakTimeForProject,
   selectProjectById,
   selectUnarchivedProjects,
   selectUnarchivedProjectsWithoutCurrent,
 } from './store/project.selectors';
+import { OpenProjectCfg } from '../issue/providers/open-project/open-project.model';
 
 @Injectable({
   providedIn: 'root',
@@ -109,6 +111,10 @@ export class ProjectService {
 
   getCaldavCfgForProject$(projectId: string): Observable<CaldavCfg> {
     return this._store$.pipe(select(selectCaldavCfgByProjectId, { id: projectId }));
+  }
+
+  getOpenProjectCfgForProject$(projectId: string): Observable<OpenProjectCfg> {
+    return this._store$.pipe(select(selectOpenProjectCfgByProjectId, { id: projectId }));
   }
 
   getProjectsWithoutId$(projectId: string | null): Observable<Project[]> {

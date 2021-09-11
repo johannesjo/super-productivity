@@ -13,3 +13,10 @@
 <ng-container *ngIf="task?.issueType===CALDAV_TYPE">
   <caldav-issue-content [issue]="issueData" [task]="task"></caldav-issue-content>
 </ng-container>
+
+<ng-container *ngIf="task?.issueType===OPEN_PROJECT_TYPE">
+  <open-project-issue-content
+    [issue]="issueData"
+    [task]="task"
+  ></open-project-issue-content>
+</ng-container>
