@@ -20,7 +20,19 @@ export const actionLogger = (action: any): void => {
   if (current.length >= NUMBER_OF_ACTIONS_TO_SAVE) {
     current.shift();
   }
-  current.push(`${Date.now()}: ${action.type}`);
+  const last = current[current.length - 1];
+
+  // avoid logs with all the same action
+  if (last.includes(action.type)) {
+    const m = last.match(/\((\d+)\)$/);
+    if (m && +m[1] > 0) {
+      current[current.length - 1] = `${Date.now()}: ${action.type} (${+m[1] + 1})`;
+    } else {
+      current[current.length - 1] = `${Date.now()}: ${action.type} (2)`;
+    }
+  } else {
+    current.push(`${Date.now()}: ${action.type}`);
+  }
 
   saveToRealLs(LS_ACTION_LOG, current);
 };
