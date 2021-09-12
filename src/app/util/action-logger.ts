@@ -23,7 +23,7 @@ export const actionLogger = (action: any): void => {
   const last = current[current.length - 1];
 
   // avoid logs with all the same action
-  if (last.includes(action.type)) {
+  if (last && last.includes(action.type)) {
     const m = last.match(/\((\d+)\)$/);
     if (m && +m[1] > 0) {
       current[current.length - 1] = `${Date.now()}: ${action.type} (${+m[1] + 1})`;
