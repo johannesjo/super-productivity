@@ -4,17 +4,20 @@ import { ChromeExtensionInterfaceService } from '../../core/chrome-extension-int
 import { TaskService } from '../tasks/task.service';
 import { IPC } from '../../../../electron/ipc-events.const';
 import { MatDialog } from '@angular/material/dialog';
-import { BehaviorSubject, Observable, Subject } from 'rxjs';
+import { Observable, Subject } from 'rxjs';
 import { DialogIdleComponent } from './dialog-idle/dialog-idle.component';
 import { GlobalConfigService } from '../config/global-config.service';
 import { Task } from '../tasks/task.model';
 import { getWorklogStr } from '../../util/get-work-log-str';
-import { distinctUntilChanged, shareReplay } from 'rxjs/operators';
+import { distinctUntilChanged, shareReplay, withLatestFrom } from 'rxjs/operators';
 import { ElectronService } from '../../core/electron/electron.service';
 import { UiHelperService } from '../ui-helper/ui-helper.service';
 import { WorkContextService } from '../work-context/work-context.service';
 import { ipcRenderer } from 'electron';
 import { lazySetInterval } from '../../../../electron/lazy-set-interval';
+import { Store } from '@ngrx/store';
+import { selectIdleTime, selectIsIdle } from './store/idle.selectors';
+import { resetIdle, setIdleTime, triggerIdle } from './store/idle.actions';
 
 const DEFAULT_MIN_IDLE_TIME = 60000;
 const IDLE_POLL_INTERVAL = 1000;
@@ -23,15 +26,16 @@ const IDLE_POLL_INTERVAL = 1000;
   providedIn: 'root',
 })
 export class IdleService {
-  isIdle: boolean = false;
-  private _isIdle$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
-  isIdle$: Observable<boolean> = this._isIdle$
-    .asObservable()
-    .pipe(distinctUntilChanged(), shareReplay(1));
+  private _isIdle$: Observable<boolean> = this._store.select(selectIsIdle);
+  isIdle$: Observable<boolean> = this._isIdle$.pipe(
+    distinctUntilChanged(),
+    shareReplay(1),
+  );
+  idleTime$: Observable<number> = this._store.select(selectIdleTime);
 
-  private _idleTime$: BehaviorSubject<number> = new BehaviorSubject(0);
-  idleTime$: Observable<number> = this._idleTime$.asObservable();
   private _triggerResetBreakTimer$: Subject<boolean> = new Subject();
+
+  // TODO check
   triggerResetBreakTimer$: Observable<boolean> =
     this._triggerResetBreakTimer$.asObservable();
 
@@ -46,6 +50,7 @@ export class IdleService {
     private _taskService: TaskService,
     private _configService: GlobalConfigService,
     private _matDialog: MatDialog,
+    private _store: Store,
     private _uiHelperService: UiHelperService,
   ) {}
 
@@ -54,7 +59,7 @@ export class IdleService {
       (this._electronService.ipcRenderer as typeof ipcRenderer).on(
         IPC.IDLE_TIME,
         (ev, idleTimeInMs) => {
-          this.handleIdle(idleTimeInMs);
+          this._handleIdle(idleTimeInMs);
         },
       );
     } else {
@@ -63,18 +68,18 @@ export class IdleService {
           IPC.IDLE_TIME,
           (ev: Event, data?: unknown) => {
             const idleTimeInMs = Number(data);
-            this.handleIdle(idleTimeInMs);
+            this._handleIdle(idleTimeInMs);
           },
         );
       });
     }
 
     // window.setTimeout(() => {
-    //   this.handleIdle(800000);
+    //   this._handleIdle(800000);
     // }, 700);
   }
 
-  handleIdle(idleTime: number): void {
+  private _handleIdle(idleTime: number): void {
     const gCfg = this._configService.cfg;
     if (!gCfg) {
       throw new Error();
@@ -87,13 +92,11 @@ export class IdleService {
       !cfg.isEnableIdleTimeTracking ||
       (cfg.isOnlyOpenIdleWhenCurrentTask && !this._taskService.currentTaskId)
     ) {
-      this.isIdle = false;
-      this._isIdle$.next(false);
+      this._store.dispatch(resetIdle());
       return;
     }
     if (idleTime > minIdleTime) {
-      this.isIdle = true;
-      this._isIdle$.next(true);
+      this._store.dispatch(triggerIdle({ idleTime }));
 
       if (!this.isIdleDialogOpen) {
         if (IS_ELECTRON) {
@@ -110,7 +113,7 @@ export class IdleService {
         }
 
         this.isIdleDialogOpen = true;
-        this.initIdlePoll(idleTime);
+        this._initIdlePoll(idleTime);
         this._matDialog
           .open(DialogIdleComponent, {
             restoreFocus: true,
@@ -121,14 +124,18 @@ export class IdleService {
             },
           })
           .afterClosed()
+          .pipe(withLatestFrom(this.idleTime$))
           .subscribe(
-            (res: {
-              task: Task | string;
-              isResetBreakTimer: boolean;
-              isTrackAsBreak: boolean;
-            }) => {
+            ([res, idleTimeI]: [
+              {
+                task: Task | string;
+                isResetBreakTimer: boolean;
+                isTrackAsBreak: boolean;
+              },
+              number,
+            ]) => {
               const { task, isResetBreakTimer, isTrackAsBreak } = res;
-              const timeSpent = this._idleTime$.getValue();
+              const timeSpent = idleTimeI;
 
               if (isResetBreakTimer || isTrackAsBreak) {
                 this._triggerResetBreakTimer$.next(true);
@@ -156,8 +163,8 @@ export class IdleService {
                 }
               }
 
-              this.cancelIdlePoll();
-              this._isIdle$.next(false);
+              this._cancelIdlePoll();
+              this._store.dispatch(resetIdle());
               this.isIdleDialogOpen = false;
             },
           );
@@ -165,21 +172,20 @@ export class IdleService {
     }
   }
 
-  initIdlePoll(initialIdleTime: number): void {
+  private _initIdlePoll(initialIdleTime: number): void {
     const idleStart = Date.now();
-    this._idleTime$.next(initialIdleTime);
+    this._store.dispatch(setIdleTime({ idleTime: initialIdleTime }));
 
     this.clearIdlePollInterval = lazySetInterval(() => {
       const delta = Date.now() - idleStart;
-      this._idleTime$.next(initialIdleTime + delta);
+      this._store.dispatch(setIdleTime({ idleTime: initialIdleTime + delta }));
     }, IDLE_POLL_INTERVAL);
   }
 
-  cancelIdlePoll(): void {
+  private _cancelIdlePoll(): void {
     if (this.clearIdlePollInterval) {
       this.clearIdlePollInterval();
       this.clearIdlePollInterval = undefined;
-      this._idleTime$.next(0);
     }
   }
 }
