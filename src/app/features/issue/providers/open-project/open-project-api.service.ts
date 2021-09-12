@@ -127,7 +127,7 @@ export class OpenProjectApiService {
       ...params,
       method: params.method || 'GET',
       headers: {
-        ...(cfg.token ? { Authorization: 'token ' + cfg.token } : {}),
+        ...(cfg.token ? { Authorization: `Basic ${btoa('apiKey:' + cfg.token)}` } : {}),
         ...(params.headers ? params.headers : {}),
       },
     };
