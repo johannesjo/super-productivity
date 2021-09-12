@@ -11,14 +11,14 @@ import { Observable, Subscription } from 'rxjs';
 import { Task } from '../../tasks/task.model';
 import { GlobalConfigService } from '../../config/global-config.service';
 import { T } from '../../../t.const';
-import { ElectronService } from 'src/app/core/electron/electron.service';
 import { ipcRenderer } from 'electron';
 import { IPC } from '../../../../../electron/ipc-events.const';
-import { IS_ELECTRON } from 'src/app/app.constants';
 import { SimpleCounterService } from '../../simple-counter/simple-counter.service';
 import { distinctUntilChanged, first, map } from 'rxjs/operators';
 import { distinctUntilChangedObject } from '../../../util/distinct-until-changed-object';
 import { DialogConfirmComponent } from '../../../ui/dialog-confirm/dialog-confirm.component';
+import { ElectronService } from '../../../core/electron/electron.service';
+import { IS_ELECTRON } from '../../../app.constants';
 
 interface SimpleCounterIdleBtn {
   id: string;

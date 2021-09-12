@@ -2,13 +2,13 @@ import { Injectable } from '@angular/core';
 import { TRACKING_INTERVAL } from '../../app.constants';
 import { interval, Observable } from 'rxjs';
 import { map, share } from 'rxjs/operators';
-import { Tick } from './time-tracking';
+import { Tick } from './tick.model';
 import { getWorklogStr } from '../../util/get-work-log-str';
 
 @Injectable({
   providedIn: 'root',
 })
-export class TimeTrackingService {
+export class GlobalTrackingIntervalService {
   public globalInterval$: Observable<number> = interval(TRACKING_INTERVAL).pipe(share());
   private _currentTrackingStart: number;
   public tick$: Observable<Tick> = this.globalInterval$.pipe(

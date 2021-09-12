@@ -27,7 +27,7 @@ import {
 } from './sync.const';
 import { IS_TOUCH_ONLY } from '../../util/is-touch';
 import { AllowedDBKeys } from '../../core/persistence/ls-keys.const';
-import { IdleService } from '../../features/time-tracking/idle.service';
+import { IdleService } from '../../features/idle/idle.service';
 import { IS_ELECTRON } from '../../app.constants';
 import { ElectronService } from '../../core/electron/electron.service';
 import { IpcRenderer } from 'electron';

@@ -23,7 +23,6 @@ import { MainHeaderModule } from './core-ui/main-header/main-header.module';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { TasksModule } from './features/tasks/tasks.module';
-import { TimeTrackingModule } from './features/time-tracking/time-tracking.module';
 import { BookmarkModule } from './features/bookmark/bookmark.module';
 import { NoteModule } from './features/note/note.module';
 import { ReminderModule } from './features/reminder/reminder.module';
@@ -45,6 +44,8 @@ import { InitialDialogModule } from './features/initial-dialog/initial-dialog.mo
 import { actionLoggerReducer } from './root-store/meta/action-logger.reducer';
 import { SyncModule } from './imex/sync/sync.module';
 import { SearchBarModule } from './features/search-bar/search-bar.module';
+import { IdleModule } from './features/idle/idle.module';
+import { TrackingReminderModule } from './features/tracking-reminder/tracking-reminder.module';
 
 // NOTE: export required for aot to work
 export const createTranslateLoader = (http: HttpClient): TranslateHttpLoader =>
@@ -66,7 +67,8 @@ export const createTranslateLoader = (http: HttpClient): TranslateHttpLoader =>
     MainHeaderModule,
     MatSidenavModule,
     ProcrastinationModule,
-    TimeTrackingModule,
+    IdleModule,
+    TrackingReminderModule,
     ReminderModule,
     CoreUiModule,
     NoteModule,

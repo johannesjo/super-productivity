@@ -46,7 +46,7 @@ import {
 } from './store/task.actions';
 import { PersistenceService } from '../../core/persistence/persistence.service';
 import { IssueProviderKey } from '../issue/issue.model';
-import { TimeTrackingService } from '../time-tracking/time-tracking.service';
+import { GlobalTrackingIntervalService } from '../../core/global-tracking-interval/global-tracking-interval.service';
 import {
   selectAllTasks,
   selectCurrentTask,
@@ -183,7 +183,7 @@ export class TaskService {
     private readonly _imexMetaService: ImexMetaService,
     private readonly _snackService: SnackService,
     private readonly _projectService: ProjectService,
-    private readonly _timeTrackingService: TimeTrackingService,
+    private readonly _timeTrackingService: GlobalTrackingIntervalService,
     private readonly _router: Router,
   ) {
     this.currentTaskId$.subscribe((val) => (this.currentTaskId = val));

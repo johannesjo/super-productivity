@@ -13,7 +13,7 @@ import { TaskService } from '../tasks/task.service';
 import { expandAnimation, expandFadeAnimation } from '../../ui/animations/expand.ani';
 import { LayoutService } from '../../core-ui/layout/layout.service';
 import { DragulaService } from 'ng2-dragula';
-import { TakeABreakService } from '../time-tracking/take-a-break/take-a-break.service';
+import { TakeABreakService } from '../take-a-break/take-a-break.service';
 import { ActivatedRoute } from '@angular/router';
 import {
   from,

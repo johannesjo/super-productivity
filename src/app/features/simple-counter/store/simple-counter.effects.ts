@@ -28,7 +28,7 @@ import {
 } from 'rxjs/operators';
 import { selectSimpleCounterFeatureState } from './simple-counter.reducer';
 import { SimpleCounterState, SimpleCounterType } from '../simple-counter.model';
-import { TimeTrackingService } from '../../time-tracking/time-tracking.service';
+import { GlobalTrackingIntervalService } from '../../../core/global-tracking-interval/global-tracking-interval.service';
 import { SimpleCounterService } from '../simple-counter.service';
 import { EMPTY, Observable, of } from 'rxjs';
 import { SIMPLE_COUNTER_TRIGGER_ACTIONS } from '../simple-counter.const';
@@ -36,7 +36,7 @@ import { T } from '../../../t.const';
 import { SnackService } from '../../../core/snack/snack.service';
 import { loadAllData } from '../../../root-store/meta/load-all-data.action';
 import { ImexMetaService } from '../../../imex/imex-meta/imex-meta.service';
-import { IdleService } from '../../time-tracking/idle.service';
+import { IdleService } from '../../idle/idle.service';
 
 @Injectable()
 export class SimpleCounterEffects {
@@ -164,7 +164,7 @@ export class SimpleCounterEffects {
   constructor(
     private _actions$: Actions,
     private _store$: Store<any>,
-    private _timeTrackingService: TimeTrackingService,
+    private _timeTrackingService: GlobalTrackingIntervalService,
     private _persistenceService: PersistenceService,
     private _simpleCounterService: SimpleCounterService,
     private _imexMetaService: ImexMetaService,

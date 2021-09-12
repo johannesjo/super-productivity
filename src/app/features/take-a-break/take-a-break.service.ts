@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
-import { TaskService } from '../../tasks/task.service';
-import { TimeTrackingService } from '../time-tracking.service';
+import { TaskService } from '../tasks/task.service';
+import { GlobalTrackingIntervalService } from '../../core/global-tracking-interval/global-tracking-interval.service';
 import { EMPTY, from, merge, Observable, of, Subject, timer } from 'rxjs';
 import {
   delay,
@@ -15,21 +15,21 @@ import {
   throttleTime,
   withLatestFrom,
 } from 'rxjs/operators';
-import { GlobalConfigService } from '../../config/global-config.service';
-import { msToString } from '../../../ui/duration/ms-to-string.pipe';
-import { ChromeExtensionInterfaceService } from '../../../core/chrome-extension-interface/chrome-extension-interface.service';
-import { IdleService } from '../idle.service';
-import { IS_ELECTRON } from '../../../app.constants';
-import { BannerService } from '../../../core/banner/banner.service';
-import { BannerId } from '../../../core/banner/banner.model';
-import { GlobalConfigState, TakeABreakConfig } from '../../config/global-config.model';
-import { T } from '../../../t.const';
-import { IPC } from '../../../../../electron/ipc-events.const';
-import { NotifyService } from '../../../core/notify/notify.service';
-import { ElectronService } from '../../../core/electron/electron.service';
-import { UiHelperService } from '../../ui-helper/ui-helper.service';
-import { WorkContextService } from '../../work-context/work-context.service';
-import { Tick } from '../time-tracking';
+import { GlobalConfigService } from '../config/global-config.service';
+import { msToString } from '../../ui/duration/ms-to-string.pipe';
+import { ChromeExtensionInterfaceService } from '../../core/chrome-extension-interface/chrome-extension-interface.service';
+import { IdleService } from '../idle/idle.service';
+import { IS_ELECTRON } from '../../app.constants';
+import { BannerService } from '../../core/banner/banner.service';
+import { BannerId } from '../../core/banner/banner.model';
+import { GlobalConfigState, TakeABreakConfig } from '../config/global-config.model';
+import { T } from '../../t.const';
+import { IPC } from '../../../../electron/ipc-events.const';
+import { NotifyService } from '../../core/notify/notify.service';
+import { ElectronService } from '../../core/electron/electron.service';
+import { UiHelperService } from '../ui-helper/ui-helper.service';
+import { WorkContextService } from '../work-context/work-context.service';
+import { Tick } from '../../core/global-tracking-interval/tick.model';
 import { ipcRenderer } from 'electron';
 
 const BREAK_TRIGGER_DURATION = 10 * 60 * 1000;
@@ -164,7 +164,7 @@ export class TakeABreakService {
 
   constructor(
     private _taskService: TaskService,
-    private _timeTrackingService: TimeTrackingService,
+    private _timeTrackingService: GlobalTrackingIntervalService,
     private _idleService: IdleService,
     private _configService: GlobalConfigService,
     private _workContextService: WorkContextService,

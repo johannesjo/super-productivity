@@ -1,13 +1,13 @@
 import { TestBed } from '@angular/core/testing';
-import { TimeTrackingService } from './time-tracking.service';
+import { GlobalTrackingIntervalService } from './global-tracking-interval.service';
 import { map } from 'rxjs/operators';
 import { cold } from 'jasmine-marbles';
 
-describe('TimeTrackingService', () => {
-  let service: TimeTrackingService;
+describe('GlobalTrackingIntervalService', () => {
+  let service: GlobalTrackingIntervalService;
   beforeEach(() => {
     TestBed.configureTestingModule({});
-    service = TestBed.inject(TimeTrackingService);
+    service = TestBed.inject(GlobalTrackingIntervalService);
   });
 
   it('should be created', () => {

@@ -1,9 +1,9 @@
 import { ChangeDetectionStrategy, Component, Inject, OnInit } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-import { TaskService } from '../../../tasks/task.service';
+import { TaskService } from '../../tasks/task.service';
 import { Observable } from 'rxjs';
-import { Task } from '../../../tasks/task.model';
-import { T } from '../../../../t.const';
+import { Task } from '../../tasks/task.model';
+import { T } from '../../../t.const';
 
 @Component({
   selector: 'dialog-tracking-reminder',

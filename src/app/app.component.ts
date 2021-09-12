@@ -38,7 +38,7 @@ import { SyncTriggerService } from './imex/sync/sync-trigger.service';
 import { environment } from '../environments/environment';
 import { ActivatedRoute, RouterOutlet } from '@angular/router';
 import { ipcRenderer } from 'electron';
-import { TrackingReminderService } from './features/time-tracking/tracking-reminder/tracking-reminder.service';
+import { TrackingReminderService } from './features/tracking-reminder/tracking-reminder.service';
 import { first } from 'rxjs/operators';
 import { IS_MOBILE } from './util/is-mobile';
 

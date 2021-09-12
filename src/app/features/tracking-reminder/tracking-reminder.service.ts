@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
-import { IdleService } from '../idle.service';
-import { TaskService } from '../../tasks/task.service';
-import { GlobalConfigService } from '../../config/global-config.service';
+import { IdleService } from '../idle/idle.service';
+import { TaskService } from '../tasks/task.service';
+import { GlobalConfigService } from '../config/global-config.service';
 import { combineLatest, EMPTY, merge, Observable, of, Subject } from 'rxjs';
 import {
   distinctUntilChanged,
@@ -11,18 +11,18 @@ import {
   switchMap,
   withLatestFrom,
 } from 'rxjs/operators';
-import { realTimer$ } from '../../../util/real-timer';
-import { BannerService } from '../../../core/banner/banner.service';
-import { BannerId } from '../../../core/banner/banner.model';
-import { msToString } from '../../../ui/duration/ms-to-string.pipe';
+import { realTimer$ } from '../../util/real-timer';
+import { BannerService } from '../../core/banner/banner.service';
+import { BannerId } from '../../core/banner/banner.model';
+import { msToString } from '../../ui/duration/ms-to-string.pipe';
 import { MatDialog } from '@angular/material/dialog';
 import { DialogTrackingReminderComponent } from './dialog-tracking-reminder/dialog-tracking-reminder.component';
-import { Task } from '../../tasks/task.model';
-import { getWorklogStr } from '../../../util/get-work-log-str';
-import { T } from '../../../t.const';
+import { Task } from '../tasks/task.model';
+import { getWorklogStr } from '../../util/get-work-log-str';
+import { T } from '../../t.const';
 import { TranslateService } from '@ngx-translate/core';
-import { TrackingReminderConfig } from '../../config/global-config.model';
-import { IS_TOUCH_ONLY } from '../../../util/is-touch';
+import { TrackingReminderConfig } from '../config/global-config.model';
+import { IS_TOUCH_ONLY } from '../../util/is-touch';
 
 @Injectable({
   providedIn: 'root',
