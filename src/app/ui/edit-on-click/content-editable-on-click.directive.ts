@@ -52,7 +52,7 @@ export class ContentEditableOnClickDirective implements OnInit, OnDestroy {
       // setTimeout(() => {
       //   document.execCommand('selectAll', false, null);
       // });
-      this._moveCursorToEnd();
+      this._moveCursorToEndForKeyboardFocus();
 
       window.clearTimeout(this._redrawTimeout);
       // this fixes the bug where the text is not visible for some time
@@ -181,13 +181,16 @@ export class ContentEditableOnClickDirective implements OnInit, OnDestroy {
       .trim();
   }
 
-  private _moveCursorToEnd(): void {
+  private _moveCursorToEndForKeyboardFocus(): void {
     // NOTE: keep in mind that we're in a contenteditable
     try {
-      document.execCommand('selectAll', false, undefined);
       const sel = document.getSelection();
       if (sel !== null) {
-        sel.collapseToEnd();
+        // only execute for focus via keyboard
+        if (sel.focusNode) {
+          document.execCommand('selectAll', false, undefined);
+          sel.collapseToEnd();
+        }
       }
     } catch (e) {
       console.error(e);
