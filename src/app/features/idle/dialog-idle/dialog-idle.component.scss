@@ -16,7 +16,10 @@
 }
 
 .track-to-label {
-  margin-bottom: $s;
-  font-size: $s * 2;
-  font-weight: bold;
+  margin-bottom: $s * 2;
+  font-size: 20px;
+}
+
+.simple-counter {
+  margin: 0 $s * 0.5;
 }
