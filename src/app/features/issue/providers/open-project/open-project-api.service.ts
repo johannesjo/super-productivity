@@ -53,7 +53,12 @@ export class OpenProjectApiService {
         url: `${cfg.host}/api/v3/projects/${cfg.projectId}/work_packages`,
         params: {
           pageSize: 100,
-          filters: `[{"subjectOrId":{"operator":"**","values":["${searchText}"]}}]`,
+          // see: https://www.openproject.org/docs/api/filters/
+          filters: JSON.stringify([
+            { subjectOrId: { operator: '**', values: [searchText] } },
+            // only list open issues
+            { status: { operator: 'o', values: [] } },
+          ]),
           // Default: [["id", "asc"]]
           sortBy: '[["updatedAt","desc"]]',
         },
@@ -81,6 +86,8 @@ export class OpenProjectApiService {
         url: `${cfg.host}/api/v3/projects/${cfg.projectId}/work_packages`,
         params: {
           pageSize: 100,
+          // see: https://www.openproject.org/docs/api/filters/
+          filters: JSON.stringify([{ status: { operator: 'o', values: [] } }]),
           sortBy: '[["updatedAt","desc"]]',
         },
       },
