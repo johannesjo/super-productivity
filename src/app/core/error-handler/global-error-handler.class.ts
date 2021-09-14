@@ -77,7 +77,6 @@ export class GlobalErrorHandler implements ErrorHandler {
 
   private async _getUserData(): Promise<AppDataComplete | undefined> {
     try {
-      console.log(this.injector.get(PersistenceService));
       return this.injector.get(PersistenceService).loadComplete();
     } catch (e) {
       console.log('Cannot load data');
