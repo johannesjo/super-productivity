@@ -11,6 +11,8 @@
   background: #fff;
   max-width: 90%;
   overflow: auto;
+  user-select: auto;
+  -webkit-touch-callout: default;
 
   pre {
     font-size: 14px;
