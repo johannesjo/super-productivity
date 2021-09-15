@@ -60,7 +60,7 @@ export const mapArchiveToWorklogWeeks = (
           timeSpent: 0,
           logEntries: [],
           dateStr,
-          dayStr: moment(dateStr).format('ddd'),
+          dayStr: moment(dateStr).format('ddd DD.MM.'),
           workStart: startEnd.workStart && startEnd.workStart[dateStr],
           workEnd: startEnd.workEnd && startEnd.workEnd[dateStr],
         };
