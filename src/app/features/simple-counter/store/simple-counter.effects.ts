@@ -10,7 +10,6 @@ import {
   setSimpleCounterCounterOff,
   setSimpleCounterCounterOn,
   setSimpleCounterCounterToday,
-  turnOffAllSimpleCounterCounters,
   updateAllSimpleCounters,
   updateSimpleCounter,
   upsertSimpleCounter,
@@ -154,12 +153,13 @@ export class SimpleCounterEffects {
     { dispatch: false },
   );
 
-  disableOnIdle$: Observable<unknown> = createEffect(() =>
-    this._idleService.isIdle$.pipe(
-      filter((isIdle) => isIdle),
-      map(() => turnOffAllSimpleCounterCounters()),
-    ),
-  );
+  // NOTE: makes more sense to do this inside the idle dialog itself
+  // disableOnIdle$: Observable<unknown> = createEffect(() =>
+  //   this._idleService.isIdle$.pipe(
+  //     filter((isIdle) => isIdle),
+  //     map(() => turnOffAllSimpleCounterCounters()),
+  //   ),
+  // );
 
   constructor(
     private _actions$: Actions,

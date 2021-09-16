@@ -14,11 +14,13 @@ import { T } from '../../../t.const';
 import { ipcRenderer } from 'electron';
 import { IPC } from '../../../../../electron/ipc-events.const';
 import { SimpleCounterService } from '../../simple-counter/simple-counter.service';
-import { distinctUntilChanged, first, map } from 'rxjs/operators';
-import { distinctUntilChangedObject } from '../../../util/distinct-until-changed-object';
+import { first, map } from 'rxjs/operators';
 import { DialogConfirmComponent } from '../../../ui/dialog-confirm/dialog-confirm.component';
 import { ElectronService } from '../../../core/electron/electron.service';
 import { IS_ELECTRON } from '../../../app.constants';
+import { SimpleCounter } from '../../simple-counter/simple-counter.model';
+import { Store } from '@ngrx/store';
+import { turnOffAllSimpleCounterCounters } from '../../simple-counter/store/simple-counter.actions';
 
 interface SimpleCounterIdleBtn {
   id: string;
@@ -44,24 +46,17 @@ export class DialogIdleComponent implements OnInit, OnDestroy {
 
   simpleCounterToggleBtns$: Observable<SimpleCounterIdleBtn[]> =
     this._simpleCounterService.enabledSimpleStopWatchCounters$.pipe(
+      // NOTE: as this is inside the idle dialog there should be no significant changes possible
+      // so once should always be enough
+      first(),
       map((simpleCounterItems) =>
         simpleCounterItems.map(
-          (simpleCounter): Partial<SimpleCounterIdleBtn> => ({
-            id: simpleCounter.id,
-            icon: simpleCounter.iconOn || simpleCounter.icon,
-            title: simpleCounter.title,
-          }),
-        ),
-      ),
-      distinctUntilChanged(distinctUntilChangedObject),
-      map((simpleCounterItems) =>
-        simpleCounterItems.map(
-          ({ id, icon, title }: Partial<SimpleCounterIdleBtn>): SimpleCounterIdleBtn =>
+          ({ id, icon, iconOn, title, isOn }: SimpleCounter): SimpleCounterIdleBtn =>
             ({
               id,
-              icon,
+              icon: iconOn || icon,
               title,
-              isTrackTo: false,
+              isTrackTo: isOn,
             } as SimpleCounterIdleBtn),
         ),
       ),
@@ -77,13 +72,16 @@ export class DialogIdleComponent implements OnInit, OnDestroy {
     private _matDialogRef: MatDialogRef<DialogIdleComponent>,
     private _matDialog: MatDialog,
     private _electronService: ElectronService,
+    private _store: Store,
     private _simpleCounterService: SimpleCounterService,
     @Inject(MAT_DIALOG_DATA) public data: any,
   ) {
     this._subs.add(
-      this.simpleCounterToggleBtns$.subscribe((v) => (this.simpleCounterToggleBtns = v)),
+      this.simpleCounterToggleBtns$.pipe(first()).subscribe((v) => {
+        this.simpleCounterToggleBtns = v;
+        this._store.dispatch(turnOffAllSimpleCounterCounters());
+      }),
     );
-
     _matDialogRef.disableClose = true;
   }
 
