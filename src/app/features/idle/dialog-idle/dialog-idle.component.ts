@@ -88,10 +88,12 @@ export class DialogIdleComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    this.lastCurrentTask$.subscribe((task) => {
-      this.selectedTask = task;
-      this.isCreate = false;
-    });
+    this._subs.add(
+      this.lastCurrentTask$.subscribe((task) => {
+        this.selectedTask = task;
+        this.isCreate = false;
+      }),
+    );
 
     if (IS_ELECTRON) {
       (this._electronService.ipcRenderer as typeof ipcRenderer).send(
