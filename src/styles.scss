@@ -21,6 +21,6 @@ input,
 textarea,
 pre,
 [contenteditable] {
-  user-select: auto;
+  user-select: text;
   -webkit-touch-callout: default;
 }
