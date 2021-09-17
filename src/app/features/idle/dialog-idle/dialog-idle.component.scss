@@ -16,14 +16,17 @@
 }
 
 .track-to-label {
-  margin-top: $s;
-  margin-bottom: $s * 2;
-  font-size: 20px;
+  padding-top: $s * 3;
+  margin: $s * 3 $s * -3 $s;
+  font-size: 22px;
+  border-top: 1px solid $dark-theme-extra-border-color;
+
+  @include lightTheme() {
+    border-color: $light-theme-extra-border-color;
+  }
 }
 
 .simple-counter-section {
-  margin-top: $s;
-  margin-bottom: $s;
 }
 
 .simple-counter {

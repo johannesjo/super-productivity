@@ -5,11 +5,6 @@
     <p>{{T.F.TIME_TRACKING.D_IDLE.IDLE_FOR|translate}}</p>
     <div class="time">{{data.idleTime$|async|msToString:true}}</div>
 
-    <select-task
-      (taskChange)="onTaskChange($event)"
-      [initialTask]="selectedTask"
-    ></select-task>
-
     <div class="track-to-label">
       <span *ngIf="!isCreate">{{T.F.TIME_TRACKING.D_IDLE.TRACK_TO|translate}}</span>
       <span
@@ -17,6 +12,12 @@
         [innerHTML]="T.F.TIME_TRACKING.D_IDLE.CREATE_AND_TRACK|translate"
       ></span>
     </div>
+
+    <select-task
+      (taskChange)="onTaskChange($event)"
+      [initialTask]="selectedTask"
+    ></select-task>
+
     <section class="simple-counter-section">
       <button
         mat-mini-fab
