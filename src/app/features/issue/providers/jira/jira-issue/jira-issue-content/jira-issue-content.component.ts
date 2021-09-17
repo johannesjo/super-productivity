@@ -7,9 +7,9 @@ import { T } from '../../../../../../t.const';
 import { TaskService } from '../../../../../tasks/task.service';
 // @ts-ignore
 import * as j2m from 'jira2md';
-import { JiraCommonInterfacesService } from '../../jira-common-interfaces.service';
 import { Observable, ReplaySubject } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
+import { JiraCommonInterfacesService } from '../../jira-common-interfaces.service';
 
 @Component({
   selector: 'jira-issue-content',
@@ -52,6 +52,9 @@ export class JiraIssueContentComponent {
   hideUpdates(): void {
     if (!this.task) {
       throw new Error('No task');
+    }
+    if (!this.issue) {
+      throw new Error('No issue');
     }
     this._taskService.markIssueUpdatesAsRead(this.task.id);
   }

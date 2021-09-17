@@ -21,7 +21,13 @@ export class GitlabIssueContentComponent {
   constructor(private readonly _taskService: TaskService) {}
 
   hideUpdates(): void {
-    this._taskService.markIssueUpdatesAsRead((this.task as TaskWithSubTasks).id);
+    if (!this.task) {
+      throw new Error('No task');
+    }
+    if (!this.issue) {
+      throw new Error('No issue');
+    }
+    this._taskService.markIssueUpdatesAsRead(this.task.id);
   }
 
   trackByIndex(i: number, p: any): number {
