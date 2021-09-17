@@ -30,6 +30,7 @@ import { NavigationEnd, Router } from '@angular/router';
 import { DataInitService } from '../../core/data-init/data-init.service';
 import { WorklogTask } from '../tasks/task.model';
 import { mapArchiveToWorklogWeeks } from './util/map-archive-to-worklog-weeks';
+import * as moment from 'moment';
 
 @Injectable({ providedIn: 'root' })
 export class WorklogService {
@@ -173,7 +174,8 @@ export class WorklogService {
     return this.worklogTasks$.pipe(
       map((tasks) => {
         tasks = tasks.filter((task: WorklogTask) => {
-          const taskDate = new Date(task.dateStr);
+          // NOTE: we need to use moment here as otherwise the dates might be off for other time zones
+          const taskDate = moment(task.dateStr).toDate();
           return (
             (!isProjectIdProvided || task.projectId === projectId) &&
             taskDate >= rangeStart &&
@@ -185,7 +187,8 @@ export class WorklogService {
           tasks = tasks.map((task): WorklogTask => {
             const timeSpentOnDay: any = {};
             Object.keys(task.timeSpentOnDay).forEach((dateStr) => {
-              const date = new Date(dateStr);
+              // NOTE: we need to use moment here as otherwise the dates might be off for other time zones
+              const date = moment(dateStr).toDate();
 
               if (date >= rangeStart && date <= rangeEnd) {
                 timeSpentOnDay[dateStr] = task.timeSpentOnDay[dateStr];
