@@ -24,6 +24,9 @@ export class OpenProjectIssueContentComponent {
     if (!this.task) {
       throw new Error('No task');
     }
+    if (!this.issue) {
+      throw new Error('No issue');
+    }
     this._taskService.markIssueUpdatesAsRead(this.task.id);
   }
 

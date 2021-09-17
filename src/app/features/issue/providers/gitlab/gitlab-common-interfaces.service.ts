@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Observable, of } from 'rxjs';
-import { IssueFieldsForTask, Task } from 'src/app/features/tasks/task.model';
+import { Task } from 'src/app/features/tasks/task.model';
 import { catchError, concatMap, first, map, switchMap } from 'rxjs/operators';
 import { IssueServiceInterface } from '../../issue-service-interface';
 import { GitlabApiService } from './gitlab-api/gitlab-api.service';
@@ -200,15 +200,12 @@ export class GitlabCommonInterfacesService implements IssueServiceInterface {
     return updatedIssues;
   }
 
-  getAddTaskData(issue: GitlabIssue): {
-    title: string;
-    additionalFields: Partial<IssueFieldsForTask>;
-  } {
+  getAddTaskData(issue: GitlabIssue): Partial<Task> & { title: string } {
     return {
       title: this._formatIssueTitle(issue.number, issue.title),
-      additionalFields: {
-        issuePoints: issue.weight,
-      },
+      issuePoints: issue.weight,
+      issueWasUpdated: false,
+      issueLastUpdated: new Date(issue.updated_at).getTime(),
     };
   }
 

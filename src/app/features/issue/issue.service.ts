@@ -200,7 +200,7 @@ export class IssueService {
             issueData: issueIdOrData,
           };
 
-    const { title = null, additionalFields = {} } =
+    const { title = null, ...additionalFields } =
       this.ISSUE_SERVICE_MAP[issueType].getAddTaskData(issueData);
 
     return this._taskService.add(title, isAddToBacklog, {

@@ -115,17 +115,12 @@ export class GithubCommonInterfacesService implements IssueServiceInterface {
     return null;
   }
 
-  getAddTaskData(issue: GithubIssueReduced): {
-    title: string;
-    additionalFields: Partial<Task>;
-  } {
+  getAddTaskData(issue: GithubIssueReduced): Partial<Task> & { title: string } {
     return {
       title: this._formatIssueTitle(issue.number, issue.title),
-      additionalFields: {
-        // issueWasUpdated: false,
-        // NOTE: we use Date.now() instead to because updated does not account for comments
-        // issueLastUpdated: new Date(issue.updated_at).getTime()
-      },
+      issueWasUpdated: false,
+      // NOTE: we use Date.now() instead to because updated does not account for comments
+      issueLastUpdated: new Date(issue.updated_at).getTime(),
     };
   }
 

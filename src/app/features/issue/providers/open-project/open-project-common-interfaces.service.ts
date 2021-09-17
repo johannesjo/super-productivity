@@ -121,18 +121,15 @@ export class OpenProjectCommonInterfacesService implements IssueServiceInterface
     return null;
   }
 
-  getAddTaskData(issue: OpenProjectWorkPackageReduced): {
-    title: string;
-    additionalFields: Partial<Task>;
-  } {
+  getAddTaskData(
+    issue: OpenProjectWorkPackageReduced,
+  ): Partial<Task> & { title: string } {
     return {
       title: this._formatIssueTitle(issue.id, issue.subject),
-      additionalFields: {
-        issuePoints: issue.storyPoints,
-        issueWasUpdated: false,
-        // NOTE: we use Date.now() instead to because updated does not account for comments
-        issueLastUpdated: new Date(issue.updatedAt).getTime(),
-      },
+      issuePoints: issue.storyPoints,
+      issueWasUpdated: false,
+      // NOTE: we use Date.now() instead to because updated does not account for comments
+      issueLastUpdated: new Date(issue.updatedAt).getTime(),
     };
   }
 

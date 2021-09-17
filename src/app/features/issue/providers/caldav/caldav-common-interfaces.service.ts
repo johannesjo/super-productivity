@@ -26,12 +26,9 @@ export class CaldavCommonInterfacesService implements IssueServiceInterface {
     return truncate(title);
   }
 
-  getAddTaskData(issueData: CaldavIssueReduced): {
-    title: string;
-    additionalFields: Partial<Task>;
-  } {
+  getAddTaskData(issueData: CaldavIssueReduced): Partial<Task> & { title: string } {
     return {
-      additionalFields: { issueLastUpdated: issueData.etag_hash },
+      issueLastUpdated: issueData.etag_hash,
       title: issueData.summary,
     };
   }
