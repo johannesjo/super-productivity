@@ -42,6 +42,11 @@
             [title]="T.PP.GITLAB_CONFIGURED|translate"
             svgIcon="gitlab"
           ></mat-icon>
+          <mat-icon
+            *ngIf="project.issueIntegrationCfgs?.OPEN_PROJECT?.projectId"
+            [title]="T.PP.OPEN_PROJECT_CONFIGURED|translate"
+            svgIcon="open_project"
+          ></mat-icon>
         </div>
 
         <div class="controls">
