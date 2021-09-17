@@ -331,7 +331,7 @@
             </a>
 
             <button (click)="updateIssueData()" *ngIf="task.issueId" mat-menu-item>
-              <mat-icon>cloud_download</mat-icon>
+              <mat-icon [svgIcon]="task.issueType|issueIcon"></mat-icon>
               {{T.F.TASK.CMP.UPDATE_ISSUE_DATA|translate}}
             </button>
 
