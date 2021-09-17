@@ -88,12 +88,8 @@ export class JiraCommonInterfacesService implements IssueServiceInterface {
     if (wasUpdated) {
       return {
         taskChanges: {
-          title: `${issue.key} ${issue.summary}`,
-          issueLastUpdated: newUpdated,
-          issueWasUpdated: wasUpdated,
-          // circumvent errors for old jira versions #652
-          issueAttachmentNr: issue.attachments?.length,
-          issuePoints: issue.storyPoints,
+          ...this.getAddTaskData(issue),
+          issueWasUpdated: true,
         },
         issue,
       };
@@ -105,6 +101,7 @@ export class JiraCommonInterfacesService implements IssueServiceInterface {
     return {
       title: `${issue.key} ${issue.summary}`,
       issuePoints: issue.storyPoints,
+      // circumvent errors for old jira versions #652
       issueAttachmentNr: issue.attachments ? issue.attachments.length : 0,
       issueWasUpdated: false,
       issueLastUpdated: new Date(issue.updated).getTime(),

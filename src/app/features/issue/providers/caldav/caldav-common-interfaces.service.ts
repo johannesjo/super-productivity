@@ -80,9 +80,8 @@ export class CaldavCommonInterfacesService implements IssueServiceInterface {
     if (wasUpdated) {
       return {
         taskChanges: {
+          ...this.getAddTaskData(issue),
           issueWasUpdated: true,
-          issueLastUpdated: issue.etag_hash,
-          title: issue.summary,
         },
         issue,
       };
@@ -149,9 +148,8 @@ export class CaldavCommonInterfacesService implements IssueServiceInterface {
         return {
           task,
           taskChanges: {
+            ...this.getAddTaskData(issue),
             issueWasUpdated: true,
-            issueLastUpdated: issue.etag_hash,
-            title: issue.summary,
           },
           issue,
         };

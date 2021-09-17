@@ -109,9 +109,8 @@ export class GitlabCommonInterfacesService implements IssueServiceInterface {
     if (wasUpdated) {
       return {
         taskChanges: {
+          ...this.getAddTaskData(issue),
           issueWasUpdated: true,
-          issueLastUpdated: lastRemoteUpdate,
-          title: this._formatIssueTitle(issue.number, issue.title),
         },
         issue,
       };
@@ -174,9 +173,8 @@ export class GitlabCommonInterfacesService implements IssueServiceInterface {
         updatedIssues.push({
           task: tasks[i],
           taskChanges: {
+            ...this.getAddTaskData(issues[i]),
             issueWasUpdated: true,
-            issueLastUpdated: lastRemoteUpdate,
-            title: this._formatIssueTitle(issues[i].number, issues[i].title),
           },
           issue: issues[i],
         });

@@ -105,9 +105,8 @@ export class GithubCommonInterfacesService implements IssueServiceInterface {
     if (wasUpdated) {
       return {
         taskChanges: {
+          ...this.getAddTaskData(issue),
           issueWasUpdated: true,
-          issueLastUpdated: lastRemoteUpdate,
-          title: `#${issue.number} ${issue.title}`,
         },
         issue,
       };
