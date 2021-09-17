@@ -222,7 +222,7 @@ For the desktop version automatic backups are stored per default in the `backup`
 
 Where user data is stored differs from os to os. The most common locations are:
 Mac OS: `~/Library/Application Support/superProductivity/`
-Windows: `C:\Users\<YOUR_USER_NAME>\AppData\Local\superProductivity/`
+Windows: `C:\Users\<YOUR_USER_NAME>\AppData\Roaming\superProductivity/` or `%APPDATA%\superProductivity`
 Linux: `~/.config/superProductivity/`
 
 The path should be shown when you go to the "Automatic Backups` section on the configuration page (minus the "backup" sub folder). You can also see it printed out when you start the app from the command line.
