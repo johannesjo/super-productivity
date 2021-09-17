@@ -443,21 +443,21 @@
     },
     "OPEN_PROJECT": {
       "DIALOG_INITIAL": {
-        "TITLE": "Setup Open Project for Project"
+        "TITLE": "Setup OpenProject for Project"
       },
       "FORM": {
         "FILTER_USER": "Username (e.g. to filter out changes by yourself)",
         "HOST": "Host (e.g.: https://www.openproject.org/)",
-        "IS_AUTO_ADD_TO_BACKLOG": "Automatically add unresolved work packages from Open Project to backlog",
-        "IS_AUTO_POLL": "Automatically poll imported open project work packages for changes",
+        "IS_AUTO_ADD_TO_BACKLOG": "Automatically add unresolved work packages from OpenProject to backlog",
+        "IS_AUTO_POLL": "Automatically poll imported OpenProject work packages for changes",
         "IS_SEARCH_ISSUES_FROM_OPEN_PROJECT": "Show work packages as suggestions when adding new tasks",
         "PROJECT_ID": "Project ID",
         "PROJECT_ID_DESCRIPTION": "Can be found as part of the url, when viewing the project in the Browser.",
         "TOKEN": "Access Token"
       },
       "FORM_SECTION": {
-        "HELP": "<p>Here you can configure SuperProductivity to list open Open Project work packages. Please Note that for this to work in the browser you need to probably configure CORS for your open project server, to allow access from app.super-productivity.com</p>",
-        "TITLE": "Open Project"
+        "HELP": "<p>Here you can configure SuperProductivity to list open OpenProject work packages. Please Note that for this to work in the browser you need to probably configure CORS for your OpenProject server, to allow access from app.super-productivity.com</p>",
+        "TITLE": "OpenProject"
       },
       "ISSUE_CONTENT": {
         "ASSIGNEE": "Assignee",
@@ -468,18 +468,18 @@
         "TYPE": "Type"
       },
       "S": {
-        "ERR_NETWORK": "Open Project: Request failed because of a client side network error",
-        "ERR_NOT_CONFIGURED": "Open Project: Is not properly configured",
-        "ERR_UNKNOWN": "Open Project: Unknown error {{statusCode}} {{errorMsg}}. Is CORS properly configured for the server?",
-        "IMPORTED_MULTIPLE_ISSUES": "Open Project: Imported {{issuesLength}} new work packages to backlog",
-        "IMPORTED_SINGLE_ISSUE": "Open Project: Imported work package \"{{issueText}}\" to backlog",
-        "ISSUE_DELETED_OR_CLOSED": "Open Project: Work package \"{{issueText}}\" seems to be deleted or closed on",
-        "ISSUE_NO_UPDATE_REQUIRED": "Open Project: No update required",
-        "ISSUE_UPDATE": "Open Project: Updated data for \"{{issueText}}\"",
-        "MANUAL_UPDATE_ISSUE_SUCCESS": "Open Project: Updated data for \"{{issueText}}\"",
-        "MISSING_ISSUE_DATA": "Open Project: Tasks with missing work package data found. Reloading.",
-        "NEW_COMMENT": "Open Project: New comment for \"{{issueText}}\"",
-        "POLLING": "Open Project: Polling Changes for work packages",
+        "ERR_NETWORK": "OpenProject: Request failed because of a client side network error",
+        "ERR_NOT_CONFIGURED": "OpenProject: Is not properly configured",
+        "ERR_UNKNOWN": "OpenProject: Unknown error {{statusCode}} {{errorMsg}}. Is CORS properly configured for the server?",
+        "IMPORTED_MULTIPLE_ISSUES": "OpenProject: Imported {{issuesLength}} new work packages to backlog",
+        "IMPORTED_SINGLE_ISSUE": "OpenProject: Imported work package \"{{issueText}}\" to backlog",
+        "ISSUE_DELETED_OR_CLOSED": "OpenProject: Work package \"{{issueText}}\" seems to be deleted or closed on",
+        "ISSUE_NO_UPDATE_REQUIRED": "OpenProject: No update required",
+        "ISSUE_UPDATE": "OpenProject: Updated data for \"{{issueText}}\"",
+        "MANUAL_UPDATE_ISSUE_SUCCESS": "OpenProject: Updated data for \"{{issueText}}\"",
+        "MISSING_ISSUE_DATA": "OpenProject: Tasks with missing work package data found. Reloading.",
+        "NEW_COMMENT": "OpenProject: New comment for \"{{issueText}}\"",
+        "POLLING": "OpenProject: Polling Changes for work packages",
         "SHOW_ISSUE_BTN": "Show me"
       }
     },
