@@ -1248,6 +1248,7 @@
     "GITLAB_CONFIGURED": "GitLab Integration Configured",
     "IMPORT_FROM_FILE": "Import from file",
     "JIRA_CONFIGURED": "Jira Integration Configured",
+    "OPEN_PROJECT_CONFIGURED": "OpenProject Integration Configured",
     "S_INVALID_JSON": "Invalid json for project file",
     "TITLE": "Project Overview",
     "UN_ARCHIVE_PROJECT": "Unarchive Project"
