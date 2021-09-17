@@ -123,12 +123,18 @@ export class OpenProjectCommonInterfacesService implements IssueServiceInterface
   getAddTaskData(
     issue: OpenProjectWorkPackageReduced,
   ): Partial<Task> & { title: string } {
+    const parsedEstimate: number =
+      typeof issue.estimatedTime === 'string'
+        ? +issue.estimatedTime.replace('PT', '').replace('H', '') * 60 * 60 * 1000
+        : 0;
+
     return {
       title: this._formatIssueTitle(issue.id, issue.subject),
       issuePoints: issue.storyPoints,
       issueWasUpdated: false,
       // NOTE: we use Date.now() instead to because updated does not account for comments
       issueLastUpdated: new Date(issue.updatedAt).getTime(),
+      ...(parsedEstimate > 0 ? { timeEstimate: parsedEstimate } : {}),
     };
   }
 
