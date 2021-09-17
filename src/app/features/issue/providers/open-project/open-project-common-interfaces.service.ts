@@ -67,31 +67,8 @@ export class OpenProjectCommonInterfacesService implements IssueServiceInterface
       .getById$(+task.issueId, cfg)
       .toPromise();
 
-    // // const issueUpdate: number = new Date(issue.updated_at).getTime();
-    // const filterUserName = cfg.filterUsername && cfg.filterUsername.toLowerCase();
-    // const commentsByOthers =
-    //   filterUserName && filterUserName.length > 1
-    //     ? issue.comments.filter(
-    //         (comment) => comment.user.login.toLowerCase() !== cfg.filterUsername,
-    //       )
-    //     : issue.comments;
-    // TODO: we also need to handle the case when the user himself updated the issue, to also update the issue...
-    // const updates: number[] = [
-    // ...commentsByOthers.map((comment) => new Date(comment.created_at).getTime()),
-    // issueUpdate
-    // ].sort();
-    // const lastRemoteUpdate = updates[updates.length - 1];
-    // const wasUpdated = lastRemoteUpdate > (task.issueLastUpdated || 0);
-
     const lastRemoteUpdate = new Date(issue.updatedAt).getTime();
     const wasUpdated = lastRemoteUpdate > (task.issueLastUpdated || 0);
-
-    // console.log('---------openProject issue update debugging--------');
-    // console.log('wasUpdated', wasUpdated, ' lastRemoteUpdate', lastRemoteUpdate, 'task.issueLastUpdated', task.issueLastUpdated);
-    // console.log(commentsByOthers, updates);
-    // console.log('cfg', cfg);
-    // console.log('issue', issue);
-    // console.log('--------end-------');
 
     if (wasUpdated && isNotifySuccess) {
       this._snackService.open({
