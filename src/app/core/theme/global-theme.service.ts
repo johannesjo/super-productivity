@@ -15,6 +15,7 @@ import { WorkContextThemeCfg } from '../../features/work-context/work-context.mo
 import { WorkContextService } from '../../features/work-context/work-context.service';
 import { combineLatest, Observable } from 'rxjs';
 import { remote } from 'electron';
+import { IS_FIREFOX } from '../../util/is-firefox';
 
 @Injectable({ providedIn: 'root' })
 export class GlobalThemeService {
@@ -137,6 +138,10 @@ export class GlobalThemeService {
 
   private _initHandlersForInitialBodyClasses(): void {
     this.document.body.classList.add(BodyClass.isNoAdvancedFeatures);
+
+    if (!IS_FIREFOX) {
+      this.document.body.classList.add(BodyClass.isNoFirefox);
+    }
 
     if (IS_MAC) {
       this.document.body.classList.add(BodyClass.isMac);

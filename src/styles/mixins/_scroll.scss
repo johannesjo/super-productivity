@@ -5,7 +5,7 @@
   overflow: auto;
   -ms-overflow-style: -ms-autohiding-scrollbar;
 
-  :host-context(.isNoMac) & {
+  :host-context(.isNoMac.isNoFirefox) & {
     @include mq(xs) {
       overflow: hidden;
 
@@ -28,8 +28,8 @@
   // important for touch events like hammer swipe to work
   touch-action: pan-y;
 
-  .isNoMac &,
-  :host-context(.isNoMac) & {
+  .isNoMac.isNoFirefox &,
+  :host-context(.isNoMac.isNoFirefox) & {
     overflow-y: overlay;
 
     @include mq(xs) {
@@ -50,7 +50,7 @@
   // important for touch events like hammer swipe to work
   touch-action: pan-y;
 
-  :host-context(.isNoMac) & {
+  :host-context(.isNoMac.isNoFirefox) & {
     @include mq(xs) {
       overflow-y: hidden !important;
       &:hover {
@@ -74,7 +74,7 @@
   -ms-overflow-style: -ms-autohiding-scrollbar;
   overflow-x: scroll;
 
-  :host-context(.isNoMac) & {
+  :host-context(.isNoMac.isNoFirefox) & {
     @include mq(xs) {
       overflow-x: hidden;
 

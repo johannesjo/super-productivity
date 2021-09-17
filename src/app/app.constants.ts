@@ -84,6 +84,7 @@ export enum BodyClass {
   isWeb = 'isWeb',
   isMac = 'isMac',
   isNoMac = 'isNoMac',
+  isNoFirefox = 'isNoFirefox',
   isExtension = 'isExtension',
   isAdvancedFeatures = 'isAdvancedFeatures',
   isNoAdvancedFeatures = 'isNoAdvancedFeatures',
