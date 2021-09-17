@@ -41,6 +41,7 @@ import { ipcRenderer } from 'electron';
 import { TrackingReminderService } from './features/tracking-reminder/tracking-reminder.service';
 import { first } from 'rxjs/operators';
 import { IS_MOBILE } from './util/is-mobile';
+import { IS_FIREFOX } from './util/is-firefox';
 
 const w = window as any;
 const productivityTip: string[] = w.productivityTips && w.productivityTips[w.randomIndex];
@@ -117,6 +118,12 @@ export class AppComponent implements OnDestroy {
 
     if (IS_ANDROID_WEB_VIEW) {
       this._androidService.init();
+    }
+
+    if (IS_FIREFOX) {
+      setTimeout(() => {
+        alert(this._translateService.instant(T.APP.A_BROWSER_WARNING));
+      }, 2000);
     }
 
     if (IS_ELECTRON) {
