@@ -90,13 +90,14 @@ $task-c-selected-bg-dark: $dark4;
   text-align: start;
   outline: none;
   margin-left: 2px;
-  padding: 4px 0 4px 6px;
+  padding: 3px 0 3px 5px;
   line-height: 1.5;
   min-height: 20px;
   text-overflow: ellipsis;
+  border: 1px solid transparent;
   cursor: text;
   transition: $transition-leave;
-  transition-property: opacity, transform;
+  transition-property: background-color, transform;
   background: inherit;
   position: relative;
   overflow: visible;
@@ -117,34 +118,18 @@ $task-c-selected-bg-dark: $dark4;
     // text-transform: uppercase;
   }
 
-  &:after {
-    transition: $transition-leave;
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    top: 0;
-    right: 0;
-    bottom: 0;
-    left: 0;
-    content: '';
-    opacity: 0;
-    z-index: -1;
-    pointer-events: none;
-
-    @include inlineEditElevation();
-  }
-
   &:focus {
     z-index: $z-task-title-focus;
-    user-select: all;
-    -webkit-user-select: all; /* Safari */
-    // thee magic number is 16/14 so we scale to whole pixels
+    user-select: text;
+    -webkit-user-select: text; /* Safari */
+    // the magic number is 16/14 so we scale to whole pixels
     transform: scale(1.142857143);
     transition: $transition-standard;
     outline: none;
 
     // NOTE: needed to overwrite color for current task
     color: $light-theme-text-color;
+    @include inlineEditElevation();
 
     @include mq(xs, max) {
       transform: scale(1);
@@ -152,11 +137,6 @@ $task-c-selected-bg-dark: $dark4;
 
     @include darkTheme() {
       color: #fff;
-    }
-
-    &:after {
-      opacity: 1;
-      transition: $transition-standard;
     }
   }
 }
