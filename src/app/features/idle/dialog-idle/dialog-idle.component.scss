@@ -16,10 +16,17 @@
 }
 
 .track-to-label {
+  margin-top: $s;
   margin-bottom: $s * 2;
   font-size: 20px;
 }
 
+.simple-counter-section {
+  margin-top: $s;
+  margin-bottom: $s;
+}
+
 .simple-counter {
   margin: 0 $s * 0.5;
+  box-shadow: none !important;
 }
