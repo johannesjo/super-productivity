@@ -20,6 +20,11 @@ const isGitlabEnabled = (gitlabCfg: GitlabCfg): boolean =>
 
 @Injectable()
 export class GitlabIssueEffects {
+  private _pollTimer$: Observable<any> = timer(
+    GITLAB_INITIAL_POLL_DELAY,
+    GITLAB_POLL_INTERVAL,
+  );
+
   private _updateIssuesForCurrentContext$: Observable<any> =
     this._workContextService.allTasksForCurrentContext$.pipe(
       first(),
@@ -56,11 +61,6 @@ export class GitlabIssueEffects {
         }
       }),
     );
-
-  private _pollTimer$: Observable<any> = timer(
-    GITLAB_INITIAL_POLL_DELAY,
-    GITLAB_POLL_INTERVAL,
-  );
 
   pollNewIssuesToBacklog$: Observable<any> = createEffect(
     () =>

@@ -51,7 +51,7 @@ export class OpenProjectCommonInterfacesService implements IssueServiceInterface
     );
   }
 
-  async refreshIssue(
+  async getFreshDataForIssue(
     task: Task,
     isNotifySuccess: boolean = true,
     isNotifyNoUpdateRequired: boolean = false,

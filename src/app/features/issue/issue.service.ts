@@ -60,7 +60,7 @@ export class IssueService {
     projectId: string,
   ): Observable<IssueData> {
     // account for issue refreshment
-    if (this.ISSUE_SERVICE_MAP[issueType].refreshIssue) {
+    if (this.ISSUE_SERVICE_MAP[issueType].getFreshDataForIssue) {
       if (!this.ISSUE_REFRESH_MAP[issueType][id]) {
         this.ISSUE_REFRESH_MAP[issueType][id] = new Subject<IssueData>();
       }
@@ -114,15 +114,13 @@ export class IssueService {
     if (!task.issueId || !task.issueType) {
       throw new Error('No issue task');
     }
-    if (!this.ISSUE_SERVICE_MAP[task.issueType].refreshIssue) {
+    if (!this.ISSUE_SERVICE_MAP[task.issueType].getFreshDataForIssue) {
       throw new Error('Issue method not available');
     }
 
-    const update = await (this.ISSUE_SERVICE_MAP[task.issueType].refreshIssue as any)(
-      task,
-      isNotifySuccess,
-      isNotifyNoUpdateRequired,
-    );
+    const update = await (
+      this.ISSUE_SERVICE_MAP[task.issueType].getFreshDataForIssue as any
+    )(task, isNotifySuccess, isNotifyNoUpdateRequired);
     if (update) {
       if (this.ISSUE_REFRESH_MAP[task.issueType][task.issueId]) {
         this.ISSUE_REFRESH_MAP[task.issueType][task.issueId].next(update.issue);
@@ -144,7 +142,7 @@ export class IssueService {
     for (const task of tasks) {
       if (!task.issueId || !task.issueType) {
         tasksWithoutIssueId.push(task);
-      } else if (!this.ISSUE_SERVICE_MAP[task.issueType].refreshIssues) {
+      } else if (!this.ISSUE_SERVICE_MAP[task.issueType].getFreshDataForIssues) {
         tasksWithoutMethod.push(task);
       } else if (!tasksIssueIdsByIssueType[task.issueType]) {
         tasksIssueIdsByIssueType[task.issueType] = [];
@@ -155,11 +153,9 @@ export class IssueService {
     }
 
     for (const issuesType of Object.keys(tasksIssueIdsByIssueType)) {
-      const updates = await (this.ISSUE_SERVICE_MAP[issuesType].refreshIssues as any)(
-        tasksIssueIdsByIssueType[issuesType],
-        isNotifySuccess,
-        isNotifyNoUpdateRequired,
-      );
+      const updates = await (
+        this.ISSUE_SERVICE_MAP[issuesType].getFreshDataForIssues as any
+      )(tasksIssueIdsByIssueType[issuesType], isNotifySuccess, isNotifyNoUpdateRequired);
       if (updates) {
         for (const update of updates) {
           if (this.ISSUE_REFRESH_MAP[issuesType][update.task.issueId]) {

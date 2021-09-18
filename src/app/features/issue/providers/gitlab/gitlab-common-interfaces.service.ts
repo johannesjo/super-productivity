@@ -59,7 +59,7 @@ export class GitlabCommonInterfacesService implements IssueServiceInterface {
     );
   }
 
-  async refreshIssue(
+  async getFreshDataForIssue(
     task: Task,
     isNotifySuccess: boolean = true,
     isNotifyNoUpdateRequired: boolean = false,
@@ -118,7 +118,7 @@ export class GitlabCommonInterfacesService implements IssueServiceInterface {
     return null;
   }
 
-  async refreshIssues(
+  async getFreshDataForIssues(
     tasks: Task[],
     isNotifySuccess: boolean = true,
     isNotifyNoUpdateRequired: boolean = false,

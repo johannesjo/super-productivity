@@ -12,18 +12,22 @@ export interface IssueServiceInterface {
 
   searchIssues$?(searchTerm: string, projectId: string): Observable<SearchResultItem[]>;
 
-  refreshIssue?(
+  getFreshDataForIssue?(
     task: Task,
+    /** @deprecated handle in issue.service instead */
     isNotifySuccess: boolean,
+    /** @deprecated */
     isNotifyNoUpdateRequired: boolean,
   ): Promise<{
     taskChanges: Partial<Task>;
     issue: IssueData;
   } | null>;
 
-  refreshIssues?(
+  getFreshDataForIssues?(
     tasks: Task[],
+    /** @deprecated */
     isNotifySuccess: boolean,
+    /** @deprecated */
     isNotifyNoUpdateRequired: boolean,
   ): Promise<
     {
@@ -33,5 +37,9 @@ export interface IssueServiceInterface {
     }[]
   >;
 
-  getMappedAttachments?(issueDataIN: IssueData): TaskAttachment[];
+  getMappedAttachments?(issueData: IssueData): TaskAttachment[];
+
+  getNewIssuesToAddToBacklog?(
+    allExistingIssueIds: number[] | string[],
+  ): Promise<IssueData[]>;
 }

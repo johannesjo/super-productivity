@@ -46,7 +46,7 @@ export class GithubCommonInterfacesService implements IssueServiceInterface {
     );
   }
 
-  async refreshIssue(
+  async getFreshDataForIssue(
     task: Task,
     isNotifySuccess: boolean = true,
     isNotifyNoUpdateRequired: boolean = false,
@@ -79,13 +79,6 @@ export class GithubCommonInterfacesService implements IssueServiceInterface {
     const lastRemoteUpdate = updates[updates.length - 1];
 
     const wasUpdated = lastRemoteUpdate > (task.issueLastUpdated || 0);
-
-    // console.log('---------github issue update debugging--------');
-    // console.log('wasUpdated', wasUpdated, ' lastRemoteUpdate', lastRemoteUpdate, 'task.issueLastUpdated', task.issueLastUpdated);
-    // console.log(commentsByOthers, updates);
-    // console.log('cfg', cfg);
-    // console.log('issue', issue);
-    // console.log('--------end-------');
 
     if (wasUpdated && isNotifySuccess) {
       this._snackService.open({
@@ -120,6 +113,7 @@ export class GithubCommonInterfacesService implements IssueServiceInterface {
       issueWasUpdated: false,
       // NOTE: we use Date.now() instead to because updated does not account for comments
       issueLastUpdated: new Date(issue.updated_at).getTime(),
+      isDone: this._isIssueDone(issue),
     };
   }
 
@@ -133,5 +127,9 @@ export class GithubCommonInterfacesService implements IssueServiceInterface {
 
   private _getCfgOnce$(projectId: string): Observable<GithubCfg> {
     return this._projectService.getGithubCfgForProject$(projectId).pipe(first());
+  }
+
+  private _isIssueDone(issue: GithubIssueReduced): boolean {
+    return issue.state === 'closed';
   }
 }

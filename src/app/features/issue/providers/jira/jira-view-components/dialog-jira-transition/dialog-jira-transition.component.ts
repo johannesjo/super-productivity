@@ -69,7 +69,11 @@ export class DialogJiraTransitionComponent {
           first(),
         )
         .subscribe(() => {
-          this._jiraCommonInterfacesService.refreshIssue(this.data.task, false, false);
+          this._jiraCommonInterfacesService.getFreshDataForIssue(
+            this.data.task,
+            false,
+            false,
+          );
           this._snackService.open({
             type: 'SUCCESS',
             msg: T.F.JIRA.S.TRANSITION,
