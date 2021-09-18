@@ -4,14 +4,19 @@ import { Task } from '../tasks/task.model';
 import { TaskAttachment } from '../tasks/task-attachment/task-attachment.model';
 
 export interface IssueServiceInterface {
+  // MANDATORY
+  // ---------
   issueLink$(issueId: string | number, projectId: string): Observable<string>;
 
   getById$(id: string | number, projectId: string): Observable<IssueData>;
 
   getAddTaskData(issueData: IssueDataReduced): Partial<Task> & { title: string };
 
+  // OPTIONAL
+  // --------
   searchIssues$?(searchTerm: string, projectId: string): Observable<SearchResultItem[]>;
 
+  // also used to determine if task is done
   refreshIssue?(
     task: Task,
     isNotifySuccess: boolean,
@@ -33,5 +38,5 @@ export interface IssueServiceInterface {
     }[]
   >;
 
-  getMappedAttachments?(issueDataIN: IssueData): TaskAttachment[];
+  getMappedAttachments?(issueData: IssueData): TaskAttachment[];
 }
