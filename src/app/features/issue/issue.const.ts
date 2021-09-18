@@ -27,20 +27,21 @@ export const JIRA_TYPE: IssueProviderKey = 'JIRA';
 export const CALDAV_TYPE: IssueProviderKey = 'CALDAV';
 export const OPEN_PROJECT_TYPE: IssueProviderKey = 'OPEN_PROJECT';
 
-// TODO uppercase
-export const issueProviderKeys: IssueProviderKey[] = [
-  JIRA_TYPE,
-  GITHUB_TYPE,
-  GITLAB_TYPE,
-  OPEN_PROJECT_TYPE,
-];
-
+// TODO screaming snake case
 export const issueProviderIconMap = {
   [JIRA_TYPE]: 'jira',
   [GITHUB_TYPE]: 'github',
   [GITLAB_TYPE]: 'gitlab',
   [CALDAV_TYPE]: 'caldav',
   [OPEN_PROJECT_TYPE]: 'open_project',
+};
+
+export const ISSUE_PROVIDER_HUMANIZED = {
+  [JIRA_TYPE]: 'Jira',
+  [GITHUB_TYPE]: 'GitHub',
+  [GITLAB_TYPE]: 'GitLab',
+  [CALDAV_TYPE]: 'CalDAV',
+  [OPEN_PROJECT_TYPE]: 'OpenProject',
 };
 
 export const DEFAULT_ISSUE_PROVIDER_CFGS = {

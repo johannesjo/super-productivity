@@ -10,7 +10,6 @@ import { GithubCfg } from './github.model';
 import { SnackService } from '../../../../core/snack/snack.service';
 import { GithubIssue, GithubIssueReduced } from './github-issue/github-issue.model';
 import { truncate } from '../../../../util/truncate';
-import { T } from '../../../../t.const';
 
 @Injectable({
   providedIn: 'root',
@@ -50,7 +49,11 @@ export class GithubCommonInterfacesService implements IssueServiceInterface {
     task: Task,
     isNotifySuccess: boolean = true,
     isNotifyNoUpdateRequired: boolean = false,
-  ): Promise<{ taskChanges: Partial<Task>; issue: GithubIssue } | null> {
+  ): Promise<{
+    taskChanges: Partial<Task>;
+    issue: GithubIssue;
+    issueTitle: string;
+  } | null> {
     if (!task.projectId) {
       throw new Error('No projectId');
     }
@@ -80,21 +83,6 @@ export class GithubCommonInterfacesService implements IssueServiceInterface {
 
     const wasUpdated = lastRemoteUpdate > (task.issueLastUpdated || 0);
 
-    if (wasUpdated && isNotifySuccess) {
-      this._snackService.open({
-        ico: 'cloud_download',
-        translateParams: {
-          issueText: this._formatIssueTitleForSnack(issue.number, issue.title),
-        },
-        msg: T.F.GITHUB.S.ISSUE_UPDATE,
-      });
-    } else if (isNotifyNoUpdateRequired) {
-      this._snackService.open({
-        msg: T.F.GITHUB.S.ISSUE_NO_UPDATE_REQUIRED,
-        ico: 'cloud_download',
-      });
-    }
-
     if (wasUpdated) {
       return {
         taskChanges: {
@@ -102,6 +90,7 @@ export class GithubCommonInterfacesService implements IssueServiceInterface {
           issueWasUpdated: true,
         },
         issue,
+        issueTitle: this._formatIssueTitleForSnack(issue.number, issue.title),
       };
     }
     return null;

@@ -63,7 +63,11 @@ export class GitlabCommonInterfacesService implements IssueServiceInterface {
     task: Task,
     isNotifySuccess: boolean = true,
     isNotifyNoUpdateRequired: boolean = false,
-  ): Promise<{ taskChanges: Partial<Task>; issue: GitlabIssue } | null> {
+  ): Promise<{
+    taskChanges: Partial<Task>;
+    issue: GitlabIssue;
+    issueTitle: string;
+  } | null> {
     if (!task.projectId) {
       throw new Error('No projectId');
     }
@@ -91,21 +95,6 @@ export class GitlabCommonInterfacesService implements IssueServiceInterface {
 
     const wasUpdated = lastRemoteUpdate > (task.issueLastUpdated || 0);
 
-    if (wasUpdated && isNotifySuccess) {
-      this._snackService.open({
-        ico: 'cloud_download',
-        translateParams: {
-          issueText: this._formatIssueTitleForSnack(issue.number, issue.title),
-        },
-        msg: T.F.GITLAB.S.ISSUE_UPDATE,
-      });
-    } else if (isNotifyNoUpdateRequired) {
-      this._snackService.open({
-        msg: T.F.GITLAB.S.ISSUE_NO_UPDATE_REQUIRED,
-        ico: 'cloud_download',
-      });
-    }
-
     if (wasUpdated) {
       return {
         taskChanges: {
@@ -113,6 +102,7 @@ export class GitlabCommonInterfacesService implements IssueServiceInterface {
           issueWasUpdated: true,
         },
         issue,
+        issueTitle: this._formatIssueTitleForSnack(issue.number, issue.title),
       };
     }
     return null;

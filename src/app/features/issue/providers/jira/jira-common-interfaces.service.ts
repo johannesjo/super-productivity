@@ -10,7 +10,6 @@ import { SearchResultItem } from '../../issue.model';
 import { JiraIssue, JiraIssueReduced } from './jira-issue/jira-issue.model';
 import { TaskAttachment } from '../../../tasks/task-attachment/task-attachment.model';
 import { mapJiraAttachmentToAttachment } from './jira-issue/jira-issue-map.util';
-import { T } from '../../../../t.const';
 import { JiraCfg } from './jira.model';
 
 @Injectable({
@@ -49,7 +48,11 @@ export class JiraCommonInterfacesService implements IssueServiceInterface {
     task: Task,
     isNotifySuccess: boolean = true,
     isNotifyNoUpdateRequired: boolean = false,
-  ): Promise<{ taskChanges: Partial<Task>; issue: JiraIssue } | null> {
+  ): Promise<{
+    taskChanges: Partial<Task>;
+    issue: JiraIssue;
+    issueTitle: string;
+  } | null> {
     if (!task.projectId) {
       throw new Error('No projectId');
     }
@@ -66,25 +69,6 @@ export class JiraCommonInterfacesService implements IssueServiceInterface {
     const newUpdated = new Date(issue.updated).getTime();
     const wasUpdated = newUpdated > (task.issueLastUpdated || 0);
 
-    // NOTIFICATIONS
-    if (wasUpdated && isNotifySuccess) {
-      this._snackService.open({
-        msg: T.F.JIRA.S.ISSUE_UPDATE,
-        translateParams: {
-          issueText: `${issue.key}`,
-        },
-        ico: 'cloud_download',
-      });
-    } else if (isNotifyNoUpdateRequired) {
-      this._snackService.open({
-        msg: T.F.JIRA.S.ISSUE_NO_UPDATE_REQUIRED,
-        translateParams: {
-          issueText: `${issue.key}`,
-        },
-        ico: 'cloud_download',
-      });
-    }
-
     if (wasUpdated) {
       return {
         taskChanges: {
@@ -92,6 +76,7 @@ export class JiraCommonInterfacesService implements IssueServiceInterface {
           issueWasUpdated: true,
         },
         issue,
+        issueTitle: issue.key,
       };
     }
     return null;

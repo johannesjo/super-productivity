@@ -240,6 +240,24 @@
         "SUCCESS_LOGIN": "GoogleApi: Login successful"
       }
     },
+    "ISSUE": {
+      "DEFAULT": {
+        "ISSUE_C:STR": "Issue",
+        "ISSUE_STR": "issue",
+        "ISSUES_STR": "issues"
+      },
+      "S": {
+        "IMPORTED_MULTIPLE_ISSUES": "{{issueProviderName}}: Imported {{issuesLength}} new {{issuesStr}} to backlog",
+        "IMPORTED_SINGLE_ISSUE": "{{issueProviderName}}: Imported {{issueStr}} \"{{issueTitle}}\" to backlog",
+        "ISSUE_DELETED_OR_CLOSED": "{{issueProviderName}}: {{issueStrC}} \"{{issueTitle}}\" seems to be deleted or closed",
+        "ISSUE_NO_UPDATE_REQUIRED": "{{issueProviderName}}: No update required",
+        "ISSUE_UPDATE": "{{issueProviderName}}: Updated data for \"{{issueTitle}}\"",
+        "MANUAL_UPDATE_ISSUE_SUCCESS": "{{issueProviderName}}: Updated data for \"{{issueTitle}}\"",
+        "MISSING_ISSUE_DATA": "{{issueProviderName}}: Tasks with missing {{issueStr}} data found. Reloading.",
+        "NEW_COMMENT": "{{issueProviderName}}: New comment for \"{{issueTitle}}\"",
+        "POLLING": "{{issueProviderName}}: Polling Changes for {{issueStr}}"
+      }
+    },
     "JIRA": {
       "BANNER": {
         "BLOCK_ACCESS_MSG": "Jira: To prevent shut out from api, access has been blocked by Super Productivity. You probably should check your jira settings!",
@@ -483,7 +501,6 @@
         "SHOW_ISSUE_BTN": "Show me"
       }
     },
-
     "PROCRASTINATION": {
       "BACK_TO_WORK": "Back to work!",
       "COMP": {

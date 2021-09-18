@@ -21,6 +21,7 @@ export interface IssueServiceInterface {
   ): Promise<{
     taskChanges: Partial<Task>;
     issue: IssueData;
+    issueTitle: string;
   } | null>;
 
   getFreshDataForIssues?(

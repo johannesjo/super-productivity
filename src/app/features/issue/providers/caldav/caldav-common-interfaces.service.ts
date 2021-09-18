@@ -47,7 +47,11 @@ export class CaldavCommonInterfacesService implements IssueServiceInterface {
     task: Task,
     isNotifySuccess: boolean,
     isNotifyNoUpdateRequired: boolean,
-  ): Promise<{ taskChanges: Partial<Task>; issue: CaldavIssue } | null> {
+  ): Promise<{
+    taskChanges: Partial<Task>;
+    issue: CaldavIssue;
+    issueTitle: string;
+  } | null> {
     if (!task.projectId) {
       throw new Error('No projectId');
     }
@@ -60,23 +64,6 @@ export class CaldavCommonInterfacesService implements IssueServiceInterface {
 
     const wasUpdated = issue.etag_hash !== task.issueLastUpdated;
 
-    if (wasUpdated && isNotifySuccess) {
-      this._snackService.open({
-        ico: 'cloud_download',
-        translateParams: {
-          issueText: CaldavCommonInterfacesService._formatIssueTitleForSnack(
-            issue.summary,
-          ),
-        },
-        msg: T.F.CALDAV.S.ISSUE_UPDATE,
-      });
-    } else if (isNotifyNoUpdateRequired) {
-      this._snackService.open({
-        msg: T.F.CALDAV.S.ISSUE_NO_UPDATE_REQUIRED,
-        ico: 'cloud_download',
-      });
-    }
-
     if (wasUpdated) {
       return {
         taskChanges: {
@@ -84,6 +71,9 @@ export class CaldavCommonInterfacesService implements IssueServiceInterface {
           issueWasUpdated: true,
         },
         issue,
+        issueTitle: CaldavCommonInterfacesService._formatIssueTitleForSnack(
+          issue.summary,
+        ),
       };
     }
     return null;

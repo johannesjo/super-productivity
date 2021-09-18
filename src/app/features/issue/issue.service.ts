@@ -11,6 +11,8 @@ import {
   CALDAV_TYPE,
   GITHUB_TYPE,
   GITLAB_TYPE,
+  ISSUE_PROVIDER_HUMANIZED,
+  issueProviderIconMap,
   JIRA_TYPE,
   OPEN_PROJECT_TYPE,
 } from './issue.const';
@@ -23,6 +25,8 @@ import { switchMap } from 'rxjs/operators';
 import { GitlabCommonInterfacesService } from './providers/gitlab/gitlab-common-interfaces.service';
 import { CaldavCommonInterfacesService } from './providers/caldav/caldav-common-interfaces.service';
 import { OpenProjectCommonInterfacesService } from './providers/open-project/open-project-common-interfaces.service';
+import { SnackService } from '../../core/snack/snack.service';
+import { T } from '../../t.const';
 
 @Injectable({
   providedIn: 'root',
@@ -52,6 +56,7 @@ export class IssueService {
     private _gitlabCommonInterfacesService: GitlabCommonInterfacesService,
     private _caldavCommonInterfaceService: CaldavCommonInterfacesService,
     private _openProjectInterfaceService: OpenProjectCommonInterfacesService,
+    private _snackService: SnackService,
   ) {}
 
   getById$(
@@ -111,21 +116,47 @@ export class IssueService {
     isNotifySuccess: boolean = true,
     isNotifyNoUpdateRequired: boolean = false,
   ): Promise<void> {
-    if (!task.issueId || !task.issueType) {
+    const { issueId, issueType, projectId } = task;
+
+    if (!issueId || !issueType || !projectId) {
       throw new Error('No issue task');
     }
-    if (!this.ISSUE_SERVICE_MAP[task.issueType].getFreshDataForIssue) {
+    if (!this.ISSUE_SERVICE_MAP[issueType].getFreshDataForIssue) {
       throw new Error('Issue method not available');
     }
 
-    const update = await (
-      this.ISSUE_SERVICE_MAP[task.issueType].getFreshDataForIssue as any
-    )(task, isNotifySuccess, isNotifyNoUpdateRequired);
+    const update = await (this.ISSUE_SERVICE_MAP[issueType].getFreshDataForIssue as any)(
+      task,
+      isNotifySuccess,
+      isNotifyNoUpdateRequired,
+    );
+
     if (update) {
-      if (this.ISSUE_REFRESH_MAP[task.issueType][task.issueId]) {
-        this.ISSUE_REFRESH_MAP[task.issueType][task.issueId].next(update.issue);
+      if (this.ISSUE_REFRESH_MAP[issueType][issueId]) {
+        this.ISSUE_REFRESH_MAP[issueType][issueId].next(update.issue);
       }
       this._taskService.update(task.id, update.taskChanges);
+
+      if (isNotifySuccess) {
+        this._snackService.open({
+          svgIco: issueProviderIconMap[issueType],
+          msg: T.F.ISSUE.S.ISSUE_UPDATE,
+          translateParams: {
+            issueProviderName: ISSUE_PROVIDER_HUMANIZED[issueType],
+            // TODO add open project case
+            issueStr: T.F.ISSUE.DEFAULT.ISSUE_STR,
+            issueTitle: update.issueTitle,
+          },
+        });
+      }
+    } else if (isNotifyNoUpdateRequired) {
+      this._snackService.open({
+        svgIco: issueProviderIconMap[issueType],
+        msg: T.F.ISSUE.S.ISSUE_NO_UPDATE_REQUIRED,
+        translateParams: {
+          issueProviderName: ISSUE_PROVIDER_HUMANIZED[issueType],
+        },
+      });
     }
   }
 

@@ -13,7 +13,6 @@ import {
   OpenProjectWorkPackageReduced,
 } from './open-project-issue/open-project-issue.model';
 import { truncate } from '../../../../util/truncate';
-import { T } from '../../../../t.const';
 
 @Injectable({
   providedIn: 'root',
@@ -55,7 +54,11 @@ export class OpenProjectCommonInterfacesService implements IssueServiceInterface
     task: Task,
     isNotifySuccess: boolean = true,
     isNotifyNoUpdateRequired: boolean = false,
-  ): Promise<{ taskChanges: Partial<Task>; issue: OpenProjectWorkPackage } | null> {
+  ): Promise<{
+    taskChanges: Partial<Task>;
+    issue: OpenProjectWorkPackage;
+    issueTitle: string;
+  } | null> {
     if (!task.projectId) {
       throw new Error('No projectId');
     }
@@ -70,21 +73,6 @@ export class OpenProjectCommonInterfacesService implements IssueServiceInterface
     const lastRemoteUpdate = new Date(issue.updatedAt).getTime();
     const wasUpdated = lastRemoteUpdate > (task.issueLastUpdated || 0);
 
-    if (wasUpdated && isNotifySuccess) {
-      this._snackService.open({
-        ico: 'cloud_download',
-        translateParams: {
-          issueText: this._formatIssueTitleForSnack(issue.id, issue.subject),
-        },
-        msg: T.F.OPEN_PROJECT.S.ISSUE_UPDATE,
-      });
-    } else if (isNotifyNoUpdateRequired) {
-      this._snackService.open({
-        msg: T.F.OPEN_PROJECT.S.ISSUE_NO_UPDATE_REQUIRED,
-        ico: 'cloud_download',
-      });
-    }
-
     if (wasUpdated) {
       return {
         taskChanges: {
@@ -92,6 +80,7 @@ export class OpenProjectCommonInterfacesService implements IssueServiceInterface
           issueWasUpdated: true,
         },
         issue,
+        issueTitle: this._formatIssueTitleForSnack(issue.id, issue.subject),
       };
     }
     return null;
