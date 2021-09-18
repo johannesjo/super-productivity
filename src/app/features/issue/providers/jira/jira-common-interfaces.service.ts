@@ -44,11 +44,7 @@ export class JiraCommonInterfacesService implements IssueServiceInterface {
     );
   }
 
-  async getFreshDataForIssue(
-    task: Task,
-    isNotifySuccess: boolean = true,
-    isNotifyNoUpdateRequired: boolean = false,
-  ): Promise<{
+  async getFreshDataForIssueTask(task: Task): Promise<{
     taskChanges: Partial<Task>;
     issue: JiraIssue;
     issueTitle: string;

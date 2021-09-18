@@ -65,7 +65,7 @@ export class IssueService {
     projectId: string,
   ): Observable<IssueData> {
     // account for issue refreshment
-    if (this.ISSUE_SERVICE_MAP[issueType].getFreshDataForIssue) {
+    if (this.ISSUE_SERVICE_MAP[issueType].getFreshDataForIssueTask) {
       if (!this.ISSUE_REFRESH_MAP[issueType][id]) {
         this.ISSUE_REFRESH_MAP[issueType][id] = new Subject<IssueData>();
       }
@@ -121,15 +121,13 @@ export class IssueService {
     if (!issueId || !issueType || !projectId) {
       throw new Error('No issue task');
     }
-    if (!this.ISSUE_SERVICE_MAP[issueType].getFreshDataForIssue) {
+    if (!this.ISSUE_SERVICE_MAP[issueType].getFreshDataForIssueTask) {
       throw new Error('Issue method not available');
     }
 
-    const update = await (this.ISSUE_SERVICE_MAP[issueType].getFreshDataForIssue as any)(
-      task,
-      isNotifySuccess,
-      isNotifyNoUpdateRequired,
-    );
+    const update = await (
+      this.ISSUE_SERVICE_MAP[issueType].getFreshDataForIssueTask as any
+    )(task, isNotifySuccess, isNotifyNoUpdateRequired);
 
     if (update) {
       if (this.ISSUE_REFRESH_MAP[issueType][issueId]) {
@@ -173,7 +171,7 @@ export class IssueService {
     for (const task of tasks) {
       if (!task.issueId || !task.issueType) {
         tasksWithoutIssueId.push(task);
-      } else if (!this.ISSUE_SERVICE_MAP[task.issueType].getFreshDataForIssues) {
+      } else if (!this.ISSUE_SERVICE_MAP[task.issueType].getFreshDataForIssueTasks) {
         tasksWithoutMethod.push(task);
       } else if (!tasksIssueIdsByIssueType[task.issueType]) {
         tasksIssueIdsByIssueType[task.issueType] = [];
@@ -185,7 +183,7 @@ export class IssueService {
 
     for (const issuesType of Object.keys(tasksIssueIdsByIssueType)) {
       const updates = await (
-        this.ISSUE_SERVICE_MAP[issuesType].getFreshDataForIssues as any
+        this.ISSUE_SERVICE_MAP[issuesType].getFreshDataForIssueTasks as any
       )(tasksIssueIdsByIssueType[issuesType], isNotifySuccess, isNotifyNoUpdateRequired);
       if (updates) {
         for (const update of updates) {

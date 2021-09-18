@@ -43,11 +43,7 @@ export class CaldavCommonInterfacesService implements IssueServiceInterface {
     return of('');
   }
 
-  async getFreshDataForIssue(
-    task: Task,
-    isNotifySuccess: boolean,
-    isNotifyNoUpdateRequired: boolean,
-  ): Promise<{
+  async getFreshDataForIssueTask(task: Task): Promise<{
     taskChanges: Partial<Task>;
     issue: CaldavIssue;
     issueTitle: string;
@@ -79,7 +75,7 @@ export class CaldavCommonInterfacesService implements IssueServiceInterface {
     return null;
   }
 
-  async getFreshDataForIssues(
+  async getFreshDataForIssueTasks(
     tasks: Task[],
     isNotifySuccess: boolean = true,
     isNotifyNoUpdateRequired: boolean = false,

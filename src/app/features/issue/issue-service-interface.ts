@@ -12,19 +12,13 @@ export interface IssueServiceInterface {
 
   searchIssues$?(searchTerm: string, projectId: string): Observable<SearchResultItem[]>;
 
-  getFreshDataForIssue?(
-    task: Task,
-    /** @deprecated handle in issue.service instead */
-    isNotifySuccess: boolean,
-    /** @deprecated */
-    isNotifyNoUpdateRequired: boolean,
-  ): Promise<{
+  getFreshDataForIssueTask?(task: Task): Promise<{
     taskChanges: Partial<Task>;
     issue: IssueData;
     issueTitle: string;
   } | null>;
 
-  getFreshDataForIssues?(
+  getFreshDataForIssueTasks?(
     tasks: Task[],
     /** @deprecated */
     isNotifySuccess: boolean,

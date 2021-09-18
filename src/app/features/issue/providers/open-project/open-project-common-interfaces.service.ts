@@ -50,11 +50,7 @@ export class OpenProjectCommonInterfacesService implements IssueServiceInterface
     );
   }
 
-  async getFreshDataForIssue(
-    task: Task,
-    isNotifySuccess: boolean = true,
-    isNotifyNoUpdateRequired: boolean = false,
-  ): Promise<{
+  async getFreshDataForIssueTask(task: Task): Promise<{
     taskChanges: Partial<Task>;
     issue: OpenProjectWorkPackage;
     issueTitle: string;
