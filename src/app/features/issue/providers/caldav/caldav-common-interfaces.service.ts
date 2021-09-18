@@ -10,7 +10,6 @@ import { catchError, concatMap, first, switchMap } from 'rxjs/operators';
 import { ProjectService } from '../../../project/project.service';
 import { SnackService } from '../../../../core/snack/snack.service';
 import { truncate } from '../../../../util/truncate';
-import { T } from '../../../../t.const';
 
 @Injectable({
   providedIn: 'root',
@@ -77,8 +76,6 @@ export class CaldavCommonInterfacesService implements IssueServiceInterface {
 
   async getFreshDataForIssueTasks(
     tasks: Task[],
-    isNotifySuccess: boolean = true,
-    isNotifyNoUpdateRequired: boolean = false,
   ): Promise<{ task: Task; taskChanges: Partial<Task>; issue: CaldavIssue }[]> {
     // First sort the tasks by the issueId
     // because the API returns it in a desc order by issue iid(issueId)
@@ -97,21 +94,6 @@ export class CaldavCommonInterfacesService implements IssueServiceInterface {
       .toPromise();
     const issueMap = new Map(issues.map((item) => [item.id, item]));
 
-    if (isNotifyNoUpdateRequired) {
-      tasks
-        .filter(
-          (task) =>
-            issueMap.has(task.id) &&
-            issueMap.get(task.id)?.etag_hash === task.issueLastUpdated,
-        )
-        .forEach((_) =>
-          this._snackService.open({
-            msg: T.F.CALDAV.S.ISSUE_NO_UPDATE_REQUIRED,
-            ico: 'cloud_download',
-          }),
-        );
-    }
-
     return tasks
       .filter(
         (task) =>
@@ -120,17 +102,6 @@ export class CaldavCommonInterfacesService implements IssueServiceInterface {
       )
       .map((task) => {
         const issue = issueMap.get(task.id) as CaldavIssue;
-        if (isNotifySuccess) {
-          this._snackService.open({
-            ico: 'cloud_download',
-            translateParams: {
-              issueText: CaldavCommonInterfacesService._formatIssueTitleForSnack(
-                issue.summary,
-              ),
-            },
-            msg: T.F.CALDAV.S.ISSUE_UPDATE,
-          });
-        }
         return {
           task,
           taskChanges: {

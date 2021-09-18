@@ -18,13 +18,7 @@ export interface IssueServiceInterface {
     issueTitle: string;
   } | null>;
 
-  getFreshDataForIssueTasks?(
-    tasks: Task[],
-    /** @deprecated */
-    isNotifySuccess: boolean,
-    /** @deprecated */
-    isNotifyNoUpdateRequired: boolean,
-  ): Promise<
+  getFreshDataForIssueTasks?(tasks: Task[]): Promise<
     {
       task: Task;
       taskChanges: Partial<Task>;

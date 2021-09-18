@@ -10,7 +10,6 @@ import { GitlabCfg } from './gitlab';
 import { SnackService } from '../../../../core/snack/snack.service';
 import { GitlabIssue } from './gitlab-issue/gitlab-issue.model';
 import { truncate } from '../../../../util/truncate';
-import { T } from '../../../../t.const';
 import { GITLAB_BASE_URL } from './gitlab.const';
 
 @Injectable({
@@ -106,8 +105,6 @@ export class GitlabCommonInterfacesService implements IssueServiceInterface {
 
   async getFreshDataForIssueTasks(
     tasks: Task[],
-    isNotifySuccess: boolean = true,
-    isNotifyNoUpdateRequired: boolean = false,
   ): Promise<{ task: Task; taskChanges: Partial<Task>; issue: GitlabIssue }[]> {
     // First sort the tasks by the issueId
     // because the API returns it in a desc order by issue iid(issueId)
@@ -163,21 +160,6 @@ export class GitlabCommonInterfacesService implements IssueServiceInterface {
             issueWasUpdated: true,
           },
           issue: issues[i],
-        });
-      }
-
-      if (wasUpdated && isNotifySuccess) {
-        this._snackService.open({
-          ico: 'cloud_download',
-          translateParams: {
-            issueText: this._formatIssueTitleForSnack(issues[i].number, issues[i].title),
-          },
-          msg: T.F.GITLAB.S.ISSUE_UPDATE,
-        });
-      } else if (isNotifyNoUpdateRequired) {
-        this._snackService.open({
-          msg: T.F.GITLAB.S.ISSUE_NO_UPDATE_REQUIRED,
-          ico: 'cloud_download',
         });
       }
     }

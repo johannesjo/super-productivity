@@ -27,6 +27,7 @@ import { CaldavCommonInterfacesService } from './providers/caldav/caldav-common-
 import { OpenProjectCommonInterfacesService } from './providers/open-project/open-project-common-interfaces.service';
 import { SnackService } from '../../core/snack/snack.service';
 import { T } from '../../t.const';
+import { TranslateService } from '@ngx-translate/core';
 
 @Injectable({
   providedIn: 'root',
@@ -57,6 +58,7 @@ export class IssueService {
     private _caldavCommonInterfaceService: CaldavCommonInterfacesService,
     private _openProjectInterfaceService: OpenProjectCommonInterfacesService,
     private _snackService: SnackService,
+    private _translateService: TranslateService,
   ) {}
 
   getById$(
@@ -142,7 +144,7 @@ export class IssueService {
           translateParams: {
             issueProviderName: ISSUE_PROVIDER_HUMANIZED[issueType],
             // TODO add open project case
-            issueStr: T.F.ISSUE.DEFAULT.ISSUE_STR,
+            issueStr: this._translateService.instant(T.F.ISSUE.DEFAULT.ISSUE_STR),
             issueTitle: update.issueTitle,
           },
         });
@@ -158,11 +160,7 @@ export class IssueService {
     }
   }
 
-  async refreshIssues(
-    tasks: Task[],
-    isNotifySuccess: boolean = true,
-    isNotifyNoUpdateRequired: boolean = false,
-  ): Promise<void> {
+  async refreshIssues(tasks: Task[]): Promise<void> {
     // dynamic map that has a list of tasks for every entry where the entry is an issue type
     const tasksIssueIdsByIssueType: any = {};
     const tasksWithoutIssueId = [];
@@ -182,15 +180,47 @@ export class IssueService {
     }
 
     for (const issuesType of Object.keys(tasksIssueIdsByIssueType)) {
-      const updates = await (
-        this.ISSUE_SERVICE_MAP[issuesType].getFreshDataForIssueTasks as any
-      )(tasksIssueIdsByIssueType[issuesType], isNotifySuccess, isNotifyNoUpdateRequired);
-      if (updates) {
+      const updates: {
+        task: Task;
+        taskChanges: Partial<Task>;
+        issue: IssueData;
+      }[] = await // TODO export fn to type instead
+      (this.ISSUE_SERVICE_MAP[issuesType].getFreshDataForIssueTasks as any)(
+        tasksIssueIdsByIssueType[issuesType],
+      );
+
+      if (updates.length > 0) {
         for (const update of updates) {
-          if (this.ISSUE_REFRESH_MAP[issuesType][update.task.issueId]) {
-            this.ISSUE_REFRESH_MAP[issuesType][update.task.issueId].next(update.issue);
+          if (this.ISSUE_REFRESH_MAP[issuesType][update.task.issueId as string]) {
+            this.ISSUE_REFRESH_MAP[issuesType][update.task.issueId as string].next(
+              update.issue,
+            );
           }
           this._taskService.update(update.task.id, update.taskChanges);
+        }
+
+        if (updates.length === 1) {
+          this._snackService.open({
+            svgIco: issueProviderIconMap[issuesType as IssueProviderKey],
+            msg: T.F.ISSUE.S.ISSUE_UPDATE,
+            translateParams: {
+              issueProviderName: ISSUE_PROVIDER_HUMANIZED[issuesType as IssueProviderKey],
+              // TODO add open project case
+              issueStr: this._translateService.instant(T.F.ISSUE.DEFAULT.ISSUE_STR),
+              issueTitle: updates[0].taskChanges.title || updates[0].task.title,
+            },
+          });
+        } else {
+          this._snackService.open({
+            svgIco: issueProviderIconMap[issuesType as IssueProviderKey],
+            msg: T.F.ISSUE.S.ISSUE_UPDATE_MULTIPLE,
+            translateParams: {
+              issueProviderName: ISSUE_PROVIDER_HUMANIZED[issuesType as IssueProviderKey],
+              // TODO add open project case
+              issuesStr: this._translateService.instant(T.F.ISSUE.DEFAULT.ISSUES_STR),
+              nr: updates.length,
+            },
+          });
         }
       }
     }

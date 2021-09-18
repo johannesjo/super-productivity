@@ -151,7 +151,7 @@ export class CaldavIssueEffects {
         svgIco: 'caldav',
         isSpinner: true,
       });
-      this._issueService.refreshIssues(caldavTasks, true, false);
+      this._issueService.refreshIssues(caldavTasks);
     }
   }
 

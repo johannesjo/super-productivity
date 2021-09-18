@@ -57,7 +57,7 @@ export class GitlabIssueEffects {
             svgIco: 'gitlab',
             isSpinner: true,
           });
-          this._issueService.refreshIssues(gitlabTasks, true, false);
+          this._issueService.refreshIssues(gitlabTasks);
         }
       }),
     );
