@@ -256,7 +256,7 @@
         "MANUAL_UPDATE_ISSUE_SUCCESS": "{{issueProviderName}}: Updated data for \"{{issueTitle}}\"",
         "MISSING_ISSUE_DATA": "{{issueProviderName}}: Tasks with missing {{issueStr}} data found. Reloading.",
         "NEW_COMMENT": "{{issueProviderName}}: New comment for \"{{issueTitle}}\"",
-        "POLLING": "{{issueProviderName}}: Polling Changes for {{issueStr}}"
+        "POLLING": "{{issueProviderName}}: Polling Changes for {{issuesStr}}"
       }
     },
     "JIRA": {

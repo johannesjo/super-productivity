@@ -7,14 +7,12 @@ import { concatMap, filter, first, map, switchMap, takeUntil, tap } from 'rxjs/o
 import { IssueService } from '../../../issue.service';
 import { forkJoin, Observable, timer } from 'rxjs';
 import { Task, TaskWithSubTasks } from 'src/app/features/tasks/task.model';
-import { T } from '../../../../../t.const';
 import { WorkContextService } from '../../../../work-context/work-context.service';
 import { CALDAV_TYPE } from '../../../issue.const';
 import { IssueEffectHelperService } from '../../../issue-effect-helper.service';
 import { CALDAV_INITIAL_POLL_DELAY, CALDAV_POLL_INTERVAL } from '../caldav.const';
 import { isCaldavEnabled } from '../is-caldav-enabled.util';
 import { CaldavClientService } from '../caldav-client.service';
-import { CaldavIssueReduced } from './caldav-issue.model';
 import { CaldavCfg } from '../caldav.model';
 import { updateTask } from '../../../../tasks/store/task.actions';
 
@@ -66,25 +64,11 @@ export class CaldavIssueEffects {
                 // NOTE: required otherwise timer stays alive for filtered actions
                 takeUntil(this._issueEffectHelperService.pollToBacklogActions$),
                 tap(() => console.log('CALDAV_POLL_BACKLOG_CHANGES')),
-                switchMap(() =>
-                  forkJoin([
-                    this._caldavClientService.getOpenTasks$(caldavCfg),
-                    this._taskService.getAllIssueIdsForProject(
-                      pId,
-                      CALDAV_TYPE,
-                    ) as Promise<string[]>,
-                  ]),
-                ),
-                tap(
-                  ([issues, allTaskCaldavIssueIds]: [CaldavIssueReduced[], string[]]) => {
-                    const issuesToAdd = issues.filter(
-                      (issue) => !allTaskCaldavIssueIds.includes(issue.id),
-                    );
-                    console.log('issuesToAdd', issuesToAdd);
-                    if (issuesToAdd?.length) {
-                      this._importNewIssuesToBacklog(pId, issuesToAdd);
-                    }
-                  },
+                tap(() =>
+                  this._issueService.checkAndImportNewIssuesToBacklogForProject(
+                    CALDAV_TYPE,
+                    pId,
+                  ),
                 ),
               ),
             ),
@@ -146,39 +130,7 @@ export class CaldavIssueEffects {
 
   private _refreshIssues(caldavTasks: TaskWithSubTasks[]): void {
     if (caldavTasks && caldavTasks.length > 0) {
-      this._snackService.open({
-        msg: T.F.CALDAV.S.POLLING,
-        svgIco: 'caldav',
-        isSpinner: true,
-      });
       this._issueService.refreshIssues(caldavTasks);
-    }
-  }
-
-  private _importNewIssuesToBacklog(
-    projectId: string,
-    issuesToAdd: CaldavIssueReduced[],
-  ): void {
-    issuesToAdd.forEach((issue) => {
-      this._issueService.addTaskWithIssue(CALDAV_TYPE, issue, projectId, true);
-    });
-
-    if (issuesToAdd.length === 1) {
-      this._snackService.open({
-        ico: 'cloud_download',
-        translateParams: {
-          issueText: issuesToAdd[0].summary,
-        },
-        msg: T.F.CALDAV.S.IMPORTED_SINGLE_ISSUE,
-      });
-    } else if (issuesToAdd.length > 1) {
-      this._snackService.open({
-        ico: 'cloud_download',
-        translateParams: {
-          issuesLength: issuesToAdd.length,
-        },
-        msg: T.F.CALDAV.S.IMPORTED_MULTIPLE_ISSUES,
-      });
     }
   }
 

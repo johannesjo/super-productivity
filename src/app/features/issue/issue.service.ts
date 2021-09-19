@@ -233,6 +233,17 @@ export class IssueService {
     }
 
     for (const issuesType of Object.keys(tasksIssueIdsByIssueType)) {
+      this._snackService.open({
+        svgIco: issueProviderIconMap[issuesType as IssueProviderKey],
+        msg: T.F.ISSUE.S.POLLING,
+        isSpinner: true,
+        translateParams: {
+          issueProviderName: ISSUE_PROVIDER_HUMANIZED[issuesType as IssueProviderKey],
+          // TODO add open project case Work Packages
+          issuesStr: this._translateService.instant(T.F.ISSUE.DEFAULT.ISSUES_STR),
+        },
+      });
+
       const updates: {
         task: Task;
         taskChanges: Partial<Task>;
@@ -258,7 +269,7 @@ export class IssueService {
             msg: T.F.ISSUE.S.ISSUE_UPDATE_SINGLE,
             translateParams: {
               issueProviderName: ISSUE_PROVIDER_HUMANIZED[issuesType as IssueProviderKey],
-              // TODO add open project case
+              // TODO add open project case Work Packages
               issueStr: this._translateService.instant(T.F.ISSUE.DEFAULT.ISSUE_STR),
               issueTitle: updates[0].taskChanges.title || updates[0].task.title,
             },
@@ -269,7 +280,7 @@ export class IssueService {
             msg: T.F.ISSUE.S.ISSUE_UPDATE_MULTIPLE,
             translateParams: {
               issueProviderName: ISSUE_PROVIDER_HUMANIZED[issuesType as IssueProviderKey],
-              // TODO add open project case
+              // TODO add open project case Work Packages
               issuesStr: this._translateService.instant(T.F.ISSUE.DEFAULT.ISSUES_STR),
               nr: updates.length,
             },

@@ -125,6 +125,14 @@ export class CaldavCommonInterfacesService implements IssueServiceInterface {
     );
   }
 
+  async getNewIssuesToAddToBacklog(
+    projectId: string,
+    allExistingIssueIds: number[] | string[],
+  ): Promise<CaldavIssueReduced[]> {
+    const cfg = await this._getCfgOnce$(projectId).toPromise();
+    return await this._caldavClientService.getOpenTasks$(cfg).toPromise();
+  }
+
   private _getCfgOnce$(projectId: string): Observable<CaldavCfg> {
     return this._projectService.getCaldavCfgForProject$(projectId).pipe(first());
   }
