@@ -1,5 +1,6 @@
 {
   "APP": {
+    "A_BROWSER_WARNING": "Üzgünüz, ancak uygulama bu tarayıcıda çalışacak şekilde optimize edilmedi. Lütfen krom tabanlı bir tarayıcı kullanmayı veya uygulamanın elektron sürümünü indirmeyi düşünün.",
     "B_INSTALL": {
       "IGNORE": "Aldırmamak",
       "INSTALL": "kurmak",
@@ -19,7 +20,9 @@
   "CONFIRM": {
     "AUTO_FIX": "Verileriniz zarar görmüş görünüyor. Otomatik olarak düzeltmeyi denemek ister misiniz? Bu, kısmi veri kaybına neden olabilir.",
     "DELETE_STRAY_BACKUP": "Bu iletişim kutusunu görmemek için arka tarafı silmek istiyor musunuz?",
+    "RELOAD_AFTER_IDB_ERROR": "Veritabanına erişilemiyor :( Olası nedenler, arka planda uygulama güncellemesi veya düşük disk alanıdır. Uygulamayı yeniden yüklemek için Tamam'a basın (bazı platformlarda uygulamanın manuel olarak yeniden başlatılması gerekebilir).",
     "RESTORE_FILE_BACKUP": "VERİ YOK gibi görünüyor, ancak \"{{dir}}\" adresinde yedeklemeler var. En son yedeklemeyi {{from}}kaynağından geri yüklemek istiyor musunuz?",
+    "RESTORE_FILE_BACKUP_ANDROID": "HİÇBİR VERİ yok gibi görünüyor, ancak bir yedek mevcut. Yüklemek istiyor musun?",
     "RESTORE_STRAY_BACKUP": "Son senkronizasyon sırasında bazı hatalar olabilir. Son yedeği geri yüklemek istiyor musunuz?"
   },
   "DATETIME_INPUT": {
@@ -106,14 +109,7 @@
       "S": {
         "CALENDAR_NOT_FOUND": "CalDav: \"{{calendarName}}\" takvimi bulunamadı",
         "CALENDAR_READ_ONLY": "CalDav: \"{{calendarName}}\" takvimi salt okunur",
-        "ERR_NETWORK": "CalDav: İstemci tarafı ağ hatası nedeniyle istek başarısız oldu",
-        "ERR_NOT_CONFIGURED": "CalDav: Düzgün yapılandırılmamış",
-        "IMPORTED_MULTIPLE_ISSUES": "calDav: Git'ten biriktirme listesine {{issuesLength}} yeni sorun aktarıldı",
-        "IMPORTED_SINGLE_ISSUE": "CalDav: \"{{issueText}}\" sorunu biriktirme listesine aktarıldı",
-        "ISSUE_NOT_FOUND": "CalDav: Yapılacak \"{{issueId}}\" sunucuda silinmiş görünüyor.",
-        "ISSUE_NO_UPDATE_REQUIRED": "CalDav: Güncelleme gerekmez.",
-        "ISSUE_UPDATE": "Caldav: \"{{issueText}}\" için değiştirilmiş veriler",
-        "POLLING": "Caldav: Todos için yoklama değişiklikleri"
+        "ISSUE_NOT_FOUND": "CalDav: Yapılacak \"{{issueId}}\" sunucuda silinmiş görünüyor."
       }
     },
     "CONFIG": {
@@ -126,6 +122,7 @@
         "ACCESS_TOKEN_ERROR": "Dropbox: Yetkilendirme Kodundan Erişim Simgesi oluşturulamıyor",
         "ACCESS_TOKEN_GENERATED": "Dropbox: Yetkilendirme Kodundan oluşturulan Erişim Simgesi",
         "AUTH_ERROR": "Dropbox: Geçersiz erişim belirteci sağlandı",
+        "AUTH_ERROR_ACTION": "Jeton Değiştir",
         "OFFLINE": "Dropbox: Senkronize edilemiyor, çünkü çevrimdışı",
         "SYNC_ERROR": "Dropbox: Senkronizasyon sırasında hata"
       }
@@ -158,19 +155,7 @@
         "WRITE_A_COMMENT": "Bir yorum Yaz"
       },
       "S": {
-        "ERR_NETWORK": "GitHub: İstemci tarafı ağ hatası nedeniyle istek başarısız oldu",
-        "ERR_NOT_CONFIGURED": "GitHub: Düzgün yapılandırılmamış",
-        "ERR_UNKNOWN": "GitHub: Bilinmeyen hata {{statusCode}} {{errorMsg}}",
-        "IMPORTED_MULTIPLE_ISSUES": "GitHub: Git'ten backlog'a {{issuesLength}} yeni sayı alındı",
-        "IMPORTED_SINGLE_ISSUE": "GitHub: Git'ten backlog'a \"{{issueText}}\" sorunu alındı",
-        "ISSUE_DELETED_OR_CLOSED": "GitHub: Sorun \"{{issueText}}\", halindeyken silinmiş veya kapatılmış görünüyor",
-        "ISSUE_NO_UPDATE_REQUIRED": "GitHub: Güncelleme gerekmez",
-        "ISSUE_UPDATE": "GitHub: \"{{issueText}}\" için güncellenmiş veriler",
-        "MANUAL_UPDATE_ISSUE_SUCCESS": "GitHub: \"{{issueText}}\" için güncellenmiş veriler",
-        "MISSING_ISSUE_DATA": "GitHub: Eksik sayı verisi olan görevler bulundu. Yeniden yükleniyor.",
-        "NEW_COMMENT": "GitHub: \"{{issueText}}\" için yeni yorum",
-        "POLLING": "GitHub: Sorunların Sorgulanması Değişiklikleri",
-        "SHOW_ISSUE_BTN": "Göster bana"
+        "ERR_UNKNOWN": "GitHub: Bilinmeyen hata {{statusCode}} {{errorMsg}}"
       }
     },
     "GITLAB": {
@@ -201,19 +186,7 @@
         "WRITE_A_COMMENT": "Bir yorum Yaz"
       },
       "S": {
-        "ERR_NETWORK": "GitLab: İstemci tarafı ağ hatası nedeniyle istek başarısız oldu",
-        "ERR_NOT_CONFIGURED": "GitLab: Düzgün yapılandırılmamış",
-        "ERR_UNKNOWN": "GitLab: Bilinmeyen hata {{statusCode}} {{errorMsg}}",
-        "IMPORTED_MULTIPLE_ISSUES": "GitLab: Git'ten backlog'a {{issuesLength}} yeni sayı alındı",
-        "IMPORTED_SINGLE_ISSUE": "GitLab: Git'ten backlog'a \"{{issueText}}\" sorunu alındı",
-        "ISSUE_DELETED_OR_CLOSED": "GitLab: Sorun \"{{issueText}}\", halindeyken silinmiş veya kapatılmış görünüyor",
-        "ISSUE_NO_UPDATE_REQUIRED": "GitLab: Güncelleme gerekmez",
-        "ISSUE_UPDATE": "GitLab: \"{{issueText}}\" için güncellenmiş veriler",
-        "MANUAL_UPDATE_ISSUE_SUCCESS": "GitLab: \"{{issueText}}\" için güncellenmiş veriler",
-        "MISSING_ISSUE_DATA": "GitLab: Eksik sayı verisi olan görevler bulundu. Yeniden yükleniyor.",
-        "NEW_COMMENT": "GitLab: \"{{issueText}}\" için yeni yorum",
-        "POLLING": "GitLab: Sorunların Sorgulanması Değişiklikleri",
-        "SHOW_ISSUE_BTN": "Göster bana"
+        "ERR_UNKNOWN": "GitLab: Bilinmeyen hata {{statusCode}} {{errorMsg}}"
       }
     },
     "GOOGLE": {
@@ -234,6 +207,27 @@
         "ERR_NO_FILE_ID": "GoogleApi: Belirtilen dosya kimliği yok",
         "ERR_NO_FILE_NAME": "GoogleApi: Belirtilen dosya adı yok",
         "SUCCESS_LOGIN": "GoogleApi: Giriş başarılı"
+      }
+    },
+    "ISSUE": {
+      "DEFAULT": {
+        "ISSUES_STR": "Sorunlar",
+        "ISSUE_STR": "Konu"
+      },
+      "S": {
+        "ERR_NETWORK": "{{issueProviderName}}: İstemci tarafı ağ hatası nedeniyle istek başarısız oldu",
+        "ERR_NOT_CONFIGURED": "{{issueProviderName}}: Düzgün yapılandırılmamış",
+        "IMPORTED_MULTIPLE_ISSUES": "{{issueProviderName}}: {{nr}} yeni {{issuesStr}} biriktirme listesine aktarıldı",
+        "IMPORTED_SINGLE_ISSUE": "{{issueProviderName}}: {{issueStr}} \"{{issueTitle}}\" biriktirme listesine aktarıldı",
+        "ISSUE_DELETED_OR_CLOSED": "{{issueProviderName}}: {{issueStrC}} \"{{issueTitle}}\" silinmiş veya kapatılmış görünüyor",
+        "ISSUE_NO_UPDATE_REQUIRED": "{{issueProviderName}}: Güncelleme gerekli değil",
+        "ISSUE_UPDATE_MULTIPLE": "{{issueProviderName}}: {{nr}} {{issuesStr}}için güncellenmiş veriler",
+        "ISSUE_UPDATE_SINGLE": "{{issueProviderName}}: \"{{issueTitle}}\" için güncellenmiş veriler",
+        "MANUAL_UPDATE_ISSUE_SUCCESS": "{{issueProviderName}}: \"{{issueTitle}}\" için güncellenmiş veriler",
+        "MISSING_ISSUE_DATA": "{{issueProviderName}}: Eksik {{issueStr}} verisi bulunan görevler bulundu. Yeniden yükleniyor.",
+        "NEW_COMMENT": "{{issueProviderName}}: \"{{issueTitle}}\" için yeni yorum",
+        "POLLING_BACKLOG": "{{issueProviderName}}: Yeni {{issuesStr}}için anket",
+        "POLLING_CHANGES": "{{issueProviderName}}: {{issuesStr}}için Anket Değişiklikleri"
       }
     },
     "JIRA": {
@@ -266,6 +260,7 @@
         "CHOOSE_STATUS": "Atanacak durumu seçin",
         "CURRENT_ASSIGNEE": "Güncel Görevli:",
         "CURRENT_STATUS": "Şu anki durum:",
+        "TASK_NAME": "Görev adı:",
         "TITLE": "Jira: Güncelleme Durumu",
         "UPDATE_STATUS": "Güncelleme durumu"
       },
@@ -298,6 +293,7 @@
         "HOST": "Ev sahibi (örneğin: http://my-host.de:1234)",
         "PASSWORD": "Jeton / Şifre",
         "USER_NAME": "Email / Kullanıcı Adı",
+        "USE_PAT": "Şifre yerine Kişisel Erişim Simgesi kullanın",
         "WONKY_COOKIE_MODE": "Wonky Cookie Yedek Kimlik Doğrulaması (yalnızca masaüstü uygulaması)"
       },
       "FORM_SECTION": {
@@ -337,16 +333,13 @@
       "S": {
         "ADDED_WORKLOG_FOR": "Jira: {{issueKey}}için çalışma grubu eklendi",
         "EXTENSION_NOT_LOADED": "Süper Verimlilik Uzantısı yüklenmedi. Sayfayı yeniden yüklemek yardımcı olabilir",
-        "IMPORTED_MULTIPLE_ISSUES": "Jira: {{issuesLength}} 'a jira'dan backlog'a yeni sayı aktarıldı",
-        "IMPORTED_SINGLE_ISSUE": "Jira: Jira'dan backlog'a ithal edilen \"{{issueText}}\" sayısı",
         "INSUFFICIENT_SETTINGS": "Jira için Yetersiz Ayarlar",
+        "INVALID_RESPONSE": "Jira: Yanıt geçersiz veriler içeriyor",
         "ISSUE_NO_UPDATE_REQUIRED": "Jira: \"{{issueText}}\" zaten güncel",
-        "ISSUE_UPDATE": "Jira: \"{{issueText}}\" için güncellenmiş veriler",
         "MANUAL_UPDATE_ISSUE_SUCCESS": "Jira: \"{{issueText}}\" için güncellenmiş veriler",
         "MISSING_ISSUE_DATA": "Jira: Eksik sayı verisi olan görevler bulundu. Yeniden yükleniyor.",
         "NO_AUTO_IMPORT_JQL": "Jira: Otomatik içe aktarma için tanımlanmış arama sorgusu yok",
         "NO_VALID_TRANSITION": "Jira: Geçerli bir geçiş yapılandırılmadı",
-        "POLLING": "Jira: Sorunları Sorgulama Değişiklikleri",
         "TIMED_OUT": "Jira: İstek zaman aşımına uğradı",
         "TRANSITION": "Jira: \"{{issueKey}}\" sayısını \"{{name}}\" olarak ayarla",
         "TRANSITIONS_LOADED": "Jira: Geçişler yüklendi. Bunları atamak için aşağıdaki seçimleri kullanın",
@@ -378,6 +371,9 @@
         "MOOD_PRODUCTIVITY_OVER_TIME": "Zaman içinde ruh hali ve verimlilik",
         "NO_ADDITIONAL_DATA_YET": "Henüz ek veri toplanmadı. Bunu yapmak için günlük değerlendirme \"Değerlendirme\" panelindeki formu kullanın.",
         "OBSTRUCTION_SELECTION_COUNT": "Engelleyici bir faktörün seçilme sayısı",
+        "SIMPLE_CLICK_COUNTERS_OVER_TIME": "Zamanla Sayaçlar'ı tıklayın",
+        "SIMPLE_COUNTERS": "Basit Sayaçlar",
+        "SIMPLE_STOPWATCH_COUNTERS_OVER_TIME": "Zaman içinde kronometre Sayaçları",
         "TASKS_DONE_CREATED": "Görevler (yapıldı / oluşturuldu)",
         "TIME_ESTIMATED": "Tahmini Süre",
         "TIME_SPENT": "Harcanan zaman"
@@ -404,22 +400,10 @@
       }
     },
     "NOTE": {
-      "ADD_REMINDER": "Hatırlatıcı ekle",
       "D_ADD": {
-        "DATETIME_LABEL": "Hatırlatıcı için Datetime (isteğe bağlı)",
         "NOTE_LABEL": "Not olarak kaydetmek için bir metin girin ..."
       },
-      "D_ADD_REMINDER": {
-        "E_ENTER_TITLE": "Bir başlık girmeniz gerekiyor",
-        "L_DATETIME": "Hatırlatıcı için Datetime",
-        "L_TITLE": "Bildirimin başlığı"
-      },
-      "D_VIEW_REMINDER": {
-        "SNOOZE": "Erteleme",
-        "TITLE": "not"
-      },
       "EDIT_FULLSCREEN": "Tam ekranda düzenle",
-      "EDIT_REMINDER": "Hatırlatıcıyı düzenle",
       "NOTES_CMP": {
         "ADD_BTN": "Yeni not ekle",
         "DROP_TO_ADD": "Yeni not eklemek için buraya bırakın"
@@ -427,14 +411,41 @@
       "NOTE_CMP": {
         "DISABLE_PARSE": "Marka aşağı ayrıştırmayı devre dışı bırak",
         "ENABLE_PARSE": "Markdown ayrıştırmayı etkinleştir"
+      }
+    },
+    "OPEN_PROJECT": {
+      "DIALOG_INITIAL": {
+        "TITLE": "OpenProject for Project Kurulumu"
       },
-      "REMOVE_REMINDER": "Hatırlatıcıyı kaldır",
+      "FORM": {
+        "FILTER_USER": "Kullanıcı adı (örneğin, değişiklikleri kendiniz filtrelemek için)",
+        "HOST": "Ana bilgisayar (ör.: https://www.openproject.org/)",
+        "IS_AUTO_ADD_TO_BACKLOG": "Çözümlenmemiş iş paketlerini OpenProject'ten biriktirme listesine otomatik olarak ekleyin",
+        "IS_AUTO_POLL": "Değişiklikler için içe aktarılan OpenProject iş paketlerini otomatik olarak yokla",
+        "IS_SEARCH_ISSUES_FROM_OPEN_PROJECT": "Yeni görevler eklerken iş paketlerini öneri olarak göster",
+        "PROJECT_ID": "Proje Kimliği",
+        "PROJECT_ID_DESCRIPTION": "Projeyi Tarayıcıda görüntülerken url'nin bir parçası olarak bulunabilir.",
+        "TOKEN": "Erişim Simgesi"
+      },
+      "FORM_SECTION": {
+        "HELP": "<p>Burada SuperProductivity'yi açık OpenProject iş paketlerini listeleyecek şekilde yapılandırabilirsiniz. Lütfen bunun tarayıcıda çalışması için, app.super-productivity.com adresinden erişime izin vermek üzere OpenProject sunucunuz için CORS'u yapılandırmanız gerektiğini unutmayın</p>",
+        "TITLE": "OpenProject"
+      },
+      "ISSUE_CONTENT": {
+        "ASSIGNEE": "vekil",
+        "DESCRIPTION": "Açıklama",
+        "MARK_AS_CHECKED": "Güncellemeleri işaretli olarak işaretle",
+        "STATUS": "durum",
+        "SUMMARY": "özet",
+        "TYPE": "tip"
+      },
+      "ISSUE_STRINGS": {
+        "ISSUES_STR": "iş paketleri",
+        "ISSUE_STR": "calisma paketi"
+      },
       "S": {
-        "ADDED_REMINDER": "Not için hatırlatıcı eklendi",
-        "DELETED_REMINDER": "Not için silinen hatırlatıcı",
-        "UPDATED_REMINDER": "Not için güncellenmiş hatırlatıcı"
-      },
-      "UPDATE_REMINDER": "Güncellemeyi hatırlat"
+        "ERR_UNKNOWN": "OpenProject: Bilinmeyen hata {{statusCode}} {{errorMsg}}. CORS, sunucu için uygun şekilde yapılandırılmış mı?"
+      }
     },
     "POMODORO": {
       "BACK_TO_WORK": "İşe geri dön!",
@@ -529,8 +540,20 @@
         "UPDATED": "Güncellenen proje ayarları"
       }
     },
+    "QUICK_HISTORY": {
+      "NO_DATA": "Cari yıl için veri yok",
+      "PAGE_TITLE": "Hızlı Geçmiş",
+      "WEEK_TITLE": " {{nr}} . Hafta ({{timeSpent}})"
+    },
     "REMINDER": {
       "S_REMINDER_ERR": "Hatırlatma arayüzü hatası"
+    },
+    "SEARCH_BAR": {
+      "INFO": "Arşivlenmiş görevleri aramak için liste simgesine tıklayın",
+      "INFO_ARCHIVED": "Normal görevleri aramak için arşiv simgesine tıklayın",
+      "PLACEHOLDER": "Görev veya görev tanımını arayın",
+      "PLACEHOLDER_ARCHIVED": "Arşivlenmiş görevleri arayın",
+      "TOO_MANY_RESULTS": "Çok fazla sonuç, lütfen aramanızı daraltın"
     },
     "SIMPLE_COUNTER": {
       "D_CONFIRM_REMOVE": {
@@ -585,14 +608,15 @@
       },
       "FORM": {
         "DROPBOX": {
-          "B_GENERATE_TOKEN": "Jeton Oluştur",
-          "FOLLOW_LINK": "Lütfen aşağıdaki bağlantıyı açın ve orada verilen kimlik doğrulama kodunu giriş alanına kopyalayın.",
-          "L_ACCESS_TOKEN": "Erişim Simgesi (Kimlik Doğrulama Kodundan üretilir)",
-          "L_AUTH_CODE": "Doğrulama kodu"
+          "L_ACCESS_TOKEN": "Erişim Simgesi (Kimlik Doğrulama Kodundan üretilir)"
         },
         "GOOGLE": {
           "L_IS_COMPRESS_DATA": "Veriyi Sıkıştır",
           "L_SYNC_FILE_NAME": "Dosya adını senkronize et"
+        },
+        "LOCAL_FILE": {
+          "L_SYNC_FILE_PATH": "Dosya Yolunu Senkronize Et",
+          "L_SYNC_FILE_PATH_DESCRIPTION": "Senkronizasyon için kullanılması gereken (oluşturulacak) dosyanın mutlak yolu."
         },
         "L_ENABLE_SYNCING": "Eşitlemeyi Etkinleştir",
         "L_SYNC_INTERVAL": "Senkron aralığı",
@@ -613,6 +637,7 @@
         "INCOMPLETE_CFG": "Senkronizasyon için kimlik doğrulama başarısız oldu. Lütfen Yapılandırmanızı kontrol edin!",
         "INITIAL_SYNC_ERROR": "İlk Senkronizasyon başarısız oldu",
         "SUCCESS_IMPORT": "Alınan veri",
+        "SUCCESS_VIA_BUTTON": "Veriler başarıyla senkronize edildi",
         "UNKNOWN_ERROR": "Senkronizasyon sırasında bilinmeyen hata. Lütfen konsolu kontrol edin.",
         "UPLOAD_ERROR": "Bilinmeyen Yükleme Hatası (Ayarlar doğru mu?): {{err}}"
       }
@@ -658,8 +683,10 @@
       "ADD_TASK_BAR": {
         "ADD_EXISTING_TASK": "Mevcut \"{{taskTitle}}\" görevini ekle",
         "ADD_ISSUE_TASK": " {{issueType}}kaynaklı{{issueNr}} numaralı sorunu ekleyin",
-        "ADD_TASK": "Görev ekle",
-        "ADD_TASK_TO_BACKLOG": "İş gününe görev ekle",
+        "ADD_TASK_TO_BOTTOM_OF_BACKLOG": "İş listesinin altına görev ekle",
+        "ADD_TASK_TO_BOTTOM_OF_TODAY": "Listenin en altına görev ekle",
+        "ADD_TASK_TO_TOP_OF_BACKLOG": "Biriktirme listesinin en üstüne görev ekle",
+        "ADD_TASK_TO_TOP_OF_TODAY": "Listenin başına görev ekle",
         "CREATE_TASK": "Yeni görev oluştur",
         "EXAMPLE": "Örnek: \"Bazı görev başlığı + projeAdı # bazı etiket # bazı diğer etiket 10a / 3sa\"",
         "START": "Başlamak için bir kez daha enter tuşuna basın"
@@ -698,9 +725,12 @@
         "UPDATE_ISSUE_DATA": "Sorun verilerini güncelle"
       },
       "D_REMINDER_ADD": {
+        "CONFIRM_REPEAT_OK": "program",
+        "CONFIRM_REPEAT_TXT": "Bu tekrarlanan görevi başka bir güne planlamaya çalışıyorsunuz. Tekrarlanan görevler genellikle belirli günlerde yeniden oluşturulur ve yalnızca o gün planlanır. Yine de devam etmek istiyor musun?",
         "DATETIME_FOR": "Hatırlatıcı için Datetime",
         "EDIT": "Hatırlatıcıyı düzenle",
         "MOVE_TO_BACKLOG": "Zamanlanana kadar görevi günlüğe kaydetme",
+        "REMIND_AT": "Şurada hatırlat:",
         "RO_10M": "Başlamadan 10 dakika önce",
         "RO_15M": "Başlamadan 15 dakika önce",
         "RO_1H": "Başlamadan 1 saat önce",
@@ -715,6 +745,7 @@
         "ADD_TO_TODAY": "Bugüne ekle",
         "DISMISS": "Hatırlatmayı Sil",
         "DISMISS_ALL": "Hepsini reddet",
+        "DONE": "tamam",
         "DUE_TASK": "Son görev",
         "DUE_TASKS": "Teslim edilecek görevler",
         "FOR_CURRENT": "Görev kaynaklanmaktadır. Üzerinde çalışmaya başlamak ister misiniz?",
@@ -784,7 +815,11 @@
         "FRIDAY": "Cuma",
         "IS_ADD_TO_BOTTOM": "Görevi listenin altına taşı",
         "MONDAY": "Pazartesi",
+        "REMIND_AT": "Şurada hatırlat:",
+        "REMIND_AT_PLACEHOLDER": "Ne zaman hatırlatılacağını seçin",
         "SATURDAY": "Cumartesi",
+        "START_TIME": "Planlanan başlangıç zamanı",
+        "START_TIME_DESCRIPTION": "Örneğin. 15:00. Tüm gün süren bir görev için boş bırakın",
         "SUNDAY": "Pazar",
         "THURSDAY": "Perşembe",
         "TITLE": "Görev Başlığı",
@@ -802,7 +837,8 @@
       "MENU_TITLE": "Zaman çizelgesi",
       "NOW": "şimdi",
       "NO_TASKS": "Şu anda görev yok. Lütfen üst çubuktaki + Düğmesi aracılığıyla bazı görevler ekleyin.",
-      "START": "İş Başlangıcı"
+      "START": "İş Başlangıcı",
+      "TASK_PROJECTION_INFO": "Zamanlanmış tekrarlanabilir bir görevin gelecek projeksiyonu"
     },
     "TIME_TRACKING": {
       "B": {
@@ -817,6 +853,11 @@
         "BREAK": "mola",
         "CREATE_AND_TRACK": "<em></em> oluşturun ve takip edin:",
         "IDLE_FOR": "Boşta kaldınız:",
+        "SIMPLE_CONFIRM_COUNTER_CANCEL": "atlamak",
+        "SIMPLE_CONFIRM_COUNTER_OK": "Izlemek",
+        "SIMPLE_COUNTER_CONFIRM_TXT": "Atlamayı seçtiniz, ancak {{nr}} basit sayaç düğmesini etkinleştirdiniz. Onlara boşta kalma süresini izlemek istiyor musunuz?",
+        "SIMPLE_COUNTER_TOOLTIP": " {{title}}için takip etmek için tıklayın",
+        "SIMPLE_COUNTER_TOOLTIP_DISABLE": " {{title}}TAKİP ETMEMEK için tıklayın",
         "SKIP": "atlamak",
         "TASK": "görev",
         "TASK_BREAK": "Görev Arası",
@@ -965,6 +1006,7 @@
       "OPEN_PROJECT_NOTES": "Proje Notlarını Göster / Gizle",
       "SELECT_NEXT_TASK": "Sonraki görevi seç",
       "SELECT_PREVIOUS_TASK": "Önceki Görevi Seç",
+      "SHOW_SEARCH_BAR": "Arama çubuğunu göster",
       "SYSTEM_SHORTCUTS": "Global Kısayollar (sistem genelinde)",
       "TASK_ADD_SUB_TASK": "Alt Görev ekle",
       "TASK_DELETE": "Görevi Sil",
@@ -1054,6 +1096,7 @@
       "MESSAGE": "Bir ara mesajı al",
       "MIN_WORKING_TIME": "Tetiksiz, X'in bir olmadan çalıştıktan sonra bir mola bildirimi almasını sağlar",
       "MOTIVATIONAL_IMG": "Motivasyonel resim (web url'si)",
+      "SNOOZE_TIME": "Mola vermeniz istendiğinde zamanı erteleme",
       "TITLE": "Hatırlatma Arası"
     },
     "TIMELINE": {
@@ -1075,7 +1118,10 @@
   "GLOBAL_SNACK": {
     "COPY_TO_CLIPPBOARD": "Panoya kopyalandı",
     "ERR_COMPRESSION": "Sıkıştırma arayüzü için hata",
+    "FILE_DOWNLOADED": "{{fileName}} indirildi",
+    "FILE_DOWNLOADED_BTN": "Açık dosya",
     "PERSISTENCE_DISALLOWED": "Veri kalıcı olarak sürdürülmeyecek. Bunun veri kaybına neden olabileceğini unutmayın!",
+    "PERSISTENCE_ERROR": "Verilerin kalıcı hale getirilmesi istenirken hata oluştu: {{err}}",
     "RUNNING_X": "\"{{str}}\" çalıştırılıyor.",
     "SHORTCUT_WARN_OPEN_BOOKMARKS_FROM_TAG": "{{keyCombo}} basıldı, ancak yer imlerini aç kısayolu yalnızca proje bağlamındayken kullanılabilir.",
     "SHORTCUT_WARN_OPEN_NOTES_FROM_TAG": "{{keyCombo}} basılı, ancak açık notlar kısayolu yalnızca proje bağlamındayken kullanılabilir."
@@ -1107,8 +1153,10 @@
     "PROJECTS": "Projeler",
     "PROJECT_MENU": "Proje Menüsü",
     "PROJECT_SETTINGS": "Proje ayarları",
+    "QUICK_HISTORY": "Hızlı Geçmiş",
     "SCHEDULED": "tarifeli",
     "SETTINGS": "ayarlar",
+    "SHOW_SEARCH_BAR": "Arama çubuğunu göster",
     "TAGS": "Etiketler",
     "TASKS": "Görevler",
     "TASK_LIST": "Görev listesi",
@@ -1127,6 +1175,7 @@
       "MSG": "Sen iş bitti Eve gitme zamanı!",
       "OK": "Hay hay! Kapat!"
     },
+    "ESTIMATE_TOTAL": "Toplam tahmin:",
     "EVALUATION": "Değerlendirme",
     "EXPORT_TASK_LIST": "Görev Listesini Dışa Aktar",
     "NO_TASKS": "Bu gün için görev yok",
@@ -1176,6 +1225,7 @@
     "GITLAB_CONFIGURED": "GitLab Entegrasyonu Yapılandırıldı",
     "IMPORT_FROM_FILE": "Dosyadan içe aktar",
     "JIRA_CONFIGURED": "Jira Entegrasyonu Yapılandırıldı",
+    "OPEN_PROJECT_CONFIGURED": "OpenProject Entegrasyonu Yapılandırıldı",
     "S_INVALID_JSON": "Proje dosyası için geçersiz json",
     "TITLE": "Projeye Genel Bakış",
     "UN_ARCHIVE_PROJECT": "Silahsız Proje"

@@ -1,5 +1,6 @@
 {
   "APP": {
+    "A_BROWSER_WARNING": "죄송합니다. 앱이 이 브라우저에서 실행되도록 최적화되어 있지 않습니다. 크롬 기반 브라우저를 사용하거나 앱의 전자 버전을 다운로드하는 것을 고려하십시오.",
     "B_INSTALL": {
       "IGNORE": "무시",
       "INSTALL": "설치",
@@ -19,7 +20,9 @@
   "CONFIRM": {
     "AUTO_FIX": "데이터가 손상된 것 같습니다. 자동으로 수정 하시겠습니까? 이로 인해 데이터가 부분적으로 손실 될 수 있습니다.",
     "DELETE_STRAY_BACKUP": "이 대화 상자가 표시되지 않도록 뒷면을 삭제 하시겠습니까?",
+    "RELOAD_AFTER_IDB_ERROR": "데이터베이스에 액세스할 수 없음:(가능한 원인은 백그라운드에서 앱 업데이트 또는 디스크 공간 부족입니다. 앱을 다시 로드하려면 확인을 누르십시오(일부 플랫폼에서는 앱을 수동으로 다시 시작해야 할 수 있음).",
     "RESTORE_FILE_BACKUP": "데이터가없는 것 같지만 \"{{dir}}\"에서 사용 가능한 백업이 있습니다. {{from}}에서 최신 백업을 복원 하시겠습니까?",
+    "RESTORE_FILE_BACKUP_ANDROID": "데이터가 없는 것 같지만 사용 가능한 백업이 있습니다. 로드하시겠습니까?",
     "RESTORE_STRAY_BACKUP": "마지막 동기화 중에 오류가 발생했을 수 있습니다. 마지막 백업을 복원 하시겠습니까?"
   },
   "DATETIME_INPUT": {
@@ -93,7 +96,7 @@
         "IS_TRANSITION_ISSUES_ENABLED": "작업 완료시 CalDav 할 일을 자동으로 완료"
       },
       "FORM_SECTION": {
-        "HELP": "",
+        "HELP": "<p>여기에서 일일 계획 보기의 작업 생성 패널에서 특정 프로젝트에 대해 완료되지 않은 CalDav 할 일을 나열하도록 SuperProductivity를 구성할 수 있습니다. 제안 사항으로 나열되며 할 일에 대한 링크와 이에 대한 추가 정보를 제공합니다.</p> <p>또한 완료되지 않은 모든 할 일을 작업 백로그에 자동으로 추가하고 동기화할 수 있습니다.</p><p>모바일 및 웹의 nextcloud에서 작동하도록 하려면 nextcloud 앱 <a href='https://apps.nextcloud.com/apps/webapppassword'>webapppassword<a>를 통해 \"https://app.super-productivity.com\"을 허용 목록에 추가해야 할 수 있습니다.</p>",
         "TITLE": "CalDav"
       },
       "ISSUE_CONTENT": {
@@ -106,14 +109,7 @@
       "S": {
         "CALENDAR_NOT_FOUND": "CalDav : 캘린더 \"{{calendarName}}\"을 (를) 찾을 수 없음",
         "CALENDAR_READ_ONLY": "CalDav : 캘린더 \"{{calendarName}}\"은 (는) 읽기 전용입니다.",
-        "ERR_NETWORK": "CalDav : 클라이언트 측 네트워크 오류로 인해 요청이 실패했습니다.",
-        "ERR_NOT_CONFIGURED": "CalDav : 제대로 구성되지 않음",
-        "IMPORTED_MULTIPLE_ISSUES": "calDav : git에서 백 로그로 새 문제 {{issuesLength}} 개 가져옴",
-        "IMPORTED_SINGLE_ISSUE": "CalDav : 백 로그에서 \"{{issueText}}\"문제를 가져옴",
-        "ISSUE_NOT_FOUND": "CalDav : 서버에서 할 일 \"{{issueId}}\"이 (가) 삭제 된 것 같습니다.",
-        "ISSUE_NO_UPDATE_REQUIRED": "CalDav : 업데이트가 필요하지 않습니다.",
-        "ISSUE_UPDATE": "Caldav : \"{{issueText}}\"에 대한 Uodated 데이터",
-        "POLLING": "Caldav : 할 일에 대한 폴링 변경"
+        "ISSUE_NOT_FOUND": "CalDav : 서버에서 할 일 \"{{issueId}}\"이 (가) 삭제 된 것 같습니다."
       }
     },
     "CONFIG": {
@@ -126,6 +122,7 @@
         "ACCESS_TOKEN_ERROR": "Dropbox : 인증 코드에서 액세스 토큰을 생성 할 수 없습니다",
         "ACCESS_TOKEN_GENERATED": "Dropbox : 인증 코드에서 생성 된 액세스 토큰",
         "AUTH_ERROR": "보관 용 계정 : 잘못된 액세스 토큰 제공",
+        "AUTH_ERROR_ACTION": "토큰 변경",
         "OFFLINE": "보관 용 계정 : 오프라인 상태이므로 동기화 할 수 없습니다",
         "SYNC_ERROR": "보관 용 계정 : 동기화 중 오류"
       }
@@ -158,19 +155,7 @@
         "WRITE_A_COMMENT": "의견 쓰기"
       },
       "S": {
-        "ERR_NETWORK": "GitHub : 클라이언트 측 네트워크 오류 때문에 요청하지 못했습니다.",
-        "ERR_NOT_CONFIGURED": "GitHub : 제대로 구성되지 않았습니다.",
-        "ERR_UNKNOWN": "GitHub : 알 수없는 오류 {{statusCode}} {{errorMsg}}",
-        "IMPORTED_MULTIPLE_ISSUES": "GitHub : git에서 새 백 로그로 {{issuesLength}} 개의 새 발행물을 가져 왔습니다.",
-        "IMPORTED_SINGLE_ISSUE": "GitHub : git에서 백 로그로 가져온 문제 \"{{issueText}}\"",
-        "ISSUE_DELETED_OR_CLOSED": "GitHub : git에서 \"{{issueText}}\"이 삭제되거나 닫힌 것 같습니다.",
-        "ISSUE_NO_UPDATE_REQUIRED": "GitHub : 업데이트가 필요하지 않습니다",
-        "ISSUE_UPDATE": "GitHub : \"{{issueText}}\"에 대한 데이터가 업데이트되었습니다.",
-        "MANUAL_UPDATE_ISSUE_SUCCESS": "GitHub : \"{{issueText}}\"에 대한 데이터가 업데이트되었습니다.",
-        "MISSING_ISSUE_DATA": "GitHub : 누락 된 문제 데이터가있는 작업이 발견되었습니다. 다시로드 중입니다.",
-        "NEW_COMMENT": "GitHub : \"{{issueText}}\"에 대한 새로운 설명",
-        "POLLING": "GitHub : 문제에 대한 폴링 변경 사항",
-        "SHOW_ISSUE_BTN": "보여줘"
+        "ERR_UNKNOWN": "GitHub : 알 수없는 오류 {{statusCode}} {{errorMsg}}"
       }
     },
     "GITLAB": {
@@ -201,19 +186,7 @@
         "WRITE_A_COMMENT": "의견 쓰기"
       },
       "S": {
-        "ERR_NETWORK": "GitLab : 클라이언트 측 네트워크 오류 때문에 요청하지 못했습니다.",
-        "ERR_NOT_CONFIGURED": "GitLab : 제대로 구성되지 않았습니다.",
-        "ERR_UNKNOWN": "GitLab : 알 수없는 오류 {{statusCode}} {{errorMsg}}",
-        "IMPORTED_MULTIPLE_ISSUES": "GitLab : git에서 새 백 로그로 {{issuesLength}} 개의 새 발행물을 가져 왔습니다.",
-        "IMPORTED_SINGLE_ISSUE": "GitLab : git에서 백 로그로 가져온 문제 \"{{issueText}}\"",
-        "ISSUE_DELETED_OR_CLOSED": "GitLab : git에서 \"{{issueText}}\"이 삭제되거나 닫힌 것 같습니다.",
-        "ISSUE_NO_UPDATE_REQUIRED": "GitLab : 업데이트가 필요하지 않습니다",
-        "ISSUE_UPDATE": "GitLab : \"{{issueText}}\"에 대한 데이터가 업데이트되었습니다.",
-        "MANUAL_UPDATE_ISSUE_SUCCESS": "GitLab : \"{{issueText}}\"에 대한 데이터가 업데이트되었습니다.",
-        "MISSING_ISSUE_DATA": "GitLab : 누락 된 문제 데이터가있는 작업이 발견되었습니다. 다시로드 중입니다.",
-        "NEW_COMMENT": "GitLab : \"{{issueText}}\"에 대한 새로운 설명",
-        "POLLING": "GitLab : 문제에 대한 폴링 변경 사항",
-        "SHOW_ISSUE_BTN": "보여줘"
+        "ERR_UNKNOWN": "GitLab : 알 수없는 오류 {{statusCode}} {{errorMsg}}"
       }
     },
     "GOOGLE": {
@@ -234,6 +207,27 @@
         "ERR_NO_FILE_ID": "GoogleApi : 지정된 파일 ID가 없습니다.",
         "ERR_NO_FILE_NAME": "GoogleApi : 파일 이름이 지정되지 않았습니다.",
         "SUCCESS_LOGIN": "GoogleApi : 로그인 성공"
+      }
+    },
+    "ISSUE": {
+      "DEFAULT": {
+        "ISSUES_STR": "문제",
+        "ISSUE_STR": "발행물"
+      },
+      "S": {
+        "ERR_NETWORK": "{{issueProviderName}}: 클라이언트 측 네트워크 오류로 인해 요청이 실패했습니다.",
+        "ERR_NOT_CONFIGURED": "{{issueProviderName}}: 제대로 구성되지 않음",
+        "IMPORTED_MULTIPLE_ISSUES": "{{issueProviderName}}: 백로그에 {{nr}} 개의 새 {{issuesStr}} 가져오기",
+        "IMPORTED_SINGLE_ISSUE": "{{issueProviderName}}: {{issueStr}} \"{{issueTitle}}\"을(를) 백로그로 가져왔습니다.",
+        "ISSUE_DELETED_OR_CLOSED": "{{issueProviderName}}: {{issueStrC}} \"{{issueTitle}}\"이(가) 삭제되었거나 닫힌 것 같습니다.",
+        "ISSUE_NO_UPDATE_REQUIRED": "{{issueProviderName}}: 업데이트 필요 없음",
+        "ISSUE_UPDATE_MULTIPLE": "{{issueProviderName}}: {{nr}} {{issuesStr}}에 대한 업데이트된 데이터",
+        "ISSUE_UPDATE_SINGLE": "{{issueProviderName}}: \"{{issueTitle}}\"에 대한 업데이트된 데이터",
+        "MANUAL_UPDATE_ISSUE_SUCCESS": "{{issueProviderName}}: \"{{issueTitle}}\"에 대한 업데이트된 데이터",
+        "MISSING_ISSUE_DATA": "{{issueProviderName}}: 누락된 {{issueStr}} 데이터가 있는 작업을 찾았습니다. 다시 로드 중.",
+        "NEW_COMMENT": "{{issueProviderName}}: \"{{issueTitle}}\"에 대한 새 댓글",
+        "POLLING_BACKLOG": "{{issueProviderName}}: 새 {{issuesStr}}에 대한 폴링",
+        "POLLING_CHANGES": "{{issueProviderName}}: {{issuesStr}}에 대한 폴링 변경 사항"
       }
     },
     "JIRA": {
@@ -266,6 +260,7 @@
         "CHOOSE_STATUS": "할당 할 상태 선택",
         "CURRENT_ASSIGNEE": "현재 양수인 :",
         "CURRENT_STATUS": "현재 상태:",
+        "TASK_NAME": "작업 이름:",
         "TITLE": "Jira : 업데이트 상태",
         "UPDATE_STATUS": "업데이트 상태"
       },
@@ -298,6 +293,7 @@
         "HOST": "호스트 (예 : http://my-host.de:1234)",
         "PASSWORD": "토큰 / 비밀번호",
         "USER_NAME": "이메일 / 사용자 이름",
+        "USE_PAT": "비밀번호 대신 개인 액세스 토큰 사용",
         "WONKY_COOKIE_MODE": "Wonky Cookie Fallback Authentication (데스크톱 앱만 해당)"
       },
       "FORM_SECTION": {
@@ -337,16 +333,13 @@
       "S": {
         "ADDED_WORKLOG_FOR": "Jira : {{issueKey}}에 대한 작업 기록 추가됨",
         "EXTENSION_NOT_LOADED": "Super Productivity Extension이로드되지 않았습니다. 페이지를 새로 고침하면 도움이 될 수 있습니다.",
-        "IMPORTED_MULTIPLE_ISSUES": "Jira : jira에서 백 로그로 새 { {{issuesLength}} 개의 이슈를 가져 왔습니다.",
-        "IMPORTED_SINGLE_ISSUE": "Jira : jira에서 백 로그로 가져온 문제 \"{{issueText}}\"",
         "INSUFFICIENT_SETTINGS": "Jira에 대한 설정이 충분하지 않음",
+        "INVALID_RESPONSE": "Jira: 응답에 잘못된 데이터가 포함되어 있습니다.",
         "ISSUE_NO_UPDATE_REQUIRED": "Jira : \"{{issueText}}\"이 (가) 이미 업데이트되었습니다.",
-        "ISSUE_UPDATE": "Jira : \"{{issueText}}\"에 대한 데이터가 업데이트되었습니다.",
         "MANUAL_UPDATE_ISSUE_SUCCESS": "Jira : \"{{issueText}}\"에 대한 데이터가 업데이트되었습니다.",
         "MISSING_ISSUE_DATA": "Jira : 누락 된 문제 데이터가있는 작업이 발견되었습니다. 다시로드 중입니다.",
         "NO_AUTO_IMPORT_JQL": "Jira : 자동 가져 오기에 대해 정의 된 검색어가 없습니다.",
         "NO_VALID_TRANSITION": "Jira : 유효한 전환이 설정되지 않았습니다.",
-        "POLLING": "Jira : 문제에 대한 폴링 변경 사항",
         "TIMED_OUT": "Jira : 요청 시간이 초과되었습니다.",
         "TRANSITION": "Jira : \"{{issueKey}}\"문제를 \"{{name}}\"(으)로 설정하십시오.",
         "TRANSITIONS_LOADED": "Jira : 전환이로드되었습니다. 아래 선택을 사용하여 지정하십시오",
@@ -378,6 +371,9 @@
         "MOOD_PRODUCTIVITY_OVER_TIME": "시간 경과에 따른 기분과 생산성",
         "NO_ADDITIONAL_DATA_YET": "추가로 수집 된 데이터가 없습니다. 일일 요약 '평가'패널에있는 양식을 사용하십시오.",
         "OBSTRUCTION_SELECTION_COUNT": "장애 요소가 선택 된 횟수",
+        "SIMPLE_CLICK_COUNTERS_OVER_TIME": "시간 경과에 따른 클릭 카운터",
+        "SIMPLE_COUNTERS": "간단한 카운터",
+        "SIMPLE_STOPWATCH_COUNTERS_OVER_TIME": "시간 경과에 따른 스톱워치 카운터",
         "TASKS_DONE_CREATED": "할 일 목록 (완료 / 생성)",
         "TIME_ESTIMATED": "예상 시간",
         "TIME_SPENT": "지출 된 시간"
@@ -404,22 +400,10 @@
       }
     },
     "NOTE": {
-      "ADD_REMINDER": "알림 추가",
       "D_ADD": {
-        "DATETIME_LABEL": "알림 시간 (선택 사항)",
         "NOTE_LABEL": "메모로 저장할 텍스트를 입력하십시오 ..."
       },
-      "D_ADD_REMINDER": {
-        "E_ENTER_TITLE": "제목을 입력해야합니다.",
-        "L_DATETIME": "알림 시간",
-        "L_TITLE": "알림 제목"
-      },
-      "D_VIEW_REMINDER": {
-        "SNOOZE": "에 대한 일시 중지",
-        "TITLE": "노트"
-      },
       "EDIT_FULLSCREEN": "전체 화면으로 편집",
-      "EDIT_REMINDER": "알림 수정",
       "NOTES_CMP": {
         "ADD_BTN": "새 메모 추가",
         "DROP_TO_ADD": "새 메모를 추가하려면 여기로 드래그하십시오."
@@ -427,14 +411,41 @@
       "NOTE_CMP": {
         "DISABLE_PARSE": "마크 다운 구문 분석 사용 중지",
         "ENABLE_PARSE": "markdown 구문 분석 사용"
+      }
+    },
+    "OPEN_PROJECT": {
+      "DIALOG_INITIAL": {
+        "TITLE": "프로젝트용 OpenProject 설정"
       },
-      "REMOVE_REMINDER": "알림 삭제",
+      "FORM": {
+        "FILTER_USER": "사용자 이름 (예 : 혼자서 변경 사항을 필터링)",
+        "HOST": "호스트(예: https://www.openproject.org/)",
+        "IS_AUTO_ADD_TO_BACKLOG": "OpenProject에서 백로그로 미해결 작업 패키지 자동 추가",
+        "IS_AUTO_POLL": "가져온 OpenProject 작업 패키지에서 변경 사항을 자동으로 폴링",
+        "IS_SEARCH_ISSUES_FROM_OPEN_PROJECT": "새 작업을 추가할 때 작업 패키지를 제안으로 표시",
+        "PROJECT_ID": "프로젝트 ID",
+        "PROJECT_ID_DESCRIPTION": "브라우저에서 프로젝트를 볼 때 URL의 일부로 찾을 수 있습니다.",
+        "TOKEN": "액세스 토큰"
+      },
+      "FORM_SECTION": {
+        "HELP": "<p>여기에서 열려 있는 OpenProject 작업 패키지를 나열하도록 SuperProductivity를 구성할 수 있습니다. 이것이 브라우저에서 작동하려면 app.super-productivity.com</p>에서 액세스를 허용하도록 OpenProject 서버에 대해 CORS를 구성해야 합니다.",
+        "TITLE": "오픈프로젝트"
+      },
+      "ISSUE_CONTENT": {
+        "ASSIGNEE": "양수인",
+        "DESCRIPTION": "기술",
+        "MARK_AS_CHECKED": "체크 된대로 업데이트 표시",
+        "STATUS": "지위",
+        "SUMMARY": "개요",
+        "TYPE": "유형"
+      },
+      "ISSUE_STRINGS": {
+        "ISSUES_STR": "작업 패키지",
+        "ISSUE_STR": "작업 패키지"
+      },
       "S": {
-        "ADDED_REMINDER": "메모에 알림 추가됨",
-        "DELETED_REMINDER": "메모를 위해 삭제 된 알림",
-        "UPDATED_REMINDER": "메모에 대한 업데이트 알림"
-      },
-      "UPDATE_REMINDER": "리마인더 업데이트"
+        "ERR_UNKNOWN": "OpenProject: 알 수 없는 오류 {{statusCode}} {{errorMsg}}. CORS가 서버에 대해 올바르게 구성되어 있습니까?"
+      }
     },
     "POMODORO": {
       "BACK_TO_WORK": "다시 일!",
@@ -529,8 +540,20 @@
         "UPDATED": "프로젝트 설정 업데이트"
       }
     },
+    "QUICK_HISTORY": {
+      "NO_DATA": "현재 연도에 대한 데이터가 없습니다.",
+      "PAGE_TITLE": "빠른 기록",
+      "WEEK_TITLE": " {{nr}} 주({{timeSpent}})"
+    },
     "REMINDER": {
       "S_REMINDER_ERR": "알림 인터페이스 오류"
+    },
+    "SEARCH_BAR": {
+      "INFO": "보관된 작업을 검색하려면 목록 아이콘을 클릭하십시오.",
+      "INFO_ARCHIVED": "일반 작업을 검색하려면 아카이브 아이콘을 클릭하십시오.",
+      "PLACEHOLDER": "작업 또는 작업 설명 검색",
+      "PLACEHOLDER_ARCHIVED": "보관된 작업 검색",
+      "TOO_MANY_RESULTS": "결과가 너무 많습니다. 검색 범위를 좁히십시오."
     },
     "SIMPLE_COUNTER": {
       "D_CONFIRM_REMOVE": {
@@ -585,14 +608,15 @@
       },
       "FORM": {
         "DROPBOX": {
-          "B_GENERATE_TOKEN": "토큰 생성",
-          "FOLLOW_LINK": "다음 링크를 열고 제공된 인증 코드를 입력 필드에 복사하십시오.",
-          "L_ACCESS_TOKEN": "액세스 토큰 (인증 코드에서 생성)",
-          "L_AUTH_CODE": "인증 코드"
+          "L_ACCESS_TOKEN": "액세스 토큰 (인증 코드에서 생성)"
         },
         "GOOGLE": {
           "L_IS_COMPRESS_DATA": "데이터 압축",
           "L_SYNC_FILE_NAME": "파일 이름 동기화"
+        },
+        "LOCAL_FILE": {
+          "L_SYNC_FILE_PATH": "동기화 파일 경로",
+          "L_SYNC_FILE_PATH_DESCRIPTION": "동기화에 사용해야 하는 파일의 절대 경로(생성 예정)."
         },
         "L_ENABLE_SYNCING": "동기화 활성화",
         "L_SYNC_INTERVAL": "동기화 간격",
@@ -613,6 +637,7 @@
         "INCOMPLETE_CFG": "동기화 인증에 실패했습니다. 구성을 확인하십시오!",
         "INITIAL_SYNC_ERROR": "초기 동기화 실패",
         "SUCCESS_IMPORT": "가져온 데이터",
+        "SUCCESS_VIA_BUTTON": "데이터가 성공적으로 동기화되었습니다.",
         "UNKNOWN_ERROR": "동기화하는 동안 알 수없는 오류가 발생했습니다. 콘솔을 확인하십시오.",
         "UPLOAD_ERROR": "알 수없는 업로드 오류 (설정이 맞습니까?) : {{err}}"
       }
@@ -658,8 +683,10 @@
       "ADD_TASK_BAR": {
         "ADD_EXISTING_TASK": "기존 작업 \"{{taskTitle}}\"추가",
         "ADD_ISSUE_TASK": " {{issueType}}의{{issueNr}} 호 추가",
-        "ADD_TASK": "작업 추가",
-        "ADD_TASK_TO_BACKLOG": "백 로그에 작업 추가",
+        "ADD_TASK_TO_BOTTOM_OF_BACKLOG": "백로그 하단에 작업 추가",
+        "ADD_TASK_TO_BOTTOM_OF_TODAY": "목록 맨 아래에 작업 추가",
+        "ADD_TASK_TO_TOP_OF_BACKLOG": "백로그 맨 위에 작업 추가",
+        "ADD_TASK_TO_TOP_OF_TODAY": "목록 맨 위에 작업 추가",
         "CREATE_TASK": "새 할 일 만들기",
         "EXAMPLE": "예 : \"일부 작업 제목 + projectName #some tag #some other tag 10m / 3h\"",
         "START": "시작하려면 한 번 더 입력하십시오."
@@ -698,9 +725,12 @@
         "UPDATE_ISSUE_DATA": "문제 데이터 업데이트"
       },
       "D_REMINDER_ADD": {
+        "CONFIRM_REPEAT_OK": "시간표",
+        "CONFIRM_REPEAT_TXT": "이 반복 작업을 다른 날짜로 예약하려고 합니다. 반복되는 작업은 일반적으로 지정된 날짜에 다시 생성되고 해당 날짜에만 예약됩니다. 그래도 계속하시겠습니까?",
         "DATETIME_FOR": "알림 시간",
         "EDIT": "알림 수정",
         "MOVE_TO_BACKLOG": "예약 될 때까지 작업을 백 로그로 이동하십시오.",
+        "REMIND_AT": "에 알림",
         "RO_10M": "시작하기 10 분 전",
         "RO_15M": "시작하기 15 분 전",
         "RO_1H": "시작 1 시간 전",
@@ -715,6 +745,7 @@
         "ADD_TO_TODAY": "오늘 추가",
         "DISMISS": "알림 일시 중지",
         "DISMISS_ALL": "모두 해제",
+        "DONE": "끝난",
         "DUE_TASK": "마감일",
         "DUE_TASKS": "마감일",
         "FOR_CURRENT": "작업이 완료되었습니다. 그것에 착수하고 싶니?",
@@ -784,7 +815,11 @@
         "FRIDAY": "금요일",
         "IS_ADD_TO_BOTTOM": "작업을 목록의 맨 아래로 이동",
         "MONDAY": "월요일",
+        "REMIND_AT": "에 알림",
+        "REMIND_AT_PLACEHOLDER": "알림 시간 선택",
         "SATURDAY": "토요일",
+        "START_TIME": "예정된 시작 시간",
+        "START_TIME_DESCRIPTION": "예를 들어 15:00. 하루 종일 작업을 위해 비워 둡니다.",
         "SUNDAY": "일요일",
         "THURSDAY": "목요일",
         "TITLE": "작업 제목",
@@ -802,7 +837,8 @@
       "MENU_TITLE": "타임 라인",
       "NOW": "지금",
       "NO_TASKS": "현재 작업이 없습니다. 상단 표시 줄의 + 버튼을 통해 몇 가지 작업을 추가하세요.",
-      "START": "작업 시작"
+      "START": "작업 시작",
+      "TASK_PROJECTION_INFO": "예약된 반복 작업의 미래 예측"
     },
     "TIME_TRACKING": {
       "B": {
@@ -817,6 +853,11 @@
         "BREAK": "단절",
         "CREATE_AND_TRACK": "<em></em> 만들기 및 추적 :",
         "IDLE_FOR": "당신은 유휴 상태였습니다.",
+        "SIMPLE_CONFIRM_COUNTER_CANCEL": "버킷",
+        "SIMPLE_CONFIRM_COUNTER_OK": "선로",
+        "SIMPLE_COUNTER_CONFIRM_TXT": "건너뛰기를 선택했지만 간단한 카운터 버튼 {{nr}} 개를 활성화했습니다. 유휴 시간을 추적하시겠습니까?",
+        "SIMPLE_COUNTER_TOOLTIP": " {{title}}까지 추적하려면 클릭하세요.",
+        "SIMPLE_COUNTER_TOOLTIP_DISABLE": " {{title}}을(를) 추적하지 않으려면 클릭하십시오.",
         "SKIP": "버킷",
         "TASK": "태스크",
         "TASK_BREAK": "작업 나누기",
@@ -965,6 +1006,7 @@
       "OPEN_PROJECT_NOTES": "프로젝트 노트 표시 / 숨기기",
       "SELECT_NEXT_TASK": "다음 작업 선택",
       "SELECT_PREVIOUS_TASK": "이전 작업 선택",
+      "SHOW_SEARCH_BAR": "검색창 표시",
       "SYSTEM_SHORTCUTS": "글로벌 단축키 (시스템 전체)",
       "TASK_ADD_SUB_TASK": "하위 작업 추가",
       "TASK_DELETE": "작업 삭제",
@@ -1054,6 +1096,7 @@
       "MESSAGE": "휴식 메시지 받기",
       "MIN_WORKING_TIME": "트리거가없는 X 작업 후 휴식 알림을받습니다.",
       "MOTIVATIONAL_IMG": "동기 부여 이미지 (웹 URL)",
+      "SNOOZE_TIME": "휴식을 취하라는 메시지가 표시되면 일시 중지 시간",
       "TITLE": "휴식 알림"
     },
     "TIMELINE": {
@@ -1075,7 +1118,10 @@
   "GLOBAL_SNACK": {
     "COPY_TO_CLIPPBOARD": "클립 보드에 복사 됨",
     "ERR_COMPRESSION": "압축 인터페이스 오류",
+    "FILE_DOWNLOADED": "{{fileName}} 다운로드됨",
+    "FILE_DOWNLOADED_BTN": "폴더 열기",
     "PERSISTENCE_DISALLOWED": "데이터는 영구적으로 유지되지 않습니다. 이로 인해 데이터가 손실 될 수 있습니다 !!",
+    "PERSISTENCE_ERROR": "데이터 유지 요청 시 오류: {{err}}",
     "RUNNING_X": "\"{{str}}\"실행 중.",
     "SHORTCUT_WARN_OPEN_BOOKMARKS_FROM_TAG": "{{keyCombo}} 을 눌렀지만 북마크 열기 바로 가기는 프로젝트 컨텍스트에서만 사용할 수 있습니다.",
     "SHORTCUT_WARN_OPEN_NOTES_FROM_TAG": "{{keyCombo}} 을 눌렀지만 노트 열기 단축키는 프로젝트 컨텍스트에서만 사용할 수 있습니다."
@@ -1107,8 +1153,10 @@
     "PROJECTS": "프로젝트",
     "PROJECT_MENU": "프로젝트 메뉴",
     "PROJECT_SETTINGS": "프로젝트 설정",
+    "QUICK_HISTORY": "빠른 기록",
     "SCHEDULED": "예정",
     "SETTINGS": "설정",
+    "SHOW_SEARCH_BAR": "검색창 표시",
     "TAGS": "태그",
     "TASKS": "할 일 목록",
     "TASK_LIST": "작업 목록",
@@ -1127,6 +1175,7 @@
       "MSG": "당신은 일을 끝냈습니다. 집에 갈 시간!",
       "OK": "네 네! 일시 휴업!"
     },
+    "ESTIMATE_TOTAL": "총 견적:",
     "EVALUATION": "평가",
     "EXPORT_TASK_LIST": "작업 목록 내보내기",
     "NO_TASKS": "오늘은 아무 작업도 없습니다.",
@@ -1176,6 +1225,7 @@
     "GITLAB_CONFIGURED": "GitLab 통합 구성",
     "IMPORT_FROM_FILE": "파일에서 가져 오기",
     "JIRA_CONFIGURED": "Jira 통합 구성",
+    "OPEN_PROJECT_CONFIGURED": "OpenProject 통합 구성됨",
     "S_INVALID_JSON": "프로젝트 파일에 잘못된 json이 있습니다.",
     "TITLE": "프로젝트 개요",
     "UN_ARCHIVE_PROJECT": "프로젝트 보관 취소"

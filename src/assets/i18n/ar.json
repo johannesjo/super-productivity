@@ -1,5 +1,6 @@
 {
   "APP": {
+    "A_BROWSER_WARNING": "معذرةً ، لم يتم تحسين التطبيق للتشغيل في هذا المتصفح. يرجى التفكير في استخدام متصفح يستند إلى الكروم أو تنزيل الإصدار الإلكتروني من التطبيق",
     "B_INSTALL": {
       "IGNORE": "تجاهل",
       "INSTALL": "التثبت",
@@ -19,7 +20,9 @@
   "CONFIRM": {
     "AUTO_FIX": "يبدو أن بياناتك تالفة. هل تريد محاولة إصلاحه تلقائيًا؟ قد يؤدي هذا إلى فقدان جزئي للبيانات.",
     "DELETE_STRAY_BACKUP": "هل تريد حذف الجزء الخلفي لتجنب رؤية هذا الحوار؟",
+    "RELOAD_AFTER_IDB_ERROR": "لا يمكن الوصول إلى قاعدة البيانات: (الأسباب المحتملة هي تحديث التطبيق للتطبيق في الخلفية أو انخفاض مساحة القرص. اضغط على \"موافق\" لإعادة تحميل التطبيق (قد يتطلب إعادة تشغيل التطبيق يدويًا على بعض الأنظمة الأساسية).",
     "RESTORE_FILE_BACKUP": "يبدو أنه لا توجد بيانات ، ولكن توجد نسخ احتياطية متوفرة على \"{{dir}}\". هل تريد استعادة أحدث نسخة احتياطية من {{from}}؟",
+    "RESTORE_FILE_BACKUP_ANDROID": "يبدو أنه لا توجد بيانات ، ولكن هناك نسخة احتياطية متاحة. هل تريد تحميله؟",
     "RESTORE_STRAY_BACKUP": "قد يكون هناك خطأ ما أثناء المزامنة الأخيرة. هل تريد استعادة آخر نسخة احتياطية؟"
   },
   "DATETIME_INPUT": {
@@ -106,14 +109,7 @@
       "S": {
         "CALENDAR_NOT_FOUND": "CalDav: التقويم \"{{calendarName}}\" غير موجود",
         "CALENDAR_READ_ONLY": "CalDav: التقويم \"{{calendarName}}\" للقراءة فقط",
-        "ERR_NETWORK": "CalDav: فشل الطلب بسبب خطأ في الشبكة من جانب العميل",
-        "ERR_NOT_CONFIGURED": "CalDav: لم يتم تكوينه بشكل صحيح",
-        "IMPORTED_MULTIPLE_ISSUES": "calDav: تم استيراد {{issuesLength}} من الإصدارات الجديدة من git إلى backlog",
-        "IMPORTED_SINGLE_ISSUE": "CalDav: تم استيراد الإصدار \"{{issueText}}\" من إلى backlog",
-        "ISSUE_NOT_FOUND": "CalDav: يبدو أن Todo \"{{issueId}}\" محذوفة على الخادم.",
-        "ISSUE_NO_UPDATE_REQUIRED": "CalDav: لا يوجد تحديث مطلوب.",
-        "ISSUE_UPDATE": "Caldav: بيانات Uodated لـ \"{{issueText}}\"",
-        "POLLING": "Caldav: استطلاعات الرأي التغييرات لـ todos"
+        "ISSUE_NOT_FOUND": "CalDav: يبدو أن Todo \"{{issueId}}\" محذوفة على الخادم."
       }
     },
     "CONFIG": {
@@ -126,6 +122,7 @@
         "ACCESS_TOKEN_ERROR": "Dropbox: تعذر إنشاء رمز الدخول من كود المصادقة",
         "ACCESS_TOKEN_GENERATED": "Dropbox: رمز الدخول الذي تم إنشاؤه من كود المصادقة",
         "AUTH_ERROR": "Dropbox: تم توفير رمز دخول غير صالح",
+        "AUTH_ERROR_ACTION": "تغيير الرمز",
         "OFFLINE": "Dropbox: غير قادر على المزامنة ، لأنك غير متصل بالإنترنت",
         "SYNC_ERROR": "Dropbox: حدث خطأ أثناء المزامنة"
       }
@@ -158,19 +155,7 @@
         "WRITE_A_COMMENT": "أكتب تعليقا"
       },
       "S": {
-        "ERR_NETWORK": "GitHub: فشل الطلب بسبب خطأ في شبكة جانب العميل",
-        "ERR_NOT_CONFIGURED": "جيثب: لم يتم تكوينه بشكل صحيح",
-        "ERR_UNKNOWN": "جيثب: خطأ غير معروف {{statusCode}} {{errorMsg}}",
-        "IMPORTED_MULTIPLE_ISSUES": "جيثب: {{issuesLength}} قضايا جديدة مستوردة من بوابة إلى تراكم",
-        "IMPORTED_SINGLE_ISSUE": "GitHub: المشكلة المستوردة \"{{issueText}}\" من بوابة إلى تراكم",
-        "ISSUE_DELETED_OR_CLOSED": "GitHub: يبدو أن المشكلة \"{{issueText}}\" يتم حذفها أو إغلاقها على بوابة",
-        "ISSUE_NO_UPDATE_REQUIRED": "جيثب: لا يوجد تحديث مطلوب",
-        "ISSUE_UPDATE": "جيثب: بيانات محدثة لـ \"{{issueText}}\"",
-        "MANUAL_UPDATE_ISSUE_SUCCESS": "جيثب: بيانات محدثة لـ \"{{issueText}}\"",
-        "MISSING_ISSUE_DATA": "جيثب: المهام مع بيانات القضية المفقودة وجدت. إعادة شحن.",
-        "NEW_COMMENT": "جيثب: تعليق جديد لـ \"{{issueText}}\"",
-        "POLLING": "جيثب: تغييرات الاقتراع للقضايا",
-        "SHOW_ISSUE_BTN": "أرني"
+        "ERR_UNKNOWN": "جيثب: خطأ غير معروف {{statusCode}} {{errorMsg}}"
       }
     },
     "GITLAB": {
@@ -201,19 +186,7 @@
         "WRITE_A_COMMENT": "أكتب تعليقا"
       },
       "S": {
-        "ERR_NETWORK": "GitLab: فشل الطلب بسبب خطأ في شبكة جانب العميل",
-        "ERR_NOT_CONFIGURED": "جيتلاب: لم يتم تكوينه بشكل صحيح",
-        "ERR_UNKNOWN": "جيتلاب: خطأ غير معروف {{statusCode}} {{errorMsg}}",
-        "IMPORTED_MULTIPLE_ISSUES": "جيتلاب: {{issuesLength}} قضايا جديدة مستوردة من بوابة إلى تراكم",
-        "IMPORTED_SINGLE_ISSUE": "GitLab: المشكلة المستوردة \"{{issueText}}\" من بوابة إلى تراكم",
-        "ISSUE_DELETED_OR_CLOSED": "GitLab: يبدو أن المشكلة \"{{issueText}}\" يتم حذفها أو إغلاقها على بوابة",
-        "ISSUE_NO_UPDATE_REQUIRED": "جيتلاب: لا يوجد تحديث مطلوب",
-        "ISSUE_UPDATE": "جيتلاب: بيانات محدثة لـ \"{{issueText}}\"",
-        "MANUAL_UPDATE_ISSUE_SUCCESS": "جيتلاب: بيانات محدثة لـ \"{{issueText}}\"",
-        "MISSING_ISSUE_DATA": "جيتلاب: المهام مع بيانات القضية المفقودة وجدت. إعادة شحن.",
-        "NEW_COMMENT": "جيتلاب: تعليق جديد لـ \"{{issueText}}\"",
-        "POLLING": "جيتلاب: تغييرات الاقتراع للقضايا",
-        "SHOW_ISSUE_BTN": "أرني"
+        "ERR_UNKNOWN": "جيتلاب: خطأ غير معروف {{statusCode}} {{errorMsg}}"
       }
     },
     "GOOGLE": {
@@ -234,6 +207,27 @@
         "ERR_NO_FILE_ID": "GoogleApi: لم يتم تحديد معرف الملف",
         "ERR_NO_FILE_NAME": "GoogleApi: لم يتم تحديد اسم ملف",
         "SUCCESS_LOGIN": "GoogleApi: تم تسجيل الدخول بنجاح"
+      }
+    },
+    "ISSUE": {
+      "DEFAULT": {
+        "ISSUES_STR": "مسائل",
+        "ISSUE_STR": "القضية"
+      },
+      "S": {
+        "ERR_NETWORK": "{{issueProviderName}}: فشل الطلب بسبب خطأ في الشبكة من جانب العميل",
+        "ERR_NOT_CONFIGURED": "{{issueProviderName}}: غير مهيأ بشكل صحيح",
+        "IMPORTED_MULTIPLE_ISSUES": "{{issueProviderName}}: مستورد {{nr}} جديد {{issuesStr}} للتراكم",
+        "IMPORTED_SINGLE_ISSUE": "{{issueProviderName}}: تم استيراد {{issueStr}} \"{{issueTitle}}\" للتراكم",
+        "ISSUE_DELETED_OR_CLOSED": "{{issueProviderName}}: {{issueStrC}} يبدو أن \"{{issueTitle}}\" محذوفة أو مغلقة",
+        "ISSUE_NO_UPDATE_REQUIRED": "{{issueProviderName}}: لا يوجد تحديث مطلوب",
+        "ISSUE_UPDATE_MULTIPLE": "{{issueProviderName}}: بيانات محدثة لـ {{nr}} {{issuesStr}}",
+        "ISSUE_UPDATE_SINGLE": "{{issueProviderName}}: بيانات محدثة لـ \"{{issueTitle}}\"",
+        "MANUAL_UPDATE_ISSUE_SUCCESS": "{{issueProviderName}}: بيانات محدثة لـ \"{{issueTitle}}\"",
+        "MISSING_ISSUE_DATA": "{{issueProviderName}}: تم العثور على مهام بها بيانات {{issueStr}} مفقودة. إعادة تحميل.",
+        "NEW_COMMENT": "{{issueProviderName}}: تعليق جديد على \"{{issueTitle}}\"",
+        "POLLING_BACKLOG": "{{issueProviderName}}: استطلاع جديد {{issuesStr}}",
+        "POLLING_CHANGES": "{{issueProviderName}}: تغييرات الاقتراع للموقع {{issuesStr}}"
       }
     },
     "JIRA": {
@@ -266,6 +260,7 @@
         "CHOOSE_STATUS": "اختيار الحالة لتعيين",
         "CURRENT_ASSIGNEE": "المعين الحالي:",
         "CURRENT_STATUS": "الحالة الحالية:",
+        "TASK_NAME": "اسم المهمة:",
         "TITLE": "جيرا: تحديث الحالة",
         "UPDATE_STATUS": "تحديث الحالة"
       },
@@ -298,6 +293,7 @@
         "HOST": "المضيف (على سبيل المثال: http://my-host.de:1234)",
         "PASSWORD": "الرمز / كلمة المرور",
         "USER_NAME": "البريد الإلكتروني / اسم المستخدم",
+        "USE_PAT": "استخدم رمز الوصول الشخصي بدلاً من كلمة المرور",
         "WONKY_COOKIE_MODE": "مصادقة Wonky Cookie Fallback (تطبيق سطح المكتب فقط)"
       },
       "FORM_SECTION": {
@@ -337,16 +333,13 @@
       "S": {
         "ADDED_WORKLOG_FOR": "جيرا: تمت إضافة سجل العمل لـ {{issueKey}}",
         "EXTENSION_NOT_LOADED": "سوبر الإنتاجية تمديد لم يتم تحميل. قد تساعد إعادة تحميل الصفحة",
-        "IMPORTED_MULTIPLE_ISSUES": "Jira: تم استيراد {{issuesLength}} مشكلات جديدة من jira إلى backlog",
-        "IMPORTED_SINGLE_ISSUE": "Jira: المشكلة المستوردة \"{{issueText}}\" من jira إلى backlog",
         "INSUFFICIENT_SETTINGS": "تم توفير إعدادات غير كافية لجيرا",
+        "INVALID_RESPONSE": "جيرا: احتوى الرد على بيانات غير صالحة",
         "ISSUE_NO_UPDATE_REQUIRED": "جيرا: \"{{issueText}}\" مُحدث بالفعل",
-        "ISSUE_UPDATE": "جيرا: بيانات محدثة لـ \"{{issueText}}\"",
         "MANUAL_UPDATE_ISSUE_SUCCESS": "جيرا: بيانات محدثة لـ \"{{issueText}}\"",
         "MISSING_ISSUE_DATA": "جيرا: المهام مع المفقودين قضية البيانات وجدت. إعادة شحن.",
         "NO_AUTO_IMPORT_JQL": "جيرا: لم يتم تحديد استعلام بحث للاستيراد التلقائي",
         "NO_VALID_TRANSITION": "جيرا: لا يوجد انتقال صالح تكوين",
-        "POLLING": "جيرا: الاقتراع التغييرات للقضايا",
         "TIMED_OUT": "جيرا: انتهت مهلة الطلب",
         "TRANSITION": "جيرا: اضبط المشكلة \"{{issueKey}}\" على \"{{name}}\"",
         "TRANSITIONS_LOADED": "جيرا: التحولات تحميلها. استخدم التحديدات أدناه لتعيينها",
@@ -378,6 +371,9 @@
         "MOOD_PRODUCTIVITY_OVER_TIME": "المزاج والإنتاجية مع مرور الوقت",
         "NO_ADDITIONAL_DATA_YET": "لا توجد بيانات إضافية تم جمعها حتى الآن. استخدم النموذج الموجود في لوحة \"التقييم\" الملخص اليومية للقيام بذلك.",
         "OBSTRUCTION_SELECTION_COUNT": "عدد المرات التي تم فيها اختيار عامل الانسداد",
+        "SIMPLE_CLICK_COUNTERS_OVER_TIME": "انقر فوق عدادات بمرور الوقت",
+        "SIMPLE_COUNTERS": "عدادات بسيطة",
+        "SIMPLE_STOPWATCH_COUNTERS_OVER_TIME": "عدادات ساعة التوقيف بمرور الوقت",
         "TASKS_DONE_CREATED": "المهام (تم التنفيذ / الإنشاء)",
         "TIME_ESTIMATED": "الوقت المقدر",
         "TIME_SPENT": "قضاء الوقت"
@@ -404,22 +400,10 @@
       }
     },
     "NOTE": {
-      "ADD_REMINDER": "إضافة تذكير",
       "D_ADD": {
-        "DATETIME_LABEL": "وقت التذكير (اختياري)",
         "NOTE_LABEL": "أدخل نصًا لحفظه كملاحظة ..."
       },
-      "D_ADD_REMINDER": {
-        "E_ENTER_TITLE": "تحتاج إلى إدخال عنوان",
-        "L_DATETIME": "وقت للتذكير",
-        "L_TITLE": "عنوان الإخطار"
-      },
-      "D_VIEW_REMINDER": {
-        "SNOOZE": "قيلولة بعد الظهر لـ",
-        "TITLE": "ملحوظة"
-      },
       "EDIT_FULLSCREEN": "تحرير في وضع ملء الشاشة",
-      "EDIT_REMINDER": "تحرير تذكير",
       "NOTES_CMP": {
         "ADD_BTN": "إضافة ملاحظة جديدة",
         "DROP_TO_ADD": "إسقاط هنا لإضافة ملاحظة جديدة"
@@ -427,14 +411,41 @@
       "NOTE_CMP": {
         "DISABLE_PARSE": "تعطيل تحليل تخفيض السعر",
         "ENABLE_PARSE": "تمكين تحليل تخفيض السعر"
+      }
+    },
+    "OPEN_PROJECT": {
+      "DIALOG_INITIAL": {
+        "TITLE": "قم بإعداد OpenProject للمشروع"
       },
-      "REMOVE_REMINDER": "إزالة تذكير",
+      "FORM": {
+        "FILTER_USER": "اسم المستخدم (مثل تصفية التغييرات بنفسك)",
+        "HOST": "المضيف (على سبيل المثال: https://www.openproject.org/)",
+        "IS_AUTO_ADD_TO_BACKLOG": "إضافة حزم العمل التي لم يتم حلها تلقائيًا من OpenProject إلى backlog",
+        "IS_AUTO_POLL": "استقصاء حزم عمل OpenProject المستوردة تلقائيًا للتغييرات",
+        "IS_SEARCH_ISSUES_FROM_OPEN_PROJECT": "عرض حزم العمل كاقتراحات عند إضافة مهام جديدة",
+        "PROJECT_ID": "معرف المشروع",
+        "PROJECT_ID_DESCRIPTION": "يمكن العثور عليها كجزء من عنوان url عند عرض المشروع في المتصفح.",
+        "TOKEN": "رمز وصول"
+      },
+      "FORM_SECTION": {
+        "HELP": "<p>هنا يمكنك تكوين SuperProductivity لإدراج حزم عمل OpenProject المفتوحة. يرجى ملاحظة أنه لكي يعمل هذا في المتصفح ، ربما تحتاج إلى تكوين CORS لخادم OpenProject الخاص بك ، للسماح بالوصول من app.super-productivity.com</p>",
+        "TITLE": "مشروع مفتوح"
+      },
+      "ISSUE_CONTENT": {
+        "ASSIGNEE": "المحال",
+        "DESCRIPTION": "وصف",
+        "MARK_AS_CHECKED": "وضع علامة على التحديثات على أنها محددة",
+        "STATUS": "الحالة",
+        "SUMMARY": "ملخص",
+        "TYPE": "نوع"
+      },
+      "ISSUE_STRINGS": {
+        "ISSUES_STR": "حزم العمل",
+        "ISSUE_STR": "حزمة العمل"
+      },
       "S": {
-        "ADDED_REMINDER": "وأضاف تذكير للمذكرة",
-        "DELETED_REMINDER": "تذكير محذوف للمذكرة",
-        "UPDATED_REMINDER": "تم تحديث التذكير للمذكرة"
-      },
-      "UPDATE_REMINDER": "تحديث تذكير"
+        "ERR_UNKNOWN": "OpenProject: خطأ غير معروف {{statusCode}} {{errorMsg}}. هل تم تكوين CORS بشكل صحيح للخادم؟"
+      }
     },
     "POMODORO": {
       "BACK_TO_WORK": "العودة الى العمل!",
@@ -529,8 +540,20 @@
         "UPDATED": "تحديث إعدادات المشروع"
       }
     },
+    "QUICK_HISTORY": {
+      "NO_DATA": "لا توجد بيانات للسنة الحالية",
+      "PAGE_TITLE": "التاريخ السريع",
+      "WEEK_TITLE": "الأسبوع {{nr}} ({{timeSpent}})"
+    },
     "REMINDER": {
       "S_REMINDER_ERR": "خطأ في واجهة التذكير"
+    },
+    "SEARCH_BAR": {
+      "INFO": "انقر فوق رمز القائمة للبحث عن المهام المؤرشفة",
+      "INFO_ARCHIVED": "انقر فوق رمز الأرشيف للبحث عن المهام العادية",
+      "PLACEHOLDER": "ابحث عن وصف المهمة أو المهمة",
+      "PLACEHOLDER_ARCHIVED": "ابحث عن المهام المؤرشفة",
+      "TOO_MANY_RESULTS": "نتائج كثيرة جدا ، يرجى تضييق نطاق البحث"
     },
     "SIMPLE_COUNTER": {
       "D_CONFIRM_REMOVE": {
@@ -585,14 +608,15 @@
       },
       "FORM": {
         "DROPBOX": {
-          "B_GENERATE_TOKEN": "إنشاء رمز",
-          "FOLLOW_LINK": "يرجى فتح الرابط التالي ونسخ كود المصادقة المقدم هناك في حقل الإدخال.",
-          "L_ACCESS_TOKEN": "رمز الوصول (تم إنشاؤه من كود المصادقة)",
-          "L_AUTH_CODE": "رمز المصادقة"
+          "L_ACCESS_TOKEN": "رمز الوصول (تم إنشاؤه من كود المصادقة)"
         },
         "GOOGLE": {
           "L_IS_COMPRESS_DATA": "ضغط البيانات",
           "L_SYNC_FILE_NAME": "مزامنة اسم الملف"
+        },
+        "LOCAL_FILE": {
+          "L_SYNC_FILE_PATH": "مسار ملف المزامنة",
+          "L_SYNC_FILE_PATH_DESCRIPTION": "المسار المطلق للملف الذي يجب استخدامه للمزامنة (سيتم إنشاؤه)."
         },
         "L_ENABLE_SYNCING": "تمكين المزامنة",
         "L_SYNC_INTERVAL": "فترة المزامنة",
@@ -613,6 +637,7 @@
         "INCOMPLETE_CFG": "فشلت مصادقة المزامنة. يرجى التحقق من التكوين الخاص بك!",
         "INITIAL_SYNC_ERROR": "فشلت المزامنة الأولية",
         "SUCCESS_IMPORT": "البيانات المستوردة",
+        "SUCCESS_VIA_BUTTON": "تمت مزامنة البيانات بنجاح",
         "UNKNOWN_ERROR": "خطأ غير معروف أثناء المزامنة. يرجى التحقق من وحدة التحكم.",
         "UPLOAD_ERROR": "خطأ غير معروف في التحميل (الإعدادات صحيحة؟): {{err}}"
       }
@@ -658,8 +683,10 @@
       "ADD_TASK_BAR": {
         "ADD_EXISTING_TASK": "إضافة مهمة موجودة \"{{taskTitle}}\"",
         "ADD_ISSUE_TASK": "إضافة العدد رقم{{issueNr}} من {{issueType}}",
-        "ADD_TASK": "إضافة مهمة",
-        "ADD_TASK_TO_BACKLOG": "إضافة مهمة إلى تراكم",
+        "ADD_TASK_TO_BOTTOM_OF_BACKLOG": "إضافة مهمة إلى أسفل الأعمال المتراكمة",
+        "ADD_TASK_TO_BOTTOM_OF_TODAY": "إضافة مهمة إلى أسفل القائمة",
+        "ADD_TASK_TO_TOP_OF_BACKLOG": "أضف مهمة إلى أعلى الأعمال المتراكمة",
+        "ADD_TASK_TO_TOP_OF_TODAY": "أضف مهمة إلى أعلى القائمة",
         "CREATE_TASK": "إنشاء مهمة جديدة",
         "EXAMPLE": "مثال: \"بعض عناوين المهمة + اسم المشروع # علامة بعض # علامة أخرى بعض 10 م / 3 س\"",
         "START": "اضغط على إدخال مرة أخرى للبدء"
@@ -698,9 +725,12 @@
         "UPDATE_ISSUE_DATA": "تحديث بيانات القضية"
       },
       "D_REMINDER_ADD": {
+        "CONFIRM_REPEAT_OK": "جدول",
+        "CONFIRM_REPEAT_TXT": "أنت تحاول جدولة هذه المهمة المتكررة ليوم آخر. عادةً ما يُفترض إعادة إنشاء المهام المتكررة في أيام محددة وتتم جدولتها فقط في ذلك اليوم. هل تريد المتابعة على أي حال؟",
         "DATETIME_FOR": "وقت للتذكير",
         "EDIT": "تحرير تذكير",
         "MOVE_TO_BACKLOG": "نقل المهمة إلى تراكم حتى المقرر",
+        "REMIND_AT": "تذكير في",
         "RO_10M": "10 دقائق قبل أن يبدأ",
         "RO_15M": "15 دقيقة قبل أن يبدأ",
         "RO_1H": "1 ساعة قبل أن تبدأ",
@@ -715,6 +745,7 @@
         "ADD_TO_TODAY": "أضف إلى اليوم",
         "DISMISS": "تجاهل تذكير",
         "DISMISS_ALL": "افصل الكل",
+        "DONE": "فعله",
         "DUE_TASK": "المهمة المستحقة",
         "DUE_TASKS": "المهام المستحقة",
         "FOR_CURRENT": "المهمة مستحقة. هل تريد أن تبدأ العمل على ذلك؟",
@@ -784,7 +815,11 @@
         "FRIDAY": "يوم الجمعة",
         "IS_ADD_TO_BOTTOM": "انقل المهمة إلى أسفل القائمة",
         "MONDAY": "الإثنين",
+        "REMIND_AT": "تذكير في",
+        "REMIND_AT_PLACEHOLDER": "حدد وقت التذكير",
         "SATURDAY": "يوم السبت",
+        "START_TIME": "وقت البدء المجدول",
+        "START_TIME_DESCRIPTION": "على سبيل المثال 15:00. اتركه فارغًا لمهمة طوال اليوم",
         "SUNDAY": "الأحد",
         "THURSDAY": "الخميس",
         "TITLE": "عنوان المهمة",
@@ -802,7 +837,8 @@
       "MENU_TITLE": "الجدول الزمني",
       "NOW": "الآن",
       "NO_TASKS": "حاليا لا توجد مهام. الرجاء إضافة بعض المهام عبر زر + في الشريط العلوي.",
-      "START": "بدء العمل"
+      "START": "بدء العمل",
+      "TASK_PROJECTION_INFO": "الإسقاط المستقبلي لمهمة مجدولة قابلة للتكرار"
     },
     "TIME_TRACKING": {
       "B": {
@@ -817,6 +853,11 @@
         "BREAK": "استراحة",
         "CREATE_AND_TRACK": "<em>قم بإنشاء</em> وتتبع إلى:",
         "IDLE_FOR": "لقد كنت خاملاً عن:",
+        "SIMPLE_CONFIRM_COUNTER_CANCEL": "تخطى",
+        "SIMPLE_CONFIRM_COUNTER_OK": "مسار",
+        "SIMPLE_COUNTER_CONFIRM_TXT": "لقد حددت \"تخطي\" ، ولكن نشّطت {{nr}} زر (أزرار) للعداد البسيط. هل تريد تتبع وقت الخمول لهم؟",
+        "SIMPLE_COUNTER_TOOLTIP": "انقر للتتبع إلى {{title}}",
+        "SIMPLE_COUNTER_TOOLTIP_DISABLE": "انقر لعدم التعقب إلى {{title}}",
         "SKIP": "تخطى",
         "TASK": "مهمة",
         "TASK_BREAK": "استراحة المهمة",
@@ -965,6 +1006,7 @@
       "OPEN_PROJECT_NOTES": "إظهار / إخفاء ملاحظات المشروع",
       "SELECT_NEXT_TASK": "حدد المهمة التالية",
       "SELECT_PREVIOUS_TASK": "حدد المهمة السابقة",
+      "SHOW_SEARCH_BAR": "إظهار شريط البحث",
       "SYSTEM_SHORTCUTS": "اختصارات عالمية (على مستوى النظام)",
       "TASK_ADD_SUB_TASK": "إضافة المهمة الفرعية",
       "TASK_DELETE": "حذف المهمة",
@@ -1054,6 +1096,7 @@
       "MESSAGE": "خذ رسالة استراحة",
       "MIN_WORKING_TIME": "يأخذ الزناد إشعار استراحة بعد عمل X بدون إشعار",
       "MOTIVATIONAL_IMG": "صورة تحفيزية (رابط الويب)",
+      "SNOOZE_TIME": "غفوة الوقت عند مطالبتك بأخذ قسط من الراحة",
       "TITLE": "التذكير بالاستراحة"
     },
     "TIMELINE": {
@@ -1075,7 +1118,10 @@
   "GLOBAL_SNACK": {
     "COPY_TO_CLIPPBOARD": "نسخ إلى الحافظة",
     "ERR_COMPRESSION": "خطأ لواجهة الضغط",
+    "FILE_DOWNLOADED": " تم تنزيل{{fileName}} ",
+    "FILE_DOWNLOADED_BTN": "افتح المجلد",
     "PERSISTENCE_DISALLOWED": "لن يتم استمرار البيانات بشكل دائم. أن تدرك أن هذا يمكن أن يؤدي إلى فقدان البيانات!",
+    "PERSISTENCE_ERROR": "خطأ عند طلب الاحتفاظ بالبيانات: {{err}}",
     "RUNNING_X": "تشغيل \"{{str}}\".",
     "SHORTCUT_WARN_OPEN_BOOKMARKS_FROM_TAG": " تم الضغط على{{keyCombo}} ، ولكن لا يتوفر اختصار الإشارات المرجعية المفتوح إلا في سياق المشروع.",
     "SHORTCUT_WARN_OPEN_NOTES_FROM_TAG": " تم الضغط على{{keyCombo}} ، ولكن فتح اختصار الملاحظات متاح فقط في سياق المشروع."
@@ -1107,8 +1153,10 @@
     "PROJECTS": "مشاريع",
     "PROJECT_MENU": "قائمة المشروع",
     "PROJECT_SETTINGS": "إعدادات المشروع",
+    "QUICK_HISTORY": "التاريخ السريع",
     "SCHEDULED": "المقرر",
     "SETTINGS": "الإعدادات",
+    "SHOW_SEARCH_BAR": "إظهار شريط البحث",
     "TAGS": "الكلمات",
     "TASKS": "مهام",
     "TASK_LIST": "قائمة المهام",
@@ -1127,6 +1175,7 @@
       "MSG": "لقد انتهيت من العمل. موعد الذهاب للمنزل!",
       "OK": "ايي ايي! اغلق!"
     },
+    "ESTIMATE_TOTAL": "التقدير الإجمالي:",
     "EVALUATION": "تقييم",
     "EXPORT_TASK_LIST": "تصدير قائمة المهام",
     "NO_TASKS": "لا توجد مهام لهذا اليوم",
@@ -1176,6 +1225,7 @@
     "GITLAB_CONFIGURED": "جيتلاب التكامل تكوين",
     "IMPORT_FROM_FILE": "استيراد من الملف",
     "JIRA_CONFIGURED": "جيرا تكامل التكوين",
+    "OPEN_PROJECT_CONFIGURED": "تم تكوين تكامل OpenProject",
     "S_INVALID_JSON": "ملف json غير صالح لملف المشروع",
     "TITLE": "ملخص المشروع",
     "UN_ARCHIVE_PROJECT": "مشروع غير جذري"

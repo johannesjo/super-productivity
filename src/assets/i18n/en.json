@@ -211,8 +211,8 @@
     },
     "ISSUE": {
       "DEFAULT": {
-        "ISSUE_STR": "issue",
-        "ISSUES_STR": "issues"
+        "ISSUES_STR": "issues",
+        "ISSUE_STR": "issue"
       },
       "S": {
         "ERR_NETWORK": "{{issueProviderName}}: Request failed because of a client side network error",
@@ -260,9 +260,9 @@
         "CHOOSE_STATUS": "Choose status to assign",
         "CURRENT_ASSIGNEE": "Current Assignee:",
         "CURRENT_STATUS": "Current Status:",
+        "TASK_NAME": "Task name:",
         "TITLE": "Jira: Update Status",
-        "UPDATE_STATUS": "Update Status",
-        "TASK_NAME": "Task name:"
+        "UPDATE_STATUS": "Update Status"
       },
       "DIALOG_WORKLOG": {
         "CURRENTLY_LOGGED": "Currently logged time: ",
@@ -293,8 +293,8 @@
         "HOST": "Host (e.g.: http://my-host.de:1234)",
         "PASSWORD": "Token / Password",
         "USER_NAME": "Email / Username",
-        "WONKY_COOKIE_MODE": "Wonky Cookie Fallback Authentication (desktop app only)",
-        "USE_PAT": "Use Personal Access Token instead of password"
+        "USE_PAT": "Use Personal Access Token instead of password",
+        "WONKY_COOKIE_MODE": "Wonky Cookie Fallback Authentication (desktop app only)"
       },
       "FORM_SECTION": {
         "ADV_CFG": "Advanced Config",
@@ -371,8 +371,8 @@
         "MOOD_PRODUCTIVITY_OVER_TIME": "Mood and productivity over time",
         "NO_ADDITIONAL_DATA_YET": "No additional data collected yet. Use the form on the daily summary \"Evaluation\" panel to do so.",
         "OBSTRUCTION_SELECTION_COUNT": "Number of times an obstructing factor was selected",
-        "SIMPLE_COUNTERS": "Simple Counters",
         "SIMPLE_CLICK_COUNTERS_OVER_TIME": "Click Counters over time",
+        "SIMPLE_COUNTERS": "Simple Counters",
         "SIMPLE_STOPWATCH_COUNTERS_OVER_TIME": "Stopwatch Counters over time",
         "TASKS_DONE_CREATED": "Tasks (done/created)",
         "TIME_ESTIMATED": "Time Estimated",
@@ -413,20 +413,6 @@
         "ENABLE_PARSE": "Enable markdown parse"
       }
     },
-    "POMODORO": {
-      "BACK_TO_WORK": "Back to work!",
-      "BREAK_IS_DONE": "Your break is done!",
-      "ENJOY_YOURSELF": "Enjoy yourself, get yourself moving, come back in:",
-      "FINISH_SESSION_X": "You successfully finished session <strong>{{nr}}</strong>!",
-      "NOTIFICATION": {
-        "BREAK_X_START": "Pomodoro: Break {{nr}} started!",
-        "SESSION_X_START": "Pomodoro: Session {{nr}} started!"
-      },
-      "S": {
-        "SESSION_X_START": "Pomodoro: Session {{nr}} started!"
-      },
-      "SKIP_BREAK": "Skip break"
-    },
     "OPEN_PROJECT": {
       "DIALOG_INITIAL": {
         "TITLE": "Setup OpenProject for Project"
@@ -454,12 +440,26 @@
         "TYPE": "Type"
       },
       "ISSUE_STRINGS": {
-        "ISSUE_STR": "work package",
-        "ISSUES_STR": "work packages"
+        "ISSUES_STR": "work packages",
+        "ISSUE_STR": "work package"
       },
       "S": {
         "ERR_UNKNOWN": "OpenProject: Unknown error {{statusCode}} {{errorMsg}}. Is CORS properly configured for the server?"
       }
+    },
+    "POMODORO": {
+      "BACK_TO_WORK": "Back to work!",
+      "BREAK_IS_DONE": "Your break is done!",
+      "ENJOY_YOURSELF": "Enjoy yourself, get yourself moving, come back in:",
+      "FINISH_SESSION_X": "You successfully finished session <strong>{{nr}}</strong>!",
+      "NOTIFICATION": {
+        "BREAK_X_START": "Pomodoro: Break {{nr}} started!",
+        "SESSION_X_START": "Pomodoro: Session {{nr}} started!"
+      },
+      "S": {
+        "SESSION_X_START": "Pomodoro: Session {{nr}} started!"
+      },
+      "SKIP_BREAK": "Skip break"
     },
     "PROCRASTINATION": {
       "BACK_TO_WORK": "Back to work!",
@@ -540,8 +540,20 @@
         "UPDATED": "Updated project settings"
       }
     },
+    "QUICK_HISTORY": {
+      "NO_DATA": "No data for current year",
+      "PAGE_TITLE": "Quick History",
+      "WEEK_TITLE": "Week {{nr}} ({{timeSpent}})"
+    },
     "REMINDER": {
       "S_REMINDER_ERR": "Error for reminder interface"
+    },
+    "SEARCH_BAR": {
+      "INFO": "Click on the list icon to search for archived tasks",
+      "INFO_ARCHIVED": "Click on the archive icon to search for normal tasks",
+      "PLACEHOLDER": "Search for task or task description",
+      "PLACEHOLDER_ARCHIVED": "Search for archived tasks",
+      "TOO_MANY_RESULTS": "Too many results, please narrow your search"
     },
     "SIMPLE_COUNTER": {
       "D_CONFIRM_REMOVE": {
@@ -671,10 +683,10 @@
       "ADD_TASK_BAR": {
         "ADD_EXISTING_TASK": "Add existing task \"{{taskTitle}}\"",
         "ADD_ISSUE_TASK": "Add issue #{{issueNr}} from {{issueType}}",
-        "ADD_TASK_TO_TOP_OF_BACKLOG": "Add task to top of backlog",
-        "ADD_TASK_TO_TOP_OF_TODAY": "Add task to top of list",
         "ADD_TASK_TO_BOTTOM_OF_BACKLOG": "Add task to bottom of backlog",
         "ADD_TASK_TO_BOTTOM_OF_TODAY": "Add task to bottom of list",
+        "ADD_TASK_TO_TOP_OF_BACKLOG": "Add task to top of backlog",
+        "ADD_TASK_TO_TOP_OF_TODAY": "Add task to top of list",
         "CREATE_TASK": "Create new task",
         "EXAMPLE": "Example: \"Some task title +projectName #some tag #some other tag 10m/3h\"",
         "START": "Press enter one more time to start"
@@ -713,8 +725,8 @@
         "UPDATE_ISSUE_DATA": "Update issue data"
       },
       "D_REMINDER_ADD": {
-        "CONFIRM_REPEAT_TXT": "You're trying to schedule this repeated task to another day. Repeated tasks are usually meant to be re-created on specified days and only scheduled on that day. Do you want to proceed anyway?",
         "CONFIRM_REPEAT_OK": "Schedule",
+        "CONFIRM_REPEAT_TXT": "You're trying to schedule this repeated task to another day. Repeated tasks are usually meant to be re-created on specified days and only scheduled on that day. Do you want to proceed anyway?",
         "DATETIME_FOR": "Datetime for reminder",
         "EDIT": "Edit Reminder",
         "MOVE_TO_BACKLOG": "Move task to backlog until scheduled",
@@ -803,9 +815,9 @@
         "FRIDAY": "Friday",
         "IS_ADD_TO_BOTTOM": "Move task to bottom of list",
         "MONDAY": "Monday",
-        "SATURDAY": "Saturday",
         "REMIND_AT": "Remind at",
         "REMIND_AT_PLACEHOLDER": "Select when to remind",
+        "SATURDAY": "Saturday",
         "START_TIME": "Scheduled start time",
         "START_TIME_DESCRIPTION": "E.g. 15:00. Leave blank for an all day task",
         "SUNDAY": "Sunday",
@@ -839,13 +851,13 @@
       },
       "D_IDLE": {
         "BREAK": "Break",
-        "SIMPLE_CONFIRM_COUNTER_CANCEL": "Skip",
-        "SIMPLE_CONFIRM_COUNTER_OK": "Track",
-        "SIMPLE_COUNTER_TOOLTIP": "Click to track to {{title}}",
-        "SIMPLE_COUNTER_TOOLTIP_DISABLE": "Click to NOT track to {{title}}",
-        "SIMPLE_COUNTER_CONFIRM_TXT": "You selected skip, but activated {{nr}} simple counter button(s). Do you want to track the idle time to them?",
         "CREATE_AND_TRACK": "<em>Create</em> and track to",
         "IDLE_FOR": "You have been idle for:",
+        "SIMPLE_CONFIRM_COUNTER_CANCEL": "Skip",
+        "SIMPLE_CONFIRM_COUNTER_OK": "Track",
+        "SIMPLE_COUNTER_CONFIRM_TXT": "You selected skip, but activated {{nr}} simple counter button(s). Do you want to track the idle time to them?",
+        "SIMPLE_COUNTER_TOOLTIP": "Click to track to {{title}}",
+        "SIMPLE_COUNTER_TOOLTIP_DISABLE": "Click to NOT track to {{title}}",
         "SKIP": "Skip",
         "TASK": "Task",
         "TASK_BREAK": "Task+Break",
@@ -858,11 +870,6 @@
         "TRACK_TO": "Track to:",
         "UNTRACKED_TIME": "Untracked time:"
       }
-    },
-    "QUICK_HISTORY": {
-      "NO_DATA": "No data for current year",
-      "PAGE_TITLE": "Quick History",
-      "WEEK_TITLE": "Week {{nr}} ({{timeSpent}})"
     },
     "WORKLOG": {
       "CMP": {
@@ -919,13 +926,6 @@
         "NO_DATA": "No tasks this week yet.",
         "TITLE": "Title"
       }
-    },
-    "SEARCH_BAR": {
-      "TOO_MANY_RESULTS": "Too many results, please narrow your search",
-      "PLACEHOLDER": "Search for task or task description",
-      "PLACEHOLDER_ARCHIVED": "Search for archived tasks",
-      "INFO": "Click on the list icon to search for archived tasks",
-      "INFO_ARCHIVED": "Click on the archive icon to search for normal tasks"
     }
   },
   "FILE_IMEX": {
@@ -999,7 +999,6 @@
       "GO_TO_TIMELINE": "Go to Timeline",
       "GO_TO_WORK_VIEW": "Go to Work View",
       "HELP": "<p>Here you can configure all keyboard shortcuts.</p> <p>Click on the text input and enter the desired keyboard combination. Hit enter to save and Escape to abort.</p> <p>There are three types of shortcuts:</p> <ul> <li> <strong>Global shortcuts:</strong> When the app is running it will trigger the action from every other application. </li> <li> <strong>Application level shortcuts:</strong> Will trigger from every screen of the application, but not if you're currently editing a text field. </li> <li> <strong>Task level shortcuts:</strong> They will only trigger if you have selected a task via mouse or keyboard and usually trigger an action specifically related to that one task. </li> </ul><p>You can <strong>press Escape to remove a shortcut.</strong>",
-      "SHOW_SEARCH_BAR": "Show search bar",
       "MOVE_TASK_DOWN": "Move Task down in List",
       "MOVE_TASK_UP": "Move Task up in List",
       "MOVE_TO_BACKLOG": "Move Task to Task Backlog",
@@ -1007,6 +1006,7 @@
       "OPEN_PROJECT_NOTES": "Show/Hide Project Notes",
       "SELECT_NEXT_TASK": "Select next Task",
       "SELECT_PREVIOUS_TASK": "Select previous Task",
+      "SHOW_SEARCH_BAR": "Show search bar",
       "SYSTEM_SHORTCUTS": "Global Shortcuts (system wide)",
       "TASK_ADD_SUB_TASK": "Add sub Task",
       "TASK_DELETE": "Delete Task",
@@ -1094,9 +1094,9 @@
       "IS_FOCUS_WINDOW": "Focus app window when reminder is active (desktop only)",
       "IS_LOCK_SCREEN": "Lock screen when a break is due (desktop only)",
       "MESSAGE": "Take a break message",
-      "SNOOZE_TIME": "Snooze time when prompted to take a break",
       "MIN_WORKING_TIME": "Trigger take a break notification after X working without one",
       "MOTIVATIONAL_IMG": "Motivational image (web url)",
+      "SNOOZE_TIME": "Snooze time when prompted to take a break",
       "TITLE": "Break Reminder"
     },
     "TIMELINE": {
@@ -1153,17 +1153,17 @@
     "PROJECTS": "Projects",
     "PROJECT_MENU": "Project Menu",
     "PROJECT_SETTINGS": "Project Settings",
+    "QUICK_HISTORY": "Quick History",
     "SCHEDULED": "Scheduled",
     "SETTINGS": "Settings",
+    "SHOW_SEARCH_BAR": "Show Search Bar",
     "TAGS": "Tags",
     "TASKS": "Tasks",
     "TASK_LIST": "Task List",
     "TOGGLE_SHOW_BOOKMARKS": "Show/Hide Bookmarks",
     "TOGGLE_SHOW_NOTES": "Show/Hide Project Notes",
     "TOGGLE_TRACK_TIME": "Start/Stop tracking time",
-    "WORKLOG": "Worklog",
-    "QUICK_HISTORY": "Quick History",
-    "SHOW_SEARCH_BAR": "Show Search Bar"
+    "WORKLOG": "Worklog"
   },
   "PDS": {
     "BACK": "Wait I forgot something!",
@@ -1175,8 +1175,8 @@
       "MSG": "Your work is done. Time to go home!",
       "OK": "Aye aye! Shutdown!"
     },
-    "EVALUATION": "Evaluation",
     "ESTIMATE_TOTAL": "Total estimate:",
+    "EVALUATION": "Evaluation",
     "EXPORT_TASK_LIST": "Export Task List",
     "NO_TASKS": "There are no tasks for this day",
     "PLAN": "Plan",

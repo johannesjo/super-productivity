@@ -1,5 +1,6 @@
 {
   "APP": {
+    "A_BROWSER_WARNING": "Lamentamos, mas o aplicativo não está otimizado para ser executado neste navegador. Considere usar um navegador baseado em cromo ou baixar a versão eletrônica do aplicativo",
     "B_INSTALL": {
       "IGNORE": "Ignorar",
       "INSTALL": "Instalar",
@@ -19,7 +20,9 @@
   "CONFIRM": {
     "AUTO_FIX": "Seus dados parecem estar danificados. Quer tentar consertar automaticamente? Isso pode resultar em perda parcial de dados.",
     "DELETE_STRAY_BACKUP": "Quer excluir o verso para evitar ver esta caixa de diálogo?",
+    "RELOAD_AFTER_IDB_ERROR": "Não é possível acessar o banco de dados :( As possíveis causas são uma atualização do aplicativo em segundo plano ou pouco espaço em disco. Pressione OK para recarregar o aplicativo (pode exigir a reinicialização manual do aplicativo em algumas plataformas).",
     "RESTORE_FILE_BACKUP": "Parece não haver NENHUM DADO, mas há backups disponíveis em \"{{dir}}\". Quer restaurar o backup mais recente de {{from}}?",
+    "RESTORE_FILE_BACKUP_ANDROID": "Parece não haver NENHUM DADO, mas há um backup disponível. Você quer carregá-lo?",
     "RESTORE_STRAY_BACKUP": "Durante a última sincronização, pode ter ocorrido algum erro. Você quer restaurar o último backup?"
   },
   "DATETIME_INPUT": {
@@ -106,14 +109,7 @@
       "S": {
         "CALENDAR_NOT_FOUND": "CalDav: Calendário \"{{calendarName}}\" não encontrado",
         "CALENDAR_READ_ONLY": "CalDav: o calendário \"{{calendarName}}\" é somente leitura",
-        "ERR_NETWORK": "CalDav: a solicitação falhou devido a um erro de rede do lado do cliente",
-        "ERR_NOT_CONFIGURED": "CalDav: não configurado corretamente",
-        "IMPORTED_MULTIPLE_ISSUES": "calDav: importou {{issuesLength}} novos problemas do git para o backlog",
-        "IMPORTED_SINGLE_ISSUE": "CalDav: Problema importado \"{{issueText}}\" do backlog",
-        "ISSUE_NOT_FOUND": "CalDav: Todo \"{{issueId}}\" parece ter sido excluído do servidor.",
-        "ISSUE_NO_UPDATE_REQUIRED": "CalDav: nenhuma atualização necessária.",
-        "ISSUE_UPDATE": "Caldav: dados modificados para \"{{issueText}}\"",
-        "POLLING": "Caldav: sondagem de alterações para todos"
+        "ISSUE_NOT_FOUND": "CalDav: Todo \"{{issueId}}\" parece ter sido excluído do servidor."
       }
     },
     "CONFIG": {
@@ -126,6 +122,7 @@
         "ACCESS_TOKEN_ERROR": "Dropbox: Não é possível gerar o token de acesso a partir do código de autenticação",
         "ACCESS_TOKEN_GENERATED": "Dropbox: token de acesso gerado a partir do código de autenticação",
         "AUTH_ERROR": "Dropbox: token de acesso inválido fornecido",
+        "AUTH_ERROR_ACTION": "Mudar Token",
         "OFFLINE": "Dropbox: não é possível sincronizar, porque off-line",
         "SYNC_ERROR": "Dropbox: erro ao sincronizar"
       }
@@ -158,19 +155,7 @@
         "WRITE_A_COMMENT": "Comentar"
       },
       "S": {
-        "ERR_NETWORK": "GitHub: A solicitação falhou devido a um erro de rede do lado do cliente.",
-        "ERR_NOT_CONFIGURED": "GitHub: Não está configurado corretamente",
-        "ERR_UNKNOWN": "GitHub: Erro desconhecido {{statusCode}} {{errorMsg}}. Limite de taxa de API excedido?",
-        "IMPORTED_MULTIPLE_ISSUES": "GitHub: Importado {{issuesLength}} novas issues do git para o backlog",
-        "IMPORTED_SINGLE_ISSUE": "GitHub: Importado issue \"{{issueText}}\" do git para o backlog",
-        "ISSUE_DELETED_OR_CLOSED": "GitHub: Issue \"{{issueText}}\" parece ter sido excluído ou fechado no git",
-        "ISSUE_NO_UPDATE_REQUIRED": "GitHub: Nenhuma atualização necessária",
-        "ISSUE_UPDATE": "GitHub: Dados atualizados para \"{{issueText}}\"",
-        "MANUAL_UPDATE_ISSUE_SUCCESS": "GitHub: Dados atualizados para \"{{issueText}}\"",
-        "MISSING_ISSUE_DATA": "GitHub:  Encontrado tarefa sem dados da issue. Recarregando.",
-        "NEW_COMMENT": "GitHub: Novo comentário para \"{{issueText}}\"",
-        "POLLING": "GitHub: Mudanças de sondagem para problemas",
-        "SHOW_ISSUE_BTN": "Mostre-me"
+        "ERR_UNKNOWN": "GitHub: Erro desconhecido {{statusCode}} {{errorMsg}}. Limite de taxa de API excedido?"
       }
     },
     "GITLAB": {
@@ -201,19 +186,7 @@
         "WRITE_A_COMMENT": "Comentar"
       },
       "S": {
-        "ERR_NETWORK": "GitLab: A solicitação falhou devido a um erro de rede do lado do cliente.",
-        "ERR_NOT_CONFIGURED": "GitLab: Não está configurado corretamente",
-        "ERR_UNKNOWN": "GitLab: Erro desconhecido {{statusCode}} {{errorMsg}}",
-        "IMPORTED_MULTIPLE_ISSUES": "GitLab: Importado {{issuesLength}} novas issues do git para o backlog",
-        "IMPORTED_SINGLE_ISSUE": "GitLab: Importado issue \"{{issueText}}\" do git para o backlog",
-        "ISSUE_DELETED_OR_CLOSED": "GitLab: Issue \"{{issueText}}\" parece ter sido excluído ou fechado no git",
-        "ISSUE_NO_UPDATE_REQUIRED": "GitLab: Nenhuma atualização necessária",
-        "ISSUE_UPDATE": "GitLab: Dados atualizados para \"{{issueText}}\"",
-        "MANUAL_UPDATE_ISSUE_SUCCESS": "GitLab: Dados atualizados para \"{{issueText}}\"",
-        "MISSING_ISSUE_DATA": "GitLab:  Encontrado tarefa sem dados da issue. Recarregando.",
-        "NEW_COMMENT": "GitLab: Novo comentário para \"{{issueText}}\"",
-        "POLLING": "GitLab: Mudanças de sondagem para problemas",
-        "SHOW_ISSUE_BTN": "Mostre-me"
+        "ERR_UNKNOWN": "GitLab: Erro desconhecido {{statusCode}} {{errorMsg}}"
       }
     },
     "GOOGLE": {
@@ -234,6 +207,27 @@
         "ERR_NO_FILE_ID": "GoogleApi: Nenhum ID de arquivo especificado",
         "ERR_NO_FILE_NAME": "GoogleApi: Nenhum nome de arquivo especificado",
         "SUCCESS_LOGIN": "GoogleApi: login bem-sucedido"
+      }
+    },
+    "ISSUE": {
+      "DEFAULT": {
+        "ISSUES_STR": "Problemas",
+        "ISSUE_STR": "Questão"
+      },
+      "S": {
+        "ERR_NETWORK": "{{issueProviderName}}: O pedido falhou devido a um erro de rede do lado do cliente",
+        "ERR_NOT_CONFIGURED": "{{issueProviderName}}: Não configurado corretamente",
+        "IMPORTED_MULTIPLE_ISSUES": "{{issueProviderName}}: Importado {{nr}} novo {{issuesStr}} para o backlog",
+        "IMPORTED_SINGLE_ISSUE": "{{issueProviderName}}: Importado {{issueStr}} \"{{issueTitle}}\" para o backlog",
+        "ISSUE_DELETED_OR_CLOSED": "{{issueProviderName}}: {{issueStrC}} \"{{issueTitle}}\" parece ter sido excluído ou fechado",
+        "ISSUE_NO_UPDATE_REQUIRED": "{{issueProviderName}}: Nenhuma atualização necessária",
+        "ISSUE_UPDATE_MULTIPLE": "{{issueProviderName}}: Dados atualizados para {{nr}} {{issuesStr}}",
+        "ISSUE_UPDATE_SINGLE": "{{issueProviderName}}: Dados atualizados para \"{{issueTitle}}\"",
+        "MANUAL_UPDATE_ISSUE_SUCCESS": "{{issueProviderName}}: Dados atualizados para \"{{issueTitle}}\"",
+        "MISSING_ISSUE_DATA": "{{issueProviderName}}: Tarefas sem dados {{issueStr}} encontrados. Recarregando.",
+        "NEW_COMMENT": "{{issueProviderName}}: Novo comentário para \"{{issueTitle}}\"",
+        "POLLING_BACKLOG": "{{issueProviderName}}: Sondagem para novo {{issuesStr}}",
+        "POLLING_CHANGES": "{{issueProviderName}}: Alterações de sondagem para {{issuesStr}}"
       }
     },
     "JIRA": {
@@ -266,9 +260,9 @@
         "CHOOSE_STATUS": "Escolha o status para atribuir",
         "CURRENT_ASSIGNEE": "Responsável atual:",
         "CURRENT_STATUS": "Status atual:",
+        "TASK_NAME": "Nome da Tarefa:",
         "TITLE": "Jira: Atualizar status",
-        "UPDATE_STATUS": "Atualizar status",
-        "TASK_NAME": "Nome da Tarefa:"
+        "UPDATE_STATUS": "Atualizar status"
       },
       "DIALOG_WORKLOG": {
         "CURRENTLY_LOGGED": "Hora atualmente registrada:",
@@ -299,6 +293,7 @@
         "HOST": "Host (e.g.: http://my-host.de:1234)",
         "PASSWORD": "Token / Senha",
         "USER_NAME": "Email / Usuário",
+        "USE_PAT": "Use token de acesso pessoal em vez de senha",
         "WONKY_COOKIE_MODE": "Autenticação de reserva de cookie Wonky (somente aplicativo de desktop)"
       },
       "FORM_SECTION": {
@@ -338,16 +333,13 @@
       "S": {
         "ADDED_WORKLOG_FOR": "Jira: log de trabalho adicionado para {{issueKey}}",
         "EXTENSION_NOT_LOADED": "Extensão de superprodutividade não carregada. Atualizar a página pode ajudar",
-        "IMPORTED_MULTIPLE_ISSUES": "Jira: importou {{issuesLength}} novos issues do Jira para o backlog",
-        "IMPORTED_SINGLE_ISSUE": "Jira: issue importado \"{{issueText}}\" do Jira para o backlog",
         "INSUFFICIENT_SETTINGS": "Configurações insuficientes fornecidas para Jira",
+        "INVALID_RESPONSE": "Jira: A resposta continha dados inválidos",
         "ISSUE_NO_UPDATE_REQUIRED": "Jira: \"{{issueText}}\" já está atualizado",
-        "ISSUE_UPDATE": "Jira: dados atualizados para \"{{issueText}}\" ",
         "MANUAL_UPDATE_ISSUE_SUCCESS": "Jira: dados atualizados para \"{{issueText}}\" ",
         "MISSING_ISSUE_DATA": "Jira: Foram encontradas tarefas com dados de problemas ausentes. Recarregando.",
         "NO_AUTO_IMPORT_JQL": "Jira: Nenhuma consulta de pesquisa definida para importação automática",
         "NO_VALID_TRANSITION": "Jira: nenhuma transição válida configurada",
-        "POLLING": "Jira: Mudanças na pesquisa de problemas",
         "TIMED_OUT": "Jira: solicitação expirada",
         "TRANSITION": "Jira: defina o problema \"{{issueKey}}\" como \"{{name}}\" ",
         "TRANSITIONS_LOADED": "Jira: Transições carregadas. Use as opções abaixo para atribuí-las",
@@ -379,6 +371,9 @@
         "MOOD_PRODUCTIVITY_OVER_TIME": "Humor e produtividade ao longo do tempo",
         "NO_ADDITIONAL_DATA_YET": "Ainda não foram coletados dados adicionais. Use o formulário no painel Resumo diário \"Avaliação\" para fazer isso.",
         "OBSTRUCTION_SELECTION_COUNT": "Número de vezes que um fator obstrutivo foi selecionado",
+        "SIMPLE_CLICK_COUNTERS_OVER_TIME": "Contadores de cliques ao longo do tempo",
+        "SIMPLE_COUNTERS": "Contadores simples",
+        "SIMPLE_STOPWATCH_COUNTERS_OVER_TIME": "Contadores de cronômetro ao longo do tempo",
         "TASKS_DONE_CREATED": "Tarefas (concluídas / criadas)",
         "TIME_ESTIMATED": "Tempo estimado",
         "TIME_SPENT": "Tempo gasto"
@@ -405,22 +400,10 @@
       }
     },
     "NOTE": {
-      "ADD_REMINDER": "Adicionar lembrete",
       "D_ADD": {
-        "DATETIME_LABEL": "Data e hora para lembrete (opcional)",
         "NOTE_LABEL": "Digite algum texto para salvar como nota ..."
       },
-      "D_ADD_REMINDER": {
-        "E_ENTER_TITLE": "Você precisa inserir um título",
-        "L_DATETIME": "Data e hora para lembrete",
-        "L_TITLE": "Título para notificação"
-      },
-      "D_VIEW_REMINDER": {
-        "SNOOZE": "Soneca",
-        "TITLE": "Observação"
-      },
       "EDIT_FULLSCREEN": "Editar em tela cheia",
-      "EDIT_REMINDER": "Editar lembrete",
       "NOTES_CMP": {
         "ADD_BTN": "Adicionar nova nota",
         "DROP_TO_ADD": "Solte aqui para adicionar nova nota"
@@ -428,14 +411,41 @@
       "NOTE_CMP": {
         "DISABLE_PARSE": "Desativar análise de remarcação",
         "ENABLE_PARSE": "Ativar análise de remarcação"
+      }
+    },
+    "OPEN_PROJECT": {
+      "DIALOG_INITIAL": {
+        "TITLE": "Configurar OpenProject para Projeto"
       },
-      "REMOVE_REMINDER": "Remover lembrete",
+      "FORM": {
+        "FILTER_USER": "Nome de usuário (por exemplo, para filtrar as alterações você mesmo)",
+        "HOST": "Host (por exemplo: https://www.openproject.org/)",
+        "IS_AUTO_ADD_TO_BACKLOG": "Adicionar automaticamente pacotes de trabalho não resolvidos do OpenProject ao backlog",
+        "IS_AUTO_POLL": "Pesquise automaticamente pacotes de trabalho OpenProject importados para alterações",
+        "IS_SEARCH_ISSUES_FROM_OPEN_PROJECT": "Mostrar pacotes de trabalho como sugestões ao adicionar novas tarefas",
+        "PROJECT_ID": "ID do projeto",
+        "PROJECT_ID_DESCRIPTION": "Pode ser encontrado como parte da url, ao visualizar o projeto no navegador.",
+        "TOKEN": "Token de Acesso"
+      },
+      "FORM_SECTION": {
+        "HELP": "<p>Aqui você pode configurar SuperProductivity para listar pacotes de trabalho OpenProject abertos. Observe que, para que isso funcione no navegador, você provavelmente precisará configurar o CORS para o servidor OpenProject, para permitir o acesso de app.super-productivity.com</p>",
+        "TITLE": "Projeto aberto"
+      },
+      "ISSUE_CONTENT": {
+        "ASSIGNEE": "Cessionário",
+        "DESCRIPTION": "Descrição",
+        "MARK_AS_CHECKED": "Marcar atualizações como marcadas",
+        "STATUS": "Status",
+        "SUMMARY": "Resumo",
+        "TYPE": "Tipo"
+      },
+      "ISSUE_STRINGS": {
+        "ISSUES_STR": "pacotes de trabalho",
+        "ISSUE_STR": "Pacote de trabalho"
+      },
       "S": {
-        "ADDED_REMINDER": "Lembrete adicionado para a nota",
-        "DELETED_REMINDER": "Lembrete excluído da nota",
-        "UPDATED_REMINDER": "Lembrete atualizado para a nota"
-      },
-      "UPDATE_REMINDER": "Atualizar lembrete"
+        "ERR_UNKNOWN": "OpenProject: Erro desconhecido {{statusCode}} {{errorMsg}}. O CORS está configurado corretamente para o servidor?"
+      }
     },
     "POMODORO": {
       "BACK_TO_WORK": "Voltar ao trabalho!",
@@ -530,8 +540,20 @@
         "UPDATED": "Configurações atualizadas do projeto"
       }
     },
+    "QUICK_HISTORY": {
+      "NO_DATA": "Sem dados para o ano atual",
+      "PAGE_TITLE": "História Rápida",
+      "WEEK_TITLE": "Semana {{nr}} ({{timeSpent}})"
+    },
     "REMINDER": {
       "S_REMINDER_ERR": "Erro na interface do lembrete"
+    },
+    "SEARCH_BAR": {
+      "INFO": "Clique no ícone da lista para procurar tarefas arquivadas",
+      "INFO_ARCHIVED": "Clique no ícone de arquivo para procurar tarefas normais",
+      "PLACEHOLDER": "Pesquisa por tarefa ou descrição de tarefa",
+      "PLACEHOLDER_ARCHIVED": "Pesquisar tarefas arquivadas",
+      "TOO_MANY_RESULTS": "Muitos resultados, por favor restrinja sua pesquisa"
     },
     "SIMPLE_COUNTER": {
       "D_CONFIRM_REMOVE": {
@@ -586,14 +608,15 @@
       },
       "FORM": {
         "DROPBOX": {
-          "B_GENERATE_TOKEN": "Gerar token",
-          "FOLLOW_LINK": "Abra o link a seguir e copie o código de autenticação fornecido no campo de entrada.",
-          "L_ACCESS_TOKEN": "Token de acesso (gerado a partir do código de autenticação)",
-          "L_AUTH_CODE": "Código de autenticação"
+          "L_ACCESS_TOKEN": "Token de acesso (gerado a partir do código de autenticação)"
         },
         "GOOGLE": {
           "L_IS_COMPRESS_DATA": "Comprimir dados",
           "L_SYNC_FILE_NAME": "Nome do arquivo de sincronização"
+        },
+        "LOCAL_FILE": {
+          "L_SYNC_FILE_PATH": "Caminho do arquivo de sincronização",
+          "L_SYNC_FILE_PATH_DESCRIPTION": "Caminho absoluto para o arquivo que deve ser usado para sincronização (será criado)."
         },
         "L_ENABLE_SYNCING": "Habilitar Sincronização",
         "L_SYNC_INTERVAL": "Intervalo de sincronização",
@@ -614,6 +637,7 @@
         "INCOMPLETE_CFG": "A autenticação para sincronização falhou. Por favor, verifique o seu Config!",
         "INITIAL_SYNC_ERROR": "A sincronização inicial falhou",
         "SUCCESS_IMPORT": "Dados importados",
+        "SUCCESS_VIA_BUTTON": "Dados sincronizados com sucesso",
         "UNKNOWN_ERROR": "Erro desconhecido durante a sincronização. Verifique o console.",
         "UPLOAD_ERROR": "Erro de upload desconhecido (configurações corretas?): {{err}}"
       }
@@ -659,8 +683,10 @@
       "ADD_TASK_BAR": {
         "ADD_EXISTING_TASK": "Adicionar tarefa existente \"{{taskTitle}}\"",
         "ADD_ISSUE_TASK": "Adicione a edição nº{{issueNr}} de {{issueType}}",
-        "ADD_TASK": "Adicionar tarefa",
-        "ADD_TASK_TO_BACKLOG": "Adicionar tarefa ao backlog",
+        "ADD_TASK_TO_BOTTOM_OF_BACKLOG": "Adicionar tarefa ao final da lista de pendências",
+        "ADD_TASK_TO_BOTTOM_OF_TODAY": "Adicionar tarefa ao final da lista",
+        "ADD_TASK_TO_TOP_OF_BACKLOG": "Adicionar tarefa ao topo da lista de pendências",
+        "ADD_TASK_TO_TOP_OF_TODAY": "Adicionar tarefa ao topo da lista",
         "CREATE_TASK": "Criar nova tarefa",
         "EXAMPLE": "Exemplo: \"Algum título da tarefa + nome do projeto # alguma tag # alguma outra tag 10m / 3h\"",
         "START": "Pressione enter mais uma vez para iniciar"
@@ -699,9 +725,12 @@
         "UPDATE_ISSUE_DATA": "Atualizar dados da issue"
       },
       "D_REMINDER_ADD": {
+        "CONFIRM_REPEAT_OK": "Cronograma",
+        "CONFIRM_REPEAT_TXT": "Você está tentando agendar essa tarefa repetida para outro dia. Normalmente, as tarefas repetidas devem ser recriadas em dias específicos e agendadas apenas nesse dia. Você deseja continuar mesmo assim?",
         "DATETIME_FOR": "Data e hora para lembrete",
         "EDIT": "Editar lembrete",
         "MOVE_TO_BACKLOG": "Mova a tarefa para backlog até que seja agendada",
+        "REMIND_AT": "Lembre-se em",
         "RO_10M": "10 minutos antes de começar",
         "RO_15M": "15 minutos antes de começar",
         "RO_1H": "1 hora antes de começar",
@@ -716,6 +745,7 @@
         "ADD_TO_TODAY": "Adicione hoje",
         "DISMISS": "Dispensar lembrete",
         "DISMISS_ALL": "Recusar tudo",
+        "DONE": "Feito",
         "DUE_TASK": "Tarefa devida",
         "DUE_TASKS": "Tarefas devidas",
         "FOR_CURRENT": "A tarefa está vencida. Deseja começar a trabalhar nela?",
@@ -785,7 +815,11 @@
         "FRIDAY": "Sexta-feira",
         "IS_ADD_TO_BOTTOM": "Mover a tarefa para o final da lista",
         "MONDAY": "Segunda-feira",
+        "REMIND_AT": "Lembre-se em",
+        "REMIND_AT_PLACEHOLDER": "Selecione quando lembrar",
         "SATURDAY": "Sábado",
+        "START_TIME": "Horário de início agendado",
+        "START_TIME_DESCRIPTION": "Por exemplo. 15:00. Deixe em branco para uma tarefa de dia inteiro",
         "SUNDAY": "Domingo",
         "THURSDAY": "Quinta-feira",
         "TITLE": "Título da tarefa",
@@ -803,7 +837,8 @@
       "MENU_TITLE": "Timeline",
       "NOW": "agora",
       "NO_TASKS": "Atualmente não há tarefas. Adicione algumas tarefas através do botão + na barra superior.",
-      "START": "Início do Trabalho"
+      "START": "Início do Trabalho",
+      "TASK_PROJECTION_INFO": "Projeção futura de uma tarefa repetível programada"
     },
     "TIME_TRACKING": {
       "B": {
@@ -818,6 +853,11 @@
         "BREAK": "Pausa",
         "CREATE_AND_TRACK": "<em>Criar</em> e acompanhar:",
         "IDLE_FOR": "Você esteve ocioso por:",
+        "SIMPLE_CONFIRM_COUNTER_CANCEL": "Pular",
+        "SIMPLE_CONFIRM_COUNTER_OK": "Track",
+        "SIMPLE_COUNTER_CONFIRM_TXT": "Você selecionou ignorar, mas ativou {{nr}} botão (s) de contador simples. Você deseja rastrear o tempo ocioso deles?",
+        "SIMPLE_COUNTER_TOOLTIP": "Clique para rastrear até {{title}}",
+        "SIMPLE_COUNTER_TOOLTIP_DISABLE": "Clique para NÃO rastrear para {{title}}",
         "SKIP": "Pular",
         "TASK": "Tarefa",
         "TASK_BREAK": "Tarefa+Pausa",
@@ -966,6 +1006,7 @@
       "OPEN_PROJECT_NOTES": "Mostrar / ocultar notas do projeto",
       "SELECT_NEXT_TASK": "Selecione a próxima tarefa",
       "SELECT_PREVIOUS_TASK": "Selecionar tarefa anterior",
+      "SHOW_SEARCH_BAR": "Mostrar barra de pesquisa",
       "SYSTEM_SHORTCUTS": "Atalhos globais (todo o sistema)",
       "TASK_ADD_SUB_TASK": "Adicionar subtarefa",
       "TASK_DELETE": "Excluir tarefa",
@@ -1055,6 +1096,7 @@
       "MESSAGE": "Mensagem de pausa",
       "MIN_WORKING_TIME": "Acionar notificação de pausa após trabalhar X sem uma",
       "MOTIVATIONAL_IMG": "Imagem motivacional (URL da Web)",
+      "SNOOZE_TIME": "Tempo de soneca quando solicitado para fazer uma pausa",
       "TITLE": "Lembrete de Pausa"
     },
     "TIMELINE": {
@@ -1076,7 +1118,10 @@
   "GLOBAL_SNACK": {
     "COPY_TO_CLIPPBOARD": "Copiado para a área de transferência",
     "ERR_COMPRESSION": "Erro para interface de compactação",
+    "FILE_DOWNLOADED": "{{fileName}} baixado",
+    "FILE_DOWNLOADED_BTN": "Pasta aberta",
     "PERSISTENCE_DISALLOWED": "Os dados não serão mantidos permanentemente. Esteja ciente de que isso pode levar à perda de dados!",
+    "PERSISTENCE_ERROR": "Erro ao solicitar a persistência de dados: {{err}}",
     "RUNNING_X": "Rodando \"{{str}}\".",
     "SHORTCUT_WARN_OPEN_BOOKMARKS_FROM_TAG": "{{keyCombo}} pressionado, mas o atalho para abrir favoritos só está disponível no contexto do projeto.",
     "SHORTCUT_WARN_OPEN_NOTES_FROM_TAG": "{{keyCombo}} pressionado, mas o atalho para abrir notas só está disponível no contexto do projeto."
@@ -1108,8 +1153,10 @@
     "PROJECTS": "Projetos",
     "PROJECT_MENU": "Menu Projeto",
     "PROJECT_SETTINGS": "Configurações do projeto",
+    "QUICK_HISTORY": "História Rápida",
     "SCHEDULED": "Programado",
     "SETTINGS": "Configurações",
+    "SHOW_SEARCH_BAR": "Mostrar barra de pesquisa",
     "TAGS": "Tag",
     "TASKS": "Tarefas",
     "TASK_LIST": "Lista de tarefas",
@@ -1128,6 +1175,7 @@
       "MSG": "Seu trabalho está feito. Hora de ir para casa!",
       "OK": "Sim, sim! Desligar!"
     },
+    "ESTIMATE_TOTAL": "Estimativa total:",
     "EVALUATION": "Avaliação",
     "EXPORT_TASK_LIST": "Exportar lista de tarefas",
     "NO_TASKS": "Não há tarefas para este dia",
@@ -1177,6 +1225,7 @@
     "GITLAB_CONFIGURED": "Integração do GitLab configurada",
     "IMPORT_FROM_FILE": "Importar do arquivo",
     "JIRA_CONFIGURED": "Integração Jira configurada",
+    "OPEN_PROJECT_CONFIGURED": "Integração OpenProject configurada",
     "S_INVALID_JSON": "Json inválido para o arquivo de projeto",
     "TITLE": "Visão Geral do Projeto",
     "UN_ARCHIVE_PROJECT": "Desarquivar projeto"

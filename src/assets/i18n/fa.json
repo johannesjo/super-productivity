@@ -1,5 +1,6 @@
 {
   "APP": {
+    "A_BROWSER_WARNING": "متأسفیم ، اما برنامه برای اجرا در این مرورگر بهینه نشده است. لطفاً از مرورگر مبتنی بر کروم یا بارگیری نسخه الکترونیکی برنامه استفاده کنید",
     "B_INSTALL": {
       "IGNORE": "نادیده گرفتن",
       "INSTALL": "نصب",
@@ -19,7 +20,9 @@
   "CONFIRM": {
     "AUTO_FIX": "به نظر می رسد داده های شما آسیب دیده است. آیا می خواهید به طور خودکار آن را برطرف کنید؟ این ممکن است منجر به از دست دادن جزئی اطلاعات شود.",
     "DELETE_STRAY_BACKUP": "آیا می خواهید برای جلوگیری از دیدن این گفتگو ، قسمت پشتی را حذف کنید؟",
+    "RELOAD_AFTER_IDB_ERROR": "دسترسی به پایگاه داده امکان پذیر نیست :( دلایل احتمالی عبارتند از:",
     "RESTORE_FILE_BACKUP": "به نظر می رسد هیچ داده ای وجود ندارد ، اما نسخه پشتیبان در \"{{dir}}\" موجود است. آیا می خواهید آخرین نسخه پشتیبان را از {{from}}بازیابی کنید؟",
+    "RESTORE_FILE_BACKUP_ANDROID": "به نظر می رسد هیچ داده ای وجود ندارد ، اما نسخه پشتیبان موجود است. آیا می خواهید آن را بارگیری کنید؟",
     "RESTORE_STRAY_BACKUP": "در آخرین همگام سازی ممکن است خطایی رخ داده باشد. آیا می خواهید آخرین نسخه پشتیبان را بازیابی کنید؟"
   },
   "DATETIME_INPUT": {
@@ -106,14 +109,7 @@
       "S": {
         "CALENDAR_NOT_FOUND": "CalDav: تقویم \"{{calendarName}}\" یافت نشد",
         "CALENDAR_READ_ONLY": "CalDav: تقویم \"{{calendarName}}\" فقط خواندنی است",
-        "ERR_NETWORK": "CalDav: درخواست به دلیل خطای شبکه سمت مشتری انجام نشد",
-        "ERR_NOT_CONFIGURED": "CalDav: به درستی پیکربندی نشده است",
-        "IMPORTED_MULTIPLE_ISSUES": "calDav: {{issuesLength}} شماره جدید از git به موارد عقب مانده وارد شده است",
-        "IMPORTED_SINGLE_ISSUE": "CalDav: شماره \"{{issueText}}\" را از موارد موجود وارد کرد",
-        "ISSUE_NOT_FOUND": "CalDav: به نظر می رسد Todo \"{{issueId}}\" در سرور حذف شده است.",
-        "ISSUE_NO_UPDATE_REQUIRED": "CalDav: نیازی به بروزرسانی نیست.",
-        "ISSUE_UPDATE": "Caldav: داده های دارای کد برای \"{{issueText}}\"",
-        "POLLING": "Caldav: نظرسنجی برای todos تغییر می کند"
+        "ISSUE_NOT_FOUND": "CalDav: به نظر می رسد Todo \"{{issueId}}\" در سرور حذف شده است."
       }
     },
     "CONFIG": {
@@ -126,6 +122,7 @@
         "ACCESS_TOKEN_ERROR": "Dropbox: تولید توکن دسترسی از Auth Code امکان پذیر نیست",
         "ACCESS_TOKEN_GENERATED": "Dropbox: Access Token تولید شده از Auth Code",
         "AUTH_ERROR": "Dropbox: نشانه دسترسی نامعتبر ارائه شده است",
+        "AUTH_ERROR_ACTION": "تغییر توکن",
         "OFFLINE": "Dropbox: همگام سازی امکان پذیر نیست ، زیرا آفلاین است",
         "SYNC_ERROR": "Dropbox: خطا هنگام همگام سازی"
       }
@@ -158,19 +155,7 @@
         "WRITE_A_COMMENT": "دیدگاهتان را بنویسید"
       },
       "S": {
-        "ERR_NETWORK": "گیت هاب: به علت مشکل شبکه سمت کاربر درخواست انجام نشد",
-        "ERR_NOT_CONFIGURED": "گیت هاب: به درستی پیکربندی نشده است",
-        "ERR_UNKNOWN": "GitHub: خطای ناشناخته{{errorMsg}} {{statusCode}} . محدودیت نرخ Api بیش از?",
-        "IMPORTED_MULTIPLE_ISSUES": "GitHub: Imported {{issuesLength}} new issues from git to backlog",
-        "IMPORTED_SINGLE_ISSUE": "GitHub: Imported issue \"{{issueText}}\" from git to backlog",
-        "ISSUE_DELETED_OR_CLOSED": "GitHub: Issue \"{{issueText}}\" seems to be deleted or closed on git",
-        "ISSUE_NO_UPDATE_REQUIRED": "GitHub: به روزرسانی لازم نیست",
-        "ISSUE_UPDATE": "گیت هاب: اطلاعات برای \"{{issueText}}\" بروزرسانی شد",
-        "MANUAL_UPDATE_ISSUE_SUCCESS": "GitHub: Updated data for \"{{issueText}}\"",
-        "MISSING_ISSUE_DATA": "GitHub: Tasks with missing issue data found. Reloading.",
-        "NEW_COMMENT": "گیت هاب: دیدگاه جدید برای \"{{issueText}}\"",
-        "POLLING": "GitHub: Polling Changes for issues",
-        "SHOW_ISSUE_BTN": "به من نشان بده"
+        "ERR_UNKNOWN": "GitHub: خطای ناشناخته{{errorMsg}} {{statusCode}} . محدودیت نرخ Api بیش از?"
       }
     },
     "GITLAB": {
@@ -201,19 +186,7 @@
         "WRITE_A_COMMENT": "دیدگاهتان را بنویسید"
       },
       "S": {
-        "ERR_NETWORK": "گیت لاب: به علت مشکل شبکه سمت کاربر درخواست انجام نشد",
-        "ERR_NOT_CONFIGURED": "گیت لاب: به درستی پیکربندی نشده است",
-        "ERR_UNKNOWN": "GitLab: خطای ناشناخته {{statusCode}} {{errorMsg}}",
-        "IMPORTED_MULTIPLE_ISSUES": "GitLab: Imported {{issuesLength}} new issues from git to backlog",
-        "IMPORTED_SINGLE_ISSUE": "GitLab: Imported issue \"{{issueText}}\" from git to backlog",
-        "ISSUE_DELETED_OR_CLOSED": "GitLab: Issue \"{{issueText}}\" seems to be deleted or closed on git",
-        "ISSUE_NO_UPDATE_REQUIRED": "GitLab: به روزرسانی لازم نیست",
-        "ISSUE_UPDATE": "گیت لاب: اطلاعات برای \"{{issueText}}\" بروزرسانی شد",
-        "MANUAL_UPDATE_ISSUE_SUCCESS": "GitLab: Updated data for \"{{issueText}}\"",
-        "MISSING_ISSUE_DATA": "GitLab: Tasks with missing issue data found. Reloading.",
-        "NEW_COMMENT": "گیت لاب: دیدگاه جدید برای \"{{issueText}}\"",
-        "POLLING": "GitLab: Polling Changes for issues",
-        "SHOW_ISSUE_BTN": "به من نشان بده"
+        "ERR_UNKNOWN": "GitLab: خطای ناشناخته {{statusCode}} {{errorMsg}}"
       }
     },
     "GOOGLE": {
@@ -234,6 +207,27 @@
         "ERR_NO_FILE_ID": "GoogleApi: آیدی فایل مشخص نشده است",
         "ERR_NO_FILE_NAME": "GoogleApi: نام فایل مشخص نشده است",
         "SUCCESS_LOGIN": "GoogleApi: ورود موفق به سیستم"
+      }
+    },
+    "ISSUE": {
+      "DEFAULT": {
+        "ISSUES_STR": "مسائل",
+        "ISSUE_STR": "موضوع"
+      },
+      "S": {
+        "ERR_NETWORK": "{{issueProviderName}}: درخواست به دلیل خطای شبکه سمت سرویس گیرنده ناموفق بود",
+        "ERR_NOT_CONFIGURED": "{{issueProviderName}}: به درستی پیکربندی نشده است",
+        "IMPORTED_MULTIPLE_ISSUES": "{{issueProviderName}}: {{nr}} جدید {{issuesStr}} به عقب افتاده وارد شد",
+        "IMPORTED_SINGLE_ISSUE": "{{issueProviderName}}: {{issueStr}} \"{{issueTitle}}\" را به عقب افتاده وارد کرد",
+        "ISSUE_DELETED_OR_CLOSED": "{{issueProviderName}}: به نظر می رسد {{issueStrC}} \"{{issueTitle}}\" حذف یا بسته شده است",
+        "ISSUE_NO_UPDATE_REQUIRED": "{{issueProviderName}}: نیازی به بروزرسانی نیست",
+        "ISSUE_UPDATE_MULTIPLE": "{{issueProviderName}}: داده های به روز شده برای {{nr}} {{issuesStr}}",
+        "ISSUE_UPDATE_SINGLE": "{{issueProviderName}}: داده های به روز شده برای \"{{issueTitle}}\"",
+        "MANUAL_UPDATE_ISSUE_SUCCESS": "{{issueProviderName}}: داده های به روز شده برای \"{{issueTitle}}\"",
+        "MISSING_ISSUE_DATA": "{{issueProviderName}}: کارهایی با {{issueStr}} داده گم شده پیدا شد. بارگیری مجدد",
+        "NEW_COMMENT": "{{issueProviderName}}: نظر جدید برای \"{{issueTitle}}\"",
+        "POLLING_BACKLOG": "{{issueProviderName}}: نظرسنجی برای موارد جدید {{issuesStr}}",
+        "POLLING_CHANGES": "{{issueProviderName}}: نظرسنجی تغییرات برای {{issuesStr}}"
       }
     },
     "JIRA": {
@@ -266,6 +260,7 @@
         "CHOOSE_STATUS": "یک وضعیت برای کار انتخاب کنید",
         "CURRENT_ASSIGNEE": "مسئول فعلی:",
         "CURRENT_STATUS": "وضعیت فعلی:",
+        "TASK_NAME": "نام کار:",
         "TITLE": "جیرا : بروزرسانی وضعیت",
         "UPDATE_STATUS": "بروزرسانی وضعیت"
       },
@@ -298,6 +293,7 @@
         "HOST": "آدرس جیرای شما (مثلا: http://my-jira.ir:1234)",
         "PASSWORD": "توکن / کلمه عبور",
         "USER_NAME": "ایمیل / نام کاربری",
+        "USE_PAT": "به جای گذرواژه از رمز دسترسی شخصی استفاده کنید",
         "WONKY_COOKIE_MODE": "تأیید هویت کوکی Wonky Cookie (فقط برنامه دسک تاپ)"
       },
       "FORM_SECTION": {
@@ -337,16 +333,13 @@
       "S": {
         "ADDED_WORKLOG_FOR": "Jira: Added worklog for {{issueKey}}",
         "EXTENSION_NOT_LOADED": "Super Productivity Extension not loaded. Reloading the page might help",
-        "IMPORTED_MULTIPLE_ISSUES": "Jira: Imported {{issuesLength}} new issues from jira to backlog",
-        "IMPORTED_SINGLE_ISSUE": "Jira: Imported issue \"{{issueText}}\" from jira to backlog",
         "INSUFFICIENT_SETTINGS": "Insufficient Settings provided for Jira",
+        "INVALID_RESPONSE": "جیرا: پاسخ حاوی اطلاعات نامعتبر بود",
         "ISSUE_NO_UPDATE_REQUIRED": "Jira: \"{{issueText}}\" already up to date",
-        "ISSUE_UPDATE": "Jira: Updated data for \"{{issueText}}\"",
         "MANUAL_UPDATE_ISSUE_SUCCESS": "Jira: Updated data for \"{{issueText}}\"",
         "MISSING_ISSUE_DATA": "Jira: Tasks with missing issue data found. Reloading.",
         "NO_AUTO_IMPORT_JQL": "جیرا: هیچگونه جستجوی جستجو برای واردات خودکار تعریف نشده است",
         "NO_VALID_TRANSITION": "Jira: No valid transition configured",
-        "POLLING": "Jira: Polling Changes for issues",
         "TIMED_OUT": "Jira: Request timed out",
         "TRANSITION": "Jira: Set issue \"{{issueKey}}\" to \"{{name}}\"",
         "TRANSITIONS_LOADED": "Jira: Transitions loaded. Use the selects below to assign them",
@@ -378,6 +371,9 @@
         "MOOD_PRODUCTIVITY_OVER_TIME": "Mood and productivity over time",
         "NO_ADDITIONAL_DATA_YET": "No additional data collected yet. Use the form on the daily summary \"Evaluation\" panel to do so.",
         "OBSTRUCTION_SELECTION_COUNT": "Number of times an obstructing factor was selected",
+        "SIMPLE_CLICK_COUNTERS_OVER_TIME": "با گذشت زمان روی Counters کلیک کنید",
+        "SIMPLE_COUNTERS": "پیشخوان های ساده",
+        "SIMPLE_STOPWATCH_COUNTERS_OVER_TIME": "شمارنده کرونومتر در طول زمان",
         "TASKS_DONE_CREATED": "Tasks (done/created)",
         "TIME_ESTIMATED": "Time Estimated",
         "TIME_SPENT": "Time Spent"
@@ -404,22 +400,10 @@
       }
     },
     "NOTE": {
-      "ADD_REMINDER": "اضافه کردن یادآوری",
       "D_ADD": {
-        "DATETIME_LABEL": "تاریخ و زمان برای یادآوری (اختیاری)",
         "NOTE_LABEL": "متنی برای دخیره به عنوان یادداشت وارد کنید..."
       },
-      "D_ADD_REMINDER": {
-        "E_ENTER_TITLE": "شما باید یک عنوان وارد کنید",
-        "L_DATETIME": "تاریخ و زمان برای یادآوری",
-        "L_TITLE": "عنوان برای اطلاع رسانی"
-      },
-      "D_VIEW_REMINDER": {
-        "SNOOZE": "تعویق",
-        "TITLE": "یادداشت"
-      },
       "EDIT_FULLSCREEN": "ویرایش در تمام صفحه",
-      "EDIT_REMINDER": "ویرایش یادآوری",
       "NOTES_CMP": {
         "ADD_BTN": "اضافه کردن کار جدید",
         "DROP_TO_ADD": "برای اضافه کردن کارجدید اینجا رها کنید"
@@ -427,14 +411,41 @@
       "NOTE_CMP": {
         "DISABLE_PARSE": "Disable markdown parsing",
         "ENABLE_PARSE": "Enable markdown parse"
+      }
+    },
+    "OPEN_PROJECT": {
+      "DIALOG_INITIAL": {
+        "TITLE": "راه اندازی OpenProject برای پروژه"
       },
-      "REMOVE_REMINDER": "Remove reminder",
+      "FORM": {
+        "FILTER_USER": "نام کاربری (به عنوان مثال برای فیلتر کردن تغییرات توسط خودتان)",
+        "HOST": "میزبان (به عنوان مثال: https://www.openproject.org/)",
+        "IS_AUTO_ADD_TO_BACKLOG": "به صورت خودکار بسته های کاری حل نشده از OpenProject را به backlog اضافه کنید",
+        "IS_AUTO_POLL": "بسته های کاری OpenProject وارد شده را برای تغییرات به طور خودکار نظرسنجی کنید",
+        "IS_SEARCH_ISSUES_FROM_OPEN_PROJECT": "هنگام افزودن کارهای جدید ، بسته های کاری را به عنوان پیشنهاد نشان دهید",
+        "PROJECT_ID": "شناسه پروژه",
+        "PROJECT_ID_DESCRIPTION": "هنگام مشاهده پروژه در مرورگر ، می توانید آن را به عنوان بخشی از url پیدا کنید.",
+        "TOKEN": "نشانه دسترسی"
+      },
+      "FORM_SECTION": {
+        "HELP": "<p>در اینجا می توانید SuperProductivity را برای لیست بسته های کاری OpenProject باز شده پیکربندی کنید. لطفاً توجه داشته باشید که برای کارکردن در مرورگر ، احتمالاً باید CORS را برای سرور OpenProject خود پیکربندی کنید ، تا از app.super-productivity.com اجازه دسترسی داشته باشید</p>",
+        "TITLE": "پروژه باز"
+      },
+      "ISSUE_CONTENT": {
+        "ASSIGNEE": "اختصاص دهنده",
+        "DESCRIPTION": "شرح",
+        "MARK_AS_CHECKED": "به روزرسانی ها را به عنوان علامت گذاری شده علامت گذاری کنید",
+        "STATUS": "وضعیت",
+        "SUMMARY": "خلاصه",
+        "TYPE": "تایپ کنید"
+      },
+      "ISSUE_STRINGS": {
+        "ISSUES_STR": "بسته های کاری",
+        "ISSUE_STR": "بسته کاری"
+      },
       "S": {
-        "ADDED_REMINDER": "Added reminder for note",
-        "DELETED_REMINDER": "Deleted reminder for note",
-        "UPDATED_REMINDER": "Updated reminder for note"
-      },
-      "UPDATE_REMINDER": "Update reminder"
+        "ERR_UNKNOWN": "OpenProject: خطای ناشناخته {{statusCode}} {{errorMsg}}. آیا CORS به درستی برای سرور پیکربندی شده است؟"
+      }
     },
     "POMODORO": {
       "BACK_TO_WORK": "بازگشت به کار!",
@@ -529,8 +540,20 @@
         "UPDATED": "Updated project settings"
       }
     },
+    "QUICK_HISTORY": {
+      "NO_DATA": "هیچ اطلاعاتی برای سال جاری وجود ندارد",
+      "PAGE_TITLE": "تاریخچه سریع",
+      "WEEK_TITLE": "هفته {{nr}} ({{timeSpent}})"
+    },
     "REMINDER": {
       "S_REMINDER_ERR": "خطا در رابط یادآوری"
+    },
+    "SEARCH_BAR": {
+      "INFO": "برای جستجوی کارهای بایگانی شده روی نماد لیست کلیک کنید",
+      "INFO_ARCHIVED": "برای جستجوی کارهای معمولی ، روی نماد بایگانی کلیک کنید",
+      "PLACEHOLDER": "جستجو برای شرح وظیفه یا کار",
+      "PLACEHOLDER_ARCHIVED": "جستجوی کارهای بایگانی شده",
+      "TOO_MANY_RESULTS": "نتایج بسیار زیاد است ، لطفاً جستجوی خود را محدود کنید"
     },
     "SIMPLE_COUNTER": {
       "D_CONFIRM_REMOVE": {
@@ -585,14 +608,15 @@
       },
       "FORM": {
         "DROPBOX": {
-          "B_GENERATE_TOKEN": "تولید توکن",
-          "FOLLOW_LINK": "لطفاً پیوند زیر را باز کرده و کد Auth ارائه شده در قسمت ورودی را کپی کنید.",
-          "L_ACCESS_TOKEN": "Access Token (تولید شده از کد Auth)",
-          "L_AUTH_CODE": "کد تایید"
+          "L_ACCESS_TOKEN": "Access Token (تولید شده از کد Auth)"
         },
         "GOOGLE": {
           "L_IS_COMPRESS_DATA": "فشرده سازی داده ها",
           "L_SYNC_FILE_NAME": "نام پرونده همگام سازی کنید"
+        },
+        "LOCAL_FILE": {
+          "L_SYNC_FILE_PATH": "مسیر پرونده همگام سازی",
+          "L_SYNC_FILE_PATH_DESCRIPTION": "مسیر مطلق به پرونده که باید برای همگام سازی استفاده شود (ایجاد می شود)."
         },
         "L_ENABLE_SYNCING": "همگام سازی را فعال کنید",
         "L_SYNC_INTERVAL": "فاصله همگام سازی",
@@ -613,6 +637,7 @@
         "INCOMPLETE_CFG": "احراز هویت برای همگام سازی انجام نشد. لطفا پیکربندی خود را بررسی کنید!",
         "INITIAL_SYNC_ERROR": "همگام سازی اولیه انجام نشد",
         "SUCCESS_IMPORT": "داده وارد شد",
+        "SUCCESS_VIA_BUTTON": "همگام سازی داده ها با موفقیت انجام شد",
         "UNKNOWN_ERROR": "خطای ناشناخته هنگام همگام سازی لطفا کنسول را بررسی کنید.",
         "UPLOAD_ERROR": "خطای بارگذاری ناشناخته (تنظیمات درست است؟): {{err}}"
       }
@@ -658,8 +683,10 @@
       "ADD_TASK_BAR": {
         "ADD_EXISTING_TASK": "افزودن کار موجود \"{{taskTitle}}\"",
         "ADD_ISSUE_TASK": "شماره شماره{{issueNr}} را از {{issueType}}اضافه کنید",
-        "ADD_TASK": "اضافه کردن کار",
-        "ADD_TASK_TO_BACKLOG": "اضافه کردن کار به بک لاگ",
+        "ADD_TASK_TO_BOTTOM_OF_BACKLOG": "وظیفه را به قسمت عقب مانده اضافه کنید",
+        "ADD_TASK_TO_BOTTOM_OF_TODAY": "اضافه کردن وظیفه به پایین لیست",
+        "ADD_TASK_TO_TOP_OF_BACKLOG": "اضافه کردن وظیفه به بالای مطالب عقب افتاده",
+        "ADD_TASK_TO_TOP_OF_TODAY": "اضافه کردن وظیفه به بالای لیست",
         "CREATE_TASK": "ایجاد کار جدید",
         "EXAMPLE": "مثال: \"برخی از عنوان های کار + پروژه نام # برخی از برچسب ها # برخی دیگر از برچسب ها 10m / 3h\"",
         "START": "جهت شروع یکبار دیگر دکمه اینتر را بزنید"
@@ -698,9 +725,12 @@
         "UPDATE_ISSUE_DATA": "Update issue data"
       },
       "D_REMINDER_ADD": {
+        "CONFIRM_REPEAT_OK": "برنامه",
+        "CONFIRM_REPEAT_TXT": "شما سعی می کنید این کار مکرر را برای یک روز دیگر برنامه ریزی کنید. وظایف مکرر معمولاً در روزهای معین ایجاد می شوند و فقط در آن روز برنامه ریزی می شوند. آیا به هر حال می خواهید ادامه دهید؟",
         "DATETIME_FOR": "تاریخ و زمان برای یادآوری",
         "EDIT": "ویرایش یادآوری",
         "MOVE_TO_BACKLOG": "Move task to backlog until scheduled",
+        "REMIND_AT": "یادآوری در",
         "RO_10M": "10 دقیقه قبل از شروع آن",
         "RO_15M": "15 دقیقه قبل از شروع آن",
         "RO_1H": "1 ساعت قبل از شروع آن",
@@ -715,6 +745,7 @@
         "ADD_TO_TODAY": "به امروز اضافه کنید",
         "DISMISS": "Dismiss Reminder",
         "DISMISS_ALL": "اخراج همه",
+        "DONE": "انجام شده",
         "DUE_TASK": "وظیفه مقرر",
         "DUE_TASKS": "وظایف مقرر",
         "FOR_CURRENT": "Task is due. Do you want to start working on it?",
@@ -784,7 +815,11 @@
         "FRIDAY": "جمعه",
         "IS_ADD_TO_BOTTOM": "کار را به پایین لیست منتقل کنید",
         "MONDAY": "دوشنبه",
+        "REMIND_AT": "یادآوری در",
+        "REMIND_AT_PLACEHOLDER": "زمان یادآوری را انتخاب کنید",
         "SATURDAY": "شنبه",
+        "START_TIME": "زمان شروع برنامه ریزی شده",
+        "START_TIME_DESCRIPTION": "به عنوان مثال. ساعت 15:00 برای یک کار تمام روز خالی بگذارید",
         "SUNDAY": "یک شنبه",
         "THURSDAY": "پنج شنبه",
         "TITLE": "عنوان برای کار",
@@ -802,7 +837,8 @@
       "MENU_TITLE": "جدول زمانی",
       "NOW": "اکنون",
       "NO_TASKS": "در حال حاضر هیچ وظیفه ای وجود ندارد. لطفاً برخی از کارها را از طریق دکمه + در نوار بالا اضافه کنید.",
-      "START": "شروع کار"
+      "START": "شروع کار",
+      "TASK_PROJECTION_INFO": "پیش بینی آینده یک کار تکراری برنامه ریزی شده"
     },
     "TIME_TRACKING": {
       "B": {
@@ -817,6 +853,11 @@
         "BREAK": "استراحت",
         "CREATE_AND_TRACK": "<em>Create</em> and track to:",
         "IDLE_FOR": "You have been idle for:",
+        "SIMPLE_CONFIRM_COUNTER_CANCEL": "پرش",
+        "SIMPLE_CONFIRM_COUNTER_OK": "مسیر",
+        "SIMPLE_COUNTER_CONFIRM_TXT": "شما پرش را انتخاب کرده اید ، اما {{nr}} دکمه (های) شمارنده ساده را فعال کرده اید. آیا می خواهید زمان بیکاری را برای آنها پیگیری کنید؟",
+        "SIMPLE_COUNTER_TOOLTIP": "برای ردیابی به {{title}}کلیک کنید",
+        "SIMPLE_COUNTER_TOOLTIP_DISABLE": "برای عدم ردیابی به {{title}}کلیک کنید",
         "SKIP": "Skip",
         "TASK": "کار",
         "TASK_BREAK": "کار+استراحت",
@@ -965,6 +1006,7 @@
       "OPEN_PROJECT_NOTES": "Show/Hide Project Notes",
       "SELECT_NEXT_TASK": "انتخاب کار بعدی",
       "SELECT_PREVIOUS_TASK": "Select previous Task",
+      "SHOW_SEARCH_BAR": "نمایش نوار جستجو",
       "SYSTEM_SHORTCUTS": "Global Shortcuts (system wide)",
       "TASK_ADD_SUB_TASK": "اضافه کردن کار فرعی",
       "TASK_DELETE": "حذف کار",
@@ -1054,6 +1096,7 @@
       "MESSAGE": "Take a break message",
       "MIN_WORKING_TIME": "Trigger take a break notification after X working without one",
       "MOTIVATIONAL_IMG": "تصویر انگیزشی (آدرس اینترنتی)",
+      "SNOOZE_TIME": "زمان استراحت را به تعویق بیندازید",
       "TITLE": "یادآوری استراحت"
     },
     "TIMELINE": {
@@ -1075,7 +1118,10 @@
   "GLOBAL_SNACK": {
     "COPY_TO_CLIPPBOARD": "در کلیپ برد کپی شد",
     "ERR_COMPRESSION": "خطایی برای رابط فشرده سازی",
+    "FILE_DOWNLOADED": "{{fileName}} بارگیری شد",
+    "FILE_DOWNLOADED_BTN": "پوشه را باز کنید",
     "PERSISTENCE_DISALLOWED": "Data will be not persisted permanently. Be aware that this can lead to data loss!!",
+    "PERSISTENCE_ERROR": "خطا هنگام درخواست تداوم داده: {{err}}",
     "RUNNING_X": "Running \"{{str}}\".",
     "SHORTCUT_WARN_OPEN_BOOKMARKS_FROM_TAG": "{{keyCombo}} فشرده شده است ، اما میانبر نشانک های باز فقط در متن پروژه در دسترس است.",
     "SHORTCUT_WARN_OPEN_NOTES_FROM_TAG": "{{keyCombo}} میانبر فشرده شده است ، اما باز کردن یادداشت های باز فقط وقتی در متن پروژه باشد ، در دسترس است."
@@ -1107,8 +1153,10 @@
     "PROJECTS": "پروژه ها",
     "PROJECT_MENU": "منوی پروژه",
     "PROJECT_SETTINGS": "تنظیمات پروژه",
+    "QUICK_HISTORY": "تاریخچه سریع",
     "SCHEDULED": "برنامه ریزی شده",
     "SETTINGS": "تنظیمات",
+    "SHOW_SEARCH_BAR": "نمایش نوار جستجو",
     "TAGS": "برچسب ها",
     "TASKS": "کارها",
     "TASK_LIST": "لیست کار",
@@ -1127,6 +1175,7 @@
       "MSG": "کارتان تمام شده، وقت رفتن به خانه است!",
       "OK": "Aye aye! Shutdown!"
     },
+    "ESTIMATE_TOTAL": "برآورد کل:",
     "EVALUATION": "Evaluation",
     "EXPORT_TASK_LIST": "Export Task List",
     "NO_TASKS": "There are no tasks for this day",
@@ -1176,6 +1225,7 @@
     "GITLAB_CONFIGURED": "GitLab Integration Configured",
     "IMPORT_FROM_FILE": "Import from file",
     "JIRA_CONFIGURED": "Jira Integration Configured",
+    "OPEN_PROJECT_CONFIGURED": "OpenProject Integration پیکربندی شده است",
     "S_INVALID_JSON": "Invalid json for project file",
     "TITLE": "Project Overview",
     "UN_ARCHIVE_PROJECT": "Unarchive Project"

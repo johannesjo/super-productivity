@@ -1,5 +1,6 @@
 {
   "APP": {
+    "A_BROWSER_WARNING": "Сожалеем, но приложение не оптимизировано для работы в этом браузере. Рассмотрите возможность использования браузера на основе хрома или загрузки электронной версии приложения.",
     "B_INSTALL": {
       "IGNORE": "Игнорировать",
       "INSTALL": "Установить",
@@ -19,7 +20,9 @@
   "CONFIRM": {
     "AUTO_FIX": "Кажется, ваши данные повреждены. Хотите попробовать исправить это автоматически? Это может привести к частичной потере данных.",
     "DELETE_STRAY_BACKUP": "Вы хотите удалить заднюю часть, чтобы не видеть это диалоговое окно?",
+    "RELOAD_AFTER_IDB_ERROR": "Невозможно получить доступ к базе данных: (Возможные причины - обновление приложения в фоновом режиме или нехватка места на диске. Нажмите OK, чтобы перезагрузить приложение (на некоторых платформах может потребоваться перезапуск приложения вручную).",
     "RESTORE_FILE_BACKUP": "Кажется, НЕТ ДАННЫХ, но есть резервные копии, доступные в \"{{dir}}\". Вы хотите восстановить последнюю резервную копию с {{from}}?",
+    "RESTORE_FILE_BACKUP_ANDROID": "Вроде НЕТ ДАННЫХ, но есть резервная копия. Вы хотите его загрузить?",
     "RESTORE_STRAY_BACKUP": "Во время последней синхронизации могла быть ошибка. Вы хотите восстановить последнюю резервную копию?"
   },
   "DATETIME_INPUT": {
@@ -106,14 +109,7 @@
       "S": {
         "CALENDAR_NOT_FOUND": "CalDav: Календарь \"{{calendarName}}\" не найден",
         "CALENDAR_READ_ONLY": "CalDav: Календарь \"{{calendarName}}\" доступен только для чтения",
-        "ERR_NETWORK": "CalDav: запрос не выполнен из-за сетевой ошибки на стороне клиента",
-        "ERR_NOT_CONFIGURED": "CalDav: неправильно настроен",
-        "IMPORTED_MULTIPLE_ISSUES": "calDav: импортировано новых задач ( {{issuesLength}} ) из git в список невыполненных работ",
-        "IMPORTED_SINGLE_ISSUE": "CalDav: проблема \"{{issueText}}\" импортирована из журнала ожидания",
-        "ISSUE_NOT_FOUND": "CalDav: Похоже, что Todo \"{{issueId}}\" удален на сервере.",
-        "ISSUE_NO_UPDATE_REQUIRED": "CalDav: обновление не требуется.",
-        "ISSUE_UPDATE": "Калдав: Uodated данные для \"{{issueText}}\"",
-        "POLLING": "Калдав: изменения в опросе для задач"
+        "ISSUE_NOT_FOUND": "CalDav: Похоже, что Todo \"{{issueId}}\" удален на сервере."
       }
     },
     "CONFIG": {
@@ -126,6 +122,7 @@
         "ACCESS_TOKEN_ERROR": "Dropbox: невозможно создать токен доступа из кода авторизации",
         "ACCESS_TOKEN_GENERATED": "Dropbox: токен доступа, сгенерированный из кода авторизации",
         "AUTH_ERROR": "Dropbox: предоставлен неверный токен доступа",
+        "AUTH_ERROR_ACTION": "Сменить токен",
         "OFFLINE": "Dropbox: невозможно синхронизировать, потому что в автономном режиме",
         "SYNC_ERROR": "Dropbox: ошибка при синхронизации"
       }
@@ -158,19 +155,7 @@
         "WRITE_A_COMMENT": "Написать комментарий"
       },
       "S": {
-        "ERR_NETWORK": "GitHub: запрос не выполнен из-за ошибки сети на стороне клиента",
-        "ERR_NOT_CONFIGURED": "GitHub: неправильно настроен",
-        "ERR_UNKNOWN": "GitHub: неизвестная ошибка {{statusCode}} {{errorMsg}}",
-        "IMPORTED_MULTIPLE_ISSUES": "GitHub: импортировано {{issuesLength}} новых заданий из git в список задач",
-        "IMPORTED_SINGLE_ISSUE": "GitHub: импортированная проблема \"{{issueText}}\" из git в список задач",
-        "ISSUE_DELETED_OR_CLOSED": "GitHub: проблема \"{{issueText}}\", кажется, удалена или закрыта на git",
-        "ISSUE_NO_UPDATE_REQUIRED": "GitHub: обновление не требуется",
-        "ISSUE_UPDATE": "GitHub: обновлены данные для \"{{issueText}}\"",
-        "MANUAL_UPDATE_ISSUE_SUCCESS": "GitHub: обновлены данные для \"{{issueText}}\"",
-        "MISSING_ISSUE_DATA": "GitHub: найдены задачи с отсутствующими данными о проблеме. Перезагрузка.",
-        "NEW_COMMENT": "GitHub: новый комментарий для \"{{issueText}}\"",
-        "POLLING": "GitHub: Опрос Изменения для проблем",
-        "SHOW_ISSUE_BTN": "Покажи мне"
+        "ERR_UNKNOWN": "GitHub: неизвестная ошибка {{statusCode}} {{errorMsg}}"
       }
     },
     "GITLAB": {
@@ -201,19 +186,7 @@
         "WRITE_A_COMMENT": "Написать комментарий"
       },
       "S": {
-        "ERR_NETWORK": "GitLab: запрос не выполнен из-за ошибки сети на стороне клиента",
-        "ERR_NOT_CONFIGURED": "GitLab: неправильно настроен",
-        "ERR_UNKNOWN": "GitLab: неизвестная ошибка {{statusCode}} {{errorMsg}}",
-        "IMPORTED_MULTIPLE_ISSUES": "GitLab: импортировано {{issuesLength}} новых заданий из git в список задач",
-        "IMPORTED_SINGLE_ISSUE": "GitLab: импортированная проблема \"{{issueText}}\" из git в список задач",
-        "ISSUE_DELETED_OR_CLOSED": "GitLab: проблема \"{{issueText}}\", кажется, удалена или закрыта на git",
-        "ISSUE_NO_UPDATE_REQUIRED": "GitLab: обновление не требуется",
-        "ISSUE_UPDATE": "GitLab: обновлены данные для \"{{issueText}}\"",
-        "MANUAL_UPDATE_ISSUE_SUCCESS": "GitLab: обновлены данные для \"{{issueText}}\"",
-        "MISSING_ISSUE_DATA": "GitLab: найдены задачи с отсутствующими данными о проблеме. Перезагрузка.",
-        "NEW_COMMENT": "GitLab: новый комментарий для \"{{issueText}}\"",
-        "POLLING": "GitLab: Опрос Изменения для проблем",
-        "SHOW_ISSUE_BTN": "Покажи мне"
+        "ERR_UNKNOWN": "GitLab: неизвестная ошибка {{statusCode}} {{errorMsg}}"
       }
     },
     "GOOGLE": {
@@ -234,6 +207,27 @@
         "ERR_NO_FILE_ID": "GoogleApi: идентификатор файла не указан",
         "ERR_NO_FILE_NAME": "GoogleApi: имя файла не указано",
         "SUCCESS_LOGIN": "GoogleApi: вход выполнен успешно"
+      }
+    },
+    "ISSUE": {
+      "DEFAULT": {
+        "ISSUES_STR": "Вопросы",
+        "ISSUE_STR": "вопрос"
+      },
+      "S": {
+        "ERR_NETWORK": "{{issueProviderName}}: запрос не выполнен из-за сетевой ошибки на стороне клиента.",
+        "ERR_NOT_CONFIGURED": "{{issueProviderName}}: неправильно настроен",
+        "IMPORTED_MULTIPLE_ISSUES": "{{issueProviderName}}: импортировано {{nr}} новых {{issuesStr}} в очередь",
+        "IMPORTED_SINGLE_ISSUE": "{{issueProviderName}}: импортировано {{issueStr}} \"{{issueTitle}}\" в очередь",
+        "ISSUE_DELETED_OR_CLOSED": "{{issueProviderName}}: {{issueStrC}} \"{{issueTitle}}\" кажется удаленным или закрытым",
+        "ISSUE_NO_UPDATE_REQUIRED": "{{issueProviderName}}: обновление не требуется",
+        "ISSUE_UPDATE_MULTIPLE": "{{issueProviderName}}: обновленные данные для {{nr}} {{issuesStr}}",
+        "ISSUE_UPDATE_SINGLE": "{{issueProviderName}}: обновленные данные для \"{{issueTitle}}\"",
+        "MANUAL_UPDATE_ISSUE_SUCCESS": "{{issueProviderName}}: обновленные данные для \"{{issueTitle}}\"",
+        "MISSING_ISSUE_DATA": "{{issueProviderName}}: обнаружены задачи с отсутствующими данными {{issueStr}} . Перезарядка.",
+        "NEW_COMMENT": "{{issueProviderName}}: новый комментарий для \"{{issueTitle}}\"",
+        "POLLING_BACKLOG": "{{issueProviderName}}: опрос нового {{issuesStr}}",
+        "POLLING_CHANGES": "{{issueProviderName}}: изменения в опросе для {{issuesStr}}"
       }
     },
     "JIRA": {
@@ -266,6 +260,7 @@
         "CHOOSE_STATUS": "Выберите статус для назначения",
         "CURRENT_ASSIGNEE": "Текущий Исполнитель:",
         "CURRENT_STATUS": "Текущее состояние:",
+        "TASK_NAME": "Название задачи:",
         "TITLE": "Jira: обновить статус",
         "UPDATE_STATUS": "Обновить статус"
       },
@@ -298,8 +293,8 @@
         "HOST": "Хост (например, http://my-host.de:1234)",
         "PASSWORD": "Токен / Пароль",
         "USER_NAME": "Адрес электронной почты / Имя пользователя",
-        "WONKY_COOKIE_MODE": "Wonky Cookie Fallback Authentication (только настольное приложение)",
-        "USE_PAT": "Использовать Personal Access Token вместо пароля"
+        "USE_PAT": "Использовать Personal Access Token вместо пароля",
+        "WONKY_COOKIE_MODE": "Wonky Cookie Fallback Authentication (только настольное приложение)"
       },
       "FORM_SECTION": {
         "ADV_CFG": "Расширенный настройки",
@@ -338,16 +333,13 @@
       "S": {
         "ADDED_WORKLOG_FOR": "Jira: добавлен рабочий журнал для {{issueKey}}",
         "EXTENSION_NOT_LOADED": "Расширение Super Productivity Extension не загружено. Перезагрузка страницы может помочь",
-        "IMPORTED_MULTIPLE_ISSUES": "Jira: импортировано {{issuesLength}} новых проблем из jira в список задач",
-        "IMPORTED_SINGLE_ISSUE": "Jira: импортированная проблема \"{{issueText}}\" из jira в отставание",
         "INSUFFICIENT_SETTINGS": "Недостаточно настроек для Jira",
+        "INVALID_RESPONSE": "Jira: ответ содержал недопустимые данные",
         "ISSUE_NO_UPDATE_REQUIRED": "Jira: \"{{issueText}}\" уже обновлен",
-        "ISSUE_UPDATE": "Jira: обновлены данные для \"{{issueText}}\"",
         "MANUAL_UPDATE_ISSUE_SUCCESS": "Jira: обновлены данные для \"{{issueText}}\"",
         "MISSING_ISSUE_DATA": "Jira: Найдены задачи с отсутствующими данными о проблеме. Перезагрузка.",
         "NO_AUTO_IMPORT_JQL": "Jira: для автоматического импорта не определен поисковый запрос",
         "NO_VALID_TRANSITION": "Jira: Не настроен правильный переход",
-        "POLLING": "Jira: проверка изменений для заданий",
         "TIMED_OUT": "Jira: время запроса истекло",
         "TRANSITION": "Jira: установите проблему \"{{issueKey}}\" на \"{{name}}\"",
         "TRANSITIONS_LOADED": "Jira: Переходы загружены. Используйте выбранные ниже, чтобы назначить их",
@@ -379,6 +371,9 @@
         "MOOD_PRODUCTIVITY_OVER_TIME": "Настроение и производительность со временем",
         "NO_ADDITIONAL_DATA_YET": "Никаких дополнительных данных еще не собрано. Для этого воспользуйтесь формой на ежедневной сводной панели «Оценка».",
         "OBSTRUCTION_SELECTION_COUNT": "Сколько раз был выбран препятствующий фактор",
+        "SIMPLE_CLICK_COUNTERS_OVER_TIME": "Счетчики кликов с течением времени",
+        "SIMPLE_COUNTERS": "Простые счетчики",
+        "SIMPLE_STOPWATCH_COUNTERS_OVER_TIME": "Секундомер Счетчики с течением времени",
         "TASKS_DONE_CREATED": "Задачи (сделано / создано)",
         "TIME_ESTIMATED": "Расчетное время",
         "TIME_SPENT": "Время потрачено"
@@ -405,22 +400,10 @@
       }
     },
     "NOTE": {
-      "ADD_REMINDER": "Добавить напоминание",
       "D_ADD": {
-        "DATETIME_LABEL": "Дата и время для напоминания (необязательно)",
         "NOTE_LABEL": "Введите текст, чтобы сохранить как заметку ..."
       },
-      "D_ADD_REMINDER": {
-        "E_ENTER_TITLE": "Вам необходимо ввести название",
-        "L_DATETIME": "Дата и время для напоминания",
-        "L_TITLE": "Название для уведомления"
-      },
-      "D_VIEW_REMINDER": {
-        "SNOOZE": "Отложить",
-        "TITLE": "Заметка"
-      },
       "EDIT_FULLSCREEN": "Редактировать в полноэкранном режиме",
-      "EDIT_REMINDER": "Изменить напоминание",
       "NOTES_CMP": {
         "ADD_BTN": "Добавить новую заметку",
         "DROP_TO_ADD": "Зайдите сюда, чтобы добавить новую заметку"
@@ -428,14 +411,41 @@
       "NOTE_CMP": {
         "DISABLE_PARSE": "Отключить анализ уценки",
         "ENABLE_PARSE": "Включить анализ уценки"
+      }
+    },
+    "OPEN_PROJECT": {
+      "DIALOG_INITIAL": {
+        "TITLE": "Настроить OpenProject для проекта"
       },
-      "REMOVE_REMINDER": "Удалить напоминание",
+      "FORM": {
+        "FILTER_USER": "Имя пользователя (например, чтобы отфильтровать изменения самостоятельно)",
+        "HOST": "Хост (например: https://www.openproject.org/)",
+        "IS_AUTO_ADD_TO_BACKLOG": "Автоматически добавлять неразрешенные рабочие пакеты из OpenProject в список невыполненных работ",
+        "IS_AUTO_POLL": "Автоматически опрашивать импортированные рабочие пакеты OpenProject на предмет изменений",
+        "IS_SEARCH_ISSUES_FROM_OPEN_PROJECT": "Показывать рабочие пакеты как предложения при добавлении новых задач",
+        "PROJECT_ID": "Идентификатор проекта",
+        "PROJECT_ID_DESCRIPTION": "Можно найти как часть URL-адреса при просмотре проекта в браузере.",
+        "TOKEN": "Токен доступа"
+      },
+      "FORM_SECTION": {
+        "HELP": "<p>Здесь вы можете настроить SuperProductivity для вывода списка открытых рабочих пакетов OpenProject. Обратите внимание, что для того, чтобы это работало в браузере, вам, вероятно, потребуется настроить CORS для вашего сервера OpenProject, чтобы разрешить доступ с app.super-productivity.com</p>",
+        "TITLE": "OpenProject"
+      },
+      "ISSUE_CONTENT": {
+        "ASSIGNEE": "правопреемник",
+        "DESCRIPTION": "Описание",
+        "MARK_AS_CHECKED": "Отметить обновления как отмеченные",
+        "STATUS": "Статус",
+        "SUMMARY": "Резюме",
+        "TYPE": "Тип"
+      },
+      "ISSUE_STRINGS": {
+        "ISSUES_STR": "рабочие пакеты",
+        "ISSUE_STR": "комплекс работ"
+      },
       "S": {
-        "ADDED_REMINDER": "Добавлено напоминание для заметки",
-        "DELETED_REMINDER": "Удалено напоминание для заметки",
-        "UPDATED_REMINDER": "Обновленное напоминание для заметки"
-      },
-      "UPDATE_REMINDER": "Обновить напоминание"
+        "ERR_UNKNOWN": "OpenProject: неизвестная ошибка {{statusCode}} {{errorMsg}}. Правильно ли настроен CORS для сервера?"
+      }
     },
     "POMODORO": {
       "BACK_TO_WORK": "Возвращайтесь к работе!",
@@ -530,8 +540,20 @@
         "UPDATED": "Обновлены настройки проекта"
       }
     },
+    "QUICK_HISTORY": {
+      "NO_DATA": "Нет данных за текущий год",
+      "PAGE_TITLE": "Быстрая история",
+      "WEEK_TITLE": "Неделя {{nr}} ({{timeSpent}})"
+    },
     "REMINDER": {
       "S_REMINDER_ERR": "Ошибка интерфейса напоминания"
+    },
+    "SEARCH_BAR": {
+      "INFO": "Щелкните значок списка для поиска заархивированных задач.",
+      "INFO_ARCHIVED": "Щелкните значок архива для поиска обычных задач.",
+      "PLACEHOLDER": "Найдите задачу или описание задачи",
+      "PLACEHOLDER_ARCHIVED": "Поиск заархивированных задач",
+      "TOO_MANY_RESULTS": "Слишком много результатов, сузьте область поиска"
     },
     "SIMPLE_COUNTER": {
       "D_CONFIRM_REMOVE": {
@@ -586,14 +608,15 @@
       },
       "FORM": {
         "DROPBOX": {
-          "B_GENERATE_TOKEN": "Создать токен",
-          "FOLLOW_LINK": "Пожалуйста, откройте следующую ссылку и скопируйте предоставленный там код авторизации в поле ввода.",
-          "L_ACCESS_TOKEN": "Токен доступа (генерируется из кода авторизации)",
-          "L_AUTH_CODE": "Код авторизации"
+          "L_ACCESS_TOKEN": "Токен доступа (генерируется из кода авторизации)"
         },
         "GOOGLE": {
           "L_IS_COMPRESS_DATA": "Сжать данные",
           "L_SYNC_FILE_NAME": "Синхронизировать имя файла"
+        },
+        "LOCAL_FILE": {
+          "L_SYNC_FILE_PATH": "Путь к файлу синхронизации",
+          "L_SYNC_FILE_PATH_DESCRIPTION": "Абсолютный путь к файлу, который нужно использовать для синхронизации (будет создан)."
         },
         "L_ENABLE_SYNCING": "Включить синхронизацию",
         "L_SYNC_INTERVAL": "Интервал синхронизации",
@@ -614,6 +637,7 @@
         "INCOMPLETE_CFG": "Ошибка аутентификации для синхронизации. Пожалуйста, проверьте свою конфигурацию!",
         "INITIAL_SYNC_ERROR": "Не удалось выполнить первоначальную синхронизацию",
         "SUCCESS_IMPORT": "Данные импортированы",
+        "SUCCESS_VIA_BUTTON": "Данные успешно синхронизированы",
         "UNKNOWN_ERROR": "Неизвестная ошибка при синхронизации. Пожалуйста, проверьте console.",
         "UPLOAD_ERROR": "Неизвестная ошибка загрузки (правильные настройки?): {{err}}"
       }
@@ -659,8 +683,10 @@
       "ADD_TASK_BAR": {
         "ADD_EXISTING_TASK": "Добавить существующую задачу \"{{taskTitle}}\"",
         "ADD_ISSUE_TASK": "Добавить выпуск №{{issueNr}} из {{issueType}}",
-        "ADD_TASK": "Добавить задачу",
-        "ADD_TASK_TO_BACKLOG": "Добавить задачу в отставание",
+        "ADD_TASK_TO_BOTTOM_OF_BACKLOG": "Добавить задачу в конец невыполненной работы",
+        "ADD_TASK_TO_BOTTOM_OF_TODAY": "Добавить задачу в конец списка",
+        "ADD_TASK_TO_TOP_OF_BACKLOG": "Добавить задачу в начало невыполненной работы",
+        "ADD_TASK_TO_TOP_OF_TODAY": "Добавить задачу в начало списка",
         "CREATE_TASK": "Создать новую задачу",
         "EXAMPLE": "Пример: \"Название задачи + название проекта # какой-то тег # какой-то другой тег 10 м / 3 ч\"",
         "START": "Нажмите ввод еще раз, чтобы начать"
@@ -699,9 +725,12 @@
         "UPDATE_ISSUE_DATA": "Обновить данные о проблеме"
       },
       "D_REMINDER_ADD": {
+        "CONFIRM_REPEAT_OK": "график",
+        "CONFIRM_REPEAT_TXT": "Вы пытаетесь перенести эту повторяющуюся задачу на другой день. Повторяющиеся задачи обычно предназначены для воссоздания в определенные дни и только запланированы на этот день. Вы все равно хотите продолжить?",
         "DATETIME_FOR": "Дата и время для напоминания",
         "EDIT": "Изменить напоминание",
         "MOVE_TO_BACKLOG": "Переместить задачу в отставание до запланированного",
+        "REMIND_AT": "Напомнить на",
         "RO_10M": "За 10 минут до начала",
         "RO_15M": "За 15 минут до начала",
         "RO_1H": "За 1 час до начала",
@@ -716,6 +745,7 @@
         "ADD_TO_TODAY": "Добавить сегодня",
         "DISMISS": "Отменить напоминание",
         "DISMISS_ALL": "Отклонить все",
+        "DONE": "Готово",
         "DUE_TASK": "Должное задание",
         "DUE_TASKS": "Должные задачи",
         "FOR_CURRENT": "Задача должна быть выполнена. Вы хотите начать работать над ней?",
@@ -785,7 +815,11 @@
         "FRIDAY": "Пятница",
         "IS_ADD_TO_BOTTOM": "Переместить задачу в конец списка",
         "MONDAY": "Понедельник",
+        "REMIND_AT": "Напомнить на",
+        "REMIND_AT_PLACEHOLDER": "Выберите, когда напоминать",
         "SATURDAY": "Суббота",
+        "START_TIME": "Запланированное время начала",
+        "START_TIME_DESCRIPTION": "Например. 15:00. Оставьте поле пустым для задачи на весь день",
         "SUNDAY": "Воскресенье",
         "THURSDAY": "Четверг",
         "TITLE": "Название для задания",
@@ -803,7 +837,8 @@
       "MENU_TITLE": "график",
       "NOW": "в настоящее время",
       "NO_TASKS": "На данный момент нет задач. Пожалуйста, добавьте несколько задач с помощью кнопки + на верхней панели.",
-      "START": "Начало работы"
+      "START": "Начало работы",
+      "TASK_PROJECTION_INFO": "Будущая проекция запланированной повторяемой задачи"
     },
     "TIME_TRACKING": {
       "B": {
@@ -818,6 +853,11 @@
         "BREAK": "Перерыв",
         "CREATE_AND_TRACK": "<em>Создать</em> и отследить до:",
         "IDLE_FOR": "Вы были без дела:",
+        "SIMPLE_CONFIRM_COUNTER_CANCEL": "Пропускать",
+        "SIMPLE_CONFIRM_COUNTER_OK": "трек",
+        "SIMPLE_COUNTER_CONFIRM_TXT": "Вы выбрали пропустить, но активировали кнопки простого счетчика ( {{nr}} ). Хотите отследить им время простоя?",
+        "SIMPLE_COUNTER_TOOLTIP": "Нажмите, чтобы отслеживать до {{title}}",
+        "SIMPLE_COUNTER_TOOLTIP_DISABLE": "Нажмите, чтобы НЕ отслеживать до {{title}}",
         "SKIP": "Пропускать",
         "TASK": "Задача",
         "TASK_BREAK": "Break Break",
@@ -966,6 +1006,7 @@
       "OPEN_PROJECT_NOTES": "Показать / Скрыть заметки проекта",
       "SELECT_NEXT_TASK": "Выберите следующую задачу",
       "SELECT_PREVIOUS_TASK": "Выберите предыдущее задание",
+      "SHOW_SEARCH_BAR": "Показать панель поиска",
       "SYSTEM_SHORTCUTS": "Глобальные ярлыки (общесистемные)",
       "TASK_ADD_SUB_TASK": "Добавить подзадачу",
       "TASK_DELETE": "Удалить задачу",
@@ -1055,6 +1096,7 @@
       "MESSAGE": "Сделать перерыв сообщение",
       "MIN_WORKING_TIME": "Уведомить о перерыве после X работы без перерыва",
       "MOTIVATIONAL_IMG": "Мотивационное изображение (веб-URL)",
+      "SNOOZE_TIME": "Время откладывать, когда будет предложено сделать перерыв",
       "TITLE": "Напоминание о перерыве "
     },
     "TIMELINE": {
@@ -1076,7 +1118,10 @@
   "GLOBAL_SNACK": {
     "COPY_TO_CLIPPBOARD": "Скопировано в буфер обмена",
     "ERR_COMPRESSION": "Ошибка для интерфейса сжатия",
+    "FILE_DOWNLOADED": "{{fileName}} скачано",
+    "FILE_DOWNLOADED_BTN": "Открыть папку",
     "PERSISTENCE_DISALLOWED": "Данные не будут сохранены постоянно. Имейте в виду, что это может привести к потере данных!",
+    "PERSISTENCE_ERROR": "Ошибка при запросе на сохранение данных: {{err}}",
     "RUNNING_X": "Запуск \"{{str}}\".",
     "SHORTCUT_WARN_OPEN_BOOKMARKS_FROM_TAG": "{{keyCombo}} нажата, но ярлык для открытия закладок доступен только в контексте проекта.",
     "SHORTCUT_WARN_OPEN_NOTES_FROM_TAG": "{{keyCombo}} нажата, но ярлык для открытия заметок доступен только в контексте проекта."
@@ -1108,8 +1153,10 @@
     "PROJECTS": "Проектов",
     "PROJECT_MENU": "Меню проекта",
     "PROJECT_SETTINGS": "Настройки проекта",
+    "QUICK_HISTORY": "Быстрая история",
     "SCHEDULED": "Запланированное",
     "SETTINGS": "Настройки",
+    "SHOW_SEARCH_BAR": "Показать панель поиска",
     "TAGS": "Теги",
     "TASKS": "Задачи",
     "TASK_LIST": "Список заданий",
@@ -1128,6 +1175,7 @@
       "MSG": "Ваша работа выполнена. Пора идти домой!",
       "OK": "Да, да! Выключай!"
     },
+    "ESTIMATE_TOTAL": "Общая оценка:",
     "EVALUATION": "Оценка",
     "EXPORT_TASK_LIST": "Экспорт списка задач",
     "NO_TASKS": "На этот день нет заданий",
@@ -1177,6 +1225,7 @@
     "GITLAB_CONFIGURED": "Интеграция GitLab настроена",
     "IMPORT_FROM_FILE": "Импорт из файла",
     "JIRA_CONFIGURED": "Интеграция Jira настроена",
+    "OPEN_PROJECT_CONFIGURED": "Настроена интеграция OpenProject",
     "S_INVALID_JSON": "Неверный JSON для файла проекта",
     "TITLE": "Обзор проекта",
     "UN_ARCHIVE_PROJECT": "Разархивировать проект"

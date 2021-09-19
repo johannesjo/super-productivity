@@ -1,5 +1,6 @@
 {
   "APP": {
+    "A_BROWSER_WARNING": "申し訳ありませんが、アプリはこのブラウザで実行するように最適化されていません。クロムベースのブラウザを使用するか、アプリの電子バージョンをダウンロードすることを検討してください",
     "B_INSTALL": {
       "IGNORE": "無視する",
       "INSTALL": "インストール",
@@ -19,7 +20,9 @@
   "CONFIRM": {
     "AUTO_FIX": "データが破損しているようです。自動修復を試しますか？その結果、データが部分的に失われる可能性があります。",
     "DELETE_STRAY_BACKUP": "このダイアログが表示されないように、バックアップを削除しますか？",
+    "RELOAD_AFTER_IDB_ERROR": "データベースにアクセスできません:(考えられる原因は、バックグラウンドでのアプリの更新またはディスク容量の不足です。[OK]を押してアプリをリロードします（一部のプラットフォームではアプリを手動で再起動する必要がある場合があります）。",
     "RESTORE_FILE_BACKUP": "データがないようですが、「{{dir}}」で利用可能なバックアップがあります。 {{from}}から最新のバックアップを復元しますか？",
+    "RESTORE_FILE_BACKUP_ANDROID": "データがないようですが、利用可能なバックアップがあります。ロードしますか？",
     "RESTORE_STRAY_BACKUP": "最後の同期中に、エラーが発生した可能性があります。最後のバックアップを復元しますか？"
   },
   "DATETIME_INPUT": {
@@ -106,14 +109,7 @@
       "S": {
         "CALENDAR_NOT_FOUND": "CalDav：カレンダー \"{{calendarName}}\"が見つかりません",
         "CALENDAR_READ_ONLY": "CalDav：カレンダー \"{{calendarName}}\"は読み取り専用です",
-        "ERR_NETWORK": "CalDav：クライアント側のネットワークエラーが原因でリクエストが失敗しました",
-        "ERR_NOT_CONFIGURED": "CalDav：適切に構成されていません",
-        "IMPORTED_MULTIPLE_ISSUES": "calDav：gitからバックログに {{issuesLength}} の新しい問題をインポートしました",
-        "IMPORTED_SINGLE_ISSUE": "CalDav：インポートされた問題「{{issueText}}」からバックログへ",
-        "ISSUE_NOT_FOUND": "CalDav：Todo \"{{issueId}}\"がサーバー上で削除されているようです。",
-        "ISSUE_NO_UPDATE_REQUIRED": "CalDav：更新は必要ありません。",
-        "ISSUE_UPDATE": "Caldav：「{{issueText}}」のUodatedデータ",
-        "POLLING": "Caldav：ToDoのポーリングの変更"
+        "ISSUE_NOT_FOUND": "CalDav：Todo \"{{issueId}}\"がサーバー上で削除されているようです。"
       }
     },
     "CONFIG": {
@@ -126,6 +122,7 @@
         "ACCESS_TOKEN_ERROR": "Dropbox：認証コードからアクセストークンを生成できません",
         "ACCESS_TOKEN_GENERATED": "Dropbox：認証コードから生成されたアクセストークン",
         "AUTH_ERROR": "Dropbox：提供された無効なアクセストークン",
+        "AUTH_ERROR_ACTION": "トークンの変更",
         "OFFLINE": "Dropbox：オフラインのため、同期できません",
         "SYNC_ERROR": "Dropbox：同期中のエラー"
       }
@@ -158,19 +155,7 @@
         "WRITE_A_COMMENT": "コメントを書く"
       },
       "S": {
-        "ERR_NETWORK": "GitHub：クライアント側のネットワークエラーが原因で要求が失敗しました",
-        "ERR_NOT_CONFIGURED": "GitHub：正しく設定されていません",
-        "ERR_UNKNOWN": "GitHub：不明なエラー {{statusCode}} {{errorMsg}}",
-        "IMPORTED_MULTIPLE_ISSUES": "GitHub：gitからバックログに {{issuesLength}} 件の新しい課題をインポートしました",
-        "IMPORTED_SINGLE_ISSUE": "GitHub：gitからバックログへの課題 \"{{issueText}}\"のインポート",
-        "ISSUE_DELETED_OR_CLOSED": "GitHub：課題 \"{{issueText}}\"がgitで削除されたか終了したようです",
-        "ISSUE_NO_UPDATE_REQUIRED": "GitHub：更新は不要",
-        "ISSUE_UPDATE": "GitHub： \"{{issueText}}\"のデータを更新しました",
-        "MANUAL_UPDATE_ISSUE_SUCCESS": "GitHub： \"{{issueText}}\"のデータを更新しました",
-        "MISSING_ISSUE_DATA": "GitHub：課題データが見つからないタスクが見つかりました。再読み込みしています。",
-        "NEW_COMMENT": "GitHub： \"{{issueText}}\"への新しいコメント",
-        "POLLING": "GitHub：課題に対する投票の変更",
-        "SHOW_ISSUE_BTN": "見せて"
+        "ERR_UNKNOWN": "GitHub：不明なエラー {{statusCode}} {{errorMsg}}"
       }
     },
     "GITLAB": {
@@ -201,19 +186,7 @@
         "WRITE_A_COMMENT": "コメントを書く"
       },
       "S": {
-        "ERR_NETWORK": "GitLab：クライアント側のネットワークエラーが原因で要求が失敗しました",
-        "ERR_NOT_CONFIGURED": "GitLab：正しく設定されていません",
-        "ERR_UNKNOWN": "GitLab：不明なエラー {{statusCode}} {{errorMsg}}",
-        "IMPORTED_MULTIPLE_ISSUES": "GitLab：gitからバックログに {{issuesLength}} 件の新しい課題をインポートしました",
-        "IMPORTED_SINGLE_ISSUE": "GitLab：gitからバックログへの課題 \"{{issueText}}\"のインポート",
-        "ISSUE_DELETED_OR_CLOSED": "GitLab：課題 \"{{issueText}}\"がgitで削除されたか終了したようです",
-        "ISSUE_NO_UPDATE_REQUIRED": "GitLab：更新は不要",
-        "ISSUE_UPDATE": "GitLab： \"{{issueText}}\"のデータを更新しました",
-        "MANUAL_UPDATE_ISSUE_SUCCESS": "GitLab： \"{{issueText}}\"のデータを更新しました",
-        "MISSING_ISSUE_DATA": "GitLab：課題データが見つからないタスクが見つかりました。再読み込みしています。",
-        "NEW_COMMENT": "GitLab： \"{{issueText}}\"への新しいコメント",
-        "POLLING": "GitLab：課題に対する投票の変更",
-        "SHOW_ISSUE_BTN": "見せて"
+        "ERR_UNKNOWN": "GitLab：不明なエラー {{statusCode}} {{errorMsg}}"
       }
     },
     "GOOGLE": {
@@ -234,6 +207,27 @@
         "ERR_NO_FILE_ID": "GoogleApi：ファイルIDが指定されていません",
         "ERR_NO_FILE_NAME": "GoogleApi：ファイル名が指定されていません",
         "SUCCESS_LOGIN": "GoogleApi：ログイン成功"
+      }
+    },
+    "ISSUE": {
+      "DEFAULT": {
+        "ISSUES_STR": "課題",
+        "ISSUE_STR": "問題"
+      },
+      "S": {
+        "ERR_NETWORK": "{{issueProviderName}}：クライアント側のネットワークエラーが原因でリクエストが失敗しました",
+        "ERR_NOT_CONFIGURED": "{{issueProviderName}}：適切に構成されていません",
+        "IMPORTED_MULTIPLE_ISSUES": "{{issueProviderName}}： {{nr}} 新しい {{issuesStr}} をバックログにインポートしました",
+        "IMPORTED_SINGLE_ISSUE": "{{issueProviderName}}：バックログにインポートされた {{issueStr}} \"{{issueTitle}}\"",
+        "ISSUE_DELETED_OR_CLOSED": "{{issueProviderName}}： {{issueStrC}} \"{{issueTitle}}\"は削除されたか、閉じられたようです",
+        "ISSUE_NO_UPDATE_REQUIRED": "{{issueProviderName}}：更新は必要ありません",
+        "ISSUE_UPDATE_MULTIPLE": "{{issueProviderName}}： {{nr}} {{issuesStr}}のデータを更新しました",
+        "ISSUE_UPDATE_SINGLE": "{{issueProviderName}}：「{{issueTitle}}」のデータを更新しました",
+        "MANUAL_UPDATE_ISSUE_SUCCESS": "{{issueProviderName}}：「{{issueTitle}}」のデータを更新しました",
+        "MISSING_ISSUE_DATA": "{{issueProviderName}}： {{issueStr}} データが欠落しているタスクが見つかりました。リロード。",
+        "NEW_COMMENT": "{{issueProviderName}}：「{{issueTitle}}」の新しいコメント",
+        "POLLING_BACKLOG": "{{issueProviderName}}：新しい {{issuesStr}}のポーリング",
+        "POLLING_CHANGES": "{{issueProviderName}}： {{issuesStr}}のポーリングの変更"
       }
     },
     "JIRA": {
@@ -266,6 +260,7 @@
         "CHOOSE_STATUS": "割り当てるステータスを選択",
         "CURRENT_ASSIGNEE": "現在の担当者：",
         "CURRENT_STATUS": "現在の状態：",
+        "TASK_NAME": "タスク名：",
         "TITLE": "Jira：ステータス更新",
         "UPDATE_STATUS": "最新状況"
       },
@@ -298,6 +293,7 @@
         "HOST": "ホスト（例：http://my-host.de:1234）",
         "PASSWORD": "トークン/パスワード",
         "USER_NAME": "電子メール/ユーザー名",
+        "USE_PAT": "パスワードの代わりにパーソナルアクセストークンを使用する",
         "WONKY_COOKIE_MODE": "Wonky Cookieフォールバック認証（デスクトップアプリのみ）"
       },
       "FORM_SECTION": {
@@ -337,16 +333,13 @@
       "S": {
         "ADDED_WORKLOG_FOR": "Jira： {{issueKey}}の作業ログを追加しました",
         "EXTENSION_NOT_LOADED": "Super Productivity Extensionがロードされていません。ページをリロードすると役に立つかもしれません",
-        "IMPORTED_MULTIPLE_ISSUES": "Jira：Jiraからバックログに {{issuesLength}} 件の新しい課題をインポートしました",
-        "IMPORTED_SINGLE_ISSUE": "Jira：Jiraからバックログにissue \"{{issueText}}\"をインポートしました",
         "INSUFFICIENT_SETTINGS": "Jiraの設定が不十分",
+        "INVALID_RESPONSE": "Jira：応答に無効なデータが含まれていました",
         "ISSUE_NO_UPDATE_REQUIRED": "Jira： \"{{issueText}}\"はすでに最新です",
-        "ISSUE_UPDATE": "Jira： \"{{issueText}}\"のデータを更新しました",
         "MANUAL_UPDATE_ISSUE_SUCCESS": "Jira： \"{{issueText}}\"のデータを更新しました",
         "MISSING_ISSUE_DATA": "Jira：課題データが欠けているタスクが見つかりました。再読み込みしています。",
         "NO_AUTO_IMPORT_JQL": "Jira：自動インポート用に定義された検索クエリはありません",
         "NO_VALID_TRANSITION": "Jira：有効な遷移が設定されていません",
-        "POLLING": "Jira：課題に対する投票の変更",
         "TIMED_OUT": "Jira：リクエストがタイムアウトしました",
         "TRANSITION": "Jira：issue \"{{issueKey}}\"を \"{{name}}\"に設定",
         "TRANSITIONS_LOADED": "Jira：トランジションがロードされました。それらを割り当てるために下記の選択を使用してください",
@@ -378,6 +371,9 @@
         "MOOD_PRODUCTIVITY_OVER_TIME": "時間とともに気分と生産性",
         "NO_ADDITIONAL_DATA_YET": "追加データはまだ収集されていません。そのためには、日次要約の「評価」パネルのフォームを使用してください。",
         "OBSTRUCTION_SELECTION_COUNT": "妨害要因が選択された回数",
+        "SIMPLE_CLICK_COUNTERS_OVER_TIME": "時間の経過とともにカウンターをクリックします",
+        "SIMPLE_COUNTERS": "シンプルなカウンター",
+        "SIMPLE_STOPWATCH_COUNTERS_OVER_TIME": "時間の経過とともにストップウォッチカウンター",
         "TASKS_DONE_CREATED": "タスク（完了/作成済み）",
         "TIME_ESTIMATED": "推定時間",
         "TIME_SPENT": "使った時間"
@@ -404,22 +400,10 @@
       }
     },
     "NOTE": {
-      "ADD_REMINDER": "リマインダーを追加",
       "D_ADD": {
-        "DATETIME_LABEL": "リマインダーの日時（オプション）",
         "NOTE_LABEL": "メモとして保存するテキストを入力してください..."
       },
-      "D_ADD_REMINDER": {
-        "E_ENTER_TITLE": "タイトルを入力してください",
-        "L_DATETIME": "リマインダーの日時",
-        "L_TITLE": "通知のタイトル"
-      },
-      "D_VIEW_REMINDER": {
-        "SNOOZE": "スヌーズ",
-        "TITLE": "メモ"
-      },
       "EDIT_FULLSCREEN": "全画面で編集する",
-      "EDIT_REMINDER": "リマインダーを編集",
       "NOTES_CMP": {
         "ADD_BTN": "新しいメモを追加",
         "DROP_TO_ADD": "新しいメモを追加するには、ここにドロップしてください"
@@ -427,14 +411,41 @@
       "NOTE_CMP": {
         "DISABLE_PARSE": "マークダウン解析を無効にする",
         "ENABLE_PARSE": "マークダウン解析を有効にする"
+      }
+    },
+    "OPEN_PROJECT": {
+      "DIALOG_INITIAL": {
+        "TITLE": "プロジェクト用にOpenProjectをセットアップする"
       },
-      "REMOVE_REMINDER": "リマインダーを削除",
+      "FORM": {
+        "FILTER_USER": "ユーザー名（例：自分で変更を除外するため）",
+        "HOST": "ホスト（例：https：//www.openproject.org/）",
+        "IS_AUTO_ADD_TO_BACKLOG": "OpenProjectからバックログに未解決の作業パッケージを自動的に追加します",
+        "IS_AUTO_POLL": "インポートされたOpenProjectワークパッケージの変更を自動的にポーリングします",
+        "IS_SEARCH_ISSUES_FROM_OPEN_PROJECT": "新しいタスクを追加するときに提案として作業パッケージを表示する",
+        "PROJECT_ID": "プロジェクトID",
+        "PROJECT_ID_DESCRIPTION": "ブラウザでプロジェクトを表示すると、URLの一部として見つけることができます。",
+        "TOKEN": "アクセストークン"
+      },
+      "FORM_SECTION": {
+        "HELP": "<p>ここでは、開いているOpenProjectワークパッケージを一覧表示するようにSuperProductivityを構成できます。これがブラウザで機能するためには、おそらくOpenProjectサーバーのCORSを構成して、app.super-productivity.comからのアクセスを許可する必要があることに注意してください</p>",
+        "TITLE": "OpenProject"
+      },
+      "ISSUE_CONTENT": {
+        "ASSIGNEE": "譲受人",
+        "DESCRIPTION": "説明",
+        "MARK_AS_CHECKED": "更新をチェック済みとしてマーク",
+        "STATUS": "状態",
+        "SUMMARY": "概要",
+        "TYPE": "タイプ"
+      },
+      "ISSUE_STRINGS": {
+        "ISSUES_STR": "作業パッケージ",
+        "ISSUE_STR": "ワークパッケージ"
+      },
       "S": {
-        "ADDED_REMINDER": "メモのリマインダーを追加しました",
-        "DELETED_REMINDER": "メモのリマインダーを削除しました",
-        "UPDATED_REMINDER": "メモのリマインダーを更新しました"
-      },
-      "UPDATE_REMINDER": "リマインダーを更新"
+        "ERR_UNKNOWN": "OpenProject：不明なエラー {{statusCode}} {{errorMsg}}。 CORSはサーバー用に適切に構成されていますか？"
+      }
     },
     "POMODORO": {
       "BACK_TO_WORK": "仕事に戻る！",
@@ -529,8 +540,20 @@
         "UPDATED": "更新されたプロジェクト設定"
       }
     },
+    "QUICK_HISTORY": {
+      "NO_DATA": "今年度のデータはありません",
+      "PAGE_TITLE": "クイックヒストリー",
+      "WEEK_TITLE": "週 {{nr}} （{{timeSpent}}）"
+    },
     "REMINDER": {
       "S_REMINDER_ERR": "リマインダーインターフェースのエラー"
+    },
+    "SEARCH_BAR": {
+      "INFO": "リストアイコンをクリックして、アーカイブされたタスクを検索します",
+      "INFO_ARCHIVED": "アーカイブアイコンをクリックして、通常のタスクを検索します",
+      "PLACEHOLDER": "タスクまたはタスクの説明を検索する",
+      "PLACEHOLDER_ARCHIVED": "アーカイブされたタスクを検索する",
+      "TOO_MANY_RESULTS": "結果が多すぎるため、検索を絞り込んでください"
     },
     "SIMPLE_COUNTER": {
       "D_CONFIRM_REMOVE": {
@@ -585,14 +608,15 @@
       },
       "FORM": {
         "DROPBOX": {
-          "B_GENERATE_TOKEN": "トークンを生成",
-          "FOLLOW_LINK": "次のリンクを開き、そこに提供されている認証コードを入力フィールドにコピーしてください。",
-          "L_ACCESS_TOKEN": "アクセストークン（認証コードから生成）",
-          "L_AUTH_CODE": "認証コード"
+          "L_ACCESS_TOKEN": "アクセストークン（認証コードから生成）"
         },
         "GOOGLE": {
           "L_IS_COMPRESS_DATA": "データを圧縮する",
           "L_SYNC_FILE_NAME": "同期ファイル名"
+        },
+        "LOCAL_FILE": {
+          "L_SYNC_FILE_PATH": "同期ファイルパス",
+          "L_SYNC_FILE_PATH_DESCRIPTION": "同期に使用する必要があるファイルへの絶対パス（作成されます）。"
         },
         "L_ENABLE_SYNCING": "同期を有効にする",
         "L_SYNC_INTERVAL": "同期間隔",
@@ -613,6 +637,7 @@
         "INCOMPLETE_CFG": "同期の認証に失敗しました。設定を確認してください！",
         "INITIAL_SYNC_ERROR": "初期同期に失敗しました",
         "SUCCESS_IMPORT": "インポートされたデータ",
+        "SUCCESS_VIA_BUTTON": "データが正常に同期されました",
         "UNKNOWN_ERROR": "同期中に不明なエラーが発生しました。コンソールを確認してください。",
         "UPLOAD_ERROR": "不明なアップロードエラー（設定は正しいですか？）： {{err}}"
       }
@@ -658,8 +683,10 @@
       "ADD_TASK_BAR": {
         "ADD_EXISTING_TASK": "既存のタスク「{{taskTitle}}」を追加",
         "ADD_ISSUE_TASK": " {{issueType}}から課題番号{{issueNr}} を追加",
-        "ADD_TASK": "タスクを追加",
-        "ADD_TASK_TO_BACKLOG": "バックログにタスクを追加",
+        "ADD_TASK_TO_BOTTOM_OF_BACKLOG": "バックログの最後にタスクを追加",
+        "ADD_TASK_TO_BOTTOM_OF_TODAY": "リストの一番下にタスクを追加",
+        "ADD_TASK_TO_TOP_OF_BACKLOG": "バックログの先頭にタスクを追加",
+        "ADD_TASK_TO_TOP_OF_TODAY": "リストの一番上にタスクを追加",
         "CREATE_TASK": "新しいタスクを作成する",
         "EXAMPLE": "例：「Some task title + projectName #some tag #some other tag 10m / 3h」",
         "START": "もう一度Enterキーを押して開始します"
@@ -698,9 +725,12 @@
         "UPDATE_ISSUE_DATA": "課題データを更新"
       },
       "D_REMINDER_ADD": {
+        "CONFIRM_REPEAT_OK": "スケジュール",
+        "CONFIRM_REPEAT_TXT": "この繰り返されるタスクを別の日にスケジュールしようとしています。繰り返されるタスクは通常、指定された日に再作成され、その日にのみスケジュールされることを意味します。とにかく続行しますか？",
         "DATETIME_FOR": "リマインダーの日時",
         "EDIT": "リマインダーを編集",
         "MOVE_TO_BACKLOG": "スケジュールされるまでタスクをバックログに移動",
+        "REMIND_AT": "で思い出させる",
         "RO_10M": "開始の10分前",
         "RO_15M": "開始の15分前",
         "RO_1H": "開始の1時間前",
@@ -715,6 +745,7 @@
         "ADD_TO_TODAY": "今日に追加",
         "DISMISS": "リマインダーを却下",
         "DISMISS_ALL": "すべて却下する",
+        "DONE": "完了",
         "DUE_TASK": "期限付きタスク",
         "DUE_TASKS": "期限付きタスク",
         "FOR_CURRENT": "タスクは期限が来ています。あなたはそれに取り組み始めますか？",
@@ -784,7 +815,11 @@
         "FRIDAY": "金曜日",
         "IS_ADD_TO_BOTTOM": "タスクをリストの一番下に移動",
         "MONDAY": "月曜日",
+        "REMIND_AT": "で思い出させる",
+        "REMIND_AT_PLACEHOLDER": "いつ思い出させるかを選択します",
         "SATURDAY": "土曜日",
+        "START_TIME": "開始予定時刻",
+        "START_TIME_DESCRIPTION": "例えば。 15:00。終日のタスクは空白のままにします",
         "SUNDAY": "日曜日",
         "THURSDAY": "木曜日",
         "TITLE": "タスクのタイトル",
@@ -802,7 +837,8 @@
       "MENU_TITLE": "タイムライン",
       "NOW": "今",
       "NO_TASKS": "現在、タスクはありません。トップバーの+ボタンからいくつかのタスクを追加してください。",
-      "START": "作業開始"
+      "START": "作業開始",
+      "TASK_PROJECTION_INFO": "スケジュールされた反復可能なタスクの将来の予測"
     },
     "TIME_TRACKING": {
       "B": {
@@ -817,6 +853,11 @@
         "BREAK": "休憩",
         "CREATE_AND_TRACK": "<em>作成</em>して追加",
         "IDLE_FOR": "アイドル状態になっている時間：",
+        "SIMPLE_CONFIRM_COUNTER_CANCEL": "スキップ",
+        "SIMPLE_CONFIRM_COUNTER_OK": "トラック",
+        "SIMPLE_COUNTER_CONFIRM_TXT": "スキップを選択しましたが、 {{nr}} のシンプルなカウンターボタンをアクティブにしました。あなたは彼らへのアイドル時間を追跡したいですか？",
+        "SIMPLE_COUNTER_TOOLTIP": "クリックして {{title}}まで追跡",
+        "SIMPLE_COUNTER_TOOLTIP_DISABLE": "クリックして {{title}}を追跡しない",
         "SKIP": "スキップ",
         "TASK": "タスク",
         "TASK_BREAK": "タスク+休憩",
@@ -965,6 +1006,7 @@
       "OPEN_PROJECT_NOTES": "プロジェクトノートの表示/非表示",
       "SELECT_NEXT_TASK": "次のタスクを選択",
       "SELECT_PREVIOUS_TASK": "前のタスクを選択",
+      "SHOW_SEARCH_BAR": "検索バーを表示する",
       "SYSTEM_SHORTCUTS": "グローバルショートカット（システム全体）",
       "TASK_ADD_SUB_TASK": "サブタスクを追加",
       "TASK_DELETE": "タスクを削除",
@@ -1054,6 +1096,7 @@
       "MESSAGE": "休憩メッセージを受け取る",
       "MIN_WORKING_TIME": "休憩の通知を受け取るまでの時間",
       "MOTIVATIONAL_IMG": "やる気を起こさせる画像（ウェブのURL）",
+      "SNOOZE_TIME": "休憩をとるように促されたときに時間をスヌーズする",
       "TITLE": "休憩リマインダー"
     },
     "TIMELINE": {
@@ -1075,7 +1118,10 @@
   "GLOBAL_SNACK": {
     "COPY_TO_CLIPPBOARD": "クリップボードにコピー",
     "ERR_COMPRESSION": "圧縮インターフェースのエラー",
+    "FILE_DOWNLOADED": "{{fileName}} ダウンロード",
+    "FILE_DOWNLOADED_BTN": "開いたフォルダ",
     "PERSISTENCE_DISALLOWED": "データは永続的に保持されません。これはデータの損失につながる可能性があることに注意してください!!",
+    "PERSISTENCE_ERROR": "データの永続化をリクエストする際のエラー： {{err}}",
     "RUNNING_X": "\"{{str}}\"を実行しています。",
     "SHORTCUT_WARN_OPEN_BOOKMARKS_FROM_TAG": "{{keyCombo}} が押されましたが、ブックマークを開くショートカットはプロジェクトコンテキストでのみ使用できます。",
     "SHORTCUT_WARN_OPEN_NOTES_FROM_TAG": "{{keyCombo}} が押されましたが、メモを開くショートカットはプロジェクトコンテキストでのみ使用できます。"
@@ -1107,8 +1153,10 @@
     "PROJECTS": "プロジェクト",
     "PROJECT_MENU": "プロジェクトメニュー",
     "PROJECT_SETTINGS": "プロジェクト設定",
+    "QUICK_HISTORY": "クイックヒストリー",
     "SCHEDULED": "予定",
     "SETTINGS": "設定",
+    "SHOW_SEARCH_BAR": "検索バーを表示する",
     "TAGS": "タグ",
     "TASKS": "タスク",
     "TASK_LIST": "タスクリスト",
@@ -1127,6 +1175,7 @@
       "MSG": "あなたの仕事は終わりました。家に帰る時間！",
       "OK": "アイアイ！シャットダウンします！"
     },
+    "ESTIMATE_TOTAL": "合計見積もり：",
     "EVALUATION": "評価",
     "EXPORT_TASK_LIST": "タスクリストのエクスポート",
     "NO_TASKS": "この日は何もしていません",
@@ -1176,6 +1225,7 @@
     "GITLAB_CONFIGURED": "GitLab連携を設定済み",
     "IMPORT_FROM_FILE": "ファイルからインポート",
     "JIRA_CONFIGURED": "Jira連携が設定されました",
+    "OPEN_PROJECT_CONFIGURED": "OpenProject統合の構成",
     "S_INVALID_JSON": "プロジェクトファイルのjsonが無効です",
     "TITLE": "プロジェクト概要",
     "UN_ARCHIVE_PROJECT": "アンアーカイブプロジェクト"

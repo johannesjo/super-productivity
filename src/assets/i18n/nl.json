@@ -1,5 +1,6 @@
 {
   "APP": {
+    "A_BROWSER_WARNING": "Het spijt ons, maar de app is niet geoptimaliseerd voor gebruik in deze browser. Overweeg om een op chroom gebaseerde browser te gebruiken of de elektronische versie van de app te downloaden",
     "B_INSTALL": {
       "IGNORE": "Negeren",
       "INSTALL": "Installeren",
@@ -19,7 +20,9 @@
   "CONFIRM": {
     "AUTO_FIX": "Uw gegevens lijken beschadigd te zijn. Wilt u proberen het automatisch op te lossen? Dit kan leiden tot gedeeltelijk gegevensverlies.",
     "DELETE_STRAY_BACKUP": "Wilt u de achterkant verwijderen om dit dialoogvenster niet te zien?",
+    "RELOAD_AFTER_IDB_ERROR": "Kan geen toegang krijgen tot de database :( Mogelijke oorzaken zijn een app-update van de app op de achtergrond of weinig schijfruimte. Druk op OK om de app opnieuw te laden (op sommige platforms kan het nodig zijn de app handmatig opnieuw te starten).",
     "RESTORE_FILE_BACKUP": "Er lijken GEEN GEGEVENS te zijn, maar er zijn back-ups beschikbaar op \"{{dir}}\". Wilt u de nieuwste back-up van {{from}}herstellen?",
+    "RESTORE_FILE_BACKUP_ANDROID": "Er lijken GEEN GEGEVENS te zijn, maar er is een back-up beschikbaar. Wil je hem laden?",
     "RESTORE_STRAY_BACKUP": "Tijdens de laatste synchronisatie is er mogelijk een fout opgetreden. Wilt u de laatste back-up herstellen?"
   },
   "DATETIME_INPUT": {
@@ -106,14 +109,7 @@
       "S": {
         "CALENDAR_NOT_FOUND": "CalDav: agenda \"{{calendarName}}\" niet gevonden",
         "CALENDAR_READ_ONLY": "CalDav: Agenda \"{{calendarName}}\" is alleen-lezen",
-        "ERR_NETWORK": "CalDav: verzoek is mislukt vanwege een netwerkfout aan de clientzijde",
-        "ERR_NOT_CONFIGURED": "CalDav: niet correct geconfigureerd",
-        "IMPORTED_MULTIPLE_ISSUES": "calDav: {{issuesLength}} nieuwe problemen geïmporteerd van git naar backlog",
-        "IMPORTED_SINGLE_ISSUE": "CalDav: geïmporteerd probleem \"{{issueText}}\" van naar backlog",
-        "ISSUE_NOT_FOUND": "CalDav: Todo \"{{issueId}}\" lijkt te zijn verwijderd op de server.",
-        "ISSUE_NO_UPDATE_REQUIRED": "CalDav: geen update vereist.",
-        "ISSUE_UPDATE": "Caldav: geupdate gegevens voor \"{{issueText}}\"",
-        "POLLING": "Caldav: Polling-wijzigingen voor todos"
+        "ISSUE_NOT_FOUND": "CalDav: Todo \"{{issueId}}\" lijkt te zijn verwijderd op de server."
       }
     },
     "CONFIG": {
@@ -126,6 +122,7 @@
         "ACCESS_TOKEN_ERROR": "Dropbox: Onmogelijk om een Access Token van Auth Code te genereren",
         "ACCESS_TOKEN_GENERATED": "Dropbox: Access Token generated from Auth Code",
         "AUTH_ERROR": "Dropbox: Ongeldige access token opgegeven",
+        "AUTH_ERROR_ACTION": "Token wijzigen",
         "OFFLINE": "Dropbox: Kan niet worden gesynchroniseerd, vanwege offline",
         "SYNC_ERROR": "Dropbox: Fout tijdens her synchroniseren"
       }
@@ -158,19 +155,7 @@
         "WRITE_A_COMMENT": "Schrijf een reactie"
       },
       "S": {
-        "ERR_NETWORK": "GitHub: verzoek mislukt vanwege een netwerkfout aan de clientzijde",
-        "ERR_NOT_CONFIGURED": "GitHub: is niet correct geconfigureerd",
-        "ERR_UNKNOWN": "GitHub: onbekende fout {{statusCode}} {{errorMsg}}. API-limiet overschreden?",
-        "IMPORTED_MULTIPLE_ISSUES": "GitHub: {{issuesLength}} nieuwe problemen geïmporteerd van git naar backlog",
-        "IMPORTED_SINGLE_ISSUE": "GitHub: geïmporteerd probleem \"{{issueText}}\" van git naar backlog",
-        "ISSUE_DELETED_OR_CLOSED": "GitHub: Probleem \"{{issueText}}\" lijkt te zijn verwijderd of gesloten op git",
-        "ISSUE_NO_UPDATE_REQUIRED": "GitHub: geen update vereist",
-        "ISSUE_UPDATE": "GitHub: bijgewerkte gegevens voor \"{{issueText}}\"",
-        "MANUAL_UPDATE_ISSUE_SUCCESS": "GitHub: bijgewerkte gegevens voor \"{{issueText}}\"",
-        "MISSING_ISSUE_DATA": "GitHub: taken met ontbrekende probleemgegevens gevonden. Herladen.",
-        "NEW_COMMENT": "GitHub: nieuwe opmerking voor \"{{issueText}}\"",
-        "POLLING": "GitHub: Polling-wijzigingen voor problemen",
-        "SHOW_ISSUE_BTN": "Laat het mij eens zien"
+        "ERR_UNKNOWN": "GitHub: onbekende fout {{statusCode}} {{errorMsg}}. API-limiet overschreden?"
       }
     },
     "GITLAB": {
@@ -201,19 +186,7 @@
         "WRITE_A_COMMENT": "Schrijf een reactie"
       },
       "S": {
-        "ERR_NETWORK": "GitLab: verzoek mislukt vanwege een netwerkfout aan de clientzijde",
-        "ERR_NOT_CONFIGURED": "GitLab: is niet correct geconfigureerd",
-        "ERR_UNKNOWN": "GitLab: onbekende fout {{statusCode}} {{errorMsg}}",
-        "IMPORTED_MULTIPLE_ISSUES": "GitLab: {{issuesLength}} nieuwe problemen geïmporteerd van git naar backlog",
-        "IMPORTED_SINGLE_ISSUE": "GitLab: geïmporteerd probleem \"{{issueText}}\" van git naar backlog",
-        "ISSUE_DELETED_OR_CLOSED": "GitLab: Probleem \"{{issueText}}\" lijkt te zijn verwijderd of gesloten op git",
-        "ISSUE_NO_UPDATE_REQUIRED": "GitLab: geen update vereist",
-        "ISSUE_UPDATE": "GitLab: bijgewerkte gegevens voor \"{{issueText}}\"",
-        "MANUAL_UPDATE_ISSUE_SUCCESS": "GitLab: bijgewerkte gegevens voor \"{{issueText}}\"",
-        "MISSING_ISSUE_DATA": "GitLab: taken met ontbrekende probleemgegevens gevonden. Herladen.",
-        "NEW_COMMENT": "GitLab: nieuwe opmerking voor \"{{issueText}}\"",
-        "POLLING": "GitLab: Polling-wijzigingen voor problemen",
-        "SHOW_ISSUE_BTN": "Laat het mij eens zien"
+        "ERR_UNKNOWN": "GitLab: onbekende fout {{statusCode}} {{errorMsg}}"
       }
     },
     "GOOGLE": {
@@ -234,6 +207,27 @@
         "ERR_NO_FILE_ID": "GoogleApi: geen bestands-ID opgegeven",
         "ERR_NO_FILE_NAME": "GoogleApi: geen bestandsnaam opgegeven",
         "SUCCESS_LOGIN": "GoogleApi: inloggen geslaagd"
+      }
+    },
+    "ISSUE": {
+      "DEFAULT": {
+        "ISSUES_STR": "Problemen",
+        "ISSUE_STR": "Kwestie"
+      },
+      "S": {
+        "ERR_NETWORK": "{{issueProviderName}}: Verzoek is mislukt vanwege een netwerkfout aan de clientzijde",
+        "ERR_NOT_CONFIGURED": "{{issueProviderName}}: Niet goed geconfigureerd",
+        "IMPORTED_MULTIPLE_ISSUES": "{{issueProviderName}}: {{nr}} nieuw {{issuesStr}} geïmporteerd naar achterstand",
+        "IMPORTED_SINGLE_ISSUE": "{{issueProviderName}}: Geïmporteerd {{issueStr}} \"{{issueTitle}}\" naar achterstand",
+        "ISSUE_DELETED_OR_CLOSED": "{{issueProviderName}}: {{issueStrC}} \"{{issueTitle}}\" lijkt te zijn verwijderd of gesloten",
+        "ISSUE_NO_UPDATE_REQUIRED": "{{issueProviderName}}: Geen update vereist",
+        "ISSUE_UPDATE_MULTIPLE": "{{issueProviderName}}: bijgewerkte gegevens voor {{nr}} {{issuesStr}}",
+        "ISSUE_UPDATE_SINGLE": "{{issueProviderName}}: bijgewerkte gegevens voor \"{{issueTitle}}\"",
+        "MANUAL_UPDATE_ISSUE_SUCCESS": "{{issueProviderName}}: bijgewerkte gegevens voor \"{{issueTitle}}\"",
+        "MISSING_ISSUE_DATA": "{{issueProviderName}}: taken met ontbrekende {{issueStr}} gegevens gevonden. Herladen.",
+        "NEW_COMMENT": "{{issueProviderName}}: Nieuwe opmerking voor \"{{issueTitle}}\"",
+        "POLLING_BACKLOG": "{{issueProviderName}}: Polling voor nieuwe {{issuesStr}}",
+        "POLLING_CHANGES": "{{issueProviderName}}: pollingwijzigingen voor {{issuesStr}}"
       }
     },
     "JIRA": {
@@ -266,6 +260,7 @@
         "CHOOSE_STATUS": "Kies de status die u wilt toewijzen",
         "CURRENT_ASSIGNEE": "Huidige toegewezen:",
         "CURRENT_STATUS": "Huidige status:",
+        "TASK_NAME": "Opdrachtnaam:",
         "TITLE": "Jira: Status bijwerken",
         "UPDATE_STATUS": "Status bijwerken"
       },
@@ -298,6 +293,7 @@
         "HOST": "Host (bijv .: http://my-host.de:1234)",
         "PASSWORD": "Token / wachtwoord",
         "USER_NAME": "E-mail / gebruikersnaam",
+        "USE_PAT": "Persoonlijke toegangstoken gebruiken in plaats van wachtwoord",
         "WONKY_COOKIE_MODE": "Wonky Cookie Fallback Authentication (alleen desktop-app)"
       },
       "FORM_SECTION": {
@@ -337,16 +333,13 @@
       "S": {
         "ADDED_WORKLOG_FOR": "Jira: Worklog toegevoegd voor {{issueKey}}",
         "EXTENSION_NOT_LOADED": "Super Productivity-extensie niet geladen. Het kan helpen om de pagina opnieuw te laden",
-        "IMPORTED_MULTIPLE_ISSUES": "Jira: {{issuesLength}} nieuwe problemen geïmporteerd van jira naar backlog",
-        "IMPORTED_SINGLE_ISSUE": "Jira: geïmporteerd probleem \"{{issueText}}\" van jira naar backlog",
         "INSUFFICIENT_SETTINGS": "Er zijn onvoldoende instellingen voor Jira",
+        "INVALID_RESPONSE": "Jira: Reactie bevat ongeldige gegevens",
         "ISSUE_NO_UPDATE_REQUIRED": "Jira: \"{{issueText}}\" is al up-to-date",
-        "ISSUE_UPDATE": "Jira: bijgewerkte gegevens voor \"{{issueText}}\"",
         "MANUAL_UPDATE_ISSUE_SUCCESS": "Jira: bijgewerkte gegevens voor \"{{issueText}}\"",
         "MISSING_ISSUE_DATA": "Jira: Taken met ontbrekende probleemgegevens gevonden. Herladen.",
         "NO_AUTO_IMPORT_JQL": "Jira: Geen zoekopdracht gedefinieerd voor automatisch importeren",
         "NO_VALID_TRANSITION": "Jira: Geen geldige overgang geconfigureerd",
-        "POLLING": "Jira: Polling-wijzigingen voor problemen",
         "TIMED_OUT": "Jira: Time-out voor verzoek",
         "TRANSITION": "Jira: Stel probleem \"{{issueKey}}\" in op \"{{name}}\"",
         "TRANSITIONS_LOADED": "Jira: Overgangen geladen. Gebruik de onderstaande selecties om ze toe te wijzen",
@@ -378,6 +371,9 @@
         "MOOD_PRODUCTIVITY_OVER_TIME": "Stemming en productiviteit in de tijd",
         "NO_ADDITIONAL_DATA_YET": "Nog geen aanvullende gegevens verzameld. Gebruik hiervoor het formulier in het dagoverzicht \"Evaluatie\" -paneel.",
         "OBSTRUCTION_SELECTION_COUNT": "Aantal keren dat een belemmerende factor is geselecteerd",
+        "SIMPLE_CLICK_COUNTERS_OVER_TIME": "Klik op Tellers na verloop van tijd",
+        "SIMPLE_COUNTERS": "Eenvoudige tellers",
+        "SIMPLE_STOPWATCH_COUNTERS_OVER_TIME": "Stopwatch Tellers in de tijd",
         "TASKS_DONE_CREATED": "Taken (gedaan / gemaakt)",
         "TIME_ESTIMATED": "Tijd geschat",
         "TIME_SPENT": "Tijd besteed"
@@ -404,22 +400,10 @@
       }
     },
     "NOTE": {
-      "ADD_REMINDER": "Herinnering toevoegen",
       "D_ADD": {
-        "DATETIME_LABEL": "Datetime voor herinnering (optioneel)",
         "NOTE_LABEL": "Voer wat tekst in om op te slaan als notitie ..."
       },
-      "D_ADD_REMINDER": {
-        "E_ENTER_TITLE": "Je moet een titel invoeren",
-        "L_DATETIME": "Datetime voor herinnering",
-        "L_TITLE": "Titel voor kennisgeving"
-      },
-      "D_VIEW_REMINDER": {
-        "SNOOZE": "Snooze",
-        "TITLE": "Notitie"
-      },
       "EDIT_FULLSCREEN": "Bewerken in volledig scherm",
-      "EDIT_REMINDER": "Herinnering bewerken",
       "NOTES_CMP": {
         "ADD_BTN": "Nieuwe notitie toevoegen",
         "DROP_TO_ADD": "Ga hierheen om een nieuwe notitie toe te voegen"
@@ -427,14 +411,41 @@
       "NOTE_CMP": {
         "DISABLE_PARSE": "Markering-parsering uitschakelen",
         "ENABLE_PARSE": "Markering ontleden inschakelen"
+      }
+    },
+    "OPEN_PROJECT": {
+      "DIALOG_INITIAL": {
+        "TITLE": "OpenProject voor Project instellen"
       },
-      "REMOVE_REMINDER": "Herinnering verwijderen",
+      "FORM": {
+        "FILTER_USER": "Gebruikersnaam (bijvoorbeeld om zelf wijzigingen uit te filteren)",
+        "HOST": "Host (bijv.: https://www.openproject.org/)",
+        "IS_AUTO_ADD_TO_BACKLOG": "Automatisch onopgeloste werkpakketten van OpenProject toevoegen aan achterstand",
+        "IS_AUTO_POLL": "Geïmporteerde OpenProject-werkpakketten automatisch op wijzigingen controleren",
+        "IS_SEARCH_ISSUES_FROM_OPEN_PROJECT": "Werkpakketten weergeven als suggesties bij het toevoegen van nieuwe taken",
+        "PROJECT_ID": "Project-ID",
+        "PROJECT_ID_DESCRIPTION": "Kan worden gevonden als onderdeel van de url, bij het bekijken van het project in de browser.",
+        "TOKEN": "Toegangstoken"
+      },
+      "FORM_SECTION": {
+        "HELP": "<p>Hier kunt u SuperProductivity configureren om open OpenProject-werkpakketten weer te geven. Houd er rekening mee dat om dit in de browser te laten werken, u waarschijnlijk CORS moet configureren voor uw OpenProject-server, om toegang te verlenen vanaf app.super-productivity.com</p>",
+        "TITLE": "open project"
+      },
+      "ISSUE_CONTENT": {
+        "ASSIGNEE": "Cessionaris",
+        "DESCRIPTION": "Omschrijving",
+        "MARK_AS_CHECKED": "Markeer updates als aangevinkt",
+        "STATUS": "staat",
+        "SUMMARY": "Samenvatting",
+        "TYPE": "Type"
+      },
+      "ISSUE_STRINGS": {
+        "ISSUES_STR": "Werkpakketten",
+        "ISSUE_STR": "Werkpakket"
+      },
       "S": {
-        "ADDED_REMINDER": "Herinnering toegevoegd voor notitie",
-        "DELETED_REMINDER": "Herinnering voor notitie verwijderd",
-        "UPDATED_REMINDER": "Herinnering voor notitie bijgewerkt"
-      },
-      "UPDATE_REMINDER": "Herinnering updaten"
+        "ERR_UNKNOWN": "OpenProject: onbekende fout {{statusCode}} {{errorMsg}}. Is CORS correct geconfigureerd voor de server?"
+      }
     },
     "POMODORO": {
       "BACK_TO_WORK": "Terug aan het werk!",
@@ -529,8 +540,20 @@
         "UPDATED": "Bijgewerkte projectinstellingen"
       }
     },
+    "QUICK_HISTORY": {
+      "NO_DATA": "Geen gegevens voor het huidige jaar",
+      "PAGE_TITLE": "Snelle geschiedenis",
+      "WEEK_TITLE": "Week {{nr}} ({{timeSpent}})"
+    },
     "REMINDER": {
       "S_REMINDER_ERR": "Fout voor herinneringsinterface"
+    },
+    "SEARCH_BAR": {
+      "INFO": "Klik op het lijstpictogram om te zoeken naar gearchiveerde taken",
+      "INFO_ARCHIVED": "Klik op het archiefpictogram om naar normale taken te zoeken",
+      "PLACEHOLDER": "Zoek naar taak of taakbeschrijving",
+      "PLACEHOLDER_ARCHIVED": "Zoeken naar gearchiveerde taken",
+      "TOO_MANY_RESULTS": "Te veel resultaten, verfijn uw zoekopdracht a.u.b."
     },
     "SIMPLE_COUNTER": {
       "D_CONFIRM_REMOVE": {
@@ -585,14 +608,15 @@
       },
       "FORM": {
         "DROPBOX": {
-          "B_GENERATE_TOKEN": "Genereer token",
-          "FOLLOW_LINK": "Open de volgende link en kopieer de daar verstrekte auth-code naar het invoerveld.",
-          "L_ACCESS_TOKEN": "Toegangstoken (gegenereerd op basis van Auth Code)",
-          "L_AUTH_CODE": "Autorisatie code"
+          "L_ACCESS_TOKEN": "Toegangstoken (gegenereerd op basis van Auth Code)"
         },
         "GOOGLE": {
           "L_IS_COMPRESS_DATA": "Comprimeer gegevens",
           "L_SYNC_FILE_NAME": "Synchroniseer bestandsnaam"
+        },
+        "LOCAL_FILE": {
+          "L_SYNC_FILE_PATH": "Synchroniseer bestandspad",
+          "L_SYNC_FILE_PATH_DESCRIPTION": "Absoluut pad naar het bestand dat moet worden gebruikt voor synchronisatie (wordt gemaakt)."
         },
         "L_ENABLE_SYNCING": "Schakel synchronisatie in",
         "L_SYNC_INTERVAL": "Synchronisatie-interval",
@@ -613,6 +637,7 @@
         "INCOMPLETE_CFG": "Verificatie voor synchronisatie is mislukt. Controleer uw configuratie!",
         "INITIAL_SYNC_ERROR": "Initiële synchronisatie mislukt",
         "SUCCESS_IMPORT": "Gegevens geïmporteerd",
+        "SUCCESS_VIA_BUTTON": "Gegevens succesvol gesynchroniseerd",
         "UNKNOWN_ERROR": "Onbekende fout tijdens het synchroniseren. Controleer de console.",
         "UPLOAD_ERROR": "Onbekende uploadfout (instellingen correct?): {{err}}"
       }
@@ -658,8 +683,10 @@
       "ADD_TASK_BAR": {
         "ADD_EXISTING_TASK": "Voeg bestaande taak \"{{taskTitle}}\" toe",
         "ADD_ISSUE_TASK": "Voeg probleem #{{issueNr}} van {{issueType}}toe",
-        "ADD_TASK": "Voeg taak toe",
-        "ADD_TASK_TO_BACKLOG": "Taak toevoegen aan backlog",
+        "ADD_TASK_TO_BOTTOM_OF_BACKLOG": "Taak onderaan de achterstand toevoegen",
+        "ADD_TASK_TO_BOTTOM_OF_TODAY": "Taak onderaan lijst toevoegen",
+        "ADD_TASK_TO_TOP_OF_BACKLOG": "Taak bovenaan de achterstand toevoegen",
+        "ADD_TASK_TO_TOP_OF_TODAY": "Taak bovenaan lijst toevoegen",
         "CREATE_TASK": "Maak een nieuwe taak",
         "EXAMPLE": "Voorbeeld: \"Een taaktitel + projectnaam # een tag # een andere tag 10 m / 3 uur\"",
         "START": "Druk nogmaals op Enter om te beginnen"
@@ -698,9 +725,12 @@
         "UPDATE_ISSUE_DATA": "Update probleemgegevens"
       },
       "D_REMINDER_ADD": {
+        "CONFIRM_REPEAT_OK": "Planning",
+        "CONFIRM_REPEAT_TXT": "U probeert deze herhaalde taak op een andere dag te plannen. Herhaalde taken zijn meestal bedoeld om op bepaalde dagen opnieuw te worden gemaakt en alleen op die dag te worden gepland. Wil je toch doorgaan?",
         "DATETIME_FOR": "Datetime voor herinnering",
         "EDIT": "Herinnering bewerken",
         "MOVE_TO_BACKLOG": "Verplaats taak naar backlog tot gepland",
+        "REMIND_AT": "Herinner bij",
         "RO_10M": "10 minuten voordat het begint",
         "RO_15M": "15 minuten voordat het begint",
         "RO_1H": "1 uur voordat het begint",
@@ -715,6 +745,7 @@
         "ADD_TO_TODAY": "Voeg toe aan vandaag",
         "DISMISS": "Herinnering afwijzen",
         "DISMISS_ALL": "Alles afkeuren",
+        "DONE": "Gedaan",
         "DUE_TASK": "Gepaste taak",
         "DUE_TASKS": "Geplande taken",
         "FOR_CURRENT": "Taak is verschuldigd. Wil je eraan beginnen te werken?",
@@ -784,7 +815,11 @@
         "FRIDAY": "vrijdag",
         "IS_ADD_TO_BOTTOM": "Verplaats taak naar de onderkant van de lijst",
         "MONDAY": "maandag",
+        "REMIND_AT": "Herinner bij",
+        "REMIND_AT_PLACEHOLDER": "Selecteer wanneer u eraan wilt herinneren",
         "SATURDAY": "zaterdag",
+        "START_TIME": "Geplande starttijd",
+        "START_TIME_DESCRIPTION": "bijv. 15:00 uur. Laat leeg voor een hele dagtaak",
         "SUNDAY": "zondag",
         "THURSDAY": "donderdag",
         "TITLE": "Titel voor taak",
@@ -802,7 +837,8 @@
       "MENU_TITLE": "Tijdlijn",
       "NOW": "nu",
       "NO_TASKS": "Momenteel zijn er geen taken. Voeg een aantal taken toe via de + knop in de bovenste balk.",
-      "START": "werk start"
+      "START": "werk start",
+      "TASK_PROJECTION_INFO": "Toekomstige projectie van een geplande herhaalbare taak"
     },
     "TIME_TRACKING": {
       "B": {
@@ -817,6 +853,11 @@
         "BREAK": "Pauze",
         "CREATE_AND_TRACK": "<em>Maak</em> en ga naar:",
         "IDLE_FOR": "Je hebt niets gedaan voor:",
+        "SIMPLE_CONFIRM_COUNTER_CANCEL": "overspringen",
+        "SIMPLE_CONFIRM_COUNTER_OK": "bijhouden",
+        "SIMPLE_COUNTER_CONFIRM_TXT": "U heeft overslaan geselecteerd, maar heeft {{nr}} eenvoudige tellerknop(pen) geactiveerd. Wilt u de inactieve tijd voor hen bijhouden?",
+        "SIMPLE_COUNTER_TOOLTIP": "Klik om te volgen naar {{title}}",
+        "SIMPLE_COUNTER_TOOLTIP_DISABLE": "Klik om NIET te volgen naar {{title}}",
         "SKIP": "Overslaan",
         "TASK": "Taak",
         "TASK_BREAK": "Taak + pauze",
@@ -965,6 +1006,7 @@
       "OPEN_PROJECT_NOTES": "Projectnotities tonen / verbergen",
       "SELECT_NEXT_TASK": "Selecteer de volgende taak",
       "SELECT_PREVIOUS_TASK": "Selecteer vorige taak",
+      "SHOW_SEARCH_BAR": "Toon zoekbalk",
       "SYSTEM_SHORTCUTS": "Globale snelkoppelingen (systeembreed)",
       "TASK_ADD_SUB_TASK": "Subtaak toevoegen",
       "TASK_DELETE": "Taak verwijderen",
@@ -1054,6 +1096,7 @@
       "MESSAGE": "Neem een pauze-bericht",
       "MIN_WORKING_TIME": "Trigger neemt een pauze-melding nadat X zonder een heeft gewerkt",
       "MOTIVATIONAL_IMG": "Motiverende afbeelding (web-URL)",
+      "SNOOZE_TIME": "Snoozetijd wanneer u wordt gevraagd om een pauze te nemen",
       "TITLE": "Pauzeherinnering"
     },
     "TIMELINE": {
@@ -1075,7 +1118,10 @@
   "GLOBAL_SNACK": {
     "COPY_TO_CLIPPBOARD": "Gekopieerd naar het klembord",
     "ERR_COMPRESSION": "Fout voor compressie-interface",
+    "FILE_DOWNLOADED": "{{fileName}} gedownload",
+    "FILE_DOWNLOADED_BTN": "Open folder",
     "PERSISTENCE_DISALLOWED": "Gegevens worden niet permanent bewaard. Houd er rekening mee dat dit kan leiden tot gegevensverlies !!",
+    "PERSISTENCE_ERROR": "Fout bij verzoek om gegevens te bewaren: {{err}}",
     "RUNNING_X": "\"{{Str}}\" wordt uitgevoerd.",
     "SHORTCUT_WARN_OPEN_BOOKMARKS_FROM_TAG": "{{keyCombo}} ingedrukt, maar de snelkoppeling naar bladwijzers openen is alleen beschikbaar in projectcontext.",
     "SHORTCUT_WARN_OPEN_NOTES_FROM_TAG": "{{keyCombo}} ingedrukt, maar de snelkoppeling voor open notities is alleen beschikbaar in projectcontext."
@@ -1107,8 +1153,10 @@
     "PROJECTS": "Projecten",
     "PROJECT_MENU": "Project Menu",
     "PROJECT_SETTINGS": "Projectinstellingen",
+    "QUICK_HISTORY": "Snelle geschiedenis",
     "SCHEDULED": "Gepland",
     "SETTINGS": "Instellingen",
+    "SHOW_SEARCH_BAR": "Toon zoekbalk",
     "TAGS": "Tags",
     "TASKS": "Taken",
     "TASK_LIST": "Takenlijst",
@@ -1127,6 +1175,7 @@
       "MSG": "Je werk is gedaan. Tijd om naar huis te gaan!",
       "OK": "Aye aye! Afsluiten!"
     },
+    "ESTIMATE_TOTAL": "Totale schatting:",
     "EVALUATION": "Evaluatie",
     "EXPORT_TASK_LIST": "Takenlijst exporteren",
     "NO_TASKS": "Er zijn geen taken voor deze dag",
@@ -1176,6 +1225,7 @@
     "GITLAB_CONFIGURED": "GitLab-integratie geconfigureerd",
     "IMPORT_FROM_FILE": "Importeren uit bestand",
     "JIRA_CONFIGURED": "Jira-integratie geconfigureerd",
+    "OPEN_PROJECT_CONFIGURED": "OpenProject-integratie geconfigureerd",
     "S_INVALID_JSON": "Ongeldige json voor projectbestand",
     "TITLE": "Projectoverzicht",
     "UN_ARCHIVE_PROJECT": "Unarchive Project"

@@ -1,5 +1,6 @@
 {
   "APP": {
+    "A_BROWSER_WARNING": "很抱歉，该应用程序未针对在此浏览器中运行进行优化。请考虑使用基于铬的浏览器或下载应用程序的电子版本",
     "B_INSTALL": {
       "IGNORE": "忽略",
       "INSTALL": "安装",
@@ -19,7 +20,9 @@
   "CONFIRM": {
     "AUTO_FIX": "您的数据似乎已损坏。您想尝试自动修复它吗？这可能会导致部分数据丢失。",
     "DELETE_STRAY_BACKUP": "是否要删除背面以避免看到此对话框？",
+    "RELOAD_AFTER_IDB_ERROR": "无法访问数据库 :( 可能的原因是应用程序在后台更新或磁盘空间不足。按确定重新加载应用程序（在某些平台上可能需要手动重新启动应用程序）。",
     "RESTORE_FILE_BACKUP": "似乎没有数据，但是“{{dir}}”处有可用的备份。您是否要从 {{from}}恢复最新备份？",
+    "RESTORE_FILE_BACKUP_ANDROID": "似乎没有数据，但有可用的备份。你想加载它吗？",
     "RESTORE_STRAY_BACKUP": "在上次同步期间，可能有一些错误。您要还原上一个备份吗？"
   },
   "DATETIME_INPUT": {
@@ -106,14 +109,7 @@
       "S": {
         "CALENDAR_NOT_FOUND": "CalDav：未找到日历“{{calendarName}}”",
         "CALENDAR_READ_ONLY": "CalDav：日历“{{calendarName}}”是只读的",
-        "ERR_NETWORK": "CalDav：由于客户端网络错误，请求失败",
-        "ERR_NOT_CONFIGURED": "CalDav：配置不正确",
-        "IMPORTED_MULTIPLE_ISSUES": "CalDav：从git导入 {{issuesLength}} 个新问题到积压",
-        "IMPORTED_SINGLE_ISSUE": "CalDav：导入的问题“{{issueText}}”从到积压",
-        "ISSUE_NOT_FOUND": "CalDav：待办事项“{{issueId}}”似乎已在服务器上删除。",
-        "ISSUE_NO_UPDATE_REQUIRED": "CalDav：不需要更新。",
-        "ISSUE_UPDATE": "CalDav：“{{issueText}}”的原始数据",
-        "POLLING": "CalDav：轮询待办事项"
+        "ISSUE_NOT_FOUND": "CalDav：待办事项“{{issueId}}”似乎已在服务器上删除。"
       }
     },
     "CONFIG": {
@@ -126,6 +122,7 @@
         "ACCESS_TOKEN_ERROR": "Dropbox：无法从身份验证代码生成访问令牌",
         "ACCESS_TOKEN_GENERATED": "Dropbox：根据验证码生成的访问令牌",
         "AUTH_ERROR": "Dropbox：提供了无效的访问令牌",
+        "AUTH_ERROR_ACTION": "更改令牌",
         "OFFLINE": "Dropbox：已离线，无法同步",
         "SYNC_ERROR": "Dropbox：同步时出错"
       }
@@ -158,19 +155,7 @@
         "WRITE_A_COMMENT": "评论"
       },
       "S": {
-        "ERR_NETWORK": "GitHub：由于客户端网络错误，请求失败",
-        "ERR_NOT_CONFIGURED": "GitHub：没有正确配置",
-        "ERR_UNKNOWN": "GitHub：未知错误 {{statusCode}} {{errorMsg}}",
-        "IMPORTED_MULTIPLE_ISSUES": "GitHub：从git导入到待办事项 {{issuesLength}} 个新 Issue ",
-        "IMPORTED_SINGLE_ISSUE": "GitHub：从git导入 Issue “{{issueText}}”到积压待办事项",
-        "ISSUE_DELETED_OR_CLOSED": "GitHub：Issue “{{issueText}}” 似乎在git上被删除或关闭",
-        "ISSUE_NO_UPDATE_REQUIRED": "GitHub：不需要更新",
-        "ISSUE_UPDATE": "GitHub：更新了“{{issueText}}”的数据",
-        "MANUAL_UPDATE_ISSUE_SUCCESS": "GitHub：更新了“{{issueText}}”的数据",
-        "MISSING_ISSUE_DATA": "GitHub：发现缺少 Issue 数据的任务。正在重新加载。",
-        "NEW_COMMENT": "GitHub：对“{{issueText}}”的新评论",
-        "POLLING": "GitHub：拉取 Issue 的变更",
-        "SHOW_ISSUE_BTN": "为我显示"
+        "ERR_UNKNOWN": "GitHub：未知错误 {{statusCode}} {{errorMsg}}"
       }
     },
     "GITLAB": {
@@ -201,19 +186,7 @@
         "WRITE_A_COMMENT": "评论"
       },
       "S": {
-        "ERR_NETWORK": "GitLab：由于客户端网络错误，请求失败",
-        "ERR_NOT_CONFIGURED": "GitLab：没有正确配置",
-        "ERR_UNKNOWN": "GitLab：未知错误 {{statusCode}} {{errorMsg}}",
-        "IMPORTED_MULTIPLE_ISSUES": "GitLab：从git导入到待办事项  {{issuesLength}} 个新 Issue ",
-        "IMPORTED_SINGLE_ISSUE": "GitLab：从git导入 Issue “{{issueText}}”到积压",
-        "ISSUE_DELETED_OR_CLOSED": "GitLab： Issue “{{issueText}}”似乎在git上被删除或关闭",
-        "ISSUE_NO_UPDATE_REQUIRED": "GitLab：不需要更新",
-        "ISSUE_UPDATE": "GitLab：更新了“{{issueText}}”的数据",
-        "MANUAL_UPDATE_ISSUE_SUCCESS": "GitLab：更新了“{{issueText}}”的数据",
-        "MISSING_ISSUE_DATA": "GitLab：发现缺少 Issue 数据的任务，重新加载。",
-        "NEW_COMMENT": "GitLab：对“{{issueText}}”的新评论",
-        "POLLING": "GitLab：自动拉取 Issue 的变化",
-        "SHOW_ISSUE_BTN": "为我显示"
+        "ERR_UNKNOWN": "GitLab：未知错误 {{statusCode}} {{errorMsg}}"
       }
     },
     "GOOGLE": {
@@ -234,6 +207,27 @@
         "ERR_NO_FILE_ID": "GoogleApi：未指定文件ID",
         "ERR_NO_FILE_NAME": "GoogleApi：未指定文件名",
         "SUCCESS_LOGIN": "GoogleApi：登录成功"
+      }
+    },
+    "ISSUE": {
+      "DEFAULT": {
+        "ISSUES_STR": "问题",
+        "ISSUE_STR": "问题"
+      },
+      "S": {
+        "ERR_NETWORK": "{{issueProviderName}}：请求失败，因为客户端网络错误",
+        "ERR_NOT_CONFIGURED": "{{issueProviderName}}：未正确配置",
+        "IMPORTED_MULTIPLE_ISSUES": "{{issueProviderName}}：将 {{nr}} 个新 {{issuesStr}} 导入待办事项",
+        "IMPORTED_SINGLE_ISSUE": "{{issueProviderName}}：将 {{issueStr}} 个“{{issueTitle}}”导入待办事项",
+        "ISSUE_DELETED_OR_CLOSED": "{{issueProviderName}}： {{issueStrC}} “{{issueTitle}}”似乎已被删除或关闭",
+        "ISSUE_NO_UPDATE_REQUIRED": "{{issueProviderName}}：无需更新",
+        "ISSUE_UPDATE_MULTIPLE": "{{issueProviderName}}：更新了 {{nr}} 个{{issuesStr}}的数据",
+        "ISSUE_UPDATE_SINGLE": "{{issueProviderName}}：“{{issueTitle}}”的更新数据",
+        "MANUAL_UPDATE_ISSUE_SUCCESS": "{{issueProviderName}}：“{{issueTitle}}”的更新数据",
+        "MISSING_ISSUE_DATA": "{{issueProviderName}}：找到缺少 {{issueStr}} 数据的任务。重装。",
+        "NEW_COMMENT": "{{issueProviderName}}：“{{issueTitle}}”的新评论",
+        "POLLING_BACKLOG": "{{issueProviderName}}：轮询新的 {{issuesStr}}",
+        "POLLING_CHANGES": "{{issueProviderName}}： {{issuesStr}}的轮询更改"
       }
     },
     "JIRA": {
@@ -266,6 +260,7 @@
         "CHOOSE_STATUS": "选择要分配的状态",
         "CURRENT_ASSIGNEE": "现任 Assignee 代理人：",
         "CURRENT_STATUS": "当前状态：",
+        "TASK_NAME": "任务名称：",
         "TITLE": "Jira：更新状态",
         "UPDATE_STATUS": "更新状态"
       },
@@ -298,6 +293,7 @@
         "HOST": "主机地址（例如：http://my-host.de:1234）",
         "PASSWORD": "令牌/密码",
         "USER_NAME": "电子邮件/用户名",
+        "USE_PAT": "使用个人访问令牌而不是密码",
         "WONKY_COOKIE_MODE": "Wonky Cookie后备身份验证（仅桌面应用程序）"
       },
       "FORM_SECTION": {
@@ -337,16 +333,13 @@
       "S": {
         "ADDED_WORKLOG_FOR": "Jira：为 {{issueKey}}添加了工作日志",
         "EXTENSION_NOT_LOADED": "Super Productivity扩展未加载。重新加载页面可能会有所帮助",
-        "IMPORTED_MULTIPLE_ISSUES": "Jira：从jira导入到待办事项 {{issuesLength}} 个新 Issue",
-        "IMPORTED_SINGLE_ISSUE": "Jira：从jira导入 Issue e“{{issueText}}”到积压",
         "INSUFFICIENT_SETTINGS": "为Jira提供的设置不足",
+        "INVALID_RESPONSE": "Jira：响应包含无效数据",
         "ISSUE_NO_UPDATE_REQUIRED": "Jira：“{{issueText}}”已经是最新的",
-        "ISSUE_UPDATE": "Jira：更新了“{{issueText}}”的数据",
         "MANUAL_UPDATE_ISSUE_SUCCESS": "Jira：更新了“{{issueText}}”的数据",
         "MISSING_ISSUE_DATA": "Jira：发现缺少Issue数据的任务，重新加载。",
         "NO_AUTO_IMPORT_JQL": "Jira：没有为自动导入定义搜索查询",
         "NO_VALID_TRANSITION": "Jira：未配置有效转换",
-        "POLLING": "Jira：自动拉取Issue的变化",
         "TIMED_OUT": "Jira：请求超时",
         "TRANSITION": "Jira：将 Issue “{{issueKey}}”设置为“{{name}}”",
         "TRANSITIONS_LOADED": "Jira：加载过渡。使用下面的选项分配它们",
@@ -378,6 +371,9 @@
         "MOOD_PRODUCTIVITY_OVER_TIME": "情绪和效率的时间变化",
         "NO_ADDITIONAL_DATA_YET": "尚未收集其他数据，完成每日任务后通过添加“评估”来执行此操作。",
         "OBSTRUCTION_SELECTION_COUNT": "选择消极因子的次数",
+        "SIMPLE_CLICK_COUNTERS_OVER_TIME": "随着时间的推移点击计数器",
+        "SIMPLE_COUNTERS": "简单柜台",
+        "SIMPLE_STOPWATCH_COUNTERS_OVER_TIME": "秒表计数器随着时间的推移",
         "TASKS_DONE_CREATED": "任务数目（完成/创建）",
         "TIME_ESTIMATED": "估计时间",
         "TIME_SPENT": "花费时间"
@@ -404,22 +400,10 @@
       }
     },
     "NOTE": {
-      "ADD_REMINDER": "添加提醒",
       "D_ADD": {
-        "DATETIME_LABEL": "提醒日期时间（可选）",
         "NOTE_LABEL": "请输入提醒的内容..."
       },
-      "D_ADD_REMINDER": {
-        "E_ENTER_TITLE": "请输入标题",
-        "L_DATETIME": "提醒的日期时间",
-        "L_TITLE": "提醒的标题"
-      },
-      "D_VIEW_REMINDER": {
-        "SNOOZE": "暂停",
-        "TITLE": "注意"
-      },
       "EDIT_FULLSCREEN": "全屏编辑",
-      "EDIT_REMINDER": "编辑提醒",
       "NOTES_CMP": {
         "ADD_BTN": "添加新笔记",
         "DROP_TO_ADD": "拖动到此处以添加新笔记"
@@ -427,14 +411,41 @@
       "NOTE_CMP": {
         "DISABLE_PARSE": "禁用 Markdown",
         "ENABLE_PARSE": "启用 Markdown"
+      }
+    },
+    "OPEN_PROJECT": {
+      "DIALOG_INITIAL": {
+        "TITLE": "为项目设置 OpenProject"
       },
-      "REMOVE_REMINDER": "删除提醒",
+      "FORM": {
+        "FILTER_USER": "用户名（例如，自行过滤掉更改）",
+        "HOST": "主机（例如：https://www.openproject.org/）",
+        "IS_AUTO_ADD_TO_BACKLOG": "自动将 OpenProject 中未解决的工作包添加到 backlog",
+        "IS_AUTO_POLL": "自动轮询导入的 OpenProject 工作包的更改",
+        "IS_SEARCH_ISSUES_FROM_OPEN_PROJECT": "添加新任务时将工作包显示为建议",
+        "PROJECT_ID": "专案编号",
+        "PROJECT_ID_DESCRIPTION": "在浏览器中查看项目时，可以作为 url 的一部分找到。",
+        "TOKEN": "访问令牌"
+      },
+      "FORM_SECTION": {
+        "HELP": "<p>您可以在此处配置 SuperProductivity 以列出打开的 OpenProject 工作包。请注意，要使其在浏览器中工作，您可能需要为 OpenProject 服务器配置 CORS，以允许从 app.super-productivity.com 访问</p>",
+        "TITLE": "开放项目"
+      },
+      "ISSUE_CONTENT": {
+        "ASSIGNEE": "代理人",
+        "DESCRIPTION": "描述",
+        "MARK_AS_CHECKED": "将更新标记为已选中",
+        "STATUS": "状态",
+        "SUMMARY": "摘要",
+        "TYPE": "类型"
+      },
+      "ISSUE_STRINGS": {
+        "ISSUES_STR": "工作包",
+        "ISSUE_STR": "工作包"
+      },
       "S": {
-        "ADDED_REMINDER": "为笔记添加提醒",
-        "DELETED_REMINDER": "已删除笔记提醒",
-        "UPDATED_REMINDER": "更新了笔记的提醒"
-      },
-      "UPDATE_REMINDER": "更新提醒"
+        "ERR_UNKNOWN": "OpenProject：未知错误 {{statusCode}} {{errorMsg}}。是否为服务器正确配置了 CORS？"
+      }
     },
     "POMODORO": {
       "BACK_TO_WORK": "继续加油！",
@@ -529,8 +540,20 @@
         "UPDATED": "更新了项目设置"
       }
     },
+    "QUICK_HISTORY": {
+      "NO_DATA": "没有当年的数据",
+      "PAGE_TITLE": "快速历史",
+      "WEEK_TITLE": "第 {{nr}} 周 ({{timeSpent}})"
+    },
     "REMINDER": {
       "S_REMINDER_ERR": "提醒界面出错"
+    },
+    "SEARCH_BAR": {
+      "INFO": "单击列表图标以搜索存档任务",
+      "INFO_ARCHIVED": "点击存档图标搜索正常任务",
+      "PLACEHOLDER": "搜索任务或任务描述",
+      "PLACEHOLDER_ARCHIVED": "搜索存档任务",
+      "TOO_MANY_RESULTS": "结果太多，请缩小搜索范围"
     },
     "SIMPLE_COUNTER": {
       "D_CONFIRM_REMOVE": {
@@ -585,14 +608,15 @@
       },
       "FORM": {
         "DROPBOX": {
-          "B_GENERATE_TOKEN": "生成令牌",
-          "FOLLOW_LINK": "请打开以下链接，并将提供的身份验证代码复制到输入字段中。",
-          "L_ACCESS_TOKEN": "访问令牌（从身份验证代码生成）",
-          "L_AUTH_CODE": "授权码"
+          "L_ACCESS_TOKEN": "访问令牌（从身份验证代码生成）"
         },
         "GOOGLE": {
           "L_IS_COMPRESS_DATA": "压缩数据",
           "L_SYNC_FILE_NAME": "同步文件名"
+        },
+        "LOCAL_FILE": {
+          "L_SYNC_FILE_PATH": "同步文件路径",
+          "L_SYNC_FILE_PATH_DESCRIPTION": "应该用于同步的文件的绝对路径（将被创建）。"
         },
         "L_ENABLE_SYNCING": "启用同步",
         "L_SYNC_INTERVAL": "同步间隔",
@@ -613,6 +637,7 @@
         "INCOMPLETE_CFG": "同步身份验证失败。请检查您的配置！",
         "INITIAL_SYNC_ERROR": "初始同步失败",
         "SUCCESS_IMPORT": "数据已导入",
+        "SUCCESS_VIA_BUTTON": "数据同步成功",
         "UNKNOWN_ERROR": "同步时发生未知错误。请检查控制台。",
         "UPLOAD_ERROR": "未知的上载错误（设置正确吗？）： {{err}}"
       }
@@ -658,8 +683,10 @@
       "ADD_TASK_BAR": {
         "ADD_EXISTING_TASK": "添加现有任务“{{taskTitle}}”",
         "ADD_ISSUE_TASK": "从 {{issueType}}添加问题＃{{issueNr}} ",
-        "ADD_TASK": "添加任务",
-        "ADD_TASK_TO_BACKLOG": "将任务添加到待办事项中",
+        "ADD_TASK_TO_BOTTOM_OF_BACKLOG": "将任务添加到待办事项的底部",
+        "ADD_TASK_TO_BOTTOM_OF_TODAY": "将任务添加到列表底部",
+        "ADD_TASK_TO_TOP_OF_BACKLOG": "将任务添加到待办事项的顶部",
+        "ADD_TASK_TO_TOP_OF_TODAY": "将任务添加到列表顶部",
         "CREATE_TASK": "创建新任务",
         "EXAMPLE": "示例：“某些任务标题+ projectName＃一些标签＃一些其他标签10m / 3h”",
         "START": "再次按回车键开始"
@@ -698,9 +725,12 @@
         "UPDATE_ISSUE_DATA": "更新 Issue 数据"
       },
       "D_REMINDER_ADD": {
+        "CONFIRM_REPEAT_OK": "时间表",
+        "CONFIRM_REPEAT_TXT": "您正在尝试将此重复任务安排到另一天。重复的任务通常意味着在指定的日期重新创建并且只安排在当天。您仍要继续吗？",
         "DATETIME_FOR": "提醒的日期时间",
         "EDIT": "编辑提醒",
         "MOVE_TO_BACKLOG": "在计划时间到来后将任务移至待办事项",
+        "REMIND_AT": "提醒在",
         "RO_10M": "开始前10分钟",
         "RO_15M": "开始前15分钟",
         "RO_1H": "开始前1小时",
@@ -715,6 +745,7 @@
         "ADD_TO_TODAY": "添加到今天",
         "DISMISS": "取消提醒",
         "DISMISS_ALL": "关闭所有",
+        "DONE": "完成",
         "DUE_TASK": "到期任务",
         "DUE_TASKS": "到期任务",
         "FOR_CURRENT": "任务到期了，你想开始工作吗？",
@@ -784,7 +815,11 @@
         "FRIDAY": "星期️五",
         "IS_ADD_TO_BOTTOM": "将任务移到列表底部",
         "MONDAY": "星期一",
+        "REMIND_AT": "提醒在",
+        "REMIND_AT_PLACEHOLDER": "选择提醒时间",
         "SATURDAY": "星期️六",
+        "START_TIME": "预定开始时间",
+        "START_TIME_DESCRIPTION": "例如。 15:00。为全天任务留空",
         "SUNDAY": "星期️日",
         "THURSDAY": "星期️四",
         "TITLE": "任务标题",
@@ -802,7 +837,8 @@
       "MENU_TITLE": "时间线",
       "NOW": "现在",
       "NO_TASKS": "当前没有任务。请通过顶部栏中的+按钮添加一些任务。",
-      "START": "工作开始"
+      "START": "工作开始",
+      "TASK_PROJECTION_INFO": "计划的可重复任务的未来预测"
     },
     "TIME_TRACKING": {
       "B": {
@@ -817,6 +853,11 @@
         "BREAK": "休息",
         "CREATE_AND_TRACK": "<em>创建</em> 并记录到：",
         "IDLE_FOR": "你一直未开始工作：",
+        "SIMPLE_CONFIRM_COUNTER_CANCEL": "跳跃",
+        "SIMPLE_CONFIRM_COUNTER_OK": "跟踪",
+        "SIMPLE_COUNTER_CONFIRM_TXT": "您选择了跳过，但激活了 {{nr}} 个简单的计数器按钮。你想跟踪他们的空闲时间吗？",
+        "SIMPLE_COUNTER_TOOLTIP": "点击跟踪 {{title}}",
+        "SIMPLE_COUNTER_TOOLTIP_DISABLE": "单击以不跟踪到 {{title}}",
         "SKIP": "跳过",
         "TASK": "任务",
         "TASK_BREAK": "任务中断",
@@ -965,6 +1006,7 @@
       "OPEN_PROJECT_NOTES": "显示/隐藏项目备注",
       "SELECT_NEXT_TASK": "选择下一个任务",
       "SELECT_PREVIOUS_TASK": "选择上一个任务",
+      "SHOW_SEARCH_BAR": "显示搜索栏",
       "SYSTEM_SHORTCUTS": "全局快捷方式（全系统）",
       "TASK_ADD_SUB_TASK": "添加子任务",
       "TASK_DELETE": "删除任务",
@@ -1054,6 +1096,7 @@
       "MESSAGE": "休息一下",
       "MIN_WORKING_TIME": "触发休息提醒的工作时长",
       "MOTIVATIONAL_IMG": "励志图片（网址）",
+      "SNOOZE_TIME": "提示休息时暂停时间",
       "TITLE": "休息提醒"
     },
     "TIMELINE": {
@@ -1075,7 +1118,10 @@
   "GLOBAL_SNACK": {
     "COPY_TO_CLIPPBOARD": "复制到剪贴板",
     "ERR_COMPRESSION": "压缩界面出错",
+    "FILE_DOWNLOADED": "{{fileName}} 个已下载",
+    "FILE_DOWNLOADED_BTN": "打开文件夹",
     "PERSISTENCE_DISALLOWED": "数据将不会永久保存。请注意，这可能会导致数据丢失！！",
+    "PERSISTENCE_ERROR": "请求保留数据时出错： {{err}}",
     "RUNNING_X": "运行“{{str}}”。",
     "SHORTCUT_WARN_OPEN_BOOKMARKS_FROM_TAG": " 按下了{{keyCombo}} ，但是打开书签快捷方式仅在项目上下文中可用。",
     "SHORTCUT_WARN_OPEN_NOTES_FROM_TAG": " 按下了{{keyCombo}} ，但是仅在项目上下文中，打开注释快捷方式才可用。"
@@ -1107,8 +1153,10 @@
     "PROJECTS": "项目",
     "PROJECT_MENU": "项目菜单",
     "PROJECT_SETTINGS": "项目设置",
+    "QUICK_HISTORY": "快速历史",
     "SCHEDULED": "计划",
     "SETTINGS": "设置",
+    "SHOW_SEARCH_BAR": "显示搜索栏",
     "TAGS": "标签",
     "TASKS": "任务",
     "TASK_LIST": "任务列表",
@@ -1127,6 +1175,7 @@
       "MSG": "你的工作已经完成！返回主界面",
       "OK": "好的！结束程序！"
     },
+    "ESTIMATE_TOTAL": "总估计数：",
     "EVALUATION": "评估",
     "EXPORT_TASK_LIST": "导出任务列表",
     "NO_TASKS": "今天没有任务",
@@ -1176,6 +1225,7 @@
     "GITLAB_CONFIGURED": "配置GitLab集成",
     "IMPORT_FROM_FILE": "从文件导入",
     "JIRA_CONFIGURED": "配置Jira集成",
+    "OPEN_PROJECT_CONFIGURED": "已配置 OpenProject 集成",
     "S_INVALID_JSON": "项目文件的json无效",
     "TITLE": "项目概况",
     "UN_ARCHIVE_PROJECT": "Unarchive项目"

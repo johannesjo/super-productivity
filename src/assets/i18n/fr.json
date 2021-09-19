@@ -1,5 +1,6 @@
 {
   "APP": {
+    "A_BROWSER_WARNING": "Nous sommes désolés, mais l'application n'est pas optimisée pour fonctionner dans ce navigateur. Veuillez envisager d'utiliser un navigateur à base de chrome ou de télécharger la version électronique de l'application",
     "B_INSTALL": {
       "IGNORE": "Ignorer",
       "INSTALL": "Installer",
@@ -19,7 +20,9 @@
   "CONFIRM": {
     "AUTO_FIX": "Vos données semblent endommagées. Voulez-vous essayer de le réparer automatiquement? Cela peut entraîner une perte de données partielle.",
     "DELETE_STRAY_BACKUP": "Voulez-vous supprimer le verso pour éviter de voir cette boîte de dialogue?",
+    "RELOAD_AFTER_IDB_ERROR": "Impossible d'accéder à la base de données :( Les causes possibles sont une mise à jour de l'application en arrière-plan ou un espace disque insuffisant. Appuyez sur OK pour recharger l'application (peut nécessiter un redémarrage manuel de l'application sur certaines plates-formes).",
     "RESTORE_FILE_BACKUP": "Il ne semble pas y avoir de DONNÉES, mais des sauvegardes sont disponibles sur \"{{dir}}\". Voulez-vous restaurer la dernière sauvegarde de {{from}}?",
+    "RESTORE_FILE_BACKUP_ANDROID": "Il semble qu'il n'y ait PAS DE DONNÉES, mais une sauvegarde est disponible. Voulez-vous le charger ?",
     "RESTORE_STRAY_BACKUP": "Lors de la dernière synchronisation, une erreur s'est peut-être produite. Voulez-vous restaurer la dernière sauvegarde?"
   },
   "DATETIME_INPUT": {
@@ -106,14 +109,7 @@
       "S": {
         "CALENDAR_NOT_FOUND": "CalDav: calendrier \"{{calendarName}}\" introuvable",
         "CALENDAR_READ_ONLY": "CalDav: l'agenda \"{{calendarName}}\" est en lecture seule",
-        "ERR_NETWORK": "CalDav: la demande a échoué en raison d'une erreur réseau côté client",
-        "ERR_NOT_CONFIGURED": "CalDav: pas correctement configuré",
-        "IMPORTED_MULTIPLE_ISSUES": "calDav: importation de {{issuesLength}} nouveaux problèmes de git dans le backlog",
-        "IMPORTED_SINGLE_ISSUE": "CalDav: problème importé \"{{issueText}}\" depuis le backlog",
-        "ISSUE_NOT_FOUND": "CalDav: Todo \"{{issueId}}\" semble être supprimé sur le serveur.",
-        "ISSUE_NO_UPDATE_REQUIRED": "CalDav: aucune mise à jour requise.",
-        "ISSUE_UPDATE": "Caldav: données actualisées pour \"{{issueText}}\"",
-        "POLLING": "Caldav: Changements d'interrogation pour todos"
+        "ISSUE_NOT_FOUND": "CalDav: Todo \"{{issueId}}\" semble être supprimé sur le serveur."
       }
     },
     "CONFIG": {
@@ -126,6 +122,7 @@
         "ACCESS_TOKEN_ERROR": "Dropbox: impossible de générer un jeton d'accès à partir du code d'authentification",
         "ACCESS_TOKEN_GENERATED": "Dropbox: jeton d'accès généré à partir du code d'authentification",
         "AUTH_ERROR": "Dropbox: jeton d'accès non valide fourni",
+        "AUTH_ERROR_ACTION": "Changer de jeton",
         "OFFLINE": "Dropbox: impossible de synchroniser, car hors ligne",
         "SYNC_ERROR": "Dropbox: erreur lors de la synchronisation"
       }
@@ -158,19 +155,7 @@
         "WRITE_A_COMMENT": "Écrire un commentaire"
       },
       "S": {
-        "ERR_NETWORK": "GitHub : la requête a échouée à cause d'une erreur réseau côté client",
-        "ERR_NOT_CONFIGURED": "GitHub : n'est pas configuré correctement",
-        "ERR_UNKNOWN": "GitHub: erreur inconnue {{statusCode}} {{errorMsg}}",
-        "IMPORTED_MULTIPLE_ISSUES": "GitHub : {{issuesLength}} nouvelles issues de git dans le backlog",
-        "IMPORTED_SINGLE_ISSUE": "GitHub : Issue \"{{issueText}}\" importée de git dans le backlog",
-        "ISSUE_DELETED_OR_CLOSED": "GitHub : l'issue' \"{{issueText}}\" semble être supprimée ou fermé sur git",
-        "ISSUE_NO_UPDATE_REQUIRED": "GitHub: aucune mise à jour requise",
-        "ISSUE_UPDATE": "GitHub : données mises à jour pour \"{{issueText}}\"",
-        "MANUAL_UPDATE_ISSUE_SUCCESS": "GitHub : données mises à jour pour \"{{issueText}}\"",
-        "MISSING_ISSUE_DATA": "GitHub : Tâches avec données d'issue manquantes trouvées. Rechargement.",
-        "NEW_COMMENT": "GitHub : Nouveau commentaire pour \"{{issueText}}\"",
-        "POLLING": "GitHub : Recherche de modification sur les issues",
-        "SHOW_ISSUE_BTN": "Montre moi"
+        "ERR_UNKNOWN": "GitHub: erreur inconnue {{statusCode}} {{errorMsg}}"
       }
     },
     "GITLAB": {
@@ -201,19 +186,7 @@
         "WRITE_A_COMMENT": "Écrire un commentaire"
       },
       "S": {
-        "ERR_NETWORK": "GitLab : la requête a échouée à cause d'une erreur réseau côté client",
-        "ERR_NOT_CONFIGURED": "GitLab : n'est pas configuré correctement",
-        "ERR_UNKNOWN": "GitLab: erreur inconnue {{statusCode}} {{errorMsg}}",
-        "IMPORTED_MULTIPLE_ISSUES": "GitLab : {{issuesLength}} nouvelles issues de git dans le backlog",
-        "IMPORTED_SINGLE_ISSUE": "GitLab : Issue \"{{issueText}}\" importée de git dans le backlog",
-        "ISSUE_DELETED_OR_CLOSED": "GitLab : l'issue' \"{{issueText}}\" semble être supprimée ou fermé sur git",
-        "ISSUE_NO_UPDATE_REQUIRED": "GitLab: aucune mise à jour requise",
-        "ISSUE_UPDATE": "GitLab : données mises à jour pour \"{{issueText}}\"",
-        "MANUAL_UPDATE_ISSUE_SUCCESS": "GitLab : données mises à jour pour \"{{issueText}}\"",
-        "MISSING_ISSUE_DATA": "GitLab : Tâches avec données d'issue manquantes trouvées. Rechargement.",
-        "NEW_COMMENT": "GitLab : Nouveau commentaire pour \"{{issueText}}\"",
-        "POLLING": "GitLab : Recherche de modification sur les issues",
-        "SHOW_ISSUE_BTN": "Montre moi"
+        "ERR_UNKNOWN": "GitLab: erreur inconnue {{statusCode}} {{errorMsg}}"
       }
     },
     "GOOGLE": {
@@ -234,6 +207,27 @@
         "ERR_NO_FILE_ID": "GoogleApi: aucun identifiant de fichier spécifié",
         "ERR_NO_FILE_NAME": "GoogleApi: aucun nom de fichier spécifié",
         "SUCCESS_LOGIN": "GoogleApi: connexion réussie"
+      }
+    },
+    "ISSUE": {
+      "DEFAULT": {
+        "ISSUES_STR": "Problèmes",
+        "ISSUE_STR": "Problème"
+      },
+      "S": {
+        "ERR_NETWORK": "{{issueProviderName}}: la demande a échoué en raison d'une erreur réseau côté client",
+        "ERR_NOT_CONFIGURED": "{{issueProviderName}}: pas correctement configuré",
+        "IMPORTED_MULTIPLE_ISSUES": "{{issueProviderName}}: {{nr}} nouveau {{issuesStr}} importé dans le backlog",
+        "IMPORTED_SINGLE_ISSUE": "{{issueProviderName}}: {{issueStr}} \"{{issueTitle}}\" importé dans le backlog",
+        "ISSUE_DELETED_OR_CLOSED": "{{issueProviderName}}: {{issueStrC}} \"{{issueTitle}}\" semble être supprimé ou fermé",
+        "ISSUE_NO_UPDATE_REQUIRED": "{{issueProviderName}}: aucune mise à jour requise",
+        "ISSUE_UPDATE_MULTIPLE": "{{issueProviderName}}: données mises à jour pour {{nr}} {{issuesStr}}",
+        "ISSUE_UPDATE_SINGLE": "{{issueProviderName}}: données mises à jour pour \"{{issueTitle}}\"",
+        "MANUAL_UPDATE_ISSUE_SUCCESS": "{{issueProviderName}}: données mises à jour pour \"{{issueTitle}}\"",
+        "MISSING_ISSUE_DATA": "{{issueProviderName}}: tâches avec des données {{issueStr}} manquantes trouvées. Rechargement.",
+        "NEW_COMMENT": "{{issueProviderName}}: Nouveau commentaire pour \"{{issueTitle}}\"",
+        "POLLING_BACKLOG": "{{issueProviderName}}: interrogation pour le nouveau {{issuesStr}}",
+        "POLLING_CHANGES": "{{issueProviderName}}: interrogation des modifications pour {{issuesStr}}"
       }
     },
     "JIRA": {
@@ -266,6 +260,7 @@
         "CHOOSE_STATUS": "Choisissez le statut à attribuer",
         "CURRENT_ASSIGNEE": "Responsable actuel:",
         "CURRENT_STATUS": "Statut actuel:",
+        "TASK_NAME": "Nom de la tâche:",
         "TITLE": "Jira: Mettre à jour le statut",
         "UPDATE_STATUS": "Mettre à jour le statut"
       },
@@ -298,6 +293,7 @@
         "HOST": "Hôte (par exemple: http://my-host.de:1234)",
         "PASSWORD": "Jeton / mot de passe",
         "USER_NAME": "Email / Nom d'utilisateur",
+        "USE_PAT": "Utiliser le jeton d'accès personnel au lieu du mot de passe",
         "WONKY_COOKIE_MODE": "Authentification de secours Wonky Cookie (application de bureau uniquement)"
       },
       "FORM_SECTION": {
@@ -337,16 +333,13 @@
       "S": {
         "ADDED_WORKLOG_FOR": "Jira: temps de travail ajouté pour {{issueKey}}",
         "EXTENSION_NOT_LOADED": "Extension Super Productivity non chargée. Recharger la page peut aider",
-        "IMPORTED_MULTIPLE_ISSUES": "Jira: {{issuesLength}} nouveaux tickets importés de jira dans le backlog",
-        "IMPORTED_SINGLE_ISSUE": "Jira: ticket \"{{issueText}}\" importé de jira dans le backlog",
         "INSUFFICIENT_SETTINGS": "Réglages insuffisants pour Jira",
+        "INVALID_RESPONSE": "Jira : la réponse contenait des données non valides",
         "ISSUE_NO_UPDATE_REQUIRED": "Jira: \"{{issueText}}\" déjà à jour",
-        "ISSUE_UPDATE": "Jira: données mises à jour pour \"{{issueText}}\"",
         "MANUAL_UPDATE_ISSUE_SUCCESS": "Jira: données mises à jour pour \"{{issueText}}\"",
         "MISSING_ISSUE_DATA": "Jira: Tâches avec données du ticket manquantes trouvées. Rechargement.",
         "NO_AUTO_IMPORT_JQL": "Jira: aucune requête de recherche définie pour l'importation automatique",
         "NO_VALID_TRANSITION": "Jira: Aucune transition valide n'est configurée",
-        "POLLING": "Jira: Recherche de changements sur les tickets",
         "TIMED_OUT": "Jira: la demande a expiré",
         "TRANSITION": "Jira: passer le ticket \"{{issueKey}}\" à \"{{name}}\"",
         "TRANSITIONS_LOADED": "Jira: Transitions chargées. Utilisez les listes ci-dessous pour les assigner",
@@ -378,6 +371,9 @@
         "MOOD_PRODUCTIVITY_OVER_TIME": "Humeur et productivité dans le temps",
         "NO_ADDITIONAL_DATA_YET": "Aucune donnée supplémentaire collectée pour l'instant. Utilisez le formulaire du panneau \"Evaluation\" du résumé quotidien pour le faire.",
         "OBSTRUCTION_SELECTION_COUNT": "Nombre de fois qu'un facteur d'obstruction a été sélectionné",
+        "SIMPLE_CLICK_COUNTERS_OVER_TIME": "Compteurs de clics au fil du temps",
+        "SIMPLE_COUNTERS": "Compteurs simples",
+        "SIMPLE_STOPWATCH_COUNTERS_OVER_TIME": "Compteurs de chronomètre au fil du temps",
         "TASKS_DONE_CREATED": "Tâches (effectuées / créées)",
         "TIME_ESTIMATED": "Temps estimé",
         "TIME_SPENT": "Temps passé"
@@ -404,22 +400,10 @@
       }
     },
     "NOTE": {
-      "ADD_REMINDER": "Ajouter un rappel",
       "D_ADD": {
-        "DATETIME_LABEL": "Date et heure du rappel (facultatif)",
         "NOTE_LABEL": "Entrez le texte à enregistrer en tant que note ..."
       },
-      "D_ADD_REMINDER": {
-        "E_ENTER_TITLE": "Vous devez entrer un titre",
-        "L_DATETIME": "Date et heure du rappel",
-        "L_TITLE": "Titre de la notification"
-      },
-      "D_VIEW_REMINDER": {
-        "SNOOZE": "Sommeil",
-        "TITLE": "Note"
-      },
       "EDIT_FULLSCREEN": "Modifier en plein écran",
-      "EDIT_REMINDER": "Modifier le rappel",
       "NOTES_CMP": {
         "ADD_BTN": "Ajouter une nouvelle note",
         "DROP_TO_ADD": "Déposer ici pour ajouter une nouvelle note"
@@ -427,14 +411,41 @@
       "NOTE_CMP": {
         "DISABLE_PARSE": "Désactiver le markdown",
         "ENABLE_PARSE": "Activer le markdown"
+      }
+    },
+    "OPEN_PROJECT": {
+      "DIALOG_INITIAL": {
+        "TITLE": "Configurer OpenProject pour le projet"
       },
-      "REMOVE_REMINDER": "Supprimer le rappel",
+      "FORM": {
+        "FILTER_USER": "Nom d'utilisateur (par exemple, pour filtrer vous-même les modifications)",
+        "HOST": "Hébergeur (ex : https://www.openproject.org/)",
+        "IS_AUTO_ADD_TO_BACKLOG": "Ajouter automatiquement des lots de travaux non résolus d'OpenProject au backlog",
+        "IS_AUTO_POLL": "Sondage automatique des packages de travail OpenProject importés pour les modifications",
+        "IS_SEARCH_ISSUES_FROM_OPEN_PROJECT": "Afficher les lots de travaux sous forme de suggestions lors de l'ajout de nouvelles tâches",
+        "PROJECT_ID": "identifiant du projet",
+        "PROJECT_ID_DESCRIPTION": "Peut être trouvé dans l'url, lors de la visualisation du projet dans le navigateur.",
+        "TOKEN": "Jeton d'accès"
+      },
+      "FORM_SECTION": {
+        "HELP": "<p>Ici, vous pouvez configurer SuperProductivity pour répertorier les packages de travail OpenProject ouverts. Veuillez noter que pour que cela fonctionne dans le navigateur, vous devez probablement configurer CORS pour votre serveur OpenProject, pour autoriser l'accès depuis app.super-productivity.com</p>",
+        "TITLE": "Projet ouvert"
+      },
+      "ISSUE_CONTENT": {
+        "ASSIGNEE": "Cessionnaire",
+        "DESCRIPTION": "La description",
+        "MARK_AS_CHECKED": "Marquer les mises à jour comme cochées",
+        "STATUS": "Statut",
+        "SUMMARY": "Résumé",
+        "TYPE": "Type"
+      },
+      "ISSUE_STRINGS": {
+        "ISSUES_STR": "lots de travaux",
+        "ISSUE_STR": "Lot de travaux"
+      },
       "S": {
-        "ADDED_REMINDER": "Rappel ajouté pour la note",
-        "DELETED_REMINDER": "Rappel supprimé pour la note",
-        "UPDATED_REMINDER": "Rappel mis à jour pour note"
-      },
-      "UPDATE_REMINDER": "Mettre à jour le rappel"
+        "ERR_UNKNOWN": "OpenProject : erreur inconnue {{statusCode}} {{errorMsg}}. CORS est-il correctement configuré pour le serveur ?"
+      }
     },
     "POMODORO": {
       "BACK_TO_WORK": "Au travail !",
@@ -529,8 +540,20 @@
         "UPDATED": "Paramètres du projet mis à jour"
       }
     },
+    "QUICK_HISTORY": {
+      "NO_DATA": "Pas de données pour l'année en cours",
+      "PAGE_TITLE": "Historique rapide",
+      "WEEK_TITLE": "Semaine {{nr}} ({{timeSpent}})"
+    },
     "REMINDER": {
       "S_REMINDER_ERR": "Erreur pour l'interface de rappel"
+    },
+    "SEARCH_BAR": {
+      "INFO": "Cliquez sur l'icône de la liste pour rechercher les tâches archivées",
+      "INFO_ARCHIVED": "Cliquez sur l'icône d'archive pour rechercher les tâches normales",
+      "PLACEHOLDER": "Rechercher une tâche ou une description de tâche",
+      "PLACEHOLDER_ARCHIVED": "Rechercher des tâches archivées",
+      "TOO_MANY_RESULTS": "Trop de résultats, veuillez affiner votre recherche"
     },
     "SIMPLE_COUNTER": {
       "D_CONFIRM_REMOVE": {
@@ -585,14 +608,15 @@
       },
       "FORM": {
         "DROPBOX": {
-          "B_GENERATE_TOKEN": "Générer un jeton",
-          "FOLLOW_LINK": "Veuillez ouvrir le lien suivant et copier le code d'authentification fourni dans le champ de saisie.",
-          "L_ACCESS_TOKEN": "Jeton d'accès (généré à partir du code d'authentification)",
-          "L_AUTH_CODE": "Code d'autorisation"
+          "L_ACCESS_TOKEN": "Jeton d'accès (généré à partir du code d'authentification)"
         },
         "GOOGLE": {
           "L_IS_COMPRESS_DATA": "Compresser les données",
           "L_SYNC_FILE_NAME": "Nom du fichier de synchronisation"
+        },
+        "LOCAL_FILE": {
+          "L_SYNC_FILE_PATH": "Chemin du fichier de synchronisation",
+          "L_SYNC_FILE_PATH_DESCRIPTION": "Chemin absolu vers le fichier qui doit être utilisé pour la synchronisation (sera créé)."
         },
         "L_ENABLE_SYNCING": "Activer la synchronisation",
         "L_SYNC_INTERVAL": "Intervalle de synchronisation",
@@ -613,6 +637,7 @@
         "INCOMPLETE_CFG": "L'authentification pour la synchronisation a échoué. Veuillez vérifier votre configuration!",
         "INITIAL_SYNC_ERROR": "Échec de la synchronisation initiale",
         "SUCCESS_IMPORT": "Données importées",
+        "SUCCESS_VIA_BUTTON": "Données synchronisées avec succès",
         "UNKNOWN_ERROR": "Erreur inconnue lors de la synchronisation. Veuillez vérifier la console.",
         "UPLOAD_ERROR": "Erreur de téléversement inconnue (paramètres corrects?): {{err}}"
       }
@@ -658,8 +683,10 @@
       "ADD_TASK_BAR": {
         "ADD_EXISTING_TASK": "Ajouter la tâche existante \"{{taskTitle}}\"",
         "ADD_ISSUE_TASK": "Ajouter le problème n °{{issueNr}} de {{issueType}}",
-        "ADD_TASK": "Ajouter une tâche",
-        "ADD_TASK_TO_BACKLOG": "Ajouter une tâche au backlog",
+        "ADD_TASK_TO_BOTTOM_OF_BACKLOG": "Ajouter une tâche au bas du backlog",
+        "ADD_TASK_TO_BOTTOM_OF_TODAY": "Ajouter une tâche au bas de la liste",
+        "ADD_TASK_TO_TOP_OF_BACKLOG": "Ajouter une tâche en haut du backlog",
+        "ADD_TASK_TO_TOP_OF_TODAY": "Ajouter une tâche en haut de la liste",
         "CREATE_TASK": "Créer une nouvelle tâche",
         "EXAMPLE": "Exemple: \"Un titre de tâche + projectName # une balise # une autre balise 10m / 3h\"",
         "START": "Appuyez sur Entrée une fois de plus pour démarrer"
@@ -698,9 +725,12 @@
         "UPDATE_ISSUE_DATA": "Mettre à jour les données du ticket"
       },
       "D_REMINDER_ADD": {
+        "CONFIRM_REPEAT_OK": "Programme",
+        "CONFIRM_REPEAT_TXT": "Vous essayez de programmer cette tâche répétée à un autre jour. Les tâches répétées sont généralement destinées à être recréées à des jours spécifiés et planifiées uniquement ce jour-là. Voulez-vous continuer malgré tout ?",
         "DATETIME_FOR": "Date et heure du rappel",
         "EDIT": "Modifier le rappel",
         "MOVE_TO_BACKLOG": "Déplacer la tâche dans le backlog en atendant la planification",
+        "REMIND_AT": "Rappeler à",
         "RO_10M": "10 minutes avant le début",
         "RO_15M": "15 minutes avant le début",
         "RO_1H": "1 heure avant le début",
@@ -715,6 +745,7 @@
         "ADD_TO_TODAY": "Ajouter à aujourd'hui",
         "DISMISS": "Fermer le rappel",
         "DISMISS_ALL": "Rejeter la totalité",
+        "DONE": "Terminé",
         "DUE_TASK": "Tâche due",
         "DUE_TASKS": "Tâches dues",
         "FOR_CURRENT": "La tâche est due. Voulez-vous commencer à travailler dessus ?",
@@ -784,7 +815,11 @@
         "FRIDAY": "vendredi",
         "IS_ADD_TO_BOTTOM": "Déplacer la tâche en bas de la liste",
         "MONDAY": "lundi",
+        "REMIND_AT": "Rappeler à",
+        "REMIND_AT_PLACEHOLDER": "Sélectionnez quand rappeler",
         "SATURDAY": "samedi",
+        "START_TIME": "Heure de début programmée",
+        "START_TIME_DESCRIPTION": "Par exemple. 15h00. Laisser vide pour une tâche toute la journée",
         "SUNDAY": "dimanche",
         "THURSDAY": "jeudi",
         "TITLE": "Titre de la tâche",
@@ -802,7 +837,8 @@
       "MENU_TITLE": "Chronologie",
       "NOW": "À présent",
       "NO_TASKS": "Il n'y a actuellement aucune tâche. Veuillez ajouter quelques tâches via le bouton + dans la barre supérieure.",
-      "START": "Début des travaux"
+      "START": "Début des travaux",
+      "TASK_PROJECTION_INFO": "Projection future d'une tâche répétable planifiée"
     },
     "TIME_TRACKING": {
       "B": {
@@ -817,6 +853,11 @@
         "BREAK": "Pause",
         "CREATE_AND_TRACK": "<em>Créer</em> et ajouter sur :",
         "IDLE_FOR": "Vous avez été inactif pendant : ",
+        "SIMPLE_CONFIRM_COUNTER_CANCEL": "Sauter",
+        "SIMPLE_CONFIRM_COUNTER_OK": "Piste",
+        "SIMPLE_COUNTER_CONFIRM_TXT": "Vous avez sélectionné ignorer, mais activé {{nr}} bouton(s) de compteur simple. Voulez-vous suivre le temps d'inactivité pour eux ?",
+        "SIMPLE_COUNTER_TOOLTIP": "Cliquez pour suivre jusqu'à {{title}}",
+        "SIMPLE_COUNTER_TOOLTIP_DISABLE": "Cliquez pour ne PAS suivre jusqu'à {{title}}",
         "SKIP": "Passer",
         "TASK": "Tâche",
         "TASK_BREAK": "Pause de travail",
@@ -965,6 +1006,7 @@
       "OPEN_PROJECT_NOTES": "Afficher / masquer les notes de projet",
       "SELECT_NEXT_TASK": "Sélectionner la tâche suivante",
       "SELECT_PREVIOUS_TASK": "Sélectionner la tâche précédente",
+      "SHOW_SEARCH_BAR": "Afficher la barre de recherche",
       "SYSTEM_SHORTCUTS": "Raccourcis globaux (à l'échelle du système)",
       "TASK_ADD_SUB_TASK": "Ajouter une sous-tâche",
       "TASK_DELETE": "Supprimer la tâche",
@@ -1054,6 +1096,7 @@
       "MESSAGE": "Message invitant à prendre une pause",
       "MIN_WORKING_TIME": "Déclencher l'invitation à prendre une pause après avoir travaillé X sans pause",
       "MOTIVATIONAL_IMG": "Image de motivation (URL Web)",
+      "SNOOZE_TIME": "Temps de répétition lorsque vous êtes invité à faire une pause",
       "TITLE": "Rappel de pause"
     },
     "TIMELINE": {
@@ -1075,7 +1118,10 @@
   "GLOBAL_SNACK": {
     "COPY_TO_CLIPPBOARD": "Copié dans le presse-papier",
     "ERR_COMPRESSION": "Erreur pour l'interface de compression",
+    "FILE_DOWNLOADED": "{{fileName}} téléchargé",
+    "FILE_DOWNLOADED_BTN": "Dossier ouvert",
     "PERSISTENCE_DISALLOWED": "Les données ne seront pas conservées de manière permanente. Sachez que cela peut entraîner une perte de données!",
+    "PERSISTENCE_ERROR": "Erreur lors de la demande de persistance des données : {{err}}",
     "RUNNING_X": "\"{{str}}\" en cours.",
     "SHORTCUT_WARN_OPEN_BOOKMARKS_FROM_TAG": "{{keyCombo}} enfoncé, mais le raccourci vers les favoris ouverts n'est disponible que dans le contexte du projet.",
     "SHORTCUT_WARN_OPEN_NOTES_FROM_TAG": "{{keyCombo}} enfoncé, mais le raccourci Notes ouvertes n'est disponible que dans le contexte du projet."
@@ -1107,8 +1153,10 @@
     "PROJECTS": "Projets",
     "PROJECT_MENU": "Menu du projet",
     "PROJECT_SETTINGS": "paramètres du projet",
+    "QUICK_HISTORY": "Historique rapide",
     "SCHEDULED": "Prévu",
     "SETTINGS": "Réglages",
+    "SHOW_SEARCH_BAR": "Afficher la barre de recherche",
     "TAGS": "Mots clés",
     "TASKS": "Tâches",
     "TASK_LIST": "Liste de tâches",
@@ -1127,6 +1175,7 @@
       "MSG": "Votre journée de travail est terminée. Il est temps de rentrer à la maison!",
       "OK": "Aye Aye ! Fermer !"
     },
+    "ESTIMATE_TOTAL": "Estimation totale :",
     "EVALUATION": "évaluation",
     "EXPORT_TASK_LIST": "Exporter la liste des tâches",
     "NO_TASKS": "Il n'y a pas de tâches pour aujourd'hui",
@@ -1176,6 +1225,7 @@
     "GITLAB_CONFIGURED": "Intégration GitLab configurée",
     "IMPORT_FROM_FILE": "Importer depuis un fichier",
     "JIRA_CONFIGURED": "Intégration Jira configurée",
+    "OPEN_PROJECT_CONFIGURED": "Intégration OpenProject configurée",
     "S_INVALID_JSON": "JSON non valide pour le fichier de projet",
     "TITLE": "Aperçu du projet",
     "UN_ARCHIVE_PROJECT": "Désarchiver le projet"
