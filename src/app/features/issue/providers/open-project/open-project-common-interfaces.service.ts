@@ -100,6 +100,22 @@ export class OpenProjectCommonInterfacesService implements IssueServiceInterface
     };
   }
 
+  async getNewIssuesToAddToBacklog(
+    projectId: string,
+    allExistingIssueIds: number[] | string[],
+  ): Promise<OpenProjectWorkPackageReduced[]> {
+    const cfg = await this._getCfgOnce$(projectId).toPromise();
+    console.log(
+      await this._openProjectApiService
+        .getLast100WorkPackagesForCurrentOpenProjectProject$(cfg)
+        .toPromise(),
+    );
+
+    return await this._openProjectApiService
+      .getLast100WorkPackagesForCurrentOpenProjectProject$(cfg)
+      .toPromise();
+  }
+
   private _formatIssueTitle(id: number, subject: string): string {
     return `#${id} ${subject}`;
   }

@@ -17,7 +17,6 @@ import { WorkContextService } from '../../../../work-context/work-context.servic
 import { OPEN_PROJECT_TYPE } from '../../../issue.const';
 import { OpenProjectCfg } from '../open-project.model';
 import { isOpenProjectEnabled } from '../is-open-project-enabled.util';
-import { OpenProjectWorkPackageReduced } from './open-project-issue.model';
 import { IssueEffectHelperService } from '../../../issue-effect-helper.service';
 
 @Injectable()
@@ -42,29 +41,11 @@ export class OpenProjectIssueEffects {
                 // NOTE: required otherwise timer stays alive for filtered actions
                 takeUntil(this._issueEffectHelperService.pollToBacklogActions$),
                 tap(() => console.log('OPEN_PROJECT_POLL_BACKLOG_CHANGES')),
-                switchMap(() =>
-                  forkJoin([
-                    this._openProjectApiService.getLast100WorkPackagesForCurrentOpenProjectProject$(
-                      openProjectCfg,
-                    ),
-                    this._taskService.getAllIssueIdsForProject(
-                      pId,
-                      OPEN_PROJECT_TYPE,
-                    ) as Promise<number[]>,
-                  ]),
-                ),
-                tap(
-                  ([issues, allTaskOpenProjectIssueIds]: [
-                    OpenProjectWorkPackageReduced[],
-                    number[],
-                  ]) => {
-                    const issuesToAdd = issues
-                      .filter((issue) => !allTaskOpenProjectIssueIds.includes(issue.id))
-                      .sort((a, b) => a.id - b.id);
-                    if (issuesToAdd?.length) {
-                      this._importNewIssuesToBacklog(pId, issuesToAdd);
-                    }
-                  },
+                tap(() =>
+                  this._issueService.checkAndImportNewIssuesToBacklogForProject(
+                    OPEN_PROJECT_TYPE,
+                    pId,
+                  ),
                 ),
               ),
             ),
@@ -139,33 +120,6 @@ export class OpenProjectIssueEffects {
       openProjectTasks.forEach((task) =>
         this._issueService.refreshIssue(task, true, false),
       );
-    }
-  }
-
-  private _importNewIssuesToBacklog(
-    projectId: string,
-    issuesToAdd: OpenProjectWorkPackageReduced[],
-  ): void {
-    issuesToAdd.forEach((issue) => {
-      this._issueService.addTaskWithIssue(OPEN_PROJECT_TYPE, issue, projectId, true);
-    });
-
-    if (issuesToAdd.length === 1) {
-      this._snackService.open({
-        ico: 'cloud_download',
-        translateParams: {
-          issueText: `#${issuesToAdd[0].id} ${issuesToAdd[0].subject}`,
-        },
-        msg: T.F.OPEN_PROJECT.S.IMPORTED_SINGLE_ISSUE,
-      });
-    } else if (issuesToAdd.length > 1) {
-      this._snackService.open({
-        ico: 'cloud_download',
-        translateParams: {
-          issuesLength: issuesToAdd.length,
-        },
-        msg: T.F.OPEN_PROJECT.S.IMPORTED_MULTIPLE_ISSUES,
-      });
     }
   }
 }
