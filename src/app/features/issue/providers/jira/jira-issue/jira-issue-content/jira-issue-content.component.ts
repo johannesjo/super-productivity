@@ -10,6 +10,7 @@ import * as j2m from 'jira2md';
 import { Observable, ReplaySubject } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
 import { JiraCommonInterfacesService } from '../../jira-common-interfaces.service';
+import { devError } from '../../../../../../util/dev-error';
 
 @Component({
   selector: 'jira-issue-content',
@@ -41,7 +42,13 @@ export class JiraIssueContentComponent {
 
   @Input('issue') set issueIn(i: JiraIssue) {
     this.issue = i;
-    this.description = i && i.description && j2m.to_markdown(i.description);
+    try {
+      this.description = i && i.description && j2m.to_markdown(i.description);
+    } catch (e) {
+      console.log(i);
+      devError(e);
+      this.description = (i && i.description) || undefined;
+    }
   }
 
   @Input('task') set taskIn(v: TaskWithSubTasks) {
