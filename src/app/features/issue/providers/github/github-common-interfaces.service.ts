@@ -77,6 +77,34 @@ export class GithubCommonInterfacesService implements IssueServiceInterface {
     }
 
     const cfg = await this._getCfgOnce$(task.projectId).toPromise();
+    // this._githubApiService
+    //   .graphQl$(
+    //     cfg,
+    //     `
+    // query {
+    //   search(first: 100, type: ISSUE, query: "state:open") {
+    //     issueCount
+    //     pageInfo {
+    //       hasNextPage
+    //       endCursor
+    //     }
+    //     edges {
+    //       node {
+    //         ... on Issue {
+    //           createdAt
+    //           title
+    //           url,
+    //           repository {
+    //             name
+    //           }
+    //         }
+    //       }
+    //     }
+    //   }
+    // }
+    // `,
+    //   )
+    //   .subscribe(console.log);
     const issue = await this._githubApiService.getById$(+task.issueId, cfg).toPromise();
 
     // NOTE we are not able to filter out user updates to the issue itself by the user

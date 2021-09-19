@@ -86,6 +86,16 @@ export class GithubApiService {
     );
   }
 
+  graphQl$(cfg: GithubCfg, query: string): Observable<unknown> {
+    return this._sendRequest$(
+      {
+        url: `${BASE}graphql`,
+        payload: { query },
+      },
+      cfg,
+    );
+  }
+
   getLast100IssuesForRepo$(cfg: GithubCfg): Observable<GithubIssueReduced[]> {
     const repo = cfg.repo;
     // NOTE: alternate approach (but no caching :( )
