@@ -29,7 +29,7 @@ export class GitlabCommonInterfacesService implements IssueServiceInterface {
           const fixedUrl = cfg.gitlabBaseUrl.match(/.*\/$/)
             ? cfg.gitlabBaseUrl
             : `${cfg.gitlabBaseUrl}/`;
-          return `${fixedUrl}${cfg.project}issues/${issueId}`;
+          return `${fixedUrl}${cfg.project}/issues/${issueId}`;
         } else {
           return `${GITLAB_BASE_URL}${cfg.project?.replace(
             /%2F/g,
