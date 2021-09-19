@@ -4,7 +4,6 @@ import { Task } from 'src/app/features/tasks/task.model';
 import { catchError, first, map, switchMap } from 'rxjs/operators';
 import { IssueServiceInterface } from '../../issue-service-interface';
 import { JiraApiService } from './jira-api.service';
-import { SnackService } from '../../../../core/snack/snack.service';
 import { ProjectService } from '../../../project/project.service';
 import { SearchResultItem } from '../../issue.model';
 import { JiraIssue, JiraIssueReduced } from './jira-issue/jira-issue.model';
@@ -18,7 +17,6 @@ import { JiraCfg } from './jira.model';
 export class JiraCommonInterfacesService implements IssueServiceInterface {
   constructor(
     private readonly _jiraApiService: JiraApiService,
-    private readonly _snackService: SnackService,
     private readonly _projectService: ProjectService,
   ) {}
 
@@ -76,6 +74,32 @@ export class JiraCommonInterfacesService implements IssueServiceInterface {
       };
     }
     return null;
+  }
+
+  async getFreshDataForIssueTasks(
+    tasks: Task[],
+  ): Promise<{ task: Task; taskChanges: Partial<Task>; issue: JiraIssue }[]> {
+    return Promise.all(
+      tasks.map((task) =>
+        this.getFreshDataForIssueTask(task).then((refreshDataForTask) => ({
+          task,
+          refreshDataForTask,
+        })),
+      ),
+    ).then((items) => {
+      return items
+        .filter(({ refreshDataForTask, task }) => !!refreshDataForTask)
+        .map(({ refreshDataForTask, task }) => {
+          if (!refreshDataForTask) {
+            throw new Error('No refresh data for task js error');
+          }
+          return {
+            task,
+            taskChanges: refreshDataForTask.taskChanges,
+            issue: refreshDataForTask.issue,
+          };
+        });
+    });
   }
 
   getAddTaskData(issue: JiraIssueReduced): Partial<Task> & { title: string } {

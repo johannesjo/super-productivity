@@ -12,7 +12,6 @@ import {
   OPEN_PROJECT_POLL_INTERVAL,
 } from '../open-project.const';
 import { TaskWithSubTasks } from '../../../../tasks/task.model';
-import { T } from '../../../../../t.const';
 import { WorkContextService } from '../../../../work-context/work-context.service';
 import { OPEN_PROJECT_TYPE } from '../../../issue.const';
 import { OpenProjectCfg } from '../open-project.model';
@@ -87,7 +86,7 @@ export class OpenProjectIssueEffects {
           .map(({ task }: { cfg: OpenProjectCfg; task: TaskWithSubTasks }) => task),
       ),
       tap((openProjectTasksToCheck: TaskWithSubTasks[]) =>
-        this._refreshIssues(openProjectTasksToCheck),
+        this._issueService.refreshIssues(openProjectTasksToCheck),
       ),
     );
 
@@ -109,17 +108,4 @@ export class OpenProjectIssueEffects {
     private readonly _workContextService: WorkContextService,
     private readonly _issueEffectHelperService: IssueEffectHelperService,
   ) {}
-
-  private _refreshIssues(openProjectTasks: TaskWithSubTasks[]): void {
-    if (openProjectTasks && openProjectTasks.length > 0) {
-      this._snackService.open({
-        msg: T.F.OPEN_PROJECT.S.POLLING,
-        svgIco: 'open_project',
-        isSpinner: true,
-      });
-      openProjectTasks.forEach((task) =>
-        this._issueService.refreshIssue(task, true, false),
-      );
-    }
-  }
 }

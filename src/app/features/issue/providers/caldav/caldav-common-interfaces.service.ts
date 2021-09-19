@@ -8,7 +8,6 @@ import { CaldavClientService } from './caldav-client.service';
 import { CaldavCfg } from './caldav.model';
 import { catchError, concatMap, first, switchMap } from 'rxjs/operators';
 import { ProjectService } from '../../../project/project.service';
-import { SnackService } from '../../../../core/snack/snack.service';
 import { truncate } from '../../../../util/truncate';
 
 @Injectable({
@@ -18,7 +17,6 @@ export class CaldavCommonInterfacesService implements IssueServiceInterface {
   constructor(
     private readonly _projectService: ProjectService,
     private readonly _caldavClientService: CaldavClientService,
-    private readonly _snackService: SnackService,
   ) {}
 
   private static _formatIssueTitleForSnack(title: string): string {

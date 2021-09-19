@@ -10,15 +10,15 @@ export interface IssueServiceInterface {
 
   getAddTaskData(issueData: IssueDataReduced): Partial<Task> & { title: string };
 
-  searchIssues$?(searchTerm: string, projectId: string): Observable<SearchResultItem[]>;
+  searchIssues$(searchTerm: string, projectId: string): Observable<SearchResultItem[]>;
 
-  getFreshDataForIssueTask?(task: Task): Promise<{
+  getFreshDataForIssueTask(task: Task): Promise<{
     taskChanges: Partial<Task>;
     issue: IssueData;
     issueTitle: string;
   } | null>;
 
-  getFreshDataForIssueTasks?(tasks: Task[]): Promise<
+  getFreshDataForIssueTasks(tasks: Task[]): Promise<
     {
       task: Task;
       taskChanges: Partial<Task>;
@@ -26,6 +26,8 @@ export interface IssueServiceInterface {
     }[]
   >;
 
+  // OPTIONAL INTERFACES
+  // -------------------
   getMappedAttachments?(issueData: IssueData): TaskAttachment[];
 
   getNewIssuesToAddToBacklog?(

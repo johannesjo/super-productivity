@@ -353,16 +353,7 @@ export class JiraIssueEffects {
                 .map(({ task }: { cfg: JiraCfg; task: TaskWithSubTasks }) => task),
             ),
             tap((jiraTasks: TaskWithSubTasks[]) => {
-              if (jiraTasks && jiraTasks.length > 0) {
-                this._snackService.open({
-                  msg: T.F.JIRA.S.POLLING,
-                  svgIco: 'jira',
-                  isSpinner: true,
-                });
-                jiraTasks.forEach((task) =>
-                  this._issueService.refreshIssue(task, true, false),
-                );
-              }
+              this._issueService.refreshIssues(jiraTasks);
             }),
           ),
         ),

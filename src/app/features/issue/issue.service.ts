@@ -67,20 +67,16 @@ export class IssueService {
     projectId: string,
   ): Observable<IssueData> {
     // account for issue refreshment
-    if (this.ISSUE_SERVICE_MAP[issueType].getFreshDataForIssueTask) {
-      if (!this.ISSUE_REFRESH_MAP[issueType][id]) {
-        this.ISSUE_REFRESH_MAP[issueType][id] = new Subject<IssueData>();
-      }
-      return this.ISSUE_SERVICE_MAP[issueType]
-        .getById$(id, projectId)
-        .pipe(
-          switchMap((issue) =>
-            merge<IssueData>(of(issue), this.ISSUE_REFRESH_MAP[issueType][id]),
-          ),
-        );
-    } else {
-      return this.ISSUE_SERVICE_MAP[issueType].getById$(id, projectId);
+    if (!this.ISSUE_REFRESH_MAP[issueType][id]) {
+      this.ISSUE_REFRESH_MAP[issueType][id] = new Subject<IssueData>();
     }
+    return this.ISSUE_SERVICE_MAP[issueType]
+      .getById$(id, projectId)
+      .pipe(
+        switchMap((issue) =>
+          merge<IssueData>(of(issue), this.ISSUE_REFRESH_MAP[issueType][id]),
+        ),
+      );
   }
 
   searchIssues$(searchTerm: string, projectId: string): Observable<SearchResultItem[]> {
@@ -217,13 +213,10 @@ export class IssueService {
     // dynamic map that has a list of tasks for every entry where the entry is an issue type
     const tasksIssueIdsByIssueType: any = {};
     const tasksWithoutIssueId = [];
-    const tasksWithoutMethod = [];
 
     for (const task of tasks) {
       if (!task.issueId || !task.issueType) {
         tasksWithoutIssueId.push(task);
-      } else if (!this.ISSUE_SERVICE_MAP[task.issueType].getFreshDataForIssueTasks) {
-        tasksWithoutMethod.push(task);
       } else if (!tasksIssueIdsByIssueType[task.issueType]) {
         tasksIssueIdsByIssueType[task.issueType] = [];
         tasksIssueIdsByIssueType[task.issueType].push(task);
@@ -291,9 +284,6 @@ export class IssueService {
 
     for (const taskWithoutIssueId of tasksWithoutIssueId) {
       throw new Error('No issue task ' + taskWithoutIssueId.id);
-    }
-    for (const taskWithoutMethod of tasksWithoutMethod) {
-      throw new Error('Issue method not available ' + taskWithoutMethod);
     }
   }
 

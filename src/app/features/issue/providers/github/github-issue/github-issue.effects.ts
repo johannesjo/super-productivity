@@ -9,7 +9,6 @@ import { IssueService } from '../../../issue.service';
 import { forkJoin, Observable, timer } from 'rxjs';
 import { GITHUB_INITIAL_POLL_DELAY, GITHUB_POLL_INTERVAL } from '../github.const';
 import { TaskWithSubTasks } from 'src/app/features/tasks/task.model';
-import { T } from '../../../../../t.const';
 import { WorkContextService } from '../../../../work-context/work-context.service';
 import { GITHUB_TYPE } from '../../../issue.const';
 import { GithubCfg } from '../github.model';
@@ -79,7 +78,9 @@ export class GithubIssueEffects {
           )
           .map(({ task }: { cfg: GithubCfg; task: TaskWithSubTasks }) => task),
       ),
-      tap((githubTasks: TaskWithSubTasks[]) => this._refreshIssues(githubTasks)),
+      tap((githubTasks: TaskWithSubTasks[]) =>
+        this._issueService.refreshIssues(githubTasks),
+      ),
     );
 
   pollIssueChangesForCurrentContext$: Observable<any> = createEffect(
@@ -100,15 +101,4 @@ export class GithubIssueEffects {
     private readonly _workContextService: WorkContextService,
     private readonly _issueEffectHelperService: IssueEffectHelperService,
   ) {}
-
-  private _refreshIssues(githubTasks: TaskWithSubTasks[]): void {
-    if (githubTasks && githubTasks.length > 0) {
-      this._snackService.open({
-        msg: T.F.GITHUB.S.POLLING,
-        svgIco: 'github',
-        isSpinner: true,
-      });
-      githubTasks.forEach((task) => this._issueService.refreshIssue(task, true, false));
-    }
-  }
 }

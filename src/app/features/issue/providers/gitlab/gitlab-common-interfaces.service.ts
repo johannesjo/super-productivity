@@ -7,7 +7,6 @@ import { GitlabApiService } from './gitlab-api/gitlab-api.service';
 import { ProjectService } from '../../../project/project.service';
 import { IssueData, SearchResultItem } from '../../issue.model';
 import { GitlabCfg } from './gitlab';
-import { SnackService } from '../../../../core/snack/snack.service';
 import { GitlabIssue } from './gitlab-issue/gitlab-issue.model';
 import { truncate } from '../../../../util/truncate';
 import { GITLAB_BASE_URL } from './gitlab.const';
@@ -19,7 +18,6 @@ export class GitlabCommonInterfacesService implements IssueServiceInterface {
   constructor(
     private readonly _gitlabApiService: GitlabApiService,
     private readonly _projectService: ProjectService,
-    private readonly _snackService: SnackService,
   ) {}
 
   issueLink$(issueId: number, projectId: string): Observable<string> {
