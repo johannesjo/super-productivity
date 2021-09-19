@@ -107,7 +107,7 @@ export class IssueService {
   // }
 
   // TODO rename to ONCE
-  isBacklogPollEnabledForProject$(
+  isBacklogPollEnabledForProjectOnce$(
     providerKey: IssueProviderKey,
     projectId: string,
   ): Observable<boolean> {
@@ -120,7 +120,7 @@ export class IssueService {
     providerKey: IssueProviderKey,
     projectId: string,
   ): Observable<boolean> {
-    return this.ISSUE_SERVICE_MAP[providerKey].isBacklogPollingEnabledForProjectOnce$(
+    return this.ISSUE_SERVICE_MAP[providerKey].isIssueRefreshEnabledForProjectOnce$(
       projectId,
     );
   }

@@ -33,6 +33,12 @@ export class CaldavCommonInterfacesService implements IssueServiceInterface {
     );
   }
 
+  isIssueRefreshEnabledForProjectOnce$(projectId: string): Observable<boolean> {
+    return this._getCfgOnce$(projectId).pipe(
+      map((cfg) => this.isEnabled(cfg) && cfg.isAutoPoll),
+    );
+  }
+
   isEnabled(cfg: CaldavCfg): boolean {
     return isCaldavEnabled(cfg);
   }

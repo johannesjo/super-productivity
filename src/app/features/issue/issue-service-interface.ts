@@ -13,7 +13,7 @@ export interface IssueServiceInterface {
 
   isBacklogPollingEnabledForProjectOnce$(projectId: string): Observable<boolean>;
 
-  // isIssueRefreshEnabledForProject$(projectId: string): Observable<boolean>;
+  isIssueRefreshEnabledForProjectOnce$(projectId: string): Observable<boolean>;
 
   pollTimer$: Observable<number>;
 

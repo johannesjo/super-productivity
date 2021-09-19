@@ -38,6 +38,12 @@ export class OpenProjectCommonInterfacesService implements IssueServiceInterface
     );
   }
 
+  isIssueRefreshEnabledForProjectOnce$(projectId: string): Observable<boolean> {
+    return this._getCfgOnce$(projectId).pipe(
+      map((cfg) => this.isEnabled(cfg) && cfg.isAutoPoll),
+    );
+  }
+
   isEnabled(cfg: OpenProjectCfg): boolean {
     return isOpenProjectEnabled(cfg);
   }

@@ -15,23 +15,25 @@ export class PollToBacklogEffects {
         switchMap((pId) =>
           merge(
             ...ISSUE_PROVIDER_TYPES.map((providerKey) =>
-              this._issueService.isBacklogPollEnabledForProject$(providerKey, pId).pipe(
-                switchMap((isEnabled) => {
-                  return isEnabled
-                    ? this._issueService.getPollTimer$(providerKey).pipe(
-                        // NOTE: required otherwise timer stays alive for filtered actions
-                        takeUntil(this._issueEffectHelperService.pollToBacklogActions$),
-                        tap(() => console.log('POLL ' + providerKey)),
-                        switchMap(() =>
-                          this._issueService.checkAndImportNewIssuesToBacklogForProject(
-                            providerKey,
-                            pId,
+              this._issueService
+                .isBacklogPollEnabledForProjectOnce$(providerKey, pId)
+                .pipe(
+                  switchMap((isEnabled) => {
+                    return isEnabled
+                      ? this._issueService.getPollTimer$(providerKey).pipe(
+                          // NOTE: required otherwise timer stays alive for filtered actions
+                          takeUntil(this._issueEffectHelperService.pollToBacklogActions$),
+                          tap(() => console.log('POLL ' + providerKey)),
+                          switchMap(() =>
+                            this._issueService.checkAndImportNewIssuesToBacklogForProject(
+                              providerKey,
+                              pId,
+                            ),
                           ),
-                        ),
-                      )
-                    : EMPTY;
-                }),
-              ),
+                        )
+                      : EMPTY;
+                  }),
+                ),
             ),
           ),
         ),
