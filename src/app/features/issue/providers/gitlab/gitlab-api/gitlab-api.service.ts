@@ -28,23 +28,6 @@ import { SearchResultItem } from '../../../issue.model';
 export class GitlabApiService {
   constructor(private _snackService: SnackService, private _http: HttpClient) {}
 
-  getProjectData$(cfg: GitlabCfg): Observable<GitlabIssue[]> {
-    if (!this._isValidSettings(cfg)) {
-      return EMPTY;
-    }
-    return this._getProjectIssues$(1, cfg).pipe(
-      mergeMap((issues: GitlabIssue[]) => {
-        if (issues && issues.length) {
-          return forkJoin([
-            ...issues.map((issue) => this.getIssueWithComments$(issue, cfg)),
-          ]);
-        } else {
-          return of([]);
-        }
-      }),
-    );
-  }
-
   getById$(id: number, cfg: GitlabCfg): Observable<GitlabIssue> {
     return this._sendRequest$(
       {
@@ -127,6 +110,23 @@ export class GitlabApiService {
       }),
       map((issues: GitlabIssue[]) => {
         return issues ? issues.map(mapGitlabIssueToSearchResult) : [];
+      }),
+    );
+  }
+
+  getProjectIssuesWithComments$(cfg: GitlabCfg): Observable<GitlabIssue[]> {
+    if (!this._isValidSettings(cfg)) {
+      return EMPTY;
+    }
+    return this._getProjectIssues$(1, cfg).pipe(
+      mergeMap((issues: GitlabIssue[]) => {
+        if (issues && issues.length) {
+          return forkJoin([
+            ...issues.map((issue) => this.getIssueWithComments$(issue, cfg)),
+          ]);
+        } else {
+          return of([]);
+        }
       }),
     );
   }

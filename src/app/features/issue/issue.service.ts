@@ -113,6 +113,56 @@ export class IssueService {
     return (this.ISSUE_SERVICE_MAP[issueType].getMappedAttachments as any)(issueDataIN);
   }
 
+  async checkAndImportNewIssuesToBacklogForProject(
+    issuesType: IssueProviderKey,
+    projectId: string,
+  ): Promise<void> {
+    if (!this.ISSUE_SERVICE_MAP[issuesType].getNewIssuesToAddToBacklog) {
+      return;
+    }
+    const allExistingIssueIds: string[] | number[] =
+      await this._taskService.getAllIssueIdsForProject(projectId, issuesType);
+
+    const potentialIssuesToAdd = await (
+      this.ISSUE_SERVICE_MAP[issuesType] as any
+    ).getNewIssuesToAddToBacklog(projectId, allExistingIssueIds);
+
+    const issuesToAdd = potentialIssuesToAdd.filter(
+      (issue: IssueData): boolean =>
+        !(allExistingIssueIds as string[]).includes(issue.id as string),
+    );
+
+    issuesToAdd.forEach((issue: IssueData) => {
+      this.addTaskWithIssue(issuesType, issue, projectId, true);
+    });
+
+    if (issuesToAdd.length === 1) {
+      this._snackService.open({
+        svgIco: issueProviderIconMap[issuesType as IssueProviderKey],
+        ico: 'cloud_download',
+        msg: T.F.ISSUE.S.IMPORTED_SINGLE_ISSUE,
+        translateParams: {
+          issueProviderName: ISSUE_PROVIDER_HUMANIZED[issuesType as IssueProviderKey],
+          // TODO add open project case
+          issueStr: this._translateService.instant(T.F.ISSUE.DEFAULT.ISSUE_STR),
+          issueTitle: issuesToAdd[0].taskChanges.title || issuesToAdd[0].task.title,
+        },
+      });
+    } else if (issuesToAdd.length > 1) {
+      this._snackService.open({
+        svgIco: issueProviderIconMap[issuesType as IssueProviderKey],
+        ico: 'cloud_download',
+        msg: T.F.ISSUE.S.IMPORTED_MULTIPLE_ISSUES,
+        translateParams: {
+          issueProviderName: ISSUE_PROVIDER_HUMANIZED[issuesType as IssueProviderKey],
+          // TODO add open project case
+          issuesStr: this._translateService.instant(T.F.ISSUE.DEFAULT.ISSUES_STR),
+          nr: issuesToAdd.length,
+        },
+      });
+    }
+  }
+
   async refreshIssue(
     task: Task,
     isNotifySuccess: boolean = true,
@@ -140,7 +190,7 @@ export class IssueService {
       if (isNotifySuccess) {
         this._snackService.open({
           svgIco: issueProviderIconMap[issueType],
-          msg: T.F.ISSUE.S.ISSUE_UPDATE,
+          msg: T.F.ISSUE.S.ISSUE_UPDATE_SINGLE,
           translateParams: {
             issueProviderName: ISSUE_PROVIDER_HUMANIZED[issueType],
             // TODO add open project case
@@ -202,7 +252,7 @@ export class IssueService {
         if (updates.length === 1) {
           this._snackService.open({
             svgIco: issueProviderIconMap[issuesType as IssueProviderKey],
-            msg: T.F.ISSUE.S.ISSUE_UPDATE,
+            msg: T.F.ISSUE.S.ISSUE_UPDATE_SINGLE,
             translateParams: {
               issueProviderName: ISSUE_PROVIDER_HUMANIZED[issuesType as IssueProviderKey],
               // TODO add open project case
@@ -210,7 +260,7 @@ export class IssueService {
               issueTitle: updates[0].taskChanges.title || updates[0].task.title,
             },
           });
-        } else {
+        } else if (updates.length > 1) {
           this._snackService.open({
             svgIco: issueProviderIconMap[issuesType as IssueProviderKey],
             msg: T.F.ISSUE.S.ISSUE_UPDATE_MULTIPLE,

@@ -76,7 +76,12 @@ export class GitlabIssueEffects {
                 // NOTE: required otherwise timer stays alive for filtered actions
                 takeUntil(this._issueEffectHelperService.pollToBacklogActions$),
                 tap(() => console.log('GITLAB!_POLL_BACKLOG_CHANGES')),
-                tap(() => this._importNewIssuesToBacklog(pId, gitlabCfg)),
+                tap(() =>
+                  this._issueService.checkAndImportNewIssuesToBacklogForProject(
+                    GITLAB_TYPE,
+                    pId,
+                  ),
+                ),
               ),
             ),
           ),
@@ -103,40 +108,4 @@ export class GitlabIssueEffects {
     private readonly _workContextService: WorkContextService,
     private readonly _issueEffectHelperService: IssueEffectHelperService,
   ) {}
-
-  private async _importNewIssuesToBacklog(
-    projectId: string,
-    gitlabCfg: GitlabCfg,
-  ): Promise<void> {
-    const issues = await this._gitlabApiService.getProjectData$(gitlabCfg).toPromise();
-    const allTaskGitlabIssueIds = (await this._taskService.getAllIssueIdsForProject(
-      projectId,
-      GITLAB_TYPE,
-    )) as number[];
-    const issuesToAdd = issues.filter(
-      (issue) => !allTaskGitlabIssueIds.includes(issue.id),
-    );
-
-    issuesToAdd.forEach((issue) => {
-      this._issueService.addTaskWithIssue(GITLAB_TYPE, issue, projectId, true);
-    });
-
-    if (issuesToAdd.length === 1) {
-      this._snackService.open({
-        ico: 'cloud_download',
-        translateParams: {
-          issueText: `#${issuesToAdd[0].number} ${issuesToAdd[0].title}`,
-        },
-        msg: T.F.GITLAB.S.IMPORTED_SINGLE_ISSUE,
-      });
-    } else if (issuesToAdd.length > 1) {
-      this._snackService.open({
-        ico: 'cloud_download',
-        translateParams: {
-          issuesLength: issuesToAdd.length,
-        },
-        msg: T.F.GITLAB.S.IMPORTED_MULTIPLE_ISSUES,
-      });
-    }
-  }
 }

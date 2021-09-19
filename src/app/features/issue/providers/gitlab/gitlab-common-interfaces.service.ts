@@ -5,7 +5,7 @@ import { catchError, concatMap, first, map, switchMap } from 'rxjs/operators';
 import { IssueServiceInterface } from '../../issue-service-interface';
 import { GitlabApiService } from './gitlab-api/gitlab-api.service';
 import { ProjectService } from '../../../project/project.service';
-import { SearchResultItem } from '../../issue.model';
+import { IssueData, SearchResultItem } from '../../issue.model';
 import { GitlabCfg } from './gitlab';
 import { SnackService } from '../../../../core/snack/snack.service';
 import { GitlabIssue } from './gitlab-issue/gitlab-issue.model';
@@ -173,6 +173,14 @@ export class GitlabCommonInterfacesService implements IssueServiceInterface {
       issueWasUpdated: false,
       issueLastUpdated: new Date(issue.updated_at).getTime(),
     };
+  }
+
+  async getNewIssuesToAddToBacklog(
+    projectId: string,
+    allExistingIssueIds: number[] | string[],
+  ): Promise<IssueData[]> {
+    const cfg = await this._getCfgOnce$(projectId).toPromise();
+    return await this._gitlabApiService.getProjectIssuesWithComments$(cfg).toPromise();
   }
 
   private _formatIssueTitle(id: number, title: string): string {

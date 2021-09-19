@@ -29,6 +29,7 @@ export interface IssueServiceInterface {
   getMappedAttachments?(issueData: IssueData): TaskAttachment[];
 
   getNewIssuesToAddToBacklog?(
+    projectId: string,
     allExistingIssueIds: number[] | string[],
   ): Promise<IssueData[]>;
 }
