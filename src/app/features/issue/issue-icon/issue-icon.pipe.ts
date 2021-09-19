@@ -1,6 +1,6 @@
 import { Pipe, PipeTransform } from '@angular/core';
 import { IssueProviderKey } from '../issue.model';
-import { issueProviderIconMap } from '../issue.const';
+import { ISSUE_PROVIDER_ICON_MAP } from '../issue.const';
 
 @Pipe({
   name: 'issueIcon',
@@ -8,6 +8,6 @@ import { issueProviderIconMap } from '../issue.const';
 export class IssueIconPipe implements PipeTransform {
   // NOTE: null is only accepted to make view more performant
   transform(value: IssueProviderKey | null, args?: any): any {
-    return issueProviderIconMap[value as IssueProviderKey];
+    return ISSUE_PROVIDER_ICON_MAP[value as IssueProviderKey];
   }
 }

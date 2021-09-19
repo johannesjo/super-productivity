@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Observable, of } from 'rxjs';
+import { Observable, of, timer } from 'rxjs';
 import { Task } from 'src/app/features/tasks/task.model';
 import { catchError, concatMap, first, map, switchMap } from 'rxjs/operators';
 import { IssueServiceInterface } from '../../issue-service-interface';
@@ -7,13 +7,16 @@ import { OpenProjectApiService } from './open-project-api.service';
 import { ProjectService } from '../../../project/project.service';
 import { SearchResultItem } from '../../issue.model';
 import { OpenProjectCfg } from './open-project.model';
-import { SnackService } from '../../../../core/snack/snack.service';
 import {
   OpenProjectWorkPackage,
   OpenProjectWorkPackageReduced,
 } from './open-project-issue/open-project-issue.model';
 import { truncate } from '../../../../util/truncate';
-import { T } from '../../../../t.const';
+import { isOpenProjectEnabled } from './is-open-project-enabled.util';
+import {
+  OPEN_PROJECT_INITIAL_POLL_DELAY,
+  OPEN_PROJECT_POLL_INTERVAL,
+} from './open-project.const';
 
 @Injectable({
   providedIn: 'root',
@@ -22,8 +25,28 @@ export class OpenProjectCommonInterfacesService implements IssueServiceInterface
   constructor(
     private readonly _openProjectApiService: OpenProjectApiService,
     private readonly _projectService: ProjectService,
-    private readonly _snackService: SnackService,
   ) {}
+
+  pollTimer$: Observable<number> = timer(
+    OPEN_PROJECT_INITIAL_POLL_DELAY,
+    OPEN_PROJECT_POLL_INTERVAL,
+  );
+
+  isBacklogPollingEnabledForProjectOnce$(projectId: string): Observable<boolean> {
+    return this._getCfgOnce$(projectId).pipe(
+      map((cfg) => this.isEnabled(cfg) && cfg.isAutoAddToBacklog),
+    );
+  }
+
+  isIssueRefreshEnabledForProjectOnce$(projectId: string): Observable<boolean> {
+    return this._getCfgOnce$(projectId).pipe(
+      map((cfg) => this.isEnabled(cfg) && cfg.isAutoPoll),
+    );
+  }
+
+  isEnabled(cfg: OpenProjectCfg): boolean {
+    return isOpenProjectEnabled(cfg);
+  }
 
   issueLink$(issueId: number, projectId: string): Observable<string> {
     return this._getCfgOnce$(projectId).pipe(
@@ -51,11 +74,11 @@ export class OpenProjectCommonInterfacesService implements IssueServiceInterface
     );
   }
 
-  async refreshIssue(
-    task: Task,
-    isNotifySuccess: boolean = true,
-    isNotifyNoUpdateRequired: boolean = false,
-  ): Promise<{ taskChanges: Partial<Task>; issue: OpenProjectWorkPackage } | null> {
+  async getFreshDataForIssueTask(task: Task): Promise<{
+    taskChanges: Partial<Task>;
+    issue: OpenProjectWorkPackage;
+    issueTitle: string;
+  } | null> {
     if (!task.projectId) {
       throw new Error('No projectId');
     }
@@ -70,21 +93,6 @@ export class OpenProjectCommonInterfacesService implements IssueServiceInterface
     const lastRemoteUpdate = new Date(issue.updatedAt).getTime();
     const wasUpdated = lastRemoteUpdate > (task.issueLastUpdated || 0);
 
-    if (wasUpdated && isNotifySuccess) {
-      this._snackService.open({
-        ico: 'cloud_download',
-        translateParams: {
-          issueText: this._formatIssueTitleForSnack(issue.id, issue.subject),
-        },
-        msg: T.F.OPEN_PROJECT.S.ISSUE_UPDATE,
-      });
-    } else if (isNotifyNoUpdateRequired) {
-      this._snackService.open({
-        msg: T.F.OPEN_PROJECT.S.ISSUE_NO_UPDATE_REQUIRED,
-        ico: 'cloud_download',
-      });
-    }
-
     if (wasUpdated) {
       return {
         taskChanges: {
@@ -92,9 +100,38 @@ export class OpenProjectCommonInterfacesService implements IssueServiceInterface
           issueWasUpdated: true,
         },
         issue,
+        issueTitle: this._formatIssueTitleForSnack(issue.id, issue.subject),
       };
     }
     return null;
+  }
+
+  async getFreshDataForIssueTasks(
+    tasks: Task[],
+  ): Promise<
+    { task: Task; taskChanges: Partial<Task>; issue: OpenProjectWorkPackage }[]
+  > {
+    return Promise.all(
+      tasks.map((task) =>
+        this.getFreshDataForIssueTask(task).then((refreshDataForTask) => ({
+          task,
+          refreshDataForTask,
+        })),
+      ),
+    ).then((items) => {
+      return items
+        .filter(({ refreshDataForTask, task }) => !!refreshDataForTask)
+        .map(({ refreshDataForTask, task }) => {
+          if (!refreshDataForTask) {
+            throw new Error('No refresh data for task js error');
+          }
+          return {
+            task,
+            taskChanges: refreshDataForTask.taskChanges,
+            issue: refreshDataForTask.issue,
+          };
+        });
+    });
   }
 
   getAddTaskData(
@@ -113,6 +150,22 @@ export class OpenProjectCommonInterfacesService implements IssueServiceInterface
       issueLastUpdated: new Date(issue.updatedAt).getTime(),
       ...(parsedEstimate > 0 ? { timeEstimate: parsedEstimate } : {}),
     };
+  }
+
+  async getNewIssuesToAddToBacklog(
+    projectId: string,
+    allExistingIssueIds: number[] | string[],
+  ): Promise<OpenProjectWorkPackageReduced[]> {
+    const cfg = await this._getCfgOnce$(projectId).toPromise();
+    console.log(
+      await this._openProjectApiService
+        .getLast100WorkPackagesForCurrentOpenProjectProject$(cfg)
+        .toPromise(),
+    );
+
+    return await this._openProjectApiService
+      .getLast100WorkPackagesForCurrentOpenProjectProject$(cfg)
+      .toPromise();
   }
 
   private _formatIssueTitle(id: number, subject: string): string {

@@ -244,7 +244,7 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   updateIssueData(): void {
-    this._issueService.refreshIssue(this.task, true, true);
+    this._issueService.refreshIssueTask(this.task, true, true);
   }
 
   editTaskRepeatCfg(): void {

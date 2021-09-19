@@ -12,6 +12,7 @@ import { Task } from '../../../../../tasks/task.model';
 import { JiraCommonInterfacesService } from '../../jira-common-interfaces.service';
 import { ProjectService } from '../../../../../project/project.service';
 import { JiraCfg } from '../../jira.model';
+import { IssueService } from '../../../../issue.service';
 
 @Component({
   selector: 'dialog-jira-transition',
@@ -37,6 +38,7 @@ export class DialogJiraTransitionComponent {
 
   constructor(
     private _jiraApiService: JiraApiService,
+    private _issueService: IssueService,
     private _projectService: ProjectService,
     private _jiraCommonInterfacesService: JiraCommonInterfacesService,
     private _matDialogRef: MatDialogRef<DialogJiraTransitionComponent>,
@@ -69,7 +71,7 @@ export class DialogJiraTransitionComponent {
           first(),
         )
         .subscribe(() => {
-          this._jiraCommonInterfacesService.refreshIssue(this.data.task, false, false);
+          this._issueService.refreshIssueTask(this.data.task, false, false);
           this._snackService.open({
             type: 'SUCCESS',
             msg: T.F.JIRA.S.TRANSITION,

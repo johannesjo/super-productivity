@@ -6,10 +6,8 @@ import {
   filter,
   first,
   map,
-  mapTo,
   switchMap,
   take,
-  takeUntil,
   tap,
   throttleTime,
   withLatestFrom,
@@ -17,29 +15,18 @@ import {
 import { JiraApiService } from '../jira-api.service';
 import { JiraIssueReduced } from './jira-issue.model';
 import { SnackService } from '../../../../../core/snack/snack.service';
-import { Task, TaskWithSubTasks } from '../../../../tasks/task.model';
+import { Task } from '../../../../tasks/task.model';
 import { TaskService } from '../../../../tasks/task.service';
-import {
-  BehaviorSubject,
-  EMPTY,
-  forkJoin,
-  Observable,
-  of,
-  throwError,
-  timer,
-} from 'rxjs';
+import { BehaviorSubject, EMPTY, Observable, throwError, timer } from 'rxjs';
 import { MatDialog } from '@angular/material/dialog';
 import { DialogJiraTransitionComponent } from '../jira-view-components/dialog-jira-transition/dialog-jira-transition.component';
 import { IssueLocalState } from '../../../issue.model';
-import { JIRA_INITIAL_POLL_BACKLOG_DELAY, JIRA_POLL_INTERVAL } from '../jira.const';
 import { ProjectService } from '../../../../project/project.service';
 import { IssueService } from '../../../issue.service';
 import { JIRA_TYPE } from '../../../issue.const';
 import { T } from '../../../../../t.const';
-import { truncate } from '../../../../../util/truncate';
 import { WorkContextService } from '../../../../work-context/work-context.service';
 import { JiraCfg, JiraTransitionOption } from '../jira.model';
-import { IssueEffectHelperService } from '../../../issue-effect-helper.service';
 import { setCurrentTask, updateTask } from '../../../../tasks/store/task.actions';
 import { DialogJiraAddWorklogComponent } from '../jira-view-components/dialog-jira-add-worklog/dialog-jira-add-worklog.component';
 import {
@@ -282,89 +269,6 @@ export class JiraIssueEffects {
       ),
     { dispatch: false },
   );
-  private _pollTimer$: Observable<number> = timer(
-    JIRA_INITIAL_POLL_BACKLOG_DELAY,
-    JIRA_POLL_INTERVAL,
-  );
-  // -----------------
-
-  pollNewIssuesToBacklog$: any = createEffect(
-    () =>
-      this._issueEffectHelperService.pollToBacklogTriggerToProjectId$.pipe(
-        switchMap(this._afterInitialRequestCheckForProjectJiraSuccessfull$.bind(this)),
-        switchMap((pId: string) =>
-          this._getCfgOnce$(pId).pipe(
-            filter((jiraCfg) => isJiraEnabled(jiraCfg) && jiraCfg.isAutoAddToBacklog),
-            // tap(() => console.log('POLL TIMER STARTED')),
-            switchMap((jiraCfg) =>
-              this._pollTimer$.pipe(
-                // NOTE: required otherwise timer stays alive for filtered actions
-                takeUntil(this._issueEffectHelperService.pollToBacklogActions$),
-                tap(() => console.log('JIRA_POLL_BACKLOG_CHANGES')),
-                tap(() => this._importNewIssuesToBacklog(pId, jiraCfg)),
-              ),
-            ),
-          ),
-        ),
-      ),
-    { dispatch: false },
-  );
-
-  pollIssueChangesForCurrentContext$: any = createEffect(
-    () =>
-      this._issueEffectHelperService.pollIssueTaskUpdatesActions$.pipe(
-        switchMap((inVal) =>
-          this._workContextService.isActiveWorkContextProject$.pipe(
-            take(1),
-            switchMap((isProject) =>
-              isProject
-                ? this._afterInitialRequestCheckForProjectJiraSuccessfull$(inVal)
-                : of(inVal),
-            ),
-          ),
-        ),
-        switchMap(() => this._pollTimer$),
-        switchMap(() =>
-          this._workContextService.allTasksForCurrentContext$.pipe(
-            first(),
-            switchMap((tasks) => {
-              const jiraIssueTasks = tasks.filter((task) => task.issueType === JIRA_TYPE);
-              return forkJoin(
-                jiraIssueTasks.map((task) => {
-                  if (!task.projectId) {
-                    throw new Error('No projectId for task');
-                  }
-                  return this._getCfgOnce$(task.projectId).pipe(
-                    map((cfg) => ({ cfg, task })),
-                  );
-                }),
-              );
-            }),
-            map((cos) =>
-              cos
-                .filter(
-                  ({ cfg, task }: { cfg: JiraCfg; task: TaskWithSubTasks }) =>
-                    isJiraEnabled(cfg) && cfg.isAutoPollTickets,
-                )
-                .map(({ task }: { cfg: JiraCfg; task: TaskWithSubTasks }) => task),
-            ),
-            tap((jiraTasks: TaskWithSubTasks[]) => {
-              if (jiraTasks && jiraTasks.length > 0) {
-                this._snackService.open({
-                  msg: T.F.JIRA.S.POLLING,
-                  svgIco: 'jira',
-                  isSpinner: true,
-                });
-                jiraTasks.forEach((task) =>
-                  this._issueService.refreshIssue(task, true, false),
-                );
-              }
-            }),
-          ),
-        ),
-      ),
-    { dispatch: false },
-  );
 
   constructor(
     private readonly _actions$: Actions,
@@ -376,18 +280,7 @@ export class JiraIssueEffects {
     private readonly _jiraApiService: JiraApiService,
     private readonly _issueService: IssueService,
     private readonly _matDialog: MatDialog,
-    private readonly _issueEffectHelperService: IssueEffectHelperService,
   ) {}
-
-  private _afterInitialRequestCheckForProjectJiraSuccessfull$<TY>(
-    args: TY,
-  ): Observable<TY> {
-    return this._isInitialRequestForProjectDone$.pipe(
-      filter((isDone) => isDone),
-      take(1),
-      mapTo(args),
-    );
-  }
 
   private _handleTransitionForIssue(
     localState: IssueLocalState,
@@ -442,7 +335,7 @@ export class JiraIssueEffects {
                         chosenTransition: `${chosenTransition.name}`,
                       },
                     });
-                    return this._issueService.refreshIssue(task, false, false);
+                    return this._issueService.refreshIssueTask(task, false, false);
                   }),
                 );
             } else {
@@ -484,49 +377,6 @@ export class JiraIssueEffects {
         },
       })
       .afterClosed();
-  }
-
-  private _importNewIssuesToBacklog(projectId: string, cfg: JiraCfg): void {
-    this._jiraApiService
-      .findAutoImportIssues$(cfg)
-      .subscribe(async (issues: JiraIssueReduced[]) => {
-        if (!Array.isArray(issues)) {
-          return;
-        }
-        const allTaskJiraIssueIds = (await this._taskService.getAllIssueIdsForProject(
-          projectId,
-          JIRA_TYPE,
-        )) as string[];
-
-        // NOTE: we check for key as well as id although normally the key should suffice
-        const issuesToAdd = issues.filter(
-          (issue) =>
-            !allTaskJiraIssueIds.includes(issue.id) &&
-            !allTaskJiraIssueIds.includes(issue.key),
-        );
-
-        issuesToAdd.forEach((issue) => {
-          this._issueService.addTaskWithIssue(JIRA_TYPE, issue, projectId, true);
-        });
-
-        if (issuesToAdd.length === 1) {
-          this._snackService.open({
-            translateParams: {
-              issueText: truncate(`${issuesToAdd[0].key} ${issuesToAdd[0].summary}`),
-            },
-            msg: T.F.JIRA.S.IMPORTED_SINGLE_ISSUE,
-            ico: 'cloud_download',
-          });
-        } else if (issuesToAdd.length > 1) {
-          this._snackService.open({
-            translateParams: {
-              issuesLength: issuesToAdd.length,
-            },
-            msg: T.F.JIRA.S.IMPORTED_MULTIPLE_ISSUES,
-            ico: 'cloud_download',
-          });
-        }
-      });
   }
 
   private _getCfgOnce$(projectId: string): Observable<JiraCfg> {

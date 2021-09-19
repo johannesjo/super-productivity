@@ -11,6 +11,9 @@ import {
   CALDAV_TYPE,
   GITHUB_TYPE,
   GITLAB_TYPE,
+  ISSUE_PROVIDER_HUMANIZED,
+  ISSUE_PROVIDER_ICON_MAP,
+  ISSUE_STR_MAP,
   JIRA_TYPE,
   OPEN_PROJECT_TYPE,
 } from './issue.const';
@@ -23,6 +26,9 @@ import { switchMap } from 'rxjs/operators';
 import { GitlabCommonInterfacesService } from './providers/gitlab/gitlab-common-interfaces.service';
 import { CaldavCommonInterfacesService } from './providers/caldav/caldav-common-interfaces.service';
 import { OpenProjectCommonInterfacesService } from './providers/open-project/open-project-common-interfaces.service';
+import { SnackService } from '../../core/snack/snack.service';
+import { T } from '../../t.const';
+import { TranslateService } from '@ngx-translate/core';
 
 @Injectable({
   providedIn: 'root',
@@ -52,6 +58,8 @@ export class IssueService {
     private _gitlabCommonInterfacesService: GitlabCommonInterfacesService,
     private _caldavCommonInterfaceService: CaldavCommonInterfacesService,
     private _openProjectInterfaceService: OpenProjectCommonInterfacesService,
+    private _snackService: SnackService,
+    private _translateService: TranslateService,
   ) {}
 
   getById$(
@@ -60,20 +68,16 @@ export class IssueService {
     projectId: string,
   ): Observable<IssueData> {
     // account for issue refreshment
-    if (this.ISSUE_SERVICE_MAP[issueType].refreshIssue) {
-      if (!this.ISSUE_REFRESH_MAP[issueType][id]) {
-        this.ISSUE_REFRESH_MAP[issueType][id] = new Subject<IssueData>();
-      }
-      return this.ISSUE_SERVICE_MAP[issueType]
-        .getById$(id, projectId)
-        .pipe(
-          switchMap((issue) =>
-            merge<IssueData>(of(issue), this.ISSUE_REFRESH_MAP[issueType][id]),
-          ),
-        );
-    } else {
-      return this.ISSUE_SERVICE_MAP[issueType].getById$(id, projectId);
+    if (!this.ISSUE_REFRESH_MAP[issueType][id]) {
+      this.ISSUE_REFRESH_MAP[issueType][id] = new Subject<IssueData>();
     }
+    return this.ISSUE_SERVICE_MAP[issueType]
+      .getById$(id, projectId)
+      .pipe(
+        switchMap((issue) =>
+          merge<IssueData>(of(issue), this.ISSUE_REFRESH_MAP[issueType][id]),
+        ),
+      );
   }
 
   searchIssues$(searchTerm: string, projectId: string): Observable<SearchResultItem[]> {
@@ -96,6 +100,28 @@ export class IssueService {
     return this.ISSUE_SERVICE_MAP[issueType].issueLink$(issueId, projectId);
   }
 
+  isBacklogPollEnabledForProjectOnce$(
+    providerKey: IssueProviderKey,
+    projectId: string,
+  ): Observable<boolean> {
+    return this.ISSUE_SERVICE_MAP[providerKey].isBacklogPollingEnabledForProjectOnce$(
+      projectId,
+    );
+  }
+
+  isPollIssueChangesEnabledForProjectOnce$(
+    providerKey: IssueProviderKey,
+    projectId: string,
+  ): Observable<boolean> {
+    return this.ISSUE_SERVICE_MAP[providerKey].isIssueRefreshEnabledForProjectOnce$(
+      projectId,
+    );
+  }
+
+  getPollTimer$(providerKey: IssueProviderKey): Observable<number> {
+    return this.ISSUE_SERVICE_MAP[providerKey].pollTimer$;
+  }
+
   getMappedAttachments(
     issueType: IssueProviderKey,
     issueDataIN: IssueData,
@@ -106,75 +132,198 @@ export class IssueService {
     return (this.ISSUE_SERVICE_MAP[issueType].getMappedAttachments as any)(issueDataIN);
   }
 
-  async refreshIssue(
+  async checkAndImportNewIssuesToBacklogForProject(
+    providerKey: IssueProviderKey,
+    projectId: string,
+  ): Promise<void> {
+    if (!this.ISSUE_SERVICE_MAP[providerKey].getNewIssuesToAddToBacklog) {
+      return;
+    }
+    this._snackService.open({
+      svgIco: ISSUE_PROVIDER_ICON_MAP[providerKey],
+      msg: T.F.ISSUE.S.POLLING_BACKLOG,
+      isSpinner: true,
+      translateParams: {
+        issueProviderName: ISSUE_PROVIDER_HUMANIZED[providerKey],
+        issuesStr: this._translateService.instant(ISSUE_STR_MAP[providerKey].ISSUES_STR),
+      },
+    });
+
+    const allExistingIssueIds: string[] | number[] =
+      await this._taskService.getAllIssueIdsForProject(projectId, providerKey);
+
+    const potentialIssuesToAdd = await (
+      this.ISSUE_SERVICE_MAP[providerKey] as any
+    ).getNewIssuesToAddToBacklog(projectId, allExistingIssueIds);
+
+    const issuesToAdd: IssueDataReduced[] = potentialIssuesToAdd.filter(
+      (issue: IssueData): boolean =>
+        !(allExistingIssueIds as string[]).includes(issue.id as string),
+    );
+
+    issuesToAdd.forEach((issue: IssueDataReduced) => {
+      this.addTaskWithIssue(providerKey, issue, projectId, true);
+    });
+
+    if (issuesToAdd.length === 1) {
+      const issueTitle = this.ISSUE_SERVICE_MAP[providerKey].getAddTaskData(
+        issuesToAdd[0],
+      ).title;
+      this._snackService.open({
+        svgIco: ISSUE_PROVIDER_ICON_MAP[providerKey],
+        // ico: 'cloud_download',
+        msg: T.F.ISSUE.S.IMPORTED_SINGLE_ISSUE,
+        translateParams: {
+          issueProviderName: ISSUE_PROVIDER_HUMANIZED[providerKey],
+          issueStr: this._translateService.instant(ISSUE_STR_MAP[providerKey].ISSUE_STR),
+          issueTitle,
+        },
+      });
+    } else if (issuesToAdd.length > 1) {
+      this._snackService.open({
+        svgIco: ISSUE_PROVIDER_ICON_MAP[providerKey],
+        // ico: 'cloud_download',
+        msg: T.F.ISSUE.S.IMPORTED_MULTIPLE_ISSUES,
+        translateParams: {
+          issueProviderName: ISSUE_PROVIDER_HUMANIZED[providerKey],
+          issuesStr: this._translateService.instant(
+            ISSUE_STR_MAP[providerKey].ISSUES_STR,
+          ),
+          nr: issuesToAdd.length,
+        },
+      });
+    }
+  }
+
+  async refreshIssueTask(
     task: Task,
     isNotifySuccess: boolean = true,
     isNotifyNoUpdateRequired: boolean = false,
   ): Promise<void> {
-    if (!task.issueId || !task.issueType) {
+    const { issueId, issueType, projectId } = task;
+
+    if (!issueId || !issueType || !projectId) {
       throw new Error('No issue task');
     }
-    if (!this.ISSUE_SERVICE_MAP[task.issueType].refreshIssue) {
+    if (!this.ISSUE_SERVICE_MAP[issueType].getFreshDataForIssueTask) {
       throw new Error('Issue method not available');
     }
 
-    const update = await (this.ISSUE_SERVICE_MAP[task.issueType].refreshIssue as any)(
-      task,
-      isNotifySuccess,
-      isNotifyNoUpdateRequired,
-    );
+    const update = await (
+      this.ISSUE_SERVICE_MAP[issueType].getFreshDataForIssueTask as any
+    )(task, isNotifySuccess, isNotifyNoUpdateRequired);
+
     if (update) {
-      if (this.ISSUE_REFRESH_MAP[task.issueType][task.issueId]) {
-        this.ISSUE_REFRESH_MAP[task.issueType][task.issueId].next(update.issue);
+      if (this.ISSUE_REFRESH_MAP[issueType][issueId]) {
+        this.ISSUE_REFRESH_MAP[issueType][issueId].next(update.issue);
       }
       this._taskService.update(task.id, update.taskChanges);
+
+      if (isNotifySuccess) {
+        this._snackService.open({
+          svgIco: ISSUE_PROVIDER_ICON_MAP[issueType],
+          msg: T.F.ISSUE.S.ISSUE_UPDATE_SINGLE,
+          translateParams: {
+            issueProviderName: ISSUE_PROVIDER_HUMANIZED[issueType],
+            issueStr: this._translateService.instant(ISSUE_STR_MAP[issueType].ISSUE_STR),
+            issueTitle: update.issueTitle,
+          },
+        });
+      }
+    } else if (isNotifyNoUpdateRequired) {
+      this._snackService.open({
+        svgIco: ISSUE_PROVIDER_ICON_MAP[issueType],
+        msg: T.F.ISSUE.S.ISSUE_NO_UPDATE_REQUIRED,
+        translateParams: {
+          issueProviderName: ISSUE_PROVIDER_HUMANIZED[issueType],
+        },
+      });
     }
   }
 
-  async refreshIssues(
-    tasks: Task[],
-    isNotifySuccess: boolean = true,
-    isNotifyNoUpdateRequired: boolean = false,
-  ): Promise<void> {
+  async refreshIssueTasks(tasks: Task[]): Promise<void> {
     // dynamic map that has a list of tasks for every entry where the entry is an issue type
-    const tasksIssueIdsByIssueType: any = {};
+    const tasksIssueIdsByIssueProviderKey: any = {};
     const tasksWithoutIssueId = [];
-    const tasksWithoutMethod = [];
 
     for (const task of tasks) {
       if (!task.issueId || !task.issueType) {
         tasksWithoutIssueId.push(task);
-      } else if (!this.ISSUE_SERVICE_MAP[task.issueType].refreshIssues) {
-        tasksWithoutMethod.push(task);
-      } else if (!tasksIssueIdsByIssueType[task.issueType]) {
-        tasksIssueIdsByIssueType[task.issueType] = [];
-        tasksIssueIdsByIssueType[task.issueType].push(task);
+      } else if (!tasksIssueIdsByIssueProviderKey[task.issueType]) {
+        tasksIssueIdsByIssueProviderKey[task.issueType] = [];
+        tasksIssueIdsByIssueProviderKey[task.issueType].push(task);
       } else {
-        tasksIssueIdsByIssueType[task.issueType].push(task);
+        tasksIssueIdsByIssueProviderKey[task.issueType].push(task);
       }
     }
 
-    for (const issuesType of Object.keys(tasksIssueIdsByIssueType)) {
-      const updates = await (this.ISSUE_SERVICE_MAP[issuesType].refreshIssues as any)(
-        tasksIssueIdsByIssueType[issuesType],
-        isNotifySuccess,
-        isNotifyNoUpdateRequired,
+    for (const pKey of Object.keys(tasksIssueIdsByIssueProviderKey)) {
+      const providerKey = pKey as IssueProviderKey;
+      console.log(
+        'POLLING CHANGES FOR ' + providerKey,
+        tasksIssueIdsByIssueProviderKey[providerKey],
       );
-      if (updates) {
+      this._snackService.open({
+        svgIco: ISSUE_PROVIDER_ICON_MAP[providerKey],
+        msg: T.F.ISSUE.S.POLLING_CHANGES,
+        isSpinner: true,
+        translateParams: {
+          issueProviderName: ISSUE_PROVIDER_HUMANIZED[providerKey],
+          issuesStr: this._translateService.instant(
+            ISSUE_STR_MAP[providerKey].ISSUES_STR,
+          ),
+        },
+      });
+
+      const updates: {
+        task: Task;
+        taskChanges: Partial<Task>;
+        issue: IssueData;
+      }[] = await // TODO export fn to type instead
+      (this.ISSUE_SERVICE_MAP[providerKey].getFreshDataForIssueTasks as any)(
+        tasksIssueIdsByIssueProviderKey[providerKey],
+      );
+
+      if (updates.length > 0) {
         for (const update of updates) {
-          if (this.ISSUE_REFRESH_MAP[issuesType][update.task.issueId]) {
-            this.ISSUE_REFRESH_MAP[issuesType][update.task.issueId].next(update.issue);
+          if (this.ISSUE_REFRESH_MAP[providerKey][update.task.issueId as string]) {
+            this.ISSUE_REFRESH_MAP[providerKey][update.task.issueId as string].next(
+              update.issue,
+            );
           }
           this._taskService.update(update.task.id, update.taskChanges);
+        }
+
+        if (updates.length === 1) {
+          this._snackService.open({
+            svgIco: ISSUE_PROVIDER_ICON_MAP[providerKey],
+            msg: T.F.ISSUE.S.ISSUE_UPDATE_SINGLE,
+            translateParams: {
+              issueProviderName: ISSUE_PROVIDER_HUMANIZED[providerKey],
+              issueStr: this._translateService.instant(
+                ISSUE_STR_MAP[providerKey].ISSUE_STR,
+              ),
+              issueTitle: updates[0].taskChanges.title || updates[0].task.title,
+            },
+          });
+        } else if (updates.length > 1) {
+          this._snackService.open({
+            svgIco: ISSUE_PROVIDER_ICON_MAP[providerKey],
+            msg: T.F.ISSUE.S.ISSUE_UPDATE_MULTIPLE,
+            translateParams: {
+              issueProviderName: ISSUE_PROVIDER_HUMANIZED[providerKey],
+              issuesStr: this._translateService.instant(
+                ISSUE_STR_MAP[providerKey].ISSUES_STR,
+              ),
+              nr: updates.length,
+            },
+          });
         }
       }
     }
 
     for (const taskWithoutIssueId of tasksWithoutIssueId) {
       throw new Error('No issue task ' + taskWithoutIssueId.id);
-    }
-    for (const taskWithoutMethod of tasksWithoutMethod) {
-      throw new Error('Issue method not available ' + taskWithoutMethod);
     }
   }
 

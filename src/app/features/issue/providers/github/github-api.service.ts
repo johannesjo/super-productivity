@@ -25,6 +25,7 @@ import { SearchResultItem } from '../../issue.model';
 import { HANDLED_ERROR_PROP_STR } from '../../../../app.constants';
 import { T } from '../../../../t.const';
 import { throwHandledError } from '../../../../util/throw-handled-error';
+import { GITHUB_TYPE, ISSUE_PROVIDER_HUMANIZED } from '../../issue.const';
 
 const BASE = GITHUB_API_BASE_URL;
 
@@ -110,7 +111,10 @@ export class GithubApiService {
     if (!this._isValidSettings(cfg)) {
       this._snackService.open({
         type: 'ERROR',
-        msg: T.F.GITHUB.S.ERR_NOT_CONFIGURED,
+        msg: T.F.ISSUE.S.ERR_NOT_CONFIGURED,
+        translateParams: {
+          issueProviderName: ISSUE_PROVIDER_HUMANIZED[GITHUB_TYPE],
+        },
       });
       throwHandledError('Github: Not enough settings');
     }
@@ -164,12 +168,15 @@ export class GithubApiService {
       // A client-side or network error occurred. Handle it accordingly.
       this._snackService.open({
         type: 'ERROR',
-        msg: T.F.GITHUB.S.ERR_NETWORK,
+        msg: T.F.ISSUE.S.ERR_NETWORK,
+        translateParams: {
+          issueProviderName: ISSUE_PROVIDER_HUMANIZED[GITHUB_TYPE],
+        },
       });
     } else if (error.error && error.error.message) {
       this._snackService.open({
         type: 'ERROR',
-        msg: 'Github: ' + error.error.message,
+        msg: ISSUE_PROVIDER_HUMANIZED[GITHUB_TYPE] + ': ' + error.error.message,
       });
     } else {
       // The backend returned an unsuccessful response code.

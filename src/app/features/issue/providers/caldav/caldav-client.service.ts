@@ -9,7 +9,7 @@ import ICAL from 'ical.js';
 
 import { from, Observable, throwError } from 'rxjs';
 import { CaldavIssue } from './caldav-issue/caldav-issue.model';
-import { CALDAV_TYPE } from '../../issue.const';
+import { CALDAV_TYPE, ISSUE_PROVIDER_HUMANIZED } from '../../issue.const';
 import { SearchResultItem } from '../../issue.model';
 import { SnackService } from '../../../../core/snack/snack.service';
 import { T } from '../../../../t.const';
@@ -294,7 +294,10 @@ export class CaldavClientService {
   private _handleNetErr(err: any): void {
     this._snackService.open({
       type: 'ERROR',
-      msg: T.F.CALDAV.S.ERR_NETWORK,
+      msg: T.F.ISSUE.S.ERR_NETWORK,
+      translateParams: {
+        issueProviderName: ISSUE_PROVIDER_HUMANIZED[CALDAV_TYPE],
+      },
     });
     throw new Error('CALDAV NETWORK ERROR: ' + err);
   }
@@ -303,7 +306,10 @@ export class CaldavClientService {
     if (!CaldavClientService._isValidSettings(cfg)) {
       this._snackService.open({
         type: 'ERROR',
-        msg: T.F.CALDAV.S.ERR_NOT_CONFIGURED,
+        msg: T.F.ISSUE.S.ERR_NOT_CONFIGURED,
+        translateParams: {
+          issueProviderName: ISSUE_PROVIDER_HUMANIZED[CALDAV_TYPE],
+        },
       });
       throwHandledError('CalDav: Not enough settings');
     }

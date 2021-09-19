@@ -1,17 +1,20 @@
 import { Injectable } from '@angular/core';
-import { Observable, of } from 'rxjs';
+import { Observable, of, timer } from 'rxjs';
 import { Task } from 'src/app/features/tasks/task.model';
 import { catchError, concatMap, first, map, switchMap } from 'rxjs/operators';
 import { IssueServiceInterface } from '../../issue-service-interface';
 import { GitlabApiService } from './gitlab-api/gitlab-api.service';
 import { ProjectService } from '../../../project/project.service';
-import { SearchResultItem } from '../../issue.model';
+import { IssueData, SearchResultItem } from '../../issue.model';
 import { GitlabCfg } from './gitlab';
-import { SnackService } from '../../../../core/snack/snack.service';
 import { GitlabIssue } from './gitlab-issue/gitlab-issue.model';
 import { truncate } from '../../../../util/truncate';
-import { T } from '../../../../t.const';
-import { GITLAB_BASE_URL } from './gitlab.const';
+import {
+  GITLAB_BASE_URL,
+  GITLAB_INITIAL_POLL_DELAY,
+  GITLAB_POLL_INTERVAL,
+} from './gitlab.const';
+import { isGitlabEnabled } from './is-gitlab-enabled';
 
 @Injectable({
   providedIn: 'root',
@@ -20,8 +23,25 @@ export class GitlabCommonInterfacesService implements IssueServiceInterface {
   constructor(
     private readonly _gitlabApiService: GitlabApiService,
     private readonly _projectService: ProjectService,
-    private readonly _snackService: SnackService,
   ) {}
+
+  pollTimer$: Observable<number> = timer(GITLAB_INITIAL_POLL_DELAY, GITLAB_POLL_INTERVAL);
+
+  isBacklogPollingEnabledForProjectOnce$(projectId: string): Observable<boolean> {
+    return this._getCfgOnce$(projectId).pipe(
+      map((cfg) => this.isEnabled(cfg) && cfg.isAutoAddToBacklog),
+    );
+  }
+
+  isIssueRefreshEnabledForProjectOnce$(projectId: string): Observable<boolean> {
+    return this._getCfgOnce$(projectId).pipe(
+      map((cfg) => this.isEnabled(cfg) && cfg.isAutoPoll),
+    );
+  }
+
+  isEnabled(cfg: GitlabCfg): boolean {
+    return isGitlabEnabled(cfg);
+  }
 
   issueLink$(issueId: number, projectId: string): Observable<string> {
     return this._getCfgOnce$(projectId).pipe(
@@ -30,7 +50,7 @@ export class GitlabCommonInterfacesService implements IssueServiceInterface {
           const fixedUrl = cfg.gitlabBaseUrl.match(/.*\/$/)
             ? cfg.gitlabBaseUrl
             : `${cfg.gitlabBaseUrl}/`;
-          return `${fixedUrl}${cfg.project}issues/${issueId}`;
+          return `${fixedUrl}${cfg.project}/issues/${issueId}`;
         } else {
           return `${GITLAB_BASE_URL}${cfg.project?.replace(
             /%2F/g,
@@ -59,11 +79,11 @@ export class GitlabCommonInterfacesService implements IssueServiceInterface {
     );
   }
 
-  async refreshIssue(
-    task: Task,
-    isNotifySuccess: boolean = true,
-    isNotifyNoUpdateRequired: boolean = false,
-  ): Promise<{ taskChanges: Partial<Task>; issue: GitlabIssue } | null> {
+  async getFreshDataForIssueTask(task: Task): Promise<{
+    taskChanges: Partial<Task>;
+    issue: GitlabIssue;
+    issueTitle: string;
+  } | null> {
     if (!task.projectId) {
       throw new Error('No projectId');
     }
@@ -91,21 +111,6 @@ export class GitlabCommonInterfacesService implements IssueServiceInterface {
 
     const wasUpdated = lastRemoteUpdate > (task.issueLastUpdated || 0);
 
-    if (wasUpdated && isNotifySuccess) {
-      this._snackService.open({
-        ico: 'cloud_download',
-        translateParams: {
-          issueText: this._formatIssueTitleForSnack(issue.number, issue.title),
-        },
-        msg: T.F.GITLAB.S.ISSUE_UPDATE,
-      });
-    } else if (isNotifyNoUpdateRequired) {
-      this._snackService.open({
-        msg: T.F.GITLAB.S.ISSUE_NO_UPDATE_REQUIRED,
-        ico: 'cloud_download',
-      });
-    }
-
     if (wasUpdated) {
       return {
         taskChanges: {
@@ -113,15 +118,14 @@ export class GitlabCommonInterfacesService implements IssueServiceInterface {
           issueWasUpdated: true,
         },
         issue,
+        issueTitle: this._formatIssueTitleForSnack(issue.number, issue.title),
       };
     }
     return null;
   }
 
-  async refreshIssues(
+  async getFreshDataForIssueTasks(
     tasks: Task[],
-    isNotifySuccess: boolean = true,
-    isNotifyNoUpdateRequired: boolean = false,
   ): Promise<{ task: Task; taskChanges: Partial<Task>; issue: GitlabIssue }[]> {
     // First sort the tasks by the issueId
     // because the API returns it in a desc order by issue iid(issueId)
@@ -179,21 +183,6 @@ export class GitlabCommonInterfacesService implements IssueServiceInterface {
           issue: issues[i],
         });
       }
-
-      if (wasUpdated && isNotifySuccess) {
-        this._snackService.open({
-          ico: 'cloud_download',
-          translateParams: {
-            issueText: this._formatIssueTitleForSnack(issues[i].number, issues[i].title),
-          },
-          msg: T.F.GITLAB.S.ISSUE_UPDATE,
-        });
-      } else if (isNotifyNoUpdateRequired) {
-        this._snackService.open({
-          msg: T.F.GITLAB.S.ISSUE_NO_UPDATE_REQUIRED,
-          ico: 'cloud_download',
-        });
-      }
     }
     return updatedIssues;
   }
@@ -205,6 +194,14 @@ export class GitlabCommonInterfacesService implements IssueServiceInterface {
       issueWasUpdated: false,
       issueLastUpdated: new Date(issue.updated_at).getTime(),
     };
+  }
+
+  async getNewIssuesToAddToBacklog(
+    projectId: string,
+    allExistingIssueIds: number[] | string[],
+  ): Promise<IssueData[]> {
+    const cfg = await this._getCfgOnce$(projectId).toPromise();
+    return await this._gitlabApiService.getProjectIssues$(1, cfg).toPromise();
   }
 
   private _formatIssueTitle(id: number, title: string): string {

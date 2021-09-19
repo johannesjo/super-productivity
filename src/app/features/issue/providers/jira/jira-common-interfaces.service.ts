@@ -1,17 +1,17 @@
 import { Injectable } from '@angular/core';
-import { Observable, of } from 'rxjs';
+import { Observable, of, timer } from 'rxjs';
 import { Task } from 'src/app/features/tasks/task.model';
 import { catchError, first, map, switchMap } from 'rxjs/operators';
 import { IssueServiceInterface } from '../../issue-service-interface';
 import { JiraApiService } from './jira-api.service';
-import { SnackService } from '../../../../core/snack/snack.service';
 import { ProjectService } from '../../../project/project.service';
 import { SearchResultItem } from '../../issue.model';
 import { JiraIssue, JiraIssueReduced } from './jira-issue/jira-issue.model';
 import { TaskAttachment } from '../../../tasks/task-attachment/task-attachment.model';
 import { mapJiraAttachmentToAttachment } from './jira-issue/jira-issue-map.util';
-import { T } from '../../../../t.const';
 import { JiraCfg } from './jira.model';
+import { isJiraEnabled } from './is-jira-enabled.util';
+import { JIRA_INITIAL_POLL_DELAY, JIRA_POLL_INTERVAL } from './jira.const';
 
 @Injectable({
   providedIn: 'root',
@@ -19,9 +19,26 @@ import { JiraCfg } from './jira.model';
 export class JiraCommonInterfacesService implements IssueServiceInterface {
   constructor(
     private readonly _jiraApiService: JiraApiService,
-    private readonly _snackService: SnackService,
     private readonly _projectService: ProjectService,
   ) {}
+
+  pollTimer$: Observable<number> = timer(JIRA_INITIAL_POLL_DELAY, JIRA_POLL_INTERVAL);
+
+  isBacklogPollingEnabledForProjectOnce$(projectId: string): Observable<boolean> {
+    return this._getCfgOnce$(projectId).pipe(
+      map((cfg) => this.isEnabled(cfg) && cfg.isAutoAddToBacklog),
+    );
+  }
+
+  isIssueRefreshEnabledForProjectOnce$(projectId: string): Observable<boolean> {
+    return this._getCfgOnce$(projectId).pipe(
+      map((cfg) => this.isEnabled(cfg) && cfg.isAutoPollTickets),
+    );
+  }
+
+  isEnabled(cfg: JiraCfg): boolean {
+    return isJiraEnabled(cfg);
+  }
 
   // NOTE: we're using the issueKey instead of the real issueId
   getById$(issueId: string | number, projectId: string): Observable<JiraIssue> {
@@ -45,11 +62,11 @@ export class JiraCommonInterfacesService implements IssueServiceInterface {
     );
   }
 
-  async refreshIssue(
-    task: Task,
-    isNotifySuccess: boolean = true,
-    isNotifyNoUpdateRequired: boolean = false,
-  ): Promise<{ taskChanges: Partial<Task>; issue: JiraIssue } | null> {
+  async getFreshDataForIssueTask(task: Task): Promise<{
+    taskChanges: Partial<Task>;
+    issue: JiraIssue;
+    issueTitle: string;
+  } | null> {
     if (!task.projectId) {
       throw new Error('No projectId');
     }
@@ -66,25 +83,6 @@ export class JiraCommonInterfacesService implements IssueServiceInterface {
     const newUpdated = new Date(issue.updated).getTime();
     const wasUpdated = newUpdated > (task.issueLastUpdated || 0);
 
-    // NOTIFICATIONS
-    if (wasUpdated && isNotifySuccess) {
-      this._snackService.open({
-        msg: T.F.JIRA.S.ISSUE_UPDATE,
-        translateParams: {
-          issueText: `${issue.key}`,
-        },
-        ico: 'cloud_download',
-      });
-    } else if (isNotifyNoUpdateRequired) {
-      this._snackService.open({
-        msg: T.F.JIRA.S.ISSUE_NO_UPDATE_REQUIRED,
-        translateParams: {
-          issueText: `${issue.key}`,
-        },
-        ico: 'cloud_download',
-      });
-    }
-
     if (wasUpdated) {
       return {
         taskChanges: {
@@ -92,9 +90,36 @@ export class JiraCommonInterfacesService implements IssueServiceInterface {
           issueWasUpdated: true,
         },
         issue,
+        issueTitle: issue.key,
       };
     }
     return null;
+  }
+
+  async getFreshDataForIssueTasks(
+    tasks: Task[],
+  ): Promise<{ task: Task; taskChanges: Partial<Task>; issue: JiraIssue }[]> {
+    return Promise.all(
+      tasks.map((task) =>
+        this.getFreshDataForIssueTask(task).then((refreshDataForTask) => ({
+          task,
+          refreshDataForTask,
+        })),
+      ),
+    ).then((items) => {
+      return items
+        .filter(({ refreshDataForTask, task }) => !!refreshDataForTask)
+        .map(({ refreshDataForTask, task }) => {
+          if (!refreshDataForTask) {
+            throw new Error('No refresh data for task js error');
+          }
+          return {
+            task,
+            taskChanges: refreshDataForTask.taskChanges,
+            issue: refreshDataForTask.issue,
+          };
+        });
+    });
   }
 
   getAddTaskData(issue: JiraIssueReduced): Partial<Task> & { title: string } {
@@ -117,6 +142,14 @@ export class JiraCommonInterfacesService implements IssueServiceInterface {
       first(),
       map((jiraCfg) => jiraCfg.host + '/browse/' + issueId),
     );
+  }
+
+  async getNewIssuesToAddToBacklog(
+    projectId: string,
+    allExistingIssueIds: number[] | string[],
+  ): Promise<JiraIssueReduced[]> {
+    const cfg = await this._getCfgOnce$(projectId).toPromise();
+    return await this._jiraApiService.findAutoImportIssues$(cfg).toPromise();
   }
 
   getMappedAttachments(issueData: JiraIssue): TaskAttachment[] {

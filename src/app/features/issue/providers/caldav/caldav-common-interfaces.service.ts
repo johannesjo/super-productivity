@@ -1,16 +1,16 @@
 import { Injectable } from '@angular/core';
-import { Observable, of } from 'rxjs';
+import { Observable, of, timer } from 'rxjs';
 import { Task } from 'src/app/features/tasks/task.model';
 import { IssueServiceInterface } from '../../issue-service-interface';
 import { SearchResultItem } from '../../issue.model';
 import { CaldavIssue, CaldavIssueReduced } from './caldav-issue/caldav-issue.model';
 import { CaldavClientService } from './caldav-client.service';
 import { CaldavCfg } from './caldav.model';
-import { catchError, concatMap, first, switchMap } from 'rxjs/operators';
+import { catchError, concatMap, first, map, switchMap } from 'rxjs/operators';
 import { ProjectService } from '../../../project/project.service';
-import { SnackService } from '../../../../core/snack/snack.service';
 import { truncate } from '../../../../util/truncate';
-import { T } from '../../../../t.const';
+import { isCaldavEnabled } from './is-caldav-enabled.util';
+import { CALDAV_INITIAL_POLL_DELAY, CALDAV_POLL_INTERVAL } from './caldav.const';
 
 @Injectable({
   providedIn: 'root',
@@ -19,11 +19,28 @@ export class CaldavCommonInterfacesService implements IssueServiceInterface {
   constructor(
     private readonly _projectService: ProjectService,
     private readonly _caldavClientService: CaldavClientService,
-    private readonly _snackService: SnackService,
   ) {}
 
   private static _formatIssueTitleForSnack(title: string): string {
     return truncate(title);
+  }
+
+  pollTimer$: Observable<number> = timer(CALDAV_INITIAL_POLL_DELAY, CALDAV_POLL_INTERVAL);
+
+  isBacklogPollingEnabledForProjectOnce$(projectId: string): Observable<boolean> {
+    return this._getCfgOnce$(projectId).pipe(
+      map((cfg) => this.isEnabled(cfg) && cfg.isAutoAddToBacklog),
+    );
+  }
+
+  isIssueRefreshEnabledForProjectOnce$(projectId: string): Observable<boolean> {
+    return this._getCfgOnce$(projectId).pipe(
+      map((cfg) => this.isEnabled(cfg) && cfg.isAutoPoll),
+    );
+  }
+
+  isEnabled(cfg: CaldavCfg): boolean {
+    return isCaldavEnabled(cfg);
   }
 
   getAddTaskData(issueData: CaldavIssueReduced): Partial<Task> & { title: string } {
@@ -43,11 +60,11 @@ export class CaldavCommonInterfacesService implements IssueServiceInterface {
     return of('');
   }
 
-  async refreshIssue(
-    task: Task,
-    isNotifySuccess: boolean,
-    isNotifyNoUpdateRequired: boolean,
-  ): Promise<{ taskChanges: Partial<Task>; issue: CaldavIssue } | null> {
+  async getFreshDataForIssueTask(task: Task): Promise<{
+    taskChanges: Partial<Task>;
+    issue: CaldavIssue;
+    issueTitle: string;
+  } | null> {
     if (!task.projectId) {
       throw new Error('No projectId');
     }
@@ -60,23 +77,6 @@ export class CaldavCommonInterfacesService implements IssueServiceInterface {
 
     const wasUpdated = issue.etag_hash !== task.issueLastUpdated;
 
-    if (wasUpdated && isNotifySuccess) {
-      this._snackService.open({
-        ico: 'cloud_download',
-        translateParams: {
-          issueText: CaldavCommonInterfacesService._formatIssueTitleForSnack(
-            issue.summary,
-          ),
-        },
-        msg: T.F.CALDAV.S.ISSUE_UPDATE,
-      });
-    } else if (isNotifyNoUpdateRequired) {
-      this._snackService.open({
-        msg: T.F.CALDAV.S.ISSUE_NO_UPDATE_REQUIRED,
-        ico: 'cloud_download',
-      });
-    }
-
     if (wasUpdated) {
       return {
         taskChanges: {
@@ -84,15 +84,16 @@ export class CaldavCommonInterfacesService implements IssueServiceInterface {
           issueWasUpdated: true,
         },
         issue,
+        issueTitle: CaldavCommonInterfacesService._formatIssueTitleForSnack(
+          issue.summary,
+        ),
       };
     }
     return null;
   }
 
-  async refreshIssues(
+  async getFreshDataForIssueTasks(
     tasks: Task[],
-    isNotifySuccess: boolean = true,
-    isNotifyNoUpdateRequired: boolean = false,
   ): Promise<{ task: Task; taskChanges: Partial<Task>; issue: CaldavIssue }[]> {
     // First sort the tasks by the issueId
     // because the API returns it in a desc order by issue iid(issueId)
@@ -111,21 +112,6 @@ export class CaldavCommonInterfacesService implements IssueServiceInterface {
       .toPromise();
     const issueMap = new Map(issues.map((item) => [item.id, item]));
 
-    if (isNotifyNoUpdateRequired) {
-      tasks
-        .filter(
-          (task) =>
-            issueMap.has(task.id) &&
-            issueMap.get(task.id)?.etag_hash === task.issueLastUpdated,
-        )
-        .forEach((_) =>
-          this._snackService.open({
-            msg: T.F.CALDAV.S.ISSUE_NO_UPDATE_REQUIRED,
-            ico: 'cloud_download',
-          }),
-        );
-    }
-
     return tasks
       .filter(
         (task) =>
@@ -134,17 +120,6 @@ export class CaldavCommonInterfacesService implements IssueServiceInterface {
       )
       .map((task) => {
         const issue = issueMap.get(task.id) as CaldavIssue;
-        if (isNotifySuccess) {
-          this._snackService.open({
-            ico: 'cloud_download',
-            translateParams: {
-              issueText: CaldavCommonInterfacesService._formatIssueTitleForSnack(
-                issue.summary,
-              ),
-            },
-            msg: T.F.CALDAV.S.ISSUE_UPDATE,
-          });
-        }
         return {
           task,
           taskChanges: {
@@ -166,6 +141,14 @@ export class CaldavCommonInterfacesService implements IssueServiceInterface {
           : of([]),
       ),
     );
+  }
+
+  async getNewIssuesToAddToBacklog(
+    projectId: string,
+    allExistingIssueIds: number[] | string[],
+  ): Promise<CaldavIssueReduced[]> {
+    const cfg = await this._getCfgOnce$(projectId).toPromise();
+    return await this._caldavClientService.getOpenTasks$(cfg).toPromise();
   }
 
   private _getCfgOnce$(projectId: string): Observable<CaldavCfg> {
