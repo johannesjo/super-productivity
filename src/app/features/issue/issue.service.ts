@@ -12,7 +12,8 @@ import {
   GITHUB_TYPE,
   GITLAB_TYPE,
   ISSUE_PROVIDER_HUMANIZED,
-  issueProviderIconMap,
+  ISSUE_PROVIDER_ICON_MAP,
+  ISSUE_STR_MAP,
   JIRA_TYPE,
   OPEN_PROJECT_TYPE,
 } from './issue.const';
@@ -99,14 +100,6 @@ export class IssueService {
     return this.ISSUE_SERVICE_MAP[issueType].issueLink$(issueId, projectId);
   }
 
-  // getCfg$(
-  //   providerKey: IssueProviderKey,
-  //   projectId: string,
-  // ): Observable<IssueIntegrationCfg> {
-  //   return this.ISSUE_SERVICE_MAP[providerKey].getCfgForProject$(projectId);
-  // }
-
-  // TODO rename to ONCE
   isBacklogPollEnabledForProjectOnce$(
     providerKey: IssueProviderKey,
     projectId: string,
@@ -140,28 +133,27 @@ export class IssueService {
   }
 
   async checkAndImportNewIssuesToBacklogForProject(
-    issuesType: IssueProviderKey,
+    providerKey: IssueProviderKey,
     projectId: string,
   ): Promise<void> {
-    if (!this.ISSUE_SERVICE_MAP[issuesType].getNewIssuesToAddToBacklog) {
+    if (!this.ISSUE_SERVICE_MAP[providerKey].getNewIssuesToAddToBacklog) {
       return;
     }
     this._snackService.open({
-      svgIco: issueProviderIconMap[issuesType as IssueProviderKey],
+      svgIco: ISSUE_PROVIDER_ICON_MAP[providerKey],
       msg: T.F.ISSUE.S.POLLING_BACKLOG,
       isSpinner: true,
       translateParams: {
-        issueProviderName: ISSUE_PROVIDER_HUMANIZED[issuesType as IssueProviderKey],
-        // TODO add open project case Work Packages
-        issuesStr: this._translateService.instant(T.F.ISSUE.DEFAULT.ISSUES_STR),
+        issueProviderName: ISSUE_PROVIDER_HUMANIZED[providerKey],
+        issuesStr: this._translateService.instant(ISSUE_STR_MAP[providerKey].ISSUES_STR),
       },
     });
 
     const allExistingIssueIds: string[] | number[] =
-      await this._taskService.getAllIssueIdsForProject(projectId, issuesType);
+      await this._taskService.getAllIssueIdsForProject(projectId, providerKey);
 
     const potentialIssuesToAdd = await (
-      this.ISSUE_SERVICE_MAP[issuesType] as any
+      this.ISSUE_SERVICE_MAP[providerKey] as any
     ).getNewIssuesToAddToBacklog(projectId, allExistingIssueIds);
 
     const issuesToAdd: IssueDataReduced[] = potentialIssuesToAdd.filter(
@@ -170,40 +162,40 @@ export class IssueService {
     );
 
     issuesToAdd.forEach((issue: IssueDataReduced) => {
-      this.addTaskWithIssue(issuesType, issue, projectId, true);
+      this.addTaskWithIssue(providerKey, issue, projectId, true);
     });
 
     if (issuesToAdd.length === 1) {
-      const issueTitle = this.ISSUE_SERVICE_MAP[issuesType].getAddTaskData(
+      const issueTitle = this.ISSUE_SERVICE_MAP[providerKey].getAddTaskData(
         issuesToAdd[0],
       ).title;
       this._snackService.open({
-        svgIco: issueProviderIconMap[issuesType as IssueProviderKey],
+        svgIco: ISSUE_PROVIDER_ICON_MAP[providerKey],
         // ico: 'cloud_download',
         msg: T.F.ISSUE.S.IMPORTED_SINGLE_ISSUE,
         translateParams: {
-          issueProviderName: ISSUE_PROVIDER_HUMANIZED[issuesType as IssueProviderKey],
-          // TODO add open project case
-          issueStr: this._translateService.instant(T.F.ISSUE.DEFAULT.ISSUE_STR),
+          issueProviderName: ISSUE_PROVIDER_HUMANIZED[providerKey],
+          issueStr: this._translateService.instant(ISSUE_STR_MAP[providerKey].ISSUE_STR),
           issueTitle,
         },
       });
     } else if (issuesToAdd.length > 1) {
       this._snackService.open({
-        svgIco: issueProviderIconMap[issuesType as IssueProviderKey],
+        svgIco: ISSUE_PROVIDER_ICON_MAP[providerKey],
         // ico: 'cloud_download',
         msg: T.F.ISSUE.S.IMPORTED_MULTIPLE_ISSUES,
         translateParams: {
-          issueProviderName: ISSUE_PROVIDER_HUMANIZED[issuesType as IssueProviderKey],
-          // TODO add open project case
-          issuesStr: this._translateService.instant(T.F.ISSUE.DEFAULT.ISSUES_STR),
+          issueProviderName: ISSUE_PROVIDER_HUMANIZED[providerKey],
+          issuesStr: this._translateService.instant(
+            ISSUE_STR_MAP[providerKey].ISSUES_STR,
+          ),
           nr: issuesToAdd.length,
         },
       });
     }
   }
 
-  async refreshIssue(
+  async refreshIssueTask(
     task: Task,
     isNotifySuccess: boolean = true,
     isNotifyNoUpdateRequired: boolean = false,
@@ -229,19 +221,18 @@ export class IssueService {
 
       if (isNotifySuccess) {
         this._snackService.open({
-          svgIco: issueProviderIconMap[issueType],
+          svgIco: ISSUE_PROVIDER_ICON_MAP[issueType],
           msg: T.F.ISSUE.S.ISSUE_UPDATE_SINGLE,
           translateParams: {
             issueProviderName: ISSUE_PROVIDER_HUMANIZED[issueType],
-            // TODO add open project case
-            issueStr: this._translateService.instant(T.F.ISSUE.DEFAULT.ISSUE_STR),
+            issueStr: this._translateService.instant(ISSUE_STR_MAP[issueType].ISSUE_STR),
             issueTitle: update.issueTitle,
           },
         });
       }
     } else if (isNotifyNoUpdateRequired) {
       this._snackService.open({
-        svgIco: issueProviderIconMap[issueType],
+        svgIco: ISSUE_PROVIDER_ICON_MAP[issueType],
         msg: T.F.ISSUE.S.ISSUE_NO_UPDATE_REQUIRED,
         translateParams: {
           issueProviderName: ISSUE_PROVIDER_HUMANIZED[issueType],
@@ -250,35 +241,37 @@ export class IssueService {
     }
   }
 
-  async refreshIssues(tasks: Task[]): Promise<void> {
+  async refreshIssueTasks(tasks: Task[]): Promise<void> {
     // dynamic map that has a list of tasks for every entry where the entry is an issue type
-    const tasksIssueIdsByIssueType: any = {};
+    const tasksIssueIdsByIssueProviderKey: any = {};
     const tasksWithoutIssueId = [];
 
     for (const task of tasks) {
       if (!task.issueId || !task.issueType) {
         tasksWithoutIssueId.push(task);
-      } else if (!tasksIssueIdsByIssueType[task.issueType]) {
-        tasksIssueIdsByIssueType[task.issueType] = [];
-        tasksIssueIdsByIssueType[task.issueType].push(task);
+      } else if (!tasksIssueIdsByIssueProviderKey[task.issueType]) {
+        tasksIssueIdsByIssueProviderKey[task.issueType] = [];
+        tasksIssueIdsByIssueProviderKey[task.issueType].push(task);
       } else {
-        tasksIssueIdsByIssueType[task.issueType].push(task);
+        tasksIssueIdsByIssueProviderKey[task.issueType].push(task);
       }
     }
 
-    for (const issuesType of Object.keys(tasksIssueIdsByIssueType)) {
+    for (const pKey of Object.keys(tasksIssueIdsByIssueProviderKey)) {
+      const providerKey = pKey as IssueProviderKey;
       console.log(
-        'POLLING CHANGES FOR ' + issuesType,
-        tasksIssueIdsByIssueType[issuesType],
+        'POLLING CHANGES FOR ' + providerKey,
+        tasksIssueIdsByIssueProviderKey[providerKey],
       );
       this._snackService.open({
-        svgIco: issueProviderIconMap[issuesType as IssueProviderKey],
+        svgIco: ISSUE_PROVIDER_ICON_MAP[providerKey],
         msg: T.F.ISSUE.S.POLLING_CHANGES,
         isSpinner: true,
         translateParams: {
-          issueProviderName: ISSUE_PROVIDER_HUMANIZED[issuesType as IssueProviderKey],
-          // TODO add open project case Work Packages
-          issuesStr: this._translateService.instant(T.F.ISSUE.DEFAULT.ISSUES_STR),
+          issueProviderName: ISSUE_PROVIDER_HUMANIZED[providerKey],
+          issuesStr: this._translateService.instant(
+            ISSUE_STR_MAP[providerKey].ISSUES_STR,
+          ),
         },
       });
 
@@ -287,14 +280,14 @@ export class IssueService {
         taskChanges: Partial<Task>;
         issue: IssueData;
       }[] = await // TODO export fn to type instead
-      (this.ISSUE_SERVICE_MAP[issuesType].getFreshDataForIssueTasks as any)(
-        tasksIssueIdsByIssueType[issuesType],
+      (this.ISSUE_SERVICE_MAP[providerKey].getFreshDataForIssueTasks as any)(
+        tasksIssueIdsByIssueProviderKey[providerKey],
       );
 
       if (updates.length > 0) {
         for (const update of updates) {
-          if (this.ISSUE_REFRESH_MAP[issuesType][update.task.issueId as string]) {
-            this.ISSUE_REFRESH_MAP[issuesType][update.task.issueId as string].next(
+          if (this.ISSUE_REFRESH_MAP[providerKey][update.task.issueId as string]) {
+            this.ISSUE_REFRESH_MAP[providerKey][update.task.issueId as string].next(
               update.issue,
             );
           }
@@ -303,23 +296,25 @@ export class IssueService {
 
         if (updates.length === 1) {
           this._snackService.open({
-            svgIco: issueProviderIconMap[issuesType as IssueProviderKey],
+            svgIco: ISSUE_PROVIDER_ICON_MAP[providerKey],
             msg: T.F.ISSUE.S.ISSUE_UPDATE_SINGLE,
             translateParams: {
-              issueProviderName: ISSUE_PROVIDER_HUMANIZED[issuesType as IssueProviderKey],
-              // TODO add open project case Work Packages
-              issueStr: this._translateService.instant(T.F.ISSUE.DEFAULT.ISSUE_STR),
+              issueProviderName: ISSUE_PROVIDER_HUMANIZED[providerKey],
+              issueStr: this._translateService.instant(
+                ISSUE_STR_MAP[providerKey].ISSUE_STR,
+              ),
               issueTitle: updates[0].taskChanges.title || updates[0].task.title,
             },
           });
         } else if (updates.length > 1) {
           this._snackService.open({
-            svgIco: issueProviderIconMap[issuesType as IssueProviderKey],
+            svgIco: ISSUE_PROVIDER_ICON_MAP[providerKey],
             msg: T.F.ISSUE.S.ISSUE_UPDATE_MULTIPLE,
             translateParams: {
-              issueProviderName: ISSUE_PROVIDER_HUMANIZED[issuesType as IssueProviderKey],
-              // TODO add open project case Work Packages
-              issuesStr: this._translateService.instant(T.F.ISSUE.DEFAULT.ISSUES_STR),
+              issueProviderName: ISSUE_PROVIDER_HUMANIZED[providerKey],
+              issuesStr: this._translateService.instant(
+                ISSUE_STR_MAP[providerKey].ISSUES_STR,
+              ),
               nr: updates.length,
             },
           });

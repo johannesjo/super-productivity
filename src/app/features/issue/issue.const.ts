@@ -20,6 +20,7 @@ import {
   DEFAULT_OPEN_PROJECT_CFG,
   OPEN_PROJECT_CONFIG_FORM_SECTION,
 } from './providers/open-project/open-project.const';
+import { T } from '../../t.const';
 
 export const GITLAB_TYPE: IssueProviderKey = 'GITLAB';
 export const GITHUB_TYPE: IssueProviderKey = 'GITHUB';
@@ -35,8 +36,7 @@ export const ISSUE_PROVIDER_TYPES: IssueProviderKey[] = [
   OPEN_PROJECT_TYPE,
 ];
 
-// TODO screaming snake case
-export const issueProviderIconMap = {
+export const ISSUE_PROVIDER_ICON_MAP = {
   [JIRA_TYPE]: 'jira',
   [GITHUB_TYPE]: 'github',
   [GITLAB_TYPE]: 'gitlab',
@@ -67,3 +67,20 @@ export const ISSUE_PROVIDER_FORM_CFGS: ConfigFormConfig = [
   CALDAV_CONFIG_FORM_SECTION as GenericConfigFormSection,
   OPEN_PROJECT_CONFIG_FORM_SECTION as GenericConfigFormSection,
 ];
+
+const DEFAULT_ISSUE_STRS: { ISSUE_STR: string; ISSUES_STR: string } = {
+  ISSUE_STR: T.F.ISSUE.DEFAULT.ISSUE_STR,
+  ISSUES_STR: T.F.ISSUE.DEFAULT.ISSUES_STR,
+};
+
+export const ISSUE_STR_MAP: { [key: string]: { ISSUE_STR: string; ISSUES_STR: string } } =
+  {
+    [JIRA_TYPE]: DEFAULT_ISSUE_STRS,
+    [GITHUB_TYPE]: DEFAULT_ISSUE_STRS,
+    [GITLAB_TYPE]: DEFAULT_ISSUE_STRS,
+    [CALDAV_TYPE]: DEFAULT_ISSUE_STRS,
+    [OPEN_PROJECT_TYPE]: {
+      ISSUE_STR: T.F.OPEN_PROJECT.ISSUE_STRINGS.ISSUE_STR,
+      ISSUES_STR: T.F.OPEN_PROJECT.ISSUE_STRINGS.ISSUES_STR,
+    },
+  };

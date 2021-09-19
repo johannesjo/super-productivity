@@ -47,7 +47,7 @@ export class PollIssueUpdatesEffects {
                       );
                     }),
                     tap((issueTasks: TaskWithSubTasks[]) =>
-                      this._issueService.refreshIssues(issueTasks),
+                      this._issueService.refreshIssueTasks(issueTasks),
                     ),
                   ),
                 ),

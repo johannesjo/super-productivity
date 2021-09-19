@@ -71,7 +71,7 @@ export class DialogJiraTransitionComponent {
           first(),
         )
         .subscribe(() => {
-          this._issueService.refreshIssue(this.data.task, false, false);
+          this._issueService.refreshIssueTask(this.data.task, false, false);
           this._snackService.open({
             type: 'SUCCESS',
             msg: T.F.JIRA.S.TRANSITION,

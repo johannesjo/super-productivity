@@ -52,7 +52,7 @@ export class CaldavIssueEffects {
   private _handleTransitionForIssue$(caldavCfg: CaldavCfg, task: Task): Observable<any> {
     return this._caldavClientService
       .updateCompletedState$(caldavCfg, task.issueId as string, task.isDone)
-      .pipe(concatMap(() => this._issueService.refreshIssue(task, true)));
+      .pipe(concatMap(() => this._issueService.refreshIssueTask(task, true)));
   }
 
   private _getCfgOnce$(projectId: string): Observable<CaldavCfg> {

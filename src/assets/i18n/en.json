@@ -211,7 +211,6 @@
     },
     "ISSUE": {
       "DEFAULT": {
-        "ISSUE_C:STR": "Issue",
         "ISSUE_STR": "issue",
         "ISSUES_STR": "issues"
       },
@@ -453,6 +452,10 @@
         "STATUS": "Status",
         "SUMMARY": "Summary",
         "TYPE": "Type"
+      },
+      "ISSUE_STRINGS": {
+        "ISSUE_STR": "work package",
+        "ISSUES_STR": "work packages"
       },
       "S": {
         "ERR_UNKNOWN": "OpenProject: Unknown error {{statusCode}} {{errorMsg}}. Is CORS properly configured for the server?"

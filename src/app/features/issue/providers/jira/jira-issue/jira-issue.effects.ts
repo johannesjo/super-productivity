@@ -335,7 +335,7 @@ export class JiraIssueEffects {
                         chosenTransition: `${chosenTransition.name}`,
                       },
                     });
-                    return this._issueService.refreshIssue(task, false, false);
+                    return this._issueService.refreshIssueTask(task, false, false);
                   }),
                 );
             } else {
