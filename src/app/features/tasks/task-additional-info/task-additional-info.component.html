@@ -146,7 +146,7 @@
         [mode]="'indeterminate'"
       ></mat-progress-bar>
       <issue-content
-        *ngIf="issueData && isIssueDataLoadedForCurrentType$|async"
+        *ngIf="issueData && (isIssueDataLoadedForCurrentType$|async)"
         [@expandFadeInOnly]
         [issueData]="issueData"
         [task]="task"
