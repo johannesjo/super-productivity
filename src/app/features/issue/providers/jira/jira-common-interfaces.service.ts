@@ -10,6 +10,7 @@ import { JiraIssue, JiraIssueReduced } from './jira-issue/jira-issue.model';
 import { TaskAttachment } from '../../../tasks/task-attachment/task-attachment.model';
 import { mapJiraAttachmentToAttachment } from './jira-issue/jira-issue-map.util';
 import { JiraCfg } from './jira.model';
+import { isJiraEnabled } from './is-jira-enabled.util';
 
 @Injectable({
   providedIn: 'root',
@@ -19,6 +20,10 @@ export class JiraCommonInterfacesService implements IssueServiceInterface {
     private readonly _jiraApiService: JiraApiService,
     private readonly _projectService: ProjectService,
   ) {}
+
+  isEnabled(cfg: JiraCfg): boolean {
+    return isJiraEnabled(cfg);
+  }
 
   // NOTE: we're using the issueKey instead of the real issueId
   getById$(issueId: string | number, projectId: string): Observable<JiraIssue> {

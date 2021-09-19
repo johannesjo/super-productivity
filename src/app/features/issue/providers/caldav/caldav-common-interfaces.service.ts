@@ -9,6 +9,7 @@ import { CaldavCfg } from './caldav.model';
 import { catchError, concatMap, first, switchMap } from 'rxjs/operators';
 import { ProjectService } from '../../../project/project.service';
 import { truncate } from '../../../../util/truncate';
+import { isCaldavEnabled } from './is-caldav-enabled.util';
 
 @Injectable({
   providedIn: 'root',
@@ -21,6 +22,10 @@ export class CaldavCommonInterfacesService implements IssueServiceInterface {
 
   private static _formatIssueTitleForSnack(title: string): string {
     return truncate(title);
+  }
+
+  isEnabled(cfg: CaldavCfg): boolean {
+    return isCaldavEnabled(cfg);
   }
 
   getAddTaskData(issueData: CaldavIssueReduced): Partial<Task> & { title: string } {

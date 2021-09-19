@@ -10,6 +10,7 @@ import { GithubCfg } from './github.model';
 import { GithubIssue, GithubIssueReduced } from './github-issue/github-issue.model';
 import { truncate } from '../../../../util/truncate';
 import { getTimestamp } from '../../../../util/get-timestamp';
+import { isGithubEnabled } from './is-github-enabled.util';
 
 @Injectable({
   providedIn: 'root',
@@ -19,6 +20,10 @@ export class GithubCommonInterfacesService implements IssueServiceInterface {
     private readonly _githubApiService: GithubApiService,
     private readonly _projectService: ProjectService,
   ) {}
+
+  isEnabled(cfg: GithubCfg): boolean {
+    return isGithubEnabled(cfg);
+  }
 
   issueLink$(issueId: number, projectId: string): Observable<string> {
     return this._getCfgOnce$(projectId).pipe(

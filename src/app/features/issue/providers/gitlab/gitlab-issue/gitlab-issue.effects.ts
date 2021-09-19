@@ -14,9 +14,7 @@ import { GitlabCfg } from '../gitlab';
 import { T } from 'src/app/t.const';
 import { TaskWithSubTasks } from '../../../../tasks/task.model';
 import { WorkContextService } from '../../../../work-context/work-context.service';
-
-const isGitlabEnabled = (gitlabCfg: GitlabCfg): boolean =>
-  !!gitlabCfg && !!gitlabCfg.project;
+import { isGitlabEnabled } from '../is-gitlab-enabled';
 
 @Injectable()
 export class GitlabIssueEffects {

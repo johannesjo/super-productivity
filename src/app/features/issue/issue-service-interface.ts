@@ -1,9 +1,16 @@
 import { Observable } from 'rxjs';
-import { IssueData, IssueDataReduced, SearchResultItem } from './issue.model';
+import {
+  IssueData,
+  IssueDataReduced,
+  IssueIntegrationCfg,
+  SearchResultItem,
+} from './issue.model';
 import { Task } from '../tasks/task.model';
 import { TaskAttachment } from '../tasks/task-attachment/task-attachment.model';
 
 export interface IssueServiceInterface {
+  isEnabled(cfg: IssueIntegrationCfg): boolean;
+
   issueLink$(issueId: string | number, projectId: string): Observable<string>;
 
   getById$(id: string | number, projectId: string): Observable<IssueData>;

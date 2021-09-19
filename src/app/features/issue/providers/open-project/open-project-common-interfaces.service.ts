@@ -12,6 +12,7 @@ import {
   OpenProjectWorkPackageReduced,
 } from './open-project-issue/open-project-issue.model';
 import { truncate } from '../../../../util/truncate';
+import { isOpenProjectEnabled } from './is-open-project-enabled.util';
 
 @Injectable({
   providedIn: 'root',
@@ -21,6 +22,10 @@ export class OpenProjectCommonInterfacesService implements IssueServiceInterface
     private readonly _openProjectApiService: OpenProjectApiService,
     private readonly _projectService: ProjectService,
   ) {}
+
+  isEnabled(cfg: OpenProjectCfg): boolean {
+    return isOpenProjectEnabled(cfg);
+  }
 
   issueLink$(issueId: number, projectId: string): Observable<string> {
     return this._getCfgOnce$(projectId).pipe(

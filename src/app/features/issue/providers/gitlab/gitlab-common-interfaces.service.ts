@@ -10,6 +10,7 @@ import { GitlabCfg } from './gitlab';
 import { GitlabIssue } from './gitlab-issue/gitlab-issue.model';
 import { truncate } from '../../../../util/truncate';
 import { GITLAB_BASE_URL } from './gitlab.const';
+import { isGitlabEnabled } from './is-gitlab-enabled';
 
 @Injectable({
   providedIn: 'root',
@@ -19,6 +20,10 @@ export class GitlabCommonInterfacesService implements IssueServiceInterface {
     private readonly _gitlabApiService: GitlabApiService,
     private readonly _projectService: ProjectService,
   ) {}
+
+  isEnabled(cfg: GitlabCfg): boolean {
+    return isGitlabEnabled(cfg);
+  }
 
   issueLink$(issueId: number, projectId: string): Observable<string> {
     return this._getCfgOnce$(projectId).pipe(
