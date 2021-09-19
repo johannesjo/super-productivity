@@ -142,11 +142,11 @@
 
     <ng-container panel-content>
       <mat-progress-bar
-        *ngIf="issueData === null"
+        *ngIf="!(isIssueDataLoadedForCurrentType$|async)"
         [mode]="'indeterminate'"
       ></mat-progress-bar>
       <issue-content
-        *ngIf="issueData"
+        *ngIf="issueData && isIssueDataLoadedForCurrentType$|async"
         [@expandFadeInOnly]
         [issueData]="issueData"
         [task]="task"

@@ -18,7 +18,16 @@ import {
 } from '../task.model';
 import { IssueService } from '../../issue/issue.service';
 import { TaskAttachmentService } from '../task-attachment/task-attachment.service';
-import { BehaviorSubject, merge, Observable, of, Subject, Subscription } from 'rxjs';
+import {
+  BehaviorSubject,
+  combineLatest,
+  merge,
+  Observable,
+  of,
+  ReplaySubject,
+  Subject,
+  Subscription,
+} from 'rxjs';
 import {
   TaskAttachment,
   TaskAttachmentCopy,
@@ -73,6 +82,11 @@ interface IssueAndType {
   type: IssueProviderKey | null;
 }
 
+interface IssueDataAndType {
+  issueData: IssueData | null;
+  issueType: IssueProviderKey | null;
+}
+
 @Component({
   selector: 'task-additional-info',
   templateUrl: './task-additional-info.component.html',
@@ -108,18 +122,6 @@ export class TaskAdditionalInfoComponent implements AfterViewInit, OnDestroy {
     switchMap((id) => (id ? this._reminderService.getById$(id) : of(null))),
   );
 
-  issueIdAndType$: Subject<IssueAndType> = new Subject();
-  issueIdAndTypeShared$: Observable<IssueAndType> = this.issueIdAndType$.pipe(
-    shareReplay(1),
-  );
-
-  issueDataNullTrigger$: Subject<IssueAndType | null> = new Subject();
-
-  issueDataTrigger$: Observable<IssueAndType | null> = merge(
-    this.issueIdAndTypeShared$,
-    this.issueDataNullTrigger$,
-  );
-  issueData?: IssueData | null | false;
   repeatCfgId$: BehaviorSubject<string | null> = new BehaviorSubject<string | null>(null);
   repeatCfgDays$: Observable<string | null> = this.repeatCfgId$.pipe(
     switchMap((id) =>
@@ -158,30 +160,70 @@ export class TaskAdditionalInfoComponent implements AfterViewInit, OnDestroy {
 
   // NOTE: should be treated as private
   _taskData?: TaskWithSubTasks;
-  issueData$: Observable<IssueData | null | false> = this.issueDataTrigger$.pipe(
-    switchMap((args) => {
-      if (args && args.id && args.type) {
-        if (!this._taskData || !this._taskData.projectId) {
-          throw new Error('task data not ready');
-        }
-        return this._issueService
-          .getById$(args.type, args.id, this._taskData.projectId)
-          .pipe(
-            // NOTE we need this, otherwise the error is going to weird up the observable
-            catchError(() => {
-              return of(false);
-            }),
-          ) as Observable<false | IssueData>;
-      }
-      return of(null);
-    }),
-    shareReplay(1),
-    // NOTE: this seems to fix the issue loading bug, when we end up with the
-    // expandable closed when the data is loaded
-    delay(0),
+
+  issueIdAndType$: Subject<IssueAndType> = new ReplaySubject(1);
+  loadedIssueType$: Subject<IssueProviderKey | null> = new ReplaySubject(1);
+  issueDataNullTrigger$: Subject<IssueAndType | null> = new Subject();
+
+  issueDataTrigger$: Observable<IssueAndType | null> = merge(
+    this.issueIdAndType$,
+    this.issueDataNullTrigger$,
   );
+  issueData?: IssueData | null | false;
+
+  // NOTE: null means is loading, false means just don't show
+  issueDataAndType$: Observable<IssueDataAndType | null | false> =
+    this.issueDataTrigger$.pipe(
+      switchMap((args) => {
+        if (args && args.id && args.type) {
+          if (!this._taskData || !this._taskData.projectId) {
+            throw new Error('task data not ready');
+          }
+          return this._issueService
+            .getById$(args.type, args.id, this._taskData.projectId)
+            .pipe(
+              // NOTE we need this, otherwise the error is going to weird up the observable
+              catchError(() => {
+                return of(false);
+              }),
+              map((issueDataIfGiven) =>
+                issueDataIfGiven
+                  ? { issueData: issueDataIfGiven, issueType: args.type }
+                  : issueDataIfGiven,
+              ),
+            ) as Observable<false | IssueDataAndType>;
+        }
+        return of(null);
+      }),
+      shareReplay(1),
+      // NOTE: this seems to fix the issue loading bug, when we end up with the
+      // expandable closed when the data is loaded
+      delay(0),
+    );
+
+  issueData$: Observable<IssueData | null | false> = this.issueDataAndType$.pipe(
+    map((issueDataAndType) =>
+      issueDataAndType ? issueDataAndType.issueData : issueDataAndType,
+    ),
+    shareReplay(1),
+  );
+
+  isIssueDataLoadedForCurrentType$: Observable<boolean> = combineLatest([
+    this.issueDataAndType$,
+    this.issueDataTrigger$,
+  ]).pipe(
+    map(
+      ([issueDataAndType, issueDataTrigger]): boolean =>
+        !!(
+          issueDataAndType &&
+          issueDataTrigger &&
+          issueDataAndType.issueType === issueDataTrigger.type
+        ),
+    ),
+  );
+
   issueAttachments$: Observable<TaskAttachmentCopy[]> = this.issueData$.pipe(
-    withLatestFrom(this.issueIdAndTypeShared$),
+    withLatestFrom(this.issueIdAndType$),
     map(([data, { type }]) =>
       data && type ? this._issueService.getMappedAttachments(type, data) : [],
     ),
@@ -228,7 +270,7 @@ export class TaskAdditionalInfoComponent implements AfterViewInit, OnDestroy {
     // NOTE: this works as long as there is no other place to display issue attachments for jira
     if (IS_ELECTRON) {
       this._subs.add(
-        this.issueIdAndTypeShared$
+        this.issueIdAndType$
           .pipe(
             filter(({ id, type }) => type === JIRA_TYPE),
             // not strictly reactive reactive but should work a 100% as issueIdAndType are triggered after task data
@@ -279,6 +321,7 @@ export class TaskAdditionalInfoComponent implements AfterViewInit, OnDestroy {
       (newVal.issueWasUpdated === true && !prev.issueWasUpdated)
     ) {
       this.issueDataNullTrigger$.next(null);
+
       this.issueIdAndType$.next({
         id: newVal.issueId,
         type: newVal.issueType,
