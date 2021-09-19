@@ -6,7 +6,6 @@ import {
   filter,
   first,
   map,
-  mapTo,
   switchMap,
   take,
   tap,
@@ -16,21 +15,12 @@ import {
 import { JiraApiService } from '../jira-api.service';
 import { JiraIssueReduced } from './jira-issue.model';
 import { SnackService } from '../../../../../core/snack/snack.service';
-import { Task, TaskWithSubTasks } from '../../../../tasks/task.model';
+import { Task } from '../../../../tasks/task.model';
 import { TaskService } from '../../../../tasks/task.service';
-import {
-  BehaviorSubject,
-  EMPTY,
-  forkJoin,
-  Observable,
-  of,
-  throwError,
-  timer,
-} from 'rxjs';
+import { BehaviorSubject, EMPTY, Observable, throwError, timer } from 'rxjs';
 import { MatDialog } from '@angular/material/dialog';
 import { DialogJiraTransitionComponent } from '../jira-view-components/dialog-jira-transition/dialog-jira-transition.component';
 import { IssueLocalState } from '../../../issue.model';
-import { JIRA_INITIAL_POLL_BACKLOG_DELAY, JIRA_POLL_INTERVAL } from '../jira.const';
 import { ProjectService } from '../../../../project/project.service';
 import { IssueService } from '../../../issue.service';
 import { JIRA_TYPE } from '../../../issue.const';
@@ -280,58 +270,6 @@ export class JiraIssueEffects {
       ),
     { dispatch: false },
   );
-  private _pollTimer$: Observable<number> = timer(
-    JIRA_INITIAL_POLL_BACKLOG_DELAY,
-    JIRA_POLL_INTERVAL,
-  );
-  // -----------------
-
-  pollIssueChangesForCurrentContext$: any = createEffect(
-    () =>
-      this._issueEffectHelperService.pollIssueTaskUpdatesActions$.pipe(
-        switchMap((inVal) =>
-          this._workContextService.isActiveWorkContextProject$.pipe(
-            take(1),
-            switchMap((isProject) =>
-              isProject
-                ? this._afterInitialRequestCheckForProjectJiraSuccessfull$(inVal)
-                : of(inVal),
-            ),
-          ),
-        ),
-        switchMap(() => this._pollTimer$),
-        switchMap(() =>
-          this._workContextService.allTasksForCurrentContext$.pipe(
-            first(),
-            switchMap((tasks) => {
-              const jiraIssueTasks = tasks.filter((task) => task.issueType === JIRA_TYPE);
-              return forkJoin(
-                jiraIssueTasks.map((task) => {
-                  if (!task.projectId) {
-                    throw new Error('No projectId for task');
-                  }
-                  return this._getCfgOnce$(task.projectId).pipe(
-                    map((cfg) => ({ cfg, task })),
-                  );
-                }),
-              );
-            }),
-            map((cos) =>
-              cos
-                .filter(
-                  ({ cfg, task }: { cfg: JiraCfg; task: TaskWithSubTasks }) =>
-                    isJiraEnabled(cfg) && cfg.isAutoPollTickets,
-                )
-                .map(({ task }: { cfg: JiraCfg; task: TaskWithSubTasks }) => task),
-            ),
-            tap((jiraTasks: TaskWithSubTasks[]) => {
-              this._issueService.refreshIssues(jiraTasks);
-            }),
-          ),
-        ),
-      ),
-    { dispatch: false },
-  );
 
   constructor(
     private readonly _actions$: Actions,
@@ -345,16 +283,6 @@ export class JiraIssueEffects {
     private readonly _matDialog: MatDialog,
     private readonly _issueEffectHelperService: IssueEffectHelperService,
   ) {}
-
-  private _afterInitialRequestCheckForProjectJiraSuccessfull$<TY>(
-    args: TY,
-  ): Observable<TY> {
-    return this._isInitialRequestForProjectDone$.pipe(
-      filter((isDone) => isDone),
-      take(1),
-      mapTo(args),
-    );
-  }
 
   private _handleTransitionForIssue(
     localState: IssueLocalState,

@@ -106,7 +106,17 @@ export class IssueService {
   //   return this.ISSUE_SERVICE_MAP[providerKey].getCfgForProject$(projectId);
   // }
 
+  // TODO rename to ONCE
   isBacklogPollEnabledForProject$(
+    providerKey: IssueProviderKey,
+    projectId: string,
+  ): Observable<boolean> {
+    return this.ISSUE_SERVICE_MAP[providerKey].isBacklogPollingEnabledForProjectOnce$(
+      projectId,
+    );
+  }
+
+  isPollIssueChangesEnabledForProjectOnce$(
     providerKey: IssueProviderKey,
     projectId: string,
   ): Observable<boolean> {
@@ -257,6 +267,10 @@ export class IssueService {
     }
 
     for (const issuesType of Object.keys(tasksIssueIdsByIssueType)) {
+      console.log(
+        'POLLING CHANGES FOR ' + issuesType,
+        tasksIssueIdsByIssueType[issuesType],
+      );
       this._snackService.open({
         svgIco: issueProviderIconMap[issuesType as IssueProviderKey],
         msg: T.F.ISSUE.S.POLLING_CHANGES,
