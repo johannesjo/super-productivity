@@ -100,6 +100,14 @@ export class JiraCommonInterfacesService implements IssueServiceInterface {
     );
   }
 
+  async getNewIssuesToAddToBacklog(
+    projectId: string,
+    allExistingIssueIds: number[] | string[],
+  ): Promise<JiraIssueReduced[]> {
+    const cfg = await this._getCfgOnce$(projectId).toPromise();
+    return await this._jiraApiService.findAutoImportIssues$(cfg).toPromise();
+  }
+
   getMappedAttachments(issueData: JiraIssue): TaskAttachment[] {
     return (
       issueData &&

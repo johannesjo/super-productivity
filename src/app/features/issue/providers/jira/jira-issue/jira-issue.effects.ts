@@ -36,7 +36,6 @@ import { ProjectService } from '../../../../project/project.service';
 import { IssueService } from '../../../issue.service';
 import { JIRA_TYPE } from '../../../issue.const';
 import { T } from '../../../../../t.const';
-import { truncate } from '../../../../../util/truncate';
 import { WorkContextService } from '../../../../work-context/work-context.service';
 import { JiraCfg, JiraTransitionOption } from '../jira.model';
 import { IssueEffectHelperService } from '../../../issue-effect-helper.service';
@@ -301,7 +300,12 @@ export class JiraIssueEffects {
                 // NOTE: required otherwise timer stays alive for filtered actions
                 takeUntil(this._issueEffectHelperService.pollToBacklogActions$),
                 tap(() => console.log('JIRA_POLL_BACKLOG_CHANGES')),
-                tap(() => this._importNewIssuesToBacklog(pId, jiraCfg)),
+                tap(() =>
+                  this._issueService.checkAndImportNewIssuesToBacklogForProject(
+                    JIRA_TYPE,
+                    pId,
+                  ),
+                ),
               ),
             ),
           ),
@@ -484,49 +488,6 @@ export class JiraIssueEffects {
         },
       })
       .afterClosed();
-  }
-
-  private _importNewIssuesToBacklog(projectId: string, cfg: JiraCfg): void {
-    this._jiraApiService
-      .findAutoImportIssues$(cfg)
-      .subscribe(async (issues: JiraIssueReduced[]) => {
-        if (!Array.isArray(issues)) {
-          return;
-        }
-        const allTaskJiraIssueIds = (await this._taskService.getAllIssueIdsForProject(
-          projectId,
-          JIRA_TYPE,
-        )) as string[];
-
-        // NOTE: we check for key as well as id although normally the key should suffice
-        const issuesToAdd = issues.filter(
-          (issue) =>
-            !allTaskJiraIssueIds.includes(issue.id) &&
-            !allTaskJiraIssueIds.includes(issue.key),
-        );
-
-        issuesToAdd.forEach((issue) => {
-          this._issueService.addTaskWithIssue(JIRA_TYPE, issue, projectId, true);
-        });
-
-        if (issuesToAdd.length === 1) {
-          this._snackService.open({
-            translateParams: {
-              issueText: truncate(`${issuesToAdd[0].key} ${issuesToAdd[0].summary}`),
-            },
-            msg: T.F.JIRA.S.IMPORTED_SINGLE_ISSUE,
-            ico: 'cloud_download',
-          });
-        } else if (issuesToAdd.length > 1) {
-          this._snackService.open({
-            translateParams: {
-              issuesLength: issuesToAdd.length,
-            },
-            msg: T.F.JIRA.S.IMPORTED_MULTIPLE_ISSUES,
-            ico: 'cloud_download',
-          });
-        }
-      });
   }
 
   private _getCfgOnce$(projectId: string): Observable<JiraCfg> {
