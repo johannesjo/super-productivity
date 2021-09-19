@@ -27,7 +27,6 @@ import { JIRA_TYPE } from '../../../issue.const';
 import { T } from '../../../../../t.const';
 import { WorkContextService } from '../../../../work-context/work-context.service';
 import { JiraCfg, JiraTransitionOption } from '../jira.model';
-import { IssueEffectHelperService } from '../../../issue-effect-helper.service';
 import { setCurrentTask, updateTask } from '../../../../tasks/store/task.actions';
 import { DialogJiraAddWorklogComponent } from '../jira-view-components/dialog-jira-add-worklog/dialog-jira-add-worklog.component';
 import {
@@ -281,7 +280,6 @@ export class JiraIssueEffects {
     private readonly _jiraApiService: JiraApiService,
     private readonly _issueService: IssueService,
     private readonly _matDialog: MatDialog,
-    private readonly _issueEffectHelperService: IssueEffectHelperService,
   ) {}
 
   private _handleTransitionForIssue(
