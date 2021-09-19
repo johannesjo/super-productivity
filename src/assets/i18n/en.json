@@ -109,14 +109,7 @@
       "S": {
         "CALENDAR_NOT_FOUND": "CalDav: Calendar \"{{calendarName}}\" not found",
         "CALENDAR_READ_ONLY": "CalDav: Calendar \"{{calendarName}}\" is readonly",
-        "ERR_NETWORK": "CalDav: Request failed because of a client side network error",
-        "ERR_NOT_CONFIGURED": "CalDav: Not properly configured",
-        "IMPORTED_MULTIPLE_ISSUES": "CalDav: Imported {{issuesLength}} new issues from git to backlog",
-        "IMPORTED_SINGLE_ISSUE": "CalDav: Imported issue \"{{issueText}}\" from to backlog",
-        "ISSUE_NOT_FOUND": "CalDav: Todo \"{{issueId}}\" seems to be deleted on server.",
-        "ISSUE_NO_UPDATE_REQUIRED": "CalDav: No update required.",
-        "ISSUE_UPDATE": "Caldav: Uodated data for \"{{issueText}}\"",
-        "POLLING": "Caldav: Polling changes for todos"
+        "ISSUE_NOT_FOUND": "CalDav: Todo \"{{issueId}}\" seems to be deleted on server."
       }
     },
     "CONFIG": {
@@ -162,19 +155,7 @@
         "WRITE_A_COMMENT": "Write a comment"
       },
       "S": {
-        "ERR_NETWORK": "GitHub: Request failed because of a client side network error",
-        "ERR_NOT_CONFIGURED": "GitHub: Is not properly configured",
-        "ERR_UNKNOWN": "GitHub: Unknown error {{statusCode}} {{errorMsg}}. Api Rate limit exceeded?",
-        "IMPORTED_MULTIPLE_ISSUES": "GitHub: Imported {{issuesLength}} new issues from git to backlog",
-        "IMPORTED_SINGLE_ISSUE": "GitHub: Imported issue \"{{issueText}}\" from git to backlog",
-        "ISSUE_DELETED_OR_CLOSED": "GitHub: Issue \"{{issueText}}\" seems to be deleted or closed on git",
-        "ISSUE_NO_UPDATE_REQUIRED": "GitHub: No update required",
-        "ISSUE_UPDATE": "GitHub: Updated data for \"{{issueText}}\"",
-        "MANUAL_UPDATE_ISSUE_SUCCESS": "GitHub: Updated data for \"{{issueText}}\"",
-        "MISSING_ISSUE_DATA": "GitHub: Tasks with missing issue data found. Reloading.",
-        "NEW_COMMENT": "GitHub: New comment for \"{{issueText}}\"",
-        "POLLING": "GitHub: Polling Changes for issues",
-        "SHOW_ISSUE_BTN": "Show me"
+        "ERR_UNKNOWN": "GitHub: Unknown error {{statusCode}} {{errorMsg}}. Api Rate limit exceeded?"
       }
     },
     "GITLAB": {
@@ -205,19 +186,7 @@
         "WRITE_A_COMMENT": "Write a comment"
       },
       "S": {
-        "ERR_NETWORK": "GitLab: Request failed because of a client side network error",
-        "ERR_NOT_CONFIGURED": "GitLab: Is not properly configured",
-        "ERR_UNKNOWN": "GitLab: Unknown error {{statusCode}} {{errorMsg}}",
-        "IMPORTED_MULTIPLE_ISSUES": "GitLab: Imported {{issuesLength}} new issues from git to backlog",
-        "IMPORTED_SINGLE_ISSUE": "GitLab: Imported issue \"{{issueText}}\" from git to backlog",
-        "ISSUE_DELETED_OR_CLOSED": "GitLab: Issue \"{{issueText}}\" seems to be deleted or closed on git",
-        "ISSUE_NO_UPDATE_REQUIRED": "GitLab: No update required",
-        "ISSUE_UPDATE": "GitLab: Updated data for \"{{issueText}}\"",
-        "MANUAL_UPDATE_ISSUE_SUCCESS": "GitLab: Updated data for \"{{issueText}}\"",
-        "MISSING_ISSUE_DATA": "GitLab: Tasks with missing issue data found. Reloading.",
-        "NEW_COMMENT": "GitLab: New comment for \"{{issueText}}\"",
-        "POLLING": "GitLab: Polling Changes for issues",
-        "SHOW_ISSUE_BTN": "Show me"
+        "ERR_UNKNOWN": "GitLab: Unknown error {{statusCode}} {{errorMsg}}"
       }
     },
     "GOOGLE": {
@@ -247,6 +216,8 @@
         "ISSUES_STR": "issues"
       },
       "S": {
+        "ERR_NETWORK": "{{issueProviderName}}: Request failed because of a client side network error",
+        "ERR_NOT_CONFIGURED": "{{issueProviderName}}: Not properly configured",
         "IMPORTED_MULTIPLE_ISSUES": "{{issueProviderName}}: Imported {{nr}} new {{issuesStr}} to backlog",
         "IMPORTED_SINGLE_ISSUE": "{{issueProviderName}}: Imported {{issueStr}} \"{{issueTitle}}\" to backlog",
         "ISSUE_DELETED_OR_CLOSED": "{{issueProviderName}}: {{issueStrC}} \"{{issueTitle}}\" seems to be deleted or closed",
@@ -363,17 +334,13 @@
       "S": {
         "ADDED_WORKLOG_FOR": "Jira: Added worklog for {{issueKey}}",
         "EXTENSION_NOT_LOADED": "Super Productivity Extension not loaded. Reloading the page might help",
-        "IMPORTED_MULTIPLE_ISSUES": "Jira: Imported {{issuesLength}} new issues from Jira to backlog",
-        "IMPORTED_SINGLE_ISSUE": "Jira: Imported issue \"{{issueText}}\" from Jira to backlog",
         "INSUFFICIENT_SETTINGS": "Insufficient Settings provided for Jira",
         "INVALID_RESPONSE": "Jira: Response contained invalid data",
         "ISSUE_NO_UPDATE_REQUIRED": "Jira: \"{{issueText}}\" already up to date",
-        "ISSUE_UPDATE": "Jira: Updated data for \"{{issueText}}\"",
         "MANUAL_UPDATE_ISSUE_SUCCESS": "Jira: Updated data for \"{{issueText}}\"",
         "MISSING_ISSUE_DATA": "Jira: Tasks with missing issue data found. Reloading.",
         "NO_AUTO_IMPORT_JQL": "Jira: No search query defined for auto import",
         "NO_VALID_TRANSITION": "Jira: No valid transition configured",
-        "POLLING": "Jira: Polling Changes for issues",
         "TIMED_OUT": "Jira: Request timed out",
         "TRANSITION": "Jira: Set issue \"{{issueKey}}\" to \"{{name}}\"",
         "TRANSITIONS_LOADED": "Jira: Transitions loaded. Use the selects below to assign them",
@@ -488,19 +455,7 @@
         "TYPE": "Type"
       },
       "S": {
-        "ERR_NETWORK": "OpenProject: Request failed because of a client side network error",
-        "ERR_NOT_CONFIGURED": "OpenProject: Is not properly configured",
-        "ERR_UNKNOWN": "OpenProject: Unknown error {{statusCode}} {{errorMsg}}. Is CORS properly configured for the server?",
-        "IMPORTED_MULTIPLE_ISSUES": "OpenProject: Imported {{issuesLength}} new work packages to backlog",
-        "IMPORTED_SINGLE_ISSUE": "OpenProject: Imported work package \"{{issueText}}\" to backlog",
-        "ISSUE_DELETED_OR_CLOSED": "OpenProject: Work package \"{{issueText}}\" seems to be deleted or closed on",
-        "ISSUE_NO_UPDATE_REQUIRED": "OpenProject: No update required",
-        "ISSUE_UPDATE": "OpenProject: Updated data for \"{{issueText}}\"",
-        "MANUAL_UPDATE_ISSUE_SUCCESS": "OpenProject: Updated data for \"{{issueText}}\"",
-        "MISSING_ISSUE_DATA": "OpenProject: Tasks with missing work package data found. Reloading.",
-        "NEW_COMMENT": "OpenProject: New comment for \"{{issueText}}\"",
-        "POLLING": "OpenProject: Polling Changes for work packages",
-        "SHOW_ISSUE_BTN": "Show me"
+        "ERR_UNKNOWN": "OpenProject: Unknown error {{statusCode}} {{errorMsg}}. Is CORS properly configured for the server?"
       }
     },
     "PROCRASTINATION": {

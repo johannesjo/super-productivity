@@ -27,6 +27,7 @@ import { SearchResultItem } from '../../issue.model';
 import { HANDLED_ERROR_PROP_STR } from '../../../../app.constants';
 import { T } from '../../../../t.const';
 import { throwHandledError } from '../../../../util/throw-handled-error';
+import { ISSUE_PROVIDER_HUMANIZED, OPEN_PROJECT_TYPE } from '../../issue.const';
 
 @Injectable({
   providedIn: 'root',
@@ -108,7 +109,10 @@ export class OpenProjectApiService {
     if (!this._isValidSettings(cfg)) {
       this._snackService.open({
         type: 'ERROR',
-        msg: T.F.OPEN_PROJECT.S.ERR_NOT_CONFIGURED,
+        msg: T.F.ISSUE.S.ERR_NOT_CONFIGURED,
+        translateParams: {
+          issueProviderName: ISSUE_PROVIDER_HUMANIZED[OPEN_PROJECT_TYPE],
+        },
       });
       throwHandledError('OpenProject: Not enough settings');
     }
@@ -169,12 +173,15 @@ export class OpenProjectApiService {
       // A client-side or network error occurred. Handle it accordingly.
       this._snackService.open({
         type: 'ERROR',
-        msg: T.F.OPEN_PROJECT.S.ERR_NETWORK,
+        msg: T.F.ISSUE.S.ERR_NETWORK,
+        translateParams: {
+          issueProviderName: ISSUE_PROVIDER_HUMANIZED[OPEN_PROJECT_TYPE],
+        },
       });
     } else if (error.error && error.error.message) {
       this._snackService.open({
         type: 'ERROR',
-        msg: 'OpenProject: ' + error.error.message,
+        msg: ISSUE_PROVIDER_HUMANIZED[OPEN_PROJECT_TYPE] + ': ' + error.error.message,
       });
     } else {
       // The backend returned an unsuccessful response code.

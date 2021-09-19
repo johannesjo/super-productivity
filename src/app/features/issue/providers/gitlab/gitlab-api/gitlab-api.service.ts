@@ -21,6 +21,7 @@ import {
   mapGitlabIssueToSearchResult,
 } from '../gitlab-issue/gitlab-issue-map.util';
 import { SearchResultItem } from '../../../issue.model';
+import { GITLAB_TYPE, ISSUE_PROVIDER_HUMANIZED } from '../../../issue.const';
 
 @Injectable({
   providedIn: 'root',
@@ -175,7 +176,10 @@ export class GitlabApiService {
     }
     this._snackService.open({
       type: 'ERROR',
-      msg: T.F.GITLAB.S.ERR_NOT_CONFIGURED,
+      msg: T.F.ISSUE.S.ERR_NOT_CONFIGURED,
+      translateParams: {
+        issueProviderName: ISSUE_PROVIDER_HUMANIZED[GITLAB_TYPE],
+      },
     });
     return false;
   }
@@ -225,19 +229,30 @@ export class GitlabApiService {
       // A client-side or network error occurred. Handle it accordingly.
       this._snackService.open({
         type: 'ERROR',
-        msg: T.F.GITLAB.S.ERR_NETWORK,
+        msg: T.F.ISSUE.S.ERR_NETWORK,
+        translateParams: {
+          issueProviderName: ISSUE_PROVIDER_HUMANIZED[GITLAB_TYPE],
+        },
+      });
+    } else if (error.error && error.error.message) {
+      this._snackService.open({
+        type: 'ERROR',
+        msg: ISSUE_PROVIDER_HUMANIZED[GITLAB_TYPE] + ': ' + error.error.message,
       });
     } else {
       // The backend returned an unsuccessful response code.
       this._snackService.open({
         type: 'ERROR',
         translateParams: {
+          errorMsg:
+            (error.error && (error.error.name || error.error.statusText)) ||
+            error.toString(),
           statusCode: error.status,
-          errorMsg: error.error && error.error.message,
         },
-        msg: T.F.GITLAB.S.ERR_NOT_CONFIGURED,
+        msg: T.F.GITLAB.S.ERR_UNKNOWN,
       });
     }
+
     if (error && error.message) {
       return throwError({ [HANDLED_ERROR_PROP_STR]: 'Gitlab: ' + error.message });
     }
