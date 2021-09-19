@@ -127,31 +127,34 @@ export class IssueService {
       this.ISSUE_SERVICE_MAP[issuesType] as any
     ).getNewIssuesToAddToBacklog(projectId, allExistingIssueIds);
 
-    const issuesToAdd = potentialIssuesToAdd.filter(
+    const issuesToAdd: IssueDataReduced[] = potentialIssuesToAdd.filter(
       (issue: IssueData): boolean =>
         !(allExistingIssueIds as string[]).includes(issue.id as string),
     );
 
-    issuesToAdd.forEach((issue: IssueData) => {
+    issuesToAdd.forEach((issue: IssueDataReduced) => {
       this.addTaskWithIssue(issuesType, issue, projectId, true);
     });
 
     if (issuesToAdd.length === 1) {
+      const issueTitle = this.ISSUE_SERVICE_MAP[issuesType].getAddTaskData(
+        issuesToAdd[0],
+      ).title;
       this._snackService.open({
         svgIco: issueProviderIconMap[issuesType as IssueProviderKey],
-        ico: 'cloud_download',
+        // ico: 'cloud_download',
         msg: T.F.ISSUE.S.IMPORTED_SINGLE_ISSUE,
         translateParams: {
           issueProviderName: ISSUE_PROVIDER_HUMANIZED[issuesType as IssueProviderKey],
           // TODO add open project case
           issueStr: this._translateService.instant(T.F.ISSUE.DEFAULT.ISSUE_STR),
-          issueTitle: issuesToAdd[0].taskChanges.title || issuesToAdd[0].task.title,
+          issueTitle,
         },
       });
     } else if (issuesToAdd.length > 1) {
       this._snackService.open({
         svgIco: issueProviderIconMap[issuesType as IssueProviderKey],
-        ico: 'cloud_download',
+        // ico: 'cloud_download',
         msg: T.F.ISSUE.S.IMPORTED_MULTIPLE_ISSUES,
         translateParams: {
           issueProviderName: ISSUE_PROVIDER_HUMANIZED[issuesType as IssueProviderKey],
