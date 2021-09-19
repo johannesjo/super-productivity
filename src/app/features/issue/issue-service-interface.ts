@@ -11,6 +11,12 @@ import { TaskAttachment } from '../tasks/task-attachment/task-attachment.model';
 export interface IssueServiceInterface {
   isEnabled(cfg: IssueIntegrationCfg): boolean;
 
+  isBacklogPollingEnabledForProjectOnce$(projectId: string): Observable<boolean>;
+
+  // isIssueRefreshEnabledForProject$(projectId: string): Observable<boolean>;
+
+  pollTimer$: Observable<number>;
+
   issueLink$(issueId: string | number, projectId: string): Observable<string>;
 
   getById$(id: string | number, projectId: string): Observable<IssueData>;

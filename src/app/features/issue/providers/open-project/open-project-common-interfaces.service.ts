@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Observable, of } from 'rxjs';
+import { Observable, of, timer } from 'rxjs';
 import { Task } from 'src/app/features/tasks/task.model';
 import { catchError, concatMap, first, map, switchMap } from 'rxjs/operators';
 import { IssueServiceInterface } from '../../issue-service-interface';
@@ -13,6 +13,10 @@ import {
 } from './open-project-issue/open-project-issue.model';
 import { truncate } from '../../../../util/truncate';
 import { isOpenProjectEnabled } from './is-open-project-enabled.util';
+import {
+  OPEN_PROJECT_INITIAL_POLL_DELAY,
+  OPEN_PROJECT_POLL_INTERVAL,
+} from './open-project.const';
 
 @Injectable({
   providedIn: 'root',
@@ -22,6 +26,17 @@ export class OpenProjectCommonInterfacesService implements IssueServiceInterface
     private readonly _openProjectApiService: OpenProjectApiService,
     private readonly _projectService: ProjectService,
   ) {}
+
+  pollTimer$: Observable<number> = timer(
+    OPEN_PROJECT_INITIAL_POLL_DELAY,
+    OPEN_PROJECT_POLL_INTERVAL,
+  );
+
+  isBacklogPollingEnabledForProjectOnce$(projectId: string): Observable<boolean> {
+    return this._getCfgOnce$(projectId).pipe(
+      map((cfg) => this.isEnabled(cfg) && cfg.isAutoAddToBacklog),
+    );
+  }
 
   isEnabled(cfg: OpenProjectCfg): boolean {
     return isOpenProjectEnabled(cfg);

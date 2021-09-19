@@ -3,7 +3,7 @@ import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { SnackService } from '../../../../../core/snack/snack.service';
 import { TaskService } from '../../../../tasks/task.service';
 import { ProjectService } from '../../../../project/project.service';
-import { concatMap, filter, first, map, switchMap, takeUntil, tap } from 'rxjs/operators';
+import { concatMap, filter, first, map, switchMap, tap } from 'rxjs/operators';
 import { IssueService } from '../../../issue.service';
 import { forkJoin, Observable, timer } from 'rxjs';
 import { Task, TaskWithSubTasks } from 'src/app/features/tasks/task.model';
@@ -50,33 +50,6 @@ export class CaldavIssueEffects {
     CALDAV_POLL_INTERVAL,
   );
 
-  pollNewIssuesToBacklog$: Observable<any> = createEffect(
-    () =>
-      this._issueEffectHelperService.pollToBacklogTriggerToProjectId$.pipe(
-        switchMap((pId) =>
-          this._projectService.getCaldavCfgForProject$(pId).pipe(
-            first(),
-            filter(
-              (caldavCfg) => isCaldavEnabled(caldavCfg) && caldavCfg.isAutoAddToBacklog,
-            ),
-            switchMap((caldavCfg) =>
-              this._pollTimer$.pipe(
-                // NOTE: required otherwise timer stays alive for filtered actions
-                takeUntil(this._issueEffectHelperService.pollToBacklogActions$),
-                tap(() => console.log('CALDAV_POLL_BACKLOG_CHANGES')),
-                tap(() =>
-                  this._issueService.checkAndImportNewIssuesToBacklogForProject(
-                    CALDAV_TYPE,
-                    pId,
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ),
-      ),
-    { dispatch: false },
-  );
   private _updateIssuesForCurrentContext$: Observable<any> =
     this._workContextService.allTasksForCurrentContext$.pipe(
       first(),

@@ -9,7 +9,6 @@ import {
   mapTo,
   switchMap,
   take,
-  takeUntil,
   tap,
   throttleTime,
   withLatestFrom,
@@ -286,33 +285,6 @@ export class JiraIssueEffects {
     JIRA_POLL_INTERVAL,
   );
   // -----------------
-
-  pollNewIssuesToBacklog$: any = createEffect(
-    () =>
-      this._issueEffectHelperService.pollToBacklogTriggerToProjectId$.pipe(
-        switchMap(this._afterInitialRequestCheckForProjectJiraSuccessfull$.bind(this)),
-        switchMap((pId: string) =>
-          this._getCfgOnce$(pId).pipe(
-            filter((jiraCfg) => isJiraEnabled(jiraCfg) && jiraCfg.isAutoAddToBacklog),
-            // tap(() => console.log('POLL TIMER STARTED')),
-            switchMap((jiraCfg) =>
-              this._pollTimer$.pipe(
-                // NOTE: required otherwise timer stays alive for filtered actions
-                takeUntil(this._issueEffectHelperService.pollToBacklogActions$),
-                tap(() => console.log('JIRA_POLL_BACKLOG_CHANGES')),
-                tap(() =>
-                  this._issueService.checkAndImportNewIssuesToBacklogForProject(
-                    JIRA_TYPE,
-                    pId,
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ),
-      ),
-    { dispatch: false },
-  );
 
   pollIssueChangesForCurrentContext$: any = createEffect(
     () =>

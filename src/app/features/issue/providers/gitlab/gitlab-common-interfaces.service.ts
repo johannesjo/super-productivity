@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Observable, of } from 'rxjs';
+import { Observable, of, timer } from 'rxjs';
 import { Task } from 'src/app/features/tasks/task.model';
 import { catchError, concatMap, first, map, switchMap } from 'rxjs/operators';
 import { IssueServiceInterface } from '../../issue-service-interface';
@@ -9,7 +9,11 @@ import { IssueData, SearchResultItem } from '../../issue.model';
 import { GitlabCfg } from './gitlab';
 import { GitlabIssue } from './gitlab-issue/gitlab-issue.model';
 import { truncate } from '../../../../util/truncate';
-import { GITLAB_BASE_URL } from './gitlab.const';
+import {
+  GITLAB_BASE_URL,
+  GITLAB_INITIAL_POLL_DELAY,
+  GITLAB_POLL_INTERVAL,
+} from './gitlab.const';
 import { isGitlabEnabled } from './is-gitlab-enabled';
 
 @Injectable({
@@ -20,6 +24,14 @@ export class GitlabCommonInterfacesService implements IssueServiceInterface {
     private readonly _gitlabApiService: GitlabApiService,
     private readonly _projectService: ProjectService,
   ) {}
+
+  pollTimer$: Observable<number> = timer(GITLAB_INITIAL_POLL_DELAY, GITLAB_POLL_INTERVAL);
+
+  isBacklogPollingEnabledForProjectOnce$(projectId: string): Observable<boolean> {
+    return this._getCfgOnce$(projectId).pipe(
+      map((cfg) => this.isEnabled(cfg) && cfg.isAutoAddToBacklog),
+    );
+  }
 
   isEnabled(cfg: GitlabCfg): boolean {
     return isGitlabEnabled(cfg);

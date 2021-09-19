@@ -99,6 +99,26 @@ export class IssueService {
     return this.ISSUE_SERVICE_MAP[issueType].issueLink$(issueId, projectId);
   }
 
+  // getCfg$(
+  //   providerKey: IssueProviderKey,
+  //   projectId: string,
+  // ): Observable<IssueIntegrationCfg> {
+  //   return this.ISSUE_SERVICE_MAP[providerKey].getCfgForProject$(projectId);
+  // }
+
+  isBacklogPollEnabledForProject$(
+    providerKey: IssueProviderKey,
+    projectId: string,
+  ): Observable<boolean> {
+    return this.ISSUE_SERVICE_MAP[providerKey].isBacklogPollingEnabledForProjectOnce$(
+      projectId,
+    );
+  }
+
+  getPollTimer$(providerKey: IssueProviderKey): Observable<number> {
+    return this.ISSUE_SERVICE_MAP[providerKey].pollTimer$;
+  }
+
   getMappedAttachments(
     issueType: IssueProviderKey,
     issueDataIN: IssueData,
@@ -116,6 +136,17 @@ export class IssueService {
     if (!this.ISSUE_SERVICE_MAP[issuesType].getNewIssuesToAddToBacklog) {
       return;
     }
+    this._snackService.open({
+      svgIco: issueProviderIconMap[issuesType as IssueProviderKey],
+      msg: T.F.ISSUE.S.POLLING_BACKLOG,
+      isSpinner: true,
+      translateParams: {
+        issueProviderName: ISSUE_PROVIDER_HUMANIZED[issuesType as IssueProviderKey],
+        // TODO add open project case Work Packages
+        issuesStr: this._translateService.instant(T.F.ISSUE.DEFAULT.ISSUES_STR),
+      },
+    });
+
     const allExistingIssueIds: string[] | number[] =
       await this._taskService.getAllIssueIdsForProject(projectId, issuesType);
 
@@ -228,7 +259,7 @@ export class IssueService {
     for (const issuesType of Object.keys(tasksIssueIdsByIssueType)) {
       this._snackService.open({
         svgIco: issueProviderIconMap[issuesType as IssueProviderKey],
-        msg: T.F.ISSUE.S.POLLING,
+        msg: T.F.ISSUE.S.POLLING_CHANGES,
         isSpinner: true,
         translateParams: {
           issueProviderName: ISSUE_PROVIDER_HUMANIZED[issuesType as IssueProviderKey],

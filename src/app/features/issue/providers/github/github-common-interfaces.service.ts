@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Observable, of } from 'rxjs';
+import { Observable, of, timer } from 'rxjs';
 import { Task } from 'src/app/features/tasks/task.model';
 import { catchError, concatMap, first, map, switchMap } from 'rxjs/operators';
 import { IssueServiceInterface } from '../../issue-service-interface';
@@ -11,6 +11,7 @@ import { GithubIssue, GithubIssueReduced } from './github-issue/github-issue.mod
 import { truncate } from '../../../../util/truncate';
 import { getTimestamp } from '../../../../util/get-timestamp';
 import { isGithubEnabled } from './is-github-enabled.util';
+import { GITHUB_INITIAL_POLL_DELAY, GITHUB_POLL_INTERVAL } from './github.const';
 
 @Injectable({
   providedIn: 'root',
@@ -20,6 +21,14 @@ export class GithubCommonInterfacesService implements IssueServiceInterface {
     private readonly _githubApiService: GithubApiService,
     private readonly _projectService: ProjectService,
   ) {}
+
+  pollTimer$: Observable<number> = timer(GITHUB_INITIAL_POLL_DELAY, GITHUB_POLL_INTERVAL);
+
+  isBacklogPollingEnabledForProjectOnce$(projectId: string): Observable<boolean> {
+    return this._getCfgOnce$(projectId).pipe(
+      map((cfg) => this.isEnabled(cfg) && cfg.isAutoAddToBacklog),
+    );
+  }
 
   isEnabled(cfg: GithubCfg): boolean {
     return isGithubEnabled(cfg);

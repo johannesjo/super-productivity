@@ -4,7 +4,7 @@ import { OpenProjectApiService } from '../open-project-api.service';
 import { SnackService } from '../../../../../core/snack/snack.service';
 import { TaskService } from '../../../../tasks/task.service';
 import { ProjectService } from '../../../../project/project.service';
-import { filter, first, map, switchMap, takeUntil, tap } from 'rxjs/operators';
+import { first, map, switchMap, tap } from 'rxjs/operators';
 import { IssueService } from '../../../issue.service';
 import { forkJoin, Observable, timer } from 'rxjs';
 import {
@@ -23,35 +23,6 @@ export class OpenProjectIssueEffects {
   private _pollTimer$: Observable<any> = timer(
     OPEN_PROJECT_INITIAL_POLL_DELAY,
     OPEN_PROJECT_POLL_INTERVAL,
-  );
-
-  pollNewIssuesToBacklog$: Observable<any> = createEffect(
-    () =>
-      this._issueEffectHelperService.pollToBacklogTriggerToProjectId$.pipe(
-        switchMap((pId) =>
-          this._projectService.getOpenProjectCfgForProject$(pId).pipe(
-            first(),
-            filter(
-              (openProjectCfg) =>
-                isOpenProjectEnabled(openProjectCfg) && openProjectCfg.isAutoAddToBacklog,
-            ),
-            switchMap((openProjectCfg) =>
-              this._pollTimer$.pipe(
-                // NOTE: required otherwise timer stays alive for filtered actions
-                takeUntil(this._issueEffectHelperService.pollToBacklogActions$),
-                tap(() => console.log('OPEN_PROJECT_POLL_BACKLOG_CHANGES')),
-                tap(() =>
-                  this._issueService.checkAndImportNewIssuesToBacklogForProject(
-                    OPEN_PROJECT_TYPE,
-                    pId,
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ),
-      ),
-    { dispatch: false },
   );
 
   private _updateIssuesForCurrentContext$: Observable<any> =

@@ -27,6 +27,14 @@ export const JIRA_TYPE: IssueProviderKey = 'JIRA';
 export const CALDAV_TYPE: IssueProviderKey = 'CALDAV';
 export const OPEN_PROJECT_TYPE: IssueProviderKey = 'OPEN_PROJECT';
 
+export const ISSUE_PROVIDER_TYPES: IssueProviderKey[] = [
+  GITLAB_TYPE,
+  GITHUB_TYPE,
+  JIRA_TYPE,
+  CALDAV_TYPE,
+  OPEN_PROJECT_TYPE,
+];
+
 // TODO screaming snake case
 export const issueProviderIconMap = {
   [JIRA_TYPE]: 'jira',

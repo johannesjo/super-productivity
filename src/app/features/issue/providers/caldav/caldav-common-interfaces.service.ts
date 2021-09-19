@@ -1,15 +1,16 @@
 import { Injectable } from '@angular/core';
-import { Observable, of } from 'rxjs';
+import { Observable, of, timer } from 'rxjs';
 import { Task } from 'src/app/features/tasks/task.model';
 import { IssueServiceInterface } from '../../issue-service-interface';
 import { SearchResultItem } from '../../issue.model';
 import { CaldavIssue, CaldavIssueReduced } from './caldav-issue/caldav-issue.model';
 import { CaldavClientService } from './caldav-client.service';
 import { CaldavCfg } from './caldav.model';
-import { catchError, concatMap, first, switchMap } from 'rxjs/operators';
+import { catchError, concatMap, first, map, switchMap } from 'rxjs/operators';
 import { ProjectService } from '../../../project/project.service';
 import { truncate } from '../../../../util/truncate';
 import { isCaldavEnabled } from './is-caldav-enabled.util';
+import { CALDAV_INITIAL_POLL_DELAY, CALDAV_POLL_INTERVAL } from './caldav.const';
 
 @Injectable({
   providedIn: 'root',
@@ -22,6 +23,14 @@ export class CaldavCommonInterfacesService implements IssueServiceInterface {
 
   private static _formatIssueTitleForSnack(title: string): string {
     return truncate(title);
+  }
+
+  pollTimer$: Observable<number> = timer(CALDAV_INITIAL_POLL_DELAY, CALDAV_POLL_INTERVAL);
+
+  isBacklogPollingEnabledForProjectOnce$(projectId: string): Observable<boolean> {
+    return this._getCfgOnce$(projectId).pipe(
+      map((cfg) => this.isEnabled(cfg) && cfg.isAutoAddToBacklog),
+    );
   }
 
   isEnabled(cfg: CaldavCfg): boolean {

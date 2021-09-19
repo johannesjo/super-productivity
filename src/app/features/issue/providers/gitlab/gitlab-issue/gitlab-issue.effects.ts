@@ -4,7 +4,7 @@ import { GitlabApiService } from '../gitlab-api/gitlab-api.service';
 import { SnackService } from '../../../../../core/snack/snack.service';
 import { TaskService } from '../../../../tasks/task.service';
 import { ProjectService } from '../../../../project/project.service';
-import { filter, first, map, switchMap, takeUntil, tap } from 'rxjs/operators';
+import { first, map, switchMap, tap } from 'rxjs/operators';
 import { forkJoin, Observable, timer } from 'rxjs';
 import { GITLAB_INITIAL_POLL_DELAY, GITLAB_POLL_INTERVAL } from '../gitlab.const';
 import { IssueService } from '../../../issue.service';
@@ -59,34 +59,6 @@ export class GitlabIssueEffects {
         }
       }),
     );
-
-  pollNewIssuesToBacklog$: Observable<any> = createEffect(
-    () =>
-      this._issueEffectHelperService.pollToBacklogTriggerToProjectId$.pipe(
-        switchMap((pId) =>
-          this._projectService.getGitlabCfgForProject$(pId).pipe(
-            first(),
-            filter(
-              (gitlabCfg) => isGitlabEnabled(gitlabCfg) && gitlabCfg.isAutoAddToBacklog,
-            ),
-            switchMap((gitlabCfg) =>
-              this._pollTimer$.pipe(
-                // NOTE: required otherwise timer stays alive for filtered actions
-                takeUntil(this._issueEffectHelperService.pollToBacklogActions$),
-                tap(() => console.log('GITLAB!_POLL_BACKLOG_CHANGES')),
-                tap(() =>
-                  this._issueService.checkAndImportNewIssuesToBacklogForProject(
-                    GITLAB_TYPE,
-                    pId,
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ),
-      ),
-    { dispatch: false },
-  );
 
   pollIssueChangesForCurrentContext$: Observable<any> = createEffect(
     () =>
