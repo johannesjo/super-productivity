@@ -92,6 +92,14 @@ export class GithubCommonInterfacesService implements IssueServiceInterface {
     return null;
   }
 
+  async getNewIssuesToAddToBacklog(
+    projectId: string,
+    allExistingIssueIds: number[] | string[],
+  ): Promise<GithubIssueReduced[]> {
+    const cfg = await this._getCfgOnce$(projectId).toPromise();
+    return await this._githubApiService.getLast100IssuesForRepo$(cfg).toPromise();
+  }
+
   getAddTaskData(issue: GithubIssueReduced): Partial<Task> & { title: string } {
     return {
       title: this._formatIssueTitle(issue.number, issue.title),

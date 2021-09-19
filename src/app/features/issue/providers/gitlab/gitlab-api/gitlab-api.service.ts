@@ -114,27 +114,24 @@ export class GitlabApiService {
     );
   }
 
-  getProjectIssuesWithComments$(cfg: GitlabCfg): Observable<GitlabIssue[]> {
-    if (!this._isValidSettings(cfg)) {
-      return EMPTY;
-    }
-    return this._getProjectIssues$(1, cfg).pipe(
-      mergeMap((issues: GitlabIssue[]) => {
-        if (issues && issues.length) {
-          return forkJoin([
-            ...issues.map((issue) => this.getIssueWithComments$(issue, cfg)),
-          ]);
-        } else {
-          return of([]);
-        }
-      }),
-    );
-  }
+  // getProjectIssuesWithComments$(cfg: GitlabCfg): Observable<GitlabIssue[]> {
+  //   if (!this._isValidSettings(cfg)) {
+  //     return EMPTY;
+  //   }
+  //   return this._getProjectIssues$(1, cfg).pipe(
+  //     mergeMap((issues: GitlabIssue[]) => {
+  //       if (issues && issues.length) {
+  //         return forkJoin([
+  //           ...issues.map((issue) => this.getIssueWithComments$(issue, cfg)),
+  //         ]);
+  //       } else {
+  //         return of([]);
+  //       }
+  //     }),
+  //   );
+  // }
 
-  private _getProjectIssues$(
-    pageNumber: number,
-    cfg: GitlabCfg,
-  ): Observable<GitlabIssue[]> {
+  getProjectIssues$(pageNumber: number, cfg: GitlabCfg): Observable<GitlabIssue[]> {
     return this._sendRequest$(
       {
         url: `${this.apiLink(

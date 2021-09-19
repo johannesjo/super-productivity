@@ -31,5 +31,5 @@ export interface IssueServiceInterface {
   getNewIssuesToAddToBacklog?(
     projectId: string,
     allExistingIssueIds: number[] | string[],
-  ): Promise<IssueData[]>;
+  ): Promise<IssueDataReduced[]>;
 }

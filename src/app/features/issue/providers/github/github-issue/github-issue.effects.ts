@@ -14,7 +14,6 @@ import { WorkContextService } from '../../../../work-context/work-context.servic
 import { GITHUB_TYPE } from '../../../issue.const';
 import { GithubCfg } from '../github.model';
 import { isGithubEnabled } from '../is-github-enabled.util';
-import { GithubIssueReduced } from './github-issue.model';
 import { IssueEffectHelperService } from '../../../issue-effect-helper.service';
 
 @Injectable()
@@ -38,24 +37,11 @@ export class GithubIssueEffects {
                 // NOTE: required otherwise timer stays alive for filtered actions
                 takeUntil(this._issueEffectHelperService.pollToBacklogActions$),
                 tap(() => console.log('GITHUB_POLL_BACKLOG_CHANGES')),
-                switchMap(() =>
-                  forkJoin([
-                    this._githubApiService.getLast100IssuesForRepo$(githubCfg),
-                    this._taskService.getAllIssueIdsForProject(
-                      pId,
-                      GITHUB_TYPE,
-                    ) as Promise<number[]>,
-                  ]),
-                ),
-                tap(
-                  ([issues, allTaskGithubIssueIds]: [GithubIssueReduced[], number[]]) => {
-                    const issuesToAdd = issues
-                      .filter((issue) => !allTaskGithubIssueIds.includes(issue.id))
-                      .sort((a, b) => a.id - b.id);
-                    if (issuesToAdd?.length) {
-                      this._importNewIssuesToBacklog(pId, issuesToAdd);
-                    }
-                  },
+                tap(() =>
+                  this._issueService.checkAndImportNewIssuesToBacklogForProject(
+                    GITHUB_TYPE,
+                    pId,
+                  ),
                 ),
               ),
             ),
@@ -64,6 +50,7 @@ export class GithubIssueEffects {
       ),
     { dispatch: false },
   );
+
   private _updateIssuesForCurrentContext$: Observable<any> =
     this._workContextService.allTasksForCurrentContext$.pipe(
       first(),
@@ -122,33 +109,6 @@ export class GithubIssueEffects {
         isSpinner: true,
       });
       githubTasks.forEach((task) => this._issueService.refreshIssue(task, true, false));
-    }
-  }
-
-  private _importNewIssuesToBacklog(
-    projectId: string,
-    issuesToAdd: GithubIssueReduced[],
-  ): void {
-    issuesToAdd.forEach((issue) => {
-      this._issueService.addTaskWithIssue(GITHUB_TYPE, issue, projectId, true);
-    });
-
-    if (issuesToAdd.length === 1) {
-      this._snackService.open({
-        ico: 'cloud_download',
-        translateParams: {
-          issueText: `#${issuesToAdd[0].number} ${issuesToAdd[0].title}`,
-        },
-        msg: T.F.GITHUB.S.IMPORTED_SINGLE_ISSUE,
-      });
-    } else if (issuesToAdd.length > 1) {
-      this._snackService.open({
-        ico: 'cloud_download',
-        translateParams: {
-          issuesLength: issuesToAdd.length,
-        },
-        msg: T.F.GITHUB.S.IMPORTED_MULTIPLE_ISSUES,
-      });
     }
   }
 }
