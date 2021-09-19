@@ -10,6 +10,7 @@ import { GithubCfg } from './github.model';
 import { SnackService } from '../../../../core/snack/snack.service';
 import { GithubIssue, GithubIssueReduced } from './github-issue/github-issue.model';
 import { truncate } from '../../../../util/truncate';
+import { getTimestamp } from '../../../../util/get-timestamp';
 
 @Injectable({
   providedIn: 'root',
@@ -60,7 +61,7 @@ export class GithubCommonInterfacesService implements IssueServiceInterface {
     const cfg = await this._getCfgOnce$(task.projectId).toPromise();
     const issue = await this._githubApiService.getById$(+task.issueId, cfg).toPromise();
 
-    // const issueUpdate: number = new Date(issue.updated_at).getTime();
+    // NOTE we are not able to filter out user updates to the issue itself by the user
     const filterUserName = cfg.filterUsername && cfg.filterUsername.toLowerCase();
     const commentsByOthers =
       filterUserName && filterUserName.length > 1
@@ -69,15 +70,14 @@ export class GithubCommonInterfacesService implements IssueServiceInterface {
           )
         : issue.comments;
 
-    // TODO: we also need to handle the case when the user himself updated the issue, to also update the issue...
-    const updates: number[] = [
-      ...commentsByOthers.map((comment) => new Date(comment.created_at).getTime()),
-      // todo check if this can be re-implemented
-      // issueUpdate
-    ].sort();
-    const lastRemoteUpdate = updates[updates.length - 1];
+    const commentUpdates: number[] = commentsByOthers
+      .map((comment) => getTimestamp(comment.created_at))
+      .sort();
+    const newestCommentUpdate = commentUpdates[commentUpdates.length - 1];
 
-    const wasUpdated = lastRemoteUpdate > (task.issueLastUpdated || 0);
+    const wasUpdated =
+      newestCommentUpdate > (task.issueLastUpdated || 0) ||
+      getTimestamp(issue.updated_at) > (task.issueLastUpdated || 0);
 
     if (wasUpdated) {
       return {
