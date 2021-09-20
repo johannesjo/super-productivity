@@ -51,6 +51,15 @@
           >
         </button>
       </div>
+      <div class="item">
+        <button (click)="openOpenProjectCfg()" color="primary" mat-button type="button">
+          <mat-icon *ngIf="!openProjectCfg?.host" svgIcon="open_project"></mat-icon>
+          <mat-icon *ngIf="openProjectCfg?.host">checkmark</mat-icon>
+          <span style="padding-left: 8px"
+            >{{T.F.PROJECT.D_CREATE.SETUP_OPEN_PROJECT|translate}}</span
+          >
+        </button>
+      </div>
       <!--<div class="item">-->
       <!--<button mat-raised-button color=primary-->
       <!--type="button">-->

@@ -508,7 +508,8 @@
         "SETUP_CALDAV": "Setup Caldav Integration",
         "SETUP_GIT": "Setup GitHub Integration",
         "SETUP_GITLAB": "Setup GitLab Integration",
-        "SETUP_JIRA": "Setup Jira Integration"
+        "SETUP_JIRA": "Setup Jira Integration",
+        "SETUP_OPEN_PROJECT": "Setup OpenProject Integration"
       },
       "FORM_BASIC": {
         "L_TITLE": "Project Name",
