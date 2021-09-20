@@ -5,7 +5,7 @@ import { SnackService } from '../../../../../../core/snack/snack.service';
 import { Task } from '../../../../../tasks/task.model';
 import { T } from '../../../../../../t.const';
 import { ProjectService } from '../../../../../project/project.service';
-import { first } from 'rxjs/operators';
+import { concatMap, first } from 'rxjs/operators';
 import * as moment from 'moment';
 import { OpenProjectWorkPackage } from '../../open-project-issue/open-project-issue.model';
 import { parseOpenProjectDuration } from '../parse-open-project-duration.util';
@@ -24,6 +24,17 @@ export class DialogOpenProjectTrackTimeComponent {
   comment: string;
   workPackage: OpenProjectWorkPackage;
   timeSpentForWorkPackage: number = 0;
+  activityId: number = 1;
+  activities$ = this._projectService
+    .getOpenProjectCfgForProject$(this.data.task.projectId as string)
+    .pipe(
+      concatMap((cfg) => {
+        return this._openProjectApiService.getActivitiesForTrackTime$(
+          this.workPackage.id,
+          cfg,
+        );
+      }),
+    );
 
   constructor(
     private _openProjectApiService: OpenProjectApiService,
@@ -66,6 +77,7 @@ export class DialogOpenProjectTrackTimeComponent {
           spentOn: moment(this.started).format('YYYY-MM-DD'),
           hours: moment.duration({ milliseconds: this.timeSpent }).toISOString(),
           comment: this.comment,
+          activityId: this.activityId,
           cfg,
         })
         .subscribe((res) => {

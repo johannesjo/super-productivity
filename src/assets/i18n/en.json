@@ -418,6 +418,7 @@
         "TITLE": "Setup OpenProject for Project"
       },
       "DIALOG_TRACK_TIME": {
+        "ACTIVITY": "Activity",
         "CURRENTLY_LOGGED": "Currently logged time: ",
         "INVALID_DATE": "The entered value is not a date!",
         "POST_TIME": "Post Time",

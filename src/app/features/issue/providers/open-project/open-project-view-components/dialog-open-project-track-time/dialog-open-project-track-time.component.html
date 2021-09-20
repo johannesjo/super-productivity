@@ -48,6 +48,19 @@
           >{{T.F.OPEN_PROJECT.DIALOG_TRACK_TIME.INVALID_DATE|translate}}</mat-error
         >
       </mat-form-field>
+
+      <mat-form-field>
+        <mat-select
+          [(ngModel)]="activityId"
+          name="activity"
+          [placeholder]="T.F.OPEN_PROJECT.DIALOG_TRACK_TIME.ACTIVITY|translate"
+        >
+          <mat-option *ngFor="let activity of (activities$|async);" [value]="activity.id">
+            {{activity.name}}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+
       <mat-form-field>
         <mat-label>Comment</mat-label>
         <textarea
