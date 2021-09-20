@@ -11,13 +11,16 @@ import {
   OpenProjectWorkPackage,
   OpenProjectWorkPackageReduced,
 } from './open-project-issue/open-project-issue.model';
-import { truncate } from '../../../../util/truncate';
 import { isOpenProjectEnabled } from './is-open-project-enabled.util';
 import {
   OPEN_PROJECT_INITIAL_POLL_DELAY,
   OPEN_PROJECT_POLL_INTERVAL,
 } from './open-project.const';
 import { parseOpenProjectDuration } from './open-project-view-components/parse-open-project-duration.util';
+import {
+  formatOpenProjectWorkPackageSubject,
+  formatOpenProjectWorkPackageSubjectForSnack,
+} from './format-open-project-work-package-subject.util';
 
 @Injectable({
   providedIn: 'root',
@@ -101,7 +104,7 @@ export class OpenProjectCommonInterfacesService implements IssueServiceInterface
           issueWasUpdated: true,
         },
         issue,
-        issueTitle: this._formatIssueTitleForSnack(issue.id, issue.subject),
+        issueTitle: formatOpenProjectWorkPackageSubjectForSnack(issue),
       };
     }
     return null;
@@ -143,7 +146,7 @@ export class OpenProjectCommonInterfacesService implements IssueServiceInterface
     );
 
     return {
-      title: this._formatIssueTitle(issue.id, issue.subject),
+      title: formatOpenProjectWorkPackageSubject(issue),
       issuePoints: issue.storyPoints,
       issueWasUpdated: false,
       // NOTE: we use Date.now() instead to because updated does not account for comments
@@ -166,14 +169,6 @@ export class OpenProjectCommonInterfacesService implements IssueServiceInterface
     return await this._openProjectApiService
       .getLast100WorkPackagesForCurrentOpenProjectProject$(cfg)
       .toPromise();
-  }
-
-  private _formatIssueTitle(id: number, subject: string): string {
-    return `#${id} ${subject}`;
-  }
-
-  private _formatIssueTitleForSnack(id: number, title: string): string {
-    return `${truncate(this._formatIssueTitle(id, title))}`;
   }
 
   private _getCfgOnce$(projectId: string): Observable<OpenProjectCfg> {

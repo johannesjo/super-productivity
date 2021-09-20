@@ -9,6 +9,8 @@ import { first } from 'rxjs/operators';
 import * as moment from 'moment';
 import { OpenProjectWorkPackage } from '../../open-project-issue/open-project-issue.model';
 import { parseOpenProjectDuration } from '../parse-open-project-duration.util';
+import { formatOpenProjectWorkPackageSubjectForSnack } from '../../format-open-project-work-package-subject.util';
+
 @Component({
   selector: 'dialog-open-project-track-time',
   templateUrl: './dialog-open-project-track-time.component.html',
@@ -70,7 +72,9 @@ export class DialogOpenProjectTrackTimeComponent {
           this._snackService.open({
             type: 'SUCCESS',
             msg: T.F.OPEN_PROJECT.S.POST_TIME_SUCCESS,
-            translateParams: { id: this.workPackage.id },
+            translateParams: {
+              issueTitle: formatOpenProjectWorkPackageSubjectForSnack(this.workPackage),
+            },
           });
           this.close();
         });
