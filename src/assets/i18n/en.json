@@ -423,6 +423,9 @@
         "IS_AUTO_ADD_TO_BACKLOG": "Automatically add unresolved work packages from OpenProject to backlog",
         "IS_AUTO_POLL": "Automatically poll imported OpenProject work packages for changes",
         "IS_SEARCH_ISSUES_FROM_OPEN_PROJECT": "Show work packages as suggestions when adding new tasks",
+        "IS_SHOW_TIME_TRACKING_DIALOG": "Show time tracking dialog to report to OpenProject",
+        "IS_SHOW_TIME_TRACKING_DIALOG_FOR_EACH_SUB_TASK": "Show time tracking dialog to report to OpenProject",
+        "IS_SHOW_TIME_TRACKING_DIALOG_DESCRIPTION": "Requires time tracking module to be enabled for OpenProject project",
         "PROJECT_ID": "Project ID",
         "PROJECT_ID_DESCRIPTION": "Can be found as part of the url, when viewing the project in the Browser.",
         "TOKEN": "Access Token"

@@ -13,6 +13,8 @@ export const DEFAULT_OPEN_PROJECT_CFG: OpenProjectCfg = {
   isSearchIssuesFromOpenProject: false,
   isAutoPoll: false,
   isAutoAddToBacklog: false,
+  isShowTimeTrackingDialog: false,
+  isShowTimeTrackingDialogForEachSubTask: false,
   filterUsername: null,
 };
 
@@ -67,6 +69,21 @@ export const OPEN_PROJECT_CONFIG_FORM: LimitedFormlyFieldConfig<OpenProjectCfg>[
     type: 'checkbox',
     templateOptions: {
       label: T.F.OPEN_PROJECT.FORM.IS_AUTO_ADD_TO_BACKLOG,
+    },
+  },
+  {
+    key: 'isShowTimeTrackingDialog',
+    type: 'checkbox',
+    templateOptions: {
+      label: T.F.OPEN_PROJECT.FORM.IS_SHOW_TIME_TRACKING_DIALOG,
+      description: T.F.OPEN_PROJECT.FORM.IS_SHOW_TIME_TRACKING_DIALOG_DESCRIPTION,
+    },
+  },
+  {
+    key: 'isShowTimeTrackingDialogForEachSubTask',
+    type: 'checkbox',
+    templateOptions: {
+      label: T.F.OPEN_PROJECT.FORM.IS_SHOW_TIME_TRACKING_DIALOG_FOR_EACH_SUB_TASK,
     },
   },
   // TODO also remove translation and model if removing it for good
