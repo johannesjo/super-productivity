@@ -210,7 +210,7 @@
     "ngx-date-time-picker-schedule": "^9.4.15",
     "ngx-markdown": "^12.0.1",
     "nightwatch": "^1.7.6",
-    "object-path": "^0.11.6",
+    "object-path": "^0.11.8",
     "p-throttle": "^3.1.0",
     "prettier": "^2.3.2",
     "pretty-quick": "^3.1.0",
