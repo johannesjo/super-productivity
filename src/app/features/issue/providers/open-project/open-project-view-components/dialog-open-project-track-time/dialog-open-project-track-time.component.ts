@@ -9,7 +9,6 @@ import { first } from 'rxjs/operators';
 import * as moment from 'moment';
 import { OpenProjectWorkPackage } from '../../open-project-issue/open-project-issue.model';
 import { parseOpenProjectDuration } from '../parse-open-project-duration.util';
-
 @Component({
   selector: 'dialog-open-project-track-time',
   templateUrl: './dialog-open-project-track-time.component.html',
@@ -38,14 +37,9 @@ export class DialogOpenProjectTrackTimeComponent {
     this.timeSpent = this.data.task.timeSpent;
     this.workPackage = this.data.workPackage;
     this.started = this._convertTimestamp(this.data.task.created);
-    this.comment = this.data.task.title;
+    this.comment = this.data.task.parentId ? this.data.task.title : '';
     this.timeSpentForWorkPackage = parseOpenProjectDuration(
       this.workPackage.spentTime as string,
-    );
-    console.log(
-      this.timeSpentForWorkPackage,
-      this.workPackage.spentTime,
-      this.workPackage,
     );
   }
 
@@ -66,18 +60,17 @@ export class DialogOpenProjectTrackTimeComponent {
         .toPromise();
       this._openProjectApiService
         .trackTime$({
-          workPackageId: this.workPackage.id,
-          started: this.started,
-          timeSpent: this.timeSpent,
+          workPackage: this.workPackage,
+          spentOn: moment(this.started).format('YYYY-MM-DD'),
+          hours: moment.duration({ milliseconds: this.timeSpent }).toISOString(),
           comment: this.comment,
           cfg,
         })
         .subscribe((res) => {
           this._snackService.open({
             type: 'SUCCESS',
-            msg: 'SUC',
-            // msg: T.F.OPEN_PROJECT.S.ADDED_WORKLOG_FOR,
-            translateParams: { workPackageKey: this.workPackage.id },
+            msg: T.F.OPEN_PROJECT.S.POST_TIME_SUCCESS,
+            translateParams: { id: this.workPackage.id },
           });
           this.close();
         });

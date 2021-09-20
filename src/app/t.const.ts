@@ -464,6 +464,7 @@ const T = {
       },
       S: {
         ERR_UNKNOWN: 'F.OPEN_PROJECT.S.ERR_UNKNOWN',
+        POST_TIME_SUCCESS: 'F.OPEN_PROJECT.S.POST_TIME_SUCCESS',
       },
     },
     POMODORO: {

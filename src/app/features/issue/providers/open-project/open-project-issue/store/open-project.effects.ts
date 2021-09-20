@@ -35,8 +35,6 @@ export class OpenProjectEffects {
           mainTask.projectId
             ? this._getCfgOnce$(mainTask.projectId).pipe(
                 tap((openProjectCfg) => {
-                  console.log('XXXXXXXXXXXXXx', openProjectCfg, mainTask, subTask);
-
                   if (
                     subTask &&
                     openProjectCfg.isShowTimeTrackingDialogForEachSubTask &&
@@ -47,7 +45,12 @@ export class OpenProjectEffects {
                       +(mainTask.issueId as string),
                       openProjectCfg,
                     );
-                  } else if (openProjectCfg.isShowTimeTrackingDialog && !subTask) {
+                  } else if (
+                    openProjectCfg.isShowTimeTrackingDialog &&
+                    !subTask &&
+                    (!openProjectCfg.isShowTimeTrackingDialogForEachSubTask ||
+                      !mainTask.subTaskIds.length)
+                  ) {
                     this._openTrackTimeDialog(
                       mainTask,
                       +(mainTask.issueId as string),
@@ -70,9 +73,7 @@ export class OpenProjectEffects {
     private readonly _openProjectApiService: OpenProjectApiService,
     private readonly _matDialog: MatDialog,
     private readonly _taskService: TaskService,
-  ) {
-    console.log('I am here!');
-  }
+  ) {}
 
   private _openTrackTimeDialog(
     task: Task,

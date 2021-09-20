@@ -8,7 +8,7 @@ import {
   HttpParams,
   HttpRequest,
 } from '@angular/common/http';
-import { Observable, ObservableInput, of, throwError } from 'rxjs';
+import { Observable, ObservableInput, throwError } from 'rxjs';
 import {
   OpenProjectOriginalWorkPackageReduced,
   OpenProjectWorkPackageSearchResult,
@@ -81,14 +81,41 @@ export class OpenProjectApiService {
     );
   }
 
-  trackTime$(params: {
-    workPackageId: number;
-    started: string;
+  trackTime$({
+    cfg,
+    workPackage,
+    spentOn,
+    comment,
+    hours,
+  }: {
+    spentOn: string; // 'YYYY-MM-DD'
     comment: string;
-    timeSpent: number;
+    workPackage: OpenProjectWorkPackage | OpenProjectWorkPackageReduced;
+    hours: string; // ISO8601
     cfg: OpenProjectCfg;
   }): Observable<any> {
-    return of('YEAH');
+    return this._sendRequest$(
+      {
+        method: 'POST',
+        url: `${cfg.host}/api/v3/time_entries`,
+        data: {
+          _links: {
+            activity: {
+              href: '/api/v3/time_entries/activities/1',
+            },
+            workPackage: {
+              href: '/api/v3/work_packages/' + workPackage.id,
+            },
+          },
+          comment: {
+            raw: comment,
+          },
+          spentOn,
+          hours,
+        },
+      },
+      cfg,
+    );
   }
 
   getLast100WorkPackagesForCurrentOpenProjectProject$(
