@@ -162,7 +162,7 @@
     "@typescript-eslint/parser": "4.28.5",
     "angular-material-css-vars": "^1.2.0",
     "angular2-promise-buttons": "^5.0.2",
-    "axios": "^0.21.1",
+    "axios": "^0.21.2",
     "cdav-library": "nextcloud/cdav-library",
     "chart.js": "^2.8.0",
     "chromedriver": "^91.0.1",
