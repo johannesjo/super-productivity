@@ -8,7 +8,7 @@ import {
   HttpParams,
   HttpRequest,
 } from '@angular/common/http';
-import { Observable, ObservableInput, throwError } from 'rxjs';
+import { Observable, ObservableInput, of, throwError } from 'rxjs';
 import {
   OpenProjectOriginalWorkPackageReduced,
   OpenProjectWorkPackageSearchResult,
@@ -35,10 +35,13 @@ import { ISSUE_PROVIDER_HUMANIZED, OPEN_PROJECT_TYPE } from '../../issue.const';
 export class OpenProjectApiService {
   constructor(private _snackService: SnackService, private _http: HttpClient) {}
 
-  getById$(issueId: number, cfg: OpenProjectCfg): Observable<OpenProjectWorkPackage> {
+  getById$(
+    workPackageId: number,
+    cfg: OpenProjectCfg,
+  ): Observable<OpenProjectWorkPackage> {
     return this._sendRequest$(
       {
-        url: `${cfg.host}/api/v3/work_packages/${issueId}`,
+        url: `${cfg.host}/api/v3/work_packages/${workPackageId}`,
       },
       cfg,
     ).pipe(map((workPackage) => mapOpenProjectIssueFull(workPackage, cfg)));
@@ -76,6 +79,16 @@ export class OpenProjectApiService {
           : [];
       }),
     );
+  }
+
+  trackTime$(params: {
+    workPackageId: number;
+    started: string;
+    comment: string;
+    timeSpent: number;
+    cfg: OpenProjectCfg;
+  }): Observable<any> {
+    return of('YEAH');
   }
 
   getLast100WorkPackagesForCurrentOpenProjectProject$(

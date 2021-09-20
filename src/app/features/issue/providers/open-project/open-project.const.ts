@@ -82,6 +82,9 @@ export const OPEN_PROJECT_CONFIG_FORM: LimitedFormlyFieldConfig<OpenProjectCfg>[
   {
     key: 'isShowTimeTrackingDialogForEachSubTask',
     type: 'checkbox',
+    hideExpression: (model: any) => {
+      return !model.isShowTimeTrackingDialog;
+    },
     templateOptions: {
       label: T.F.OPEN_PROJECT.FORM.IS_SHOW_TIME_TRACKING_DIALOG_FOR_EACH_SUB_TASK,
     },

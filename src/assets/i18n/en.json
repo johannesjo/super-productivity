@@ -417,6 +417,15 @@
       "DIALOG_INITIAL": {
         "TITLE": "Setup OpenProject for Project"
       },
+      "DIALOG_TRACK_TIME": {
+        "CURRENTLY_LOGGED": "Currently logged time: ",
+        "INVALID_DATE": "The entered value is not a date!",
+        "POST_TIME": "Post Time",
+        "STARTED": "Started",
+        "SUBMIT_TIME_FOR": "Submit time to OpenProject for",
+        "TIME_SPENT": "Time Spent",
+        "TITLE": "OpenProject: Submit Worklog"
+      },
       "FORM": {
         "FILTER_USER": "Username (e.g. to filter out changes by yourself)",
         "HOST": "Host (e.g.: https://www.openproject.org/)",
@@ -424,7 +433,7 @@
         "IS_AUTO_POLL": "Automatically poll imported OpenProject work packages for changes",
         "IS_SEARCH_ISSUES_FROM_OPEN_PROJECT": "Show work packages as suggestions when adding new tasks",
         "IS_SHOW_TIME_TRACKING_DIALOG": "Show time tracking dialog to report to OpenProject",
-        "IS_SHOW_TIME_TRACKING_DIALOG_FOR_EACH_SUB_TASK": "Show time tracking dialog to report to OpenProject",
+        "IS_SHOW_TIME_TRACKING_DIALOG_FOR_EACH_SUB_TASK": "Show time tracking dialog when sub tasks are completed",
         "IS_SHOW_TIME_TRACKING_DIALOG_DESCRIPTION": "Requires time tracking module to be enabled for OpenProject project",
         "PROJECT_ID": "Project ID",
         "PROJECT_ID_DESCRIPTION": "Can be found as part of the url, when viewing the project in the Browser.",

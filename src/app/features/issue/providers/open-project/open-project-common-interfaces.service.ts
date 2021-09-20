@@ -17,6 +17,7 @@ import {
   OPEN_PROJECT_INITIAL_POLL_DELAY,
   OPEN_PROJECT_POLL_INTERVAL,
 } from './open-project.const';
+import { parseOpenProjectDuration } from './open-project-view-components/parse-open-project-duration.util';
 
 @Injectable({
   providedIn: 'root',
@@ -137,10 +138,9 @@ export class OpenProjectCommonInterfacesService implements IssueServiceInterface
   getAddTaskData(
     issue: OpenProjectWorkPackageReduced,
   ): Partial<Task> & { title: string } {
-    const parsedEstimate: number =
-      typeof issue.estimatedTime === 'string'
-        ? +issue.estimatedTime.replace('PT', '').replace('H', '') * 60 * 60 * 1000
-        : 0;
+    const parsedEstimate: number = parseOpenProjectDuration(
+      issue.estimatedTime as string | number | null,
+    );
 
     return {
       title: this._formatIssueTitle(issue.id, issue.subject),
