@@ -1,6 +1,13 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable, of } from 'rxjs';
-import { delay, distinctUntilChanged, map, startWith, switchMap } from 'rxjs/operators';
+import { BehaviorSubject, EMPTY, Observable, of, timer } from 'rxjs';
+import {
+  delay,
+  distinctUntilChanged,
+  map,
+  startWith,
+  switchMap,
+  tap,
+} from 'rxjs/operators';
 import { PROGRESS_BAR_LABEL_MAP } from './global-progress-bar.const';
 import { T } from '../../t.const';
 
@@ -18,6 +25,21 @@ export class GlobalProgressBarService {
     delay(0),
   );
 
+  // We don't wan the spinner to appear forever, after 30000 seconds we just assume something
+  // was not counted down correctly
+  private _dirtyCountdown$ = this.isShowGlobalProgressBar$.pipe(
+    switchMap((isShow) => {
+      return isShow
+        ? timer(30 * 1000).pipe(
+            tap(() => {
+              console.error('Global spinner was shown forever (30s). Forcing countDown!');
+              this.countDown();
+            }),
+          )
+        : EMPTY;
+    }),
+  );
+
   private _label$: BehaviorSubject<string | null> = new BehaviorSubject<string | null>(
     null,
   );
@@ -30,12 +52,13 @@ export class GlobalProgressBarService {
     delay(0),
   );
 
-  constructor() {}
+  constructor() {
+    this._dirtyCountdown$.subscribe();
+  }
 
   countUp(url: string): void {
     this.nrOfRequests$.next(this.nrOfRequests$.getValue() + 1);
     this._label$.next(this._urlToLabel(url));
-    console.log('PBS UP', this.nrOfRequests$.getValue(), url);
   }
 
   countDown(): void {
@@ -43,7 +66,6 @@ export class GlobalProgressBarService {
     if (this.nrOfRequests$.getValue() - 1 <= 0) {
       this._label$.next(null);
     }
-    console.log('PBS DOWN', this.nrOfRequests$.getValue());
   }
 
   private _urlToLabel(url: string): string {
