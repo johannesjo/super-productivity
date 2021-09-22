@@ -1,3 +1,15 @@
+# [7.6.0-rc.1](https://github.com/johannesjo/super-productivity/compare/v7.6.0-rc.0...v7.6.0-rc.1) (2021-09-22)
+
+### Bug Fixes
+
+- memory leaks ([f2e3d0d](https://github.com/johannesjo/super-productivity/commit/f2e3d0d5c6f1dc17c08aa6455d24b20d87dcff35))
+- **task:** deleting task unsets current task ([c639538](https://github.com/johannesjo/super-productivity/commit/c6395386d94abb50cfa1f7a7b51e787524a3507d))
+
+### Features
+
+- don't show global progress spinner forever if something goes wrong ([699ea33](https://github.com/johannesjo/super-productivity/commit/699ea3396bf78e8d44c853e4a6f522d71c1c0944))
+- improve error handling ([9ce5c0a](https://github.com/johannesjo/super-productivity/commit/9ce5c0acb85fe5d7c0fb88e57c7356245e2d8840))
+
 # [7.6.0-rc.0](https://github.com/johannesjo/super-productivity/compare/v7.5.2...v7.6.0-rc.0) (2021-09-20)
 
 ### Bug Fixes
