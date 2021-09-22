@@ -423,7 +423,7 @@
         "IS_AUTO_ADD_TO_BACKLOG": "自动将 OpenProject 中未解决的工作包添加到 backlog",
         "IS_AUTO_POLL": "自动轮询导入的 OpenProject 工作包的更改",
         "IS_SEARCH_ISSUES_FROM_OPEN_PROJECT": "添加新任务时将工作包显示为建议",
-        "PROJECT_ID": "专案编号",
+        "PROJECT_ID": "项目编号",
         "PROJECT_ID_DESCRIPTION": "在浏览器中查看项目时，可以作为 url 的一部分找到。",
         "TOKEN": "访问令牌"
       },
@@ -954,7 +954,7 @@
     "RESET": "重启",
     "SAVE": "保存",
     "TITLE": "标题",
-    "UNDO": "解开",
+    "UNDO": "撤销",
     "UPDATE": "更新",
     "WITHOUT_PROJECT": "没有项目",
     "YESTERDAY": "昨天"
@@ -1086,7 +1086,7 @@
       "IS_INCREASE_DONE_PITCH": "为完成的每项任务增加音调",
       "IS_PLAY_DONE_SOUND": "任务标记为完成时播放声音",
       "TITLE": "声音",
-      "VOLUME": "体积"
+      "VOLUME": "音量"
     },
     "TAKE_A_BREAK": {
       "HELP": "<div><p>允许您在工作了指定的时间而不休息时配置重复提醒。</p> <p>您可以修改显示的消息。 ${duration}将被替换为连续工作时长。</p></div>",
@@ -1183,8 +1183,8 @@
     "ROUND_15M": "将所有任务舍入到15分钟",
     "ROUND_30M": "将所有任务舍入到30分钟",
     "ROUND_5M": "将所有任务舍入到5分钟",
-    "ROUND_TIME_SPENT": "花了很长时间",
-    "ROUND_TIME_SPENT_TITLE": "花在所有任务上的时间。小心！你不能撤消这个！",
+    "ROUND_TIME_SPENT": "对花费的时间取整",
+    "ROUND_TIME_SPENT_TITLE": "对花在所有任务上的时间取整。小心！你不能撤消这个操作！",
     "ROUND_TIME_WARNING": "！小心这不能撤消！",
     "ROUND_UP_15M": "将所有任务向上取整为15分钟",
     "ROUND_UP_30M": "将所有任务向上取整为30分钟",
