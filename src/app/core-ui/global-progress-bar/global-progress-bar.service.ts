@@ -35,6 +35,7 @@ export class GlobalProgressBarService {
   countUp(url: string): void {
     this.nrOfRequests$.next(this.nrOfRequests$.getValue() + 1);
     this._label$.next(this._urlToLabel(url));
+    console.log('PBS UP', this.nrOfRequests$.getValue(), url);
   }
 
   countDown(): void {
@@ -42,6 +43,7 @@ export class GlobalProgressBarService {
     if (this.nrOfRequests$.getValue() - 1 <= 0) {
       this._label$.next(null);
     }
+    console.log('PBS DOWN', this.nrOfRequests$.getValue());
   }
 
   private _urlToLabel(url: string): string {
