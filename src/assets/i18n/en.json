@@ -1178,6 +1178,7 @@
     "TOGGLE_SHOW_BOOKMARKS": "Show/Hide Bookmarks",
     "TOGGLE_SHOW_NOTES": "Show/Hide Project Notes",
     "TOGGLE_TRACK_TIME": "Start/Stop tracking time",
+    "TRIGGER_SYNC": "Trigger sync manually",
     "WORKLOG": "Worklog"
   },
   "PDS": {
