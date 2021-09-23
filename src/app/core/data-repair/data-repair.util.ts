@@ -5,6 +5,7 @@ import { isDataRepairPossible } from './is-data-repair-possible.util';
 import { Task, TaskArchive, TaskCopy, TaskState } from '../../features/tasks/task.model';
 import { unique } from '../../util/unique';
 import { TODAY_TAG } from '../../features/tag/tag.const';
+import { TaskRepeatCfgCopy } from '../../features/task-repeat-cfg/task-repeat-cfg.model';
 
 const ENTITY_STATE_KEYS: (keyof AppDataComplete)[] = [
   'task',
@@ -25,7 +26,8 @@ export const dataRepair = (data: AppDataComplete): AppDataComplete => {
   // let dataOut: AppDataComplete = dirtyDeepCopy(data);
   dataOut = _fixEntityStates(dataOut);
   dataOut = _removeMissingTasksFromListsOrRestoreFromArchive(dataOut);
-  dataOut = _removeNonExistentProjectIds(dataOut);
+  dataOut = _removeNonExistentProjectIdsFromTasks(dataOut);
+  dataOut = _removeNonExistentProjectIdsFromTaskRepeatCfg(dataOut);
   dataOut = _addOrphanedTasksToProjectLists(dataOut);
   dataOut = _moveArchivedSubTasksToUnarchivedParents(dataOut);
   dataOut = _moveUnArchivedSubTasksToArchivedParents(dataOut);
@@ -269,7 +271,9 @@ const _addOrphanedTasksToProjectLists = (data: AppDataComplete): AppDataComplete
   return data;
 };
 
-const _removeNonExistentProjectIds = (data: AppDataComplete): AppDataComplete => {
+const _removeNonExistentProjectIdsFromTasks = (
+  data: AppDataComplete,
+): AppDataComplete => {
   const { task, project, taskArchive } = data;
   const projectIds: string[] = project.ids as string[];
   const taskIds: string[] = task.ids;
@@ -290,6 +294,34 @@ const _removeNonExistentProjectIds = (data: AppDataComplete): AppDataComplete =>
     }
   });
 
+  return data;
+};
+
+const _removeNonExistentProjectIdsFromTaskRepeatCfg = (
+  data: AppDataComplete,
+): AppDataComplete => {
+  const { project, taskRepeatCfg } = data;
+  const projectIds: string[] = project.ids as string[];
+  const taskRepeatCfgIds: string[] = taskRepeatCfg.ids as string[];
+  taskRepeatCfgIds.forEach((id) => {
+    const repeatCfg = taskRepeatCfg.entities[id] as TaskRepeatCfgCopy;
+    if (repeatCfg.projectId && !projectIds.includes(repeatCfg.projectId)) {
+      if (repeatCfg.tagIds.length) {
+        console.log(
+          'Delete missing project id from task repeat cfg ' + repeatCfg.projectId,
+        );
+        repeatCfg.projectId = null;
+      } else {
+        taskRepeatCfg.ids = (taskRepeatCfg.ids as string[]).filter(
+          (rid: string) => rid !== repeatCfg.id,
+        );
+        delete taskRepeatCfg.entities[repeatCfg.id];
+        console.log(
+          'Delete task repeat cfg with missing project id' + repeatCfg.projectId,
+        );
+      }
+    }
+  });
   return data;
 };
 
