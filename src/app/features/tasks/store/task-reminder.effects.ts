@@ -167,6 +167,8 @@ export class TaskReminderEffects {
           if (
             task.reminderId &&
             task.plannedAt &&
+            // NOTE this could be an alternative approach
+            // task.plannedAt === getDateTimeFromClockString(DEFAULT_DAY_START, new Date())
             task.plannedAt ===
               getDateTimeFromClockString(DEFAULT_DAY_START, task.plannedAt)
           ) {
