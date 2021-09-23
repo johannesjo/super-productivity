@@ -16,6 +16,7 @@ import {
   deleteTaskRepeatCfg,
   deleteTaskRepeatCfgs,
   updateTaskRepeatCfg,
+  updateTaskRepeatCfgs,
   upsertTaskRepeatCfg,
 } from './task-repeat-cfg.actions';
 import { selectTaskRepeatCfgFeatureState } from './task-repeat-cfg.reducer';
@@ -39,6 +40,7 @@ export class TaskRepeatCfgEffects {
         ofType(
           addTaskRepeatCfgToTask,
           updateTaskRepeatCfg,
+          updateTaskRepeatCfgs,
           upsertTaskRepeatCfg,
           deleteTaskRepeatCfg,
           deleteTaskRepeatCfgs,
