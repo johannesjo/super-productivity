@@ -26,6 +26,7 @@ interface SimpleCounterIdleBtn {
   id: string;
   icon: string | null;
   isTrackTo: boolean;
+  isWasEnabledBefore: boolean;
   title: string;
 }
 
@@ -57,6 +58,7 @@ export class DialogIdleComponent implements OnInit, OnDestroy {
               icon: iconOn || icon,
               title,
               isTrackTo: isOn,
+              isWasEnabledBefore: isOn,
             } as SimpleCounterIdleBtn),
         ),
       ),
@@ -172,6 +174,9 @@ export class DialogIdleComponent implements OnInit, OnDestroy {
     this.simpleCounterToggleBtns.forEach((tglBtn) => {
       if (tglBtn.isTrackTo) {
         this._simpleCounterService.increaseCounterToday(tglBtn.id, idleTime);
+        if (tglBtn.isWasEnabledBefore) {
+          this._simpleCounterService.toggleCounter(tglBtn.id);
+        }
       }
     });
   }
