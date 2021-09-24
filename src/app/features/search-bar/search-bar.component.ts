@@ -35,6 +35,8 @@ import { getWorklogStr } from '../../util/get-work-log-str';
 import { devError } from 'src/app/util/dev-error';
 import { MatAutocompleteTrigger } from '@angular/material/autocomplete';
 
+const MAX_RESULTS = 100;
+
 @Component({
   selector: 'search-bar',
   templateUrl: './search-bar.component.html',
@@ -196,9 +198,9 @@ export class SearchBarComponent implements AfterViewInit, OnDestroy {
         task.taskNotes.includes(searchTerm.toLowerCase()),
     );
 
-    if (result.length > 200) {
+    if (result.length > MAX_RESULTS) {
       this.tooManyResults = true;
-      result = result.slice(0, 200);
+      result = result.slice(0, MAX_RESULTS);
     } else {
       this.tooManyResults = false;
     }
