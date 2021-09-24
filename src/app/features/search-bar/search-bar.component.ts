@@ -4,7 +4,6 @@ import {
   Component,
   ElementRef,
   EventEmitter,
-  Input,
   OnDestroy,
   Output,
   ViewChild,
@@ -44,7 +43,6 @@ import { MatAutocompleteTrigger } from '@angular/material/autocomplete';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SearchBarComponent implements AfterViewInit, OnDestroy {
-  @Input() isElevated: boolean = false;
   @Output() blurred: EventEmitter<any> = new EventEmitter();
 
   @ViewChild('inputEl') inputEl!: ElementRef;

@@ -2,10 +2,7 @@
   #searchForm
   @blendInOut
   (@blendInOut.done)="onAnimationEvent($event)"
-  [class.isElevated]="isElevated"
-  [class.mat-elevation-z3]="!isElevated"
-  [class.mat-elevation-z4]="isElevated"
-  class="search-form"
+  class="search-form mat-elevation-z4"
 >
   <div class="input-wrapper">
     <div *ngIf="(isLoading$|async)" class="spinner">
@@ -23,7 +20,6 @@
 
     <button
       (click)="closeBtnClose($event)"
-      *ngIf="isElevated"
       class="close-btn"
       mat-icon-button
       type="button"
@@ -46,12 +42,14 @@
     [displayWith]="getOptionText"
   >
     <mat-option
+      class="search-mat-option"
       *ngFor="let item of (filteredIssueSuggestions$|async); trackBy:trackByFn"
       [value]="item"
     >
-      <mat-icon *ngIf="item.issueType" [svgIcon]="item.issueType|issueIcon"></mat-icon>
       <tag *ngIf="item.ctx" [tag]="item.ctx"></tag>
       <span>{{item?.titleHighlighted || item?.title}}</span>
+      <mat-icon *ngIf="item.issueType" [svgIcon]="item.issueType|issueIcon"></mat-icon>
+      <mat-icon *ngIf="!item.isNonArchiveTask">archive</mat-icon>
     </mat-option>
   </mat-autocomplete>
 </form>

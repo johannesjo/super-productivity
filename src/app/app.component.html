@@ -18,8 +18,6 @@
   <search-bar
     (blurred)="layoutService.hideSearchBar()"
     *ngIf="layoutService.isShowSearchBar$|async"
-    [isElevated]="true"
-    class="global"
   ></search-bar>
   <div *ngIf="(layoutService.isShowSearchBar$|async)" @fade class="backdrop"></div>
   <mat-sidenav-container [dir]="isRTL ? 'rtl' : 'ltr'">

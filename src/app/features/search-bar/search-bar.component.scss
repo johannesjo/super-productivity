@@ -4,28 +4,25 @@
   display: block;
   //overflow: hidden;
   text-align: start;
+  position: fixed;
+  top: $s;
+  left: $s;
+  right: $s;
+  overflow: visible;
+  transform-origin: left top;
 
-  &.global {
-    position: fixed;
-    top: $s;
-    left: $s;
-    right: $s;
-    overflow: visible;
-    transform-origin: left top;
+  @include mq(xs, max) {
+    transform: translateX(0) !important;
+  }
 
-    @include mq(xs, max) {
-      transform: translateX(0) !important;
-    }
-
-    @include mq(xs) {
-      margin-top: 20px;
-      max-width: 632px;
-      width: 80%;
-      top: $s * 6;
-      left: 50%;
-      right: auto;
-      transform: translateX(-50%);
-    }
+  @include mq(xs) {
+    margin-top: 20px;
+    max-width: 632px;
+    width: 80%;
+    top: $s * 6;
+    left: 50%;
+    right: auto;
+    transform: translateX(-50%);
   }
 }
 
@@ -72,13 +69,6 @@ $short-syntax-bar-height: 28px;
 
   input {
     @include darkTheme {
-      background-color: $dark-theme-bg-lighter;
-      color: $dark-theme-text-color-most-intense;
-    }
-  }
-
-  &.isElevated input {
-    @include darkTheme {
       background-color: $dark-theme-bg-lightest;
       color: $dark-theme-text-color-most-intense;
     }
@@ -93,12 +83,33 @@ $short-syntax-bar-height: 28px;
   z-index: 2;
 }
 
-.is-loading {
-  padding: $s;
-
-  ::ng-deep .mat-option-text {
+// NOTE: because it's ejected from the dom we need to use global styles
+::ng-deep .search-mat-option {
+  .mat-option-text {
     display: flex;
-    justify-content: center;
+    align-items: center;
+    min-width: 0;
+
+    tag {
+      flex-shrink: 0;
+    }
+
+    .tag-title {
+      display: none !important;
+    }
+
+    span {
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      overflow: hidden;
+      margin-right: $s * 3;
+      flex-grow: 1;
+    }
+
+    mat-icon {
+      margin-left: auto;
+      flex-shrink: 0;
+    }
   }
 }
 
