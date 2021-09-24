@@ -2,8 +2,9 @@ import { Dictionary } from '@ngrx/entity';
 import { MODEL_VERSION_KEY } from '../../app.constants';
 import { isMigrateModel } from '../../util/model-version';
 import { TaskRepeatCfg, TaskRepeatCfgState } from './task-repeat-cfg.model';
+import { isValidSplitTime } from '../../util/is-valid-split-time';
 
-const MODEL_VERSION = 1.1;
+const MODEL_VERSION = 1.2;
 
 export const migrateTaskRepeatCfgState = (
   taskRepeatState: TaskRepeatCfgState,
@@ -16,6 +17,9 @@ export const migrateTaskRepeatCfgState = (
   Object.keys(taskRepeatEntities).forEach((key) => {
     // NOTE: absolutely needs to come last as otherwise the previous defaults won't work
     taskRepeatEntities[key] = _addNewFieldsToTaskRepeatCfgs(
+      taskRepeatEntities[key] as TaskRepeatCfg,
+    );
+    taskRepeatEntities[key] = _fixTaskRepeatCfgClockStr(
       taskRepeatEntities[key] as TaskRepeatCfg,
     );
   });
@@ -34,4 +38,10 @@ const _addNewFieldsToTaskRepeatCfgs = (taskRepeat: TaskRepeatCfg): TaskRepeatCfg
     tagIds: taskRepeat.tagIds || [],
     startTime: undefined,
   };
+};
+
+const _fixTaskRepeatCfgClockStr = (taskRepeat: TaskRepeatCfg): TaskRepeatCfg => {
+  return taskRepeat.startTime && !isValidSplitTime(taskRepeat.startTime)
+    ? { ...taskRepeat, startTime: undefined }
+    : taskRepeat;
 };
