@@ -1,10 +1,9 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, combineLatest, Observable, of, throwError } from 'rxjs';
+import { BehaviorSubject, combineLatest, Observable, of } from 'rxjs';
 import { DropboxSyncService } from './dropbox/dropbox-sync.service';
 import { SyncProvider, SyncProviderServiceInterface } from './sync-provider.model';
 import { GlobalConfigService } from '../../features/config/global-config.service';
 import {
-  catchError,
   distinctUntilChanged,
   filter,
   first,
@@ -12,7 +11,6 @@ import {
   shareReplay,
   switchMap,
   take,
-  timeout,
 } from 'rxjs/operators';
 import { SyncConfig } from '../../features/config/global-config.model';
 import { GoogleDriveSyncService } from './google/google-drive-sync.service';
@@ -84,12 +82,6 @@ export class SyncProviderService {
     ),
   );
 
-  private _inMemoryComplete$: Observable<AppDataComplete> =
-    this._persistenceService.inMemoryComplete$.pipe(
-      timeout(5000),
-      catchError(() => throwError('Error while trying to get inMemoryComplete$')),
-    );
-
   constructor(
     private _dropboxSyncService: DropboxSyncService,
     private _dataImportService: DataImportService,
@@ -146,7 +138,7 @@ export class SyncProviderService {
     if (typeof revRes === 'string') {
       if (revRes === 'NO_REMOTE_DATA' && this._c(T.F.SYNC.C.NO_REMOTE_DATA)) {
         this._log(cp, '↑ Update Remote after no getRevAndLastClientUpdate()');
-        const localLocal = await this._inMemoryComplete$.pipe(take(1)).toPromise();
+        const localLocal = await this._persistenceService.getValidCompleteData();
         await this._uploadAppData(cp, localLocal);
         return 'SUCCESS';
       }
@@ -170,7 +162,7 @@ export class SyncProviderService {
     if (rev && rev === localRev) {
       this._log(cp, 'PRE1: ↔ Same Rev', rev);
       // NOTE: same rev, doesn't mean. that we can't have local changes
-      local = await this._inMemoryComplete$.pipe(take(1)).toPromise();
+      local = await this._persistenceService.getValidCompleteData();
       if (lastSync === local.lastLocalSyncModelChange) {
         this._log(cp, 'PRE1: No local changes to sync');
         return 'NO_UPDATE_REQUIRED';
@@ -181,7 +173,7 @@ export class SyncProviderService {
     // simple check based on local meta
     // simple check if lastLocalSyncModelChange
     // ------------------------------------
-    local = local || (await this._inMemoryComplete$.pipe(take(1)).toPromise());
+    local = local || (await this._persistenceService.getValidCompleteData());
     // NOTE: should never be the case, but we need to make sure it is
     if (typeof local.lastLocalSyncModelChange !== 'number') {
       console.log(local);
