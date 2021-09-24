@@ -11,24 +11,13 @@
     <div *ngIf="(isLoading$|async)" class="spinner">
       <mat-spinner diameter="50"></mat-spinner>
     </div>
-    <button
-      (mousedown)="switchTaskSource($event);"
-      class="switch-add-to-btn"
-      mat-icon-button
-      type="button"
-    >
-      <mat-icon *ngIf="isArchivedTasks">archive</mat-icon>
-      <mat-icon *ngIf="!isArchivedTasks">list</mat-icon>
-    </button>
     <input
       #inputEl
       tabindex="0"
       (blur)="onBlur($event)"
       [formControl]="taskSuggestionsCtrl"
       [matAutocomplete]="autoEl"
-      [placeholder]="!isArchivedTasks
-        ? (T.F.SEARCH_BAR.PLACEHOLDER|translate)
-        : (T.F.SEARCH_BAR.PLACEHOLDER_ARCHIVED|translate)"
+      [placeholder]="(T.F.SEARCH_BAR.PLACEHOLDER|translate)"
       matInput
     />
 
@@ -45,8 +34,8 @@
 
   <div class="info-bar">
     <div class="info-text">
-      {{ (!tooManyResults ? !isArchivedTasks ? T.F.SEARCH_BAR.INFO :
-      T.F.SEARCH_BAR.INFO_ARCHIVED : T.F.SEARCH_BAR.TOO_MANY_RESULTS)|translate }}
+      {{ (!tooManyResults ? T.F.SEARCH_BAR.INFO :
+      T.F.SEARCH_BAR.TOO_MANY_RESULTS)|translate }}
     </div>
   </div>
 

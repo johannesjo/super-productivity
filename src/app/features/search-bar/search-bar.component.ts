@@ -11,13 +11,13 @@ import {
 } from '@angular/core';
 import { T } from '../../t.const';
 import { FormControl } from '@angular/forms';
-import { BehaviorSubject, combineLatest, from, Observable, Subscription } from 'rxjs';
+import { BehaviorSubject, combineLatest, Observable, Subscription } from 'rxjs';
 import {
   debounceTime,
   filter,
+  first,
   map,
   startWith,
-  switchMap,
   tap,
   withLatestFrom,
 } from 'rxjs/operators';
@@ -35,7 +35,6 @@ import { SearchItem, SearchQueryParams } from './search-bar.model';
 import { getWorklogStr } from '../../util/get-work-log-str';
 import { devError } from 'src/app/util/dev-error';
 import { MatAutocompleteTrigger } from '@angular/material/autocomplete';
-import { IS_MOBILE } from 'src/app/util/is-mobile';
 
 @Component({
   selector: 'search-bar',
@@ -56,20 +55,21 @@ export class SearchBarComponent implements AfterViewInit, OnDestroy {
   isLoading$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(true);
   taskSuggestionsCtrl: FormControl = new FormControl();
   filteredIssueSuggestions$: Observable<SearchItem[]> = new Observable();
-  isArchivedTasks: boolean = false;
-  isArchivedTasks$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
   tooManyResults: boolean = false;
 
   private _subs: Subscription = new Subscription();
   private _attachKeyDownHandlerTimeout?: number;
   private _openPanelTimeout?: number;
-  private _tasks$: Observable<Task[]> = this.isArchivedTasks$.pipe(
-    switchMap((isArchivedTasks) => this._loadTasks$(isArchivedTasks)),
-  );
 
-  private _searchableItems$: Observable<SearchItem[]> = this._tasks$.pipe(
+  private _searchableItems$: Observable<SearchItem[]> = combineLatest([
+    this._taskService.allTasks$,
+    this._taskService.getArchivedTasks(),
+  ]).pipe(
     withLatestFrom(this._projectService.list$, this._tagService.tags$),
-    map(([tasks, projects, tags]) => this._mapTasksToSearchItems(tasks, projects, tags)),
+    map(([[allTasks, archiveTasks], projects, tags]) => [
+      ...this._mapTasksToSearchItems(true, allTasks, projects, tags),
+      ...this._mapTasksToSearchItems(false, archiveTasks, projects, tags),
+    ]),
   );
 
   constructor(
@@ -79,13 +79,8 @@ export class SearchBarComponent implements AfterViewInit, OnDestroy {
     private _router: Router,
   ) {}
 
-  private _loadTasks$(isArchivedTasks: boolean): Observable<Task[]> {
-    return !isArchivedTasks
-      ? this._taskService.allTasks$
-      : from(this._taskService.getArchivedTasks());
-  }
-
   private _mapTasksToSearchItems(
+    isNonArchiveTasks: boolean,
     tasks: Task[],
     projects: Project[],
     tags: Tag[],
@@ -109,6 +104,7 @@ export class SearchBarComponent implements AfterViewInit, OnDestroy {
         created: task.created,
         issueType: task.issueType,
         ctx: this._getContextIcon(task, projects, tags, tagId),
+        isNonArchiveTask: isNonArchiveTasks,
       };
     });
   }
@@ -150,9 +146,6 @@ export class SearchBarComponent implements AfterViewInit, OnDestroy {
       this.inputEl.nativeElement.addEventListener('keydown', (ev: KeyboardEvent) => {
         if (ev.key === 'Escape') {
           this.blurred.emit();
-        } else if (ev.key === '1' && ev.ctrlKey) {
-          this.switchTaskSource();
-          ev.preventDefault();
         } else if (
           ev.key === 'Enter' &&
           (!this.taskSuggestionsCtrl.value ||
@@ -166,7 +159,7 @@ export class SearchBarComponent implements AfterViewInit, OnDestroy {
   }
 
   private _getLocation(item: SearchItem): string {
-    const tasksOrWorklog = !this.isArchivedTasks ? 'tasks' : 'worklog';
+    const tasksOrWorklog = item.isNonArchiveTask ? 'tasks' : 'worklog';
     if (item.projectId) {
       return `/project/${item.projectId}/${tasksOrWorklog}`;
     } else if (item.tagId === TODAY_TAG.id) {
@@ -222,17 +215,6 @@ export class SearchBarComponent implements AfterViewInit, OnDestroy {
     };
   }
 
-  switchTaskSource(event?: MouseEvent): void {
-    // trigger on mousedown to keep inputEl in focus
-    event?.preventDefault();
-    this.isLoading$.next(true);
-    this.isArchivedTasks = !this.isArchivedTasks;
-    this.isArchivedTasks$.next(this.isArchivedTasks);
-    if (IS_MOBILE) {
-      this._openPanelTimeout = window.setTimeout(() => this.autocomplete.openPanel());
-    }
-  }
-
   onAnimationEvent(event: AnimationEvent): void {
     if (event.fromState) {
       this.inputEl.nativeElement.focus();
@@ -244,22 +226,20 @@ export class SearchBarComponent implements AfterViewInit, OnDestroy {
     this.isLoading$.next(true);
     const location = this._getLocation(item);
     const queryParams: SearchQueryParams = { focusItem: item.id };
-    if (!this.isArchivedTasks) {
+    if (item.isNonArchiveTask) {
       this._subs.add(
-        this._projectService.list$.subscribe((projects) => {
+        this._projectService.list$.pipe(first()).subscribe((projects) => {
           this.blurred.emit();
           queryParams.isInBacklog = this._isInBacklog(item, projects);
           this._router.navigate([location], { queryParams });
         }),
       );
     } else {
-      this._subs.add(
-        this._tasks$.subscribe((tasks) => {
-          this.blurred.emit();
-          queryParams.dateStr = this._getArchivedDate(item, tasks);
-          this._router.navigate([location], { queryParams });
-        }),
-      );
+      this._taskService.getArchivedTasks().then((tasks) => {
+        this.blurred.emit();
+        queryParams.dateStr = this._getArchivedDate(item, tasks);
+        this._router.navigate([location], { queryParams });
+      });
     }
   }
 
@@ -271,7 +251,7 @@ export class SearchBarComponent implements AfterViewInit, OnDestroy {
   onBlur(ev: FocusEvent): void {
     const relatedTarget: HTMLElement = ev.relatedTarget as HTMLElement;
     if (!relatedTarget?.className.includes('mat-option')) {
-      this.blurred.emit(ev);
+      // this.blurred.emit(ev);
     }
   }
 
