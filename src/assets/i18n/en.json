@@ -168,8 +168,16 @@
         "IS_AUTO_ADD_TO_BACKLOG": "Automatically add unresolved issues from GitLab to backlog",
         "IS_AUTO_POLL": "Automatically poll imported git issues for changes",
         "IS_SEARCH_ISSUES_FROM_GITLAB": "Show issues from git as suggestions when adding new tasks",
-        "PROJECT": "project ID or user name/project",
-        "TOKEN": "Access Token"
+        "PROJECT": "(default) project ID or user name/project",
+        "TOKEN": "Access Token",
+        "SCOPE": "Scope",
+        "SCOPE_ALL": "All",
+        "SCOPE_ASSIGNED": "Assigned to me",
+        "SCOPE_CREATED": "Created by me",
+        "SOURCE": "Source",
+        "SOURCE_GLOBAL": "All",
+        "SOURCE_PROJECT": "Project",
+        "SOURCE_GROUP": "Group"
       },
       "FORM_SECTION": {
         "HELP": "<p>Here you can configure SuperProductivity to list open GitLab (either its the online version or a self-hosted instance) issues for a specific project in the task creation panel in the daily planning view. They will be listed as suggestions and will provide a link to the issue as well as more information about it.</p> <p>In addition you can automatically add and sync all open issues to your task backlog.</p>",

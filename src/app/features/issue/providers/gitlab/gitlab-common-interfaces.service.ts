@@ -43,25 +43,23 @@ export class GitlabCommonInterfacesService implements IssueServiceInterface {
     return isGitlabEnabled(cfg);
   }
 
-  issueLink$(issueId: number, projectId: string): Observable<string> {
+  issueLink$(issueId: string, projectId: string): Observable<string> {
     return this._getCfgOnce$(projectId).pipe(
       map((cfg) => {
+        const project: string = this._gitlabApiService.getProjectFromIssue$(issueId, cfg);
         if (cfg.gitlabBaseUrl) {
           const fixedUrl = cfg.gitlabBaseUrl.match(/.*\/$/)
             ? cfg.gitlabBaseUrl
             : `${cfg.gitlabBaseUrl}/`;
-          return `${fixedUrl}${cfg.project}/issues/${issueId}`;
+          return `${fixedUrl}${project}/issues/${issueId}`;
         } else {
-          return `${GITLAB_BASE_URL}${cfg.project?.replace(
-            /%2F/g,
-            '/',
-          )}/issues/${issueId}`;
+          return `${GITLAB_BASE_URL}${project}/issues/${issueId}`;
         }
       }),
     );
   }
 
-  getById$(issueId: number, projectId: string): Observable<GitlabIssue> {
+  getById$(issueId: string, projectId: string): Observable<GitlabIssue> {
     return this._getCfgOnce$(projectId).pipe(
       concatMap((gitlabCfg) => this._gitlabApiService.getById$(issueId, gitlabCfg)),
     );
@@ -92,7 +90,9 @@ export class GitlabCommonInterfacesService implements IssueServiceInterface {
     }
 
     const cfg = await this._getCfgOnce$(task.projectId).toPromise();
-    const issue = await this._gitlabApiService.getById$(+task.issueId, cfg).toPromise();
+    const fullIssueRef = this._gitlabApiService.getFullIssueRef$(task.issueId, cfg);
+    const idFormatChanged = task.issueId !== fullIssueRef;
+    const issue = await this._gitlabApiService.getById$(fullIssueRef, cfg).toPromise();
 
     const issueUpdate: number = new Date(issue.updated_at).getTime();
     const commentsByOthers =
@@ -111,14 +111,14 @@ export class GitlabCommonInterfacesService implements IssueServiceInterface {
 
     const wasUpdated = lastRemoteUpdate > (task.issueLastUpdated || 0);
 
-    if (wasUpdated) {
+    if (wasUpdated || idFormatChanged) {
       return {
         taskChanges: {
           ...this.getAddTaskData(issue),
           issueWasUpdated: true,
         },
         issue,
-        issueTitle: this._formatIssueTitleForSnack(issue.number, issue.title),
+        issueTitle: this._formatIssueTitleForSnack(issue),
       };
     }
     return null;
@@ -126,61 +126,89 @@ export class GitlabCommonInterfacesService implements IssueServiceInterface {
 
   async getFreshDataForIssueTasks(
     tasks: Task[],
-  ): Promise<{ task: Task; taskChanges: Partial<Task>; issue: GitlabIssue }[]> {
-    // First sort the tasks by the issueId
-    // because the API returns it in a desc order by issue iid(issueId)
-    // so it makes the update check easier and faster
-    tasks.sort((a, b) => +(b.issueId as string) - +(a.issueId as string));
+  ): Promise<{ task: Task; taskChanges: Partial<Task>; issue: GitlabIssue | null }[]> {
     const projectId = tasks && tasks[0].projectId ? tasks[0].projectId : 0;
     if (!projectId) {
       throw new Error('No projectId');
     }
 
     const cfg = await this._getCfgOnce$(projectId).toPromise();
-    const issues: GitlabIssue[] = [];
+    const issues = new Map<string, GitlabIssue>();
     const paramsCount = 59; // Can't send more than 59 issue id For some reason it returns 502 bad gateway
-    let ids;
+    const iidsByProject = new Map<string, string[]>();
     let i = 0;
-    while (i < tasks.length) {
-      ids = [];
-      for (let j = 0; j < paramsCount && i < tasks.length; j++, i++) {
-        ids.push(tasks[i].issueId);
+
+    for (const task of tasks) {
+      if (!task.issueId) {
+        continue;
       }
-      issues.push(
-        ...(await this._gitlabApiService.getByIds$(ids as string[], cfg).toPromise()),
-      );
+      const project = this._gitlabApiService.getProjectFromIssue$(task.issueId, cfg);
+      if (!iidsByProject.has(project)) {
+        iidsByProject.set(project, []);
+      }
+      iidsByProject.get(project)?.push(task.issueId as string);
     }
+
+    iidsByProject.forEach(async (allIds, project) => {
+      for (i = 0; i < allIds.length; i += paramsCount) {
+        (
+          await this._gitlabApiService
+            .getByIds$(project, allIds.slice(i, i + paramsCount), cfg)
+            .toPromise()
+        ).forEach((found) => {
+          issues.set(found.id as string, found);
+        });
+      }
+    });
 
     const updatedIssues: {
       task: Task;
       taskChanges: Partial<Task>;
-      issue: GitlabIssue;
+      issue: GitlabIssue | null;
     }[] = [];
 
-    for (i = 0; i < tasks.length; i++) {
-      const issueUpdate: number = new Date(issues[i].updated_at).getTime();
-      const commentsByOthers =
-        cfg.filterUsername && cfg.filterUsername.length > 1
-          ? issues[i].comments.filter(
-              (comment) => comment.author.username !== cfg.filterUsername,
-            )
-          : issues[i].comments;
+    for (const task of tasks) {
+      if (!task.issueId) {
+        continue;
+      }
+      let idFormatChanged = false;
+      const fullIssueRef = this._gitlabApiService.getFullIssueRef$(task.issueId, cfg);
+      idFormatChanged = task.issueId !== fullIssueRef;
+      const issue = issues.get(fullIssueRef);
+      if (issue) {
+        const issueUpdate: number = new Date(issue.updated_at).getTime();
+        const commentsByOthers =
+          cfg.filterUsername && cfg.filterUsername.length > 1
+            ? issue.comments.filter(
+                (comment) => comment.author.username !== cfg.filterUsername,
+              )
+            : issue.comments;
 
-      const updates: number[] = [
-        ...commentsByOthers.map((comment) => new Date(comment.created_at).getTime()),
-        issueUpdate,
-      ].sort();
-      const lastRemoteUpdate = updates[updates.length - 1];
-      const wasUpdated = lastRemoteUpdate > (tasks[i].issueLastUpdated || 0);
-
-      if (wasUpdated) {
+        const updates: number[] = [
+          ...commentsByOthers.map((comment) => new Date(comment.created_at).getTime()),
+          issueUpdate,
+        ].sort();
+        const lastRemoteUpdate = updates[updates.length - 1];
+        const wasUpdated = lastRemoteUpdate > (tasks[i].issueLastUpdated || 0);
+        if (wasUpdated || idFormatChanged) {
+          updatedIssues.push({
+            task,
+            taskChanges: {
+              ...this.getAddTaskData(issue),
+              issueWasUpdated: true,
+            },
+            issue,
+          });
+        }
+      } else {
         updatedIssues.push({
-          task: tasks[i],
+          task,
           taskChanges: {
-            ...this.getAddTaskData(issues[i]),
             issueWasUpdated: true,
+            issueId: null,
+            issueType: null,
           },
-          issue: issues[i],
+          issue: null,
         });
       }
     }
@@ -189,10 +217,11 @@ export class GitlabCommonInterfacesService implements IssueServiceInterface {
 
   getAddTaskData(issue: GitlabIssue): Partial<Task> & { title: string } {
     return {
-      title: this._formatIssueTitle(issue.number, issue.title),
+      title: this._formatIssueTitle(issue),
       issuePoints: issue.weight,
       issueWasUpdated: false,
       issueLastUpdated: new Date(issue.updated_at).getTime(),
+      issueId: issue.id as string,
     };
   }
 
@@ -204,12 +233,12 @@ export class GitlabCommonInterfacesService implements IssueServiceInterface {
     return await this._gitlabApiService.getProjectIssues$(1, cfg).toPromise();
   }
 
-  private _formatIssueTitle(id: number, title: string): string {
-    return `#${id} ${title}`;
+  private _formatIssueTitle(issue: GitlabIssue): string {
+    return `#${issue.number} ${issue.title}`;
   }
 
-  private _formatIssueTitleForSnack(id: number, title: string): string {
-    return `${truncate(this._formatIssueTitle(id, title))}`;
+  private _formatIssueTitleForSnack(issue: GitlabIssue): string {
+    return `${truncate(this._formatIssueTitle(issue))}`;
   }
 
   private _getCfgOnce$(projectId: string): Observable<GitlabCfg> {
