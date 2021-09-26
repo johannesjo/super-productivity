@@ -9,7 +9,7 @@ import { TaskService } from '../../features/tasks/task.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { IS_ELECTRON } from '../../app.constants';
 import { MatDialog } from '@angular/material/dialog';
-import { combineLatest, from, merge, Observable, Subscription } from 'rxjs';
+import { combineLatest, from, merge, Observable, Subject } from 'rxjs';
 import { IPC } from '../../../../electron/ipc-events.const';
 import { DialogConfirmComponent } from '../../ui/dialog-confirm/dialog-confirm.component';
 import { GlobalConfigService } from '../../features/config/global-config.service';
@@ -21,6 +21,7 @@ import {
   startWith,
   switchMap,
   take,
+  takeUntil,
   withLatestFrom,
 } from 'rxjs/operators';
 import { getWorklogStr } from '../../util/get-work-log-str';
@@ -37,6 +38,7 @@ import { PersistenceService } from '../../core/persistence/persistence.service';
 import { WorkContextType } from '../../features/work-context/work-context.model';
 import { EntityState } from '@ngrx/entity';
 import { TODAY_TAG } from '../../features/tag/tag.const';
+import { shareReplayUntil } from '../../util/share-replay-until';
 
 const SUCCESS_ANIMATION_DURATION = 500;
 const MAGIC_YESTERDAY_MARGIN = 4 * 60 * 60 * 1000;
@@ -49,6 +51,7 @@ const MAGIC_YESTERDAY_MARGIN = 4 * 60 * 60 * 1000;
 })
 export class DailySummaryComponent implements OnInit, OnDestroy {
   T: typeof T = T;
+  _onDestroy$ = new Subject<void>();
 
   cfg: any = {};
 
@@ -70,7 +73,7 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
         return getWorklogStr();
       }
     }),
-    shareReplay(1),
+    shareReplayUntil(this._onDestroy$, 1),
   );
 
   tasksWorkedOnOrDoneOrRepeatableFlat$: Observable<Task[]> = this.dayStr$.pipe(
@@ -149,9 +152,6 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
 
   private _successAnimationTimeout?: number;
 
-  // calc time spent on todays tasks today
-  private _subs: Subscription = new Subscription();
-
   constructor(
     public readonly configService: GlobalConfigService,
     public readonly workContextService: WorkContextService,
@@ -173,29 +173,29 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     // we need to wait, otherwise data would get overwritten
-    this._subs.add(
-      this._taskService.currentTaskId$
-        .pipe(
-          filter((id) => !!id),
-          take(1),
-        )
-        .subscribe(() => {
-          this._taskService.setCurrentId(null);
-        }),
-    );
+    this._taskService.currentTaskId$
+      .pipe(
+        takeUntil(this._onDestroy$),
+        filter((id) => !!id),
+        take(1),
+      )
+      .subscribe(() => {
+        this._taskService.setCurrentId(null);
+      });
 
-    this._subs.add(
-      this._activatedRoute.paramMap.subscribe((s: any) => {
+    this._activatedRoute.paramMap
+      .pipe(takeUntil(this._onDestroy$))
+      .subscribe((s: any) => {
         if (s && s.params.dayStr) {
           this.isForToday = false;
           this.dayStr = s.params.dayStr;
         }
-      }),
-    );
+      });
   }
 
   ngOnDestroy(): void {
-    this._subs.unsubscribe();
+    this._onDestroy$.next();
+    this._onDestroy$.complete();
     // should not happen, but just in case
     if (this._successAnimationTimeout) {
       window.clearTimeout(this._successAnimationTimeout);

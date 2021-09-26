@@ -51,7 +51,7 @@ export type OpenProjectOriginalWorkPackageReduced = Readonly<{
   derivedStartDate: unknown | null;
   description: OpenProjectDescription;
   dueDate: string;
-  estimatedTime: unknown | null;
+  estimatedTime: string | null | undefined;
   lockVersion: number;
   percentageDone: number;
   position: number;
@@ -65,6 +65,9 @@ export type OpenProjectOriginalWorkPackageReduced = Readonly<{
   _links: OpenProjectApiLinks;
   id: number;
   _type: 'WorkPackage';
+
+  // NOTE: only available if package is activated
+  spentTime: string | null | undefined;
 }>;
 
 export type OpenProjectWorkPackageSearchResult = Readonly<OpenProjectCollection> &

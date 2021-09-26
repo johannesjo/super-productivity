@@ -1,15 +1,17 @@
 import { Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
+import { addTask, deleteTask, undoDeleteTask, updateTask } from './task.actions';
+import { select, Store } from '@ngrx/store';
 import {
-  addTask,
-  addTimeSpent,
-  deleteTask,
-  undoDeleteTask,
-  updateTask,
-} from './task.actions';
-import { Action, select, Store } from '@ngrx/store';
-import { filter, tap, throttleTime, withLatestFrom } from 'rxjs/operators';
-import { selectCurrentTask } from './task.selectors';
+  distinctUntilChanged,
+  filter,
+  skip,
+  switchMap,
+  tap,
+  throttleTime,
+  withLatestFrom,
+} from 'rxjs/operators';
+import { selectCurrentTask, selectCurrentTaskId } from './task.selectors';
 import { NotifyService } from '../../../core/notify/notify.service';
 import { TaskService } from '../task.service';
 import { selectConfigFeatureState } from '../../config/store/global-config.reducer';
@@ -18,10 +20,11 @@ import { BannerService } from '../../../core/banner/banner.service';
 import { BannerId } from '../../../core/banner/banner.model';
 import { T } from '../../../t.const';
 import { SnackService } from '../../../core/snack/snack.service';
-import { GlobalConfigState } from '../../config/global-config.model';
 import { WorkContextService } from '../../work-context/work-context.service';
 import { GlobalConfigService } from '../../config/global-config.service';
 import { playDoneSound } from '../util/play-done-sound';
+import { Task } from '../task.model';
+import { EMPTY } from 'rxjs';
 
 @Injectable()
 export class TaskUiEffects {
@@ -64,15 +67,56 @@ export class TaskUiEffects {
 
   timeEstimateExceeded$: any = createEffect(
     () =>
-      this._actions$.pipe(
-        ofType(addTimeSpent),
-        // refresh every 10 minute max
-        throttleTime(10 * 60 * 1000),
-        withLatestFrom(
-          this._store$.pipe(select(selectCurrentTask)),
-          this._store$.pipe(select(selectConfigFeatureState)),
+      this._store$.pipe(select(selectConfigFeatureState)).pipe(
+        switchMap((globalCfg) =>
+          globalCfg && globalCfg.misc.isNotifyWhenTimeEstimateExceeded
+            ? // reset whenever the current taskId changes (but no the task data, which is polled afterwards)
+              this._store$.pipe(select(selectCurrentTaskId)).pipe(
+                distinctUntilChanged(),
+                switchMap(() =>
+                  this._store$.pipe(
+                    select(selectCurrentTask),
+                    filter(
+                      (currentTask) =>
+                        !!currentTask &&
+                        currentTask.timeEstimate > 0 &&
+                        currentTask.timeSpent > currentTask.timeEstimate,
+                    ),
+                    // refresh every 10 minute max
+                    throttleTime(10 * 60 * 1000),
+                    tap((currentTask) => {
+                      this._notifyAboutTimeEstimateExceeded(currentTask as Task);
+                    }),
+                  ),
+                ),
+              )
+            : EMPTY,
         ),
-        tap((args) => this._notifyAboutTimeEstimateExceeded(args)),
+      ),
+    { dispatch: false },
+  );
+
+  timeEstimateExceededDismissBanner$: any = createEffect(
+    () =>
+      this._store$.pipe(select(selectConfigFeatureState)).pipe(
+        switchMap((globalCfg) =>
+          globalCfg && globalCfg.misc.isNotifyWhenTimeEstimateExceeded
+            ? this._bannerService.activeBanner$.pipe(
+                switchMap((activeBanner) =>
+                  activeBanner?.id === BannerId.TimeEstimateExceeded
+                    ? this._store$.pipe(
+                        select(selectCurrentTaskId),
+                        distinctUntilChanged(),
+                        skip(1),
+                      )
+                    : EMPTY,
+                ),
+                tap(() => {
+                  this._bannerService.dismiss(BannerId.TimeEstimateExceeded);
+                }),
+              )
+            : EMPTY,
+        ),
       ),
     { dispatch: false },
   );
@@ -103,40 +147,28 @@ export class TaskUiEffects {
     private _workContextService: WorkContextService,
   ) {}
 
-  private _notifyAboutTimeEstimateExceeded([action, ct, globalCfg]: [
-    Action,
-    any,
-    GlobalConfigState,
-  ]): void {
-    if (
-      globalCfg &&
-      globalCfg.misc.isNotifyWhenTimeEstimateExceeded &&
-      ct &&
-      ct.timeEstimate > 0 &&
-      ct.timeSpent > ct.timeEstimate
-    ) {
-      const title = truncate(ct.title);
+  private _notifyAboutTimeEstimateExceeded(currentTask: Task): void {
+    const title = truncate(currentTask.title);
 
-      this._notifyService.notify({
-        title: T.F.TASK.N.ESTIMATE_EXCEEDED,
-        body: T.F.TASK.N.ESTIMATE_EXCEEDED_BODY,
-        translateParams: { title },
-      });
+    this._notifyService.notify({
+      title: T.F.TASK.N.ESTIMATE_EXCEEDED,
+      body: T.F.TASK.N.ESTIMATE_EXCEEDED_BODY,
+      translateParams: { title },
+    });
 
-      this._bannerService.open({
-        msg: T.F.TASK.B.ESTIMATE_EXCEEDED,
-        id: BannerId.TimeEstimateExceeded,
-        ico: 'timer',
-        translateParams: { title },
-        action: {
-          label: T.F.TASK.B.ADD_HALF_HOUR,
-          fn: () =>
-            this._taskService.update(ct.id, {
-              // prettier-ignore
-              timeEstimate: ct.timeSpent + (30 * 60000),
-            }),
-        },
-      });
-    }
+    this._bannerService.open({
+      msg: T.F.TASK.B.ESTIMATE_EXCEEDED,
+      id: BannerId.TimeEstimateExceeded,
+      ico: 'timer',
+      translateParams: { title },
+      action: {
+        label: T.F.TASK.B.ADD_HALF_HOUR,
+        fn: () =>
+          this._taskService.update(currentTask.id, {
+            // prettier-ignore
+            timeEstimate: currentTask.timeSpent + (30 * 60000),
+          }),
+      },
+    });
   }
 }

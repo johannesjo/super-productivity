@@ -24,7 +24,12 @@ import {
 } from '../../../../core/persistence/local-storage';
 import { GithubCfg } from '../../../issue/providers/github/github.model';
 import { DialogGithubInitialSetupComponent } from '../../../issue/providers/github/github-view-components/dialog-github-initial-setup/dialog-github-initial-setup.component';
-import { CALDAV_TYPE, GITHUB_TYPE, GITLAB_TYPE } from '../../../issue/issue.const';
+import {
+  CALDAV_TYPE,
+  GITHUB_TYPE,
+  GITLAB_TYPE,
+  OPEN_PROJECT_TYPE,
+} from '../../../issue/issue.const';
 import { T } from '../../../../t.const';
 import { DEFAULT_JIRA_CFG } from '../../../issue/providers/jira/jira.const';
 import { DEFAULT_GITHUB_CFG } from '../../../issue/providers/github/github.const';
@@ -35,6 +40,9 @@ import { DialogGitlabInitialSetupComponent } from 'src/app/features/issue/provid
 import { CaldavCfg } from 'src/app/features/issue/providers/caldav/caldav.model';
 import { DEFAULT_CALDAV_CFG } from 'src/app/features/issue/providers/caldav/caldav.const';
 import { DialogCaldavInitialSetupComponent } from 'src/app/features/issue/providers/caldav/dialog-caldav-initial-setup/dialog-caldav-initial-setup.component';
+import { DialogOpenProjectInitialSetupComponent } from '../../../issue/providers/open-project/open-project-view-components/dialog-open-project-initial-setup/dialog-open-project-initial-setup.component';
+import { OpenProjectCfg } from '../../../issue/providers/open-project/open-project.model';
+import { DEFAULT_OPEN_PROJECT_CFG } from '../../../issue/providers/open-project/open-project.const';
 
 @Component({
   selector: 'dialog-create-project',
@@ -49,6 +57,7 @@ export class DialogCreateProjectComponent implements OnInit, OnDestroy {
   githubCfg?: GithubCfg;
   gitlabCfg?: GitlabCfg;
   caldavCfg?: CaldavCfg;
+  openProjectCfg?: OpenProjectCfg;
 
   formBasic: FormGroup = new FormGroup({});
   formTheme: FormGroup = new FormGroup({});
@@ -103,6 +112,7 @@ export class DialogCreateProjectComponent implements OnInit, OnDestroy {
           GITHUB: this.githubCfg,
           GITLAB: this.gitlabCfg,
           CALDAV: this.caldavCfg,
+          OPEN_PROJECT: this.openProjectCfg,
         };
         const projectDataToSave: Project | Partial<Project> = {
           ...this.projectData,
@@ -141,6 +151,7 @@ export class DialogCreateProjectComponent implements OnInit, OnDestroy {
       GITHUB: this.githubCfg || DEFAULT_GITHUB_CFG,
       GITLAB: this.gitlabCfg || DEFAULT_GITLAB_CFG,
       CALDAV: this.caldavCfg || DEFAULT_CALDAV_CFG,
+      OPEN_PROJECT: this.openProjectCfg || DEFAULT_OPEN_PROJECT_CFG,
     };
 
     const projectDataToSave: Project | Partial<Project> = {
@@ -234,6 +245,23 @@ export class DialogCreateProjectComponent implements OnInit, OnDestroy {
         }),
     );
   }
+  openOpenProjectCfg(): void {
+    this._subs.add(
+      this._matDialog
+        .open(DialogOpenProjectInitialSetupComponent, {
+          restoreFocus: true,
+          data: {
+            openProjectCfg: this.openProjectCfg,
+          },
+        })
+        .afterClosed()
+        .subscribe((openProjectCfg: OpenProjectCfg) => {
+          if (openProjectCfg) {
+            this._saveOpenProjectCfg(openProjectCfg);
+          }
+        }),
+    );
+  }
 
   private _saveJiraCfg(jiraCfg: JiraCfg): void {
     this.jiraCfg = jiraCfg;
@@ -287,6 +315,20 @@ export class DialogCreateProjectComponent implements OnInit, OnDestroy {
         this.projectData.id,
         CALDAV_TYPE,
         this.caldavCfg,
+      );
+    }
+  }
+
+  private _saveOpenProjectCfg(openProjectCfg: OpenProjectCfg): void {
+    this.openProjectCfg = openProjectCfg;
+    this._cd.markForCheck();
+
+    // if we're editing save right away
+    if (this.projectData.id) {
+      this._projectService.updateIssueProviderConfig(
+        this.projectData.id,
+        OPEN_PROJECT_TYPE,
+        this.openProjectCfg,
       );
     }
   }

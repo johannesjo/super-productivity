@@ -30,7 +30,6 @@ import {
 import {
   AppBaseData,
   AppDataComplete,
-  AppDataCompleteOptionalSyncModelChange,
   AppDataForProjects,
 } from '../../imex/sync/sync.model';
 import { Reminder } from '../../features/reminder/reminder.model';
@@ -82,10 +81,8 @@ import {
   SimpleCounterState,
 } from '../../features/simple-counter/simple-counter.model';
 import { simpleCounterReducer } from '../../features/simple-counter/store/simple-counter.reducer';
-import { from, merge, Observable, Subject } from 'rxjs';
-import { debounceTime, filter, shareReplay, switchMap } from 'rxjs/operators';
+import { Subject } from 'rxjs';
 import { devError } from '../../util/dev-error';
-import { isValidAppData } from '../../imex/sync/is-valid-app-data.util';
 import { removeFromDb, saveToDb } from './persistence.actions';
 import { crossModelMigrations } from './cross-model-migrations';
 import { metricReducer } from '../../features/metric/store/metric.reducer';
@@ -97,6 +94,7 @@ import {
   migrateObstructionState,
 } from '../../features/metric/migrate-metric-states.util';
 import { DEFAULT_APP_BASE_DATA } from '../../imex/sync/sync.const';
+import { isValidAppData } from '../../imex/sync/is-valid-app-data.util';
 
 @Injectable({
   providedIn: 'root',
@@ -206,33 +204,25 @@ export class PersistenceService {
     isSyncModelChange: boolean;
     projectId?: string;
   }> = new Subject();
-  onAfterImport$: Subject<AppDataComplete> = new Subject();
 
-  inMemoryComplete$: Observable<AppDataComplete> = merge(
-    from(this.loadComplete()),
-    this.onAfterImport$,
-    this.onAfterSave$.pipe(
-      // wait for all updates if fired in short succession (which happens for relational data)
-      debounceTime(50),
-      switchMap(() => this.loadComplete()),
-      // TODO maybe not necessary ??
-      // only propagate data if it is valid
-      filter((complete) => isValidAppData(complete)),
-    ),
-  ).pipe(shareReplay(1));
-
-  private _inMemoryComplete?: AppDataCompleteOptionalSyncModelChange;
   private _isBlockSaving: boolean = false;
 
   constructor(
     private _databaseService: DatabaseService,
     private _compressionService: CompressionService,
     private _store: Store<any>,
-  ) {
-    // NOTE: we actually need to subscribe to this, otherwise onAfterSave$ won't always be taken
-    // into consideration for inMemoryComplete$ and we won't always have the latest data
-    this.inMemoryComplete$.subscribe();
-    // this.inMemoryComplete$.subscribe((v) => console.log('inMemoryComplete$', v));
+  ) {}
+
+  async getValidCompleteData(): Promise<AppDataComplete> {
+    const d = await this.loadComplete();
+    // if we are very unlucky app data might not be valid. we never want to sync that! :)
+    if (isValidAppData(d)) {
+      return d;
+    } else {
+      // TODO remove as this is not a real error, and this is just a test to check if this ever occurs
+      devError('Invalid data => RETRY getValidCompleteData');
+      return this.getValidCompleteData();
+    }
   }
 
   // PROJECT ARCHIVING
@@ -400,29 +390,27 @@ export class PersistenceService {
   // async loadCompleteWithPrivate(): Promise<AppDataComplete> {
   // }
 
-  async loadComplete(): Promise<AppDataComplete> {
-    let r;
-    if (!this._inMemoryComplete) {
-      const projectState = await this.project.loadState();
-      const pids = projectState ? (projectState.ids as string[]) : [DEFAULT_PROJECT_ID];
-      if (!pids) {
-        throw new Error('Project State is broken');
-      }
+  async loadComplete(isMigrate = false): Promise<AppDataComplete> {
+    console.log('LOAD COMPLETE', isMigrate);
 
-      r = crossModelMigrations({
-        ...(await this._loadAppDataForProjects(pids)),
-        ...(await this._loadAppBaseData()),
-      } as AppDataComplete);
-      this._inMemoryComplete = r;
-    } else {
-      r = this._inMemoryComplete;
+    const projectState = await this.project.loadState();
+    const pids = projectState ? (projectState.ids as string[]) : [DEFAULT_PROJECT_ID];
+    if (!pids) {
+      throw new Error('Project State is broken');
     }
+
+    const r = isMigrate
+      ? crossModelMigrations({
+          ...(await this._loadAppDataForProjects(pids)),
+          ...(await this._loadAppBaseData()),
+        } as AppDataComplete)
+      : {
+          ...(await this._loadAppDataForProjects(pids)),
+          ...(await this._loadAppBaseData()),
+        };
 
     return {
       ...r,
-      // TODO remove legacy field
-      ...({ lastActiveTime: this.getLastLocalSyncModelChange() } as any),
-
       lastLocalSyncModelChange: this.getLastLocalSyncModelChange(),
     };
   }
@@ -457,8 +445,6 @@ export class PersistenceService {
     return await Promise.all([forBase, forProject])
       .then(() => {
         this.updateLastLocalSyncModelChange(data.lastLocalSyncModelChange as number);
-        this._inMemoryComplete = data;
-        this.onAfterImport$.next(data);
       })
       .finally(() => {
         this._isBlockSaving = false;
@@ -710,12 +696,6 @@ export class PersistenceService {
       this._store.dispatch(saveToDb({ dbKey, data }));
       const r = await this._databaseService.save(idbKey, data);
 
-      this._updateInMemory({
-        projectId,
-        appDataKey: dbKey,
-        data,
-      });
-
       if (isSyncModelChange) {
         this.updateLastLocalSyncModelChange();
       }
@@ -771,51 +751,5 @@ export class PersistenceService {
       (await this._databaseService.load(legacyDBKey)) ||
       undefined
     );
-  }
-
-  private _updateInMemory({
-    appDataKey,
-    projectId,
-    data,
-  }: {
-    appDataKey: AllowedDBKeys;
-    projectId?: string;
-    data: any;
-  }): void {
-    if (!this._inMemoryComplete) {
-      throw new Error('No in memory copy yet');
-    }
-
-    this._inMemoryComplete = this._extendAppDataComplete({
-      complete: this._inMemoryComplete,
-      projectId,
-      appDataKey,
-      data,
-    });
-  }
-
-  private _extendAppDataComplete({
-    complete,
-    appDataKey,
-    projectId,
-    data,
-  }: {
-    complete: AppDataComplete | AppDataCompleteOptionalSyncModelChange;
-    appDataKey: AllowedDBKeys;
-    projectId?: string;
-    data: any;
-  }): AppDataComplete | AppDataCompleteOptionalSyncModelChange {
-    // console.log(appDataKey, data && data.ids && data.ids.length);
-    return {
-      ...complete,
-      ...(projectId
-        ? {
-            [appDataKey]: {
-              ...(complete as any)[appDataKey],
-              [projectId]: data,
-            },
-          }
-        : { [appDataKey]: data }),
-    };
   }
 }

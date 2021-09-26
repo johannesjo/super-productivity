@@ -117,7 +117,7 @@ export class TaskInternalEffects {
 
           // QUICK FIX FOR THE ISSUE
           // TODO better solution
-          case deleteTask: {
+          case deleteTask.type: {
             nextId = state.currentTaskId;
             break;
           }

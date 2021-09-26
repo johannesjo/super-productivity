@@ -28,6 +28,7 @@ import { HANDLED_ERROR_PROP_STR } from '../../../../app.constants';
 import { T } from '../../../../t.const';
 import { throwHandledError } from '../../../../util/throw-handled-error';
 import { ISSUE_PROVIDER_HUMANIZED, OPEN_PROJECT_TYPE } from '../../issue.const';
+import { devError } from '../../../../util/dev-error';
 
 @Injectable({
   providedIn: 'root',
@@ -35,10 +36,13 @@ import { ISSUE_PROVIDER_HUMANIZED, OPEN_PROJECT_TYPE } from '../../issue.const';
 export class OpenProjectApiService {
   constructor(private _snackService: SnackService, private _http: HttpClient) {}
 
-  getById$(issueId: number, cfg: OpenProjectCfg): Observable<OpenProjectWorkPackage> {
+  getById$(
+    workPackageId: number,
+    cfg: OpenProjectCfg,
+  ): Observable<OpenProjectWorkPackage> {
     return this._sendRequest$(
       {
-        url: `${cfg.host}/api/v3/work_packages/${issueId}`,
+        url: `${cfg.host}/api/v3/work_packages/${workPackageId}`,
       },
       cfg,
     ).pipe(map((workPackage) => mapOpenProjectIssueFull(workPackage, cfg)));
@@ -75,6 +79,78 @@ export class OpenProjectApiService {
               .map(mapOpenProjectIssueToSearchResult)
           : [];
       }),
+    );
+  }
+
+  getActivitiesForTrackTime$(
+    workPackageId: number,
+    cfg: OpenProjectCfg,
+  ): Observable<{ default: boolean; id: number; name: string; position: number }[]> {
+    return this._sendRequest$(
+      {
+        method: 'POST',
+        url: `${cfg.host}/api/v3/time_entries/form`,
+        data: {
+          _links: {
+            workPackage: {
+              href: '/api/v3/work_packages/' + workPackageId,
+              title: '',
+            },
+            self: { href: null },
+            // comment: { format: 'plain', raw: null, html: '' },
+            // spentOn: '2021-09-20',
+            // hours: 'PT1H',
+            // activity: { href: '/api/v3/time_entries/activities/1', title: 'Management' },
+          },
+          id: 'new',
+        },
+      },
+      cfg,
+    ).pipe(
+      map((res: any) => res._embedded.schema.activity._embedded.allowedValues),
+      catchError((e) => {
+        devError(e);
+        return [];
+      }),
+    );
+  }
+
+  trackTime$({
+    cfg,
+    workPackage,
+    spentOn,
+    comment,
+    hours,
+    activityId,
+  }: {
+    spentOn: string; // 'YYYY-MM-DD'
+    comment: string;
+    activityId: number;
+    workPackage: OpenProjectWorkPackage | OpenProjectWorkPackageReduced;
+    hours: string; // ISO8601
+    cfg: OpenProjectCfg;
+  }): Observable<any> {
+    return this._sendRequest$(
+      {
+        method: 'POST',
+        url: `${cfg.host}/api/v3/time_entries`,
+        data: {
+          _links: {
+            activity: {
+              href: '/api/v3/time_entries/activities/' + activityId,
+            },
+            workPackage: {
+              href: '/api/v3/work_packages/' + workPackage.id,
+            },
+          },
+          comment: {
+            raw: comment,
+          },
+          spentOn,
+          hours,
+        },
+      },
+      cfg,
     );
   }
 

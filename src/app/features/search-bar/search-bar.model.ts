@@ -14,6 +14,8 @@ export interface SearchItem {
   timeSpentOnDay: TimeSpentOnDay;
   created: number;
   tagId: string;
+  // NOTE: probably faster this way round
+  isNonArchiveTask: boolean;
 
   // for the icons
   issueType: IssueProviderKey | null;

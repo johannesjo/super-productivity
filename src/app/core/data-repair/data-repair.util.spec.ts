@@ -8,6 +8,7 @@ import { Tag, TagState } from '../../features/tag/tag.model';
 import { Project, ProjectState } from '../../features/project/project.model';
 import { DEFAULT_PROJECT } from '../../features/project/project.const';
 import { DEFAULT_TAG, TODAY_TAG } from '../../features/tag/tag.const';
+import { TaskRepeatCfg } from '../../features/task-repeat-cfg/task-repeat-cfg.model';
 
 const FAKE_PROJECT_ID = 'FAKE_PROJECT_ID';
 describe('dataRepair()', () => {
@@ -887,6 +888,90 @@ describe('dataRepair()', () => {
             projectId: null,
           },
         },
+      },
+    });
+  });
+
+  it('should delete non-existent project ids for taskRepeatCfgCfgs', () => {
+    const taskRepeatCfgState = {
+      ...mock.taskRepeatCfg,
+      ...fakeEntityStateFromArray<TaskRepeatCfg>([
+        {
+          id: 'TEST',
+          title: 'TEST',
+          projectId: 'NON_EXISTENT',
+          lastTaskCreation: 0,
+          defaultEstimate: undefined,
+          startTime: undefined,
+          remindAt: undefined,
+          monday: true,
+          tuesday: true,
+          wednesday: true,
+          thursday: true,
+          friday: true,
+          saturday: true,
+          sunday: true,
+          isAddToBottom: true,
+          tagIds: ['SOME_TAG'],
+        },
+      ]),
+    } as any;
+
+    expect(
+      dataRepair({
+        ...mock,
+        taskRepeatCfg: taskRepeatCfgState,
+      } as any),
+    ).toEqual({
+      ...mock,
+      taskRepeatCfg: {
+        ...taskRepeatCfgState,
+        entities: {
+          TEST: {
+            ...taskRepeatCfgState.entities.TEST,
+            projectId: null,
+          },
+        },
+      },
+    });
+  });
+
+  it('should delete non-existent taskRepeatCfg if projectId is missing and no tags', () => {
+    const taskRepeatCfgState = {
+      ...mock.taskRepeatCfg,
+      ...fakeEntityStateFromArray<TaskRepeatCfg>([
+        {
+          id: 'TEST',
+          title: 'TEST',
+          projectId: 'NON_EXISTENT',
+          lastTaskCreation: 0,
+          defaultEstimate: undefined,
+          startTime: undefined,
+          remindAt: undefined,
+          monday: true,
+          tuesday: true,
+          wednesday: true,
+          thursday: true,
+          friday: true,
+          saturday: true,
+          sunday: true,
+          isAddToBottom: true,
+          tagIds: [],
+        },
+      ]),
+    } as any;
+
+    expect(
+      dataRepair({
+        ...mock,
+        taskRepeatCfg: taskRepeatCfgState,
+      } as any),
+    ).toEqual({
+      ...mock,
+      taskRepeatCfg: {
+        ...taskRepeatCfgState,
+        ids: [],
+        entities: {},
       },
     });
   });

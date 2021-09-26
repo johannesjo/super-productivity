@@ -2,39 +2,24 @@
   #searchForm
   @blendInOut
   (@blendInOut.done)="onAnimationEvent($event)"
-  [class.isElevated]="isElevated"
-  [class.mat-elevation-z3]="!isElevated"
-  [class.mat-elevation-z4]="isElevated"
-  class="search-form"
+  class="search-form mat-elevation-z4"
 >
   <div class="input-wrapper">
     <div *ngIf="(isLoading$|async)" class="spinner">
       <mat-spinner diameter="50"></mat-spinner>
     </div>
-    <button
-      (mousedown)="switchTaskSource($event);"
-      class="switch-add-to-btn"
-      mat-icon-button
-      type="button"
-    >
-      <mat-icon *ngIf="isArchivedTasks">archive</mat-icon>
-      <mat-icon *ngIf="!isArchivedTasks">list</mat-icon>
-    </button>
     <input
       #inputEl
       tabindex="0"
       (blur)="onBlur($event)"
       [formControl]="taskSuggestionsCtrl"
       [matAutocomplete]="autoEl"
-      [placeholder]="!isArchivedTasks
-        ? (T.F.SEARCH_BAR.PLACEHOLDER|translate)
-        : (T.F.SEARCH_BAR.PLACEHOLDER_ARCHIVED|translate)"
+      [placeholder]="(T.F.SEARCH_BAR.PLACEHOLDER|translate)"
       matInput
     />
 
     <button
       (click)="closeBtnClose($event)"
-      *ngIf="isElevated"
       class="close-btn"
       mat-icon-button
       type="button"
@@ -45,8 +30,8 @@
 
   <div class="info-bar">
     <div class="info-text">
-      {{ (!tooManyResults ? !isArchivedTasks ? T.F.SEARCH_BAR.INFO :
-      T.F.SEARCH_BAR.INFO_ARCHIVED : T.F.SEARCH_BAR.TOO_MANY_RESULTS)|translate }}
+      {{ (!tooManyResults ? T.F.SEARCH_BAR.INFO :
+      T.F.SEARCH_BAR.TOO_MANY_RESULTS)|translate }}
     </div>
   </div>
 
@@ -57,12 +42,14 @@
     [displayWith]="getOptionText"
   >
     <mat-option
+      class="search-mat-option"
       *ngFor="let item of (filteredIssueSuggestions$|async); trackBy:trackByFn"
       [value]="item"
     >
-      <mat-icon *ngIf="item.issueType" [svgIcon]="item.issueType|issueIcon"></mat-icon>
       <tag *ngIf="item.ctx" [tag]="item.ctx"></tag>
       <span>{{item?.titleHighlighted || item?.title}}</span>
+      <mat-icon *ngIf="item.issueType" [svgIcon]="item.issueType|issueIcon"></mat-icon>
+      <mat-icon *ngIf="!item.isNonArchiveTask">archive</mat-icon>
     </mat-option>
   </mat-autocomplete>
 </form>

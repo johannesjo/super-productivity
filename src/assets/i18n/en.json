@@ -425,12 +425,25 @@
       "DIALOG_INITIAL": {
         "TITLE": "Setup OpenProject for Project"
       },
+      "DIALOG_TRACK_TIME": {
+        "ACTIVITY": "Activity",
+        "CURRENTLY_LOGGED": "Currently logged time: ",
+        "INVALID_DATE": "The entered value is not a date!",
+        "POST_TIME": "Post Time",
+        "STARTED": "Started",
+        "SUBMIT_TIME_FOR": "Submit time to OpenProject for",
+        "TIME_SPENT": "Time Spent",
+        "TITLE": "OpenProject: Submit Worklog"
+      },
       "FORM": {
         "FILTER_USER": "Username (e.g. to filter out changes by yourself)",
         "HOST": "Host (e.g.: https://www.openproject.org/)",
         "IS_AUTO_ADD_TO_BACKLOG": "Automatically add unresolved work packages from OpenProject to backlog",
         "IS_AUTO_POLL": "Automatically poll imported OpenProject work packages for changes",
         "IS_SEARCH_ISSUES_FROM_OPEN_PROJECT": "Show work packages as suggestions when adding new tasks",
+        "IS_SHOW_TIME_TRACKING_DIALOG": "Show time tracking dialog to report to OpenProject",
+        "IS_SHOW_TIME_TRACKING_DIALOG_FOR_EACH_SUB_TASK": "Show time tracking dialog when sub tasks are completed",
+        "IS_SHOW_TIME_TRACKING_DIALOG_DESCRIPTION": "Requires time tracking module to be enabled for OpenProject project",
         "PROJECT_ID": "Project ID",
         "PROJECT_ID_DESCRIPTION": "Can be found as part of the url, when viewing the project in the Browser.",
         "TOKEN": "Access Token"
@@ -452,7 +465,8 @@
         "ISSUE_STR": "work package"
       },
       "S": {
-        "ERR_UNKNOWN": "OpenProject: Unknown error {{statusCode}} {{errorMsg}}. Is CORS properly configured for the server?"
+        "ERR_UNKNOWN": "OpenProject: Unknown error {{statusCode}} {{errorMsg}}. Is CORS properly configured for the server?",
+        "POST_TIME_SUCCESS": "OpenProject: Successfully created time entry for {{issueTitle}}"
       }
     },
     "POMODORO": {
@@ -513,7 +527,8 @@
         "SETUP_CALDAV": "Setup Caldav Integration",
         "SETUP_GIT": "Setup GitHub Integration",
         "SETUP_GITLAB": "Setup GitLab Integration",
-        "SETUP_JIRA": "Setup Jira Integration"
+        "SETUP_JIRA": "Setup Jira Integration",
+        "SETUP_OPEN_PROJECT": "Setup OpenProject Integration"
       },
       "FORM_BASIC": {
         "L_TITLE": "Project Name",
@@ -1171,6 +1186,7 @@
     "TOGGLE_SHOW_BOOKMARKS": "Show/Hide Bookmarks",
     "TOGGLE_SHOW_NOTES": "Show/Hide Project Notes",
     "TOGGLE_TRACK_TIME": "Start/Stop tracking time",
+    "TRIGGER_SYNC": "Trigger sync manually",
     "WORKLOG": "Worklog"
   },
   "PDS": {

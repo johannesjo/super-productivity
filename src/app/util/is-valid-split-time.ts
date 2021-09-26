@@ -2,6 +2,7 @@ export const isValidSplitTime = (v: string | undefined): boolean => {
   if (v && v.split) {
     const split = v.split(':');
     return (
+      v.length <= 5 &&
       split.length === 2 &&
       !isNaN(+split[0]) &&
       !isNaN(+split[1]) &&

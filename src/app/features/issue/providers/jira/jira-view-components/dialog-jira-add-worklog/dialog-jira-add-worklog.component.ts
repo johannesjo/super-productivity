@@ -36,7 +36,7 @@ export class DialogJiraAddWorklogComponent {
     this.timeSpent = this.data.task.timeSpent;
     this.issue = this.data.issue;
     this.started = this._convertTimestamp(this.data.task.created);
-    this.comment = this.data.task.title;
+    this.comment = this.data.task.parentId ? this.data.task.title : '';
   }
 
   close(): void {

@@ -1,10 +1,12 @@
+import { isValidSplitTime } from './is-valid-split-time';
+
 export const getDateTimeFromClockString = (
   clockString: string,
   date: number | Date,
 ): number => {
   const [h, m] = clockString.split(':');
 
-  if (clockString.length > 5 || isNaN(+h) || isNaN(+m)) {
+  if (!isValidSplitTime(clockString)) {
     throw new Error('Invalid clock string');
   }
   const d = new Date(date);
