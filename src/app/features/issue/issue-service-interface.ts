@@ -38,7 +38,7 @@ export interface IssueServiceInterface {
     {
       task: Task;
       taskChanges: Partial<Task>;
-      issue: IssueData;
+      issue: IssueData | null;
     }[]
   >;
 

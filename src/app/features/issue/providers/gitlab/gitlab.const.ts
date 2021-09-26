@@ -15,6 +15,8 @@ export const DEFAULT_GITLAB_CFG: GitlabCfg = {
   isAutoPoll: false,
   isAutoAddToBacklog: false,
   filterUsername: null,
+  scope: 'created-by-me',
+  source: 'project',
 };
 
 // NOTE: we need a high limit because git has low usage limits :(
@@ -25,7 +27,7 @@ export const GITLAB_INITIAL_POLL_DELAY = GITHUB_INITIAL_POLL_DELAY + 8000;
 // export const GITLAB_POLL_INTERVAL = 15 * 1000;
 export const GITLAB_BASE_URL = 'https://gitlab.com/';
 
-export const GITLAB_API_BASE_URL = `${GITLAB_BASE_URL}api/v4/projects`;
+export const GITLAB_API_BASE_URL = `${GITLAB_BASE_URL}api/v4`;
 
 export const GITLAB_PROJECT_REGEX =
   /(^[1-9][0-9]*$)|((\w-?|\.-?)+((\/|%2F)(\w-?|\.-?)+)+$)/i;
@@ -39,6 +41,19 @@ export const GITLAB_CONFIG_FORM: LimitedFormlyFieldConfig<GitlabCfg>[] = [
       type: 'text',
       pattern:
         /((([A-Za-z]{3,9}:(?:\/\/)?)(?:[\-;:&=\+\$,\w]+@)?[A-Za-z0-9\.\-]+|(?:www\.|[\-;:&=\+\$,\w]+@)[A-Za-z0-9\.\-]+)((?:\/[\+~%\/\.\w\-_]*)?\??(?:[\-\+=&;%@\.\w_]*)#?(?:[\.\!\/\\\w]*))?)/,
+    },
+  },
+  {
+    key: 'source',
+    type: 'select',
+    defaultValue: 'project',
+    templateOptions: {
+      label: T.F.GITLAB.FORM.SOURCE,
+      options: [
+        { value: 'project', label: T.F.GITLAB.FORM.SOURCE_PROJECT },
+        { value: 'group', label: T.F.GITLAB.FORM.SOURCE_GROUP },
+        { value: 'global', label: T.F.GITLAB.FORM.SOURCE_GLOBAL },
+      ],
     },
   },
   {
@@ -93,6 +108,19 @@ export const GITLAB_CONFIG_FORM: LimitedFormlyFieldConfig<GitlabCfg>[] = [
     type: 'input',
     templateOptions: {
       label: T.F.GITLAB.FORM.FILTER_USER,
+    },
+  },
+  {
+    key: 'scope',
+    type: 'select',
+    defaultValue: 'created-by-me',
+    templateOptions: {
+      label: T.F.GITLAB.FORM.SCOPE,
+      options: [
+        { value: 'all', label: T.F.GITLAB.FORM.SCOPE_ALL },
+        { value: 'created-by-me', label: T.F.GITLAB.FORM.SCOPE_CREATED },
+        { value: 'assigned-to-me', label: T.F.GITLAB.FORM.SCOPE_ASSIGNED },
+      ],
     },
   },
 ];

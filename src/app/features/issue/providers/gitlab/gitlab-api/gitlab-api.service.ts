@@ -29,36 +29,33 @@ import { GITLAB_TYPE, ISSUE_PROVIDER_HUMANIZED } from '../../../issue.const';
 export class GitlabApiService {
   constructor(private _snackService: SnackService, private _http: HttpClient) {}
 
-  getById$(id: number, cfg: GitlabCfg): Observable<GitlabIssue> {
+  getById$(id: string, cfg: GitlabCfg): Observable<GitlabIssue> {
     return this._sendRequest$(
       {
-        url: `${this.apiLink(cfg)}/issues/${id}`,
+        url: `${this.apiLink(cfg, id)}`,
       },
       cfg,
     ).pipe(
       mergeMap((issue: GitlabOriginalIssue) => {
-        return this.getIssueWithComments$(mapGitlabIssue(issue), cfg);
+        return this.getIssueWithComments$(mapGitlabIssue(issue, cfg), cfg);
       }),
     );
   }
 
-  getByIds$(ids: string[], cfg: GitlabCfg): Observable<GitlabIssue[]> {
-    let queryParams = 'iids[]=';
-    for (let i = 0; i < ids.length; i++) {
-      if (i === ids.length - 1) {
-        queryParams += ids[i];
-      } else {
-        queryParams += `${ids[i]}&iids[]=`;
-      }
-    }
+  getByIds$(project: string, ids: string[], cfg: GitlabCfg): Observable<GitlabIssue[]> {
+    const queryParams = 'iids[]=' + ids.join('&iids[]=');
+
     return this._sendRequest$(
       {
-        url: `${this.apiLink(cfg)}/issues?${queryParams}&per_page=100`,
+        url: `${this.apiLink(
+          cfg,
+          null,
+        )}/projects/${project}/issues?${queryParams}&scope=${cfg.scope}&per_page=100`,
       },
       cfg,
     ).pipe(
       map((issues: GitlabOriginalIssue[]) => {
-        return issues ? issues.map(mapGitlabIssue) : [];
+        return issues ? issues.map((issue) => mapGitlabIssue(issue, cfg)) : [];
       }),
       mergeMap((issues: GitlabIssue[]) => {
         if (issues && issues.length) {
@@ -93,12 +90,14 @@ export class GitlabApiService {
     }
     return this._sendRequest$(
       {
-        url: `${this.apiLink(cfg)}/issues?search=${searchText}&order_by=updated_at`,
+        url: `${this.apiLink(cfg, null)}/issues?search=${searchText}&scope=${
+          cfg.scope
+        }&order_by=updated_at`,
       },
       cfg,
     ).pipe(
       map((issues: GitlabOriginalIssue[]) => {
-        return issues ? issues.map(mapGitlabIssue) : [];
+        return issues ? issues.map((issue) => mapGitlabIssue(issue, cfg)) : [];
       }),
       mergeMap((issues: GitlabIssue[]) => {
         if (issues && issues.length) {
@@ -137,19 +136,68 @@ export class GitlabApiService {
       {
         url: `${this.apiLink(
           cfg,
-        )}/issues?state=opened&order_by=updated_at&per_page=100&page=${pageNumber}`,
+          null,
+        )}/issues?state=opened&order_by=updated_at&per_page=100&scope=${
+          cfg.scope
+        }&page=${pageNumber}`,
       },
       cfg,
     ).pipe(
       take(1),
       map((issues: GitlabOriginalIssue[]) => {
-        return issues ? issues.map(mapGitlabIssue) : [];
+        return issues ? issues.map((issue) => mapGitlabIssue(issue, cfg)) : [];
       }),
     );
   }
 
+  getFullIssueRef$(issue: string | number, projectConfig: GitlabCfg): string {
+    if (this._getPartsFromIssue$(issue).length === 2) {
+      return issue.toString();
+    } else {
+      return (
+        this.getProjectFromIssue$(issue, projectConfig) +
+        '#' +
+        this._getIidFromIssue$(issue)
+      );
+    }
+  }
+
+  getProjectFromIssue$(issue: string | number | null, projectConfig: GitlabCfg): string {
+    const parts: string[] = this._getPartsFromIssue$(issue);
+    if (parts.length === 2) {
+      return parts[0];
+    }
+
+    const projectURL: string = projectConfig.project ? projectConfig.project : '';
+
+    const projectPath = projectURL.match(GITLAB_PROJECT_REGEX);
+    if (!projectPath) {
+      throwError('Gitlab Project URL');
+    }
+    return projectURL;
+  }
+
+  private _getIidFromIssue$(issue: string | number): string {
+    const parts: string[] = this._getPartsFromIssue$(issue);
+    if (parts.length === 2) {
+      return parts[1];
+    } else {
+      return parts[0];
+    }
+  }
+
+  private _getPartsFromIssue$(issue: string | number | null): string[] {
+    if (typeof issue === 'string') {
+      return issue.split('#');
+    } else if (typeof issue == 'number') {
+      return [issue.toString()];
+    } else {
+      return [];
+    }
+  }
+
   private _getIssueComments$(
-    issueid: number,
+    issueid: number | string,
     pageNumber: number,
     cfg: GitlabCfg,
   ): Observable<GitlabOriginalComment[]> {
@@ -158,9 +206,7 @@ export class GitlabApiService {
     }
     return this._sendRequest$(
       {
-        url: `${this.apiLink(
-          cfg,
-        )}/issues/${issueid}/notes?per_page=100&page=${pageNumber}`,
+        url: `${this.apiLink(cfg, issueid)}/notes?per_page=100&page=${pageNumber}`,
       },
       cfg,
     ).pipe(
@@ -259,25 +305,36 @@ export class GitlabApiService {
     return throwError({ [HANDLED_ERROR_PROP_STR]: 'Gitlab: Api request failed.' });
   }
 
-  private apiLink(projectConfig: GitlabCfg): string {
+  private apiLink(projectConfig: GitlabCfg, issueId: string | number | null): string {
     let apiURL: string = '';
-    let projectURL: string = projectConfig.project ? projectConfig.project : '';
+
     if (projectConfig.gitlabBaseUrl) {
       const fixedUrl = projectConfig.gitlabBaseUrl.match(/.*\/$/)
         ? projectConfig.gitlabBaseUrl
         : `${projectConfig.gitlabBaseUrl}/`;
-      apiURL = fixedUrl + 'api/v4/projects/';
+      apiURL = fixedUrl + 'api/v4/';
     } else {
       apiURL = GITLAB_API_BASE_URL + '/';
     }
-    const projectPath = projectURL.match(GITLAB_PROJECT_REGEX);
-    if (projectPath) {
-      projectURL = projectURL.replace(/\//gi, '%2F');
+
+    const projectURL: string = this.getProjectFromIssue$(issueId, projectConfig).replace(
+      /\//gi,
+      '%2F',
+    );
+
+    if (issueId) {
+      apiURL += 'projects/' + projectURL + '/issues/' + this._getIidFromIssue$(issueId);
     } else {
-      // Should never enter here
-      throwError('Gitlab Project URL');
+      switch (projectConfig.source) {
+        case 'project':
+          apiURL += 'projects/' + projectURL;
+          break;
+        case 'group':
+          apiURL += 'groups/' + projectURL;
+          break;
+      }
     }
-    apiURL += projectURL;
+
     return apiURL;
   }
 }

@@ -1,8 +1,12 @@
 import { GitlabIssue } from './gitlab-issue.model';
 import { GitlabOriginalIssue } from '../gitlab-api/gitlab-api-responses';
 import { IssueProviderKey, SearchResultItem } from '../../../issue.model';
+import { GitlabCfg } from '../gitlab';
 
-export const mapGitlabIssue = (issue: GitlabOriginalIssue): GitlabIssue => {
+export const mapGitlabIssue = (
+  issue: GitlabOriginalIssue,
+  cfg: GitlabCfg,
+): GitlabIssue => {
   return {
     html_url: issue.web_url,
     // eslint-disable-next-line id-blacklist
@@ -27,7 +31,8 @@ export const mapGitlabIssue = (issue: GitlabOriginalIssue): GitlabIssue => {
     comments: [],
     url: issue.web_url,
     // NOTE: we use the issue number as id as well, as it there is not much to be done with the id with the api
-    id: issue.iid,
+    // when we can get issues from multiple projects we use full refence as id
+    id: issue.references.full,
   };
 };
 

@@ -4,6 +4,8 @@ export interface GitlabCfg {
   isAutoPoll: boolean;
   filterUsername: string | null;
   gitlabBaseUrl: string | null | undefined;
+  source: string | null;
   project: string | null;
   token: string | null;
+  scope: string | null;
 }
