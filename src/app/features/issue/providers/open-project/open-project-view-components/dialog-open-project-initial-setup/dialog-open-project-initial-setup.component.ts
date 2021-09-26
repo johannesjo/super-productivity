@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, Inject, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { OpenProjectCfg } from '../../open-project.model';
 import { FormGroup } from '@angular/forms';
@@ -15,7 +15,7 @@ import { T } from '../../../../../../t.const';
   styleUrls: ['./dialog-open-project-initial-setup.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class DialogOpenProjectInitialSetupComponent implements OnInit {
+export class DialogOpenProjectInitialSetupComponent {
   T: typeof T = T;
   openProjectCfg: OpenProjectCfg;
   formGroup: FormGroup = new FormGroup({});
@@ -27,8 +27,6 @@ export class DialogOpenProjectInitialSetupComponent implements OnInit {
   ) {
     this.openProjectCfg = this.data.openProjectCfg || DEFAULT_OPEN_PROJECT_CFG;
   }
-
-  ngOnInit(): void {}
 
   saveOpenProjectCfg(gitCfg: OpenProjectCfg): void {
     this._matDialogRef.close(gitCfg);

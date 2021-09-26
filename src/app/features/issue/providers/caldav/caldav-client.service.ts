@@ -276,6 +276,7 @@ export class CaldavClientService {
       // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
       xhr.open = function (): void {
         // @ts-ignore
+        // eslint-disable-next-line prefer-rest-params
         const result = oldOpen.apply(this, arguments);
         // @ts-ignore
         xhr.setRequestHeader('X-Requested-With', 'SuperProductivity');

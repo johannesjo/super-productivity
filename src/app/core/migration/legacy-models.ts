@@ -63,8 +63,7 @@ export interface LegacyPersistenceBaseModel<T> {
 
   save(state: T, isForce?: boolean): Promise<unknown>;
 }
-
-// eslint-disable-next-line no-unused-vars
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export interface LegacyPersistenceForProjectModel<S, M> {
   appDataKey: keyof LegacyAppDataForProjects;
 

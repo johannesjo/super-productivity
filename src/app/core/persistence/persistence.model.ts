@@ -33,7 +33,7 @@ export interface PersistenceBaseEntityModel<S, M> extends PersistenceBaseModel<S
   execAction(action: Action): Promise<S>;
 }
 
-// eslint-disable-next-line no-unused-vars
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export interface EntityModelHelpers<S, M> {
   getById(projectId: string, id: string): Promise<M>;
 }

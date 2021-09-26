@@ -10,6 +10,4 @@ import { expandFadeAnimation } from '../animations/expand.ani';
 })
 export class HelpSectionComponent {
   @Input() isShowHelp: boolean = false;
-
-  constructor() {}
 }

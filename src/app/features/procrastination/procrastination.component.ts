@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { TaskService } from '../tasks/task.service';
 import { T } from '../../t.const';
 
@@ -8,10 +8,8 @@ import { T } from '../../t.const';
   styleUrls: ['./procrastination.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class ProcrastinationComponent implements OnInit {
+export class ProcrastinationComponent {
   T: typeof T = T;
 
   constructor(public taskService: TaskService) {}
-
-  ngOnInit(): void {}
 }
