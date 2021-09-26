@@ -42,6 +42,7 @@ testem.log
 chromedriver.log
 e2e-test-results
 e2e/screenshots
+.eslintcache
 
 # System Files
 .DS_Store
