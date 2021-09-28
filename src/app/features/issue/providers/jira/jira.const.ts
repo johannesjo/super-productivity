@@ -26,7 +26,6 @@ export const DEFAULT_JIRA_CFG: JiraCfg = {
     'assignee = currentUser() AND sprint in openSprints() AND resolution = Unresolved',
 
   isWorklogEnabled: true,
-  isAutoWorklog: false,
   isAddWorklogOnSubTaskDone: true,
   isAllowSelfSignedCertificate: false,
   isUpdateIssueFromLocal: false,

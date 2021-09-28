@@ -26,7 +26,6 @@ export interface JiraCfg {
   autoAddBacklogJqlQuery: string;
 
   isWorklogEnabled: boolean;
-  isAutoWorklog: boolean;
   isAddWorklogOnSubTaskDone: boolean;
 
   isUpdateIssueFromLocal: boolean;
