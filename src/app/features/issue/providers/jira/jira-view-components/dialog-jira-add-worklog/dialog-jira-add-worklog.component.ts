@@ -8,19 +8,29 @@ import { T } from '../../../../../../t.const';
 import { ProjectService } from '../../../../../project/project.service';
 import { first } from 'rxjs/operators';
 import * as moment from 'moment';
+import { expandFadeAnimation } from '../../../../../../ui/animations/expand.ani';
+import { getWorklogStr } from '../../../../../../util/get-work-log-str';
+
+type FillMode = 'TIME_TODAY' | 'ALL_TIME' | 'ALL_TIME_MINUS_LOGGED';
 
 @Component({
   selector: 'dialog-jira-add-worklog',
   templateUrl: './dialog-jira-add-worklog.component.html',
   styleUrls: ['./dialog-jira-add-worklog.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  animations: [expandFadeAnimation],
 })
 export class DialogJiraAddWorklogComponent {
   T: typeof T = T;
   timeSpent: number;
+  timeLogged: number;
   started: string;
   comment: string;
   issue: JiraIssue;
+  selectedFillMode?: FillMode;
+
+  timeSpentToday: number;
+  timeSpentLoggedDelta: number;
 
   constructor(
     private _jiraApiService: JiraApiService,
@@ -35,8 +45,11 @@ export class DialogJiraAddWorklogComponent {
   ) {
     this.timeSpent = this.data.task.timeSpent;
     this.issue = this.data.issue;
+    this.timeLogged = this.issue.timespent * 1000;
     this.started = this._convertTimestamp(this.data.task.created);
     this.comment = this.data.task.parentId ? this.data.task.title : '';
+    this.timeSpentToday = this.data.task.timeSpentOnDay[getWorklogStr()];
+    this.timeSpentLoggedDelta = Math.max(0, this.data.task.timeSpent - this.timeLogged);
   }
 
   close(): void {
@@ -65,6 +78,22 @@ export class DialogJiraAddWorklogComponent {
           });
           this.close();
         });
+    }
+  }
+
+  fill(mode: FillMode): void {
+    this.selectedFillMode = mode;
+
+    switch (mode) {
+      case 'ALL_TIME':
+        this.timeSpent = this.data.task.timeSpent;
+        return;
+      case 'TIME_TODAY':
+        this.timeSpent = this.timeSpentToday;
+        return;
+      case 'ALL_TIME_MINUS_LOGGED':
+        this.timeSpent = this.timeSpentLoggedDelta;
+        return;
     }
   }
 

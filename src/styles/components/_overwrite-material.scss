@@ -117,6 +117,20 @@ body .mat-form-field {
   }
 }
 
+.mat-form-field:not(.mat-form-field-appearance-legacy)
+  .mat-form-field-prefix
+  .mat-icon-button,
+.mat-form-field:not(.mat-form-field-appearance-legacy)
+  .mat-form-field-suffix
+  .mat-icon-button {
+  width: 2.5em;
+  height: 2.5em;
+
+  mat-icon {
+    font-size: 24px;
+  }
+}
+
 // CARD BG
 .isDarkTheme .mat-card {
   background: $dark-theme-card-bg;
