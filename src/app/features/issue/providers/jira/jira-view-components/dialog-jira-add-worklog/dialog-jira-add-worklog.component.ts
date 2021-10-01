@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, Inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Inject, OnDestroy } from '@angular/core';
 import { JiraApiService } from '../../jira-api.service';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { SnackService } from '../../../../../../core/snack/snack.service';
@@ -10,8 +10,13 @@ import { first } from 'rxjs/operators';
 import * as moment from 'moment';
 import { expandFadeAnimation } from '../../../../../../ui/animations/expand.ani';
 import { getWorklogStr } from '../../../../../../util/get-work-log-str';
-
-type FillMode = 'TIME_TODAY' | 'ALL_TIME' | 'ALL_TIME_MINUS_LOGGED';
+import {
+  JIRA_ISSUE_TYPE,
+  JIRA_WORK_LOG_EXPORT_CHECKBOXES,
+  JIRA_WORK_LOG_EXPORT_FORM_OPTIONS,
+} from '../../jira.const';
+import { JiraWorklogExportDefaultTime } from '../../jira.model';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'dialog-jira-add-worklog',
@@ -20,17 +25,24 @@ type FillMode = 'TIME_TODAY' | 'ALL_TIME' | 'ALL_TIME_MINUS_LOGGED';
   changeDetection: ChangeDetectionStrategy.OnPush,
   animations: [expandFadeAnimation],
 })
-export class DialogJiraAddWorklogComponent {
+export class DialogJiraAddWorklogComponent implements OnDestroy {
   T: typeof T = T;
   timeSpent: number;
   timeLogged: number;
   started: string;
   comment: string;
   issue: JiraIssue;
-  selectedFillMode?: FillMode;
-
+  selectedDefaultTimeMode?: JiraWorklogExportDefaultTime;
+  defaultTimeOptions = JIRA_WORK_LOG_EXPORT_FORM_OPTIONS;
+  defaultTimeCheckboxContent?: {
+    label: string;
+    value: JiraWorklogExportDefaultTime;
+    isChecked: boolean;
+  };
   timeSpentToday: number;
   timeSpentLoggedDelta: number;
+
+  private _subs = new Subscription();
 
   constructor(
     private _jiraApiService: JiraApiService,
@@ -50,6 +62,21 @@ export class DialogJiraAddWorklogComponent {
     this.comment = this.data.task.parentId ? this.data.task.title : '';
     this.timeSpentToday = this.data.task.timeSpentOnDay[getWorklogStr()];
     this.timeSpentLoggedDelta = Math.max(0, this.data.task.timeSpent - this.timeLogged);
+
+    this._subs.add(
+      this._projectService
+        .getJiraCfgForProject$(this.data.task.projectId as string)
+        .pipe(first())
+        .subscribe((cfg) => {
+          if (cfg.worklogDialogDefaultTIme) {
+            this.timeSpent = this.getTimeToLogForMode(cfg.worklogDialogDefaultTIme);
+          }
+        }),
+    );
+  }
+
+  ngOnDestroy(): void {
+    this._subs.unsubscribe();
   }
 
   close(): void {
@@ -62,6 +89,18 @@ export class DialogJiraAddWorklogComponent {
         .getJiraCfgForProject$(this.data.task.projectId)
         .pipe(first())
         .toPromise();
+
+      if (this.defaultTimeCheckboxContent?.isChecked === true) {
+        this._projectService.updateIssueProviderConfig(
+          this.data.task.projectId,
+          JIRA_ISSUE_TYPE,
+          {
+            ...cfg,
+            worklogDialogDefaultTIme: this.defaultTimeCheckboxContent.value,
+          },
+        );
+      }
+
       this._jiraApiService
         .addWorklog$({
           issueId: this.issue.id,
@@ -81,20 +120,27 @@ export class DialogJiraAddWorklogComponent {
     }
   }
 
-  fill(mode: FillMode): void {
-    this.selectedFillMode = mode;
+  fill(mode: JiraWorklogExportDefaultTime): void {
+    this.selectedDefaultTimeMode = mode;
+    this.timeSpent = this.getTimeToLogForMode(mode);
+    const matchingCheckboxCfg = JIRA_WORK_LOG_EXPORT_CHECKBOXES.find(
+      (checkCfg) => checkCfg.value === mode,
+    );
+    this.defaultTimeCheckboxContent = matchingCheckboxCfg
+      ? { ...matchingCheckboxCfg, isChecked: false }
+      : undefined;
+  }
 
+  getTimeToLogForMode(mode: JiraWorklogExportDefaultTime): number {
     switch (mode) {
-      case 'ALL_TIME':
-        this.timeSpent = this.data.task.timeSpent;
-        return;
-      case 'TIME_TODAY':
-        this.timeSpent = this.timeSpentToday;
-        return;
-      case 'ALL_TIME_MINUS_LOGGED':
-        this.timeSpent = this.timeSpentLoggedDelta;
-        return;
+      case JiraWorklogExportDefaultTime.AllTime:
+        return this.data.task.timeSpent;
+      case JiraWorklogExportDefaultTime.TimeToday:
+        return this.timeSpentToday;
+      case JiraWorklogExportDefaultTime.AllTimeMinusLogged:
+        return this.timeSpentLoggedDelta;
     }
+    return 0;
   }
 
   private _convertTimestamp(timestamp: number): string {

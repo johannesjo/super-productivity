@@ -265,12 +265,19 @@
         "UPDATE_STATUS": "Update Status"
       },
       "DIALOG_WORKLOG": {
+        "CHECKBOXES": {
+          "ALL_TIME": "Always use all time spent on task as default",
+          "ALL_TIME_MINUS_LOGGED": "Always use only time spent minus time logged as default",
+          "TIME_SPENT_TODAY": "Always use only time spent today as default",
+          "TIME_SPENT_YESTERDAY": "Always use only time spent yesterday as default"
+        },
         "CURRENTLY_LOGGED": "Currently logged time: ",
         "INVALID_DATE": "The entered value is not a date!",
         "SAVE_WORKLOG": "Save Worklog",
         "STARTED": "Started",
         "SUBMIT_WORKLOG_FOR": "Submit a worklog to Jira for",
         "TIME_SPENT": "Time Spent",
+        "TIME_SPENT_TOOLTIP": "Add different times",
         "TITLE": "Jira: Submit Worklog"
       },
       "FORM": {
@@ -286,6 +293,11 @@
         "IS_AUTO_POLL_TICKETS": "Check imported issues for changes automatically and notify",
         "IS_CHECK_TO_RE_ASSIGN_TICKET_ON_TASK_START": "Check if the currently worked on issue is assigned to current user",
         "IS_WORKLOG_ENABLED": "Open dialog to submit worklog to Jira when task is done",
+        "WORKLOG_DEFAULT_TIME_MODE": "Default time value to submit",
+        "WORKLOG_DEFAULT_ALL_TIME": "Fill in all time spent on task",
+        "WORKLOG_DEFAULT_ALL_TIME_MINUS_LOGGED": "Fill in time spent minus time logged",
+        "WORKLOG_DEFAULT_TODAY": "Fill only time spent today",
+        "WORKLOG_DEFAULT_YESTERDAY": "Fill only time spent yesterday",
         "SEARCH_JQL_QUERY": "JQL Query for limiting searching tasks"
       },
       "FORM_CRED": {

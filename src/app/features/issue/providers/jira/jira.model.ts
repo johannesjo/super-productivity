@@ -2,6 +2,13 @@ import { JiraOriginalTransition } from './jira-api-responses';
 
 export type JiraTransitionOption = 'ALWAYS_ASK' | 'DO_NOT' | JiraOriginalTransition;
 
+export enum JiraWorklogExportDefaultTime {
+  AllTime = 'AllTime',
+  TimeToday = 'TimeToday',
+  TimeYesterday = 'TimeYesterday',
+  AllTimeMinusLogged = 'AllTimeMinusLogged',
+}
+
 export interface JiraTransitionConfig {
   // NOTE: keys mirror IssueLocalState type
   OPEN: JiraTransitionOption;
@@ -27,6 +34,7 @@ export interface JiraCfg {
 
   isWorklogEnabled: boolean;
   isAddWorklogOnSubTaskDone: boolean;
+  worklogDialogDefaultTIme: JiraWorklogExportDefaultTime;
 
   isUpdateIssueFromLocal: boolean;
 

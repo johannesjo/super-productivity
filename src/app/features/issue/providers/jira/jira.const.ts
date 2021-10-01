@@ -1,5 +1,5 @@
 // TODO use as a checklist
-import { JiraCfg } from './jira.model';
+import { JiraCfg, JiraWorklogExportDefaultTime } from './jira.model';
 import { GITHUB_INITIAL_POLL_DELAY } from '../github/github.const';
 import { T } from '../../../../t.const';
 import {
@@ -27,6 +27,7 @@ export const DEFAULT_JIRA_CFG: JiraCfg = {
 
   isWorklogEnabled: true,
   isAddWorklogOnSubTaskDone: true,
+  worklogDialogDefaultTIme: JiraWorklogExportDefaultTime.AllTime,
   isAllowSelfSignedCertificate: false,
   isUpdateIssueFromLocal: false,
 
@@ -79,6 +80,50 @@ export const JIRA_REDUCED_ISSUE_FIELDS = [
   'updated',
   'timeestimate',
   'timespent',
+];
+
+export const JIRA_WORK_LOG_EXPORT_FORM_OPTIONS: {
+  label: string;
+  value: JiraWorklogExportDefaultTime;
+}[] = [
+  {
+    label: T.F.JIRA.FORM_ADV.WORKLOG_DEFAULT_ALL_TIME,
+    value: JiraWorklogExportDefaultTime.AllTime,
+  },
+  {
+    label: T.F.JIRA.FORM_ADV.WORKLOG_DEFAULT_ALL_TIME_MINUS_LOGGED,
+    value: JiraWorklogExportDefaultTime.AllTimeMinusLogged,
+  },
+  {
+    label: T.F.JIRA.FORM_ADV.WORKLOG_DEFAULT_TODAY,
+    value: JiraWorklogExportDefaultTime.TimeToday,
+  },
+  {
+    label: T.F.JIRA.FORM_ADV.WORKLOG_DEFAULT_YESTERDAY,
+    value: JiraWorklogExportDefaultTime.TimeYesterday,
+  },
+];
+
+export const JIRA_WORK_LOG_EXPORT_CHECKBOXES: {
+  label: string;
+  value: JiraWorklogExportDefaultTime;
+}[] = [
+  {
+    label: T.F.JIRA.DIALOG_WORKLOG.CHECKBOXES.ALL_TIME,
+    value: JiraWorklogExportDefaultTime.AllTime,
+  },
+  {
+    label: T.F.JIRA.DIALOG_WORKLOG.CHECKBOXES.ALL_TIME_MINUS_LOGGED,
+    value: JiraWorklogExportDefaultTime.AllTimeMinusLogged,
+  },
+  {
+    label: T.F.JIRA.DIALOG_WORKLOG.CHECKBOXES.TIME_SPENT_TODAY,
+    value: JiraWorklogExportDefaultTime.TimeToday,
+  },
+  {
+    label: T.F.JIRA.DIALOG_WORKLOG.CHECKBOXES.TIME_SPENT_YESTERDAY,
+    value: JiraWorklogExportDefaultTime.TimeYesterday,
+  },
 ];
 
 export const JIRA_CREDENTIALS_FORM_CFG: LimitedFormlyFieldConfig<JiraCfg>[] = [
@@ -184,6 +229,17 @@ export const JIRA_ADVANCED_FORM_CFG: LimitedFormlyFieldConfig<JiraCfg>[] = [
     type: 'checkbox',
     templateOptions: {
       label: T.F.JIRA.FORM_ADV.IS_ADD_WORKLOG_ON_SUB_TASK_DONE,
+    },
+  },
+  {
+    hideExpression: (model: any) => {
+      return !model.isWorklogEnabled;
+    },
+    key: 'worklogDialogDefaultTIme',
+    type: 'select',
+    templateOptions: {
+      label: T.F.JIRA.FORM_ADV.WORKLOG_DEFAULT_TIME_MODE,
+      options: JIRA_WORK_LOG_EXPORT_FORM_OPTIONS,
     },
   },
 ];

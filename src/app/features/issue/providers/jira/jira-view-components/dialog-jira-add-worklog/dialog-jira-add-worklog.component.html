@@ -31,7 +31,7 @@
           matSuffix
           type="button"
           [matMenuTriggerFor]="contextMenu"
-          matTooltip="Add different times"
+          [matTooltip]="T.F.JIRA.DIALOG_WORKLOG.TIME_SPENT_TOOLTIP|translate"
         >
           <mat-icon style="font-size: 20px">timer</mat-icon>
         </button>
@@ -39,35 +39,24 @@
 
       <mat-menu #contextMenu="matMenu">
         <ng-template matMenuContent>
-          <button mat-menu-item type="button" (click)="fill('ALL_TIME')">
-            Fill in all time spent on task ({{data.task.timeSpent|msToString}})
-          </button>
-          <button mat-menu-item type="button" (click)="fill('TIME_TODAY')">
-            Fill only time spent today ({{timeSpentToday|msToString}})
-          </button>
-          <button mat-menu-item type="button" (click)="fill('ALL_TIME_MINUS_LOGGED')">
-            Fill in time spent minus time logged ({{timeSpentLoggedDelta|msToString}})
+          <button
+            *ngFor="let opt of defaultTimeOptions"
+            mat-menu-item
+            type="button"
+            (click)="fill(opt.value)"
+          >
+            {{opt.label|translate}} ({{(getTimeToLogForMode(opt.value)|msToString)}})
           </button>
         </ng-template>
       </mat-menu>
 
       <mat-checkbox
+        *ngIf="defaultTimeCheckboxContent"
         [@expandFade]
+        [checked]="defaultTimeCheckboxContent.isChecked"
+        (change)="defaultTimeCheckboxContent.isChecked = $event.checked"
         style="margin-bottom: 20px"
-        *ngIf="selectedFillMode==='ALL_TIME'"
-        >Always use all time spent on task as default
-      </mat-checkbox>
-      <mat-checkbox
-        [@expandFade]
-        style="margin-bottom: 20px"
-        *ngIf="selectedFillMode==='TIME_TODAY'"
-        >Always use only time spent today as default
-      </mat-checkbox>
-      <mat-checkbox
-        [@expandFade]
-        style="margin-bottom: 20px"
-        *ngIf="selectedFillMode==='ALL_TIME_MINUS_LOGGED'"
-        >Always use only time spent minus time logged as default
+        >{{defaultTimeCheckboxContent.label|translate}}
       </mat-checkbox>
 
       <mat-form-field>
