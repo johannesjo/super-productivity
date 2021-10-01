@@ -26,15 +26,19 @@
           type="text"
         />
 
-        <button
-          mat-icon-button
+        <div
+          class="suffix-wrapper"
           matSuffix
-          type="button"
           [matMenuTriggerFor]="contextMenu"
           [matTooltip]="T.F.JIRA.DIALOG_WORKLOG.TIME_SPENT_TOOLTIP|translate"
         >
-          <mat-icon style="font-size: 20px">timer</mat-icon>
-        </button>
+          <button mat-icon-button type="button">
+            <mat-icon style="font-size: 24px">add</mat-icon>
+          </button>
+          <button mat-icon-button type="button">
+            <mat-icon style="font-size: 24px">timer</mat-icon>
+          </button>
+        </div>
       </mat-form-field>
 
       <mat-menu #contextMenu="matMenu">

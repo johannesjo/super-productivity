@@ -68,8 +68,8 @@ export class DialogJiraAddWorklogComponent implements OnDestroy {
         .getJiraCfgForProject$(this.data.task.projectId as string)
         .pipe(first())
         .subscribe((cfg) => {
-          if (cfg.worklogDialogDefaultTIme) {
-            this.timeSpent = this.getTimeToLogForMode(cfg.worklogDialogDefaultTIme);
+          if (cfg.worklogDialogDefaultTime) {
+            this.timeSpent = this.getTimeToLogForMode(cfg.worklogDialogDefaultTime);
           }
         }),
     );
@@ -95,8 +95,7 @@ export class DialogJiraAddWorklogComponent implements OnDestroy {
           this.data.task.projectId,
           JIRA_ISSUE_TYPE,
           {
-            ...cfg,
-            worklogDialogDefaultTIme: this.defaultTimeCheckboxContent.value,
+            worklogDialogDefaultTime: this.defaultTimeCheckboxContent.value,
           },
         );
       }

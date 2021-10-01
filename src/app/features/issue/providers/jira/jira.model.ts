@@ -34,7 +34,7 @@ export interface JiraCfg {
 
   isWorklogEnabled: boolean;
   isAddWorklogOnSubTaskDone: boolean;
-  worklogDialogDefaultTIme: JiraWorklogExportDefaultTime;
+  worklogDialogDefaultTime: JiraWorklogExportDefaultTime;
 
   isUpdateIssueFromLocal: boolean;
 

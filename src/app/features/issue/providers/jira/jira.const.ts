@@ -27,7 +27,7 @@ export const DEFAULT_JIRA_CFG: JiraCfg = {
 
   isWorklogEnabled: true,
   isAddWorklogOnSubTaskDone: true,
-  worklogDialogDefaultTIme: JiraWorklogExportDefaultTime.AllTime,
+  worklogDialogDefaultTime: JiraWorklogExportDefaultTime.AllTime,
   isAllowSelfSignedCertificate: false,
   isUpdateIssueFromLocal: false,
 
@@ -235,7 +235,7 @@ export const JIRA_ADVANCED_FORM_CFG: LimitedFormlyFieldConfig<JiraCfg>[] = [
     hideExpression: (model: any) => {
       return !model.isWorklogEnabled;
     },
-    key: 'worklogDialogDefaultTIme',
+    key: 'worklogDialogDefaultTime',
     type: 'select',
     templateOptions: {
       label: T.F.JIRA.FORM_ADV.WORKLOG_DEFAULT_TIME_MODE,
