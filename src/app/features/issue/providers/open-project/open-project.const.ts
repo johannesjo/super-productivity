@@ -5,6 +5,8 @@ import {
   ConfigFormSection,
   LimitedFormlyFieldConfig,
 } from '../../../config/global-config.model';
+import { JIRA_WORK_LOG_EXPORT_FORM_OPTIONS } from '../jira/jira.const';
+import { JiraWorklogExportDefaultTime } from '../jira/jira.model';
 
 export const DEFAULT_OPEN_PROJECT_CFG: OpenProjectCfg = {
   host: null,
@@ -15,6 +17,7 @@ export const DEFAULT_OPEN_PROJECT_CFG: OpenProjectCfg = {
   isAutoAddToBacklog: false,
   isShowTimeTrackingDialog: false,
   isShowTimeTrackingDialogForEachSubTask: false,
+  timeTrackingDialogDefaultTime: JiraWorklogExportDefaultTime.AllTime,
   filterUsername: null,
 };
 
@@ -87,6 +90,17 @@ export const OPEN_PROJECT_CONFIG_FORM: LimitedFormlyFieldConfig<OpenProjectCfg>[
     },
     templateOptions: {
       label: T.F.OPEN_PROJECT.FORM.IS_SHOW_TIME_TRACKING_DIALOG_FOR_EACH_SUB_TASK,
+    },
+  },
+  {
+    hideExpression: (model: any) => {
+      return !model.isShowTimeTrackingDialog;
+    },
+    key: 'timeTrackingDialogDefaultTime',
+    type: 'select',
+    templateOptions: {
+      label: T.F.JIRA.FORM_ADV.WORKLOG_DEFAULT_TIME_MODE,
+      options: JIRA_WORK_LOG_EXPORT_FORM_OPTIONS,
     },
   },
   // TODO also remove translation and model if removing it for good

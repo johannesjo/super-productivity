@@ -293,9 +293,9 @@
         "IS_AUTO_POLL_TICKETS": "Check imported issues for changes automatically and notify",
         "IS_CHECK_TO_RE_ASSIGN_TICKET_ON_TASK_START": "Check if the currently worked on issue is assigned to current user",
         "IS_WORKLOG_ENABLED": "Open dialog to submit worklog to Jira when task is done",
-        "WORKLOG_DEFAULT_TIME_MODE": "Default time value to submit",
+        "WORKLOG_DEFAULT_TIME_MODE": "Default time value for dialog",
         "WORKLOG_DEFAULT_ALL_TIME": "Fill in all time spent on task",
-        "WORKLOG_DEFAULT_ALL_TIME_MINUS_LOGGED": "Fill in time spent minus time logged",
+        "WORKLOG_DEFAULT_ALL_TIME_MINUS_LOGGED": "Fill in all time spent minus time logged",
         "WORKLOG_DEFAULT_TODAY": "Fill only time spent today",
         "WORKLOG_DEFAULT_YESTERDAY": "Fill only time spent yesterday",
         "SEARCH_JQL_QUERY": "JQL Query for limiting searching tasks"
