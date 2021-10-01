@@ -186,7 +186,7 @@
     "glob": "^7.1.7",
     "hammerjs": "^2.0.8",
     "helpful-decorators": "^2.1.0",
-    "husky": "^4.2.5",
+    "husky": "^7.0.2",
     "ical.js": "^1.4.0",
     "idb": "^6.0.0",
     "jasmine-core": "^3.8.0",
