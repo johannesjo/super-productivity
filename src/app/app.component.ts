@@ -33,7 +33,6 @@ import { ImexMetaService } from './imex/imex-meta/imex-meta.service';
 import { AndroidService } from './core/android/android.service';
 import { IS_ANDROID_WEB_VIEW } from './util/is-android-web-view';
 import { isOnline, isOnline$ } from './util/is-online';
-import { InitialDialogService } from './features/initial-dialog/initial-dialog.service';
 import { SyncTriggerService } from './imex/sync/sync-trigger.service';
 import { environment } from '../environments/environment';
 import { ActivatedRoute, RouterOutlet } from '@angular/router';
@@ -78,7 +77,6 @@ export class AppComponent implements OnDestroy {
     private _uiHelperService: UiHelperService,
     private _languageService: LanguageService,
     private _androidService: AndroidService,
-    private _initialDialogService: InitialDialogService,
     private _bookmarkService: BookmarkService,
     private _startTrackingReminderService: TrackingReminderService,
     private _activatedRoute: ActivatedRoute,
@@ -100,9 +98,6 @@ export class AppComponent implements OnDestroy {
         }
       }),
     );
-
-    // check for dialog
-    this._initialDialogService.showDialogIfNecessary$().subscribe();
 
     // init theme and body class handlers
     this._globalThemeService.init();

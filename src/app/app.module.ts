@@ -40,7 +40,6 @@ import { EntityDataModule } from '@ngrx/data';
 import { MaterialCssVarsModule } from 'angular-material-css-vars';
 import { WorkContextModule } from './features/work-context/work-context.module';
 import { undoTaskDeleteMetaReducer } from './root-store/meta/undo-task-delete.meta-reducer';
-import { InitialDialogModule } from './features/initial-dialog/initial-dialog.module';
 import { actionLoggerReducer } from './root-store/meta/action-logger.reducer';
 import { SyncModule } from './imex/sync/sync.module';
 import { SearchBarModule } from './features/search-bar/search-bar.module';
@@ -75,7 +74,6 @@ export const createTranslateLoader = (http: HttpClient): TranslateHttpLoader =>
     BookmarkModule,
     TasksModule,
     SyncModule,
-    InitialDialogModule,
     MaterialCssVarsModule.forRoot(),
     SearchBarModule,
 
