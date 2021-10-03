@@ -181,7 +181,8 @@
         "serve": {
           "builder": "@angular-builders/custom-webpack:dev-server",
           "options": {
-            "browserTarget": "sp2:build"
+            "browserTarget": "sp2:build",
+            "open": false
           },
           "configurations": {
             "production": {

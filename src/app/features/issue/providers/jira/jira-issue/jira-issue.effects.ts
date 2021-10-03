@@ -17,7 +17,7 @@ import { JiraIssueReduced } from './jira-issue.model';
 import { SnackService } from '../../../../../core/snack/snack.service';
 import { Task } from '../../../../tasks/task.model';
 import { TaskService } from '../../../../tasks/task.service';
-import { BehaviorSubject, EMPTY, Observable, throwError, timer } from 'rxjs';
+import { BehaviorSubject, EMPTY, Observable, of, throwError, timer } from 'rxjs';
 import { MatDialog } from '@angular/material/dialog';
 import { DialogJiraTransitionComponent } from '../jira-view-components/dialog-jira-transition/dialog-jira-transition.component';
 import { IssueLocalState } from '../../../issue.model';
@@ -29,10 +29,7 @@ import { WorkContextService } from '../../../../work-context/work-context.servic
 import { JiraCfg, JiraTransitionOption } from '../jira.model';
 import { setCurrentTask, updateTask } from '../../../../tasks/store/task.actions';
 import { DialogJiraAddWorklogComponent } from '../jira-view-components/dialog-jira-add-worklog/dialog-jira-add-worklog.component';
-import {
-  selectCurrentTaskParentOrCurrent,
-  selectTaskEntities,
-} from '../../../../tasks/store/task.selectors';
+import { selectCurrentTaskParentOrCurrent } from '../../../../tasks/store/task.selectors';
 import { HANDLED_ERROR_PROP_STR } from '../../../../../app.constants';
 import { DialogConfirmComponent } from '../../../../../ui/dialog-confirm/dialog-confirm.component';
 import { setActiveWorkContext } from '../../../../work-context/store/work-context.actions';
@@ -43,52 +40,48 @@ import { isJiraEnabled } from '../is-jira-enabled.util';
 export class JiraIssueEffects {
   // -----
 
-  addWorklog$: any = createEffect(
+  addWorkLog$: any = createEffect(
     () =>
       this._actions$.pipe(
         ofType(updateTask),
         filter(({ task }) => task.changes.isDone === true),
-        withLatestFrom(
-          this._workContextService.isActiveWorkContextProject$,
-          this._workContextService.activeWorkContextId$,
+        concatMap(({ task }) => this._taskService.getByIdOnce$(task.id as string)),
+        concatMap((task) =>
+          task.parentId
+            ? this._taskService
+                .getByIdOnce$(task.parentId)
+                .pipe(map((parent) => ({ mainTask: parent, subTask: task })))
+            : of({ mainTask: task, subTask: undefined }),
         ),
-        filter(([, isActiveContextProject]) => isActiveContextProject),
-        concatMap(([act, , projectId]) =>
-          this._getCfgOnce$(projectId as string).pipe(
-            map((jiraCfg) => ({
-              act,
-              projectId,
-              jiraCfg,
-            })),
-          ),
+        concatMap(({ mainTask, subTask }) =>
+          mainTask.issueType === JIRA_TYPE && mainTask.issueId && mainTask.projectId
+            ? this._getCfgOnce$(mainTask.projectId).pipe(
+                tap((openProjectCfg) => {
+                  if (
+                    subTask &&
+                    openProjectCfg.isWorklogEnabled &&
+                    openProjectCfg.isAddWorklogOnSubTaskDone
+                  ) {
+                    this._openWorklogDialog(
+                      subTask,
+                      mainTask.issueId as string,
+                      openProjectCfg,
+                    );
+                  } else if (
+                    openProjectCfg.isAddWorklogOnSubTaskDone &&
+                    !subTask &&
+                    (!openProjectCfg.isWorklogEnabled || !mainTask.subTaskIds.length)
+                  ) {
+                    this._openWorklogDialog(
+                      mainTask,
+                      mainTask.issueId as string,
+                      openProjectCfg,
+                    );
+                  }
+                }),
+              )
+            : EMPTY,
         ),
-        filter(({ jiraCfg }) => isJiraEnabled(jiraCfg)),
-        withLatestFrom(this._store$.pipe(select(selectTaskEntities))),
-        tap(([{ act, projectId, jiraCfg }, taskEntities]) => {
-          const taskId = act.task.id;
-          const task = taskEntities[taskId];
-          if (!task) {
-            throw new Error('No task');
-          }
-
-          if (jiraCfg.isAddWorklogOnSubTaskDone && jiraCfg.isWorklogEnabled) {
-            if (
-              task &&
-              task.issueType === JIRA_TYPE &&
-              task.issueId &&
-              !(jiraCfg.isAddWorklogOnSubTaskDone && task.subTaskIds.length > 0)
-            ) {
-              this._openWorklogDialog(task, task.issueId, jiraCfg);
-            } else if (task.parentId) {
-              const parent = taskEntities[task.parentId];
-              if (parent && parent.issueId && parent.issueType === JIRA_TYPE) {
-                // NOTE we're still sending the sub task for the meta data we need
-                this._openWorklogDialog(task, parent.issueId, jiraCfg);
-              }
-            }
-          }
-          return undefined;
-        }),
       ),
     { dispatch: false },
   );

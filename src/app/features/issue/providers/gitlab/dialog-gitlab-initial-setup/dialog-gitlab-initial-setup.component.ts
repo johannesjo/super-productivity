@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, Inject, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { FormGroup } from '@angular/forms';
 import { FormlyFieldConfig } from '@ngx-formly/core';
@@ -12,7 +12,7 @@ import { DEFAULT_GITLAB_CFG, GITLAB_CONFIG_FORM } from '../gitlab.const';
   styleUrls: ['./dialog-gitlab-initial-setup.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class DialogGitlabInitialSetupComponent implements OnInit {
+export class DialogGitlabInitialSetupComponent {
   T: typeof T = T;
   gitlabCfg: GitlabCfg;
   formGroup: FormGroup = new FormGroup({});
@@ -24,8 +24,6 @@ export class DialogGitlabInitialSetupComponent implements OnInit {
   ) {
     this.gitlabCfg = this.data.gitlabCfg || DEFAULT_GITLAB_CFG;
   }
-
-  ngOnInit(): void {}
 
   saveGitlabCfg(gitlabCfg: GitlabCfg): void {
     this._matDialogRef.close(gitlabCfg);

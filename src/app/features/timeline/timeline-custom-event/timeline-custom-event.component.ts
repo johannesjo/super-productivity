@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, Input, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
 import { TimelineCustomEvent } from '../timeline.model';
 
 @Component({
@@ -7,7 +7,7 @@ import { TimelineCustomEvent } from '../timeline.model';
   styleUrls: ['./timeline-custom-event.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class TimelineCustomEventComponent implements OnInit {
+export class TimelineCustomEventComponent {
   @Input() event: TimelineCustomEvent = {
     title: '',
     icon: '',
@@ -16,6 +16,4 @@ export class TimelineCustomEventComponent implements OnInit {
   };
 
   constructor() {}
-
-  ngOnInit(): void {}
 }

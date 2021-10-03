@@ -4,21 +4,32 @@
   "overrides": [
     {
       "files": ["*.ts"],
+      "parser": "@typescript-eslint/parser",
       "parserOptions": {
         "project": ["tsconfig.json", "e2e/tsconfig.e2e.json"],
+        "ecmaVersion": 2020,
+        "sourceType": "module",
         "createDefaultProgram": true
       },
       "extends": [
-        "plugin:@angular-eslint/ng-cli-compat",
-        "plugin:@angular-eslint/ng-cli-compat--formatting-add-on",
-        "plugin:@angular-eslint/template/process-inline-templates",
-        "prettier"
+        "plugin:@typescript-eslint/recommended",
+        "plugin:@angular-eslint/recommended",
+        "plugin:prettier/recommended"
       ],
-      "plugins": ["prettier", "unused-imports"],
+      "plugins": ["@typescript-eslint", "prettier", "unused-imports", "prefer-arrow"],
       "rules": {
+        "@typescript-eslint/no-explicit-any": 0,
+        "@typescript-eslint/ban-ts-comment": 0,
+        "@typescript-eslint/no-empty-function": 0,
+        "@typescript-eslint/explicit-module-boundary-types": 0,
         "prettier/prettier": "error",
         "@angular-eslint/component-selector": ["off"],
-        "no-unused-vars": [2, { "args": "none" }],
+        "@typescript-eslint/no-unused-vars": [
+          "error",
+          {
+            "args": "none"
+          }
+        ],
         "unused-imports/no-unused-imports": "error",
         "@typescript-eslint/explicit-function-return-type": [
           "error",
@@ -85,7 +96,6 @@
         "@typescript-eslint/no-shadow": ["error"],
         "comma-dangle": ["error", "always-multiline"],
         "no-mixed-operators": "error",
-
         "prefer-arrow/prefer-arrow-functions": "error",
         "@angular-eslint/directive-selector": [
           "error",
@@ -100,7 +110,16 @@
     },
     {
       "files": ["*.html"],
-      "extends": ["plugin:@angular-eslint/template/recommended", "prettier"],
+      "extends": [
+        "plugin:@typescript-eslint/recommended",
+        "plugin:@angular-eslint/template/recommended",
+        "prettier"
+      ],
+      "parserOptions": {
+        "ecmaVersion": 2020,
+        "sourceType": "module"
+      },
+      "processor": "@angular-eslint/template/extract-inline-html",
       "plugins": ["prettier"],
       "rules": {
         "@angular-eslint/template/no-negated-async": "off",

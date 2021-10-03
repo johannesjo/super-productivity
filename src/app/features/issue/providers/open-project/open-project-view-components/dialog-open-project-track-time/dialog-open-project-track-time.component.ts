@@ -10,12 +10,22 @@ import * as moment from 'moment';
 import { OpenProjectWorkPackage } from '../../open-project-issue/open-project-issue.model';
 import { parseOpenProjectDuration } from '../parse-open-project-duration.util';
 import { formatOpenProjectWorkPackageSubjectForSnack } from '../../format-open-project-work-package-subject.util';
+import { JiraWorklogExportDefaultTime } from '../../../jira/jira.model';
+import {
+  JIRA_WORK_LOG_EXPORT_CHECKBOXES,
+  JIRA_WORK_LOG_EXPORT_FORM_OPTIONS,
+} from '../../../jira/jira.const';
+import { Subscription } from 'rxjs';
+import { getWorklogStr } from '../../../../../../util/get-work-log-str';
+import { OPEN_PROJECT_TYPE } from '../../../../issue.const';
+import { expandFadeAnimation } from '../../../../../../ui/animations/expand.ani';
 
 @Component({
   selector: 'dialog-open-project-track-time',
   templateUrl: './dialog-open-project-track-time.component.html',
   styleUrls: ['./dialog-open-project-track-time.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  animations: [expandFadeAnimation],
 })
 export class DialogOpenProjectTrackTimeComponent {
   T: typeof T = T;
@@ -23,7 +33,17 @@ export class DialogOpenProjectTrackTimeComponent {
   started: string;
   comment: string;
   workPackage: OpenProjectWorkPackage;
-  timeSpentForWorkPackage: number = 0;
+  timeLoggedForWorkPackage: number = 0;
+  selectedDefaultTimeMode?: JiraWorklogExportDefaultTime;
+  defaultTimeOptions = JIRA_WORK_LOG_EXPORT_FORM_OPTIONS;
+  defaultTimeCheckboxContent?: {
+    label: string;
+    value: JiraWorklogExportDefaultTime;
+    isChecked: boolean;
+  };
+  timeSpentToday: number;
+  timeSpentLoggedDelta: number;
+
   activityId: number = 1;
   activities$ = this._projectService
     .getOpenProjectCfgForProject$(this.data.task.projectId as string)
@@ -35,6 +55,7 @@ export class DialogOpenProjectTrackTimeComponent {
         );
       }),
     );
+  private _subs = new Subscription();
 
   constructor(
     private _openProjectApiService: OpenProjectApiService,
@@ -51,8 +72,24 @@ export class DialogOpenProjectTrackTimeComponent {
     this.workPackage = this.data.workPackage;
     this.started = this._convertTimestamp(this.data.task.created);
     this.comment = this.data.task.parentId ? this.data.task.title : '';
-    this.timeSpentForWorkPackage = parseOpenProjectDuration(
+    this.timeLoggedForWorkPackage = parseOpenProjectDuration(
       this.workPackage.spentTime as string,
+    );
+    this.timeSpentToday = this.data.task.timeSpentOnDay[getWorklogStr()];
+    this.timeSpentLoggedDelta = Math.max(
+      0,
+      this.data.task.timeSpent - this.timeLoggedForWorkPackage,
+    );
+
+    this._subs.add(
+      this._projectService
+        .getOpenProjectCfgForProject$(this.data.task.projectId as string)
+        .pipe(first())
+        .subscribe((cfg) => {
+          if (cfg.timeTrackingDialogDefaultTime) {
+            this.timeSpent = this.getTimeToLogForMode(cfg.timeTrackingDialogDefaultTime);
+          }
+        }),
     );
   }
 
@@ -71,6 +108,17 @@ export class DialogOpenProjectTrackTimeComponent {
         .getOpenProjectCfgForProject$(this.data.task.projectId)
         .pipe(first())
         .toPromise();
+
+      if (this.defaultTimeCheckboxContent?.isChecked === true) {
+        this._projectService.updateIssueProviderConfig(
+          this.data.task.projectId,
+          OPEN_PROJECT_TYPE,
+          {
+            timeTrackingDialogDefaultTime: this.defaultTimeCheckboxContent.value,
+          },
+        );
+      }
+
       this._openProjectApiService
         .trackTime$({
           workPackage: this.workPackage,
@@ -91,6 +139,29 @@ export class DialogOpenProjectTrackTimeComponent {
           this.close();
         });
     }
+  }
+
+  fill(mode: JiraWorklogExportDefaultTime): void {
+    this.selectedDefaultTimeMode = mode;
+    this.timeSpent = this.getTimeToLogForMode(mode);
+    const matchingCheckboxCfg = JIRA_WORK_LOG_EXPORT_CHECKBOXES.find(
+      (checkCfg) => checkCfg.value === mode,
+    );
+    this.defaultTimeCheckboxContent = matchingCheckboxCfg
+      ? { ...matchingCheckboxCfg, isChecked: false }
+      : undefined;
+  }
+
+  getTimeToLogForMode(mode: JiraWorklogExportDefaultTime): number {
+    switch (mode) {
+      case JiraWorklogExportDefaultTime.AllTime:
+        return this.data.task.timeSpent;
+      case JiraWorklogExportDefaultTime.TimeToday:
+        return this.timeSpentToday;
+      case JiraWorklogExportDefaultTime.AllTimeMinusLogged:
+        return this.timeSpentLoggedDelta;
+    }
+    return 0;
   }
 
   private _convertTimestamp(timestamp: number): string {

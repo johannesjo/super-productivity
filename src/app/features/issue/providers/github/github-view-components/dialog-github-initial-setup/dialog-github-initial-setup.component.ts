@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, Inject, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { GithubCfg } from '../../github.model';
 import { FormGroup } from '@angular/forms';
@@ -12,7 +12,7 @@ import { T } from '../../../../../../t.const';
   styleUrls: ['./dialog-github-initial-setup.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class DialogGithubInitialSetupComponent implements OnInit {
+export class DialogGithubInitialSetupComponent {
   T: typeof T = T;
   githubCfg: GithubCfg;
   formGroup: FormGroup = new FormGroup({});
@@ -24,8 +24,6 @@ export class DialogGithubInitialSetupComponent implements OnInit {
   ) {
     this.githubCfg = this.data.githubCfg || DEFAULT_GITHUB_CFG;
   }
-
-  ngOnInit(): void {}
 
   saveGithubCfg(gitCfg: GithubCfg): void {
     this._matDialogRef.close(gitCfg);

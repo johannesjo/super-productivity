@@ -1,6 +1,5 @@
 import { GlobalConfigState } from './global-config.model';
 import { IS_MAC } from '../../util/is-mac';
-import { IS_F_DROID_APP } from '../../util/is-android-web-view';
 
 export const IS_USE_DARK_THEME_AS_DEFAULT: boolean =
   !IS_MAC ||
@@ -24,7 +23,6 @@ export const DEFAULT_GLOBAL_CONFIG: GlobalConfigState = {
     isAutoAddWorkedOnToToday: true,
     isMinimizeToTray: false,
     isTrayShowCurrentTask: true,
-    isDisableInitialDialog: IS_F_DROID_APP,
     defaultProjectId: null,
     firstDayOfWeek: 1,
     taskNotesTpl: `**How can I best achieve it now?**
