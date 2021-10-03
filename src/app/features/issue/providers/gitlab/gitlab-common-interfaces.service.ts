@@ -46,7 +46,7 @@ export class GitlabCommonInterfacesService implements IssueServiceInterface {
   issueLink$(issueId: string, projectId: string): Observable<string> {
     return this._getCfgOnce$(projectId).pipe(
       map((cfg) => {
-        const project: string = this._gitlabApiService.getProjectFromIssue$(issueId, cfg);
+        const project: string = this._gitlabApiService.getProject$(cfg, issueId);
         if (cfg.gitlabBaseUrl) {
           const fixedUrl = cfg.gitlabBaseUrl.match(/.*\/$/)
             ? cfg.gitlabBaseUrl
@@ -142,7 +142,7 @@ export class GitlabCommonInterfacesService implements IssueServiceInterface {
       if (!task.issueId) {
         continue;
       }
-      const project = this._gitlabApiService.getProjectFromIssue$(task.issueId, cfg);
+      const project = this._gitlabApiService.getProject$(cfg, task.issueId);
       if (!iidsByProject.has(project)) {
         iidsByProject.set(project, []);
       }
@@ -190,7 +190,8 @@ export class GitlabCommonInterfacesService implements IssueServiceInterface {
         ].sort();
         const lastRemoteUpdate = updates[updates.length - 1];
         const wasUpdated = lastRemoteUpdate > (tasks[i].issueLastUpdated || 0);
-        if (wasUpdated || idFormatChanged) {
+        const project_tag_missing = task.tagIds.indexOf(issue.project) === -1;
+        if (wasUpdated || idFormatChanged || project_tag_missing) {
           updatedIssues.push({
             task,
             taskChanges: {
@@ -200,16 +201,6 @@ export class GitlabCommonInterfacesService implements IssueServiceInterface {
             issue,
           });
         }
-      } else {
-        updatedIssues.push({
-          task,
-          taskChanges: {
-            issueWasUpdated: true,
-            issueId: null,
-            issueType: null,
-          },
-          issue: null,
-        });
       }
     }
     return updatedIssues;
@@ -234,7 +225,7 @@ export class GitlabCommonInterfacesService implements IssueServiceInterface {
   }
 
   private _formatIssueTitle(issue: GitlabIssue): string {
-    return `#${issue.number} ${issue.title}`;
+    return `#${issue.number} ${issue.title} #${issue.project}`;
   }
 
   private _formatIssueTitleForSnack(issue: GitlabIssue): string {

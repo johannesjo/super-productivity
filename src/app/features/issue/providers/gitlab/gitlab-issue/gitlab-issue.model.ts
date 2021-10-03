@@ -42,6 +42,7 @@ export type GitlabIssue = Readonly<{
   url: string;
   // NOTE: we use the issue number as id as well, as it there is not much to be done with the id with the api
   id: number | string;
+  project: string;
 
   // according to the docs: "Users on GitLab Starter, Bronze, or higher will also see the weight parameter"
   weight?: number;
