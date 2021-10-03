@@ -2,6 +2,7 @@ import { GitlabIssue } from './gitlab-issue.model';
 import { GitlabOriginalIssue } from '../gitlab-api/gitlab-api-responses';
 import { IssueProviderKey, SearchResultItem } from '../../../issue.model';
 import { GitlabCfg } from '../gitlab';
+import { GitlabApiService } from '../gitlab-api/gitlab-api.service';
 
 export const mapGitlabIssue = (
   issue: GitlabOriginalIssue,
@@ -33,6 +34,7 @@ export const mapGitlabIssue = (
     // NOTE: we use the issue number as id as well, as it there is not much to be done with the id with the api
     // when we can get issues from multiple projects we use full refence as id
     id: issue.references.full,
+    project: GitlabApiService.getPartsFromIssue(issue.references.full)[0],
   };
 };
 

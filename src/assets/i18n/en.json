@@ -188,7 +188,8 @@
         "MARK_AS_CHECKED": "Mark updates as checked",
         "STATUS": "Status",
         "SUMMARY": "Summary",
-        "WRITE_A_COMMENT": "Write a comment"
+        "WRITE_A_COMMENT": "Write a comment",
+        "PROJECT": "Project"
       },
       "S": {
         "ERR_UNKNOWN": "GitLab: Unknown error {{statusCode}} {{errorMsg}}"
