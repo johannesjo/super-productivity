@@ -17,6 +17,7 @@ import '@angular/common/locales/global/tr';
 import '@angular/common/locales/global/zh';
 import '@angular/common/locales/global/zh-Hant';
 import '@angular/common/locales/global/it';
+import '@angular/common/locales/global/pl';
 import '@angular/common/locales/global/pt';
 import '@angular/common/locales/global/nl';
 import '@angular/common/locales/global/nb';
@@ -55,6 +56,7 @@ export enum LanguageCode {
   zh = 'zh',
   zh_tw = 'zh_tw',
   it = 'it',
+  pl = 'pl',
   pt = 'pt',
   nl = 'nl',
   nb = 'nb',
@@ -72,6 +74,7 @@ export enum LanguageCodeMomentMap {
   ru = 'ru',
   tr = 'tr',
   it = 'it',
+  pl = 'pl',
   pt = 'pt',
   nl = 'nl',
   nb = 'nb',

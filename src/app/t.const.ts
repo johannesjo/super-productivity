@@ -1080,6 +1080,7 @@ const T = {
       LABEL: 'GCF.LANG.LABEL',
       NB: 'GCF.LANG.NB',
       NL: 'GCF.LANG.NL',
+      PL: 'GCF.LANG.PL',
       PT: 'GCF.LANG.PT',
       RU: 'GCF.LANG.RU',
       TITLE: 'GCF.LANG.TITLE',
