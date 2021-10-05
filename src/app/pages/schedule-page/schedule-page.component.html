@@ -40,10 +40,12 @@
             <div (click)="editReminder(task)" class="due-date" mat-ripple>
               <div class="date-and-time-left">
                 <div class="date hide-xs">
-                  {{task.reminderData.remindAt|date:'EE, d MMM, hh:mm'}}
+                  {{task.reminderData.remindAt|date:'EE, d MMM, '}}
+                  {{task.reminderData.remindAt|date:'shortTime'}}
                 </div>
                 <div class="date show-xs-only">
-                  {{task.reminderData.remindAt|date:'d MMM, hh:mm'}}
+                  {{task.reminderData.remindAt|date:'d MMM, '}},
+                  {{task.reminderData.remindAt|date:'shortTime'}}
                 </div>
 
                 <div class="time-left">
