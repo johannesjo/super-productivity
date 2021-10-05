@@ -138,9 +138,7 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
     private readonly _projectService: ProjectService,
     public readonly workContextService: WorkContextService,
     @Attribute('showParentTitle') private showParentTitle: string,
-  ) {
-    console.log('I am here!');
-  }
+  ) {}
 
   @Input('task') set taskSet(v: TaskWithSubTasks) {
     this.task = v;
