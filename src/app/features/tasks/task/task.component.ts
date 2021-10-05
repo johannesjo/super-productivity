@@ -138,7 +138,9 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
     private readonly _projectService: ProjectService,
     public readonly workContextService: WorkContextService,
     @Attribute('showParentTitle') private showParentTitle: string,
-  ) {}
+  ) {
+    console.log('I am here!');
+  }
 
   @Input('task') set taskSet(v: TaskWithSubTasks) {
     this.task = v;
@@ -362,13 +364,16 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
     this.focusSelf();
   }
 
-  toggleShowAdditionalInfoOpen(): void {
+  toggleShowAdditionalInfoOpen(ev?: MouseEvent): void {
     if (this.isSelected) {
       this._taskService.setSelectedId(null);
     } else {
       this._taskService.setSelectedId(this.task.id);
     }
-    // this.focusSelf();
+    if (ev) {
+      ev.preventDefault();
+      ev.stopPropagation();
+    }
   }
 
   toggleShowAttachments(): void {

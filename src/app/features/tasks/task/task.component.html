@@ -89,7 +89,7 @@
       </div>
 
       <div
-        (click)="IS_TOUCH_ONLY && toggleShowAdditionalInfoOpen()"
+        (click)="IS_TOUCH_ONLY && toggleShowAdditionalInfoOpen($event)"
         class="title-and-tags-wrapper"
       >
         <div class="parent-title" *ngIf="isShowParentTitle && task.parentId">
