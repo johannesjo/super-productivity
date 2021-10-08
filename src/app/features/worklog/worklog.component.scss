@@ -187,6 +187,11 @@ $this-table-outer-padding-left-right: $s * 6;
     text-align: left;
     border-collapse: collapse;
 
+    * {
+      user-select: text;
+      -webkit-touch-callout: default;
+    }
+
     // Overwrite default styles in table.scss
     tr {
       &:first-of-type {
