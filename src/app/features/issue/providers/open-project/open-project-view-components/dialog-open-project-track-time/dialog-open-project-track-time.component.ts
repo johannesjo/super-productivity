@@ -88,6 +88,7 @@ export class DialogOpenProjectTrackTimeComponent {
         .subscribe((cfg) => {
           if (cfg.timeTrackingDialogDefaultTime) {
             this.timeSpent = this.getTimeToLogForMode(cfg.timeTrackingDialogDefaultTime);
+            this.started = this._fillInStarted(cfg.timeTrackingDialogDefaultTime);
           }
         }),
     );
@@ -150,6 +151,7 @@ export class DialogOpenProjectTrackTimeComponent {
     this.defaultTimeCheckboxContent = matchingCheckboxCfg
       ? { ...matchingCheckboxCfg, isChecked: false }
       : undefined;
+    this.started = this._fillInStarted(mode);
   }
 
   getTimeToLogForMode(mode: JiraWorklogExportDefaultTime): number {
@@ -168,5 +170,16 @@ export class DialogOpenProjectTrackTimeComponent {
     const date = moment(timestamp);
     const isoStr = date.seconds(0).local().format();
     return isoStr.substring(0, 19);
+  }
+
+  private _fillInStarted(mode: JiraWorklogExportDefaultTime): string {
+    if (mode === JiraWorklogExportDefaultTime.TimeToday) {
+      return this._convertTimestamp(Date.now());
+    } else if (mode === JiraWorklogExportDefaultTime.TimeYesterday) {
+      const oneDay = 24 * 60 * 60 * 1000;
+      return this._convertTimestamp(Date.now() - oneDay);
+    } else {
+      return this._convertTimestamp(this.data.task.created);
+    }
   }
 }
