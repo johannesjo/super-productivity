@@ -1,0 +1,11 @@
+::-webkit-calendar-picker-indicator {
+  cursor: pointer;
+  height: 20px;
+  width: 20px;
+  margin: 0;
+  padding: 0;
+}
+
+.isDarkTheme ::-webkit-calendar-picker-indicator {
+  filter: invert(1);
+}
