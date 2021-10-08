@@ -70,6 +70,7 @@ export class DialogJiraAddWorklogComponent implements OnDestroy {
         .subscribe((cfg) => {
           if (cfg.worklogDialogDefaultTime) {
             this.timeSpent = this.getTimeToLogForMode(cfg.worklogDialogDefaultTime);
+            this.started = this._fillInStarted(cfg.worklogDialogDefaultTime);
           }
         }),
     );
@@ -128,6 +129,7 @@ export class DialogJiraAddWorklogComponent implements OnDestroy {
     this.defaultTimeCheckboxContent = matchingCheckboxCfg
       ? { ...matchingCheckboxCfg, isChecked: false }
       : undefined;
+    this.started = this._fillInStarted(mode);
   }
 
   getTimeToLogForMode(mode: JiraWorklogExportDefaultTime): number {
@@ -146,5 +148,16 @@ export class DialogJiraAddWorklogComponent implements OnDestroy {
     const date = moment(timestamp);
     const isoStr = date.seconds(0).local().format();
     return isoStr.substring(0, 19);
+  }
+
+  private _fillInStarted(mode: JiraWorklogExportDefaultTime): string {
+    if (mode === JiraWorklogExportDefaultTime.TimeToday) {
+      return this._convertTimestamp(Date.now());
+    } else if (mode === JiraWorklogExportDefaultTime.TimeYesterday) {
+      const oneDay = 24 * 60 * 60 * 1000;
+      return this._convertTimestamp(Date.now() - oneDay);
+    } else {
+      return this._convertTimestamp(this.data.task.created);
+    }
   }
 }
