@@ -126,7 +126,7 @@ export class GitlabCommonInterfacesService implements IssueServiceInterface {
 
   async getFreshDataForIssueTasks(
     tasks: Task[],
-  ): Promise<{ task: Task; taskChanges: Partial<Task>; issue: GitlabIssue | null }[]> {
+  ): Promise<{ task: Task; taskChanges: Partial<Task>; issue: GitlabIssue }[]> {
     const projectId = tasks && tasks[0].projectId ? tasks[0].projectId : 0;
     if (!projectId) {
       throw new Error('No projectId');
@@ -164,7 +164,7 @@ export class GitlabCommonInterfacesService implements IssueServiceInterface {
     const updatedIssues: {
       task: Task;
       taskChanges: Partial<Task>;
-      issue: GitlabIssue | null;
+      issue: GitlabIssue;
     }[] = [];
 
     for (const task of tasks) {

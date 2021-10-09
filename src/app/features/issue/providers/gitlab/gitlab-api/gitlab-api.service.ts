@@ -42,6 +42,14 @@ export class GitlabApiService {
     );
   }
 
+  private getScopeParam(cfg: GitlabCfg): string {
+    if (cfg.scope) {
+      return `&scope=${cfg.scope}`;
+    } else {
+      return '';
+    }
+  }
+
   getByIds$(
     project: string,
     ids: string[] | number[],
@@ -54,9 +62,9 @@ export class GitlabApiService {
 
     return this._sendRequest$(
       {
-        url: `${this._apiLink(cfg, project)}/issues?${queryParams}&scope=${
-          cfg.scope
-        }&per_page=100`,
+        url: `${this._apiLink(cfg, project)}/issues?${queryParams}${this.getScopeParam(
+          cfg,
+        )}&per_page=100`,
       },
       cfg,
     ).pipe(
@@ -96,9 +104,9 @@ export class GitlabApiService {
     }
     return this._sendRequest$(
       {
-        url: `${this._apiLink(cfg)}/issues?search=${searchText}&scope=${
-          cfg.scope
-        }&order_by=updated_at`,
+        url: `${this._apiLink(cfg)}/issues?search=${searchText}${this.getScopeParam(
+          cfg,
+        )}&order_by=updated_at`,
       },
       cfg,
     ).pipe(
@@ -142,9 +150,9 @@ export class GitlabApiService {
       {
         url: `${this._apiLink(
           cfg,
-        )}/issues?state=opened&order_by=updated_at&per_page=100&scope=${
-          cfg.scope
-        }&page=${pageNumber}`,
+        )}/issues?state=opened&order_by=updated_at&per_page=100${this.getScopeParam(
+          cfg,
+        )}&page=${pageNumber}`,
       },
       cfg,
     ).pipe(
