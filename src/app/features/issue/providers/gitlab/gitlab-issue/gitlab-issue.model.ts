@@ -40,8 +40,8 @@ export type GitlabIssue = Readonly<{
   // transformed
   comments: GitlabComment[];
   url: string;
-  // NOTE: we use the issue number as id as well, as it there is not much to be done with the id with the api
-  // In the new version This contains "project#iid"
+  // NOTE: the old version used the issue number as id
+  // the new version uses the real id ("project#iid")
   id: number | string;
   project: string;
 
