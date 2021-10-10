@@ -25,7 +25,7 @@ table {
   border-radius: $card-border-radius;
 }
 
-$this-table-min-height: $s*2;
+$this-table-min-height: $s * 2;
 $this-table-shadow: $whiteframe-shadow-1dp;
 div.material-table {
   box-shadow: $this-table-shadow;
@@ -42,7 +42,13 @@ div.material-table {
   box-shadow: $this-table-shadow;
   font-size: 13px;
   white-space: nowrap;
-  background-color: #FFF;
+  background-color: #fff;
+
+  &,
+  * {
+    user-select: text;
+    -webkit-touch-callout: default;
+  }
 
   &._no-elevation {
     box-shadow: none;
@@ -58,13 +64,11 @@ div.material-table {
     background: $dark-theme-card-bg;
     // NOTE: because we're on a lighter background
     color: $dark-theme-text-color;
-
   }
 
   .isDarkTheme &._no-elevation {
     background-color: transparent;
   }
-
 
   tr {
     min-height: $this-table-min-height;
@@ -77,7 +81,7 @@ div.material-table {
     position: relative;
     border-top: 1px solid;
     border-bottom: 1px solid;
-    padding: $s $s*2.25;
+    padding: $s $s * 2.25;
     box-sizing: border-box;
     text-align: left;
 
@@ -90,12 +94,11 @@ div.material-table {
     }
 
     &:first-of-type {
-      padding-left: $s*3;
+      padding-left: $s * 3;
     }
 
-
     &:last-of-type {
-      padding-right: $s*3;
+      padding-right: $s * 3;
     }
   }
 
