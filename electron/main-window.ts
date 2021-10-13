@@ -81,7 +81,6 @@ export const createWindow = ({
       webSecurity: !IS_DEV,
       nodeIntegration: true,
       // make remote module work with those two settings
-      enableRemoteModule: true,
       contextIsolation: false,
     },
     icon: ICONS_FOLDER + '/icon_256x256.png',
