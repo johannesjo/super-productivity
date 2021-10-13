@@ -14,7 +14,6 @@ import { ElectronService } from '../electron/electron.service';
 import { WorkContextThemeCfg } from '../../features/work-context/work-context.model';
 import { WorkContextService } from '../../features/work-context/work-context.service';
 import { combineLatest, Observable } from 'rxjs';
-import { remote } from 'electron';
 import { IS_FIREFOX } from '../../util/is-firefox';
 
 @Injectable({ providedIn: 'root' })
@@ -22,18 +21,12 @@ export class GlobalThemeService {
   isDarkTheme$: Observable<boolean> =
     IS_ELECTRON && this._electronService.isMacOS
       ? new Observable((subscriber) => {
-          subscriber.next(
-            (this._electronService.remote as typeof remote).nativeTheme
-              .shouldUseDarkColors,
-          );
-          (
-            this._electronService.remote as typeof remote
-          ).systemPreferences.subscribeNotification(
+          subscriber.next(this._electronService.remote.nativeTheme.shouldUseDarkColors);
+          this._electronService.remote.systemPreferences.subscribeNotification(
             'AppleInterfaceThemeChangedNotification',
             () =>
               subscriber.next(
-                (this._electronService.remote as typeof remote).nativeTheme
-                  .shouldUseDarkColors,
+                this._electronService.remote.nativeTheme.shouldUseDarkColors,
               ),
           );
         })

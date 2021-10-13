@@ -1,7 +1,7 @@
-import * as ElectronRenderer from 'electron/renderer';
+import { Renderer } from 'electron';
 
 let _electron: any = null;
-export const getElectron = (): typeof ElectronRenderer | null => {
+export const getElectron = (): typeof Renderer | null => {
   // eslint-disable-next-line
   if (window['require']) {
     _electron = window.require('electron');

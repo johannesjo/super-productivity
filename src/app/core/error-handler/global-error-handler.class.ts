@@ -8,7 +8,6 @@ import {
   isHandledError,
   logAdvancedStacktrace,
 } from './global-error-handler.util';
-import { remote } from 'electron';
 import { saveBeforeLastErrorActionLog } from '../../util/action-logger';
 import { AppDataComplete } from '../../imex/sync/sync.model';
 import { PersistenceService } from '../persistence/persistence.service';
@@ -22,9 +21,7 @@ export class GlobalErrorHandler implements ErrorHandler {
     @Inject(Injector) private injector: Injector,
   ) {
     if (IS_ELECTRON) {
-      this._electronLogger = (this._electronService.remote as typeof remote).require(
-        'electron-log',
-      );
+      this._electronLogger = this._electronService.remote.require('electron-log');
     }
   }
 

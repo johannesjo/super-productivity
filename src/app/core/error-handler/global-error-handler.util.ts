@@ -4,7 +4,6 @@ import { environment } from '../../../environments/environment';
 import * as StackTrace from 'stacktrace-js';
 import * as pThrottle from 'p-throttle';
 import * as newGithubIssueUrl from 'new-github-issue-url';
-import { remote } from 'electron';
 import { getBeforeLastErrorActionLog } from '../../util/action-logger';
 import { download } from '../../util/download';
 import { AppDataComplete } from '../../imex/sync/sync.model';
@@ -105,7 +104,7 @@ export const createErrorAlert = (
   btnReload.innerText = 'Reload App';
   btnReload.addEventListener('click', () => {
     if (IS_ELECTRON) {
-      (eSvc.remote as typeof remote).getCurrentWindow().webContents.reload();
+      eSvc.remote.getCurrentWindow().webContents.reload();
     } else {
       window.location.reload();
     }
@@ -143,7 +142,7 @@ export const createErrorAlert = (
   }, 1500);
 
   if (IS_ELECTRON) {
-    (eSvc.remote as typeof remote).getCurrentWindow().webContents.openDevTools();
+    eSvc.remote.getCurrentWindow().webContents.openDevTools();
   }
 };
 

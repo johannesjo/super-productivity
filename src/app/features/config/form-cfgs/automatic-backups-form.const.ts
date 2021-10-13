@@ -1,13 +1,12 @@
 /* eslint-disable max-len */
 import { ConfigFormSection, LocalBackupConfig } from '../global-config.model';
 import { T } from '../../../t.const';
-import { getElectron } from '../../../util/get-electron';
+import { getElectronRemoteModule } from '../../../util/get-electron-remote-module';
 import { IS_ELECTRON } from '../../../app.constants';
-import * as ElectronRenderer from 'electron/renderer';
 
 const backupPath =
-  IS_ELECTRON &&
-  `${(getElectron() as typeof ElectronRenderer).remote.app.getPath('userData')}/backups`;
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+  IS_ELECTRON && `${getElectronRemoteModule()!.app.getPath('userData')}/backups`;
 
 export const AUTOMATIC_BACKUPS_FORM: ConfigFormSection<LocalBackupConfig> = {
   title: T.GCF.AUTO_BACKUPS.TITLE,

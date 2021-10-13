@@ -1,10 +1,11 @@
 import { Injectable } from '@angular/core';
 // If you import a module but never use any of the imported values other than as TypeScript types,
 // the resulting javascript file will look as if you never imported the module at all.
-import { ipcRenderer, remote, shell, webFrame } from 'electron';
+import { ipcRenderer, Renderer, shell, webFrame } from 'electron';
 import { IS_ELECTRON } from '../../app.constants';
+import { getElectronRemoteModule } from '../../util/get-electron-remote-module';
 import { getElectron } from '../../util/get-electron';
-import * as ElectronRenderer from 'electron/renderer';
+import * as remote from '@electron/remote';
 
 // TODO make available for both
 export const getSendChannel = (channel: string): string =>
@@ -31,7 +32,7 @@ const getResponseChannels = (
 export class ElectronService {
   ipcRenderer?: typeof ipcRenderer;
   webFrame?: typeof webFrame;
-  remote?: typeof remote;
+  remote!: typeof remote;
   shell?: typeof shell;
 
   // fs: typeof fs;
@@ -39,10 +40,11 @@ export class ElectronService {
   constructor() {
     // Conditional imports
     if (IS_ELECTRON) {
-      const electron = getElectron() as typeof ElectronRenderer;
+      const electron = getElectron() as typeof Renderer;
       this.ipcRenderer = electron.ipcRenderer;
       this.webFrame = electron.webFrame;
-      this.remote = electron.remote;
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      this.remote = getElectronRemoteModule()!;
       // NOTE: works for non-sandboxed electron only
       this.shell = (electron as any).shell;
 

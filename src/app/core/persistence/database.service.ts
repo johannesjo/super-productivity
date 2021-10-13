@@ -132,8 +132,8 @@ export class DatabaseService {
 
   private _restartApp(): void {
     if (IS_ELECTRON) {
-      this._electronService.remote?.app.relaunch();
-      this._electronService.remote?.app.exit(0);
+      this._electronService.remote.app.relaunch();
+      this._electronService.remote.app.exit(0);
     } else {
       window.location.reload();
     }

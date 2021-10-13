@@ -28,6 +28,8 @@ import lockscreen from './lockscreen';
 import { lazySetInterval } from './lazy-set-interval';
 import { KeyboardConfig } from '../src/app/features/config/keyboard-config.model';
 
+import { initialize } from '@electron/remote/main';
+
 const ICONS_FOLDER = __dirname + '/assets/icons/';
 const IS_MAC = process.platform === 'darwin';
 // const DESKTOP_ENV = process.env.DESKTOP_SESSION;
@@ -77,10 +79,9 @@ interface MyApp extends App {
 }
 
 const appIN: MyApp = app;
-// NOTE: to get rid of the warning => https://github.com/electron/electron/issues/18397
-appIN.allowRendererProcessReuse = true;
 
 initDebug({ showDevTools: isShowDevTools }, IS_DEV);
+initialize();
 
 // NOTE: opening the folder crashes the mas build
 if (!IS_MAC) {
