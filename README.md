@@ -100,6 +100,9 @@ sudo snap install superproductivity
 
 # edge channel releases
  sudo snap install --channel=edge superproductivity
+ 
+ # it is also recommended to disable updates to the app while it is running:
+ sudo snap set core experimental.refresh-app-awareness=true
 ```
 
 <a href="https://snapcraft.io/superproductivity">
