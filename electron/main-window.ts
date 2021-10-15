@@ -16,6 +16,7 @@ import { IPC } from './ipc-events.const';
 import { getSettings } from './get-settings';
 import { readFileSync, stat } from 'fs';
 import { error, log } from 'electron-log';
+import { enable } from '@electron/remote/main';
 
 let mainWin: BrowserWindow;
 
@@ -85,6 +86,9 @@ export const createWindow = ({
     },
     icon: ICONS_FOLDER + '/icon_256x256.png',
   });
+
+  // enable remote module
+  enable(mainWin.webContents);
 
   mainWindowState.manage(mainWin);
 

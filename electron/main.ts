@@ -29,6 +29,7 @@ import { lazySetInterval } from './lazy-set-interval';
 import { KeyboardConfig } from '../src/app/features/config/keyboard-config.model';
 
 import { initialize } from '@electron/remote/main';
+initialize();
 
 const ICONS_FOLDER = __dirname + '/assets/icons/';
 const IS_MAC = process.platform === 'darwin';
@@ -81,7 +82,6 @@ interface MyApp extends App {
 const appIN: MyApp = app;
 
 initDebug({ showDevTools: isShowDevTools }, IS_DEV);
-initialize();
 
 // NOTE: opening the folder crashes the mas build
 if (!IS_MAC) {
