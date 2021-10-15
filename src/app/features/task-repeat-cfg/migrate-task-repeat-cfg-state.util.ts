@@ -4,7 +4,7 @@ import { isMigrateModel } from '../../util/model-version';
 import { TaskRepeatCfg, TaskRepeatCfgState } from './task-repeat-cfg.model';
 import { isValidSplitTime } from '../../util/is-valid-split-time';
 
-const MODEL_VERSION = 1.2;
+const MODEL_VERSION = 1.3;
 
 export const migrateTaskRepeatCfgState = (
   taskRepeatState: TaskRepeatCfgState,
@@ -36,7 +36,13 @@ const _addNewFieldsToTaskRepeatCfgs = (taskRepeat: TaskRepeatCfg): TaskRepeatCfg
   return {
     ...taskRepeat,
     tagIds: taskRepeat.tagIds || [],
-    startTime: undefined,
+    startTime: taskRepeat.startTime || undefined,
+    order:
+      typeof taskRepeat.order === 'number'
+        ? taskRepeat.order
+        : (taskRepeat as any).isAddToBottom
+        ? 1
+        : 0,
   };
 };
 

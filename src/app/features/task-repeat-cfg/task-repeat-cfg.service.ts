@@ -36,6 +36,7 @@ import { isValidSplitTime } from '../../util/is-valid-split-time';
 import { getDateTimeFromClockString } from '../../util/get-date-time-from-clock-string';
 import { isSameDay } from '../../util/is-same-day';
 import { remindOptionToMilliseconds } from '../tasks/util/remind-option-to-milliseconds';
+import { sortRepeatableTaskCfgs } from './sort-repeatable-task-cfg';
 
 @Injectable({
   providedIn: 'root',
@@ -149,9 +150,13 @@ export class TaskRepeatCfgService {
       await this._taskService.movePlannedTasksToToday(plannedTasks);
     }
     if (repeatableScheduledForTomorrow.length) {
-      const promises = repeatableScheduledForTomorrow.map((repeatCfg) => {
-        return this.createRepeatableTask(repeatCfg, targetDay, currentTaskId);
-      });
+      console.log(repeatableScheduledForTomorrow.sort(sortRepeatableTaskCfgs));
+
+      const promises = repeatableScheduledForTomorrow
+        .sort(sortRepeatableTaskCfgs)
+        .map((repeatCfg) => {
+          return this.createRepeatableTask(repeatCfg, targetDay, currentTaskId);
+        });
       await Promise.all(promises);
     }
   }
@@ -268,7 +273,7 @@ export class TaskRepeatCfgService {
           tagIds: isAddToTodayAsFallback ? [TODAY_TAG.id] : taskRepeatCfg.tagIds || [],
         },
       }),
-      isAddToBottom: taskRepeatCfg.isAddToBottom || false,
+      isAddToBottom: taskRepeatCfg.order > 0,
     };
   }
 }

@@ -31,6 +31,7 @@ import { WorkContextService } from '../../work-context/work-context.service';
 import { setActiveWorkContext } from '../../work-context/store/work-context.actions';
 import { SyncTriggerService } from '../../../imex/sync/sync-trigger.service';
 import { SyncProviderService } from '../../../imex/sync/sync-provider.service';
+import { sortRepeatableTaskCfgs } from '../sort-repeatable-task-cfg';
 
 @Injectable()
 export class TaskRepeatCfgEffects {
@@ -76,7 +77,8 @@ export class TaskRepeatCfgEffects {
 
       // existing tasks with sub tasks are loaded, because need to move them to the archive
       mergeMap(([taskRepeatCfgs, currentTaskId]) =>
-        from(taskRepeatCfgs).pipe(
+        // NOTE sorting here is important
+        from(taskRepeatCfgs.sort(sortRepeatableTaskCfgs)).pipe(
           mergeMap((taskRepeatCfg: TaskRepeatCfg) =>
             this._taskRepeatCfgService.getActionsForTaskRepeatCfg(
               taskRepeatCfg,

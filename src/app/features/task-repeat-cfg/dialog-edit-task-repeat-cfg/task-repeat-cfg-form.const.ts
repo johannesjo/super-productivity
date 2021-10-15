@@ -94,10 +94,14 @@ export const TASK_REPEAT_CFG_FORM_CFG: FormlyFieldConfig[] = [
     },
   },
   {
-    key: 'isAddToBottom',
-    type: 'checkbox',
+    key: 'order',
+    type: 'input',
     templateOptions: {
-      label: T.F.TASK_REPEAT.F.IS_ADD_TO_BOTTOM,
+      // label: T.F.TASK_REPEAT.F.IS_ADD_TO_BOTTOM,
+      label: 'Order',
+      type: 'number',
+      description:
+        'Creation order of repeatable tasks. Only affects repeatable tasks created at the same time. A value greater than 0 means items are created at the bottom of normal tasks.',
     },
   },
 ];
