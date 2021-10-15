@@ -1,9 +1,23 @@
-h1, mat-dialog-actions, help-section {
-  :host-context([dir=rtl]) & {
+h1,
+mat-dialog-actions,
+help-section {
+  :host-context([dir='rtl']) & {
     direction: rtl;
   }
 }
 
 .form-wrapper {
   min-width: 280px;
+  max-width: 500px;
+}
+
+:host::ng-deep mat-form-field .mat-form-field {
+  &-underline {
+    position: relative;
+    bottom: auto;
+  }
+
+  &-subscript-wrapper {
+    position: static;
+  }
 }
