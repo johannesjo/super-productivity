@@ -112,7 +112,6 @@
     "node-fetch": "^2.6.1"
   },
   "devDependencies": {
-    "@angular-builders/custom-webpack": "^12.1.0",
     "@angular-devkit/build-angular": "~12.2.7",
     "@angular-eslint/builder": "^12.2.0",
     "@angular-eslint/eslint-plugin": "^12.2.0",
