@@ -104,6 +104,7 @@
     }
   ],
   "dependencies": {
+    "@electron/remote": "^2.0.1",
     "electron-dl": "^3.2.1",
     "electron-localshortcut": "^3.1.0",
     "electron-log": "^4.4.1",
@@ -135,7 +136,6 @@
     "@angular/router": "^12.2.7",
     "@angular/service-worker": "^12.2.7",
     "@biesbjerg/ngx-translate-extract": "^7.0.4",
-    "@electron/remote": "^2.0.1",
     "@fontsource/roboto": "^4.3.0",
     "@ngrx/data": "^12.4.0",
     "@ngrx/effects": "^12.4.0",
