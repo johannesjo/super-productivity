@@ -76,9 +76,10 @@ export class TaskRepeatCfgEffects {
       withLatestFrom(this._taskService.currentTaskId$),
 
       // existing tasks with sub tasks are loaded, because need to move them to the archive
-      mergeMap(([taskRepeatCfgs, currentTaskId]) =>
+      mergeMap(([taskRepeatCfgs, currentTaskId]) => {
         // NOTE sorting here is important
-        from(taskRepeatCfgs.sort(sortRepeatableTaskCfgs)).pipe(
+        const sorted = taskRepeatCfgs.sort(sortRepeatableTaskCfgs);
+        return from(sorted).pipe(
           mergeMap((taskRepeatCfg: TaskRepeatCfg) =>
             this._taskRepeatCfgService.getActionsForTaskRepeatCfg(
               taskRepeatCfg,
@@ -86,13 +87,9 @@ export class TaskRepeatCfgEffects {
               Date.now(),
             ),
           ),
-          tap((actionsForRepeatCfg) =>
-            console.log('actionsForRepeatCfg', actionsForRepeatCfg),
-          ),
           concatMap((actionsForRepeatCfg) => from(actionsForRepeatCfg)),
-        ),
-      ),
-      tap((v) => console.log('IMP Create Repeatable Tasks', v)),
+        );
+      }),
     ),
   );
 
