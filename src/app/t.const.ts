@@ -1,3 +1,4 @@
+/* String constants. See src/assets/i18n/ */
 const T = {
   APP: {
     A_BROWSER_WARNING: 'APP.A_BROWSER_WARNING',
@@ -495,6 +496,7 @@ const T = {
       NOTIFICATION: {
         BREAK_X_START: 'F.POMODORO.NOTIFICATION.BREAK_X_START',
         SESSION_X_START: 'F.POMODORO.NOTIFICATION.SESSION_X_START',
+        NO_TASKS: 'F.POMODORO.NOTIFICATION.NO_TASKS',
       },
       S: {
         SESSION_X_START: 'F.POMODORO.S.SESSION_X_START',

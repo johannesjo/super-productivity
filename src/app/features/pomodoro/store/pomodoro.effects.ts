@@ -59,6 +59,12 @@ export class PomodoroEffects {
               }
               return of(startPomodoro());
             } else {
+              if (action.type === unsetCurrentTask.type) {
+                this._notifyService.notifyDesktop({
+                  title: T.F.POMODORO.NOTIFICATION.NO_TASKS,
+                  translateParams: { nr: `1` },
+                })
+              }
               return of(pausePomodoro({ isBreakEndPause: false }));
             }
           }),

@@ -486,7 +486,8 @@
       "FINISH_SESSION_X": "You successfully finished session <strong>{{nr}}</strong>!",
       "NOTIFICATION": {
         "BREAK_X_START": "Pomodoro: Break {{nr}} started!",
-        "SESSION_X_START": "Pomodoro: Session {{nr}} started!"
+        "SESSION_X_START": "Pomodoro: Session {{nr}} started!",
+        "NO_TASKS": "You need to add tasks before the Pomodoro timer can start."
       },
       "S": {
         "SESSION_X_START": "Pomodoro: Session {{nr}} started!"
