@@ -1,5 +1,5 @@
 <ng-container
-  *ngIf="(syncTriggerService.afterInitialSyncDoneAndDataLoadedInitially$|async) && !(imexMetaService.isDataImportInProgress$|async)"
+  *ngIf="(syncTriggerService.afterInitialSyncDoneAndDataLoadedInitially$|async) && !(imexMetaService.isDataImportInProgress$|async) && userActive"
 >
   <div
     *ngIf="(globalThemeService.backgroundImg$|async) as bgImage"
@@ -55,7 +55,7 @@
 </ng-container>
 
 <div
-  *ngIf="!(syncTriggerService.afterInitialSyncDoneAndDataLoadedInitially$|async) || (imexMetaService.isDataImportInProgress$|async)"
+  *ngIf="!(syncTriggerService.afterInitialSyncDoneAndDataLoadedInitially$|async) || (imexMetaService.isDataImportInProgress$|async) || !userActive"
   class="loading-full-page-wrapper"
 >
   <global-progress-bar></global-progress-bar>

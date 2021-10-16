@@ -60,6 +60,7 @@ export class AppComponent implements OnDestroy {
   @ViewChild('sideNavElRef', { read: ViewContainerRef }) sideNavElRef?: ViewContainerRef;
 
   isRTL: boolean = false;
+  userActive: boolean = false;
 
   private _subs: Subscription = new Subscription();
   private _intervalTimer?: NodeJS.Timeout;
@@ -210,6 +211,16 @@ export class AppComponent implements OnDestroy {
         },
       },
     });
+  }
+
+  @HostListener('document:mousemove', ['$event'])
+  startUserActiveViaMouse() {
+    this.userActive = true
+  }
+
+  @HostListener('document:keydown', ['$event'])
+  startUserActiveViaKey() {
+    this.userActive = true
   }
 
   getPage(outlet: RouterOutlet): string {
