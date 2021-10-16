@@ -1,4 +1,4 @@
-import { GithubIssue } from './github-issue.model';
+import { GithubIssue, GithubIssueReduced } from './github-issue.model';
 import { GithubOriginalIssue } from '../github-api-responses';
 import { IssueProviderKey, SearchResultItem } from '../../../issue.model';
 
@@ -35,6 +35,20 @@ export const mapGithubIssue = (issue: GithubOriginalIssue): GithubIssue => {
 
     // transformed
     comments: [],
+  };
+};
+
+export const mapGithubGraphQLSearchResult = (res: any): GithubIssueReduced[] => {
+  return res.data.repository.issues.edges.map(mapGithubReducedIssueFromGraphQL);
+};
+
+export const mapGithubReducedIssueFromGraphQL = ({ node }: any): GithubIssueReduced => {
+  return {
+    id: node.number,
+    number: node.number,
+    title: node.title,
+    state: node.state,
+    updated_at: node.updatedAt,
   };
 };
 

@@ -13,6 +13,7 @@ import { Observable, ObservableInput, of, throwError } from 'rxjs';
 import { GithubIssueSearchResult, GithubOriginalIssue } from './github-api-responses';
 import { catchError, filter, map, switchMap } from 'rxjs/operators';
 import {
+  mapGithubGraphQLSearchResult,
   mapGithubIssue,
   mapGithubIssueToSearchResult,
 } from './github-issue/github-issue-map.util';
@@ -90,7 +91,8 @@ export class GithubApiService {
     return this._sendRequest$(
       {
         url: `${BASE}graphql`,
-        payload: { query },
+        method: 'POST',
+        data: { query },
       },
       cfg,
     );
@@ -115,6 +117,31 @@ export class GithubApiService {
     ).pipe(
       map((issues: GithubOriginalIssue[]) => (issues ? issues.map(mapGithubIssue) : [])),
     );
+  }
+
+  getImportToBacklogIssuesFromGraphQL(cfg: GithubCfg): Observable<GithubIssueReduced[]> {
+    const split: any = cfg.repo?.split('/');
+    const owner = encodeURIComponent(split[0]);
+    const repo = encodeURIComponent(split[1]);
+    return this.graphQl$(
+      cfg,
+      `
+query Issues {
+  repository(owner: "${owner}", name: "${repo}") {
+    issues(last: 100, filterBy: {states: OPEN}, orderBy: {field: UPDATED_AT, direction:DESC}) {
+      edges {
+        node {
+          number
+          title
+          state
+          updatedAt
+        }
+      }
+    }
+  }
+}
+    `,
+    ).pipe(map((res) => mapGithubGraphQLSearchResult(res)));
   }
 
   private _checkSettings(cfg: GithubCfg): void {
