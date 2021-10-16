@@ -46,6 +46,7 @@ $thisLowerHeight: $thisHeight - $thisUpperHeight;
     }
 
     .view-btn,
+    .copy-btn,
     .edit-btn,
     .trash-btn {
       transform: translate(0, 0);
@@ -145,9 +146,9 @@ $thisLowerHeight: $thisHeight - $thisUpperHeight;
   border-bottom-right-radius: 0;
   border-bottom-left-radius: 0;
   flex: 1;
-  flex-basis: 100%;
-  width: 100%;
-  min-width: 100%;
+  flex-basis: 50%;
+  width: 50%;
+  min-width: 50%;
   line-height: $thisUpperHeight;
   height: $thisUpperHeight;
 
@@ -161,6 +162,19 @@ $thisLowerHeight: $thisHeight - $thisUpperHeight;
   margin-top: 2px;
   line-height: $thisLowerHeight;
   height: $thisLowerHeight;
+}
+
+.copy-btn {
+  pointer-events: all;
+  border-top-right-radius: 0;
+  border-top-left-radius: 0;
+  border-bottom-right-radius: 0;
+  flex-basis: 50%;
+  width: 50%;
+
+  @include mq(xs) {
+    transform: translate(0, 0);
+  }
 }
 
 .edit-btn {
