@@ -23,6 +23,7 @@ import { DialogAddTaskReminderComponent } from '../tasks/dialog-add-task-reminde
 import { AddTaskReminderInterface } from '../tasks/dialog-add-task-reminder/add-task-reminder-interface';
 import { HttpClient } from '@angular/common/http';
 import { getRelevantEventsFromIcal } from './ical/get-relevant-events-from-ical';
+import { SnackService } from '../../core/snack/snack.service';
 
 @Component({
   selector: 'timeline',
@@ -49,9 +50,22 @@ export class TimelineComponent implements OnDestroy {
                       icon: calProvider.icon,
                     })),
                     catchError((err) => {
-                      // TODO snack
                       console.error(err);
-                      return of([]);
+                      this._snackService.open({
+                        type: 'ERROR',
+                        msg: T.F.TIMELINE.S.CAL_PROVIDER_ERROR,
+                        translateParams: {
+                          errTxt:
+                            err?.toString() ||
+                            err?.status ||
+                            err?.message ||
+                            'UNKNOWN :(',
+                        },
+                      });
+                      return of({
+                        items: [],
+                        icon: '',
+                      });
                     }),
                   ),
                 ),
@@ -100,9 +114,8 @@ export class TimelineComponent implements OnDestroy {
     private _globalConfigService: GlobalConfigService,
     private _matDialog: MatDialog,
     private _http: HttpClient,
+    private _snackService: SnackService,
   ) {
-    this.icalEvents$.subscribe((v) => console.log(`icalEvents$`, v));
-
     if (!localStorage.getItem(LS_WAS_TIMELINE_INITIAL_DIALOG_SHOWN)) {
       this._matDialog.open(DialogTimelineInitialSetupComponent);
     }

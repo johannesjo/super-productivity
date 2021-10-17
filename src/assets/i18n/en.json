@@ -873,6 +873,9 @@
       "MENU_TITLE": "Timeline",
       "NOW": "Now",
       "NO_TASKS": "Currently there are no tasks. Please add some tasks via the + Button in the top bar.",
+      "S": {
+        "CAL_PROVIDER_ERROR": "Timeline Cal Provider Error: {{errTxt}}"
+      },
       "START": "Work Start",
       "TASK_PROJECTION_INFO": "Future projection of a scheduled repeatable task"
     },
