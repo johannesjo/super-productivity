@@ -2,7 +2,7 @@
 
 .form-wrapper {
   overflow: hidden;
-  padding: $s*2 $s*2 $s !important;
+  padding: $s * 2 $s * 2 $s !important;
 
   config-form {
     display: block;
@@ -30,7 +30,6 @@ $this-panel-padding-left-right: 12px;
   font-size: 16px;
   margin-top: 0;
   padding: 10px $this-panel-padding-left-right;
-
 }
 
 :host ::ng-deep .collapsible-expand-icon {
@@ -60,6 +59,10 @@ $this-panel-padding-left-right: 12px;
 :host ::ng-deep .help-btn {
   display: block;
   animation: $transition-duration-m help-ico-animation $ani-standard-timing;
+}
+
+:host ::ng-deep .extra-margin-top {
+  margin-top: $s * 4;
 }
 
 @keyframes help-ico-animation {

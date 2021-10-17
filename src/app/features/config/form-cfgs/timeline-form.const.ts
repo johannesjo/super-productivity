@@ -45,10 +45,27 @@ export const TIMELINE_FORM_CFG: ConfigFormSection<TimelineConfig> = {
       },
     },
     {
+      type: 'tpl',
+      className: 'tpl',
+      templateOptions: {
+        tag: 'h3',
+        class: 'extra-margin-top',
+        text: T.GCF.TIMELINE.CAL_PROVIDERS,
+      },
+    },
+    {
+      type: 'tpl',
+      className: 'tpl',
+      templateOptions: {
+        tag: 'p',
+        text: T.GCF.TIMELINE.CAL_PROVIDERS_INFO,
+      },
+    },
+    {
       key: 'calendarProviders',
       type: 'repeat',
       templateOptions: {
-        addText: T.F.SIMPLE_COUNTER.FORM.ADD_NEW,
+        addText: T.GCF.TIMELINE.CAL_PROVIDERS_ADD,
       },
       fieldArray: {
         fieldGroup: [
@@ -64,7 +81,6 @@ export const TIMELINE_FORM_CFG: ConfigFormSection<TimelineConfig> = {
             key: 'icalUrl',
             templateOptions: {
               label: T.GCF.TIMELINE.L_CAL_PATH,
-              description: T.GCF.TIMELINE.L_CAL_PATH_DESCRIPTION,
             },
           },
           {
