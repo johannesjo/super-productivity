@@ -2,7 +2,7 @@ import { TaskPlanned } from '../../tasks/task.model';
 import {
   BlockedBlock,
   BlockedBlockType,
-  TimelineFromCalendarEvent,
+  TimelineCalendarMapEntry,
   TimelineWorkStartEndCfg,
 } from '../timeline.model';
 import { getTimeLeftForTask } from '../../../util/get-time-left-for-task';
@@ -17,7 +17,7 @@ const PROJECTION_DAYS: number = 29;
 export const createSortedBlockerBlocks = (
   scheduledTasks: TaskPlanned[],
   scheduledTaskRepeatCfgs: TaskRepeatCfg[],
-  icalEvents: TimelineFromCalendarEvent[],
+  icalEventMap: TimelineCalendarMapEntry[],
   workStartEndCfg?: TimelineWorkStartEndCfg,
   now?: number,
 ): BlockedBlock[] => {
@@ -26,7 +26,7 @@ export const createSortedBlockerBlocks = (
   }
   let blockedBlocks: BlockedBlock[] = [
     ...createBlockerBlocksForScheduledTasks(scheduledTasks),
-    ...createBlockerBlocksForCalendarEvents(icalEvents),
+    ...createBlockerBlocksForCalendarEvents(icalEventMap),
     ...createBlockerBlocksForScheduledRepeatProjections(
       now as number,
       scheduledTaskRepeatCfgs,
@@ -175,43 +175,45 @@ const createBlockerBlocksForScheduledTasks = (
 };
 
 const createBlockerBlocksForCalendarEvents = (
-  icalEvents: TimelineFromCalendarEvent[],
+  icalEventMap: TimelineCalendarMapEntry[],
 ): BlockedBlock[] => {
   const blockedBlocks: BlockedBlock[] = [];
-  icalEvents.forEach((calEv) => {
-    const start = calEv.start;
-    const end = calEv.start + calEv.duration;
+  icalEventMap.forEach((icalMapEntry) => {
+    icalMapEntry.items.forEach((calEv) => {
+      const start = calEv.start;
+      const end = calEv.start + calEv.duration;
 
-    let wasMerged = false;
-    for (const blockedBlock of blockedBlocks) {
-      if (isOverlappingBlock({ start, end }, blockedBlock)) {
-        blockedBlock.start = Math.min(start, blockedBlock.start);
-        blockedBlock.end = Math.max(end, blockedBlock.end);
-        blockedBlock.entries.push({
-          start,
-          end,
-          type: BlockedBlockType.CalendarEvent,
-          data: calEv,
-        });
-        wasMerged = true;
-        break;
-      }
-    }
-
-    if (!wasMerged) {
-      blockedBlocks.push({
-        start,
-        end,
-        entries: [
-          {
+      let wasMerged = false;
+      for (const blockedBlock of blockedBlocks) {
+        if (isOverlappingBlock({ start, end }, blockedBlock)) {
+          blockedBlock.start = Math.min(start, blockedBlock.start);
+          blockedBlock.end = Math.max(end, blockedBlock.end);
+          blockedBlock.entries.push({
             start,
             end,
             type: BlockedBlockType.CalendarEvent,
-            data: calEv,
-          },
-        ],
-      });
-    }
+            data: { ...calEv, icon: icalMapEntry.icon },
+          });
+          wasMerged = true;
+          break;
+        }
+      }
+
+      if (!wasMerged) {
+        blockedBlocks.push({
+          start,
+          end,
+          entries: [
+            {
+              start,
+              end,
+              type: BlockedBlockType.CalendarEvent,
+              data: { ...calEv, icon: icalMapEntry.icon },
+            },
+          ],
+        });
+      }
+    });
   });
 
   return blockedBlocks;

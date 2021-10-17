@@ -108,11 +108,17 @@ export type SyncConfig = Readonly<{
   localFileSync: LocalFileSyncConfig;
 }>;
 
+export type TimelineCalendarProvider = Readonly<{
+  icalUrl: string;
+  icon: string | null;
+  isEnabled: boolean;
+}>;
+
 export type TimelineConfig = Readonly<{
   isWorkStartEndEnabled: boolean;
   workStart: string;
   workEnd: string;
-  icalUrl: string | null;
+  calendarProviders: TimelineCalendarProvider[];
 }>;
 
 export type TrackingReminderConfig = Readonly<{

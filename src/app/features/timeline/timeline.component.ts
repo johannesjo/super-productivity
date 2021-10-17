@@ -1,8 +1,12 @@
 import { ChangeDetectionStrategy, Component, OnDestroy } from '@angular/core';
-import { TimelineFromCalendarEvent, TimelineViewEntry } from './timeline.model';
+import {
+  TimelineCalendarMapEntry,
+  TimelineFromCalendarEvent,
+  TimelineViewEntry,
+} from './timeline.model';
 import { catchError, debounceTime, map, startWith, switchMap, tap } from 'rxjs/operators';
 import { TaskService } from '../tasks/task.service';
-import { combineLatest, Observable, of } from 'rxjs';
+import { combineLatest, forkJoin, Observable, of } from 'rxjs';
 import { mapToTimelineViewEntries } from './map-timeline-data/map-to-timeline-view-entries';
 import { T } from 'src/app/t.const';
 import { standardListAnimation } from '../../ui/animations/standard-list.ani';
@@ -30,19 +34,29 @@ import { getRelevantEventsFromIcal } from './ical/get-relevant-events-from-ical'
 export class TimelineComponent implements OnDestroy {
   T: typeof T = T;
   TimelineViewEntryType: typeof TimelineViewEntryType = TimelineViewEntryType;
-  icalEvents$: Observable<TimelineFromCalendarEvent[]> =
+  icalEvents$: Observable<TimelineCalendarMapEntry[]> =
     this._globalConfigService.timelineCfg$.pipe(
       switchMap((cfg) => {
-        return cfg.icalUrl && cfg.icalUrl.length > 3
-          ? this._http.get(cfg.icalUrl, { responseType: 'text' }).pipe(
-              map(getRelevantEventsFromIcal),
-              catchError((err) => {
-                // TODO snack
-                console.error(err);
-                return of([]);
-              }),
+        return cfg.calendarProviders && cfg.calendarProviders.length
+          ? forkJoin(
+              cfg.calendarProviders
+                .filter((calProvider) => calProvider.isEnabled)
+                .map((calProvider) =>
+                  this._http.get(calProvider.icalUrl, { responseType: 'text' }).pipe(
+                    map(getRelevantEventsFromIcal),
+                    map((items: TimelineFromCalendarEvent[]) => ({
+                      items,
+                      icon: calProvider.icon,
+                    })),
+                    catchError((err) => {
+                      // TODO snack
+                      console.error(err);
+                      return of([]);
+                    }),
+                  ),
+                ),
             )
-          : of([]);
+          : of([] as any);
       }),
       startWith([]),
     );

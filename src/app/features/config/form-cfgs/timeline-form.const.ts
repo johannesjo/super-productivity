@@ -45,11 +45,36 @@ export const TIMELINE_FORM_CFG: ConfigFormSection<TimelineConfig> = {
       },
     },
     {
-      key: 'icalUrl',
-      type: 'input',
+      key: 'calendarProviders',
+      type: 'repeat',
       templateOptions: {
-        label: T.GCF.TIMELINE.L_CAL_PATH,
-        description: T.GCF.TIMELINE.L_CAL_PATH_DESCRIPTION,
+        addText: T.F.SIMPLE_COUNTER.FORM.ADD_NEW,
+      },
+      fieldArray: {
+        fieldGroup: [
+          {
+            type: 'checkbox',
+            key: 'isEnabled',
+            templateOptions: {
+              label: T.F.SIMPLE_COUNTER.FORM.L_IS_ENABLED,
+            },
+          },
+          {
+            type: 'input',
+            key: 'icalUrl',
+            templateOptions: {
+              label: T.GCF.TIMELINE.L_CAL_PATH,
+              description: T.GCF.TIMELINE.L_CAL_PATH_DESCRIPTION,
+            },
+          },
+          {
+            type: 'icon',
+            key: 'icon',
+            templateOptions: {
+              label: T.F.SIMPLE_COUNTER.FORM.L_ICON,
+            },
+          },
+        ],
       },
     },
   ],

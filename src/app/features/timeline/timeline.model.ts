@@ -39,8 +39,7 @@ export interface TimelineFromCalendarEvent {
   title: string;
   start: number;
   duration: number;
-  // TODO check
-  isReoccurring?: boolean;
+  icon?: string;
 }
 
 export interface TimelineCustomEvent extends TimelineFromCalendarEvent {
@@ -133,4 +132,9 @@ export interface BlockedBlock {
   start: number;
   end: number;
   entries: BlockedBlockEntry[];
+}
+
+export interface TimelineCalendarMapEntry {
+  icon: string;
+  items: TimelineFromCalendarEvent[];
 }
