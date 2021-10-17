@@ -95,8 +95,8 @@ export class TimelineComponent implements OnDestroy {
         unPlanned,
         planned,
         taskRepeatCfgs,
-        currentId,
         icalEvents,
+        currentId,
         timelineCfg?.isWorkStartEndEnabled
           ? {
               startTime: timelineCfg.workStart,

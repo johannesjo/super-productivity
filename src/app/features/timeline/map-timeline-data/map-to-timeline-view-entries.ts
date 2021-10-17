@@ -28,8 +28,8 @@ export const mapToTimelineViewEntries = (
   tasks: Task[],
   scheduledTasks: TaskPlanned[],
   scheduledTaskRepeatCfgs: TaskRepeatCfg[],
-  currentId: string | null,
   icalEventMaps: TimelineCalendarMapEntry[],
+  currentId: string | null,
   workStartEndCfg?: TimelineWorkStartEndCfg,
   now: number = Date.now(),
 ): TimelineViewEntry[] => {
