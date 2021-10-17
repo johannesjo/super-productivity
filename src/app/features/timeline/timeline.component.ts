@@ -14,7 +14,10 @@ import { getTomorrow } from '../../util/get-tomorrow';
 import { TimelineViewEntryType } from './timeline.const';
 import { GlobalConfigService } from '../config/global-config.service';
 import { MatDialog } from '@angular/material/dialog';
-import { LS_WAS_TIMELINE_INITIAL_DIALOG_SHOWN } from '../../core/persistence/ls-keys.const';
+import {
+  LS_TIMELINE_CACHE,
+  LS_WAS_TIMELINE_INITIAL_DIALOG_SHOWN,
+} from '../../core/persistence/ls-keys.const';
 import { DialogTimelineInitialSetupComponent } from './dialog-timeline-initial-setup/dialog-timeline-initial-setup.component';
 import { WorkContextService } from '../work-context/work-context.service';
 import { TaskRepeatCfgService } from '../task-repeat-cfg/task-repeat-cfg.service';
@@ -24,6 +27,7 @@ import { AddTaskReminderInterface } from '../tasks/dialog-add-task-reminder/add-
 import { HttpClient } from '@angular/common/http';
 import { getRelevantEventsFromIcal } from './ical/get-relevant-events-from-ical';
 import { SnackService } from '../../core/snack/snack.service';
+import { loadFromRealLs, saveToRealLs } from '../../core/persistence/local-storage';
 
 @Component({
   selector: 'timeline',
@@ -69,10 +73,14 @@ export class TimelineComponent implements OnDestroy {
                     }),
                   ),
                 ),
+            ).pipe(
+              tap((val) => {
+                saveToRealLs(LS_TIMELINE_CACHE, val);
+              }),
             )
           : of([] as any);
       }),
-      startWith([]),
+      startWith(loadFromRealLs(LS_TIMELINE_CACHE) || []),
     );
   timelineEntries$: Observable<TimelineViewEntry[]> = combineLatest([
     this._workContextService.timelineTasks$,
