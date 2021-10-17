@@ -6,12 +6,14 @@ import { UiModule } from '../../ui/ui.module';
 import { TimelineRepeatTaskProjectionComponent } from './timeline-repeat-task-projection/timeline-repeat-task-projection.component';
 import { DialogTimelineInitialSetupComponent } from './dialog-timeline-initial-setup/dialog-timeline-initial-setup.component';
 import { TimelineCustomEventComponent } from './timeline-custom-event/timeline-custom-event.component';
+import { TimelineCalendarEventComponent } from './timeline-calendar-event/timeline-calendar-event.component';
 
 @NgModule({
   declarations: [
     TimelineComponent,
     TimelineCustomEventComponent,
     TimelineRepeatTaskProjectionComponent,
+    TimelineCalendarEventComponent,
     DialogTimelineInitialSetupComponent,
   ],
   exports: [TimelineComponent],

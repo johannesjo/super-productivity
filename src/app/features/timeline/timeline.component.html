@@ -76,15 +76,15 @@
             </div>
           </div>
 
-          <timeline-custom-event
-            *ngSwitchCase="TimelineViewEntryType.CustomEvent"
-            [event]="row.data"
-          ></timeline-custom-event>
+          <!--          <timeline-custom-event-->
+          <!--            *ngSwitchCase="TimelineViewEntryType.CustomEvent"-->
+          <!--            [event]="row.data"-->
+          <!--          ></timeline-custom-event>-->
 
-          <timeline-custom-event
+          <timeline-calendar-event
             *ngSwitchCase="TimelineViewEntryType.CalendarEvent"
-            [event]="row.data"
-          ></timeline-custom-event>
+            [calendarEvent]="row.data"
+          ></timeline-calendar-event>
 
           <timeline-task-repeat-projection
             [title]="T.F.TIMELINE.TASK_PROJECTION_INFO|translate"
