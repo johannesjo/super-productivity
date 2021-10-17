@@ -22,7 +22,7 @@ $vertical-button-margin: $s;
 .inner-content-wrapper {
   max-width: $component-max-width;
   margin: auto;
-  padding: $s*2;
+  padding: $s * 2;
   padding-top: $s;
   padding-bottom: $s;
   display: flex;
@@ -31,8 +31,8 @@ $vertical-button-margin: $s;
 
   @include mq(component) {
     // sync to task list padding
-    padding-left: 3*$s;
-    padding-right: 3*$s;
+    padding-left: 3 * $s;
+    padding-right: 3 * $s;
   }
 }
 
@@ -43,12 +43,12 @@ $vertical-button-margin: $s;
   padding-bottom: $s;
 
   mat-icon {
-    margin-right: $s*1.5;
+    margin-right: $s * 1.5;
     min-width: 20px;
 
-    :host-context([dir=rtl]) & {
+    :host-context([dir='rtl']) & {
       margin-right: 0px;
-      margin-left: $s*1.5;
+      margin-left: $s * 1.5;
     }
 
     .isError & {
@@ -60,8 +60,9 @@ $vertical-button-margin: $s;
 .buttons {
   display: flex;
   align-items: center;
+  margin-left: auto;
 
-  :host-context([dir=rtl]) & {
+  :host-context([dir='rtl']) & {
     button {
       font-weight: bolder;
     }
@@ -69,11 +70,13 @@ $vertical-button-margin: $s;
 }
 
 .motivational-img-wrapper {
+  margin: auto;
+
   img {
     width: 100%;
     height: auto;
     max-height: 30vh;
     margin: auto auto 8px;
-    object-fit: cover
+    object-fit: cover;
   }
 }
