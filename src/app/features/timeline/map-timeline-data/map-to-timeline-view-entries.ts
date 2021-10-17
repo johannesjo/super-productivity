@@ -2,6 +2,7 @@ import { Task, TaskPlanned, TaskWithoutReminder } from '../../tasks/task.model';
 import {
   BlockedBlock,
   BlockedBlockType,
+  TimelineFromCalendarEvent,
   TimelineViewEntry,
   TimelineViewEntrySplitTaskContinued,
   TimelineViewEntryTask,
@@ -18,6 +19,7 @@ import {
 } from '../timeline.const';
 import * as moment from 'moment';
 import { TaskRepeatCfg } from '../../task-repeat-cfg/task-repeat-cfg.model';
+import { msToString } from '../../../ui/duration/ms-to-string.pipe';
 
 // const debug = (...args: any) => console.log(...args);
 const debug = (...args: any): void => undefined;
@@ -27,6 +29,7 @@ export const mapToTimelineViewEntries = (
   scheduledTasks: TaskPlanned[],
   scheduledTaskRepeatCfgs: TaskRepeatCfg[],
   currentId: string | null,
+  icalEvents: TimelineFromCalendarEvent[],
   workStartEndCfg?: TimelineWorkStartEndCfg,
   now: number = Date.now(),
 ): TimelineViewEntry[] => {
@@ -61,6 +64,7 @@ export const mapToTimelineViewEntries = (
   const blockedBlocks = createSortedBlockerBlocks(
     scheduledTasks,
     scheduledTaskRepeatCfgs,
+    icalEvents,
     workStartEndCfg,
     now,
   );
@@ -216,6 +220,20 @@ const createViewEntriesForBlock = (blockedBlock: BlockedBlock): TimelineViewEntr
         start: entry.start,
         type: TimelineViewEntryType.ScheduledRepeatTaskProjection,
         data: repeatCfg,
+        isHideTime: false,
+      });
+    } else if (entry.type === BlockedBlockType.CalendarEvent) {
+      const customEvent = entry.data;
+      viewEntriesForBock.push({
+        // TODO fix
+        id: customEvent.title,
+        start: entry.start,
+        type: TimelineViewEntryType.CalendarEvent,
+        data: {
+          ...customEvent,
+          icon: 'event',
+          title: customEvent.title + ' (' + msToString(customEvent.duration) + ')',
+        },
         isHideTime: false,
       });
     } else if (entry.type === BlockedBlockType.WorkdayStartEnd) {

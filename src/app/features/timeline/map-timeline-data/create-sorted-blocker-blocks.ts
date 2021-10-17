@@ -2,6 +2,7 @@ import { TaskPlanned } from '../../tasks/task.model';
 import {
   BlockedBlock,
   BlockedBlockType,
+  TimelineFromCalendarEvent,
   TimelineWorkStartEndCfg,
 } from '../timeline.model';
 import { getTimeLeftForTask } from '../../../util/get-time-left-for-task';
@@ -16,6 +17,7 @@ const PROJECTION_DAYS: number = 29;
 export const createSortedBlockerBlocks = (
   scheduledTasks: TaskPlanned[],
   scheduledTaskRepeatCfgs: TaskRepeatCfg[],
+  icalEvents: TimelineFromCalendarEvent[],
   workStartEndCfg?: TimelineWorkStartEndCfg,
   now?: number,
 ): BlockedBlock[] => {
@@ -24,6 +26,7 @@ export const createSortedBlockerBlocks = (
   }
   let blockedBlocks: BlockedBlock[] = [
     ...createBlockerBlocksForScheduledTasks(scheduledTasks),
+    ...createBlockerBlocksForCalendarEvents(icalEvents),
     ...createBlockerBlocksForScheduledRepeatProjections(
       now as number,
       scheduledTaskRepeatCfgs,
@@ -162,6 +165,49 @@ const createBlockerBlocksForScheduledTasks = (
             end,
             type: BlockedBlockType.ScheduledTask,
             data: task,
+          },
+        ],
+      });
+    }
+  });
+
+  return blockedBlocks;
+};
+
+const createBlockerBlocksForCalendarEvents = (
+  icalEvents: TimelineFromCalendarEvent[],
+): BlockedBlock[] => {
+  const blockedBlocks: BlockedBlock[] = [];
+  icalEvents.forEach((calEv) => {
+    const start = calEv.start;
+    const end = calEv.start + calEv.duration;
+
+    let wasMerged = false;
+    for (const blockedBlock of blockedBlocks) {
+      if (isOverlappingBlock({ start, end }, blockedBlock)) {
+        blockedBlock.start = Math.min(start, blockedBlock.start);
+        blockedBlock.end = Math.max(end, blockedBlock.end);
+        blockedBlock.entries.push({
+          start,
+          end,
+          type: BlockedBlockType.CalendarEvent,
+          data: calEv,
+        });
+        wasMerged = true;
+        break;
+      }
+    }
+
+    if (!wasMerged) {
+      blockedBlocks.push({
+        start,
+        end,
+        entries: [
+          {
+            start,
+            end,
+            type: BlockedBlockType.CalendarEvent,
+            data: calEv,
           },
         ],
       });

@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, OnDestroy } from '@angular/core';
 import { TimelineFromCalendarEvent, TimelineViewEntry } from './timeline.model';
-import { catchError, debounceTime, map, switchMap, tap } from 'rxjs/operators';
+import { catchError, debounceTime, map, startWith, switchMap, tap } from 'rxjs/operators';
 import { TaskService } from '../tasks/task.service';
 import { combineLatest, Observable, of } from 'rxjs';
 import { mapToTimelineViewEntries } from './map-timeline-data/map-to-timeline-view-entries';
@@ -44,20 +44,23 @@ export class TimelineComponent implements OnDestroy {
             )
           : of([]);
       }),
+      startWith([]),
     );
   timelineEntries$: Observable<TimelineViewEntry[]> = combineLatest([
     this._workContextService.timelineTasks$,
     this._taskRepeatCfgService.taskRepeatCfgsWithStartTime$,
     this.taskService.currentTaskId$,
     this._globalConfigService.timelineCfg$,
+    this.icalEvents$,
   ]).pipe(
     debounceTime(50),
-    map(([{ planned, unPlanned }, taskRepeatCfgs, currentId, timelineCfg]) =>
+    map(([{ planned, unPlanned }, taskRepeatCfgs, currentId, timelineCfg, icalEvents]) =>
       mapToTimelineViewEntries(
         unPlanned,
         planned,
         taskRepeatCfgs,
         currentId,
+        icalEvents,
         timelineCfg?.isWorkStartEndEnabled
           ? {
               startTime: timelineCfg.workStart,

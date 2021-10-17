@@ -52,6 +52,11 @@ interface TimelineViewEntryCustomEvent extends TimelineViewEntryBase {
   data: TimelineCustomEvent;
 }
 
+interface TimelineViewEntryCalendarEvent extends TimelineViewEntryBase {
+  type: TimelineViewEntryType.CalendarEvent;
+  data: TimelineCustomEvent;
+}
+
 export interface TimelineWorkStartEndCfg {
   startTime: string;
   endTime: string;
@@ -76,6 +81,7 @@ export type TimelineViewEntry =
   | TimelineViewEntryTaskScheduledRepeatProjection
   | TimelineViewEntrySplitTaskContinued
   | TimelineViewEntryCustomEvent
+  | TimelineViewEntryCalendarEvent
   | TimelineViewEntryWorkStart
   | TimelineViewEntryWorkEnd
   | TimelineDayCrossing;
@@ -85,6 +91,7 @@ export type TimelineViewEntry =
 export enum BlockedBlockType {
   ScheduledTask = 'ScheduledTask',
   ScheduledRepeatProjection = 'ScheduledRepeatProjection',
+  CalendarEvent = 'CalendarEvent',
   WorkdayStartEnd = 'WorkdayStartEnd',
 }
 
@@ -102,6 +109,13 @@ export interface BlockedBlockEntryScheduledRepeatProjection {
   data: TaskRepeatCfg;
 }
 
+export interface BlockedBlockEntryCalendarEvent {
+  start: number;
+  end: number;
+  type: BlockedBlockType.CalendarEvent;
+  data: TimelineFromCalendarEvent;
+}
+
 export interface BlockedBlockEntryWorkdayStartEnd {
   start: number;
   end: number;
@@ -112,6 +126,7 @@ export interface BlockedBlockEntryWorkdayStartEnd {
 export type BlockedBlockEntry =
   | BlockedBlockEntryScheduledTask
   | BlockedBlockEntryScheduledRepeatProjection
+  | BlockedBlockEntryCalendarEvent
   | BlockedBlockEntryWorkdayStartEnd;
 
 export interface BlockedBlock {
