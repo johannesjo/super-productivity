@@ -1213,4 +1213,55 @@ describe('mapToViewEntries()', () => {
       );
     });
   });
+
+  describe('calenderWithItems', () => {
+    it('should work for calenderWithItems', () => {
+      const d = {
+        calendarWithItems: [
+          {
+            icon: 'testICON',
+            items: [
+              {
+                start: getDateTimeFromClockString('13:00', 0),
+                duration: hours(3),
+              },
+            ],
+          },
+        ],
+        tasks: [
+          {
+            timeSpent: 0,
+            timeEstimate: hours(5),
+            title: 'Task',
+            reminderId: null,
+            plannedAt: null,
+          },
+        ],
+        scheduledTasks: [],
+        repeatTaskProjections: [],
+        workStartEndCfg: { startTime: '14:00', endTime: '20:00' },
+        now: getDateTimeFromClockString('12:00', 0),
+      } as any;
+
+      const r = mapToTimelineViewEntries(
+        d.tasks,
+        d.scheduledTasks,
+        d.repeatTaskProjections,
+        d.calendarWithItems,
+        'SCHEDULED_CURRENT_ID',
+        d.workStartEndCfg,
+        d.now,
+      );
+
+      console.log(r);
+
+      expect(r[0].type).toEqual(TimelineViewEntryType.CalendarEvent);
+      expect(r[1].type).toEqual(TimelineViewEntryType.SplitTask);
+      expect(r[2].type).toEqual(TimelineViewEntryType.WorkdayEnd);
+      expect(r[3].type).toEqual(TimelineViewEntryType.DayCrossing);
+      // expect(r[3].start).toEqual(
+      //   getDateTimeFromClockString('10:00', 24 * 60 * 60 * 1000),
+      // );
+    });
+  });
 });

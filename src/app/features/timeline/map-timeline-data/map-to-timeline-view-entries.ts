@@ -28,7 +28,7 @@ export const mapToTimelineViewEntries = (
   tasks: Task[],
   scheduledTasks: TaskPlanned[],
   scheduledTaskRepeatCfgs: TaskRepeatCfg[],
-  icalEventMaps: TimelineCalendarMapEntry[],
+  calenderWithItems: TimelineCalendarMapEntry[],
   currentId: string | null,
   workStartEndCfg?: TimelineWorkStartEndCfg,
   now: number = Date.now(),
@@ -64,7 +64,7 @@ export const mapToTimelineViewEntries = (
   const blockedBlocks = createSortedBlockerBlocks(
     scheduledTasks,
     scheduledTaskRepeatCfgs,
-    icalEventMaps,
+    calenderWithItems,
     workStartEndCfg,
     now,
   );
