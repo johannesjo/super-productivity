@@ -44,5 +44,13 @@ export const TIMELINE_FORM_CFG: ConfigFormSection<TimelineConfig> = {
         },
       },
     },
+    {
+      key: 'icalUrl',
+      type: 'input',
+      templateOptions: {
+        label: T.GCF.TIMELINE.L_CAL_PATH,
+        description: T.GCF.TIMELINE.L_CAL_PATH_DESCRIPTION,
+      },
+    },
   ],
 };

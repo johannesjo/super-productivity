@@ -1137,6 +1137,8 @@
     },
     "TIMELINE": {
       "HELP": "The timeline feature should provide you with a quick overview over how your planned tasks play out over time. You can find it in the left hand menu under <a href='#/timeline'>'Timeline'</a>. ",
+      "L_CAL_PATH": "Url/File path for calendar ICAL (optional)",
+      "L_CAL_PATH_DESCRIPTION": "Import calendar as ICAL from file or url. NOTE: Might not work from browser version.",
       "L_IS_WORK_START_END_ENABLED": "Limit unscheduled task flow to specific work times",
       "L_WORK_END": "Work Day End",
       "L_WORK_START": "Work Day Start",

@@ -1,8 +1,8 @@
 import { ChangeDetectionStrategy, Component, OnDestroy } from '@angular/core';
-import { TimelineViewEntry } from './timeline.model';
-import { debounceTime, map, tap } from 'rxjs/operators';
+import { TimelineFromCalendarEvent, TimelineViewEntry } from './timeline.model';
+import { catchError, debounceTime, map, switchMap, tap } from 'rxjs/operators';
 import { TaskService } from '../tasks/task.service';
-import { combineLatest, Observable } from 'rxjs';
+import { combineLatest, Observable, of } from 'rxjs';
 import { mapToTimelineViewEntries } from './map-timeline-data/map-to-timeline-view-entries';
 import { T } from 'src/app/t.const';
 import { standardListAnimation } from '../../ui/animations/standard-list.ani';
@@ -17,6 +17,8 @@ import { TaskRepeatCfgService } from '../task-repeat-cfg/task-repeat-cfg.service
 import { Task } from '../tasks/task.model';
 import { DialogAddTaskReminderComponent } from '../tasks/dialog-add-task-reminder/dialog-add-task-reminder.component';
 import { AddTaskReminderInterface } from '../tasks/dialog-add-task-reminder/add-task-reminder-interface';
+import { HttpClient } from '@angular/common/http';
+import { getRelevantEventsFromIcal } from './ical/get-relevant-events-from-ical';
 
 @Component({
   selector: 'timeline',
@@ -28,6 +30,21 @@ import { AddTaskReminderInterface } from '../tasks/dialog-add-task-reminder/add-
 export class TimelineComponent implements OnDestroy {
   T: typeof T = T;
   TimelineViewEntryType: typeof TimelineViewEntryType = TimelineViewEntryType;
+  icalEvents$: Observable<TimelineFromCalendarEvent[]> =
+    this._globalConfigService.timelineCfg$.pipe(
+      switchMap((cfg) => {
+        return cfg.icalUrl && cfg.icalUrl.length > 3
+          ? this._http.get(cfg.icalUrl, { responseType: 'text' }).pipe(
+              map(getRelevantEventsFromIcal),
+              catchError((err) => {
+                // TODO snack
+                console.error(err);
+                return of([]);
+              }),
+            )
+          : of([]);
+      }),
+    );
   timelineEntries$: Observable<TimelineViewEntry[]> = combineLatest([
     this._workContextService.timelineTasks$,
     this._taskRepeatCfgService.taskRepeatCfgsWithStartTime$,
@@ -49,6 +66,7 @@ export class TimelineComponent implements OnDestroy {
           : undefined,
       ),
     ),
+
     // NOTE: this doesn't require cd.detect changes because view is already re-checked with obs
     tap(() => (this.now = Date.now())),
   );
@@ -64,7 +82,10 @@ export class TimelineComponent implements OnDestroy {
     private _workContextService: WorkContextService,
     private _globalConfigService: GlobalConfigService,
     private _matDialog: MatDialog,
+    private _http: HttpClient,
   ) {
+    this.icalEvents$.subscribe((v) => console.log(`icalEvents$`, v));
+
     if (!localStorage.getItem(LS_WAS_TIMELINE_INITIAL_DIALOG_SHOWN)) {
       this._matDialog.open(DialogTimelineInitialSetupComponent);
     }

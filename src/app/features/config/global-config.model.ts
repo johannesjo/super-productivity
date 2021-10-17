@@ -112,6 +112,7 @@ export type TimelineConfig = Readonly<{
   isWorkStartEndEnabled: boolean;
   workStart: string;
   workEnd: string;
+  icalUrl: string | null;
 }>;
 
 export type TrackingReminderConfig = Readonly<{
