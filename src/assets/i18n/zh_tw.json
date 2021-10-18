@@ -138,7 +138,7 @@
         "TOKEN_DESCRIPTION": "私儲存庫存取所需"
       },
       "FORM_SECTION": {
-        "HELP": "<p>您可以在此處配置 Super Productivity，以在日常計劃視圖的任務建立面板中列出特儲存庫的打開 GitHub Issue。它們將被列為建議，並將提供該 Issue 的連結以及有關該 Issue 的更多信息。</p> <p>此外，您還可以自動將所有未解決的 Issue 添加並同步到任務待辦事項中。</p><p>您可以提供存取Token以此獲得使用限制並進行存取， <a href='https://docs.github.com/en/free-pro-team@latest/developers/apps/scopes-for-oauth-apps'>更多信息，請參見此處</a>。",
+        "HELP": "<p>您可以在此處配置 Super Productivity，以在日常計劃視圖的任務建立面板中列出特儲存庫的打開 GitHub Issue。它們將被列為建議，並將提供該 Issue 的連結以及有關該 Issue 的更多資訊。</p> <p>此外，您還可以自動將所有未解決的 Issue 添加並同步到任務待辦事項中。</p><p>您可以提供存取Token以此獲得使用限制並進行存取， <a href='https://docs.github.com/en/free-pro-team@latest/developers/apps/scopes-for-oauth-apps'>更多資訊，請參見此處</a>。",
         "TITLE": "GitHub"
       },
       "ISSUE_CONTENT": {
@@ -177,7 +177,7 @@
           "SOURCE_GROUP": "Group"
       },
       "FORM_SECTION": {
-        "HELP": "<p>在這裡，您可以配置 Super Productivity 在日常計劃視圖的任務建立面板中列出特定項目的打開的 GitLab Issue（線上版本或自託管實例）。它們將作為建議列出，並提供指向該 Issue 的連結以及有關此 Issue 的更多信息。</p> <p>此外，您可以自動將所有未解決的 Issue 添加並同步到待辦事項。</p>",
+        "HELP": "<p>在這裡，您可以配置 Super Productivity 在日常計劃視圖的任務建立面板中列出特定項目的打開的 GitLab Issue（線上版本或自託管實例）。它們將作為建議列出，並提供指向該 Issue 的連結以及有關此 Issue 的更多資訊。</p> <p>此外，您可以自動將所有未解決的 Issue 添加並同步到待辦事項。</p>",
         "TITLE": "GitLab"
       },
       "ISSUE_CONTENT": {
@@ -402,7 +402,7 @@
         "ENABLE_REPEAT_EVERY_DAY": "每天重複",
         "HELP_H1": "我為什麼要在乎？",
         "HELP_LINK_TXT": "轉到指標部分",
-        "HELP_P1": "花時間進行自我評估！此處的答案已儲存，併為您提供有關如何在指標部分工作的一些統計信息。此外，對明天的建議將在第二天出現在您的任務列表上方。",
+        "HELP_P1": "花時間進行自我評估！此處的答案已儲存，併為您提供有關如何在指標部分工作的一些統計資料。此外，對明天的建議將在第二天出現在您的任務列表上方。",
         "HELP_P2": "這不僅僅是為了計算精確的指標，或是提高效率，而是為了改善您對工作的看法。評估日常生活中的自己的不足可能會對進步有所幫助。對它的清晰認識有助於更好地掌握這些並改善你的能力。",
         "IMPROVEMENTS": "什麼提高了你的效率生產力？",
         "IMPROVEMENTS_TOMORROW": "你能做些什麼來讓明天更高效？",
@@ -656,7 +656,7 @@
         "L_SYNC_PROVIDER": "同步提供者",
         "TITLE": "同步",
         "WEB_DAV": {
-          "CORS_INFO": "<p><strong>實驗！！</strong>為了<strong>完成這項工作，您需要為Nextcloud實例停用或限制CORS</strong>，這可能會對安全性造成負面影響！請<a href='https://github.com/nextcloud/server/issues/3131'>參考該Issue</a>以獲取更多信息。使此功能在移動設備上起作用的一種方法是通過nextcloud應用程序<a href='https://apps.nextcloud.com/apps/webapppassword'>webapppassword<a> 將 \"https://app.super-roductivity.com\"列入白名單使用風險自負！",
+          "CORS_INFO": "<p><strong>實驗！！</strong>為了<strong>完成這項工作，您需要為Nextcloud實例停用或限制CORS</strong>，這可能會對安全性造成負面影響！請<a href='https://github.com/nextcloud/server/issues/3131'>參考該Issue</a>以獲取更多資訊。使此功能在移動設備上起作用的一種方法是通過nextcloud應用程序<a href='https://apps.nextcloud.com/apps/webapppassword'>webapppassword<a> 將 \"https://app.super-roductivity.com\"列入白名單使用風險自負！",
           "L_BASE_URL": "基本網址",
           "L_PASSWORD": "密碼",
           "L_SYNC_FILE_PATH": "同步檔案路徑",
@@ -749,7 +749,7 @@
         "REPEAT_EDIT": "編輯重複任務",
         "SCHEDULE": "安排任務",
         "SHOW_UPDATES": "顯示更新",
-        "TOGGLE_ADDITIONAL": "顯示/隱藏其他信息",
+        "TOGGLE_ADDITIONAL": "顯示/隱藏其他資訊",
         "TOGGLE_ATTACHMENTS": "顯示/隱藏附件",
         "TOGGLE_DONE": "標記為已完成/未完成",
         "TOGGLE_SUB_TASK_VISIBILITY": "切換子任務可見性",
@@ -1054,7 +1054,7 @@
       "TASK_SCHEDULE": "安排任務",
       "TASK_SHORTCUTS": "任務",
       "TASK_SHORTCUTS_INFO": "以下捷徑適用於當前選定的任務（通過選項卡或滑鼠選擇）。",
-      "TASK_TOGGLE_ADDITIONAL_INFO_OPEN": "顯示/隱藏其他任務信息",
+      "TASK_TOGGLE_ADDITIONAL_INFO_OPEN": "顯示/隱藏其他任務資訊",
       "TASK_TOGGLE_DONE": "切換完成",
       "TITLE": "鍵盤快捷鍵",
       "TOGGLE_BACKLOG": "顯示/隱藏待辦事項",
