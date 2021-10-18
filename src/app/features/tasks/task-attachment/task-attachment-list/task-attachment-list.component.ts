@@ -5,7 +5,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { DialogEditTaskAttachmentComponent } from '../dialog-edit-attachment/dialog-edit-task-attachment.component';
 import { standardListAnimation } from '../../../../ui/animations/standard-list.ani';
 import { T } from '../../../../t.const';
-import { MatIcon } from '@angular/material/icon';
+import { SnackService } from 'src/app/core/snack/snack.service';
 
 @Component({
   selector: 'task-attachment-list',
@@ -25,6 +25,7 @@ export class TaskAttachmentListComponent {
   constructor(
     public readonly attachmentService: TaskAttachmentService,
     private readonly _matDialog: MatDialog,
+    private readonly _snackService: SnackService,
   ) {}
 
   openEditDialog(attachment?: TaskAttachment): void {
@@ -58,21 +59,14 @@ export class TaskAttachmentListComponent {
       });
   }
 
-  async copy($event: MouseEvent, attachment?: TaskAttachment) {
-    if (!attachment) return
+  async copy(attachment?: TaskAttachment) {
+    if (!attachment) return;
     // Force-cast PermissionDescriptor as 'clipboard-write' is not defined in type
-    const permission = {name: 'clipboard-write'} as unknown as PermissionDescriptor
-    const result = await navigator.permissions.query(permission)
+    const permission = {name: 'clipboard-write'} as unknown as PermissionDescriptor;
+    const result = await navigator.permissions.query(permission);
     if (result.state == "granted" || result.state == "prompt") {
-      await navigator.clipboard.writeText(attachment.path)
-      const matIcon = $event.target! as HTMLElement
-      // const matIcon = button.querySelector('mat-icon') as HTMLElement
-      // console.log($event.target)
-      // Update icon to checkmark for 2.5s to confirm copy event
-      matIcon.innerHTML = 'done'
-      setTimeout(() => {
-        matIcon.innerHTML = 'content_copy'
-      }, 2500)
+      await navigator.clipboard.writeText(attachment.path);
+      this._snackService.open(T.GLOBAL_SNACK.COPY_TO_CLIPPBOARD)
     }
   }
 
