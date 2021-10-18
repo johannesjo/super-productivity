@@ -232,7 +232,6 @@ const createViewEntriesForBlock = (blockedBlock: BlockedBlock): TimelineViewEntr
         data: {
           ...calendarEvent,
           icon: calendarEvent.icon || 'event',
-          title: calendarEvent.title + ' (' + msToString(calendarEvent.duration) + ')',
         },
         isHideTime: false,
       });
