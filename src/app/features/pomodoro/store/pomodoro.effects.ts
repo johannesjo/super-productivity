@@ -5,7 +5,7 @@ import {
   toggleStart,
   unsetCurrentTask,
 } from '../../tasks/store/task.actions';
-import { concatMap, filter, mapTo, switchMap, tap, withLatestFrom } from 'rxjs/operators';
+import { concatMap, filter, map, mapTo, switchMap, tap, withLatestFrom } from 'rxjs/operators';
 import { PomodoroService } from '../pomodoro.service';
 import {
   finishPomodoroSession,
@@ -18,7 +18,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { DialogPomodoroBreakComponent } from '../dialog-pomodoro-break/dialog-pomodoro-break.component';
 import { Action, select, Store } from '@ngrx/store';
 import { selectCurrentTaskId } from '../../tasks/store/task.selectors';
-import { EMPTY, Observable, of } from 'rxjs';
+import { EMPTY, observable, Observable, of, Subscription } from 'rxjs';
 import { NotifyService } from '../../../core/notify/notify.service';
 import { IS_ELECTRON } from '../../../app.constants';
 import { T } from '../../../t.const';
@@ -26,11 +26,16 @@ import { SnackService } from '../../../core/snack/snack.service';
 import { ElectronService } from '../../../core/electron/electron.service';
 import { ipcRenderer } from 'electron';
 import { IPC } from '../../../../../electron/ipc-events.const';
+import { TaskService } from '../../../features/tasks/task.service';
 
 @Injectable()
 export class PomodoroEffects {
   currentTaskId$: Observable<string | null> = this._store$.pipe(
     select(selectCurrentTaskId),
+  );
+
+  hasActiveTasks$ = this._taskService.allStartableTasks$.pipe(
+    map(tasks => tasks.length > 0)
   );
 
   playPauseOnCurrentUpdate$: Observable<Action> = createEffect(() =>
@@ -44,27 +49,27 @@ export class PomodoroEffects {
             this._pomodoroService.cfg$,
             this._pomodoroService.isBreak$,
             this._pomodoroService.currentSessionTime$,
+            this.hasActiveTasks$,
           ),
           // don't update when on break and stop time tracking is active
           filter(
-            ([action, cfg, isBreak, currentSessionTime]) =>
+            ([action, cfg, isBreak, currentSessionTime, hasActiveTasks]) =>
               !isBreak ||
               !cfg.isStopTrackingOnBreak ||
               (isBreak && currentSessionTime <= 0 && action.type === setCurrentTask.type),
           ),
-          concatMap(([action, , isBreak, currentSessionTime]) => {
+          concatMap(([action, , isBreak, currentSessionTime, hasActiveTasks]) => {
+            if (!hasActiveTasks) {
+              // We cannot start Pomodoro Timer
+              this._snackService.open(T.F.POMODORO.NOTIFICATION.NO_TASKS);
+              return of(pausePomodoro({ isBreakEndPause: false }));
+            }
             if ((action as any)?.id && action.type !== unsetCurrentTask.type) {
               if (isBreak && currentSessionTime <= 0) {
                 return of(finishPomodoroSession(), startPomodoro());
               }
               return of(startPomodoro());
             } else {
-              if (action.type === unsetCurrentTask.type) {
-                this._notifyService.notifyDesktop({
-                  title: T.F.POMODORO.NOTIFICATION.NO_TASKS,
-                  translateParams: { nr: `1` },
-                })
-              }
               return of(pausePomodoro({ isBreakEndPause: false }));
             }
           }),
@@ -247,5 +252,7 @@ export class PomodoroEffects {
     private _electronService: ElectronService,
     private _snackService: SnackService,
     private _store$: Store<any>,
-  ) {}
+    private _taskService: TaskService,
+  ) {
+  }
 }
