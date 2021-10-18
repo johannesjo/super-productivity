@@ -31,7 +31,7 @@
         <mat-icon *ngIf="attachment?.type==='IMG'">search</mat-icon>
         <mat-icon *ngIf="attachment?.type!=='IMG'">open_in_new</mat-icon>
       </button>
-      <button (click)="copy($event, attachment)" class="copy-btn" mat-flat-button *ngIf="attachment?.type!=='IMG'">
+      <button (click)="copy(attachment)" class="copy-btn" mat-flat-button *ngIf="attachment?.type!=='IMG'">
         <mat-icon>content_copy</mat-icon>
       </button>
 

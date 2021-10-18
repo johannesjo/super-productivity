@@ -153,7 +153,7 @@ $thisLowerHeight: $thisHeight - $thisUpperHeight;
   height: $thisUpperHeight;
 
   @include mq(xs) {
-    transform: translate(0, -50%);
+    transform: translate(-100%, -50%);
   }
 }
 
@@ -173,7 +173,7 @@ $thisLowerHeight: $thisHeight - $thisUpperHeight;
   width: 50%;
 
   @include mq(xs) {
-    transform: translate(0, 0);
+    transform: translate(100%, -50%);
   }
 }
 
