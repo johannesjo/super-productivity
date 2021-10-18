@@ -19,7 +19,6 @@ import {
 } from '../timeline.const';
 import * as moment from 'moment';
 import { TaskRepeatCfg } from '../../task-repeat-cfg/task-repeat-cfg.model';
-import { msToString } from '../../../ui/duration/ms-to-string.pipe';
 
 // const debug = (...args: any) => console.log(...args);
 const debug = (...args: any): void => undefined;
