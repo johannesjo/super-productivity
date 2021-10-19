@@ -16,15 +16,15 @@ export const TIMELINE_VIEW_TYPE_ORDER: {
   [key: string]: number;
 } = {
   [TimelineViewEntryType.WorkdayStart]: 1,
-  [TimelineViewEntryType.ScheduledTask]: 2,
-  [TimelineViewEntryType.ScheduledRepeatTaskProjection]: 2,
-  [TimelineViewEntryType.CustomEvent]: 2,
-  [TimelineViewEntryType.CalendarEvent]: 2,
-  [TimelineViewEntryType.Task]: 3,
-  [TimelineViewEntryType.SplitTask]: 4,
-  [TimelineViewEntryType.SplitTaskContinued]: 5,
-  [TimelineViewEntryType.SplitTaskContinuedLast]: 6,
-  [TimelineViewEntryType.WorkdayEnd]: 7,
+  [TimelineViewEntryType.WorkdayEnd]: 2,
+  [TimelineViewEntryType.ScheduledTask]: 3,
+  [TimelineViewEntryType.ScheduledRepeatTaskProjection]: 3,
+  [TimelineViewEntryType.CustomEvent]: 3,
+  [TimelineViewEntryType.CalendarEvent]: 3,
+  [TimelineViewEntryType.Task]: 4,
+  [TimelineViewEntryType.SplitTask]: 5,
+  [TimelineViewEntryType.SplitTaskContinued]: 6,
+  [TimelineViewEntryType.SplitTaskContinuedLast]: 7,
 };
 
 export const TIMELINE_MOVEABLE_TYPES: TimelineViewEntryType[] = [
