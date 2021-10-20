@@ -30,10 +30,14 @@ import { KeyboardConfig } from '../src/app/features/config/keyboard-config.model
 
 import { initialize } from '@electron/remote/main';
 import { join } from 'path';
-import { existsSync, mkdirSync } from 'fs';
-import { copySync } from 'fs-extra';
-// import { copySync } from 'fs-extra';
-// import { statSync } from 'fs';
+import {
+  existsSync,
+  mkdirSync,
+  readdirSync,
+  readFileSync,
+  statSync,
+  writeFileSync,
+} from 'fs';
 
 initialize();
 
@@ -80,55 +84,62 @@ process.argv.forEach((val) => {
   }
 });
 
-console.log(
-  '**************************************************************************+',
-);
-
-console.log(process.env.SNAP);
-console.log(process.env.SNAP_USER_COMMON);
-console.log(process.env.SNAP_DATA);
-
-console.log(
-  process.platform === 'linux' && process.env.SNAP && process.env.SNAP_USER_COMMON,
-  'YEAAH',
-);
-
 if (process.platform === 'linux' && process.env.SNAP && process.env.SNAP_USER_COMMON) {
+  // COPY LEGACY SNAP DATA TO COMMON DIRECTORY
+  // -----------------------------------------
+  console.log(
+    '\n\n**********************************************************************',
+  );
   const appName = app.getName();
   const commonDir = process.env.SNAP_USER_COMMON;
   const currentDir = commonDir.replace(/common$/, 'current');
-  const oldPathBase = join(currentDir, '.config');
-  const oldPath = join(oldPathBase, appName);
-  const newPathBase = join(commonDir, '.config');
-  const newPath = join(newPathBase, appName);
-  console.log('oldPathBase', oldPathBase);
+  const oldPath = join(currentDir, '.config', appName);
+  const newPath = join(commonDir, '.config', appName);
+  const isExistsOldPath = existsSync(oldPath);
+  const isExistsNewPath = existsSync(newPath);
+
   console.log('oldPath', oldPath);
-  console.log('newPathBase', newPathBase);
   console.log('newPath', newPath);
+  console.log('isExistsOldPath', isExistsOldPath);
+  console.log('isExistsNewPath', isExistsNewPath);
 
-  try {
-    const isExistsOldPath = existsSync(oldPath);
-    const isExistsNewPath = existsSync(newPath);
-    console.log('isExistsOldPath', isExistsOldPath);
-    console.log('isExistsNewPath', isExistsNewPath);
+  if (isExistsOldPath && !isExistsNewPath) {
+    console.log('--------------------------------------------------');
+    console.log('Detected legacy snap user data. Copying it over...', oldPath, newPath);
+    console.log('--------------------------------------------------');
+    mkdirSync(newPath, { recursive: true });
 
-    if (isExistsOldPath && !isExistsNewPath) {
-      console.log('--------------------------------------------------');
-      console.log('Detected legacy snap user data. Copying it over...', oldPath, newPath);
-      console.log('--------------------------------------------------');
-      mkdirSync(newPath, { recursive: true });
-      copySync(oldPath, newPath, { recursive: true });
-    }
-  } catch (e) {
-    console.error(e);
+    const copyDir = (srcDir: string, dstDir: string): string[] => {
+      let results = [];
+      const list = readdirSync(srcDir);
+      let src;
+      let dst;
+      list.forEach((file) => {
+        src = srcDir + '/' + file;
+        dst = dstDir + '/' + file;
+        const stat = statSync(src);
+        if (stat && stat.isDirectory()) {
+          mkdirSync(dst);
+          results = results.concat(copyDir(src, dst));
+        } else {
+          writeFileSync(dst, readFileSync(src));
+          results.push(src);
+        }
+      });
+      return results;
+    };
+    copyDir(oldPath, newPath);
   }
+  console.log(
+    '**********************************************************************\n\n',
+  );
 
+  // SET COMMON DIRECTORY AS USER DATA DIRECTORY
+  // -------------------------------------------
+  // set userDa dir to common data to avoid the data being accessed by the update process
   app.setPath('userData', newPath);
   app.setAppLogsPath();
 }
-console.log(
-  '**************************************************************************+',
-);
 
 const BACKUP_DIR = `${app.getPath('userData')}/backups`;
 
