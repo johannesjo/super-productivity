@@ -34,7 +34,7 @@ import { SnackService } from '../../../core/snack/snack.service';
 import { ElectronService } from '../../../core/electron/electron.service';
 import { ipcRenderer } from 'electron';
 import { IPC } from '../../../../../electron/ipc-events.const';
-import { TaskService } from '../../../features/tasks/task.service';
+import { TaskService } from '../../tasks/task.service';
 
 @Injectable()
 export class PomodoroEffects {
