@@ -5,7 +5,15 @@ import {
   toggleStart,
   unsetCurrentTask,
 } from '../../tasks/store/task.actions';
-import { concatMap, filter, map, mapTo, switchMap, tap, withLatestFrom } from 'rxjs/operators';
+import {
+  concatMap,
+  filter,
+  map,
+  mapTo,
+  switchMap,
+  tap,
+  withLatestFrom,
+} from 'rxjs/operators';
 import { PomodoroService } from '../pomodoro.service';
 import {
   finishPomodoroSession,
@@ -18,7 +26,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { DialogPomodoroBreakComponent } from '../dialog-pomodoro-break/dialog-pomodoro-break.component';
 import { Action, select, Store } from '@ngrx/store';
 import { selectCurrentTaskId } from '../../tasks/store/task.selectors';
-import { EMPTY, observable, Observable, of, Subscription } from 'rxjs';
+import { EMPTY, Observable, of } from 'rxjs';
 import { NotifyService } from '../../../core/notify/notify.service';
 import { IS_ELECTRON } from '../../../app.constants';
 import { T } from '../../../t.const';
@@ -35,7 +43,7 @@ export class PomodoroEffects {
   );
 
   hasActiveTasks$ = this._taskService.allStartableTasks$.pipe(
-    map(tasks => tasks.length > 0)
+    map((tasks) => tasks.length > 0),
   );
 
   playPauseOnCurrentUpdate$: Observable<Action> = createEffect(() =>
@@ -253,6 +261,5 @@ export class PomodoroEffects {
     private _snackService: SnackService,
     private _store$: Store<any>,
     private _taskService: TaskService,
-  ) {
-  }
+  ) {}
 }
