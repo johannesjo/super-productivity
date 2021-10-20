@@ -30,6 +30,8 @@ import { KeyboardConfig } from '../src/app/features/config/keyboard-config.model
 
 import { initialize } from '@electron/remote/main';
 import { join } from 'path';
+import { existsSync, mkdirSync } from 'fs';
+import { copySync } from 'fs-extra';
 // import { copySync } from 'fs-extra';
 // import { statSync } from 'fs';
 
@@ -78,6 +80,10 @@ process.argv.forEach((val) => {
   }
 });
 
+console.log(
+  '**************************************************************************+',
+);
+
 console.log(process.env.SNAP);
 console.log(process.env.SNAP_USER_COMMON);
 console.log(process.env.SNAP_DATA);
@@ -88,20 +94,41 @@ console.log(
 );
 
 if (process.platform === 'linux' && process.env.SNAP && process.env.SNAP_USER_COMMON) {
-  // console.log('XXXXXXXXXXXXXXXXXXXXXXXXXx');
-  //
-  // const oldPath = join(process.env.SNAP_DATA, '.config', app.getName());
-  const newPath = join(process.env.SNAP_USER_COMMON, '.config', app.getName());
-  // console.log('old', oldPath);
-  // console.log('new', newPath);
-  //
-  // if (statSync(oldPath) && !statSync(newPath)) {
-  //   console.log('Detected legacy snap user data. Copying it over', oldPath, newPath);
-  //   copySync(oldPath, newPath);
-  // }
+  const appName = app.getName();
+  const commonDir = process.env.SNAP_USER_COMMON;
+  const currentDir = commonDir.replace(/common$/, 'current');
+  const oldPathBase = join(currentDir, '.config');
+  const oldPath = join(oldPathBase, appName);
+  const newPathBase = join(commonDir, '.config');
+  const newPath = join(newPathBase, appName);
+  console.log('oldPathBase', oldPathBase);
+  console.log('oldPath', oldPath);
+  console.log('newPathBase', newPathBase);
+  console.log('newPath', newPath);
+
+  try {
+    const isExistsOldPath = existsSync(oldPath);
+    const isExistsNewPath = existsSync(newPath);
+    console.log('isExistsOldPath', isExistsOldPath);
+    console.log('isExistsNewPath', isExistsNewPath);
+
+    if (isExistsOldPath && !isExistsNewPath) {
+      console.log('--------------------------------------------------');
+      console.log('Detected legacy snap user data. Copying it over...', oldPath, newPath);
+      console.log('--------------------------------------------------');
+      mkdirSync(newPath, { recursive: true });
+      copySync(oldPath, newPath, { recursive: true });
+    }
+  } catch (e) {
+    console.error(e);
+  }
+
   app.setPath('userData', newPath);
   app.setAppLogsPath();
 }
+console.log(
+  '**************************************************************************+',
+);
 
 const BACKUP_DIR = `${app.getPath('userData')}/backups`;
 
