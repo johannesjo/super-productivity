@@ -29,6 +29,10 @@ import { lazySetInterval } from './lazy-set-interval';
 import { KeyboardConfig } from '../src/app/features/config/keyboard-config.model';
 
 import { initialize } from '@electron/remote/main';
+import { join } from 'path';
+// import { copySync } from 'fs-extra';
+// import { statSync } from 'fs';
+
 initialize();
 
 const ICONS_FOLDER = __dirname + '/assets/icons/';
@@ -73,6 +77,32 @@ process.argv.forEach((val) => {
     isShowDevTools = true;
   }
 });
+
+console.log(process.env.SNAP);
+console.log(process.env.SNAP_USER_COMMON);
+console.log(process.env.SNAP_DATA);
+
+console.log(
+  process.platform === 'linux' && process.env.SNAP && process.env.SNAP_USER_COMMON,
+  'YEAAH',
+);
+
+if (process.platform === 'linux' && process.env.SNAP && process.env.SNAP_USER_COMMON) {
+  // console.log('XXXXXXXXXXXXXXXXXXXXXXXXXx');
+  //
+  // const oldPath = join(process.env.SNAP_DATA, '.config', app.getName());
+  const newPath = join(process.env.SNAP_USER_COMMON, '.config', app.getName());
+  // console.log('old', oldPath);
+  // console.log('new', newPath);
+  //
+  // if (statSync(oldPath) && !statSync(newPath)) {
+  //   console.log('Detected legacy snap user data. Copying it over', oldPath, newPath);
+  //   copySync(oldPath, newPath);
+  // }
+  app.setPath('userData', newPath);
+  app.setAppLogsPath();
+}
+
 const BACKUP_DIR = `${app.getPath('userData')}/backups`;
 
 interface MyApp extends App {
