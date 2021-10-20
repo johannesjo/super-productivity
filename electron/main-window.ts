@@ -176,6 +176,7 @@ function createMenu(quitApp): void {
         {
           label: 'Quit',
           click: quitApp,
+          accelerator: 'CmdOrCtrl+Q',
         },
       ],
     },
