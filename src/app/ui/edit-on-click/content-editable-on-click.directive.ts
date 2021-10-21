@@ -7,8 +7,6 @@ import {
   OnInit,
   Output,
 } from '@angular/core';
-import { platformBrowser } from '@angular/platform-browser';
-import { BrowserView } from 'electron';
 import { IS_CHROME } from '../../util/is-chrome';
 
 // HELPER
