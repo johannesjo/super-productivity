@@ -36,7 +36,7 @@ import { MatTableModule } from '@angular/material/table';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { MarkdownModule, MarkdownService } from 'ngx-markdown';
+import { MarkdownModule, MarkdownService, MarkedOptions } from 'ngx-markdown';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { FORMLY_CONFIG, FormlyModule } from '@ngx-formly/core';
 import { ThemeSelectComponent } from './theme-select/theme-select.component';
@@ -173,9 +173,19 @@ const OTHER_3RD_PARTY_MODS_WITHOUT_CFG = [
   imports: [
     ...OTHER_3RD_PARTY_MODS_WITHOUT_CFG,
     ...MAT_MODULES,
-
     CommonModule,
-    MarkdownModule.forRoot(),
+    MarkdownModule.forRoot({
+      markedOptions: {
+        provide: MarkedOptions,
+        useValue: {
+          gfm: true,
+          breaks: false,
+          pedantic: false,
+          smartLists: true,
+          smartypants: false,
+        },
+      },
+    }),
     FormsModule,
     ReactiveFormsModule,
     FormlyModule.forChild({
