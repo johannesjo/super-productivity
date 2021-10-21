@@ -7,6 +7,9 @@ import {
   OnInit,
   Output,
 } from '@angular/core';
+import { platformBrowser } from '@angular/platform-browser';
+import { BrowserView } from 'electron';
+import { IS_CHROME } from '../../util/is-chrome';
 
 // HELPER
 // -----------------------------------
@@ -76,9 +79,9 @@ export class ContentEditableOnClickDirective implements OnInit, OnDestroy {
 
     // prevent keyboard shortcuts from firing when here
     el.addEventListener('keydown', (ev: KeyboardEvent) => {
-      ev.stopPropagation();
       // blur on escape
       if (ev.key === 'Enter' || ev.key === 'Escape') {
+        ev.stopPropagation();
         ev.preventDefault();
         setTimeout(() => {
           el.blur();
@@ -151,18 +154,47 @@ export class ContentEditableOnClickDirective implements OnInit, OnDestroy {
       return;
     }
 
-    const start = sel.anchorOffset;
-    const end = sel.focusOffset;
+    let start = sel.anchorOffset;
+    let end = sel.focusOffset;
     const text = el.innerText;
+    let forSave = 0; // the childNode index
 
+    // sometimes, the selected node is not the first one, and the new text will add in the wrong place.
+    // so, it is needed to check what is the correct selected node before doing the rest of the code
+    if (el.childNodes.length > 1 && !IS_CHROME) {
+      let untilNode = 0;
+      el.childNodes.forEach((item, index) => {
+        if (!sel.anchorNode?.isSameNode(item)) {
+          untilNode += item.nodeValue ? item.nodeValue.length : untilNode;
+        } else {
+          if (index !== 0) {
+            start = start + untilNode;
+            end = end + untilNode;
+            forSave = index;
+          }
+        }
+      });
+    }
+    if (start > text.length) {
+      start = text.length;
+    }
+    if (end > text.length) {
+      end = text.length;
+    }
     const textBefore = text.substring(0, start);
-    const textAfter = text.substring(end, text.length);
-
-    el.innerText = (textBefore + newText + textAfter).trim();
+    const textAfter = text.substring(start, text.length);
 
     // reset caret to proper offset
     const range = document.createRange();
-    range.setStart(el.childNodes[0], start + newText.length);
+    // it is not the chrome browser, then to do a different way of adding the new text
+    // otherwise, doing the setStart command
+    if (!IS_CHROME) {
+      el.innerText = (textBefore + newText + textAfter).trim();
+      range.setStartAfter(el.childNodes[forSave]);
+    } else {
+      el.innerText = (textBefore + newText + textAfter).trim();
+      range.setStart(el.childNodes[0], start + newText.length);
+    }
     range.collapse(true);
 
     const sel2 = window.getSelection();
