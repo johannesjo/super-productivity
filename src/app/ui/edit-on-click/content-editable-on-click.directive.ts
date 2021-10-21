@@ -182,7 +182,7 @@ export class ContentEditableOnClickDirective implements OnInit, OnDestroy {
       end = text.length;
     }
     const textBefore = text.substring(0, start);
-    const textAfter = text.substring(start, text.length);
+    const textAfter = text.substring(end, text.length);
 
     // reset caret to proper offset
     const range = document.createRange();
