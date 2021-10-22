@@ -51,6 +51,7 @@ let isShowDevTools: boolean = IS_DEV;
 let customUrl: string;
 let isDisableTray = false;
 let forceDarkTray = false;
+let wasUserDataDirSet = false;
 
 if (IS_DEV) {
   log('Starting in DEV Mode!!!');
@@ -72,6 +73,7 @@ process.argv.forEach((val) => {
     const customUserDir = val.replace('--user-data-dir=', '').trim();
     log('Using custom directory for user data', customUserDir);
     app.setPath('userData', customUserDir);
+    wasUserDataDirSet = true;
   }
 
   if (val && val.includes('--custom-url=')) {
@@ -84,12 +86,15 @@ process.argv.forEach((val) => {
   }
 });
 
-if (process.platform === 'linux' && process.env.SNAP && process.env.SNAP_USER_COMMON) {
+// TODO remove at one point in the future and only leave the directory setting part
+if (
+  !wasUserDataDirSet &&
+  process.platform === 'linux' &&
+  process.env.SNAP &&
+  process.env.SNAP_USER_COMMON
+) {
   // COPY LEGACY SNAP DATA TO COMMON DIRECTORY
   // -----------------------------------------
-  console.log(
-    '\n\n**********************************************************************',
-  );
   const appName = app.getName();
   const commonDir = process.env.SNAP_USER_COMMON;
   const currentDir = commonDir.replace(/common$/, 'current');
@@ -98,15 +103,16 @@ if (process.platform === 'linux' && process.env.SNAP && process.env.SNAP_USER_CO
   const isExistsOldPath = existsSync(oldPath);
   const isExistsNewPath = existsSync(newPath);
 
-  console.log('oldPath', oldPath);
-  console.log('newPath', newPath);
-  console.log('isExistsOldPath', isExistsOldPath);
-  console.log('isExistsNewPath', isExistsNewPath);
-
   if (isExistsOldPath && !isExistsNewPath) {
-    console.log('--------------------------------------------------');
-    console.log('Detected legacy snap user data. Copying it over...', oldPath, newPath);
-    console.log('--------------------------------------------------');
+    console.log('\n');
+    console.log('-------------------------------------------------------------');
+    console.log('Detected legacy snap user data. Copying it over to common...');
+    console.log('-------------------------------------------------------------');
+    console.log('oldPath', oldPath);
+    console.log('newPath', newPath);
+    console.log('isExistsOldPath', isExistsOldPath);
+    console.log('isExistsNewPath', isExistsNewPath);
+    console.log('\n');
     mkdirSync(newPath, { recursive: true });
 
     const copyDir = (srcDir: string, dstDir: string): string[] => {
@@ -129,10 +135,9 @@ if (process.platform === 'linux' && process.env.SNAP && process.env.SNAP_USER_CO
       return results;
     };
     copyDir(oldPath, newPath);
+  } else {
+    console.log('SNAP: common directory is used');
   }
-  console.log(
-    '**********************************************************************\n\n',
-  );
 
   // SET COMMON DIRECTORY AS USER DATA DIRECTORY
   // -------------------------------------------
