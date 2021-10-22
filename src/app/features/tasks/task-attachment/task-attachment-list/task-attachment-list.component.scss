@@ -1,9 +1,9 @@
 @import 'src/variables';
 
-$thisHeight: 80px;
+$thisHeight: 88px;
 $thisMargin: $s;
 
-$thisUpperHeight: 52px;
+$thisUpperHeight: 60px;
 $thisLowerHeight: $thisHeight - $thisUpperHeight;
 
 :host {
@@ -13,7 +13,7 @@ $thisLowerHeight: $thisHeight - $thisUpperHeight;
 .attachments {
   list-style-type: none;
   display: flex;
-  margin: -1*$thisMargin;
+  margin: -1 * $thisMargin;
   padding: 0;
   flex-flow: row;
   justify-content: left;
@@ -40,6 +40,7 @@ $thisLowerHeight: $thisHeight - $thisUpperHeight;
   &:hover .controls {
     visibility: visible;
 
+    a,
     button {
       opacity: 1;
       transition: $transition-fast;
@@ -57,7 +58,7 @@ $thisLowerHeight: $thisHeight - $thisUpperHeight;
 .attachment-link {
   padding: $s;
   height: $thisHeight;
-  min-width: $thisHeight;
+  min-width: $thisHeight + $s * 2;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -72,9 +73,9 @@ $thisLowerHeight: $thisHeight - $thisUpperHeight;
   }
 
   mat-icon {
-    font-size: $s*5;
-    height: $s*5;
-    width: $s*5;
+    font-size: $s * 5;
+    height: $s * 5;
+    width: $s * 5;
   }
 
   &.isImage {
@@ -111,9 +112,10 @@ $thisLowerHeight: $thisHeight - $thisUpperHeight;
   flex-wrap: wrap;
   pointer-events: none;
 
+  a,
   button {
     display: block;
-    transition: $transition-fast;
+    transition: $transition-enter;
     margin: 0;
     padding: 0;
     min-height: 0;
@@ -142,15 +144,20 @@ $thisLowerHeight: $thisHeight - $thisUpperHeight;
   }
 }
 
+$larger-size: 65%;
+$smaller-size: 100% -$larger-size;
+
 .view-btn {
+  pointer-events: all;
   border-bottom-right-radius: 0;
   border-bottom-left-radius: 0;
   flex: 1;
-  flex-basis: 50%;
-  width: 50%;
-  min-width: 50%;
+  flex-basis: $larger-size;
+  width: $larger-size;
+  min-width: $larger-size;
   line-height: $thisUpperHeight;
   height: $thisUpperHeight;
+  transition: $transition-ultra-fast !important;
 
   @include mq(xs) {
     transform: translate(-100%, -50%);
@@ -169,8 +176,8 @@ $thisLowerHeight: $thisHeight - $thisUpperHeight;
   border-top-right-radius: 0;
   border-top-left-radius: 0;
   border-bottom-right-radius: 0;
-  flex-basis: 50%;
-  width: 50%;
+  flex-basis: $smaller-size;
+  width: $smaller-size;
 
   @include mq(xs) {
     transform: translate(100%, -50%);
@@ -182,8 +189,8 @@ $thisLowerHeight: $thisHeight - $thisUpperHeight;
   border-top-right-radius: 0;
   border-top-left-radius: 0;
   border-bottom-right-radius: 0;
-  flex-basis: 50%;
-  width: 50%;
+  flex-basis: $larger-size;
+  width: $larger-size;
 
   @include mq(xs) {
     transform: translate(-100%, 50%);
@@ -196,8 +203,8 @@ $thisLowerHeight: $thisHeight - $thisUpperHeight;
   border-top-right-radius: 0;
   border-bottom-left-radius: 0;
   margin-left: 1px;
-  flex-basis: 50%;
-  width: 50%;
+  flex-basis: $smaller-size;
+  width: $smaller-size;
 
   &:hover {
     background: $c-warn !important;

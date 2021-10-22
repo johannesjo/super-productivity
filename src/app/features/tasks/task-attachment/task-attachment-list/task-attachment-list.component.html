@@ -4,6 +4,7 @@
     class="attachment"
     draggable="false"
   >
+    <!-- NOTE: view link exists twice, both for mobile and for clicks before animation is done -->
     <a
       [class.isImage]="attachment?.type==='IMG' && !isError[i]"
       [href]="attachment?.path"
@@ -27,10 +28,18 @@
     </a>
 
     <div *ngIf="!isDisableControls" class="controls border-color-primary">
-      <button (click)="openEditDialog(attachment)" class="view-btn" mat-flat-button>
+      <a
+        class="view-btn"
+        mat-flat-button
+        [href]="attachment?.path"
+        [type]="isError[i] ? 'LINK': attachment?.type"
+        draggable="false"
+        target="_blank"
+        taskAttachmentLink
+      >
         <mat-icon *ngIf="attachment?.type==='IMG'">search</mat-icon>
         <mat-icon *ngIf="attachment?.type!=='IMG'">open_in_new</mat-icon>
-      </button>
+      </a>
       <button
         (click)="copy(attachment)"
         class="copy-btn"
