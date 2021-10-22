@@ -1,4 +1,4 @@
-import { ErrorHandler, NgModule } from '@angular/core';
+import { ErrorHandler, NgModule, SecurityContext } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { InputDurationDirective } from './duration/input-duration.directive';
 import { DurationFromStringPipe } from './duration/duration-from-string.pipe';
@@ -36,7 +36,12 @@ import { MatTableModule } from '@angular/material/table';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { MarkdownModule, MarkdownService, MarkedOptions } from 'ngx-markdown';
+import {
+  MarkdownModule,
+  MarkdownService,
+  MarkedOptions,
+  MarkedRenderer,
+} from 'ngx-markdown';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { FORMLY_CONFIG, FormlyModule } from '@ngx-formly/core';
 import { ThemeSelectComponent } from './theme-select/theme-select.component';
@@ -177,14 +182,23 @@ const OTHER_3RD_PARTY_MODS_WITHOUT_CFG = [
     MarkdownModule.forRoot({
       markedOptions: {
         provide: MarkedOptions,
-        useValue: {
-          gfm: true,
-          breaks: false,
-          pedantic: false,
-          smartLists: true,
-          smartypants: false,
+        useFactory: (): MarkedOptions => {
+          const renderer = new MarkedRenderer();
+          renderer.listitem = (text: string) =>
+            /<input.+type="checkbox"/.test(text)
+              ? '<li style="list-style: none;">' + text + '</li>'
+              : '<li>' + text + '</li>';
+          return {
+            renderer: renderer,
+            gfm: true,
+            breaks: false,
+            pedantic: false,
+            smartLists: true,
+            smartypants: false,
+          };
         },
       },
+      sanitize: SecurityContext.NONE,
     }),
     FormsModule,
     ReactiveFormsModule,

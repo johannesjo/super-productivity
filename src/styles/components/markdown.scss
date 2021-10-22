@@ -20,7 +20,12 @@
     padding-left: 20px;
   }
 
-  h1, h2, h3, h4, h5, h6 {
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
     line-height: 1;
     margin-top: 16px;
   }
@@ -45,5 +50,10 @@
     code {
       font-size: 12px;
     }
+  }
+
+  input[type='checkbox'] {
+    margin-left: -20px;
+    pointer-events: none;
   }
 }
