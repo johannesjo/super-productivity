@@ -8,6 +8,7 @@ import {
 import { GITHUB_INITIAL_POLL_DELAY } from '../github/github.const';
 
 export const DEFAULT_GITLAB_CFG: GitlabCfg = {
+  isEnabled: false,
   project: null,
   gitlabBaseUrl: null,
   token: null,
@@ -35,6 +36,7 @@ export const GITLAB_CONFIG_FORM: LimitedFormlyFieldConfig<GitlabCfg>[] = [
   {
     key: 'gitlabBaseUrl',
     type: 'input',
+    hideExpression: (model: any) => !model.isEnabled,
     templateOptions: {
       label: T.F.GITLAB.FORM.GITLAB_BASE_URL,
       type: 'text',
@@ -46,7 +48,9 @@ export const GITLAB_CONFIG_FORM: LimitedFormlyFieldConfig<GitlabCfg>[] = [
     key: 'source',
     type: 'select',
     defaultValue: 'project',
+    hideExpression: (model: any) => !model.isEnabled,
     templateOptions: {
+      required: true,
       label: T.F.GITLAB.FORM.SOURCE,
       options: [
         { value: 'project', label: T.F.GITLAB.FORM.SOURCE_PROJECT },
@@ -58,7 +62,9 @@ export const GITLAB_CONFIG_FORM: LimitedFormlyFieldConfig<GitlabCfg>[] = [
   {
     key: 'project',
     type: 'input',
+    hideExpression: (model: any) => !model.isEnabled,
     templateOptions: {
+      required: true,
       label: T.F.GITLAB.FORM.PROJECT,
       type: 'text',
       pattern: GITLAB_PROJECT_REGEX,
@@ -67,7 +73,9 @@ export const GITLAB_CONFIG_FORM: LimitedFormlyFieldConfig<GitlabCfg>[] = [
   {
     key: 'token',
     type: 'input',
+    hideExpression: (model: any) => !model.isEnabled,
     templateOptions: {
+      required: true,
       label: T.F.GITLAB.FORM.TOKEN,
     },
     validation: {
@@ -83,6 +91,7 @@ export const GITLAB_CONFIG_FORM: LimitedFormlyFieldConfig<GitlabCfg>[] = [
   {
     key: 'isSearchIssuesFromGitlab',
     type: 'checkbox',
+    hideExpression: (model: any) => !model.isEnabled,
     templateOptions: {
       label: T.F.GITLAB.FORM.IS_SEARCH_ISSUES_FROM_GITLAB,
     },
@@ -90,6 +99,7 @@ export const GITLAB_CONFIG_FORM: LimitedFormlyFieldConfig<GitlabCfg>[] = [
   {
     key: 'isAutoPoll',
     type: 'checkbox',
+    hideExpression: (model: any) => !model.isEnabled,
     templateOptions: {
       label: T.F.GITLAB.FORM.IS_AUTO_POLL,
     },
@@ -97,6 +107,7 @@ export const GITLAB_CONFIG_FORM: LimitedFormlyFieldConfig<GitlabCfg>[] = [
   {
     key: 'isAutoAddToBacklog',
     type: 'checkbox',
+    hideExpression: (model: any) => !model.isEnabled,
     templateOptions: {
       label: T.F.GITLAB.FORM.IS_AUTO_ADD_TO_BACKLOG,
     },
@@ -104,6 +115,7 @@ export const GITLAB_CONFIG_FORM: LimitedFormlyFieldConfig<GitlabCfg>[] = [
   {
     key: 'filterUsername',
     type: 'input',
+    hideExpression: (model: any) => !model.isEnabled,
     templateOptions: {
       label: T.F.GITLAB.FORM.FILTER_USER,
     },
@@ -112,7 +124,9 @@ export const GITLAB_CONFIG_FORM: LimitedFormlyFieldConfig<GitlabCfg>[] = [
     key: 'scope',
     type: 'select',
     defaultValue: 'created-by-me',
+    hideExpression: (model: any) => !model.isEnabled,
     templateOptions: {
+      required: true,
       label: T.F.GITLAB.FORM.SCOPE,
       options: [
         { value: 'all', label: T.F.GITLAB.FORM.SCOPE_ALL },

@@ -9,6 +9,7 @@ import { JIRA_WORK_LOG_EXPORT_FORM_OPTIONS } from '../jira/jira.const';
 import { JiraWorklogExportDefaultTime } from '../jira/jira.model';
 
 export const DEFAULT_OPEN_PROJECT_CFG: OpenProjectCfg = {
+  isEnabled: false,
   host: null,
   projectId: null,
   token: null,
@@ -28,6 +29,7 @@ export const OPEN_PROJECT_CONFIG_FORM: LimitedFormlyFieldConfig<OpenProjectCfg>[
   {
     key: 'host',
     type: 'input',
+    hideExpression: (model: any) => !model.isEnabled,
     templateOptions: {
       label: T.F.OPEN_PROJECT.FORM.HOST,
       type: 'text',
@@ -38,6 +40,7 @@ export const OPEN_PROJECT_CONFIG_FORM: LimitedFormlyFieldConfig<OpenProjectCfg>[
   {
     key: 'token',
     type: 'input',
+    hideExpression: (model: any) => !model.isEnabled,
     templateOptions: {
       label: T.F.OPEN_PROJECT.FORM.TOKEN,
       required: true,
@@ -46,6 +49,7 @@ export const OPEN_PROJECT_CONFIG_FORM: LimitedFormlyFieldConfig<OpenProjectCfg>[
   {
     key: 'projectId',
     type: 'input',
+    hideExpression: (model: any) => !model.isEnabled,
     templateOptions: {
       label: T.F.OPEN_PROJECT.FORM.PROJECT_ID,
       type: 'text',
@@ -56,6 +60,7 @@ export const OPEN_PROJECT_CONFIG_FORM: LimitedFormlyFieldConfig<OpenProjectCfg>[
   {
     key: 'isSearchIssuesFromOpenProject',
     type: 'checkbox',
+    hideExpression: (model: any) => !model.isEnabled,
     templateOptions: {
       label: T.F.OPEN_PROJECT.FORM.IS_SEARCH_ISSUES_FROM_OPEN_PROJECT,
     },
@@ -63,6 +68,7 @@ export const OPEN_PROJECT_CONFIG_FORM: LimitedFormlyFieldConfig<OpenProjectCfg>[
   {
     key: 'isAutoPoll',
     type: 'checkbox',
+    hideExpression: (model: any) => !model.isEnabled,
     templateOptions: {
       label: T.F.OPEN_PROJECT.FORM.IS_AUTO_POLL,
     },
@@ -70,6 +76,7 @@ export const OPEN_PROJECT_CONFIG_FORM: LimitedFormlyFieldConfig<OpenProjectCfg>[
   {
     key: 'isAutoAddToBacklog',
     type: 'checkbox',
+    hideExpression: (model: any) => !model.isEnabled,
     templateOptions: {
       label: T.F.OPEN_PROJECT.FORM.IS_AUTO_ADD_TO_BACKLOG,
     },
@@ -77,6 +84,7 @@ export const OPEN_PROJECT_CONFIG_FORM: LimitedFormlyFieldConfig<OpenProjectCfg>[
   {
     key: 'isShowTimeTrackingDialog',
     type: 'checkbox',
+    hideExpression: (model: any) => !model.isEnabled,
     templateOptions: {
       label: T.F.OPEN_PROJECT.FORM.IS_SHOW_TIME_TRACKING_DIALOG,
       description: T.F.OPEN_PROJECT.FORM.IS_SHOW_TIME_TRACKING_DIALOG_DESCRIPTION,
@@ -85,19 +93,15 @@ export const OPEN_PROJECT_CONFIG_FORM: LimitedFormlyFieldConfig<OpenProjectCfg>[
   {
     key: 'isShowTimeTrackingDialogForEachSubTask',
     type: 'checkbox',
-    hideExpression: (model: any) => {
-      return !model.isShowTimeTrackingDialog;
-    },
+    hideExpression: (model: any) => !model.isShowTimeTrackingDialog || !model.isEnabled,
     templateOptions: {
       label: T.F.OPEN_PROJECT.FORM.IS_SHOW_TIME_TRACKING_DIALOG_FOR_EACH_SUB_TASK,
     },
   },
   {
-    hideExpression: (model: any) => {
-      return !model.isShowTimeTrackingDialog;
-    },
     key: 'timeTrackingDialogDefaultTime',
     type: 'select',
+    hideExpression: (model: any) => !model.isShowTimeTrackingDialog || !model.isEnabled,
     templateOptions: {
       label: T.F.JIRA.FORM_ADV.WORKLOG_DEFAULT_TIME_MODE,
       options: JIRA_WORK_LOG_EXPORT_FORM_OPTIONS,

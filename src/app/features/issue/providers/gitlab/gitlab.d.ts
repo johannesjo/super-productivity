@@ -1,4 +1,6 @@
-export interface GitlabCfg {
+import { BaseIssueProviderCfg } from '../../issue.model';
+
+export interface GitlabCfg extends BaseIssueProviderCfg {
   isSearchIssuesFromGitlab: boolean;
   isAutoAddToBacklog: boolean;
   isAutoPoll: boolean;

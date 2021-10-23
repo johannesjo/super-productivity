@@ -6,6 +6,7 @@ import {
 import { T } from '../../../../t.const';
 
 export const DEFAULT_CALDAV_CFG: CaldavCfg = {
+  isEnabled: false,
   caldavUrl: null,
   resourceName: null,
   username: null,
@@ -24,7 +25,9 @@ export const CALDAV_CONFIG_FORM: LimitedFormlyFieldConfig<CaldavCfg>[] = [
   {
     key: 'caldavUrl',
     type: 'input',
+    hideExpression: (model: any) => !model.isEnabled,
     templateOptions: {
+      required: true,
       label: T.F.CALDAV.FORM.CALDAV_URL,
       type: 'text',
       pattern:
@@ -34,7 +37,9 @@ export const CALDAV_CONFIG_FORM: LimitedFormlyFieldConfig<CaldavCfg>[] = [
   {
     key: 'resourceName',
     type: 'input',
+    hideExpression: (model: any) => !model.isEnabled,
     templateOptions: {
+      required: true,
       label: T.F.CALDAV.FORM.CALDAV_RESOURCE,
       type: 'text',
     },
@@ -42,7 +47,9 @@ export const CALDAV_CONFIG_FORM: LimitedFormlyFieldConfig<CaldavCfg>[] = [
   {
     key: 'username',
     type: 'input',
+    hideExpression: (model: any) => !model.isEnabled,
     templateOptions: {
+      required: true,
       label: T.F.CALDAV.FORM.CALDAV_USER,
       type: 'text',
     },
@@ -50,7 +57,9 @@ export const CALDAV_CONFIG_FORM: LimitedFormlyFieldConfig<CaldavCfg>[] = [
   {
     key: 'password',
     type: 'input',
+    hideExpression: (model: any) => !model.isEnabled,
     templateOptions: {
+      required: true,
       type: 'password',
       label: T.F.CALDAV.FORM.CALDAV_PASSWORD,
     },
@@ -61,12 +70,14 @@ export const CALDAV_CONFIG_FORM: LimitedFormlyFieldConfig<CaldavCfg>[] = [
       // !! is used to get the associated boolean value of a non boolean value
       // It's not a fancy trick using model.project alone gets the required case right but won't remove it
       // if the project field is empty so this is needed for the wanted behavior
+      hideExpression: (model: any) => !model.isEnabled,
       'templateOptions.required': '!!model.project',
     },
   },
   {
     key: 'isSearchIssuesFromCaldav',
     type: 'checkbox',
+    hideExpression: (model: any) => !model.isEnabled,
     templateOptions: {
       label: T.F.CALDAV.FORM.IS_SEARCH_ISSUES_FROM_CALDAV,
     },
@@ -74,6 +85,7 @@ export const CALDAV_CONFIG_FORM: LimitedFormlyFieldConfig<CaldavCfg>[] = [
   {
     key: 'isAutoPoll',
     type: 'checkbox',
+    hideExpression: (model: any) => !model.isEnabled,
     templateOptions: {
       label: T.F.CALDAV.FORM.IS_AUTO_POLL,
     },
@@ -81,6 +93,7 @@ export const CALDAV_CONFIG_FORM: LimitedFormlyFieldConfig<CaldavCfg>[] = [
   {
     key: 'isAutoAddToBacklog',
     type: 'checkbox',
+    hideExpression: (model: any) => !model.isEnabled,
     templateOptions: {
       label: T.F.CALDAV.FORM.IS_AUTO_ADD_TO_BACKLOG,
     },
@@ -88,6 +101,7 @@ export const CALDAV_CONFIG_FORM: LimitedFormlyFieldConfig<CaldavCfg>[] = [
   {
     key: 'isTransitionIssuesEnabled',
     type: 'checkbox',
+    hideExpression: (model: any) => !model.isEnabled,
     templateOptions: {
       label: T.F.CALDAV.FORM.IS_TRANSITION_ISSUES_ENABLED,
     },
@@ -95,6 +109,7 @@ export const CALDAV_CONFIG_FORM: LimitedFormlyFieldConfig<CaldavCfg>[] = [
   {
     key: 'categoryFilter',
     type: 'input',
+    hideExpression: (model: any) => !model.isEnabled,
     templateOptions: {
       label: T.F.CALDAV.FORM.CALDAV_CATEGORY_FILTER,
       type: 'text',

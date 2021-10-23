@@ -21,6 +21,10 @@ import {
   OpenProjectWorkPackageReduced,
 } from './providers/open-project/open-project-issue/open-project-issue.model';
 
+export interface BaseIssueProviderCfg {
+  isEnabled: boolean;
+}
+
 export type IssueProviderKey = 'JIRA' | 'GITHUB' | 'GITLAB' | 'CALDAV' | 'OPEN_PROJECT';
 export type IssueIntegrationCfg =
   | JiraCfg

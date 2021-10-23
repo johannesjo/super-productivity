@@ -7,6 +7,7 @@ import {
 } from '../../../config/global-config.model';
 
 export const DEFAULT_GITHUB_CFG: GithubCfg = {
+  isEnabled: false,
   repo: null,
   token: null,
   isSearchIssuesFromGithub: false,
@@ -28,8 +29,10 @@ export const GITHUB_CONFIG_FORM: LimitedFormlyFieldConfig<GithubCfg>[] = [
   {
     key: 'repo',
     type: 'input',
+    hideExpression: (model: any) => !model.isEnabled,
     templateOptions: {
       label: T.F.GITHUB.FORM.REPO,
+      required: true,
       type: 'text',
       pattern: /^.+\/.+?$/i,
     },
@@ -37,6 +40,7 @@ export const GITHUB_CONFIG_FORM: LimitedFormlyFieldConfig<GithubCfg>[] = [
   {
     key: 'token',
     type: 'input',
+    hideExpression: (model: any) => !model.isEnabled,
     templateOptions: {
       label: T.F.GITHUB.FORM.TOKEN,
       description: T.F.GITHUB.FORM.TOKEN_DESCRIPTION,
@@ -45,6 +49,7 @@ export const GITHUB_CONFIG_FORM: LimitedFormlyFieldConfig<GithubCfg>[] = [
   {
     key: 'isSearchIssuesFromGithub',
     type: 'checkbox',
+    hideExpression: (model: any) => !model.isEnabled,
     templateOptions: {
       label: T.F.GITHUB.FORM.IS_SEARCH_ISSUES_FROM_GITHUB,
     },
@@ -52,6 +57,7 @@ export const GITHUB_CONFIG_FORM: LimitedFormlyFieldConfig<GithubCfg>[] = [
   {
     key: 'isAutoPoll',
     type: 'checkbox',
+    hideExpression: (model: any) => !model.isEnabled,
     templateOptions: {
       label: T.F.GITHUB.FORM.IS_AUTO_POLL,
     },
@@ -59,6 +65,7 @@ export const GITHUB_CONFIG_FORM: LimitedFormlyFieldConfig<GithubCfg>[] = [
   {
     key: 'isAutoAddToBacklog',
     type: 'checkbox',
+    hideExpression: (model: any) => !model.isEnabled,
     templateOptions: {
       label: T.F.GITHUB.FORM.IS_AUTO_ADD_TO_BACKLOG,
     },
@@ -66,6 +73,7 @@ export const GITHUB_CONFIG_FORM: LimitedFormlyFieldConfig<GithubCfg>[] = [
   {
     key: 'filterUsername',
     type: 'input',
+    hideExpression: (model: any) => !model.isEnabled,
     templateOptions: {
       label: T.F.GITHUB.FORM.FILTER_USER,
     },

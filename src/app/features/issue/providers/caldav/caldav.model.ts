@@ -1,4 +1,6 @@
-export interface CaldavCfg {
+import { BaseIssueProviderCfg } from '../../issue.model';
+
+export interface CaldavCfg extends BaseIssueProviderCfg {
   caldavUrl: string | null;
   resourceName: string | null;
   username: string | null;

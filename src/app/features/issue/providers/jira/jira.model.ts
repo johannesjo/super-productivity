@@ -1,4 +1,5 @@
 import { JiraOriginalTransition } from './jira-api-responses';
+import { BaseIssueProviderCfg } from '../../issue.model';
 
 export type JiraTransitionOption = 'ALWAYS_ASK' | 'DO_NOT' | JiraOriginalTransition;
 
@@ -16,8 +17,7 @@ export interface JiraTransitionConfig {
   DONE: JiraTransitionOption;
 }
 
-export interface JiraCfg {
-  isEnabled: boolean;
+export interface JiraCfg extends BaseIssueProviderCfg {
   _isBlockAccess: boolean;
   host: string | null;
   userName: string | null;

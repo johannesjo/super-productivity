@@ -1,7 +1,13 @@
 import { Dictionary } from '@ngrx/entity';
 import { Project, ProjectState } from './project.model';
 import { DEFAULT_PROJECT, PROJECT_MODEL_VERSION } from './project.const';
-import { DEFAULT_ISSUE_PROVIDER_CFGS } from '../issue/issue.const';
+import {
+  CALDAV_TYPE,
+  DEFAULT_ISSUE_PROVIDER_CFGS,
+  GITHUB_TYPE,
+  GITLAB_TYPE,
+  OPEN_PROJECT_TYPE,
+} from '../issue/issue.const';
 import {
   MODEL_VERSION_KEY,
   THEME_COLOR_MAP,
@@ -12,6 +18,14 @@ import * as moment from 'moment';
 import { convertToWesternArabic } from '../../util/numeric-converter';
 import { WORK_CONTEXT_DEFAULT_THEME } from '../work-context/work-context.const';
 import { dirtyDeepCopy } from '../../util/dirtyDeepCopy';
+import { isGitlabEnabledLegacy } from '../issue/providers/gitlab/is-gitlab-enabled';
+import { isGithubEnabledLegacy } from '../issue/providers/github/is-github-enabled.util';
+import { isCaldavEnabledLegacy } from '../issue/providers/caldav/is-caldav-enabled.util';
+import { isOpenProjectEnabledLegacy } from '../issue/providers/open-project/is-open-project-enabled.util';
+import { GithubCfg } from '../issue/providers/github/github.model';
+import { GitlabCfg } from '../issue/providers/gitlab/gitlab';
+import { CaldavCfg } from '../issue/providers/caldav/caldav.model';
+import { OpenProjectCfg } from '../issue/providers/open-project/open-project.model';
 
 const MODEL_VERSION = PROJECT_MODEL_VERSION;
 
@@ -29,6 +43,9 @@ export const migrateProjectState = (projectState: ProjectState): ProjectState =>
 
     // NOTE: absolutely needs to come last as otherwise the previous defaults won't work
     projectEntities[key] = _extendProjectDefaults(projectEntities[key] as Project);
+    projectEntities[key] = _migrateIsEnabledForIssueProviders(
+      projectEntities[key] as Project,
+    );
     projectEntities[key] = _removeOutdatedData(projectEntities[key] as Project);
   });
 
@@ -58,6 +75,40 @@ const _removeOutdatedData = (project: Project): Project => {
   delete copy.advancedCfg.simpleSummarySettings;
   delete copy.timeWorkedWithoutBreak;
   return copy;
+};
+
+const _migrateIsEnabledForIssueProviders = (project: Project): Project => {
+  return {
+    ...project,
+    // also add missing issue integration cfgs
+    issueIntegrationCfgs: {
+      ...project.issueIntegrationCfgs,
+      GITHUB: {
+        ...(project.issueIntegrationCfgs[GITHUB_TYPE] as GithubCfg),
+        isEnabled: isGithubEnabledLegacy(
+          project.issueIntegrationCfgs[GITHUB_TYPE] as GithubCfg,
+        ),
+      },
+      GITLAB: {
+        ...(project.issueIntegrationCfgs[GITLAB_TYPE] as GitlabCfg),
+        isEnabled: isGitlabEnabledLegacy(
+          project.issueIntegrationCfgs[GITLAB_TYPE] as GitlabCfg,
+        ),
+      },
+      CALDAV: {
+        ...(project.issueIntegrationCfgs[CALDAV_TYPE] as CaldavCfg),
+        isEnabled: isCaldavEnabledLegacy(
+          project.issueIntegrationCfgs[CALDAV_TYPE] as CaldavCfg,
+        ),
+      },
+      OPEN_PROJECT: {
+        ...(project.issueIntegrationCfgs[OPEN_PROJECT_TYPE] as OpenProjectCfg),
+        isEnabled: isOpenProjectEnabledLegacy(
+          project.issueIntegrationCfgs[OPEN_PROJECT_TYPE] as OpenProjectCfg,
+        ),
+      },
+    },
+  };
 };
 
 const __convertToWesternArabicDateKeys = (workStartEnd: {

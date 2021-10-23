@@ -180,7 +180,10 @@ export class DialogCreateProjectComponent implements OnInit, OnDestroy {
         .open(DialogJiraInitialSetupComponent, {
           restoreFocus: true,
           data: {
-            jiraCfg: this.jiraCfg,
+            jiraCfg: {
+              ...this.jiraCfg,
+              isEnabled: true,
+            },
           },
         })
         .afterClosed()
@@ -198,7 +201,7 @@ export class DialogCreateProjectComponent implements OnInit, OnDestroy {
         .open(DialogGithubInitialSetupComponent, {
           restoreFocus: true,
           data: {
-            githubCfg: this.githubCfg,
+            githubCfg: { ...this.githubCfg, isEnabled: true },
           },
         })
         .afterClosed()
@@ -216,7 +219,7 @@ export class DialogCreateProjectComponent implements OnInit, OnDestroy {
         .open(DialogGitlabInitialSetupComponent, {
           restoreFocus: true,
           data: {
-            gitlabCfg: this.gitlabCfg,
+            gitlabCfg: { ...this.gitlabCfg, isEnabled: true },
           },
         })
         .afterClosed()
@@ -234,7 +237,7 @@ export class DialogCreateProjectComponent implements OnInit, OnDestroy {
         .open(DialogCaldavInitialSetupComponent, {
           restoreFocus: true,
           data: {
-            caldavCfg: this.caldavCfg,
+            caldavCfg: { ...this.caldavCfg, isEnabled: true },
           },
         })
         .afterClosed()
@@ -245,13 +248,14 @@ export class DialogCreateProjectComponent implements OnInit, OnDestroy {
         }),
     );
   }
+
   openOpenProjectCfg(): void {
     this._subs.add(
       this._matDialog
         .open(DialogOpenProjectInitialSetupComponent, {
           restoreFocus: true,
           data: {
-            openProjectCfg: this.openProjectCfg,
+            openProjectCfg: { ...this.openProjectCfg, isEnabled: true },
           },
         })
         .afterClosed()

@@ -1,4 +1,3 @@
-/* String constants. See src/assets/i18n/ */
 const T = {
   APP: {
     A_BROWSER_WARNING: 'APP.A_BROWSER_WARNING',
@@ -995,6 +994,7 @@ const T = {
     DISMISS: 'G.DISMISS',
     DO_IT: 'G.DO_IT',
     EDIT: 'G.EDIT',
+    ENABLED: 'G.ENABLED',
     EXTENSION_INFO: 'G.EXTENSION_INFO',
     LOGIN: 'G.LOGIN',
     LOGOUT: 'G.LOGOUT',

@@ -66,7 +66,19 @@ export const ISSUE_PROVIDER_FORM_CFGS: ConfigFormConfig = [
   JIRA_CONFIG_FORM_SECTION as GenericConfigFormSection,
   CALDAV_CONFIG_FORM_SECTION as GenericConfigFormSection,
   OPEN_PROJECT_CONFIG_FORM_SECTION as GenericConfigFormSection,
-];
+].map((providerCfg) => ({
+  ...providerCfg,
+  items: providerCfg.items && [
+    {
+      key: 'isEnabled',
+      type: 'checkbox',
+      templateOptions: {
+        label: T.G.ENABLED,
+      },
+    },
+    ...providerCfg.items,
+  ],
+}));
 
 const DEFAULT_ISSUE_STRS: { ISSUE_STR: string; ISSUES_STR: string } = {
   ISSUE_STR: T.F.ISSUE.DEFAULT.ISSUE_STR,
