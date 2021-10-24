@@ -71,7 +71,7 @@ export const ISSUE_PROVIDER_FORM_CFGS: ConfigFormConfig = [
   items: providerCfg.items && [
     {
       key: 'isEnabled',
-      type: 'checkbox',
+      type: 'toggle',
       templateOptions: {
         label: T.G.ENABLED,
       },
