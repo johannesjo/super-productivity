@@ -34,14 +34,31 @@ export const GITLAB_PROJECT_REGEX = /(^[1-9][0-9]*$)|((\/|%2F|\w-?|\.-?)+$)/i;
 
 export const GITLAB_CONFIG_FORM: LimitedFormlyFieldConfig<GitlabCfg>[] = [
   {
-    key: 'gitlabBaseUrl',
+    key: 'project',
     type: 'input',
     hideExpression: (model: any) => !model.isEnabled,
     templateOptions: {
-      label: T.F.GITLAB.FORM.GITLAB_BASE_URL,
+      required: true,
+      label: T.F.GITLAB.FORM.PROJECT,
       type: 'text',
-      pattern:
-        /((([A-Za-z]{3,9}:(?:\/\/)?)(?:[\-;:&=\+\$,\w]+@)?[A-Za-z0-9\.\-]+|(?:www\.|[\-;:&=\+\$,\w]+@)[A-Za-z0-9\.\-]+)((?:\/[\+~%\/\.\w\-_]*)?\??(?:[\-\+=&;%@\.\w_]*)#?(?:[\.\!\/\\\w]*))?)/,
+      pattern: GITLAB_PROJECT_REGEX,
+    },
+  },
+  {
+    key: 'token',
+    type: 'input',
+    hideExpression: (model: any) => !model.isEnabled,
+    templateOptions: {
+      label: T.F.GITLAB.FORM.TOKEN,
+    },
+    validation: {
+      show: true,
+    },
+    expressionProperties: {
+      // !! is used to get the associated boolean value of a non boolean value
+      // It's not a fancy trick using model.project alone gets the required case right but won't remove it
+      // if the project field is empty so this is needed for the wanted behavior
+      'templateOptions.required': '!!model.project',
     },
   },
   {
@@ -60,32 +77,29 @@ export const GITLAB_CONFIG_FORM: LimitedFormlyFieldConfig<GitlabCfg>[] = [
     },
   },
   {
-    key: 'project',
-    type: 'input',
+    key: 'scope',
+    type: 'select',
+    defaultValue: 'created-by-me',
     hideExpression: (model: any) => !model.isEnabled,
     templateOptions: {
       required: true,
-      label: T.F.GITLAB.FORM.PROJECT,
-      type: 'text',
-      pattern: GITLAB_PROJECT_REGEX,
+      label: T.F.GITLAB.FORM.SCOPE,
+      options: [
+        { value: 'all', label: T.F.GITLAB.FORM.SCOPE_ALL },
+        { value: 'created-by-me', label: T.F.GITLAB.FORM.SCOPE_CREATED },
+        { value: 'assigned-to-me', label: T.F.GITLAB.FORM.SCOPE_ASSIGNED },
+      ],
     },
   },
   {
-    key: 'token',
+    key: 'gitlabBaseUrl',
     type: 'input',
     hideExpression: (model: any) => !model.isEnabled,
     templateOptions: {
-      required: true,
-      label: T.F.GITLAB.FORM.TOKEN,
-    },
-    validation: {
-      show: true,
-    },
-    expressionProperties: {
-      // !! is used to get the associated boolean value of a non boolean value
-      // It's not a fancy trick using model.project alone gets the required case right but won't remove it
-      // if the project field is empty so this is needed for the wanted behavior
-      'templateOptions.required': '!!model.project',
+      label: T.F.GITLAB.FORM.GITLAB_BASE_URL,
+      type: 'text',
+      pattern:
+        /((([A-Za-z]{3,9}:(?:\/\/)?)(?:[\-;:&=\+\$,\w]+@)?[A-Za-z0-9\.\-]+|(?:www\.|[\-;:&=\+\$,\w]+@)[A-Za-z0-9\.\-]+)((?:\/[\+~%\/\.\w\-_]*)?\??(?:[\-\+=&;%@\.\w_]*)#?(?:[\.\!\/\\\w]*))?)/,
     },
   },
   {
@@ -118,21 +132,6 @@ export const GITLAB_CONFIG_FORM: LimitedFormlyFieldConfig<GitlabCfg>[] = [
     hideExpression: (model: any) => !model.isEnabled,
     templateOptions: {
       label: T.F.GITLAB.FORM.FILTER_USER,
-    },
-  },
-  {
-    key: 'scope',
-    type: 'select',
-    defaultValue: 'created-by-me',
-    hideExpression: (model: any) => !model.isEnabled,
-    templateOptions: {
-      required: true,
-      label: T.F.GITLAB.FORM.SCOPE,
-      options: [
-        { value: 'all', label: T.F.GITLAB.FORM.SCOPE_ALL },
-        { value: 'created-by-me', label: T.F.GITLAB.FORM.SCOPE_CREATED },
-        { value: 'assigned-to-me', label: T.F.GITLAB.FORM.SCOPE_ASSIGNED },
-      ],
     },
   },
 ];
