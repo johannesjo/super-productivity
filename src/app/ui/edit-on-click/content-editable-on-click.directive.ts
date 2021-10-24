@@ -152,33 +152,53 @@ export class ContentEditableOnClickDirective implements OnInit, OnDestroy {
       return;
     }
 
+    if (IS_FIREFOX) {
+      this._insertAtCursorFirefox(sel, el, newText);
+    } else {
+      this._insertAtCursorChromium(sel, el, newText);
+    }
+  }
+
+  /**
+   * Function that insert the pasted text in the correct point of the HTML element.
+   * For Firefox.
+   */
+  private _insertAtCursorFirefox(sel: Selection, el: HTMLElement, newText: string): void {
+    let start = sel.anchorOffset;
+    let end = sel.focusOffset;
     const text = el.innerText;
+    let indexNode = 0; // the childNode index
 
-    const auxilixarInformation = this._calculateStartAndEnd(
-      sel.anchorOffset,
-      sel.focusOffset,
-      sel.anchorNode,
-      el,
-      text.length,
-    );
-    const start = auxilixarInformation.start;
-    const end = auxilixarInformation.end;
-    const indexNode = auxilixarInformation.index;
-
+    // sometimes, the selected node is not the first one, and the new text will add in the wrong place.
+    // so, it is needed to check what is the correct selected node before doing the rest of the code
+    if (el.childNodes.length > 1) {
+      let untilNode = 0;
+      el.childNodes.forEach((item, index) => {
+        if (!sel.anchorNode?.isSameNode(item)) {
+          untilNode += item.nodeValue ? item.nodeValue.length : untilNode;
+        } else {
+          if (index !== 0) {
+            start = start + untilNode;
+            end = end + untilNode;
+            indexNode = index;
+          }
+        }
+      });
+    }
+    if (start > text.length) {
+      start = text.length;
+    }
+    if (end > text.length) {
+      end = text.length;
+    }
     const textBefore = text.substring(0, start);
     const textAfter = text.substring(end, text.length);
 
     // reset caret to proper offset
     const range = document.createRange();
-    // it is not the chrome browser, then to do a different way of adding the new text
-    // otherwise, doing the setStart command
-    if (IS_FIREFOX) {
-      el.innerText = (textBefore + newText + textAfter).trim();
-      range.setStartAfter(el.childNodes[indexNode]);
-    } else {
-      el.innerText = (textBefore + newText + textAfter).trim();
-      range.setStart(el.childNodes[0], start + newText.length);
-    }
+    el.innerText = (textBefore + newText + textAfter).trim();
+    range.setStartAfter(el.childNodes[indexNode]);
+
     range.collapse(true);
 
     const sel2 = window.getSelection();
@@ -189,46 +209,33 @@ export class ContentEditableOnClickDirective implements OnInit, OnDestroy {
   }
 
   /**
-   * Function that calculates the value of the start and the value of the end position
-   * to build the text for the selected element.
-   */
-  private _calculateStartAndEnd(
-    initialStart: number,
-    initialEnd: number,
-    selectedNode: Node | null,
+   * Function that insert the pasted text in the correct point of the HTML Element.
+   * For Chrome.
+   * */
+  private _insertAtCursorChromium(
+    sel: Selection,
     el: HTMLElement,
-    sizeText: number,
-  ): any {
-    let auxiliarInformation = {
-      start: initialStart,
-      end: initialEnd,
-      index: 0,
-    };
-    let forSave = 0; // the childNode index
+    newText: string,
+  ): void {
+    const start = sel.anchorOffset;
+    const end = sel.focusOffset;
+    const text = el.innerText;
 
-    // sometimes, the selected node is not the first one, and the new text will add in the wrong place.
-    // so, it is needed to check what is the correct selected node before doing the rest of the code
-    if (el.childNodes.length > 1 && IS_FIREFOX) {
-      let untilNode = 0;
-      el.childNodes.forEach((item, index) => {
-        if (!selectedNode?.isSameNode(item)) {
-          untilNode += item.nodeValue ? item.nodeValue.length : untilNode;
-        } else {
-          if (index !== 0) {
-            auxiliarInformation.start = auxiliarInformation.start + untilNode;
-            auxiliarInformation.end = auxiliarInformation.end + untilNode;
-            forSave = index;
-          }
-        }
-      });
+    const textBefore = text.substring(0, start);
+    const textAfter = text.substring(end, text.length);
+
+    el.innerText = (textBefore + newText + textAfter).trim();
+
+    // reset caret to proper offset
+    const range = document.createRange();
+    range.setStart(el.childNodes[0], start + newText.length);
+    range.collapse(true);
+
+    const sel2 = window.getSelection();
+    if (sel2 !== null) {
+      sel2.removeAllRanges();
+      sel2.addRange(range);
     }
-    if (auxiliarInformation.start > sizeText) {
-      auxiliarInformation.start = sizeText;
-    }
-    if (auxiliarInformation.end > sizeText) {
-      auxiliarInformation.end = sizeText;
-    }
-    return auxiliarInformation;
   }
 
   private _removeTags(str: string): string {
