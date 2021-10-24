@@ -63,16 +63,6 @@ export const CALDAV_CONFIG_FORM: LimitedFormlyFieldConfig<CaldavCfg>[] = [
       type: 'password',
       label: T.F.CALDAV.FORM.CALDAV_PASSWORD,
     },
-    validation: {
-      show: true,
-    },
-    expressionProperties: {
-      // !! is used to get the associated boolean value of a non boolean value
-      // It's not a fancy trick using model.project alone gets the required case right but won't remove it
-      // if the project field is empty so this is needed for the wanted behavior
-      hideExpression: (model: any) => !model.isEnabled,
-      'templateOptions.required': '!!model.project',
-    },
   },
   {
     key: 'isSearchIssuesFromCaldav',
