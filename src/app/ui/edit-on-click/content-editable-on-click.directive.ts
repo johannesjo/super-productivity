@@ -7,6 +7,7 @@ import {
   OnInit,
   Output,
 } from '@angular/core';
+import { IS_FIREFOX } from '../../util/is-firefox';
 
 // HELPER
 // -----------------------------------
@@ -151,6 +152,71 @@ export class ContentEditableOnClickDirective implements OnInit, OnDestroy {
       return;
     }
 
+    if (IS_FIREFOX) {
+      this._insertAtCursorFirefox(sel, el, newText);
+    } else {
+      this._insertAtCursorChromium(sel, el, newText);
+    }
+  }
+
+  /**
+   * Function that insert the pasted text in the correct point of the HTML element.
+   * For Firefox.
+   */
+  private _insertAtCursorFirefox(sel: Selection, el: HTMLElement, newText: string): void {
+    let start = sel.anchorOffset;
+    let end = sel.focusOffset;
+    const text = el.innerText;
+    let indexNode = 0; // the childNode index
+
+    // sometimes, the selected node is not the first one, and the new text will add in the wrong place.
+    // so, it is needed to check what is the correct selected node before doing the rest of the code
+    if (el.childNodes.length > 1) {
+      let untilNode = 0;
+      el.childNodes.forEach((item, index) => {
+        if (!sel.anchorNode?.isSameNode(item)) {
+          untilNode += item.nodeValue ? item.nodeValue.length : untilNode;
+        } else {
+          if (index !== 0) {
+            start = start + untilNode;
+            end = end + untilNode;
+            indexNode = index;
+          }
+        }
+      });
+    }
+    if (start > text.length) {
+      start = text.length;
+    }
+    if (end > text.length) {
+      end = text.length;
+    }
+    const textBefore = text.substring(0, start);
+    const textAfter = text.substring(end, text.length);
+
+    // reset caret to proper offset
+    const range = document.createRange();
+    el.innerText = (textBefore + newText + textAfter).trim();
+    range.setStartAfter(el.childNodes[indexNode]);
+
+    range.collapse(true);
+
+    const sel2 = window.getSelection();
+    if (sel2 !== null) {
+      sel2.removeAllRanges();
+      sel2.addRange(range);
+    }
+  }
+
+  /**
+   * Function that insert the pasted text in the correct point of the HTML Element.
+   * For Chrome.
+   * */
+  private _insertAtCursorChromium(
+    sel: Selection,
+    el: HTMLElement,
+    newText: string,
+  ): void {
     const start = sel.anchorOffset;
     const end = sel.focusOffset;
     const text = el.innerText;
