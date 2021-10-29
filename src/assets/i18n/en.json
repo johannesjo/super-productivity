@@ -1251,7 +1251,6 @@
   "PP": {
     "ARCHIVED_PROJECTS": "Archived Projects",
     "ARCHIVE_PROJECT": "Archive Project",
-    "CREATE_NEW": "Create New",
     "DELETE_PROJECT": "Delete Project",
     "D_CONFIRM_ARCHIVE": {
       "MSG": "Are you sure you want to archive this project? Archived Projects will not be shown in the menu any more and you can't access any of their data without restoring them. It's recommended that you backup your data before you do this.",

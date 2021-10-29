@@ -84,18 +84,6 @@
         </div>
       </mat-card>
     </div>
-
-    <div class="add-new-project-wrapper">
-      <button (click)="openCreateDialog()" color="primary" mat-flat-button>
-        <mat-icon>add</mat-icon>
-        {{T.PP.CREATE_NEW|translate}}
-      </button>
-
-      <!--      <button (click)="fileInput.click()" mat-flat-button type="button">-->
-      <!--        {{T.PP.IMPORT_FROM_FILE|translate}}-->
-      <!--      </button>-->
-      <!--      <input #fileInput (change)="handleFileInput($event)" hidden id="file" type="file" />-->
-    </div>
   </div>
 
   <div *ngIf="(projectService.archived$|async)?.length" class="component-wrapper">

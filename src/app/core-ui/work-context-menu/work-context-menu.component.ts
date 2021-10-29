@@ -3,7 +3,6 @@ import { WorkContextType } from '../../features/work-context/work-context.model'
 import { T } from 'src/app/t.const';
 import { TODAY_TAG } from '../../features/tag/tag.const';
 import { from, Observable, of } from 'rxjs';
-import { DialogCreateProjectComponent } from '../../features/project/dialogs/create-project/dialog-create-project.component';
 import { DialogConfirmComponent } from '../../ui/dialog-confirm/dialog-confirm.component';
 import { MatDialog } from '@angular/material/dialog';
 import { TagService } from '../../features/tag/tag.service';
@@ -59,13 +58,6 @@ export class WorkContextMenuComponent {
           this._tagService.removeTag(this.contextId);
         }
       });
-  }
-
-  edit(project: Project): void {
-    this._matDialog.open(DialogCreateProjectComponent, {
-      restoreFocus: true,
-      data: Object.assign({}, project),
-    });
   }
 
   private _confirmTagDelete(): Observable<boolean> {
