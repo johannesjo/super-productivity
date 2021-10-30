@@ -58,6 +58,7 @@ import {
   selectStartableTasksForActiveContext,
   selectTimelineTasks,
 } from './store/work-context.selectors';
+import { GlobalTrackingIntervalService } from '../../core/global-tracking-interval/global-tracking-interval.service';
 
 @Injectable({
   providedIn: 'root',
@@ -215,7 +216,9 @@ export class WorkContextService {
     unPlanned: Task[];
   }> = this._store$.pipe(select(selectTimelineTasks));
 
-  workingToday$: Observable<any> = this.getTimeWorkedForDay$(getWorklogStr());
+  workingToday$: Observable<any> = this._globalTrackingIntervalService.todayDateStr$.pipe(
+    switchMap((worklogStrDate) => this.getTimeWorkedForDay$(worklogStrDate)),
+  );
 
   isHasTasksToWorkOn$: Observable<boolean> = this.todaysTasks$.pipe(
     map(hasTasksToWorkOn),
@@ -255,6 +258,7 @@ export class WorkContextService {
     private _store$: Store<WorkContextState>,
     private _actions$: Actions,
     private _tagService: TagService,
+    private _globalTrackingIntervalService: GlobalTrackingIntervalService,
     private _router: Router,
   ) {
     this.isToday$.subscribe((v) => (this.isToday = v));

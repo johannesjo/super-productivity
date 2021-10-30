@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { TRACKING_INTERVAL } from '../../app.constants';
-import { interval, Observable } from 'rxjs';
-import { map, share } from 'rxjs/operators';
+import { interval, Observable, of } from 'rxjs';
+import { concatMap, distinctUntilChanged, map, share } from 'rxjs/operators';
 import { Tick } from './tick.model';
 import { getWorklogStr } from '../../util/get-work-log-str';
 
@@ -9,9 +9,9 @@ import { getWorklogStr } from '../../util/get-work-log-str';
   providedIn: 'root',
 })
 export class GlobalTrackingIntervalService {
-  public globalInterval$: Observable<number> = interval(TRACKING_INTERVAL).pipe(share());
+  globalInterval$: Observable<number> = interval(TRACKING_INTERVAL).pipe(share());
   private _currentTrackingStart: number;
-  public tick$: Observable<Tick> = this.globalInterval$.pipe(
+  tick$: Observable<Tick> = this.globalInterval$.pipe(
     map(() => {
       const delta = Date.now() - this._currentTrackingStart;
       this._currentTrackingStart = Date.now();
@@ -23,6 +23,11 @@ export class GlobalTrackingIntervalService {
     }),
     // important because we want the same interval for everyone
     share(),
+  );
+
+  todayDateStr$: Observable<string> = this.globalInterval$.pipe(
+    concatMap(() => of(getWorklogStr())),
+    distinctUntilChanged(),
   );
 
   constructor() {
