@@ -83,6 +83,7 @@ $thisLowerHeight: $thisHeight - $thisUpperHeight;
     cursor: zoom-in;
 
     img {
+      cursor: zoom-in;
       height: $thisHeight;
       width: auto;
     }
@@ -161,6 +162,14 @@ $smaller-size: 100% -$larger-size;
 
   @include mq(xs) {
     transform: translate(-100%, -50%);
+  }
+
+  &.isImage {
+    pointer-events: none;
+
+    @include mq(xs) {
+      transform: translate(0, -50%);
+    }
   }
 }
 
