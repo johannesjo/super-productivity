@@ -28,7 +28,7 @@ export const AUTOMATIC_BACKUPS_FORM: ConfigFormSection<LocalBackupConfig> = {
             className: `tpl`,
             templateOptions: {
               tag: 'p',
-              text: backupPath,
+              text: `<a href="file://${backupPath}" target="_blank">${backupPath}</a>`,
             },
           },
         ]
