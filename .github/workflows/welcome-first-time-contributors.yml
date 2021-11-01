@@ -24,7 +24,7 @@ jobs:
 
           In case you want to claim this issue, please comment down below! We will try to get back to you as soon as we can.👀
 
-          Feel free to visit [super-productivity.com](https://super-productivity.com/). 👩‍💻 If you have any interesting ideas , simply open an issue and we would love to hear you and engage in discussions.💖
+          Feel free to visit [super-productivity.com](https://super-productivity.com/). 👩‍💻 If you have any interesting ideas , simply open an issue and we would love to hear you and engage in [discussions](https://github.com/johannesjo/super-productivity/discussions).💖
 
         pr-message: |
           Hello there ${{ github.actor }} 👋
