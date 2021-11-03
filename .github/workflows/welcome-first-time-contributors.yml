@@ -12,25 +12,21 @@ jobs:
   welcome:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/first-interaction@v1
-      with:
-        repo-token: ${{ secrets.GITHUB_TOKEN }}
-        issue-message: |
-          Hello there ${{ github.actor }} 👋
+      - uses: actions/first-interaction@v1
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          issue-message: |
+            Hello there ${{ github.actor }}! 👋
 
-          Welcome to super-productivity !! 💖🥳
+            Thank you and congratulations 🎉 for opening your very first issue in this project! 💖
 
-          Thank you and congratulations 🎉 for opening your very first issue in this project. super-productivity fosters an open and welcoming environment for all our contributors.🌸 
+            In case you want to claim this issue, please comment down below! We will try to get back to you as soon as we can. 👀
 
-          In case you want to claim this issue, please comment down below! We will try to get back to you as soon as we can.👀
+            For more open ended discussions and/or specific questions, please visit the [discussions page](https://github.com/johannesjo/super-productivity/discussions). 💖
 
-          Feel free to visit [super-productivity.com](https://super-productivity.com/). 👩‍💻 If you have any interesting ideas , simply open an issue and we would love to hear you and engage in [discussions](https://github.com/johannesjo/super-productivity/discussions).💖
+          pr-message: |
+            Hello there ${{ github.actor }}! 👋
 
-        pr-message: |
-          Hello there ${{ github.actor }} 👋
+            Thank you and congrats 🎉 for opening your first PR on this project! ✨ 💖
 
-          Thank you and congrats 🎉 for opening your first PR on this project.✨
-
-          We will review it soon!
-
-          super-productivity fosters an open and welcoming environment for all our contributors.🌸 
+            We will try to review it soon!
