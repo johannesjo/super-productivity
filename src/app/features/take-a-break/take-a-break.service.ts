@@ -31,6 +31,7 @@ import { UiHelperService } from '../ui-helper/ui-helper.service';
 import { WorkContextService } from '../work-context/work-context.service';
 import { Tick } from '../../core/global-tracking-interval/tick.model';
 import { ipcRenderer } from 'electron';
+import { PomodoroService } from '../pomodoro/pomodoro.service';
 
 const BREAK_TRIGGER_DURATION = 10 * 60 * 1000;
 const PING_UPDATE_BANNER_INTERVAL = 60 * 1000;
@@ -102,11 +103,19 @@ export class TakeABreakService {
     }),
   );
 
+  // NOTE to keep things simple we always reset the break timer when pomodoro is active for each pomodoro cycle
+  // (the features don't make much sense together anyway)
+  private _pomodoroTimerReset$: Observable<any> = this._pomodoroService.isEnabled$.pipe(
+    switchMap((isEnabled) => (isEnabled ? this._pomodoroService.currentCycle$ : EMPTY)),
+    distinctUntilChanged(),
+  );
+
   private _triggerManualReset$: Subject<number> = new Subject<number>();
 
   private _triggerReset$: Observable<number> = merge(
     this._triggerProgrammaticReset$,
     this._triggerManualReset$,
+    this._pomodoroTimerReset$,
   ).pipe(mapTo(0));
 
   timeWorkingWithoutABreak$: Observable<number> = merge(
@@ -170,10 +179,15 @@ export class TakeABreakService {
     private _workContextService: WorkContextService,
     private _electronService: ElectronService,
     private _notifyService: NotifyService,
+    private _pomodoroService: PomodoroService,
     private _bannerService: BannerService,
     private _chromeExtensionInterfaceService: ChromeExtensionInterfaceService,
     private _uiHelperService: UiHelperService,
   ) {
+    this._pomodoroService.isBreak$.subscribe((v) =>
+      console.log(`_pomodoroService.isBreak$`, v),
+    );
+
     this._triggerReset$
       .pipe(
         withLatestFrom(this._configService.takeABreak$),
