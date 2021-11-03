@@ -124,6 +124,11 @@
         "SYNC_ERROR": "Dropbox: Error while syncing"
       }
     },
+    "FINISH_DAY_BEFORE_EXIT": {
+      "C": {
+        "FINISH_DAY_BEFORE_EXIT": "There are {{nr}} done tasks in your today list not yet moved to the archive. Do you really want to quit without finishing your day?"
+      }
+    },
     "GITHUB": {
       "DIALOG_INITIAL": {
         "TITLE": "Setup GitHub for Project"
@@ -1099,6 +1104,7 @@
       "IS_AUTO_MARK_PARENT_AS_DONE": "Mark parent task as done, when all sub tasks are done",
       "IS_AUTO_START_NEXT_TASK": "Start tracking next task when marking current as done",
       "IS_CONFIRM_BEFORE_EXIT": "Confirm before exiting the app",
+      "IS_CONFIRM_BEFORE_EXIT_WITHOUT_FINISH_DAY": "Confirm before exiting the app without finishing day first",
       "IS_DARK_MODE": "Dark Mode",
       "IS_HIDE_NAV": "Hide navigation until main header is hovered (desktop only)",
       "IS_MINIMIZE_TO_TRAY": "Minimize to tray (desktop only)",

@@ -2,11 +2,9 @@ import * as windowStateKeeper from 'electron-window-state';
 import {
   App,
   BrowserWindow,
-  dialog,
   ipcMain,
   Menu,
   MenuItemConstructorOptions,
-  MessageBoxReturnValue,
   shell,
 } from 'electron';
 import { errorHandlerWithFrontendInform } from './error-handler-with-frontend-inform';
@@ -237,25 +235,7 @@ const appCloseHandler = (app: App): void => {
           log('Actions to wait for ', ids);
           mainWin.webContents.send(IPC.NOTIFY_ON_CLOSE, ids);
         } else {
-          if (appCfg && appCfg.misc.isConfirmBeforeExit && !(app as any).isQuiting) {
-            dialog
-              .showMessageBox(mainWin, {
-                type: 'question',
-                buttons: ['Yes', 'No'],
-                title: 'Confirm',
-                message: 'Are you sure you want to quit?',
-              })
-              .then((choice: MessageBoxReturnValue) => {
-                if (choice.response === 1) {
-                  return;
-                } else if (choice.response === 0) {
-                  _quitApp();
-                  return;
-                }
-              });
-          } else {
-            _quitApp();
-          }
+          _quitApp();
         }
       });
     }

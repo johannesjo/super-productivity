@@ -16,6 +16,7 @@ export const DEFAULT_GLOBAL_CONFIG: GlobalConfigState = {
   misc: {
     isDarkMode: IS_USE_DARK_THEME_AS_DEFAULT,
     isConfirmBeforeExit: false,
+    isConfirmBeforeExitWithoutFinishDay: true,
     isNotifyWhenTimeEstimateExceeded: true,
     isAutMarkParentAsDone: false,
     isAutoStartNextTask: true,

@@ -1,6 +1,11 @@
 /* eslint-disable max-len */
-import { ConfigFormSection, MiscConfig } from '../global-config.model';
+import {
+  ConfigFormSection,
+  LimitedFormlyFieldConfig,
+  MiscConfig,
+} from '../global-config.model';
 import { T } from '../../../t.const';
+import { IS_ELECTRON } from '../../../app.constants';
 
 export const MISC_SETTINGS_FORM_CFG: ConfigFormSection<MiscConfig> = {
   title: T.GCF.MISC.TITLE,
@@ -14,13 +19,25 @@ export const MISC_SETTINGS_FORM_CFG: ConfigFormSection<MiscConfig> = {
     //     label: T.GCF.MISC.IS_DARK_MODE,
     //   },
     // },
-    {
-      key: 'isConfirmBeforeExit',
-      type: 'checkbox',
-      templateOptions: {
-        label: T.GCF.MISC.IS_CONFIRM_BEFORE_EXIT,
-      },
-    },
+    ...((IS_ELECTRON
+      ? [
+          {
+            key: 'isConfirmBeforeExitWithoutFinishDay',
+            type: 'checkbox',
+            templateOptions: {
+              label: T.GCF.MISC.IS_CONFIRM_BEFORE_EXIT_WITHOUT_FINISH_DAY,
+            },
+          },
+        ]
+      : [
+          {
+            key: 'isConfirmBeforeExit',
+            type: 'checkbox',
+            templateOptions: {
+              label: T.GCF.MISC.IS_CONFIRM_BEFORE_EXIT,
+            },
+          },
+        ]) as LimitedFormlyFieldConfig<MiscConfig>[]),
     {
       key: 'isNotifyWhenTimeEstimateExceeded',
       type: 'checkbox',

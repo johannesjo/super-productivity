@@ -9,6 +9,7 @@ export type MiscConfig = Readonly<{
   isAutMarkParentAsDone: boolean;
   isAutoStartNextTask: boolean;
   isConfirmBeforeExit: boolean;
+  isConfirmBeforeExitWithoutFinishDay: boolean;
   isNotifyWhenTimeEstimateExceeded: boolean;
   isTurnOffMarkdown: boolean;
   isAutoAddWorkedOnToToday: boolean;
