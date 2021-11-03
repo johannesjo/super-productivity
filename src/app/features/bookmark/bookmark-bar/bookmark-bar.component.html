@@ -21,7 +21,11 @@
       >
         <mat-icon>more_vert</mat-icon>
       </button>
-      <button (click)="isEditMode=false" *ngIf="isEditMode" mat-stroked-button>
+      <button
+        (click)="isEditMode=false; isContextMenuDisabled=false"
+        *ngIf="isEditMode"
+        mat-stroked-button
+      >
         <mat-icon>check</mat-icon>
       </button>
 
