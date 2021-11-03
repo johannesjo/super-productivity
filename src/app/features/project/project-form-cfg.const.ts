@@ -21,6 +21,7 @@ export const BASIC_PROJECT_CONFIG_FORM_CONFIG: ConfigFormSection<Project> = {
 };
 
 export const CREATE_PROJECT_BASIC_CONFIG_FORM_CONFIG: GenericConfigFormSection = {
+  // TODO translate
   title: 'Project Settings & Theme',
   key: 'basic',
   /* eslint-disable */

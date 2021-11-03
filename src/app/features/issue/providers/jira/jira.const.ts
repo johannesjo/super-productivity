@@ -246,7 +246,7 @@ export const JIRA_ADVANCED_FORM_CFG: LimitedFormlyFieldConfig<JiraCfg>[] = [
 
 export const JIRA_CONFIG_FORM_SECTION: ConfigFormSection<JiraCfg> = {
   title: 'Jira',
-  key: 'JIRA',
+  key: JIRA_ISSUE_TYPE,
   customSection: 'JIRA_CFG',
   helpArr: [
     {

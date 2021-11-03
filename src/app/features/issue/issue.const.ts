@@ -2,7 +2,11 @@ import {
   ConfigFormConfig,
   GenericConfigFormSection,
 } from '../config/global-config.model';
-import { DEFAULT_JIRA_CFG, JIRA_CONFIG_FORM_SECTION } from './providers/jira/jira.const';
+import {
+  DEFAULT_JIRA_CFG,
+  JIRA_CONFIG_FORM_SECTION,
+  JIRA_ISSUE_TYPE,
+} from './providers/jira/jira.const';
 import { IssueProviderKey } from './issue.model';
 import {
   DEFAULT_GITHUB_CFG,
@@ -68,16 +72,21 @@ export const ISSUE_PROVIDER_FORM_CFGS: ConfigFormConfig = [
   OPEN_PROJECT_CONFIG_FORM_SECTION as GenericConfigFormSection,
 ].map((providerCfg) => ({
   ...providerCfg,
-  items: providerCfg.items && [
-    {
-      key: 'isEnabled',
-      type: 'toggle',
-      templateOptions: {
-        label: T.G.ENABLED,
-      },
-    },
-    ...providerCfg.items,
-  ],
+  // NOTE we don't do this for jira as there is a custom cfg component with an enabled toggle
+  ...(providerCfg.items && providerCfg.key !== JIRA_ISSUE_TYPE
+    ? {
+        items: [
+          {
+            key: 'isEnabled',
+            type: 'toggle',
+            templateOptions: {
+              label: T.G.ENABLED,
+            },
+          },
+          ...providerCfg.items,
+        ],
+      }
+    : {}),
 }));
 
 const DEFAULT_ISSUE_STRS: { ISSUE_STR: string; ISSUES_STR: string } = {
