@@ -29,8 +29,6 @@ import { getRelevantEventsFromIcal } from './ical/get-relevant-events-from-ical'
 import { SnackService } from '../../core/snack/snack.service';
 import { loadFromRealLs, saveToRealLs } from '../../core/persistence/local-storage';
 
-const NOW = Date.now();
-
 @Component({
   selector: 'timeline',
   templateUrl: './timeline.component.html',
@@ -82,14 +80,7 @@ export class TimelineComponent implements OnDestroy {
             )
           : of([] as any);
       }),
-      startWith(
-        ((loadFromRealLs(LS_TIMELINE_CACHE) as TimelineCalendarMapEntry[]) || [])
-          // filter out cached past entries
-          .map((provider) => ({
-            ...provider,
-            items: provider.items.filter((item) => item.start + item.duration >= NOW),
-          })),
-      ),
+      startWith(this._getCalProviderFromCache()),
     );
 
   timelineEntries$: Observable<TimelineViewEntry[]> = combineLatest([
@@ -137,6 +128,7 @@ export class TimelineComponent implements OnDestroy {
     if (!localStorage.getItem(LS_WAS_TIMELINE_INITIAL_DIALOG_SHOWN)) {
       this._matDialog.open(DialogTimelineInitialSetupComponent);
     }
+    this.icalEvents$.subscribe((v) => console.log(`icalEvents$`, v));
   }
 
   ngOnDestroy(): void {
@@ -184,5 +176,17 @@ export class TimelineComponent implements OnDestroy {
     this._matDialog.open(DialogAddTaskReminderComponent, {
       data: { task } as AddTaskReminderInterface,
     });
+  }
+
+  private _getCalProviderFromCache(): TimelineCalendarMapEntry[] {
+    const now = Date.now();
+    return (
+      ((loadFromRealLs(LS_TIMELINE_CACHE) as TimelineCalendarMapEntry[]) || [])
+        // filter out cached past entries
+        .map((provider) => ({
+          ...provider,
+          items: provider.items.filter((item) => item.start + item.duration >= now),
+        }))
+    );
   }
 }
