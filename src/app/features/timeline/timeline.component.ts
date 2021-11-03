@@ -29,6 +29,8 @@ import { getRelevantEventsFromIcal } from './ical/get-relevant-events-from-ical'
 import { SnackService } from '../../core/snack/snack.service';
 import { loadFromRealLs, saveToRealLs } from '../../core/persistence/local-storage';
 
+const NOW = Date.now();
+
 @Component({
   selector: 'timeline',
   templateUrl: './timeline.component.html',
@@ -80,8 +82,16 @@ export class TimelineComponent implements OnDestroy {
             )
           : of([] as any);
       }),
-      startWith(loadFromRealLs(LS_TIMELINE_CACHE) || []),
+      startWith(
+        ((loadFromRealLs(LS_TIMELINE_CACHE) as TimelineCalendarMapEntry[]) || [])
+          // filter out cached past entries
+          .map((provider) => ({
+            ...provider,
+            items: provider.items.filter((item) => item.start + item.duration >= NOW),
+          })),
+      ),
     );
+
   timelineEntries$: Observable<TimelineViewEntry[]> = combineLatest([
     this._workContextService.timelineTasks$,
     this._taskRepeatCfgService.taskRepeatCfgsWithStartTime$,
