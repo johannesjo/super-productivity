@@ -1,20 +1,20 @@
 <section class="main">
   <div
-    *ngFor="let context of (workContextService.mainWorkContexts$|async); trackBy: trackById; "
-    [class.hasTasks]="context.taskIds.length"
-    [class.isActiveContext]="context.id===activeWorkContextId"
+    *ngIf="(workContextService.mainWorkContext$|async) as mainContext"
+    [class.hasTasks]="mainContext.taskIds.length"
+    [class.isActiveContext]="mainContext.id===activeWorkContextId"
     class="tag"
   >
-    <div [style.background]="context.theme.primary" class="tag-color"></div>
+    <div [style.background]="mainContext.theme.primary" class="tag-color"></div>
     <button
       #menuEntry
-      [routerLink]="['tag', context.id, 'tasks']"
+      [routerLink]="['tag', mainContext.id, 'tasks']"
       mat-menu-item
       routerLinkActive="isActiveRoute"
     >
-      <span class="badge">{{context.taskIds.length}}</span>
-      <mat-icon>{{context.icon}}</mat-icon>
-      <span class="text">{{context.title}}</span>
+      <span class="badge">{{mainContext.taskIds.length}}</span>
+      <mat-icon>{{mainContext.icon}}</mat-icon>
+      <span class="text">{{mainContext.title}}</span>
     </button>
 
     <button
@@ -29,8 +29,8 @@
     <mat-menu #tagMenu="matMenu">
       <ng-template matMenuContent>
         <work-context-menu
-          [contextId]="context.id"
-          [contextType]="context.type"
+          [contextId]="mainContext.id"
+          [contextType]="mainContext.type"
         ></work-context-menu>
       </ng-template>
     </mat-menu>

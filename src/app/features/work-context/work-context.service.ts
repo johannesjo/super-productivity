@@ -104,11 +104,6 @@ export class WorkContextService {
       shareReplay(1),
     );
 
-  isActiveWorkContextTodayList$: Observable<boolean> = this.activeWorkContextId$.pipe(
-    map((id) => id === TODAY_TAG.id),
-    shareReplay(1),
-  );
-
   activeWorkContextIdIfProject$: Observable<string> =
     this.activeWorkContextTypeAndId$.pipe(
       map(({ activeType, activeId }) => {
@@ -127,16 +122,14 @@ export class WorkContextService {
     switchMap(() => this._store$.select(selectActiveWorkContext)),
     shareReplay(1),
   );
-  mainWorkContexts$: Observable<WorkContext[]> = this._isAllDataLoaded$.pipe(
+  mainWorkContext$: Observable<WorkContext> = this._isAllDataLoaded$.pipe(
     concatMap(() => this._tagService.getTagById$(TODAY_TAG.id)),
     switchMap((myDayTag) =>
-      of([
-        {
-          ...myDayTag,
-          type: WorkContextType.TAG,
-          routerLink: `tag/${myDayTag.id}`,
-        } as WorkContext,
-      ]),
+      of({
+        ...myDayTag,
+        type: WorkContextType.TAG,
+        routerLink: `tag/${myDayTag.id}`,
+      } as WorkContext),
     ),
   );
 
