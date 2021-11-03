@@ -69,7 +69,7 @@ export class OpenProjectCommonInterfacesService implements IssueServiceInterface
   searchIssues$(searchTerm: string, projectId: string): Observable<SearchResultItem[]> {
     return this._getCfgOnce$(projectId).pipe(
       switchMap((openProjectCfg) =>
-        openProjectCfg && openProjectCfg.isSearchIssuesFromOpenProject
+        this.isEnabled(openProjectCfg) && openProjectCfg.isSearchIssuesFromOpenProject
           ? this._openProjectApiService
               .searchIssueForRepo$(searchTerm, openProjectCfg)
               .pipe(catchError(() => []))

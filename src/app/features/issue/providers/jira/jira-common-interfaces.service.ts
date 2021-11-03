@@ -53,7 +53,7 @@ export class JiraCommonInterfacesService implements IssueServiceInterface {
   searchIssues$(searchTerm: string, projectId: string): Observable<SearchResultItem[]> {
     return this._getCfgOnce$(projectId).pipe(
       switchMap((jiraCfg) =>
-        jiraCfg && jiraCfg.isEnabled
+        this.isEnabled(jiraCfg) && jiraCfg.isEnabled
           ? this._jiraApiService
               .issuePicker$(searchTerm, jiraCfg)
               .pipe(catchError(() => []))
