@@ -169,9 +169,25 @@
       </ng-container>
     </div>
 
-    <simple-counter-button
-      *ngFor="let simpleCounter of (simpleCounterService.enabledSimpleCounters$|async); trackBy: trackById"
-      [simpleCounter]="simpleCounter"
-    ></simple-counter-button>
+    <div class="simple-counter-buttons-outer-wrapper">
+      <button
+        (click)="isShowSimpleCounterBtnsMobile=!isShowSimpleCounterBtnsMobile"
+        class="simple-counter-mobile-trigger show-xs-only"
+        color=""
+        mat-mini-fab
+      >
+        <mat-icon>timer</mat-icon>
+      </button>
+
+      <div
+        class="simple-counter-buttons"
+        [class.isVisibleMobile]="isShowSimpleCounterBtnsMobile"
+      >
+        <simple-counter-button
+          *ngFor="let simpleCounter of (simpleCounterService.enabledSimpleCounters$|async); trackBy: trackById"
+          [simpleCounter]="simpleCounter"
+        ></simple-counter-button>
+      </div>
+    </div>
   </nav>
 </div>

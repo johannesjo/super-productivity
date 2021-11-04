@@ -39,6 +39,7 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
   progressCircleRadius: number = 10;
   circumference: number = this.progressCircleRadius * Math.PI * 2;
   IS_TOUCH_ONLY: boolean = IS_TOUCH_ONLY;
+  isShowSimpleCounterBtnsMobile: boolean = false;
 
   @ViewChild('circleSvg', { static: true }) circleSvg?: ElementRef;
 

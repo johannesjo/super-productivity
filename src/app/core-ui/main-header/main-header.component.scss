@@ -222,7 +222,7 @@ button {
     opacity: 0;
     position: relative;
     z-index: 2;
-    margin-top: $s * 0.5;
+    margin-top: $s;
     margin-left: 0;
 
     &:nth-child(2) {
@@ -269,6 +269,55 @@ button {
 
   :host:hover & {
     opacity: 0;
+  }
+}
+
+.simple-counter-mobile-trigger {
+  margin-left: $s;
+}
+
+.simple-counter-buttons-outer-wrapper {
+  position: relative;
+}
+
+.simple-counter-buttons {
+  display: flex;
+
+  @include mq(xs, max) {
+    position: absolute;
+    display: flex;
+    transition: $transition-standard;
+    top: 100%;
+    flex-direction: column;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 2;
+    pointer-events: none;
+
+    &.isVisibleMobile {
+      pointer-events: all;
+    }
+  }
+}
+
+simple-counter-button {
+  @include mq(xs, max) {
+    transition: $transition-standard;
+    transform: translateY(-100%);
+    opacity: 0;
+    position: relative;
+    z-index: 2;
+    margin-top: $s;
+    margin-left: 0;
+
+    &:nth-child(2) {
+      transform: translateY(-200%);
+    }
+
+    .simple-counter-buttons.isVisibleMobile & {
+      transform: translateY(0);
+      opacity: 1;
+    }
   }
 }
 
