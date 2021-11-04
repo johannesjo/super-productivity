@@ -10,6 +10,7 @@ import { MetricModule } from '../../features/metric/metric.module';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { BetterDrawerModule } from '../../ui/better-drawer/better-drawer.module';
 import { WorkViewComponent } from './work-view.component';
+import { RightPanelComponent } from './right-panel/right-panel.component';
 
 @NgModule({
   imports: [
@@ -24,7 +25,7 @@ import { WorkViewComponent } from './work-view.component';
     MatSidenavModule,
     BetterDrawerModule,
   ],
-  declarations: [WorkViewComponent, BacklogComponent],
+  declarations: [WorkViewComponent, BacklogComponent, RightPanelComponent],
   exports: [WorkViewComponent],
 })
 export class WorkViewModule {}

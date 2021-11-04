@@ -1,4 +1,4 @@
-<task-additional-info-wrapper *ngIf="timelineEntries$|async as timelineEntries">
+<right-panel *ngIf="timelineEntries$|async as timelineEntries">
   <div class="wrapper">
     <div class="inner-wrapper" [@standardList]="timelineEntries.length">
       <div *ngIf="!timelineEntries.length" class="no-tasks-msg">
@@ -120,4 +120,4 @@
       </div>
     </div>
   </div>
-</task-additional-info-wrapper>
+</right-panel>

@@ -1,6 +1,6 @@
 // import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 //
-// import { TaskAdditionalInfoWrapperComponent } from './task-additional-info-wrapper.component';
+// import { TaskAdditionalInfoWrapperComponent } from './right-panel.component';
 //
 // describe('TaskAdditionalInfoWrapperComponent', () => {
 //   let component: TaskAdditionalInfoWrapperComponent;

@@ -1,4 +1,4 @@
-<task-additional-info-wrapper
+<right-panel
   *ngIf="!(workContextService.isContextChangingWithDelay$|async)"
   @projectChange
 >
@@ -214,7 +214,7 @@
       </div>
     </div>
   </div>
-</task-additional-info-wrapper>
+</right-panel>
 
 <button
   (click)="layoutService.showAddTaskBar()"

@@ -1,17 +1,17 @@
 import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
-import { TaskService } from '../../task.service';
-import { LayoutService } from '../../../../core-ui/layout/layout.service';
-import { delay, switchMap } from 'rxjs/operators';
 import { Observable, of } from 'rxjs';
-import { TaskWithSubTasks } from '../../task.model';
+import { TaskWithSubTasks } from '../../tasks/task.model';
+import { delay, switchMap } from 'rxjs/operators';
+import { TaskService } from '../../tasks/task.service';
+import { LayoutService } from '../../../core-ui/layout/layout.service';
 
 @Component({
-  selector: 'task-additional-info-wrapper',
-  templateUrl: './task-additional-info-wrapper.component.html',
-  styleUrls: ['./task-additional-info-wrapper.component.scss'],
+  selector: 'right-panel',
+  templateUrl: './right-panel.component.html',
+  styleUrls: ['./right-panel.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class TaskAdditionalInfoWrapperComponent {
+export class RightPanelComponent {
   // NOTE: used for debugging
   @Input() isAlwaysOver: boolean = false;
 
