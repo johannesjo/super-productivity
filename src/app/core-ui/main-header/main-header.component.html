@@ -193,5 +193,15 @@
         ></simple-counter-button>
       </div>
     </div>
+
+    <button
+      (click)="layoutService.toggleNotes()"
+      mat-icon-button
+      [matTooltip]="T.MH.TOGGLE_SHOW_NOTES|translate"
+    >
+      <mat-icon [class.rotate]="(layoutService.isShowNotes$|async)" class="note-ico"
+        >comment
+      </mat-icon>
+    </button>
   </nav>
 </div>

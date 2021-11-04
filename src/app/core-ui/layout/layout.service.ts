@@ -16,6 +16,7 @@ import { select, Store } from '@ngrx/store';
 import {
   LayoutState,
   selectIsShowAddTaskBar,
+  selectIsShowNotes,
   selectIsShowSearchBar,
   selectIsShowSideNav,
 } from './store/layout.reducer';
@@ -25,7 +26,7 @@ import { NavigationStart, Router } from '@angular/router';
 import { WorkContextService } from '../../features/work-context/work-context.service';
 
 const NAV_ALWAYS_VISIBLE = 1250;
-const NAV_OVER_NOTES_NEXT = 800;
+const NAV_OVER_RIGHT_PANEL_NEXT = 800;
 const BOTH_OVER = 720;
 const XS_MAX = 599;
 
@@ -46,13 +47,13 @@ export class LayoutService {
   isNavAlwaysVisible$: Observable<boolean> = this._breakPointObserver
     .observe([`(min-width: ${NAV_ALWAYS_VISIBLE}px)`])
     .pipe(map((result) => result.matches));
-  isNotesNextNavOver$: Observable<boolean> = this._breakPointObserver
-    .observe([`(min-width: ${NAV_OVER_NOTES_NEXT}px)`])
+  isRightPanelNextNavOver$: Observable<boolean> = this._breakPointObserver
+    .observe([`(min-width: ${NAV_OVER_RIGHT_PANEL_NEXT}px)`])
     .pipe(map((result) => result.matches));
-  isNotesOver$: Observable<boolean> = this._breakPointObserver
+  isRightPanelOver$: Observable<boolean> = this._breakPointObserver
     .observe([`(min-width: ${BOTH_OVER}px)`])
     .pipe(map((result) => !result.matches));
-  isNavOver$: Observable<boolean> = this.isNotesNextNavOver$.pipe(map((v) => !v));
+  isNavOver$: Observable<boolean> = this.isRightPanelNextNavOver$.pipe(map((v) => !v));
   isScrolled$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
   private _isShowSideNav$: Observable<boolean> = this._store$.pipe(
     select(selectIsShowSideNav),
@@ -63,14 +64,10 @@ export class LayoutService {
     }),
   );
 
-  // isShowNotes$: Observable<boolean> = this._isShowNotes$.pipe(
-  //   switchMap((isShow) => {
-  //     return isShow
-  //       ? of(isShow)
-  //       : this.isBothAlwaysVisible$;
-  //   }),
-  // );
-  // private _isShowNotes$: Observable<boolean> = this._store$.pipe(select(selectIsShowNotes));
+  private _isShowNotes$: Observable<boolean> = this._store$.pipe(
+    select(selectIsShowNotes),
+  );
+  isShowNotes$: Observable<boolean> = this._isShowNotes$.pipe();
 
   constructor(
     private _store$: Store<LayoutState>,

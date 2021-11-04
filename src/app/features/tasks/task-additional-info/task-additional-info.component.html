@@ -1,6 +1,6 @@
 <div *ngIf="task.id" [@taskAdditionalInfoTaskChange]="task.id" class="wrapper">
   <header
-    *ngIf="IS_TOUCH_ONLY || (layoutService.isNotesOver$|async)"
+    *ngIf="IS_TOUCH_ONLY || (layoutService.isRightPanelOver$|async)"
     class="task-title-wrapper"
   >
     <button (click)="close()" *ngIf="(layoutService.isScreenXs$|async)" mat-icon-button>
@@ -24,7 +24,7 @@
   <task-additional-info-item
     (collapseParent)="collapseParent()"
     (keyPress)="onItemKeyPress($event)"
-    *ngIf="!task.parentId && (layoutService.isNotesOver$|async)"
+    *ngIf="!task.parentId && (layoutService.isRightPanelOver$|async)"
     [type]="'panel'"
   >
     <ng-container panel-header>
@@ -271,6 +271,12 @@
   </task-additional-info-item>
 
   <div class="created">Created on {{task?.created|date:'short'}}</div>
+
+  <div
+    style="height: 2px; border: 2px solid gray; margin-bottom: 32px; margin-top: 32px"
+  ></div>
+  <h2 style="text-align: center">Project Notes</h2>
+  <notes></notes>
 </div>
 
 <div *ngIf="isDragOver" class="bgc-accent drag-over-msg">
