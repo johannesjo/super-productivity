@@ -205,19 +205,6 @@
     <mat-icon>settings_applications</mat-icon>
     <span class="text">{{T.MH.SETTINGS|translate}}</span>
   </button>
-
-  <button
-    #menuEntry
-    (click)="onScrollToNotesClick()"
-    *ngIf="workContextService.isActiveWorkContextProject$|async"
-    [@expandFade]
-    class="route-link scroll-down-btn"
-    mat-menu-item
-  >
-    <mat-icon>notes</mat-icon>
-    <span class="text">{{T.MH.NOTES|translate}}</span>
-    <mat-icon>arrow_downwards</mat-icon>
-  </button>
 </section>
 
 <!-- NOTE: needs to be here for mat menu styles always to be loaded -->

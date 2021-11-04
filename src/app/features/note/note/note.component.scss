@@ -5,14 +5,11 @@ $noteFontSize: 12px;
 
 :host {
   display: block;
-  margin-right: $s;
 
-  :host-context([dir=rtl]) {
-    margin-left: $s;
+  :host-context([dir='rtl']) {
     margin-right: unset;
   }
 }
-
 
 .note {
   @include noteStyle;
@@ -42,13 +39,13 @@ $noteFontSize: 12px;
 
 .controls {
   position: absolute;
-  top: -$s*0.75;
-  right: -$s*0.75;
+  top: -$s * 0.75;
+  right: -$s * 0.75;
 
-  :host-context([dir=rtl]) & {
+  :host-context([dir='rtl']) & {
     position: absolute;
     right: unset;
-    left: -$s*0.75;
+    left: -$s * 0.75;
   }
 
   // fixes drag and drop on mobile
@@ -97,7 +94,7 @@ $noteFontSize: 12px;
 
     .markdown-unparsed,
     .markdown-parsed > *:first-child {
-      padding-right: $s*1.25;
+      padding-right: $s * 1.25;
     }
 
     .markdown-parsed > *:last-child {

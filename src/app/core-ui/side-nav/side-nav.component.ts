@@ -2,10 +2,8 @@ import {
   ChangeDetectionStrategy,
   Component,
   ElementRef,
-  EventEmitter,
   HostListener,
   OnDestroy,
-  Output,
   QueryList,
   ViewChild,
   ViewChildren,
@@ -43,8 +41,6 @@ import { TODAY_TAG } from '../../features/tag/tag.const';
   animations: [standardListAnimation, expandFadeAnimation],
 })
 export class SideNavComponent implements OnDestroy {
-  @Output() scrollToNotes: EventEmitter<void> = new EventEmitter();
-
   @ViewChildren('menuEntry') navEntries?: QueryList<MatMenuItem>;
   keyboardFocusTimeout?: number;
   @ViewChild('projectExpandBtn', { read: ElementRef }) projectExpandBtn?: ElementRef;
@@ -174,10 +170,6 @@ export class SideNavComponent implements OnDestroy {
     const standardColor = (THEME_COLOR_MAP as any)[color];
     const colorToUse = standardColor ? standardColor : color;
     return { background: colorToUse };
-  }
-
-  onScrollToNotesClick(): void {
-    this.scrollToNotes.emit();
   }
 
   fetchProjectListState(): boolean {

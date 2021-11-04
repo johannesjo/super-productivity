@@ -216,18 +216,6 @@ export class AppComponent implements OnDestroy {
     return outlet.activatedRouteData.page || 'one';
   }
 
-  scrollToNotes(): void {
-    (this.notesElRef as ViewContainerRef).element.nativeElement.scrollIntoView({
-      behavior: 'smooth',
-    });
-  }
-
-  scrollToSidenav(): void {
-    (this.sideNavElRef as ViewContainerRef).element.nativeElement.scrollIntoView({
-      behavior: 'smooth',
-    });
-  }
-
   ngOnDestroy(): void {
     this._subs.unsubscribe();
     if (this._intervalTimer) clearInterval(this._intervalTimer);

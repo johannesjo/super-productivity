@@ -1,11 +1,9 @@
 import {
   ChangeDetectionStrategy,
   Component,
-  EventEmitter,
   HostListener,
   OnDestroy,
   OnInit,
-  Output,
   ViewChild,
 } from '@angular/core';
 import { NoteService } from '../note.service';
@@ -28,8 +26,6 @@ import { Task } from '../../tasks/task.model';
   animations: [standardListAnimation, fadeAnimation],
 })
 export class NotesComponent implements OnInit, OnDestroy {
-  @Output() scrollToSidenav: EventEmitter<void> = new EventEmitter();
-
   T: typeof T = T;
   isElementWasAdded: boolean = false;
   isDragOver: boolean = false;
@@ -94,9 +90,5 @@ export class NotesComponent implements OnInit, OnDestroy {
 
   addNote(): void {
     this._matDialog.open(DialogAddNoteComponent);
-  }
-
-  onScrollToSidenavClick(): void {
-    this.scrollToSidenav.emit();
   }
 }

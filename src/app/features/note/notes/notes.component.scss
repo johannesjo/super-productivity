@@ -6,29 +6,23 @@
   text-align: center;
   min-height: 100%;
   box-sizing: border-box;
-  //width: $s*36;
-  width: 200px;
   position: relative;
 }
 
-header {
+footer {
   display: flex;
-  position: sticky;
-  top: 0;
-  z-index: 55;
   background-color: inherit;
-  @include extraBorder('-bottom');
-  margin-bottom: $s;
-  padding-right: 8px;
+  @include extraBorder('-top');
+  margin-top: auto;
 }
 
 .notes {
-  padding: 0 $s;
+  padding: $s * 1.5;
 }
 
 note {
   display: block;
-  margin-bottom: $s*1.5;
+  margin-bottom: $s * 1.5;
 }
 
 .drag-over-msg {

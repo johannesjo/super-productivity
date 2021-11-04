@@ -1,6 +1,6 @@
 <better-drawer-container
   (wasClosed)="taskService.setSelectedId(null)"
-  [isOpen]="!!(taskService.selectedTask$|async)"
+  [isOpen]="!!(taskService.selectedTask$|async) || (layoutService.isShowNotes$|async)"
   [isOver]="isAlwaysOver || (layoutService.isRightPanelOver$|async)"
   [sideWidth]="40"
 >
@@ -9,11 +9,14 @@
   </ng-container>
 
   <ng-container better-drawer-side>
-    <div class="additional-info-panel">
-      <task-additional-info
-        *ngIf="selectedTaskWithDelayForNone$|async"
-        [task]="selectedTaskWithDelayForNone$|async"
-      ></task-additional-info>
+    <div
+      class="additional-info-panel"
+      [@slideInFromRight]
+      *ngIf="selectedTaskWithDelayForNone$|async as selectedTaskWithDelayForNone"
+    >
+      <task-additional-info [task]="selectedTaskWithDelayForNone"></task-additional-info>
     </div>
+
+    <notes *ngIf="!(taskService.selectedTask$|async)" [@slideInFromBottom]></notes>
   </ng-container>
 </better-drawer-container>

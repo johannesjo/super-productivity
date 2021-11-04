@@ -27,10 +27,8 @@
       [opened]="(layoutService.isShowSideNav$|async)"
       position="start"
     >
-      <side-nav #sideNavElRef (scrollToNotes)="scrollToNotes()"></side-nav>
+      <side-nav #sideNavElRef></side-nav>
       <ng-container *ngIf="workContextService.isActiveWorkContextProject$|async">
-        <hr />
-        <notes #notesElRef (scrollToSidenav)="scrollToSidenav()"></notes>
       </ng-container>
     </mat-sidenav>
 
