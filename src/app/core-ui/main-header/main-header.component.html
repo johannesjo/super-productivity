@@ -169,14 +169,18 @@
       </ng-container>
     </div>
 
-    <div class="simple-counter-buttons-outer-wrapper">
+    <div
+      class="simple-counter-buttons-outer-wrapper"
+      *ngIf="(simpleCounterService.enabledSimpleCounters$|async) as enabledSimpleCounters"
+    >
       <button
         (click)="isShowSimpleCounterBtnsMobile=!isShowSimpleCounterBtnsMobile"
         class="simple-counter-mobile-trigger show-xs-only"
-        color=""
+        [color]="isCounterRunning(enabledSimpleCounters) ? 'accent':''"
         mat-mini-fab
       >
-        <mat-icon>timer</mat-icon>
+        <mat-icon *ngIf="!isShowSimpleCounterBtnsMobile">timer</mat-icon>
+        <mat-icon *ngIf="isShowSimpleCounterBtnsMobile">close</mat-icon>
       </button>
 
       <div
@@ -184,7 +188,7 @@
         [class.isVisibleMobile]="isShowSimpleCounterBtnsMobile"
       >
         <simple-counter-button
-          *ngFor="let simpleCounter of (simpleCounterService.enabledSimpleCounters$|async); trackBy: trackById"
+          *ngFor="let simpleCounter of enabledSimpleCounters; trackBy: trackById"
           [simpleCounter]="simpleCounter"
         ></simple-counter-button>
       </div>
