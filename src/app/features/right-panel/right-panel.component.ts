@@ -1,9 +1,9 @@
 import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
 import { Observable, of } from 'rxjs';
-import { TaskWithSubTasks } from '../../tasks/task.model';
+import { TaskWithSubTasks } from '../tasks/task.model';
 import { delay, switchMap } from 'rxjs/operators';
-import { TaskService } from '../../tasks/task.service';
-import { LayoutService } from '../../../core-ui/layout/layout.service';
+import { TaskService } from '../tasks/task.service';
+import { LayoutService } from '../../core-ui/layout/layout.service';
 
 @Component({
   selector: 'right-panel',

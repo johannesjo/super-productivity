@@ -8,9 +8,8 @@ import { SplitModule } from './split/split.module';
 import { BacklogComponent } from './backlog/backlog.component';
 import { MetricModule } from '../../features/metric/metric.module';
 import { MatSidenavModule } from '@angular/material/sidenav';
-import { BetterDrawerModule } from '../../ui/better-drawer/better-drawer.module';
 import { WorkViewComponent } from './work-view.component';
-import { RightPanelComponent } from './right-panel/right-panel.component';
+import { RightPanelModule } from '../right-panel/right-panel.module';
 
 @NgModule({
   imports: [
@@ -23,9 +22,9 @@ import { RightPanelComponent } from './right-panel/right-panel.component';
     SplitModule,
     MetricModule,
     MatSidenavModule,
-    BetterDrawerModule,
+    RightPanelModule,
   ],
-  declarations: [WorkViewComponent, BacklogComponent, RightPanelComponent],
+  declarations: [WorkViewComponent, BacklogComponent],
   exports: [WorkViewComponent],
 })
 export class WorkViewModule {}
