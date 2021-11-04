@@ -184,10 +184,6 @@ export class TakeABreakService {
     private _chromeExtensionInterfaceService: ChromeExtensionInterfaceService,
     private _uiHelperService: UiHelperService,
   ) {
-    this._pomodoroService.isBreak$.subscribe((v) =>
-      console.log(`_pomodoroService.isBreak$`, v),
-    );
-
     this._triggerReset$
       .pipe(
         withLatestFrom(this._configService.takeABreak$),
