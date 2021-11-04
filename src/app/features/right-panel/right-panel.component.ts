@@ -6,13 +6,14 @@ import { TaskService } from '../tasks/task.service';
 import { LayoutService } from '../../core-ui/layout/layout.service';
 import { slideInFromRightAni } from '../../ui/animations/slide-in-from-right.ani';
 import { slideInFromBottomAni } from '../../ui/animations/slide-in-from-bottom.ani';
+import { expandAnimation } from '../../ui/animations/expand.ani';
 
 @Component({
   selector: 'right-panel',
   templateUrl: './right-panel.component.html',
   styleUrls: ['./right-panel.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  animations: [slideInFromRightAni, slideInFromBottomAni],
+  animations: [slideInFromRightAni, slideInFromBottomAni, expandAnimation],
 })
 export class RightPanelComponent {
   // NOTE: used for debugging

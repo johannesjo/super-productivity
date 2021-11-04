@@ -11,12 +11,12 @@
   <ng-container better-drawer-side>
     <div
       class="additional-info-panel"
-      [@slideInFromRight]
+      [@expand]
       *ngIf="selectedTaskWithDelayForNone$|async as selectedTaskWithDelayForNone"
     >
       <task-additional-info [task]="selectedTaskWithDelayForNone"></task-additional-info>
     </div>
 
-    <notes *ngIf="!(taskService.selectedTask$|async)" [@slideInFromBottom]></notes>
+    <notes *ngIf="(layoutService.isShowNotes$|async)" [@slideInFromBottom]></notes>
   </ng-container>
 </better-drawer-container>
