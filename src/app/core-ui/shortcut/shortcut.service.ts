@@ -138,18 +138,7 @@ export class ShortcutService {
       }
     } else if (checkKeyCombo(ev, keys.openProjectNotes)) {
       ev.preventDefault();
-      if (this._workContextService.activeWorkContextType === WorkContextType.PROJECT) {
-        this._layoutService.toggleNotes();
-      } else {
-        this._snackService.open({
-          msg: this._translateService.instant(
-            T.GLOBAL_SNACK.SHORTCUT_WARN_OPEN_NOTES_FROM_TAG,
-            {
-              keyCombo: keys.openProjectNotes,
-            },
-          ),
-        });
-      }
+      this._layoutService.toggleNotes();
     } else if (checkKeyCombo(ev, keys.toggleBookmarks)) {
       ev.preventDefault();
       if (this._workContextService.activeWorkContextType === WorkContextType.PROJECT) {
