@@ -10,12 +10,14 @@ import { NoteComponent } from './note/note.component';
 import { UiModule } from '../../ui/ui.module';
 import { FormsModule } from '@angular/forms';
 import { DialogAddNoteComponent } from './dialog-add-note/dialog-add-note.component';
+import { TagModule } from '../tag/tag.module';
 
 @NgModule({
   imports: [
     CommonModule,
     FormsModule,
     UiModule,
+    TagModule,
     StoreModule.forFeature(NOTE_FEATURE_NAME, fromNote.noteReducer),
     EffectsModule.forFeature([NoteEffects]),
   ],

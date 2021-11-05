@@ -4,6 +4,7 @@ import { NoteService } from '../note.service';
 import { MatDialog } from '@angular/material/dialog';
 import { T } from '../../../t.const';
 import { DialogFullscreenMarkdownComponent } from '../../../ui/dialog-fullscreen-markdown/dialog-fullscreen-markdown.component';
+import { Tag } from '../../tag/tag.model';
 
 @Component({
   selector: 'note',
@@ -16,7 +17,11 @@ export class NoteComponent {
   @Input() isFocus?: boolean;
 
   @ViewChild('markdownEl') markdownEl?: HTMLElement;
-
+  fakeTag: Partial<Tag> = {
+    id: 'fa',
+    color: '#ff00dd',
+    title: 'Super Productivity',
+  };
   T: typeof T = T;
 
   constructor(

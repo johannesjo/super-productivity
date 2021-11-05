@@ -101,3 +101,34 @@ $noteFontSize: 12px;
     }
   }
 }
+
+:host:hover .bottom-controls {
+  opacity: 1;
+}
+
+.bottom-controls {
+  display: flex;
+  align-items: center;
+  opacity: 0;
+  transition: $transition-standard;
+  cursor: grab;
+  cursor: move;
+
+  &:active {
+    cursor: grabbing;
+  }
+
+  tag {
+    margin: auto !important;
+    pointer-events: none;
+    opacity: 1;
+  }
+
+  button:first-of-type {
+    margin-right: auto;
+  }
+
+  button:last-of-type {
+    margin-left: auto;
+  }
+}

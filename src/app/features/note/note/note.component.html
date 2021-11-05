@@ -17,36 +17,42 @@
     ></inline-markdown>
   </div>
 
-  <div class="controls handle-drag">
-    <button
-      [matMenuTriggerFor]="menu"
-      class="handle-drag mat-elevation-z2"
-      color=""
-      mat-mini-fab
-    >
-      <mat-icon class="handle-drag">more_vert</mat-icon>
+  <div class="bottom-controls handle-drag">
+    <button mat-icon-button>
+      <!--      <mat-icon>wb_sunny</mat-icon>-->
+      <mat-icon svgIcon="remove_today"></mat-icon>
     </button>
 
-    <mat-menu #menu="matMenu">
-      <ng-template matMenuContent>
-        <button (click)="editFullscreen()" mat-menu-item>
-          <mat-icon>fullscreen</mat-icon>
-          {{T.F.NOTE.EDIT_FULLSCREEN|translate}}
-        </button>
+    <tag [tag]="fakeTag" style="margin-left: 10px"></tag>
 
-        <button (click)="toggleLock()" *ngIf="!note.imgUrl" mat-menu-item>
-          <mat-icon *ngIf="note.isLock">lock</mat-icon>
-          <mat-icon *ngIf="!note.isLock">lock_open</mat-icon>
+    <!--    <button mat-icon-button>-->
+    <!--      <mat-icon class="drag-handle-ico" svgIcon="drag_handle"></mat-icon>-->
+    <!--    </button>-->
 
-          {{note.isLock ? (T.F.NOTE.NOTE_CMP.ENABLE_PARSE|translate) :
-          (T.F.NOTE.NOTE_CMP.DISABLE_PARSE|translate)}}
-        </button>
-
-        <button (click)="removeNote()" mat-menu-item>
-          <mat-icon style="color: #e15d63">delete_forever</mat-icon>
-          {{T.G.DELETE|translate}}
-        </button>
-      </ng-template>
-    </mat-menu>
+    <button [matMenuTriggerFor]="menu" mat-icon-button>
+      <mat-icon>more_vert</mat-icon>
+    </button>
   </div>
 </div>
+
+<mat-menu #menu="matMenu">
+  <ng-template matMenuContent>
+    <button (click)="editFullscreen()" mat-menu-item>
+      <mat-icon>fullscreen</mat-icon>
+      {{T.F.NOTE.EDIT_FULLSCREEN|translate}}
+    </button>
+
+    <button (click)="toggleLock()" *ngIf="!note.imgUrl" mat-menu-item>
+      <mat-icon *ngIf="note.isLock">lock</mat-icon>
+      <mat-icon *ngIf="!note.isLock">lock_open</mat-icon>
+
+      {{note.isLock ? (T.F.NOTE.NOTE_CMP.ENABLE_PARSE|translate) :
+      (T.F.NOTE.NOTE_CMP.DISABLE_PARSE|translate)}}
+    </button>
+
+    <button (click)="removeNote()" mat-menu-item>
+      <mat-icon style="color: #e15d63">delete_forever</mat-icon>
+      {{T.G.DELETE|translate}}
+    </button>
+  </ng-template>
+</mat-menu>
