@@ -8,15 +8,14 @@
     <ng-content></ng-content>
   </ng-container>
 
-  <ng-container better-drawer-side>
-    <div
-      class="additional-info-panel"
-      [@expand]
-      *ngIf="selectedTaskWithDelayForNone$|async as selectedTaskWithDelayForNone"
-    >
-      <task-additional-info [task]="selectedTaskWithDelayForNone"></task-additional-info>
+  <ng-container better-drawer-side [@skipAni]>
+    <div class="additional-info-panel">
+      <notes *ngIf="!(selectedTaskWithDelayForNone$|async) " [@slideInFromTop]></notes>
+      <task-additional-info
+        [@slideAdditionalInfoInFromLeft]
+        *ngIf="selectedTaskWithDelayForNone$|async as selectedTaskWithDelayForNone"
+        [task]="selectedTaskWithDelayForNone"
+      ></task-additional-info>
     </div>
-
-    <notes *ngIf="(layoutService.isShowNotes$|async)" [@slideInFromBottom]></notes>
   </ng-container>
 </better-drawer-container>
