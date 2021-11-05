@@ -8,9 +8,9 @@
     <ng-content></ng-content>
   </ng-container>
 
-  <ng-container better-drawer-side [@skipAni]>
+  <ng-container better-drawer-side>
     <div class="additional-info-panel">
-      <notes *ngIf="!(selectedTaskWithDelayForNone$|async) " [@slideInFromTop]></notes>
+      <notes *ngIf="!(selectedTaskWithDelayForNone$|async) " [@slideInFromRight]></notes>
       <task-additional-info
         [@slideAdditionalInfoInFromLeft]
         *ngIf="selectedTaskWithDelayForNone$|async as selectedTaskWithDelayForNone"
