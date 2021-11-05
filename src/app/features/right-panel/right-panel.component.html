@@ -1,6 +1,6 @@
 <better-drawer-container
   (wasClosed)="close()"
-  [isOpen]="!!(taskService.selectedTask$|async) || (layoutService.isShowNotes$|async)"
+  [isOpen]="isOpen$|async"
   [isOver]="isAlwaysOver || (layoutService.isRightPanelOver$|async)"
   [sideWidth]="40"
 >

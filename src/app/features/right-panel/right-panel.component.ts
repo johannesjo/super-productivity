@@ -1,7 +1,7 @@
-import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
-import { Observable, of } from 'rxjs';
+import { ChangeDetectionStrategy, Component, Input, OnDestroy } from '@angular/core';
+import { combineLatest, Observable, of, Subscription } from 'rxjs';
 import { TaskWithSubTasks } from '../tasks/task.model';
-import { delay, switchMap } from 'rxjs/operators';
+import { delay, map, switchMap } from 'rxjs/operators';
 import { TaskService } from '../tasks/task.service';
 import { LayoutService } from '../../core-ui/layout/layout.service';
 import { slideInFromTopAni } from '../../ui/animations/slide-in-from-top.ani';
@@ -15,7 +15,7 @@ import { slideInFromRightAni } from '../../ui/animations/slide-in-from-right.ani
   changeDetection: ChangeDetectionStrategy.OnPush,
   animations: [slideAdditionalInfoInFromLeftAni, slideInFromTopAni, slideInFromRightAni],
 })
-export class RightPanelComponent {
+export class RightPanelComponent implements OnDestroy {
   // NOTE: used for debugging
   @Input() isAlwaysOver: boolean = false;
 
@@ -25,10 +25,34 @@ export class RightPanelComponent {
       switchMap((task) => (task ? of(task) : of(null).pipe(delay(200)))),
     );
 
-  constructor(public taskService: TaskService, public layoutService: LayoutService) {}
+  isOpen$: Observable<boolean> = combineLatest([
+    this.taskService.selectedTask$,
+    this.layoutService.isShowNotes$,
+  ]).pipe(map(([selectedTask, isShowNotes]) => !!(selectedTask || isShowNotes)));
+
+  private _subs = new Subscription();
+
+  constructor(public taskService: TaskService, public layoutService: LayoutService) {
+    this._subs.add(
+      this.isOpen$.subscribe((isOpen) => {
+        if (!isOpen) {
+          this.onClose();
+        }
+      }),
+    );
+  }
+
+  ngOnDestroy(): void {
+    this._subs.unsubscribe();
+  }
 
   close(): void {
     this.taskService.setSelectedId(null);
     this.layoutService.hideNotes();
+    this.onClose();
+  }
+
+  onClose(): void {
+    this.taskService.focusFirstTaskIfVisible();
   }
 }
