@@ -1,8 +1,5 @@
 <div *ngIf="task.id" [@taskAdditionalInfoTaskChange]="task.id" class="wrapper">
-  <header
-    *ngIf="IS_TOUCH_ONLY || (layoutService.isRightPanelOver$|async)"
-    class="task-title-wrapper"
-  >
+  <header *ngIf="isOver" class="task-title-wrapper">
     <button (click)="close()" *ngIf="(layoutService.isScreenXs$|async)" mat-icon-button>
       <mat-icon>arrow_back</mat-icon>
     </button>

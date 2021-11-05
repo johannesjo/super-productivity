@@ -103,6 +103,7 @@ interface IssueDataAndType {
   ],
 })
 export class TaskAdditionalInfoComponent implements AfterViewInit, OnDestroy {
+  @Input() isOver: boolean = false;
   @HostBinding('@noop') alwaysTrue: boolean = true;
 
   @ViewChildren(TaskAdditionalInfoItemComponent)

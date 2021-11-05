@@ -12,6 +12,7 @@
     <div class="additional-info-panel">
       <notes *ngIf="!(selectedTaskWithDelayForNone$|async) " [@slideInFromRight]></notes>
       <task-additional-info
+        [isOver]="isAlwaysOver || (layoutService.isRightPanelOver$|async)"
         [@slideAdditionalInfoInFromLeft]
         *ngIf="selectedTaskWithDelayForNone$|async as selectedTaskWithDelayForNone"
         [task]="selectedTaskWithDelayForNone"
