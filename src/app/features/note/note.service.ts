@@ -56,8 +56,14 @@ export class NoteService {
     );
   }
 
-  remove(id: string): void {
-    this._store$.dispatch(deleteNote({ id }));
+  remove(note: Note): void {
+    this._store$.dispatch(
+      deleteNote({
+        id: note.id,
+        projectId: note.projectId,
+        isPinnedToToday: note.isPinnedToToday,
+      }),
+    );
   }
 
   update(id: string, note: Partial<Note>): void {
@@ -72,7 +78,15 @@ export class NoteService {
   }
 
   updateOrder(ids: string[]): void {
-    this._store$.dispatch(updateNoteOrder({ ids }));
+    // TODO maybe check
+    this._store$.dispatch(
+      updateNoteOrder({
+        ids,
+        activeContextType: this._workContextService
+          .activeWorkContextType as WorkContextType,
+        activeContextId: this._workContextService.activeWorkContextId as string,
+      }),
+    );
   }
 
   // REMINDER

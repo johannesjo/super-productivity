@@ -1,17 +1,6 @@
 import { createEntityAdapter, EntityAdapter } from '@ngrx/entity';
 import { Note, NoteState } from '../note.model';
-import {
-  addNote,
-  addNotes,
-  clearNotes,
-  deleteNote,
-  deleteNotes,
-  updateNote,
-  updateNoteOrder,
-  updateNotes,
-  upsertNote,
-  upsertNotes,
-} from './note.actions';
+import { addNote, deleteNote, updateNote, updateNoteOrder } from './note.actions';
 import {
   Action,
   createFeatureSelector,
@@ -21,6 +10,7 @@ import {
 } from '@ngrx/store';
 import { loadAllData } from '../../../root-store/meta/load-all-data.action';
 import { devError } from '../../../util/dev-error';
+import { WorkContextType } from '../../work-context/work-context.model';
 
 export const adapter: EntityAdapter<Note> = createEntityAdapter<Note>();
 
@@ -71,10 +61,14 @@ const _reducer = createReducer<NoteState>(
     appDataComplete.note ? appDataComplete.note : state,
   ),
 
-  on(updateNoteOrder, (state, payload) => ({
-    ...state,
-    ids: payload.ids,
-  })),
+  on(updateNoteOrder, (state, { ids, activeContextType }) =>
+    activeContextType !== WorkContextType.PROJECT
+      ? {
+          ...state,
+          noteIds: ids,
+        }
+      : state,
+  ),
 
   on(addNote, (state, payload) => ({
     ...state,
@@ -86,21 +80,9 @@ const _reducer = createReducer<NoteState>(
     ids: [payload.note.id, ...state.ids] as string[] | number[],
   })),
 
-  on(upsertNote, (state, { note }) => adapter.upsertOne(note, state)),
-
-  on(addNotes, (state, { notes }) => adapter.addMany(notes, state)),
-
-  on(upsertNotes, (state, { notes }) => adapter.upsertMany(notes, state)),
-
   on(updateNote, (state, { note }) => adapter.updateOne(note, state)),
 
-  on(updateNotes, (state, { notes }) => adapter.updateMany(notes, state)),
-
   on(deleteNote, (state, { id }) => adapter.removeOne(id, state)),
-
-  on(deleteNotes, (state, { ids }) => adapter.removeMany(ids, state)),
-
-  on(clearNotes, (state) => adapter.removeAll(state)),
 );
 
 export const noteReducer = (

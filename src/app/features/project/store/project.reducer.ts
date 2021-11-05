@@ -56,6 +56,7 @@ import {
   updateProjectWorkStart,
   upsertProject,
 } from './project.actions';
+import { addNote, deleteNote, updateNoteOrder } from '../../note/store/note.actions';
 
 export const PROJECT_FEATURE_NAME = 'projects';
 const WORK_CONTEXT_TYPE: WorkContextType = WorkContextType.PROJECT;
@@ -450,6 +451,52 @@ export const projectReducer = createReducer<ProjectState>(
           state,
         );
   }),
+
+  // Note Actions
+  // ------------
+  on(addNote, (state, { note }) =>
+    note.projectId
+      ? projectAdapter.updateOne(
+          {
+            id: note.projectId as string,
+            changes: {
+              noteIds: [note.id, ...(state.entities[note.projectId] as Project).noteIds],
+            },
+          },
+          state,
+        )
+      : state,
+  ),
+
+  on(deleteNote, (state, { projectId, id }) =>
+    projectId
+      ? projectAdapter.updateOne(
+          {
+            id: projectId,
+            changes: {
+              noteIds: (state.entities[projectId] as Project).noteIds.filter(
+                (nid) => nid !== id,
+              ),
+            },
+          },
+          state,
+        )
+      : state,
+  ),
+
+  on(updateNoteOrder, (state, { ids, activeContextType, activeContextId }) =>
+    activeContextType === WorkContextType.PROJECT
+      ? projectAdapter.updateOne(
+          {
+            id: activeContextId as string,
+            changes: {
+              noteIds: ids,
+            },
+          },
+          state,
+        )
+      : state,
+  ),
 
   // Task Actions
   // ------------

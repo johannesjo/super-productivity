@@ -1,24 +1,19 @@
 import { createAction, props } from '@ngrx/store';
 import { Update } from '@ngrx/entity';
 import { Note } from '../note.model';
+import { WorkContextType } from '../../work-context/work-context.model';
 
 export const updateNoteOrder = createAction(
   '[Note] Update Note Order',
-  props<{ ids: string[] }>(),
+  props<{ ids: string[]; activeContextType: WorkContextType; activeContextId: string }>(),
 );
 
 export const addNote = createAction(
   '[Note] Add Note',
-  props<{ note: Note; isPreventFocus?: boolean }>(),
-);
-
-export const upsertNote = createAction('[Note] Upsert Note', props<{ note: Note }>());
-
-export const addNotes = createAction('[Note] Add Notes', props<{ notes: Note[] }>());
-
-export const upsertNotes = createAction(
-  '[Note] Upsert Notes',
-  props<{ notes: Note[] }>(),
+  props<{
+    note: Note;
+    isPreventFocus?: boolean;
+  }>(),
 );
 
 export const updateNote = createAction(
@@ -26,16 +21,7 @@ export const updateNote = createAction(
   props<{ note: Update<Note> }>(),
 );
 
-export const updateNotes = createAction(
-  '[Note] Update Notes',
-  props<{ notes: Update<Note>[] }>(),
+export const deleteNote = createAction(
+  '[Note] Delete Note',
+  props<{ id: string; projectId: string | null; isPinnedToToday: boolean }>(),
 );
-
-export const deleteNote = createAction('[Note] Delete Note', props<{ id: string }>());
-
-export const deleteNotes = createAction(
-  '[Note] Delete Notes',
-  props<{ ids: string[] }>(),
-);
-
-export const clearNotes = createAction('[Note] Clear Notes');

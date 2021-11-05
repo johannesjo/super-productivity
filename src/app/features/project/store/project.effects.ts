@@ -61,6 +61,7 @@ import { TODAY_TAG } from '../../tag/tag.const';
 import { EMPTY, Observable, of } from 'rxjs';
 import { TaskRepeatCfg } from '../../task-repeat-cfg/task-repeat-cfg.model';
 import { projectSelectors } from './project.selectors';
+import { addNote, deleteNote, updateNoteOrder } from '../../note/store/note.actions';
 
 @Injectable()
 export class ProjectEffects {
@@ -102,6 +103,30 @@ export class ProjectEffects {
             return this.saveToLs$(true);
           }
         }),
+      ),
+    { dispatch: false },
+  );
+
+  updateProjectStorageConditionalNote$: Observable<unknown> = createEffect(
+    () =>
+      this._actions$.pipe(
+        ofType(updateNoteOrder, addNote, deleteNote),
+        switchMap((a) => {
+          let isChange = false;
+          switch (a.type) {
+            case updateNoteOrder.type:
+              isChange = a.activeContextType === WorkContextType.PROJECT;
+              break;
+            case addNote.type:
+              isChange = !!a.note.projectId;
+              break;
+            case deleteNote.type:
+              isChange = !!a.projectId;
+              break;
+          }
+          return isChange ? of(a) : EMPTY;
+        }),
+        switchMap(() => this.saveToLs$(true)),
       ),
     { dispatch: false },
   );

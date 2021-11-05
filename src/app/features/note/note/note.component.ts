@@ -47,7 +47,7 @@ export class NoteComponent {
     if (!this.note) {
       throw new Error('No note');
     }
-    this._noteService.remove(this.note.id);
+    this._noteService.remove(this.note);
   }
 
   editFullscreen(): void {
