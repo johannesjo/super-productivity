@@ -30,6 +30,9 @@ export class RightPanelComponent implements OnDestroy {
     this.layoutService.isShowNotes$,
   ]).pipe(map(([selectedTask, isShowNotes]) => !!(selectedTask || isShowNotes)));
 
+  // NOTE: prevents the inner animation from happening file panel is expanding
+  isDisableTaskPanelAni = true;
+
   private _subs = new Subscription();
 
   constructor(public taskService: TaskService, public layoutService: LayoutService) {
@@ -38,6 +41,12 @@ export class RightPanelComponent implements OnDestroy {
         if (!isOpen) {
           this.onClose();
         }
+      }),
+    );
+    this._subs.add(
+      // NOTE: delay is needed, because otherwise timing won't work
+      this.isOpen$.pipe(delay(500)).subscribe((isOpen) => {
+        this.isDisableTaskPanelAni = !isOpen;
       }),
     );
   }
