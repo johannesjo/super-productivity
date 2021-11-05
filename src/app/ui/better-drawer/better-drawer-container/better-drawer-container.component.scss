@@ -29,12 +29,18 @@ $z-this-backdrop: -1 + $z-task-side-bar-over;
   // NOTE: if this value is to big it might mess, with the push out logic, as
   // the width is not really 40% any more
   min-width: 200px;
-  max-width: 760px;
+  // NOTE: prevents overlapping with nav when open
+  max-width: 700px;
   background: transparent;
   //border: 1px solid;
   //border-right: 0;
   //border-bottom: 0;
   //box-shadow: 0px 8px 10px -5px rgba(0, 0, 0, 0.2), 0px 16px 24px 2px rgba(0, 0, 0, 0.14), 0px 6px 30px 5px rgba(0, 0, 0, 0.12) !important;
+
+  @include mq(sm, max) {
+    // NOTE: prevents overlapping with nav when open
+    max-width: 500px;
+  }
 
   @include mq(xs, max) {
     max-width: 100%;
