@@ -420,10 +420,6 @@ export class TaskAdditionalInfoComponent implements AfterViewInit, OnDestroy {
     }
   }
 
-  close(): void {
-    this.taskService.setSelectedId(null);
-  }
-
   estimateTime(): void {
     this._matDialog.open(DialogTimeEstimateComponent, {
       data: { task: this.task },

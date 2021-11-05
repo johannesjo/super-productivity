@@ -40,7 +40,13 @@ progress-bar {
   background: inherit;
   top: 0;
   padding: 0 $s;
+  // NOTE make space for close button
+  padding-right: 50px;
   z-index: 44;
+
+  @include mq(xs) {
+    padding: 0 $s;
+  }
 
   @include lightTheme() {
     background: #fff;

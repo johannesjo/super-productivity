@@ -1,8 +1,5 @@
 <div *ngIf="task.id" [@taskAdditionalInfoTaskChange]="task.id" class="wrapper">
   <header *ngIf="isOver" class="task-title-wrapper">
-    <button (click)="close()" *ngIf="(layoutService.isScreenXs$|async)" mat-icon-button>
-      <mat-icon>arrow_back</mat-icon>
-    </button>
     <h2
       (editFinished)="updateTaskTitleIfChanged($event.isChanged, $event.newVal)"
       [isResetAfterEdit]="true"

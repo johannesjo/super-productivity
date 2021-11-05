@@ -100,14 +100,22 @@ $z-this-backdrop: -1 + $z-task-side-bar-over;
   text-align: center;
   line-height: 46px;
   position: absolute;
-  right: 100%;
-  //top: $s*2;
-  top: 0;
   background: inherit;
-  border: 1px solid;
-  z-index: 2;
-  box-shadow: $whiteframe-shadow-1dp;
+  z-index: 23;
+  top: 5px;
   cursor: pointer;
+  right: $s;
+  box-shadow: $whiteframe-shadow-2dp;
+  border-radius: 50%;
+  border: 1px solid;
+
+  @include mq(xs) {
+    top: 0;
+    border-radius: 0;
+    right: 100%;
+    box-shadow: $whiteframe-shadow-1dp;
+    border: 1px solid;
+  }
 
   &,
   &:focus,
@@ -122,8 +130,12 @@ $z-this-backdrop: -1 + $z-task-side-bar-over;
 
   @include darkTheme() {
     color: $dark-theme-text-color;
-    background: $dark-theme-bg-slightly-lighter;
+    background: $dark-theme-bg-lightest;
     border-color: $dark-theme-extra-border-color;
+
+    @include mq(xs) {
+      background: $dark-theme-bg-slightly-lighter;
+    }
   }
 
   :host.isOver.isOpen & {
@@ -131,6 +143,6 @@ $z-this-backdrop: -1 + $z-task-side-bar-over;
   }
 
   @include mq(xs) {
-    display: none;
+    //display: none;
   }
 }

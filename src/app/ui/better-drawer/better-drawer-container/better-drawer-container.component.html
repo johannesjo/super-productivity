@@ -5,7 +5,7 @@
 <div (click)="close()" *ngIf="isOpenGet && isOverGet" @fade class="backdrop"></div>
 
 <div (swiperight)="close()" [style]="sideStyle" class="side">
-  <button (click)="close()" class="close-btn hide-xs">&times;</button>
+  <button (click)="close()" class="close-btn">&times;</button>
   <div class="side-inner">
     <ng-content select="[better-drawer-side]"></ng-content>
   </div>

@@ -11,6 +11,11 @@
 
 header {
   margin-top: $s;
+  margin-bottom: 2 * $s;
+
+  @include mq(xs) {
+    margin-bottom: 0;
+  }
 }
 
 .notes {
