@@ -327,7 +327,7 @@ simple-counter-button {
     border-top-left-radius: 4px;
     border-top-right-radius: 4px;
     z-index: -1;
-    box-shadow: 0px -1px 3px 0px rgba(0, 0, 0, $shadow-key-umbra-opacity);
+    box-shadow: 0px -2px 3px 0px rgba(0, 0, 0, 0.3);
 
     @include lightTheme() {
       background: $light-theme-selected-task-bg-color;

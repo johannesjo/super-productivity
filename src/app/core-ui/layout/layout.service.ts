@@ -126,11 +126,11 @@ export class LayoutService {
     this._store$.dispatch(hideSideNav());
   }
 
-  public toggleNotes(): void {
+  toggleNotes(): void {
     this._store$.dispatch(toggleShowNotes());
   }
 
-  public hideNotes(): void {
+  hideNotes(): void {
     this._store$.dispatch(hideNotes());
   }
 }

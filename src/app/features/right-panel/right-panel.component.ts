@@ -25,4 +25,9 @@ export class RightPanelComponent {
     );
 
   constructor(public taskService: TaskService, public layoutService: LayoutService) {}
+
+  close(): void {
+    this.taskService.setSelectedId(null);
+    this.layoutService.hideNotes();
+  }
 }
