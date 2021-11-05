@@ -1,6 +1,6 @@
 @import '../../../../variables';
 
-$z-this-content: $z-task-side-bar +1;
+$z-this-content: $z-task-side-bar + 1;
 $z-this-backdrop: -1 + $z-task-side-bar-over;
 
 :host {
@@ -8,12 +8,12 @@ $z-this-backdrop: -1 + $z-task-side-bar-over;
   flex-direction: row;
   justify-content: stretch;
   align-items: stretch;
-  height: 100%
+  height: 100%;
 }
 
 .content {
   flex-grow: 1;
-  max-width: 100vw;
+  max-width: 100%;
   position: relative;
   z-index: $z-this-content;
 }
@@ -39,7 +39,6 @@ $z-this-backdrop: -1 + $z-task-side-bar-over;
   @include mq(xs, max) {
     max-width: 100%;
   }
-
 
   @include lightTheme() {
     background: $light-theme-selected-task-bg-color;
@@ -107,7 +106,7 @@ $z-this-backdrop: -1 + $z-task-side-bar-over;
   &,
   &:focus,
   &:active {
-    outline: none
+    outline: none;
   }
 
   @include lightTheme() {
