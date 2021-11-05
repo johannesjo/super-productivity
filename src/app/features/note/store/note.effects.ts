@@ -35,7 +35,7 @@ export class NoteEffects {
 
   private _saveToLs(currentProjectId: string, noteState: NoteState): void {
     if (currentProjectId) {
-      this._persistenceService.note.save(currentProjectId, noteState, {
+      this._persistenceService.note.saveState(noteState, {
         isSyncModelChange: true,
       });
     } else {

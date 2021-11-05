@@ -13,6 +13,7 @@ export const DEFAULT_PROJECT: Project = {
   issueIntegrationCfgs: DEFAULT_ISSUE_PROVIDER_CFGS,
   taskIds: [],
   backlogTaskIds: [],
+  noteIds: [],
   ...WORK_CONTEXT_DEFAULT_COMMON,
   theme: {
     ...WORK_CONTEXT_DEFAULT_THEME,

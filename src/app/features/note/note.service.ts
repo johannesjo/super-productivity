@@ -10,36 +10,34 @@ import {
   updateNoteOrder,
 } from './store/note.actions';
 import * as shortid from 'shortid';
-import { initialNoteState, selectAllNotes, selectNoteById } from './store/note.reducer';
+import {
+  selectAllNotes,
+  selectNoteById,
+  selectNoteFeatureState,
+} from './store/note.reducer';
 import { PersistenceService } from '../../core/persistence/persistence.service';
 import { take } from 'rxjs/operators';
 import { createFromDrop } from '../../core/drop-paste-input/drop-paste-input';
 import { isImageUrl, isImageUrlSimple } from '../../util/is-image-url';
 import { DropPasteInput } from '../../core/drop-paste-input/drop-paste.model';
+import { WorkContextService } from '../work-context/work-context.service';
+import { WorkContextType } from '../work-context/work-context.model';
 
 @Injectable({
   providedIn: 'root',
 })
 export class NoteService {
   notes$: Observable<Note[]> = this._store$.pipe(select(selectAllNotes));
+  state$: Observable<NoteState> = this._store$.select(selectNoteFeatureState);
 
   constructor(
     private _store$: Store<any>,
     private _persistenceService: PersistenceService,
+    private _workContextService: WorkContextService,
   ) {}
 
-  getById$(id: string): Observable<Note> {
+  getByIdOnce$(id: string): Observable<Note> {
     return this._store$.pipe(select(selectNoteById, { id }), take(1));
-  }
-
-  async getByIdFromEverywhere(id: string, projectId: string): Promise<Note> {
-    return await this._persistenceService.note.ent.getById(projectId, id);
-  }
-
-  async loadStateForProject(projectId: string): Promise<void> {
-    const notes =
-      (await this._persistenceService.note.load(projectId)) || initialNoteState;
-    this.loadState(notes);
   }
 
   loadState(state: NoteState): void {
@@ -53,6 +51,11 @@ export class NoteService {
       addNote({
         note: {
           id,
+          projectId:
+            (this._workContextService.activeWorkContextType === WorkContextType.PROJECT &&
+              this._workContextService.activeWorkContextId) ||
+            null,
+          isPinnedToToday: false,
           content: '',
           created: Date.now(),
           modified: Date.now(),
@@ -76,23 +79,6 @@ export class NoteService {
         },
       }),
     );
-  }
-
-  async updateFromDifferentWorkContext(
-    workContextId: string,
-    id: string,
-    updates: Partial<Note>,
-  ): Promise<unknown> {
-    const noteState = await this._persistenceService.note.load(workContextId);
-    const noteToUpdate = noteState.entities[id];
-    if (noteToUpdate) {
-      Object.assign(noteToUpdate, updates);
-    } else {
-      console.warn('Note not found while trying to update for different project');
-    }
-    return await this._persistenceService.note.save(workContextId, noteState, {
-      isSyncModelChange: true,
-    });
   }
 
   updateOrder(ids: string[]): void {

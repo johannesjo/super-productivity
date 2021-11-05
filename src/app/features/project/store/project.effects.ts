@@ -194,10 +194,9 @@ export class ProjectEffects {
       filter(({ activeType }) => activeType === WorkContextType.PROJECT),
       switchMap((action) => {
         const projectId = action.activeId;
-        return Promise.all([
-          this._noteService.loadStateForProject(projectId),
-          this._bookmarkService.loadStateForProject(projectId),
-        ]).then(() => projectId);
+        return Promise.all([this._bookmarkService.loadStateForProject(projectId)]).then(
+          () => projectId,
+        );
       }),
       map((projectId) => {
         return loadProjectRelatedDataSuccess({ projectId });

@@ -20,6 +20,7 @@ export interface ProjectBasicCfg {
 
   taskIds: string[];
   backlogTaskIds: string[];
+  noteIds: string[];
 }
 
 export interface ProjectCopy extends ProjectBasicCfg, WorkContextCommon {

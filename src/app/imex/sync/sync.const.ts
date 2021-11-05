@@ -10,6 +10,7 @@ import { initialMetricState } from '../../features/metric/store/metric.reducer';
 import { initialImprovementState } from '../../features/metric/improvement/store/improvement.reducer';
 import { initialObstructionState } from '../../features/metric/obstruction/store/obstruction.reducer';
 import { AppBaseData } from './sync.model';
+import { initialNoteState } from '../../features/note/store/note.reducer';
 
 export const SYNC_INITIAL_SYNC_TRIGGER = 'INITIAL_SYNC_TRIGGER';
 export const SYNC_DEFAULT_AUDIT_TIME = 10000;
@@ -31,6 +32,7 @@ export const DEFAULT_APP_BASE_DATA: AppBaseData = {
   simpleCounter: initialSimpleCounterState,
   taskArchive: createEmptyEntity() as TaskArchive,
   taskRepeatCfg: initialTaskRepeatCfgState,
+  note: initialNoteState,
 
   // metric
   metric: initialMetricState,

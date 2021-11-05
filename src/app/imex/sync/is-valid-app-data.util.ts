@@ -191,6 +191,7 @@ const _isEntityStatesConsistent = (data: AppDataComplete): boolean => {
     'taskRepeatCfg',
     'tag',
     'project',
+    'note',
     'simpleCounter',
 
     // TODO include later after everybody is migrated
@@ -198,7 +199,7 @@ const _isEntityStatesConsistent = (data: AppDataComplete): boolean => {
     // 'improvement',
     // 'obstruction',
   ];
-  const projectStateKeys: (keyof AppDataForProjects)[] = ['note', 'bookmark'];
+  const projectStateKeys: (keyof AppDataForProjects)[] = ['bookmark'];
 
   const brokenItem =
     baseStateKeys.find((key) => !isEntityStateConsistent(data[key], key)) ||

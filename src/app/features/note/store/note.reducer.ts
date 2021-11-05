@@ -23,7 +23,9 @@ import {
 
 export const adapter: EntityAdapter<Note> = createEntityAdapter<Note>();
 
-export const initialNoteState: NoteState = adapter.getInitialState({});
+export const initialNoteState: NoteState = adapter.getInitialState({
+  todayOrder: [],
+});
 
 export const { selectIds, selectEntities, selectAll, selectTotal } =
   adapter.getSelectors();

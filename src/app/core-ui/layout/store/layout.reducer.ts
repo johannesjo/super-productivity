@@ -33,7 +33,7 @@ const _initialLayoutState: LayoutState = {
   isShowBookmarkBar: false,
   isShowSideNav: false,
   isShowSearchBar: false,
-  isShowNotes: false,
+  isShowNotes: true,
 };
 
 export const selectLayoutFeatureState =

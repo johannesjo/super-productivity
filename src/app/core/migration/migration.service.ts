@@ -20,6 +20,7 @@ import { initialSimpleCounterState } from '../../features/simple-counter/store/s
 import { initialMetricState } from '../../features/metric/store/metric.reducer';
 import { initialImprovementState } from '../../features/metric/improvement/store/improvement.reducer';
 import { initialObstructionState } from '../../features/metric/obstruction/store/obstruction.reducer';
+import { initialNoteState } from '../../features/note/store/note.reducer';
 
 const EMTPY_ENTITY = (): Dictionary<any> => ({ ids: [], entities: {} });
 
@@ -80,6 +81,7 @@ export class MigrationService {
       metric: initialMetricState,
       improvement: initialImprovementState,
       obstruction: initialObstructionState,
+      note: initialNoteState,
 
       // migrated
       project: {
@@ -92,7 +94,6 @@ export class MigrationService {
       taskArchive: this._mTaskArchiveState(legacyAppDataComplete),
 
       // NEW PROJECT MODELS
-      note: {},
       bookmark: {},
     };
 

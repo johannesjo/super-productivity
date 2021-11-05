@@ -95,6 +95,7 @@ import {
 } from '../../features/metric/migrate-metric-states.util';
 import { DEFAULT_APP_BASE_DATA } from '../../imex/sync/sync.const';
 import { isValidAppData } from '../../imex/sync/is-valid-app-data.util';
+import { noteReducer } from '../../features/note/store/note.reducer';
 
 @Injectable({
   providedIn: 'root',
@@ -131,6 +132,11 @@ export class PersistenceService {
       'simpleCounter',
       simpleCounterReducer,
     );
+  note: PersistenceBaseEntityModel<NoteState, Note> = this._cmBaseEntity<NoteState, Note>(
+    LS_NOTE_STATE,
+    'note',
+    noteReducer,
+  );
 
   // METRIC MODELS
   metric: PersistenceBaseEntityModel<MetricState, Metric> = this._cmBaseEntity<
@@ -176,10 +182,11 @@ export class PersistenceService {
     BookmarkState,
     Bookmark
   >(LS_BOOKMARK_STATE, 'bookmark');
-  note: PersistenceForProjectModel<NoteState, Note> = this._cmProject<NoteState, Note>(
-    LS_NOTE_STATE,
-    'note',
-  );
+
+  legacyNote: PersistenceForProjectModel<NoteState, Note> = this._cmProjectLegacy<
+    NoteState,
+    Note
+  >(LS_NOTE_STATE, 'note' as any);
 
   // LEGACY PROJECT MODELS
   legacyMetric: PersistenceForProjectModel<MetricState, Metric> = this._cmProjectLegacy<

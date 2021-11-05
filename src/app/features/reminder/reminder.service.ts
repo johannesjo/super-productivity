@@ -7,7 +7,6 @@ import { BehaviorSubject, Observable, ReplaySubject, Subject } from 'rxjs';
 import { dirtyDeepCopy } from '../../util/dirtyDeepCopy';
 import { ImexMetaService } from '../../imex/imex-meta/imex-meta.service';
 import { TaskService } from '../tasks/task.service';
-import { Note } from '../note/note.model';
 import { Task } from '../tasks/task.model';
 import { NoteService } from '../note/note.service';
 import { T } from '../../t.const';
@@ -16,6 +15,7 @@ import { migrateReminders } from './migrate-reminder.util';
 import { WorkContextService } from '../work-context/work-context.service';
 import { devError } from '../../util/dev-error';
 import { WorkContextType } from '../work-context/work-context.model';
+import { Note } from '../note/note.model';
 
 @Injectable({
   providedIn: 'root',
@@ -241,13 +241,12 @@ export class ReminderService {
   private async _getRelatedDataForReminder(reminder: Reminder): Promise<Task | Note> {
     switch (reminder.type) {
       case 'NOTE':
-        return await this._noteService.getByIdFromEverywhere(
-          reminder.relatedId,
-          reminder.workContextId,
-        );
+        return await this._noteService.getByIdOnce$(reminder.relatedId).toPromise();
       case 'TASK':
         // NOTE: remember we don't want archive tasks to pop up here
         return await this._taskService.getByIdOnce$(reminder.relatedId).toPromise();
     }
+
+    throw new Error('Cannot get related model for reminder');
   }
 }
