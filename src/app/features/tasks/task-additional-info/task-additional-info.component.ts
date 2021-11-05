@@ -51,7 +51,7 @@ import { fadeAnimation } from '../../../ui/animations/fade.ani';
 import { swirlAnimation } from '../../../ui/animations/swirl-in-out.ani';
 import { DialogTimeEstimateComponent } from '../dialog-time-estimate/dialog-time-estimate.component';
 import { MatDialog } from '@angular/material/dialog';
-import { IS_TOUCH_ONLY, isTouchOnly } from '../../../util/is-touch';
+import { isTouchOnly } from '../../../util/is-touch';
 import { DialogAddTaskReminderComponent } from '../dialog-add-task-reminder/dialog-add-task-reminder.component';
 import { AddTaskReminderInterface } from '../dialog-add-task-reminder/add-task-reminder-interface';
 import { ReminderCopy } from '../../reminder/reminder.model';
@@ -113,7 +113,6 @@ export class TaskAdditionalInfoComponent implements AfterViewInit, OnDestroy {
 
   _onDestroy$ = new Subject<void>();
 
-  IS_TOUCH_ONLY: boolean = IS_TOUCH_ONLY;
   ShowSubTasksMode: typeof ShowSubTasksMode = ShowSubTasksMode;
   selectedItemIndex: number = 0;
   isFocusNotes: boolean = false;
@@ -166,7 +165,6 @@ export class TaskAdditionalInfoComponent implements AfterViewInit, OnDestroy {
   _taskData?: TaskWithSubTasks;
 
   issueIdAndType$: Subject<IssueAndType> = new ReplaySubject(1);
-  loadedIssueType$: Subject<IssueProviderKey | null> = new ReplaySubject(1);
   issueDataNullTrigger$: Subject<IssueAndType | null> = new Subject();
 
   issueDataTrigger$: Observable<IssueAndType | null> = merge(
@@ -202,7 +200,7 @@ export class TaskAdditionalInfoComponent implements AfterViewInit, OnDestroy {
       shareReplayUntil(this._onDestroy$, 1),
       // NOTE: this seems to fix the issue loading bug, when we end up with the
       // expandable closed when the data is loaded
-      delay(0),
+      delay(50),
     );
 
   issueData$: Observable<IssueData | null | false> = this.issueDataAndType$.pipe(
@@ -232,8 +230,11 @@ export class TaskAdditionalInfoComponent implements AfterViewInit, OnDestroy {
       data && type ? this._issueService.getMappedAttachments(type, data) : [],
     ),
   );
-  IS_MOBILE: boolean = IS_MOBILE;
   defaultTaskNotes: string = '';
+
+  isExpandedIssuePanel: boolean = false;
+  isExpandedNotesPanel: boolean = false;
+  isExpandedAttachmentPanel: boolean = !IS_MOBILE;
 
   private _focusTimeout?: number;
   private _dragEnterTarget?: HTMLElement;
@@ -263,6 +264,7 @@ export class TaskAdditionalInfoComponent implements AfterViewInit, OnDestroy {
 
     this.issueData$.pipe(takeUntil(this._onDestroy$)).subscribe((issueData) => {
       this.issueData = issueData;
+      this.isExpandedIssuePanel = !IS_MOBILE && !!this.issueData;
       this._cd.detectChanges();
     });
 
@@ -341,6 +343,11 @@ export class TaskAdditionalInfoComponent implements AfterViewInit, OnDestroy {
     if (!prev || prev.parentId !== newVal.parentId) {
       this.parentId$.next(newVal.parentId);
     }
+
+    // panel states
+    this.isExpandedIssuePanel = !IS_MOBILE && !!this.issueData;
+    this.isExpandedNotesPanel =
+      !IS_MOBILE && (!!newVal.notes || (!newVal.issueId && !newVal.attachments?.length));
   }
 
   get progress(): number {

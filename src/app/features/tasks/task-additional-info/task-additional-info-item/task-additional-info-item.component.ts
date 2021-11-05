@@ -17,7 +17,7 @@ import {
 })
 export class TaskAdditionalInfoItemComponent {
   @Input() type: 'input' | 'panel' = 'input';
-  @Input() expanded?: boolean = false;
+  @Input() expanded: boolean = false;
   @Input() inputIcon?: string;
 
   @Output() collapseParent: EventEmitter<void> = new EventEmitter();
