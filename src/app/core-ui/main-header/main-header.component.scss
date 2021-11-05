@@ -305,6 +305,21 @@ simple-counter-button {
     &:nth-child(2) {
       transform: translateY(-200%);
     }
+    &:nth-child(3) {
+      transform: translateY(-300%);
+    }
+    &:nth-child(4) {
+      transform: translateY(-400%);
+    }
+    &:nth-child(5) {
+      transform: translateY(-500%);
+    }
+    &:nth-child(6) {
+      transform: translateY(-600%);
+    }
+    &:nth-child(7) {
+      transform: translateY(-700%);
+    }
 
     .simple-counter-buttons.isVisibleMobile & {
       transform: translateY(0);
