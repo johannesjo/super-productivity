@@ -195,13 +195,14 @@
     </div>
 
     <button
+      class="toggle-notes-btn"
+      [class.isActive]="(layoutService.isShowNotes$|async)"
+      [class.isRouteWithRightPanel]="(isRouteWithRightPanel$|async)"
       (click)="layoutService.toggleNotes()"
       mat-icon-button
       [matTooltip]="T.MH.TOGGLE_SHOW_NOTES|translate"
     >
-      <mat-icon [class.rotate]="(layoutService.isShowNotes$|async)" class="note-ico"
-        >comment
-      </mat-icon>
+      <mat-icon class="note-ico">comment</mat-icon>
     </button>
   </nav>
 </div>

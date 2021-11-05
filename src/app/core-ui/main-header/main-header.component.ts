@@ -14,7 +14,7 @@ import { TaskService } from '../../features/tasks/task.service';
 import { PomodoroService } from '../../features/pomodoro/pomodoro.service';
 import { T } from '../../t.const';
 import { fadeAnimation } from '../../ui/animations/fade.ani';
-import { filter, first, switchMap } from 'rxjs/operators';
+import { filter, first, map, startWith, switchMap } from 'rxjs/operators';
 import { Observable, of, Subscription } from 'rxjs';
 import { WorkContextService } from '../../features/work-context/work-context.service';
 import { TagService } from '../../features/tag/tag.service';
@@ -26,6 +26,7 @@ import { SimpleCounter } from '../../features/simple-counter/simple-counter.mode
 import { SyncProviderService } from '../../imex/sync/sync-provider.service';
 import { IS_TOUCH_ONLY } from 'src/app/util/is-touch';
 import { SnackService } from '../../core/snack/snack.service';
+import { NavigationEnd, Router } from '@angular/router';
 
 @Component({
   selector: 'main-header',
@@ -64,6 +65,13 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
       ),
     );
 
+  isRouteWithRightPanel$: Observable<boolean> = this._router.events.pipe(
+    filter((event: any) => event instanceof NavigationEnd),
+    map((event) => !!event.url.match(/(tasks|timeline)$/)),
+    // TODO adjust to get real value
+    startWith(!!this._router.url.match(/(tasks|timeline)$/)),
+  );
+
   private _subs: Subscription = new Subscription();
 
   constructor(
@@ -78,6 +86,7 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
     private readonly _tagService: TagService,
     private readonly _renderer: Renderer2,
     private readonly _snackService: SnackService,
+    private readonly _router: Router,
   ) {}
 
   ngOnDestroy(): void {

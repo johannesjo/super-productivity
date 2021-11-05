@@ -125,14 +125,6 @@ button {
   }
 }
 
-.note-ico {
-  transition: $transition-standard;
-
-  &.rotate {
-    transform: rotate(45deg);
-  }
-}
-
 .play-btn-wrapper {
   position: relative;
   margin-left: $s * 0.5;
@@ -318,6 +310,42 @@ simple-counter-button {
       transform: translateY(0);
       opacity: 1;
     }
+  }
+}
+
+.toggle-notes-btn {
+  position: relative;
+  overflow: visible !important;
+
+  &.isActive.isRouteWithRightPanel::after {
+    content: '';
+    width: 100%;
+    position: absolute;
+    left: 1px;
+    top: 0;
+    bottom: -5px;
+    border-top-left-radius: 4px;
+    border-top-right-radius: 4px;
+    z-index: -1;
+    box-shadow: 0px -1px 3px 0px rgba(0, 0, 0, $shadow-key-umbra-opacity);
+
+    @include lightTheme() {
+      background: $light-theme-selected-task-bg-color;
+      //border-color: rgba(0, 0, 0, 0.12);
+    }
+
+    @include darkTheme() {
+      background: $dark-theme-bg-slightly-lighter;
+      //border-color: $dark-theme-extra-border-color;
+    }
+  }
+}
+
+.note-ico {
+  transition: $transition-standard;
+
+  .toggle-notes-btn.isActive & {
+    transform: rotate(45deg);
   }
 }
 
