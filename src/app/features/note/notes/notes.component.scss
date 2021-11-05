@@ -9,11 +9,8 @@
   position: relative;
 }
 
-footer {
-  display: flex;
-  background-color: inherit;
-  @include extraBorder('-top');
-  margin-top: auto;
+header {
+  margin-top: $s;
 }
 
 .notes {
