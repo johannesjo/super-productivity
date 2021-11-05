@@ -16,7 +16,6 @@ $noteFontSize: 12px;
 
   &:hover,
   &.isFocused {
-    transform: scale(1.04);
     transform-origin: center center;
     position: relative;
     z-index: 4;

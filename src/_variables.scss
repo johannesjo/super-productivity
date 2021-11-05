@@ -133,7 +133,8 @@ $z-search-bar: 10000;
 // ----------
 $standard-note-bg-light: #ffffff;
 $standard-note-fg-light: $light-theme-text-color;
-$standard-note-bg-dark: $dark-theme-bg-lightest;
+$standard-note-bg-dark: $dark-theme-bg-lighter;
+$standard-note-bg-dark-hovered: $dark-theme-bg-lightest;
 $standard-note-fg-dark: #eeeeee;
 
 // ANIMATIONS
