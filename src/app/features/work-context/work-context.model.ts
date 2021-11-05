@@ -76,6 +76,7 @@ export interface WorkContextCopy extends WorkContextCommon {
   routerLink: string;
   taskIds: string[];
   backlogTaskIds?: string[];
+  noteIds: string[];
   type: WorkContextType;
 }
 

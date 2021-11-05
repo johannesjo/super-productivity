@@ -1,11 +1,6 @@
 import { createAction, props } from '@ngrx/store';
 import { Update } from '@ngrx/entity';
-import { Note, NoteState } from '../note.model';
-
-export const loadNoteState = createAction(
-  '[Note] Load Note State',
-  props<{ state: NoteState }>(),
-);
+import { Note } from '../note.model';
 
 export const updateNoteOrder = createAction(
   '[Note] Update Note Order',

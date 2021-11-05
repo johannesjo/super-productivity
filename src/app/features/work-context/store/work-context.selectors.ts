@@ -11,6 +11,7 @@ import {
   selectProjectById,
   projectSelectors,
 } from '../../project/store/project.selectors';
+import { selectNoteTodayOrder } from '../../note/store/note.reducer';
 
 export const WORK_CONTEXT_FEATURE_NAME = 'context';
 
@@ -43,13 +44,15 @@ export const selectActiveWorkContext = createSelector(
   selectActiveContextTypeAndId,
   projectSelectors,
   selectTagFeatureState,
-  ({ activeId, activeType }, projectState, tagState): WorkContext => {
+  selectNoteTodayOrder,
+  ({ activeId, activeType }, projectState, tagState, todayOrder): WorkContext => {
     if (activeType === WorkContextType.TAG) {
       const tag = selectTagById.projector(tagState, { id: activeId });
       return {
         ...tag,
         type: WorkContextType.TAG,
         routerLink: `tag/${tag.id}`,
+        noteIds: todayOrder,
       };
     }
     if (activeType === WorkContextType.PROJECT) {

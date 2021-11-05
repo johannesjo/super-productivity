@@ -6,7 +6,6 @@ import {
   clearNotes,
   deleteNote,
   deleteNotes,
-  loadNoteState,
   updateNote,
   updateNoteOrder,
   updateNotes,
@@ -20,6 +19,8 @@ import {
   createSelector,
   on,
 } from '@ngrx/store';
+import { loadAllData } from '../../../root-store/meta/load-all-data.action';
+import { devError } from '../../../util/dev-error';
 
 export const adapter: EntityAdapter<Note> = createEntityAdapter<Note>();
 
@@ -33,6 +34,11 @@ export const NOTE_FEATURE_NAME = 'note';
 export const selectNoteFeatureState = createFeatureSelector<NoteState>(NOTE_FEATURE_NAME);
 
 export const selectAllNotes = createSelector(selectNoteFeatureState, selectAll);
+export const selectNoteTodayOrder = createSelector(
+  selectNoteFeatureState,
+  (state: NoteState) => state.todayOrder,
+);
+
 export const selectNoteById = createSelector(
   selectNoteFeatureState,
   (state: NoteState, props: { id: string }): Note => {
@@ -44,13 +50,26 @@ export const selectNoteById = createSelector(
   },
 );
 
+export const selectNotesById = createSelector(
+  selectNoteFeatureState,
+  (state: NoteState, props: { ids: string[] }): Note[] =>
+    props.ids.map((id: string) => {
+      const note = state.entities[id];
+      if (!note) {
+        devError('Note data not found for ' + id);
+      }
+      return note as Note;
+    }),
+);
+
 const _reducer = createReducer<NoteState>(
   initialNoteState,
 
-  on(loadNoteState, (state, payload) => ({
-    ...state,
-    ...payload.state,
-  })),
+  // META ACTIONS
+  // ------------
+  on(loadAllData, (state, { appDataComplete }) =>
+    appDataComplete.note ? appDataComplete.note : state,
+  ),
 
   on(updateNoteOrder, (state, payload) => ({
     ...state,

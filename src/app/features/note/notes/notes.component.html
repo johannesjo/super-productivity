@@ -11,13 +11,13 @@
 </div>
 
 <div
-  [@standardList]="(noteService.notes$|async)?.length"
-  [dragulaModel]="(noteService.notes$|async)"
+  [@standardList]="(workContextService.notes$|async)?.length"
+  [dragulaModel]="(workContextService.notes$|async)"
   class="notes"
   dragula="NOTES"
 >
   <note
-    *ngFor="let note of (noteService.notes$|async); trackBy:trackById; let i = index;"
+    *ngFor="let note of (workContextService.notes$|async); trackBy:trackById; let i = index;"
     [isFocus]="isElementWasAdded && i===0"
     [note]="note"
   ></note>

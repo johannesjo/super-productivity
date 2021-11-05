@@ -49,7 +49,7 @@ export class MigrateNoteService {
               await this._persistenceService.legacyNote.load(projectId);
             console.log(legacyNoteStateForProject);
 
-            if (legacyNoteStateForProject) {
+            if (legacyNoteStateForProject && legacyNoteStateForProject.ids.length) {
               console.log('noteMigration:', {
                 legacyNoteStateForProject,
               });
@@ -65,7 +65,8 @@ export class MigrateNoteService {
               );
 
               // @ts-ignore
-              newProjectState.entities[projectId].noteIds = legacyNoteStateForProject.ids;
+              newProjectState.entities[projectId].noteIds =
+                legacyNoteStateForProject.ids || [];
             }
           }
           console.log('noteMigration:', { newNoteState, newProjectState });

@@ -59,6 +59,8 @@ import {
   selectTimelineTasks,
 } from './store/work-context.selectors';
 import { GlobalTrackingIntervalService } from '../../core/global-tracking-interval/global-tracking-interval.service';
+import { Note } from '../note/note.model';
+import { selectNotesById } from '../note/store/note.reducer';
 
 @Injectable({
   providedIn: 'root',
@@ -129,6 +131,8 @@ export class WorkContextService {
         ...myDayTag,
         type: WorkContextType.TAG,
         routerLink: `tag/${myDayTag.id}`,
+        // TODO get pinned noteIds
+        noteIds: [],
       } as WorkContext),
     ),
   );
@@ -150,6 +154,15 @@ export class WorkContextService {
   );
   isContextChangingWithDelay$: Observable<boolean> = this.isContextChanging$.pipe(
     delayWhen((val) => (val ? of(undefined) : interval(60))),
+  );
+
+  // NOTES LEVEL
+  // -----------
+  notes$: Observable<Note[]> = this.activeWorkContext$.pipe(
+    map((ac) => ac.noteIds),
+    distinctUntilChanged(distinctUntilChangedObject),
+    switchMap((taskIds) => this._getNotesByIds$(taskIds)),
+    shareReplay(1),
   );
 
   // TASK LEVEL
@@ -412,9 +425,19 @@ export class WorkContextService {
   // we don't want a circular dependency that's why we do it here...
   private _getTasksByIds$(ids: string[]): Observable<TaskWithSubTasks[]> {
     if (!Array.isArray(ids)) {
+      console.log({ ids });
       throw new Error('Invalid param provided for getByIds$ :(');
     }
-    return this._store$.pipe(select(selectTasksWithSubTasksByIds, { ids }));
+    return this._store$.select(selectTasksWithSubTasksByIds, { ids });
+  }
+
+  // we don't want a circular dependency that's why we do it here...
+  private _getNotesByIds$(ids: string[]): Observable<Note[]> {
+    if (!Array.isArray(ids)) {
+      console.log({ ids });
+      throw new Error('Invalid param provided for getByIds$ :(');
+    }
+    return this._store$.select(selectNotesById, { ids });
   }
 
   // NOTE: NEVER call this from some place other than the route change stuff

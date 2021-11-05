@@ -2,13 +2,7 @@ import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { Note, NoteState } from './note.model';
 import { select, Store } from '@ngrx/store';
-import {
-  addNote,
-  deleteNote,
-  loadNoteState,
-  updateNote,
-  updateNoteOrder,
-} from './store/note.actions';
+import { addNote, deleteNote, updateNote, updateNoteOrder } from './store/note.actions';
 import * as shortid from 'shortid';
 import {
   selectAllNotes,
@@ -38,10 +32,6 @@ export class NoteService {
 
   getByIdOnce$(id: string): Observable<Note> {
     return this._store$.pipe(select(selectNoteById, { id }), take(1));
-  }
-
-  loadState(state: NoteState): void {
-    this._store$.dispatch(loadNoteState({ state }));
   }
 
   add(note: Partial<Note> = {}, isPreventFocus: boolean = false): void {

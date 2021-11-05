@@ -17,6 +17,7 @@ import { fadeAnimation } from '../../../ui/animations/fade.ani';
 import { Note } from '../note.model';
 import { T } from '../../../t.const';
 import { Task } from '../../tasks/task.model';
+import { WorkContextService } from '../../work-context/work-context.service';
 
 @Component({
   selector: 'notes',
@@ -36,6 +37,7 @@ export class NotesComponent implements OnInit, OnDestroy {
 
   constructor(
     public noteService: NoteService,
+    public workContextService: WorkContextService,
     private _dragulaService: DragulaService,
     private _matDialog: MatDialog,
   ) {}

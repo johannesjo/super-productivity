@@ -61,6 +61,7 @@ const _extendProjectDefaults = (project: Project): Project => {
   return {
     ...DEFAULT_PROJECT,
     ...project,
+    noteIds: project.noteIds || [],
     // also add missing issue integration cfgs
     issueIntegrationCfgs: {
       ...DEFAULT_ISSUE_PROVIDER_CFGS,
