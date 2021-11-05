@@ -33,6 +33,7 @@ export const isValidAppData = (d: AppDataComplete): boolean => {
     Array.isArray(d.reminders) &&
     _isEntityStatesConsistent(d) &&
     _isAllTasksAvailableAndListConsistent(d) &&
+    _isAllNotesAvailableAndListConsistent(d) &&
     _isNoLonelySubTasks(d) &&
     _isNoMissingSubTasks(d) &&
     _isAllProjectsAvailable(d) &&
@@ -182,6 +183,54 @@ const _isAllTasksAvailableAndListConsistent = (data: AppDataComplete): boolean =
   }
 
   return !idNotFound && !isInconsistentProjectId && !isMissingTaskData;
+};
+
+const _isAllNotesAvailableAndListConsistent = (data: AppDataComplete): boolean => {
+  let allIds: string[] = [];
+  let isInconsistentProjectId: boolean = false;
+  let isMissingNoteData: boolean = false;
+
+  (data.project.ids as string[])
+    .map((id) => data.project.entities[id])
+    .forEach((project) => {
+      if (!project) {
+        console.log(data.project);
+        throw new Error('No project');
+      }
+      const allNoteIdsForProject: string[] = project.noteIds;
+      allIds = allIds.concat(allNoteIdsForProject);
+      allNoteIdsForProject.forEach((tid) => {
+        const note = data.note.entities[tid];
+        if (!note) {
+          isMissingNoteData = true;
+          devError('Missing note data (tid: ' + tid + ') for Project ' + project.title);
+        } else if (note.projectId !== project.id) {
+          isInconsistentProjectId = true;
+          console.log('--------------------------------');
+          console.log('nid', note.projectId, 'pid', project.id, { note, project });
+          devError('Inconsistent note projectId');
+        }
+      });
+    });
+
+  allIds = allIds.concat(data.note.todayOrder);
+
+  // check ids as well
+  const idNotFound = allIds.find((id) => !data.note.ids.includes(id));
+  if (idNotFound) {
+    const project = (data.project.ids as string[])
+      .map((id) => data.project.entities[id])
+      .find((projectI) => (projectI as Project).noteIds.includes(idNotFound));
+
+    devError(
+      'Inconsistent Note State: Missing note id ' +
+        idNotFound +
+        ' for Project ' +
+        project?.title,
+    );
+  }
+
+  return !idNotFound && !isInconsistentProjectId && !isMissingNoteData;
 };
 
 const _isEntityStatesConsistent = (data: AppDataComplete): boolean => {

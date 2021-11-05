@@ -15,6 +15,7 @@ const TAG_CTX = {
   icon: 'string',
   routerLink: 'string',
   taskIds: ['A'],
+  noteIds: [],
   type: WorkContextType.TAG,
   theme: WORK_CONTEXT_DEFAULT_THEME,
 } as WorkContext;

@@ -22,6 +22,7 @@ describe('dataRepair()', () => {
           id: FAKE_PROJECT_ID,
           taskIds: [],
           backlogTaskIds: [],
+          noteIds: [],
         },
       ] as Partial<Project>[]),
     };
@@ -134,6 +135,7 @@ describe('dataRepair()', () => {
           id: 'TEST_ID_PROJECT',
           taskIds: ['goneProject', 'TEST', 'noneExisting'],
           backlogTaskIds: [],
+          noteIds: [],
         },
       ] as Partial<Project>[]),
     };
@@ -155,6 +157,7 @@ describe('dataRepair()', () => {
             id: 'TEST_ID_PROJECT',
             taskIds: ['TEST'],
             backlogTaskIds: [],
+            noteIds: [],
           },
         } as any,
       },
@@ -178,6 +181,7 @@ describe('dataRepair()', () => {
           id: 'TEST_ID_PROJECT',
           taskIds: ['EXISTING', 'goneProject', 'TEST', 'noneExisting'],
           backlogTaskIds: ['noneExistingBacklog', 'nullBacklog'],
+          noteIds: [],
         },
       ] as Partial<Project>[]),
     };
@@ -199,6 +203,54 @@ describe('dataRepair()', () => {
             id: 'TEST_ID_PROJECT',
             taskIds: ['EXISTING'],
             backlogTaskIds: [],
+            noteIds: [],
+          },
+        } as any,
+      },
+    });
+  });
+
+  it('should remove notes with missing data from the project lists', () => {
+    const noteState = {
+      ...mock.note,
+      ids: ['EXISTING'],
+      entities: {
+        EXISTING: { ...DEFAULT_TASK, id: 'EXISTING', projectId: 'TEST_PROJECT' },
+        nullBacklog: null,
+      },
+      todayOrder: ['NON_EXISTING_TODAY'],
+    } as any;
+
+    const projectState: ProjectState = {
+      ...fakeEntityStateFromArray([
+        {
+          title: 'TEST_PROJECT',
+          id: 'TEST_ID_PROJECT',
+          taskIds: [],
+          backlogTaskIds: ['noneExistingBacklog', 'nullBacklog'],
+          noteIds: ['EXISTING', 'goneProject', 'TEST', 'noneExisting'],
+        },
+      ] as Partial<Project>[]),
+    };
+
+    expect(
+      dataRepair({
+        ...mock,
+        project: projectState,
+        note: noteState,
+      }),
+    ).toEqual({
+      ...mock,
+      note: noteState as any,
+      project: {
+        ...projectState,
+        entities: {
+          TEST_ID_PROJECT: {
+            title: 'TEST_PROJECT',
+            id: 'TEST_ID_PROJECT',
+            taskIds: [],
+            backlogTaskIds: [],
+            noteIds: ['EXISTING'],
           },
         } as any,
       },
@@ -227,6 +279,7 @@ describe('dataRepair()', () => {
           id: 'TEST_ID_PROJECT',
           taskIds: [],
           backlogTaskIds: ['SUB_ID'],
+          noteIds: [],
         },
       ] as Partial<Project>[]),
     };
@@ -248,6 +301,7 @@ describe('dataRepair()', () => {
             id: 'TEST_ID_PROJECT',
             taskIds: [],
             backlogTaskIds: [],
+            noteIds: [],
           },
         } as any,
       },
@@ -273,6 +327,7 @@ describe('dataRepair()', () => {
           id: 'TEST_ID_PROJECT',
           taskIds: [],
           backlogTaskIds: ['goneProject', 'TEST', 'noneExisting'],
+          noteIds: [],
         },
       ] as Partial<Project>[]),
     };
@@ -294,6 +349,7 @@ describe('dataRepair()', () => {
             id: 'TEST_ID_PROJECT',
             taskIds: [],
             backlogTaskIds: ['TEST'],
+            noteIds: [],
           },
         } as any,
       },
@@ -477,6 +533,7 @@ describe('dataRepair()', () => {
           id: 'TEST_ID_PROJECT',
           taskIds: ['goneToArchiveToday', 'GONE'],
           backlogTaskIds: ['goneToArchiveBacklog', 'GONE'],
+          noteIds: [],
         },
       ] as Partial<Project>[]),
     };
@@ -518,6 +575,7 @@ describe('dataRepair()', () => {
             id: 'TEST_ID_PROJECT',
             taskIds: ['goneToArchiveToday'],
             backlogTaskIds: ['goneToArchiveBacklog'],
+            noteIds: [],
           },
         } as any,
       },
@@ -559,12 +617,14 @@ describe('dataRepair()', () => {
           id: 'TEST_ID_PROJECT',
           taskIds: ['GONE'],
           backlogTaskIds: [],
+          noteIds: [],
         },
         {
           title: 'TEST_PROJECT_OTHER',
           id: 'TEST_ID_PROJECT_OTHER',
           taskIds: ['regularTaskOtherProject'],
           backlogTaskIds: [],
+          noteIds: [],
         },
       ] as Partial<Project>[]),
     };
@@ -586,12 +646,14 @@ describe('dataRepair()', () => {
             id: 'TEST_ID_PROJECT',
             taskIds: ['orphanedTask'],
             backlogTaskIds: [],
+            noteIds: [],
           },
           TEST_ID_PROJECT_OTHER: {
             title: 'TEST_PROJECT_OTHER',
             id: 'TEST_ID_PROJECT_OTHER',
             taskIds: ['regularTaskOtherProject', 'orphanedTaskOtherProject'],
             backlogTaskIds: [],
+            noteIds: [],
           },
         } as any,
       },

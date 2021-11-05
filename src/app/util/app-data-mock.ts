@@ -31,7 +31,10 @@ export const createAppDataCompleteMock = (): AppDataComplete => ({
 
   // OPTIONAL though they are really not
   reminders: [],
-  note: {},
+  note: {
+    ...createEmptyEntity(),
+    todayOrder: [],
+  },
   bookmark: {},
   metric: createEmptyEntity(),
   improvement: createEmptyEntity() as any,

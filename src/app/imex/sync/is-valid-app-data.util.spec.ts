@@ -7,6 +7,7 @@ import { Project } from '../../features/project/project.model';
 import { Tag } from '../../features/tag/tag.model';
 import { createAppDataCompleteMock } from '../../util/app-data-mock';
 import { DEFAULT_PROJECT } from '../../features/project/project.const';
+import { Note } from '../../features/note/note.model';
 
 // const BASE_STATE_KEYS: (keyof AppBaseData)[] = [
 //   'task',
@@ -471,5 +472,51 @@ describe('isValidAppData()', () => {
         task: taskState,
       }),
     ).toThrowError(`Task without project or tag`);
+  });
+
+  it('should throw for inconsistent note todayOrder list', () => {
+    const noteState = {
+      ...mock.note,
+      ...fakeEntityStateFromArray<Note>([
+        {
+          id: 'NOOOTE1',
+          title: 'NOOOTE1',
+        },
+      ]),
+      todayOrder: ['MISSING'],
+    } as any;
+
+    expect(() =>
+      isValidAppData({
+        ...mock,
+        // NOTE: it's empty
+        note: noteState,
+      }),
+    ).toThrowError(
+      `Inconsistent Note State: Missing note id MISSING for Project undefined`,
+    );
+  });
+
+  it('should throw for missing note data', () => {
+    const projectState = {
+      ...mock.project,
+      ...fakeEntityStateFromArray<Project>([
+        {
+          ...DEFAULT_PROJECT,
+          id: 'NOOOTE1',
+          title: 'NOOOTE1',
+          noteIds: ['MISSING'],
+        },
+      ]),
+      todayOrder: [],
+    } as any;
+
+    expect(() =>
+      isValidAppData({
+        ...mock,
+        // NOTE: it's empty
+        project: projectState,
+      }),
+    ).toThrowError(`Missing note data (tid: MISSING) for Project NOOOTE1`);
   });
 });

@@ -33,6 +33,7 @@ export const dataRepair = (data: AppDataComplete): AppDataComplete => {
   dataOut = _moveUnArchivedSubTasksToArchivedParents(dataOut);
   dataOut = _cleanupOrphanedSubTasks(dataOut);
   dataOut = _cleanupNonExistingTasksFromLists(dataOut);
+  dataOut = _cleanupNonExistingNotesFromLists(dataOut);
   dataOut = _fixInconsistentProjectId(dataOut);
   dataOut = _fixInconsistentTagId(dataOut);
   dataOut = _setTaskProjectIdAccordingToParent(dataOut);
@@ -352,6 +353,25 @@ const _cleanupNonExistingTasksFromLists = (data: AppDataComplete): AppDataComple
         (tid) => !!data.task.entities[tid],
       );
     });
+  return data;
+};
+
+const _cleanupNonExistingNotesFromLists = (data: AppDataComplete): AppDataComplete => {
+  const projectIds: string[] = data.project.ids as string[];
+  projectIds.forEach((pid) => {
+    const projectItem = data.project.entities[pid];
+    if (!projectItem) {
+      console.log(data.project);
+      throw new Error('No project');
+    }
+    (projectItem as ProjectCopy).noteIds = projectItem.noteIds.filter(
+      (tid) => !!data.note.entities[tid],
+    );
+  });
+
+  // also cleanup today's notes
+  data.note.todayOrder = data.note.todayOrder.filter((tid) => !!data.note.entities[tid]);
+
   return data;
 };
 
