@@ -64,8 +64,11 @@ const _addNewIssueFields = (task: Task): Task => {
           ...task,
         }
       : {
+          // @ts-ignore
           issueAttachmentNr: null,
+          // @ts-ignore
           issueLastUpdated: null,
+          // @ts-ignore
           issueWasUpdated: null,
           ...task,
         };

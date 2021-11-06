@@ -467,7 +467,6 @@ export class JiraApiService {
       ...(jr.body ? { body: JSON.stringify(jr.body) } : {}),
 
       headers: {
-        Cookie: '',
         'Content-Type': 'application/json',
         ...(IS_ELECTRON && cfg.isWonkyCookieMode
           ? {
@@ -475,9 +474,11 @@ export class JiraApiService {
             }
           : cfg.usePAT
           ? {
+              Cookie: '',
               authorization: `Bearer ${cfg.password}`,
             }
           : {
+              Cookie: '',
               authorization: `Basic ${this._b64EncodeUnicode(
                 `${cfg.userName}:${cfg.password}`,
               )}`,

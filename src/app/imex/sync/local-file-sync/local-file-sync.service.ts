@@ -43,7 +43,7 @@ export class LocalFileSyncService implements SyncProviderServiceInterface {
       );
       return r as any;
     } catch (e) {
-      throw new Error(e);
+      throw new Error(e as any);
     }
   }
 
@@ -61,7 +61,7 @@ export class LocalFileSyncService implements SyncProviderServiceInterface {
       })) as Promise<string | Error>;
       return r as any;
     } catch (e) {
-      throw new Error(e);
+      throw new Error(e as any);
     }
   }
 
@@ -76,7 +76,7 @@ export class LocalFileSyncService implements SyncProviderServiceInterface {
       })) as Promise<{ rev: string; data: AppDataComplete | undefined }>;
       return r as any;
     } catch (e) {
-      throw new Error(e);
+      throw new Error(e as any);
     }
   }
 }

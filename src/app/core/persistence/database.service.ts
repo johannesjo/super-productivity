@@ -110,7 +110,8 @@ export class DatabaseService {
       console.error('Database initialization failed');
       console.error('_lastParams', this._lastParams);
       alert('IndexedDB INIT Error');
-      throw new Error(e);
+      // TODO fix typing issue
+      throw new Error(e as any);
     }
 
     this.isReady$.next(true);
@@ -118,7 +119,11 @@ export class DatabaseService {
   }
 
   // eslint-disable-next-line @typescript-eslint/ban-types
-  private async _errorHandler(e: Error, fn: Function, args: any[]): Promise<void> {
+  private async _errorHandler(
+    e: Error | unknown,
+    fn: Function,
+    args: any[],
+  ): Promise<void> {
     devError(e);
     if (confirm(this._translateService.instant(T.CONFIRM.RELOAD_AFTER_IDB_ERROR))) {
       this._restartApp();
@@ -144,7 +149,7 @@ export class DatabaseService {
       return await this._afterReady$.pipe(take(1)).toPromise();
     } catch (e) {
       console.warn('DB After Ready Error: Last Params,', this._lastParams);
-      throw new Error(e);
+      throw new Error(e as string);
     }
   }
 }

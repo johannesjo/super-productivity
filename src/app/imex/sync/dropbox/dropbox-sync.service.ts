@@ -42,14 +42,14 @@ export class DropboxSyncService implements SyncProviderServiceInterface {
         rev: r.rev,
       };
     } catch (e) {
-      const isAxiosError = !!(e && e.response && e.response.status);
+      const isAxiosError = !!(e && (e as any).response && (e as any).response.status);
       if (
         isAxiosError &&
-        e.response.data &&
-        e.response.data.error_summary === 'path/not_found/..'
+        (e as any).response.data &&
+        (e as any).response.data.error_summary === 'path/not_found/..'
       ) {
         return 'NO_REMOTE_DATA';
-      } else if (isAxiosError && e.response.status === 401) {
+      } else if (isAxiosError && (e as any).response.status === 401) {
         this._snackService.open({
           msg: T.F.DROPBOX.S.AUTH_ERROR,
           type: 'ERROR',
@@ -60,7 +60,8 @@ export class DropboxSyncService implements SyncProviderServiceInterface {
       } else {
         console.error(e);
         if (environment.production) {
-          return e;
+          // todo fix this
+          return e as any;
         } else {
           throw new Error('DBX: Unknown error');
         }
@@ -97,7 +98,8 @@ export class DropboxSyncService implements SyncProviderServiceInterface {
       return r.rev;
     } catch (e) {
       console.error(e);
-      return e;
+      // TODO fix this
+      return e as any;
     }
   }
 }

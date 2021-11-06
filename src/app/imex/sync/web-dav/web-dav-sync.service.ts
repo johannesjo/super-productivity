@@ -47,14 +47,14 @@ export class WebDavSyncService implements SyncProviderServiceInterface {
         clientUpdate: d.getTime(),
         rev: this._getRevFromMeta(meta),
       };
-    } catch (e) {
-      const isAxiosError = !!(e && e.response && e.response.status);
-      if (isAxiosError && e.response.status === 404) {
+    } catch (e: unknown) {
+      const isAxiosError = !!(e && (e as any).response && (e as any).response.status);
+      if (isAxiosError && (e as any).response.status === 404) {
         return 'NO_REMOTE_DATA';
       }
       console.error(e);
       if (environment.production) {
-        return e;
+        return e as Error;
       } else {
         throw new Error('WebDAV: Unknown error');
       }
@@ -79,7 +79,8 @@ export class WebDavSyncService implements SyncProviderServiceInterface {
       };
     } catch (e) {
       this._globalProgressBarService.countDown();
-      return e;
+      // TODO fix error handling
+      return e as any;
     }
   }
 
@@ -103,7 +104,7 @@ export class WebDavSyncService implements SyncProviderServiceInterface {
     } catch (e) {
       console.error(e);
       this._globalProgressBarService.countDown();
-      return e;
+      return e as Error;
     }
   }
 

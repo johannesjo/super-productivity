@@ -112,7 +112,8 @@ export class GoogleDriveSyncService implements SyncProviderServiceInterface {
       return (r as any).md5Checksum;
     } catch (e) {
       console.error(e);
-      return e;
+      // TODO fix error handling
+      return e as any;
     }
   }
 
