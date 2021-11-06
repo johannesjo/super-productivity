@@ -8,8 +8,7 @@ import { unique } from '../../util/unique';
 import { NoteService } from './note.service';
 import { initialNoteState } from './store/note.reducer';
 import { Note, NoteState } from './note.model';
-
-const NOTE_MODEL_VERSION = 2;
+import { NOTE_MODEL_VERSION } from './note.const';
 
 @Injectable({
   providedIn: 'root',
@@ -35,6 +34,11 @@ export class MigrateNoteService {
         console.log('noteMigration:', currentNoteState[MODEL_VERSION_KEY], {
           noteState: currentNoteState,
         });
+        console.log(
+          'currentNoteState[MODEL_VERSION_KEY]',
+          currentNoteState[MODEL_VERSION_KEY],
+        );
+
         if (!currentNoteState[MODEL_VERSION_KEY]) {
           const projectState = await this._persistenceService.project.loadState();
           // For new instances
