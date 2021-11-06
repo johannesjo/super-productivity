@@ -4,7 +4,6 @@ import { NoteService } from '../note.service';
 import { MatDialog } from '@angular/material/dialog';
 import { T } from '../../../t.const';
 import { DialogFullscreenMarkdownComponent } from '../../../ui/dialog-fullscreen-markdown/dialog-fullscreen-markdown.component';
-import { Tag } from '../../tag/tag.model';
 import { Observable, of } from 'rxjs';
 import { TagComponentTag } from '../../tag/tag/tag.component';
 import { map, switchMap } from 'rxjs/operators';
@@ -19,22 +18,19 @@ import { ProjectService } from '../../project/project.service';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class NoteComponent {
-  @Input() note?: Note;
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+  @Input() note!: Note;
   @Input() isFocus?: boolean;
 
   @ViewChild('markdownEl') markdownEl?: HTMLElement;
-  fakeTag: Partial<Tag> = {
-    id: 'fa',
-    color: '#ff00dd',
-    title: 'Super Productivity',
-  };
+
   T: typeof T = T;
 
   projectTag$: Observable<TagComponentTag | null> =
     this._workContextService.activeWorkContextTypeAndId$.pipe(
       switchMap(({ activeType }) =>
-        activeType === WorkContextType.TAG && this.note!.projectId
-          ? this._projectService.getByIdOnce$(this.note!.projectId).pipe(
+        activeType === WorkContextType.TAG && this.note.projectId
+          ? this._projectService.getByIdOnce$(this.note.projectId).pipe(
               map(
                 (project) =>
                   project && {
