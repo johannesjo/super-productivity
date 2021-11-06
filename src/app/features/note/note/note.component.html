@@ -17,7 +17,7 @@
     ></inline-markdown>
   </div>
 
-  <div class="bottom-controls handle-drag">
+  <div class="bottom-controls handle-drag" [class.isOver]="note.imgUrl">
     <button mat-icon-button (click)="togglePinToToday()" *ngIf="note.projectId">
       <mat-icon *ngIf="!note.isPinnedToToday">wb_sunny</mat-icon>
       <mat-icon *ngIf="note.isPinnedToToday" svgIcon="remove_today"></mat-icon>

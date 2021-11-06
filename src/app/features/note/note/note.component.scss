@@ -14,6 +14,8 @@ $noteFontSize: 12px;
 .note {
   @include noteStyle;
 
+  overflow: hidden;
+
   &:hover,
   &.isFocused {
     transform-origin: center center;
@@ -104,6 +106,10 @@ $noteFontSize: 12px;
 
 :host:hover .bottom-controls {
   opacity: 1;
+
+  &.isOver {
+    opacity: 0.8;
+  }
 }
 
 .bottom-controls {
@@ -118,8 +124,16 @@ $noteFontSize: 12px;
     cursor: grabbing;
   }
 
+  &.isOver {
+    background: inherit;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+  }
+
   tag {
-    margin: auto !important;
+    margin: auto;
     pointer-events: none;
     opacity: 1;
   }
