@@ -14,7 +14,7 @@ export const mapSimpleMetrics = ([
   allTasks,
 ]: [BreakNr, BreakTime, Worklog, number, Task[]]): SimpleMetrics => {
   const s = {
-    start: 99999999999999999999999,
+    start: 999999999999999,
     end: getWorklogStr(),
     timeSpent: totalTimeSpent,
     breakTime: Object.keys(breakTime).reduce((acc, d) => acc + breakTime[d], 0),

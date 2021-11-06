@@ -118,9 +118,9 @@ export class DatabaseService {
     return this.db;
   }
 
-  // eslint-disable-next-line @typescript-eslint/ban-types
   private async _errorHandler(
     e: Error | unknown,
+    // eslint-disable-next-line @typescript-eslint/ban-types
     fn: Function,
     args: any[],
   ): Promise<void> {
