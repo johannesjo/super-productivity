@@ -1,6 +1,6 @@
-@use '~@angular/material' as mat;
-@import '~angular-material-css-vars/public-util';
-@import '~angular-material-css-vars/main';
+@use '@angular/material' as mat;
+@import '~angular-material-css-vars/src/lib/public-util';
+@import '~angular-material-css-vars/src/lib/main';
 
 $custom-typography: mat.define-typography-config(
   $font-family: null,
