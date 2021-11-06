@@ -25,7 +25,7 @@ import { BreakpointObserver } from '@angular/cdk/layout';
 import { NavigationStart, Router } from '@angular/router';
 import { WorkContextService } from '../../features/work-context/work-context.service';
 
-const NAV_ALWAYS_VISIBLE = 1250;
+const NAV_ALWAYS_VISIBLE = 1200;
 const NAV_OVER_RIGHT_PANEL_NEXT = 800;
 const BOTH_OVER = 720;
 const XS_MAX = 599;

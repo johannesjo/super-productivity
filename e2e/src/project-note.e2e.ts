@@ -22,6 +22,8 @@ module.exports = {
     browser
       .goToDefaultProject()
       .addNote('Some new Note')
+      // wait for save
+      .pause(200)
       .execute('window.location.reload()')
       .waitForElementPresent(NOTES_WRAPPER)
       .moveToElement(NOTES_WRAPPER, 10, 50)
