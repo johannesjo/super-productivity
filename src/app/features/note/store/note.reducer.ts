@@ -15,6 +15,7 @@ import { WorkContextType } from '../../work-context/work-context.model';
 export const adapter: EntityAdapter<Note> = createEntityAdapter<Note>();
 
 export const initialNoteState: NoteState = adapter.getInitialState({
+  ids: [],
   todayOrder: [],
 });
 
@@ -70,19 +71,36 @@ const _reducer = createReducer<NoteState>(
       : state,
   ),
 
-  on(addNote, (state, payload) => ({
+  on(addNote, (state, { note }) => ({
     ...state,
     entities: {
       ...state.entities,
-      [payload.note.id]: payload.note,
+      [note.id]: note,
     },
     // add to top rather than bottom
-    ids: [payload.note.id, ...state.ids] as string[] | number[],
+    ids: [note.id, ...state.ids],
+    todayOrder: note.isPinnedToToday ? [note.id, ...state.todayOrder] : state.todayOrder,
   })),
 
-  on(updateNote, (state, { note }) => adapter.updateOne(note, state)),
+  on(updateNote, (state, { note }) => {
+    if ('isPinnedToToday' in note.changes) {
+      return {
+        ...state,
+        ...adapter.updateOne(note, state),
+        todayOrder: note.changes.isPinnedToToday
+          ? [note.id as string, ...state.todayOrder]
+          : state.todayOrder.filter((id) => id !== note.id),
+      };
+    }
+    return adapter.updateOne(note, state);
+  }),
 
-  on(deleteNote, (state, { id }) => adapter.removeOne(id, state)),
+  on(deleteNote, (state, { id }) => {
+    return {
+      ...adapter.removeOne(id, state),
+      todayOrder: state.todayOrder.filter((i) => i !== id),
+    };
+  }),
 );
 
 export const noteReducer = (

@@ -4,9 +4,6 @@ import { NoteService } from '../note.service';
 import { SS_NOTE_TMP } from '../../../core/persistence/ls-keys.const';
 import { T } from '../../../t.const';
 import { WorkContextService } from '../../work-context/work-context.service';
-import { Observable } from 'rxjs';
-import { WorkContextType } from '../../work-context/work-context.model';
-import { map } from 'rxjs/operators';
 
 @Component({
   selector: 'dialog-add-note',
@@ -18,10 +15,6 @@ export class DialogAddNoteComponent {
   T: typeof T = T;
   noteContent: string;
   isSubmitted: boolean = false;
-  isInProjectContext$: Observable<boolean> =
-    this._workContextService.activeWorkContextTypeAndId$.pipe(
-      map(({ activeType }) => activeType === WorkContextType.PROJECT),
-    );
 
   constructor(
     private _matDialogRef: MatDialogRef<DialogAddNoteComponent>,

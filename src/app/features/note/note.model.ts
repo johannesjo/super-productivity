@@ -14,6 +14,7 @@ export interface Note {
 }
 
 export interface NoteState extends EntityState<Note> {
+  ids: string[];
   todayOrder: string[];
   [MODEL_VERSION_KEY]?: number;
 }

@@ -1,4 +1,4 @@
-<form (submit)="submit()" *ngIf="(isInProjectContext$|async)">
+<form (submit)="submit()">
   <div class="form-wrapper">
     <div class="textarea-wrapper">
       <textarea
@@ -36,25 +36,3 @@
     </div>
   </mat-dialog-actions>
 </form>
-
-<div *ngIf="!(isInProjectContext$|async)">
-  <p>
-    You're trying to add a Note via the global shortcut. Currently Notes can only be added
-    when in project context.
-  </p>
-  <p>Sorry, I know this sucks, but this will change at some point!</p>
-
-  <mat-dialog-actions align="end">
-    <div class="wrap-buttons">
-      <button
-        (click)="close()"
-        class="btn btn-primary submit-button"
-        color="primary"
-        mat-button
-        type="button"
-      >
-        {{T.G.CLOSE|translate}}
-      </button>
-    </div>
-  </mat-dialog-actions>
-</div>

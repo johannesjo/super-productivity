@@ -45,7 +45,8 @@ export class NoteService {
             (this._workContextService.activeWorkContextType === WorkContextType.PROJECT &&
               this._workContextService.activeWorkContextId) ||
             null,
-          isPinnedToToday: false,
+          isPinnedToToday:
+            this._workContextService.activeWorkContextType === WorkContextType.TAG,
           content: '',
           created: Date.now(),
           modified: Date.now(),

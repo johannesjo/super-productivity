@@ -18,12 +18,12 @@
   </div>
 
   <div class="bottom-controls handle-drag">
-    <button mat-icon-button>
-      <!--      <mat-icon>wb_sunny</mat-icon>-->
-      <mat-icon svgIcon="remove_today"></mat-icon>
+    <button mat-icon-button (click)="togglePinToToday()" *ngIf="note.projectId">
+      <mat-icon *ngIf="!note.isPinnedToToday">wb_sunny</mat-icon>
+      <mat-icon *ngIf="note.isPinnedToToday" svgIcon="remove_today"></mat-icon>
     </button>
 
-    <tag [tag]="fakeTag" style="margin-left: 10px"></tag>
+    <tag *ngIf="projectTag$|async as projectTag" [tag]="projectTag"></tag>
 
     <!--    <button mat-icon-button>-->
     <!--      <mat-icon class="drag-handle-ico" svgIcon="drag_handle"></mat-icon>-->

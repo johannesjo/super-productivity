@@ -5,6 +5,12 @@ import { MatDialog } from '@angular/material/dialog';
 import { T } from '../../../t.const';
 import { DialogFullscreenMarkdownComponent } from '../../../ui/dialog-fullscreen-markdown/dialog-fullscreen-markdown.component';
 import { Tag } from '../../tag/tag.model';
+import { Observable, of } from 'rxjs';
+import { TagComponentTag } from '../../tag/tag/tag.component';
+import { map, switchMap } from 'rxjs/operators';
+import { WorkContextType } from '../../work-context/work-context.model';
+import { WorkContextService } from '../../work-context/work-context.service';
+import { ProjectService } from '../../project/project.service';
 
 @Component({
   selector: 'note',
@@ -24,9 +30,28 @@ export class NoteComponent {
   };
   T: typeof T = T;
 
+  projectTag$: Observable<TagComponentTag | null> =
+    this._workContextService.activeWorkContextTypeAndId$.pipe(
+      switchMap(({ activeType }) =>
+        activeType === WorkContextType.TAG && this.note!.projectId
+          ? this._projectService.getByIdOnce$(this.note!.projectId).pipe(
+              map(
+                (project) =>
+                  project && {
+                    ...project,
+                    icon: 'list',
+                  },
+              ),
+            )
+          : of(null),
+      ),
+    );
+
   constructor(
     private readonly _matDialog: MatDialog,
     private readonly _noteService: NoteService,
+    private readonly _projectService: ProjectService,
+    private readonly _workContextService: WorkContextService,
   ) {}
 
   toggleLock(): void {
@@ -48,6 +73,15 @@ export class NoteComponent {
       throw new Error('No note');
     }
     this._noteService.remove(this.note);
+  }
+
+  togglePinToToday(): void {
+    if (!this.note) {
+      throw new Error('No note');
+    }
+    this._noteService.update(this.note.id, {
+      isPinnedToToday: !this.note.isPinnedToToday,
+    });
   }
 
   editFullscreen(): void {

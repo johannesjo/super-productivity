@@ -6,7 +6,7 @@ import { first, switchMap, tap } from 'rxjs/operators';
 import { addNote, deleteNote, updateNote, updateNoteOrder } from './note.actions';
 import { selectNoteFeatureState } from './note.reducer';
 import { WorkContextService } from '../../work-context/work-context.service';
-import { combineLatest, Observable } from 'rxjs';
+import { Observable } from 'rxjs';
 import { NoteState } from '../note.model';
 
 @Injectable()
@@ -15,13 +15,8 @@ export class NoteEffects {
     () =>
       this._actions$.pipe(
         ofType(addNote, deleteNote, updateNote, updateNoteOrder),
-        switchMap(() =>
-          combineLatest([
-            this._workContextService.activeWorkContextIdIfProject$,
-            this._store$.pipe(select(selectNoteFeatureState)),
-          ]).pipe(first()),
-        ),
-        tap(([projectId, state]) => this._saveToLs(projectId, state)),
+        switchMap(() => this._store$.pipe(select(selectNoteFeatureState)).pipe(first())),
+        tap((state) => this._saveToLs(state)),
       ),
     { dispatch: false },
   );
@@ -33,13 +28,9 @@ export class NoteEffects {
     private _workContextService: WorkContextService,
   ) {}
 
-  private _saveToLs(currentProjectId: string, noteState: NoteState): void {
-    if (currentProjectId) {
-      this._persistenceService.note.saveState(noteState, {
-        isSyncModelChange: true,
-      });
-    } else {
-      throw new Error('No current project id');
-    }
+  private _saveToLs(noteState: NoteState): void {
+    this._persistenceService.note.saveState(noteState, {
+      isSyncModelChange: true,
+    });
   }
 }
