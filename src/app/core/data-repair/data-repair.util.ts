@@ -364,9 +364,9 @@ const _cleanupNonExistingNotesFromLists = (data: AppDataComplete): AppDataComple
       console.log(data.project);
       throw new Error('No project');
     }
-    (projectItem as ProjectCopy).noteIds = projectItem.noteIds.filter(
-      (tid) => !!data.note.entities[tid],
-    );
+    (projectItem as ProjectCopy).noteIds = (projectItem as ProjectCopy).noteIds
+      ? projectItem.noteIds.filter((tid) => !!data.note.entities[tid])
+      : [];
   });
 
   // also cleanup today's notes
