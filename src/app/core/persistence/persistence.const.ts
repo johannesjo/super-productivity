@@ -68,6 +68,7 @@ import {
 import { taskRepeatCfgReducer } from '../../features/task-repeat-cfg/store/task-repeat-cfg.reducer';
 import { migrateTaskRepeatCfgState } from '../../features/task-repeat-cfg/migrate-task-repeat-cfg-state.util';
 import { Bookmark, BookmarkState } from '../../features/bookmark/bookmark.model';
+import { MODEL_VERSION } from '../model-version';
 
 interface PersistenceBaseModelCfgs {
   // [key: string]: PersistenceBaseModelCfg<any>;
@@ -100,11 +101,13 @@ export const BASE_MODEL_CFGS: PersistenceBaseModelCfgs = {
   globalConfig: {
     lsKey: LS_GLOBAL_CFG,
     appDataKey: 'globalConfig',
+    modelVersion: MODEL_VERSION.GLOBAL_CONFIG,
     migrateFn: migrateGlobalConfigState,
   },
   reminders: {
     lsKey: LS_REMINDER,
     appDataKey: 'reminders',
+    modelVersion: MODEL_VERSION.___NOT_USED_YET___,
   },
 };
 
@@ -112,6 +115,7 @@ export const ENTITY_MODEL_CFGS: PersistenceEntityModelCfgs = {
   project: {
     lsKey: LS_PROJECT_META_LIST,
     appDataKey: 'project',
+    modelVersion: MODEL_VERSION.PROJECT,
     reducerFn: projectReducer as any,
     migrateFn: migrateProjectState,
   },
@@ -119,16 +123,19 @@ export const ENTITY_MODEL_CFGS: PersistenceEntityModelCfgs = {
   tag: {
     lsKey: LS_TAG_STATE,
     appDataKey: 'tag',
+    modelVersion: MODEL_VERSION.TAG,
     reducerFn: tagReducer,
   },
   simpleCounter: {
     lsKey: LS_SIMPLE_COUNTER_STATE,
     appDataKey: 'simpleCounter',
+    modelVersion: MODEL_VERSION.SIMPLE_COUNTER,
     reducerFn: simpleCounterReducer,
   },
   note: {
     lsKey: LS_NOTE_STATE,
     appDataKey: 'note',
+    modelVersion: MODEL_VERSION.NOTE,
     reducerFn: noteReducer,
   },
 
@@ -136,12 +143,14 @@ export const ENTITY_MODEL_CFGS: PersistenceEntityModelCfgs = {
   metric: {
     lsKey: LS_METRIC_STATE,
     appDataKey: 'metric',
+    modelVersion: MODEL_VERSION.METRIC,
     reducerFn: metricReducer as any,
     migrateFn: migrateMetricState,
   },
   improvement: {
     lsKey: LS_IMPROVEMENT_STATE,
     appDataKey: 'improvement',
+    modelVersion: MODEL_VERSION.___NOT_USED_YET___,
     reducerFn: improvementReducer,
     migrateFn: migrateImprovementState,
   },
@@ -149,6 +158,7 @@ export const ENTITY_MODEL_CFGS: PersistenceEntityModelCfgs = {
   obstruction: {
     lsKey: LS_OBSTRUCTION_STATE,
     appDataKey: 'obstruction',
+    modelVersion: MODEL_VERSION.___NOT_USED_YET___,
     reducerFn: obstructionReducer as any,
     migrateFn: migrateObstructionState,
   },
@@ -157,23 +167,30 @@ export const ENTITY_MODEL_CFGS: PersistenceEntityModelCfgs = {
   task: {
     lsKey: LS_TASK_STATE,
     appDataKey: 'task',
+    modelVersion: MODEL_VERSION.TASK,
     reducerFn: taskReducer,
     migrateFn: migrateTaskState,
   },
   taskArchive: {
     lsKey: LS_TASK_ARCHIVE,
     appDataKey: 'taskArchive',
+    modelVersion: MODEL_VERSION.TASK_ARCHIVE,
     reducerFn: taskReducer as any,
     migrateFn: migrateTaskArchiveState,
   },
   taskRepeatCfg: {
     lsKey: LS_TASK_REPEAT_CFG_STATE,
     appDataKey: 'taskRepeatCfg',
+    modelVersion: MODEL_VERSION.TASK_REPEAT,
     reducerFn: taskRepeatCfgReducer as any,
     migrateFn: migrateTaskRepeatCfgState,
   },
 };
 
 export const PROJECT_MODEL_CFGS: PersistenceProjectModelCfgs = {
-  bookmark: { lsKey: LS_BOOKMARK_STATE, appDataKey: 'bookmark' },
+  bookmark: {
+    lsKey: LS_BOOKMARK_STATE,
+    appDataKey: 'bookmark',
+    modelVersion: MODEL_VERSION.___NOT_USED_YET___,
+  },
 };

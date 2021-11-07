@@ -58,6 +58,7 @@ export interface PersistenceForProjectModel<S, M> {
 export interface PersistenceBaseModelCfg<S> {
   lsKey: string;
   appDataKey: keyof AppBaseData;
+  modelVersion: number;
   migrateFn?: (state: S) => S;
   isSkipPush?: boolean;
 }
@@ -66,6 +67,7 @@ export interface PersistenceBaseModelCfg<S> {
 export interface PersistenceEntityModelCfg<S, M> {
   lsKey: string;
   appDataKey: keyof AppBaseData;
+  modelVersion: number;
   reducerFn: (state: S, action: { type: string; payload?: any }) => S;
   migrateFn?: (state: S) => S;
 }
@@ -74,5 +76,6 @@ export interface PersistenceEntityModelCfg<S, M> {
 export interface PersistenceProjectModelCfg<S, M> {
   lsKey: string;
   appDataKey: keyof AppDataForProjects;
+  modelVersion: number;
   migrateFn?: (state: S, projectId: string) => S;
 }

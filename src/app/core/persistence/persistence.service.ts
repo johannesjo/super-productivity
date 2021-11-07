@@ -140,14 +140,16 @@ export class PersistenceService {
   legacyMetric: PersistenceForProjectModel<MetricState, Metric> = this._cmProjectLegacy<
     MetricState,
     Metric
-  >({ lsKey: LS_METRIC_STATE, appDataKey: 'metric' as any });
+  >({ lsKey: LS_METRIC_STATE, appDataKey: 'metric' as any, modelVersion: 0 });
   legacyImprovement: PersistenceForProjectModel<ImprovementState, Improvement> =
     this._cmProjectLegacy<ImprovementState, Improvement>({
+      modelVersion: 0,
       lsKey: LS_IMPROVEMENT_STATE,
       appDataKey: 'improvement' as any,
     });
   legacyObstruction: PersistenceForProjectModel<ObstructionState, Obstruction> =
     this._cmProjectLegacy<ObstructionState, Obstruction>({
+      modelVersion: 0,
       lsKey: LS_OBSTRUCTION_STATE,
       appDataKey: 'obstruction' as any,
     });
@@ -501,11 +503,13 @@ export class PersistenceService {
   private _cmBaseEntity<S, M>({
     lsKey,
     appDataKey,
+    modelVersion,
     reducerFn,
     migrateFn = (v) => v,
   }: PersistenceEntityModelCfg<S, M>): PersistenceBaseEntityModel<S, M> {
     const model = {
-      ...this._cmBase({ lsKey, appDataKey, migrateFn, isSkipPush: true }),
+      // NOTE: isSkipPush is true because we do it below after
+      ...this._cmBase({ lsKey, appDataKey, modelVersion, migrateFn, isSkipPush: true }),
 
       getById: async (id: string): Promise<M> => {
         const state = (await model.loadState()) as any;
@@ -529,9 +533,15 @@ export class PersistenceService {
   private _cmProject<S, M>({
     lsKey,
     appDataKey,
+    modelVersion,
     migrateFn = (v) => v,
   }: PersistenceProjectModelCfg<S, M>): PersistenceForProjectModel<S, M> {
-    const model = this._cmProjectLegacy<S, M>({ lsKey, appDataKey, migrateFn });
+    const model = this._cmProjectLegacy<S, M>({
+      lsKey,
+      appDataKey,
+      modelVersion,
+      migrateFn,
+    });
     this._projectModels.push(model);
     return model;
   }
