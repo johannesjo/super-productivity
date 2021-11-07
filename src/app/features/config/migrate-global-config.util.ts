@@ -9,12 +9,12 @@ import { MODEL_VERSION_KEY } from '../../app.constants';
 import { isMigrateModel } from '../../util/model-version';
 import { SyncProvider } from '../../imex/sync/sync-provider.model';
 
-const MODEL_VERSION = 2.2006;
+const GLOBAL_CONFIG_MODEL_VERSION = 2.2006;
 
 export const migrateGlobalConfigState = (
   globalConfigState: GlobalConfigState,
 ): GlobalConfigState => {
-  if (!isMigrateModel(globalConfigState, MODEL_VERSION, 'GlobalConfig')) {
+  if (!isMigrateModel(globalConfigState, GLOBAL_CONFIG_MODEL_VERSION, 'GlobalConfig')) {
     return globalConfigState;
   }
 
@@ -35,7 +35,7 @@ export const migrateGlobalConfigState = (
   return {
     ...globalConfigState,
     // Update model version after all migrations ran successfully
-    [MODEL_VERSION_KEY]: MODEL_VERSION,
+    [MODEL_VERSION_KEY]: GLOBAL_CONFIG_MODEL_VERSION,
   };
 };
 

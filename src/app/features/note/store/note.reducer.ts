@@ -11,12 +11,15 @@ import {
 import { loadAllData } from '../../../root-store/meta/load-all-data.action';
 import { devError } from '../../../util/dev-error';
 import { WorkContextType } from '../../work-context/work-context.model';
+import { MODEL_VERSION_KEY } from '../../../app.constants';
+import { NOTE_MODEL_VERSION } from '../note.const';
 
 export const adapter: EntityAdapter<Note> = createEntityAdapter<Note>();
 
 export const initialNoteState: NoteState = adapter.getInitialState({
   ids: [],
   todayOrder: [],
+  [MODEL_VERSION_KEY]: NOTE_MODEL_VERSION,
 });
 
 export const { selectIds, selectEntities, selectAll, selectTotal } =

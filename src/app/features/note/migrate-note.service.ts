@@ -33,7 +33,7 @@ export class MigrateNoteService {
         if (!currentNoteState[MODEL_VERSION_KEY]) {
           console.log('Migrating Legacy Note State to new model');
           console.log('noteMigration:', currentNoteState[MODEL_VERSION_KEY], {
-            noteState: currentNoteState,
+            currentNoteState,
           });
           console.log(
             'currentNoteState[MODEL_VERSION_KEY]',
