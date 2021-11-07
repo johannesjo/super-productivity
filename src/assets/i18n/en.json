@@ -627,6 +627,7 @@
         "FORCE_UPLOAD": "Upload local data anyway?",
         "FORCE_UPLOAD_AFTER_ERROR": "An Error occurred while uploading your local data. Try to force the update?",
         "NO_REMOTE_DATA": "No remote data found. Upload local to Remote?",
+        "MIGRATE_LEGACY": "Legacy data detected while importing, do you want to try to migrate it?",
         "TRY_LOAD_REMOTE_AGAIN": "Try to re-load data from remote once again?"
       },
       "D_AUTH_CODE": {

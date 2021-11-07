@@ -13,6 +13,7 @@ import { TranslateService } from '@ngx-translate/core';
 import { GLOBAL_CONFIG_LOCAL_ONLY_FIELDS } from './sync.const';
 import { get, set } from 'object-path';
 import { migrateLegacyAppData } from './migrate-legacy-app-data.util';
+import { isLegacyAppData } from './is-legacy-app-data.util';
 
 // TODO some of this can be done in a background script
 
@@ -68,19 +69,32 @@ export class DataImportService {
       await this._persistenceService.clearDatabaseExceptBackup();
     }
 
-    // if (isLegacyAppData(data)) {
-    // }
     let migratedData;
-    try {
-      migratedData = migrateLegacyAppData(data);
-    } catch (e) {
-      console.error(e);
-      console.error('Unable to migrate data');
+    console.log('I am here!');
+    console.log(isLegacyAppData(data));
+
+    if (isLegacyAppData(data)) {
+      if (confirm(this._translateService.instant(T.F.SYNC.C.MIGRATE_LEGACY))) {
+        try {
+          migratedData = migrateLegacyAppData(data);
+        } catch (e) {
+          console.error(e);
+          console.error('Unable to migrate data');
+          migratedData = data;
+        }
+      } else {
+        this._snackService.open({
+          type: 'ERROR',
+          msg: T.F.SYNC.S.ERROR_INVALID_DATA,
+        });
+        return;
+      }
+    } else {
       migratedData = data;
     }
 
-    console.log('isValidAppData', isValidAppData(migratedData), migratedData);
     if (isValidAppData(migratedData)) {
+      console.log('isValidAppData', true, migratedData);
       try {
         const mergedData = isOmitLocalFields
           ? await this._mergeWithLocalOmittedFields(migratedData)
@@ -107,6 +121,7 @@ export class DataImportService {
         isSkipStrayBackupCheck: true,
       });
     } else {
+      console.log('isValidAppData', false, migratedData);
       this._snackService.open({ type: 'ERROR', msg: T.F.SYNC.S.ERROR_INVALID_DATA });
       console.error(migratedData);
       this._imexMetaService.setDataImportInProgress(false);
