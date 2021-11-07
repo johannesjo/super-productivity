@@ -1,7 +1,7 @@
 import { createEntityAdapter, EntityAdapter, Update } from '@ngrx/entity';
 import { Project, ProjectState } from '../project.model';
 import { createReducer, on } from '@ngrx/store';
-import { FIRST_PROJECT, PROJECT_MODEL_VERSION } from '../project.const';
+import { FIRST_PROJECT } from '../project.const';
 import {
   WorkContextAdvancedCfg,
   WorkContextType,
@@ -57,6 +57,7 @@ import {
   upsertProject,
 } from './project.actions';
 import { addNote, deleteNote, updateNoteOrder } from '../../note/store/note.actions';
+import { MODEL_VERSION } from '../../../core/model-version';
 
 export const PROJECT_FEATURE_NAME = 'projects';
 const WORK_CONTEXT_TYPE: WorkContextType = WorkContextType.PROJECT;
@@ -70,7 +71,7 @@ export const initialProjectState: ProjectState = projectAdapter.getInitialState(
   entities: {
     [FIRST_PROJECT.id]: FIRST_PROJECT,
   },
-  [MODEL_VERSION_KEY]: PROJECT_MODEL_VERSION,
+  [MODEL_VERSION_KEY]: MODEL_VERSION.PROJECT,
 });
 
 export const projectReducer = createReducer<ProjectState>(

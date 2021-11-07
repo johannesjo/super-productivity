@@ -2,13 +2,14 @@ import { MODEL_VERSION_KEY } from '../../app.constants';
 import { isMigrateModel } from '../../util/model-version';
 import { SimpleCounter, SimpleCounterState } from './simple-counter.model';
 import { Dictionary } from '@ngrx/entity';
-
-const MODEL_VERSION = 2;
+import { MODEL_VERSION } from '../../core/model-version';
 
 export const migrateSimpleCounterState = (
   simpleCounterState: SimpleCounterState,
 ): SimpleCounterState => {
-  if (!isMigrateModel(simpleCounterState, MODEL_VERSION, 'SimpleCounter')) {
+  if (
+    !isMigrateModel(simpleCounterState, MODEL_VERSION.SIMPLE_COUNTER, 'SimpleCounter')
+  ) {
     return simpleCounterState;
   }
 
@@ -22,11 +23,11 @@ export const migrateSimpleCounterState = (
   });
 
   // Update model version after all migrations ran successfully
-  simpleCounterState[MODEL_VERSION_KEY] = MODEL_VERSION;
+  simpleCounterState[MODEL_VERSION_KEY] = MODEL_VERSION.SIMPLE_COUNTER;
   return {
     ...simpleCounterState,
     entities: simpleCounterEntities,
-    [MODEL_VERSION_KEY]: MODEL_VERSION,
+    [MODEL_VERSION_KEY]: MODEL_VERSION.SIMPLE_COUNTER,
   };
 };
 

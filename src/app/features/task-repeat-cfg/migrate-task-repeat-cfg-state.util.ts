@@ -3,13 +3,12 @@ import { MODEL_VERSION_KEY } from '../../app.constants';
 import { isMigrateModel } from '../../util/model-version';
 import { TaskRepeatCfg, TaskRepeatCfgState } from './task-repeat-cfg.model';
 import { isValidSplitTime } from '../../util/is-valid-split-time';
-
-const MODEL_VERSION = 1.3;
+import { MODEL_VERSION } from '../../core/model-version';
 
 export const migrateTaskRepeatCfgState = (
   taskRepeatState: TaskRepeatCfgState,
 ): TaskRepeatCfgState => {
-  if (!isMigrateModel(taskRepeatState, MODEL_VERSION, 'TaskRepeat')) {
+  if (!isMigrateModel(taskRepeatState, MODEL_VERSION.TASK_REPEAT, 'TaskRepeat')) {
     return taskRepeatState;
   }
 
@@ -28,7 +27,7 @@ export const migrateTaskRepeatCfgState = (
     ...taskRepeatState,
     entities: taskRepeatEntities,
     // Update model version after all migrations ran successfully
-    [MODEL_VERSION_KEY]: MODEL_VERSION,
+    [MODEL_VERSION_KEY]: MODEL_VERSION.TASK_REPEAT,
   };
 };
 

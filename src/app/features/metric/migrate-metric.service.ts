@@ -10,9 +10,9 @@ import { initialObstructionState } from './obstruction/store/obstruction.reducer
 import { ImprovementState } from './improvement/improvement.model';
 import { DataImportService } from '../../imex/sync/data-import.service';
 import { MODEL_VERSION_KEY } from '../../app.constants';
-import { METRIC_MODEL_VERSION } from './metric.const';
 import { SyncTriggerService } from '../../imex/sync/sync-trigger.service';
 import { unique } from '../../util/unique';
+import { MODEL_VERSION } from '../../core/model-version';
 
 @Injectable({
   providedIn: 'root',
@@ -77,7 +77,7 @@ export class MigrateMetricService {
           await this._persistenceService.metric.saveState(
             {
               ...newM,
-              [MODEL_VERSION_KEY]: METRIC_MODEL_VERSION,
+              [MODEL_VERSION_KEY]: MODEL_VERSION.METRIC,
             },
             { isSyncModelChange: false },
           );

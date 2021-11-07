@@ -9,5 +9,3 @@ export const DEFAULT_METRIC_FOR_DAY: Omit<Metric, 'id'> = {
   mood: undefined,
   productivity: undefined,
 };
-
-export const METRIC_MODEL_VERSION = 1.0;

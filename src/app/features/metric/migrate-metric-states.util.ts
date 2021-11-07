@@ -1,22 +1,20 @@
-import { METRIC_MODEL_VERSION } from './metric.const';
 import { isMigrateModel } from '../../util/model-version';
 import { MetricState } from './metric.model';
 import { ObstructionState } from './obstruction/obstruction.model';
 import { ImprovementState } from './improvement/improvement.model';
 import { MODEL_VERSION_KEY } from '../../app.constants';
-
-const MODEL_VERSION = METRIC_MODEL_VERSION;
+import { MODEL_VERSION } from '../../core/model-version';
 
 const migrateMetricStatesUtil =
   (modelName: string) =>
   (metricState: any): any => {
-    if (!isMigrateModel(metricState, MODEL_VERSION, modelName)) {
+    if (!isMigrateModel(metricState, MODEL_VERSION.METRIC, modelName)) {
       return metricState;
     }
     return {
       ...metricState,
       // Update model version after all migrations ran successfully
-      [MODEL_VERSION_KEY]: MODEL_VERSION,
+      [MODEL_VERSION_KEY]: MODEL_VERSION.METRIC,
     };
   };
 

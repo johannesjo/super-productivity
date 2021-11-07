@@ -8,7 +8,7 @@ import { unique } from '../../util/unique';
 import { NoteService } from './note.service';
 import { initialNoteState } from './store/note.reducer';
 import { Note, NoteState } from './note.model';
-import { NOTE_MODEL_VERSION } from './note.const';
+import { MODEL_VERSION } from '../../core/model-version';
 
 @Injectable({
   providedIn: 'root',
@@ -78,7 +78,7 @@ export class MigrateNoteService {
           await this._persistenceService.note.saveState(
             {
               ...newNoteState,
-              [MODEL_VERSION_KEY]: NOTE_MODEL_VERSION,
+              [MODEL_VERSION_KEY]: MODEL_VERSION.NOTE,
             },
             { isSyncModelChange: false },
           );

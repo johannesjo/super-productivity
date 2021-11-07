@@ -5,12 +5,12 @@ import { MODEL_VERSION_KEY, WORKLOG_DATE_STR_FORMAT } from '../../app.constants'
 import * as moment from 'moment';
 import { convertToWesternArabic } from '../../util/numeric-converter';
 import { isMigrateModel } from '../../util/model-version';
+import { MODEL_VERSION } from '../../core/model-version';
 
-const MODEL_VERSION = 3.3337;
 export const LEGACY_GITHUB_TYPE = 'GIT';
 
 export const migrateTaskState = (taskState: TaskState, modelType = 'Task'): TaskState => {
-  if (!isMigrateModel(taskState, MODEL_VERSION, modelType)) {
+  if (!isMigrateModel(taskState, MODEL_VERSION.TASK, modelType)) {
     return taskState;
   }
 
@@ -22,7 +22,11 @@ export const migrateTaskState = (taskState: TaskState, modelType = 'Task'): Task
     taskEntities[key] = _taskEntityMigrations(taskEntities[key] as TaskCopy);
   });
 
-  return { ...taskState, entities: taskEntities, [MODEL_VERSION_KEY]: MODEL_VERSION };
+  return {
+    ...taskState,
+    entities: taskEntities,
+    [MODEL_VERSION_KEY]: MODEL_VERSION.TASK,
+  };
 };
 
 export const migrateTaskArchiveState = (taskArchiveState: TaskArchive): TaskArchive => {

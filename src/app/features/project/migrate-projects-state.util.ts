@@ -1,6 +1,6 @@
 import { Dictionary } from '@ngrx/entity';
 import { Project, ProjectState } from './project.model';
-import { DEFAULT_PROJECT, PROJECT_MODEL_VERSION } from './project.const';
+import { DEFAULT_PROJECT } from './project.const';
 import {
   CALDAV_TYPE,
   DEFAULT_ISSUE_PROVIDER_CFGS,
@@ -26,11 +26,10 @@ import { GithubCfg } from '../issue/providers/github/github.model';
 import { GitlabCfg } from '../issue/providers/gitlab/gitlab';
 import { CaldavCfg } from '../issue/providers/caldav/caldav.model';
 import { OpenProjectCfg } from '../issue/providers/open-project/open-project.model';
-
-const MODEL_VERSION = PROJECT_MODEL_VERSION;
+import { MODEL_VERSION } from '../../core/model-version';
 
 export const migrateProjectState = (projectState: ProjectState): ProjectState => {
-  if (!isMigrateModel(projectState, MODEL_VERSION, 'Project')) {
+  if (!isMigrateModel(projectState, MODEL_VERSION.PROJECT, 'Project')) {
     return projectState;
   }
 
@@ -53,7 +52,7 @@ export const migrateProjectState = (projectState: ProjectState): ProjectState =>
     ..._fixIds(projectState),
     entities: projectEntities,
     // Update model version after all migrations ran successfully
-    [MODEL_VERSION_KEY]: MODEL_VERSION,
+    [MODEL_VERSION_KEY]: MODEL_VERSION.PROJECT,
   };
 };
 
