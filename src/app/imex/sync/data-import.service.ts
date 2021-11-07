@@ -5,7 +5,6 @@ import { SnackService } from '../../core/snack/snack.service';
 import { ReminderService } from '../../features/reminder/reminder.service';
 import { ImexMetaService } from '../imex-meta/imex-meta.service';
 import { T } from '../../t.const';
-import { MigrationService } from '../../core/migration/migration.service';
 import { DataInitService } from '../../core/data-init/data-init.service';
 import { isValidAppData } from './is-valid-app-data.util';
 import { DataRepairService } from '../../core/data-repair/data-repair.service';
@@ -25,14 +24,12 @@ export class DataImportService {
     private _snackService: SnackService,
     private _reminderService: ReminderService,
     private _imexMetaService: ImexMetaService,
-    private _migrationService: MigrationService,
     private _dataInitService: DataInitService,
     private _dataRepairService: DataRepairService,
     private _translateService: TranslateService,
   ) {
     this._isCheckForStrayLocalDBBackupAndImport();
   }
-
   async getCompleteSyncData(): Promise<AppDataComplete> {
     return await this._persistenceService.loadComplete();
   }
@@ -73,10 +70,9 @@ export class DataImportService {
 
     if (isValidAppData(data)) {
       try {
-        const migratedData = this._migrationService.migrateIfNecessary(data);
         const mergedData = isOmitLocalFields
           ? await this._mergeWithLocalOmittedFields(data)
-          : migratedData;
+          : data;
         // save data to database first then load to store from there
         await this._persistenceService.importComplete(mergedData);
         await this._loadAllFromDatabaseToStore();
