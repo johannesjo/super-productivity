@@ -207,23 +207,23 @@ export class PersistenceService {
   legacyNote: PersistenceForProjectModel<NoteState, Note> = this._cmProjectLegacy<
     NoteState,
     Note
-  >(LS_NOTE_STATE, 'note' as any);
+  >({ lsKey: LS_NOTE_STATE, appDataKey: 'note' as any });
 
   // LEGACY PROJECT MODELS
   legacyMetric: PersistenceForProjectModel<MetricState, Metric> = this._cmProjectLegacy<
     MetricState,
     Metric
-  >(LS_METRIC_STATE, 'metric' as any);
+  >({ lsKey: LS_METRIC_STATE, appDataKey: 'metric' as any });
   legacyImprovement: PersistenceForProjectModel<ImprovementState, Improvement> =
-    this._cmProjectLegacy<ImprovementState, Improvement>(
-      LS_IMPROVEMENT_STATE,
-      'improvement' as any,
-    );
+    this._cmProjectLegacy<ImprovementState, Improvement>({
+      lsKey: LS_IMPROVEMENT_STATE,
+      appDataKey: 'improvement' as any,
+    });
   legacyObstruction: PersistenceForProjectModel<ObstructionState, Obstruction> =
-    this._cmProjectLegacy<ObstructionState, Obstruction>(
-      LS_OBSTRUCTION_STATE,
-      'obstruction' as any,
-    );
+    this._cmProjectLegacy<ObstructionState, Obstruction>({
+      lsKey: LS_OBSTRUCTION_STATE,
+      appDataKey: 'obstruction' as any,
+    });
 
   onAfterSave$: Subject<{
     appDataKey: AllowedDBKeys;
@@ -618,17 +618,21 @@ export class PersistenceService {
     appDataKey: keyof AppDataForProjects;
     migrateFn?: (state: S, projectId: string) => S;
   }): PersistenceForProjectModel<S, M> {
-    const model = this._cmProjectLegacy<S, M>(lsKey, appDataKey, migrateFn);
+    const model = this._cmProjectLegacy<S, M>({ lsKey, appDataKey, migrateFn });
     this._projectModels.push(model);
     return model;
   }
 
   // TODO maybe find a way to exec effects here as well
-  private _cmProjectLegacy<S, M>(
-    lsKey: string,
-    appDataKey: keyof AppDataForProjects,
-    migrateFn: (state: S, projectId: string) => S = (v) => v,
-  ): PersistenceForProjectModel<S, M> {
+  private _cmProjectLegacy<S, M>({
+    lsKey,
+    appDataKey,
+    migrateFn = (v) => v,
+  }: {
+    lsKey: string;
+    appDataKey: keyof AppDataForProjects;
+    migrateFn?: (state: S, projectId: string) => S;
+  }): PersistenceForProjectModel<S, M> {
     const model = {
       appDataKey,
       load: (projectId: string): Promise<S> =>
