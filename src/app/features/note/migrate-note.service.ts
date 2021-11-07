@@ -30,16 +30,16 @@ export class MigrateNoteService {
         first(),
       )
       .subscribe(async (currentNoteState: NoteState) => {
-        console.log('Migrating Legacy Note State to new model');
-        console.log('noteMigration:', currentNoteState[MODEL_VERSION_KEY], {
-          noteState: currentNoteState,
-        });
-        console.log(
-          'currentNoteState[MODEL_VERSION_KEY]',
-          currentNoteState[MODEL_VERSION_KEY],
-        );
-
         if (!currentNoteState[MODEL_VERSION_KEY]) {
+          console.log('Migrating Legacy Note State to new model');
+          console.log('noteMigration:', currentNoteState[MODEL_VERSION_KEY], {
+            noteState: currentNoteState,
+          });
+          console.log(
+            'currentNoteState[MODEL_VERSION_KEY]',
+            currentNoteState[MODEL_VERSION_KEY],
+          );
+
           const projectState = await this._persistenceService.project.loadState();
           // For new instances
           if (!projectState?.ids?.length) {

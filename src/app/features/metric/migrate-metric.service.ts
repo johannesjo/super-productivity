@@ -34,9 +34,12 @@ export class MigrateMetricService {
         first(),
       )
       .subscribe(async (metricState: MetricState) => {
-        console.log('Migrating Legacy Metric State to new model');
-        console.log('metricMigration:', metricState[MODEL_VERSION_KEY], { metricState });
         if (!metricState[MODEL_VERSION_KEY]) {
+          console.log('Migrating Legacy Metric State to new model');
+          console.log('metricMigration:', metricState[MODEL_VERSION_KEY], {
+            metricState,
+          });
+
           const projectState = await this._persistenceService.project.loadState();
           // For new instances
           if (!projectState?.ids?.length) {
