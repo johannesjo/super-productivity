@@ -11,7 +11,6 @@ import { UiModule } from '../../ui/ui.module';
 import { FormsModule } from '@angular/forms';
 import { DialogAddNoteComponent } from './dialog-add-note/dialog-add-note.component';
 import { TagModule } from '../tag/tag.module';
-import { MigrateNoteService } from './migrate-note.service';
 
 @NgModule({
   imports: [
@@ -26,7 +25,5 @@ import { MigrateNoteService } from './migrate-note.service';
   exports: [NotesComponent],
 })
 export class NoteModule {
-  constructor(private _migrateNoteService: MigrateNoteService) {
-    this._migrateNoteService.checkMigrate();
-  }
+  constructor() {}
 }
