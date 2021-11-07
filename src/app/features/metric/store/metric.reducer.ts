@@ -4,11 +4,14 @@ import { Metric, MetricState } from '../metric.model';
 import { loadAllData } from '../../../root-store/meta/load-all-data.action';
 import { migrateMetricState } from '../migrate-metric-states.util';
 import { createReducer, on } from '@ngrx/store';
+import { MODEL_VERSION_KEY } from '../../../app.constants';
+import { MODEL_VERSION } from '../../../core/model-version';
 
 export const METRIC_FEATURE_NAME = 'metric';
 export const metricAdapter: EntityAdapter<Metric> = createEntityAdapter<Metric>();
 
 export const initialMetricState: MetricState = metricAdapter.getInitialState({
+  [MODEL_VERSION_KEY]: MODEL_VERSION.METRIC,
   // additional entity state properties
 });
 

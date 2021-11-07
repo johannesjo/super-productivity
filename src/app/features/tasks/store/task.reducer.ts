@@ -59,6 +59,8 @@ import { roundDurationVanilla } from '../../../util/round-duration';
 import { loadAllData } from '../../../root-store/meta/load-all-data.action';
 import { migrateTaskState } from '../migrate-task-state.util';
 import { createReducer, on } from '@ngrx/store';
+import { MODEL_VERSION_KEY } from '../../../app.constants';
+import { MODEL_VERSION } from '../../../core/model-version';
 
 export const TASK_FEATURE_NAME = 'tasks';
 
@@ -74,6 +76,7 @@ export const initialTaskState: TaskState = taskAdapter.getInitialState({
   taskAdditionalInfoTargetPanel: TaskAdditionalInfoTargetPanel.Default,
   lastCurrentTaskId: null,
   isDataLoaded: false,
+  [MODEL_VERSION_KEY]: MODEL_VERSION.TASK,
 }) as TaskState;
 
 export const taskReducer = createReducer<TaskState>(

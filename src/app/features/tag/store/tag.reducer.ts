@@ -25,6 +25,8 @@ import { unique } from '../../../util/unique';
 import { loadAllData } from '../../../root-store/meta/load-all-data.action';
 import { TaskWithSubTasks } from '../../tasks/task.model';
 import { migrateTagState } from '../migrate-tag-state.util';
+import { MODEL_VERSION_KEY } from '../../../app.constants';
+import { MODEL_VERSION } from '../../../core/model-version';
 
 export const TAG_FEATURE_NAME = 'tag';
 const WORK_CONTEXT_TYPE: WorkContextType = WorkContextType.TAG;
@@ -86,6 +88,7 @@ const _addMyDayTagIfNecessary = (state: TagState): TagState => {
 export const initialTagState: TagState = _addMyDayTagIfNecessary(
   tagAdapter.getInitialState({
     // additional entity state properties
+    [MODEL_VERSION_KEY]: MODEL_VERSION.TAG,
   }),
 );
 

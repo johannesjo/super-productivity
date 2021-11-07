@@ -1,5 +1,4 @@
 import { initialProjectState } from '../../features/project/store/project.reducer';
-import { DEFAULT_GLOBAL_CONFIG } from '../../features/config/default-global-config.const';
 import { initialTaskState } from '../../features/tasks/store/task.reducer';
 import { initialTagState } from '../../features/tag/store/tag.reducer';
 import { initialSimpleCounterState } from '../../features/simple-counter/store/simple-counter.reducer';
@@ -11,6 +10,9 @@ import { initialImprovementState } from '../../features/metric/improvement/store
 import { initialObstructionState } from '../../features/metric/obstruction/store/obstruction.reducer';
 import { AppBaseData } from './sync.model';
 import { initialNoteState } from '../../features/note/store/note.reducer';
+import { initialGlobalConfigState } from '../../features/config/store/global-config.reducer';
+import { MODEL_VERSION } from '../../core/model-version';
+import { MODEL_VERSION_KEY } from '../../app.constants';
 
 export const SYNC_INITIAL_SYNC_TRIGGER = 'INITIAL_SYNC_TRIGGER';
 export const SYNC_DEFAULT_AUDIT_TIME = 10000;
@@ -24,13 +26,16 @@ export const SYNC_MIN_INTERVAL = 5000;
 export const DEFAULT_APP_BASE_DATA: AppBaseData = {
   project: initialProjectState,
   archivedProjects: {},
-  globalConfig: DEFAULT_GLOBAL_CONFIG,
+  globalConfig: initialGlobalConfigState,
   reminders: [],
 
   task: initialTaskState,
   tag: initialTagState,
   simpleCounter: initialSimpleCounterState,
-  taskArchive: createEmptyEntity() as TaskArchive,
+  taskArchive: {
+    ...(createEmptyEntity() as TaskArchive),
+    [MODEL_VERSION_KEY]: MODEL_VERSION.TASK_ARCHIVE,
+  },
   taskRepeatCfg: initialTaskRepeatCfgState,
   note: initialNoteState,
 

@@ -19,6 +19,8 @@ import { getWorklogStr } from '../../../util/get-work-log-str';
 import { updateAllInDictionary } from '../../../util/update-all-in-dictionary';
 import { migrateSimpleCounterState } from '../migrate-simple-counter-state.util';
 import { Update } from '@ngrx/entity/src/models';
+import { MODEL_VERSION_KEY } from '../../../app.constants';
+import { MODEL_VERSION } from '../../../core/model-version';
 
 export const SIMPLE_COUNTER_FEATURE_NAME = 'simpleCounter';
 
@@ -63,6 +65,7 @@ export const initialSimpleCounterState: SimpleCounterState =
   adapter.getInitialState<SimpleCounterState>({
     ids: DEFAULT_SIMPLE_COUNTERS.map((value) => value.id),
     entities: arrayToDictionary<SimpleCounter>(DEFAULT_SIMPLE_COUNTERS),
+    [MODEL_VERSION_KEY]: MODEL_VERSION.SIMPLE_COUNTER,
   });
 
 const disableIsOnForAll = (state: SimpleCounterState): SimpleCounterState => {

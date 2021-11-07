@@ -13,6 +13,8 @@ import {
 import { DEFAULT_GLOBAL_CONFIG } from '../default-global-config.const';
 import { loadAllData } from '../../../root-store/meta/load-all-data.action';
 import { migrateGlobalConfigState } from '../migrate-global-config.util';
+import { MODEL_VERSION_KEY } from '../../../app.constants';
+import { MODEL_VERSION } from '../../../core/model-version';
 
 export const CONFIG_FEATURE_NAME = 'globalConfig';
 export const selectConfigFeatureState =
@@ -46,10 +48,13 @@ export const selectTimelineConfig = createSelector(
   (cfg): TimelineConfig => cfg.timeline,
 );
 
-const initialState: GlobalConfigState = DEFAULT_GLOBAL_CONFIG;
+export const initialGlobalConfigState: GlobalConfigState = {
+  ...DEFAULT_GLOBAL_CONFIG,
+  [MODEL_VERSION_KEY]: MODEL_VERSION.GLOBAL_CONFIG,
+};
 
 export const globalConfigReducer = createReducer<GlobalConfigState>(
-  initialState,
+  initialGlobalConfigState,
 
   on(loadAllData, (oldState, { appDataComplete }) =>
     appDataComplete.globalConfig

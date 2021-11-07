@@ -16,6 +16,8 @@ import { createFeatureSelector, createReducer, createSelector, on } from '@ngrx/
 import { loadAllData } from '../../../root-store/meta/load-all-data.action';
 import { migrateTaskRepeatCfgState } from '../migrate-task-repeat-cfg-state.util';
 import { isSameDay } from '../../../util/is-same-day';
+import { MODEL_VERSION_KEY } from '../../../app.constants';
+import { MODEL_VERSION } from '../../../core/model-version';
 
 export const TASK_REPEAT_CFG_FEATURE_NAME = 'taskRepeatCfg';
 
@@ -77,6 +79,7 @@ export const selectTaskRepeatCfgByIdAllowUndefined = createSelector(
 
 export const initialTaskRepeatCfgState: TaskRepeatCfgState = adapter.getInitialState({
   // additional entity state properties
+  [MODEL_VERSION_KEY]: MODEL_VERSION.TASK_REPEAT,
 });
 
 export const taskRepeatCfgReducer = createReducer<TaskRepeatCfgState>(
