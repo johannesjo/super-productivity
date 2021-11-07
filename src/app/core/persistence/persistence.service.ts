@@ -121,63 +121,82 @@ export class PersistenceService {
   project: PersistenceBaseEntityModel<ProjectState, Project> = this._cmBaseEntity<
     ProjectState,
     Project
-  >(LS_PROJECT_META_LIST, 'project', projectReducer as any, migrateProjectState);
+  >({
+    lsKey: LS_PROJECT_META_LIST,
+    appDataKey: 'project',
+    reducerFn: projectReducer as any,
+    migrateFn: migrateProjectState,
+  });
 
-  tag: PersistenceBaseEntityModel<TagState, Tag> = this._cmBaseEntity<TagState, Tag>(
-    LS_TAG_STATE,
-    'tag',
-    tagReducer,
-  );
+  tag: PersistenceBaseEntityModel<TagState, Tag> = this._cmBaseEntity<TagState, Tag>({
+    lsKey: LS_TAG_STATE,
+    appDataKey: 'tag',
+    reducerFn: tagReducer,
+  });
   simpleCounter: PersistenceBaseEntityModel<SimpleCounterState, SimpleCounter> =
-    this._cmBaseEntity<SimpleCounterState, SimpleCounter>(
-      LS_SIMPLE_COUNTER_STATE,
-      'simpleCounter',
-      simpleCounterReducer,
-    );
+    this._cmBaseEntity<SimpleCounterState, SimpleCounter>({
+      lsKey: LS_SIMPLE_COUNTER_STATE,
+      appDataKey: 'simpleCounter',
+      reducerFn: simpleCounterReducer,
+    });
   note: PersistenceBaseEntityModel<NoteState, Note> = this._cmBaseEntity<NoteState, Note>(
-    LS_NOTE_STATE,
-    'note',
-    noteReducer,
+    {
+      lsKey: LS_NOTE_STATE,
+      appDataKey: 'note',
+      reducerFn: noteReducer,
+    },
   );
 
   // METRIC MODELS
   metric: PersistenceBaseEntityModel<MetricState, Metric> = this._cmBaseEntity<
     MetricState,
     Metric
-  >(LS_METRIC_STATE, 'metric', metricReducer as any, migrateMetricState);
+  >({
+    lsKey: LS_METRIC_STATE,
+    appDataKey: 'metric',
+    reducerFn: metricReducer as any,
+    migrateFn: migrateMetricState,
+  });
   improvement: PersistenceBaseEntityModel<ImprovementState, Improvement> =
-    this._cmBaseEntity<ImprovementState, Improvement>(
-      LS_IMPROVEMENT_STATE,
-      'improvement',
-      improvementReducer,
-      migrateImprovementState,
-    );
+    this._cmBaseEntity<ImprovementState, Improvement>({
+      lsKey: LS_IMPROVEMENT_STATE,
+      appDataKey: 'improvement',
+      reducerFn: improvementReducer,
+      migrateFn: migrateImprovementState,
+    });
   obstruction: PersistenceBaseEntityModel<ObstructionState, Obstruction> =
-    this._cmBaseEntity<ObstructionState, Obstruction>(
-      LS_OBSTRUCTION_STATE,
-      'obstruction',
-      obstructionReducer as any,
-      migrateObstructionState,
-    );
+    this._cmBaseEntity<ObstructionState, Obstruction>({
+      lsKey: LS_OBSTRUCTION_STATE,
+      appDataKey: 'obstruction',
+      reducerFn: obstructionReducer as any,
+      migrateFn: migrateObstructionState,
+    });
 
   // MAIN TASK MODELS
   task: PersistenceBaseEntityModel<TaskState, Task> = this._cmBaseEntity<TaskState, Task>(
-    LS_TASK_STATE,
-    'task',
-    taskReducer,
-    migrateTaskState,
+    {
+      lsKey: LS_TASK_STATE,
+      appDataKey: 'task',
+      reducerFn: taskReducer,
+      migrateFn: migrateTaskState,
+    },
   );
   taskArchive: PersistenceBaseEntityModel<TaskArchive, ArchiveTask> = this._cmBaseEntity<
     TaskArchive,
     ArchiveTask
-  >(LS_TASK_ARCHIVE, 'taskArchive', taskReducer as any, migrateTaskArchiveState);
+  >({
+    lsKey: LS_TASK_ARCHIVE,
+    appDataKey: 'taskArchive',
+    reducerFn: taskReducer as any,
+    migrateFn: migrateTaskArchiveState,
+  });
   taskRepeatCfg: PersistenceBaseEntityModel<TaskRepeatCfgState, TaskRepeatCfg> =
-    this._cmBaseEntity<TaskRepeatCfgState, TaskRepeatCfg>(
-      LS_TASK_REPEAT_CFG_STATE,
-      'taskRepeatCfg',
-      taskRepeatCfgReducer as any,
-      migrateTaskRepeatCfgState,
-    );
+    this._cmBaseEntity<TaskRepeatCfgState, TaskRepeatCfg>({
+      lsKey: LS_TASK_REPEAT_CFG_STATE,
+      appDataKey: 'taskRepeatCfg',
+      reducerFn: taskRepeatCfgReducer as any,
+      migrateFn: migrateTaskRepeatCfgState,
+    });
 
   // PROJECT MODELS
   bookmark: PersistenceForProjectModel<BookmarkState, Bookmark> = this._cmProject<
@@ -557,12 +576,17 @@ export class PersistenceService {
   // return globalConfig;
   // }
 
-  private _cmBaseEntity<S, M>(
-    lsKey: string,
-    appDataKey: keyof AppBaseData,
-    reducerFn: (state: S, action: { type: string; payload?: any }) => S,
-    migrateFn: (state: S) => S = (v) => v,
-  ): PersistenceBaseEntityModel<S, M> {
+  private _cmBaseEntity<S, M>({
+    lsKey,
+    appDataKey,
+    reducerFn,
+    migrateFn = (v) => v,
+  }: {
+    lsKey: string;
+    appDataKey: keyof AppBaseData;
+    reducerFn: (state: S, action: { type: string; payload?: any }) => S;
+    migrateFn?: (state: S) => S;
+  }): PersistenceBaseEntityModel<S, M> {
     const model = {
       ...this._cmBase({ lsKey, appDataKey, migrateFn, isSkipPush: true }),
 
