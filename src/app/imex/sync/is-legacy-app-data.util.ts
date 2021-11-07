@@ -20,7 +20,15 @@ export const isLegacyAppData = (appData: AppDataComplete): boolean => {
       if (typeof appDataModelVersion !== 'number') {
         return false;
       }
-      return isLegacyVersion(appDataModelVersion, codedModelVersion);
+      const isLegacyVersionV = isLegacyVersion(appDataModelVersion, codedModelVersion);
+      if (isLegacyVersionV) {
+        console.log(
+          'LEGACY MODEL  => ' + appDataKey,
+          appDataModelVersion,
+          codedModelVersion,
+        );
+      }
+      return isLegacyVersionV;
     });
 };
 

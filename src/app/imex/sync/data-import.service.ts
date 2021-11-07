@@ -70,9 +70,6 @@ export class DataImportService {
     }
 
     let migratedData;
-    console.log('I am here!');
-    console.log(isLegacyAppData(data));
-
     if (isLegacyAppData(data)) {
       if (confirm(this._translateService.instant(T.F.SYNC.C.MIGRATE_LEGACY))) {
         try {
