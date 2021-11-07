@@ -2,10 +2,7 @@ import { Injectable } from '@angular/core';
 import {
   AllowedDBKeys,
   LS_BACKUP,
-  LS_IMPROVEMENT_STATE,
   LS_LAST_LOCAL_SYNC_MODEL_CHANGE,
-  LS_METRIC_STATE,
-  LS_OBSTRUCTION_STATE,
   LS_PROJECT_ARCHIVE,
   LS_PROJECT_PREFIX,
 } from './ls-keys.const';
@@ -135,24 +132,6 @@ export class PersistenceService {
     BookmarkState,
     Bookmark
   >(PROJECT_MODEL_CFGS.bookmark);
-
-  // LEGACY PROJECT MODELS
-  legacyMetric: PersistenceForProjectModel<MetricState, Metric> = this._cmProjectLegacy<
-    MetricState,
-    Metric
-  >({ lsKey: LS_METRIC_STATE, appDataKey: 'metric' as any, modelVersion: 0 });
-  legacyImprovement: PersistenceForProjectModel<ImprovementState, Improvement> =
-    this._cmProjectLegacy<ImprovementState, Improvement>({
-      modelVersion: 0,
-      lsKey: LS_IMPROVEMENT_STATE,
-      appDataKey: 'improvement' as any,
-    });
-  legacyObstruction: PersistenceForProjectModel<ObstructionState, Obstruction> =
-    this._cmProjectLegacy<ObstructionState, Obstruction>({
-      modelVersion: 0,
-      lsKey: LS_OBSTRUCTION_STATE,
-      appDataKey: 'obstruction' as any,
-    });
 
   onAfterSave$: Subject<{
     appDataKey: AllowedDBKeys;
@@ -533,23 +512,6 @@ export class PersistenceService {
   private _cmProject<S, M>({
     lsKey,
     appDataKey,
-    modelVersion,
-    migrateFn = (v) => v,
-  }: PersistenceProjectModelCfg<S, M>): PersistenceForProjectModel<S, M> {
-    const model = this._cmProjectLegacy<S, M>({
-      lsKey,
-      appDataKey,
-      modelVersion,
-      migrateFn,
-    });
-    this._projectModels.push(model);
-    return model;
-  }
-
-  // TODO maybe find a way to exec effects here as well
-  private _cmProjectLegacy<S, M>({
-    lsKey,
-    appDataKey,
     migrateFn = (v) => v,
   }: PersistenceProjectModelCfg<S, M>): PersistenceForProjectModel<S, M> {
     const model = {
@@ -583,6 +545,7 @@ export class PersistenceService {
         },
       },
     };
+    this._projectModels.push(model);
     return model;
   }
 

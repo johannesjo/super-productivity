@@ -15,7 +15,7 @@ export const isLegacyAppData = (appData: AppDataComplete): boolean => {
           : 0;
       const codedModelVersion = ALL_MODEL_CFGS[modelCfgKey].modelVersion;
 
-      console.log({ appDataKey, appDataModelVersion, codedModelVersion });
+      // console.log({ appDataKey, appDataModelVersion, codedModelVersion });
 
       if (typeof appDataModelVersion !== 'number') {
         return false;
