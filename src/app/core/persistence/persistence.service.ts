@@ -3,24 +3,15 @@ import {
   AllowedDBKeys,
   LS_BACKUP,
   LS_BOOKMARK_STATE,
-  LS_GLOBAL_CFG,
   LS_IMPROVEMENT_STATE,
   LS_LAST_LOCAL_SYNC_MODEL_CHANGE,
   LS_METRIC_STATE,
   LS_NOTE_STATE,
   LS_OBSTRUCTION_STATE,
   LS_PROJECT_ARCHIVE,
-  LS_PROJECT_META_LIST,
   LS_PROJECT_PREFIX,
-  LS_REMINDER,
-  LS_SIMPLE_COUNTER_STATE,
-  LS_TAG_STATE,
-  LS_TASK_ARCHIVE,
-  LS_TASK_REPEAT_CFG_STATE,
-  LS_TASK_STATE,
 } from './ls-keys.const';
 import { GlobalConfigState } from '../../features/config/global-config.model';
-import { projectReducer } from '../../features/project/store/project.reducer';
 import {
   ArchiveTask,
   Task,
@@ -66,39 +57,20 @@ import {
 import { Bookmark, BookmarkState } from '../../features/bookmark/bookmark.model';
 import { Note, NoteState } from '../../features/note/note.model';
 import { Action, Store } from '@ngrx/store';
-import { taskRepeatCfgReducer } from '../../features/task-repeat-cfg/store/task-repeat-cfg.reducer';
 import { Tag, TagState } from '../../features/tag/tag.model';
-import { migrateProjectState } from '../../features/project/migrate-projects-state.util';
-import {
-  migrateTaskArchiveState,
-  migrateTaskState,
-} from '../../features/tasks/migrate-task-state.util';
-import { migrateGlobalConfigState } from '../../features/config/migrate-global-config.util';
-import { taskReducer } from '../../features/tasks/store/task.reducer';
-import { tagReducer } from '../../features/tag/store/tag.reducer';
-import { migrateTaskRepeatCfgState } from '../../features/task-repeat-cfg/migrate-task-repeat-cfg-state.util';
 import { environment } from '../../../environments/environment';
 import { checkFixEntityStateConsistency } from '../../util/check-fix-entity-state-consistency';
 import {
   SimpleCounter,
   SimpleCounterState,
 } from '../../features/simple-counter/simple-counter.model';
-import { simpleCounterReducer } from '../../features/simple-counter/store/simple-counter.reducer';
 import { Subject } from 'rxjs';
 import { devError } from '../../util/dev-error';
 import { removeFromDb, saveToDb } from './persistence.actions';
 import { crossModelMigrations } from './cross-model-migrations';
-import { metricReducer } from '../../features/metric/store/metric.reducer';
-import { improvementReducer } from '../../features/metric/improvement/store/improvement.reducer';
-import { obstructionReducer } from '../../features/metric/obstruction/store/obstruction.reducer';
-import {
-  migrateImprovementState,
-  migrateMetricState,
-  migrateObstructionState,
-} from '../../features/metric/migrate-metric-states.util';
 import { DEFAULT_APP_BASE_DATA } from '../../imex/sync/sync.const';
 import { isValidAppData } from '../../imex/sync/is-valid-app-data.util';
-import { noteReducer } from '../../features/note/store/note.reducer';
+import { BASE_MODEL_CFGS, ENTITY_MODEL_CFGS } from './persistence.const';
 
 @Injectable({
   providedIn: 'root',
@@ -110,96 +82,51 @@ export class PersistenceService {
 
   // TODO auto generate ls keys from appDataKey where possible
   globalConfig: PersistenceBaseModel<GlobalConfigState> = this._cmBase<GlobalConfigState>(
-    {
-      lsKey: LS_GLOBAL_CFG,
-      appDataKey: 'globalConfig',
-      migrateFn: migrateGlobalConfigState,
-    },
+    BASE_MODEL_CFGS.globalConfig,
   );
-  reminders: PersistenceBaseModel<Reminder[]> = this._cmBase<Reminder[]>({
-    lsKey: LS_REMINDER,
-    appDataKey: 'reminders',
-  });
+  reminders: PersistenceBaseModel<Reminder[]> = this._cmBase<Reminder[]>(
+    BASE_MODEL_CFGS.reminders,
+  );
 
   project: PersistenceBaseEntityModel<ProjectState, Project> = this._cmBaseEntity<
     ProjectState,
     Project
-  >({
-    lsKey: LS_PROJECT_META_LIST,
-    appDataKey: 'project',
-    reducerFn: projectReducer as any,
-    migrateFn: migrateProjectState,
-  });
+  >(ENTITY_MODEL_CFGS.project);
 
-  tag: PersistenceBaseEntityModel<TagState, Tag> = this._cmBaseEntity<TagState, Tag>({
-    lsKey: LS_TAG_STATE,
-    appDataKey: 'tag',
-    reducerFn: tagReducer,
-  });
+  tag: PersistenceBaseEntityModel<TagState, Tag> = this._cmBaseEntity<TagState, Tag>(
+    ENTITY_MODEL_CFGS.tag,
+  );
   simpleCounter: PersistenceBaseEntityModel<SimpleCounterState, SimpleCounter> =
-    this._cmBaseEntity<SimpleCounterState, SimpleCounter>({
-      lsKey: LS_SIMPLE_COUNTER_STATE,
-      appDataKey: 'simpleCounter',
-      reducerFn: simpleCounterReducer,
-    });
+    this._cmBaseEntity<SimpleCounterState, SimpleCounter>(
+      ENTITY_MODEL_CFGS.simpleCounter,
+    );
   note: PersistenceBaseEntityModel<NoteState, Note> = this._cmBaseEntity<NoteState, Note>(
-    {
-      lsKey: LS_NOTE_STATE,
-      appDataKey: 'note',
-      reducerFn: noteReducer,
-    },
+    ENTITY_MODEL_CFGS.note,
   );
 
   // METRIC MODELS
   metric: PersistenceBaseEntityModel<MetricState, Metric> = this._cmBaseEntity<
     MetricState,
     Metric
-  >({
-    lsKey: LS_METRIC_STATE,
-    appDataKey: 'metric',
-    reducerFn: metricReducer as any,
-    migrateFn: migrateMetricState,
-  });
+  >(ENTITY_MODEL_CFGS.metric);
+
   improvement: PersistenceBaseEntityModel<ImprovementState, Improvement> =
-    this._cmBaseEntity<ImprovementState, Improvement>({
-      lsKey: LS_IMPROVEMENT_STATE,
-      appDataKey: 'improvement',
-      reducerFn: improvementReducer,
-      migrateFn: migrateImprovementState,
-    });
+    this._cmBaseEntity<ImprovementState, Improvement>(ENTITY_MODEL_CFGS.improvement);
   obstruction: PersistenceBaseEntityModel<ObstructionState, Obstruction> =
-    this._cmBaseEntity<ObstructionState, Obstruction>({
-      lsKey: LS_OBSTRUCTION_STATE,
-      appDataKey: 'obstruction',
-      reducerFn: obstructionReducer as any,
-      migrateFn: migrateObstructionState,
-    });
+    this._cmBaseEntity<ObstructionState, Obstruction>(ENTITY_MODEL_CFGS.obstruction);
 
   // MAIN TASK MODELS
   task: PersistenceBaseEntityModel<TaskState, Task> = this._cmBaseEntity<TaskState, Task>(
-    {
-      lsKey: LS_TASK_STATE,
-      appDataKey: 'task',
-      reducerFn: taskReducer,
-      migrateFn: migrateTaskState,
-    },
+    ENTITY_MODEL_CFGS.task,
   );
   taskArchive: PersistenceBaseEntityModel<TaskArchive, ArchiveTask> = this._cmBaseEntity<
     TaskArchive,
     ArchiveTask
-  >({
-    lsKey: LS_TASK_ARCHIVE,
-    appDataKey: 'taskArchive',
-    reducerFn: taskReducer as any,
-    migrateFn: migrateTaskArchiveState,
-  });
+  >(ENTITY_MODEL_CFGS.taskArchive);
   taskRepeatCfg: PersistenceBaseEntityModel<TaskRepeatCfgState, TaskRepeatCfg> =
-    this._cmBaseEntity<TaskRepeatCfgState, TaskRepeatCfg>({
-      lsKey: LS_TASK_REPEAT_CFG_STATE,
-      appDataKey: 'taskRepeatCfg',
-      reducerFn: taskRepeatCfgReducer as any,
-      migrateFn: migrateTaskRepeatCfgState,
-    });
+    this._cmBaseEntity<TaskRepeatCfgState, TaskRepeatCfg>(
+      ENTITY_MODEL_CFGS.taskRepeatCfg,
+    );
 
   // PROJECT MODELS
   bookmark: PersistenceForProjectModel<BookmarkState, Bookmark> = this._cmProject<
@@ -579,7 +506,7 @@ export class PersistenceService {
     appDataKey,
     reducerFn,
     migrateFn = (v) => v,
-  }: PersistenceEntityModelCfg<S>): PersistenceBaseEntityModel<S, M> {
+  }: PersistenceEntityModelCfg<S, M>): PersistenceBaseEntityModel<S, M> {
     const model = {
       ...this._cmBase({ lsKey, appDataKey, migrateFn, isSkipPush: true }),
 
@@ -606,7 +533,7 @@ export class PersistenceService {
     lsKey,
     appDataKey,
     migrateFn = (v) => v,
-  }: PersistenceProjectModelCfg<S>): PersistenceForProjectModel<S, M> {
+  }: PersistenceProjectModelCfg<S, M>): PersistenceForProjectModel<S, M> {
     const model = this._cmProjectLegacy<S, M>({ lsKey, appDataKey, migrateFn });
     this._projectModels.push(model);
     return model;
@@ -617,7 +544,7 @@ export class PersistenceService {
     lsKey,
     appDataKey,
     migrateFn = (v) => v,
-  }: PersistenceProjectModelCfg<S>): PersistenceForProjectModel<S, M> {
+  }: PersistenceProjectModelCfg<S, M>): PersistenceForProjectModel<S, M> {
     const model = {
       appDataKey,
       load: (projectId: string): Promise<S> =>

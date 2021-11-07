@@ -62,14 +62,16 @@ export interface PersistenceBaseModelCfg<S> {
   isSkipPush?: boolean;
 }
 
-export interface PersistenceEntityModelCfg<S> {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export interface PersistenceEntityModelCfg<S, M> {
   lsKey: string;
   appDataKey: keyof AppBaseData;
   reducerFn: (state: S, action: { type: string; payload?: any }) => S;
   migrateFn?: (state: S) => S;
 }
 
-export interface PersistenceProjectModelCfg<S> {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export interface PersistenceProjectModelCfg<S, M> {
   lsKey: string;
   appDataKey: keyof AppDataForProjects;
   migrateFn?: (state: S, projectId: string) => S;
