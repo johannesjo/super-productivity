@@ -202,7 +202,7 @@ export class PersistenceService {
   bookmark: PersistenceForProjectModel<BookmarkState, Bookmark> = this._cmProject<
     BookmarkState,
     Bookmark
-  >(LS_BOOKMARK_STATE, 'bookmark');
+  >({ lsKey: LS_BOOKMARK_STATE, appDataKey: 'bookmark' });
 
   legacyNote: PersistenceForProjectModel<NoteState, Note> = this._cmProjectLegacy<
     NoteState,
@@ -609,11 +609,15 @@ export class PersistenceService {
   }
 
   // TODO maybe find a way to exec effects here as well
-  private _cmProject<S, M>(
-    lsKey: string,
-    appDataKey: keyof AppDataForProjects,
-    migrateFn: (state: S, projectId: string) => S = (v) => v,
-  ): PersistenceForProjectModel<S, M> {
+  private _cmProject<S, M>({
+    lsKey,
+    appDataKey,
+    migrateFn = (v) => v,
+  }: {
+    lsKey: string;
+    appDataKey: keyof AppDataForProjects;
+    migrateFn?: (state: S, projectId: string) => S;
+  }): PersistenceForProjectModel<S, M> {
     const model = this._cmProjectLegacy<S, M>(lsKey, appDataKey, migrateFn);
     this._projectModels.push(model);
     return model;
