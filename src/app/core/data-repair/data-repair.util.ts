@@ -370,7 +370,9 @@ const _cleanupNonExistingNotesFromLists = (data: AppDataComplete): AppDataComple
   });
 
   // also cleanup today's notes
-  data.note.todayOrder = data.note.todayOrder.filter((tid) => !!data.note.entities[tid]);
+  data.note.todayOrder = data.note.todayOrder
+    ? data.note.todayOrder.filter((tid) => !!data.note.entities[tid])
+    : [];
 
   return data;
 };
