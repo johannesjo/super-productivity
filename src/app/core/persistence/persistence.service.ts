@@ -2,11 +2,9 @@ import { Injectable } from '@angular/core';
 import {
   AllowedDBKeys,
   LS_BACKUP,
-  LS_BOOKMARK_STATE,
   LS_IMPROVEMENT_STATE,
   LS_LAST_LOCAL_SYNC_MODEL_CHANGE,
   LS_METRIC_STATE,
-  LS_NOTE_STATE,
   LS_OBSTRUCTION_STATE,
   LS_PROJECT_ARCHIVE,
   LS_PROJECT_PREFIX,
@@ -70,7 +68,11 @@ import { removeFromDb, saveToDb } from './persistence.actions';
 import { crossModelMigrations } from './cross-model-migrations';
 import { DEFAULT_APP_BASE_DATA } from '../../imex/sync/sync.const';
 import { isValidAppData } from '../../imex/sync/is-valid-app-data.util';
-import { BASE_MODEL_CFGS, ENTITY_MODEL_CFGS } from './persistence.const';
+import {
+  BASE_MODEL_CFGS,
+  ENTITY_MODEL_CFGS,
+  PROJECT_MODEL_CFGS,
+} from './persistence.const';
 
 @Injectable({
   providedIn: 'root',
@@ -132,12 +134,7 @@ export class PersistenceService {
   bookmark: PersistenceForProjectModel<BookmarkState, Bookmark> = this._cmProject<
     BookmarkState,
     Bookmark
-  >({ lsKey: LS_BOOKMARK_STATE, appDataKey: 'bookmark' });
-
-  legacyNote: PersistenceForProjectModel<NoteState, Note> = this._cmProjectLegacy<
-    NoteState,
-    Note
-  >({ lsKey: LS_NOTE_STATE, appDataKey: 'note' as any });
+  >(PROJECT_MODEL_CFGS.bookmark);
 
   // LEGACY PROJECT MODELS
   legacyMetric: PersistenceForProjectModel<MetricState, Metric> = this._cmProjectLegacy<
