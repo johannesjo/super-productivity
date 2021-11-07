@@ -107,14 +107,16 @@ export class PersistenceService {
 
   // TODO auto generate ls keys from appDataKey where possible
   globalConfig: PersistenceBaseModel<GlobalConfigState> = this._cmBase<GlobalConfigState>(
-    LS_GLOBAL_CFG,
-    'globalConfig',
-    migrateGlobalConfigState,
+    {
+      lsKey: LS_GLOBAL_CFG,
+      appDataKey: 'globalConfig',
+      migrateFn: migrateGlobalConfigState,
+    },
   );
-  reminders: PersistenceBaseModel<Reminder[]> = this._cmBase<Reminder[]>(
-    LS_REMINDER,
-    'reminders',
-  );
+  reminders: PersistenceBaseModel<Reminder[]> = this._cmBase<Reminder[]>({
+    lsKey: LS_REMINDER,
+    appDataKey: 'reminders',
+  });
 
   project: PersistenceBaseEntityModel<ProjectState, Project> = this._cmBaseEntity<
     ProjectState,
@@ -486,12 +488,17 @@ export class PersistenceService {
   // TODO maybe refactor to class?
 
   // ------------------
-  private _cmBase<T>(
-    lsKey: string,
-    appDataKey: keyof AppBaseData,
-    migrateFn: (state: T) => T = (v) => v,
-    isSkipPush: boolean = false,
-  ): PersistenceBaseModel<T> {
+  private _cmBase<T>({
+    lsKey,
+    appDataKey,
+    migrateFn = (v) => v,
+    isSkipPush = false,
+  }: {
+    lsKey: string;
+    appDataKey: keyof AppBaseData;
+    migrateFn?: (state: T) => T;
+    isSkipPush?: boolean;
+  }): PersistenceBaseModel<T> {
     const model = {
       appDataKey,
       loadState: (isSkipMigrate = false) =>
@@ -557,7 +564,7 @@ export class PersistenceService {
     migrateFn: (state: S) => S = (v) => v,
   ): PersistenceBaseEntityModel<S, M> {
     const model = {
-      ...this._cmBase(lsKey, appDataKey, migrateFn, true),
+      ...this._cmBase({ lsKey, appDataKey, migrateFn, isSkipPush: true }),
 
       getById: async (id: string): Promise<M> => {
         const state = (await model.loadState()) as any;
