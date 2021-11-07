@@ -35,8 +35,8 @@ export class MigrateMetricService {
       )
       .subscribe(async (metricState: MetricState) => {
         if (!metricState[MODEL_VERSION_KEY]) {
-          console.log('Migrating Legacy Metric State to new model');
-          console.log('metricMigration:', metricState[MODEL_VERSION_KEY], {
+          console.log('[M] Migrating Legacy Metric State to new model');
+          console.log('[M] metricMigration:', metricState[MODEL_VERSION_KEY], {
             metricState,
           });
 
@@ -56,7 +56,11 @@ export class MigrateMetricService {
             const iForProject = await this._persistenceService.legacyImprovement.load(id);
             const oForProject = await this._persistenceService.legacyObstruction.load(id);
             if (mForProject && (oForProject || iForProject)) {
-              console.log('metricMigration:', { mForProject, iForProject, oForProject });
+              console.log('[M] metricMigration:', {
+                mForProject,
+                iForProject,
+                oForProject,
+              });
               newM = this._mergeMetricsState(newM, mForProject);
               if (iForProject) {
                 newI = this._mergeIntoState(newI, iForProject) as ImprovementState;
@@ -66,7 +70,7 @@ export class MigrateMetricService {
               }
             }
           }
-          console.log('metricMigration:', { newM, newI, newO });
+          console.log('[M] metricMigration:', { newM, newI, newO });
 
           await this._persistenceService.improvement.saveState(newI, {
             isSyncModelChange: false,

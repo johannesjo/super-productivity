@@ -32,7 +32,7 @@ export const isMigrateModel = (
     }
   } else {
     console.log(
-      `Migrating model "${modelType}" to version from ${importVersion} to ${localVersion}`,
+      `[M] Migrating model "${modelType}" to version from ${importVersion} to ${localVersion}`,
       modelData,
     );
     return true;
