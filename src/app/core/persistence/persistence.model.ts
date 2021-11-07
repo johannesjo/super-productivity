@@ -54,3 +54,23 @@ export interface PersistenceForProjectModel<S, M> {
   /* @deprecated */
   remove(projectId: string): Promise<unknown>;
 }
+
+export interface PersistenceBaseModelCfg<S> {
+  lsKey: string;
+  appDataKey: keyof AppBaseData;
+  migrateFn?: (state: S) => S;
+  isSkipPush?: boolean;
+}
+
+export interface PersistenceEntityModelCfg<S> {
+  lsKey: string;
+  appDataKey: keyof AppBaseData;
+  reducerFn: (state: S, action: { type: string; payload?: any }) => S;
+  migrateFn?: (state: S) => S;
+}
+
+export interface PersistenceProjectModelCfg<S> {
+  lsKey: string;
+  appDataKey: keyof AppDataForProjects;
+  migrateFn?: (state: S, projectId: string) => S;
+}

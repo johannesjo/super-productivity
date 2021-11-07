@@ -45,7 +45,10 @@ import { CompressionService } from '../compression/compression.service';
 import {
   PersistenceBaseEntityModel,
   PersistenceBaseModel,
+  PersistenceBaseModelCfg,
+  PersistenceEntityModelCfg,
   PersistenceForProjectModel,
+  PersistenceProjectModelCfg,
 } from './persistence.model';
 import { Metric, MetricState } from '../../features/metric/metric.model';
 import {
@@ -512,12 +515,7 @@ export class PersistenceService {
     appDataKey,
     migrateFn = (v) => v,
     isSkipPush = false,
-  }: {
-    lsKey: string;
-    appDataKey: keyof AppBaseData;
-    migrateFn?: (state: T) => T;
-    isSkipPush?: boolean;
-  }): PersistenceBaseModel<T> {
+  }: PersistenceBaseModelCfg<T>): PersistenceBaseModel<T> {
     const model = {
       appDataKey,
       loadState: (isSkipMigrate = false) =>
@@ -581,12 +579,7 @@ export class PersistenceService {
     appDataKey,
     reducerFn,
     migrateFn = (v) => v,
-  }: {
-    lsKey: string;
-    appDataKey: keyof AppBaseData;
-    reducerFn: (state: S, action: { type: string; payload?: any }) => S;
-    migrateFn?: (state: S) => S;
-  }): PersistenceBaseEntityModel<S, M> {
+  }: PersistenceEntityModelCfg<S>): PersistenceBaseEntityModel<S, M> {
     const model = {
       ...this._cmBase({ lsKey, appDataKey, migrateFn, isSkipPush: true }),
 
@@ -613,11 +606,7 @@ export class PersistenceService {
     lsKey,
     appDataKey,
     migrateFn = (v) => v,
-  }: {
-    lsKey: string;
-    appDataKey: keyof AppDataForProjects;
-    migrateFn?: (state: S, projectId: string) => S;
-  }): PersistenceForProjectModel<S, M> {
+  }: PersistenceProjectModelCfg<S>): PersistenceForProjectModel<S, M> {
     const model = this._cmProjectLegacy<S, M>({ lsKey, appDataKey, migrateFn });
     this._projectModels.push(model);
     return model;
@@ -628,11 +617,7 @@ export class PersistenceService {
     lsKey,
     appDataKey,
     migrateFn = (v) => v,
-  }: {
-    lsKey: string;
-    appDataKey: keyof AppDataForProjects;
-    migrateFn?: (state: S, projectId: string) => S;
-  }): PersistenceForProjectModel<S, M> {
+  }: PersistenceProjectModelCfg<S>): PersistenceForProjectModel<S, M> {
     const model = {
       appDataKey,
       load: (projectId: string): Promise<S> =>
