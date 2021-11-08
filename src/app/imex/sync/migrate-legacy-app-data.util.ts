@@ -1,27 +1,32 @@
-import { AppDataComplete } from './sync.model';
-import { migrateProjectState } from '../../features/project/migrate-projects-state.util';
+import { AppBaseData, AppDataComplete } from './sync.model';
 import { crossModelMigrations } from '../../core/persistence/cross-model-migrations';
-import { migrateGlobalConfigState } from '../../features/config/migrate-global-config.util';
-import {
-  migrateImprovementState,
-  migrateMetricState,
-  migrateObstructionState,
-} from '../../features/metric/migrate-metric-states.util';
-import { migrateTaskState } from '../../features/tasks/migrate-task-state.util';
-import { migrateTaskRepeatCfgState } from '../../features/task-repeat-cfg/migrate-task-repeat-cfg-state.util';
-import { migrateTagState } from '../../features/tag/migrate-tag-state.util';
 import { dirtyDeepCopy } from '../../util/dirtyDeepCopy';
+import {
+  BASE_MODEL_CFGS,
+  ENTITY_MODEL_CFGS,
+} from '../../core/persistence/persistence.const';
 
 export const migrateLegacyAppData = (appData: AppDataComplete): AppDataComplete => {
-  // TODO make it dynamic
-  const newData = dirtyDeepCopy(appData);
-  newData.project = migrateProjectState(newData.project);
-  newData.task = migrateTaskState(newData.task);
-  newData.tag = migrateTagState(newData.tag);
-  newData.taskRepeatCfg = migrateTaskRepeatCfgState(newData.taskRepeatCfg);
-  newData.globalConfig = migrateGlobalConfigState(newData.globalConfig);
-  newData.metric = migrateMetricState(newData.metric);
-  newData.improvement = migrateImprovementState(newData.improvement);
-  newData.obstruction = migrateObstructionState(newData.obstruction);
-  return crossModelMigrations(newData);
+  const newAppData = dirtyDeepCopy(appData);
+
+  for (const [, baseModelCfg] of Object.entries(BASE_MODEL_CFGS)) {
+    if (baseModelCfg.migrateFn) {
+      newAppData[baseModelCfg.appDataKey as keyof AppBaseData] = baseModelCfg.migrateFn(
+        newAppData[baseModelCfg.appDataKey as keyof AppBaseData],
+      );
+    }
+  }
+
+  for (const [, entityModelCfg] of Object.entries(ENTITY_MODEL_CFGS)) {
+    if (entityModelCfg.migrateFn) {
+      newAppData[entityModelCfg.appDataKey as keyof AppBaseData] =
+        entityModelCfg.migrateFn(
+          newAppData[entityModelCfg.appDataKey as keyof AppBaseData],
+        );
+    }
+  }
+
+  // NOTE ProjectModel migrations are currently not necessary as they don't exist
+
+  return crossModelMigrations(newAppData);
 };
