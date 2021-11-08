@@ -13,6 +13,7 @@ import { migrateTagState } from '../../features/tag/migrate-tag-state.util';
 import { dirtyDeepCopy } from '../../util/dirtyDeepCopy';
 
 export const migrateLegacyAppData = (appData: AppDataComplete): AppDataComplete => {
+  // TODO make it dynamic
   const newData = dirtyDeepCopy(appData);
   newData.project = migrateProjectState(newData.project);
   newData.task = migrateTaskState(newData.task);
@@ -22,5 +23,5 @@ export const migrateLegacyAppData = (appData: AppDataComplete): AppDataComplete 
   newData.metric = migrateMetricState(newData.metric);
   newData.improvement = migrateImprovementState(newData.improvement);
   newData.obstruction = migrateObstructionState(newData.obstruction);
-  return crossModelMigrations(appData);
+  return crossModelMigrations(newData);
 };
