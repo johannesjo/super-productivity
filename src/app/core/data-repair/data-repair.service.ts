@@ -4,6 +4,7 @@ import { T } from '../../t.const';
 import { TranslateService } from '@ngx-translate/core';
 import { dataRepair } from './data-repair.util';
 import { isDataRepairPossible } from './is-data-repair-possible.util';
+import { getLastValidityError } from '../../imex/sync/is-valid-app-data.util';
 
 @Injectable({
   providedIn: 'root',
@@ -20,6 +21,10 @@ export class DataRepairService {
       alert('Data damaged, repair not possible.');
       return false;
     }
-    return confirm(this._translateService.instant(T.CONFIRM.AUTO_FIX));
+    return confirm(
+      this._translateService.instant(T.CONFIRM.AUTO_FIX, {
+        validityError: getLastValidityError(),
+      }),
+    );
   }
 }

@@ -45,13 +45,20 @@ export const isValidAppData = (d: AppDataComplete): boolean => {
   return isValid;
 };
 
+let lastValidityError: string;
+export const getLastValidityError = (): string | undefined => lastValidityError;
+const _validityError = (errTxt: string): void => {
+  devError(errTxt);
+  lastValidityError = errTxt;
+};
+
 const _isAllRemindersAvailable = ({ reminders, task }: AppDataComplete): boolean => {
   let isValid: boolean = true;
   task.ids.forEach((id: string) => {
     const t: Task = task.entities[id] as Task;
     if (t.reminderId && !reminders.find((r) => r.id === t.reminderId)) {
       console.log({ task: t, reminders });
-      devError(`Missing reminder ${t.reminderId} from task not existing`);
+      _validityError(`Missing reminder ${t.reminderId} from task not existing`);
       isValid = false;
     }
   });
@@ -66,7 +73,7 @@ const _isAllProjectsAvailable = (data: AppDataComplete): boolean => {
     const t: Task = data.task.entities[id] as Task;
     if (t.projectId && !pids.includes(t.projectId)) {
       console.log(t);
-      devError(`projectId ${t.projectId} from task not existing`);
+      _validityError(`projectId ${t.projectId} from task not existing`);
       isValid = false;
     }
   });
@@ -74,7 +81,7 @@ const _isAllProjectsAvailable = (data: AppDataComplete): boolean => {
     const t: Task = data.taskArchive.entities[id] as Task;
     if (t.projectId && !pids.includes(t.projectId)) {
       console.log(t);
-      devError(`projectId ${t.projectId} from archive task not existing`);
+      _validityError(`projectId ${t.projectId} from archive task not existing`);
       isValid = false;
     }
   });
@@ -90,7 +97,7 @@ const _isAllTagsAvailable = (data: AppDataComplete): boolean => {
     const missingTagId = t.tagIds.find((tagId) => !allTagIds.includes(tagId));
     if (missingTagId) {
       console.log(t);
-      devError(`tagId "${missingTagId}" from task not existing`);
+      _validityError(`tagId "${missingTagId}" from task not existing`);
       isValid = false;
     }
   });
@@ -99,7 +106,7 @@ const _isAllTagsAvailable = (data: AppDataComplete): boolean => {
     const missingTagId = t.tagIds.find((tagId) => !allTagIds.includes(tagId));
     if (missingTagId) {
       console.log(t);
-      devError(`tagId "${missingTagId}" from task archive not existing`);
+      _validityError(`tagId "${missingTagId}" from task archive not existing`);
       isValid = false;
     }
   });
@@ -112,7 +119,7 @@ const _isAllTasksHaveAProjectOrTag = (data: AppDataComplete): boolean => {
   data.task.ids.forEach((id: string) => {
     const t: Task = data.task.entities[id] as Task;
     if (!t.parentId && !t.projectId && !t.tagIds.length) {
-      devError(`Task without project or tag`);
+      _validityError(`Task without project or tag`);
       isValid = false;
     }
   });
@@ -149,12 +156,14 @@ const _isAllTasksAvailableAndListConsistent = (data: AppDataComplete): boolean =
         const task = data.task.entities[tid];
         if (!task) {
           isMissingTaskData = true;
-          devError('Missing task data (tid: ' + tid + ') for Project ' + project.title);
+          _validityError(
+            'Missing task data (tid: ' + tid + ') for Project ' + project.title,
+          );
         } else if (task.projectId !== project.id) {
           isInconsistentProjectId = true;
           console.log('--------------------------------');
           console.log('tid', task.projectId, 'pid', project.id, { task, project });
-          devError('Inconsistent task projectId');
+          _validityError('Inconsistent task projectId');
         }
       });
     });
@@ -174,7 +183,7 @@ const _isAllTasksAvailableAndListConsistent = (data: AppDataComplete): boolean =
           (projectI as Project).backlogTaskIds.includes(idNotFound),
       );
 
-    devError(
+    _validityError(
       'Inconsistent Task State: Missing task id ' +
         idNotFound +
         ' for Project/Tag ' +
@@ -203,12 +212,14 @@ const _isAllNotesAvailableAndListConsistent = (data: AppDataComplete): boolean =
         const note = data.note.entities[tid];
         if (!note) {
           isMissingNoteData = true;
-          devError('Missing note data (tid: ' + tid + ') for Project ' + project.title);
+          _validityError(
+            'Missing note data (tid: ' + tid + ') for Project ' + project.title,
+          );
         } else if (note.projectId !== project.id) {
           isInconsistentProjectId = true;
           console.log('--------------------------------');
           console.log('nid', note.projectId, 'pid', project.id, { note, project });
-          devError('Inconsistent note projectId');
+          _validityError('Inconsistent note projectId');
         }
       });
     });
@@ -222,7 +233,7 @@ const _isAllNotesAvailableAndListConsistent = (data: AppDataComplete): boolean =
       .map((id) => data.project.entities[id])
       .find((projectI) => (projectI as Project).noteIds.includes(idNotFound));
 
-    devError(
+    _validityError(
       'Inconsistent Note State: Missing note id ' +
         idNotFound +
         ' for Project ' +
@@ -277,7 +288,7 @@ const _isNoLonelySubTasks = (data: AppDataComplete): boolean => {
     const t: Task = data.task.entities[id] as Task;
     if (t.parentId && !data.task.entities[t.parentId]) {
       console.log(t);
-      devError(`Inconsistent Task State: Lonely Sub Task in Today ${t.id}`);
+      _validityError(`Inconsistent Task State: Lonely Sub Task in Today ${t.id}`);
       isValid = false;
     }
   });
@@ -286,7 +297,7 @@ const _isNoLonelySubTasks = (data: AppDataComplete): boolean => {
     const t: Task = data.taskArchive.entities[id] as Task;
     if (t.parentId && !data.taskArchive.entities[t.parentId]) {
       console.log(t);
-      devError(`Inconsistent Task State: Lonely Sub Task in Archive ${t.id}`);
+      _validityError(`Inconsistent Task State: Lonely Sub Task in Archive ${t.id}`);
       isValid = false;
     }
   });
@@ -302,7 +313,9 @@ const _isNoMissingSubTasks = (data: AppDataComplete): boolean => {
       t.subTaskIds.forEach((subId) => {
         if (!data.task.entities[subId]) {
           console.log(t);
-          devError(`Inconsistent Task State: Missing sub task data in today ${subId}`);
+          _validityError(
+            `Inconsistent Task State: Missing sub task data in today ${subId}`,
+          );
           isValid = false;
         }
       });
@@ -315,7 +328,9 @@ const _isNoMissingSubTasks = (data: AppDataComplete): boolean => {
       t.subTaskIds.forEach((subId) => {
         if (!data.taskArchive.entities[subId]) {
           console.log(t);
-          devError(`Inconsistent Task State: Missing sub task data in archive ${subId}`);
+          _validityError(
+            `Inconsistent Task State: Missing sub task data in archive ${subId}`,
+          );
           isValid = false;
         }
       });
