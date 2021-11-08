@@ -419,6 +419,7 @@ export class PersistenceService {
     lsKey,
     appDataKey,
     migrateFn = (v) => v,
+    // NOTE: isSkipPush is used to use this for _cmBaseEntity as well
     isSkipPush = false,
   }: PersistenceBaseModelCfg<T>): PersistenceBaseModel<T> {
     const model = {
