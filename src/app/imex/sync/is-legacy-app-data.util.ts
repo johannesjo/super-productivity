@@ -1,19 +1,20 @@
 import { AppDataComplete } from './sync.model';
-import { ALL_MODEL_CFGS } from '../../core/persistence/persistence.const';
 import { MODEL_VERSION_KEY } from '../../app.constants';
+import { MIGRATABLE_MODEL_CFGS } from '../../core/persistence/persistence.const';
 
 export const isLegacyAppData = (appData: AppDataComplete): boolean => {
-  // const importVersion = modelData && modelData[MODEL_VERSION_KEY];
-  const allModelCfgKeys = Object.keys(ALL_MODEL_CFGS);
-  return !!allModelCfgKeys
-    .filter((modelCfgKey) => ALL_MODEL_CFGS[modelCfgKey].modelVersion > 0)
+  const migratableModelCfgKeys = Object.keys(MIGRATABLE_MODEL_CFGS);
+  return !!migratableModelCfgKeys
+    .filter((modelCfgKey) => MIGRATABLE_MODEL_CFGS[modelCfgKey].modelVersion > 0)
     .find((modelCfgKey) => {
-      const appDataKey = ALL_MODEL_CFGS[modelCfgKey].appDataKey;
+      const appDataKey = MIGRATABLE_MODEL_CFGS[modelCfgKey].appDataKey;
       const appDataModelVersion =
         appDataKey in appData && MODEL_VERSION_KEY in appData[appDataKey]
-          ? (appData[appDataKey] as any)[MODEL_VERSION_KEY]
+          ? (appData[appDataKey as keyof AppDataComplete] as { [key: string]: any })[
+              MODEL_VERSION_KEY
+            ]
           : 0;
-      const codedModelVersion = ALL_MODEL_CFGS[modelCfgKey].modelVersion;
+      const codedModelVersion = MIGRATABLE_MODEL_CFGS[modelCfgKey].modelVersion;
 
       // console.log({ appDataKey, appDataModelVersion, codedModelVersion });
 
@@ -23,7 +24,7 @@ export const isLegacyAppData = (appData: AppDataComplete): boolean => {
       const isLegacyVersionV = isLegacyVersion(appDataModelVersion, codedModelVersion);
       if (isLegacyVersionV) {
         console.log(
-          'LEGACY MODEL  => ' + appDataKey,
+          '[M] LEGACY MODEL  => ' + appDataKey,
           appDataModelVersion,
           codedModelVersion,
         );

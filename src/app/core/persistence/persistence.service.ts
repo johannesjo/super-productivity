@@ -512,8 +512,8 @@ export class PersistenceService {
   private _cmProject<S, M>({
     lsKey,
     appDataKey,
-    migrateFn = (v) => v,
-  }: PersistenceProjectModelCfg<S, M>): PersistenceForProjectModel<S, M> {
+  }: // migrateFn = (v) => v,
+  PersistenceProjectModelCfg<S, M>): PersistenceForProjectModel<S, M> {
     const model = {
       appDataKey,
       load: (projectId: string): Promise<S> =>
@@ -521,7 +521,8 @@ export class PersistenceService {
           dbKey: appDataKey,
           projectId,
           legacyDBKey: this._makeProjectKey(projectId, lsKey),
-        }).then((v) => migrateFn(v, projectId)),
+        }),
+      // }).then((v) => migrateFn(v, projectId)),
       save: (
         projectId: string,
         data: any,

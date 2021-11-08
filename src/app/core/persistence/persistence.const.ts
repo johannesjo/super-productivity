@@ -191,17 +191,12 @@ export const PROJECT_MODEL_CFGS: PersistenceProjectModelCfgs = {
   bookmark: {
     lsKey: LS_BOOKMARK_STATE,
     appDataKey: 'bookmark',
-    modelVersion: MODEL_VERSION.___NOT_USED_YET___,
   },
 };
 
-export const ALL_MODEL_CFGS: {
-  [key: string]:
-    | PersistenceBaseModelCfg<any>
-    | PersistenceEntityModelCfg<any, any>
-    | PersistenceProjectModelCfg<any, any>;
+export const MIGRATABLE_MODEL_CFGS: {
+  [key: string]: PersistenceBaseModelCfg<any> | PersistenceEntityModelCfg<any, any>;
 } = {
   ...BASE_MODEL_CFGS,
   ...ENTITY_MODEL_CFGS,
-  ...PROJECT_MODEL_CFGS,
 };

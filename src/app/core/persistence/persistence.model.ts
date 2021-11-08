@@ -76,6 +76,6 @@ export interface PersistenceEntityModelCfg<S, M> {
 export interface PersistenceProjectModelCfg<S, M> {
   lsKey: string;
   appDataKey: keyof AppDataForProjects;
-  modelVersion: number;
-  migrateFn?: (state: S, projectId: string) => S;
+  // modelVersion: number;
+  // migrateFn?: (state: S, projectId: string) => S;
 }
