@@ -5,15 +5,19 @@ import { delay, map, switchMap } from 'rxjs/operators';
 import { TaskService } from '../tasks/task.service';
 import { LayoutService } from '../../core-ui/layout/layout.service';
 import { slideInFromTopAni } from '../../ui/animations/slide-in-from-top.ani';
-import { slideAdditionalInfoInFromLeftAni } from './slide-additional-info-in-from-left.ani';
 import { slideInFromRightAni } from '../../ui/animations/slide-in-from-right.ani';
+import { taskAdditionalInfoTaskChangeAnimation } from '../tasks/task-additional-info/task-additional-info.ani';
 
 @Component({
   selector: 'right-panel',
   templateUrl: './right-panel.component.html',
   styleUrls: ['./right-panel.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  animations: [slideAdditionalInfoInFromLeftAni, slideInFromTopAni, slideInFromRightAni],
+  animations: [
+    taskAdditionalInfoTaskChangeAnimation,
+    slideInFromTopAni,
+    slideInFromRightAni,
+  ],
 })
 export class RightPanelComponent implements OnDestroy {
   // NOTE: used for debugging

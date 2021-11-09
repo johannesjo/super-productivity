@@ -1,4 +1,4 @@
-<div *ngIf="task.id" [@taskAdditionalInfoTaskChange]="task.id" class="wrapper">
+<div class="wrapper">
   <header *ngIf="isOver" class="task-title-wrapper">
     <h2
       (editFinished)="updateTaskTitleIfChanged($event.isChanged, $event.newVal)"

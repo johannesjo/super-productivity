@@ -3,7 +3,6 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
-  HostBinding,
   HostListener,
   Input,
   OnDestroy,
@@ -61,8 +60,6 @@ import { TaskRepeatCfgService } from '../../task-repeat-cfg/task-repeat-cfg.serv
 import { TaskRepeatCfg } from '../../task-repeat-cfg/task-repeat-cfg.model';
 import * as moment from 'moment';
 import { DialogEditTaskAttachmentComponent } from '../task-attachment/dialog-edit-attachment/dialog-edit-task-attachment.component';
-import { taskAdditionalInfoTaskChangeAnimation } from './task-additional-info.ani';
-import { noopAnimation } from '../../../ui/animations/noop.ani';
 import { TaskAdditionalInfoItemComponent } from './task-additional-info-item/task-additional-info-item.component';
 import { IssueData, IssueProviderKey } from '../../issue/issue.model';
 import { JIRA_TYPE } from '../../issue/issue.const';
@@ -93,18 +90,10 @@ interface IssueDataAndType {
   templateUrl: './task-additional-info.component.html',
   styleUrls: ['./task-additional-info.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  animations: [
-    expandAnimation,
-    expandFadeInOnlyAnimation,
-    fadeAnimation,
-    swirlAnimation,
-    taskAdditionalInfoTaskChangeAnimation,
-    noopAnimation,
-  ],
+  animations: [expandAnimation, expandFadeInOnlyAnimation, fadeAnimation, swirlAnimation],
 })
 export class TaskAdditionalInfoComponent implements AfterViewInit, OnDestroy {
   @Input() isOver: boolean = false;
-  @HostBinding('@noop') alwaysTrue: boolean = true;
 
   @ViewChildren(TaskAdditionalInfoItemComponent)
   itemEls?: QueryList<TaskAdditionalInfoItemComponent>;
