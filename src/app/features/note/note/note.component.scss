@@ -119,6 +119,17 @@ $noteFontSize: 12px;
   transition: $transition-standard;
   cursor: grab;
   cursor: move;
+  border-top: 1px dashed $dark-theme-extra-border-color;
+
+  @include lightTheme() {
+    border-color: $light-theme-extra-border-color;
+  }
+
+  @include mq(xs) {
+    position: relative;
+    z-index: 1;
+    margin-top: -8px;
+  }
 
   &:active {
     cursor: grabbing;
@@ -145,5 +156,11 @@ $noteFontSize: 12px;
   button:last-of-type {
     margin-left: auto;
     margin-right: 0;
+  }
+
+  .mat-icon-button {
+    height: 36px;
+    width: 36px;
+    line-height: 36px;
   }
 }
