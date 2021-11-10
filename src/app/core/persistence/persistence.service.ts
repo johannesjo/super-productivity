@@ -375,7 +375,9 @@ export class PersistenceService {
     );
 
     if (typeof data.lastLocalSyncModelChange !== 'number') {
-      throw new Error('lastLocalSyncModelChange');
+      // not necessarily a critical error as there might be other reasons for this error to popup
+      devError('No lastLocalSyncModelChange for imported data');
+      data.lastLocalSyncModelChange = Date.now();
     }
 
     return await Promise.all([forBase, forProject])
