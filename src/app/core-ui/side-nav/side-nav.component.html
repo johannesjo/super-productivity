@@ -83,6 +83,7 @@
       *ngFor="let project of projectList; trackBy: trackById;"
       [class.hasTasks]="project.taskIds.length"
       [class.isActiveContext]="project.id===activeWorkContextId"
+      [class.isHidden]="project.isHiddenFromMenu"
       class="project"
     >
       <div

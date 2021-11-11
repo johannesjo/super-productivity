@@ -548,6 +548,7 @@
         "SETUP_OPEN_PROJECT": "Setup OpenProject Integration"
       },
       "FORM_BASIC": {
+        "L_IS_HIDDEN_FROM_MENU": "Hide project from menu",
         "L_TITLE": "Project Name",
         "TITLE": "Basic Settings"
       },
@@ -1258,6 +1259,8 @@
   "PP": {
     "ARCHIVED_PROJECTS": "Archived Projects",
     "ARCHIVE_PROJECT": "Archive Project",
+    "CLICK_TO_HIDE": "Click to hide project from menu",
+    "CLICK_TO_SHOW": "Click to show project in menu",
     "DELETE_PROJECT": "Delete Project",
     "D_CONFIRM_ARCHIVE": {
       "MSG": "Are you sure you want to archive this project? Archived Projects will not be shown in the menu any more and you can't access any of their data without restoring them. It's recommended that you backup your data before you do this.",

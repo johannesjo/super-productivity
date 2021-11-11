@@ -99,6 +99,11 @@ export const unarchiveProject = createAction(
   props<{ id: string }>(),
 );
 
+export const toggleHideFromMenu = createAction(
+  '[Project] Toggle hide from menu',
+  props<{ id: string }>(),
+);
+
 // MOVE TASK ACTIONS
 // -----------------
 export const moveProjectTaskToBacklogListAuto = createAction(

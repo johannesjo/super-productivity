@@ -153,6 +153,7 @@ export class ProjectSettingsPageComponent implements OnInit, OnDestroy {
     } else {
       this.projectService.update(this.currentProject.id, {
         title: $event.config.title,
+        isHiddenFromMenu: $event.config.isHiddenFromMenu,
       });
     }
   }

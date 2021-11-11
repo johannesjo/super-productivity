@@ -72,6 +72,16 @@
           <!--                  mat-icon-button>-->
           <!--            <mat-icon>flight</mat-icon>-->
           <!--          </button>-->
+
+          <button
+            (click)="toggleHideFromMenu(project.id)"
+            [title]="(project.isHiddenFromMenu?T.PP.CLICK_TO_SHOW:T.PP.CLICK_TO_HIDE)|translate"
+            color=""
+            mat-icon-button
+          >
+            <mat-icon *ngIf="!project.isHiddenFromMenu">visibility</mat-icon>
+            <mat-icon *ngIf="project.isHiddenFromMenu">visibility_off</mat-icon>
+          </button>
           <button
             (click)="remove(project.id)"
             [disabled]="project.id === (workContextService.activeWorkContextId$|async)"

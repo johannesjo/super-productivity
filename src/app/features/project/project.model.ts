@@ -10,6 +10,7 @@ export type RoundTimeOption = '5M' | 'QUARTER' | 'HALF' | 'HOUR' | null;
 
 export interface ProjectBasicCfg {
   title: string;
+  isHiddenFromMenu: boolean;
   isArchived: boolean;
 
   taskIds: string[];

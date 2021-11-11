@@ -26,6 +26,7 @@ import {
   moveProjectTaskToBacklogList,
   moveProjectTaskToBacklogListAuto,
   moveProjectTaskToTodayListAuto,
+  toggleHideFromMenu,
   unarchiveProject,
   updateProject,
   updateProjectIssueProviderCfg,
@@ -190,6 +191,10 @@ export class ProjectService {
 
   remove(projectId: string): void {
     this._store$.dispatch(deleteProject({ id: projectId }));
+  }
+
+  toggleHideFromMenu(projectId: string): void {
+    this._store$.dispatch(toggleHideFromMenu({ id: projectId }));
   }
 
   update(projectId: string, changedFields: Partial<Project>): void {

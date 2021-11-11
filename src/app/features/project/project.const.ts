@@ -9,6 +9,7 @@ import {
 export const DEFAULT_PROJECT: Project = {
   id: '',
   title: '',
+  isHiddenFromMenu: false,
   isArchived: false,
   issueIntegrationCfgs: DEFAULT_ISSUE_PROVIDER_CFGS,
   taskIds: [],

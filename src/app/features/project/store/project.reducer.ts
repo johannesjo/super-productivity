@@ -47,6 +47,7 @@ import {
   moveProjectTaskToTodayList,
   moveProjectTaskToTodayListAuto,
   moveProjectTaskUpInBacklogList,
+  toggleHideFromMenu,
   unarchiveProject,
   updateProject,
   updateProjectAdvancedCfg,
@@ -141,6 +142,18 @@ export const projectReducer = createReducer<ProjectState>(
   on(deleteProject, (state, { id }) => projectAdapter.removeOne(id, state)),
   on(deleteProjects, (state, { ids }) => projectAdapter.removeMany(ids, state)),
   on(loadProjects, (state, { projects }) => projectAdapter.setAll(projects, state)),
+
+  on(toggleHideFromMenu, (state, { id }) =>
+    projectAdapter.updateOne(
+      {
+        id,
+        changes: {
+          isHiddenFromMenu: !state.entities[id]?.isHiddenFromMenu,
+        },
+      },
+      state,
+    ),
+  ),
 
   on(archiveProject, (state, { id }) =>
     projectAdapter.updateOne(

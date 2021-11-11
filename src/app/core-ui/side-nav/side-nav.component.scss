@@ -114,6 +114,10 @@ section {
     }
   }
 
+  &.isHidden {
+    display: none !important;
+  }
+
   button:first-of-type {
     flex-grow: 1;
   }

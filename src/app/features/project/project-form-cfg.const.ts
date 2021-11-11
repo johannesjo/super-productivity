@@ -17,6 +17,13 @@ export const BASIC_PROJECT_CONFIG_FORM_CONFIG: ConfigFormSection<Project> = {
         label: T.F.PROJECT.FORM_BASIC.L_TITLE,
       },
     },
+    {
+      key: 'isHiddenFromMenu',
+      type: 'checkbox',
+      templateOptions: {
+        label: T.F.PROJECT.FORM_BASIC.L_IS_HIDDEN_FROM_MENU,
+      },
+    },
   ],
 };
 

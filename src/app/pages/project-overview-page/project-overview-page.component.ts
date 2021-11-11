@@ -148,6 +148,10 @@ export class ProjectOverviewPageComponent implements OnInit, OnDestroy {
       });
   }
 
+  toggleHideFromMenu(projectId: string): void {
+    this.projectService.toggleHideFromMenu(projectId);
+  }
+
   trackById(i: number, project: Project): string {
     return project.id;
   }
