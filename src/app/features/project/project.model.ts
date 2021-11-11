@@ -10,12 +10,6 @@ export type RoundTimeOption = '5M' | 'QUARTER' | 'HALF' | 'HOUR' | null;
 
 export interface ProjectBasicCfg {
   title: string;
-  /** @deprecated use new theme model instead. */
-  themeColor?: string;
-  /** @deprecated use new theme model instead. */
-  isDarkTheme?: boolean;
-  /** @deprecated use new theme model instead. */
-  isReducedTheme?: boolean;
   isArchived: boolean;
 
   taskIds: string[];

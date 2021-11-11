@@ -74,6 +74,9 @@ const _removeOutdatedData = (project: Project): Project => {
   delete copy.advancedCfg.googleTimeSheetExport;
   delete copy.advancedCfg.simpleSummarySettings;
   delete copy.timeWorkedWithoutBreak;
+  delete copy.themeColor;
+  delete copy.isDarkTheme;
+  delete copy.isReducedTheme;
   return copy;
 };
 
@@ -151,9 +154,9 @@ const _updateThemeModel = (project: Project): Project => {
         theme: {
           ...WORK_CONTEXT_DEFAULT_THEME,
           // eslint-disable-next-line
-          primary: project.themeColor
+          primary: (project as any).themeColor
             ? // eslint-disable-next-line
-              (THEME_COLOR_MAP as any)[project.themeColor]
+              (THEME_COLOR_MAP as any)[(project as any).themeColor]
             : WORK_CONTEXT_DEFAULT_THEME.primary,
           // eslint-disable-next-line
         },
