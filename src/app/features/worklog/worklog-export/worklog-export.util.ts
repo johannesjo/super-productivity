@@ -183,9 +183,13 @@ const handleWorklogGroup = (data: WorklogExportData): ItemsByKey<RowItem> => {
  */
 const getTaskFields = (task: WorklogTask, data: WorklogExportData): TaskFields => {
   const titlesWithSub = [task.title];
-  const titles = task.parentId
-    ? [(data.tasks.find((ptIN) => ptIN.id === task.parentId) as WorklogTask).title]
-    : [task.title];
+  const parentTask =
+    task.parentId !== null
+      ? // NOTE: we use 'ERR' to still throw an error for invalid data
+        (data.tasks.find((t) => t.id === task.parentId) as WorklogTask) || 'ERR'
+      : undefined;
+
+  const titles = parentTask ? [parentTask.title] : [task.title];
 
   const notes = task.notes ? [task.notes.replace(/\n/g, ' - ')] : [];
   const projects = task.projectId
@@ -196,10 +200,7 @@ const getTaskFields = (task: WorklogTask, data: WorklogExportData): TaskFields =
     : [];
 
   // by design subtasks don't have tags, so we must set its parent's tags
-  let tags =
-    task.parentId !== null
-      ? (data.tasks.find((t) => t.id === task.parentId) as WorklogTask).tagIds
-      : task.tagIds;
+  let tags = parentTask ? parentTask.tagIds : task.tagIds;
   tags = tags.map(
     (tagId) => (data.tags.find((tag) => tag.id === tagId) as TagCopy).title,
   );
