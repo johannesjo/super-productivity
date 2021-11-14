@@ -110,6 +110,13 @@ export class SyncProviderService {
     } catch (e) {
       console.log('__error during sync__');
       console.error(e);
+      this._snackService.open({
+        msg: T.F.SYNC.S.UNKNOWN_ERROR,
+        type: 'ERROR',
+        translateParams: {
+          err: getSyncErrorStr(e),
+        },
+      });
       this.isSyncing$.next(false);
       return 'ERROR';
     }

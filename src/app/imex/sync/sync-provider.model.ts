@@ -1,7 +1,5 @@
 import { Observable } from 'rxjs';
-import { DropboxFileMetadata } from './dropbox/dropbox.model';
 import { AppDataComplete, SyncGetRevResult } from './sync.model';
-import { GoogleDriveFileMeta } from './google/google-api.model';
 
 // NOTE: do not change!!
 export enum SyncProvider {
@@ -10,8 +8,6 @@ export enum SyncProvider {
   'WebDAV' = 'WebDAV',
   'LocalFile' = 'LocalFile',
 }
-
-export type SyncFileMeta = DropboxFileMetadata | GoogleDriveFileMeta;
 
 export interface SyncProviderServiceInterface {
   id: SyncProvider;
