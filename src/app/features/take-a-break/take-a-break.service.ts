@@ -202,7 +202,7 @@ export class TakeABreakService {
     this._triggerDesktopNotification$.subscribe(([timeWithoutBreak, cfg]) => {
       const msg = this._createMessage(timeWithoutBreak, cfg.takeABreak);
       this._notifyService.notifyDesktop({
-        title: 'Take a break!',
+        title: T.GCF.TAKE_A_BREAK.NOTIFICATION_TITLE,
         body: msg,
       });
     });
