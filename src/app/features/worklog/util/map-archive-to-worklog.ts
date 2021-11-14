@@ -74,8 +74,9 @@ export const mapArchiveToWorklog = (
           workEnd: startEnd.workEnd && startEnd.workEnd[dateStr],
         };
       }
+
+      const timeSpentForTask = +timeSpentOnDay[dateStr];
       if (task.subTaskIds.length === 0) {
-        const timeSpentForTask = +timeSpentOnDay[dateStr];
         worklog[year].ent[month].ent[day].timeSpent =
           worklog[year].ent[month].ent[day].timeSpent + timeSpentForTask;
         worklog[year].ent[month].timeSpent =
@@ -92,19 +93,26 @@ export const mapArchiveToWorklog = (
         timeSpent: timeSpentOnDay[dateStr],
       };
       if (task.parentId) {
-        let insertIndex;
-        insertIndex = worklog[year].ent[month].ent[day].logEntries.findIndex(
-          // sibling
-          (t) => t.task.parentId === task.parentId,
-        );
-        if (insertIndex === -1) {
+        // only show sub tasks in worklog when there is actually time spent on them
+        if (timeSpentForTask > 0) {
+          let insertIndex;
           insertIndex = worklog[year].ent[month].ent[day].logEntries.findIndex(
-            // parent
-            (t) => t.task.id === task.parentId,
+            // sibling
+            (t) => t.task.parentId === task.parentId,
+          );
+          if (insertIndex === -1) {
+            insertIndex = worklog[year].ent[month].ent[day].logEntries.findIndex(
+              // parent
+              (t) => t.task.id === task.parentId,
+            );
+          }
+
+          worklog[year].ent[month].ent[day].logEntries.splice(
+            insertIndex + 1,
+            0,
+            newItem,
           );
         }
-
-        worklog[year].ent[month].ent[day].logEntries.splice(insertIndex + 1, 0, newItem);
       } else {
         worklog[year].ent[month].ent[day].logEntries.push(newItem);
       }
