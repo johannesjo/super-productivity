@@ -7,9 +7,6 @@
       "MSG": "Vuoi installare Super Productivity come PWA?"
     },
     "B_OFFLINE": "Sei disconnesso da Internet. La sincronizzazione e la richiesta dei dati del provider di problemi non funzioneranno.",
-    "D_INITIAL": {
-      "TITLE": "Benvenuto in v{{nr}}"
-    },
     "UPDATE_MAIN_MODEL": "Super Productivity ha ricevuto un importante aggiornamento! Sarà necessario migrare i tuoi dati. Nota che questo renderà i tuoi dati incompatibili con versioni precedenti dell'app.",
     "UPDATE_MAIN_MODEL_NO_UPDATE": "Hai scelto di non aggiornare i dati. Nota che dovrai usare una versione precedente dell'app, se davvero non vuoi aggiornare.",
     "UPDATE_WEB_APP": "Una nuova versione è disponibile. Vuoi caricare la nuova versione?"
@@ -127,6 +124,11 @@
         "SYNC_ERROR": "Dropbox: errore durante la sincronizzazione"
       }
     },
+    "FINISH_DAY_BEFORE_EXIT": {
+      "C": {
+        "FINISH_DAY_BEFORE_EXIT": "Ci sono {{nr}} attività svolte nell'elenco di oggi non ancora spostate nell'archivio. Vuoi davvero smettere senza finire la giornata?"
+      }
+    },
     "GITHUB": {
       "DIALOG_INITIAL": {
         "TITLE": "Configura GitHub per il progetto"
@@ -169,6 +171,14 @@
         "IS_AUTO_POLL": "Esegui il polling automatico delle modifiche sugli issue di git importati",
         "IS_SEARCH_ISSUES_FROM_GITLAB": "Mostra gli issue di git come suggerimenti quando aggiungi un nuovo task",
         "PROJECT": "Percorso completo o nome utente / progetto",
+        "SCOPE": "Scopo",
+        "SCOPE_ALL": "Tutti",
+        "SCOPE_ASSIGNED": "Assegnato a me",
+        "SCOPE_CREATED": "Creato da me",
+        "SOURCE": "fonte",
+        "SOURCE_GLOBAL": "Tutti",
+        "SOURCE_GROUP": "Gruppo",
+        "SOURCE_PROJECT": "Progetto",
         "TOKEN": "Token di accesso"
       },
       "FORM_SECTION": {
@@ -181,6 +191,7 @@
         "DESCRIPTION": "Descrizione",
         "LABELS": "Etichetta",
         "MARK_AS_CHECKED": "Segna gli aggiornamenti come verificati",
+        "PROJECT": "Progetto",
         "STATUS": "Stato",
         "SUMMARY": "Riepilogo",
         "WRITE_A_COMMENT": "Scrivi un commento"
@@ -265,12 +276,19 @@
         "UPDATE_STATUS": "Aggiorna stato"
       },
       "DIALOG_WORKLOG": {
+        "CHECKBOXES": {
+          "ALL_TIME": "Usa sempre tutto il tempo speso per l'attività come impostazione predefinita",
+          "ALL_TIME_MINUS_LOGGED": "Usa sempre solo il tempo trascorso meno il tempo registrato come impostazione predefinita",
+          "TIME_SPENT_TODAY": "Usa sempre solo il tempo trascorso oggi come impostazione predefinita",
+          "TIME_SPENT_YESTERDAY": "Usa sempre solo il tempo trascorso ieri come impostazione predefinita"
+        },
         "CURRENTLY_LOGGED": "Tempo connesso al momento: ",
         "INVALID_DATE": "Il valore inserito non è una data!",
         "SAVE_WORKLOG": "Salva worklog",
         "STARTED": "Iniziato",
         "SUBMIT_WORKLOG_FOR": "Invia un worklog su Jira per",
         "TIME_SPENT": "Tempo impiegato",
+        "TIME_SPENT_TOOLTIP": "Aggiungi tempi diversi",
         "TITLE": "Jira: Invia worklog"
       },
       "FORM": {
@@ -286,7 +304,12 @@
         "IS_AUTO_POLL_TICKETS": "Controlla automaticamente le modifiche sugli issue importati e notificamelo",
         "IS_CHECK_TO_RE_ASSIGN_TICKET_ON_TASK_START": "Controlla se l'issue sul quale correntemente si sta lavorando è assegnato all'utente corrente",
         "IS_WORKLOG_ENABLED": "Apri una finestra per sottomettere il worklog su jira quando un task è completato",
-        "SEARCH_JQL_QUERY": "JQL Query per limitare i task della ricerca"
+        "SEARCH_JQL_QUERY": "JQL Query per limitare i task della ricerca",
+        "WORKLOG_DEFAULT_ALL_TIME": "Compila tutto il tempo speso per l'attività",
+        "WORKLOG_DEFAULT_ALL_TIME_MINUS_LOGGED": "Inserisci tutto il tempo trascorso meno il tempo registrato",
+        "WORKLOG_DEFAULT_TIME_MODE": "Valore di tempo predefinito per la finestra di dialogo",
+        "WORKLOG_DEFAULT_TODAY": "Riempi solo il tempo trascorso oggi",
+        "WORKLOG_DEFAULT_YESTERDAY": "Riempi solo il tempo trascorso ieri"
       },
       "FORM_CRED": {
         "ALLOW_SELF_SIGNED": "Consenti certificato autofirmato",
@@ -406,7 +429,8 @@
       "EDIT_FULLSCREEN": "Modifica in schermo intero",
       "NOTES_CMP": {
         "ADD_BTN": "Aggiungi nuova nota",
-        "DROP_TO_ADD": "Trascina qui per aggiungere una nuova nota"
+        "DROP_TO_ADD": "Trascina qui per aggiungere una nuova nota",
+        "NO_NOTES": "Al momento non ci sono note"
       },
       "NOTE_CMP": {
         "DISABLE_PARSE": "Disabilita parsing markdown",
@@ -417,12 +441,25 @@
       "DIALOG_INITIAL": {
         "TITLE": "Imposta OpenProject per Project"
       },
+      "DIALOG_TRACK_TIME": {
+        "ACTIVITY": "attività",
+        "CURRENTLY_LOGGED": "Tempo attualmente registrato:",
+        "INVALID_DATE": "Il valore inserito non è una data!",
+        "POST_TIME": "Tempo di pubblicazione",
+        "STARTED": "iniziato",
+        "SUBMIT_TIME_FOR": "Invia il tempo a OpenProject per",
+        "TIME_SPENT": "Tempo impiegato",
+        "TITLE": "OpenProject: invia il registro di lavoro"
+      },
       "FORM": {
         "FILTER_USER": "Nome utente (ad es. per filtrare le modifiche da soli)",
         "HOST": "Host (es.: https://www.openproject.org/)",
         "IS_AUTO_ADD_TO_BACKLOG": "Aggiungi automaticamente pacchetti di lavoro non risolti da OpenProject al backlog",
         "IS_AUTO_POLL": "Interroga automaticamente i pacchetti di lavoro OpenProject importati per le modifiche",
         "IS_SEARCH_ISSUES_FROM_OPEN_PROJECT": "Mostra i pacchetti di lavoro come suggerimenti quando aggiungi nuove attività",
+        "IS_SHOW_TIME_TRACKING_DIALOG": "Mostra la finestra di dialogo del monitoraggio del tempo per segnalare a OpenProject",
+        "IS_SHOW_TIME_TRACKING_DIALOG_DESCRIPTION": "Richiede che il modulo di monitoraggio del tempo sia abilitato per il progetto OpenProject",
+        "IS_SHOW_TIME_TRACKING_DIALOG_FOR_EACH_SUB_TASK": "Mostra la finestra di dialogo di monitoraggio del tempo quando le attività secondarie sono completate",
         "PROJECT_ID": "ID progetto",
         "PROJECT_ID_DESCRIPTION": "Può essere trovato come parte dell'URL, quando si visualizza il progetto nel Browser.",
         "TOKEN": "Token di accesso"
@@ -444,7 +481,8 @@
         "ISSUE_STR": "pacchetto di lavoro"
       },
       "S": {
-        "ERR_UNKNOWN": "OpenProject: errore sconosciuto {{statusCode}} {{errorMsg}}. CORS è configurato correttamente per il server?"
+        "ERR_UNKNOWN": "OpenProject: errore sconosciuto {{statusCode}} {{errorMsg}}. CORS è configurato correttamente per il server?",
+        "POST_TIME_SUCCESS": "OpenProject: inserimento dell'ora creato con successo per {{issueTitle}}"
       }
     },
     "POMODORO": {
@@ -454,6 +492,7 @@
       "FINISH_SESSION_X": "Hai completato con successo la sessione <strong>{{nr}}</strong>!",
       "NOTIFICATION": {
         "BREAK_X_START": "Pomodoro: Pausa {{nr}} iniziata!",
+        "NO_TASKS": "È necessario aggiungere attività prima che il timer del Pomodoro possa iniziare.",
         "SESSION_X_START": "Pomodoro: Sessione {{nr}} iniziata!"
       },
       "S": {
@@ -505,9 +544,11 @@
         "SETUP_CALDAV": "Configurazione integrazione Caldav",
         "SETUP_GIT": "Configura integrazione Githun",
         "SETUP_GITLAB": "Configura integrazione GitLab",
-        "SETUP_JIRA": "Configura integrazione Jira"
+        "SETUP_JIRA": "Configura integrazione Jira",
+        "SETUP_OPEN_PROJECT": "Configurazione dell'integrazione OpenProject"
       },
       "FORM_BASIC": {
+        "L_IS_HIDDEN_FROM_MENU": "Nascondi progetto dal menu",
         "L_TITLE": "Nome progetto",
         "TITLE": "Impostazioni base"
       },
@@ -586,6 +627,7 @@
         "FORCE_IMPORT": "Importare comunque i dati remoti?",
         "FORCE_UPLOAD": "Caricare comunque i dati locali?",
         "FORCE_UPLOAD_AFTER_ERROR": "Si è verificato un errore durante il caricamento dei dati locali. Prova a forzare l'aggiornamento?",
+        "MIGRATE_LEGACY": "Dati legacy rilevati durante l'importazione, vuoi provare a migrarli?",
         "NO_REMOTE_DATA": "Nessun dato remoto trovato. Carica locale su remoto?",
         "TRY_LOAD_REMOTE_AGAIN": "Vuoi provare a ricaricare i dati da remoto ancora una volta?"
       },
@@ -808,6 +850,7 @@
         "HELP1": "I task ripetuti servono ai doveri quotidiani, es: \"Organizzazione\", \"Meeting giornalieri\", \"Code Review\", \"Controllare email\" o task simili, che è probabile accadano più e più volte.",
         "HELP2": "Una volta configurato, un task ripetuto sarà ricreato per ognuno dei giorni selezionati sotto non appena aprirai il progetto, e sarà automaticamente segnato come completato alla fine della giornata. Saranno gestiti come istanze separate, quindi puoi liberamente aggiungere sotto-task etc.",
         "HELP3": "I tasks importati da Jira o gli issue di Git non possono essere ripetuti. Su un task ripetuto, saranno anche eliminati tutti i promemoria.",
+        "HELP4": "Una nota sul campo dell'ordine: riferimento alle attività ripetibili dell'ordine di creazione. Valido solo per attività ripetibili create contemporaneamente. Un valore più basso significa che un'attività sarà più in alto nell'elenco, un numero più basso che sarà più in basso. Un valore maggiore di 0 significa che gli elementi vengono creati alla fine delle normali attività.",
         "TAG_LABEL": "Etichette da aggiungere"
       },
       "F": {
@@ -815,6 +858,8 @@
         "FRIDAY": "Venerdì",
         "IS_ADD_TO_BOTTOM": "Sposta l'attività in fondo all'elenco",
         "MONDAY": "Lunedì",
+        "ORDER": "ordine",
+        "ORDER_DESCRIPTION": "Ordine di creazione delle attività ripetibili. Influisce solo sulle attività ripetibili create contemporaneamente. Un valore più basso significa che un'attività verrà creata più in alto nell'elenco, un numero più basso che sarà più in basso. Un valore maggiore di 0 significa che gli elementi vengono creati alla fine delle normali attività.",
         "REMIND_AT": "Ricorda a",
         "REMIND_AT_PLACEHOLDER": "Seleziona quando ricordare",
         "SATURDAY": "Sabato",
@@ -837,6 +882,9 @@
       "MENU_TITLE": "Sequenza temporale",
       "NOW": "Adesso",
       "NO_TASKS": "Attualmente non ci sono attività. Aggiungi alcune attività tramite il pulsante + nella barra in alto.",
+      "S": {
+        "CAL_PROVIDER_ERROR": "Errore del provider di cal. cronologica: {{errTxt}}"
+      },
       "START": "Inizio del lavoro",
       "TASK_PROJECTION_INFO": "Proiezione futura di un'attività ripetibile pianificata"
     },
@@ -941,6 +989,7 @@
     "DISMISS": "Rimuovi",
     "DO_IT": "Fallo!",
     "EDIT": "Modifica",
+    "ENABLED": "Abilitato",
     "EXTENSION_INFO": "Per favore <a target=\"_blank\" href=\"https://chrome.google.com/webstore/detail/super-productivity/ljkbjodfmekklcoibdnhahlaalhihmlb\"> scarica l'estensione di chrome</a> per permettere la comunicazione con le api di Jira e la gestione del tempo inattivo. Nota che non funziona su dispositivi mobile.",
     "LOGIN": "Login",
     "LOGOUT": "Logout",
@@ -1058,8 +1107,8 @@
       "IS_AUTO_MARK_PARENT_AS_DONE": "Segna il task padre come completato, quando tutti i sotto-task sono completati",
       "IS_AUTO_START_NEXT_TASK": "Inizia a tracciare l'attività successiva quando si contrassegna corrente come fatto",
       "IS_CONFIRM_BEFORE_EXIT": "Conferma prima di uscire dall'applicazione",
+      "IS_CONFIRM_BEFORE_EXIT_WITHOUT_FINISH_DAY": "Conferma prima di uscire dall'app senza prima terminare il giorno",
       "IS_DARK_MODE": "Tema scuro",
-      "IS_DISABLE_INITIAL_DIALOG": "Disabilita la finestra di dialogo delle informazioni iniziali (potresti perdere importanti aggiornamenti!)",
       "IS_HIDE_NAV": "Nascondi la navigazione mentre il cursore è sull'header principale (solo Desktop)",
       "IS_MINIMIZE_TO_TRAY": "Riduci a icona nel vassoio (solo desktop)",
       "IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "Notificami quando il tempo stimato viene superato",
@@ -1097,11 +1146,16 @@
       "MESSAGE": "Messaggio per prenderti una pausa",
       "MIN_WORKING_TIME": "Innesca la notifica di prendersi una pausa dopo X tempo lavorato senza fare pausa",
       "MOTIVATIONAL_IMG": "Immagine motivazionale (URL web)",
+      "NOTIFICATION_TITLE": "Fare una pausa!",
       "SNOOZE_TIME": "Posticipa quando ti viene chiesto di fare una pausa",
       "TITLE": "Promemoria pausa"
     },
     "TIMELINE": {
+      "CAL_PROVIDERS": "Fornitori di calendari (sperimentali e facoltativi)",
+      "CAL_PROVIDERS_ADD": "Aggiungi fonte ical",
+      "CAL_PROVIDERS_INFO": "Puoi facoltativamente configurare la sequenza temporale per caricare e visualizzare anche i dati da iCal (ad es. Google Calendar).",
       "HELP": "La funzione cronologia dovrebbe fornirti una rapida panoramica su come le attività pianificate si svolgono nel tempo. Puoi trovarlo nel menu a sinistra sotto <a href='#/timeline'>\"Cronologia\"</a>.",
+      "L_CAL_PATH": "Percorso URL/file per il calendario ICAL (opzionale)",
       "L_IS_WORK_START_END_ENABLED": "Limita il flusso di attività non pianificate a orari di lavoro specifici",
       "L_WORK_END": "Fine giornata lavorativa",
       "L_WORK_START": "Inizio giornata lavorativa",
@@ -1124,8 +1178,7 @@
     "PERSISTENCE_DISALLOWED": "I dati non saranno salvati permanentemente. Fai attenzione che questo può portare a perdita dei dati!!",
     "PERSISTENCE_ERROR": "Errore durante la richiesta di dati persistenti: {{err}}",
     "RUNNING_X": "Eseguendo \"{{str}}\".",
-    "SHORTCUT_WARN_OPEN_BOOKMARKS_FROM_TAG": "{{keyCombo}} premuto, ma la scorciatoia Apri segnalibri è disponibile solo nel contesto del progetto.",
-    "SHORTCUT_WARN_OPEN_NOTES_FROM_TAG": "{{keyCombo}} premuto, ma la scorciatoia per le note aperte è disponibile solo nel contesto del progetto."
+    "SHORTCUT_WARN_OPEN_BOOKMARKS_FROM_TAG": "{{keyCombo}} premuto, ma la scorciatoia Apri segnalibri è disponibile solo nel contesto del progetto."
   },
   "GPB": {
     "ASSETS": "Caricamento risorse in corso ...",
@@ -1164,6 +1217,7 @@
     "TOGGLE_SHOW_BOOKMARKS": "Mostra/nascondi segnalibri",
     "TOGGLE_SHOW_NOTES": "Mostra/nascondi note di progetto",
     "TOGGLE_TRACK_TIME": "Inizia/smetti di tracciare il tempo",
+    "TRIGGER_SYNC": "Attiva la sincronizzazione manualmente",
     "WORKLOG": "Worklog"
   },
   "PDS": {
@@ -1206,7 +1260,8 @@
   "PP": {
     "ARCHIVED_PROJECTS": "Progetti archiviati",
     "ARCHIVE_PROJECT": "Archivia progetto",
-    "CREATE_NEW": "Crea nuovo",
+    "CLICK_TO_HIDE": "Fare clic per nascondere il progetto dal menu",
+    "CLICK_TO_SHOW": "Fare clic per mostrare il progetto nel menu",
     "DELETE_PROJECT": "Elimina progetto",
     "D_CONFIRM_ARCHIVE": {
       "MSG": "Sei sicuro di voler archiviare questo progetto? I progetti archiviati non saranno più mostrati nel menu e non potrai accederne ai dati senza prima riabilitarli. E' consigliato fare un backup dei dati prima di eseguire questa operazione.",

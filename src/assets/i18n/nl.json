@@ -7,9 +7,6 @@
       "MSG": "Wilt u Super Productivity als PWA installeren?"
     },
     "B_OFFLINE": "Je hebt geen verbinding met internet. Het synchroniseren en opvragen van probleemprovidergegevens werkt niet.",
-    "D_INITIAL": {
-      "TITLE": "Welkom bij v {{nr}}"
-    },
     "UPDATE_MAIN_MODEL": "Super Productivity heeft een grote update gekregen! Sommige migraties voor uw gegevens zijn vereist. Houd er rekening mee dat hierdoor uw gegevens niet compatibel zijn met oudere versies van de app.",
     "UPDATE_MAIN_MODEL_NO_UPDATE": "Geen modelupdate gekozen. Houd er rekening mee dat u ofwel moet downgraden naar de laatste versie, als u de modelupgrade niet wilt uitvoeren.",
     "UPDATE_WEB_APP": "Nieuwe versie beschikbaar. Nieuwe versie laden?"
@@ -127,6 +124,11 @@
         "SYNC_ERROR": "Dropbox: Fout tijdens her synchroniseren"
       }
     },
+    "FINISH_DAY_BEFORE_EXIT": {
+      "C": {
+        "FINISH_DAY_BEFORE_EXIT": "Er zijn {{nr}} voltooide taken in uw lijst van vandaag die nog niet naar het archief zijn verplaatst. Wil je echt stoppen zonder je dag af te maken?"
+      }
+    },
     "GITHUB": {
       "DIALOG_INITIAL": {
         "TITLE": "Stel GitHub in voor Project"
@@ -169,6 +171,14 @@
         "IS_AUTO_POLL": "Poll automatisch geïmporteerde git-problemen voor wijzigingen",
         "IS_SEARCH_ISSUES_FROM_GITLAB": "Toon problemen van git als suggesties bij het toevoegen van nieuwe taken",
         "PROJECT": "Volledig pad of gebruikersnaam / project",
+        "SCOPE": "strekking",
+        "SCOPE_ALL": "Allemaal",
+        "SCOPE_ASSIGNED": "Toegewezen aan mij",
+        "SCOPE_CREATED": "Gecreëerd door mij",
+        "SOURCE": "bron",
+        "SOURCE_GLOBAL": "Allemaal",
+        "SOURCE_GROUP": "Groep",
+        "SOURCE_PROJECT": "project",
         "TOKEN": "Toegangstoken"
       },
       "FORM_SECTION": {
@@ -181,6 +191,7 @@
         "DESCRIPTION": "Omschrijving",
         "LABELS": "Etiketten",
         "MARK_AS_CHECKED": "Markeer updates als aangevinkt",
+        "PROJECT": "project",
         "STATUS": "Toestand",
         "SUMMARY": "Overzicht",
         "WRITE_A_COMMENT": "Schrijf een reactie"
@@ -265,12 +276,19 @@
         "UPDATE_STATUS": "Status bijwerken"
       },
       "DIALOG_WORKLOG": {
+        "CHECKBOXES": {
+          "ALL_TIME": "Gebruik altijd alle tijd die aan een taak wordt besteed als standaard",
+          "ALL_TIME_MINUS_LOGGED": "Gebruik altijd alleen de bestede tijd minus de geregistreerde tijd als standaard",
+          "TIME_SPENT_TODAY": "Gebruik altijd alleen de tijd die vandaag is doorgebracht als standaard",
+          "TIME_SPENT_YESTERDAY": "Gebruik altijd alleen de tijd die gisteren is doorgebracht als standaard"
+        },
         "CURRENTLY_LOGGED": "Momenteel gelogde tijd:",
         "INVALID_DATE": "De ingevoerde waarde is geen datum!",
         "SAVE_WORKLOG": "Sla Worklog op",
         "STARTED": "Begonnen",
         "SUBMIT_WORKLOG_FOR": "Dien een werklog in bij Jira voor",
         "TIME_SPENT": "Tijd besteed",
+        "TIME_SPENT_TOOLTIP": "Voeg verschillende tijden toe",
         "TITLE": "Jira: Werklogboek indienen"
       },
       "FORM": {
@@ -286,7 +304,12 @@
         "IS_AUTO_POLL_TICKETS": "Controleer geïmporteerde problemen automatisch op wijzigingen en stel ze op de hoogte",
         "IS_CHECK_TO_RE_ASSIGN_TICKET_ON_TASK_START": "Controleer of het probleem waaraan momenteel is gewerkt, is toegewezen aan de huidige gebruiker",
         "IS_WORKLOG_ENABLED": "Open dialoogvenster om werklog naar jira te sturen wanneer de taak is voltooid",
-        "SEARCH_JQL_QUERY": "JQL Query voor het beperken van zoektaken"
+        "SEARCH_JQL_QUERY": "JQL Query voor het beperken van zoektaken",
+        "WORKLOG_DEFAULT_ALL_TIME": "Vul alle tijd in die aan een taak is besteed",
+        "WORKLOG_DEFAULT_ALL_TIME_MINUS_LOGGED": "Vul alle bestede tijd min de geregistreerde tijd in",
+        "WORKLOG_DEFAULT_TIME_MODE": "Standaard tijdwaarde voor dialoog",
+        "WORKLOG_DEFAULT_TODAY": "Vul alleen de tijd in die vandaag is doorgebracht",
+        "WORKLOG_DEFAULT_YESTERDAY": "Vul alleen de tijd in die gisteren is doorgebracht"
       },
       "FORM_CRED": {
         "ALLOW_SELF_SIGNED": "Zelfondertekend certificaat toestaan",
@@ -406,7 +429,8 @@
       "EDIT_FULLSCREEN": "Bewerken in volledig scherm",
       "NOTES_CMP": {
         "ADD_BTN": "Nieuwe notitie toevoegen",
-        "DROP_TO_ADD": "Ga hierheen om een nieuwe notitie toe te voegen"
+        "DROP_TO_ADD": "Ga hierheen om een nieuwe notitie toe te voegen",
+        "NO_NOTES": "Er zijn momenteel geen notities"
       },
       "NOTE_CMP": {
         "DISABLE_PARSE": "Markering-parsering uitschakelen",
@@ -417,12 +441,25 @@
       "DIALOG_INITIAL": {
         "TITLE": "OpenProject voor Project instellen"
       },
+      "DIALOG_TRACK_TIME": {
+        "ACTIVITY": "Activiteit",
+        "CURRENTLY_LOGGED": "Momenteel ingelogde tijd:",
+        "INVALID_DATE": "De ingevoerde waarde is geen datum!",
+        "POST_TIME": "Post tijd",
+        "STARTED": "Begonnen",
+        "SUBMIT_TIME_FOR": "Tijd indienen bij OpenProject voor",
+        "TIME_SPENT": "Tijd besteed",
+        "TITLE": "OpenProject: werklogboek indienen"
+      },
       "FORM": {
         "FILTER_USER": "Gebruikersnaam (bijvoorbeeld om zelf wijzigingen uit te filteren)",
         "HOST": "Host (bijv.: https://www.openproject.org/)",
         "IS_AUTO_ADD_TO_BACKLOG": "Automatisch onopgeloste werkpakketten van OpenProject toevoegen aan achterstand",
         "IS_AUTO_POLL": "Geïmporteerde OpenProject-werkpakketten automatisch op wijzigingen controleren",
         "IS_SEARCH_ISSUES_FROM_OPEN_PROJECT": "Werkpakketten weergeven als suggesties bij het toevoegen van nieuwe taken",
+        "IS_SHOW_TIME_TRACKING_DIALOG": "Dialoogvenster voor tijdregistratie weergeven om te rapporteren aan OpenProject",
+        "IS_SHOW_TIME_TRACKING_DIALOG_DESCRIPTION": "Vereist dat de tijdregistratiemodule is ingeschakeld voor het OpenProject-project",
+        "IS_SHOW_TIME_TRACKING_DIALOG_FOR_EACH_SUB_TASK": "Dialoogvenster voor tijdregistratie weergeven wanneer subtaken zijn voltooid",
         "PROJECT_ID": "Project-ID",
         "PROJECT_ID_DESCRIPTION": "Kan worden gevonden als onderdeel van de url, bij het bekijken van het project in de browser.",
         "TOKEN": "Toegangstoken"
@@ -444,7 +481,8 @@
         "ISSUE_STR": "Werkpakket"
       },
       "S": {
-        "ERR_UNKNOWN": "OpenProject: onbekende fout {{statusCode}} {{errorMsg}}. Is CORS correct geconfigureerd voor de server?"
+        "ERR_UNKNOWN": "OpenProject: onbekende fout {{statusCode}} {{errorMsg}}. Is CORS correct geconfigureerd voor de server?",
+        "POST_TIME_SUCCESS": "OpenProject: tijdsinvoer voor {{issueTitle}}gemaakt"
       }
     },
     "POMODORO": {
@@ -454,6 +492,7 @@
       "FINISH_SESSION_X": "Sessie <strong>{{nr}}</strong>is succesvol afgerond!",
       "NOTIFICATION": {
         "BREAK_X_START": "Pomodoro: Break {{nr}} is begonnen!",
+        "NO_TASKS": "Je moet taken toevoegen voordat de Pomodoro-timer kan starten.",
         "SESSION_X_START": "Pomodoro: Sessie {{nr}} is begonnen!"
       },
       "S": {
@@ -505,9 +544,11 @@
         "SETUP_CALDAV": "Stel Caldav-integratie in",
         "SETUP_GIT": "GitHub-integratie instellen",
         "SETUP_GITLAB": "GitLab-integratie instellen",
-        "SETUP_JIRA": "Jira-integratie instellen"
+        "SETUP_JIRA": "Jira-integratie instellen",
+        "SETUP_OPEN_PROJECT": "OpenProject-integratie instellen"
       },
       "FORM_BASIC": {
+        "L_IS_HIDDEN_FROM_MENU": "Project verbergen in menu",
         "L_TITLE": "Naam van het project",
         "TITLE": "Basis instellingen"
       },
@@ -586,6 +627,7 @@
         "FORCE_IMPORT": "Toch externe gegevens importeren?",
         "FORCE_UPLOAD": "Lokale gegevens toch uploaden?",
         "FORCE_UPLOAD_AFTER_ERROR": "Er is een fout opgetreden tijdens het uploaden van uw lokale gegevens. Probeer de update te forceren?",
+        "MIGRATE_LEGACY": "Verouderde gegevens gedetecteerd tijdens het importeren. Wilt u proberen deze te migreren?",
         "NO_REMOTE_DATA": "Geen externe gegevens gevonden. Lokaal uploaden naar Remote?",
         "TRY_LOAD_REMOTE_AGAIN": "Wilt u nogmaals gegevens van de afstandsbediening opnieuw laden?"
       },
@@ -808,6 +850,7 @@
         "HELP1": "Herhalende taken zijn bedoeld voor dagelijkse taken, bijvoorbeeld: \"Organisatie\", \"Dagelijkse vergadering\", \"Code review\", \"E-mails controleren\" of soortgelijke taken die waarschijnlijk steeds weer zullen voorkomen.",
         "HELP2": "Eenmaal geconfigureerd, wordt een herhalende taak opnieuw gemaakt op elke hieronder geselecteerde dag zodra u uw project opent en wordt automatisch gemarkeerd als voltooid aan het einde van de dag. Ze worden als verschillende instanties behandeld. U kunt dus vrijelijk subtaken toevoegen enz.",
         "HELP3": "Taken geïmporteerd uit Jira of Git-problemen kunnen niet worden herhaald. Alle herinneringen worden ook verwijderd bij een herhalende taak.",
+        "HELP4": "Een opmerking over het bestelveld: Verwijzend naar herhaalbare taken voor de aanmaakvolgorde. Alleen van kracht voor herhaalbare taken die tegelijkertijd worden gemaakt. Een lagere waarde betekent dat een taak hoger in de lijst komt te staan, een lager getal dat deze lager komt te staan. Een waarde groter dan 0 betekent dat items onderaan normale taken worden gemaakt.",
         "TAG_LABEL": "Tags om toe te voegen"
       },
       "F": {
@@ -815,6 +858,8 @@
         "FRIDAY": "vrijdag",
         "IS_ADD_TO_BOTTOM": "Verplaats taak naar de onderkant van de lijst",
         "MONDAY": "maandag",
+        "ORDER": "Bestellen",
+        "ORDER_DESCRIPTION": "Aanmaakvolgorde van herhaalbare taken. Heeft alleen invloed op herhaalbare taken die tegelijkertijd zijn gemaakt. Een lagere waarde betekent dat een taak hoger in de lijst wordt gemaakt, een lager aantal dat het verderop in de lijst staat. Een waarde groter dan 0 betekent dat items onderaan normale taken worden gemaakt.",
         "REMIND_AT": "Herinner bij",
         "REMIND_AT_PLACEHOLDER": "Selecteer wanneer u eraan wilt herinneren",
         "SATURDAY": "zaterdag",
@@ -837,6 +882,9 @@
       "MENU_TITLE": "Tijdlijn",
       "NOW": "nu",
       "NO_TASKS": "Momenteel zijn er geen taken. Voeg een aantal taken toe via de + knop in de bovenste balk.",
+      "S": {
+        "CAL_PROVIDER_ERROR": "Tijdlijn Cal Provider-fout: {{errTxt}}"
+      },
       "START": "werk start",
       "TASK_PROJECTION_INFO": "Toekomstige projectie van een geplande herhaalbare taak"
     },
@@ -941,6 +989,7 @@
     "DISMISS": "Afwijzen",
     "DO_IT": "Doe het!",
     "EDIT": "Bewerk",
+    "ENABLED": "Ingeschakeld",
     "EXTENSION_INFO": "<a target=\"_blank\" href=\"https://chrome.google.com/webstore/detail/super-productivity/ljkbjodfmekklcoibdnhahlaalhihmlb\"> Download de Chrome-extensie</a> om communicatie met de Jira Api en Idle Time Handling mogelijk te maken. Merk op dat dit niet werkt voor mobiel.",
     "LOGIN": "Log in",
     "LOGOUT": "Uitloggen",
@@ -1058,8 +1107,8 @@
       "IS_AUTO_MARK_PARENT_AS_DONE": "Markeer de bovenliggende taak als voltooid wanneer alle subtaken zijn voltooid",
       "IS_AUTO_START_NEXT_TASK": "Begin met het volgen van de volgende taak wanneer u de stroom als voltooid markeert",
       "IS_CONFIRM_BEFORE_EXIT": "Bevestig voordat u de app afsluit",
+      "IS_CONFIRM_BEFORE_EXIT_WITHOUT_FINISH_DAY": "Bevestig voordat u de app verlaat zonder eerst de dag af te sluiten",
       "IS_DARK_MODE": "Donkere modus",
-      "IS_DISABLE_INITIAL_DIALOG": "Schakel het dialoogvenster met eerste informatie uit (u mist mogelijk belangrijke updates!)",
       "IS_HIDE_NAV": "Verberg navigatie totdat de hoofdkop is opgehangen (alleen desktop)",
       "IS_MINIMIZE_TO_TRAY": "Minimaliseren naar lade (alleen desktop)",
       "IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "Informeer wanneer de geschatte tijd is overschreden",
@@ -1097,11 +1146,16 @@
       "MESSAGE": "Neem een pauze-bericht",
       "MIN_WORKING_TIME": "Trigger neemt een pauze-melding nadat X zonder een heeft gewerkt",
       "MOTIVATIONAL_IMG": "Motiverende afbeelding (web-URL)",
+      "NOTIFICATION_TITLE": "Neem een pauze!",
       "SNOOZE_TIME": "Snoozetijd wanneer u wordt gevraagd om een pauze te nemen",
       "TITLE": "Pauzeherinnering"
     },
     "TIMELINE": {
+      "CAL_PROVIDERS": "Agenda-providers (experimenteel en optioneel)",
+      "CAL_PROVIDERS_ADD": "ical bron toevoegen",
+      "CAL_PROVIDERS_INFO": "U kunt optioneel de tijdlijn configureren om ook gegevens uit iCal (bijvoorbeeld Google Agenda) te laden en weer te geven.",
       "HELP": "De tijdlijnfunctie zou u een snel overzicht moeten geven van hoe uw geplande taken in de loop van de tijd verlopen. U vindt het in het menu aan de linkerkant onder <a href='#/timeline'>'Tijdlijn'</a>.",
+      "L_CAL_PATH": "URL/bestandspad voor kalender ICAL (optioneel)",
       "L_IS_WORK_START_END_ENABLED": "Beperk ongeplande taakstroom tot specifieke werktijden",
       "L_WORK_END": "Einde van de werkdag",
       "L_WORK_START": "Start van de werkdag",
@@ -1124,8 +1178,7 @@
     "PERSISTENCE_DISALLOWED": "Gegevens worden niet permanent bewaard. Houd er rekening mee dat dit kan leiden tot gegevensverlies !!",
     "PERSISTENCE_ERROR": "Fout bij verzoek om gegevens te bewaren: {{err}}",
     "RUNNING_X": "\"{{Str}}\" wordt uitgevoerd.",
-    "SHORTCUT_WARN_OPEN_BOOKMARKS_FROM_TAG": "{{keyCombo}} ingedrukt, maar de snelkoppeling naar bladwijzers openen is alleen beschikbaar in projectcontext.",
-    "SHORTCUT_WARN_OPEN_NOTES_FROM_TAG": "{{keyCombo}} ingedrukt, maar de snelkoppeling voor open notities is alleen beschikbaar in projectcontext."
+    "SHORTCUT_WARN_OPEN_BOOKMARKS_FROM_TAG": "{{keyCombo}} ingedrukt, maar de snelkoppeling naar bladwijzers openen is alleen beschikbaar in projectcontext."
   },
   "GPB": {
     "ASSETS": "Activa laden ...",
@@ -1164,6 +1217,7 @@
     "TOGGLE_SHOW_BOOKMARKS": "Bladwijzers tonen / verbergen",
     "TOGGLE_SHOW_NOTES": "Projectnotities tonen / verbergen",
     "TOGGLE_TRACK_TIME": "Start / stop volgtijd",
+    "TRIGGER_SYNC": "Synchronisatie handmatig activeren",
     "WORKLOG": "Werklogboek"
   },
   "PDS": {
@@ -1206,7 +1260,8 @@
   "PP": {
     "ARCHIVED_PROJECTS": "Gearchiveerde projecten",
     "ARCHIVE_PROJECT": "Archiefproject",
-    "CREATE_NEW": "Maak nieuw",
+    "CLICK_TO_HIDE": "Klik om het project in het menu te verbergen",
+    "CLICK_TO_SHOW": "Klik om project in menu te tonen",
     "DELETE_PROJECT": "Project verwijderen",
     "D_CONFIRM_ARCHIVE": {
       "MSG": "Weet u zeker dat u dit project wilt archiveren? Gearchiveerde projecten worden niet meer in het menu weergegeven en u hebt geen toegang tot hun gegevens zonder ze te herstellen. Het wordt aanbevolen dat u een back-up van uw gegevens maakt voordat u dit doet.",

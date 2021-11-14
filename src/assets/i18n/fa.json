@@ -7,9 +7,6 @@
       "MSG": "آیا میخواهید سوپر پروداکتیویتی به عنوان PWA نصب بشود؟"
     },
     "B_OFFLINE": "شما از اینترنت جدا هستید. همگام سازی و درخواست داده های ارائه دهنده مشکل کار نمی کند.",
-    "D_INITIAL": {
-      "TITLE": "به v{{nr}}خوش آمدید "
-    },
     "UPDATE_MAIN_MODEL": "سوپر بهره وری به روزرسانی اساسی را بدست آورده است! برخی از مهاجرت ها برای داده های شما مورد نیاز است. لطفا توجه داشته باشید که این داده های شما را با نسخه های قدیمی تر برنامه ناسازگار می کند.",
     "UPDATE_MAIN_MODEL_NO_UPDATE": "هیچ به روزرسانی مدل انتخاب نشده است. لطفاً توجه داشته باشید که اگر نمی خواهید به روزرسانی مدل را انجام دهید ، به آخرین نسخه پایین بروید.",
     "UPDATE_WEB_APP": "نسخه جدید موجود است، نسخه جدید بارگیری شود?"
@@ -127,6 +124,11 @@
         "SYNC_ERROR": "Dropbox: خطا هنگام همگام سازی"
       }
     },
+    "FINISH_DAY_BEFORE_EXIT": {
+      "C": {
+        "FINISH_DAY_BEFORE_EXIT": " {{nr}} کار انجام شده در لیست امروز شما هنوز به بایگانی منتقل نشده است. آیا واقعاً می خواهید بدون اینکه روز خود را تمام کنید ترک کنید؟"
+      }
+    },
     "GITHUB": {
       "DIALOG_INITIAL": {
         "TITLE": "راه اندازی گیت هاب برای پروژه"
@@ -169,6 +171,14 @@
         "IS_AUTO_POLL": "Automatically poll imported git issues for changes",
         "IS_SEARCH_ISSUES_FROM_GITLAB": "Show issues from git as suggestions when adding new tasks",
         "PROJECT": "مسیر کامل یا نام کاربری / پروژه",
+        "SCOPE": "محدوده",
+        "SCOPE_ALL": "همه",
+        "SCOPE_ASSIGNED": "به من اختصاص داده شده است",
+        "SCOPE_CREATED": "ایجاد شده توسط من",
+        "SOURCE": "منبع",
+        "SOURCE_GLOBAL": "همه",
+        "SOURCE_GROUP": "گروه",
+        "SOURCE_PROJECT": "پروژه",
         "TOKEN": "توکن دسترسی"
       },
       "FORM_SECTION": {
@@ -181,6 +191,7 @@
         "DESCRIPTION": "توضیحات",
         "LABELS": "برچسب ها",
         "MARK_AS_CHECKED": "بروزرسانی ها به عنوان بررسی شده نشان شود.",
+        "PROJECT": "پروژه",
         "STATUS": "وضعیت",
         "SUMMARY": "خلاصه",
         "WRITE_A_COMMENT": "دیدگاهتان را بنویسید"
@@ -265,12 +276,19 @@
         "UPDATE_STATUS": "بروزرسانی وضعیت"
       },
       "DIALOG_WORKLOG": {
+        "CHECKBOXES": {
+          "ALL_TIME": "همیشه از تمام زمان صرف شده برای کار به عنوان پیش فرض استفاده کنید",
+          "ALL_TIME_MINUS_LOGGED": "همیشه فقط از زمان صرف شده منهای زمان ثبت شده به عنوان پیش فرض استفاده کنید",
+          "TIME_SPENT_TODAY": "همیشه فقط از زمان صرف شده امروز به عنوان پیش فرض استفاده کنید",
+          "TIME_SPENT_YESTERDAY": "همیشه فقط از زمان صرف شده دیروز به عنوان پیش فرض استفاده کنید"
+        },
         "CURRENTLY_LOGGED": "زمان ورود به سیستم: ",
         "INVALID_DATE": "مقدار وارد شده تاریخ نیست!",
         "SAVE_WORKLOG": "دخیره فعالیت",
         "STARTED": "شروع شده",
         "SUBMIT_WORKLOG_FOR": "ارسال گزارش کاری به جیرا برای",
         "TIME_SPENT": "زمان صرف شده",
+        "TIME_SPENT_TOOLTIP": "زمان های مختلف را اضافه کنید",
         "TITLE": "جیرا: ارسال گزارش کار"
       },
       "FORM": {
@@ -286,7 +304,12 @@
         "IS_AUTO_POLL_TICKETS": "Check imported issues for changes automatically and notify",
         "IS_CHECK_TO_RE_ASSIGN_TICKET_ON_TASK_START": "Check if the currently worked on issue is assigned to current user",
         "IS_WORKLOG_ENABLED": "Open dialog to submit worklog to jira when task is done",
-        "SEARCH_JQL_QUERY": "JQL Query for to limit the searcher tasks"
+        "SEARCH_JQL_QUERY": "JQL Query for to limit the searcher tasks",
+        "WORKLOG_DEFAULT_ALL_TIME": "تمام زمان صرف شده برای کار را پر کنید",
+        "WORKLOG_DEFAULT_ALL_TIME_MINUS_LOGGED": "تمام زمان صرف شده منهای زمان ثبت شده را پر کنید",
+        "WORKLOG_DEFAULT_TIME_MODE": "مقدار زمان پیش‌فرض برای گفتگو",
+        "WORKLOG_DEFAULT_TODAY": "فقط زمان صرف شده امروز را پر کنید",
+        "WORKLOG_DEFAULT_YESTERDAY": "فقط زمانی را که دیروز صرف کرده اید پر کنید"
       },
       "FORM_CRED": {
         "ALLOW_SELF_SIGNED": "اجازه گواهی خود امضا شده",
@@ -406,7 +429,8 @@
       "EDIT_FULLSCREEN": "ویرایش در تمام صفحه",
       "NOTES_CMP": {
         "ADD_BTN": "اضافه کردن کار جدید",
-        "DROP_TO_ADD": "برای اضافه کردن کارجدید اینجا رها کنید"
+        "DROP_TO_ADD": "برای اضافه کردن کارجدید اینجا رها کنید",
+        "NO_NOTES": "در حال حاضر هیچ یادداشتی وجود ندارد"
       },
       "NOTE_CMP": {
         "DISABLE_PARSE": "Disable markdown parsing",
@@ -417,12 +441,25 @@
       "DIALOG_INITIAL": {
         "TITLE": "راه اندازی OpenProject برای پروژه"
       },
+      "DIALOG_TRACK_TIME": {
+        "ACTIVITY": "فعالیت",
+        "CURRENTLY_LOGGED": "زمان ثبت نام در حال حاضر:",
+        "INVALID_DATE": "مقدار وارد شده یک تاریخ نیست!",
+        "POST_TIME": "زمان ارسال",
+        "STARTED": "آغاز شده",
+        "SUBMIT_TIME_FOR": "ارسال زمان به OpenProject برای",
+        "TIME_SPENT": "زمان صرف شده",
+        "TITLE": "OpenProject: ارسال کارنامه"
+      },
       "FORM": {
         "FILTER_USER": "نام کاربری (به عنوان مثال برای فیلتر کردن تغییرات توسط خودتان)",
         "HOST": "میزبان (به عنوان مثال: https://www.openproject.org/)",
         "IS_AUTO_ADD_TO_BACKLOG": "به صورت خودکار بسته های کاری حل نشده از OpenProject را به backlog اضافه کنید",
         "IS_AUTO_POLL": "بسته های کاری OpenProject وارد شده را برای تغییرات به طور خودکار نظرسنجی کنید",
         "IS_SEARCH_ISSUES_FROM_OPEN_PROJECT": "هنگام افزودن کارهای جدید ، بسته های کاری را به عنوان پیشنهاد نشان دهید",
+        "IS_SHOW_TIME_TRACKING_DIALOG": "نمایش گفتگوی ردیابی زمان برای گزارش به OpenProject",
+        "IS_SHOW_TIME_TRACKING_DIALOG_DESCRIPTION": "برای پروژه OpenProject به ماژول ردیابی زمان نیاز دارد",
+        "IS_SHOW_TIME_TRACKING_DIALOG_FOR_EACH_SUB_TASK": "نمایش گفتگوی ردیابی زمان پس از تکمیل وظایف فرعی",
         "PROJECT_ID": "شناسه پروژه",
         "PROJECT_ID_DESCRIPTION": "هنگام مشاهده پروژه در مرورگر ، می توانید آن را به عنوان بخشی از url پیدا کنید.",
         "TOKEN": "نشانه دسترسی"
@@ -444,7 +481,8 @@
         "ISSUE_STR": "بسته کاری"
       },
       "S": {
-        "ERR_UNKNOWN": "OpenProject: خطای ناشناخته {{statusCode}} {{errorMsg}}. آیا CORS به درستی برای سرور پیکربندی شده است؟"
+        "ERR_UNKNOWN": "OpenProject: خطای ناشناخته {{statusCode}} {{errorMsg}}. آیا CORS به درستی برای سرور پیکربندی شده است؟",
+        "POST_TIME_SUCCESS": "OpenProject: ورودی زمان برای {{issueTitle}}با موفقیت ایجاد شد"
       }
     },
     "POMODORO": {
@@ -454,6 +492,7 @@
       "FINISH_SESSION_X": "You successfully finished session <strong>{{nr}}</strong>!",
       "NOTIFICATION": {
         "BREAK_X_START": "Pomodoro: Break {{nr}} started!",
+        "NO_TASKS": "قبل از شروع تایمر Pomodoro باید کارها را اضافه کنید.",
         "SESSION_X_START": "Pomodoro: Session {{nr}} started!"
       },
       "S": {
@@ -505,9 +544,11 @@
         "SETUP_CALDAV": "ادغام Caldav را تنظیم کنید",
         "SETUP_GIT": "راه اندازی ارتباط با گیت",
         "SETUP_GITLAB": "راه اندازی ارتباط با گیت لاب",
-        "SETUP_JIRA": "راه اندازی ارتباط با جیرا"
+        "SETUP_JIRA": "راه اندازی ارتباط با جیرا",
+        "SETUP_OPEN_PROJECT": "راه اندازی OpenProject Integration"
       },
       "FORM_BASIC": {
+        "L_IS_HIDDEN_FROM_MENU": "پروژه را از منو مخفی کنید",
         "L_TITLE": "نام پروژه",
         "TITLE": "تنظیمات پایه"
       },
@@ -586,6 +627,7 @@
         "FORCE_IMPORT": "به هر حال داده از راه دور وارد می شود؟",
         "FORCE_UPLOAD": "به هر حال داده های محلی بارگذاری می شوند؟",
         "FORCE_UPLOAD_AFTER_ERROR": "هنگام بارگذاری داده های محلی شما خطایی روی داد. سعی کنید به زودی بروزرسانی کنید؟",
+        "MIGRATE_LEGACY": "داده‌های قدیمی هنگام وارد کردن شناسایی شدند، آیا می‌خواهید آن‌ها را انتقال دهید؟",
         "NO_REMOTE_DATA": "داده ای از راه دور یافت نشد محلی در Remote بارگذاری شود؟",
         "TRY_LOAD_REMOTE_AGAIN": "سعی می کنید بار دیگر داده ها را از راه دور بارگیری کنید؟"
       },
@@ -808,6 +850,7 @@
         "HELP1": "Repeating tasks are meant for daily chores, e.g.: \"Organization\", \"Daily Meeting\", \"Code Review\", \"Checking emails\" or similar tasks which are likely to occur again and again.",
         "HELP2": "Once configured a repeating task will be recreated on every day selected below as soon as you open your project and will be automatically marked as completed at the end of the day. They will be handled as different instances. So you can freely add sub tasks etc.",
         "HELP3": "Tasks imported from Jira or Git Issues cannot be repeated. All reminders will also be deleted on a repeating task.",
+        "HELP4": "نکته ای در مورد فیلد سفارش: اشاره به دستور ایجاد کارهای تکرارپذیر. فقط برای کارهای تکراری که به طور همزمان ایجاد می شوند قابل اجرا است. مقدار کمتر به این معنی است که یک کار در لیست بالاتر خواهد بود، یک عدد پایین تر که پایین تر خواهد بود. مقدار بزرگتر از 0 به این معنی است که موارد در انتهای کارهای عادی ایجاد می شوند.",
         "TAG_LABEL": "برچسب ها برای اضافه کردن"
       },
       "F": {
@@ -815,6 +858,8 @@
         "FRIDAY": "جمعه",
         "IS_ADD_TO_BOTTOM": "کار را به پایین لیست منتقل کنید",
         "MONDAY": "دوشنبه",
+        "ORDER": "سفارش",
+        "ORDER_DESCRIPTION": "ترتیب ایجاد وظایف تکرار شونده فقط بر کارهای تکراری ایجاد شده در همان زمان تأثیر می گذارد. مقدار کمتر به این معنی است که یک کار بالاتر از لیست ایجاد می شود، یک عدد پایین تر که پایین تر خواهد بود. مقدار بزرگتر از 0 به این معنی است که موارد در انتهای کارهای عادی ایجاد می شوند.",
         "REMIND_AT": "یادآوری در",
         "REMIND_AT_PLACEHOLDER": "زمان یادآوری را انتخاب کنید",
         "SATURDAY": "شنبه",
@@ -837,6 +882,9 @@
       "MENU_TITLE": "جدول زمانی",
       "NOW": "اکنون",
       "NO_TASKS": "در حال حاضر هیچ وظیفه ای وجود ندارد. لطفاً برخی از کارها را از طریق دکمه + در نوار بالا اضافه کنید.",
+      "S": {
+        "CAL_PROVIDER_ERROR": "خط زمان خطای ارائه دهنده Cal: {{errTxt}}"
+      },
       "START": "شروع کار",
       "TASK_PROJECTION_INFO": "پیش بینی آینده یک کار تکراری برنامه ریزی شده"
     },
@@ -941,6 +989,7 @@
     "DISMISS": "رد کردن",
     "DO_IT": "انجام بدهید!",
     "EDIT": "ویرایش",
+    "ENABLED": "فعال شده است",
     "EXTENSION_INFO": "لطفا برای ارتباط با جیرا و مدیریت زمان <a target=\"_blank\" href=\"https://chrome.google.com/webstore/detail/super-productivity/ljkbjodfmekklcoibdnhahlaalhihmlb\"> افزونه گوگل کروم</a> را دانلود کنید. توجه این افزونه برای نسخه موبایل کروم کار نمی کند.",
     "LOGIN": "وارد شدن",
     "LOGOUT": "خارج شدن",
@@ -1042,6 +1091,7 @@
       "LABEL": "لطفا یک زبان انتخاب کنید",
       "NB": "نروژی",
       "NL": "هلندی",
+      "PL": "لهستانی",
       "PT": "پرتغالی",
       "RU": "روسی",
       "TITLE": "زبان",
@@ -1057,8 +1107,8 @@
       "IS_AUTO_MARK_PARENT_AS_DONE": "Mark parent task as done, when all sub tasks are done",
       "IS_AUTO_START_NEXT_TASK": "هنگام علامت گذاری جریان ، به عنوان انجام کار ، ردیابی کار بعدی را شروع کنید",
       "IS_CONFIRM_BEFORE_EXIT": "Confirm before exiting the app",
+      "IS_CONFIRM_BEFORE_EXIT_WITHOUT_FINISH_DAY": "قبل از خروج از برنامه بدون اتمام روز اول آن را تأیید کنید",
       "IS_DARK_MODE": "Dark Mode",
-      "IS_DISABLE_INITIAL_DIALOG": "گفتگوی اطلاعات اولیه را غیرفعال کنید (ممکن است به روزرسانی های مهم را از دست دهید!)",
       "IS_HIDE_NAV": "Hide navigation until main header is hovered (desktop only)",
       "IS_MINIMIZE_TO_TRAY": "کوچک کردن به سینی (فقط دسک تاپ)",
       "IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "Notify when time estimate was exceeded",
@@ -1096,11 +1146,16 @@
       "MESSAGE": "Take a break message",
       "MIN_WORKING_TIME": "Trigger take a break notification after X working without one",
       "MOTIVATIONAL_IMG": "تصویر انگیزشی (آدرس اینترنتی)",
+      "NOTIFICATION_TITLE": "استراحت کن!",
       "SNOOZE_TIME": "زمان استراحت را به تعویق بیندازید",
       "TITLE": "یادآوری استراحت"
     },
     "TIMELINE": {
+      "CAL_PROVIDERS": "ارائه دهندگان تقویم (تجربی و اختیاری)",
+      "CAL_PROVIDERS_ADD": "منبع ical اضافه کنید",
+      "CAL_PROVIDERS_INFO": "می‌توانید به‌صورت اختیاری جدول زمانی را برای بارگیری و نمایش داده‌ها از iCal (مانند Google Calendar) پیکربندی کنید.",
       "HELP": "ویژگی جدول زمانی باید مروری سریع درباره چگونگی انجام کارهای برنامه ریزی شده شما در طول زمان داشته باشد. می توانید آن را در فهرست سمت چپ در زیر <a href='#/timeline'>'Timeline'</a>پیدا کنید.",
+      "L_CAL_PATH": "مسیر URL/فایل برای تقویم ICAL (اختیاری)",
       "L_IS_WORK_START_END_ENABLED": "جریان کار بدون برنامه را به زمانهای خاص کار محدود کنید",
       "L_WORK_END": "پایان روز کار",
       "L_WORK_START": "شروع روز کار",
@@ -1123,8 +1178,7 @@
     "PERSISTENCE_DISALLOWED": "Data will be not persisted permanently. Be aware that this can lead to data loss!!",
     "PERSISTENCE_ERROR": "خطا هنگام درخواست تداوم داده: {{err}}",
     "RUNNING_X": "Running \"{{str}}\".",
-    "SHORTCUT_WARN_OPEN_BOOKMARKS_FROM_TAG": "{{keyCombo}} فشرده شده است ، اما میانبر نشانک های باز فقط در متن پروژه در دسترس است.",
-    "SHORTCUT_WARN_OPEN_NOTES_FROM_TAG": "{{keyCombo}} میانبر فشرده شده است ، اما باز کردن یادداشت های باز فقط وقتی در متن پروژه باشد ، در دسترس است."
+    "SHORTCUT_WARN_OPEN_BOOKMARKS_FROM_TAG": "{{keyCombo}} فشرده شده است ، اما میانبر نشانک های باز فقط در متن پروژه در دسترس است."
   },
   "GPB": {
     "ASSETS": "در حال بارگیری دارایی ...",
@@ -1163,6 +1217,7 @@
     "TOGGLE_SHOW_BOOKMARKS": "Show/Hide Bookmarks",
     "TOGGLE_SHOW_NOTES": "Show/Hide Project Notes",
     "TOGGLE_TRACK_TIME": "Start/Stop tracking time",
+    "TRIGGER_SYNC": "همگام سازی را به صورت دستی فعال کنید",
     "WORKLOG": "گزارش کار"
   },
   "PDS": {
@@ -1205,7 +1260,8 @@
   "PP": {
     "ARCHIVED_PROJECTS": "Archived Projects",
     "ARCHIVE_PROJECT": "Archive Project",
-    "CREATE_NEW": "Create New",
+    "CLICK_TO_HIDE": "برای مخفی کردن پروژه از منو کلیک کنید",
+    "CLICK_TO_SHOW": "برای نمایش پروژه در منو کلیک کنید",
     "DELETE_PROJECT": "Delete Project",
     "D_CONFIRM_ARCHIVE": {
       "MSG": "Are you sure you want to archive this project? Archived Projects will not be shown in the menu any more and you can't access any of their data without restoring them. It's recommended that you backup your data before you do this.",

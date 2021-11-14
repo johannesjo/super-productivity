@@ -7,9 +7,6 @@
       "MSG": "Süper Verimliliği PWA olarak kurmak ister misiniz?"
     },
     "B_OFFLINE": "İnternet bağlantınız kesildi. Sorun sağlayıcı verilerini senkronize etmek ve istemek işe yaramaz.",
-    "D_INITIAL": {
-      "TITLE": "V{{nr}}'a hoş geldiniz"
-    },
     "UPDATE_MAIN_MODEL": "Süper Verimlilik büyük bir güncelleme aldı! Verileriniz için bazı taşıma işlemleri gerekiyor. Bunun verilerinizi uygulamanın eski sürümleriyle uyumsuz hale getirdiğini lütfen unutmayın.",
     "UPDATE_MAIN_MODEL_NO_UPDATE": "Hiçbir model güncellemesi seçilmedi. Model yükseltmesini gerçekleştirmek istemiyorsanız, ya son sürüme geçmeniz gerektiğini lütfen unutmayın.",
     "UPDATE_WEB_APP": "Yeni sürüm mevcut. Yeni Sürüm Yükle?"
@@ -127,6 +124,11 @@
         "SYNC_ERROR": "Dropbox: Senkronizasyon sırasında hata"
       }
     },
+    "FINISH_DAY_BEFORE_EXIT": {
+      "C": {
+        "FINISH_DAY_BEFORE_EXIT": "Bugün listenizde henüz arşive taşınmamış {{nr}} tamamlanmış görev var. Gününüzü bitirmeden gerçekten bırakmak istiyor musunuz?"
+      }
+    },
     "GITHUB": {
       "DIALOG_INITIAL": {
         "TITLE": "Project için GitHub Kurulumu"
@@ -169,6 +171,14 @@
         "IS_AUTO_POLL": "İçe aktarılan git sorunlarını değişiklikler için otomatik olarak yokla",
         "IS_SEARCH_ISSUES_FROM_GITLAB": "Yeni görevler eklerken git'in önerilerini öneri olarak göster",
         "PROJECT": "Tam yol veya kullanıcı adı / projesi",
+        "SCOPE": "kapsam",
+        "SCOPE_ALL": "Herşey",
+        "SCOPE_ASSIGNED": "Beni görevlendirdi",
+        "SCOPE_CREATED": "Benim tarafımdan oluşturuldu",
+        "SOURCE": "Kaynak",
+        "SOURCE_GLOBAL": "Herşey",
+        "SOURCE_GROUP": "Grup",
+        "SOURCE_PROJECT": "proje",
         "TOKEN": "Erişim Simgesi"
       },
       "FORM_SECTION": {
@@ -181,6 +191,7 @@
         "DESCRIPTION": "Açıklama",
         "LABELS": "Etiketler",
         "MARK_AS_CHECKED": "Güncellemeleri işaretli olarak işaretle",
+        "PROJECT": "proje",
         "STATUS": "durum",
         "SUMMARY": "özet",
         "WRITE_A_COMMENT": "Bir yorum Yaz"
@@ -265,12 +276,19 @@
         "UPDATE_STATUS": "Güncelleme durumu"
       },
       "DIALOG_WORKLOG": {
+        "CHECKBOXES": {
+          "ALL_TIME": "Göreve harcanan tüm zamanı her zaman varsayılan olarak kullan",
+          "ALL_TIME_MINUS_LOGGED": "Her zaman yalnızca harcanan süre eksi varsayılan olarak kaydedilen süreyi kullanın",
+          "TIME_SPENT_TODAY": "Her zaman varsayılan olarak yalnızca bugün harcanan zamanı kullanın",
+          "TIME_SPENT_YESTERDAY": "Her zaman varsayılan olarak yalnızca dün harcanan zamanı kullanın"
+        },
         "CURRENTLY_LOGGED": "Şu anda kayıtlı saat:",
         "INVALID_DATE": "Girilen değer bir tarih değil!",
         "SAVE_WORKLOG": "Worklog’u Kaydet",
         "STARTED": "Başlatılan",
         "SUBMIT_WORKLOG_FOR": "İçin bir çalışma günlüğü gönder",
         "TIME_SPENT": "Harcanan zaman",
+        "TIME_SPENT_TOOLTIP": "Farklı zamanlar ekle",
         "TITLE": "Jira: Worklog Gönder"
       },
       "FORM": {
@@ -286,7 +304,12 @@
         "IS_AUTO_POLL_TICKETS": "İçe aktarılan sorunları otomatik olarak kontrol et ve bildir",
         "IS_CHECK_TO_RE_ASSIGN_TICKET_ON_TASK_START": "Halen çalışılmakta olan sorun geçerli kullanıcıya atanmış mı kontrol edin",
         "IS_WORKLOG_ENABLED": "Görev tamamlandığında çalışma günlüğünü jira'ya göndermek için iletişim kutusunu aç",
-        "SEARCH_JQL_QUERY": "Arama görevlerini sınırlamak için JQL Sorgusu"
+        "SEARCH_JQL_QUERY": "Arama görevlerini sınırlamak için JQL Sorgusu",
+        "WORKLOG_DEFAULT_ALL_TIME": "Göreve harcanan tüm zamanı doldurun",
+        "WORKLOG_DEFAULT_ALL_TIME_MINUS_LOGGED": "Harcanan tüm zamanı eksi günlüğe kaydedilen zamanı doldurun",
+        "WORKLOG_DEFAULT_TIME_MODE": "İletişim kutusu için varsayılan zaman değeri",
+        "WORKLOG_DEFAULT_TODAY": "Yalnızca bugün harcanan zamanı doldurun",
+        "WORKLOG_DEFAULT_YESTERDAY": "Yalnızca dün harcanan zamanı doldurun"
       },
       "FORM_CRED": {
         "ALLOW_SELF_SIGNED": "Kendinden imzalı sertifikaya izin ver",
@@ -406,7 +429,8 @@
       "EDIT_FULLSCREEN": "Tam ekranda düzenle",
       "NOTES_CMP": {
         "ADD_BTN": "Yeni not ekle",
-        "DROP_TO_ADD": "Yeni not eklemek için buraya bırakın"
+        "DROP_TO_ADD": "Yeni not eklemek için buraya bırakın",
+        "NO_NOTES": "Şu anda not yok"
       },
       "NOTE_CMP": {
         "DISABLE_PARSE": "Marka aşağı ayrıştırmayı devre dışı bırak",
@@ -417,12 +441,25 @@
       "DIALOG_INITIAL": {
         "TITLE": "OpenProject for Project Kurulumu"
       },
+      "DIALOG_TRACK_TIME": {
+        "ACTIVITY": "Aktivite",
+        "CURRENTLY_LOGGED": "Şu anda kayıtlı saat:",
+        "INVALID_DATE": "Girilen değer bir tarih değil!",
+        "POST_TIME": "Posta zamanı",
+        "STARTED": "Başlatılan",
+        "SUBMIT_TIME_FOR": "için OpenProject'e zaman gönderin",
+        "TIME_SPENT": "Harcanan zaman",
+        "TITLE": "OpenProject: İş Günlüğünü Gönder"
+      },
       "FORM": {
         "FILTER_USER": "Kullanıcı adı (örneğin, değişiklikleri kendiniz filtrelemek için)",
         "HOST": "Ana bilgisayar (ör.: https://www.openproject.org/)",
         "IS_AUTO_ADD_TO_BACKLOG": "Çözümlenmemiş iş paketlerini OpenProject'ten biriktirme listesine otomatik olarak ekleyin",
         "IS_AUTO_POLL": "Değişiklikler için içe aktarılan OpenProject iş paketlerini otomatik olarak yokla",
         "IS_SEARCH_ISSUES_FROM_OPEN_PROJECT": "Yeni görevler eklerken iş paketlerini öneri olarak göster",
+        "IS_SHOW_TIME_TRACKING_DIALOG": "OpenProject'e rapor vermek için zaman izleme iletişim kutusunu göster",
+        "IS_SHOW_TIME_TRACKING_DIALOG_DESCRIPTION": "OpenProject projesi için etkinleştirilecek zaman izleme modülünü gerektirir",
+        "IS_SHOW_TIME_TRACKING_DIALOG_FOR_EACH_SUB_TASK": "Alt görevler tamamlandığında zaman izleme iletişim kutusunu göster",
         "PROJECT_ID": "Proje Kimliği",
         "PROJECT_ID_DESCRIPTION": "Projeyi Tarayıcıda görüntülerken url'nin bir parçası olarak bulunabilir.",
         "TOKEN": "Erişim Simgesi"
@@ -444,7 +481,8 @@
         "ISSUE_STR": "calisma paketi"
       },
       "S": {
-        "ERR_UNKNOWN": "OpenProject: Bilinmeyen hata {{statusCode}} {{errorMsg}}. CORS, sunucu için uygun şekilde yapılandırılmış mı?"
+        "ERR_UNKNOWN": "OpenProject: Bilinmeyen hata {{statusCode}} {{errorMsg}}. CORS, sunucu için uygun şekilde yapılandırılmış mı?",
+        "POST_TIME_SUCCESS": "OpenProject: {{issueTitle}}için başarıyla oluşturulan zaman girişi"
       }
     },
     "POMODORO": {
@@ -454,6 +492,7 @@
       "FINISH_SESSION_X": " <strong>{{nr}}</strong>oturumunu başarıyla tamamladınız!",
       "NOTIFICATION": {
         "BREAK_X_START": "Pomodoro: Arası {{nr}} başladı!",
+        "NO_TASKS": "Pomodoro zamanlayıcısının başlayabilmesi için önce görevler eklemeniz gerekir.",
         "SESSION_X_START": "Pomodoro: {{nr}} oturumu başladı!"
       },
       "S": {
@@ -505,9 +544,11 @@
         "SETUP_CALDAV": "Caldav Entegrasyonunu Kurun",
         "SETUP_GIT": "GitHub Entegrasyonunu Ayarla",
         "SETUP_GITLAB": "GitLab Entegrasyonunu Ayarla",
-        "SETUP_JIRA": "Jira Entegrasyonunu Kur"
+        "SETUP_JIRA": "Jira Entegrasyonunu Kur",
+        "SETUP_OPEN_PROJECT": "OpenProject Entegrasyonunu Kurma"
       },
       "FORM_BASIC": {
+        "L_IS_HIDDEN_FROM_MENU": "Menüden projeyi gizle",
         "L_TITLE": "proje Adı",
         "TITLE": "Temel ayarlar"
       },
@@ -586,6 +627,7 @@
         "FORCE_IMPORT": "Yine de uzak veriler içe aktarılsın mı?",
         "FORCE_UPLOAD": "Yine de yerel veriler yüklensin mi?",
         "FORCE_UPLOAD_AFTER_ERROR": "Yerel verilerinizi yüklerken bir hata oluştu. Güncellemeyi zorlamaya mı çalışıyorsunuz?",
+        "MIGRATE_LEGACY": "İçe aktarılırken eski veriler algılandı, taşımayı denemek istiyor musunuz?",
         "NO_REMOTE_DATA": "Uzak veri bulunamadı. Uzak'a yerel yüklensin mi?",
         "TRY_LOAD_REMOTE_AGAIN": "Verileri bir kez daha uzaktan kumandadan yeniden yüklemeyi mi deneyin?"
       },
@@ -808,6 +850,7 @@
         "HELP1": "Tekrarlanan görevler günlük işler, örneğin: \"Organizasyon\", \"Günlük Toplantı\", \"Kod İnceleme\", \"E-postaları Kontrol Etme\" veya tekrar tekrar gerçekleşmesi muhtemel benzer işler içindir.",
         "HELP2": "Yapılandırıldıktan sonra, projenizi açar açmaz aşağıda seçilen her gün tekrarlanan bir görev yeniden oluşturulur ve günün sonunda otomatik olarak tamamlanır olarak işaretlenir. Farklı örnekler olarak ele alınacaklar. Böylece serbestçe alt görevler vb ekleyebilirsiniz.",
         "HELP3": "Jira veya Git'den alınan görevler tekrarlanamaz. Tüm hatırlatıcılar, tekrar eden bir görevde silinecektir.",
+        "HELP4": "Sipariş alanı hakkında bir not: Oluşturma sırasına atıfta bulunularak tekrarlanabilir görevler. Yalnızca aynı anda oluşturulan tekrarlanabilir görevler için geçerlidir. Daha düşük bir değer, bir görevin listede daha üstte olacağı, daha düşük bir sayı ise daha aşağıda olacağı anlamına gelir. 0'dan büyük bir değer, öğelerin normal görevlerin altında oluşturulduğu anlamına gelir.",
         "TAG_LABEL": "Eklenecek etiketler"
       },
       "F": {
@@ -815,6 +858,8 @@
         "FRIDAY": "Cuma",
         "IS_ADD_TO_BOTTOM": "Görevi listenin altına taşı",
         "MONDAY": "Pazartesi",
+        "ORDER": "Sipariş",
+        "ORDER_DESCRIPTION": "Tekrarlanabilir görevlerin oluşturulma sırası. Yalnızca aynı anda oluşturulan tekrarlanabilir görevleri etkiler. Daha düşük bir değer, bir görevin listenin yukarısında oluşturulacağı, daha düşük bir sayı ise daha aşağıda olacağı anlamına gelir. 0'dan büyük bir değer, öğelerin normal görevlerin altında oluşturulduğu anlamına gelir.",
         "REMIND_AT": "Şurada hatırlat:",
         "REMIND_AT_PLACEHOLDER": "Ne zaman hatırlatılacağını seçin",
         "SATURDAY": "Cumartesi",
@@ -837,6 +882,9 @@
       "MENU_TITLE": "Zaman çizelgesi",
       "NOW": "şimdi",
       "NO_TASKS": "Şu anda görev yok. Lütfen üst çubuktaki + Düğmesi aracılığıyla bazı görevler ekleyin.",
+      "S": {
+        "CAL_PROVIDER_ERROR": "Zaman Çizelgesi Cal Sağlayıcı Hatası: {{errTxt}}"
+      },
       "START": "İş Başlangıcı",
       "TASK_PROJECTION_INFO": "Zamanlanmış tekrarlanabilir bir görevin gelecek projeksiyonu"
     },
@@ -941,6 +989,7 @@
     "DISMISS": "Reddet",
     "DO_IT": "Yap!",
     "EDIT": "Düzenle",
+    "ENABLED": "Etkin",
     "EXTENSION_INFO": "Jira Api ve Idle Time Handling ile iletişime izin vermek için lütfen <a target=\"_blank\" href=\"https://chrome.google.com/webstore/detail/super-productivity/ljkbjodfmekklcoibdnhahlaalhihmlb\"> krom uzantısını</a> indirin. Bunun mobil cihazlar için işe yaramadığını unutmayın.",
     "LOGIN": "Oturum aç",
     "LOGOUT": "Çıkış Yap",
@@ -1058,8 +1107,8 @@
       "IS_AUTO_MARK_PARENT_AS_DONE": "Tüm alt görevler tamamlandığında ana görevi yapıldığı gibi işaretle",
       "IS_AUTO_START_NEXT_TASK": "Akımı tamam olarak işaretlerken bir sonraki görevi izlemeye başla",
       "IS_CONFIRM_BEFORE_EXIT": "Uygulamadan çıkmadan önce onayla",
+      "IS_CONFIRM_BEFORE_EXIT_WITHOUT_FINISH_DAY": "Önce günü bitirmeden uygulamadan çıkmadan önce onaylayın",
       "IS_DARK_MODE": "Karanlık modu",
-      "IS_DISABLE_INITIAL_DIALOG": "İlk bilgi iletişim kutusunu devre dışı bırak (önemli güncellemeleri kaçırabilirsiniz!)",
       "IS_HIDE_NAV": "Ana başlık yönlendirilene kadar gezinmeyi gizle (yalnızca masaüstü)",
       "IS_MINIMIZE_TO_TRAY": "Tepsiye küçült (yalnızca masaüstü)",
       "IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "Zaman hesaplamasının ne zaman aşıldığını bildir",
@@ -1097,11 +1146,16 @@
       "MESSAGE": "Bir ara mesajı al",
       "MIN_WORKING_TIME": "Tetiksiz, X'in bir olmadan çalıştıktan sonra bir mola bildirimi almasını sağlar",
       "MOTIVATIONAL_IMG": "Motivasyonel resim (web url'si)",
+      "NOTIFICATION_TITLE": "Ara ver!",
       "SNOOZE_TIME": "Mola vermeniz istendiğinde zamanı erteleme",
       "TITLE": "Hatırlatma Arası"
     },
     "TIMELINE": {
+      "CAL_PROVIDERS": "Takvim sağlayıcıları (deneysel ve isteğe bağlı)",
+      "CAL_PROVIDERS_ADD": "ical kaynağı ekle",
+      "CAL_PROVIDERS_INFO": "İsteğe bağlı olarak zaman çizelgesini, iCal'den (ör. Google Takvim) verileri de yükleyecek ve görüntüleyecek şekilde yapılandırabilirsiniz.",
       "HELP": "Zaman çizelgesi özelliği, planlanan görevlerinizin zaman içinde nasıl oynandığına dair size hızlı bir genel bakış sağlamalıdır. Bunu sol taraftaki menüde <a href='#/timeline'>\"Zaman çizelgesi\"</a>altında bulabilirsiniz.",
+      "L_CAL_PATH": "ICAL takvimi için URL/Dosya yolu (isteğe bağlı)",
       "L_IS_WORK_START_END_ENABLED": "Planlanmamış görev akışını belirli çalışma süreleriyle sınırlandırın",
       "L_WORK_END": "İş Günü Sonu",
       "L_WORK_START": "İş Günü Başlangıcı",
@@ -1124,8 +1178,7 @@
     "PERSISTENCE_DISALLOWED": "Veri kalıcı olarak sürdürülmeyecek. Bunun veri kaybına neden olabileceğini unutmayın!",
     "PERSISTENCE_ERROR": "Verilerin kalıcı hale getirilmesi istenirken hata oluştu: {{err}}",
     "RUNNING_X": "\"{{str}}\" çalıştırılıyor.",
-    "SHORTCUT_WARN_OPEN_BOOKMARKS_FROM_TAG": "{{keyCombo}} basıldı, ancak yer imlerini aç kısayolu yalnızca proje bağlamındayken kullanılabilir.",
-    "SHORTCUT_WARN_OPEN_NOTES_FROM_TAG": "{{keyCombo}} basılı, ancak açık notlar kısayolu yalnızca proje bağlamındayken kullanılabilir."
+    "SHORTCUT_WARN_OPEN_BOOKMARKS_FROM_TAG": "{{keyCombo}} basıldı, ancak yer imlerini aç kısayolu yalnızca proje bağlamındayken kullanılabilir."
   },
   "GPB": {
     "ASSETS": "Varlıklar yükleniyor ...",
@@ -1164,6 +1217,7 @@
     "TOGGLE_SHOW_BOOKMARKS": "Yer İşaretlerini Göster / Gizle",
     "TOGGLE_SHOW_NOTES": "Proje Notlarını Göster / Gizle",
     "TOGGLE_TRACK_TIME": "Başlat / Durdur takip süresi",
+    "TRIGGER_SYNC": "Senkronizasyonu manuel olarak tetikle",
     "WORKLOG": "worklog"
   },
   "PDS": {
@@ -1206,7 +1260,8 @@
   "PP": {
     "ARCHIVED_PROJECTS": "Arşivlenmiş Projeler",
     "ARCHIVE_PROJECT": "Arşiv Projesi",
-    "CREATE_NEW": "Yeni oluşturmak",
+    "CLICK_TO_HIDE": "Projeyi menüden gizlemek için tıklayın",
+    "CLICK_TO_SHOW": "Projeyi menüde göstermek için tıklayın",
     "DELETE_PROJECT": "Projeyi Sil",
     "D_CONFIRM_ARCHIVE": {
       "MSG": "Bu projeyi arşivlemek istediğinize emin misiniz? Arşivlenmiş Projeler artık menüde gösterilmeyecek ve verilerinin hiçbirini geri yüklemeden erişemezsiniz. Bunu yapmadan önce verilerinizi yedeklemeniz önerilir.",

@@ -7,9 +7,6 @@
       "MSG": "PWA로 Super Productivity를 설치 하시겠습니까?"
     },
     "B_OFFLINE": "인터넷 연결이 끊어졌습니다. 문제 제공자 데이터 동기화 및 요청이 작동하지 않습니다.",
-    "D_INITIAL": {
-      "TITLE": "v{{nr}}에 오신 것을 환영합니다"
-    },
     "UPDATE_MAIN_MODEL": "슈퍼 생산성이 대폭 업데이트되었습니다! 데이터에 대한 일부 마이그레이션이 필요합니다. 이로 인해 데이터가 이전 버전의 앱과 호환되지 않습니다.",
     "UPDATE_MAIN_MODEL_NO_UPDATE": "선택된 모델 업데이트가 없습니다. 모델 업그레이드를 수행하지 않으려면 마지막 버전으로 다운 그레이드해야합니다.",
     "UPDATE_WEB_APP": "새 버전을 사용할 수 있습니다. 새 버전을로드 하시겠습니까?"
@@ -127,6 +124,11 @@
         "SYNC_ERROR": "보관 용 계정 : 동기화 중 오류"
       }
     },
+    "FINISH_DAY_BEFORE_EXIT": {
+      "C": {
+        "FINISH_DAY_BEFORE_EXIT": "오늘 목록에 아직 아카이브로 이동되지 않은 완료된 작업이 {{nr}} 개 있습니다. 하루를 끝내지 않고 정말 그만두시겠습니까?"
+      }
+    },
     "GITHUB": {
       "DIALOG_INITIAL": {
         "TITLE": "프로젝트를위한 GitHub 설정"
@@ -169,6 +171,14 @@
         "IS_AUTO_POLL": "변경 사항에 대해 가져온 git 문제를 자동으로 폴링합니다.",
         "IS_SEARCH_ISSUES_FROM_GITLAB": "새 작업을 추가 할 때 git의 제안 사항을 제안으로 표시합니다.",
         "PROJECT": "전체 경로 또는 사용자 이름 / 프로젝트",
+        "SCOPE": "범위",
+        "SCOPE_ALL": "모든",
+        "SCOPE_ASSIGNED": "나에게 할당됨",
+        "SCOPE_CREATED": "내가 만든",
+        "SOURCE": "출처",
+        "SOURCE_GLOBAL": "모든",
+        "SOURCE_GROUP": "그룹",
+        "SOURCE_PROJECT": "계획",
         "TOKEN": "액세스 토큰"
       },
       "FORM_SECTION": {
@@ -181,6 +191,7 @@
         "DESCRIPTION": "기술",
         "LABELS": "레이블",
         "MARK_AS_CHECKED": "체크 된대로 업데이트 표시",
+        "PROJECT": "계획",
         "STATUS": "지위",
         "SUMMARY": "개요",
         "WRITE_A_COMMENT": "의견 쓰기"
@@ -265,12 +276,19 @@
         "UPDATE_STATUS": "업데이트 상태"
       },
       "DIALOG_WORKLOG": {
+        "CHECKBOXES": {
+          "ALL_TIME": "항상 작업에 소요된 모든 시간을 기본값으로 사용",
+          "ALL_TIME_MINUS_LOGGED": "항상 기본으로 기록된 시간에서 소요 시간을 뺀 시간만 사용",
+          "TIME_SPENT_TODAY": "항상 오늘 보낸 시간만 기본값으로 사용",
+          "TIME_SPENT_YESTERDAY": "항상 어제 보낸 시간만 기본값으로 사용"
+        },
         "CURRENTLY_LOGGED": "현재 기록 된 시간 :",
         "INVALID_DATE": "입력 한 값이 날짜가 아닙니다!",
         "SAVE_WORKLOG": "작업 기록 저장",
         "STARTED": "시작됨",
         "SUBMIT_WORKLOG_FOR": "Jira에게 작업 로그 제출",
         "TIME_SPENT": "지출 된 시간",
+        "TIME_SPENT_TOOLTIP": "다른 시간 추가",
         "TITLE": "Jira : 작업 로그 제출"
       },
       "FORM": {
@@ -286,7 +304,12 @@
         "IS_AUTO_POLL_TICKETS": "가져온 변경 사항을 자동으로 확인하고 알립니다.",
         "IS_CHECK_TO_RE_ASSIGN_TICKET_ON_TASK_START": "현재 발행 된 문제가 현재 사용자에게 할당되었는지 확인",
         "IS_WORKLOG_ENABLED": "작업이 완료되면 작업 로그를 jira로 제출하기위한 열기 대화 상자",
-        "SEARCH_JQL_QUERY": "검색 자 작업을 제한하기위한 JQL 쿼리"
+        "SEARCH_JQL_QUERY": "검색 자 작업을 제한하기위한 JQL 쿼리",
+        "WORKLOG_DEFAULT_ALL_TIME": "작업에 소요된 모든 시간 입력",
+        "WORKLOG_DEFAULT_ALL_TIME_MINUS_LOGGED": "모든 소요 시간에서 기록 시간을 뺀 값을 입력하세요.",
+        "WORKLOG_DEFAULT_TIME_MODE": "대화의 기본 시간 값",
+        "WORKLOG_DEFAULT_TODAY": "오늘 보낸 시간만 채우세요",
+        "WORKLOG_DEFAULT_YESTERDAY": "어제 보낸 시간만 채우기"
       },
       "FORM_CRED": {
         "ALLOW_SELF_SIGNED": "자체 서명 된 인증서 허용",
@@ -406,7 +429,8 @@
       "EDIT_FULLSCREEN": "전체 화면으로 편집",
       "NOTES_CMP": {
         "ADD_BTN": "새 메모 추가",
-        "DROP_TO_ADD": "새 메모를 추가하려면 여기로 드래그하십시오."
+        "DROP_TO_ADD": "새 메모를 추가하려면 여기로 드래그하십시오.",
+        "NO_NOTES": "현재 메모가 없습니다"
       },
       "NOTE_CMP": {
         "DISABLE_PARSE": "마크 다운 구문 분석 사용 중지",
@@ -417,12 +441,25 @@
       "DIALOG_INITIAL": {
         "TITLE": "프로젝트용 OpenProject 설정"
       },
+      "DIALOG_TRACK_TIME": {
+        "ACTIVITY": "활동",
+        "CURRENTLY_LOGGED": "현재 기록 된 시간 :",
+        "INVALID_DATE": "입력 한 값이 날짜가 아닙니다!",
+        "POST_TIME": "게시 시간",
+        "STARTED": "시작됨",
+        "SUBMIT_TIME_FOR": "OpenProject에 시간 제출",
+        "TIME_SPENT": "지출 된 시간",
+        "TITLE": "OpenProject: 작업 로그 제출"
+      },
       "FORM": {
         "FILTER_USER": "사용자 이름 (예 : 혼자서 변경 사항을 필터링)",
         "HOST": "호스트(예: https://www.openproject.org/)",
         "IS_AUTO_ADD_TO_BACKLOG": "OpenProject에서 백로그로 미해결 작업 패키지 자동 추가",
         "IS_AUTO_POLL": "가져온 OpenProject 작업 패키지에서 변경 사항을 자동으로 폴링",
         "IS_SEARCH_ISSUES_FROM_OPEN_PROJECT": "새 작업을 추가할 때 작업 패키지를 제안으로 표시",
+        "IS_SHOW_TIME_TRACKING_DIALOG": "OpenProject에 보고하는 시간 추적 대화 상자 표시",
+        "IS_SHOW_TIME_TRACKING_DIALOG_DESCRIPTION": "OpenProject 프로젝트에 대해 시간 추적 모듈을 활성화해야 합니다.",
+        "IS_SHOW_TIME_TRACKING_DIALOG_FOR_EACH_SUB_TASK": "하위 작업이 완료되면 시간 추적 대화 상자 표시",
         "PROJECT_ID": "프로젝트 ID",
         "PROJECT_ID_DESCRIPTION": "브라우저에서 프로젝트를 볼 때 URL의 일부로 찾을 수 있습니다.",
         "TOKEN": "액세스 토큰"
@@ -444,7 +481,8 @@
         "ISSUE_STR": "작업 패키지"
       },
       "S": {
-        "ERR_UNKNOWN": "OpenProject: 알 수 없는 오류 {{statusCode}} {{errorMsg}}. CORS가 서버에 대해 올바르게 구성되어 있습니까?"
+        "ERR_UNKNOWN": "OpenProject: 알 수 없는 오류 {{statusCode}} {{errorMsg}}. CORS가 서버에 대해 올바르게 구성되어 있습니까?",
+        "POST_TIME_SUCCESS": "OpenProject: {{issueTitle}}에 대한 시간 항목을 성공적으로 생성했습니다."
       }
     },
     "POMODORO": {
@@ -454,6 +492,7 @@
       "FINISH_SESSION_X": " <strong>{{nr}}</strong>세션을 성공적으로 마쳤습니다!",
       "NOTIFICATION": {
         "BREAK_X_START": "Pomodoro : 휴식 {{nr}} 시작!",
+        "NO_TASKS": "Pomodoro 타이머가 시작되기 전에 작업을 추가해야 합니다.",
         "SESSION_X_START": "Pomodoro : 세션 {{nr}} 이 시작되었습니다."
       },
       "S": {
@@ -505,9 +544,11 @@
         "SETUP_CALDAV": "Caldav 통합 설정",
         "SETUP_GIT": "GitHub 통합 설치",
         "SETUP_GITLAB": "GitLab 통합 설치",
-        "SETUP_JIRA": "Jira 통합 설정"
+        "SETUP_JIRA": "Jira 통합 설정",
+        "SETUP_OPEN_PROJECT": "OpenProject 통합 설정"
       },
       "FORM_BASIC": {
+        "L_IS_HIDDEN_FROM_MENU": "메뉴에서 프로젝트 숨기기",
         "L_TITLE": "프로젝트 이름",
         "TITLE": "기본 설정"
       },
@@ -586,6 +627,7 @@
         "FORCE_IMPORT": "그래도 원격 데이터를 가져 오시겠습니까?",
         "FORCE_UPLOAD": "그래도 로컬 데이터를 업로드 하시겠습니까?",
         "FORCE_UPLOAD_AFTER_ERROR": "로컬 데이터를 업로드하는 동안 오류가 발생했습니다. 강제로 업데이트 하시겠습니까?",
+        "MIGRATE_LEGACY": "가져오는 동안 기존 데이터가 감지되었습니다. 마이그레이션을 시도하시겠습니까?",
         "NO_REMOTE_DATA": "원격 데이터가 없습니다. 원격에 로컬을 업로드 하시겠습니까?",
         "TRY_LOAD_REMOTE_AGAIN": "원격에서 데이터를 다시로드 하시겠습니까?"
       },
@@ -808,6 +850,7 @@
         "HELP1": "반복 작업은 일별 잡일을 의미합니다 (예 : \"조직\", \"일일 모임\", \"코드 검토\", \"이메일 확인\"또는 여러 번 반복 될 수있는 유사한 작업).",
         "HELP2": "일단 구성되면 반복 작업은 프로젝트를 여는 즉시 아래에서 선택한 매일에 다시 작성되며 하루가 끝날 때 자동 완성으로 표시됩니다. 그들은 다른 인스턴스로 처리됩니다. 따라서 하위 작업 등을 자유롭게 추가 할 수 있습니다.",
         "HELP3": "Jira 또는 Git Issues에서 가져온 작업은 반복 할 수 없습니다. 모든 미리 알림은 반복 작업에서 삭제됩니다.",
+        "HELP4": "주문 필드에 대한 참고 사항: 생성 주문 반복 가능한 작업 참조. 동시에 생성되는 반복 가능한 작업에만 적용됩니다. 값이 낮을수록 작업이 목록의 위쪽에 있고 숫자가 낮을수록 아래쪽에 있음을 의미합니다. 0보다 큰 값은 항목이 일반 작업의 맨 아래에 생성됨을 의미합니다.",
         "TAG_LABEL": "추가 할 태그"
       },
       "F": {
@@ -815,6 +858,8 @@
         "FRIDAY": "금요일",
         "IS_ADD_TO_BOTTOM": "작업을 목록의 맨 아래로 이동",
         "MONDAY": "월요일",
+        "ORDER": "주문",
+        "ORDER_DESCRIPTION": "반복 가능한 작업의 생성 순서. 동시에 생성된 반복 가능한 작업에만 영향을 줍니다. 값이 낮을수록 작업이 목록 위쪽에 생성되고 숫자가 낮을수록 아래쪽에 생성됨을 의미합니다. 0보다 큰 값은 항목이 일반 작업의 맨 아래에 생성됨을 의미합니다.",
         "REMIND_AT": "에 알림",
         "REMIND_AT_PLACEHOLDER": "알림 시간 선택",
         "SATURDAY": "토요일",
@@ -837,6 +882,9 @@
       "MENU_TITLE": "타임 라인",
       "NOW": "지금",
       "NO_TASKS": "현재 작업이 없습니다. 상단 표시 줄의 + 버튼을 통해 몇 가지 작업을 추가하세요.",
+      "S": {
+        "CAL_PROVIDER_ERROR": "타임라인 Cal Provider 오류: {{errTxt}}"
+      },
       "START": "작업 시작",
       "TASK_PROJECTION_INFO": "예약된 반복 작업의 미래 예측"
     },
@@ -941,6 +989,7 @@
     "DISMISS": "버리다",
     "DO_IT": "해!",
     "EDIT": "편집하다",
+    "ENABLED": "사용",
     "EXTENSION_INFO": "Jira Api 및 Idle Time Handling과의 통신을 허용하려면 <a target=\"_blank\" href=\"https://chrome.google.com/webstore/detail/super-productivity/ljkbjodfmekklcoibdnhahlaalhihmlb\"> 크롬 확장</a> 을 다운로드하십시오. 이 기능은 모바일에서 작동하지 않습니다.",
     "LOGIN": "로그인",
     "LOGOUT": "로그 아웃",
@@ -1058,8 +1107,8 @@
       "IS_AUTO_MARK_PARENT_AS_DONE": "모든 하위 작업이 완료되면 상위 작업을 완료로 표시합니다.",
       "IS_AUTO_START_NEXT_TASK": "전류를 완료로 표시 할 때 다음 작업 추적 시작",
       "IS_CONFIRM_BEFORE_EXIT": "앱을 종료하기 전에 확인",
+      "IS_CONFIRM_BEFORE_EXIT_WITHOUT_FINISH_DAY": "하루를 먼저 끝내지 않고 앱을 종료하기 전에 확인",
       "IS_DARK_MODE": "다크 모드",
-      "IS_DISABLE_INITIAL_DIALOG": "초기 정보 대화 상자를 비활성화합니다 (중요한 업데이트가 누락 될 수 있습니다).",
       "IS_HIDE_NAV": "기본 헤더가 올라갈 때까지 탐색을 숨 깁니다 (데스크톱 만 해당).",
       "IS_MINIMIZE_TO_TRAY": "트레이로 최소화 (데스크탑 만 해당)",
       "IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "예상 시간을 초과했을 때 알림",
@@ -1097,11 +1146,16 @@
       "MESSAGE": "휴식 메시지 받기",
       "MIN_WORKING_TIME": "트리거가없는 X 작업 후 휴식 알림을받습니다.",
       "MOTIVATIONAL_IMG": "동기 부여 이미지 (웹 URL)",
+      "NOTIFICATION_TITLE": "휴식을 취하다!",
       "SNOOZE_TIME": "휴식을 취하라는 메시지가 표시되면 일시 중지 시간",
       "TITLE": "휴식 알림"
     },
     "TIMELINE": {
+      "CAL_PROVIDERS": "캘린더 제공자(실험 및 선택사항)",
+      "CAL_PROVIDERS_ADD": "소스 추가",
+      "CAL_PROVIDERS_INFO": "iCal(예: Google 캘린더)의 데이터도 로드하고 표시하도록 타임라인을 선택적으로 구성할 수 있습니다.",
       "HELP": "타임 라인 기능은 계획된 작업이 시간에 따라 어떻게 진행되는지에 대한 빠른 개요를 제공해야합니다. <a href='#/timeline'>'타임 라인'</a>아래의 왼쪽 메뉴에서 찾을 수 있습니다.",
+      "L_CAL_PATH": "캘린더 ICAL의 URL/파일 경로(선택 사항)",
       "L_IS_WORK_START_END_ENABLED": "예정되지 않은 작업 흐름을 특정 작업 시간으로 제한",
       "L_WORK_END": "근무일 종료",
       "L_WORK_START": "근무일 시작",
@@ -1124,8 +1178,7 @@
     "PERSISTENCE_DISALLOWED": "데이터는 영구적으로 유지되지 않습니다. 이로 인해 데이터가 손실 될 수 있습니다 !!",
     "PERSISTENCE_ERROR": "데이터 유지 요청 시 오류: {{err}}",
     "RUNNING_X": "\"{{str}}\"실행 중.",
-    "SHORTCUT_WARN_OPEN_BOOKMARKS_FROM_TAG": "{{keyCombo}} 을 눌렀지만 북마크 열기 바로 가기는 프로젝트 컨텍스트에서만 사용할 수 있습니다.",
-    "SHORTCUT_WARN_OPEN_NOTES_FROM_TAG": "{{keyCombo}} 을 눌렀지만 노트 열기 단축키는 프로젝트 컨텍스트에서만 사용할 수 있습니다."
+    "SHORTCUT_WARN_OPEN_BOOKMARKS_FROM_TAG": "{{keyCombo}} 을 눌렀지만 북마크 열기 바로 가기는 프로젝트 컨텍스트에서만 사용할 수 있습니다."
   },
   "GPB": {
     "ASSETS": "자산로드 중 ...",
@@ -1164,6 +1217,7 @@
     "TOGGLE_SHOW_BOOKMARKS": "북마크 표시 / 숨기기",
     "TOGGLE_SHOW_NOTES": "프로젝트 노트 표시 / 숨기기",
     "TOGGLE_TRACK_TIME": "추적 시작 / 중지 시간",
+    "TRIGGER_SYNC": "수동으로 동기화 트리거",
     "WORKLOG": "작업 로그"
   },
   "PDS": {
@@ -1206,7 +1260,8 @@
   "PP": {
     "ARCHIVED_PROJECTS": "보관 된 프로젝트",
     "ARCHIVE_PROJECT": "프로젝트 아카이브",
-    "CREATE_NEW": "새로 만들기",
+    "CLICK_TO_HIDE": "메뉴에서 프로젝트를 숨기려면 클릭하세요.",
+    "CLICK_TO_SHOW": "메뉴에 프로젝트를 표시하려면 클릭하세요.",
     "DELETE_PROJECT": "프로젝트 삭제",
     "D_CONFIRM_ARCHIVE": {
       "MSG": "이 프로젝트를 보관 하시겠습니까? 보관 된 프로젝트는 더 이상 메뉴에 표시되지 않으며 복원하지 않으면 데이터에 액세스 할 수 없습니다. 이렇게하기 전에 데이터를 백업하는 것이 좋습니다.",

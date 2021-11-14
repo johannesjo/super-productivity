@@ -7,9 +7,6 @@
       "MSG": "Super ProductivityをPWAとしてインストールしますか？"
     },
     "B_OFFLINE": "インターネットに接続していません。課題プロバイダーデータの同期と要求は機能しません。",
-    "D_INITIAL": {
-      "TITLE": "v{{nr}}へようこそ"
-    },
     "UPDATE_MAIN_MODEL": "Super Productivityが大幅に更新されました！データのいくつかの移行が必要です。これにより、データが古いバージョンのアプリと互換性がなくなることに注意してください。",
     "UPDATE_MAIN_MODEL_NO_UPDATE": "モデルの更新が選択されていません。モデルのアップグレードを実行しない場合は、前のバージョンにダウングレードする必要があることに注意してください。",
     "UPDATE_WEB_APP": "新しいバージョンがあります。新しいバージョンをロードしますか？"
@@ -127,6 +124,11 @@
         "SYNC_ERROR": "Dropbox：同期中のエラー"
       }
     },
+    "FINISH_DAY_BEFORE_EXIT": {
+      "C": {
+        "FINISH_DAY_BEFORE_EXIT": "今日のリストには、まだアーカイブに移動されていない {{nr}} の完了したタスクがあります。あなたは本当にあなたの一日を終えることなくやめたいですか？"
+      }
+    },
     "GITHUB": {
       "DIALOG_INITIAL": {
         "TITLE": "プロジェクト用GitHubのセットアップ"
@@ -169,6 +171,14 @@
         "IS_AUTO_POLL": "変更についてインポートされたGitの課題を自動的にポーリングします",
         "IS_SEARCH_ISSUES_FROM_GITLAB": "新しいタスクを追加するときにgitからの課題を提案として表示する",
         "PROJECT": "フルパスまたはユーザー名/プロジェクト",
+        "SCOPE": "範囲",
+        "SCOPE_ALL": "すべて",
+        "SCOPE_ASSIGNED": "私に割り当てられた",
+        "SCOPE_CREATED": "自分で作成",
+        "SOURCE": "ソース",
+        "SOURCE_GLOBAL": "すべて",
+        "SOURCE_GROUP": "グループ",
+        "SOURCE_PROJECT": "プロジェクト",
         "TOKEN": "アクセストークン"
       },
       "FORM_SECTION": {
@@ -181,6 +191,7 @@
         "DESCRIPTION": "説明",
         "LABELS": "ラベル",
         "MARK_AS_CHECKED": "更新をチェック済みとしてマーク",
+        "PROJECT": "プロジェクト",
         "STATUS": "状態",
         "SUMMARY": "概要",
         "WRITE_A_COMMENT": "コメントを書く"
@@ -265,12 +276,19 @@
         "UPDATE_STATUS": "最新状況"
       },
       "DIALOG_WORKLOG": {
+        "CHECKBOXES": {
+          "ALL_TIME": "常にタスクに費やされたすべての時間をデフォルトとして使用します",
+          "ALL_TIME_MINUS_LOGGED": "常に、費やした時間からログに記録された時間を差し引いたもののみをデフォルトとして使用します",
+          "TIME_SPENT_TODAY": "常に今日費やした時間のみをデフォルトとして使用します",
+          "TIME_SPENT_YESTERDAY": "常に昨日費やした時間のみをデフォルトとして使用します"
+        },
         "CURRENTLY_LOGGED": "現在記録されている時間：",
         "INVALID_DATE": "入力された値は日付ではありません。",
         "SAVE_WORKLOG": "作業ログを保存",
         "STARTED": "始めました",
         "SUBMIT_WORKLOG_FOR": "の仕事ログをJiraに提出する",
         "TIME_SPENT": "使った時間",
+        "TIME_SPENT_TOOLTIP": "異なる時間を追加する",
         "TITLE": "Jira：作業記録を提出する"
       },
       "FORM": {
@@ -286,7 +304,12 @@
         "IS_AUTO_POLL_TICKETS": "インポートされたissueに変更がないか自動的に確認して通知する",
         "IS_CHECK_TO_RE_ASSIGN_TICKET_ON_TASK_START": "現在作業中の課題が現在のユーザーに割り当てられているかどうかを確認してください",
         "IS_WORKLOG_ENABLED": "タスクが完了したら作業ログをJiraに送信するためのダイアログを開く",
-        "SEARCH_JQL_QUERY": "検索者のタスクを制限するためのJQLクエリ"
+        "SEARCH_JQL_QUERY": "検索者のタスクを制限するためのJQLクエリ",
+        "WORKLOG_DEFAULT_ALL_TIME": "タスクに費やしたすべての時間を記入してください",
+        "WORKLOG_DEFAULT_ALL_TIME_MINUS_LOGGED": "費やした時間から記録した時間を差し引いたすべての時間を入力します",
+        "WORKLOG_DEFAULT_TIME_MODE": "ダイアログのデフォルトの時間値",
+        "WORKLOG_DEFAULT_TODAY": "今日過ごした時間だけを埋める",
+        "WORKLOG_DEFAULT_YESTERDAY": "昨日過ごした時間だけを埋める"
       },
       "FORM_CRED": {
         "ALLOW_SELF_SIGNED": "自己署名証明書を許可する",
@@ -406,7 +429,8 @@
       "EDIT_FULLSCREEN": "全画面で編集する",
       "NOTES_CMP": {
         "ADD_BTN": "新しいメモを追加",
-        "DROP_TO_ADD": "新しいメモを追加するには、ここにドロップしてください"
+        "DROP_TO_ADD": "新しいメモを追加するには、ここにドロップしてください",
+        "NO_NOTES": "現在、メモはありません"
       },
       "NOTE_CMP": {
         "DISABLE_PARSE": "マークダウン解析を無効にする",
@@ -417,12 +441,25 @@
       "DIALOG_INITIAL": {
         "TITLE": "プロジェクト用にOpenProjectをセットアップする"
       },
+      "DIALOG_TRACK_TIME": {
+        "ACTIVITY": "アクティビティ",
+        "CURRENTLY_LOGGED": "現在記録されている時間：",
+        "INVALID_DATE": "入力された値は日付ではありません。",
+        "POST_TIME": "投稿時間",
+        "STARTED": "始めました",
+        "SUBMIT_TIME_FOR": "OpenProjectに時間を送信します",
+        "TIME_SPENT": "使った時間",
+        "TITLE": "OpenProject：ワークログの送信"
+      },
       "FORM": {
         "FILTER_USER": "ユーザー名（例：自分で変更を除外するため）",
         "HOST": "ホスト（例：https：//www.openproject.org/）",
         "IS_AUTO_ADD_TO_BACKLOG": "OpenProjectからバックログに未解決の作業パッケージを自動的に追加します",
         "IS_AUTO_POLL": "インポートされたOpenProjectワークパッケージの変更を自動的にポーリングします",
         "IS_SEARCH_ISSUES_FROM_OPEN_PROJECT": "新しいタスクを追加するときに提案として作業パッケージを表示する",
+        "IS_SHOW_TIME_TRACKING_DIALOG": "OpenProjectにレポートするタイムトラッキングダイアログを表示する",
+        "IS_SHOW_TIME_TRACKING_DIALOG_DESCRIPTION": "OpenProjectプロジェクトでタイムトラッキングモジュールを有効にする必要があります",
+        "IS_SHOW_TIME_TRACKING_DIALOG_FOR_EACH_SUB_TASK": "サブタスクが完了したときにタイムトラッキングダイアログを表示する",
         "PROJECT_ID": "プロジェクトID",
         "PROJECT_ID_DESCRIPTION": "ブラウザでプロジェクトを表示すると、URLの一部として見つけることができます。",
         "TOKEN": "アクセストークン"
@@ -444,7 +481,8 @@
         "ISSUE_STR": "ワークパッケージ"
       },
       "S": {
-        "ERR_UNKNOWN": "OpenProject：不明なエラー {{statusCode}} {{errorMsg}}。 CORSはサーバー用に適切に構成されていますか？"
+        "ERR_UNKNOWN": "OpenProject：不明なエラー {{statusCode}} {{errorMsg}}。 CORSはサーバー用に適切に構成されていますか？",
+        "POST_TIME_SUCCESS": "OpenProject： {{issueTitle}}の時間エントリが正常に作成されました"
       }
     },
     "POMODORO": {
@@ -454,6 +492,7 @@
       "FINISH_SESSION_X": "セッション <strong>{{nr}}</strong>が正常に終了しました。",
       "NOTIFICATION": {
         "BREAK_X_START": "ポモドーロ：休憩 {{nr}} が始まりました！",
+        "NO_TASKS": "ポモドーロタイマーを開始する前に、タスクを追加する必要があります。",
         "SESSION_X_START": "ポモドーロ：セッション {{nr}} が始まりました！"
       },
       "S": {
@@ -505,9 +544,11 @@
         "SETUP_CALDAV": "Caldav統合のセットアップ",
         "SETUP_GIT": "GitHub連携のセットアップ",
         "SETUP_GITLAB": "GitLab連携のセットアップ",
-        "SETUP_JIRA": "Jira連携のセットアップ"
+        "SETUP_JIRA": "Jira連携のセットアップ",
+        "SETUP_OPEN_PROJECT": "OpenProject統合のセットアップ"
       },
       "FORM_BASIC": {
+        "L_IS_HIDDEN_FROM_MENU": "メニューからプロジェクトを非表示",
         "L_TITLE": "プロジェクト名",
         "TITLE": "基本設定"
       },
@@ -586,6 +627,7 @@
         "FORCE_IMPORT": "とにかくリモートデータをインポートしますか？",
         "FORCE_UPLOAD": "とにかくローカルデータをアップロードしますか？",
         "FORCE_UPLOAD_AFTER_ERROR": "ローカルデータのアップロード中にエラーが発生しました。強制的に更新しますか？",
+        "MIGRATE_LEGACY": "インポート中にレガシーデータが検出されましたが、移行してみますか？",
         "NO_REMOTE_DATA": "リモートデータが見つかりません。ローカルをリモートにアップロードしますか？",
         "TRY_LOAD_REMOTE_AGAIN": "リモートからもう一度データを再ロードしてみますか？"
       },
@@ -808,6 +850,7 @@
         "HELP1": "繰り返しタスクは、日々の雑用、たとえば「整理」、「毎日の会議」、「コードレビュー」、「メールの確認」、といった何度も繰り返し発生するタスクに向いています。",
         "HELP2": "繰り返しタスクを一度設定すると、プロジェクトを開いたときにタスクが以下で選択した曜日に再作成され、1日の終わりに自動的に完了としてマークされます。個々のタスクそれぞれ別のものとして扱われるため、サブタスクなどは自由に追加できます",
         "HELP3": "JiraまたはGit Issueからインポートしたタスクを繰り返すことはできません。繰り返しタスクでは、リマインダーもすべて削除されます。",
+        "HELP4": "注文フィールドに関する注意：作成注文の繰り返し可能なタスクを参照してください。同時に作成される繰り返し可能なタスクに対してのみ有効です。値が小さいほど、タスクはリストの上位になり、数値が小さいほど、リストの下位になります。 0より大きい値は、通常のタスクの下部にアイテムが作成されることを意味します。",
         "TAG_LABEL": "追加するタグ"
       },
       "F": {
@@ -815,6 +858,8 @@
         "FRIDAY": "金曜日",
         "IS_ADD_TO_BOTTOM": "タスクをリストの一番下に移動",
         "MONDAY": "月曜日",
+        "ORDER": "注文",
+        "ORDER_DESCRIPTION": "繰り返し可能なタスクの作成順序。同時に作成された繰り返し可能なタスクにのみ影響します。値が小さいほど、タスクはリストの上位に作成され、数値が小さいほど、リストの下位に作成されます。 0より大きい値は、通常のタスクの下部にアイテムが作成されることを意味します。",
         "REMIND_AT": "で思い出させる",
         "REMIND_AT_PLACEHOLDER": "いつ思い出させるかを選択します",
         "SATURDAY": "土曜日",
@@ -837,6 +882,9 @@
       "MENU_TITLE": "タイムライン",
       "NOW": "今",
       "NO_TASKS": "現在、タスクはありません。トップバーの+ボタンからいくつかのタスクを追加してください。",
+      "S": {
+        "CAL_PROVIDER_ERROR": "タイムライン校正プロバイダーエラー： {{errTxt}}"
+      },
       "START": "作業開始",
       "TASK_PROJECTION_INFO": "スケジュールされた反復可能なタスクの将来の予測"
     },
@@ -941,6 +989,7 @@
     "DISMISS": "やめる",
     "DO_IT": "やれ！",
     "EDIT": "編集",
+    "ENABLED": "有効",
     "EXTENSION_INFO": "Jira ApiおよびIdle Time Handlingとの通信を可能にするために、<a target=\"_blank\" href=\"https://chrome.google.com/webstore/detail/super-productivity/ljkbjodfmekklcoibdnhahlaalhihmlb\">Chrome拡張機能をダウンロード</a>してください。これはモバイルでは機能しないことに注意してください。",
     "LOGIN": "ログイン",
     "LOGOUT": "ログアウト",
@@ -1058,8 +1107,8 @@
       "IS_AUTO_MARK_PARENT_AS_DONE": "すべてのサブタスクが完了したら、親タスクを完了としてマークする",
       "IS_AUTO_START_NEXT_TASK": "現在のタスクを完了したら、次のタスクの追跡を開始する",
       "IS_CONFIRM_BEFORE_EXIT": "アプリを終了する前に確認する",
+      "IS_CONFIRM_BEFORE_EXIT_WITHOUT_FINISH_DAY": "最初に1日を終えずにアプリを終了する前に確認してください",
       "IS_DARK_MODE": "ダークモード",
-      "IS_DISABLE_INITIAL_DIALOG": "初期情報ダイアログを無効にする（重要な更新を見逃す可能性があります！）",
       "IS_HIDE_NAV": "メインヘッダーが表示されるまでナビゲーションを非表示にする（デスクトップのみ）",
       "IS_MINIMIZE_TO_TRAY": "トレイに最小化（デスクトップのみ）",
       "IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "見積もり時間を超えたときに通知する",
@@ -1097,11 +1146,16 @@
       "MESSAGE": "休憩メッセージを受け取る",
       "MIN_WORKING_TIME": "休憩の通知を受け取るまでの時間",
       "MOTIVATIONAL_IMG": "やる気を起こさせる画像（ウェブのURL）",
+      "NOTIFICATION_TITLE": "休憩する！",
       "SNOOZE_TIME": "休憩をとるように促されたときに時間をスヌーズする",
       "TITLE": "休憩リマインダー"
     },
     "TIMELINE": {
+      "CAL_PROVIDERS": "カレンダープロバイダー（実験的およびオプション）",
+      "CAL_PROVIDERS_ADD": "icalソースを追加する",
+      "CAL_PROVIDERS_INFO": "オプションで、iCal（Googleカレンダーなど）からデータを読み込んで表示するようにタイムラインを構成できます。",
       "HELP": "タイムライン機能は、計画されたタスクが時間の経過とともにどのように実行されるかについての簡単な概要を提供する必要があります。左側のメニューの <a href='#/timeline'>'タイムライン'</a>の下にあります。",
+      "L_CAL_PATH": "カレンダーICALのURL /ファイルパス（オプション）",
       "L_IS_WORK_START_END_ENABLED": "予定外のタスクフローを特定の作業時間に制限する",
       "L_WORK_END": "就業日の終わり",
       "L_WORK_START": "就業日開始",
@@ -1124,8 +1178,7 @@
     "PERSISTENCE_DISALLOWED": "データは永続的に保持されません。これはデータの損失につながる可能性があることに注意してください!!",
     "PERSISTENCE_ERROR": "データの永続化をリクエストする際のエラー： {{err}}",
     "RUNNING_X": "\"{{str}}\"を実行しています。",
-    "SHORTCUT_WARN_OPEN_BOOKMARKS_FROM_TAG": "{{keyCombo}} が押されましたが、ブックマークを開くショートカットはプロジェクトコンテキストでのみ使用できます。",
-    "SHORTCUT_WARN_OPEN_NOTES_FROM_TAG": "{{keyCombo}} が押されましたが、メモを開くショートカットはプロジェクトコンテキストでのみ使用できます。"
+    "SHORTCUT_WARN_OPEN_BOOKMARKS_FROM_TAG": "{{keyCombo}} が押されましたが、ブックマークを開くショートカットはプロジェクトコンテキストでのみ使用できます。"
   },
   "GPB": {
     "ASSETS": "アセットを読み込んでいます...",
@@ -1164,6 +1217,7 @@
     "TOGGLE_SHOW_BOOKMARKS": "ブックマークの表示/非表示",
     "TOGGLE_SHOW_NOTES": "プロジェクトノートの表示/非表示",
     "TOGGLE_TRACK_TIME": "追跡時間の開始/停止",
+    "TRIGGER_SYNC": "手動で同期をトリガーする",
     "WORKLOG": "作業記録"
   },
   "PDS": {
@@ -1206,7 +1260,8 @@
   "PP": {
     "ARCHIVED_PROJECTS": "アーカイブプロジェクト",
     "ARCHIVE_PROJECT": "アーカイブプロジェクト",
-    "CREATE_NEW": "新しく作る",
+    "CLICK_TO_HIDE": "メニューからプロジェクトを非表示にするにはクリックします",
+    "CLICK_TO_SHOW": "クリックしてプロジェクトをメニューに表示",
     "DELETE_PROJECT": "プロジェクトを削除",
     "D_CONFIRM_ARCHIVE": {
       "MSG": "このプロジェクトをアーカイブしますか？アーカイブされたプロジェクトはメニューに表示されなくなり、復元しないとデータにアクセスできなくなります。これを行う前にデータをバックアップすることをお勧めします。",

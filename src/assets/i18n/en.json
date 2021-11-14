@@ -171,15 +171,15 @@
         "IS_AUTO_POLL": "Automatically poll imported git issues for changes",
         "IS_SEARCH_ISSUES_FROM_GITLAB": "Show issues from git as suggestions when adding new tasks",
         "PROJECT": "(default) project ID or user name/project",
-        "TOKEN": "Access Token",
         "SCOPE": "Scope",
         "SCOPE_ALL": "All",
         "SCOPE_ASSIGNED": "Assigned to me",
         "SCOPE_CREATED": "Created by me",
         "SOURCE": "Source",
         "SOURCE_GLOBAL": "All",
+        "SOURCE_GROUP": "Group",
         "SOURCE_PROJECT": "Project",
-        "SOURCE_GROUP": "Group"
+        "TOKEN": "Access Token"
       },
       "FORM_SECTION": {
         "HELP": "<p>Here you can configure SuperProductivity to list open GitLab (either its the online version or a self-hosted instance) issues for a specific project in the task creation panel in the daily planning view. They will be listed as suggestions and will provide a link to the issue as well as more information about it.</p> <p>In addition you can automatically add and sync all open issues to your task backlog.</p>",
@@ -191,10 +191,10 @@
         "DESCRIPTION": "Description",
         "LABELS": "Labels",
         "MARK_AS_CHECKED": "Mark updates as checked",
+        "PROJECT": "Project",
         "STATUS": "Status",
         "SUMMARY": "Summary",
-        "WRITE_A_COMMENT": "Write a comment",
-        "PROJECT": "Project"
+        "WRITE_A_COMMENT": "Write a comment"
       },
       "S": {
         "ERR_UNKNOWN": "GitLab: Unknown error {{statusCode}} {{errorMsg}}"
@@ -304,12 +304,12 @@
         "IS_AUTO_POLL_TICKETS": "Check imported issues for changes automatically and notify",
         "IS_CHECK_TO_RE_ASSIGN_TICKET_ON_TASK_START": "Check if the currently worked on issue is assigned to current user",
         "IS_WORKLOG_ENABLED": "Open dialog to submit worklog to Jira when task is done",
-        "WORKLOG_DEFAULT_TIME_MODE": "Default time value for dialog",
+        "SEARCH_JQL_QUERY": "JQL Query for limiting searching tasks",
         "WORKLOG_DEFAULT_ALL_TIME": "Fill in all time spent on task",
         "WORKLOG_DEFAULT_ALL_TIME_MINUS_LOGGED": "Fill in all time spent minus time logged",
+        "WORKLOG_DEFAULT_TIME_MODE": "Default time value for dialog",
         "WORKLOG_DEFAULT_TODAY": "Fill only time spent today",
-        "WORKLOG_DEFAULT_YESTERDAY": "Fill only time spent yesterday",
-        "SEARCH_JQL_QUERY": "JQL Query for limiting searching tasks"
+        "WORKLOG_DEFAULT_YESTERDAY": "Fill only time spent yesterday"
       },
       "FORM_CRED": {
         "ALLOW_SELF_SIGNED": "Allow self signed certificate",
@@ -458,8 +458,8 @@
         "IS_AUTO_POLL": "Automatically poll imported OpenProject work packages for changes",
         "IS_SEARCH_ISSUES_FROM_OPEN_PROJECT": "Show work packages as suggestions when adding new tasks",
         "IS_SHOW_TIME_TRACKING_DIALOG": "Show time tracking dialog to report to OpenProject",
-        "IS_SHOW_TIME_TRACKING_DIALOG_FOR_EACH_SUB_TASK": "Show time tracking dialog when sub tasks are completed",
         "IS_SHOW_TIME_TRACKING_DIALOG_DESCRIPTION": "Requires time tracking module to be enabled for OpenProject project",
+        "IS_SHOW_TIME_TRACKING_DIALOG_FOR_EACH_SUB_TASK": "Show time tracking dialog when sub tasks are completed",
         "PROJECT_ID": "Project ID",
         "PROJECT_ID_DESCRIPTION": "Can be found as part of the url, when viewing the project in the Browser.",
         "TOKEN": "Access Token"
@@ -492,8 +492,8 @@
       "FINISH_SESSION_X": "You successfully finished session <strong>{{nr}}</strong>!",
       "NOTIFICATION": {
         "BREAK_X_START": "Pomodoro: Break {{nr}} started!",
-        "SESSION_X_START": "Pomodoro: Session {{nr}} started!",
-        "NO_TASKS": "You need to add tasks before the Pomodoro timer can start."
+        "NO_TASKS": "You need to add tasks before the Pomodoro timer can start.",
+        "SESSION_X_START": "Pomodoro: Session {{nr}} started!"
       },
       "S": {
         "SESSION_X_START": "Pomodoro: Session {{nr}} started!"
@@ -627,8 +627,8 @@
         "FORCE_IMPORT": "Import remote data anyway?",
         "FORCE_UPLOAD": "Upload local data anyway?",
         "FORCE_UPLOAD_AFTER_ERROR": "An Error occurred while uploading your local data. Try to force the update?",
-        "NO_REMOTE_DATA": "No remote data found. Upload local to Remote?",
         "MIGRATE_LEGACY": "Legacy data detected while importing, do you want to try to migrate it?",
+        "NO_REMOTE_DATA": "No remote data found. Upload local to Remote?",
         "TRY_LOAD_REMOTE_AGAIN": "Try to re-load data from remote once again?"
       },
       "D_AUTH_CODE": {
@@ -1144,9 +1144,9 @@
       "IS_FOCUS_WINDOW": "Focus app window when reminder is active (desktop only)",
       "IS_LOCK_SCREEN": "Lock screen when a break is due (desktop only)",
       "MESSAGE": "Take a break message",
-      "NOTIFICATION_TITLE": "Take a break!",
       "MIN_WORKING_TIME": "Trigger take a break notification after X working without one",
       "MOTIVATIONAL_IMG": "Motivational image (web url)",
+      "NOTIFICATION_TITLE": "Take a break!",
       "SNOOZE_TIME": "Snooze time when prompted to take a break",
       "TITLE": "Break Reminder"
     },
