@@ -504,9 +504,12 @@ export class JiraApiService {
 <ol>
   <li><a href="${loginUrl}">Log into Jira from your browser</a></li>
   <li><a href="${apiUrl}" target="_blank">Go to this api url</a></li>
-  <li>Open up the dev tools</li>
-  <li>Navigate to "network" and reload page</li>
-  <li>Copy all request header cookies from the api request and enter them here</li>
+  <li>Open up the dev tools (Ctrl+Shift+i)</li>
+  <li>Navigate to the "Network" tab and reload page</li>
+  <li>Click the "myself" file on the left side.</li>
+  <li>In the "Headers" tab, scroll down and locate the "Request Headers" section.</li>
+  <li>Locate the "cookie" header and right click to copy the value</li>
+  <li>Fill this form with the cookie as "cookie: {paste-cookie-value}"</li>
 </ol>`,
           },
         })
