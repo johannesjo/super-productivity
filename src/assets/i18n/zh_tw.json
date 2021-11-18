@@ -168,13 +168,13 @@
         "PROJECT": "GitLab 完整路徑或使用者名稱/repo",
         "TOKEN": "存取權杖",
         "SCOPE": "Scope",
-          "SCOPE_ALL": "All",
-          "SCOPE_ASSIGNED": "Assigned to me",
-          "SCOPE_CREATED": "Created by me",
-          "SOURCE": "Source",
-          "SOURCE_GLOBAL": "All",
-          "SOURCE_PROJECT": "Project",
-          "SOURCE_GROUP": "Group"
+        "SCOPE_ALL": "All",
+        "SCOPE_ASSIGNED": "Assigned to me",
+        "SCOPE_CREATED": "Created by me",
+        "SOURCE": "Source",
+        "SOURCE_GLOBAL": "All",
+        "SOURCE_PROJECT": "Project",
+        "SOURCE_GROUP": "Group"
       },
       "FORM_SECTION": {
         "HELP": "<p>在這裡，您可以配置 Super Productivity 在日常計劃視圖的任務建立面板中列出特定項目的打開的 GitLab Issue（線上版本或自託管實例）。它們將作為建議列出，並提供指向該 Issue 的連結以及有關此 Issue 的更多資訊。</p> <p>此外，您可以自動將所有未解決的 Issue 添加並同步到待辦事項。</p>",
@@ -300,10 +300,10 @@
         "IS_CHECK_TO_RE_ASSIGN_TICKET_ON_TASK_START": "檢查當前處理的 Issue 是否已分配給當前用戶",
         "IS_WORKLOG_ENABLED": "打開對話框，在任務完成時將工作日誌提交給 Jira",
         "WORKLOG_DEFAULT_TIME_MODE": "Default time value for dialog",
-          "WORKLOG_DEFAULT_ALL_TIME": "Fill in all time spent on task",
-          "WORKLOG_DEFAULT_ALL_TIME_MINUS_LOGGED": "Fill in all time spent minus time logged",
-          "WORKLOG_DEFAULT_TODAY": "Fill only time spent today",
-          "WORKLOG_DEFAULT_YESTERDAY": "Fill only time spent yesterday",
+        "WORKLOG_DEFAULT_ALL_TIME": "Fill in all time spent on task",
+        "WORKLOG_DEFAULT_ALL_TIME_MINUS_LOGGED": "Fill in all time spent minus time logged",
+        "WORKLOG_DEFAULT_TODAY": "Fill only time spent today",
+        "WORKLOG_DEFAULT_YESTERDAY": "Fill only time spent yesterday",
         "SEARCH_JQL_QUERY": "JQL Query用於限制搜索器任務"
       },
       "FORM_CRED": {
@@ -429,51 +429,51 @@
       "NOTE_CMP": {
         "DISABLE_PARSE": "停用 Markdown",
         "ENABLE_PARSE": "啟用 Markdown"
-        }
+      }
+    },
+    "OPEN_PROJECT": {
+      "DIALOG_INITIAL": {
+        "TITLE": "Setup OpenProject for Project"
       },
-      "OPEN_PROJECT": {
-        "DIALOG_INITIAL": {
-          "TITLE": "Setup OpenProject for Project"
-        },
-        "DIALOG_TRACK_TIME": {
-          "ACTIVITY": "Activity",
-          "CURRENTLY_LOGGED": "Currently logged time: ",
-          "INVALID_DATE": "The entered value is not a date!",
-          "POST_TIME": "Post Time",
-          "STARTED": "Started",
-          "SUBMIT_TIME_FOR": "Submit time to OpenProject for",
-          "TIME_SPENT": "Time Spent",
-          "TITLE": "OpenProject: Submit Worklog"
-        },
-        "FORM": {
-          "FILTER_USER": "Username (e.g. to filter out changes by yourself)",
-          "HOST": "Host (e.g.: https://www.openproject.org/)",
-          "IS_AUTO_ADD_TO_BACKLOG": "Automatically add unresolved work packages from OpenProject to backlog",
-          "IS_AUTO_POLL": "Automatically poll imported OpenProject work packages for changes",
-          "IS_SEARCH_ISSUES_FROM_OPEN_PROJECT": "Show work packages as suggestions when adding new tasks",
-          "IS_SHOW_TIME_TRACKING_DIALOG": "Show time tracking dialog to report to OpenProject",
-          "IS_SHOW_TIME_TRACKING_DIALOG_FOR_EACH_SUB_TASK": "Show time tracking dialog when sub tasks are completed",
-          "IS_SHOW_TIME_TRACKING_DIALOG_DESCRIPTION": "Requires time tracking module to be enabled for OpenProject project",
-          "PROJECT_ID": "Project ID",
-          "PROJECT_ID_DESCRIPTION": "Can be found as part of the url, when viewing the project in the Browser.",
-          "TOKEN": "存取權杖"
-        },
-        "FORM_SECTION": {
-          "HELP": "<p>Here you can configure SuperProductivity to list open OpenProject work packages. Please Note that for this to work in the browser you need to probably configure CORS for your OpenProject server, to allow access from app.super-productivity.com</p>",
-          "TITLE": "OpenProject"
-        },
-        "ISSUE_CONTENT": {
-          "ASSIGNEE": "Assignee",
-          "DESCRIPTION": "Description",
-          "MARK_AS_CHECKED": "Mark updates as checked",
-          "STATUS": "Status",
-          "SUMMARY": "Summary",
-          "TYPE": "Type"
-        },
-        "ISSUE_STRINGS": {
-          "ISSUES_STR": "work packages",
-          "ISSUE_STR": "work package"
-        },
+      "DIALOG_TRACK_TIME": {
+        "ACTIVITY": "Activity",
+        "CURRENTLY_LOGGED": "Currently logged time: ",
+        "INVALID_DATE": "The entered value is not a date!",
+        "POST_TIME": "Post Time",
+        "STARTED": "Started",
+        "SUBMIT_TIME_FOR": "Submit time to OpenProject for",
+        "TIME_SPENT": "Time Spent",
+        "TITLE": "OpenProject: Submit Worklog"
+      },
+      "FORM": {
+        "FILTER_USER": "Username (e.g. to filter out changes by yourself)",
+        "HOST": "Host (e.g.: https://www.openproject.org/)",
+        "IS_AUTO_ADD_TO_BACKLOG": "Automatically add unresolved work packages from OpenProject to backlog",
+        "IS_AUTO_POLL": "Automatically poll imported OpenProject work packages for changes",
+        "IS_SEARCH_ISSUES_FROM_OPEN_PROJECT": "Show work packages as suggestions when adding new tasks",
+        "IS_SHOW_TIME_TRACKING_DIALOG": "Show time tracking dialog to report to OpenProject",
+        "IS_SHOW_TIME_TRACKING_DIALOG_FOR_EACH_SUB_TASK": "Show time tracking dialog when sub tasks are completed",
+        "IS_SHOW_TIME_TRACKING_DIALOG_DESCRIPTION": "Requires time tracking module to be enabled for OpenProject project",
+        "PROJECT_ID": "Project ID",
+        "PROJECT_ID_DESCRIPTION": "Can be found as part of the url, when viewing the project in the Browser.",
+        "TOKEN": "存取權杖"
+      },
+      "FORM_SECTION": {
+        "HELP": "<p>Here you can configure SuperProductivity to list open OpenProject work packages. Please Note that for this to work in the browser you need to probably configure CORS for your OpenProject server, to allow access from app.super-productivity.com</p>",
+        "TITLE": "OpenProject"
+      },
+      "ISSUE_CONTENT": {
+        "ASSIGNEE": "Assignee",
+        "DESCRIPTION": "Description",
+        "MARK_AS_CHECKED": "Mark updates as checked",
+        "STATUS": "Status",
+        "SUMMARY": "Summary",
+        "TYPE": "Type"
+      },
+      "ISSUE_STRINGS": {
+        "ISSUES_STR": "work packages",
+        "ISSUE_STR": "work package"
+      },
       "S": {
         "ERR_UNKNOWN": "OpenProject: Unknown error {{statusCode}} {{errorMsg}}. Is CORS properly configured for the server?",
         "POST_TIME_SUCCESS": "OpenProject: Successfully created time entry for {{issueTitle}}"
@@ -841,7 +841,7 @@
         "HELP1": "重複任務適用於日常瑣事，例如：\"每日會議\"，\"代碼審查\"，\"檢查電子郵件\"或可能一次又一次發生的類似任務。",
         "HELP2": "配置完成後，一旦打開項目，將在選擇的每一天重新建立重複任務，併在一天結束時自動標記為已完成。它們將作為不同的實例處理。所以你可以自由添加子任務等。",
         "HELP3": "從 Jira 或 Git Issue 匯入的任務不能重複。",
-        "HELP4": "A note about the order field: Referring to the creation order repeatable tasks. Only in effect for repeatable tasks that are created at the same time. A lower value means a task will be higher up the list, a lower number that it will be further down. A value greater than 0 means items are created at the bottom of normal tasks.",
+        "HELP4": "A note about the order field: Referring to the creation order repeatable tasks. Only in effect for repeatable tasks that are created at the same time. A lower value means a task will be higher up the list, a higher number that it will be further down. A value greater than 0 means items are created at the bottom of normal tasks.",
         "TAG_LABEL": "要添加的標籤"
       },
       "F": {
@@ -850,7 +850,7 @@
         "IS_ADD_TO_BOTTOM": "將任務移到列表底部",
         "MONDAY": "星期一",
         "ORDER": "Order",
-        "ORDER_DESCRIPTION": "Creation order of repeatable tasks. Only affects repeatable tasks created at the same time. A lower value means a task will be created higher up the list, a lower number that it will be further down. A value greater than 0 means items are created at the bottom of normal tasks.",
+        "ORDER_DESCRIPTION": "Creation order of repeatable tasks. Only affects repeatable tasks created at the same time. A lower value means a task will be created higher up the list, a higher number that it will be further down. A value greater than 0 means items are created at the bottom of normal tasks.",
         "REMIND_AT": "Remind at",
         "REMIND_AT_PLACEHOLDER": "Select when to remind",
         "SATURDAY": "星期️六",
