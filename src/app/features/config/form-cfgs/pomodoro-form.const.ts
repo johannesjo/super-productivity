@@ -55,6 +55,7 @@ export const POMODORO_FORM_CFG: ConfigFormSection<PomodoroConfig> = {
       templateOptions: {
         required: true,
         label: T.GCF.POMODORO.DURATION,
+        description: T.G.DURATION_DESCRIPTION,
       },
     },
     {
@@ -63,6 +64,7 @@ export const POMODORO_FORM_CFG: ConfigFormSection<PomodoroConfig> = {
       templateOptions: {
         required: true,
         label: T.GCF.POMODORO.BREAK_DURATION,
+        description: T.G.DURATION_DESCRIPTION,
       },
     },
     {
@@ -71,6 +73,7 @@ export const POMODORO_FORM_CFG: ConfigFormSection<PomodoroConfig> = {
       templateOptions: {
         required: true,
         label: T.GCF.POMODORO.LONGER_BREAK_DURATION,
+        description: T.G.DURATION_DESCRIPTION,
       },
     },
     {

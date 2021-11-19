@@ -16,6 +16,7 @@ export const TASK_REPEAT_CFG_FORM_CFG: FormlyFieldConfig[] = [
     type: 'duration',
     templateOptions: {
       label: T.F.TASK_REPEAT.F.DEFAULT_ESTIMATE,
+      description: T.G.DURATION_DESCRIPTION,
     },
   },
   {

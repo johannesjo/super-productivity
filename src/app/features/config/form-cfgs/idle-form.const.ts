@@ -33,6 +33,7 @@ export const IDLE_FORM_CFG: ConfigFormSection<IdleConfig> = {
       templateOptions: {
         required: true,
         label: T.GCF.IDLE.MIN_IDLE_TIME,
+        description: T.G.DURATION_DESCRIPTION,
       },
     },
     {

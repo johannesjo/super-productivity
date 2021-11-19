@@ -25,6 +25,7 @@ export const SYNC_FORM: ConfigFormSection<SyncConfig> = {
         required: true,
         isAllowSeconds: true,
         label: T.F.SYNC.FORM.L_SYNC_INTERVAL,
+        description: T.G.DURATION_DESCRIPTION,
       },
     },
     {

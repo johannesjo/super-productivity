@@ -35,6 +35,7 @@ export const TAKE_A_BREAK_FORM_CFG: ConfigFormSection<TakeABreakConfig> = {
       templateOptions: {
         label: T.GCF.TAKE_A_BREAK.MIN_WORKING_TIME,
         required: true,
+        description: T.G.DURATION_DESCRIPTION,
       },
     },
     {
@@ -44,6 +45,7 @@ export const TAKE_A_BREAK_FORM_CFG: ConfigFormSection<TakeABreakConfig> = {
       templateOptions: {
         label: T.GCF.TAKE_A_BREAK.SNOOZE_TIME,
         required: true,
+        description: T.G.DURATION_DESCRIPTION,
       },
     },
     {
