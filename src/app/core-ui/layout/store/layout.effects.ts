@@ -1,20 +1,36 @@
 import { Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
-import { toggleShowNotes } from './layout.actions';
-import { concatMap, filter, withLatestFrom } from 'rxjs/operators';
-import { TaskService } from '../../../features/tasks/task.service';
+import { hideNotes, toggleShowNotes } from './layout.actions';
+import { filter, mapTo, withLatestFrom } from 'rxjs/operators';
 import { setSelectedTask } from '../../../features/tasks/store/task.actions';
+import { LayoutService } from '../layout.service';
+
+// what should happen
+// task selected => open panel
+// note show => open panel
+// task selected, note show => task unselected, note shown
+// note show, task selected, note show => task unselected, note shown
+// note show, task selected => task shown, note hidden
+// task selected, note show, task selected => task shown, note hidden
 
 @Injectable()
 export class LayoutEffects {
-  showNotesWhenTaskIsSelected$ = createEffect(() =>
+  hideWhenTaskIsSelected$ = createEffect(() =>
     this.actions$.pipe(
-      ofType(toggleShowNotes),
-      withLatestFrom(this.taskService.selectedTaskId$),
-      filter(([a, selectedTaskId]) => selectedTaskId !== null),
-      concatMap(() => [setSelectedTask({ id: null }), toggleShowNotes()]),
+      ofType(setSelectedTask),
+      filter(({ id }) => id !== null),
+      mapTo(hideNotes()),
     ),
   );
 
-  constructor(private actions$: Actions, private taskService: TaskService) {}
+  hideSelectedTaskWhenNoteShowIsToggled$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(toggleShowNotes),
+      withLatestFrom(this.layoutService.isShowNotes$),
+      filter(([, isShowNotes]) => isShowNotes),
+      mapTo(setSelectedTask({ id: null })),
+    ),
+  );
+
+  constructor(private actions$: Actions, private layoutService: LayoutService) {}
 }
