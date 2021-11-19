@@ -1,6 +1,4 @@
-<ng-container
-  *ngIf="(syncTriggerService.afterInitialSyncDoneAndDataLoadedInitially$|async) && !(imexMetaService.isDataImportInProgress$|async)"
->
+<ng-container *ngIf="isShowUi$|async">
   <div
     *ngIf="(globalThemeService.backgroundImg$|async) as bgImage"
     [style.background]="'url(' + bgImage + ')'"

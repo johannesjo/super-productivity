@@ -13,11 +13,10 @@ import { LayoutService } from './core-ui/layout/layout.service';
 import { IPC } from '../../electron/ipc-events.const';
 import { SnackService } from './core/snack/snack.service';
 import { IS_ELECTRON } from './app.constants';
-import { SwUpdate } from '@angular/service-worker';
 import { BookmarkService } from './features/bookmark/bookmark.service';
 import { expandAnimation } from './ui/animations/expand.ani';
 import { warpRouteAnimation } from './ui/animations/warp-route';
-import { Subscription } from 'rxjs';
+import { combineLatest, Observable, Subscription } from 'rxjs';
 import { fadeAnimation } from './ui/animations/fade.ani';
 import { BannerService } from './core/banner/banner.service';
 import { SS_WEB_APP_INSTALL } from './core/persistence/ls-keys.const';
@@ -32,13 +31,13 @@ import { WorkContextService } from './features/work-context/work-context.service
 import { ImexMetaService } from './imex/imex-meta/imex-meta.service';
 import { AndroidService } from './core/android/android.service';
 import { IS_ANDROID_WEB_VIEW } from './util/is-android-web-view';
-import { isOnline, isOnline$ } from './util/is-online';
+import { isOnline$ } from './util/is-online';
 import { SyncTriggerService } from './imex/sync/sync-trigger.service';
 import { environment } from '../environments/environment';
 import { ActivatedRoute, RouterOutlet } from '@angular/router';
 import { ipcRenderer } from 'electron';
 import { TrackingReminderService } from './features/tracking-reminder/tracking-reminder.service';
-import { first } from 'rxjs/operators';
+import { first, map } from 'rxjs/operators';
 import { IS_MOBILE } from './util/is-mobile';
 import { IS_FIREFOX } from './util/is-firefox';
 
@@ -61,6 +60,16 @@ export class AppComponent implements OnDestroy {
 
   isRTL: boolean = false;
 
+  isShowUi$: Observable<boolean> = combineLatest([
+    this.syncTriggerService.afterInitialSyncDoneAndDataLoadedInitially$,
+    this.imexMetaService.isDataImportInProgress$,
+  ]).pipe(
+    map(
+      ([afterInitialIsReady, isDataImportInProgress]) =>
+        afterInitialIsReady && !isDataImportInProgress,
+    ),
+  );
+
   private _subs: Subscription = new Subscription();
   private _intervalTimer?: NodeJS.Timeout;
 
@@ -71,7 +80,6 @@ export class AppComponent implements OnDestroy {
     private _electronService: ElectronService,
     private _snackService: SnackService,
     private _chromeExtensionInterfaceService: ChromeExtensionInterfaceService,
-    private _swUpdate: SwUpdate,
     private _translateService: TranslateService,
     private _globalThemeService: GlobalThemeService,
     private _uiHelperService: UiHelperService,
@@ -137,16 +145,6 @@ export class AppComponent implements OnDestroy {
       );
     } else {
       // WEB VERSION
-      if (this._swUpdate.isEnabled) {
-        if (isOnline()) {
-          this._swUpdate.checkForUpdate();
-        }
-        this._swUpdate.available.subscribe(() => {
-          if (confirm(this._translateService.instant(T.APP.UPDATE_WEB_APP))) {
-            window.location.reload();
-          }
-        });
-      }
       this._chromeExtensionInterfaceService.init();
 
       window.addEventListener('beforeunload', (e) => {

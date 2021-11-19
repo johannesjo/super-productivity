@@ -32,6 +32,7 @@ import { TaskService } from '../../features/tasks/task.service';
 import { SimpleCounterService } from '../../features/simple-counter/simple-counter.service';
 import { SyncProviderService } from './sync-provider.service';
 import { getSyncErrorStr } from './get-sync-error-str';
+import { InitialPwaUpdateCheckService } from '../../core/initial-pwa-update-check.service';
 
 @Injectable()
 export class SyncEffects {
@@ -109,7 +110,8 @@ export class SyncEffects {
             ),
 
             // initial after starting app
-            this._syncProviderService.isEnabledAndReady$.pipe(
+            this._initialPwaUpdateCheckService.afterInitialUpdateCheck$.pipe(
+              concatMap(() => this._syncProviderService.isEnabledAndReady$),
               take(1),
               withLatestFrom(this._syncProviderService.isEnabled$),
               switchMap(([isEnabledAndReady, isEnabled]) => {
@@ -174,5 +176,6 @@ export class SyncEffects {
     private _simpleCounterService: SimpleCounterService,
     private _dataInitService: DataInitService,
     private _execBeforeCloseService: ExecBeforeCloseService,
+    private readonly _initialPwaUpdateCheckService: InitialPwaUpdateCheckService,
   ) {}
 }
