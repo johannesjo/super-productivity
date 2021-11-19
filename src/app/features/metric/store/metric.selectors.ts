@@ -91,9 +91,9 @@ export const selectAllUsedImprovementIds = createSelector(
 
 export const selectUnusedImprovementIds = createSelector(
   selectAllUsedImprovementIds,
-  selectAllImprovementIds as any,
-  (usedIds: string[], allIds: string[]): string[] => {
-    return allIds.filter((id) => !usedIds.includes(id));
+  selectAllImprovementIds,
+  (usedIds: string[], allIds: string[] | number[]): string[] => {
+    return (allIds as string[]).filter((id) => !usedIds.includes(id));
   },
 );
 
@@ -111,9 +111,9 @@ export const selectAllUsedObstructionIds = createSelector(
 
 export const selectUnusedObstructionIds = createSelector(
   selectAllUsedObstructionIds,
-  selectAllObstructionIds as any,
-  (usedIds: string[], allIds: string[]): string[] => {
-    return allIds.filter((id) => !usedIds.includes(id));
+  selectAllObstructionIds,
+  (usedIds: string[], allIds: string[] | number[]): string[] => {
+    return (allIds as string[]).filter((id) => !usedIds.includes(id));
   },
 );
 

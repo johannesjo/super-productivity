@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { filter, first, map, switchMap, tap, withLatestFrom } from 'rxjs/operators';
-import { select, Store } from '@ngrx/store';
+import { Store } from '@ngrx/store';
 import {
   addImprovement,
   addImprovementCheckedDay,
@@ -37,9 +37,7 @@ export class ImprovementEffects {
           deleteImprovement,
           addImprovementCheckedDay,
         ),
-        switchMap(() =>
-          this._store$.pipe(select(selectImprovementFeatureState)).pipe(first()),
-        ),
+        switchMap(() => this._store$.select(selectImprovementFeatureState).pipe(first())),
         tap((state) => this._saveToLs(state)),
       ),
     { dispatch: false },
@@ -48,7 +46,7 @@ export class ImprovementEffects {
   clearImprovements$: any = createEffect(() =>
     this._actions$.pipe(
       ofType(loadProjectRelatedDataSuccess.type),
-      withLatestFrom(this._store$.pipe(select(selectImprovementHideDay))),
+      withLatestFrom(this._store$.select(selectImprovementHideDay)),
       filter(([, hideDay]) => hideDay !== getWorklogStr()),
       map(() => clearHiddenImprovements()),
     ),
@@ -57,7 +55,7 @@ export class ImprovementEffects {
   clearUnusedImprovements$: any = createEffect(() =>
     this._actions$.pipe(
       ofType(loadProjectRelatedDataSuccess.type),
-      withLatestFrom(this._store$.pipe(select(selectUnusedImprovementIds))),
+      withLatestFrom(this._store$.select(selectUnusedImprovementIds)),
       map(([a, unusedIds]) => deleteImprovements({ ids: unusedIds })),
     ),
   );
