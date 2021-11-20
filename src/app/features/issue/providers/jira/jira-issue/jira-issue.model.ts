@@ -66,7 +66,15 @@ export type JiraIssueReduced = Readonly<{
   storyPoints?: number;
 }>;
 
+export type JiraSubtask = Readonly<{
+  key: string;
+  id: string;
+  summary: string;
+  // url needs to be calculated manually
+}>;
+
 export type JiraIssue = JiraIssueReduced &
   Readonly<{
     changelog: JiraChangelogEntry[];
+    subtasks: JiraSubtask[];
   }>;

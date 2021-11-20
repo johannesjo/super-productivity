@@ -16,13 +16,13 @@
 }
 
 .wrapper {
-  margin: $s*2;
+  margin: $s * 2;
   margin-bottom: $s;
 }
 
 .comment {
   display: flex;
-  margin-bottom: $s*2;
+  margin-bottom: $s * 2;
   align-items: flex-start;
 
   .author-avatar {
@@ -44,7 +44,6 @@
 
   .name-and-comment-content {
   }
-
 }
 
 .attachments {
@@ -66,8 +65,8 @@
 
 .changelog {
   list-style: none;
-  margin: 0 0 $s*2;
-  padding: 0 0 $s*2;
+  margin: 0 0 $s * 2;
+  padding: 0 0 $s * 2;
   max-height: 100px;
   display: block;
   overflow-y: auto;
@@ -80,4 +79,14 @@
 
 .summary a {
   color: inherit;
+}
+
+.subtask-list {
+  margin: 0;
+  padding: 0;
+  margin-left: $s * 2;
+
+  a {
+    color: inherit;
+  }
 }

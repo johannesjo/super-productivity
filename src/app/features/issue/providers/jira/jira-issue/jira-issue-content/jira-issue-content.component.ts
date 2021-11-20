@@ -1,16 +1,20 @@
 import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
 import { TaskWithSubTasks } from '../../../../../tasks/task.model';
-import { JiraIssue } from '../jira-issue.model';
+import { JiraIssue, JiraSubtask } from '../jira-issue.model';
 import { expandAnimation } from '../../../../../../ui/animations/expand.ani';
 import { TaskAttachment } from '../../../../../tasks/task-attachment/task-attachment.model';
 import { T } from '../../../../../../t.const';
 import { TaskService } from '../../../../../tasks/task.service';
 // @ts-ignore
 import * as j2m from 'jira2md';
-import { Observable, ReplaySubject } from 'rxjs';
-import { switchMap } from 'rxjs/operators';
+import { combineLatest, forkJoin, Observable, of, ReplaySubject, Subject } from 'rxjs';
+import { map, switchMap } from 'rxjs/operators';
 import { JiraCommonInterfacesService } from '../../jira-common-interfaces.service';
 import { devError } from '../../../../../../util/dev-error';
+
+interface JiraSubtaskWithUrl extends JiraSubtask {
+  href: string;
+}
 
 @Component({
   selector: 'jira-issue-content',
@@ -25,13 +29,36 @@ export class JiraIssueContentComponent {
   T: typeof T = T;
   issue?: JiraIssue;
   task?: TaskWithSubTasks;
-  private _task$: ReplaySubject<TaskWithSubTasks> = new ReplaySubject(1);
+  private _task$: Subject<TaskWithSubTasks> = new ReplaySubject(1);
+  private _issue$: Subject<JiraIssue> = new ReplaySubject(1);
+
   issueUrl$: Observable<string> = this._task$.pipe(
     switchMap((task) =>
       this._jiraCommonInterfacesService.issueLink$(
         task.issueId as string,
         task.projectId as string,
       ),
+    ),
+  );
+  jiraSubTasks$: Observable<JiraSubtaskWithUrl[] | undefined> = combineLatest([
+    this._task$,
+    this._issue$,
+  ]).pipe(
+    switchMap(([task, issue]) =>
+      issue.subtasks?.length
+        ? forkJoin(
+            ...issue.subtasks.map((ist: any) => {
+              return this._jiraCommonInterfacesService
+                .issueLink$(ist.id as string, task.projectId as string)
+                .pipe(
+                  map((issueUrl) => ({
+                    ...ist,
+                    href: issueUrl,
+                  })),
+                );
+            }),
+          )
+        : of(undefined),
     ),
   );
 
@@ -42,6 +69,7 @@ export class JiraIssueContentComponent {
 
   @Input('issue') set issueIn(i: JiraIssue) {
     this.issue = i;
+    this._issue$.next(i);
     try {
       this.description = i && i.description && j2m.to_markdown(i.description);
     } catch (e) {

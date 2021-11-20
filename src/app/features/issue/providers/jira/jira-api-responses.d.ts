@@ -87,6 +87,7 @@ export type JiraOriginalFields = Readonly<{
   timeestimate: number;
   timespent: number;
   description: string | null;
+  subtasks?: JiraIssueOriginalSubtask[];
   comment?: {
     comments: JiraOriginalComment[];
     maxResults: number;
@@ -159,3 +160,8 @@ export type JiraIssueOriginal = Readonly<{
   fields: JiraOriginalFields;
   changelog?: JiraOriginalChangelog;
 }>;
+
+export type JiraIssueOriginalSubtask = Omit<
+  JiraIssueOriginal,
+  'expand' | 'changelog' | 'subtasks'
+>;

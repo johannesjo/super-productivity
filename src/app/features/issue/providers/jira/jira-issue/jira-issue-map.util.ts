@@ -4,9 +4,11 @@ import {
   JiraChangelogEntry,
   JiraComment,
   JiraIssue,
+  JiraSubtask,
 } from './jira-issue.model';
 import {
   JiraIssueOriginal,
+  JiraIssueOriginalSubtask,
   JiraOriginalAttachment,
   JiraOriginalAuthor,
   JiraOriginalChangelog,
@@ -79,8 +81,17 @@ export const mapIssue = (issue: JiraIssueOriginal, cfg: JiraCfg): JiraIssue => {
         : [],
     changelog: mapChangelog(issueCopy.changelog as JiraOriginalChangelog),
     assignee: mapAuthor(fields.assignee, true),
+    subtasks: fields.subtasks?.length ? mapSubTasks(fields.subtasks) : [],
     // url: makeIssueUrl(cfg.host, issueCopy.key)
   };
+};
+
+const mapSubTasks = (subtasks: JiraIssueOriginalSubtask[]): JiraSubtask[] => {
+  return subtasks.map((st) => ({
+    id: st.id,
+    key: st.key,
+    summary: st.fields.summary,
+  }));
 };
 
 export const mapAuthor = (

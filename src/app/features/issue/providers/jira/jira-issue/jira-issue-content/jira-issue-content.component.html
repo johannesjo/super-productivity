@@ -51,6 +51,18 @@
         1000)|msToString}}
       </td>
     </tr>
+    <tr *ngIf="(jiraSubTasks$|async) as jiraSubTasks">
+      <!--      <th>{{T.F.JIRA.ISSUE_CONTENT.ASSIGNEE|translate}}</th>-->
+      <th>Subtasks</th>
+      <td>
+        <ul class="subtask-list">
+          <li *ngFor="let st of jiraSubTasks;">
+            <a target="_blank" [href]="st.href"> {{st.key}} {{st.summary}}</a>
+          </li>
+        </ul>
+      </td>
+    </tr>
+
     <tr *ngIf="issue?.components?.length">
       <th>{{T.F.JIRA.ISSUE_CONTENT.COMPONENTS|translate}}</th>
       <td>

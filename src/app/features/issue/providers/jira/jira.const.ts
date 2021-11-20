@@ -72,6 +72,7 @@ export const JIRA_ADDITIONAL_ISSUE_FIELDS = [
   'updated',
   'components',
   'subtasks',
+  'linkedIssues',
 ];
 
 // there has to be one field otherwise we get all...
