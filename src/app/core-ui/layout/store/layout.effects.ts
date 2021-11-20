@@ -4,6 +4,7 @@ import { hideNotes, toggleShowNotes } from './layout.actions';
 import { filter, mapTo, withLatestFrom } from 'rxjs/operators';
 import { setSelectedTask } from '../../../features/tasks/store/task.actions';
 import { LayoutService } from '../layout.service';
+import { NavigationEnd, Router } from '@angular/router';
 
 // what should happen
 // task selected => open panel
@@ -15,10 +16,18 @@ import { LayoutService } from '../layout.service';
 
 @Injectable()
 export class LayoutEffects {
-  hideWhenTaskIsSelected$ = createEffect(() =>
+  hideNotesWhenTaskIsSelected$ = createEffect(() =>
     this.actions$.pipe(
       ofType(setSelectedTask),
       filter(({ id }) => id !== null),
+      mapTo(hideNotes()),
+    ),
+  );
+
+  hideNotesNavigatingToDailySummary$ = createEffect(() =>
+    this.router.events.pipe(
+      filter((event: any) => event instanceof NavigationEnd),
+      filter((event) => !!event.url.match(/(daily-summary)$/)),
       mapTo(hideNotes()),
     ),
   );
@@ -32,5 +41,9 @@ export class LayoutEffects {
     ),
   );
 
-  constructor(private actions$: Actions, private layoutService: LayoutService) {}
+  constructor(
+    private actions$: Actions,
+    private layoutService: LayoutService,
+    private router: Router,
+  ) {}
 }
