@@ -4,6 +4,7 @@ import {
   JiraChangelogEntry,
   JiraComment,
   JiraIssue,
+  JiraRelatedIssue,
   JiraSubtask,
 } from './jira-issue.model';
 import {
@@ -13,6 +14,8 @@ import {
   JiraOriginalAuthor,
   JiraOriginalChangelog,
   JiraOriginalComment,
+  JiraOriginalIssueLink,
+  JiraOriginalLinkedIssue,
 } from '../jira-api-responses';
 import { JiraCfg } from '../jira.model';
 import {
@@ -58,6 +61,7 @@ export const mapIssueResponse = (res: any, cfg: JiraCfg): JiraIssue =>
 export const mapIssue = (issue: JiraIssueOriginal, cfg: JiraCfg): JiraIssue => {
   const issueCopy = Object.assign({}, issue);
   const fields = issueCopy.fields;
+  console.log(fields);
 
   return {
     key: issueCopy.key,
@@ -82,8 +86,24 @@ export const mapIssue = (issue: JiraIssueOriginal, cfg: JiraCfg): JiraIssue => {
     changelog: mapChangelog(issueCopy.changelog as JiraOriginalChangelog),
     assignee: mapAuthor(fields.assignee, true),
     subtasks: fields.subtasks?.length ? mapSubTasks(fields.subtasks) : [],
+    relatedIssues: fields.issuelinks?.length ? mapIssueLinks(fields.issuelinks) : [],
     // url: makeIssueUrl(cfg.host, issueCopy.key)
   };
+};
+
+const mapIssueLinks = (issueLinks: JiraOriginalIssueLink[]): JiraRelatedIssue[] => {
+  console.log(issueLinks);
+
+  return issueLinks.map((il) => {
+    const isInwardIssue = !!il.inwardIssue;
+    const relatedIssue = (il.inwardIssue || il.outwardIssue) as JiraOriginalLinkedIssue;
+    return {
+      id: relatedIssue.id as string,
+      key: relatedIssue.key as string,
+      relatedHow: isInwardIssue ? il.type.inward : il.type.outward,
+      summary: relatedIssue.fields.summary,
+    };
+  });
 };
 
 const mapSubTasks = (subtasks: JiraIssueOriginalSubtask[]): JiraSubtask[] => {

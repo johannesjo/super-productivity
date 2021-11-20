@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
 import { TaskWithSubTasks } from '../../../../../tasks/task.model';
-import { JiraIssue, JiraSubtask } from '../jira-issue.model';
+import { JiraIssue, JiraRelatedIssue, JiraSubtask } from '../jira-issue.model';
 import { expandAnimation } from '../../../../../../ui/animations/expand.ani';
 import { TaskAttachment } from '../../../../../tasks/task-attachment/task-attachment.model';
 import { T } from '../../../../../../t.const';
@@ -48,6 +48,28 @@ export class JiraIssueContentComponent {
       issue.subtasks?.length
         ? forkJoin(
             ...issue.subtasks.map((ist: any) => {
+              return this._jiraCommonInterfacesService
+                .issueLink$(ist.id as string, task.projectId as string)
+                .pipe(
+                  map((issueUrl) => ({
+                    ...ist,
+                    href: issueUrl,
+                  })),
+                );
+            }),
+          )
+        : of(undefined),
+    ),
+  );
+
+  jiraRelatedIssues$: Observable<JiraRelatedIssue[] | undefined> = combineLatest([
+    this._task$,
+    this._issue$,
+  ]).pipe(
+    switchMap(([task, issue]) =>
+      issue.relatedIssues?.length
+        ? forkJoin(
+            ...issue.relatedIssues.map((ist: any) => {
               return this._jiraCommonInterfacesService
                 .issueLink$(ist.id as string, task.projectId as string)
                 .pipe(

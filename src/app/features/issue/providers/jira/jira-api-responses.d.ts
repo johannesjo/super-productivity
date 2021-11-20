@@ -1,3 +1,5 @@
+// CHECK SWAGGER EXPORT IF MORE ARE NEEDED!!!
+
 // Standard API responses
 export type JiraOriginalComponent = Readonly<{
   self: string;
@@ -52,6 +54,29 @@ export type JiraOriginalAttachment = Readonly<{
   thumbnail?: string;
 }>;
 
+export interface JiraOriginalIssueLinkType {
+  id?: string;
+  name?: string;
+  inward?: string;
+  outward?: string;
+  readonly self?: string;
+}
+
+export interface JiraOriginalLinkedIssue {
+  id: string;
+  key: string;
+  readonly self: string;
+  readonly fields: JiraOriginalFields;
+}
+
+export interface JiraOriginalIssueLink {
+  readonly id?: string;
+  readonly self?: string;
+  type: JiraOriginalIssueLinkType;
+  inwardIssue?: JiraOriginalLinkedIssue;
+  outwardIssue?: JiraOriginalLinkedIssue;
+}
+
 export type JiraOriginalComment = Readonly<{
   self: string;
   id: string;
@@ -97,6 +122,7 @@ export type JiraOriginalFields = Readonly<{
   assignee: JiraOriginalAuthor;
   updated: string;
   status: JiraOriginalStatus;
+  issuelinks: JiraOriginalIssueLink[];
 }>;
 
 // export type JiraIssueOriginalReduced = Readonly<{

@@ -73,8 +73,17 @@ export type JiraSubtask = Readonly<{
   // url needs to be calculated manually
 }>;
 
+export type JiraRelatedIssue = Readonly<{
+  key: string;
+  id: string;
+  summary: string;
+  relatedHow?: string;
+  // url needs to be calculated manually
+}>;
+
 export type JiraIssue = JiraIssueReduced &
   Readonly<{
     changelog: JiraChangelogEntry[];
     subtasks: JiraSubtask[];
+    relatedIssues: JiraRelatedIssue[];
   }>;

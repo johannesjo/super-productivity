@@ -81,12 +81,20 @@
   color: inherit;
 }
 
-.subtask-list {
+.subtask-list,
+.related-issue-list {
   margin: 0;
   padding: 0;
-  margin-left: $s * 2;
 
   a {
     color: inherit;
+    font-weight: bold;
   }
+}
+.subtask-list {
+  margin-left: $s * 2;
+}
+
+.related-issue-list {
+  list-style-type: none;
 }

@@ -63,6 +63,19 @@
       </td>
     </tr>
 
+    <tr *ngIf="(jiraRelatedIssues$|async) as relatedIssues">
+      <!--      <th>{{T.F.JIRA.ISSUE_CONTENT.ASSIGNEE|translate}}</th>-->
+      <th>Related</th>
+      <td>
+        <ul class="related-issue-list">
+          <li *ngFor="let ri of relatedIssues;">
+            <i>{{ri.relatedHow}} => </i>
+            <a target="_blank" [href]="ri.href">{{ri.key}} {{ri.summary}}</a>
+          </li>
+        </ul>
+      </td>
+    </tr>
+
     <tr *ngIf="issue?.components?.length">
       <th>{{T.F.JIRA.ISSUE_CONTENT.COMPONENTS|translate}}</th>
       <td>
