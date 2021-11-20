@@ -347,8 +347,10 @@
         "LIST_OF_CHANGES": "List of changes",
         "MARK_AS_CHECKED": "Mark updates as checked",
         "ON": "on",
+        "RELATED": "Related",
         "STATUS": "Status",
         "STORY_POINTS": "Story Points",
+        "SUB_TASKS": "Subtasks",
         "SUMMARY": "Summary",
         "WORKLOG": "Worklog",
         "WRITE_A_COMMENT": "Write a comment"
