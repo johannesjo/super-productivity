@@ -7,6 +7,7 @@ import * as newGithubIssueUrl from 'new-github-issue-url';
 import { getBeforeLastErrorActionLog } from '../../util/action-logger';
 import { download } from '../../util/download';
 import { AppDataComplete } from '../../imex/sync/sync.model';
+import { privacyExport } from '../../imex/file-imex/privacy-export';
 
 let isWasErrorAlertCreated = false;
 
@@ -123,6 +124,18 @@ export const createErrorAlert = (
       );
     });
     innerWrapper.append(btnExport);
+
+    const btnPrivacyExport = document.createElement('BUTTON');
+    btnPrivacyExport.innerText = 'PE';
+    btnPrivacyExport.title =
+      'Export anonymized data (to send to contact@super-productivity.com for debugging)';
+    btnPrivacyExport.addEventListener('click', () => {
+      download(
+        'ANONYMIZED-super-productivity-crash-user-data-export.json',
+        privacyExport(userData),
+      );
+    });
+    innerWrapper.append(btnPrivacyExport);
   }
 
   const tagReport = document.createElement('A');
