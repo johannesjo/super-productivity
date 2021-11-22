@@ -3,8 +3,19 @@
   {{T.FILE_IMEX.EXPORT_DATA|translate}}
 </button>
 
+<button
+  (click)="privacyAppDataDownload()"
+  color="primary"
+  mat-stroked-button
+  type="button"
+  [matTooltip]="T.FILE_IMEX.PRIVACY_EXPORT|translate"
+>
+  <mat-icon>code</mat-icon>
+</button>
+
 <button (click)="fileInput.click()" color="primary" mat-stroked-button type="button">
   <mat-icon>file_download</mat-icon>
   {{T.FILE_IMEX.IMPORT_FROM_FILE|translate}}
 </button>
+
 <input #fileInput (change)="handleFileInput($event)" hidden id="file" type="file" />

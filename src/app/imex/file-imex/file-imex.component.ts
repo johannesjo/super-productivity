@@ -6,6 +6,7 @@ import { download } from '../../util/download';
 import { T } from '../../t.const';
 import { TODAY_TAG } from '../../features/tag/tag.const';
 import { Router } from '@angular/router';
+import { privacyExport } from './privacy-export';
 
 @Component({
   selector: 'file-imex',
@@ -62,5 +63,10 @@ export class FileImexComponent {
     const data = await this._dataImportService.getCompleteSyncData();
     download('super-productivity-backup.json', JSON.stringify(data));
     // download('super-productivity-backup.json', privacyExport(data));
+  }
+
+  async privacyAppDataDownload(): Promise<void> {
+    const data = await this._dataImportService.getCompleteSyncData();
+    download('super-productivity-backup.json', privacyExport(data));
   }
 }

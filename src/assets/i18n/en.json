@@ -981,6 +981,7 @@
   "FILE_IMEX": {
     "EXPORT_DATA": "Export Data",
     "IMPORT_FROM_FILE": "Import from file",
+    "PRIVACY_EXPORT": "Export anonymized data (to send to contact@super-productivity.com for debugging)",
     "S_ERR_INVALID_DATA": "Import failed: Invalid JSON"
   },
   "G": {
