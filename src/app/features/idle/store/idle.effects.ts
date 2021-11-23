@@ -16,7 +16,7 @@ import {
   triggerResetBreakTimer,
 } from './idle.actions';
 import { DialogIdleComponent } from '../dialog-idle/dialog-idle.component';
-import { first, switchMap, tap, withLatestFrom } from 'rxjs/operators';
+import { first, map, switchMap, tap, withLatestFrom } from 'rxjs/operators';
 import { Task } from '../../tasks/task.model';
 import { getWorklogStr } from '../../../util/get-work-log-str';
 import { lazySetInterval } from '../../../../../electron/lazy-set-interval';
@@ -36,8 +36,10 @@ export class IdleEffects {
 
   triggerIdle$ = createEffect(
     () =>
-      IS_ELECTRON
-        ? fromEvent(this._electronService.ipcRenderer as IpcRenderer, IPC.IDLE_TIME)
+      (IS_ELECTRON
+        ? fromEvent(this._electronService.ipcRenderer as IpcRenderer, IPC.IDLE_TIME).pipe(
+            map(([ev, idleTimeInMs]: any) => idleTimeInMs as number),
+          )
         : this._chromeExtensionInterfaceService.onReady$.pipe(
             first(),
             switchMap(() => {
@@ -51,8 +53,8 @@ export class IdleEffects {
                 );
               });
             }),
-            tap((idleTimeInMs) => this._handleIdle(idleTimeInMs as number)),
-          ),
+          )
+      ).pipe(tap((idleTimeInMs) => this._handleIdle(idleTimeInMs as number))),
     { dispatch: false },
   );
 
