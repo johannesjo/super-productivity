@@ -32,6 +32,8 @@ import { WorkContextService } from '../work-context/work-context.service';
 import { Tick } from '../../core/global-tracking-interval/tick.model';
 import { ipcRenderer } from 'electron';
 import { PomodoroService } from '../pomodoro/pomodoro.service';
+import { Actions, ofType } from '@ngrx/effects';
+import { triggerResetBreakTimer } from '../idle/store/idle.actions';
 
 const BREAK_TRIGGER_DURATION = 10 * 60 * 1000;
 const PING_UPDATE_BANNER_INTERVAL = 60 * 1000;
@@ -98,7 +100,7 @@ export class TakeABreakService {
   private _triggerProgrammaticReset$: Observable<any> = this._isIdleResetEnabled$.pipe(
     switchMap((isIdleResetEnabled) => {
       return isIdleResetEnabled
-        ? this._idleService.triggerResetBreakTimer$
+        ? this._actions$.pipe(ofType(triggerResetBreakTimer))
         : this._triggerSimpleBreakReset$;
     }),
   );
@@ -175,6 +177,7 @@ export class TakeABreakService {
     private _taskService: TaskService,
     private _timeTrackingService: GlobalTrackingIntervalService,
     private _idleService: IdleService,
+    private _actions$: Actions,
     private _configService: GlobalConfigService,
     private _workContextService: WorkContextService,
     private _electronService: ElectronService,

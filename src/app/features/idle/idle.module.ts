@@ -6,7 +6,8 @@ import { TasksModule } from '../tasks/tasks.module';
 import { DialogIdleComponent } from './dialog-idle/dialog-idle.component';
 import { StoreModule } from '@ngrx/store';
 import { IDLE_FEATURE_KEY, idleReducer } from './store/idle.reducer';
-import { IdleService } from './idle.service';
+import { EffectsModule } from '@ngrx/effects';
+import { IdleEffects } from './store/idle.effects';
 
 @NgModule({
   imports: [
@@ -15,11 +16,8 @@ import { IdleService } from './idle.service';
     FormsModule,
     TasksModule,
     StoreModule.forFeature(IDLE_FEATURE_KEY, idleReducer),
+    EffectsModule.forFeature([IdleEffects]),
   ],
   declarations: [DialogIdleComponent],
 })
-export class IdleModule {
-  constructor(private _idleService: IdleService) {
-    _idleService.init();
-  }
-}
+export class IdleModule {}
