@@ -14,13 +14,12 @@ import { T } from '../../../t.const';
 import { ipcRenderer } from 'electron';
 import { IPC } from '../../../../../electron/ipc-events.const';
 import { SimpleCounterService } from '../../simple-counter/simple-counter.service';
-import { first, map } from 'rxjs/operators';
+import { first } from 'rxjs/operators';
 import { DialogConfirmComponent } from '../../../ui/dialog-confirm/dialog-confirm.component';
 import { ElectronService } from '../../../core/electron/electron.service';
 import { IS_ELECTRON } from '../../../app.constants';
 import { SimpleCounter } from '../../simple-counter/simple-counter.model';
 import { Store } from '@ngrx/store';
-import { turnOffAllSimpleCounterCounters } from '../../simple-counter/store/simple-counter.actions';
 
 interface SimpleCounterIdleBtn {
   id: string;
@@ -45,25 +44,6 @@ export class DialogIdleComponent implements OnInit, OnDestroy {
   newTaskTitle?: string;
   isCreate?: boolean;
 
-  simpleCounterToggleBtns$: Observable<SimpleCounterIdleBtn[]> =
-    this._simpleCounterService.enabledSimpleStopWatchCounters$.pipe(
-      // NOTE: as this is inside the idle dialog there should be no significant changes possible
-      // so once should always be enough
-      first(),
-      map((simpleCounterItems) =>
-        simpleCounterItems.map(
-          ({ id, icon, iconOn, title, isOn }: SimpleCounter): SimpleCounterIdleBtn =>
-            ({
-              id,
-              icon: iconOn || icon,
-              title,
-              isTrackTo: isOn,
-              isWasEnabledBefore: isOn,
-            } as SimpleCounterIdleBtn),
-        ),
-      ),
-    );
-
   simpleCounterToggleBtns: SimpleCounterIdleBtn[] = [];
 
   private _subs = new Subscription();
@@ -78,12 +58,19 @@ export class DialogIdleComponent implements OnInit, OnDestroy {
     private _simpleCounterService: SimpleCounterService,
     @Inject(MAT_DIALOG_DATA) public data: any,
   ) {
-    this._subs.add(
-      this.simpleCounterToggleBtns$.pipe(first()).subscribe((v) => {
-        this.simpleCounterToggleBtns = v;
-        this._store.dispatch(turnOffAllSimpleCounterCounters());
-      }),
+    this.simpleCounterToggleBtns = (
+      data.enabledSimpleStopWatchCounters as SimpleCounter[]
+    ).map(
+      ({ id, icon, iconOn, title, isOn }: SimpleCounter): SimpleCounterIdleBtn =>
+        ({
+          id,
+          icon: iconOn || icon,
+          title,
+          isTrackTo: isOn,
+          isWasEnabledBefore: isOn,
+        } as SimpleCounterIdleBtn),
     );
+
     _matDialogRef.disableClose = true;
   }
 

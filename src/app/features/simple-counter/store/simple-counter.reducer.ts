@@ -58,7 +58,7 @@ export const selectEnabledAndToggledSimpleCounters = createSelector(
 export const selectEnabledSimpleStopWatchCounters = createSelector(
   selectEnabledSimpleCounters,
   (items): SimpleCounter[] =>
-    items.filter((item) => item.type === SimpleCounterType.StopWatch),
+    items.filter((item) => item.type === SimpleCounterType.StopWatch && item.isEnabled),
 );
 
 export const initialSimpleCounterState: SimpleCounterState =
@@ -120,6 +120,29 @@ const _reducer = createReducer<SimpleCounterState>(
       const currentTotalCount = oldEntity.countOnDay || {};
       const currentVal = currentTotalCount[todayStr] || 0;
       const newValForToday = currentVal + increaseBy;
+      return adapter.updateOne(
+        {
+          id,
+          changes: {
+            countOnDay: {
+              ...currentTotalCount,
+              [todayStr]: newValForToday,
+            },
+          },
+        },
+        state,
+      );
+    },
+  ),
+
+  on(
+    simpleCounterActions.decreaseSimpleCounterCounterToday,
+    (state, { id, decreaseBy }) => {
+      const todayStr = getWorklogStr();
+      const oldEntity = state.entities[id] as SimpleCounter;
+      const currentTotalCount = oldEntity.countOnDay || {};
+      const currentVal = currentTotalCount[todayStr] || 0;
+      const newValForToday = Math.max(0, currentVal - decreaseBy);
       return adapter.updateOne(
         {
           id,

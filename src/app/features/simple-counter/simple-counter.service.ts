@@ -8,6 +8,7 @@ import {
 } from './store/simple-counter.reducer';
 import {
   addSimpleCounter,
+  decreaseSimpleCounterCounterToday,
   deleteSimpleCounter,
   deleteSimpleCounters,
   increaseSimpleCounterCounterToday,
@@ -97,6 +98,10 @@ export class SimpleCounterService {
 
   increaseCounterToday(id: string, increaseBy: number): void {
     this._store$.dispatch(increaseSimpleCounterCounterToday({ id, increaseBy }));
+  }
+
+  decreaseCounterToday(id: string, decreaseBy: number): void {
+    this._store$.dispatch(decreaseSimpleCounterCounterToday({ id, decreaseBy }));
   }
 
   toggleCounter(id: string): void {

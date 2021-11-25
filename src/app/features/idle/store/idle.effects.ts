@@ -26,6 +26,7 @@ import { DialogIdleComponent } from '../dialog-idle/dialog-idle.component';
 import { selectIdleTime } from './idle.selectors';
 import { Task } from '../../tasks/task.model';
 import { getWorklogStr } from '../../../util/get-work-log-str';
+import { turnOffAllSimpleCounterCounters } from '../../simple-counter/store/simple-counter.actions';
 
 const DEFAULT_MIN_IDLE_TIME = 60000;
 const IDLE_POLL_INTERVAL = 1000;
@@ -82,11 +83,12 @@ export class IdleEffects {
     { dispatch: false },
   );
 
-  onTriggerIdle$ = createEffect(
+  handleIdle$ = createEffect(
     () =>
       this.actions$.pipe(
         ofType(triggerIdle),
-        tap(({ idleTime }) => {
+        withLatestFrom(this._simpleCounterService.enabledSimpleStopWatchCounters$),
+        tap(([{ idleTime }, enabledSimpleStopWatchCounters]) => {
           if (!this.isIdleDialogOpen) {
             this.isIdleDialogOpen = true;
 
@@ -106,6 +108,18 @@ export class IdleEffects {
               this.lastCurrentTaskId = null;
             }
 
+            if (enabledSimpleStopWatchCounters.length) {
+              enabledSimpleStopWatchCounters.forEach((simpleCounter) => {
+                if (simpleCounter.isOn) {
+                  this._simpleCounterService.decreaseCounterToday(
+                    simpleCounter.id,
+                    idleTime,
+                  );
+                }
+              });
+              this._store.dispatch(turnOffAllSimpleCounterCounters());
+            }
+
             this._initIdlePoll(idleTime);
 
             this._matDialog
@@ -116,6 +130,7 @@ export class IdleEffects {
                   lastCurrentTaskId: this.lastCurrentTaskId,
                   // todo get inside component instead maybe?
                   idleTime$: this._store.select(selectIdleTime),
+                  enabledSimpleStopWatchCounters,
                 },
               })
               .afterClosed()
@@ -195,8 +210,8 @@ export class IdleEffects {
     private _uiHelperService: UiHelperService,
   ) {
     // window.setTimeout(() => {
-    //   this._store.dispatch(triggerIdle({ idleTime: 800000 }));
-    // }, 700);
+    //   this._store.dispatch(triggerIdle({ idleTime: 60 * 1000 }));
+    // }, 8700);
   }
 
   private _initIdlePoll(initialIdleTime: number): void {
