@@ -37,50 +37,48 @@ export class IdleEffects {
   private isIdleDialogOpen: boolean = false;
   private clearIdlePollInterval?: () => void;
 
-  triggerIdle$ = createEffect(
-    () =>
-      (IS_ELECTRON
-        ? fromEvent(this._electronService.ipcRenderer as IpcRenderer, IPC.IDLE_TIME).pipe(
-            map(([ev, idleTimeInMs]: any) => idleTimeInMs as number),
-          )
-        : this._chromeExtensionInterfaceService.onReady$.pipe(
-            first(),
-            switchMap(() => {
-              return new Observable((subscriber) => {
-                this._chromeExtensionInterfaceService.addEventListener(
-                  IPC.IDLE_TIME,
-                  (ev: Event, data?: unknown) => {
-                    const idleTimeInMs = Number(data);
-                    subscriber.next(idleTimeInMs);
-                  },
-                );
-              });
-            }),
-          )
-      ).pipe(
-        switchMap((idleTimeInMs) => {
-          const idleTime = idleTimeInMs as number;
-          const gCfg = this._configService.cfg;
-          if (!gCfg) {
-            throw new Error();
-          }
-          const cfg = gCfg.idle;
-          const minIdleTime = cfg.minIdleTime || DEFAULT_MIN_IDLE_TIME;
+  triggerIdle$ = createEffect(() =>
+    (IS_ELECTRON
+      ? fromEvent(this._electronService.ipcRenderer as IpcRenderer, IPC.IDLE_TIME).pipe(
+          map(([ev, idleTimeInMs]: any) => idleTimeInMs as number),
+        )
+      : this._chromeExtensionInterfaceService.onReady$.pipe(
+          first(),
+          switchMap(() => {
+            return new Observable((subscriber) => {
+              this._chromeExtensionInterfaceService.addEventListener(
+                IPC.IDLE_TIME,
+                (ev: Event, data?: unknown) => {
+                  const idleTimeInMs = Number(data);
+                  subscriber.next(idleTimeInMs);
+                },
+              );
+            });
+          }),
+        )
+    ).pipe(
+      switchMap((idleTimeInMs) => {
+        const idleTime = idleTimeInMs as number;
+        const gCfg = this._configService.cfg;
+        if (!gCfg) {
+          throw new Error();
+        }
+        const cfg = gCfg.idle;
+        const minIdleTime = cfg.minIdleTime || DEFAULT_MIN_IDLE_TIME;
 
-          // don't run if option is not enabled
-          if (
-            !cfg.isEnableIdleTimeTracking ||
-            (cfg.isOnlyOpenIdleWhenCurrentTask && !this._taskService.currentTaskId)
-          ) {
-            return of(resetIdle());
-          }
-          if (idleTime > minIdleTime) {
-            return of(triggerIdle({ idleTime }));
-          }
-          return EMPTY;
-        }),
-      ),
-    { dispatch: false },
+        // don't run if option is not enabled
+        if (
+          !cfg.isEnableIdleTimeTracking ||
+          (cfg.isOnlyOpenIdleWhenCurrentTask && !this._taskService.currentTaskId)
+        ) {
+          return of(resetIdle());
+        }
+        if (idleTime >= minIdleTime) {
+          return of(triggerIdle({ idleTime }));
+        }
+        return EMPTY;
+      }),
+    ),
   );
 
   handleIdle$ = createEffect(
