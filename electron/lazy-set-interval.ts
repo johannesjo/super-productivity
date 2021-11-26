@@ -1,3 +1,5 @@
+// avoids the performance issues caused by normal set interval, when the user
+// is not at the computer for some time
 export const lazySetInterval = (
   func: () => void,
   intervalDuration: number,

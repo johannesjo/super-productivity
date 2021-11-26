@@ -11,30 +11,38 @@ import { UiHelperService } from '../../ui-helper/ui-helper.service';
 import { IS_ELECTRON } from '../../../app.constants';
 import {
   idleDialogResult,
+  openIdleDialog,
   resetIdle,
   setIdleTime,
   triggerIdle,
   triggerResetBreakTimer,
 } from './idle.actions';
-import { first, map, switchMap, tap, withLatestFrom } from 'rxjs/operators';
+import {
+  distinctUntilChanged,
+  first,
+  map,
+  mapTo,
+  switchMap,
+  tap,
+  withLatestFrom,
+} from 'rxjs/operators';
 import { lazySetInterval } from '../../../../../electron/lazy-set-interval';
-import { EMPTY, fromEvent, Observable, of } from 'rxjs';
+import { EMPTY, fromEvent, iif, Observable, of } from 'rxjs';
 import { IpcRenderer } from 'electron';
 import { IPC } from '../../../../../electron/ipc-events.const';
 import { SimpleCounterService } from '../../simple-counter/simple-counter.service';
-import { DialogIdleComponent } from '../dialog-idle/dialog-idle.component';
-import { selectIdleTime } from './idle.selectors';
-import { Task } from '../../tasks/task.model';
+import { selectIdleTime, selectIsIdle } from './idle.selectors';
 import { getWorklogStr } from '../../../util/get-work-log-str';
 import { turnOffAllSimpleCounterCounters } from '../../simple-counter/store/simple-counter.actions';
+import { IdleService } from '../idle.service';
+import { DialogIdleComponent } from '../dialog-idle/dialog-idle.component';
+import { Task } from '../../tasks/task.model';
 
 const DEFAULT_MIN_IDLE_TIME = 60000;
 const IDLE_POLL_INTERVAL = 1000;
 
 @Injectable()
 export class IdleEffects {
-  private lastCurrentTaskId?: string | null;
-  private isIdleDialogOpen: boolean = false;
   private clearIdlePollInterval?: () => void;
 
   triggerIdle$ = createEffect(() =>
@@ -81,118 +89,121 @@ export class IdleEffects {
     ),
   );
 
-  handleIdle$ = createEffect(
-    () =>
-      this.actions$.pipe(
-        ofType(triggerIdle),
-        withLatestFrom(this._simpleCounterService.enabledSimpleStopWatchCounters$),
-        tap(([{ idleTime }, enabledSimpleStopWatchCounters]) => {
-          if (!this.isIdleDialogOpen) {
-            this.isIdleDialogOpen = true;
-
-            if (IS_ELECTRON) {
-              this._uiHelperService.focusApp();
-            }
-
-            if (this._taskService.currentTaskId) {
-              // remove idle time already tracked
-              this._taskService.removeTimeSpent(
-                this._taskService.currentTaskId,
-                idleTime,
-              );
-              this.lastCurrentTaskId = this._taskService.currentTaskId;
-              this._taskService.setCurrentId(null);
-            } else {
-              this.lastCurrentTaskId = null;
-            }
-
-            if (enabledSimpleStopWatchCounters.length) {
-              enabledSimpleStopWatchCounters.forEach((simpleCounter) => {
-                if (simpleCounter.isOn) {
-                  this._simpleCounterService.decreaseCounterToday(
-                    simpleCounter.id,
-                    idleTime,
-                  );
-                }
-              });
-              this._store.dispatch(turnOffAllSimpleCounterCounters());
-            }
-
-            this._initIdlePoll(idleTime);
-
-            this._matDialog
-              .open(DialogIdleComponent, {
-                restoreFocus: true,
-                disableClose: true,
-                data: {
-                  lastCurrentTaskId: this.lastCurrentTaskId,
-                  // todo get inside component instead maybe?
-                  idleTime$: this._store.select(selectIdleTime),
-                  enabledSimpleStopWatchCounters,
-                },
-              })
-              .afterClosed()
-              .pipe(withLatestFrom(this._store.select(selectIdleTime)))
-              .subscribe(
-                ([res, idleTimeI]: [
-                  {
-                    task: Task | string;
-                    isResetBreakTimer: boolean;
-                    isTrackAsBreak: boolean;
-                  },
-                  number,
-                ]) => {
-                  const { task, isResetBreakTimer, isTrackAsBreak } = res;
-                  this._store.dispatch(
-                    idleDialogResult({
-                      timeSpent: idleTimeI,
-                      selectedTaskOrTitle: task,
-                      isResetBreakTimer,
-                      isTrackAsBreak,
-                    }),
-                  );
-                },
-              );
-          }
-        }),
+  handleIdle$ = createEffect(() =>
+    this._store.select(selectIsIdle).pipe(
+      distinctUntilChanged(),
+      switchMap((isIdle) => iif(() => isIdle, of(isIdle))),
+      withLatestFrom(
+        this._store.select(selectIdleTime),
+        this._simpleCounterService.enabledSimpleStopWatchCounters$,
       ),
-    { dispatch: false },
+      map(([, idleTime, enabledSimpleStopWatchCounters]) => {
+        // ALL IDLE SIDE EFFECTS
+        // ---------------------
+        if (IS_ELECTRON) {
+          this._uiHelperService.focusApp();
+        }
+
+        // untrack current task time und unselect
+        let lastCurrentTaskId: string | null;
+        if (this._taskService.currentTaskId) {
+          lastCurrentTaskId = this._taskService.currentTaskId;
+          // remove idle time already tracked
+          this._taskService.removeTimeSpent(this._taskService.currentTaskId, idleTime);
+          this._taskService.setCurrentId(null);
+        } else {
+          lastCurrentTaskId = null;
+        }
+
+        // untrack on simple counter time and turn off
+        if (enabledSimpleStopWatchCounters.length) {
+          enabledSimpleStopWatchCounters.forEach((simpleCounter) => {
+            if (simpleCounter.isOn) {
+              this._simpleCounterService.decreaseCounterToday(simpleCounter.id, idleTime);
+            }
+          });
+          this._store.dispatch(turnOffAllSimpleCounterCounters());
+        }
+
+        // NOTE: we need a new idleTimer since the other values are reset as soon as the user is active again
+        this._initIdlePoll(idleTime);
+
+        // this._openDialog(enabledSimpleStopWatchCounters, lastCurrentTaskId);
+        // finally open dialog
+        return openIdleDialog({ enabledSimpleStopWatchCounters, lastCurrentTaskId });
+      }),
+    ),
   );
 
-  onIdleDialogResult$ = createEffect(
-    () =>
-      this.actions$.pipe(
-        ofType(idleDialogResult),
-        tap(({ timeSpent, selectedTaskOrTitle, isResetBreakTimer, isTrackAsBreak }) => {
-          if (isResetBreakTimer || isTrackAsBreak) {
-            this._store.dispatch(triggerResetBreakTimer());
-          }
-
-          if (isTrackAsBreak) {
-            this._workContextService.addToBreakTimeForActiveContext(undefined, timeSpent);
-          }
-
-          if (selectedTaskOrTitle) {
-            if (typeof selectedTaskOrTitle === 'string') {
-              const currId = this._taskService.add(selectedTaskOrTitle, false, {
-                timeSpent,
-                timeSpentOnDay: {
-                  [getWorklogStr()]: timeSpent,
-                },
-              });
-              this._taskService.setCurrentId(currId);
-            } else {
-              this._taskService.addTimeSpent(selectedTaskOrTitle, timeSpent);
-              this._taskService.setCurrentId(selectedTaskOrTitle.id);
-            }
-          }
-
-          this._cancelIdlePoll();
-          this._store.dispatch(resetIdle());
-          this.isIdleDialogOpen = false;
-        }),
+  idleDialog$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(openIdleDialog),
+      switchMap(({ enabledSimpleStopWatchCounters, lastCurrentTaskId }) => {
+        return this._matDialog
+          .open(DialogIdleComponent, {
+            restoreFocus: true,
+            disableClose: true,
+            data: {
+              lastCurrentTaskId,
+              // todo get inside component instead maybe?
+              idleTime$: this._store.select(selectIdleTime),
+              enabledSimpleStopWatchCounters,
+            },
+          })
+          .afterClosed();
+      }),
+      withLatestFrom(this._store.select(selectIdleTime)),
+      map(
+        ([{ task, isResetBreakTimer, isTrackAsBreak }, idleTimeI]: [
+          {
+            task: Task | string;
+            isResetBreakTimer: boolean;
+            isTrackAsBreak: boolean;
+          },
+          number,
+        ]) =>
+          idleDialogResult({
+            timeSpent: idleTimeI,
+            selectedTaskOrTitle: task,
+            isResetBreakTimer,
+            isTrackAsBreak,
+          }),
       ),
-    { dispatch: false },
+    ),
+  );
+
+  onIdleDialogResult$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(idleDialogResult),
+      tap(({ timeSpent, selectedTaskOrTitle, isResetBreakTimer, isTrackAsBreak }) => {
+        if (isResetBreakTimer || isTrackAsBreak) {
+          this._store.dispatch(triggerResetBreakTimer());
+        }
+
+        if (isTrackAsBreak) {
+          this._workContextService.addToBreakTimeForActiveContext(undefined, timeSpent);
+        }
+
+        if (selectedTaskOrTitle) {
+          if (typeof selectedTaskOrTitle === 'string') {
+            const currId = this._taskService.add(selectedTaskOrTitle, false, {
+              timeSpent,
+              timeSpentOnDay: {
+                [getWorklogStr()]: timeSpent,
+              },
+            });
+            this._taskService.setCurrentId(currId);
+          } else {
+            this._taskService.addTimeSpent(selectedTaskOrTitle, timeSpent);
+            this._taskService.setCurrentId(selectedTaskOrTitle.id);
+          }
+        }
+
+        this._cancelIdlePoll();
+      }),
+      // unset idle at the end
+      mapTo(resetIdle()),
+    ),
   );
 
   constructor(
@@ -206,6 +217,7 @@ export class IdleEffects {
     private _matDialog: MatDialog,
     private _store: Store,
     private _uiHelperService: UiHelperService,
+    private _idleService: IdleService,
   ) {
     // window.setTimeout(() => {
     //   this._store.dispatch(triggerIdle({ idleTime: 60 * 1000 }));
