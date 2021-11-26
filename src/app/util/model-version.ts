@@ -14,8 +14,10 @@ export const isMigrateModel = (
   } else if (importVersion > localVersion) {
     const isNewMajor = Math.floor(importVersion) - Math.floor(localVersion) >= 1;
     if (isNewMajor) {
+      console.log(modelType, { importVersion, localVersion, modelData });
       alert(
-        'Cannot load model. Version to load is newer than local. Please close the app and update your local productivity version first, before importing the data.',
+        // eslint-disable-next-line max-len
+        `Cannot load model. Version to load (${importVersion}) is newer than the hard coded version (${localVersion}) for "${modelType}". Please close the app and update your local productivity version first, before importing the data.`,
       );
       throw new Error('Cannot load model. Version to load is newer than local');
     } else {
