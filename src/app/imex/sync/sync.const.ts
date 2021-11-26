@@ -49,6 +49,7 @@ export const GLOBAL_CONFIG_LOCAL_ONLY_FIELDS: string[][] = [
   ['misc', 'isDarkMode'],
   ['sync', 'localFileSync', 'syncFilePath'],
   ['sync', 'webDav', 'password'],
-  ['sync', 'googleDriveSync', 'authCode'],
   ['sync', 'dropboxSync', 'accessToken'],
+  // NOTE: googleDriveSync uses localStorage SUP_GOOGLE_SESSION instead
+  // ['sync', 'googleDriveSync', 'authCode'],
 ];

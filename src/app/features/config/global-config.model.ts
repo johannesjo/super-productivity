@@ -62,8 +62,6 @@ export type PomodoroConfig = Readonly<{
 export interface GoogleDriveSyncConfig {
   isCompressData: boolean;
   syncFileName: string;
-  // TODO rename to accessToken
-  authCode: string | null;
   _syncFileNameForBackupDocId: string | null;
   _backupDocId: string | null;
 }

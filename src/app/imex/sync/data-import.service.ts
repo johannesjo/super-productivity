@@ -133,12 +133,10 @@ export class DataImportService {
     const oldLocalData: AppDataComplete = await this._persistenceService.loadComplete(
       true,
     );
-    console.log({ oldLocalData });
-
     const mergedData = { ...newData };
     GLOBAL_CONFIG_LOCAL_ONLY_FIELDS.forEach((op) => {
       const oldLocalValue = get(oldLocalData.globalConfig, op);
-      console.log({ oldLocalValue, op });
+      // console.log({ oldLocalValue, op });
 
       if (oldLocalValue) {
         set(mergedData.globalConfig, op, oldLocalValue);
