@@ -64,9 +64,7 @@ export class DataImportService {
       ) {
         return;
       }
-
       await this._persistenceService.saveBackup();
-      await this._persistenceService.clearDatabaseExceptBackup();
     }
 
     let migratedData;
@@ -96,6 +94,10 @@ export class DataImportService {
         const mergedData = isOmitLocalFields
           ? await this._mergeWithLocalOmittedFields(migratedData)
           : migratedData;
+
+        // clear database to have a clean one and delete legacy stuff
+        await this._persistenceService.clearDatabaseExceptBackup();
+
         // save data to database first then load to store from there
         await this._persistenceService.importComplete(mergedData);
         await this._loadAllFromDatabaseToStore();
@@ -131,9 +133,13 @@ export class DataImportService {
     const oldLocalData: AppDataComplete = await this._persistenceService.loadComplete(
       true,
     );
+    console.log({ oldLocalData });
+
     const mergedData = { ...newData };
     GLOBAL_CONFIG_LOCAL_ONLY_FIELDS.forEach((op) => {
       const oldLocalValue = get(oldLocalData.globalConfig, op);
+      console.log({ oldLocalValue, op });
+
       if (oldLocalValue) {
         set(mergedData.globalConfig, op, oldLocalValue);
       }
