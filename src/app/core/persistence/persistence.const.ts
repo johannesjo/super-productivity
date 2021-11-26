@@ -69,6 +69,9 @@ import { taskRepeatCfgReducer } from '../../features/task-repeat-cfg/store/task-
 import { migrateTaskRepeatCfgState } from '../../features/task-repeat-cfg/migrate-task-repeat-cfg-state.util';
 import { Bookmark, BookmarkState } from '../../features/bookmark/bookmark.model';
 import { MODEL_VERSION } from '../model-version';
+import { migrateSimpleCounterState } from '../../features/simple-counter/migrate-simple-counter-state.util';
+import { migrateTagState } from '../../features/tag/migrate-tag-state.util';
+import { migrateNoteState } from '../../features/note/migrate-note-state.util';
 
 interface PersistenceBaseModelCfgs {
   // [key: string]: PersistenceBaseModelCfg<any>;
@@ -108,6 +111,8 @@ export const BASE_MODEL_CFGS: PersistenceBaseModelCfgs = {
     lsKey: LS_REMINDER,
     appDataKey: 'reminders',
     modelVersion: MODEL_VERSION.___NOT_USED_YET___,
+    // no migrations needed yet
+    migrateFn: (s: Reminder[]) => s,
   },
 };
 
@@ -125,18 +130,21 @@ export const ENTITY_MODEL_CFGS: PersistenceEntityModelCfgs = {
     appDataKey: 'tag',
     modelVersion: MODEL_VERSION.TAG,
     reducerFn: tagReducer,
+    migrateFn: migrateTagState,
   },
   simpleCounter: {
     lsKey: LS_SIMPLE_COUNTER_STATE,
     appDataKey: 'simpleCounter',
     modelVersion: MODEL_VERSION.SIMPLE_COUNTER,
     reducerFn: simpleCounterReducer,
+    migrateFn: migrateSimpleCounterState,
   },
   note: {
     lsKey: LS_NOTE_STATE,
     appDataKey: 'note',
     modelVersion: MODEL_VERSION.NOTE,
     reducerFn: noteReducer,
+    migrateFn: migrateNoteState,
   },
 
   // METRIC MODELS

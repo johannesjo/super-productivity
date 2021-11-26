@@ -18,12 +18,13 @@ export const migrateLegacyAppData = (appData: AppDataComplete): AppDataComplete 
   }
 
   for (const [, entityModelCfg] of Object.entries(ENTITY_MODEL_CFGS)) {
-    if (entityModelCfg.migrateFn) {
-      newAppData[entityModelCfg.appDataKey as keyof AppBaseData] =
-        entityModelCfg.migrateFn(
-          newAppData[entityModelCfg.appDataKey as keyof AppBaseData],
-        );
+    if (!entityModelCfg.migrateFn) {
+      throw new Error('Missing migrateFn');
     }
+
+    newAppData[entityModelCfg.appDataKey as keyof AppBaseData] = entityModelCfg.migrateFn(
+      newAppData[entityModelCfg.appDataKey as keyof AppBaseData],
+    );
   }
 
   // NOTE ProjectModel migrations are currently not necessary as they don't exist

@@ -59,7 +59,7 @@ export interface PersistenceBaseModelCfg<S> {
   lsKey: string;
   appDataKey: keyof AppBaseData;
   modelVersion: number;
-  migrateFn?: (state: S) => S;
+  migrateFn: (state: S) => S;
   isSkipPush?: boolean;
 }
 
@@ -69,7 +69,7 @@ export interface PersistenceEntityModelCfg<S, M> {
   appDataKey: keyof AppBaseData;
   modelVersion: number;
   reducerFn: (state: S, action: { type: string; payload?: any }) => S;
-  migrateFn?: (state: S) => S;
+  migrateFn: (state: S) => S;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars

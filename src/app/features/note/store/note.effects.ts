@@ -8,7 +8,6 @@ import { selectNoteFeatureState } from './note.reducer';
 import { WorkContextService } from '../../work-context/work-context.service';
 import { Observable } from 'rxjs';
 import { NoteState } from '../note.model';
-import { MODEL_VERSION_KEY } from '../../../app.constants';
 
 @Injectable()
 export class NoteEffects {
@@ -30,8 +29,6 @@ export class NoteEffects {
   ) {}
 
   private _saveToLs(noteState: NoteState): void {
-    console.log('save noteState', noteState[MODEL_VERSION_KEY], noteState);
-
     this._persistenceService.note.saveState(noteState, {
       isSyncModelChange: true,
     });
