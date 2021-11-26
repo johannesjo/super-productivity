@@ -1,10 +1,7 @@
 import { ProjectDataLsKey } from './persistence.model';
 import { AppDataComplete } from '../../imex/sync/sync.model';
 
-export type AllowedDBKeys =
-  | keyof AppDataComplete
-  | 'SUP_COMPLETE_BACKUP'
-  | 'PRIVATE_LOCAL';
+export type AllowedDBKeys = keyof AppDataComplete | 'SUP_COMPLETE_BACKUP';
 
 export const LS_PREFIX = 'SUP_';
 export const LS_PROJECT_PREFIX = LS_PREFIX + 'P_';
