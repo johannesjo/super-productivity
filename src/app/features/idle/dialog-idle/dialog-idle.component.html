@@ -3,7 +3,7 @@
 <form (submit)="track()">
   <div class="dialog-content" mat-dialog-content>
     <p>{{T.F.TIME_TRACKING.D_IDLE.IDLE_FOR|translate}}</p>
-    <div class="time">{{data.idleTime$|async|msToString:true}}</div>
+    <div class="time">{{idleTime$|async|msToString:true}}</div>
 
     <div class="track-to-label">
       <span *ngIf="!isCreate">{{T.F.TIME_TRACKING.D_IDLE.TRACK_TO|translate}}</span>

@@ -145,8 +145,6 @@ export class IdleEffects {
             disableClose: true,
             data: {
               lastCurrentTaskId,
-              // todo get inside component instead maybe?
-              idleTime$: this._store.select(selectIdleTime),
               enabledSimpleStopWatchCounters,
             },
           })

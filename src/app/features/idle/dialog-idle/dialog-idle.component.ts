@@ -20,6 +20,7 @@ import { ElectronService } from '../../../core/electron/electron.service';
 import { IS_ELECTRON } from '../../../app.constants';
 import { SimpleCounter } from '../../simple-counter/simple-counter.model';
 import { Store } from '@ngrx/store';
+import { selectIdleTime } from '../store/idle.selectors';
 
 interface SimpleCounterIdleBtn {
   id: string;
@@ -37,9 +38,12 @@ interface SimpleCounterIdleBtn {
 })
 export class DialogIdleComponent implements OnInit, OnDestroy {
   T: typeof T = T;
+
   lastCurrentTask$: Observable<Task> = this._taskService.getByIdOnce$(
     this.data.lastCurrentTaskId,
   );
+  idleTime$ = this._store.select(selectIdleTime);
+
   selectedTask: Task | null = null;
   newTaskTitle?: string;
   isCreate?: boolean;
@@ -156,7 +160,7 @@ export class DialogIdleComponent implements OnInit, OnDestroy {
   }
 
   private async _updateSimpleCounterValues(): Promise<void> {
-    const idleTime = await this.data.idleTime$.pipe(first()).toPromise();
+    const idleTime = await this.idleTime$.pipe(first()).toPromise();
 
     this.simpleCounterToggleBtns.forEach((tglBtn) => {
       if (tglBtn.isTrackTo) {
