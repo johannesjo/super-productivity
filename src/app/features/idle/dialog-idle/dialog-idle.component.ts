@@ -136,6 +136,7 @@ export class DialogIdleComponent implements OnInit, OnDestroy {
     this._matDialogRef.close({
       task: null,
       isResetBreakTimer: true,
+      isTrackAsBreak: false,
     });
   }
 
