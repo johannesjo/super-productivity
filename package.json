@@ -165,7 +165,7 @@
     "axios": "^0.21.4",
     "cdav-library": "nextcloud/cdav-library",
     "chart.js": "^2.8.0",
-    "chromedriver": "^91.0.1",
+    "chromedriver": "^96.0.0",
     "clipboard": "^2.0.8",
     "codelyzer": "^6.0.2",
     "conventional-changelog-cli": "^2.0.21",
@@ -193,7 +193,7 @@
     "jasmine-spec-reporter": "~7.0.0",
     "jira2md": "git+https://github.com/johannesjo/J2M.git",
     "jo": "file:./tools/schematics",
-    "karma": "~6.3.2",
+    "karma": "~6.3.9",
     "karma-chrome-launcher": "~3.1.0",
     "karma-cli": "^2.0.0",
     "karma-coverage-istanbul-reporter": "~3.0.2",
@@ -222,7 +222,7 @@
     "tslib": "^2.2.0",
     "typescript": "~4.4.4",
     "utils-decorators": "^1.10.4",
-    "webdav": "~4.3.0",
+    "webdav": "~4.7.0",
     "zone.js": "~0.11.4"
   },
   "resolutions": {
