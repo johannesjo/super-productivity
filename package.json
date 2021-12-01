@@ -136,7 +136,7 @@
     "@angular/router": "^13.0.2",
     "@angular/service-worker": "^13.0.2",
     "@biesbjerg/ngx-translate-extract": "^7.0.4",
-    "@fontsource/roboto": "^4.3.0",
+    "@fontsource/roboto": "^4.5.1",
     "@ngrx/data": "^13.0.1",
     "@ngrx/effects": "^13.0.1",
     "@ngrx/entity": "^13.0.1",
