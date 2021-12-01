@@ -37,6 +37,7 @@ import { turnOffAllSimpleCounterCounters } from '../../simple-counter/store/simp
 import { IdleService } from '../idle.service';
 import { DialogIdleComponent } from '../dialog-idle/dialog-idle.component';
 import { Task } from '../../tasks/task.model';
+import { selectIdleConfig } from '../../config/store/global-config.reducer';
 
 const DEFAULT_MIN_IDLE_TIME = 60000;
 const IDLE_POLL_INTERVAL = 1000;
@@ -46,47 +47,47 @@ export class IdleEffects {
   private _isFrontEndIdlePollRunning = false;
   private _clearIdlePollInterval?: () => void;
 
-  triggerIdle$ = createEffect(() =>
-    (IS_ELECTRON
-      ? fromEvent(this._electronService.ipcRenderer as IpcRenderer, IPC.IDLE_TIME).pipe(
-          map(([ev, idleTimeInMs]: any) => idleTimeInMs as number),
-        )
-      : this._chromeExtensionInterfaceService.onReady$.pipe(
-          first(),
-          switchMap(() => {
-            return new Observable((subscriber) => {
-              this._chromeExtensionInterfaceService.addEventListener(
-                IPC.IDLE_TIME,
-                (ev: Event, data?: unknown) => {
-                  const idleTimeInMs = Number(data);
-                  subscriber.next(idleTimeInMs);
-                },
-              );
-            });
-          }),
-        )
-    ).pipe(
-      switchMap((idleTimeInMs) => {
-        const idleTime = idleTimeInMs as number;
-        const gCfg = this._configService.cfg;
-        if (!gCfg) {
-          throw new Error();
-        }
-        const cfg = gCfg.idle;
-        const minIdleTime = cfg.minIdleTime || DEFAULT_MIN_IDLE_TIME;
+  private _triggerIdleApis$ = IS_ELECTRON
+    ? fromEvent(this._electronService.ipcRenderer as IpcRenderer, IPC.IDLE_TIME).pipe(
+        map(([ev, idleTimeInMs]: any) => idleTimeInMs as number),
+      )
+    : this._chromeExtensionInterfaceService.onReady$.pipe(
+        first(),
+        switchMap(() => {
+          return new Observable((subscriber) => {
+            this._chromeExtensionInterfaceService.addEventListener(
+              IPC.IDLE_TIME,
+              (ev: Event, data?: unknown) => {
+                const idleTimeInMs = Number(data);
+                subscriber.next(idleTimeInMs);
+              },
+            );
+          });
+        }),
+      );
 
-        // don't run if option is not enabled
-        if (
-          !cfg.isEnableIdleTimeTracking ||
-          (cfg.isOnlyOpenIdleWhenCurrentTask && !this._taskService.currentTaskId)
-        ) {
-          return of(resetIdle());
-        }
-        if (idleTime >= minIdleTime && !this._isFrontEndIdlePollRunning) {
-          return of(triggerIdle({ idleTime }));
-        }
-        return EMPTY;
-      }),
+  triggerIdleWhenEnabled$ = createEffect(() =>
+    this._store.select(selectIdleConfig).pipe(
+      switchMap(
+        ({
+          isEnableIdleTimeTracking,
+          isOnlyOpenIdleWhenCurrentTask,
+          minIdleTime = DEFAULT_MIN_IDLE_TIME,
+        }) =>
+          !isEnableIdleTimeTracking
+            ? of(resetIdle())
+            : this._triggerIdleApis$.pipe(
+                switchMap((idleTimeInMs) => {
+                  if (isOnlyOpenIdleWhenCurrentTask && !this._taskService.currentTaskId) {
+                    return of(resetIdle());
+                  }
+                  const idleTime = idleTimeInMs as number;
+                  return idleTime >= minIdleTime && !this._isFrontEndIdlePollRunning
+                    ? of(triggerIdle({ idleTime }))
+                    : EMPTY;
+                }),
+              ),
+      ),
     ),
   );
 
