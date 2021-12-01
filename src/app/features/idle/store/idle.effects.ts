@@ -43,7 +43,8 @@ const IDLE_POLL_INTERVAL = 1000;
 
 @Injectable()
 export class IdleEffects {
-  private clearIdlePollInterval?: () => void;
+  private _isFrontEndIdlePollRunning = false;
+  private _clearIdlePollInterval?: () => void;
 
   triggerIdle$ = createEffect(() =>
     (IS_ELECTRON
@@ -81,7 +82,7 @@ export class IdleEffects {
         ) {
           return of(resetIdle());
         }
-        if (idleTime >= minIdleTime) {
+        if (idleTime >= minIdleTime && !this._isFrontEndIdlePollRunning) {
           return of(triggerIdle({ idleTime }));
         }
         return EMPTY;
@@ -138,8 +139,8 @@ export class IdleEffects {
   idleDialog$ = createEffect(() =>
     this.actions$.pipe(
       ofType(openIdleDialog),
-      switchMap(({ enabledSimpleStopWatchCounters, lastCurrentTaskId }) => {
-        return this._matDialog
+      switchMap(({ enabledSimpleStopWatchCounters, lastCurrentTaskId }) =>
+        this._matDialog
           .open(DialogIdleComponent, {
             restoreFocus: true,
             disableClose: true,
@@ -148,8 +149,8 @@ export class IdleEffects {
               enabledSimpleStopWatchCounters,
             },
           })
-          .afterClosed();
-      }),
+          .afterClosed(),
+      ),
       withLatestFrom(this._store.select(selectIdleTime)),
       map(
         ([{ task, isResetBreakTimer, isTrackAsBreak }, idleTimeI]: [
@@ -226,16 +227,18 @@ export class IdleEffects {
     const idleStart = Date.now();
     this._store.dispatch(setIdleTime({ idleTime: initialIdleTime }));
 
-    this.clearIdlePollInterval = lazySetInterval(() => {
+    this._clearIdlePollInterval = lazySetInterval(() => {
       const delta = Date.now() - idleStart;
       this._store.dispatch(setIdleTime({ idleTime: initialIdleTime + delta }));
     }, IDLE_POLL_INTERVAL);
+    this._isFrontEndIdlePollRunning = true;
   }
 
   private _cancelIdlePoll(): void {
-    if (this.clearIdlePollInterval) {
-      this.clearIdlePollInterval();
-      this.clearIdlePollInterval = undefined;
+    if (this._clearIdlePollInterval) {
+      this._clearIdlePollInterval();
+      this._clearIdlePollInterval = undefined;
     }
+    this._isFrontEndIdlePollRunning = false;
   }
 }
