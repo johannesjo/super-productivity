@@ -145,7 +145,7 @@
     "@ngrx/store-devtools": "^13.0.1",
     "@ngx-formly/core": "5.10.3",
     "@ngx-formly/material": "5.10.3",
-    "@ngx-translate/core": "^13.0.0",
+    "@ngx-translate/core": "^14.0.0",
     "@ngx-translate/http-loader": "^6.0.0",
     "@schematics/angular": "^11.2.12",
     "@types/file-saver": "^2.0.2",
