@@ -19,6 +19,7 @@ import {
 } from './idle.actions';
 import {
   distinctUntilChanged,
+  filter,
   first,
   map,
   mapTo,
@@ -46,6 +47,7 @@ const IDLE_POLL_INTERVAL = 1000;
 export class IdleEffects {
   private _isFrontEndIdlePollRunning = false;
   private _clearIdlePollInterval?: () => void;
+  private _isDialogOpen: boolean = false;
 
   private _triggerIdleApis$ = IS_ELECTRON
     ? fromEvent(this._electronService.ipcRenderer as IpcRenderer, IPC.IDLE_TIME).pipe(
@@ -140,11 +142,14 @@ export class IdleEffects {
   idleDialog$ = createEffect(() =>
     this.actions$.pipe(
       ofType(openIdleDialog),
+      filter(() => !this._isDialogOpen),
+      tap(() => (this._isDialogOpen = true)),
       switchMap(({ enabledSimpleStopWatchCounters, lastCurrentTaskId }) =>
         this._matDialog
           .open(DialogIdleComponent, {
             restoreFocus: true,
             disableClose: true,
+            closeOnNavigation: false,
             data: {
               lastCurrentTaskId,
               enabledSimpleStopWatchCounters,
@@ -169,6 +174,7 @@ export class IdleEffects {
             isTrackAsBreak,
           }),
       ),
+      tap(() => (this._isDialogOpen = false)),
     ),
   );
 
