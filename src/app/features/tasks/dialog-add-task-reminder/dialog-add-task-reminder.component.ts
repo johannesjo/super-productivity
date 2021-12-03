@@ -85,6 +85,10 @@ export class DialogAddTaskReminderComponent {
         remindCfg: this.selectedReminderCfgId,
         isMoveToBacklog: this.isMoveToBacklog,
       });
+      localStorage.setItem(
+        LS_LAST_IS_MOVE_SCHEDULED_TO_BACKLOG,
+        this.isMoveToBacklog + '',
+      );
       this.close();
     } else {
       if (!!this.task.repeatCfgId && !isToday(timestamp)) {
