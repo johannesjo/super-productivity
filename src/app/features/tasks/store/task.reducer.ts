@@ -573,10 +573,10 @@ export const taskReducer = createReducer<TaskState>(
     );
   }),
 
-  on(reScheduleTask, (state, { id, plannedAt }) => {
+  on(reScheduleTask, (state, { task, plannedAt }) => {
     return taskAdapter.updateOne(
       {
-        id,
+        id: task.id,
         changes: {
           plannedAt,
         },

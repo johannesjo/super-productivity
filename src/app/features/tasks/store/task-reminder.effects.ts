@@ -77,31 +77,55 @@ export class TaskReminderEffects {
     ),
   );
 
-  updateTaskReminder$: any = createEffect(
-    () =>
-      this._actions$.pipe(
-        ofType(reScheduleTask),
-        filter(
-          ({ reminderId, remindAt }) => typeof remindAt === 'number' && !!reminderId,
-        ),
-        tap(({ title, remindAt, reminderId }) => {
-          this._reminderService.updateReminder(reminderId as string, {
-            remindAt,
-            title,
-          });
+  updateTaskReminder$: any = createEffect(() =>
+    this._actions$.pipe(
+      ofType(reScheduleTask),
+      filter(({ task, remindAt }) => typeof remindAt === 'number' && !!task.reminderId),
+      tap(({ task, remindAt }) => {
+        this._reminderService.updateReminder(task.reminderId as string, {
+          remindAt,
+          title: task.title,
+        });
+      }),
+      tap(({ task }) =>
+        this._snackService.open({
+          type: 'SUCCESS',
+          translateParams: {
+            title: truncate(task.title),
+          },
+          msg: T.F.TASK.S.REMINDER_UPDATED,
+          ico: 'schedule',
         }),
-        tap(({ title }) =>
-          this._snackService.open({
-            type: 'SUCCESS',
-            translateParams: {
-              title: truncate(title),
-            },
-            msg: T.F.TASK.S.REMINDER_UPDATED,
-            ico: 'schedule',
-          }),
-        ),
       ),
-    { dispatch: false },
+      mergeMap(({ task, remindAt, isMoveToBacklog }) => {
+        if (isMoveToBacklog && !task.projectId) {
+          throw new Error('Move to backlog not possible for non project tasks');
+        }
+        if (typeof remindAt !== 'number') {
+          return EMPTY;
+        }
+        const isRemoveFromToday = isMoveToBacklog && task.tagIds.includes(TODAY_TAG.id);
+        return [
+          ...(isMoveToBacklog
+            ? [
+                moveProjectTaskToBacklogListAuto({
+                  taskId: task.id,
+                  projectId: task.projectId as string,
+                }),
+              ]
+            : []),
+          ...(isRemoveFromToday
+            ? [
+                updateTaskTags({
+                  task,
+                  newTagIds: task.tagIds.filter((tagId) => tagId !== TODAY_TAG.id),
+                  oldTagIds: task.tagIds,
+                }),
+              ]
+            : []),
+        ];
+      }),
+    ),
   );
 
   removeTaskReminder$: any = createEffect(() =>

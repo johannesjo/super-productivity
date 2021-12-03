@@ -59,14 +59,14 @@ export class DialogAddTaskReminderComponent {
     // NOTE: JSON.parse is good for parsing string booleans
     const lastIsMoveToBacklog =
       lsLastIsMoveToBacklog && JSON.parse(lsLastIsMoveToBacklog);
-    if (this.isEdit) {
-      this.isMoveToBacklog = false;
-    } else {
-      this.isMoveToBacklog =
-        this.isShowMoveToBacklog && typeof lastIsMoveToBacklog === 'boolean'
-          ? lastIsMoveToBacklog
-          : this.isShowMoveToBacklog;
-    }
+    // if (this.isEdit) {
+    //   this.isMoveToBacklog = false;
+    // } else {
+    this.isMoveToBacklog =
+      this.isShowMoveToBacklog && typeof lastIsMoveToBacklog === 'boolean'
+        ? lastIsMoveToBacklog
+        : this.isShowMoveToBacklog;
+    // }
   }
 
   // NOTE: throttle is used as quick way to prevent multiple submits
@@ -80,11 +80,10 @@ export class DialogAddTaskReminderComponent {
 
     if (this.isEdit && this.reminder) {
       this._taskService.reScheduleTask({
-        taskId: this.task.id,
-        reminderId: this.task.reminderId as string,
+        task: this.task,
         plannedAt: timestamp,
         remindCfg: this.selectedReminderCfgId,
-        title: this.task.title,
+        isMoveToBacklog: this.isMoveToBacklog,
       });
       this.close();
     } else {

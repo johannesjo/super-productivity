@@ -165,10 +165,9 @@ export const reScheduleTask = createAction(
   TaskActionTypes.ReScheduleTask,
 
   props<{
-    id: string;
-    title: string;
+    task: Task;
     plannedAt: number;
-    reminderId?: string;
+    isMoveToBacklog: boolean;
     remindAt?: number;
   }>(),
 );

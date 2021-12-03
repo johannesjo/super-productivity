@@ -574,25 +574,22 @@ export class TaskService {
   }
 
   reScheduleTask({
-    taskId,
+    task,
     plannedAt,
-    reminderId,
     remindCfg,
-    title,
+    isMoveToBacklog = false,
   }: {
-    taskId: string;
+    task: Task;
     plannedAt: number;
-    title: string;
-    reminderId?: string;
     remindCfg: TaskReminderOptionId;
+    isMoveToBacklog: boolean;
   }): void {
     this._store.dispatch(
       reScheduleTask({
-        id: taskId,
+        task,
         plannedAt,
-        reminderId,
         remindAt: remindOptionToMilliseconds(plannedAt, remindCfg),
-        title,
+        isMoveToBacklog,
       }),
     );
   }
