@@ -1129,7 +1129,7 @@
       "IS_PLAY_TICK": "Spielen Sie jede Sekunde einen Tick-Sound",
       "IS_STOP_TRACKING_ON_BREAK": "Stoppen Sie die Zeiterfassung für die Aufgabe in der Pause",
       "LONGER_BREAK_DURATION": "Dauer längerer Pausen",
-      "TITLE": "Pomodoro TImer"
+      "TITLE": "Pomodoro Timer"
     },
     "SOUND": {
       "DONE_SOUND": "Aufgabe erledigt Ton",
