@@ -19,6 +19,7 @@ import {
 } from './idle.actions';
 import {
   distinctUntilChanged,
+  exhaustMap,
   filter,
   first,
   map,
@@ -144,7 +145,8 @@ export class IdleEffects {
       ofType(openIdleDialog),
       filter(() => !this._isDialogOpen),
       tap(() => (this._isDialogOpen = true)),
-      switchMap(({ enabledSimpleStopWatchCounters, lastCurrentTaskId }) =>
+      // use exhaustMap to prevent opening up multiple dialogs
+      exhaustMap(({ enabledSimpleStopWatchCounters, lastCurrentTaskId }) =>
         this._matDialog
           .open(DialogIdleComponent, {
             restoreFocus: true,
