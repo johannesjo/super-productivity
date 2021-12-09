@@ -1,3 +1,35 @@
+## [7.8.1](https://github.com/johannesjo/super-productivity/compare/v7.8.0...v7.8.1) (2021-12-09)
+
+### Bug Fixes
+
+- filter out weird empty response for idle dialog [#1684](https://github.com/johannesjo/super-productivity/issues/1684) ([01d766f](https://github.com/johannesjo/super-productivity/commit/01d766fe7d3eb9d074df3c7525690f5233e96f8f))
+- **idle:** conflicting timer ([77e023f](https://github.com/johannesjo/super-productivity/commit/77e023f414cc1eb88e3a8ac2da736121e4002eb2))
+- **idle:** dialog not triggering ([3954f58](https://github.com/johannesjo/super-productivity/commit/3954f58b778538eaa1a9cc5f64f7798c5edf0518))
+- **idle:** maybe fix destructure issue [#1684](https://github.com/johannesjo/super-productivity/issues/1684) ([f9b15be](https://github.com/johannesjo/super-productivity/commit/f9b15bef529bbffafd773fbef04351e4396e9ec8))
+- local only database fields being ignored [#1673](https://github.com/johannesjo/super-productivity/issues/1673) ([9b3cc4e](https://github.com/johannesjo/super-productivity/commit/9b3cc4e0bd6670e1c9deca643f33c438826c2aa3))
+- migrations not being executed for all models on import [#1673](https://github.com/johannesjo/super-productivity/issues/1673) ([6d16d61](https://github.com/johannesjo/super-productivity/commit/6d16d6115ab1dad8d78f3e62398b358301c292fd))
+
+### Features
+
+- add description to each duration input ([ccb16d6](https://github.com/johannesjo/super-productivity/commit/ccb16d63459e1bcfb0efb8723ac0e0d44a0f2546))
+- add privacy export [#1682](https://github.com/johannesjo/super-productivity/issues/1682) ([b0ef2e5](https://github.com/johannesjo/super-productivity/commit/b0ef2e54027eef4cf93211785bbd496cbc555f4f))
+- add privacy export to error dialog [#1682](https://github.com/johannesjo/super-productivity/issues/1682) ([391ead2](https://github.com/johannesjo/super-productivity/commit/391ead215ed85e48cc0137c082ea9a475811d220))
+- adjust time input size ([8f52ea8](https://github.com/johannesjo/super-productivity/commit/8f52ea8f5d55f96c573749f50788b4e9995ccb91))
+- check for service worker updates before syncing data ([4cc61ac](https://github.com/johannesjo/super-productivity/commit/4cc61ac8b071e8e58b466014fab5f000a0237c09))
+- hide note panel when navigating to daily summary ([895a6c4](https://github.com/johannesjo/super-productivity/commit/895a6c4466aa6d0abb17aab2af71706e31f48d1f))
+- **idle:** make sure that there only ever is one dialog instance ([15fd37a](https://github.com/johannesjo/super-productivity/commit/15fd37a540c53dd9351451ffd7062ce5979ab9b5))
+- **idle:** only enable listening to apis when enabled in settings ([61d1b98](https://github.com/johannesjo/super-productivity/commit/61d1b98774c31e1371fcb73d965bb3fefdc5fc08))
+- **idle:** remove time from active simple counter timers on idle dialog ([52d6ec7](https://github.com/johannesjo/super-productivity/commit/52d6ec740c76f686bde5ae09130bff70c2706f1f))
+- improve update before import message ([f1adc44](https://github.com/johannesjo/super-productivity/commit/f1adc44afebe5e871f0991fb41541c8fac716147))
+- improve update before import message 2 ([441c300](https://github.com/johannesjo/super-productivity/commit/441c300c49c11b3281c682ffe1e2c6c0cdcf034b))
+- internationalize date for task schedule button ([581343c](https://github.com/johannesjo/super-productivity/commit/581343c6864e162855516021f42ce75dd4885ba5))
+- **jira:** add translations ([0fba718](https://github.com/johannesjo/super-productivity/commit/0fba718a8037f126027b71ab8ced71525901c1d4))
+- **jira:** display related issues ([a61b435](https://github.com/johannesjo/super-productivity/commit/a61b435a72096b01770d356426617f3519ec5834))
+- **jira:** display sub tasks ([6ec161a](https://github.com/johannesjo/super-productivity/commit/6ec161a58f014d215d163cd35ce1101298737ad7))
+- **task:** also allow for already scheduled tasks to be moved to backlog on option ([afecfa9](https://github.com/johannesjo/super-productivity/commit/afecfa9a43f657f7a3a16ec0ea860a55401fd30c))
+- **task:** also allow for already scheduled tasks to be moved to backlog on option 2 ([f78219e](https://github.com/johannesjo/super-productivity/commit/f78219ea0aed4e22bafd37cf051a644ca7f34771))
+- **task:** make add and remove to today shortcuts remove and today tag ([3de0d93](https://github.com/johannesjo/super-productivity/commit/3de0d93779299e7d35492b3bf18bc7f6e4b5b98d))
+
 # [7.8.0](https://github.com/johannesjo/super-productivity/compare/v7.7.0...v7.8.0) (2021-11-19)
 
 ### Bug Fixes
