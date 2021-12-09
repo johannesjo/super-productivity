@@ -40,6 +40,7 @@ import { IdleService } from '../idle.service';
 import { DialogIdleComponent } from '../dialog-idle/dialog-idle.component';
 import { Task } from '../../tasks/task.model';
 import { selectIdleConfig } from '../../config/store/global-config.reducer';
+import { devError } from '../../../util/dev-error';
 
 const DEFAULT_MIN_IDLE_TIME = 60000;
 const IDLE_POLL_INTERVAL = 1000;
@@ -160,6 +161,14 @@ export class IdleEffects {
           })
           .afterClosed(),
       ),
+      filter((dialogRes) => {
+        // for yet unknown reasons, this might be empty, so we do this to avoid 100 more error tickets
+        /// (maybe dialogRefs mess up, not sure)
+        if (!dialogRes) {
+          devError('Idle dialog unexpected empty result ???');
+        }
+        return !!dialogRes;
+      }),
       withLatestFrom(this._store.select(selectIdleTime)),
       map(
         ([{ task, isResetBreakTimer, isTrackAsBreak }, idleTimeI]: [
