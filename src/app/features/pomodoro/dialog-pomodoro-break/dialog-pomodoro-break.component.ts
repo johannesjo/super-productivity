@@ -50,7 +50,8 @@ export class DialogPomodoroBreakComponent {
   }
 
   close(): void {
-    this._matDialogRef.close(null);
+    // debug #1745 and #1685
+    this._matDialogRef.close('REALLY NO RESULT');
   }
 
   nextSession(isSkipBreak: boolean = false): void {

@@ -21,7 +21,7 @@ export class DialogPromptComponent {
     if (isSave) {
       this._matDialogRef.close(this.txtVal);
     } else {
-      this._matDialogRef.close(null);
+      this._matDialogRef.close(undefined);
     }
   }
 }

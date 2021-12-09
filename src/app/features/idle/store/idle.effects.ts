@@ -52,6 +52,7 @@ export class IdleEffects {
 
   private _triggerIdleApis$ = IS_ELECTRON
     ? fromEvent(this._electronService.ipcRenderer as IpcRenderer, IPC.IDLE_TIME).pipe(
+        tap((v) => console.log('IIIIIIIIII', v)),
         map(([ev, idleTimeInMs]: any) => idleTimeInMs as number),
       )
     : this._chromeExtensionInterfaceService.onReady$.pipe(
