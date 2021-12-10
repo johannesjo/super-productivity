@@ -1,0 +1,38 @@
+@import '../../../../../variables';
+
+:host p {
+  text-align: center;
+}
+
+.time {
+  font-size: 20px;
+  text-align: center;
+  font-weight: bold;
+  margin-bottom: $s * 2;
+}
+
+.track-to-item {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: row;
+  flex-wrap: wrap;
+  padding-top: $s * 2;
+  padding-bottom: $s;
+  border-top: 1px solid $light-theme-extra-border-color;
+
+  // TODO mobile styles => not needed now
+
+  select-task {
+    margin: 0 $s * 2;
+  }
+}
+
+.simple-counter-section {
+  text-align: center;
+}
+
+.simple-counter {
+  margin: 0 $s * 0.5;
+  box-shadow: none !important;
+}

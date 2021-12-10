@@ -93,6 +93,7 @@ import { DialogPromptComponent } from './dialog-prompt/dialog-prompt.component';
 import { RoundDurationPipe } from './pipes/round-duration.pipe';
 import { ShortPlannedAtPipe } from './pipes/short-planned-at.pipe';
 import { LongPressIOSDirective } from './longpress/longpress-ios.directive';
+import { MatButtonToggleModule } from '@angular/material/button-toggle';
 
 const DIALOG_COMPONENTS = [
   DialogConfirmComponent,
@@ -153,6 +154,7 @@ const MAT_MODULES = [
   MatInputModule,
   MatListModule,
   MatMenuModule,
+  MatButtonToggleModule,
   MatMomentDateModule,
   MatNativeDateModule,
   MatOptionModule,

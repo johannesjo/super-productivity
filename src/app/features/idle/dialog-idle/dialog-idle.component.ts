@@ -21,14 +21,7 @@ import { IS_ELECTRON } from '../../../app.constants';
 import { SimpleCounter } from '../../simple-counter/simple-counter.model';
 import { Store } from '@ngrx/store';
 import { selectIdleTime } from '../store/idle.selectors';
-
-interface SimpleCounterIdleBtn {
-  id: string;
-  icon: string | null;
-  isTrackTo: boolean;
-  isWasEnabledBefore: boolean;
-  title: string;
-}
+import { SimpleCounterIdleBtn } from './dialog-idle.model';
 
 @Component({
   selector: 'dialog-idle',
@@ -47,6 +40,7 @@ export class DialogIdleComponent implements OnInit, OnDestroy {
   selectedTask: Task | null = null;
   newTaskTitle?: string;
   isCreate?: boolean;
+  isSplitMode: boolean = true;
 
   simpleCounterToggleBtns: SimpleCounterIdleBtn[] = [];
 
@@ -74,6 +68,7 @@ export class DialogIdleComponent implements OnInit, OnDestroy {
           isWasEnabledBefore: isOn,
         } as SimpleCounterIdleBtn),
     );
+    console.log(this.simpleCounterToggleBtns);
 
     _matDialogRef.disableClose = true;
   }

@@ -1,6 +1,8 @@
 @import '../../../../variables';
 
 .dialog-content {
+  min-width: 800px;
+
   p,
   .track-to-label,
   .simple-counter-section,
@@ -17,7 +19,7 @@
 
 .track-to-label {
   padding-top: $s * 3;
-  margin: $s * 3 $s * -3 $s;
+  margin: $s $s * -3 $s;
   font-size: 22px;
   border-top: 1px solid $dark-theme-extra-border-color;
 
