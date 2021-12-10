@@ -1,42 +1,45 @@
-<form (submit)="save()" #form>
-  <div class="dialog-content" mat-dialog-content>
-    <p>{{T.F.TIME_TRACKING.D_IDLE.IDLE_FOR|translate}}</p>
-    <div class="time">{{idleTime$|async|msToString:true}}</div>
+<div class="dialog-content" mat-dialog-content>
+  <p>{{T.F.TIME_TRACKING.D_IDLE.IDLE_FOR|translate}}</p>
+  <div class="time">{{idleTime$|async|msToString:true}}</div>
 
+  <div class="track-to-items">
     <div class="track-to-item" *ngFor="let item of trackToItems">
-      <mat-button-toggle-group #group="matButtonToggleGroup">
-        <mat-button-toggle value="BREAK">
-          <mat-icon>free_breakfast</mat-icon>
-        </mat-button-toggle>
-        <mat-button-toggle value="TASK_BREAK">
-          <mat-icon>free_breakfast</mat-icon>
-          +
-          <mat-icon>track_changes</mat-icon>
-        </mat-button-toggle>
-        <mat-button-toggle value="TASK">
-          <mat-icon>track_changes</mat-icon>
-        </mat-button-toggle>
-      </mat-button-toggle-group>
+      <div class="first-block">
+        <mat-button-toggle-group [(ngModel)]="item.type">
+          <mat-button-toggle value="BREAK">
+            <mat-icon>free_breakfast</mat-icon>
+          </mat-button-toggle>
+          <mat-button-toggle value="TASK_BREAK">
+            <mat-icon>free_breakfast</mat-icon>
+            +
+            <mat-icon>track_changes</mat-icon>
+          </mat-button-toggle>
+          <mat-button-toggle value="TASK">
+            <mat-icon>track_changes</mat-icon>
+          </mat-button-toggle>
+        </mat-button-toggle-group>
 
-      <select-task [initialTask]="item.task">
-        <!--      (taskChange)="onTaskChange($event)"-->
-        <!--      [initialTask]="selectedTask"-->
+        <select-task
+          [initialTask]="item.task"
+          (taskChange)="onTaskChange(item, $event)"
+          [class.isDisabled]="item.type==='BREAK'"
         >
-      </select-task>
+        </select-task>
 
-      <section class="simple-counter-section">
-        <button
-          mat-mini-fab
-          class="simple-counter"
-          type="button"
-          *ngFor="let simpleCounterBtn of item.simpleCounterToggleBtns"
-          (click)="simpleCounterBtn.isTrackTo=!simpleCounterBtn.isTrackTo"
-          [matTooltip]="(simpleCounterBtn.isTrackTo ? T.F.TIME_TRACKING.D_IDLE.SIMPLE_COUNTER_TOOLTIP_DISABLE : T.F.TIME_TRACKING.D_IDLE.SIMPLE_COUNTER_TOOLTIP)|translate:{ title: simpleCounterBtn.title }"
-          [color]="simpleCounterBtn.isTrackTo ? 'primary' : ''"
-        >
-          <mat-icon>{{simpleCounterBtn.icon}}</mat-icon>
-        </button>
-      </section>
+        <section class="simple-counter-section">
+          <button
+            mat-mini-fab
+            class="simple-counter"
+            type="button"
+            *ngFor="let simpleCounterBtn of item.simpleCounterToggleBtns"
+            (click)="simpleCounterBtn.isTrackTo=!simpleCounterBtn.isTrackTo"
+            [matTooltip]="(simpleCounterBtn.isTrackTo ? T.F.TIME_TRACKING.D_IDLE.SIMPLE_COUNTER_TOOLTIP_DISABLE : T.F.TIME_TRACKING.D_IDLE.SIMPLE_COUNTER_TOOLTIP)|translate:{ title: simpleCounterBtn.title }"
+            [color]="simpleCounterBtn.isTrackTo ? 'primary' : ''"
+          >
+            <mat-icon>{{simpleCounterBtn.icon}}</mat-icon>
+          </button>
+        </section>
+      </div>
 
       <input-duration-slider
         [(model)]="item.time"
@@ -44,25 +47,29 @@
       >
       </input-duration-slider>
 
-      <button mat-icon-button [color]="'warn'">
-        <mat-icon>delete_forever</mat-icon>
-      </button>
+      <div>
+        <button mat-icon-button [color]="'warn'">
+          <mat-icon>delete_forever</mat-icon>
+        </button>
+      </div>
     </div>
 
-    <div style="text-align: center">
+    <div style="text-align: center; margin-top: 8px">
       <button mat-button (click)="addTrackingItem()">
         <mat-icon>add</mat-icon>
         Add entry for tracking
       </button>
     </div>
   </div>
+</div>
 
-  <div align="end" mat-dialog-actions>
-    <button color="primary" mat-button type="button">{{T.G.CANCEL|translate}}</button>
+<div align="end" mat-dialog-actions>
+  <button (click)="cancelI()" color="primary" mat-button type="button">
+    {{T.G.CANCEL|translate}}
+  </button>
 
-    <button [disabled]="!form.valid" color="primary" mat-stroked-button type="submit">
-      <mat-icon>save</mat-icon>
-      {{T.G.SAVE|translate}}
-    </button>
-  </div>
-</form>
+  <button (click)="saveI()" color="primary" mat-stroked-button type="submit">
+    <mat-icon>save</mat-icon>
+    {{T.G.SAVE|translate}}
+  </button>
+</div>

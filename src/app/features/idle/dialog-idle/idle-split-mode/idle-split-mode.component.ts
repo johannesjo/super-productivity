@@ -1,4 +1,11 @@
-import { ChangeDetectionStrategy, Component, Input, OnInit } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  EventEmitter,
+  Input,
+  OnInit,
+  Output,
+} from '@angular/core';
 import { Task } from '../../../tasks/task.model';
 import { selectIdleTime } from '../../store/idle.selectors';
 import { Store } from '@ngrx/store';
@@ -30,6 +37,9 @@ export class IdleSplitModeComponent implements OnInit {
 
   idleTime$ = this._store.select(selectIdleTime);
   trackToItems: TrackToItem[] = [];
+
+  @Output() cancel = new EventEmitter();
+  @Output() save = new EventEmitter();
 
   constructor(
     private _store: Store,
@@ -68,16 +78,16 @@ export class IdleSplitModeComponent implements OnInit {
         ];
   }
 
-  // onTaskChange(taskOrTaskTitle: Task | string): void {
-  //   this.isCreate = typeof taskOrTaskTitle === 'string';
-  //   if (this.isCreate) {
-  //     this.newTaskTitle = taskOrTaskTitle as string;
-  //     this.selectedTask = null;
-  //   } else {
-  //     this.selectedTask = taskOrTaskTitle as Task;
-  //     this.newTaskTitle = undefined;
-  //   }
-  // }
+  onTaskChange(item: TrackToItem, taskOrTaskTitle: Task | string): void {
+    const isCreate = typeof taskOrTaskTitle === 'string';
+    if (isCreate) {
+      item.title = taskOrTaskTitle as string;
+      item.task = undefined;
+    } else {
+      item.task = taskOrTaskTitle as Task;
+      item.title = undefined;
+    }
+  }
 
   addTrackingItem(): void {
     this.trackToItems.push({
@@ -88,7 +98,13 @@ export class IdleSplitModeComponent implements OnInit {
     });
   }
 
-  save(): void {}
+  saveI(): void {
+    this.save.emit();
+  }
+
+  cancelI(): void {
+    this.cancel.emit();
+  }
 
   private async _updateSimpleCounterValues(): Promise<void> {
     const idleTime = await this.idleTime$.pipe(first()).toPromise();

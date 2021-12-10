@@ -36,6 +36,7 @@ $this-dot-size: 14px;
   user-select: none;
   -webkit-user-select: none; /* Safari */
   width: $this-size + $this-margin * 2;
+  min-width: $this-size + $this-margin * 2;
   @include standardThemeTextColor();
 
   &.is-dragging .circle {

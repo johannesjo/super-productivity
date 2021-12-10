@@ -2,6 +2,8 @@
   *ngIf="isSplitMode"
   [simpleCounterToggleBtns]="simpleCounterToggleBtns"
   [prevSelectedTask]="selectedTask"
+  (cancel)="isSplitMode=false"
+  (save)="skipTrack()"
 ></idle-split-mode>
 
 <form (submit)="track()" *ngIf="!isSplitMode">

@@ -16,15 +16,36 @@
   align-items: center;
   justify-content: center;
   flex-direction: row;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   padding-top: $s * 2;
   padding-bottom: $s;
   border-top: 1px solid $light-theme-extra-border-color;
 
+  @include darkTheme() {
+    border-color: $dark-theme-extra-border-color;
+  }
+
+  &:first-of-type {
+    border-top: none !important;
+  }
+
   // TODO mobile styles => not needed now
+  .first-block {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
 
   select-task {
     margin: 0 $s * 2;
+    width: 220px;
+
+    &.isDisabled {
+      pointer-events: none;
+      opacity: 0.4;
+    }
   }
 }
 
