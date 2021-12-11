@@ -43,8 +43,12 @@ import { devError } from '../../../util/dev-error';
 import {
   DialogIdlePassedData,
   DialogIdleReturnData,
+  IdleTrackItem,
+  SimpleCounterIdleBtn,
 } from '../dialog-idle/dialog-idle.model';
 import { isNotNullOrUndefined } from '../../../util/is-not-null-or-undefined';
+import { DialogConfirmComponent } from '../../../ui/dialog-confirm/dialog-confirm.component';
+import { T } from '../../../t.const';
 
 const DEFAULT_MIN_IDLE_TIME = 60000;
 const IDLE_POLL_INTERVAL = 1000;
@@ -57,7 +61,6 @@ export class IdleEffects {
 
   private _triggerIdleApis$ = IS_ELECTRON
     ? fromEvent(this._electronService.ipcRenderer as IpcRenderer, IPC.IDLE_TIME).pipe(
-        tap((v) => console.log('IIIIIIIIII', v)),
         map(([ev, idleTimeInMs]: any) => idleTimeInMs as number),
       )
     : this._chromeExtensionInterfaceService.onReady$.pipe(
@@ -175,15 +178,7 @@ export class IdleEffects {
         }
       }),
       isNotNullOrUndefined(),
-      withLatestFrom(this._store.select(selectIdleTime)),
-      map(([{ task, isResetBreakTimer, isTrackAsBreak }, idleTimeI]) =>
-        idleDialogResult({
-          timeSpent: idleTimeI,
-          selectedTaskOrTitle: task as any,
-          isResetBreakTimer,
-          isTrackAsBreak,
-        }),
-      ),
+      map((dialogRes) => idleDialogResult(dialogRes)),
       tap(() => (this._isDialogOpen = false)),
     ),
   );
@@ -191,31 +186,84 @@ export class IdleEffects {
   onIdleDialogResult$ = createEffect(() =>
     this.actions$.pipe(
       ofType(idleDialogResult),
-      tap(({ timeSpent, selectedTaskOrTitle, isResetBreakTimer, isTrackAsBreak }) => {
-        if (isResetBreakTimer || isTrackAsBreak) {
+      withLatestFrom(this._store.select(selectIdleTime)),
+      tap(([{ trackItems, simpleCounterToggleBtnsWhenNoTrackItems }, idleTime]) => {
+        this._cancelIdlePoll();
+
+        if (trackItems.length === 0 && simpleCounterToggleBtnsWhenNoTrackItems) {
+          const activatedItemNr = simpleCounterToggleBtnsWhenNoTrackItems.filter(
+            (btn) => btn.isTrackTo,
+          ).length;
+
+          // TODO maybe move to effect
+          if (activatedItemNr > 0) {
+            this._matDialog
+              .open(DialogConfirmComponent, {
+                restoreFocus: true,
+                data: {
+                  cancelTxt: T.F.TIME_TRACKING.D_IDLE.SIMPLE_CONFIRM_COUNTER_CANCEL,
+                  okTxt: T.F.TIME_TRACKING.D_IDLE.SIMPLE_CONFIRM_COUNTER_OK,
+                  message: T.F.TIME_TRACKING.D_IDLE.SIMPLE_COUNTER_CONFIRM_TXT,
+                  translateParams: {
+                    nr: activatedItemNr,
+                  },
+                },
+              })
+              .afterClosed()
+              .subscribe((isConfirm: boolean) => {
+                if (isConfirm) {
+                  // TODO maybe move to effect
+                  this._updateSimpleCounterValues(
+                    simpleCounterToggleBtnsWhenNoTrackItems,
+                    idleTime,
+                  );
+                }
+              });
+          }
+          return;
+        }
+
+        const itemsWithMappedIdleTime = trackItems.map((trackItem) => ({
+          ...trackItem,
+          time: trackItem.time === 'IDLE_TIME' ? idleTime : trackItem.time,
+        }));
+
+        itemsWithMappedIdleTime.forEach((item) => {
+          this._updateSimpleCounterValues(item.simpleCounterToggleBtns, item.time);
+        });
+
+        const breakItems = itemsWithMappedIdleTime.filter(
+          (item: IdleTrackItem) =>
+            item.type === 'BREAK' || item.type === 'TASK_AND_BREAK',
+        );
+        if (breakItems.length) {
           this._store.dispatch(triggerResetBreakTimer());
+          breakItems.forEach((item) => {
+            this._workContextService.addToBreakTimeForActiveContext(undefined, item.time);
+          });
         }
 
-        if (isTrackAsBreak) {
-          this._workContextService.addToBreakTimeForActiveContext(undefined, timeSpent);
-        }
-
-        if (selectedTaskOrTitle) {
-          if (typeof selectedTaskOrTitle === 'string') {
-            const currId = this._taskService.add(selectedTaskOrTitle, false, {
-              timeSpent,
+        const taskItems = itemsWithMappedIdleTime.filter(
+          (item: IdleTrackItem) => item.type === 'TASK' || item.type === 'TASK_AND_BREAK',
+        );
+        let taskItemId: string | undefined;
+        taskItems.forEach((taskItem) => {
+          if (typeof taskItem.title === 'string') {
+            taskItemId = this._taskService.add(taskItem.title, false, {
+              timeSpent: taskItem.time,
               timeSpentOnDay: {
-                [getWorklogStr()]: timeSpent,
+                [getWorklogStr()]: taskItem.time,
               },
             });
-            this._taskService.setCurrentId(currId);
-          } else {
-            this._taskService.addTimeSpent(selectedTaskOrTitle, timeSpent);
-            this._taskService.setCurrentId(selectedTaskOrTitle.id);
+          } else if (taskItem.task) {
+            taskItemId = taskItem.task.id;
+            this._taskService.addTimeSpent(taskItem.task, taskItem.time);
           }
-        }
+        });
 
-        this._cancelIdlePoll();
+        if (taskItems.length === 1 && taskItemId) {
+          this._taskService.setCurrentId(taskItemId);
+        }
       }),
       // unset idle at the end
       mapTo(resetIdle()),
@@ -257,5 +305,19 @@ export class IdleEffects {
       this._clearIdlePollInterval = undefined;
     }
     this._isFrontEndIdlePollRunning = false;
+  }
+
+  private async _updateSimpleCounterValues(
+    simpleCounterToggleBtns: SimpleCounterIdleBtn[],
+    idleTime: number,
+  ): Promise<void> {
+    simpleCounterToggleBtns.forEach((tglBtn) => {
+      if (tglBtn.isTrackTo) {
+        this._simpleCounterService.increaseCounterToday(tglBtn.id, idleTime);
+        if (tglBtn.isWasEnabledBefore) {
+          this._simpleCounterService.toggleCounter(tglBtn.id);
+        }
+      }
+    });
   }
 }

@@ -10,12 +10,19 @@ export interface SimpleCounterIdleBtn {
 }
 
 export interface DialogIdleReturnData {
-  task: null | Task | string | undefined;
-  isResetBreakTimer: boolean;
-  isTrackAsBreak: boolean;
+  trackItems: IdleTrackItem[];
+  simpleCounterToggleBtnsWhenNoTrackItems?: SimpleCounterIdleBtn[];
 }
 
 export interface DialogIdlePassedData {
   enabledSimpleStopWatchCounters: SimpleCounter[];
   lastCurrentTaskId: string | null;
+}
+
+export interface IdleTrackItem {
+  type: 'BREAK' | 'TASK' | 'TASK_AND_BREAK';
+  time: number | 'IDLE_TIME';
+  simpleCounterToggleBtns: SimpleCounterIdleBtn[];
+  task?: Task;
+  title?: string;
 }

@@ -14,8 +14,6 @@ import { T } from '../../../t.const';
 import { ipcRenderer } from 'electron';
 import { IPC } from '../../../../../electron/ipc-events.const';
 import { SimpleCounterService } from '../../simple-counter/simple-counter.service';
-import { first } from 'rxjs/operators';
-import { DialogConfirmComponent } from '../../../ui/dialog-confirm/dialog-confirm.component';
 import { ElectronService } from '../../../core/electron/electron.service';
 import { IS_ELECTRON } from '../../../app.constants';
 import { SimpleCounter } from '../../simple-counter/simple-counter.model';
@@ -73,8 +71,6 @@ export class DialogIdleComponent implements OnInit, OnDestroy {
           isWasEnabledBefore: isOn,
         } as SimpleCounterIdleBtn),
     );
-    console.log(this.simpleCounterToggleBtns);
-
     _matDialogRef.disableClose = true;
   }
 
@@ -109,67 +105,36 @@ export class DialogIdleComponent implements OnInit, OnDestroy {
   }
 
   skipTrack(): void {
-    const activatedItemNr = this.simpleCounterToggleBtns.filter(
-      (btn) => btn.isTrackTo,
-    ).length;
-    if (activatedItemNr > 0) {
-      this._matDialog
-        .open(DialogConfirmComponent, {
-          restoreFocus: true,
-          data: {
-            cancelTxt: T.F.TIME_TRACKING.D_IDLE.SIMPLE_CONFIRM_COUNTER_CANCEL,
-            okTxt: T.F.TIME_TRACKING.D_IDLE.SIMPLE_CONFIRM_COUNTER_OK,
-            message: T.F.TIME_TRACKING.D_IDLE.SIMPLE_COUNTER_CONFIRM_TXT,
-            translateParams: {
-              nr: activatedItemNr,
-            },
-          },
-        })
-        .afterClosed()
-        .subscribe((isConfirm: boolean) => {
-          if (isConfirm) {
-            this._updateSimpleCounterValues();
-          }
-        });
-    }
-
     this._matDialogRef.close({
-      task: null,
-      isResetBreakTimer: true,
-      isTrackAsBreak: false,
+      trackItems: [],
+      simpleCounterToggleBtnsWhenNoTrackItems: this.simpleCounterToggleBtns,
     });
   }
 
   trackAsBreak(): void {
-    this._updateSimpleCounterValues();
-
     this._matDialogRef.close({
-      task: null,
-      isResetBreakTimer: true,
-      isTrackAsBreak: true,
+      trackItems: [
+        {
+          type: 'BREAK',
+          time: 'IDLE_TIME',
+          simpleCounterToggleBtns: this.simpleCounterToggleBtns,
+        },
+      ],
     });
   }
 
   track(isTrackAsBreak: boolean = false): void {
-    this._updateSimpleCounterValues();
-
     this._matDialogRef.close({
-      task: this.selectedTask || this.newTaskTitle,
-      isTrackAsBreak,
-      isResetBreakTimer: isTrackAsBreak,
-    });
-  }
-
-  private async _updateSimpleCounterValues(): Promise<void> {
-    const idleTime = await this.idleTime$.pipe(first()).toPromise();
-
-    this.simpleCounterToggleBtns.forEach((tglBtn) => {
-      if (tglBtn.isTrackTo) {
-        this._simpleCounterService.increaseCounterToday(tglBtn.id, idleTime);
-        if (tglBtn.isWasEnabledBefore) {
-          this._simpleCounterService.toggleCounter(tglBtn.id);
-        }
-      }
+      trackItems: [
+        {
+          type: isTrackAsBreak ? 'TASK_AND_BREAK' : 'TASK',
+          time: 'IDLE_TIME',
+          simpleCounterToggleBtns: this.simpleCounterToggleBtns,
+          ...(this.isCreate
+            ? { title: this.newTaskTitle as string }
+            : { task: this.selectedTask as Task }),
+        },
+      ],
     });
   }
 }

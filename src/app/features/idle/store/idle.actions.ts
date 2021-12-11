@@ -1,6 +1,6 @@
 import { createAction, props } from '@ngrx/store';
 import { SimpleCounter } from '../../simple-counter/simple-counter.model';
-import { Task } from '../../tasks/task.model';
+import { IdleTrackItem, SimpleCounterIdleBtn } from '../dialog-idle/dialog-idle.model';
 
 export const triggerIdle = createAction(
   '[Idle] Trigger Idle',
@@ -24,10 +24,8 @@ export const setIdleTime = createAction(
 export const idleDialogResult = createAction(
   '[Idle] Dialog result',
   props<{
-    timeSpent: number;
-    selectedTaskOrTitle: Task | string;
-    isResetBreakTimer: boolean;
-    isTrackAsBreak: boolean;
+    trackItems: IdleTrackItem[];
+    simpleCounterToggleBtnsWhenNoTrackItems?: SimpleCounterIdleBtn[];
   }>(),
 );
 

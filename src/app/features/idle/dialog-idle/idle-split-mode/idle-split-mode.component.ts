@@ -12,16 +12,8 @@ import { Store } from '@ngrx/store';
 import { SimpleCounterService } from '../../../simple-counter/simple-counter.service';
 import { first } from 'rxjs/operators';
 import { T } from 'src/app/t.const';
-import { SimpleCounterIdleBtn } from '../dialog-idle.model';
+import { SimpleCounterIdleBtn, IdleTrackItem } from '../dialog-idle.model';
 import { dirtyDeepCopy } from '../../../../util/dirtyDeepCopy';
-
-interface TrackToItem {
-  type: 'BREAK' | 'TASK' | 'TASK_BREAK';
-  time: number;
-  simpleCounterToggleBtns: SimpleCounterIdleBtn[];
-  task?: Task;
-  title?: string;
-}
 
 @Component({
   selector: 'idle-split-mode',
@@ -36,7 +28,7 @@ export class IdleSplitModeComponent implements OnInit {
   @Input() prevSelectedTask: Task | null = null;
 
   idleTime$ = this._store.select(selectIdleTime);
-  trackToItems: TrackToItem[] = [];
+  trackToItems: IdleTrackItem[] = [];
 
   @Output() cancel = new EventEmitter();
   @Output() save = new EventEmitter();
@@ -78,7 +70,7 @@ export class IdleSplitModeComponent implements OnInit {
         ];
   }
 
-  onTaskChange(item: TrackToItem, taskOrTaskTitle: Task | string): void {
+  onTaskChange(item: IdleTrackItem, taskOrTaskTitle: Task | string): void {
     const isCreate = typeof taskOrTaskTitle === 'string';
     if (isCreate) {
       item.title = taskOrTaskTitle as string;
