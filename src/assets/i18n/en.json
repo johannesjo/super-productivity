@@ -900,6 +900,7 @@
         "MSG": "You have not been tracking time for {{time}}"
       },
       "D_IDLE": {
+        "ADD_ENTRY": "Add entry for tracking",
         "BREAK": "Break",
         "CREATE_AND_TRACK": "<em>Create</em> and track to",
         "IDLE_FOR": "You have been idle for:",
@@ -909,6 +910,7 @@
         "SIMPLE_COUNTER_TOOLTIP": "Click to track to {{title}}",
         "SIMPLE_COUNTER_TOOLTIP_DISABLE": "Click to NOT track to {{title}}",
         "SKIP": "Skip",
+        "SPLIT_TIME": "Split time into multiples tasks and breaks",
         "TASK": "Task",
         "TASK_BREAK": "Task+Break",
         "TRACK_TO": "Track to"
