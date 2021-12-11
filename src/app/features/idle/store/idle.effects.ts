@@ -103,7 +103,7 @@ export class IdleEffects {
     ),
   );
 
-  handleIdle$ = createEffect(() =>
+  handleIdleInit$ = createEffect(() =>
     this._store.select(selectIsIdle).pipe(
       distinctUntilChanged(),
       switchMap((isIdle) => iif(() => isIdle, of(isIdle))),
@@ -183,7 +183,7 @@ export class IdleEffects {
     ),
   );
 
-  onIdleDialogResult$ = createEffect(() =>
+  handleIdleDialogResult$ = createEffect(() =>
     this.actions$.pipe(
       ofType(idleDialogResult),
       withLatestFrom(this._store.select(selectIdleTime)),
@@ -283,9 +283,9 @@ export class IdleEffects {
     private _uiHelperService: UiHelperService,
     private _idleService: IdleService,
   ) {
-    window.setTimeout(() => {
-      this._store.dispatch(triggerIdle({ idleTime: 60 * 1000 }));
-    }, 2700);
+    // window.setTimeout(() => {
+    //   this._store.dispatch(triggerIdle({ idleTime: 60 * 1000 }));
+    // }, 2700);
   }
 
   private _initIdlePoll(initialIdleTime: number): void {
