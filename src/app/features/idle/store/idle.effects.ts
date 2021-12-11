@@ -38,9 +38,13 @@ import { getWorklogStr } from '../../../util/get-work-log-str';
 import { turnOffAllSimpleCounterCounters } from '../../simple-counter/store/simple-counter.actions';
 import { IdleService } from '../idle.service';
 import { DialogIdleComponent } from '../dialog-idle/dialog-idle.component';
-import { Task } from '../../tasks/task.model';
 import { selectIdleConfig } from '../../config/store/global-config.reducer';
 import { devError } from '../../../util/dev-error';
+import {
+  DialogIdlePassedData,
+  DialogIdleReturnData,
+} from '../dialog-idle/dialog-idle.model';
+import { isNotNullOrUndefined } from '../../../util/is-not-null-or-undefined';
 
 const DEFAULT_MIN_IDLE_TIME = 60000;
 const IDLE_POLL_INTERVAL = 1000;
@@ -150,7 +154,11 @@ export class IdleEffects {
       // use exhaustMap to prevent opening up multiple dialogs
       exhaustMap(({ enabledSimpleStopWatchCounters, lastCurrentTaskId }) =>
         this._matDialog
-          .open(DialogIdleComponent, {
+          .open<
+            DialogIdleComponent,
+            DialogIdlePassedData,
+            DialogIdleReturnData | undefined
+          >(DialogIdleComponent, {
             restoreFocus: true,
             disableClose: true,
             closeOnNavigation: false,
@@ -161,30 +169,20 @@ export class IdleEffects {
           })
           .afterClosed(),
       ),
-      filter((dialogRes) => {
-        // for yet unknown reasons, this might be empty, so we do this to avoid 100 more error tickets
-        /// (maybe dialogRefs mess up, not sure)
+      tap((dialogRes) => {
         if (!dialogRes) {
           devError('Idle dialog unexpected empty result ???');
         }
-        return !!dialogRes;
       }),
+      isNotNullOrUndefined(),
       withLatestFrom(this._store.select(selectIdleTime)),
-      map(
-        ([{ task, isResetBreakTimer, isTrackAsBreak }, idleTimeI]: [
-          {
-            task: Task | string;
-            isResetBreakTimer: boolean;
-            isTrackAsBreak: boolean;
-          },
-          number,
-        ]) =>
-          idleDialogResult({
-            timeSpent: idleTimeI,
-            selectedTaskOrTitle: task,
-            isResetBreakTimer,
-            isTrackAsBreak,
-          }),
+      map(([{ task, isResetBreakTimer, isTrackAsBreak }, idleTimeI]) =>
+        idleDialogResult({
+          timeSpent: idleTimeI,
+          selectedTaskOrTitle: task as any,
+          isResetBreakTimer,
+          isTrackAsBreak,
+        }),
       ),
       tap(() => (this._isDialogOpen = false)),
     ),
@@ -237,9 +235,9 @@ export class IdleEffects {
     private _uiHelperService: UiHelperService,
     private _idleService: IdleService,
   ) {
-    // window.setTimeout(() => {
-    //   this._store.dispatch(triggerIdle({ idleTime: 60 * 1000 }));
-    // }, 8700);
+    window.setTimeout(() => {
+      this._store.dispatch(triggerIdle({ idleTime: 60 * 1000 }));
+    }, 2700);
   }
 
   private _initIdlePoll(initialIdleTime: number): void {

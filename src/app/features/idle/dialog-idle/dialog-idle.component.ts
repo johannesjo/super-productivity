@@ -7,7 +7,7 @@ import {
 } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { TaskService } from '../../tasks/task.service';
-import { Observable, Subscription } from 'rxjs';
+import { EMPTY, Observable, Subscription } from 'rxjs';
 import { Task } from '../../tasks/task.model';
 import { GlobalConfigService } from '../../config/global-config.service';
 import { T } from '../../../t.const';
@@ -21,7 +21,11 @@ import { IS_ELECTRON } from '../../../app.constants';
 import { SimpleCounter } from '../../simple-counter/simple-counter.model';
 import { Store } from '@ngrx/store';
 import { selectIdleTime } from '../store/idle.selectors';
-import { SimpleCounterIdleBtn } from './dialog-idle.model';
+import {
+  DialogIdlePassedData,
+  DialogIdleReturnData,
+  SimpleCounterIdleBtn,
+} from './dialog-idle.model';
 
 @Component({
   selector: 'dialog-idle',
@@ -32,9 +36,10 @@ import { SimpleCounterIdleBtn } from './dialog-idle.model';
 export class DialogIdleComponent implements OnInit, OnDestroy {
   T: typeof T = T;
 
-  lastCurrentTask$: Observable<Task> = this._taskService.getByIdOnce$(
-    this.data.lastCurrentTaskId,
-  );
+  lastCurrentTask$: Observable<Task> = this.data.lastCurrentTaskId
+    ? this._taskService.getByIdOnce$(this.data.lastCurrentTaskId)
+    : EMPTY;
+
   idleTime$ = this._store.select(selectIdleTime);
 
   selectedTask: Task | null = null;
@@ -49,12 +54,12 @@ export class DialogIdleComponent implements OnInit, OnDestroy {
   constructor(
     public configService: GlobalConfigService,
     private _taskService: TaskService,
-    private _matDialogRef: MatDialogRef<DialogIdleComponent>,
+    private _matDialogRef: MatDialogRef<DialogIdleComponent, DialogIdleReturnData>,
     private _matDialog: MatDialog,
     private _electronService: ElectronService,
     private _store: Store,
     private _simpleCounterService: SimpleCounterService,
-    @Inject(MAT_DIALOG_DATA) public data: any,
+    @Inject(MAT_DIALOG_DATA) public data: DialogIdlePassedData,
   ) {
     this.simpleCounterToggleBtns = (
       data.enabledSimpleStopWatchCounters as SimpleCounter[]
