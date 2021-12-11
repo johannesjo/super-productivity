@@ -10,9 +10,8 @@ import { Task } from '../../../tasks/task.model';
 import { selectIdleTime } from '../../store/idle.selectors';
 import { Store } from '@ngrx/store';
 import { SimpleCounterService } from '../../../simple-counter/simple-counter.service';
-import { first } from 'rxjs/operators';
 import { T } from 'src/app/t.const';
-import { SimpleCounterIdleBtn, IdleTrackItem } from '../dialog-idle.model';
+import { IdleTrackItem, SimpleCounterIdleBtn } from '../dialog-idle.model';
 import { dirtyDeepCopy } from '../../../../util/dirtyDeepCopy';
 
 @Component({
@@ -31,7 +30,7 @@ export class IdleSplitModeComponent implements OnInit {
   trackToItems: IdleTrackItem[] = [];
 
   @Output() cancel = new EventEmitter();
-  @Output() save = new EventEmitter();
+  @Output() save = new EventEmitter<IdleTrackItem[]>();
 
   constructor(
     private _store: Store,
@@ -91,23 +90,10 @@ export class IdleSplitModeComponent implements OnInit {
   }
 
   saveI(): void {
-    this.save.emit();
+    this.save.emit(this.trackToItems);
   }
 
   cancelI(): void {
     this.cancel.emit();
-  }
-
-  private async _updateSimpleCounterValues(): Promise<void> {
-    const idleTime = await this.idleTime$.pipe(first()).toPromise();
-
-    this.simpleCounterToggleBtns.forEach((tglBtn) => {
-      if (tglBtn.isTrackTo) {
-        this._simpleCounterService.increaseCounterToday(tglBtn.id, idleTime);
-        if (tglBtn.isWasEnabledBefore) {
-          this._simpleCounterService.toggleCounter(tglBtn.id);
-        }
-      }
-    });
   }
 }

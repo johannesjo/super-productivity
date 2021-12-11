@@ -3,7 +3,7 @@
   [simpleCounterToggleBtns]="simpleCounterToggleBtns"
   [prevSelectedTask]="selectedTask"
   (cancel)="isSplitMode=false"
-  (save)="skipTrack()"
+  (save)="trackMultiple($event)"
 ></idle-split-mode>
 
 <form (submit)="track()" *ngIf="!isSplitMode">

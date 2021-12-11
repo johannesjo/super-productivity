@@ -22,6 +22,7 @@ import { selectIdleTime } from '../store/idle.selectors';
 import {
   DialogIdlePassedData,
   DialogIdleReturnData,
+  IdleTrackItem,
   SimpleCounterIdleBtn,
 } from './dialog-idle.model';
 
@@ -43,7 +44,7 @@ export class DialogIdleComponent implements OnInit, OnDestroy {
   selectedTask: Task | null = null;
   newTaskTitle?: string;
   isCreate?: boolean;
-  isSplitMode: boolean = true;
+  isSplitMode: boolean = false;
 
   simpleCounterToggleBtns: SimpleCounterIdleBtn[] = [];
 
@@ -135,6 +136,12 @@ export class DialogIdleComponent implements OnInit, OnDestroy {
             : { task: this.selectedTask as Task }),
         },
       ],
+    });
+  }
+
+  trackMultiple(trackItems: IdleTrackItem[]): void {
+    this._matDialogRef.close({
+      trackItems,
     });
   }
 }
