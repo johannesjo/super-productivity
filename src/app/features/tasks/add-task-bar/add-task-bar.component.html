@@ -10,15 +10,7 @@
     <div *ngIf="(isLoading$|async)" class="spinner">
       <mat-spinner diameter="50"></mat-spinner>
     </div>
-    <button
-      (click)="isAddToBacklog=!isAddToBacklog"
-      class="switch-add-to-btn"
-      mat-icon-button
-      type="button"
-    >
-      <mat-icon *ngIf="isAddToBacklog">library_add</mat-icon>
-      <mat-icon *ngIf="!isAddToBacklog">playlist_add</mat-icon>
-    </button>
+
     <input
       #inputEl
       [tabindex]="tabindex"
@@ -37,26 +29,26 @@
       matInput
     />
 
-    <!-- <button
-      (click)="closeBtnClose($event)"
-      *ngIf="isElevated"
-      class="close-btn"
-      mat-icon-button
-      type="button"
-    >
-      <mat-icon>close</mat-icon>
-    </button> -->
-
-    <button
-      (click)="isAddToBottom=!isAddToBottom"
-      class="switch-add-to-bot-btn"
-      mat-icon-button
-      type="button"
-    >
-      <mat-icon *ngIf="isAddToBottom">vertical_align_bottom</mat-icon>
-      <mat-icon *ngIf="!isAddToBottom">vertical_align_top</mat-icon>
-      <!-- #1382 consider: <mat-icon *ngIf="!isAddToBottom">keyboard_tab</mat-icon> -->
-    </button>
+    <div class="button-controls">
+      <button
+        (click)="isAddToBacklog=!isAddToBacklog"
+        class="switch-add-to-btn"
+        mat-icon-button
+        type="button"
+      >
+        <mat-icon *ngIf="isAddToBacklog">library_add</mat-icon>
+        <mat-icon *ngIf="!isAddToBacklog">playlist_add</mat-icon>
+      </button>
+      <button
+        (click)="isAddToBottom=!isAddToBottom"
+        class="switch-add-to-bot-btn"
+        mat-icon-button
+        type="button"
+      >
+        <mat-icon *ngIf="isAddToBottom">vertical_align_bottom</mat-icon>
+        <mat-icon *ngIf="!isAddToBottom">vertical_align_top</mat-icon>
+      </button>
+    </div>
   </div>
 
   <div class="info-bar">
