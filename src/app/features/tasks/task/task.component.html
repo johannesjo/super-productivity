@@ -210,7 +210,9 @@
             color=""
             mat-icon-button
           >
-            <mat-icon *ngIf="!task.issueWasUpdated">chat_bubble_outline</mat-icon>
+            <mat-icon *ngIf="!task.issueWasUpdated">&#xe949;</mat-icon>
+            <!--            <mat-icon *ngIf="!task.issueWasUpdated">toc</mat-icon>-->
+            <!--            <mat-icon *ngIf="!task.issueWasUpdated">chevron_right</mat-icon>-->
             <mat-icon *ngIf="task.issueWasUpdated" color="accent">update </mat-icon>
           </button>
         </div>
