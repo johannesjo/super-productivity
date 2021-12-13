@@ -73,7 +73,7 @@ public class KeyValStore extends SQLiteOpenHelper {
      */
     public static synchronized long set(Context context, String key, String value) {
         key = DatabaseUtils.sqlEscapeString(key);
-        Log.v(TAG, "setting cache: " + key);
+        Log.v(TAG, "setting db value: " + key);
         KeyValStore dbHelper = getInstance(context);
         SQLiteDatabase db = dbHelper.getWritableDatabase();
         long row = 0;
@@ -113,5 +113,16 @@ public class KeyValStore extends SQLiteOpenHelper {
             db.close();
         }
         return value;
+    }
+
+
+    public static synchronized void clearAll(Context context) {
+        KeyValStore dbHelper = getInstance(context);
+        SQLiteDatabase db = dbHelper.getWritableDatabase();
+        if (db != null) {
+            db.delete(DATABASE_TABLE, null, null);
+            Log.v(TAG, "cleared db ");
+            db.close();
+        }
     }
 }

@@ -1,16 +1,12 @@
 package com.superproductivity.superproductivity;
 
 import android.app.Application;
-import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.os.Build;
 import android.webkit.WebView;
 import android.widget.Toast;
 
-import androidx.lifecycle.Lifecycle;
 import androidx.lifecycle.LifecycleObserver;
-import androidx.lifecycle.OnLifecycleEvent;
-import androidx.lifecycle.ProcessLifecycleOwner;
 
 public class App extends Application implements LifecycleObserver {
     WebView wv;
@@ -35,7 +31,7 @@ public class App extends Application implements LifecycleObserver {
         if (wv != null) {
             // needs to come last for some settings to take effect
             if (IS_DEBUG) {
-                // String url = "https://test-app.super-productivity.com";
+//                 String url = "https://test-app.super-productivity.com";
                 String url = "http://10.0.2.2:4200/";
                 // String url = "https://app.super-productivity.com";
                 wv.loadUrl(url);

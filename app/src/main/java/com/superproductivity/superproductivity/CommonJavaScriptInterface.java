@@ -79,6 +79,20 @@ public class CommonJavaScriptInterface {
 
     @SuppressWarnings("unused")
     @JavascriptInterface
+    public void removeFromDb(final String key) {
+        KeyValStore.set(mContext, key, null);
+        _callJavaScriptFunction("window.removeFromDbCallback()");
+    }
+
+    @SuppressWarnings("unused")
+    @JavascriptInterface
+    public void clearDb() {
+        KeyValStore.clearAll(mContext);
+        _callJavaScriptFunction("window.clearDbCallback()");
+    }
+
+    @SuppressWarnings("unused")
+    @JavascriptInterface
     public void showNotification(String title, String body) {
         Log.d("TW", "title " + title);
         Log.d("TW", "body " + body);
