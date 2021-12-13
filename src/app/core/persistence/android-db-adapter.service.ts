@@ -15,12 +15,12 @@ export class AndroidDbAdapterService {
 
   async load(key: string): Promise<unknown> {
     const data = await androidInterface.loadFromDbWrapped(key);
-    console.log(data);
+    console.log('load', key, data);
     return typeof data === 'string' ? JSON.parse(data as string) : undefined;
   }
 
   async save(key: string, data: unknown): Promise<unknown> {
-    console.log(data);
+    console.log('save', key, data);
     return await androidInterface.saveToDbWrapped(key, JSON.stringify(data));
   }
 
