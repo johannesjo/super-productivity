@@ -71,6 +71,8 @@ import {
   PROJECT_MODEL_CFGS,
 } from './persistence.const';
 
+const MAX_INVALID_DATA_ATTEMPTS = 10;
+
 @Injectable({
   providedIn: 'root',
 })
@@ -142,6 +144,7 @@ export class PersistenceService {
   }> = new Subject();
 
   private _isBlockSaving: boolean = false;
+  private _invalidDataCount = 0;
 
   constructor(
     private _databaseService: DatabaseService,
@@ -153,10 +156,15 @@ export class PersistenceService {
     const d = await this.loadComplete();
     // if we are very unlucky app data might not be valid. we never want to sync that! :)
     if (isValidAppData(d)) {
+      this._invalidDataCount = 0;
       return d;
     } else {
       // TODO remove as this is not a real error, and this is just a test to check if this ever occurs
       devError('Invalid data => RETRY getValidCompleteData');
+      this._invalidDataCount++;
+      if (this._invalidDataCount > MAX_INVALID_DATA_ATTEMPTS) {
+        throw new Error('Unable to get valid app data');
+      }
       return this.getValidCompleteData();
     }
   }
