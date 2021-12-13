@@ -27,7 +27,7 @@ export interface AndroidInterface {
 
   removeFromDbWrapped(key: string): Promise<void>;
 
-  clearDb(key: string): void;
+  clearDb(): void;
 
   clearDbWrapped(): Promise<void>;
 
@@ -70,6 +70,26 @@ if (IS_ANDROID_WEB_VIEW) {
       // NOTE currently there is no error handling
       (window as any).loadFromDbCallback = (k: string, result?: string) => {
         resolve(result || null);
+      };
+    });
+  };
+
+  androidInterface.removeFromDbWrapped = (key: string): Promise<void> => {
+    androidInterface.removeFromDb(key);
+    return new Promise((resolve, reject) => {
+      // NOTE currently there is no error handling
+      (window as any).removeFromDbCallback = () => {
+        resolve();
+      };
+    });
+  };
+
+  androidInterface.clearDbWrapped = (): Promise<void> => {
+    androidInterface.clearDb();
+    return new Promise((resolve, reject) => {
+      // NOTE currently there is no error handling
+      (window as any).clearDbCallback = () => {
+        resolve();
       };
     });
   };
