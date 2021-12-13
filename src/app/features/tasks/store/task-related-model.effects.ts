@@ -11,7 +11,6 @@ import {
 } from './task.actions';
 import {
   concatMap,
-  delay,
   filter,
   first,
   map,
@@ -143,45 +142,6 @@ export class TaskRelatedModelEffects {
     ),
   );
 
-  setDefaultProjectId$: any = createEffect(() =>
-    this._actions$.pipe(
-      ofType(addTask),
-      concatMap(({ task }) =>
-        this._globalConfigService.misc$.pipe(
-          first(),
-          // error handling
-          switchMap((miscConfig) =>
-            !!miscConfig.defaultProjectId
-              ? this._projectService.getByIdOnce$(miscConfig.defaultProjectId).pipe(
-                  tap((project) => {
-                    if (!project) {
-                      throw new Error('Default Project not found');
-                    }
-                  }),
-                  mapTo(miscConfig),
-                )
-              : of(miscConfig),
-          ),
-          // error handling end
-          map((miscCfg) => ({
-            defaultProjectId: miscCfg.defaultProjectId,
-            task,
-          })),
-        ),
-      ),
-      filter(
-        ({ defaultProjectId, task }) =>
-          !!defaultProjectId && !task.projectId && !task.parentId,
-      ),
-      map(({ task, defaultProjectId }) =>
-        moveToOtherProject({
-          task: task as TaskWithSubTasks,
-          targetProjectId: defaultProjectId as string,
-        }),
-      ),
-    ),
-  );
-
   shortSyntax$: any = createEffect(() =>
     this._actions$.pipe(
       ofType(addTask, updateTask),
@@ -194,17 +154,55 @@ export class TaskRelatedModelEffects {
         return changeProps.length === 1 && changeProps[0] === 'title';
       }),
       // dirty fix to execute this after setDefaultProjectId$ effect
-      delay(20),
-      concatMap((action): Observable<any> => {
-        return this._taskService.getByIdOnce$(action.task.id as string);
+      concatMap((originalAction): Observable<any> => {
+        return this._taskService.getByIdOnce$(originalAction.task.id as string).pipe(
+          map((task) => ({
+            task,
+            originalAction,
+          })),
+        );
       }),
-      withLatestFrom(this._tagService.tags$, this._projectService.list$),
-      mergeMap(([task, tags, projects]) => {
+      withLatestFrom(
+        this._tagService.tags$,
+        this._projectService.list$,
+        this._globalConfigService.misc$.pipe(
+          map((misc) => misc.defaultProjectId),
+          concatMap((defaultProjectId) =>
+            defaultProjectId
+              ? this._projectService.getByIdOnce$(defaultProjectId).pipe(
+                  tap((project) => {
+                    if (!project) {
+                      // to avoid further data inconsistencies
+                      throw new Error('Default Project not found');
+                    }
+                  }),
+                  mapTo(defaultProjectId),
+                )
+              : of(defaultProjectId),
+          ),
+        ),
+      ),
+      mergeMap(([{ task, originalAction }, tags, projects, defaultProjectId]) => {
         const r = shortSyntax(task, tags, projects);
         if (environment.production) {
           console.log('shortSyntax', r);
         }
+        const isAddDefaultProjectIfNecessary: boolean =
+          !!defaultProjectId &&
+          !task.projectId &&
+          !task.parentId &&
+          task.projectId !== defaultProjectId &&
+          originalAction.type === addTask.type;
+
         if (!r) {
+          if (isAddDefaultProjectIfNecessary) {
+            return [
+              moveToOtherProject({
+                task,
+                targetProjectId: defaultProjectId as string,
+              }),
+            ];
+          }
           return EMPTY;
         }
 
@@ -219,11 +217,18 @@ export class TaskRelatedModelEffects {
             },
           }),
         );
-        if (r.projectId && r.projectId !== task.projectId) {
+        if (r.projectId && r.projectId !== task.projectId && !task.parentId) {
           actions.push(
             moveToOtherProject({
               task,
               targetProjectId: r.projectId,
+            }),
+          );
+        } else if (isAddDefaultProjectIfNecessary) {
+          actions.push(
+            moveToOtherProject({
+              task,
+              targetProjectId: defaultProjectId as string,
             }),
           );
         }
