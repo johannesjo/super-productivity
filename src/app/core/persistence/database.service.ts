@@ -6,18 +6,23 @@ import { TranslateService } from '@ngx-translate/core';
 import { T } from '../../t.const';
 import { IndexedDBAdapterService } from './indexed-db-adapter.service';
 import { DBAdapter } from './db-adapter.model';
+import { AndroidDbAdapterService } from './android-db-adapter.service';
+import { IS_ANDROID_WEB_VIEW } from '../../util/is-android-web-view';
 
 @Injectable({
   providedIn: 'root',
 })
 export class DatabaseService {
   private _lastParams?: { a: string; key?: string; data?: unknown };
-  private _adapter: DBAdapter = this._indexedDbAdapterService;
+  private _adapter: DBAdapter = IS_ANDROID_WEB_VIEW
+    ? this._androidDbAdapterService
+    : this._indexedDbAdapterService;
 
   constructor(
     private _electronService: ElectronService,
     private _translateService: TranslateService,
     private _indexedDbAdapterService: IndexedDBAdapterService,
+    private _androidDbAdapterService: AndroidDbAdapterService,
   ) {
     this._init().then();
   }

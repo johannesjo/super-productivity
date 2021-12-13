@@ -22,6 +22,17 @@ export interface AndroidInterface {
 
   loadFromDbWrapped(key: string): Promise<string | null>;
 
+  // TODO not implemented for android yet
+  removeFromDb(key: string): void;
+
+  removeFromDbWrapped(key: string): Promise<void>;
+
+  clearDb(key: string): void;
+
+  clearDbWrapped(): Promise<void>;
+
+
+  // permanent notification
   updatePermanentNotification?(
     title: string,
     // because java sucks, we have to do this
@@ -36,13 +47,6 @@ export interface AndroidInterface {
 }
 
 export const androidInterface: AndroidInterface = (window as any).SUPAndroid;
-
-// let i = 0;
-// window.setInterval(() => {
-//   androidInterface.updateNotificationWidget('Task ', 'me' + i++, i, 'play');
-//   console.log(i);
-// }, 3000);
-
 export const IS_ANDROID_BACKUP_READY =
   IS_ANDROID_WEB_VIEW && typeof androidInterface?.saveToDb === 'function';
 
