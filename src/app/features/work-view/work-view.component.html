@@ -89,6 +89,8 @@
             </button>
 
             <button
+              *ngIf="(workContextService.isToday$|async)"
+              [matTooltip]="T.WW.FINISH_DAY_TOOLTIP|translate"
               color="primary"
               mat-flat-button
               routerLink="/active/daily-summary"
@@ -96,6 +98,30 @@
             >
               <mat-icon>done_all</mat-icon>
               {{T.WW.FINISH_DAY|translate}}
+            </button>
+
+            <button
+              *ngIf="!(workContextService.isToday$|async) && (workContextService.activeWorkContextType==='PROJECT')"
+              [matTooltip]="T.WW.FINISH_DAY_TOOLTIP|translate"
+              color="primary"
+              mat-flat-button
+              routerLink="/active/daily-summary"
+              tabindex="1"
+            >
+              <mat-icon>done_all</mat-icon>
+              {{T.WW.FINISH_DAY_FOR_PROJECT|translate}}
+            </button>
+
+            <button
+              *ngIf="!(workContextService.isToday$|async) && (workContextService.activeWorkContextType==='TAG')"
+              [matTooltip]="T.WW.FINISH_DAY_TOOLTIP|translate"
+              color="primary"
+              mat-flat-button
+              routerLink="/active/daily-summary"
+              tabindex="1"
+            >
+              <mat-icon>done_all</mat-icon>
+              {{T.WW.FINISH_DAY_FOR_TAG|translate}}
             </button>
           </div>
         </div>
@@ -178,6 +204,8 @@
           <div class="finish-day-button-wrapper">
             <!-- NOTE: tabindex is same as for tasks -->
             <button
+              *ngIf="(workContextService.isToday$|async)"
+              [matTooltip]="T.WW.FINISH_DAY_TOOLTIP|translate"
               color="primary"
               mat-flat-button
               routerLink="/active/daily-summary"
@@ -185,6 +213,30 @@
             >
               <mat-icon>done_all</mat-icon>
               {{T.WW.FINISH_DAY|translate}}
+            </button>
+
+            <button
+              *ngIf="!(workContextService.isToday$|async) && (workContextService.activeWorkContextType==='PROJECT')"
+              [matTooltip]="T.WW.FINISH_DAY_TOOLTIP|translate"
+              color="primary"
+              mat-flat-button
+              routerLink="/active/daily-summary"
+              tabindex="1"
+            >
+              <mat-icon>done_all</mat-icon>
+              {{T.WW.FINISH_DAY_FOR_PROJECT|translate}}
+            </button>
+
+            <button
+              *ngIf="!(workContextService.isToday$|async) && (workContextService.activeWorkContextType==='TAG')"
+              [matTooltip]="T.WW.FINISH_DAY_TOOLTIP|translate"
+              color="primary"
+              mat-flat-button
+              routerLink="/active/daily-summary"
+              tabindex="1"
+            >
+              <mat-icon>done_all</mat-icon>
+              {{T.WW.FINISH_DAY_FOR_TAG|translate}}
             </button>
           </div>
         </div>
