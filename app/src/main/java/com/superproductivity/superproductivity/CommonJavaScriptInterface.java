@@ -70,31 +70,31 @@ public class CommonJavaScriptInterface {
 
     @SuppressWarnings("unused")
     @JavascriptInterface
-    public void saveToDb(final String key, final String value) {
+    public void saveToDb(final String requestId, final String key, final String value) {
         KeyValStore.set(mContext, key, value);
-        _callJavaScriptFunction("window.saveToDbCallback()");
+        _callJavaScriptFunction("window.saveToDbCallback('" + requestId + "')");
     }
 
     @SuppressWarnings("unused")
     @JavascriptInterface
-    public void loadFromDb(final String key) {
+    public void loadFromDb(final String requestId,final String key) {
         String r = KeyValStore.get(mContext, key, "");
         // NOTE: ' are important as otherwise the json messes up
-        _callJavaScriptFunction("window.loadFromDbCallback('" + key + "', '" + r + "')");
+        _callJavaScriptFunction("window.loadFromDbCallback('" + requestId + "', '" + key + "', '" + r + "')");
     }
 
     @SuppressWarnings("unused")
     @JavascriptInterface
-    public void removeFromDb(final String key) {
+    public void removeFromDb(final String requestId,final String key) {
         KeyValStore.set(mContext, key, null);
-        _callJavaScriptFunction("window.removeFromDbCallback()");
+        _callJavaScriptFunction("window.removeFromDbCallback('" + requestId + "')");
     }
 
     @SuppressWarnings("unused")
     @JavascriptInterface
-    public void clearDb() {
+    public void clearDb(final String requestId) {
         KeyValStore.clearAll(mContext);
-        _callJavaScriptFunction("window.clearDbCallback()");
+        _callJavaScriptFunction("window.clearDbCallback('" + requestId + "')");
     }
 
     @SuppressWarnings("unused")
