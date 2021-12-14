@@ -132,7 +132,13 @@
 
     <section class="daily-summary-actions">
       <div class="bottom-buttons">
-        <button (click)="finishDay()" *ngIf="isForToday" color="primary" mat-flat-button>
+        <button
+          (click)="finishDay()"
+          [matTooltip]="T.PDS.SAVE_AND_GO_HOME_TOOLTIP|translate"
+          *ngIf="isForToday"
+          color="primary"
+          mat-flat-button
+        >
           <mat-icon>wb_sunny</mat-icon>
           {{T.PDS.SAVE_AND_GO_HOME|translate}}
         </button>

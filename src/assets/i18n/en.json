@@ -1251,6 +1251,7 @@
     "ROUND_UP_30M": "Round UP all tasks to 30 minutes",
     "ROUND_UP_5M": "Round UP all tasks to 5 minutes",
     "SAVE_AND_GO_HOME": "Save and go home",
+    "SAVE_AND_GO_HOME_TOOLTIP": "Move all done tasks to the archive (worklog) and optionally sync all data and close the app.",
     "START_END": "Start – End",
     "SUMMARY_FOR": "Daily Summary for {{dayStr}}",
     "TASKS_COMPLETED": "Tasks Completed",
