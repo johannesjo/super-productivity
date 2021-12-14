@@ -8,6 +8,8 @@ import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.widget.LinearLayout;
 
+import androidx.annotation.RequiresApi;
+
 
 public class WebHelper {
     private static final String TAG = WebHelper.class.getSimpleName();
@@ -20,16 +22,17 @@ public class WebHelper {
         wv = new WebView(context);
         wv.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.MATCH_PARENT));
-        if (Build.VERSION.SDK_INT >= 19) {
-            wv.setLayerType(View.LAYER_TYPE_HARDWARE, null);
-        } else {
-            wv.setLayerType(View.LAYER_TYPE_SOFTWARE, null);
+        wv.setLayerType(View.LAYER_TYPE_HARDWARE, null);
+        wv.setFocusableInTouchMode(true);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            wv.setRendererPriorityPolicy(WebView.RENDERER_PRIORITY_IMPORTANT, false);
         }
 
         // additional web view settings
         WebSettings wSettings = wv.getSettings();
 
         wSettings.setJavaScriptEnabled(true);
+        wSettings.setRenderPriority(WebSettings.RenderPriority.HIGH);
         wSettings.setLoadsImagesAutomatically(true);
         wSettings.setDomStorageEnabled(true);
         wSettings.setLoadWithOverviewMode(true);
@@ -40,6 +43,9 @@ public class WebHelper {
         wSettings.setMediaPlaybackRequiresUserGesture(false);
         wSettings.setJavaScriptCanOpenWindowsAutomatically(true);
         wSettings.setMixedContentMode(WebSettings.MIXED_CONTENT_ALWAYS_ALLOW);
+
+        wSettings.setAllowUniversalAccessFromFileURLs(true);
+        wSettings.setAllowContentAccess(true);
 
         // allow google login
         // @see https://stackoverflow.com/questions/45863004/how-some-apps-are-able-to-perform-google-login-successfully-in-android-webview
