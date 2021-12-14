@@ -5,7 +5,6 @@ import android.os.AsyncTask;
 import android.util.Log;
 import android.webkit.JavascriptInterface;
 import android.webkit.WebView;
-
 import com.google.android.gms.auth.GoogleAuthException;
 import com.google.android.gms.auth.GoogleAuthUtil;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
@@ -27,7 +26,6 @@ public class JavaScriptInterface extends CommonJavaScriptInterface {
     JavaScriptInterface(FullscreenActivity c, WebView wv, boolean isDebug) {
         super(c, wv);
         IS_DEBUG = isDebug;
-        _callJavaScriptFunction("window.SUP_ANDROID_VERSION=" + BuildConfig.VERSION_CODE + ";");
     }
 
     @Override
