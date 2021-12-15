@@ -61,21 +61,10 @@ public class CommonJavaScriptInterface {
     @JavascriptInterface
     public void updateNotificationWidget(String title, String message, String... icon) {
         Log.w("TW", "JavascriptInterface: updateNotificationWidget");
-//        Intent intent = new Intent(mContext.getApplicationContext(), KeepAliveService.class);
-        Intent intent = new Intent(mContext.getApplicationContext(), KeepAliveService.class);
+        Intent intent = new Intent(mContext.getApplicationContext(), KeepAliveService.MyReceiver.class);
         intent.setAction(KeepAliveService.UPDATE_PERMANENT_NOTIFICATION);
-//        intent.putExtra("message", message);
+        intent.putExtra("message", message);
         mContext.sendBroadcast(intent);
-
-        Intent intent2 = new Intent(mContext.getApplicationContext(), KeepAliveService.MyReceiver.class);
-        intent2.setAction(KeepAliveService.UPDATE_PERMANENT_NOTIFICATION);
-//        intent2.putExtra("message", message);
-        mContext.sendBroadcast(intent2);
-
-        Intent intent3 = new Intent(mContext.getApplicationContext(), KeepAliveService.MyReceiver.class);
-        intent3.setAction(KeepAliveService.UPDATE_PERMANENT_NOTIFICATION);
-//        intent3.putExtra("message", message);
-        mContext.sendBroadcast(intent3);
     }
 
     @SuppressWarnings("unused")

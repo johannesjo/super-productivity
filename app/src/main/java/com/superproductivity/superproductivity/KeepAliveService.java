@@ -27,11 +27,18 @@ public class KeepAliveService extends Service {
     BroadcastReceiver receiver;
 
     // use this as an inner class like here or as a top-level class
-    public class MyReceiver extends BroadcastReceiver {
+    public static class MyReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
             Log.w("TW", "KeepAliveService: onReceive");
-            // do something
+            Log.w("TW", "KeepAliveService: onReceive");
+            String action = intent.getAction();
+            if (action.equals(UPDATE_PERMANENT_NOTIFICATION)) {
+                //action for sms received
+                String message = intent.getStringExtra("message");
+                Log.w("TW", "KeepAliveService: onReceiveINNER");
+                Log.w("TW", "KeepAliveService: onReceive: " + message);
+            }
         }
 
         // constructor
@@ -44,34 +51,10 @@ public class KeepAliveService extends Service {
     public void onCreate() {
         // get an instance of the receiver in your service
         IntentFilter filter = new IntentFilter();
-        filter.addAction("action");
         filter.addAction(UPDATE_PERMANENT_NOTIFICATION);
         receiver = new MyReceiver();
         registerReceiver(receiver, filter);
     }
-//    private final BroadcastReceiver receiver = new BroadcastReceiver() {
-//        @Override
-//        public void onReceive(Context context, Intent intent) {
-//            Log.w("TW", "KeepAliveService: onReceive");
-//            String action = intent.getAction();
-//            if (action.equals(UPDATE_PERMANENT_NOTIFICATION)) {
-//                //action for sms received
-//                String message = intent.getStringExtra("message");
-//                Log.w("TW", "KeepAliveService: onReceiveINNER");
-//                Log.w("TW", "KeepAliveService: onReceive: " + message);
-//            }
-//        }
-//    };
-//
-//    @Override
-//    public void onCreate() {
-//        super.onCreate();
-//        Log.w("TW", "KeepAliveService: onCreate");
-//        IntentFilter filter = new IntentFilter();
-//        filter.addAction(UPDATE_PERMANENT_NOTIFICATION);
-//        filter.addAction(TaskListWidget.LIST_CHANGED);
-//        registerReceiver(receiver, filter);
-//    }
 
     @Override
     public void onDestroy() {
@@ -92,7 +75,7 @@ public class KeepAliveService extends Service {
         return super.onStartCommand(intent, flags, startId);
     }
 
-    private void updateNotification(String message, int progress) {
+    public void updateNotification(String message, int progress) {
         builder.setContentText(message)
                 .setProgress(100, progress, true);
         notificationManager.notify(NOTIFY_ID, builder.build());
