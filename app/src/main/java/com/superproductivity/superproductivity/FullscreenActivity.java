@@ -8,18 +8,14 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.View;
 import android.webkit.JsResult;
 import android.webkit.ValueCallback;
 import android.webkit.WebChromeClient;
-import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.FrameLayout;
-import android.widget.LinearLayout;
 import android.widget.Toast;
 
 /**
@@ -29,7 +25,6 @@ import android.widget.Toast;
 public class FullscreenActivity extends AppCompatActivity {
     CommonJavaScriptInterface jsi;
     WebView wv;
-    private FrameLayout frameLayout;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -50,8 +45,8 @@ public class FullscreenActivity extends AppCompatActivity {
             if (wv != null) {
                 // needs to come last for some settings to take effect
                 if (IS_DEBUG) {
-                 String url = "https://test-app.super-productivity.com";
-//                    String url = "http://10.0.2.2:4200/";
+//                    String url = "https://test-app.super-productivity.com";
+                    String url = "http://10.0.2.2:4200/";
                     // String url = "https://app.super-productivity.com";
                     wv.loadUrl(url);
                     Toast.makeText(this, "DEBUG: " + url, Toast.LENGTH_SHORT).show();
@@ -66,7 +61,7 @@ public class FullscreenActivity extends AppCompatActivity {
             setContentView(R.layout.activity_fullscreen);
 
             // init web view
-            frameLayout = findViewById(R.id.webview_wrapper);
+            FrameLayout frameLayout = findViewById(R.id.webview_wrapper);
             frameLayout.addView(wv);
 
             // init JS here, as it needs an activity to work

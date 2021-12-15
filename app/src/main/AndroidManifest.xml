@@ -6,7 +6,7 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
 
     <application
             android:name=".App"
@@ -49,7 +49,6 @@
         <!--        </activity>-->
 
 
-
         <!-- App in WebFrame -->
         <activity
                 android:launchMode="singleTask"
@@ -62,7 +61,7 @@
             <!-- This intent-filter adds the Trusted Web Activity to the Android Launcher -->
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-<!--                <action android:name="custom.actions.intent.TRIGGER_SYNC" />-->
+                <!--                <action android:name="custom.actions.intent.TRIGGER_SYNC" />-->
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
 
@@ -101,6 +100,16 @@
                 android:exported="false"
                 android:permission="android.permission.BIND_REMOTEVIEWS" />
 
-        <service android:name=".KeepAliveService" />
+        <service android:name=".KeepAliveService">
+<!--            <intent-filter>-->
+<!--                <action android:name="com.superproductivity.superproductivity.UPDATE_PERMANENT_NOTIFICATION" />-->
+<!--            </intent-filter>-->
+        </service>
+        <!--        <receiver android:name=".KeepAliveService">-->
+        <!--            <intent-filter>-->
+        <!--                <action android:name="com.superproductivity.superproductivity.UPDATE_PERMANENT_NOTIFICATION" />-->
+        <!--            </intent-filter>-->
+        <!--        </receiver>-->
+
     </application>
 </manifest>

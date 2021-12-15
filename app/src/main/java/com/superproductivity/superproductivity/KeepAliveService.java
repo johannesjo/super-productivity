@@ -5,9 +5,13 @@ import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Build;
 import android.os.IBinder;
+import android.util.Log;
 
 import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
@@ -15,10 +19,66 @@ import androidx.core.app.NotificationCompat;
 public class KeepAliveService extends Service {
     private static final int NOTIFY_ID = 1;
     private static final String NOTIFY_CHANNEL_ID = "SUP_KeepAlive";
-    private  NotificationManager notificationManager;
+    private NotificationManager notificationManager;
     private final NotificationCompat.Builder builder = new NotificationCompat.Builder(this,
             NOTIFY_CHANNEL_ID);
+    public static final String UPDATE_PERMANENT_NOTIFICATION = "com.superproductivity.superproductivity.UPDATE_PERMANENT_NOTIFICATION";
 
+    BroadcastReceiver receiver;
+
+    // use this as an inner class like here or as a top-level class
+    public class MyReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Log.w("TW", "KeepAliveService: onReceive");
+            // do something
+        }
+
+        // constructor
+        public MyReceiver() {
+            Log.w("TW", "KeepAliveService: MyReceiver constructor");
+        }
+    }
+
+    @Override
+    public void onCreate() {
+        // get an instance of the receiver in your service
+        IntentFilter filter = new IntentFilter();
+        filter.addAction("action");
+        filter.addAction(UPDATE_PERMANENT_NOTIFICATION);
+        receiver = new MyReceiver();
+        registerReceiver(receiver, filter);
+    }
+//    private final BroadcastReceiver receiver = new BroadcastReceiver() {
+//        @Override
+//        public void onReceive(Context context, Intent intent) {
+//            Log.w("TW", "KeepAliveService: onReceive");
+//            String action = intent.getAction();
+//            if (action.equals(UPDATE_PERMANENT_NOTIFICATION)) {
+//                //action for sms received
+//                String message = intent.getStringExtra("message");
+//                Log.w("TW", "KeepAliveService: onReceiveINNER");
+//                Log.w("TW", "KeepAliveService: onReceive: " + message);
+//            }
+//        }
+//    };
+//
+//    @Override
+//    public void onCreate() {
+//        super.onCreate();
+//        Log.w("TW", "KeepAliveService: onCreate");
+//        IntentFilter filter = new IntentFilter();
+//        filter.addAction(UPDATE_PERMANENT_NOTIFICATION);
+//        filter.addAction(TaskListWidget.LIST_CHANGED);
+//        registerReceiver(receiver, filter);
+//    }
+
+    @Override
+    public void onDestroy() {
+        Log.w("TW", "KeepAliveService: onDestroy");
+        unregisterReceiver(receiver);
+        super.onDestroy();
+    }
 
     @Nullable
     @Override
