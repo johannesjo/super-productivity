@@ -1,6 +1,7 @@
 
 package com.superproductivity.superproductivity;
 
+import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -26,24 +27,21 @@ public class KeepAliveService extends Service {
 
     BroadcastReceiver receiver;
 
+
     // use this as an inner class like here or as a top-level class
-    public static class MyReceiver extends BroadcastReceiver {
+    public class MyReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
-            Log.w("TW", "KeepAliveService: onReceive");
             Log.w("TW", "KeepAliveService: onReceive");
             String action = intent.getAction();
             if (action.equals(UPDATE_PERMANENT_NOTIFICATION)) {
                 //action for sms received
+                String title = intent.getStringExtra("title");
                 String message = intent.getStringExtra("message");
-                Log.w("TW", "KeepAliveService: onReceiveINNER");
-                Log.w("TW", "KeepAliveService: onReceive: " + message);
+                String icon = intent.getStringExtra("icon");
+                Log.w("TW", "KeepAliveService: onReceive: " + title + "||" + message);
+                KeepAliveService.this.updateNotification(title, message, -1);
             }
-        }
-
-        // constructor
-        public MyReceiver() {
-            Log.w("TW", "KeepAliveService: MyReceiver constructor");
         }
     }
 
@@ -71,13 +69,21 @@ public class KeepAliveService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+        Log.w("TW", "KeepAliveService: STAAAAAAAAAART");
+
         startForeground();
         return super.onStartCommand(intent, flags, startId);
     }
 
-    public void updateNotification(String message, int progress) {
+    public void updateNotification(String title, String message, int progress) {
         builder.setContentText(message)
-                .setProgress(100, progress, true);
+                .setContentTitle(title);
+        if (progress > -1) {
+            builder.setProgress(100, progress, true);
+        } else {
+            builder.setProgress(0, 0, false);
+        }
+
         notificationManager.notify(NOTIFY_ID, builder.build());
     }
 
@@ -107,8 +113,6 @@ public class KeepAliveService extends Service {
                     .setContentText("Service is running background")
                     .setContentIntent(pendingIntent)
                     .build());
-
-            updateNotification("YEAH", 22);
         }
     }
 }

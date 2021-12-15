@@ -61,9 +61,11 @@ public class CommonJavaScriptInterface {
     @JavascriptInterface
     public void updateNotificationWidget(String title, String message, String... icon) {
         Log.w("TW", "JavascriptInterface: updateNotificationWidget");
-        Intent intent = new Intent(mContext.getApplicationContext(), KeepAliveService.MyReceiver.class);
-        intent.setAction(KeepAliveService.UPDATE_PERMANENT_NOTIFICATION);
+        // we need to use an explicit intent to make this work
+        Intent intent = new Intent(KeepAliveService.UPDATE_PERMANENT_NOTIFICATION);
+        intent.putExtra("title", title);
         intent.putExtra("message", message);
+        intent.putExtra("icon", icon);
         mContext.sendBroadcast(intent);
     }
 
