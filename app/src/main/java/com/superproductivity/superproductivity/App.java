@@ -1,6 +1,7 @@
 package com.superproductivity.superproductivity;
 
 import android.app.Application;
+import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.os.Build;
 import android.webkit.WebView;
@@ -14,6 +15,8 @@ public class App extends Application implements LifecycleObserver {
     @Override
     public void onCreate() {
         super.onCreate();
+
+        startService(new Intent(this, KeepAliveService.class));
         // NOTE: if we init the web view here, we can't use native date & time dialogs....
 
 //        ProcessLifecycleOwner.get().getLifecycle().addObserver(this);

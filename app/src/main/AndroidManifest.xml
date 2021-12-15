@@ -6,6 +6,7 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
 
     <application
             android:name=".App"
@@ -99,5 +100,7 @@
                 android:name=".TaskListWidgetViewsService"
                 android:exported="false"
                 android:permission="android.permission.BIND_REMOTEVIEWS" />
+
+        <service android:name=".KeepAliveService" />
     </application>
 </manifest>
