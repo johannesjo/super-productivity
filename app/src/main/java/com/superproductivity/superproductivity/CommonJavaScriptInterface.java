@@ -52,13 +52,14 @@ public class CommonJavaScriptInterface {
 
     @SuppressWarnings("unused")
     @JavascriptInterface
-    public void updatePermanentNotification(String title, String message, int progress) {
+    public void updatePermanentNotification(String title, String message, int progress, boolean notify) {
         Log.w("TW", "JavascriptInterface: updateNotificationWidget");
         // we need to use an explicit intent to make this work
         Intent intent = new Intent(KeepAliveNotificationService.UPDATE_PERMANENT_NOTIFICATION);
         intent.putExtra("title", title);
         intent.putExtra("message", message);
         intent.putExtra("progress", progress);
+        intent.putExtra("notify", notify);
         mContext.sendBroadcast(intent);
     }
 
