@@ -2,7 +2,10 @@ package com.superproductivity.superproductivity;
 
 import android.app.Application;
 import android.content.Intent;
+import android.content.pm.ApplicationInfo;
+import android.os.Build;
 import android.webkit.WebView;
+import android.widget.Toast;
 
 import androidx.lifecycle.LifecycleObserver;
 
@@ -13,7 +16,13 @@ public class App extends Application implements LifecycleObserver {
     public void onCreate() {
         super.onCreate();
 
-        startService(new Intent(this, KeepAliveNotificationService.class));
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            startForegroundService(new Intent(this, KeepAliveNotificationService.class));
+        } else {
+            startService(new Intent(this, KeepAliveNotificationService.class));
+        }
+
+//        startService(new Intent(this, KeepAliveNotificationService.class));
         // NOTE: if we init the web view here, we can't use native date & time dialogs....
 
 //        ProcessLifecycleOwner.get().getLifecycle().addObserver(this);
