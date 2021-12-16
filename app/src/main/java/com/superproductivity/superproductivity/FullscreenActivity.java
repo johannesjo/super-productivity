@@ -29,9 +29,9 @@ public class FullscreenActivity extends AppCompatActivity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Log.v("TW", "onCreate");
+        Log.v("TW", "FullScreenActivity: onCreate");
         if (savedInstanceState == null) {
-            Log.v("TW", "onCreate reeeeeeeeeeeeeeeeeeload");
+            Log.v("TW", "FullScreenActivity: onCreate reeeeeeeeeeeeeeeeeeload");
 
             WebHelper.instanceView(this);
             boolean IS_DEBUG = 0 != (getApplicationInfo().flags & ApplicationInfo.FLAG_DEBUGGABLE);
@@ -61,6 +61,7 @@ public class FullscreenActivity extends AppCompatActivity {
             setContentView(R.layout.activity_fullscreen);
 
             // init web view
+            wv = WebHelper.getWebView();
             FrameLayout frameLayout = findViewById(R.id.webview_wrapper);
             frameLayout.addView(wv);
 
@@ -125,6 +126,37 @@ public class FullscreenActivity extends AppCompatActivity {
             // wv.clearHistory();
         }
     }
+
+    @Override
+    protected void onDestroy() {
+        Log.v("TW", "FullScreenActivity: onDestroy ");
+        super.onDestroy();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        Log.v("TW", "FullScreenActivity: onStop ");
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        Log.v("TW", "FullScreenActivity: onPause");
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        Log.v("TW", "FullScreenActivity: onResume");
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        Log.v("TW", "FullScreenActivity: onStart");
+    }
+
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
