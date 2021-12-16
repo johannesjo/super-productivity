@@ -24,6 +24,7 @@ export interface AndroidInterface {
     // because java sucks, we have to do this
     message: string, // '' => undefined
     progress: number, // -1 => undefined; 999 => indeterminate
+    notify: boolean,
   ): void;
 }
 

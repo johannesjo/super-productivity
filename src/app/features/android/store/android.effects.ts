@@ -42,6 +42,7 @@ export class AndroidEffects {
               '▶ ' + current.title,
               '',
               isPomodoro ? -1 : progress,
+              false,
             );
           } else {
             this._setDefaultNotification();
@@ -61,6 +62,7 @@ export class AndroidEffects {
                 'Super Productivity',
                 'Syncing',
                 999,
+                false,
               )
             : this._setDefaultNotification(),
         ),
@@ -80,6 +82,7 @@ export class AndroidEffects {
       'Super Productivity',
       'No active tasks',
       -1,
+      false,
     );
   }
 }
