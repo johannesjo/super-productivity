@@ -100,7 +100,7 @@
                 android:exported="false"
                 android:permission="android.permission.BIND_REMOTEVIEWS" />
 
-        <service android:name=".KeepAliveService" >
+        <service android:name=".KeepAliveNotificationService" >
             <intent-filter>
                 <action android:name="com.superproductivity.superproductivity.UPDATE_PERMANENT_NOTIFICATION" />
             </intent-filter>

@@ -1,7 +1,6 @@
 
 package com.superproductivity.superproductivity;
 
-import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -18,7 +17,7 @@ import android.util.Log;
 import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
 
-public class KeepAliveService extends Service {
+public class KeepAliveNotificationService extends Service {
     private static final int NOTIFY_ID = 1;
     private static final String NOTIFY_CHANNEL_ID = "SUP_KeepAlive";
     private NotificationManager notificationManager;
@@ -42,7 +41,7 @@ public class KeepAliveService extends Service {
                 int progress = intent.getIntExtra("progress", -1);
                 String icon = intent.getStringExtra("icon");
                 Log.w("TW", "KeepAliveService: onReceive: " + title + "||" + message);
-                KeepAliveService.this.updateNotification(title, message, progress);
+                KeepAliveNotificationService.this.updateNotification(title, message, progress);
             }
         }
     }

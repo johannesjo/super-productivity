@@ -6,7 +6,6 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
-import android.database.sqlite.SQLiteDatabase;
 import android.graphics.BitmapFactory;
 import android.os.Build;
 import android.util.Log;
@@ -15,12 +14,6 @@ import android.webkit.WebView;
 import android.widget.Toast;
 
 import androidx.core.app.NotificationCompat;
-
-import com.google.android.gms.auth.api.signin.GoogleSignIn;
-import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
-import com.google.android.gms.tasks.Task;
-
-import static java.security.AccessController.getContext;
 
 public class CommonJavaScriptInterface {
     protected FullscreenActivity mContext;
@@ -62,7 +55,7 @@ public class CommonJavaScriptInterface {
     public void updateNotificationWidget(String title, String message, int progress, String icon) {
         Log.w("TW", "JavascriptInterface: updateNotificationWidget");
         // we need to use an explicit intent to make this work
-        Intent intent = new Intent(KeepAliveService.UPDATE_PERMANENT_NOTIFICATION);
+        Intent intent = new Intent(KeepAliveNotificationService.UPDATE_PERMANENT_NOTIFICATION);
         intent.putExtra("title", title);
         intent.putExtra("message", message);
         intent.putExtra("progress", progress);
