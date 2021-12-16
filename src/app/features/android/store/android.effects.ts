@@ -38,11 +38,10 @@ export class AndroidEffects {
                   current.timeEstimate &&
                   (current.timeSpent / current.timeEstimate) * 100,
               ) || -1;
-            androidInterface.updateNotificationWidget(
-              current.title,
+            androidInterface.updatePermanentNotification?.(
+              '▶ ' + current.title,
               '',
               isPomodoro ? -1 : progress,
-              'play',
             );
           } else {
             this._setDefaultNotification();
@@ -58,11 +57,10 @@ export class AndroidEffects {
         distinctUntilChanged(),
         tap((isSync) =>
           isSync
-            ? androidInterface.updateNotificationWidget(
+            ? androidInterface.updatePermanentNotification?.(
                 'Super Productivity',
                 'Syncing',
                 999,
-                'default',
               )
             : this._setDefaultNotification(),
         ),
@@ -78,11 +76,10 @@ export class AndroidEffects {
   ) {}
 
   private _setDefaultNotification(): void {
-    androidInterface.updateNotificationWidget(
+    androidInterface.updatePermanentNotification?.(
       'Super Productivity',
       'No active tasks',
       -1,
-      'default',
     );
   }
 }

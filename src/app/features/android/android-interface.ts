@@ -19,12 +19,11 @@ export interface AndroidInterface {
 
   loadFromDbWrapped(key: string): Promise<string | null>;
 
-  updateNotificationWidget(
+  updatePermanentNotification?(
     title: string,
-    // because java sux, we have to do this
+    // because java sucks, we have to do this
     message: string, // '' => undefined
     progress: number, // -1 => undefined; 999 => indeterminate
-    icon: 'play' | 'default', // '' => 'default'
   ): void;
 }
 
