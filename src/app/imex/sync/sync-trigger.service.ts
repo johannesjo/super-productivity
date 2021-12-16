@@ -33,6 +33,7 @@ import { ElectronService } from '../../core/electron/electron.service';
 import { IpcRenderer } from 'electron';
 import { IPC } from '../../../../electron/ipc-events.const';
 import { GlobalConfigState } from '../../features/config/global-config.model';
+import { IS_ANDROID_WEB_VIEW } from '../../util/is-android-web-view';
 
 const MAX_WAIT_FOR_INITIAL_SYNC = 25000;
 
@@ -100,11 +101,6 @@ export class SyncTriggerService {
   );
 
   // OTHER INITIAL SYNC STUFF
-  private _immediateSyncTrigger$: Observable<string> = merge(
-    this._activityAfterSomethingElseTriggers$,
-    this._beforeGoingToSleepTriggers$,
-    this._isOnlineTrigger$,
-  );
   // ------------------------
 
   private _isInitialSyncEnabled$: Observable<boolean> =
@@ -150,11 +146,20 @@ export class SyncTriggerService {
     syncInterval: number = SYNC_DEFAULT_AUDIT_TIME,
     minSyncInterval: number = 5000,
   ): Observable<unknown> {
+    const _immediateSyncTrigger$: Observable<string> = merge(
+      this._activityAfterSomethingElseTriggers$,
+      this._beforeGoingToSleepTriggers$,
+      this._isOnlineTrigger$,
+      ...(IS_ANDROID_WEB_VIEW
+        ? [timer(syncInterval, syncInterval).pipe(mapTo('MOBILE_ONLY_TIMER'))]
+        : []),
+    );
+
     return merge(
-      this._immediateSyncTrigger$,
+      _immediateSyncTrigger$,
 
       // we do this to reset the audit time to avoid sync checks in short succession
-      this._immediateSyncTrigger$.pipe(
+      _immediateSyncTrigger$.pipe(
         // NOTE: startWith needs to come before switchMap!
         startWith(false),
         switchMap(() =>

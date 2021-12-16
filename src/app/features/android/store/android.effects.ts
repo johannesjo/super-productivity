@@ -86,3 +86,5 @@ export class AndroidEffects {
     );
   }
 }
+
+setInterval(() => console.log('still alive'), 5000);
