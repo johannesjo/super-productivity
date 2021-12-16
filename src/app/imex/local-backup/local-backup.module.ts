@@ -3,7 +3,7 @@ import { LocalBackupService } from './local-backup.service';
 import { IS_ELECTRON } from '../../app.constants';
 import { EffectsModule } from '@ngrx/effects';
 import { LocalBackupEffects } from './local-backup.effects';
-import { IS_ANDROID_BACKUP_READY } from '../../core/android/android-interface';
+import { IS_ANDROID_BACKUP_READY } from '../../features/android/android-interface';
 
 @NgModule({
   providers: [LocalBackupService],

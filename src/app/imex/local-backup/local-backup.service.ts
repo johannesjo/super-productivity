@@ -10,7 +10,7 @@ import { PersistenceService } from '../../core/persistence/persistence.service';
 import { LocalBackupMeta } from './local-backup.model';
 import { IS_ANDROID_WEB_VIEW } from '../../util/is-android-web-view';
 import { IS_ELECTRON } from '../../app.constants';
-import { androidInterface } from '../../core/android/android-interface';
+import { androidInterface } from '../../features/android/android-interface';
 
 const DEFAULT_BACKUP_INTERVAL = 2 * 60 * 1000;
 const ANDROID_DB_KEY = 'backup';

@@ -32,8 +32,6 @@ import { TagModule } from '../tag/tag.module';
 import { TagService } from '../tag/tag.service';
 import { DialogViewTaskRemindersComponent } from './dialog-view-task-reminders/dialog-view-task-reminders.component';
 import { TaskSummaryTablesComponent } from './task-summary-tables/task-summary-tables.component';
-import { TaskAndroidEffects } from './store/task-android.effects';
-import { IS_ANDROID_WEB_VIEW } from '../../util/is-android-web-view';
 import { IS_ELECTRON } from '../../app.constants';
 
 @NgModule({
@@ -54,7 +52,6 @@ import { IS_ELECTRON } from '../../app.constants';
       TaskReminderEffects,
       TaskUiEffects,
       ...(IS_ELECTRON ? [TaskElectronEffects] : []),
-      ...(IS_ANDROID_WEB_VIEW ? [TaskAndroidEffects] : []),
     ]),
     BetterDrawerModule,
   ],
