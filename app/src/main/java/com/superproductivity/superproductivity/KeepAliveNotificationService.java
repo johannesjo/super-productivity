@@ -70,7 +70,7 @@ public class KeepAliveNotificationService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        Log.w("TW", "KeepAliveService: STAAAAAAAAAART");
+        Log.w("TW", "KeepAliveService: Start");
 
         startForeground();
         return super.onStartCommand(intent, flags, startId);
@@ -98,12 +98,10 @@ public class KeepAliveNotificationService extends Service {
     private void startForeground() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             // create notification channel
-            CharSequence name = NOTIFY_CHANNEL_ID;
             String description = "Here to keep the app alive for syncing";
             int importance = NotificationManager.IMPORTANCE_DEFAULT;
 
-            NotificationChannel channel = null;
-            channel = new NotificationChannel(NOTIFY_CHANNEL_ID, name, importance);
+            NotificationChannel channel = new NotificationChannel(NOTIFY_CHANNEL_ID, NOTIFY_CHANNEL_ID, importance);
             channel.setDescription(description);
             notificationManager = getSystemService(NotificationManager.class);
             notificationManager.createNotificationChannel(channel);

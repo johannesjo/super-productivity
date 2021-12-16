@@ -106,11 +106,5 @@
             </intent-filter>
         </service>
 
-<!--        <receiver android:name=".KeepAliveService">-->
-<!--            <intent-filter>-->
-<!--                <action android:name="com.superproductivity.superproductivity.UPDATE_PERMANENT_NOTIFICATION" />-->
-<!--            </intent-filter>-->
-<!--        </receiver>-->
-
     </application>
 </manifest>
