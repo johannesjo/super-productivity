@@ -1,6 +1,7 @@
 
 package com.superproductivity.superproductivity;
 
+import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -16,6 +17,7 @@ import android.util.Log;
 
 import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
+import androidx.core.content.ContextCompat;
 
 public class KeepAliveNotificationService extends Service {
     private static final int NOTIFY_ID = 1;
@@ -39,9 +41,8 @@ public class KeepAliveNotificationService extends Service {
                 String title = intent.getStringExtra("title");
                 String message = intent.getStringExtra("message");
                 int progress = intent.getIntExtra("progress", -1);
-                String icon = intent.getStringExtra("icon");
-                Log.w("TW", "KeepAliveService: onReceive: " + title + "||" + message);
                 KeepAliveNotificationService.this.updateNotification(title, message, progress);
+                Log.w("TW", "KeepAliveService: onReceive: " + title + "||" + message);
             }
         }
     }
@@ -79,16 +80,12 @@ public class KeepAliveNotificationService extends Service {
 
     public void updateNotification(String title, String message, int progress) {
         if (progress == 999) {
-            builder.setLargeIcon(null);
             builder.setProgress(100, progress, true);
         } else if (progress > -1) {
-            builder.setLargeIcon(BitmapFactory.decodeResource(getResources(), R.drawable.ic_play));
             builder.setProgress(100, progress, false);
         } else {
-            builder.setLargeIcon(null);
             builder.setProgress(0, 0, false);
         }
-        builder.setSmallIcon(R.drawable.ic_sp);
         builder.setContentText(message)
                 .setContentTitle(title);
 
@@ -111,14 +108,14 @@ public class KeepAliveNotificationService extends Service {
             PendingIntent pendingIntent = PendingIntent.getActivity(this, 0,
                     notificationIntent, 0);
 
-            startForeground(NOTIFY_ID, builder
+            Notification notification = builder
                     .setOngoing(true)
                     .setOnlyAlertOnce(true)
-                    .setSmallIcon(R.drawable.ic_sp)
-                    .setContentTitle(getString(R.string.app_name))
+                    .setSmallIcon(R.drawable.ic_launcher_foreground)
                     .setContentText("Service is running background")
                     .setContentIntent(pendingIntent)
-                    .build());
+                    .build();
+            startForeground(NOTIFY_ID, notification);
         }
     }
 }
