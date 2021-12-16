@@ -18,9 +18,24 @@ export interface AndroidInterface {
   loadFromDb(key: string): void;
 
   loadFromDbWrapped(key: string): Promise<string | null>;
+
+  updateNotificationWidget(
+    title: string,
+    // because java sux, we have to do this
+    message: string, // '' => undefined
+    progress: number, // -1 => undefined; 999 => indeterminate
+    icon: 'play' | 'default', // '' => 'default'
+  ): void;
 }
 
 export const androidInterface: AndroidInterface = (window as any).SUPAndroid;
+
+// let i = 0;
+// window.setInterval(() => {
+//   androidInterface.updateNotificationWidget('Task ', 'me' + i++, i, 'play');
+//   console.log(i);
+// }, 3000);
+
 export const IS_ANDROID_BACKUP_READY =
   IS_ANDROID_WEB_VIEW && typeof androidInterface?.saveToDb === 'function';
 
