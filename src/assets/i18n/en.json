@@ -1,4 +1,11 @@
 {
+  "ANDROID": {
+    "PERMANENT_NOTIFICATION_MSGS": {
+      "INITIAL": "App running in background to allow for syncing if enabled",
+      "NO_ACTIVE_TASKS": "No active tasks",
+      "SYNCING": "Syncing"
+    }
+  },
   "APP": {
     "A_BROWSER_WARNING": "We are sorry, but the app is not optimized to run in this browser. Please consider using a chromium based browser or downloading the electron version of the app",
     "B_INSTALL": {

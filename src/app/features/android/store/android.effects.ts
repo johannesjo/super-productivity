@@ -11,6 +11,8 @@ import { selectCurrentTask } from '../../tasks/store/task.selectors';
 import { GlobalConfigService } from '../../config/global-config.service';
 import { androidInterface } from '../android-interface';
 import { SyncProviderService } from '../../../imex/sync/sync-provider.service';
+import { TranslateService } from '@ngx-translate/core';
+import { T } from '../../../t.const';
 
 // TODO send message to electron when current task changes here
 
@@ -60,7 +62,9 @@ export class AndroidEffects {
           isSync
             ? androidInterface.updatePermanentNotification?.(
                 'Super Productivity',
-                'Syncing',
+                this._translateService.instant(
+                  T.ANDROID.PERMANENT_NOTIFICATION_MSGS.SYNCING,
+                ),
                 999,
                 false,
               )
@@ -75,12 +79,22 @@ export class AndroidEffects {
     private _store$: Store<any>,
     private _globalConfigService: GlobalConfigService,
     private _syncProviderService: SyncProviderService,
-  ) {}
+    private _translateService: TranslateService,
+  ) {
+    androidInterface.updatePermanentNotification?.(
+      'Super Productivity',
+      this._translateService.instant(T.ANDROID.PERMANENT_NOTIFICATION_MSGS.INITIAL),
+      -1,
+      false,
+    );
+  }
 
   private _setDefaultNotification(): void {
     androidInterface.updatePermanentNotification?.(
       'Super Productivity',
-      'No active tasks',
+      this._translateService.instant(
+        T.ANDROID.PERMANENT_NOTIFICATION_MSGS.NO_ACTIVE_TASKS,
+      ),
       -1,
       false,
     );
