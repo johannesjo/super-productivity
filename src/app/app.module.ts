@@ -46,7 +46,6 @@ import { SearchBarModule } from './features/search-bar/search-bar.module';
 import { IdleModule } from './features/idle/idle.module';
 import { TrackingReminderModule } from './features/tracking-reminder/tracking-reminder.module';
 import { FinishDayBeforeCloseModule } from './features/finish-day-before-close/finish-day-before-close.module';
-import { IS_ANDROID_WEB_VIEW } from './util/is-android-web-view';
 import { AndroidModule } from './features/android/android.module';
 
 // NOTE: export required for aot to work
@@ -81,7 +80,8 @@ export const createTranslateLoader = (http: HttpClient): TranslateHttpLoader =>
     SearchBarModule,
     FinishDayBeforeCloseModule,
 
-    ...(IS_ANDROID_WEB_VIEW ? [AndroidModule] : []),
+    AndroidModule,
+    // throws build error ...(IS_ANDROID_WEB_VIEW ? [AndroidModule] : []),
 
     // External
     BrowserModule,

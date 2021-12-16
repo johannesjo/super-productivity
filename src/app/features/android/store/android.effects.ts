@@ -6,24 +6,30 @@ import {
   unsetCurrentTask,
 } from '../../tasks/store/task.actions';
 import { select, Store } from '@ngrx/store';
-import { tap, withLatestFrom } from 'rxjs/operators';
+import { distinctUntilChanged, tap, withLatestFrom } from 'rxjs/operators';
 import { selectCurrentTask } from '../../tasks/store/task.selectors';
 import { GlobalConfigService } from '../../config/global-config.service';
 import { androidInterface } from '../android-interface';
+import { SyncProviderService } from '../../../imex/sync/sync-provider.service';
 
 // TODO send message to electron when current task changes here
 
 @Injectable()
 export class AndroidEffects {
-  taskChange$: any = createEffect(
+  taskChangeNotification$: any = createEffect(
     () =>
       this._actions$.pipe(
         ofType(setCurrentTask, unsetCurrentTask, addTimeSpent),
         withLatestFrom(
           this._store$.pipe(select(selectCurrentTask)),
           this._globalConfigService.cfg$,
+          this._syncProviderService.isSyncing$,
         ),
-        tap(([action, current, cfg]) => {
+        tap(([action, current, cfg, isSyncing]) => {
+          if (isSyncing) {
+            return;
+          }
+
           const isPomodoro = cfg.pomodoro.isEnabled;
           if (current) {
             const progress =
@@ -39,14 +45,27 @@ export class AndroidEffects {
               'play',
             );
           } else {
-            androidInterface.updateNotificationWidget(
-              'Super Productivity',
-              'No active tasks',
-              -1,
-              'default',
-            );
+            this._setDefaultNotification();
           }
         }),
+      ),
+    { dispatch: false },
+  );
+
+  syncNotification$ = createEffect(
+    () =>
+      this._syncProviderService.isSyncing$.pipe(
+        distinctUntilChanged(),
+        tap((isSync) =>
+          isSync
+            ? androidInterface.updateNotificationWidget(
+                'Super Productivity',
+                'Syncing',
+                999,
+                'default',
+              )
+            : this._setDefaultNotification(),
+        ),
       ),
     { dispatch: false },
   );
@@ -55,5 +74,15 @@ export class AndroidEffects {
     private _actions$: Actions,
     private _store$: Store<any>,
     private _globalConfigService: GlobalConfigService,
+    private _syncProviderService: SyncProviderService,
   ) {}
+
+  private _setDefaultNotification(): void {
+    androidInterface.updateNotificationWidget(
+      'Super Productivity',
+      'No active tasks',
+      -1,
+      'default',
+    );
+  }
 }
