@@ -10,6 +10,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.graphics.BitmapFactory;
 import android.os.Build;
 import android.os.IBinder;
 import android.util.Log;
@@ -38,9 +39,10 @@ public class KeepAliveService extends Service {
                 //action for sms received
                 String title = intent.getStringExtra("title");
                 String message = intent.getStringExtra("message");
+                int progress = intent.getIntExtra("progress", -1);
                 String icon = intent.getStringExtra("icon");
                 Log.w("TW", "KeepAliveService: onReceive: " + title + "||" + message);
-                KeepAliveService.this.updateNotification(title, message, -1);
+                KeepAliveService.this.updateNotification(title, message, progress);
             }
         }
     }
@@ -75,14 +77,21 @@ public class KeepAliveService extends Service {
         return super.onStartCommand(intent, flags, startId);
     }
 
+
     public void updateNotification(String title, String message, int progress) {
-        builder.setContentText(message)
-                .setContentTitle(title);
-        if (progress > -1) {
+        if (progress == 999) {
+            builder.setLargeIcon(null);
             builder.setProgress(100, progress, true);
+        } else if (progress > -1) {
+            builder.setLargeIcon(BitmapFactory.decodeResource(getResources(), R.drawable.ic_play));
+            builder.setProgress(100, progress, false);
         } else {
+            builder.setLargeIcon(null);
             builder.setProgress(0, 0, false);
         }
+        builder.setSmallIcon(R.drawable.ic_sp);
+        builder.setContentText(message)
+                .setContentTitle(title);
 
         notificationManager.notify(NOTIFY_ID, builder.build());
     }
