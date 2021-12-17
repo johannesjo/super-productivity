@@ -99,6 +99,14 @@ public class CommonJavaScriptInterface {
 
     @SuppressWarnings("unused")
     @JavascriptInterface
+    public void showNotificationIfAppIsNotOpen(String title, String body) {
+        if (!mContext.isInForeground) {
+            showNotification(title, body);
+        }
+    }
+
+    @SuppressWarnings("unused")
+    @JavascriptInterface
     public void showNotification(String title, String body) {
         Log.d("TW", "title " + title);
         Log.d("TW", "body " + body);

@@ -4,14 +4,12 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.app.AlertDialog;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.webkit.JsResult;
-import android.webkit.ValueCallback;
 import android.webkit.WebChromeClient;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
@@ -28,6 +26,7 @@ public class FullscreenActivity extends AppCompatActivity {
     WebView wv;
     public final static String INTERFACE_PROPERTY = "SUPAndroid";
     public final static String INTERFACE_PROPERTY_F_DROID = "SUPFDroid";
+    public boolean isInForeground = false;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -115,6 +114,7 @@ public class FullscreenActivity extends AppCompatActivity {
     @Override
     protected void onPause() {
         super.onPause();
+        isInForeground = false;
         Log.v("TW", "FullScreenActivity: onPause");
         callJSInterfaceFunctionIfExists("onPause$.next");
     }
@@ -122,6 +122,7 @@ public class FullscreenActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
+        isInForeground = true;
         Log.v("TW", "FullScreenActivity: onResume");
         callJSInterfaceFunctionIfExists("onResume$.next");
     }
