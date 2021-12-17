@@ -16,7 +16,6 @@ import android.webkit.WebChromeClient;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.FrameLayout;
-import android.widget.Toast;
 
 /**
  * An example full-screen activity that shows and hides the system UI (i.e.
@@ -25,6 +24,8 @@ import android.widget.Toast;
 public class FullscreenActivity extends AppCompatActivity {
     CommonJavaScriptInterface jsi;
     WebView wv;
+    public final static String INTERFACE_PROPERTY = "SUPAndroid";
+    public final static String INTERFACE_PROPERTY_F_DROID = "SUPFDroid";
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -45,9 +46,9 @@ public class FullscreenActivity extends AppCompatActivity {
 
             // init JS here, as it needs an activity to work
             jsi = new JavaScriptInterface(this, wv, IS_DEBUG);
-            wv.addJavascriptInterface(jsi, "SUPAndroid");
+            wv.addJavascriptInterface(jsi, INTERFACE_PROPERTY);
             if (BuildConfig.FLAVOR.equals("fdroid")) {
-                wv.addJavascriptInterface(jsi, "SUPFDroid");
+                wv.addJavascriptInterface(jsi, INTERFACE_PROPERTY_F_DROID);
             }
 
             // also needs to be done here, because new Intent otherwise will crash the app
@@ -121,12 +122,14 @@ public class FullscreenActivity extends AppCompatActivity {
     protected void onPause() {
         super.onPause();
         Log.v("TW", "FullScreenActivity: onPause");
+        callJSInterfaceFunctionIfExists("onPause$.next");
     }
 
     @Override
     protected void onResume() {
         super.onResume();
         Log.v("TW", "FullScreenActivity: onResume");
+        callJSInterfaceFunctionIfExists("onResume$.next");
     }
 
     @Override
@@ -143,6 +146,10 @@ public class FullscreenActivity extends AppCompatActivity {
         jsi.onActivityResult(requestCode, resultCode, data);
     }
 
+    public void callJSInterfaceFunctionIfExists(final String fnName) {
+        final String fnFullName = "window." + INTERFACE_PROPERTY + "." + fnName;
+        callJavaScriptFunction("if(" + fnFullName + ")" + fnFullName + "();");
+    }
 
     public void callJavaScriptFunction(final String script) {
         if (wv == null) {
