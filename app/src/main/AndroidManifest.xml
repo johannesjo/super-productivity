@@ -11,6 +11,7 @@
     <application
             android:name=".App"
             android:allowBackup="true"
+            android:fullBackupContent="true"
             android:icon="@mipmap/ic_launcher"
             android:label="@string/app_name"
             android:roundIcon="@mipmap/ic_launcher_round"
@@ -18,41 +19,12 @@
             android:theme="@style/AppTheme"
             android:usesCleartextTraffic="true">
 
-        <!-- App in TWA -->
-        <!--        <activity-->
-        <!--                android:name="com.google.androidbrowserhelper.trusted.LauncherActivity"-->
-        <!--                android:theme="@style/Theme.LauncherActivity">-->
-
-        <!--            <meta-data-->
-        <!--                    android:name="asset_statements"-->
-        <!--                    android:resource="@string/asset_statements" />-->
-
-        <!--            <meta-data-->
-        <!--                    android:name="android.support.customtabs.trusted.DEFAULT_URL"-->
-        <!--                    android:value="https://app.super-productivity.com" />-->
-
-        <!--            <intent-filter>-->
-        <!--                <action android:name="android.intent.action.MAIN" />-->
-        <!--                <category android:name="android.intent.category.LAUNCHER" />-->
-        <!--            </intent-filter>-->
-
-        <!--            <intent-filter>-->
-        <!--                <action android:name="android.intent.action.VIEW" />-->
-
-        <!--                <category android:name="android.intent.category.DEFAULT" />-->
-        <!--                <category android:name="android.intent.category.BROWSABLE" />-->
-
-        <!--                <data-->
-        <!--                        android:host="app.super-productivity.com"-->
-        <!--                        android:scheme="https" />-->
-        <!--            </intent-filter>-->
-        <!--        </activity>-->
-
 
         <!-- App in WebFrame -->
         <activity
                 android:launchMode="singleTask"
                 android:name=".FullscreenActivity"
+                android:exported="true"
                 android:hardwareAccelerated="true"
                 android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale|smallestScreenSize|screenLayout|uiMode"
                 android:label="@string/title_activity_fullscreen"
@@ -84,7 +56,7 @@
 
 
         <!-- Widget -->
-        <receiver android:name=".TaskListWidget">
+        <receiver android:name=".TaskListWidget" android:exported="false">
             <intent-filter>
                 <action android:name="com.superproductivity.superproductivity.LIST_CHANGED" />
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
@@ -101,6 +73,7 @@
                 android:permission="android.permission.BIND_REMOTEVIEWS" />
 
         <service
+                android:exported="false"
                 android:name=".KeepAliveNotificationService"
                 android:stopWithTask="true">
             <intent-filter>
