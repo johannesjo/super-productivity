@@ -83,7 +83,7 @@ public class KeyValStore extends SQLiteOpenHelper {
             values.put(VALUE, value);
             values.put(KEY_CREATED_AT, "time('now')");
             row = db.replace(DATABASE_TABLE, null, values);
-            Log.v(TAG, "save db value size: " + String.valueOf(value.length()));
+            Log.v(TAG, "save db value size: " + value.length());
             db.close();
         }
         return row;
@@ -107,7 +107,7 @@ public class KeyValStore extends SQLiteOpenHelper {
                 if (c.moveToNext()) {
                     value = c.getString(c.getColumnIndex(VALUE));
                 }
-                Log.v(TAG, "get db value size:" + String.valueOf(value.length()));
+                Log.v(TAG, "get db value size:" + value.length());
                 c.close();
             }
             db.close();

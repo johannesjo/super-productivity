@@ -17,6 +17,8 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.FrameLayout;
 
+import java.util.Objects;
+
 /**
  * An example full-screen activity that shows and hides the system UI (i.e.
  * status bar and navigation/system bar) with user interaction.
@@ -32,11 +34,11 @@ public class FullscreenActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         Log.v("TW", "FullScreenActivity: onCreate");
         if (savedInstanceState == null) {
-            Log.v("TW", "FullScreenActivity: onCreate reeeeeeeeeeeeeeeeeeload");
+            Log.v("TW", "FullScreenActivity: onCreate reload");
             boolean IS_DEBUG = 0 != (getApplicationInfo().flags & ApplicationInfo.FLAG_DEBUGGABLE);
 
             // hide action bar
-            getSupportActionBar().hide();
+            Objects.requireNonNull(getSupportActionBar()).hide();
             setContentView(R.layout.activity_fullscreen);
 
             // init web view
@@ -57,7 +59,7 @@ public class FullscreenActivity extends AppCompatActivity {
                 public boolean shouldOverrideUrlLoading(WebView view, String url) {
                     Log.v("TW", url);
 
-                    if (url != null && (url.startsWith("http://") || url.startsWith("https://"))) {
+                    if (url.startsWith("http://") || url.startsWith("https://")) {
                         if (url.contains("super-productivity.com") || url.contains("localhost")) {
                             return false;
                         } else {
@@ -82,17 +84,9 @@ public class FullscreenActivity extends AppCompatActivity {
                     new AlertDialog.Builder(FullscreenActivity.this)
                             .setMessage(message)
                             .setPositiveButton(android.R.string.ok,
-                                    new DialogInterface.OnClickListener() {
-                                        public void onClick(DialogInterface dialog, int which) {
-                                            result.confirm();
-                                        }
-                                    })
+                                    (dialog, which) -> result.confirm())
                             .setNegativeButton(android.R.string.cancel,
-                                    new DialogInterface.OnClickListener() {
-                                        public void onClick(DialogInterface dialog, int which) {
-                                            result.cancel();
-                                        }
-                                    })
+                                    (dialog, which) -> result.cancel())
                             .create()
                             .show();
 
@@ -155,15 +149,7 @@ public class FullscreenActivity extends AppCompatActivity {
         if (wv == null) {
             return;
         }
-        wv.post(new Runnable() {
-            @Override
-            public void run() {
-                wv.evaluateJavascript(script, new ValueCallback<String>() {
-                    @Override
-                    public void onReceiveValue(String value) {
-                    }
-                });
-            }
-        });
+        wv.post(() -> wv.evaluateJavascript(script, value -> {
+        }));
     }
 }

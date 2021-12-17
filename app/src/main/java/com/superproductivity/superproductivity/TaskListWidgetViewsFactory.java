@@ -9,15 +9,13 @@ import android.view.View;
 import android.widget.RemoteViews;
 import android.widget.RemoteViewsService;
 
-import androidx.annotation.Nullable;
-
 import com.google.gson.Gson;
 
 public class TaskListWidgetViewsFactory implements RemoteViewsService.RemoteViewsFactory {
 
     private SpTask[] tasks;
-    private Context mContext = null;
-    private Gson gson = new Gson();
+    private final Context mContext;
+    private final Gson gson = new Gson();
 
     TaskListWidgetViewsFactory(Context context, Intent intent) {
         mContext = context;
@@ -77,8 +75,8 @@ public class TaskListWidgetViewsFactory implements RemoteViewsService.RemoteView
         }
 
 
-        view.setOnClickFillInIntent(R.id.firstLine, this.getPendingSelfIntent(null));
-        view.setOnClickFillInIntent(R.id.button, this.getPendingSelfIntent(null));
+        view.setOnClickFillInIntent(R.id.firstLine, this.getPendingSelfIntent());
+        view.setOnClickFillInIntent(R.id.button, this.getPendingSelfIntent());
 
         return view;
     }
@@ -129,13 +127,7 @@ public class TaskListWidgetViewsFactory implements RemoteViewsService.RemoteView
     }
 
 
-    private Intent getPendingSelfIntent(@Nullable String action) {
-        Intent intent = new Intent(mContext, FullscreenActivity.class);
-//        intent.setAction(action);
-//        Bundle extras = new Bundle();
-//        Intent fillInIntent = new Intent();
-//        intent.putExtra("xxx", "xxxxxx");
-
-        return intent;
+    private Intent getPendingSelfIntent() {
+        return new Intent(mContext, FullscreenActivity.class);
     }
 }

@@ -58,13 +58,13 @@ public class JavaScriptInterface extends CommonJavaScriptInterface {
             // The ApiException status code indicates the detailed failure reason.
             // Please refer to the GoogleSignInStatusCodes class reference for more information.
             Log.w("TW", "signInResult:failed code=" + e.getStatusCode());
-            _callJavaScriptFunction("window.googleGetTokenErrorCallback(\'" + e.getStatusCode() + "\')");
+            _callJavaScriptFunction("window.googleGetTokenErrorCallback('" + e.getStatusCode() + "')");
         }
     }
 
     private static class GetAccessToken extends AsyncTask<Void, Void, String> {
-        private WeakReference<FullscreenActivity> activityReference;
-        private GoogleSignInAccount account;
+        private final WeakReference<FullscreenActivity> activityReference;
+        private final GoogleSignInAccount account;
 
         // only retain a weak reference to the activity
         GetAccessToken(FullscreenActivity context, GoogleSignInAccount accountIn) {
@@ -78,7 +78,7 @@ public class JavaScriptInterface extends CommonJavaScriptInterface {
             String accessToken = null;
             try {
                 accessToken = GoogleAuthUtil.getToken(activity, account.getEmail(), "oauth2:profile email");
-                activity.callJavaScriptFunction("window.googleGetTokenSuccessCallback(\'" + accessToken + "\')");
+                activity.callJavaScriptFunction("window.googleGetTokenSuccessCallback('" + accessToken + "')");
                 Log.d("TW", "accessToken " + accessToken);
             } catch (IOException | GoogleAuthException e) {
                 e.printStackTrace();

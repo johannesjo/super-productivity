@@ -1,5 +1,6 @@
 package com.superproductivity.superproductivity;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.os.Build;
 import android.util.Log;
@@ -8,16 +9,15 @@ import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.widget.LinearLayout;
 
-import androidx.annotation.RequiresApi;
-
 
 public class WebHelper {
     private static final String TAG = WebHelper.class.getSimpleName();
 
-    // should be correct as they only ever get's assigned once?
+    // should be correct as they only ever gets assigned once?
     private static WebView wv;
 
 
+    @SuppressLint("SetJavaScriptEnabled")
     public static void instanceView(Context context) {
         wv = new WebView(context);
         wv.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,

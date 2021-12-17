@@ -8,7 +8,6 @@ import android.webkit.WebView;
 import android.widget.Toast;
 
 import androidx.lifecycle.LifecycleObserver;
-import androidx.lifecycle.ProcessLifecycleOwner;
 
 public class App extends Application implements LifecycleObserver {
     WebView wv;
@@ -16,8 +15,6 @@ public class App extends Application implements LifecycleObserver {
     @Override
     public void onCreate() {
         super.onCreate();
-//        ProcessLifecycleOwner.get().getLifecycle().addObserver(this);
-
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             startForegroundService(new Intent(this, KeepAliveNotificationService.class));
         } else {
@@ -29,10 +26,8 @@ public class App extends Application implements LifecycleObserver {
         boolean IS_DEBUG = 0 != (getApplicationInfo().flags & ApplicationInfo.FLAG_DEBUGGABLE);
 
         // if your build is in debug mode, enable inspecting of web views
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-            if (IS_DEBUG) {
-                WebView.setWebContentsDebuggingEnabled(true);
-            }
+        if (IS_DEBUG) {
+            WebView.setWebContentsDebuggingEnabled(true);
         }
 
         wv = WebHelper.getWebView();
