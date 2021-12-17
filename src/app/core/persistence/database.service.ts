@@ -7,21 +7,17 @@ import { T } from '../../t.const';
 import { IndexedDBAdapterService } from './indexed-db-adapter.service';
 import { DBAdapter } from './db-adapter.model';
 import { AndroidDbAdapterService } from './android-db-adapter.service';
-import {
-  IS_ANDROID_NEW_DATA_INTERFACE,
-  IS_ANDROID_WEB_VIEW,
-} from '../../util/is-android-web-view';
 
 @Injectable({
   providedIn: 'root',
 })
 export class DatabaseService {
   private _lastParams?: { a: string; key?: string; data?: unknown };
-  private _adapter: DBAdapter =
-    IS_ANDROID_WEB_VIEW && IS_ANDROID_NEW_DATA_INTERFACE
-      ? this._androidDbAdapterService
-      : this._indexedDbAdapterService;
-  // private _adapter: DBAdapter = IS_ANDROID_WEB_VIEW ?? this._indexedDbAdapterService;
+  // private _adapter: DBAdapter =
+  //   IS_ANDROID_WEB_VIEW && androidInterface.saveToDbNew && androidInterface.loadFromDb
+  //     ? this._androidDbAdapterService
+  //     : this._indexedDbAdapterService;
+  private _adapter: DBAdapter = this._indexedDbAdapterService;
 
   constructor(
     private _electronService: ElectronService,

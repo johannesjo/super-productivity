@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { androidInterface } from '../android/android-interface';
+import { androidInterface } from '../../features/android/android-interface';
 
 @Injectable({
   providedIn: 'root',

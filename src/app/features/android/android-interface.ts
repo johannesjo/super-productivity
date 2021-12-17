@@ -1,6 +1,5 @@
-import { ANDROID_APP_VERSION, IS_ANDROID_WEB_VIEW } from '../../util/is-android-web-view';
-import shortid from 'shortid';
 import { IS_ANDROID_WEB_VIEW } from '../../util/is-android-web-view';
+import shortid from 'shortid';
 import { Subject } from 'rxjs';
 
 export interface AndroidInterface {
@@ -19,30 +18,34 @@ export interface AndroidInterface {
   // save
   saveToDbWrapped(key: string, value: string): Promise<void>;
 
-  saveToDb(key: string, value: string): void; // old
+  saveToDb?(key: string, value: string): void; // @deprecated
 
-  saveToDb(rId: string, key: string, value: string): void;
+  saveToDbNew?(rId: string, key: string, value: string): void;
+
+  saveToDbCallback?(rId: string): void;
 
   // load
   loadFromDbWrapped(key: string): Promise<string | null>;
 
-  loadFromDb(key: string): void; // old
+  loadFromDb?(key: string): void; // @deprecated
 
-  loadFromDb(rId: string, key: string): void;
+  loadFromDbNew?(rId: string, key: string): void;
+
+  loadFromDbCallback?(rId: string, data: string): void;
 
   // remove
   removeFromDbWrapped(key: string): Promise<void>;
 
-  removeFromDb(key: string): void; // old
+  removeFromDb?(rId: string, key: string): void; // @deprecated
 
-  removeFromDb(rId: string, key: string): void;
+  removeFromDbCallback?(rId: string): void;
 
   // clear db
   clearDbWrapped(): Promise<void>;
 
-  clearDb(): void; // old
+  clearDb?(rId: string): void; // @deprecated
 
-  clearDb(rId: string): void;
+  clearDbCallback?(rId: string): void;
 
   // permanent notification
   updatePermanentNotification?(
@@ -79,43 +82,74 @@ if (IS_ANDROID_WEB_VIEW) {
     });
   };
 
-  // NOTE currently there is no error handling
+  if (androidInterface.saveToDbNew) {
+    androidInterface.saveToDbCallback = (rId: string) => {
+      requestMap[rId].resolve();
+      delete requestMap[rId];
+    };
+  }
   androidInterface.saveToDbWrapped = (key: string, value: string): Promise<void> => {
-    const rId = shortid();
-    androidInterface.saveToDb(rId, key, value);
-    return getRequestMapPromise(rId);
-  };
-  (window as any).saveToDbCallback = (rId: string) => {
-    requestMap[rId].resolve();
-    delete requestMap[rId];
+    if (androidInterface.saveToDbNew) {
+      const rId = shortid();
+      androidInterface.saveToDbNew(rId, key, value);
+      return getRequestMapPromise(rId);
+      // legacy stuff, changed in newer versions of the android app
+      // TODO remove if gone
+    } else if (androidInterface.saveToDb) {
+      androidInterface.saveToDb(key, value);
+      return new Promise((resolve, reject) => {
+        // NOTE currently there is no error handling
+        (window as any).saveToDbCallback = () => {
+          resolve();
+        };
+      });
+    } else {
+      throw new Error('No android save to db interface');
+    }
   };
 
+  if (androidInterface.loadFromDbNew) {
+    androidInterface.loadFromDbCallback = (rId: string, k: string, result?: string) => {
+      requestMap[rId].resolve(result || null);
+      delete requestMap[rId];
+    };
+  }
   androidInterface.loadFromDbWrapped = (key: string): Promise<string | null> => {
-    const rId = shortid();
-    androidInterface.loadFromDb(rId, key);
-    return getRequestMapPromise(rId);
-  };
-  (window as any).loadFromDbCallback = (rId: string, k: string, result?: string) => {
-    requestMap[rId].resolve(result || null);
-    delete requestMap[rId];
+    if (androidInterface.loadFromDbNew) {
+      const rId = shortid();
+      androidInterface.loadFromDbNew(rId, key);
+      return getRequestMapPromise(rId);
+      // legacy stuff, changed in newer versions of the android app
+      // TODO remove if gone
+    } else if (androidInterface.loadFromDb) {
+      androidInterface.loadFromDb(key);
+      return new Promise((resolve, reject) => {
+        // NOTE currently there is no error handling
+        (window as any).loadFromDbCallback = (k: string, result?: string) => {
+          resolve(result || null);
+        };
+      });
+    } else {
+      throw new Error('No android loadFromDb interface');
+    }
   };
 
   androidInterface.removeFromDbWrapped = (key: string): Promise<void> => {
     const rId = shortid();
-    androidInterface.removeFromDb(rId, key);
+    androidInterface.removeFromDb?.(rId, key);
     return getRequestMapPromise(rId);
   };
-  (window as any).removeFromDbCallback = (rId: string) => {
+  androidInterface.removeFromDbCallback = (rId: string) => {
     requestMap[rId].resolve();
     delete requestMap[rId];
   };
 
   androidInterface.clearDbWrapped = (): Promise<void> => {
     const rId = shortid();
-    androidInterface.clearDb(rId);
+    androidInterface.clearDb?.(rId);
     return getRequestMapPromise(rId);
   };
-  (window as any).clearDbCallback = (rId: string) => {
+  androidInterface.clearDbCallback = (rId: string) => {
     requestMap[rId].resolve();
     delete requestMap[rId];
   };
@@ -136,19 +170,18 @@ if (IS_ANDROID_WEB_VIEW) {
   };
 
   androidInterface.getGoogleToken = () => {
-      androidInterface.triggerGetGoogleToken();
+    androidInterface.triggerGetGoogleToken();
 
-      // TODO add map similar to jira api
-      return new Promise<string>((resolve, reject) => {
-        (window as any).googleGetTokenSuccessCallback = (token: string) => {
-          resolve(token);
-        };
-        (window as any).googleGetTokenErrorCallback = (token: string) => {
-          reject(token);
-        };
-      });
-    };
-  }
+    // TODO add map similar to jira api
+    return new Promise<string>((resolve, reject) => {
+      (window as any).googleGetTokenSuccessCallback = (token: string) => {
+        resolve(token);
+      };
+      (window as any).googleGetTokenErrorCallback = (token: string) => {
+        reject(token);
+      };
+    });
+  };
 
   console.log('Android Web View interfaces initialized', androidInterface);
 }
