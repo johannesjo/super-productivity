@@ -116,7 +116,7 @@ public class FullscreenActivity extends AppCompatActivity {
         super.onPause();
         isInForeground = false;
         Log.v("TW", "FullScreenActivity: onPause");
-        callJSInterfaceFunctionIfExists("onPause$.next");
+        callJSInterfaceFunctionIfExists("next", "onPause$");
     }
 
     @Override
@@ -124,7 +124,7 @@ public class FullscreenActivity extends AppCompatActivity {
         super.onResume();
         isInForeground = true;
         Log.v("TW", "FullScreenActivity: onResume");
-        callJSInterfaceFunctionIfExists("onResume$.next");
+        callJSInterfaceFunctionIfExists("next", "onResume$");
     }
 
     @Override
@@ -141,9 +141,10 @@ public class FullscreenActivity extends AppCompatActivity {
         jsi.onActivityResult(requestCode, resultCode, data);
     }
 
-    public void callJSInterfaceFunctionIfExists(final String fnName) {
-        final String fnFullName = "window." + INTERFACE_PROPERTY + "." + fnName;
-        callJavaScriptFunction("if(" + fnFullName + ")" + fnFullName + "();");
+    public void callJSInterfaceFunctionIfExists(final String fnName, final String objectPath) {
+        final String fnFullName = "window." + INTERFACE_PROPERTY + "." + objectPath + '.' + fnName;
+        final String fullObjectPath = "window." + INTERFACE_PROPERTY + "." + objectPath;
+        callJavaScriptFunction("if(" + fullObjectPath + " && " + fnFullName + ")" + fnFullName + "();");
     }
 
     public void callJavaScriptFunction(final String script) {
