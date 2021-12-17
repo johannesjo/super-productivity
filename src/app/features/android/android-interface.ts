@@ -6,6 +6,8 @@ export interface AndroidInterface {
 
   showNotification(title: string, body: string): void;
 
+  showNotificationIfAppIsNotOpen?(title: string, body: string): void;
+
   updateTaskData(s: string): void;
 
   triggerGetGoogleToken(): void;

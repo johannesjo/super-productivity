@@ -1,5 +1,9 @@
 {
   "ANDROID": {
+    "NOTIFICATIONS": {
+      "SYNC_CONFLICT_TITLE": "A sync conflict occurred",
+      "SYNC_CONFLICT_MSG": "Please check and decide what to do."
+    },
     "PERMANENT_NOTIFICATION_MSGS": {
       "INITIAL": "App running in background to allow for syncing if enabled",
       "NO_ACTIVE_TASKS": "No active tasks",

@@ -34,6 +34,8 @@ import { PersistenceLocalService } from '../../core/persistence/persistence-loca
 import { getSyncErrorStr } from './get-sync-error-str';
 import { PersistenceService } from '../../core/persistence/persistence.service';
 import { LocalFileSyncService } from './local-file-sync/local-file-sync.service';
+import { IS_ANDROID_WEB_VIEW } from '../../util/is-android-web-view';
+import { androidInterface } from '../../features/android/android-interface';
 
 @Injectable({
   providedIn: 'root',
@@ -423,6 +425,12 @@ export class SyncProviderService {
       rev: string;
     },
   ): Promise<void> {
+    if (IS_ANDROID_WEB_VIEW) {
+      androidInterface.showNotificationIfAppIsNotOpen?.(
+        this._translateService.instant(T.ANDROID.NOTIFICATIONS.SYNC_CONFLICT_TITLE),
+        this._translateService.instant(T.ANDROID.NOTIFICATIONS.SYNC_CONFLICT_MSG),
+      );
+    }
     const dr = await this._openConflictDialog$({
       local: local.lastLocalSyncModelChange,
       lastSync,
