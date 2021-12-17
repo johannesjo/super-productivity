@@ -19,6 +19,9 @@ public class CommonJavaScriptInterface {
     protected FullscreenActivity mContext;
     private final WebView webView;
     private final KeyValStore dbHelper;
+    // TODO rename to WINDOW_PROPERTY
+    private final static String INTERFACE_PROPERTY = FullscreenActivity.INTERFACE_PROPERTY;
+    private final static String FN_PREFIX = "window." + INTERFACE_PROPERTY + ".";
 
     /**
      * Instantiate the interface and set the context
@@ -66,8 +69,42 @@ public class CommonJavaScriptInterface {
     @SuppressWarnings("unused")
     @JavascriptInterface
     public void triggerGetGoogleToken() {
+        // NOTE: empty here, and only filled for google build flavor
     }
 
+    @SuppressWarnings("unused")
+    @JavascriptInterface
+    // LEGACY
+    public void saveToDbNew(final String requestId, final String key, final String value) {
+        KeyValStore.set(mContext, key, value);
+        _callJavaScriptFunction(FN_PREFIX + "saveToDbCallback('" + requestId + "')");
+    }
+
+    @SuppressWarnings("unused")
+    @JavascriptInterface
+    // LEGACY
+    public void loadFromDbNew(final String requestId, final String key) {
+        String r = KeyValStore.get(mContext, key, "");
+        // NOTE: ' are important as otherwise the json messes up
+        _callJavaScriptFunction(FN_PREFIX + "loadFromDbCallback('" + requestId + "', '" + key + "', '" + r + "')");
+    }
+
+    @SuppressWarnings("unused")
+    @JavascriptInterface
+    public void removeFromDb(final String requestId, final String key) {
+        KeyValStore.set(mContext, key, null);
+        _callJavaScriptFunction(FN_PREFIX + "removeFromDbCallback('" + requestId + "')");
+    }
+
+    @SuppressWarnings("unused")
+    @JavascriptInterface
+    public void clearDb(final String requestId) {
+        KeyValStore.clearAll(mContext);
+        _callJavaScriptFunction(FN_PREFIX + "clearDbCallback('" + requestId + "')");
+    }
+
+
+    // TODO: legacy remove in future version, but no the next release
     @SuppressWarnings("unused")
     @JavascriptInterface
     public void saveToDb(final String key, final String value) {
@@ -75,6 +112,7 @@ public class CommonJavaScriptInterface {
         _callJavaScriptFunction("window.saveToDbCallback()");
     }
 
+    // TODO: legacy remove in future version, but no the next release
     @SuppressWarnings("unused")
     @JavascriptInterface
     public void loadFromDb(final String key) {
@@ -83,19 +121,6 @@ public class CommonJavaScriptInterface {
         _callJavaScriptFunction("window.loadFromDbCallback('" + key + "', '" + r + "')");
     }
 
-    @SuppressWarnings("unused")
-    @JavascriptInterface
-    public void removeFromDb(final String key) {
-        KeyValStore.set(mContext, key, null);
-        _callJavaScriptFunction("window.removeFromDbCallback()");
-    }
-
-    @SuppressWarnings("unused")
-    @JavascriptInterface
-    public void clearDb() {
-        KeyValStore.clearAll(mContext);
-        _callJavaScriptFunction("window.clearDbCallback()");
-    }
 
     @SuppressWarnings("unused")
     @JavascriptInterface

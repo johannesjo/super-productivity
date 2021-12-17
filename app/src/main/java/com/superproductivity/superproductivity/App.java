@@ -34,7 +34,7 @@ public class App extends Application implements LifecycleObserver {
         if (wv != null) {
             // needs to come last for some settings to take effect
             if (IS_DEBUG) {
-//                 String url = "https://test-app.super-productivity.com";
+//                String url = "https://test-app.super-productivity.com";
                 String url = "http://10.0.2.2:4200/";
                 // String url = "https://app.super-productivity.com";
                 wv.loadUrl(url);
