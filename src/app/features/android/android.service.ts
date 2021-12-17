@@ -1,5 +1,4 @@
 import { Injectable } from '@angular/core';
-import { Task } from '../tasks/task.model';
 import { combineLatest, Observable } from 'rxjs';
 import { TagService } from '../tag/tag.service';
 import { TaskService } from '../tasks/task.service';
@@ -11,14 +10,17 @@ import { ProjectService } from '../project/project.service';
 import { Project } from '../project/project.model';
 import { Tag } from '../tag/tag.model';
 
-interface TaskWithCategoryText extends Task {
+interface TaskForAndroidWidgetWithCategoryText {
+  id: string;
+  title: string;
+  isDone: boolean;
   category: string;
   categoryHtml: string;
 }
 
 @Injectable({ providedIn: 'root' })
 export class AndroidService {
-  private _todayTagTasksFlat$: Observable<TaskWithCategoryText[]> =
+  private _todayTagTasksFlat$: Observable<TaskForAndroidWidgetWithCategoryText[]> =
     this._dataInitService.isAllDataLoadedInitially$.pipe(
       switchMap(() => this._tagService.getTagById$(TODAY_TAG.id)),
       switchMap((tag) => this._taskService.getByIdsLive$(tag.taskIds)),
@@ -32,7 +34,9 @@ export class AndroidService {
             return tasks
               .filter((task) => !!task)
               .map((task) => ({
-                ...task,
+                id: task.id,
+                title: task.title,
+                isDone: task.isDone,
                 category: [
                   ...(task.projectId
                     ? [(projects.find((p) => p.id === task.projectId) as Project).title]
