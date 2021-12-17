@@ -11,11 +11,14 @@ import android.widget.RemoteViewsService;
 
 import com.google.gson.Gson;
 
+import java.util.Arrays;
+
 public class TaskListWidgetViewsFactory implements RemoteViewsService.RemoteViewsFactory {
 
     private SpTask[] tasks;
     private final Context mContext;
     private final Gson gson = new Gson();
+    private String lastJsonStr = "NOTHING";
 
     TaskListWidgetViewsFactory(Context context, Intent intent) {
         mContext = context;
@@ -23,13 +26,13 @@ public class TaskListWidgetViewsFactory implements RemoteViewsService.RemoteView
 
     @Override
     public void onCreate() {
-        Log.v("TW", "onCreate");
+        Log.v("TW", "TaskListWidgetViewsFactory: onCreate");
         loadListData();
     }
 
     @Override
     public void onDataSetChanged() {
-        Log.v("TW", "onDataSetChanged");
+        Log.v("TW", "TaskListWidgetViewsFactory: onDataSetChanged");
         loadListData();
     }
 
@@ -103,26 +106,31 @@ public class TaskListWidgetViewsFactory implements RemoteViewsService.RemoteView
     }
 
     private void loadListData() {
-        Log.v("TW", "loadListData");
+        Log.v("TW", "TaskListWidgetViewsFactory: loadListData");
         String jsonStr = null;
 
         try {
             jsonStr = TaskListDataService.getInstance().getData();
         } catch (Exception e) {
-            Log.e("TW", e.toString());
+            Log.e("TW", "TaskListWidgetViewsFactory:" + e.toString());
         }
 
-        Log.v("TW", "jsonStr...");
+        Log.v("TW", "TaskListWidgetViewsFactory: jsonStr...");
 
         if (jsonStr != null && !jsonStr.isEmpty()) {
-            Log.v("TW", jsonStr.length() + "");
-            tasks = gson.fromJson(jsonStr, SpTask[].class);
-//            Log.v("TW", jsonStr);
-            Log.v("TW", "______________________");
-            Log.v("TW", gson.toJson(tasks));
+            Log.v("TW", "TaskListWidgetViewsFactory:" + jsonStr.length() + "");
+            Log.v("TW", "TaskListWidgetViewsFactory: " + jsonStr);
+
+            if (!jsonStr.equals(lastJsonStr)) {
+                SpTask[] newTasks = gson.fromJson(jsonStr, SpTask[].class);
+                Log.v("TW", "TaskListWidgetViewsFactory: " + newTasks.toString());
+                tasks = newTasks;
+                Log.v("TW", "TaskListWidgetViewsFactory: update tasks");
+                lastJsonStr = jsonStr;
+            }
 
         } else {
-            Log.d("TW", "No jsonStr data (yet)");
+            Log.d("TW", "TaskListWidgetViewsFactory: No jsonStr data (yet)");
         }
     }
 
