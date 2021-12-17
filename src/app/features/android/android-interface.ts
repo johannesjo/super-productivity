@@ -1,4 +1,5 @@
 import { IS_ANDROID_WEB_VIEW } from '../../util/is-android-web-view';
+import { Subject } from 'rxjs';
 
 export interface AndroidInterface {
   showToast(s: string): void;
@@ -26,6 +27,10 @@ export interface AndroidInterface {
     progress: number, // -1 => undefined; 999 => indeterminate
     notify: boolean,
   ): void;
+
+  // added here only
+  onResume$: Subject<void>;
+  onPause$: Subject<void>;
 }
 
 export const androidInterface: AndroidInterface = (window as any).SUPAndroid;
@@ -40,6 +45,9 @@ export const IS_ANDROID_BACKUP_READY =
   IS_ANDROID_WEB_VIEW && typeof androidInterface?.saveToDb === 'function';
 
 if (IS_ANDROID_WEB_VIEW) {
+  androidInterface.onResume$ = new Subject();
+  androidInterface.onPause$ = new Subject();
+
   androidInterface.saveToDbWrapped = (key: string, value: string): Promise<void> => {
     androidInterface.saveToDb(key, value);
     return new Promise((resolve, reject) => {

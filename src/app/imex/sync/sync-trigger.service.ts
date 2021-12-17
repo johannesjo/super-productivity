@@ -34,6 +34,7 @@ import { IpcRenderer } from 'electron';
 import { IPC } from '../../../../electron/ipc-events.const';
 import { GlobalConfigState } from '../../features/config/global-config.model';
 import { IS_ANDROID_WEB_VIEW } from '../../util/is-android-web-view';
+import { androidInterface } from '../../features/android/android-interface';
 
 const MAX_WAIT_FOR_INITIAL_SYNC = 25000;
 
@@ -138,9 +139,7 @@ export class SyncTriggerService {
     private readonly _idleService: IdleService,
     private readonly _persistenceService: PersistenceService,
     private readonly _electronService: ElectronService,
-  ) {
-    // this.getSyncTrigger$(5000).subscribe((v) => console.log('.getSyncTrigger$(5000)', v));
-  }
+  ) {}
 
   getSyncTrigger$(
     syncInterval: number = SYNC_DEFAULT_AUDIT_TIME,
@@ -151,16 +150,24 @@ export class SyncTriggerService {
       this._beforeGoingToSleepTriggers$,
       this._isOnlineTrigger$,
       ...(IS_ANDROID_WEB_VIEW
-        ? [timer(syncInterval, syncInterval).pipe(mapTo('MOBILE_ONLY_TIMER'))]
+        ? [
+            // to update in background for widget
+            timer(syncInterval, syncInterval).pipe(mapTo('MOBILE_ONLY_TIMER')),
+            androidInterface.onResume$.pipe(throttleTime(10000)),
+            androidInterface.onPause$.pipe(throttleTime(10000)),
+          ]
         : []),
     );
 
     return merge(
+      // once immediately
       _immediateSyncTrigger$,
 
+      // and once we reset the sync interval for all other triggers
       // we do this to reset the audit time to avoid sync checks in short succession
       _immediateSyncTrigger$.pipe(
         // NOTE: startWith needs to come before switchMap!
+        // NOTE2: we use startWith, since we want to start listening to the onUpdateLocalDataTrigger right away
         startWith(false),
         switchMap(() =>
           this._onUpdateLocalDataTrigger$.pipe(
