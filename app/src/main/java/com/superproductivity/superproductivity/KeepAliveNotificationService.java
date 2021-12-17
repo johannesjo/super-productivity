@@ -110,7 +110,7 @@ public class KeepAliveNotificationService extends Service {
             Notification notification = builder
                     .setOngoing(true)
                     .setOnlyAlertOnce(true)
-                    .setSmallIcon(R.drawable.ic_launcher_foreground)
+                    .setSmallIcon(R.drawable.ic_stat_name)
                     .setContentText("Service is running background")
                     .setContentIntent(pendingIntent)
                     .build();

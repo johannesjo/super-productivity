@@ -104,6 +104,8 @@ public class CommonJavaScriptInterface {
         Log.d("TW", "body " + body);
 
         NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(mContext.getApplicationContext(), "SUP_CHANNEL_ID");
+        mBuilder.build().flags |= Notification.FLAG_AUTO_CANCEL;
+
         Intent ii = new Intent(mContext.getApplicationContext(), FullscreenActivity.class);
         PendingIntent pendingIntent = PendingIntent.getActivity(mContext, 0, ii, 0);
 
@@ -121,6 +123,7 @@ public class CommonJavaScriptInterface {
         mBuilder.setSmallIcon(R.drawable.ic_stat_name);
         mBuilder.setPriority(Notification.PRIORITY_MAX);
         mBuilder.setStyle(bigText);
+        mBuilder.setAutoCancel(true);
 
         NotificationManager mNotificationManager =
                 (NotificationManager) mContext.getSystemService(Context.NOTIFICATION_SERVICE);
