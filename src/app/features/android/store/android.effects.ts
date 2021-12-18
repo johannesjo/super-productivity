@@ -87,7 +87,7 @@ export class AndroidEffects {
         this._translateService.instant(T.ANDROID.PERMANENT_NOTIFICATION_MSGS.INITIAL),
         -1,
       );
-    }, 5000);
+    }, 10000);
 
     // this._translateService
     //   .stream(T.ANDROID.PERMANENT_NOTIFICATION_MSGS.INITIAL)
