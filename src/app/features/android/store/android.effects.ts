@@ -4,9 +4,17 @@ import {
   addTimeSpent,
   setCurrentTask,
   unsetCurrentTask,
+  updateTask,
 } from '../../tasks/store/task.actions';
 import { select, Store } from '@ngrx/store';
-import { distinctUntilChanged, tap, withLatestFrom } from 'rxjs/operators';
+import {
+  distinctUntilChanged,
+  filter,
+  map,
+  skip,
+  tap,
+  withLatestFrom,
+} from 'rxjs/operators';
 import { selectCurrentTask } from '../../tasks/store/task.selectors';
 import { GlobalConfigService } from '../../config/global-config.service';
 import { androidInterface } from '../android-interface';
@@ -14,6 +22,7 @@ import { SyncProviderService } from '../../../imex/sync/sync-provider.service';
 import { TranslateService } from '@ngx-translate/core';
 import { T } from '../../../t.const';
 import { msToClockString } from '../../../ui/duration/ms-to-clock-string.pipe';
+import { TaskCopy } from '../../tasks/task.model';
 
 // TODO send message to electron when current task changes here
 
@@ -57,6 +66,8 @@ export class AndroidEffects {
   syncNotification$ = createEffect(
     () =>
       this._syncProviderService.isSyncing$.pipe(
+        // skip first to avoid default message
+        skip(1),
         distinctUntilChanged(),
         tap((isSync) =>
           isSync
@@ -73,6 +84,26 @@ export class AndroidEffects {
     { dispatch: false },
   );
 
+  markTaskAsDone$ = createEffect(() =>
+    androidInterface.onMarkCurrentTaskAsDone$.pipe(
+      withLatestFrom(this._store$.select(selectCurrentTask)),
+      filter(([, currentTask]) => !!currentTask),
+      map(([, currentTask]) =>
+        updateTask({
+          task: { id: (currentTask as TaskCopy).id, changes: { isDone: true } },
+        }),
+      ),
+    ),
+  );
+
+  pauseTracking$ = createEffect(() =>
+    androidInterface.onPauseCurrentTask$.pipe(
+      withLatestFrom(this._store$.select(selectCurrentTask)),
+      filter(([, currentTask]) => !!currentTask),
+      map(([, currentTask]) => setCurrentTask({ id: null })),
+    ),
+  );
+
   constructor(
     private _actions$: Actions,
     private _store$: Store<any>,
@@ -87,8 +118,7 @@ export class AndroidEffects {
         this._translateService.instant(T.ANDROID.PERMANENT_NOTIFICATION_MSGS.INITIAL),
         -1,
       );
-    }, 10000);
-
+    }, 4000);
     // this._translateService
     //   .stream(T.ANDROID.PERMANENT_NOTIFICATION_MSGS.INITIAL)
     //   .pipe(

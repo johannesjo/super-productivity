@@ -58,6 +58,8 @@ export interface AndroidInterface {
   // added here only
   onResume$: Subject<void>;
   onPause$: Subject<void>;
+  onPauseCurrentTask$: Subject<void>;
+  onMarkCurrentTaskAsDone$: Subject<void>;
 }
 
 // setInterval(() => {
@@ -73,6 +75,8 @@ export const IS_ANDROID_BACKUP_READY =
 if (IS_ANDROID_WEB_VIEW) {
   androidInterface.onResume$ = new Subject();
   androidInterface.onPause$ = new Subject();
+  androidInterface.onPauseCurrentTask$ = new Subject();
+  androidInterface.onMarkCurrentTaskAsDone$ = new Subject();
 
   const requestMap: {
     [key: string]: {
