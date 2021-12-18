@@ -79,10 +79,13 @@ public class KeepAliveNotificationService extends Service {
 
     public void updateNotification(String title, String message, int progress) {
         if (progress == 999) {
+            builder.setSmallIcon(R.drawable.ic_stat_sync);
             builder.setProgress(100, progress, true);
         } else if (progress > -1) {
+            builder.setSmallIcon(R.drawable.ic_stat_play);
             builder.setProgress(100, progress, false);
         } else {
+            builder.setSmallIcon(R.drawable.ic_stat_sp);
             builder.setProgress(0, 0, false);
         }
         builder.setContentText(message)
@@ -104,16 +107,25 @@ public class KeepAliveNotificationService extends Service {
 
             // create notification
             Intent notificationIntent = new Intent(this, FullscreenActivity.class);
-            PendingIntent pendingIntent = PendingIntent.getActivity(this, 0,
-                    notificationIntent, 0);
+
+            PendingIntent pendingIntent = null;
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
+                pendingIntent = PendingIntent.getActivity(this, 0,
+                        notificationIntent, PendingIntent.FLAG_MUTABLE);
+            } else {
+                pendingIntent = PendingIntent.getActivity(this, 0,
+                        notificationIntent, 0);
+            }
+
 
             Notification notification = builder
                     .setOngoing(true)
                     .setOnlyAlertOnce(true)
-                    .setSmallIcon(R.drawable.ic_stat_name)
+                    .setSmallIcon(R.drawable.ic_stat_sp)
                     .setContentText("Service is running background")
                     .setContentIntent(pendingIntent)
                     .build();
+
             startForeground(NOTIFY_ID, notification);
         }
     }
