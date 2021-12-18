@@ -1,6 +1,7 @@
 
 package com.superproductivity.superproductivity;
 
+import android.annotation.SuppressLint;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -24,6 +25,9 @@ public class KeepAliveNotificationService extends Service {
     private final NotificationCompat.Builder builder = new NotificationCompat.Builder(this,
             NOTIFY_CHANNEL_ID);
     public static final String UPDATE_PERMANENT_NOTIFICATION = "com.superproductivity.superproductivity.UPDATE_PERMANENT_NOTIFICATION";
+    public final static String INTENT_MARK_TASK_AS_DONE = "com.superproductivity.superproductivity.DONE";
+    public final static String INTENT_PAUSE_TRACKING = "com.superproductivity.superproductivity.PAUSE";
+
 
     BroadcastReceiver receiver;
 
@@ -76,16 +80,28 @@ public class KeepAliveNotificationService extends Service {
     }
 
 
+    @SuppressLint("RestrictedApi")
     public void updateNotification(String title, String message, int progress) {
+        builder.mActions.clear();
         if (progress == 999) {
             builder.setSmallIcon(R.drawable.ic_stat_sync);
             builder.setProgress(100, progress, true);
-        } else if (progress == 333) {
-            builder.setSmallIcon(R.drawable.ic_stat_play);
-            builder.setProgress(0, 0, false);
         } else if (progress > -1) {
+            PendingIntent pausePendingIntent = PendingIntent.getActivity(this, 0,
+                    new Intent(INTENT_PAUSE_TRACKING), 0);
+            builder.addAction(R.drawable.ic_pause, "Pause", pausePendingIntent);
+            PendingIntent donePendingIntent = PendingIntent.getActivity(this, 0,
+                    new Intent(INTENT_MARK_TASK_AS_DONE), 0);
+            builder.addAction(R.drawable.ic_done, "Done", donePendingIntent);
+
+
             builder.setSmallIcon(R.drawable.ic_stat_play);
-            builder.setProgress(100, progress, false);
+            if (progress == 333) {
+                builder.setProgress(0, 0, false);
+            } else {
+                builder.setProgress(100, progress, false);
+
+            }
         } else {
             builder.setSmallIcon(R.drawable.ic_stat_sp);
             builder.setProgress(0, 0, false);
