@@ -81,6 +81,9 @@ public class KeepAliveNotificationService extends Service {
         if (progress == 999) {
             builder.setSmallIcon(R.drawable.ic_stat_sync);
             builder.setProgress(100, progress, true);
+        } else if (progress == 333) {
+            builder.setSmallIcon(R.drawable.ic_stat_play);
+            builder.setProgress(0, 0, false);
         } else if (progress > -1) {
             builder.setSmallIcon(R.drawable.ic_stat_play);
             builder.setProgress(100, progress, false);
