@@ -53,13 +53,16 @@ export interface AndroidInterface {
     // because java sucks, we have to do this
     message: string, // '' => undefined
     progress: number, // -1 => undefined; 999 => indeterminate; 333 => show play but no progress bar
-    notify: boolean,
   ): void;
 
   // added here only
   onResume$: Subject<void>;
   onPause$: Subject<void>;
 }
+
+// setInterval(() => {
+//   androidInterface.updatePermanentNotification?.(new Date().toString(), '', -1);
+// }, 7000);
 
 export const androidInterface: AndroidInterface = (window as any).SUPAndroid;
 export const IS_ANDROID_BACKUP_READY =

@@ -45,7 +45,6 @@ export class AndroidEffects {
               current.title,
               msToClockString(current.timeSpent, true),
               isPomodoro ? -1 : progress,
-              false,
             );
           } else {
             this._setDefaultNotification();
@@ -67,7 +66,6 @@ export class AndroidEffects {
                 ),
                 '',
                 999,
-                false,
               )
             : this._setDefaultNotification(),
         ),
@@ -88,7 +86,6 @@ export class AndroidEffects {
         '',
         this._translateService.instant(T.ANDROID.PERMANENT_NOTIFICATION_MSGS.INITIAL),
         -1,
-        false,
       );
     }, 5000);
 
@@ -115,7 +112,6 @@ export class AndroidEffects {
         T.ANDROID.PERMANENT_NOTIFICATION_MSGS.NO_ACTIVE_TASKS,
       ),
       -1,
-      false,
     );
   }
 }
