@@ -52,7 +52,7 @@ export interface AndroidInterface {
     title: string,
     // because java sucks, we have to do this
     message: string, // '' => undefined
-    progress: number, // -1 => undefined; 999 => indeterminate
+    progress: number, // -1 => undefined; 999 => indeterminate; 333 => show play but no progress bar
     notify: boolean,
   ): void;
 
@@ -63,7 +63,9 @@ export interface AndroidInterface {
 
 export const androidInterface: AndroidInterface = (window as any).SUPAndroid;
 export const IS_ANDROID_BACKUP_READY =
-  IS_ANDROID_WEB_VIEW && typeof androidInterface?.saveToDb === 'function';
+  IS_ANDROID_WEB_VIEW &&
+  (typeof androidInterface?.saveToDb === 'function' ||
+    typeof androidInterface?.saveToDbNew === 'function');
 
 if (IS_ANDROID_WEB_VIEW) {
   androidInterface.onResume$ = new Subject();

@@ -13,6 +13,7 @@ import { androidInterface } from '../android-interface';
 import { SyncProviderService } from '../../../imex/sync/sync-provider.service';
 import { TranslateService } from '@ngx-translate/core';
 import { T } from '../../../t.const';
+import { msToClockString } from '../../../ui/duration/ms-to-clock-string.pipe';
 
 // TODO send message to electron when current task changes here
 
@@ -42,7 +43,7 @@ export class AndroidEffects {
               ) || 333;
             androidInterface.updatePermanentNotification?.(
               current.title,
-              '',
+              msToClockString(current.timeSpent, true),
               isPomodoro ? -1 : progress,
               false,
             );
