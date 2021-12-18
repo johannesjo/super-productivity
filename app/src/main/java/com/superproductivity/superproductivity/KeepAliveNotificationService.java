@@ -93,6 +93,12 @@ public class KeepAliveNotificationService extends Service {
         }
         builder.setContentText(message)
                 .setContentTitle(title);
+        if (title.equals("")) {
+            builder.setContentTitle(null);
+        }
+        if (message.equals("")) {
+            builder.setContentText(null);
+        }
 
         notificationManager.notify(NOTIFY_ID, builder.build());
     }
