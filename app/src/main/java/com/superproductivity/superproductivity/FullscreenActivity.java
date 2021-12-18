@@ -4,6 +4,7 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.net.Uri;
@@ -75,6 +76,13 @@ public class FullscreenActivity extends AppCompatActivity {
             wv.setWebChromeClient(new WebChromeClient() {
                 @Override
                 public boolean onJsAlert(WebView view, String url, String message, JsResult result) {
+                    Log.v("TW", "onJsAlert");
+                    AlertDialog.Builder builder = new AlertDialog.Builder(FullscreenActivity.this);
+                    builder.setMessage(message)
+                            .setNeutralButton("OK", (dialog, arg1) -> dialog.dismiss())
+                            .create()
+                            .show();
+                    result.cancel();
                     return super.onJsAlert(view, url, message, result);
                 }
 
