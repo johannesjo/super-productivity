@@ -39,7 +39,6 @@ public class KeepAliveNotificationService extends Service {
                 String title = intent.getStringExtra("title");
                 String message = intent.getStringExtra("message");
                 int progress = intent.getIntExtra("progress", -1);
-                boolean isNotify = intent.getBooleanExtra("notify", false);
                 KeepAliveNotificationService.this.updateNotification(title, message, progress);
                 Log.w("TW", "KeepAliveService: onReceive: " + title + "||" + message);
             }
