@@ -34,14 +34,14 @@ export class AndroidEffects {
 
           const isPomodoro = cfg.pomodoro.isEnabled;
           if (current) {
-            const progress =
+            const progress: number =
               Math.round(
                 current &&
                   current.timeEstimate &&
                   (current.timeSpent / current.timeEstimate) * 100,
-              ) || -1;
+              ) || 333;
             androidInterface.updatePermanentNotification?.(
-              '▶ ' + current.title,
+              current.title,
               '',
               isPomodoro ? -1 : progress,
               false,
@@ -61,10 +61,10 @@ export class AndroidEffects {
         tap((isSync) =>
           isSync
             ? androidInterface.updatePermanentNotification?.(
-                'Super Productivity',
                 this._translateService.instant(
                   T.ANDROID.PERMANENT_NOTIFICATION_MSGS.SYNCING,
                 ),
+                '',
                 999,
                 false,
               )
@@ -81,12 +81,30 @@ export class AndroidEffects {
     private _syncProviderService: SyncProviderService,
     private _translateService: TranslateService,
   ) {
-    androidInterface.updatePermanentNotification?.(
-      'Super Productivity',
-      this._translateService.instant(T.ANDROID.PERMANENT_NOTIFICATION_MSGS.INITIAL),
-      -1,
-      false,
-    );
+    // wait for initial translation
+    setTimeout(() => {
+      androidInterface.updatePermanentNotification?.(
+        '',
+        this._translateService.instant(T.ANDROID.PERMANENT_NOTIFICATION_MSGS.INITIAL),
+        -1,
+        false,
+      );
+    }, 5000);
+
+    // this._translateService
+    //   .stream(T.ANDROID.PERMANENT_NOTIFICATION_MSGS.INITIAL)
+    //   .pipe(
+    //     filter((v) => v !== T.ANDROID.PERMANENT_NOTIFICATION_MSGS.INITIAL),
+    //     first(),
+    //   )
+    //   .subscribe(() => {
+    //     androidInterface.updatePermanentNotification?.(
+    //       'Super Productivity',
+    //       this._translateService.instant(T.ANDROID.PERMANENT_NOTIFICATION_MSGS.INITIAL),
+    //       -1,
+    //       false,
+    //     );
+    //   });
   }
 
   private _setDefaultNotification(): void {
