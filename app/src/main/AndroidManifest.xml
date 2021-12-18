@@ -33,25 +33,9 @@
             <!-- This intent-filter adds the Trusted Web Activity to the Android Launcher -->
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-                <!--                <action android:name="custom.actions.intent.TRIGGER_SYNC" />-->
                 <category android:name="android.intent.category.LAUNCHER" />
                 <action android:name="com.superproductivity.superproductivity.DONE" />
                 <action android:name="com.superproductivity.superproductivity.PAUSE" />
-            </intent-filter>
-            <!--
-              This intent-filter allows the Trusted Web Activity to handle Intents to open
-              app.super-productivity.com.
-            -->
-            <intent-filter android:autoVerify="true">
-                <action android:name="android.intent.action.VIEW" />
-
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
-
-                <!-- Edit android:host to handle links to the target URL -->
-                <data
-                        android:host="app.super-productivity.com"
-                        android:scheme="https" />
             </intent-filter>
         </activity>
 

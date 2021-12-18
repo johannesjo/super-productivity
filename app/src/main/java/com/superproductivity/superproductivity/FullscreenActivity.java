@@ -141,6 +141,20 @@ public class FullscreenActivity extends AppCompatActivity {
         Log.v("TW", "FullScreenActivity: onStart");
     }
 
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        Log.v("TW", "FullScreenActivity: onNewIntent");
+        String action = intent.getStringExtra("action");
+        Log.v("TW", "FullScreenActivity: action " + action);
+        if (action != null) {
+            if (action.equals("PAUSE")) {
+                callJSInterfaceFunctionIfExists("next", "onPauseCurrentTask$");
+            } else if (action.equals("DONE")) {
+                callJSInterfaceFunctionIfExists("next", "onMarkCurrentTaskAsDone$");
+            }
+        }
+    }
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {

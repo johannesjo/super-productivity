@@ -87,13 +87,21 @@ public class KeepAliveNotificationService extends Service {
             builder.setSmallIcon(R.drawable.ic_stat_sync);
             builder.setProgress(100, progress, true);
         } else if (progress > -1) {
-            PendingIntent pausePendingIntent = PendingIntent.getActivity(this, 0,
-                    new Intent(INTENT_PAUSE_TRACKING), 0);
+//            Intent pauseIntent = new Intent("com.superproductivity.superproductivity.PAUSE");
+            Intent pauseIntent = new Intent(this, FullscreenActivity.class);
+            pauseIntent.setAction("PAUSE_A");
+            pauseIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            pauseIntent.putExtra("action", "PAUSE");
+            PendingIntent pausePendingIntent = PendingIntent.getActivity(this, 1, pauseIntent, PendingIntent.FLAG_UPDATE_CURRENT);
             builder.addAction(R.drawable.ic_pause, "Pause", pausePendingIntent);
-            PendingIntent donePendingIntent = PendingIntent.getActivity(this, 0,
-                    new Intent(INTENT_MARK_TASK_AS_DONE), 0);
-            builder.addAction(R.drawable.ic_done, "Done", donePendingIntent);
 
+//            Intent doneIntent = new Intent("com.superproductivity.superproductivity.DONE");
+            Intent doneIntent = new Intent(this, FullscreenActivity.class);
+            doneIntent.setAction("DONE_A");
+            doneIntent.putExtra("action", "DONE");
+            doneIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            PendingIntent donePendingIntent = PendingIntent.getActivity(this, 2, doneIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+            builder.addAction(R.drawable.ic_done, "Done", donePendingIntent);
 
             builder.setSmallIcon(R.drawable.ic_stat_play);
             if (progress == 333) {
