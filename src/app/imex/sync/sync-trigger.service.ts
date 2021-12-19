@@ -33,8 +33,10 @@ import { IPC } from '../../../../electron/ipc-events.const';
 import { GlobalConfigState } from '../../features/config/global-config.model';
 import { IS_ANDROID_WEB_VIEW } from '../../util/is-android-web-view';
 import { androidInterface } from '../../features/android/android-interface';
+import { IS_TOUCH_ONLY } from '../../util/is-touch';
 
 const MAX_WAIT_FOR_INITIAL_SYNC = 25000;
+const USER_INTERACTION_SYNC_CHECK_THROTTLE_TIME = 15 * 60 * 10000;
 
 // TODO naming
 @Injectable({
@@ -55,20 +57,41 @@ export class SyncTriggerService {
 
   // IMMEDIATE TRIGGERS
   // ----------------------
-  private _mouseMoveAfterIdleTrigger$: Observable<string | never> =
-    this._idleService.isIdle$.pipe(
-      distinctUntilChanged(),
-      switchMap((isIdle) =>
-        isIdle
-          ? fromEvent(window, 'mousemove').pipe(
-              // we throttle this to prevent lots of updates, but
-              // but also cover the case when the user doesn't interact with the idle dialog
-              throttleTime(10 * 1000),
-              mapTo('I_MOUSE_MOVE_AFTER_IDLE_THROTTLED'),
-            )
-          : EMPTY,
-      ),
-    );
+  private _mouseMoveAfterIdleOrUserInteractionFallbackTrigger$: Observable<
+    string | never
+  > = this._globalConfigService.idle$.pipe(
+    switchMap((idleCfg) =>
+      idleCfg.isEnableIdleTimeTracking
+        ? // idle should be a good indicator for remote data changes
+          this._idleService.isIdle$.pipe(
+            distinctUntilChanged(),
+            switchMap((isIdle) =>
+              isIdle
+                ? fromEvent(window, 'mousemove').pipe(
+                    // we throttle this to prevent lots of updates, but
+                    // but also cover the case when the user doesn't interact with the idle dialog
+                    throttleTime(60 * 1000),
+                    mapTo('I_MOUSE_MOVE_AFTER_IDLE_THROTTLED'),
+                  )
+                : EMPTY,
+            ),
+          )
+        : // FALLBACK we check if there was any kind of user interaction
+        // (otherwise sync might never be checked if there are no local data changes)
+        IS_TOUCH_ONLY
+        ? merge(
+            fromEvent(window, 'touchstart'),
+            fromEvent(window, 'visibilitychange'),
+          ).pipe(
+            mapTo('I_MOUSE_TOUCH_MOVE_OR_VISIBILITYCHANGE'),
+            throttleTime(USER_INTERACTION_SYNC_CHECK_THROTTLE_TIME),
+          )
+        : fromEvent(window, 'focus').pipe(
+            mapTo('I_FOCUS_THROTTLED'),
+            throttleTime(USER_INTERACTION_SYNC_CHECK_THROTTLE_TIME),
+          ),
+    ),
+  );
 
   private _onIdleTrigger$: Observable<string | never> = this._idleService.isIdle$.pipe(
     distinctUntilChanged(),
@@ -103,7 +126,6 @@ export class SyncTriggerService {
 
   // OTHER INITIAL SYNC STUFF
   // ------------------------
-
   private _isInitialSyncEnabled$: Observable<boolean> =
     this._dataInitService.isAllDataLoadedInitially$.pipe(
       switchMap(() => this._globalConfigService.cfg$),
@@ -164,7 +186,7 @@ export class SyncTriggerService {
         )
       : // EVERYTHING ELSE
         merge(
-          this._mouseMoveAfterIdleTrigger$,
+          this._mouseMoveAfterIdleOrUserInteractionFallbackTrigger$,
           this._beforeGoingToSleepTriggers$,
           this._isOnlineTrigger$,
           this._onIdleTrigger$,
@@ -182,6 +204,7 @@ export class SyncTriggerService {
         // NOTE2: we use startWith, since we want to start listening to the onUpdateLocalDataTrigger right away
         startWith('INITIAL_TIMER_TRIGGER'),
         switchMap(() =>
+          // NOTE: interval changes are only ever executed, if local data was changed
           this._onUpdateLocalDataTrigger$.pipe(
             // tap((ev) => console.log('__trigger_sync__', ev.appDataKey, ev)),
             tap((ev) => console.log('__trigger_sync__', ev.appDataKey)),
