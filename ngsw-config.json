@@ -29,6 +29,14 @@
           "/*.(otf|ttf|woff|woff2)"
         ]
       }
+    },
+    {
+      "name": "externalAssets",
+      "installMode": "lazy",
+      "updateMode": "prefetch",
+      "resources": {
+        "urls": ["**/*.(png|jpg|jpeg|gif)"]
+      }
     }
   ],
   "dataGroups": []
