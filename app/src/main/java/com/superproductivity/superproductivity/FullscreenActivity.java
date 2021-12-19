@@ -4,7 +4,6 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.app.AlertDialog;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.net.Uri;
@@ -60,7 +59,7 @@ public class FullscreenActivity extends AppCompatActivity {
                     Log.v("TW", url);
 
                     if (url.startsWith("http://") || url.startsWith("https://")) {
-                        if (url.contains("super-productivity.com") || url.contains("localhost")) {
+                        if (url.contains("super-productivity.com") || url.contains("localhost") || url.contains("10.0.2.2:4200")) {
                             return false;
                         } else {
                             FullscreenActivity.this.startActivity(
