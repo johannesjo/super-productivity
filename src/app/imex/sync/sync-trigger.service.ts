@@ -21,11 +21,9 @@ import { DataInitService } from '../../core/data-init/data-init.service';
 import { isOnline$ } from '../../util/is-online';
 import { PersistenceService } from '../../core/persistence/persistence.service';
 import {
-  SYNC_ACTIVITY_AFTER_SOMETHING_ELSE_THROTTLE_TIME,
   SYNC_BEFORE_GOING_TO_SLEEP_THROTTLE_TIME,
   SYNC_DEFAULT_AUDIT_TIME,
 } from './sync.const';
-import { IS_TOUCH_ONLY } from '../../util/is-touch';
 import { AllowedDBKeys } from '../../core/persistence/ls-keys.const';
 import { IdleService } from '../../features/idle/idle.service';
 import { IS_ELECTRON } from '../../app.constants';
@@ -57,34 +55,36 @@ export class SyncTriggerService {
 
   // IMMEDIATE TRIGGERS
   // ----------------------
-  private _mouseMoveAfterIdle$: Observable<string | never> =
+  private _mouseMoveAfterIdleTrigger$: Observable<string | never> =
     this._idleService.isIdle$.pipe(
       distinctUntilChanged(),
       switchMap((isIdle) =>
         isIdle
-          ? fromEvent(window, 'mousemove').pipe(take(1), mapTo('I_MOUSE_MOVE_AFTER_IDLE'))
+          ? fromEvent(window, 'mousemove').pipe(
+              // we throttle this to prevent lots of updates, but
+              // but also cover the case when the user doesn't interact with the idle dialog
+              throttleTime(10 * 1000),
+              mapTo('I_MOUSE_MOVE_AFTER_IDLE_THROTTLED'),
+            )
           : EMPTY,
       ),
     );
 
-  private _activityAfterSomethingElseTriggers$: Observable<string> = merge(
-    fromEvent(window, 'focus').pipe(mapTo('I_FOCUS_THROTTLED')),
+  private _onIdleTrigger$: Observable<string | never> = this._idleService.isIdle$.pipe(
+    distinctUntilChanged(),
+    switchMap((isIdle) =>
+      isIdle
+        ? // NOTE: wait for a second for all possible data changes and disabling timers to take place
+          timer(1000).pipe(mapTo('I_ON_IDLE'))
+        : EMPTY,
+    ),
+  );
 
-    IS_ELECTRON
-      ? fromEvent(this._electronService.ipcRenderer as IpcRenderer, IPC.RESUME).pipe(
-          mapTo('I_IPC_RESUME'),
-        )
-      : EMPTY,
-
-    IS_TOUCH_ONLY
-      ? merge(
-          fromEvent(window, 'touchstart'),
-          fromEvent(window, 'visibilitychange'),
-        ).pipe(mapTo('I_MOUSE_TOUCH_MOVE_OR_VISIBILITYCHANGE'))
-      : EMPTY,
-
-    this._mouseMoveAfterIdle$,
-  ).pipe(throttleTime(SYNC_ACTIVITY_AFTER_SOMETHING_ELSE_THROTTLE_TIME));
+  private _onElectronResumeTrigger$: Observable<string | never> = IS_ELECTRON
+    ? fromEvent(this._electronService.ipcRenderer as IpcRenderer, IPC.RESUME).pipe(
+        mapTo('I_IPC_RESUME'),
+      )
+    : EMPTY;
 
   private _beforeGoingToSleepTriggers$: Observable<string> = merge(
     IS_ELECTRON
@@ -98,7 +98,7 @@ export class SyncTriggerService {
     // skip initial online which always fires on page load
     skip(1),
     filter((isOnline) => isOnline),
-    mapTo('IS_ONLINE'),
+    mapTo('I_IS_ONLINE'),
   );
 
   // OTHER INITIAL SYNC STUFF
@@ -153,32 +153,34 @@ export class SyncTriggerService {
             switchMap((isInBackground) =>
               isInBackground
                 ? timer(syncInterval, syncInterval).pipe(
-                    mapTo('MOBILE_ONLY_BACKGROUND_TIMER'),
+                    mapTo('I_MOBILE_ONLY_BACKGROUND_TIMER'),
                   )
                 : EMPTY,
             ),
           ),
-          androidInterface.onResume$.pipe(throttleTime(10000), mapTo('RESUME_APP')),
-          androidInterface.onPause$.pipe(throttleTime(10000), mapTo('PAUSE_APP')),
+          androidInterface.onResume$.pipe(throttleTime(10000), mapTo('I_RESUME_APP')),
+          androidInterface.onPause$.pipe(throttleTime(10000), mapTo('I_PAUSE_APP')),
           this._isOnlineTrigger$,
         )
       : // EVERYTHING ELSE
         merge(
-          this._activityAfterSomethingElseTriggers$,
+          this._mouseMoveAfterIdleTrigger$,
           this._beforeGoingToSleepTriggers$,
           this._isOnlineTrigger$,
+          this._onIdleTrigger$,
+          this._onElectronResumeTrigger$,
         );
 
     return merge(
       // once immediately
-      _immediateSyncTrigger$,
+      _immediateSyncTrigger$.pipe(tap((v) => console.log('immediate sync trigger', v))),
 
       // and once we reset the sync interval for all other triggers
       // we do this to reset the audit time to avoid sync checks in short succession
       _immediateSyncTrigger$.pipe(
         // NOTE: startWith needs to come before switchMap!
         // NOTE2: we use startWith, since we want to start listening to the onUpdateLocalDataTrigger right away
-        startWith(false),
+        startWith('INITIAL_TIMER_TRIGGER'),
         switchMap(() =>
           this._onUpdateLocalDataTrigger$.pipe(
             // tap((ev) => console.log('__trigger_sync__', ev.appDataKey, ev)),
