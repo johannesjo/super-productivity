@@ -145,19 +145,29 @@ export class SyncTriggerService {
     syncInterval: number = SYNC_DEFAULT_AUDIT_TIME,
     minSyncInterval: number = 5000,
   ): Observable<unknown> {
-    const _immediateSyncTrigger$: Observable<string> = merge(
-      this._activityAfterSomethingElseTriggers$,
-      this._beforeGoingToSleepTriggers$,
-      this._isOnlineTrigger$,
-      ...(IS_ANDROID_WEB_VIEW
-        ? [
-            // to update in background for widget
-            timer(syncInterval, syncInterval).pipe(mapTo('MOBILE_ONLY_TIMER')),
-            androidInterface.onResume$.pipe(throttleTime(10000)),
-            androidInterface.onPause$.pipe(throttleTime(10000)),
-          ]
-        : []),
-    );
+    const _immediateSyncTrigger$: Observable<string> = IS_ANDROID_WEB_VIEW
+      ? // ANDROID ONLY
+        merge(
+          // to update in background for widget
+          androidInterface.isInBackground$.pipe(
+            switchMap((isInBackground) =>
+              isInBackground
+                ? timer(syncInterval, syncInterval).pipe(
+                    mapTo('MOBILE_ONLY_BACKGROUND_TIMER'),
+                  )
+                : EMPTY,
+            ),
+          ),
+          androidInterface.onResume$.pipe(throttleTime(10000), mapTo('RESUME_APP')),
+          androidInterface.onPause$.pipe(throttleTime(10000), mapTo('PAUSE_APP')),
+          this._isOnlineTrigger$,
+        )
+      : // EVERYTHING ELSE
+        merge(
+          this._activityAfterSomethingElseTriggers$,
+          this._beforeGoingToSleepTriggers$,
+          this._isOnlineTrigger$,
+        );
 
     return merge(
       // once immediately

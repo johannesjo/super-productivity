@@ -1,6 +1,7 @@
 import { IS_ANDROID_WEB_VIEW } from '../../util/is-android-web-view';
 import shortid from 'shortid';
-import { Subject } from 'rxjs';
+import { merge, Observable, Subject } from 'rxjs';
+import { mapTo } from 'rxjs/operators';
 
 export interface AndroidInterface {
   showToast(s: string): void;
@@ -58,6 +59,7 @@ export interface AndroidInterface {
   // added here only
   onResume$: Subject<void>;
   onPause$: Subject<void>;
+  isInBackground$: Observable<boolean>;
   onPauseCurrentTask$: Subject<void>;
   onMarkCurrentTaskAsDone$: Subject<void>;
 }
@@ -77,6 +79,11 @@ if (IS_ANDROID_WEB_VIEW) {
   androidInterface.onPause$ = new Subject();
   androidInterface.onPauseCurrentTask$ = new Subject();
   androidInterface.onMarkCurrentTaskAsDone$ = new Subject();
+
+  androidInterface.isInBackground$ = merge(
+    androidInterface.onResume$.pipe(mapTo(false)),
+    androidInterface.onPause$.pipe(mapTo(true)),
+  );
 
   const requestMap: {
     [key: string]: {
