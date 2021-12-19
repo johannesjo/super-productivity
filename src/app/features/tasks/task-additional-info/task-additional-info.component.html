@@ -1,5 +1,5 @@
 <div class="wrapper">
-  <header *ngIf="isOver" class="task-title-wrapper">
+  <header *ngIf="isOver|| IS_TOUCH_ONLY" class="task-title-wrapper">
     <h2
       (editFinished)="updateTaskTitleIfChanged($event.isChanged, $event.newVal)"
       [isResetAfterEdit]="true"
