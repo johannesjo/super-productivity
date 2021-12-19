@@ -3,6 +3,7 @@ package com.superproductivity.superproductivity;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
@@ -11,6 +12,8 @@ import android.os.Bundle;
 import android.util.Log;
 import android.webkit.JsResult;
 import android.webkit.WebChromeClient;
+import android.webkit.WebResourceRequest;
+import android.webkit.WebResourceResponse;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.FrameLayout;
@@ -70,7 +73,21 @@ public class FullscreenActivity extends AppCompatActivity {
                         return false;
                     }
                 }
+
+
+                @Override
+                public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) {
+                    if (!request.isForMainFrame() && request.getUrl().getPath().contains("assets/icons/favicon")) {
+                        try {
+                            return new WebResourceResponse("image/png", null, null);
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
+                    return null;
+                }
             });
+
 
             wv.setWebChromeClient(new WebChromeClient() {
                 @Override
