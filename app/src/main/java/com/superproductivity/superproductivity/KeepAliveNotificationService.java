@@ -25,8 +25,8 @@ public class KeepAliveNotificationService extends Service {
     private final NotificationCompat.Builder builder = new NotificationCompat.Builder(this,
             NOTIFY_CHANNEL_ID);
     public static final String UPDATE_PERMANENT_NOTIFICATION = "com.superproductivity.superproductivity.UPDATE_PERMANENT_NOTIFICATION";
-    public final static String INTENT_MARK_TASK_AS_DONE = "com.superproductivity.superproductivity.DONE";
-    public final static String INTENT_PAUSE_TRACKING = "com.superproductivity.superproductivity.PAUSE";
+    public final static String EXTRA_ACTION_DONE = "DONE";
+    public final static String EXTRA_ACTION_PAUSE = "PAUSE";
 
 
     BroadcastReceiver receiver;
@@ -89,16 +89,14 @@ public class KeepAliveNotificationService extends Service {
         } else if (progress > -1) {
 //            Intent pauseIntent = new Intent("com.superproductivity.superproductivity.PAUSE");
             Intent pauseIntent = new Intent(this, FullscreenActivity.class);
-            pauseIntent.setAction("PAUSE_A");
             pauseIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            pauseIntent.putExtra("action", "PAUSE");
+            pauseIntent.putExtra("action", EXTRA_ACTION_PAUSE);
             PendingIntent pausePendingIntent = PendingIntent.getActivity(this, 1, pauseIntent, PendingIntent.FLAG_UPDATE_CURRENT);
             builder.addAction(R.drawable.ic_pause, "Pause", pausePendingIntent);
 
 //            Intent doneIntent = new Intent("com.superproductivity.superproductivity.DONE");
             Intent doneIntent = new Intent(this, FullscreenActivity.class);
-            doneIntent.setAction("DONE_A");
-            doneIntent.putExtra("action", "DONE");
+            doneIntent.putExtra("action", EXTRA_ACTION_DONE);
             doneIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             PendingIntent donePendingIntent = PendingIntent.getActivity(this, 2, doneIntent, PendingIntent.FLAG_UPDATE_CURRENT);
             builder.addAction(R.drawable.ic_done, "Done", donePendingIntent);

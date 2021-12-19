@@ -147,9 +147,9 @@ public class FullscreenActivity extends AppCompatActivity {
         String action = intent.getStringExtra("action");
         Log.v("TW", "FullScreenActivity: action " + action);
         if (action != null) {
-            if (action.equals("PAUSE")) {
+            if (action.equals(KeepAliveNotificationService.EXTRA_ACTION_PAUSE)) {
                 callJSInterfaceFunctionIfExists("next", "onPauseCurrentTask$");
-            } else if (action.equals("DONE")) {
+            } else if (action.equals(KeepAliveNotificationService.EXTRA_ACTION_DONE)) {
                 callJSInterfaceFunctionIfExists("next", "onMarkCurrentTaskAsDone$");
             }
         }
