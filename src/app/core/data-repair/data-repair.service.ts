@@ -23,7 +23,7 @@ export class DataRepairService {
     }
     return confirm(
       this._translateService.instant(T.CONFIRM.AUTO_FIX, {
-        validityError: getLastValidityError(),
+        validityError: getLastValidityError() || 'Unknown validity error',
       }),
     );
   }

@@ -136,6 +136,7 @@ const _isAllTasksAvailableAndListConsistent = (data: AppDataComplete): boolean =
     .forEach((tag) => {
       if (!tag) {
         console.log(data.tag);
+        _validityError('No tag');
         throw new Error('No tag');
       }
       allIds = allIds.concat(tag.taskIds);
@@ -261,25 +262,38 @@ const _isEntityStatesConsistent = (data: AppDataComplete): boolean => {
   ];
   const projectStateKeys: (keyof AppDataForProjects)[] = ['bookmark'];
 
-  const brokenItem =
-    baseStateKeys.find((key) => !isEntityStateConsistent(data[key], key)) ||
-    projectStateKeys.find((projectModelKey) => {
-      const dataForProjects = data[projectModelKey];
-      if (typeof (dataForProjects as any) !== 'object') {
-        throw new Error('No dataForProjects');
-      }
-      return Object.keys(dataForProjects).find(
-        (projectId) =>
-          // also allow undefined for project models
-          (data as any)[projectId] !== undefined &&
-          !isEntityStateConsistent(
-            (data as any)[projectId],
-            `${projectModelKey} pId:${projectId}`,
-          ),
-      );
-    });
+  const brokenBaseItem = baseStateKeys.find((key) => {
+    if (!isEntityStateConsistent(data[key], key)) {
+      console.log(key, data[key]);
+      _validityError('Inconsistent entity state for ' + key);
+      return true;
+    }
+    return false;
+  });
 
-  return !brokenItem;
+  const brokenProjectItem = projectStateKeys.find((projectModelKey) => {
+    const dataForProjects = data[projectModelKey];
+    if (typeof (dataForProjects as any) !== 'object') {
+      throw new Error('No dataForProjects');
+    }
+    return Object.keys(dataForProjects).find((projectId) => {
+      // also allow undefined for project models
+      if (
+        (data as any)[projectId] !== undefined &&
+        !isEntityStateConsistent(
+          (data as any)[projectId],
+          `${projectModelKey} pId:${projectId}`,
+        )
+      ) {
+        console.log(projectModelKey, projectId, (data as any)[projectId]);
+        _validityError('Inconsistent entity state for ' + projectModelKey);
+        return true;
+      }
+      return false;
+    });
+  });
+
+  return !brokenBaseItem && !brokenProjectItem;
 };
 
 const _isNoLonelySubTasks = (data: AppDataComplete): boolean => {
