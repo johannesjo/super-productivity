@@ -119,25 +119,11 @@ export class AndroidEffects {
         -1,
       );
     }, 4000);
-    // this._translateService
-    //   .stream(T.ANDROID.PERMANENT_NOTIFICATION_MSGS.INITIAL)
-    //   .pipe(
-    //     filter((v) => v !== T.ANDROID.PERMANENT_NOTIFICATION_MSGS.INITIAL),
-    //     first(),
-    //   )
-    //   .subscribe(() => {
-    //     androidInterface.updatePermanentNotification?.(
-    //       'Super Productivity',
-    //       this._translateService.instant(T.ANDROID.PERMANENT_NOTIFICATION_MSGS.INITIAL),
-    //       -1,
-    //       false,
-    //     );
-    //   });
   }
 
   private _setDefaultNotification(): void {
     androidInterface.updatePermanentNotification?.(
-      'Super Productivity',
+      '',
       this._translateService.instant(
         T.ANDROID.PERMANENT_NOTIFICATION_MSGS.NO_ACTIVE_TASKS,
       ),
