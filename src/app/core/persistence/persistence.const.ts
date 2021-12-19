@@ -72,6 +72,7 @@ import { MODEL_VERSION } from '../model-version';
 import { migrateSimpleCounterState } from '../../features/simple-counter/migrate-simple-counter-state.util';
 import { migrateTagState } from '../../features/tag/migrate-tag-state.util';
 import { migrateNoteState } from '../../features/note/migrate-note-state.util';
+import { AppBaseData } from '../../imex/sync/sync.model';
 
 interface PersistenceBaseModelCfgs {
   // [key: string]: PersistenceBaseModelCfg<any>;
@@ -194,6 +195,9 @@ export const ENTITY_MODEL_CFGS: PersistenceEntityModelCfgs = {
     migrateFn: migrateTaskRepeatCfgState,
   },
 };
+export const ALL_ENTITY_MODEL_KEYS: (keyof AppBaseData)[] = Object.entries(
+  ENTITY_MODEL_CFGS,
+).map(([, entry]) => entry.appDataKey);
 
 export const PROJECT_MODEL_CFGS: PersistenceProjectModelCfgs = {
   bookmark: {

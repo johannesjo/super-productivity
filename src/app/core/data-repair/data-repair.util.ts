@@ -6,15 +6,9 @@ import { Task, TaskArchive, TaskCopy, TaskState } from '../../features/tasks/tas
 import { unique } from '../../util/unique';
 import { TODAY_TAG } from '../../features/tag/tag.const';
 import { TaskRepeatCfgCopy } from '../../features/task-repeat-cfg/task-repeat-cfg.model';
+import { ALL_ENTITY_MODEL_KEYS } from '../persistence/persistence.const';
 
-const ENTITY_STATE_KEYS: (keyof AppDataComplete)[] = [
-  'task',
-  'taskArchive',
-  'taskRepeatCfg',
-  'tag',
-  'project',
-  'simpleCounter',
-];
+const ENTITY_STATE_KEYS: (keyof AppDataComplete)[] = ALL_ENTITY_MODEL_KEYS;
 
 export const dataRepair = (data: AppDataComplete): AppDataComplete => {
   if (!isDataRepairPossible(data)) {
