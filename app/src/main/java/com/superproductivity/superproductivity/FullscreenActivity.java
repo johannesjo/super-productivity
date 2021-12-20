@@ -168,6 +168,8 @@ public class FullscreenActivity extends AppCompatActivity {
                 callJSInterfaceFunctionIfExists("next", "onPauseCurrentTask$");
             } else if (action.equals(KeepAliveNotificationService.EXTRA_ACTION_DONE)) {
                 callJSInterfaceFunctionIfExists("next", "onMarkCurrentTaskAsDone$");
+            } else if (action.equals(KeepAliveNotificationService.EXTRA_ACTION_ADD_TASK)) {
+                callJSInterfaceFunctionIfExists("next", "onAddNewTask$");
             }
         }
     }

@@ -27,6 +27,7 @@ public class KeepAliveNotificationService extends Service {
     public static final String UPDATE_PERMANENT_NOTIFICATION = "com.superproductivity.superproductivity.UPDATE_PERMANENT_NOTIFICATION";
     public final static String EXTRA_ACTION_DONE = "DONE";
     public final static String EXTRA_ACTION_PAUSE = "PAUSE";
+    public final static String EXTRA_ACTION_ADD_TASK = "ADD_TASK";
 
 
     BroadcastReceiver receiver;
@@ -87,14 +88,12 @@ public class KeepAliveNotificationService extends Service {
             builder.setSmallIcon(R.drawable.ic_stat_sync);
             builder.setProgress(100, progress, true);
         } else if (progress > -1) {
-//            Intent pauseIntent = new Intent("com.superproductivity.superproductivity.PAUSE");
             Intent pauseIntent = new Intent(this, FullscreenActivity.class);
             pauseIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             pauseIntent.putExtra("action", EXTRA_ACTION_PAUSE);
             PendingIntent pausePendingIntent = PendingIntent.getActivity(this, 1, pauseIntent, PendingIntent.FLAG_UPDATE_CURRENT);
             builder.addAction(R.drawable.ic_pause, "Pause", pausePendingIntent);
 
-//            Intent doneIntent = new Intent("com.superproductivity.superproductivity.DONE");
             Intent doneIntent = new Intent(this, FullscreenActivity.class);
             doneIntent.putExtra("action", EXTRA_ACTION_DONE);
             doneIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -109,6 +108,12 @@ public class KeepAliveNotificationService extends Service {
 
             }
         } else {
+            Intent addTaskIntent = new Intent(this, FullscreenActivity.class);
+            addTaskIntent.putExtra("action", EXTRA_ACTION_ADD_TASK);
+            addTaskIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            PendingIntent addTaskPendingIntent = PendingIntent.getActivity(this, 2, addTaskIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+            builder.addAction(R.drawable.ic_add, "Add new task", addTaskPendingIntent);
+
             builder.setSmallIcon(R.drawable.ic_stat_sp);
             builder.setProgress(0, 0, false);
         }
