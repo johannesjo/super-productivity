@@ -62,6 +62,7 @@ export interface AndroidInterface {
   isInBackground$: Observable<boolean>;
   onPauseCurrentTask$: Subject<void>;
   onMarkCurrentTaskAsDone$: Subject<void>;
+  onAddNewTask$: Subject<void>;
 }
 
 // setInterval(() => {
@@ -79,6 +80,7 @@ if (IS_ANDROID_WEB_VIEW) {
   androidInterface.onPause$ = new Subject();
   androidInterface.onPauseCurrentTask$ = new Subject();
   androidInterface.onMarkCurrentTaskAsDone$ = new Subject();
+  androidInterface.onAddNewTask$ = new Subject();
 
   androidInterface.isInBackground$ = merge(
     androidInterface.onResume$.pipe(mapTo(false)),

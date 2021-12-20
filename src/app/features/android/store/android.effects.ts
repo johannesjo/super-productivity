@@ -23,6 +23,7 @@ import { TranslateService } from '@ngx-translate/core';
 import { T } from '../../../t.const';
 import { msToClockString } from '../../../ui/duration/ms-to-clock-string.pipe';
 import { TaskCopy } from '../../tasks/task.model';
+import { showAddTaskBar } from '../../../core-ui/layout/store/layout.actions';
 
 // TODO send message to electron when current task changes here
 
@@ -102,6 +103,10 @@ export class AndroidEffects {
       filter(([, currentTask]) => !!currentTask),
       map(([, currentTask]) => setCurrentTask({ id: null })),
     ),
+  );
+
+  showAddTaskBar$ = createEffect(() =>
+    androidInterface.onAddNewTask$.pipe(map(() => showAddTaskBar())),
   );
 
   constructor(
