@@ -8,6 +8,7 @@ import {
   Output,
 } from '@angular/core';
 import { IS_FIREFOX } from '../../util/is-firefox';
+import { devError } from '../../util/dev-error';
 
 // HELPER
 // -----------------------------------
@@ -254,8 +255,13 @@ export class ContentEditableOnClickDirective implements OnInit, OnDestroy {
       if (sel !== null) {
         // only execute for focus via keyboard
         if (sel.focusNode) {
-          document.execCommand('selectAll', false, undefined);
-          sel.collapseToEnd();
+          try {
+            document.execCommand('selectAll', false, undefined);
+            // NOTE: might not work on android
+            sel.collapseToEnd();
+          } catch (e) {
+            devError(e);
+          }
         }
       }
     } catch (e) {

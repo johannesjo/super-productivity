@@ -32,6 +32,7 @@ import { TagModule } from '../tag/tag.module';
 import { TagService } from '../tag/tag.service';
 import { DialogViewTaskRemindersComponent } from './dialog-view-task-reminders/dialog-view-task-reminders.component';
 import { TaskSummaryTablesComponent } from './task-summary-tables/task-summary-tables.component';
+import { IS_ELECTRON } from '../../app.constants';
 
 @NgModule({
   imports: [
@@ -50,7 +51,7 @@ import { TaskSummaryTablesComponent } from './task-summary-tables/task-summary-t
       TaskRelatedModelEffects,
       TaskReminderEffects,
       TaskUiEffects,
-      TaskElectronEffects,
+      ...(IS_ELECTRON ? [TaskElectronEffects] : []),
     ]),
     BetterDrawerModule,
   ],

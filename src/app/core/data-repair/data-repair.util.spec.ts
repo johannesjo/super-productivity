@@ -170,7 +170,6 @@ describe('dataRepair()', () => {
       ids: ['EXISTING'],
       entities: {
         EXISTING: { ...DEFAULT_TASK, id: 'EXISTING', projectId: 'TEST_PROJECT' },
-        nullBacklog: null,
       },
     } as any;
 
@@ -215,10 +214,9 @@ describe('dataRepair()', () => {
       ...mock.note,
       ids: ['EXISTING'],
       entities: {
-        EXISTING: { ...DEFAULT_TASK, id: 'EXISTING', projectId: 'TEST_PROJECT' },
-        nullBacklog: null,
+        EXISTING: { id: 'EXISTING', projectId: 'TEST_PROJECT' },
       },
-      todayOrder: ['NON_EXISTING_TODAY'],
+      todayOrder: [],
     } as any;
 
     const projectState: ProjectState = {
@@ -227,8 +225,8 @@ describe('dataRepair()', () => {
           title: 'TEST_PROJECT',
           id: 'TEST_ID_PROJECT',
           taskIds: [],
-          backlogTaskIds: ['noneExistingBacklog', 'nullBacklog'],
-          noteIds: ['EXISTING', 'goneProject', 'TEST', 'noneExisting'],
+          backlogTaskIds: [],
+          noteIds: ['EXISTING', 'goneProject', 'noneExisting'],
         },
       ] as Partial<Project>[]),
     };

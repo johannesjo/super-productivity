@@ -169,30 +169,34 @@
       </ng-container>
     </div>
 
-    <div
-      class="simple-counter-buttons-outer-wrapper"
+    <ng-container
       *ngIf="(simpleCounterService.enabledSimpleCounters$|async) as enabledSimpleCounters"
     >
-      <button
-        (click)="isShowSimpleCounterBtnsMobile=!isShowSimpleCounterBtnsMobile"
-        class="simple-counter-mobile-trigger show-xs-only"
-        [color]="isCounterRunning(enabledSimpleCounters) ? 'accent':''"
-        mat-mini-fab
-      >
-        <mat-icon *ngIf="!isShowSimpleCounterBtnsMobile">timer</mat-icon>
-        <mat-icon *ngIf="isShowSimpleCounterBtnsMobile">close</mat-icon>
-      </button>
-
       <div
-        class="simple-counter-buttons"
-        [class.isVisibleMobile]="isShowSimpleCounterBtnsMobile"
+        *ngIf="enabledSimpleCounters.length"
+        class="simple-counter-buttons-outer-wrapper"
       >
-        <simple-counter-button
-          *ngFor="let simpleCounter of enabledSimpleCounters; trackBy: trackById"
-          [simpleCounter]="simpleCounter"
-        ></simple-counter-button>
+        <button
+          (click)="isShowSimpleCounterBtnsMobile=!isShowSimpleCounterBtnsMobile"
+          class="simple-counter-mobile-trigger show-xs-only"
+          [color]="isCounterRunning(enabledSimpleCounters) ? 'accent':''"
+          mat-mini-fab
+        >
+          <mat-icon *ngIf="!isShowSimpleCounterBtnsMobile">timer</mat-icon>
+          <mat-icon *ngIf="isShowSimpleCounterBtnsMobile">close</mat-icon>
+        </button>
+
+        <div
+          class="simple-counter-buttons"
+          [class.isVisibleMobile]="isShowSimpleCounterBtnsMobile"
+        >
+          <simple-counter-button
+            *ngFor="let simpleCounter of enabledSimpleCounters; trackBy: trackById"
+            [simpleCounter]="simpleCounter"
+          ></simple-counter-button>
+        </div>
       </div>
-    </div>
+    </ng-container>
 
     <button
       class="toggle-notes-btn"

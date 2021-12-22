@@ -22,9 +22,11 @@ import { selectIdleTime } from '../store/idle.selectors';
 import {
   DialogIdlePassedData,
   DialogIdleReturnData,
-  IdleTrackItem,
+  DialogIdleSplitPassedData,
+  DialogIdleSplitReturnData,
   SimpleCounterIdleBtn,
 } from './dialog-idle.model';
+import { DialogIdleSplitComponent } from './dialog-idle-split-mode/dialog-idle-split.component';
 
 @Component({
   selector: 'dialog-idle',
@@ -94,6 +96,29 @@ export class DialogIdleComponent implements OnInit, OnDestroy {
     this._subs.unsubscribe();
   }
 
+  showSplit(): void {
+    this._matDialog
+      .open<
+        DialogIdleSplitComponent,
+        DialogIdleSplitPassedData,
+        DialogIdleSplitReturnData | undefined
+      >(DialogIdleSplitComponent, {
+        data: {
+          simpleCounterToggleBtns: this.simpleCounterToggleBtns,
+          prevSelectedTask: this.selectedTask,
+          newTaskTitle: this.newTaskTitle,
+        },
+      })
+      .afterClosed()
+      .subscribe((res) => {
+        if (res) {
+          this._matDialogRef.close({
+            trackItems: res.trackItems,
+          });
+        }
+      });
+  }
+
   onTaskChange(taskOrTaskTitle: Task | string): void {
     this.isCreate = typeof taskOrTaskTitle === 'string';
     if (this.isCreate) {
@@ -136,12 +161,6 @@ export class DialogIdleComponent implements OnInit, OnDestroy {
             : { task: this.selectedTask as Task }),
         },
       ],
-    });
-  }
-
-  trackMultiple(trackItems: IdleTrackItem[]): void {
-    this._matDialogRef.close({
-      trackItems,
     });
   }
 }

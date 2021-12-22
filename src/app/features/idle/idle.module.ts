@@ -8,7 +8,7 @@ import { StoreModule } from '@ngrx/store';
 import { IDLE_FEATURE_KEY, idleReducer } from './store/idle.reducer';
 import { EffectsModule } from '@ngrx/effects';
 import { IdleEffects } from './store/idle.effects';
-import { IdleSplitModeComponent } from './dialog-idle/idle-split-mode/idle-split-mode.component';
+import { DialogIdleSplitComponent } from './dialog-idle/dialog-idle-split-mode/dialog-idle-split.component';
 
 @NgModule({
   imports: [
@@ -19,6 +19,6 @@ import { IdleSplitModeComponent } from './dialog-idle/idle-split-mode/idle-split
     StoreModule.forFeature(IDLE_FEATURE_KEY, idleReducer),
     EffectsModule.forFeature([IdleEffects]),
   ],
-  declarations: [DialogIdleComponent, IdleSplitModeComponent],
+  declarations: [DialogIdleComponent, DialogIdleSplitComponent],
 })
 export class IdleModule {}

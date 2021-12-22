@@ -36,7 +36,7 @@ import { BannerId } from '../../../core/banner/banner.model';
 import { T } from '../../../t.const';
 import { isOnline } from '../../../util/is-online';
 import { IS_ANDROID_WEB_VIEW } from '../../../util/is-android-web-view';
-import { androidInterface } from '../../../core/android/android-interface';
+import { androidInterface } from '../../../features/android/android-interface';
 import { getGoogleSession, GoogleSession, updateGoogleSession } from './google-session';
 import { GoogleDriveFileMeta } from './google-api.model';
 import axios, { AxiosResponse } from 'axios';

@@ -6,7 +6,7 @@ import { IS_MOBILE } from '../../util/is-mobile';
 import { TranslateService } from '@ngx-translate/core';
 import { UiHelperService } from '../../features/ui-helper/ui-helper.service';
 import { IS_ANDROID_WEB_VIEW } from '../../util/is-android-web-view';
-import { androidInterface } from '../android/android-interface';
+import { androidInterface } from '../../features/android/android-interface';
 
 @Injectable({
   providedIn: 'root',

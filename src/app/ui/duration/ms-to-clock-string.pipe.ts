@@ -18,7 +18,7 @@ export const msToClockString = (
     hours +
     ':' +
     ('00' + +md.minutes()).slice(-2) +
-    (showSeconds ? ('00' + +md.seconds()).slice(-2) : '');
+    (showSeconds ? ':' + ('00' + +md.seconds()).slice(-2) : '');
 
   if (!isHideEmptyPlaceholder && parsed.trim() === '0:00') {
     return '-';

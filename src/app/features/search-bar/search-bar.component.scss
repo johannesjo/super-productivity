@@ -43,6 +43,13 @@ $short-syntax-bar-height: 28px;
     color: #eeeeee;
   }
 
+  .search-icon {
+    position: absolute;
+    left: 14px;
+    top: 12px;
+    opacity: 0.4;
+  }
+
   .input-wrapper {
     position: relative;
   }

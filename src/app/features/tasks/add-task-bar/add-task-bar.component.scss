@@ -62,8 +62,8 @@ $short-syntax-bar-height: 28px;
     outline: 0;
     border-color: $c-primary;
 
-    padding-right: 48px !important;
-    padding-left: 48px !important;
+    padding-right: 96px !important;
+    padding-left: $s * 2;
     line-height: 42px;
 
     color: #000000;
@@ -102,51 +102,21 @@ $short-syntax-bar-height: 28px;
   }
 }
 
+.button-controls {
+  position: absolute;
+  right: $s * 0.5;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 2;
+  margin-top: -0.5 * $short-syntax-bar-height;
+}
+
+.switch-add-to-bot-btn,
 .switch-add-to-btn {
-  position: absolute;
-  left: $s;
-  top: 50%;
-  transform: translateY(-50%);
-  z-index: 2;
   opacity: 0.4;
-  margin-top: -0.5 * $short-syntax-bar-height;
 
   &:hover {
     opacity: 1;
-  }
-}
-
-.switch-add-to-bot-btn {
-  position: absolute;
-  right: $s * 0.5;
-  top: 50%;
-  transform: translateY(-50%);
-  z-index: 2;
-  opacity: 0.4;
-  margin-top: -0.5 * $short-syntax-bar-height;
-
-  &:hover {
-    opacity: 1;
-  }
-
-  @include mq(xs) {
-  }
-}
-
-.close-btn {
-  position: absolute;
-  right: $s * 0.5;
-  top: 50%;
-  transform: translateY(-50%);
-  z-index: 2;
-  opacity: 0.4;
-  margin-top: -0.5 * $short-syntax-bar-height;
-
-  &:hover {
-    opacity: 1;
-  }
-
-  @include mq(xs) {
   }
 }
 

@@ -1,4 +1,15 @@
 {
+  "ANDROID": {
+    "NOTIFICATIONS": {
+      "SYNC_CONFLICT_TITLE": "A sync conflict occurred",
+      "SYNC_CONFLICT_MSG": "Please check and decide what to do."
+    },
+    "PERMANENT_NOTIFICATION_MSGS": {
+      "INITIAL": "App running in background to allow for syncing if enabled",
+      "NO_ACTIVE_TASKS": "No active tasks",
+      "SYNCING": "Syncing"
+    }
+  },
   "APP": {
     "A_BROWSER_WARNING": "We are sorry, but the app is not optimized to run in this browser. Please consider using a chromium based browser or downloading the electron version of the app",
     "B_INSTALL": {
@@ -1251,6 +1262,7 @@
     "ROUND_UP_30M": "Round UP all tasks to 30 minutes",
     "ROUND_UP_5M": "Round UP all tasks to 5 minutes",
     "SAVE_AND_GO_HOME": "Save and go home",
+    "SAVE_AND_GO_HOME_TOOLTIP": "Move all done tasks to the archive (worklog) and optionally sync all data and close the app.",
     "START_END": "Start – End",
     "SUMMARY_FOR": "Daily Summary for {{dayStr}}",
     "TASKS_COMPLETED": "Tasks Completed",
@@ -1343,6 +1355,9 @@
     "COMPLETED_TASKS": "Completed Tasks",
     "ESTIMATE_REMAINING": "Estimate remaining:",
     "FINISH_DAY": "Finish Day",
+    "FINISH_DAY_TOOLTIP": "Evaluate your day, move all done tasks to the archive (optionally) and/or plan your next day.",
+    "FINISH_DAY_FOR_PROJECT": "Finish Day for this Project",
+    "FINISH_DAY_FOR_TAG": "Finish Day for this Tag",
     "HELP_PROCRASTINATION": "Help I'm procrastinating!",
     "NO_COMPLETED_TASKS": "There are currently no completed tasks",
     "NO_PLANNED_TASKS": "No planned tasks",

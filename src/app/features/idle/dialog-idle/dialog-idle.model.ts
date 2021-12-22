@@ -19,6 +19,16 @@ export interface DialogIdlePassedData {
   lastCurrentTaskId: string | null;
 }
 
+export interface DialogIdleSplitPassedData {
+  simpleCounterToggleBtns: SimpleCounterIdleBtn[];
+  prevSelectedTask: Task | null;
+  newTaskTitle?: string;
+}
+
+export interface DialogIdleSplitReturnData {
+  trackItems: IdleTrackItem[];
+}
+
 export interface IdleTrackItem {
   type: 'BREAK' | 'TASK' | 'TASK_AND_BREAK';
   time: number | 'IDLE_TIME';

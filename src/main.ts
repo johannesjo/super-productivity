@@ -5,7 +5,7 @@ import { AppModule } from './app/app.module';
 import { environment } from './environments/environment';
 import { IS_ELECTRON } from './app/app.constants';
 import { IS_ANDROID_WEB_VIEW } from './app/util/is-android-web-view';
-import { androidInterface } from './app/core/android/android-interface';
+import { androidInterface } from './app/features/android/android-interface';
 
 if (environment.production || environment.stage) {
   enableProdMode();

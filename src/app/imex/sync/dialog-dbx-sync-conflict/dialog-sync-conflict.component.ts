@@ -1,7 +1,6 @@
 import { ChangeDetectionStrategy, Component, Inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { T } from 'src/app/t.const';
-import * as moment from 'moment';
 import { DialogConflictResolutionResult } from '../sync.model';
 
 @Component({
@@ -13,13 +12,13 @@ import { DialogConflictResolutionResult } from '../sync.model';
 export class DialogSyncConflictComponent {
   T: typeof T = T;
 
-  remoteDate: string = this._formatDate(this.data.remote);
-  localDate: string = this._formatDate(this.data.local);
-  lastDate: string = this._formatDate(this.data.lastSync);
+  remoteDate: number = this.data.remote;
+  localDate: number = this.data.local;
+  lastDate: number = this.data.lastSync;
 
-  remoteTime: string = this._formatTime(this.data.remote);
-  localTime: string = this._formatTime(this.data.local);
-  lastTime: string = this._formatTime(this.data.lastSync);
+  remoteTime: number = this.data.remote;
+  localTime: number = this.data.local;
+  lastTime: number = this.data.lastSync;
 
   isHighlightRemote: boolean = this.data.remote >= this.data.local;
   isHighlightLocal: boolean = this.data.local >= this.data.remote;
@@ -38,13 +37,5 @@ export class DialogSyncConflictComponent {
 
   close(res?: DialogConflictResolutionResult): void {
     this._matDialogRef.close(res);
-  }
-
-  private _formatDate(date: Date | string | number): string {
-    return moment(date).format('DD-MM-YYYY');
-  }
-
-  private _formatTime(date: Date | string | number): string {
-    return moment(date).format('hh:mm:ss');
   }
 }

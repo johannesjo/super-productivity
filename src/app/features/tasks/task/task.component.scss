@@ -723,6 +723,10 @@ progress-bar {
       //opacity: 0.3;
       //}
     }
+
+    :host.isCurrent & {
+      opacity: 0;
+    }
   }
 
   &:active {

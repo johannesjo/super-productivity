@@ -162,11 +162,15 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
   }
 
   ngAfterViewInit(): void {
-    this._autofocusTimeout = window.setTimeout(() => {
-      if (!this.isDisableAutoFocus) {
+    // for android we need to make sure that a focus event is called to open the keyboard
+    if (!this.isDisableAutoFocus) {
+      document.body.focus();
+      (this.inputEl as ElementRef).nativeElement.focus();
+      this._autofocusTimeout = window.setTimeout(() => {
+        document.body.focus();
         (this.inputEl as ElementRef).nativeElement.focus();
-      }
-    });
+      }, 1000);
+    }
 
     this._attachKeyDownHandlerTimeout = window.setTimeout(() => {
       (this.inputEl as ElementRef).nativeElement.addEventListener(

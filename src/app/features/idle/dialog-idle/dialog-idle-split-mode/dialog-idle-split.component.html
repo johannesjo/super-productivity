@@ -3,7 +3,7 @@
   <div class="time">{{idleTime$|async|msToString:true}}</div>
 
   <div class="track-to-items">
-    <div class="track-to-item" *ngFor="let item of trackToItems">
+    <div class="track-to-item" *ngFor="let item of trackItems">
       <div class="first-block">
         <mat-button-toggle-group [(ngModel)]="item.type">
           <mat-button-toggle value="BREAK">
@@ -55,7 +55,7 @@
     </div>
 
     <div style="text-align: center; margin-top: 8px">
-      <button mat-button (click)="addTrackingItem()">
+      <button mat-button (click)="addTrackItem()">
         <mat-icon>add</mat-icon>
         {{T.F.TIME_TRACKING.D_IDLE.ADD_ENTRY|translate}}
       </button>
@@ -64,11 +64,11 @@
 </div>
 
 <div align="end" mat-dialog-actions>
-  <button (click)="cancelI()" color="primary" mat-button type="button">
+  <button (click)="cancel()" color="primary" mat-button type="button">
     {{T.G.CANCEL|translate}}
   </button>
 
-  <button (click)="saveI()" color="primary" mat-stroked-button type="submit">
+  <button (click)="save()" color="primary" mat-stroked-button type="submit">
     <mat-icon>save</mat-icon>
     {{T.G.SAVE|translate}}
   </button>

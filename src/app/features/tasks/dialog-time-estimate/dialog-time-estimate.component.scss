@@ -1,7 +1,7 @@
 @import '../../../../variables';
 
 .dialog-help-wrapper {
-  :host-context([dir=rtl]) & {
+  :host-context([dir='rtl']) & {
     direction: rtl;
   }
 }
@@ -27,6 +27,7 @@
 
 .other-day {
   display: flex;
+  align-items: center;
 }
 
 .side-info {

@@ -29,7 +29,7 @@ import { LanguageService } from './core/language/language.service';
 import { ElectronService } from './core/electron/electron.service';
 import { WorkContextService } from './features/work-context/work-context.service';
 import { ImexMetaService } from './imex/imex-meta/imex-meta.service';
-import { AndroidService } from './core/android/android.service';
+import { AndroidService } from './features/android/android.service';
 import { IS_ANDROID_WEB_VIEW } from './util/is-android-web-view';
 import { isOnline$ } from './util/is-online';
 import { SyncTriggerService } from './imex/sync/sync-trigger.service';

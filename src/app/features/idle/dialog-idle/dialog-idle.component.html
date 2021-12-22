@@ -1,12 +1,4 @@
-<idle-split-mode
-  *ngIf="isSplitMode"
-  [simpleCounterToggleBtns]="simpleCounterToggleBtns"
-  [prevSelectedTask]="selectedTask"
-  (cancel)="isSplitMode=false"
-  (save)="trackMultiple($event)"
-></idle-split-mode>
-
-<form (submit)="track()" *ngIf="!isSplitMode">
+<form (submit)="track()">
   <div class="dialog-content" mat-dialog-content>
     <p>{{T.F.TIME_TRACKING.D_IDLE.IDLE_FOR|translate}}</p>
     <div class="time">{{idleTime$|async|msToString:true}}</div>
@@ -15,7 +7,7 @@
       <button
         mat-icon-button
         [matTooltip]="T.F.TIME_TRACKING.D_IDLE.SPLIT_TIME|translate"
-        (click)="isSplitMode=true"
+        (click)="showSplit()"
         type="button"
       >
         <mat-icon>call_split</mat-icon>

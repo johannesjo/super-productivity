@@ -5,12 +5,7 @@
       "name": "app",
       "installMode": "prefetch",
       "resources": {
-        "files": [
-          "/favicon.ico",
-          "/index.html",
-          "/*.css",
-          "/*.js"
-        ]
+        "files": ["/favicon.ico", "/index.html", "/*.css", "/*.js"]
       }
     },
     {
@@ -18,8 +13,20 @@
       "installMode": "lazy",
       "updateMode": "prefetch",
       "resources": {
+        "files": ["/assets/**"]
+      }
+    },
+    {
+      "name": "assetsAlwaysNeeded",
+      "installMode": "prefetch",
+      "updateMode": "prefetch",
+      "resources": {
         "files": [
-          "/assets/**"
+          "/assets/icons/*.svg",
+          "/assets/i18n/en.json",
+          "/assets/unicorn.png",
+          "/assets/fonts/MaterialIcons-Regular.ttf",
+          "/*.(otf|ttf|woff|woff2)"
         ]
       }
     },
@@ -28,10 +35,7 @@
       "installMode": "lazy",
       "updateMode": "prefetch",
       "resources": {
-        "urls": [
-          "https://fonts.googleapis.com/**",
-          "https://fonts.gstatic.com/**"
-        ]
+        "urls": ["**/*.(png|jpg|jpeg|gif)"]
       }
     }
   ],

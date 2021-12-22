@@ -146,7 +146,7 @@
       </div>
 
       <div class="controls">
-        <div *ngIf="isFirstLineHover" class="hover-controls">
+        <div *ngIf="isFirstLineHover && !IS_TOUCH_ONLY" class="hover-controls">
           <button
             (click)="startTask()"
             *ngIf="!task.isDone && !isCurrent && !task.subTasks?.length"
@@ -210,7 +210,9 @@
             color=""
             mat-icon-button
           >
-            <mat-icon *ngIf="!task.issueWasUpdated">chat_bubble_outline</mat-icon>
+            <mat-icon *ngIf="!task.issueWasUpdated">&#xe949;</mat-icon>
+            <!--            <mat-icon *ngIf="!task.issueWasUpdated">toc</mat-icon>-->
+            <!--            <mat-icon *ngIf="!task.issueWasUpdated">chevron_right</mat-icon>-->
             <mat-icon *ngIf="task.issueWasUpdated" color="accent">update </mat-icon>
           </button>
         </div>
