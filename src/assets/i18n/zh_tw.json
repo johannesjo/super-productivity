@@ -47,7 +47,7 @@
   "F": {
     "ATTACHMENT": {
       "DIALOG_EDIT": {
-        "ADD_ATTACHMENT": "添加附件",
+        "ADD_ATTACHMENT": "新增附件",
         "EDIT_ATTACHMENT": "編輯附件",
         "LABELS": {
           "FILE": "檔案路徑",
@@ -64,13 +64,13 @@
     },
     "BOOKMARK": {
       "BAR": {
-        "ADD": "添加書籤",
-        "DROP": "點擊此處添加書籤",
+        "ADD": "新增書籤",
+        "DROP": "點擊此處新增書籤",
         "EDIT": "編輯書籤",
         "NO_BOOKMARKS": "您沒有專案書籤。通過拖放或點擊「加號」按鈕以新增。"
       },
       "DIALOG_EDIT": {
-        "ADD_BOOKMARK": "添加書籤",
+        "ADD_BOOKMARK": "新增書籤",
         "EDIT_BOOKMARK": "編輯書籤",
         "LABELS": {
           "COMMAND": "命令",
@@ -146,7 +146,7 @@
       },
       "FORM": {
         "FILTER_USER": "使用者名稱（請輸入您的使用者名稱）",
-        "IS_AUTO_ADD_TO_BACKLOG": "自動將 GitHub 未解決的 Issue 添加到待辦事項",
+        "IS_AUTO_ADD_TO_BACKLOG": "自動將 GitHub 未解決的 Issue 新增到待辦事項",
         "IS_AUTO_POLL": "自動拉取匯入的git Issue",
         "IS_SEARCH_ISSUES_FROM_GITHUB": "在新增任務時，將 git 中的 Issue 顯示為建議",
         "REPO": "GitHub：\"username / repositoryName\"",
@@ -154,7 +154,7 @@
         "TOKEN_DESCRIPTION": "私儲存庫存取所需"
       },
       "FORM_SECTION": {
-        "HELP": "<p>您可以在此處配置 Super Productivity，以在日常計劃視圖的任務建立面板中列出特儲存庫的打開 GitHub Issue。它們將被列為建議，並將提供該 Issue 的連結以及有關該 Issue 的更多資訊。</p> <p>此外，您還可以自動將所有未解決的 Issue 添加並同步到任務待辦事項中。</p><p>您可以提供存取Token以此獲得使用限制並進行存取， <a href='https://docs.github.com/en/free-pro-team@latest/developers/apps/scopes-for-oauth-apps'>更多資訊，請參見此處</a>。",
+        "HELP": "<p>您可以在此處配置 Super Productivity，以在日常計劃視圖的任務建立面板中列出特儲存庫的打開 GitHub Issue。它們將被列為建議，並將提供該 Issue 的連結以及有關該 Issue 的更多資訊。</p> <p>此外，您還可以自動將所有未解決的 Issue 新增並同步到任務待辦事項中。</p><p>您可以提供存取Token以此獲得使用限制並進行存取， <a href='https://docs.github.com/en/free-pro-team@latest/developers/apps/scopes-for-oauth-apps'>更多資訊，請參見此處</a>。",
         "TITLE": "GitHub"
       },
       "ISSUE_CONTENT": {
@@ -178,7 +178,7 @@
       "FORM": {
         "FILTER_USER": "使用者名稱（例如，自行過濾掉更改）",
         "GITLAB_BASE_URL": "Custom GitLab base URL",
-        "IS_AUTO_ADD_TO_BACKLOG": "自動將未解決的 Issue 從 GitLab 添加到待辦事項",
+        "IS_AUTO_ADD_TO_BACKLOG": "自動將未解決的 Issue 從 GitLab 新增到待辦事項",
         "IS_AUTO_POLL": "自動拉取匯入的 git 的 Issue 以進行更改",
         "IS_SEARCH_ISSUES_FROM_GITLAB": "在新增任務時，將git中的 Issue 顯示為建議",
         "PROJECT": "GitLab 完整路徑或使用者名稱/repo",
@@ -193,7 +193,7 @@
         "SOURCE_GROUP": "Group"
       },
       "FORM_SECTION": {
-        "HELP": "<p>在這裡，您可以配置 Super Productivity 在日常計劃視圖的任務建立面板中列出特定專案的打開的 GitLab Issue（線上版本或自託管實例）。它們將作為建議列出，並提供指向該 Issue 的連結以及有關此 Issue 的更多資訊。</p> <p>此外，您可以自動將所有未解決的 Issue 添加並同步到待辦事項。</p>",
+        "HELP": "<p>在這裡，您可以配置 Super Productivity 在日常計劃視圖的任務建立面板中列出特定專案的打開的 GitLab Issue（線上版本或自託管實例）。它們將作為建議列出，並提供指向該 Issue 的連結以及有關此 Issue 的更多資訊。</p> <p>此外，您可以自動將所有未解決的 Issue 新增並同步到待辦事項。</p>",
         "TITLE": "GitLab"
       },
       "ISSUE_CONTENT": {
@@ -303,15 +303,15 @@
         "TITLE": "Jira：提交工作日誌 Worklog"
       },
       "FORM": {
-        "IS_AUTO_ADD_TO_BACKLOG": "自動將未解決的 Issue 從 GitHub 添加到待辦事項",
+        "IS_AUTO_ADD_TO_BACKLOG": "自動將未解決的 Issue 從 GitHub 新增到待辦事項",
         "IS_AUTO_POLL": "自動拉取匯入的 git Issue 進行的更改",
         "IS_SEARCH_ISSUES_FROM_GITHUB": "在新增任務時，將 git 中的 Issue 顯示為建議",
         "REPO": "您要追蹤的 git 儲存庫的\"username / repositoryName\""
       },
       "FORM_ADV": {
-        "AUTO_ADD_BACKLOG_JQL_QUERY": "JQL用於自動向待辦事項添加任務",
+        "AUTO_ADD_BACKLOG_JQL_QUERY": "JQL用於自動向待辦事項新增任務",
         "IS_ADD_WORKLOG_ON_SUB_TASK_DONE": "子任務完成後，打開對話框將工作日誌提交給Jira",
-        "IS_AUTO_ADD_TO_BACKLOG": "自動向Jira待辦事項添加 Issue ",
+        "IS_AUTO_ADD_TO_BACKLOG": "自動向Jira待辦事項新增 Issue ",
         "IS_AUTO_POLL_TICKETS": "自動檢查匯入的 Issue 以進行更改並通知",
         "IS_CHECK_TO_RE_ASSIGN_TICKET_ON_TASK_START": "檢查目前處理的 Issue 是否已分配給目前用戶",
         "IS_WORKLOG_ENABLED": "打開對話框，在任務完成時將工作日誌提交給 Jira",
@@ -338,10 +338,10 @@
           "H2": "工作日誌設置",
           "H3": "預設轉換",
           "P1_1": "如果由於某種原因無法產生登入名，請提供登入名（可在您的個人資料頁面上找到）和<a target=\"_blank\" href=\"https://confluence.atlassian.com/cloud/api-tokens-938839638.html\" target=\"_blank\"> API權杖</a>或密碼。請注意，較新版本的jira有時只能使用權杖。",
-          "P1_2": "您還需要指定一個JQL查詢，該查詢用於從Jira添加任務的建議。如果您需要幫助，請查看此連結 <a target=\"_blank\" href=\"https://confluence.atlassian.com/jirasoftwarecloud/advanced-searching-764478330.html\" target=\"_blank\">https://confluence.atlassian.com/jirasoftwarecloud/advanced-searching-764478330.html</a>。",
-          "P1_3": "如果要自動配置（例如，每次存取計劃視圖時），還可以配置將自定義JQL查詢指定的所有新任務添加到待辦事項。",
+          "P1_2": "您還需要指定一個JQL查詢，該查詢用於從Jira新增任務的建議。如果您需要幫助，請查看此連結 <a target=\"_blank\" href=\"https://confluence.atlassian.com/jirasoftwarecloud/advanced-searching-764478330.html\" target=\"_blank\">https://confluence.atlassian.com/jirasoftwarecloud/advanced-searching-764478330.html</a>。",
+          "P1_3": "如果要自動配置（例如，每次存取計劃視圖時），還可以配置將自定義JQL查詢指定的所有新任務新增到待辦事項。",
           "P1_4": "另一個選項是\"檢查目前票證是否分配給目前用戶\"。如果啟用並且您正在啟動，那麼如果您目前已在Jira上分配了該票證，則會進行檢查，如果沒有出現可以選擇將票證分配給您自己的對話框。",
-          "P2_1": "有幾個選項可以確定您何時以及如何提交工作日誌。啟用<em>'打開工作日誌對話框，在任務完成時向Jira添加工作日誌'</em>打開一個對話框，每次將Jira任務標記為已完成時添加工作日誌。所以請記住，工作日誌將添加到目前為止所追蹤的所有內容之上。因此，如果您將任務標記為第二次完成，則可能不希望再次為該任務提交完整的工作時間。",
+          "P2_1": "有幾個選項可以確定您何時以及如何提交工作日誌。啟用<em>'打開工作日誌對話框，在任務完成時向Jira新增工作日誌'</em>打開一個對話框，每次將Jira任務標記為已完成時新增工作日誌。所以請記住，工作日誌將新增到目前為止所追蹤的所有內容之上。因此，如果您將任務標記為第二次完成，則可能不希望再次為該任務提交完整的工作時間。",
           "P2_2": "<em>當子任務完成時打開工作日誌對話框而不是子任務本身的任務'</em>每次將Jira Issue 的子任務標記為已完成時打開工作日誌對話框。因為您已經通過子任務追蹤了時間，所以一旦將Jira任務標記為已完成，就不會打開任何對話框。",
           "P2_3": "<em>'在沒有對話框的情況下自動向工作日誌發送更新'</em>完成了它所說的內容。由於將任務標記為已完成多次會導致整個工作時間被追蹤兩次，因此不建議這樣做。",
           "P3_1": "在這裡，您可以重新配置預設轉換。 Jira支持廣泛的轉換配置，通常會在Jira Agile板上的不同列中生效，我們無法對轉換任務的位置和時間做出假設，您需要手動設置它。"
@@ -367,7 +367,7 @@
         "WRITE_A_COMMENT": "評論"
       },
       "S": {
-        "ADDED_WORKLOG_FOR": "Jira：為 {{issueKey}} 添加了工作日誌",
+        "ADDED_WORKLOG_FOR": "Jira：為 {{issueKey}} 新增了工作日誌",
         "EXTENSION_NOT_LOADED": "Super Productivity擴充功能未載入。重新載入頁面可能會有所幫助",
         "INSUFFICIENT_SETTINGS": "為Jira提供的設置不足",
         "INVALID_RESPONSE": "Jira: Response contained invalid data",
@@ -405,7 +405,7 @@
         "GLOBAL_METRICS": "Global Metrics",
         "IMPROVEMENT_SELECTION_COUNT": "選擇積極因數的次數",
         "MOOD_PRODUCTIVITY_OVER_TIME": "情緒和效率的時間變化",
-        "NO_ADDITIONAL_DATA_YET": "尚未收集其他資料，完成每日任務後通過添加\"評估\"來執行此操作。",
+        "NO_ADDITIONAL_DATA_YET": "尚未收集其他資料，完成每日任務後通過新增\"評估\"來執行此操作。",
         "OBSTRUCTION_SELECTION_COUNT": "選擇消極因數的次數",
         "SIMPLE_CLICK_COUNTERS_OVER_TIME": "Click Counters over time",
         "SIMPLE_COUNTERS": "Simple Counters",
@@ -415,7 +415,7 @@
         "TIME_SPENT": "花費時間"
       },
       "EVAL_FORM": {
-        "ADD_NOTE_FOR_TOMORROW": "為明天添加建議",
+        "ADD_NOTE_FOR_TOMORROW": "為明天新增建議",
         "DISABLE_REPEAT_EVERY_DAY": "停用每日重複",
         "ENABLE_REPEAT_EVERY_DAY": "每天重複",
         "HELP_H1": "我為什麼要在乎？",
@@ -473,7 +473,7 @@
         "IS_SHOW_TIME_TRACKING_DIALOG": "Show time tracking dialog to report to OpenProject",
         "IS_SHOW_TIME_TRACKING_DIALOG_DESCRIPTION": "Requires time tracking module to be enabled for OpenProject project",
         "IS_SHOW_TIME_TRACKING_DIALOG_FOR_EACH_SUB_TASK": "Show time tracking dialog when sub tasks are completed",
-        "PROJECT_ID": "Project ID",
+        "PROJECT_ID": "專案 ID",
         "PROJECT_ID_DESCRIPTION": "Can be found as part of the url, when viewing the project in the Browser.",
         "TOKEN": "存取權杖"
       },
@@ -619,7 +619,7 @@
         "TITLE": "編輯簡單計數器"
       },
       "FORM": {
-        "ADD_NEW": "添加簡單的計數器",
+        "ADD_NEW": "新增簡單的計數器",
         "HELP": "您可以在此處配置簡單的按鈕，這些按鈕將顯示在右上方。通過單擊它們，它們可以是計時器，也可以是簡單的計數器。",
         "L_AUTO_COUNT_UP": "自動觸發計數",
         "L_AUTO_SWITCH_OFF": "自動觸發關閉",
@@ -706,7 +706,7 @@
         "CONFIRM_MSG": "您是否真的要刪除標籤 \"{{tagName}}\"？它將從所有任務中刪除。這不能被撤消。"
       },
       "D_EDIT": {
-        "ADD": "為\"{{title}}\"添加標籤",
+        "ADD": "為\"{{title}}\"新增標籤",
         "EDIT": "編輯\"{{title}}\"的標籤",
         "LABEL": "標籤"
       },
@@ -722,8 +722,8 @@
     },
     "TASK": {
       "ADDITIONAL_INFO": {
-        "ADD_ATTACHMENT": "添加附件",
-        "ADD_SUB_TASK": "添加子任務",
+        "ADD_ATTACHMENT": "新增附件",
+        "ADD_SUB_TASK": "新增子任務",
         "ATTACHMENTS": "附件 {{nr}}",
         "FROM_PARENT": "（來自父任務）",
         "LOCAL_ATTACHMENTS": "本地附件",
@@ -736,8 +736,8 @@
         "TIME": "時間"
       },
       "ADD_TASK_BAR": {
-        "ADD_EXISTING_TASK": "添加現有任務\"{{taskTitle}}\"",
-        "ADD_ISSUE_TASK": "從 {{issueType}}添加問題#{{issueNr}} ",
+        "ADD_EXISTING_TASK": "新增現有任務\"{{taskTitle}}\"",
+        "ADD_ISSUE_TASK": "從 {{issueType}}新增問題#{{issueNr}} ",
         "ADD_TASK_TO_BOTTOM_OF_BACKLOG": "Add task to bottom of backlog",
         "ADD_TASK_TO_BOTTOM_OF_TODAY": "Add task to bottom of list",
         "ADD_TASK_TO_TOP_OF_BACKLOG": "Add task to top of backlog",
@@ -751,9 +751,9 @@
         "ESTIMATE_EXCEEDED": "已超過\"{{title}}\"的時間估計"
       },
       "CMP": {
-        "ADD_SUB_TASK": "添加子任務",
-        "ADD_TO_MY_DAY": "添加到我的一天",
-        "ADD_TO_PROJECT": "添加到專案",
+        "ADD_SUB_TASK": "新增子任務",
+        "ADD_TO_MY_DAY": "新增到我的一天",
+        "ADD_TO_PROJECT": "新增到專案",
         "CONVERT_TO_PARENT_TASK": "轉換為父任務",
         "DELETE": "刪除任務",
         "DROP_ATTACHMENT": "放在此處以附加到\"{{title}}\"",
@@ -796,8 +796,8 @@
         "UNSCHEDULE": "取消計劃"
       },
       "D_REMINDER_VIEW": {
-        "ADD_ALL_TO_TODAY": "全部添加到今天",
-        "ADD_TO_TODAY": "添加到今天",
+        "ADD_ALL_TO_TODAY": "全部新增到今天",
+        "ADD_TO_TODAY": "新增到今天",
         "DISMISS": "取消提醒",
         "DISMISS_ALL": "關閉所有",
         "DONE": "完成",
@@ -814,7 +814,7 @@
         "SWITCH_CONTEXT_START": "切換內容上下文並開始"
       },
       "D_TIME": {
-        "ADD_FOR_OTHER_DAY": "添加已花費的時間",
+        "ADD_FOR_OTHER_DAY": "新增已花費的時間",
         "DELETE_FOR": "刪除當天的條目",
         "ESTIMATE": "估計",
         "TIME_SPENT": "已花費的時間",
@@ -826,7 +826,7 @@
         "DATE": "新條目的日期",
         "HELP": "範例：<br>30m => 30分鐘<br><br> 2h => 2小時<br><br> 2h 30m => 2小時30分鐘",
         "TINE_SPENT": "所花費的時間",
-        "TITLE": "添加今天任務"
+        "TITLE": "新增今天任務"
       },
       "N": {
         "ESTIMATE_EXCEEDED": "超出預估時間！",
@@ -835,7 +835,7 @@
       "S": {
         "DELETED": "已刪除任務\"{{title}}\"",
         "FOUND_MOVE_FROM_BACKLOG": "將任務<strong>{{title}}</strong>移至今日任務列表",
-        "FOUND_MOVE_FROM_OTHER_LIST": "已將任務<strong>{{title}}</strong>從<strong>{{contextTitle}}</strong>添加到目前列表",
+        "FOUND_MOVE_FROM_OTHER_LIST": "已將任務<strong>{{title}}</strong>從<strong>{{contextTitle}}</strong>新增到目前列表",
         "FOUND_RESTORE_FROM_ARCHIVE": "已恢復的任務<strong>{{title}}</strong>與存檔 Issue 相關",
         "LAST_TAG_DELETION_WARNING": "您正在嘗試刪除非專案任務的最後一個標籤。這是不允許的！",
         "REMINDER_ADDED": "已計劃任務\"{{title}}\"",
@@ -858,13 +858,13 @@
         "OK": "完全刪除"
       },
       "D_EDIT": {
-        "ADD": "添加重複任務配置",
+        "ADD": "新增重複任務配置",
         "EDIT": "編輯重複任務配置",
         "HELP1": "重複任務適用於日常瑣事，例如：\"每日會議\"，\"代碼審查\"，\"檢查電子郵件\"或可能一次又一次發生的類似任務。",
-        "HELP2": "配置完成後，一旦打開專案，將在選擇的每一天重新建立重複任務，併在一天結束時自動標記為已完成。它們將作為不同的實例處理。所以你可以自由添加子任務等。",
+        "HELP2": "配置完成後，一旦打開專案，將在選擇的每一天重新建立重複任務，併在一天結束時自動標記為已完成。它們將作為不同的實例處理。所以你可以自由新增子任務等。",
         "HELP3": "從 Jira 或 Git Issue 匯入的任務不能重複。",
         "HELP4": "A note about the order field: Referring to the creation order repeatable tasks. Only in effect for repeatable tasks that are created at the same time. A lower value means a task will be higher up the list, a higher number that it will be further down. A value greater than 0 means items are created at the bottom of normal tasks.",
-        "TAG_LABEL": "要添加的標籤"
+        "TAG_LABEL": "要新增的標籤"
       },
       "F": {
         "DEFAULT_ESTIMATE": "預設預估用時",
@@ -907,7 +907,7 @@
         "SNOOZE": "暫停 {{time}}"
       },
       "B_TTR": {
-        "ADD_TO_TASK": "添加到任務",
+        "ADD_TO_TASK": "新增到任務",
         "MSG": "您尚未追蹤 {{time}}的時間"
       },
       "D_IDLE": {
@@ -928,7 +928,7 @@
       },
       "D_TRACKING_REMINDER": {
         "CREATE_AND_TRACK": "<em>建立</em>並追蹤到",
-        "IDLE_FOR": "你一直閑著：",
+        "IDLE_FOR": "你一直閒著：",
         "TASK": "任務",
         "TRACK_TO": "追蹤到：",
         "UNTRACKED_TIME": "未追蹤時間："
@@ -949,7 +949,7 @@
       "D_EXPORT_TITLE": "匯出 {{start}} - {{end}}工作日誌",
       "D_EXPORT_TITLE_SINGLE": "匯出 {{day}}",
       "EXPORT": {
-        "ADD_COL": "添加列",
+        "ADD_COL": "新增列",
         "COPY_TO_CLIPBOARD": "複製到剪貼簿",
         "DONT_ROUND": "停用取整",
         "EDIT_COL": "編輯列",
@@ -1037,12 +1037,12 @@
       "TITLE": "評估與指標"
     },
     "IDLE": {
-      "HELP": "啟用空閑時間處理後，將在指定的時間後打開一個對話框，以檢查您在空閑時是否以及在哪個任務上追蹤您的時間。",
-      "IS_ENABLE_IDLE_TIME_TRACKING": "啟用空閑時間處理",
-      "IS_ONLY_OPEN_IDLE_WHEN_CURRENT_TASK": "僅在選擇目前任務時觸發空閑時間對話框",
-      "IS_UN_TRACKED_IDLE_RESETS_BREAK_TIMER": "未追蹤的空閑時間重置需要休息計時器",
-      "MIN_IDLE_TIME": "觸發空閑的時間閾值",
-      "TITLE": "閑置處理"
+      "HELP": "啟用空閒時間處理後，將在指定的時間後打開一個對話框，以檢查您在空閒時是否以及在哪個任務上追蹤您的時間。",
+      "IS_ENABLE_IDLE_TIME_TRACKING": "啟用空閒時間處理",
+      "IS_ONLY_OPEN_IDLE_WHEN_CURRENT_TASK": "僅在選擇目前任務時觸發空閒時間對話框",
+      "IS_UN_TRACKED_IDLE_RESETS_BREAK_TIMER": "未追蹤的空閒時間重置需要休息計時器",
+      "MIN_IDLE_TIME": "觸發空閒的時間閾值",
+      "TITLE": "閒置處理"
     },
     "IMEX": {
       "HELP": "<p>您可以在此處配置所有鍵盤快捷鍵。</p> <p>單擊文本輸入並輸入所需的鍵盤組合。按Enter鍵儲存，Escape退出。</p><p> 有三種類型的捷徑：</p> <ul> <li> <strong>全域捷徑：</strong>當應用程式運行時，它將觸發其他所有應用程式的操作。 </li> <li> <strong>應用程式級捷徑： </strong>將從應用程式的每個螢幕觸發，但如果您目前正在編輯文本欄位則不會。 </li> <li> <strong> 任務級捷徑：</strong> 只有通過滑鼠或鍵盤選擇任務並且通常會觸發與該任務特定相關的操作時，它們才會觸發。  </li> </ul><p>可以 <strong>單擊 Escape移除鍵盤組合。</strong>",
@@ -1074,7 +1074,7 @@
       "SELECT_PREVIOUS_TASK": "選擇上一個任務",
       "SHOW_SEARCH_BAR": "顯示搜尋欄",
       "SYSTEM_SHORTCUTS": "全域捷徑（全系統）",
-      "TASK_ADD_SUB_TASK": "添加子任務",
+      "TASK_ADD_SUB_TASK": "新增子任務",
       "TASK_DELETE": "刪除任務",
       "TASK_EDIT_TAGS": "編輯標籤",
       "TASK_EDIT_TITLE": "編輯標題",
@@ -1104,23 +1104,23 @@
       "FR": "法語",
       "IT": "義大利語",
       "JA": "日本語",
-      "KO": "北韓語",
+      "KO": "韓語",
       "LABEL": "請選擇一種語言",
       "NB": "挪威語",
       "NL": "荷蘭語",
-      "PL": "拋光",
+      "PL": "波蘭語",
       "PT": "葡萄牙語",
       "RU": "俄語",
       "TITLE": "語言",
       "TR": "土耳其語",
-      "ZH": "中文(簡體)",
-      "ZH_TW": "中文(繁體)"
+      "ZH": "中文 (簡體)",
+      "ZH_TW": "中文 (繁體)"
     },
     "MISC": {
       "DEFAULT_PROJECT": "如果未指定，則用於任務的預設專案",
       "FIRST_DAY_OF_WEEK": "一周的第一天",
       "HELP": "<p><strong>沒有看到桌面通知？</strong>對於Windows，您可能需要檢查 系統 > 通知與動作，並檢查是否已啟用所需的通知。</p>",
-      "IS_AUTO_ADD_WORKED_ON_TO_TODAY": "自動添加今日標籤以處理任務",
+      "IS_AUTO_ADD_WORKED_ON_TO_TODAY": "自動新增今日標籤以處理任務",
       "IS_AUTO_MARK_PARENT_AS_DONE": "完成所有子任務後，將父任務標記為已完成",
       "IS_AUTO_START_NEXT_TASK": "將目前標記為已完成時，開始追蹤下一個任務",
       "IS_CONFIRM_BEFORE_EXIT": "退出應用前確認",
@@ -1348,10 +1348,10 @@
     "E_REQUIRED": "必填"
   },
   "WW": {
-    "ADD_MORE": "添加更多",
+    "ADD_MORE": "新增更多",
     "ADD_SCHEDULED_FOR_TODAY": "Add tasks planned for today ({{nr}})",
     "ADD_SCHEDULED_FOR_TOMORROW": "Add tasks planned for tomorrow ({{nr}})",
-    "ADD_SOME_TASKS": "添加一些任務來規劃你的一天！",
+    "ADD_SOME_TASKS": "新增一些任務來規劃你的一天！",
     "COMPLETED_TASKS": "完成的任務",
     "ESTIMATE_REMAINING": "預估剩餘時間：",
     "FINISH_DAY": "完成日",
