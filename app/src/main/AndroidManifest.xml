@@ -26,6 +26,9 @@
                 android:name=".FullscreenActivity"
                 android:exported="true"
                 android:hardwareAccelerated="true"
+                android:allowTaskReparenting="true"
+                android:windowSoftInputMode="adjustResize"
+                android:alwaysRetainTaskState="true"
                 android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale|smallestScreenSize|screenLayout|uiMode"
                 android:label="@string/title_activity_fullscreen"
                 android:theme="@style/FullscreenTheme">
