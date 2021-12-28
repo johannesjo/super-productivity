@@ -48,7 +48,12 @@
       </input-duration-slider>
 
       <div>
-        <button mat-icon-button [color]="'warn'">
+        <button
+          mat-icon-button
+          [color]="'warn'"
+          (click)="removeTrackItem(item)"
+          [disabled]="trackItems.length <= 1"
+        >
           <mat-icon>delete_forever</mat-icon>
         </button>
       </div>

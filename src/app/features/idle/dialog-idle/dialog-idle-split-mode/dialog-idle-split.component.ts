@@ -90,6 +90,10 @@ export class DialogIdleSplitComponent implements OnInit {
     });
   }
 
+  removeTrackItem(itemToRemove: IdleTrackItem): void {
+    this.trackItems = this.trackItems.filter((item) => item !== itemToRemove);
+  }
+
   save(): void {
     this._matDialogRef.close({ trackItems: this.trackItems });
   }
