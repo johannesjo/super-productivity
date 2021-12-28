@@ -1,3 +1,13 @@
+## [7.9.1](https://github.com/johannesjo/super-productivity/compare/v7.9.0...v7.9.1) (2021-12-28)
+
+### Bug Fixes
+
+- **e2e:** problem ([ab5f8e3](https://github.com/johannesjo/super-productivity/commit/ab5f8e3589ab7d4347691707edbf63b81cac1d20))
+
+### Features
+
+- **idle:** add removing item to split dialog ([0a0aaa4](https://github.com/johannesjo/super-productivity/commit/0a0aaa41738bd74ada5e0085af2dafe9f9295209))
+
 # [7.9.0](https://github.com/johannesjo/super-productivity/compare/v7.8.1...v7.9.0) (2021-12-28)
 
 ### Bug Fixes
