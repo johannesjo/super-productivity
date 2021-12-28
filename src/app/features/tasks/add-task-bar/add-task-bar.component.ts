@@ -43,6 +43,7 @@ import { slideAnimation } from '../../../ui/animations/slide.ani';
 import { blendInOutAnimation } from 'src/app/ui/animations/blend-in-out.ani';
 import { fadeAnimation } from '../../../ui/animations/fade.ani';
 import { SS_TODO_TMP } from '../../../core/persistence/ls-keys.const';
+import { IS_ANDROID_WEB_VIEW } from '../../../util/is-android-web-view';
 
 @Component({
   selector: 'add-task-bar',
@@ -164,12 +165,19 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
   ngAfterViewInit(): void {
     // for android we need to make sure that a focus event is called to open the keyboard
     if (!this.isDisableAutoFocus) {
-      document.body.focus();
-      (this.inputEl as ElementRef).nativeElement.focus();
-      this._autofocusTimeout = window.setTimeout(() => {
+      if (IS_ANDROID_WEB_VIEW) {
         document.body.focus();
         (this.inputEl as ElementRef).nativeElement.focus();
-      }, 1000);
+        this._autofocusTimeout = window.setTimeout(() => {
+          document.body.focus();
+          (this.inputEl as ElementRef).nativeElement.focus();
+        }, 1000);
+      } else {
+        // for non mobile we don't need this, since it's much faster
+        this._autofocusTimeout = window.setTimeout(() => {
+          (this.inputEl as ElementRef).nativeElement.focus();
+        });
+      }
     }
 
     this._attachKeyDownHandlerTimeout = window.setTimeout(() => {
