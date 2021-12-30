@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { CaldavCfg } from './caldav.model';
 // @ts-ignore
-import DavClient, { namespaces as NS } from 'cdav-library';
+import DavClient, { namespaces as NS } from '@nextcloud/cdav-library';
 // @ts-ignore
 import Calendar from 'cdav-library/models/calendar';
 // @ts-ignore
