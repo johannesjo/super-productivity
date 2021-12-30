@@ -101,6 +101,18 @@ export class SideNavComponent implements OnDestroy {
         );
       },
     });
+    this._dragulaService.createGroup(this.TAG_SIDE_NAV, {
+      direction: 'vertical',
+      moves: (el, container, handle) => {
+        return (
+          this.isTagsExpanded &&
+          !!handle &&
+          handle.className.indexOf &&
+          handle.className.indexOf('drag-handle') > -1
+        );
+      },
+    });
+
     this._subs.add(
       this.workContextService.activeWorkContextId$.subscribe(
         (id) => (this.activeWorkContextId = id),
