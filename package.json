@@ -148,7 +148,7 @@
     "@ngx-translate/core": "^14.0.0",
     "@ngx-translate/http-loader": "^7.0.0",
     "@schematics/angular": "^13.0.3",
-    "@types/file-saver": "^2.0.2",
+    "@types/file-saver": "^2.0.4",
     "@types/hammerjs": "^2.0.39",
     "@types/jasmine": "^3.10.2",
     "@types/jasminewd2": "~2.0.9",
