@@ -146,7 +146,7 @@
     "@ngx-formly/core": "5.10.3",
     "@ngx-formly/material": "5.10.3",
     "@ngx-translate/core": "^14.0.0",
-    "@ngx-translate/http-loader": "^6.0.0",
+    "@ngx-translate/http-loader": "^7.0.0",
     "@schematics/angular": "^13.0.3",
     "@types/file-saver": "^2.0.2",
     "@types/hammerjs": "^2.0.39",
