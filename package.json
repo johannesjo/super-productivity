@@ -110,7 +110,7 @@
     "electron-log": "^4.4.1",
     "electron-window-state": "^5.0.3",
     "fs-extra": "^10.0.0",
-    "node-fetch": "^2.6.5"
+    "node-fetch": "^3.1.0"
   },
   "devDependencies": {
     "@angular-devkit/build-angular": "^13.0.4",
