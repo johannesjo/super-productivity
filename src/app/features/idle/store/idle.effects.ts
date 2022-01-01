@@ -189,6 +189,11 @@ export class IdleEffects {
       withLatestFrom(this._store.select(selectIdleTime)),
       tap(([{ trackItems, simpleCounterToggleBtnsWhenNoTrackItems }, idleTime]) => {
         this._cancelIdlePoll();
+        // handle dialog result weirdness :(
+        if (!trackItems) {
+          devError('No track items ???');
+          return;
+        }
 
         if (trackItems.length === 0 && simpleCounterToggleBtnsWhenNoTrackItems) {
           const activatedItemNr = simpleCounterToggleBtnsWhenNoTrackItems.filter(
