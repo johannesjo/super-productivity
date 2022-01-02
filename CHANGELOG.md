@@ -1,3 +1,12 @@
+## [7.9.2](https://github.com/johannesjo/super-productivity/compare/v7.9.1...v7.9.2) (2022-01-02)
+
+### Bug Fixes
+
+- avoid weird error case [#1779](https://github.com/johannesjo/super-productivity/issues/1779) ([a19b7f2](https://github.com/johannesjo/super-productivity/commit/a19b7f28db0a7914be5999da229fc4bfbe6f6612))
+- broken cdav library ([6e04879](https://github.com/johannesjo/super-productivity/commit/6e04879dfa4553f274185e06fc01aadda896077e))
+- drag handle for tags ([ea79f71](https://github.com/johannesjo/super-productivity/commit/ea79f71cff6ccf23fa7fcccfc72fce2013db20df))
+- revert note fetch update ([a258731](https://github.com/johannesjo/super-productivity/commit/a25873124fc431a44da80cb35b0b741ff3544542))
+
 ## [7.9.1](https://github.com/johannesjo/super-productivity/compare/v7.9.0...v7.9.1) (2021-12-28)
 
 ### Bug Fixes
