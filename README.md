@@ -53,18 +53,23 @@
        height="50" />
 </a>
 
-Organize your daily tasks in one place while making time tracking a lot less annoying. Super Productivity is a ToDo List / Time Tracker / Personal Jira Task Manager for Linux, MacOS and Windows aimed at reducing the time you spend with repetitive tasks and to provide you with a place to collect all the information you need to do your job.
+Super Productivity is an advanced todo list app with integrated [Timeboxing](https://en.wikipedia.org/wiki/Timeboxing) and time tracking capabilities.
 
 <p align="center"><a href="https://app.super-productivity.com">:globe_with_meridians: Open Web App</a> or <a href="https://github.com/johannesjo/super-productivity/releases">:computer: Download</a></p>
 
 ## :heavy_check_mark: Features
 
-- **Plan, track & summarize**. Create time sheets and work summaries in a breeze to easily export them to your company's time tracking system.
+- **Keep organized and focused!** Plan and categorize your tasks using sub tasks, projects and tags and color code them as needed.
+- Use **timeboxing** and **track your time**. Create time sheets and work summaries in a breeze to easily export them to your company's time tracking system.
+- Helps you to **establish healthy & productive habits**:
+  - A **break reminder** reminds to you, when it's time to step away.
+  - The **anti-procrastination feature** helps you gain perspective, when you really need to.
+  - Need some extra focus? A **pomodoro timer** is also always at hand.
+  - **Collect personal metrics** to see, which of your work routines need adjustments.
 - Integrate with **Jira**, **GitHub**, **GitLab** and **OpenProject**. Auto import tasks assigned to you, plan the details locally, automatically create worklogs and get notified right away, when something changes.
-- Organize your project's data. Create **notes**, attach **files** or create **bookmarks** for links, files and even commands and have it all out of the way, once you're ready for the weekend.
-- Helps you to **establish healthy habits**. A break timer reminds to you, when it's time to step away. You also can collect personal metrics for yourself to see, which of your work routines need adjustments.
-- Stuck and procrastinating? No problem! Super Productivity's **anti procrastination** feature helps you to reconsider your options and a **pomodoro timer** is also always at hand.
-- Super Productivity **does NOT collect any data** and there are no user accounts or registration. It's **free** and **open source** and always will be.
+- Attach context information to tasks and projects. Create **notes**, attach **files** or create **project level bookmarks** for links, files and even commands.
+- Super Productivity **respects your privacy** and **does NOT collect any data** and there are no user accounts or registration. **You decide where you store your data!**
+- It's **free** and **open source** and always will be.
 
 And much more!
 
