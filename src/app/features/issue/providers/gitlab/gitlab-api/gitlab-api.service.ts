@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import {
   HttpClient,
   HttpErrorResponse,
+  HttpEvent,
   HttpHeaders,
   HttpParams,
   HttpRequest,
@@ -14,7 +15,7 @@ import { GitlabOriginalComment, GitlabOriginalIssue } from './gitlab-api-respons
 import { HANDLED_ERROR_PROP_STR } from 'src/app/app.constants';
 import { GITLAB_API_BASE_URL, GITLAB_PROJECT_REGEX } from '../gitlab.const';
 import { T } from 'src/app/t.const';
-import { catchError, filter, map, mergeMap, take } from 'rxjs/operators';
+import { catchError, expand, filter, map, mergeMap, reduce, take } from 'rxjs/operators';
 import { GitlabIssue } from '../gitlab-issue/gitlab-issue.model';
 import {
   mapGitlabIssue,
@@ -30,14 +31,14 @@ export class GitlabApiService {
   constructor(private _snackService: SnackService, private _http: HttpClient) {}
 
   getById$(id: string, cfg: GitlabCfg): Observable<GitlabIssue> {
-    return this._sendRequest$(
+    return this._sendPaginatedRequest$(
       {
         url: this._issueApiLink(cfg, id),
       },
       cfg,
     ).pipe(
-      mergeMap((issue: GitlabOriginalIssue) => {
-        return this.getIssueWithComments$(mapGitlabIssue(issue, cfg), cfg);
+      mergeMap((issue: GitlabIssue) => {
+        return this.getIssueWithComments$(issue, cfg);
       }),
     );
   }
@@ -60,17 +61,14 @@ export class GitlabApiService {
     });
     const queryParams = 'iids[]=' + iids.join('&iids[]=');
 
-    return this._sendRequest$(
+    return this._sendPaginatedRequest$(
       {
         url: `${this._apiLink(cfg, project)}/issues?${queryParams}${this.getScopeParam(
           cfg,
-        )}&per_page=100`,
+        )}`,
       },
       cfg,
     ).pipe(
-      map((issues: GitlabOriginalIssue[]) => {
-        return issues ? issues.map((issue) => mapGitlabIssue(issue, cfg)) : [];
-      }),
       mergeMap((issues: GitlabIssue[]) => {
         if (issues && issues.length) {
           return forkJoin([
@@ -84,7 +82,7 @@ export class GitlabApiService {
   }
 
   getIssueWithComments$(issue: GitlabIssue, cfg: GitlabCfg): Observable<GitlabIssue> {
-    return this._getIssueComments$(issue.id, 1, cfg).pipe(
+    return this._getIssueComments$(issue.id, cfg).pipe(
       map((comments) => {
         return {
           ...issue,
@@ -102,7 +100,7 @@ export class GitlabApiService {
     if (!this._isValidSettings(cfg)) {
       return EMPTY;
     }
-    return this._sendRequest$(
+    return this._sendPaginatedRequest$(
       {
         url: `${this._apiLink(cfg)}/issues?search=${searchText}${this.getScopeParam(
           cfg,
@@ -110,9 +108,6 @@ export class GitlabApiService {
       },
       cfg,
     ).pipe(
-      map((issues: GitlabOriginalIssue[]) => {
-        return issues ? issues.map((issue) => mapGitlabIssue(issue, cfg)) : [];
-      }),
       mergeMap((issues: GitlabIssue[]) => {
         if (issues && issues.length) {
           return forkJoin([
@@ -145,22 +140,15 @@ export class GitlabApiService {
   //   );
   // }
 
-  getProjectIssues$(pageNumber: number, cfg: GitlabCfg): Observable<GitlabIssue[]> {
-    return this._sendRequest$(
+  getProjectIssues$(cfg: GitlabCfg): Observable<GitlabIssue[]> {
+    return this._sendPaginatedRequest$(
       {
         url: `${this._apiLink(
           cfg,
-        )}/issues?state=opened&order_by=updated_at&per_page=100${this.getScopeParam(
-          cfg,
-        )}&page=${pageNumber}`,
+        )}/issues?state=opened&order_by=updated_at&${this.getScopeParam(cfg)}`,
       },
       cfg,
-    ).pipe(
-      take(1),
-      map((issues: GitlabOriginalIssue[]) => {
-        return issues ? issues.map((issue) => mapGitlabIssue(issue, cfg)) : [];
-      }),
-    );
+    ).pipe(take(1));
   }
 
   getFullIssueRef$(issue: string | number, projectConfig: GitlabCfg): string {
@@ -207,15 +195,14 @@ export class GitlabApiService {
 
   private _getIssueComments$(
     issueid: number | string,
-    pageNumber: number,
     cfg: GitlabCfg,
   ): Observable<GitlabOriginalComment[]> {
     if (!this._isValidSettings(cfg)) {
       return EMPTY;
     }
-    return this._sendRequest$(
+    return this._sendPaginatedRequest$(
       {
-        url: `${this._issueApiLink(cfg, issueid)}/notes?per_page=100&page=${pageNumber}`,
+        url: `${this._issueApiLink(cfg, issueid)}/notes`,
       },
       cfg,
     ).pipe(
@@ -243,6 +230,46 @@ export class GitlabApiService {
     params: HttpRequest<string> | any,
     cfg: GitlabCfg,
   ): Observable<any> {
+    return this._sendRawRequest$(params, cfg).pipe(
+      map((res: any) => (res && res.body ? res.body : res)),
+    );
+  }
+
+  private _sendPaginatedRequest$(
+    params: HttpRequest<string> | any,
+    cfg: GitlabCfg,
+  ): Observable<any> {
+    return this._sendPaginatedRequestImpl$(params, cfg, 1).pipe(
+      expand((res: any) => {
+        if (res && res.body && res.headers) {
+          const headers: HttpHeaders = res.headers;
+          const next_page = headers.get('x-next-page');
+          if (next_page) {
+            return this._sendPaginatedRequestImpl$(params, cfg, Number(next_page));
+          }
+        }
+        return EMPTY;
+      }),
+      reduce((acc, res) => acc.concat(res.body), []),
+      map((issues: GitlabOriginalIssue[]) => {
+        return issues ? issues.map((issue) => mapGitlabIssue(issue, cfg)) : [];
+      }),
+    );
+  }
+
+  private _sendPaginatedRequestImpl$(
+    params: HttpRequest<string> | any,
+    cfg: GitlabCfg,
+    page: number,
+  ): Observable<any> {
+    params.url += `&per_page=100&page=${page}`;
+    return this._sendRawRequest$(params, cfg);
+  }
+
+  private _sendRawRequest$(
+    params: HttpRequest<string> | any,
+    cfg: GitlabCfg,
+  ): Observable<HttpEvent<unknown>> {
     this._isValidSettings(cfg);
 
     const p: HttpRequest<any> | any = {
@@ -270,15 +297,14 @@ export class GitlabApiService {
     return this._http.request(req).pipe(
       // TODO remove type: 0 @see https://brianflove.com/2018/09/03/angular-http-client-observe-response/
       filter((res) => !(res === Object(res) && res.type === 0)),
-      map((res: any) => (res && res.body ? res.body : res)),
       catchError(this._handleRequestError$.bind(this)),
     );
   }
 
   private _handleRequestError$(
     error: HttpErrorResponse,
-    caught: Observable<unknown>,
-  ): ObservableInput<unknown> {
+    caught: Observable<HttpEvent<unknown>>,
+  ): ObservableInput<HttpEvent<unknown>> {
     console.error(error);
     if (error.error instanceof ErrorEvent) {
       // A client-side or network error occurred. Handle it accordingly.
