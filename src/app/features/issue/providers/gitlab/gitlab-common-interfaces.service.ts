@@ -221,7 +221,7 @@ export class GitlabCommonInterfacesService implements IssueServiceInterface {
     allExistingIssueIds: number[] | string[],
   ): Promise<IssueData[]> {
     const cfg = await this._getCfgOnce$(projectId).toPromise();
-    return await this._gitlabApiService.getProjectIssues$(1, cfg).toPromise();
+    return await this._gitlabApiService.getProjectIssues$(cfg).toPromise();
   }
 
   private _formatIssueTitle(issue: GitlabIssue): string {
