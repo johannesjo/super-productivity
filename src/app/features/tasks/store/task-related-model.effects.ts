@@ -52,19 +52,6 @@ export class TaskRelatedModelEffects {
     { dispatch: false },
   );
 
-  // TODO remove once reminder is changed
-
-  moveToOtherProject: any = createEffect(
-    () =>
-      this._actions$.pipe(
-        ofType(moveToOtherProject),
-        tap(({ task, targetProjectId }) =>
-          this._moveToOtherProject(task, targetProjectId),
-        ),
-      ),
-    { dispatch: false },
-  );
-
   restoreTask$: any = createEffect(
     () =>
       this._actions$.pipe(
@@ -328,24 +315,5 @@ export class TaskRelatedModelEffects {
     return this._persistenceService.taskArchive.saveState(newArchive, {
       isSyncModelChange: true,
     });
-  }
-
-  private _moveToOtherProject(
-    mainTasks: TaskWithSubTasks,
-    targetProjectId: string,
-  ): void {
-    const workContextId = targetProjectId;
-
-    if (mainTasks.reminderId) {
-      this._reminderService.updateReminder(mainTasks.reminderId, { workContextId });
-    }
-
-    if (mainTasks.subTasks) {
-      mainTasks.subTasks.forEach((subTask) => {
-        if (subTask.reminderId) {
-          this._reminderService.updateReminder(subTask.reminderId, { workContextId });
-        }
-      });
-    }
   }
 }

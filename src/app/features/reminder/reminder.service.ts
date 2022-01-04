@@ -12,9 +12,7 @@ import { NoteService } from '../note/note.service';
 import { T } from '../../t.const';
 import { filter, map, skipUntil } from 'rxjs/operators';
 import { migrateReminders } from './migrate-reminder.util';
-import { WorkContextService } from '../work-context/work-context.service';
 import { devError } from '../../util/dev-error';
-import { WorkContextType } from '../work-context/work-context.model';
 import { Note } from '../note/note.model';
 
 @Injectable({
@@ -45,7 +43,6 @@ export class ReminderService {
   private _reminders: Reminder[] = [];
 
   constructor(
-    private readonly _workContextService: WorkContextService,
     private readonly _persistenceService: PersistenceService,
     private readonly _snackService: SnackService,
     private readonly _taskService: TaskService,
@@ -130,8 +127,6 @@ export class ReminderService {
     this._reminders = dirtyDeepCopy(this._reminders);
     this._reminders.push({
       id,
-      workContextId: this._workContextService.activeWorkContextId as string,
-      workContextType: this._workContextService.activeWorkContextType as WorkContextType,
       relatedId,
       title,
       remindAt,
@@ -182,17 +177,6 @@ export class ReminderService {
   removeRemindersByRelatedIds(relatedIds: string[]): void {
     const reminders = this._reminders.filter((reminderIN) =>
       relatedIds.includes(reminderIN.relatedId),
-    );
-    if (reminders && reminders.length) {
-      reminders.forEach((reminder) => {
-        this.removeReminder(reminder.id);
-      });
-    }
-  }
-
-  removeRemindersByWorkContextId(workContextId: string): void {
-    const reminders = this._reminders.filter(
-      (reminderIN) => reminderIN.workContextId === workContextId,
     );
     if (reminders && reminders.length) {
       reminders.forEach((reminder) => {

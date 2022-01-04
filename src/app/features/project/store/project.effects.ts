@@ -237,8 +237,7 @@ export class ProjectEffects {
         ofType(deleteProject.type),
         tap(async ({ id }) => {
           await this._persistenceService.removeCompleteRelatedDataForProject(id);
-          this._reminderService.removeRemindersByWorkContextId(id);
-          this._removeAllTasksForProject(id);
+          this._removeAllNonArchiveTasksForProject(id);
           this._removeAllArchiveTasksForProject(id);
           this._removeAllRepeatingTasksForProject(id);
 
@@ -252,37 +251,37 @@ export class ProjectEffects {
     { dispatch: false },
   );
 
-  archiveProject: Observable<unknown> = createEffect(
-    () =>
-      this._actions$.pipe(
-        ofType(archiveProject.type),
-        tap(async ({ id }) => {
-          await this._persistenceService.archiveProject(id);
-          this._reminderService.removeRemindersByWorkContextId(id);
-          this._snackService.open({
-            ico: 'archive',
-            msg: T.F.PROJECT.S.ARCHIVED,
-          });
-        }),
-      ),
-    { dispatch: false },
-  );
-
-  unarchiveProject: Observable<unknown> = createEffect(
-    () =>
-      this._actions$.pipe(
-        ofType(unarchiveProject.type),
-        tap(async ({ id }) => {
-          await this._persistenceService.unarchiveProject(id);
-
-          this._snackService.open({
-            ico: 'unarchive',
-            msg: T.F.PROJECT.S.UNARCHIVED,
-          });
-        }),
-      ),
-    { dispatch: false },
-  );
+  // CURRENTLY NOT IMPLEMENTED
+  // archiveProject: Observable<unknown> = createEffect(
+  //   () =>
+  //     this._actions$.pipe(
+  //       ofType(archiveProject.type),
+  //       tap(async ({ id }) => {
+  //         await this._persistenceService.archiveProject(id);
+  //         // TODO remove reminders
+  //         this._snackService.open({
+  //           ico: 'archive',
+  //           msg: T.F.PROJECT.S.ARCHIVED,
+  //         });
+  //       }),
+  //     ),
+  //   { dispatch: false },
+  // );
+  // unarchiveProject: Observable<unknown> = createEffect(
+  //   () =>
+  //     this._actions$.pipe(
+  //       ofType(unarchiveProject.type),
+  //       tap(async ({ id }) => {
+  //         await this._persistenceService.unarchiveProject(id);
+  //
+  //         this._snackService.open({
+  //           ico: 'unarchive',
+  //           msg: T.F.PROJECT.S.UNARCHIVED,
+  //         });
+  //       }),
+  //     ),
+  //   { dispatch: false },
+  // );
 
   // PURE SNACKS
   // -----------
@@ -412,7 +411,9 @@ export class ProjectEffects {
     private _taskRepeatCfgService: TaskRepeatCfgService,
   ) {}
 
-  private async _removeAllTasksForProject(projectIdToDelete: string): Promise<any> {
+  private async _removeAllNonArchiveTasksForProject(
+    projectIdToDelete: string,
+  ): Promise<any> {
     const taskState: TaskState = await this._taskService.taskFeatureState$
       .pipe(
         filter((s) => s.isDataLoaded),
