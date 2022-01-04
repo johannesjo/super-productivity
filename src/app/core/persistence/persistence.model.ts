@@ -31,6 +31,9 @@ export interface PersistenceBaseEntityModel<S, M> extends PersistenceBaseModel<S
 
   // NOTE: side effects are not executed!!!
   execAction(action: Action): Promise<S>;
+
+  // NOTE: side effects are not executed!!!
+  execActions(actions: Action[]): Promise<S>;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars

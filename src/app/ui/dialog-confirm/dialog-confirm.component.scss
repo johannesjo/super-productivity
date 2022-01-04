@@ -1,3 +1,4 @@
 .content {
-  max-width: 300px;
+  // avoid one long line of difficult to read text, but also don't make the text less wide than the buttons
+  max-width: 420px;
 }

@@ -94,6 +94,7 @@ import {
   moveProjectTaskToTodayList,
   moveProjectTaskUpInBacklogList,
 } from '../project/store/project.actions';
+import { Update } from '@ngrx/entity';
 
 @Injectable({
   providedIn: 'root',
@@ -700,6 +701,13 @@ export class TaskService {
     );
   }
 
+  // BEWARE: does only work for task model updates, but not the meta models
+  async updateArchiveTasks(updates: Update<Task>[]): Promise<void> {
+    await this._persistenceService.taskArchive.execActions(
+      updates.map((upd) => updateTask({ task: upd })),
+    );
+  }
+
   async getByIdFromEverywhere(id: string): Promise<Task> {
     return (
       (await this._persistenceService.task.getById(id)) ||
@@ -715,6 +723,16 @@ export class TaskService {
     const archiveTasks = ids.map((id) => archiveTaskState.entities[id]);
     return [...allTasks, ...archiveTasks].filter(
       (task) => (task as Task).projectId === projectId,
+    ) as Task[];
+  }
+
+  async getArchiveTasksForRepeatCfgId(repeatCfgId: string): Promise<Task[]> {
+    const archiveTaskState: TaskArchive =
+      await this._persistenceService.taskArchive.loadState();
+    const ids = (archiveTaskState && (archiveTaskState.ids as string[])) || [];
+    const archiveTasks = ids.map((id) => archiveTaskState.entities[id]);
+    return archiveTasks.filter(
+      (task) => (task as Task).repeatCfgId === repeatCfgId,
     ) as Task[];
   }
 

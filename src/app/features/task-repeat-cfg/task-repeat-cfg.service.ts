@@ -95,8 +95,17 @@ export class TaskRepeatCfgService {
     this._store$.dispatch(deleteTaskRepeatCfgs({ ids }));
   }
 
-  updateTaskRepeatCfg(id: string, changes: Partial<TaskRepeatCfg>): void {
-    this._store$.dispatch(updateTaskRepeatCfg({ taskRepeatCfg: { id, changes } }));
+  updateTaskRepeatCfg(
+    id: string,
+    changes: Partial<TaskRepeatCfg>,
+    isUpdateAllTaskInstances: boolean = false,
+  ): void {
+    this._store$.dispatch(
+      updateTaskRepeatCfg({
+        taskRepeatCfg: { id, changes },
+        isAskToUpdateAllTaskInstances: isUpdateAllTaskInstances,
+      }),
+    );
   }
 
   updateTaskRepeatCfgs(ids: string[], changes: Partial<TaskRepeatCfg>): void {

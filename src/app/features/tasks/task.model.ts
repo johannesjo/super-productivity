@@ -77,6 +77,7 @@ export interface TaskCopy extends IssueFieldsForTask {
   parentId: string | null;
   reminderId: string | null;
   repeatCfgId: string | null;
+  // NOTE: only main tasks have tagIds set
   tagIds: string[];
 
   // attachments

@@ -489,6 +489,14 @@ export class PersistenceService {
         await model.saveState(newState, { isDataImport: false });
         return newState;
       },
+
+      // NOTE: side effects are not executed!!!
+      execActions: async (actions: Action[]): Promise<S> => {
+        const state = await model.loadState();
+        const newState = actions.reduce((acc, act) => reducerFn(acc, act), state);
+        await model.saveState(newState, { isDataImport: false });
+        return newState;
+      },
     };
 
     this._baseModels.push(model);

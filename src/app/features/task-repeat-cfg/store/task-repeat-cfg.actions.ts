@@ -9,7 +9,10 @@ export const addTaskRepeatCfgToTask = createAction(
 
 export const updateTaskRepeatCfg = createAction(
   '[TaskRepeatCfg] Update TaskRepeatCfg',
-  props<{ taskRepeatCfg: Update<TaskRepeatCfg> }>(),
+  props<{
+    taskRepeatCfg: Update<TaskRepeatCfg>;
+    isAskToUpdateAllTaskInstances?: boolean;
+  }>(),
 );
 
 export const updateTaskRepeatCfgs = createAction(

@@ -79,6 +79,7 @@ export class DialogEditTaskRepeatCfgComponent implements OnInit, OnDestroy {
       this._taskRepeatCfgService.updateTaskRepeatCfg(
         exists(this.taskRepeatCfgId),
         this.taskRepeatCfg,
+        true,
       );
       this.close();
     } else {
