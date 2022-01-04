@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import {
   deleteTask,
+  deleteTasks,
   reScheduleTask,
   scheduleTask,
   unScheduleTask,
@@ -162,6 +163,16 @@ export class TaskReminderEffects {
           deletedTaskIds.forEach((id) => {
             this._reminderService.removeReminderByRelatedIdIfSet(id);
           });
+        }),
+      ),
+    { dispatch: false },
+  );
+  clearMultipleReminders: any = createEffect(
+    () =>
+      this._actions$.pipe(
+        ofType(deleteTasks),
+        tap(({ taskIds }) => {
+          this._reminderService.removeRemindersByRelatedIds(taskIds);
         }),
       ),
     { dispatch: false },

@@ -179,6 +179,17 @@ export class ReminderService {
     }
   }
 
+  removeRemindersByRelatedIds(relatedIds: string[]): void {
+    const reminders = this._reminders.filter((reminderIN) =>
+      relatedIds.includes(reminderIN.relatedId),
+    );
+    if (reminders && reminders.length) {
+      reminders.forEach((reminder) => {
+        this.removeReminder(reminder.id);
+      });
+    }
+  }
+
   removeRemindersByWorkContextId(workContextId: string): void {
     const reminders = this._reminders.filter(
       (reminderIN) => reminderIN.workContextId === workContextId,
