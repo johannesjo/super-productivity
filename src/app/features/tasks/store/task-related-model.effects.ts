@@ -37,6 +37,8 @@ import { TagService } from '../../tag/tag.service';
 import { shortSyntax } from '../short-syntax.util';
 import { environment } from '../../../../environments/environment';
 import { moveProjectTaskToTodayList } from '../../project/store/project.actions';
+import { SnackService } from '../../../core/snack/snack.service';
+import { T } from '../../../t.const';
 
 @Injectable()
 export class TaskRelatedModelEffects {
@@ -205,12 +207,19 @@ export class TaskRelatedModelEffects {
           }),
         );
         if (r.projectId && r.projectId !== task.projectId && !task.parentId) {
-          actions.push(
-            moveToOtherProject({
-              task,
-              targetProjectId: r.projectId,
-            }),
-          );
+          if (task.repeatCfgId) {
+            this._snackService.open({
+              ico: 'warning',
+              msg: T.F.TASK.S.CANNOT_ASSIGN_PROJECT_FOR_REPEATABLE_TASK,
+            });
+          } else {
+            actions.push(
+              moveToOtherProject({
+                task,
+                targetProjectId: r.projectId,
+              }),
+            );
+          }
         } else if (isAddDefaultProjectIfNecessary) {
           actions.push(
             moveToOtherProject({
@@ -259,6 +268,7 @@ export class TaskRelatedModelEffects {
     private _projectService: ProjectService,
     private _globalConfigService: GlobalConfigService,
     private _persistenceService: PersistenceService,
+    private _snackService: SnackService,
   ) {}
 
   private async _removeFromArchive(task: Task): Promise<unknown> {
