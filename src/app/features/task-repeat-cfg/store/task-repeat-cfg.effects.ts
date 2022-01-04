@@ -36,6 +36,8 @@ import { MatDialog } from '@angular/material/dialog';
 import { DialogConfirmComponent } from '../../../ui/dialog-confirm/dialog-confirm.component';
 import { T } from '../../../t.const';
 import { Update } from '@ngrx/entity';
+import { getDateTimeFromClockString } from '../../../util/get-date-time-from-clock-string';
+import { isToday } from '../../../util/is-today.util';
 
 @Injectable()
 export class TaskRepeatCfgEffects {
@@ -152,11 +154,15 @@ export class TaskRepeatCfgEffects {
             })
             .afterClosed()
             .pipe(
-              tap((isConfirm) => {
+              withLatestFrom(
+                this._taskRepeatCfgService.getTaskRepeatCfgById$(id as string),
+              ),
+              tap(([isConfirm, completeCfg]) => {
                 if (isConfirm) {
                   console.log(changes);
                   console.log(todayTasks, archiveTasks);
                   // NOTE: keep in mind that it's very likely that there will be only one task for today
+                  // TODO update reminders if given
                   todayTasks.forEach((task) => {
                     // NOTE: projects can't be updated from the dialog,
                     // if (
@@ -169,6 +175,31 @@ export class TaskRepeatCfgEffects {
                     //     .toPromise();
                     //   this._taskService.moveToProject(withSubTasks, changes.projectId);
                     // }
+                    if (
+                      (changes.startTime || changes.remindAt) &&
+                      completeCfg.remindAt &&
+                      completeCfg.startTime &&
+                      isToday(task.created)
+                    ) {
+                      const dateTime = getDateTimeFromClockString(
+                        completeCfg.startTime as string,
+                        new Date(),
+                      );
+                      if (task.reminderId) {
+                        this._taskService.reScheduleTask({
+                          task,
+                          plannedAt: dateTime,
+                          remindCfg: completeCfg.remindAt,
+                          isMoveToBacklog: false,
+                        });
+                      } else {
+                        this._taskService.scheduleTask(
+                          task,
+                          dateTime,
+                          completeCfg.remindAt,
+                        );
+                      }
+                    }
                     if (changes.tagIds) {
                       this._taskService.updateTags(task, changes.tagIds, task.tagIds);
                     }
