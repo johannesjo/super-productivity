@@ -14,10 +14,11 @@ import {
   ViewChild,
 } from '@angular/core';
 import { TaskService } from '../task.service';
-import { EMPTY, Observable, of, ReplaySubject, Subject } from 'rxjs';
+import { EMPTY, forkJoin, Observable, of, ReplaySubject, Subject } from 'rxjs';
 import {
   ShowSubTasksMode,
   TaskAdditionalInfoTargetPanel,
+  TaskCopy,
   TaskWithSubTasks,
 } from '../task.model';
 import { MatDialog } from '@angular/material/dialog';
@@ -25,7 +26,16 @@ import { DialogTimeEstimateComponent } from '../dialog-time-estimate/dialog-time
 import { expandAnimation } from '../../../ui/animations/expand.ani';
 import { GlobalConfigService } from '../../config/global-config.service';
 import { checkKeyCombo } from '../../../util/check-key-combo';
-import { distinctUntilChanged, map, switchMap, take, takeUntil } from 'rxjs/operators';
+import {
+  concatMap,
+  distinctUntilChanged,
+  first,
+  map,
+  switchMap,
+  take,
+  takeUntil,
+  tap,
+} from 'rxjs/operators';
 import { fadeAnimation } from '../../../ui/animations/fade.ani';
 import { TaskAttachmentService } from '../task-attachment/task-attachment.service';
 import { IssueService } from '../../issue/issue.service';
@@ -44,6 +54,9 @@ import { DialogEditTagsForTaskComponent } from '../../tag/dialog-edit-tags/dialo
 import { WorkContextService } from '../../work-context/work-context.service';
 import { environment } from '../../../../environments/environment';
 import { throttle } from 'helpful-decorators';
+import { TaskRepeatCfgService } from '../../task-repeat-cfg/task-repeat-cfg.service';
+import { DialogConfirmComponent } from '../../../ui/dialog-confirm/dialog-confirm.component';
+import { Update } from '@ngrx/entity';
 
 @Component({
   selector: 'task',
@@ -127,6 +140,7 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
 
   constructor(
     private readonly _taskService: TaskService,
+    private readonly _taskRepeatCfgService: TaskRepeatCfgService,
     private readonly _matDialog: MatDialog,
     private readonly _configService: GlobalConfigService,
     private readonly _issueService: IssueService,
@@ -589,7 +603,96 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   moveTaskToProject(projectId: string): void {
-    this._taskService.moveToProject(this.task, projectId);
+    if (projectId === this.task.projectId) {
+      return;
+    }
+    if (!this.task.repeatCfgId) {
+      this._taskService.moveToProject(this.task, projectId);
+    } else {
+      forkJoin([
+        this._taskRepeatCfgService
+          .getTaskRepeatCfgById$(this.task.repeatCfgId)
+          .pipe(first()),
+        this._taskService
+          .getTasksWithSubTasksByRepeatCfgId$(this.task.repeatCfgId)
+          .pipe(first()),
+        this._taskService.getArchiveTasksForRepeatCfgId(this.task.repeatCfgId),
+        this._projectService.getByIdOnce$(projectId),
+      ])
+        .pipe(
+          concatMap(
+            ([
+              reminderCfg,
+              nonArchiveInstancesWithSubTasks,
+              archiveInstances,
+              targetProject,
+            ]) => {
+              console.log({
+                reminderCfg,
+                nonArchiveInstancesWithSubTasks,
+                archiveInstances,
+              });
+
+              // if there is only a single instance (probably just created) than directly update the task repeat cfg
+              if (
+                nonArchiveInstancesWithSubTasks.length === 1 &&
+                archiveInstances.length === 0
+              ) {
+                this._taskRepeatCfgService.updateTaskRepeatCfg(reminderCfg.id, {
+                  projectId,
+                });
+                this._taskService.moveToProject(this.task, projectId);
+                return EMPTY;
+              }
+
+              return this._matDialog
+                .open(DialogConfirmComponent, {
+                  restoreFocus: true,
+                  data: {
+                    okTxt: T.F.TASK_REPEAT.D_CONFIRM_MOVE_TO_PROJECT.OK,
+                    message: T.F.TASK_REPEAT.D_CONFIRM_MOVE_TO_PROJECT.MSG,
+                    translateParams: {
+                      projectName: targetProject.title,
+                      tasksNr:
+                        nonArchiveInstancesWithSubTasks.length + archiveInstances.length,
+                    },
+                  },
+                })
+                .afterClosed()
+                .pipe(
+                  tap((isConfirm) => {
+                    if (isConfirm) {
+                      this._taskRepeatCfgService.updateTaskRepeatCfg(reminderCfg.id, {
+                        projectId,
+                      });
+                      nonArchiveInstancesWithSubTasks.forEach((nonArchiveTask) => {
+                        this._taskService.moveToProject(nonArchiveTask, projectId);
+                      });
+
+                      const archiveUpdates: Update<TaskCopy>[] = [];
+                      archiveInstances.forEach((archiveTask) => {
+                        archiveUpdates.push({
+                          id: archiveTask.id,
+                          changes: { projectId },
+                        });
+                        if (archiveTask.subTaskIds.length) {
+                          archiveTask.subTaskIds.forEach((subId) => {
+                            archiveUpdates.push({
+                              id: subId,
+                              changes: { projectId },
+                            });
+                          });
+                        }
+                      });
+                      this._taskService.updateArchiveTasks(archiveUpdates);
+                    }
+                  }),
+                );
+            },
+          ),
+        )
+        .subscribe();
+    }
   }
 
   moveToBacklog(): void {
@@ -705,7 +808,7 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
     if (checkKeyCombo(ev, keys.taskAddSubTask)) {
       this.addSubTask();
     }
-    if (checkKeyCombo(ev, keys.taskMoveToProject)) {
+    if (!this.task.parentId && checkKeyCombo(ev, keys.taskMoveToProject)) {
       if (!this.projectMenuTrigger) {
         throw new Error('No el');
       }
