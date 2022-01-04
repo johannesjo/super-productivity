@@ -3,8 +3,8 @@ import {
   addTask,
   addTimeSpent,
   convertToMainTask,
-  deleteMainTasks,
   deleteTask,
+  deleteTasks,
   moveSubTask,
   moveSubTaskDown,
   moveSubTaskUp,
@@ -245,11 +245,17 @@ export const taskReducer = createReducer<TaskState>(
     return deleteTaskHelper(state, task);
   }),
 
-  on(deleteMainTasks, (state, { taskIds }) => {
+  on(deleteTasks, (state, { taskIds }) => {
     const allIds = taskIds.reduce((acc: string[], id: string) => {
       return [...acc, id, ...getTaskById(id, state).subTaskIds];
     }, []);
-    return taskAdapter.removeMany(allIds, state);
+    const newState = taskAdapter.removeMany(allIds, state);
+    return state.currentTaskId && taskIds.includes(state.currentTaskId)
+      ? {
+          ...newState,
+          currentTaskId: null,
+        }
+      : newState;
   }),
 
   on(moveSubTask, (state, { taskId, srcTaskId, targetTaskId, newOrderedIds }) => {

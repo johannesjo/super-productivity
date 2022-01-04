@@ -22,8 +22,8 @@ import {
   addTask,
   addTimeSpent,
   convertToMainTask,
-  deleteMainTasks,
   deleteTask,
+  deleteTasks,
   moveToArchive,
   removeTagsForAllTasks,
   restoreTask,
@@ -74,7 +74,7 @@ export class TagEffects {
           addToBreakTimeForTag,
 
           // TASK Actions
-          deleteMainTasks,
+          deleteTasks,
           updateTaskTags,
         ),
         switchMap(() => this.saveToLs$),
@@ -206,20 +206,27 @@ export class TagEffects {
           const taskIdsToRemove: string[] = tasks
             .filter(isOrphanedParentTask)
             .map((t) => t.id);
-          this._taskService.removeMultipleMainTasks(taskIdsToRemove);
+          this._taskService.removeMultipleTasks(taskIdsToRemove);
 
           // remove orphaned for archive
           const taskArchiveState: TaskArchive =
             (await this._persistenceService.taskArchive.loadState()) ||
             createEmptyEntity();
-          const archiveTaskIdsToDelete = (taskArchiveState.ids as string[]).filter(
-            (id) => {
-              const t = taskArchiveState.entities[id] as Task;
-              return isOrphanedParentTask(t);
-            },
-          );
+
+          let archiveSubTaskIdsToDelete: string[] = [];
+          const archiveMainTaskIdsToDelete: string[] = [];
+          (taskArchiveState.ids as string[]).forEach((id) => {
+            const t = taskArchiveState.entities[id] as Task;
+            if (isOrphanedParentTask(t)) {
+              archiveMainTaskIdsToDelete.push(id);
+              archiveSubTaskIdsToDelete = archiveSubTaskIdsToDelete.concat(t.subTaskIds);
+            }
+          });
+
           await this._persistenceService.taskArchive.execAction(
-            deleteMainTasks({ taskIds: archiveTaskIdsToDelete }),
+            deleteTasks({
+              taskIds: [...archiveMainTaskIdsToDelete, ...archiveSubTaskIdsToDelete],
+            }),
           );
 
           // remove from task repeat

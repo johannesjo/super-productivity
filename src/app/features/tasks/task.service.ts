@@ -21,8 +21,8 @@ import {
   addTask,
   addTimeSpent,
   convertToMainTask,
-  deleteMainTasks,
   deleteTask,
+  deleteTasks,
   moveSubTask,
   moveSubTaskDown,
   moveSubTaskUp,
@@ -270,8 +270,8 @@ export class TaskService {
     this._store.dispatch(deleteTask({ task }));
   }
 
-  removeMultipleMainTasks(taskIds: string[]): void {
-    this._store.dispatch(deleteMainTasks({ taskIds }));
+  removeMultipleTasks(taskIds: string[]): void {
+    this._store.dispatch(deleteTasks({ taskIds }));
   }
 
   update(id: string, changedFields: Partial<Task>): void {

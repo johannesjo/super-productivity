@@ -5,7 +5,7 @@ import { createFeatureSelector, createReducer, createSelector, on } from '@ngrx/
 import {
   addTask,
   convertToMainTask,
-  deleteMainTasks,
+  deleteTasks,
   deleteTask,
   moveToArchive,
   restoreTask,
@@ -331,7 +331,7 @@ export const tagReducer = createReducer<TagState>(
   }),
 
   // cleans up all occurrences
-  on(deleteMainTasks, (state, { taskIds }) => {
+  on(deleteTasks, (state, { taskIds }) => {
     const updates: Update<Tag>[] = (state.ids as string[]).map((tagId) => ({
       id: tagId,
       changes: {

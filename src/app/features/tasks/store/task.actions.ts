@@ -19,6 +19,7 @@ enum TaskActionTypes {
   'UpdateTask' = '[Task] Update Task',
   'UpdateTasks' = '[Task] Update Tasks',
   'DeleteTask' = '[Task] Delete Task',
+  'DeleteTasks' = '[Task] Delete Tasks',
   'DeleteMainTasks' = '[Task] Delete Main Tasks',
   'UndoDeleteTask' = '[Task] Undo Delete Task',
   'MoveSubTask' = '[Task] Move sub task',
@@ -108,9 +109,9 @@ export const deleteTask = createAction(
   props<{ task: TaskWithSubTasks }>(),
 );
 
-// WARNING! Not fully functional delete as not all side effects are triggered
-export const deleteMainTasks = createAction(
-  TaskActionTypes.DeleteMainTasks,
+// NOTE: does not automatically account for sub tasks!!!
+export const deleteTasks = createAction(
+  TaskActionTypes.DeleteTasks,
   props<{ taskIds: string[] }>(),
 );
 

@@ -34,8 +34,8 @@ import {
   addTask,
   addTimeSpent,
   convertToMainTask,
-  deleteMainTasks,
   deleteTask,
+  deleteTasks,
   moveToArchive,
   moveToOtherProject,
   restoreTask,
@@ -425,7 +425,7 @@ export class ProjectEffects {
         throw new Error('No task');
       }
       // NOTE sub tasks are accounted for in DeleteMainTasks action
-      return t.projectId === projectIdToDelete && !t.parentId;
+      return t.projectId === projectIdToDelete;
     });
 
     console.log(
@@ -433,7 +433,7 @@ export class ProjectEffects {
       nonArchiveTaskIdsToDelete,
       unique(nonArchiveTaskIdsToDelete),
     );
-    this._taskService.removeMultipleMainTasks(nonArchiveTaskIdsToDelete);
+    this._taskService.removeMultipleTasks(nonArchiveTaskIdsToDelete);
   }
 
   private async _removeAllArchiveTasksForProject(
@@ -448,8 +448,7 @@ export class ProjectEffects {
           if (!t) {
             throw new Error('No task');
           }
-          // NOTE sub tasks are accounted for in DeleteMainTasks action
-          return t.projectId === projectIdToDelete && !t.parentId;
+          return t.projectId === projectIdToDelete;
         })
       : [];
     console.log(
@@ -459,7 +458,7 @@ export class ProjectEffects {
     );
     // remove archive
     await this._persistenceService.taskArchive.execAction(
-      deleteMainTasks({ taskIds: archiveTaskIdsToDelete }),
+      deleteTasks({ taskIds: archiveTaskIdsToDelete }),
     );
   }
 
