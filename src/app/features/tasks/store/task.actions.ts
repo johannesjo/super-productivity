@@ -108,6 +108,7 @@ export const deleteTask = createAction(
   props<{ task: TaskWithSubTasks }>(),
 );
 
+// WARNING! Not fully functional delete as not all side effects are triggered
 export const deleteMainTasks = createAction(
   TaskActionTypes.DeleteMainTasks,
   props<{ taskIds: string[] }>(),
