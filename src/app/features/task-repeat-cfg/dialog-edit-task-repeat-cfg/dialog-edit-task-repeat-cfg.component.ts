@@ -39,6 +39,8 @@ export class DialogEditTaskRepeatCfgComponent implements OnInit, OnDestroy {
     tagIds: unique([TODAY_TAG.id, ...this.task.tagIds]),
   };
 
+  taskRepeatCfgInitial?: TaskRepeatCfgCopy;
+
   taskRepeatCfgId: string | null = this.task.repeatCfgId;
   isEdit: boolean = !!this.taskRepeatCfgId;
 
@@ -64,6 +66,7 @@ export class DialogEditTaskRepeatCfgComponent implements OnInit, OnDestroy {
           .getTaskRepeatCfgById$(this.task.repeatCfgId)
           .subscribe((cfg) => {
             this.taskRepeatCfg = cfg;
+            this.taskRepeatCfgInitial = cfg;
             this._cd.detectChanges();
           }),
       );
@@ -76,10 +79,22 @@ export class DialogEditTaskRepeatCfgComponent implements OnInit, OnDestroy {
 
   save(): void {
     if (this.isEdit) {
+      if (!this.taskRepeatCfgInitial) {
+        throw new Error('Initial task repeat cfg missing (code error)');
+      }
+      const isRelevantChangesForUpdateAllTasks =
+        this.taskRepeatCfgInitial.title !== this.taskRepeatCfg.title ||
+        this.taskRepeatCfgInitial.defaultEstimate !==
+          this.taskRepeatCfg.defaultEstimate ||
+        this.taskRepeatCfgInitial.remindAt !== this.taskRepeatCfg.remindAt ||
+        this.taskRepeatCfgInitial.startTime !== this.taskRepeatCfg.startTime ||
+        JSON.stringify(this.taskRepeatCfgInitial.tagIds) !==
+          JSON.stringify(this.taskRepeatCfg.tagIds);
+
       this._taskRepeatCfgService.updateTaskRepeatCfg(
         exists(this.taskRepeatCfgId),
         this.taskRepeatCfg,
-        true,
+        isRelevantChangesForUpdateAllTasks,
       );
       this.close();
     } else {
