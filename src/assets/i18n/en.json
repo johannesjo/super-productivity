@@ -437,7 +437,7 @@
     },
     "NOTE": {
       "D_ADD": {
-        "NOTE_LABEL": "Enter some text to save as note..."
+        "NOTE_LABEL": "Enter some text to save as note (you can use markdown)..."
       },
       "EDIT_FULLSCREEN": "Edit in fullscreen",
       "NOTES_CMP": {
