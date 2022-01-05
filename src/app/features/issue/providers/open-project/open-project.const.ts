@@ -44,6 +44,7 @@ export const OPEN_PROJECT_CONFIG_FORM: LimitedFormlyFieldConfig<OpenProjectCfg>[
     templateOptions: {
       label: T.F.OPEN_PROJECT.FORM.TOKEN,
       required: true,
+      type: 'password',
     },
   },
   {

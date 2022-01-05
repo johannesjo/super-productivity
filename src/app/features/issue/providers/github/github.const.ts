@@ -44,6 +44,7 @@ export const GITHUB_CONFIG_FORM: LimitedFormlyFieldConfig<GithubCfg>[] = [
     templateOptions: {
       label: T.F.GITHUB.FORM.TOKEN,
       description: T.F.GITHUB.FORM.TOKEN_DESCRIPTION,
+      type: 'password',
     },
   },
   {
