@@ -478,8 +478,7 @@
         "TOKEN": "Token za pristup"
       },
       "FORM_SECTION": {
-        "HELP": "<p>Ovdje možeš konfigurirati „Super produktivnost” za prikaz popisa otvorenih radnih OpenProject paketa. Da bi ovo funkcioniralo u pregledniku, vjerojatno ćeš morati konfigurirati CORS za tvoj OpenProject poslužitelj da bi se dozvolio pristup s app.super-productivity.com
-</p>",
+        "HELP": "<p>Ovdje možeš konfigurirati „Super produktivnost” za prikaz popisa otvorenih radnih OpenProject paketa. Da bi ovo funkcioniralo u pregledniku, vjerojatno ćeš morati konfigurirati CORS za tvoj OpenProject poslužitelj da bi se dozvolio pristup s app.super-productivity.com</p>",
         "TITLE": "OpenProject"
       },
       "ISSUE_CONTENT": {
