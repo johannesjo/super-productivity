@@ -23,7 +23,7 @@
     "UPDATE_WEB_APP": "Postoji nova verzija. Želiš li učitati novu veziju?"
   },
   "BL": {
-    "NO_TASKS": "Trenutačno nema neizvršenih zadataka"
+    "NO_TASKS": "Trenutačno nema zadataka u tvom odlagalištu"
   },
   "CONFIRM": {
     "AUTO_FIX": "Čini se da su tvoji podaci oštećeni (\"{{validityError}}\"). Želiš li pokušati automatski popraviti podatke? To može prouzročiti djelomično gubljenje podataka.",
@@ -98,13 +98,13 @@
         "CALDAV_RESOURCE": "Ime CalDav resursa (kalendar)",
         "CALDAV_URL": "CalDav URL (osnovni URL)",
         "CALDAV_USER": "Tvoje CalDav korisničko ime",
-        "IS_AUTO_ADD_TO_BACKLOG": "Automatski dodaj popis neodređenih CalDav zadataka u svoje neobavljene zadatke",
+        "IS_AUTO_ADD_TO_BACKLOG": "Automatski dodaj popis nedovršenih CalDav zadataka u svoje odlagalište",
         "IS_AUTO_POLL": "Automatski preispitaj ima li promjena u uvezenim zadacima",
         "IS_SEARCH_ISSUES_FROM_CALDAV": "Pokaži nedovršene CalDav zadatke kao prijedloge tijekom dodavanja novih zadataka",
         "IS_TRANSITION_ISSUES_ENABLED": "Automatski dovrši CalDav zadatke nakon obavljanja zadatka"
       },
       "FORM_SECTION": {
-        "HELP": "<p>Here you can configure SuperProductivity to list uncompleted CalDav todos for a specific project in the task creation panel in the daily planning view. They will be listed as suggestions and will provide a link to the todo as well as more information about it.</p> <p>In addition you can automatically add and sync all uncompleted todos to your task backlog.</p><p>To make it work for nextcloud on mobile and web, you might need to whitelist \"https://app.super-productivity.com\" via the nextcloud app <a href='https://apps.nextcloud.com/apps/webapppassword'>webapppassword<a>.</p>",
+        "HELP": "<p>Ovdje možeš konfigurirati „Super produktivnost” za prikaz popisa nedovršenih CalDav zadataka za određeni projekt na ploči za stvaranje zadataka u prikazu dnevnog planiranja. U popisu će se ti zadaci navesti kao prijedlozi s poveznicom na zadatak te s daljnjim informacija o zadatku.</p> <p>Osim toga, sve nedovršene zadatke možeš automatski dodati i sinkronizirati u svoje odlagalište zadataka.</p><p>Da bi to za nextcloud radilo na mobilnom uređaju i webu, možda ćeš morati staviti \"https://app.super-productivity.com\" na popis dopuštenih putem nextcloud programa <a href='https://apps.nextcloud. com/apps/webapppassword'>webapppassword<a>.</p>",
         "TITLE": "CalDav"
       },
       "ISSUE_CONTENT": {
@@ -146,15 +146,15 @@
       },
       "FORM": {
         "FILTER_USER": "Korisničko ime (npr. za izdvajanje vlastitih promjena)",
-        "IS_AUTO_ADD_TO_BACKLOG": "Automatski dodaj popis neodređenih GitHub problema u neobavljene zadatke",
-        "IS_AUTO_POLL": "Automatski preispitaj ima li promjena u uvezenim git problemima",
-        "IS_SEARCH_ISSUES_FROM_GITHUB": "Prikaži probleme iz git-a kao prijedloge tijekom dodavanja novih zadataka",
+        "IS_AUTO_ADD_TO_BACKLOG": "Automatski dodaj popis neriješenih GitHub problema u odlagalište",
+        "IS_AUTO_POLL": "Automatski preispitaj uvezene git probleme za promjenama",
+        "IS_SEARCH_ISSUES_FROM_GITHUB": "Prikaži git probleme kao prijedloge prilikom dodavanja novih zadataka",
         "REPO": "\"username/repositoryName\" za git repozitorij koji želiš pratiti",
         "TOKEN": "Token za pristup",
         "TOKEN_DESCRIPTION": "Potreban je za pristup privatnom repozitoriju"
       },
       "FORM_SECTION": {
-        "HELP": "<p>Here you can configure SuperProductivity to list open GitHub issues for a specific repository in the task creation panel in the daily planning view. They will be listed as suggestions and will provide a link to the issue as well as more information about it.</p> <p>In addition you can automatically add and sync all open issues to your task backlog.</p><p>To get by usage limits and to access you can provide a an access token. <a href='https://docs.github.com/en/free-pro-team@latest/developers/apps/scopes-for-oauth-apps'>More info about its scopes can be found here</a>.",
+        "HELP": "<p>Ovdje možeš konfigurirati „Super produktivnost” za prikaz popisa nedovršenih GitHub problema za određeni repozitorij na ploči za stvaranje zadataka u prikazu dnevnog planiranja. U popisu će se ti problemi navesti kao prijedlozi s poveznicom na problem te s daljnjim informacija o problemu.</p> <p>Osim toga, sve neriješene probleme možeš automatski dodati i sinkronizirati u svoje odlagalište zadataka.</p><p>Za dobivanje ograničenja korištenja i za pristupanje možeš navesti token za pristup. <a href='https://docs.github.com/en/free-pro-team@latest/developers/apps/scopes-for-oauth-apps'>Više informacija o njegovom opsegu možeš pronaći ovdje</a >.</p>",
         "TITLE": "GitHub"
       },
       "ISSUE_CONTENT": {
@@ -178,8 +178,8 @@
       "FORM": {
         "FILTER_USER": "Korisničko ime (npr. za izdvajanje vlastitih promjena)",
         "GITLAB_BASE_URL": "Prilagođen osnovni GitLab URL (opcijonalno)",
-        "IS_AUTO_ADD_TO_BACKLOG": "Automatski dodaj popis neodređenih GitLab problema u neobavljene zadatke",
-        "IS_AUTO_POLL": "Automatically poll imported git issues for changes",
+        "IS_AUTO_ADD_TO_BACKLOG": "Automatski dodaj neriješene GitLab probleme u odlagalište",
+        "IS_AUTO_POLL": "Automatski preispitaj uvezene git probleme za promjenama",
         "IS_SEARCH_ISSUES_FROM_GITLAB": "Prikaži git probleme kao prijedloge prilikom dodavanja novih zadataka",
         "PROJECT": "(standardni) ID projekta ili korisničko ime / projekt",
         "SCOPE": "Opseg",
@@ -193,7 +193,7 @@
         "TOKEN": "Token za pristup"
       },
       "FORM_SECTION": {
-        "HELP": "<p>Here you can configure SuperProductivity to list open GitLab (either its the online version or a self-hosted instance) issues for a specific project in the task creation panel in the daily planning view. They will be listed as suggestions and will provide a link to the issue as well as more information about it.</p> <p>In addition you can automatically add and sync all open issues to your task backlog.</p>",
+        "HELP": "<p>Ovdje možeš konfigurirati „Super produktivnost” za prikaz popisa nedovršenih GitLab problema (online verzija ili instanca vlastitog histinga) za određeni projekt na ploči za stvaranje zadataka u prikazu dnevnog planiranja. U popisu će se ti problemi navesti kao prijedlozi s poveznicom na problem te s daljnjim informacija o problemu.</p> <p>Osim toga, sve neriješene probleme možeš automatski dodati i sinkronizirati u svoje odlagalište zadataka.</p>",
         "TITLE": "GitLab"
       },
       "ISSUE_CONTENT": {
@@ -239,17 +239,17 @@
       "S": {
         "ERR_NETWORK": "{{issueProviderName}}: Zahtjev neuspio zbog mrežne greške klijenta",
         "ERR_NOT_CONFIGURED": "{{issueProviderName}}: Nije ispravno konfigurirano",
-        "IMPORTED_MULTIPLE_ISSUES": "{{issueProviderName}}: Uvezeno {{nr}} novih {{issuesStr}} u popis neodređenih zadataka",
-        "IMPORTED_SINGLE_ISSUE": "{{issueProviderName}}: Uvezen {{issueStr}} \"{{issueTitle}}\" u popis neodređenih zadataka",
-        "ISSUE_DELETED_OR_CLOSED": "{{issueProviderName}}: {{issueStrC}} \"{{issueTitle}}\" je vjerojatno izbrisan ili zatvoren",
+        "IMPORTED_MULTIPLE_ISSUES": "{{issueProviderName}}: Uvezeno {{nr}} novih problema {{issuesStr}} u odlagalište",
+        "IMPORTED_SINGLE_ISSUE": "{{issueProviderName}}: Uvezen problem {{issueStr}} \"{{issueTitle}}\" u odlagalište",
+        "ISSUE_DELETED_OR_CLOSED": "{{issueProviderName}}: Problem {{issueStrC}} \"{{issueTitle}}\" je vjerojatno izbrisan ili riješen",
         "ISSUE_NO_UPDATE_REQUIRED": "{{issueProviderName}}: Aktualiziranje nije potrebno",
-        "ISSUE_UPDATE_MULTIPLE": "{{issueProviderName}}: Aktualizirani su podaci za {{nr}} {{issuesStr}}",
-        "ISSUE_UPDATE_SINGLE": "{{issueProviderName}}: Aktualizirani su podaci za \"{{issueTitle}}\"",
-        "MANUAL_UPDATE_ISSUE_SUCCESS": "{{issueProviderName}}: Aktualizirani su podaci za \"{{issueTitle}}\"",
+        "ISSUE_UPDATE_MULTIPLE": "{{issueProviderName}}: Aktualizirani su podaci za problem {{nr}} {{issuesStr}}",
+        "ISSUE_UPDATE_SINGLE": "{{issueProviderName}}: Aktualizirani su podaci za problem \"{{issueTitle}}\"",
+        "MANUAL_UPDATE_ISSUE_SUCCESS": "{{issueProviderName}}: Aktualizirani su podaci za problem \"{{issueTitle}}\"",
         "MISSING_ISSUE_DATA": "{{issueProviderName}}: Pronađeni su problemi s podacima problema {{issueStr}}. Ponovo se učitavaju.",
-        "NEW_COMMENT": "{{issueProviderName}}: Novi komentar za \"{{issueTitle}}\"",
-        "POLLING_BACKLOG": "{{issueProviderName}}: Polling for new {{issuesStr}}",
-        "POLLING_CHANGES": "{{issueProviderName}}: Polling Changes for {{issuesStr}}"
+        "NEW_COMMENT": "{{issueProviderName}}: Novi komentar za problem \"{{issueTitle}}\"",
+        "POLLING_BACKLOG": "{{issueProviderName}}: Preispituje se novi problem {{issuesStr}}",
+        "POLLING_CHANGES": "{{issueProviderName}}: Preispituju se promjene za problem {{issuesStr}}"
       }
     },
     "JIRA": {
@@ -265,11 +265,11 @@
         "ENABLE_TRANSITIONS": "Aktiviraj mogućnost mijenjanja stanja ili izvršavanje radnje",
         "IN_PROGRESS": "Stanje za započinjanje zadatka",
         "LOAD_SUGGESTIONS": "Učitaj prijedloge",
-        "MAP_CUSTOM_FIELDS": "Load Story Points",
-        "MAP_CUSTOM_FIELDS_INFO": "Unfortunately some of Jira's data is saved under custom fields which are different for every installation. If you want to include this data you need to select the proper custom field for it. Currently there is only the story points field that needs to be mapped.",
+        "MAP_CUSTOM_FIELDS": "Učitaj jedinice procjene za potpunu implementaciju",
+        "MAP_CUSTOM_FIELDS_INFO": "Nažalost, neki Jira podaci spremaju se u prilagođena polja koja su različita za svaku instalaciju. Ako želiš uključiti ove podatke, moraš odabrati odgovarajuće prilagođeno polje za njih. Trenutačno postoji samo polje jedinice procjene za potpunu implementaciju koja se treba mapirati.",
         "OPEN": "Stanje za pauziranje zadatka",
         "SELECT_ISSUE_FOR_TRANSITIONS": "Učitaj problem za učitavanje dostupnih mogućnosti mijenjanja stanja ili izvršavanja radnji",
-        "STORY_POINTS": "Story Points Field Name"
+        "STORY_POINTS": "Ime polja jedinice procjene za potpunu implementaciju"
       },
       "DIALOG_CONFIRM_ASSIGNMENT": {
         "MSG": "<strong>{{summary}}</strong> je trenutačno dodijeljen <strong>{{assignee}}</strong>. Želiš li ga dodijeliti sebi?",
@@ -303,16 +303,16 @@
         "TITLE": "Jira: Pošalji dnevnik rada"
       },
       "FORM": {
-        "IS_AUTO_ADD_TO_BACKLOG": "Automatski dodaj nedovršene GitHub probleme u neobavljene zadatke",
-        "IS_AUTO_POLL": "Automatically poll imported git issues for changes",
+        "IS_AUTO_ADD_TO_BACKLOG": "Automatski dodaj nedovršene GitHub probleme u odlagalište",
+        "IS_AUTO_POLL": "Automatski preispitaj uvezene git porbleme za promjenama",
         "IS_SEARCH_ISSUES_FROM_GITHUB": "Prikaži git probleme kao prijedloge prilikom dodavanja novih zadataka",
         "REPO": "\"username/repositoryName\" za git repozitorij koji želiš pratiti"
       },
       "FORM_ADV": {
-        "AUTO_ADD_BACKLOG_JQL_QUERY": "JQL used for adding tasks automatically to backlog",
+        "AUTO_ADD_BACKLOG_JQL_QUERY": "Korišteni JQL za automatsko dodavanje zadataka u odlagalište",
         "IS_ADD_WORKLOG_ON_SUB_TASK_DONE": "Otvori dijaloški okvir za slanje dnevnika rada na Jira kad je podzdatak obavljen",
-        "IS_AUTO_ADD_TO_BACKLOG": "Automatski dodaj Jira probleme u popis neodređenih zadataka",
-        "IS_AUTO_POLL_TICKETS": "Automatski provjeri uvezene probleme za promjenama te obavijesti",
+        "IS_AUTO_ADD_TO_BACKLOG": "Automatski dodaj Jira probleme u odlagalište",
+        "IS_AUTO_POLL_TICKETS": "Automatski preispitaj uvezene probleme za promjenama, te obavijesti",
         "IS_CHECK_TO_RE_ASSIGN_TICKET_ON_TASK_START": "Provjeri je li problem koji se trenutačno obrađuje dodijeljen trenutačnom korisniku",
         "IS_WORKLOG_ENABLED": "Otvori dijaloški okvir za slanje dnevnika rada na Jira kad je zdatak obavljen",
         "SEARCH_JQL_QUERY": "JQL upit za ograničavanje pretraživanja zadataka",
@@ -407,9 +407,9 @@
         "MOOD_PRODUCTIVITY_OVER_TIME": "Raspoloženje i produktivnost tijekom vremena",
         "NO_ADDITIONAL_DATA_YET": "Još nisu prikupljeni dodatni podaci. Koristi obrazac na ploči dnevnog sažetka \"Evaluacija\" za prikupljanje dodatnih podataka.",
         "OBSTRUCTION_SELECTION_COUNT": "Koliko je puta odabran faktor ometanja",
-        "SIMPLE_CLICK_COUNTERS_OVER_TIME": "Click Counters over time",
-        "SIMPLE_COUNTERS": "Simple Counters",
-        "SIMPLE_STOPWATCH_COUNTERS_OVER_TIME": "Stopwatch Counters over time",
+        "SIMPLE_CLICK_COUNTERS_OVER_TIME": "Brojači pritiskanja namjesto vremena",
+        "SIMPLE_COUNTERS": "Jednostavni brojači",
+        "SIMPLE_STOPWATCH_COUNTERS_OVER_TIME": "Brojači štoperice namjesto vremena",
         "TASKS_DONE_CREATED": "Zadaci (obavljeni/stvoreni)",
         "TIME_ESTIMATED": "Procijenjeno vrijeme",
         "TIME_SPENT": "Utrošeno vrijeme"
@@ -437,7 +437,7 @@
     },
     "NOTE": {
       "D_ADD": {
-        "NOTE_LABEL": "Za spremanje bilješke upiši neki tekst …"
+        "NOTE_LABEL": "Za spremanje bilješke upiši neki tekst (možeš koristiti markdown) …"
       },
       "EDIT_FULLSCREEN": "Uredi u cjeloerkanskom prikazu",
       "NOTES_CMP": {
@@ -467,8 +467,8 @@
       "FORM": {
         "FILTER_USER": "Korisničko ime (npr. za izdvajanje tvojih promjena)",
         "HOST": "Host (npr.: https://www.openproject.org/)",
-        "IS_AUTO_ADD_TO_BACKLOG": "Automatically add unresolved work packages from OpenProject to backlog",
-        "IS_AUTO_POLL": "Automatically poll imported OpenProject work packages for changes",
+        "IS_AUTO_ADD_TO_BACKLOG": "AUtomatski dodaj neriješene radne pakete OpenProjecta u odlagalište",
+        "IS_AUTO_POLL": "AUtomatski preispitaj uvezene radne pakete OpenProjecta za promjenama",
         "IS_SEARCH_ISSUES_FROM_OPEN_PROJECT": "Prikaži radne pakete kao prijedloge prilikom dodavanja novih zadataka",
         "IS_SHOW_TIME_TRACKING_DIALOG": "Prikaži dijaloški okvir praćenja vremena za prijavu OpenProjectu",
         "IS_SHOW_TIME_TRACKING_DIALOG_DESCRIPTION": "Zahtijeva aktiviranje modula za praćenje vremena za OpenProject projekt",
@@ -611,7 +611,7 @@
     },
     "SIMPLE_COUNTER": {
       "D_CONFIRM_REMOVE": {
-        "MSG": "Brisanjem jednostavnog brojača izbrisat će se i svi prošli podaci praćeni tim brojačem. Stvarno želiš nastaviti?",
+        "MSG": "Brisanjem jednostavnog brojača izbrisat će se i svi prethodni podaci praćeni tim brojačem. Stvarno želiš nastaviti?",
         "OK": "Da, izbriši!"
       },
       "D_EDIT": {
@@ -621,9 +621,9 @@
       "FORM": {
         "ADD_NEW": "Dodaj jednostavni brojač",
         "HELP": "Ovdje možeš konfigurirati jednostavne gumbe koji će se pojaviti u gornjem desnom kutu. To mogu biti mjerači vremena ili jednostavno običan brojač koji broji kad se pritisne.",
-        "L_AUTO_COUNT_UP": "Auto trigger count up for",
-        "L_AUTO_SWITCH_OFF": "Auto trigger switch off for",
-        "L_AUTO_SWITCH_ON": "Auto trigger switch on for",
+        "L_AUTO_COUNT_UP": "Automatski broji za",
+        "L_AUTO_SWITCH_OFF": "Automatski ugasi za",
+        "L_AUTO_SWITCH_ON": "Automatski upali za",
         "L_ICON": "Ikona",
         "L_ICON_ON": "Ikona kad je uključeno",
         "L_IS_ENABLED": "Aktivirano",
@@ -678,7 +678,7 @@
         "L_SYNC_PROVIDER": "Pružatelj usluge sinkronizacije",
         "TITLE": "Sinkronizacija",
         "WEB_DAV": {
-          "CORS_INFO": "<strong>Making it work on MOBILE and in the browser:</strong> To make this work for mobile or the browser you need to whitelist Super Productivity for CORS requests for your Nextcloud instance. This can have negative security implications! Please <a href='https://github.com/nextcloud/server/issues/3131'>refer to this thread for more information</a>. One approach to make this work on mobile is whitelisting \"https://app.super-productivity.com\" via the nextcloud app <a href='https://apps.nextcloud.com/apps/webapppassword'>webapppassword<a>. Use at your own risk!</p>",
+          "CORS_INFO": "<strong>Omogućavanje rada na mobilnom uređaju i u pregledniku:</strong> da bi ovo radilo na mobilnom uređaju ili pregledniku, „Super produktivnost” moraš staviti na popis dopuštenih za CORS zahtjeve za tvoju Nextcloud instancu. To može negativno utjecati na sigurnost! <a href='https://github.com/nextcloud/server/issues/3131'>Pogledaj ovu razgovor za daljnje informacija</a>. Jedan od pristupa da bi ovo radilo na mobilnom uređaju je stavljanje adrese \"https://app.super-productivity.com\" na popis dopuštenih putem Nextcloud programa <a href='https://apps.nextcloud.com/apps/webapppassword'>webapppassword <a>. Koristi na vlastitu odgovornost!</p>",
           "L_BASE_URL": "Osnovni Url",
           "L_PASSWORD": "Lozinka",
           "L_SYNC_FILE_PATH": "Staza datoteke sinkronizacije",
@@ -686,8 +686,8 @@
         }
       },
       "S": {
-        "ERROR_FALLBACK_TO_BACKUP": "Something went wrong while importing the data. Falling back to local backup.",
-        "ERROR_INVALID_DATA": "Greška  tijekom sinkronizacije. Neispravni podaci",
+        "ERROR_FALLBACK_TO_BACKUP": "Greška tijekom sinkronizacije uvoza podataka. Obnavlja se lokalna sigurnosna kopija.",
+        "ERROR_INVALID_DATA": "Greška tijekom sinkronizacije. Neispravni podaci",
         "IMPORTING": "Uvoz podataka",
         "INCOMPLETE_CFG": "Autentifikacija za sinkronizaciju neuspjela. Provjeri svoju konfiguraciju!",
         "INITIAL_SYNC_ERROR": "Izvorna sinkronizacija neuspjela",
@@ -738,10 +738,10 @@
       "ADD_TASK_BAR": {
         "ADD_EXISTING_TASK": "Dodaj postojeći zadatak \"{{taskTitle}}\"",
         "ADD_ISSUE_TASK": "Dodaj problem broj {{issueNr}} vrste {{issueType}}",
-        "ADD_TASK_TO_BOTTOM_OF_BACKLOG": "Add task to bottom of backlog",
+        "ADD_TASK_TO_BOTTOM_OF_BACKLOG": "Dodaj zadatak na kraj odlagališta",
         "ADD_TASK_TO_BOTTOM_OF_TODAY": "Dodaj zadatak na kraj popisa",
-        "ADD_TASK_TO_TOP_OF_BACKLOG": "Add task to top of backlog",
-        "ADD_TASK_TO_TOP_OF_TODAY": "Dodaj zadatak na početak popisa",
+        "ADD_TASK_TO_TOP_OF_BACKLOG": "Dodaj zadatak na vrh odlagališta",
+        "ADD_TASK_TO_TOP_OF_TODAY": "Dodaj zadatak na vrh popisa",
         "CREATE_TASK": "Stvori novi zadatak",
         "EXAMPLE": "Primjer: \"Naslov nekog zadatka +ime projekta #neka oznaka #neka druga oznaka 10 m/3 h\"",
         "START": "Za pokretanje pritisni tipku enter još jednom"
@@ -761,13 +761,13 @@
         "EDIT_TAGS": "Uredi oznake",
         "MARK_DONE": "Označi kao obavljeno",
         "MARK_UNDONE": "Označi kao neobavljeno",
-        "MOVE_TO_BACKLOG": "Move to backlog",
+        "MOVE_TO_BACKLOG": "Premjesti u odlagalište",
         "MOVE_TO_OTHER_PROJECT": "Premjesti u jedan drugi projekt",
         "MOVE_TO_TODAY": "Premjesti u popis za danas",
         "OPEN_ATTACH": "Priloži datoteku ili poveznicu",
         "OPEN_ISSUE": "Otvori u pregledniku",
         "OPEN_TIME": "Praćenje vremena",
-        "REMOVE_FROM_MY_DAY": "Uklon iz \"Moj dan\"",
+        "REMOVE_FROM_MY_DAY": "Ukloni iz \"Moj dan\"",
         "REPEAT_EDIT": "Uredi konfiguraciju za ponavljanje zadatka",
         "SCHEDULE": "Terminiraj zadatak",
         "SHOW_UPDATES": "Prikaži aktualiziranja",
@@ -784,7 +784,7 @@
         "CONFIRM_REPEAT_TXT": "Pokušavaš terminirati ovaj ponavljajući zadatak na jedan drugi dan. Uobičajeno je da se ponavljajući zadaci ponovo stvore na određene dane i da se terminiraju samo na taj dan. Želiš li svejedno nastaviti?",
         "DATETIME_FOR": "Datum i vrijeme za podsjetnika",
         "EDIT": "Uredi podsjetnik",
-        "MOVE_TO_BACKLOG": "Move task to backlog until scheduled",
+        "MOVE_TO_BACKLOG": "Premjesti zadatak u odlagalište dok se ne terminira",
         "REMIND_AT": "Podsjeti",
         "RO_10M": "10 minuta prije početka",
         "RO_15M": "15 minuta prije početka",
@@ -801,17 +801,17 @@
         "DISMISS": "Odbaci podsjetnik",
         "DISMISS_ALL": "Odbaci sve",
         "DONE": "Obavljeno",
-        "DUE_TASK": "Due task",
-        "DUE_TASKS": "Due tasks",
-        "FOR_CURRENT": "Task is due. Do you want to start working on it?",
-        "FOR_OTHER": "Task is due. Do you want to start working on it?",
+        "DUE_TASK": "Dospio zadatak",
+        "DUE_TASKS": "Dospjeli zadaci",
+        "FOR_CURRENT": "Zadatak je dospio. Želiš li ga početi obrađivati?",
+        "FOR_OTHER": "Zadatak je dospio. Želiš li ga početi obrađivati?",
         "FROM_PROJECT": "Od projekta: \"{{title}}\"",
         "FROM_TAG": "Od oznake: \"{{title}}\"",
-        "RESCHEDULE_UNTIL_TOMORROW": "Re-schedule for tomorrow",
-        "SNOOZE": "Snooze",
-        "SNOOZE_ALL": "Snooze all",
+        "RESCHEDULE_UNTIL_TOMORROW": "Promijeni termin na sutra",
+        "SNOOZE": "Odgodi",
+        "SNOOZE_ALL": "Odgodi sve",
         "START": "Počni",
-        "SWITCH_CONTEXT_START": "Switch Context & Start"
+        "SWITCH_CONTEXT_START": "Zamijeni kontekst i počni"
       },
       "D_TIME": {
         "ADD_FOR_OTHER_DAY": "Dodaj utrošeno vrijeme za drugi dan",
@@ -833,11 +833,12 @@
         "ESTIMATE_EXCEEDED_BODY": "Premašio/la si procijenjeno vrijeme za \"{{title}}\"."
       },
       "S": {
-        "DELETED": "Izbrisan zadatak \"{{title}}\"",
-        "FOUND_MOVE_FROM_BACKLOG": "Moved task <strong>{{title}}</strong> from backlog to todays task list",
-        "FOUND_MOVE_FROM_OTHER_LIST": "Zadatak <strong>{{title}}</strong> je dodan od <strong>{{contextTitle}}</strong> u trenutačni popis",
-        "FOUND_RESTORE_FROM_ARCHIVE": "Obnovljen zadatak <strong>{{title}}</strong> je povezan s problemom iz arhive",
-        "LAST_TAG_DELETION_WARNING": "Pokušavaš ukloniti zadmki oznaku zadatka koji nije projekt. To nije dozvoljeno!",
+        "CANNOT_ASSIGN_PROJECT_FOR_REPEATABLE_TASK": "Nije moguće dodijeliti projekt putem kratke sintakse za ponavljajuće zadatke!",
+        "DELETED": "Izbrisan je zadatak \"{{title}}\"",
+        "FOUND_MOVE_FROM_BACKLOG": "Zadatak <strong>{{title}}</strong> je premješten iz odlagališta u popis današnjih zadataka",
+        "FOUND_MOVE_FROM_OTHER_LIST": "Zadatak <strong>{{title}}</strong> je dodan iz <strong>{{contextTitle}}</strong> u trenutačni popis",
+        "FOUND_RESTORE_FROM_ARCHIVE": "Obnovljeni zadatak <strong>{{title}}</strong> je povezan s problemom iz arhive",
+        "LAST_TAG_DELETION_WARNING": "Pokušavaš ukloniti zadnju oznaku zadatka koji nije projekt. To nije dozvoljeno!",
         "REMINDER_ADDED": "Terminirani zadatak \"{{title}}\"",
         "REMINDER_DELETED": "Izbrisan je podjsetnik za zadatak",
         "REMINDER_UPDATED": "Aktualiziran je podjsetnik za zadatak \"{{title}}\"",
@@ -857,6 +858,14 @@
         "MSG": "Uklanjanje konfiguracije ponavljanja pretvorit će sve prethodne instance ovog zadatka u redovite zadatke. Stvarno želiš nastaviti",
         "OK": "Ukloni potpuno"
       },
+      "D_CONFIRM_UPDATE_INSTANCES": {
+        "MSG": "Postoje {{tasksNr}} instance stvorene za ovaj ponovljajući zadatak. Želiš li ih sve aktualizirati s novim standardnim postavkama ili samo buduće zadatke?",
+        "OK": "Aktualiziraj sve instance"
+      },
+      "D_CONFIRM_MOVE_TO_PROJECT": {
+        "MSG": "Postoje {{tasksNr}} instance stvorene za ovaj ponovljajući zadatak. Želiš li ih sve premjestiti u projekt \"{{projectName}}\"?",
+        "OK": "Aktualiziraj sve instance"
+      },
       "D_EDIT": {
         "ADD": "Dodaj koniguraciju ponavljanja zadatka",
         "EDIT": "Uredi koniguraciju ponavljanja zadatka",
@@ -871,8 +880,8 @@
         "FRIDAY": "Petak",
         "IS_ADD_TO_BOTTOM": "Premjesti zadatak na kraj popisa",
         "MONDAY": "Ponedjeljak",
-        "ORDER": "Order",
-        "ORDER_DESCRIPTION": "Stvaranje redoslijeda ponovljivih zadataka. Utječe samo na ponovljive zadatke koji su stvoreni u isto vrijeme. Manji broj znači da će se zadatak stvoriti na vrhu popisa, a veći broj da će se stvoriti niže u popisu. Broj veći od 0 znači da se zadaci stvoraju na dnu običnih zadataka.",
+        "ORDER": "Redoslijed",
+        "ORDER_DESCRIPTION": "Redoslijed stvaranja ponovljivih zadataka. Utječe samo na ponovljive zadatke koji su stvoreni u isto vrijeme. Manji broj znači da će se zadatak stvoriti na vrhu popisa, a veći broj da će se stvoriti niže u popisu. Broj veći od 0 znači da se zadaci stvoraju na dnu običnih zadataka.",
         "REMIND_AT": "Podsjeti u",
         "REMIND_AT_PLACEHOLDER": "Odaberi vrijeme podjsećivanja",
         "SATURDAY": "Subota",
@@ -904,7 +913,7 @@
     "TIME_TRACKING": {
       "B": {
         "ALREADY_DID": "Već jesam",
-        "SNOOZE": "Snooze {{time}}"
+        "SNOOZE": "Odgodi {{time}}"
       },
       "B_TTR": {
         "ADD_TO_TASK": "Dodaj zadatku",
@@ -914,7 +923,7 @@
         "ADD_ENTRY": "Dodaj unos za praćenje",
         "BREAK": "Pauza",
         "CREATE_AND_TRACK": "<em>Stvori</em> i prati za",
-        "IDLE_FOR": "Ne radiš već:",
+        "IDLE_FOR": "Vrijeme tvoje neaktivnosti:",
         "SIMPLE_CONFIRM_COUNTER_CANCEL": "Preskoči",
         "SIMPLE_CONFIRM_COUNTER_OK": "Prati",
         "SIMPLE_COUNTER_CONFIRM_TXT": "Odabrao/la si preskakanje, ali si aktivirao/la {{nr}} jednostavna/ih gumba brojenja. Želiš li pratiti njihova neaktivna vremena?",
@@ -928,7 +937,7 @@
       },
       "D_TRACKING_REMINDER": {
         "CREATE_AND_TRACK": "<em>Stvori</em> i prati za",
-        "IDLE_FOR": "Tvoje neaktivno vrijeme:",
+        "IDLE_FOR": "Vrijeme tvoje neaktivnosti:",
         "TASK": "Zadatak",
         "TRACK_TO": "Prati za:",
         "UNTRACKED_TIME": "Nepraćeno vrijeme:"
@@ -940,7 +949,7 @@
         "MONTH_WORKED": "Brj radnih mjeseci:",
         "REPEATING_TASK": "Ponavljanje zadatka",
         "RESTORE_TASK_FROM_ARCHIVE": "Obnovi zadatak iz arhive",
-        "TASKS": "Broj zadataka",
+        "TASKS": "Zadaci",
         "TOTAL_TIME": "Ukupno utrošeno vrijeme:",
         "WEEK_NR": "{{nr}}. tjedan",
         "WORKED": "Vrijeme rada"
@@ -1007,7 +1016,7 @@
     "DO_IT": "Obavi!",
     "EDIT": "Uredi",
     "ENABLED": "Aktivirano",
-    "EXTENSION_INFO": "Preuzmi <a target=\"_blank\" href=\"https://chrome.google.com/webstore/detail/super-productivity/ljkbjodfmekklcoibdnhahlaalhihmlb\"> chrome proširenje</a> za omogućivanje komunikacije s Jira Api-jem i baratanje nezaposlenim vremenom. Napomena: To ne radi s mobilnim uređajima.",
+    "EXTENSION_INFO": "Preuzmi <a target=\"_blank\" href=\"https://chrome.google.com/webstore/detail/super-productivity/ljkbjodfmekklcoibdnhahlaalhihmlb\"> chrome proširenje</a> za omogućivanje komunikacije s Jira Api-jem i baratanje vremenom neaktivnosti. Napomena: To ne radi s mobilnim uređajima.",
     "LOGIN": "Prijava",
     "LOGOUT": "Odjava",
     "MINUTES": "{{m}} min",
@@ -1037,16 +1046,16 @@
       "TITLE": "Evaluacija i metrični podaci"
     },
     "IDLE": {
-      "HELP": "<div><p>When idle time handling is enabled a dialog will open after a specified amount of time to check if and on which task you want to track your time, when you have been idle.</p></div>",
-      "IS_ENABLE_IDLE_TIME_TRACKING": "Aktiviraj baratanje neaktivnih vremenom",
+      "HELP": "<div><p>Kad je baratanje neaktivnim vremenom aktivirano, nakon određenog vremena otvorit će se dijaloški okvir za provjeru je li želiš, i pri kojem zadatku želiš pratiti svoje neaktivno vrijeme.</p></div>",
+      "IS_ENABLE_IDLE_TIME_TRACKING": "Aktiviraj baratanje neaktivnim vremenom",
       "IS_ONLY_OPEN_IDLE_WHEN_CURRENT_TASK": "Pokreni dijaloški okvir za neaktivnost samo kad je odabran trenutačni zadatak",
       "IS_UN_TRACKED_IDLE_RESETS_BREAK_TIMER": "Nepraćeno neaktivno vrijeme resetira timer pauza",
-      "MIN_IDLE_TIME": "Porkeni neaktivno vrijeme nakon X",
+      "MIN_IDLE_TIME": "Pokreni neaktivno vrijeme nakon X",
       "TITLE": "Baratanje neaktivnim vremenom"
     },
     "IMEX": {
-      "HELP": "<p>Here you can export all your data as a <strong>JSON</strong> for backups, but also to use it in a different context (e.g. you might want to export your projects in the browser and import them into the desktop version). </p> <p>The import expects valid JSON to be copied into the text area. <strong>NOTE: Once you hit the import button all your current settings and data will be overwritten!</strong></p>",
-      "TITLE": "Import/Export"
+      "HELP": "<p>Ovdje možeš izvesti sve svoje podatke kao <strong>JSON</strong> za sigurnosne kopije, ali ih koristiti i u drugom kontekstu (npr. možda želiš izvesti svoje projekte u pregledniku i uvesti ih u desktop verziju). </p> <p>Uvoz očekuje ispravni JSON za kopiranje u područje teksta. <strong>NAPOMENA: Nakon što pritisneš gumb za uvoz, sve tvoje trenutačne postavke i podaci će se prepisati!</strong></p>",
+      "TITLE": "Uvoz/Izvoz"
     },
     "KEYBOARD": {
       "ADD_NEW_NOTE": "Dodaj novu bilješku",
@@ -1067,7 +1076,7 @@
       "HELP": "<p>Here you can configure all keyboard shortcuts.</p> <p>Click on the text input and enter the desired keyboard combination. Hit enter to save and Escape to abort.</p> <p>There are three types of shortcuts:</p> <ul> <li> <strong>Global shortcuts:</strong> When the app is running it will trigger the action from every other application. </li> <li> <strong>Application level shortcuts:</strong> Will trigger from every screen of the application, but not if you're currently editing a text field. </li> <li> <strong>Task level shortcuts:</strong> They will only trigger if you have selected a task via mouse or keyboard and usually trigger an action specifically related to that one task. </li> </ul><p>You can <strong>press Escape to remove a shortcut.</strong>",
       "MOVE_TASK_DOWN": "Premjesti zadatak prema dolje u popisu",
       "MOVE_TASK_UP": "Premjesti zadatak prema gore u popisu",
-      "MOVE_TO_BACKLOG": "Premjesti zadatak u neobavljenje zadatke",
+      "MOVE_TO_BACKLOG": "Premjesti zadatak u odlagalište",
       "MOVE_TO_TODAYS_TASKS": "Premjesti zadatak u popis današnjih zadataka",
       "OPEN_PROJECT_NOTES": "Prikaži/Sakrij bilješke",
       "SELECT_NEXT_TASK": "Odaberi sljedeći zadatak",
@@ -1087,7 +1096,7 @@
       "TASK_TOGGLE_ADDITIONAL_INFO_OPEN": "Prikaži/Sakrij dodatne podatke zadatka",
       "TASK_TOGGLE_DONE": "Uključi/Isključi obavljeno",
       "TITLE": "Tipkovni prečaci",
-      "TOGGLE_BACKLOG": "Prikaži/Sakrij neobavljene zadatke",
+      "TOGGLE_BACKLOG": "Prikaži/Sakrij odlagalište",
       "TOGGLE_BOOKMARKS": "Prikaži/Sakrij traku straničnika",
       "TOGGLE_PLAY": "Počni/Prekini zadatak",
       "TOGGLE_SIDE_NAV": "Prikaži i fokusiraj/Sakrij bočnu navigaciju",
@@ -1102,6 +1111,7 @@
       "ES": "Španjolski",
       "FA": "Farsi",
       "FR": "Francuski",
+      "HR": "Hrvatski",
       "IT": "Talijansi",
       "JA": "Japanski",
       "KO": "Korejski",
@@ -1119,8 +1129,8 @@
     "MISC": {
       "DEFAULT_PROJECT": "Standardno korišteni projekt za zadatke ako nijedan nije određen",
       "FIRST_DAY_OF_WEEK": "Prvi dan tjedna",
-      "HELP": "<p><strong>Not seeing Desktop Notifications?</strong> For windows you might want to check System > Notifications & actions and check if the required notifications have been enabled.</p>",
-      "IS_AUTO_ADD_WORKED_ON_TO_TODAY": "Automatically add today tag to worked on tasks",
+      "HELP": "<p><strong>Ne vidiš obavijesti na radnoj površini?</strong> Za Windows provjeri Sustav > Obavijesti i radnje te provjeri jesu li potrebne obavijesti aktivirane.</p>",
+      "IS_AUTO_ADD_WORKED_ON_TO_TODAY": "Automatski dodaj oznaku danas zadacima koje si obrađivao/la",
       "IS_AUTO_MARK_PARENT_AS_DONE": "Označi nadređeni zadatak kao obavljen kad se obave svi podzadaci",
       "IS_AUTO_START_NEXT_TASK": "Počni pratiti sljedeži zadatak kad označiš trenutačni zadatak kao obavljen",
       "IS_CONFIRM_BEFORE_EXIT": "Potvrdi prije zatvaranja programa",
@@ -1164,7 +1174,7 @@
       "MIN_WORKING_TIME": "Uključi obavijest za pauziranje nakon X radova bez pauziranja",
       "MOTIVATIONAL_IMG": "Motivacijska slika (web url)",
       "NOTIFICATION_TITLE": "Pauziraj!",
-      "SNOOZE_TIME": "Snooze time when prompted to take a break",
+      "SNOOZE_TIME": "Vrijeme odgađanja kad te se zapita da pauziraš",
       "TITLE": "Podsjetnik za pauzu"
     },
     "TIMELINE": {
@@ -1264,8 +1274,8 @@
     "SAVE_AND_GO_HOME": "Spremi i idi doma",
     "SAVE_AND_GO_HOME_TOOLTIP": "Premjesti sve obavljene zadatke u arhivu (neobavljeni zadaci) te opcionalno sinkroniziraj sve podatake i zatvori program.",
     "START_END": "Početak – Kraj",
-    "SUMMARY_FOR": "Dnevni sažetakza {{dayStr}}",
-    "TASKS_COMPLETED": "Završeni zadaci",
+    "SUMMARY_FOR": "Dnevni sažetak za {{dayStr}}",
+    "TASKS_COMPLETED": "Dovršeni zadaci",
     "TASK_LIST": "Popis zadataka",
     "TIME_SPENT_AND_ESTIMATE_LABEL": "Utrošeno / Procijenjeno vrijeme",
     "TIME_SPENT_ESTIMATE_TITLE": "Utrošeno vrijeme: Ukupno danas utrošeno vrijeme. Arhivirani zadaci su iključeni iz računice. – Procijenjeno vrijeme: Procijenjeno vrijeme za danas obrađene zadatke minus već utrošeno vrijeme prethodnih dana.",
@@ -1349,8 +1359,8 @@
   },
   "WW": {
     "ADD_MORE": "Dodaj još",
-    "ADD_SCHEDULED_FOR_TODAY": "Dodaj terminirane zadatke za danas ({{nr}})",
-    "ADD_SCHEDULED_FOR_TOMORROW": "Dodaj terminirane zadatke za sutra ({{nr}})",
+    "ADD_SCHEDULED_FOR_TODAY": "Dodaj za danas planirane zadatke ({{nr}})",
+    "ADD_SCHEDULED_FOR_TOMORROW": "Dodaj za sutra planirane zadatke ({{nr}})",
     "ADD_SOME_TASKS": "Dodaj zadatke za planiranje dana!",
     "COMPLETED_TASKS": "Dovršeni zadaci",
     "ESTIMATE_REMAINING": "Preostalo procijenjeno vrijeme:",
