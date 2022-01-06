@@ -65,10 +65,14 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
       ),
     );
 
-  isRouteWithRightPanel$: Observable<boolean> = this._router.events.pipe(
+  isRouteWithAdditionalInfoPanel$: Observable<boolean> = this._router.events.pipe(
+    filter((event: any) => event instanceof NavigationEnd),
+    map((event) => !!event.url.match(/(tasks|timeline|daily-summary)$/)),
+    startWith(!!this._router.url.match(/(tasks|timeline|daily-summary)$/)),
+  );
+  isRouteWithSplitAddtionalInfoPanel$: Observable<boolean> = this._router.events.pipe(
     filter((event: any) => event instanceof NavigationEnd),
     map((event) => !!event.url.match(/(tasks|timeline)$/)),
-    // TODO adjust to get real value
     startWith(!!this._router.url.match(/(tasks|timeline)$/)),
   );
 
