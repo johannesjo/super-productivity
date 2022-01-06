@@ -77,7 +77,13 @@ And much more!
 
 ## :question: How to use it
 
-I wrote [a little article](https://dev.to/johannesjo/super-productivity-how-to-grow-fond-of-time-tracking-and-task-management-22ee) on how I use the app - and [another one](https://dev.to/johannesjo/the-prioritising-scheme-how-to-eat-the-frog-with-super-productivity-mlk) on how I implement the 'eat the frog' prioritizing scheme in the app . There is also [a youtube video available](https://www.youtube.com/watch?v=VoF2_RSdNXA).
+If you need some help, [the best place to start is this article on dev.to](https://dev.to/johannesjo/getting-started-with-super-productivity-2791).
+
+If you prefer there is also a (long) [youtube video available](https://www.youtube.com/watch?v=VoF2_RSdNXA).
+
+There is another [article](https://dev.to/johannesjo/super-productivity-how-to-grow-fond-of-time-tracking-and-task-management-22ee) on how I personally might use the app - and still [another one](https://dev.to/johannesjo/the-prioritising-scheme-how-to-eat-the-frog-with-super-productivity-mlk) on how I implement the 'eat the frog' prioritizing scheme in the app .
+
+[If you have further questions, please refer to the discussions page](https://github.com/johannesjo/super-productivity/discussions).
 
 ## :globe_with_meridians: Web Version
 
