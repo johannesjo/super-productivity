@@ -202,6 +202,7 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   @HostListener('drop', ['$event']) onDrop(ev: DragEvent): void {
+    this.focusSelf();
     this._attachmentService.createFromDrop(ev, this.task.id);
     ev.stopPropagation();
     this.isDragOver = false;
@@ -334,10 +335,10 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
       .afterClosed()
       .pipe(takeUntil(this._destroy$))
       .subscribe((result) => {
-        this.focusSelf();
         if (result) {
           this._attachmentService.addAttachment(this.task.id, result);
         }
+        this.focusSelf();
       });
   }
 
@@ -647,7 +648,6 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
 
               return this._matDialog
                 .open(DialogConfirmComponent, {
-                  restoreFocus: true,
                   data: {
                     okTxt: T.F.TASK_REPEAT.D_CONFIRM_MOVE_TO_PROJECT.OK,
                     message: T.F.TASK_REPEAT.D_CONFIRM_MOVE_TO_PROJECT.MSG,
@@ -691,7 +691,7 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
             },
           ),
         )
-        .subscribe();
+        .subscribe(() => this.focusSelf());
     }
   }
 
