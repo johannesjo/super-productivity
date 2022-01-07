@@ -1,0 +1,40 @@
+<h1 mat-dialog-title>
+  Welcome to Super Productivity!
+  <!--  <span>{{T.F.CALDAV.DIALOG_INITIAL.TITLE|translate}}</span>-->
+</h1>
+
+<mat-dialog-content>
+  <p>🦄 Great to see, that you decided to give this app a go! 🦄</p>
+  <p>
+    If you're having trouble to find your way around, there are several places to find
+    help:
+  </p>
+
+  <ul>
+    <li>
+      <a
+        target="_blank"
+        href="https://dev.to/johannesjo/getting-started-with-super-productivity-2791"
+        >Getting started</a
+      >
+    </li>
+    <li>
+      <a
+        target="_blank"
+        href="https://www.youtube.com/watch?v=_mvMXWLsL-8&ab_channel=JohannesM"
+        >Introductory video on youtube</a
+      >
+    </li>
+    <li>
+      <a
+        target="_blank"
+        href="https://github.com/johannesjo/super-productivity/discussions/new?category=q-a"
+        >Ask a question</a
+      >
+    </li>
+  </ul>
+</mat-dialog-content>
+<!--{{T.G.OK|translate}}-->
+<mat-dialog-actions align="end">
+  <button color="primary" mat-stroked-button (click)="close()">Let's go!!</button>
+</mat-dialog-actions>
