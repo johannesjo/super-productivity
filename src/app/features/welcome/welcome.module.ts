@@ -7,7 +7,7 @@ import { LS_HAS_WELCOME_DIALOG_BEEN_SHOWN } from '../../core/persistence/ls-keys
 import { Store } from '@ngrx/store';
 import { ProjectService } from '../project/project.service';
 import { DataInitService } from '../../core/data-init/data-init.service';
-import { concatMap, switchMap, take } from 'rxjs/operators';
+import { concatMap, first, switchMap } from 'rxjs/operators';
 import { EMPTY } from 'rxjs';
 
 @NgModule({
@@ -28,8 +28,8 @@ export class WelcomeModule {
     ) {
       this._dataInitService.isAllDataLoadedInitially$
         .pipe(
-          take(1),
-          concatMap(() => this._projectService.list$),
+          first(),
+          concatMap(() => this._projectService.list$.pipe(first())),
           switchMap((projectList) => {
             if (projectList.length <= 2) {
               return this._matDialog
@@ -40,6 +40,7 @@ export class WelcomeModule {
               return EMPTY;
             }
           }),
+          first(),
         )
         .subscribe((dialogRes) => {
           if (dialogRes === true) {
