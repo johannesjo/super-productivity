@@ -24,3 +24,12 @@ pre,
   user-select: text;
   -webkit-touch-callout: default;
 }
+
+body.isDisableAnimations {
+  *,
+  *:after,
+  *:before {
+    transition: none !important;
+    animation: none !important;
+  }
+}

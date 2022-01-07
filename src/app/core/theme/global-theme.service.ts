@@ -155,6 +155,14 @@ export class GlobalThemeService {
       });
     }
 
+    this._globalConfigService.misc$.subscribe((misc) => {
+      if (misc.isDisableAnimations) {
+        this.document.body.classList.add(BodyClass.isDisableAnimations);
+      } else {
+        this.document.body.classList.remove(BodyClass.isDisableAnimations);
+      }
+    });
+
     if (isTouchOnly()) {
       this.document.body.classList.add(BodyClass.isTouchOnly);
     } else {

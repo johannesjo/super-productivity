@@ -117,5 +117,12 @@ export const MISC_SETTINGS_FORM_CFG: ConfigFormSection<MiscConfig> = {
         label: T.GCF.MISC.TASK_NOTES_TPL,
       },
     },
+    {
+      key: 'isDisableAnimations',
+      type: 'checkbox',
+      templateOptions: {
+        label: T.GCF.MISC.IS_DISABLE_ANIMATIONS,
+      },
+    },
   ],
 };

@@ -19,6 +19,7 @@ export type MiscConfig = Readonly<{
   defaultProjectId: string | null | false;
   firstDayOfWeek: number;
   taskNotesTpl: string;
+  isDisableAnimations: boolean;
 }>;
 
 export type EvaluationConfig = Readonly<{

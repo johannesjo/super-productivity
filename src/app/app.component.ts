@@ -1,6 +1,7 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  HostBinding,
   HostListener,
   OnDestroy,
   ViewChild,
@@ -55,6 +56,8 @@ export class AppComponent implements OnDestroy {
   productivityTipTitle: string = productivityTip && productivityTip[0];
   productivityTipText: string = productivityTip && productivityTip[1];
 
+  @HostBinding('@.disabled') isDisableAnimations = false;
+
   @ViewChild('notesElRef', { read: ViewContainerRef }) notesElRef?: ViewContainerRef;
   @ViewChild('sideNavElRef', { read: ViewContainerRef }) sideNavElRef?: ViewContainerRef;
 
@@ -104,6 +107,11 @@ export class AppComponent implements OnDestroy {
         if (!!params.focusItem) {
           this._focusElement(params.focusItem);
         }
+      }),
+    );
+    this._subs.add(
+      this._globalConfigService.misc$.subscribe((misc) => {
+        this.isDisableAnimations = misc.isDisableAnimations;
       }),
     );
 

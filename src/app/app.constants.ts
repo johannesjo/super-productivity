@@ -99,6 +99,7 @@ export enum BodyClass {
   isDarkTheme = 'isDarkTheme',
   isDisableBackgroundGradient = 'isDisableBackgroundGradient',
   isEnabledBackgroundGradient = 'isEnabledBackgroundGradient',
+  isDisableAnimations = 'isDisableAnimations',
 }
 
 export enum MainContainerClass {
