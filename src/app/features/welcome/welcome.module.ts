@@ -28,7 +28,7 @@ export class WelcomeModule {
           take(1),
           concatMap(() => this._projectService.list$),
           switchMap((projectList) => {
-            if (projectList.length <= 1) {
+            if (projectList.length <= 2) {
               return this._matDialog.open(DialogWelcomeComponent).afterClosed();
             } else {
               localStorage.setItem(LS_HAS_WELCOME_DIALOG_BEEN_SHOWN, 'true');

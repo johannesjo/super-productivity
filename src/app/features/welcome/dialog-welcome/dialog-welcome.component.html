@@ -4,12 +4,17 @@
 </h1>
 
 <mat-dialog-content>
-  <p>🦄 Great to see, that you decided to give this app a go! 🦄</p>
-  <p>
-    If you're having trouble to find your way around, there are several places to find
-    help:
+  <p>Great to see, that you decided to give this app a go! 🦄</p>
+
+  <p *ngIf="IS_TOUCH_ONLY">
+    <strong>Swipe</strong> created tasks <strong>right, to mark them as done</strong>.
+    Swipe them left to schedule. Longpress them for more actions.
   </p>
 
+  <p>
+    If you're having trouble to find your way around here, there are several places you
+    can find help:
+  </p>
   <ul>
     <li>
       <a
