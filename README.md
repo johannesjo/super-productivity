@@ -70,6 +70,8 @@ Super Productivity is an advanced todo list app with integrated [Timeboxing](htt
 - Attach context information to tasks and projects. Create **notes**, attach **files** or create **project level bookmarks** for links, files and even commands.
 - Super Productivity **respects your privacy** and **does NOT collect any data** and there are no user accounts or registration. **You decide where you store your data!**
 - It's **free** and **open source** and always will be.
+- It's **translated** into several languages.
+
 
 And much more!
 
