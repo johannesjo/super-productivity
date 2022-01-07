@@ -6,6 +6,7 @@ import {
   DEFAULT_ISSUE_PROVIDER_CFGS,
   GITHUB_TYPE,
   GITLAB_TYPE,
+  JIRA_TYPE,
   OPEN_PROJECT_TYPE,
 } from '../issue/issue.const';
 import {
@@ -27,6 +28,8 @@ import { GitlabCfg } from '../issue/providers/gitlab/gitlab';
 import { CaldavCfg } from '../issue/providers/caldav/caldav.model';
 import { OpenProjectCfg } from '../issue/providers/open-project/open-project.model';
 import { MODEL_VERSION } from '../../core/model-version';
+import { JiraCfg } from '../issue/providers/jira/jira.model';
+import { DEFAULT_JIRA_CFG } from '../issue/providers/jira/jira.const';
 
 export const migrateProjectState = (projectState: ProjectState): ProjectState => {
   if (!isMigrateModel(projectState, MODEL_VERSION.PROJECT, 'Project')) {
@@ -86,6 +89,11 @@ const _migrateIsEnabledForIssueProviders = (project: Project): Project => {
     // also add missing issue integration cfgs
     issueIntegrationCfgs: {
       ...project.issueIntegrationCfgs,
+      // fix projects without any jira config @see #1802
+      JIRA: {
+        ...DEFAULT_JIRA_CFG,
+        ...(project.issueIntegrationCfgs[JIRA_TYPE] as JiraCfg),
+      },
       GITHUB: {
         ...(project.issueIntegrationCfgs[GITHUB_TYPE] as GithubCfg),
         isEnabled: isGithubEnabledLegacy(
