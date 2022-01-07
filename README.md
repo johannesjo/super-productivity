@@ -174,7 +174,7 @@ There are several ways to help.
 
 7. **[Make a feature or improvement request](https://github.com/johannesjo/super-productivity/issues/new)**: Something can be be done better? Something essential missing? Let us know!
 
-8. **Translations, Icons, etc.**: You don't have to be programmer to help. Some of the icons really need improvement and many of the translations could use some love.
+8. **[Translations](https://github.com/johannesjo/super-productivity/tree/master/src/assets/i18n), Icons, etc.**: You don't have to be programmer to help. Some of the icons really need improvement and many of the translations could use some love.
 
 9. **[Sponsor the project](https://github.com/sponsors/johannesjo)**
 
