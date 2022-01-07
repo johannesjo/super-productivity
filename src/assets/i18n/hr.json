@@ -17,7 +17,7 @@
       "INSTALL": "Instaliraj",
       "MSG": "Želiš li instalirati program „Super produktivnost” kao PWA (progresivni web-program)?"
     },
-    "B_OFFLINE": "Ne postoji veza s internetom. Sinkronizacija i traženje podataka pružatelja problema neće funkcionirati.",
+    "B_OFFLINE": "Ne postoji veza s internetom. Sinkronizacija i traženje podataka pružatelja usluge za praćenje problema neće funkcionirati.",
     "UPDATE_MAIN_MODEL": "Postoji nova verzija za „Super produktivnost”! Potrebne su neke migracije za tvoje podatke. Imaj na umu da će zbog toga tvoji podaci biti nekompatibilni sa starijim verzijama programa.",
     "UPDATE_MAIN_MODEL_NO_UPDATE": "Aktualiziranje modela nije odabran. Imaj na umu da se moraš vratiti na prethodnu verziju ako ne želiš aktualizirati model.",
     "UPDATE_WEB_APP": "Postoji nova verzija. Želiš li učitati novu veziju?"
@@ -145,7 +145,7 @@
         "TITLE": "Postavi GitHub za projekt"
       },
       "FORM": {
-        "FILTER_USER": "Korisničko ime (npr. za izdvajanje vlastitih promjena)",
+        "FILTER_USER": "Korisničko ime (npr. za izdvajanje vlastito izrađenih promjena)",
         "IS_AUTO_ADD_TO_BACKLOG": "Automatski dodaj popis neriješenih GitHub problema u odlagalište",
         "IS_AUTO_POLL": "Automatski preispitaj uvezene git probleme za promjenama",
         "IS_SEARCH_ISSUES_FROM_GITHUB": "Prikaži git probleme kao prijedloge prilikom dodavanja novih zadataka",
@@ -259,7 +259,7 @@
       },
       "CFG_CMP": {
         "ALWAYS_ASK": "Uvijek otvori dijaloški okvir",
-        "DONE": "Stanje za obavljanje zadatka",
+        "DONE": "Stanje za dovršavanje zadatka",
         "DO_NOT": "Nemoj promijeniti stanje niti izvršiti radnju",
         "ENABLE": "Aktiviraj Jira integraciju",
         "ENABLE_TRANSITIONS": "Aktiviraj mogućnost mijenjanja stanja ili izvršavanje radnje",
@@ -272,7 +272,7 @@
         "STORY_POINTS": "Ime polja jedinice procjene za potpunu implementaciju"
       },
       "DIALOG_CONFIRM_ASSIGNMENT": {
-        "MSG": "<strong>{{summary}}</strong> je trenutačno dodijeljen <strong>{{assignee}}</strong>. Želiš li ga dodijeliti sebi?",
+        "MSG": "Sažetak <strong>{{summary}}</strong> je trenutačno dodijeljen odgovornoj osobi <strong>{{assignee}}</strong>. Želiš li ga dodijeliti sebi?",
         "OK": "U redu!"
       },
       "DIALOG_INITIAL": {
@@ -310,11 +310,11 @@
       },
       "FORM_ADV": {
         "AUTO_ADD_BACKLOG_JQL_QUERY": "Korišteni JQL za automatsko dodavanje zadataka u odlagalište",
-        "IS_ADD_WORKLOG_ON_SUB_TASK_DONE": "Otvori dijaloški okvir za slanje dnevnika rada na Jira kad je podzdatak obavljen",
+        "IS_ADD_WORKLOG_ON_SUB_TASK_DONE": "Otvori dijaloški okvir za slanje dnevnika rada na Jira kad je podzadatak obavljen",
         "IS_AUTO_ADD_TO_BACKLOG": "Automatski dodaj Jira probleme u odlagalište",
         "IS_AUTO_POLL_TICKETS": "Automatski preispitaj uvezene probleme za promjenama, te obavijesti",
         "IS_CHECK_TO_RE_ASSIGN_TICKET_ON_TASK_START": "Provjeri je li problem koji se trenutačno obrađuje dodijeljen trenutačnom korisniku",
-        "IS_WORKLOG_ENABLED": "Otvori dijaloški okvir za slanje dnevnika rada na Jira kad je zdatak obavljen",
+        "IS_WORKLOG_ENABLED": "Otvori dijaloški okvir za slanje dnevnika rada na Jira kad je zadatak obavljen",
         "SEARCH_JQL_QUERY": "JQL upit za ograničavanje pretraživanja zadataka",
         "WORKLOG_DEFAULT_ALL_TIME": "Upiši svo utrošeno vrijeme na zadatak",
         "WORKLOG_DEFAULT_ALL_TIME_MINUS_LOGGED": "Upiši svo utrošeno vrijeme na zadatak minus zapisano vrijeme",
@@ -341,9 +341,9 @@
           "P1_2": "Također moraš navesti JQL upit koji se koristi za prijedloge za dodavanje Jira zadataka. Ako trebaš pomoć, pogledaj ovu poveznicu <a target=\"_blank\" href=\"https://confluence.atlassian.com/jirasoftwarecloud/advanced-searching-764478330.html\" target=\"_blank\">https://confluence.atlassian.com/jirasoftwarecloud/advanced-searching-764478330.html</a>.",
           "P1_3": "Ako želiš, također možeš konfigurirati automatsko dodavanje (npr. svaki put kad posjetiš prikaz planiranja) svih novih zadataka koji su određeni prilagođenim JQL upitom u odlagalište.",
           "P1_4": "Druga opcija je „Provjeri je li problem koji se trenutačno obrađuje dodijeljen trenutačnom korisniku”. Ako je aktivirano i ako počinješ, izvršit će se provjera, je li tebi trenutačno dodijeljen Jira problem, ako se ne pojavi dijaloški okvir u kojem možeš odabrati sebi dodijeliti problem.",
-          "P2_1": "Postoji nekoliko opcija za određivanje vremena i načina slanja dnevnika rada. Aktiviranje opcije <em>'Otvori dijaloški okvir dnevnika rada za dodavanje dnevnika rada u Jira kad se zadatak dovrši'</em> otvara dijaloški okvir za dodavanje dnevnika rada svaki put kad označiš Jira zadatak kao dovršen. Stoga imaj na umu da će se dnevnici rada dodati na vrh svega dosad praćenoga. Dakle, ako označiš zadatak kao dovršen po drugi put, možda nećeš htjeti ponovo poslati kompletno radno vrijeme za zadatak.",
-          "P2_2": "<em>'Otvori dijaloški okvir dnevnika rada kad je podzadatak dovršen, a ne za same zadatke s podzadacima'</em> otvara dijaloški okvir dnevnika rada svaki put kad označiš Jira podzadatak kao dovršen. Budući da već pratiš svoje vrijeme putem podzadataka, nijedan dijaloški okvir se neće otvoriti kad označiš sam Jira zadatak kao dovršen.",
-          "P2_3": "<em>'Automatski pošalji aktualiziranja u dnevnik rada bez dijaloškog okvira'</em> radi to što kaže. Budući da višestruko označavanje zadatka kao obavljenog dovodi do toga da se cijelo radno vrijeme prati dvaput. To se ne preporučuje.",
+          "P2_1": "Postoji nekoliko opcija za određivanje vremena i načina slanja dnevnika rada. Aktiviranje opcije <em>'Otvori dijaloški okvir dnevnika rada za dodavanje dnevnika rada u Jira kad je zadatak obavljen'</em> otvara dijaloški okvir za dodavanje dnevnika rada svaki put kad označiš Jira zadatak kao obavljen. Stoga imaj na umu da će se dnevnici rada dodati na vrh svega dosad praćenoga. Dakle, ako označiš zadatak kao obavljen po drugi put, možda nećeš htjeti ponovo poslati kompletno radno vrijeme za zadatak.",
+          "P2_2": "<em>'Otvori dijaloški okvir dnevnika rada kad je podzadatak obavljen, a ne za same zadatke s podzadacima'</em> otvara dijaloški okvir dnevnika rada svaki put kad označiš Jira podzadatak kao obavljen. Budući da već pratiš svoje vrijeme putem podzadataka, nijedan dijaloški okvir se neće otvoriti kad označiš sam Jira zadatak kao obavljen.",
+          "P2_3": "<em>'Automatski pošalji aktualiziranja u dnevnik rada bez dijaloškog okvira'</em>, radi to što kaže. Budući da višestruko označavanje zadatka kao obavljenog dovodi do toga da se cijelo radno vrijeme prati dvaput. To se ne preporučuje.",
           "P3_1": "Ovdje možeš ponovo konfigurirati svoje standardne prijelaze. Jira omogućuje široki broj konfiguracija prijelaza koji obično stupaju na snagu kao različiti stupci na tvojoj Jirinoj ploči agilnih. Mi ne možemo pretpostaviti mjesto i vrijeme prijelaza tvojih zadataka te ih moraš to postaviti ručno."
         }
       },
@@ -368,7 +368,7 @@
       },
       "S": {
         "ADDED_WORKLOG_FOR": "Jira: Dodan je dnevnik rada za {{issueKey}}",
-        "EXTENSION_NOT_LOADED": "Proširenje za „Super produktivnost” nije učitana. Ponovno učitavanje stranice može pomoči",
+        "EXTENSION_NOT_LOADED": "Proširenje za „Super produktivnost” nije učitano. Ponovno učitavanje stranice može pomoči",
         "INSUFFICIENT_SETTINGS": "Nedovoljne postavke dostavljene za Jira",
         "INVALID_RESPONSE": "Jira: Odgovor je sadržao neispravne podatke",
         "ISSUE_NO_UPDATE_REQUIRED": "Jira: „{{issueText}}” je već aktualiziran",
@@ -472,7 +472,7 @@
         "IS_SEARCH_ISSUES_FROM_OPEN_PROJECT": "Prikaži radne pakete kao prijedloge prilikom dodavanja novih zadataka",
         "IS_SHOW_TIME_TRACKING_DIALOG": "Prikaži dijaloški okvir praćenja vremena za prijavu OpenProjectu",
         "IS_SHOW_TIME_TRACKING_DIALOG_DESCRIPTION": "Zahtijeva aktiviranje modula za praćenje vremena za OpenProject projekt",
-        "IS_SHOW_TIME_TRACKING_DIALOG_FOR_EACH_SUB_TASK": "Prikaži dijaloški okvir za praćenje vremena kad se podzadaci obave",
+        "IS_SHOW_TIME_TRACKING_DIALOG_FOR_EACH_SUB_TASK": "Prikaži dijaloški okvir za praćenje vremena kad se podzadaci dovrše",
         "PROJECT_ID": "ID projekta",
         "PROJECT_ID_DESCRIPTION": "Može se pronaći kao dio url-a kad se projekt prikazuje u pregledniku.",
         "TOKEN": "Token za pristup"
@@ -500,7 +500,7 @@
     },
     "POMODORO": {
       "BACK_TO_WORK": "Vrati se na posao!",
-      "BREAK_IS_DONE": "Pauza je gotova!",
+      "BREAK_IS_DONE": "Tvoja pauza je gotova!",
       "ENJOY_YOURSELF": "Odmori se, razgibaj se, vrati se za:",
       "FINISH_SESSION_X": "Uspješno si završio/la sesiju broj <strong>{{nr}}</strong>!",
       "NOTIFICATION": {
@@ -533,16 +533,16 @@
         "L5": "Kako se mijenjanju osjećaji u tvom tijelu dok se i dalje fokusiraš na njih?",
         "TITLE": "Znatiželja"
       },
-      "H1": "Cut yourself some slack!",
-      "P1": "Kao prvo, opusti se! Svatko to čini s vremena na vrijeme. A ako ne radiš ono što bi trebao/la, barem uživaj utome! Zatim pogledaj sljedeće odjeljke za nešto korisno.",
+      "H1": "Oslobodi se pritiska!",
+      "P1": "Kao prvo, opusti se! Svatko to čini s vremena na vrijeme. A ako ne radiš ono što bi trebao/la, barem uživaj u tome! Zatim pogledaj sljedeće odjeljke za nešto korisno.",
       "P2": "Ako želiš saznati više o znanosti koja stoji iza svega toga, preporučujem <a target=\"_blank\" href=\"https://www.nytimes.com/2019/03/25/smarter-living/why- you-procrastinate-it-has-nothing-to-do-with-self-control.html\" target=\"_blank\">ovaj članak</a> s nekim vježbama.",
       "P3": "Zapampti: Odugovlačenje je emotivan problem reguliranja, a ne problem upravljanja vremena.",
       "REFRAME": {
-        "INTRO": "Razmisli što bi moglo biti pozitivno u vezi zadatka unatoč njegovim nedostacima.",
-        "TITLE": "Preispitavanje",
-        "TL1": "Što bi moglo biti zanimljivo o tome?",
-        "TL2": "Koja je dobit ako ga završiš?",
-        "TL3": "Kako ćeš se osjećati kad ga završiš?"
+        "INTRO": "Razmisli što bi moglo biti pozitivno u vezi sa zadatkom unatoč njegovim nedostacima.",
+        "TITLE": "Preispitivanje",
+        "TL1": "Što bi moglo biti zanimljivo u zadatku?",
+        "TL2": "Koja je dobit ako ga dovršiš?",
+        "TL3": "Kako ćeš se osjećati ako ga dovršiš?"
       },
       "SPLIT_UP": {
         "INTRO": "Podijeli zadatak na što više moguće manje dijelove.",
@@ -675,7 +675,7 @@
         },
         "L_ENABLE_SYNCING": "Aktiviraj sinkronizaciju",
         "L_SYNC_INTERVAL": "Interval sinkronizacije",
-        "L_SYNC_PROVIDER": "Pružatelj usluge sinkronizacije",
+        "L_SYNC_PROVIDER": "Usluga sinkronizacije",
         "TITLE": "Sinkronizacija",
         "WEB_DAV": {
           "CORS_INFO": "<strong>Omogućavanje rada na mobilnom uređaju i u pregledniku:</strong> da bi ovo radilo na mobilnom uređaju ili pregledniku, „Super produktivnost” moraš staviti na popis dopuštenih za CORS zahtjeve za tvoju Nextcloud instancu. To može negativno utjecati na sigurnost! <a href='https://github.com/nextcloud/server/issues/3131'>Pogledaj ovu razgovor za daljnje informacija</a>. Jedan od pristupa da bi ovo radilo na mobilnom uređaju je stavljanje adrese „https://app.super-productivity.com” na popis dopuštenih putem Nextcloud programa <a href='https://apps.nextcloud.com/apps/webapppassword'>webapppassword <a>. Koristi na vlastitu odgovornost!</p>",
@@ -759,8 +759,8 @@
         "DROP_ATTACHMENT": "Ispusti ovdje za prilaganje naslovu „{{title}}”",
         "EDIT_REMINDER": "Uredi podsjetnik",
         "EDIT_TAGS": "Uredi oznake",
-        "MARK_DONE": "Označi kao obavljeno",
-        "MARK_UNDONE": "Označi kao neobavljeno",
+        "MARK_DONE": "Označi kao obavljen",
+        "MARK_UNDONE": "Označi kao neobavljen",
         "MOVE_TO_BACKLOG": "Premjesti u odlagalište",
         "MOVE_TO_OTHER_PROJECT": "Premjesti u jedan drugi projekt",
         "MOVE_TO_TODAY": "Premjesti u popis za danas",
@@ -773,7 +773,7 @@
         "SHOW_UPDATES": "Prikaži aktualiziranja",
         "TOGGLE_ADDITIONAL": "Prikaži/Sakrij dodatne informacije",
         "TOGGLE_ATTACHMENTS": "Prikaži/Sakrij priloge",
-        "TOGGLE_DONE": "Označi kao obavljeno/neobavljeno",
+        "TOGGLE_DONE": "Označi kao obavljen/neobavljen",
         "TOGGLE_SUB_TASK_VISIBILITY": "Uključi/Isključi vidljivost podzadataka",
         "TRACK_TIME": "Počni pratiti vrijeme",
         "TRACK_TIME_STOP": "Zaustavi praćenje vremena",
@@ -850,7 +850,7 @@
         "SPENT_TODAY": "Danas utrošeno",
         "SPENT_TOTAL": "Ukupno utrošeno",
         "TASK": "Zadatak",
-        "TOGGLE_DONE": "Odznači/označi kao obavljen"
+        "TOGGLE_DONE": "odznači/označi kao obavljen"
       }
     },
     "TASK_REPEAT": {
@@ -941,6 +941,18 @@
         "TASK": "Zadatak",
         "TRACK_TO": "Prati za:",
         "UNTRACKED_TIME": "Nepraćeno vrijeme:"
+      }
+    },
+    "WELCOME": {
+      "D_WELCOME": {
+        "L1": "Prvi koraci",
+        "L2": "Uvodni video na youtube",
+        "L3": "Postavi pitanje",
+        "LETS_GO": "Krenimo!!",
+        "MOBILE_INFO": "Za označavanje stvorenih zadtaka kao obavljene <strong>povuci ih prema desno</strong>.\n Za terminiranje zadataka povuci ih prema lijevo. Za daljnje radnje pritisni ih dugo.",
+        "T1": "Radujemo se da želiš isprobati ovaj program! \uD83E\uDD84",
+        "T2": "Ako se ovdje ne možeš snaći, postoji nekoliko mjesta gdje\n možeš pronaći pomoć:",
+        "TITLE": "Dobro došao, dobro došla u Super Productivity!"
       }
     },
     "WORKLOG": {
@@ -1132,7 +1144,7 @@
       "HELP": "<p><strong>Ne vidiš obavijesti na radnoj površini?</strong> Za Windows provjeri Sustav > Obavijesti i radnje te provjeri jesu li potrebne obavijesti aktivirane.</p>",
       "IS_AUTO_ADD_WORKED_ON_TO_TODAY": "Automatski dodaj oznaku danas zadacima koje si obrađivao/la",
       "IS_AUTO_MARK_PARENT_AS_DONE": "Označi nadređeni zadatak kao obavljen kad se obave svi podzadaci",
-      "IS_AUTO_START_NEXT_TASK": "Počni pratiti sljedeži zadatak kad označiš trenutačni zadatak kao obavljen",
+      "IS_AUTO_START_NEXT_TASK": "Počni pratiti sljedeći zadatak kad trenutačni zadatak označiš kao obavljen",
       "IS_CONFIRM_BEFORE_EXIT": "Potvrdi prije zatvaranja programa",
       "IS_CONFIRM_BEFORE_EXIT_WITHOUT_FINISH_DAY": "Potvrdi prije zatvaranja programa bez prethodnog završavanja dana",
       "IS_DARK_MODE": "Tamni modus",
@@ -1153,7 +1165,7 @@
       "IS_MANUAL_CONTINUE": "Ručno potvrdi početak sljedeće pomodoro sesije",
       "IS_PLAY_SOUND": "Sviraj zvuk kad je sesija gotova",
       "IS_PLAY_SOUND_AFTER_BREAK": "Sviraj zvuk kad je pauza gotova",
-      "IS_PLAY_TICK": "Sviraj zvuk kucanja svake sekunde",
+      "IS_PLAY_TICK": "Sviraj zvuk otkucavanja sekundi",
       "IS_STOP_TRACKING_ON_BREAK": "Prekini praćenje vremena zadatka tijekom pauze",
       "LONGER_BREAK_DURATION": "Trajanje dužih pauza",
       "TITLE": "Pomodoro timer"
@@ -1178,7 +1190,7 @@
       "TITLE": "Podsjetnik za pauzu"
     },
     "TIMELINE": {
-      "CAL_PROVIDERS": "Pružatelji kalendara (eksperimentalno i opcijonalno)",
+      "CAL_PROVIDERS": "Pružatelji usluge kalendara (eksperimentalno i opcijonalno)",
       "CAL_PROVIDERS_ADD": "Dodaj ical izvor",
       "CAL_PROVIDERS_INFO": "Opcionalno možeš konfigurirati vremensku traku da također učitava i prikazuje iCal podatke (npr. Google Calendar).",
       "HELP": "Vremenska traka omogućuje brzi pregled kako se tvoji terminirani zadaci odvijaju tijekom vremena. Nalazi se u lijevom izborniku pod <a href='#/timeline'>„Vremenska traka”</a>. ",
@@ -1230,6 +1242,7 @@
     "MANAGE_PROJECTS": "Upravljaj projektima",
     "METRICS": "Metrični podaci",
     "NOTES": "Bilješke",
+    "NOTES_PANEL_INFO": "Bilješke se mogu prikazati samo u prikazima vremenske trake i uobičajenih popisa zadataka.",
     "PROCRASTINATE": "Odugovlači",
     "PROJECTS": "Projekti",
     "PROJECT_MENU": "Izbornik projakta",
