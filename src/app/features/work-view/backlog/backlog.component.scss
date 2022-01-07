@@ -8,6 +8,10 @@
   top: 0;
   left: 0;
 
+  task-list ::ng-deep > .task-list-inner {
+    min-height: 50px;
+  }
+
   &:before {
     position: absolute;
     content: '';
