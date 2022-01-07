@@ -22,7 +22,10 @@ export class WelcomeModule {
     private _projectService: ProjectService,
     private _dataInitService: DataInitService,
   ) {
-    if (!localStorage.getItem(LS_HAS_WELCOME_DIALOG_BEEN_SHOWN)) {
+    if (
+      !localStorage.getItem(LS_HAS_WELCOME_DIALOG_BEEN_SHOWN) &&
+      navigator.userAgent !== 'NIGHTWATCH'
+    ) {
       this._dataInitService.isAllDataLoadedInitially$
         .pipe(
           take(1),

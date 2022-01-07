@@ -28,6 +28,7 @@ module.exports = {
             '--no-sandbox',
             '--disable-dev-shm-usage',
             '--disable-browser-side-navigation',
+            '--user-agent=NIGHTWATCH',
             // `--binary=${process.env.CHROME_BIN}`
           ],
           w3c: false,
