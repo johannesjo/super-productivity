@@ -1,45 +1,38 @@
-<h1 mat-dialog-title>
-  Welcome to Super Productivity!
-  <!--  <span>{{T.F.CALDAV.DIALOG_INITIAL.TITLE|translate}}</span>-->
-</h1>
+<h1 mat-dialog-title>{{T.F.WELCOME.D_WELCOME.TITLE|translate}}</h1>
 
 <mat-dialog-content>
-  <p>Great to see, that you decided to give this app a go! 🦄</p>
+  <p>{{T.F.WELCOME.D_WELCOME.T1|translate}}</p>
 
-  <p *ngIf="IS_TOUCH_ONLY">
-    <strong>Swipe</strong> created tasks <strong>right, to mark them as done</strong>.
-    Swipe them left to schedule. Longpress them for more actions.
-  </p>
+  <p *ngIf="IS_TOUCH_ONLY" [innerHTML]="T.F.WELCOME.D_WELCOME.MOBILE_INFO|translate"></p>
 
-  <p>
-    If you're having trouble to find your way around here, there are several places you
-    can find help:
-  </p>
+  <p>{{T.F.WELCOME.D_WELCOME.T2|translate}}</p>
   <ul>
     <li>
       <a
         target="_blank"
         href="https://dev.to/johannesjo/getting-started-with-super-productivity-2791"
-        >Getting started</a
+        >{{T.F.WELCOME.D_WELCOME.L1|translate}}</a
       >
     </li>
     <li>
       <a
         target="_blank"
         href="https://www.youtube.com/watch?v=_mvMXWLsL-8&ab_channel=JohannesM"
-        >Introductory video on youtube</a
+        >{{T.F.WELCOME.D_WELCOME.L2|translate}}</a
       >
     </li>
     <li>
       <a
         target="_blank"
         href="https://github.com/johannesjo/super-productivity/discussions/new?category=q-a"
-        >Ask a question</a
+        >{{T.F.WELCOME.D_WELCOME.L3|translate}}</a
       >
     </li>
   </ul>
 </mat-dialog-content>
-<!--{{T.G.OK|translate}}-->
+
 <mat-dialog-actions align="end">
-  <button color="primary" mat-stroked-button (click)="close()">Let's go!!</button>
+  <button color="primary" mat-stroked-button (click)="close()">
+    {{T.F.WELCOME.D_WELCOME.LETS_GO|translate}}
+  </button>
 </mat-dialog-actions>
