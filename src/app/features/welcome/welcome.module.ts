@@ -32,7 +32,9 @@ export class WelcomeModule {
           concatMap(() => this._projectService.list$),
           switchMap((projectList) => {
             if (projectList.length <= 2) {
-              return this._matDialog.open(DialogWelcomeComponent).afterClosed();
+              return this._matDialog
+                .open(DialogWelcomeComponent, { autoFocus: false })
+                .afterClosed();
             } else {
               localStorage.setItem(LS_HAS_WELCOME_DIALOG_BEEN_SHOWN, 'true');
               return EMPTY;

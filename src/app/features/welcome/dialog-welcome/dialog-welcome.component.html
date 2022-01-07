@@ -10,6 +10,7 @@
     <li>
       <a
         target="_blank"
+        tabindex="2"
         href="https://dev.to/johannesjo/getting-started-with-super-productivity-2791"
         >{{T.F.WELCOME.D_WELCOME.L1|translate}}</a
       >
@@ -17,6 +18,7 @@
     <li>
       <a
         target="_blank"
+        tabindex="2"
         href="https://www.youtube.com/watch?v=_mvMXWLsL-8&ab_channel=JohannesM"
         >{{T.F.WELCOME.D_WELCOME.L2|translate}}</a
       >
@@ -24,6 +26,7 @@
     <li>
       <a
         target="_blank"
+        tabindex="2"
         href="https://github.com/johannesjo/super-productivity/discussions/new?category=q-a"
         >{{T.F.WELCOME.D_WELCOME.L3|translate}}</a
       >
@@ -32,7 +35,14 @@
 </mat-dialog-content>
 
 <mat-dialog-actions align="end">
-  <button color="primary" class="welcome-ok-btn" mat-stroked-button (click)="close()">
+  <button
+    color="primary"
+    class="welcome-ok-btn"
+    mat-stroked-button
+    autofocus="autofocus"
+    (click)="close()"
+    tabindex="0"
+  >
     {{T.F.WELCOME.D_WELCOME.LETS_GO|translate}}
   </button>
 </mat-dialog-actions>
