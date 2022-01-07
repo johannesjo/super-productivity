@@ -11,11 +11,11 @@ module.exports = {
       .waitForElementVisible(WELCOME_BUTTON_SEL)
       .execute(() => localStorage.setItem('SUP_HAS_WELCOME_DIALOG_BEEN_SHOWN', 'true'))
       .sendKeys('body', this.Keys.ESCAPE)
-      .pause(400)
+      .pause(500)
       .sendKeys('body', this.Keys.ESCAPE)
-      .pause(400)
+      .pause(500)
       .sendKeys('body', this.Keys.ESCAPE)
-      .pause(400)
+      .pause(500)
       .sendKeys('body', this.Keys.ESCAPE);
   },
 };
