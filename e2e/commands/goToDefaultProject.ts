@@ -1,5 +1,5 @@
-import { NightwatchBrowser } from 'nightwatch';
 import { BASE } from '../e2e.const';
+import { NBrowser } from '../n-browser-interface';
 
 const BASE_URL = `${BASE}`;
 
@@ -14,8 +14,8 @@ const BACKLOG = `.backlog`;
 const SPLIT = `split`;
 
 module.exports = {
-  async command(this: NightwatchBrowser) {
-    return this.url(BASE_URL)
+  async command(this: NBrowser) {
+    return this.loadAppAndClickAwayWelcomeDialog(BASE_URL)
       .waitForElementVisible(EXPAND_PROJECT_BTN)
       .click(EXPAND_PROJECT_BTN)
       .waitForElementVisible(DEFAULT_PROJECT_BTN)

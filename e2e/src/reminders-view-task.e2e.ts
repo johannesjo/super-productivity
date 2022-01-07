@@ -25,7 +25,7 @@ module.exports = {
 
   'should display a modal with a scheduled task if due': (browser: NBrowser) =>
     browser
-      .url(WORK_VIEW_URL)
+      .loadAppAndClickAwayWelcomeDialog(WORK_VIEW_URL)
       .addTaskWithReminder({ title: '0 A task', scheduleTime: Date.now() })
       .waitForElementVisible(DIALOG, SCHEDULE_MAX_WAIT_TIME)
       .assert.elementPresent(DIALOG)
@@ -37,7 +37,7 @@ module.exports = {
   'should display a modal with 2 scheduled task if due': (browser: NBrowser) => {
     return (
       browser
-        .url(WORK_VIEW_URL)
+        .loadAppAndClickAwayWelcomeDialog(WORK_VIEW_URL)
         // NOTE: tasks are sorted by due time
         .addTaskWithReminder({ title: '0 B task' })
         .addTaskWithReminder({ title: '1 B task', scheduleTime: Date.now() })
@@ -53,7 +53,7 @@ module.exports = {
 
   'should start single task': (browser: NBrowser) =>
     browser
-      .url(WORK_VIEW_URL)
+      .loadAppAndClickAwayWelcomeDialog(WORK_VIEW_URL)
       .addTaskWithReminder({ title: '0 C task', scheduleTime: Date.now() })
       .waitForElementVisible(DIALOG, SCHEDULE_MAX_WAIT_TIME)
       .waitForElementVisible(DIALOG_TASK1)
@@ -66,7 +66,7 @@ module.exports = {
     const start = Date.now() + 100000;
     return (
       browser
-        .url(WORK_VIEW_URL)
+        .loadAppAndClickAwayWelcomeDialog(WORK_VIEW_URL)
         // NOTE: tasks are sorted by due time
         .addTaskWithReminder({ title: '0 D task xyz', scheduleTime: start })
         .addTaskWithReminder({ title: '1 D task xyz', scheduleTime: start })

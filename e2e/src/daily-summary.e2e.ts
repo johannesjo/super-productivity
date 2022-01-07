@@ -10,14 +10,14 @@ module.exports = {
 
   'Daily summary message': (browser: NBrowser) =>
     browser
-      .url(URL)
+      .loadAppAndClickAwayWelcomeDialog(URL)
       .waitForElementVisible('.done-headline')
       .assert.containsText('.done-headline', 'Take a moment to celebrate')
       .end(),
 
   'show any added task in table': (browser: NBrowser) =>
     browser
-      .url(URL)
+      .loadAppAndClickAwayWelcomeDialog(URL)
       .waitForElementVisible(ADD_TASK_BTN_SEL)
       .click(ADD_TASK_BTN_SEL)
       .waitForElementVisible(ADD_TASK_GLOBAL_SEL)

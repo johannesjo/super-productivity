@@ -21,7 +21,7 @@ module.exports = {
 
   'should add a scheduled tasks': (browser: NBrowser) =>
     browser
-      .url(WORK_VIEW_URL)
+      .loadAppAndClickAwayWelcomeDialog(WORK_VIEW_URL)
       .waitForElementPresent(READY_TO_WORK_BTN)
       .addTaskWithReminder({ title: '0 test task koko', scheduleTime: Date.now() })
       .waitForElementVisible(TASK)
@@ -37,7 +37,7 @@ module.exports = {
 
   'should add multiple scheduled tasks': (browser: NBrowser) =>
     browser
-      .url(WORK_VIEW_URL)
+      .loadAppAndClickAwayWelcomeDialog(WORK_VIEW_URL)
       .waitForElementPresent(READY_TO_WORK_BTN)
       .addTaskWithReminder({ title: '0 test task koko', taskSel: TASK })
       .addTaskWithReminder({ title: '2 hihihi', taskSel: TASK_2 })

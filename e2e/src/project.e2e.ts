@@ -34,7 +34,7 @@ module.exports = {
 
   'navigate to project settings': (browser: NBrowser) =>
     browser
-      .url(BASE_URL)
+      .loadAppAndClickAwayWelcomeDialog()
       .waitForElementVisible(EXPAND_PROJECT_BTN)
       .click(EXPAND_PROJECT_BTN)
       .waitForElementVisible(DEFAULT_PROJECT_BTN)
@@ -53,7 +53,7 @@ module.exports = {
 
   'create project': (browser: NBrowser) =>
     browser
-      .url(BASE_URL)
+      .loadAppAndClickAwayWelcomeDialog()
       .waitForElementVisible(EXPAND_PROJECT_BTN)
       .click(EXPAND_PROJECT_BTN)
       .waitForElementVisible(CREATE_PROJECT_BTN)

@@ -10,6 +10,7 @@ export interface NBrowser extends NightwatchBrowser {
   addTask: (taskTitle: string) => NBrowser;
   addNote: (noteTitle: string) => NBrowser;
   goToDefaultProject: () => NBrowser;
+  loadAppAndClickAwayWelcomeDialog: (url?: string) => NBrowser;
   openPanelForTask: (taskSel: string) => NBrowser;
   // TODO use object for params
   addTaskWithReminder: (params: AddTaskWithReminderParams) => NBrowser;

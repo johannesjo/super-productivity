@@ -13,7 +13,7 @@ module.exports = {
 
   'should add task via key combo': (browser: NBrowser) =>
     browser
-      .url(WORK_VIEW_URL)
+      .loadAppAndClickAwayWelcomeDialog(WORK_VIEW_URL)
       .waitForElementVisible(READY_TO_WORK_BTN)
       .addTask('0 test task koko')
       .waitForElementVisible(TASK)
@@ -23,7 +23,7 @@ module.exports = {
 
   'should add a task from initial bar': (browser: NBrowser) =>
     browser
-      .url(WORK_VIEW_URL)
+      .loadAppAndClickAwayWelcomeDialog(WORK_VIEW_URL)
       .waitForElementVisible(ADD_TASK_INITIAL)
 
       .setValue(ADD_TASK_INITIAL, '1 test task hihi')
@@ -36,7 +36,7 @@ module.exports = {
 
   'should add 2 tasks from initial bar': (browser: NBrowser) =>
     browser
-      .url(WORK_VIEW_URL)
+      .loadAppAndClickAwayWelcomeDialog(WORK_VIEW_URL)
       .waitForElementVisible(ADD_TASK_INITIAL)
 
       .setValue(ADD_TASK_INITIAL, '2 test task hihi')
@@ -52,7 +52,7 @@ module.exports = {
 
   'should add multiple tasks from header button': (browser: NBrowser) =>
     browser
-      .url(WORK_VIEW_URL)
+      .loadAppAndClickAwayWelcomeDialog(WORK_VIEW_URL)
       .waitForElementVisible(ADD_TASK_BTN)
       .click(ADD_TASK_BTN)
       .waitForElementVisible(ADD_TASK_GLOBAL)
@@ -71,7 +71,7 @@ module.exports = {
 
   'should still show created task after reload': (browser: NBrowser) =>
     browser
-      .url(WORK_VIEW_URL)
+      .loadAppAndClickAwayWelcomeDialog(WORK_VIEW_URL)
       .waitForElementVisible(READY_TO_WORK_BTN)
       .addTask('0 test task lolo')
       .waitForElementVisible(TASK)
@@ -85,7 +85,7 @@ module.exports = {
   'should add 3 tasks from initial bar and remove 2 of them via the default keyboard shortcut':
     (browser: NBrowser) =>
       browser
-        .url(WORK_VIEW_URL)
+        .loadAppAndClickAwayWelcomeDialog(WORK_VIEW_URL)
         .waitForElementVisible(ADD_TASK_INITIAL)
 
         .setValue(ADD_TASK_INITIAL, '1 test task hihi')

@@ -11,7 +11,7 @@ module.exports = {
 
   'should add task with project via short syntax': (browser: NBrowser) =>
     browser
-      .url(WORK_VIEW_URL)
+      .loadAppAndClickAwayWelcomeDialog(WORK_VIEW_URL)
       .waitForElementVisible(READY_TO_WORK_BTN)
       .addTask('0 test task koko +s')
       .waitForElementVisible(TASK)
