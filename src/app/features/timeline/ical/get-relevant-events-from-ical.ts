@@ -5,6 +5,8 @@ import { TimelineFromCalendarEvent } from '../timeline.model';
 // NOTE: this sucks and is slow, but writing a new ical parser would be very hard... :(
 
 const TWO_MONTHS = 60 * 60 * 1000 * 24 * 62;
+const DEFAULT_DURATION = 15 * 60 * 1000;
+
 export const getRelevantEventsFromIcal = (
   icalData: string,
 ): TimelineFromCalendarEvent[] => {
@@ -70,7 +72,10 @@ const getForReoccurring = (
 
 const convertVEventToTimelineEvent = (vevent: any): TimelineFromCalendarEvent => {
   const start = vevent.getFirstPropertyValue('dtstart').toJSDate().getTime();
-  const end = vevent.getFirstPropertyValue('dtend').toJSDate().getTime();
+  // NOTE: dtend might not always be defined for some reason @see #1814
+  const endVal = vevent.getFirstPropertyValue('dtend');
+  const end = endVal ? endVal.toJSDate().getTime() : start + DEFAULT_DURATION;
+
   return {
     title: vevent.getFirstPropertyValue('summary'),
     start,
