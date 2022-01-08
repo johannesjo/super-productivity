@@ -28,7 +28,6 @@ export class WelcomeModule {
     ) {
       this._dataInitService.isAllDataLoadedInitially$
         .pipe(
-          first(),
           concatMap(() => this._projectService.list$.pipe(first())),
           switchMap((projectList) => {
             if (projectList.length <= 2) {
@@ -40,7 +39,6 @@ export class WelcomeModule {
               return EMPTY;
             }
           }),
-          first(),
         )
         .subscribe((dialogRes) => {
           if (dialogRes === true) {
