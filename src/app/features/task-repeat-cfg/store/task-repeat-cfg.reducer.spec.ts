@@ -26,14 +26,15 @@ const DAY = 24 * 60 * 60 * 1000;
 // Monday 9.1.2022
 const FAKE_MONDAY = 1641797082974;
 const FULL_WEEK = [0, 1, 2, 3, 4, 5, 6].map((v) => FAKE_MONDAY + v * DAY);
+
 const dummyRepeatable = (id: string, fields: Partial<TaskRepeatCfg>): TaskRepeatCfg => ({
   ...DUMMY_REPEATABLE_TASK,
   id,
   ...fields,
 });
 
-describe('taskRepeatCfg selectors', () => {
-  describe('selectTaskRepeatCfgsDueOnDay', () => {
+describe('selectTaskRepeatCfgsDueOnDay', () => {
+  describe('for week days', () => {
     it('should return available for day', () => {
       const result = selectTaskRepeatCfgsDueOnDay.projector(
         [dummyRepeatable('R1', { monday: true })],
@@ -56,6 +57,29 @@ describe('taskRepeatCfg selectors', () => {
           .map((item) => item.id),
       );
       expect(results).toEqual([['R1'], [], ['R2'], [], [], [], []]);
+    });
+  });
+
+  describe('for DAILY', () => {
+    it('should work for a week', () => {
+      const repeatableTasks = [
+        dummyRepeatable('R1', { repeatCycle: 'DAILY' }),
+        dummyRepeatable('R2', { repeatCycle: 'DAILY' }),
+      ];
+      const results = FULL_WEEK.map((dayTimestamp) =>
+        selectTaskRepeatCfgsDueOnDay
+          .projector(repeatableTasks, { dayDate: dayTimestamp })
+          .map((item) => item.id),
+      );
+      expect(results).toEqual([
+        ['R1', 'R2'],
+        ['R1', 'R2'],
+        ['R1', 'R2'],
+        ['R1', 'R2'],
+        ['R1', 'R2'],
+        ['R1', 'R2'],
+        ['R1', 'R2'],
+      ]);
     });
   });
 });

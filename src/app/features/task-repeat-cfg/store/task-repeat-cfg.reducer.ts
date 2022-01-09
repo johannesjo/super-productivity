@@ -57,19 +57,30 @@ export const selectTaskRepeatCfgsDueOnDay = createSelector(
     taskRepeatCfgs: TaskRepeatCfg[],
     { dayDate }: { dayDate: number },
   ): TaskRepeatCfg[] => {
-    console.log(taskRepeatCfgs, dayDate);
-
-    const day = new Date(dayDate).getDay();
-    const dayStr: keyof TaskRepeatCfg = TASK_REPEAT_WEEKDAY_MAP[day];
+    const todayDay = new Date(dayDate).getDay();
+    const todayDayStr: keyof TaskRepeatCfg = TASK_REPEAT_WEEKDAY_MAP[todayDay];
     return (
       taskRepeatCfgs &&
-      taskRepeatCfgs.filter(
-        (taskRepeatCfg: TaskRepeatCfg) =>
-          taskRepeatCfg[dayStr] &&
-          !isSameDay(taskRepeatCfg.lastTaskCreation, dayDate) &&
-          // also check for if future instance was already created via the work-view button
-          dayDate >= taskRepeatCfg.lastTaskCreation,
-      )
+      taskRepeatCfgs.filter((taskRepeatCfg: TaskRepeatCfg) => {
+        switch (taskRepeatCfg.repeatCycle) {
+          case 'DAILY': {
+            return (
+              !isSameDay(taskRepeatCfg.lastTaskCreation, dayDate) &&
+              // also check for if future instance was already created via the work-view button
+              dayDate >= taskRepeatCfg.lastTaskCreation
+            );
+          }
+          case 'WEEKLY':
+          default: {
+            return (
+              taskRepeatCfg[todayDayStr] &&
+              !isSameDay(taskRepeatCfg.lastTaskCreation, dayDate) &&
+              // also check for if future instance was already created via the work-view button
+              dayDate >= taskRepeatCfg.lastTaskCreation
+            );
+          }
+        }
+      })
     );
   },
 );
