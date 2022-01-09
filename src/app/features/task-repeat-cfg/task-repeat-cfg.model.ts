@@ -12,15 +12,22 @@ export const TASK_REPEAT_WEEKDAY_MAP: (keyof TaskRepeatCfg)[] = [
   'saturday',
 ];
 
+export type RepeatCycleOption = 'DAILY' | 'WEEKLY' | 'MONTHLY' | 'YEARLY';
+
 export interface TaskRepeatCfgCopy {
   id: string;
   projectId: string | null;
   lastTaskCreation: number;
   title: string | null;
   defaultEstimate: number | undefined;
-  // TODO migrate all existing to undefined
   startTime: string | undefined;
   remindAt: TaskReminderOptionId | undefined;
+  tagIds: string[];
+  order: number;
+
+  // actual repeat cfg fields
+  isPaused: boolean;
+  repeatCycle: RepeatCycleOption;
   monday: boolean;
   tuesday: boolean;
   wednesday: boolean;
@@ -28,9 +35,6 @@ export interface TaskRepeatCfgCopy {
   friday: boolean;
   saturday: boolean;
   sunday: boolean;
-  // isAddToBottom: boolean;
-  tagIds: string[];
-  order: number;
 }
 
 export type TaskRepeatCfg = Readonly<TaskRepeatCfgCopy>;
@@ -52,6 +56,8 @@ export const DEFAULT_TASK_REPEAT_CFG: Omit<TaskRepeatCfgCopy, 'id'> = {
   startTime: undefined,
   remindAt: undefined,
 
+  isPaused: false,
+  repeatCycle: 'WEEKLY',
   monday: true,
   tuesday: true,
   wednesday: true,
