@@ -1263,5 +1263,50 @@ describe('mapToViewEntries()', () => {
       //   getDateTimeFromClockString('10:00', 24 * 60 * 60 * 1000),
       // );
     });
+
+    it('should work for 0 duration calenderWithItems', () => {
+      const d = {
+        calendarWithItems: [
+          {
+            icon: 'testICON',
+            items: [
+              {
+                start: getDateTimeFromClockString('15:00', 0),
+                duration: 0,
+              },
+            ],
+          },
+        ],
+        tasks: [
+          {
+            timeSpent: 0,
+            timeEstimate: hours(5),
+            title: 'Task',
+            reminderId: null,
+            plannedAt: null,
+          },
+        ],
+        scheduledTasks: [],
+        repeatTaskProjections: [],
+        workStartEndCfg: { startTime: '14:00', endTime: '20:00' },
+        now: getDateTimeFromClockString('12:00', 0),
+      } as any;
+
+      const r = mapToTimelineViewEntries(
+        d.tasks,
+        d.scheduledTasks,
+        d.repeatTaskProjections,
+        d.calendarWithItems,
+        'SCHEDULED_CURRENT_ID',
+        d.workStartEndCfg,
+        d.now,
+      );
+
+      expect(r[0].type).toEqual(TimelineViewEntryType.SplitTask);
+      expect(r[1].type).toEqual(TimelineViewEntryType.CalendarEvent);
+      expect(r[2].type).toEqual(TimelineViewEntryType.SplitTaskContinuedLast);
+      expect(r.length).toBe(3);
+      expect(r[2].start).toEqual(r[1].start);
+    });
   });
 });

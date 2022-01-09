@@ -2,6 +2,7 @@ import { createSortedBlockerBlocks } from './create-sorted-blocker-blocks';
 import { TaskReminderOptionId, TaskWithReminder } from '../../tasks/task.model';
 import { getDateTimeFromClockString } from '../../../util/get-date-time-from-clock-string';
 import { TaskRepeatCfg } from '../../task-repeat-cfg/task-repeat-cfg.model';
+import { TimelineCalendarMapEntry } from '../timeline.model';
 
 const minutes = (n: number): number => n * 60 * 1000;
 const hours = (n: number): number => 60 * minutes(n);
@@ -986,6 +987,68 @@ describe('createBlockerBlocks()', () => {
       expect(r[2].end).toEqual(208800000);
       expect(r[2].entries.length).toEqual(1);
       expect(r[4].entries.length).toEqual(2);
+    });
+  });
+
+  describe('icalEventMap', () => {
+    it('should work for calendar events', () => {
+      const icalEventMap: TimelineCalendarMapEntry[] = [
+        {
+          icon: '',
+          items: [
+            {
+              start: getDateTimeFromClockString('10:00', 24 * 60 * 60 * 1000),
+              title: 'XXX',
+              icon: 'aaa',
+              duration: hours(1),
+            },
+          ],
+        },
+      ];
+      const fakeTasks: TaskWithReminder[] = [
+        {
+          id: 'S1',
+          timeSpent: 0,
+          timeEstimate: hours(2),
+          title: 'Scheduled 1 15:00',
+          reminderId: 'rhCi_JJyP',
+          plannedAt: getDateTimeFromClockString('9:20', 0),
+        },
+      ] as any;
+      const r = createSortedBlockerBlocks(fakeTasks, [], icalEventMap, undefined, 0);
+      expect(r).toEqual([
+        {
+          end: 37200000,
+          entries: [
+            {
+              data: {
+                id: 'S1',
+                plannedAt: 30000000,
+                reminderId: 'rhCi_JJyP',
+                timeEstimate: 7200000,
+                timeSpent: 0,
+                title: 'Scheduled 1 15:00',
+              },
+              end: 37200000,
+              start: 30000000,
+              type: 'ScheduledTask',
+            },
+          ],
+          start: 30000000,
+        },
+        {
+          end: 122400000,
+          entries: [
+            {
+              data: { duration: 3600000, icon: '', start: 118800000, title: 'XXX' },
+              end: 122400000,
+              start: 118800000,
+              type: 'CalendarEvent',
+            },
+          ],
+          start: 118800000,
+        },
+      ] as any);
     });
   });
 });
