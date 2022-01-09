@@ -57,6 +57,8 @@ export const selectTaskRepeatCfgsDueOnDay = createSelector(
     taskRepeatCfgs: TaskRepeatCfg[],
     { dayDate }: { dayDate: number },
   ): TaskRepeatCfg[] => {
+    console.log(taskRepeatCfgs, dayDate);
+
     const day = new Date(dayDate).getDay();
     const dayStr: keyof TaskRepeatCfg = TASK_REPEAT_WEEKDAY_MAP[day];
     return (

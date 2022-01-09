@@ -480,7 +480,7 @@ describe('isValidAppData()', () => {
       ...fakeEntityStateFromArray<Note>([
         {
           id: 'NOOOTE1',
-          title: 'NOOOTE1',
+          content: 'NOOOTE1',
         },
       ]),
       todayOrder: ['MISSING'],

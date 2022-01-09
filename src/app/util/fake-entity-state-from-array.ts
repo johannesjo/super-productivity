@@ -1,11 +1,9 @@
 import { Dictionary, EntityState } from '@ngrx/entity';
 import { arrayToDictionary } from './array-to-dictionary';
 
-export const fakeEntityStateFromArray = <T>(
-  items: { [key: string]: any }[],
-): EntityState<T> => {
+export const fakeEntityStateFromArray = <T>(items: Partial<T>[]): EntityState<T> => {
   const dict = arrayToDictionary(items) as Dictionary<T>;
-  const ids = items.map((item) => item.id);
+  const ids = items.map((item) => (item as any).id);
   return {
     entities: dict,
     ids,
