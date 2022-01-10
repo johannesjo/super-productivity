@@ -13,10 +13,7 @@ import { DEFAULT_TASK_REPEAT_CFG, TaskRepeatCfgCopy } from '../task-repeat-cfg.m
 import { Observable, Subscription } from 'rxjs';
 import { FormlyFieldConfig } from '@ngx-formly/core';
 import { FormGroup } from '@angular/forms';
-import {
-  TASK_REPEAT_CFG_FORM_CFG_BASE,
-  TASK_REPEAT_CFG_FORM_CFG_REPEAT,
-} from './task-repeat-cfg-form.const';
+import { TASK_REPEAT_CFG_FORM_CFG_BEFORE_TAGS } from './task-repeat-cfg-form.const';
 import { T } from '../../../t.const';
 import { TagService } from '../../tag/tag.service';
 import { unique } from '../../../util/unique';
@@ -47,9 +44,8 @@ export class DialogEditTaskRepeatCfgComponent implements OnInit, OnDestroy {
   taskRepeatCfgId: string | null = this.task.repeatCfgId;
   isEdit: boolean = !!this.taskRepeatCfgId;
 
-  TASK_REPEAT_CFG_FORM_CFG_BASE: FormlyFieldConfig[] = TASK_REPEAT_CFG_FORM_CFG_BASE;
-  // TASK_REPEAT_CFG_FORM_CFG_BASE: FormlyFieldConfig[] = [];
-  TASK_REPEAT_CFG_FORM_CFG_REPEAT: FormlyFieldConfig[] = TASK_REPEAT_CFG_FORM_CFG_REPEAT;
+  TASK_REPEAT_CFG_FORM_CFG_BEFORE_TAGS: FormlyFieldConfig[] =
+    TASK_REPEAT_CFG_FORM_CFG_BEFORE_TAGS;
 
   form: FormGroup = new FormGroup({});
   tagSuggestions$: Observable<Tag[]> = this._tagService.tags$;

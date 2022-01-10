@@ -4,7 +4,7 @@ import { isValidSplitTime } from '../../../util/is-valid-split-time';
 import { TASK_REMINDER_OPTIONS } from '../../tasks/dialog-add-task-reminder/task-reminder-options.const';
 import { getWorklogStr } from '../../../util/get-work-log-str';
 
-export const TASK_REPEAT_CFG_FORM_CFG_BASE: FormlyFieldConfig[] = [
+export const TASK_REPEAT_CFG_FORM_CFG_BEFORE_TAGS: FormlyFieldConfig[] = [
   {
     key: 'title',
     type: 'input',
@@ -12,52 +12,8 @@ export const TASK_REPEAT_CFG_FORM_CFG_BASE: FormlyFieldConfig[] = [
       label: T.F.TASK_REPEAT.F.TITLE,
     },
   },
-  {
-    key: 'defaultEstimate',
-    type: 'duration',
-    templateOptions: {
-      label: T.F.TASK_REPEAT.F.DEFAULT_ESTIMATE,
-      description: T.G.DURATION_DESCRIPTION,
-    },
-  },
-  {
-    key: 'startTime',
-    type: 'input',
-    templateOptions: {
-      label: T.F.TASK_REPEAT.F.START_TIME,
-      description: T.F.TASK_REPEAT.F.START_TIME_DESCRIPTION,
-    },
-    validators: {
-      validTimeString: (c: { value: string | undefined }) => {
-        return !c.value || isValidSplitTime(c.value);
-      },
-    },
-  },
-  {
-    key: 'remindAt',
-    type: 'select',
-    hideExpression: '!model.startTime',
-    templateOptions: {
-      required: true,
-      label: T.F.TASK_REPEAT.F.REMIND_AT,
-      options: TASK_REMINDER_OPTIONS,
-      valueProp: 'value',
-      labelProp: 'label',
-      placeholder: T.F.TASK_REPEAT.F.REMIND_AT_PLACEHOLDER,
-    },
-  },
-  {
-    key: 'order',
-    type: 'input',
-    templateOptions: {
-      label: T.F.TASK_REPEAT.F.ORDER,
-      type: 'number',
-      description: T.F.TASK_REPEAT.F.ORDER_DESCRIPTION,
-    },
-  },
-];
 
-export const TASK_REPEAT_CFG_FORM_CFG_REPEAT: FormlyFieldConfig[] = [
+  // REPEAT CFG
   {
     key: 'startDate',
     type: 'input',
@@ -152,4 +108,50 @@ export const TASK_REPEAT_CFG_FORM_CFG_REPEAT: FormlyFieldConfig[] = [
       label: T.F.TASK_REPEAT.F.SUNDAY,
     },
   },
+  // REPEAT CFG END
+  {
+    key: 'startTime',
+    type: 'input',
+    templateOptions: {
+      label: T.F.TASK_REPEAT.F.START_TIME,
+      description: T.F.TASK_REPEAT.F.START_TIME_DESCRIPTION,
+    },
+    validators: {
+      validTimeString: (c: { value: string | undefined }) => {
+        return !c.value || isValidSplitTime(c.value);
+      },
+    },
+  },
+  {
+    key: 'remindAt',
+    type: 'select',
+    hideExpression: '!model.startTime',
+    templateOptions: {
+      required: true,
+      label: T.F.TASK_REPEAT.F.REMIND_AT,
+      options: TASK_REMINDER_OPTIONS,
+      valueProp: 'value',
+      labelProp: 'label',
+      placeholder: T.F.TASK_REPEAT.F.REMIND_AT_PLACEHOLDER,
+    },
+  },
+  {
+    key: 'defaultEstimate',
+    type: 'duration',
+    templateOptions: {
+      label: T.F.TASK_REPEAT.F.DEFAULT_ESTIMATE,
+      description: T.G.DURATION_DESCRIPTION,
+    },
+  },
+  {
+    key: 'order',
+    type: 'input',
+    templateOptions: {
+      label: T.F.TASK_REPEAT.F.ORDER,
+      type: 'number',
+      description: T.F.TASK_REPEAT.F.ORDER_DESCRIPTION,
+    },
+  },
 ];
+
+export const TASK_REPEAT_CFG_FORM_CFG_AFTER_TAGS: FormlyFieldConfig[] = [];
