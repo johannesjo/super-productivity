@@ -11,9 +11,12 @@ import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { TaskRepeatCfgService } from '../task-repeat-cfg.service';
 import { DEFAULT_TASK_REPEAT_CFG, TaskRepeatCfgCopy } from '../task-repeat-cfg.model';
 import { Observable, Subscription } from 'rxjs';
-import { FormlyFieldConfig, FormlyFormOptions } from '@ngx-formly/core';
+import { FormlyFieldConfig } from '@ngx-formly/core';
 import { FormGroup } from '@angular/forms';
-import { TASK_REPEAT_CFG_FORM_CFG } from './task-repeat-cfg-form.const';
+import {
+  TASK_REPEAT_CFG_FORM_CFG_BASE,
+  TASK_REPEAT_CFG_FORM_CFG_REPEAT,
+} from './task-repeat-cfg-form.const';
 import { T } from '../../../t.const';
 import { TagService } from '../../tag/tag.service';
 import { unique } from '../../../util/unique';
@@ -44,9 +47,11 @@ export class DialogEditTaskRepeatCfgComponent implements OnInit, OnDestroy {
   taskRepeatCfgId: string | null = this.task.repeatCfgId;
   isEdit: boolean = !!this.taskRepeatCfgId;
 
-  fields: FormlyFieldConfig[] = TASK_REPEAT_CFG_FORM_CFG;
+  TASK_REPEAT_CFG_FORM_CFG_BASE: FormlyFieldConfig[] = TASK_REPEAT_CFG_FORM_CFG_BASE;
+  // TASK_REPEAT_CFG_FORM_CFG_BASE: FormlyFieldConfig[] = [];
+  TASK_REPEAT_CFG_FORM_CFG_REPEAT: FormlyFieldConfig[] = TASK_REPEAT_CFG_FORM_CFG_REPEAT;
+
   form: FormGroup = new FormGroup({});
-  options: FormlyFormOptions = {};
   tagSuggestions$: Observable<Tag[]> = this._tagService.tags$;
 
   private _subs: Subscription = new Subscription();

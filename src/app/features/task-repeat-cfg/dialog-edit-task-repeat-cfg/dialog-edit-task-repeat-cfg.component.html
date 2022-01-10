@@ -13,24 +13,32 @@
       <p>{{T.F.TASK_REPEAT.D_EDIT.HELP4|translate}}</p>
     </help-section>
 
-    <div class="form-wrapper">
-      <formly-form
-        (modelChange)="taskRepeatCfg=$event"
-        [fields]="fields"
-        [form]="form"
-        [model]="taskRepeatCfg"
-        [options]="options"
-      >
-      </formly-form>
+    <div class="form-wrapper" style="display: flex">
+      <div>
+        <formly-form
+          (modelChange)="taskRepeatCfg=$event"
+          [form]="form"
+          [fields]="TASK_REPEAT_CFG_FORM_CFG_BASE"
+          [model]="taskRepeatCfg"
+        ></formly-form>
+        <chip-list-input
+          (addItem)="addTag($event)"
+          (addNewItem)="addNewTag($event)"
+          (removeItem)="removeTag($event)"
+          [label]="T.F.TASK_REPEAT.D_EDIT.TAG_LABEL|translate"
+          [model]="taskRepeatCfg.tagIds"
+          [suggestions]="(tagSuggestions$|async)"
+        ></chip-list-input>
+      </div>
 
-      <chip-list-input
-        (addItem)="addTag($event)"
-        (addNewItem)="addNewTag($event)"
-        (removeItem)="removeTag($event)"
-        [label]="T.F.TASK_REPEAT.D_EDIT.TAG_LABEL|translate"
-        [model]="taskRepeatCfg.tagIds"
-        [suggestions]="(tagSuggestions$|async)"
-      ></chip-list-input>
+      <div>
+        <formly-form
+          [form]="form"
+          (modelChange)="taskRepeatCfg=$event"
+          [fields]="TASK_REPEAT_CFG_FORM_CFG_REPEAT"
+          [model]="taskRepeatCfg"
+        ></formly-form>
+      </div>
     </div>
   </mat-dialog-content>
 

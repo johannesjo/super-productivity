@@ -2,8 +2,9 @@ import { FormlyFieldConfig } from '@ngx-formly/core';
 import { T } from '../../../t.const';
 import { isValidSplitTime } from '../../../util/is-valid-split-time';
 import { TASK_REMINDER_OPTIONS } from '../../tasks/dialog-add-task-reminder/task-reminder-options.const';
+import { getWorklogStr } from '../../../util/get-work-log-str';
 
-export const TASK_REPEAT_CFG_FORM_CFG: FormlyFieldConfig[] = [
+export const TASK_REPEAT_CFG_FORM_CFG_BASE: FormlyFieldConfig[] = [
   {
     key: 'title',
     type: 'input',
@@ -46,8 +47,59 @@ export const TASK_REPEAT_CFG_FORM_CFG: FormlyFieldConfig[] = [
     },
   },
   {
+    key: 'order',
+    type: 'input',
+    templateOptions: {
+      label: T.F.TASK_REPEAT.F.ORDER,
+      type: 'number',
+      description: T.F.TASK_REPEAT.F.ORDER_DESCRIPTION,
+    },
+  },
+];
+
+export const TASK_REPEAT_CFG_FORM_CFG_REPEAT: FormlyFieldConfig[] = [
+  {
+    key: 'startDate',
+    type: 'input',
+    defaultValue: getWorklogStr(),
+    templateOptions: {
+      label: 'Start date',
+      required: true,
+      min: getWorklogStr() as any,
+      type: 'date',
+    },
+  },
+  {
+    key: 'repeatCycle',
+    type: 'select',
+    defaultValue: 'WEEKLY',
+    templateOptions: {
+      required: true,
+      label: T.F.GITLAB.FORM.SOURCE,
+      options: [
+        { value: 'DAILY', label: 'DAILY' },
+        { value: 'WEEKLY', label: 'WEEKLY' },
+        { value: 'MONTHLY', label: 'MONTHLY' },
+        { value: 'YEARLY', label: 'YEARLY' },
+      ],
+    },
+  },
+  {
+    key: 'repeatEvery',
+    type: 'input',
+    defaultValue: 1,
+    templateOptions: {
+      label: 'Repeat every X',
+      required: true,
+      min: 1,
+      max: 1000,
+      type: 'number',
+    },
+  },
+  {
     key: 'monday',
     type: 'checkbox',
+    hideExpression: (model: any) => model.repeatCycle !== 'WEEKLY',
     templateOptions: {
       label: T.F.TASK_REPEAT.F.MONDAY,
     },
@@ -55,6 +107,7 @@ export const TASK_REPEAT_CFG_FORM_CFG: FormlyFieldConfig[] = [
   {
     key: 'tuesday',
     type: 'checkbox',
+    hideExpression: (model: any) => model.repeatCycle !== 'WEEKLY',
     templateOptions: {
       label: T.F.TASK_REPEAT.F.TUESDAY,
     },
@@ -62,6 +115,7 @@ export const TASK_REPEAT_CFG_FORM_CFG: FormlyFieldConfig[] = [
   {
     key: 'wednesday',
     type: 'checkbox',
+    hideExpression: (model: any) => model.repeatCycle !== 'WEEKLY',
     templateOptions: {
       label: T.F.TASK_REPEAT.F.WEDNESDAY,
     },
@@ -69,6 +123,7 @@ export const TASK_REPEAT_CFG_FORM_CFG: FormlyFieldConfig[] = [
   {
     key: 'thursday',
     type: 'checkbox',
+    hideExpression: (model: any) => model.repeatCycle !== 'WEEKLY',
     templateOptions: {
       label: T.F.TASK_REPEAT.F.THURSDAY,
     },
@@ -76,6 +131,7 @@ export const TASK_REPEAT_CFG_FORM_CFG: FormlyFieldConfig[] = [
   {
     key: 'friday',
     type: 'checkbox',
+    hideExpression: (model: any) => model.repeatCycle !== 'WEEKLY',
     templateOptions: {
       label: T.F.TASK_REPEAT.F.FRIDAY,
     },
@@ -83,6 +139,7 @@ export const TASK_REPEAT_CFG_FORM_CFG: FormlyFieldConfig[] = [
   {
     key: 'saturday',
     type: 'checkbox',
+    hideExpression: (model: any) => model.repeatCycle !== 'WEEKLY',
     templateOptions: {
       label: T.F.TASK_REPEAT.F.SATURDAY,
     },
@@ -90,17 +147,9 @@ export const TASK_REPEAT_CFG_FORM_CFG: FormlyFieldConfig[] = [
   {
     key: 'sunday',
     type: 'checkbox',
+    hideExpression: (model: any) => model.repeatCycle !== 'WEEKLY',
     templateOptions: {
       label: T.F.TASK_REPEAT.F.SUNDAY,
-    },
-  },
-  {
-    key: 'order',
-    type: 'input',
-    templateOptions: {
-      label: T.F.TASK_REPEAT.F.ORDER,
-      type: 'number',
-      description: T.F.TASK_REPEAT.F.ORDER_DESCRIPTION,
     },
   },
 ];
