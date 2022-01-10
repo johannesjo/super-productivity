@@ -39,6 +39,7 @@ export class DialogEditTaskRepeatCfgComponent implements OnInit, OnDestroy {
     title: this.task.title,
     // NOTE: always add today tag, as that's likely what we want
     tagIds: unique([TODAY_TAG.id, ...this.task.tagIds]),
+    defaultEstimate: this.task.timeEstimate,
   };
 
   taskRepeatCfgInitial?: TaskRepeatCfgCopy;

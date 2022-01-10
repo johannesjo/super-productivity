@@ -19,6 +19,7 @@ import { isSameDay } from '../../../util/is-same-day';
 import { MODEL_VERSION_KEY } from '../../../app.constants';
 import { MODEL_VERSION } from '../../../core/model-version';
 import { getDiffInMonth } from '../../../util/get-diff-in-month';
+import { getDiffInWeeks } from '../../../util/get-diff-in-weeks';
 
 export const TASK_REPEAT_CFG_FEATURE_NAME = 'taskRepeatCfg';
 
@@ -60,8 +61,7 @@ export const selectTaskRepeatCfgsDueOnDay = createSelector(
   ): TaskRepeatCfg[] => {
     const dateToCheckTimestamp = dayDate;
     const dateToCheckDate = new Date(dateToCheckTimestamp);
-    const todayDay = dateToCheckDate.getDay();
-    const todayDayStr: keyof TaskRepeatCfg = TASK_REPEAT_WEEKDAY_MAP[todayDay];
+
     return (
       taskRepeatCfgs &&
       taskRepeatCfgs.filter((taskRepeatCfg: TaskRepeatCfg) => {
@@ -75,12 +75,31 @@ export const selectTaskRepeatCfgsDueOnDay = createSelector(
 
         switch (taskRepeatCfg.repeatCycle) {
           case 'DAILY': {
+            // NOTE: we ignore the start date for daily
             return true;
           }
-          case 'WEEKLY':
-          default: {
-            return taskRepeatCfg[todayDayStr];
+
+          case 'WEEKLY': {
+            if (!taskRepeatCfg.startDate) {
+              throw new Error('Repeat startDate needs to be defined for WEEKLY');
+            }
+            if (+taskRepeatCfg.repeatEvery < 1) {
+              throw new Error('Invalid repeatEvery value given for WEEKLY');
+            }
+            const startDateDate = new Date(taskRepeatCfg.startDate);
+
+            const todayDay = dateToCheckDate.getDay();
+            const todayDayStr: keyof TaskRepeatCfg = TASK_REPEAT_WEEKDAY_MAP[todayDay];
+            const diffInWeeks = getDiffInWeeks(startDateDate, dateToCheckDate);
+
+            return (
+              // start date is not in the future
+              diffInWeeks >= 0 &&
+              diffInWeeks % taskRepeatCfg.repeatEvery === 0 &&
+              taskRepeatCfg[todayDayStr]
+            );
           }
+
           case 'MONTHLY': {
             if (!taskRepeatCfg.startDate) {
               throw new Error('Repeat startDate needs to be defined for MONTHLY');

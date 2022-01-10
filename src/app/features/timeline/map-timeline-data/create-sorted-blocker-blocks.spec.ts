@@ -3,6 +3,7 @@ import { TaskReminderOptionId, TaskWithReminder } from '../../tasks/task.model';
 import { getDateTimeFromClockString } from '../../../util/get-date-time-from-clock-string';
 import { TimelineCalendarMapEntry } from '../timeline.model';
 import { TaskRepeatCfg } from '../../task-repeat-cfg/task-repeat-cfg.model';
+import { getWorklogStr } from '../../../util/get-work-log-str';
 
 const minutes = (n: number): number => n * 60 * 1000;
 const hours = (n: number): number => 60 * minutes(n);
@@ -905,7 +906,7 @@ describe('createBlockerBlocks()', () => {
       remindAt: undefined,
       isPaused: false,
       repeatCycle: 'WEEKLY',
-      startDate: undefined,
+      startDate: getWorklogStr(new Date(0)),
       repeatEvery: 1,
       monday: false,
       tuesday: false,

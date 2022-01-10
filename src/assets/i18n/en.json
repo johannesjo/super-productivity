@@ -887,7 +887,7 @@
         "ORDER": "Order",
         "ORDER_DESCRIPTION": "Creation order of repeatable tasks. Only affects repeatable tasks created at the same time. A lower value means a task will be created higher up the list, a higher number that it will be further down. A value greater than 0 means items are created at the bottom of normal tasks.",
         "Q_CUSTOM": "Custom repeat config",
-        "Q_DAILY": "Repeat every day",
+        "Q_DAILY": "Every day",
         "Q_MONTHLY_CURRENT_DATE": "Every month on the {{dateDayStr}}th",
         "Q_MONDAY_TO_FRIDAY": "Every monday to friday",
         "Q_WEEKLY_CURRENT_WEEKDAY": "Every week on {{weekdayStr}}",
