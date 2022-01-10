@@ -4,6 +4,7 @@ import { TaskRepeatCfg } from '../task-repeat-cfg.model';
 const DUMMY_REPEATABLE_TASK: TaskRepeatCfg = {
   id: 'REPEATABLE_DEFAULT',
   title: 'REPEATABLE_DEFAULT',
+  quickSetting: 'DAILY',
   lastTaskCreation: 60 * 60 * 1000,
   defaultEstimate: undefined,
   projectId: null,

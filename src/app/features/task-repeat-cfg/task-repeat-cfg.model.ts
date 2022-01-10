@@ -13,6 +13,13 @@ export const TASK_REPEAT_WEEKDAY_MAP: (keyof TaskRepeatCfg)[] = [
 ];
 
 export type RepeatCycleOption = 'DAILY' | 'WEEKLY' | 'MONTHLY' | 'YEARLY';
+export type RepeatQuickSetting =
+  | 'DAILY'
+  | 'WEEKLY_CURRENT_WEEKDAY'
+  | 'MONTHLY_CURRENT_DATE'
+  | 'MONDAY_TO_FRIDAY'
+  | 'YEARLY_CURRENT_DATE'
+  | 'CUSTOM';
 
 export interface TaskRepeatCfgCopy {
   id: string;
@@ -27,6 +34,8 @@ export interface TaskRepeatCfgCopy {
 
   // actual repeat cfg fields
   isPaused: boolean;
+  // has no direct effect, but is used to update values inside form
+  quickSetting: RepeatQuickSetting;
   repeatCycle: RepeatCycleOption;
   // worklog string; only in effect for monthly/yearly
   startDate: string | undefined;
@@ -61,6 +70,7 @@ export const DEFAULT_TASK_REPEAT_CFG: Omit<TaskRepeatCfgCopy, 'id'> = {
   repeatEvery: 1,
   remindAt: undefined,
   isPaused: false,
+  quickSetting: 'DAILY',
   repeatCycle: 'WEEKLY',
   monday: true,
   tuesday: true,
