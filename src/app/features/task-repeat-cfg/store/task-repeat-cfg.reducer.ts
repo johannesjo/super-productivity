@@ -18,6 +18,7 @@ import { migrateTaskRepeatCfgState } from '../migrate-task-repeat-cfg-state.util
 import { isSameDay } from '../../../util/is-same-day';
 import { MODEL_VERSION_KEY } from '../../../app.constants';
 import { MODEL_VERSION } from '../../../core/model-version';
+import { getDiffInMonth } from '../../../util/get-diff-in-month';
 
 export const TASK_REPEAT_CFG_FEATURE_NAME = 'taskRepeatCfg';
 
@@ -57,26 +58,46 @@ export const selectTaskRepeatCfgsDueOnDay = createSelector(
     taskRepeatCfgs: TaskRepeatCfg[],
     { dayDate }: { dayDate: number },
   ): TaskRepeatCfg[] => {
-    const todayDay = new Date(dayDate).getDay();
+    const dateToCheckTimestamp = dayDate;
+    const dateToCheckDate = new Date(dateToCheckTimestamp);
+    const todayDay = dateToCheckDate.getDay();
     const todayDayStr: keyof TaskRepeatCfg = TASK_REPEAT_WEEKDAY_MAP[todayDay];
     return (
       taskRepeatCfgs &&
       taskRepeatCfgs.filter((taskRepeatCfg: TaskRepeatCfg) => {
+        if (
+          isSameDay(taskRepeatCfg.lastTaskCreation, dateToCheckTimestamp) ||
+          // also check for if future instance was already created via the work-view button
+          dateToCheckTimestamp < taskRepeatCfg.lastTaskCreation
+        ) {
+          return false;
+        }
+
         switch (taskRepeatCfg.repeatCycle) {
           case 'DAILY': {
-            return (
-              !isSameDay(taskRepeatCfg.lastTaskCreation, dayDate) &&
-              // also check for if future instance was already created via the work-view button
-              dayDate >= taskRepeatCfg.lastTaskCreation
-            );
+            return true;
           }
           case 'WEEKLY':
           default: {
+            return taskRepeatCfg[todayDayStr];
+          }
+          case 'MONTHLY': {
+            if (!taskRepeatCfg.startDate) {
+              throw new Error('Repeat startDate needs to be defined for MONTHLY');
+            }
+            if (+taskRepeatCfg.repeatEvery < 1) {
+              throw new Error('Invalid repeatEvery value given for MONTHLY');
+            }
+            const startDateDate = new Date(taskRepeatCfg.startDate);
+            const dayDateForRepeat: number = +taskRepeatCfg.startDate.substr(-2);
+            const isCreationDayThisMonth = dateToCheckDate.getDate() === dayDateForRepeat;
+
+            const diffInMonth = getDiffInMonth(startDateDate, dateToCheckDate);
             return (
-              taskRepeatCfg[todayDayStr] &&
-              !isSameDay(taskRepeatCfg.lastTaskCreation, dayDate) &&
-              // also check for if future instance was already created via the work-view button
-              dayDate >= taskRepeatCfg.lastTaskCreation
+              isCreationDayThisMonth &&
+              // start date is not in the future
+              diffInMonth >= 0 &&
+              diffInMonth % taskRepeatCfg.repeatEvery === 0
             );
           }
         }

@@ -11,6 +11,8 @@ const DUMMY_REPEATABLE_TASK: TaskRepeatCfg = {
   remindAt: undefined,
   isPaused: false,
   repeatCycle: 'WEEKLY',
+  startDate: undefined,
+  repeatEvery: 1,
   monday: false,
   tuesday: false,
   wednesday: false,
@@ -23,9 +25,10 @@ const DUMMY_REPEATABLE_TASK: TaskRepeatCfg = {
 };
 
 const DAY = 24 * 60 * 60 * 1000;
-// Monday 9.1.2022
-const FAKE_MONDAY = 1641797082974;
-const FULL_WEEK = [0, 1, 2, 3, 4, 5, 6].map((v) => FAKE_MONDAY + v * DAY);
+
+const FAKE_MONDAY_THE_10TH = new Date('2022-01-10').getTime();
+// eslint-disable-next-line no-mixed-operators
+const FULL_WEEK = [0, 1, 2, 3, 4, 5, 6].map((v) => FAKE_MONDAY_THE_10TH + v * DAY);
 
 const dummyRepeatable = (id: string, fields: Partial<TaskRepeatCfg>): TaskRepeatCfg => ({
   ...DUMMY_REPEATABLE_TASK,
@@ -39,7 +42,7 @@ describe('selectTaskRepeatCfgsDueOnDay', () => {
       const result = selectTaskRepeatCfgsDueOnDay.projector(
         [dummyRepeatable('R1', { monday: true })],
         {
-          dayDate: 1641797082974,
+          dayDate: FAKE_MONDAY_THE_10TH,
         },
       );
       const resultIds = result.map((item) => item.id);
@@ -80,6 +83,71 @@ describe('selectTaskRepeatCfgsDueOnDay', () => {
         ['R1', 'R2'],
         ['R1', 'R2'],
       ]);
+    });
+  });
+
+  describe('for MONTHLY', () => {
+    it('should return cfg for startDate today', () => {
+      const result = selectTaskRepeatCfgsDueOnDay.projector(
+        [dummyRepeatable('R1', { repeatCycle: 'MONTHLY', startDate: '2022-01-10' })],
+        {
+          dayDate: FAKE_MONDAY_THE_10TH,
+        },
+      );
+      const resultIds = result.map((item) => item.id);
+      expect(resultIds).toEqual(['R1']);
+    });
+    it('should return cfg for startDate in the past', () => {
+      const result = selectTaskRepeatCfgsDueOnDay.projector(
+        [dummyRepeatable('R1', { repeatCycle: 'MONTHLY', startDate: '2022-01-10' })],
+        {
+          dayDate: new Date('2022-02-10').getTime(),
+        },
+      );
+      const resultIds = result.map((item) => item.id);
+      expect(resultIds).toEqual(['R1']);
+    });
+    it('should NOT return cfg for future startDate', () => {
+      const result = selectTaskRepeatCfgsDueOnDay.projector(
+        [dummyRepeatable('R1', { repeatCycle: 'MONTHLY', startDate: '2022-02-10' })],
+        {
+          dayDate: FAKE_MONDAY_THE_10TH,
+        },
+      );
+      const resultIds = result.map((item) => item.id);
+      expect(resultIds).toEqual([]);
+    });
+    it('should return cfg if repeatCycle matches', () => {
+      const result = selectTaskRepeatCfgsDueOnDay.projector(
+        [
+          dummyRepeatable('R1', {
+            repeatCycle: 'MONTHLY',
+            startDate: '2022-01-10',
+            repeatEvery: 2,
+          }),
+        ],
+        {
+          dayDate: new Date('2022-03-10').getTime(),
+        },
+      );
+      const resultIds = result.map((item) => item.id);
+      expect(resultIds).toEqual(['R1']);
+    });
+    it('should NOT return cfg if repeatCycle does NOT match', () => {
+      const result = selectTaskRepeatCfgsDueOnDay.projector(
+        [
+          dummyRepeatable('R1', {
+            repeatCycle: 'MONTHLY',
+            startDate: '2022-01-10',
+            repeatEvery: 3,
+          }),
+        ],
+        {
+          dayDate: new Date('2022-03-10').getTime(),
+        },
+      );
+      const resultIds = result.map((item) => item.id);
+      expect(resultIds).toEqual([]);
     });
   });
 });

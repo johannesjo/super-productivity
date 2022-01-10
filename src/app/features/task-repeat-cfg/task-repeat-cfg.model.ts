@@ -28,6 +28,9 @@ export interface TaskRepeatCfgCopy {
   // actual repeat cfg fields
   isPaused: boolean;
   repeatCycle: RepeatCycleOption;
+  // worklog string; only in effect for monthly/yearly
+  startDate: string | undefined;
+  repeatEvery: number;
   monday: boolean;
   tuesday: boolean;
   wednesday: boolean;
@@ -54,8 +57,9 @@ export const DEFAULT_TASK_REPEAT_CFG: Omit<TaskRepeatCfgCopy, 'id'> = {
   // lastTaskCreation: Date.now() - 24 * 60 * 60 * 1000,
 
   startTime: undefined,
+  startDate: undefined,
+  repeatEvery: 1,
   remindAt: undefined,
-
   isPaused: false,
   repeatCycle: 'WEEKLY',
   monday: true,

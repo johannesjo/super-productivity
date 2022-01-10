@@ -904,6 +904,8 @@ describe('createBlockerBlocks()', () => {
       remindAt: undefined,
       isPaused: false,
       repeatCycle: 'WEEKLY',
+      startDate: undefined,
+      repeatEvery: 1,
       monday: false,
       tuesday: false,
       wednesday: false,
