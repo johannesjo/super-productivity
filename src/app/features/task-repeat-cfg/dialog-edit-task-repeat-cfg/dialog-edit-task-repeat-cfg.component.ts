@@ -3,6 +3,7 @@ import {
   ChangeDetectorRef,
   Component,
   Inject,
+  LOCALE_ID,
   OnDestroy,
   OnInit,
 } from '@angular/core';
@@ -20,6 +21,7 @@ import { unique } from '../../../util/unique';
 import { Tag } from '../../tag/tag.model';
 import { exists } from '../../../util/exists';
 import { TODAY_TAG } from '../../tag/tag.const';
+import { TranslateService } from '@ngx-translate/core';
 
 // TASK_REPEAT_CFG_FORM_CFG
 @Component({
@@ -44,8 +46,7 @@ export class DialogEditTaskRepeatCfgComponent implements OnInit, OnDestroy {
   taskRepeatCfgId: string | null = this.task.repeatCfgId;
   isEdit: boolean = !!this.taskRepeatCfgId;
 
-  TASK_REPEAT_CFG_FORM_CFG_BEFORE_TAGS: FormlyFieldConfig[] =
-    TASK_REPEAT_CFG_FORM_CFG_BEFORE_TAGS;
+  TASK_REPEAT_CFG_FORM_CFG_BEFORE_TAGS: FormlyFieldConfig[];
 
   form: FormGroup = new FormGroup({});
   tagSuggestions$: Observable<Tag[]> = this._tagService.tags$;
@@ -57,8 +58,58 @@ export class DialogEditTaskRepeatCfgComponent implements OnInit, OnDestroy {
     private _cd: ChangeDetectorRef,
     private _taskRepeatCfgService: TaskRepeatCfgService,
     private _matDialogRef: MatDialogRef<DialogEditTaskRepeatCfgComponent>,
+    private _translateService: TranslateService,
+    @Inject(LOCALE_ID) private locale: string,
     @Inject(MAT_DIALOG_DATA) public data: { task: Task },
-  ) {}
+  ) {
+    this.TASK_REPEAT_CFG_FORM_CFG_BEFORE_TAGS = TASK_REPEAT_CFG_FORM_CFG_BEFORE_TAGS;
+
+    const today = new Date();
+    const weekdayStr = today.toLocaleDateString(locale, {
+      weekday: 'long',
+    });
+    const dateDayStr = today.toLocaleDateString(locale, {
+      day: 'numeric',
+    });
+    const dayAndMonthStr = today.toLocaleDateString(locale, {
+      day: 'numeric',
+      month: 'numeric',
+    });
+
+    (this.TASK_REPEAT_CFG_FORM_CFG_BEFORE_TAGS[1] as any).templateOptions.options = [
+      {
+        value: 'DAILY',
+        label: this._translateService.instant(T.F.TASK_REPEAT.F.Q_DAILY),
+      },
+      {
+        value: 'WEEKLY_CURRENT_WEEKDAY',
+        label: this._translateService.instant(
+          T.F.TASK_REPEAT.F.Q_WEEKLY_CURRENT_WEEKDAY,
+          { weekdayStr },
+        ),
+      },
+      {
+        value: 'MONTHLY_CURRENT_DATE',
+        label: this._translateService.instant(T.F.TASK_REPEAT.F.Q_MONTHLY_CURRENT_DATE, {
+          dateDayStr,
+        }),
+      },
+      {
+        value: 'MONDAY_TO_FRIDAY',
+        label: this._translateService.instant(T.F.TASK_REPEAT.F.Q_MONDAY_TO_FRIDAY),
+      },
+      {
+        value: 'YEARLY_CURRENT_DATE',
+        label: this._translateService.instant(T.F.TASK_REPEAT.F.Q_YEARLY_CURRENT_DATE, {
+          dayAndMonthStr,
+        }),
+      },
+      {
+        value: 'CUSTOM',
+        label: this._translateService.instant(T.F.TASK_REPEAT.F.Q_CUSTOM, {}),
+      },
+    ];
+  }
 
   ngOnInit(): void {
     if (this.isEdit && this.task.repeatCfgId) {

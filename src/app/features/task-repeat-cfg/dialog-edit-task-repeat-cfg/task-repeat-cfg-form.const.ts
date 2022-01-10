@@ -29,12 +29,22 @@ export const TASK_REPEAT_CFG_FORM_CFG_BEFORE_TAGS: FormlyFieldConfig[] = [
       label: T.F.TASK_REPEAT.F.TITLE,
     },
   },
-
   {
     key: 'quickSetting',
     type: 'select',
     defaultValue: 'DAILY',
     templateOptions: {
+      required: true,
+      label: T.F.TASK_REPEAT.F.QUICK_SETTING,
+      // NOTE replaced in component to allow for dynamic translation
+      options: [
+        // { value: 'DAILY', label: 'DAILY' },
+        // { value: 'WEEKLY_CURRENT_WEEKDAY', label: 'WEEKLY_CURRENT_WEEKDAY' },
+        // { value: 'MONTHLY_CURRENT_DATE', label: 'MONTHLY_CURRENT_DATE' },
+        // { value: 'MONDAY_TO_FRIDAY', label: 'MONDAY_TO_FRIDAY' },
+        // { value: 'YEARLY_CURRENT_DATE', label: 'YEARLY_CURRENT_DATE' },
+        // { value: 'CUSTOM', label: 'CUSTOM' },
+      ],
       change: (field, event) => {
         // field.formControl?.patchValue(event.value);
         switch (event.value as RepeatQuickSetting) {
@@ -90,16 +100,6 @@ export const TASK_REPEAT_CFG_FORM_CFG_BEFORE_TAGS: FormlyFieldConfig[] = [
           default:
         }
       },
-      required: true,
-      label: T.F.GITLAB.FORM.SOURCE,
-      options: [
-        { value: 'DAILY', label: 'DAILY' },
-        { value: 'WEEKLY_CURRENT_WEEKDAY', label: 'WEEKLY_CURRENT_WEEKDAY' },
-        { value: 'MONTHLY_CURRENT_DATE', label: 'MONTHLY_CURRENT_DATE' },
-        { value: 'MONDAY_TO_FRIDAY', label: 'MONDAY_TO_FRIDAY' },
-        { value: 'YEARLY_CURRENT_DATE', label: 'YEARLY_CURRENT_DATE' },
-        { value: 'CUSTOM', label: 'CUSTOM' },
-      ],
     },
   },
 
@@ -107,10 +107,10 @@ export const TASK_REPEAT_CFG_FORM_CFG_BEFORE_TAGS: FormlyFieldConfig[] = [
   {
     key: 'startDate',
     type: 'input',
-    // hideExpression: (model: any) => model.quickSetting !== 'CUSTOM',
+    hideExpression: (model: any) => model.quickSetting !== 'CUSTOM',
     defaultValue: getWorklogStr(),
     templateOptions: {
-      label: 'Start date',
+      label: T.F.TASK_REPEAT.F.START_DATE,
       required: true,
       min: getWorklogStr() as any,
       type: 'date',
@@ -119,26 +119,26 @@ export const TASK_REPEAT_CFG_FORM_CFG_BEFORE_TAGS: FormlyFieldConfig[] = [
   {
     key: 'repeatCycle',
     type: 'select',
-    // hideExpression: (model: any) => model.quickSetting !== 'CUSTOM',
+    hideExpression: (model: any) => model.quickSetting !== 'CUSTOM',
     defaultValue: 'WEEKLY',
     templateOptions: {
       required: true,
-      label: T.F.GITLAB.FORM.SOURCE,
+      label: T.F.TASK_REPEAT.F.REPEAT_CYCLE,
       options: [
-        { value: 'DAILY', label: 'DAILY' },
-        { value: 'WEEKLY', label: 'WEEKLY' },
-        { value: 'MONTHLY', label: 'MONTHLY' },
-        { value: 'YEARLY', label: 'YEARLY' },
+        { value: 'DAILY', label: T.F.TASK_REPEAT.F.C_DAILY },
+        { value: 'WEEKLY', label: T.F.TASK_REPEAT.F.C_WEEKLY },
+        { value: 'MONTHLY', label: T.F.TASK_REPEAT.F.C_MONTHLY },
+        { value: 'YEARLY', label: T.F.TASK_REPEAT.F.C_YEARLY },
       ],
     },
   },
   {
     key: 'repeatEvery',
     type: 'input',
-    // hideExpression: (model: any) => model.quickSetting !== 'CUSTOM',
+    hideExpression: (model: any) => model.quickSetting !== 'CUSTOM',
     defaultValue: 1,
     templateOptions: {
-      label: 'Repeat every X',
+      label: T.F.TASK_REPEAT.F.REPEAT_EVERY,
       required: true,
       min: 1,
       max: 1000,
@@ -148,8 +148,8 @@ export const TASK_REPEAT_CFG_FORM_CFG_BEFORE_TAGS: FormlyFieldConfig[] = [
   {
     key: 'monday',
     type: 'checkbox',
-    // hideExpression: (model: any) =>
-    //   model.quickSetting !== 'CUSTOM' || model.repeatCycle !== 'WEEKLY',
+    hideExpression: (model: any) =>
+      model.quickSetting !== 'CUSTOM' || model.repeatCycle !== 'WEEKLY',
     templateOptions: {
       label: T.F.TASK_REPEAT.F.MONDAY,
     },
@@ -157,8 +157,8 @@ export const TASK_REPEAT_CFG_FORM_CFG_BEFORE_TAGS: FormlyFieldConfig[] = [
   {
     key: 'tuesday',
     type: 'checkbox',
-    // hideExpression: (model: any) =>
-    //   model.quickSetting !== 'CUSTOM' || model.repeatCycle !== 'WEEKLY',
+    hideExpression: (model: any) =>
+      model.quickSetting !== 'CUSTOM' || model.repeatCycle !== 'WEEKLY',
     templateOptions: {
       label: T.F.TASK_REPEAT.F.TUESDAY,
     },
@@ -166,8 +166,8 @@ export const TASK_REPEAT_CFG_FORM_CFG_BEFORE_TAGS: FormlyFieldConfig[] = [
   {
     key: 'wednesday',
     type: 'checkbox',
-    // hideExpression: (model: any) =>
-    //   model.quickSetting !== 'CUSTOM' || model.repeatCycle !== 'WEEKLY',
+    hideExpression: (model: any) =>
+      model.quickSetting !== 'CUSTOM' || model.repeatCycle !== 'WEEKLY',
     templateOptions: {
       label: T.F.TASK_REPEAT.F.WEDNESDAY,
     },
@@ -175,8 +175,8 @@ export const TASK_REPEAT_CFG_FORM_CFG_BEFORE_TAGS: FormlyFieldConfig[] = [
   {
     key: 'thursday',
     type: 'checkbox',
-    // hideExpression: (model: any) =>
-    //   model.quickSetting !== 'CUSTOM' || model.repeatCycle !== 'WEEKLY',
+    hideExpression: (model: any) =>
+      model.quickSetting !== 'CUSTOM' || model.repeatCycle !== 'WEEKLY',
     templateOptions: {
       label: T.F.TASK_REPEAT.F.THURSDAY,
     },
@@ -184,8 +184,8 @@ export const TASK_REPEAT_CFG_FORM_CFG_BEFORE_TAGS: FormlyFieldConfig[] = [
   {
     key: 'friday',
     type: 'checkbox',
-    // hideExpression: (model: any) =>
-    //   model.quickSetting !== 'CUSTOM' || model.repeatCycle !== 'WEEKLY',
+    hideExpression: (model: any) =>
+      model.quickSetting !== 'CUSTOM' || model.repeatCycle !== 'WEEKLY',
     templateOptions: {
       label: T.F.TASK_REPEAT.F.FRIDAY,
     },
@@ -193,8 +193,8 @@ export const TASK_REPEAT_CFG_FORM_CFG_BEFORE_TAGS: FormlyFieldConfig[] = [
   {
     key: 'saturday',
     type: 'checkbox',
-    // hideExpression: (model: any) =>
-    //   model.quickSetting !== 'CUSTOM' || model.repeatCycle !== 'WEEKLY',
+    hideExpression: (model: any) =>
+      model.quickSetting !== 'CUSTOM' || model.repeatCycle !== 'WEEKLY',
     templateOptions: {
       label: T.F.TASK_REPEAT.F.SATURDAY,
     },
@@ -202,8 +202,8 @@ export const TASK_REPEAT_CFG_FORM_CFG_BEFORE_TAGS: FormlyFieldConfig[] = [
   {
     key: 'sunday',
     type: 'checkbox',
-    // hideExpression: (model: any) =>
-    //   model.quickSetting !== 'CUSTOM' || model.repeatCycle !== 'WEEKLY',
+    hideExpression: (model: any) =>
+      model.quickSetting !== 'CUSTOM' || model.repeatCycle !== 'WEEKLY',
     templateOptions: {
       label: T.F.TASK_REPEAT.F.SUNDAY,
     },
@@ -253,5 +253,3 @@ export const TASK_REPEAT_CFG_FORM_CFG_BEFORE_TAGS: FormlyFieldConfig[] = [
     },
   },
 ];
-
-export const TASK_REPEAT_CFG_FORM_CFG_AFTER_TAGS: FormlyFieldConfig[] = [];
