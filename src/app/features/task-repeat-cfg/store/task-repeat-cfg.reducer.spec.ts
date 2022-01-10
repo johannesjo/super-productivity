@@ -150,4 +150,69 @@ describe('selectTaskRepeatCfgsDueOnDay', () => {
       expect(resultIds).toEqual([]);
     });
   });
+
+  describe('for YEARLY', () => {
+    it('should return cfg for startDate today', () => {
+      const result = selectTaskRepeatCfgsDueOnDay.projector(
+        [dummyRepeatable('R1', { repeatCycle: 'YEARLY', startDate: '2022-01-10' })],
+        {
+          dayDate: FAKE_MONDAY_THE_10TH,
+        },
+      );
+      const resultIds = result.map((item) => item.id);
+      expect(resultIds).toEqual(['R1']);
+    });
+    it('should return cfg for startDate in the past', () => {
+      const result = selectTaskRepeatCfgsDueOnDay.projector(
+        [dummyRepeatable('R1', { repeatCycle: 'YEARLY', startDate: '2021-01-10' })],
+        {
+          dayDate: new Date('2022-01-10').getTime(),
+        },
+      );
+      const resultIds = result.map((item) => item.id);
+      expect(resultIds).toEqual(['R1']);
+    });
+    it('should NOT return cfg for future startDate', () => {
+      const result = selectTaskRepeatCfgsDueOnDay.projector(
+        [dummyRepeatable('R1', { repeatCycle: 'YEARLY', startDate: '2023-01-10' })],
+        {
+          dayDate: FAKE_MONDAY_THE_10TH,
+        },
+      );
+      const resultIds = result.map((item) => item.id);
+      expect(resultIds).toEqual([]);
+    });
+    it('should return cfg if repeatCycle matches', () => {
+      const result = selectTaskRepeatCfgsDueOnDay.projector(
+        [
+          dummyRepeatable('R1', {
+            repeatCycle: 'YEARLY',
+            startDate: '2024-01-10',
+            repeatEvery: 2,
+          }),
+        ],
+        {
+          dayDate: new Date('2024-01-10').getTime(),
+        },
+      );
+      const resultIds = result.map((item) => item.id);
+      expect(resultIds).toEqual(['R1']);
+    });
+    it('should NOT return cfg if repeatCycle does NOT match', () => {
+      const result = selectTaskRepeatCfgsDueOnDay.projector(
+        [
+          dummyRepeatable('R1', {
+            repeatCycle: 'YEARLY',
+            startDate: '2022-01-10',
+            repeatEvery: 2,
+          }),
+        ],
+        {
+          dayDate: new Date('2023-01-10').getTime(),
+        },
+      );
+      const resultIds = result.map((item) => item.id);
+      expect(resultIds).toEqual([]);
+    });
+  });
 });

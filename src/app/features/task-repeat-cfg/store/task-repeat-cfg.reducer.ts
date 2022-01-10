@@ -89,8 +89,8 @@ export const selectTaskRepeatCfgsDueOnDay = createSelector(
               throw new Error('Invalid repeatEvery value given for MONTHLY');
             }
             const startDateDate = new Date(taskRepeatCfg.startDate);
-            const dayDateForRepeat: number = +taskRepeatCfg.startDate.substr(-2);
-            const isCreationDayThisMonth = dateToCheckDate.getDate() === dayDateForRepeat;
+            const isCreationDayThisMonth =
+              dateToCheckDate.getDate() === startDateDate.getDate();
 
             const diffInMonth = getDiffInMonth(startDateDate, dateToCheckDate);
             return (
@@ -98,6 +98,29 @@ export const selectTaskRepeatCfgsDueOnDay = createSelector(
               // start date is not in the future
               diffInMonth >= 0 &&
               diffInMonth % taskRepeatCfg.repeatEvery === 0
+            );
+          }
+
+          case 'YEARLY': {
+            if (!taskRepeatCfg.startDate) {
+              throw new Error('Repeat startDate needs to be defined for YEARLY');
+            }
+            if (+taskRepeatCfg.repeatEvery < 1) {
+              throw new Error('Invalid repeatEvery value given for YEARLY');
+            }
+            const startDateDate = new Date(taskRepeatCfg.startDate);
+            const isRightMonthAndDay =
+              dateToCheckDate.getDate() === startDateDate.getDate() &&
+              dateToCheckDate.getMonth() === startDateDate.getMonth();
+
+            const diffInYears =
+              dateToCheckDate.getFullYear() - startDateDate.getFullYear();
+
+            return (
+              isRightMonthAndDay &&
+              // start date is not in the future
+              diffInYears >= 0 &&
+              diffInYears % taskRepeatCfg.repeatEvery === 0
             );
           }
         }
