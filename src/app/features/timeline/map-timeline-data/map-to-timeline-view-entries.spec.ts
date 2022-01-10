@@ -1173,7 +1173,7 @@ describe('mapToViewEntries()', () => {
             id: 'R1',
             title: 'Repeat 1 10:00',
             startTime: '10:00',
-            lastTaskCreation: 0,
+            lastTaskCreation: 60000,
             defaultEstimate: hours(1),
             monday: false,
             tuesday: false,

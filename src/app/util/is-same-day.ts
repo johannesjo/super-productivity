@@ -3,6 +3,7 @@ export const isSameDay = (date1: number | Date, date2: number | Date): boolean =
   const d2 = new Date(date2);
   const isValid = d1.getTime() > 0 && d2.getTime() > 0;
   if (!isValid) {
+    console.log(date1, date2);
     throw new Error('Invalid dates passed');
   }
   return (

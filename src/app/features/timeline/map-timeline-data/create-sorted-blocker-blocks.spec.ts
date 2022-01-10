@@ -921,7 +921,6 @@ describe('createBlockerBlocks()', () => {
           ...DUMMY_REPEATABLE_TASK,
           id: 'R1',
           startTime: '10:00',
-          lastTaskCreation: 0,
           defaultEstimate: hours(1),
           friday: true,
           remindAt: TaskReminderOptionId.AtStart,
@@ -981,6 +980,30 @@ describe('createBlockerBlocks()', () => {
       expect(r[2].end).toEqual(208800000);
       expect(r[2].entries.length).toEqual(1);
       expect(r[4].entries.length).toEqual(2);
+    });
+
+    it('should work for DAILY repeatable tasks', () => {
+      const fakeRepeatTaskCfgs: TaskRepeatCfg[] = [
+        {
+          ...DUMMY_REPEATABLE_TASK,
+          id: 'R1',
+          startTime: '10:00',
+          defaultEstimate: hours(1),
+          repeatCycle: 'DAILY',
+        },
+      ];
+      const r = createSortedBlockerBlocks([], fakeRepeatTaskCfgs, [], undefined, 0);
+      expect(r.length).toEqual(29);
+      expect(r[0].start).toEqual(
+        getDateTimeFromClockString('10:00', 24 * 60 * 60 * 1000),
+      );
+      expect(r[0].end).toEqual(getDateTimeFromClockString('11:00', 24 * 60 * 60 * 1000));
+      expect(r[28].start).toEqual(
+        getDateTimeFromClockString('10:00', 29 * 24 * 60 * 60 * 1000),
+      );
+      expect(r[28].end).toEqual(
+        getDateTimeFromClockString('11:00', 29 * 24 * 60 * 60 * 1000),
+      );
     });
   });
 

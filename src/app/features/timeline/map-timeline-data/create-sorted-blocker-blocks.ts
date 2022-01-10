@@ -7,10 +7,8 @@ import {
 } from '../timeline.model';
 import { getTimeLeftForTask } from '../../../util/get-time-left-for-task';
 import { getDateTimeFromClockString } from '../../../util/get-date-time-from-clock-string';
-import {
-  TASK_REPEAT_WEEKDAY_MAP,
-  TaskRepeatCfg,
-} from '../../task-repeat-cfg/task-repeat-cfg.model';
+import { TaskRepeatCfg } from '../../task-repeat-cfg/task-repeat-cfg.model';
+import { selectTaskRepeatCfgsDueOnDay } from '../../task-repeat-cfg/store/task-repeat-cfg.reducer';
 
 const PROJECTION_DAYS: number = 29;
 
@@ -53,40 +51,38 @@ const createBlockerBlocksForScheduledRepeatProjections = (
 ): BlockedBlock[] => {
   const blockedBlocks: BlockedBlock[] = [];
 
-  scheduledTaskRepeatCfgs.forEach((repeatCfg) => {
-    // NOTE: we start at 1 as we assume there already is a task for today
-    let i: number = 1;
-    while (i <= PROJECTION_DAYS) {
+  let i: number = 1;
+  while (i <= PROJECTION_DAYS) {
+    // eslint-disable-next-line no-mixed-operators
+    const currentDayTimestamp = now + i * 24 * 60 * 60 * 1000;
+    const allRepeatableTasksForDay = selectTaskRepeatCfgsDueOnDay.projector(
+      scheduledTaskRepeatCfgs,
+      {
+        dayDate: currentDayTimestamp,
+      },
+    );
+    i++;
+
+    allRepeatableTasksForDay.forEach((repeatCfg) => {
       if (!repeatCfg.startTime) {
         throw new Error('Timeline: No startTime for repeat projection');
       }
-      const start = getDateTimeFromClockString(
-        repeatCfg.startTime,
-        // prettier-ignore
-        now + (i * 24 * 60 * 60 * 1000),
-      );
-      const day = new Date(start).getDay();
-      const dayStr: keyof TaskRepeatCfg = TASK_REPEAT_WEEKDAY_MAP[day];
-      const isRepeatForDay: boolean = !!repeatCfg[dayStr];
-
-      if (isRepeatForDay && start > repeatCfg.lastTaskCreation) {
-        const end = start + (repeatCfg.defaultEstimate || 0);
-        blockedBlocks.push({
-          start,
-          end,
-          entries: [
-            {
-              type: BlockedBlockType.ScheduledRepeatProjection,
-              data: repeatCfg,
-              start,
-              end,
-            },
-          ],
-        });
-      }
-      i++;
-    }
-  });
+      const start = getDateTimeFromClockString(repeatCfg.startTime, currentDayTimestamp);
+      const end = start + (repeatCfg.defaultEstimate || 0);
+      blockedBlocks.push({
+        start,
+        end,
+        entries: [
+          {
+            type: BlockedBlockType.ScheduledRepeatProjection,
+            data: repeatCfg,
+            start,
+            end,
+          },
+        ],
+      });
+    });
+  }
 
   return blockedBlocks;
 };
