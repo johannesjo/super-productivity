@@ -8,7 +8,7 @@ export enum MODEL_VERSION {
   SIMPLE_COUNTER = 2.0,
   NOTE = 1.0,
   TAG = 1.0,
-  TASK_REPEAT = 1.3,
+  TASK_REPEAT = 1.4,
 
   // eslint-disable-next-line @typescript-eslint/naming-convention
   ___NOT_USED_YET___ = 0,

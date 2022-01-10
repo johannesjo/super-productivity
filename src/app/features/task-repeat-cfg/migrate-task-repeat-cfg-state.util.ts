@@ -1,9 +1,14 @@
 import { Dictionary } from '@ngrx/entity';
 import { MODEL_VERSION_KEY } from '../../app.constants';
 import { isMigrateModel } from '../../util/model-version';
-import { TaskRepeatCfg, TaskRepeatCfgState } from './task-repeat-cfg.model';
+import {
+  DEFAULT_TASK_REPEAT_CFG,
+  TaskRepeatCfg,
+  TaskRepeatCfgState,
+} from './task-repeat-cfg.model';
 import { isValidSplitTime } from '../../util/is-valid-split-time';
 import { MODEL_VERSION } from '../../core/model-version';
+import { getWorklogStr } from '../../util/get-work-log-str';
 
 export const migrateTaskRepeatCfgState = (
   taskRepeatState: TaskRepeatCfgState,
@@ -33,6 +38,7 @@ export const migrateTaskRepeatCfgState = (
 
 const _addNewFieldsToTaskRepeatCfgs = (taskRepeat: TaskRepeatCfg): TaskRepeatCfg => {
   return {
+    ...DEFAULT_TASK_REPEAT_CFG,
     ...taskRepeat,
     tagIds: taskRepeat.tagIds || [],
     startTime: taskRepeat.startTime || undefined,
@@ -42,6 +48,10 @@ const _addNewFieldsToTaskRepeatCfgs = (taskRepeat: TaskRepeatCfg): TaskRepeatCfg
         : (taskRepeat as any).isAddToBottom
         ? 1
         : 0,
+    quickSetting: taskRepeat.quickSetting || 'CUSTOM',
+    repeatCycle: taskRepeat.repeatCycle || 'WEEKLY',
+    repeatEvery: taskRepeat.repeatEvery || 1,
+    startDate: taskRepeat.startDate || getWorklogStr(),
   };
 };
 
