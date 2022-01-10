@@ -1,8 +1,8 @@
 import { createSortedBlockerBlocks } from './create-sorted-blocker-blocks';
 import { TaskReminderOptionId, TaskWithReminder } from '../../tasks/task.model';
 import { getDateTimeFromClockString } from '../../../util/get-date-time-from-clock-string';
-import { TaskRepeatCfg } from '../../task-repeat-cfg/task-repeat-cfg.model';
 import { TimelineCalendarMapEntry } from '../timeline.model';
+import { TaskRepeatCfg } from '../../task-repeat-cfg/task-repeat-cfg.model';
 
 const minutes = (n: number): number => n * 60 * 1000;
 const hours = (n: number): number => 60 * minutes(n);
@@ -894,26 +894,37 @@ describe('createBlockerBlocks()', () => {
   });
 
   describe('repeatTaskProjections', () => {
+    const DUMMY_REPEATABLE_TASK: TaskRepeatCfg = {
+      id: 'REPEATABLE_DEFAULT',
+      title: 'REPEATABLE_DEFAULT',
+      lastTaskCreation: 60 * 60 * 1000,
+      defaultEstimate: undefined,
+      projectId: null,
+      startTime: undefined,
+      remindAt: undefined,
+      isPaused: false,
+      repeatCycle: 'WEEKLY',
+      monday: false,
+      tuesday: false,
+      wednesday: false,
+      thursday: false,
+      friday: false,
+      saturday: false,
+      sunday: false,
+      tagIds: [],
+      order: 0,
+    };
+
     it('should work for a scheduled repeatable task', () => {
       const fakeRepeatTaskCfgs: TaskRepeatCfg[] = [
         {
+          ...DUMMY_REPEATABLE_TASK,
           id: 'R1',
-          title: 'Repeat 1 15:00',
           startTime: '10:00',
           lastTaskCreation: 0,
           defaultEstimate: hours(1),
-          monday: false,
-          tuesday: false,
-          wednesday: false,
-          thursday: false,
           friday: true,
-          saturday: false,
-          sunday: false,
-
-          projectId: null,
           remindAt: TaskReminderOptionId.AtStart,
-          order: 0,
-          tagIds: [],
         },
       ];
       const r = createSortedBlockerBlocks([], fakeRepeatTaskCfgs, [], undefined, 0);
@@ -927,31 +938,20 @@ describe('createBlockerBlocks()', () => {
     it('should work for different types of repeatable tasks', () => {
       const fakeRepeatTaskCfgs: TaskRepeatCfg[] = [
         {
+          ...DUMMY_REPEATABLE_TASK,
           id: 'R1',
           title: 'Repeat 1',
-          projectId: null,
           startTime: '10:00',
-          lastTaskCreation: 0,
           defaultEstimate: hours(1),
-          remindAt: TaskReminderOptionId.AtStart,
-          monday: false,
-          tuesday: false,
-          wednesday: false,
-          thursday: false,
-          friday: false,
-          saturday: false,
           sunday: true,
-          order: 0,
-          tagIds: [],
         },
         {
+          ...DUMMY_REPEATABLE_TASK,
           id: 'R2',
           title: 'Repeat 2',
-          projectId: null,
           startTime: '14:00',
           lastTaskCreation: getDateTimeFromClockString('22:20', 0),
           defaultEstimate: hours(1),
-          remindAt: TaskReminderOptionId.AtStart,
           monday: true,
           tuesday: true,
           wednesday: true,
@@ -959,17 +959,13 @@ describe('createBlockerBlocks()', () => {
           friday: true,
           saturday: true,
           sunday: true,
-          order: 0,
-          tagIds: [],
         },
         {
+          ...DUMMY_REPEATABLE_TASK,
           id: 'R3',
           title: 'Repeat 3 No Time',
-          projectId: null,
           startTime: '10:00',
-          lastTaskCreation: 0,
           defaultEstimate: hours(1),
-          remindAt: TaskReminderOptionId.AtStart,
           monday: true,
           tuesday: true,
           wednesday: true,
@@ -977,8 +973,6 @@ describe('createBlockerBlocks()', () => {
           friday: true,
           saturday: true,
           sunday: true,
-          order: 0,
-          tagIds: [],
         },
       ];
       const r = createSortedBlockerBlocks([], fakeRepeatTaskCfgs, [], undefined, 0);
