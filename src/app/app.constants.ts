@@ -100,6 +100,7 @@ export enum BodyClass {
   isDisableBackgroundGradient = 'isDisableBackgroundGradient',
   isEnabledBackgroundGradient = 'isEnabledBackgroundGradient',
   isDisableAnimations = 'isDisableAnimations',
+  isDataImportInProgress = 'isDataImportInProgress',
 }
 
 export enum MainContainerClass {

@@ -15,6 +15,7 @@ import { WorkContextThemeCfg } from '../../features/work-context/work-context.mo
 import { WorkContextService } from '../../features/work-context/work-context.service';
 import { combineLatest, Observable } from 'rxjs';
 import { IS_FIREFOX } from '../../util/is-firefox';
+import { ImexMetaService } from '../../imex/imex-meta/imex-meta.service';
 
 @Injectable({ providedIn: 'root' })
 export class GlobalThemeService {
@@ -55,6 +56,7 @@ export class GlobalThemeService {
     private _domSanitizer: DomSanitizer,
     private _chartThemeService: NgChartThemeService,
     private _chromeExtensionInterfaceService: ChromeExtensionInterfaceService,
+    private _imexMetaService: ImexMetaService,
   ) {}
 
   init(): void {
@@ -160,6 +162,17 @@ export class GlobalThemeService {
         this.document.body.classList.add(BodyClass.isDisableAnimations);
       } else {
         this.document.body.classList.remove(BodyClass.isDisableAnimations);
+      }
+    });
+
+    this._imexMetaService.isDataImportInProgress$.subscribe((isInProgress) => {
+      // timer(1000, 5000)
+      //   .pipe(map((val) => val % 2 === 0))
+      //   .subscribe((isInProgress) => {
+      if (isInProgress) {
+        this.document.body.classList.add(BodyClass.isDataImportInProgress);
+      } else {
+        this.document.body.classList.remove(BodyClass.isDataImportInProgress);
       }
     });
 
