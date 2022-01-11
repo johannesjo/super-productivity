@@ -4,7 +4,9 @@ import {
   ChangeDetectorRef,
   Component,
   HostListener,
+  Inject,
   Input,
+  LOCALE_ID,
   OnDestroy,
   QueryList,
   ViewChild,
@@ -50,7 +52,7 @@ import { fadeAnimation } from '../../../ui/animations/fade.ani';
 import { swirlAnimation } from '../../../ui/animations/swirl-in-out.ani';
 import { DialogTimeEstimateComponent } from '../dialog-time-estimate/dialog-time-estimate.component';
 import { MatDialog } from '@angular/material/dialog';
-import { isTouchOnly, IS_TOUCH_ONLY } from '../../../util/is-touch';
+import { IS_TOUCH_ONLY, isTouchOnly } from '../../../util/is-touch';
 import { DialogAddTaskReminderComponent } from '../dialog-add-task-reminder/dialog-add-task-reminder.component';
 import { AddTaskReminderInterface } from '../dialog-add-task-reminder/add-task-reminder-interface';
 import { ReminderCopy } from '../../reminder/reminder.model';
@@ -74,6 +76,7 @@ import { SS_JIRA_WONKY_COOKIE } from '../../../core/persistence/ls-keys.const';
 import { IS_MOBILE } from '../../../util/is-mobile';
 import { GlobalConfigService } from '../../config/global-config.service';
 import { shareReplayUntil } from '../../../util/share-replay-until';
+import { TranslateService } from '@ngx-translate/core';
 
 interface IssueAndType {
   id: string | number | null;
@@ -125,20 +128,93 @@ export class TaskAdditionalInfoComponent implements AfterViewInit, OnDestroy {
               if (!repeatCfg) {
                 return null;
               }
-              const days: (keyof TaskRepeatCfg)[] = [
-                'sunday',
-                'monday',
-                'tuesday',
-                'wednesday',
-                'thursday',
-                'friday',
-                'saturday',
-              ];
-              const localWeekDays = moment.weekdaysMin();
-              return days
-                .filter((day) => repeatCfg[day])
-                .map((day, index) => localWeekDays[days.indexOf(day)])
-                .join(', ');
+              const timeStr = repeatCfg.startTime || '';
+              const locale = this.locale;
+
+              switch (repeatCfg.quickSetting) {
+                case 'DAILY':
+                  return this._translateService.instant(
+                    timeStr
+                      ? T.F.TASK_REPEAT.ADD_INFO_PANEL.DAILY_AND_TIME
+                      : T.F.TASK_REPEAT.ADD_INFO_PANEL.DAILY,
+                    { timeStr },
+                  );
+                case 'MONDAY_TO_FRIDAY':
+                  return this._translateService.instant(
+                    timeStr
+                      ? T.F.TASK_REPEAT.ADD_INFO_PANEL.MONDAY_TO_FRIDAY_AND_TIME
+                      : T.F.TASK_REPEAT.ADD_INFO_PANEL.MONDAY_TO_FRIDAY,
+                    { timeStr },
+                  );
+                case 'WEEKLY_CURRENT_WEEKDAY':
+                  const weekdayStr = new Date(
+                    repeatCfg.startDate as string,
+                  ).toLocaleDateString(locale, {
+                    weekday: 'short',
+                  });
+                  return this._translateService.instant(
+                    timeStr
+                      ? T.F.TASK_REPEAT.ADD_INFO_PANEL.WEEKLY_CURRENT_WEEKDAY_AND_TIME
+                      : T.F.TASK_REPEAT.ADD_INFO_PANEL.WEEKLY_CURRENT_WEEKDAY,
+                    {
+                      weekdayStr,
+                      timeStr,
+                    },
+                  );
+                case 'MONTHLY_CURRENT_DATE':
+                  const dateDayStr = new Date(
+                    repeatCfg.startDate as string,
+                  ).toLocaleDateString(locale, {
+                    day: 'numeric',
+                  });
+                  return this._translateService.instant(
+                    timeStr
+                      ? T.F.TASK_REPEAT.ADD_INFO_PANEL.MONTHLY_CURRENT_DATE_AND_TIME
+                      : T.F.TASK_REPEAT.ADD_INFO_PANEL.MONTHLY_CURRENT_DATE,
+                    {
+                      dateDayStr,
+                      timeStr,
+                    },
+                  );
+
+                case 'YEARLY_CURRENT_DATE':
+                  const dayAndMonthStr = new Date(
+                    repeatCfg.startDate as string,
+                  ).toLocaleDateString(locale, {
+                    day: 'numeric',
+                    month: 'numeric',
+                  });
+                  return this._translateService.instant(
+                    timeStr
+                      ? T.F.TASK_REPEAT.ADD_INFO_PANEL.YEARLY_CURRENT_DATE_AND_TIME
+                      : T.F.TASK_REPEAT.ADD_INFO_PANEL.YEARLY_CURRENT_DATE,
+                    {
+                      dayAndMonthStr,
+                      timeStr,
+                    },
+                  );
+
+                case 'CUSTOM':
+                  switch (repeatCfg.repeatCycle) {
+                    case 'WEEKLY':
+                      const days: (keyof TaskRepeatCfg)[] = [
+                        'sunday',
+                        'monday',
+                        'tuesday',
+                        'wednesday',
+                        'thursday',
+                        'friday',
+                        'saturday',
+                      ];
+                      const localWeekDays = moment.weekdaysMin();
+                      return days
+                        .filter((day) => repeatCfg[day])
+                        .map((day, index) => localWeekDays[days.indexOf(day)])
+                        .join(', ');
+                  }
+              }
+
+              return '???????';
             }),
           )
         : of(null),
@@ -241,6 +317,8 @@ export class TaskAdditionalInfoComponent implements AfterViewInit, OnDestroy {
     private _projectService: ProjectService,
     private readonly _attachmentService: TaskAttachmentService,
     private _electronService: ElectronService,
+    private _translateService: TranslateService,
+    @Inject(LOCALE_ID) private locale: string,
     private _cd: ChangeDetectorRef,
   ) {
     // NOTE: needs to be assigned here before any setter is called

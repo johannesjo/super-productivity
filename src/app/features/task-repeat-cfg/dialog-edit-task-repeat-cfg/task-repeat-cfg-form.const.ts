@@ -157,7 +157,7 @@ export const TASK_REPEAT_CFG_FORM_CFG_BEFORE_TAGS: FormlyFieldConfig[] = [
     templateOptions: {
       label: T.F.TASK_REPEAT.F.START_DATE,
       required: true,
-      min: getWorklogStr() as any,
+      // min: getWorklogStr() as any,
       type: 'date',
     },
   },
