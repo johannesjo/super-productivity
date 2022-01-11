@@ -6,5 +6,6 @@ export const getDiffInWeeks = (d1: Date, d2: Date): number => {
   d2Copy.setHours(0, 0, 0, 0);
   let diff = (d2Copy.getTime() - d1Copy.getTime()) / 1000;
   diff /= 60 * 60 * 24 * 7;
+  // NOTE: we use math round to avoid JS math weirdness and summer winter time problems
   return Math.round(diff);
 };

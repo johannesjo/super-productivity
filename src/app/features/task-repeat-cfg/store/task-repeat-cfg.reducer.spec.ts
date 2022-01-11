@@ -62,9 +62,8 @@ describe('selectTaskRepeatCfgsDueOnDay', () => {
       FAKE_MONDAY_THE_10TH + DAY * 6,
       // eslint-disable-next-line no-mixed-operators
       FAKE_MONDAY_THE_10TH + DAY * 300,
-      // TODO fix special edge case
       // eslint-disable-next-line no-mixed-operators
-      // FAKE_MONDAY_THE_10TH + DAY * 150,
+      FAKE_MONDAY_THE_10TH + DAY * 150,
     ].forEach((dayDateStr) => {
       it('should return cfg for a for repeatEvery correctly', () => {
         const result = selectTaskRepeatCfgsDueOnDay.projector(
@@ -93,8 +92,7 @@ describe('selectTaskRepeatCfgsDueOnDay', () => {
       // eslint-disable-next-line no-mixed-operators
       FAKE_MONDAY_THE_10TH + DAY * 702 + HOUR * 2,
       // eslint-disable-next-line no-mixed-operators
-      // TODO fix special edge case
-      // FAKE_MONDAY_THE_10TH + DAY * 150 + HOUR * 6,
+      FAKE_MONDAY_THE_10TH + DAY * 150 + HOUR * 6,
     ].forEach((dayDateStr) => {
       it('should return cfg for a for repeatEvery correctly for non exact day dates', () => {
         const result = selectTaskRepeatCfgsDueOnDay.projector(

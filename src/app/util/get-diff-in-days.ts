@@ -5,6 +5,6 @@ export const getDiffInDays = (d1: Date, d2: Date): number => {
   d1Copy.setHours(0, 0, 0, 0);
   d2Copy.setHours(0, 0, 0, 0);
   const diffTime: number = d2Copy.getTime() - d1Copy.getTime();
-  // return Math.ceil(Math.abs(diffTime) / (1000 * 60 * 60 * 24)) * (diffTime < 0 ? -1 : 1);
-  return diffTime / (1000 * 60 * 60 * 24);
+  // NOTE: we use math round to avoid JS math weirdness and summer winter time problems
+  return Math.round(diffTime / (1000 * 60 * 60 * 24));
 };
