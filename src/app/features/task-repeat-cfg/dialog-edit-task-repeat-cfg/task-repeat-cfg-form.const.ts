@@ -214,31 +214,37 @@ export const TASK_REPEAT_CFG_FORM_CFG_BEFORE_TAGS: FormlyFieldConfig[] = [
     },
   },
   // REPEAT CFG END
+
   {
-    key: 'startTime',
-    type: 'input',
-    templateOptions: {
-      label: T.F.TASK_REPEAT.F.START_TIME,
-      description: T.F.TASK_REPEAT.F.START_TIME_DESCRIPTION,
-    },
-    validators: {
-      validTimeString: (c: { value: string | undefined }) => {
-        return !c.value || isValidSplitTime(c.value);
+    fieldGroupClassName: 'formly-row',
+    fieldGroup: [
+      {
+        key: 'startTime',
+        type: 'input',
+        templateOptions: {
+          label: T.F.TASK_REPEAT.F.START_TIME,
+          description: T.F.TASK_REPEAT.F.START_TIME_DESCRIPTION,
+        },
+        validators: {
+          validTimeString: (c: { value: string | undefined }) => {
+            return !c.value || isValidSplitTime(c.value);
+          },
+        },
       },
-    },
-  },
-  {
-    key: 'remindAt',
-    type: 'select',
-    hideExpression: '!model.startTime',
-    templateOptions: {
-      required: true,
-      label: T.F.TASK_REPEAT.F.REMIND_AT,
-      options: TASK_REMINDER_OPTIONS,
-      valueProp: 'value',
-      labelProp: 'label',
-      placeholder: T.F.TASK_REPEAT.F.REMIND_AT_PLACEHOLDER,
-    },
+      {
+        key: 'remindAt',
+        type: 'select',
+        hideExpression: '!model.startTime',
+        templateOptions: {
+          required: true,
+          label: T.F.TASK_REPEAT.F.REMIND_AT,
+          options: TASK_REMINDER_OPTIONS,
+          valueProp: 'value',
+          labelProp: 'label',
+          placeholder: T.F.TASK_REPEAT.F.REMIND_AT_PLACEHOLDER,
+        },
+      },
+    ],
   },
   {
     key: 'defaultEstimate',

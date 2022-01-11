@@ -29,11 +29,19 @@ help-section {
 
   > * {
     width: 100%;
-    margin-left: $s;
+    margin-left: $s * 2;
 
     &:first-child {
       margin-left: 0;
       width: auto;
+
+      .mat-form-field-infix {
+        width: 90px;
+
+        @include mq(xs) {
+          width: 120px;
+        }
+      }
     }
   }
 }

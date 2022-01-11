@@ -1,0 +1,16 @@
+@import '../../variables';
+
+.formly-row {
+  @include mq(xs) {
+    display: flex;
+
+    > * {
+      width: 100%;
+      margin-left: $s * 2;
+
+      &:first-child {
+        margin-left: 0;
+      }
+    }
+  }
+}
