@@ -59,8 +59,6 @@ import { ReminderCopy } from '../../reminder/reminder.model';
 import { ReminderService } from '../../reminder/reminder.service';
 import { DialogEditTaskRepeatCfgComponent } from '../../task-repeat-cfg/dialog-edit-task-repeat-cfg/dialog-edit-task-repeat-cfg.component';
 import { TaskRepeatCfgService } from '../../task-repeat-cfg/task-repeat-cfg.service';
-import { TaskRepeatCfg } from '../../task-repeat-cfg/task-repeat-cfg.model';
-import * as moment from 'moment';
 import { DialogEditTaskAttachmentComponent } from '../task-attachment/dialog-edit-attachment/dialog-edit-task-attachment.component';
 import { TaskAdditionalInfoItemComponent } from './task-additional-info-item/task-additional-info-item.component';
 import { IssueData, IssueProviderKey } from '../../issue/issue.model';
@@ -77,6 +75,7 @@ import { IS_MOBILE } from '../../../util/is-mobile';
 import { GlobalConfigService } from '../../config/global-config.service';
 import { shareReplayUntil } from '../../../util/share-replay-until';
 import { TranslateService } from '@ngx-translate/core';
+import { getTaskRepeatInfoText } from './get-task-repeat-info-text.util';
 
 interface IssueAndType {
   id: string | number | null;
@@ -128,127 +127,8 @@ export class TaskAdditionalInfoComponent implements AfterViewInit, OnDestroy {
               if (!repeatCfg) {
                 return null;
               }
-              const timeStr = repeatCfg.startTime || '';
-              const locale = this.locale;
-
-              switch (repeatCfg.quickSetting) {
-                case 'DAILY':
-                  return this._translateService.instant(
-                    timeStr
-                      ? T.F.TASK_REPEAT.ADD_INFO_PANEL.DAILY_AND_TIME
-                      : T.F.TASK_REPEAT.ADD_INFO_PANEL.DAILY,
-                    { timeStr },
-                  );
-                case 'MONDAY_TO_FRIDAY':
-                  return this._translateService.instant(
-                    timeStr
-                      ? T.F.TASK_REPEAT.ADD_INFO_PANEL.MONDAY_TO_FRIDAY_AND_TIME
-                      : T.F.TASK_REPEAT.ADD_INFO_PANEL.MONDAY_TO_FRIDAY,
-                    { timeStr },
-                  );
-                case 'WEEKLY_CURRENT_WEEKDAY':
-                  const weekdayStr = new Date(
-                    repeatCfg.startDate as string,
-                  ).toLocaleDateString(locale, {
-                    weekday: 'short',
-                  });
-                  return this._translateService.instant(
-                    timeStr
-                      ? T.F.TASK_REPEAT.ADD_INFO_PANEL.WEEKLY_CURRENT_WEEKDAY_AND_TIME
-                      : T.F.TASK_REPEAT.ADD_INFO_PANEL.WEEKLY_CURRENT_WEEKDAY,
-                    {
-                      weekdayStr,
-                      timeStr,
-                    },
-                  );
-                case 'MONTHLY_CURRENT_DATE':
-                  const dateDayStr = new Date(
-                    repeatCfg.startDate as string,
-                  ).toLocaleDateString(locale, {
-                    day: 'numeric',
-                  });
-                  return this._translateService.instant(
-                    timeStr
-                      ? T.F.TASK_REPEAT.ADD_INFO_PANEL.MONTHLY_CURRENT_DATE_AND_TIME
-                      : T.F.TASK_REPEAT.ADD_INFO_PANEL.MONTHLY_CURRENT_DATE,
-                    {
-                      dateDayStr,
-                      timeStr,
-                    },
-                  );
-
-                case 'YEARLY_CURRENT_DATE':
-                  const dayAndMonthStr = new Date(
-                    repeatCfg.startDate as string,
-                  ).toLocaleDateString(locale, {
-                    day: 'numeric',
-                    month: 'numeric',
-                  });
-                  return this._translateService.instant(
-                    timeStr
-                      ? T.F.TASK_REPEAT.ADD_INFO_PANEL.YEARLY_CURRENT_DATE_AND_TIME
-                      : T.F.TASK_REPEAT.ADD_INFO_PANEL.YEARLY_CURRENT_DATE,
-                    {
-                      dayAndMonthStr,
-                      timeStr,
-                    },
-                  );
-
-                case 'CUSTOM':
-                  switch (repeatCfg.repeatCycle) {
-                    case 'DAILY':
-                      if (repeatCfg.repeatEvery === 1) {
-                        return this._translateService.instant(
-                          timeStr
-                            ? T.F.TASK_REPEAT.ADD_INFO_PANEL.DAILY_AND_TIME
-                            : T.F.TASK_REPEAT.ADD_INFO_PANEL.DAILY,
-                          { timeStr },
-                        );
-                      } else {
-                        return this._translateService.instant(
-                          timeStr
-                            ? T.F.TASK_REPEAT.ADD_INFO_PANEL.CUSTOM_AND_TIME
-                            : T.F.TASK_REPEAT.ADD_INFO_PANEL.CUSTOM,
-                          { timeStr },
-                        );
-                      }
-
-                    case 'WEEKLY':
-                      const days: (keyof TaskRepeatCfg)[] = [
-                        'sunday',
-                        'monday',
-                        'tuesday',
-                        'wednesday',
-                        'thursday',
-                        'friday',
-                        'saturday',
-                      ];
-                      const localWeekDays = moment.weekdaysMin();
-                      const daysStr = days
-                        .filter((day) => repeatCfg[day])
-                        .map((day, index) => localWeekDays[days.indexOf(day)])
-                        .join(', ');
-                      return this._translateService.instant(
-                        timeStr
-                          ? T.F.TASK_REPEAT.ADD_INFO_PANEL.CUSTOM_WEEKLY_AND_TIME
-                          : T.F.TASK_REPEAT.ADD_INFO_PANEL.CUSTOM_WEEKLY,
-                        {
-                          timeStr,
-                          daysStr,
-                        },
-                      );
-
-                    default:
-                      return this._translateService.instant(
-                        timeStr
-                          ? T.F.TASK_REPEAT.ADD_INFO_PANEL.CUSTOM_AND_TIME
-                          : T.F.TASK_REPEAT.ADD_INFO_PANEL.CUSTOM,
-                        { timeStr },
-                      );
-                  }
-              }
-
-              return '???????';
+              const [key, params] = getTaskRepeatInfoText(repeatCfg, this.locale);
+              return this._translateService.instant(key, params);
             }),
           )
         : of(null),
