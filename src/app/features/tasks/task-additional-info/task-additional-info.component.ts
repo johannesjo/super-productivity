@@ -196,6 +196,23 @@ export class TaskAdditionalInfoComponent implements AfterViewInit, OnDestroy {
 
                 case 'CUSTOM':
                   switch (repeatCfg.repeatCycle) {
+                    case 'DAILY':
+                      if (repeatCfg.repeatEvery === 1) {
+                        return this._translateService.instant(
+                          timeStr
+                            ? T.F.TASK_REPEAT.ADD_INFO_PANEL.DAILY_AND_TIME
+                            : T.F.TASK_REPEAT.ADD_INFO_PANEL.DAILY,
+                          { timeStr },
+                        );
+                      } else {
+                        return this._translateService.instant(
+                          timeStr
+                            ? T.F.TASK_REPEAT.ADD_INFO_PANEL.CUSTOM_AND_TIME
+                            : T.F.TASK_REPEAT.ADD_INFO_PANEL.CUSTOM,
+                          { timeStr },
+                        );
+                      }
+
                     case 'WEEKLY':
                       const days: (keyof TaskRepeatCfg)[] = [
                         'sunday',
@@ -207,10 +224,27 @@ export class TaskAdditionalInfoComponent implements AfterViewInit, OnDestroy {
                         'saturday',
                       ];
                       const localWeekDays = moment.weekdaysMin();
-                      return days
+                      const daysStr = days
                         .filter((day) => repeatCfg[day])
                         .map((day, index) => localWeekDays[days.indexOf(day)])
                         .join(', ');
+                      return this._translateService.instant(
+                        timeStr
+                          ? T.F.TASK_REPEAT.ADD_INFO_PANEL.CUSTOM_WEEKLY_AND_TIME
+                          : T.F.TASK_REPEAT.ADD_INFO_PANEL.CUSTOM_WEEKLY,
+                        {
+                          timeStr,
+                          daysStr,
+                        },
+                      );
+
+                    default:
+                      return this._translateService.instant(
+                        timeStr
+                          ? T.F.TASK_REPEAT.ADD_INFO_PANEL.CUSTOM_AND_TIME
+                          : T.F.TASK_REPEAT.ADD_INFO_PANEL.CUSTOM,
+                        { timeStr },
+                      );
                   }
               }
 

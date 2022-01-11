@@ -856,6 +856,9 @@
     "TASK_REPEAT": {
       "ADD_INFO_PANEL": {
         "CUSTOM": "Custom repeat config",
+        "CUSTOM_AND_TIME": "Custom, {{timeStr}}",
+        "CUSTOM_WEEKLY": "{{daysStr}}",
+        "CUSTOM_WEEKLY_AND_TIME": "{{daysStr}}, {{timeStr}}",
         "DAILY": "Every day",
         "DAILY_AND_TIME": "Every day, {{timeStr}}",
         "MONTHLY_CURRENT_DATE": "Monthly on {{dateDayStr}}th",
