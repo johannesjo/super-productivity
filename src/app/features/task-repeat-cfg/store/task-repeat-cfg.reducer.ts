@@ -84,7 +84,6 @@ export const selectTaskRepeatCfgsDueOnDay = createSelector(
             }
             const startDateDate = new Date(taskRepeatCfg.startDate);
             const diffInDays = getDiffInDays(startDateDate, dateToCheckDate);
-            console.log(diffInDays);
 
             return (
               // start date is not in the future
