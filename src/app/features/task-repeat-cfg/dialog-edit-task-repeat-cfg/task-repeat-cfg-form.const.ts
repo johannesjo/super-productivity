@@ -117,33 +117,38 @@ export const TASK_REPEAT_CFG_FORM_CFG_BEFORE_TAGS: FormlyFieldConfig[] = [
     },
   },
   {
-    key: 'repeatCycle',
-    type: 'select',
-    hideExpression: (model: any) => model.quickSetting !== 'CUSTOM',
-    defaultValue: 'WEEKLY',
-    templateOptions: {
-      required: true,
-      label: T.F.TASK_REPEAT.F.REPEAT_CYCLE,
-      options: [
-        { value: 'DAILY', label: T.F.TASK_REPEAT.F.C_DAILY },
-        { value: 'WEEKLY', label: T.F.TASK_REPEAT.F.C_WEEKLY },
-        { value: 'MONTHLY', label: T.F.TASK_REPEAT.F.C_MONTHLY },
-        { value: 'YEARLY', label: T.F.TASK_REPEAT.F.C_YEARLY },
-      ],
-    },
-  },
-  {
-    key: 'repeatEvery',
-    type: 'input',
-    hideExpression: (model: any) => model.quickSetting !== 'CUSTOM',
-    defaultValue: 1,
-    templateOptions: {
-      label: T.F.TASK_REPEAT.F.REPEAT_EVERY,
-      required: true,
-      min: 1,
-      max: 1000,
-      type: 'number',
-    },
+    fieldGroupClassName: 'repeat-cycle',
+    fieldGroup: [
+      {
+        key: 'repeatEvery',
+        type: 'input',
+        hideExpression: (model: any) => model.quickSetting !== 'CUSTOM',
+        defaultValue: 1,
+        templateOptions: {
+          label: T.F.TASK_REPEAT.F.REPEAT_EVERY,
+          required: true,
+          min: 1,
+          max: 1000,
+          type: 'number',
+        },
+      },
+      {
+        key: 'repeatCycle',
+        type: 'select',
+        hideExpression: (model: any) => model.quickSetting !== 'CUSTOM',
+        defaultValue: 'WEEKLY',
+        templateOptions: {
+          required: true,
+          label: T.F.TASK_REPEAT.F.REPEAT_CYCLE,
+          options: [
+            { value: 'DAILY', label: T.F.TASK_REPEAT.F.C_DAY },
+            { value: 'WEEKLY', label: T.F.TASK_REPEAT.F.C_WEEK },
+            { value: 'MONTHLY', label: T.F.TASK_REPEAT.F.C_MONTH },
+            { value: 'YEARLY', label: T.F.TASK_REPEAT.F.C_YEAR },
+          ],
+        },
+      },
+    ],
   },
   {
     key: 'monday',

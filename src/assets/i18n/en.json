@@ -876,10 +876,10 @@
         "TAG_LABEL": "Tags to add"
       },
       "F": {
-        "C_DAILY": "Daily",
-        "C_MONTHLY": "Monthly",
-        "C_WEEKLY": "Weekly",
-        "C_YEARLY": "Yearly",
+        "C_DAY": "Day",
+        "C_MONTH": "Month",
+        "C_WEEK": "Week",
+        "C_YEAR": "Year",
         "DEFAULT_ESTIMATE": "Default Estimate",
         "FRIDAY": "Friday",
         "IS_ADD_TO_BOTTOM": "Move task to bottom of list",
