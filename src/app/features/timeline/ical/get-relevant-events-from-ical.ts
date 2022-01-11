@@ -72,8 +72,8 @@ const getForReoccurring = (
 const convertVEventToTimelineEvent = (vevent: any): TimelineFromCalendarEvent => {
   const start = vevent.getFirstPropertyValue('dtstart').toJSDate().getTime();
   // NOTE: if dtend is missing, it defaults to dtstart; @see #1814 and RFC 2455
-  //       detailed comment in #1814:
-  //         https://github.com/johannesjo/super-productivity/issues/1814#issuecomment-1008132824
+  // detailed comment in #1814:
+  // https://github.com/johannesjo/super-productivity/issues/1814#issuecomment-1008132824
   const endVal = vevent.getFirstPropertyValue('dtend');
   const end = endVal ? endVal.toJSDate().getTime() : start;
 
