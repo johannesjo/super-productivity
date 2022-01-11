@@ -24,6 +24,17 @@ help-section {
   }
 }
 
+:host::ng-deep .weekdays {
+  display: flex;
+  flex-wrap: wrap;
+
+  .mat-form-field-infix {
+    width: auto;
+    min-width: 100px;
+    margin-right: $s * 2;
+    border-top: 0;
+  }
+}
 :host::ng-deep .repeat-cycle {
   display: flex;
 

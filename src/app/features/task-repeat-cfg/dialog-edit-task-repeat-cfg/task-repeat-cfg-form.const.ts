@@ -103,19 +103,7 @@ export const TASK_REPEAT_CFG_FORM_CFG_BEFORE_TAGS: FormlyFieldConfig[] = [
     },
   },
 
-  // REPEAT CFG
-  {
-    key: 'startDate',
-    type: 'input',
-    hideExpression: (model: any) => model.quickSetting !== 'CUSTOM',
-    defaultValue: getWorklogStr(),
-    templateOptions: {
-      label: T.F.TASK_REPEAT.F.START_DATE,
-      required: true,
-      min: getWorklogStr() as any,
-      type: 'date',
-    },
-  },
+  // REPEAT CUSTOM CFG
   {
     fieldGroupClassName: 'repeat-cycle',
     fieldGroup: [
@@ -151,67 +139,72 @@ export const TASK_REPEAT_CFG_FORM_CFG_BEFORE_TAGS: FormlyFieldConfig[] = [
     ],
   },
   {
-    key: 'monday',
-    type: 'checkbox',
-    hideExpression: (model: any) =>
-      model.quickSetting !== 'CUSTOM' || model.repeatCycle !== 'WEEKLY',
+    key: 'startDate',
+    type: 'input',
+    hideExpression: (model: any) => model.quickSetting !== 'CUSTOM',
+    defaultValue: getWorklogStr(),
     templateOptions: {
-      label: T.F.TASK_REPEAT.F.MONDAY,
+      label: T.F.TASK_REPEAT.F.START_DATE,
+      required: true,
+      min: getWorklogStr() as any,
+      type: 'date',
     },
   },
   {
-    key: 'tuesday',
-    type: 'checkbox',
+    fieldGroupClassName: 'weekdays',
     hideExpression: (model: any) =>
       model.quickSetting !== 'CUSTOM' || model.repeatCycle !== 'WEEKLY',
-    templateOptions: {
-      label: T.F.TASK_REPEAT.F.TUESDAY,
-    },
-  },
-  {
-    key: 'wednesday',
-    type: 'checkbox',
-    hideExpression: (model: any) =>
-      model.quickSetting !== 'CUSTOM' || model.repeatCycle !== 'WEEKLY',
-    templateOptions: {
-      label: T.F.TASK_REPEAT.F.WEDNESDAY,
-    },
-  },
-  {
-    key: 'thursday',
-    type: 'checkbox',
-    hideExpression: (model: any) =>
-      model.quickSetting !== 'CUSTOM' || model.repeatCycle !== 'WEEKLY',
-    templateOptions: {
-      label: T.F.TASK_REPEAT.F.THURSDAY,
-    },
-  },
-  {
-    key: 'friday',
-    type: 'checkbox',
-    hideExpression: (model: any) =>
-      model.quickSetting !== 'CUSTOM' || model.repeatCycle !== 'WEEKLY',
-    templateOptions: {
-      label: T.F.TASK_REPEAT.F.FRIDAY,
-    },
-  },
-  {
-    key: 'saturday',
-    type: 'checkbox',
-    hideExpression: (model: any) =>
-      model.quickSetting !== 'CUSTOM' || model.repeatCycle !== 'WEEKLY',
-    templateOptions: {
-      label: T.F.TASK_REPEAT.F.SATURDAY,
-    },
-  },
-  {
-    key: 'sunday',
-    type: 'checkbox',
-    hideExpression: (model: any) =>
-      model.quickSetting !== 'CUSTOM' || model.repeatCycle !== 'WEEKLY',
-    templateOptions: {
-      label: T.F.TASK_REPEAT.F.SUNDAY,
-    },
+    fieldGroup: [
+      {
+        key: 'monday',
+        type: 'checkbox',
+        templateOptions: {
+          label: T.F.TASK_REPEAT.F.MONDAY,
+        },
+      },
+      {
+        key: 'tuesday',
+        type: 'checkbox',
+        templateOptions: {
+          label: T.F.TASK_REPEAT.F.TUESDAY,
+        },
+      },
+      {
+        key: 'wednesday',
+        type: 'checkbox',
+        templateOptions: {
+          label: T.F.TASK_REPEAT.F.WEDNESDAY,
+        },
+      },
+      {
+        key: 'thursday',
+        type: 'checkbox',
+        templateOptions: {
+          label: T.F.TASK_REPEAT.F.THURSDAY,
+        },
+      },
+      {
+        key: 'friday',
+        type: 'checkbox',
+        templateOptions: {
+          label: T.F.TASK_REPEAT.F.FRIDAY,
+        },
+      },
+      {
+        key: 'saturday',
+        type: 'checkbox',
+        templateOptions: {
+          label: T.F.TASK_REPEAT.F.SATURDAY,
+        },
+      },
+      {
+        key: 'sunday',
+        type: 'checkbox',
+        templateOptions: {
+          label: T.F.TASK_REPEAT.F.SUNDAY,
+        },
+      },
+    ],
   },
   // REPEAT CFG END
 
