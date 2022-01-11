@@ -25,7 +25,8 @@ const DUMMY_REPEATABLE_TASK: TaskRepeatCfg = {
   order: 0,
 };
 
-const DAY = 24 * 60 * 60 * 1000;
+const HOUR = 60 * 60 * 1000;
+const DAY = 24 * HOUR;
 
 const FAKE_MONDAY_THE_10TH = new Date('2022-01-10').getTime();
 
@@ -36,6 +37,112 @@ const dummyRepeatable = (id: string, fields: Partial<TaskRepeatCfg>): TaskRepeat
 });
 
 describe('selectTaskRepeatCfgsDueOnDay', () => {
+  describe('for DAILY', () => {
+    it('should return cfg for a far future task', () => {
+      const result = selectTaskRepeatCfgsDueOnDay.projector(
+        [
+          dummyRepeatable('R1', {
+            repeatCycle: 'DAILY',
+            startDate: '2022-01-10',
+          }),
+        ],
+        {
+          dayDate: new Date('2025-11-11'),
+        },
+      );
+      const resultIds = result.map((item) => item.id);
+      expect(resultIds).toEqual(['R1']);
+    });
+
+    [
+      FAKE_MONDAY_THE_10TH,
+      // eslint-disable-next-line no-mixed-operators
+      FAKE_MONDAY_THE_10TH + DAY * 3,
+      // eslint-disable-next-line no-mixed-operators
+      FAKE_MONDAY_THE_10TH + DAY * 6,
+      // eslint-disable-next-line no-mixed-operators
+      FAKE_MONDAY_THE_10TH + DAY * 300,
+      // TODO fix special edge case
+      // eslint-disable-next-line no-mixed-operators
+      // FAKE_MONDAY_THE_10TH + DAY * 150,
+    ].forEach((dayDateStr) => {
+      it('should return cfg for a for repeatEvery correctly', () => {
+        const result = selectTaskRepeatCfgsDueOnDay.projector(
+          [
+            dummyRepeatable('R1', {
+              repeatCycle: 'DAILY',
+              repeatEvery: 3,
+              startDate: '2022-01-10',
+            }),
+          ],
+          {
+            dayDate: new Date(dayDateStr),
+          },
+        );
+        const resultIds = result.map((item) => item.id);
+        expect(resultIds).toEqual(['R1']);
+      });
+    });
+
+    [
+      FAKE_MONDAY_THE_10TH + 11,
+      // eslint-disable-next-line no-mixed-operators
+      FAKE_MONDAY_THE_10TH + DAY * 3 + HOUR * 22,
+      // eslint-disable-next-line no-mixed-operators
+      FAKE_MONDAY_THE_10TH + DAY * 6 + HOUR * 3,
+      // eslint-disable-next-line no-mixed-operators
+      FAKE_MONDAY_THE_10TH + DAY * 702 + HOUR * 2,
+      // eslint-disable-next-line no-mixed-operators
+      // TODO fix special edge case
+      // FAKE_MONDAY_THE_10TH + DAY * 150 + HOUR * 6,
+    ].forEach((dayDateStr) => {
+      it('should return cfg for a for repeatEvery correctly for non exact day dates', () => {
+        const result = selectTaskRepeatCfgsDueOnDay.projector(
+          [
+            dummyRepeatable('R1', {
+              repeatCycle: 'DAILY',
+              repeatEvery: 3,
+              startDate: '2022-01-10',
+            }),
+          ],
+          {
+            dayDate: new Date(dayDateStr),
+          },
+        );
+        const resultIds = result.map((item) => item.id);
+        expect(resultIds).toEqual(['R1']);
+      });
+    });
+
+    [
+      // eslint-disable-next-line no-mixed-operators
+      FAKE_MONDAY_THE_10TH + DAY,
+      // eslint-disable-next-line no-mixed-operators
+      FAKE_MONDAY_THE_10TH + DAY * 11,
+      // eslint-disable-next-line no-mixed-operators
+      FAKE_MONDAY_THE_10TH + DAY * 21,
+      // eslint-disable-next-line no-mixed-operators
+      FAKE_MONDAY_THE_10TH + DAY * 34,
+    ].forEach((dayDateStr) => {
+      it('should NOT return cfg for a for repeatEvery if not correct', () => {
+        const result = selectTaskRepeatCfgsDueOnDay.projector(
+          [
+            dummyRepeatable('R1', {
+              repeatCycle: 'DAILY',
+              repeatEvery: 4,
+              startDate: '2022-01-10',
+            }),
+          ],
+          {
+            dayDate: new Date(dayDateStr),
+          },
+        );
+        const resultIds = result.map((item) => item.id);
+        expect(resultIds).toEqual([]);
+      });
+    });
+  });
+
   describe('for WEEKLY', () => {
     it('should return cfg for startDate today', () => {
       const result = selectTaskRepeatCfgsDueOnDay.projector(

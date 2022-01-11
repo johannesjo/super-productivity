@@ -20,6 +20,7 @@ import { MODEL_VERSION_KEY } from '../../../app.constants';
 import { MODEL_VERSION } from '../../../core/model-version';
 import { getDiffInMonth } from '../../../util/get-diff-in-month';
 import { getDiffInWeeks } from '../../../util/get-diff-in-weeks';
+import { getDiffInDays } from '../../../util/get-diff-in-days';
 
 export const TASK_REPEAT_CFG_FEATURE_NAME = 'taskRepeatCfg';
 
@@ -75,8 +76,19 @@ export const selectTaskRepeatCfgsDueOnDay = createSelector(
 
         switch (taskRepeatCfg.repeatCycle) {
           case 'DAILY': {
-            // NOTE: we ignore the start date for daily
-            return true;
+            if (!taskRepeatCfg.startDate) {
+              throw new Error('Repeat startDate needs to be defined for DAILY');
+            }
+            if (+taskRepeatCfg.repeatEvery < 1) {
+              throw new Error('Invalid repeatEvery value given for DAILY');
+            }
+            const startDateDate = new Date(taskRepeatCfg.startDate);
+            const diffInDays = getDiffInDays(startDateDate, dateToCheckDate);
+
+            return (
+              // start date is not in the future
+              diffInDays >= 0 && diffInDays % taskRepeatCfg.repeatEvery === 0
+            );
           }
 
           case 'WEEKLY': {
