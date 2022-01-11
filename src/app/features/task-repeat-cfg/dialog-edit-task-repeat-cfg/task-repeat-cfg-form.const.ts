@@ -11,14 +11,12 @@ import {
 
 const updateParent = (
   field: FormlyFieldConfig,
-  key: keyof TaskRepeatCfg,
-  val: any,
+  changes: Partial<TaskRepeatCfg>,
 ): void => {
-  const ctrlForField = field.parent?.fieldGroup?.find(
-    (item) => item.key === key,
-  )?.formControl;
-  ctrlForField?.patchValue(val);
-  // field.parent?.model = val;
+  field.parent?.formControl?.patchValue({
+    ...field.parent.model,
+    ...changes,
+  });
 };
 
 export const TASK_REPEAT_CFG_FORM_CFG_BEFORE_TAGS: FormlyFieldConfig[] = [
@@ -49,50 +47,64 @@ export const TASK_REPEAT_CFG_FORM_CFG_BEFORE_TAGS: FormlyFieldConfig[] = [
         // field.formControl?.patchValue(event.value);
         switch (event.value as RepeatQuickSetting) {
           case 'DAILY': {
-            updateParent(field, 'repeatCycle', 'DAILY');
-            updateParent(field, 'repeatEvery', 1);
-            updateParent(field, 'startDate', getWorklogStr());
+            updateParent(field, {
+              repeatCycle: 'DAILY',
+              repeatEvery: 1,
+              startDate: getWorklogStr(),
+            });
             break;
           }
 
           case 'WEEKLY_CURRENT_WEEKDAY': {
-            updateParent(field, 'repeatCycle', 'WEEKLY');
-            updateParent(field, 'repeatEvery', 1);
-            updateParent(field, 'startDate', getWorklogStr());
-            TASK_REPEAT_WEEKDAY_MAP.forEach((weekDayStr: keyof TaskRepeatCfg) => {
-              updateParent(field, weekDayStr, false);
-            });
             const todayWeekdayStr = TASK_REPEAT_WEEKDAY_MAP[new Date().getDay()];
-            updateParent(field, todayWeekdayStr, true);
+            updateParent(field, {
+              repeatCycle: 'WEEKLY',
+              repeatEvery: 1,
+              startDate: getWorklogStr(),
+              monday: false,
+              tuesday: false,
+              wednesday: false,
+              thursday: false,
+              friday: false,
+              saturday: false,
+              sunday: false,
+              [todayWeekdayStr as keyof TaskRepeatCfg]: true,
+            });
+
             break;
           }
 
           case 'MONDAY_TO_FRIDAY': {
-            updateParent(field, 'repeatCycle', 'WEEKLY');
-            updateParent(field, 'repeatEvery', 1);
-            updateParent(field, 'startDate', getWorklogStr());
-            ['monday', 'tuesday', 'wednesday', 'thursday', 'friday'].forEach(
-              (weekdayStr) => {
-                updateParent(field, weekdayStr as keyof TaskRepeatCfg, true);
-              },
-            );
-            ['saturday', 'sunday'].forEach((weekdayStr) => {
-              updateParent(field, weekdayStr as keyof TaskRepeatCfg, false);
+            updateParent(field, {
+              repeatCycle: 'WEEKLY',
+              repeatEvery: 1,
+              startDate: getWorklogStr(),
+              monday: true,
+              tuesday: true,
+              wednesday: true,
+              thursday: true,
+              friday: true,
+              saturday: false,
+              sunday: false,
             });
             break;
           }
 
           case 'MONTHLY_CURRENT_DATE': {
-            updateParent(field, 'repeatCycle', 'MONTHLY');
-            updateParent(field, 'startDate', getWorklogStr());
-            updateParent(field, 'repeatEvery', 1);
+            updateParent(field, {
+              repeatCycle: 'MONTHLY',
+              repeatEvery: 1,
+              startDate: getWorklogStr(),
+            });
             break;
           }
 
           case 'YEARLY_CURRENT_DATE': {
-            updateParent(field, 'repeatCycle', 'YEARLY');
-            updateParent(field, 'startDate', getWorklogStr());
-            updateParent(field, 'repeatEvery', 1);
+            updateParent(field, {
+              repeatCycle: 'YEARLY',
+              repeatEvery: 1,
+              startDate: getWorklogStr(),
+            });
             break;
           }
 
@@ -106,11 +118,11 @@ export const TASK_REPEAT_CFG_FORM_CFG_BEFORE_TAGS: FormlyFieldConfig[] = [
   // REPEAT CUSTOM CFG
   {
     fieldGroupClassName: 'repeat-cycle',
+    hideExpression: (model: any) => model.quickSetting !== 'CUSTOM',
     fieldGroup: [
       {
         key: 'repeatEvery',
         type: 'input',
-        hideExpression: (model: any) => model.quickSetting !== 'CUSTOM',
         defaultValue: 1,
         templateOptions: {
           label: T.F.TASK_REPEAT.F.REPEAT_EVERY,
@@ -123,7 +135,6 @@ export const TASK_REPEAT_CFG_FORM_CFG_BEFORE_TAGS: FormlyFieldConfig[] = [
       {
         key: 'repeatCycle',
         type: 'select',
-        hideExpression: (model: any) => model.quickSetting !== 'CUSTOM',
         defaultValue: 'WEEKLY',
         templateOptions: {
           required: true,
