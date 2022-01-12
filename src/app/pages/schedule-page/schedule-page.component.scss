@@ -143,7 +143,7 @@
     }
   }
 
-  .due-date {
+  .repeat-text {
     border-radius: $card-border-radius;
     display: flex;
     font-style: italic;
@@ -167,21 +167,8 @@
       margin-right: $s * -1;
     }
 
-    .time-left {
-      opacity: 0.9;
-    }
-
     &:hover {
       opacity: 1;
-    }
-
-    .date-and-time-left {
-      margin-top: auto;
-      margin-bottom: auto;
-
-      @include mq(xs) {
-        margin-right: $s;
-      }
     }
 
     mat-icon {

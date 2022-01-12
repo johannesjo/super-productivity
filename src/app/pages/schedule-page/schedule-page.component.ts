@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Inject, LOCALE_ID } from '@angular/core';
 import { T } from '../../t.const';
 import { TaskService } from '../../features/tasks/task.service';
 import { ScheduledTaskService } from '../../features/tasks/scheduled-task.service';
@@ -13,6 +13,12 @@ import { WorkContextService } from '../../features/work-context/work-context.ser
 import { TODAY_TAG } from '../../features/tag/tag.const';
 import { Tag } from '../../features/tag/tag.model';
 import { ProjectService } from '../../features/project/project.service';
+import { Store } from '@ngrx/store';
+import { selectTaskRepeatCfgsSortedByTitleAndProject } from '../../features/task-repeat-cfg/store/task-repeat-cfg.reducer';
+import { getTaskRepeatInfoText } from '../../features/tasks/task-additional-info/get-task-repeat-info-text.util';
+import { TaskRepeatCfg } from '../../features/task-repeat-cfg/task-repeat-cfg.model';
+import { TranslateService } from '@ngx-translate/core';
+import { DialogEditTaskRepeatCfgComponent } from '../../features/task-repeat-cfg/dialog-edit-task-repeat-cfg/dialog-edit-task-repeat-cfg.component';
 
 @Component({
   selector: 'schedule-page',
@@ -24,6 +30,7 @@ import { ProjectService } from '../../features/project/project.service';
 export class SchedulePageComponent {
   T: typeof T = T;
   TODAY_TAG: Tag = TODAY_TAG;
+  taskRepeatCfgs$ = this._store.select(selectTaskRepeatCfgsSortedByTitleAndProject);
 
   constructor(
     public scheduledTaskService: ScheduledTaskService,
@@ -33,6 +40,9 @@ export class SchedulePageComponent {
     private _projectService: ProjectService,
     private _matDialog: MatDialog,
     private _router: Router,
+    private _store: Store,
+    private _translateService: TranslateService,
+    @Inject(LOCALE_ID) private locale: string,
   ) {}
 
   startTask(task: TaskWithReminderData): void {
@@ -64,6 +74,15 @@ export class SchedulePageComponent {
     });
   }
 
+  editTaskRepeatCfg(repeatCfg: TaskRepeatCfg): void {
+    this._matDialog.open(DialogEditTaskRepeatCfgComponent, {
+      restoreFocus: false,
+      data: {
+        repeatCfg,
+      },
+    });
+  }
+
   updateTaskTitleIfChanged(isChanged: boolean, newTitle: string, task: Task): void {
     if (isChanged) {
       this._taskService.update(task.id, { title: newTitle });
@@ -73,6 +92,11 @@ export class SchedulePageComponent {
 
   trackByFn(i: number, task: TaskWithReminderData): string {
     return task.id;
+  }
+
+  getRepeatInfoText(repeatCfg: TaskRepeatCfg): string {
+    const [key, params] = getTaskRepeatInfoText(repeatCfg, this.locale);
+    return this._translateService.instant(key, params);
   }
 
   private _startTask(task: TaskWithReminderData): void {

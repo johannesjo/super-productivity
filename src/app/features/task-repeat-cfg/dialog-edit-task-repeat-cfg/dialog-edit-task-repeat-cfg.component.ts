@@ -10,7 +10,11 @@ import {
 import { Task } from '../../tasks/task.model';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { TaskRepeatCfgService } from '../task-repeat-cfg.service';
-import { DEFAULT_TASK_REPEAT_CFG, TaskRepeatCfgCopy } from '../task-repeat-cfg.model';
+import {
+  DEFAULT_TASK_REPEAT_CFG,
+  TaskRepeatCfg,
+  TaskRepeatCfgCopy,
+} from '../task-repeat-cfg.model';
 import { Observable, Subscription } from 'rxjs';
 import { FormlyFieldConfig } from '@ngx-formly/core';
 import { FormGroup } from '@angular/forms';
@@ -32,20 +36,11 @@ import { TranslateService } from '@ngx-translate/core';
 })
 export class DialogEditTaskRepeatCfgComponent implements OnInit, OnDestroy {
   T: typeof T = T;
-  task: Task = this.data.task;
 
-  taskRepeatCfg: Omit<TaskRepeatCfgCopy, 'id'> = {
-    ...DEFAULT_TASK_REPEAT_CFG,
-    title: this.task.title,
-    // NOTE: always add today tag, as that's likely what we want
-    tagIds: unique([TODAY_TAG.id, ...this.task.tagIds]),
-    defaultEstimate: this.task.timeEstimate,
-  };
-
-  taskRepeatCfgInitial?: TaskRepeatCfgCopy;
-
-  taskRepeatCfgId: string | null = this.task.repeatCfgId;
-  isEdit: boolean = !!this.taskRepeatCfgId;
+  repeatCfgInitial?: TaskRepeatCfgCopy;
+  repeatCfg: Omit<TaskRepeatCfgCopy, 'id'> | TaskRepeatCfg;
+  repeatCfgId: string | null;
+  isEdit: boolean;
 
   TASK_REPEAT_CFG_FORM_CFG_BEFORE_TAGS: FormlyFieldConfig[];
 
@@ -60,19 +55,38 @@ export class DialogEditTaskRepeatCfgComponent implements OnInit, OnDestroy {
     private _taskRepeatCfgService: TaskRepeatCfgService,
     private _matDialogRef: MatDialogRef<DialogEditTaskRepeatCfgComponent>,
     private _translateService: TranslateService,
-    @Inject(LOCALE_ID) private locale: string,
-    @Inject(MAT_DIALOG_DATA) public data: { task: Task },
+    @Inject(LOCALE_ID) private _locale: string,
+    @Inject(MAT_DIALOG_DATA) private _data: { task?: Task; repeatCfg?: TaskRepeatCfg },
   ) {
+    if (this._data.task) {
+      this.repeatCfg = {
+        ...DEFAULT_TASK_REPEAT_CFG,
+        title: this._data.task.title,
+        // NOTE: always add today tag, as that's likely what we want
+        tagIds: unique([TODAY_TAG.id, ...this._data.task.tagIds]),
+        defaultEstimate: this._data.task.timeEstimate,
+      };
+      this.repeatCfgId = this._data.task.repeatCfgId;
+      this.isEdit = !!this.repeatCfgId;
+    } else if (this._data.repeatCfg) {
+      this.repeatCfgInitial = { ...this._data.repeatCfg };
+      this.repeatCfg = { ...this._data.repeatCfg };
+      this.repeatCfgId = this._data.repeatCfg.id;
+      this.isEdit = true;
+    } else {
+      throw new Error('Invalid params given for repeat dialog!');
+    }
+
     this.TASK_REPEAT_CFG_FORM_CFG_BEFORE_TAGS = TASK_REPEAT_CFG_FORM_CFG_BEFORE_TAGS;
 
     const today = new Date();
-    const weekdayStr = today.toLocaleDateString(locale, {
+    const weekdayStr = today.toLocaleDateString(_locale, {
       weekday: 'long',
     });
-    const dateDayStr = today.toLocaleDateString(locale, {
+    const dateDayStr = today.toLocaleDateString(_locale, {
       day: 'numeric',
     });
-    const dayAndMonthStr = today.toLocaleDateString(locale, {
+    const dayAndMonthStr = today.toLocaleDateString(_locale, {
       day: 'numeric',
       month: 'numeric',
     });
@@ -113,13 +127,13 @@ export class DialogEditTaskRepeatCfgComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    if (this.isEdit && this.task.repeatCfgId) {
+    if (this.isEdit && this.repeatCfgId && this._data.task) {
       this._subs.add(
         this._taskRepeatCfgService
-          .getTaskRepeatCfgById$(this.task.repeatCfgId)
+          .getTaskRepeatCfgById$(this.repeatCfgId)
           .subscribe((cfg) => {
-            this.taskRepeatCfg = cfg;
-            this.taskRepeatCfgInitial = cfg;
+            this.repeatCfg = cfg;
+            this.repeatCfgInitial = cfg;
             this._cd.detectChanges();
           }),
       );
@@ -132,38 +146,35 @@ export class DialogEditTaskRepeatCfgComponent implements OnInit, OnDestroy {
 
   save(): void {
     if (this.isEdit) {
-      if (!this.taskRepeatCfgInitial) {
+      if (!this.repeatCfgInitial) {
         throw new Error('Initial task repeat cfg missing (code error)');
       }
       const isRelevantChangesForUpdateAllTasks =
-        this.taskRepeatCfgInitial.title !== this.taskRepeatCfg.title ||
-        this.taskRepeatCfgInitial.defaultEstimate !==
-          this.taskRepeatCfg.defaultEstimate ||
-        this.taskRepeatCfgInitial.remindAt !== this.taskRepeatCfg.remindAt ||
-        this.taskRepeatCfgInitial.startTime !== this.taskRepeatCfg.startTime ||
-        JSON.stringify(this.taskRepeatCfgInitial.tagIds) !==
-          JSON.stringify(this.taskRepeatCfg.tagIds);
+        this.repeatCfgInitial.title !== this.repeatCfg.title ||
+        this.repeatCfgInitial.defaultEstimate !== this.repeatCfg.defaultEstimate ||
+        this.repeatCfgInitial.remindAt !== this.repeatCfg.remindAt ||
+        this.repeatCfgInitial.startTime !== this.repeatCfg.startTime ||
+        JSON.stringify(this.repeatCfgInitial.tagIds) !==
+          JSON.stringify(this.repeatCfg.tagIds);
 
       this._taskRepeatCfgService.updateTaskRepeatCfg(
-        exists(this.taskRepeatCfgId),
-        this.taskRepeatCfg,
+        exists(this.repeatCfgId),
+        this.repeatCfg,
         isRelevantChangesForUpdateAllTasks,
       );
       this.close();
     } else {
       this._taskRepeatCfgService.addTaskRepeatCfgToTask(
-        this.task.id,
-        this.task.projectId,
-        this.taskRepeatCfg,
+        (this._data.task as Task).id,
+        (this._data.task as Task).projectId,
+        this.repeatCfg,
       );
       this.close();
     }
   }
 
   remove(): void {
-    this._taskRepeatCfgService.deleteTaskRepeatCfgWithDialog(
-      exists(this.task.repeatCfgId),
-    );
+    this._taskRepeatCfgService.deleteTaskRepeatCfgWithDialog(exists(this.repeatCfgId));
     this.close();
   }
 
@@ -172,22 +183,22 @@ export class DialogEditTaskRepeatCfgComponent implements OnInit, OnDestroy {
   }
 
   addTag(id: string): void {
-    this._updateTags(unique([...this.taskRepeatCfg.tagIds, id]));
+    this._updateTags(unique([...this.repeatCfg.tagIds, id]));
   }
 
   addNewTag(title: string): void {
     const id = this._tagService.addTag({ title });
-    this._updateTags(unique([...this.taskRepeatCfg.tagIds, id]));
+    this._updateTags(unique([...this.repeatCfg.tagIds, id]));
   }
 
   removeTag(id: string): void {
-    const updatedTagIds = this.taskRepeatCfg.tagIds.filter((tagId) => tagId !== id);
+    const updatedTagIds = this.repeatCfg.tagIds.filter((tagId) => tagId !== id);
     this._updateTags(updatedTagIds);
   }
 
   private _updateTags(newTagIds: string[]): void {
-    this.taskRepeatCfg = {
-      ...this.taskRepeatCfg,
+    this.repeatCfg = {
+      ...this.repeatCfg,
       tagIds: newTagIds,
     };
   }

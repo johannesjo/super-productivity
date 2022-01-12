@@ -52,6 +52,29 @@ export const selectTaskRepeatCfgsWithStartTime = createSelector(
   },
 );
 
+export const selectTaskRepeatCfgsSortedByTitleAndProject = createSelector(
+  selectAllTaskRepeatCfgs,
+  (taskRepeatCfgs: TaskRepeatCfg[]): TaskRepeatCfg[] => {
+    return taskRepeatCfgs.sort((a, b) => {
+      if (a.projectId !== b.projectId) {
+        if (a.projectId === null) {
+          return -1;
+        }
+        if (b.projectId === null) {
+          return 1;
+        }
+        if (a.projectId < b.projectId) {
+          return -1;
+        }
+        if (a.projectId > b.projectId) {
+          return 1;
+        }
+      }
+      return (a.title || '').localeCompare(b.title || '');
+    });
+  },
+);
+
 // filter out the configs which have been created today already
 // and those which are not scheduled for the current week day
 export const selectTaskRepeatCfgsDueOnDay = createSelector(
