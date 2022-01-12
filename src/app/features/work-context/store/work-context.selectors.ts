@@ -8,8 +8,8 @@ import {
 import { Task, TaskPlanned } from '../../tasks/task.model';
 import { devError } from '../../../util/dev-error';
 import {
-  selectProjectById,
   projectSelectors,
+  selectProjectById,
 } from '../../project/store/project.selectors';
 import { selectNoteTodayOrder } from '../../note/store/note.reducer';
 
@@ -93,6 +93,23 @@ export const selectStartableTasksForActiveContext = createSelector(
       }
     });
     return startableTasks.filter((task) => !task.isDone);
+  },
+);
+
+export const selectStartableTasksActiveContextFirst = createSelector(
+  selectTaskFeatureState,
+  selectStartableTasksForActiveContext,
+  (s, forActiveContext): Task[] => {
+    const activeContextIds = forActiveContext.map((item) => item.id);
+    const otherTasks = s.ids
+      .map((id) => s.entities[id] as Task)
+      .filter(
+        (task) =>
+          !task.isDone &&
+          (!!task.parentId || task.subTaskIds.length === 0) &&
+          !activeContextIds.includes(task.id),
+      );
+    return [...forActiveContext, ...otherTasks];
   },
 );
 

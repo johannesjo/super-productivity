@@ -14,6 +14,8 @@ import { Observable, Subject } from 'rxjs';
 import { T } from '../../../t.const';
 import { WorkContextService } from '../../work-context/work-context.service';
 import { TaskService } from '../task.service';
+import { Store } from '@ngrx/store';
+import { selectStartableTasksActiveContextFirst } from '../../work-context/store/work-context.selectors';
 
 @Component({
   selector: 'select-task',
@@ -33,6 +35,7 @@ export class SelectTaskComponent implements OnInit, OnDestroy {
   constructor(
     private _workContextService: WorkContextService,
     private _taskService: TaskService,
+    private _store: Store,
   ) {}
 
   @Input() set initialTask(task: Task) {
@@ -45,7 +48,7 @@ export class SelectTaskComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     const tasks$: Observable<Task[]> = this.isLimitToProject
       ? this._workContextService.startableTasksForActiveContext$
-      : this._taskService.allStartableTasks$;
+      : this._store.select(selectStartableTasksActiveContextFirst);
 
     this.taskSelectCtrl.valueChanges
       .pipe(
