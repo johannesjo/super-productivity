@@ -129,6 +129,10 @@
     }
   }
 
+  tag-list {
+    pointer-events: none;
+  }
+
   .title {
     flex: 1;
     padding-top: $s;

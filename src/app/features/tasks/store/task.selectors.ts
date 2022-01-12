@@ -277,8 +277,7 @@ export const selectTasksByRepeatConfigId = createSelector(
         state.entities[idIN].repeatCfgId === props.repeatCfgId,
     );
 
-    // @ts-ignore
-    return taskIds && taskIds.length ? taskIds.map((id) => state.entities[id]) : null;
+    return taskIds.map((id) => state.entities[id] as Task);
   },
 );
 

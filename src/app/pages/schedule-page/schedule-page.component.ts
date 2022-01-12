@@ -19,6 +19,7 @@ import { getTaskRepeatInfoText } from '../../features/tasks/task-additional-info
 import { TaskRepeatCfg } from '../../features/task-repeat-cfg/task-repeat-cfg.model';
 import { TranslateService } from '@ngx-translate/core';
 import { DialogEditTaskRepeatCfgComponent } from '../../features/task-repeat-cfg/dialog-edit-task-repeat-cfg/dialog-edit-task-repeat-cfg.component';
+import { TaskRepeatCfgService } from '../../features/task-repeat-cfg/task-repeat-cfg.service';
 
 @Component({
   selector: 'schedule-page',
@@ -42,6 +43,7 @@ export class SchedulePageComponent {
     private _router: Router,
     private _store: Store,
     private _translateService: TranslateService,
+    private _taskRepeatCfgService: TaskRepeatCfgService,
     @Inject(LOCALE_ID) private locale: string,
   ) {}
 
@@ -84,10 +86,25 @@ export class SchedulePageComponent {
   }
 
   updateTaskTitleIfChanged(isChanged: boolean, newTitle: string, task: Task): void {
-    if (isChanged) {
+    if (isChanged && newTitle !== task.title) {
       this._taskService.update(task.id, { title: newTitle });
     }
-    // this.focusSelf();
+  }
+
+  updateRepeatableTitleIfChanged(
+    isChanged: boolean,
+    newTitle: string,
+    repeatCfg: TaskRepeatCfg,
+  ): void {
+    if (isChanged && newTitle !== repeatCfg.title) {
+      this._taskRepeatCfgService.updateTaskRepeatCfg(
+        repeatCfg.id,
+        {
+          title: newTitle,
+        },
+        true,
+      );
+    }
   }
 
   trackByFn(i: number, task: TaskWithReminderData): string {
