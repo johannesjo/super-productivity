@@ -8,7 +8,7 @@
     class="component-wrapper"
     style="margin-top: 24px"
   >
-    <h2>Scheduled tasks</h2>
+    <h2>{{T.SCHEDULE.SCHEDULED_TASKS|translate}}</h2>
 
     <p *ngIf="!allScheduledTasks?.length" class="no-scheduled-tasks">
       {{T.SCHEDULE.NO_SCHEDULED|translate}}
@@ -106,9 +106,10 @@
     class="component-wrapper"
     style="margin-top: 24px"
   >
-    <h2>Repeatable tasks</h2>
+    <h2>{{T.SCHEDULE.REPEATED_TASKS|translate}}</h2>
+
     <p *ngIf="!taskRepeatCfgs?.length" class="no-scheduled-tasks">
-      {{T.SCHEDULE.NO_SCHEDULED|translate}}
+      {{T.SCHEDULE.NO_REPEATABLE_TASKS|translate}}
     </p>
 
     <div [@standardList]="taskRepeatCfgs?.length" class="repeat-task-cfgs">
