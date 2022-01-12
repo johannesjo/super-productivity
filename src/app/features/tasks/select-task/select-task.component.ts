@@ -16,6 +16,8 @@ import { WorkContextService } from '../../work-context/work-context.service';
 import { TaskService } from '../task.service';
 import { Store } from '@ngrx/store';
 import { selectStartableTasksActiveContextFirst } from '../../work-context/store/work-context.selectors';
+import { Project } from '../../project/project.model';
+import { selectAllProjects } from '../../project/store/project.selectors';
 
 @Component({
   selector: 'select-task',
@@ -27,6 +29,7 @@ export class SelectTaskComponent implements OnInit, OnDestroy {
   T: typeof T = T;
   taskSelectCtrl: FormControl = new FormControl();
   filteredTasks: Task[] = [];
+  projectMap: { [key: string]: Project } = {};
   isCreate: boolean = false;
   @Output() taskChange: EventEmitter<Task | string> = new EventEmitter();
   @Input() isLimitToProject: boolean = false;
@@ -46,6 +49,14 @@ export class SelectTaskComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
+    this._store
+      .select(selectAllProjects)
+      .pipe(takeUntil(this._destroy$))
+      .subscribe((projects) => {
+        projects.forEach((project) => {
+          this.projectMap[project.id] = project;
+        });
+      });
     const tasks$: Observable<Task[]> = this.isLimitToProject
       ? this._workContextService.startableTasksForActiveContext$
       : this._store.select(selectStartableTasksActiveContextFirst);

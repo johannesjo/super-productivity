@@ -157,3 +157,8 @@ body .mat-h1 {
     background-color: $c-backdrop-light-theme;
   }
 }
+
+// AUTOCOMPLETE
+mat-option .mat-option-text > * {
+  vertical-align: middle;
+}

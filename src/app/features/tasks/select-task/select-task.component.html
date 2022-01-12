@@ -16,7 +16,12 @@
     [displayWith]="displayWith"
   >
     <mat-option *ngFor="let task of filteredTasks; trackBy:trackById" [value]="task">
-      <span>{{ task?.title}}</span>
+      <mat-icon *ngIf="task.issueType" [svgIcon]="task.issueType|issueIcon"></mat-icon>
+      <mat-icon *ngIf="!task.issueType && !projectMap[task.projectId]"
+        >library_books
+      </mat-icon>
+      <tag *ngIf="projectMap[task.projectId]" [tag]="projectMap[task.projectId]"></tag>
+      <span [innerHTML]="task.title"></span>
     </mat-option>
   </mat-autocomplete>
 </mat-form-field>
