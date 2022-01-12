@@ -37,6 +37,30 @@ export const migrateTaskRepeatCfgState = (
 };
 
 const _addNewFieldsToTaskRepeatCfgs = (taskRepeat: TaskRepeatCfg): TaskRepeatCfg => {
+  const isMondayToFriday =
+    taskRepeat.monday &&
+    taskRepeat.tuesday &&
+    taskRepeat.wednesday &&
+    taskRepeat.thursday &&
+    taskRepeat.friday;
+
+  const isMondayToFridayOnly =
+    isMondayToFriday && !taskRepeat.saturday && !taskRepeat.sunday;
+
+  const isAllWeek = isMondayToFriday && taskRepeat.saturday && taskRepeat.sunday;
+
+  let quickSetting = taskRepeat.quickSetting;
+
+  if (!quickSetting) {
+    if (isAllWeek) {
+      quickSetting = 'DAILY';
+    } else if (isMondayToFridayOnly) {
+      quickSetting = 'MONDAY_TO_FRIDAY';
+    } else {
+      quickSetting = 'CUSTOM';
+    }
+  }
+
   return {
     ...DEFAULT_TASK_REPEAT_CFG,
     ...taskRepeat,
@@ -48,7 +72,7 @@ const _addNewFieldsToTaskRepeatCfgs = (taskRepeat: TaskRepeatCfg): TaskRepeatCfg
         : (taskRepeat as any).isAddToBottom
         ? 1
         : 0,
-    quickSetting: taskRepeat.quickSetting || 'CUSTOM',
+    quickSetting,
     repeatCycle: taskRepeat.repeatCycle || 'WEEKLY',
     repeatEvery: taskRepeat.repeatEvery || 1,
     startDate: taskRepeat.startDate || getWorklogStr(),
