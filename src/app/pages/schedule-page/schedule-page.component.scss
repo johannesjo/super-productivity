@@ -146,8 +146,7 @@
       padding-bottom: 0;
     }
   }
-
-  .repeat-text {
+  .repeat-text-and-icon {
     border-radius: $card-border-radius;
     display: flex;
     font-style: italic;
@@ -163,7 +162,7 @@
 
     @include mq(xs) {
       margin: 0 $s * 2;
-      margin-right: $s;
+      margin-right: 0;
       flex-direction: row;
     }
     @include mq(xs, max) {
@@ -180,6 +179,7 @@
       @include mq(xs) {
         display: block;
         opacity: 0.8;
+        margin-left: $s;
       }
     }
 

@@ -136,22 +136,12 @@
 
               <div
                 (click)="editTaskRepeatCfg(taskRepeatCfg)"
-                class="repeat-text"
+                class="repeat-text-and-icon"
                 mat-ripple
               >
                 <div class="repeat-text">{{ getRepeatInfoText(taskRepeatCfg)}}</div>
                 <mat-icon svgIcon="repeat"></mat-icon>
               </div>
-
-              <button
-                (click)="startTask(taskRepeatCfg)"
-                [matTooltip]="T.SCHEDULE.START_TASK|translate"
-                class="action-btn hide-xs"
-                mat-icon-button
-              >
-                <mat-icon>notifications_active</mat-icon>
-                <!--notifications_off-->
-              </button>
             </div>
           </div>
         </mat-card-content>
