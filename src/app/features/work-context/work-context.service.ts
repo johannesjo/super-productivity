@@ -61,6 +61,8 @@ import {
 import { GlobalTrackingIntervalService } from '../../core/global-tracking-interval/global-tracking-interval.service';
 import { Note } from '../note/note.model';
 import { selectNotesById } from '../note/store/note.reducer';
+import { TranslateService } from '@ngx-translate/core';
+import { T } from '../../t.const';
 
 @Injectable({
   providedIn: 'root',
@@ -122,18 +124,41 @@ export class WorkContextService {
 
   activeWorkContext$: Observable<WorkContext> = this._afterDataLoaded$.pipe(
     switchMap(() => this._store$.select(selectActiveWorkContext)),
+    switchMap((activeContext) =>
+      activeContext.id === TODAY_TAG.id && activeContext.title === TODAY_TAG.title
+        ? this._translateService.onLangChange.pipe(
+            startWith(this._translateService.currentLang),
+            map(() => ({
+              ...activeContext,
+              title: this._translateService.instant(T.G.TODAY_TAG_TITLE),
+            })),
+          )
+        : of(activeContext),
+    ),
     shareReplay(1),
   );
   mainWorkContext$: Observable<WorkContext> = this._isAllDataLoaded$.pipe(
     concatMap(() => this._tagService.getTagById$(TODAY_TAG.id)),
-    switchMap((myDayTag) =>
-      of({
-        ...myDayTag,
-        type: WorkContextType.TAG,
-        routerLink: `tag/${myDayTag.id}`,
-        // TODO get pinned noteIds
-        noteIds: [],
-      } as WorkContext),
+    map(
+      (mainWorkContext) =>
+        ({
+          ...mainWorkContext,
+          type: WorkContextType.TAG,
+          routerLink: `tag/${mainWorkContext.id}`,
+          // TODO get pinned noteIds
+          noteIds: [],
+        } as WorkContext),
+    ),
+    switchMap((mainWorkContext) =>
+      mainWorkContext.id === TODAY_TAG.id && mainWorkContext.title === TODAY_TAG.title
+        ? this._translateService.onLangChange.pipe(
+            startWith(this._translateService.currentLang),
+            map(() => ({
+              ...mainWorkContext,
+              title: this._translateService.instant(T.G.TODAY_TAG_TITLE),
+            })),
+          )
+        : of(mainWorkContext),
     ),
   );
 
@@ -266,6 +291,7 @@ export class WorkContextService {
     private _tagService: TagService,
     private _globalTrackingIntervalService: GlobalTrackingIntervalService,
     private _router: Router,
+    private _translateService: TranslateService,
   ) {
     this.isToday$.subscribe((v) => (this.isToday = v));
 
