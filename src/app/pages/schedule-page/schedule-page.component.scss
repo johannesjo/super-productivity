@@ -1,7 +1,8 @@
 @import './../../../_variables';
 @import './../../features/tasks/task/task.component.mixins';
 
-.scheduled-task {
+.scheduled-task,
+.repeat-task-cfg {
   margin-bottom: $s;
   padding: $s * 0.5 $s * 2;
   @include dividerBorderColor(1px);
@@ -28,11 +29,95 @@
   }
 }
 
-.content {
+.scheduled-task-content,
+.repeat-task-cfg-content {
   display: flex;
   align-items: center;
   justify-content: space-between;
+}
 
+.scheduled-task-content {
+  .task-info {
+    flex: 1;
+    display: flex;
+    //flex-direction: column;
+    align-items: center;
+
+    @include mq(xs) {
+      flex-direction: row;
+    }
+  }
+
+  .title {
+    flex: 1;
+    padding-top: $s;
+    //padding-bottom: $s;
+    display: flex;
+    flex-direction: column;
+
+    ::ng-deep .tags-container {
+      margin-left: 0;
+      margin-bottom: 0;
+      padding-bottom: 0;
+    }
+  }
+
+  .due-date {
+    border-radius: $card-border-radius;
+    display: flex;
+    font-style: italic;
+    flex-direction: column;
+    align-items: center;
+    cursor: pointer;
+    padding-left: $s;
+    padding-right: $s;
+
+    min-height: $mat-mini-fab-size;
+    text-align: right;
+    opacity: 0.9;
+
+    @include mq(xs) {
+      margin: 0 $s * 2;
+      margin-right: $s;
+      flex-direction: row;
+    }
+    @include mq(xs, max) {
+      font-size: 13px;
+      margin-right: $s * -1;
+    }
+
+    .time-left {
+      opacity: 0.9;
+    }
+
+    &:hover {
+      opacity: 1;
+    }
+
+    .date-and-time-left {
+      margin-top: auto;
+      margin-bottom: auto;
+
+      @include mq(xs) {
+        margin-right: $s;
+      }
+    }
+
+    mat-icon {
+      display: none;
+      @include mq(xs) {
+        display: block;
+        opacity: 0.8;
+      }
+    }
+
+    &:hover mat-icon {
+      opacity: 1;
+    }
+  }
+}
+
+.repeat-task-cfg-content {
   .task-info {
     flex: 1;
     display: flex;
