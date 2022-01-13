@@ -1,3 +1,4 @@
+// NOTE: rather than using media queries we do this to assure JS and CSS method are the same
 @mixin touchOnlyDevice {
   :host-context(.isTouchOnly) & {
     @content;
