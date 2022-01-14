@@ -854,6 +854,28 @@
       }
     },
     "TASK_REPEAT": {
+      "ADD_INFO_PANEL": {
+        "CUSTOM": "Prilagođena konfiguracija za ponavljanje",
+        "CUSTOM_AND_TIME": "Prilagođeno, {{timeStr}}",
+        "CUSTOM_WEEKLY": "{{daysStr}}",
+        "CUSTOM_WEEKLY_AND_TIME": "{{daysStr}}, {{timeStr}}",
+        "DAILY": "Svaki dan",
+        "DAILY_AND_TIME": "Svaki dan, {{timeStr}}",
+        "EVERY_X_DAILY": "Svakih {{x}} dana",
+        "EVERY_X_DAILY_AND_TIME": "Svakih {{x}} dana, {{timeStr}}",
+        "EVERY_X_MONTHLY": "Svakih {{x}} mjeseca",
+        "EVERY_X_MONTHLY_AND_TIME": "Svakih {{x}} mjeseca, {{timeStr}}",
+        "EVERY_X_YEARLY": "Svakih {{x}} godina",
+        "EVERY_X_YEARLY_AND_TIME": "Svakih {{x}} godina, {{timeStr}}",
+        "MONTHLY_CURRENT_DATE": "Mjesečno {{dateDayStr}}th",
+        "MONTHLY_CURRENT_DATE_AND_TIME": "Mjesečno {{dateDayStr}}th, {{timeStr}}",
+        "MONDAY_TO_FRIDAY": "Pon – Pet",
+        "MONDAY_TO_FRIDAY_AND_TIME": "Pon – Pet, {{timeStr}}",
+        "WEEKLY_CURRENT_WEEKDAY": "Tjedno {{weekdayStr}}",
+        "WEEKLY_CURRENT_WEEKDAY_AND_TIME": "Tjedno {{weekdayStr}}, {{timeStr}}",
+        "YEARLY_CURRENT_DATE": "Godišnje {{dayAndMonthStr}}",
+        "YEARLY_CURRENT_DATE_AND_TIME": "Godišnje {{dayAndMonthStr}}, {{timeStr}}"
+      },
       "D_CONFIRM_REMOVE": {
         "MSG": "Uklanjanje konfiguracije ponavljanja pretvorit će sve prethodne instance ovog zadatka u redovite zadatke. Stvarno želiš nastaviti",
         "OK": "Ukloni potpuno"
@@ -867,8 +889,8 @@
         "OK": "Aktualiziraj sve instance"
       },
       "D_EDIT": {
-        "ADD": "Dodaj koniguraciju ponavljanja zadatka",
-        "EDIT": "Uredi koniguraciju ponavljanja zadatka",
+        "ADD": "Dodaj koniguraciju za ponavljanje zadatka",
+        "EDIT": "Uredi koniguraciju za ponavljanje zadatka",
         "HELP1": "Ponavljajući zadaci namijenjeni su za svakodnevne poslove, e.g.: „Organizacija”, „Dnevni sastanak”, „Pregled koda”, „Provjeravanje e-mailova” ili sličnih zadataka koji vjerojatno stalno ponavljaju.",
         "HELP2": "Nakon što je konfiguriran, ponavljajući zadatak bit će ponovo kreiran svakog dolje odabranog dana kad otvoriš svoj projekt i automatski će se označiti kao dovršen na kraju dana. Tretirat će se kao različite instance. Na taj način možeš slobodno dodavati podzadatke itd.",
         "HELP3": "Zadaci uvezeni iz Jira ili Git problema ne mogu se ponoviti.",
@@ -876,15 +898,29 @@
         "TAG_LABEL": "Oznake za dodavanje"
       },
       "F": {
+        "C_DAY": "Dan",
+        "C_MONTH": "Mjesec",
+        "C_WEEK": "Tjedan",
+        "C_YEAR": "Godina",
         "DEFAULT_ESTIMATE": "Standardna procjena",
         "FRIDAY": "Petak",
         "IS_ADD_TO_BOTTOM": "Premjesti zadatak na kraj popisa",
         "MONDAY": "Ponedjeljak",
         "ORDER": "Redoslijed",
-        "ORDER_DESCRIPTION": "Redoslijed stvaranja ponavljajućih zadataka. Utječe samo na ponovljive zadatke koji su stvoreni u isto vrijeme. Manji broj znači da će se zadatak stvoriti na vrhu popisa, a veći broj da će se stvoriti niže u popisu. Broj veći od 0 znači da se zadaci stvoraju na dnu običnih zadataka.",
-        "REMIND_AT": "Podsjeti u",
+        "ORDER_DESCRIPTION": "Redoslijed stvaranja ponavljajućih zadataka. Utječe samo na ponavljajuće zadatke koji su stvoreni u isto vrijeme. Manji broj znači da će se zadatak stvoriti na vrhu popisa, a veći broj da će se stvoriti niže u popisu. Broj veći od 0 znači da se zadaci stvoraju na dnu običnih zadataka.",
+        "Q_CUSTOM": "Konfiguracija prilagođenog ponavljanja",
+        "Q_DAILY": "Svaki dan",
+        "Q_MONTHLY_CURRENT_DATE": "Svakog {{dateDayStr}}. u mjesecu",
+        "Q_MONDAY_TO_FRIDAY": "Svaki ponedjeljak do petak",
+        "Q_WEEKLY_CURRENT_WEEKDAY": "Svaki tjedan u {{weekdayStr}}",
+        "Q_YEARLY_CURRENT_DATE": "Svake godine {{dayAndMonthStr}}",
+        "QUICK_SETTING": "Konfiguracija ponavljanja",
+        "REMIND_AT": "Podsjeti",
         "REMIND_AT_PLACEHOLDER": "Odaberi vrijeme podjsećivanja",
+        "REPEAT_CYCLE": "Cikličko ponavljanje",
+        "REPEAT_EVERY": "Ponavljaj svaki",
         "SATURDAY": "Subota",
+        "START_DATE": "Datum početka",
         "START_TIME": "Terminirano vrijeme početka",
         "START_TIME_DESCRIPTION": "Npr. 15:00. Ostavi polje praznim za cjelodnevni zadatak",
         "SUNDAY": "Nedjelja",
@@ -958,7 +994,7 @@
     "WORKLOG": {
       "CMP": {
         "DAYS_WORKED": "Broj radnih dana:",
-        "MONTH_WORKED": "Brj radnih mjeseci:",
+        "MONTH_WORKED": "Radni mjesec:",
         "REPEATING_TASK": "Ponavljanje zadatka",
         "RESTORE_TASK_FROM_ARCHIVE": "Obnovi zadatak iz arhive",
         "TASKS": "Zadaci",
@@ -1041,6 +1077,7 @@
     "RESET": "Obnovi",
     "SAVE": "Spremi",
     "TITLE": "Naslov",
+    "TODAY_TAG_TITLE": "Danas",
     "UNDO": "Poništi",
     "UPDATE": "Aktualiziraj",
     "WITHOUT_PROJECT": "Bez projekta",
@@ -1148,8 +1185,9 @@
       "IS_CONFIRM_BEFORE_EXIT": "Potvrdi prije zatvaranja programa",
       "IS_CONFIRM_BEFORE_EXIT_WITHOUT_FINISH_DAY": "Potvrdi prije zatvaranja programa bez prethodnog završavanja dana",
       "IS_DARK_MODE": "Tamni modus",
+      "IS_DISABLE_ANIMATIONS": "Deaktiviraj sve animacije",
       "IS_HIDE_NAV": "Sakrij navigaciju sve dok ne prijeđeš mišem preko naslova (samo za desktop računala)",
-      "IS_MINIMIZE_TO_TRAY": "Sklopi u donju traku sustava (samo za desktop računala)",
+      "IS_MINIMIZE_TO_TRAY": "Sklopi u programsku traku (samo za desktop računala)",
       "IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "Obavijesti kad se premaši procijenjeno vrijeme",
       "IS_TRAY_SHOW_CURRENT_TASK": "Prikaži trenutačni zadatak u donjoj traci sustava / u izborniku stanja (samo mac/windows desktop računala)",
       "IS_TURN_OFF_MARKDOWN": "Isključi markdown obradu za bilješke",
@@ -1339,7 +1377,10 @@
     "TOGGLE_DARK_MODE": "Uklj./Isklj. tamni modus"
   },
   "SCHEDULE": {
-    "NO_SCHEDULED": "Trenutačno nema terminiranih zadataka. Zadatak možeš terminirati odabirom „Terminiraj zadatak” u kontekstnom izborniku zadatka. Za otvaranje, pritisni tri male točkice na desnoj strani zadatka.",
+    "NO_SCHEDULED": "Trenutačno nema terminiranih zadataka. Zadatak možeš terminirati odabirom „Terminiraj zadatak” u kontekstnom izborniku zadatka. Za otvaranje pritisni desnom tipkom miša na zadatak (pritisni dugo na mobitelu).",
+    "NO_REPEATABLE_TASKS": "Trenutačno nema ponavljajućih zadataka. Zadatak možeš terminirati odabirom „Ponovi zadatak” u bočnoj ploči zadatka. Za otvaranje pritisni najdesniju ikonu koja će se prikazati kad pređeš mišem preko zadatka (ili jednostavno dodirni zadatak na mobitelu).",
+    "REPEATED_TASKS": "Ponavljajući zadaci",
+    "SCHEDULED_TASKS": "Terminirani zadaci",
     "START_TASK": "Započni zadatak i ukloni podsjetnika"
   },
   "THEMES": {
@@ -1383,7 +1424,7 @@
     "FINISH_DAY_FOR_TAG": "Završni dan za ovu oznaku",
     "HELP_PROCRASTINATION": "Upomoć, odugovlačim!",
     "NO_COMPLETED_TASKS": "Trenutačno nema dovršenih zadataka",
-    "NO_PLANNED_TASKS": "Nema terminiranih zadataka",
+    "NO_PLANNED_TASKS": "Nema planiranih zadataka",
     "READY_TO_WORK": "Spremno za rad!",
     "RESET_BREAK_TIMER": "Obnovi bez timera prekida",
     "TIME_ESTIMATED": "Procijenjeno vrijeme:",
