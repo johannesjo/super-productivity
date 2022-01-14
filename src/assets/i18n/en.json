@@ -11,7 +11,6 @@
     }
   },
   "APP": {
-    "A_BROWSER_WARNING": "We are sorry, but the app is not optimized to run in this browser. Please consider using a chromium based browser or downloading the electron version of the app",
     "B_INSTALL": {
       "IGNORE": "Ignore",
       "INSTALL": "Install",

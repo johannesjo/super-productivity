@@ -1,6 +1,5 @@
 {
   "APP": {
-    "A_BROWSER_WARNING": "Üzgünüz, ancak uygulama bu tarayıcıda çalışacak şekilde optimize edilmedi. Lütfen krom tabanlı bir tarayıcı kullanmayı veya uygulamanın elektron sürümünü indirmeyi düşünün.",
     "B_INSTALL": {
       "IGNORE": "Aldırmamak",
       "INSTALL": "kurmak",

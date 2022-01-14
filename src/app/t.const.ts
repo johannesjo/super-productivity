@@ -11,7 +11,6 @@ const T = {
     },
   },
   APP: {
-    A_BROWSER_WARNING: 'APP.A_BROWSER_WARNING',
     B_INSTALL: {
       IGNORE: 'APP.B_INSTALL.IGNORE',
       INSTALL: 'APP.B_INSTALL.INSTALL',

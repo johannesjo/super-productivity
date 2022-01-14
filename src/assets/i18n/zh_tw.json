@@ -1,6 +1,5 @@
 {
   "APP": {
-    "A_BROWSER_WARNING": "很抱歉，但本應用程式無法在此瀏覽器中最佳化運行。請考慮使用基於 Chromium 的瀏覽器或是下載 Electron 版本的應用程式。",
     "B_INSTALL": {
       "IGNORE": "忽略",
       "INSTALL": "安裝",

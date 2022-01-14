@@ -11,7 +11,6 @@
     }
   },
   "APP": {
-    "A_BROWSER_WARNING": "Žao nam je, ali program nije optimiran za rad u ovom pregledniku. Koristi preglednik koji se temelji na chromu ili preuzmi electron verziju programa",
     "B_INSTALL": {
       "IGNORE": "Zamemari",
       "INSTALL": "Instaliraj",

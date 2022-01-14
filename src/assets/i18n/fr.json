@@ -1,6 +1,5 @@
 {
   "APP": {
-    "A_BROWSER_WARNING": "Nous sommes désolés, mais l'application n'est pas optimisée pour fonctionner dans ce navigateur. Veuillez envisager d'utiliser un navigateur à base de chrome ou de télécharger la version électronique de l'application",
     "B_INSTALL": {
       "IGNORE": "Ignorer",
       "INSTALL": "Installer",
