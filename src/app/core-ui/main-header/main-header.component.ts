@@ -24,7 +24,7 @@ import { expandFadeHorizontalAnimation } from '../../ui/animations/expand.ani';
 import { SimpleCounterService } from '../../features/simple-counter/simple-counter.service';
 import { SimpleCounter } from '../../features/simple-counter/simple-counter.model';
 import { SyncProviderService } from '../../imex/sync/sync-provider.service';
-import { IS_TOUCH_ONLY } from 'src/app/util/is-touch';
+import { IS_TOUCH_ONLY } from 'src/app/util/is-touch-only';
 import { SnackService } from '../../core/snack/snack.service';
 import { NavigationEnd, Router } from '@angular/router';
 

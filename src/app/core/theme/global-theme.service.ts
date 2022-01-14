@@ -2,7 +2,7 @@ import { Inject, Injectable } from '@angular/core';
 import { BodyClass, IS_ELECTRON } from '../../app.constants';
 import { IS_MAC } from '../../util/is-mac';
 import { distinctUntilChanged, map, take } from 'rxjs/operators';
-import { isTouchOnly } from '../../util/is-touch';
+import { IS_TOUCH_ONLY } from '../../util/is-touch-only';
 import { MaterialCssVarsService } from 'angular-material-css-vars';
 import { DOCUMENT } from '@angular/common';
 import { MatIconRegistry } from '@angular/material/icon';
@@ -176,7 +176,7 @@ export class GlobalThemeService {
       }
     });
 
-    if (isTouchOnly()) {
+    if (IS_TOUCH_ONLY) {
       this.document.body.classList.add(BodyClass.isTouchOnly);
     } else {
       this.document.body.classList.add(BodyClass.isNoTouchOnly);

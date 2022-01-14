@@ -17,7 +17,7 @@ import { Observable, ReplaySubject, Subscription } from 'rxjs';
 import { distinctUntilChanged, map, share, switchMap } from 'rxjs/operators';
 import { observeWidth } from '../../../util/resize-observer-obs';
 import { MainContainerClass } from '../../../app.constants';
-import { IS_TOUCH_ONLY } from '../../../util/is-touch';
+import { IS_TOUCH_ONLY } from '../../../util/is-touch-only';
 
 const SMALL_CONTAINER_WIDTH = 620;
 const VERY_SMALL_CONTAINER_WIDTH = 450;

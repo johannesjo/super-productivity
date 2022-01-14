@@ -22,7 +22,7 @@ import { getWorklogStr } from '../../util/get-work-log-str';
 import { T } from '../../t.const';
 import { TranslateService } from '@ngx-translate/core';
 import { TrackingReminderConfig } from '../config/global-config.model';
-import { IS_TOUCH_ONLY } from '../../util/is-touch';
+import { IS_TOUCH_ONLY } from '../../util/is-touch-only';
 
 @Injectable({
   providedIn: 'root',

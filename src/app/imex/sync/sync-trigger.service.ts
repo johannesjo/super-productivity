@@ -33,7 +33,7 @@ import { IPC } from '../../../../electron/ipc-events.const';
 import { GlobalConfigState } from '../../features/config/global-config.model';
 import { IS_ANDROID_WEB_VIEW } from '../../util/is-android-web-view';
 import { androidInterface } from '../../features/android/android-interface';
-import { IS_TOUCH_ONLY } from '../../util/is-touch';
+import { IS_TOUCH_ONLY } from '../../util/is-touch-only';
 
 const MAX_WAIT_FOR_INITIAL_SYNC = 25000;
 const USER_INTERACTION_SYNC_CHECK_THROTTLE_TIME = 15 * 60 * 10000;

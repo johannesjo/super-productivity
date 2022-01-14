@@ -41,7 +41,7 @@ import { TaskAttachmentService } from '../task-attachment/task-attachment.servic
 import { IssueService } from '../../issue/issue.service';
 import { DialogEditTaskAttachmentComponent } from '../task-attachment/dialog-edit-attachment/dialog-edit-task-attachment.component';
 import { swirlAnimation } from '../../../ui/animations/swirl-in-out.ani';
-import { IS_TOUCH_ONLY, isTouchOnly } from '../../../util/is-touch';
+import { IS_TOUCH_ONLY, isTouchOnly } from '../../../util/is-touch-only';
 import { DialogAddTaskReminderComponent } from '../dialog-add-task-reminder/dialog-add-task-reminder.component';
 import { DialogEditTaskRepeatCfgComponent } from '../../task-repeat-cfg/dialog-edit-task-repeat-cfg/dialog-edit-task-repeat-cfg.component';
 import { ProjectService } from '../../project/project.service';

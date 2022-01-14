@@ -7,13 +7,11 @@
 //   }
 // }
 // export const IS_TOUCH = isTouch();
-
+import { deviceType } from 'detect-it';
 import { IS_ANDROID_WEB_VIEW } from './is-android-web-view';
 
 // @see https://css-tricks.com/interaction-media-features-and-their-potential-for-incorrect-assumptions/
-export const isTouchOnly = (): boolean =>
-  window.matchMedia('(any-pointer: coarse)').matches &&
-  !window.matchMedia('(any-pointer: fine)').matches;
+export const isTouchOnly = (): boolean => deviceType === 'touchOnly';
 
 // NOTE: not required to add IS_ANDROID_WEB_VIEW, but we make extra sure the value is set
 export const IS_TOUCH_ONLY = IS_ANDROID_WEB_VIEW || isTouchOnly();

@@ -11,7 +11,7 @@ import {
 } from '@angular/core';
 import { fromEvent, Subscription } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
-import { isTouchOnly } from '../../../util/is-touch';
+import { isTouchOnly } from '../../../util/is-touch-only';
 
 const ANIMATABLE_CLASS = 'isAnimatable';
 

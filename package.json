@@ -170,6 +170,7 @@
     "codelyzer": "^6.0.2",
     "conventional-changelog-cli": "^2.0.21",
     "cross-env": "^7.0.3",
+    "detect-it": "^4.0.1",
     "electron": "^14.1.1",
     "electron-builder": "22.14.5",
     "electron-builder-notarize": "^1.2.0",
