@@ -26,6 +26,7 @@ import { Tag } from '../../tag/tag.model';
 import { exists } from '../../../util/exists';
 import { TODAY_TAG } from '../../tag/tag.const';
 import { TranslateService } from '@ngx-translate/core';
+import { getWorklogStr } from '../../../util/get-work-log-str';
 
 // TASK_REPEAT_CFG_FORM_CFG
 @Component({
@@ -58,9 +59,15 @@ export class DialogEditTaskRepeatCfgComponent implements OnInit, OnDestroy {
     @Inject(LOCALE_ID) private _locale: string,
     @Inject(MAT_DIALOG_DATA) private _data: { task?: Task; repeatCfg?: TaskRepeatCfg },
   ) {
-    if (this._data.task) {
+    if (this._data.repeatCfg) {
+      this.repeatCfgInitial = { ...this._data.repeatCfg };
+      this.repeatCfg = { ...this._data.repeatCfg };
+      this.repeatCfgId = this._data.repeatCfg.id;
+      this.isEdit = true;
+    } else if (this._data.task) {
       this.repeatCfg = {
         ...DEFAULT_TASK_REPEAT_CFG,
+        startDate: getWorklogStr(),
         title: this._data.task.title,
         // NOTE: always add today tag, as that's likely what we want
         tagIds: unique([TODAY_TAG.id, ...this._data.task.tagIds]),
@@ -68,11 +75,6 @@ export class DialogEditTaskRepeatCfgComponent implements OnInit, OnDestroy {
       };
       this.repeatCfgId = this._data.task.repeatCfgId;
       this.isEdit = !!this.repeatCfgId;
-    } else if (this._data.repeatCfg) {
-      this.repeatCfgInitial = { ...this._data.repeatCfg };
-      this.repeatCfg = { ...this._data.repeatCfg };
-      this.repeatCfgId = this._data.repeatCfg.id;
-      this.isEdit = true;
     } else {
       throw new Error('Invalid params given for repeat dialog!');
     }
@@ -132,8 +134,8 @@ export class DialogEditTaskRepeatCfgComponent implements OnInit, OnDestroy {
         this._taskRepeatCfgService
           .getTaskRepeatCfgById$(this.repeatCfgId)
           .subscribe((cfg) => {
-            this.repeatCfg = cfg;
-            this.repeatCfgInitial = cfg;
+            this.repeatCfg = { ...cfg };
+            this.repeatCfgInitial = { ...cfg };
             this._cd.detectChanges();
           }),
       );
