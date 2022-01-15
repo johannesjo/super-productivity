@@ -142,6 +142,9 @@ export class TaskRepeatCfgEffects {
           ]);
         }),
         concatMap(([{ id, changes }, todayTasks, archiveTasks]) => {
+          if (todayTasks.length + archiveTasks.length === 0) {
+            return of(false);
+          }
           // NOTE: there will always be at least on instance, since we're editing it
           return this._matDialog
             .open(DialogConfirmComponent, {
