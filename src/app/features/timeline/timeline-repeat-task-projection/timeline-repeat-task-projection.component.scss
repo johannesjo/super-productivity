@@ -2,6 +2,9 @@
 @import '../../tasks/task/task.component.mixins';
 
 :host {
+  display: block;
+}
+.repeat-task-projection {
   flex: 1;
   display: flex;
   align-items: center;
@@ -12,6 +15,7 @@
   border: 1px solid $dark-theme-separator-color;
   border-radius: $task-border-radius;
   opacity: 0.9;
+  cursor: pointer;
 
   @include lightTheme {
     border-color: $light-theme-separator-color;
