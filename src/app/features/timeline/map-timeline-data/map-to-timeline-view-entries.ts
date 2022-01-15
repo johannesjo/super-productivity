@@ -33,7 +33,12 @@ export const mapToTimelineViewEntries = (
   now: number = Date.now(),
 ): TimelineViewEntry[] => {
   let startTime = now;
-  if (!tasks.length && !scheduledTasks.length) {
+  if (
+    !tasks.length &&
+    !scheduledTasks.length &&
+    !scheduledTaskRepeatCfgs.length &&
+    !calenderWithItems.length
+  ) {
     return [];
   }
 

@@ -1181,6 +1181,52 @@ describe('mapToViewEntries()', () => {
   });
 
   describe('repeatTaskProjections', () => {
+    it('should work if there are only projects but no tasks', () => {
+      const d = {
+        tasks: [],
+        scheduledTasks: [],
+        repeatTaskProjections: [
+          {
+            ...DUMMY_REPEATABLE_TASK,
+            id: 'R1',
+            title: 'Repeat 1 Daily',
+            lastTaskCreation: 60000,
+            defaultEstimate: hours(1),
+            startTime: '10:00',
+            monday: true,
+            tuesday: true,
+            wednesday: true,
+            thursday: true,
+            friday: true,
+            saturday: true,
+            sunday: true,
+            remindAt: TaskReminderOptionId.AtStart,
+            tagIds: [],
+          },
+        ] as TaskRepeatCfg[],
+        workStartEndCfg: { startTime: '10:00', endTime: '20:00' },
+        now: getDateTimeFromClockString('12:00', 0),
+      } as any;
+      const r = mapToTimelineViewEntries(
+        d.tasks,
+        d.scheduledTasks,
+        d.repeatTaskProjections,
+        [],
+        'SCHEDULED_CURRENT_ID',
+        d.workStartEndCfg,
+        d.now,
+      );
+
+      expect(r[0].type).toEqual(TimelineViewEntryType.DayCrossing);
+      expect(r[1].type).toEqual(TimelineViewEntryType.WorkdayStart);
+      expect(r[2].type).toEqual(TimelineViewEntryType.ScheduledRepeatTaskProjection);
+      expect(r[3].type).toEqual(TimelineViewEntryType.WorkdayEnd);
+      expect(r[4].type).toEqual(TimelineViewEntryType.DayCrossing);
+      expect(r[5].type).toEqual(TimelineViewEntryType.WorkdayStart);
+      expect(r[6].type).toEqual(TimelineViewEntryType.ScheduledRepeatTaskProjection);
+      expect(r[7].type).toEqual(TimelineViewEntryType.WorkdayEnd);
+    });
+
     it('should work for repeat task projections', () => {
       const d = {
         tasks: [
