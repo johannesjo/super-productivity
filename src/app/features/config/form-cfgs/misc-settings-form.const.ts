@@ -114,6 +114,7 @@ export const MISC_SETTINGS_FORM_CFG: ConfigFormSection<MiscConfig> = {
       key: 'taskNotesTpl',
       type: 'textarea',
       templateOptions: {
+        rows: 5,
         label: T.GCF.MISC.TASK_NOTES_TPL,
       },
     },
