@@ -3,7 +3,10 @@ import { TaskCopy, TaskReminderOptionId } from '../../tasks/task.model';
 import { TimelineViewEntryType } from '../timeline.const';
 import { getDateTimeFromClockString } from '../../../util/get-date-time-from-clock-string';
 import { getWorklogStr } from '../../../util/get-work-log-str';
-import { TaskRepeatCfg } from '../../task-repeat-cfg/task-repeat-cfg.model';
+import {
+  DEFAULT_TASK_REPEAT_CFG,
+  TaskRepeatCfg,
+} from '../../task-repeat-cfg/task-repeat-cfg.model';
 
 const FID = 'FAKE_TASK_ID';
 const FAKE_TASK: TaskCopy = {
@@ -16,6 +19,7 @@ const FAKE_TASK: TaskCopy = {
 const minutes = (n: number): number => n * 60 * 1000;
 const hours = (n: number): number => 60 * minutes(n);
 const DUMMY_REPEATABLE_TASK: TaskRepeatCfg = {
+  ...DEFAULT_TASK_REPEAT_CFG,
   id: 'REPEATABLE_DEFAULT',
   title: 'REPEATABLE_DEFAULT',
   quickSetting: 'DAILY',

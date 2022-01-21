@@ -2,7 +2,10 @@ import { createSortedBlockerBlocks } from './create-sorted-blocker-blocks';
 import { TaskReminderOptionId, TaskWithReminder } from '../../tasks/task.model';
 import { getDateTimeFromClockString } from '../../../util/get-date-time-from-clock-string';
 import { TimelineCalendarMapEntry } from '../timeline.model';
-import { TaskRepeatCfg } from '../../task-repeat-cfg/task-repeat-cfg.model';
+import {
+  DEFAULT_TASK_REPEAT_CFG,
+  TaskRepeatCfg,
+} from '../../task-repeat-cfg/task-repeat-cfg.model';
 import { getWorklogStr } from '../../../util/get-work-log-str';
 
 const minutes = (n: number): number => n * 60 * 1000;
@@ -896,11 +899,13 @@ describe('createBlockerBlocks()', () => {
 
   describe('repeatTaskProjections', () => {
     const DUMMY_REPEATABLE_TASK: TaskRepeatCfg = {
+      ...DEFAULT_TASK_REPEAT_CFG,
       id: 'REPEATABLE_DEFAULT',
       title: 'REPEATABLE_DEFAULT',
       quickSetting: 'DAILY',
       lastTaskCreation: 60 * 60 * 1000,
       defaultEstimate: undefined,
+      notes: undefined,
       projectId: null,
       startTime: undefined,
       remindAt: undefined,
