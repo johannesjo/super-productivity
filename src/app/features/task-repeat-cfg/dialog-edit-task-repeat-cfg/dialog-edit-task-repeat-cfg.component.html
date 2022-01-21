@@ -29,14 +29,14 @@
         [suggestions]="(tagSuggestions$|async)"
       ></chip-list-input>
 
-      <collapsible [title]="'Advanced Config'">
-        <formly-form
-          (modelChange)="repeatCfg=$event"
-          [form]="form"
-          [fields]="TASK_REPEAT_CFG_ADVANCED_FORM_CFG"
-          [model]="repeatCfg"
-        ></formly-form>
-      </collapsible>
+      <!--      <collapsible [title]="T.F.TASK_REPEAT.D_EDIT.ADVANCED_CFG|translate">-->
+      <formly-form
+        (modelChange)="repeatCfg=$event"
+        [form]="form"
+        [fields]="TASK_REPEAT_CFG_ADVANCED_FORM_CFG"
+        [model]="repeatCfg"
+      ></formly-form>
+      <!--      </collapsible>-->
     </div>
   </mat-dialog-content>
 

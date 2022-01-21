@@ -274,8 +274,8 @@ export const TASK_REPEAT_CFG_ADVANCED_FORM_CFG: FormlyFieldConfig[] = [
     key: 'notes',
     type: 'textarea',
     templateOptions: {
-      label: T.F.TASK_REPEAT.F.TITLE,
-      rows: 5,
+      label: T.F.TASK_REPEAT.F.NOTES,
+      rows: 4,
     },
   },
 ];
