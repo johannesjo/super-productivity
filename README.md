@@ -85,6 +85,31 @@ There is another [article](https://dev.to/johannesjo/super-productivity-how-to-g
 
 [If you have further questions, please refer to the discussions page](https://github.com/johannesjo/super-productivity/discussions).
 
+
+<details>
+<summary> <b>⌨ Summary of keyboard shortcuts and markup-syntax</b></summary>
+
+### Keyboard shortcuts
+- `Shift`+`A`: Open add task bar
+- `Enter`: Edit currently focussed task title
+- `Arrow keys`: Navigate around task list
+- `D`: Mark currently focused task as done
+- `A`: Add subtask to currently focused task
+- `Y`: Toggle tracking time to currently focused task
+- `S`: Open schedule dialog for currently focused task
+- `Backspace`: Delete currently focused task
+- `ArrowRight`: Open additional info panel for currently focused task
+- `Ctrl`+`Shift`+`ArrowUp`: Move currently focused task up in list
+- `Ctrl`+`Shift`+`ArrowDown`: Move currently focused task down in list
+
+### Markups
+- `# <tag-name>`: add a tag to the task  
+  (`"task-description  #tag1"`)
+- `<number>m` or `<number>h`: set time-estimate for the task  
+  (`"task-description 10m"` or `"task-description 5h"`)
+
+</details>
+
 ## :globe_with_meridians: Web Version
 
 Check out the web version eventhough it is a bit limited: Time tracking only works if the app is open and for idle time tracking to work, the chrome extension has to be installed.
