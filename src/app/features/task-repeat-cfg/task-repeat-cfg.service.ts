@@ -280,6 +280,7 @@ export class TaskRepeatCfgService {
           timeEstimate: taskRepeatCfg.defaultEstimate,
           projectId: taskRepeatCfg.projectId,
           tagIds: isAddToTodayAsFallback ? [TODAY_TAG.id] : taskRepeatCfg.tagIds || [],
+          notes: taskRepeatCfg.notes || '',
         },
       }),
       isAddToBottom: taskRepeatCfg.order > 0,
