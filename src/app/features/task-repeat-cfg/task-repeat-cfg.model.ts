@@ -47,6 +47,10 @@ export interface TaskRepeatCfgCopy {
   friday: boolean;
   saturday: boolean;
   sunday: boolean;
+
+  // advanced
+  notes: string | undefined;
+  // ... possible sub tasks & attachments
 }
 
 export type TaskRepeatCfg = Readonly<TaskRepeatCfgCopy>;
@@ -81,4 +85,6 @@ export const DEFAULT_TASK_REPEAT_CFG: Omit<TaskRepeatCfgCopy, 'id'> = {
   sunday: false,
   tagIds: [],
   order: 0,
+
+  notes: undefined,
 };

@@ -1,7 +1,8 @@
 import { selectTaskRepeatCfgsDueOnDay } from './task-repeat-cfg.reducer';
-import { TaskRepeatCfg } from '../task-repeat-cfg.model';
+import { DEFAULT_TASK_REPEAT_CFG, TaskRepeatCfg } from '../task-repeat-cfg.model';
 
 const DUMMY_REPEATABLE_TASK: TaskRepeatCfg = {
+  ...DEFAULT_TASK_REPEAT_CFG,
   id: 'REPEATABLE_DEFAULT',
   title: 'REPEATABLE_DEFAULT',
   quickSetting: 'DAILY',

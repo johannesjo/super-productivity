@@ -18,7 +18,10 @@ import {
 import { Observable, Subscription } from 'rxjs';
 import { FormlyFieldConfig } from '@ngx-formly/core';
 import { FormGroup } from '@angular/forms';
-import { TASK_REPEAT_CFG_FORM_CFG_BEFORE_TAGS } from './task-repeat-cfg-form.const';
+import {
+  TASK_REPEAT_CFG_ADVANCED_FORM_CFG,
+  TASK_REPEAT_CFG_FORM_CFG_BEFORE_TAGS,
+} from './task-repeat-cfg-form.const';
 import { T } from '../../../t.const';
 import { TagService } from '../../tag/tag.service';
 import { unique } from '../../../util/unique';
@@ -44,6 +47,7 @@ export class DialogEditTaskRepeatCfgComponent implements OnInit, OnDestroy {
   isEdit: boolean;
 
   TASK_REPEAT_CFG_FORM_CFG_BEFORE_TAGS: FormlyFieldConfig[];
+  TASK_REPEAT_CFG_ADVANCED_FORM_CFG: FormlyFieldConfig[];
 
   form: FormGroup = new FormGroup({});
   tagSuggestions$: Observable<Tag[]> = this._tagService.tags$;
@@ -80,6 +84,7 @@ export class DialogEditTaskRepeatCfgComponent implements OnInit, OnDestroy {
     }
 
     this.TASK_REPEAT_CFG_FORM_CFG_BEFORE_TAGS = TASK_REPEAT_CFG_FORM_CFG_BEFORE_TAGS;
+    this.TASK_REPEAT_CFG_ADVANCED_FORM_CFG = TASK_REPEAT_CFG_ADVANCED_FORM_CFG;
 
     const today = new Date();
     const weekdayStr = today.toLocaleDateString(_locale, {
