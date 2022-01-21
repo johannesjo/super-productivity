@@ -24,6 +24,17 @@ help-section {
   }
 }
 
+:host collapsible {
+  margin-top: $s * 2;
+  margin-bottom: $s * 2;
+}
+
+:host ::ng-deep .collapsible-title {
+  flex-grow: 0 !important;
+  font-weight: bold;
+  font-size: 17px;
+}
+
 :host::ng-deep .weekdays {
   display: flex;
   flex-wrap: wrap;

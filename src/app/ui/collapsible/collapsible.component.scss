@@ -10,6 +10,7 @@
   -webkit-user-select: none; /* Safari */
   display: flex;
   flex-direction: row;
+  align-items: center;
 
   &:focus {
     outline: none;
