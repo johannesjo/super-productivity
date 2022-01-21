@@ -206,8 +206,19 @@ export class TaskRepeatCfgEffects {
                     if (changes.tagIds) {
                       this._taskService.updateTags(task, changes.tagIds, task.tagIds);
                     }
-                    if (changes.title) {
-                      this._taskService.update(task.id, { title: changes.title });
+                    if (changes.title || changes.notes) {
+                      this._taskService.update(task.id, {
+                        ...(changes.title
+                          ? {
+                              title: changes.title,
+                            }
+                          : {}),
+                        ...(changes.notes
+                          ? {
+                              notes: changes.notes,
+                            }
+                          : {}),
+                      });
                     }
                     if (
                       typeof changes.defaultEstimate === 'number' &&
@@ -242,6 +253,9 @@ export class TaskRepeatCfgEffects {
                     }
                     if (changes.title) {
                       changesForArchiveTask.title = changes.title;
+                    }
+                    if (changes.notes) {
+                      changesForArchiveTask.notes = changes.notes;
                     }
                     if (
                       typeof changes.defaultEstimate === 'number' &&

@@ -73,6 +73,7 @@ export class DialogEditTaskRepeatCfgComponent implements OnInit, OnDestroy {
         ...DEFAULT_TASK_REPEAT_CFG,
         startDate: getWorklogStr(),
         title: this._data.task.title,
+        notes: this._data.task.notes || undefined,
         // NOTE: always add today tag, as that's likely what we want
         tagIds: unique([TODAY_TAG.id, ...this._data.task.tagIds]),
         defaultEstimate: this._data.task.timeEstimate,
@@ -161,6 +162,7 @@ export class DialogEditTaskRepeatCfgComponent implements OnInit, OnDestroy {
         this.repeatCfgInitial.defaultEstimate !== this.repeatCfg.defaultEstimate ||
         this.repeatCfgInitial.remindAt !== this.repeatCfg.remindAt ||
         this.repeatCfgInitial.startTime !== this.repeatCfg.startTime ||
+        this.repeatCfgInitial.notes !== this.repeatCfg.notes ||
         JSON.stringify(this.repeatCfgInitial.tagIds) !==
           JSON.stringify(this.repeatCfg.tagIds);
 
