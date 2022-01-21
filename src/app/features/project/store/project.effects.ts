@@ -82,6 +82,7 @@ export class ProjectEffects {
           updateProjectOrder.type,
           archiveProject.type,
           unarchiveProject.type,
+          moveToOtherProject.type,
 
           moveProjectTaskInBacklogList.type,
           moveProjectTaskToBacklogList.type,
