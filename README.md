@@ -85,11 +85,11 @@ There is another [article](https://dev.to/johannesjo/super-productivity-how-to-g
 
 [If you have further questions, please refer to the discussions page](https://github.com/johannesjo/super-productivity/discussions).
 
-
 <details>
-<summary> <b>⌨ Summary of keyboard shortcuts and markup-syntax</b></summary>
+<summary> <b>⌨ Keyboard shortcuts and short-syntax</b></summary>
 
-### Keyboard shortcuts
+### Keyboard shortcuts (most importan)
+
 - `Shift`+`A`: Open add task bar
 - `Enter`: Edit currently focussed task title
 - `Arrow keys`: Navigate around task list
@@ -102,9 +102,12 @@ There is another [article](https://dev.to/johannesjo/super-productivity-how-to-g
 - `Ctrl`+`Shift`+`ArrowUp`: Move currently focused task up in list
 - `Ctrl`+`Shift`+`ArrowDown`: Move currently focused task down in list
 
-### Markups
+### Short-Syntax
+
+Can be used when adding a task.
+
 - `# <tag-name>`: add a tag to the task  
-  (`"task-description  #tag1"`)
+  (`"task-description #tag1"`)
 - `<number>m` or `<number>h`: set time-estimate for the task  
   (`"task-description 10m"` or `"task-description 5h"`)
 
