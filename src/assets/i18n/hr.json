@@ -889,7 +889,7 @@
       },
       "D_EDIT": {
         "ADD": "Dodaj koniguraciju za ponavljanje zadatka",
-        "ADVANCED_CFG": "Napredna koniguracija",
+        "ADVANCED_CFG": "Napredna konfiguracija",
         "EDIT": "Uredi koniguraciju za ponavljanje zadatka",
         "HELP1": "Ponavljajući zadaci namijenjeni su za svakodnevne poslove, e.g.: „Organizacija”, „Dnevni sastanak”, „Pregled koda”, „Provjeravanje e-mailova” ili sličnih zadataka koji vjerojatno stalno ponavljaju.",
         "HELP2": "Nakon što je konfiguriran, ponavljajući zadatak bit će ponovo kreiran svakog dolje odabranog dana kad otvoriš svoj projekt i automatski će se označiti kao dovršen na kraju dana. Tretirat će se kao različite instance. Na taj način možeš slobodno dodavati podzadatke itd.",
@@ -906,7 +906,7 @@
         "FRIDAY": "Petak",
         "IS_ADD_TO_BOTTOM": "Premjesti zadatak na kraj popisa",
         "MONDAY": "Ponedjeljak",
-        "NOTES": "Standardne biješke",
+        "NOTES": "Standardne bilješke",
         "ORDER": "Redoslijed",
         "ORDER_DESCRIPTION": "Redoslijed stvaranja ponavljajućih zadataka. Utječe samo na ponavljajuće zadatke koji su stvoreni u isto vrijeme. Manji broj znači da će se zadatak stvoriti na vrhu popisa, a veći broj da će se stvoriti niže u popisu. Broj veći od 0 znači da se zadaci stvoraju na dnu običnih zadataka.",
         "Q_CUSTOM": "Konfiguracija prilagođenog ponavljanja",
