@@ -255,11 +255,11 @@
     </ng-container>
     <ng-container input-value>
       <div
-        *ngIf="repeatCfgDays$|async as repeatCfgDays"
+        *ngIf="repeatCfgLabel$|async as repeatCfgLabel"
         class="reminder-value"
         matTooltipPosition="left"
       >
-        {{repeatCfgDays}}
+        {{repeatCfgLabel}}
       </div>
     </ng-container>
   </task-additional-info-item>
