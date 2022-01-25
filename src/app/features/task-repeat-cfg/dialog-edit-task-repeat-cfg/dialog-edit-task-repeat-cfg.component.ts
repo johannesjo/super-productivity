@@ -238,6 +238,14 @@ export class DialogEditTaskRepeatCfgComponent implements OnInit, OnDestroy {
         this.repeatCfg = { ...this.repeatCfg, quickSetting: 'CUSTOM' };
       }
     }
+    if (this.repeatCfg.quickSetting === 'MONTHLY_CURRENT_DATE') {
+      if (!this.repeatCfg.startDate) {
+        throw new Error('Invalid repeat cfg');
+      }
+      if (new Date(this.repeatCfg.startDate).getDate() !== new Date().getDate()) {
+        this.repeatCfg = { ...this.repeatCfg, quickSetting: 'CUSTOM' };
+      }
+    }
   }
 
   private _updateTags(newTagIds: string[]): void {
