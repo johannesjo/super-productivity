@@ -30,6 +30,7 @@ import { exists } from '../../../util/exists';
 import { TODAY_TAG } from '../../tag/tag.const';
 import { TranslateService } from '@ngx-translate/core';
 import { getWorklogStr } from '../../../util/get-work-log-str';
+import { first } from 'rxjs/operators';
 
 // TASK_REPEAT_CFG_FORM_CFG
 @Component({
@@ -43,7 +44,6 @@ export class DialogEditTaskRepeatCfgComponent implements OnInit, OnDestroy {
 
   repeatCfgInitial?: TaskRepeatCfgCopy;
   repeatCfg: Omit<TaskRepeatCfgCopy, 'id'> | TaskRepeatCfg;
-  repeatCfgId: string | null;
   isEdit: boolean;
 
   TASK_REPEAT_CFG_FORM_CFG_BEFORE_TAGS: FormlyFieldConfig[];
@@ -64,9 +64,9 @@ export class DialogEditTaskRepeatCfgComponent implements OnInit, OnDestroy {
     @Inject(MAT_DIALOG_DATA) private _data: { task?: Task; repeatCfg?: TaskRepeatCfg },
   ) {
     if (this._data.repeatCfg) {
-      this.repeatCfgInitial = { ...this._data.repeatCfg };
+      // NOTE: just for typing....
       this.repeatCfg = { ...this._data.repeatCfg };
-      this.repeatCfgId = this._data.repeatCfg.id;
+      this._setRepeatCfgInitiallyForEditOnly(this._data.repeatCfg);
       this.isEdit = true;
     } else if (this._data.task) {
       this.repeatCfg = {
@@ -78,8 +78,7 @@ export class DialogEditTaskRepeatCfgComponent implements OnInit, OnDestroy {
         tagIds: unique([TODAY_TAG.id, ...this._data.task.tagIds]),
         defaultEstimate: this._data.task.timeEstimate,
       };
-      this.repeatCfgId = this._data.task.repeatCfgId;
-      this.isEdit = !!this.repeatCfgId;
+      this.isEdit = !!this._data.task.repeatCfgId;
     } else {
       throw new Error('Invalid params given for repeat dialog!');
     }
@@ -135,13 +134,13 @@ export class DialogEditTaskRepeatCfgComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    if (this.isEdit && this.repeatCfgId && this._data.task) {
+    if (this.isEdit && this._data.task?.repeatCfgId) {
       this._subs.add(
         this._taskRepeatCfgService
-          .getTaskRepeatCfgById$(this.repeatCfgId)
+          .getTaskRepeatCfgById$(this._data.task.repeatCfgId)
+          .pipe(first())
           .subscribe((cfg) => {
-            this.repeatCfg = { ...cfg };
-            this.repeatCfgInitial = { ...cfg };
+            this._setRepeatCfgInitiallyForEditOnly(cfg);
             this._cd.detectChanges();
           }),
       );
@@ -167,7 +166,7 @@ export class DialogEditTaskRepeatCfgComponent implements OnInit, OnDestroy {
           JSON.stringify(this.repeatCfg.tagIds);
 
       this._taskRepeatCfgService.updateTaskRepeatCfg(
-        exists(this.repeatCfgId),
+        exists((this.repeatCfg as TaskRepeatCfg).id),
         this.repeatCfg,
         isRelevantChangesForUpdateAllTasks,
       );
@@ -183,7 +182,9 @@ export class DialogEditTaskRepeatCfgComponent implements OnInit, OnDestroy {
   }
 
   remove(): void {
-    this._taskRepeatCfgService.deleteTaskRepeatCfgWithDialog(exists(this.repeatCfgId));
+    this._taskRepeatCfgService.deleteTaskRepeatCfgWithDialog(
+      exists((this.repeatCfg as TaskRepeatCfg).id),
+    );
     this.close();
   }
 
@@ -203,6 +204,31 @@ export class DialogEditTaskRepeatCfgComponent implements OnInit, OnDestroy {
   removeTag(id: string): void {
     const updatedTagIds = this.repeatCfg.tagIds.filter((tagId) => tagId !== id);
     this._updateTags(updatedTagIds);
+  }
+
+  private _setRepeatCfgInitiallyForEditOnly(repeatCfg: TaskRepeatCfg): void {
+    this.repeatCfg = { ...repeatCfg };
+    this.repeatCfgInitial = { ...repeatCfg };
+
+    if (this.repeatCfg.quickSetting === 'WEEKLY_CURRENT_WEEKDAY') {
+      if (!this.repeatCfg.startDate) {
+        throw new Error('Invalid repeat cfg');
+      }
+      if (new Date(this.repeatCfg.startDate).getDay() !== new Date().getDay()) {
+        this.repeatCfg = { ...this.repeatCfg, quickSetting: 'CUSTOM' };
+      }
+    }
+    if (this.repeatCfg.quickSetting === 'YEARLY_CURRENT_DATE') {
+      if (!this.repeatCfg.startDate) {
+        throw new Error('Invalid repeat cfg');
+      }
+      if (
+        new Date(this.repeatCfg.startDate).getDate() !== new Date().getDate() ||
+        new Date(this.repeatCfg.startDate).getMonth() !== new Date().getMonth()
+      ) {
+        this.repeatCfg = { ...this.repeatCfg, quickSetting: 'CUSTOM' };
+      }
+    }
   }
 
   private _updateTags(newTagIds: string[]): void {
