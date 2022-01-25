@@ -31,6 +31,7 @@ import { TODAY_TAG } from '../../tag/tag.const';
 import { TranslateService } from '@ngx-translate/core';
 import { getWorklogStr } from '../../../util/get-work-log-str';
 import { first } from 'rxjs/operators';
+import { getQuickSettingUpdates } from './get-quick-setting-updates';
 
 // TASK_REPEAT_CFG_FORM_CFG
 @Component({
@@ -152,6 +153,14 @@ export class DialogEditTaskRepeatCfgComponent implements OnInit, OnDestroy {
   }
 
   save(): void {
+    // workaround for formly not always updating hidden fields correctly (in time??)
+    if (this.repeatCfg.quickSetting !== 'CUSTOM') {
+      const updatesForQuickSetting = getQuickSettingUpdates(this.repeatCfg.quickSetting);
+      if (updatesForQuickSetting) {
+        this.repeatCfg = { ...this.repeatCfg, ...updatesForQuickSetting };
+      }
+    }
+
     if (this.isEdit) {
       if (!this.repeatCfgInitial) {
         throw new Error('Initial task repeat cfg missing (code error)');

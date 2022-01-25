@@ -3,18 +3,16 @@ import { T } from '../../../t.const';
 import { isValidSplitTime } from '../../../util/is-valid-split-time';
 import { TASK_REMINDER_OPTIONS } from '../../tasks/dialog-add-task-reminder/task-reminder-options.const';
 import { getWorklogStr } from '../../../util/get-work-log-str';
-import {
-  RepeatQuickSetting,
-  TASK_REPEAT_WEEKDAY_MAP,
-  TaskRepeatCfg,
-} from '../task-repeat-cfg.model';
+import { RepeatQuickSetting, TaskRepeatCfg } from '../task-repeat-cfg.model';
+import { getQuickSettingUpdates } from './get-quick-setting-updates';
 
 const updateParent = (
   field: FormlyFieldConfig,
   changes: Partial<TaskRepeatCfg>,
 ): void => {
-  field.parent?.formControl?.patchValue({
-    ...field.parent.model,
+  // possibly better?
+  field.form?.patchValue({
+    // ...field.parent.model,
     ...changes,
   });
 };
@@ -44,72 +42,12 @@ export const TASK_REPEAT_CFG_FORM_CFG_BEFORE_TAGS: FormlyFieldConfig[] = [
         // { value: 'CUSTOM', label: 'CUSTOM' },
       ],
       change: (field, event) => {
-        // field.formControl?.patchValue(event.value);
-        switch (event.value as RepeatQuickSetting) {
-          case 'DAILY': {
-            updateParent(field, {
-              repeatCycle: 'DAILY',
-              repeatEvery: 1,
-              startDate: getWorklogStr(),
-            });
-            break;
-          }
-
-          case 'WEEKLY_CURRENT_WEEKDAY': {
-            const todayWeekdayStr = TASK_REPEAT_WEEKDAY_MAP[new Date().getDay()];
-            updateParent(field, {
-              repeatCycle: 'WEEKLY',
-              repeatEvery: 1,
-              startDate: getWorklogStr(),
-              monday: false,
-              tuesday: false,
-              wednesday: false,
-              thursday: false,
-              friday: false,
-              saturday: false,
-              sunday: false,
-              [todayWeekdayStr as keyof TaskRepeatCfg]: true,
-            });
-
-            break;
-          }
-
-          case 'MONDAY_TO_FRIDAY': {
-            updateParent(field, {
-              repeatCycle: 'WEEKLY',
-              repeatEvery: 1,
-              startDate: getWorklogStr(),
-              monday: true,
-              tuesday: true,
-              wednesday: true,
-              thursday: true,
-              friday: true,
-              saturday: false,
-              sunday: false,
-            });
-            break;
-          }
-
-          case 'MONTHLY_CURRENT_DATE': {
-            updateParent(field, {
-              repeatCycle: 'MONTHLY',
-              repeatEvery: 1,
-              startDate: getWorklogStr(),
-            });
-            break;
-          }
-
-          case 'YEARLY_CURRENT_DATE': {
-            updateParent(field, {
-              repeatCycle: 'YEARLY',
-              repeatEvery: 1,
-              startDate: getWorklogStr(),
-            });
-            break;
-          }
-
-          case 'CUSTOM':
-          default:
+        const updatesForQuickSetting = getQuickSettingUpdates(
+          event.value as RepeatQuickSetting,
+        );
+        if (updatesForQuickSetting) {
+          // NOTE: for some reason this doesn't update the model value, just the view value :(
+          updateParent(field, updatesForQuickSetting);
         }
       },
     },
