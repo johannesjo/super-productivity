@@ -14,11 +14,11 @@
     "B_INSTALL": {
       "IGNORE": "Zamemari",
       "INSTALL": "Instaliraj",
-      "MSG": "Želiš li instalirati program „Super produktivnost” kao PWA (progresivni web-program)?"
+      "MSG": "Želiš li instalirati „Super produktivnost” kao PWA (progresivni web-program)?"
     },
     "B_OFFLINE": "Ne postoji veza s internetom. Sinkronizacija i traženje podataka pružatelja usluge za praćenje problema neće funkcionirati.",
     "UPDATE_MAIN_MODEL": "Postoji nova verzija za „Super produktivnost”! Potrebne su neke migracije za tvoje podatke. Imaj na umu da će zbog toga tvoji podaci biti nekompatibilni sa starijim verzijama programa.",
-    "UPDATE_MAIN_MODEL_NO_UPDATE": "Aktualiziranje modela nije odabran. Imaj na umu da se moraš vratiti na prethodnu verziju ako ne želiš aktualizirati model.",
+    "UPDATE_MAIN_MODEL_NO_UPDATE": "Aktualiziranje modela nije odabrano. Imaj na umu da se moraš vratiti na prethodnu verziju ako ne želiš izvršiti aktualiziranje modela.",
     "UPDATE_WEB_APP": "Postoji nova verzija. Želiš li učitati novu veziju?"
   },
   "BL": {
@@ -37,7 +37,7 @@
     "TOMORROW": "sutra {{time}}"
   },
   "DATETIME_SCHEDULE": {
-    "LATER_TODAY": "U toku dana",
+    "LATER_TODAY": "Kasnije danas",
     "NEXT_WEEK": "Sljedeći tjedan",
     "PLACEHOLDER": "Odaberi datum",
     "PRESS_ENTER_AGAIN": "Za spremanje ponovo pritisni tipku enter",
@@ -367,7 +367,7 @@
       },
       "S": {
         "ADDED_WORKLOG_FOR": "Jira: Dodan je dnevnik rada za {{issueKey}}",
-        "EXTENSION_NOT_LOADED": "Proširenje za „Super produktivnost” nije učitano. Ponovno učitavanje stranice može pomoči",
+        "EXTENSION_NOT_LOADED": "Proširenje za „Super produktivnost” nije učitano. Ponovno učitavanje stranice može pomoći",
         "INSUFFICIENT_SETTINGS": "Nedovoljne postavke dostavljene za Jira",
         "INVALID_RESPONSE": "Jira: Odgovor je sadržao neispravne podatke",
         "ISSUE_NO_UPDATE_REQUIRED": "Jira: „{{issueText}}” je već aktualiziran",
@@ -782,7 +782,7 @@
         "CONFIRM_REPEAT_OK": "Terminiraj",
         "CONFIRM_REPEAT_TXT": "Pokušavaš terminirati ovaj ponavljajući zadatak na jedan drugi dan. Uobičajeno je da se ponavljajući zadaci ponovo stvore na određene dane i da se terminiraju samo na taj dan. Želiš li svejedno nastaviti?",
         "DATETIME_FOR": "Datum i vrijeme za podsjetnika",
-        "EDIT": "Uredi podsjetnik",
+        "EDIT": "Uredi podsjetnika",
         "MOVE_TO_BACKLOG": "Premjesti zadatak u odlagalište dok se ne terminira",
         "REMIND_AT": "Podsjeti",
         "RO_10M": "10 minuta prije početka",
@@ -888,9 +888,9 @@
         "OK": "Aktualiziraj sve instance"
       },
       "D_EDIT": {
-        "ADD": "Dodaj koniguraciju za ponavljanje zadatka",
+        "ADD": "Dodaj konfiguraciju za ponavljanje zadatka",
         "ADVANCED_CFG": "Napredna konfiguracija",
-        "EDIT": "Uredi koniguraciju za ponavljanje zadatka",
+        "EDIT": "Uredi konfiguraciju za ponavljanje zadatka",
         "HELP1": "Ponavljajući zadaci namijenjeni su za svakodnevne poslove, e.g.: „Organizacija”, „Dnevni sastanak”, „Pregled koda”, „Provjeravanje e-mailova” ili sličnih zadataka koji vjerojatno stalno ponavljaju.",
         "HELP2": "Nakon što je konfiguriran, ponavljajući zadatak bit će ponovo kreiran svakog dolje odabranog dana kad otvoriš svoj projekt i automatski će se označiti kao dovršen na kraju dana. Tretirat će se kao različite instance. Na taj način možeš slobodno dodavati podzadatke itd.",
         "HELP3": "Zadaci uvezeni iz Jira ili Git problema ne mogu se ponoviti.",
@@ -934,7 +934,7 @@
     "TIMELINE": {
       "CONTINUED": "nastavljeno",
       "D_INITIAL": {
-        "TEXT": "<p>Ideja vremenske trake je pružiti bolju sliku o tome kako se nečiji terminirani zadaci odvijaju tijekom vremena. Automatski se generira iz tvojih zadataka i razlikuje dvije stvari: <strong>terminirane zadatke</strong> koji se prikazuju u planirano vrijeme i <strong>redovne zadatke</strong> koji bi se trebali odvijati oko tih fiksnih događaja. Svi zadaci uzimaju u obzir dodijejene procjene vremena.</p><p>Osim toga moguće je navesti vrijeme početka i kraja rada. Ako su konfigurirani, redovni zadaci se nikada neće pojaviti izvan njih. Imaj na umu da vrmenska traga uključuje samo nadolazećih 30 dana.</p>",
+        "TEXT": "<p>Ideja vremenske trake je pružiti bolju sliku o tome kako se nečiji terminirani zadaci odvijaju tijekom vremena. Automatski se generira iz tvojih zadataka i razlikuje dvije stvari: <strong>terminirane zadatke</strong> koji se prikazuju u planirano vrijeme i <strong>redovne zadatke</strong> koji bi se trebali odvijati oko tih fiksnih događaja. Svi zadaci uzimaju u obzir dodijejene procjene vremena.</p><p>Osim toga moguće je navesti vrijeme početka i kraja rada. Ako su konfigurirani, redovni zadaci se nikada neće pojaviti izvan njih. Imaj na umu da vremenska traka uključuje samo idućih 30 dana.</p>",
         "TITLE": "Vremenska traka"
       },
       "END": "Kraj rada",
@@ -989,7 +989,7 @@
         "MOBILE_INFO": "Za označavanje stvorenih zadtaka kao obavljene <strong>povuci ih prema desno</strong>.\n Za terminiranje zadataka povuci ih prema lijevo. Za daljnje radnje pritisni ih dugo.",
         "T1": "Radujemo se da želiš isprobati ovaj program! \uD83E\uDD84",
         "T2": "Ako se ovdje ne možeš snaći, postoji nekoliko mjesta gdje\n možeš pronaći pomoć:",
-        "TITLE": "Dobro došao, dobro došla u Super Productivity!"
+        "TITLE": "Dobro došao, dobro došla u Super produktivnost!"
       }
     },
     "WORKLOG": {
