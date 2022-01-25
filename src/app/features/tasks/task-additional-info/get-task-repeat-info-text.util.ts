@@ -16,38 +16,113 @@ export const getTaskRepeatInfoText = (
       })
     : '';
 
-  switch (repeatCfg.quickSetting) {
+  if (repeatCfg.repeatEvery !== 1) {
+    switch (repeatCfg.repeatCycle) {
+      case 'DAILY':
+        return [
+          timeStr
+            ? T.F.TASK_REPEAT.ADD_INFO_PANEL.EVERY_X_DAILY_AND_TIME
+            : T.F.TASK_REPEAT.ADD_INFO_PANEL.EVERY_X_DAILY,
+          { timeStr, x: repeatCfg.repeatEvery },
+        ];
+      case 'MONTHLY':
+        return [
+          timeStr
+            ? T.F.TASK_REPEAT.ADD_INFO_PANEL.EVERY_X_MONTHLY_AND_TIME
+            : T.F.TASK_REPEAT.ADD_INFO_PANEL.EVERY_X_MONTHLY,
+          { timeStr, x: repeatCfg.repeatEvery },
+        ];
+      case 'YEARLY':
+        return [
+          timeStr
+            ? T.F.TASK_REPEAT.ADD_INFO_PANEL.EVERY_X_YEARLY_AND_TIME
+            : T.F.TASK_REPEAT.ADD_INFO_PANEL.EVERY_X_YEARLY,
+          { timeStr, x: repeatCfg.repeatEvery },
+        ];
+    }
+    return [
+      timeStr
+        ? T.F.TASK_REPEAT.ADD_INFO_PANEL.CUSTOM_AND_TIME
+        : T.F.TASK_REPEAT.ADD_INFO_PANEL.CUSTOM,
+      { timeStr },
+    ];
+  }
+
+  switch (repeatCfg.repeatCycle) {
     case 'DAILY':
+      // case 'DAILY':
+      //   return [
+      //     timeStr
+      //       ? T.F.TASK_REPEAT.ADD_INFO_PANEL.DAILY_AND_TIME
+      //       : T.F.TASK_REPEAT.ADD_INFO_PANEL.DAILY,
+      //     { timeStr },
+      //   ];
+
       return [
         timeStr
           ? T.F.TASK_REPEAT.ADD_INFO_PANEL.DAILY_AND_TIME
           : T.F.TASK_REPEAT.ADD_INFO_PANEL.DAILY,
         { timeStr },
       ];
-    case 'MONDAY_TO_FRIDAY':
-      return [
-        timeStr
-          ? T.F.TASK_REPEAT.ADD_INFO_PANEL.MONDAY_TO_FRIDAY_AND_TIME
-          : T.F.TASK_REPEAT.ADD_INFO_PANEL.MONDAY_TO_FRIDAY,
-        { timeStr },
+
+    case 'WEEKLY':
+      const days: (keyof TaskRepeatCfg)[] = [
+        'sunday',
+        'monday',
+        'tuesday',
+        'wednesday',
+        'thursday',
+        'friday',
+        'saturday',
       ];
-    case 'WEEKLY_CURRENT_WEEKDAY':
-      const weekdayStr = new Date(repeatCfg.startDate as string).toLocaleDateString(
-        locale,
-        {
-          weekday: 'short',
-        },
-      );
+      const localWeekDays = moment.weekdaysMin();
+      const enabledDays = days.filter((day) => repeatCfg[day]);
+
+      if (enabledDays.length === 1) {
+        const weekdayStr = new Date(repeatCfg.startDate as string).toLocaleDateString(
+          locale,
+          {
+            weekday: 'short',
+          },
+        );
+        return [
+          timeStr
+            ? T.F.TASK_REPEAT.ADD_INFO_PANEL.WEEKLY_CURRENT_WEEKDAY_AND_TIME
+            : T.F.TASK_REPEAT.ADD_INFO_PANEL.WEEKLY_CURRENT_WEEKDAY,
+          {
+            weekdayStr,
+            timeStr,
+          },
+        ];
+      }
+
+      if (
+        enabledDays.length === 5 &&
+        JSON.stringify(enabledDays) ===
+          JSON.stringify(['monday', 'tuesday', 'wednesday', 'thursday', 'friday'])
+      ) {
+        return [
+          timeStr
+            ? T.F.TASK_REPEAT.ADD_INFO_PANEL.MONDAY_TO_FRIDAY_AND_TIME
+            : T.F.TASK_REPEAT.ADD_INFO_PANEL.MONDAY_TO_FRIDAY,
+          { timeStr },
+        ];
+      }
+
+      const daysStr = enabledDays
+        .map((day, index) => localWeekDays[days.indexOf(day)])
+        .join(', ');
       return [
         timeStr
-          ? T.F.TASK_REPEAT.ADD_INFO_PANEL.WEEKLY_CURRENT_WEEKDAY_AND_TIME
-          : T.F.TASK_REPEAT.ADD_INFO_PANEL.WEEKLY_CURRENT_WEEKDAY,
+          ? T.F.TASK_REPEAT.ADD_INFO_PANEL.CUSTOM_WEEKLY_AND_TIME
+          : T.F.TASK_REPEAT.ADD_INFO_PANEL.CUSTOM_WEEKLY,
         {
-          weekdayStr,
           timeStr,
+          daysStr,
         },
       ];
-    case 'MONTHLY_CURRENT_DATE':
+
+    case 'MONTHLY':
       const dateDayStr = new Date(repeatCfg.startDate as string).toLocaleDateString(
         locale,
         {
@@ -65,7 +140,7 @@ export const getTaskRepeatInfoText = (
         },
       ];
 
-    case 'YEARLY_CURRENT_DATE':
+    case 'YEARLY':
       const dayAndMonthStr = new Date(repeatCfg.startDate as string).toLocaleDateString(
         locale,
         {
@@ -84,81 +159,13 @@ export const getTaskRepeatInfoText = (
         },
       ];
 
-    case 'CUSTOM':
-      if (repeatCfg.repeatEvery !== 1) {
-        switch (repeatCfg.repeatCycle) {
-          case 'DAILY':
-            return [
-              timeStr
-                ? T.F.TASK_REPEAT.ADD_INFO_PANEL.EVERY_X_DAILY_AND_TIME
-                : T.F.TASK_REPEAT.ADD_INFO_PANEL.EVERY_X_DAILY,
-              { timeStr, x: repeatCfg.repeatEvery },
-            ];
-          case 'MONTHLY':
-            return [
-              timeStr
-                ? T.F.TASK_REPEAT.ADD_INFO_PANEL.EVERY_X_MONTHLY_AND_TIME
-                : T.F.TASK_REPEAT.ADD_INFO_PANEL.EVERY_X_MONTHLY,
-              { timeStr, x: repeatCfg.repeatEvery },
-            ];
-          case 'YEARLY':
-            return [
-              timeStr
-                ? T.F.TASK_REPEAT.ADD_INFO_PANEL.EVERY_X_YEARLY_AND_TIME
-                : T.F.TASK_REPEAT.ADD_INFO_PANEL.EVERY_X_YEARLY,
-              { timeStr, x: repeatCfg.repeatEvery },
-            ];
-        }
-        return [
-          timeStr
-            ? T.F.TASK_REPEAT.ADD_INFO_PANEL.CUSTOM_AND_TIME
-            : T.F.TASK_REPEAT.ADD_INFO_PANEL.CUSTOM,
-          { timeStr },
-        ];
-      }
-
-      switch (repeatCfg.repeatCycle) {
-        case 'DAILY':
-          return [
-            timeStr
-              ? T.F.TASK_REPEAT.ADD_INFO_PANEL.DAILY_AND_TIME
-              : T.F.TASK_REPEAT.ADD_INFO_PANEL.DAILY,
-            { timeStr },
-          ];
-
-        case 'WEEKLY':
-          const days: (keyof TaskRepeatCfg)[] = [
-            'sunday',
-            'monday',
-            'tuesday',
-            'wednesday',
-            'thursday',
-            'friday',
-            'saturday',
-          ];
-          const localWeekDays = moment.weekdaysMin();
-          const daysStr = days
-            .filter((day) => repeatCfg[day])
-            .map((day, index) => localWeekDays[days.indexOf(day)])
-            .join(', ');
-          return [
-            timeStr
-              ? T.F.TASK_REPEAT.ADD_INFO_PANEL.CUSTOM_WEEKLY_AND_TIME
-              : T.F.TASK_REPEAT.ADD_INFO_PANEL.CUSTOM_WEEKLY,
-            {
-              timeStr,
-              daysStr,
-            },
-          ];
-
-        default:
-          return [
-            timeStr
-              ? T.F.TASK_REPEAT.ADD_INFO_PANEL.CUSTOM_AND_TIME
-              : T.F.TASK_REPEAT.ADD_INFO_PANEL.CUSTOM,
-            { timeStr },
-          ];
-      }
+    default:
+      return [
+        timeStr
+          ? T.F.TASK_REPEAT.ADD_INFO_PANEL.CUSTOM_AND_TIME
+          : T.F.TASK_REPEAT.ADD_INFO_PANEL.CUSTOM,
+        { timeStr },
+      ];
   }
 
   return ['???????', {}];

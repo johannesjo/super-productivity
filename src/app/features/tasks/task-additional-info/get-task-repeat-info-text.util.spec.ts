@@ -59,23 +59,22 @@ describe('getTaskRepeatInfoText()', () => {
           sunday: false,
         },
       ],
-      // TODO make it work
-      // [
-      //   T.F.TASK_REPEAT.ADD_INFO_PANEL.MONDAY_TO_FRIDAY,
-      //   undefined,
-      //   {
-      //     repeatEvery: 1,
-      //     repeatCycle: 'WEEKLY',
-      //     quickSetting: 'CUSTOM',
-      //     monday: true,
-      //     tuesday: true,
-      //     wednesday: true,
-      //     thursday: true,
-      //     friday: true,
-      //     saturday: false,
-      //     sunday: false
-      //   },
-      // ],
+      [
+        T.F.TASK_REPEAT.ADD_INFO_PANEL.MONDAY_TO_FRIDAY,
+        undefined,
+        {
+          repeatEvery: 1,
+          repeatCycle: 'WEEKLY',
+          quickSetting: 'CUSTOM',
+          monday: true,
+          tuesday: true,
+          wednesday: true,
+          thursday: true,
+          friday: true,
+          saturday: false,
+          sunday: false,
+        },
+      ],
       [
         T.F.TASK_REPEAT.ADD_INFO_PANEL.WEEKLY_CURRENT_WEEKDAY,
         { timeStr: '', weekdayStr: 'Thu' },
@@ -87,18 +86,17 @@ describe('getTaskRepeatInfoText()', () => {
           monday: true,
         },
       ],
-      // TODO make it work
-      // [
-      //   T.F.TASK_REPEAT.ADD_INFO_PANEL.WEEKLY_CURRENT_WEEKDAY,
-      //   { timeStr: '', weekdayStr: 'Thu' },
-      //   {
-      //     repeatEvery: 1,
-      //     repeatCycle: 'WEEKLY',
-      //     quickSetting: 'CUSTOM',
-      //     startDate: '2022-02-24',
-      //     monday: true,
-      //   },
-      // ],
+      [
+        T.F.TASK_REPEAT.ADD_INFO_PANEL.WEEKLY_CURRENT_WEEKDAY,
+        { timeStr: '', weekdayStr: 'Thu' },
+        {
+          repeatEvery: 1,
+          repeatCycle: 'WEEKLY',
+          quickSetting: 'CUSTOM',
+          startDate: '2022-02-24',
+          monday: true,
+        },
+      ],
       [
         T.F.TASK_REPEAT.ADD_INFO_PANEL.MONTHLY_CURRENT_DATE,
         { timeStr: '', dateDayStr: '24' },
@@ -109,17 +107,16 @@ describe('getTaskRepeatInfoText()', () => {
           startDate: '2022-02-24',
         },
       ],
-      // TODO make it work
-      // [
-      //   T.F.TASK_REPEAT.ADD_INFO_PANEL.MONTHLY_CURRENT_DATE,
-      //   { timeStr: '', dateDayStr: '24' },
-      //   {
-      //     repeatEvery: 1,
-      //     repeatCycle: 'MONTHLY',
-      //     quickSetting: 'CUSTOM',
-      //     startDate: '2022-02-24',
-      //   },
-      // ],
+      [
+        T.F.TASK_REPEAT.ADD_INFO_PANEL.MONTHLY_CURRENT_DATE,
+        { timeStr: '', dateDayStr: '24' },
+        {
+          repeatEvery: 1,
+          repeatCycle: 'MONTHLY',
+          quickSetting: 'CUSTOM',
+          startDate: '2022-02-24',
+        },
+      ],
       [
         T.F.TASK_REPEAT.ADD_INFO_PANEL.YEARLY_CURRENT_DATE,
         { timeStr: '', dayAndMonthStr: '2/24' },
@@ -130,17 +127,16 @@ describe('getTaskRepeatInfoText()', () => {
           startDate: '2022-02-24',
         },
       ],
-      // TODO make it work
-      // [
-      //   T.F.TASK_REPEAT.ADD_INFO_PANEL.YEARLY_CURRENT_DATE,
-      //   { timeStr: '', dayAndMonthStr: '2/24' },
-      //   {
-      //     repeatEvery: 1,
-      //     repeatCycle: 'YEARLY',
-      //     quickSetting: 'CUSTOM',
-      //     startDate: '2022-02-24',
-      //   },
-      // ],
+      [
+        T.F.TASK_REPEAT.ADD_INFO_PANEL.YEARLY_CURRENT_DATE,
+        { timeStr: '', dayAndMonthStr: '2/24' },
+        {
+          repeatEvery: 1,
+          repeatCycle: 'YEARLY',
+          quickSetting: 'CUSTOM',
+          startDate: '2022-02-24',
+        },
+      ],
 
       [
         T.F.TASK_REPEAT.ADD_INFO_PANEL.EVERY_X_DAILY,
