@@ -6,7 +6,7 @@ import { JiraCfg } from '../src/app/features/issue/providers/jira/jira.model';
 // const rp = require('request-promise');
 import fetch from 'node-fetch';
 import { Agent } from 'https';
-import { log, error } from 'electron-log';
+import { error, log } from 'electron-log';
 
 export const sendJiraRequest = ({
   requestId,
@@ -47,7 +47,16 @@ export const sendJiraRequest = ({
       return response;
     })
     .then((res) => res.text())
-    .then((text) => (text ? JSON.parse(text) : {}))
+    .then((text) => {
+      try {
+        return text ? JSON.parse(text) : {};
+      } catch (e) {
+        console.error('Error: Cannot parse json');
+        console.log('Error: text response', text);
+        // throw new Error(e);
+        return text;
+      }
+    })
     .then((response) => {
       mainWin.webContents.send(IPC.JIRA_CB_EVENT, {
         response,
