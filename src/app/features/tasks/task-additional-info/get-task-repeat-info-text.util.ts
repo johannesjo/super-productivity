@@ -1,4 +1,7 @@
-import { TaskRepeatCfg } from '../../task-repeat-cfg/task-repeat-cfg.model';
+import {
+  TASK_REPEAT_WEEKDAY_MAP,
+  TaskRepeatCfg,
+} from '../../task-repeat-cfg/task-repeat-cfg.model';
 import * as moment from 'moment';
 import { T } from '../../../t.const';
 import { getDateTimeFromClockString } from '../../../util/get-date-time-from-clock-string';
@@ -66,25 +69,20 @@ export const getTaskRepeatInfoText = (
       ];
 
     case 'WEEKLY':
-      const days: (keyof TaskRepeatCfg)[] = [
-        'sunday',
-        'monday',
-        'tuesday',
-        'wednesday',
-        'thursday',
-        'friday',
-        'saturday',
-      ];
       const localWeekDays = moment.weekdaysMin();
-      const enabledDays = days.filter((day) => repeatCfg[day]);
+      const enabledDays = TASK_REPEAT_WEEKDAY_MAP.filter((day) => repeatCfg[day]);
 
       if (enabledDays.length === 1) {
-        const weekdayStr = new Date(repeatCfg.startDate as string).toLocaleDateString(
-          locale,
-          {
-            weekday: 'short',
-          },
+        const enabledDayIndex = TASK_REPEAT_WEEKDAY_MAP.findIndex(
+          (day) => repeatCfg[day],
         );
+        const weekDayDate = new Date();
+        weekDayDate.setDate(
+          weekDayDate.getDate() + (enabledDayIndex - weekDayDate.getDay()),
+        );
+        const weekdayStr = weekDayDate.toLocaleDateString(locale, {
+          weekday: 'short',
+        });
         return [
           timeStr
             ? T.F.TASK_REPEAT.ADD_INFO_PANEL.WEEKLY_CURRENT_WEEKDAY_AND_TIME
@@ -110,7 +108,7 @@ export const getTaskRepeatInfoText = (
       }
 
       const daysStr = enabledDays
-        .map((day, index) => localWeekDays[days.indexOf(day)])
+        .map((day, index) => localWeekDays[TASK_REPEAT_WEEKDAY_MAP.indexOf(day)])
         .join(', ');
       return [
         timeStr

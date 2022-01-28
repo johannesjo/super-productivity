@@ -77,7 +77,7 @@ describe('getTaskRepeatInfoText()', () => {
       ],
       [
         T.F.TASK_REPEAT.ADD_INFO_PANEL.WEEKLY_CURRENT_WEEKDAY,
-        { timeStr: '', weekdayStr: 'Thu' },
+        { timeStr: '', weekdayStr: 'Mon' },
         {
           repeatEvery: 1,
           repeatCycle: 'WEEKLY',
@@ -88,7 +88,7 @@ describe('getTaskRepeatInfoText()', () => {
       ],
       [
         T.F.TASK_REPEAT.ADD_INFO_PANEL.WEEKLY_CURRENT_WEEKDAY,
-        { timeStr: '', weekdayStr: 'Thu' },
+        { timeStr: '', weekdayStr: 'Mon' },
         {
           repeatEvery: 1,
           repeatCycle: 'WEEKLY',
