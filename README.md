@@ -110,6 +110,8 @@ Can be used when adding a task.
   (`"task-description #tag1"`)
 - `<number>m` or `<number>h`: set time-estimate for the task  
   (`"task-description 10m"` or `"task-description 5h"`)
+- `+ <project-name>`: add the task to an existing project  
+  (`"task-description +Important Project"`)
 
 </details>
 
