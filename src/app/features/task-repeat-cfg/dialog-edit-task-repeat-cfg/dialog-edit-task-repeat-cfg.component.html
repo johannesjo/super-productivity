@@ -16,7 +16,7 @@
     <div class="form-wrapper">
       <formly-form
         (modelChange)="repeatCfg=$event"
-        [form]="form"
+        [form]="formGroup1"
         [fields]="TASK_REPEAT_CFG_FORM_CFG_BEFORE_TAGS"
         [model]="repeatCfg"
       ></formly-form>
@@ -32,11 +32,11 @@
       <!--      <collapsible [title]="T.F.TASK_REPEAT.D_EDIT.ADVANCED_CFG|translate">-->
       <formly-form
         (modelChange)="repeatCfg=$event"
-        [form]="form"
+        [form]="formGroup2"
         [fields]="TASK_REPEAT_CFG_ADVANCED_FORM_CFG"
         [model]="repeatCfg"
       ></formly-form>
-      <!--      </collapsible>-->
+      <!--            </collapsible>-->
     </div>
   </mat-dialog-content>
 
@@ -56,7 +56,12 @@
       {{T.G.REMOVE|translate}}
     </button>
 
-    <button [disabled]="!form.valid" color="primary" mat-stroked-button type="submit">
+    <button
+      [disabled]="!formGroup1.valid || !formGroup2.valid"
+      color="primary"
+      mat-stroked-button
+      type="submit"
+    >
       <mat-icon>save</mat-icon>
       {{T.G.SAVE|translate}}
     </button>

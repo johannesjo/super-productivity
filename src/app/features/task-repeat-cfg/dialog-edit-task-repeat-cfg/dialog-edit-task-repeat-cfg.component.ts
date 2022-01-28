@@ -50,7 +50,8 @@ export class DialogEditTaskRepeatCfgComponent implements OnInit, OnDestroy {
   TASK_REPEAT_CFG_FORM_CFG_BEFORE_TAGS: FormlyFieldConfig[];
   TASK_REPEAT_CFG_ADVANCED_FORM_CFG: FormlyFieldConfig[];
 
-  form: FormGroup = new FormGroup({});
+  formGroup1: FormGroup = new FormGroup({});
+  formGroup2: FormGroup = new FormGroup({});
   tagSuggestions$: Observable<Tag[]> = this._tagService.tags$;
 
   private _subs: Subscription = new Subscription();
