@@ -1,5 +1,5 @@
 import { IS_ANDROID_WEB_VIEW } from '../../util/is-android-web-view';
-import shortid from 'shortid';
+import { nanoid } from 'nanoid';
 import { merge, Observable, Subject } from 'rxjs';
 import { mapTo } from 'rxjs/operators';
 
@@ -108,7 +108,7 @@ if (IS_ANDROID_WEB_VIEW) {
   }
   androidInterface.saveToDbWrapped = (key: string, value: string): Promise<void> => {
     if (androidInterface.saveToDbNew) {
-      const rId = shortid();
+      const rId = nanoid();
       androidInterface.saveToDbNew(rId, key, value);
       return getRequestMapPromise(rId);
       // legacy stuff, changed in newer versions of the android app
@@ -134,7 +134,7 @@ if (IS_ANDROID_WEB_VIEW) {
   }
   androidInterface.loadFromDbWrapped = (key: string): Promise<string | null> => {
     if (androidInterface.loadFromDbNew) {
-      const rId = shortid();
+      const rId = nanoid();
       androidInterface.loadFromDbNew(rId, key);
       return getRequestMapPromise(rId);
       // legacy stuff, changed in newer versions of the android app
@@ -153,7 +153,7 @@ if (IS_ANDROID_WEB_VIEW) {
   };
 
   androidInterface.removeFromDbWrapped = (key: string): Promise<void> => {
-    const rId = shortid();
+    const rId = nanoid();
     androidInterface.removeFromDb?.(rId, key);
     return getRequestMapPromise(rId);
   };
@@ -163,7 +163,7 @@ if (IS_ANDROID_WEB_VIEW) {
   };
 
   androidInterface.clearDbWrapped = (): Promise<void> => {
-    const rId = shortid();
+    const rId = nanoid();
     androidInterface.clearDb?.(rId);
     return getRequestMapPromise(rId);
   };

@@ -3,7 +3,7 @@ import { Observable } from 'rxjs';
 import { Note, NoteState } from './note.model';
 import { select, Store } from '@ngrx/store';
 import { addNote, deleteNote, updateNote, updateNoteOrder } from './store/note.actions';
-import * as shortid from 'shortid';
+import { nanoid } from 'nanoid';
 import {
   selectAllNotes,
   selectNoteById,
@@ -35,7 +35,7 @@ export class NoteService {
   }
 
   add(note: Partial<Note> = {}, isPreventFocus: boolean = false): void {
-    const id = shortid();
+    const id = nanoid();
 
     this._store$.dispatch(
       addNote({

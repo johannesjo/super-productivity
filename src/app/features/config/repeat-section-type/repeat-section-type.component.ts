@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { FieldArrayType } from '@ngx-formly/core';
 import { T } from 'src/app/t.const';
 import { EMPTY_SIMPLE_COUNTER } from '../../simple-counter/simple-counter.const';
-import * as shortid from 'shortid';
+import { nanoid } from 'nanoid';
 import { standardListAnimation } from '../../../ui/animations/standard-list.ani';
 
 @Component({
@@ -27,7 +27,7 @@ export class RepeatSectionTypeComponent extends FieldArrayType {
     // if we need this later we can use defaultOptions for configuring this
     super.add(undefined, {
       ...EMPTY_SIMPLE_COUNTER,
-      id: shortid(),
+      id: nanoid(),
       isEnabled: true,
     });
   }

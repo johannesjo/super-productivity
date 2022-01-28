@@ -17,7 +17,7 @@ import {
 } from './store/bookmark.actions';
 import { Observable } from 'rxjs';
 import { Bookmark, BookmarkState } from './bookmark.model';
-import * as shortid from 'shortid';
+import { nanoid } from 'nanoid';
 import { DialogEditBookmarkComponent } from './dialog-edit-bookmark/dialog-edit-bookmark.component';
 import { MatDialog } from '@angular/material/dialog';
 import { PersistenceService } from '../../core/persistence/persistence.service';
@@ -56,7 +56,7 @@ export class BookmarkService {
       addBookmark({
         bookmark: {
           ...bookmark,
-          id: shortid(),
+          id: nanoid(),
         },
       }),
     );

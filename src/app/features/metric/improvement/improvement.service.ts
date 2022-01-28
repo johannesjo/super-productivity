@@ -17,7 +17,7 @@ import {
 } from './store/improvement.actions';
 import { Observable } from 'rxjs';
 import { Improvement, ImprovementState } from './improvement.model';
-import * as shortid from 'shortid';
+import { nanoid } from 'nanoid';
 import {
   selectHasLastTrackedImprovements,
   selectImprovementBannerImprovements,
@@ -44,7 +44,7 @@ export class ImprovementService {
   constructor(private _store$: Store<ImprovementState>) {}
 
   addImprovement(title: string): string {
-    const id = shortid();
+    const id = nanoid();
     this._store$.dispatch(
       addImprovement({
         improvement: {

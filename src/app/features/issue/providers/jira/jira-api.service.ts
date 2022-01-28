@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import * as shortid from 'shortid';
+import { nanoid } from 'nanoid';
 import { ChromeExtensionInterfaceService } from '../../../../core/chrome-extension-interface/chrome-extension-interface.service';
 import {
   JIRA_ADDITIONAL_ISSUE_FIELDS,
@@ -340,7 +340,7 @@ export class JiraApiService {
         // assign uuid to request to know which responsive belongs to which promise
         const requestId = `${jiraReqCfg.pathname}__${
           jiraReqCfg.method || 'GET'
-        }__${shortid()}`;
+        }__${nanoid()}`;
 
         if (!isOnline()) {
           this._snackService.open({

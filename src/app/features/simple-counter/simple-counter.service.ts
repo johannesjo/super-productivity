@@ -25,7 +25,7 @@ import {
   SimpleCounterCfgFields,
   SimpleCounterState,
 } from './simple-counter.model';
-import * as shortid from 'shortid';
+import { nanoid } from 'nanoid';
 import { distinctUntilChanged } from 'rxjs/operators';
 
 const FIELDS_TO_COMPARE: (keyof SimpleCounterCfgFields)[] = [
@@ -117,7 +117,7 @@ export class SimpleCounterService {
       addSimpleCounter({
         simpleCounter: {
           ...simpleCounter,
-          id: shortid(),
+          id: nanoid(),
         },
       }),
     );

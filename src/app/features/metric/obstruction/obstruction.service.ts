@@ -9,7 +9,7 @@ import {
 } from './store/obstruction.actions';
 import { Observable } from 'rxjs';
 import { Obstruction, ObstructionState } from './obstruction.model';
-import * as shortid from 'shortid';
+import { nanoid } from 'nanoid';
 
 @Injectable({
   providedIn: 'root',
@@ -22,7 +22,7 @@ export class ObstructionService {
   constructor(private _store$: Store<ObstructionState>) {}
 
   addObstruction(title: string): string {
-    const id = shortid();
+    const id = nanoid();
     this._store$.dispatch(
       addObstruction({
         obstruction: {

@@ -16,7 +16,7 @@ import {
 } from './store/tag.actions';
 import { Observable } from 'rxjs';
 import { Tag, TagState } from './tag.model';
-import * as shortid from 'shortid';
+import { nanoid } from 'nanoid';
 import { DEFAULT_TAG } from './tag.const';
 import { TypedAction } from '@ngrx/store/src/models';
 
@@ -72,7 +72,7 @@ export class TagService {
   }
 
   getAddTagActionAndId(tag: Partial<Tag>): { action: TypedAction<any>; id: string } {
-    const id = shortid();
+    const id = nanoid();
     return {
       id,
       action: addTag({

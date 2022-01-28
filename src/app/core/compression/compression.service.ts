@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { SnackService } from '../snack/snack.service';
-import * as shortid from 'shortid';
+import { nanoid } from 'nanoid';
 import { T } from '../../t.const';
 
 @Injectable({ providedIn: 'root' })
@@ -53,7 +53,7 @@ export class CompressionService {
     type: string;
     strToHandle: string;
   }): Promise<string> {
-    const id = shortid();
+    const id = nanoid();
 
     const promise = new Promise((resolve, reject) => {
       this._activeInstances[id] = {

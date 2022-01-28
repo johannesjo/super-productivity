@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { PersistenceService } from '../../core/persistence/persistence.service';
 import { RecurringConfig, Reminder, ReminderCopy, ReminderType } from './reminder.model';
 import { SnackService } from '../../core/snack/snack.service';
-import * as shortid from 'shortid';
+import { nanoid } from 'nanoid';
 import { BehaviorSubject, Observable, ReplaySubject, Subject } from 'rxjs';
 import { dirtyDeepCopy } from '../../util/dirtyDeepCopy';
 import { ImexMetaService } from '../../imex/imex-meta/imex-meta.service';
@@ -118,7 +118,7 @@ export class ReminderService {
     remindAt: number,
     recurringConfig?: RecurringConfig,
   ): string {
-    const id = shortid();
+    const id = nanoid();
     if (this.getByRelatedId(relatedId)) {
       throw new Error('A reminder for this ' + type + ' already exists');
     }

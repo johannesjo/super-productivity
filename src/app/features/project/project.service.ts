@@ -3,7 +3,7 @@ import { Observable, of } from 'rxjs';
 import { Project } from './project.model';
 import { PersistenceService } from '../../core/persistence/persistence.service';
 import { select, Store } from '@ngrx/store';
-import * as shortid from 'shortid';
+import { nanoid } from 'nanoid';
 import { IssueIntegrationCfg, IssueProviderKey } from '../issue/issue.model';
 import { JiraCfg } from '../issue/providers/jira/jira.model';
 import { GithubCfg } from '../issue/providers/github/github.model';
@@ -172,7 +172,7 @@ export class ProjectService {
         project: {
           ...DEFAULT_PROJECT,
           ...project,
-          id: shortid(),
+          id: nanoid(),
         },
       }),
     );
@@ -183,7 +183,7 @@ export class ProjectService {
       upsertProject({
         project: {
           ...project,
-          id: project.id || shortid(),
+          id: project.id || nanoid(),
         } as Project,
       }),
     );

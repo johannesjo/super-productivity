@@ -1,4 +1,4 @@
-import * as shortid from 'shortid';
+import { nanoid } from 'nanoid';
 import { first, map, take, withLatestFrom } from 'rxjs/operators';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
@@ -852,7 +852,7 @@ export class TaskService {
       ...DEFAULT_TASK,
       created: Date.now(),
       title: title as string,
-      id: shortid(),
+      id: nanoid(),
 
       projectId: workContextType === WorkContextType.PROJECT ? workContextId : null,
       tagIds:

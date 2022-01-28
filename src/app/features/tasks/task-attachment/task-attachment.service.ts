@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { TaskAttachment } from './task-attachment.model';
-import * as shortid from 'shortid';
+import { nanoid } from 'nanoid';
 import { DialogEditTaskAttachmentComponent } from './dialog-edit-attachment/dialog-edit-task-attachment.component';
 import { MatDialog } from '@angular/material/dialog';
 import { DropPasteInput } from '../../../core/drop-paste-input/drop-paste.model';
@@ -30,7 +30,7 @@ export class TaskAttachmentService {
         taskId,
         taskAttachment: {
           ...taskAttachment,
-          id: shortid(),
+          id: nanoid(),
         },
       }),
     );

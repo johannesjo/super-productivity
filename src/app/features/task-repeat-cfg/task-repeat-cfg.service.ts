@@ -21,7 +21,7 @@ import {
   TaskRepeatCfgCopy,
   TaskRepeatCfgState,
 } from './task-repeat-cfg.model';
-import * as shortid from 'shortid';
+import { nanoid } from 'nanoid';
 import { DialogConfirmComponent } from '../../ui/dialog-confirm/dialog-confirm.component';
 import { MatDialog } from '@angular/material/dialog';
 import { T } from '../../t.const';
@@ -80,7 +80,7 @@ export class TaskRepeatCfgService {
         taskRepeatCfg: {
           ...taskRepeatCfg,
           projectId,
-          id: shortid(),
+          id: nanoid(),
         },
         taskId,
       }),

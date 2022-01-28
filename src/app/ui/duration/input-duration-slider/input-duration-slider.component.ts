@@ -10,7 +10,7 @@ import {
   Output,
   ViewChild,
 } from '@angular/core';
-import * as shortid from 'shortid';
+import { nanoid } from 'nanoid';
 import * as moment from 'moment';
 import { dotAnimation } from './dot.ani';
 import { T } from '../../../t.const';
@@ -26,7 +26,7 @@ export class InputDurationSliderComponent implements OnInit, OnDestroy {
   T: typeof T = T;
   minutesBefore: number = 0;
   dots: any[] = [];
-  uid: string = 'duration-input-slider' + shortid();
+  uid: string = 'duration-input-slider' + nanoid();
   el: HTMLElement;
 
   startHandler?: (ev: any) => void;
