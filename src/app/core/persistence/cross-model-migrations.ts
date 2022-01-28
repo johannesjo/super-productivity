@@ -11,6 +11,7 @@ import { MetricCopy, MetricState } from '../../features/metric/metric.model';
 import { EntityState } from '@ngrx/entity';
 
 export const crossModelMigrations = (data: AppDataComplete): AppDataComplete => {
+  console.log('[M] Starting cross model migrations...');
   let newData = migrateTaskReminders(data);
 
   if (!data.note[MODEL_VERSION_KEY]) {
@@ -75,6 +76,7 @@ const migrateGlobalNoteModel = (data: AppDataComplete): AppDataComplete => {
 
   data.project = newProjectState;
   data.note = newNoteState;
+  console.log(newNoteState);
 
   return data;
 };

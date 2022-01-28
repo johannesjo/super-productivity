@@ -7,7 +7,7 @@ import {
 } from '../../core/persistence/persistence.const';
 
 export const migrateLegacyAppData = (appData: AppDataComplete): AppDataComplete => {
-  const newAppData = dirtyDeepCopy(appData);
+  const newAppData = crossModelMigrations(dirtyDeepCopy(appData));
 
   for (const [, baseModelCfg] of Object.entries(BASE_MODEL_CFGS)) {
     if (baseModelCfg.migrateFn) {
@@ -29,5 +29,5 @@ export const migrateLegacyAppData = (appData: AppDataComplete): AppDataComplete 
 
   // NOTE ProjectModel migrations are currently not necessary as they don't exist
 
-  return crossModelMigrations(newAppData);
+  return newAppData;
 };
