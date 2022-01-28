@@ -1,3 +1,20 @@
+## [7.10.1](https://github.com/johannesjo/super-productivity/compare/v7.10.0...v7.10.1) (2022-01-28)
+
+### Bug Fixes
+
+- missing locale for hr [#1872](https://github.com/johannesjo/super-productivity/issues/1872) ([dc7d068](https://github.com/johannesjo/super-productivity/commit/dc7d068c454756efac097ddc95f10c23f2b65859))
+- **repeatTask:** quick settings not being saved as intended ([61b6bbe](https://github.com/johannesjo/super-productivity/commit/61b6bbe5b96d8887b8fa40c5bf8af4243136a30c))
+- **taskRepeat:** validation not working for clock string [#1866](https://github.com/johannesjo/super-productivity/issues/1866) [#1867](https://github.com/johannesjo/super-productivity/issues/1867) [#1875](https://github.com/johannesjo/super-productivity/issues/1875) ([03e0820](https://github.com/johannesjo/super-productivity/commit/03e08208c8632d54716ab172af31439664a3dc2a))
+- **taskRepeat:** wrong weekday displayed ([16cae68](https://github.com/johannesjo/super-productivity/commit/16cae6803cdb35d2d348b419a29c55888be30a9a))
+
+### Features
+
+- **jira:** add additional error logging [#1870](https://github.com/johannesjo/super-productivity/issues/1870) ([75241e4](https://github.com/johannesjo/super-productivity/commit/75241e49e8c45b8d79df4afe19478fe8588715ff))
+- **repeatTask:** also show custom config when editing monthly ([d69e9d3](https://github.com/johannesjo/super-productivity/commit/d69e9d37bf082bcfb2525d3955665983edf8810f))
+- **repeatTask:** show repeat on weekday and yearly on as custom when editing on another day ([fba8e10](https://github.com/johannesjo/super-productivity/commit/fba8e100b6c7b4fcbd8211da1afbebe9ae0219cc))
+- **repeatTask:** unify labels for custom and quick settings ([84d4739](https://github.com/johannesjo/super-productivity/commit/84d473980cdab0401995dd53527d54c093b3082e))
+- replace shortid by nanoid for better performance and stability ([5c925bf](https://github.com/johannesjo/super-productivity/commit/5c925bf5aed40e6753f3d73fd175b7d176191178))
+
 # [7.10.0](https://github.com/johannesjo/super-productivity/compare/v7.9.2...v7.10.0) (2022-01-21)
 
 ### Bug Fixes
