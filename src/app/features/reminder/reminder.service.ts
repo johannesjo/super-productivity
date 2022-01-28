@@ -1,8 +1,8 @@
+import { nanoid } from 'nanoid';
 import { Injectable } from '@angular/core';
 import { PersistenceService } from '../../core/persistence/persistence.service';
 import { RecurringConfig, Reminder, ReminderCopy, ReminderType } from './reminder.model';
 import { SnackService } from '../../core/snack/snack.service';
-import { nanoid } from 'nanoid';
 import { BehaviorSubject, Observable, ReplaySubject, Subject } from 'rxjs';
 import { dirtyDeepCopy } from '../../util/dirtyDeepCopy';
 import { ImexMetaService } from '../../imex/imex-meta/imex-meta.service';

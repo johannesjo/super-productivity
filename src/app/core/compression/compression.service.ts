@@ -1,6 +1,6 @@
+import { nanoid } from 'nanoid';
 import { Injectable } from '@angular/core';
 import { SnackService } from '../snack/snack.service';
-import { nanoid } from 'nanoid';
 import { T } from '../../t.const';
 
 @Injectable({ providedIn: 'root' })
