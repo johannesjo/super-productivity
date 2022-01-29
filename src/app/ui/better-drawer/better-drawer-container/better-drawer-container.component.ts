@@ -109,6 +109,14 @@ export class BetterDrawerContainerComponent
     this._subs.unsubscribe();
   }
 
+  updateStyleAfterTransition(): void {
+    if (!this.isOverGet && !this.isOpenGet) {
+      this.sideStyle = this._domSanitizer.bypassSecurityTrustStyle(
+        this._getWidthRelatedStyles() + ' visibility: hidden;',
+      );
+    }
+  }
+
   close(): void {
     // FORCE blur because otherwise task notes won't save
     if (IS_TOUCH_ONLY) {
@@ -121,15 +129,20 @@ export class BetterDrawerContainerComponent
     this.wasClosed.emit();
   }
 
-  private _updateStyle(): void {
+  private _getWidthRelatedStyles(): string {
     const widthStyle = ` width: ${this.sideWidth}%;`;
-    const style = this.isOverGet
+    return this.isOverGet
       ? this.isOpenGet
         ? 'transform: translateX(0);'
         : 'transform: translateX(100%);'
       : this.isOpenGet
       ? `margin-right: 0; ${widthStyle}`
       : `margin-right: ${-1 * this.sideWidth}%; ${widthStyle}`;
-    this.sideStyle = this._domSanitizer.bypassSecurityTrustStyle(style);
+  }
+
+  private _updateStyle(): void {
+    this.sideStyle = this._domSanitizer.bypassSecurityTrustStyle(
+      this._getWidthRelatedStyles(),
+    );
   }
 }
