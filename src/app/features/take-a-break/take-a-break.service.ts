@@ -37,7 +37,7 @@ import { triggerResetBreakTimer } from '../idle/store/idle.actions';
 
 const BREAK_TRIGGER_DURATION = 10 * 60 * 1000;
 const PING_UPDATE_BANNER_INTERVAL = 60 * 1000;
-const DESKTOP_NOTIFICATION_THROTTLE = 5 * 60 * 1000;
+const DESKTOP_NOTIFICATION_THROTTLE = 60 * 1000;
 const LOCK_SCREEN_THROTTLE = 5 * 60 * 1000;
 const LOCK_SCREEN_DELAY = 30 * 1000;
 
