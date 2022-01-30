@@ -17,14 +17,13 @@ import { initIndicator } from './indicator';
 import { createWindow } from './main-window';
 
 import { sendJiraRequest, setupRequestHeadersForImages } from './jira';
-import { getGitLog } from './git-log';
 import { errorHandlerWithFrontendInform } from './error-handler-with-frontend-inform';
 import { initDebug } from './debug';
 import { IPC } from './ipc-events.const';
 import { initBackupAdapter } from './backup';
 import { initLocalFileSyncAdapter } from './local-file-sync';
 import { JiraCfg } from '../src/app/features/issue/providers/jira/jira.model';
-import lockscreen from './lockscreen';
+import { lockscreen } from './lockscreen';
 import { lazySetInterval } from './lazy-set-interval';
 import { KeyboardConfig } from '../src/app/features/config/keyboard-config.model';
 
@@ -38,6 +37,7 @@ import {
   statSync,
   writeFileSync,
 } from 'fs';
+import { exec } from 'child_process';
 
 initialize();
 
@@ -116,7 +116,7 @@ if (
     mkdirSync(newPath, { recursive: true });
 
     const copyDir = (srcDir: string, dstDir: string): string[] => {
-      let results = [];
+      let results: string[] = [];
       const list = readdirSync(srcDir);
       let src;
       let dst;
@@ -220,8 +220,8 @@ appIN.on('activate', () => {
 let isLocked = false;
 
 appIN.on('ready', () => {
-  let suspendStart;
-  const sendIdleMsgIfOverMin = (idleTime): void => {
+  let suspendStart: number;
+  const sendIdleMsgIfOverMin = (idleTime: number): void => {
     // sometimes when starting a second instance we get here although we don't want to
     if (!mainWin) {
       info(
@@ -277,7 +277,7 @@ appIN.on('will-quit', () => {
   globalShortcut.unregisterAll();
 });
 
-appIN.on('window-all-closed', (event) => {
+appIN.on('window-all-closed', () => {
   log('Quit after all windows being closed');
   // if (!IS_MAC) {
   app.quit();
@@ -309,7 +309,7 @@ appIN.on('window-all-closed', (event) => {
 // ---------------
 ipcMain.on(IPC.SHUTDOWN_NOW, quitApp);
 
-ipcMain.on(IPC.EXEC, exec);
+ipcMain.on(IPC.EXEC, execWithFrontendErrorHandlerInform);
 
 ipcMain.on(IPC.LOCK_SCREEN, () => {
   if (isLocked) {
@@ -354,10 +354,6 @@ ipcMain.on(IPC.JIRA_MAKE_REQUEST_EVENT, (ev, request) => {
   sendJiraRequest(request);
 });
 
-ipcMain.on(IPC.GIT_LOG, (ev, cwd) => {
-  getGitLog(cwd);
-});
-
 ipcMain.on(IPC.SHOW_OR_FOCUS, () => {
   showOrFocus(mainWin);
 });
@@ -400,10 +396,10 @@ function registerShowAppShortCuts(cfg: KeyboardConfig): void {
 
   if (cfg) {
     Object.keys(cfg)
-      .filter((key: keyof KeyboardConfig) => GLOBAL_KEY_CFG_KEYS.includes(key))
-      .forEach((key) => {
+      .filter((key: string) => GLOBAL_KEY_CFG_KEYS.includes(key as keyof KeyboardConfig))
+      .forEach((key: string) => {
         let actionFn: () => void;
-        const shortcut = cfg[key];
+        const shortcut = cfg[key as keyof KeyboardConfig];
 
         switch (key) {
           case 'globalShowHide':
@@ -469,7 +465,7 @@ function quitApp(): void {
 }
 
 // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
-function showOrFocus(passedWin): void {
+function showOrFocus(passedWin: BrowserWindow): void {
   // default to main winpc
   const win = passedWin || mainWin;
 
@@ -494,10 +490,9 @@ function showOrFocus(passedWin): void {
 }
 
 // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
-function exec(ev, command): void {
+function execWithFrontendErrorHandlerInform(ev: Event, command: string): void {
   log('running command ' + command);
-  const execIN = require('child_process').exec;
-  execIN(command, (err) => {
+  exec(command, (err) => {
     if (err) {
       errorHandlerWithFrontendInform(err);
     }

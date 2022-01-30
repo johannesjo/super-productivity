@@ -5,39 +5,42 @@ const getSendChannel = (channel: string): string => `%better-ipc-send-channel-${
 
 // TODO add all typing
 export const answerRenderer = (
-  browserWindowOrChannel,
-  channelOrCallback,
-  callbackOrNothing?,
+  browserWindowOrChannel: string,
+  channelOrCallback: (returnVals: any, browserWindow?: BrowserWindow | null) => any,
+  // callbackOrNothing?: unknown,
 ): (() => void) => {
-  let window;
-  let channel;
-  let callback;
+  // let window: BrowserWindow = browserWindowOrChannel as any;
+  const channel = browserWindowOrChannel;
+  const callback = channelOrCallback;
 
-  if (callbackOrNothing === undefined) {
-    channel = browserWindowOrChannel;
-    callback = channelOrCallback;
-  } else {
-    window = browserWindowOrChannel;
-    channel = channelOrCallback;
-    callback = callbackOrNothing;
-
-    if (!window) {
-      throw new Error('Browser window required');
-    }
-  }
+  // let window: BrowserWindow;
+  // let channel;
+  // let callback: (arg1: any, arg2: any) => Promise<any>;
+  // if (callbackOrNothing === undefined) {
+  // channel = browserWindowOrChannel;
+  // callback = channelOrCallback;
+  // } else {
+  //   window = browserWindowOrChannel as BrowserWindow;
+  //   channel = channelOrCallback;
+  //   callback = callbackOrNothing;
+  //
+  //   if (!window) {
+  //     throw new Error('Browser window required');
+  //   }
+  // }
 
   const sendChannel = getSendChannel(channel);
 
-  const listener = async (event: IpcMainEvent, data): Promise<void> => {
+  const listener = async (event: IpcMainEvent, data: any): Promise<void> => {
     const browserWindow: BrowserWindow | null = BrowserWindow.fromWebContents(
       event.sender,
     );
 
-    if (window && window.id !== browserWindow?.id) {
+    if (window && (window as any).id !== browserWindow?.id) {
       return;
     }
 
-    const send = (channelI, dataI): void => {
+    const send = (channelI: string, dataI: any): void => {
       if (!(browserWindow && browserWindow.isDestroyed())) {
         event.sender.send(channelI, dataI);
       }

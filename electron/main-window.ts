@@ -4,6 +4,7 @@ import {
   BrowserWindow,
   ipcMain,
   Menu,
+  MenuItem,
   MenuItemConstructorOptions,
   shell,
 } from 'electron';
@@ -15,6 +16,7 @@ import { getSettings } from './get-settings';
 import { readFileSync, stat } from 'fs';
 import { error, log } from 'electron-log';
 import { enable } from '@electron/remote/main';
+import { GlobalConfigState } from '../src/app/features/config/global-config.model';
 
 let mainWin: BrowserWindow;
 
@@ -141,7 +143,7 @@ export const createWindow = ({
 
 // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
 function initWinEventListeners(app: any): void {
-  const handleRedirect = (event, url): void => {
+  const handleRedirect = (event: Event, url: string): void => {
     event.preventDefault();
     // needed for mac; especially for jira urls we might have a host like this www.host.de//
     const urlObj = new URL(url);
@@ -163,7 +165,13 @@ function initWinEventListeners(app: any): void {
 }
 
 // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
-function createMenu(quitApp): void {
+function createMenu(
+  quitApp: (
+    menuItem: MenuItem,
+    browserWindow: BrowserWindow | undefined,
+    event: KeyboardEvent,
+  ) => void,
+): void {
   // Create application menu to enable copy & pasting on MacOS
   const menuTpl = [
     {
@@ -225,7 +233,7 @@ const appCloseHandler = (app: App): void => {
     log('close, isQuiting:', (app as any).isQuiting);
     if (!(app as any).isQuiting) {
       event.preventDefault();
-      getSettings(mainWin, (appCfg) => {
+      getSettings(mainWin, (appCfg: GlobalConfigState) => {
         if (appCfg && appCfg.misc.isMinimizeToTray && !(app as any).isQuiting) {
           mainWin.hide();
           return;
@@ -244,8 +252,8 @@ const appCloseHandler = (app: App): void => {
 
 const appMinimizeHandler = (app: App): void => {
   if (!(app as any).isQuiting) {
-    mainWin.on('minimize', (event) => {
-      getSettings(mainWin, (appCfg) => {
+    mainWin.on('minimize', (event: Event) => {
+      getSettings(mainWin, (appCfg: GlobalConfigState) => {
         if (appCfg.misc.isMinimizeToTray) {
           event.preventDefault();
           mainWin.hide();

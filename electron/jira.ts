@@ -35,7 +35,7 @@ export const sendJiraRequest = ({
         }
       : {}),
   })
-    .then((response) => {
+    .then((response: any) => {
       // log('JIRA_RAW_RESPONSE', response);
       if (!response.ok) {
         error('Jira Error Error Response ELECTRON: ', response);
@@ -46,8 +46,8 @@ export const sendJiraRequest = ({
       }
       return response;
     })
-    .then((res) => res.text())
-    .then((text) => {
+    .then((res: any) => res.text())
+    .then((text: any) => {
       try {
         return text ? JSON.parse(text) : {};
       } catch (e) {
@@ -57,13 +57,13 @@ export const sendJiraRequest = ({
         return text;
       }
     })
-    .then((response) => {
+    .then((response: any) => {
       mainWin.webContents.send(IPC.JIRA_CB_EVENT, {
         response,
         requestId,
       });
     })
-    .catch((err) => {
+    .catch((err: any) => {
       mainWin.webContents.send(IPC.JIRA_CB_EVENT, {
         error: err,
         requestId,
@@ -79,7 +79,7 @@ export const setupRequestHeadersForImages = (
   const { host, protocol } = parseHostAndPort(jiraCfg);
 
   // TODO export to util fn
-  const _b64EncodeUnicode = (str): string => {
+  const _b64EncodeUnicode = (str: string): string => {
     return Buffer.from(str || '').toString('base64');
   };
   const encoded = _b64EncodeUnicode(`${jiraCfg.userName}:${jiraCfg.password}`);
@@ -112,7 +112,7 @@ const MATCH_PORT_REG_EX = /:\d{2,4}/;
 
 const parseHostAndPort = (
   config: JiraCfg,
-): { host: string; protocol: string; port: number } => {
+): { host: string; protocol: string; port: number | undefined } => {
   let host: string = config.host as string;
   let protocol;
   let port;

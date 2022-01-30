@@ -2,6 +2,8 @@ import { App, ipcMain, Menu, nativeTheme, Tray } from 'electron';
 import { IPC } from './ipc-events.const';
 import { getSettings } from './get-settings';
 import { getWin } from './main-window';
+import { GlobalConfigState } from '../src/app/features/config/global-config.model';
+import { TaskCopy } from '../src/app/features/tasks/task.model';
 
 let tray: Tray;
 let DIR: string;
@@ -39,7 +41,7 @@ export const initIndicator = ({
 };
 
 // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
-function initAppListeners(app): void {
+function initAppListeners(app: App): void {
   if (tray) {
     app.on('before-quit', () => {
       if (tray) {
@@ -66,7 +68,7 @@ function initListeners(): void {
   ipcMain.on(IPC.CURRENT_TASK_UPDATED, (ev, params) => {
     const currentTask = params.current;
     const mainWin = getWin();
-    getSettings(mainWin, (settings) => {
+    getSettings(mainWin, (settings: GlobalConfigState) => {
       const isTrayShowCurrentTask = settings.misc.isTrayShowCurrentTask;
 
       const msg =
@@ -104,7 +106,7 @@ function initListeners(): void {
 }
 
 // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
-function createIndicatorStr(task): string {
+function createIndicatorStr(task: TaskCopy): string {
   if (task && task.title) {
     let title = task.title;
     // let timeStr = '';
@@ -133,7 +135,7 @@ function createIndicatorStr(task): string {
 }
 
 // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
-function createContextMenu(showApp, quitApp): Menu {
+function createContextMenu(showApp: () => void, quitApp: () => void): Menu {
   return Menu.buildFromTemplate([
     {
       label: 'Show App',

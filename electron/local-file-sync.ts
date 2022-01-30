@@ -23,7 +23,7 @@ export const initLocalFileSyncAdapter = (): void => {
       } catch (e) {
         log('ERR: Sync error while writing to ' + filePath);
         error(e);
-        return new Error(e);
+        return new Error(e as string);
       }
     },
   );
@@ -69,7 +69,7 @@ export const initLocalFileSyncAdapter = (): void => {
       } catch (e) {
         log('ERR: Sync error while loading file from ' + filePath);
         error(e);
-        return new Error(e);
+        return new Error(e as string);
       }
     },
   );

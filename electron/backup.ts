@@ -12,6 +12,7 @@ import { answerRenderer } from './better-ipc';
 import { LocalBackupMeta } from '../src/app/imex/local-backup/local-backup.model';
 import * as path from 'path';
 import { error, log } from 'electron-log';
+import { AppDataComplete } from '../src/app/imex/sync/sync.model';
 
 let BACKUP_DIR = `${app.getPath('userData')}/backups`;
 
@@ -52,14 +53,14 @@ export function initBackupAdapter(backupDir: string): void {
   });
 
   // RESTORE_BACKUP
-  answerRenderer(IPC.BACKUP_LOAD_DATA, (backupPath): string => {
+  answerRenderer(IPC.BACKUP_LOAD_DATA, (backupPath: string): string => {
     log('Reading backup file: ', backupPath);
     return readFileSync(backupPath, { encoding: 'utf8' });
   });
 }
 
 // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
-function backupData(ev, data): void {
+function backupData(ev: Event, data: AppDataComplete): void {
   if (!existsSync(BACKUP_DIR)) {
     mkdirSync(BACKUP_DIR);
   }

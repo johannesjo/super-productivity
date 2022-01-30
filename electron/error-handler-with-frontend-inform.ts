@@ -5,10 +5,10 @@ import { error, log } from 'electron-log';
 const WAIT_FOR_WIN_TIMEOUT_DURATION = 4000;
 
 export const errorHandlerWithFrontendInform = (
-  e = 'UNDEFINED ERROR',
-  additionalLogInfo?,
+  e: Error | unknown | string = 'UNDEFINED ERROR',
+  additionalLogInfo?: any,
 ): void => {
-  const errObj = new Error(e);
+  const errObj = new Error(e as string);
 
   if (_isReadyForFrontEndError()) {
     _handleError(e, additionalLogInfo, errObj);
@@ -28,7 +28,11 @@ function _isReadyForFrontEndError(): boolean {
 }
 
 // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
-function _handleError(e, additionalLogInfo, errObj): void {
+function _handleError(
+  e: Error | unknown | string,
+  additionalLogInfo: any,
+  errObj: any,
+): void {
   const mainWin = getWin();
   const stack = errObj.stack;
 
@@ -43,7 +47,7 @@ function _handleError(e, additionalLogInfo, errObj): void {
   if (_isReadyForFrontEndError()) {
     mainWin.webContents.send(IPC.ERROR, {
       error: e,
-      errorStr: e && e.toString(),
+      errorStr: e && (e as any).toString(),
       stack,
     });
   } else {

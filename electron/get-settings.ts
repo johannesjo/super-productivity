@@ -1,9 +1,13 @@
-import { ipcMain } from 'electron';
+import { BrowserWindow, ipcMain } from 'electron';
 import { IPC } from './ipc-events.const';
 import { warn } from 'electron-log';
+import { GlobalConfigState } from '../src/app/features/config/global-config.model';
 
-let cbs = [];
-export const getSettings = (win, cbIN): void => {
+let cbs: ((settings: GlobalConfigState) => void)[] = [];
+export const getSettings = (
+  win: BrowserWindow,
+  cbIN: (settings: GlobalConfigState) => void,
+): void => {
   cbs.push(cbIN);
   win.webContents.send(IPC.TRANSFER_SETTINGS_REQUESTED);
 };
@@ -11,7 +15,7 @@ export const getSettings = (win, cbIN): void => {
 ipcMain.on(IPC.TRANSFER_SETTINGS_TO_ELECTRON, getSettingsCb);
 
 // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
-function getSettingsCb(ev, settings): void {
+function getSettingsCb(ev: Event, settings: GlobalConfigState): void {
   if (cbs.length) {
     cbs.forEach((cb) => cb(settings));
     cbs = [];
