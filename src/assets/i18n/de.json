@@ -1420,7 +1420,7 @@
     "COMPLETED_TASKS": "Abgeschlossene Aufgaben",
     "ESTIMATE_REMAINING": "Schätzung verbleibend:",
     "FINISH_DAY": "Tag beenden",
-    "FINISH_DAY_TOOLTIP": "Evaluieren Sie Ihren Tat, alle Aufgaben werden optional in das Archiv verschoben und/oder planen Sie Ihren nächsten Tag",
+    "FINISH_DAY_TOOLTIP": "Evaluieren Sie Ihren Tag, alle Aufgaben werden optional in das Archiv verschoben und/oder planen Sie Ihren nächsten Tag",
     "FINISH_DAY_FOR_PROJECT": "Tag für dieses Projekt beenden",
     "FINISH_DAY_FOR_TAG": "Tag für dieses Schlüsselwort beenden",
     "HELP_PROCRASTINATION": "Hilfe, ich prokrastiniere!",
