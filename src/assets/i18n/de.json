@@ -1,4 +1,15 @@
 {
+  "ANDROID": {
+    "NOTIFICATIONS": {
+      "SYNC_CONFLICT_TITLE": "Ein Synchronisationskonflikt ist aufgetreten!",
+      "SYNC_CONFLICT_MSG": "Bitte nachsehen und entscheiden, was zu tun ist"
+    },
+    "PERMANENT_NOTIFICATION_MSGS": {
+      "INITIAL": "App läuft, wenn aktiviert, im Hintergrund um Synchronisation zu ermöglichen",
+      "NO_ACTIVE_TASKS": "Keine aktiven Aufgaben",
+      "SYNCING": "Synchronisieren"
+    }
+  },
   "APP": {
     "B_INSTALL": {
       "IGNORE": "Ignorieren",
@@ -44,7 +55,7 @@
         },
         "SELECT_TYPE": "Wählen Sie einen Typ",
         "TYPES": {
-          "FILE": "Datei (standardmäßig geöffnete System-App)",
+          "FILE": "Datei (öffnet in standardmäßiger System-App)",
           "IMG": "Bild (als Thumbnail angezeigt)",
           "LINK": "Link (öffnet im Browser)"
         }
@@ -55,7 +66,7 @@
         "ADD": "Lesezeichen hinzufügen",
         "DROP": "Fügen Sie hier ein Lesezeichen hinzu",
         "EDIT": "Lesezeichen bearbeiten",
-        "NO_BOOKMARKS": "Sie haben keine Projektlesezeichen. Fügen Sie eine per Drag & Drop oder durch Klicken auf das den plus button hinzu."
+        "NO_BOOKMARKS": "Sie haben keine Projektlesezeichen. Fügen Sie eines per Drag & Drop oder durch Klicken auf die 'Plus'-Schaltfläche hinzu."
       },
       "DIALOG_EDIT": {
         "ADD_BOOKMARK": "Lesezeichen hinzufügen",
@@ -70,7 +81,7 @@
         "SELECT_TYPE": "Wählen Sie einen Typ",
         "TYPES": {
           "COMMAND": "Befehl (benutzerdefinierter Shell-Befehl)",
-          "FILE": "Datei (standardmäßig geöffnete System-App)",
+          "FILE": "Datei (öffnet in standardmäßiger System-App)",
           "IMG": "Bild (als Thumbnail angezeigt)",
           "LINK": "Link (öffnet im Browser)"
         }
@@ -98,7 +109,7 @@
       "ISSUE_CONTENT": {
         "DESCRIPTION": "Beschreibung",
         "LABELS": "Kategorien",
-        "MARK_AS_CHECKED": "Markiere Updates als markiert",
+        "MARK_AS_CHECKED": "Updates als erledigt markieren",
         "STATUS": "Status",
         "SUMMARY": "Zusammenfassung"
       },
@@ -146,11 +157,11 @@
         "TITLE": "github"
       },
       "ISSUE_CONTENT": {
-        "ASSIGNEE": "Zugewiesen",
+        "ASSIGNEE": "Beauftragter",
         "AT": "am",
         "DESCRIPTION": "Beschreibung",
-        "LABELS": "Etiketten",
-        "MARK_AS_CHECKED": "Update ausblenden",
+        "LABELS": "Labels",
+        "MARK_AS_CHECKED": "Updates als erledigt markieren",
         "STATUS": "Status",
         "SUMMARY": "Zusammenfassung",
         "WRITE_A_COMMENT": "Schreibe einen Kommentar"
@@ -170,7 +181,7 @@
         "IS_AUTO_POLL": "Importierte Git-Issues automatisch nach Änderungen abfragen",
         "IS_SEARCH_ISSUES_FROM_GITLAB": "Zeigen Sie Issues von Git als Vorschläge an, wenn Sie neue Aufgaben hinzufügen",
         "PROJECT": "Vollständiger Pfad oder Benutzername / Projekt",
-        "SCOPE": "Umfang",
+        "SCOPE": "Bereich",
         "SCOPE_ALL": "Alles",
         "SCOPE_ASSIGNED": "Mir zugewiesen",
         "SCOPE_CREATED": "Von mir erstellt",
@@ -185,11 +196,11 @@
         "TITLE": "gitlab"
       },
       "ISSUE_CONTENT": {
-        "ASSIGNEE": "Zugewiesen",
+        "ASSIGNEE": "Beauftragter",
         "AT": "am",
         "DESCRIPTION": "Beschreibung",
-        "LABELS": "Etiketten",
-        "MARK_AS_CHECKED": "Update ausblenden",
+        "LABELS": "Labels",
+        "MARK_AS_CHECKED": "Updates als erledigt markieren",
         "PROJECT": "Projekt",
         "STATUS": "Status",
         "SUMMARY": "Zusammenfassung",
@@ -246,9 +257,9 @@
         "BLOCK_ACCESS_UNBLOCK": "Entsperren"
       },
       "CFG_CMP": {
-        "ALWAYS_ASK": "Immer offener Dialog",
+        "ALWAYS_ASK": "Immer Dialog öffnen",
         "DONE": "Status zum Abschließen der Aufgabe",
-        "DO_NOT": "Übergang nicht",
+        "DO_NOT": "Kein Übergang",
         "ENABLE": "Aktivieren Sie die Jira-Integration",
         "ENABLE_TRANSITIONS": "Aktivieren Sie das Transition Handling",
         "IN_PROGRESS": "Status für Startaufgabe",
@@ -256,7 +267,7 @@
         "MAP_CUSTOM_FIELDS": "Benutzerdefinierte Felder zuordnen",
         "MAP_CUSTOM_FIELDS_INFO": "Leider werden einige Daten von Jira in benutzerdefinierten Feldern gespeichert, die für jede Installation unterschiedlich sind. Wenn Sie diese Daten einschließen möchten, müssen Sie das entsprechende benutzerdefinierte Feld auswählen.",
         "OPEN": "Status für pausierende Aufgabe",
-        "SELECT_ISSUE_FOR_TRANSITIONS": "Wählen Sie Issue, um verfügbare Übergänge zu laden",
+        "SELECT_ISSUE_FOR_TRANSITIONS": "Markiere Issue, um verfügbare Übergänge zu laden",
         "STORY_POINTS": "Story-Punkte"
       },
       "DIALOG_CONFIRM_ASSIGNMENT": {
@@ -268,10 +279,10 @@
       },
       "DIALOG_TRANSITION": {
         "CHOOSE_STATUS": "Wählen Sie den zuzuweisenden Status",
-        "CURRENT_ASSIGNEE": "Derzeitiger Bevollmächtigter:",
+        "CURRENT_ASSIGNEE": "Derzeitiger Beauftragter:",
         "CURRENT_STATUS": "Aktueller Status:",
         "TASK_NAME": "Aufgabennname:",
-        "TITLE": "Jira: Update Status",
+        "TITLE": "Jira: Status aktualisieren",
         "UPDATE_STATUS": "Update Status"
       },
       "DIALOG_WORKLOG": {
@@ -284,7 +295,7 @@
         "CURRENTLY_LOGGED": "Derzeit geloggte Zeit:",
         "INVALID_DATE": "Der eingegebene Wert ist kein Datum!",
         "SAVE_WORKLOG": "Speichern",
-        "STARTED": "gestartet",
+        "STARTED": "Gestartet",
         "SUBMIT_WORKLOG_FOR": "Senden Sie ein Arbeitsprotokoll an Jira für",
         "TIME_SPENT": "Zeitaufwand",
         "TIME_SPENT_TOOLTIP": "Andere Zeiten hinzufügen",
@@ -336,18 +347,20 @@
         }
       },
       "ISSUE_CONTENT": {
-        "ASSIGNEE": "Bevollmächtigter",
+        "ASSIGNEE": "Beauftragter",
         "AT": "beim",
-        "ATTACHMENTS": "Anlagen",
+        "ATTACHMENTS": "Anhänge",
         "CHANGED": "Geändert",
         "COMMENTS": "Kommentare",
         "COMPONENTS": "Komponenten",
         "DESCRIPTION": "Beschreibung",
         "LIST_OF_CHANGES": "Liste der Änderungen",
-        "MARK_AS_CHECKED": "Markiere Updates als markiert",
-        "ON": "auf",
+        "MARK_AS_CHECKED": "Updates als erledigt markieren",
+        "ON": "am",
+        "RELATED": "Verwandt",
         "STATUS": "Status",
         "STORY_POINTS": "Story-Punkte",
+        "SUB_TASKS": "Unteraufgaben",
         "SUMMARY": "Zusammenfassung",
         "WORKLOG": "Arbeitsprotokoll",
         "WRITE_A_COMMENT": "Schreibe einen Kommentar"
@@ -369,7 +382,7 @@
         "UNABLE_TO_REASSIGN": "Jira: Ticket kann nicht neu zugewiesen werden, da Sie keinen Benutzernamen angegeben haben. Bitte besuchen Sie die Einstellungen."
       },
       "STEPPER": {
-        "CREDENTIALS": "REFERENZEN",
+        "CREDENTIALS": "Anmeldedaten",
         "DONE": "Sie sind jetzt fertig.",
         "LOGIN_SUCCESS": "Anmeldung erfolgreich!",
         "TEST_CREDENTIALS": "Anmeldeinformationen testen",
@@ -378,7 +391,7 @@
     },
     "METRIC": {
       "BANNER": {
-        "CHECK": "Ich hab es gemacht!"
+        "CHECK": "Ich hab es geschafft!"
       },
       "CMP": {
         "AVG_BREAKS_PER_DAY": "Durchschn. Pausen pro Tag",
@@ -393,7 +406,7 @@
         "MOOD_PRODUCTIVITY_OVER_TIME": "Stimmung und Produktivität im Laufe der Zeit",
         "NO_ADDITIONAL_DATA_YET": "Es wurden noch keine zusätzlichen Daten gesammelt. Verwenden Sie dazu das Formular in der täglichen Zusammenfassung \"Bewertung\".",
         "OBSTRUCTION_SELECTION_COUNT": "Häufigkeit, mit der ein Hindernisfaktor ausgewählt wurde",
-        "SIMPLE_CLICK_COUNTERS_OVER_TIME": "Klicken Sie auf Zähler im Laufe der Zeit",
+        "SIMPLE_CLICK_COUNTERS_OVER_TIME": "Klicken Sie auf die Zähler im Laufe der Zeit",
         "SIMPLE_COUNTERS": "Einfache Zähler",
         "SIMPLE_STOPWATCH_COUNTERS_OVER_TIME": "Stoppuhrzähler im Laufe der Zeit",
         "TASKS_DONE_CREATED": "Aufgaben (erledigt / erstellt)",
@@ -403,14 +416,14 @@
       "EVAL_FORM": {
         "ADD_NOTE_FOR_TOMORROW": "Notiz für morgen hinzufügen",
         "DISABLE_REPEAT_EVERY_DAY": "Deaktivieren Sie die tägliche Wiederholung",
-        "ENABLE_REPEAT_EVERY_DAY": "Wiederholen Sie jeden Tag",
+        "ENABLE_REPEAT_EVERY_DAY": "Jeden Tag wiederholen",
         "HELP_H1": "Warum sollte es mich kümmern?",
         "HELP_LINK_TXT": "Gehen Sie zum Abschnitt \"Kennzahlen\"",
-        "HELP_P1": "Zeit für eine kleine Selbsteinschätzung! Ihre Antworten hier werden gespeichert und liefern Ihnen ein bisschen Statistik darüber, wie Sie im Abschnitt \"Metriken\" arbeiten. Darüber hinaus erscheinen die Vorschläge für morgen am nächsten Tag über Ihrer Aufgabenliste.",
-        "HELP_P2": "Hier geht es weniger darum, exakte Messdaten zu berechnen oder maschinell so effizient zu werden, wie Sie es tun, als vielmehr darum, Ihre Einstellung zu Ihrer Arbeit zu verbessern. Es kann hilfreich sein, die Schmerzpunkte in Ihrem Tagesablauf zu bewerten und Faktoren zu finden, die Ihnen helfen. Ein bisschen systematisch zu sein, hilft hoffentlich dabei, diese besser in den Griff zu bekommen und zu verbessern, was Sie können.",
+        "HELP_P1": "Zeit für eine kleine Selbsteinschätzung! Ihre Antworten hier werden gespeichert und liefern Ihnen ein paar Statistiken darüber, wie Sie im Abschnitt \"Metriken\" arbeiten. Darüber hinaus erscheinen die Vorschläge für morgen am nächsten Tag über Ihrer Aufgabenliste.",
+        "HELP_P2": "Hier geht es weniger darum, exakte Messdaten zu berechnen oder in allem so effizient wie eine Maschine zu werden, als vielmehr darum, Ihre Einstellung zu Ihrer Arbeit zu verbessern. Es kann hilfreich sein, die Schmerzpunkte in Ihrem Tagesablauf zu bewerten und Faktoren zu finden, die Ihnen helfen. Ein bisschen systematisch zu sein, hilft hoffentlich dabei, diese besser in den Griff zu bekommen und zu verbessern, was Sie können.",
         "IMPROVEMENTS": "Was hat Ihre Produktivität verbessert?",
         "IMPROVEMENTS_TOMORROW": "Was könnten Sie morgen tun, um sich zu verbessern?",
-        "MOOD": "Wie fühlst du dich?",
+        "MOOD": "Wie fühlen Sie sich?",
         "MOOD_HINT": "1: Schrecklich - 10: Großartig",
         "NOTES": "Notizen für morgen",
         "OBSTRUCTIONS": "Was hat Ihre Produktivität beeinträchtigt?",
@@ -432,7 +445,7 @@
         "NO_NOTES": "Zur Zeit sind keine Notizen vorhanden"
       },
       "NOTE_CMP": {
-        "DISABLE_PARSE": "Deaktivieren Sie die Abschriftenanalyse",
+        "DISABLE_PARSE": "Deaktivieren Sie die Markdown-Analyse",
         "ENABLE_PARSE": "Markdown-Analyse aktivieren"
       }
     },
@@ -468,12 +481,12 @@
         "TITLE": "Offenes Projekt"
       },
       "ISSUE_CONTENT": {
-        "ASSIGNEE": "Bevollmächtigter",
+        "ASSIGNEE": "Beauftragter",
         "DESCRIPTION": "Beschreibung",
-        "MARK_AS_CHECKED": "Markiere Updates als markiert",
+        "MARK_AS_CHECKED": "Updates als erledigt markieren",
         "STATUS": "Status",
         "SUMMARY": "Zusammenfassung",
-        "TYPE": "Art"
+        "TYPE": "Typ"
       },
       "ISSUE_STRINGS": {
         "ISSUES_STR": "Arbeitspakete",
@@ -486,7 +499,7 @@
     },
     "POMODORO": {
       "BACK_TO_WORK": "Zurück an die Arbeit!",
-      "BREAK_IS_DONE": "Deine Pause ist geschafft!",
+      "BREAK_IS_DONE": "Ihre Pause ist geschafft!",
       "ENJOY_YOURSELF": "Amüsieren Sie sich, bewegen Sie sich, kommen Sie zurück in:",
       "FINISH_SESSION_X": "Sie haben die Sitzung <strong>{{nr}}</strong>erfolgreich beendet!",
       "NOTIFICATION": {
@@ -502,20 +515,20 @@
     "PROCRASTINATION": {
       "BACK_TO_WORK": "Zurück an die Arbeit!",
       "COMP": {
-        "INTRO": "Es ist immer eine großartige Idee, sich selbst Mitgefühl zu zeigen. Es verbessert Ihr Selbstwertgefühl, fördert positive Emotionen und kann Ihnen natürlich dabei helfen, den Aufschub zu überwinden. Probieren Sie eine kleine Übung aus:",
+        "INTRO": "Es ist immer eine großartige Idee, sich selbst Mitgefühl zu zeigen. Es verbessert Ihr Selbstwertgefühl, fördert positive Emotionen und kann Ihnen natürlich dabei helfen, Prokrastination zu überwinden. Probieren Sie eine kleine Übung aus:",
         "L1": "Setzen Sie sich etwas hin und strecken Sie sich, wenn Sie möchten, beruhigen Sie sich ein wenig",
         "L2": "Versuchen Sie, auf die aufkommenden Gedanken und Gefühle zu hören",
         "L3": "Reagieren Sie auf sich selbst so, wie Sie auf einen Freund reagieren würden?",
-        "L4": "Wenn die Antwort nein lautet, stellen Sie sich Ihren Freund in Ihrer Situation vor. Was würdest du ihnen sagen? Was würdest du für sie tun?",
+        "L4": "Wenn die Antwort nein lautet, stellen Sie sich Ihren Freund in Ihrer Situation vor. Was würden Sie ihm sagen? Was würden Sie für ihn tun?",
         "OUTRO": "Weitere Übungen <a target=\"_blank\" href=\"https://drsoph.com/blog/2018/9/17/3-exercises-in-self-compassion\" target=\"_blank\">finden Sie hier</a> oder auf <a target=\"_blank\" href=\"https://www.google.com/search?q=self+compassion+exercises&oq=self+compassion+excers&aqs=chrome.1.69i57j0l5.4303j0j7&sourceid=chrome&ie=UTF-8\" target=\"_blank\">Google</a>.",
-        "TITLE": "Selbstmitleid"
+        "TITLE": "Selbstmitgefühl"
       },
       "CUR": {
-        "INTRO": "Aufschub ist interessant, nicht wahr? Es macht keinen Sinn, es zu tun. Überhaupt nicht in Ihrem langfristigen Interesse. Aber immer noch macht es jeder. Viel Spaß beim Erkunden!",
+        "INTRO": "Prokrastination ist interessant, nicht wahr? Es macht keinen Sinn, es zu tun. Überhaupt nicht in Ihrem langfristigen Interesse. Aber immer noch macht es jeder. Viel Spaß beim Erkunden!",
         "L1": "Welche Gefühle erregen Ihre Versuchung, etwas hinauszuschieben?",
-        "L2": "Wo fühlst du sie in deinem Körper?",
-        "L3": "Woran erinnern sie dich?",
-        "L4": "Was passiert mit dem Gedanken des Aufschiebens, wenn Sie es beobachten? Wird es intensiver? Zerstreuen? Andere Emotionen aufkommen lassen?",
+        "L2": "Wo fühlen Sie sie in Ihrem Körper?",
+        "L3": "Woran erinnern sie Sie?",
+        "L4": "Was passiert mit dem Gedanken des Aufschiebens, wenn Sie es beobachten? Wird es intensiver? Löst es sich auf? Lässt es andere Emotionen aufkommen?",
         "L5": "Wie verändern sich die Empfindungen in Ihrem Körper, während Sie sich weiterhin darauf konzentrieren?",
         "TITLE": "Neugierde"
       },
@@ -525,10 +538,10 @@
       "P3": "Denken Sie daran: Prokrastination ist ein Problem der Emotionsregulation, kein Problem des Zeitmanagements.",
       "REFRAME": {
         "INTRO": "Überlegen Sie, was trotz allem an der Aufgabe positiv sein könnte.",
-        "TITLE": "Aktualisieren",
+        "TITLE": "Neuausrichtung",
         "TL1": "Was könnte daran interessant sein?",
-        "TL2": "Was ist zu gewinnen, wenn Sie es abschließen?",
-        "TL3": "Wie wirst du dich dabei fühlen, wenn du es vervollständigst?"
+        "TL2": "Was haben Sie davon, wenn Sie die Aufgabe abschließen?",
+        "TL3": "Wie werden Sie sich dabei fühlen, wenn Sie es vervollständigen?"
       },
       "SPLIT_UP": {
         "INTRO": "Teilen Sie die Aufgabe in so viele kleine Teile wie möglich auf.",
@@ -553,16 +566,16 @@
       },
       "FORM_THEME": {
         "D_IS_DARK_THEME": "Wird nicht verwendet, wenn das System den globalen Dunkelmodus unterstützt.",
-        "HELP": "Theme-Einstellungen für Ihr Projekt.",
+        "HELP": "Themen-Einstellungen für Ihr Projekt.",
         "L_BACKGROUND_IMAGE_DARK": "Hintergrundbild-URL (dunkles Thema)",
-        "L_BACKGROUND_IMAGE_LIGHT": "Hintergrundbild-URL (Lichtthema)",
+        "L_BACKGROUND_IMAGE_LIGHT": "Hintergrundbild-URL (helles Thema)",
         "L_COLOR_ACCENT": "Akzentfarbe",
         "L_COLOR_PRIMARY": "Primärfarbe",
         "L_COLOR_WARN": "Warn- / Fehlerfarbe",
         "L_HUE_ACCENT": "Schwellenwert für dunklen Text auf Akzentfarbenhintergrund",
         "L_HUE_PRIMARY": "Schwellenwert für dunklen Text auf Grundfarbenhintergrund",
         "L_HUE_WARN": "Schwellenwert für dunklen Text auf farbigem Hintergrund warnen",
-        "L_IS_AUTO_CONTRAST": "Automatisch eingestellte Textfarben für beste Lesbarkeit",
+        "L_IS_AUTO_CONTRAST": "Automatisch Textfarben einstellen für beste Lesbarkeit",
         "L_IS_DISABLE_BACKGROUND_GRADIENT": "Farbigen Hintergrundverlauf deaktivieren",
         "L_IS_REDUCED_THEME": "Reduzierte Benutzeroberfläche verwenden (keine Kästchen um Aufgaben)",
         "L_THEME_COLOR": "Farbe des Themas",
@@ -597,8 +610,8 @@
     },
     "SIMPLE_COUNTER": {
       "D_CONFIRM_REMOVE": {
-        "MSG": "Durch Löschen eines einfachen Zählers werden auch alle darauf verfolgten Daten gelöscht. Sind Sie sicher, dass Sie fortfahren möchten?",
-        "OK": "TU es!"
+        "MSG": "Durch Löschen eines einfachen Zählers werden auch alle darauf erfassten Daten gelöscht. Sind Sie sicher, dass Sie fortfahren möchten?",
+        "OK": "Tu es!"
       },
       "D_EDIT": {
         "L_COUNTER": "Anzahl",
@@ -607,28 +620,28 @@
       "FORM": {
         "ADD_NEW": "Fügen Sie einen einfachen Zähler hinzu",
         "HELP": "Hier können Sie einfache Schaltflächen konfigurieren, die oben rechts angezeigt werden. Sie können entweder Timer oder nur ein einfacher Zähler sein, der durch Klicken hochgezählt wird.",
-        "L_AUTO_COUNT_UP": "Auto Trigger Countup für",
+        "L_AUTO_COUNT_UP": "Auto Trigger hochzählen für",
         "L_AUTO_SWITCH_OFF": "Auto Trigger ausschalten für",
         "L_AUTO_SWITCH_ON": "Auto Trigger einschalten für",
         "L_ICON": "Symbol",
         "L_ICON_ON": "Symbol beim Umschalten",
         "L_IS_ENABLED": "aktiviert",
         "L_TITLE": "Titel",
-        "L_TYPE": "Art",
+        "L_TYPE": "Typ",
         "TITLE": "Einfache Zähler",
-        "TYPE_CLICK_COUNTER": "Klicken Sie auf Zähler",
+        "TYPE_CLICK_COUNTER": "Klick-Zähler",
         "TYPE_STOPWATCH": "Stoppuhr"
       }
     },
     "SYNC": {
       "C": {
-        "EMPTY_SYNC": "Sie versuchen, ein leeres Datenobjekt zu synchronisieren. Ist dies Ihre allererste Synchronisierung einer (fast) jungfräulichen App?",
+        "EMPTY_SYNC": "Sie versuchen, ein leeres Datenobjekt zu synchronisieren. Wenn Sie versuchen, Synchronisation von einer neuen App-Instanz zu aktivieren, klicken Sie einfach OK um die Daten vom Server zu laden. Andernfalls überprüfen Sie bitte Ihre Daten.",
         "FORCE_IMPORT": "Remote-Daten trotzdem importieren?",
         "FORCE_UPLOAD": "Lokale Daten trotzdem hochladen?",
-        "FORCE_UPLOAD_AFTER_ERROR": "Beim Hochladen Ihrer lokalen Daten ist ein Fehler aufgetreten. Versuchen Sie das Update zu erzwingen?",
-        "MIGRATE_LEGACY": "Beim Importieren erkannte Legacy-Daten. Möchten Sie versuchen, sie zu migrieren?",
+        "FORCE_UPLOAD_AFTER_ERROR": "Beim Hochladen Ihrer lokalen Daten ist ein Fehler aufgetreten. Versuchen, das Update zu erzwingen?",
+        "MIGRATE_LEGACY": "Beim Importieren wurden veraltete Daten erkannt. Möchten Sie versuchen, sie zu migrieren?",
         "NO_REMOTE_DATA": "Keine remote Daten gefunden. Lokal auf Remote hochladen?",
-        "TRY_LOAD_REMOTE_AGAIN": "Versuchen Sie erneut, Daten von Remote neu zu laden?"
+        "TRY_LOAD_REMOTE_AGAIN": "Erneut versuchen, Daten von Remote zu laden?"
       },
       "D_AUTH_CODE": {
         "FOLLOW_LINK": "Bitte öffnen Sie den folgenden Link und kopieren Sie den dort angegebenen Authentifizierungscode in das unten stehende Eingabefeld.",
@@ -685,25 +698,25 @@
     },
     "TAG": {
       "D_CREATE": {
-        "CREATE": "Tag erstellen",
-        "EDIT": "Tag bearbeiten"
+        "CREATE": "Stichwort erstellen",
+        "EDIT": "Stichwort bearbeiten"
       },
       "D_DELETE": {
-        "CONFIRM_MSG": "Möchten Sie das Tag \"{{tagName}}\" wirklich löschen? Es wird aus allen Aufgaben entfernt. Das kann nicht rückgängig gemacht werden."
+        "CONFIRM_MSG": "Möchten Sie das Stichwort \"{{tagName}}\" wirklich löschen? Es wird aus allen Aufgaben entfernt. Das kann nicht rückgängig gemacht werden."
       },
       "D_EDIT": {
-        "ADD": "Tags für \"{{title}}\" hinzufügen",
-        "EDIT": "Tags für \"{{title}}\" bearbeiten",
+        "ADD": "Stichworte für \"{{title}}\" hinzufügen",
+        "EDIT": "Stichworte für \"{{title}}\" bearbeiten",
         "LABEL": "Stichworte"
       },
       "FORM_BASIC": {
         "L_COLOR": "Farbe (wenn undefinierte primäre Themenfarbe verwendet wird)",
         "L_ICON": "Symbol",
-        "L_TITLE": "Verlinke den Namen",
+        "L_TITLE": "Stichwortname",
         "TITLE": "Grundeinstellungen"
       },
       "S": {
-        "UPDATED": "Die Tag-Einstellungen wurden aktualisiert"
+        "UPDATED": "Die Stichwort-Einstellungen wurden aktualisiert"
       }
     },
     "TASK": {
@@ -723,17 +736,17 @@
       },
       "ADD_TASK_BAR": {
         "ADD_EXISTING_TASK": "Vorhandene Aufgabe hinzufügen \"{{taskTitle}}\"",
-        "ADD_ISSUE_TASK": "Fügen Sie das Problem #{{issueNr}} von {{issueType}} hinzu",
-        "ADD_TASK_TO_BOTTOM_OF_BACKLOG": "Aufgabe zum Ende des Backlogs hinzufügen",
-        "ADD_TASK_TO_BOTTOM_OF_TODAY": "Aufgabe zum Ende der Liste hinzufügen",
-        "ADD_TASK_TO_TOP_OF_BACKLOG": "Aufgabe zum Anfang des Backlogs hinzufügen",
-        "ADD_TASK_TO_TOP_OF_TODAY": "Aufgabe zum Anfang der Liste hinzufügen",
+        "ADD_ISSUE_TASK": "Problem #{{issueNr}} von {{issueType}} hinzufügen",
+        "ADD_TASK_TO_BOTTOM_OF_BACKLOG": "Aufgabe am Ende des Backlogs hinzufügen",
+        "ADD_TASK_TO_BOTTOM_OF_TODAY": "Aufgabe am Ende der Liste hinzufügen",
+        "ADD_TASK_TO_TOP_OF_BACKLOG": "Aufgabe am Anfang des Backlogs hinzufügen",
+        "ADD_TASK_TO_TOP_OF_TODAY": "Aufgabe am Anfang der Liste hinzufügen",
         "CREATE_TASK": "Neue Aufgabe erstellen",
-        "EXAMPLE": "Beispiel: \"Einige Aufgabentitel + Projektname #Einiges Tag #Einiges anderes Tag 10m / 3h\"",
+        "EXAMPLE": "Beispiel: \"Aufgabentitel + Projektname #EinSchlüsselwort #EinAnderesSchlüssenwort 10m/3h\"",
         "START": "Drücken Sie die Eingabetaste noch einmal, um zu beginnen"
       },
       "B": {
-        "ADD_HALF_HOUR": "Fügen Sie 1/2 hou hinzu",
+        "ADD_HALF_HOUR": "Fügen Sie eine halbe Stunde hinzu",
         "ESTIMATE_EXCEEDED": "Zeitschätzung für \"{{title}}\" überschritten"
       },
       "CMP": {
@@ -759,10 +772,10 @@
         "SHOW_UPDATES": "Updates anzeigen",
         "TOGGLE_ADDITIONAL": "Zusätzliche Informationen ein- / ausblenden",
         "TOGGLE_ATTACHMENTS": "Anhänge ein- / ausblenden",
-        "TOGGLE_DONE": "Als erledigt / rückgängig machen markieren",
+        "TOGGLE_DONE": "Als erledigt / unerledigt markieren",
         "TOGGLE_SUB_TASK_VISIBILITY": "Schaltet die Sichtbarkeit von Unteraufgaben um",
-        "TRACK_TIME": "Starten Sie die Verfolgung der Zeit",
-        "TRACK_TIME_STOP": "Verfolgungszeit anhalten",
+        "TRACK_TIME": "Starten Sie die Erfassung der Zeit",
+        "TRACK_TIME_STOP": "Erfassung der Zeit anhalten",
         "UPDATE_ISSUE_DATA": "Issuedaten aktualisieren"
       },
       "D_REMINDER_ADD": {
@@ -779,11 +792,11 @@
         "RO_5M": "5 Minuten bevor es losgeht",
         "RO_START": "wenn es beginnt",
         "SCHEDULE": "Planen",
-        "UNSCHEDULE": "Erinnerung entfernen"
+        "UNSCHEDULE": "Planung entfernen"
       },
       "D_REMINDER_VIEW": {
         "ADD_ALL_TO_TODAY": "Fügen Sie alles zu heute hinzu",
-        "ADD_TO_TODAY": "Heute hinzufügen",
+        "ADD_TO_TODAY": "Zu heute hinzufügen",
         "DISMISS": "Erinnerung verwerfen",
         "DISMISS_ALL": "Alle schließen",
         "DONE": "Erledigt",
@@ -792,17 +805,17 @@
         "FOR_CURRENT": "Aufgabe ist fällig. Möchten Sie anfangen, daran zu arbeiten?",
         "FOR_OTHER": "Aufgabe ist fällig. Möchten Sie anfangen, daran zu arbeiten?",
         "FROM_PROJECT": "Aus dem Projekt",
-        "FROM_TAG": "Vom Tag: \"{{title}}\"",
-        "RESCHEDULE_UNTIL_TOMORROW": "Bis morgen",
-        "SNOOZE": "Snooze",
-        "SNOOZE_ALL": "Schlummer alle",
-        "START": "Task starten",
+        "FROM_TAG": "Vom Schlüsselwort: \"{{title}}\"",
+        "RESCHEDULE_UNTIL_TOMORROW": "Für morgen neu planen",
+        "SNOOZE": "Schlummern",
+        "SNOOZE_ALL": "Alle schlummern lassen",
+        "START": "Start",
         "SWITCH_CONTEXT_START": "Kontext wechseln & starten"
       },
       "D_TIME": {
-        "ADD_FOR_OTHER_DAY": "Für anderen Tag",
+        "ADD_FOR_OTHER_DAY": "Verbrachte Zeit für anderen Tag hinzufügen",
         "DELETE_FOR": "Eintrag für Tag löschen",
-        "ESTIMATE": "Schätzen",
+        "ESTIMATE": "Schätzung",
         "TIME_SPENT": "Zeitaufwand",
         "TIME_SPENT_ON": "Zeitaufwand {{date}}",
         "TITLE": "Zeitaufwand / Schätzungen"
@@ -819,11 +832,12 @@
         "ESTIMATE_EXCEEDED_BODY": "Sie haben Ihre geschätzte Zeit für \"{{title}}\" überschritten."
       },
       "S": {
+        "CANNOT_ASSIGN_PROJECT_FOR_REPEATABLE_TASK": "Projektzuweisung über Kurzsyntax für wiederholbare Aufgaben nicht möglich!",
         "DELETED": "\"{{title}}\" wurde gelöscht",
         "FOUND_MOVE_FROM_BACKLOG": "Die vorhandene Aufgabe <strong>{{title}}</strong> wurde in die Aufgabenliste von heute verschoben",
         "FOUND_MOVE_FROM_OTHER_LIST": "Aufgabe <strong>{{title}}</strong> von <strong>{{contextTitle}}</strong> zur aktuellen Liste hinzugefügt",
         "FOUND_RESTORE_FROM_ARCHIVE": "Zum Issue zugehörige Aufgabe <strong>{{title}}</strong> wurde aus dem Archiv wiederhergestellt",
-        "LAST_TAG_DELETION_WARNING": "Sie versuchen, das letzte Tag einer Nicht-Projektaufgabe zu entfernen. Das ist nicht erlaubt!",
+        "LAST_TAG_DELETION_WARNING": "Sie versuchen, das letzte Stichwort einer Nicht-Projektaufgabe zu entfernen. Das ist nicht erlaubt!",
         "REMINDER_ADDED": "Geplante Aufgabe \"{{title}}\"",
         "REMINDER_DELETED": "Erinnerung für Aufgabe gelöscht",
         "REMINDER_UPDATED": "Erinnerung für Aufgabe \"{{title}}\" aktualisiert",
@@ -831,37 +845,83 @@
       },
       "SELECT_OR_CREATE": "Aufgabe auswählen oder erstellen",
       "SUMMARY_TABLE": {
-        "ESTIMATE": "Schätzen",
+        "ESTIMATE": "Schätzung",
         "SPENT_TODAY": "Heute verbracht",
-        "SPENT_TOTAL": "Insgesamt ausgegeben",
+        "SPENT_TOTAL": "Insgesamt verbracht",
         "TASK": "Aufgabe",
-        "TOGGLE_DONE": "ab- / als erledigt markieren"
+        "TOGGLE_DONE": "als (un-)erledigt markieren"
       }
     },
     "TASK_REPEAT": {
+      "ADD_INFO_PANEL": {
+        "CUSTOM": "Benutzerdefinierte Wiederholungskonfiguration",
+        "CUSTOM_AND_TIME": "Benutzerdefiniert, {{timeStr}}",
+        "CUSTOM_WEEKLY": "{{daysStr}}",
+        "CUSTOM_WEEKLY_AND_TIME": "{{daysStr}}, {{timeStr}}",
+        "DAILY": "Jeden Tag",
+        "DAILY_AND_TIME": "Jeden Tag, {{timeStr}}",
+        "EVERY_X_DAILY": "Alle {{x}} Tage",
+        "EVERY_X_DAILY_AND_TIME": "Alle {{x}} Tage, {{timeStr}}",
+        "EVERY_X_MONTHLY": "Alle {{x}} Monate",
+        "EVERY_X_MONTHLY_AND_TIME": "Alle {{x}} Monate, {{timeStr}}",
+        "EVERY_X_YEARLY": "Alle {{x}} Jahre",
+        "EVERY_X_YEARLY_AND_TIME": "Alle {{x}} Jahre, {{timeStr}}",
+        "MONTHLY_CURRENT_DATE": "Monatlich am {{dateDayStr}}.",
+        "MONTHLY_CURRENT_DATE_AND_TIME": "Monatlich am {{dateDayStr}}., {{timeStr}}",
+        "MONDAY_TO_FRIDAY": "Mon-Fri",
+        "MONDAY_TO_FRIDAY_AND_TIME": "Mon-Fri, {{timeStr}}",
+        "WEEKLY_CURRENT_WEEKDAY": "Wöchentlich am {{weekdayStr}}",
+        "WEEKLY_CURRENT_WEEKDAY_AND_TIME": "Wöchentlich am {{weekdayStr}}, {{timeStr}}",
+        "YEARLY_CURRENT_DATE": "Jährlich am {{dayAndMonthStr}}",
+        "YEARLY_CURRENT_DATE_AND_TIME": "Jährlich {{dayAndMonthStr}}, {{timeStr}}"
+      },
       "D_CONFIRM_REMOVE": {
         "MSG": "Durch das Entfernen der Wiederholungskonfiguration werden alle vorherigen Instanzen dieser Aufgabe in normale Aufgaben konvertiert. Sind Sie sicher, dass Sie fortfahren möchten",
         "OK": "Vollständig entfernen"
       },
+      "D_CONFIRM_UPDATE_INSTANCES": {
+        "MSG": "Es gibt {{tasksNr}} Instanzen, die für diese wiederholbare Aufgabe erstellt wurden. Möchten Sie alle mit den neuen Vorgaben aktualisieren oder nur zukünftige Aufgaben?",
+        "OK": "Alle Instanzen aktualisieren"
+      },
+      "D_CONFIRM_MOVE_TO_PROJECT": {
+        "MSG": "Es gibt {{tasksNr}} Instanzen, die für diese wiederholbare Aufgabe erstellt wurden. Möchten Sie sie alle zum Projekt \"{{projectName}}\" verschieben?",
+        "OK": "Update all instances"
+      },
       "D_EDIT": {
         "ADD": "Hinzufügen der Konfiguration für Wiederholungsaufgaben",
+        "ADVANCED_CFG": "Erweiterte Konfiguration",
         "EDIT": "Bearbeite Einstellung der Wiederholungssaufgaben",
         "HELP1": "Sich wiederholende Aufgaben sind für tägliche Aufgaben gedacht, z. B .: \"Organisation\", \"Tägliche Besprechung\", \"Codeüberprüfung\", \"Überprüfen von E-Mails\" oder ähnliche Aufgaben, die wahrscheinlich immer wieder auftreten.",
         "HELP2": "Einmal konfiguriert, wird eine sich wiederholende Aufgabe an jedem unten ausgewählten Tag neu erstellt, sobald Sie Ihr Projekt öffnen, und wird am Ende des Tages automatisch als erledigt markiert. Sie werden als unterschiedliche Instanzen behandelt. So können Sie Unteraufgaben usw. frei hinzufügen.",
         "HELP3": "Aus Jira oder Git importierte Aufgaben können nicht wiederholt werden. Alle Erinnerungen werden auch bei einer sich wiederholenden Aufgabe gelöscht.",
         "HELP4": "Ein Hinweis zum Auftragsfeld: Bezieht sich auf den Erstellungsauftrag wiederholbare Aufgaben. Nur wirksam für wiederholbare Aufgaben, die gleichzeitig erstellt werden. Ein niedrigerer Wert bedeutet, dass eine Aufgabe weiter oben in der Liste steht, eine niedrigere Nummer, dass sie weiter unten steht. Ein Wert größer als 0 bedeutet, dass Elemente am Ende normaler Aufgaben erstellt werden.",
-        "TAG_LABEL": "Tags zum Hinzufügen"
+        "TAG_LABEL": "Stichwörter zum Hinzufügen"
       },
       "F": {
+        "C_DAY": "Tag",
+        "C_MONTH": "Monat",
+        "C_WEEK": "Woche",
+        "C_YEAR": "Jahr",
         "DEFAULT_ESTIMATE": "Standardschätzung",
         "FRIDAY": "Freitag",
         "IS_ADD_TO_BOTTOM": "Verschieben Sie die Aufgabe an das Ende der Liste",
         "MONDAY": "Montag",
-        "ORDER": "Auftrag",
+        "NOTES": "Standardnotizen",
+        "ORDER": "Reihenfolge",
         "ORDER_DESCRIPTION": "Erstellungsreihenfolge wiederholbarer Aufgaben. Betrifft nur wiederholbare Aufgaben, die gleichzeitig erstellt wurden. Ein niedrigerer Wert bedeutet, dass eine Aufgabe weiter oben in der Liste erstellt wird, eine niedrigere Nummer, dass sie weiter unten steht. Ein Wert größer als 0 bedeutet, dass Elemente am Ende normaler Aufgaben erstellt werden.",
-        "REMIND_AT": "Erinnern an",
+        "Q_CUSTOM": "Benutzerdefinierte Wiederholungkonfiguration",
+        "Q_DAILY": "Jeden Tag",
+        "Q_MONTHLY_CURRENT_DATE": "Jeden Monat am {{dateDayStr}}.",
+        "Q_MONDAY_TO_FRIDAY": "Jeden Montag bis Freitag",
+        "Q_WEEKLY_CURRENT_WEEKDAY": "Jede Woche am {{weekdayStr}}",
+        "Q_YEARLY_CURRENT_DATE": "Jeder Jahr am {{dayAndMonthStr}}",
+        "QUICK_SETTING": "Wiederholungskonfiguration",
+        "REMIND_AT": "Erinnern am",
         "REMIND_AT_PLACEHOLDER": "Wählen Sie aus, wann Sie erinnern möchten",
+        "REPEAT_CYCLE": "Wiederholungszyklus",
+        "REPEAT_EVERY": "Wiederhole jeden",
         "SATURDAY": "Samstag",
+        "START_DATE": "Startdatum",
         "START_TIME": "Geplante Startzeit",
         "START_TIME_DESCRIPTION": "Z.B. 15:00. Für eine ganztägige Aufgabe leer lassen",
         "SUNDAY": "Sonntag",
@@ -872,9 +932,9 @@
       }
     },
     "TIMELINE": {
-      "CONTINUED": "Fortsetzung",
+      "CONTINUED": "fortgesetzt",
       "D_INITIAL": {
-        "TEXT": "<p>Die Idee der Zeitleiste ist es, ein besseres Bild davon zu liefern, wie sich die geplanten Aufgaben im Laufe der Zeit entwickeln. Es wird automatisch aus Ihren Aufgaben generiert und unterscheidet zwei verschiedene Dinge: <strong>Geplante Aufgaben</strong>, die zum geplanten Zeitpunkt angezeigt werden, und <strong>reguläre Aufgaben</strong> , die diese festen Ereignisse umgehen sollen. Alle Aufgaben berücksichtigen die Zeitschätzungen, die Sie ihnen zugewiesen haben.</p><p>Zusätzlich können Sie eine Arbeitsstart- und -endzeit angeben. Wenn konfiguriert, werden reguläre Aufgaben niemals außerhalb dieser angezeigt. Bitte beachten Sie, dass die Zeitleiste nur die kommenden 30 Tage enthält.</p>",
+        "TEXT": "<p>Die Idee der Zeitleiste ist es, ein besseres Bild davon zu liefern, wie sich die geplanten Aufgaben im Laufe der Zeit entwickeln. Es wird automatisch aus Ihren Aufgaben generiert und unterscheidet zwei verschiedene Dinge: <strong>Geplante Aufgaben</strong>, die zum geplanten Zeitpunkt angezeigt werden, und <strong>reguläre Aufgaben</strong>, die außerhalb dieser fixen Aufgaben angezeigt werden. Alle Aufgaben berücksichtigen die Zeitschätzungen, die Sie ihnen zugewiesen haben.</p><p>Zusätzlich können Sie eine Arbeitsstart- und -endzeit angeben. Wenn konfiguriert, werden reguläre Aufgaben niemals außerhalb dieser angezeigt. Bitte beachten Sie, dass die Zeitleiste nur die kommenden 30 Tage enthält.</p>",
         "TITLE": "Zeitleiste"
       },
       "END": "Arbeitsende",
@@ -894,28 +954,42 @@
       },
       "B_TTR": {
         "ADD_TO_TASK": "Zur Aufgabe hinzufügen",
-        "MSG": "Sie haben die Zeit für {{time}} nicht verfolgt"
+        "MSG": "Sie haben die Zeit für {{time}} nicht erfasst"
       },
       "D_IDLE": {
+        "ADD_ENTRY": "Eintrag für Erfassung hinzufügen",
         "BREAK": "Pause",
         "CREATE_AND_TRACK": "<em>Erstellen Sie</em> und erfassen Sie Folgendes:",
         "IDLE_FOR": "Sie waren untätig für:",
         "SIMPLE_CONFIRM_COUNTER_CANCEL": "Überspringen",
         "SIMPLE_CONFIRM_COUNTER_OK": "Spur",
-        "SIMPLE_COUNTER_CONFIRM_TXT": "Sie haben Überspringen ausgewählt, aber {{nr}} einfache Zählerschaltfläche(n) aktiviert. Möchten Sie die Leerlaufzeit zu ihnen verfolgen?",
-        "SIMPLE_COUNTER_TOOLTIP": "Klicken, um zu {{title}}zu verfolgen",
-        "SIMPLE_COUNTER_TOOLTIP_DISABLE": "Klicken, um NICHT zu {{title}}zu verfolgen",
+        "SIMPLE_COUNTER_CONFIRM_TXT": "Sie haben Überspringen ausgewählt, aber {{nr}} einfache Zählerschaltfläche(n) aktiviert. Möchten Sie die Leerlaufzeit zu ihnen erfassen?",
+        "SIMPLE_COUNTER_TOOLTIP": "Klicken, um zu {{title}}zu erfassen",
+        "SIMPLE_COUNTER_TOOLTIP_DISABLE": "Klicken, um NICHT zu {{title}}zu erfassen",
         "SKIP": "Überspringen",
+        "SPLIT_TIME": "Zeit aufteilen in mehrere Aufgaben und Pausen",
         "TASK": "Aufgabe",
         "TASK_BREAK": "Aufgabe+Pause",
         "TRACK_TO": "Erfassen als:"
       },
       "D_TRACKING_REMINDER": {
-        "CREATE_AND_TRACK": "<em>Erstelle</em> und verfolge zu",
+        "CREATE_AND_TRACK": "<em>Erstelle</em> und erfasse zu",
         "IDLE_FOR": "Sie waren untätig wegen:",
         "TASK": "Aufgabe",
-        "TRACK_TO": "Verfolgen nach:",
-        "UNTRACKED_TIME": "Unverfolgte Zeit:"
+        "TRACK_TO": "Erfassen nach:",
+        "UNTRACKED_TIME": "Nicht erfasste Zeit:"
+      }
+    },
+    "WELCOME": {
+      "D_WELCOME": {
+        "L1": "Erste Schritte",
+        "L2": "Einführungsvideo auf YouTube",
+        "L3": "Eine Frage stellen",
+        "LETS_GO": "Los gehts!!",
+        "MOBILE_INFO": "<strong>Swipe</strong> erstellte Aufgaben <strong>nach rechts, um sie als erledigt zu merkieren</strong>.\n    Swipe sie nach rechts um sie zu planen. Halte sie gedrückt für weitere Aktionen.",
+        "T1": "Schön zu sehen, dass Sie sich entschieden haben, dieser App einen Versuch zu geben! \uD83E\uDD84",
+        "T2": "Wenn Sie Probleme haben, sich zurechtzufinden, gibt es viele Orte an denen Sie\n    Hilfe finden können:",
+        "TITLE": "Wilkommen bei Super Productivity!"
       }
     },
     "WORKLOG": {
@@ -923,7 +997,7 @@
         "DAYS_WORKED": "Arbeitstage:",
         "MONTH_WORKED": "Monat gearbeitet:",
         "REPEATING_TASK": "Aufgabe wiederholen",
-        "RESTORE_TASK_FROM_ARCHIVE": "Task aus Archiv wiederherstellen",
+        "RESTORE_TASK_FROM_ARCHIVE": "Aufgabe aus Archiv wiederherstellen",
         "TASKS": "Aufgaben",
         "TOTAL_TIME": "Insgesamt aufgewendete Zeit:",
         "WEEK_NR": "Woche {{nr}}",
@@ -944,9 +1018,9 @@
           "ESTIMATE_AS_CLOCK": "Schätzungen im Uhrzeit Format (z. B. 5:23)",
           "ESTIMATE_AS_MILLISECONDS": "Schätzungen als Millisekunden",
           "ESTIMATE_AS_STRING": "Schätzungen als Zeichenfolge (z. B. 5 Std. 23 Min.)",
-          "FULL_HALF_HOURS": "Volle halbe Stunden",
-          "FULL_HOURS": "Volle Stunden",
-          "FULL_QUARTERS": "Volle viertel Stunde",
+          "FULL_HALF_HOURS": "volle halbe Stunden",
+          "FULL_HOURS": "volle Stunden",
+          "FULL_QUARTERS": "volle viertel Stunde",
           "NOTES": "Aufgabenbeschreibungen",
           "PARENT_TASK": "Übergeordnete Aufgabe",
           "PARENT_TASK_TITLES_ONLY": "Nur übergeordnete Aufgabentitel",
@@ -961,9 +1035,9 @@
           "WORKLOG": "Arbeitsprotokoll"
         },
         "OPTIONS": "Optionen",
-        "ROUND_END_TIME_TO": "Runde Endzeit bis",
-        "ROUND_START_TIME_TO": "Rundenstartzeit bis",
-        "ROUND_TIME_WORKED_TO": "Rundenzeit arbeitete bis",
+        "ROUND_END_TIME_TO": "Runde Endzeit auf",
+        "ROUND_START_TIME_TO": "Runde Startzeit auf",
+        "ROUND_TIME_WORKED_TO": "Runde Arbeitszeit auf",
         "SAVE_TO_FILE": "Speichern unter",
         "SEPARATE_TASKS_BY": "Aufgaben trennen durch",
         "SHOW_AS_TEXT": "Als Text anzeigen"
@@ -978,6 +1052,7 @@
   "FILE_IMEX": {
     "EXPORT_DATA": "Daten exportieren",
     "IMPORT_FROM_FILE": "Aus Datei importieren",
+    "PRIVACY_EXPORT": "Exportiere anonymisierte Daten (zum Senden an contact@super-productivity.com zur Fehlersuche)",
     "S_ERR_INVALID_DATA": "Import fehlgeschlagen: Ungültiger JSON"
   },
   "G": {
@@ -986,10 +1061,11 @@
     "CLOSE": "Schließen",
     "DELETE": "Löschen",
     "DISMISS": "Verwerfen",
-    "DO_IT": "TU es!",
+    "DURATION_DESCRIPTION": "z.B. \"5h 23m\" was in 5 Stunden und 23 Minuten resultiert",
+    "DO_IT": "Tu es!",
     "EDIT": "Bearbeiten",
-    "ENABLED": "aktiviert",
-    "EXTENSION_INFO": "Bitte <a target=\"_blank\" href=\"https://chrome.google.com/webstore/detail/super-productivity/ljkbjodfmekklcoibdnhahlaalhihmlb\"> laden Sie die Chrome-Erweiterung</a> herunter, um die Kommunikation mit dem Jira Api und Idle Time Handling zu ermöglichen. Beachten Sie, dass dies für Handys nicht funktioniert.",
+    "ENABLED": "Aktiviert",
+    "EXTENSION_INFO": "Bitte <a target=\"_blank\" href=\"https://chrome.google.com/webstore/detail/super-productivity/ljkbjodfmekklcoibdnhahlaalhihmlb\"> laden Sie die Chrome-Erweiterung</a> herunter, um die Kommunikation mit dem Jira Api und Leerlaufzeitbehandlung zu ermöglichen. Beachten Sie, dass dies für Handys nicht funktioniert.",
     "LOGIN": "Anmeldung",
     "LOGOUT": "Ausloggen",
     "MINUTES": "{{m}} Minuten",
@@ -1020,12 +1096,12 @@
       "TITLE": "Auswertung & Metriken"
     },
     "IDLE": {
-      "HELP": "<div><p>Wenn die Behandlung von Leerlaufzeiten aktiviert ist, wird nach einer festgelegten Zeit ein Dialogfeld geöffnet, in dem überprüft wird, ob und für welche Aufgabe Sie Ihre Zeit nachverfolgen möchten, wenn Sie im Leerlauf waren.</p></div>",
-      "IS_ENABLE_IDLE_TIME_TRACKING": "Aktivieren Sie das Leerlaufzeithandling",
+      "HELP": "<div><p>Wenn die Behandlung von Leerlaufzeiten aktiviert ist, wird nach einer festgelegten Zeit ein Dialogfeld geöffnet, in dem überprüft wird, ob und für welche Aufgabe Sie Ihre Zeit erfassen möchten, wenn Sie im Leerlauf waren.</p></div>",
+      "IS_ENABLE_IDLE_TIME_TRACKING": "Aktivieren Sie die Leerlaufbehandlung",
       "IS_ONLY_OPEN_IDLE_WHEN_CURRENT_TASK": "Triggern Sie den Leerlaufdialog nur, wenn eine aktuelle Aufgabe ausgewählt ist",
       "IS_UN_TRACKED_IDLE_RESETS_BREAK_TIMER": "Durch Zurücksetzen der nicht verfolgten Leerlaufzeit wird ein Pausen-Timer ausgelöst",
       "MIN_IDLE_TIME": "Leerlauf nach X auslösen",
-      "TITLE": "Idle Handling"
+      "TITLE": "Leerlaufbehandlung"
     },
     "IMEX": {
       "HELP": "<p>Hier können Sie alle Ihre Daten als <strong>JSON</strong> für Backups exportieren, aber auch in einem anderen Kontext verwenden (z. B. möchten Sie Ihre Projekte möglicherweise im Browser exportieren und in die Desktop-Version importieren ). </p> <p>Der Import erwartet, dass gültiges JSON in den Textbereich kopiert wird. <strong>HINWEIS: Sobald Sie auf die Schaltfläche \"Importieren\" klicken, werden alle Ihre aktuellen Einstellungen und Daten überschrieben.</strong></p>",
@@ -1036,7 +1112,7 @@
       "ADD_NEW_TASK": "Neue Aufgabe hinzufügen",
       "APP_WIDE_SHORTCUTS": "Globale Verknüpfungen (anwendungsweit)",
       "COLLAPSE_SUB_TASKS": "Unteraufgaben reduzieren",
-      "EXPAND_SUB_TASKS": "Erweitern Sie Unteraufgaben",
+      "EXPAND_SUB_TASKS": "Erweitern der Unteraufgaben",
       "GLOBAL_ADD_NOTE": "Neue Notiz hinzufügen",
       "GLOBAL_ADD_TASK": "Neue Aufgabe hinzufügen",
       "GLOBAL_SHOW_HIDE": "Superproduktivität ein- / ausblenden",
@@ -1064,7 +1140,7 @@
       "TASK_MOVE_TO_PROJECT": "Öffnen Sie die Aufgabe zum Verschieben in das Projektmenü",
       "TASK_OPEN_CONTEXT_MENU": "Öffnen Sie das Aufgabenkontextmenü",
       "TASK_OPEN_ESTIMATION_DIALOG": "Schätzung / Zeitaufwand bearbeiten",
-      "TASK_SCHEDULE": "Task planen",
+      "TASK_SCHEDULE": "Aufgabe planen",
       "TASK_SHORTCUTS": "Aufgaben",
       "TASK_SHORTCUTS_INFO": "Die folgenden Verknüpfungen gelten für die aktuell ausgewählte Aufgabe (Auswahl über Tab oder Maus).",
       "TASK_TOGGLE_ADDITIONAL_INFO_OPEN": "Zusätzliche Aufgabeninfo ein- / ausblenden",
@@ -1073,25 +1149,26 @@
       "TOGGLE_BACKLOG": "Task-Backlog anzeigen / ausblenden",
       "TOGGLE_BOOKMARKS": "Lesezeichenleiste ein- / ausblenden",
       "TOGGLE_PLAY": "Task starten / stoppen",
-      "TOGGLE_SIDE_NAV": "Show & Focus / Hide Sidenav",
+      "TOGGLE_SIDE_NAV": "Seitennavigation anzeigen/verstecken",
       "ZOOM_DEFAULT": "Zoom Standard (nur Desktop)",
       "ZOOM_IN": "Vergrößern (nur Desktop)",
       "ZOOM_OUT": "Verkleinern (nur Desktop)"
     },
     "LANG": {
       "AR": "Arabisch",
-      "DE": "Deutsche",
+      "DE": "Deutsch",
       "EN": "Englisch",
       "ES": "Spanisch",
       "FA": "Farsi",
       "FR": "Französisch",
+      "HR": "Kroatisch",
       "IT": "Italienisch",
       "JA": "Japanisch",
       "KO": "Koreanisch",
       "LABEL": "Bitte wähle eine Sprache",
       "NB": "Norwegischer Bokmål",
       "NL": "Niederländisch",
-      "PL": "Polnish",
+      "PL": "Polnisch",
       "PT": "Portugiesisch",
       "RU": "Russisch",
       "TITLE": "Sprache",
@@ -1106,9 +1183,10 @@
       "IS_AUTO_ADD_WORKED_ON_TO_TODAY": "Fügen Sie heute automatisch das Tag \"Heute\" hinzu, um an Aufgaben zu arbeiten",
       "IS_AUTO_MARK_PARENT_AS_DONE": "Übergeordnete Aufgabe als erledigt markieren, wenn alle Unteraufgaben erledigt sind",
       "IS_AUTO_START_NEXT_TASK": "Beginnen Sie mit der Verfolgung der nächsten Aufgabe, wenn Sie den aktuellen als erledigt markieren",
-      "IS_CONFIRM_BEFORE_EXIT": "Bestätigen Sie, bevor Sie die App beenden",
-      "IS_CONFIRM_BEFORE_EXIT_WITHOUT_FINISH_DAY": "Bestätigen Sie, bevor Sie die App beenden, ohne den Tag zuerst zu beenden",
-      "IS_DARK_MODE": "Dark Mode",
+      "IS_CONFIRM_BEFORE_EXIT": "Bestätigen, bevor die App beendet wird",
+      "IS_CONFIRM_BEFORE_EXIT_WITHOUT_FINISH_DAY": "Bestätigen, bevor die App beendet wird, ohne den Tag zuerst zu beenden",
+      "IS_DARK_MODE": "Dunkler Modus",
+      "IS_DISABLE_ANIMATIONS": "Deaktiviere alle Animationen",
       "IS_HIDE_NAV": "Navigation verbergen, bis die Hauptüberschrift angezeigt wird (nur Desktop)",
       "IS_MINIMIZE_TO_TRAY": "Anwendung als Trayicon minimieren (nur Deskop)",
       "IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "Benachrichtigen, wenn die geschätzte Zeit überschritten wurde",
@@ -1119,14 +1197,14 @@
     },
     "POMODORO": {
       "BREAK_DURATION": "Dauer der kurzen Pausen",
-      "CYCLES_BEFORE_LONGER_BREAK": "Beginnen Sie eine längere Pause nach X Arbeitssitzungen",
+      "CYCLES_BEFORE_LONGER_BREAK": "Beginnen einer längeren Pause nach X Arbeitssitzungen",
       "DURATION": "Dauer der Arbeitssitzungen",
       "HELP": "<p>Der Pomodoro-Timer kann über einige Einstellungen konfiguriert werden. Die Dauer jeder Arbeitssitzung, die Dauer der normalen Pausen, die Anzahl der Arbeitssitzungen, die ausgeführt werden müssen, bevor eine längere Pause gestartet wird, und die Dauer dieser längeren Pause.</p> <p>Sie können auch festlegen, ob Ihre Ablenkungen während der Pomodoro-Pausen angezeigt werden sollen.</p> <p>Mit der Einstellung \"Pausenzeiterfassung bei Pomodoro-Pause\" werden Ihre Pausen auch als Arbeitszeit für eine Aufgabe erfasst. </p> <p>Wenn Sie \"Pomodoro-Sitzung anhalten, wenn keine aktive Aufgabe vorhanden ist\" aktivieren, wird die Pomodoro-Sitzung auch angehalten, wenn Sie eine Aufgabe anhalten.</p>",
       "IS_ENABLED": "Aktivieren Sie den Pomodoro-Timer",
       "IS_MANUAL_CONTINUE": "Bestätigen Sie den Start der nächsten Pomodoro-Sitzung manuell",
-      "IS_PLAY_SOUND": "Spielen Sie den Ton ab, wenn die Sitzung beendet ist",
-      "IS_PLAY_SOUND_AFTER_BREAK": "Sound abspielen, wenn die Pause beendet ist",
-      "IS_PLAY_TICK": "Spielen Sie jede Sekunde einen Tick-Sound",
+      "IS_PLAY_SOUND": "Ton abspielen, wenn die Sitzung beendet ist",
+      "IS_PLAY_SOUND_AFTER_BREAK": "Ton abspielen, wenn die Pause beendet ist",
+      "IS_PLAY_TICK": "Spielen Sie jede Sekunde einen Tick-Sound ab",
       "IS_STOP_TRACKING_ON_BREAK": "Stoppen Sie die Zeiterfassung für die Aufgabe in der Pause",
       "LONGER_BREAK_DURATION": "Dauer längerer Pausen",
       "TITLE": "Pomodoro Timer"
@@ -1135,7 +1213,7 @@
       "DONE_SOUND": "Aufgabe erledigt Ton",
       "IS_INCREASE_DONE_PITCH": "Erhöhen Sie die Tonhöhe für jede erledigte Aufgabe",
       "IS_PLAY_DONE_SOUND": "Ton abspielen, wenn die Aufgabe als erledigt markiert ist",
-      "TITLE": "Klingen",
+      "TITLE": "Sound",
       "VOLUME": "Volumen"
     },
     "TAKE_A_BREAK": {
@@ -1143,20 +1221,20 @@
       "IS_ENABLED": "Aktivieren Sie die Erinnerungsfunktion für eine Pause",
       "IS_FOCUS_WINDOW": "App-Fenster fokussieren, wenn Erinnerung aktiv ist (nur Desktop)",
       "IS_LOCK_SCREEN": "Bildschirm sperren, wenn eine Pause fällig ist (nur Desktop)",
-      "MESSAGE": "Mach eine Pause Nachricht",
-      "MIN_WORKING_TIME": "Trigger mach eine Pausenbenachrichtigung, nachdem X ohne eine gearbeitet hat",
+      "MESSAGE": "'Mach eine Pause'-Nachricht",
+      "MIN_WORKING_TIME": "Pausenbenachrichtigung senden, nachdem man X ohne eine gearbeitet hat",
       "MOTIVATIONAL_IMG": "Motivationsbild (Web-URL)",
       "NOTIFICATION_TITLE": "Machen Sie eine Pause!",
-      "SNOOZE_TIME": "Schlummerzeit, wenn Sie aufgefordert werden, eine Pause einzulegen",
+      "SNOOZE_TIME": "Schlummern, wenn Sie aufgefordert werden, eine Pause einzulegen",
       "TITLE": "Pausenerinnerung"
     },
     "TIMELINE": {
       "CAL_PROVIDERS": "Kalenderanbieter (experimentell und optional)",
-      "CAL_PROVIDERS_ADD": "ische Quelle hinzufügen",
+      "CAL_PROVIDERS_ADD": "iCal Quelle hinzufügen",
       "CAL_PROVIDERS_INFO": "Optional können Sie die Zeitleiste so konfigurieren, dass auch Daten aus iCal (z. B. Google Kalender) geladen und angezeigt werden.",
       "HELP": "Die Timeline-Funktion soll Ihnen einen schnellen Überblick darüber geben, wie sich Ihre geplanten Aufgaben im Laufe der Zeit entwickeln. Sie finden es im Menü auf der linken Seite unter <a href='#/timeline'>'Timeline'</a>.",
       "L_CAL_PATH": "URL/Dateipfad für Kalender-ICAL (optional)",
-      "L_IS_WORK_START_END_ENABLED": "Beschränken Sie den außerplanmäßigen Aufgabenfluss auf bestimmte Arbeitszeiten",
+      "L_IS_WORK_START_END_ENABLED": "Beschränken Sie ungeplante Aufgaben auf bestimmte Arbeitszeiten",
       "L_WORK_END": "Ende des Arbeitstages",
       "L_WORK_START": "Beginn des Arbeitstages",
       "TITLE": "Zeitleiste",
@@ -1164,7 +1242,7 @@
     },
     "TRACKING_REMINDER": {
       "HELP": "Konfigurieren Sie ein Banner, das angezeigt wird, falls Sie vergessen haben, die Zeiterfassung zu starten.",
-      "L_IS_ENABLED": "aktiviert",
+      "L_IS_ENABLED": "Aktiviert",
       "L_IS_SHOW_ON_MOBILE": "Auf mobiler App anzeigen",
       "L_MIN_TIME": "Wartezeit, bevor Banner angezeigt wird",
       "TITLE": "Zeiterfassungserinnerung"
@@ -1197,12 +1275,13 @@
   "MH": {
     "ADD_NEW_TASK": "Neue Aufgabe hinzufügen",
     "CREATE_PROJECT": "Projekt erstellen",
-    "CREATE_TAG": "Tag erstellen",
-    "DELETE_TAG": "Tag löschen",
+    "CREATE_TAG": "Stichwort erstellen",
+    "DELETE_TAG": "Stichwort löschen",
     "GO_TO_TASK_LIST": "Gehe zur Aufgabenliste",
     "MANAGE_PROJECTS": "Projekte verwalten",
     "METRICS": "Metriken",
     "NOTES": "Anmerkungen",
+    "NOTES_PANEL_INFO": "Notizen können nur von der Timeline und der normalen Aufgabenliste angezeigt werden.",
     "PROCRASTINATE": "Prokrastination",
     "PROJECTS": "Projekte",
     "PROJECT_MENU": "Projektmenü",
@@ -1226,7 +1305,7 @@
     "CELEBRATE": "Nehmen Sie sich einen Moment Zeit, um <i>zu feiern!</i>",
     "CLEAR_ALL_CONTINUE": "Alles löschen und fortfahren",
     "D_CONFIRM_APP_CLOSE": {
-      "CANCEL": "Nein, nur die Aufgaben klären",
+      "CANCEL": "Nein, nur die Aufgaben aufräumen",
       "MSG": "Ihre Arbeit ist erledigt. Zeit nach Hause zu gehen!",
       "OK": "Aye Aye! Ausschalten!"
     },
@@ -1245,7 +1324,8 @@
     "ROUND_UP_30M": "Aufrunden auf 30 Minuten",
     "ROUND_UP_5M": "Aufrunden auf 5 Minuten",
     "SAVE_AND_GO_HOME": "Speichern und nach Hause gehen",
-    "START_END": "Start Ende",
+    "SAVE_AND_GO_HOME_TOOLTIP": "Verschiebe alle erledigten Aufgaben ins Archiv (worklog) und synchronisiere optional alle Daten und schließe die App.",
+    "START_END": "Start - Ende",
     "SUMMARY_FOR": "Zusammenfassung für {{dayStr}}",
     "TASKS_COMPLETED": "Aufgaben erledigt",
     "TASK_LIST": "Aufgabenliste",
@@ -1289,34 +1369,37 @@
   "PS": {
     "GLOBAL_SETTINGS": "Globale Einstellungen",
     "ISSUE_INTEGRATION": "Problemintegration",
-    "PRIVACY_POLICY": "Privacy Policy",
+    "PRIVACY_POLICY": "Datenschutzerklärung",
     "PRODUCTIVITY_HELPER": "Produktivitäts-Helfer",
     "PROJECT_SETTINGS": "Projektspezifische Einstellungen",
     "PROVIDE_FEEDBACK": "Rückmeldung geben",
     "SYNC_EXPORT": "Synchronisieren und exportieren",
-    "TAG_SETTINGS": "Tag-spezifische Einstellungen",
+    "TAG_SETTINGS": "Stichwort-spezifische Einstellungen",
     "TOGGLE_DARK_MODE": "Schaltet den Dunklen Modus um"
   },
   "SCHEDULE": {
     "NO_SCHEDULED": "Derzeit sind keine Aufgaben geplant. Sie können eine Aufgabe planen, indem Sie im Kontextmenü der Aufgabe \"Aufgabe planen\" auswählen. Zum Öffnen klicken Sie auf die 3 kleinen Punkte rechts neben einer Aufgabe.",
+    "NO_REPEATABLE_TASKS": "Es gibt aktuell keine wiederholten Aufgaben. Sie können eine Aufgabe planen indem Sie auf \"Aufgabe wiederholen\" im Aufgaben Seitenpanel klicken. Um es zu öffnen klicken Sie auf das Symbol ganz rechts das erscheint, wenn man über eine Aufgabe fährt (oder tippen Sie auf die Aufgabe auf Mobilgeräten).",
+    "REPEATED_TASKS": "Repeated tasks",
+    "SCHEDULED_TASKS": "Scheduled tasks",
     "START_TASK": "Aufgabe jetzt starten und Erinnerung entfernen"
   },
   "THEMES": {
     "SELECT_THEME": "Farbschema wählen",
     "amber": "Bernstein",
     "blue": "Blau",
-    "blue-grey": "Blau grau",
-    "cyan": "cyan",
-    "deep-orange": "tief-orange",
-    "deep-purple": "dunkellila",
+    "blue-grey": "Blau-Grau",
+    "cyan": "Cyan",
+    "deep-orange": "Tief-Orange",
+    "deep-purple": "Dunkellila",
     "green": "Grün",
     "indigo": "Indigo",
-    "light-blue": "hellblau",
-    "light-green": "hellgrün",
+    "light-blue": "Hellblau",
+    "light-green": "Hellgrün",
     "lime": "Limette",
     "pink": "Rosa",
     "purple": "Lila",
-    "teal": "BLAUGRÜN",
+    "teal": "Blaugrün",
     "yellow": "Gelb"
   },
   "V": {
@@ -1333,10 +1416,13 @@
     "ADD_MORE": "Weitere hinzufügen",
     "ADD_SCHEDULED_FOR_TODAY": "Für heute geplante Aufgaben hinzufügen ({{nr}})",
     "ADD_SCHEDULED_FOR_TOMORROW": "Für morgen geplante Aufgaben hinzufügen ({{nr}})",
-    "ADD_SOME_TASKS": "Füge einige Aufgaben hinzu, um deinen Tag zu planen!",
+    "ADD_SOME_TASKS": "Fügen Sie einige Aufgaben hinzu, um Ihren Tag zu planen!",
     "COMPLETED_TASKS": "Abgeschlossene Aufgaben",
     "ESTIMATE_REMAINING": "Schätzung verbleibend:",
     "FINISH_DAY": "Tag beenden",
+    "FINISH_DAY_TOOLTIP": "Evaluieren Sie Ihren Tat, alle Aufgaben werden optional in das Archiv verschoben und/oder planen Sie Ihren nächsten Tag",
+    "FINISH_DAY_FOR_PROJECT": "Tag für dieses Projekt beenden",
+    "FINISH_DAY_FOR_TAG": "Tag für dieses Schlüsselwort beenden",
     "HELP_PROCRASTINATION": "Hilfe, ich prokrastiniere!",
     "NO_COMPLETED_TASKS": "Derzeit sind keine Aufgaben erledigt",
     "NO_PLANNED_TASKS": "Keine geplanten Aufgaben",
