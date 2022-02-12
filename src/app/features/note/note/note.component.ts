@@ -1,4 +1,10 @@
-import { ChangeDetectionStrategy, Component, Input, ViewChild } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  Input,
+  OnInit,
+  ViewChild,
+} from '@angular/core';
 import { Note } from '../note.model';
 import { NoteService } from '../note.service';
 import { MatDialog } from '@angular/material/dialog';
@@ -17,12 +23,15 @@ import { ProjectService } from '../../project/project.service';
   styleUrls: ['./note.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class NoteComponent {
+export class NoteComponent implements OnInit {
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   @Input() note!: Note;
   @Input() isFocus?: boolean;
 
   @ViewChild('markdownEl') markdownEl?: HTMLElement;
+
+  isLongNote?: boolean;
+  shortenedNote?: string;
 
   T: typeof T = T;
 
@@ -49,6 +58,12 @@ export class NoteComponent {
     private readonly _projectService: ProjectService,
     private readonly _workContextService: WorkContextService,
   ) {}
+
+  ngOnInit(): void {
+    const LIMIT = 320;
+    this.isLongNote = this.note.content.length > LIMIT;
+    this.shortenedNote = this.note.content.substr(0, 160) + '\n\n (...)';
+  }
 
   toggleLock(): void {
     if (!this.note) {

@@ -8,6 +8,7 @@
 
   <div *ngIf="!note.imgUrl" class="content">
     <inline-markdown
+      *ngIf="isLongNote===false"
       #markdownEl
       (blurred)="isFocus=false"
       (changed)="updateContent($event)"
@@ -15,6 +16,13 @@
       [isLock]="note.isLock"
       [model]="note.content"
     ></inline-markdown>
+    <div
+      *ngIf="isLongNote===true"
+      (click)="editFullscreen()"
+      markdown
+      [data]="shortenedNote"
+      class="markdown-preview"
+    ></div>
   </div>
 
   <div class="bottom-controls handle-drag" [class.isOver]="note.imgUrl">
