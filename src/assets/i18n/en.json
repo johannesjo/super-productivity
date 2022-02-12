@@ -755,6 +755,7 @@
         "ADD_TO_PROJECT": "Add to a Project",
         "CONVERT_TO_PARENT_TASK": "Convert to parent Task",
         "DELETE": "Delete Task",
+        "DELETE_REPEAT_INSTANCE": "Delete repeated Task Instance",
         "DROP_ATTACHMENT": "Drop here to attach to \"{{title}}\"",
         "EDIT_REMINDER": "Edit reminder",
         "EDIT_TAGS": "Edit tags",
