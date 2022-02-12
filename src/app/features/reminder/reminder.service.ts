@@ -119,22 +119,31 @@ export class ReminderService {
     recurringConfig?: RecurringConfig,
   ): string {
     const id = nanoid();
-    if (this.getByRelatedId(relatedId)) {
-      throw new Error('A reminder for this ' + type + ' already exists');
+    const existingInstanceForEntry = this.getByRelatedId(relatedId);
+    if (existingInstanceForEntry) {
+      devError('A reminder for this ' + type + ' already exists');
+      this.updateReminder(existingInstanceForEntry.id, {
+        relatedId,
+        title,
+        remindAt,
+        type,
+        recurringConfig,
+      });
+      return existingInstanceForEntry.id;
+    } else {
+      // TODO find out why we need to do this
+      this._reminders = dirtyDeepCopy(this._reminders);
+      this._reminders.push({
+        id,
+        relatedId,
+        title,
+        remindAt,
+        type,
+        recurringConfig,
+      });
+      this._saveModel(this._reminders);
+      return id;
     }
-
-    // TODO find out why we need to do this
-    this._reminders = dirtyDeepCopy(this._reminders);
-    this._reminders.push({
-      id,
-      relatedId,
-      title,
-      remindAt,
-      type,
-      recurringConfig,
-    });
-    this._saveModel(this._reminders);
-    return id;
   }
 
   snooze(reminderId: string, snoozeTime: number): void {
