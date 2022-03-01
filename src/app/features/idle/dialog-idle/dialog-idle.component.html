@@ -1,4 +1,4 @@
-<form (submit)="track()">
+<form (submit)="track()" *ngIf="isTaskDataLoadedIfNeeded">
   <div class="dialog-content" mat-dialog-content>
     <p>{{T.F.TIME_TRACKING.D_IDLE.IDLE_FOR|translate}}</p>
     <div class="time">{{idleTime$|async|msToString:true}}</div>

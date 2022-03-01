@@ -49,6 +49,7 @@ export class DialogIdleComponent implements OnInit, OnDestroy {
   isSplitMode: boolean = false;
 
   simpleCounterToggleBtns: SimpleCounterIdleBtn[] = [];
+  isTaskDataLoadedIfNeeded: boolean = !this.data.lastCurrentTaskId;
 
   private _subs = new Subscription();
 
@@ -82,6 +83,7 @@ export class DialogIdleComponent implements OnInit, OnDestroy {
       this.lastCurrentTask$.subscribe((task) => {
         this.selectedTask = task;
         this.isCreate = false;
+        this.isTaskDataLoadedIfNeeded = true;
       }),
     );
 
