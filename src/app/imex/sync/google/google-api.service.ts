@@ -40,7 +40,7 @@ import { androidInterface } from '../../../features/android/android-interface';
 import { getGoogleSession, GoogleSession, updateGoogleSession } from './google-session';
 import { GoogleDriveFileMeta } from './google-api.model';
 import axios, { AxiosResponse } from 'axios';
-import * as querystring from 'querystring';
+import { stringify } from 'query-string';
 import { MatDialog } from '@angular/material/dialog';
 import { DialogGetAndEnterAuthCodeComponent } from '../dialog-get-and-enter-auth-code/dialog-get-and-enter-auth-code.component';
 import { getGoogleAuthUrl } from './get-google-auth-url';
@@ -353,7 +353,7 @@ export class GoogleApiService {
     return axios.request({
       url:
         'https://oauth2.googleapis.com/token?' +
-        querystring.stringify({
+        stringify({
           client_id: GOOGLE_SETTINGS_ELECTRON.CLIENT_ID,
           client_secret: GOOGLE_SETTINGS_ELECTRON.API_KEY,
           grant_type: 'authorization_code',
@@ -376,7 +376,7 @@ export class GoogleApiService {
     return axios.request({
       url:
         'https://oauth2.googleapis.com/token?' +
-        querystring.stringify({
+        stringify({
           client_id: GOOGLE_SETTINGS_ELECTRON.CLIENT_ID,
           client_secret: GOOGLE_SETTINGS_ELECTRON.API_KEY,
           grant_type: 'refresh_token',

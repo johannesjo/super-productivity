@@ -1,5 +1,5 @@
-import * as querystring from 'querystring';
 import { GOOGLE_API_SCOPES_ARRAY, GOOGLE_SETTINGS_ELECTRON } from './google.const';
+import { stringify } from 'query-string';
 
 const _getGoogleAuthUrl = (opts: any = {}): string => {
   if (opts.code_challenge_method && !opts.code_challenge) {
@@ -15,7 +15,7 @@ const _getGoogleAuthUrl = (opts: any = {}): string => {
     opts.scope = opts.scope.join(' ');
   }
   const rootUrl = 'https://accounts.google.com/o/oauth2/v2/auth';
-  return rootUrl + '?' + querystring.stringify(opts);
+  return rootUrl + '?' + stringify(opts);
 };
 
 export const getGoogleAuthUrl = (codeChallenge: string): string =>
