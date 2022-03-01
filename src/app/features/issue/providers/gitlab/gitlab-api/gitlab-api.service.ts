@@ -56,7 +56,7 @@ export class GitlabApiService {
     ids: string[] | number[],
     cfg: GitlabCfg,
   ): Observable<GitlabIssue[]> {
-    const iids = ids.map((id) => {
+    const iids = ids.map((id: string | number): string => {
       return this._getIidFromIssue(id);
     });
     const queryParams = 'iids[]=' + iids.join('&iids[]=');
