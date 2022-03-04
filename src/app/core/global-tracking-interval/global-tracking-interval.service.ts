@@ -28,6 +28,7 @@ export class GlobalTrackingIntervalService {
   todayDateStr$: Observable<string> = this.globalInterval$.pipe(
     concatMap(() => of(getWorklogStr())),
     distinctUntilChanged(),
+    share(),
   );
 
   constructor() {

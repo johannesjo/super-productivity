@@ -20,46 +20,11 @@ import {
   upsertSimpleCounter,
 } from './store/simple-counter.actions';
 import { Observable } from 'rxjs';
-import {
-  SimpleCounter,
-  SimpleCounterCfgFields,
-  SimpleCounterState,
-} from './simple-counter.model';
+import { SimpleCounter, SimpleCounterState } from './simple-counter.model';
 import { nanoid } from 'nanoid';
-import { distinctUntilChanged } from 'rxjs/operators';
-
-const FIELDS_TO_COMPARE: (keyof SimpleCounterCfgFields)[] = [
-  'id',
-  'title',
-  'isEnabled',
-  'icon',
-  'iconOn',
-  'type',
-  'triggerOnActions',
-  'triggerOffActions',
-];
-
-const isEqualSimpleCounterCfg = (a: any, b: any): boolean => {
-  if (Array.isArray(a) && Array.isArray(b)) {
-    if (a.length !== b.length) {
-      return false;
-    }
-    for (let i = 0; i < a.length; ++i) {
-      if (a[i] !== b[i]) {
-        // eslint-disable-next-line @typescript-eslint/prefer-for-of
-        for (let j = 0; j < FIELDS_TO_COMPARE.length; j++) {
-          const field: any = FIELDS_TO_COMPARE[j];
-          if (a[field] !== b[field]) {
-            return false;
-          }
-        }
-      }
-    }
-    return true;
-  } else {
-    return a === b;
-  }
-};
+import { distinctUntilChanged, switchMap } from 'rxjs/operators';
+import { GlobalTrackingIntervalService } from '../../core/global-tracking-interval/global-tracking-interval.service';
+import { isEqualSimpleCounterCfg } from './is-equal-simple-counter-cfg.util';
 
 @Injectable({
   providedIn: 'root',
@@ -71,10 +36,11 @@ export class SimpleCounterService {
   simpleCountersUpdatedOnCfgChange$: Observable<SimpleCounter[]> =
     this.simpleCounters$.pipe(distinctUntilChanged(isEqualSimpleCounterCfg));
 
-  enabledSimpleCounters$: Observable<SimpleCounter[]> = this._store$.select(
-    selectEnabledSimpleCounters,
-  );
-
+  enabledSimpleCounters$: Observable<SimpleCounter[]> =
+    // refresh when day changes
+    this._globalTrackingIntervalService.todayDateStr$.pipe(
+      switchMap(() => this._store$.select(selectEnabledSimpleCounters)),
+    );
   enabledSimpleStopWatchCounters$: Observable<SimpleCounter[]> = this._store$.select(
     selectEnabledSimpleStopWatchCounters,
   );
@@ -86,7 +52,10 @@ export class SimpleCounterService {
     selectEnabledAndToggledSimpleCounters,
   );
 
-  constructor(private _store$: Store<SimpleCounterState>) {}
+  constructor(
+    private _store$: Store<SimpleCounterState>,
+    private _globalTrackingIntervalService: GlobalTrackingIntervalService,
+  ) {}
 
   updateAll(items: SimpleCounter[]): void {
     this._store$.dispatch(updateAllSimpleCounters({ items }));
