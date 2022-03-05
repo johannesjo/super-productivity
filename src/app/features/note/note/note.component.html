@@ -7,20 +7,10 @@
   />
 
   <div *ngIf="!note.imgUrl" class="content">
-    <inline-markdown
-      *ngIf="isLongNote===false"
-      #markdownEl
-      (blurred)="isFocus=false"
-      (changed)="updateContent($event)"
-      (focused)="isFocus=true"
-      [isLock]="note.isLock"
-      [model]="note.content"
-    ></inline-markdown>
     <div
-      *ngIf="isLongNote===true"
-      (click)="editFullscreen()"
+      (click)="editFullscreen($event)"
       markdown
-      [data]="shortenedNote"
+      [data]="isLongNote ? shortenedNote : note.content"
       class="markdown-preview"
     ></div>
   </div>

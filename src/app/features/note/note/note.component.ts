@@ -95,7 +95,10 @@ export class NoteComponent implements OnInit {
     });
   }
 
-  editFullscreen(): void {
+  editFullscreen(event: MouseEvent): void {
+    if ((event as any)?.target?.tagName?.toUpperCase() === 'A') {
+      return;
+    }
     if (!this.note) {
       throw new Error('No note');
     }
