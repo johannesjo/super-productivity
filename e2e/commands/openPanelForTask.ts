@@ -1,6 +1,6 @@
 import { NBrowser } from '../n-browser-interface';
 
-const SIDE_INNER = '.additional-info-panel';
+const SIDE_INNER = '.right-panel';
 
 // NOTE: needs to be executed from work view
 module.exports = {
