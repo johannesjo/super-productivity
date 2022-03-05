@@ -1,7 +1,14 @@
 import { Injectable } from '@angular/core';
 import { TRACKING_INTERVAL } from '../../app.constants';
 import { interval, Observable, of } from 'rxjs';
-import { concatMap, distinctUntilChanged, map, share } from 'rxjs/operators';
+import {
+  concatMap,
+  distinctUntilChanged,
+  map,
+  share,
+  shareReplay,
+  startWith,
+} from 'rxjs/operators';
 import { Tick } from './tick.model';
 import { getWorklogStr } from '../../util/get-work-log-str';
 
@@ -26,9 +33,11 @@ export class GlobalTrackingIntervalService {
   );
 
   todayDateStr$: Observable<string> = this.globalInterval$.pipe(
+    startWith(getWorklogStr()),
     concatMap(() => of(getWorklogStr())),
     distinctUntilChanged(),
-    share(),
+    // needs to be shareReplay otherwise some instances will never receive an update until a change occurs
+    shareReplay(1),
   );
 
   constructor() {
