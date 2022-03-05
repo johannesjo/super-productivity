@@ -9,7 +9,7 @@
   </ng-container>
 
   <ng-container better-drawer-side>
-    <div class="additional-info-panel">
+    <div class="right-panel">
       <notes *ngIf="!(selectedTaskWithDelayForNone$|async) " [@slideInFromRight]></notes>
       <task-additional-info
         [isOver]="isAlwaysOver || (layoutService.isRightPanelOver$|async)"
