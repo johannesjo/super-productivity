@@ -43,7 +43,7 @@ export class DialogFullscreenMarkdownComponent implements OnDestroy {
     this._matDialogRef.close(isSkipSave || this.data.content);
   }
 
-  setViewMode(viewMode: ViewMode): void {
-    this.viewMode = viewMode;
+  onViewModeChange(): void {
+    console.log(this.viewMode);
   }
 }
