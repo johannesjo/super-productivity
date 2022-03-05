@@ -35,11 +35,6 @@
 
 <mat-menu #menu="matMenu">
   <ng-template matMenuContent>
-    <button (click)="editFullscreen()" mat-menu-item>
-      <mat-icon>fullscreen</mat-icon>
-      {{T.F.NOTE.EDIT_FULLSCREEN|translate}}
-    </button>
-
     <button (click)="toggleLock()" *ngIf="!note.imgUrl" mat-menu-item>
       <mat-icon *ngIf="note.isLock">lock</mat-icon>
       <mat-icon *ngIf="!note.isLock">lock_open</mat-icon>

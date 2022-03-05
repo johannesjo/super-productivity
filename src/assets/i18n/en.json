@@ -438,14 +438,13 @@
       "D_ADD": {
         "NOTE_LABEL": "Enter some text to save as note (you can use markdown)..."
       },
-      "EDIT_FULLSCREEN": "Edit in fullscreen",
       "NOTES_CMP": {
         "ADD_BTN": "Add new Note",
         "DROP_TO_ADD": "Drop here to add new note",
         "NO_NOTES": "There are currently no notes"
       },
       "NOTE_CMP": {
-        "DISABLE_PARSE": "Disable markdown parsing",
+        "DISABLE_PARSE": "Disable markdown parsing for preview",
         "ENABLE_PARSE": "Enable markdown parse"
       }
     },
