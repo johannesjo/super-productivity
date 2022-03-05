@@ -9,20 +9,18 @@
   display: flex;
   flex-direction: column;
 
-  :host-context([dir=rtl]) {
+  :host-context([dir='rtl']) {
     direction: rtl;
   }
 }
-
 
 .content {
   flex-grow: 1;
   position: relative;
   @include layerTextAndBgHighest;
 
-  textarea {
-    background: inherit;
-    color: inherit;
+  textarea,
+  .markdown-preview {
     position: absolute;
     top: 0;
     right: 0;
@@ -30,6 +28,12 @@
     left: 0;
     height: 100%;
     width: 100%;
+    padding: $s $s * 2;
+  }
+
+  textarea {
+    background: inherit;
+    color: inherit;
     border: none;
     box-sizing: border-box;
     word-wrap: break-word;
@@ -37,11 +41,32 @@
     resize: none;
     min-height: inherit;
     overflow: auto;
-    padding: $s $s*2;
+    padding: $s $s * 2;
     font-size: 14px;
 
     &:focus {
       outline: none;
+    }
+  }
+
+  &.split-view {
+    textarea {
+      width: 50%;
+      right: 50%;
+    }
+
+    .markdown-preview {
+      width: 50%;
+      left: 50%;
+      border-left: 2px solid;
+
+      @include darkTheme() {
+        border-color: $dark-theme-extra-border-color;
+      }
+
+      @include lightTheme() {
+        border-color: $light-theme-extra-border-color;
+      }
     }
   }
 }
@@ -51,9 +76,17 @@
   display: flex;
   justify-content: flex-end;
   box-shadow: $whiteframe-shadow-2dp;
-  padding: 0 $s*2;
+  padding: 0 $s * 2;
 
   > button {
     margin: $s;
   }
+}
+
+.left-buttons {
+  align-items: flex-start;
+  flex-grow: 0;
+  flex-shrink: 0;
+  margin: 8px;
+  margin-right: auto;
 }
