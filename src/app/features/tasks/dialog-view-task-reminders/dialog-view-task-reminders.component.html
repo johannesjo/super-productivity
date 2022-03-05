@@ -163,7 +163,7 @@
     </button>
     <button (click)="editReminder(tasks[0], true)" *ngIf="!isMultiple" mat-menu-item>
       <mat-icon>edit</mat-icon>
-      {{T.G.EDIT|translate}}
+      {{T.F.TASK.D_REMINDER_VIEW.RESCHEDULE_EDIT|translate}}
     </button>
     <button (click)="dismissAll()" [disabled]="isDisableControls" mat-menu-item>
       <mat-icon>alarm_off</mat-icon>
