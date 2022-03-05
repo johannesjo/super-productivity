@@ -438,6 +438,11 @@
       "D_ADD": {
         "NOTE_LABEL": "Enter some text to save as note (you can use markdown)..."
       },
+      "D_FULLSCREEN": {
+        "VIEW_TEXT_ONLY": "View as unparsed text",
+        "VIEW_SPLIT": "View parsed and unparsed markdown in split view",
+        "VIEW_PARSED": "View as parsed (non editable) markdown"
+      },
       "NOTES_CMP": {
         "ADD_BTN": "Add new Note",
         "DROP_TO_ADD": "Drop here to add new note",
@@ -1191,7 +1196,7 @@
       "IS_MINIMIZE_TO_TRAY": "Minimize to tray (desktop only)",
       "IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "Notify when time estimate was exceeded",
       "IS_TRAY_SHOW_CURRENT_TASK": "Show current task in the tray / status menu (desktop mac/windows only)",
-      "IS_TURN_OFF_MARKDOWN": "Turn off markdown parsing for notes",
+      "IS_TURN_OFF_MARKDOWN": "Turn off markdown parsing for task notes",
       "TASK_NOTES_TPL": "Task description template",
       "TITLE": "Misc Settings"
     },

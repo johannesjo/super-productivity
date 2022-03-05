@@ -17,11 +17,22 @@
 <div class="controls">
   <div class="left-buttons">
     <mat-button-toggle-group [(ngModel)]="viewMode" (change)="onViewModeChange()">
-      <mat-button-toggle value="TEXT_ONLY"><mat-icon>notes</mat-icon></mat-button-toggle>
-      <mat-button-toggle value="SPLIT"
+      <mat-button-toggle
+        value="TEXT_ONLY"
+        [matTooltip]="T.F.NOTE.D_FULLSCREEN.VIEW_TEXT_ONLY|translate"
+        ><mat-icon>notes</mat-icon></mat-button-toggle
+      >
+      <mat-button-toggle
+        value="SPLIT"
+        class="hide-xs"
+        [matTooltip]="T.F.NOTE.D_FULLSCREEN.VIEW_SPLIT|translate"
         ><mat-icon>vertical_split</mat-icon></mat-button-toggle
       >
-      <mat-button-toggle value="PARSED"><mat-icon>photo</mat-icon></mat-button-toggle>
+      <mat-button-toggle
+        value="PARSED"
+        [matTooltip]="T.F.NOTE.D_FULLSCREEN.VIEW_PARSED|translate"
+        ><mat-icon>photo</mat-icon></mat-button-toggle
+      >
     </mat-button-toggle-group>
   </div>
 
