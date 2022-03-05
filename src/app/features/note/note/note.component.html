@@ -3,6 +3,7 @@
     *ngIf="note.imgUrl"
     [enlargeImg]="note.imgUrl"
     [src]="note.imgUrl"
+    (longPress)="editFullscreen($event)"
     class="note-img"
   />
 
