@@ -31,6 +31,8 @@
                 android:alwaysRetainTaskState="true"
                 android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale|smallestScreenSize|screenLayout|uiMode"
                 android:label="@string/title_activity_fullscreen"
+                android:persistableMode="persistNever"
+                android:lockTaskMode="never"
                 android:theme="@style/FullscreenTheme">
 
             <!-- This intent-filter adds the Trusted Web Activity to the Android Launcher -->
