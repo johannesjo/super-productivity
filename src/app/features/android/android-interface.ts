@@ -76,6 +76,10 @@ export const IS_ANDROID_BACKUP_READY =
     typeof androidInterface?.saveToDbNew === 'function');
 
 if (IS_ANDROID_WEB_VIEW) {
+  if (!androidInterface) {
+    throw new Error('Cannot initialize androidInterface');
+  }
+
   androidInterface.onResume$ = new Subject();
   androidInterface.onPause$ = new Subject();
   androidInterface.onPauseCurrentTask$ = new Subject();
