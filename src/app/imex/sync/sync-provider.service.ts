@@ -482,26 +482,28 @@ export class SyncProviderService {
   }
 
   private async _decompressAppDataIfNeeded(
-    backupStr: string | undefined,
+    backupStr: AppDataComplete | string | undefined,
   ): Promise<AppDataComplete | undefined> {
-    let backupData: AppDataComplete | undefined;
-    // we attempt this regardless of the option, because data might be compressed anyway
+    // if the data was a json string it happens (for dropbox) that the data is returned as object
+    if (typeof backupStr === 'object' && backupStr?.task) {
+      return backupStr as AppDataComplete;
+    }
     if (typeof backupStr === 'string') {
       try {
-        backupData = JSON.parse(backupStr) as AppDataComplete;
+        return JSON.parse(backupStr) as AppDataComplete;
       } catch (e) {
         try {
           const decompressedData = await this._compressionService.decompressUTF16(
             backupStr,
           );
-          backupData = JSON.parse(decompressedData) as AppDataComplete;
+          return JSON.parse(decompressedData) as AppDataComplete;
         } catch (ex) {
           console.error('Sync, invalid data');
           console.warn(ex);
         }
       }
     }
-    return backupData;
+    return undefined;
   }
 
   private async _compressAppDataIfEnabled(data: AppDataComplete): Promise<string> {

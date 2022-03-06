@@ -1,5 +1,5 @@
 import { Observable } from 'rxjs';
-import { SyncGetRevResult } from './sync.model';
+import { AppDataComplete, SyncGetRevResult } from './sync.model';
 
 // NOTE: do not change!!
 export enum SyncProvider {
@@ -27,5 +27,5 @@ export interface SyncProviderServiceInterface {
 
   downloadAppData(
     localRev: string | null,
-  ): Promise<{ rev: string; dataStr: string | undefined }>;
+  ): Promise<{ rev: string; dataStr: AppDataComplete | string | undefined }>;
 }
