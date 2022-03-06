@@ -4,7 +4,7 @@ import { concatMap, distinctUntilChanged, first, map } from 'rxjs/operators';
 import { GlobalConfigService } from '../../../features/config/global-config.service';
 import { GoogleDriveSyncConfig } from '../../../features/config/global-config.model';
 import { DataInitService } from '../../../core/data-init/data-init.service';
-import { AppDataComplete, SyncGetRevResult } from '../sync.model';
+import { SyncGetRevResult } from '../sync.model';
 import { SyncProvider, SyncProviderServiceInterface } from '../sync-provider.model';
 import { GoogleApiService } from './google-api.service';
 import { CompressionService } from '../../../core/compression/compression.service';
@@ -67,7 +67,7 @@ export class GoogleDriveSyncService implements SyncProviderServiceInterface {
     };
   }
 
-  async downloadAppData(): Promise<{ rev: string; data: AppDataComplete | undefined }> {
+  async downloadAppData(): Promise<{ rev: string; dataStr: string | undefined }> {
     if (IS_F_DROID_APP) {
       throw new Error('Google Drive Sync not supported on FDroid');
     }
@@ -79,12 +79,12 @@ export class GoogleDriveSyncService implements SyncProviderServiceInterface {
       .toPromise();
     // console.log(backup, meta);
 
-    const data = !!backup ? await this._decodeAppDataIfNeeded(backup) : undefined;
-    return { rev: meta.md5Checksum as string, data };
+    return { rev: meta.md5Checksum as string, dataStr: backup };
   }
 
   async uploadAppData(
-    data: AppDataComplete,
+    dataStr: string,
+    clientModified: number,
     localRev: string,
     isForceOverwrite: boolean = false,
   ): Promise<string | Error> {
@@ -95,11 +95,8 @@ export class GoogleDriveSyncService implements SyncProviderServiceInterface {
     try {
       const cfg = await this.cfg$.pipe(first()).toPromise();
       // console.log(cfg, data);
-      const uploadData = cfg.isCompressData
-        ? await this._compressionService.compressUTF16(JSON.stringify(data))
-        : JSON.stringify(data);
       const r = await this._googleApiService
-        .saveFile$(uploadData, {
+        .saveFile$(dataStr, {
           title: cfg.syncFileName,
           id: cfg._backupDocId,
           editable: true,
@@ -115,29 +112,5 @@ export class GoogleDriveSyncService implements SyncProviderServiceInterface {
       // TODO fix error handling
       return e as any;
     }
-  }
-
-  private async _decodeAppDataIfNeeded(
-    backupStr: string | AppDataComplete,
-  ): Promise<AppDataComplete> {
-    let backupData: AppDataComplete | undefined;
-
-    // we attempt this regardless of the option, because data might be compressed anyway
-    if (typeof backupStr === 'string') {
-      try {
-        backupData = JSON.parse(backupStr) as AppDataComplete;
-      } catch (e) {
-        try {
-          const decompressedData = await this._compressionService.decompressUTF16(
-            backupStr,
-          );
-          backupData = JSON.parse(decompressedData) as AppDataComplete;
-        } catch (ex) {
-          console.error('Drive Sync, invalid data');
-          console.warn(ex);
-        }
-      }
-    }
-    return backupData || (backupStr as AppDataComplete);
   }
 }

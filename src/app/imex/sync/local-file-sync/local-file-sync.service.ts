@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { SyncProvider, SyncProviderServiceInterface } from '../sync-provider.model';
 import { Observable, of } from 'rxjs';
 import { IS_ELECTRON } from '../../../app.constants';
-import { AppDataComplete, SyncGetRevResult } from '../sync.model';
+import { SyncGetRevResult } from '../sync.model';
 import { IPC } from '../../../../../electron/ipc-events.const';
 import { ElectronService } from '../../../core/electron/electron.service';
 import { concatMap, first, map } from 'rxjs/operators';
@@ -48,7 +48,8 @@ export class LocalFileSyncService implements SyncProviderServiceInterface {
   }
 
   async uploadAppData(
-    data: AppDataComplete,
+    dataStr: string,
+    clientModified: number,
     localRev: string | null,
     isForceOverwrite?: boolean,
   ): Promise<string | Error> {
@@ -57,7 +58,7 @@ export class LocalFileSyncService implements SyncProviderServiceInterface {
       const r = (await this._electronService.callMain(IPC.FILE_SYNC_SAVE, {
         localRev,
         filePath,
-        data,
+        dataStr,
       })) as Promise<string | Error>;
       return r as any;
     } catch (e) {
@@ -67,13 +68,13 @@ export class LocalFileSyncService implements SyncProviderServiceInterface {
 
   async downloadAppData(
     localRev: string | null,
-  ): Promise<{ rev: string; data: AppDataComplete | undefined }> {
+  ): Promise<{ rev: string; dataStr: string | undefined }> {
     const filePath = await this._filePathOnce$.toPromise();
     try {
       const r = (await this._electronService.callMain(IPC.FILE_SYNC_LOAD, {
         localRev,
         filePath,
-      })) as Promise<{ rev: string; data: AppDataComplete | undefined }>;
+      })) as Promise<{ rev: string; dataStr: string | undefined }>;
       return r as any;
     } catch (e) {
       throw new Error(e as any);

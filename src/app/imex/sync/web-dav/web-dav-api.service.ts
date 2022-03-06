@@ -5,7 +5,6 @@ import { DataInitService } from '../../../core/data-init/data-init.service';
 import { first, map, switchMap, tap } from 'rxjs/operators';
 // @ts-ignore
 import { createClient } from 'webdav/web';
-import { AppDataComplete } from '../sync.model';
 import { WebDavHeadResponse } from './web-dav.model';
 
 // const createClient = (...args: any) => ({
@@ -55,7 +54,7 @@ export class WebDavApiService {
     data,
   }: {
     localRev?: string | null;
-    data: AppDataComplete;
+    data: string;
     isForceOverwrite?: boolean;
   }): Promise<void> {
     await this._isReady$.toPromise();
@@ -91,7 +90,7 @@ export class WebDavApiService {
   }: {
     path: string;
     localRev?: string | null;
-  }): Promise<AppDataComplete> {
+  }): Promise<string> {
     await this._isReady$.toPromise();
     const cfg = await this._cfg$.pipe(first()).toPromise();
     const client = createClient(cfg.baseUrl, {

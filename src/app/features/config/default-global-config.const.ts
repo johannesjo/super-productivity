@@ -134,12 +134,12 @@ export const DEFAULT_GLOBAL_CONFIG: GlobalConfigState = {
 
   sync: {
     isEnabled: false,
+    isCompressionEnabled: true,
     syncProvider: null,
     syncInterval: minute,
 
     dropboxSync: {
       accessToken: null,
-      // isCompressData: true,
     },
 
     googleDriveSync: {

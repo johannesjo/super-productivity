@@ -1,6 +1,6 @@
 import { answerRenderer } from './better-ipc';
 import { IPC } from './ipc-events.const';
-import { AppDataComplete, SyncGetRevResult } from '../src/app/imex/sync/sync.model';
+import { SyncGetRevResult } from '../src/app/imex/sync/sync.model';
 import { readFileSync, statSync, writeFileSync } from 'fs';
 import { error, log } from 'electron-log';
 
@@ -9,15 +9,14 @@ export const initLocalFileSyncAdapter = (): void => {
     IPC.FILE_SYNC_SAVE,
     ({
       filePath,
-      data,
+      dataStr,
       localRev,
     }: {
       filePath: string;
-      data: AppDataComplete;
+      dataStr: string;
       localRev: string | null;
     }): string | Error => {
       try {
-        const dataStr = JSON.stringify(data);
         writeFileSync(filePath, dataStr);
         return getRev(filePath);
       } catch (e) {
@@ -59,12 +58,12 @@ export const initLocalFileSyncAdapter = (): void => {
     }: {
       filePath: string;
       localRev: string | null;
-    }): { rev: string; data: AppDataComplete | undefined } | Error => {
+    }): { rev: string; dataStr: string | undefined } | Error => {
       try {
-        const data = readFileSync(filePath, { encoding: 'utf-8' });
+        const dataStr = readFileSync(filePath, { encoding: 'utf-8' });
         return {
           rev: getRev(filePath),
-          data: JSON.parse(data) as AppDataComplete,
+          dataStr,
         };
       } catch (e) {
         log('ERR: Sync error while loading file from ' + filePath);

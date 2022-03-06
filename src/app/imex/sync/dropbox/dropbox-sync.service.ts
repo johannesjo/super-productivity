@@ -3,7 +3,7 @@ import { Observable } from 'rxjs';
 import { concatMap, distinctUntilChanged } from 'rxjs/operators';
 import { DropboxApiService } from './dropbox-api.service';
 import { DROPBOX_SYNC_FILE_PATH } from './dropbox.const';
-import { AppDataComplete, SyncGetRevResult } from '../sync.model';
+import { SyncGetRevResult } from '../sync.model';
 import { DataInitService } from '../../../core/data-init/data-init.service';
 import { SnackService } from '../../../core/snack/snack.service';
 import { environment } from '../../../../environments/environment';
@@ -70,29 +70,28 @@ export class DropboxSyncService implements SyncProviderServiceInterface {
     }
   }
 
-  async downloadAppData(
-    localRev: string,
-  ): Promise<{ rev: string; data: AppDataComplete }> {
-    const r = await this._dropboxApiService.download<AppDataComplete>({
+  async downloadAppData(localRev: string): Promise<{ rev: string; dataStr: string }> {
+    const r = await this._dropboxApiService.download<string>({
       path: DROPBOX_SYNC_FILE_PATH,
       localRev,
     });
     return {
       rev: r.meta.rev,
-      data: r.data,
+      dataStr: r.data,
     };
   }
 
   async uploadAppData(
-    data: AppDataComplete,
+    dataStr: string,
+    clientModified: number,
     localRev: string,
     isForceOverwrite: boolean = false,
   ): Promise<string | Error> {
     try {
       const r = await this._dropboxApiService.upload({
         path: DROPBOX_SYNC_FILE_PATH,
-        data,
-        clientModified: data.lastLocalSyncModelChange as number,
+        data: dataStr,
+        clientModified,
         localRev,
         isForceOverwrite,
       });

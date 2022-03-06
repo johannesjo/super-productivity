@@ -99,6 +99,7 @@ export type SoundConfig = Readonly<{
 
 export type SyncConfig = Readonly<{
   isEnabled: boolean;
+  isCompressionEnabled: boolean;
   syncProvider: SyncProvider | null;
   syncInterval: number;
 

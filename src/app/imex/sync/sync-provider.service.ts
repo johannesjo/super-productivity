@@ -36,6 +36,7 @@ import { PersistenceService } from '../../core/persistence/persistence.service';
 import { LocalFileSyncService } from './local-file-sync/local-file-sync.service';
 import { IS_ANDROID_WEB_VIEW } from '../../util/is-android-web-view';
 import { androidInterface } from '../../features/android/android-interface';
+import { CompressionService } from '../../core/compression/compression.service';
 
 @Injectable({
   providedIn: 'root',
@@ -95,6 +96,7 @@ export class SyncProviderService {
     private _translateService: TranslateService,
     private _syncTriggerService: SyncTriggerService,
     private _persistenceService: PersistenceService,
+    private _compressionService: CompressionService,
     private _snackService: SnackService,
     private _matDialog: MatDialog,
   ) {}
@@ -307,8 +309,12 @@ export class SyncProviderService {
   private async _downloadAppData(
     cp: SyncProviderServiceInterface,
   ): Promise<{ rev: string; data: AppDataComplete | undefined }> {
-    const rev = await this._getLocalRev(cp);
-    return cp.downloadAppData(rev);
+    const localRev = await this._getLocalRev(cp);
+    const { dataStr, rev } = await cp.downloadAppData(localRev);
+    return {
+      rev,
+      data: await this._decompressAppDataIfNeeded(dataStr),
+    };
   }
 
   private async _uploadAppData(
@@ -327,8 +333,14 @@ export class SyncProviderService {
       throw new Error('lastLocalSyncModelChange is not defined');
     }
 
+    const dataStrToUpload = await this._compressAppDataIfEnabled(data);
     const localRev = await this._getLocalRev(cp);
-    const successRev = await cp.uploadAppData(data, localRev, isForceOverwrite);
+    const successRev = await cp.uploadAppData(
+      dataStrToUpload,
+      data.lastLocalSyncModelChange as number,
+      localRev,
+      isForceOverwrite,
+    );
     if (typeof successRev === 'string') {
       this._log(cp, '↑ Uploaded Data ↑ ✓');
       return await this._setLocalRevAndLastSync(
@@ -467,6 +479,38 @@ export class SyncProviderService {
         },
       })
       .afterClosed();
+  }
+
+  private async _decompressAppDataIfNeeded(
+    backupStr: string | undefined,
+  ): Promise<AppDataComplete | undefined> {
+    let backupData: AppDataComplete | undefined;
+    // we attempt this regardless of the option, because data might be compressed anyway
+    if (typeof backupStr === 'string') {
+      try {
+        backupData = JSON.parse(backupStr) as AppDataComplete;
+      } catch (e) {
+        try {
+          const decompressedData = await this._compressionService.decompressUTF16(
+            backupStr,
+          );
+          backupData = JSON.parse(decompressedData) as AppDataComplete;
+        } catch (ex) {
+          console.error('Sync, invalid data');
+          console.warn(ex);
+        }
+      }
+    }
+    return backupData;
+  }
+
+  private async _compressAppDataIfEnabled(data: AppDataComplete): Promise<string> {
+    // const isCompressionEnabled = (await this.syncCfg$.pipe(first()).toPromise())
+    //   .isCompressionEnabled;
+    const isCompressionEnabled = true;
+    return isCompressionEnabled
+      ? this._compressionService.compressUTF16(JSON.stringify(data))
+      : JSON.stringify(data);
   }
 
   private _c(str: string): boolean {

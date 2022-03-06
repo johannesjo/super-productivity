@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { SyncProvider, SyncProviderServiceInterface } from '../sync-provider.model';
-import { AppDataComplete, SyncGetRevResult } from '../sync.model';
+import { SyncGetRevResult } from '../sync.model';
 
 import { Observable } from 'rxjs';
 import { concatMap, distinctUntilChanged, first, map } from 'rxjs/operators';
@@ -61,9 +61,7 @@ export class WebDavSyncService implements SyncProviderServiceInterface {
     }
   }
 
-  async downloadAppData(
-    localRev: string,
-  ): Promise<{ rev: string; data: AppDataComplete }> {
+  async downloadAppData(localRev: string): Promise<{ rev: string; dataStr: string }> {
     this._globalProgressBarService.countUp(T.GPB.WEB_DAV_DOWNLOAD);
     const cfg = await this._cfg$.pipe(first()).toPromise();
     try {
@@ -75,7 +73,7 @@ export class WebDavSyncService implements SyncProviderServiceInterface {
       this._globalProgressBarService.countDown();
       return {
         rev: this._getRevFromMeta(meta),
-        data: r,
+        dataStr: r,
       };
     } catch (e) {
       this._globalProgressBarService.countDown();
@@ -85,14 +83,15 @@ export class WebDavSyncService implements SyncProviderServiceInterface {
   }
 
   async uploadAppData(
-    data: AppDataComplete,
+    dataStr: string,
+    clientModified: number,
     localRev: string,
     isForceOverwrite: boolean = false,
   ): Promise<string | Error> {
     this._globalProgressBarService.countUp(T.GPB.WEB_DAV_UPLOAD);
     try {
       await this._webDavApiService.upload({
-        data,
+        data: dataStr,
         localRev,
         isForceOverwrite,
       });
