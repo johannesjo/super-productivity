@@ -12,6 +12,7 @@ import com.google.android.gms.common.api.Scope;
 
 import org.json.JSONArray;
 import org.json.JSONException;
+
 import android.util.Log;
 
 public class Google {
@@ -19,12 +20,8 @@ public class Google {
     private final String TOKEN;
 
 
-    Google(boolean isDebug) {
-        if (isDebug) {
-            TOKEN = GoogleClientId.CLIENT_ID_WEB;
-        } else {
-            TOKEN = GoogleClientId.CLIENT_ID_WEB;
-        }
+    Google() {
+        TOKEN = GoogleClientId.CLIENT_ID_WEB;
     }
 
     private GoogleSignInClient googleSignInClient;

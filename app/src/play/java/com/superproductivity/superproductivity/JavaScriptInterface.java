@@ -18,14 +18,11 @@ import java.lang.ref.WeakReference;
 import static com.superproductivity.superproductivity.Google.RC_SIGN_IN;
 
 public class JavaScriptInterface extends CommonJavaScriptInterface {
-    private final boolean IS_DEBUG;
-
     /**
      * Instantiate the interface and set the context
      */
-    JavaScriptInterface(FullscreenActivity c, WebView wv, boolean isDebug) {
+    JavaScriptInterface(FullscreenActivity c, WebView wv) {
         super(c, wv);
-        IS_DEBUG = isDebug;
     }
 
     @Override
@@ -44,7 +41,7 @@ public class JavaScriptInterface extends CommonJavaScriptInterface {
     @Override
     @JavascriptInterface
     public void triggerGetGoogleToken() {
-        Google g = new Google(IS_DEBUG);
+        Google g = new Google();
         g.load(mContext);
         g.signIn(mContext);
     }

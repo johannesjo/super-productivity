@@ -40,7 +40,7 @@ public class FullscreenActivity extends AppCompatActivity {
             Log.v("TW", "FullScreenActivity: onCreate reload");
         }
 
-        boolean IS_DEBUG = 0 != (getApplicationInfo().flags & ApplicationInfo.FLAG_DEBUGGABLE);
+        // boolean IS_DEBUG = 0 != (getApplicationInfo().flags & ApplicationInfo.FLAG_DEBUGGABLE);
 
         // hide action bar
         Objects.requireNonNull(getSupportActionBar()).hide();
@@ -52,7 +52,7 @@ public class FullscreenActivity extends AppCompatActivity {
         frameLayout.addView(wv);
 
         // init JS here, as it needs an activity to work
-        jsi = new JavaScriptIntrface(this, wv, IS_DEBUG);
+        jsi = new JavaScriptInterface(this, wv);
         wv.addJavascriptInterface(jsi, INTERFACE_PROPERTY);
         if (BuildConfig.FLAVOR.equals("fdroid")) {
             wv.addJavascriptInterface(jsi, INTERFACE_PROPERTY_F_DROID);

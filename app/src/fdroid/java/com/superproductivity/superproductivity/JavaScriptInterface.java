@@ -6,7 +6,7 @@ public class JavaScriptInterface extends CommonJavaScriptInterface {
     /**
      * Instantiate the interface and set the context
      */
-    JavaScriptInterface(FullscreenActivity c, WebView wv) {
+    JavaScriptInterface(FullscreenActivity c, WebView wv, boolean isDebug ) {
         super(c, wv);
     }
 }
