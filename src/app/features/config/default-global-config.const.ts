@@ -134,7 +134,8 @@ export const DEFAULT_GLOBAL_CONFIG: GlobalConfigState = {
 
   sync: {
     isEnabled: false,
-    isCompressionEnabled: true,
+    // TODO maybe enable later if it works well
+    isCompressionEnabled: false,
     syncProvider: null,
     syncInterval: minute,
 

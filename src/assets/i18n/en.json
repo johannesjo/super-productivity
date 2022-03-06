@@ -669,7 +669,6 @@
           "L_ACCESS_TOKEN": "Access Token (generated from Auth Code)"
         },
         "GOOGLE": {
-          "L_IS_COMPRESS_DATA": "Compress data",
           "L_SYNC_FILE_NAME": "Sync File Name"
         },
         "LOCAL_FILE": {
@@ -677,6 +676,7 @@
           "L_SYNC_FILE_PATH_DESCRIPTION": "Absolute path to the file that should be used for syncing (will be created)."
         },
         "L_ENABLE_SYNCING": "Enable Syncing",
+        "L_ENABLE_COMPRESSION": "Enable Compression (faster data transfer)",
         "L_SYNC_INTERVAL": "Sync Interval",
         "L_SYNC_PROVIDER": "Sync Provider",
         "TITLE": "Sync",

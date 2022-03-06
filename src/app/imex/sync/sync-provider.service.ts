@@ -505,9 +505,8 @@ export class SyncProviderService {
   }
 
   private async _compressAppDataIfEnabled(data: AppDataComplete): Promise<string> {
-    // const isCompressionEnabled = (await this.syncCfg$.pipe(first()).toPromise())
-    //   .isCompressionEnabled;
-    const isCompressionEnabled = true;
+    const isCompressionEnabled = (await this.syncCfg$.pipe(first()).toPromise())
+      .isCompressionEnabled;
     return isCompressionEnabled
       ? this._compressionService.compressUTF16(JSON.stringify(data))
       : JSON.stringify(data);

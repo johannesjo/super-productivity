@@ -17,6 +17,13 @@ export const SYNC_FORM: ConfigFormSection<SyncConfig> = {
       },
     },
     {
+      key: 'isCompressionEnabled',
+      type: 'checkbox',
+      templateOptions: {
+        label: T.F.SYNC.FORM.L_ENABLE_COMPRESSION,
+      },
+    },
+    {
       key: 'syncInterval',
       type: 'duration',
       // NOTE: we don't hide because model updates don't seem to work properly for this
@@ -75,13 +82,6 @@ export const SYNC_FORM: ConfigFormSection<SyncConfig> = {
           templateOptions: {
             required: true,
             label: T.F.SYNC.FORM.GOOGLE.L_SYNC_FILE_NAME,
-          },
-        },
-        {
-          key: 'isCompressData',
-          type: 'checkbox',
-          templateOptions: {
-            label: T.F.SYNC.FORM.GOOGLE.L_IS_COMPRESS_DATA,
           },
         },
       ],
