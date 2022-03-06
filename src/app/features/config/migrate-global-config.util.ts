@@ -140,6 +140,18 @@ const _migrateUndefinedShortcutsToNull = (
 
 const _migrateSyncCfg = (config: GlobalConfigState): GlobalConfigState => {
   if (config.sync) {
+    if (config.sync.isCompressionEnabled === undefined) {
+      return {
+        ...config,
+        sync: {
+          ...config.sync,
+          isCompressionEnabled:
+            config.sync.syncProvider === SyncProvider.GoogleDrive &&
+            config.sync.googleDriveSync.isCompressData,
+        },
+      };
+    }
+
     return config;
   }
 
