@@ -28,6 +28,11 @@ android {
     productFlavors {
         play  {
             dimension "version"
+            Properties properties = new Properties()
+            file("google.properties").withInputStream {
+                properties.load(it)
+            }
+            buildConfigField "String", "CLIENT_ID_WEB", "\"" + properties.webToken + "\""
         }
         fdroid {
             dimension "version"
@@ -46,11 +51,11 @@ dependencies {
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
     implementation 'com.google.code.gson:gson:2.8.6'
 
-    playImplementation 'com.google.android.gms:play-services-auth:20.0.0'
+    playImplementation 'com.google.android.gms:play-services-auth:20.1.0'
 
     testImplementation 'junit:junit:4.13.2'
 
-    androidTestImplementation 'androidx.test:rules:1.4.1-alpha03'
+    androidTestImplementation 'androidx.test:rules:1.4.1-alpha04'
     androidTestImplementation 'com.android.support.test:runner:1.0.2'
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
 }
