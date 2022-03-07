@@ -52,7 +52,7 @@ public class FullscreenActivity extends AppCompatActivity {
         frameLayout.addView(wv);
 
         // init JS here, as it needs an activity to work
-        jsi = new JavaScriptInterface(this, wv);
+        jsi = new CommonJavaScriptInterface(this, wv);
         wv.addJavascriptInterface(jsi, INTERFACE_PROPERTY);
         if (BuildConfig.FLAVOR.equals("fdroid")) {
             wv.addJavascriptInterface(jsi, INTERFACE_PROPERTY_F_DROID);
