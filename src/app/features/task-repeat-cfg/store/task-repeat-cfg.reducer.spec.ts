@@ -6,7 +6,7 @@ const DUMMY_REPEATABLE_TASK: TaskRepeatCfg = {
   id: 'REPEATABLE_DEFAULT',
   title: 'REPEATABLE_DEFAULT',
   quickSetting: 'DAILY',
-  lastTaskCreation: 60 * 60 * 1000,
+  lastTaskCreation: 60 * 60 * 1000, // debug: Why this number? // todo: This number might cause issues with the tests later on…
   defaultEstimate: undefined,
   projectId: null,
   startTime: undefined,
@@ -36,6 +36,17 @@ const dummyRepeatable = (id: string, fields: Partial<TaskRepeatCfg>): TaskRepeat
   id,
   ...fields,
 });
+
+const datePrintingOptions = {
+  weekday: 'long',
+  year: 'numeric',
+  month: 'long',
+  day: 'numeric',
+  hour: '2-digit',
+  minute: '2-digit',
+  second: '2-digit',
+  hour12: false,
+};
 
 describe('selectTaskRepeatCfgsDueOnDay', () => {
   describe('for DAILY', () => {
@@ -178,6 +189,24 @@ describe('selectTaskRepeatCfgsDueOnDay', () => {
       expect(resultIds).toEqual(['R1']);
     });
 
+    it('should return cfg for startDate in the past (2)', () => {
+      const result = selectTaskRepeatCfgsDueOnDay.projector(
+        [
+          dummyRepeatable('R1', {
+            repeatCycle: 'WEEKLY',
+            repeatEvery: 1,
+            startDate: '2022-01-10',
+            monday: true,
+          }),
+        ],
+        {
+          dayDate: new Date('2022-01-17').getTime(),
+        },
+      );
+      const resultIds = result.map((item) => item.id);
+      expect(resultIds).toEqual(['R1']);
+    });
+
     it('should return available for day', () => {
       const result = selectTaskRepeatCfgsDueOnDay.projector(
         [
@@ -207,6 +236,12 @@ describe('selectTaskRepeatCfgsDueOnDay', () => {
           startDate: '2022-01-10',
           repeatCycle: 'WEEKLY',
         }),
+        dummyRepeatable('R3', {
+          wednesday: true,
+          friday: true,
+          startDate: '2022-01-10',
+          repeatCycle: 'WEEKLY',
+        }),
       ];
       // eslint-disable-next-line no-mixed-operators
       const FULL_WEEK = [0, 1, 2, 3, 4, 5, 6].map((v) => FAKE_MONDAY_THE_10TH + v * DAY);
@@ -215,51 +250,97 @@ describe('selectTaskRepeatCfgsDueOnDay', () => {
           .projector(repeatableTasks, { dayDate: dayTimestamp })
           .map((item) => item.id),
       );
-      expect(results).toEqual([['R1'], [], ['R2'], [], [], [], []]);
+      console.log(results);
+      expect(results).toEqual([['R1'], [], ['R2', 'R3'], [], ['R3'], [], []]);
     });
 
-    // it('should NOT return cfg for future startDate', () => {
-    //   const result = selectTaskRepeatCfgsDueOnDay.projector(
-    //     [dummyRepeatable('R1', { repeatCycle: 'WEEKLY', startDate: '2022-02-10' })],
-    //     {
-    //       dayDate: FAKE_MONDAY_THE_10TH,
-    //     },
-    //   );
-    //   const resultIds = result.map((item) => item.id);
-    //   expect(resultIds).toEqual([]);
-    // });
-    // it('should return cfg if repeatCycle matches', () => {
-    //   const result = selectTaskRepeatCfgsDueOnDay.projector(
-    //     [
-    //       dummyRepeatable('R1', {
-    //         repeatCycle: 'WEEKLY',
-    //         startDate: '2022-01-10',
-    //         repeatEvery: 2,
-    //       }),
-    //     ],
-    //     {
-    //       dayDate: new Date('2022-03-10').getTime(),
-    //     },
-    //   );
-    //   const resultIds = result.map((item) => item.id);
-    //   expect(resultIds).toEqual(['R1']);
-    // });
-    // it('should NOT return cfg if repeatCycle does NOT match', () => {
-    //   const result = selectTaskRepeatCfgsDueOnDay.projector(
-    //     [
-    //       dummyRepeatable('R1', {
-    //         repeatCycle: 'WEEKLY',
-    //         startDate: '2022-01-10',
-    //         repeatEvery: 3,
-    //       }),
-    //     ],
-    //     {
-    //       dayDate: new Date('2022-03-10').getTime(),
-    //     },
-    //   );
-    //   const resultIds = result.map((item) => item.id);
-    //   expect(resultIds).toEqual([]);
-    // });
+    it('should NOT return cfg if startDate is in the future (1)[different week]', () => {
+      const result = selectTaskRepeatCfgsDueOnDay.projector(
+        [
+          dummyRepeatable('R1', {
+            repeatCycle: 'WEEKLY',
+            startDate: '2022-02-10', // Donnerstag / Thursday
+            tuesday: true,
+          }),
+        ],
+        {
+          dayDate: new Date('2022-01-11').getTime(), // Dienstag / Tuesday
+        },
+      );
+      const resultIds = result.map((item) => item.id);
+      expect(resultIds).toEqual([]);
+    });
+    it('should NOT return cfg if startDate is in the future (2)[same week]', () => {
+      const startDate = '2022-01-12'; // Wednesday
+      // prettier-ignore
+      // @ts-ignore
+      const printStart = new Date(startDate).toLocaleTimeString('en-us', datePrintingOptions);
+
+      const dayDate = new Date('2022-01-11'); // Tuesday
+      // @ts-ignore
+      const printDayDate = dayDate.toLocaleTimeString('en-us', datePrintingOptions);
+
+      const result = selectTaskRepeatCfgsDueOnDay.projector(
+        [
+          dummyRepeatable('R1', {
+            repeatCycle: 'WEEKLY',
+            startDate: '2022-01-12',
+            tuesday: true,
+          }),
+        ],
+        {
+          dayDate: dayDate.getTime(),
+        },
+      );
+      const resultIds = result.map((item) => item.id);
+
+      console.log(
+        '\nIDs: ',
+        resultIds,
+        '\nStart: ',
+        printStart,
+        '\nToday:',
+        printDayDate,
+      );
+      expect(resultIds).toEqual([]);
+    });
+    it('should return cfg if repeatCycle matches', () => {
+      const result = selectTaskRepeatCfgsDueOnDay.projector(
+        [
+          dummyRepeatable('R1', {
+            monday: true,
+            repeatCycle: 'WEEKLY',
+            startDate: '2022-01-10',
+            repeatEvery: 2,
+          }),
+        ],
+        {
+          //dayDate: new Date('2022-03-10').getTime(),
+          dayDate: new Date('2022-01-24').getTime(),
+        },
+      );
+      const resultIds = result.map((item) => item.id);
+      console.log(resultIds);
+      expect(resultIds).toEqual(['R1']);
+    });
+    it('should NOT return cfg if repeatCycle does NOT match', () => {
+      const result = selectTaskRepeatCfgsDueOnDay.projector(
+        [
+          dummyRepeatable('R1', {
+            monday: true,
+            repeatCycle: 'WEEKLY',
+            startDate: '2022-01-10',
+            repeatEvery: 3,
+          }),
+        ],
+        {
+          dayDate: new Date('2022-03-17').getTime(),
+        },
+      );
+      const resultIds = result.map((item) => item.id);
+      expect(resultIds).toEqual([]);
+    });
+
   });
 
   describe('for MONTHLY', () => {
