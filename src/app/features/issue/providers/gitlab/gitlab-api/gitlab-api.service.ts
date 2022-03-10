@@ -7,6 +7,7 @@ import {
   HttpParams,
   HttpRequest,
 } from '@angular/common/http';
+import { parseUrl, stringifyUrl } from 'query-string';
 import { EMPTY, forkJoin, Observable, ObservableInput, of, throwError } from 'rxjs';
 import { SnackService } from 'src/app/core/snack/snack.service';
 
@@ -262,7 +263,15 @@ export class GitlabApiService {
     cfg: GitlabCfg,
     page: number,
   ): Observable<any> {
-    params.url += `&per_page=100&page=${page}`;
+    const parsedUrl = parseUrl(params.url);
+    params.url = stringifyUrl({
+      url: parsedUrl.url,
+      query: {
+        ...parsedUrl.query,
+        per_page: 100,
+        page: page,
+      },
+    });
     return this._sendRawRequest$(params, cfg);
   }
 
