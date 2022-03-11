@@ -2,7 +2,8 @@ import {
   ChangeDetectionStrategy,
   Component,
   Input,
-  OnInit,
+  OnChanges,
+  SimpleChanges,
   ViewChild,
 } from '@angular/core';
 import { Note } from '../note.model';
@@ -23,7 +24,7 @@ import { ProjectService } from '../../project/project.service';
   styleUrls: ['./note.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class NoteComponent implements OnInit {
+export class NoteComponent implements OnChanges {
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   @Input() note!: Note;
   @Input() isFocus?: boolean;
@@ -59,10 +60,10 @@ export class NoteComponent implements OnInit {
     private readonly _workContextService: WorkContextService,
   ) {}
 
-  ngOnInit(): void {
-    const LIMIT = 320;
-    this.isLongNote = this.note.content.length > LIMIT;
-    this.shortenedNote = this.note.content.substr(0, 160) + '\n\n (...)';
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes.note) {
+      this._updateNoteTxt();
+    }
   }
 
   toggleLock(): void {
@@ -120,5 +121,11 @@ export class NoteComponent implements OnInit {
           this._noteService.update(this.note.id, { content });
         }
       });
+  }
+
+  private _updateNoteTxt(): void {
+    const LIMIT = 320;
+    this.isLongNote = this.note.content.length > LIMIT;
+    this.shortenedNote = this.note.content.substr(0, 160) + '\n\n (...)';
   }
 }
