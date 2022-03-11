@@ -130,14 +130,18 @@ $noteFontSize: 12px;
 .bottom-controls {
   display: flex;
   align-items: center;
-  opacity: 0;
   transition: $transition-standard;
   cursor: grab;
   cursor: move;
   border-top: 1px dashed $dark-theme-extra-border-color;
+  opacity: 0;
 
   @include lightTheme() {
     border-color: $light-theme-extra-border-color;
+  }
+
+  @include touchOnlyDevice() {
+    opacity: 1;
   }
 
   @include mq(xs) {
