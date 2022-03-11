@@ -29,6 +29,8 @@
     height: 100%;
     width: 100%;
     padding: $s $s * 2;
+
+    @include scrollY;
   }
 
   textarea {
