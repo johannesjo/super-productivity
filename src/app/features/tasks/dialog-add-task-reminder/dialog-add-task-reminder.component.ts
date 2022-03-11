@@ -90,7 +90,7 @@ export class DialogAddTaskReminderComponent {
         isMoveToBacklog: this.isMoveToBacklog,
       });
       localStorage.setItem(this.LS_KEY, this.isMoveToBacklog + '');
-      this.close();
+      this.close(true);
     } else {
       if (!!this.task.repeatCfgId && !isToday(timestamp)) {
         this._matDialog
@@ -111,7 +111,7 @@ export class DialogAddTaskReminderComponent {
                 this.isMoveToBacklog,
               );
               localStorage.setItem(this.LS_KEY, this.isMoveToBacklog + '');
-              this.close();
+              this.close(true);
             }
           });
       } else {
@@ -122,7 +122,7 @@ export class DialogAddTaskReminderComponent {
           this.isMoveToBacklog,
         );
         localStorage.setItem(this.LS_KEY, this.isMoveToBacklog + '');
-        this.close();
+        this.close(true);
       }
     }
   }
@@ -135,11 +135,11 @@ export class DialogAddTaskReminderComponent {
       throw new Error('No reminder or id');
     }
     this._taskService.unScheduleTask(this.task.id, this.reminder.id);
-    this.close();
+    this.close(true);
   }
 
-  close(): void {
-    this._matDialogRef.close();
+  close(wasEdited: boolean = false): void {
+    this._matDialogRef.close(wasEdited);
   }
 
   trackByIndex(i: number, p: any): number {

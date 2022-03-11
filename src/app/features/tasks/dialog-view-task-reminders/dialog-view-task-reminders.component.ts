@@ -142,8 +142,10 @@ export class DialogViewTaskRemindersComponent implements OnDestroy {
           data: { task } as AddTaskReminderInterface,
         })
         .afterClosed()
-        .subscribe(() => {
-          this._removeFromList(task.reminderId as string);
+        .subscribe((wasEdited) => {
+          if (wasEdited) {
+            this._removeFromList(task.reminderId as string);
+          }
           if (isCloseAfter) {
             this._close();
           }
