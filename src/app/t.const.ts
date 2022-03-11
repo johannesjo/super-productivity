@@ -1196,6 +1196,7 @@ const T = {
       PL: 'GCF.LANG.PL',
       PT: 'GCF.LANG.PT',
       RU: 'GCF.LANG.RU',
+      SK: 'GCF.LANG.SK',
       TITLE: 'GCF.LANG.TITLE',
       TR: 'GCF.LANG.TR',
       ZH: 'GCF.LANG.ZH',
