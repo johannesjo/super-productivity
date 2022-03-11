@@ -6,7 +6,6 @@ import { Observable } from 'rxjs';
 import { concatMap, distinctUntilChanged, first, map } from 'rxjs/operators';
 import { WebDavApiService } from './web-dav-api.service';
 import { DataInitService } from '../../../core/data-init/data-init.service';
-import { environment } from '../../../../environments/environment';
 import { WebDavConfig } from '../../../features/config/global-config.model';
 import { GlobalConfigService } from '../../../features/config/global-config.service';
 import { GlobalProgressBarService } from '../../../core-ui/global-progress-bar/global-progress-bar.service';
