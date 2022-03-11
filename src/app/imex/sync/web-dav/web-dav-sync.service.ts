@@ -6,7 +6,6 @@ import { Observable } from 'rxjs';
 import { concatMap, distinctUntilChanged, first, map } from 'rxjs/operators';
 import { WebDavApiService } from './web-dav-api.service';
 import { DataInitService } from '../../../core/data-init/data-init.service';
-import { environment } from '../../../../environments/environment';
 import { WebDavConfig } from '../../../features/config/global-config.model';
 import { GlobalConfigService } from '../../../features/config/global-config.service';
 import { GlobalProgressBarService } from '../../../core-ui/global-progress-bar/global-progress-bar.service';
@@ -40,7 +39,7 @@ export class WebDavSyncService implements SyncProviderServiceInterface {
     const cfg = await this._cfg$.pipe(first()).toPromise();
 
     try {
-      const meta = await this._webDavApiService.getMetaData('/' + cfg.syncFilePath);
+      const meta = await this._webDavApiService.getMetaData(cfg.syncFilePath as string);
       // @ts-ignore
       const d = new Date(meta['last-modified']);
       return {
@@ -53,11 +52,7 @@ export class WebDavSyncService implements SyncProviderServiceInterface {
         return 'NO_REMOTE_DATA';
       }
       console.error(e);
-      if (environment.production) {
-        return e as Error;
-      } else {
-        throw new Error('WebDAV: Unknown error');
-      }
+      return e as Error;
     }
   }
 
@@ -69,7 +64,7 @@ export class WebDavSyncService implements SyncProviderServiceInterface {
         path: cfg.syncFilePath as string,
         localRev,
       });
-      const meta = await this._webDavApiService.getMetaData('/' + cfg.syncFilePath);
+      const meta = await this._webDavApiService.getMetaData(cfg.syncFilePath as string);
       this._globalProgressBarService.countDown();
       return {
         rev: this._getRevFromMeta(meta),
@@ -89,15 +84,14 @@ export class WebDavSyncService implements SyncProviderServiceInterface {
     isForceOverwrite: boolean = false,
   ): Promise<string | Error> {
     this._globalProgressBarService.countUp(T.GPB.WEB_DAV_UPLOAD);
+    const cfg = await this._cfg$.pipe(first()).toPromise();
     try {
       await this._webDavApiService.upload({
+        path: cfg.syncFilePath as string,
         data: dataStr,
-        localRev,
-        isForceOverwrite,
       });
 
-      const cfg = await this._cfg$.pipe(first()).toPromise();
-      const meta = await this._webDavApiService.getMetaData('/' + cfg.syncFilePath);
+      const meta = await this._webDavApiService.getMetaData(cfg.syncFilePath as string);
       this._globalProgressBarService.countDown();
       return this._getRevFromMeta(meta);
     } catch (e) {

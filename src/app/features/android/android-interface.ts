@@ -56,6 +56,28 @@ export interface AndroidInterface {
     progress: number, // -1 => undefined; 999 => indeterminate; 333 => show play but no progress bar
   ): void;
 
+  // WebDAV
+  makeHttpRequestWrapped(
+    url: string,
+    method: string,
+    data: string,
+    username: string,
+    password: string,
+    readResponse: boolean,
+  ): Promise<object>;
+
+  makeHttpRequest?(
+    rId: string,
+    url: string,
+    method: string,
+    data: string,
+    username: string,
+    password: string,
+    readResponse: boolean,
+  ): void;
+
+  makeHttpRequestCallback(rId: string, result: {[key: string]:  any }): void;
+
   // added here only
   onResume$: Subject<void>;
   onPause$: Subject<void>;
@@ -203,6 +225,37 @@ if (IS_ANDROID_WEB_VIEW) {
         reject(token);
       };
     });
+  };
+
+  if (androidInterface.makeHttpRequest) {
+    androidInterface.makeHttpRequestCallback = (rId: string, result: object) => {
+      requestMap[rId].resolve(result);
+      delete requestMap[rId];
+    };
+  }
+  androidInterface.makeHttpRequestWrapped = (
+    url: string,
+    method: string,
+    data: string,
+    username: string,
+    password: string,
+    readResponse: boolean,
+  ): Promise<object> => {
+    if (androidInterface.makeHttpRequest) {
+      const rId = nanoid();
+      androidInterface.makeHttpRequest(
+        rId,
+        url,
+        method,
+        data,
+        username,
+        password,
+        readResponse,
+      );
+      return getRequestMapPromise(rId);
+    } else {
+      throw new Error('No android makeHttpRequest interface');
+    }
   };
 
   console.log('Android Web View interfaces initialized', androidInterface);

@@ -6,12 +6,27 @@ import { first, map, switchMap, tap } from 'rxjs/operators';
 // @ts-ignore
 import { createClient } from 'webdav/web';
 import { WebDavHeadResponse } from './web-dav.model';
+import { IS_ANDROID_WEB_VIEW } from '../../../util/is-android-web-view';
+import { androidInterface } from '../../../features/android/android-interface';
+import { IncomingHttpHeaders } from 'http';
 
 // const createClient = (...args: any) => ({
 //   stat: async (a: any): Promise<any> => undefined,
 //   getFileContents: async (a: any, b?: any): Promise<any> => undefined,
 //   putFileContents: async (a: any, b?: any): Promise<any> => undefined,
 // });
+
+interface AndroidHttpResponse {
+  data: string;
+  status: number;
+  headers: IncomingHttpHeaders;
+  statusText: string;
+}
+
+export interface AndroidWebDAVClientError extends Error {
+  status?: number;
+  response?: AndroidHttpResponse;
+}
 
 @Injectable({ providedIn: 'root' })
 export class WebDavApiService {
@@ -50,38 +65,64 @@ export class WebDavApiService {
     private _dataInitService: DataInitService,
   ) {}
 
-  async upload({
-    data,
-  }: {
-    localRev?: string | null;
-    data: string;
-    isForceOverwrite?: boolean;
-  }): Promise<void> {
+  private checkErrorAndroid(result: AndroidHttpResponse): void {
+    if (result.status < 200 || result.status > 299) {
+      const error = new Error(
+        `Invalid response: ${result.status} ${result.statusText}`,
+      ) as AndroidWebDAVClientError;
+      error.status = result.status;
+      error.response = result;
+      throw error;
+    }
+  }
+
+  async upload({ data, path }: { data: string; path: string }): Promise<void> {
     await this._isReady$.toPromise();
     const cfg = await this._cfg$.pipe(first()).toPromise();
-    const client = createClient(cfg.baseUrl, {
-      username: cfg.userName,
-      password: cfg.password,
-    });
+    if (IS_ANDROID_WEB_VIEW && androidInterface.makeHttpRequest) {
+      const result = (await androidInterface.makeHttpRequestWrapped(
+        cfg.baseUrl + '/' + path,
+        'PUT',
+        data,
+        cfg.userName,
+        cfg.password,
+        false,
+      )) as AndroidHttpResponse;
+      this.checkErrorAndroid(result);
+    } else {
+      const client = createClient(cfg.baseUrl, {
+        username: cfg.userName,
+        password: cfg.password,
+      });
 
-    return await client.putFileContents('/' + cfg.syncFilePath, JSON.stringify(data), {
-      contentLength: false,
-    });
+      return await client.putFileContents(path, JSON.stringify(data), {
+        contentLength: false,
+      });
+    }
   }
 
   async getMetaData(path: string): Promise<WebDavHeadResponse> {
     await this._isReady$.toPromise();
     const cfg = await this._cfg$.pipe(first()).toPromise();
-    const client = createClient(cfg.baseUrl, {
-      username: cfg.userName,
-      password: cfg.password,
-    });
-    const r = await client.customRequest(path, { method: 'HEAD' });
-    console.log(r);
-    return r.headers;
-    // const r = (await client.stat(path)) as FileStat;
-    // console.log(r);
-    // return r;
+    if (IS_ANDROID_WEB_VIEW && androidInterface.makeHttpRequest) {
+      const result = (await androidInterface.makeHttpRequestWrapped(
+        cfg.baseUrl + '/' + path,
+        'HEAD',
+        '',
+        cfg.userName,
+        cfg.password,
+        false,
+      )) as AndroidHttpResponse;
+      this.checkErrorAndroid(result);
+      return result.headers as WebDavHeadResponse;
+    } else {
+      const client = createClient(cfg.baseUrl, {
+        username: cfg.userName,
+        password: cfg.password,
+      });
+      const r = await client.customRequest(path, { method: 'HEAD' });
+      return r.headers;
+    }
   }
 
   async download({
@@ -93,12 +134,24 @@ export class WebDavApiService {
   }): Promise<string> {
     await this._isReady$.toPromise();
     const cfg = await this._cfg$.pipe(first()).toPromise();
-    const client = createClient(cfg.baseUrl, {
-      username: cfg.userName,
-      password: cfg.password,
-    });
-    const r = await client.getFileContents(path, { format: 'text' });
-    console.log(r);
-    return r as any;
+    if (IS_ANDROID_WEB_VIEW && androidInterface.makeHttpRequest) {
+      const result = (await androidInterface.makeHttpRequestWrapped(
+        cfg.baseUrl + '/' + path,
+        'GET',
+        '',
+        cfg.userName,
+        cfg.password,
+        true,
+      )) as AndroidHttpResponse;
+      this.checkErrorAndroid(result);
+      return result.data;
+    } else {
+      const client = createClient(cfg.baseUrl, {
+        username: cfg.userName,
+        password: cfg.password,
+      });
+      const r = await client.getFileContents(path, { format: 'text' });
+      return r as any;
+    }
   }
 }
