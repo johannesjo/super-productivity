@@ -17,7 +17,7 @@
             android:roundIcon="@mipmap/ic_launcher_round"
             android:supportsRtl="true"
             android:theme="@style/AppTheme"
-            android:usesCleartextTraffic="true">
+            android:networkSecurityConfig="@xml/network_security_config">
 
 
         <!-- App in WebFrame -->
@@ -28,7 +28,6 @@
                 android:hardwareAccelerated="true"
                 android:allowTaskReparenting="true"
                 android:windowSoftInputMode="adjustResize"
-                android:alwaysRetainTaskState="true"
                 android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale|smallestScreenSize|screenLayout|uiMode"
                 android:label="@string/title_activity_fullscreen"
                 android:persistableMode="persistNever"
