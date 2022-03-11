@@ -76,7 +76,7 @@ export interface AndroidInterface {
     readResponse: boolean,
   ): void;
 
-  makeHttpRequestCallback(rId: string, result: {[key: string]:  any }): void;
+  makeHttpRequestCallback(rId: string, result: { [key: string]: any }): void;
 
   // added here only
   onResume$: Subject<void>;
