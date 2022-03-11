@@ -4,6 +4,7 @@ import { T } from '../../t.const';
 import { Subscription } from 'rxjs';
 import { ESCAPE } from '@angular/cdk/keycodes';
 import { LS_LAST_FULLSCREEN_EDIT_VIEW_MODE } from '../../core/persistence/ls-keys.const';
+import { isSmallScreen } from '../../util/is-small-screen';
 
 type ViewMode = 'SPLIT' | 'PARSED' | 'TEXT_ONLY';
 const ALL_VIEW_MODES: ['SPLIT', 'PARSED', 'TEXT_ONLY'] = ['SPLIT', 'PARSED', 'TEXT_ONLY'];
@@ -16,7 +17,7 @@ const ALL_VIEW_MODES: ['SPLIT', 'PARSED', 'TEXT_ONLY'] = ['SPLIT', 'PARSED', 'TE
 })
 export class DialogFullscreenMarkdownComponent implements OnDestroy {
   T: typeof T = T;
-  viewMode: ViewMode = 'SPLIT';
+  viewMode: ViewMode = isSmallScreen() ? 'TEXT_ONLY' : 'SPLIT';
 
   private _subs: Subscription = new Subscription();
 
@@ -27,6 +28,11 @@ export class DialogFullscreenMarkdownComponent implements OnDestroy {
     const lastViewMode = localStorage.getItem(LS_LAST_FULLSCREEN_EDIT_VIEW_MODE);
     if (ALL_VIEW_MODES.includes(lastViewMode as ViewMode)) {
       this.viewMode = lastViewMode as ViewMode;
+      console.log(this.viewMode, isSmallScreen());
+
+      if (this.viewMode === 'SPLIT' && isSmallScreen()) {
+        this.viewMode = 'TEXT_ONLY';
+      }
     }
 
     // we want to save as default
