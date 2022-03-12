@@ -1,6 +1,6 @@
 'use strict';
 
-import { IPC } from './ipc-events.const';
+import { IPC } from './shared-with-frontend/ipc-events.const';
 import { error, log } from 'electron-log';
 
 const errorHandler = require('./error-handler-with-frontend-inform');

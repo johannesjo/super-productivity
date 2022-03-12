@@ -1,5 +1,5 @@
 import { App, ipcMain, Menu, nativeTheme, Tray } from 'electron';
-import { IPC } from './ipc-events.const';
+import { IPC } from './shared-with-frontend/ipc-events.const';
 import { getSettings } from './get-settings';
 import { getWin } from './main-window';
 import { GlobalConfigState } from '../src/app/features/config/global-config.model';

@@ -19,12 +19,12 @@ import { createWindow } from './main-window';
 import { sendJiraRequest, setupRequestHeadersForImages } from './jira';
 import { errorHandlerWithFrontendInform } from './error-handler-with-frontend-inform';
 import { initDebug } from './debug';
-import { IPC } from './ipc-events.const';
+import { IPC } from './shared-with-frontend/ipc-events.const';
 import { initBackupAdapter } from './backup';
 import { initLocalFileSyncAdapter } from './local-file-sync';
 import { JiraCfg } from '../src/app/features/issue/providers/jira/jira.model';
 import { lockscreen } from './lockscreen';
-import { lazySetInterval } from './lazy-set-interval';
+import { lazySetInterval } from './shared-with-frontend/lazy-set-interval';
 import { KeyboardConfig } from '../src/app/features/config/keyboard-config.model';
 
 import { initialize } from '@electron/remote/main';

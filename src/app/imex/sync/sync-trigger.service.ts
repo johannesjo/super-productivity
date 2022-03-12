@@ -29,7 +29,7 @@ import { IdleService } from '../../features/idle/idle.service';
 import { IS_ELECTRON } from '../../app.constants';
 import { ElectronService } from '../../core/electron/electron.service';
 import { IpcRenderer } from 'electron';
-import { IPC } from '../../../../electron/ipc-events.const';
+import { IPC } from '../../../../electron/shared-with-frontend/ipc-events.const';
 import { GlobalConfigState } from '../../features/config/global-config.model';
 import { IS_ANDROID_WEB_VIEW } from '../../util/is-android-web-view';
 import { androidInterface } from '../../features/android/android-interface';

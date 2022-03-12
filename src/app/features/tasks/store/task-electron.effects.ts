@@ -5,7 +5,7 @@ import { select, Store } from '@ngrx/store';
 import { filter, tap, withLatestFrom } from 'rxjs/operators';
 import { selectCurrentTask } from './task.selectors';
 import { Observable } from 'rxjs';
-import { IPC } from '../../../../../electron/ipc-events.const';
+import { IPC } from '../../../../../electron/shared-with-frontend/ipc-events.const';
 import { IS_ELECTRON } from '../../../app.constants';
 import { GlobalConfigService } from '../../config/global-config.service';
 import { ElectronService } from '../../../core/electron/electron.service';

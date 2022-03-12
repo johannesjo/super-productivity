@@ -11,7 +11,7 @@ import {
 import { errorHandlerWithFrontendInform } from './error-handler-with-frontend-inform';
 import { join, normalize } from 'path';
 import { format } from 'url';
-import { IPC } from './ipc-events.const';
+import { IPC } from './shared-with-frontend/ipc-events.const';
 import { getSettings } from './get-settings';
 import { readFileSync, stat } from 'fs';
 import { error, log } from 'electron-log';

@@ -11,7 +11,7 @@ import { ChromeExtensionInterfaceService } from './core/chrome-extension-interfa
 import { ShortcutService } from './core-ui/shortcut/shortcut.service';
 import { GlobalConfigService } from './features/config/global-config.service';
 import { LayoutService } from './core-ui/layout/layout.service';
-import { IPC } from '../../electron/ipc-events.const';
+import { IPC } from '../../electron/shared-with-frontend/ipc-events.const';
 import { SnackService } from './core/snack/snack.service';
 import { IS_ELECTRON } from './app.constants';
 import { BookmarkService } from './features/bookmark/bookmark.service';

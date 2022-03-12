@@ -10,7 +10,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { IS_ELECTRON } from '../../app.constants';
 import { MatDialog } from '@angular/material/dialog';
 import { combineLatest, from, merge, Observable, Subject } from 'rxjs';
-import { IPC } from '../../../../electron/ipc-events.const';
+import { IPC } from '../../../../electron/shared-with-frontend/ipc-events.const';
 import { DialogConfirmComponent } from '../../ui/dialog-confirm/dialog-confirm.component';
 import { GlobalConfigService } from '../../features/config/global-config.service';
 import {

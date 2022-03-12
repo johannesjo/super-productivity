@@ -33,7 +33,7 @@ import { T } from '../../../t.const';
 import { SnackService } from '../../../core/snack/snack.service';
 import { ElectronService } from '../../../core/electron/electron.service';
 import { ipcRenderer } from 'electron';
-import { IPC } from '../../../../../electron/ipc-events.const';
+import { IPC } from '../../../../../electron/shared-with-frontend/ipc-events.const';
 import { TaskService } from '../../tasks/task.service';
 
 @Injectable()

@@ -1,5 +1,5 @@
 import { getWin } from './main-window';
-import { IPC } from './ipc-events.const';
+import { IPC } from './shared-with-frontend/ipc-events.const';
 import { session } from 'electron';
 import { JiraCfg } from '../src/app/features/issue/providers/jira/jira.model';
 // import rp from 'request-promise';

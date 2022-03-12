@@ -5,7 +5,7 @@ import { DOCUMENT } from '@angular/common';
 import { LocalUiHelperSettings } from './ui-helper.model';
 import { UI_LOCAL_HELPER_DEFAULT } from './ui-helper.const';
 import { ElectronService } from '../../core/electron/electron.service';
-import { IPC } from '../../../../electron/ipc-events.const';
+import { IPC } from '../../../../electron/shared-with-frontend/ipc-events.const';
 import { IS_ELECTRON } from '../../app.constants';
 import { fromEvent } from 'rxjs';
 import { throttleTime } from 'rxjs/operators';

@@ -3,7 +3,7 @@ import { GlobalConfigService } from '../../features/config/global-config.service
 import { interval, Observable } from 'rxjs';
 import { LocalBackupConfig } from '../../features/config/global-config.model';
 import { filter, map, switchMap, tap } from 'rxjs/operators';
-import { IPC } from '../../../../electron/ipc-events.const';
+import { IPC } from '../../../../electron/shared-with-frontend/ipc-events.const';
 import { ElectronService } from '../../core/electron/electron.service';
 import { ipcRenderer } from 'electron';
 import { PersistenceService } from '../../core/persistence/persistence.service';

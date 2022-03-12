@@ -1,5 +1,5 @@
 import { BrowserWindow, ipcMain } from 'electron';
-import { IPC } from './ipc-events.const';
+import { IPC } from './shared-with-frontend/ipc-events.const';
 import { warn } from 'electron-log';
 import { GlobalConfigState } from '../src/app/features/config/global-config.model';
 

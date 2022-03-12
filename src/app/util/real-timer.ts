@@ -1,4 +1,4 @@
-import { lazySetInterval } from '../../../electron/lazy-set-interval';
+import { lazySetInterval } from '../../../electron/shared-with-frontend/lazy-set-interval';
 import { Observable } from 'rxjs';
 
 export const realTimer$ = (intervalDuration: number): Observable<number> => {

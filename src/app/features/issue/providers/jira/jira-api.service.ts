@@ -20,7 +20,7 @@ import {
   JiraOriginalUser,
 } from './jira-api-responses';
 import { JiraCfg } from './jira.model';
-import { IPC } from '../../../../../../electron/ipc-events.const';
+import { IPC } from '../../../../../../electron/shared-with-frontend/ipc-events.const';
 import { SnackService } from '../../../../core/snack/snack.service';
 import { HANDLED_ERROR_PROP_STR, IS_ELECTRON } from '../../../../app.constants';
 import { Observable, of, throwError } from 'rxjs';

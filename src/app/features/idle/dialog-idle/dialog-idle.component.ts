@@ -12,7 +12,7 @@ import { Task } from '../../tasks/task.model';
 import { GlobalConfigService } from '../../config/global-config.service';
 import { T } from '../../../t.const';
 import { ipcRenderer } from 'electron';
-import { IPC } from '../../../../../electron/ipc-events.const';
+import { IPC } from '../../../../../electron/shared-with-frontend/ipc-events.const';
 import { SimpleCounterService } from '../../simple-counter/simple-counter.service';
 import { ElectronService } from '../../../core/electron/electron.service';
 import { IS_ELECTRON } from '../../../app.constants';

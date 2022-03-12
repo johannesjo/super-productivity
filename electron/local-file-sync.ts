@@ -1,5 +1,5 @@
 import { answerRenderer } from './better-ipc';
-import { IPC } from './ipc-events.const';
+import { IPC } from './shared-with-frontend/ipc-events.const';
 import { SyncGetRevResult } from '../src/app/imex/sync/sync.model';
 import { readFileSync, statSync, writeFileSync } from 'fs';
 import { error, log } from 'electron-log';

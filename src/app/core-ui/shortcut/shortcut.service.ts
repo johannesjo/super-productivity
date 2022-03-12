@@ -8,7 +8,7 @@ import { TaskService } from '../../features/tasks/task.service';
 import { MatDialog } from '@angular/material/dialog';
 import { DialogAddNoteComponent } from '../../features/note/dialog-add-note/dialog-add-note.component';
 import { BookmarkService } from '../../features/bookmark/bookmark.service';
-import { IPC } from '../../../../electron/ipc-events.const';
+import { IPC } from '../../../../electron/shared-with-frontend/ipc-events.const';
 import { UiHelperService } from '../../features/ui-helper/ui-helper.service';
 import { ElectronService } from '../../core/electron/electron.service';
 import { ipcRenderer } from 'electron';

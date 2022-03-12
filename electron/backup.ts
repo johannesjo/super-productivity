@@ -7,7 +7,7 @@ import {
   statSync,
   writeFileSync,
 } from 'fs';
-import { IPC } from './ipc-events.const';
+import { IPC } from './shared-with-frontend/ipc-events.const';
 import { answerRenderer } from './better-ipc';
 import { LocalBackupMeta } from '../src/app/imex/local-backup/local-backup.model';
 import * as path from 'path';

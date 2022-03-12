@@ -28,10 +28,10 @@ import {
   tap,
   withLatestFrom,
 } from 'rxjs/operators';
-import { lazySetInterval } from '../../../../../electron/lazy-set-interval';
+import { lazySetInterval } from '../../../../../electron/shared-with-frontend/lazy-set-interval';
 import { EMPTY, fromEvent, iif, Observable, of } from 'rxjs';
 import { IpcRenderer } from 'electron';
-import { IPC } from '../../../../../electron/ipc-events.const';
+import { IPC } from '../../../../../electron/shared-with-frontend/ipc-events.const';
 import { SimpleCounterService } from '../../simple-counter/simple-counter.service';
 import { selectIdleTime, selectIsIdle } from './idle.selectors';
 import { getWorklogStr } from '../../../util/get-work-log-str';

@@ -4,7 +4,7 @@ import { fromEvent, Observable } from 'rxjs';
 import { IS_ELECTRON } from '../../app.constants';
 import { ElectronService } from './electron.service';
 import { IpcRenderer, shell } from 'electron';
-import { IPC } from '../../../../electron/ipc-events.const';
+import { IPC } from '../../../../electron/shared-with-frontend/ipc-events.const';
 import { tap } from 'rxjs/operators';
 import { SnackService } from '../snack/snack.service';
 import { T } from '../../t.const';

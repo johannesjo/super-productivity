@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { ElectronService } from './electron.service';
-import { IPC } from '../../../../electron/ipc-events.const';
+import { IPC } from '../../../../electron/shared-with-frontend/ipc-events.const';
 import { fromEvent, Observable, of } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { IS_ELECTRON } from '../../app.constants';
