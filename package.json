@@ -104,13 +104,13 @@
     }
   ],
   "dependencies": {
-    "@electron/remote": "^2.0.1",
+    "@electron/remote": "^2.0.7",
     "electron-dl": "^3.3.0",
     "electron-localshortcut": "^3.2.1",
     "electron-log": "^4.4.1",
     "electron-window-state": "^5.0.3",
     "fs-extra": "^10.0.0",
-    "node-fetch": "^2.6.6"
+    "node-fetch": "^3.2.3"
   },
   "devDependencies": {
     "@angular-devkit/build-angular": "^13.2.5",
@@ -149,6 +149,7 @@
     "@ngx-translate/core": "^14.0.0",
     "@ngx-translate/http-loader": "^7.0.0",
     "@schematics/angular": "^13.1.2",
+    "@types/electron-localshortcut": "^3.1.0",
     "@types/file-saver": "^2.0.5",
     "@types/hammerjs": "^2.0.39",
     "@types/jasmine": "^3.10.2",
@@ -171,8 +172,8 @@
     "conventional-changelog-cli": "^2.0.21",
     "cross-env": "^7.0.3",
     "detect-it": "^4.0.1",
-    "electron": "^14.1.1",
-    "electron-builder": "22.14.5",
+    "electron": "^17.1.2",
+    "electron-builder": "^22.14.13",
     "electron-builder-notarize": "^1.2.0",
     "electron-notarize": "^1.0.0",
     "eslint": "^8.10.0",

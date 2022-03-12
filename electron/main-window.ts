@@ -15,8 +15,8 @@ import { IPC } from './ipc-events.const';
 import { getSettings } from './get-settings';
 import { readFileSync, stat } from 'fs';
 import { error, log } from 'electron-log';
-import { enable } from '@electron/remote/main';
 import { GlobalConfigState } from '../src/app/features/config/global-config.model';
+import { enable as enableRemote } from '@electron/remote/main';
 
 let mainWin: BrowserWindow;
 
@@ -88,7 +88,7 @@ export const createWindow = ({
   });
 
   // enable remote module
-  enable(mainWin.webContents);
+  enableRemote(mainWin.webContents);
 
   mainWindowState.manage(mainWin);
 

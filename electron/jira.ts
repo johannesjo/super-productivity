@@ -23,8 +23,8 @@ export const sendJiraRequest = ({
   // log('--------------------------------------------------------------------');
   // log(url);
   // log('--------------------------------------------------------------------');
-
-  fetch(url, {
+  // TODO fix
+  (fetch as any)(url, {
     ...requestInit,
     // allow self signed certificates
     ...(jiraCfg && jiraCfg.isAllowSelfSignedCertificate

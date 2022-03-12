@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 // If you import a module but never use any of the imported values other than as TypeScript types,
 // the resulting javascript file will look as if you never imported the module at all.
-import { ipcRenderer, Renderer, shell, webFrame } from 'electron';
+import { ipcRenderer, shell, webFrame } from 'electron';
 import { IS_ELECTRON } from '../../app.constants';
 import { getElectronRemoteModule } from '../../util/get-electron-remote-module';
 import { getElectron } from '../../util/get-electron';
@@ -40,7 +40,7 @@ export class ElectronService {
   constructor() {
     // Conditional imports
     if (IS_ELECTRON) {
-      const electron = getElectron() as typeof Renderer;
+      const electron = getElectron() as typeof Electron.Renderer;
       this.ipcRenderer = electron.ipcRenderer;
       this.webFrame = electron.webFrame;
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
