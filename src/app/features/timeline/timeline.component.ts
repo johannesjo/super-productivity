@@ -14,10 +14,7 @@ import { getTomorrow } from '../../util/get-tomorrow';
 import { TimelineViewEntryType } from './timeline.const';
 import { GlobalConfigService } from '../config/global-config.service';
 import { MatDialog } from '@angular/material/dialog';
-import {
-  LS_TIMELINE_CACHE,
-  LS_WAS_TIMELINE_INITIAL_DIALOG_SHOWN,
-} from '../../core/persistence/ls-keys.const';
+import { LS } from '../../core/persistence/storage-keys.const';
 import { DialogTimelineInitialSetupComponent } from './dialog-timeline-initial-setup/dialog-timeline-initial-setup.component';
 import { WorkContextService } from '../work-context/work-context.service';
 import { TaskRepeatCfgService } from '../task-repeat-cfg/task-repeat-cfg.service';
@@ -75,7 +72,7 @@ export class TimelineComponent implements OnDestroy {
                 ),
             ).pipe(
               tap((val) => {
-                saveToRealLs(LS_TIMELINE_CACHE, val);
+                saveToRealLs(LS.TIMELINE_CACHE, val);
               }),
             )
           : of([] as any);
@@ -125,7 +122,7 @@ export class TimelineComponent implements OnDestroy {
     private _http: HttpClient,
     private _snackService: SnackService,
   ) {
-    if (!localStorage.getItem(LS_WAS_TIMELINE_INITIAL_DIALOG_SHOWN)) {
+    if (!localStorage.getItem(LS.WAS_TIMELINE_INITIAL_DIALOG_SHOWN)) {
       this._matDialog.open(DialogTimelineInitialSetupComponent);
     }
     this.icalEvents$.subscribe((v) => console.log(`icalEvents$`, v));
@@ -181,7 +178,7 @@ export class TimelineComponent implements OnDestroy {
   private _getCalProviderFromCache(): TimelineCalendarMapEntry[] {
     const now = Date.now();
     return (
-      ((loadFromRealLs(LS_TIMELINE_CACHE) as TimelineCalendarMapEntry[]) || [])
+      ((loadFromRealLs(LS.TIMELINE_CACHE) as TimelineCalendarMapEntry[]) || [])
         // filter out cached past entries
         .map((provider) => ({
           ...provider,

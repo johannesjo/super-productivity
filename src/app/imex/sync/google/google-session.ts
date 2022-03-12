@@ -1,6 +1,6 @@
 // SETTINGS (not configurable under config)
 import { loadFromRealLs, saveToRealLs } from '../../../core/persistence/local-storage';
-import { LS_GOOGLE_SESSION } from '../../../core/persistence/ls-keys.const';
+import { LS } from '../../../core/persistence/storage-keys.const';
 
 export type GoogleSession = Readonly<{
   accessToken: string | null;
@@ -15,12 +15,12 @@ const DEFAULT_GOOGLE_SESSION: GoogleSession = {
 };
 
 export const getGoogleSession = (): GoogleSession => {
-  return (loadFromRealLs(LS_GOOGLE_SESSION) as GoogleSession) || DEFAULT_GOOGLE_SESSION;
+  return (loadFromRealLs(LS.GOOGLE_SESSION) as GoogleSession) || DEFAULT_GOOGLE_SESSION;
 };
 
 export const updateGoogleSession = (googleSession: Partial<GoogleSession>): void => {
   const current = getGoogleSession();
-  saveToRealLs(LS_GOOGLE_SESSION, {
+  saveToRealLs(LS.GOOGLE_SESSION, {
     ...current,
     ...googleSession,
   });

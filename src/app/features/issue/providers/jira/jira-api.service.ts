@@ -46,7 +46,7 @@ import { getErrorTxt } from '../../../../util/get-error-text';
 import { isOnline } from '../../../../util/is-online';
 import { GlobalProgressBarService } from '../../../../core-ui/global-progress-bar/global-progress-bar.service';
 import { ipcRenderer, IpcRendererEvent } from 'electron';
-import { SS_JIRA_WONKY_COOKIE } from '../../../../core/persistence/ls-keys.const';
+import { SS } from '../../../../core/persistence/storage-keys.const';
 import { MatDialog } from '@angular/material/dialog';
 import { DialogPromptComponent } from '../../../../ui/dialog-prompt/dialog-prompt.component';
 import { stripTrailing } from '../../../../util/strip-trailing';
@@ -470,7 +470,7 @@ export class JiraApiService {
         'Content-Type': 'application/json',
         ...(IS_ELECTRON && cfg.isWonkyCookieMode
           ? {
-              Cookie: sessionStorage.getItem(SS_JIRA_WONKY_COOKIE) as string,
+              Cookie: sessionStorage.getItem(SS.JIRA_WONKY_COOKIE) as string,
             }
           : cfg.usePAT
           ? {
@@ -488,7 +488,7 @@ export class JiraApiService {
   }
 
   private async _checkSetWonkyCookie(cfg: JiraCfg): Promise<string | null> {
-    const ssVal = sessionStorage.getItem(SS_JIRA_WONKY_COOKIE);
+    const ssVal = sessionStorage.getItem(SS.JIRA_WONKY_COOKIE);
     if (ssVal && ssVal.length > 0) {
       return ssVal;
     } else {
@@ -517,7 +517,7 @@ export class JiraApiService {
         .toPromise();
 
       if (typeof val === 'string') {
-        sessionStorage.setItem(SS_JIRA_WONKY_COOKIE, val);
+        sessionStorage.setItem(SS.JIRA_WONKY_COOKIE, val);
         return val;
       }
     }
@@ -615,7 +615,7 @@ export class JiraApiService {
     // TODO also shut down all existing requests
     this._isBlockAccess = true;
     sessionStorage.setItem(BLOCK_ACCESS_KEY, 'true');
-    sessionStorage.removeItem(SS_JIRA_WONKY_COOKIE);
+    sessionStorage.removeItem(SS.JIRA_WONKY_COOKIE);
   }
 
   private _b64EncodeUnicode(str: string): string {

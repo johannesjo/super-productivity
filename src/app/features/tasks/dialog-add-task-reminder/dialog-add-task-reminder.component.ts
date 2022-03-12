@@ -8,10 +8,7 @@ import { AddTaskReminderInterface } from './add-task-reminder-interface';
 import { throttle } from 'helpful-decorators';
 import { Task, TaskReminderOption, TaskReminderOptionId } from '../task.model';
 import { millisecondsDiffToRemindOption } from '../util/remind-option-to-milliseconds';
-import {
-  LS_LAST_IS_MOVE_SCHEDULED_TO_BACKLOG_ADD,
-  LS_LAST_IS_MOVE_SCHEDULED_TO_BACKLOG_EDIT,
-} from '../../../core/persistence/ls-keys.const';
+import { LS } from '../../../core/persistence/storage-keys.const';
 import { isToday } from '../../../util/is-today.util';
 import { DialogConfirmComponent } from '../../../ui/dialog-confirm/dialog-confirm.component';
 import { TASK_REMINDER_OPTIONS } from './task-reminder-options.const';
@@ -30,8 +27,8 @@ export class DialogAddTaskReminderComponent {
     : undefined;
   isEdit: boolean = !!(this.reminder && this.reminder.id);
   LS_KEY = this.isEdit
-    ? LS_LAST_IS_MOVE_SCHEDULED_TO_BACKLOG_EDIT
-    : LS_LAST_IS_MOVE_SCHEDULED_TO_BACKLOG_ADD;
+    ? LS.LAST_IS_MOVE_SCHEDULED_TO_BACKLOG_EDIT
+    : LS.LAST_IS_MOVE_SCHEDULED_TO_BACKLOG_ADD;
 
   dateTime?: number = this.task.plannedAt || undefined;
   isShowMoveToBacklog: boolean =

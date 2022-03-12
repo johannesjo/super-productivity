@@ -6,7 +6,7 @@ import {
   Output,
 } from '@angular/core';
 import { T } from '../../t.const';
-import { LS_LAST_REMINDER_DATE } from '../../core/persistence/ls-keys.const';
+import { LS } from '../../core/persistence/storage-keys.const';
 import { timestampToDatetimeInputString } from '../../util/timestamp-to-datetime-input-string';
 
 @Component({
@@ -26,7 +26,7 @@ export class DatetimeInputComponent {
   T: typeof T = T;
 
   constructor() {
-    const lastVal = localStorage.getItem(LS_LAST_REMINDER_DATE);
+    const lastVal = localStorage.getItem(LS.LAST_REMINDER_DATE);
     if (lastVal !== null && +lastVal > Date.now()) {
       this.lastVal = +lastVal;
     }
@@ -87,7 +87,7 @@ export class DatetimeInputComponent {
     this.modelChange.emit(v as number);
 
     if (isFromInput) {
-      localStorage.setItem(LS_LAST_REMINDER_DATE, v.toString());
+      localStorage.setItem(LS.LAST_REMINDER_DATE, v.toString());
     } else {
       // required to update view value
       this.strValue = this._convertToIsoString(v as number);

@@ -3,7 +3,7 @@ import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { T } from '../../t.const';
 import { Subscription } from 'rxjs';
 import { ESCAPE } from '@angular/cdk/keycodes';
-import { LS_LAST_FULLSCREEN_EDIT_VIEW_MODE } from '../../core/persistence/ls-keys.const';
+import { LS } from '../../core/persistence/storage-keys.const';
 import { isSmallScreen } from '../../util/is-small-screen';
 
 type ViewMode = 'SPLIT' | 'PARSED' | 'TEXT_ONLY';
@@ -25,7 +25,7 @@ export class DialogFullscreenMarkdownComponent implements OnDestroy {
     private _matDialogRef: MatDialogRef<DialogFullscreenMarkdownComponent>,
     @Inject(MAT_DIALOG_DATA) public data: any,
   ) {
-    const lastViewMode = localStorage.getItem(LS_LAST_FULLSCREEN_EDIT_VIEW_MODE);
+    const lastViewMode = localStorage.getItem(LS.LAST_FULLSCREEN_EDIT_VIEW_MODE);
     if (ALL_VIEW_MODES.includes(lastViewMode as ViewMode)) {
       this.viewMode = lastViewMode as ViewMode;
       console.log(this.viewMode, isSmallScreen());
@@ -56,6 +56,6 @@ export class DialogFullscreenMarkdownComponent implements OnDestroy {
   }
 
   onViewModeChange(): void {
-    localStorage.setItem(LS_LAST_FULLSCREEN_EDIT_VIEW_MODE, this.viewMode);
+    localStorage.setItem(LS.LAST_FULLSCREEN_EDIT_VIEW_MODE, this.viewMode);
   }
 }

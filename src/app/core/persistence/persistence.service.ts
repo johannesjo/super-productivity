@@ -1,11 +1,11 @@
 import { Injectable } from '@angular/core';
 import {
   AllowedDBKeys,
-  LS_BACKUP,
-  LS_LAST_LOCAL_SYNC_MODEL_CHANGE,
-  LS_PROJECT_ARCHIVE,
-  LS_PROJECT_PREFIX,
-} from './ls-keys.const';
+  DB,
+  DB_LEGACY,
+  DB_LEGACY_PROJECT_PREFIX,
+  LS,
+} from './storage-keys.const';
 import { GlobalConfigState } from '../../features/config/global-config.model';
 import {
   ArchiveTask,
@@ -174,7 +174,7 @@ export class PersistenceService {
   async loadProjectArchive(): Promise<ProjectArchive> {
     return await this._loadFromDb({
       dbKey: 'archivedProjects',
-      legacyDBKey: LS_PROJECT_ARCHIVE,
+      legacyDBKey: DB_LEGACY.PROJECT_ARCHIVE,
     });
   }
 
@@ -193,7 +193,7 @@ export class PersistenceService {
   async loadArchivedProject(projectId: string): Promise<ProjectArchivedRelatedData> {
     const archive = await this._loadFromDb({
       dbKey: 'project',
-      legacyDBKey: LS_PROJECT_ARCHIVE,
+      legacyDBKey: DB_LEGACY.PROJECT_ARCHIVE,
       projectId,
     });
     const projectDataCompressed = archive[projectId];
@@ -209,7 +209,7 @@ export class PersistenceService {
   async removeArchivedProject(projectId: string): Promise<void> {
     const archive = await this._loadFromDb({
       dbKey: 'archivedProjects',
-      legacyDBKey: LS_PROJECT_ARCHIVE,
+      legacyDBKey: DB_LEGACY.PROJECT_ARCHIVE,
     });
     delete archive[projectId];
     await this.saveProjectArchive(archive);
@@ -296,11 +296,11 @@ export class PersistenceService {
     if (!environment || !environment.production) {
       console.log('Save Last Local Sync Model Change', date);
     }
-    localStorage.setItem(LS_LAST_LOCAL_SYNC_MODEL_CHANGE, date.toString());
+    localStorage.setItem(LS.LAST_LOCAL_SYNC_MODEL_CHANGE, date.toString());
   }
 
   getLastLocalSyncModelChange(): number | null {
-    const la = localStorage.getItem(LS_LAST_LOCAL_SYNC_MODEL_CHANGE);
+    const la = localStorage.getItem(LS.LAST_LOCAL_SYNC_MODEL_CHANGE);
     // NOTE: we need to parse because new Date('1570549698000') is "Invalid Date"
     const laParsed = Number.isNaN(Number(la)) ? la : +(la as string);
 
@@ -313,13 +313,13 @@ export class PersistenceService {
   }
 
   async loadBackup(): Promise<AppDataComplete> {
-    return this._loadFromDb({ dbKey: LS_BACKUP, legacyDBKey: LS_BACKUP });
+    return this._loadFromDb({ dbKey: DB.BACKUP, legacyDBKey: DB.BACKUP });
   }
 
   async saveBackup(backup?: AppDataComplete): Promise<unknown> {
     const data: AppDataComplete = backup || (await this.loadComplete());
     return this._saveToDb({
-      dbKey: LS_BACKUP,
+      dbKey: DB.BACKUP,
       data,
       isDataImport: true,
       isSyncModelChange: true,
@@ -327,7 +327,7 @@ export class PersistenceService {
   }
 
   async clearBackup(): Promise<unknown> {
-    return this._removeFromDb({ dbKey: LS_BACKUP });
+    return this._removeFromDb({ dbKey: DB.BACKUP });
   }
 
   // NOTE: not including backup
@@ -420,7 +420,7 @@ export class PersistenceService {
 
   // ------------------
   private _cmBase<T>({
-    lsKey,
+    legacyKey,
     appDataKey,
     migrateFn = (v) => v,
     // NOTE: isSkipPush is used to use this for _cmBaseEntity as well
@@ -430,8 +430,10 @@ export class PersistenceService {
       appDataKey,
       loadState: (isSkipMigrate = false) =>
         isSkipMigrate
-          ? this._loadFromDb({ dbKey: appDataKey, legacyDBKey: lsKey })
-          : this._loadFromDb({ dbKey: appDataKey, legacyDBKey: lsKey }).then(migrateFn),
+          ? this._loadFromDb({ dbKey: appDataKey, legacyDBKey: legacyKey })
+          : this._loadFromDb({ dbKey: appDataKey, legacyDBKey: legacyKey }).then(
+              migrateFn,
+            ),
       // In case we want to check on load
       // loadState: async (isSkipMigrate = false) => {
       //   const data = isSkipMigrate
@@ -467,7 +469,7 @@ export class PersistenceService {
   }
 
   private _cmBaseEntity<S, M>({
-    lsKey,
+    legacyKey,
     appDataKey,
     modelVersion,
     reducerFn,
@@ -475,7 +477,13 @@ export class PersistenceService {
   }: PersistenceEntityModelCfg<S, M>): PersistenceBaseEntityModel<S, M> {
     const model = {
       // NOTE: isSkipPush is true because we do it below after
-      ...this._cmBase({ lsKey, appDataKey, modelVersion, migrateFn, isSkipPush: true }),
+      ...this._cmBase({
+        legacyKey: legacyKey,
+        appDataKey,
+        modelVersion,
+        migrateFn,
+        isSkipPush: true,
+      }),
 
       getById: async (id: string): Promise<M> => {
         const state = (await model.loadState()) as any;
@@ -505,7 +513,7 @@ export class PersistenceService {
 
   // TODO maybe find a way to exec effects here as well
   private _cmProject<S, M>({
-    lsKey,
+    legacyKey,
     appDataKey,
   }: // migrateFn = (v) => v,
   PersistenceProjectModelCfg<S, M>): PersistenceForProjectModel<S, M> {
@@ -515,7 +523,7 @@ export class PersistenceService {
         this._loadFromDb({
           dbKey: appDataKey,
           projectId,
-          legacyDBKey: this._makeProjectKey(projectId, lsKey),
+          legacyDBKey: this._makeLegacyProjectKey(projectId, legacyKey),
         }),
       // }).then((v) => migrateFn(v, projectId)),
       save: (
@@ -586,13 +594,17 @@ export class PersistenceService {
     return await Promise.all(promises);
   }
 
-  private _makeProjectKey(
+  private _makeLegacyProjectKey(
     projectId: string,
     subKey: string,
     additional?: string,
   ): string {
     return (
-      LS_PROJECT_PREFIX + projectId + '_' + subKey + (additional ? '_' + additional : '')
+      DB_LEGACY_PROJECT_PREFIX +
+      projectId +
+      '_' +
+      subKey +
+      (additional ? '_' + additional : '')
     );
   }
 

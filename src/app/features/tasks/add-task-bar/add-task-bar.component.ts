@@ -42,7 +42,7 @@ import { shortSyntaxToTags } from './short-syntax-to-tags.util';
 import { slideAnimation } from '../../../ui/animations/slide.ani';
 import { blendInOutAnimation } from 'src/app/ui/animations/blend-in-out.ani';
 import { fadeAnimation } from '../../../ui/animations/fade.ani';
-import { SS_TODO_TMP } from '../../../core/persistence/ls-keys.const';
+import { SS } from '../../../core/persistence/storage-keys.const';
 import { IS_ANDROID_WEB_VIEW } from '../../../util/is-android-web-view';
 
 @Component({
@@ -199,9 +199,9 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
       );
     });
 
-    const savedTodo = sessionStorage.getItem(SS_TODO_TMP) || '';
+    const savedTodo = sessionStorage.getItem(SS.TODO_TMP) || '';
     if (savedTodo) {
-      sessionStorage.setItem(SS_TODO_TMP, '');
+      sessionStorage.setItem(SS.TODO_TMP, '');
       this.taskSuggestionsCtrl.setValue(savedTodo);
       this._saveTmpTodoTimeout = window.setTimeout(() => {
         (this.inputEl as ElementRef).nativeElement.value = savedTodo;
@@ -253,7 +253,7 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
       (relatedTarget && !relatedTarget.className.includes('close-btn') && !isUIelement)
     ) {
       sessionStorage.setItem(
-        SS_TODO_TMP,
+        SS.TODO_TMP,
         (this.inputEl as ElementRef).nativeElement.value,
       );
     }

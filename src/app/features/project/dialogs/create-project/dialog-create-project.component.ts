@@ -16,7 +16,7 @@ import { JiraCfg } from '../../../issue/providers/jira/jira.model';
 import { CREATE_PROJECT_BASIC_CONFIG_FORM_CONFIG } from '../../project-form-cfg.const';
 import { IssueIntegrationCfgs } from '../../../issue/issue.model';
 import { DialogJiraInitialSetupComponent } from '../../../issue/providers/jira/jira-view-components/dialog-jira-initial-setup/dialog-jira-initial-setup.component';
-import { SS_PROJECT_TMP } from '../../../../core/persistence/ls-keys.const';
+import { SS } from '../../../../core/persistence/storage-keys.const';
 import { Subscription } from 'rxjs';
 import {
   loadFromSessionStorage,
@@ -94,7 +94,7 @@ export class DialogCreateProjectComponent implements OnInit, OnDestroy {
     if (this._project) {
       this.projectData = { ...this._project };
     } else {
-      const ssVal: any = loadFromSessionStorage(SS_PROJECT_TMP);
+      const ssVal: any = loadFromSessionStorage(SS.PROJECT_TMP);
       if (ssVal) {
         this.projectData = {
           ...DEFAULT_PROJECT,
@@ -119,7 +119,7 @@ export class DialogCreateProjectComponent implements OnInit, OnDestroy {
           issueIntegrationCfgs,
         };
         if (this._isSaveTmpProject) {
-          saveToSessionStorage(SS_PROJECT_TMP, projectDataToSave);
+          saveToSessionStorage(SS.PROJECT_TMP, projectDataToSave);
         }
       });
     }
@@ -165,7 +165,7 @@ export class DialogCreateProjectComponent implements OnInit, OnDestroy {
       this._projectService.add(projectDataToSave);
     }
     this._isSaveTmpProject = false;
-    sessionStorage.removeItem(SS_PROJECT_TMP);
+    sessionStorage.removeItem(SS.PROJECT_TMP);
 
     this._matDialogRef.close();
   }

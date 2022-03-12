@@ -4,21 +4,7 @@ import {
   PersistenceProjectModelCfg,
 } from './persistence.model';
 import { GlobalConfigState } from '../../features/config/global-config.model';
-import {
-  LS_BOOKMARK_STATE,
-  LS_GLOBAL_CFG,
-  LS_IMPROVEMENT_STATE,
-  LS_METRIC_STATE,
-  LS_NOTE_STATE,
-  LS_OBSTRUCTION_STATE,
-  LS_PROJECT_META_LIST,
-  LS_REMINDER,
-  LS_SIMPLE_COUNTER_STATE,
-  LS_TAG_STATE,
-  LS_TASK_ARCHIVE,
-  LS_TASK_REPEAT_CFG_STATE,
-  LS_TASK_STATE,
-} from './ls-keys.const';
+import { DB_LEGACY } from './storage-keys.const';
 import { migrateGlobalConfigState } from '../../features/config/migrate-global-config.util';
 import { Reminder } from '../../features/reminder/reminder.model';
 import { Project, ProjectState } from '../../features/project/project.model';
@@ -103,13 +89,13 @@ interface PersistenceProjectModelCfgs {
 
 export const BASE_MODEL_CFGS: PersistenceBaseModelCfgs = {
   globalConfig: {
-    lsKey: LS_GLOBAL_CFG,
+    legacyKey: DB_LEGACY.GLOBAL_CFG,
     appDataKey: 'globalConfig',
     modelVersion: MODEL_VERSION.GLOBAL_CONFIG,
     migrateFn: migrateGlobalConfigState,
   },
   reminders: {
-    lsKey: LS_REMINDER,
+    legacyKey: DB_LEGACY.REMINDER,
     appDataKey: 'reminders',
     modelVersion: MODEL_VERSION.___NOT_USED_YET___,
     // no migrations needed yet
@@ -119,7 +105,7 @@ export const BASE_MODEL_CFGS: PersistenceBaseModelCfgs = {
 
 export const ENTITY_MODEL_CFGS: PersistenceEntityModelCfgs = {
   project: {
-    lsKey: LS_PROJECT_META_LIST,
+    legacyKey: DB_LEGACY.PROJECT_META_LIST,
     appDataKey: 'project',
     modelVersion: MODEL_VERSION.PROJECT,
     reducerFn: projectReducer as any,
@@ -127,21 +113,21 @@ export const ENTITY_MODEL_CFGS: PersistenceEntityModelCfgs = {
   },
 
   tag: {
-    lsKey: LS_TAG_STATE,
+    legacyKey: DB_LEGACY.TAG_STATE,
     appDataKey: 'tag',
     modelVersion: MODEL_VERSION.TAG,
     reducerFn: tagReducer,
     migrateFn: migrateTagState,
   },
   simpleCounter: {
-    lsKey: LS_SIMPLE_COUNTER_STATE,
+    legacyKey: DB_LEGACY.SIMPLE_COUNTER_STATE,
     appDataKey: 'simpleCounter',
     modelVersion: MODEL_VERSION.SIMPLE_COUNTER,
     reducerFn: simpleCounterReducer,
     migrateFn: migrateSimpleCounterState,
   },
   note: {
-    lsKey: LS_NOTE_STATE,
+    legacyKey: DB_LEGACY.NOTE_STATE,
     appDataKey: 'note',
     modelVersion: MODEL_VERSION.NOTE,
     reducerFn: noteReducer,
@@ -150,14 +136,14 @@ export const ENTITY_MODEL_CFGS: PersistenceEntityModelCfgs = {
 
   // METRIC MODELS
   metric: {
-    lsKey: LS_METRIC_STATE,
+    legacyKey: DB_LEGACY.METRIC_STATE,
     appDataKey: 'metric',
     modelVersion: MODEL_VERSION.METRIC,
     reducerFn: metricReducer as any,
     migrateFn: migrateMetricState,
   },
   improvement: {
-    lsKey: LS_IMPROVEMENT_STATE,
+    legacyKey: DB_LEGACY.IMPROVEMENT_STATE,
     appDataKey: 'improvement',
     modelVersion: MODEL_VERSION.___NOT_USED_YET___,
     reducerFn: improvementReducer,
@@ -165,7 +151,7 @@ export const ENTITY_MODEL_CFGS: PersistenceEntityModelCfgs = {
   },
 
   obstruction: {
-    lsKey: LS_OBSTRUCTION_STATE,
+    legacyKey: DB_LEGACY.OBSTRUCTION_STATE,
     appDataKey: 'obstruction',
     modelVersion: MODEL_VERSION.___NOT_USED_YET___,
     reducerFn: obstructionReducer as any,
@@ -174,21 +160,21 @@ export const ENTITY_MODEL_CFGS: PersistenceEntityModelCfgs = {
 
   // MAIN TASK MODELS
   task: {
-    lsKey: LS_TASK_STATE,
+    legacyKey: DB_LEGACY.TASK_STATE,
     appDataKey: 'task',
     modelVersion: MODEL_VERSION.TASK,
     reducerFn: taskReducer,
     migrateFn: migrateTaskState,
   },
   taskArchive: {
-    lsKey: LS_TASK_ARCHIVE,
+    legacyKey: DB_LEGACY.TASK_ARCHIVE,
     appDataKey: 'taskArchive',
     modelVersion: MODEL_VERSION.TASK_ARCHIVE,
     reducerFn: taskReducer as any,
     migrateFn: migrateTaskArchiveState,
   },
   taskRepeatCfg: {
-    lsKey: LS_TASK_REPEAT_CFG_STATE,
+    legacyKey: DB_LEGACY.TASK_REPEAT_CFG_STATE,
     appDataKey: 'taskRepeatCfg',
     modelVersion: MODEL_VERSION.TASK_REPEAT,
     reducerFn: taskRepeatCfgReducer as any,
@@ -201,7 +187,7 @@ export const ALL_ENTITY_MODEL_KEYS: (keyof AppBaseData)[] = Object.entries(
 
 export const PROJECT_MODEL_CFGS: PersistenceProjectModelCfgs = {
   bookmark: {
-    lsKey: LS_BOOKMARK_STATE,
+    legacyKey: DB_LEGACY.BOOKMARK_STATE,
     appDataKey: 'bookmark',
   },
 };

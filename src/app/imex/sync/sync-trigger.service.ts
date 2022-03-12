@@ -24,7 +24,7 @@ import {
   SYNC_BEFORE_GOING_TO_SLEEP_THROTTLE_TIME,
   SYNC_DEFAULT_AUDIT_TIME,
 } from './sync.const';
-import { AllowedDBKeys } from '../../core/persistence/ls-keys.const';
+import { AllowedDBKeys } from '../../core/persistence/storage-keys.const';
 import { IdleService } from '../../features/idle/idle.service';
 import { IS_ELECTRON } from '../../app.constants';
 import { ElectronService } from '../../core/electron/electron.service';

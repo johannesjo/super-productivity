@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { UiModule } from '../../ui/ui.module';
 import { DialogWelcomeComponent } from './dialog-welcome/dialog-welcome.component';
 import { MatDialog } from '@angular/material/dialog';
-import { LS_HAS_WELCOME_DIALOG_BEEN_SHOWN } from '../../core/persistence/ls-keys.const';
+import { LS } from '../../core/persistence/storage-keys.const';
 import { Store } from '@ngrx/store';
 import { ProjectService } from '../project/project.service';
 import { DataInitService } from '../../core/data-init/data-init.service';
@@ -23,7 +23,7 @@ export class WelcomeModule {
     private _dataInitService: DataInitService,
   ) {
     if (
-      !localStorage.getItem(LS_HAS_WELCOME_DIALOG_BEEN_SHOWN) &&
+      !localStorage.getItem(LS.HAS_WELCOME_DIALOG_BEEN_SHOWN) &&
       navigator.userAgent !== 'NIGHTWATCH'
     ) {
       this._dataInitService.isAllDataLoadedInitially$
@@ -35,14 +35,14 @@ export class WelcomeModule {
                 .open(DialogWelcomeComponent, { autoFocus: false })
                 .afterClosed();
             } else {
-              localStorage.setItem(LS_HAS_WELCOME_DIALOG_BEEN_SHOWN, 'true');
+              localStorage.setItem(LS.HAS_WELCOME_DIALOG_BEEN_SHOWN, 'true');
               return EMPTY;
             }
           }),
         )
         .subscribe((dialogRes) => {
           if (dialogRes === true) {
-            localStorage.setItem(LS_HAS_WELCOME_DIALOG_BEEN_SHOWN, 'true');
+            localStorage.setItem(LS.HAS_WELCOME_DIALOG_BEEN_SHOWN, 'true');
           }
         });
     }

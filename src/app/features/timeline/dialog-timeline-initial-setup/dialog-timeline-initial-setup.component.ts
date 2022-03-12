@@ -8,7 +8,7 @@ import { TimelineConfig } from '../../config/global-config.model';
 import { T } from '../../../t.const';
 import { GlobalConfigService } from '../../config/global-config.service';
 import { Subscription } from 'rxjs';
-import { LS_WAS_TIMELINE_INITIAL_DIALOG_SHOWN } from '../../../core/persistence/ls-keys.const';
+import { LS } from '../../../core/persistence/storage-keys.const';
 
 @Component({
   selector: 'dialog-timeline-initial-setup',
@@ -38,7 +38,7 @@ export class DialogTimelineInitialSetupComponent implements OnDestroy {
   }
 
   saveAndClose(): void {
-    localStorage.setItem(LS_WAS_TIMELINE_INITIAL_DIALOG_SHOWN, 'true');
+    localStorage.setItem(LS.WAS_TIMELINE_INITIAL_DIALOG_SHOWN, 'true');
     this._matDialogRef.close();
     if (this.timelineCfg) {
       this._globalConfigService.updateSection('timeline', this.timelineCfg);

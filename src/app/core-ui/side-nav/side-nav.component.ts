@@ -27,10 +27,7 @@ import { FocusKeyManager } from '@angular/cdk/a11y';
 import { MatMenuItem } from '@angular/material/menu';
 import { LayoutService } from '../layout/layout.service';
 import { TaskService } from '../../features/tasks/task.service';
-import {
-  LS_IS_PROJECT_LIST_EXPANDED,
-  LS_IS_TAG_LIST_EXPANDED,
-} from '../../core/persistence/ls-keys.const';
+import { LS } from '../../core/persistence/storage-keys.const';
 import { TODAY_TAG } from '../../features/tag/tag.const';
 
 @Component({
@@ -185,21 +182,21 @@ export class SideNavComponent implements OnDestroy {
   }
 
   fetchProjectListState(): boolean {
-    return localStorage.getItem(LS_IS_PROJECT_LIST_EXPANDED) === 'true';
+    return localStorage.getItem(LS.IS_PROJECT_LIST_EXPANDED) === 'true';
   }
 
   storeProjectListState(isExpanded: boolean): void {
     this.isProjectsExpanded = isExpanded;
-    localStorage.setItem(LS_IS_PROJECT_LIST_EXPANDED, isExpanded.toString());
+    localStorage.setItem(LS.IS_PROJECT_LIST_EXPANDED, isExpanded.toString());
   }
 
   fetchTagListState(): boolean {
-    return localStorage.getItem(LS_IS_TAG_LIST_EXPANDED) === 'true';
+    return localStorage.getItem(LS.IS_TAG_LIST_EXPANDED) === 'true';
   }
 
   storeTagListState(isExpanded: boolean): void {
     this.isTagsExpanded = isExpanded;
-    localStorage.setItem(LS_IS_TAG_LIST_EXPANDED, isExpanded.toString());
+    localStorage.setItem(LS.IS_TAG_LIST_EXPANDED, isExpanded.toString());
   }
 
   toggleExpandProjects(): void {

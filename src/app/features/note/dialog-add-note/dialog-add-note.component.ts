@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { MatDialogRef } from '@angular/material/dialog';
 import { NoteService } from '../note.service';
-import { SS_NOTE_TMP } from '../../../core/persistence/ls-keys.const';
+import { SS } from '../../../core/persistence/storage-keys.const';
 import { T } from '../../../t.const';
 import { WorkContextService } from '../../work-context/work-context.service';
 
@@ -21,7 +21,7 @@ export class DialogAddNoteComponent {
     private _noteService: NoteService,
     private _workContextService: WorkContextService,
   ) {
-    this.noteContent = sessionStorage.getItem(SS_NOTE_TMP) || '';
+    this.noteContent = sessionStorage.getItem(SS.NOTE_TMP) || '';
   }
 
   keydownHandler(ev: KeyboardEvent): void {
@@ -45,10 +45,10 @@ export class DialogAddNoteComponent {
   }
 
   saveTmp(val: string = this.noteContent || ''): void {
-    sessionStorage.setItem(SS_NOTE_TMP, val);
+    sessionStorage.setItem(SS.NOTE_TMP, val);
   }
 
   private _clearSessionStorage(): void {
-    sessionStorage.setItem(SS_NOTE_TMP, '');
+    sessionStorage.setItem(SS.NOTE_TMP, '');
   }
 }

@@ -8,7 +8,7 @@ import { T } from '../../t.const';
 import { DataInitService } from '../../core/data-init/data-init.service';
 import { isValidAppData } from './is-valid-app-data.util';
 import { DataRepairService } from '../../core/data-repair/data-repair.service';
-import { LS_CHECK_STRAY_PERSISTENCE_BACKUP } from '../../core/persistence/ls-keys.const';
+import { LS } from '../../core/persistence/storage-keys.const';
 import { TranslateService } from '@ngx-translate/core';
 import { GLOBAL_CONFIG_LOCAL_ONLY_FIELDS } from './sync.const';
 import { get, set } from 'object-path';
@@ -160,11 +160,11 @@ export class DataImportService {
 
   private async _isCheckForStrayLocalDBBackupAndImport(): Promise<boolean> {
     const backup = await this._persistenceService.loadBackup();
-    if (!localStorage.getItem(LS_CHECK_STRAY_PERSISTENCE_BACKUP)) {
+    if (!localStorage.getItem(LS.CHECK_STRAY_PERSISTENCE_BACKUP)) {
       if (backup) {
         await this._persistenceService.clearBackup();
       }
-      localStorage.setItem(LS_CHECK_STRAY_PERSISTENCE_BACKUP, 'true');
+      localStorage.setItem(LS.CHECK_STRAY_PERSISTENCE_BACKUP, 'true');
     }
 
     if (backup) {

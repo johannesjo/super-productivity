@@ -70,7 +70,7 @@ import { ElectronService } from '../../../core/electron/electron.service';
 import { LayoutService } from '../../../core-ui/layout/layout.service';
 import { ipcRenderer } from 'electron';
 import { devError } from '../../../util/dev-error';
-import { SS_JIRA_WONKY_COOKIE } from '../../../core/persistence/ls-keys.const';
+import { SS } from '../../../core/persistence/storage-keys.const';
 import { IS_MOBILE } from '../../../util/is-mobile';
 import { GlobalConfigService } from '../../config/global-config.service';
 import { shareReplayUntil } from '../../../util/share-replay-until';
@@ -273,7 +273,7 @@ export class TaskAdditionalInfoComponent implements AfterViewInit, OnDestroy {
                 jiraCfg,
                 wonkyCookie:
                   jiraCfg.isWonkyCookieMode &&
-                  sessionStorage.getItem(SS_JIRA_WONKY_COOKIE),
+                  sessionStorage.getItem(SS.JIRA_WONKY_COOKIE),
               },
             );
           }
