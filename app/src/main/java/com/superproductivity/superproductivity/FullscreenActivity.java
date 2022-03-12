@@ -1,12 +1,7 @@
 package com.superproductivity.superproductivity;
 
-import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
-
-import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.Intent;
-import android.content.pm.ApplicationInfo;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
@@ -16,7 +11,9 @@ import android.webkit.WebResourceRequest;
 import android.webkit.WebResourceResponse;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
-import android.widget.FrameLayout;
+
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
 
 import java.util.Objects;
 
@@ -40,16 +37,11 @@ public class FullscreenActivity extends AppCompatActivity {
             Log.v("TW", "FullScreenActivity: onCreate reload");
         }
 
-        // boolean IS_DEBUG = 0 != (getApplicationInfo().flags & ApplicationInfo.FLAG_DEBUGGABLE);
-
         // hide action bar
         Objects.requireNonNull(getSupportActionBar()).hide();
-        setContentView(R.layout.activity_fullscreen);
-
         // init web view
         wv = WebHelper.getWebView();
-        FrameLayout frameLayout = findViewById(R.id.webview_wrapper);
-        frameLayout.addView(wv);
+        setContentView(wv);
 
         // init JS here, as it needs an activity to work
         jsi = new JavaScriptInterface(this, wv);
@@ -119,10 +111,6 @@ public class FullscreenActivity extends AppCompatActivity {
                 return true;
             }
         });
-
-        // In case we want to make sure the most recent version is loaded
-        // wv.clearCache(true);
-        // wv.clearHistory();
     }
 
     @Override
@@ -165,21 +153,22 @@ public class FullscreenActivity extends AppCompatActivity {
         Log.v("TW", "FullScreenActivity: onNewIntent");
         String action = intent.getStringExtra("action");
         Log.v("TW", "FullScreenActivity: action " + action);
-        if (action != null) {
-            if (action.equals(KeepAliveNotificationService.EXTRA_ACTION_PAUSE)) {
+        switch (action) {
+            case KeepAliveNotificationService.EXTRA_ACTION_PAUSE:
                 callJSInterfaceFunctionIfExists("next", "onPauseCurrentTask$");
-            } else if (action.equals(KeepAliveNotificationService.EXTRA_ACTION_DONE)) {
+                break;
+            case KeepAliveNotificationService.EXTRA_ACTION_DONE:
                 callJSInterfaceFunctionIfExists("next", "onMarkCurrentTaskAsDone$");
-            } else if (action.equals(KeepAliveNotificationService.EXTRA_ACTION_ADD_TASK)) {
+                break;
+            case KeepAliveNotificationService.EXTRA_ACTION_ADD_TASK:
                 callJSInterfaceFunctionIfExists("next", "onAddNewTask$");
-            }
+                break;
         }
     }
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-//        Toast.makeText(this, "Google onActivityResult", Toast.LENGTH_SHORT).show();
         jsi.onActivityResult(requestCode, resultCode, data);
     }
 

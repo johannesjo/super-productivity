@@ -33,12 +33,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-import javax.net.ssl.HttpsURLConnection;
-
 public class CommonJavaScriptInterface {
     protected FullscreenActivity mContext;
-    private final WebView webView;
-    private final KeyValStore dbHelper;
     // TODO rename to WINDOW_PROPERTY
     private final static String INTERFACE_PROPERTY = FullscreenActivity.INTERFACE_PROPERTY;
     private final static String FN_PREFIX = "window." + INTERFACE_PROPERTY + ".";
@@ -48,8 +44,6 @@ public class CommonJavaScriptInterface {
      */
     CommonJavaScriptInterface(FullscreenActivity c, WebView wv) {
         mContext = c;
-        webView = wv;
-        dbHelper = new KeyValStore(c);
     }
 
     void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -159,7 +153,14 @@ public class CommonJavaScriptInterface {
         mBuilder.build().flags |= Notification.FLAG_AUTO_CANCEL;
 
         Intent ii = new Intent(mContext.getApplicationContext(), FullscreenActivity.class);
-        PendingIntent pendingIntent = PendingIntent.getActivity(mContext, 0, ii, PendingIntent.FLAG_MUTABLE);
+        PendingIntent pendingIntent;
+        int pendingIntentFlags;
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
+            pendingIntentFlags = PendingIntent.FLAG_MUTABLE;
+        } else {
+            pendingIntentFlags = 0;
+        }
+        pendingIntent = PendingIntent.getActivity(mContext, 0, ii, pendingIntentFlags);
 
         NotificationCompat.BigTextStyle bigText = new NotificationCompat.BigTextStyle();
         bigText.setBigContentTitle(title);
@@ -219,9 +220,6 @@ public class CommonJavaScriptInterface {
         try {
             URL url = new URL(urlString);
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-            if (connection instanceof HttpsURLConnection) {
-
-            }
             if (!username.isEmpty() && !password.isEmpty()) {
                 String auth = username + ":" + password;
                 String encodedAuth = Base64.encodeToString(auth.getBytes(StandardCharsets.UTF_8), Base64.NO_WRAP);
@@ -302,8 +300,7 @@ public class CommonJavaScriptInterface {
         _callJavaScriptFunction(FN_PREFIX + "makeHttpRequestCallback('" + requestId + "', " + result + ")");
     }
 
-    @SuppressWarnings("unused")
-    private void _callJavaScriptFunction(final String script) {
+    protected void _callJavaScriptFunction(final String script) {
         mContext.callJavaScriptFunction(script);
     }
 }
