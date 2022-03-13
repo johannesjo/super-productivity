@@ -21,7 +21,7 @@ public class Google {
 
 
     Google() {
-        TOKEN = BuildConfig.CLIENT_ID_WEB;
+        TOKEN = GoogleClientId.CLIENT_ID_WEB;
     }
 
     private GoogleSignInClient googleSignInClient;

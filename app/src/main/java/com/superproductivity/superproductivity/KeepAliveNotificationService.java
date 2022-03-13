@@ -22,6 +22,8 @@ public class KeepAliveNotificationService extends Service {
     private static final int NOTIFY_ID = 1;
     private static final String NOTIFY_CHANNEL_ID = "SUP_KeepAlive";
     private NotificationManager notificationManager;
+    private final NotificationCompat.Builder builder = new NotificationCompat.Builder(this,
+            NOTIFY_CHANNEL_ID);
     public static final String UPDATE_PERMANENT_NOTIFICATION = "com.superproductivity.superproductivity.UPDATE_PERMANENT_NOTIFICATION";
     public final static String EXTRA_ACTION_DONE = "DONE";
     public final static String EXTRA_ACTION_PAUSE = "PAUSE";
@@ -79,8 +81,9 @@ public class KeepAliveNotificationService extends Service {
     }
 
 
+    @SuppressLint("RestrictedApi")
     public void updateNotification(String title, String message, int progress) {
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(this, NOTIFY_CHANNEL_ID);
+        builder.mActions.clear();
         if (progress == 999) {
             builder.setSmallIcon(R.drawable.ic_stat_sync);
             builder.setProgress(100, progress, true);
@@ -140,7 +143,7 @@ public class KeepAliveNotificationService extends Service {
             // create notification
             Intent notificationIntent = new Intent(this, FullscreenActivity.class);
 
-            PendingIntent pendingIntent;
+            PendingIntent pendingIntent = null;
             if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
                 pendingIntent = PendingIntent.getActivity(this, 0,
                         notificationIntent, PendingIntent.FLAG_MUTABLE);
@@ -150,11 +153,11 @@ public class KeepAliveNotificationService extends Service {
             }
 
 
-            Notification notification = new NotificationCompat.Builder(this, NOTIFY_CHANNEL_ID)
+            Notification notification = builder
                     .setOngoing(true)
                     .setOnlyAlertOnce(true)
                     .setSmallIcon(R.drawable.ic_stat_sp)
-                    .setContentText(getString(R.string.service_background))
+                    .setContentText("Service is running background")
                     .setContentIntent(pendingIntent)
                     .build();
 

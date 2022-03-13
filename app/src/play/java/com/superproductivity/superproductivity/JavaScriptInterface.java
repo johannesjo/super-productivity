@@ -90,4 +90,9 @@ public class JavaScriptInterface extends CommonJavaScriptInterface {
             FullscreenActivity activity = activityReference.get();
         }
     }
+
+
+    private void _callJavaScriptFunction(final String script) {
+        mContext.callJavaScriptFunction(script);
+    }
 }

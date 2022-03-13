@@ -27,7 +27,7 @@ public class KeyValStore extends SQLiteOpenHelper {
 
 //    private static final String CREATE_TABLE = "CREATE TABLE supKeyValStore(TEXT PRIMARY KEY,VALUE TEXT,KEY_CREATED_AT DATETIME)";
 
-    static synchronized KeyValStore getInstance(Context context) {
+    private static synchronized KeyValStore getInstance(Context context) {
         // Use the application context, which will ensure that you
         // don't accidentally leak an Activity's context.
         // See this article for more information: http://bit.ly/6LRzfx
@@ -105,7 +105,7 @@ public class KeyValStore extends SQLiteOpenHelper {
             Cursor c = db.query(DATABASE_TABLE, new String[]{VALUE}, KEY + "=?", new String[]{key}, null, null, null);
             if (c != null) {
                 if (c.moveToNext()) {
-                    value = c.getString(c.getColumnIndexOrThrow(VALUE));
+                    value = c.getString(c.getColumnIndex(VALUE));
                 }
                 Log.v(TAG, "get db value size:" + value.length());
                 c.close();
