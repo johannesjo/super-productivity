@@ -97,14 +97,16 @@ export const selectTaskRepeatCfgsDueOnDay = createSelector(
           return false;
         }
 
+        // todo: Be more kindly
+        if (!taskRepeatCfg.startDate) {
+          // Why? Daily should only care about the last creation
+          throw new Error('Repeat startDate needs to be defined for DAILY/WEEKLY/MONTHlY/YEARLY');
+        }
+        if (+taskRepeatCfg.repeatEvery < 1) {
+          throw new Error('Invalid repeatEvery value given for DAILY/WEEKLY/MONTHlY/YEARLY');
+        }
         switch (taskRepeatCfg.repeatCycle) {
           case 'DAILY': {
-            if (!taskRepeatCfg.startDate) {
-              throw new Error('Repeat startDate needs to be defined for DAILY');
-            }
-            if (+taskRepeatCfg.repeatEvery < 1) {
-              throw new Error('Invalid repeatEvery value given for DAILY');
-            }
             const startDateDate = new Date(taskRepeatCfg.startDate);
             const diffInDays = getDiffInDays(startDateDate, dateToCheckDate);
 
@@ -115,12 +117,6 @@ export const selectTaskRepeatCfgsDueOnDay = createSelector(
           }
 
           case 'WEEKLY': {
-            if (!taskRepeatCfg.startDate) {
-              throw new Error('Repeat startDate needs to be defined for WEEKLY');
-            }
-            if (+taskRepeatCfg.repeatEvery < 1) {
-              throw new Error('Invalid repeatEvery value given for WEEKLY');
-            }
             const startDateDate = new Date(taskRepeatCfg.startDate);
 
             const todayDay = dateToCheckDate.getDay();
@@ -136,12 +132,6 @@ export const selectTaskRepeatCfgsDueOnDay = createSelector(
           }
 
           case 'MONTHLY': {
-            if (!taskRepeatCfg.startDate) {
-              throw new Error('Repeat startDate needs to be defined for MONTHLY');
-            }
-            if (+taskRepeatCfg.repeatEvery < 1) {
-              throw new Error('Invalid repeatEvery value given for MONTHLY');
-            }
             const startDateDate = new Date(taskRepeatCfg.startDate);
             const isCreationDayThisMonth =
               dateToCheckDate.getDate() === startDateDate.getDate();
@@ -156,12 +146,6 @@ export const selectTaskRepeatCfgsDueOnDay = createSelector(
           }
 
           case 'YEARLY': {
-            if (!taskRepeatCfg.startDate) {
-              throw new Error('Repeat startDate needs to be defined for YEARLY');
-            }
-            if (+taskRepeatCfg.repeatEvery < 1) {
-              throw new Error('Invalid repeatEvery value given for YEARLY');
-            }
             const startDateDate = new Date(taskRepeatCfg.startDate);
             const isRightMonthAndDay =
               dateToCheckDate.getDate() === startDateDate.getDate() &&
