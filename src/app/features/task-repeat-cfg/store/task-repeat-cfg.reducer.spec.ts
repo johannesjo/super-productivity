@@ -334,7 +334,7 @@ describe('selectTaskRepeatCfgsDueOnDay', () => {
           }),
         ],
         {
-          dayDate: new Date('2022-03-17').getTime(),
+          dayDate: new Date('2022-01-17').getTime(),
         },
       );
       const resultIds = result.map((item) => item.id);
@@ -438,7 +438,7 @@ describe('selectTaskRepeatCfgsDueOnDay', () => {
                   dummyRepeatable('R1', {
                     saturday: true,
                     repeatCycle: 'WEEKLY',
-                    startDate: '2022-01-17', // Monday
+                    startDate: '2022-01-10', // Monday
                     repeatEvery: 1,
                     lastTaskCreation: new Date(lastTaskCreation['R1'][week]).getTime(),
                   }),
