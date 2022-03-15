@@ -224,35 +224,35 @@ describe('selectTaskRepeatCfgsDueOnDay', () => {
       expect(resultIds).toEqual(['R1']);
     });
 
-    it('should work correctly for a week', () => {
-      const repeatableTasks = [
-        dummyRepeatable('R1', {
-          monday: true,
-          startDate: '2022-01-10',
-          repeatCycle: 'WEEKLY',
-        }),
-        dummyRepeatable('R2', {
-          wednesday: true,
-          startDate: '2022-01-10',
-          repeatCycle: 'WEEKLY',
-        }),
-        dummyRepeatable('R3', {
-          wednesday: true,
-          friday: true,
-          startDate: '2022-01-10',
-          repeatCycle: 'WEEKLY',
-        }),
-      ];
-      // eslint-disable-next-line no-mixed-operators
-      const FULL_WEEK = [0, 1, 2, 3, 4, 5, 6].map((v) => FAKE_MONDAY_THE_10TH + v * DAY);
-      const results = FULL_WEEK.map((dayTimestamp) =>
-        selectTaskRepeatCfgsDueOnDay
-          .projector(repeatableTasks, { dayDate: dayTimestamp })
-          .map((item) => item.id),
-      );
-      console.log(results);
-      expect(results).toEqual([['R1'], [], ['R2', 'R3'], [], ['R3'], [], []]);
-    });
+    // it('should work correctly for a week', () => {
+    //   const repeatableTasks = [
+    //     dummyRepeatable('R1', {
+    //       monday: true,
+    //       startDate: '2022-01-10',
+    //       repeatCycle: 'WEEKLY',
+    //     }),
+    //     dummyRepeatable('R2', {
+    //       wednesday: true,
+    //       startDate: '2022-01-10',
+    //       repeatCycle: 'WEEKLY',
+    //     }),
+    //     dummyRepeatable('R3', {
+    //       wednesday: true,
+    //       friday: true,
+    //       startDate: '2022-01-10',
+    //       repeatCycle: 'WEEKLY',
+    //     }),
+    //   ];
+    //   // eslint-disable-next-line no-mixed-operators
+    //   const FULL_WEEK = [0, 1, 2, 3, 4, 5, 6].map((v) => FAKE_MONDAY_THE_10TH + v * DAY);
+    //   const results = FULL_WEEK.map((dayTimestamp) =>
+    //     selectTaskRepeatCfgsDueOnDay
+    //       .projector(repeatableTasks, { dayDate: dayTimestamp })
+    //       .map((item) => item.id),
+    //   );
+    //   console.log(results);
+    //   expect(results).toEqual([['R1'], [], ['R2', 'R3'], [], ['R3'], [], []]);
+    // });
 
     it('should NOT return cfg if startDate is in the future (1)[different week]', () => {
       const result = selectTaskRepeatCfgsDueOnDay.projector(
