@@ -343,32 +343,7 @@ describe('selectTaskRepeatCfgsDueOnDay', () => {
 
     // Multiple Weeks Test
     // Please keep in mind, this test triggers every day of the week. Hence, it does not test the behaviour, if a day is skipped.
-    const repeatableTasksForMultiWeekTest = [
-      dummyRepeatable('R1', {
-        monday: true,
-        repeatCycle: 'WEEKLY',
-        startDate: '2022-01-10', // Monday
-        repeatEvery: 2,
-      }),
-      dummyRepeatable('R2', {
-        wednesday: true,
-        startDate: '2022-01-23', // Sunday
-        repeatCycle: 'WEEKLY',
-      }),
-      dummyRepeatable('R3', {
-        wednesday: true,
-        friday: true,
-        startDate: '2022-01-10', // Monday
-        repeatCycle: 'WEEKLY',
-        repeatEvery: 1,
-      }),
-      dummyRepeatable('R4', {
-        friday: true,
-        startDate: '2022-01-14', // Friday
-        repeatCycle: 'WEEKLY',
-        repeatEvery: 3,
-      }),
-    ];
+    // For convenience of the test, lastTaskCreation is always the day before the day we test.
     const expectedMultipleTest = {
       // R1 is every 2 weeks
       // R3 repeats every week, (starts in the first week, at the first day)
@@ -384,11 +359,46 @@ describe('selectTaskRepeatCfgsDueOnDay', () => {
         // prettier-ignore
         // eslint-disable-next-line no-mixed-operators
         const FULL_WEEK = [0, 1, 2, 3, 4, 5, 6].map((v) => FAKE_MONDAY_THE_10TH + (week * 7 * DAY) + v * DAY);
-        const results = FULL_WEEK.map((dayTimestamp) =>
-          selectTaskRepeatCfgsDueOnDay
-            .projector(repeatableTasksForMultiWeekTest, { dayDate: dayTimestamp })
-            .map((item) => item.id),
-        );
+        const results = [] as any;
+        for (const dayTimestamp of FULL_WEEK) {
+          results.push(
+            selectTaskRepeatCfgsDueOnDay
+              .projector(
+                [
+                  dummyRepeatable('R1', {
+                    monday: true,
+                    repeatCycle: 'WEEKLY',
+                    startDate: '2022-01-10', // Monday
+                    repeatEvery: 2,
+                    lastTaskCreation: dayTimestamp - DAY,
+                  }),
+                  dummyRepeatable('R2', {
+                    wednesday: true,
+                    startDate: '2022-01-23', // Sunday
+                    repeatCycle: 'WEEKLY',
+                    lastTaskCreation: dayTimestamp - DAY,
+                  }),
+                  dummyRepeatable('R3', {
+                    wednesday: true,
+                    friday: true,
+                    startDate: '2022-01-10', // Monday
+                    repeatCycle: 'WEEKLY',
+                    repeatEvery: 1,
+                    lastTaskCreation: dayTimestamp - DAY,
+                  }),
+                  dummyRepeatable('R4', {
+                    friday: true,
+                    startDate: '2022-01-14', // Friday
+                    repeatCycle: 'WEEKLY',
+                    repeatEvery: 3,
+                    lastTaskCreation: dayTimestamp - DAY,
+                  }),
+                ],
+                { dayDate: dayTimestamp },
+              )
+              .map((item) => item.id),
+          );
+        }
         // prettier-ignore
         // @ts-ignore
         const printWeekStart = new Date(FULL_WEEK[0]).toLocaleTimeString('en-us', datePrintingOptions);
@@ -405,7 +415,13 @@ describe('selectTaskRepeatCfgsDueOnDay', () => {
     // it partly tests the correct handling of the startDate as well (hence the first 'empty' week).
     // prettier-ignore
     const lastTaskCreation = {
-      'R1': ['2022-01-10', '2022-01-10', '2022-01-17', '2022-01-24'], // Monday: created, Saturday not opened; Next Monday: Update, Next Monday: Update
+      'R1': [// Monday: created, Saturday not opened; Next Monday: Update, Next Monday: Update
+        // '2022-01-10', '2022-01-10', '2022-01-17', '2022-01-24', // original, based on [week] instead of [c]; seems to be too inaccurate
+        // Monday   , Tuesday     , Wednesday   , Friday
+        '2022-01-10', '2022-01-10', '2022-01-10', '2022-01-10', // week 0 // Monday: created, Saturday not opened
+        '2022-01-10', '2022-01-17',  '2022-01-17', '2022-01-17', // week 1 // Monday repeated;
+        '2022-01-17', '2022-01-24',  '2022-01-24', '2022-01-24', // week 2 // Monday repeated;
+      ],
       'R2': [
         // Monday   , Tuesday     , Wednesday   , Friday
         '2022-01-14', '2022-01-14', '2022-01-14', '2022-01-14', // week 0 // "created repeatedTask"
@@ -440,7 +456,7 @@ describe('selectTaskRepeatCfgsDueOnDay', () => {
                     repeatCycle: 'WEEKLY',
                     startDate: '2022-01-10', // Monday
                     repeatEvery: 1,
-                    lastTaskCreation: new Date(lastTaskCreation['R1'][week]).getTime(),
+                    lastTaskCreation: new Date(lastTaskCreation['R1'][c]).getTime(),
                   }),
                   dummyRepeatable('R2', {
                     monday: true,
