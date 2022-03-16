@@ -1,11 +1,7 @@
 'use strict';
 import { log } from 'electron-log';
-import { OpenDevToolsOptions } from 'electron';
-
-const electron = require('electron');
-const localShortcut = require('electron-localshortcut');
-
-const { app, BrowserWindow } = electron;
+import { OpenDevToolsOptions, app } from 'electron';
+import * as localShortcut from 'electron-localshortcut';
 const isMacOS = process.platform === 'darwin';
 
 const devToolsOptions: OpenDevToolsOptions = {
@@ -13,7 +9,7 @@ const devToolsOptions: OpenDevToolsOptions = {
 };
 
 // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
-function toggleDevTools(win = BrowserWindow.getFocusedWindow()): void {
+function toggleDevTools(win = Electron.BrowserWindow.getFocusedWindow()): void {
   if (win) {
     const { webContents } = win;
     if (webContents.isDevToolsOpened()) {
@@ -25,21 +21,21 @@ function toggleDevTools(win = BrowserWindow.getFocusedWindow()): void {
 }
 
 // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
-function devTools(win = BrowserWindow.getFocusedWindow()): void {
+function devTools(win = Electron.BrowserWindow.getFocusedWindow()): void {
   if (win) {
     toggleDevTools(win);
   }
 }
 
 // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
-function openDevTools(win = BrowserWindow.getFocusedWindow()): void {
+function openDevTools(win = Electron.BrowserWindow.getFocusedWindow()): void {
   if (win) {
     win.webContents.openDevTools(devToolsOptions);
   }
 }
 
 // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
-function refresh(win = BrowserWindow.getFocusedWindow()): void {
+function refresh(win = Electron.BrowserWindow.getFocusedWindow()): void {
   if (win) {
     win.webContents.reloadIgnoringCache();
   }
@@ -47,7 +43,7 @@ function refresh(win = BrowserWindow.getFocusedWindow()): void {
 
 // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
 function inspectElements(): void {
-  const win = BrowserWindow.getFocusedWindow();
+  const win = Electron.BrowserWindow.getFocusedWindow();
   const inspect = (): void => {
     // TODO check
     // win.devToolsWebContents.executeJavaScript('DevToolsAPI.enterInspectElementMode()');
@@ -65,19 +61,19 @@ function inspectElements(): void {
 
 // const addExtensionIfInstalled = (name, getPath) => {
 //   const isExtensionInstalled = nameIN => {
-//     return BrowserWindow.getDevToolsExtensions &&
-//       {}.hasOwnProperty.call(BrowserWindow.getDevToolsExtensions(), nameIN);
+//     return Electron.BrowserWindow.getDevToolsExtensions &&
+//       {}.hasOwnProperty.call(Electron.BrowserWindow.getDevToolsExtensions(), nameIN);
 //   };
 //
 //   try {
 //     if (!isExtensionInstalled(name)) {
-//       BrowserWindow.addDevToolsExtension(getPath(name));
+//       Electron.BrowserWindow.addDevToolsExtension(getPath(name));
 //     }
 //   } catch (_) {
 //   }
 // };
 
-export const initDebug = (opts, isAddReload): void => {
+export const initDebug = (opts: any, isAddReload: boolean): void => {
   opts = Object.assign(
     {
       enabled: null,

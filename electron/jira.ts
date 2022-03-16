@@ -4,7 +4,7 @@ import { session } from 'electron';
 import { JiraCfg } from '../src/app/features/issue/providers/jira/jira.model';
 // import rp from 'request-promise';
 // const rp = require('request-promise');
-import fetch from 'node-fetch';
+import fetch, { RequestInit } from 'node-fetch';
 import { Agent } from 'https';
 import { error, log } from 'electron-log';
 
@@ -23,7 +23,6 @@ export const sendJiraRequest = ({
   // log('--------------------------------------------------------------------');
   // log(url);
   // log('--------------------------------------------------------------------');
-
   fetch(url, {
     ...requestInit,
     // allow self signed certificates
@@ -34,7 +33,7 @@ export const sendJiraRequest = ({
           }),
         }
       : {}),
-  })
+  } as RequestInit)
     .then((response: any) => {
       // log('JIRA_RAW_RESPONSE', response);
       if (!response.ok) {
