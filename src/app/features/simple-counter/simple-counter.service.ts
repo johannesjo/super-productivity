@@ -22,8 +22,7 @@ import {
 import { Observable } from 'rxjs';
 import { SimpleCounter, SimpleCounterState } from './simple-counter.model';
 import { nanoid } from 'nanoid';
-import { distinctUntilChanged, switchMap } from 'rxjs/operators';
-import { GlobalTrackingIntervalService } from '../../core/global-tracking-interval/global-tracking-interval.service';
+import { distinctUntilChanged } from 'rxjs/operators';
 import { isEqualSimpleCounterCfg } from './is-equal-simple-counter-cfg.util';
 
 @Injectable({
@@ -36,11 +35,9 @@ export class SimpleCounterService {
   simpleCountersUpdatedOnCfgChange$: Observable<SimpleCounter[]> =
     this.simpleCounters$.pipe(distinctUntilChanged(isEqualSimpleCounterCfg));
 
-  enabledSimpleCounters$: Observable<SimpleCounter[]> =
-    // refresh when day changes
-    this._globalTrackingIntervalService.todayDateStr$.pipe(
-      switchMap(() => this._store$.select(selectEnabledSimpleCounters)),
-    );
+  enabledSimpleCounters$: Observable<SimpleCounter[]> = this._store$.select(
+    selectEnabledSimpleCounters,
+  );
   enabledSimpleStopWatchCounters$: Observable<SimpleCounter[]> = this._store$.select(
     selectEnabledSimpleStopWatchCounters,
   );
@@ -52,10 +49,7 @@ export class SimpleCounterService {
     selectEnabledAndToggledSimpleCounters,
   );
 
-  constructor(
-    private _store$: Store<SimpleCounterState>,
-    private _globalTrackingIntervalService: GlobalTrackingIntervalService,
-  ) {}
+  constructor(private _store$: Store<SimpleCounterState>) {}
 
   updateAll(items: SimpleCounter[]): void {
     this._store$.dispatch(updateAllSimpleCounters({ items }));

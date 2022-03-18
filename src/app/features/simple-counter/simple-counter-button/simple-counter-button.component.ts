@@ -1,10 +1,12 @@
-import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input, OnDestroy } from '@angular/core';
 import { SimpleCounter, SimpleCounterType } from '../simple-counter.model';
 import { SimpleCounterService } from '../simple-counter.service';
 import { MatDialog } from '@angular/material/dialog';
 import { DialogSimpleCounterEditComponent } from '../dialog-simple-counter-edit/dialog-simple-counter-edit.component';
 import { T } from 'src/app/t.const';
+import { GlobalTrackingIntervalService } from '../../../core/global-tracking-interval/global-tracking-interval.service';
 import { getWorklogStr } from '../../../util/get-work-log-str';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'simple-counter-button',
@@ -12,17 +14,27 @@ import { getWorklogStr } from '../../../util/get-work-log-str';
   styleUrls: ['./simple-counter-button.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class SimpleCounterButtonComponent {
+export class SimpleCounterButtonComponent implements OnDestroy {
   T: typeof T = T;
   SimpleCounterType: typeof SimpleCounterType = SimpleCounterType;
   todayStr: string = getWorklogStr();
 
   @Input() simpleCounter?: SimpleCounter;
 
+  private _todayStr$ = this._globalTrackingIntervalService.todayDateStr$;
+  private _subs = new Subscription();
+
   constructor(
     private _simpleCounterService: SimpleCounterService,
     private _matDialog: MatDialog,
-  ) {}
+    private _globalTrackingIntervalService: GlobalTrackingIntervalService,
+  ) {
+    this._subs.add(this._todayStr$.subscribe((todayStr) => this.todayStr === todayStr));
+  }
+
+  ngOnDestroy(): void {
+    this._subs.unsubscribe();
+  }
 
   toggleStopwatch(): void {
     if (!this.simpleCounter) {
