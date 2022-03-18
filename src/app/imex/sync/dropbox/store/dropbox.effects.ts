@@ -30,7 +30,7 @@ export class DropboxEffects {
                       dropboxSync: {
                         ...sync.dropboxSync,
                         accessToken: res.accessToken,
-                        refreshTokenToken: res.refreshToken,
+                        refreshToken: res.refreshToken,
                         _tokenExpiresAt: res.expiresAt,
                       },
                     } as SyncConfig,

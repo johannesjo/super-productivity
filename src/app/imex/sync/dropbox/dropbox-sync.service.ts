@@ -51,6 +51,17 @@ export class DropboxSyncService implements SyncProviderServiceInterface {
       ) {
         return 'NO_REMOTE_DATA';
       } else if (isAxiosError && (e as any).response.status === 401) {
+        if (
+          (e as any).response.data?.error_summary?.includes('expired_access_token') ||
+          (e as any).response.data?.error_summary?.includes('invalid_access_token')
+        ) {
+          console.log('EXPIRED or INVALID TOKEN, trying to refresh');
+          const refreshResult =
+            await this._dropboxApiService.updateAccessTokenFromRefreshTokenIfAvailable();
+          if (refreshResult === 'SUCCESS') {
+            return this.getRevAndLastClientUpdate(localRev);
+          }
+        }
         this._snackService.open({
           msg: T.F.DROPBOX.S.AUTH_ERROR,
           type: 'ERROR',

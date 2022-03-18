@@ -13,11 +13,17 @@ import { MatDialog } from '@angular/material/dialog';
 import { T } from '../../../t.const';
 import { SnackService } from '../../../core/snack/snack.service';
 import { generatePKCECodes } from '../generate-pkce-codes';
+import { Store } from '@ngrx/store';
+import { updateGlobalConfigSection } from '../../../features/config/store/global-config.actions';
+import { SyncConfig } from '../../../features/config/global-config.model';
 
 @Injectable({ providedIn: 'root' })
 export class DropboxApiService {
   private _accessToken$: Observable<string | null> = this._globalConfigService.cfg$.pipe(
     map((cfg) => cfg?.sync.dropboxSync.accessToken),
+  );
+  private _refreshToken$: Observable<string | null> = this._globalConfigService.cfg$.pipe(
+    map((cfg) => cfg?.sync.dropboxSync.refreshToken),
   );
 
   isTokenAvailable$: Observable<boolean> = this._accessToken$.pipe(
@@ -36,6 +42,7 @@ export class DropboxApiService {
     private _dataInitService: DataInitService,
     private _matDialog: MatDialog,
     private _snackService: SnackService,
+    private _store: Store,
   ) {}
 
   async getMetaData(path: string): Promise<DropboxFileMetadata> {
@@ -157,20 +164,6 @@ export class DropboxApiService {
     });
   }
 
-  async getAccessTokenFromRefreshToken(refreshToken: string): Promise<string> {
-    return axios.request({
-      url:
-        'https://api.dropbox.com/oauth2/token`' +
-        `?grant_type=refresh_token` +
-        `&client_id=${DROPBOX_APP_KEY}` +
-        `&refresh_token=${refreshToken}`,
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json;charset=UTF-8',
-      },
-    });
-  }
-
   async getAccessTokenViaDialog(): Promise<{
     accessToken: string;
     refreshToken: string;
@@ -195,6 +188,54 @@ export class DropboxApiService {
       .afterClosed()
       .toPromise();
     return this._getTokensFromAuthCode(authCode, codeVerifier);
+  }
+
+  // TODO add real type
+  async updateAccessTokenFromRefreshTokenIfAvailable(): Promise<
+    'SUCCESS' | 'NO_REFRESH_TOKEN' | 'ERROR'
+  > {
+    const refreshToken =
+      (await this._refreshToken$.pipe(first()).toPromise()) || undefined;
+    if (!refreshToken) {
+      console.error('Dropbox: No refresh token available');
+      return 'NO_REFRESH_TOKEN';
+    }
+
+    return axios
+      .request({
+        url: 'https://api.dropbox.com/oauth2/token',
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
+        },
+        data: stringify({
+          refresh_token: refreshToken,
+          grant_type: 'refresh_token',
+          client_id: DROPBOX_APP_KEY,
+        }),
+      })
+      .then(async (res) => {
+        const sync = await this._globalConfigService.sync$.pipe(first()).toPromise();
+        this._store.dispatch(
+          updateGlobalConfigSection({
+            sectionKey: 'sync',
+            sectionCfg: {
+              ...sync,
+              dropboxSync: {
+                ...sync.dropboxSync,
+                accessToken: res.data.access_token,
+                // eslint-disable-next-line no-mixed-operators
+                _tokenExpiresAt: +res.data.expires_at * 1000 + Date.now(),
+              },
+            } as SyncConfig,
+          }),
+        );
+        return 'SUCCESS' as any;
+      })
+      .catch((e) => {
+        console.error(e);
+        return 'ERROR';
+      });
   }
 
   private async _getTokensFromAuthCode(
@@ -225,26 +266,31 @@ export class DropboxApiService {
           msg: T.F.DROPBOX.S.ACCESS_TOKEN_GENERATED,
         });
 
-        if (typeof res.data.accessToken !== 'string') {
+        if (typeof res.data.access_token !== 'string') {
+          console.log(res);
           throw new Error('Dropbox: Invalid access token response');
         }
-        if (typeof res.data.refreshToken !== 'string') {
+        if (typeof res.data.refresh_token !== 'string') {
+          console.log(res);
           throw new Error('Dropbox: Invalid refresh token response');
         }
         if (typeof +res.data.expires_in !== 'number') {
+          console.log(res);
           throw new Error('Dropbox: Invalid expiresIn response');
         }
 
         return {
           accessToken: res.data.access_token as string,
           refreshToken: res.data.refresh_token as string,
+          // eslint-disable-next-line no-mixed-operators
           expiresAt: +res.data.expires_in * 1000 + Date.now(),
         };
         // Not necessary as it is highly unlikely that we get a wrong on
         // const accessToken = res.data.access_token;
         // return this.checkUser(accessToken).then(() => accessToken);
       })
-      .catch(() => {
+      .catch((e) => {
+        console.error(e);
         this._snackService.open({
           type: 'ERROR',
           msg: T.F.DROPBOX.S.ACCESS_TOKEN_ERROR,
