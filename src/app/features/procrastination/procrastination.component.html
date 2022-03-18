@@ -2,11 +2,25 @@
   <h1 style="margin-top: 16px; text-align: center">
     {{T.F.PROCRASTINATION.H1|translate}}
   </h1>
-  <p>{{T.F.PROCRASTINATION.P1|translate}}</p>
-  <p [innerHTML]="T.F.PROCRASTINATION.P2|translate"></p>
-  <p>{{T.F.PROCRASTINATION.P3|translate}}</p>
 
   <mat-tab-group dynamicHeight>
+    <mat-tab [label]="T.F.PROCRASTINATION.INTRO.TITLE|translate">
+      <section class="tab-inner">
+        <p>{{T.F.PROCRASTINATION.P1|translate}}</p>
+        <p [innerHTML]="T.F.PROCRASTINATION.P2|translate"></p>
+        <p>{{T.F.PROCRASTINATION.P3|translate}}</p>
+
+        <div class="procrastination-graph">
+          <div class="wrap">
+            <div class="text-item">{{T.F.PROCRASTINATION.INTRO.AVOIDING|translate}}</div>
+            <div class="text-item">{{T.F.PROCRASTINATION.INTRO.FEAR|translate}}</div>
+          </div>
+          <mat-icon>sync</mat-icon>
+          <div class="text-item">{{T.F.PROCRASTINATION.INTRO.STRESSED|translate}}</div>
+        </div>
+      </section>
+    </mat-tab>
+
     <mat-tab [label]="T.F.PROCRASTINATION.CUR.TITLE|translate">
       <section class="tab-inner">
         <p>{{T.F.PROCRASTINATION.CUR.INTRO|translate}}</p>
