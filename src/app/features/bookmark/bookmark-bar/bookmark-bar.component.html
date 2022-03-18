@@ -4,7 +4,11 @@
   [@slide]="{value:'*',params:{elHeight:(bookmarkBarHeight)}}"
   class="global-bookmark-list-outer"
 >
-  <div *ngIf="isDragOver" @fade class="bgc-accent drag-over-msg">
+  <div
+    *ngIf="isDragOver"
+    @fade
+    class="bgc-accent drag-over-msg"
+  >
     <mat-icon>add</mat-icon>
     {{T.F.BOOKMARK.BAR.DROP|translate}}
   </div>
@@ -31,11 +35,19 @@
 
       <mat-menu #menu="matMenu">
         <ng-template matMenuContent>
-          <button (click)="openEditDialog()" color="" mat-menu-item>
+          <button
+            (click)="openEditDialog()"
+            color=""
+            mat-menu-item
+          >
             <mat-icon>add</mat-icon>
             {{T.F.BOOKMARK.BAR.ADD|translate}}
           </button>
-          <button (click)="isEditMode=!isEditMode" color="" mat-menu-item>
+          <button
+            (click)="isEditMode=!isEditMode"
+            color=""
+            mat-menu-item
+          >
             <mat-icon>edit</mat-icon>
             {{T.F.BOOKMARK.BAR.EDIT|translate}}
           </button>
@@ -49,7 +61,10 @@
       [dragula]="LIST_ID"
       class="global-bookmark-list-inner"
     >
-      <div *ngIf="!(bookmarkService.bookmarks$|async)?.length" class="msg">
+      <div
+        *ngIf="!(bookmarkService.bookmarks$|async)?.length"
+        class="msg"
+      >
         {{T.F.BOOKMARK.BAR.NO_BOOKMARKS|translate}}
       </div>
 
@@ -75,7 +90,10 @@
           {{bookmark.title}}
         </a>
 
-        <div *ngIf="isEditMode" class="controls">
+        <div
+          *ngIf="isEditMode"
+          class="controls"
+        >
           <mat-icon
             *ngIf="isEditMode"
             @fade

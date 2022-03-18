@@ -1,4 +1,7 @@
-<div [@improvementBanner]="improvements.length" class="improvements">
+<div
+  [@improvementBanner]="improvements.length"
+  class="improvements"
+>
   <div
     *ngFor="let improvement of improvements; trackBy: trackById"
     class="improvement"

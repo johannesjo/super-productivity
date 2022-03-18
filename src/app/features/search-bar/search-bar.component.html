@@ -5,7 +5,10 @@
   class="search-form mat-elevation-z4"
 >
   <div class="input-wrapper">
-    <div *ngIf="(isLoading$|async)" class="spinner">
+    <div
+      *ngIf="(isLoading$|async)"
+      class="spinner"
+    >
       <mat-spinner diameter="50"></mat-spinner>
     </div>
     <mat-icon class="search-icon">search</mat-icon>
@@ -47,9 +50,15 @@
       *ngFor="let item of (filteredIssueSuggestions$|async); trackBy:trackByFn"
       [value]="item"
     >
-      <tag *ngIf="item.ctx" [tag]="item.ctx"></tag>
+      <tag
+        *ngIf="item.ctx"
+        [tag]="item.ctx"
+      ></tag>
       <span>{{item?.titleHighlighted || item?.title}}</span>
-      <mat-icon *ngIf="item.issueType" [svgIcon]="item.issueType|issueIcon"></mat-icon>
+      <mat-icon
+        *ngIf="item.issueType"
+        [svgIcon]="item.issueType|issueIcon"
+      ></mat-icon>
       <mat-icon *ngIf="!item.isNonArchiveTask">archive</mat-icon>
     </mat-option>
   </mat-autocomplete>

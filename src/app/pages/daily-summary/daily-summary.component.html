@@ -5,8 +5,16 @@
 
 <right-panel [isAlwaysOver]="true">
   <div class="page-wrapper">
-    <div *ngIf="isForToday" style="text-align: center">
-      <a class="back-btn" color="primary" mat-button routerLink="/active/tasks">
+    <div
+      *ngIf="isForToday"
+      style="text-align: center"
+    >
+      <a
+        class="back-btn"
+        color="primary"
+        mat-button
+        routerLink="/active/tasks"
+      >
         <mat-icon>chevron_left</mat-icon>
         {{T.PDS.BACK|translate}}
         <!--<mat-icon>playlist_play</mat-icon>-->
@@ -14,7 +22,10 @@
     </div>
 
     <h1 class="done-headline mat-headline">
-      <span *ngIf="isForToday" [innerHTML]="T.PDS.CELEBRATE|translate"></span>
+      <span
+        *ngIf="isForToday"
+        [innerHTML]="T.PDS.CELEBRATE|translate"
+      ></span>
       <span *ngIf="!isForToday">{{T.PDS.SUMMARY_FOR|translate:{dayStr: dayStr} }}</span>
     </h1>
     <div class="daily-summary-summary">
@@ -49,7 +60,10 @@
           </div>
         </div>
       </div>
-      <div [title]="T.PDS.TIME_SPENT_ESTIMATE_TITLE|translate" class="summary-point">
+      <div
+        [title]="T.PDS.TIME_SPENT_ESTIMATE_TITLE|translate"
+        class="summary-point"
+      >
         <mat-icon>timer</mat-icon>
         <div class="summary-text">
           {{T.PDS.TIME_SPENT_AND_ESTIMATE_LABEL|translate}}
@@ -60,7 +74,10 @@
         </div>
       </div>
 
-      <div *ngIf="(isBreakTrackingSupport$|async)" class="summary-point">
+      <div
+        *ngIf="(isBreakTrackingSupport$|async)"
+        class="summary-point"
+      >
         <mat-icon>free_breakfast</mat-icon>
         <div class="summary-text">
           {{T.PDS.BREAK_LABEL|translate}}
@@ -109,7 +126,10 @@
         *ngIf="!(configService.evaluation$|async)?.isHideEvaluationSheet"
         [label]="T.PDS.EVALUATION|translate"
       >
-        <section class="tab-inner" style="max-width: 600px">
+        <section
+          class="tab-inner"
+          style="max-width: 600px"
+        >
           <evaluation-sheet
             (save)="onEvaluationSave()"
             [day]="(dayStr$|async)"
@@ -117,13 +137,19 @@
         </section>
       </mat-tab>
 
-      <mat-tab *ngIf="isForToday" [label]="T.PDS.PLAN|translate">
+      <mat-tab
+        *ngIf="isForToday"
+        [label]="T.PDS.PLAN|translate"
+      >
         <section class="tab-inner">
           <plan-tasks-tomorrow></plan-tasks-tomorrow>
         </section>
       </mat-tab>
 
-      <mat-tab *ngIf="isForToday" [label]="T.PDS.WEEK|translate">
+      <mat-tab
+        *ngIf="isForToday"
+        [label]="T.PDS.WEEK|translate"
+      >
         <section class="tab-inner full-width">
           <worklog-week></worklog-week>
         </section>
@@ -142,7 +168,12 @@
           <mat-icon>wb_sunny</mat-icon>
           {{T.PDS.SAVE_AND_GO_HOME|translate}}
         </button>
-        <button (click)="finishDay()" *ngIf="!isForToday" color="primary" mat-flat-button>
+        <button
+          (click)="finishDay()"
+          *ngIf="!isForToday"
+          color="primary"
+          mat-flat-button
+        >
           <mat-icon>wb_sunny</mat-icon>
           {{T.PDS.CLEAR_ALL_CONTINUE|translate}}
         </button>
@@ -150,10 +181,16 @@
     </section>
   </div>
 
-  <div *ngIf="showSuccessAnimation" class="success-animation-wrapper">
+  <div
+    *ngIf="showSuccessAnimation"
+    class="success-animation-wrapper"
+  >
     <mat-icon>wb_sunny</mat-icon>
     <div class="unicorn-wrapper">
-      <img class="unicorn" src="assets/unicorn.png" />
+      <img
+        class="unicorn"
+        src="assets/unicorn.png"
+      />
     </div>
   </div>
 </right-panel>

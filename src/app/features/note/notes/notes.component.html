@@ -1,11 +1,20 @@
 <header>
-  <button #buttonEl (click)="addNote()" id="add-note-btn" mat-button>
+  <button
+    #buttonEl
+    (click)="addNote()"
+    id="add-note-btn"
+    mat-button
+  >
     <mat-icon>add</mat-icon>
     {{T.F.NOTE.NOTES_CMP.ADD_BTN|translate}}
   </button>
 </header>
 
-<div *ngIf="isDragOver" @fade class="bgc-accent drag-over-msg">
+<div
+  *ngIf="isDragOver"
+  @fade
+  class="bgc-accent drag-over-msg"
+>
   <mat-icon>add</mat-icon>
   {{T.F.NOTE.NOTES_CMP.DROP_TO_ADD|translate}}
 </div>
@@ -23,7 +32,10 @@
       [note]="note"
     ></note>
 
-    <div class="no-notes-info" *ngIf="notes.length ===0">
+    <div
+      class="no-notes-info"
+      *ngIf="notes.length ===0"
+    >
       {{T.F.NOTE.NOTES_CMP.NO_NOTES|translate}}
     </div>
   </ng-container>

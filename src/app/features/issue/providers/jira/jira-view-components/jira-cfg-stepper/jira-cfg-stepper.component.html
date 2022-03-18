@@ -1,7 +1,13 @@
 <div class="wrapper">
-  <mat-horizontal-stepper [linear]="true" dynamicHeight>
+  <mat-horizontal-stepper
+    [linear]="true"
+    dynamicHeight
+  >
     <mat-step [stepControl]="credentialsFormGroup">
-      <form (submit)="saveStepForm(jiraCfg)" [formGroup]="credentialsFormGroup">
+      <form
+        (submit)="saveStepForm(jiraCfg)"
+        [formGroup]="credentialsFormGroup"
+      >
         <ng-template matStepLabel>{{T.F.JIRA.STEPPER.CREDENTIALS|translate}}</ng-template>
 
         <p
@@ -15,7 +21,11 @@
           [form]="credentialsFormGroup"
           [model]="jiraCfg"
         >
-          <div *ngIf="user" [@expand] class="welcome">
+          <div
+            *ngIf="user"
+            [@expand]
+            class="welcome"
+          >
             <img
               [src]="user.avatarUrls && user.avatarUrls['48x48']"
               alt="User Avatar"
@@ -53,7 +63,10 @@
     </mat-step>
 
     <mat-step [stepControl]="advancedSettingsFormGroup">
-      <form (submit)="saveStepForm(jiraCfg)" [formGroup]="advancedSettingsFormGroup">
+      <form
+        (submit)="saveStepForm(jiraCfg)"
+        [formGroup]="advancedSettingsFormGroup"
+      >
         <ng-template matStepLabel>Advanced</ng-template>
         <formly-form
           (modelChange)="jiraCfg=$event"
@@ -62,7 +75,10 @@
           [model]="jiraCfg"
         >
           <div class="center-wrapper">
-            <button mat-raised-button matStepperPrevious>
+            <button
+              mat-raised-button
+              matStepperPrevious
+            >
               <mat-icon>arrow_backward</mat-icon>
               {{T.G.PREVIOUS|translate}}
             </button>
@@ -85,11 +101,19 @@
       <ng-template matStepLabel>Done</ng-template>
       {{T.F.JIRA.STEPPER.DONE|translate}}
       <div class="center-wrapper">
-        <button mat-raised-button matStepperPrevious>
+        <button
+          mat-raised-button
+          matStepperPrevious
+        >
           <mat-icon>arrow_backward</mat-icon>
           {{T.G.PREVIOUS|translate}}
         </button>
-        <button (click)="saveConfig()" color="primary" mat-raised-button type="button">
+        <button
+          (click)="saveConfig()"
+          color="primary"
+          mat-raised-button
+          type="button"
+        >
           <mat-icon>save</mat-icon>
           {{T.G.SAVE|translate}}
         </button>

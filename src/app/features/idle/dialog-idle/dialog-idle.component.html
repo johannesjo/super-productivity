@@ -1,9 +1,18 @@
-<form (submit)="track()" *ngIf="isTaskDataLoadedIfNeeded">
-  <div class="dialog-content" mat-dialog-content>
+<form
+  (submit)="track()"
+  *ngIf="isTaskDataLoadedIfNeeded"
+>
+  <div
+    class="dialog-content"
+    mat-dialog-content
+  >
     <p>{{T.F.TIME_TRACKING.D_IDLE.IDLE_FOR|translate}}</p>
     <div class="time">{{idleTime$|async|msToString:true}}</div>
 
-    <div class="split-btn" style="text-align: center">
+    <div
+      class="split-btn"
+      style="text-align: center"
+    >
       <button
         mat-icon-button
         [matTooltip]="T.F.TIME_TRACKING.D_IDLE.SPLIT_TIME|translate"
@@ -42,13 +51,26 @@
     </section>
   </div>
 
-  <div align="center" mat-dialog-actions>
-    <button (click)="skipTrack()" color="" mat-button type="button">
+  <div
+    align="center"
+    mat-dialog-actions
+  >
+    <button
+      (click)="skipTrack()"
+      color=""
+      mat-button
+      type="button"
+    >
       <mat-icon>skip_next</mat-icon>
       {{T.F.TIME_TRACKING.D_IDLE.SKIP|translate}}
     </button>
 
-    <button (click)="trackAsBreak()" color="primary" mat-stroked-button type="button">
+    <button
+      (click)="trackAsBreak()"
+      color="primary"
+      mat-stroked-button
+      type="button"
+    >
       <mat-icon>free_breakfast</mat-icon>
       {{T.F.TIME_TRACKING.D_IDLE.BREAK|translate}}
     </button>

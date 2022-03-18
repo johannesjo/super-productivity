@@ -10,11 +10,17 @@
   >
     <h2>{{T.SCHEDULE.SCHEDULED_TASKS|translate}}</h2>
 
-    <p *ngIf="!allScheduledTasks?.length" class="no-scheduled-tasks">
+    <p
+      *ngIf="!allScheduledTasks?.length"
+      class="no-scheduled-tasks"
+    >
       {{T.SCHEDULE.NO_SCHEDULED|translate}}
     </p>
 
-    <div [@standardList]="allScheduledTasks?.length" class="tasks">
+    <div
+      [@standardList]="allScheduledTasks?.length"
+      class="tasks"
+    >
       <mat-card
         *ngFor="let task of allScheduledTasks; trackBy: trackByFn;"
         class="scheduled-task"
@@ -31,10 +37,17 @@
                 >
                   {{task.title}}
                 </div>
-                <tag-list [isShowProjectTagAlways]="true" [task]="task"></tag-list>
+                <tag-list
+                  [isShowProjectTagAlways]="true"
+                  [task]="task"
+                ></tag-list>
               </div>
 
-              <div (click)="editReminder(task)" class="due-date" mat-ripple>
+              <div
+                (click)="editReminder(task)"
+                class="due-date"
+                mat-ripple
+              >
                 <div class="date-and-time-left">
                   <div class="date hide-xs">
                     {{task.reminderData.remindAt|date:'EE, d MMM, '}}
@@ -108,11 +121,17 @@
   >
     <h2>{{T.SCHEDULE.REPEATED_TASKS|translate}}</h2>
 
-    <p *ngIf="!taskRepeatCfgs?.length" class="no-scheduled-tasks">
+    <p
+      *ngIf="!taskRepeatCfgs?.length"
+      class="no-scheduled-tasks"
+    >
       {{T.SCHEDULE.NO_REPEATABLE_TASKS|translate}}
     </p>
 
-    <div [@standardList]="taskRepeatCfgs?.length" class="repeat-task-cfgs">
+    <div
+      [@standardList]="taskRepeatCfgs?.length"
+      class="repeat-task-cfgs"
+    >
       <mat-card
         *ngFor="let taskRepeatCfg of taskRepeatCfgs; trackBy: trackByFn;"
         class="repeat-task-cfg"

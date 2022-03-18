@@ -1,6 +1,9 @@
 <mat-dialog-content>
   <div class="form-wrapper">
-    <owl-wrapper (triggerSubmit)="save()" [(dateTime)]="dateTime"></owl-wrapper>
+    <owl-wrapper
+      (triggerSubmit)="save()"
+      [(dateTime)]="dateTime"
+    ></owl-wrapper>
 
     <div class="additional-controls">
       <mat-form-field>
@@ -19,9 +22,18 @@
         </mat-select>
       </mat-form-field>
 
-      <div *ngIf="isShowMoveToBacklog" class="move-to-backlog-wrapper">
-        <mat-checkbox [(ngModel)]="isMoveToBacklog" name="isListSubTasks">
-          <div class="text-wrap" style="max-width: 280px">
+      <div
+        *ngIf="isShowMoveToBacklog"
+        class="move-to-backlog-wrapper"
+      >
+        <mat-checkbox
+          [(ngModel)]="isMoveToBacklog"
+          name="isListSubTasks"
+        >
+          <div
+            class="text-wrap"
+            style="max-width: 280px"
+          >
             {{T.F.TASK.D_REMINDER_ADD.MOVE_TO_BACKLOG|translate}}
           </div>
         </mat-checkbox>

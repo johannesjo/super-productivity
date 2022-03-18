@@ -1,4 +1,7 @@
-<div class="dialog-content" mat-dialog-content>
+<div
+  class="dialog-content"
+  mat-dialog-content
+>
   <textarea
     [(ngModel)]="txt"
     [hidden]="!isShowAsText"
@@ -45,7 +48,10 @@
               matTooltipPosition="above"
             >
               <mat-option><em>remove</em></mat-option>
-              <mat-option *ngFor="let colOpt of colOpts" [value]="colOpt.id">
+              <mat-option
+                *ngFor="let colOpt of colOpts"
+                [value]="colOpt.id"
+              >
                 {{colOpt.title|translate}}
               </mat-option>
             </mat-select>
@@ -89,7 +95,10 @@
           </div>
         </div>
         <div class="col">
-          <mat-form-field *ngIf="(isWorklogExport)" class="md-block">
+          <mat-form-field
+            *ngIf="(isWorklogExport)"
+            class="md-block"
+          >
             <label>{{T.F.WORKLOG.EXPORT.SEPARATE_TASKS_BY|translate}}</label>
             <input
               (change)="onOptionsChange()"
@@ -178,7 +187,10 @@
   </collapsible>
 </div>
 
-<div align="end" mat-dialog-actions>
+<div
+  align="end"
+  mat-dialog-actions
+>
   <button
     *ngIf="isShowAsText"
     color="primary"
@@ -191,7 +203,12 @@
     {{T.F.WORKLOG.EXPORT.COPY_TO_CLIPBOARD|translate}}
   </button>
 
-  <a [simpleDownloadData]="txt" [simpleDownload]="fileName" color="primary" mat-button>
+  <a
+    [simpleDownloadData]="txt"
+    [simpleDownload]="fileName"
+    color="primary"
+    mat-button
+  >
     <mat-icon>file_download</mat-icon>
     {{T.F.WORKLOG.EXPORT.SAVE_TO_FILE|translate}}
   </a>

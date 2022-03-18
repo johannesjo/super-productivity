@@ -2,7 +2,10 @@
   <full-page-spinner></full-page-spinner>
 </ng-template>
 
-<div *ngIf="worklogService.worklogData$|async as wData; else spinner" [@fade]>
+<div
+  *ngIf="worklogService.worklogData$|async as wData; else spinner"
+  [@fade]
+>
   <h1 class="mat-headline total-time">
     {{T.F.WORKLOG.CMP.TOTAL_TIME|translate }} <br /><strong
       >{{wData.totalTimeSpent|msToString}}</strong
@@ -14,7 +17,10 @@
       *ngFor="let year of (wData.worklog|keyvalue:sortWorklogItems); trackBy: trackByKey;"
       class="year"
     >
-      <h1 [innerHtml]="year.key" class="year-title mat-headline"></h1>
+      <h1
+        [innerHtml]="year.key"
+        class="year-title mat-headline"
+      ></h1>
       <div class="year-time-spent">
         {{T.F.WORKLOG.CMP.MONTH_WORKED|translate}}
         <strong>{{year.value.monthWorked}}</strong><br />

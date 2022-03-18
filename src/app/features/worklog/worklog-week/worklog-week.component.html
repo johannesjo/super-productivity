@@ -7,16 +7,26 @@
       class="day"
     >
       <div class="material-table">
-        <div (click)="visibility[i]=!visibility[i];" class="caption" mat-ripple>
+        <div
+          (click)="visibility[i]=!visibility[i];"
+          class="caption"
+          mat-ripple
+        >
           <div>
-            <span *ngIf="visibility[i]" [@fade]
+            <span
+              *ngIf="visibility[i]"
+              [@fade]
               >{{T.F.WORKLOG.WEEK.TITLE|translate}}</span
             >
           </div>
           <div class="center-box">
             <div class="title">
               <h3 class="mat-h3">{{day.value.dayStr}} {{day.key}}.</h3>
-              <div *ngIf="!visibility[i]" [@expandFade] class="icon-indicator-bar">
+              <div
+                *ngIf="!visibility[i]"
+                [@expandFade]
+                class="icon-indicator-bar"
+              >
                 <strong>∑ {{day.value.timeSpent|msToClockString}}</strong>
                 &nbsp;
                 <mat-icon>list</mat-icon>
@@ -33,10 +43,16 @@
                     class="simple-counter-item"
                   >
                     <mat-icon inline="true">{{sc.iconOn || sc.icon}}</mat-icon>
-                    <div *ngIf="sc.type==='ClickCounter'" class="count">
+                    <div
+                      *ngIf="sc.type==='ClickCounter'"
+                      class="count"
+                    >
                       {{sc.countOnDay[day.value.dateStr] || 0}}
                     </div>
-                    <div *ngIf="sc.type==='StopWatch'" class="count">
+                    <div
+                      *ngIf="sc.type==='StopWatch'"
+                      class="count"
+                    >
                       {{sc.countOnDay[day.value.dateStr] || 0|msToMinuteClockString}}
                     </div>
                   </div>
@@ -45,13 +61,25 @@
             </div>
           </div>
           <div class="with-icon">
-            <mat-icon *ngIf="visibility[i]" [@fade]>timer </mat-icon>
+            <mat-icon
+              *ngIf="visibility[i]"
+              [@fade]
+              >timer
+            </mat-icon>
           </div>
         </div>
 
-        <table *ngIf="visibility[i]" [@expandFade] class="task-summary-table">
+        <table
+          *ngIf="visibility[i]"
+          [@expandFade]
+          class="task-summary-table"
+        >
           <tr *ngFor="let logEntry of day.value.logEntries; trackBy: trackByLogEntry;">
-            <td [class.isSubTask]="logEntry.task.parentId" class="title" colspan>
+            <td
+              [class.isSubTask]="logEntry.task.parentId"
+              class="title"
+              colspan
+            >
               <span class="task-title">{{logEntry.task.title}}</span>
             </td>
             <td class="worked">
@@ -86,7 +114,11 @@
   </div>
 
   <div style="text-align: center; margin-top: 12px">
-    <button (click)="exportData()" color="" mat-button>
+    <button
+      (click)="exportData()"
+      color=""
+      mat-button
+    >
       <mat-icon>call_made</mat-icon>
       {{T.F.WORKLOG.WEEK.EXPORT|translate}}
     </button>

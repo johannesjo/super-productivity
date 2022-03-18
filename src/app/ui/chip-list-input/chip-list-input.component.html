@@ -7,7 +7,11 @@
     >
       {{ modelItem.title}}
 
-      <mat-icon [matTooltip]="T.G.REMOVE|translate" matChipRemove>cancel </mat-icon>
+      <mat-icon
+        [matTooltip]="T.G.REMOVE|translate"
+        matChipRemove
+        >cancel
+      </mat-icon>
 
       <button
         (click)="additionalAction.emit(modelItem.id)"
@@ -34,7 +38,10 @@
       (keydown)="triggerCtrlEnterSubmit($event)"
     />
   </mat-chip-list>
-  <mat-autocomplete #autoElRef="matAutocomplete" (optionSelected)="selected($event)">
+  <mat-autocomplete
+    #autoElRef="matAutocomplete"
+    (optionSelected)="selected($event)"
+  >
     <mat-option
       *ngFor="let suggestion of (filteredSuggestions | async); trackBy:trackById"
       [value]="suggestion.id"

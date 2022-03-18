@@ -1,4 +1,7 @@
-<form #form="ngForm" (submit)="submit()">
+<form
+  #form="ngForm"
+  (submit)="submit()"
+>
   <h1 mat-dialog-title>
     {{ (attachmentCopy.id ? (T.F.ATTACHMENT.DIALOG_EDIT.EDIT_ATTACHMENT) :
     (T.F.ATTACHMENT.DIALOG_EDIT.ADD_ATTACHMENT)) |translate }}
@@ -46,11 +49,21 @@
   </mat-dialog-content>
 
   <mat-dialog-actions align="end">
-    <button (click)="close()" color="primary" mat-button type="button">
+    <button
+      (click)="close()"
+      color="primary"
+      mat-button
+      type="button"
+    >
       {{T.G.CANCEL|translate}}
     </button>
 
-    <button [disabled]="!form.valid" color="primary" mat-stroked-button type="submit">
+    <button
+      [disabled]="!form.valid"
+      color="primary"
+      mat-stroked-button
+      type="submit"
+    >
       <mat-icon>save</mat-icon>
       {{T.G.SAVE|translate}}
     </button>

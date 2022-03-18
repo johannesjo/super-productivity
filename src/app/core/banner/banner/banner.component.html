@@ -5,13 +5,19 @@
   class="content-wrapper"
 >
   <div class="inner-content-wrapper">
-    <div *ngIf="banner.img" class="motivational-img-wrapper">
+    <div
+      *ngIf="banner.img"
+      class="motivational-img-wrapper"
+    >
       <img [src]="banner.img" />
     </div>
 
     <div class="message-wrapper">
       <mat-icon *ngIf="banner.ico">{{banner.ico}}</mat-icon>
-      <mat-icon *ngIf="banner.svgIco" [svgIcon]="banner.svgIco"></mat-icon>
+      <mat-icon
+        *ngIf="banner.svgIco"
+        [svgIcon]="banner.svgIco"
+      ></mat-icon>
 
       <div
         [innerHTML]="banner.msg|translate:banner.translateParams"

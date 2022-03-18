@@ -12,12 +12,20 @@
     [isElevated]="true"
     class="global"
   ></add-task-bar>
-  <div *ngIf="(layoutService.isShowAddTaskBar$|async)" @fade class="backdrop"></div>
+  <div
+    *ngIf="(layoutService.isShowAddTaskBar$|async)"
+    @fade
+    class="backdrop"
+  ></div>
   <search-bar
     (blurred)="layoutService.hideSearchBar()"
     *ngIf="layoutService.isShowSearchBar$|async"
   ></search-bar>
-  <div *ngIf="(layoutService.isShowSearchBar$|async)" @fade class="backdrop"></div>
+  <div
+    *ngIf="(layoutService.isShowSearchBar$|async)"
+    @fade
+    class="backdrop"
+  ></div>
   <mat-sidenav-container [dir]="isRTL ? 'rtl' : 'ltr'">
     <mat-sidenav
       (closedStart)="layoutService.hideSideNav()"
@@ -42,7 +50,11 @@
         <banner></banner>
       </header>
 
-      <div #routeWrapper [@warpRoute]="getPage(o)" class="route-wrapper">
+      <div
+        #routeWrapper
+        [@warpRoute]="getPage(o)"
+        class="route-wrapper"
+      >
         <router-outlet #o="outlet"></router-outlet>
       </div>
       <global-progress-bar></global-progress-bar>
@@ -67,7 +79,10 @@
       <div class="double-bounce2"></div>
     </div>
 
-    <svg class="logo" viewBox="0 0 64 64">
+    <svg
+      class="logo"
+      viewBox="0 0 64 64"
+    >
       <path
         d="M 0.65537046,34.582787 32.452267,63.855301 63.791548,0.94356422 30.222644,47.722023 Z"
         id="path3395"

@@ -1,6 +1,14 @@
 <ng-container>
-  <div *ngIf="task?.issueWasUpdated" @expand style="text-align: center">
-    <button (click)="hideUpdates()" color="accent" mat-raised-button>
+  <div
+    *ngIf="task?.issueWasUpdated"
+    @expand
+    style="text-align: center"
+  >
+    <button
+      (click)="hideUpdates()"
+      color="accent"
+      mat-raised-button
+    >
       {{T.F.GITHUB.ISSUE_CONTENT.MARK_AS_CHECKED|translate}}
     </button>
   </div>
@@ -10,7 +18,9 @@
       <tr>
         <th>{{T.F.GITHUB.ISSUE_CONTENT.SUMMARY|translate}}</th>
         <td>
-          <a [href]="issue?.html_url" target="_blank"
+          <a
+            [href]="issue?.html_url"
+            target="_blank"
             ><strong>{{issue?.title}} #{{issue?.number}}</strong></a
           >
         </td>
@@ -22,7 +32,9 @@
       <tr *ngIf="issue?.assignee?.html_url">
         <th>{{T.F.GITHUB.ISSUE_CONTENT.ASSIGNEE|translate}}</th>
         <td>
-          <a [href]="issue?.assignee?.html_url" target="_blank"
+          <a
+            [href]="issue?.assignee?.html_url"
+            target="_blank"
             >{{issue?.assignee?.login}}</a
           >
         </td>
@@ -42,7 +54,11 @@
       <tr *ngIf="issue?.body">
         <th>{{T.F.GITHUB.ISSUE_CONTENT.DESCRIPTION|translate}}</th>
         <td class="issue-description">
-          <div [data]="issue?.body" class="description markdown" markdown></div>
+          <div
+            [data]="issue?.body"
+            class="description markdown"
+            markdown
+          ></div>
         </td>
       </tr>
     </table>

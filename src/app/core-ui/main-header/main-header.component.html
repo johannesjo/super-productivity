@@ -129,7 +129,12 @@
           <mat-icon *ngIf="(taskService.currentTaskId$|async)">pause</mat-icon>
         </ng-container>
 
-        <svg class="circle-svg" focusable="false" height="40" width="40">
+        <svg
+          class="circle-svg"
+          focusable="false"
+          height="40"
+          width="40"
+        >
           <circle
             #circleSvg
             cx="50%"

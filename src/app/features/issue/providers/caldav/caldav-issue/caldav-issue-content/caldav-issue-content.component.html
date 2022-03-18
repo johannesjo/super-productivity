@@ -1,6 +1,14 @@
 <ng-container>
-  <div *ngIf="task?.issueWasUpdated" @expand style="text-align: center">
-    <button (click)="hideUpdates()" color="accent" mat-raised-button>
+  <div
+    *ngIf="task?.issueWasUpdated"
+    @expand
+    style="text-align: center"
+  >
+    <button
+      (click)="hideUpdates()"
+      color="accent"
+      mat-raised-button
+    >
       {{T.F.CALDAV.ISSUE_CONTENT.MARK_AS_CHECKED|translate}}
     </button>
   </div>
@@ -19,7 +27,9 @@
         <th>{{T.F.CALDAV.ISSUE_CONTENT.LABELS|translate}}</th>
         <td>
           <mat-chip-list>
-            <mat-chip *ngFor="let label of issue?.labels" [title]="label"
+            <mat-chip
+              *ngFor="let label of issue?.labels"
+              [title]="label"
               >{{label}}
             </mat-chip>
           </mat-chip-list>
@@ -28,7 +38,11 @@
       <tr *ngIf="issue?.note">
         <th>{{T.F.CALDAV.ISSUE_CONTENT.DESCRIPTION|translate}}</th>
         <td class="issue-description">
-          <div [data]="issue?.note" class="description markdown" markdown></div>
+          <div
+            [data]="issue?.note"
+            class="description markdown"
+            markdown
+          ></div>
         </td>
       </tr>
     </table>

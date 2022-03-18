@@ -1,4 +1,9 @@
-<div *ngIf="note" [class.isFocused]="isFocus" [class.isImg]="note.imgUrl" class="note">
+<div
+  *ngIf="note"
+  [class.isFocused]="isFocus"
+  [class.isImg]="note.imgUrl"
+  class="note"
+>
   <img
     *ngIf="note.imgUrl"
     [enlargeImg]="note.imgUrl"
@@ -7,7 +12,10 @@
     class="note-img"
   />
 
-  <div *ngIf="!note.imgUrl" class="content">
+  <div
+    *ngIf="!note.imgUrl"
+    class="content"
+  >
     <div
       (click)="editFullscreen($event)"
       markdown
@@ -16,19 +24,35 @@
     ></div>
   </div>
 
-  <div class="bottom-controls handle-drag" [class.isOver]="note.imgUrl">
-    <button mat-icon-button (click)="togglePinToToday()" *ngIf="note.projectId">
+  <div
+    class="bottom-controls handle-drag"
+    [class.isOver]="note.imgUrl"
+  >
+    <button
+      mat-icon-button
+      (click)="togglePinToToday()"
+      *ngIf="note.projectId"
+    >
       <mat-icon *ngIf="!note.isPinnedToToday">wb_sunny</mat-icon>
-      <mat-icon *ngIf="note.isPinnedToToday" svgIcon="remove_today"></mat-icon>
+      <mat-icon
+        *ngIf="note.isPinnedToToday"
+        svgIcon="remove_today"
+      ></mat-icon>
     </button>
 
-    <tag *ngIf="projectTag$|async as projectTag" [tag]="projectTag"></tag>
+    <tag
+      *ngIf="projectTag$|async as projectTag"
+      [tag]="projectTag"
+    ></tag>
 
     <!--    <button mat-icon-button>-->
     <!--      <mat-icon class="drag-handle-ico" svgIcon="drag_handle"></mat-icon>-->
     <!--    </button>-->
 
-    <button [matMenuTriggerFor]="menu" mat-icon-button>
+    <button
+      [matMenuTriggerFor]="menu"
+      mat-icon-button
+    >
       <mat-icon>more_vert</mat-icon>
     </button>
   </div>
@@ -36,7 +60,11 @@
 
 <mat-menu #menu="matMenu">
   <ng-template matMenuContent>
-    <button (click)="toggleLock()" *ngIf="!note.imgUrl" mat-menu-item>
+    <button
+      (click)="toggleLock()"
+      *ngIf="!note.imgUrl"
+      mat-menu-item
+    >
       <mat-icon *ngIf="note.isLock">lock</mat-icon>
       <mat-icon *ngIf="!note.isLock">lock_open</mat-icon>
 
@@ -44,7 +72,10 @@
       (T.F.NOTE.NOTE_CMP.DISABLE_PARSE|translate)}}
     </button>
 
-    <button (click)="removeNote()" mat-menu-item>
+    <button
+      (click)="removeNote()"
+      mat-menu-item
+    >
       <mat-icon style="color: #e15d63">delete_forever</mat-icon>
       {{T.G.DELETE|translate}}
     </button>

@@ -1,9 +1,15 @@
 <h1 mat-dialog-title>
-  <mat-icon class="dialog-header-icon" svgIcon="open_project"></mat-icon>
+  <mat-icon
+    class="dialog-header-icon"
+    svgIcon="open_project"
+  ></mat-icon>
   <span>{{T.F.OPEN_PROJECT.DIALOG_INITIAL.TITLE|translate}}</span>
 </h1>
 
-<form (submit)="saveOpenProjectCfg(openProjectCfg)" [formGroup]="formGroup">
+<form
+  (submit)="saveOpenProjectCfg(openProjectCfg)"
+  [formGroup]="formGroup"
+>
   <mat-dialog-content>
     <formly-form
       (modelChange)="openProjectCfg=$event"
@@ -15,7 +21,12 @@
   </mat-dialog-content>
 
   <mat-dialog-actions align="end">
-    <button (click)="close()" color="primary" mat-button type="button">
+    <button
+      (click)="close()"
+      color="primary"
+      mat-button
+      type="button"
+    >
       {{T.G.CANCEL|translate}}
     </button>
 

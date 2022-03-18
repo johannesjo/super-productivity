@@ -1,4 +1,8 @@
-<div #wrapperEl [class.isHideOverflow]="isHideOverflow" class="markdown-wrapper">
+<div
+  #wrapperEl
+  [class.isHideOverflow]="isHideOverflow"
+  class="markdown-wrapper"
+>
   <textarea
     #textareaEl
     (blur)="untoggleShowEdit(); setBlur($event)"
@@ -26,8 +30,14 @@
   ></div>
 </div>
 
-<div *ngIf="isShowControls" class="controls">
-  <button (click)="openFullScreen()" mat-icon-button>
+<div
+  *ngIf="isShowControls"
+  class="controls"
+>
+  <button
+    (click)="openFullScreen()"
+    mat-icon-button
+  >
     <mat-icon>fullscreen</mat-icon>
   </button>
 </div>

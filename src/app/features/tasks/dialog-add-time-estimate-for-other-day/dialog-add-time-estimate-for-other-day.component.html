@@ -1,10 +1,16 @@
 <div class="dialog-help-wrapper">
   <h1 mat-dialog-title>{{T.F.TASK.D_TIME_FOR_DAY.TITLE|translate}}</h1>
 
-  <form (submit)="submit()" name="addForAnotherDayForm">
+  <form
+    (submit)="submit()"
+    name="addForAnotherDayForm"
+  >
     <mat-dialog-content>
       <help-section>
-        <div [innerHTML]="T.F.TASK.D_TIME_FOR_DAY.HELP|translate" class="side-info"></div>
+        <div
+          [innerHTML]="T.F.TASK.D_TIME_FOR_DAY.HELP|translate"
+          class="side-info"
+        ></div>
       </help-section>
 
       <h3 class="mat-caption">
@@ -22,7 +28,10 @@
           type="text"
         />
         <mat-error>{{T.V.E_DATETIME|translate}}</mat-error>
-        <mat-datepicker-toggle [for]="myDatepicker" matPrefix></mat-datepicker-toggle>
+        <mat-datepicker-toggle
+          [for]="myDatepicker"
+          matPrefix
+        ></mat-datepicker-toggle>
         <mat-datepicker #myDatepicker></mat-datepicker>
       </mat-form-field>
 
@@ -36,11 +45,20 @@
     </mat-dialog-content>
 
     <mat-dialog-actions align="end">
-      <button [mat-dialog-close]="true" color="primary" mat-button type="button">
+      <button
+        [mat-dialog-close]="true"
+        color="primary"
+        mat-button
+        type="button"
+      >
         {{T.G.CANCEL|translate}}
       </button>
 
-      <button color="primary" mat-stroked-button type="submit">
+      <button
+        color="primary"
+        mat-stroked-button
+        type="submit"
+      >
         <mat-icon>save</mat-icon>
         {{T.G.SAVE|translate}}
       </button>

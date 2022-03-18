@@ -1,5 +1,8 @@
 <div class="wrapper">
-  <header *ngIf="isOver|| IS_TOUCH_ONLY" class="task-title-wrapper">
+  <header
+    *ngIf="isOver|| IS_TOUCH_ONLY"
+    class="task-title-wrapper"
+  >
     <h2
       (editFinished)="updateTaskTitleIfChanged($event.isChanged, $event.newVal)"
       [isResetAfterEdit]="true"
@@ -30,7 +33,10 @@
     </ng-container>
 
     <ng-container panel-content>
-      <div *ngIf="task.subTasks && task.subTasks.length" class="sub-tasks">
+      <div
+        *ngIf="task.subTasks && task.subTasks.length"
+        class="sub-tasks"
+      >
         <task-list
           *ngIf="task.subTasks?.length"
           [@expand]
@@ -43,7 +49,10 @@
         ></task-list>
       </div>
       <div style="text-align: center">
-        <button (click)="addSubTask()" mat-button>
+        <button
+          (click)="addSubTask()"
+          mat-button
+        >
           <mat-icon>add</mat-icon>
           <span>{{T.F.TASK.ADDITIONAL_INFO.ADD_SUB_TASK|translate}}</span>
         </button>
@@ -89,7 +98,10 @@
         <span [innerHTML]="task.timeSpent|msToString"></span>
       </span>
       <span class="separator">/</span>
-      <span [innerHTML]="task.timeEstimate|msToString" class="time-val"></span>
+      <span
+        [innerHTML]="task.timeEstimate|msToString"
+        class="time-val"
+      ></span>
 
       <ng-container input-additional>
         <progress-bar [progress]="progress"></progress-bar>
@@ -217,7 +229,10 @@
         ></task-attachment-list>
 
         <div style="text-align: center">
-          <button (click)="addAttachment()" mat-button>
+          <button
+            (click)="addAttachment()"
+            mat-button
+          >
             <mat-icon>add</mat-icon>
             <span>{{T.F.TASK.ADDITIONAL_INFO.ADD_ATTACHMENT|translate}}</span>
           </button>
@@ -267,7 +282,10 @@
   <div class="created">Created on {{task?.created|date:'short'}}</div>
 </div>
 
-<div *ngIf="isDragOver" class="bgc-accent drag-over-msg">
+<div
+  *ngIf="isDragOver"
+  class="bgc-accent drag-over-msg"
+>
   <mat-icon>add</mat-icon>
   {{T.F.TASK.CMP.DROP_ATTACHMENT|translate:{title: task?.title} }}
 </div>

@@ -6,6 +6,7 @@
   "quoteProps": "as-needed",
   "trailingComma": "all",
   "bracketSpacing": true,
+  "singleAttributePerLine": true,
   "arrowParens": "always",
   "endOfLine": "auto",
   "printWidth": 90,

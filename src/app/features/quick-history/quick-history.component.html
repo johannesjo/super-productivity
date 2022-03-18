@@ -1,7 +1,13 @@
 <h1>{{T.F.QUICK_HISTORY.PAGE_TITLE|translate}}</h1>
 
-<div *ngIf="(worklogService.quickHistoryWeeks$|async) as weeks else spinner" [@fade]>
-  <div class="no-data" *ngIf="weeks?.length===0">
+<div
+  *ngIf="(worklogService.quickHistoryWeeks$|async) as weeks else spinner"
+  [@fade]
+>
+  <div
+    class="no-data"
+    *ngIf="weeks?.length===0"
+  >
     {{T.F.QUICK_HISTORY.NO_DATA|translate}}
   </div>
 
@@ -23,7 +29,9 @@
             mat-ripple
           >
             <div>
-              <span *ngIf="visibility[i+(j*100)]" [@fade]
+              <span
+                *ngIf="visibility[i+(j*100)]"
+                [@fade]
                 >{{T.F.WORKLOG.WEEK.TITLE|translate}}</span
               >
             </div>
@@ -51,10 +59,16 @@
                       class="simple-counter-item"
                     >
                       <mat-icon inline="true">{{sc.iconOn || sc.icon}}</mat-icon>
-                      <div *ngIf="sc.type==='ClickCounter'" class="count">
+                      <div
+                        *ngIf="sc.type==='ClickCounter'"
+                        class="count"
+                      >
                         {{sc.countOnDay[day.value.dateStr] || 0}}
                       </div>
-                      <div *ngIf="sc.type==='StopWatch'" class="count">
+                      <div
+                        *ngIf="sc.type==='StopWatch'"
+                        class="count"
+                      >
                         {{sc.countOnDay[day.value.dateStr] || 0|msToMinuteClockString}}
                       </div>
                     </div>
@@ -63,13 +77,25 @@
               </div>
             </div>
             <div class="with-icon">
-              <mat-icon *ngIf="visibility[i+(j*100)]" [@fade]>timer </mat-icon>
+              <mat-icon
+                *ngIf="visibility[i+(j*100)]"
+                [@fade]
+                >timer
+              </mat-icon>
             </div>
           </div>
 
-          <table *ngIf="visibility[i+(j*100)]" [@expandFade] class="task-summary-table">
+          <table
+            *ngIf="visibility[i+(j*100)]"
+            [@expandFade]
+            class="task-summary-table"
+          >
             <tr *ngFor="let logEntry of day.value.logEntries; trackBy: trackByLogEntry;">
-              <td [class.isSubTask]="logEntry.task.parentId" class="title" colspan>
+              <td
+                [class.isSubTask]="logEntry.task.parentId"
+                class="title"
+                colspan
+              >
                 <span class="task-title">{{logEntry.task.title}}</span>
               </td>
               <td class="worked">

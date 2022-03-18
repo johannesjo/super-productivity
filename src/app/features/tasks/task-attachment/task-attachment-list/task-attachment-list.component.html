@@ -1,4 +1,7 @@
-<ul [@standardList]="attachments?.length" class="attachments">
+<ul
+  [@standardList]="attachments?.length"
+  class="attachments"
+>
   <li
     *ngFor="let attachment of attachments; let i = index; trackBy: trackByFn;"
     class="attachment"
@@ -27,7 +30,10 @@
       </ng-container>
     </a>
 
-    <div *ngIf="!isDisableControls" class="controls border-color-primary">
+    <div
+      *ngIf="!isDisableControls"
+      class="controls border-color-primary"
+    >
       <a
         class="view-btn"
         mat-flat-button
@@ -50,10 +56,18 @@
         <mat-icon>content_copy</mat-icon>
       </button>
 
-      <button (click)="openEditDialog(attachment)" class="edit-btn" mat-flat-button>
+      <button
+        (click)="openEditDialog(attachment)"
+        class="edit-btn"
+        mat-flat-button
+      >
         <mat-icon>edit</mat-icon>
       </button>
-      <button (click)="remove(attachment?.id)" class="trash-btn" mat-flat-button>
+      <button
+        (click)="remove(attachment?.id)"
+        class="trash-btn"
+        mat-flat-button
+      >
         <mat-icon color="warn">delete_forever</mat-icon>
       </button>
     </div>

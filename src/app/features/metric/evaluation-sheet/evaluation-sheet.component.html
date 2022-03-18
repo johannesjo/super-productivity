@@ -7,7 +7,12 @@
     <p>{{T.F.METRIC.EVAL_FORM.HELP_P2|translate}}</p>
   </help-section>
 
-  <form #f="ngForm" *ngIf="metricForDay" name="form" novalidate>
+  <form
+    #f="ngForm"
+    *ngIf="metricForDay"
+    name="form"
+    novalidate
+  >
     <div class="row">
       <mat-form-field>
         <input
@@ -89,7 +94,10 @@
   *ngIf="(workContextService.isActiveWorkContextProject$|async)"
   style="text-align: center; margin-top: 8px; margin-bottom: 16px"
 >
-  <button (click)="addNote()" mat-button>
+  <button
+    (click)="addNote()"
+    mat-button
+  >
     <mat-icon>add</mat-icon>
     {{T.F.METRIC.EVAL_FORM.ADD_NOTE_FOR_TOMORROW|translate}}
   </button>

@@ -1,4 +1,7 @@
-<form (ngSubmit)="submit()" [formGroup]="form">
+<form
+  (ngSubmit)="submit()"
+  [formGroup]="form"
+>
   <formly-form
     (modelChange)="onModelChange($event)"
     [fields]="section?.items"

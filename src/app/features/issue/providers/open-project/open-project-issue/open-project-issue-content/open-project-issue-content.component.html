@@ -1,6 +1,14 @@
 <ng-container>
-  <div *ngIf="task?.issueWasUpdated" @expand style="text-align: center">
-    <button (click)="hideUpdates()" color="accent" mat-raised-button>
+  <div
+    *ngIf="task?.issueWasUpdated"
+    @expand
+    style="text-align: center"
+  >
+    <button
+      (click)="hideUpdates()"
+      color="accent"
+      mat-raised-button
+    >
       {{T.F.OPEN_PROJECT.ISSUE_CONTENT.MARK_AS_CHECKED|translate}}
     </button>
   </div>
@@ -10,7 +18,9 @@
       <tr>
         <th>{{T.F.OPEN_PROJECT.ISSUE_CONTENT.SUMMARY|translate}}</th>
         <td>
-          <a [href]="issue?.url" target="_blank"
+          <a
+            [href]="issue?.url"
+            target="_blank"
             ><strong>{{issue?.subject}} #{{issue?.id}}</strong></a
           >
         </td>
@@ -24,7 +34,10 @@
       <tr *ngIf="issue?._embedded.status">
         <th>{{T.F.OPEN_PROJECT.ISSUE_CONTENT.STATUS|translate}}</th>
         <td>
-          <span class="dot" [style.backgroud-color]="issue?._embedded.status.color"></span
+          <span
+            class="dot"
+            [style.backgroud-color]="issue?._embedded.status.color"
+          ></span
           >{{issue?._embedded.status.name}}
         </td>
       </tr>

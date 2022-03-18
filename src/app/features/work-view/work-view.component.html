@@ -2,8 +2,14 @@
   *ngIf="!(workContextService.isContextChangingWithDelay$|async)"
   @projectChange
 >
-  <div #containerEl class="wrapper">
-    <div #splitTopEl class="today">
+  <div
+    #containerEl
+    class="wrapper"
+  >
+    <div
+      #splitTopEl
+      class="today"
+    >
       <header class="work-view-header">
         <div
           *ngIf="!(planningModeService.isPlanningMode$|async)"
@@ -16,7 +22,10 @@
               ~<strong class="time-val"
                 >{{workContextService.estimateRemainingToday$|async|msToString}}</strong
               >
-              <mat-icon style="margin-left: 2px" svgIcon="estimate_remaining"></mat-icon>
+              <mat-icon
+                style="margin-left: 2px"
+                svgIcon="estimate_remaining"
+              ></mat-icon>
             </span>
           </div>
 
@@ -30,7 +39,10 @@
             </span>
           </div>
 
-          <div *ngIf="isShowTimeWorkedWithoutBreak" class="item">
+          <div
+            *ngIf="isShowTimeWorkedWithoutBreak"
+            class="item"
+          >
             <span class="label">{{T.WW.WITHOUT_BREAK|translate}} </span>
             <span class="no-wrap">
               <strong class="time-val"
@@ -41,7 +53,11 @@
               [matTooltip]="T.WW.RESET_BREAK_TIMER|translate"
               class="take-a-break-reset-btn"
             >
-              <button (click)="resetBreakTimer()" color="lighter" mat-mini-fab>
+              <button
+                (click)="resetBreakTimer()"
+                color="lighter"
+                mat-mini-fab
+              >
                 <mat-icon>timer_off</mat-icon>
               </button>
             </div>
@@ -52,10 +68,16 @@
           *ngIf="(planningModeService.isPlanningMode$|async)"
           class="planning-mode-header"
         >
-          <h3 *ngIf="!(undoneTasks?.length)" class="planning-mode-header mat-h3">
+          <h3
+            *ngIf="!(undoneTasks?.length)"
+            class="planning-mode-header mat-h3"
+          >
             {{T.WW.ADD_SOME_TASKS|translate}}
           </h3>
-          <div *ngIf="undoneTasks?.length" class="status-bar">
+          <div
+            *ngIf="undoneTasks?.length"
+            class="status-bar"
+          >
             <div class="item">
               <span class="label">{{T.WW.TIME_ESTIMATED|translate}}</span>
               <span class="no-wrap">
@@ -83,7 +105,12 @@
           <h2>{{T.WW.NO_PLANNED_TASKS|translate}}</h2>
 
           <div class="btn-wrapper">
-            <button (click)="planMore()" color="" mat-flat-button tabindex="1">
+            <button
+              (click)="planMore()"
+              color=""
+              mat-flat-button
+              tabindex="1"
+            >
               <mat-icon>playlist_add</mat-icon>
               {{T.WW.ADD_MORE|translate}}
             </button>
@@ -186,7 +213,11 @@
             {{T.WW.READY_TO_WORK|translate}}
           </button>
         </div>
-        <task-list [tasks]="undoneTasks" listId="PARENT" listModelId="UNDONE"></task-list>
+        <task-list
+          [tasks]="undoneTasks"
+          listId="PARENT"
+          listModelId="UNDONE"
+        ></task-list>
 
         <div
           *ngIf="!(planningModeService.isPlanningMode$|async) || (doneTasks)?.length"
@@ -258,7 +289,11 @@
         [splitPos]="splitInputPos"
         [splitTopEl]="splitTopEl"
       ></split>
-      <div *ngIf="splitInputPos!==100" class="inner-wrapper" style="user-select: none">
+      <div
+        *ngIf="splitInputPos!==100"
+        class="inner-wrapper"
+        style="user-select: none"
+      >
         <backlog
           (closeBacklog)="splitInputPos=100"
           [backlogTasks]="backlogTasks"

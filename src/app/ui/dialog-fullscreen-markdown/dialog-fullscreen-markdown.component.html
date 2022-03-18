@@ -1,4 +1,7 @@
-<div class="content" [class.split-view]="viewMode==='SPLIT'">
+<div
+  class="content"
+  [class.split-view]="viewMode==='SPLIT'"
+>
   <textarea
     #textareaEl
     [(ngModel)]="data.content"
@@ -16,7 +19,10 @@
 
 <div class="controls">
   <div class="left-buttons">
-    <mat-button-toggle-group [(ngModel)]="viewMode" (change)="onViewModeChange()">
+    <mat-button-toggle-group
+      [(ngModel)]="viewMode"
+      (change)="onViewModeChange()"
+    >
       <mat-button-toggle
         value="TEXT_ONLY"
         [matTooltip]="T.F.NOTE.D_FULLSCREEN.VIEW_TEXT_ONLY|translate"
@@ -36,12 +42,19 @@
     </mat-button-toggle-group>
   </div>
 
-  <button (click)="close(true)" mat-button>
+  <button
+    (click)="close(true)"
+    mat-button
+  >
     <mat-icon>close</mat-icon>
     {{(T.G.CANCEL)|translate}}
   </button>
 
-  <button (click)="close()" color="primary" mat-stroked-button>
+  <button
+    (click)="close()"
+    color="primary"
+    mat-stroked-button
+  >
     <mat-icon>save</mat-icon>
     {{(T.G.SAVE)|translate}}
   </button>

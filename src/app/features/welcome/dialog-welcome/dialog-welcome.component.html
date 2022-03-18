@@ -3,7 +3,10 @@
 <mat-dialog-content>
   <p>{{T.F.WELCOME.D_WELCOME.T1|translate}}</p>
 
-  <p *ngIf="IS_TOUCH_ONLY" [innerHTML]="T.F.WELCOME.D_WELCOME.MOBILE_INFO|translate"></p>
+  <p
+    *ngIf="IS_TOUCH_ONLY"
+    [innerHTML]="T.F.WELCOME.D_WELCOME.MOBILE_INFO|translate"
+  ></p>
 
   <p>{{T.F.WELCOME.D_WELCOME.T2|translate}}</p>
   <ul>

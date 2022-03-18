@@ -9,7 +9,11 @@
   <mat-icon>{{isShowHelp ? 'close' : 'help_outline'}}</mat-icon>
 </button>
 
-<div *ngIf="isShowHelp" [@expandFade] class="help-text border-color-primary">
+<div
+  *ngIf="isShowHelp"
+  [@expandFade]
+  class="help-text border-color-primary"
+>
   <div class="help-icon-wrapper color-primary">
     <mat-icon>help_outline</mat-icon>
   </div>

@@ -1,6 +1,13 @@
-<form (submit)="postTime()" class="mat-body" name="time-estimate-form">
+<form
+  (submit)="postTime()"
+  class="mat-body"
+  name="time-estimate-form"
+>
   <h1 mat-dialog-title>
-    <mat-icon class="dialog-header-icon" svgIcon="open_project"></mat-icon>
+    <mat-icon
+      class="dialog-header-icon"
+      svgIcon="open_project"
+    ></mat-icon>
     <span>{{T.F.OPEN_PROJECT.DIALOG_TRACK_TIME.TITLE|translate}}</span>
   </h1>
 
@@ -8,7 +15,10 @@
     <p>
       {{T.F.OPEN_PROJECT.DIALOG_TRACK_TIME.SUBMIT_TIME_FOR|translate}}<br />
       <strong>
-        <a [href]="workPackage?.url" target="_blank">
+        <a
+          [href]="workPackage?.url"
+          target="_blank"
+        >
           {{workPackage.id}} {{workPackage.subject}}</a
         ></strong
       >.
@@ -37,10 +47,16 @@
           [matMenuTriggerFor]="contextMenu"
           [matTooltip]="T.F.JIRA.DIALOG_WORKLOG.TIME_SPENT_TOOLTIP|translate"
         >
-          <button mat-icon-button type="button">
+          <button
+            mat-icon-button
+            type="button"
+          >
             <mat-icon style="font-size: 24px">add</mat-icon>
           </button>
-          <button mat-icon-button type="button">
+          <button
+            mat-icon-button
+            type="button"
+          >
             <mat-icon style="font-size: 24px">timer</mat-icon>
           </button>
         </div>
@@ -88,7 +104,10 @@
           name="activity"
           [placeholder]="T.F.OPEN_PROJECT.DIALOG_TRACK_TIME.ACTIVITY|translate"
         >
-          <mat-option *ngFor="let activity of (activities$|async);" [value]="activity.id">
+          <mat-option
+            *ngFor="let activity of (activities$|async);"
+            [value]="activity.id"
+          >
             {{activity.name}}
           </mat-option>
         </mat-select>
@@ -110,10 +129,19 @@
 
   <mat-dialog-actions align="end">
     <div class="wrap-buttons">
-      <button (click)="close()" color="primary" mat-button type="button">
+      <button
+        (click)="close()"
+        color="primary"
+        mat-button
+        type="button"
+      >
         {{T.G.CANCEL|translate}}
       </button>
-      <button color="primary" mat-stroked-button type="submit">
+      <button
+        color="primary"
+        mat-stroked-button
+        type="submit"
+      >
         <mat-icon>save</mat-icon>
         {{T.F.OPEN_PROJECT.DIALOG_TRACK_TIME.POST_TIME|translate}}
       </button>

@@ -1,9 +1,15 @@
-<button [routerLink]="[base,contextId,'quick-history']" mat-menu-item>
+<button
+  [routerLink]="[base,contextId,'quick-history']"
+  mat-menu-item
+>
   <mat-icon>history</mat-icon>
   <span class="text">{{T.MH.QUICK_HISTORY|translate}}</span>
 </button>
 
-<button [routerLink]="[base,contextId,'worklog']" mat-menu-item>
+<button
+  [routerLink]="[base,contextId,'worklog']"
+  mat-menu-item
+>
   <mat-icon>date_range</mat-icon>
   <span class="text">{{T.MH.WORKLOG|translate}}</span>
 </button>
@@ -17,7 +23,10 @@
   <span class="text">{{T.MH.METRICS|translate}}</span>
 </button>
 
-<button [routerLink]="[base,contextId,'settings']" mat-menu-item>
+<button
+  [routerLink]="[base,contextId,'settings']"
+  mat-menu-item
+>
   <mat-icon>settings</mat-icon>
   <span class="text">{{T.MH.SETTINGS|translate}}</span>
 </button>

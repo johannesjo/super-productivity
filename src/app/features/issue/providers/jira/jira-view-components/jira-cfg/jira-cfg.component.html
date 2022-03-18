@@ -37,7 +37,10 @@
       {{T.F.JIRA.CFG_CMP.ENABLE_TRANSITIONS|translate}}
     </mat-slide-toggle>
 
-    <section *ngIf="cfg.isTransitionIssuesEnabled" @expand>
+    <section
+      *ngIf="cfg.isTransitionIssuesEnabled"
+      @expand
+    >
       <mat-form-field>
         <input
           [formControl]="issueSuggestionsCtrl"

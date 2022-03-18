@@ -34,32 +34,57 @@
       <mat-icon>restore</mat-icon>
       {{T.PDS.ROUND_TIME_SPENT|translate}}
     </button>
-    <button (click)="showExportModal(project.id)" *ngIf="isForToday" mat-button>
+    <button
+      (click)="showExportModal(project.id)"
+      *ngIf="isForToday"
+      mat-button
+    >
       <mat-icon>call_made</mat-icon>
       {{T.PDS.EXPORT_TASK_LIST|translate}}
     </button>
 
     <mat-menu #roundTimeActions="matMenu">
       <ng-template matMenuContent>
-        <button mat-menu-item style="color: red">
+        <button
+          mat-menu-item
+          style="color: red"
+        >
           {{T.PDS.ROUND_TIME_WARNING|translate}}
         </button>
-        <button (click)="roundTimeForTasks(project.id,'5M')" mat-menu-item>
+        <button
+          (click)="roundTimeForTasks(project.id,'5M')"
+          mat-menu-item
+        >
           {{T.PDS.ROUND_5M|translate}}
         </button>
-        <button (click)="roundTimeForTasks(project.id,'5M', true)" mat-menu-item>
+        <button
+          (click)="roundTimeForTasks(project.id,'5M', true)"
+          mat-menu-item
+        >
           {{T.PDS.ROUND_UP_5M|translate}}
         </button>
-        <button (click)="roundTimeForTasks(project.id,'QUARTER')" mat-menu-item>
+        <button
+          (click)="roundTimeForTasks(project.id,'QUARTER')"
+          mat-menu-item
+        >
           {{T.PDS.ROUND_15M|translate}}
         </button>
-        <button (click)="roundTimeForTasks(project.id,'QUARTER', true)" mat-menu-item>
+        <button
+          (click)="roundTimeForTasks(project.id,'QUARTER', true)"
+          mat-menu-item
+        >
           {{T.PDS.ROUND_UP_15M|translate}}
         </button>
-        <button (click)="roundTimeForTasks(project.id,'HALF')" mat-menu-item>
+        <button
+          (click)="roundTimeForTasks(project.id,'HALF')"
+          mat-menu-item
+        >
           {{T.PDS.ROUND_30M|translate}}
         </button>
-        <button (click)="roundTimeForTasks(project.id,'HALF', true)" mat-menu-item>
+        <button
+          (click)="roundTimeForTasks(project.id,'HALF', true)"
+          mat-menu-item
+        >
           {{T.PDS.ROUND_UP_30M|translate}}
         </button>
       </ng-template>

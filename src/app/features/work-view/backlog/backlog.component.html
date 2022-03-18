@@ -1,5 +1,8 @@
 <div class="wrapper">
-  <div class="task-list-wrapper" *ngIf="(ready$|async) else spinner">
+  <div
+    class="task-list-wrapper"
+    *ngIf="(ready$|async) else spinner"
+  >
     <task-list
       [isBacklog]="true"
       [noTasksMsg]="T.BL.NO_TASKS|translate"

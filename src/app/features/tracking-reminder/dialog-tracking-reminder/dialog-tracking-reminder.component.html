@@ -1,5 +1,8 @@
 <form (submit)="track()">
-  <div class="dialog-content" mat-dialog-content>
+  <div
+    class="dialog-content"
+    mat-dialog-content
+  >
     <p>{{T.F.TIME_TRACKING.D_TRACKING_REMINDER.UNTRACKED_TIME|translate}}</p>
     <div class="time">{{data.remindCounter$|async|msToString:true}}</div>
 
@@ -20,8 +23,16 @@
     </div>
   </div>
 
-  <div align="center" mat-dialog-actions>
-    <button (click)="cancel()" color="" mat-button type="button">
+  <div
+    align="center"
+    mat-dialog-actions
+  >
+    <button
+      (click)="cancel()"
+      color=""
+      mat-button
+      type="button"
+    >
       <mat-icon>close</mat-icon>
       {{T.G.CANCEL|translate}}
     </button>

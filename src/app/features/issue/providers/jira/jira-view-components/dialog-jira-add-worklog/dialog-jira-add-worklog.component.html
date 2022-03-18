@@ -1,6 +1,13 @@
-<form (submit)="submitWorklog()" class="mat-body" name="time-estimate-form">
+<form
+  (submit)="submitWorklog()"
+  class="mat-body"
+  name="time-estimate-form"
+>
   <h1 mat-dialog-title>
-    <mat-icon class="dialog-header-icon" svgIcon="jira"></mat-icon>
+    <mat-icon
+      class="dialog-header-icon"
+      svgIcon="jira"
+    ></mat-icon>
     <span>{{T.F.JIRA.DIALOG_WORKLOG.TITLE|translate}}</span>
   </h1>
 
@@ -32,10 +39,16 @@
           [matMenuTriggerFor]="contextMenu"
           [matTooltip]="T.F.JIRA.DIALOG_WORKLOG.TIME_SPENT_TOOLTIP|translate"
         >
-          <button mat-icon-button type="button">
+          <button
+            mat-icon-button
+            type="button"
+          >
             <mat-icon style="font-size: 24px">add</mat-icon>
           </button>
-          <button mat-icon-button type="button">
+          <button
+            mat-icon-button
+            type="button"
+          >
             <mat-icon style="font-size: 24px">timer</mat-icon>
           </button>
         </div>

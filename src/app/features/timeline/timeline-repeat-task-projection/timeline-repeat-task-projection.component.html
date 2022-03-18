@@ -1,4 +1,8 @@
-<div *ngIf="repeatCfg" class="repeat-task-projection" (click)="editTaskRepeatCfg()">
+<div
+  *ngIf="repeatCfg"
+  class="repeat-task-projection"
+  (click)="editTaskRepeatCfg()"
+>
   <mat-icon svgIcon="repeat"></mat-icon>
   <div class="title">
     {{repeatCfg.title}}

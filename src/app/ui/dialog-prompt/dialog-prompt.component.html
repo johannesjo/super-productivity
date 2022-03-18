@@ -1,7 +1,15 @@
 <mat-dialog-content>
-  <div [innerHtml]="data.message|translate:data.translateParams" class="content"></div>
+  <div
+    [innerHtml]="data.message|translate:data.translateParams"
+    class="content"
+  ></div>
   <mat-form-field>
-    <input [(ngModel)]="txtVal" [placeholder]="data.placeholder" matInput type="text" />
+    <input
+      [(ngModel)]="txtVal"
+      [placeholder]="data.placeholder"
+      matInput
+      type="text"
+    />
   </mat-form-field>
 </mat-dialog-content>
 

@@ -10,7 +10,10 @@
 
   <ng-container better-drawer-side>
     <div class="right-panel">
-      <notes *ngIf="!(selectedTaskWithDelayForNone$|async) " [@slideInFromRight]></notes>
+      <notes
+        *ngIf="!(selectedTaskWithDelayForNone$|async) "
+        [@slideInFromRight]
+      ></notes>
       <task-additional-info
         [isOver]="isAlwaysOver || (layoutService.isRightPanelOver$|async)"
         [@taskAdditionalInfoTaskChange]=" selectedTaskWithDelayForNone?.id"

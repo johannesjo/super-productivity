@@ -1,4 +1,7 @@
-<div class="wrapper" style="position: relative">
+<div
+  class="wrapper"
+  style="position: relative"
+>
   <mat-form-field>
     <input
       (ngModelChange)="updateFromInput($event)"
@@ -9,7 +12,11 @@
       matInput
       type="datetime-local"
     />
-    <input (ngModelChange)="updateFromInput($event)" [ngModel]="strValue" class="fake" />
+    <input
+      (ngModelChange)="updateFromInput($event)"
+      [ngModel]="strValue"
+      class="fake"
+    />
     <mat-error>{{T.V.E_DATETIME|translate}}</mat-error>
   </mat-form-field>
 
@@ -29,6 +36,10 @@
     <mat-chip (click)="setCommonVal('TOMORROW_11')"
       >{{T.DATETIME_INPUT.TOMORROW|translate:{time: '11:00'} }}</mat-chip
     >
-    <mat-chip (click)="setLastVal()" *ngIf="lastVal">{{lastVal|date:'short'}}</mat-chip>
+    <mat-chip
+      (click)="setLastVal()"
+      *ngIf="lastVal"
+      >{{lastVal|date:'short'}}</mat-chip
+    >
   </mat-chip-list>
 </div>

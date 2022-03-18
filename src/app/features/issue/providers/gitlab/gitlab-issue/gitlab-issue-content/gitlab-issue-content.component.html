@@ -1,6 +1,14 @@
 <ng-container>
-  <div *ngIf="task?.issueWasUpdated" @expand style="text-align: center">
-    <button (click)="hideUpdates()" color="accent" mat-raised-button>
+  <div
+    *ngIf="task?.issueWasUpdated"
+    @expand
+    style="text-align: center"
+  >
+    <button
+      (click)="hideUpdates()"
+      color="accent"
+      mat-raised-button
+    >
       {{T.F.GITLAB.ISSUE_CONTENT.MARK_AS_CHECKED|translate}}
     </button>
   </div>
@@ -10,7 +18,9 @@
       <tr>
         <th>{{T.F.GITLAB.ISSUE_CONTENT.SUMMARY|translate}}</th>
         <td>
-          <a [href]="issue?.html_url" target="_blank"
+          <a
+            [href]="issue?.html_url"
+            target="_blank"
             ><strong>{{issue?.title}} #{{issue?.number}}</strong></a
           >
         </td>
@@ -26,7 +36,9 @@
       <tr *ngIf="issue?.assignee?.web_url">
         <th>{{T.F.GITLAB.ISSUE_CONTENT.ASSIGNEE|translate}}</th>
         <td>
-          <a [href]="issue?.assignee?.web_url" target="_blank"
+          <a
+            [href]="issue?.assignee?.web_url"
+            target="_blank"
             >{{issue?.assignee?.username}}</a
           >
         </td>
@@ -35,7 +47,9 @@
         <th>{{T.F.GITLAB.ISSUE_CONTENT.LABELS|translate}}</th>
         <td>
           <mat-chip-list>
-            <mat-chip *ngFor="let label of issue?.labels" [title]="label"
+            <mat-chip
+              *ngFor="let label of issue?.labels"
+              [title]="label"
               >{{label}}
             </mat-chip>
           </mat-chip-list>
@@ -44,7 +58,11 @@
       <tr *ngIf="issue?.body">
         <th>{{T.F.GITLAB.ISSUE_CONTENT.DESCRIPTION|translate}}</th>
         <td class="issue-description">
-          <div [data]="issue?.body" class="description markdown" markdown></div>
+          <div
+            [data]="issue?.body"
+            class="description markdown"
+            markdown
+          ></div>
         </td>
       </tr>
     </table>

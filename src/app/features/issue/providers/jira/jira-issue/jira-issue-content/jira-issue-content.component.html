@@ -1,7 +1,15 @@
 <div class="wrapper">
-  <div *ngIf="task?.issueWasUpdated" [@expand] class="updates">
+  <div
+    *ngIf="task?.issueWasUpdated"
+    [@expand]
+    class="updates"
+  >
     <div>
-      <button (click)="hideUpdates()" color="accent" mat-raised-button>
+      <button
+        (click)="hideUpdates()"
+        color="accent"
+        mat-raised-button
+      >
         {{T.F.JIRA.ISSUE_CONTENT.MARK_AS_CHECKED|translate}}
       </button>
     </div>
@@ -22,7 +30,9 @@
       <th>{{T.F.JIRA.ISSUE_CONTENT.SUMMARY|translate}}</th>
       <td class="summary">
         <strong
-          ><a [href]="issueUrl$|async" target="_blank"
+          ><a
+            [href]="issueUrl$|async"
+            target="_blank"
             >{{issue?.key}} {{issue?.summary}}</a
           ></strong
         >
@@ -56,7 +66,12 @@
       <td>
         <ul class="subtask-list">
           <li *ngFor="let st of jiraSubTasks;">
-            <a target="_blank" [href]="st.href"> {{st.key}} {{st.summary}}</a>
+            <a
+              target="_blank"
+              [href]="st.href"
+            >
+              {{st.key}} {{st.summary}}</a
+            >
           </li>
         </ul>
       </td>
@@ -68,7 +83,11 @@
         <ul class="related-issue-list">
           <li *ngFor="let ri of relatedIssues;">
             <i>{{ri.relatedHow}} => </i>
-            <a target="_blank" [href]="ri.href">{{ri.key}} {{ri.summary}}</a>
+            <a
+              target="_blank"
+              [href]="ri.href"
+              >{{ri.key}} {{ri.summary}}</a
+            >
           </li>
         </ul>
       </td>
@@ -86,7 +105,10 @@
         </mat-chip-list>
       </td>
     </tr>
-    <tr *ngIf="issue?.description" class="description-row">
+    <tr
+      *ngIf="issue?.description"
+      class="description-row"
+    >
       <th>{{T.F.JIRA.ISSUE_CONTENT.DESCRIPTION|translate}}</th>
       <td>
         <div
@@ -114,7 +136,10 @@
           *ngFor="let comment of (issue?.comments|sort:'created'); trackBy: trackByIndex"
           class="comment"
         >
-          <img [src]="comment.author.avatarUrl" class="author-avatar" />
+          <img
+            [src]="comment.author.avatarUrl"
+            class="author-avatar"
+          />
           <div class="name-and-comment-content">
             <div>
               <span class="author-name">{{comment.author.displayName}}</span>
@@ -131,7 +156,11 @@
           </div>
         </div>
 
-        <a [href]="issueUrl$|async" mat-stroked-button target="_blank">
+        <a
+          [href]="issueUrl$|async"
+          mat-stroked-button
+          target="_blank"
+        >
           <mat-icon>textsms</mat-icon>
           {{T.F.JIRA.ISSUE_CONTENT.WRITE_A_COMMENT|translate}}</a
         >

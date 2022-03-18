@@ -4,7 +4,12 @@
     *ngIf="projectMetricsService.simpleMetrics$|async as sm"
     [@fade]
   >
-    <h1 class="mat-h1" style="text-align: center">{{T.PM.TITLE|translate}}</h1>
+    <h1
+      class="mat-h1"
+      style="text-align: center"
+    >
+      {{T.PM.TITLE|translate}}
+    </h1>
 
     <!--  <h2>Basic Metrics</h2>-->
     <p><i>{{sm.start}} – {{sm.end}}</i></p>
@@ -57,11 +62,17 @@
     </div>
   </section>
 
-  <p *ngIf="!(metricService.hasData$|async)" style="margin-top: 32px">
+  <p
+    *ngIf="!(metricService.hasData$|async)"
+    style="margin-top: 32px"
+  >
     {{T.F.METRIC.CMP.NO_ADDITIONAL_DATA_YET|translate}}
   </p>
 
-  <section *ngIf="(metricService.hasData$|async)" class="metric-metrics">
+  <section
+    *ngIf="(metricService.hasData$|async)"
+    class="metric-metrics"
+  >
     <h1>{{T.F.METRIC.CMP.GLOBAL_METRICS|translate}}</h1>
     <section class="pie-charts">
       <section
@@ -119,7 +130,10 @@
     </section>
   </section>
 
-  <section *ngIf="(metricService.hasData$|async)" class="metric-metrics">
+  <section
+    *ngIf="(metricService.hasData$|async)"
+    class="metric-metrics"
+  >
     <h2>{{T.F.METRIC.CMP.SIMPLE_COUNTERS|translate}}</h2>
     <section class="line-charts">
       <section *ngIf="(simpleClickCounterData$|async) as simpleCounterClickData">
