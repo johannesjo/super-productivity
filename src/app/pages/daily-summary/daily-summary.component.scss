@@ -8,6 +8,14 @@ $summary-point-inner-margin: $s;
     user-select: none;
     -webkit-user-select: none; /* Safari */
   }
+
+  // in case we every want to go sticky
+  //::ng-deep .mat-tab-header {
+  //  top: 0;
+  //  z-index: 1000;
+  //  position: sticky;
+  //  position: -webkit-sticky; /* macOS/iOS Safari */
+  //}
 }
 
 .page-wrapper {

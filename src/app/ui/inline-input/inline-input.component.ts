@@ -17,7 +17,7 @@ import {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class InlineInputComponent implements AfterViewInit {
-  @Input() type: 'text' | 'duration' = 'text';
+  @Input() type: 'text' | 'duration' | 'time' = 'text';
   @Input() value?: string | number;
   @Input() displayValue?: string;
   @Input() newValue?: string | number;
