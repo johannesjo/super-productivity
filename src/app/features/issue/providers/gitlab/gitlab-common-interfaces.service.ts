@@ -69,9 +69,12 @@ export class GitlabCommonInterfacesService implements IssueServiceInterface {
     return this._getCfgOnce$(projectId).pipe(
       switchMap((gitlabCfg) =>
         this.isEnabled(gitlabCfg) && gitlabCfg.isSearchIssuesFromGitlab
-          ? this._gitlabApiService
-              .searchIssueInProject$(searchTerm, gitlabCfg)
-              .pipe(catchError(() => []))
+          ? this._gitlabApiService.searchIssueInProject$(searchTerm, gitlabCfg).pipe(
+              catchError((err) => {
+                console.log('Error searching issue', err);
+                return [];
+              }),
+            )
           : of([]),
       ),
     );

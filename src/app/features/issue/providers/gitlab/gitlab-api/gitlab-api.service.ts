@@ -16,7 +16,16 @@ import { GitlabOriginalComment, GitlabOriginalIssue } from './gitlab-api-respons
 import { HANDLED_ERROR_PROP_STR } from 'src/app/app.constants';
 import { GITLAB_API_BASE_URL, GITLAB_PROJECT_REGEX } from '../gitlab.const';
 import { T } from 'src/app/t.const';
-import { catchError, expand, filter, map, mergeMap, reduce, take } from 'rxjs/operators';
+import {
+  catchError,
+  expand,
+  filter,
+  map,
+  mergeMap,
+  reduce,
+  take,
+  mergeAll,
+} from 'rxjs/operators';
 import { GitlabIssue } from '../gitlab-issue/gitlab-issue.model';
 import {
   mapGitlabIssue,
@@ -32,12 +41,13 @@ export class GitlabApiService {
   constructor(private _snackService: SnackService, private _http: HttpClient) {}
 
   getById$(id: string, cfg: GitlabCfg): Observable<GitlabIssue> {
-    return this._sendPaginatedRequest$(
+    return this._sendIssuePaginatedRequest$(
       {
         url: this._issueApiLink(cfg, id),
       },
       cfg,
     ).pipe(
+      mergeAll(),
       mergeMap((issue: GitlabIssue) => {
         return this.getIssueWithComments$(issue, cfg);
       }),
@@ -62,7 +72,7 @@ export class GitlabApiService {
     });
     const queryParams = 'iids[]=' + iids.join('&iids[]=');
 
-    return this._sendPaginatedRequest$(
+    return this._sendIssuePaginatedRequest$(
       {
         url: `${this._apiLink(cfg, project)}/issues?${queryParams}${this.getScopeParam(
           cfg,
@@ -101,7 +111,7 @@ export class GitlabApiService {
     if (!this._isValidSettings(cfg)) {
       return EMPTY;
     }
-    return this._sendPaginatedRequest$(
+    return this._sendIssuePaginatedRequest$(
       {
         url: `${this._apiLink(cfg)}/issues?search=${searchText}${this.getScopeParam(
           cfg,
@@ -236,6 +246,17 @@ export class GitlabApiService {
     );
   }
 
+  private _sendIssuePaginatedRequest$(
+    params: HttpRequest<string> | any,
+    cfg: GitlabCfg,
+  ): Observable<GitlabIssue[]> {
+    return this._sendPaginatedRequest$(params, cfg).pipe(
+      map((issues: GitlabOriginalIssue[]) =>
+        issues ? issues.map((issue) => mapGitlabIssue(issue, cfg)) : [],
+      ),
+    );
+  }
+
   private _sendPaginatedRequest$(
     params: HttpRequest<string> | any,
     cfg: GitlabCfg,
@@ -252,9 +273,6 @@ export class GitlabApiService {
         return EMPTY;
       }),
       reduce((acc, res) => acc.concat(res.body), []),
-      map((issues: GitlabOriginalIssue[]) => {
-        return issues ? issues.map((issue) => mapGitlabIssue(issue, cfg)) : [];
-      }),
     );
   }
 
