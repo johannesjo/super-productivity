@@ -1,3 +1,5 @@
+[![Stand With Ukraine](https://raw.githubusercontent.com/vshymanskyy/StandWithUkraine/main/banner2-direct.svg)](https://vshymanskyy.github.io/StandWithUkraine)
+
 <a href="https://super-productivity.com/">
   <img align="center" alt="Banner" src="screens/banner-bw.png" />
 </a>
