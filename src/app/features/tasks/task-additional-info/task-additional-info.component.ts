@@ -446,7 +446,8 @@ export class TaskAdditionalInfoComponent implements AfterViewInit, OnDestroy {
 
   collapseParent(): void {
     this.taskService.setSelectedId(null);
-    this.taskService.focusTask(this.task.id);
+    // NOTE: it might not always be possible to focus task since it might gone from the screen
+    this.taskService.focusTaskIfPossible(this.task.id);
   }
 
   onItemKeyPress(ev: KeyboardEvent): void {
