@@ -141,6 +141,8 @@ export const DEFAULT_GLOBAL_CONFIG: GlobalConfigState = {
 
     dropboxSync: {
       accessToken: null,
+      refreshToken: null,
+      _tokenExpiresAt: undefined,
     },
 
     googleDriveSync: {

@@ -157,12 +157,31 @@ export class DropboxApiService {
     });
   }
 
-  async getAccessTokenViaDialog(): Promise<string> {
+  async getAccessTokenFromRefreshToken(refreshToken: string): Promise<string> {
+    return axios.request({
+      url:
+        'https://api.dropbox.com/oauth2/token`' +
+        `?grant_type=refresh_token` +
+        `&client_id=${DROPBOX_APP_KEY}` +
+        `&refresh_token=${refreshToken}`,
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json;charset=UTF-8',
+      },
+    });
+  }
+
+  async getAccessTokenViaDialog(): Promise<{
+    accessToken: string;
+    refreshToken: string;
+    expiresAt: number;
+  } | null> {
     const { codeVerifier, codeChallenge } = await generatePKCECodes(128);
     const DROPBOX_AUTH_CODE_URL =
       `https://www.dropbox.com/oauth2/authorize` +
       `?response_type=code&client_id=${DROPBOX_APP_KEY}` +
       '&code_challenge_method=S256' +
+      '&token_access_type=offline' +
       `&code_challenge=${codeChallenge}`;
 
     const authCode = await this._matDialog
@@ -175,13 +194,17 @@ export class DropboxApiService {
       })
       .afterClosed()
       .toPromise();
-    return this.getAccessTokenFromAuthCode(authCode, codeVerifier);
+    return this._getTokensFromAuthCode(authCode, codeVerifier);
   }
 
-  async getAccessTokenFromAuthCode(
+  private async _getTokensFromAuthCode(
     authCode: string,
     codeVerifier: string,
-  ): Promise<string> {
+  ): Promise<{
+    accessToken: string;
+    refreshToken: string;
+    expiresAt: number;
+  } | null> {
     return axios
       .request({
         url: 'https://api.dropboxapi.com/oauth2/token',
@@ -201,7 +224,22 @@ export class DropboxApiService {
           type: 'SUCCESS',
           msg: T.F.DROPBOX.S.ACCESS_TOKEN_GENERATED,
         });
-        return res.data.access_token;
+
+        if (typeof res.data.accessToken !== 'string') {
+          throw new Error('Dropbox: Invalid access token response');
+        }
+        if (typeof res.data.refreshToken !== 'string') {
+          throw new Error('Dropbox: Invalid refresh token response');
+        }
+        if (typeof +res.data.expires_in !== 'number') {
+          throw new Error('Dropbox: Invalid expiresIn response');
+        }
+
+        return {
+          accessToken: res.data.access_token as string,
+          refreshToken: res.data.refresh_token as string,
+          expiresAt: +res.data.expires_in * 1000 + Date.now(),
+        };
         // Not necessary as it is highly unlikely that we get a wrong on
         // const accessToken = res.data.access_token;
         // return this.checkUser(accessToken).then(() => accessToken);
@@ -211,6 +249,7 @@ export class DropboxApiService {
           type: 'ERROR',
           msg: T.F.DROPBOX.S.ACCESS_TOKEN_ERROR,
         });
+        return null;
       });
   }
 }

@@ -47,7 +47,7 @@ export class DropboxSyncService implements SyncProviderServiceInterface {
         isAxiosError &&
         (e as any).response.data &&
         // NOTE: sometimes 'path/not_found/..' and sometimes 'path/not_found/...'
-        (e as any).response.data.error_summary.includes('path/not_found')
+        (e as any).response.data.error_summary?.includes('path/not_found')
       ) {
         return 'NO_REMOTE_DATA';
       } else if (isAxiosError && (e as any).response.status === 401) {

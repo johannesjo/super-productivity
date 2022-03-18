@@ -14,14 +14,14 @@ import { updateGlobalConfigSection } from '../../../../features/config/store/glo
 
 @Injectable()
 export class DropboxEffects {
-  updateTokenFromDialog$: Observable<unknown> = createEffect(() =>
+  updateTokensFromDialog$: Observable<unknown> = createEffect(() =>
     this._actions$.pipe(
       ofType(triggerDropboxAuthDialog.type),
       withLatestFrom(this._globalConfigService.sync$),
       switchMap(([, sync]) => {
         return from(this._dropboxApiService.getAccessTokenViaDialog()).pipe(
-          mergeMap((accessToken) =>
-            accessToken
+          mergeMap((res) =>
+            res
               ? of(
                   updateGlobalConfigSection({
                     sectionKey: 'sync',
@@ -29,7 +29,9 @@ export class DropboxEffects {
                       ...sync,
                       dropboxSync: {
                         ...sync.dropboxSync,
-                        accessToken,
+                        accessToken: res.accessToken,
+                        refreshTokenToken: res.refreshToken,
+                        _tokenExpiresAt: res.expiresAt,
                       },
                     } as SyncConfig,
                   }),

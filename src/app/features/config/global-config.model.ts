@@ -69,6 +69,8 @@ export interface GoogleDriveSyncConfig {
 
 export interface DropboxSyncConfig {
   accessToken: string | null;
+  refreshToken: string | null;
+  _tokenExpiresAt?: number;
 }
 
 export interface WebDavConfig {
