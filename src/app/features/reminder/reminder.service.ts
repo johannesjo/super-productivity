@@ -118,6 +118,9 @@ export class ReminderService {
     remindAt: number,
     recurringConfig?: RecurringConfig,
   ): string {
+    // make sure that there is always only a single reminder with a particular relatedId as there might be race conditions
+    this.removeReminderByRelatedIdIfSet(relatedId);
+
     const id = nanoid();
     const existingInstanceForEntry = this.getByRelatedId(relatedId);
     if (existingInstanceForEntry) {
