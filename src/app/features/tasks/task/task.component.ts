@@ -57,6 +57,7 @@ import { throttle } from 'helpful-decorators';
 import { TaskRepeatCfgService } from '../../task-repeat-cfg/task-repeat-cfg.service';
 import { DialogConfirmComponent } from '../../../ui/dialog-confirm/dialog-confirm.component';
 import { Update } from '@ngrx/entity';
+import { SnackService } from '../../../core/snack/snack.service';
 
 @Component({
   selector: 'task',
@@ -146,6 +147,7 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
     private readonly _issueService: IssueService,
     private readonly _attachmentService: TaskAttachmentService,
     private readonly _elementRef: ElementRef,
+    private readonly _snackService: SnackService,
     private readonly _renderer: Renderer2,
     private readonly _cd: ChangeDetectorRef,
     private readonly _projectService: ProjectService,
@@ -606,8 +608,14 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
   moveTaskToProject(projectId: string): void {
     if (projectId === this.task.projectId) {
       return;
-    }
-    if (!this.task.repeatCfgId) {
+    } else if (this.task.issueId) {
+      this._snackService.open({
+        type: 'CUSTOM',
+        ico: 'block',
+        msg: T.F.TASK.S.MOVE_TO_PROJECT_NOT_ALLOWED_FOR_ISSUE_TASK,
+      });
+      return;
+    } else if (!this.task.repeatCfgId) {
       this._taskService.moveToProject(this.task, projectId);
     } else {
       forkJoin([
