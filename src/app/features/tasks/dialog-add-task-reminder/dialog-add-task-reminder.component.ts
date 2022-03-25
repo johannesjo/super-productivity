@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, Inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, HostListener, Inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { TaskService } from '../task.service';
 import { ReminderCopy } from '../../reminder/reminder.model';
@@ -68,6 +68,12 @@ export class DialogAddTaskReminderComponent {
         ? lastIsMoveToBacklog
         : this.isShowMoveToBacklog;
     // }
+  }
+
+  @HostListener('keydown', ['$event']) onKeyDown(ev: KeyboardEvent): void {
+    if (this.isShowMoveToBacklog && ev.key.toLowerCase() === 'b') {
+      this.isMoveToBacklog = !this.isMoveToBacklog;
+    }
   }
 
   // NOTE: throttle is used as quick way to prevent multiple submits
