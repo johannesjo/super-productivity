@@ -438,7 +438,11 @@
       "D_ADD": {
         "NOTE_LABEL": "Za spremanje bilješke upiši neki tekst (možeš koristiti markdown) …"
       },
-      "EDIT_FULLSCREEN": "Uredi u cjeloerkanskom prikazu",
+      "D_FULLSCREEN": {
+        "VIEW_TEXT_ONLY": "Prikaži kao neobrađeni tekst",
+        "VIEW_SPLIT": "Prikaži obrađeni i neobrađeni markdown u podijeljenom prikazu",
+        "VIEW_PARSED": "Prikaži kao obrađeni (nepromjenjiv) markdown"
+      },
       "NOTES_CMP": {
         "ADD_BTN": "Dodaj novu bilješku",
         "DROP_TO_ADD": "Ispusti ovdje za dodavanje nove bilješke",
@@ -533,6 +537,12 @@
         "TITLE": "Znatiželja"
       },
       "H1": "Oslobodi se pritiska!",
+      "INTRO": {
+        "AVOIDING": "Izbjegavanje zadatka",
+        "FEAR": "Strah od neuspjeha",
+        "STRESSED": "Pod stresom zbog ne obavljanja zadataka",
+        "TITLE": "Uvod"
+      },
       "P1": "Kao prvo, opusti se! Svatko to čini s vremena na vrijeme. A ako ne radiš ono što bi trebao/la, barem uživaj u tome! Zatim pogledaj sljedeće odjeljke za nešto korisno.",
       "P2": "Ako želiš saznati više o znanosti koja stoji iza svega toga, preporučujem <a target=\"_blank\" href=\"https://www.nytimes.com/2019/03/25/smarter-living/why- you-procrastinate-it-has-nothing-to-do-with-self-control.html\" target=\"_blank\">ovaj članak</a> s nekim vježbama.",
       "P3": "Zapampti: Odugovlačenje je emotivan problem reguliranja, a ne problem upravljanja vremena.",
@@ -665,7 +675,6 @@
           "L_ACCESS_TOKEN": "Token za pristup (generiran iz koda autentifikacije)"
         },
         "GOOGLE": {
-          "L_IS_COMPRESS_DATA": "Komprimiraj podatke",
           "L_SYNC_FILE_NAME": "Ime datoteke sinkronizacije"
         },
         "LOCAL_FILE": {
@@ -673,6 +682,7 @@
           "L_SYNC_FILE_PATH_DESCRIPTION": "Apsolutna staza do datoteke, koja se treba koristiti za sinkronizaciju (stvorit će se)."
         },
         "L_ENABLE_SYNCING": "Aktiviraj sinkronizaciju",
+        "L_ENABLE_COMPRESSION": "Aktiviraj komprimiranje (brži prijenos podataka)",
         "L_SYNC_INTERVAL": "Interval sinkronizacije",
         "L_SYNC_PROVIDER": "Usluga sinkronizacije",
         "TITLE": "Sinkronizacija",
@@ -755,6 +765,7 @@
         "ADD_TO_PROJECT": "Dodaj u jedan projekt",
         "CONVERT_TO_PARENT_TASK": "Pretvori u nadređeni zadatak",
         "DELETE": "Izbriši zadatak",
+        "DELETE_REPEAT_INSTANCE": "Izbriši ponavljajuću instancu zadatka",
         "DROP_ATTACHMENT": "Ispusti ovdje za prilaganje naslovu „{{title}}”",
         "EDIT_REMINDER": "Uredi podsjetnik",
         "EDIT_TAGS": "Uredi oznake",
@@ -806,6 +817,7 @@
         "FOR_OTHER": "Zadatak je dospio. Želiš li ga početi obrađivati?",
         "FROM_PROJECT": "Od projekta: „{{title}}”",
         "FROM_TAG": "Od oznake: „{{title}}”",
+        "RESCHEDULE_EDIT": "Uredi (promijeni termin)",
         "RESCHEDULE_UNTIL_TOMORROW": "Promijeni termin na sutra",
         "SNOOZE": "Odgodi",
         "SNOOZE_ALL": "Odgodi sve",
@@ -838,6 +850,7 @@
         "FOUND_MOVE_FROM_OTHER_LIST": "Zadatak <strong>{{title}}</strong> je dodan iz <strong>{{contextTitle}}</strong> u trenutačni popis",
         "FOUND_RESTORE_FROM_ARCHIVE": "Obnovljeni zadatak <strong>{{title}}</strong> je povezan s problemom iz arhive",
         "LAST_TAG_DELETION_WARNING": "Pokušavaš ukloniti zadnju oznaku zadatka koji nije projekt. To nije dozvoljeno!",
+        "MOVE_TO_PROJECT_NOT_ALLOWED_FOR_ISSUE_TASK": "Premještanje zadataka problema u jedan drugi projekt nije dozvoljeno",
         "REMINDER_ADDED": "Terminirani zadatak „{{title}}”",
         "REMINDER_DELETED": "Izbrisan je podjsetnik za zadatak",
         "REMINDER_UPDATED": "Aktualiziran je podjsetnik za zadatak „{{title}}”",
@@ -1171,6 +1184,7 @@
       "PL": "Poljski",
       "PT": "Portugalski",
       "RU": "Ruskie",
+      "SK": "Slovački",
       "TITLE": "Jezik",
       "TR": "Turski",
       "ZH": "Pojednostavljeni kineski",
