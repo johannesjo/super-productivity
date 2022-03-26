@@ -39,8 +39,7 @@ export const millisecondsDiffToRemindOption = (
   if (typeof remindAt !== 'number') {
     return TaskReminderOptionId.DoNotRemind;
   }
-
-  const diff: number = (plannedAt as number) - remindAt;
+  const diff: number = plannedAt - remindAt;
   if (diff >= 60 * 60 * 1000) {
     return TaskReminderOptionId.h1;
   } else if (diff >= 30 * 60 * 1000) {
@@ -51,9 +50,10 @@ export const millisecondsDiffToRemindOption = (
     return TaskReminderOptionId.m10;
   } else if (diff >= 5 * 60 * 1000) {
     return TaskReminderOptionId.m5;
-  } else if (diff === 0) {
+  } else if (diff <= 0) {
     return TaskReminderOptionId.AtStart;
   } else {
-    return TaskReminderOptionId.DoNotRemind;
+    console.log(plannedAt, remindAt);
+    throw new Error('Cannot determine remind option. Invalid params');
   }
 };
