@@ -43,6 +43,7 @@ import { DialogCaldavInitialSetupComponent } from 'src/app/features/issue/provid
 import { DialogOpenProjectInitialSetupComponent } from '../../../issue/providers/open-project/open-project-view-components/dialog-open-project-initial-setup/dialog-open-project-initial-setup.component';
 import { OpenProjectCfg } from '../../../issue/providers/open-project/open-project.model';
 import { DEFAULT_OPEN_PROJECT_CFG } from '../../../issue/providers/open-project/open-project.const';
+import { getRandomWorkContextColor } from '../../../work-context/work-context-color';
 
 @Component({
   selector: 'dialog-create-project',
@@ -52,7 +53,10 @@ import { DEFAULT_OPEN_PROJECT_CFG } from '../../../issue/providers/open-project/
 })
 export class DialogCreateProjectComponent implements OnInit, OnDestroy {
   T: typeof T = T;
-  projectData: ProjectCopy | Partial<ProjectCopy> = DEFAULT_PROJECT;
+  projectData: ProjectCopy | Partial<ProjectCopy> = {
+    ...DEFAULT_PROJECT,
+    theme: { ...DEFAULT_PROJECT.theme, primary: getRandomWorkContextColor() },
+  };
   jiraCfg?: JiraCfg;
   githubCfg?: GithubCfg;
   gitlabCfg?: GitlabCfg;
