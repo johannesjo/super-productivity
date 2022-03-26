@@ -42,7 +42,7 @@ export const mapArchiveToWorklogWeeks = (
       const month = parseInt(split[1], 10);
       const day = parseInt(split[2], 10);
       const weekNr = getWeekNumber(new Date(+year, +month - 1, day));
-      const weekNrIndex = weekNr > 52 ? 0 : weekNr;
+      const weekNrIndex = month === 1 && weekNr >= 52 ? 0 : weekNr;
 
       if (!worklogYearsWithSimpleWeeks[year]) {
         worklogYearsWithSimpleWeeks[year] = [];
