@@ -1,6 +1,6 @@
 'use strict';
 import { log } from 'electron-log';
-import { OpenDevToolsOptions, app } from 'electron';
+import { OpenDevToolsOptions, app, BrowserWindow } from 'electron';
 import * as localShortcut from 'electron-localshortcut';
 const isMacOS = process.platform === 'darwin';
 
@@ -9,7 +9,7 @@ const devToolsOptions: OpenDevToolsOptions = {
 };
 
 // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
-function toggleDevTools(win = Electron.BrowserWindow.getFocusedWindow()): void {
+function toggleDevTools(win = BrowserWindow.getFocusedWindow()): void {
   if (win) {
     const { webContents } = win;
     if (webContents.isDevToolsOpened()) {
@@ -21,21 +21,21 @@ function toggleDevTools(win = Electron.BrowserWindow.getFocusedWindow()): void {
 }
 
 // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
-function devTools(win = Electron.BrowserWindow.getFocusedWindow()): void {
+function devTools(win = BrowserWindow.getFocusedWindow()): void {
   if (win) {
     toggleDevTools(win);
   }
 }
 
 // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
-function openDevTools(win = Electron.BrowserWindow.getFocusedWindow()): void {
+function openDevTools(win = BrowserWindow.getFocusedWindow()): void {
   if (win) {
     win.webContents.openDevTools(devToolsOptions);
   }
 }
 
 // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
-function refresh(win = Electron.BrowserWindow.getFocusedWindow()): void {
+function refresh(win = BrowserWindow.getFocusedWindow()): void {
   if (win) {
     win.webContents.reloadIgnoringCache();
   }
@@ -43,7 +43,7 @@ function refresh(win = Electron.BrowserWindow.getFocusedWindow()): void {
 
 // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
 function inspectElements(): void {
-  const win = Electron.BrowserWindow.getFocusedWindow();
+  const win = BrowserWindow.getFocusedWindow();
   const inspect = (): void => {
     // TODO check
     // win.devToolsWebContents.executeJavaScript('DevToolsAPI.enterInspectElementMode()');
@@ -61,13 +61,13 @@ function inspectElements(): void {
 
 // const addExtensionIfInstalled = (name, getPath) => {
 //   const isExtensionInstalled = nameIN => {
-//     return Electron.BrowserWindow.getDevToolsExtensions &&
-//       {}.hasOwnProperty.call(Electron.BrowserWindow.getDevToolsExtensions(), nameIN);
+//     return BrowserWindow.getDevToolsExtensions &&
+//       {}.hasOwnProperty.call(BrowserWindow.getDevToolsExtensions(), nameIN);
 //   };
 //
 //   try {
 //     if (!isExtensionInstalled(name)) {
-//       Electron.BrowserWindow.addDevToolsExtension(getPath(name));
+//       BrowserWindow.addDevToolsExtension(getPath(name));
 //     }
 //   } catch (_) {
 //   }
