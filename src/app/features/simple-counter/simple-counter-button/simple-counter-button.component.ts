@@ -1,4 +1,11 @@
-import { ChangeDetectionStrategy, Component, Input, OnDestroy } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  Input,
+  OnDestroy,
+  OnInit,
+} from '@angular/core';
 import { SimpleCounter, SimpleCounterType } from '../simple-counter.model';
 import { SimpleCounterService } from '../simple-counter.service';
 import { MatDialog } from '@angular/material/dialog';
@@ -14,7 +21,7 @@ import { Subscription } from 'rxjs';
   styleUrls: ['./simple-counter-button.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class SimpleCounterButtonComponent implements OnDestroy {
+export class SimpleCounterButtonComponent implements OnDestroy, OnInit {
   T: typeof T = T;
   SimpleCounterType: typeof SimpleCounterType = SimpleCounterType;
   todayStr: string = getWorklogStr();
@@ -28,8 +35,16 @@ export class SimpleCounterButtonComponent implements OnDestroy {
     private _simpleCounterService: SimpleCounterService,
     private _matDialog: MatDialog,
     private _globalTrackingIntervalService: GlobalTrackingIntervalService,
-  ) {
-    this._subs.add(this._todayStr$.subscribe((todayStr) => this.todayStr === todayStr));
+    private _cd: ChangeDetectorRef,
+  ) {}
+
+  ngOnInit(): void {
+    this._subs.add(
+      this._todayStr$.subscribe((todayStr) => {
+        this.todayStr = todayStr;
+        this._cd.detectChanges();
+      }),
+    );
   }
 
   ngOnDestroy(): void {
