@@ -1,3 +1,9 @@
+## [7.11.2](https://github.com/johannesjo/super-productivity/compare/v7.11.1...v7.11.2) (2022-03-30)
+
+### Bug Fixes
+
+- migrate legacy placeholder to mat-label [#1985](https://github.com/johannesjo/super-productivity/issues/1985) ([6c72090](https://github.com/johannesjo/super-productivity/commit/6c7209029bdfef19c9c271a7a9b9c62dd6d3ac8e))
+
 ## [7.11.1](https://github.com/johannesjo/super-productivity/compare/v7.11.0...v7.11.1) (2022-03-30)
 
 # [7.11.0](https://github.com/johannesjo/super-productivity/compare/v7.10.1...v7.11.0) (2022-03-30)
