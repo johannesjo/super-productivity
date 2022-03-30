@@ -1,8 +1,8 @@
 <mat-form-field>
+  <mat-label>{{T.F.TASK.SELECT_OR_CREATE|translate}}</mat-label>
   <input
     [formControl]="taskSelectCtrl"
     [matAutocomplete]="auto"
-    [placeholder]="T.F.TASK.SELECT_OR_CREATE|translate"
     cdkFocusInitial
     matInput
     required

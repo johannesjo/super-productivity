@@ -32,10 +32,12 @@
           *ngFor="let strDate of timeSpentOnDayCopy|keys:'reverse':todayStr;trackBy:trackByIndex"
           class="other-day"
         >
-          <mat-form-field class="mat-icon-float mat-block">
+          <mat-form-field>
+            <mat-label
+              >{{T.F.TASK.D_TIME.TIME_SPENT_ON|translate:{date: strDate} }}</mat-label
+            >
             <input
               [(ngModel)]="timeSpentOnDayCopy[strDate]"
-              [placeholder]="T.F.TASK.D_TIME.TIME_SPENT_ON|translate:{date:strDate}"
               inputDuration="optional"
               matInput
               name="timeSpentOnDay{{strDate}}"

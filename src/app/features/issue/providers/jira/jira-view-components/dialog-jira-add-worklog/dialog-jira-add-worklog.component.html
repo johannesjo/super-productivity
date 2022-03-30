@@ -22,10 +22,10 @@
     </p>
 
     <div class="form-wrapper">
+      <mat-label>{{T.F.JIRA.DIALOG_WORKLOG.TIME_SPENT|translate}}</mat-label>
       <mat-form-field>
         <input
           [(ngModel)]="timeSpent"
-          [placeholder]="T.F.JIRA.DIALOG_WORKLOG.TIME_SPENT|translate"
           inputDuration="optional"
           matInput
           name="timeSpent"
@@ -77,9 +77,9 @@
       </mat-checkbox>
 
       <mat-form-field>
+        <mat-label>{{T.F.JIRA.DIALOG_WORKLOG.STARTED|translate}}</mat-label>
         <input
           [(ngModel)]="started"
-          [placeholder]="T.F.JIRA.DIALOG_WORKLOG.STARTED|translate "
           matInput
           name="date"
           required

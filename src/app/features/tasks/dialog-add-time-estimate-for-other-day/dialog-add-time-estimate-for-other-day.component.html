@@ -18,10 +18,10 @@
         (newEntry.date|date:'dd-MM-yyyy') || '' } }}
       </h3>
       <mat-form-field>
+        <mat-label>{{T.F.TASK.D_TIME_FOR_DAY.DATE|translate}}</mat-label>
         <input
           [(ngModel)]="newEntry.date"
           [matDatepicker]="myDatepicker"
-          [placeholder]="T.F.TASK.D_TIME_FOR_DAY.DATE|translate"
           matInput
           name="date"
           required

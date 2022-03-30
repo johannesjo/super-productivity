@@ -15,11 +15,11 @@
   >
     <div class="row">
       <mat-form-field>
+        <mat-label>{{T.F.METRIC.EVAL_FORM.MOOD|translate}}</mat-label>
         <input
           #mood="ngModel"
           (ngModelChange)="updateMood($event)"
           [ngModel]="metricForDay.mood"
-          [placeholder]="T.F.METRIC.EVAL_FORM.MOOD|translate"
           matInput
           max="10"
           maxlength="2"
@@ -35,11 +35,11 @@
       </mat-form-field>
 
       <mat-form-field>
+        <mat-label>{{T.F.METRIC.EVAL_FORM.PRODUCTIVITY|translate}}</mat-label>
         <input
           #productivity="ngModel"
           (ngModelChange)="updateProductivity($event)"
           [ngModel]="metricForDay.productivity"
-          [placeholder]="T.F.METRIC.EVAL_FORM.PRODUCTIVITY|translate"
           matInput
           max="10"
           maxlength="2"

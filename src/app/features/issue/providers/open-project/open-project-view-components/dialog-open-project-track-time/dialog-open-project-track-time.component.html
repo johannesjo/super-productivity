@@ -32,9 +32,9 @@
 
     <div class="form-wrapper">
       <mat-form-field>
+        <mat-label>{{T.F.OPEN_PROJECT.DIALOG_TRACK_TIME.TIME_SPENT|translate}}</mat-label>
         <input
           [(ngModel)]="timeSpent"
-          [placeholder]="T.F.OPEN_PROJECT.DIALOG_TRACK_TIME.TIME_SPENT|translate"
           inputDuration="optional"
           matInput
           name="timeSpent"
@@ -85,9 +85,9 @@
       </mat-checkbox>
 
       <mat-form-field>
+        <mat-label>{{T.F.OPEN_PROJECT.DIALOG_TRACK_TIME.STARTED|translate}}</mat-label>
         <input
           [(ngModel)]="started"
-          [placeholder]="T.F.OPEN_PROJECT.DIALOG_TRACK_TIME.STARTED|translate "
           matInput
           name="date"
           required
@@ -99,10 +99,10 @@
       </mat-form-field>
 
       <mat-form-field>
+        <mat-label>{{T.F.OPEN_PROJECT.DIALOG_TRACK_TIME.ACTIVITY|translate}}</mat-label>
         <mat-select
           [(ngModel)]="activityId"
           name="activity"
-          [placeholder]="T.F.OPEN_PROJECT.DIALOG_TRACK_TIME.ACTIVITY|translate"
         >
           <mat-option
             *ngFor="let activity of (activities$|async);"

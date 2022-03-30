@@ -2,6 +2,8 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { ALL_THEMES } from '../../app.constants';
 import { T } from '../../t.const';
 
+// TODO remove unused component
+
 @Component({
   selector: 'theme-select',
   templateUrl: './theme-select.component.html',

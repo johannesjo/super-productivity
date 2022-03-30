@@ -3,11 +3,11 @@
   style="position: relative"
 >
   <mat-form-field>
+    <mat-label>{{placeholder}}</mat-label>
     <input
       (ngModelChange)="updateFromInput($event)"
       [name]="name"
       [ngModel]="strValue"
-      [placeholder]="placeholder"
       [required]="required"
       matInput
       type="datetime-local"

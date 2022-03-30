@@ -17,6 +17,7 @@ import { timestampToDatetimeInputString } from '../../util/timestamp-to-datetime
 })
 export class DatetimeInputComponent {
   @Input() name: string | undefined;
+  // TODO rename to label
   @Input() placeholder: string | undefined;
   @Input() required: boolean | undefined;
   @Output() modelChange: EventEmitter<number> = new EventEmitter();

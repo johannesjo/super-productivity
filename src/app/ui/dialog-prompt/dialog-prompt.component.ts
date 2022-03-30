@@ -14,6 +14,7 @@ export class DialogPromptComponent {
 
   constructor(
     private _matDialogRef: MatDialogRef<DialogPromptComponent>,
+    // TODO rename data.placeholder to data.label
     @Inject(MAT_DIALOG_DATA) public data: any,
   ) {}
 

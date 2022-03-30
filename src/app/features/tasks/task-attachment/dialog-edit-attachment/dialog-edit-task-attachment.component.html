@@ -10,9 +10,9 @@
   <mat-dialog-content>
     <div class="form-wrapper">
       <mat-form-field>
+        <mat-label>{{mapTypeToLabel(attachmentCopy.type)|translate}}</mat-label>
         <input
           [(ngModel)]="attachmentCopy.path"
-          [placeholder]="mapTypeToLabel(attachmentCopy.type)|translate"
           matInput
           name="path"
           required
@@ -20,9 +20,9 @@
         />
       </mat-form-field>
       <mat-form-field>
+        <mat-label>{{(T.G.TITLE|translate)}}</mat-label>
         <input
           [(ngModel)]="attachmentCopy.title"
-          [placeholder]="(T.G.TITLE|translate)"
           autofocus="autofocus"
           matInput
           name="title"
@@ -31,9 +31,9 @@
       </mat-form-field>
 
       <mat-form-field>
+        <mat-label>{{(T.F.ATTACHMENT.DIALOG_EDIT.SELECT_TYPE|translate)}}</mat-label>
         <mat-select
           [(ngModel)]="attachmentCopy.type"
-          [placeholder]="(T.F.ATTACHMENT.DIALOG_EDIT.SELECT_TYPE|translate)"
           name="type"
           required="true"
         >

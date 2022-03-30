@@ -42,10 +42,10 @@
       @expand
     >
       <mat-form-field>
+        <mat-label>{{T.F.JIRA.CFG_CMP.SELECT_ISSUE_FOR_TRANSITIONS|translate}}</mat-label>
         <input
           [formControl]="issueSuggestionsCtrl"
           [matAutocomplete]="autoEl"
-          [placeholder]="T.F.JIRA.CFG_CMP.SELECT_ISSUE_FOR_TRANSITIONS|translate"
           class="border-color-primary"
           matInput
         />
@@ -121,11 +121,11 @@
       </div>
 
       <mat-form-field>
+        <mat-label>{{T.F.JIRA.CFG_CMP.STORY_POINTS|translate}}</mat-label>
         <input
           [(ngModel)]="cfg.storyPointFieldId"
           [formControl]="customFieldSuggestionsCtrl"
           [matAutocomplete]="storyPointAutoEl"
-          [placeholder]="T.F.JIRA.CFG_CMP.STORY_POINTS|translate"
           class="border-color-primary"
           matInput
         />

@@ -1,4 +1,5 @@
 <mat-form-field>
+  <mat-label>{{label}}</mat-label>
   <mat-chip-list #chipListElRef>
     <mat-chip
       (removed)="remove(modelItem.id)"
@@ -34,7 +35,6 @@
       [matChipInputAddOnBlur]="true"
       [matChipInputFor]="chipListElRef"
       [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
-      [placeholder]="label"
       (keydown)="triggerCtrlEnterSubmit($event)"
     />
   </mat-chip-list>

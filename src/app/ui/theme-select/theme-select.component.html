@@ -1,5 +1,6 @@
 <mat-form-field>
-  <mat-select [placeholder]="T.THEMES.SELECT_THEME|translate">
+  <mat-label>{{T.THEMES.SELECT_THEME|translate}}</mat-label>
+  <mat-select>
     <mat-option
       *ngFor="let theme of themes; trackBy:trackBy"
       [value]="theme"
