@@ -402,6 +402,14 @@ export class CaldavClientService {
     }
     todo.updatePropertyWithValue('last-modified', now);
     todo.updatePropertyWithValue('dtstamp', now);
+    
+    var sequenceInt = 0;
+    const sequence = todo.getFirstPropertyValue('sequence');
+    if (sequence) {
+      sequenceInt = parseInt(sequence);
+    }
+    sequenceInt++;
+    todo.updatePropertyWithValue('sequence', sequenceInt);
 
     task.data = ICAL.stringify(jCal);
     await task.update().catch((err: any) => this._handleNetErr(err));
