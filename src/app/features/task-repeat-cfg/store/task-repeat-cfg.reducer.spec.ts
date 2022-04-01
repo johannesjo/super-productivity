@@ -354,7 +354,7 @@ describe('selectTaskRepeatCfgsDueOnDay', () => {
       4: [['R1'], [], ['R2', 'R3'], [], ['R3'], [], []],
     };
     for (let w = 0; w < 5; w++) {
-      it('should work correctly for multiple weeks (week ' + w + ')', () => {
+      it('should work correctly for multiple consecutive weeks (week ' + w + ')', () => {
         const week = w;
         // prettier-ignore
         // eslint-disable-next-line no-mixed-operators
