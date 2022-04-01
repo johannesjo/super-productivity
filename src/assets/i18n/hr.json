@@ -478,7 +478,11 @@
         "IS_SHOW_TIME_TRACKING_DIALOG_FOR_EACH_SUB_TASK": "Prikaži dijaloški okvir za praćenje vremena kad se podzadaci završe",
         "PROJECT_ID": "ID projekta",
         "PROJECT_ID_DESCRIPTION": "Može se pronaći kao dio url-a kad se projekt prikazuje u pregledniku.",
-        "TOKEN": "Token za pristup"
+        "TOKEN": "Token za pristup",
+        "SCOPE": "Opseg",
+        "SCOPE_ALL": "Sve",
+        "SCOPE_ASSIGNED": "Meni dodijeljeno",
+        "SCOPE_CREATED": "Od mene stvoreno"
       },
       "FORM_SECTION": {
         "HELP": "<p>Ovdje možeš konfigurirati „Super produktivnost” za prikaz popisa otvorenih radnih OpenProject paketa. Da bi ovo funkcioniralo u pregledniku, vjerojatno ćeš morati konfigurirati CORS za tvoj OpenProject poslužitelj da bi se dozvolio pristup s app.super-productivity.com</p>",

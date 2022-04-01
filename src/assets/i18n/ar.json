@@ -461,7 +461,11 @@
         "IS_SHOW_TIME_TRACKING_DIALOG_FOR_EACH_SUB_TASK": "إظهار مربع حوار تتبع الوقت عند اكتمال المهام الفرعية",
         "PROJECT_ID": "معرف المشروع",
         "PROJECT_ID_DESCRIPTION": "يمكن العثور عليها كجزء من عنوان url عند عرض المشروع في المتصفح.",
-        "TOKEN": "رمز وصول"
+        "TOKEN": "رمز وصول",
+        "SCOPE": "نطاق",
+        "SCOPE_ALL": "الكل",
+        "SCOPE_ASSIGNED": "تعيين لي",
+        "SCOPE_CREATED": "التي أنشأتها بنفسي"
       },
       "FORM_SECTION": {
         "HELP": "<p>هنا يمكنك تكوين SuperProductivity لإدراج حزم عمل OpenProject المفتوحة. يرجى ملاحظة أنه لكي يعمل هذا في المتصفح ، ربما تحتاج إلى تكوين CORS لخادم OpenProject الخاص بك ، للسماح بالوصول من app.super-productivity.com</p>",

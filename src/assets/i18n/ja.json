@@ -461,7 +461,11 @@
         "IS_SHOW_TIME_TRACKING_DIALOG_FOR_EACH_SUB_TASK": "サブタスクが完了したときにタイムトラッキングダイアログを表示する",
         "PROJECT_ID": "プロジェクトID",
         "PROJECT_ID_DESCRIPTION": "ブラウザでプロジェクトを表示すると、URLの一部として見つけることができます。",
-        "TOKEN": "アクセストークン"
+        "TOKEN": "アクセストークン",
+        "SCOPE": "範囲",
+        "SCOPE_ALL": "すべて",
+        "SCOPE_ASSIGNED": "私に割り当てられた",
+        "SCOPE_CREATED": "自分で作成"
       },
       "FORM_SECTION": {
         "HELP": "<p>ここでは、開いているOpenProjectワークパッケージを一覧表示するようにSuperProductivityを構成できます。これがブラウザで機能するためには、おそらくOpenProjectサーバーのCORSを構成して、app.super-productivity.comからのアクセスを許可する必要があることに注意してください</p>",
