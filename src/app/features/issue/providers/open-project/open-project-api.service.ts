@@ -59,11 +59,13 @@ export class OpenProjectApiService {
         params: {
           pageSize: 100,
           // see: https://www.openproject.org/docs/api/filters/
-          filters: JSON.stringify([
-            { subjectOrId: { operator: '**', values: [searchText] } },
-            // only list open issues
-            { status: { operator: 'o', values: [] } },
-          ]),
+          filters: JSON.stringify(
+            [
+              { subjectOrId: { operator: '**', values: [searchText] } },
+              // only list open issues
+              { status: { operator: 'o', values: [] } },
+            ].concat(this._getScopeParamFilter(cfg)),
+          ),
           // Default: [["id", "asc"]]
           sortBy: '[["updatedAt","desc"]]',
         },
@@ -164,7 +166,11 @@ export class OpenProjectApiService {
         params: {
           pageSize: 100,
           // see: https://www.openproject.org/docs/api/filters/
-          filters: JSON.stringify([{ status: { operator: 'o', values: [] } }]),
+          filters: JSON.stringify(
+            [{ status: { operator: 'o', values: [] } }].concat(
+              this._getScopeParamFilter(cfg),
+            ),
+          ),
           sortBy: '[["updatedAt","desc"]]',
         },
       },
@@ -179,6 +185,20 @@ export class OpenProjectApiService {
           : [];
       }),
     );
+  }
+
+  private _getScopeParamFilter(cfg: OpenProjectCfg): any[] {
+    if (!cfg.scope) {
+      return [];
+    }
+
+    if (cfg.scope === 'created-by-me') {
+      return [{ author: { operator: '=', values: 'me' } }];
+    } else if (cfg.scope === 'assigned-to-me') {
+      return [{ assignee: { operator: '=', values: 'me' } }];
+    } else {
+      return [];
+    }
   }
 
   private _checkSettings(cfg: OpenProjectCfg): void {

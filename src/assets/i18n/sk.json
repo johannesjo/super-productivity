@@ -143,10 +143,7 @@
       "DIALOG_INITIAL": {
         "TITLE": "Nastaviť GitHub pre Projekt"
       },
-      "FORM": {
-       
-
-      }
+      "FORM": {}
     },
     "GITLAB": {
       "DIALOG_INITIAL": {
@@ -456,7 +453,11 @@
         "IS_SHOW_TIME_TRACKING_DIALOG_FOR_EACH_SUB_TASK": "Zobrazenie dialógového okna sledovania času po dokončení čiastkových úloh",
         "PROJECT_ID": "ID projektu",
         "PROJECT_ID_DESCRIPTION": "Dá sa nájsť ako súčasť adresy URL pri prezeraní projektu v Prehliadači",
-        "TOKEN": "Access Token"
+        "TOKEN": "Access Token",
+        "SCOPE": "Rozsah",
+        "SCOPE_ALL": "Všetko",
+        "SCOPE_ASSIGNED": "Pridelené mne",
+        "SCOPE_CREATED": "Vytvorené mnou"
       },
       "FORM_SECTION": {
         "HELP": "<p>Here you can configure SuperProductivity to list open OpenProject work packages. Please Note that for this to work in the browser you need to probably configure CORS for your OpenProject server, to allow access from app.super-productivity.com</p>",

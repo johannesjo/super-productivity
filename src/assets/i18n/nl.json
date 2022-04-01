@@ -461,7 +461,11 @@
         "IS_SHOW_TIME_TRACKING_DIALOG_FOR_EACH_SUB_TASK": "Dialoogvenster voor tijdregistratie weergeven wanneer subtaken zijn voltooid",
         "PROJECT_ID": "Project-ID",
         "PROJECT_ID_DESCRIPTION": "Kan worden gevonden als onderdeel van de url, bij het bekijken van het project in de browser.",
-        "TOKEN": "Toegangstoken"
+        "TOKEN": "Toegangstoken",
+        "SCOPE": "strekking",
+        "SCOPE_ALL": "Allemaal",
+        "SCOPE_ASSIGNED": "Toegewezen aan mij",
+        "SCOPE_CREATED": "Gecreëerd door mij"
       },
       "FORM_SECTION": {
         "HELP": "<p>Hier kunt u SuperProductivity configureren om open OpenProject-werkpakketten weer te geven. Houd er rekening mee dat om dit in de browser te laten werken, u waarschijnlijk CORS moet configureren voor uw OpenProject-server, om toegang te verlenen vanaf app.super-productivity.com</p>",

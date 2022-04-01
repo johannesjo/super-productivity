@@ -461,7 +461,11 @@
         "IS_SHOW_TIME_TRACKING_DIALOG_FOR_EACH_SUB_TASK": "Mostra la finestra di dialogo di monitoraggio del tempo quando le attività secondarie sono completate",
         "PROJECT_ID": "ID progetto",
         "PROJECT_ID_DESCRIPTION": "Può essere trovato come parte dell'URL, quando si visualizza il progetto nel Browser.",
-        "TOKEN": "Token di accesso"
+        "TOKEN": "Token di accesso",
+        "SCOPE": "Scopo",
+        "SCOPE_ALL": "Tutti",
+        "SCOPE_ASSIGNED": "Assegnato a me",
+        "SCOPE_CREATED": "Creato da me"
       },
       "FORM_SECTION": {
         "HELP": "<p>Qui puoi configurare SuperProductivity per elencare i pacchetti di lavoro OpenProject aperti. Nota che per farlo funzionare nel browser devi probabilmente configurare CORS per il tuo server OpenProject, per consentire l'accesso da app.super-productivity.com</p>",
