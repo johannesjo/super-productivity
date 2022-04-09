@@ -4,12 +4,14 @@ import { UiModule } from '../../../../../ui/ui.module';
 import { DialogOpenProjectInitialSetupComponent } from './dialog-open-project-initial-setup/dialog-open-project-initial-setup.component';
 import { DialogOpenProjectTrackTimeComponent } from './dialog-open-project-track-time/dialog-open-project-track-time.component';
 import { FormsModule } from '@angular/forms';
+import { OpenprojectCfgComponent } from './openproject-cfg/openproject-cfg.component';
 
 @NgModule({
   imports: [CommonModule, UiModule, FormsModule],
   declarations: [
     DialogOpenProjectInitialSetupComponent,
     DialogOpenProjectTrackTimeComponent,
+    OpenprojectCfgComponent,
   ],
   exports: [],
 })

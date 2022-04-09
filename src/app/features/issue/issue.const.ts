@@ -64,6 +64,8 @@ export const DEFAULT_ISSUE_PROVIDER_CFGS = {
   [OPEN_PROJECT_TYPE]: DEFAULT_OPEN_PROJECT_CFG,
 };
 
+export const ISSUE_PROVIDER_WITH_CUSTOM_COMP = [JIRA_ISSUE_TYPE, OPEN_PROJECT_TYPE];
+
 export const ISSUE_PROVIDER_FORM_CFGS: ConfigFormConfig = [
   GITLAB_CONFIG_FORM_SECTION as GenericConfigFormSection,
   GITHUB_CONFIG_FORM_SECTION as GenericConfigFormSection,
@@ -73,7 +75,7 @@ export const ISSUE_PROVIDER_FORM_CFGS: ConfigFormConfig = [
 ].map((providerCfg) => ({
   ...providerCfg,
   // NOTE we don't do this for jira as there is a custom cfg component with an enabled toggle
-  ...(providerCfg.items && providerCfg.key !== JIRA_ISSUE_TYPE
+  ...(providerCfg.items && !ISSUE_PROVIDER_WITH_CUSTOM_COMP.includes(providerCfg.key)
     ? {
         items: [
           {
