@@ -164,7 +164,11 @@ export interface LimitedFormlyFieldConfig<FormModel>
   key?: keyof FormModel;
 }
 
-export type CustomCfgSection = 'FILE_IMPORT_EXPORT' | 'JIRA_CFG' | 'SIMPLE_COUNTER_CFG';
+export type CustomCfgSection =
+  | 'FILE_IMPORT_EXPORT'
+  | 'JIRA_CFG'
+  | 'SIMPLE_COUNTER_CFG'
+  | 'OPENPROJECT_CFG';
 
 // Intermediate model
 export interface ConfigFormSection<FormModel> {

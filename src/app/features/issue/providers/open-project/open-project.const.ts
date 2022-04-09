@@ -21,6 +21,13 @@ export const DEFAULT_OPEN_PROJECT_CFG: OpenProjectCfg = {
   timeTrackingDialogDefaultTime: JiraWorklogExportDefaultTime.AllTime,
   filterUsername: null,
   scope: 'created-by-me',
+  isTransitionIssuesEnabled: false,
+  availableTransitions: [],
+  transitionConfig: {
+    OPEN: 'DO_NOT',
+    IN_PROGRESS: 'ALWAYS_ASK',
+    DONE: 'ALWAYS_ASK',
+  },
 };
 
 export const OPEN_PROJECT_POLL_INTERVAL = 5 * 60 * 1000;
@@ -137,6 +144,7 @@ export const OPEN_PROJECT_CONFIG_FORM: LimitedFormlyFieldConfig<OpenProjectCfg>[
 export const OPEN_PROJECT_CONFIG_FORM_SECTION: ConfigFormSection<OpenProjectCfg> = {
   title: 'Open Project',
   key: 'OPEN_PROJECT',
+  customSection: 'OPENPROJECT_CFG',
   items: OPEN_PROJECT_CONFIG_FORM,
   help: T.F.OPEN_PROJECT.FORM_SECTION.HELP,
 };
