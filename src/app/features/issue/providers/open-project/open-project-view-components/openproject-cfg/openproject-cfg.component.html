@@ -21,14 +21,14 @@
     >
     </formly-form>
 
-    <h3 class="sub-section-heading">Transition Handling</h3>
+    <h3 class="sub-section-heading">{{T.F.OPEN_PROJECT.CFG_CMP.TRANSITION|translate}}</h3>
     <mat-slide-toggle
       [(ngModel)]="cfg.isTransitionIssuesEnabled"
       [ngModelOptions]="{standalone: true}"
       name="isTransitionIssuesEnabled"
       style="margin-bottom: 8px"
     >
-      {{T.F.JIRA.CFG_CMP.ENABLE_TRANSITIONS|translate}}
+      {{T.F.OPEN_PROJECT.CFG_CMP.ENABLE_TRANSITIONS|translate}}
     </mat-slide-toggle>
 
     <section
@@ -36,7 +36,9 @@
       @expand
     >
       <mat-form-field>
-        <mat-label>{{T.F.JIRA.CFG_CMP.SELECT_ISSUE_FOR_TRANSITIONS|translate}}</mat-label>
+        <mat-label>
+          {{T.F.OPEN_PROJECT.CFG_CMP.SELECT_ISSUE_FOR_TRANSITIONS|translate}}
+        </mat-label>
         <input
           [formControl]="issueSuggestionsCtrl"
           [matAutocomplete]="autoEl"
@@ -67,11 +69,15 @@
 
       <div *ngFor="let opt of transitionConfigOpts">
         <mat-form-field>
-          <label *ngIf="opt.key==='OPEN'">{{T.F.JIRA.CFG_CMP.OPEN|translate}}</label>
-          <label *ngIf="opt.key==='IN_PROGRESS'"
-            >{{T.F.JIRA.CFG_CMP.IN_PROGRESS|translate}}</label
-          >
-          <label *ngIf="opt.key==='DONE'">{{T.F.JIRA.CFG_CMP.DONE|translate}}</label>
+          <label *ngIf="opt.key==='OPEN'">
+            {{T.F.OPEN_PROJECT.CFG_CMP.OPEN|translate}}
+          </label>
+          <label *ngIf="opt.key==='IN_PROGRESS'">
+            {{T.F.OPEN_PROJECT.CFG_CMP.IN_PROGRESS|translate}}
+          </label>
+          <label *ngIf="opt.key==='DONE'">
+            {{T.F.OPEN_PROJECT.CFG_CMP.DONE|translate}}
+          </label>
 
           <!-- TODO check for a better way to do this -->
           <!--          <mat-select [(ngModel)]="cfg.transitionConfig[opt.key]"-->
@@ -80,10 +86,12 @@
             [ngModelOptions]="{standalone: true}"
             [ngModel]="getTransition(opt.key)"
           >
-            <mat-option value="DO_NOT">{{T.F.JIRA.CFG_CMP.DO_NOT|translate}}</mat-option>
-            <mat-option value="ALWAYS_ASK"
-              >{{T.F.JIRA.CFG_CMP.ALWAYS_ASK|translate}}</mat-option
-            >
+            <mat-option value="DO_NOT">
+              {{T.F.OPEN_PROJECT.CFG_CMP.DO_NOT|translate}}
+            </mat-option>
+            <mat-option value="ALWAYS_ASK">
+              {{T.F.OPEN_PROJECT.CFG_CMP.ALWAYS_ASK|translate}}
+            </mat-option>
             <mat-option
               *ngFor="let transition of cfg.availableTransitions"
               [value]="transition"

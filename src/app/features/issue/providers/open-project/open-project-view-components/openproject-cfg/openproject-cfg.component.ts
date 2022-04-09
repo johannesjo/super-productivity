@@ -89,7 +89,6 @@ export class OpenprojectCfgComponent implements OnInit, OnDestroy {
     val: OpenProjectTransitionOption;
   }[] = [];
 
-  private _cfg?: OpenProjectCfg;
   private _subs: Subscription = new Subscription();
 
   constructor(
@@ -99,26 +98,7 @@ export class OpenprojectCfgComponent implements OnInit, OnDestroy {
     private _workContextService: WorkContextService,
   ) {}
 
-  ngOnInit(): void {
-    this.fields = (this.section as ConfigFormSection<OpenProjectCfg>).items;
-  }
-
-  ngOnDestroy(): void {
-    this._subs.unsubscribe();
-  }
-
-  submit(): void {
-    if (!this.cfg) {
-      throw new Error(
-        'No config for ' + (this.section as ConfigFormSection<OpenProjectCfg>).key,
-      );
-    } else {
-      this.save.emit({
-        sectionKey: (this.section as ConfigFormSection<OpenProjectCfg>).key,
-        config: this.cfg,
-      });
-    }
-  }
+  private _cfg?: OpenProjectCfg;
 
   get cfg(): OpenProjectCfg {
     return this._cfg as OpenProjectCfg;
@@ -127,7 +107,7 @@ export class OpenprojectCfgComponent implements OnInit, OnDestroy {
   // NOTE: this is legit because it might be that there is no issue provider cfg yet
   @Input() set cfg(cfg: OpenProjectCfg) {
     const newCfg: OpenProjectCfg = cfg ? { ...cfg } : DEFAULT_OPEN_PROJECT_CFG;
-
+    console.log('SET CHUGUEI', cfg);
     if (!newCfg.transitionConfig) {
       newCfg.transitionConfig = DEFAULT_OPEN_PROJECT_CFG.transitionConfig;
     } else {
@@ -142,7 +122,7 @@ export class OpenprojectCfgComponent implements OnInit, OnDestroy {
     if (!Array.isArray(newCfg.availableTransitions)) {
       newCfg.availableTransitions = DEFAULT_OPEN_PROJECT_CFG.availableTransitions;
     }
-
+    console.log('SET CFG', newCfg);
     this._cfg = newCfg;
 
     this.transitionConfigOpts = Object.keys(newCfg.transitionConfig).map((k: string) => {
@@ -152,6 +132,41 @@ export class OpenprojectCfgComponent implements OnInit, OnDestroy {
         val: newCfg.transitionConfig[key],
       };
     });
+  }
+
+  ngOnInit(): void {
+    this.fields = (this.section as ConfigFormSection<OpenProjectCfg>).items;
+  }
+
+  ngOnDestroy(): void {
+    this._subs.unsubscribe();
+  }
+
+  getTransition(key: keyof OpenProjectTransitionConfig): OpenProjectTransitionOption {
+    return this.cfg.transitionConfig[key];
+  }
+
+  setTransition(
+    key: keyof OpenProjectTransitionConfig,
+    value: OpenProjectTransitionOption,
+  ): OpenProjectTransitionOption {
+    const transitionConfig = { ...this.cfg.transitionConfig };
+    transitionConfig[key] = value;
+    this.cfg.transitionConfig = transitionConfig;
+    return value;
+  }
+
+  submit(): void {
+    if (!this.cfg) {
+      throw new Error(
+        'No config for ' + (this.section as ConfigFormSection<OpenProjectCfg>).key,
+      );
+    } else {
+      this.save.emit({
+        sectionKey: (this.section as ConfigFormSection<OpenProjectCfg>).key,
+        config: this.cfg,
+      });
+    }
   }
 
   updateTransitionOptions(): void {
@@ -170,22 +185,11 @@ export class OpenprojectCfgComponent implements OnInit, OnDestroy {
             this.cfg.availableTransitions = val;
             this._snackService.open({
               type: 'SUCCESS',
-              msg: T.F.JIRA.S.TRANSITIONS_LOADED,
+              msg: T.F.OPEN_PROJECT.S.TRANSITIONS_LOADED,
             });
           }),
       );
     }
-  }
-
-  getTransition(key: keyof OpenProjectTransitionConfig): OpenProjectTransitionOption {
-    return this.cfg.transitionConfig[key];
-  }
-
-  setTransition(
-    key: keyof OpenProjectTransitionConfig,
-    value: OpenProjectTransitionOption,
-  ): OpenProjectTransitionOption {
-    return (this.cfg.transitionConfig[key] = value);
   }
 
   toggleEnabled(isEnabled: boolean): void {

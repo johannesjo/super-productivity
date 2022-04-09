@@ -457,6 +457,17 @@
       "DIALOG_INITIAL": {
         "TITLE": "Setup OpenProject for Project"
       },
+      "CFG_CMP": {
+        "ALWAYS_ASK": "Always open dialog",
+        "DONE": "Status for completing task",
+        "DO_NOT": "Don't transition",
+        "ENABLE": "Enable Openproject integration",
+        "TRANSITION": "Transition Handling",
+        "ENABLE_TRANSITIONS": "Enable Transition Handling",
+        "IN_PROGRESS": "Status for starting task",
+        "OPEN": "Status for pausing task",
+        "SELECT_ISSUE_FOR_TRANSITIONS": "Select issue to load available transitions"
+      },
       "DIALOG_TRACK_TIME": {
         "ACTIVITY": "Activity",
         "CURRENTLY_LOGGED": "Currently logged time: ",
@@ -502,7 +513,8 @@
       },
       "S": {
         "ERR_UNKNOWN": "OpenProject: Unknown error {{statusCode}} {{errorMsg}}. Is CORS properly configured for the server?",
-        "POST_TIME_SUCCESS": "OpenProject: Successfully created time entry for {{issueTitle}}"
+        "POST_TIME_SUCCESS": "OpenProject: Successfully created time entry for {{issueTitle}}",
+        "TRANSITIONS_LOADED": "Transitions loaded. Use the selects below to assign them"
       }
     },
     "POMODORO": {
