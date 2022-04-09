@@ -461,7 +461,11 @@
         "IS_SHOW_TIME_TRACKING_DIALOG_FOR_EACH_SUB_TASK": "Afficher la boîte de dialogue de suivi du temps lorsque les sous-tâches sont terminées",
         "PROJECT_ID": "identifiant du projet",
         "PROJECT_ID_DESCRIPTION": "Peut être trouvé dans l'url, lors de la visualisation du projet dans le navigateur.",
-        "TOKEN": "Jeton d'accès"
+        "TOKEN": "Jeton d'accès",
+        "SCOPE": "Portée",
+        "SCOPE_ALL": "Tout",
+        "SCOPE_ASSIGNED": "Assigné à moi",
+        "SCOPE_CREATED": "Créé par moi"
       },
       "FORM_SECTION": {
         "HELP": "<p>Ici, vous pouvez configurer SuperProductivity pour répertorier les packages de travail OpenProject ouverts. Veuillez noter que pour que cela fonctionne dans le navigateur, vous devez probablement configurer CORS pour votre serveur OpenProject, pour autoriser l'accès depuis app.super-productivity.com</p>",

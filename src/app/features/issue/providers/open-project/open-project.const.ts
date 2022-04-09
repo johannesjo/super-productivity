@@ -20,6 +20,7 @@ export const DEFAULT_OPEN_PROJECT_CFG: OpenProjectCfg = {
   isShowTimeTrackingDialogForEachSubTask: false,
   timeTrackingDialogDefaultTime: JiraWorklogExportDefaultTime.AllTime,
   filterUsername: null,
+  scope: 'created-by-me',
 };
 
 export const OPEN_PROJECT_POLL_INTERVAL = 5 * 60 * 1000;
@@ -56,6 +57,21 @@ export const OPEN_PROJECT_CONFIG_FORM: LimitedFormlyFieldConfig<OpenProjectCfg>[
       type: 'text',
       required: true,
       description: T.F.OPEN_PROJECT.FORM.PROJECT_ID_DESCRIPTION,
+    },
+  },
+  {
+    key: 'scope',
+    type: 'select',
+    defaultValue: 'created-by-me',
+    hideExpression: (model: any) => !model.isEnabled,
+    templateOptions: {
+      required: true,
+      label: T.F.OPEN_PROJECT.FORM.SCOPE,
+      options: [
+        { value: 'all', label: T.F.OPEN_PROJECT.FORM.SCOPE_ALL },
+        { value: 'created-by-me', label: T.F.OPEN_PROJECT.FORM.SCOPE_CREATED },
+        { value: 'assigned-to-me', label: T.F.OPEN_PROJECT.FORM.SCOPE_ASSIGNED },
+      ],
     },
   },
   {

@@ -461,7 +461,11 @@
         "IS_SHOW_TIME_TRACKING_DIALOG_FOR_EACH_SUB_TASK": "Alt görevler tamamlandığında zaman izleme iletişim kutusunu göster",
         "PROJECT_ID": "Proje Kimliği",
         "PROJECT_ID_DESCRIPTION": "Projeyi Tarayıcıda görüntülerken url'nin bir parçası olarak bulunabilir.",
-        "TOKEN": "Erişim Simgesi"
+        "TOKEN": "Erişim Simgesi",
+        "SCOPE": "kapsam",
+        "SCOPE_ALL": "Herşey",
+        "SCOPE_ASSIGNED": "Beni görevlendirdi",
+        "SCOPE_CREATED": "Benim tarafımdan oluşturuldu"
       },
       "FORM_SECTION": {
         "HELP": "<p>Burada SuperProductivity'yi açık OpenProject iş paketlerini listeleyecek şekilde yapılandırabilirsiniz. Lütfen bunun tarayıcıda çalışması için, app.super-productivity.com adresinden erişime izin vermek üzere OpenProject sunucunuz için CORS'u yapılandırmanız gerektiğini unutmayın</p>",

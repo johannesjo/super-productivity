@@ -12,4 +12,5 @@ export interface OpenProjectCfg extends BaseIssueProviderCfg {
   host: string | null;
   projectId: string | null;
   token: string | null;
+  scope: string | null;
 }

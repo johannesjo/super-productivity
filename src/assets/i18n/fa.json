@@ -461,7 +461,11 @@
         "IS_SHOW_TIME_TRACKING_DIALOG_FOR_EACH_SUB_TASK": "نمایش گفتگوی ردیابی زمان پس از تکمیل وظایف فرعی",
         "PROJECT_ID": "شناسه پروژه",
         "PROJECT_ID_DESCRIPTION": "هنگام مشاهده پروژه در مرورگر ، می توانید آن را به عنوان بخشی از url پیدا کنید.",
-        "TOKEN": "نشانه دسترسی"
+        "TOKEN": "نشانه دسترسی",
+        "SCOPE": "محدوده",
+        "SCOPE_ALL": "همه",
+        "SCOPE_ASSIGNED": "به من اختصاص داده شده است",
+        "SCOPE_CREATED": "ایجاد شده توسط من"
       },
       "FORM_SECTION": {
         "HELP": "<p>در اینجا می توانید SuperProductivity را برای لیست بسته های کاری OpenProject باز شده پیکربندی کنید. لطفاً توجه داشته باشید که برای کارکردن در مرورگر ، احتمالاً باید CORS را برای سرور OpenProject خود پیکربندی کنید ، تا از app.super-productivity.com اجازه دسترسی داشته باشید</p>",
