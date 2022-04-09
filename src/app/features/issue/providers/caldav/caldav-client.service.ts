@@ -405,10 +405,9 @@ export class CaldavClientService {
     
     var sequenceInt = 0;
     const sequence = todo.getFirstPropertyValue('sequence');
-    if (sequence) {
-      sequenceInt = parseInt(sequence);
-    }
-    sequenceInt++;
+    const sequenceInt = sequence
+      ? parseInt(sequence) + 1
+      : 1;
     todo.updatePropertyWithValue('sequence', sequenceInt);
 
     task.data = ICAL.stringify(jCal);
