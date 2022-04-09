@@ -43,7 +43,7 @@ interface OpenProjectUser {
   _type: 'User';
 }
 
-export interface OpenProjectOriginalStatus {
+export type OpenProjectOriginalStatus = Readonly<{
   _type: 'Status';
   id: number;
   name: string;
@@ -54,7 +54,7 @@ export interface OpenProjectOriginalStatus {
   defaultDoneRatio: null;
   position: number;
   _links: OpenProjectApiLinks;
-}
+}>;
 
 // NOTE unknown currently means we haven't evaluated the possible values
 export type OpenProjectOriginalWorkPackageReduced = Readonly<{
