@@ -110,29 +110,25 @@ export class OpenProjectApiService {
   }
 
   transitionIssue$(
-    issueId: number,
+    workPackage: OpenProjectWorkPackage,
     trans: OpenProjectOriginalStatus,
     cfg: OpenProjectCfg,
   ): Observable<any> {
-    return this.getById$(issueId, cfg).pipe(
-      concatMap((workPackage: OpenProjectWorkPackage) =>
-        this._sendRequest$(
-          {
-            pathname: `api/v3/work_packages/${issueId}}`,
-            method: 'PATCH',
-            body: {
-              lockVersion: workPackage.lockVersion,
-              _links: {
-                status: {
-                  href: trans._links.href,
-                },
-              },
+    return this._sendRequest$(
+      {
+        url: `${cfg.host}/api/v3/work_packages/${workPackage.id}`,
+        method: 'PATCH',
+        data: {
+          lockVersion: workPackage.lockVersion,
+          percentageDone: workPackage.percentageDone,
+          _links: {
+            status: {
+              href: trans._links.self.href,
             },
           },
-          cfg,
-        ),
-      ),
-      first(),
+        },
+      },
+      cfg,
     );
   }
 

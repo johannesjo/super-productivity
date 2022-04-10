@@ -8,11 +8,9 @@ import { IssueService } from 'src/app/features/issue/issue.service';
 import { ProjectService } from 'src/app/features/project/project.service';
 import { T } from 'src/app/t.const';
 import { Task } from '../../../../../tasks/task.model';
-import {
-  OpenProjectOriginalStatus,
-  OpenProjectOriginalWorkPackageFull,
-} from '../../open-project-api-responses';
+import { OpenProjectOriginalStatus } from '../../open-project-api-responses';
 import { OpenProjectApiService } from '../../open-project-api.service';
+import { OpenProjectWorkPackage } from '../../open-project-issue/open-project-issue.model';
 import { OpenProjectCfg } from '../../open-project.model';
 
 @Component({
@@ -40,6 +38,7 @@ export class DialogOpenprojectTransitionComponent {
     );
 
   chosenTransition?: OpenProjectOriginalStatus;
+  percentageDone: number;
 
   constructor(
     private _openProjectApiService: OpenProjectApiService,
@@ -49,7 +48,7 @@ export class DialogOpenprojectTransitionComponent {
     private _snackService: SnackService,
     @Inject(MAT_DIALOG_DATA)
     public data: {
-      issue: OpenProjectOriginalWorkPackageFull;
+      issue: OpenProjectWorkPackage;
       localState: IssueLocalState;
       task: Task;
     },
@@ -57,6 +56,7 @@ export class DialogOpenprojectTransitionComponent {
     if (!this.data.task.projectId) {
       throw new Error('No projectId for task');
     }
+    this.percentageDone = data.issue.percentageDone;
   }
 
   transitionIssue(): void {
@@ -67,7 +67,7 @@ export class DialogOpenprojectTransitionComponent {
         .pipe(
           concatMap((openProjectCfg) =>
             this._openProjectApiService.transitionIssue$(
-              this.data.issue.id,
+              { ...this.data.issue, percentageDone: this.percentageDone },
               trans,
               openProjectCfg,
             ),
@@ -79,7 +79,7 @@ export class DialogOpenprojectTransitionComponent {
           this._snackService.open({
             type: 'SUCCESS',
             msg: T.F.OPEN_PROJECT.S.TRANSITION,
-            translateParams: { issueKey: this.data.issue.id, name: trans.name },
+            translateParams: { issueKey: this.data.issue.subject, name: trans.name },
           });
           this.close();
         });
@@ -92,5 +92,16 @@ export class DialogOpenprojectTransitionComponent {
 
   trackByIndex(i: number, p: any): number {
     return i;
+  }
+
+  formatLabel(value: number): string {
+    if (!value || value < 0) {
+      value = 0;
+    }
+    if (value > 100) {
+      value = 100;
+    }
+
+    return `${value}%`;
   }
 }

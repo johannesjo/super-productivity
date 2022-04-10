@@ -1,7 +1,7 @@
 <h1 mat-dialog-title>
   <mat-icon
     class="dialog-header-icon"
-    svgIcon="open-project"
+    svgIcon="open_project"
   ></mat-icon>
   <span>{{T.F.OPEN_PROJECT.DIALOG_TRANSITION.TITLE|translate}}</span>
 </h1>
@@ -26,8 +26,22 @@
         '–'}}
       </td>
     </tr>
+    <tr>
+      <th>{{T.F.OPEN_PROJECT.DIALOG_TRANSITION.PERCENTAGE_DONE|translate}}</th>
+      <td>
+        <mat-slider
+          thumbLabel
+          [(ngModel)]="percentageDone"
+          [displayWith]="formatLabel"
+          tickInterval="5"
+          step="5"
+          min="0"
+          max="100"
+          aria-label="units"
+        ></mat-slider>
+      </td>
+    </tr>
   </table>
-
   <mat-form-field>
     <label>{{T.F.OPEN_PROJECT.DIALOG_TRANSITION.CHOOSE_STATUS|translate}}</label>
     <mat-select [(ngModel)]="chosenTransition">
