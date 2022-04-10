@@ -482,6 +482,7 @@
         "CHOOSE_STATUS": "Choose status to assign",
         "CURRENT_ASSIGNEE": "Current Assignee:",
         "CURRENT_STATUS": "Current Status:",
+        "PERCENTAGE_DONE": "Progress:",
         "TASK_NAME": "Task name:",
         "TITLE": "OpenProject: Update Status",
         "UPDATE_STATUS": "Update Status"
@@ -523,6 +524,7 @@
         "ERR_UNKNOWN": "OpenProject: Unknown error {{statusCode}} {{errorMsg}}. Is CORS properly configured for the server?",
         "POST_TIME_SUCCESS": "OpenProject: Successfully created time entry for {{issueTitle}}",
         "TRANSITION": "OpenProject: Set issue \"{{issueKey}}\" to \"{{name}}\"",
+        "TRANSITION_SUCCESS": "OpenProject: Set issue {{issueKey}} to <strong>{{chosenTransition}}</strong>",
         "TRANSITIONS_LOADED": "Transitions loaded. Use the selects below to assign them"
       }
     },
