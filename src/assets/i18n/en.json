@@ -454,9 +454,6 @@
       }
     },
     "OPEN_PROJECT": {
-      "DIALOG_INITIAL": {
-        "TITLE": "Setup OpenProject for Project"
-      },
       "CFG_CMP": {
         "ALWAYS_ASK": "Always open dialog",
         "DONE": "Status for completing task",
@@ -468,6 +465,9 @@
         "OPEN": "Status for pausing task",
         "SELECT_ISSUE_FOR_TRANSITIONS": "Select issue to load available transitions"
       },
+      "DIALOG_INITIAL": {
+        "TITLE": "Setup OpenProject for Project"
+      },
       "DIALOG_TRACK_TIME": {
         "ACTIVITY": "Activity",
         "CURRENTLY_LOGGED": "Currently logged time: ",
@@ -477,6 +477,14 @@
         "SUBMIT_TIME_FOR": "Submit time to OpenProject for",
         "TIME_SPENT": "Time Spent",
         "TITLE": "OpenProject: Submit Worklog"
+      },
+      "DIALOG_TRANSITION": {
+        "CHOOSE_STATUS": "Choose status to assign",
+        "CURRENT_ASSIGNEE": "Current Assignee:",
+        "CURRENT_STATUS": "Current Status:",
+        "TASK_NAME": "Task name:",
+        "TITLE": "OpenProject: Update Status",
+        "UPDATE_STATUS": "Update Status"
       },
       "FORM": {
         "FILTER_USER": "Username (e.g. to filter out changes by yourself)",
@@ -514,6 +522,7 @@
       "S": {
         "ERR_UNKNOWN": "OpenProject: Unknown error {{statusCode}} {{errorMsg}}. Is CORS properly configured for the server?",
         "POST_TIME_SUCCESS": "OpenProject: Successfully created time entry for {{issueTitle}}",
+        "TRANSITION": "OpenProject: Set issue \"{{issueKey}}\" to \"{{name}}\"",
         "TRANSITIONS_LOADED": "Transitions loaded. Use the selects below to assign them"
       }
     },

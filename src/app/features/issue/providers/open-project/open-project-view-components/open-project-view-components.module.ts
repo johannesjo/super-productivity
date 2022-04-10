@@ -5,6 +5,7 @@ import { DialogOpenProjectInitialSetupComponent } from './dialog-open-project-in
 import { DialogOpenProjectTrackTimeComponent } from './dialog-open-project-track-time/dialog-open-project-track-time.component';
 import { FormsModule } from '@angular/forms';
 import { OpenprojectCfgComponent } from './openproject-cfg/openproject-cfg.component';
+import { DialogOpenprojectTransitionComponent } from './dialog-openproject-transition/dialog-openproject-transition.component';
 
 @NgModule({
   imports: [CommonModule, UiModule, FormsModule],
@@ -12,6 +13,7 @@ import { OpenprojectCfgComponent } from './openproject-cfg/openproject-cfg.compo
     DialogOpenProjectInitialSetupComponent,
     DialogOpenProjectTrackTimeComponent,
     OpenprojectCfgComponent,
+    DialogOpenprojectTransitionComponent,
   ],
   exports: [],
 })
