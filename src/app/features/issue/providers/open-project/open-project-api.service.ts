@@ -14,7 +14,7 @@ import {
   OpenProjectOriginalWorkPackageReduced,
   OpenProjectWorkPackageSearchResult,
 } from './open-project-api-responses';
-import { catchError, filter, map } from 'rxjs/operators';
+import { catchError, concatMap, filter, first, map } from 'rxjs/operators';
 import {
   mapOpenProjectIssueFull,
   mapOpenProjectIssueReduced,
@@ -86,7 +86,7 @@ export class OpenProjectApiService {
   }
 
   getTransitionsForIssue$(
-    workPackageId: string,
+    workPackageId: string | number,
     lockVersion: number,
     cfg: OpenProjectCfg,
   ): Observable<OpenProjectOriginalStatus[]> {
@@ -106,6 +106,33 @@ export class OpenProjectApiService {
         devError(e);
         return [];
       }),
+    );
+  }
+
+  transitionIssue$(
+    issueId: number,
+    trans: OpenProjectOriginalStatus,
+    cfg: OpenProjectCfg,
+  ): Observable<any> {
+    return this.getById$(issueId, cfg).pipe(
+      concatMap((workPackage: OpenProjectWorkPackage) =>
+        this._sendRequest$(
+          {
+            pathname: `api/v3/work_packages/${issueId}}`,
+            method: 'PATCH',
+            body: {
+              lockVersion: workPackage.lockVersion,
+              _links: {
+                status: {
+                  href: trans._links.href,
+                },
+              },
+            },
+          },
+          cfg,
+        ),
+      ),
+      first(),
     );
   }
 
