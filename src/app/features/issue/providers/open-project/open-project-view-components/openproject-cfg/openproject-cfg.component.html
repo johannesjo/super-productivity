@@ -100,6 +100,27 @@
             </mat-option>
           </mat-select>
         </mat-form-field>
+
+        <div *ngIf="showSetProgressOption(opt.key)">
+          <mat-checkbox
+            [(ngModel)]="this.cfg.isSetProgressOnTaskDone"
+            [ngModelOptions]="{standalone: true}"
+          >
+            Set progress on save
+          </mat-checkbox>
+          <mat-slider
+            *ngIf="this.cfg.isSetProgressOnTaskDone"
+            thumbLabel
+            [displayWith]="displayThumbWith"
+            tickInterval="5"
+            min="0"
+            max="100"
+            step="5"
+            aria-label="units"
+            [(ngModel)]="this.cfg.progressOnDone"
+            [ngModelOptions]="{standalone: true}"
+          ></mat-slider>
+        </div>
       </div>
     </section>
   </div>

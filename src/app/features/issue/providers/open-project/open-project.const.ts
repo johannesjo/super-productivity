@@ -22,6 +22,8 @@ export const DEFAULT_OPEN_PROJECT_CFG: OpenProjectCfg = {
   filterUsername: null,
   scope: 'created-by-me',
   isTransitionIssuesEnabled: false,
+  isSetProgressOnTaskDone: false,
+  progressOnDone: 0,
   availableTransitions: [],
   transitionConfig: {
     OPEN: 'DO_NOT',

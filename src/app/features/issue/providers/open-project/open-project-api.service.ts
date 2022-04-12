@@ -14,7 +14,7 @@ import {
   OpenProjectOriginalWorkPackageReduced,
   OpenProjectWorkPackageSearchResult,
 } from './open-project-api-responses';
-import { catchError, concatMap, filter, first, map } from 'rxjs/operators';
+import { catchError, filter, map } from 'rxjs/operators';
 import {
   mapOpenProjectIssueFull,
   mapOpenProjectIssueReduced,
