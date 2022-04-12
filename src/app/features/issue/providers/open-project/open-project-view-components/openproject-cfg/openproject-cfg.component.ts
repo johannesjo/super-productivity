@@ -107,7 +107,7 @@ export class OpenprojectCfgComponent implements OnInit, OnDestroy {
   // NOTE: this is legit because it might be that there is no issue provider cfg yet
   @Input() set cfg(cfg: OpenProjectCfg) {
     const newCfg: OpenProjectCfg = cfg ? { ...cfg } : DEFAULT_OPEN_PROJECT_CFG;
-    console.log('SET CHUGUEI', cfg);
+
     if (!newCfg.transitionConfig) {
       newCfg.transitionConfig = DEFAULT_OPEN_PROJECT_CFG.transitionConfig;
     } else {
@@ -122,7 +122,7 @@ export class OpenprojectCfgComponent implements OnInit, OnDestroy {
     if (!Array.isArray(newCfg.availableTransitions)) {
       newCfg.availableTransitions = DEFAULT_OPEN_PROJECT_CFG.availableTransitions;
     }
-    console.log('SET CFG', newCfg);
+
     this._cfg = newCfg;
 
     this.transitionConfigOpts = Object.keys(newCfg.transitionConfig).map((k: string) => {
@@ -152,6 +152,11 @@ export class OpenprojectCfgComponent implements OnInit, OnDestroy {
   ): OpenProjectTransitionOption {
     const transitionConfig = { ...this.cfg.transitionConfig };
     transitionConfig[key] = value;
+    if (key === 'DONE') {
+      if (value === 'ALWAYS_ASK' || value === 'DO_NOT') {
+        this.cfg.isSetProgressOnTaskDone = false;
+      }
+    }
     this.cfg.transitionConfig = transitionConfig;
     return value;
   }
@@ -209,5 +214,18 @@ export class OpenprojectCfgComponent implements OnInit, OnDestroy {
 
   trackByIssueId(i: number, issue: OpenProjectWorkPackage): number {
     return issue.id;
+  }
+
+  showSetProgressOption(key: any): boolean {
+    const transitionOption = this.getTransition(key).valueOf();
+    let shouldShow: boolean = false;
+    if (key === 'DONE') {
+      shouldShow = transitionOption !== 'DO_NOT' && transitionOption !== 'ALWAYS_ASK';
+    }
+    return shouldShow;
+  }
+
+  displayThumbWith(value: number): string {
+    return `${value}%`;
   }
 }

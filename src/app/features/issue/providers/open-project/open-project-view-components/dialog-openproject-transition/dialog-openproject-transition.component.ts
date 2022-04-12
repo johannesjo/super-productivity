@@ -94,14 +94,7 @@ export class DialogOpenprojectTransitionComponent {
     return i;
   }
 
-  formatLabel(value: number): string {
-    if (!value || value < 0) {
-      value = 0;
-    }
-    if (value > 100) {
-      value = 100;
-    }
-
+  displayThumbWith(value: number): string {
     return `${value}%`;
   }
 }
