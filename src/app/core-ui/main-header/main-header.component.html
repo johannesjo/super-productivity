@@ -112,7 +112,7 @@
       <button
         (click)="taskService.toggleStartTask()"
         [color]="(taskService.currentTaskId$|async)? 'accent': 'primary'"
-        [matTooltip]="T.MH.TOGGLE_TRACK_TIME|translate"
+        [matTooltip]="(pomodoroService.isEnabled$|async)? '': T.MH.TOGGLE_TRACK_TIME|translate"
         class="play-btn mat-elevation-z3"
         mat-mini-fab
       >
