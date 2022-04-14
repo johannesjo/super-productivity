@@ -30,7 +30,6 @@
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:gravity="center_vertical"
-            android:layout_centerVertical="true"
             android:minHeight="28dp"
             android:orientation="vertical"
             android:padding="0dp">
@@ -41,15 +40,13 @@
                 android:layout_height="14dip"
                 android:maxLines="1"
                 android:padding="0dp"
-                android:text="Description"
-                android:textSize="10sp"
+                android:textSize="11sp"
                 android:visibility="gone" />
 
         <TextView
                 android:id="@+id/firstLine"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
-                android:text="Example application hehrehre"
                 android:textSize="13sp" />
     </LinearLayout>
 </LinearLayout>
