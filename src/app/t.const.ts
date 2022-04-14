@@ -525,6 +525,8 @@ const T = {
       },
       S: {
         SESSION_X_START: 'F.POMODORO.S.SESSION_X_START',
+        SESSION_SKIP: 'F.POMODORO.S.SESSION_SKIP',
+        SESSION_END: 'F.POMODORO.S.SESSION_END',
       },
       SKIP_BREAK: 'F.POMODORO.SKIP_BREAK',
     },

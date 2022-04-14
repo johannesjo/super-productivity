@@ -516,7 +516,9 @@
         "SESSION_X_START": "Pomodoro: Session {{nr}} started!"
       },
       "S": {
-        "SESSION_X_START": "Pomodoro: Session {{nr}} started!"
+        "SESSION_X_START": "Pomodoro: Session {{nr}} started!",
+        "SESSION_SKIP": "Skip Pomodoro session",
+        "SESSION_END": "End Pomodoro session"
       },
       "SKIP_BREAK": "Skip break"
     },
