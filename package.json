@@ -202,7 +202,7 @@
     "karma-jasmine": "~4.0.1",
     "karma-jasmine-html-reporter": "^1.6.0",
     "lz-string": "^1.4.4",
-    "moment": "2.29.1",
+    "moment": "2.29.2",
     "moment-duration-format": "^2.2.2",
     "nanoid": "^3.3.2",
     "new-github-issue-url": "^0.2.1",
