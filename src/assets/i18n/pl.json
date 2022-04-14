@@ -439,16 +439,19 @@
     "POMODORO": {
       "BACK_TO_WORK": "Wróć do pracy!",
       "BREAK_IS_DONE": "Twoja przerwa się skończyła!",
-      "ENJOY_YOURSELF": "Enjoy yourself, get yourself moving, come back in:",
-      "FINISH_SESSION_X": "You successfully finished session <strong>{{nr}}</strong>!",
+      "ENJOY_YOURSELF": "Zrób sobie przerwę, poruszaj się trochę, wróć za:",
+      "FINISH_SESSION_X": "Zakończyłeś sesję <strong>{{nr}}</strong> z powodzeniem!",
       "NOTIFICATION": {
-        "BREAK_X_START": "Pomodoro: Break {{nr}} started!",
-        "SESSION_X_START": "Pomodoro: Session {{nr}} started!"
+        "BREAK_X_START": "Pomodoro: Przerwa {{nr}} się zaczęła!",
+        "BREAK_TIME": "Pomodoro: Czas na przerwę {{nr}}!",
+        "NO_TASKS": "Przed uruchomieniem minutnika Pomodoro należy dodać zadania.",
+        "SESSION_X_START": "Pomodoro: Sesja {{nr}} się zaczęła!"
       },
       "S": {
-        "SESSION_X_START": "Pomodoro: Session {{nr}} started!"
+        "SESSION_X_START": "Pomodoro: Sesja {{nr}} się zaczęła!"
       },
-      "SKIP_BREAK": "Skip break"
+      "SKIP_BREAK": "Pomiń przerwę",
+      "START_BREAK": "Zacznij przerwę"
     },
     "PROCRASTINATION": {
       "BACK_TO_WORK": "Wróć do pracy!",
@@ -1041,6 +1044,7 @@
       "HELP": "<p>The pomodoro timer can be configured via a couple of settings. The duration of every work session, the duration of normal breaks, the number of work sessions to run before a longer break is started and the duration of this longer break.</p> <p>You can also set if you want to display your distractions during your pomodoro breaks.</p> <p>Setting \"Pause time tracking on pomodoro break\" will also track your breaks as work time spent on a task. </p> <p>Enabling \"Pause pomodoro session when no active task\" will also pause the pomodoro session, when you pause a task.</p>",
       "IS_ENABLED": "Enable pomodoro timer",
       "IS_MANUAL_CONTINUE": "Manually confirm starting next pomodoro session",
+      "IS_MANUAL_CONTINUE_BREAK": "Manually confirm starting next break",
       "IS_PLAY_SOUND": "Play sound when session is done",
       "IS_PLAY_SOUND_AFTER_BREAK": "Play sound when break is done",
       "IS_PLAY_TICK": "Play tick sound every second",

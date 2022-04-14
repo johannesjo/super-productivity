@@ -64,6 +64,7 @@ export const DEFAULT_GLOBAL_CONFIG: GlobalConfigState = {
     isStopTrackingOnBreak: true,
     isStopTrackingOnLongBreak: true,
     isManualContinue: false,
+    isManualContinueBreak: false,
     isPlaySound: true,
     isPlaySoundAfterBreak: false,
     // isGoToWorkView: false,

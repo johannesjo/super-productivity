@@ -17,8 +17,17 @@
   <button (click)="close()" color="primary" mat-button>{{T.G.CLOSE|translate}}</button>
 
   <button
+    (click)="startBreak()"
+    *ngIf="(isBreakStart$|async)"
+    color="primary"
+    mat-stroked-button
+  >
+    <mat-icon>free_breakfast</mat-icon>
+    <span>{{T.F.POMODORO.START_BREAK|translate}}</span>
+  </button>
+  <button
     (click)="nextSession(true)"
-    *ngIf="!(isBreakDone$|async)"
+    *ngIf="!(isBreakDone$|async) && !(isBreakDone$|async)"
     color="primary"
     mat-stroked-button
   >

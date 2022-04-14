@@ -29,6 +29,13 @@ export const POMODORO_FORM_CFG: ConfigFormSection<PomodoroConfig> = {
       },
     },
     {
+      key: 'isManualContinueBreak',
+      type: 'checkbox',
+      templateOptions: {
+        label: T.GCF.POMODORO.IS_MANUAL_CONTINUE_BREAK,
+      },
+    },
+    {
       key: 'isPlaySound',
       type: 'checkbox',
       templateOptions: {
