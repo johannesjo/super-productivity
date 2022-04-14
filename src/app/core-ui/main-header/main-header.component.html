@@ -112,7 +112,8 @@
       <button
         (click)="taskService.toggleStartTask()"
         [color]="(taskService.currentTaskId$|async)? 'accent': 'primary'"
-        [matTooltip]="(pomodoroService.isEnabled$|async)? '': T.MH.TOGGLE_TRACK_TIME|translate"
+        [matTooltip]="T.MH.TOGGLE_TRACK_TIME|translate"
+        [matTooltipPosition]="(pomodoroService.isEnabled$|async)? 'left': 'below'"
         class="play-btn mat-elevation-z3"
         mat-mini-fab
       >
@@ -156,6 +157,8 @@
         <div class="pomodoro-controls">
           <button
             (click)="pomodoroService.finishPomodoroSession()"
+            [matTooltip]="T.F.POMODORO.S.SESSION_SKIP|translate"
+            matTooltipPosition="left"
             class="pomodoro-btn"
             color=""
             mat-mini-fab
@@ -164,6 +167,8 @@
           </button>
           <button
             (click)="pomodoroService.stop()"
+            [matTooltip]="T.F.POMODORO.S.SESSION_END|translate"
+            matTooltipPosition="left"
             class="pomodoro-btn"
             color=""
             mat-mini-fab
