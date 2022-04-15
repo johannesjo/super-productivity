@@ -402,15 +402,13 @@ export class CaldavClientService {
     }
     todo.updatePropertyWithValue('last-modified', now);
     todo.updatePropertyWithValue('dtstamp', now);
-    
+
     // https://datatracker.ietf.org/doc/html/rfc5545#section-3.8.7.4
     // Some calendar clients do not see updates (completion) submitted by SuperProductivity as the 'sequence' number is unchanged.
     // As 'sequence' starts at 0 and completing probably counts as a major change, then it should be at least 1 in the end,
     // if no other changes have been written.
     const sequence = todo.getFirstPropertyValue('sequence');
-    const sequenceInt = sequence
-      ? parseInt(sequence) + 1
-      : 1;
+    const sequenceInt = sequence ? parseInt(sequence) + 1 : 1;
     todo.updatePropertyWithValue('sequence', sequenceInt);
 
     task.data = ICAL.stringify(jCal);
