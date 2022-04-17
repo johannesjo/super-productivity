@@ -213,13 +213,9 @@ export class PomodoroEffects {
                 ),
                 withLatestFrom(
                   this._pomodoroService.isBreak$,
-                  this._pomodoroService.isManualPause$,
+                  this._pomodoroService.isManualPauseWork$,
                   this._pomodoroService.isManualPauseBreak$,
                   this._pomodoroService.currentCycle$,
-                ),
-                filter(
-                  ([action, isBreak, isPause, isPauseBreak, currentCycle]) =>
-                    isBreak || action.type !== startPomodoroBreak.type,
                 ),
                 tap(([action, isBreak, isPause, isPauseBreak, currentCycle]) =>
                   // TODO only notify if window is not currently focused
@@ -258,7 +254,7 @@ export class PomodoroEffects {
             !isEnabledI ? EMPTY : this._pomodoroService.sessionProgress$,
           ),
           withLatestFrom(
-            this._pomodoroService.isManualPause$,
+            this._pomodoroService.isManualPauseWork$,
             this._pomodoroService.isManualPauseBreak$,
           ),
           // we display pomodoro progress for pomodoro

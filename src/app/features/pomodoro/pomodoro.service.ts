@@ -53,7 +53,9 @@ export class PomodoroService {
     shareReplay(1),
   );
 
-  isManualPause$: Observable<boolean> = this._store$.pipe(select(selectIsManualPause));
+  isManualPauseWork$: Observable<boolean> = this._store$.pipe(
+    select(selectIsManualPause),
+  );
   isManualPauseBreak$: Observable<boolean> = this._store$.pipe(
     select(selectIsManualPauseBreak),
   );
@@ -86,10 +88,15 @@ export class PomodoroService {
   );
 
   tick$: Observable<number> = this._timer$.pipe(
-    withLatestFrom(this.isManualPause$, this.isManualPauseBreak$, this.isEnabled$),
+    withLatestFrom(
+      this.isManualPauseWork$,
+      this.isManualPauseBreak$,
+      this.isBreak$,
+      this.isEnabled$,
+    ),
     filter(
-      ([v, isManualPause, isManualPauseBreak, isEnabled]) =>
-        !isManualPause && !isManualPauseBreak && isEnabled,
+      ([v, isManualPause, isManualPauseBreak, isBreak, isEnabled]) =>
+        !isManualPause && (!isBreak || !isManualPauseBreak) && isEnabled,
     ),
     map(([tick]) => tick * -1),
   );
