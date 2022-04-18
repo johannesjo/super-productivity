@@ -268,7 +268,8 @@
         "MAP_CUSTOM_FIELDS_INFO": "Unfortunately some of Jira's data is saved under custom fields which are different for every installation. If you want to include this data you need to select the proper custom field for it. Currently there is only the story points field that needs to be mapped.",
         "OPEN": "Status for pausing task",
         "SELECT_ISSUE_FOR_TRANSITIONS": "Select issue to load available transitions",
-        "STORY_POINTS": "Story Points Field Name"
+        "STORY_POINTS": "Story Points Field Name",
+        "TRANSITION": "Transition Handling"
       },
       "DIALOG_CONFIRM_ASSIGNMENT": {
         "MSG": "<strong>{{summary}}</strong> is currently assigned to <strong>{{assignee}}</strong>. Do you want to assign it to yourself?",

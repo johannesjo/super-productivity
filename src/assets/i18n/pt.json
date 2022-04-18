@@ -257,7 +257,8 @@
         "MAP_CUSTOM_FIELDS_INFO": "Infelizmente, alguns dados do Jira são salvos em campos personalizados que são diferentes para cada instalação. Se você deseja incluir esses dados, precisa selecionar o campo personalizado apropriado para eles.",
         "OPEN": "Status para Pausar Tarefa",
         "SELECT_ISSUE_FOR_TRANSITIONS": "Selecione uma issue para carregar as transições disponíveis",
-        "STORY_POINTS": "Story Points"
+        "STORY_POINTS": "Pontos de estória",
+        "TRANSITION": "Ativar transição"
       },
       "DIALOG_CONFIRM_ASSIGNMENT": {
         "MSG": "<strong>{{summary}}</strong> está atualmente atribuído a <strong>{{assignee}}</strong>. Deseja atribuir a si mesmo?",
