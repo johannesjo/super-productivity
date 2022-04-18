@@ -40,15 +40,17 @@ export class FileImexComponent {
         this._snackService.open({ type: 'ERROR', msg: T.FILE_IMEX.S_ERR_INVALID_DATA });
       }
 
-      if (oldData.config && Array.isArray(oldData.tasks)) {
-        alert('V1 Data. Migration not imported any more.');
+      if (!data || !oldData) {
+        this._snackService.open({ type: 'ERROR', msg: T.FILE_IMEX.S_ERR_INVALID_DATA });
+      } else if (oldData.config && Array.isArray(oldData.tasks)) {
+        alert('V1 Data. Migration not supported any more.');
       } else {
         await this._router.navigate([`tag/${TODAY_TAG.id}/tasks`]);
         await this._dataImportService.importCompleteSyncData(data as AppDataComplete);
       }
 
       if (!this.fileInputRef) {
-        throw new Error();
+        throw new Error('No file input Ref element');
       }
 
       // clear input
