@@ -106,7 +106,7 @@
             [(ngModel)]="this.cfg.isSetProgressOnTaskDone"
             [ngModelOptions]="{standalone: true}"
           >
-            Set progress on save
+            {{T.F.OPEN_PROJECT.CFG_CMP.PROGRESS_ON_SAVE|translate}}
           </mat-checkbox>
           <mat-slider
             *ngIf="this.cfg.isSetProgressOnTaskDone"
