@@ -225,8 +225,7 @@ export class OpenProjectEffects {
               ) {
                 return this._openProjectApiService
                   .transitionIssue$(
-                    //TODO: ask for a percentageDone value in config
-                    { ...issue, percentageDone: 100 },
+                    { ...issue, percentageDone: openProjectCfg.progressOnDone },
                     chosenTransition,
                     openProjectCfg,
                   )
