@@ -459,10 +459,11 @@
         "DONE": "Status for completing task",
         "DO_NOT": "Don't transition",
         "ENABLE": "Enable Openproject integration",
-        "TRANSITION": "Transition Handling",
         "ENABLE_TRANSITIONS": "Enable Transition Handling",
         "IN_PROGRESS": "Status for starting task",
         "OPEN": "Status for pausing task",
+        "PROGRESS_ON_SAVE": "Default progress on save",
+        "TRANSITION": "Transition Handling",
         "SELECT_ISSUE_FOR_TRANSITIONS": "Select issue to load available transitions"
       },
       "DIALOG_INITIAL": {

@@ -437,6 +437,18 @@
       }
     },
     "OPEN_PROJECT": {
+      "CFG_CMP": {
+        "ALWAYS_ASK": "Sempre abrir diálogo",
+        "DONE": "Status para conclusão da tarefa",
+        "DO_NOT": "Não faça a transição",
+        "ENABLE": "Ativar integração com OpenProject",
+        "ENABLE_TRANSITIONS": "Ativar tratamento de transição",
+        "IN_PROGRESS": "Status para iniciar a tarefa",
+        "OPEN": "Status para pausar tarefa",
+        "PROGRESS_ON_SAVE": "Progresso padrão ao salvar",
+        "SELECT_ISSUE_FOR_TRANSITIONS": "Selecione uma tarefa para carregar as transições disponíveis",
+        "TRANSITION": "Ativar transição"
+      },
       "DIALOG_INITIAL": {
         "TITLE": "Configurar OpenProject para Projeto"
       },
@@ -449,6 +461,15 @@
         "SUBMIT_TIME_FOR": "Enviar tempo para OpenProject para",
         "TIME_SPENT": "Tempo gasto",
         "TITLE": "OpenProject: enviar log de trabalho"
+      },
+      "DIALOG_TRANSITION": {
+        "CHOOSE_STATUS": "Escolha o status para atribuir",
+        "CURRENT_ASSIGNEE": "Responsável atual:",
+        "CURRENT_STATUS": "Estado atual:",
+        "PERCENTAGE_DONE": "Progresso:",
+        "TASK_NAME": "Nome da tarefa:",
+        "TITLE": "OpenProject: Atualizar estado",
+        "UPDATE_STATUS": "Atualizar estado"
       },
       "FORM": {
         "FILTER_USER": "Nome de usuário (por exemplo, para filtrar as alterações você mesmo)",
@@ -485,7 +506,10 @@
       },
       "S": {
         "ERR_UNKNOWN": "OpenProject: Erro desconhecido {{statusCode}} {{errorMsg}}. O CORS está configurado corretamente para o servidor?",
-        "POST_TIME_SUCCESS": "OpenProject: entrada de hora criada com sucesso para {{issueTitle}}"
+        "POST_TIME_SUCCESS": "OpenProject: entrada de hora criada com sucesso para {{issueTitle}}",
+        "TRANSITION": "OpenProject: Atualizar tarefa \"{{issueKey}}\" para \"{{name}}\"",
+        "TRANSITION_SUCCESS": "OpenProject: Tarefa {{issueKey}} atualizada para <strong>{{chosenTransition}}</strong>",
+        "TRANSITIONS_LOADED": "Transições carregadas. Utilize os campos abaixo para associá-las"
       }
     },
     "POMODORO": {
