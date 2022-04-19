@@ -94,8 +94,12 @@ export class TagListComponent implements OnDestroy {
 
   @Input() set task(task: Task) {
     this._task = task;
-    this._tagIds$.next(task.tagIds);
-    this._projectId$.next(task.projectId);
+    if (this._tagIds$.getValue() !== task.tagIds) {
+      this._tagIds$.next(task.tagIds);
+    }
+    if (this._projectId$.getValue() !== task.projectId) {
+      this._projectId$.next(task.projectId);
+    }
   }
 
   ngOnDestroy(): void {
