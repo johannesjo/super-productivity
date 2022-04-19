@@ -63,6 +63,7 @@ import { Note } from '../note/note.model';
 import { selectNotesById } from '../note/store/note.reducer';
 import { TranslateService } from '@ngx-translate/core';
 import { T } from '../../t.const';
+import { distinctUntilChangedSimpleArray } from '../../util/distinct-until-changed-simple-array';
 
 @Injectable({
   providedIn: 'root',
@@ -164,10 +165,12 @@ export class WorkContextService {
 
   currentTheme$: Observable<WorkContextThemeCfg> = this.activeWorkContext$.pipe(
     map((awc) => awc.theme),
+    distinctUntilChanged(distinctUntilChangedObject),
   );
 
   advancedCfg$: Observable<WorkContextAdvancedCfg> = this.activeWorkContext$.pipe(
     map((awc) => awc.advancedCfg),
+    distinctUntilChanged(distinctUntilChangedObject),
   );
 
   onWorkContextChange$: Observable<any> = this._actions$.pipe(
@@ -185,7 +188,7 @@ export class WorkContextService {
   // -----------
   notes$: Observable<Note[]> = this.activeWorkContext$.pipe(
     map((ac) => ac.noteIds),
-    distinctUntilChanged(distinctUntilChangedObject),
+    distinctUntilChanged(distinctUntilChangedSimpleArray),
     switchMap((taskIds) => this._getNotesByIds$(taskIds)),
     shareReplay(1),
   );
@@ -194,13 +197,13 @@ export class WorkContextService {
   // ----------
   todaysTaskIds$: Observable<string[]> = this.activeWorkContext$.pipe(
     map((ac) => ac.taskIds),
-    distinctUntilChanged(distinctUntilChangedObject),
+    distinctUntilChanged(distinctUntilChangedSimpleArray),
     shareReplay(1),
   );
 
   backlogTaskIds$: Observable<string[]> = this.activeWorkContext$.pipe(
     map((ac) => ac.backlogTaskIds || []),
-    distinctUntilChanged(distinctUntilChangedObject),
+    distinctUntilChanged(distinctUntilChangedSimpleArray),
     shareReplay(1),
   );
 
