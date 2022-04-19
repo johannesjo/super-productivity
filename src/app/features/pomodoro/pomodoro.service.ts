@@ -27,7 +27,6 @@ import {
 } from './store/pomodoro.reducer';
 import { DEFAULT_GLOBAL_CONFIG } from '../config/default-global-config.const';
 import { Actions, ofType } from '@ngrx/effects';
-import { distinctUntilChangedObject } from '../../util/distinct-until-changed-object';
 
 const TICK_DURATION = 500;
 const DEFAULT_SOUND = 'assets/snd/positive.ogg';
@@ -88,7 +87,8 @@ export class PomodoroService {
   // isManualPause$
   nextSession$: Observable<number> = merge(
     this.isBreak$,
-    this.cfg$.pipe(distinctUntilChanged(distinctUntilChangedObject)),
+    // NOTE: not needed, since already included .pipe(distinctUntilChanged(distinctUntilChangedObject))
+    this.cfg$,
     this.onStop$,
   ).pipe(
     withLatestFrom(this.isLongBreak$, this.isShortBreak$, this.isBreak$, this.cfg$),
