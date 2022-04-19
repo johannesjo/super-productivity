@@ -125,19 +125,20 @@ export class WorkContextService {
 
   activeWorkContext$: Observable<WorkContext> = this._afterDataLoaded$.pipe(
     switchMap(() => this._store$.select(selectActiveWorkContext)),
+    shareReplay(1),
+  );
+
+  activeWorkContextTitle$: Observable<string> = this.activeWorkContext$.pipe(
     switchMap((activeContext) =>
       activeContext.id === TODAY_TAG.id && activeContext.title === TODAY_TAG.title
         ? this._translateService.onLangChange.pipe(
             startWith(this._translateService.currentLang),
-            map(() => ({
-              ...activeContext,
-              title: this._translateService.instant(T.G.TODAY_TAG_TITLE),
-            })),
+            map(() => this._translateService.instant(T.G.TODAY_TAG_TITLE)),
           )
-        : of(activeContext),
+        : of(activeContext.title),
     ),
-    shareReplay(1),
   );
+
   mainWorkContext$: Observable<WorkContext> = this._isAllDataLoaded$.pipe(
     concatMap(() => this._tagService.getTagById$(TODAY_TAG.id)),
     map(
