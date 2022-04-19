@@ -28,7 +28,6 @@ import {
 import { TODAY_TAG } from '../tag/tag.const';
 import { TagService } from '../tag/tag.service';
 import { Task, TaskPlanned, TaskWithSubTasks } from '../tasks/task.model';
-import { distinctUntilChangedObject } from '../../util/distinct-until-changed-object';
 import { getWorklogStr } from '../../util/get-work-log-str';
 import { hasTasksToWorkOn, mapEstimateRemainingFromTasks } from './work-context.util';
 import {
@@ -65,6 +64,8 @@ import { selectNotesById } from '../note/store/note.reducer';
 import { TranslateService } from '@ngx-translate/core';
 import { T } from '../../t.const';
 import { distinctUntilChangedSimpleArray } from '../../util/distinct-until-changed-simple-array';
+import { isShallowEqual } from '../../util/is-shallow-equal';
+import { distinctUntilChangedObject } from '../../util/distinct-until-changed-object';
 
 @Injectable({
   providedIn: 'root',
@@ -81,7 +82,7 @@ export class WorkContextService {
 
   // should be treated as private
   _afterDataLoaded$: Observable<unknown> = this._isAllDataLoaded$.pipe(
-    filter((v) => v === true),
+    filter((v) => v),
     shareReplay(1),
   );
 
@@ -170,7 +171,7 @@ export class WorkContextService {
 
   currentTheme$: Observable<WorkContextThemeCfg> = this.activeWorkContext$.pipe(
     map((awc) => awc.theme),
-    distinctUntilChanged(distinctUntilChangedObject),
+    distinctUntilChanged<WorkContextThemeCfg>(isShallowEqual),
   );
 
   advancedCfg$: Observable<WorkContextAdvancedCfg> = this.activeWorkContext$.pipe(

@@ -72,6 +72,10 @@ export const selectActiveWorkContext = createSelector(
   },
 );
 
+export const selectActiveContextTheme = createSelector(
+  selectActiveWorkContext,
+  (workContext) => workContext.theme,
+);
 export const selectStartableTasksForActiveContext = createSelector(
   selectActiveWorkContext,
   selectTaskEntities,
