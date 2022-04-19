@@ -20,9 +20,9 @@
       ></mat-icon>
     </ng-container>
     <ng-container *ngIf="!workContextService.isToday">
-      <mat-icon *ngIf="!task.tagIds.includes(TODAY_TAG_ID)">wb_sunny</mat-icon>
+      <mat-icon *ngIf="!isTodayTag">wb_sunny</mat-icon>
       <mat-icon
-        *ngIf="task.tagIds.includes(TODAY_TAG_ID) && (task.projectId || task.tagIds?.length > 1)"
+        *ngIf="isTodayTag && (task.projectId || task.tagIds?.length > 1)"
         svgIcon="remove_today"
       ></mat-icon>
     </ng-container>
@@ -225,7 +225,7 @@
 
           <button
             (click)="addToMyDay()"
-            *ngIf="!task.parentId && !task.tagIds.includes(TODAY_TAG_ID)"
+            *ngIf="!task.parentId && !isTodayTag"
             [title]="T.F.TASK.CMP.ADD_TO_MY_DAY|translate"
             class="ico-btn"
             color=""
@@ -236,7 +236,7 @@
 
           <button
             (click)="removeFromMyDay()"
-            *ngIf="!task.parentId && !task.isDone && task.tagIds.includes(TODAY_TAG_ID) && (task.projectId || task.tagIds?.length > 1)"
+            *ngIf="!task.parentId && !task.isDone && isTodayTag && (task.projectId || task.tagIds?.length > 1)"
             [title]="T.F.TASK.CMP.REMOVE_FROM_MY_DAY|translate"
             class="ico-btn"
             color=""
@@ -345,7 +345,7 @@
 
             <button
               (click)="removeFromMyDay()"
-              *ngIf="IS_TOUCH_ONLY && !task.parentId && !task.isDone && task.tagIds.includes(TODAY_TAG_ID) && (task.projectId || task.tagIds?.length > 1)"
+              *ngIf="IS_TOUCH_ONLY && !task.parentId && !task.isDone && isTodayTag && (task.projectId || task.tagIds?.length > 1)"
               mat-menu-item
             >
               <mat-icon svgIcon="remove_today"></mat-icon>

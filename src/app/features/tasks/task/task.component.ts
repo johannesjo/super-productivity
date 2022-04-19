@@ -82,6 +82,7 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
   contextMenuPosition: { x: string; y: string } = { x: '0px', y: '0px' };
   progress: number = 0;
   isDev: boolean = !(environment.production || environment.stage);
+  isTodayTag: boolean = false;
   @ViewChild('contentEditableOnClickEl', { static: true })
   contentEditableOnClickEl?: ElementRef;
   @ViewChild('blockLeftEl') blockLeftElRef?: ElementRef;
@@ -98,7 +99,6 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
   // @see ngOnInit
   @HostBinding('class.isCurrent') isCurrent: boolean = false;
   @HostBinding('class.isSelected') isSelected: boolean = false;
-  TODAY_TAG_ID: string = TODAY_TAG.id;
   private _task$: ReplaySubject<TaskWithSubTasks> = new ReplaySubject(1);
   issueUrl$: Observable<string | null> = this._task$.pipe(
     switchMap((v) => {
@@ -161,6 +161,7 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
     this.progress = v && v.timeEstimate && (v.timeSpent / v.timeEstimate) * 100;
     this.taskIdWithPrefix = 't-' + this.task.id;
     this.isDone = v.isDone;
+    this.isTodayTag = v.tagIds.includes(TODAY_TAG.id);
     this._task$.next(v);
   }
 
