@@ -100,7 +100,8 @@ export class WorkContextService {
   }> = this._isAllDataLoaded$.pipe(
     switchMap(() => this._store$),
     select(selectActiveContextTypeAndId),
-    distinctUntilChanged(distinctUntilChangedObject),
+    // NOTE: checking for id should be enough
+    distinctUntilChanged((a, b): boolean => a.activeId === b.activeId),
     shareReplay(1),
   );
   isActiveWorkContextProject$: Observable<boolean> =
