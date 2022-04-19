@@ -16,6 +16,7 @@ import {
   delayWhen,
   distinctUntilChanged,
   filter,
+  first,
   map,
   mapTo,
   shareReplay,
@@ -79,10 +80,12 @@ export class WorkContextService {
   );
 
   // should be treated as private
-  _afterDataLoaded$: Observable<any> = this._isAllDataLoaded$.pipe(
+  _afterDataLoaded$: Observable<unknown> = this._isAllDataLoaded$.pipe(
     filter((v) => v === true),
     shareReplay(1),
   );
+
+  _afterDataLoadedOnce$: Observable<unknown> = this._afterDataLoaded$.pipe(first());
 
   // CONTEXT LEVEL
   // -------------
@@ -124,7 +127,7 @@ export class WorkContextService {
   activeWorkContextId?: string;
   activeWorkContextType?: WorkContextType;
 
-  activeWorkContext$: Observable<WorkContext> = this._afterDataLoaded$.pipe(
+  activeWorkContext$: Observable<WorkContext> = this._afterDataLoadedOnce$.pipe(
     switchMap(() => this._store$.select(selectActiveWorkContext)),
     shareReplay(1),
   );
@@ -241,7 +244,7 @@ export class WorkContextService {
     this.backlogTasks$,
   ]).pipe(map(([today, backlog]) => [...today, ...backlog]));
 
-  startableTasksForActiveContext$: Observable<Task[]> = this._afterDataLoaded$.pipe(
+  startableTasksForActiveContext$: Observable<Task[]> = this._afterDataLoadedOnce$.pipe(
     switchMap(() => this._store$),
     select(selectStartableTasksForActiveContext),
     shareReplay(1),
