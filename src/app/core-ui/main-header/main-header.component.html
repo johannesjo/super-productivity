@@ -9,7 +9,9 @@
     <mat-icon>menu</mat-icon>
   </button>
 
-  <ng-container *ngIf="workContextService.activeWorkContext$|async as activeWorkContext">
+  <ng-container
+    *ngIf="workContextService.activeWorkContextTypeAndId$|async as activeWorkContextTypeAndId"
+  >
     <div
       [matTooltip]="T.MH.GO_TO_TASK_LIST|translate"
       class="current-work-context-title"
@@ -31,9 +33,9 @@
     <mat-menu #activeWorkContextMenu="matMenu">
       <ng-template matMenuContent>
         <work-context-menu
-          [contextId]="activeWorkContext?.id"
+          [contextId]="activeWorkContextTypeAndId.activeId"
           [project]="projectService.currentProject$|async"
-          [contextType]="activeWorkContext?.type"
+          [contextType]="activeWorkContextTypeAndId.activeType"
         ></work-context-menu>
       </ng-template>
     </mat-menu>
