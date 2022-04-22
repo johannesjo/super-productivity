@@ -17,7 +17,8 @@ export class DialogPomodoroBreakComponent {
   currentTime$: Observable<number> = this.pomodoroService.currentSessionTime$.pipe(
     takeUntil(this.isStopCurrentTime$),
   );
-  isBreakDone$: Observable<boolean> = this.pomodoroService.isManualPause$;
+  isManualPauseBreak$: Observable<boolean> = this.pomodoroService.isManualPauseBreak$;
+  isManualPauseWork$: Observable<boolean> = this.pomodoroService.isManualPauseWork$;
   currentCycle$: Observable<number> = this.pomodoroService.currentCycle$.pipe(
     map((cycle) => cycle + 1),
   );
@@ -62,5 +63,9 @@ export class DialogPomodoroBreakComponent {
       this.pomodoroService.finishPomodoroSession();
     }
     this.close();
+  }
+
+  startBreak(): void {
+    this.pomodoroService.startBreak(false);
   }
 }

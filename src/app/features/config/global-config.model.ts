@@ -48,6 +48,7 @@ export type PomodoroConfig = Readonly<{
   isStopTrackingOnBreak: boolean;
   isStopTrackingOnLongBreak: boolean;
   isManualContinue: boolean;
+  isManualContinueBreak: boolean;
   isPlaySound: boolean;
   isPlaySoundAfterBreak: boolean;
   // isGoToWorkView: boolean;

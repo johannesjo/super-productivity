@@ -2,8 +2,10 @@ import { createFeatureSelector, createReducer, createSelector, on } from '@ngrx/
 import {
   finishPomodoroSession,
   pausePomodoro,
+  pausePomodoroBreak,
   skipPomodoroBreak,
   startPomodoro,
+  startPomodoroBreak,
   stopPomodoro,
 } from './pomodoro.actions';
 
@@ -11,12 +13,14 @@ export const POMODORO_FEATURE_NAME = 'pomodoro';
 
 export interface PomodoroState {
   isManualPause: boolean;
+  isManualPauseBreak: boolean;
   isBreak: boolean;
   currentCycle: number;
 }
 
 export const initialPomodoroState: PomodoroState = {
   isManualPause: true,
+  isManualPauseBreak: false,
   isBreak: false,
   currentCycle: 0,
 };
@@ -27,6 +31,10 @@ export const selectPomodoroFeatureState =
 export const selectIsManualPause = createSelector(
   selectPomodoroFeatureState,
   (state) => state.isManualPause,
+);
+export const selectIsManualPauseBreak = createSelector(
+  selectPomodoroFeatureState,
+  (state) => state.isManualPauseBreak,
 );
 export const selectIsBreak = createSelector(
   selectPomodoroFeatureState,
@@ -53,9 +61,24 @@ export const pomodoroReducer = createReducer<PomodoroState>(
     };
   }),
 
+  on(pausePomodoroBreak, (state) => {
+    return {
+      ...state,
+      isManualPauseBreak: true,
+      isBreak: true,
+    };
+  }),
+  on(startPomodoroBreak, (state) => {
+    return {
+      ...state,
+      isManualPauseBreak: false,
+    };
+  }),
+
   on(stopPomodoro, () => {
     return {
       isManualPause: true,
+      isManualPauseBreak: false,
       isBreak: false,
       currentCycle: 0,
     };

@@ -1,12 +1,12 @@
 <div mat-dialog-content>
-  <div *ngIf="!(isBreakDone$|async)">
+  <div *ngIf="!(isManualPauseWork$|async)">
     <p
       [innerHTML]="T.F.POMODORO.FINISH_SESSION_X|translate:{nr: (currentCycle$|async)}"
     ></p>
     <p>{{T.F.POMODORO.ENJOY_YOURSELF|translate}}</p>
   </div>
 
-  <div *ngIf="(isBreakDone$|async)">
+  <div *ngIf="(isManualPauseWork$|async)">
     <p>{{T.F.POMODORO.BREAK_IS_DONE|translate}}</p>
   </div>
 
@@ -26,8 +26,17 @@
   </button>
 
   <button
+    (click)="startBreak()"
+    *ngIf="(isManualPauseBreak$|async)"
+    color="primary"
+    mat-stroked-button
+  >
+    <mat-icon>free_breakfast</mat-icon>
+    <span>{{T.F.POMODORO.START_BREAK|translate}}</span>
+  </button>
+  <button
     (click)="nextSession(true)"
-    *ngIf="!(isBreakDone$|async)"
+    *ngIf="!(isManualPauseWork$|async)"
     color="primary"
     mat-stroked-button
   >
@@ -35,7 +44,7 @@
     <span>{{T.F.POMODORO.SKIP_BREAK|translate}}</span>
   </button>
 
-  <ng-container *ngIf="(isBreakDone$|async)">
+  <ng-container *ngIf="(isManualPauseWork$|async)">
     <button
       (click)="nextSession()"
       color="primary"
