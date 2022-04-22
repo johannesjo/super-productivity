@@ -43,6 +43,19 @@ interface OpenProjectUser {
   _type: 'User';
 }
 
+export type OpenProjectOriginalStatus = Readonly<{
+  _type: 'Status';
+  id: number;
+  name: string;
+  isClosed: boolean;
+  color: string;
+  isDefault: boolean;
+  isReadonly: boolean;
+  defaultDoneRatio: null;
+  position: number;
+  _links: OpenProjectApiLinks;
+}>;
+
 // NOTE unknown currently means we haven't evaluated the possible values
 export type OpenProjectOriginalWorkPackageReduced = Readonly<{
   createdAt: string;
@@ -124,18 +137,7 @@ export type OpenProjectOriginalWorkPackageFull =
           _links: OpenProjectApiLinks;
           _type: 'Collection';
         };
-        status: {
-          color: string;
-          defaultDoneRatio: null;
-          id: number;
-          isClosed: boolean;
-          isDefault: boolean;
-          isReadonly: boolean;
-          name: string;
-          position: number;
-          _links: OpenProjectApiLinks;
-          _type: 'Status';
-        };
+        status: OpenProjectOriginalStatus;
         type: {
           color: string;
           createdAt: string;

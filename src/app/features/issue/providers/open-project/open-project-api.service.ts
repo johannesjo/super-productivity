@@ -10,6 +10,7 @@ import {
 } from '@angular/common/http';
 import { Observable, ObservableInput, throwError } from 'rxjs';
 import {
+  OpenProjectOriginalStatus,
   OpenProjectOriginalWorkPackageReduced,
   OpenProjectWorkPackageSearchResult,
 } from './open-project-api-responses';
@@ -81,6 +82,53 @@ export class OpenProjectApiService {
               .map(mapOpenProjectIssueToSearchResult)
           : [];
       }),
+    );
+  }
+
+  getTransitionsForIssue$(
+    workPackageId: string | number,
+    lockVersion: number,
+    cfg: OpenProjectCfg,
+  ): Observable<OpenProjectOriginalStatus[]> {
+    return this._sendRequest$(
+      {
+        method: 'POST',
+        url: `${cfg.host}/api/v3/work_packages/${workPackageId}/form`,
+        data: {
+          lockVersion: lockVersion,
+          _links: {},
+        },
+      },
+      cfg,
+    ).pipe(
+      map((res: any) => res._embedded.schema.status._embedded.allowedValues),
+      catchError((e) => {
+        devError(e);
+        return [];
+      }),
+    );
+  }
+
+  transitionIssue$(
+    workPackage: OpenProjectWorkPackage,
+    trans: OpenProjectOriginalStatus,
+    cfg: OpenProjectCfg,
+  ): Observable<any> {
+    return this._sendRequest$(
+      {
+        url: `${cfg.host}/api/v3/work_packages/${workPackage.id}`,
+        method: 'PATCH',
+        data: {
+          lockVersion: workPackage.lockVersion,
+          percentageDone: workPackage.percentageDone,
+          _links: {
+            status: {
+              href: trans._links.self.href,
+            },
+          },
+        },
+      },
+      cfg,
     );
   }
 
