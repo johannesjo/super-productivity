@@ -75,6 +75,8 @@ export const createWindow = ({
     y: mainWindowState.y,
     width: mainWindowState.width,
     height: mainWindowState.height,
+    minHeight: 240,
+    minWidth: 300,
     titleBarStyle: IS_MAC ? 'hidden' : 'default',
     show: false,
     webPreferences: {
