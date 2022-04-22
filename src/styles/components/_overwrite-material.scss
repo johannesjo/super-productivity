@@ -103,6 +103,13 @@ body .mat-form-field {
   text-transform: uppercase;
 }
 
+.mat-button-wrapper,
+.mat-button-wrapper > .mat-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 // otherwise it's hard to see when an off-screen element gets focused via tab
 .mat-flat-button.mat-primary:focus {
   &:after {
