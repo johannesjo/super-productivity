@@ -65,7 +65,7 @@ export class DialogPomodoroBreakComponent {
     this.close();
   }
 
-  startBreak() {
+  startBreak(): void {
     this.pomodoroService.startBreak(false);
   }
 }
