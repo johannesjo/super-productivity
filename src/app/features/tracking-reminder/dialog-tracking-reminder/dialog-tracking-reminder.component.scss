@@ -1,6 +1,11 @@
 @import '../../../../variables';
 
 .dialog-content {
+  // 600px
+  @include mq(xs) {
+    min-width: 500px;
+  }
+
   p,
   .track-to-label,
   .time {
