@@ -16,14 +16,17 @@ import { select, Store } from '@ngrx/store';
 import {
   finishPomodoroSession,
   pausePomodoro,
+  pausePomodoroBreak,
   skipPomodoroBreak,
   startPomodoro,
+  startPomodoroBreak,
   stopPomodoro,
 } from './store/pomodoro.actions';
 import {
   selectCurrentCycle,
   selectIsBreak,
   selectIsManualPause,
+  selectIsManualPauseBreak,
 } from './store/pomodoro.reducer';
 import { DEFAULT_GLOBAL_CONFIG } from '../config/default-global-config.const';
 import { Actions, ofType } from '@ngrx/effects';
@@ -49,7 +52,12 @@ export class PomodoroService {
     shareReplay(1),
   );
 
-  isManualPause$: Observable<boolean> = this._store$.pipe(select(selectIsManualPause));
+  isManualPauseWork$: Observable<boolean> = this._store$.pipe(
+    select(selectIsManualPause),
+  );
+  isManualPauseBreak$: Observable<boolean> = this._store$.pipe(
+    select(selectIsManualPauseBreak),
+  );
   isBreak$: Observable<boolean> = this._store$.pipe(select(selectIsBreak));
   currentCycle$: Observable<number> = this._store$.pipe(select(selectCurrentCycle));
 
@@ -79,8 +87,16 @@ export class PomodoroService {
   );
 
   tick$: Observable<number> = this._timer$.pipe(
-    withLatestFrom(this.isManualPause$, this.isEnabled$),
-    filter(([v, isManualPause, isEnabled]) => !isManualPause && isEnabled),
+    withLatestFrom(
+      this.isManualPauseWork$,
+      this.isManualPauseBreak$,
+      this.isBreak$,
+      this.isEnabled$,
+    ),
+    filter(
+      ([v, isManualPause, isManualPauseBreak, isBreak, isEnabled]) =>
+        !isManualPause && (!isBreak || !isManualPauseBreak) && isEnabled,
+    ),
     map(([tick]) => tick * -1),
   );
 
@@ -142,7 +158,9 @@ export class PomodoroService {
         withLatestFrom(this.cfg$, this.isBreak$),
       )
       .subscribe(([val, cfg, isBreak]) => {
-        if (cfg.isManualContinue && isBreak) {
+        if (cfg.isManualContinueBreak && !isBreak) {
+          this.pauseBreak(true);
+        } else if (cfg.isManualContinue && isBreak) {
           this.pause(true);
         } else {
           this.finishPomodoroSession();
@@ -169,6 +187,14 @@ export class PomodoroService {
 
   pause(isBreakEndPause: boolean = false): void {
     this._store$.dispatch(pausePomodoro({ isBreakEndPause }));
+  }
+
+  pauseBreak(isBreakStartPause: boolean = false): void {
+    this._store$.dispatch(pausePomodoroBreak({ isBreakStartPause }));
+  }
+
+  startBreak(isBreakStart: boolean = false): void {
+    this._store$.dispatch(startPomodoroBreak({ isBreakStart }));
   }
 
   stop(): void {

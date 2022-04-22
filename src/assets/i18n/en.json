@@ -537,6 +537,7 @@
       "FINISH_SESSION_X": "You successfully finished session <strong>{{nr}}</strong>!",
       "NOTIFICATION": {
         "BREAK_X_START": "Pomodoro: Break {{nr}} started!",
+        "BREAK_TIME": "Pomodoro: Time for break {{nr}}!",
         "NO_TASKS": "You need to add tasks before the Pomodoro timer can start.",
         "SESSION_X_START": "Pomodoro: Session {{nr}} started!"
       },
@@ -545,7 +546,8 @@
         "SESSION_SKIP": "Skip Pomodoro session",
         "SESSION_END": "End Pomodoro session"
       },
-      "SKIP_BREAK": "Skip break"
+      "SKIP_BREAK": "Skip break",
+      "START_BREAK": "Start break"
     },
     "PROCRASTINATION": {
       "BACK_TO_WORK": "Back to work!",
@@ -1247,6 +1249,7 @@
       "HELP": "<p>The pomodoro timer can be configured via a couple of settings. The duration of every work session, the duration of normal breaks, the number of work sessions to run before a longer break is started and the duration of this longer break.</p> <p>You can also set if you want to display your distractions during your pomodoro breaks.</p> <p>Setting \"Pause time tracking on pomodoro break\" will also track your breaks as work time spent on a task. </p> <p>Enabling \"Pause pomodoro session when no active task\" will also pause the pomodoro session, when you pause a task.</p>",
       "IS_ENABLED": "Enable pomodoro timer",
       "IS_MANUAL_CONTINUE": "Manually confirm starting next pomodoro session",
+      "IS_MANUAL_CONTINUE_BREAK": "Manually confirm starting next break",
       "IS_PLAY_SOUND": "Play sound when session is done",
       "IS_PLAY_SOUND_AFTER_BREAK": "Play sound when break is done",
       "IS_PLAY_TICK": "Play tick sound every second",
