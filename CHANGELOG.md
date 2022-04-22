@@ -1,3 +1,25 @@
+## [7.11.3](https://github.com/johannesjo/super-productivity/compare/v7.11.2...v7.11.3) (2022-04-22)
+
+### Bug Fixes
+
+- add minHeight and minWidth for window to fix mac store issue ([e3fbd03](https://github.com/johannesjo/super-productivity/commit/e3fbd035cb0bfbebc52e2ebd3166326077cf3ff1))
+- adjust margin to center sub-task toggle [#1975](https://github.com/johannesjo/super-productivity/issues/1975) ([fede2bb](https://github.com/johannesjo/super-productivity/commit/fede2bbbbe6dafd2634d3ffb06d9c512b5ff84a3))
+- change btns to flex to center on android[#1975](https://github.com/johannesjo/super-productivity/issues/1975) ([a6fc825](https://github.com/johannesjo/super-productivity/commit/a6fc825e4a6661369e46d6adde51860c4f3abdfe))
+
+### Features
+
+- add min width for time tracking reminder dialog ([d44367a](https://github.com/johannesjo/super-productivity/commit/d44367a9992eeed87129fd70ec6342c42506c232))
+- add scope to openproject integration with the number [#1989](https://github.com/johannesjo/super-productivity/issues/1989) ([1469206](https://github.com/johannesjo/super-productivity/commit/1469206c042ada1c491e522e88082c4d4b9f3e86))
+- improve error handling for file imex [#2019](https://github.com/johannesjo/super-productivity/issues/2019) ([8a6a338](https://github.com/johannesjo/super-productivity/commit/8a6a3387f455415118c4dd1b4d96861b86166744))
+- improve performance ([12dc9af](https://github.com/johannesjo/super-productivity/commit/12dc9af880180f5acca2eb58f3644f16dd5d40b3))
+- **perf:** close sub ([86f8597](https://github.com/johannesjo/super-productivity/commit/86f859773b0d793a96b2e99677f81fdf13580f00))
+- **perf:** minor optimization for tag-list component ([6a7dc6b](https://github.com/johannesjo/super-productivity/commit/6a7dc6b2058b509f083a16d05ac84dc243b7040f))
+- **perf:** minor optimization for task component ([be38653](https://github.com/johannesjo/super-productivity/commit/be3865301c8c63c51d194af73be342719b4b6993))
+- **perf:** minor simplification ([6ce4c72](https://github.com/johannesjo/super-productivity/commit/6ce4c72caaec2e4dd931d1b1fc6a1c8eed2bde45))
+- **perf:** simplify distinctUntilChanged ([0d8ad71](https://github.com/johannesjo/super-productivity/commit/0d8ad7123928af5f3007d13d2b0203504d9ccfaa))
+- **perf:** simplify distinctUntilChanged check ([01befbb](https://github.com/johannesjo/super-productivity/commit/01befbb07dc8cb49f70368c31cf48ed6015beb89))
+- **perf:** use less data ([d7edddc](https://github.com/johannesjo/super-productivity/commit/d7edddc1739c0b8bf8339b48d3b59e48eb78dbc2))
+
 ## [7.11.2](https://github.com/johannesjo/super-productivity/compare/v7.11.1...v7.11.2) (2022-03-30)
 
 ### Bug Fixes
