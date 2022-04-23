@@ -41,8 +41,6 @@ export class PollToBacklogEffects {
                 .isBacklogPollEnabledForProjectOnce$(providerKey, pId)
                 .pipe(
                   switchMap((isEnabled) => {
-                    //TODO fix this later
-                    if (providerKey == 'GITEA') return EMPTY;
                     return isEnabled
                       ? this._issueService.getPollTimer$(providerKey).pipe(
                           // NOTE: required otherwise timer stays alive for filtered actions

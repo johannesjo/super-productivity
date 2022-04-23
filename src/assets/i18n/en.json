@@ -139,6 +139,43 @@
         "FINISH_DAY_BEFORE_EXIT": "There are {{nr}} done tasks in your today list not yet moved to the archive. Do you really want to quit without finishing your day?"
       }
     },
+    "GITEA": {
+      "DIALOG_INITIAL": {
+        "TITLE": "Setup Gitea for Project"
+      },
+      "FORM": {
+        "FILTER_USER": "Username (e.g. to filter out changes by yourself)",
+        "IS_AUTO_ADD_TO_BACKLOG": "Automatically add unresolved issues from Gitea to backlog",
+        "IS_AUTO_POLL": "Automatically poll imported git issues for changes",
+        "IS_SEARCH_ISSUES_FROM_GITEA": "Show issues from git as suggestions when adding new tasks",
+        "HOST": "Host (e.g.: https://try.gitea.io)",
+        "TOKEN": "Access Token",
+        "TOKEN_DESCRIPTION": "Required for private repository access",
+        "PROJECT_ID": "Project ID",
+        "PROJECT_ID_DESCRIPTION": "Can be found as part of the url, when viewing the project in the Browser.",
+        "SCOPE": "Scope",
+        "SCOPE_ALL": "All",
+        "SCOPE_ASSIGNED": "Assigned to me",
+        "SCOPE_CREATED": "Created by me"
+      },
+      "FORM_SECTION": {
+        "HELP": "<p>Here you can configure SuperProductivity to list open GitHub issues for a specific repository in the task creation panel in the daily planning view. They will be listed as suggestions and will provide a link to the issue as well as more information about it.</p> <p>In addition you can automatically add and sync all open issues to your task backlog.</p><p>To get by usage limits and to access you can provide a an access token. <a href='https://docs.github.com/en/free-pro-team@latest/developers/apps/scopes-for-oauth-apps'>More info about its scopes can be found here</a>.",
+        "TITLE": "Gitea"
+      },
+      "ISSUE_CONTENT": {
+        "ASSIGNEE": "Assignee",
+        "AT": "at",
+        "DESCRIPTION": "Description",
+        "LABELS": "Labels",
+        "MARK_AS_CHECKED": "Mark updates as checked",
+        "STATUS": "Status",
+        "SUMMARY": "Summary",
+        "WRITE_A_COMMENT": "Write a comment"
+      },
+      "S": {
+        "ERR_UNKNOWN": "Gitea: Unknown error {{statusCode}} {{errorMsg}}. Api Rate limit exceeded?"
+      }
+    },
     "GITHUB": {
       "DIALOG_INITIAL": {
         "TITLE": "Setup GitHub for Project"
