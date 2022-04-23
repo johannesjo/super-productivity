@@ -20,18 +20,27 @@ import {
   OpenProjectWorkPackage,
   OpenProjectWorkPackageReduced,
 } from './providers/open-project/open-project-issue/open-project-issue.model';
+import { GiteaCfg } from './providers/gitea/gitea.model';
 
 export interface BaseIssueProviderCfg {
   isEnabled: boolean;
 }
 
-export type IssueProviderKey = 'JIRA' | 'GITHUB' | 'GITLAB' | 'CALDAV' | 'OPEN_PROJECT';
+export type IssueProviderKey =
+  | 'JIRA'
+  | 'GITHUB'
+  | 'GITLAB'
+  | 'CALDAV'
+  | 'OPEN_PROJECT'
+  | 'GITEA';
+
 export type IssueIntegrationCfg =
   | JiraCfg
   | GithubCfg
   | GitlabCfg
   | CaldavCfg
-  | OpenProjectCfg;
+  | OpenProjectCfg
+  | GiteaCfg;
 
 export enum IssueLocalState {
   OPEN = 'OPEN',
@@ -46,6 +55,7 @@ export interface IssueIntegrationCfgs {
   GITLAB?: GitlabCfg;
   CALDAV?: CaldavCfg;
   OPEN_PROJECT?: OpenProjectCfg;
+  GITEA?: GiteaCfg;
 }
 
 export type IssueData =

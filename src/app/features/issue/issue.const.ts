@@ -25,12 +25,14 @@ import {
   OPEN_PROJECT_CONFIG_FORM_SECTION,
 } from './providers/open-project/open-project.const';
 import { T } from '../../t.const';
+import { DEFAULT_GITEA_CFG } from './providers/gitea/gitea.const';
 
 export const GITLAB_TYPE: IssueProviderKey = 'GITLAB';
 export const GITHUB_TYPE: IssueProviderKey = 'GITHUB';
 export const JIRA_TYPE: IssueProviderKey = 'JIRA';
 export const CALDAV_TYPE: IssueProviderKey = 'CALDAV';
 export const OPEN_PROJECT_TYPE: IssueProviderKey = 'OPEN_PROJECT';
+export const GITEA_TYPE: IssueProviderKey = 'GITEA';
 
 export const ISSUE_PROVIDER_TYPES: IssueProviderKey[] = [
   GITLAB_TYPE,
@@ -38,6 +40,7 @@ export const ISSUE_PROVIDER_TYPES: IssueProviderKey[] = [
   JIRA_TYPE,
   CALDAV_TYPE,
   OPEN_PROJECT_TYPE,
+  GITEA_TYPE,
 ];
 
 export const ISSUE_PROVIDER_ICON_MAP = {
@@ -46,6 +49,7 @@ export const ISSUE_PROVIDER_ICON_MAP = {
   [GITLAB_TYPE]: 'gitlab',
   [CALDAV_TYPE]: 'caldav',
   [OPEN_PROJECT_TYPE]: 'open_project',
+  [GITEA_TYPE]: 'gitea',
 };
 
 export const ISSUE_PROVIDER_HUMANIZED = {
@@ -54,6 +58,7 @@ export const ISSUE_PROVIDER_HUMANIZED = {
   [GITLAB_TYPE]: 'GitLab',
   [CALDAV_TYPE]: 'CalDAV',
   [OPEN_PROJECT_TYPE]: 'OpenProject',
+  [GITEA_TYPE]: 'Gitea',
 };
 
 export const DEFAULT_ISSUE_PROVIDER_CFGS = {
@@ -62,6 +67,7 @@ export const DEFAULT_ISSUE_PROVIDER_CFGS = {
   [GITLAB_TYPE]: DEFAULT_GITLAB_CFG,
   [CALDAV_TYPE]: DEFAULT_CALDAV_CFG,
   [OPEN_PROJECT_TYPE]: DEFAULT_OPEN_PROJECT_CFG,
+  [GITEA_TYPE]: DEFAULT_GITEA_CFG,
 };
 
 export const ISSUE_PROVIDER_WITH_CUSTOM_COMP = [JIRA_ISSUE_TYPE, OPEN_PROJECT_TYPE];

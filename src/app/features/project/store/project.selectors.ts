@@ -4,6 +4,7 @@ import { JiraCfg } from '../../issue/providers/jira/jira.model';
 import { GithubCfg } from '../../issue/providers/github/github.model';
 import {
   CALDAV_TYPE,
+  GITEA_TYPE,
   GITHUB_TYPE,
   GITLAB_TYPE,
   JIRA_TYPE,
@@ -14,6 +15,7 @@ import { exists } from '../../../util/exists';
 import { CaldavCfg } from '../../issue/providers/caldav/caldav.model';
 import { PROJECT_FEATURE_NAME, projectAdapter } from './project.reducer';
 import { OpenProjectCfg } from '../../issue/providers/open-project/open-project.model';
+import { GiteaCfg } from '../../issue/providers/gitea/gitea.model';
 
 export const projectSelectors = createFeatureSelector<ProjectState>(PROJECT_FEATURE_NAME);
 const { selectAll } = projectAdapter.getSelectors();
@@ -66,6 +68,11 @@ export const selectOpenProjectCfgByProjectId = createSelector(
   selectProjectById,
   (p: Project): OpenProjectCfg =>
     p.issueIntegrationCfgs[OPEN_PROJECT_TYPE] as OpenProjectCfg,
+);
+
+export const selectGiteaCfgByProjectId = createSelector(
+  selectProjectById,
+  (p: Project): GiteaCfg => p.issueIntegrationCfgs[GITEA_TYPE] as GiteaCfg,
 );
 
 export const selectUnarchivedProjectsWithoutCurrent = createSelector(

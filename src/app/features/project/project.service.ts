@@ -37,6 +37,7 @@ import { DEFAULT_PROJECT } from './project.const';
 import {
   selectArchivedProjects,
   selectCaldavCfgByProjectId,
+  selectGiteaCfgByProjectId,
   selectGithubCfgByProjectId,
   selectGitlabCfgByProjectId,
   selectJiraCfgByProjectId,
@@ -48,6 +49,7 @@ import {
   selectUnarchivedProjectsWithoutCurrent,
 } from './store/project.selectors';
 import { OpenProjectCfg } from '../issue/providers/open-project/open-project.model';
+import { GiteaCfg } from '../issue/providers/gitea/gitea.model';
 
 @Injectable({
   providedIn: 'root',
@@ -116,6 +118,10 @@ export class ProjectService {
 
   getOpenProjectCfgForProject$(projectId: string): Observable<OpenProjectCfg> {
     return this._store$.pipe(select(selectOpenProjectCfgByProjectId, { id: projectId }));
+  }
+
+  getGiteaCfgForProject$(projectId: string): Observable<GiteaCfg> {
+    return this._store$.pipe(select(selectGiteaCfgByProjectId, { id: projectId }));
   }
 
   getProjectsWithoutId$(projectId: string | null): Observable<Project[]> {

@@ -9,6 +9,7 @@ import { TaskAttachment } from '../tasks/task-attachment/task-attachment.model';
 import { from, merge, Observable, of, Subject, zip } from 'rxjs';
 import {
   CALDAV_TYPE,
+  GITEA_TYPE,
   GITHUB_TYPE,
   GITLAB_TYPE,
   ISSUE_PROVIDER_HUMANIZED,
@@ -26,6 +27,7 @@ import { switchMap } from 'rxjs/operators';
 import { GitlabCommonInterfacesService } from './providers/gitlab/gitlab-common-interfaces.service';
 import { CaldavCommonInterfacesService } from './providers/caldav/caldav-common-interfaces.service';
 import { OpenProjectCommonInterfacesService } from './providers/open-project/open-project-common-interfaces.service';
+import { GiteaCommonInterfacesService } from './providers/gitea/gitea-common-interfaces.service';
 import { SnackService } from '../../core/snack/snack.service';
 import { T } from '../../t.const';
 import { TranslateService } from '@ngx-translate/core';
@@ -40,6 +42,7 @@ export class IssueService {
     [JIRA_TYPE]: this._jiraCommonInterfacesService,
     [CALDAV_TYPE]: this._caldavCommonInterfaceService,
     [OPEN_PROJECT_TYPE]: this._openProjectInterfaceService,
+    [GITEA_TYPE]: this._giteaInterfaceService,
   };
 
   // NOTE: in theory we might need to clean this up on project change, but it's unlikely to matter
@@ -58,6 +61,7 @@ export class IssueService {
     private _gitlabCommonInterfacesService: GitlabCommonInterfacesService,
     private _caldavCommonInterfaceService: CaldavCommonInterfacesService,
     private _openProjectInterfaceService: OpenProjectCommonInterfacesService,
+    private _giteaInterfaceService: GiteaCommonInterfacesService,
     private _snackService: SnackService,
     private _translateService: TranslateService,
   ) {}
