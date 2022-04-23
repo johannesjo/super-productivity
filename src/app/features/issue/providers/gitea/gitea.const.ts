@@ -94,7 +94,7 @@ export const GITEA_CONFIG_FORM: LimitedFormlyFieldConfig<GiteaCfg>[] = [
 ];
 
 export const GITEA_CONFIG_FORM_SECTION: ConfigFormSection<GiteaCfg> = {
-  title: 'Open Project',
+  title: 'Gitea',
   key: 'GITEA',
   items: GITEA_CONFIG_FORM,
   help: T.F.GITEA.FORM_SECTION.HELP,

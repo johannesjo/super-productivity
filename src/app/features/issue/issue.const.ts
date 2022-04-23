@@ -25,7 +25,10 @@ import {
   OPEN_PROJECT_CONFIG_FORM_SECTION,
 } from './providers/open-project/open-project.const';
 import { T } from '../../t.const';
-import { DEFAULT_GITEA_CFG } from './providers/gitea/gitea.const';
+import {
+  DEFAULT_GITEA_CFG,
+  GITEA_CONFIG_FORM_SECTION,
+} from './providers/gitea/gitea.const';
 
 export const GITLAB_TYPE: IssueProviderKey = 'GITLAB';
 export const GITHUB_TYPE: IssueProviderKey = 'GITHUB';
@@ -78,6 +81,7 @@ export const ISSUE_PROVIDER_FORM_CFGS: ConfigFormConfig = [
   JIRA_CONFIG_FORM_SECTION as GenericConfigFormSection,
   CALDAV_CONFIG_FORM_SECTION as GenericConfigFormSection,
   OPEN_PROJECT_CONFIG_FORM_SECTION as GenericConfigFormSection,
+  GITEA_CONFIG_FORM_SECTION as GenericConfigFormSection,
 ].map((providerCfg) => ({
   ...providerCfg,
   // NOTE we don't do this for jira as there is a custom cfg component with an enabled toggle
