@@ -23,9 +23,11 @@ import {
   saveToSessionStorage,
 } from '../../../../core/persistence/local-storage';
 import { GithubCfg } from '../../../issue/providers/github/github.model';
+import { GiteaCfg } from '../../../issue/providers/gitea/gitea.model';
 import { DialogGithubInitialSetupComponent } from '../../../issue/providers/github/github-view-components/dialog-github-initial-setup/dialog-github-initial-setup.component';
 import {
   CALDAV_TYPE,
+  GITEA_TYPE,
   GITHUB_TYPE,
   GITLAB_TYPE,
   OPEN_PROJECT_TYPE,
@@ -43,7 +45,9 @@ import { DialogCaldavInitialSetupComponent } from 'src/app/features/issue/provid
 import { DialogOpenProjectInitialSetupComponent } from '../../../issue/providers/open-project/open-project-view-components/dialog-open-project-initial-setup/dialog-open-project-initial-setup.component';
 import { OpenProjectCfg } from '../../../issue/providers/open-project/open-project.model';
 import { DEFAULT_OPEN_PROJECT_CFG } from '../../../issue/providers/open-project/open-project.const';
+import { DEFAULT_GITEA_CFG } from '../../../issue/providers/gitea/gitea.const';
 import { getRandomWorkContextColor } from '../../../work-context/work-context-color';
+import { DialogGiteaInitialSetupComponent } from 'src/app/features/issue/providers/gitea/gitea-view-components/dialog-gitea-initial-setup/dialog-gitea-initial-setup.component';
 
 @Component({
   selector: 'dialog-create-project',
@@ -62,6 +66,7 @@ export class DialogCreateProjectComponent implements OnInit, OnDestroy {
   gitlabCfg?: GitlabCfg;
   caldavCfg?: CaldavCfg;
   openProjectCfg?: OpenProjectCfg;
+  giteaCfg?: GiteaCfg;
 
   formBasic: FormGroup = new FormGroup({});
   formTheme: FormGroup = new FormGroup({});
@@ -117,6 +122,7 @@ export class DialogCreateProjectComponent implements OnInit, OnDestroy {
           GITLAB: this.gitlabCfg,
           CALDAV: this.caldavCfg,
           OPEN_PROJECT: this.openProjectCfg,
+          GITEA: this.giteaCfg,
         };
         const projectDataToSave: Project | Partial<Project> = {
           ...this.projectData,
@@ -141,6 +147,9 @@ export class DialogCreateProjectComponent implements OnInit, OnDestroy {
       if (this.projectData.issueIntegrationCfgs.CALDAV) {
         this.caldavCfg = this.projectData.issueIntegrationCfgs.CALDAV;
       }
+      if (this.projectData.issueIntegrationCfgs.GITEA) {
+        this.giteaCfg = this.projectData.issueIntegrationCfgs.GITEA;
+      }
     }
   }
 
@@ -156,6 +165,7 @@ export class DialogCreateProjectComponent implements OnInit, OnDestroy {
       GITLAB: this.gitlabCfg || DEFAULT_GITLAB_CFG,
       CALDAV: this.caldavCfg || DEFAULT_CALDAV_CFG,
       OPEN_PROJECT: this.openProjectCfg || DEFAULT_OPEN_PROJECT_CFG,
+      GITEA: this.giteaCfg || DEFAULT_GITEA_CFG,
     };
 
     const projectDataToSave: Project | Partial<Project> = {
@@ -271,6 +281,23 @@ export class DialogCreateProjectComponent implements OnInit, OnDestroy {
     );
   }
 
+  openGiteaCfg(): void {
+    this._subs.add(
+      this._matDialog
+        .open(DialogGiteaInitialSetupComponent, {
+          restoreFocus: true,
+          data: {
+            giteaCfg: { ...this.giteaCfg, isEnabled: true },
+          },
+        })
+        .afterClosed()
+        .subscribe((giteaCfg: GiteaCfg) => {
+          if (giteaCfg) {
+            this._saveGiteaCfg(giteaCfg);
+          }
+        }),
+    );
+  }
   private _saveJiraCfg(jiraCfg: JiraCfg): void {
     this.jiraCfg = jiraCfg;
     this._cd.markForCheck();
@@ -337,6 +364,20 @@ export class DialogCreateProjectComponent implements OnInit, OnDestroy {
         this.projectData.id,
         OPEN_PROJECT_TYPE,
         this.openProjectCfg,
+      );
+    }
+  }
+
+  private _saveGiteaCfg(giteaCfg: GiteaCfg): void {
+    this.giteaCfg = giteaCfg;
+    this._cd.markForCheck();
+
+    // if we're editing save right away
+    if (this.projectData.id) {
+      this._projectService.updateIssueProviderConfig(
+        this.projectData.id,
+        GITEA_TYPE,
+        this.giteaCfg,
       );
     }
   }

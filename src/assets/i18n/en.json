@@ -600,7 +600,8 @@
         "SETUP_GIT": "Setup GitHub Integration",
         "SETUP_GITLAB": "Setup GitLab Integration",
         "SETUP_JIRA": "Setup Jira Integration",
-        "SETUP_OPEN_PROJECT": "Setup OpenProject Integration"
+        "SETUP_OPEN_PROJECT": "Setup OpenProject Integration",
+        "SETUP_GITEA_PROJECT": "Setup Gitea Integration"
       },
       "FORM_BASIC": {
         "L_IS_HIDDEN_FROM_MENU": "Hide project from menu",
