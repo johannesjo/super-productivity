@@ -5,12 +5,7 @@ import { ProjectService } from 'src/app/features/project/project.service';
 import { TaskAttachmentCopy } from '../../../tasks/task-attachment/task-attachment.model';
 import { TaskCopy } from '../../../tasks/task.model';
 import { IssueServiceInterface } from '../../issue-service-interface';
-import {
-  IssueIntegrationCfg,
-  IssueData,
-  IssueDataReduced,
-  SearchResultItem,
-} from '../../issue.model';
+import { IssueData, IssueDataReduced, SearchResultItem } from '../../issue.model';
 import { GITEA_INITIAL_POLL_DELAY, GITEA_POLL_INTERVAL } from './gitea.const';
 import { GiteaCfg } from './gitea.model';
 import { isGiteaEnabled } from './is-gitea-enabled.util';
