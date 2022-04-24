@@ -18,6 +18,7 @@ import { distinctUntilChanged, map, share, switchMap } from 'rxjs/operators';
 import { observeWidth } from '../../../util/resize-observer-obs';
 import { MainContainerClass } from '../../../app.constants';
 import { IS_TOUCH_ONLY } from '../../../util/is-touch-only';
+import { LanguageService } from '../../../core/language/language.service';
 
 const SMALL_CONTAINER_WIDTH = 620;
 const VERY_SMALL_CONTAINER_WIDTH = 450;
@@ -51,7 +52,15 @@ export class BetterDrawerContainerComponent
   sideStyle: SafeStyle = '';
   private _subs: Subscription = new Subscription();
 
-  constructor(private _elementRef: ElementRef, private _domSanitizer: DomSanitizer) {}
+  constructor(
+    private _elementRef: ElementRef,
+    private _domSanitizer: DomSanitizer,
+    private _languageService: LanguageService,
+  ) {
+    this._subs = this._languageService.isLangRTL.subscribe((val) => {
+      this.isRTL = val;
+    });
+  }
 
   @HostBinding('class.isOpen') get isOpenGet(): boolean {
     return this._isOpen;
@@ -129,15 +138,19 @@ export class BetterDrawerContainerComponent
     this.wasClosed.emit();
   }
 
+  isRTL: boolean = false;
+
   private _getWidthRelatedStyles(): string {
-    const widthStyle = ` width: ${this.sideWidth}%;`;
+    const widthStyle = ` width: ${this.sideWidth}%;`,
+      margin = this.isRTL ? 'margin-left' : 'margin-right';
+
     return this.isOverGet
       ? this.isOpenGet
         ? 'transform: translateX(0);'
         : 'transform: translateX(100%);'
       : this.isOpenGet
-      ? `margin-right: 0; ${widthStyle}`
-      : `margin-right: ${-1 * this.sideWidth}%; ${widthStyle}`;
+      ? `${margin}: 0; ${widthStyle}`
+      : `${margin}: ${-1 * this.sideWidth}%; ${widthStyle}`;
   }
 
   private _updateStyle(): void {
