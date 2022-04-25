@@ -35,6 +35,7 @@ export const mapArchiveToWorklog = (
   taskState: EntityState<Task>,
   noRestoreIds: string[] = [],
   startEnd: { workStart: WorkStartEnd; workEnd: WorkStartEnd },
+  firstDayOfWeek: number = 1,
 ): { worklog: Worklog; totalTimeSpent: number } => {
   const entities = taskState.entities;
   const worklog: Worklog = {};
@@ -130,7 +131,7 @@ export const mapArchiveToWorklog = (
       month.daysWorked = days.length;
       year.daysWorked += days.length;
 
-      const weeks = getWeeksInMonth(+monthIN - 1, +yearIN);
+      const weeks = getWeeksInMonth(+monthIN - 1, +yearIN, firstDayOfWeek);
 
       month.weeks = weeks
         .map((week) => {
@@ -139,7 +140,10 @@ export const mapArchiveToWorklog = (
             timeSpent: 0,
             daysWorked: 0,
             ent: {},
-            weekNr: getWeekNumber(new Date(+yearIN, +monthIN - 1, week.start)),
+            weekNr: getWeekNumber(
+              new Date(+yearIN, +monthIN - 1, week.start),
+              firstDayOfWeek,
+            ),
           };
 
           days.forEach((dayIN: string) => {

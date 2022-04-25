@@ -13,6 +13,16 @@ describe('getWeekNumber()', () => {
     expect(result).toBe(1);
   });
 
+  it('should return a valid value for 2020-01-08 based on first day of week', () => {
+    let d = new Date('2020-01-08');
+    let result = getWeekNumber(d);
+    expect(result).toBe(2);
+
+    d = new Date('2020-01-08');
+    result = getWeekNumber(d, 6);
+    expect(result).toBe(1);
+  });
+
   it('should return a valid value for last of the year', () => {
     const d = new Date('2020-12-31');
     const result = getWeekNumber(d);
