@@ -11,6 +11,7 @@ import { DialogWorklogExportComponent } from '../worklog/dialog-worklog-export/d
 import { Task } from '../tasks/task.model';
 import { WorklogDataForDay } from '../worklog/worklog.model';
 import { T } from 'src/app/t.const';
+import { DateAdapter } from '@angular/material/core';
 
 @Component({
   selector: 'quick-history',
@@ -29,6 +30,7 @@ export class QuickHistoryComponent {
     public readonly simpleCounterService: SimpleCounterService,
     private readonly _matDialog: MatDialog,
     private readonly _taskService: TaskService,
+    private _dateAdapter: DateAdapter<unknown>,
   ) {
     this.worklogService.quickHistoryWeeks$.subscribe((v) =>
       console.log(`worklogService.quickHistoryWeeks$`, v),
@@ -42,7 +44,7 @@ export class QuickHistoryComponent {
   async exportData(): Promise<void> {
     const now = new Date();
     const year = now.getFullYear();
-    const weekNr = getWeekNumber(now);
+    const weekNr = getWeekNumber(now, this._dateAdapter.getFirstDayOfWeek());
 
     // get for whole week
     const { rangeStart, rangeEnd } = getDateRangeForWeek(year, weekNr);
