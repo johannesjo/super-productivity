@@ -21,6 +21,7 @@ import {
   OpenProjectWorkPackageReduced,
 } from './providers/open-project/open-project-issue/open-project-issue.model';
 import { GiteaCfg } from './providers/gitea/gitea.model';
+import { GiteaIssue } from './providers/gitea/gitea-issue/gitea-issue.model';
 
 export interface BaseIssueProviderCfg {
   isEnabled: boolean;
@@ -63,14 +64,16 @@ export type IssueData =
   | GithubIssue
   | GitlabIssue
   | CaldavIssue
-  | OpenProjectWorkPackage;
+  | OpenProjectWorkPackage
+  | GiteaIssue;
 
 export type IssueDataReduced =
   | GithubIssueReduced
   | JiraIssueReduced
   | GitlabIssue
   | OpenProjectWorkPackageReduced
-  | CaldavIssueReduced;
+  | CaldavIssueReduced
+  | GiteaIssue;
 
 export interface SearchResultItem {
   title: string;

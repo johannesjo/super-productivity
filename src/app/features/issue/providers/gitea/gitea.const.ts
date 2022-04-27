@@ -19,6 +19,12 @@ export const DEFAULT_GITEA_CFG: GiteaCfg = {
   scope: 'created-by-me',
 };
 
+export enum ScopeOptions {
+  all = 'all',
+  createdByMe = 'created-by-me',
+  assignedToMe = 'assigned-to-me',
+}
+
 export const GITEA_CONFIG_FORM: LimitedFormlyFieldConfig<GiteaCfg>[] = [
   {
     key: 'host',
@@ -61,9 +67,9 @@ export const GITEA_CONFIG_FORM: LimitedFormlyFieldConfig<GiteaCfg>[] = [
       required: true,
       label: T.F.GITEA.FORM.SCOPE,
       options: [
-        { value: 'all', label: T.F.OPEN_PROJECT.FORM.SCOPE_ALL },
-        { value: 'created-by-me', label: T.F.OPEN_PROJECT.FORM.SCOPE_CREATED },
-        { value: 'assigned-to-me', label: T.F.OPEN_PROJECT.FORM.SCOPE_ASSIGNED },
+        { value: ScopeOptions.all, label: T.F.GITEA.FORM.SCOPE_ALL },
+        { value: ScopeOptions.createdByMe, label: T.F.GITEA.FORM.SCOPE_CREATED },
+        { value: ScopeOptions.assignedToMe, label: T.F.GITEA.FORM.SCOPE_ASSIGNED },
       ],
     },
   },
@@ -99,3 +105,7 @@ export const GITEA_CONFIG_FORM_SECTION: ConfigFormSection<GiteaCfg> = {
   items: GITEA_CONFIG_FORM,
   help: T.F.GITEA.FORM_SECTION.HELP,
 };
+
+export const GITEA_API_SUFFIX = 'api';
+export const GITEA_API_VERSION = 'v1';
+export const GITEA_API_SUBPATH_REPO = 'repos';
