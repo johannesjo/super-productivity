@@ -16,6 +16,10 @@ import { T } from '../../../../t.const';
 import { ISSUE_PROVIDER_HUMANIZED, GITEA_TYPE } from '../../issue.const';
 import { GiteaIssue, GiteaIssueStateOptions } from './gitea-issue/gitea-issue.model';
 import {
+  mapGiteaIssueToSearchResult,
+  isIssueFromProject,
+} from './gitea-issue/gitea-issue-map.util';
+import {
   GITEA_API_SUBPATH_REPO,
   GITEA_API_SUFFIX,
   GITEA_API_VERSION,
@@ -29,43 +33,38 @@ import { SearchResultItem } from '../../issue.model';
 export class GiteaApiService {
   constructor(private _snackService: SnackService, private _http: HttpClient) {}
 
-  // searchIssueForRepo$(searchText: string, cfg: GiteaCfg): Observable<SearchResultItem[]> {
-  //   return this._sendRequest$(
-  //     {
-  //       // see https://www.openproject.org/docs/api/endpoints/work-packages/
-  //       url: `${cfg.host}/api/v3/projects/${cfg.projectId}/work_packages`,
-  //       params: {
-  //         pageSize: 100,
-  //         // see: https://www.openproject.org/docs/api/filters/
-  //         filters: JSON.stringify(
-  //           [
-  //             { subjectOrId: { operator: '**', values: [searchText] } },
-  //             // only list open issues
-  //             { status: { operator: 'o', values: [] } },
-  //           ].concat(this._getScopeParamFilter(cfg)),
-  //         ),
-  //         // Default: [["id", "asc"]]
-  //         sortBy: '[["updatedAt","desc"]]',
-  //       },
-  //     },
-  //     cfg,
-  //   ).pipe(
-  //     map((res: OpenProjectWorkPackageSearchResult) => {
-  //       return res && res._embedded.elements
-  //         ? res._embedded.elements
-  //             .map((workPackage: OpenProjectOriginalWorkPackageReduced) =>
-  //               mapOpenProjectIssueReduced(workPackage, cfg),
-  //             )
-  //             .map(mapOpenProjectIssueToSearchResult)
-  //         : [];
-  //     }),
-  //   );
-  // }
+  searchIssueForRepo$(searchText: string, cfg: GiteaCfg): Observable<SearchResultItem[]> {
+    return this._sendRequest$(
+      {
+        url: this._getIssueSearchUrlFor(cfg),
+        params: ParamsBuilder.create()
+          .withLimit(100)
+          .withState(GiteaIssueStateOptions.open)
+          .withScopeForSearchFrom(cfg)
+          .withSearchTerm(searchText)
+          .build(),
+      },
+      cfg,
+    ).pipe(
+      map((res: GiteaIssue[]) => {
+        return res
+          ? res
+              .filter((issue: GiteaIssue) => isIssueFromProject(issue, cfg))
+              .map((issue: GiteaIssue) => mapGiteaIssueToSearchResult(issue))
+          : [];
+      }),
+    );
+  }
+
+  private _getIssueSearchUrlFor(cfg: GiteaCfg): string {
+    //TODO ajustar para usar o parametro passado na configuracao
+    // see https://try.gitea.io/api/swagger#/issue
+    return `${this._getBaseUrlFor(cfg)}/${GITEA_API_SUBPATH_REPO}/issues/search`;
+  }
 
   getLast100IssuesForCurrentGiteaProject$(cfg: GiteaCfg): Observable<GiteaIssue[]> {
     return this._sendRequest$(
       {
-        // see https://www.openproject.org/docs/api/endpoints/work-packages/
         url: this._getIssueUrlFor(cfg),
         params: ParamsBuilder.create()
           .withLimit(100)
@@ -84,6 +83,7 @@ export class GiteaApiService {
 
   private _getIssueUrlFor(cfg: GiteaCfg): string {
     //TODO ajustar para usar o parametro passado na configuracao
+    // see https://try.gitea.io/api/swagger#/issue
     return `${this._getBaseUrlFor(
       cfg,
     )}/${GITEA_API_SUBPATH_REPO}/hugaleno/first_project/issues`;
@@ -230,6 +230,25 @@ class ParamsBuilder {
       this.params['assigned_by'] = 'hugaleno';
     }
 
+    return this;
+  }
+
+  withScopeForSearchFrom(cfg: GiteaCfg): ParamsBuilder {
+    if (!cfg.scope) {
+      return this;
+    }
+
+    if (cfg.scope === ScopeOptions.createdByMe) {
+      this.params['created'] = true;
+    } else if (cfg.scope === ScopeOptions.assignedToMe) {
+      this.params['assigned'] = true;
+    }
+
+    return this;
+  }
+
+  withSearchTerm(search: string): ParamsBuilder {
+    this.params['q'] = search;
     return this;
   }
 
