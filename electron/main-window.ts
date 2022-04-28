@@ -81,6 +81,7 @@ export const createWindow = ({
     show: false,
     webPreferences: {
       scrollBounce: true,
+      backgroundThrottling: false,
       webSecurity: !IS_DEV,
       nodeIntegration: true,
       // make remote module work with those two settings
