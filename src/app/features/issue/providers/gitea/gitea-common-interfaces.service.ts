@@ -1,8 +1,7 @@
 import { Injectable } from '@angular/core';
-import { EMPTY, Observable, timer } from 'rxjs';
-import { first, map, switchMap } from 'rxjs/operators';
+import { Observable, of, timer } from 'rxjs';
+import { catchError, first, map, switchMap } from 'rxjs/operators';
 import { ProjectService } from 'src/app/features/project/project.service';
-import { TaskAttachmentCopy } from '../../../tasks/task-attachment/task-attachment.model';
 import { TaskCopy } from '../../../tasks/task.model';
 import { IssueServiceInterface } from '../../issue-service-interface';
 import { IssueData, IssueDataReduced, SearchResultItem } from '../../issue.model';
@@ -58,16 +57,15 @@ export class GiteaCommonInterfacesService implements IssueServiceInterface {
     };
   }
   searchIssues$(searchTerm: string, projectId: string): Observable<SearchResultItem[]> {
-    throw new Error('Method not implemented.');
-    // return this._getCfgOnce$(projectId).pipe(
-    //   switchMap((giteaCfg) =>
-    //     this.isEnabled(giteaCfg) && giteaCfg.isSearchIssuesFromOpenGitea
-    //       ? this._giteaApiService
-    //           .searchIssueForRepo$(searchTerm, giteaCfg)
-    //           .pipe(catchError(() => []))
-    //       : of([]),
-    //   ),
-    // );
+    return this._getCfgOnce$(projectId).pipe(
+      switchMap((giteaCfg) =>
+        this.isEnabled(giteaCfg) && giteaCfg.isSearchIssuesFromGitea
+          ? this._giteaApiService
+              .searchIssueForRepo$(searchTerm, giteaCfg)
+              .pipe(catchError(() => []))
+          : of([]),
+      ),
+    );
   }
   getFreshDataForIssueTask(task: Readonly<TaskCopy>): Promise<{
     taskChanges: Partial<Readonly<TaskCopy>>;
