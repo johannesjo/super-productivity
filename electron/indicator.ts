@@ -32,7 +32,6 @@ export const initIndicator = ({
   const suf = shouldUseDarkColors ? '-d.png' : '-l.png';
   tray = new Tray(DIR + `stopped${suf}`);
   tray.setContextMenu(createContextMenu(showApp, quitApp));
-  tray.setToolTip('XXXXXXXXXXXXXXXXXXXx');
 
   tray.on('click', () => {
     showApp();
