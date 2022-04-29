@@ -28,6 +28,7 @@ export const mapArchiveToWorklogWeeks = (
   taskState: EntityState<Task>,
   noRestoreIds: string[] = [],
   startEnd: { workStart: WorkStartEnd; workEnd: WorkStartEnd },
+  firstDayOfWeek: number = 1,
 ): WorklogYearsWithWeeks => {
   const entities = taskState.entities;
   const worklogYearsWithSimpleWeeks: WorklogYearsWithWeeks = {};
@@ -41,7 +42,7 @@ export const mapArchiveToWorklogWeeks = (
       const year = parseInt(split[0], 10);
       const month = parseInt(split[1], 10);
       const day = parseInt(split[2], 10);
-      const weekNr = getWeekNumber(new Date(+year, +month - 1, day));
+      const weekNr = getWeekNumber(new Date(+year, +month - 1, day), firstDayOfWeek);
       const weekNrIndex = month === 1 && weekNr >= 52 ? 0 : weekNr;
 
       if (!worklogYearsWithSimpleWeeks[year]) {

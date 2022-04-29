@@ -31,6 +31,7 @@ import { DataInitService } from '../../core/data-init/data-init.service';
 import { WorklogTask } from '../tasks/task.model';
 import { mapArchiveToWorklogWeeks } from './util/map-archive-to-worklog-weeks';
 import * as moment from 'moment';
+import { DateAdapter } from '@angular/material/core';
 
 @Injectable({ providedIn: 'root' })
 export class WorklogService {
@@ -156,6 +157,7 @@ export class WorklogService {
     private readonly _dataInitService: DataInitService,
     private readonly _taskService: TaskService,
     private readonly _router: Router,
+    private _dateAdapter: DateAdapter<unknown>,
   ) {}
 
   refreshWorklog(): void {
@@ -234,6 +236,7 @@ export class WorklogService {
         completeStateForWorkContext,
         unarchivedIds,
         startEnd,
+        this._dateAdapter.getFirstDayOfWeek(),
       );
       return {
         worklog,
@@ -273,6 +276,7 @@ export class WorklogService {
         completeStateForWorkContext,
         unarchivedIds,
         startEnd,
+        this._dateAdapter.getFirstDayOfWeek(),
       );
     }
     return null;

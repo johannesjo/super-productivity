@@ -11,6 +11,7 @@ import { Task } from '../../tasks/task.model';
 import { TaskService } from '../../tasks/task.service';
 import { T } from '../../../t.const';
 import { SimpleCounterService } from '../../simple-counter/simple-counter.service';
+import { DateAdapter } from '@angular/material/core';
 
 @Component({
   selector: 'worklog-week',
@@ -29,6 +30,7 @@ export class WorklogWeekComponent {
     public readonly simpleCounterService: SimpleCounterService,
     private readonly _matDialog: MatDialog,
     private readonly _taskService: TaskService,
+    private _dateAdapter: DateAdapter<unknown>,
   ) {}
 
   sortDays(a: any, b: any): number {
@@ -38,7 +40,7 @@ export class WorklogWeekComponent {
   async exportData(): Promise<void> {
     const now = new Date();
     const year = now.getFullYear();
-    const weekNr = getWeekNumber(now);
+    const weekNr = getWeekNumber(now, this._dateAdapter.getFirstDayOfWeek());
 
     // get for whole week
     const { rangeStart, rangeEnd } = getDateRangeForWeek(year, weekNr);
