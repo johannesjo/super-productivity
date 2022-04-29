@@ -9,23 +9,23 @@
   >
     <!-- NOTE: view link exists twice, both for mobile and for clicks before animation is done -->
     <a
-      [class.isImage]="attachment?.type==='IMG' && !isError[i]"
-      [href]="attachment?.path"
-      [type]="isError[i] ? 'LINK': attachment?.type"
+      [class.isImage]="attachment.type==='IMG' && !isError[i]"
+      [href]="attachment.path"
+      [type]="isError[i] ? 'LINK': attachment.type"
       class="attachment-link mat-elevation-z3"
       draggable="false"
       target="_blank"
       taskAttachmentLink
     >
-      <ng-container *ngIf="attachment?.type!=='IMG' || isError[i]">
-        <mat-icon *ngIf="attachment?.icon">{{attachment?.icon}} </mat-icon>
-        <div class="title">{{attachment?.title || attachment?.path}}</div>
+      <ng-container *ngIf="attachment.type!=='IMG' || isError[i]">
+        <mat-icon *ngIf="attachment.icon">{{attachment.icon}} </mat-icon>
+        <div class="title">{{attachment.title || attachment.path}}</div>
       </ng-container>
-      <ng-container *ngIf="attachment?.type==='IMG' && !isError[i]">
+      <ng-container *ngIf="attachment.type==='IMG' && !isError[i]">
         <img
           (error)="isError[i]=true"
-          [enlargeImg]="attachment?.originalImgPath"
-          [src]="attachment?.path"
+          [enlargeImg]="attachment.originalImgPath"
+          [src]="attachment.path"
         />
       </ng-container>
     </a>
@@ -37,21 +37,21 @@
       <a
         class="view-btn"
         mat-flat-button
-        [class.isImage]="attachment?.type==='IMG' && !isError[i]"
-        [href]="attachment?.path"
-        [type]="isError[i] ? 'LINK': attachment?.type"
+        [class.isImage]="attachment.type==='IMG' && !isError[i]"
+        [href]="attachment.path"
+        [type]="isError[i] ? 'LINK': attachment.type"
         draggable="false"
         target="_blank"
         taskAttachmentLink
       >
-        <mat-icon *ngIf="attachment?.type==='IMG'">search</mat-icon>
-        <mat-icon *ngIf="attachment?.type!=='IMG'">open_in_new</mat-icon>
+        <mat-icon *ngIf="attachment.type==='IMG'">search</mat-icon>
+        <mat-icon *ngIf="attachment.type!=='IMG'">open_in_new</mat-icon>
       </a>
       <button
         (click)="copy(attachment)"
         class="copy-btn"
         mat-flat-button
-        *ngIf="attachment?.type!=='IMG'"
+        *ngIf="attachment.type!=='IMG'"
       >
         <mat-icon>content_copy</mat-icon>
       </button>
@@ -64,7 +64,7 @@
         <mat-icon>edit</mat-icon>
       </button>
       <button
-        (click)="remove(attachment?.id)"
+        (click)="remove(attachment.id)"
         class="trash-btn"
         mat-flat-button
       >
