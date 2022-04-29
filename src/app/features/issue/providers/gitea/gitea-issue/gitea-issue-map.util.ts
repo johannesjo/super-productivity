@@ -16,6 +16,5 @@ export const isIssueFromProject = (issue: GiteaIssue, cfg: GiteaCfg): boolean =>
   if (!issue.repository) {
     return false;
   }
-  // TODO fix this later
-  return issue.repository.full_name === 'hugaleno/first_project';
+  return issue.repository.full_name === cfg.repoFullname;
 };

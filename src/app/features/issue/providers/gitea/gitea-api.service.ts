@@ -8,24 +8,30 @@ import {
   HttpRequest,
 } from '@angular/common/http';
 import { GiteaCfg } from './gitea.model';
-import { catchError, filter, map } from 'rxjs/operators';
+import { catchError, filter, map, switchMap } from 'rxjs/operators';
 import { Observable, ObservableInput, throwError } from 'rxjs';
 import { throwHandledError } from '../../../../util/throw-handled-error';
 import { HANDLED_ERROR_PROP_STR } from '../../../../app.constants';
 import { T } from '../../../../t.const';
 import { ISSUE_PROVIDER_HUMANIZED, GITEA_TYPE } from '../../issue.const';
-import { GiteaIssue, GiteaIssueStateOptions } from './gitea-issue/gitea-issue.model';
+import {
+  GiteaIssue,
+  GiteaIssueStateOptions,
+  GiteaRepositoryReduced,
+} from './gitea-issue/gitea-issue.model';
 import {
   mapGiteaIssueToSearchResult,
   isIssueFromProject,
 } from './gitea-issue/gitea-issue-map.util';
 import {
   GITEA_API_SUBPATH_REPO,
+  GITEA_API_SUBPATH_USER,
   GITEA_API_SUFFIX,
   GITEA_API_VERSION,
   ScopeOptions,
 } from './gitea.const';
 import { SearchResultItem } from '../../issue.model';
+import { GiteaUser } from './gitea-api-responses';
 
 @Injectable({
   providedIn: 'root',
@@ -34,59 +40,99 @@ export class GiteaApiService {
   constructor(private _snackService: SnackService, private _http: HttpClient) {}
 
   searchIssueForRepo$(searchText: string, cfg: GiteaCfg): Observable<SearchResultItem[]> {
-    return this._sendRequest$(
-      {
-        url: this._getIssueSearchUrlFor(cfg),
-        params: ParamsBuilder.create()
-          .withLimit(100)
-          .withState(GiteaIssueStateOptions.open)
-          .withScopeForSearchFrom(cfg)
-          .withSearchTerm(searchText)
-          .build(),
-      },
-      cfg,
-    ).pipe(
-      map((res: GiteaIssue[]) => {
-        return res
-          ? res
-              .filter((issue: GiteaIssue) => isIssueFromProject(issue, cfg))
-              .map((issue: GiteaIssue) => mapGiteaIssueToSearchResult(issue))
-          : [];
+    return this.getCurrentRepositoryFor$(cfg).pipe(
+      switchMap((repository: GiteaRepositoryReduced) => {
+        return this._sendRequest$(
+          {
+            url: this._getIssueSearchUrlFor(cfg),
+            params: ParamsBuilder.create()
+              .withLimit(100)
+              .withState(GiteaIssueStateOptions.open)
+              .withScopeForSearchFrom(cfg, repository)
+              .withSearchTerm(searchText)
+              .build(),
+          },
+          cfg,
+        ).pipe(
+          map((res: GiteaIssue[]) => {
+            return res
+              ? res
+                  .filter((issue: GiteaIssue) => isIssueFromProject(issue, cfg))
+                  .map((issue: GiteaIssue) => mapGiteaIssueToSearchResult(issue))
+              : [];
+          }),
+        );
       }),
     );
   }
 
   private _getIssueSearchUrlFor(cfg: GiteaCfg): string {
-    //TODO ajustar para usar o parametro passado na configuracao
     // see https://try.gitea.io/api/swagger#/issue
     return `${this._getBaseUrlFor(cfg)}/${GITEA_API_SUBPATH_REPO}/issues/search`;
   }
 
-  getLast100IssuesForCurrentGiteaProject$(cfg: GiteaCfg): Observable<GiteaIssue[]> {
-    return this._sendRequest$(
-      {
-        url: this._getIssueUrlFor(cfg),
-        params: ParamsBuilder.create()
-          .withLimit(100)
-          .withState(GiteaIssueStateOptions.open)
-          .withScopeFrom(cfg)
-          .build(),
-      },
-      cfg,
-    ).pipe(
-      map((issues: GiteaIssue[]) => {
-        console.log(issues);
-        return issues ? issues : [];
+  getLast100IssuesFor$(cfg: GiteaCfg): Observable<GiteaIssue[]> {
+    return this.getLoggedUserFor$(cfg).pipe(
+      switchMap((user: GiteaUser) => {
+        return this._sendRequest$(
+          {
+            url: this._getIssueUrlFor(cfg),
+            params: ParamsBuilder.create()
+              .withLimit(100)
+              .withState(GiteaIssueStateOptions.open)
+              .withScopeFrom(cfg, user)
+              .build(),
+          },
+          cfg,
+        ).pipe(
+          map((issues: GiteaIssue[]) => {
+            return issues ? issues : [];
+          }),
+        );
       }),
     );
   }
 
   private _getIssueUrlFor(cfg: GiteaCfg): string {
-    //TODO ajustar para usar o parametro passado na configuracao
-    // see https://try.gitea.io/api/swagger#/issue
-    return `${this._getBaseUrlFor(
+    return `${this._getBaseUrlFor(cfg)}/${GITEA_API_SUBPATH_REPO}/${
+      cfg.repoFullname
+    }/issues`;
+  }
+
+  getLoggedUserFor$(cfg: GiteaCfg): Observable<GiteaUser> {
+    return this._sendRequest$(
+      {
+        url: this._getUserUrlFor(cfg),
+        params: {},
+      },
       cfg,
-    )}/${GITEA_API_SUBPATH_REPO}/hugaleno/first_project/issues`;
+    ).pipe(
+      map((user: GiteaUser) => {
+        return user;
+      }),
+    );
+  }
+
+  private _getUserUrlFor(cfg: GiteaCfg): string {
+    return `${this._getBaseUrlFor(cfg)}/${GITEA_API_SUBPATH_USER}`;
+  }
+
+  getCurrentRepositoryFor$(cfg: GiteaCfg): Observable<GiteaRepositoryReduced> {
+    return this._sendRequest$(
+      {
+        url: this._getRepositoryUrlFor(cfg),
+        params: {},
+      },
+      cfg,
+    ).pipe(
+      map((repository: GiteaRepositoryReduced) => {
+        return repository;
+      }),
+    );
+  }
+
+  private _getRepositoryUrlFor(cfg: GiteaCfg): string {
+    return `${this._getBaseUrlFor(cfg)}/${GITEA_API_SUBPATH_REPO}/${cfg.repoFullname}`;
   }
 
   private _getBaseUrlFor(cfg: GiteaCfg): string {
@@ -109,7 +155,6 @@ export class GiteaApiService {
     this._checkSettings(cfg);
     params.params = { ...params.params, access_token: cfg.token };
     const p: HttpRequest<any> | any = {
-      //...{ params, access_token: cfg.token },
       ...params,
       method: params.method || 'GET',
       headers: {
@@ -156,8 +201,8 @@ export class GiteaApiService {
       !!cfg &&
       !!cfg.host &&
       cfg.host.length > 0 &&
-      !!cfg.projectId &&
-      cfg.projectId.length > 0
+      !!cfg.repoFullname &&
+      cfg.repoFullname.length > 0
     );
   }
 
@@ -165,7 +210,6 @@ export class GiteaApiService {
     error: HttpErrorResponse,
     caught: Observable<unknown>,
   ): ObservableInput<unknown> {
-    console.log(error);
     if (error.error instanceof ErrorEvent) {
       // A client-side or network error occurred. Handle it accordingly.
       this._snackService.open({
@@ -218,25 +262,30 @@ class ParamsBuilder {
     return this;
   }
 
-  withScopeFrom(cfg: GiteaCfg): ParamsBuilder {
+  withScopeFrom(cfg: GiteaCfg, user: GiteaUser): ParamsBuilder {
     if (!cfg.scope) {
       return this;
     }
 
     if (cfg.scope === ScopeOptions.createdByMe) {
-      // TODO fix this later
-      this.params['created_by'] = 'hugaleno';
+      this.params['created_by'] = user.username;
     } else if (cfg.scope === ScopeOptions.assignedToMe) {
-      this.params['assigned_by'] = 'hugaleno';
+      this.params['assigned_by'] = user.username;
     }
 
     return this;
   }
 
-  withScopeForSearchFrom(cfg: GiteaCfg): ParamsBuilder {
+  withScopeForSearchFrom(
+    cfg: GiteaCfg,
+    repository: GiteaRepositoryReduced,
+  ): ParamsBuilder {
     if (!cfg.scope) {
       return this;
     }
+
+    // Seens to be the only way to "filter" for the current repo
+    if (repository.id) this.params['priority_repo_id'] = repository.id;
 
     if (cfg.scope === ScopeOptions.createdByMe) {
       this.params['created'] = true;

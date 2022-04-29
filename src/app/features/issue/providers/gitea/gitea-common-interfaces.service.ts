@@ -37,9 +37,8 @@ export class GiteaCommonInterfacesService implements IssueServiceInterface {
   pollTimer$: Observable<number> = timer(GITEA_INITIAL_POLL_DELAY, GITEA_POLL_INTERVAL);
 
   issueLink$(issueId: string | number, projectId: string): Observable<string> {
-    //TODO fix url
     return this._getCfgOnce$(projectId).pipe(
-      map((cfg) => `${cfg.host}/hugaleno/${cfg.projectId}/issues/${issueId}`),
+      map((cfg) => `${cfg.host}/${cfg.repoFullname}/issues/${issueId}`),
     );
   }
   getById$(id: string | number, projectId: string): Observable<IssueData> {
@@ -89,9 +88,7 @@ export class GiteaCommonInterfacesService implements IssueServiceInterface {
     allExistingIssueIds: number[] | string[],
   ): Promise<IssueDataReduced[]> {
     const cfg = await this._getCfgOnce$(projectId).toPromise();
-    return await this._giteaApiService
-      .getLast100IssuesForCurrentGiteaProject$(cfg)
-      .toPromise();
+    return await this._giteaApiService.getLast100IssuesFor$(cfg).toPromise();
   }
 
   private _getCfgOnce$(projectId: string): Observable<GiteaCfg> {

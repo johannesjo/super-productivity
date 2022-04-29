@@ -14,7 +14,7 @@ export type GiteaLabel = Readonly<{
   url: string;
 }>;
 
-export type GiteaRepository = Readonly<{
+export type GiteaRepositoryReduced = Readonly<{
   id: number;
   name: string;
   owner: string;
@@ -43,5 +43,5 @@ export type GiteaIssue = Readonly<{
   updated_at: string;
   closed_at: string | null;
   due_date: string | null;
-  repository: GiteaRepository;
+  repository: GiteaRepositoryReduced;
 }>;

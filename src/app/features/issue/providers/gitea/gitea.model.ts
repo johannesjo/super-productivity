@@ -1,7 +1,7 @@
 import { BaseIssueProviderCfg } from '../../issue.model';
 
 export interface GiteaCfg extends BaseIssueProviderCfg {
-  projectId: string | null;
+  repoFullname: string | null;
   host: string | null;
   token: string | null;
   scope: string | null;
