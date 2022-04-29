@@ -11,7 +11,7 @@ export const GITEA_INITIAL_POLL_DELAY = 8 * 1000;
 export const DEFAULT_GITEA_CFG: GiteaCfg = {
   isEnabled: false,
   host: null,
-  projectId: null,
+  repoFullname: null,
   token: null,
   isAutoPoll: false,
   isSearchIssuesFromGitea: false,
@@ -48,14 +48,14 @@ export const GITEA_CONFIG_FORM: LimitedFormlyFieldConfig<GiteaCfg>[] = [
     },
   },
   {
-    key: 'projectId',
+    key: 'repoFullname',
     type: 'input',
     hideExpression: (model: any) => !model.isEnabled,
     templateOptions: {
-      label: T.F.GITEA.FORM.PROJECT_ID,
+      label: T.F.GITEA.FORM.REPO_FULL_NAME,
       type: 'text',
       required: true,
-      description: T.F.GITEA.FORM.PROJECT_ID_DESCRIPTION,
+      description: T.F.GITEA.FORM.REPO_FULL_NAME_DESCRIPTION,
     },
   },
   {
@@ -109,3 +109,4 @@ export const GITEA_CONFIG_FORM_SECTION: ConfigFormSection<GiteaCfg> = {
 export const GITEA_API_SUFFIX = 'api';
 export const GITEA_API_VERSION = 'v1';
 export const GITEA_API_SUBPATH_REPO = 'repos';
+export const GITEA_API_SUBPATH_USER = 'user';
