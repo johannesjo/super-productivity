@@ -32,3 +32,11 @@
     [task]="task"
   ></open-project-issue-content>
 </ng-container>
+
+//TODO Add gitea issue content hugaleno
+<ng-container *ngIf="task?.issueType===GITEA_TYPE">
+  <open-project-issue-content
+    [issue]="issueData"
+    [task]="task"
+  ></open-project-issue-content>
+</ng-container>
