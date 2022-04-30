@@ -21,6 +21,7 @@ import {
 } from './gitea-issue/gitea-issue.model';
 import {
   mapGiteaIssueToSearchResult,
+  mapGiteaIssueIdToIssueNumber,
   isIssueFromProject,
 } from './gitea-issue/gitea-issue-map.util';
 import {
@@ -58,6 +59,7 @@ export class GiteaApiService {
             return res
               ? res
                   .filter((issue: GiteaIssue) => isIssueFromProject(issue, cfg))
+                  .map((issue: GiteaIssue) => mapGiteaIssueIdToIssueNumber(issue))
                   .map((issue: GiteaIssue) => mapGiteaIssueToSearchResult(issue))
               : [];
           }),
@@ -86,7 +88,9 @@ export class GiteaApiService {
           cfg,
         ).pipe(
           map((issues: GiteaIssue[]) => {
-            return issues ? issues : [];
+            return issues
+              ? issues.map((issue: GiteaIssue) => mapGiteaIssueIdToIssueNumber(issue))
+              : [];
           }),
         );
       }),
@@ -139,10 +143,10 @@ export class GiteaApiService {
     return `${cfg.host}/${GITEA_API_SUFFIX}/${GITEA_API_VERSION}`;
   }
 
-  getById$(issueId: number, cfg: GiteaCfg): Observable<GiteaIssue> {
+  getById$(issueNumber: number, cfg: GiteaCfg): Observable<GiteaIssue> {
     return this._sendRequest$(
       {
-        url: `${this._getIssueUrlFor(cfg)}/${issueId}`,
+        url: `${this._getIssueUrlFor(cfg)}/${issueNumber}`,
       },
       cfg,
     ).pipe(map((issue) => issue));

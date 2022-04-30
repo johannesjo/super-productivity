@@ -40,9 +40,9 @@ export class GiteaCommonInterfacesService implements IssueServiceInterface {
 
   pollTimer$: Observable<number> = timer(GITEA_INITIAL_POLL_DELAY, GITEA_POLL_INTERVAL);
 
-  issueLink$(issueId: string | number, projectId: string): Observable<string> {
+  issueLink$(issueNumber: string | number, projectId: string): Observable<string> {
     return this._getCfgOnce$(projectId).pipe(
-      map((cfg) => `${cfg.host}/${cfg.repoFullname}/issues/${issueId}`),
+      map((cfg) => `${cfg.host}/${cfg.repoFullname}/issues/${issueNumber}`),
     );
   }
   getById$(id: string | number, projectId: string): Observable<IssueData> {
