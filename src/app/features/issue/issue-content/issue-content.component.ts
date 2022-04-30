@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
 import { TaskWithSubTasks } from '../../tasks/task.model';
 import {
   CALDAV_TYPE,
+  GITEA_TYPE,
   GITHUB_TYPE,
   GITLAB_TYPE,
   JIRA_TYPE,
@@ -23,6 +24,7 @@ export class IssueContentComponent {
   readonly JIRA_TYPE: string = JIRA_TYPE;
   readonly CALDAV_TYPE: string = CALDAV_TYPE;
   readonly OPEN_PROJECT_TYPE: string = OPEN_PROJECT_TYPE;
+  readonly GITEA_TYPE: string = GITEA_TYPE;
 
   constructor() {}
 }

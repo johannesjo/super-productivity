@@ -2,10 +2,14 @@ import { Injectable } from '@angular/core';
 import { Observable, of, timer } from 'rxjs';
 import { catchError, first, map, switchMap } from 'rxjs/operators';
 import { ProjectService } from 'src/app/features/project/project.service';
-import { TaskCopy } from '../../../tasks/task.model';
+import { Task, TaskCopy } from '../../../tasks/task.model';
 import { IssueServiceInterface } from '../../issue-service-interface';
 import { IssueData, IssueDataReduced, SearchResultItem } from '../../issue.model';
 import { GITEA_INITIAL_POLL_DELAY, GITEA_POLL_INTERVAL } from './gitea.const';
+import {
+  formatGiteaIssueTitle,
+  formatGiteaIssueTitleForSnack,
+} from './format-gitea-issue-title.util';
 import { GiteaCfg } from './gitea.model';
 import { isGiteaEnabled } from './is-gitea-enabled.util';
 import { GiteaApiService } from '../gitea/gitea-api.service';
@@ -50,7 +54,7 @@ export class GiteaCommonInterfacesService implements IssueServiceInterface {
   }
   getAddTaskData(issue: GiteaIssue): Partial<Readonly<TaskCopy>> & { title: string } {
     return {
-      title: `#${issue.id} ${issue.title}`,
+      title: formatGiteaIssueTitle(issue),
       issueWasUpdated: false,
       issueLastUpdated: new Date(issue.updated_at).getTime(),
     };
@@ -66,21 +70,64 @@ export class GiteaCommonInterfacesService implements IssueServiceInterface {
       ),
     );
   }
-  getFreshDataForIssueTask(task: Readonly<TaskCopy>): Promise<{
-    taskChanges: Partial<Readonly<TaskCopy>>;
-    issue: IssueData;
+  async getFreshDataForIssueTask(task: Task): Promise<{
+    taskChanges: Partial<Task>;
+    issue: GiteaIssue;
     issueTitle: string;
-  }> {
-    throw new Error('Method not implemented.');
+  } | null> {
+    if (!task.projectId) {
+      throw new Error('No projectId');
+    }
+    if (!task.issueId) {
+      throw new Error('No issueId');
+    }
+    const cfg = await this._getCfgOnce$(task.projectId).toPromise();
+    const issue = await this._giteaApiService.getById$(+task.issueId, cfg).toPromise();
+
+    const lastRemoteUpdate = new Date(issue.updated_at).getTime();
+    const wasUpdated = lastRemoteUpdate > (task.issueLastUpdated || 0);
+
+    if (wasUpdated) {
+      return {
+        taskChanges: {
+          ...this.getAddTaskData(issue),
+          issueWasUpdated: true,
+        },
+        issue,
+        issueTitle: formatGiteaIssueTitleForSnack(issue),
+      };
+    }
+    return null;
   }
-  getFreshDataForIssueTasks(tasks: Readonly<TaskCopy>[]): Promise<
+
+  async getFreshDataForIssueTasks(tasks: Task[]): Promise<
     {
-      task: Readonly<TaskCopy>;
-      taskChanges: Partial<Readonly<TaskCopy>>;
-      issue: IssueData;
+      task: Task;
+      taskChanges: Partial<Task>;
+      issue: GiteaIssue;
     }[]
   > {
-    throw new Error('Method not implemented.');
+    return Promise.all(
+      tasks.map((task) =>
+        this.getFreshDataForIssueTask(task).then((refreshDataForTask) => ({
+          task,
+          refreshDataForTask,
+        })),
+      ),
+    ).then((items) => {
+      return items
+        .filter(({ refreshDataForTask, task }) => !!refreshDataForTask)
+        .map(({ refreshDataForTask, task }) => {
+          if (!refreshDataForTask) {
+            throw new Error('No refresh data for task js error');
+          }
+          return {
+            task,
+            taskChanges: refreshDataForTask.taskChanges,
+            issue: refreshDataForTask.issue,
+          };
+        });
+    });
   }
 
   async getNewIssuesToAddToBacklog?(

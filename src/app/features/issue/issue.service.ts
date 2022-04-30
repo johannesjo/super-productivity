@@ -52,6 +52,7 @@ export class IssueService {
     [JIRA_TYPE]: {},
     [CALDAV_TYPE]: {},
     [OPEN_PROJECT_TYPE]: {},
+    [GITEA_TYPE]: {},
   };
 
   constructor(

@@ -142,7 +142,7 @@ export class GiteaApiService {
   getById$(issueId: number, cfg: GiteaCfg): Observable<GiteaIssue> {
     return this._sendRequest$(
       {
-        url: `${this._getIssueUrlFor}/${issueId}`,
+        url: `${this._getIssueUrlFor(cfg)}/${issueId}`,
       },
       cfg,
     ).pipe(map((issue) => issue));
