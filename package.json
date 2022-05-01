@@ -156,7 +156,7 @@
     "@types/jasminewd2": "~2.0.9",
     "@types/lz-string": "^1.3.34",
     "@types/moment-duration-format": "^2.2.2",
-    "@types/nightwatch": "^1.3.3",
+    "@types/nightwatch": "^2.0.7",
     "@types/node": "^16.11.27",
     "@types/node-fetch": "^2.6.1",
     "@types/object-path": "^0.11.1",
