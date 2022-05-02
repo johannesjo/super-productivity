@@ -128,6 +128,43 @@
         "FINISH_DAY_BEFORE_EXIT": "Existem {{nr}} tarefas concluídas na sua lista de hoje que ainda não foram movidas para o arquivo. Quer mesmo parar sem terminar o dia?"
       }
     },
+    "GITEA": {
+      "DIALOG_INITIAL": {
+        "TITLE": "Configurar Gitea para Projeto"
+      },
+      "FORM": {
+        "FILTER_USER": "Nome de usuário (ex.: para filtrar suas próprias alterações)",
+        "IS_AUTO_ADD_TO_BACKLOG": "Adicionar automaticamente tarefas não resolvidas do Gitea para o backlog",
+        "IS_AUTO_POLL": "Obter automaticamente tarefas do Gitea para atualizações",
+        "IS_SEARCH_ISSUES_FROM_GITEA": "Mostrar tarefas do Gitea como sugestões ao adicionar novas tarefas",
+        "HOST": "Endereço do servidor (ex: https://try.gitea.io)",
+        "TOKEN": "Token de acesso",
+        "TOKEN_DESCRIPTION": "Requerido para acessar repositórios privados",
+        "REPO_FULL_NAME": "Nome do usuário ou organização/projeto",
+        "REPO_FULL_NAME_DESCRIPTION": "Pode ser encontrado como parte da url, ao acessar o projeto no navegador",
+        "SCOPE": "Escopo",
+        "SCOPE_ALL": "Todos",
+        "SCOPE_ASSIGNED": "Atribuídos a mim",
+        "SCOPE_CREATED": "Criados por mim"
+      },
+      "FORM_SECTION": {
+        "HELP": "<p>Aqui você pode configurar o SuperProductivity para listar tarefas do Gitea de um repositório específico no painel de tarefas na tela de planejamento diário. Elas também serão listadas como sugestões e será disponibilizado um link para a tarefa bem como mais informações sobre a mesma.</p> <p>Além disso você pode adicionar e sincronizar todas as tarefas abertas para o seu backlog.</p><p>",
+        "TITLE": "Gitea"
+      },
+      "ISSUE_CONTENT": {
+        "ASSIGNEE": "Responsável",
+        "AT": "em",
+        "DESCRIPTION": "Descrição",
+        "LABELS": "Etiquetas",
+        "MARK_AS_CHECKED": "Marcar atualizações como verificadas",
+        "STATUS": "Estado",
+        "SUMMARY": "Resumo",
+        "WRITE_A_COMMENT": "Escreva um comentário"
+      },
+      "S": {
+        "ERR_UNKNOWN": "Gitea: Erro desconhecido {{statusCode}} {{errorMsg}}. Limit de uso da api excedido?"
+      }
+    },
     "GITHUB": {
       "DIALOG_INITIAL": {
         "TITLE": "Configurar GitHub para Projeto"
@@ -494,7 +531,7 @@
         "TITLE": "Projeto aberto"
       },
       "ISSUE_CONTENT": {
-        "ASSIGNEE": "Cessionário",
+        "ASSIGNEE": "Responsável",
         "DESCRIPTION": "Descrição",
         "MARK_AS_CHECKED": "Marcar atualizações como marcadas",
         "STATUS": "Status",
@@ -1017,7 +1054,7 @@
     "DISMISS": "Dispensar",
     "DO_IT": "Fazer isto!",
     "EDIT": "Editar",
-    "ENABLED": "ativado",
+    "ENABLED": "Ativado",
     "EXTENSION_INFO": "Por favor <a target=\"_blank\" href=\"https://chrome.google.com/webstore/detail/super-productivity/ljkbjodfmekklcoibdnhahlaalhihmlb\"> faça o download da extensão chrome</a> para permitir a comunicação com o Jira Api e o Idle Time Handling. Observe que isso não funciona para dispositivos móveis.",
     "LOGIN": "Login",
     "LOGOUT": "Sair",
@@ -1316,7 +1353,7 @@
   },
   "PS": {
     "GLOBAL_SETTINGS": "Configurações globais",
-    "ISSUE_INTEGRATION": "Integração de problemas",
+    "ISSUE_INTEGRATION": "Integração com gerenciadores de tarefas",
     "PRIVACY_POLICY": "Política Privada",
     "PRODUCTIVITY_HELPER": "Auxiliar de produtividade",
     "PROJECT_SETTINGS": "Configurações específicas do projeto",

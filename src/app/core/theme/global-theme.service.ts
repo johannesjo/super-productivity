@@ -113,6 +113,7 @@ export class GlobalThemeService {
       ['estimate_remaining', 'assets/icons/estimate-remaining.svg'],
       ['working_today', 'assets/icons/working-today.svg'],
       ['repeat', 'assets/icons/repeat.svg'],
+      ['gitea', 'assets/icons/gitea.svg'],
     ];
 
     icons.forEach(([name, path]) => {

@@ -103,6 +103,23 @@
           >
         </button>
       </div>
+      <div class="item">
+        <button
+          (click)="openGiteaCfg()"
+          color="primary"
+          mat-button
+          type="button"
+        >
+          <mat-icon
+            *ngIf="!giteaCfg?.isEnabled"
+            svgIcon="gitea"
+          ></mat-icon>
+          <mat-icon *ngIf="giteaCfg?.isEnabled">checkmark</mat-icon>
+          <span style="padding-left: 8px"
+            >{{T.F.PROJECT.D_CREATE.SETUP_GITEA_PROJECT|translate}}</span
+          >
+        </button>
+      </div>
       <!--<div class="item">-->
       <!--<button mat-raised-button color=primary-->
       <!--type="button">-->

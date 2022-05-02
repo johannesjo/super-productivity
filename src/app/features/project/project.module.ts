@@ -12,6 +12,7 @@ import { GithubViewComponentsModule } from '../issue/providers/github/github-vie
 import { DialogGitlabInitialSetupModule } from '../issue/providers/gitlab/dialog-gitlab-initial-setup/dialog-gitlab-initial-setup.module';
 import { DialogCaldavInitialSetupModule } from '../issue/providers/caldav/dialog-caldav-initial-setup/dialog-caldav-initial-setup.module';
 import { OpenProjectViewComponentsModule } from '../issue/providers/open-project/open-project-view-components/open-project-view-components.module';
+import { GiteaViewComponentsModule } from '../issue/providers/gitea/gitea-view-components/gitea-view-components.module';
 
 @NgModule({
   imports: [
@@ -24,6 +25,7 @@ import { OpenProjectViewComponentsModule } from '../issue/providers/open-project
     DialogGitlabInitialSetupModule,
     DialogCaldavInitialSetupModule,
     OpenProjectViewComponentsModule,
+    GiteaViewComponentsModule,
   ],
   declarations: [DialogCreateProjectComponent],
   providers: [ProjectService],
