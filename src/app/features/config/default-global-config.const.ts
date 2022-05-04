@@ -26,6 +26,7 @@ export const DEFAULT_GLOBAL_CONFIG: GlobalConfigState = {
     isTrayShowCurrentTask: true,
     defaultProjectId: null,
     firstDayOfWeek: 1,
+    startOfNextDay: 0,
     isDisableAnimations: false,
     // @ts-ignore
     taskNotesTpl: `**How can I best achieve it now?**

@@ -1226,6 +1226,8 @@
     "MISC": {
       "DEFAULT_PROJECT": "Default project to use for tasks if none is specified",
       "FIRST_DAY_OF_WEEK": "First day of the week",
+      "START_OF_NEXT_DAY": "Start time of the next day",
+      "START_OF_NEXT_DAY_HINT": "from when (in hour) you want to count the next day has started. default is midnight which is 0.",
       "HELP": "<p><strong>Not seeing Desktop Notifications?</strong> For windows you might want to check System > Notifications & actions and check if the required notifications have been enabled.</p>",
       "IS_AUTO_ADD_WORKED_ON_TO_TODAY": "Automatically add today tag to worked on tasks",
       "IS_AUTO_MARK_PARENT_AS_DONE": "Mark parent task as done, when all sub tasks are done",
