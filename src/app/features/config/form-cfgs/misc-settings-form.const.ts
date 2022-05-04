@@ -111,6 +111,19 @@ export const MISC_SETTINGS_FORM_CFG: ConfigFormSection<MiscConfig> = {
       },
     },
     {
+      key: 'startOfNextDay',
+      type: 'input',
+      defaultValue: 0,
+      templateOptions: {
+        required: true,
+        label: T.GCF.MISC.START_OF_NEXT_DAY,
+        description: T.GCF.MISC.START_OF_NEXT_DAY_HINT,
+        type: 'number',
+        min: 0,
+        max: 23,
+      },
+    },
+    {
       key: 'taskNotesTpl',
       type: 'textarea',
       templateOptions: {
