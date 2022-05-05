@@ -294,6 +294,8 @@ export class WorkContextService {
     shareReplay(1),
   );
 
+  startOfNextDayDiff: number = 0;
+
   constructor(
     private _store$: Store<WorkContextState>,
     private _actions$: Actions,
@@ -432,6 +434,10 @@ export class WorkContextService {
         ? addToProjectBreakTime(payload)
         : addToBreakTimeForTag(payload);
     this._store$.dispatch(action);
+  }
+
+  setStartOfNextDayDiff(startOfNextDay: number): void {
+    this.startOfNextDayDiff = (startOfNextDay || 0) * 60 * 60 * 1000;
   }
 
   private _updateAdvancedCfgForCurrentContext(
