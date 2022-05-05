@@ -69,12 +69,14 @@ export class TaskRepeatCfgEffects {
     delay(1000),
   );
 
-  createRepeatableTasks: any = createEffect(() =>
-    this.triggerRepeatableTaskCreation$.pipe(
+  createRepeatableTasks: any = createEffect(() => {
+    return this.triggerRepeatableTaskCreation$.pipe(
       concatMap(
         () =>
           this._taskRepeatCfgService
-            .getRepeatTableTasksDueForDay$(Date.now())
+            .getRepeatTableTasksDueForDay$(
+              Date.now() - this._workContextService.startOfNextDayDiff,
+            )
             .pipe(first()),
         // ===> taskRepeatCfgs scheduled for today and not yet created already
       ),
@@ -90,14 +92,14 @@ export class TaskRepeatCfgEffects {
             this._taskRepeatCfgService.getActionsForTaskRepeatCfg(
               taskRepeatCfg,
               currentTaskId,
-              Date.now(),
+              Date.now() - this._workContextService.startOfNextDayDiff,
             ),
           ),
           concatMap((actionsForRepeatCfg) => from(actionsForRepeatCfg)),
         );
       }),
-    ),
-  );
+    );
+  });
 
   removeConfigIdFromTaskStateTasks$: any = createEffect(() =>
     this._actions$.pipe(
