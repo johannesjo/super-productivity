@@ -31,6 +31,13 @@ $pad: ($ico-size - $line-height + $ico-pad * 2) * 0.5;
   font-size: 12px;
   line-height: $line-height;
   padding: $pad 0;
+
+  // hide inside add task bar for smaller screens
+  :host-context(.mat-autocomplete-panel) & {
+    @include mq(xs, max) {
+      display: none;
+    }
+  }
 }
 
 .tag-ico {
