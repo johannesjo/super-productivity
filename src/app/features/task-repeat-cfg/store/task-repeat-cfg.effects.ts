@@ -27,7 +27,7 @@ import { TaskService } from '../../tasks/task.service';
 import { TaskRepeatCfgService } from '../task-repeat-cfg.service';
 import { TaskRepeatCfg, TaskRepeatCfgState } from '../task-repeat-cfg.model';
 import { forkJoin, from, merge, of } from 'rxjs';
-import { WorkContextService } from '../../work-context/work-context.service';
+import { GlobalTrackingIntervalService } from '../../../core/global-tracking-interval/global-tracking-interval.service';
 import { setActiveWorkContext } from '../../work-context/store/work-context.actions';
 import { SyncTriggerService } from '../../../imex/sync/sync-trigger.service';
 import { SyncProviderService } from '../../../imex/sync/sync-provider.service';
@@ -75,7 +75,7 @@ export class TaskRepeatCfgEffects {
         () =>
           this._taskRepeatCfgService
             .getRepeatTableTasksDueForDay$(
-              Date.now() - this._workContextService.startOfNextDayDiff,
+              Date.now() - this._globalTrackingService.startOfNextDayDiff,
             )
             .pipe(first()),
         // ===> taskRepeatCfgs scheduled for today and not yet created already
@@ -87,12 +87,13 @@ export class TaskRepeatCfgEffects {
       mergeMap(([taskRepeatCfgs, currentTaskId]) => {
         // NOTE sorting here is important
         const sorted = taskRepeatCfgs.sort(sortRepeatableTaskCfgs);
+        console.log(sorted);
         return from(sorted).pipe(
           mergeMap((taskRepeatCfg: TaskRepeatCfg) =>
             this._taskRepeatCfgService.getActionsForTaskRepeatCfg(
               taskRepeatCfg,
               currentTaskId,
-              Date.now() - this._workContextService.startOfNextDayDiff,
+              Date.now() - this._globalTrackingService.startOfNextDayDiff,
             ),
           ),
           concatMap((actionsForRepeatCfg) => from(actionsForRepeatCfg)),
@@ -282,7 +283,7 @@ export class TaskRepeatCfgEffects {
     private _taskService: TaskService,
     private _store$: Store<any>,
     private _persistenceService: PersistenceService,
-    private _workContextService: WorkContextService,
+    private _globalTrackingService: GlobalTrackingIntervalService,
     private _taskRepeatCfgService: TaskRepeatCfgService,
     private _syncTriggerService: SyncTriggerService,
     private _syncProviderService: SyncProviderService,

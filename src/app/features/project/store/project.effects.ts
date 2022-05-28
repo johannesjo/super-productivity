@@ -29,7 +29,6 @@ import { PersistenceService } from '../../../core/persistence/persistence.servic
 import { BookmarkService } from '../../bookmark/bookmark.service';
 import { NoteService } from '../../note/note.service';
 import { SnackService } from '../../../core/snack/snack.service';
-import { getWorklogStr } from '../../../util/get-work-log-str';
 import {
   addTask,
   addTimeSpent,
@@ -62,6 +61,7 @@ import { EMPTY, Observable, of } from 'rxjs';
 import { TaskRepeatCfg } from '../../task-repeat-cfg/task-repeat-cfg.model';
 import { projectSelectors } from './project.selectors';
 import { addNote, deleteNote, updateNoteOrder } from '../../note/store/note.actions';
+import { GlobalTrackingIntervalService } from '../../../core/global-tracking-interval/global-tracking-interval.service';
 
 @Injectable()
 export class ProjectEffects {
@@ -189,11 +189,14 @@ export class ProjectEffects {
       concatMap(({ task }) =>
         this._projectService.getByIdOnce$(task.projectId as string).pipe(first()),
       ),
-      filter((project: Project) => !project.workStart[getWorklogStr()]),
+      filter(
+        (project: Project) =>
+          !project.workStart[this._globalTrackingIntervalService.getWorklogStr()],
+      ),
       map((project) => {
         return updateProjectWorkStart({
           id: project.id,
-          date: getWorklogStr(),
+          date: this._globalTrackingIntervalService.getWorklogStr(),
           newVal: Date.now(),
         });
       }),
@@ -207,7 +210,7 @@ export class ProjectEffects {
       map(({ task }) => {
         return updateProjectWorkEnd({
           id: task.projectId as string,
-          date: getWorklogStr(),
+          date: this._globalTrackingIntervalService.getWorklogStr(),
           newVal: Date.now(),
         });
       }),
@@ -410,6 +413,7 @@ export class ProjectEffects {
     // private _workContextService: WorkContextService,
     private _taskService: TaskService,
     private _taskRepeatCfgService: TaskRepeatCfgService,
+    private _globalTrackingIntervalService: GlobalTrackingIntervalService,
   ) {}
 
   private async _removeAllNonArchiveTasksForProject(

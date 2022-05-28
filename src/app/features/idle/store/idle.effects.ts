@@ -34,7 +34,6 @@ import { IpcRenderer } from 'electron';
 import { IPC } from '../../../../../electron/shared-with-frontend/ipc-events.const';
 import { SimpleCounterService } from '../../simple-counter/simple-counter.service';
 import { selectIdleTime, selectIsIdle } from './idle.selectors';
-import { getWorklogStr } from '../../../util/get-work-log-str';
 import { turnOffAllSimpleCounterCounters } from '../../simple-counter/store/simple-counter.actions';
 import { IdleService } from '../idle.service';
 import { DialogIdleComponent } from '../dialog-idle/dialog-idle.component';
@@ -49,6 +48,7 @@ import {
 import { isNotNullOrUndefined } from '../../../util/is-not-null-or-undefined';
 import { DialogConfirmComponent } from '../../../ui/dialog-confirm/dialog-confirm.component';
 import { T } from '../../../t.const';
+import { GlobalTrackingIntervalService } from '../../../core/global-tracking-interval/global-tracking-interval.service';
 
 const DEFAULT_MIN_IDLE_TIME = 60000;
 const IDLE_POLL_INTERVAL = 1000;
@@ -257,7 +257,7 @@ export class IdleEffects {
             taskItemId = this._taskService.add(taskItem.title, false, {
               timeSpent: taskItem.time,
               timeSpentOnDay: {
-                [getWorklogStr()]: taskItem.time,
+                [this._globalTrackingService.getWorklogStr()]: taskItem.time,
               },
             });
           } else if (taskItem.task) {
@@ -287,6 +287,7 @@ export class IdleEffects {
     private _store: Store,
     private _uiHelperService: UiHelperService,
     private _idleService: IdleService,
+    private _globalTrackingService: GlobalTrackingIntervalService,
   ) {
     // window.setTimeout(() => {
     //   this._store.dispatch(triggerIdle({ idleTime: 60 * 1000 }));

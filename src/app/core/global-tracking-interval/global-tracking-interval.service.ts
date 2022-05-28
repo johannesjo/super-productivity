@@ -24,7 +24,7 @@ export class GlobalTrackingIntervalService {
       this._currentTrackingStart = Date.now();
       return {
         duration: delta,
-        date: getWorklogStr(),
+        date: this.getWorklogStr(),
         timestamp: Date.now(),
       };
     }),
@@ -33,14 +33,27 @@ export class GlobalTrackingIntervalService {
   );
 
   todayDateStr$: Observable<string> = this.globalInterval$.pipe(
-    startWith(getWorklogStr()),
-    concatMap(() => of(getWorklogStr())),
+    startWith(this.getWorklogStr()),
+    concatMap(() => of(this.getWorklogStr())),
     distinctUntilChanged(),
     // needs to be shareReplay otherwise some instances will never receive an update until a change occurs
     shareReplay(1),
   );
 
+  startOfNextDayDiff: number = 0;
+
   constructor() {
     this._currentTrackingStart = Date.now();
+  }
+
+  setStartOfNextDayDiff(startOfNextDay: number): void {
+    this.startOfNextDayDiff = (startOfNextDay || 0) * 60 * 60 * 1000;
+  }
+
+  getWorklogStr(date?: Date | number): string {
+    if (!date) {
+      date = new Date(Date.now() - this.startOfNextDayDiff);
+    }
+    return getWorklogStr(date);
   }
 }

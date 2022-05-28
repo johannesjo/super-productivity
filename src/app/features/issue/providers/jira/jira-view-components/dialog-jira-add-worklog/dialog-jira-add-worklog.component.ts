@@ -9,7 +9,6 @@ import { ProjectService } from '../../../../../project/project.service';
 import { first } from 'rxjs/operators';
 import * as moment from 'moment';
 import { expandFadeAnimation } from '../../../../../../ui/animations/expand.ani';
-import { getWorklogStr } from '../../../../../../util/get-work-log-str';
 import {
   JIRA_ISSUE_TYPE,
   JIRA_WORK_LOG_EXPORT_CHECKBOXES,
@@ -17,6 +16,7 @@ import {
 } from '../../jira.const';
 import { JiraWorklogExportDefaultTime } from '../../jira.model';
 import { Subscription } from 'rxjs';
+import { GlobalTrackingIntervalService } from '../../../../../../core/global-tracking-interval/global-tracking-interval.service';
 
 @Component({
   selector: 'dialog-jira-add-worklog',
@@ -54,13 +54,15 @@ export class DialogJiraAddWorklogComponent implements OnDestroy {
       issue: JiraIssue;
       task: Task;
     },
+    private _globalTrackingService: GlobalTrackingIntervalService,
   ) {
     this.timeSpent = this.data.task.timeSpent;
     this.issue = this.data.issue;
     this.timeLogged = this.issue.timespent * 1000;
     this.started = this._convertTimestamp(this.data.task.created);
     this.comment = this.data.task.parentId ? this.data.task.title : '';
-    this.timeSpentToday = this.data.task.timeSpentOnDay[getWorklogStr()];
+    this.timeSpentToday =
+      this.data.task.timeSpentOnDay[this._globalTrackingService.getWorklogStr()];
     this.timeSpentLoggedDelta = Math.max(0, this.data.task.timeSpent - this.timeLogged);
 
     this._subs.add(

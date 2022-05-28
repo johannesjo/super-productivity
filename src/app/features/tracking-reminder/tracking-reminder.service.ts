@@ -18,11 +18,11 @@ import { msToString } from '../../ui/duration/ms-to-string.pipe';
 import { MatDialog } from '@angular/material/dialog';
 import { DialogTrackingReminderComponent } from './dialog-tracking-reminder/dialog-tracking-reminder.component';
 import { Task } from '../tasks/task.model';
-import { getWorklogStr } from '../../util/get-work-log-str';
 import { T } from '../../t.const';
 import { TranslateService } from '@ngx-translate/core';
 import { TrackingReminderConfig } from '../config/global-config.model';
 import { IS_TOUCH_ONLY } from '../../util/is-touch-only';
+import { GlobalTrackingIntervalService } from '../../core/global-tracking-interval/global-tracking-interval.service';
 
 @Injectable({
   providedIn: 'root',
@@ -69,6 +69,7 @@ export class TrackingReminderService {
     private _bannerService: BannerService,
     private _matDialog: MatDialog,
     private _translateService: TranslateService,
+    private _globalTrackingIntervalService: GlobalTrackingIntervalService,
   ) {}
 
   init(): void {
@@ -132,7 +133,7 @@ export class TrackingReminderService {
               const currId = this._taskService.add(task, false, {
                 timeSpent,
                 timeSpentOnDay: {
-                  [getWorklogStr()]: timeSpent,
+                  [this._globalTrackingIntervalService.getWorklogStr()]: timeSpent,
                 },
               });
               this._taskService.setCurrentId(currId);

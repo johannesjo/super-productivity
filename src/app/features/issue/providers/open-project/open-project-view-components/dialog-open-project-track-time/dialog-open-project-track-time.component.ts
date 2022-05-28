@@ -16,9 +16,9 @@ import {
   JIRA_WORK_LOG_EXPORT_FORM_OPTIONS,
 } from '../../../jira/jira.const';
 import { Subscription } from 'rxjs';
-import { getWorklogStr } from '../../../../../../util/get-work-log-str';
 import { OPEN_PROJECT_TYPE } from '../../../../issue.const';
 import { expandFadeAnimation } from '../../../../../../ui/animations/expand.ani';
+import { GlobalTrackingIntervalService } from '../../../../../../core/global-tracking-interval/global-tracking-interval.service';
 
 @Component({
   selector: 'dialog-open-project-track-time',
@@ -67,6 +67,7 @@ export class DialogOpenProjectTrackTimeComponent {
       workPackage: OpenProjectWorkPackage;
       task: Task;
     },
+    private _globalTrackingService: GlobalTrackingIntervalService,
   ) {
     this.timeSpent = this.data.task.timeSpent;
     this.workPackage = this.data.workPackage;
@@ -75,7 +76,8 @@ export class DialogOpenProjectTrackTimeComponent {
     this.timeLoggedForWorkPackage = parseOpenProjectDuration(
       this.workPackage.spentTime as string,
     );
-    this.timeSpentToday = this.data.task.timeSpentOnDay[getWorklogStr()];
+    this.timeSpentToday =
+      this.data.task.timeSpentOnDay[this._globalTrackingService.getWorklogStr()];
     this.timeSpentLoggedDelta = Math.max(
       0,
       this.data.task.timeSpent - this.timeLoggedForWorkPackage,

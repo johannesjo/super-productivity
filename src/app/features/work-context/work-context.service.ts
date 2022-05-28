@@ -28,7 +28,6 @@ import {
 import { TODAY_TAG } from '../tag/tag.const';
 import { TagService } from '../tag/tag.service';
 import { Task, TaskPlanned, TaskWithSubTasks } from '../tasks/task.model';
-import { getWorklogStr } from '../../util/get-work-log-str';
 import { hasTasksToWorkOn, mapEstimateRemainingFromTasks } from './work-context.util';
 import {
   flattenTasks,
@@ -294,8 +293,6 @@ export class WorkContextService {
     shareReplay(1),
   );
 
-  startOfNextDayDiff: number = 0;
-
   constructor(
     private _store$: Store<WorkContextState>,
     private _actions$: Actions,
@@ -348,7 +345,9 @@ export class WorkContextService {
   }
 
   // TODO could be done better
-  getTimeWorkedForDay$(day: string = getWorklogStr()): Observable<number> {
+  getTimeWorkedForDay$(
+    day: string = this._globalTrackingIntervalService.getWorklogStr(),
+  ): Observable<number> {
     return this.todaysTasks$.pipe(
       map((tasks) => {
         return (
@@ -368,19 +367,27 @@ export class WorkContextService {
     );
   }
 
-  getWorkStart$(day: string = getWorklogStr()): Observable<number> {
+  getWorkStart$(
+    day: string = this._globalTrackingIntervalService.getWorklogStr(),
+  ): Observable<number> {
     return this.activeWorkContext$.pipe(map((ctx) => ctx.workStart[day]));
   }
 
-  getWorkEnd$(day: string = getWorklogStr()): Observable<number> {
+  getWorkEnd$(
+    day: string = this._globalTrackingIntervalService.getWorklogStr(),
+  ): Observable<number> {
     return this.activeWorkContext$.pipe(map((ctx) => ctx.workEnd[day]));
   }
 
-  getBreakTime$(day: string = getWorklogStr()): Observable<number> {
+  getBreakTime$(
+    day: string = this._globalTrackingIntervalService.getWorklogStr(),
+  ): Observable<number> {
     return this.activeWorkContext$.pipe(map((ctx) => ctx.breakTime[day]));
   }
 
-  getBreakNr$(day: string = getWorklogStr()): Observable<number> {
+  getBreakNr$(
+    day: string = this._globalTrackingIntervalService.getWorklogStr(),
+  ): Observable<number> {
     return this.activeWorkContext$.pipe(map((ctx) => ctx.breakNr[day]));
   }
 
@@ -423,7 +430,10 @@ export class WorkContextService {
     this._store$.dispatch(action);
   }
 
-  addToBreakTimeForActiveContext(date: string = getWorklogStr(), valToAdd: number): void {
+  addToBreakTimeForActiveContext(
+    date: string = this._globalTrackingIntervalService.getWorklogStr(),
+    valToAdd: number,
+  ): void {
     const payload: { id: string; date: string; valToAdd: number } = {
       id: this.activeWorkContextId as string,
       date,
@@ -434,10 +444,6 @@ export class WorkContextService {
         ? addToProjectBreakTime(payload)
         : addToBreakTimeForTag(payload);
     this._store$.dispatch(action);
-  }
-
-  setStartOfNextDayDiff(startOfNextDay: number): void {
-    this.startOfNextDayDiff = (startOfNextDay || 0) * 60 * 60 * 1000;
   }
 
   private _updateAdvancedCfgForCurrentContext(
