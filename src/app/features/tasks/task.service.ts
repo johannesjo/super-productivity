@@ -68,7 +68,6 @@ import {
   selectTasksPlannedForRangeNotOnToday,
   selectTaskWithSubTasksByRepeatConfigId,
 } from './store/task.selectors';
-import { getWorklogStr } from '../../util/get-work-log-str';
 import { RoundTimeOption } from '../project/project.model';
 import { TagService } from '../tag/tag.service';
 import { TODAY_TAG } from '../tag/tag.const';
@@ -479,11 +478,19 @@ export class TaskService {
     );
   }
 
-  addTimeSpent(task: Task, duration: number, date: string = getWorklogStr()): void {
+  addTimeSpent(
+    task: Task,
+    duration: number,
+    date: string = this._timeTrackingService.getWorklogStr(),
+  ): void {
     this._store.dispatch(addTimeSpent({ task, date, duration }));
   }
 
-  removeTimeSpent(id: string, duration: number, date: string = getWorklogStr()): void {
+  removeTimeSpent(
+    id: string,
+    duration: number,
+    date: string = this._timeTrackingService.getWorklogStr(),
+  ): void {
     this._store.dispatch(removeTimeSpent({ id, date, duration }));
   }
 

@@ -6,9 +6,9 @@ import {
   Output,
 } from '@angular/core';
 import { Task } from '../task.model';
-import { getWorklogStr } from '../../../util/get-work-log-str';
 import { TaskService } from '../task.service';
 import { T } from '../../../t.const';
+import { GlobalTrackingIntervalService } from '../../../core/global-tracking-interval/global-tracking-interval.service';
 
 @Component({
   selector: 'task-summary-table',
@@ -18,12 +18,15 @@ import { T } from '../../../t.const';
 })
 export class TaskSummaryTableComponent {
   @Input() flatTasks: Task[] = [];
-  @Input() day: string = getWorklogStr();
+  @Input() day: string = this._globalTrackingIntervalService.getWorklogStr();
   @Output() updated: EventEmitter<void> = new EventEmitter();
 
   T: typeof T = T;
 
-  constructor(private _taskService: TaskService) {}
+  constructor(
+    private _taskService: TaskService,
+    private _globalTrackingIntervalService: GlobalTrackingIntervalService,
+  ) {}
 
   updateTimeSpentTodayForTask(task: Task, newVal: number | string): void {
     this._taskService.updateEverywhere(task.id, {

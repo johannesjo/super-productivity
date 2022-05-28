@@ -6,7 +6,6 @@ import { WorklogService } from '../../worklog/worklog.service';
 import { DialogWorklogExportComponent } from '../../worklog/dialog-worklog-export/dialog-worklog-export.component';
 import { Project, RoundTimeOption } from '../../project/project.model';
 import { Task } from '../task.model';
-import { getWorklogStr } from '../../../util/get-work-log-str';
 import { T } from 'src/app/t.const';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { map, withLatestFrom } from 'rxjs/operators';
@@ -17,6 +16,7 @@ import {
   mapToProjectWithTasks,
   ProjectWithTasks,
 } from './map-to-project-with-tasks.util';
+import { GlobalTrackingIntervalService } from '../../../core/global-tracking-interval/global-tracking-interval.service';
 
 @Component({
   selector: 'task-summary-tables',
@@ -27,7 +27,7 @@ import {
 export class TaskSummaryTablesComponent {
   T: typeof T = T;
 
-  @Input() dayStr: string = getWorklogStr();
+  @Input() dayStr: string = this._globalTrackingIntervalService.getWorklogStr();
 
   @Input() isForToday: boolean = true;
 
@@ -60,6 +60,7 @@ export class TaskSummaryTablesComponent {
     private readonly _matDialog: MatDialog,
     private readonly _worklogService: WorklogService,
     private readonly _projectService: ProjectService,
+    private _globalTrackingIntervalService: GlobalTrackingIntervalService,
   ) {}
 
   @Input('flatTasks') set flatTasksIn(v: Task[]) {
@@ -112,7 +113,7 @@ export class TaskSummaryTablesComponent {
     if (this.isShowYesterday && this.isForToday) {
       const t = new Date();
       t.setDate(t.getDate() - 1);
-      yesterdayStr = getWorklogStr(t);
+      yesterdayStr = this._globalTrackingIntervalService.getWorklogStr(t);
     }
 
     return mapToProjectWithTasks(project, this.flatTasks, this.dayStr, yesterdayStr);
