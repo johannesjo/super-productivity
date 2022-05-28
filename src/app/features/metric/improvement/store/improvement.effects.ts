@@ -19,9 +19,9 @@ import {
 } from './improvement.reducer';
 import { PersistenceService } from '../../../../core/persistence/persistence.service';
 import { selectUnusedImprovementIds } from '../../store/metric.selectors';
-import { getWorklogStr } from '../../../../util/get-work-log-str';
 import { ImprovementState } from '../improvement.model';
 import { loadProjectRelatedDataSuccess } from '../../../project/store/project.actions';
+import { GlobalTrackingIntervalService } from '../../../../core/global-tracking-interval/global-tracking-interval.service';
 
 @Injectable()
 export class ImprovementEffects {
@@ -47,7 +47,9 @@ export class ImprovementEffects {
     this._actions$.pipe(
       ofType(loadProjectRelatedDataSuccess.type),
       withLatestFrom(this._store$.select(selectImprovementHideDay)),
-      filter(([, hideDay]) => hideDay !== getWorklogStr()),
+      filter(
+        ([, hideDay]) => hideDay !== this._globalTrackingIntervalService.getWorklogStr(),
+      ),
       map(() => clearHiddenImprovements()),
     ),
   );
@@ -64,6 +66,7 @@ export class ImprovementEffects {
     private _actions$: Actions,
     private _store$: Store<any>,
     private _persistenceService: PersistenceService,
+    private _globalTrackingIntervalService: GlobalTrackingIntervalService,
   ) {}
 
   private _saveToLs(improvementState: ImprovementState): void {

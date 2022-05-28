@@ -13,12 +13,12 @@ import { MetricService } from '../metric.service';
 import { ObstructionService } from '../obstruction/obstruction.service';
 import { ImprovementService } from '../improvement/improvement.service';
 import { BehaviorSubject, Observable, Subscription } from 'rxjs';
-import { getWorklogStr } from '../../../util/get-work-log-str';
 import { switchMap } from 'rxjs/operators';
 import { T } from '../../../t.const';
 import { DialogAddNoteComponent } from '../../note/dialog-add-note/dialog-add-note.component';
 import { MatDialog } from '@angular/material/dialog';
 import { WorkContextService } from '../../work-context/work-context.service';
+import { GlobalTrackingIntervalService } from '../../../core/global-tracking-interval/global-tracking-interval.service';
 
 @Component({
   selector: 'evaluation-sheet',
@@ -30,7 +30,9 @@ export class EvaluationSheetComponent implements OnDestroy, OnInit {
   @Output() save: EventEmitter<any> = new EventEmitter();
   T: typeof T = T;
   metricForDay?: MetricCopy;
-  day$: BehaviorSubject<string> = new BehaviorSubject(getWorklogStr());
+  day$: BehaviorSubject<string> = new BehaviorSubject(
+    this._globalTrackingIntervalService.getWorklogStr(),
+  );
   private _metricForDay$: Observable<MetricCopy> = this.day$.pipe(
     switchMap((day) =>
       this._metricService.getMetricForDayOrDefaultWithCheckedImprovements$(day),
@@ -46,6 +48,7 @@ export class EvaluationSheetComponent implements OnDestroy, OnInit {
     private _metricService: MetricService,
     private _matDialog: MatDialog,
     private _cd: ChangeDetectorRef,
+    private _globalTrackingIntervalService: GlobalTrackingIntervalService,
   ) {}
 
   @Input() set day(val: string) {

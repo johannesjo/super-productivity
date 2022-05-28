@@ -12,7 +12,6 @@ import { MatDialog } from '@angular/material/dialog';
 import { DialogSimpleCounterEditComponent } from '../dialog-simple-counter-edit/dialog-simple-counter-edit.component';
 import { T } from 'src/app/t.const';
 import { GlobalTrackingIntervalService } from '../../../core/global-tracking-interval/global-tracking-interval.service';
-import { getWorklogStr } from '../../../util/get-work-log-str';
 import { Subscription } from 'rxjs';
 
 @Component({
@@ -24,7 +23,7 @@ import { Subscription } from 'rxjs';
 export class SimpleCounterButtonComponent implements OnDestroy, OnInit {
   T: typeof T = T;
   SimpleCounterType: typeof SimpleCounterType = SimpleCounterType;
-  todayStr: string = getWorklogStr();
+  todayStr: string = this._globalTrackingIntervalService.getWorklogStr();
 
   @Input() simpleCounter?: SimpleCounter;
 

@@ -36,7 +36,7 @@ export const deleteImprovements = createAction(
 
 export const hideImprovement = createAction(
   ImprovementActionTypes.HideImprovement,
-  props<{ id: string }>(),
+  props<{ id: string; day: string }>(),
 );
 
 export const addImprovementCheckedDay = createAction(

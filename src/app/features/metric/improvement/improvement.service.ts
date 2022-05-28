@@ -22,7 +22,7 @@ import {
   selectHasLastTrackedImprovements,
   selectImprovementBannerImprovements,
 } from '../store/metric.selectors';
-import { getWorklogStr } from '../../../util/get-work-log-str';
+import { GlobalTrackingIntervalService } from '../../../core/global-tracking-interval/global-tracking-interval.service';
 
 @Injectable({
   providedIn: 'root',
@@ -41,7 +41,10 @@ export class ImprovementService {
     select(selectHasLastTrackedImprovements),
   );
 
-  constructor(private _store$: Store<ImprovementState>) {}
+  constructor(
+    private _store$: Store<ImprovementState>,
+    private _globalTrackingIntervalService: GlobalTrackingIntervalService,
+  ) {}
 
   addImprovement(title: string): string {
     const id = nanoid();
@@ -58,7 +61,10 @@ export class ImprovementService {
     return id;
   }
 
-  addCheckedDay(id: string, checkedDay: string = getWorklogStr()): void {
+  addCheckedDay(
+    id: string,
+    checkedDay: string = this._globalTrackingIntervalService.getWorklogStr(),
+  ): void {
     this._store$.dispatch(
       addImprovementCheckedDay({
         id,
@@ -80,7 +86,8 @@ export class ImprovementService {
   }
 
   hideImprovement(id: string): void {
-    this._store$.dispatch(hideImprovement({ id }));
+    const day = this._globalTrackingIntervalService.getWorklogStr();
+    this._store$.dispatch(hideImprovement({ id, day }));
   }
 
   toggleImprovementRepeat(id: string): void {

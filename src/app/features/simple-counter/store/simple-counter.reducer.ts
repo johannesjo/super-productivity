@@ -15,7 +15,6 @@ import {
 import { DEFAULT_SIMPLE_COUNTERS } from '../simple-counter.const';
 import { arrayToDictionary } from '../../../util/array-to-dictionary';
 import { loadAllData } from '../../../root-store/meta/load-all-data.action';
-import { getWorklogStr } from '../../../util/get-work-log-str';
 import { updateAllInDictionary } from '../../../util/update-all-in-dictionary';
 import { migrateSimpleCounterState } from '../migrate-simple-counter-state.util';
 import { Update } from '@ngrx/entity/src/models';
@@ -97,14 +96,14 @@ const _reducer = createReducer<SimpleCounterState>(
     return newState;
   }),
 
-  on(simpleCounterActions.setSimpleCounterCounterToday, (state, { id, newVal }) =>
+  on(simpleCounterActions.setSimpleCounterCounterToday, (state, { id, newVal, today }) =>
     adapter.updateOne(
       {
         id,
         changes: {
           countOnDay: {
             ...(state.entities[id] as SimpleCounter).countOnDay,
-            [getWorklogStr()]: newVal,
+            [today]: newVal,
           },
         },
       },
@@ -114,8 +113,8 @@ const _reducer = createReducer<SimpleCounterState>(
 
   on(
     simpleCounterActions.increaseSimpleCounterCounterToday,
-    (state, { id, increaseBy }) => {
-      const todayStr = getWorklogStr();
+    (state, { id, increaseBy, today }) => {
+      const todayStr = today;
       const oldEntity = state.entities[id] as SimpleCounter;
       const currentTotalCount = oldEntity.countOnDay || {};
       const currentVal = currentTotalCount[todayStr] || 0;
@@ -137,8 +136,8 @@ const _reducer = createReducer<SimpleCounterState>(
 
   on(
     simpleCounterActions.decreaseSimpleCounterCounterToday,
-    (state, { id, decreaseBy }) => {
-      const todayStr = getWorklogStr();
+    (state, { id, decreaseBy, today }) => {
+      const todayStr = today;
       const oldEntity = state.entities[id] as SimpleCounter;
       const currentTotalCount = oldEntity.countOnDay || {};
       const currentVal = currentTotalCount[todayStr] || 0;
