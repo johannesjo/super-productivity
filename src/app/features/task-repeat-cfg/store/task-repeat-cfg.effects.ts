@@ -69,8 +69,8 @@ export class TaskRepeatCfgEffects {
     delay(1000),
   );
 
-  createRepeatableTasks: any = createEffect(() => {
-    return this.triggerRepeatableTaskCreation$.pipe(
+  createRepeatableTasks: any = createEffect(() =>
+    this.triggerRepeatableTaskCreation$.pipe(
       concatMap(
         () =>
           this._taskRepeatCfgService
@@ -87,7 +87,6 @@ export class TaskRepeatCfgEffects {
       mergeMap(([taskRepeatCfgs, currentTaskId]) => {
         // NOTE sorting here is important
         const sorted = taskRepeatCfgs.sort(sortRepeatableTaskCfgs);
-        console.log(sorted);
         return from(sorted).pipe(
           mergeMap((taskRepeatCfg: TaskRepeatCfg) =>
             this._taskRepeatCfgService.getActionsForTaskRepeatCfg(
@@ -99,8 +98,8 @@ export class TaskRepeatCfgEffects {
           concatMap((actionsForRepeatCfg) => from(actionsForRepeatCfg)),
         );
       }),
-    );
-  });
+    ),
+  );
 
   removeConfigIdFromTaskStateTasks$: any = createEffect(() =>
     this._actions$.pipe(
