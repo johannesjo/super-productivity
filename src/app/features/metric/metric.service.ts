@@ -8,7 +8,6 @@ import {
 } from './store/metric.actions';
 import { combineLatest, Observable, of } from 'rxjs';
 import { LineChartData, Metric, MetricState, PieChartData } from './metric.model';
-import { getWorklogStr } from '../../util/get-work-log-str';
 import {
   selectImprovementCountsPieChartData,
   selectMetricById,
@@ -26,6 +25,7 @@ import {
   selectRepeatedImprovementIds,
 } from './improvement/store/improvement.reducer';
 import { selectHasSimpleCounterData } from '../simple-counter/store/simple-counter.reducer';
+import { GlobalTrackingIntervalService } from '../../core/global-tracking-interval/global-tracking-interval.service';
 
 @Injectable({
   providedIn: 'root',
@@ -47,7 +47,10 @@ export class MetricService {
 
   // productivityHappinessLineChartData$: Observable<LineChartData> = this._store$.pipe(select(selectProductivityHappinessLineChartDataComplete));
 
-  constructor(private _store$: Store<MetricState>) {}
+  constructor(
+    private _store$: Store<MetricState>,
+    private _globalTrackingIntervalService: GlobalTrackingIntervalService,
+  ) {}
 
   // getMetricForDay$(id: string = getWorklogStr()): Observable<Metric> {
   //   if (!id) {
@@ -57,7 +60,7 @@ export class MetricService {
   // }
 
   getMetricForDayOrDefaultWithCheckedImprovements$(
-    day: string = getWorklogStr(),
+    day: string = this._globalTrackingIntervalService.getWorklogStr(),
   ): Observable<Metric> {
     return this._store$.pipe(select(selectMetricById, { id: day })).pipe(
       switchMap((metric) => {
@@ -85,7 +88,7 @@ export class MetricService {
       addMetric({
         metric: {
           ...metric,
-          id: metric.id || getWorklogStr(),
+          id: metric.id || this._globalTrackingIntervalService.getWorklogStr(),
         },
       }),
     );
@@ -104,7 +107,7 @@ export class MetricService {
   }
 
   upsertTodayMetric(metricIn: Partial<Metric>): void {
-    const day = getWorklogStr();
+    const day = this._globalTrackingIntervalService.getWorklogStr();
     const metric = {
       id: day,
       ...DEFAULT_METRIC_FOR_DAY,

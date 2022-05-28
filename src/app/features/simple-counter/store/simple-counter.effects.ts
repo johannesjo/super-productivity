@@ -71,8 +71,13 @@ export class SimpleCounterEffects {
           : EMPTY,
       ),
       mergeMap(({ items, tick }) => {
+        const today = this._timeTrackingService.getWorklogStr();
         return items.map((item) =>
-          increaseSimpleCounterCounterToday({ id: item.id, increaseBy: tick.duration }),
+          increaseSimpleCounterCounterToday({
+            id: item.id,
+            increaseBy: tick.duration,
+            today,
+          }),
         );
       }),
     ),
@@ -126,12 +131,13 @@ export class SimpleCounterEffects {
           (item) =>
             item.triggerOffActions && item.triggerOffActions.includes(action.type),
         );
+        const today = this._timeTrackingService.getWorklogStr();
 
         return [
           ...startItems.map((item) => setSimpleCounterCounterOn({ id: item.id })),
           ...stopItems.map((item) => setSimpleCounterCounterOff({ id: item.id })),
           ...counterUpItems.map((item) =>
-            increaseSimpleCounterCounterToday({ id: item.id, increaseBy: 1 }),
+            increaseSimpleCounterCounterToday({ id: item.id, increaseBy: 1, today }),
           ),
         ];
       }),

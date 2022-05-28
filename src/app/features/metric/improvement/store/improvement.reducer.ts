@@ -12,7 +12,6 @@ import {
 } from './improvement.actions';
 import { Improvement, ImprovementState } from '../improvement.model';
 import { createFeatureSelector, createReducer, createSelector, on } from '@ngrx/store';
-import { getWorklogStr } from '../../../../util/get-work-log-str';
 import { loadAllData } from '../../../../root-store/meta/load-all-data.action';
 import { migrateImprovementState } from '../../migrate-metric-states.util';
 
@@ -87,11 +86,11 @@ export const improvementReducer = createReducer<ImprovementState>(
     return adapter.removeMany(ids, state);
   }),
 
-  on(hideImprovement, (state, { id }) => {
+  on(hideImprovement, (state, { id, day }) => {
     const items = state.hiddenImprovementBannerItems || [];
     return {
       ...state,
-      hideDay: getWorklogStr(),
+      hideDay: day,
       hiddenImprovementBannerItems: [...items, id],
     };
   }),

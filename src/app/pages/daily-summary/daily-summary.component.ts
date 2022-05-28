@@ -24,7 +24,6 @@ import {
   takeUntil,
   withLatestFrom,
 } from 'rxjs/operators';
-import { getWorklogStr } from '../../util/get-work-log-str';
 import * as moment from 'moment';
 import { T } from '../../t.const';
 import { ElectronService } from '../../core/electron/electron.service';
@@ -39,6 +38,7 @@ import { WorkContextType } from '../../features/work-context/work-context.model'
 import { EntityState } from '@ngrx/entity';
 import { TODAY_TAG } from '../../features/tag/tag.const';
 import { shareReplayUntil } from '../../util/share-replay-until';
+import { GlobalTrackingIntervalService } from '../../core/global-tracking-interval/global-tracking-interval.service';
 
 const SUCCESS_ANIMATION_DURATION = 500;
 const MAGIC_YESTERDAY_MARGIN = 4 * 60 * 60 * 1000;
@@ -62,15 +62,17 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
   isForToday: boolean = true;
 
   // TODO remove one?
-  dayStr: string = getWorklogStr();
+  dayStr: string = this._globalTrackingIntervalService.getWorklogStr();
 
   dayStr$: Observable<string> = this._activatedRoute.paramMap.pipe(
-    startWith({ params: { dayStr: getWorklogStr() } }),
+    startWith({
+      params: { dayStr: this._globalTrackingIntervalService.getWorklogStr() },
+    }),
     map((s: any) => {
       if (s && s.params.dayStr) {
         return s.params.dayStr;
       } else {
-        return getWorklogStr();
+        return this._globalTrackingIntervalService.getWorklogStr();
       }
     }),
     shareReplayUntil(this._onDestroy$, 1),
@@ -164,6 +166,7 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
     private readonly _cd: ChangeDetectorRef,
     private readonly _activatedRoute: ActivatedRoute,
     private readonly _syncProviderService: SyncProviderService,
+    private _globalTrackingIntervalService: GlobalTrackingIntervalService,
   ) {
     this._taskService.setSelectedId(null);
     const todayStart = new Date();
@@ -286,7 +289,7 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
       if (this.isIncludeYesterday) {
         const yesterday = new Date();
         yesterday.setDate(yesterday.getDate() - 1);
-        const yesterdayStr = getWorklogStr(yesterday);
+        const yesterdayStr = this._globalTrackingIntervalService.getWorklogStr(yesterday);
 
         return (t: Task) =>
           (t.timeSpentOnDay &&
