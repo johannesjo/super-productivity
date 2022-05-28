@@ -12,7 +12,7 @@
   },
   "APP": {
     "B_INSTALL": {
-      "IGNORE": "Zamemari",
+      "IGNORE": "Zanemari",
       "INSTALL": "Instaliraj",
       "MSG": "Želiš li instalirati „Super produktivnost” kao PWA (progresivni web-program)?"
     },
@@ -64,9 +64,9 @@
     "BOOKMARK": {
       "BAR": {
         "ADD": "Dodaj straničnik",
-        "DROP": "Za dodavanje straničnika, povuci poveznicu ovamo",
+        "DROP": "Za dodavanje straničnika povuci poveznicu ovamo",
         "EDIT": "Uredi straničnike",
-        "NO_BOOKMARKS": "Nemaš straničnike za projekt. Dodaj straničnik putem povuci-i-otpusti ili pritisni gumb 'plus'."
+        "NO_BOOKMARKS": "Nemaš straničnike za projekt. Dodaj straničnik putem povuci-i-otpusti ili pritisni gumb „plus”."
       },
       "DIALOG_EDIT": {
         "ADD_BOOKMARK": "Dodaj straničnik",
@@ -136,25 +136,31 @@
     },
     "FINISH_DAY_BEFORE_EXIT": {
       "C": {
-        "FINISH_DAY_BEFORE_EXIT": "Broj obavljenih zadataka koji još nisu premješteni u arhivu: {{nr}}. Želiš li stvarno zatvoriti program bez završavanja tvog dana?"
+        "FINISH_DAY_BEFORE_EXIT": "Broj obavljenih zadataka u tvom popisu za danas koji još nisu premješteni u arhivu: {{nr}}. Želiš li stvarno zatvoriti program bez završavanja tvog dana?"
       }
     },
-    "GITHUB": {
+    "GITEA": {
       "DIALOG_INITIAL": {
-        "TITLE": "Postavi GitHub za projekt"
+        "TITLE": "Postavi Gitea za projekt"
       },
       "FORM": {
         "FILTER_USER": "Korisničko ime (npr. za izdvajanje vlastito izrađenih promjena)",
-        "IS_AUTO_ADD_TO_BACKLOG": "Automatski dodaj popis neriješenih GitHub problema u odlagalište",
+        "IS_AUTO_ADD_TO_BACKLOG": "Automatski dodaj popis neriješenih Gitea problema u odlagalište",
         "IS_AUTO_POLL": "Automatski preispitaj uvezene git probleme za promjenama",
-        "IS_SEARCH_ISSUES_FROM_GITHUB": "Prikaži git probleme kao prijedloge prilikom dodavanja novih zadataka",
-        "REPO": "„username/repositoryName” za git repozitorij koji želiš pratiti",
+        "IS_SEARCH_ISSUES_FROM_GITEA": "Prikaži git probleme kao prijedloge prilikom dodavanja novih zadataka",
+        "HOST": "Host računalo (npr.: https://try.gitea.io)",
         "TOKEN": "Token za pristup",
         "TOKEN_DESCRIPTION": "Potreban je za pristup privatnom repozitoriju"
+        "REPO_FULL_NAME": "Korisničko ime ili ime organizacije/projekta",
+        "REPO_FULL_NAME_DESCRIPTION": "Može se pronaći kao dio url-a prilikom pregledavanja projekta u pregledniku.",
+        "SCOPE": "Opseg",
+        "SCOPE_ALL": "Sve",
+        "SCOPE_ASSIGNED": "Dodijeljeno meni",
+        "SCOPE_CREATED": "Od mene stvoreno",
       },
       "FORM_SECTION": {
-        "HELP": "<p>Ovdje možeš konfigurirati „Super produktivnost” za prikaz popisa nezavršenih GitHub problema za određeni repozitorij na ploči za stvaranje zadataka u prikazu dnevnog planiranja. U popisu će se ti problemi navesti kao prijedlozi s poveznicom na problem te s daljnjim informacija o problemu.</p> <p>Osim toga, sve neriješene probleme možeš automatski dodati i sinkronizirati u svoje odlagalište zadataka.</p><p>Za dobivanje ograničenja korištenja i za pristupanje možeš navesti token za pristup. <a href='https://docs.github.com/en/free-pro-team@latest/developers/apps/scopes-for-oauth-apps'>Više informacija o njegovom opsegu možeš pronaći ovdje</a >.</p>",
-        "TITLE": "GitHub"
+        "HELP": "<p>Ovdje možeš konfigurirati „Super produktivnost” za prikaz popisa nezavršenih Gitea problema za određeni repozitorij na ploči za stvaranje zadataka u prikazu dnevnog planiranja. U popisu će se ti problemi navesti kao prijedlozi s poveznicom na problem te s daljnjim informacija o problemu.</p> <p>Osim toga, sve neriješene probleme možeš automatski dodati i sinkronizirati u svoje odlagalište zadataka.</p><p>Za dobivanje ograničenja korištenja i za pristupanje možeš navesti token za pristup.",
+        "TITLE": "Gitea"
       },
       "ISSUE_CONTENT": {
         "ASSIGNEE": "Odgovorna osoba",
@@ -167,26 +173,57 @@
         "WRITE_A_COMMENT": "Zapiši komentar"
       },
       "S": {
-        "ERR_UNKNOWN": "GitHub: Nepoznata greška {{statusCode}} {{errorMsg}}. Je li prekoračeno API ograničenje?"
+        "ERR_UNKNOWN": "Gitea: Nepoznata greška {{statusCode}} {{errorMsg}}. Je li prekoračeno API ograničenje?"
+      }
+    },
+    "GITHUB": {
+      "DIALOG_INITIAL": {
+        "TITLE": "Postavi GitHub za projekt"
+      },
+      "FORM": {
+        "FILTER_USER": "Korisničko ime (npr. za izdvajanje vlastitih promjena)",
+        "IS_AUTO_ADD_TO_BACKLOG": "Automatski dodaj neriješene GitHub probleme u odlagalište",
+        "IS_AUTO_POLL": "Automatski preispitaj uvezene git probleme za promjenama",
+        "IS_SEARCH_ISSUES_FROM_GITHUB": "Prikaži git probleme kao prijedloge prilikom dodavanja novih zadataka",
+        "REPO": "„korisničko ime/ime repozitorija” za git repozitorij koji želiš pratiti",
+        "TOKEN": "Token za pristup"
+        "TOKEN_DESCRIPTION": "Potrebno za pristup privatnom spremištu"
+      },
+      "FORM_SECTION": {
+        "HELP": "<p>Ovdje možeš konfigurirati „Super produktivnost” za prikaz popisa nezavršenih GitHub problema (online verzija ili instanca vlastitog histinga) za određeni projekt na ploči za stvaranje zadataka u prikazu dnevnog planiranja. U popisu će se ti problemi navesti kao prijedlozi s poveznicom na problem te s daljnjim informacija o problemu.</p> <p>Osim toga, sve neriješene probleme možeš automatski dodati i sinkronizirati u svoje odlagalište zadataka.</p>",
+        "TITLE": "GitLab"
+      },
+      "ISSUE_CONTENT": {
+        "ASSIGNEE": "Odgovorna osoba",
+        "AT": "pri",
+        "DESCRIPTION": "Opis",
+        "LABELS": "Etikete",
+        "MARK_AS_CHECKED": "Označi aktualiziranja kao provjerena",
+        "STATUS": "Stanje",
+        "SUMMARY": "Sažetak",
+        "WRITE_A_COMMENT": "Zapiši komentar"
+      },
+      "S": {
+        "ERR_UNKNOWN": "GitHub: Nepoznata greška {{statusCode}} {{errorMsg}}"
       }
     },
     "GITLAB": {
       "DIALOG_INITIAL": {
-        "TITLE": "Postavi GitLab za projekt"
+        "TITLE": "Postavi GitLab za projek"
       },
       "FORM": {
         "FILTER_USER": "Korisničko ime (npr. za izdvajanje vlastitih promjena)",
-        "GITLAB_BASE_URL": "Prilagođen osnovni GitLab URL (opcijonalno)",
-        "IS_AUTO_ADD_TO_BACKLOG": "Automatski dodaj neriješene GitLab probleme u odlagalište",
+        "GITLAB_BASE_URL": "Prilagođeni osnovni GitLab URL (opcionalno)",
+        "IS_AUTO_ADD_TO_BACKLOG": "Automatically add unresolved issues from GitLab to backlog",
         "IS_AUTO_POLL": "Automatski preispitaj uvezene git probleme za promjenama",
         "IS_SEARCH_ISSUES_FROM_GITLAB": "Prikaži git probleme kao prijedloge prilikom dodavanja novih zadataka",
-        "PROJECT": "(standardni) ID projekta ili korisničko ime / projekt",
+        "PROJECT": "(standardni) ID projekta ili korisničko ime/projekt",
         "SCOPE": "Opseg",
         "SCOPE_ALL": "Sve",
-        "SCOPE_ASSIGNED": "Meni dodijeljeno",
+        "SCOPE_ASSIGNED": "Dodijeljeno meni",
         "SCOPE_CREATED": "Od mene stvoreno",
         "SOURCE": "Izvor",
-        "SOURCE_GLOBAL": "Svi",
+        "SOURCE_GLOBAL": "Sve",
         "SOURCE_GROUP": "Grupa",
         "SOURCE_PROJECT": "Projekt",
         "TOKEN": "Token za pristup"
@@ -246,9 +283,9 @@
         "ISSUE_UPDATE_SINGLE": "{{issueProviderName}}: Aktualizirani su podaci za problem „{{issueTitle}}”",
         "MANUAL_UPDATE_ISSUE_SUCCESS": "{{issueProviderName}}: Aktualizirani su podaci za problem „{{issueTitle}}”",
         "MISSING_ISSUE_DATA": "{{issueProviderName}}: Pronađeni su problemi s podacima problema {{issueStr}}. Ponovo se učitavaju.",
-        "NEW_COMMENT": "{{issueProviderName}}: Novi komentar za problem „{{issueTitle}}”",
-        "POLLING_BACKLOG": "{{issueProviderName}}: Preispituje se novi problem {{issuesStr}}",
-        "POLLING_CHANGES": "{{issueProviderName}}: Preispituju se promjene za problem {{issuesStr}}"
+        "NEW_COMMENT": "{{issueProviderName}}: Novi komentar za „{{issueTitle}}”",
+        "POLLING_BACKLOG": "{{issueProviderName}}: Anketiranje za novi problem {{issuesStr}}",
+        "POLLING_CHANGES": "{{issueProviderName}}: Promjene anketiranja za problem {{issuesStr}}"
       }
     },
     "JIRA": {
@@ -264,11 +301,12 @@
         "ENABLE_TRANSITIONS": "Aktiviraj mogućnost mijenjanja stanja ili izvršavanje radnje",
         "IN_PROGRESS": "Stanje za započinjanje zadatka",
         "LOAD_SUGGESTIONS": "Učitaj prijedloge",
-        "MAP_CUSTOM_FIELDS": "Učitaj jedinice procjene za potpunu implementaciju",
-        "MAP_CUSTOM_FIELDS_INFO": "Nažalost, neki Jira podaci spremaju se u prilagođena polja koja su različita za svaku instalaciju. Ako želiš uključiti ove podatke, moraš odabrati odgovarajuće prilagođeno polje za njih. Trenutačno postoji samo polje jedinice procjene za potpunu implementaciju koja se treba mapirati.",
+        "MAP_CUSTOM_FIELDS": "Učitaj bodovanja",
+        "MAP_CUSTOM_FIELDS_INFO": "Nažalost, neki Jira podaci spremaju se u prilagođena polja koja su različita za svaku instalaciju. Ako želiš uključiti ove podatke, moraš odabrati odgovarajuće prilagođeno polje za njih. Trenutačno postoji samo polje bodovanja koja se mora mapirati.",
         "OPEN": "Stanje za pauziranje zadatka",
         "SELECT_ISSUE_FOR_TRANSITIONS": "Učitaj problem za učitavanje dostupnih mogućnosti mijenjanja stanja ili izvršavanja radnji",
-        "STORY_POINTS": "Ime polja jedinice procjene za potpunu implementaciju"
+        "STORY_POINTS": "Ime polja bodovanja"
+        "TRANSITION": "Baratanje tranzicijom"
       },
       "DIALOG_CONFIRM_ASSIGNMENT": {
         "MSG": "Sažetak <strong>{{summary}}</strong> je trenutačno dodijeljen odgovornoj osobi <strong>{{assignee}}</strong>. Želiš li ga dodijeliti sebi?",
@@ -359,7 +397,7 @@
         "ON": "na",
         "RELATED": "Povezano",
         "STATUS": "Stanje",
-        "STORY_POINTS": "Story Points",
+        "STORY_POINTS": "Bodovanja",
         "SUB_TASKS": "Podzadaci",
         "SUMMARY": "Sažetak",
         "WORKLOG": "Dnevnik rada",
@@ -401,7 +439,7 @@
         "AVG_TIME_SPENT_PER_TASK": "Prosječno utrošeno vrijeme po zadatku",
         "COUNTING_SUBTASKS": "(brojenje podzadataka)",
         "DAYS_WORKED": "Broj radnih dana",
-        "GLOBAL_METRICS": "Globalni metrični podaci",
+        "GLOBAL_METRICS": "Globalni mjerni podaci",
         "IMPROVEMENT_SELECTION_COUNT": "Koliko je puta odabran faktor poboljšanja",
         "MOOD_PRODUCTIVITY_OVER_TIME": "Raspoloženje i produktivnost tijekom vremena",
         "NO_ADDITIONAL_DATA_YET": "Još nisu prikupljeni dodatni podaci. Koristi obrazac na ploči dnevnog sažetka „Evaluacija” za prikupljanje dodatnih podataka.",
@@ -418,7 +456,7 @@
         "DISABLE_REPEAT_EVERY_DAY": "Deaktiviraj svakodnevno ponavljanje",
         "ENABLE_REPEAT_EVERY_DAY": "Ponavljaj svaki dan",
         "HELP_H1": "Zašto je to važno?",
-        "HELP_LINK_TXT": "Idi na odjeljak metričkih podataka",
+        "HELP_LINK_TXT": "Idi na odjeljak mjernih podataka",
         "HELP_P1": "Vrijeme je za evaluaciju vlastitog rada! Tvoji ovdje zapisani odgovori su spremljeni i pružaju statistiku tvog rada u odjeljku metričkih podataka. Nadalje, prijedlozi za sutra će se sljedećeg dana pojaviti iznad tvog popisa zadataka.",
         "HELP_P2": "Namjera nije izračunavanje točnih metričkih podataka ili strojna produktivnost u svemu što radiš, nego poboljšanje osjećaja o vlatitom radu. Može biti korisno za procjenjivanje problema u tvojoj svakodnevnoj rutini, kao i za pronalaženje čimbenika koji ti pomažu u obavjanju posla. Uz ponešto sistematike može pomoći bolje svladati i poboljšati tvoje poslove.",
         "IMPROVEMENTS": "Što je poboljšalo tvoju produktivnost?",
@@ -449,11 +487,23 @@
         "NO_NOTES": "Trenutačno nema novih bilježaka"
       },
       "NOTE_CMP": {
-        "DISABLE_PARSE": "Deaktiviraj markdown obradu",
+        "DISABLE_PARSE": "Deaktiviraj markdown obradu u pregledu",
         "ENABLE_PARSE": "Aktiviraj markdown obradu"
       }
     },
     "OPEN_PROJECT": {
+      "CFG_CMP": {
+        "ALWAYS_ASK": "Uvijek otvori dijalog",
+        "DONE": "Stanje za obavljeni zadatak",
+        "DO_NOT": "Nemoj mijenjati oblik",
+        "ENABLE": "Aktiviraj Openproject integraciju",
+        "ENABLE_TRANSITIONS": "Aktiviraj baratanje mijenjanja oblika",
+        "IN_PROGRESS": "Stanje za započinjanje zadatka",
+        "OPEN": "Stanje za pauziranje zadatka",
+        "PROGRESS_ON_SAVE": "Standardni napredak pri spremanju",
+        "TRANSITION": "Baratanje mijenjanja oblika",
+        "SELECT_ISSUE_FOR_TRANSITIONS": "Odaberi problem za učitavanje dostupnih promjena oblika"
+      },
       "DIALOG_INITIAL": {
         "TITLE": "Postavi OpenProject za projekt"
       },
@@ -466,6 +516,15 @@
         "SUBMIT_TIME_FOR": "Pošalji OpenProjectu vrijeme za",
         "TIME_SPENT": "Utrošeno vrijeme",
         "TITLE": "OpenProject: Pošalji dnevnik rada"
+      },
+      "DIALOG_TRANSITION": {
+        "CHOOSE_STATUS": "Odaberi stanje za dodjeljivanje",
+        "CURRENT_ASSIGNEE": "Trenutačna odgovorna osoba:",
+        "CURRENT_STATUS": "Trenutačno stanje:",
+        "PERCENTAGE_DONE": "Napredak:",
+        "TASK_NAME": "Ime zadatka:",
+        "TITLE": "OpenProject: Stanje aktualiziranja",
+        "UPDATE_STATUS": "Stanje aktualiziranja"
       },
       "FORM": {
         "FILTER_USER": "Korisničko ime (npr. za izdvajanje tvojih promjena)",
@@ -503,6 +562,9 @@
       "S": {
         "ERR_UNKNOWN": "OpenProject: Nepoznata greška {{statusCode}} {{errorMsg}}. Je li CORS ispravno konfiguriran za poslužitelja?",
         "POST_TIME_SUCCESS": "OpenProject: Unos vremena uspješno stvoren za {{issueTitle}}"
+        "TRANSITION": "OpenProject: Zadaj problemu „{{issueKey}}” ime „{{name}}”",
+        "TRANSITION_SUCCESS": "OpenProject: Postavi problem {{issueKey}} kao <strong>{{chosenTransition}}</strong>",
+        "TRANSITIONS_LOADED": "Prijelazi su učitani. Koristi donje odabire za dodjeljivanje"
       }
     },
     "POMODORO": {
@@ -512,13 +574,17 @@
       "FINISH_SESSION_X": "Uspješno si završio/la sesiju broj <strong>{{nr}}</strong>!",
       "NOTIFICATION": {
         "BREAK_X_START": "Pomodoro: {{nr}}. pauza je počela!",
+        "BREAK_TIME": "Pomodoro: Vrijeme je za {{nr}}. pauzu!",
         "NO_TASKS": "Prije nego što se Pomodoro timer može pokrenuti moraš dodati zadatke.",
         "SESSION_X_START": "Pomodoro: {{nr}}. sesija je počela!"
       },
       "S": {
         "SESSION_X_START": "Pomodoro: {{nr}}. sesija je počela!"
+        "SESSION_SKIP": "Preskoči Pomodoro sesiju",
+        "SESSION_END": "Završi Pomodoro sesiju"
       },
       "SKIP_BREAK": "Preskoči pauzu"
+      "START_BREAK": "Počni pauzu"
     },
     "PROCRASTINATION": {
       "BACK_TO_WORK": "Vrati se na posao!",
@@ -572,6 +638,7 @@
         "SETUP_GITLAB": "Postavi GitLab integraciju",
         "SETUP_JIRA": "Postavi Jira integraciju",
         "SETUP_OPEN_PROJECT": "Postavi OpenProject integraciju"
+        "SETUP_GITEA_PROJECT": "Postavi Gitea integraciju"
       },
       "FORM_BASIC": {
         "L_IS_HIDDEN_FROM_MENU": "Sakrij projekt iz izbornika",
@@ -602,7 +669,7 @@
         "DELETED": "Izbrisani projekt",
         "E_EXISTS": "Projekt „{{title}}” već postoji",
         "E_INVALID_FILE": "Neispravni podaci za datoteku projekta",
-        "ISSUE_PROVIDER_UPDATED": "Aktualizirane postavke projekta za <strong>{{issueProviderKey}}</strong>",
+        "ISSUE_PROVIDER_UPDATED": "Postavke projekta su aktualizirane za <strong>{{issueProviderKey}}</strong>",
         "UNARCHIVED": "Nearhivirani projekt",
         "UPDATED": "Aktualizirane postavke projekta"
       }
@@ -650,11 +717,11 @@
     "SYNC": {
       "C": {
         "EMPTY_SYNC": "Pokušavaš sinkronizirati prazan objekt podataka. Ako pokušavaš postaviti sinkronizaciju iz nove instance programa, jednostavno pritisni „U redu” za učitavanje podataka s poslužitelja. U suprotnom, provjeri svoje podatke.",
-        "FORCE_IMPORT": "Svejedno uvesti udaljene podatke?",
-        "FORCE_UPLOAD": "Svejedno učitati lokalne podatke?",
-        "FORCE_UPLOAD_AFTER_ERROR": "Dogodila se greška tijekom učitavanja lokalnih podataka. Želiš li pokušati prisilno aktualizirati?",
+        "FORCE_IMPORT": "Svejedno uvesti podatke udaljenog uređaja?",
+        "FORCE_UPLOAD": "Svejedno učitati podatke lokalnog uređaja?",
+        "FORCE_UPLOAD_AFTER_ERROR": "Dogodila se greška tijekom učitavanja podataka lokalnog uređaja. Želiš li pokušati prisilno aktualizirati?",
         "MIGRATE_LEGACY": "Otkriveni su stari podaci tijekom uvoza. Želiš li ih pokušati migrirati?",
-        "NO_REMOTE_DATA": "Podaci na udaljenom uređaju nisu pronađeni. Želiš li učitati lokalne podatke na udaljeni uređaj?",
+        "NO_REMOTE_DATA": "Podaci udaljenog uređaja nisu pronađeni. Želiš li učitati lokalne podatke na udaljeni uređaj?",
         "TRY_LOAD_REMOTE_AGAIN": "Želiš li ponovo pokušati učitati podatke s udaljenog uređaja?"
       },
       "D_AUTH_CODE": {
@@ -666,13 +733,13 @@
       "D_CONFLICT": {
         "LAST_CHANGE": "Zadnja promjena:",
         "LAST_SYNC": "Zadnja sinkronizacija:",
-        "LOCAL": "Lokalni",
-        "LOCAL_REMOTE": "Lokalni -> Udaljeni",
+        "LOCAL": "Lokalni uređaj",
+        "LOCAL_REMOTE": "Lokalni uređaj -> Udaljeni uređaj",
         "REMOTE": "Udaljeni uređaj",
-        "TEXT": "<p>Aktualiziraj s udaljenog uređaja. Čini se da su promijenjeni lokalni podaci kao i podaci na udaljenom uređaju.</p>",
+        "TEXT": "<p>Aktualiziraj s udaljenog uređaja. Čini se da su promijenjeni podaci lokalnog i udaljenog uređaja.</p>",
         "TITLE": "Sinkronizacija: Konfliktni podaci",
-        "USE_LOCAL": "Koristi lokalne",
-        "USE_REMOTE": "Koristi udaljene"
+        "USE_LOCAL": "Koristi lokalne podatke",
+        "USE_REMOTE": "Koristi udaljene podatke"
       },
       "FORM": {
         "DROPBOX": {
@@ -756,11 +823,11 @@
         "ADD_TASK_TO_TOP_OF_BACKLOG": "Dodaj zadatak na vrh odlagališta",
         "ADD_TASK_TO_TOP_OF_TODAY": "Dodaj zadatak na vrh popisa",
         "CREATE_TASK": "Stvori novi zadatak",
-        "EXAMPLE": "Primjer: „Naslov nekog zadatka +ime projekta #neka oznaka #neka druga oznaka 10 m/3 h”",
+        "EXAMPLE": "Primjer: „Naslov nekog zadatka +ime projekta #jedna oznaka #jedna druga oznaka 10 m/3 h”",
         "START": "Za pokretanje pritisni tipku enter još jednom"
       },
       "B": {
-        "ADD_HALF_HOUR": "Dodaj 1/2 sata",
+        "ADD_HALF_HOUR": "Dodaj pola sata",
         "ESTIMATE_EXCEEDED": "Premašeno je procijenjeno vrijeme za „{{title}}”"
       },
       "CMP": {
@@ -866,7 +933,7 @@
         "SPENT_TODAY": "Danas utrošeno",
         "SPENT_TOTAL": "Ukupno utrošeno",
         "TASK": "Zadatak",
-        "TOGGLE_DONE": "odznači/označi kao obavljen"
+        "TOGGLE_DONE": "odznači/označi kao obavljeno"
       }
     },
     "TASK_REPEAT": {
@@ -1105,12 +1172,12 @@
     "AUTO_BACKUPS": {
       "HELP": "Automatski spremi sve podatke u mapu programa kao sigurnost ukoliko se dogodi nešto krivo.",
       "LABEL_IS_ENABLED": "Aktiviraj automatsko spremanje sigurnosnih kopija",
-      "LOCATION_INFO": "Sigurnosne kopije se spremaju u:",
+      "LOCATION_INFO": "Sigurnosne kopije spremaju se u:",
       "TITLE": "Automatske sigurnosne kopije"
     },
     "EVALUATION": {
-      "IS_HIDE_EVALUATION_SHEET": "Sakrij evaluaciju o dnevnom sažetku",
-      "TITLE": "Evaluacija i metrični podaci"
+      "IS_HIDE_EVALUATION_SHEET": "Sakrij stranicu evaluacije u dnevnom sažetku",
+      "TITLE": "Evaluacija i mjerni podaci"
     },
     "IDLE": {
       "HELP": "<div><p>Kad je baratanje neaktivnim vremenom aktivirano, nakon određenog vremena otvorit će se dijaloški okvir za provjeru je li želiš, i pri kojem zadatku želiš pratiti svoje neaktivno vrijeme.</p></div>",
@@ -1220,6 +1287,7 @@
       "HELP": "<p>Pomodoro timer se može konfigurirati putem nekoliko postavki. Trajanje svake radne sesije, trajanje normalnih pauza, broj radnih sesija koje se pokreću prije početka duže pauze i trajanje ove duže pauze.</p> <p>Također možeš postaviti prikaz tvojih ometanja tijekom pomodoro pauza.</p> <p>Postavka „Pauziraj praćenja vremena pri pomodoro pauzi” će također pratiti tvoje pauze kao utrošeno radno vrijeme na zadatku. </p> <p>Aktiviranje „Pauziraj pomodoro sesiju kad nema aktivnog zadatka” također će pauzirati pomodoro sesiju kad pauziraš zadatak.</p>",
       "IS_ENABLED": "Aktiviraj pomodoro timer",
       "IS_MANUAL_CONTINUE": "Ručno potvrdi početak sljedeće pomodoro sesije",
+      "IS_MANUAL_CONTINUE_BREAK": "Ručno potvrdi početak sljedeće pauze",
       "IS_PLAY_SOUND": "Sviraj zvuk kad je sesija gotova",
       "IS_PLAY_SOUND_AFTER_BREAK": "Sviraj zvuk kad je pauza gotova",
       "IS_PLAY_TICK": "Sviraj zvuk otkucavanja sekundi",
@@ -1297,12 +1365,12 @@
     "DELETE_TAG": "Izbriši oznaku",
     "GO_TO_TASK_LIST": "Idi na popis zadataka",
     "MANAGE_PROJECTS": "Upravljaj projektima",
-    "METRICS": "Metrični podaci",
+    "METRICS": "Mjerni podaci",
     "NOTES": "Bilješke",
     "NOTES_PANEL_INFO": "Bilješke se mogu prikazati samo u prikazima vremenske trake i uobičajenih popisa zadataka.",
     "PROCRASTINATE": "Odugovlači",
     "PROJECTS": "Projekti",
-    "PROJECT_MENU": "Izbornik projakta",
+    "PROJECT_MENU": "Izbornik projekta",
     "PROJECT_SETTINGS": "Postavke projakta",
     "QUICK_HISTORY": "Brza povijest",
     "SCHEDULED": "Terminirano",
@@ -1353,7 +1421,7 @@
     "WEEK": "Tjedan"
   },
   "PM": {
-    "TITLE": "Metrični podaci projekta"
+    "TITLE": "Mjerni podaci projekata"
   },
   "PP": {
     "ARCHIVED_PROJECTS": "Arhivirani projekti",
