@@ -32,3 +32,10 @@
     [task]="task"
   ></open-project-issue-content>
 </ng-container>
+
+<ng-container *ngIf="task?.issueType===GITEA_TYPE">
+  <gitea-issue-content
+    [issue]="issueData"
+    [task]="task"
+  ></gitea-issue-content>
+</ng-container>

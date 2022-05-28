@@ -115,7 +115,9 @@ $thisLowerHeight: $thisHeight - $thisUpperHeight;
 
   a,
   button {
-    display: block;
+    display: flex;
+    justify-content: center;
+    align-items: center;
     transition: $transition-enter;
     margin: 0;
     padding: 0;

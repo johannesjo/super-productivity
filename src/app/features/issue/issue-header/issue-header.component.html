@@ -17,3 +17,6 @@
 <ng-container *ngIf="task?.issueType===OPEN_PROJECT_TYPE">
   <open-project-issue-header [task]="task"></open-project-issue-header>
 </ng-container>
+<ng-container *ngIf="task?.issueType===GITEA_TYPE">
+  <gitea-issue-header [task]="task"></gitea-issue-header>
+</ng-container>
