@@ -82,7 +82,7 @@ export const selectUnarchivedProjectsWithoutCurrent = createSelector(
     return ids
       .filter((id) => id !== props.currentId)
       .map((id) => exists(s.entities[id]) as Project)
-      .filter((p) => !p.isArchived && p.id);
+      .filter((p) => !p.isArchived && !p.isHiddenFromMenu && p.id);
   },
 );
 
