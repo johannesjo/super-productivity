@@ -137,22 +137,23 @@ Due to certification issues it's recommended to download the app from the Micros
 
 ### Linux
 
+#### Snap - Most distributions
+Install via command-line:
 ```
 # stable
 sudo snap install superproductivity
 
 # edge channel releases
- sudo snap install --channel=edge superproductivity
+sudo snap install --channel=edge superproductivity
 
- # it is also recommended to disable updates to the app while it is running:
- sudo snap set core experimental.refresh-app-awareness=true
+# it is also recommended to disable updates to the app while it is running:
+sudo snap set core experimental.refresh-app-awareness=true
 ```
-
 <a href="https://snapcraft.io/superproductivity">
   <img alt="Get it from the Snap Store" src="https://snapcraft.io/static/images/badges/en/snap-store-black.svg" />
 </a>
 
-#### Arch
+#### Aur - Arch Linux
 
 ```bash
 git clone https://aur.archlinux.org/superproductivity-bin.git
