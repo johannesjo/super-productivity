@@ -25,7 +25,7 @@ import {
   selectRepeatedImprovementIds,
 } from './improvement/store/improvement.reducer';
 import { selectHasSimpleCounterData } from '../simple-counter/store/simple-counter.reducer';
-import { GlobalTrackingIntervalService } from '../../core/global-tracking-interval/global-tracking-interval.service';
+import { DateService } from 'src/app/core/date/date.service';
 
 @Injectable({
   providedIn: 'root',
@@ -47,10 +47,7 @@ export class MetricService {
 
   // productivityHappinessLineChartData$: Observable<LineChartData> = this._store$.pipe(select(selectProductivityHappinessLineChartDataComplete));
 
-  constructor(
-    private _store$: Store<MetricState>,
-    private _globalTrackingIntervalService: GlobalTrackingIntervalService,
-  ) {}
+  constructor(private _store$: Store<MetricState>, private _dateService: DateService) {}
 
   // getMetricForDay$(id: string = getWorklogStr()): Observable<Metric> {
   //   if (!id) {
@@ -60,7 +57,7 @@ export class MetricService {
   // }
 
   getMetricForDayOrDefaultWithCheckedImprovements$(
-    day: string = this._globalTrackingIntervalService.getWorklogStr(),
+    day: string = this._dateService.todayStr(),
   ): Observable<Metric> {
     return this._store$.pipe(select(selectMetricById, { id: day })).pipe(
       switchMap((metric) => {
@@ -88,7 +85,7 @@ export class MetricService {
       addMetric({
         metric: {
           ...metric,
-          id: metric.id || this._globalTrackingIntervalService.getWorklogStr(),
+          id: metric.id || this._dateService.todayStr(),
         },
       }),
     );
@@ -107,7 +104,7 @@ export class MetricService {
   }
 
   upsertTodayMetric(metricIn: Partial<Metric>): void {
-    const day = this._globalTrackingIntervalService.getWorklogStr();
+    const day = this._dateService.todayStr();
     const metric = {
       id: day,
       ...DEFAULT_METRIC_FOR_DAY,

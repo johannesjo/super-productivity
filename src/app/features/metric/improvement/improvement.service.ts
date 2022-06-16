@@ -22,7 +22,7 @@ import {
   selectHasLastTrackedImprovements,
   selectImprovementBannerImprovements,
 } from '../store/metric.selectors';
-import { GlobalTrackingIntervalService } from '../../../core/global-tracking-interval/global-tracking-interval.service';
+import { DateService } from 'src/app/core/date/date.service';
 
 @Injectable({
   providedIn: 'root',
@@ -43,7 +43,7 @@ export class ImprovementService {
 
   constructor(
     private _store$: Store<ImprovementState>,
-    private _globalTrackingIntervalService: GlobalTrackingIntervalService,
+    private _dateService: DateService,
   ) {}
 
   addImprovement(title: string): string {
@@ -61,10 +61,7 @@ export class ImprovementService {
     return id;
   }
 
-  addCheckedDay(
-    id: string,
-    checkedDay: string = this._globalTrackingIntervalService.getWorklogStr(),
-  ): void {
+  addCheckedDay(id: string, checkedDay: string = this._dateService.todayStr()): void {
     this._store$.dispatch(
       addImprovementCheckedDay({
         id,
@@ -86,7 +83,7 @@ export class ImprovementService {
   }
 
   hideImprovement(id: string): void {
-    const day = this._globalTrackingIntervalService.getWorklogStr();
+    const day = this._dateService.todayStr();
     this._store$.dispatch(hideImprovement({ id, day }));
   }
 

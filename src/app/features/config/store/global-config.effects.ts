@@ -8,7 +8,7 @@ import { IPC } from '../../../../../electron/shared-with-frontend/ipc-events.con
 import { IS_ELECTRON, LanguageCode } from '../../../app.constants';
 import { T } from '../../../t.const';
 import { LanguageService } from '../../../core/language/language.service';
-import { GlobalTrackingIntervalService } from '../../../core/global-tracking-interval/global-tracking-interval.service';
+import { DateService } from 'src/app/core/date/date.service';
 import { SnackService } from '../../../core/snack/snack.service';
 import { ElectronService } from '../../../core/electron/electron.service';
 import { loadAllData } from '../../../root-store/meta/load-all-data.action';
@@ -125,9 +125,7 @@ export class GlobalConfigEffects {
         ),
         tap(({ sectionKey, sectionCfg }) => {
           // eslint-disable-next-line
-          this._globalTrackingService.setStartOfNextDayDiff(
-            (sectionCfg as any)['startOfNextDay'],
-          );
+          this._dateService.setStartOfNextDayDiff((sectionCfg as any)['startOfNextDay']);
         }),
       ),
     { dispatch: false },
@@ -140,7 +138,7 @@ export class GlobalConfigEffects {
         tap(({ appDataComplete }) => {
           const cfg = appDataComplete.globalConfig || DEFAULT_GLOBAL_CONFIG;
           const startOfNextDay = cfg && cfg.misc && cfg.misc.startOfNextDay;
-          this._globalTrackingService.setStartOfNextDayDiff(startOfNextDay);
+          this._dateService.setStartOfNextDayDiff(startOfNextDay);
         }),
       ),
     { dispatch: false },
@@ -151,7 +149,7 @@ export class GlobalConfigEffects {
     private _persistenceService: PersistenceService,
     private _electronService: ElectronService,
     private _languageService: LanguageService,
-    private _globalTrackingService: GlobalTrackingIntervalService,
+    private _dateService: DateService,
     private _snackService: SnackService,
     private _store: Store<any>,
   ) {}

@@ -27,7 +27,6 @@ import { TaskService } from '../../tasks/task.service';
 import { TaskRepeatCfgService } from '../task-repeat-cfg.service';
 import { TaskRepeatCfg, TaskRepeatCfgState } from '../task-repeat-cfg.model';
 import { forkJoin, from, merge, of } from 'rxjs';
-import { GlobalTrackingIntervalService } from '../../../core/global-tracking-interval/global-tracking-interval.service';
 import { setActiveWorkContext } from '../../work-context/store/work-context.actions';
 import { SyncTriggerService } from '../../../imex/sync/sync-trigger.service';
 import { SyncProviderService } from '../../../imex/sync/sync-provider.service';
@@ -38,6 +37,7 @@ import { T } from '../../../t.const';
 import { Update } from '@ngrx/entity';
 import { getDateTimeFromClockString } from '../../../util/get-date-time-from-clock-string';
 import { isToday } from '../../../util/is-today.util';
+import { DateService } from 'src/app/core/date/date.service';
 
 @Injectable()
 export class TaskRepeatCfgEffects {
@@ -75,7 +75,7 @@ export class TaskRepeatCfgEffects {
         () =>
           this._taskRepeatCfgService
             .getRepeatTableTasksDueForDay$(
-              Date.now() - this._globalTrackingService.startOfNextDayDiff,
+              Date.now() - this._dateService.startOfNextDayDiff,
             )
             .pipe(first()),
         // ===> taskRepeatCfgs scheduled for today and not yet created already
@@ -92,7 +92,7 @@ export class TaskRepeatCfgEffects {
             this._taskRepeatCfgService.getActionsForTaskRepeatCfg(
               taskRepeatCfg,
               currentTaskId,
-              Date.now() - this._globalTrackingService.startOfNextDayDiff,
+              Date.now() - this._dateService.startOfNextDayDiff,
             ),
           ),
           concatMap((actionsForRepeatCfg) => from(actionsForRepeatCfg)),
@@ -282,7 +282,7 @@ export class TaskRepeatCfgEffects {
     private _taskService: TaskService,
     private _store$: Store<any>,
     private _persistenceService: PersistenceService,
-    private _globalTrackingService: GlobalTrackingIntervalService,
+    private _dateService: DateService,
     private _taskRepeatCfgService: TaskRepeatCfgService,
     private _syncTriggerService: SyncTriggerService,
     private _syncProviderService: SyncProviderService,

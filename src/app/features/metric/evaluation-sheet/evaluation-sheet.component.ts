@@ -18,7 +18,7 @@ import { T } from '../../../t.const';
 import { DialogAddNoteComponent } from '../../note/dialog-add-note/dialog-add-note.component';
 import { MatDialog } from '@angular/material/dialog';
 import { WorkContextService } from '../../work-context/work-context.service';
-import { GlobalTrackingIntervalService } from '../../../core/global-tracking-interval/global-tracking-interval.service';
+import { DateService } from 'src/app/core/date/date.service';
 
 @Component({
   selector: 'evaluation-sheet',
@@ -30,9 +30,7 @@ export class EvaluationSheetComponent implements OnDestroy, OnInit {
   @Output() save: EventEmitter<any> = new EventEmitter();
   T: typeof T = T;
   metricForDay?: MetricCopy;
-  day$: BehaviorSubject<string> = new BehaviorSubject(
-    this._globalTrackingIntervalService.getWorklogStr(),
-  );
+  day$: BehaviorSubject<string> = new BehaviorSubject(this._dateService.todayStr());
   private _metricForDay$: Observable<MetricCopy> = this.day$.pipe(
     switchMap((day) =>
       this._metricService.getMetricForDayOrDefaultWithCheckedImprovements$(day),
@@ -48,7 +46,7 @@ export class EvaluationSheetComponent implements OnDestroy, OnInit {
     private _metricService: MetricService,
     private _matDialog: MatDialog,
     private _cd: ChangeDetectorRef,
-    private _globalTrackingIntervalService: GlobalTrackingIntervalService,
+    private _dateService: DateService,
   ) {}
 
   @Input() set day(val: string) {

@@ -16,7 +16,7 @@ import {
   mapToProjectWithTasks,
   ProjectWithTasks,
 } from './map-to-project-with-tasks.util';
-import { GlobalTrackingIntervalService } from '../../../core/global-tracking-interval/global-tracking-interval.service';
+import { DateService } from 'src/app/core/date/date.service';
 
 @Component({
   selector: 'task-summary-tables',
@@ -27,7 +27,7 @@ import { GlobalTrackingIntervalService } from '../../../core/global-tracking-int
 export class TaskSummaryTablesComponent {
   T: typeof T = T;
 
-  @Input() dayStr: string = this._globalTrackingIntervalService.getWorklogStr();
+  @Input() dayStr: string = this._dateService.todayStr();
 
   @Input() isForToday: boolean = true;
 
@@ -60,7 +60,7 @@ export class TaskSummaryTablesComponent {
     private readonly _matDialog: MatDialog,
     private readonly _worklogService: WorklogService,
     private readonly _projectService: ProjectService,
-    private _globalTrackingIntervalService: GlobalTrackingIntervalService,
+    private _dateService: DateService,
   ) {}
 
   @Input('flatTasks') set flatTasksIn(v: Task[]) {
@@ -113,7 +113,7 @@ export class TaskSummaryTablesComponent {
     if (this.isShowYesterday && this.isForToday) {
       const t = new Date();
       t.setDate(t.getDate() - 1);
-      yesterdayStr = this._globalTrackingIntervalService.getWorklogStr(t);
+      yesterdayStr = this._dateService.todayStr(t);
     }
 
     return mapToProjectWithTasks(project, this.flatTasks, this.dayStr, yesterdayStr);

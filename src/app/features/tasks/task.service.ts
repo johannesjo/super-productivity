@@ -94,6 +94,7 @@ import {
   moveProjectTaskUpInBacklogList,
 } from '../project/store/project.actions';
 import { Update } from '@ngrx/entity';
+import { DateService } from 'src/app/core/date/date.service';
 
 @Injectable({
   providedIn: 'root',
@@ -184,6 +185,7 @@ export class TaskService {
     private readonly _snackService: SnackService,
     private readonly _projectService: ProjectService,
     private readonly _timeTrackingService: GlobalTrackingIntervalService,
+    private readonly _dateService: DateService,
     private readonly _router: Router,
   ) {
     this.currentTaskId$.subscribe((val) => (this.currentTaskId = val));
@@ -481,7 +483,7 @@ export class TaskService {
   addTimeSpent(
     task: Task,
     duration: number,
-    date: string = this._timeTrackingService.getWorklogStr(),
+    date: string = this._dateService.todayStr(),
   ): void {
     this._store.dispatch(addTimeSpent({ task, date, duration }));
   }
@@ -489,7 +491,7 @@ export class TaskService {
   removeTimeSpent(
     id: string,
     duration: number,
-    date: string = this._timeTrackingService.getWorklogStr(),
+    date: string = this._dateService.todayStr(),
   ): void {
     this._store.dispatch(removeTimeSpent({ id, date, duration }));
   }

@@ -38,7 +38,7 @@ import { WorkContextType } from '../../features/work-context/work-context.model'
 import { EntityState } from '@ngrx/entity';
 import { TODAY_TAG } from '../../features/tag/tag.const';
 import { shareReplayUntil } from '../../util/share-replay-until';
-import { GlobalTrackingIntervalService } from '../../core/global-tracking-interval/global-tracking-interval.service';
+import { DateService } from 'src/app/core/date/date.service';
 
 const SUCCESS_ANIMATION_DURATION = 500;
 const MAGIC_YESTERDAY_MARGIN = 4 * 60 * 60 * 1000;
@@ -62,17 +62,17 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
   isForToday: boolean = true;
 
   // TODO remove one?
-  dayStr: string = this._globalTrackingIntervalService.getWorklogStr();
+  dayStr: string = this._dateService.todayStr();
 
   dayStr$: Observable<string> = this._activatedRoute.paramMap.pipe(
     startWith({
-      params: { dayStr: this._globalTrackingIntervalService.getWorklogStr() },
+      params: { dayStr: this._dateService.todayStr() },
     }),
     map((s: any) => {
       if (s && s.params.dayStr) {
         return s.params.dayStr;
       } else {
-        return this._globalTrackingIntervalService.getWorklogStr();
+        return this._dateService.todayStr();
       }
     }),
     shareReplayUntil(this._onDestroy$, 1),
@@ -166,7 +166,7 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
     private readonly _cd: ChangeDetectorRef,
     private readonly _activatedRoute: ActivatedRoute,
     private readonly _syncProviderService: SyncProviderService,
-    private _globalTrackingIntervalService: GlobalTrackingIntervalService,
+    private _dateService: DateService,
   ) {
     this._taskService.setSelectedId(null);
     const todayStart = new Date();
@@ -289,7 +289,7 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
       if (this.isIncludeYesterday) {
         const yesterday = new Date();
         yesterday.setDate(yesterday.getDate() - 1);
-        const yesterdayStr = this._globalTrackingIntervalService.getWorklogStr(yesterday);
+        const yesterdayStr = this._dateService.todayStr(yesterday);
 
         return (t: Task) =>
           (t.timeSpentOnDay &&

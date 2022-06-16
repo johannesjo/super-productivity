@@ -61,7 +61,7 @@ import { EMPTY, Observable, of } from 'rxjs';
 import { TaskRepeatCfg } from '../../task-repeat-cfg/task-repeat-cfg.model';
 import { projectSelectors } from './project.selectors';
 import { addNote, deleteNote, updateNoteOrder } from '../../note/store/note.actions';
-import { GlobalTrackingIntervalService } from '../../../core/global-tracking-interval/global-tracking-interval.service';
+import { DateService } from 'src/app/core/date/date.service';
 
 @Injectable()
 export class ProjectEffects {
@@ -189,14 +189,11 @@ export class ProjectEffects {
       concatMap(({ task }) =>
         this._projectService.getByIdOnce$(task.projectId as string).pipe(first()),
       ),
-      filter(
-        (project: Project) =>
-          !project.workStart[this._globalTrackingIntervalService.getWorklogStr()],
-      ),
+      filter((project: Project) => !project.workStart[this._dateService.todayStr()]),
       map((project) => {
         return updateProjectWorkStart({
           id: project.id,
-          date: this._globalTrackingIntervalService.getWorklogStr(),
+          date: this._dateService.todayStr(),
           newVal: Date.now(),
         });
       }),
@@ -210,7 +207,7 @@ export class ProjectEffects {
       map(({ task }) => {
         return updateProjectWorkEnd({
           id: task.projectId as string,
-          date: this._globalTrackingIntervalService.getWorklogStr(),
+          date: this._dateService.todayStr(),
           newVal: Date.now(),
         });
       }),
@@ -413,7 +410,7 @@ export class ProjectEffects {
     // private _workContextService: WorkContextService,
     private _taskService: TaskService,
     private _taskRepeatCfgService: TaskRepeatCfgService,
-    private _globalTrackingIntervalService: GlobalTrackingIntervalService,
+    private _dateService: DateService,
   ) {}
 
   private async _removeAllNonArchiveTasksForProject(

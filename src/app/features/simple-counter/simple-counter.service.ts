@@ -24,7 +24,7 @@ import { SimpleCounter, SimpleCounterState } from './simple-counter.model';
 import { nanoid } from 'nanoid';
 import { distinctUntilChanged } from 'rxjs/operators';
 import { isEqualSimpleCounterCfg } from './is-equal-simple-counter-cfg.util';
-import { GlobalTrackingIntervalService } from '../../core/global-tracking-interval/global-tracking-interval.service';
+import { DateService } from 'src/app/core/date/date.service';
 
 @Injectable({
   providedIn: 'root',
@@ -52,7 +52,7 @@ export class SimpleCounterService {
 
   constructor(
     private _store$: Store<SimpleCounterState>,
-    private _globalTrackingIntervalService: GlobalTrackingIntervalService,
+    private _dateService: DateService,
   ) {}
 
   updateAll(items: SimpleCounter[]): void {
@@ -60,17 +60,17 @@ export class SimpleCounterService {
   }
 
   setCounterToday(id: string, newVal: number): void {
-    const today = this._globalTrackingIntervalService.getWorklogStr();
+    const today = this._dateService.todayStr();
     this._store$.dispatch(setSimpleCounterCounterToday({ id, newVal, today }));
   }
 
   increaseCounterToday(id: string, increaseBy: number): void {
-    const today = this._globalTrackingIntervalService.getWorklogStr();
+    const today = this._dateService.todayStr();
     this._store$.dispatch(increaseSimpleCounterCounterToday({ id, increaseBy, today }));
   }
 
   decreaseCounterToday(id: string, decreaseBy: number): void {
-    const today = this._globalTrackingIntervalService.getWorklogStr();
+    const today = this._dateService.todayStr();
     this._store$.dispatch(decreaseSimpleCounterCounterToday({ id, decreaseBy, today }));
   }
 

@@ -48,7 +48,7 @@ import {
 import { isNotNullOrUndefined } from '../../../util/is-not-null-or-undefined';
 import { DialogConfirmComponent } from '../../../ui/dialog-confirm/dialog-confirm.component';
 import { T } from '../../../t.const';
-import { GlobalTrackingIntervalService } from '../../../core/global-tracking-interval/global-tracking-interval.service';
+import { DateService } from 'src/app/core/date/date.service';
 
 const DEFAULT_MIN_IDLE_TIME = 60000;
 const IDLE_POLL_INTERVAL = 1000;
@@ -257,7 +257,7 @@ export class IdleEffects {
             taskItemId = this._taskService.add(taskItem.title, false, {
               timeSpent: taskItem.time,
               timeSpentOnDay: {
-                [this._globalTrackingService.getWorklogStr()]: taskItem.time,
+                [this._dateService.todayStr()]: taskItem.time,
               },
             });
           } else if (taskItem.task) {
@@ -287,7 +287,7 @@ export class IdleEffects {
     private _store: Store,
     private _uiHelperService: UiHelperService,
     private _idleService: IdleService,
-    private _globalTrackingService: GlobalTrackingIntervalService,
+    private _dateService: DateService,
   ) {
     // window.setTimeout(() => {
     //   this._store.dispatch(triggerIdle({ idleTime: 60 * 1000 }));

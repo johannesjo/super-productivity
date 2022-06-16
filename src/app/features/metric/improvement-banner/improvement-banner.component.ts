@@ -4,7 +4,7 @@ import { ImprovementService } from '../improvement/improvement.service';
 import { improvementBannerAnimation } from './improvement-banner.ani';
 import { Subscription } from 'rxjs';
 import { T } from '../../../t.const';
-import { GlobalTrackingIntervalService } from '../../../core/global-tracking-interval/global-tracking-interval.service';
+import { DateService } from 'src/app/core/date/date.service';
 
 @Component({
   selector: 'improvement-banner',
@@ -21,7 +21,7 @@ export class ImprovementBannerComponent implements OnDestroy {
 
   constructor(
     public improvementService: ImprovementService,
-    private _globalTrackingIntervalService: GlobalTrackingIntervalService,
+    private _dateService: DateService,
   ) {
     this._subs.add(
       this.improvementService.improvementBannerImprovements$.subscribe(
@@ -39,10 +39,7 @@ export class ImprovementBannerComponent implements OnDestroy {
   }
 
   check(improvement: Improvement): void {
-    this.improvementService.addCheckedDay(
-      improvement.id,
-      this._globalTrackingIntervalService.getWorklogStr(),
-    );
+    this.improvementService.addCheckedDay(improvement.id, this._dateService.todayStr());
     this.improvementService.hideImprovement(improvement.id);
   }
 
