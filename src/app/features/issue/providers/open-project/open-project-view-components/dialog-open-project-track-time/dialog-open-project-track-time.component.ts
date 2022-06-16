@@ -18,7 +18,7 @@ import {
 import { Subscription } from 'rxjs';
 import { OPEN_PROJECT_TYPE } from '../../../../issue.const';
 import { expandFadeAnimation } from '../../../../../../ui/animations/expand.ani';
-import { GlobalTrackingIntervalService } from '../../../../../../core/global-tracking-interval/global-tracking-interval.service';
+import { DateService } from 'src/app/core/date/date.service';
 
 @Component({
   selector: 'dialog-open-project-track-time',
@@ -67,7 +67,7 @@ export class DialogOpenProjectTrackTimeComponent {
       workPackage: OpenProjectWorkPackage;
       task: Task;
     },
-    private _globalTrackingService: GlobalTrackingIntervalService,
+    private _dateService: DateService,
   ) {
     this.timeSpent = this.data.task.timeSpent;
     this.workPackage = this.data.workPackage;
@@ -76,8 +76,7 @@ export class DialogOpenProjectTrackTimeComponent {
     this.timeLoggedForWorkPackage = parseOpenProjectDuration(
       this.workPackage.spentTime as string,
     );
-    this.timeSpentToday =
-      this.data.task.timeSpentOnDay[this._globalTrackingService.getWorklogStr()];
+    this.timeSpentToday = this.data.task.timeSpentOnDay[this._dateService.todayStr()];
     this.timeSpentLoggedDelta = Math.max(
       0,
       this.data.task.timeSpent - this.timeLoggedForWorkPackage,

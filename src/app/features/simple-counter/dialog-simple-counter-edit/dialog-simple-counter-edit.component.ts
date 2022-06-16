@@ -3,7 +3,7 @@ import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { T } from '../../../t.const';
 import { SimpleCounter, SimpleCounterType } from '../simple-counter.model';
 import { SimpleCounterService } from '../simple-counter.service';
-import { GlobalTrackingIntervalService } from '../../../core/global-tracking-interval/global-tracking-interval.service';
+import { DateService } from 'src/app/core/date/date.service';
 
 @Component({
   selector: 'dialog-simple-counter-edit',
@@ -15,13 +15,13 @@ export class DialogSimpleCounterEditComponent {
   T: typeof T = T;
   SimpleCounterType: typeof SimpleCounterType = SimpleCounterType;
 
-  todayStr: string = this._globalTrackingIntervalService.getWorklogStr();
+  todayStr: string = this._dateService.todayStr();
   val: number = this.data.simpleCounter.countOnDay[this.todayStr];
 
   constructor(
     private _matDialogRef: MatDialogRef<DialogSimpleCounterEditComponent>,
     private _simpleCounterService: SimpleCounterService,
-    private _globalTrackingIntervalService: GlobalTrackingIntervalService,
+    private _dateService: DateService,
     @Inject(MAT_DIALOG_DATA) public data: { simpleCounter: SimpleCounter },
   ) {}
 

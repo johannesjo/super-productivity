@@ -45,7 +45,7 @@ import {
   moveTaskUpInTodayList,
 } from '../../work-context/store/work-context-meta.actions';
 import { TaskRepeatCfgService } from '../../task-repeat-cfg/task-repeat-cfg.service';
-import { GlobalTrackingIntervalService } from '../../../core/global-tracking-interval/global-tracking-interval.service';
+import { DateService } from 'src/app/core/date/date.service';
 
 @Injectable()
 export class TagEffects {
@@ -149,13 +149,11 @@ export class TagEffects {
       concatMap((tags: Tag[]) =>
         tags
           // only if not assigned for day already
-          .filter(
-            (tag) => !tag.workStart[this._globalTrackingIntervalService.getWorklogStr()],
-          )
+          .filter((tag) => !tag.workStart[this._dateService.todayStr()])
           .map((tag) =>
             updateWorkStartForTag({
               id: tag.id,
-              date: this._globalTrackingIntervalService.getWorklogStr(),
+              date: this._dateService.todayStr(),
               newVal: Date.now(),
             }),
           ),
@@ -179,7 +177,7 @@ export class TagEffects {
         tags.map((tag) =>
           updateWorkEndForTag({
             id: tag.id,
-            date: this._globalTrackingIntervalService.getWorklogStr(),
+            date: this._dateService.todayStr(),
             newVal: Date.now(),
           }),
         ),
@@ -320,6 +318,6 @@ export class TagEffects {
     private _taskService: TaskService,
     private _taskRepeatCfgService: TaskRepeatCfgService,
     private _router: Router,
-    private _globalTrackingIntervalService: GlobalTrackingIntervalService,
+    private _dateService: DateService,
   ) {}
 }

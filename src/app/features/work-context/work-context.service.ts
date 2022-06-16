@@ -65,6 +65,7 @@ import { T } from '../../t.const';
 import { distinctUntilChangedSimpleArray } from '../../util/distinct-until-changed-simple-array';
 import { isShallowEqual } from '../../util/is-shallow-equal';
 import { distinctUntilChangedObject } from '../../util/distinct-until-changed-object';
+import { DateService } from 'src/app/core/date/date.service';
 
 @Injectable({
   providedIn: 'root',
@@ -298,6 +299,7 @@ export class WorkContextService {
     private _actions$: Actions,
     private _tagService: TagService,
     private _globalTrackingIntervalService: GlobalTrackingIntervalService,
+    private _dateService: DateService,
     private _router: Router,
     private _translateService: TranslateService,
   ) {
@@ -345,9 +347,7 @@ export class WorkContextService {
   }
 
   // TODO could be done better
-  getTimeWorkedForDay$(
-    day: string = this._globalTrackingIntervalService.getWorklogStr(),
-  ): Observable<number> {
+  getTimeWorkedForDay$(day: string = this._dateService.todayStr()): Observable<number> {
     return this.todaysTasks$.pipe(
       map((tasks) => {
         return (
@@ -367,27 +367,19 @@ export class WorkContextService {
     );
   }
 
-  getWorkStart$(
-    day: string = this._globalTrackingIntervalService.getWorklogStr(),
-  ): Observable<number> {
+  getWorkStart$(day: string = this._dateService.todayStr()): Observable<number> {
     return this.activeWorkContext$.pipe(map((ctx) => ctx.workStart[day]));
   }
 
-  getWorkEnd$(
-    day: string = this._globalTrackingIntervalService.getWorklogStr(),
-  ): Observable<number> {
+  getWorkEnd$(day: string = this._dateService.todayStr()): Observable<number> {
     return this.activeWorkContext$.pipe(map((ctx) => ctx.workEnd[day]));
   }
 
-  getBreakTime$(
-    day: string = this._globalTrackingIntervalService.getWorklogStr(),
-  ): Observable<number> {
+  getBreakTime$(day: string = this._dateService.todayStr()): Observable<number> {
     return this.activeWorkContext$.pipe(map((ctx) => ctx.breakTime[day]));
   }
 
-  getBreakNr$(
-    day: string = this._globalTrackingIntervalService.getWorklogStr(),
-  ): Observable<number> {
+  getBreakNr$(day: string = this._dateService.todayStr()): Observable<number> {
     return this.activeWorkContext$.pipe(map((ctx) => ctx.breakNr[day]));
   }
 
@@ -431,7 +423,7 @@ export class WorkContextService {
   }
 
   addToBreakTimeForActiveContext(
-    date: string = this._globalTrackingIntervalService.getWorklogStr(),
+    date: string = this._dateService.todayStr(),
     valToAdd: number,
   ): void {
     const payload: { id: string; date: string; valToAdd: number } = {

@@ -36,6 +36,7 @@ import { SnackService } from '../../../core/snack/snack.service';
 import { loadAllData } from '../../../root-store/meta/load-all-data.action';
 import { ImexMetaService } from '../../../imex/imex-meta/imex-meta.service';
 import { IdleService } from '../../idle/idle.service';
+import { DateService } from 'src/app/core/date/date.service';
 
 @Injectable()
 export class SimpleCounterEffects {
@@ -71,7 +72,7 @@ export class SimpleCounterEffects {
           : EMPTY,
       ),
       mergeMap(({ items, tick }) => {
-        const today = this._timeTrackingService.getWorklogStr();
+        const today = this._dateService.todayStr();
         return items.map((item) =>
           increaseSimpleCounterCounterToday({
             id: item.id,
@@ -131,7 +132,7 @@ export class SimpleCounterEffects {
           (item) =>
             item.triggerOffActions && item.triggerOffActions.includes(action.type),
         );
-        const today = this._timeTrackingService.getWorklogStr();
+        const today = this._dateService.todayStr();
 
         return [
           ...startItems.map((item) => setSimpleCounterCounterOn({ id: item.id })),
@@ -171,6 +172,7 @@ export class SimpleCounterEffects {
     private _actions$: Actions,
     private _store$: Store<any>,
     private _timeTrackingService: GlobalTrackingIntervalService,
+    private _dateService: DateService,
     private _persistenceService: PersistenceService,
     private _simpleCounterService: SimpleCounterService,
     private _imexMetaService: ImexMetaService,

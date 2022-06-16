@@ -13,6 +13,7 @@ import { DialogSimpleCounterEditComponent } from '../dialog-simple-counter-edit/
 import { T } from 'src/app/t.const';
 import { GlobalTrackingIntervalService } from '../../../core/global-tracking-interval/global-tracking-interval.service';
 import { Subscription } from 'rxjs';
+import { DateService } from 'src/app/core/date/date.service';
 
 @Component({
   selector: 'simple-counter-button',
@@ -23,7 +24,7 @@ import { Subscription } from 'rxjs';
 export class SimpleCounterButtonComponent implements OnDestroy, OnInit {
   T: typeof T = T;
   SimpleCounterType: typeof SimpleCounterType = SimpleCounterType;
-  todayStr: string = this._globalTrackingIntervalService.getWorklogStr();
+  todayStr: string = this._dateService.todayStr();
 
   @Input() simpleCounter?: SimpleCounter;
 
@@ -34,6 +35,7 @@ export class SimpleCounterButtonComponent implements OnDestroy, OnInit {
     private _simpleCounterService: SimpleCounterService,
     private _matDialog: MatDialog,
     private _globalTrackingIntervalService: GlobalTrackingIntervalService,
+    private _dateService: DateService,
     private _cd: ChangeDetectorRef,
   ) {}
 

@@ -10,7 +10,7 @@ import {
   startWith,
 } from 'rxjs/operators';
 import { Tick } from './tick.model';
-import { getWorklogStr } from '../../util/get-work-log-str';
+import { DateService } from 'src/app/core/date/date.service';
 
 @Injectable({
   providedIn: 'root',
@@ -24,7 +24,7 @@ export class GlobalTrackingIntervalService {
       this._currentTrackingStart = Date.now();
       return {
         duration: delta,
-        date: this.getWorklogStr(),
+        date: this._dateService.todayStr(),
         timestamp: Date.now(),
       };
     }),
@@ -33,27 +33,14 @@ export class GlobalTrackingIntervalService {
   );
 
   todayDateStr$: Observable<string> = this.globalInterval$.pipe(
-    startWith(this.getWorklogStr()),
-    concatMap(() => of(this.getWorklogStr())),
+    startWith(this._dateService.todayStr()),
+    concatMap(() => of(this._dateService.todayStr())),
     distinctUntilChanged(),
     // needs to be shareReplay otherwise some instances will never receive an update until a change occurs
     shareReplay(1),
   );
 
-  startOfNextDayDiff: number = 0;
-
-  constructor() {
+  constructor(private _dateService: DateService) {
     this._currentTrackingStart = Date.now();
-  }
-
-  setStartOfNextDayDiff(startOfNextDay: number): void {
-    this.startOfNextDayDiff = (startOfNextDay || 0) * 60 * 60 * 1000;
-  }
-
-  getWorklogStr(date?: Date | number): string {
-    if (!date) {
-      date = new Date(Date.now() - this.startOfNextDayDiff);
-    }
-    return getWorklogStr(date);
   }
 }

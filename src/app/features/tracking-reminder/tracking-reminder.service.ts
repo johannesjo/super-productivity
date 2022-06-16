@@ -22,7 +22,7 @@ import { T } from '../../t.const';
 import { TranslateService } from '@ngx-translate/core';
 import { TrackingReminderConfig } from '../config/global-config.model';
 import { IS_TOUCH_ONLY } from '../../util/is-touch-only';
-import { GlobalTrackingIntervalService } from '../../core/global-tracking-interval/global-tracking-interval.service';
+import { DateService } from 'src/app/core/date/date.service';
 
 @Injectable({
   providedIn: 'root',
@@ -69,7 +69,7 @@ export class TrackingReminderService {
     private _bannerService: BannerService,
     private _matDialog: MatDialog,
     private _translateService: TranslateService,
-    private _globalTrackingIntervalService: GlobalTrackingIntervalService,
+    private _dateService: DateService,
   ) {}
 
   init(): void {
@@ -133,7 +133,7 @@ export class TrackingReminderService {
               const currId = this._taskService.add(task, false, {
                 timeSpent,
                 timeSpentOnDay: {
-                  [this._globalTrackingIntervalService.getWorklogStr()]: timeSpent,
+                  [this._dateService.todayStr()]: timeSpent,
                 },
               });
               this._taskService.setCurrentId(currId);

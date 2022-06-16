@@ -8,7 +8,7 @@ import {
 import { Task } from '../task.model';
 import { TaskService } from '../task.service';
 import { T } from '../../../t.const';
-import { GlobalTrackingIntervalService } from '../../../core/global-tracking-interval/global-tracking-interval.service';
+import { DateService } from 'src/app/core/date/date.service';
 
 @Component({
   selector: 'task-summary-table',
@@ -18,15 +18,12 @@ import { GlobalTrackingIntervalService } from '../../../core/global-tracking-int
 })
 export class TaskSummaryTableComponent {
   @Input() flatTasks: Task[] = [];
-  @Input() day: string = this._globalTrackingIntervalService.getWorklogStr();
+  @Input() day: string = this._dateService.todayStr();
   @Output() updated: EventEmitter<void> = new EventEmitter();
 
   T: typeof T = T;
 
-  constructor(
-    private _taskService: TaskService,
-    private _globalTrackingIntervalService: GlobalTrackingIntervalService,
-  ) {}
+  constructor(private _taskService: TaskService, private _dateService: DateService) {}
 
   updateTimeSpentTodayForTask(task: Task, newVal: number | string): void {
     this._taskService.updateEverywhere(task.id, {

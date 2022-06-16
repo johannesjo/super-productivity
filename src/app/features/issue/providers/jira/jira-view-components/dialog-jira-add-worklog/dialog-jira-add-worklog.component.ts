@@ -16,7 +16,7 @@ import {
 } from '../../jira.const';
 import { JiraWorklogExportDefaultTime } from '../../jira.model';
 import { Subscription } from 'rxjs';
-import { GlobalTrackingIntervalService } from '../../../../../../core/global-tracking-interval/global-tracking-interval.service';
+import { DateService } from 'src/app/core/date/date.service';
 
 @Component({
   selector: 'dialog-jira-add-worklog',
@@ -54,15 +54,14 @@ export class DialogJiraAddWorklogComponent implements OnDestroy {
       issue: JiraIssue;
       task: Task;
     },
-    private _globalTrackingService: GlobalTrackingIntervalService,
+    private _dateService: DateService,
   ) {
     this.timeSpent = this.data.task.timeSpent;
     this.issue = this.data.issue;
     this.timeLogged = this.issue.timespent * 1000;
     this.started = this._convertTimestamp(this.data.task.created);
     this.comment = this.data.task.parentId ? this.data.task.title : '';
-    this.timeSpentToday =
-      this.data.task.timeSpentOnDay[this._globalTrackingService.getWorklogStr()];
+    this.timeSpentToday = this.data.task.timeSpentOnDay[this._dateService.todayStr()];
     this.timeSpentLoggedDelta = Math.max(0, this.data.task.timeSpent - this.timeLogged);
 
     this._subs.add(
