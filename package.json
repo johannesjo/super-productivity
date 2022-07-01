@@ -173,7 +173,7 @@
     "cross-env": "^7.0.3",
     "detect-it": "^4.0.1",
     "electron": "^18.2.0",
-    "electron-builder": "23.0.3",
+    "electron-builder": "23.1.0",
     "electron-builder-notarize": "^1.4.0",
     "electron-notarize": "^1.2.1",
     "eslint": "^8.10.0",
