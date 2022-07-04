@@ -32,6 +32,7 @@ linux:
     - github
 snap:
   grade: stable
+  allowNativeWayland: true
 
 mac:
   appId: com.super-productivity.app
