@@ -1263,7 +1263,9 @@
     },
     "MISC": {
       "DEFAULT_PROJECT": "Standardno korišteni projekt za zadatke ako nijedan nije određen",
-      "FIRST_DAY_OF_WEEK": "Prvi dan tjedna",
+      "FIRST_DAY_OF_WEEK": "Prvi dan u tjednu",
+      "START_OF_NEXT_DAY": "Vrijeme početka sljedećeg dana",
+      "START_OF_NEXT_DAY_HINT": "U koje vrijeme (sat) želiš brojiti početak sljedećeg dana. Standardno je postavljena ponoć, što je 0.",
       "HELP": "<p><strong>Ne vidiš obavijesti na radnoj površini?</strong> Za Windows provjeri Sustav > Obavijesti i radnje te provjeri jesu li potrebne obavijesti aktivirane.</p>",
       "IS_AUTO_ADD_WORKED_ON_TO_TODAY": "Automatski dodaj oznaku danas zadacima koje si obrađivao/la",
       "IS_AUTO_MARK_PARENT_AS_DONE": "Označi nadređeni zadatak kao obavljen kad se obave svi podzadaci",
