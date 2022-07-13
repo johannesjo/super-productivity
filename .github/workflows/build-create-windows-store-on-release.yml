@@ -12,6 +12,9 @@ jobs:
     if: '!github.event.release.prerelease'
 
     steps:
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 14
       # required because setting via env.TZ does not work on windows
       - name: Set timezone to Europe Standard Time
         uses: szenius/set-timezone@v1.0

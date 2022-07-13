@@ -12,6 +12,9 @@ jobs:
     if: '!github.event.release.prerelease'
 
     steps:
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 14
       - name: Check out Git repository
         uses: actions/checkout@v3
 

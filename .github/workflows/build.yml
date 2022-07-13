@@ -10,6 +10,9 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 14
       - name: Check out Git repository
         uses: actions/checkout@v3
 
@@ -65,6 +68,9 @@ jobs:
     if: startsWith(github.ref, 'refs/tags/v')
 
     steps:
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 14
       - name: Echo is Release
         run: echo "IS_RELEASE $IS_RELEASE, ${{ startsWith(github.ref, 'refs/tags/v') }}"
         env:
@@ -130,6 +136,9 @@ jobs:
     if: startsWith(github.ref, 'refs/tags/v')
 
     steps:
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 14
       # required because setting via env.TZ does not work on windows
       - name: Set timezone to Europe Standard Time
         uses: szenius/set-timezone@v1.0
