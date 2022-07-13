@@ -37,6 +37,10 @@ assignees: ''
 3.
 4.
 
+### Can you reproduce this reliably?
+
+<!--- Was this a one time thing or can you reliably reproduce this issue --->
+
 ### Console Output
 
 <!--- Is there any output if you press Ctrl+Shift+i (Cmd+Alt+i for mac) in the console tab? If so please post it here. -->
