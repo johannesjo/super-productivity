@@ -137,7 +137,7 @@
     "@angular/service-worker": "^13.3.3",
     "@biesbjerg/ngx-translate-extract": "^7.0.4",
     "@fontsource/roboto": "^4.5.7",
-    "@nextcloud/cdav-library": "^1.0.0",
+    "@nextcloud/cdav-library": "^1.1.0",
     "@ngrx/data": "^13.1.0",
     "@ngrx/effects": "^13.1.0",
     "@ngrx/entity": "^13.1.0",
