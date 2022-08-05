@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, Inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { GithubCfg } from '../../github.model';
-import { FormGroup } from '@angular/forms';
+import { UntypedFormGroup } from '@angular/forms';
 import { FormlyFieldConfig } from '@ngx-formly/core';
 import { DEFAULT_GITHUB_CFG, GITHUB_CONFIG_FORM } from '../../github.const';
 import { T } from '../../../../../../t.const';
@@ -15,7 +15,7 @@ import { T } from '../../../../../../t.const';
 export class DialogGithubInitialSetupComponent {
   T: typeof T = T;
   githubCfg: GithubCfg;
-  formGroup: FormGroup = new FormGroup({});
+  formGroup: UntypedFormGroup = new UntypedFormGroup({});
   formConfig: FormlyFieldConfig[] = GITHUB_CONFIG_FORM;
 
   constructor(

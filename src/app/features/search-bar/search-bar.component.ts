@@ -9,7 +9,7 @@ import {
   ViewChild,
 } from '@angular/core';
 import { T } from '../../t.const';
-import { FormControl } from '@angular/forms';
+import { UntypedFormControl } from '@angular/forms';
 import { BehaviorSubject, combineLatest, Observable, Subscription } from 'rxjs';
 import {
   debounceTime,
@@ -53,7 +53,7 @@ export class SearchBarComponent implements AfterViewInit, OnDestroy {
 
   T: typeof T = T;
   isLoading$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(true);
-  taskSuggestionsCtrl: FormControl = new FormControl();
+  taskSuggestionsCtrl: UntypedFormControl = new UntypedFormControl();
   filteredIssueSuggestions$: Observable<SearchItem[]> = new Observable();
   tooManyResults: boolean = false;
 

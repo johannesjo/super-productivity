@@ -6,7 +6,7 @@ import {
   Output,
 } from '@angular/core';
 import { FormlyFieldConfig, FormlyFormOptions } from '@ngx-formly/core';
-import { FormGroup } from '@angular/forms';
+import { UntypedFormGroup } from '@angular/forms';
 import { GlobalConfigSectionKey } from '../global-config.model';
 import { ProjectCfgFormKey } from '../../project/project.model';
 import { T } from '../../../t.const';
@@ -27,7 +27,7 @@ export class ConfigFormComponent {
     config: unknown;
   }> = new EventEmitter();
   fields?: FormlyFieldConfig[];
-  form: FormGroup = new FormGroup({});
+  form: UntypedFormGroup = new UntypedFormGroup({});
   options: FormlyFormOptions = {};
 
   constructor() {}

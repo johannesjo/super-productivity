@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, OnDestroy } from '@angular/core';
 import { MatDialogRef } from '@angular/material/dialog';
-import { FormGroup } from '@angular/forms';
+import { UntypedFormGroup } from '@angular/forms';
 import { FormlyFieldConfig } from '@ngx-formly/core';
 import { TIMELINE_FORM_CFG } from '../../config/form-cfgs/timeline-form.const';
 import { DEFAULT_GLOBAL_CONFIG } from '../../config/default-global-config.const';
@@ -19,7 +19,7 @@ import { LS } from '../../../core/persistence/storage-keys.const';
 export class DialogTimelineInitialSetupComponent implements OnDestroy {
   T: typeof T = T;
   timelineCfg: TimelineConfig;
-  formGroup: FormGroup = new FormGroup({});
+  formGroup: UntypedFormGroup = new UntypedFormGroup({});
   formConfig: FormlyFieldConfig[] = TIMELINE_FORM_CFG.items as FormlyFieldConfig[];
   private _subs = new Subscription();
 

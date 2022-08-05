@@ -8,7 +8,7 @@ import {
 } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { Project, ProjectCopy } from '../../project.model';
-import { FormGroup } from '@angular/forms';
+import { UntypedFormGroup } from '@angular/forms';
 import { FormlyFieldConfig, FormlyFormOptions } from '@ngx-formly/core';
 import { ProjectService } from '../../project.service';
 import { DEFAULT_PROJECT } from '../../project.const';
@@ -68,8 +68,8 @@ export class DialogCreateProjectComponent implements OnInit, OnDestroy {
   openProjectCfg?: OpenProjectCfg;
   giteaCfg?: GiteaCfg;
 
-  formBasic: FormGroup = new FormGroup({});
-  formTheme: FormGroup = new FormGroup({});
+  formBasic: UntypedFormGroup = new UntypedFormGroup({});
+  formTheme: UntypedFormGroup = new UntypedFormGroup({});
   formOptionsBasic: FormlyFormOptions = {
     formState: {
       awesomeIsForced: false,

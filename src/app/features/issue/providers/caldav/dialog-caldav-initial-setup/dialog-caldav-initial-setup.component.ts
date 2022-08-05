@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, Inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-import { FormGroup } from '@angular/forms';
+import { UntypedFormGroup } from '@angular/forms';
 import { FormlyFieldConfig } from '@ngx-formly/core';
 import { T } from 'src/app/t.const';
 import { CALDAV_CONFIG_FORM, DEFAULT_CALDAV_CFG } from '../caldav.const';
@@ -15,7 +15,7 @@ import { CaldavCfg } from '../caldav.model';
 export class DialogCaldavInitialSetupComponent {
   T: typeof T = T;
   caldavCfg: CaldavCfg;
-  formGroup: FormGroup = new FormGroup({});
+  formGroup: UntypedFormGroup = new UntypedFormGroup({});
   formConfig: FormlyFieldConfig[] = CALDAV_CONFIG_FORM;
 
   constructor(

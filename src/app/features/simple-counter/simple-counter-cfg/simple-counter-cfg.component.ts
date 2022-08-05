@@ -13,7 +13,7 @@ import {
 import { ProjectCfgFormKey } from '../../project/project.model';
 import { SimpleCounterConfig } from '../simple-counter.model';
 import { FormlyFormOptions } from '@ngx-formly/core';
-import { FormGroup } from '@angular/forms';
+import { UntypedFormGroup } from '@angular/forms';
 import { T } from 'src/app/t.const';
 import { SimpleCounterService } from '../simple-counter.service';
 import { map } from 'rxjs/operators';
@@ -36,7 +36,7 @@ export class SimpleCounterCfgComponent implements OnDestroy {
   }> = new EventEmitter();
 
   T: typeof T = T;
-  form: FormGroup = new FormGroup({});
+  form: UntypedFormGroup = new UntypedFormGroup({});
   options: FormlyFormOptions = {};
 
   simpleCounterCfg$: Observable<SimpleCounterConfig> =

@@ -219,10 +219,9 @@
       }
     }
   },
-  "defaultProject": "sp2",
   "cli": {
-    "defaultCollection": "@ngrx/schematics",
-    "analytics": false
+    "analytics": false,
+    "schematicCollections": ["@ngrx/schematics"]
   },
   "schematics": {
     "@schematics/angular:component": {

@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, Inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { OpenProjectCfg } from '../../open-project.model';
-import { FormGroup } from '@angular/forms';
+import { UntypedFormGroup } from '@angular/forms';
 import { FormlyFieldConfig } from '@ngx-formly/core';
 import {
   DEFAULT_OPEN_PROJECT_CFG,
@@ -18,7 +18,7 @@ import { T } from '../../../../../../t.const';
 export class DialogOpenProjectInitialSetupComponent {
   T: typeof T = T;
   openProjectCfg: OpenProjectCfg;
-  formGroup: FormGroup = new FormGroup({});
+  formGroup: UntypedFormGroup = new UntypedFormGroup({});
   formConfig: FormlyFieldConfig[] = OPEN_PROJECT_CONFIG_FORM;
 
   constructor(

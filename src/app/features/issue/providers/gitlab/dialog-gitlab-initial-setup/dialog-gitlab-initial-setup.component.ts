@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, Inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-import { FormGroup } from '@angular/forms';
+import { UntypedFormGroup } from '@angular/forms';
 import { FormlyFieldConfig } from '@ngx-formly/core';
 import { T } from 'src/app/t.const';
 import { GitlabCfg } from '../gitlab';
@@ -15,7 +15,7 @@ import { DEFAULT_GITLAB_CFG, GITLAB_CONFIG_FORM } from '../gitlab.const';
 export class DialogGitlabInitialSetupComponent {
   T: typeof T = T;
   gitlabCfg: GitlabCfg;
-  formGroup: FormGroup = new FormGroup({});
+  formGroup: UntypedFormGroup = new UntypedFormGroup({});
   formConfig: FormlyFieldConfig[] = GITLAB_CONFIG_FORM;
 
   constructor(

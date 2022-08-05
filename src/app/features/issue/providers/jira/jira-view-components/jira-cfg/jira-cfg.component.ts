@@ -13,7 +13,7 @@ import {
 } from '../../../../../config/global-config.model';
 import { ProjectCfgFormKey } from '../../../../../project/project.model';
 import { FormlyFieldConfig, FormlyFormOptions } from '@ngx-formly/core';
-import { FormControl, FormGroup } from '@angular/forms';
+import { UntypedFormControl, UntypedFormGroup } from '@angular/forms';
 import { JiraCfg, JiraTransitionConfig, JiraTransitionOption } from '../../jira.model';
 import { expandAnimation } from '../../../../../../ui/animations/expand.ani';
 import { BehaviorSubject, Observable, Subscription } from 'rxjs';
@@ -53,13 +53,13 @@ export class JiraCfgComponent implements OnInit, OnDestroy {
   }> = new EventEmitter();
   T: typeof T = T;
   HelperClasses: typeof HelperClasses = HelperClasses;
-  issueSuggestionsCtrl: FormControl = new FormControl();
-  customFieldSuggestionsCtrl: FormControl = new FormControl();
+  issueSuggestionsCtrl: UntypedFormControl = new UntypedFormControl();
+  customFieldSuggestionsCtrl: UntypedFormControl = new UntypedFormControl();
   customFields: any[] = [];
   customFieldsPromise?: Promise<any>;
   isLoading$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
   fields?: FormlyFieldConfig[];
-  form: FormGroup = new FormGroup({});
+  form: UntypedFormGroup = new UntypedFormGroup({});
   options: FormlyFormOptions = {};
   filteredIssueSuggestions$: Observable<SearchResultItem[]> =
     this.issueSuggestionsCtrl.valueChanges.pipe(

@@ -7,7 +7,7 @@ import {
   EventEmitter,
   OnDestroy,
 } from '@angular/core';
-import { FormControl, FormGroup } from '@angular/forms';
+import { UntypedFormControl, UntypedFormGroup } from '@angular/forms';
 import { FormlyFieldConfig, FormlyFormOptions } from '@ngx-formly/core';
 import { BehaviorSubject, Observable, Subscription } from 'rxjs';
 import { catchError, debounceTime, first, switchMap, tap } from 'rxjs/operators';
@@ -52,8 +52,8 @@ export class OpenprojectCfgComponent implements OnInit, OnDestroy {
   }> = new EventEmitter();
   T: typeof T = T;
   HelperClasses: typeof HelperClasses = HelperClasses;
-  issueSuggestionsCtrl: FormControl = new FormControl();
-  form: FormGroup = new FormGroup({});
+  issueSuggestionsCtrl: UntypedFormControl = new UntypedFormControl();
+  form: UntypedFormGroup = new UntypedFormGroup({});
   isLoading$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
   fields?: FormlyFieldConfig[];
   options: FormlyFormOptions = {};

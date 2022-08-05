@@ -17,7 +17,7 @@ import {
 } from '../task-repeat-cfg.model';
 import { Observable, Subscription } from 'rxjs';
 import { FormlyFieldConfig } from '@ngx-formly/core';
-import { FormGroup } from '@angular/forms';
+import { UntypedFormGroup } from '@angular/forms';
 import {
   TASK_REPEAT_CFG_ADVANCED_FORM_CFG,
   TASK_REPEAT_CFG_FORM_CFG_BEFORE_TAGS,
@@ -50,8 +50,8 @@ export class DialogEditTaskRepeatCfgComponent implements OnInit, OnDestroy {
   TASK_REPEAT_CFG_FORM_CFG_BEFORE_TAGS: FormlyFieldConfig[];
   TASK_REPEAT_CFG_ADVANCED_FORM_CFG: FormlyFieldConfig[];
 
-  formGroup1: FormGroup = new FormGroup({});
-  formGroup2: FormGroup = new FormGroup({});
+  formGroup1: UntypedFormGroup = new UntypedFormGroup({});
+  formGroup2: UntypedFormGroup = new UntypedFormGroup({});
   tagSuggestions$: Observable<Tag[]> = this._tagService.tags$;
 
   private _subs: Subscription = new Subscription();

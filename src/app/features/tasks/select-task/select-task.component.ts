@@ -7,7 +7,7 @@ import {
   OnInit,
   Output,
 } from '@angular/core';
-import { FormControl } from '@angular/forms';
+import { UntypedFormControl } from '@angular/forms';
 import { Task } from '../task.model';
 import { map, startWith, takeUntil, withLatestFrom } from 'rxjs/operators';
 import { Observable, Subject } from 'rxjs';
@@ -27,7 +27,7 @@ import { selectAllProjects } from '../../project/store/project.selectors';
 })
 export class SelectTaskComponent implements OnInit, OnDestroy {
   T: typeof T = T;
-  taskSelectCtrl: FormControl = new FormControl();
+  taskSelectCtrl: UntypedFormControl = new UntypedFormControl();
   filteredTasks: Task[] = [];
   projectMap: { [key: string]: Project } = {};
   isCreate: boolean = false;

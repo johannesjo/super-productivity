@@ -7,7 +7,7 @@ import {
   OnDestroy,
   Output,
 } from '@angular/core';
-import { FormGroup } from '@angular/forms';
+import { UntypedFormGroup } from '@angular/forms';
 import { JiraCfg } from '../../jira.model';
 import {
   DEFAULT_JIRA_CFG,
@@ -33,10 +33,10 @@ import { HANDLED_ERROR_PROP_STR, HelperClasses } from '../../../../../../app.con
 export class JiraCfgStepperComponent implements OnDestroy {
   T: typeof T = T;
   HelperClasses: typeof HelperClasses = HelperClasses;
-  credentialsFormGroup: FormGroup = new FormGroup({});
+  credentialsFormGroup: UntypedFormGroup = new UntypedFormGroup({});
   credentialsFormConfig: FormlyFieldConfig[] = [];
 
-  advancedSettingsFormGroup: FormGroup = new FormGroup({});
+  advancedSettingsFormGroup: UntypedFormGroup = new UntypedFormGroup({});
   advancedSettingsFormConfig: FormlyFieldConfig[] = [];
 
   isTestCredentialsSuccess: boolean = false;

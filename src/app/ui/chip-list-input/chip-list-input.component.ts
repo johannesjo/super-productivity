@@ -9,7 +9,7 @@ import {
   Output,
   ViewChild,
 } from '@angular/core';
-import { FormControl } from '@angular/forms';
+import { UntypedFormControl } from '@angular/forms';
 import { Observable } from 'rxjs';
 import {
   MatAutocomplete,
@@ -50,7 +50,7 @@ export class ChipListInputComponent implements OnDestroy {
 
   suggestionsIn: Suggestion[] = [];
   modelItems: Suggestion[] = [];
-  inputCtrl: FormControl = new FormControl();
+  inputCtrl: UntypedFormControl = new UntypedFormControl();
   separatorKeysCodes: number[] = [ENTER, COMMA];
   isAutoFocus = false;
   @ViewChild('inputElRef', { static: true }) inputEl?: ElementRef<HTMLInputElement>;

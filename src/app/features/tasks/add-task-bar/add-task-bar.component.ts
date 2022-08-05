@@ -10,7 +10,7 @@ import {
   Output,
   ViewChild,
 } from '@angular/core';
-import { FormControl } from '@angular/forms';
+import { UntypedFormControl } from '@angular/forms';
 import { TaskService } from '../task.service';
 import {
   debounceTime,
@@ -68,7 +68,7 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
   isLoading$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
   doubleEnterCount: number = 0;
 
-  taskSuggestionsCtrl: FormControl = new FormControl();
+  taskSuggestionsCtrl: UntypedFormControl = new UntypedFormControl();
 
   filteredIssueSuggestions$: Observable<AddTaskSuggestion[]> =
     this.taskSuggestionsCtrl.valueChanges.pipe(

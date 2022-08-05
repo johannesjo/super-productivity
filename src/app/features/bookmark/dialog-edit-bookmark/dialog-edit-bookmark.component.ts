@@ -3,7 +3,7 @@ import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { IS_ELECTRON } from '../../../app.constants';
 import { MATERIAL_ICONS } from '../../../ui/material-icons.const';
 import { Bookmark, BookmarkCopy, BookmarkType } from '../bookmark.model';
-import { FormControl } from '@angular/forms';
+import { UntypedFormControl } from '@angular/forms';
 import { Observable } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
 import { T } from '../../../t.const';
@@ -24,7 +24,7 @@ export class DialogEditBookmarkComponent implements OnInit {
   types?: BookmarkSelectType[];
   bookmarkCopy?: BookmarkCopy;
   customIcons: string[] = MATERIAL_ICONS;
-  iconControl: FormControl = new FormControl();
+  iconControl: UntypedFormControl = new UntypedFormControl();
   filteredIcons$: Observable<string[]> = this.iconControl.valueChanges.pipe(
     startWith(''),
     map((searchTerm) => {

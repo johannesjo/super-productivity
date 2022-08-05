@@ -1,5 +1,6 @@
 import { AppBaseData, AppDataForProjects } from '../../imex/sync/sync.model';
 import { Action } from '@ngrx/store';
+import { ActionReducer } from '@ngrx/store/src/models';
 
 export interface PersistenceBaseModel<T> {
   appDataKey: keyof AppBaseData;
@@ -57,7 +58,7 @@ export interface PersistenceEntityModelCfg<S, M> {
   legacyKey: string;
   appDataKey: keyof AppBaseData;
   modelVersion: number;
-  reducerFn: (state: S, action: { type: string; payload?: any }) => S;
+  reducerFn: ActionReducer<S, { type: string; payload?: any }>;
   migrateFn: (state: S) => S;
 }
 

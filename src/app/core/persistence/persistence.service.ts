@@ -492,16 +492,16 @@ export class PersistenceService {
 
       // NOTE: side effects are not executed!!!
       execAction: async (action: Action): Promise<S> => {
-        const state = await model.loadState();
-        const newState = reducerFn(state, action);
+        const state: S = await model.loadState();
+        const newState: S = reducerFn(state, action);
         await model.saveState(newState, { isDataImport: false });
         return newState;
       },
 
       // NOTE: side effects are not executed!!!
       execActions: async (actions: Action[]): Promise<S> => {
-        const state = await model.loadState();
-        const newState = actions.reduce((acc, act) => reducerFn(acc, act), state);
+        const state: S = await model.loadState();
+        const newState: S = actions.reduce((acc, act) => reducerFn(acc, act), state);
         await model.saveState(newState, { isDataImport: false });
         return newState;
       },

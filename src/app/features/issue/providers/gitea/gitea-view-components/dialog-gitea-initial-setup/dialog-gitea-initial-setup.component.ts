@@ -1,5 +1,5 @@
 import { Component, ChangeDetectionStrategy, Inject } from '@angular/core';
-import { FormGroup } from '@angular/forms';
+import { UntypedFormGroup } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { FormlyFieldConfig } from '@ngx-formly/core';
 import { T } from 'src/app/t.const';
@@ -15,7 +15,7 @@ import { GiteaCfg } from '../../gitea.model';
 export class DialogGiteaInitialSetupComponent {
   T: typeof T = T;
   giteaCfg: GiteaCfg;
-  formGroup: FormGroup = new FormGroup({});
+  formGroup: UntypedFormGroup = new UntypedFormGroup({});
   formConfig: FormlyFieldConfig[] = GITEA_CONFIG_FORM;
 
   constructor(
