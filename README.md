@@ -15,6 +15,11 @@
        src="https://img.shields.io/github/downloads/johannesjo/super-productivity/total"
        align="center">
 </a>
+<a href="https://community.chocolatey.org/packages/super-productivity">
+  <img alt="Chocolatey package"
+       src="https://img.shields.io/chocolatey/dt/super-productivity?color=blue&label=chocolatey"
+       align="center">
+</a>
 <a href="https://www.producthunt.com/posts/super-productivity">
   <img alt="On product hunt"
        src="https://img.shields.io/badge/on-product%20hunt-blue.svg?style=flat-square"
@@ -134,6 +139,11 @@ If you want the Jira integration and idle time tracking to work, you have to als
 Due to certification issues it's recommended to download the app from the Microsoft Store:
 
 <a href='//www.microsoft.com/store/apps/9nhfvg8361tw?cid=storebadge&ocid=badge'><img src='https://developer.microsoft.com/store/badges/images/English_get-it-from-MS.png' alt='English badge' width="127" height="52"/></a>
+
+You can also install the app using [Chocolatey](https://community.chocolatey.org/packages/super-productivity):
+```powershell
+choco install super-productivity
+```
 
 ### Linux
 
