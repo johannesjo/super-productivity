@@ -279,7 +279,10 @@
     </ng-container>
   </task-additional-info-item>
 
-  <div class="created">Created on {{task?.created|date:'short'}}</div>
+  <div class="date-info">
+    <div>Created on {{task?.created|date:'short'}}</div>
+    <div *ngIf="task.doneOn">Completed on {{task?.doneOn|date:'short'}}</div>
+  </div>
 </div>
 
 <div
