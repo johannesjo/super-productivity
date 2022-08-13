@@ -78,6 +78,15 @@ export interface AndroidInterface {
 
   makeHttpRequestCallback(rId: string, result: { [key: string]: any }): void;
 
+  isGrantedFilePermission(): boolean;
+  grantFilePermissionWrapped(): Promise<object>;
+  grantFilePermission(rId: string): void;
+  grantFilePermissionCallBack(rId: string): void;
+
+  getFileRev(filePath: string): string;
+  readFile(filePath: string): string;
+  writeFile(filePath: string, data: string): string;
+
   // added here only
   onResume$: Subject<void>;
   onPause$: Subject<void>;
@@ -256,6 +265,17 @@ if (IS_ANDROID_WEB_VIEW) {
     } else {
       throw new Error('No android makeHttpRequest interface');
     }
+  };
+
+  androidInterface.grantFilePermissionWrapped = (): Promise<object> => {
+    const rId = nanoid();
+    androidInterface.grantFilePermission(rId);
+    return getRequestMapPromise(rId);
+  };
+
+  androidInterface.grantFilePermissionCallBack = (rId: string) => {
+    requestMap[rId].resolve();
+    delete requestMap[rId];
   };
 
   console.log('Android Web View interfaces initialized', androidInterface);

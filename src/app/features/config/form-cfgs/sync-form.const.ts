@@ -2,8 +2,8 @@
 import { T } from '../../../t.const';
 import { ConfigFormSection, DropboxSyncConfig, SyncConfig } from '../global-config.model';
 import { SyncProvider } from '../../../imex/sync/sync-provider.model';
-import { IS_F_DROID_APP } from '../../../util/is-android-web-view';
-import { IS_ELECTRON } from '../../../app.constants';
+import { IS_F_DROID_APP, IS_ANDROID_WEB_VIEW } from '../../../util/is-android-web-view';
+import { androidInterface } from '../../android/android-interface';
 
 export const SYNC_FORM: ConfigFormSection<SyncConfig> = {
   title: T.F.SYNC.FORM.TITLE,
@@ -47,11 +47,32 @@ export const SYNC_FORM: ConfigFormSection<SyncConfig> = {
             ? []
             : [{ label: SyncProvider.GoogleDrive, value: SyncProvider.GoogleDrive }]),
           { label: SyncProvider.WebDAV, value: SyncProvider.WebDAV },
-
-          ...(IS_ELECTRON
-            ? [{ label: SyncProvider.LocalFile, value: SyncProvider.LocalFile }]
-            : []),
+          { label: SyncProvider.LocalFile, value: SyncProvider.LocalFile },
         ],
+        change: (field) => {
+          if (
+            IS_ANDROID_WEB_VIEW &&
+            field.model.syncProvider === SyncProvider.LocalFile
+          ) {
+            androidInterface.grantFilePermissionWrapped().then(() => {
+              field.formControl?.updateValueAndValidity();
+            });
+          }
+        },
+      },
+      validators: {
+        validFileAccessPermission: {
+          expression: (c: any) => {
+            if (IS_ANDROID_WEB_VIEW && c.value === SyncProvider.LocalFile) {
+              return androidInterface.isGrantedFilePermission();
+            }
+            return true;
+          },
+          message: T.F.SYNC.FORM.LOCAL_FILE.L_SYNC_FILE_PATH_PERMISSION_VALIDATION,
+        },
+      },
+      validation: {
+        show: true,
       },
     },
     {

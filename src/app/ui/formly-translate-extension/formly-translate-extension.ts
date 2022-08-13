@@ -15,6 +15,14 @@ export class TranslateExtension {
         .pipe(map((labels) => options.map((o) => ({ ...o, label: labels[o.label] }))));
     }
 
+    const validators = field.validators || {};
+    for (const [k, validator] of Object.entries(validators)) {
+      const v = validator as any;
+      if (v.message && typeof v.message === 'string') {
+        validators[k].message = this.translate.stream(v.message);
+      }
+    }
+
     field.expressionProperties = {
       ...(field.expressionProperties || {}),
       ...(to.label ? { 'templateOptions.label': this.translate.stream(to.label) } : {}),

@@ -741,6 +741,12 @@
         "USE_LOCAL": "Use local",
         "USE_REMOTE": "Use remote"
       },
+      "D_PERMISSION": {
+        "DISABLE_SYNC": "Disable sync",
+        "PERM_FILE": "Give permission",
+        "TEXT": "<p>Your file permission for local syncing has been revoked.</p>",
+        "TITLE": "Sync: Local file permission denied"
+      },
       "FORM": {
         "DROPBOX": {
           "L_ACCESS_TOKEN": "Access Token (generated from Auth Code)"
@@ -750,7 +756,8 @@
         },
         "LOCAL_FILE": {
           "L_SYNC_FILE_PATH": "Sync file path",
-          "L_SYNC_FILE_PATH_DESCRIPTION": "Absolute path to the file that should be used for syncing (will be created)."
+          "L_SYNC_FILE_PATH_DESCRIPTION": "Absolute path to the file that should be used for syncing (will be created).",
+          "L_SYNC_FILE_PATH_PERMISSION_VALIDATION": "Needs file access permission"
         },
         "L_ENABLE_SYNCING": "Enable Syncing",
         "L_ENABLE_COMPRESSION": "Enable Compression (faster data transfer)",
