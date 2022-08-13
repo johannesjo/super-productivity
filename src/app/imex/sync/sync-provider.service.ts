@@ -17,11 +17,13 @@ import { GoogleDriveSyncService } from './google/google-drive-sync.service';
 import {
   AppDataComplete,
   DialogConflictResolutionResult,
+  DialogPermissionResolutionResult,
   SyncResult,
 } from './sync.model';
 import { T } from '../../t.const';
 import { checkForUpdate, UpdateCheckResult } from './check-for-update.util';
 import { DialogSyncConflictComponent } from './dialog-dbx-sync-conflict/dialog-sync-conflict.component';
+import { DialogSyncPermissionComponent } from './dialog-sync-permission/dialog-sync-permission.component';
 import { TranslateService } from '@ngx-translate/core';
 import { SyncTriggerService } from './sync-trigger.service';
 import { MatDialog } from '@angular/material/dialog';
@@ -33,7 +35,8 @@ import { truncate } from '../../util/truncate';
 import { PersistenceLocalService } from '../../core/persistence/persistence-local.service';
 import { getSyncErrorStr } from './get-sync-error-str';
 import { PersistenceService } from '../../core/persistence/persistence.service';
-import { LocalFileSyncService } from './local-file-sync/local-file-sync.service';
+import { LocalFileSyncAndroidService } from './local-file-sync/local-file-sync-android.service';
+import { LocalFileSyncElectronService } from './local-file-sync/local-file-sync-electron.service';
 import { IS_ANDROID_WEB_VIEW } from '../../util/is-android-web-view';
 import { androidInterface } from '../../features/android/android-interface';
 import { CompressionService } from '../../core/compression/compression.service';
@@ -58,7 +61,11 @@ export class SyncProviderService {
         case SyncProvider.WebDAV:
           return this._webDavSyncService;
         case SyncProvider.LocalFile:
-          return this._localFileSyncService;
+          if (IS_ANDROID_WEB_VIEW) {
+            return this._localFileSyncAndroidService;
+          } else {
+            return this._localFileSyncElectronService;
+          }
         default:
           return null;
       }
@@ -90,7 +97,8 @@ export class SyncProviderService {
     private _dataImportService: DataImportService,
     private _googleDriveSyncService: GoogleDriveSyncService,
     private _webDavSyncService: WebDavSyncService,
-    private _localFileSyncService: LocalFileSyncService,
+    private _localFileSyncElectronService: LocalFileSyncElectronService,
+    private _localFileSyncAndroidService: LocalFileSyncAndroidService,
     private _globalConfigService: GlobalConfigService,
     private _persistenceLocalService: PersistenceLocalService,
     private _translateService: TranslateService,
@@ -106,6 +114,17 @@ export class SyncProviderService {
     if (!currentProvider) {
       throw new Error('No Sync Provider for sync()');
     }
+    if (
+      currentProvider === this._localFileSyncAndroidService &&
+      !androidInterface.isGrantedFilePermission()
+    ) {
+      const res = await this._openPermissionDialog$().toPromise();
+      if (res === 'DISABLED_SYNC') {
+        this._log(currentProvider, 'Dialog => Disable Sync');
+        return 'USER_ABORT';
+      }
+    }
+
     this.isSyncing$.next(true);
     try {
       const r = await this._sync(currentProvider);
@@ -477,6 +496,15 @@ export class SyncProviderService {
           local,
           lastSync,
         },
+      })
+      .afterClosed();
+  }
+
+  private _openPermissionDialog$(): Observable<DialogPermissionResolutionResult> {
+    return this._matDialog
+      .open(DialogSyncPermissionComponent, {
+        restoreFocus: true,
+        disableClose: true,
       })
       .afterClosed();
   }
