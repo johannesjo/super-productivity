@@ -4,6 +4,13 @@ import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.Manifest;
+import android.os.Environment;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+import android.content.pm.PackageManager;
+import android.provider.Settings;
+import android.net.Uri;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.BitmapFactory;
@@ -25,6 +32,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.FileReader;
+import java.io.BufferedReader;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -34,12 +43,18 @@ import java.security.cert.Certificate;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.HashMap;
+import java.util.concurrent.ThreadLocalRandom;
+import java.io.File;
+import java.io.BufferedWriter;
+import java.io.FileWriter;
 
 public class CommonJavaScriptInterface {
     protected FullscreenActivity mContext;
     // TODO rename to WINDOW_PROPERTY
     private final static String INTERFACE_PROPERTY = FullscreenActivity.INTERFACE_PROPERTY;
     private final static String FN_PREFIX = "window." + INTERFACE_PROPERTY + ".";
+    private static HashMap<Integer, String> requestIds = new HashMap<Integer, String>();
 
     /**
      * Instantiate the interface and set the context
@@ -48,7 +63,16 @@ public class CommonJavaScriptInterface {
         mContext = c;
     }
 
-    void onActivityResult(int requestCode, int resultCode, Intent data) {
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestIds.containsKey(requestCode)) {
+            _callJavaScriptFunction(FN_PREFIX + "grantFilePermissionCallBack('" + requestIds.get(requestCode) + "')");
+        }
+    }
+
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        if (requestIds.containsKey(requestCode)) {
+            _callJavaScriptFunction(FN_PREFIX + "grantFilePermissionCallBack('" + requestIds.get(requestCode) + "')");
+        }
     }
 
     @SuppressWarnings("unused")
@@ -314,6 +338,80 @@ public class CommonJavaScriptInterface {
         }
         Log.d("TW", requestId + ": " + result);
         _callJavaScriptFunction(FN_PREFIX + "makeHttpRequestCallback('" + requestId + "', " + result + ")");
+    }
+
+    @SuppressWarnings("unused")
+    @JavascriptInterface
+    public String getFileRev(final String filePath) throws IOException {
+        File file = new File(filePath);
+        return String.valueOf(file.lastModified());
+    }
+
+    @SuppressWarnings("unused")
+    @JavascriptInterface
+    public String readFile(final String filePath) throws IOException {
+        BufferedReader reader = new BufferedReader(new FileReader(filePath));
+        StringBuilder sb = new StringBuilder();
+        String line;
+        String ls = System.getProperty("line.separator");
+        while ((line = reader.readLine()) != null) {
+            sb.append(line);
+            sb.append(ls);
+        }
+        sb.deleteCharAt(sb.length() - 1);
+        reader.close();
+
+        return sb.toString();
+    }
+
+    @SuppressWarnings("unused")
+    @JavascriptInterface
+    public void writeFile(final String filePath, final String data) throws IOException {
+        BufferedWriter writer = new BufferedWriter(new FileWriter(filePath));
+        writer.write(data);
+
+        writer.close();
+    }
+
+    @SuppressWarnings("unused")
+    @JavascriptInterface
+    public boolean isGrantedFilePermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            return Environment.isExternalStorageManager();
+        } else {
+            int result = ContextCompat.checkSelfPermission(mContext, Manifest.permission.READ_EXTERNAL_STORAGE);
+            int result1 = ContextCompat.checkSelfPermission(mContext, Manifest.permission.WRITE_EXTERNAL_STORAGE);
+            return result == PackageManager.PERMISSION_GRANTED && result1 == PackageManager.PERMISSION_GRANTED;
+        }
+    }
+
+    @SuppressWarnings("unused")
+    @JavascriptInterface
+    public void grantFilePermission(final String requestId) {
+        if (this.isGrantedFilePermission()) {
+            _callJavaScriptFunction(FN_PREFIX + "grantFilePermissionCallBack('" + requestId + "')");
+            return;
+        }
+
+        Intent intent;
+        Integer requestCode = ThreadLocalRandom.current().nextInt(0, 65535 + 1);
+        requestIds.put(requestCode, requestId);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            try {
+                intent = new Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION);
+                intent.addCategory("android.intent.category.DEFAULT");
+                intent.setData(Uri.parse(String.format("package:%s", mContext.getApplicationContext(). getPackageName())));
+            } catch (Exception e) {
+                intent = new Intent();
+                intent.setAction(Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION);
+            }
+
+            mContext.startActivityForResult(intent, requestCode);
+        } else {
+            ActivityCompat.requestPermissions(mContext, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                    Manifest.permission.READ_EXTERNAL_STORAGE}, 1);
+        }
     }
 
     protected void _callJavaScriptFunction(final String script) {
