@@ -48,11 +48,12 @@ export const SYNC_FORM: ConfigFormSection<SyncConfig> = {
             ? []
             : [{ label: SyncProvider.GoogleDrive, value: SyncProvider.GoogleDrive }]),
           { label: SyncProvider.WebDAV, value: SyncProvider.WebDAV },
-          ...((IS_ELECTRON || IS_ANDROID_WEB_VIEW) &&
-          androidInterface.grantFilePermissionWrapped &&
-          androidInterface.isGrantedFilePermission
-            ? []
-            : [{ label: SyncProvider.LocalFile, value: SyncProvider.LocalFile }]),
+          ...(IS_ELECTRON ||
+          (IS_ANDROID_WEB_VIEW &&
+            androidInterface.grantFilePermissionWrapped &&
+            androidInterface.isGrantedFilePermission)
+            ? [{ label: SyncProvider.LocalFile, value: SyncProvider.LocalFile }]
+            : []),
         ],
         change: (field) => {
           if (
