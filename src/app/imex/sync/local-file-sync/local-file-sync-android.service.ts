@@ -1,20 +1,19 @@
 import { Injectable } from '@angular/core';
 import { SyncProvider, SyncProviderServiceInterface } from '../sync-provider.model';
 import { Observable, of } from 'rxjs';
-import { IS_ELECTRON } from '../../../app.constants';
+import { IS_ANDROID_WEB_VIEW } from '../../../util/is-android-web-view';
 import { SyncGetRevResult } from '../sync.model';
-import { IPC } from '../../../../../electron/shared-with-frontend/ipc-events.const';
-import { ElectronService } from '../../../core/electron/electron.service';
 import { concatMap, first, map } from 'rxjs/operators';
 import { GlobalConfigService } from '../../../features/config/global-config.service';
+import { androidInterface } from '../../../features/android/android-interface';
 
 @Injectable({
   providedIn: 'root',
 })
-export class LocalFileSyncService implements SyncProviderServiceInterface {
+export class LocalFileSyncAndroidService implements SyncProviderServiceInterface {
   id: SyncProvider = SyncProvider.LocalFile;
   isUploadForcePossible?: boolean;
-  isReady$: Observable<boolean> = of(IS_ELECTRON).pipe(
+  isReady$: Observable<boolean> = of(IS_ANDROID_WEB_VIEW).pipe(
     concatMap(() => this._filePath$),
     map((v) => !!v),
   );
@@ -24,24 +23,20 @@ export class LocalFileSyncService implements SyncProviderServiceInterface {
   );
   private _filePathOnce$: Observable<string | null> = this._filePath$.pipe(first());
 
-  constructor(
-    private _electronService: ElectronService,
-    private _globalConfigService: GlobalConfigService,
-  ) {}
+  constructor(private _globalConfigService: GlobalConfigService) {}
 
   async getRevAndLastClientUpdate(
     localRev: string | null,
   ): Promise<{ rev: string; clientUpdate?: number } | SyncGetRevResult> {
     const filePath = await this._filePathOnce$.toPromise();
+    if (!filePath) {
+      throw new Error('File path is null');
+    }
+
     try {
-      const r = await this._electronService.callMain(
-        IPC.FILE_SYNC_GET_REV_AND_CLIENT_UPDATE,
-        {
-          filePath,
-          localRev,
-        },
-      );
-      return r as any;
+      const rev = androidInterface.getFileRev(filePath);
+
+      return { rev } as any;
     } catch (e) {
       throw new Error(e as any);
     }
@@ -54,13 +49,14 @@ export class LocalFileSyncService implements SyncProviderServiceInterface {
     isForceOverwrite?: boolean,
   ): Promise<string | Error> {
     const filePath = await this._filePathOnce$.toPromise();
+    if (!filePath) {
+      throw new Error('File path is null');
+    }
+
     try {
-      const r = (await this._electronService.callMain(IPC.FILE_SYNC_SAVE, {
-        localRev,
-        filePath,
-        dataStr,
-      })) as Promise<string | Error>;
-      return r as any;
+      androidInterface.writeFile(filePath, dataStr);
+
+      return androidInterface.getFileRev(filePath);
     } catch (e) {
       throw new Error(e as any);
     }
@@ -70,12 +66,18 @@ export class LocalFileSyncService implements SyncProviderServiceInterface {
     localRev: string | null,
   ): Promise<{ rev: string; dataStr: string | undefined }> {
     const filePath = await this._filePathOnce$.toPromise();
+    if (!filePath) {
+      throw new Error('File path is null');
+    }
+
     try {
-      const r = (await this._electronService.callMain(IPC.FILE_SYNC_LOAD, {
-        localRev,
-        filePath,
-      })) as Promise<{ rev: string; dataStr: string | undefined }>;
-      return r as any;
+      const rev = androidInterface.getFileRev(filePath);
+      const dataStr = androidInterface.readFile(filePath);
+
+      return {
+        rev,
+        dataStr,
+      };
     } catch (e) {
       throw new Error(e as any);
     }
