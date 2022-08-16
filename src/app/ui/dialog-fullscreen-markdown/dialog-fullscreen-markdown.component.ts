@@ -22,7 +22,7 @@ export class DialogFullscreenMarkdownComponent implements OnDestroy {
   private _subs: Subscription = new Subscription();
 
   constructor(
-    private _matDialogRef: MatDialogRef<DialogFullscreenMarkdownComponent>,
+    public _matDialogRef: MatDialogRef<DialogFullscreenMarkdownComponent>,
     @Inject(MAT_DIALOG_DATA) public data: any,
   ) {
     const lastViewMode = localStorage.getItem(LS.LAST_FULLSCREEN_EDIT_VIEW_MODE);
@@ -46,6 +46,14 @@ export class DialogFullscreenMarkdownComponent implements OnDestroy {
       }),
     );
   }
+
+  keydownHandler(ev: KeyboardEvent): void {
+    if (ev.key === 'Enter' && ev.ctrlKey) {
+      this.close();
+    }
+  }
+
+  ngModelChange(data: string): void {}
 
   ngOnDestroy(): void {
     this._subs.unsubscribe();

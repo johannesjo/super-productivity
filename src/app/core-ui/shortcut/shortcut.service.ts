@@ -63,7 +63,11 @@ export class ShortcutService {
       (this._electronService.ipcRenderer as typeof ipcRenderer).on(IPC.ADD_NOTE, () => {
         if (this._matDialog.openDialogs.length === 0) {
           this._ngZone.run(() => {
-            this._matDialog.open(DialogAddNoteComponent);
+            this._matDialog.open(DialogAddNoteComponent, {
+              minWidth: '100vw',
+              height: '100vh',
+              restoreFocus: true,
+            });
           });
         }
       });
@@ -133,7 +137,11 @@ export class ShortcutService {
       ev.preventDefault();
     } else if (checkKeyCombo(ev, keys.addNewNote)) {
       if (this._matDialog.openDialogs.length === 0) {
-        this._matDialog.open(DialogAddNoteComponent);
+        this._matDialog.open(DialogAddNoteComponent, {
+          minWidth: '100vw',
+          height: '100vh',
+          restoreFocus: true,
+        });
         ev.preventDefault();
       }
     } else if (checkKeyCombo(ev, keys.openProjectNotes)) {

@@ -5,6 +5,8 @@
   <textarea
     #textareaEl
     [(ngModel)]="data.content"
+    (keydown)="keydownHandler($event)"
+    (ngModelChange)="ngModelChange($event)"
     rows="1"
     tabindex="3"
     *ngIf="viewMode==='TEXT_ONLY' || viewMode==='SPLIT'"

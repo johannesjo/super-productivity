@@ -1,50 +1,45 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnDestroy } from '@angular/core';
 import { MatDialogRef } from '@angular/material/dialog';
-import { NoteService } from '../note.service';
 import { SS } from '../../../core/persistence/storage-keys.const';
 import { T } from '../../../t.const';
-import { WorkContextService } from '../../work-context/work-context.service';
+import { DialogFullscreenMarkdownComponent } from '../../../ui/dialog-fullscreen-markdown/dialog-fullscreen-markdown.component';
+import { NoteService } from '../note.service';
 
 @Component({
-  selector: 'dialog-add-note',
-  templateUrl: './dialog-add-note.component.html',
-  styleUrls: ['./dialog-add-note.component.scss'],
+  // selector: 'dialog-add-note',
+  selector: 'dialog-fullscreen-markdown',
+  templateUrl:
+    '../../../ui/dialog-fullscreen-markdown/dialog-fullscreen-markdown.component.html',
+  styleUrls: [
+    '../../../ui/dialog-fullscreen-markdown/dialog-fullscreen-markdown.component.scss',
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class DialogAddNoteComponent {
+export class DialogAddNoteComponent
+  extends DialogFullscreenMarkdownComponent
+  implements OnDestroy
+{
   T: typeof T = T;
-  noteContent: string;
-  isSubmitted: boolean = false;
+  data: { content: string };
 
   constructor(
-    private _matDialogRef: MatDialogRef<DialogAddNoteComponent>,
+    public _matDialogRef: MatDialogRef<DialogAddNoteComponent>,
     private _noteService: NoteService,
-    private _workContextService: WorkContextService,
   ) {
-    this.noteContent = sessionStorage.getItem(SS.NOTE_TMP) || '';
+    const data = { content: sessionStorage.getItem(SS.NOTE_TMP) || '' };
+    super(_matDialogRef, data);
+    this.data = data;
   }
 
-  keydownHandler(ev: KeyboardEvent): void {
-    if (ev.key === 'Enter' && ev.ctrlKey) {
-      this.submit();
-    }
-  }
-
-  submit(): void {
-    if (!this.isSubmitted && this.noteContent && this.noteContent.trim().length > 0) {
-      this._noteService.add({ content: this.noteContent }, true);
-
-      this.isSubmitted = true;
+  close(isSkipSave: boolean = false): void {
+    if (!isSkipSave && this.data.content && this.data.content.trim().length > 0) {
+      this._noteService.add({ content: this.data.content }, true);
       this._clearSessionStorage();
-      this.close();
     }
-  }
-
-  close(): void {
     this._matDialogRef.close();
   }
 
-  saveTmp(val: string = this.noteContent || ''): void {
+  ngModelChange(val: string = this.data.content || ''): void {
     sessionStorage.setItem(SS.NOTE_TMP, val);
   }
 
