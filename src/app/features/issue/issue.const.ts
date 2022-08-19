@@ -29,7 +29,10 @@ import {
   DEFAULT_GITEA_CFG,
   GITEA_CONFIG_FORM_SECTION,
 } from './providers/gitea/gitea.const';
-import { DEFAULT_REDMINE_CFG } from './providers/redmine/redmine.const';
+import {
+  DEFAULT_REDMINE_CFG,
+  REDMINE_CONFIG_FORM_SECTION,
+} from './providers/redmine/redmine.const';
 
 export const GITLAB_TYPE: IssueProviderKey = 'GITLAB';
 export const GITHUB_TYPE: IssueProviderKey = 'GITHUB';
@@ -84,6 +87,7 @@ export const ISSUE_PROVIDER_WITH_CUSTOM_COMP = [JIRA_ISSUE_TYPE, OPEN_PROJECT_TY
 export const ISSUE_PROVIDER_FORM_CFGS: ConfigFormConfig = [
   GITLAB_CONFIG_FORM_SECTION as GenericConfigFormSection,
   GITHUB_CONFIG_FORM_SECTION as GenericConfigFormSection,
+  REDMINE_CONFIG_FORM_SECTION as GenericConfigFormSection,
   JIRA_CONFIG_FORM_SECTION as GenericConfigFormSection,
   CALDAV_CONFIG_FORM_SECTION as GenericConfigFormSection,
   OPEN_PROJECT_CONFIG_FORM_SECTION as GenericConfigFormSection,

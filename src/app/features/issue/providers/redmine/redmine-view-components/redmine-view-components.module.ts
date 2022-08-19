@@ -2,7 +2,7 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { UiModule } from '../../../../../ui/ui.module';
 import { FormsModule } from '@angular/forms';
-import { DialogRedmineInitialSetupComponent } from './dialog-redmine-initial-setup/dialog-redmine-initial-setup.component';
+import { DialogRedmineInitialSetupComponent } from './redmine-initial-setup/dialog-redmine-initial-setup.component';
 
 @NgModule({
   imports: [CommonModule, UiModule, FormsModule],

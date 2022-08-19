@@ -13,6 +13,7 @@ import { DialogGitlabInitialSetupModule } from '../issue/providers/gitlab/dialog
 import { DialogCaldavInitialSetupModule } from '../issue/providers/caldav/dialog-caldav-initial-setup/dialog-caldav-initial-setup.module';
 import { OpenProjectViewComponentsModule } from '../issue/providers/open-project/open-project-view-components/open-project-view-components.module';
 import { GiteaViewComponentsModule } from '../issue/providers/gitea/gitea-view-components/gitea-view-components.module';
+import { RedmineViewComponentsModule } from '../issue/providers/redmine/redmine-view-components/redmine-view-components.module';
 
 @NgModule({
   imports: [
@@ -26,6 +27,7 @@ import { GiteaViewComponentsModule } from '../issue/providers/gitea/gitea-view-c
     DialogCaldavInitialSetupModule,
     OpenProjectViewComponentsModule,
     GiteaViewComponentsModule,
+    RedmineViewComponentsModule,
   ],
   declarations: [DialogCreateProjectComponent],
   providers: [ProjectService],

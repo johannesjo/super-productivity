@@ -176,6 +176,25 @@
         "ERR_UNKNOWN": "Gitea: Unknown error {{statusCode}} {{errorMsg}}. Api Rate limit exceeded?"
       }
     },
+    "REDMINE": {
+      "DIALOG_INITIAL": {
+        "TITLE": "Setup Redmine for Project"
+      },
+      "FORM": {
+        "PROJECT_ID": "Project ID",
+        "PROJECT_ID_DESCRIPTION": "Can be found as part of the url, when viewing the project in the Browser.",
+        "HOST": "Host (e.g.: https://redmine.org)",
+        "API_KEY": "Access Token",
+        "SCOPE": "Scope",
+        "IS_AUTO_POLL": "Automatically poll imported redmine issues for changes",
+        "IS_SEARCH_ISSUES_FROM_REDMINE": "Show issues from redmine as suggestions when adding new tasks",
+        "IS_AUTO_ADD_TO_BACKLOG": "Automatically add open issues from redmine to backlog"
+      },
+      "FORM_SECTION": {
+        "TITLE": "Redmine",
+        "HELP": "<p>Here you can configure SuperProductivity to list open Redmine (either its the online version or a self-hosted instance) issues for a specific project in the task creation panel in the daily planning view. They will be listed as suggestions and will provide a link to the issue as well as more information about it.</p><p>In addition you can automatically add and sync all open issues to your task backlog.</p>"
+      }
+    },
     "GITHUB": {
       "DIALOG_INITIAL": {
         "TITLE": "Setup GitHub for Project"
