@@ -58,19 +58,15 @@ jobs:
           github_token: ${{ secrets.github_token }}
           release: ${{ startsWith(github.ref, 'refs/tags/v') }}
 
-  # DISABLED until working again
-  #      - name: Install Snapcraft
-  #        uses: samuelmeuli/action-snapcraft@v1
-  #        with:
-  #          # Log in to Snap Store
-  #          snapcraft_token: ${{ secrets.snapcraft_token }}
-  #
-  #
-  #      # Release to edge if no tag and to candidate if tag
-  #      - run: snapcraft push app-builds/superProductivity*.snap --release edge
-  #        if: false == startsWith(github.ref, 'refs/tags/v')
-  #      - run: snapcraft push app-builds/superProductivity*.snap --release candidate
-  #        if: startsWith(github.ref, 'refs/tags/v')
+      # DISABLED until working again
+      - name: Install Snapcraft
+        uses: samuelmeuli/action-snapcraft@v1
+      - run: ls -la app-builds
+      # Release to edge if no tag and to candidate if tag
+      - run: snapcraft push app-builds/superProductivity*.snap --release edge
+        if: false == startsWith(github.ref, 'refs/tags/v')
+      - run: snapcraft push app-builds/superProductivity*.snap --release candidate
+        if: startsWith(github.ref, 'refs/tags/v')
 
   mac-bin:
     runs-on: macos-latest
