@@ -18,5 +18,11 @@ jobs:
         uses: actions/checkout@v2
         with:
           persist-credentials: false
+      # work around for npm installs from git+https://github.com/johannesjo/J2M.git
+      - name: Reconfigure git to use HTTP authentication
+        run: >
+          git config --global url."https://github.com/".insteadOf
+          ssh://git@github.com/
+
       - name: 'Dependency Review'
         uses: actions/dependency-review-action@v2
