@@ -14,7 +14,7 @@ jobs:
     steps:
       - uses: actions/setup-node@v3
         with:
-          node-version: 14
+          node-version: 16
       - name: Check out Git repository
         uses: actions/checkout@v2
         with:
