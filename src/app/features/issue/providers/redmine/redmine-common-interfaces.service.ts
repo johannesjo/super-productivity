@@ -1,16 +1,10 @@
-import { inject, Injectable } from '@angular/core';
+import { Injectable } from '@angular/core';
 import { Observable, timer } from 'rxjs';
 import { first, map } from 'rxjs/operators';
 import { ProjectService } from 'src/app/features/project/project.service';
-import { TaskAttachmentCopy } from '../../../tasks/task-attachment/task-attachment.model';
 import { TaskCopy } from '../../../tasks/task.model';
 import { IssueServiceInterface } from '../../issue-service-interface';
-import {
-  IssueIntegrationCfg,
-  IssueData,
-  IssueDataReduced,
-  SearchResultItem,
-} from '../../issue.model';
+import { IssueData, IssueDataReduced, SearchResultItem } from '../../issue.model';
 import { REDMINE_INITIAL_POLL_DELAY, REDMINE_POLL_INTERVAL } from './redmine.const';
 import { RedmineCfg } from './redmine.model';
 import { isRedmineEnabled } from './is-redmine-enabled.util';
@@ -58,9 +52,7 @@ export class RedmineCommonInterfacesService implements IssueServiceInterface {
     throw new Error('Method not implemented.');
   }
 
-  getFreshDataForIssueTask(
-    task: Readonly<TaskCopy>,
-  ): Promise<{
+  getFreshDataForIssueTask(task: Readonly<TaskCopy>): Promise<{
     taskChanges: Partial<Readonly<TaskCopy>>;
     issue: IssueData;
     issueTitle: string;
@@ -68,9 +60,7 @@ export class RedmineCommonInterfacesService implements IssueServiceInterface {
     throw new Error('Method not implemented.');
   }
 
-  getFreshDataForIssueTasks(
-    tasks: Readonly<TaskCopy>[],
-  ): Promise<
+  getFreshDataForIssueTasks(tasks: Readonly<TaskCopy>[]): Promise<
     {
       task: Readonly<TaskCopy>;
       taskChanges: Partial<Readonly<TaskCopy>>;
