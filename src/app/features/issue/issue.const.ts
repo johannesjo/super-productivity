@@ -29,6 +29,7 @@ import {
   DEFAULT_GITEA_CFG,
   GITEA_CONFIG_FORM_SECTION,
 } from './providers/gitea/gitea.const';
+import { DEFAULT_REDMINE_CFG } from './providers/redmine/redmine.const';
 
 export const GITLAB_TYPE: IssueProviderKey = 'GITLAB';
 export const GITHUB_TYPE: IssueProviderKey = 'GITHUB';
@@ -36,6 +37,7 @@ export const JIRA_TYPE: IssueProviderKey = 'JIRA';
 export const CALDAV_TYPE: IssueProviderKey = 'CALDAV';
 export const OPEN_PROJECT_TYPE: IssueProviderKey = 'OPEN_PROJECT';
 export const GITEA_TYPE: IssueProviderKey = 'GITEA';
+export const REDMINE_TYPE: IssueProviderKey = 'REDMINE';
 
 export const ISSUE_PROVIDER_TYPES: IssueProviderKey[] = [
   GITLAB_TYPE,
@@ -44,6 +46,7 @@ export const ISSUE_PROVIDER_TYPES: IssueProviderKey[] = [
   CALDAV_TYPE,
   OPEN_PROJECT_TYPE,
   GITEA_TYPE,
+  REDMINE_TYPE,
 ];
 
 export const ISSUE_PROVIDER_ICON_MAP = {
@@ -53,6 +56,7 @@ export const ISSUE_PROVIDER_ICON_MAP = {
   [CALDAV_TYPE]: 'caldav',
   [OPEN_PROJECT_TYPE]: 'open_project',
   [GITEA_TYPE]: 'gitea',
+  [REDMINE_TYPE]: 'redmine',
 };
 
 export const ISSUE_PROVIDER_HUMANIZED = {
@@ -62,6 +66,7 @@ export const ISSUE_PROVIDER_HUMANIZED = {
   [CALDAV_TYPE]: 'CalDAV',
   [OPEN_PROJECT_TYPE]: 'OpenProject',
   [GITEA_TYPE]: 'Gitea',
+  [REDMINE_TYPE]: 'Redmine',
 };
 
 export const DEFAULT_ISSUE_PROVIDER_CFGS = {
@@ -71,6 +76,7 @@ export const DEFAULT_ISSUE_PROVIDER_CFGS = {
   [CALDAV_TYPE]: DEFAULT_CALDAV_CFG,
   [OPEN_PROJECT_TYPE]: DEFAULT_OPEN_PROJECT_CFG,
   [GITEA_TYPE]: DEFAULT_GITEA_CFG,
+  [REDMINE_TYPE]: DEFAULT_REDMINE_CFG,
 };
 
 export const ISSUE_PROVIDER_WITH_CUSTOM_COMP = [JIRA_ISSUE_TYPE, OPEN_PROJECT_TYPE];

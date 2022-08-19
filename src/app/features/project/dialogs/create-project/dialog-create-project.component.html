@@ -54,6 +54,23 @@
       </div>
       <div class="item">
         <button
+          (click)="openRedmineCfg()"
+          color="primary"
+          mat-button
+          type="button"
+        >
+          <mat-icon
+            *ngIf="!redmineCfg?.isEnabled"
+            svgIcon="redmine"
+          ></mat-icon>
+          <mat-icon *ngIf="redmineCfg?.isEnabled">checkmark</mat-icon>
+          <span style="padding-left: 8px"
+            >{{T.F.PROJECT.D_CREATE.SETUP_REDMINE_PROJECT|translate}}</span
+          >
+        </button>
+      </div>
+      <div class="item">
+        <button
           (click)="openGitlabCfg()"
           color="primary"
           mat-button

@@ -9,6 +9,7 @@ import {
   GITLAB_TYPE,
   JIRA_TYPE,
   OPEN_PROJECT_TYPE,
+  REDMINE_TYPE,
 } from '../../issue/issue.const';
 import { GitlabCfg } from '../../issue/providers/gitlab/gitlab';
 import { exists } from '../../../util/exists';
@@ -16,6 +17,7 @@ import { CaldavCfg } from '../../issue/providers/caldav/caldav.model';
 import { PROJECT_FEATURE_NAME, projectAdapter } from './project.reducer';
 import { OpenProjectCfg } from '../../issue/providers/open-project/open-project.model';
 import { GiteaCfg } from '../../issue/providers/gitea/gitea.model';
+import { RedmineCfg } from '../../issue/providers/redmine/redmine.model';
 
 export const projectSelectors = createFeatureSelector<ProjectState>(PROJECT_FEATURE_NAME);
 const { selectAll } = projectAdapter.getSelectors();
@@ -52,6 +54,11 @@ export const selectJiraCfgByProjectId = createSelector(
 export const selectGithubCfgByProjectId = createSelector(
   selectProjectById,
   (p: Project): GithubCfg => p.issueIntegrationCfgs[GITHUB_TYPE] as GithubCfg,
+);
+
+export const selectRedmineCfgByProjectId = createSelector(
+  selectProjectById,
+  (p: Project): RedmineCfg => p.issueIntegrationCfgs[REDMINE_TYPE] as RedmineCfg,
 );
 
 export const selectGitlabCfgByProjectId = createSelector(

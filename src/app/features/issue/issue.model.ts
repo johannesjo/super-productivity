@@ -22,6 +22,7 @@ import {
 } from './providers/open-project/open-project-issue/open-project-issue.model';
 import { GiteaCfg } from './providers/gitea/gitea.model';
 import { GiteaIssue } from './providers/gitea/gitea-issue/gitea-issue.model';
+import { RedmineCfg } from './providers/redmine/redmine.model';
 
 export interface BaseIssueProviderCfg {
   isEnabled: boolean;
@@ -33,7 +34,8 @@ export type IssueProviderKey =
   | 'GITLAB'
   | 'CALDAV'
   | 'OPEN_PROJECT'
-  | 'GITEA';
+  | 'GITEA'
+  | 'REDMINE';
 
 export type IssueIntegrationCfg =
   | JiraCfg
@@ -41,7 +43,8 @@ export type IssueIntegrationCfg =
   | GitlabCfg
   | CaldavCfg
   | OpenProjectCfg
-  | GiteaCfg;
+  | GiteaCfg
+  | RedmineCfg;
 
 export enum IssueLocalState {
   OPEN = 'OPEN',
@@ -57,6 +60,7 @@ export interface IssueIntegrationCfgs {
   CALDAV?: CaldavCfg;
   OPEN_PROJECT?: OpenProjectCfg;
   GITEA?: GiteaCfg;
+  REDMINE?: RedmineCfg;
 }
 
 export type IssueData =

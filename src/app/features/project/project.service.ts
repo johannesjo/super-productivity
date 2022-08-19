@@ -42,6 +42,7 @@ import {
   selectGitlabCfgByProjectId,
   selectJiraCfgByProjectId,
   selectOpenProjectCfgByProjectId,
+  selectRedmineCfgByProjectId,
   selectProjectBreakNrForProject,
   selectProjectBreakTimeForProject,
   selectProjectById,
@@ -50,6 +51,7 @@ import {
 } from './store/project.selectors';
 import { OpenProjectCfg } from '../issue/providers/open-project/open-project.model';
 import { GiteaCfg } from '../issue/providers/gitea/gitea.model';
+import { RedmineCfg } from '../issue/providers/redmine/redmine.model';
 
 @Injectable({
   providedIn: 'root',
@@ -122,6 +124,10 @@ export class ProjectService {
 
   getGiteaCfgForProject$(projectId: string): Observable<GiteaCfg> {
     return this._store$.pipe(select(selectGiteaCfgByProjectId, { id: projectId }));
+  }
+
+  getRedmineCfgForProject$(projectId: string): Observable<RedmineCfg> {
+    return this._store$.pipe(select(selectRedmineCfgByProjectId, { id: projectId }));
   }
 
   getProjectsWithoutId$(projectId: string | null): Observable<Project[]> {

@@ -24,10 +24,12 @@ import {
 } from '../../../../core/persistence/local-storage';
 import { GithubCfg } from '../../../issue/providers/github/github.model';
 import { GiteaCfg } from '../../../issue/providers/gitea/gitea.model';
+import { RedmineCfg } from '../../../issue/providers/redmine/redmine.model';
 import { DialogGithubInitialSetupComponent } from '../../../issue/providers/github/github-view-components/dialog-github-initial-setup/dialog-github-initial-setup.component';
 import {
   CALDAV_TYPE,
   GITEA_TYPE,
+  REDMINE_TYPE,
   GITHUB_TYPE,
   GITLAB_TYPE,
   OPEN_PROJECT_TYPE,
@@ -46,8 +48,10 @@ import { DialogOpenProjectInitialSetupComponent } from '../../../issue/providers
 import { OpenProjectCfg } from '../../../issue/providers/open-project/open-project.model';
 import { DEFAULT_OPEN_PROJECT_CFG } from '../../../issue/providers/open-project/open-project.const';
 import { DEFAULT_GITEA_CFG } from '../../../issue/providers/gitea/gitea.const';
+import { DEFAULT_REDMINE_CFG } from '../../../issue/providers/redmine/redmine.const';
 import { getRandomWorkContextColor } from '../../../work-context/work-context-color';
 import { DialogGiteaInitialSetupComponent } from 'src/app/features/issue/providers/gitea/gitea-view-components/dialog-gitea-initial-setup/dialog-gitea-initial-setup.component';
+import { DialogRedmineInitialSetupComponent } from 'src/app/features/issue/providers/redmine/redmine-view-components/redmine-initial-setup/dialog-redmine-initial-setup.component';
 
 @Component({
   selector: 'dialog-create-project',
@@ -67,6 +71,7 @@ export class DialogCreateProjectComponent implements OnInit, OnDestroy {
   caldavCfg?: CaldavCfg;
   openProjectCfg?: OpenProjectCfg;
   giteaCfg?: GiteaCfg;
+  redmineCfg?: RedmineCfg;
 
   formBasic: UntypedFormGroup = new UntypedFormGroup({});
   formTheme: UntypedFormGroup = new UntypedFormGroup({});
@@ -123,6 +128,7 @@ export class DialogCreateProjectComponent implements OnInit, OnDestroy {
           CALDAV: this.caldavCfg,
           OPEN_PROJECT: this.openProjectCfg,
           GITEA: this.giteaCfg,
+          REDMINE: this.redmineCfg,
         };
         const projectDataToSave: Project | Partial<Project> = {
           ...this.projectData,
@@ -150,6 +156,9 @@ export class DialogCreateProjectComponent implements OnInit, OnDestroy {
       if (this.projectData.issueIntegrationCfgs.GITEA) {
         this.giteaCfg = this.projectData.issueIntegrationCfgs.GITEA;
       }
+      if (this.projectData.issueIntegrationCfgs.REDMINE) {
+        this.redmineCfg = this.projectData.issueIntegrationCfgs.REDMINE;
+      }
     }
   }
 
@@ -166,6 +175,7 @@ export class DialogCreateProjectComponent implements OnInit, OnDestroy {
       CALDAV: this.caldavCfg || DEFAULT_CALDAV_CFG,
       OPEN_PROJECT: this.openProjectCfg || DEFAULT_OPEN_PROJECT_CFG,
       GITEA: this.giteaCfg || DEFAULT_GITEA_CFG,
+      REDMINE: this.redmineCfg || DEFAULT_REDMINE_CFG,
     };
 
     const projectDataToSave: Project | Partial<Project> = {
@@ -298,6 +308,38 @@ export class DialogCreateProjectComponent implements OnInit, OnDestroy {
         }),
     );
   }
+
+  openRedmineCfg(): void {
+    this._subs.add(
+      this._matDialog
+        .open(DialogRedmineInitialSetupComponent, {
+          restoreFocus: true,
+          data: {
+            redmineCfg: { ...this.redmineCfg, isEnabled: true },
+          },
+        })
+        .afterClosed()
+        .subscribe((redmineCfg: RedmineCfg) => {
+          if (redmineCfg) {
+            this._saveRedmineCfg(redmineCfg);
+          }
+        }),
+    );
+  }
+
+  private _saveRedmineCfg(redmineCfg: RedmineCfg): void {
+    this.redmineCfg = redmineCfg;
+    this._cd.markForCheck();
+
+    if (this.projectData.id) {
+      this._projectService.updateIssueProviderConfig(
+        this.projectData.id,
+        REDMINE_TYPE,
+        this.redmineCfg,
+      );
+    }
+  }
+
   private _saveJiraCfg(jiraCfg: JiraCfg): void {
     this.jiraCfg = jiraCfg;
     this._cd.markForCheck();
