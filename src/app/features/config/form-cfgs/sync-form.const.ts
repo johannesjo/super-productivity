@@ -50,7 +50,7 @@ export const SYNC_FORM: ConfigFormSection<SyncConfig> = {
           { label: SyncProvider.WebDAV, value: SyncProvider.WebDAV },
           ...(IS_ELECTRON ||
           (IS_ANDROID_WEB_VIEW &&
-            androidInterface.grantFilePermissionWrapped &&
+            (androidInterface as any).grantFilePermission &&
             androidInterface.isGrantedFilePermission)
             ? [{ label: SyncProvider.LocalFile, value: SyncProvider.LocalFile }]
             : []),
