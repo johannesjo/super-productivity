@@ -1,8 +1,9 @@
 import { NightwatchBrowser } from 'nightwatch';
 
 const ADD_NOTE_BTN = '#add-note-btn';
-const TEXTAREA = 'dialog-add-note textarea';
-const ADD_NOTE_SUBMIT_BTN = 'dialog-add-note button[type=submit]:enabled';
+const TEXTAREA = 'dialog-fullscreen-markdown textarea';
+// const ADD_NOTE_SUBMIT_BTN = 'dialog-add-note button[type=submit]:enabled';
+const ADD_NOTE_SUBMIT_BTN = '#T-save-note';
 const NOTES_WRAPPER = 'notes';
 const ROUTER_WRAPPER = '.route-wrapper';
 
