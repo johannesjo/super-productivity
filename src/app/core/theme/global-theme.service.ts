@@ -114,6 +114,7 @@ export class GlobalThemeService {
       ['working_today', 'assets/icons/working-today.svg'],
       ['repeat', 'assets/icons/repeat.svg'],
       ['gitea', 'assets/icons/gitea.svg'],
+      ['redmine', 'assets/icons/redmine.svg'],
     ];
 
     icons.forEach(([name, path]) => {
