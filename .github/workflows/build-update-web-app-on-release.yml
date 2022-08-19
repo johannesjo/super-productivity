@@ -17,6 +17,8 @@ jobs:
           node-version: 14
       - name: Check out Git repository
         uses: actions/checkout@v3
+        with:
+          persist-credentials: false
 
       - name: Install Node.js, NPM and Yarn
         uses: actions/setup-node@v3

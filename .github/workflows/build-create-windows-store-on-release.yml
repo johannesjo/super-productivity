@@ -23,6 +23,8 @@ jobs:
 
       - name: Check out Git repository
         uses: actions/checkout@v3
+        with:
+          persist-credentials: false
 
       - name: Load Electron Builder Windows Store Config
         run: echo $WIN_STORE_ELECTRON_BUILDER_YML | base64 --decode > electron-builder.yaml
