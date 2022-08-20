@@ -12,6 +12,13 @@
   ></github-issue-content>
 </ng-container>
 
+<ng-contailer *ngIf="task?.issueType===REDMINE_TYPE">
+  <redmine-issue-content
+    [issue]="issueData"
+    [task]="task"
+  ></redmine-issue-content>
+</ng-contailer>
+
 <ng-container *ngIf="task?.issueType===GITLAB_TYPE">
   <gitlab-issue-content
     [issue]="issueData"
