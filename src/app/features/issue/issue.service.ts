@@ -52,6 +52,7 @@ export class IssueService {
   ISSUE_REFRESH_MAP: { [key: string]: { [key: string]: Subject<IssueData> } } = {
     [GITLAB_TYPE]: {},
     [GITHUB_TYPE]: {},
+    [REDMINE_TYPE]: {},
     [JIRA_TYPE]: {},
     [CALDAV_TYPE]: {},
     [OPEN_PROJECT_TYPE]: {},
