@@ -6,6 +6,10 @@
   <github-issue-header [task]="task"></github-issue-header>
 </ng-container>
 
+<ng-container *ngIf="task?.issueType===REDMINE_TYPE">
+  <redmine-issue-header [task]="task"></redmine-issue-header>
+</ng-container>
+
 <ng-container *ngIf="task?.issueType===GITLAB_TYPE">
   <gitlab-issue-header [task]="task"></gitlab-issue-header>
 </ng-container>

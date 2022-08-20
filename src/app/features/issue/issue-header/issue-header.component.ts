@@ -5,6 +5,7 @@ import {
   GITEA_TYPE,
   GITHUB_TYPE,
   GITLAB_TYPE,
+  REDMINE_TYPE,
   JIRA_TYPE,
   OPEN_PROJECT_TYPE,
 } from '../issue.const';
@@ -20,6 +21,7 @@ export class IssueHeaderComponent {
 
   readonly GITLAB_TYPE: string = GITLAB_TYPE;
   readonly GITHUB_TYPE: string = GITHUB_TYPE;
+  readonly REDMINE_TYPE: string = REDMINE_TYPE;
   readonly JIRA_TYPE: string = JIRA_TYPE;
   readonly CALDAV_TYPE: string = CALDAV_TYPE;
   readonly OPEN_PROJECT_TYPE: string = OPEN_PROJECT_TYPE;
