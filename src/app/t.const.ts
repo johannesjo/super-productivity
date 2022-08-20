@@ -203,6 +203,9 @@ const T = {
         TITLE: 'F.REDMINE.FORM_SECTION.TITLE',
         HELP: 'F.REDMINE.FORM_SECTION.HELP',
       },
+      S: {
+        ERR_UNKNOWN: 'F.REDMINE.S.ERR_UNKNOWN',
+      },
     },
     GITHUB: {
       DIALOG_INITIAL: {

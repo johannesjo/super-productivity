@@ -78,7 +78,8 @@ export class RedmineApiService {
     cfg: RedmineCfg,
   ): Observable<any> {
     this._checkSettings(cfg);
-    params.params = { ...params.params, access_token: cfg.api_key };
+    params.params = { ...params.params, key: cfg.api_key };
+    // params.headers = { ...params.headers, 'X-Redmine-API-Key': cfg.api_key}
     const p: HttpRequest<any> | any = {
       ...params,
       method: params.method || 'GET',
@@ -160,7 +161,7 @@ export class RedmineApiService {
             error.toString(),
           statusCode: error.status,
         },
-        msg: T.F.OPEN_PROJECT.S.ERR_UNKNOWN,
+        msg: T.F.REDMINE.S.ERR_UNKNOWN,
       });
     }
     if (error && error.message) {
