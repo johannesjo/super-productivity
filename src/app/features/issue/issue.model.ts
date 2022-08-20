@@ -23,6 +23,7 @@ import {
 import { GiteaCfg } from './providers/gitea/gitea.model';
 import { GiteaIssue } from './providers/gitea/gitea-issue/gitea-issue.model';
 import { RedmineCfg } from './providers/redmine/redmine.model';
+import { RedmineIssue } from './providers/redmine/redmine-issue/redmine-issue.model';
 
 export interface BaseIssueProviderCfg {
   isEnabled: boolean;
@@ -69,7 +70,8 @@ export type IssueData =
   | GitlabIssue
   | CaldavIssue
   | OpenProjectWorkPackage
-  | GiteaIssue;
+  | GiteaIssue
+  | RedmineIssue;
 
 export type IssueDataReduced =
   | GithubIssueReduced
@@ -77,7 +79,8 @@ export type IssueDataReduced =
   | GitlabIssue
   | OpenProjectWorkPackageReduced
   | CaldavIssueReduced
-  | GiteaIssue;
+  | GiteaIssue
+  | RedmineIssue;
 
 export interface SearchResultItem {
   title: string;

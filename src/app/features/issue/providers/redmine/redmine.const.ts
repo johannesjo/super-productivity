@@ -19,6 +19,12 @@ export const DEFAULT_REDMINE_CFG: RedmineCfg = {
   isAutoAddToBacklog: false,
 };
 
+export enum ScopeOptions {
+  all = 'all',
+  createdByMe = 'created-by-me',
+  assignedToMe = 'assigned-to-me',
+}
+
 export const REDMINE_CONFIG_FORM: LimitedFormlyFieldConfig<RedmineCfg>[] = [
   {
     key: 'host',
@@ -61,9 +67,9 @@ export const REDMINE_CONFIG_FORM: LimitedFormlyFieldConfig<RedmineCfg>[] = [
       required: true,
       label: T.F.REDMINE.FORM.SCOPE,
       options: [
-        { value: 'all', label: T.F.OPEN_PROJECT.FORM.SCOPE_ALL },
-        { value: 'created-by-me', label: T.F.OPEN_PROJECT.FORM.SCOPE_CREATED },
-        { value: 'assigned-to-me', label: T.F.OPEN_PROJECT.FORM.SCOPE_ASSIGNED },
+        { value: ScopeOptions.all, label: T.F.REDMINE.FORM.SCOPE_ALL },
+        { value: ScopeOptions.createdByMe, label: T.F.REDMINE.FORM.SCOPE_CREATED },
+        { value: ScopeOptions.assignedToMe, label: T.F.REDMINE.FORM.SCOPE_ASSIGNED },
       ],
     },
   },

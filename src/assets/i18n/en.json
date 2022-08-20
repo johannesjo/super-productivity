@@ -186,6 +186,9 @@
         "HOST": "Host (e.g.: https://redmine.org)",
         "API_KEY": "Access Token",
         "SCOPE": "Scope",
+        "SCOPE_ALL": "All",
+        "SCOPE_ASSIGNED": "Assigned to me",
+        "SCOPE_CREATED": "Created by me",
         "IS_AUTO_POLL": "Automatically poll imported redmine issues for changes",
         "IS_SEARCH_ISSUES_FROM_REDMINE": "Show issues from redmine as suggestions when adding new tasks",
         "IS_AUTO_ADD_TO_BACKLOG": "Automatically add open issues from redmine to backlog"

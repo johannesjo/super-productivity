@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
-import { Observable, timer } from 'rxjs';
-import { first, map } from 'rxjs/operators';
+import { Observable, of, timer } from 'rxjs';
+import { catchError, first, map, switchMap } from 'rxjs/operators';
 import { ProjectService } from 'src/app/features/project/project.service';
 import { TaskCopy } from '../../../tasks/task.model';
 import { IssueServiceInterface } from '../../issue-service-interface';
@@ -8,12 +8,17 @@ import { IssueData, IssueDataReduced, SearchResultItem } from '../../issue.model
 import { REDMINE_INITIAL_POLL_DELAY, REDMINE_POLL_INTERVAL } from './redmine.const';
 import { RedmineCfg } from './redmine.model';
 import { isRedmineEnabled } from './is-redmine-enabled.util';
+import { RedmineApiService } from '../redmine/redmine-api.service';
+import { RedmineIssue } from './redmine-issue/redmine-issue.model';
 
 @Injectable({
   providedIn: 'root',
 })
 export class RedmineCommonInterfacesService implements IssueServiceInterface {
-  constructor(private readonly _projectService: ProjectService) {}
+  constructor(
+    private readonly _redmineApiService: RedmineApiService,
+    private readonly _projectService: ProjectService,
+  ) {}
 
   isEnabled(cfg: RedmineCfg): boolean {
     return isRedmineEnabled(cfg);
@@ -26,7 +31,9 @@ export class RedmineCommonInterfacesService implements IssueServiceInterface {
   }
 
   isIssueRefreshEnabledForProjectOnce$(projectId: string): Observable<boolean> {
-    throw new Error('Method not implemented.');
+    return this._getCfgOnce$(projectId).pipe(
+      map((cfg) => this.isEnabled(cfg) && cfg.isAutoPoll),
+    );
   }
 
   pollTimer$: Observable<number> = timer(
@@ -35,21 +42,35 @@ export class RedmineCommonInterfacesService implements IssueServiceInterface {
   );
 
   issueLink$(issueId: number, projectId: string): Observable<string> {
-    throw new Error('Method not implemented.');
+    return this._getCfgOnce$(projectId).pipe(
+      map((cfg) => `${cfg.host}/issues/${issueId}`),
+    );
   }
 
   getById$(id: number, projectId: string): Observable<IssueData> {
-    throw new Error('Method not implemented.');
+    return this._getCfgOnce$(projectId).pipe(
+      switchMap((cfg: RedmineCfg) => this._redmineApiService.getById$(id as number, cfg)),
+    );
   }
 
-  getAddTaskData(
-    issueData: IssueDataReduced,
-  ): Partial<Readonly<TaskCopy>> & { title: string } {
-    throw new Error('Method not implemented.');
+  getAddTaskData(issue: RedmineIssue): Partial<Readonly<TaskCopy>> & { title: string } {
+    return {
+      title: `#${issue.id} ${issue.subject}`,
+      issueWasUpdated: false,
+      issueLastUpdated: new Date(issue.updated_on).getTime(),
+    };
   }
 
-  searchIssues$(searchTerm: string, projectId: string): Observable<SearchResultItem[]> {
-    throw new Error('Method not implemented.');
+  searchIssues$(query: string, projectId: string): Observable<SearchResultItem[]> {
+    return this._getCfgOnce$(projectId).pipe(
+      switchMap((cfg) =>
+        this.isEnabled(cfg) && cfg.isSearchIssuesFromRedmine
+          ? this._redmineApiService
+              .searchIssuesInProject$(query, cfg)
+              .pipe(catchError(() => []))
+          : of([]),
+      ),
+    );
   }
 
   getFreshDataForIssueTask(task: Readonly<TaskCopy>): Promise<{
@@ -74,7 +95,11 @@ export class RedmineCommonInterfacesService implements IssueServiceInterface {
     projectId: string,
     allExistingIssueIds: number[],
   ): Promise<IssueDataReduced[]> {
-    throw new Error('Method not implemented.');
+    const cfg = await this._getCfgOnce$(projectId).toPromise();
+
+    return await this._redmineApiService
+      .getLast100IssuesForCurrentRedmineProject$(cfg)
+      .toPromise();
   }
 
   private _getCfgOnce$(projectId: string): Observable<RedmineCfg> {
