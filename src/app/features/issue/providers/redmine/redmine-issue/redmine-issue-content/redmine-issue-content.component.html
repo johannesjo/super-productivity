@@ -1,6 +1,39 @@
 <ng-container>
+  <h3>
+    <a
+      [href]="issue?.url"
+      target="_blank"
+    >
+      {{issue?.tracker.name}} #{{issue?.id}}
+    </a>
+  </h3>
+
+  <div class="table-wrapper">
+    <table class="issue-table">
+      <tr>
+        <th>{{T.F.REDMINE.ISSUE_CONTENT.AUTHOR|translate}}</th>
+        <td>{{issue?.author.name}}</td>
+      </tr>
+
+      <tr>
+        <th>{{T.F.REDMINE.ISSUE_CONTENT.STATUS|translate}}</th>
+        <td>{{issue?.status.name}}</td>
+      </tr>
+
+      <tr>
+        <th>{{T.F.REDMINE.ISSUE_CONTENT.PRIORITY|translate}}</th>
+        <td>{{issue?.priority.name}}</td>
+      </tr>
+
+      <tr *ngIf="issue?.description">
+        <th>{{T.F.REDMINE.ISSUE_CONTENT.DESCRIPTION|translate}}</th>
+        <td>{{issue?.description}}</td>
+      </tr>
+    </table>
+  </div>
+
   <div
-    *ngIf="tas?.issueWasUpdated"
+    *ngIf="task?.issueWasUpdated"
     @expand
     style="text-align: center"
   >
@@ -11,61 +44,5 @@
     >
       {{T.F.REDMINE.ISSUE_CONTENT.MARK_AS_CHECKED|translate}}
     </button>
-  </div>
-
-  <div class="table-wrapper">
-    <table class="issue-table">
-      <tr>
-        <th>{{T.F.REDMINE.ISSUE_CONTENT.SUMMARY|translate}}</th>
-        <td>
-          <a
-            [href]="issue?.html_url"
-            target="_blank"
-            ><strong>{{issue?.title}} #{{issue?.number}}</strong></a
-          >
-        </td>
-      </tr>
-      <tr>
-        <th>{{T.F.REDMINE.ISSUE_CONTENT.PROJECT|translate}}</th>
-        <td>{{issue?.project.name}}</td>
-      </tr>
-      <tr>
-        <th>{{T.F.REDMINE.ISSUE_CONTENT.STATUS|translate}}</th>
-        <td>{{issue?.status}}</td>
-      </tr>
-      <tr *ngIf="issue?.assignee?.web_url">
-        <th>{{T.F.REDMINE.ISSUE_CONTENT.ASSIGNEE|translate}}</th>
-        <td>
-          <a
-            [href]="issue?.assignee?.web_url"
-            target="_blank"
-            >{{issue?.assigned_to?.name}}</a
-          >
-        </td>
-      </tr>
-      <tr *ngIf="issue?.body">
-        <th>{{T.F.REDMINE.ISSUE_CONTENT.DESCRIPTION|translate}}</th>
-        <td class="issue-description">
-          <div
-            [data]="issue?.body"
-            class="description markdown"
-            markdown
-          ></div>
-        </td>
-      </tr>
-    </table>
-
-    <div style="text-align: center">
-      <a
-        [href]="issue?.html_url"
-        class="write-a-comment"
-        color="primary"
-        mat-stroked-button
-        target="_blank"
-      >
-        <mat-icon>textsms</mat-icon>
-        {{T.F.REDMINE.ISSUE_CONTENT.WRITE_A_COMMENT|translate}}
-      </a>
-    </div>
   </div>
 </ng-container>
