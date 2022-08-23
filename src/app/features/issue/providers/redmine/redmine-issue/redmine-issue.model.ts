@@ -55,3 +55,10 @@ export type RedmineIssue = Readonly<{
   created_on: string;
   updated_on: string;
 }>;
+
+export type RedmineSearchResult = Readonly<{
+  issues: RedmineIssue[];
+  limit: number;
+  offset: number;
+  total_count: number;
+}>;

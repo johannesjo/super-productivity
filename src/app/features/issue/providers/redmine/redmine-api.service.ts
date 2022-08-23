@@ -8,13 +8,14 @@ import {
   HttpRequest,
 } from '@angular/common/http';
 import { RedmineCfg } from './redmine.model';
-import { catchError, filter, map, reduce } from 'rxjs/operators';
+import { catchError, filter, map } from 'rxjs/operators';
 import { Observable, throwError } from 'rxjs';
 import { throwHandledError } from '../../../../util/throw-handled-error';
 import { HANDLED_ERROR_PROP_STR } from '../../../../app.constants';
 import { T } from '../../../../t.const';
 import { ISSUE_PROVIDER_HUMANIZED, REDMINE_TYPE } from '../../issue.const';
 import {
+  RedmineSearchResult,
   RedmineIssue,
   RedmineIssueStatusOptions,
 } from './redmine-issue/redmine-issue.model';
@@ -41,9 +42,9 @@ export class RedmineApiService {
       },
       cfg,
     ).pipe(
-      map((res: RedmineIssue[]) => {
+      map((res: RedmineSearchResult) => {
         return res
-          ? res.map((issue: RedmineIssue) => mapRedmineIssueToSearchResult(issue))
+          ? res.issues.map((issue: RedmineIssue) => mapRedmineIssueToSearchResult(issue))
           : [];
       }),
     );
@@ -67,10 +68,12 @@ export class RedmineApiService {
   getById$(issueId: number, cfg: RedmineCfg): Observable<RedmineIssue> {
     return this._sendRequest$(
       {
-        url: `${cfg.host}/projects/${cfg.projectId}/issues/${issueId}.json`,
+        url: `${cfg.host}/issues/${issueId}.json`,
       },
       cfg,
-    ).pipe(map((issue) => issue));
+    ).pipe(
+      map(({ issue }) => Object.assign({ url: `${cfg.host}/issues/${issueId}` }, issue)),
+    );
   }
 
   private _sendRequest$(
@@ -80,6 +83,10 @@ export class RedmineApiService {
     this._checkSettings(cfg);
     params.params = { ...params.params, key: cfg.api_key };
     // params.headers = { ...params.headers, 'X-Redmine-API-Key': cfg.api_key}
+    // params.headers = {
+    //   ...(cfg.api_key ? { 'Authorization': `Basic ${btoa(`${cfg.api_key}:`)}` } : {}),
+    //   ...(params.headers ? params.headers : {}),
+    // }
     const p: HttpRequest<any> | any = {
       ...params,
       method: params.method || 'GET',
