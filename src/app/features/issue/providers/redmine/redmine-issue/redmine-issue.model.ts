@@ -44,7 +44,7 @@ export type RedmineIssue = Readonly<{
   id: number;
   project: RedmineProject;
   tracker: RedmineTracker;
-  statuts: RedmineStatus;
+  status: RedmineStatus;
   priority: RedminePriority;
   author: RedmineAuthor;
   category: RedmineCategory;
