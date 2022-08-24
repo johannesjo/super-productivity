@@ -57,12 +57,7 @@ export class RedmineApiService {
         params: ParamsBuilder.create().withLimit(100).withScopeFrom(cfg).build(),
       },
       cfg,
-    ).pipe(
-      map((issues: RedmineIssue[]) => {
-        console.log(issues);
-        return issues ? issues : [];
-      }),
-    );
+    ).pipe(map((res: RedmineSearchResult) => (res && res.issues ? res.issues : [])));
   }
 
   getById$(issueId: number, cfg: RedmineCfg): Observable<RedmineIssue> {
@@ -81,18 +76,16 @@ export class RedmineApiService {
     cfg: RedmineCfg,
   ): Observable<any> {
     this._checkSettings(cfg);
-    params.params = { ...params.params, key: cfg.api_key };
-    // params.headers = { ...params.headers, 'X-Redmine-API-Key': cfg.api_key}
-    // params.headers = {
-    //   ...(cfg.api_key ? { 'Authorization': `Basic ${btoa(`${cfg.api_key}:`)}` } : {}),
-    //   ...(params.headers ? params.headers : {}),
-    // }
+    params.headers = {
+      ...params.headers,
+      'X-Redmine-API-Key': cfg.api_key,
+    };
+
+    // params.params = { ...params.params, key: cfg.api_key };
+
     const p: HttpRequest<any> | any = {
       ...params,
       method: params.method || 'GET',
-      headers: {
-        ...(params.headers ? params.headers : {}),
-      },
     };
 
     const bodyArg = params.data ? [params.data] : [];
