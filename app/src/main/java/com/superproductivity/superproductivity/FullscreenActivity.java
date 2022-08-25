@@ -188,4 +188,13 @@ public class FullscreenActivity extends AppCompatActivity {
         wv.post(() -> wv.evaluateJavascript(script, value -> {
         }));
     }
+
+   @Override
+    public void onBackPressed() {
+        if (wv.canGoBack()) {
+            wv.goBack();
+        } else {
+            super.onBackPressed();
+        }
+    }
 }
