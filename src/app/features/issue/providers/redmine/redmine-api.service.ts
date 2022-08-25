@@ -20,10 +20,7 @@ import {
   RedmineIssueResult,
   RedmineSearchResultItem,
 } from './redmine-issue/redmine-issue.model';
-import {
-  mapRedmineIssueToSearchResult,
-  mapRedmineSearchResultItemToSearchResult,
-} from './redmine-issue/redmine-issue-map.util';
+import { mapRedmineSearchResultItemToSearchResult } from './redmine-issue/redmine-issue-map.util';
 import { SearchResultItem } from '../../issue.model';
 import { ScopeOptions } from './redmine.const';
 
