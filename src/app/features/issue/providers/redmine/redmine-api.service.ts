@@ -17,9 +17,13 @@ import { ISSUE_PROVIDER_HUMANIZED, REDMINE_TYPE } from '../../issue.const';
 import {
   RedmineSearchResult,
   RedmineIssue,
-  RedmineIssueStatusOptions,
+  RedmineIssueResult,
+  RedmineSearchResultItem,
 } from './redmine-issue/redmine-issue.model';
-import { mapRedmineIssueToSearchResult } from './redmine-issue/redmine-issue-map.util';
+import {
+  mapRedmineIssueToSearchResult,
+  mapRedmineSearchResultItemToSearchResult,
+} from './redmine-issue/redmine-issue-map.util';
 import { SearchResultItem } from '../../issue.model';
 import { ScopeOptions } from './redmine.const';
 
@@ -32,19 +36,21 @@ export class RedmineApiService {
   searchIssuesInProject$(query: string, cfg: RedmineCfg): Observable<SearchResultItem[]> {
     return this._sendRequest$(
       {
-        url: `${cfg.host}/projects/${cfg.projectId}/issues.json`,
+        url: `${cfg.host}/projects/${cfg.projectId}/search.json`,
         params: ParamsBuilder.create()
           .withLimit(100)
-          .withState(RedmineIssueStatusOptions.open)
-          .withScopeFrom(cfg)
           .withQuery(query)
+          .onlyIssues(true)
+          .openIssues(true)
           .build(),
       },
       cfg,
     ).pipe(
       map((res: RedmineSearchResult) => {
         return res
-          ? res.issues.map((issue: RedmineIssue) => mapRedmineIssueToSearchResult(issue))
+          ? res.results.map((item: RedmineSearchResultItem) =>
+              mapRedmineSearchResultItemToSearchResult(item),
+            )
           : [];
       }),
     );
@@ -57,7 +63,7 @@ export class RedmineApiService {
         params: ParamsBuilder.create().withLimit(100).withScopeFrom(cfg).build(),
       },
       cfg,
-    ).pipe(map((res: RedmineSearchResult) => (res && res.issues ? res.issues : [])));
+    ).pipe(map((res: RedmineIssueResult) => (res && res.issues ? res.issues : [])));
   }
 
   getById$(issueId: number, cfg: RedmineCfg): Observable<RedmineIssue> {
@@ -205,6 +211,17 @@ class ParamsBuilder {
   }
 
   withQuery(query: string): ParamsBuilder {
+    this.params['q'] = query;
+    return this;
+  }
+
+  onlyIssues(isOnlyIssues: boolean): ParamsBuilder {
+    this.params['issues'] = isOnlyIssues ? '1' : '0';
+    return this;
+  }
+
+  openIssues(isOpen: boolean): ParamsBuilder {
+    this.params['open_issues'] = isOpen ? '1' : '0';
     return this;
   }
 

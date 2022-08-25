@@ -54,9 +54,23 @@ export type RedmineIssue = Readonly<{
   custom_fields: RedmineCustomField[];
   created_on: string;
   updated_on: string;
+  url: string | null;
+}>;
+
+export type RedmineSearchResultItem = Readonly<{
+  id: number;
+  title: string;
+  url: string;
 }>;
 
 export type RedmineSearchResult = Readonly<{
+  results: RedmineSearchResultItem[];
+  total_count: number;
+  offset: number;
+  limit: number;
+}>;
+
+export type RedmineIssueResult = Readonly<{
   issues: RedmineIssue[];
   limit: number;
   offset: number;
