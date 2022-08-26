@@ -1,3 +1,41 @@
+## [7.11.6](https://github.com/johannesjo/super-productivity/compare/v7.11.5...v7.11.6) (2022-08-26)
+
+
+### Bug Fixes
+
+* add missing tranlation on Jira integration; Fix portuguese translation ([e1d1080](https://github.com/johannesjo/super-productivity/commit/e1d10803a4e3f287dcab5e6661e93d2db39726a3))
+* add missing tranlation on Jira integration; Fix portuguese translation ([d88800a](https://github.com/johannesjo/super-productivity/commit/d88800a61d3e0eadb131b51db180e99a9644a103))
+* change gitlab icon to a transparent one ([4b9bc81](https://github.com/johannesjo/super-productivity/commit/4b9bc81f043019c45de734fa547b60d704c439d2))
+* change spin direction ([a09162d](https://github.com/johannesjo/super-productivity/commit/a09162db457226c1cff2088f2b442d2a3c58e46c))
+* height for task schedule buttons ([eed8542](https://github.com/johannesjo/super-productivity/commit/eed8542e9941c507cfb5588359b7578bd3b6aeb0))
+* Hide archived projects from Add To Project context menu [#2077](https://github.com/johannesjo/super-productivity/issues/2077) ([974f962](https://github.com/johannesjo/super-productivity/commit/974f962c28ff0a3c14aa38616d7406883c610e05))
+* icon position for attachment buttons ([ba2e57f](https://github.com/johannesjo/super-productivity/commit/ba2e57f9f42f41194d37ce9d33f6d995be3a1831))
+* lint ([0467df8](https://github.com/johannesjo/super-productivity/commit/0467df86f7eaa9657cf864455ccc4775159cf7c1))
+* move notes sidebar to left when rtl ([aa4abd2](https://github.com/johannesjo/super-productivity/commit/aa4abd2a4036509933dad1e745974cf3dc9351e5))
+* problem with empty project configuration with number [#2066](https://github.com/johannesjo/super-productivity/issues/2066) ([fe7e37a](https://github.com/johannesjo/super-productivity/commit/fe7e37a1776d4be2dcc028491f74c59bc7883dcf))
+* remove tray icon tooltip [#2032](https://github.com/johannesjo/super-productivity/issues/2032) ([db1ade9](https://github.com/johannesjo/super-productivity/commit/db1ade9023a44cd55c6d4ed78effc034cc76b14d))
+* wrong android interface check ([98f521d](https://github.com/johannesjo/super-productivity/commit/98f521dcef3c2fb29f1ed252838cdf68034c9979))
+
+
+### Features
+
+* add styling for task completed date ([1f3ed44](https://github.com/johannesjo/super-productivity/commit/1f3ed44d4dd480037cb45d34eef62cc77cf9ec9f))
+* add task's completed date to Additional Info panel ([5aec41f](https://github.com/johannesjo/super-productivity/commit/5aec41fd2298dfc00c32793002de9c630cd48202))
+* disable backgroundThrottling [#2028](https://github.com/johannesjo/super-productivity/issues/2028) ([4425fb3](https://github.com/johannesjo/super-productivity/commit/4425fb3f1d4d6897cfcb443c3bcdad6be0aa273f))
+* manually start next pomodoro break [#333](https://github.com/johannesjo/super-productivity/issues/333) ([da92c88](https://github.com/johannesjo/super-productivity/commit/da92c88e43e9347bc39f3ee4c52d5ed0139eccb4))
+* manually start next pomodoro break [#333](https://github.com/johannesjo/super-productivity/issues/333) (Review changes) ([40c5f77](https://github.com/johannesjo/super-productivity/commit/40c5f772fad42278f7b3491ee3cb609fc9996b9d))
+* only add done date if it exists ([6dd4f77](https://github.com/johannesjo/super-productivity/commit/6dd4f77d3e61ccff22443973b5f8e3283cd3335a))
+* respect first day of week in reports ([4bb3c53](https://github.com/johannesjo/super-productivity/commit/4bb3c53c537de63e95290d52b6b6ae4c110f5e64))
+* shorten task autocompletion for smaller screens [#2031](https://github.com/johannesjo/super-productivity/issues/2031) ([5177a3b](https://github.com/johannesjo/super-productivity/commit/5177a3bf66642310002bd17086489c549a95cf84))
+* use new fullscreen note edit dialog everywhere ([83c373a](https://github.com/johannesjo/super-productivity/commit/83c373aa64f7963ed4deb9af459fdf2ea82ee08e))
+
+
+### Reverts
+
+* Revert "build(deps): bump electron-log from 4.4.1 to 4.4.8" ([5694117](https://github.com/johannesjo/super-productivity/commit/5694117f094653c7e1595b89db02eaa05ebd504a))
+
+
+
 ## [7.11.5](https://github.com/johannesjo/super-productivity/compare/v7.11.4...v7.11.5) (2022-04-22)
 
 ## [7.11.4](https://github.com/johannesjo/super-productivity/compare/v7.11.3...v7.11.4) (2022-04-22)
