@@ -166,7 +166,7 @@ function setTrayIcon(tr: Tray, icoPath: string): void {
 
 // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
 function isWindows11(): boolean {
-  if (process.platform !== 'win32') {
+  if (!IS_WINDOWS) {
     return false;
   }
 
