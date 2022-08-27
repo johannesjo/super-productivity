@@ -4,11 +4,14 @@ import { getSettings } from './get-settings';
 import { getWin } from './main-window';
 import { GlobalConfigState } from '../src/app/features/config/global-config.model';
 import { TaskCopy } from '../src/app/features/tasks/task.model';
+import { release } from 'os';
 
 let tray: Tray;
 let DIR: string;
 let shouldUseDarkColors: boolean;
 const IS_MAC = process.platform === 'darwin';
+const IS_LINUX = process.platform === 'linux';
+const IS_WINDOWS = process.platform === 'win32';
 
 export const initIndicator = ({
   showApp,
@@ -24,7 +27,11 @@ export const initIndicator = ({
   forceDarkTray: boolean;
 }): Tray => {
   DIR = ICONS_FOLDER + 'indicator/';
-  shouldUseDarkColors = forceDarkTray || nativeTheme.shouldUseDarkColors;
+  shouldUseDarkColors =
+    forceDarkTray ||
+    IS_LINUX ||
+    (IS_WINDOWS && !isWindows11()) ||
+    nativeTheme.shouldUseDarkColors;
 
   initAppListeners(app);
   initListeners();
@@ -155,4 +162,22 @@ function setTrayIcon(tr: Tray, icoPath: string): void {
     curIco = icoPath;
     tr.setImage(icoPath);
   }
+}
+
+// eslint-disable-next-line prefer-arrow/prefer-arrow-functions
+function isWindows11(): boolean {
+  if (process.platform !== 'win32') {
+    return false;
+  }
+
+  const v = release();
+  let isWin11 = false;
+  if (v.startsWith('11.')) {
+    isWin11 = true;
+  } else if (v.startsWith('10.')) {
+    const ss = v.split('.');
+    isWin11 = ss.length > 2 && parseInt(ss[2]) >= 22000 ? true : false;
+  }
+
+  return isWin11;
 }
