@@ -132,7 +132,7 @@
     "@angular/material-moment-adapter": "^14.1.1",
     "@angular/platform-browser": "^14.1.1",
     "@angular/platform-browser-dynamic": "^14.1.1",
-    "@angular/platform-server": "^14.1.1",
+    "@angular/platform-server": "^14.2.0",
     "@angular/router": "^14.1.1",
     "@angular/service-worker": "^14.1.1",
     "@biesbjerg/ngx-translate-extract": "^7.0.4",
