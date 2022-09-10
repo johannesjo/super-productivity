@@ -176,6 +176,38 @@
         "ERR_UNKNOWN": "Gitea: Nepoznata greška {{statusCode}} {{errorMsg}}. Je li prekoračeno API ograničenje?"
       }
     },
+    "REDMINE": {
+      "DIALOG_INITIAL": {
+        "TITLE": "Postavi Redmine za projek"
+      },
+      "FORM": {
+        "PROJECT_ID": "Identifikator projekta",
+        "PROJECT_ID_DESCRIPTION": "Može se pronaći kao dio url-a kad se projekt prikazuje u pregledniku.",
+        "HOST": "Host računalo (npr.: https://redmine.org)",
+        "API_KEY": "Ključ za pritup API-u",
+        "SCOPE": "Opseg",
+        "SCOPE_ALL": "Sve",
+        "SCOPE_ASSIGNED": "Dodijeljeno meni",
+        "SCOPE_CREATED": "Od mene stvoreno",
+        "IS_AUTO_POLL": "Automatski preispitaj uvezene redmine probleme za promjenama",
+        "IS_SEARCH_ISSUES_FROM_REDMINE": "Prikaži redmine probleme kao prijedloge prilikom dodavanja novih zadataka",
+        "IS_AUTO_ADD_TO_BACKLOG": "Automatski dodaj popis neriješenih redmine problema u odlagalište"
+      },
+      "FORM_SECTION": {
+        "TITLE": "Redmine",
+        "HELP": "<p>Ovdje možeš konfigurirati „Super produktivnost” za prikaz popisa nezavršenih Redmine problema (online verzija ili instanca vlastitog hostinga) za određeni projekt na ploči za stvaranje zadataka u prikazu dnevnog planiranja. U popisu će se ti problemi navesti kao prijedlozi s poveznicom na problem te s daljnjim informacija o problemu.</p><p>Osim toga, sve neriješene probleme možeš automatski dodati i sinkronizirati u svoje odlagalište zadataka.</p>"
+      },
+      "ISSUE_CONTENT": {
+        "AUTHOR": "Autor",
+        "STATUS": "Stanje",
+        "PRIORITY": "Prioritet",
+        "DESCRIPTION": "Opis",
+        "MARK_AS_CHECKED": "Označi aktualiziranja kao provjerena"
+      },
+      "S": {
+        "ERR_UNKNOWN": "Redmine: Nepoznata greška {{statusCode}} {{errorMsg}}."
+      }
+    },
     "GITHUB": {
       "DIALOG_INITIAL": {
         "TITLE": "Postavi GitHub za projekt"
@@ -187,11 +219,11 @@
         "IS_SEARCH_ISSUES_FROM_GITHUB": "Prikaži git probleme kao prijedloge prilikom dodavanja novih zadataka",
         "REPO": "„korisničko ime/ime repozitorija” za git repozitorij koji želiš pratiti",
         "TOKEN": "Token za pristup"
-        "TOKEN_DESCRIPTION": "Potrebno za pristup privatnom spremištu"
+        "TOKEN_DESCRIPTION": "Potrebno za pristup privatnom repozitoriju"
       },
       "FORM_SECTION": {
-        "HELP": "<p>Ovdje možeš konfigurirati „Super produktivnost” za prikaz popisa nezavršenih GitHub problema (online verzija ili instanca vlastitog histinga) za određeni projekt na ploči za stvaranje zadataka u prikazu dnevnog planiranja. U popisu će se ti problemi navesti kao prijedlozi s poveznicom na problem te s daljnjim informacija o problemu.</p> <p>Osim toga, sve neriješene probleme možeš automatski dodati i sinkronizirati u svoje odlagalište zadataka.</p>",
-        "TITLE": "GitLab"
+        "HELP": "<p>Ovdje možeš konfigurirati „Super produktivnost” za prikaz popisa nezavršenih GitHub problema (online verzija ili instanca vlastitog histinga) za određeni projekt na ploči za stvaranje zadataka u prikazu dnevnog planiranja. U popisu će se ti problemi navesti kao prijedlozi s poveznicom na problem te s daljnjim informacija o problemu.</p> <p>Osim toga, sve neriješene probleme možeš automatski dodati i sinkronizirati u svoje odlagalište zadataka.</p><p>Za zaobilaženje ograničenja upotrebe i za pristupanje, možeš zadati pristupni token. <a href='https://docs.github.com/en/free-pro-team@latest/developers/apps/scopes-for-oauth-apps'>Više informacija mogu se pronaći odvje</a>.",
+        "TITLE": "GitHub"
       },
       "ISSUE_CONTENT": {
         "ASSIGNEE": "Odgovorna osoba",
@@ -214,7 +246,7 @@
       "FORM": {
         "FILTER_USER": "Korisničko ime (npr. za izdvajanje vlastitih promjena)",
         "GITLAB_BASE_URL": "Prilagođeni osnovni GitLab URL (opcionalno)",
-        "IS_AUTO_ADD_TO_BACKLOG": "Automatically add unresolved issues from GitLab to backlog",
+        "IS_AUTO_ADD_TO_BACKLOG": "Automatski dodaj neriješene GitLab probleme u odlagalište",
         "IS_AUTO_POLL": "Automatski preispitaj uvezene git probleme za promjenama",
         "IS_SEARCH_ISSUES_FROM_GITLAB": "Prikaži git probleme kao prijedloge prilikom dodavanja novih zadataka",
         "PROJECT": "(standardni) ID projekta ili korisničko ime/projekt",
@@ -466,7 +498,7 @@
         "NOTES": "Bilješke za sutra",
         "OBSTRUCTIONS": "Što je omelo tvoju produktivnost?",
         "PRODUCTIVITY": "Stupanj produktivnosti tvog rada?",
-        "PRODUCTIVITY_HINT": "1: Još nisam ni počeo/la – 10: Visoka produktivnost"
+        "PRODUCTIVITY_HINT": "1: Još nisam ni počeo/la – 10: Visoka efektivnost"
       },
       "S": {
         "SAVE_METRIC": "Metrični podaci su uspješno spremljeni"
@@ -639,6 +671,7 @@
         "SETUP_JIRA": "Postavi Jira integraciju",
         "SETUP_OPEN_PROJECT": "Postavi OpenProject integraciju"
         "SETUP_GITEA_PROJECT": "Postavi Gitea integraciju"
+        "SETUP_REDMINE_PROJECT": "Postavi Redmine integraciju"
       },
       "FORM_BASIC": {
         "L_IS_HIDDEN_FROM_MENU": "Sakrij projekt iz izbornika",
@@ -741,6 +774,12 @@
         "USE_LOCAL": "Koristi lokalne podatke",
         "USE_REMOTE": "Koristi udaljene podatke"
       },
+      "D_PERMISSION": {
+        "DISABLE_SYNC": "Deaktiviraj sinkronizaciju",
+        "PERM_FILE": "Daj dozvole",
+        "TEXT": "<p>Tvoja dozvola za lokalno sinkroniziranje je opozvana.</p>",
+        "TITLE": "Sinkronizacija: Odbijena dozvola za lokalne datoteke"
+      },
       "FORM": {
         "DROPBOX": {
           "L_ACCESS_TOKEN": "Token za pristup (generiran iz koda autentifikacije)"
@@ -751,6 +790,7 @@
         "LOCAL_FILE": {
           "L_SYNC_FILE_PATH": "Staza datoteke sinkronizacije",
           "L_SYNC_FILE_PATH_DESCRIPTION": "Apsolutna staza do datoteke, koja se treba koristiti za sinkronizaciju (stvorit će se)."
+          "L_SYNC_FILE_PATH_PERMISSION_VALIDATION": "Treba dozvolu za pristup datotekama"
         },
         "L_ENABLE_SYNCING": "Aktiviraj sinkronizaciju",
         "L_ENABLE_COMPRESSION": "Aktiviraj komprimiranje (brži prijenos podataka)",
