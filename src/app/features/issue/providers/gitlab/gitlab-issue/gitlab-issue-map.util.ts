@@ -33,7 +33,7 @@ export const mapGitlabIssue = (
     url: issue.web_url,
     // NOTE: we use the issue number as id as well, as it there is not much to be done with the id with the api
     // when we can get issues from multiple projects we use full refence as id
-    id: issue.references.full,
+    id: /* issue.references.full, */ issue.id,
     project: GitlabApiService.getPartsFromIssue(issue.references.full)[0],
   };
 };
