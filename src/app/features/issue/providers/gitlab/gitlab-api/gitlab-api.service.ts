@@ -152,7 +152,7 @@ export class GitlabApiService {
   // }
 
   getProjectIssues$(cfg: GitlabCfg): Observable<GitlabIssue[]> {
-    return this._sendPaginatedRequest$(
+    return this._sendIssuePaginatedRequest$(
       {
         url: `${this._apiLink(
           cfg,
