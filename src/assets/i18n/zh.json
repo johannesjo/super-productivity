@@ -861,7 +861,7 @@
         "FRIDAY": "星期️五",
         "IS_ADD_TO_BOTTOM": "将任务移到列表底部",
         "MONDAY": "星期一",
-        "ORDER": "订购",
+        "ORDER": "顺序",
         "ORDER_DESCRIPTION": "可重复任务的创建顺序。仅影响同时创建的可重复任务。较低的值意味着任务将在列表的更高位置创建，较低的数字将进一步向下。大于 0 的值表示在正常任务的底部创建项目。",
         "REMIND_AT": "提醒在",
         "REMIND_AT_PLACEHOLDER": "选择提醒时间",
