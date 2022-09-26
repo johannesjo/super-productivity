@@ -425,7 +425,11 @@
       "D_ADD": {
         "NOTE_LABEL": "请输入提醒的内容..."
       },
-      "EDIT_FULLSCREEN": "全屏编辑",
+      "D_FULLSCREEN": {
+        "VIEW_PARSED": "展示转换后的(不可编辑)markdown文本",
+        "VIEW_SPLIT": "分屏展示转换前和转换后的markdown文本",
+        "VIEW_TEXT_ONLY": "展示未转换的文本"
+      },
       "NOTES_CMP": {
         "ADD_BTN": "添加新笔记",
         "DROP_TO_ADD": "拖动到此处以添加新笔记",
@@ -461,11 +465,11 @@
         "IS_SHOW_TIME_TRACKING_DIALOG_FOR_EACH_SUB_TASK": "子任务完成时显示时间跟踪对话框",
         "PROJECT_ID": "项目编号",
         "PROJECT_ID_DESCRIPTION": "在浏览器中查看项目时，可以作为 url 的一部分找到。",
-        "TOKEN": "访问令牌",
         "SCOPE": "范围",
         "SCOPE_ALL": "所有",
         "SCOPE_ASSIGNED": "分配给我",
-        "SCOPE_CREATED": "由我创建"
+        "SCOPE_CREATED": "由我创建",
+        "TOKEN": "访问令牌"
       },
       "FORM_SECTION": {
         "HELP": "<p>您可以在此处配置 SuperProductivity 以列出打开的 OpenProject 工作包。请注意，要使其在浏览器中工作，您可能需要为 OpenProject 服务器配置 CORS，以允许从 app.super-productivity.com 访问</p>",
@@ -494,14 +498,18 @@
       "ENJOY_YOURSELF": "放松一会再继续吧！",
       "FINISH_SESSION_X": "您已成功完成会话 <strong>{{nr}}</strong>！",
       "NOTIFICATION": {
+        "BREAK_TIME": "番茄钟：休息 {{nr}} 的时间到了！",
         "BREAK_X_START": "番茄钟：休息 {{nr}} 开始了！",
         "NO_TASKS": "您需要在番茄钟计时器启动之前添加任务。",
         "SESSION_X_START": "番茄钟：会话 {{nr}} 开始了！"
       },
       "S": {
+        "SESSION_END": "终止番茄钟会话",
+        "SESSION_SKIP": "跳过当前番茄钟会话",
         "SESSION_X_START": "番茄钟：会话 {{nr}} 开始了！"
       },
-      "SKIP_BREAK": "跳过休息"
+      "SKIP_BREAK": "跳过休息",
+      "START_BREAK": "开始休息"
     },
     "PROCRASTINATION": {
       "BACK_TO_WORK": "继续加油！",
@@ -524,6 +532,12 @@
         "TITLE": "好奇心"
       },
       "H1": "减少松懈！",
+      "INTRO": {
+        "AVOIDING": "逃避任务",
+        "FEAR": "害怕失败",
+        "STRESSED": "为无法完成的事情而感到压力",
+        "TITLE": "介绍"
+      },
       "P1": "首先放松一下！每个人都会偶尔懈怠。如果你脱离了计划，你至少应该享受这段时间！然后再继续去做有意义的事情。",
       "P2": "如果你想了解更多有关背后的科学知识，我可以推荐 <a target=\"_blank\" href=\"https://www.nytimes.com/2019/03/25/smarter-living/why-you-procrastinate-it-has-nothing-to-do-with-self-control.html\" target=\"_blank\">这篇文章</a> ，其中有一些练习。",
       "P3": "记住：拖延是一种情绪调节问题，而不是时间管理问题。",
@@ -546,9 +560,11 @@
         "EDIT": "编辑项目",
         "SETUP_CALDAV": "关联 Caldav",
         "SETUP_GIT": "关联 GitHub",
+        "SETUP_GITEA_PROJECT": "关联 Gitea",
         "SETUP_GITLAB": "关联 GitLab",
         "SETUP_JIRA": "关联 Jira",
-        "SETUP_OPEN_PROJECT": "设置 OpenProject 集成"
+        "SETUP_OPEN_PROJECT": "关联 OpenProject",
+        "SETUP_REDMINE_PROJECT": "关联 Redmine"
       },
       "FORM_BASIC": {
         "L_IS_HIDDEN_FROM_MENU": "从菜单中隐藏项目",
@@ -656,13 +672,14 @@
           "L_ACCESS_TOKEN": "访问令牌（从身份验证代码生成）"
         },
         "GOOGLE": {
-          "L_IS_COMPRESS_DATA": "压缩数据",
           "L_SYNC_FILE_NAME": "同步文件名"
         },
         "LOCAL_FILE": {
           "L_SYNC_FILE_PATH": "同步文件路径",
-          "L_SYNC_FILE_PATH_DESCRIPTION": "应该用于同步的文件的绝对路径（将被创建）。"
+          "L_SYNC_FILE_PATH_DESCRIPTION": "应该用于同步的文件的绝对路径（将被创建）。",
+          "L_SYNC_FILE_PATH_PERMISSION_VALIDATION": "需要文件访问权限"
         },
+        "L_ENABLE_COMPRESSION": "启用压缩（加快传输速度）",
         "L_ENABLE_SYNCING": "启用同步",
         "L_SYNC_INTERVAL": "同步间隔",
         "L_SYNC_PROVIDER": "同步提供者",
@@ -746,6 +763,7 @@
         "ADD_TO_PROJECT": "添加到项目",
         "CONVERT_TO_PARENT_TASK": "转换为父任务",
         "DELETE": "删除任务",
+        "DELETE_REPEAT_INSTANCE": "删除重复任务",
         "DROP_ATTACHMENT": "放在此处以附加到“{{title}}”",
         "EDIT_REMINDER": "编辑提醒",
         "EDIT_TAGS": "编辑标签",
@@ -797,6 +815,7 @@
         "FOR_OTHER": "任务到期了。你想开始工作吗？",
         "FROM_PROJECT": "来自项目",
         "FROM_TAG": "来自标签：“{{title}}”",
+        "RESCHEDULE_EDIT": "编辑（重新计划）",
         "RESCHEDULE_UNTIL_TOMORROW": "明天重新开始",
         "SNOOZE": "暂停",
         "SNOOZE_ALL": "全部暂停",
@@ -823,11 +842,13 @@
         "ESTIMATE_EXCEEDED_BODY": "您超出了“{{title}}”的预计时间。"
       },
       "S": {
+        "CANNOT_ASSIGN_PROJECT_FOR_REPEATABLE_TASK": "无法通过快捷语法为可重复任务分配项目!",
         "DELETED": "已删除任务“{{title}}”",
         "FOUND_MOVE_FROM_BACKLOG": "将任务 <strong>{{title}}</strong> 移至今日任务列表",
         "FOUND_MOVE_FROM_OTHER_LIST": "已将任务 <strong>{{title}}</strong> 从 <strong>{{contextTitle}}</strong> 添加到当前列表",
         "FOUND_RESTORE_FROM_ARCHIVE": "已恢复的任务 <strong>{{title}}</strong> 与存档 Issue 相关",
         "LAST_TAG_DELETION_WARNING": "您正在尝试删除非项目任务的最后一个标签。这是不允许的！",
+        "MOVE_TO_PROJECT_NOT_ALLOWED_FOR_ISSUE_TASK": "不允许将关联到 Issue 的任务移动到其他项目中。",
         "REMINDER_ADDED": "已计划任务“{{title}}”",
         "REMINDER_DELETED": "已删除任务提醒",
         "REMINDER_UPDATED": "更新了任务“{{title}}”的提醒",
@@ -843,12 +864,43 @@
       }
     },
     "TASK_REPEAT": {
+      "ADD_INFO_PANEL": {
+        "CUSTOM": "自定义重复设置",
+        "CUSTOM_AND_TIME": "自定义, {{timeStr}}",
+        "CUSTOM_WEEKLY": "{{daysStr}}",
+        "CUSTOM_WEEKLY_AND_TIME": "{{daysStr}}, {{timeStr}}",
+        "DAILY": "每天",
+        "DAILY_AND_TIME": "每天, {{timeStr}}",
+        "EVERY_X_DAILY": "每 {{x}} 天",
+        "EVERY_X_DAILY_AND_TIME": "每 {{x}} 天, {{timeStr}}",
+        "EVERY_X_MONTHLY": "每 {{x}} 月",
+        "EVERY_X_MONTHLY_AND_TIME": "每 {{x}} 月, {{timeStr}}",
+        "EVERY_X_YEARLY": "每 {{x}} 年",
+        "EVERY_X_YEARLY_AND_TIME": "每 {{x}} 年, {{timeStr}}",
+        "MONDAY_TO_FRIDAY": "周一-周五",
+        "MONDAY_TO_FRIDAY_AND_TIME": "周一-周五, {{timeStr}}",
+        "MONTHLY_CURRENT_DATE": "每月 {{dateDayStr}}日",
+        "MONTHLY_CURRENT_DATE_AND_TIME": "每月 {{dateDayStr}}日, {{timeStr}}",
+        "WEEKLY_CURRENT_WEEKDAY": "每周 {{weekdayStr}}",
+        "WEEKLY_CURRENT_WEEKDAY_AND_TIME": "每周 {{weekdayStr}}, {{timeStr}}",
+        "YEARLY_CURRENT_DATE": "每年 {{dayAndMonthStr}}",
+        "YEARLY_CURRENT_DATE_AND_TIME": "每年 {{dayAndMonthStr}}, {{timeStr}}"
+      },
+      "D_CONFIRM_MOVE_TO_PROJECT": {
+        "MSG": "当前重复任务已有 {{tasksNr}} 个已创建的实例，您想要将他们全部移动到项目 \"{{projectName}}\" 吗?",
+        "OK": "更新所有实例"
+      },
       "D_CONFIRM_REMOVE": {
         "MSG": "删除重复配置会将此任务的所有先前实例转换为常规任务，是否继续？",
         "OK": "完全删除"
       },
+      "D_CONFIRM_UPDATE_INSTANCES": {
+        "MSG": "当前重复任务已有 {{tasksNr}} 个已创建的实例，您想要使用新的默认值更新所有的实例还是仅更新未来创建的任务?",
+        "OK": "更新所有实例"
+      },
       "D_EDIT": {
         "ADD": "添加重复任务配置",
+        "ADVANCED_CFG": "高级配置",
         "EDIT": "编辑重复任务配置",
         "HELP1": "重复任务适用于日常琐事，例如：“每日会议”，“代码审查”，“检查电子邮件”或可能一次又一次发生的类似任务。",
         "HELP2": "配置完成后，一旦打开项目，将在选择的每一天重新创建重复任务，并在一天结束时自动标记为已完成。它们将作为不同的实例处理。所以你可以自由添加子任务等。",
@@ -857,15 +909,30 @@
         "TAG_LABEL": "要添加的标签"
       },
       "F": {
+        "C_DAY": "日",
+        "C_MONTH": "月",
+        "C_WEEK": "周",
+        "C_YEAR": "年",
         "DEFAULT_ESTIMATE": "默认预估用时",
         "FRIDAY": "星期️五",
         "IS_ADD_TO_BOTTOM": "将任务移到列表底部",
         "MONDAY": "星期一",
+        "NOTES": "默认笔记",
         "ORDER": "顺序",
         "ORDER_DESCRIPTION": "可重复任务的创建顺序。仅影响同时创建的可重复任务。较低的值意味着任务将在列表的更高位置创建，较低的数字将进一步向下。大于 0 的值表示在正常任务的底部创建项目。",
+        "QUICK_SETTING": "重复设置",
+        "Q_CUSTOM": "自定义重复设置",
+        "Q_DAILY": "每天",
+        "Q_MONDAY_TO_FRIDAY": "每周一到周五",
+        "Q_MONTHLY_CURRENT_DATE": "每月 {{dateDayStr}}日",
+        "Q_WEEKLY_CURRENT_WEEKDAY": "每周 {{weekdayStr}}",
+        "Q_YEARLY_CURRENT_DATE": "每年 {{dayAndMonthStr}}",
         "REMIND_AT": "提醒在",
         "REMIND_AT_PLACEHOLDER": "选择提醒时间",
+        "REPEAT_CYCLE": "重复周期",
+        "REPEAT_EVERY": "每...重复",
         "SATURDAY": "星期️六",
+        "START_DATE": "开始日期",
         "START_TIME": "预定开始时间",
         "START_TIME_DESCRIPTION": "例如。 15:00。为全天任务留空",
         "SUNDAY": "星期️日",
@@ -920,6 +987,18 @@
         "TASK": "任务",
         "TRACK_TO": "记录到：",
         "UNTRACKED_TIME": "未记录时间："
+      }
+    },
+    "WELCOME": {
+      "D_WELCOME": {
+        "L1": "入门指引",
+        "L2": "youtube指引视频",
+        "L3": "发起提问",
+        "LETS_GO": "让我们开始吧！！",
+        "MOBILE_INFO": "<strong>向右滑动</strong>已创建的任务，<strong>可将他们设为完成</strong>。\n    向左滑动来计划任务。长按选择更多操作",
+        "T1": "很高兴看到您决定尝试本应用程序！ 🦄",
+        "T2": "如果您在使用时遇到问题，您可以在下列位置找到帮助：",
+        "TITLE": "欢迎使用 Super Productivity！"
       }
     },
     "WORKLOG": {
@@ -982,15 +1061,17 @@
   "FILE_IMEX": {
     "EXPORT_DATA": "导出数据",
     "IMPORT_FROM_FILE": "从文件导入",
+    "PRIVACY_EXPORT": "导出匿名数据 (可发送给 contact@super-productivity.com 用于排查错误)",
     "S_ERR_INVALID_DATA": "导入失败：无效的JSON"
   },
   "G": {
     "CANCEL": "取消",
     "CLICK_TO_EDIT": "点击编辑",
-    "CLOSE": "关",
+    "CLOSE": "关闭",
     "DELETE": "删除",
     "DISMISS": "取消",
     "DO_IT": "开始吧！",
+    "DURATION_DESCRIPTION": "例如 \"5h 23m\" 表示5小时23分钟",
     "EDIT": "编辑",
     "ENABLED": "启用",
     "EXTENSION_INFO": "请 <a target=\"_blank\" href=\"https://chrome.google.com/webstore/detail/super-productivity/ljkbjodfmekklcoibdnhahlaalhihmlb\"> 下载Chrome扩展程序</a> ，以便与Jira Api和空闲时间处理进行通信。请注意，这不适用于移动设备。",
@@ -1001,11 +1082,12 @@
     "NONE": "没有",
     "NO_CON": "您目前离线。请重新连接到互联网。",
     "OK": "好",
-    "PREVIOUS": "以前",
-    "REMOVE": "去掉",
+    "PREVIOUS": "上一个",
+    "REMOVE": "删除",
     "RESET": "重启",
     "SAVE": "保存",
     "TITLE": "标题",
+    "TODAY_TAG_TITLE": "今天",
     "UNDO": "撤销",
     "UPDATE": "更新",
     "WITHOUT_PROJECT": "没有项目",
@@ -1055,7 +1137,7 @@
       "MOVE_TASK_UP": "在列表中向上移动任务",
       "MOVE_TO_BACKLOG": "将任务移动到任务待办事项",
       "MOVE_TO_TODAYS_TASKS": "将任务移动到今天的任务列表",
-      "OPEN_PROJECT_NOTES": "显示/隐藏项目备注",
+      "OPEN_PROJECT_NOTES": "显示/隐藏项目笔记",
       "SELECT_NEXT_TASK": "选择下一个任务",
       "SELECT_PREVIOUS_TASK": "选择上一个任务",
       "SHOW_SEARCH_BAR": "显示搜索栏",
@@ -1088,6 +1170,7 @@
       "ES": "西班牙语",
       "FA": "波斯语",
       "FR": "法语",
+      "HR": "克罗地亚语",
       "IT": "意大利语",
       "JA": "日本语",
       "KO": "朝鲜语",
@@ -1097,6 +1180,7 @@
       "PL": "拋光",
       "PT": "葡萄牙语",
       "RU": "俄语",
+      "SK": "斯洛伐克语",
       "TITLE": "语言",
       "TR": "土耳其语",
       "ZH": "中文(简体)",
@@ -1112,11 +1196,14 @@
       "IS_CONFIRM_BEFORE_EXIT": "退出应用前确认",
       "IS_CONFIRM_BEFORE_EXIT_WITHOUT_FINISH_DAY": "在没有先完成一天的情况下退出应用程序之前确认",
       "IS_DARK_MODE": "深色模式",
+      "IS_DISABLE_ANIMATIONS": "禁用所有动画",
       "IS_HIDE_NAV": "隐藏导航，直到主标题悬停（仅限桌面）",
       "IS_MINIMIZE_TO_TRAY": "最小化到托盘（仅限桌面）",
       "IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "在超出时间估算时发送通知",
       "IS_TRAY_SHOW_CURRENT_TASK": "在任务栏/状态菜单中显示当前任务（仅限桌面）",
       "IS_TURN_OFF_MARKDOWN": "停止在任务备注中解析Markdown",
+      "START_OF_NEXT_DAY": "第二天开始时间",
+      "START_OF_NEXT_DAY_HINT": "您想要开始计算第二天的时间（以小时为单位）。 默认为午夜，即 0。",
       "TASK_NOTES_TPL": "任务描述模板",
       "TITLE": "其他设置"
     },
@@ -1127,6 +1214,7 @@
       "HELP": "<p>番茄钟有一些可以设定的参数：任务时长、短休息时长、开始长休息之前的番茄数量，及长休息时长。</p> <p>您还可以设置是否要在番茄钟休息时显示您的分心情况。</p> <p>设置“暂停在进行番茄钟休息时记录时间”会把您的休息时间也计入在任务上花费的工作时间。 </p> <p>当您暂停任务时，启用“当没有活动任务时暂停番茄钟会话”会一并暂停番茄钟会话。</p>",
       "IS_ENABLED": "启用番茄钟",
       "IS_MANUAL_CONTINUE": "手动确认再开始下一个番茄钟",
+      "IS_MANUAL_CONTINUE_BREAK": "手动确认再开始下一个休息",
       "IS_PLAY_SOUND": "会话完成后播放声音",
       "IS_PLAY_SOUND_AFTER_BREAK": "休息结束时播放声音",
       "IS_PLAY_TICK": "每秒播放滴答声",
@@ -1206,6 +1294,7 @@
     "MANAGE_PROJECTS": "管理项目",
     "METRICS": "评估",
     "NOTES": "笔记",
+    "NOTES_PANEL_INFO": "笔记仅在时间线和一般任务列表中展示。",
     "PROCRASTINATE": "拖延",
     "PROJECTS": "项目",
     "PROJECT_MENU": "项目菜单",
@@ -1218,7 +1307,7 @@
     "TASKS": "任务",
     "TASK_LIST": "任务列表",
     "TOGGLE_SHOW_BOOKMARKS": "显示/隐藏书签",
-    "TOGGLE_SHOW_NOTES": "显示/隐藏项目备注",
+    "TOGGLE_SHOW_NOTES": "显示/隐藏项目笔记",
     "TOGGLE_TRACK_TIME": "开始/停止记录时间",
     "TRIGGER_SYNC": "手动触发同步",
     "WORKLOG": "工作日志"
@@ -1248,6 +1337,7 @@
     "ROUND_UP_30M": "将所有任务向上取整为30分钟",
     "ROUND_UP_5M": "将所有任务向上取整为5分钟",
     "SAVE_AND_GO_HOME": "保存并返回主界面",
+    "SAVE_AND_GO_HOME_TOOLTIP": "移动所有已完成任务到归档（工作日志）并同步所有数据（可选），之后关闭应用",
     "START_END": "开始 - 结束",
     "SUMMARY_FOR": " {{dayStr}}的每日摘要",
     "TASKS_COMPLETED": "任务已完成",
@@ -1301,7 +1391,10 @@
     "TOGGLE_DARK_MODE": "切换深色模式"
   },
   "SCHEDULE": {
-    "NO_SCHEDULED": "目前没有计划任务。您可以通过在任务上下文菜单中选择“计划任务”来计划任务。要打开它，请单击任务右侧的3个小点。",
+    "NO_REPEATABLE_TASKS": "目前没有重复的任务。您可以在任务侧边栏选择\"重复\"来规划任务。要打开它，请单击在任务最右侧的\"显示/隐藏其他信息\"按钮 (移动端只需单击任务).",
+    "NO_SCHEDULED": "目前没有计划任务。您可以通过在任务上下文菜单中选择“计划任务”来计划任务。要打开它，请右键点击任务（移动端长按任务）。",
+    "REPEATED_TASKS": "重复任务",
+    "SCHEDULED_TASKS": "计划任务",
     "START_TASK": "立即开始任务并删除提醒"
   },
   "THEMES": {
@@ -1340,6 +1433,9 @@
     "COMPLETED_TASKS": "完成的任务",
     "ESTIMATE_REMAINING": "预估剩余时间：",
     "FINISH_DAY": "完成本日",
+    "FINISH_DAY_FOR_PROJECT": "完成当前项目本日工作",
+    "FINISH_DAY_FOR_TAG": "完成当前标签本日工作",
+    "FINISH_DAY_TOOLTIP": "评估你今天的工作，归档所有已完成的任务（可选）并计划明天的工作。",
     "HELP_PROCRASTINATION": "帮帮我！我在拖延！",
     "NO_COMPLETED_TASKS": "目前还没有完成的任务",
     "NO_PLANNED_TASKS": "没有计划的任务",
