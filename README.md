@@ -66,15 +66,15 @@ Super Productivity is an advanced todo list app with integrated [Timeboxing](htt
 
 ## :heavy_check_mark: Features
 
-- **Keep organized and focused!** Plan and categorize your tasks using sub tasks, projects and tags and color code them as needed.
+- **Keep organized and focused!** Plan and categorize your tasks using sub-tasks, projects and tags and color code them as needed.
 - Use **timeboxing** and **track your time**. Create time sheets and work summaries in a breeze to easily export them to your company's time tracking system.
 - Helps you to **establish healthy & productive habits**:
-  - A **break reminder** reminds to you, when it's time to step away.
-  - The **anti-procrastination feature** helps you gain perspective, when you really need to.
-  - Need some extra focus? A **pomodoro timer** is also always at hand.
+  - A **break reminder** reminds you when it's time to step away.
+  - The **anti-procrastination feature** helps you gain perspective when you really need to.
+  - Need some extra focus? A **Pomodoro timer** is also always at hand.
   - **Collect personal metrics** to see, which of your work routines need adjustments.
-- Integrate with **Jira**, **GitHub**, **GitLab** and **OpenProject**. Auto import tasks assigned to you, plan the details locally, automatically create worklogs and get notified right away, when something changes.
-- Attach context information to tasks and projects. Create **notes**, attach **files** or create **project level bookmarks** for links, files and even commands.
+- Integrate with **Jira**, **GitHub**, **GitLab**, and **OpenProject**. Auto import tasks assigned to you, plan the details locally, automatically create work logs, and get notified immediately, when something changes.
+- Attach context information to tasks and projects. Create **notes**, attach **files** or create **project-level bookmarks** for links, files, and even commands.
 - Super Productivity **respects your privacy** and **does NOT collect any data** and there are no user accounts or registration. **You decide where you store your data!**
 - It's **free** and **open source** and always will be.
 
@@ -84,11 +84,11 @@ And much more!
 
 ## :question: How to use it
 
-If you need some help, [the best place to start is this article on dev.to](https://dev.to/johannesjo/getting-started-with-super-productivity-2791).
+If you need some help, [this aarticle on dev.to is the best place to start](https://dev.to/johannesjo/getting-started-with-super-productivity-2791).
 
-If you prefer there is also a (long) [youtube video available](https://www.youtube.com/watch?v=VoF2_RSdNXA).
+If you prefer, there is also a (long) [youtube video available](https://www.youtube.com/watch?v=VoF2_RSdNXA).
 
-There is another [article](https://dev.to/johannesjo/super-productivity-how-to-grow-fond-of-time-tracking-and-task-management-22ee) on how I personally might use the app - and still [another one](https://dev.to/johannesjo/the-prioritising-scheme-how-to-eat-the-frog-with-super-productivity-mlk) on how I implement the 'eat the frog' prioritizing scheme in the app .
+There is another [article](https://dev.to/johannesjo/super-productivity-how-to-grow-fond-of-time-tracking-and-task-management-22ee) on how I personally might use the app - and still [another one](https://dev.to/johannesjo/the-prioritising-scheme-how-to-eat-the-frog-with-super-productivity-mlk) on how I implement the 'eat the frog' prioritizing scheme in the app.
 
 [If you have further questions, please refer to the discussions page](https://github.com/johannesjo/super-productivity/discussions).
 
@@ -124,7 +124,7 @@ Can be used when adding a task.
 
 ## :globe_with_meridians: Web Version
 
-Check out the web version eventhough it is a bit limited: Time tracking only works if the app is open and for idle time tracking to work, the chrome extension has to be installed.
+Check out the web version even though it is a bit limited: Time tracking only works if the app is open and for idle time tracking to work, the chrome extension has to be installed.
 
 If you want the Jira integration and idle time tracking to work, you have to also download and install the [Super Productivity Chrome Extension](https://chrome.google.com/webstore/detail/super-productivity/ljkbjodfmekklcoibdnhahlaalhihmlb).
 
