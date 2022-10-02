@@ -84,7 +84,7 @@ And much more!
 
 ## :question: How to use it
 
-If you need some help, [this aarticle on dev.to is the best place to start](https://dev.to/johannesjo/getting-started-with-super-productivity-2791).
+If you need some help, [this article on dev.to is the best place to start](https://dev.to/johannesjo/getting-started-with-super-productivity-2791).
 
 If you prefer, there is also a (long) [youtube video available](https://www.youtube.com/watch?v=VoF2_RSdNXA).
 
