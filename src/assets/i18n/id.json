@@ -159,144 +159,144 @@
         "SCOPE_CREATED": "Dibuat oleh saya"
       },
       "FORM_SECTION": {
-        "HELP": "<p>Here you can configure SuperProductivity to list open Gitea issues for a specific repository in the task creation panel in the daily planning view. They will be listed as suggestions and will provide a link to the issue as well as more information about it.</p> <p>In addition you can automatically add and sync all open issues to your task backlog.</p><p>To get by usage limits and to access you can provide a an access token.",
+        "HELP": "<p>Di sini Anda dapat mengonfigurasi SuperProductivity untuk membuat daftar open Gitea issues untuk repositori tertentu di panel pembuatan tugas dalam tampilan perencanaan harian. Mereka akan dicantumkan sebagai saran dan akan memberikan tautan ke masalah tersebut serta informasi lebih lanjut tentangnya.</p> <p>Selain itu, Anda dapat secara otomatis menambahkan dan menyinkronkan semua open issues ke backlog tugas Anda.</p><p>Untuk mencapai batas penggunaan dan untuk mengakses, Anda dapat memberikan token akses.</p>",
         "TITLE": "Gitea"
       },
       "ISSUE_CONTENT": {
-        "ASSIGNEE": "Assignee",
-        "AT": "at",
-        "DESCRIPTION": "Description",
-        "LABELS": "Labels",
-        "MARK_AS_CHECKED": "Mark updates as checked",
+        "ASSIGNEE": "Penerima tugas",
+        "AT": "pada",
+        "DESCRIPTION": "Deskripsi",
+        "LABELS": "Label",
+        "MARK_AS_CHECKED": "Tandai pembaruan sebagai dicentang",
         "STATUS": "Status",
-        "SUMMARY": "Summary",
-        "WRITE_A_COMMENT": "Write a comment"
+        "SUMMARY": "Ringkasan",
+        "WRITE_A_COMMENT": "Tulis komentar"
       },
       "S": {
-        "ERR_UNKNOWN": "Gitea: Unknown error {{statusCode}} {{errorMsg}}. Api Rate limit exceeded?"
+        "ERR_UNKNOWN": "Gitea: Error tidak diketahui {{statusCode}} {{errorMsg}}. Batas Tarif API terlampaui?"
       }
     },
     "REDMINE": {
       "DIALOG_INITIAL": {
-        "TITLE": "Setup Redmine for Project"
+        "TITLE": "Atur Redmine untuk Proyek"
       },
       "FORM": {
-        "PROJECT_ID": "Project Identifier",
-        "PROJECT_ID_DESCRIPTION": "Can be found as part of the url, when viewing the project in the Browser.",
+        "PROJECT_ID": "Pengidentifikasi Proyek",
+        "PROJECT_ID_DESCRIPTION": "Dapat ditemukan sebagai bagian dari url, saat melihat proyek di Browser.",
         "HOST": "Host (e.g.: https://redmine.org)",
-        "API_KEY": "API access key",
-        "SCOPE": "Scope",
-        "SCOPE_ALL": "All",
-        "SCOPE_ASSIGNED": "Assigned to me",
-        "SCOPE_CREATED": "Created by me",
-        "IS_AUTO_POLL": "Automatically poll imported redmine issues for changes",
-        "IS_SEARCH_ISSUES_FROM_REDMINE": "Show issues from redmine as suggestions when adding new tasks",
-        "IS_AUTO_ADD_TO_BACKLOG": "Automatically add open issues from redmine to backlog"
+        "API_KEY": "Akses kunci API",
+        "SCOPE": "Cakupan",
+        "SCOPE_ALL": "Semua",
+        "SCOPE_ASSIGNED": "Ditugaskan kepada saya",
+        "SCOPE_CREATED": "Dibuat oleh saya",
+        "IS_AUTO_POLL": "Secara otomatis polling masalah Redmine yang diimpor untuk perubahan",
+        "IS_SEARCH_ISSUES_FROM_REDMINE": "Tampilkan Issues dari Redmine sebagai saran saat menambahkan tugas baru",
+        "IS_AUTO_ADD_TO_BACKLOG": "Secara otomatis menambahkan masalah terbuka dari Redmine ke backlog"
       },
       "FORM_SECTION": {
         "TITLE": "Redmine",
-        "HELP": "<p>Here you can configure SuperProductivity to list open Redmine (either its the online version or a self-hosted instance) issues for a specific project in the task creation panel in the daily planning view. They will be listed as suggestions and will provide a link to the issue as well as more information about it.</p><p>In addition you can automatically add and sync all open issues to your task backlog.</p>"
+        "HELP": "<p>Di sini Anda dapat mengonfigurasi SuperProductivity untuk mencantumkan open Redmine issues (baik versi online atau yang dihosting sendiri) untuk proyek tertentu di panel pembuatan tugas dalam tampilan perencanaan harian. Mereka akan dicantumkan sebagai saran dan akan memberikan tautan ke issues tersebut serta informasi lebih lanjut tentangnya.</p><p>Selain itu, Anda dapat secara otomatis menambahkan dan menyinkronkan semua masalah yang terbuka ke backlog tugas Anda.</p>"
       },
       "ISSUE_CONTENT": {
-        "AUTHOR": "Author",
+        "AUTHOR": "Penulis",
         "STATUS": "Status",
-        "PRIORITY": "Priority",
-        "DESCRIPTION": "Description",
-        "MARK_AS_CHECKED": "Mark updates as checked"
+        "PRIORITY": "Prioritas",
+        "DESCRIPTION": "Deskripsi",
+        "MARK_AS_CHECKED": "Tandai pembaruan sebagai dicentang"
       },
       "S": {
-        "ERR_UNKNOWN": "Redmine: Unknown error {{statusCode}} {{errorMsg}}."
+        "ERR_UNKNOWN": "Redmine: Error tidak diketahui {{statusCode}} {{errorMsg}}."
       }
     },
     "GITHUB": {
       "DIALOG_INITIAL": {
-        "TITLE": "Setup GitHub for Project"
+        "TITLE": "Atur Github untuk Proyek"
       },
       "FORM": {
-        "FILTER_USER": "Username (e.g. to filter out changes by yourself)",
-        "IS_AUTO_ADD_TO_BACKLOG": "Automatically add unresolved issues from GitHub to backlog",
-        "IS_AUTO_POLL": "Automatically poll imported git issues for changes",
-        "IS_SEARCH_ISSUES_FROM_GITHUB": "Show issues from git as suggestions when adding new tasks",
-        "REPO": "\"username/repositoryName\" for the git repository you want to track",
-        "TOKEN": "Access Token",
-        "TOKEN_DESCRIPTION": "Required for private repository access"
+        "FILTER_USER": "Nama pengguna (misalnya untuk memfilter perubahan sendiri)",
+        "IS_AUTO_ADD_TO_BACKLOG": "Secara otomatis menambahkan issues yang belum terselesaikan dari GitHub ke backlog",
+        "IS_AUTO_POLL": "Secara otomatis polling masalah git yang diimpor untuk perubahan",
+        "IS_SEARCH_ISSUES_FROM_GITHUB": "Tampilkan masalah dari git sebagai saran saat menambahkan tugas baru",
+        "REPO": "\"username/repositoryName\" untuk repositori git yang ingin Anda lacak",
+        "TOKEN": "Akses Token",
+        "TOKEN_DESCRIPTION": "Diperlukan untuk akses repositori pribadi"
       },
       "FORM_SECTION": {
-        "HELP": "<p>Here you can configure SuperProductivity to list open GitHub issues for a specific repository in the task creation panel in the daily planning view. They will be listed as suggestions and will provide a link to the issue as well as more information about it.</p> <p>In addition you can automatically add and sync all open issues to your task backlog.</p><p>To get by usage limits and to access you can provide a an access token. <a href='https://docs.github.com/en/free-pro-team@latest/developers/apps/scopes-for-oauth-apps'>More info about its scopes can be found here</a>.",
+        "HELP": "<p>Di sini Anda dapat mengonfigurasi SuperProductivity untuk membuat daftar open GitHub issues untuk repositori tertentu di panel pembuatan tugas dalam tampilan perencanaan harian. Mereka akan dicantumkan sebagai saran dan akan memberikan tautan ke masalah tersebut serta informasi lebih lanjut tentangnya.</p> <p>Selain itu, Anda dapat secara otomatis menambahkan dan menyinkronkan semua masalah yang terbuka ke backlog tugas Anda.</p><p>Untuk mencapai batas penggunaan dan untuk mengakses, Anda dapat memberikan token akses. <a href='https://docs.github.com/en/free-pro-team@latest/developers/apps/scopes-for-oauth-apps'>Info lebih lanjut tentang cakupannya dapat ditemukan di sini</a>.",
         "TITLE": "GitHub"
       },
       "ISSUE_CONTENT": {
-        "ASSIGNEE": "Assignee",
-        "AT": "at",
-        "DESCRIPTION": "Description",
-        "LABELS": "Labels",
-        "MARK_AS_CHECKED": "Mark updates as checked",
+        "ASSIGNEE": "Penerima tugas",
+        "AT": "pada",
+        "DESCRIPTION": "Deskripsi",
+        "LABELS": "Label",
+        "MARK_AS_CHECKED": "Tandai pembaruan sebagai dicentang",
         "STATUS": "Status",
-        "SUMMARY": "Summary",
-        "WRITE_A_COMMENT": "Write a comment"
+        "SUMMARY": "Ringkasan",
+        "WRITE_A_COMMENT": "Tulis komentar"
       },
       "S": {
-        "ERR_UNKNOWN": "GitHub: Unknown error {{statusCode}} {{errorMsg}}. Api Rate limit exceeded?"
+        "ERR_UNKNOWN": "GitHub: Error tidak diketahui {{statusCode}} {{errorMsg}}. Batas kecepatan API terlampaui?"
       }
     },
     "GITLAB": {
       "DIALOG_INITIAL": {
-        "TITLE": "Setup GitLab for Project"
+        "TITLE": "Atur Gitlab untuk Proyek"
       },
       "FORM": {
-        "FILTER_USER": "Username (e.g. to filter out changes by yourself)",
-        "GITLAB_BASE_URL": "Custom GitLab base URL (optional)",
-        "IS_AUTO_ADD_TO_BACKLOG": "Automatically add unresolved issues from GitLab to backlog",
-        "IS_AUTO_POLL": "Automatically poll imported git issues for changes",
-        "IS_SEARCH_ISSUES_FROM_GITLAB": "Show issues from git as suggestions when adding new tasks",
-        "PROJECT": "(default) project ID or user name/project",
-        "SCOPE": "Scope",
-        "SCOPE_ALL": "All",
-        "SCOPE_ASSIGNED": "Assigned to me",
-        "SCOPE_CREATED": "Created by me",
-        "SOURCE": "Source",
-        "SOURCE_GLOBAL": "All",
-        "SOURCE_GROUP": "Group",
-        "SOURCE_PROJECT": "Project",
-        "TOKEN": "Access Token"
+        "FILTER_USER": "Nama pengguna (misalnya untuk memfilter perubahan sendiri)",
+        "GITLAB_BASE_URL": "URL dasar GitLab khusus (opsional)",
+        "IS_AUTO_ADD_TO_BACKLOG": "Secara otomatis menambahkan masalah yang belum terselesaikan dari GitLab ke backlog",
+        "IS_AUTO_POLL": "Secara otomatis polling Git issues yang diimpor untuk perubahan",
+        "IS_SEARCH_ISSUES_FROM_GITLAB": "Tampilkan Git issues sebagai saran saat menambahkan tugas baru",
+        "PROJECT": "(default) ID proyek atau nama pengguna/proyek",
+        "SCOPE": "Cakupan",
+        "SCOPE_ALL": "Semua",
+        "SCOPE_ASSIGNED": "Ditugaskan kepada saya",
+        "SCOPE_CREATED": "Dibuat oleh saya",
+        "SOURCE": "Sumber",
+        "SOURCE_GLOBAL": "Semua",
+        "SOURCE_GROUP": "Grup",
+        "SOURCE_PROJECT": "Proyek",
+        "TOKEN": "Akses Token"
       },
       "FORM_SECTION": {
-        "HELP": "<p>Here you can configure SuperProductivity to list open GitLab (either its the online version or a self-hosted instance) issues for a specific project in the task creation panel in the daily planning view. They will be listed as suggestions and will provide a link to the issue as well as more information about it.</p> <p>In addition you can automatically add and sync all open issues to your task backlog.</p>",
+        "HELP": "<p>Di sini Anda dapat mengonfigurasi SuperProductivity untuk membuat daftar open GitLab issues (baik versi online atau instance yang dihosting sendiri) untuk proyek tertentu di panel pembuatan tugas dalam tampilan perencanaan harian. Mereka akan dicantumkan sebagai saran dan akan memberikan tautan ke masalah tersebut serta informasi lebih lanjut tentangnya.</p> <p>Selain itu, Anda dapat secara otomatis menambahkan dan menyinkronkan semua masalah yang terbuka ke backlog tugas Anda.</p>",
         "TITLE": "GitLab"
       },
       "ISSUE_CONTENT": {
-        "ASSIGNEE": "Assignee",
-        "AT": "at",
-        "DESCRIPTION": "Description",
-        "LABELS": "Labels",
-        "MARK_AS_CHECKED": "Mark updates as checked",
-        "PROJECT": "Project",
+        "ASSIGNEE": "Penerima tugas",
+        "AT": "pada",
+        "DESCRIPTION": "Deskripsi",
+        "LABELS": "Label",
+        "MARK_AS_CHECKED": "Tandai pembaruan sebagai dicentang",
+        "PROJECT": "Proyek",
         "STATUS": "Status",
-        "SUMMARY": "Summary",
-        "WRITE_A_COMMENT": "Write a comment"
+        "SUMMARY": "Ringkasan",
+        "WRITE_A_COMMENT": "Tulis komentar"
       },
       "S": {
-        "ERR_UNKNOWN": "GitLab: Unknown error {{statusCode}} {{errorMsg}}"
+        "ERR_UNKNOWN": "GitLab: Error tidak diketahui {{statusCode}} {{errorMsg}}"
       }
     },
     "GOOGLE": {
       "BANNER": {
-        "AUTH_FAIL": "GoogleApi: Failed to authenticate please try logging in again!"
+        "AUTH_FAIL": "GoogleApi: Gagal mengautentikasi, coba masuk lagi!"
       },
       "DIALOG": {
-        "CREATE_SYNC_FILE": "Google Drive: No file with the name <strong>\"{{fileName}}\"</strong> was found. <strong>Create</strong> it as sync file on Google Drive?",
-        "USE_EXISTING_SYNC_FILE": "Google Drive: Use <strong>existing</strong> file <strong>\"{{fileName}}\"</strong> as sync file? If not please change the Sync file name."
+        "CREATE_SYNC_FILE": "Google Drive: Tidak ada file dengan nama <strong>\"{{fileName}}\"</strong> yang ditemukan. <strong>Buat</strong> apakah itu file sinkronisasi di Google Drive?",
+        "USE_EXISTING_SYNC_FILE": "Google Drive: Ingin gunakan file <strong>\"{{fileName}}\"</strong> <strong>yang ada</strong>  sebagai file sinkronasi? Jika tidak, silakan ubah nama file sinkronasinya."
       },
       "S": {
-        "MULTIPLE_SYNC_FILES_WITH_SAME_NAME": "Multiple files with the name \"{{newFileName}}\" found. Please delete all but one or choose a different name.",
-        "SYNC_FILE_CREATION_ERROR": "Google Drive: Error while creating sync file. {{err}}",
-        "UPDATED_SYNC_FILE_NAME": "Google Drive: Updated sync file name"
+        "MULTIPLE_SYNC_FILES_WITH_SAME_NAME": "Beberapa file dengan nama \"{{newFileName}}\" ditemukan. Hapus semua kecuali satu atau pilih nama lain.",
+        "SYNC_FILE_CREATION_ERROR": "Google Drive: Error saat membuat file sinkronasi. {{err}}",
+        "UPDATED_SYNC_FILE_NAME": "Google Drive: Nama file sinkronisasi yang diperbarui!"
       },
       "S_API": {
         "ERR": "GoogleApi Error: {{errStr}}",
-        "ERR_NO_FILE_ID": "GoogleApi: No file id specified",
-        "ERR_NO_FILE_NAME": "GoogleApi: No file name specified",
-        "SUCCESS_LOGIN": "GoogleApi: Login successful"
+        "ERR_NO_FILE_ID": "GoogleApi: Tidak ada id file yang ditentukan",
+        "ERR_NO_FILE_NAME": "GoogleApi: Tidak ada nama file yang ditentukan",
+        "SUCCESS_LOGIN": "GoogleApi: Login berhasil"
       }
     },
     "ISSUE": {
@@ -305,19 +305,19 @@
         "ISSUE_STR": "issue"
       },
       "S": {
-        "ERR_NETWORK": "{{issueProviderName}}: Request failed because of a client side network error",
-        "ERR_NOT_CONFIGURED": "{{issueProviderName}}: Not properly configured",
-        "IMPORTED_MULTIPLE_ISSUES": "{{issueProviderName}}: Imported {{nr}} new {{issuesStr}} to backlog",
-        "IMPORTED_SINGLE_ISSUE": "{{issueProviderName}}: Imported {{issueStr}} \"{{issueTitle}}\" to backlog",
-        "ISSUE_DELETED_OR_CLOSED": "{{issueProviderName}}: {{issueStrC}} \"{{issueTitle}}\" seems to be deleted or closed",
-        "ISSUE_NO_UPDATE_REQUIRED": "{{issueProviderName}}: No update required",
-        "ISSUE_UPDATE_MULTIPLE": "{{issueProviderName}}: Updated data for {{nr}} {{issuesStr}}",
-        "ISSUE_UPDATE_SINGLE": "{{issueProviderName}}: Updated data for \"{{issueTitle}}\"",
-        "MANUAL_UPDATE_ISSUE_SUCCESS": "{{issueProviderName}}: Updated data for \"{{issueTitle}}\"",
-        "MISSING_ISSUE_DATA": "{{issueProviderName}}: Tasks with missing {{issueStr}} data found. Reloading.",
-        "NEW_COMMENT": "{{issueProviderName}}: New comment for \"{{issueTitle}}\"",
-        "POLLING_BACKLOG": "{{issueProviderName}}: Polling for new {{issuesStr}}",
-        "POLLING_CHANGES": "{{issueProviderName}}: Polling Changes for {{issuesStr}}"
+        "ERR_NETWORK": "{{issueProviderName}}: Permintaan gagal karena kesalahan jaringan sisi klien ",
+        "ERR_NOT_CONFIGURED": "{{issueProviderName}}: Tidak dikonfigurasi dengan benar",
+        "IMPORTED_MULTIPLE_ISSUES": "{{issueProviderName}}: Impor {{nr}} {{issuesStr}} baru ke backlog",
+        "IMPORTED_SINGLE_ISSUE": "{{issueProviderName}}: Impor {{issueStr}} \"{{issueTitle}}\" ke backlog",
+        "ISSUE_DELETED_OR_CLOSED": "{{issueProviderName}}: {{issueStrC}} \"{{issueTitle}}\" sepertinya dihapus atau ditutup",
+        "ISSUE_NO_UPDATE_REQUIRED": "{{issueProviderName}}: Tidak ada pembaruan yang dibutuhkan",
+        "ISSUE_UPDATE_MULTIPLE": "{{issueProviderName}}: Data terupdate untuk {{nr}} {{issuesStr}}",
+        "ISSUE_UPDATE_SINGLE": "{{issueProviderName}}: Data terupdate untuk {{issueTitle}}\"",
+        "MANUAL_UPDATE_ISSUE_SUCCESS": "{{issueProviderName}}: Data terupdate untuk \"{{issueTitle}}\"",
+        "MISSING_ISSUE_DATA": "{{issueProviderName}}: Tugas dengan data {{issueStr}} yang hilang ditemukan. Memuat ulang.",
+        "NEW_COMMENT": "{{issueProviderName}}: Komentar baru untuk \"{{issueTitle}}\"",
+        "POLLING_BACKLOG": "{{issueProviderName}}: Polling untuk {{issuesStr}} baru",
+        "POLLING_CHANGES": "{{issueProviderName}}: Polling untuk {{issuesStr}}"
       }
     },
     "JIRA": {
