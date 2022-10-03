@@ -6,9 +6,9 @@
       "MSG": "¿Deseas instalar Super Productivity como una PWA?"
     },
     "B_OFFLINE": "Estás desconectado de internet. La sincronización y solicitud de datos del proveedor no funcionarán.",
-    "UPDATE_MAIN_MODEL": "¡Super Productivity ha recibido una actualización importante! Se requieren algunas migraciones de tus datos. Ten en cuenta que esto hace que tus datos sean incompatibles con versiones anteriores de la aplicación.",
+    "UPDATE_MAIN_MODEL": "¡Super Productivity ha recibido una actualización importante! Se requieren algunas migraciones de tus datos. Ten en cuenta que esto hará que tus datos sean incompatibles con versiones anteriores de la aplicación.",
     "UPDATE_MAIN_MODEL_NO_UPDATE": "No se eligió ninguna actualización del modelo. Ten en cuenta que, si no deseas realizar la actualización del modelo, debes descargar la última versión.",
-    "UPDATE_WEB_APP": "Nueva versión disponible. ¿Cargar nueva versión?"
+    "UPDATE_WEB_APP": "Nueva versión disponible. ¿Descargar nueva versión?"
   },
   "BL": {
     "NO_TASKS": "Actualmente no hay tareas en tu registro de trabajo"
@@ -18,7 +18,7 @@
     "DELETE_STRAY_BACKUP": "¿Quieres eliminar el reverso para evitar ver este diálogo?",
     "RELOAD_AFTER_IDB_ERROR": "No se puede acceder a la base de datos :( Las posibles causas son una actualización de la aplicación en el fondo o poco espacio en el disco. Presione OK para volver a cargar la aplicación (puede requerir el reinicio manual de la aplicación en algunas plataformas).",
     "RESTORE_FILE_BACKUP": "Parece que NO HAY DATOS, pero hay copias de seguridad disponibles en \"{{dir}}\". ¿Quiere restaurar la última copia de seguridad de {{from}}?",
-    "RESTORE_FILE_BACKUP_ANDROID": "Parece que NO HAY DATOS, pero hay una copia de seguridad disponible. ¿Quieres cargarlo?",
+    "RESTORE_FILE_BACKUP_ANDROID": "Parece que NO HAY DATOS, pero hay una copia de seguridad disponible. ¿Quieres cargarla?",
     "RESTORE_STRAY_BACKUP": "Durante la última sincronización puede que haya habido algún error. ¿Quieres restaurar la última copia de seguridad?"
   },
   "DATETIME_INPUT": {
@@ -125,7 +125,7 @@
     },
     "FINISH_DAY_BEFORE_EXIT": {
       "C": {
-        "FINISH_DAY_BEFORE_EXIT": "Hay {{nr}} tareas realizadas en su lista de hoy que aún no se han movido al archivo. ¿De verdad quieres dejar de fumar sin terminar tu día?"
+        "FINISH_DAY_BEFORE_EXIT": "Hay {{nr}} tareas realizadas en su lista de hoy que aún no se han movido al archivo. ¿De verdad quieres salir sin terminar tu día?"
       }
     },
     "GITHUB": {
@@ -221,7 +221,7 @@
     },
     "ISSUE": {
       "DEFAULT": {
-        "ISSUES_STR": "Cuestiones",
+        "ISSUES_STR": "Problemas",
         "ISSUE_STR": "Problema"
       },
       "S": {
@@ -298,7 +298,7 @@
       },
       "FORM_ADV": {
         "AUTO_ADD_BACKLOG_JQL_QUERY": "JQL usado para agregar tareas automáticamente al registro de trabajo",
-        "IS_ADD_WORKLOG_ON_SUB_TASK_DONE": "Abrir el cuadro de diálogo para enviar el registro de trabajo a jira cuando se realiza la subtarea",
+        "IS_ADD_WORKLOG_ON_SUB_TASK_DONE": "Abrir el cuadro de diálogo para enviar el registro de trabajo a Jira cuando se realiza la subtarea",
         "IS_AUTO_ADD_TO_BACKLOG": "Agregar automáticamente problemas al registro de trabajo de Jira",
         "IS_AUTO_POLL_TICKETS": "Verifica automáticamente los problemas importados por cambios y notifica",
         "IS_CHECK_TO_RE_ASSIGN_TICKET_ON_TASK_START": "Compruebe si el problema actualmente trabajado está asignado al usuario actual",
@@ -308,14 +308,14 @@
         "WORKLOG_DEFAULT_ALL_TIME_MINUS_LOGGED": "Complete todo el tiempo dedicado menos el tiempo registrado",
         "WORKLOG_DEFAULT_TIME_MODE": "Valor de tiempo predeterminado para el diálogo",
         "WORKLOG_DEFAULT_TODAY": "Llene solo el tiempo dedicado hoy",
-        "WORKLOG_DEFAULT_YESTERDAY": "Llena solo el tiempo pasado ayer"
+        "WORKLOG_DEFAULT_YESTERDAY": "Llena solo el tiempo dedicado ayer"
       },
       "FORM_CRED": {
         "ALLOW_SELF_SIGNED": "Permitir certificado autofirmado",
         "HOST": "Host (por ejemplo, http://my-host.de:1234)",
         "PASSWORD": "Token / Contraseña",
         "USER_NAME": "Email / Nombre de usuario",
-        "USE_PAT": "Use token de acceso personal en lugar de contraseña",
+        "USE_PAT": "Usar token de acceso personal en lugar de contraseña",
         "WONKY_COOKIE_MODE": "Autenticación de recuperación de cookies Wonky (solo aplicación de escritorio)"
       },
       "FORM_SECTION": {
@@ -382,12 +382,12 @@
       },
       "CMP": {
         "AVG_BREAKS_PER_DAY": "Promedio de descansos por día",
-        "AVG_TASKS_PER_DAY_WORKED": "Promedio de tareas tranajadas por dia",
+        "AVG_TASKS_PER_DAY_WORKED": "Promedio de tareas trabajadas por dia",
         "AVG_TIME_SPENT_ON_BREAKS": "Tiempo promedio dedicado a los descansos",
         "AVG_TIME_SPENT_PER_DAY": "Tiempo promedio empleado por día",
         "AVG_TIME_SPENT_PER_TASK": "Tiempo promedio empleado por tarea",
         "COUNTING_SUBTASKS": "(contando subtareas)",
-        "DAYS_WORKED": "Dias laborados",
+        "DAYS_WORKED": "Dias trabajados",
         "GLOBAL_METRICS": "Métricas globales",
         "IMPROVEMENT_SELECTION_COUNT": "Número de veces que se seleccionó un factor de mejora",
         "MOOD_PRODUCTIVITY_OVER_TIME": "Estado de ánimo y productividad a lo largo del tiempo.",
@@ -403,10 +403,10 @@
       "EVAL_FORM": {
         "ADD_NOTE_FOR_TOMORROW": "Agregar nota para mañana",
         "DISABLE_REPEAT_EVERY_DAY": "Desactivar repetir todos los días",
-        "ENABLE_REPEAT_EVERY_DAY": "Repite todos los dias",
+        "ENABLE_REPEAT_EVERY_DAY": "Repetir todos los dias",
         "HELP_H1": "¿Por qué debería importarme?",
         "HELP_LINK_TXT": "Ir a la sección de métricas.",
-        "HELP_P1": "¡Hora de una pequeña autoevaluación! Sus respuestas aquí se guardan y le proporcionan un poco de estadísticas sobre cómo trabaja en la sección de métricas. Además, las sugerencias para mañana aparecerán sobre su lista de tareas al día siguiente.",
+        "HELP_P1": "¡Hora de una pequeña autoevaluación! Sus respuestas aquí se guardan y le proporcionan algunas estadísticas sobre cómo trabaja en la sección de métricas. Además, las sugerencias para mañana aparecerán sobre su lista de tareas al día siguiente.",
         "HELP_P2": "La intención es que no se trate de calcular métricas exactas o de ser tan eficiente como una máquina en todo lo que haga, sino de mejorar cómo se siente con respecto a su trabajo. Puede ser útil evaluar los puntos de dolor en su rutina diaria, así como también encontrar factores que lo ayuden. Siendo un poco sistemático al respecto, ojalá ayude a tener un mejor control de estos y a mejorar lo que pueda.",
         "IMPROVEMENTS": "¿Qué mejoró tu productividad?",
         "IMPROVEMENTS_TOMORROW": "¿Qué podrías hacer para mejorar mañana?",
@@ -510,7 +510,7 @@
         "L1": "Siéntate un poco y estírate, si quieres, cálmate un poco.",
         "L2": "Intenta escuchar los pensamientos y sentimientos que surgen.",
         "L3": "¿Te estás respondiendo a ti mismo de la misma manera que responderías a un amigo?",
-        "L4": "Si la respuesta es no, imagina a tu amigo en tu situación. ¿Qué les dirías a ellos? ¿Qué harías por ellos?",
+        "L4": "Si la respuesta es no, imagina a tu amigo en tu situación. ¿Qué les dirías a él? ¿Qué harías por él?",
         "OUTRO": "Más ejercicios <a target=\"_blank\" href=\"https://drsoph.com/blog/2018/9/17/3-exercises-in-self-compassion\" target=\"_blank\">se pueden encontrar aquí</a> o en <a target=\"_blank\" href=\"https://www.google.com/search?q=self+compassion+exercises&oq=self+compassion+excers&aqs=chrome.1.69i57j0l5.4303j0j7&sourceid=chrome&ie=UTF-8\" target=\"_blank\">google</a>.",
         "TITLE": "Autocompasión"
       },
@@ -791,10 +791,10 @@
         "DISMISS": "Descartar recordatorio",
         "DISMISS_ALL": "Descartar todo",
         "DONE": "hecho",
-        "DUE_TASK": "Tarea debida",
-        "DUE_TASKS": "Tareas debidas",
-        "FOR_CURRENT": "Tarea programada. ¿Quieres empezar a trabajar en ello?",
-        "FOR_OTHER": "Tarea programada. ¿Quieres empezar a trabajar en ello?",
+        "DUE_TASK": "Tarea vencida",
+        "DUE_TASKS": "Tareas vencidas",
+        "FOR_CURRENT": "Tarea programada. ¿Quieres empezar a trabajar en ella?",
+        "FOR_OTHER": "Tarea programada. ¿Quieres empezar a trabajar en ella?",
         "FROM_PROJECT": "Del proyecto",
         "FROM_TAG": "De la etiqueta: \"{{title}}\"",
         "RESCHEDULE_UNTIL_TOMORROW": "Hasta mañana",
@@ -819,7 +819,7 @@
         "TITLE": "Agregar para el día"
       },
       "N": {
-        "ESTIMATE_EXCEEDED": "!Tiempo estimado superado!",
+        "ESTIMATE_EXCEEDED": "¡Tiempo estimado superado!",
         "ESTIMATE_EXCEEDED_BODY": "Has excedido tu tiempo estimado para \"{{title}}\"."
       },
       "S": {
@@ -837,7 +837,7 @@
       "SUMMARY_TABLE": {
         "ESTIMATE": "Estimado",
         "SPENT_TODAY": "Dedicado hoy",
-        "SPENT_TOTAL": "Dedicado total",
+        "SPENT_TOTAL": "Dedicado en total",
         "TASK": "Tarea",
         "TOGGLE_DONE": "des- / marcar como realizada"
       }
@@ -1271,7 +1271,7 @@
       "OK": "Archivar"
     },
     "D_CONFIRM_DELETE": {
-      "MSG": "¿Seguro que quieres eliminar este proyecto? Se recomienda hacer una copia de seguridad de sus datos antes de hacer esto.",
+      "MSG": "¿Seguro que quieres eliminar este proyecto? Es recomendable hacer una copia de seguridad de tus datos antes de hacer esto.",
       "OK": "Borrar"
     },
     "D_CONFIRM_UNARCHIVE": {
@@ -1279,7 +1279,7 @@
       "OK": "Desarchivar"
     },
     "EDIT_PROJECT": "Editar proyecto",
-    "EXPORT_PROJECT": "Proyecto de exportación",
+    "EXPORT_PROJECT": "Exportar proyecto",
     "GITHUB_CONFIGURED": "Integración de GitHub configurada",
     "GITLAB_CONFIGURED": "Integración de GitLab configurada",
     "IMPORT_FROM_FILE": "Importar desde archivo",
@@ -1292,7 +1292,7 @@
   "PS": {
     "GLOBAL_SETTINGS": "Ajustes globales",
     "ISSUE_INTEGRATION": "Integración de problemas",
-    "PRIVACY_POLICY": "Política privada",
+    "PRIVACY_POLICY": "Política de Privacidad",
     "PRODUCTIVITY_HELPER": "Ayudante de Productividad",
     "PROJECT_SETTINGS": "Ajustes Específicos del Proyecto",
     "PROVIDE_FEEDBACK": "Suministre realimentación",
@@ -1310,7 +1310,7 @@
     "blue": "Azul",
     "blue-grey": "Gris azulado",
     "cyan": "Cian",
-    "deep-orange": "Naranja profundo",
+    "deep-orange": "Naranja oscuro",
     "deep-purple": "Morado oscuro",
     "green": "Verde",
     "indigo": "Índigo",
@@ -1324,11 +1324,11 @@
   },
   "V": {
     "E_1TO10": "Ingresa un valor entre 1 y 10",
-    "E_DATETIME": "El valor ingresado no es una fecha y hora!",
+    "E_DATETIME": "¡El valor ingresado no es una fecha y hora!",
     "E_MAX": "No debe ser más grande que {{val}}",
     "E_MAX_LENGTH": "Debe tener una longitud máxima de {{val}} caracteres",
     "E_MIN": "Debería ser menor que {{val}}",
-    "E_MIN_LENGTH": "Debe tener al menos {{val}} caracteres de largo",
+    "E_MIN_LENGTH": "Debe tener al menos {{val}} caracteres",
     "E_PATTERN": "Entrada inválida",
     "E_REQUIRED": "Este campo es requerido"
   },
@@ -1339,7 +1339,7 @@
     "ADD_SOME_TASKS": "¡Agrega algunas tareas para planificar tu día!",
     "COMPLETED_TASKS": "Tareas completadas",
     "ESTIMATE_REMAINING": "Estimación restante:",
-    "FINISH_DAY": "Fin de dia",
+    "FINISH_DAY": "Fin de día",
     "HELP_PROCRASTINATION": "Ayuda, !estoy procrastinando!",
     "NO_COMPLETED_TASKS": "Actualmente no hay tareas completadas.",
     "NO_PLANNED_TASKS": "No hay tareas planificadas",
@@ -1347,6 +1347,6 @@
     "RESET_BREAK_TIMER": "Restablecer sin temporizador de pausa",
     "TIME_ESTIMATED": "Tiempo estimado:",
     "WITHOUT_BREAK": "Sin descanso:",
-    "WORKING_TODAY": "Trabajando hoy:"
+    "WORKING_TODAY": "Trabajado hoy:"
   }
 }
