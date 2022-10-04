@@ -204,7 +204,7 @@
     "lz-string": "^1.4.4",
     "moment": "2.29.4",
     "moment-duration-format": "^2.2.2",
-    "nanoid": "^3.3.2",
+    "nanoid": "^4.0.0",
     "new-github-issue-url": "^0.2.1",
     "ng2-charts": "^2.3.0",
     "ng2-charts-schematics": "^0.1.7",
