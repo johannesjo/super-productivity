@@ -149,7 +149,7 @@ choco install super-productivity
 
 #### Snap - Most distributions
 Install via command-line:
-```
+```bash
 # stable
 sudo snap install superproductivity
 
@@ -175,7 +175,7 @@ makepkg -si
 
 Install via [homebrew cask](https://github.com/caskroom/homebrew-cask):
 
-```
+```bash
 brew install --cask superproductivity
 ```
 
@@ -227,13 +227,13 @@ To run the development server you need to have node installed at least in the ve
 
 **Clone repo**
 
-```
+```bash
 git clone https://github.com/johannesjo/super-productivity.git
 ```
 
 **Install dependencies**
 
-```
+```bash
 cd super-productivity
 npm i -g @angular/cli
 npm i
@@ -241,7 +241,7 @@ npm i
 
 **Run the dev server**
 
-```
+```bash
 ng serve
 ```
 
@@ -249,7 +249,7 @@ Afterwards you can open http://localhost:4200 in your browser. For most adjustme
 
 If you want to run the app standalone do the following:
 
-```
+```bash
 ng serve
 
 # in a new console tab
@@ -262,7 +262,7 @@ Packaging the app is done via [electron-builder](https://github.com/electron-use
 
 ## Run as Docker Container
 
-```
+```bash
 docker run -d -p 80:80 johannesjo/super-productivity:latest
 ```
 
@@ -283,9 +283,12 @@ For the desktop version automatic backups are stored per default in the `backup`
 ## User Data Folder
 
 Where user data is stored differs from os to os. The most common locations are:
-Mac OS: `~/Library/Application Support/superProductivity/`
-Windows: `C:\Users\<YOUR_USER_NAME>\AppData\Roaming\superProductivity/` or `%APPDATA%\superProductivity`
-Linux: `~/.config/superProductivity/`
+
+| OS | Location |
+| - | - |
+| **Mac OS** | `~/Library/Application Support/superProductivity/` |
+| **Windows** | `C:\Users\<YOUR_USER_NAME>\AppData\Roaming\superProductivity/` or `%APPDATA%\superProductivity` |
+| **Linux** | `~/.config/superProductivity/` |
 
 The path should be shown when you go to the "Automatic Backups` section on the configuration page (minus the "backup" sub folder). You can also see it printed out when you start the app from the command line.
 
@@ -295,6 +298,6 @@ For web browsers data is simply stored for the current user inside the browser s
 
 You can specify a custom folder for saving your data by starting the application with the `--user-data-dir` parameter like so:
 
-```
+```bash
 superproductivity --user-data-dir=/path/to/my/data
 ```
