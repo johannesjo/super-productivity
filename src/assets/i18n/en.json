@@ -168,6 +168,7 @@
         "DESCRIPTION": "Description",
         "LABELS": "Labels",
         "MARK_AS_CHECKED": "Mark updates as checked",
+        "PROJECT": "Project",
         "STATUS": "Status",
         "SUMMARY": "Summary",
         "WRITE_A_COMMENT": "Write a comment"
