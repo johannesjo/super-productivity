@@ -140,6 +140,12 @@ body {
   }
 }
 
+blockquote {
+  border-left: 4px solid rgba(var(--palette-accent-500), 1);
+  margin: 20px 0;
+  padding: 1px 20px;
+}
+
 a[href] {
   color: $c-accent;
 }

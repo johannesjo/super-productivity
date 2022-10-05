@@ -273,13 +273,18 @@ export class UiModule {
 
     this._markdownService.renderer.paragraph = (text) => {
       const split = text.split('\n');
-      return split.reduce((acc, p) => {
+      return split.reduce((acc, p, i) => {
         const result = /h(\d)\./.exec(p);
         if (result !== null) {
           const h = `h${result[1]}`;
           return acc + `<${h}>${p.replace(result[0], '')}</${h}>`;
         }
-        return acc + `<p>${p}</p>`;
+
+        if (split.length === 1) {
+          return `<p>` + p + `</p>`;
+        }
+
+        return acc ? (split.length - 1 === i ? acc + p + `</p>` : acc + p) : `<p>` + p;
       }, '');
     };
   }
