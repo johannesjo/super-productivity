@@ -10,7 +10,7 @@ import {
 } from 'electron';
 import * as electronDl from 'electron-dl';
 
-import { info, log } from 'electron-log';
+import { error, info, log } from 'electron-log';
 import { CONFIG } from './CONFIG';
 
 import { initIndicator } from './indicator';
@@ -28,7 +28,7 @@ import { lazySetInterval } from './shared-with-frontend/lazy-set-interval';
 import { KeyboardConfig } from '../src/app/features/config/keyboard-config.model';
 
 import { initialize } from '@electron/remote/main';
-import { join } from 'path';
+import { join, normalize } from 'path';
 import {
   existsSync,
   mkdirSync,
@@ -38,6 +38,8 @@ import {
   writeFileSync,
 } from 'fs';
 import { exec } from 'child_process';
+import { TakeABreakConfig } from '../src/app/features/config/global-config.model';
+import { format } from 'url';
 
 initialize();
 
@@ -357,6 +359,47 @@ ipcMain.on(IPC.JIRA_MAKE_REQUEST_EVENT, (ev, request) => {
 ipcMain.on(IPC.SHOW_OR_FOCUS, () => {
   showOrFocus(mainWin);
 });
+
+let isFullScreenWindowOpen = false;
+ipcMain.on(
+  IPC.FULL_SCREEN_BLOCKER,
+  (
+    ev,
+    { msg, takeABreakCfg }: { msg: string; takeABreakCfg: TakeABreakConfig },
+  ): void => {
+    if (isFullScreenWindowOpen) {
+      return;
+    }
+    const win = new BrowserWindow({
+      title: msg,
+      fullscreen: true,
+      alwaysOnTop: true,
+    });
+    win.setAlwaysOnTop(true, 'floating');
+    win.setVisibleOnAllWorkspaces(true);
+    win.setFullScreenable(false);
+    isFullScreenWindowOpen = true;
+    win.loadURL(
+      format({
+        pathname: normalize(
+          join(
+            __dirname,
+            IS_DEV ? '../src/static/overlay.html' : '../dist/static/overlay.html',
+          ),
+        ),
+        protocol: 'file:',
+        slashes: true,
+      }) + `#msg=${encodeURI(msg)}&img=${encodeURI(takeABreakCfg.motivationalImg || '')}`,
+    );
+    win.on('close', () => {
+      isFullScreenWindowOpen = false;
+    });
+
+    setTimeout(() => {
+      win.close();
+    }, takeABreakCfg.timedFullScreenBlockerDuration || 5000);
+  },
+);
 
 // HELPER FUNCTIONS
 // ----------------

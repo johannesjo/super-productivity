@@ -31,7 +31,7 @@ export const TAKE_A_BREAK_FORM_CFG: ConfigFormSection<TakeABreakConfig> = {
     {
       key: 'isFocusWindow',
       type: 'checkbox',
-      hideExpression: (model: any) => model.isTimedFullScreenBlocker,
+      // hideExpression: (model: any) => model.isTimedFullScreenBlocker,
       templateOptions: {
         label: T.GCF.TAKE_A_BREAK.IS_FOCUS_WINDOW,
       },

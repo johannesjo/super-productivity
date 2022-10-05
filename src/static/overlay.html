@@ -1,0 +1,63 @@
+<html>
+  <head>
+    <style>
+      #container {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        max-width: 1200px;
+        transform: translate(-50%, -50%);
+        font-family: 'Roboto', 'Comic Sans MS', sans-serif;
+        font-size: 34px;
+      }
+
+      img {
+        display: block;
+        margin: auto;
+        margin-bottom: 20px;
+        max-width: 100%;
+      }
+
+      #msg {
+        text-align: center;
+        max-width: 700px;
+        margin: auto;
+      }
+
+      @media (prefers-color-scheme: dark) {
+        body {
+          background: rgb(18, 18, 18);
+          color: rgb(235, 235, 235);
+        }
+      }
+
+      @media (prefers-color-scheme: light) {
+        body {
+          background: rgb(250, 250, 250);
+          color: rgb(44, 44, 44);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="container">
+      <div id="msg">MSG</div>
+    </div>
+  </body>
+
+  <script>
+    const hashObj = window.location.hash
+      .replace('#', '')
+      .split('&')
+      .map((v) => v.split('='))
+      .reduce((pre, [key, value]) => ({ ...pre, [key]: value }), {});
+    const msg = hashObj.msg;
+    document.getElementById('msg').innerHTML = decodeURI(msg);
+    const imgUrl = hashObj.img;
+    if (imgUrl) {
+      const img = document.createElement('img');
+      img.src = imgUrl;
+      document.getElementById('container').prepend(img);
+    }
+  </script>
+</html>

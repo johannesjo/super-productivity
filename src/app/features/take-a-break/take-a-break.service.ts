@@ -210,6 +210,16 @@ export class TakeABreakService {
         title: T.GCF.TAKE_A_BREAK.NOTIFICATION_TITLE,
         body: msg,
       });
+
+      if (IS_ELECTRON && cfg.takeABreak.isTimedFullScreenBlocker) {
+        (this._electronService.ipcRenderer as typeof ipcRenderer).send(
+          IPC.FULL_SCREEN_BLOCKER,
+          {
+            msg,
+            takeABreakCfg: cfg.takeABreak,
+          },
+        );
+      }
     });
 
     this._triggerBanner$.subscribe(([timeWithoutBreak, cfg]) => {
