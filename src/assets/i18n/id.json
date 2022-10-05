@@ -320,6 +320,7 @@
         "POLLING_CHANGES": "{{issueProviderName}}: Polling untuk {{issuesStr}}"
       }
     },
+    // TODO:
     "JIRA": {
       "BANNER": {
         "BLOCK_ACCESS_MSG": "Jira: To prevent shut out from api, access has been blocked by Super Productivity. You probably should check your jira settings!",
