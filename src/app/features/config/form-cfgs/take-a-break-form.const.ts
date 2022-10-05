@@ -22,10 +22,26 @@ export const TAKE_A_BREAK_FORM_CFG: ConfigFormSection<TakeABreakConfig> = {
       },
     },
     {
-      key: 'isFocusWindow',
+      key: 'isTimedFullScreenBlocker',
       type: 'checkbox',
       templateOptions: {
+        label: T.GCF.TAKE_A_BREAK.IS_FULL_SCREEN_BLOCKER,
+      },
+    },
+    {
+      key: 'isFocusWindow',
+      type: 'checkbox',
+      hideExpression: (model: any) => model.isTimedFullScreenBlocker,
+      templateOptions: {
         label: T.GCF.TAKE_A_BREAK.IS_FOCUS_WINDOW,
+      },
+    },
+    {
+      hideExpression: (model: any) => !model.isTimedFullScreenBlocker,
+      key: 'timedFullScreenBlockerDuration',
+      type: 'duration',
+      templateOptions: {
+        label: T.GCF.TAKE_A_BREAK.FULL_SCREEN_BLOCKER_DURATION,
       },
     },
     {

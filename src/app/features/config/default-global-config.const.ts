@@ -48,6 +48,8 @@ export const DEFAULT_GLOBAL_CONFIG: GlobalConfigState = {
   takeABreak: {
     isTakeABreakEnabled: true,
     isLockScreen: false,
+    isTimedFullScreenBlocker: false,
+    timedFullScreenBlockerDuration: 5000,
     isFocusWindow: false,
     /* eslint-disable-next-line */
     takeABreakMessage:

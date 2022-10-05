@@ -1349,6 +1349,8 @@
       "IS_ENABLED": "Enable take a break reminder",
       "IS_FOCUS_WINDOW": "Focus app window when reminder is active (desktop only)",
       "IS_LOCK_SCREEN": "Lock screen when a break is due (desktop only)",
+      "IS_FULL_SCREEN_BLOCKER": "Display message in fullscreen window (desktop only)",
+      "FULL_SCREEN_BLOCKER_DURATION": "Duration to display the fullscreen window (desktop only)",
       "MESSAGE": "Take a break message",
       "MIN_WORKING_TIME": "Trigger take a break notification after X working without one",
       "MOTIVATIONAL_IMG": "Motivational image (web url)",
