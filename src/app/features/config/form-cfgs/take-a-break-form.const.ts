@@ -41,7 +41,9 @@ export const TAKE_A_BREAK_FORM_CFG: ConfigFormSection<TakeABreakConfig> = {
       key: 'timedFullScreenBlockerDuration',
       type: 'duration',
       templateOptions: {
+        isAllowSeconds: true,
         label: T.GCF.TAKE_A_BREAK.FULL_SCREEN_BLOCKER_DURATION,
+        description: T.G.DURATION_DESCRIPTION,
       },
     },
     {
