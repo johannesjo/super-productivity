@@ -19,6 +19,7 @@ export const initFullScreenBlocker = (IS_DEV: boolean): void => {
         title: msg,
         fullscreen: true,
         alwaysOnTop: true,
+        transparent: true,
       });
       win.setAlwaysOnTop(true, 'floating');
       win.setVisibleOnAllWorkspaces(true);
@@ -37,7 +38,9 @@ export const initFullScreenBlocker = (IS_DEV: boolean): void => {
           protocol: 'file:',
           slashes: true,
         }) +
-          `#msg=${encodeURI(msg)}&img=${encodeURI(takeABreakCfg.motivationalImg || '')}`,
+          `#msg=${encodeURI(msg)}&img=${encodeURI(
+            takeABreakCfg.motivationalImg || '',
+          )}&time=${takeABreakCfg.timedFullScreenBlockerDuration}`,
       );
 
       const closeTimeout = setTimeout(() => {

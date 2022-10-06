@@ -10,7 +10,7 @@ import {
 } from 'electron';
 import * as electronDl from 'electron-dl';
 
-import { error, info, log } from 'electron-log';
+import { info, log } from 'electron-log';
 import { CONFIG } from './CONFIG';
 
 import { initIndicator } from './indicator';
@@ -28,7 +28,7 @@ import { lazySetInterval } from './shared-with-frontend/lazy-set-interval';
 import { KeyboardConfig } from '../src/app/features/config/keyboard-config.model';
 
 import { initialize } from '@electron/remote/main';
-import { join, normalize } from 'path';
+import { join } from 'path';
 import {
   existsSync,
   mkdirSync,
@@ -38,8 +38,6 @@ import {
   writeFileSync,
 } from 'fs';
 import { exec } from 'child_process';
-import { TakeABreakConfig } from '../src/app/features/config/global-config.model';
-import { format } from 'url';
 import { initFullScreenBlocker } from './full-screen-blocker';
 
 initialize();
@@ -157,7 +155,7 @@ interface MyApp extends App {
 
 const appIN: MyApp = app;
 
-initDebug({ showDevTools: isShowDevTools }, IS_DEV);
+// initDebug({ showDevTools: isShowDevTools }, IS_DEV);
 
 // NOTE: opening the folder crashes the mas build
 if (!IS_MAC) {
