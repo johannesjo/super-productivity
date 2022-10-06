@@ -40,6 +40,7 @@ import {
 import { exec } from 'child_process';
 import { TakeABreakConfig } from '../src/app/features/config/global-config.model';
 import { format } from 'url';
+import { initFullScreenBlocker } from './full-screen-blocker';
 
 initialize();
 
@@ -204,6 +205,7 @@ appIN.on('certificate-error', (event, webContents, url, err, certificate, callba
 appIN.on('ready', createMainWin);
 appIN.on('ready', () => initBackupAdapter(BACKUP_DIR));
 appIN.on('ready', () => initLocalFileSyncAdapter());
+appIN.on('ready', () => initFullScreenBlocker(IS_DEV));
 
 if (!isDisableTray) {
   appIN.on('ready', createIndicator);
@@ -359,47 +361,6 @@ ipcMain.on(IPC.JIRA_MAKE_REQUEST_EVENT, (ev, request) => {
 ipcMain.on(IPC.SHOW_OR_FOCUS, () => {
   showOrFocus(mainWin);
 });
-
-let isFullScreenWindowOpen = false;
-ipcMain.on(
-  IPC.FULL_SCREEN_BLOCKER,
-  (
-    ev,
-    { msg, takeABreakCfg }: { msg: string; takeABreakCfg: TakeABreakConfig },
-  ): void => {
-    if (isFullScreenWindowOpen) {
-      return;
-    }
-    const win = new BrowserWindow({
-      title: msg,
-      fullscreen: true,
-      alwaysOnTop: true,
-    });
-    win.setAlwaysOnTop(true, 'floating');
-    win.setVisibleOnAllWorkspaces(true);
-    win.setFullScreenable(false);
-    isFullScreenWindowOpen = true;
-    win.loadURL(
-      format({
-        pathname: normalize(
-          join(
-            __dirname,
-            IS_DEV ? '../src/static/overlay.html' : '../dist/static/overlay.html',
-          ),
-        ),
-        protocol: 'file:',
-        slashes: true,
-      }) + `#msg=${encodeURI(msg)}&img=${encodeURI(takeABreakCfg.motivationalImg || '')}`,
-    );
-    win.on('close', () => {
-      isFullScreenWindowOpen = false;
-    });
-
-    setTimeout(() => {
-      win.close();
-    }, takeABreakCfg.timedFullScreenBlockerDuration || 5000);
-  },
-);
 
 // HELPER FUNCTIONS
 // ----------------
