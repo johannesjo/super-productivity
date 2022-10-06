@@ -33,7 +33,7 @@
               "src/favicon.ico",
               "src/assets",
               "src/manifest.json",
-              "src/static/*.html"
+              "src/static"
             ],
             "styles": ["src/styles.scss"],
             "scripts": [],
