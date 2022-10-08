@@ -501,200 +501,200 @@
         "PRODUCTIVITY_HINT": "1: Bahkan belum dimulai – 10: Sangat efisien"
       },
       "S": {
-        "SAVE_METRIC": "Metric successfully saved"
+        "SAVE_METRIC": "Metrik berhasil disimpan"
       }
     },
     "NOTE": {
       "D_ADD": {
-        "NOTE_LABEL": "Enter some text to save as note (you can use markdown)..."
+        "NOTE_LABEL": "Masukkan beberapa teks untuk disimpan sebagai catatan (Anda dapat menggunakan Markdown)..."
       },
       "D_FULLSCREEN": {
-        "VIEW_TEXT_ONLY": "View as unparsed text",
-        "VIEW_SPLIT": "View parsed and unparsed markdown in split view",
-        "VIEW_PARSED": "View as parsed (non editable) markdown"
+        "VIEW_TEXT_ONLY": "Lihat sebagai teks yang belum diurai",
+        "VIEW_SPLIT": "Lihat Markdown yang diuraikan dan tidak diuraikan dalam tampilan terpisah",
+        "VIEW_PARSED": "Lihat sebagai Markdown yang diuraikan (tidak dapat diedit)"
       },
       "NOTES_CMP": {
-        "ADD_BTN": "Add new Note",
-        "DROP_TO_ADD": "Drop here to add new note",
-        "NO_NOTES": "There are currently no notes"
+        "ADD_BTN": "Tambah catatan baru",
+        "DROP_TO_ADD": "Jatuhkan di sini untuk menambahkan catatan baru",
+        "NO_NOTES": "Saat ini tidak ada catatan"
       },
       "NOTE_CMP": {
-        "DISABLE_PARSE": "Disable markdown parsing for preview",
-        "ENABLE_PARSE": "Enable markdown parse"
+        "DISABLE_PARSE": "Nonaktifkan penguraian Markdown untuk pratinjau",
+        "ENABLE_PARSE": "Aktifkan penguraian Markdown"
       }
     },
     "OPEN_PROJECT": {
       "CFG_CMP": {
-        "ALWAYS_ASK": "Always open dialog",
-        "DONE": "Status for completing task",
-        "DO_NOT": "Don't transition",
-        "ENABLE": "Enable Openproject integration",
-        "ENABLE_TRANSITIONS": "Enable Transition Handling",
-        "IN_PROGRESS": "Status for starting task",
-        "OPEN": "Status for pausing task",
-        "PROGRESS_ON_SAVE": "Default progress on save",
-        "TRANSITION": "Transition Handling",
-        "SELECT_ISSUE_FOR_TRANSITIONS": "Select issue to load available transitions"
+        "ALWAYS_ASK": "Selalu buka dialog",
+        "DONE": "Status untuk menyelesaikan tugas",
+        "DO_NOT": "Jangan bertransisi",
+        "ENABLE": "Aktifkan integrasi Openproject",
+        "ENABLE_TRANSITIONS": "Aktifkan Penanganan Transisi",
+        "IN_PROGRESS": "Status untuk memulai tugas",
+        "OPEN": "Status untuk menjeda tugas",
+        "PROGRESS_ON_SAVE": "Kemajuan default saat disimpan",
+        "TRANSITION": "Penanganan Transisi",
+        "SELECT_ISSUE_FOR_TRANSITIONS": "Pilih masalah untuk memuat transisi yang tersedia"
       },
       "DIALOG_INITIAL": {
-        "TITLE": "Setup OpenProject for Project"
+        "TITLE": "Atur OpenProject untuk Proyek"
       },
       "DIALOG_TRACK_TIME": {
-        "ACTIVITY": "Activity",
-        "CURRENTLY_LOGGED": "Currently logged time: ",
-        "INVALID_DATE": "The entered value is not a date!",
-        "POST_TIME": "Post Time",
-        "STARTED": "Started",
-        "SUBMIT_TIME_FOR": "Submit time to OpenProject for",
-        "TIME_SPENT": "Time Spent",
-        "TITLE": "OpenProject: Submit Worklog"
+        "ACTIVITY": "Aktifitas",
+        "CURRENTLY_LOGGED": "Waktu login saat ini: ",
+        "INVALID_DATE": "Nilai yang dimasukkan bukan tanggal!",
+        "POST_TIME": "Waktu Posting",
+        "STARTED": "Dimulai",
+        "SUBMIT_TIME_FOR": "Kirim waktu ke OpenProject untuk",
+        "TIME_SPENT": "Waktu yang Dihabiskan",
+        "TITLE": "OpenProject: Kirim Worklog"
       },
       "DIALOG_TRANSITION": {
-        "CHOOSE_STATUS": "Choose status to assign",
-        "CURRENT_ASSIGNEE": "Current Assignee:",
-        "CURRENT_STATUS": "Current Status:",
-        "PERCENTAGE_DONE": "Progress:",
-        "TASK_NAME": "Task name:",
-        "TITLE": "OpenProject: Update Status",
-        "UPDATE_STATUS": "Update Status"
+        "CHOOSE_STATUS": "Pilih status untuk ditetapkan",
+        "CURRENT_ASSIGNEE": "Penerima Tugas saat ini:",
+        "CURRENT_STATUS": "Status terkini:",
+        "PERCENTAGE_DONE": "Proses:",
+        "TASK_NAME": "Nama tugas:",
+        "TITLE": "OpenProject: Perbarui Status",
+        "UPDATE_STATUS": "Memperbarui status"
       },
       "FORM": {
-        "FILTER_USER": "Username (contoh. to filter out changes by yourself)",
+        "FILTER_USER": "Nama pengguna (misalnya untuk memfilter perubahan sendiri)",
         "HOST": "Host (contoh.: https://www.openproject.org/)",
-        "IS_AUTO_ADD_TO_BACKLOG": "Automatically add unresolved work packages from OpenProject to backlog",
-        "IS_AUTO_POLL": "Automatically poll imported OpenProject work packages for changes",
-        "IS_SEARCH_ISSUES_FROM_OPEN_PROJECT": "Show work packages as suggestions when adding new tasks",
-        "IS_SHOW_TIME_TRACKING_DIALOG": "Show time tracking dialog to report to OpenProject",
-        "IS_SHOW_TIME_TRACKING_DIALOG_DESCRIPTION": "Requires time tracking module to be enabled for OpenProject project",
-        "IS_SHOW_TIME_TRACKING_DIALOG_FOR_EACH_SUB_TASK": "Show time tracking dialog when sub tasks are completed",
-        "PROJECT_ID": "Project ID",
-        "PROJECT_ID_DESCRIPTION": "Can be found as part of the url, when viewing the project in the Browser.",
-        "TOKEN": "Access Token",
-        "SCOPE": "Scope",
-        "SCOPE_ALL": "All",
-        "SCOPE_ASSIGNED": "Assigned to me",
-        "SCOPE_CREATED": "Created by me"
+        "IS_AUTO_ADD_TO_BACKLOG": "Secara otomatis menambahkan work packages yang belum terselesaikan dari OpenProject ke backlog",
+        "IS_AUTO_POLL": "Secara otomatis polling work packages OpenProject yang diimpor untuk perubahan",
+        "IS_SEARCH_ISSUES_FROM_OPEN_PROJECT": "Tampilkan work packages sebagai saran saat menambahkan tugas baru",
+        "IS_SHOW_TIME_TRACKING_DIALOG": "Tampilkan dialog pelacakan waktu untuk melapor ke OpenProject",
+        "IS_SHOW_TIME_TRACKING_DIALOG_DESCRIPTION": "Membutuhkan modul pelacakan waktu untuk diaktifkan untuk proyek OpenProject",
+        "IS_SHOW_TIME_TRACKING_DIALOG_FOR_EACH_SUB_TASK": "Tampilkan dialog pelacakan waktu ketika sub tugas selesai",
+        "PROJECT_ID": "ID Proyek",
+        "PROJECT_ID_DESCRIPTION": "Dapat ditemukan sebagai bagian dari url, saat melihat proyek di Browser.",
+        "TOKEN": "Akses Token",
+        "SCOPE": "Cakupan",
+        "SCOPE_ALL": "Semua",
+        "SCOPE_ASSIGNED": "Ditugaskan kepada saya",
+        "SCOPE_CREATED": "Dibuat oleh saya"
       },
       "FORM_SECTION": {
-        "HELP": "<p>Here you can configure SuperProductivity to list open OpenProject work packages. Please Note that for this to work in the browser you need to probably configure CORS for your OpenProject server, to allow access from app.super-productivity.com</p>",
+        "HELP": "<p>Di sini Anda dapat mengonfigurasi SuperProductivity untuk membuat daftar work packages OpenProject yang terbuka. Harap Perhatikan bahwa agar ini berfungsi di browser, Anda mungkin perlu mengonfigurasi CORS untuk server OpenProject Anda, untuk mengizinkan akses dari app.super-productivity.com</p>",
         "TITLE": "OpenProject"
       },
       "ISSUE_CONTENT": {
-        "ASSIGNEE": "Assignee",
-        "DESCRIPTION": "Description",
-        "MARK_AS_CHECKED": "Mark updates as checked",
+        "ASSIGNEE": "Penerima tugas",
+        "DESCRIPTION": "Deskripsi",
+        "MARK_AS_CHECKED": "Tandai pembaruan sebagai dicentang",
         "STATUS": "Status",
-        "SUMMARY": "Summary",
-        "TYPE": "Type"
+        "SUMMARY": "Ringkasan",
+        "TYPE": "Tipe"
       },
       "ISSUE_STRINGS": {
         "ISSUES_STR": "work packages",
         "ISSUE_STR": "work package"
       },
       "S": {
-        "ERR_UNKNOWN": "OpenProject: Unknown error {{statusCode}} {{errorMsg}}. Is CORS properly configured for the server?",
-        "POST_TIME_SUCCESS": "OpenProject: Successfully created time entry for {{issueTitle}}",
-        "TRANSITION": "OpenProject: Set issue \"{{issueKey}}\" to \"{{name}}\"",
-        "TRANSITION_SUCCESS": "OpenProject: Set issue {{issueKey}} to <strong>{{chosenTransition}}</strong>",
-        "TRANSITIONS_LOADED": "Transitions loaded. Use the selects below to assign them"
+        "ERR_UNKNOWN": "OpenProject: Error tidak diketahui {{statusCode}} {{errorMsg}}. Apakah CORS dikonfigurasi dengan benar untuk server?",
+        "POST_TIME_SUCCESS": "OpenProject: Berhasil membuat entri waktu untuk {{issueTitle}}",
+        "TRANSITION": "OpenProject: Atur issue \"{{issueKey}}\" untuk \"{{name}}\"",
+        "TRANSITION_SUCCESS": "OpenProject: Atur issue {{issueKey}} untuk <strong>{{chosenTransition}}</strong>",
+        "TRANSITIONS_LOADED": "Transisi dimuat. Gunakan pilihan di bawah ini untuk menetapkannya"
       }
     },
     "POMODORO": {
-      "BACK_TO_WORK": "Back to work!",
-      "BREAK_IS_DONE": "Your break is done!",
-      "ENJOY_YOURSELF": "Enjoy yourself, get yourself moving, come back in:",
-      "FINISH_SESSION_X": "You successfully finished session <strong>{{nr}}</strong>!",
+      "BACK_TO_WORK": "Kembali bekerja!",
+      "BREAK_IS_DONE": "Istirahat Anda selesai!",
+      "ENJOY_YOURSELF": "Nikmati diri Anda sendiri, buat diri Anda bergerak, kembali dalam:",
+      "FINISH_SESSION_X": "Anda berhasil menyelesaikan sesi <strong>{{nr}}</strong>!",
       "NOTIFICATION": {
-        "BREAK_X_START": "Pomodoro: Break {{nr}} started!",
-        "BREAK_TIME": "Pomodoro: Time for break {{nr}}!",
-        "NO_TASKS": "You need to add tasks before the Pomodoro timer can start.",
-        "SESSION_X_START": "Pomodoro: Session {{nr}} started!"
+        "BREAK_X_START": "Pomodoro: Istirahat {{nr}} dimulai!",
+        "BREAK_TIME": "Pomodoro: Waktunya istirahat {{nr}}!",
+        "NO_TASKS": "Anda perlu menambahkan tugas sebelum timer Pomodoro dapat dimulai.",
+        "SESSION_X_START": "Pomodoro: Sesi {{nr}} dimulai!"
       },
       "S": {
-        "SESSION_X_START": "Pomodoro: Session {{nr}} started!",
-        "SESSION_SKIP": "Skip Pomodoro session",
-        "SESSION_END": "End Pomodoro session"
+        "SESSION_X_START": "Pomodoro: Sesi {{nr}} dimulai!",
+        "SESSION_SKIP": "Lewatkan sesi Pomodoro",
+        "SESSION_END": "Akhiri sesi Pomodoro"
       },
-      "SKIP_BREAK": "Skip break",
-      "START_BREAK": "Start break"
+      "SKIP_BREAK": "Lewatkan istirahat",
+      "START_BREAK": "Mulai istirahat"
     },
     "PROCRASTINATION": {
-      "BACK_TO_WORK": "Back to work!",
+      "BACK_TO_WORK": "Kembali bekerja!",
       "COMP": {
-        "INTRO": "People with high procrastination levels usually have low self-compassion. So practice it! It improves your feeling of self-worth, fosters positive emotions and can help you overcome procrastination, of course. Try a little exercise:",
-        "L1": "Sit down for bit and stretch yourself, if you like, calm down a little bit",
-        "L2": "Try to listen to the thoughts and feelings that arise",
-        "L3": "Are you responding to yourself in a way that you would respond to a friend?",
-        "L4": "If the answer is no, imagine your friend in your situation. What you would say to them? What you would do for them?",
-        "OUTRO": "More exercises <a target=\"_blank\" href=\"https://drsoph.com/blog/2018/9/17/3-exercises-in-self-compassion\" target=\"_blank\">can be found here</a> or on <a target=\"_blank\" href=\"https://www.google.com/search?q=self+compassion+exercises&oq=self+compassion+excers&aqs=chrome.1.69i57j0l5.4303j0j7&sourceid=chrome&ie=UTF-8\" target=\"_blank\">google</a>.",
+        "INTRO": "Orang dengan tingkat prokrastinasi yang tinggi biasanya memiliki self-compassion yang rendah. Jadi praktekkan! Ini meningkatkan perasaan harga diri Anda, menumbuhkan emosi positif dan tentu saja dapat membantu Anda mengatasi penundaan. Cobalah sedikit latihan:",
+        "L1": "Duduklah sebentar dan regangkan dirimu, jika kamu suka, tenanglah sedikit",
+        "L2": "Coba dengarkan pikiran dan perasaan yang muncul",
+        "L3": "Apakah Anda menanggapi diri sendiri dengan cara yang Anda akan menanggapi seorang teman?",
+        "L4": "Jika jawabannya tidak, bayangkan teman Anda dalam situasi Anda. Apa yang akan Anda katakan kepada mereka? Apa yang akan Anda lakukan untuk mereka?",
+        "OUTRO": "Latihan <a target=\"_blank\" href=\"https://drsoph.com/blog/2018/9/17/3-exercises-in-self-compassion\" target=\"_blank\">bisa ditemukan di sini</a> atau di <a target=\"_blank\" href=\"https://www.google.com/search?q=self+compassion+exercises&oq=self+compassion+excers&aqs=chrome.1.69i57j0l5.4303j0j7&sourceid=chrome&ie=UTF-8\" target=\"_blank\">google</a>.",
         "TITLE": "Self Compassion"
       },
       "CUR": {
-        "INTRO": "Procrastination is interesting, isn't it? It doesn't make sense to do it. Not in your long term interest at all. But still everybody does it. Enjoy and explore!",
-        "L1": "What feelings are eliciting your temptation to procrastinate?",
-        "L2": "Where do you feel them in your body?",
-        "L3": "What do they remind you of?",
-        "L4": "What happens to the thought of procrastinating as you observe it? Does it intensify? Dissipate? Cause other emotions to arise?",
-        "L5": "How are the sensations in your body shifting as you continue to rest your awareness on them?",
-        "TITLE": "Curiosity"
+        "INTRO": "Menunda-nunda itu menarik, bukan? Tidak masuk akal untuk melakukannya. Sama sekali tidak untuk kepentingan jangka panjang Anda. Tapi tetap saja semua orang melakukannya. Nikmati dan jelajahi!",
+        "L1": "Perasaan apa yang memunculkan godaan Anda untuk menunda-nunda?",
+        "L2": "Di mana Anda merasakannya di dalam diri Anda?",
+        "L3": "Apa yang mereka ingatkan Anda?",
+        "L4": "Apa yang terjadi pada pikiran untuk menunda-nunda saat Anda mengamatinya? Apakah itu mengintensifkan? Menghilang? Menyebabkan emosi lain muncul?",
+        "L5": "Bagaimana sensasi dalam tubuh Anda bergeser saat Anda terus mengistirahatkan kesadaran Anda pada mereka?",
+        "TITLE": "Rasa ingin tahu"
       },
-      "H1": "Cut yourself some slack!",
+      "H1": "Kurangi sedikit kelonggaran Anda!",
       "INTRO": {
-        "AVOIDING": "Avoiding the task",
-        "FEAR": "Fear of failure",
-        "STRESSED": "Stressed about not getting things done",
-        "TITLE": "Intro"
+        "AVOIDING": "Menghindari tugas",
+        "FEAR": "Takut gagal",
+        "STRESSED": "Tertekan karena tidak menyelesaikan sesuatu",
+        "TITLE": "Pengantar"
       },
-      "P1": "First of all relax! Everybody does it once in a while. And if you're not doing what you should, you should at least enjoy it! Then check out the other tab for some helpful methods.",
-      "P2": "If you want to know more about the science behind all here I can recommend <a target=\"_blank\" href=\"https://www.nytimes.com/2019/03/25/smarter-living/why-you-procrastinate-it-has-nothing-to-do-with-self-control.html\" target=\"_blank\">this article</a> from which are some of the exercises.",
-      "P3": "Remember: Procrastination is an emotion regulation problem, not a time management problem.",
+      "P1": "Pertama-tama santai! Semua orang melakukannya sesekali. Dan jika Anda tidak melakukan apa yang seharusnya Anda lakukan, setidaknya Anda harus menikmatinya! Kemudian periksa tab lain untuk beberapa metode bermanfaat.",
+      "P2": "Jika Anda ingin tahu lebih banyak tentang sains di balik semua di sini, saya dapat merekomendasikan <a target=\"_blank\" href=\"https://www.nytimes.com/2019/03/25/smarter-living/why-you-procrastinate-it-has-nothing-to-do-with-self-control.html\" target=\"_blank\">artikel ini</a> dari beberapa latihannya",
+      "P3": "Ingat: Penundaan adalah masalah pengaturan emosi, bukan masalah manajemen waktu.",
       "REFRAME": {
-        "INTRO": "Think about what might be positive about the task despite its flaws.",
-        "TITLE": "Reframing",
-        "TL1": "What might be interesting about it?",
-        "TL2": "What is to gain if you complete it?",
-        "TL3": "How will you feel about it if you complete it?"
+        "INTRO": "Pikirkan tentang apa yang mungkin positif tentang tugas itu terlepas dari kekurangannya.",
+        "TITLE": "Membingkai ulang",
+        "TL1": "Apa yang mungkin menarik tentang itu?",
+        "TL2": "Apa yang didapat jika Anda menyelesaikannya?",
+        "TL3": "Bagaimana perasaan Anda jika Anda menyelesaikannya??"
       },
       "SPLIT_UP": {
-        "INTRO": "Split up the task into as many small chunks as you can.",
-        "OUTRO": "Done? Then think about it. What would be – strictly theoretical – the first thing you would do <i>if</i> you were to start working on the task? Just think about it...",
-        "TITLE": "Split it up!"
+        "INTRO": "Bagi tugas menjadi bagian-bagian kecil sebanyak yang Anda bisa.",
+        "OUTRO": "Selesai? Kemudian pikirkanlah. Apa yang akan – benar-benar teoretis – hal pertama yang akan Anda lakukan <i>jika</i> Anda mulai mengerjakan tugas tersebut? Pikirkan saja...",
+        "TITLE": "Pisahkan!"
       }
     },
     "PROJECT": {
       "D_CREATE": {
-        "CREATE": "Create Project",
-        "EDIT": "Edit Project",
-        "SETUP_CALDAV": "Setup Caldav Integration",
-        "SETUP_GIT": "Setup GitHub Integration",
-        "SETUP_GITLAB": "Setup GitLab Integration",
-        "SETUP_JIRA": "Setup Jira Integration",
-        "SETUP_OPEN_PROJECT": "Setup OpenProject Integration",
-        "SETUP_GITEA_PROJECT": "Setup Gitea Integration",
-        "SETUP_REDMINE_PROJECT": "Setup Redmine Integration"
+        "CREATE": "Buat Proyek",
+        "EDIT": "Ubah Proyek",
+        "SETUP_CALDAV": "Atur Integrasi Caldav",
+        "SETUP_GIT": "Atur Integrasi GitHub",
+        "SETUP_GITLAB": "Atur Integrasi Gitlab",
+        "SETUP_JIRA": "Atur Integrasi Jira",
+        "SETUP_OPEN_PROJECT": "Atur Integrasi OpenProject",
+        "SETUP_GITEA_PROJECT": "Atur Integrasi Gitea",
+        "SETUP_REDMINE_PROJECT": "Atur Integrasi Redmine"
       },
       "FORM_BASIC": {
-        "L_IS_HIDDEN_FROM_MENU": "Hide project from menu",
-        "L_TITLE": "Project Name",
-        "TITLE": "Basic Settings"
+        "L_IS_HIDDEN_FROM_MENU": "Sembunyikan proyek dari menu",
+        "L_TITLE": "Nama Proyek",
+        "TITLE": "Pengaturan dasar"
       },
       "FORM_THEME": {
-        "D_IS_DARK_THEME": "Won`t be used if system supports global dark mode.",
-        "HELP": "Theme settings for your project.",
-        "L_BACKGROUND_IMAGE_DARK": "Background Image Url (Dark Theme)",
-        "L_BACKGROUND_IMAGE_LIGHT": "Background Image Url (Light Theme)",
-        "L_COLOR_ACCENT": "Accent Color",
-        "L_COLOR_PRIMARY": "Primary Color",
-        "L_COLOR_WARN": "Warn/Error Color",
-        "L_HUE_ACCENT": "Threshold for dark text on accent color background",
-        "L_HUE_PRIMARY": "Threshold for dark text on primary color background",
-        "L_HUE_WARN": "Threshold for dark text on warn color background",
-        "L_IS_AUTO_CONTRAST": "Auto set text colors for best readability",
-        "L_IS_DISABLE_BACKGROUND_GRADIENT": "Disable colored background gradient",
-        "L_IS_REDUCED_THEME": "Use reduced UI (no boxes around tasks)",
-        "L_THEME_COLOR": "Theme Color",
-        "L_TITLE": "Title",
-        "TITLE": "Theme"
+        "D_IS_DARK_THEME": "Tidak akan digunakan jika sistem mendukung mode gelap global.",
+        "HELP": "Pengaturan tema untuk proyek Anda.",
+        "L_BACKGROUND_IMAGE_DARK": "Url Gambar Latar Belakang (Tema Terang)",
+        "L_BACKGROUND_IMAGE_LIGHT": "Url Gambar Latar Belakang (Tema Gelap)",
+        "L_COLOR_ACCENT": "Warna Aksen",
+        "L_COLOR_PRIMARY": "Warna Primer",
+        "L_COLOR_WARN": "Warna Perhatian/Error",
+        "L_HUE_ACCENT": "Ambang batas untuk teks gelap pada latar belakang warna aksen",
+        "L_HUE_PRIMARY": "Ambang batas untuk teks gelap pada latar belakang warna primer",
+        "L_HUE_WARN": "Ambang batas untuk teks gelap pada latar belakang warna peringatan",
+        "L_IS_AUTO_CONTRAST": "Atur warna teks secara otomatis untuk keterbacaan terbaik",
+        "L_IS_DISABLE_BACKGROUND_GRADIENT": "Nonaktifkan gradien latar belakang berwarna",
+        "L_IS_REDUCED_THEME": "Gunakan UI yang diperkecil (tidak ada kotak di sekitar tugas)",
+        "L_THEME_COLOR": "Tema Warna",
+        "L_TITLE": "Judul",
+        "TITLE": "Tema"
       },
       "S": {
         "ARCHIVED": "Archived Project",
