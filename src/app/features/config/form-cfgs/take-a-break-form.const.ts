@@ -93,21 +93,10 @@ export const TAKE_A_BREAK_FORM_CFG: ConfigFormSection<TakeABreakConfig> = {
         // addText: T.F.SIMPLE_COUNTER.FORM.ADD_NEW,
         addText: 'Add motivational image',
         required: true,
+        defaultValue: '',
       },
       fieldArray: {
-        defaultValue: 'XXXXX1',
         type: 'input',
-        expressionProperties: {
-          'templateOptions.label': '"Fruitname " + field.key',
-        },
-        templateOptions: {
-          defaultValue: 'AAAAAAAA',
-          required: true,
-          placeholder: T.GCF.TAKE_A_BREAK.MOTIVATIONAL_IMG,
-          type: 'url',
-          // change: (...args) => console.log(args),
-          keypress: (...args) => console.log(args),
-        },
       },
     },
   ],

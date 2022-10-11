@@ -18,15 +18,14 @@ export class RepeatSectionTypeComponent extends FieldArrayType {
   }
 
   removeItem(i: number): void {
-    super.remove(i);
+    super.remove(i, { markAsDirty: true });
   }
 
   addItem(): void {
-    const fn = this.field?.props?.getInitialValue;
+    const fn = this.field?.templateOptions?.getInitialValue;
+    const initialValue =
+      this.field?.templateOptions?.defaultValue || (fn && fn(this.field));
 
-    const initialValue = fn && fn(this.field);
-
-    // if we need this later we can use defaultOptions for configuring this
     super.add(undefined, initialValue);
   }
 
