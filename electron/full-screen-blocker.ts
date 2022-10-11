@@ -21,6 +21,12 @@ export const initFullScreenBlocker = (IS_DEV: boolean): void => {
         alwaysOnTop: true,
         transparent: true,
       });
+      const randomImgUrl = takeABreakCfg.motivationalImgs.length
+        ? takeABreakCfg.motivationalImgs[
+            Math.floor(Math.random() * takeABreakCfg.motivationalImgs.length)
+          ]
+        : '';
+
       win.setAlwaysOnTop(true, 'floating');
       win.setVisibleOnAllWorkspaces(true);
       win.setFullScreenable(false);
@@ -38,9 +44,9 @@ export const initFullScreenBlocker = (IS_DEV: boolean): void => {
           protocol: 'file:',
           slashes: true,
         }) +
-          `#msg=${encodeURI(msg)}&img=${encodeURI(
-            takeABreakCfg.motivationalImg || '',
-          )}&time=${takeABreakCfg.timedFullScreenBlockerDuration}`,
+          `#msg=${encodeURI(msg)}&img=${encodeURI(randomImgUrl)}&time=${
+            takeABreakCfg.timedFullScreenBlockerDuration
+          }`,
       );
 
       const closeTimeout = setTimeout(() => {

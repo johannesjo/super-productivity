@@ -31,7 +31,6 @@ export const TAKE_A_BREAK_FORM_CFG: ConfigFormSection<TakeABreakConfig> = {
     {
       key: 'isFocusWindow',
       type: 'checkbox',
-      // hideExpression: (model: any) => model.isTimedFullScreenBlocker,
       templateOptions: {
         label: T.GCF.TAKE_A_BREAK.IS_FOCUS_WINDOW,
       },
@@ -41,6 +40,7 @@ export const TAKE_A_BREAK_FORM_CFG: ConfigFormSection<TakeABreakConfig> = {
       key: 'timedFullScreenBlockerDuration',
       type: 'duration',
       templateOptions: {
+        required: true,
         isAllowSeconds: true,
         label: T.GCF.TAKE_A_BREAK.FULL_SCREEN_BLOCKER_DURATION,
         description: T.G.DURATION_DESCRIPTION,
@@ -49,7 +49,7 @@ export const TAKE_A_BREAK_FORM_CFG: ConfigFormSection<TakeABreakConfig> = {
     {
       key: 'takeABreakMinWorkingTime',
       type: 'duration',
-      hideExpression: '!model.isTakeABreakEnabled',
+      expressionProperties: { 'templateOptions.required': 'model.isTakeABreakEnabled' },
       templateOptions: {
         label: T.GCF.TAKE_A_BREAK.MIN_WORKING_TIME,
         required: true,
@@ -59,7 +59,7 @@ export const TAKE_A_BREAK_FORM_CFG: ConfigFormSection<TakeABreakConfig> = {
     {
       key: 'takeABreakSnoozeTime',
       type: 'duration',
-      hideExpression: '!model.isTakeABreakEnabled',
+      expressionProperties: { 'templateOptions.required': 'model.isTakeABreakEnabled' },
       templateOptions: {
         label: T.GCF.TAKE_A_BREAK.SNOOZE_TIME,
         required: true,
@@ -69,17 +69,45 @@ export const TAKE_A_BREAK_FORM_CFG: ConfigFormSection<TakeABreakConfig> = {
     {
       key: 'takeABreakMessage',
       type: 'textarea',
-      hideExpression: '!model.isTakeABreakEnabled',
+      expressionProperties: { 'templateOptions.required': 'model.isTakeABreakEnabled' },
       templateOptions: {
         label: T.GCF.TAKE_A_BREAK.MESSAGE,
       },
     },
     {
-      key: 'motivationalImg',
-      type: 'input',
-      hideExpression: '!model.isTakeABreakEnabled',
+      type: 'tpl',
+      className: 'tpl',
       templateOptions: {
-        label: T.GCF.TAKE_A_BREAK.MOTIVATIONAL_IMG,
+        tag: 'h3',
+        class: 'sub-section-heading',
+        // text: T.GCF.KEYBOARD.APP_WIDE_SHORTCUTS,
+        // text: 'Motivational Images',
+        text: T.GCF.TAKE_A_BREAK.MOTIVATIONAL_IMG,
+      },
+    },
+    {
+      key: 'motivationalImgs',
+      expressionProperties: { 'templateOptions.required': 'model.isTakeABreakEnabled' },
+      type: 'repeat',
+      templateOptions: {
+        // addText: T.F.SIMPLE_COUNTER.FORM.ADD_NEW,
+        addText: 'Add motivational image',
+        required: true,
+      },
+      fieldArray: {
+        defaultValue: 'XXXXX1',
+        type: 'input',
+        expressionProperties: {
+          'templateOptions.label': '"Fruitname " + field.key',
+        },
+        templateOptions: {
+          defaultValue: 'AAAAAAAA',
+          required: true,
+          placeholder: T.GCF.TAKE_A_BREAK.MOTIVATIONAL_IMG,
+          type: 'url',
+          // change: (...args) => console.log(args),
+          keypress: (...args) => console.log(args),
+        },
       },
     },
   ],

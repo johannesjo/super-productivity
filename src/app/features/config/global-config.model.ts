@@ -43,7 +43,7 @@ export type TakeABreakConfig = Readonly<{
   takeABreakMessage: string;
   takeABreakMinWorkingTime: number;
   takeABreakSnoozeTime: number;
-  motivationalImg: string | null;
+  motivationalImgs: string[];
 }>;
 
 export type PomodoroConfig = Readonly<{

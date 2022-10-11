@@ -246,7 +246,13 @@ export class TakeABreakService {
           label: T.F.TIME_TRACKING.B.SNOOZE,
           fn: () => this.snooze(cfg.takeABreak.takeABreakSnoozeTime),
         },
-        img: cfg.takeABreak.motivationalImg || undefined,
+        img:
+          // random image
+          cfg.takeABreak.motivationalImgs.length
+            ? cfg.takeABreak.motivationalImgs[
+                Math.floor(Math.random() * cfg.takeABreak.motivationalImgs.length)
+              ]
+            : undefined,
       });
     });
   }
