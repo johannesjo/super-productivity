@@ -5,7 +5,11 @@ import {
   SimpleCounterType,
 } from '../../simple-counter/simple-counter.model';
 import { T } from '../../../t.const';
-import { SIMPLE_COUNTER_TRIGGER_ACTIONS } from '../../simple-counter/simple-counter.const';
+import {
+  EMPTY_SIMPLE_COUNTER,
+  SIMPLE_COUNTER_TRIGGER_ACTIONS,
+} from '../../simple-counter/simple-counter.const';
+import { nanoid } from 'nanoid';
 
 export const SIMPLE_COUNTER_FORM: ConfigFormSection<SimpleCounterConfig> = {
   title: T.F.SIMPLE_COUNTER.FORM.TITLE,
@@ -18,6 +22,11 @@ export const SIMPLE_COUNTER_FORM: ConfigFormSection<SimpleCounterConfig> = {
       type: 'repeat',
       templateOptions: {
         addText: T.F.SIMPLE_COUNTER.FORM.ADD_NEW,
+        getInitialValue: () => ({
+          ...EMPTY_SIMPLE_COUNTER,
+          id: nanoid(),
+          isEnabled: true,
+        }),
       },
       fieldArray: {
         fieldGroup: [
