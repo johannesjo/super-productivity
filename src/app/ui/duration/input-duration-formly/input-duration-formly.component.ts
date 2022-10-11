@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { FieldType } from '@ngx-formly/material';
+import { FormlyFieldConfig } from '@ngx-formly/core';
 
 @Component({
   selector: 'input-duration-formly',
@@ -7,6 +8,6 @@ import { FieldType } from '@ngx-formly/material';
   styleUrls: ['./input-duration-formly.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class InputDurationFormlyComponent extends FieldType {
+export class InputDurationFormlyComponent extends FieldType<FormlyFieldConfig> {
   // @ViewChild(MatInput, {static: true}) formFieldControl?: MatInput;
 }

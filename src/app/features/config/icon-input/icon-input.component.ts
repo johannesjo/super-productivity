@@ -3,6 +3,7 @@ import { FieldType } from '@ngx-formly/material';
 import { MATERIAL_ICONS } from '../../../ui/material-icons.const';
 import { Observable } from 'rxjs';
 import { filter, map, startWith } from 'rxjs/operators';
+import { FormlyFieldConfig } from '@ngx-formly/core';
 
 @Component({
   selector: 'icon-input',
@@ -10,7 +11,7 @@ import { filter, map, startWith } from 'rxjs/operators';
   styleUrls: ['./icon-input.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class IconInputComponent extends FieldType implements OnInit {
+export class IconInputComponent extends FieldType<FormlyFieldConfig> implements OnInit {
   // @ViewChild(MatInput) formFieldControl: MatInput;
 
   customIcons: string[] = MATERIAL_ICONS;
@@ -21,8 +22,6 @@ export class IconInputComponent extends FieldType implements OnInit {
   }
 
   ngOnInit(): void {
-    super.ngOnInit();
-
     this.filteredIcons$ = this.formControl.valueChanges.pipe(
       startWith(''),
       filter((searchTerm) => !!searchTerm),
