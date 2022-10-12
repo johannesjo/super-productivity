@@ -58,6 +58,11 @@ export const initFullScreenBlocker = (IS_DEV: boolean): void => {
         }
         isFullScreenWindowOpen = false;
       });
+      // prevent closing via alt f4 and all other keys
+      win.webContents.on('before-input-event', (event, input) => {
+        event.preventDefault();
+        // if (input.code == 'F4' && input.alt) event.preventDefault();
+      });
     },
   );
 };
