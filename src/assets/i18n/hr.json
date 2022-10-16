@@ -150,13 +150,13 @@
         "IS_SEARCH_ISSUES_FROM_GITEA": "Prikaži git probleme kao prijedloge prilikom dodavanja novih zadataka",
         "HOST": "Host računalo (npr.: https://try.gitea.io)",
         "TOKEN": "Token za pristup",
-        "TOKEN_DESCRIPTION": "Potreban je za pristup privatnom repozitoriju"
+        "TOKEN_DESCRIPTION": "Potreban je za pristup privatnom repozitoriju",
         "REPO_FULL_NAME": "Korisničko ime ili ime organizacije/projekta",
         "REPO_FULL_NAME_DESCRIPTION": "Može se pronaći kao dio url-a prilikom pregledavanja projekta u pregledniku.",
         "SCOPE": "Opseg",
         "SCOPE_ALL": "Sve",
         "SCOPE_ASSIGNED": "Dodijeljeno meni",
-        "SCOPE_CREATED": "Od mene stvoreno",
+        "SCOPE_CREATED": "Od mene stvoreno"
       },
       "FORM_SECTION": {
         "HELP": "<p>Ovdje možeš konfigurirati „Super produktivnost” za prikaz popisa nezavršenih Gitea problema za određeni repozitorij na ploči za stvaranje zadataka u prikazu dnevnog planiranja. U popisu će se ti problemi navesti kao prijedlozi s poveznicom na problem te s daljnjim informacija o problemu.</p> <p>Osim toga, sve neriješene probleme možeš automatski dodati i sinkronizirati u svoje odlagalište zadataka.</p><p>Za dobivanje ograničenja korištenja i za pristupanje možeš navesti token za pristup.",
@@ -218,7 +218,7 @@
         "IS_AUTO_POLL": "Automatski preispitaj uvezene git probleme za promjenama",
         "IS_SEARCH_ISSUES_FROM_GITHUB": "Prikaži git probleme kao prijedloge prilikom dodavanja novih zadataka",
         "REPO": "„korisničko ime/ime repozitorija” za git repozitorij koji želiš pratiti",
-        "TOKEN": "Token za pristup"
+        "TOKEN": "Token za pristup",
         "TOKEN_DESCRIPTION": "Potrebno za pristup privatnom repozitoriju"
       },
       "FORM_SECTION": {
@@ -337,7 +337,7 @@
         "MAP_CUSTOM_FIELDS_INFO": "Nažalost, neki Jira podaci spremaju se u prilagođena polja koja su različita za svaku instalaciju. Ako želiš uključiti ove podatke, moraš odabrati odgovarajuće prilagođeno polje za njih. Trenutačno postoji samo polje bodovanja koja se mora mapirati.",
         "OPEN": "Stanje za pauziranje zadatka",
         "SELECT_ISSUE_FOR_TRANSITIONS": "Učitaj problem za učitavanje dostupnih mogućnosti mijenjanja stanja ili izvršavanja radnji",
-        "STORY_POINTS": "Ime polja bodovanja"
+        "STORY_POINTS": "Ime polja bodovanja",
         "TRANSITION": "Baratanje tranzicijom"
       },
       "DIALOG_CONFIRM_ASSIGNMENT": {
@@ -593,7 +593,7 @@
       },
       "S": {
         "ERR_UNKNOWN": "OpenProject: Nepoznata greška {{statusCode}} {{errorMsg}}. Je li CORS ispravno konfiguriran za poslužitelja?",
-        "POST_TIME_SUCCESS": "OpenProject: Unos vremena uspješno stvoren za {{issueTitle}}"
+        "POST_TIME_SUCCESS": "OpenProject: Unos vremena uspješno stvoren za {{issueTitle}}",
         "TRANSITION": "OpenProject: Zadaj problemu „{{issueKey}}” ime „{{name}}”",
         "TRANSITION_SUCCESS": "OpenProject: Postavi problem {{issueKey}} kao <strong>{{chosenTransition}}</strong>",
         "TRANSITIONS_LOADED": "Prijelazi su učitani. Koristi donje odabire za dodjeljivanje"
@@ -611,11 +611,11 @@
         "SESSION_X_START": "Pomodoro: {{nr}}. sesija je počela!"
       },
       "S": {
-        "SESSION_X_START": "Pomodoro: {{nr}}. sesija je počela!"
+        "SESSION_X_START": "Pomodoro: {{nr}}. sesija je počela!",
         "SESSION_SKIP": "Preskoči Pomodoro sesiju",
         "SESSION_END": "Završi Pomodoro sesiju"
       },
-      "SKIP_BREAK": "Preskoči pauzu"
+      "SKIP_BREAK": "Preskoči pauzu",
       "START_BREAK": "Počni pauzu"
     },
     "PROCRASTINATION": {
@@ -669,8 +669,8 @@
         "SETUP_GIT": "Postavi GitHub integraciju",
         "SETUP_GITLAB": "Postavi GitLab integraciju",
         "SETUP_JIRA": "Postavi Jira integraciju",
-        "SETUP_OPEN_PROJECT": "Postavi OpenProject integraciju"
-        "SETUP_GITEA_PROJECT": "Postavi Gitea integraciju"
+        "SETUP_OPEN_PROJECT": "Postavi OpenProject integraciju",
+        "SETUP_GITEA_PROJECT": "Postavi Gitea integraciju",
         "SETUP_REDMINE_PROJECT": "Postavi Redmine integraciju"
       },
       "FORM_BASIC": {
@@ -789,7 +789,7 @@
         },
         "LOCAL_FILE": {
           "L_SYNC_FILE_PATH": "Staza datoteke sinkronizacije",
-          "L_SYNC_FILE_PATH_DESCRIPTION": "Apsolutna staza do datoteke, koja se treba koristiti za sinkronizaciju (stvorit će se)."
+          "L_SYNC_FILE_PATH_DESCRIPTION": "Apsolutna staza do datoteke, koja se treba koristiti za sinkronizaciju (stvorit će se).",
           "L_SYNC_FILE_PATH_PERMISSION_VALIDATION": "Treba dozvolu za pristup datotekama"
         },
         "L_ENABLE_SYNCING": "Aktiviraj sinkronizaciju",
@@ -1351,7 +1351,7 @@
       "IS_LOCK_SCREEN": "Zaključaj ekran kad dođe vrijeme pauze (samo desktop računala)",
       "MESSAGE": "Poruka za pauziranje",
       "MIN_WORKING_TIME": "Uključi obavijest za pauziranje nakon određenog vremena sprovedenog radom bez pauze",
-      "MOTIVATIONAL_IMG": "Motivacijska slika (web url)",
+      "MOTIVATIONAL_IMGS": "Motivacijska slika (web url)",
       "NOTIFICATION_TITLE": "Pauziraj!",
       "SNOOZE_TIME": "Odgodi mjerenje vremena kad te program zatraži da pauziraš",
       "TITLE": "Podsjetnik za pauzu"

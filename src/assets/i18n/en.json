@@ -1346,6 +1346,7 @@
       "VOLUME": "Volume"
     },
     "TAKE_A_BREAK": {
+      "ADD_NEW_IMG": "Add motivational image",
       "HELP": "<div> <p>Allows you to configure a reoccurring reminder when you have worked for a specified amount of time without taking a break.</p> <p>You can modify the message displayed. ${duration} will be replaced with the time spent without a break.</p> </div>",
       "IS_ENABLED": "Enable take a break reminder",
       "IS_FOCUS_WINDOW": "Focus app window when reminder is active (desktop only)",
@@ -1354,7 +1355,7 @@
       "FULL_SCREEN_BLOCKER_DURATION": "Duration to display the fullscreen window (desktop only)",
       "MESSAGE": "Take a break message",
       "MIN_WORKING_TIME": "Trigger take a break notification after X working without one",
-      "MOTIVATIONAL_IMG": "Motivational image (web url)",
+      "MOTIVATIONAL_IMGS": "Motivational images (use web urls)",
       "NOTIFICATION_TITLE": "Take a break!",
       "SNOOZE_TIME": "Snooze time when prompted to take a break",
       "TITLE": "Break Reminder"

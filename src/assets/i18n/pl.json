@@ -1067,7 +1067,7 @@
       "MESSAGE": "Take a break message",
       "SNOOZE_TIME": "Snooze time when prompted to take a break",
       "MIN_WORKING_TIME": "Trigger take a break notification after X working without one",
-      "MOTIVATIONAL_IMG": "Motivational image (web url)",
+      "MOTIVATIONAL_IMGS": "Motivational image (web url)",
       "TITLE": "Break Reminder"
     },
     "TIMELINE": {

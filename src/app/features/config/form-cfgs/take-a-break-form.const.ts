@@ -80,9 +80,7 @@ export const TAKE_A_BREAK_FORM_CFG: ConfigFormSection<TakeABreakConfig> = {
       templateOptions: {
         tag: 'h3',
         class: 'sub-section-heading',
-        // text: T.GCF.KEYBOARD.APP_WIDE_SHORTCUTS,
-        // text: 'Motivational Images',
-        text: T.GCF.TAKE_A_BREAK.MOTIVATIONAL_IMG,
+        text: T.GCF.TAKE_A_BREAK.MOTIVATIONAL_IMGS,
       },
     },
     {
@@ -90,8 +88,7 @@ export const TAKE_A_BREAK_FORM_CFG: ConfigFormSection<TakeABreakConfig> = {
       expressionProperties: { 'templateOptions.required': 'model.isTakeABreakEnabled' },
       type: 'repeat',
       templateOptions: {
-        // addText: T.F.SIMPLE_COUNTER.FORM.ADD_NEW,
-        addText: 'Add motivational image',
+        addText: T.GCF.TAKE_A_BREAK.ADD_NEW_IMG,
         required: true,
         defaultValue: '',
       },

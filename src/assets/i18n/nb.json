@@ -992,7 +992,7 @@
       "IS_LOCK_SCREEN": "Låseskjerm når en pause er forfalt (kun på skrivebordet)",
       "MESSAGE": "Ta en pause-melding",
       "MIN_WORKING_TIME": "Trigger ta en pause varsel etter X arbeider uten en",
-      "MOTIVATIONAL_IMG": "Motiverende bilde (nettadresse)",
+      "MOTIVATIONAL_IMGS": "Motiverende bilde (nettadresse)",
       "TITLE": "Pausepåminnelse"
     },
     "TRACKING_REMINDER": {

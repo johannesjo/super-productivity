@@ -1148,7 +1148,7 @@
       "IS_LOCK_SCREEN": "休憩時間が来たら画面をロックする（デスクトップのみ）",
       "MESSAGE": "休憩メッセージを受け取る",
       "MIN_WORKING_TIME": "休憩の通知を受け取るまでの時間",
-      "MOTIVATIONAL_IMG": "やる気を起こさせる画像（ウェブのURL）",
+      "MOTIVATIONAL_IMGS": "やる気を起こさせる画像（ウェブのURL）",
       "NOTIFICATION_TITLE": "休憩する！",
       "SNOOZE_TIME": "休憩をとるように促されたときに時間をスヌーズする",
       "TITLE": "休憩リマインダー"

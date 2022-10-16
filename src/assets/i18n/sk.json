@@ -1209,7 +1209,7 @@
       "IS_LOCK_SCREEN": "Lock screen when a break is due (desktop only)",
       "MESSAGE": "Take a break message",
       "MIN_WORKING_TIME": "Trigger take a break notification after X working without one",
-      "MOTIVATIONAL_IMG": "Motivational image (web url)",
+      "MOTIVATIONAL_IMGS": "Motivational image (web url)",
       "NOTIFICATION_TITLE": "Take a break!",
       "SNOOZE_TIME": "Snooze time when prompted to take a break",
       "TITLE": "Break Reminder"

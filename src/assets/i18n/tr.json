@@ -1148,7 +1148,7 @@
       "IS_LOCK_SCREEN": "Bir mola verilmesi gerektiğinde ekranı kilitle (yalnızca masaüstü)",
       "MESSAGE": "Bir ara mesajı al",
       "MIN_WORKING_TIME": "Tetiksiz, X'in bir olmadan çalıştıktan sonra bir mola bildirimi almasını sağlar",
-      "MOTIVATIONAL_IMG": "Motivasyonel resim (web url'si)",
+      "MOTIVATIONAL_IMGS": "Motivasyonel resim (web url'si)",
       "NOTIFICATION_TITLE": "Ara ver!",
       "SNOOZE_TIME": "Mola vermeniz istendiğinde zamanı erteleme",
       "TITLE": "Hatırlatma Arası"

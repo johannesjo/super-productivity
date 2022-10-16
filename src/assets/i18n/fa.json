@@ -1148,7 +1148,7 @@
       "IS_LOCK_SCREEN": "Lock screen when a break is due (desktop only)",
       "MESSAGE": "Take a break message",
       "MIN_WORKING_TIME": "Trigger take a break notification after X working without one",
-      "MOTIVATIONAL_IMG": "تصویر انگیزشی (آدرس اینترنتی)",
+      "MOTIVATIONAL_IMGS": "تصویر انگیزشی (آدرس اینترنتی)",
       "NOTIFICATION_TITLE": "استراحت کن!",
       "SNOOZE_TIME": "زمان استراحت را به تعویق بیندازید",
       "TITLE": "یادآوری استراحت"
