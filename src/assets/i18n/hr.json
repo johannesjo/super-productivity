@@ -168,6 +168,7 @@
         "DESCRIPTION": "Opis",
         "LABELS": "Etikete",
         "MARK_AS_CHECKED": "Označi aktualiziranja kao provjerena",
+        "PROJECT": "Projekt",
         "STATUS": "Stanje",
         "SUMMARY": "Sažetak",
         "WRITE_A_COMMENT": "Zapiši komentar"
@@ -178,7 +179,7 @@
     },
     "REDMINE": {
       "DIALOG_INITIAL": {
-        "TITLE": "Postavi Redmine za projek"
+        "TITLE": "Postavi Redmine za projekt"
       },
       "FORM": {
         "PROJECT_ID": "Identifikator projekta",
@@ -241,7 +242,7 @@
     },
     "GITLAB": {
       "DIALOG_INITIAL": {
-        "TITLE": "Postavi GitLab za projek"
+        "TITLE": "Postavi GitLab za projekt"
       },
       "FORM": {
         "FILTER_USER": "Korisničko ime (npr. za izdvajanje vlastitih promjena)",
@@ -1286,7 +1287,8 @@
       "FA": "Farsi",
       "FR": "Francuski",
       "HR": "Hrvatski",
-      "IT": "Talijansi",
+      "ID": "Indonezijski",
+      "IT": "Talijanski",
       "JA": "Japanski",
       "KO": "Korejski",
       "LABEL": "Odaberi jezik",
@@ -1345,10 +1347,13 @@
       "VOLUME": "Glasnoća"
     },
     "TAKE_A_BREAK": {
+      "ADD_NEW_IMG": "Dodaj motivacijsku sliku",
       "HELP": "<div> <p>Omogućuje konfiguriranje ponavljajućeg podsjetnika kad si radio/la određeno vrijeme bez pauze.</p> <p>Prikazanu poruku možeš promijeniti. ${duration} će se zamijeniti s utrošenim vremenom bez pauze.</p> </div>",
       "IS_ENABLED": "Aktiviraj podsjetnik za pauziranje",
       "IS_FOCUS_WINDOW": "Fokusiraj prozor programa kad je podsjetnik aktivan (samo desktop računala)",
       "IS_LOCK_SCREEN": "Zaključaj ekran kad dođe vrijeme pauze (samo desktop računala)",
+      "IS_FULL_SCREEN_BLOCKER": "Prikaži poruku u cjeloekranskom prozoru (samo desktop računala)",
+      "FULL_SCREEN_BLOCKER_DURATION": "Trajanje prikaza u cjeloekranskom prozoru (samo desktop računala)",
       "MESSAGE": "Poruka za pauziranje",
       "MIN_WORKING_TIME": "Uključi obavijest za pauziranje nakon određenog vremena sprovedenog radom bez pauze",
       "MOTIVATIONAL_IMGS": "Motivacijska slika (web url)",
@@ -1547,7 +1552,7 @@
     "ADD_SOME_TASKS": "Dodaj zadatke za planiranje dana!",
     "COMPLETED_TASKS": "Završeni zadaci",
     "ESTIMATE_REMAINING": "Preostalo procijenjeno vrijeme:",
-    "FINISH_DAY": "Završi dan",
+    "FINISH_DAY": "Završni dan",
     "FINISH_DAY_TOOLTIP": "Evaluiraj dan, premjesti sve obavljene zadatke u arhivu (opcionalno) i/ili planiraj sljedeći dan.",
     "FINISH_DAY_FOR_PROJECT": "Završni dan za ovaj projekt",
     "FINISH_DAY_FOR_TAG": "Završni dan za ovu oznaku",
