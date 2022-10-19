@@ -1,6 +1,10 @@
-@import "mixins/media-queries";
+@import 'mixins/media-queries';
 
 .center-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
   text-align: center;
 }
 
@@ -21,7 +25,6 @@
   @include mq(xs, max) {
     display: none !important;
   }
-
 }
 
 .show-only-on-touch-only {
@@ -46,7 +49,6 @@
   @include mq(sm, max) {
     display: none !important;
   }
-
 }
 
 .show-xs-only {
