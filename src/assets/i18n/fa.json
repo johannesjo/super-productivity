@@ -749,9 +749,9 @@
         "DROP_ATTACHMENT": "Drop here to attach to \"{{title}}\"",
         "EDIT_REMINDER": "ویرایش یادآوری",
         "EDIT_TAGS": "برچسب ها را ویرایش کنید",
-        "MARK_DONE": "Mark as done",
-        "MARK_UNDONE": "Mark as undone",
-        "MOVE_TO_BACKLOG": "Move to backlog",
+        "MARK_DONE": "علامت زدن به عنوان انجام شده",
+        "MARK_UNDONE": "علامت زدن به عنوان انجام نشده",
+        "MOVE_TO_BACKLOG": "انتقال به بک لاگ",
         "MOVE_TO_OTHER_PROJECT": "Move to other Project",
         "MOVE_TO_TODAY": "Move to today's list",
         "OPEN_ATTACH": "Attach file or link",
@@ -833,7 +833,7 @@
         "REMINDER_UPDATED": "Updated reminder for task \"{{title}}\"",
         "TASK_CREATED": "Created task \"{{title}}\""
       },
-      "SELECT_OR_CREATE": "Select or create task",
+      "SELECT_OR_CREATE": "کاری انتخاب و یا ایجاد کنید",
       "SUMMARY_TABLE": {
         "ESTIMATE": "Estimate",
         "SPENT_TODAY": "Spent Today",
@@ -903,16 +903,16 @@
       "D_IDLE": {
         "BREAK": "استراحت",
         "CREATE_AND_TRACK": "<em>Create</em> and track to:",
-        "IDLE_FOR": "You have been idle for:",
+        "IDLE_FOR": "شما به این میزان بیکار بودید:",
         "SIMPLE_CONFIRM_COUNTER_CANCEL": "پرش",
         "SIMPLE_CONFIRM_COUNTER_OK": "مسیر",
         "SIMPLE_COUNTER_CONFIRM_TXT": "شما پرش را انتخاب کرده اید ، اما {{nr}} دکمه (های) شمارنده ساده را فعال کرده اید. آیا می خواهید زمان بیکاری را برای آنها پیگیری کنید؟",
         "SIMPLE_COUNTER_TOOLTIP": "برای ردیابی به {{title}}کلیک کنید",
         "SIMPLE_COUNTER_TOOLTIP_DISABLE": "برای عدم ردیابی به {{title}}کلیک کنید",
-        "SKIP": "Skip",
+        "SKIP": "رد شدن",
         "TASK": "کار",
         "TASK_BREAK": "کار+استراحت",
-        "TRACK_TO": "Track to:"
+        "TRACK_TO": "تایین کنید:"
       },
       "D_TRACKING_REMINDER": {
         "CREATE_AND_TRACK": "<em>ایجاد کنید</em> و پیگیری کنید",
@@ -1070,7 +1070,7 @@
       "TASK_SCHEDULE": "کار برنامه ریزی شده",
       "TASK_SHORTCUTS": "کارها",
       "TASK_SHORTCUTS_INFO": "The following shortcuts apply for the currently selected task (selected via tab or mouse).",
-      "TASK_TOGGLE_ADDITIONAL_INFO_OPEN": "Show/Hide additional task info",
+      "TASK_TOGGLE_ADDITIONAL_INFO_OPEN": "نمایش دادن/پنهان کردن اطلاعات بیشتر در مورد کار",
       "TASK_TOGGLE_DONE": "Toggle Done",
       "TITLE": "میانبرهای صفحه کلید",
       "TOGGLE_BACKLOG": "Show/Hide Task Backlog",
