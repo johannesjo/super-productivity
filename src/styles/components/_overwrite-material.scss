@@ -109,6 +109,7 @@ body .mat-form-field {
   display: flex;
   align-items: center;
   justify-content: center;
+  gap: 5px;
 }
 
 // otherwise it's hard to see when an off-screen element gets focused via tab
