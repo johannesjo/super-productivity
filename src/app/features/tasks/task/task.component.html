@@ -83,6 +83,7 @@
 
     <div class="title-and-left-btns-wrapper">
       <div
+        (click)="focusSelf()"
         [class.handle-par]="!task.parentId"
         [class.handle-sub]="task.parentId"
         class="drag-handle"
