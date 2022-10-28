@@ -155,7 +155,7 @@ interface MyApp extends App {
 
 const appIN: MyApp = app;
 
-// initDebug({ showDevTools: isShowDevTools }, IS_DEV);
+initDebug({ showDevTools: isShowDevTools }, IS_DEV);
 
 // NOTE: opening the folder crashes the mas build
 if (!IS_MAC) {
