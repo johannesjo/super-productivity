@@ -132,7 +132,7 @@
     },
     "GITHUB": {
       "DIALOG_INITIAL": {
-        "TITLE": "Setup GitHub for Project"
+        "TITLE": "Skonfiguruj GitHub dla projektu"
       },
       "FORM": {
         "FILTER_USER": "Username (e.g. to filter out changes by yourself)",
@@ -148,14 +148,14 @@
         "TITLE": "GitHub"
       },
       "ISSUE_CONTENT": {
-        "ASSIGNEE": "Assignee",
+        "ASSIGNEE": "Przypisany",
         "AT": "at",
-        "DESCRIPTION": "Description",
-        "LABELS": "Labels",
-        "MARK_AS_CHECKED": "Mark updates as checked",
+        "DESCRIPTION": "Opis",
+        "LABELS": "Kategorie",
+        "MARK_AS_CHECKED": "Zaznacz zmiany jako sprawdzone",
         "STATUS": "Status",
-        "SUMMARY": "Summary",
-        "WRITE_A_COMMENT": "Write a comment"
+        "SUMMARY": "Podsumowanie",
+        "WRITE_A_COMMENT": "Napisz komentarz"
       },
       "S": {
         "ERR_NETWORK": "GitHub: Request failed because of a client side network error",
