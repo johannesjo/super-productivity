@@ -138,7 +138,7 @@
     "@biesbjerg/ngx-translate-extract": "^7.0.4",
     "@fontsource/roboto": "^4.5.8",
     "@nextcloud/cdav-library": "^1.1.0",
-    "@ngrx/data": "^14.0.2",
+    "@ngrx/data": "^14.3.2",
     "@ngrx/effects": "^14.0.2",
     "@ngrx/entity": "^14.0.2",
     "@ngrx/schematics": "^14.0.2",
