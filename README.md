@@ -119,6 +119,7 @@ Can be used when adding a task.
   (`"task-description 10m"` or `"task-description 5h"`)
 - `+ <project-name>`: add the task to an existing project  
   (`"task-description +Important Project"`)
+- `Ctr + 2`: toggle between moving the new task to the bottom and top of the list
 
 </details>
 
