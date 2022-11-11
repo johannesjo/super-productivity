@@ -9,17 +9,20 @@ export const initFullScreenBlocker = (IS_DEV: boolean): void => {
   ipcMain.on(
     IPC.FULL_SCREEN_BLOCKER,
     (
-      ev,
+      ipcEvent,
       { msg, takeABreakCfg }: { msg: string; takeABreakCfg: TakeABreakConfig },
     ): void => {
       if (isFullScreenWindowOpen) {
         return;
       }
+      let isClosable = false;
       const win = new BrowserWindow({
         title: msg,
         fullscreen: true,
         alwaysOnTop: true,
         transparent: true,
+        skipTaskbar: true,
+        frame: false,
       });
       const randomImgUrl = takeABreakCfg.motivationalImgs.length
         ? takeABreakCfg.motivationalImgs[
@@ -48,20 +51,20 @@ export const initFullScreenBlocker = (IS_DEV: boolean): void => {
             takeABreakCfg.timedFullScreenBlockerDuration
           }`,
       );
-
       const closeTimeout = setTimeout(() => {
+        isClosable = true;
         win.close();
       }, takeABreakCfg.timedFullScreenBlockerDuration || 5000);
-      win.on('close', () => {
-        if (closeTimeout) {
-          clearTimeout(closeTimeout);
+
+      win.on('close', (evI) => {
+        if (isClosable) {
+          if (closeTimeout) {
+            clearTimeout(closeTimeout);
+          }
+          isFullScreenWindowOpen = false;
+        } else {
+          evI.preventDefault();
         }
-        isFullScreenWindowOpen = false;
-      });
-      // prevent closing via alt f4 and all other keys
-      win.webContents.on('before-input-event', (event, input) => {
-        event.preventDefault();
-        // if (input.code == 'F4' && input.alt) event.preventDefault();
       });
     },
   );
