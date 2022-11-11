@@ -12,7 +12,7 @@ import { ipcRenderer, shell } from 'electron';
 })
 export class TaskAttachmentLinkDirective {
   @Input() type?: TaskAttachmentType;
-  @Input() href?: TaskAttachmentType;
+  @Input() href?: string;
 
   constructor(
     private _electronService: ElectronService,
