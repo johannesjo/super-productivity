@@ -6,6 +6,7 @@ import {
   moveToArchive,
   moveToOtherProject,
   restoreTask,
+  scheduleTask,
   updateTask,
   updateTaskTags,
 } from './task.actions';
@@ -21,7 +22,7 @@ import {
   withLatestFrom,
 } from 'rxjs/operators';
 import { PersistenceService } from '../../../core/persistence/persistence.service';
-import { Task, TaskArchive, TaskWithSubTasks } from '../task.model';
+import { Task, TaskArchive, TaskWithSubTasks, TaskReminderOptionId } from '../task.model';
 import { ReminderService } from '../../reminder/reminder.service';
 import { moveTaskInTodayList } from '../../work-context/store/work-context-meta.actions';
 import { taskAdapter } from './task.adapter';
@@ -35,6 +36,7 @@ import { createEmptyEntity } from '../../../util/create-empty-entity';
 import { ProjectService } from '../../project/project.service';
 import { TagService } from '../../tag/tag.service';
 import { shortSyntax } from '../short-syntax.util';
+import { remindOptionToMilliseconds } from '../util/remind-option-to-milliseconds';
 import { environment } from '../../../../environments/environment';
 import { moveProjectTaskToTodayList } from '../../project/store/project.actions';
 import { SnackService } from '../../../core/snack/snack.service';
@@ -197,6 +199,7 @@ export class TaskRelatedModelEffects {
 
         const actions: any[] = [];
         const tagIds: string[] = [...(r.taskChanges.tagIds || task.tagIds)];
+        const { taskChanges } = r;
 
         actions.push(
           updateTask({
@@ -206,6 +209,16 @@ export class TaskRelatedModelEffects {
             },
           }),
         );
+        if (taskChanges.plannedAt && !taskChanges.reminderId) {
+          const { plannedAt } = taskChanges;
+          const schedule = scheduleTask({
+            task,
+            plannedAt,
+            remindAt: remindOptionToMilliseconds(plannedAt, TaskReminderOptionId.AtStart),
+            isMoveToBacklog: false,
+          });
+          actions.push(schedule);
+        }
         if (r.projectId && r.projectId !== task.projectId && !task.parentId) {
           if (task.repeatCfgId) {
             this._snackService.open({
