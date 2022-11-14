@@ -69,7 +69,11 @@ export const shortSyntax = (
 
   // NOTE: we do this twice... :-O ...it's weird, but required to make whitespaces work as separator and not as one
   taskChanges = parseTimeSpentChanges(task);
-
+  const changesForScheduledDate = parseScheduledDate(task);
+  taskChanges = {
+    ...taskChanges,
+    ...changesForScheduledDate,
+  };
   const changesForProject = parseProjectChanges(
     { ...task, title: taskChanges.title || task.title },
     allProjects,
