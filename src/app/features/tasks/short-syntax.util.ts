@@ -68,6 +68,11 @@ export const shortSyntax = (
   let taskChanges: Partial<TaskCopy>;
 
   taskChanges = parseTimeSpentChanges(task);
+  const changesForScheduledDate = parseScheduledDate(task);
+  taskChanges = {
+    ...taskChanges,
+    ...changesForScheduledDate,
+  };
   const changesForProject = parseProjectChanges(
     { ...task, title: taskChanges.title || task.title },
     allProjects,
