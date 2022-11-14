@@ -241,6 +241,35 @@ const parseTagChanges = (
   };
 };
 
+const parseScheduledDate = (task: Partial<TaskCopy>): Partial<Task> => {
+  if (!task.title) {
+    return {};
+  }
+  const now = new Date();
+  // TODO: There's an option in Chrono that allows date to be forward into the future
+  // Currently, however, it only works when the input date doesn't contain time
+  const parsedDateArr = customDateParser.parse(task.title);
+  if (parsedDateArr.length) {
+    const parsedDateResult = parsedDateArr[0];
+    const start = parsedDateResult.start;
+    let plannedAt = start.date().getTime();
+    // If user doesn't explicitly enter time, set the scheduled date
+    // to 23:59:59 of the given day
+    if (!start.isCertain('hour')) {
+      plannedAt = start.date().setHours(23, 59, 59);
+    } else if (start.date().getTime() < now.getTime()) {
+      plannedAt = start.date().setDate(start.date().getDate() + 1);
+      console.log('Resolved date: ', new Date(plannedAt));
+    }
+    const inputDate = parsedDateResult.text;
+    return {
+      plannedAt,
+      title: task.title.replace(inputDate, ''),
+    };
+  }
+  return {};
+};
+
 const parseTimeSpentChanges = (task: Partial<TaskCopy>): Partial<Task> => {
   if (!task.title) {
     return {};
