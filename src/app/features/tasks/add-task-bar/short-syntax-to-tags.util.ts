@@ -65,7 +65,51 @@ export const shortSyntaxToTags = ({
       icon: 'timer',
     });
   }
-
+  if (r.taskChanges.plannedAt) {
+    let displayedDayStr: string;
+    const { plannedAt } = r.taskChanges;
+    const plannedDate = new Date(plannedAt);
+    const hour = plannedDate.getHours();
+    const minute = plannedDate.getMinutes();
+    const hh = hour < 10 ? `0${hour}` : hour.toString();
+    const mm = minute < 10 ? `0${minute}` : minute.toString();
+    const displayedTimeStr = `${hh}:${mm}`;
+    const today = new Date();
+    const tomorrow = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1);
+    // Check if the scheduled date is today
+    if (
+      today.getFullYear() === plannedDate.getFullYear() &&
+      today.getMonth() === plannedDate.getMonth() &&
+      today.getDate() === plannedDate.getDate()
+    ) {
+      displayedDayStr = `Today`;
+    }
+    // Check if the scheduled date is tomorrow
+    else if (
+      tomorrow.getFullYear() === plannedDate.getFullYear() &&
+      tomorrow.getMonth() === plannedDate.getMonth() &&
+      tomorrow.getDate() === plannedDate.getDate()
+    ) {
+      displayedDayStr = `Tomorrow`;
+    } else {
+      const weekdays = [
+        'Sunday',
+        'Monday',
+        'Tuesday',
+        'Wednesday',
+        'Thursday',
+        'Friday',
+        'Saturday',
+      ];
+      displayedDayStr = `${weekdays[plannedDate.getDay()]}`;
+    }
+    const displayedDateStr = `${displayedDayStr} ${displayedTimeStr}`;
+    shortSyntaxTags.push({
+      title: displayedDateStr,
+      color: defaultColor,
+      icon: 'event',
+    });
+  }
   // if(due){
   //   shortSyntaxTags.push({
   //     // title: tag.title,
