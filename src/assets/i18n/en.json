@@ -168,6 +168,7 @@
         "DESCRIPTION": "Description",
         "LABELS": "Labels",
         "MARK_AS_CHECKED": "Mark updates as checked",
+        "PROJECT": "Project",
         "STATUS": "Status",
         "SUMMARY": "Summary",
         "WRITE_A_COMMENT": "Write a comment"
@@ -1286,6 +1287,7 @@
       "FA": "Farsi",
       "FR": "French",
       "HR": "Croatian",
+      "ID": "Indonesian",
       "IT": "Italian",
       "JA": "Japanese",
       "KO": "Korean",
@@ -1345,13 +1347,16 @@
       "VOLUME": "Volume"
     },
     "TAKE_A_BREAK": {
+      "ADD_NEW_IMG": "Add motivational image",
       "HELP": "<div> <p>Allows you to configure a reoccurring reminder when you have worked for a specified amount of time without taking a break.</p> <p>You can modify the message displayed. ${duration} will be replaced with the time spent without a break.</p> </div>",
       "IS_ENABLED": "Enable take a break reminder",
       "IS_FOCUS_WINDOW": "Focus app window when reminder is active (desktop only)",
       "IS_LOCK_SCREEN": "Lock screen when a break is due (desktop only)",
+      "IS_FULL_SCREEN_BLOCKER": "Display message in fullscreen window (desktop only)",
+      "FULL_SCREEN_BLOCKER_DURATION": "Duration to display the fullscreen window (desktop only)",
       "MESSAGE": "Take a break message",
       "MIN_WORKING_TIME": "Trigger take a break notification after X working without one",
-      "MOTIVATIONAL_IMG": "Motivational image (web url)",
+      "MOTIVATIONAL_IMGS": "Motivational images (use web urls)",
       "NOTIFICATION_TITLE": "Take a break!",
       "SNOOZE_TIME": "Snooze time when prompted to take a break",
       "TITLE": "Break Reminder"
@@ -1359,7 +1364,7 @@
     "TIMELINE": {
       "CAL_PROVIDERS": "Calendar providers (experimental and optional)",
       "CAL_PROVIDERS_ADD": "Add ical source",
-      "CAL_PROVIDERS_INFO": "You can optionally configure the timeline to also load and display data from iCal (e.g. Google Calendar).",
+      "CAL_PROVIDERS_INFO": "You can optionally configure the timeline to also load and display data from iCal (e.g. <a href=\"https://support.google.com/calendar/answer/37648?hl=en#zippy=%2Csync-your-google-calendar-view-edit%2Cget-your-calendar-view-only\">Google Calendar</a>).",
       "HELP": "The timeline feature should provide you with a quick overview over how your planned tasks play out over time. You can find it in the left hand menu under <a href='#/timeline'>'Timeline'</a>. ",
       "L_CAL_PATH": "Url/File path for calendar ICAL (optional)",
       "L_IS_WORK_START_END_ENABLED": "Limit unscheduled task flow to specific work times",

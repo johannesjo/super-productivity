@@ -210,6 +210,16 @@ export class TakeABreakService {
         title: T.GCF.TAKE_A_BREAK.NOTIFICATION_TITLE,
         body: msg,
       });
+
+      if (IS_ELECTRON && cfg.takeABreak.isTimedFullScreenBlocker) {
+        (this._electronService.ipcRenderer as typeof ipcRenderer).send(
+          IPC.FULL_SCREEN_BLOCKER,
+          {
+            msg,
+            takeABreakCfg: cfg.takeABreak,
+          },
+        );
+      }
     });
 
     this._triggerBanner$.subscribe(([timeWithoutBreak, cfg]) => {
@@ -236,7 +246,13 @@ export class TakeABreakService {
           label: T.F.TIME_TRACKING.B.SNOOZE,
           fn: () => this.snooze(cfg.takeABreak.takeABreakSnoozeTime),
         },
-        img: cfg.takeABreak.motivationalImg || undefined,
+        img:
+          // random image
+          cfg.takeABreak.motivationalImgs.length
+            ? cfg.takeABreak.motivationalImgs[
+                Math.floor(Math.random() * cfg.takeABreak.motivationalImgs.length)
+              ]
+            : undefined,
       });
     });
   }

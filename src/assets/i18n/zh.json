@@ -1236,7 +1236,7 @@
       "IS_LOCK_SCREEN": "休息时间到时锁定屏幕（仅限桌面）",
       "MESSAGE": "休息一下",
       "MIN_WORKING_TIME": "触发休息提醒的工作时长",
-      "MOTIVATIONAL_IMG": "励志图片（网址）",
+      "MOTIVATIONAL_IMGS": "励志图片（网址）",
       "NOTIFICATION_TITLE": "休息一下！",
       "SNOOZE_TIME": "提示休息时暂停时间",
       "TITLE": "休息提醒"

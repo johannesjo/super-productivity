@@ -25,6 +25,8 @@ export const migrateGlobalConfigState = (
 
   globalConfigState = _migrateSyncCfg(globalConfigState);
 
+  globalConfigState = _migrateMotivationalImg(globalConfigState);
+
   globalConfigState = _fixDefaultProjectId(globalConfigState);
 
   // NOTE: absolutely needs to come last as otherwise the previous defaults won't work
@@ -135,6 +137,31 @@ const _migrateUndefinedShortcutsToNull = (
   return {
     ...config,
     keyboard: keyboardCopy,
+  };
+};
+
+const _migrateMotivationalImg = (config: GlobalConfigState): GlobalConfigState => {
+  const takeABreakCopy: TakeABreakConfig = {
+    // also add new keys
+    ...DEFAULT_GLOBAL_CONFIG.takeABreak,
+    ...config.takeABreak,
+  };
+
+  if (!takeABreakCopy.motivationalImgs) {
+    (takeABreakCopy as any).motivationalImgs = [];
+  }
+  if ((takeABreakCopy as any).motivationalImg) {
+    if (!takeABreakCopy.motivationalImgs.length) {
+      (takeABreakCopy as any).motivationalImgs = [
+        (takeABreakCopy as any).motivationalImg,
+      ];
+    }
+    delete (takeABreakCopy as any).motivationalImg;
+  }
+
+  return {
+    ...config,
+    takeABreak: takeABreakCopy,
   };
 };
 

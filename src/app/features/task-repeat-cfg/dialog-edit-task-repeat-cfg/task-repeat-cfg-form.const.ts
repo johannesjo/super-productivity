@@ -14,7 +14,7 @@ const updateParent = (
   field.form?.patchValue({
     // ...field.parent.model,
     ...changes,
-  });
+  } as any);
 };
 
 export const TASK_REPEAT_CFG_FORM_CFG_BEFORE_TAGS: FormlyFieldConfig[] = [

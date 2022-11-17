@@ -119,6 +119,7 @@ Can be used when adding a task.
   (`"task-description 10m"` or `"task-description 5h"`)
 - `+ <project-name>`: add the task to an existing project  
   (`"task-description +Important Project"`)
+- `Ctr + 2`: toggle between moving the new task to the bottom and top of the list
 
 </details>
 
@@ -141,6 +142,7 @@ Due to certification issues it's recommended to download the app from the Micros
 <a href='//www.microsoft.com/store/apps/9nhfvg8361tw?cid=storebadge&ocid=badge'><img src='https://developer.microsoft.com/store/badges/images/English_get-it-from-MS.png' alt='English badge' width="127" height="52"/></a>
 
 You can also install the app using [Chocolatey](https://community.chocolatey.org/packages/super-productivity):
+
 ```powershell
 choco install super-productivity
 ```
@@ -148,7 +150,9 @@ choco install super-productivity
 ### Linux
 
 #### Snap - Most distributions
+
 Install via command-line:
+
 ```bash
 # stable
 sudo snap install superproductivity
@@ -159,6 +163,7 @@ sudo snap install --channel=edge superproductivity
 # it is also recommended to disable updates to the app while it is running:
 sudo snap set core experimental.refresh-app-awareness=true
 ```
+
 <a href="https://snapcraft.io/superproductivity">
   <img alt="Get it from the Snap Store" src="https://snapcraft.io/static/images/badges/en/snap-store-black.svg" />
 </a>
@@ -284,11 +289,11 @@ For the desktop version automatic backups are stored per default in the `backup`
 
 Where user data is stored differs from os to os. The most common locations are:
 
-| OS | Location |
-| - | - |
-| **Mac OS** | `~/Library/Application Support/superProductivity/` |
+| OS          | Location                                                                                        |
+| ----------- | ----------------------------------------------------------------------------------------------- |
+| **Mac OS**  | `~/Library/Application Support/superProductivity/`                                              |
 | **Windows** | `C:\Users\<YOUR_USER_NAME>\AppData\Roaming\superProductivity/` or `%APPDATA%\superProductivity` |
-| **Linux** | `~/.config/superProductivity/` |
+| **Linux**   | `~/.config/superProductivity/`                                                                  |
 
 The path should be shown when you go to the "Automatic Backups` section on the configuration page (minus the "backup" sub folder). You can also see it printed out when you start the app from the command line.
 

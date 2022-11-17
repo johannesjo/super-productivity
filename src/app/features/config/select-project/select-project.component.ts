@@ -3,6 +3,7 @@ import { FieldType } from '@ngx-formly/material';
 import { ProjectService } from '../../project/project.service';
 import { Project } from '../../project/project.model';
 import { T } from 'src/app/t.const';
+import { FormlyFieldConfig } from '@ngx-formly/core';
 
 @Component({
   selector: 'select-project',
@@ -10,7 +11,7 @@ import { T } from 'src/app/t.const';
   styleUrls: ['./select-project.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class SelectProjectComponent extends FieldType {
+export class SelectProjectComponent extends FieldType<FormlyFieldConfig> {
   T: typeof T = T;
 
   constructor(public projectService: ProjectService) {

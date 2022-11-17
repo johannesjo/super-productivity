@@ -153,11 +153,9 @@ export class JiraCommonInterfacesService implements IssueServiceInterface {
   }
 
   getMappedAttachments(issueData: JiraIssue): TaskAttachment[] {
-    return (
-      issueData &&
-      issueData.attachments &&
-      issueData.attachments.map(mapJiraAttachmentToAttachment)
-    );
+    return issueData?.attachments?.length
+      ? issueData.attachments.map(mapJiraAttachmentToAttachment)
+      : [];
   }
 
   private _getCfgOnce$(projectId: string): Observable<JiraCfg> {

@@ -25,7 +25,7 @@
         <img
           (error)="isError[i]=true"
           [enlargeImg]="attachment.originalImgPath"
-          [src]="attachment.path"
+          [src]="attachment.originalImgPath||attachment.path"
         />
       </ng-container>
     </a>

@@ -38,6 +38,7 @@ import {
   writeFileSync,
 } from 'fs';
 import { exec } from 'child_process';
+import { initFullScreenBlocker } from './full-screen-blocker';
 
 initialize();
 
@@ -202,6 +203,7 @@ appIN.on('certificate-error', (event, webContents, url, err, certificate, callba
 appIN.on('ready', createMainWin);
 appIN.on('ready', () => initBackupAdapter(BACKUP_DIR));
 appIN.on('ready', () => initLocalFileSyncAdapter());
+appIN.on('ready', () => initFullScreenBlocker(IS_DEV));
 
 if (!isDisableTray) {
   appIN.on('ready', createIndicator);

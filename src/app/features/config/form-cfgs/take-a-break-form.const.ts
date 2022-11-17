@@ -22,6 +22,13 @@ export const TAKE_A_BREAK_FORM_CFG: ConfigFormSection<TakeABreakConfig> = {
       },
     },
     {
+      key: 'isTimedFullScreenBlocker',
+      type: 'checkbox',
+      templateOptions: {
+        label: T.GCF.TAKE_A_BREAK.IS_FULL_SCREEN_BLOCKER,
+      },
+    },
+    {
       key: 'isFocusWindow',
       type: 'checkbox',
       templateOptions: {
@@ -29,9 +36,20 @@ export const TAKE_A_BREAK_FORM_CFG: ConfigFormSection<TakeABreakConfig> = {
       },
     },
     {
+      hideExpression: (model: any) => !model.isTimedFullScreenBlocker,
+      key: 'timedFullScreenBlockerDuration',
+      type: 'duration',
+      templateOptions: {
+        required: true,
+        isAllowSeconds: true,
+        label: T.GCF.TAKE_A_BREAK.FULL_SCREEN_BLOCKER_DURATION,
+        description: T.G.DURATION_DESCRIPTION,
+      },
+    },
+    {
       key: 'takeABreakMinWorkingTime',
       type: 'duration',
-      hideExpression: '!model.isTakeABreakEnabled',
+      expressionProperties: { 'templateOptions.required': 'model.isTakeABreakEnabled' },
       templateOptions: {
         label: T.GCF.TAKE_A_BREAK.MIN_WORKING_TIME,
         required: true,
@@ -41,7 +59,7 @@ export const TAKE_A_BREAK_FORM_CFG: ConfigFormSection<TakeABreakConfig> = {
     {
       key: 'takeABreakSnoozeTime',
       type: 'duration',
-      hideExpression: '!model.isTakeABreakEnabled',
+      expressionProperties: { 'templateOptions.required': 'model.isTakeABreakEnabled' },
       templateOptions: {
         label: T.GCF.TAKE_A_BREAK.SNOOZE_TIME,
         required: true,
@@ -51,17 +69,31 @@ export const TAKE_A_BREAK_FORM_CFG: ConfigFormSection<TakeABreakConfig> = {
     {
       key: 'takeABreakMessage',
       type: 'textarea',
-      hideExpression: '!model.isTakeABreakEnabled',
+      expressionProperties: { 'templateOptions.required': 'model.isTakeABreakEnabled' },
       templateOptions: {
         label: T.GCF.TAKE_A_BREAK.MESSAGE,
       },
     },
     {
-      key: 'motivationalImg',
-      type: 'input',
-      hideExpression: '!model.isTakeABreakEnabled',
+      type: 'tpl',
+      className: 'tpl',
       templateOptions: {
-        label: T.GCF.TAKE_A_BREAK.MOTIVATIONAL_IMG,
+        tag: 'h3',
+        class: 'sub-section-heading',
+        text: T.GCF.TAKE_A_BREAK.MOTIVATIONAL_IMGS,
+      },
+    },
+    {
+      key: 'motivationalImgs',
+      expressionProperties: { 'templateOptions.required': 'model.isTakeABreakEnabled' },
+      type: 'repeat',
+      templateOptions: {
+        addText: T.GCF.TAKE_A_BREAK.ADD_NEW_IMG,
+        required: true,
+        defaultValue: '',
+      },
+      fieldArray: {
+        type: 'input',
       },
     },
   ],

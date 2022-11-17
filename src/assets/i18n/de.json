@@ -1227,7 +1227,7 @@
       "IS_LOCK_SCREEN": "Bildschirm sperren, wenn eine Pause fällig ist (nur Desktop)",
       "MESSAGE": "'Mach eine Pause'-Nachricht",
       "MIN_WORKING_TIME": "Pausenbenachrichtigung senden, nachdem man X ohne eine gearbeitet hat",
-      "MOTIVATIONAL_IMG": "Motivationsbild (Web-URL)",
+      "MOTIVATIONAL_IMGS": "Motivationsbild (Web-URL)",
       "NOTIFICATION_TITLE": "Machen Sie eine Pause!",
       "SNOOZE_TIME": "Schlummern, wenn Sie aufgefordert werden, eine Pause einzulegen",
       "TITLE": "Pausenerinnerung"

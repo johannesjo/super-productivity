@@ -1,0 +1,98 @@
+<html>
+  <head>
+    <style>
+      #container {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        max-width: 1200px;
+        transform: translate(-50%, -50%);
+        font-family: 'Roboto', 'Comic Sans MS', sans-serif;
+        font-size: 28px;
+        z-index: 2;
+      }
+
+      img {
+        display: block;
+        margin: auto;
+        margin-bottom: 20px;
+        max-width: 100%;
+        max-height: 70vw;
+      }
+
+      #msg {
+        text-align: center;
+        max-width: 1200px;
+        padding: 16px;
+        margin: auto;
+      }
+
+      html,
+      body {
+        background: transparent;
+      }
+
+      #bg {
+        position: absolute;
+        top: 0;
+        right: 0;
+        left: 0;
+        bottom: 0;
+        opacity: 0;
+        transition: opacity 500ms linear;
+      }
+
+      @media (prefers-color-scheme: dark) {
+        body {
+          color: rgb(235, 235, 235);
+        }
+
+        #bg {
+          background: rgb(18, 18, 18);
+        }
+      }
+
+      @media (prefers-color-scheme: light) {
+        body {
+          color: rgb(44, 44, 44);
+        }
+
+        #bg {
+          background: rgb(250, 250, 250);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="bg">
+      <div id="container">
+        <div id="msg">MSG</div>
+      </div>
+    </div>
+  </body>
+
+  <script>
+    const hashObj = window.location.hash
+      .replace('#', '')
+      .split('&')
+      .map((v) => v.split('='))
+      .reduce((pre, [key, value]) => ({ ...pre, [key]: value }), {});
+    const msg = hashObj.msg;
+    document.getElementById('msg').innerHTML = decodeURI(msg);
+    const imgUrl = hashObj.img;
+    const time = hashObj.time;
+
+    window.setTimeout(() => {
+      document.getElementById('bg').style.opacity = '1';
+    });
+    window.setTimeout(() => {
+      document.getElementById('bg').style.opacity = '0';
+    }, time - 700);
+
+    if (imgUrl) {
+      const img = document.createElement('img');
+      img.src = imgUrl;
+      document.getElementById('container').prepend(img);
+    }
+  </script>
+</html>

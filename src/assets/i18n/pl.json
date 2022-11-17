@@ -132,7 +132,7 @@
     },
     "GITHUB": {
       "DIALOG_INITIAL": {
-        "TITLE": "Setup GitHub for Project"
+        "TITLE": "Skonfiguruj GitHub dla projektu"
       },
       "FORM": {
         "FILTER_USER": "Username (e.g. to filter out changes by yourself)",
@@ -148,14 +148,14 @@
         "TITLE": "GitHub"
       },
       "ISSUE_CONTENT": {
-        "ASSIGNEE": "Assignee",
+        "ASSIGNEE": "Przypisany",
         "AT": "at",
-        "DESCRIPTION": "Description",
-        "LABELS": "Labels",
-        "MARK_AS_CHECKED": "Mark updates as checked",
+        "DESCRIPTION": "Opis",
+        "LABELS": "Kategorie",
+        "MARK_AS_CHECKED": "Zaznacz zmiany jako sprawdzone",
         "STATUS": "Status",
-        "SUMMARY": "Summary",
-        "WRITE_A_COMMENT": "Write a comment"
+        "SUMMARY": "Podsumowanie",
+        "WRITE_A_COMMENT": "Napisz komentarz"
       },
       "S": {
         "ERR_NETWORK": "GitHub: Request failed because of a client side network error",
@@ -175,14 +175,14 @@
     },
     "GITLAB": {
       "DIALOG_INITIAL": {
-        "TITLE": "Setup GitLab for Project"
+        "TITLE": "Skonfiguruj GitLab dla projektu"
       },
       "FORM": {
         "FILTER_USER": "Username (e.g. to filter out changes by yourself)",
         "GITLAB_BASE_URL": "Custom GitLab base URL",
-        "IS_AUTO_ADD_TO_BACKLOG": "Automatically add unresolved issues from GitLab to backlog",
+        "IS_AUTO_ADD_TO_BACKLOG": "Automatycznie dodaj niezrobione zadania GitLab do backlogu",
         "IS_AUTO_POLL": "Automatically poll imported git issues for changes",
-        "IS_SEARCH_ISSUES_FROM_GITLAB": "Show issues from git as suggestions when adding new tasks",
+        "IS_SEARCH_ISSUES_FROM_GITLAB": "Pokaż niedokończone zadania z git jako sugestie podczas dodawania nowych zadań",
         "PROJECT": "project ID or user name/project",
         "TOKEN": "Access Token"
       },
@@ -191,14 +191,14 @@
         "TITLE": "GitLab"
       },
       "ISSUE_CONTENT": {
-        "ASSIGNEE": "Assignee",
+        "ASSIGNEE": "Przypisany",
         "AT": "at",
-        "DESCRIPTION": "Description",
-        "LABELS": "Labels",
-        "MARK_AS_CHECKED": "Mark updates as checked",
+        "DESCRIPTION": "Opis",
+        "LABELS": "Kategorie",
+        "MARK_AS_CHECKED": "Zaznacz zmiany jako sprawdzone",
         "STATUS": "Status",
-        "SUMMARY": "Summary",
-        "WRITE_A_COMMENT": "Write a comment"
+        "SUMMARY": "Podsumowanie",
+        "WRITE_A_COMMENT": "Napisz komentarz"
       },
       "S": {
         "ERR_NETWORK": "GitLab: Request failed because of a client side network error",
@@ -1067,7 +1067,7 @@
       "MESSAGE": "Take a break message",
       "SNOOZE_TIME": "Snooze time when prompted to take a break",
       "MIN_WORKING_TIME": "Trigger take a break notification after X working without one",
-      "MOTIVATIONAL_IMG": "Motivational image (web url)",
+      "MOTIVATIONAL_IMGS": "Motivational image (web url)",
       "TITLE": "Break Reminder"
     },
     "TIMELINE": {
