@@ -47,15 +47,15 @@ android {
 
 dependencies {
     implementation 'com.android.support:appcompat-v7:31.0.0'
-    implementation 'com.google.androidbrowserhelper:androidbrowserhelper:2.3.0'
+    implementation 'com.google.androidbrowserhelper:androidbrowserhelper:2.4.0'
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
-    implementation 'com.google.code.gson:gson:2.8.6'
+    implementation 'com.google.code.gson:gson:2.10'
 
-    playImplementation 'com.google.android.gms:play-services-auth:20.1.0'
+    playImplementation 'com.google.android.gms:play-services-auth:20.4.0'
 
     testImplementation 'junit:junit:4.13.2'
 
-    androidTestImplementation 'androidx.test:rules:1.4.1-alpha04'
+    androidTestImplementation 'androidx.test:rules:1.5.0'
     androidTestImplementation 'com.android.support.test:runner:1.0.2'
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
 }
