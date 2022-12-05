@@ -101,6 +101,30 @@ describe('shortSyntax', () => {
     });
   });
 
+  describe('should recognize short syntax for date', () => {
+    it('should parse syntax "tod" as today 23:59', () => {
+      const t = {
+        ...TASK,
+        title: 'Test tod',
+      };
+      const date = new Date();
+      date.setHours(23, 59, 59);
+      const dateInMilliSeconds = date.getTime();
+      const r = shortSyntax(t);
+      const plannedAt = r?.taskChanges?.plannedAt as number;
+      console.log({ plannedAt });
+      console.log({ r });
+      console.log(Math.abs(date.getTime() - plannedAt));
+      const marginError = Math.abs(dateInMilliSeconds - plannedAt);
+      console.log({ marginError });
+      // There may be slight discrepancy between the plannedAt number
+      // and the milliseconds representing today 23:59:59 here, so
+      // we accept the discrepancy to be equal or less than 1000
+      // milliseconds, or 1 second
+      expect(marginError).toBeLessThanOrEqual(1000);
+    });
+  });
+
   describe('tags', () => {
     it('should not trigger for tasks with starting # (e.g. github issues)', () => {
       const t = {
