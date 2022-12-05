@@ -53,9 +53,7 @@ open class CommonJavaScriptInterface(
     fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent) {
         if (requestIds.containsKey(requestCode)) {
             callJavaScriptFunction(
-                FN_PREFIX + "grantFilePermissionCallBack('" + requestIds.get(
-                    requestCode
-                ) + "')"
+                FN_PREFIX + "grantFilePermissionCallBack('" + requestIds[requestCode] + "')"
             )
         }
     }
@@ -65,9 +63,7 @@ open class CommonJavaScriptInterface(
     ) {
         if (requestIds.containsKey(requestCode)) {
             callJavaScriptFunction(
-                FN_PREFIX + "grantFilePermissionCallBack('" + requestIds.get(
-                    requestCode
-                ) + "')"
+                FN_PREFIX + "grantFilePermissionCallBack('" + requestIds[requestCode] + "')"
             )
         }
     }
@@ -85,7 +81,7 @@ open class CommonJavaScriptInterface(
         val intent = Intent(activity.applicationContext, TaskListWidget::class.java)
         intent.action = TaskListWidget.LIST_CHANGED
         intent.putExtra("taskJson", str)
-        TaskListDataService.getInstance().data = str
+        (activity.application as App).dataHolder.data = str
         activity.sendBroadcast(intent)
     }
 
@@ -111,7 +107,7 @@ open class CommonJavaScriptInterface(
     @JavascriptInterface
     // LEGACY
     fun saveToDbNew(requestId: String, key: String, value: String) {
-        KeyValStore.set(activity, key, value)
+        (activity.application as App).keyValStore.set(key, value)
         callJavaScriptFunction(FN_PREFIX + "saveToDbCallback('" + requestId + "')")
     }
 
@@ -119,7 +115,7 @@ open class CommonJavaScriptInterface(
     @JavascriptInterface
     // LEGACY
     fun loadFromDbNew(requestId: String, key: String) {
-        val r = KeyValStore.get(activity, key, "")
+        val r = (activity.application as App).keyValStore.get(key, "")
         // NOTE: ' are important as otherwise the json messes up
         callJavaScriptFunction(FN_PREFIX + "loadFromDbCallback('" + requestId + "', '" + key + "', '" + r + "')")
     }
@@ -127,14 +123,14 @@ open class CommonJavaScriptInterface(
     @Suppress("unused")
     @JavascriptInterface
     fun removeFromDb(requestId: String, key: String) {
-        KeyValStore.set(activity, key, null)
+        (activity.application as App).keyValStore.set(key, null)
         callJavaScriptFunction(FN_PREFIX + "removeFromDbCallback('" + requestId + "')")
     }
 
     @Suppress("unused")
     @JavascriptInterface
     fun clearDb(requestId: String) {
-        KeyValStore.clearAll(activity)
+        (activity.application as App).keyValStore.clearAll(activity)
         callJavaScriptFunction(FN_PREFIX + "clearDbCallback('" + requestId + "')")
     }
 
@@ -143,7 +139,7 @@ open class CommonJavaScriptInterface(
     @Suppress("unused")
     @JavascriptInterface
     fun saveToDb(key: String, value: String) {
-        KeyValStore.set(activity, key, value)
+        (activity.application as App).keyValStore.set(key, value)
         callJavaScriptFunction("window.saveToDbCallback()")
     }
 
@@ -151,9 +147,9 @@ open class CommonJavaScriptInterface(
     @Suppress("unused")
     @JavascriptInterface
     fun loadFromDb(key: String) {
-        val r = KeyValStore.get(activity, key, "")
+        val r = (activity.application as App).keyValStore.get(key, "")
         // NOTE: ' are important as otherwise the json messes up
-        callJavaScriptFunction("window.loadFromDbCallback('" + key + "', '" + r + "')")
+        callJavaScriptFunction("window.loadFromDbCallback('$key', '$r')")
     }
 
 

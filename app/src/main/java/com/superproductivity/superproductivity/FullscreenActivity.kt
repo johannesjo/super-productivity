@@ -32,7 +32,7 @@ class FullscreenActivity : AppCompatActivity() {
         } else {
             startService(Intent(this, KeepAliveNotificationService::class.java))
         }
-        wv = (application as App).webView()
+        wv = (application as App).wv
         // if your build is in debug mode, enable inspecting of web views
         if (BuildConfig.DEBUG) {
             WebView.setWebContentsDebuggingEnabled(true)

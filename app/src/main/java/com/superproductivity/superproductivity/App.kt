@@ -5,12 +5,15 @@ import android.webkit.WebView
 
 class App : Application() {
 
-    private lateinit var wv: WebView
+    val wv: WebView by lazy {
+        WebHelper().instanceView(this)
+    }
 
-    fun webView(): WebView = if (this::wv.isInitialized) {
-        wv
-    } else {
-        wv = WebHelper().instanceView(this)
-        wv
+    val keyValStore: KeyValStore by lazy {
+        KeyValStore(this)
+    }
+
+    val dataHolder: TaskListDataService by lazy {
+        TaskListDataService()
     }
 }
