@@ -32,17 +32,16 @@ class FullscreenActivity : AppCompatActivity() {
         } else {
             startService(Intent(this, KeepAliveNotificationService::class.java))
         }
-        WebHelper.instanceView(applicationContext)
+        wv = (application as App).webView()
         // if your build is in debug mode, enable inspecting of web views
         if (BuildConfig.DEBUG) {
             WebView.setWebContentsDebuggingEnabled(true)
         }
-        wv = WebHelper.getWebView()
         if (BuildConfig.DEBUG) {
             // val url = "https://test-app.super-productivity.com"
             //TODO TODO TODO
-//            val url = "http://10.0.2.2:4200/"
-             val url = "https://app.super-productivity.com"
+//          val url = "http://10.0.2.2:4200/"
+            val url = "https://app.super-productivity.com"
             wv.loadUrl(url)
             Toast.makeText(this, "DEBUG: $url", Toast.LENGTH_SHORT).show()
         } else {
