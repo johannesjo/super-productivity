@@ -112,16 +112,50 @@ describe('shortSyntax', () => {
       const dateInMilliSeconds = date.getTime();
       const r = shortSyntax(t);
       const plannedAt = r?.taskChanges?.plannedAt as number;
-      console.log({ plannedAt });
-      console.log({ r });
-      console.log(Math.abs(date.getTime() - plannedAt));
       const marginError = Math.abs(dateInMilliSeconds - plannedAt);
-      console.log({ marginError });
       // There may be slight discrepancy between the plannedAt number
       // and the milliseconds representing today 23:59:59 here, so
       // we accept the discrepancy to be equal or less than 1000
       // milliseconds, or 1 second
       expect(marginError).toBeLessThanOrEqual(1000);
+    });
+
+    it('should parse syntax "tom" as tomorrow 23:59:59', () => {
+      const t = {
+        ...TASK,
+        title: 'Test tom',
+      };
+      const r = shortSyntax(t);
+      const parsedTimestamp = r?.taskChanges?.plannedAt as number;
+      const implicitDate = new Date();
+      implicitDate.setDate(implicitDate.getDate() + 1);
+      implicitDate.setHours(23, 59, 59);
+      const implicitTimestamp = implicitDate.getTime();
+      expect(Math.abs(implicitTimestamp - parsedTimestamp)).toBeLessThanOrEqual(1000);
+    });
+
+    it('should correctly parse syntax "tod 4pm', () => {
+      const t = {
+        ...TASK,
+        title: 'Test tod 4pm',
+      };
+      const r = shortSyntax(t);
+      const plannedAt = r?.taskChanges?.plannedAt as number;
+      const parsedDate = new Date(plannedAt);
+      const now = new Date();
+      const sameTime = parsedDate.getHours() === 16 && parsedDate.getMinutes() === 0;
+      expect(sameTime).toBeTrue();
+      let implicitDate = now;
+      // If the current time is past the given time, it means the task is set for
+      // tomorrow and we need to set impliicit date to tomorrow
+      if (now.getHours() > 16 || (now.getHours() === 16 && now.getMinutes() > 0)) {
+        implicitDate = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
+      }
+      const matchedDate =
+        implicitDate.getFullYear() === parsedDate.getFullYear() &&
+        implicitDate.getMonth() === parsedDate.getMonth() &&
+        implicitDate.getDate() === parsedDate.getDate();
+      expect(matchedDate).toBeTrue();
     });
   });
 
