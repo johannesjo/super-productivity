@@ -1,8 +1,15 @@
-apply plugin: 'com.android.application'
+plugins {
+
+    id "com.android.application"
+    id "org.jetbrains.kotlin.android"
+}
 
 android {
+
     compileSdkVersion 33
+
     defaultConfig {
+
         applicationId "com.superproductivity.superproductivity"
         minSdkVersion 23
         targetSdkVersion 33
@@ -20,13 +27,16 @@ android {
     buildTypes {
         release {
             minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
         }
     }
 
     flavorDimensions "version"
+
     productFlavors {
-        play  {
+
+        play {
+
             dimension "version"
             Properties properties = new Properties()
             file("google.properties").withInputStream {
@@ -34,6 +44,7 @@ android {
             }
             buildConfigField "String", "CLIENT_ID_WEB", "\"" + properties.webToken + "\""
         }
+
         fdroid {
             dimension "version"
         }
@@ -43,19 +54,21 @@ android {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
+    namespace "com.superproductivity.superproductivity"
 }
 
 dependencies {
-    implementation 'com.android.support:appcompat-v7:31.0.0'
-    implementation 'com.google.androidbrowserhelper:androidbrowserhelper:2.4.0'
-    implementation 'androidx.legacy:legacy-support-v4:1.0.0'
-    implementation 'com.google.code.gson:gson:2.10'
 
-    playImplementation 'com.google.android.gms:play-services-auth:20.4.0'
+    implementation "androidx.appcompat:appcompat:1.5.1"
+    implementation "com.google.androidbrowserhelper:androidbrowserhelper:2.4.0"
+    implementation "com.google.code.gson:gson:2.10"
+    implementation "androidx.core:core-ktx:1.9.0"
 
-    testImplementation 'junit:junit:4.13.2'
+    playImplementation "com.google.android.gms:play-services-auth:20.4.0"
 
-    androidTestImplementation 'androidx.test:rules:1.5.0'
-    androidTestImplementation 'com.android.support.test:runner:1.0.2'
-    androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
+    testImplementation "junit:junit:4.13.2"
+
+    androidTestImplementation "androidx.test:rules:1.5.0"
+    androidTestImplementation "com.android.support.test:runner:1.0.2"
+    androidTestImplementation "com.android.support.test.espresso:espresso-core:3.0.2"
 }
