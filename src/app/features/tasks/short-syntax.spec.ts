@@ -43,6 +43,33 @@ const ALL_TAGS: Tag[] = [
   { ...DEFAULT_TAG, id: 'multi_word_id', title: 'Multi Word Tag' },
 ];
 
+const getPlannedDateInMilliseconds = (taskInput: TaskCopy): number => {
+  const r = shortSyntax(taskInput);
+  const parsedDateInMilliseconds = r?.taskChanges?.plannedAt as number;
+  return parsedDateInMilliseconds;
+};
+
+const checkSameDay = (date1: Date, date2: Date): boolean => {
+  return (
+    date1.getFullYear() === date2.getFullYear() &&
+    date1.getMonth() === date2.getMonth() &&
+    date1.getDate() === date2.getDate()
+  );
+};
+
+const checkIfADateIsTomorrow = (date1: Date, date2: Date): boolean => {
+  const nextday = new Date(date1.getFullYear(), date1.getMonth(), date1.getDate() + 1);
+  return (
+    nextday.getFullYear() === date2.getFullYear() &&
+    nextday.getMonth() === date2.getMonth() &&
+    nextday.getDate() === date2.getDate()
+  );
+};
+
+const checkIfDateHasCorrectTime = (date: Date, hour: number, minute: number): boolean => {
+  return date.getHours() === hour && date.getMinutes() === minute;
+};
+
 describe('shortSyntax', () => {
   it('should ignore for no short syntax', () => {
     const r = shortSyntax(TASK);
