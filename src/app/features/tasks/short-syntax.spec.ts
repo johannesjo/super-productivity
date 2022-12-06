@@ -203,6 +203,20 @@ describe('shortSyntax', () => {
         implicitDate.getDate() === parsedDate.getDate();
       expect(matchedDate).toBeTrue();
     });
+
+    it('should correctly parse syntax for tomorrow with time', () => {
+      const t = {
+        ...TASK,
+        title: 'Test tom 4pm',
+      };
+      const parsedDateInMilliseconds = getPlannedDateInMilliseconds(t);
+      const parsedDate = new Date(parsedDateInMilliseconds);
+      const now = new Date();
+      const isSetToTomorrow = checkIfADateIsTomorrow(now, parsedDate);
+      const isTimeSetCorrectly = checkIfDateHasCorrectTime(parsedDate, 16, 0);
+      expect(isSetToTomorrow).toBeTrue();
+      expect(isTimeSetCorrectly).toBeTrue();
+    });
   });
 
   describe('tags', () => {
