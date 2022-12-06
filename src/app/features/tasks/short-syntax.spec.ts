@@ -129,6 +129,25 @@ describe('shortSyntax', () => {
   });
 
   describe('should recognize short syntax for date', () => {
+    it('should correctly parse schedule syntax with time only', () => {
+      const t = {
+        ...TASK,
+        title: 'Test 4pm',
+      };
+      const parsedDateInMilliseconds = getPlannedDateInMilliseconds(t);
+      const parsedDate = new Date(parsedDateInMilliseconds);
+      const now = new Date();
+      if (now.getHours() > 16 || (now.getHours() === 16 && now.getMinutes() > 0)) {
+        const isSetToTomorrow = checkIfADateIsTomorrow(now, parsedDate);
+        expect(isSetToTomorrow).toBeTrue();
+      } else {
+        const isSetToSameDay = checkSameDay(parsedDate, now);
+        expect(isSetToSameDay).toBeTrue();
+      }
+      const isTimeSetCorrectly = checkIfDateHasCorrectTime(parsedDate, 16, 0);
+      expect(isTimeSetCorrectly).toBeTrue();
+    });
+
     it('should parse syntax "tod" as today 23:59', () => {
       const t = {
         ...TASK,
