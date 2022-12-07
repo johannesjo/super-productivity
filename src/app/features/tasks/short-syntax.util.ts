@@ -43,7 +43,11 @@ export const SHORT_SYNTAX_PROJECT_REG_EX = new RegExp(
   'gi',
 );
 export const SHORT_SYNTAX_TAGS_REG_EX = new RegExp(`\\${CH_TAG}[^${ALL_SPECIAL}]+`, 'gi');
-// export const SHORT_SYNTAX_DUE_REG_EX = new RegExp(`\\${CH_DUE}[^${ALL_SPECIAL}]+`, 'gi');
+
+// Literal notation: /\@[^\+|\#|\@]/gi
+// Match string starting with the literal @ and followed by 1 or more of the characters
+// not in the ALL_SPECIAL
+export const SHORT_SYNTAX_DUE_REG_EX = new RegExp(`\\${CH_DUE}[^${ALL_SPECIAL}]+`, 'gi');
 
 export const shortSyntax = (
   task: Task | Partial<Task>,
@@ -249,27 +253,31 @@ const parseScheduledDate = (task: Partial<TaskCopy>): Partial<Task> => {
   if (!task.title) {
     return {};
   }
-  const now = new Date();
-  // TODO: There's an option in Chrono that allows date to be forward into the future
-  // Currently, however, it only works when the input date doesn't contain time
-  const parsedDateArr = customDateParser.parse(task.title);
-  if (parsedDateArr.length) {
-    const parsedDateResult = parsedDateArr[0];
-    const start = parsedDateResult.start;
-    let plannedAt = start.date().getTime();
-    // If user doesn't explicitly enter time, set the scheduled date
-    // to 23:59:59 of the given day
-    if (!start.isCertain('hour')) {
-      plannedAt = start.date().setHours(23, 59, 59);
-    } else if (start.date().getTime() < now.getTime()) {
-      plannedAt = start.date().setDate(start.date().getDate() + 1);
-      console.log('Resolved date: ', new Date(plannedAt));
+  const rr = task.title.match(SHORT_SYNTAX_DUE_REG_EX);
+  if (rr && rr[0]) {
+    const now = new Date();
+    const parsedDateArr = customDateParser.parse(task.title, new Date(), {
+      forwardDate: true,
+    });
+    if (parsedDateArr.length) {
+      const parsedDateResult = parsedDateArr[0];
+      console.log({ parsedDateResult });
+      const start = parsedDateResult.start;
+      let plannedAt = start.date().getTime();
+      // If user doesn't explicitly enter time, set the scheduled date
+      // to 23:59:59 of the given day
+      if (!start.isCertain('hour')) {
+        plannedAt = start.date().setHours(23, 59, 59);
+      } else if (start.date().getTime() < now.getTime()) {
+        plannedAt = start.date().setDate(start.date().getDate() + 1);
+      }
+      const inputDate = parsedDateResult.text;
+      return {
+        plannedAt,
+        // Strip out the short syntax for scheduled date and given date
+        title: task.title.replace(`@${inputDate}`, ''),
+      };
     }
-    const inputDate = parsedDateResult.text;
-    return {
-      plannedAt,
-      title: task.title.replace(inputDate, ''),
-    };
   }
   return {};
 };
