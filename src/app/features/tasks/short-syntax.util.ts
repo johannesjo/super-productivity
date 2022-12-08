@@ -18,7 +18,7 @@ const customDateParser = chrono.casual.clone();
 customDateParser.parsers.push(
   {
     // match tomorrow
-    pattern: () => /^tom| tom/i,
+    pattern: () => /^tom| @tom/i,
     extract: () => {
       const today = new Date();
       return {
@@ -28,7 +28,7 @@ customDateParser.parsers.push(
   },
   {
     // match today
-    pattern: () => /^tod| tod/i,
+    pattern: () => /^tod| @tod/i,
     extract: () => {
       const today = new Date();
       return {
