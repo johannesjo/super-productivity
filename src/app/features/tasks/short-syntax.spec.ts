@@ -132,7 +132,7 @@ describe('shortSyntax', () => {
     it('should correctly parse schedule syntax with time only', () => {
       const t = {
         ...TASK,
-        title: 'Test 4pm',
+        title: 'Test @4pm',
       };
       const parsedDateInMilliseconds = getPlannedDateInMilliseconds(t);
       const parsedDate = new Date(parsedDateInMilliseconds);
@@ -147,50 +147,43 @@ describe('shortSyntax', () => {
       const isTimeSetCorrectly = checkIfDateHasCorrectTime(parsedDate, 16, 0);
       expect(isTimeSetCorrectly).toBeTrue();
     });
-
-    it('should parse syntax "tod" as today 23:59', () => {
+    it('should parse syntax "@tod" as today 23:59:59', () => {
       const t = {
         ...TASK,
-        title: 'Test tod',
+        title: 'Test @tod',
       };
       const date = new Date();
       date.setHours(23, 59, 59);
-      const dateInMilliSeconds = date.getTime();
-      const r = shortSyntax(t);
-      const plannedAt = r?.taskChanges?.plannedAt as number;
-      const marginError = Math.abs(dateInMilliSeconds - plannedAt);
+      const parsedDateInMilliseconds = getPlannedDateInMilliseconds(t);
+      const marginError = Math.abs(date.getTime() - parsedDateInMilliseconds);
       // There may be slight discrepancy between the plannedAt number
       // and the milliseconds representing today 23:59:59 here, so
       // we accept the discrepancy to be equal or less than 1000
       // milliseconds, or 1 second
       expect(marginError).toBeLessThanOrEqual(1000);
     });
-
     it('should parse syntax "tom" as tomorrow 23:59:59', () => {
       const t = {
         ...TASK,
-        title: 'Test tom',
+        title: 'Test @tom',
       };
-      const r = shortSyntax(t);
-      const parsedTimestamp = r?.taskChanges?.plannedAt as number;
-      const implicitDate = new Date();
-      implicitDate.setDate(implicitDate.getDate() + 1);
-      implicitDate.setHours(23, 59, 59);
-      const implicitTimestamp = implicitDate.getTime();
-      expect(Math.abs(implicitTimestamp - parsedTimestamp)).toBeLessThanOrEqual(1000);
+      const parsedDateInMilliseconds = getPlannedDateInMilliseconds(t);
+      const date = new Date();
+      date.setDate(date.getDate() + 1);
+      date.setHours(23, 59, 59);
+      const marginError = Math.abs(date.getTime() - parsedDateInMilliseconds);
+      expect(marginError).toBeLessThanOrEqual(1000);
     });
-
     it('should correctly parse syntax "tod 4pm', () => {
       const t = {
         ...TASK,
-        title: 'Test tod 4pm',
+        title: 'Test @tod 4pm',
       };
-      const r = shortSyntax(t);
-      const plannedAt = r?.taskChanges?.plannedAt as number;
-      const parsedDate = new Date(plannedAt);
+      const parsedDateInMilliseconds = getPlannedDateInMilliseconds(t);
+      const parsedDate = new Date(parsedDateInMilliseconds);
+      const isTimeSetCorrectly = checkIfDateHasCorrectTime(parsedDate, 16, 0);
+      expect(isTimeSetCorrectly).toBeTrue();
       const now = new Date();
-      const sameTime = parsedDate.getHours() === 16 && parsedDate.getMinutes() === 0;
-      expect(sameTime).toBeTrue();
       let implicitDate = now;
       // If the current time is past the given time, it means the task is set for
       // tomorrow and we need to set impliicit date to tomorrow
@@ -203,11 +196,10 @@ describe('shortSyntax', () => {
         implicitDate.getDate() === parsedDate.getDate();
       expect(matchedDate).toBeTrue();
     });
-
     it('should correctly parse syntax for tomorrow with time', () => {
       const t = {
         ...TASK,
-        title: 'Test tom 4pm',
+        title: 'Test @tom 4pm',
       };
       const parsedDateInMilliseconds = getPlannedDateInMilliseconds(t);
       const parsedDate = new Date(parsedDateInMilliseconds);
