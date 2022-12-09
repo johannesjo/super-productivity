@@ -209,18 +209,38 @@ describe('shortSyntax', () => {
       expect(isSetToTomorrow).toBeTrue();
       expect(isTimeSetCorrectly).toBeTrue();
     });
-  });
-
-  describe('tags', () => {
-    it('should not trigger for tasks with starting # (e.g. github issues)', () => {
+    it('should correctly parse day of the week', () => {
       const t = {
         ...TASK,
-        title: '#134 Fun title',
+        title: 'Test @Friday',
       };
-      const r = shortSyntax(t, ALL_TAGS);
-
-      expect(r).toEqual(undefined);
+      const parsedDateInMilliseconds = getPlannedDateInMilliseconds(t);
+      const parsedDate = new Date(parsedDateInMilliseconds);
+      // 5 represents Friday
+      expect(parsedDate.getDay()).toEqual(5);
+      const now = new Date();
+      const todayInNumber = now.getDay();
+      let dayIncrement = 0;
+      // If today happens to be Friday, the parsed date will be the next Friday,
+      // 7 days from today
+      if (todayInNumber === 5) {
+        dayIncrement = 7;
+      } else {
+        if (todayInNumber < 5) {
+          dayIncrement = 5 - todayInNumber;
+        } else {
+          dayIncrement = 7 - todayInNumber + 5;
+        }
+      }
+      const nextFriday = new Date(
+        now.getFullYear(),
+        now.getMonth(),
+        now.getDate() + dayIncrement,
+      );
+      const isDateSetCorrectly = checkSameDay(parsedDate, nextFriday);
+      expect(isDateSetCorrectly).toBeTrue();
     });
+  });
 
     it('should not trigger for tasks with starting # (e.g. github issues) when adding tags', () => {
       const t = {
