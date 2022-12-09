@@ -54,6 +54,7 @@ export class FinishDayBeforeCloseEffects {
           ),
           switchMap(() =>
             this._workContextService.mainWorkContext$.pipe(
+              first(),
               switchMap((workContext) =>
                 this._taskService.getByIdsLive$(workContext.taskIds).pipe(first()),
               ),
