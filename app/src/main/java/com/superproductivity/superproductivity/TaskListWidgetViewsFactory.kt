@@ -83,7 +83,7 @@ class TaskListWidgetViewsFactory(private val context: Context) :
 
     private fun loadListData() {
         Log.v("TW", "TaskListWidgetViewsFactory: loadListData")
-        var jsonStr: String? = null
+        var jsonStr = ""
         try {
             jsonStr = (context.applicationContext as App).dataHolder.data
         } catch (e: Exception) {
@@ -91,7 +91,7 @@ class TaskListWidgetViewsFactory(private val context: Context) :
         }
         Log.v("TW", "TaskListWidgetViewsFactory: jsonStr...")
 
-        if (jsonStr?.isNotEmpty() == true) {
+        if (jsonStr.isNotEmpty()) {
             Log.v("TW", "TaskListWidgetViewsFactory:" + jsonStr.length + "")
             Log.v("TW", "TaskListWidgetViewsFactory: $jsonStr")
 
