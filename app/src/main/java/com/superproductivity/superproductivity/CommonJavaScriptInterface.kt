@@ -41,7 +41,7 @@ import java.util.Locale
 import java.util.concurrent.ThreadLocalRandom
 import javax.net.ssl.SSLHandshakeException
 
-open class CommonJavaScriptInterface(
+abstract class CommonJavaScriptInterface(
     private val activity: FullscreenActivity,
 ) {
     private val requestIds: HashMap<Int, String> = HashMap()
@@ -49,18 +49,7 @@ open class CommonJavaScriptInterface(
     /**
      * Instantiate the interface and set the context
      */
-
-    fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent) {
-        if (requestIds.containsKey(requestCode)) {
-            callJavaScriptFunction(
-                FN_PREFIX + "grantFilePermissionCallBack('" + requestIds[requestCode] + "')"
-            )
-        }
-    }
-
-    fun onRequestPermissionsResult(
-        requestCode: Int, permissions: Array<String>, grantResults: Array<Int>
-    ) {
+    open fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent) {
         if (requestIds.containsKey(requestCode)) {
             callJavaScriptFunction(
                 FN_PREFIX + "grantFilePermissionCallBack('" + requestIds[requestCode] + "')"
@@ -99,7 +88,7 @@ open class CommonJavaScriptInterface(
 
     @Suppress("unused")
     @JavascriptInterface
-    fun triggerGetGoogleToken() {
+    open fun triggerGetGoogleToken() {
         // NOTE: empty here, and only filled for google build flavor
     }
 
@@ -411,7 +400,7 @@ open class CommonJavaScriptInterface(
         }
     }
 
-    private fun callJavaScriptFunction(script: String) {
+    protected fun callJavaScriptFunction(script: String) {
         activity.callJavaScriptFunction(script)
     }
 

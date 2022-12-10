@@ -9,7 +9,6 @@ import android.content.Intent
 import android.util.Log
 import android.widget.RemoteViews
 
-
 /**
  * Implementation of App Widget functionality.
  */

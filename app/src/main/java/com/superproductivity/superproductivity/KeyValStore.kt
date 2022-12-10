@@ -10,7 +10,6 @@ import android.util.Log
 class KeyValStore(private val context: Context) :
     SQLiteOpenHelper(context, DATABASE_NAME, null, DATABASE_VERSION) {
 
-
 //    private static final String CREATE_TABLE = "CREATE TABLE supKeyValStore(TEXT PRIMARY KEY,VALUE TEXT,KEY_CREATED_AT DATETIME)"
 
     override fun onCreate(db: SQLiteDatabase?) {
@@ -27,7 +26,6 @@ class KeyValStore(private val context: Context) :
     /**
      * Setter method. Sets a (key, value) pair in sqlite3 db.
      *
-     * @param context Any context object.
      * @param key     The URL or some other unique id for data can be used
      * @param value   String data to be saved
      * @return rowid of the insertion row
@@ -52,7 +50,6 @@ class KeyValStore(private val context: Context) :
     }
 
     /**
-     * @param context      Any context object.
      * @param key          The URL or some other unique id for data can be used
      * @param defaultValue value to be returned in case something goes wrong or no data is found
      * @return value stored in DB if present, defaultValue otherwise.
