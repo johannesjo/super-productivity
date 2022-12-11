@@ -5,11 +5,8 @@ plugins {
 }
 
 android {
-
     compileSdkVersion 33
-
     defaultConfig {
-
         applicationId "com.superproductivity.superproductivity"
         minSdkVersion 23
         targetSdkVersion 33
@@ -30,13 +27,9 @@ android {
             proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
         }
     }
-
     flavorDimensions "version"
-
     productFlavors {
-
         play {
-
             dimension "version"
             Properties properties = new Properties()
             file("google.properties").withInputStream {
@@ -44,12 +37,10 @@ android {
             }
             buildConfigField "String", "CLIENT_ID_WEB", "\"" + properties.webToken + "\""
         }
-
         fdroid {
             dimension "version"
         }
     }
-
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
