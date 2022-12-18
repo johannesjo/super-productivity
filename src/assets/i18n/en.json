@@ -1006,6 +1006,7 @@
       },
       "D_CONFIRM_UPDATE_INSTANCES": {
         "MSG": "There are {{tasksNr}} instances created for this repeatable task. Do you want to update all of them with the new defaults or just future tasks?",
+        "CANCEL": "Only future tasks",
         "OK": "Update all instances"
       },
       "D_CONFIRM_MOVE_TO_PROJECT": {
