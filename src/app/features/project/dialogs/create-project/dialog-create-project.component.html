@@ -54,6 +54,23 @@
       </div>
       <div class="item">
         <button
+          (click)="openAzuredevopsCfg()"
+          color="primary"
+          mat-button
+          type="button"
+        >
+          <mat-icon
+            *ngIf="!azuredevopsCfg?.isEnabled"
+            svgIcon="azuredevops"
+          ></mat-icon>
+          <mat-icon *ngIf="azuredevopsCfg?.isEnabled">checkmark</mat-icon>
+          <span style="padding-left: 8px"
+            >{{T.F.PROJECT.D_CREATE.SETUP_AZUREDEVOPS|translate}}</span
+          >
+        </button>
+      </div>
+      <div class="item">
+        <button
           (click)="openRedmineCfg()"
           color="primary"
           mat-button

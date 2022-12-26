@@ -7,6 +7,7 @@ import { GithubIssueModule } from './providers/github/github-issue/github-issue.
 import { RedmineIssueModule } from './providers/redmine/redmine-issue/redmine-issue.module';
 import { IssueIconPipe } from './issue-icon/issue-icon.pipe';
 import { GitlabIssueModule } from './providers/gitlab/gitlab-issue/gitlab-issue.module';
+import { AzuredevopsIssueModule } from './providers/azuredevops/azuredevops-issue/azuredevops-issue.module';
 import { CaldavIssueModule } from './providers/caldav/caldav-issue/caldav-issue.module';
 import { OpenProjectIssueModule } from './providers/open-project/open-project-issue/open-project-issue.module';
 import { GiteaIssueModule } from './providers/gitea/gitea-issue/gitea-issue.module';
@@ -21,6 +22,7 @@ import { PollIssueUpdatesEffects } from './store/poll-issue-updates.effects';
     GithubIssueModule,
     RedmineIssueModule,
     GitlabIssueModule,
+    AzuredevopsIssueModule,
     CaldavIssueModule,
     OpenProjectIssueModule,
     GiteaIssueModule,

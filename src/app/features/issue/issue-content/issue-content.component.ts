@@ -6,6 +6,7 @@ import {
   GITHUB_TYPE,
   REDMINE_TYPE,
   GITLAB_TYPE,
+  AZUREDEVOPS_TYPE,
   JIRA_TYPE,
   OPEN_PROJECT_TYPE,
 } from '../issue.const';
@@ -22,6 +23,7 @@ export class IssueContentComponent {
   @Input() issueData?: IssueData;
   readonly GITLAB_TYPE: string = GITLAB_TYPE;
   readonly GITHUB_TYPE: string = GITHUB_TYPE;
+  readonly AZUREDEVOPS_TYPE: string = AZUREDEVOPS_TYPE;
   readonly REDMINE_TYPE: string = REDMINE_TYPE;
   readonly JIRA_TYPE: string = JIRA_TYPE;
   readonly CALDAV_TYPE: string = CALDAV_TYPE;

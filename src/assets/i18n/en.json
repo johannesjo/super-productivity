@@ -240,6 +240,38 @@
         "ERR_UNKNOWN": "GitHub: Unknown error {{statusCode}} {{errorMsg}}. Api Rate limit exceeded?"
       }
     },
+    "AZUREDEVOPS": {
+      "DIALOG_INITIAL": {
+        "TITLE": "Setup Azure Devops for Project"
+      },
+      "FORM": {
+        "FILTER_USER": "your email (e.g. to filter out changes by yourself)",
+        "IS_AUTO_ADD_TO_BACKLOG": "Automatically add unresolved work items from Azure Devops to backlog",
+        "IS_AUTO_POLL": "Automatically poll imported work items for changes",
+        "IS_SEARCH_ISSUES_FROM_AZUREDEVOPS": "Show work items from Azure Devops as suggestions when adding new tasks",
+        "ORGANIZATION": "Organization name for the project you want to track",
+        "PROJECT": "The project you want to track",
+        "TOKEN": "Access Token",
+        "TOKEN_DESCRIPTION": "Required for Azure Devops access"
+      },
+      "FORM_SECTION": {
+        "HELP": "<p>Here you can configure SuperProductivity to list open Azure devops work items for a specific project in the task creation panel in the daily planning view. They will be listed as suggestions and will provide a link to the work item as well as more information about it.</p> <p>In addition you can automatically add and sync all open work items to your task backlog.</p><p>To get by usage limits and to access you can provide a an access token. <a href='https://https://learn.microsoft.com/en-us/azure/devops/organizations/accounts/use-personal-access-tokens-to-authenticate?view=azure-devops&tabs=Windows'>More info about its scopes can be found here</a>.",
+        "TITLE": "GitHub"
+      },
+      "ISSUE_CONTENT": {
+        "ASSIGNEE": "Assignee",
+        "AT": "at",
+        "DESCRIPTION": "Description",
+        "LABELS": "Labels",
+        "MARK_AS_CHECKED": "Mark updates as checked",
+        "STATUS": "Status",
+        "SUMMARY": "Summary",
+        "WRITE_A_COMMENT": "Write a comment"
+      },
+      "S": {
+        "ERR_UNKNOWN": "Azure Devops: Unknown error {{statusCode}} {{errorMsg}}. Api Rate limit exceeded?"
+      }
+    },
     "GITLAB": {
       "DIALOG_INITIAL": {
         "TITLE": "Setup GitLab for Project"
@@ -669,6 +701,7 @@
         "SETUP_CALDAV": "Setup Caldav Integration",
         "SETUP_GIT": "Setup GitHub Integration",
         "SETUP_GITLAB": "Setup GitLab Integration",
+        "SETUP_AZUREDEVOPS": "Setup Azure Devops Integration",
         "SETUP_JIRA": "Setup Jira Integration",
         "SETUP_OPEN_PROJECT": "Setup OpenProject Integration",
         "SETUP_GITEA_PROJECT": "Setup Gitea Integration",

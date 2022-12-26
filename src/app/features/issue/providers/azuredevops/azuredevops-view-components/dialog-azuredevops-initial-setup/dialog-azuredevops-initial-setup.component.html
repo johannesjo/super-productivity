@@ -1,0 +1,43 @@
+<h1 mat-dialog-title>
+  <mat-icon
+    class="dialog-header-icon"
+    svgIcon="azuredevops"
+  ></mat-icon>
+  <span>{{T.F.AZUREDEVOPS.DIALOG_INITIAL.TITLE|translate}}</span>
+</h1>
+
+<form
+  (submit)="saveAzuredevopsCfg(azuredevopsCfg)"
+  [formGroup]="formGroup"
+>
+  <mat-dialog-content>
+    <formly-form
+      (modelChange)="azuredevopsCfg=$event"
+      [fields]="formConfig"
+      [form]="formGroup"
+      [model]="azuredevopsCfg"
+    >
+    </formly-form>
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end">
+    <button
+      (click)="close()"
+      color="primary"
+      mat-button
+      type="button"
+    >
+      {{T.G.CANCEL|translate}}
+    </button>
+
+    <button
+      [disabled]="!formGroup.valid"
+      color="primary"
+      mat-stroked-button
+      type="submit"
+    >
+      <mat-icon>save</mat-icon>
+      {{T.G.SAVE|translate}}
+    </button>
+  </mat-dialog-actions>
+</form>

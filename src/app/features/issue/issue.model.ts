@@ -24,6 +24,11 @@ import { GiteaCfg } from './providers/gitea/gitea.model';
 import { GiteaIssue } from './providers/gitea/gitea-issue/gitea-issue.model';
 import { RedmineCfg } from './providers/redmine/redmine.model';
 import { RedmineIssue } from './providers/redmine/redmine-issue/redmine-issue.model';
+import { AzuredevopsCfg } from './providers/azuredevops/azuredevops.model';
+import {
+  AzuredevopsIssue,
+  AzuredevopsIssueReduced,
+} from './providers/azuredevops/azuredevops-issue/azuredevops-issue.model';
 
 export interface BaseIssueProviderCfg {
   isEnabled: boolean;
@@ -31,6 +36,7 @@ export interface BaseIssueProviderCfg {
 
 export type IssueProviderKey =
   | 'JIRA'
+  | 'AZUREDEVOPS'
   | 'GITHUB'
   | 'GITLAB'
   | 'CALDAV'
@@ -42,6 +48,7 @@ export type IssueIntegrationCfg =
   | JiraCfg
   | GithubCfg
   | GitlabCfg
+  | AzuredevopsCfg
   | CaldavCfg
   | OpenProjectCfg
   | GiteaCfg
@@ -58,6 +65,7 @@ export interface IssueIntegrationCfgs {
   JIRA?: JiraCfg;
   GITHUB?: GithubCfg;
   GITLAB?: GitlabCfg;
+  AZUREDEVOPS?: AzuredevopsCfg;
   CALDAV?: CaldavCfg;
   OPEN_PROJECT?: OpenProjectCfg;
   GITEA?: GiteaCfg;
@@ -68,6 +76,7 @@ export type IssueData =
   | JiraIssue
   | GithubIssue
   | GitlabIssue
+  | AzuredevopsIssue
   | CaldavIssue
   | OpenProjectWorkPackage
   | GiteaIssue
@@ -77,6 +86,7 @@ export type IssueDataReduced =
   | GithubIssueReduced
   | JiraIssueReduced
   | GitlabIssue
+  | AzuredevopsIssueReduced
   | OpenProjectWorkPackageReduced
   | CaldavIssueReduced
   | GiteaIssue

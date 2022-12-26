@@ -14,8 +14,14 @@ import { SnackService } from '../../core/snack/snack.service';
 import { T } from '../../t.const';
 import { BreakNr, BreakTime, WorkContextType } from '../work-context/work-context.model';
 import { WorkContextService } from '../work-context/work-context.service';
-import { GITHUB_TYPE, GITLAB_TYPE, JIRA_TYPE } from '../issue/issue.const';
+import {
+  GITHUB_TYPE,
+  GITLAB_TYPE,
+  JIRA_TYPE,
+  AZUREDEVOPS_TYPE,
+} from '../issue/issue.const';
 import { GitlabCfg } from '../issue/providers/gitlab/gitlab';
+import { AzuredevopsCfg } from '../issue/providers/azuredevops/azuredevops.model';
 import { ExportedProject } from './project-archive.model';
 import { CaldavCfg } from '../issue/providers/caldav/caldav.model';
 import {
@@ -40,6 +46,7 @@ import {
   selectGiteaCfgByProjectId,
   selectGithubCfgByProjectId,
   selectGitlabCfgByProjectId,
+  selectAzuredevopsCfgByProjectId,
   selectJiraCfgByProjectId,
   selectOpenProjectCfgByProjectId,
   selectRedmineCfgByProjectId,
@@ -110,6 +117,10 @@ export class ProjectService {
     return this._store$.pipe(select(selectGithubCfgByProjectId, { id: projectId }));
   }
 
+  getAzuredevopsCfgForProject$(projectId: string): Observable<AzuredevopsCfg> {
+    return this._store$.pipe(select(selectAzuredevopsCfgByProjectId, { id: projectId }));
+  }
+
   getGitlabCfgForProject$(projectId: string): Observable<GitlabCfg> {
     return this._store$.pipe(select(selectGitlabCfgByProjectId, { id: projectId }));
   }
@@ -154,6 +165,8 @@ export class ProjectService {
       return this.getJiraCfgForProject$(projectId);
     } else if (issueProviderKey === GITLAB_TYPE) {
       return this.getGitlabCfgForProject$(projectId);
+    } else if (issueProviderKey === AZUREDEVOPS_TYPE) {
+      return this.getAzuredevopsCfgForProject$(projectId);
     } else {
       throw new Error('Invalid IssueProviderKey');
     }

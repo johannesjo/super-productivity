@@ -6,6 +6,7 @@ import {
   DEFAULT_ISSUE_PROVIDER_CFGS,
   GITHUB_TYPE,
   GITLAB_TYPE,
+  AZUREDEVOPS_TYPE,
   JIRA_TYPE,
   OPEN_PROJECT_TYPE,
 } from '../issue/issue.const';
@@ -23,10 +24,12 @@ import { isGitlabEnabledLegacy } from '../issue/providers/gitlab/is-gitlab-enabl
 import { isGithubEnabledLegacy } from '../issue/providers/github/is-github-enabled.util';
 import { isCaldavEnabledLegacy } from '../issue/providers/caldav/is-caldav-enabled.util';
 import { isOpenProjectEnabledLegacy } from '../issue/providers/open-project/is-open-project-enabled.util';
+import { isAzuredevopsEnabledLegacy } from '../issue/providers/azuredevops/is-azuredevops-enabled.util';
 import { GithubCfg } from '../issue/providers/github/github.model';
 import { GitlabCfg } from '../issue/providers/gitlab/gitlab';
 import { CaldavCfg } from '../issue/providers/caldav/caldav.model';
 import { OpenProjectCfg } from '../issue/providers/open-project/open-project.model';
+import { AzuredevopsCfg } from '../issue/providers/azuredevops/azuredevops.model';
 import { MODEL_VERSION } from '../../core/model-version';
 import { JiraCfg } from '../issue/providers/jira/jira.model';
 import { DEFAULT_JIRA_CFG } from '../issue/providers/jira/jira.const';
@@ -104,6 +107,12 @@ const _migrateIsEnabledForIssueProviders = (project: Project): Project => {
         ...(project.issueIntegrationCfgs[GITLAB_TYPE] as GitlabCfg),
         isEnabled: isGitlabEnabledLegacy(
           project.issueIntegrationCfgs[GITLAB_TYPE] as GitlabCfg,
+        ),
+      },
+      AZUREDEVOPS: {
+        ...(project.issueIntegrationCfgs[AZUREDEVOPS_TYPE] as AzuredevopsCfg),
+        isEnabled: isAzuredevopsEnabledLegacy(
+          project.issueIntegrationCfgs[AZUREDEVOPS_TYPE] as AzuredevopsCfg,
         ),
       },
       CALDAV: {

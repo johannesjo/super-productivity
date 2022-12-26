@@ -13,6 +13,7 @@ import {
   REDMINE_TYPE,
   GITHUB_TYPE,
   GITLAB_TYPE,
+  AZUREDEVOPS_TYPE,
   ISSUE_PROVIDER_HUMANIZED,
   ISSUE_PROVIDER_ICON_MAP,
   ISSUE_STR_MAP,
@@ -24,6 +25,7 @@ import { Task } from '../tasks/task.model';
 import { IssueServiceInterface } from './issue-service-interface';
 import { JiraCommonInterfacesService } from './providers/jira/jira-common-interfaces.service';
 import { GithubCommonInterfacesService } from './providers/github/github-common-interfaces.service';
+import { AzuredevopsCommonInterfacesService } from './providers/azuredevops/azuredevops-common-interfaces.service';
 import { switchMap } from 'rxjs/operators';
 import { GitlabCommonInterfacesService } from './providers/gitlab/gitlab-common-interfaces.service';
 import { CaldavCommonInterfacesService } from './providers/caldav/caldav-common-interfaces.service';
@@ -41,6 +43,7 @@ export class IssueService {
   ISSUE_SERVICE_MAP: { [key: string]: IssueServiceInterface } = {
     [GITLAB_TYPE]: this._gitlabCommonInterfacesService,
     [GITHUB_TYPE]: this._githubCommonInterfacesService,
+    [AZUREDEVOPS_TYPE]: this._azuredevopsCommonInterfacesService,
     [JIRA_TYPE]: this._jiraCommonInterfacesService,
     [CALDAV_TYPE]: this._caldavCommonInterfaceService,
     [OPEN_PROJECT_TYPE]: this._openProjectInterfaceService,
@@ -52,6 +55,7 @@ export class IssueService {
   ISSUE_REFRESH_MAP: { [key: string]: { [key: string]: Subject<IssueData> } } = {
     [GITLAB_TYPE]: {},
     [GITHUB_TYPE]: {},
+    [AZUREDEVOPS_TYPE]: {},
     [REDMINE_TYPE]: {},
     [JIRA_TYPE]: {},
     [CALDAV_TYPE]: {},
@@ -64,6 +68,7 @@ export class IssueService {
     private _taskService: TaskService,
     private _jiraCommonInterfacesService: JiraCommonInterfacesService,
     private _githubCommonInterfacesService: GithubCommonInterfacesService,
+    private _azuredevopsCommonInterfacesService: AzuredevopsCommonInterfacesService,
     private _gitlabCommonInterfacesService: GitlabCommonInterfacesService,
     private _caldavCommonInterfaceService: CaldavCommonInterfacesService,
     private _openProjectInterfaceService: OpenProjectCommonInterfacesService,

@@ -23,20 +23,24 @@ import {
   saveToSessionStorage,
 } from '../../../../core/persistence/local-storage';
 import { GithubCfg } from '../../../issue/providers/github/github.model';
+import { AzuredevopsCfg } from '../../../issue/providers/azuredevops/azuredevops.model';
 import { GiteaCfg } from '../../../issue/providers/gitea/gitea.model';
 import { RedmineCfg } from '../../../issue/providers/redmine/redmine.model';
 import { DialogGithubInitialSetupComponent } from '../../../issue/providers/github/github-view-components/dialog-github-initial-setup/dialog-github-initial-setup.component';
+import { DialogAzuredevopsInitialSetupComponent } from '../../../issue/providers/azuredevops/azuredevops-view-components/dialog-azuredevops-initial-setup/dialog-azuredevops-initial-setup.component';
 import {
   CALDAV_TYPE,
   GITEA_TYPE,
   REDMINE_TYPE,
   GITHUB_TYPE,
   GITLAB_TYPE,
+  AZUREDEVOPS_TYPE,
   OPEN_PROJECT_TYPE,
 } from '../../../issue/issue.const';
 import { T } from '../../../../t.const';
 import { DEFAULT_JIRA_CFG } from '../../../issue/providers/jira/jira.const';
 import { DEFAULT_GITHUB_CFG } from '../../../issue/providers/github/github.const';
+import { DEFAULT_AZUREDEVOPS_CFG } from 'src/app/features/issue/providers/azuredevops/azuredevops.const';
 import { WORK_CONTEXT_THEME_CONFIG_FORM_CONFIG } from '../../../work-context/work-context.const';
 import { GitlabCfg } from 'src/app/features/issue/providers/gitlab/gitlab';
 import { DEFAULT_GITLAB_CFG } from 'src/app/features/issue/providers/gitlab/gitlab.const';
@@ -68,6 +72,7 @@ export class DialogCreateProjectComponent implements OnInit, OnDestroy {
   jiraCfg?: JiraCfg;
   githubCfg?: GithubCfg;
   gitlabCfg?: GitlabCfg;
+  azuredevopsCfg?: AzuredevopsCfg;
   caldavCfg?: CaldavCfg;
   openProjectCfg?: OpenProjectCfg;
   giteaCfg?: GiteaCfg;
@@ -125,6 +130,7 @@ export class DialogCreateProjectComponent implements OnInit, OnDestroy {
           JIRA: this.jiraCfg,
           GITHUB: this.githubCfg,
           GITLAB: this.gitlabCfg,
+          AZUREDEVOPS: this.azuredevopsCfg,
           CALDAV: this.caldavCfg,
           OPEN_PROJECT: this.openProjectCfg,
           GITEA: this.giteaCfg,
@@ -150,6 +156,9 @@ export class DialogCreateProjectComponent implements OnInit, OnDestroy {
       if (this.projectData.issueIntegrationCfgs.GITLAB) {
         this.gitlabCfg = this.projectData.issueIntegrationCfgs.GITLAB;
       }
+      if (this.projectData.issueIntegrationCfgs.AZUREDEVOPS) {
+        this.azuredevopsCfg = this.projectData.issueIntegrationCfgs.AZUREDEVOPS;
+      }
       if (this.projectData.issueIntegrationCfgs.CALDAV) {
         this.caldavCfg = this.projectData.issueIntegrationCfgs.CALDAV;
       }
@@ -172,6 +181,7 @@ export class DialogCreateProjectComponent implements OnInit, OnDestroy {
       JIRA: this.jiraCfg || DEFAULT_JIRA_CFG,
       GITHUB: this.githubCfg || DEFAULT_GITHUB_CFG,
       GITLAB: this.gitlabCfg || DEFAULT_GITLAB_CFG,
+      AZUREDEVOPS: this.azuredevopsCfg || DEFAULT_AZUREDEVOPS_CFG,
       CALDAV: this.caldavCfg || DEFAULT_CALDAV_CFG,
       OPEN_PROJECT: this.openProjectCfg || DEFAULT_OPEN_PROJECT_CFG,
       GITEA: this.giteaCfg || DEFAULT_GITEA_CFG,
@@ -232,6 +242,24 @@ export class DialogCreateProjectComponent implements OnInit, OnDestroy {
         .subscribe((gitCfg: GithubCfg) => {
           if (gitCfg) {
             this._saveGithubCfg(gitCfg);
+          }
+        }),
+    );
+  }
+
+  openAzuredevopsCfg(): void {
+    this._subs.add(
+      this._matDialog
+        .open(DialogAzuredevopsInitialSetupComponent, {
+          restoreFocus: true,
+          data: {
+            azuredevopsCfg: { ...this.azuredevopsCfg, isEnabled: true },
+          },
+        })
+        .afterClosed()
+        .subscribe((azuredevopsCfg: AzuredevopsCfg) => {
+          if (azuredevopsCfg) {
+            this._saveAzuredevopsCfg(azuredevopsCfg);
           }
         }),
     );
@@ -364,6 +392,20 @@ export class DialogCreateProjectComponent implements OnInit, OnDestroy {
         this.projectData.id,
         GITHUB_TYPE,
         this.githubCfg,
+      );
+    }
+  }
+
+  private _saveAzuredevopsCfg(azuredevopsCfg: AzuredevopsCfg): void {
+    this.azuredevopsCfg = azuredevopsCfg;
+    this._cd.markForCheck();
+
+    // if we're editing save right away
+    if (this.projectData.id) {
+      this._projectService.updateIssueProviderConfig(
+        this.projectData.id,
+        AZUREDEVOPS_TYPE,
+        this.azuredevopsCfg,
       );
     }
   }

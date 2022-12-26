@@ -46,6 +46,11 @@
             svgIcon="gitlab"
           ></mat-icon>
           <mat-icon
+            *ngIf="project.issueIntegrationCfgs?.AZUREDEVOPS?.isEnabled"
+            [title]="T.PP.AZUREDEVOPS_CONFIGURED|translate"
+            svgIcon="azuredevops"
+          ></mat-icon>
+          <mat-icon
             *ngIf="project.issueIntegrationCfgs?.OPEN_PROJECT?.projectId"
             [title]="T.PP.OPEN_PROJECT_CONFIGURED|translate"
             svgIcon="open_project"
@@ -135,6 +140,11 @@
         <mat-icon
           *ngIf="project.issueIntegrationCfgs?.GITLAB?.project"
           [title]="T.PP.GITLAB_CONFIGURED|translate"
+          svgIcon="gitlab"
+        ></mat-icon>
+        <mat-icon
+          *ngIf="project.issueIntegrationCfgs?.AZUREDEVOPS?.isEnabled"
+          [title]="T.PP.AZUREDEVOPS_CONFIGURED|translate"
           svgIcon="gitlab"
         ></mat-icon>
       </div>
