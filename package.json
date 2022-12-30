@@ -211,7 +211,7 @@
     "ng2-dragula": "^2.1.1",
     "ngx-date-time-picker-schedule": "^9.4.17",
     "ngx-markdown": "^14.0.1",
-    "nightwatch": "^1.7.11",
+    "nightwatch": "^2.6.3",
     "object-path": "^0.11.8",
     "p-throttle": "^3.1.0",
     "prettier": "^2.7.1",
