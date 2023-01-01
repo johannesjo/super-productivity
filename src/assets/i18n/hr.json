@@ -97,13 +97,13 @@
         "CALDAV_RESOURCE": "Ime CalDav resursa (kalendar)",
         "CALDAV_URL": "CalDav URL (osnovni URL)",
         "CALDAV_USER": "Tvoje CalDav korisničko ime",
-        "IS_AUTO_ADD_TO_BACKLOG": "Automatski dodaj nezavršene CalDav zadatke u svoje odlagalište",
+        "IS_AUTO_ADD_TO_BACKLOG": "Automatski dodaj nezavršene CalDav zadatke u odlagalište",
         "IS_AUTO_POLL": "Automatski preispitaj ima li promjena u uvezenim zadacima",
         "IS_SEARCH_ISSUES_FROM_CALDAV": "Pokaži nezavršene CalDav zadatke kao prijedloge tijekom dodavanja novih zadataka",
         "IS_TRANSITION_ISSUES_ENABLED": "Automatski završi CalDav zadatke nakon završavanja zadatka"
       },
       "FORM_SECTION": {
-        "HELP": "<p>Ovdje možeš konfigurirati „Super produktivnost” za prikaz popisa nezavršenih CalDav zadataka za određeni projekt na ploči za stvaranje zadataka u prikazu dnevnog planiranja. U popisu će se ti zadaci navesti kao prijedlozi s poveznicom na zadatak te s daljnjim informacija o zadatku.</p> <p>Osim toga, sve nezavršene zadatke možeš automatski dodati i sinkronizirati u svoje odlagalište zadataka.</p><p>Da bi to za nextcloud radilo na mobilnom uređaju i webu, možda ćeš morati staviti „https://app.super-productivity.com” na popis dopuštenih putem nextcloud programa <a href='https://apps.nextcloud. com/apps/webapppassword'>webapppassword<a>.</p>",
+        "HELP": "<p>Ovdje možeš konfigurirati „Super produktivnost” za prikaz popisa nezavršenih CalDav zadataka za određeni projekt na ploči za stvaranje zadataka u prikazu dnevnog planiranja. U popisu će se ti zadaci navesti kao prijedlozi s poveznicom na zadatak te s daljnjim informacija o zadatku.</p> <p>Osim toga, sve nezavršene zadatke možeš automatski dodati u odlagalište zadataka i sinkronizirati ih.</p><p>Da bi to za nextcloud radilo na mobilnom uređaju i webu, možda ćeš morati staviti „https://app.super-productivity.com” na popis dopuštenih putem nextcloud programa <a href='https://apps.nextcloud. com/apps/webapppassword'>webapppassword<a>.</p>",
         "TITLE": "CalDav"
       },
       "ISSUE_CONTENT": {
@@ -159,7 +159,7 @@
         "SCOPE_CREATED": "Od mene stvoreno"
       },
       "FORM_SECTION": {
-        "HELP": "<p>Ovdje možeš konfigurirati „Super produktivnost” za prikaz popisa nezavršenih Gitea problema za određeni repozitorij na ploči za stvaranje zadataka u prikazu dnevnog planiranja. U popisu će se ti problemi navesti kao prijedlozi s poveznicom na problem te s daljnjim informacija o problemu.</p> <p>Osim toga, sve neriješene probleme možeš automatski dodati i sinkronizirati u svoje odlagalište zadataka.</p><p>Za dobivanje ograničenja korištenja i za pristupanje možeš navesti token za pristup.",
+        "HELP": "<p>Ovdje možeš konfigurirati „Super produktivnost” za prikaz popisa nezavršenih Gitea problema za određeni repozitorij na ploči za stvaranje zadataka u prikazu dnevnog planiranja. U popisu će se ti problemi navesti kao prijedlozi s poveznicom na problem te s daljnjim informacija o problemu.</p> <p>Osim toga, sve neriješene probleme možeš automatski u odlagalište zadataka i sinkronizirati ih.</p><p>Za dobivanje ograničenja korištenja i za pristupanje možeš navesti token za pristup.",
         "TITLE": "Gitea"
       },
       "ISSUE_CONTENT": {
@@ -196,7 +196,7 @@
       },
       "FORM_SECTION": {
         "TITLE": "Redmine",
-        "HELP": "<p>Ovdje možeš konfigurirati „Super produktivnost” za prikaz popisa nezavršenih Redmine problema (online verzija ili instanca vlastitog hostinga) za određeni projekt na ploči za stvaranje zadataka u prikazu dnevnog planiranja. U popisu će se ti problemi navesti kao prijedlozi s poveznicom na problem te s daljnjim informacija o problemu.</p><p>Osim toga, sve neriješene probleme možeš automatski dodati i sinkronizirati u svoje odlagalište zadataka.</p>"
+        "HELP": "<p>Ovdje možeš konfigurirati „Super produktivnost” za prikaz popisa nezavršenih Redmine problema (online verzija ili instanca vlastitog hostinga) za određeni projekt na ploči za stvaranje zadataka u prikazu dnevnog planiranja. U popisu će se ti problemi navesti kao prijedlozi s poveznicom na problem te s daljnjim informacija o problemu.</p><p>Osim toga, sve neriješene probleme možeš automatski dodati u odlagalište zadataka i sinkronizirati ih.</p>"
       },
       "ISSUE_CONTENT": {
         "AUTHOR": "Autor",
@@ -223,7 +223,7 @@
         "TOKEN_DESCRIPTION": "Potrebno za pristup privatnom repozitoriju"
       },
       "FORM_SECTION": {
-        "HELP": "<p>Ovdje možeš konfigurirati „Super produktivnost” za prikaz popisa nezavršenih GitHub problema (online verzija ili instanca vlastitog histinga) za određeni projekt na ploči za stvaranje zadataka u prikazu dnevnog planiranja. U popisu će se ti problemi navesti kao prijedlozi s poveznicom na problem te s daljnjim informacija o problemu.</p> <p>Osim toga, sve neriješene probleme možeš automatski dodati i sinkronizirati u svoje odlagalište zadataka.</p><p>Za zaobilaženje ograničenja upotrebe i za pristupanje, možeš zadati pristupni token. <a href='https://docs.github.com/en/free-pro-team@latest/developers/apps/scopes-for-oauth-apps'>Više informacija mogu se pronaći odvje</a>.",
+        "HELP": "<p>Ovdje možeš konfigurirati „Super produktivnost” za prikaz popisa nezavršenih GitHub problema (online verzija ili instanca vlastitog histinga) za određeni projekt na ploči za stvaranje zadataka u prikazu dnevnog planiranja. U popisu će se ti problemi navesti kao prijedlozi s poveznicom na problem te s daljnjim informacija o problemu.</p> <p>Osim toga, sve neriješene probleme možeš automatski dodati u odlagalište zadataka i sinkronizirati ih.</p><p>Za zaobilaženje ograničenja upotrebe i za pristupanje, možeš zadati pristupni token. <a href='https://docs.github.com/en/free-pro-team@latest/developers/apps/scopes-for-oauth-apps'>Više informacija mogu se pronaći odvje</a>.",
         "TITLE": "GitHub"
       },
       "ISSUE_CONTENT": {
@@ -262,7 +262,7 @@
         "TOKEN": "Token za pristup"
       },
       "FORM_SECTION": {
-        "HELP": "<p>Ovdje možeš konfigurirati „Super produktivnost” za prikaz popisa nezavršenih GitLab problema (online verzija ili instanca vlastitog histinga) za određeni projekt na ploči za stvaranje zadataka u prikazu dnevnog planiranja. U popisu će se ti problemi navesti kao prijedlozi s poveznicom na problem te s daljnjim informacija o problemu.</p> <p>Osim toga, sve neriješene probleme možeš automatski dodati i sinkronizirati u svoje odlagalište zadataka.</p>",
+        "HELP": "<p>Ovdje možeš konfigurirati „Super produktivnost” za prikaz popisa nezavršenih GitLab problema (online verzija ili instanca vlastitog histinga) za određeni projekt na ploči za stvaranje zadataka u prikazu dnevnog planiranja. U popisu će se ti problemi navesti kao prijedlozi s poveznicom na problem te s daljnjim informacija o problemu.</p> <p>Osim toga, sve neriješene probleme možeš automatski dodati u odlagalište zadataka i sinkronizirati ih.</p>",
         "TITLE": "GitLab"
       },
       "ISSUE_CONTENT": {
@@ -323,7 +323,7 @@
     },
     "JIRA": {
       "BANNER": {
-        "BLOCK_ACCESS_MSG": "Jira: Za izbjegavanje prekidanja API-a, „Super produktivnost” je blokirao pristup. Vjerojatno moraš provjeriti svoje Jira postavke!",
+        "BLOCK_ACCESS_MSG": "Jira: Za izbjegavanje prekidanja API-a, „Super produktivnost” je blokirao pristup. Vjerojatno moraš provjeriti tvoje Jira postavke!",
         "BLOCK_ACCESS_UNBLOCK": "Deblokiraj"
       },
       "CFG_CMP": {
@@ -412,9 +412,9 @@
           "P1_3": "Ako želiš, također možeš konfigurirati automatsko dodavanje (npr. svaki put kad posjetiš prikaz planiranja) svih novih zadataka koji su određeni prilagođenim JQL upitom u odlagalište.",
           "P1_4": "Druga opcija je „Provjeri je li problem koji se trenutačno obrađuje dodijeljen trenutačnom korisniku”. Ako je aktivirano i ako počinješ, izvršit će se provjera, je li tebi trenutačno dodijeljen Jira problem, ako se ne pojavi dijaloški okvir u kojem možeš odabrati sebi dodijeliti problem.",
           "P2_1": "Postoji nekoliko opcija za određivanje vremena i načina slanja dnevnika rada. Aktiviranje opcije <em>'Otvori dijaloški okvir dnevnika rada za dodavanje dnevnika rada u Jira kad je zadatak obavljen'</em> otvara dijaloški okvir za dodavanje dnevnika rada svaki put kad označiš Jira zadatak kao obavljen. Stoga imaj na umu da će se dnevnici rada dodati na vrh svega dosad praćenoga. Dakle, ako označiš zadatak kao obavljen po drugi put, možda nećeš htjeti ponovo poslati kompletno radno vrijeme za zadatak.",
-          "P2_2": "<em>'Otvori dijaloški okvir dnevnika rada kad je podzadatak obavljen, a ne za same zadatke s podzadacima'</em> otvara dijaloški okvir dnevnika rada svaki put kad označiš Jira podzadatak kao obavljen. Budući da već pratiš svoje vrijeme putem podzadataka, nijedan dijaloški okvir se neće otvoriti kad označiš sam Jira zadatak kao obavljen.",
+          "P2_2": "<em>'Otvori dijaloški okvir dnevnika rada kad je podzadatak obavljen, a ne za same zadatke s podzadacima'</em> otvara dijaloški okvir dnevnika rada svaki put kad označiš Jira podzadatak kao obavljen. Budući da već pratiš tvoje vrijeme putem podzadataka, nijedan dijaloški okvir se neće otvoriti kad označiš sam Jira zadatak kao obavljen.",
           "P2_3": "<em>'Automatski pošalji aktualiziranja u dnevnik rada bez dijaloškog okvira'</em>, radi to što kaže. Budući da višestruko označavanje zadatka kao obavljenog dovodi do toga da se cijelo radno vrijeme prati dvaput. To se ne preporučuje.",
-          "P3_1": "Ovdje možeš ponovo konfigurirati svoje standardne prijelaze. Jira omogućuje široki broj konfiguracija prijelaza koji obično stupaju na snagu kao različiti stupci na tvojoj Jirinoj ploči agilnih. Mi ne možemo pretpostaviti mjesto i vrijeme prijelaza tvojih zadataka te ih moraš to postaviti ručno."
+          "P3_1": "Ovdje možeš ponovo konfigurirati standardne prijelaze. Jira omogućuje veliki broj konfiguracija prijelaza koji obično stupaju na snagu kao različiti stupci na tvojoj Jira ploči agilnih. Mi ne možemo pretpostaviti mjesto i vrijeme prijelaza tvojih zadataka te ih moraš to postaviti ručno."
         }
       },
       "ISSUE_CONTENT": {
@@ -750,7 +750,7 @@
     },
     "SYNC": {
       "C": {
-        "EMPTY_SYNC": "Pokušavaš sinkronizirati prazan objekt podataka. Ako pokušavaš postaviti sinkronizaciju iz nove instance programa, jednostavno pritisni „U redu” za učitavanje podataka s poslužitelja. U suprotnom, provjeri svoje podatke.",
+        "EMPTY_SYNC": "Pokušavaš sinkronizirati prazan objekt podataka. Ako pokušavaš postaviti sinkronizaciju iz nove instance programa, jednostavno pritisni „U redu” za učitavanje podataka s poslužitelja. U suprotnom, provjeri tvoje podatke.",
         "FORCE_IMPORT": "Svejedno uvesti podatke udaljenog uređaja?",
         "FORCE_UPLOAD": "Svejedno učitati podatke lokalnog uređaja?",
         "FORCE_UPLOAD_AFTER_ERROR": "Dogodila se greška tijekom učitavanja podataka lokalnog uređaja. Želiš li pokušati prisilno aktualizirati?",
@@ -810,7 +810,7 @@
         "ERROR_FALLBACK_TO_BACKUP": "Greška tijekom sinkronizacije uvoza podataka. Obnavlja se lokalna sigurnosna kopija.",
         "ERROR_INVALID_DATA": "Greška tijekom sinkronizacije. Neispravni podaci",
         "IMPORTING": "Uvoz podataka",
-        "INCOMPLETE_CFG": "Autentifikacija za sinkronizaciju neuspjela. Provjeri svoju konfiguraciju!",
+        "INCOMPLETE_CFG": "Autentifikacija za sinkronizaciju neuspjela. Provjeri konfiguraciju!",
         "INITIAL_SYNC_ERROR": "Izvorna sinkronizacija neuspjela",
         "SUCCESS_IMPORT": "Podaci su uvezeni",
         "SUCCESS_VIA_BUTTON": "Podaci su uspješno sinkronizirani",
@@ -1006,6 +1006,7 @@
       },
       "D_CONFIRM_UPDATE_INSTANCES": {
         "MSG": "Postoje {{tasksNr}} instance stvorene za ovaj ponavljajući zadatak. Želiš li ih sve aktualizirati s novim standardnim postavkama ili samo buduće zadatke?",
+        "CANCEL": "Samo buduće zadatke",
         "OK": "Aktualiziraj sve instance"
       },
       "D_CONFIRM_MOVE_TO_PROJECT": {
@@ -1017,7 +1018,7 @@
         "ADVANCED_CFG": "Napredna konfiguracija",
         "EDIT": "Uredi konfiguraciju za ponavljanje zadatka",
         "HELP1": "Ponavljajući zadaci namijenjeni su za svakodnevne poslove, e.g.: „Organizacija”, „Dnevni sastanak”, „Pregled koda”, „Provjeravanje e-mailova” ili sličnih zadataka koji vjerojatno stalno ponavljaju.",
-        "HELP2": "Nakon što je konfiguriran, ponavljajući zadatak bit će ponovo kreiran svakog dolje odabranog dana kad otvoriš svoj projekt i automatski će se označiti kao završen na kraju dana. Tretirat će se kao različite instance. Na taj način možeš slobodno dodavati podzadatke itd.",
+        "HELP2": "Nakon što je konfiguriran, ponavljajući zadatak bit će ponovo kreiran svakog dolje odabranog dana kad otvoriš tvoj projekt i automatski će se označiti kao završen na kraju dana. Tretirat će se kao različite instance. Na taj način možeš slobodno dodavati podzadatke itd.",
         "HELP3": "Zadaci uvezeni iz Jira ili Git problema ne mogu se ponoviti.",
         "HELP4": "Napomena o polju redoslijeda: Odnosi se na redoslijed kreiranih ponavljajućih zadataka. Koristi se za ponavljajuće zadatke koji se kreiraju u isto vrijeme. Niža vrijednost znači da će se zadatak nalaziti u gornjem dijelu popis, viša vrijednost da će se zadatak nalaziti niže dolje. Vrijednost veća od 0 znači da se elementi stvaraju na kraju uobičajenih zadataka.",
         "TAG_LABEL": "Oznake za dodavanje"
@@ -1065,7 +1066,7 @@
       "END": "Kraj rada",
       "MENU_TITLE": "Vremenska traka",
       "NOW": "Sada",
-      "NO_TASKS": "Trenutačno nema zadataka. Dodaj zadatke putem gumba + na gornjoj traci.",
+      "NO_TASKS": "Trenutačno nema zadataka. Dodaj zadatke putem gumba + u gornjoj traci.",
       "S": {
         "CAL_PROVIDER_ERROR": "Greška vremenske trake pružatelja usluge za Cal: {{errTxt}}"
       },
@@ -1221,7 +1222,7 @@
       "TITLE": "Evaluacija i mjerni podaci"
     },
     "IDLE": {
-      "HELP": "<div><p>Kad je baratanje neaktivnim vremenom aktivirano, nakon određenog vremena otvorit će se dijaloški okvir za provjeru je li želiš, i pri kojem zadatku želiš pratiti svoje neaktivno vrijeme.</p></div>",
+      "HELP": "<div><p>Kad je baratanje neaktivnim vremenom aktivirano, nakon određenog vremena otvorit će se dijaloški okvir za provjeru je li želiš, i pri kojem zadatku želiš pratiti tvoje neaktivno vrijeme.</p></div>",
       "IS_ENABLE_IDLE_TIME_TRACKING": "Aktiviraj baratanje neaktivnim vremenom",
       "IS_ONLY_OPEN_IDLE_WHEN_CURRENT_TASK": "Pokreni dijaloški okvir za neaktivnost samo kad je odabran trenutačni zadatak",
       "IS_UN_TRACKED_IDLE_RESETS_BREAK_TIMER": "Nepraćeno neaktivno vrijeme resetira timer pauza",
@@ -1229,7 +1230,7 @@
       "TITLE": "Baratanje neaktivnim vremenom"
     },
     "IMEX": {
-      "HELP": "<p>Ovdje možeš izvesti sve svoje podatke kao <strong>JSON</strong> za sigurnosne kopije, ali ih koristiti i u drugom kontekstu (npr. možda želiš izvesti svoje projekte u pregledniku i uvesti ih u desktop verziju). </p> <p>Uvoz očekuje ispravni JSON za kopiranje u područje teksta. <strong>NAPOMENA: Nakon što pritisneš gumb za uvoz, sve tvoje trenutačne postavke i podaci će se prepisati!</strong></p>",
+      "HELP": "<p>Ovdje možeš izvesti sve tvoje podatke kao <strong>JSON</strong> za sigurnosne kopije, ali ih koristiti i u drugom kontekstu (npr. možda želiš izvesti tvoje projekte u pregledniku i uvesti ih u desktop verziju). </p> <p>Uvoz očekuje ispravni JSON za kopiranje u područje teksta. <strong>NAPOMENA: Nakon što pritisneš gumb za uvoz, sve tvoje trenutačne postavke i podaci će se prepisati!</strong></p>",
       "TITLE": "Uvoz/Izvoz"
     },
     "KEYBOARD": {
@@ -1418,7 +1419,7 @@
     "PROCRASTINATE": "Odugovlači",
     "PROJECTS": "Projekti",
     "PROJECT_MENU": "Izbornik projekta",
-    "PROJECT_SETTINGS": "Postavke projakta",
+    "PROJECT_SETTINGS": "Postavke projekta",
     "QUICK_HISTORY": "Brza povijest",
     "SCHEDULED": "Terminirano",
     "SETTINGS": "Postavke",
@@ -1435,7 +1436,7 @@
   "PDS": {
     "BACK": "Čekaj, nešto sam zaboravio/la!",
     "BREAK_LABEL": "Pauze (broj / vrijeme)",
-    "CELEBRATE": "Odvoji trenutak za <i>proslavu!</i>",
+    "CELEBRATE": "Odvoji trenutak za <i>slavlje!</i>",
     "CLEAR_ALL_CONTINUE": "Izbriši sve obavljene i nastavi",
     "D_CONFIRM_APP_CLOSE": {
       "CANCEL": "Ne, izbriši samo zadatke",
@@ -1527,8 +1528,8 @@
     "deep-purple": "tamnoljubičasta",
     "green": "zelena",
     "indigo": "indigo",
-    "light-blue": "svijteloplava",
-    "light-green": "svijtelozelena",
+    "light-blue": "svjetloplava",
+    "light-green": "svjetlozelena",
     "lime": "limunasta",
     "pink": "ružičasta",
     "purple": "ljubičasta",
@@ -1552,15 +1553,15 @@
     "ADD_SOME_TASKS": "Dodaj zadatke za planiranje dana!",
     "COMPLETED_TASKS": "Završeni zadaci",
     "ESTIMATE_REMAINING": "Preostalo procijenjeno vrijeme:",
-    "FINISH_DAY": "Završni dan",
+    "FINISH_DAY": "Završi dan",
     "FINISH_DAY_TOOLTIP": "Evaluiraj dan, premjesti sve obavljene zadatke u arhivu (opcionalno) i/ili planiraj sljedeći dan.",
-    "FINISH_DAY_FOR_PROJECT": "Završni dan za ovaj projekt",
-    "FINISH_DAY_FOR_TAG": "Završni dan za ovu oznaku",
+    "FINISH_DAY_FOR_PROJECT": "Završi dan za ovaj projekt",
+    "FINISH_DAY_FOR_TAG": "Završi dan za ovu oznaku",
     "HELP_PROCRASTINATION": "Upomoć, odugovlačim!",
     "NO_COMPLETED_TASKS": "Trenutačno nema završenih zadataka",
     "NO_PLANNED_TASKS": "Nema planiranih zadataka",
     "READY_TO_WORK": "Spremno za rad!",
-    "RESET_BREAK_TIMER": "Obnovi bez timera pauziranja",
+    "RESET_BREAK_TIMER": "Obnovi bez timera pauza",
     "TIME_ESTIMATED": "Procijenjeno vrijeme:",
     "WITHOUT_BREAK": "Bez pauze:",
     "WORKING_TODAY": "Današnje vrijeme rada:"
