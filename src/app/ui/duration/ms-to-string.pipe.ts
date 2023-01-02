@@ -16,10 +16,10 @@ export const msToString = (
   const seconds = isShowSeconds ? Math.floor((value - (hours * H) - (minutes * M)) / S) : 0;
 
   const parsed =
-    // ((+md.days() > 0) ? (md.days() + 'd ') : '')
-    (hours > 0 ? hours + 'h ' : '') +
-    (minutes > 0 ? minutes + 'm ' : '') +
-    (isShowSeconds && seconds > 0 ? seconds + 's ' : '');
+    // ((+md.days() > 0) ? (md.days() + ' d ') : '')
+    (hours > 0 ? hours + ' h ' : '') +
+    (minutes > 0 ? minutes + ' min ' : '') +
+    (isShowSeconds && seconds > 0 ? seconds + ' s ' : '');
 
   if (!isHideEmptyPlaceholder && parsed.trim() === '') {
     return '-';
