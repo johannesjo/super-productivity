@@ -16,17 +16,17 @@ export const durationToString = (momentDuration: any, args?: any): any => {
     if (md.duration || md._milliseconds) {
       const dd = (md.duration && md.duration()._data) || md._data;
       val = '';
-      val += (parseInt(dd.days, 10) > 0 && dd.days + 'd ') || '';
-      val += (parseInt(dd.hours, 10) > 0 && dd.hours + 'h ') || '';
-      val += (parseInt(dd.minutes, 10) > 0 && dd.minutes + 'm ') || '';
-      val += (parseInt(dd.seconds, 10) > 0 && dd.seconds + 's ') || '';
+      val += (parseInt(dd.days, 10) > 0 && dd.days + ' d ') || '';
+      val += (parseInt(dd.hours, 10) > 0 && dd.hours + ' h ') || '';
+      val += (parseInt(dd.minutes, 10) > 0 && dd.minutes + ' min ') || '';
+      val += (parseInt(dd.seconds, 10) > 0 && dd.seconds + ' s ') || '';
       val = val.trim();
 
       // if moment duration string
     } else if (md.replace) {
       val = md.replace('PT', '');
       val = val.toLowerCase(val);
-      val = val.replace(/(d|h|m|s)/g, '$1 ');
+      val = val.replace(/(d|h|min|s)/g, '$1 ');
       val = val.trim();
     }
   }
