@@ -132,7 +132,7 @@ function createIndicatorStr(task: TaskCopy): string {
     //   timeStr += '/' + timeEstimateAsMin;
     // }
     //
-    // msg = title + ' | ' + timeStr + 'm ';
+    // msg = title + ' | ' + timeStr + ' min ';
     // return msg;
   }
 
