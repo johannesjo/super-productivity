@@ -20,7 +20,7 @@ import android.widget.Toast
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
-import com.superproductivity.superproductivity.FullscreenActivity.Companion.INTERFACE_PROPERTY
+import com.superproductivity.superproductivity.FullscreenActivity.Companion.WINDOW_INTERFACE_PROPERTY
 import org.json.JSONException
 import org.json.JSONObject
 import java.io.BufferedOutputStream
@@ -406,6 +406,6 @@ abstract class CommonJavaScriptInterface(
 
     companion object {
         // TODO rename to WINDOW_PROPERTY
-        const val FN_PREFIX: String = "window.$INTERFACE_PROPERTY."
+        const val FN_PREFIX: String = "window.$WINDOW_INTERFACE_PROPERTY."
     }
 }

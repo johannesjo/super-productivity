@@ -77,9 +77,9 @@ class FullscreenActivity : AppCompatActivity() {
         webView = (application as App).wv
         val url: String
         if (BuildConfig.DEBUG) {
-            url = "https://app.super-productivity.com"
+//            url = "https://app.super-productivity.com"
             // for debugging locally run web server
-//            url = "http://10.0.2.2:4200"
+            url = "http://10.0.2.2:4200"
             Toast.makeText(this, "DEBUG: $url", Toast.LENGTH_SHORT).show()
             webView.clearCache(true)
             webView.clearHistory()
@@ -90,10 +90,11 @@ class FullscreenActivity : AppCompatActivity() {
         webView.loadUrl(url)
         supportActionBar?.hide()
         javaScriptInterface = JavaScriptInterface(this)
+        webView.addJavascriptInterface(javaScriptInterface, WINDOW_INTERFACE_PROPERTY)
         if (BuildConfig.FLAVOR.equals("fdroid")) {
-            webView.addJavascriptInterface(javaScriptInterface, INTERFACE_PROPERTY_F_DROID)
-        } else {
-            webView.addJavascriptInterface(javaScriptInterface, INTERFACE_PROPERTY)
+            webView.addJavascriptInterface(javaScriptInterface, WINDOW_PROPERTY_F_DROID)
+            // not ready in time, that's why we create a second JS interface just to fill the prop
+            // callJavaScriptFunction("window.$WINDOW_PROPERTY_F_DROID=true")
         }
         webView.webViewClient = object : WebViewClient() {
 
@@ -176,8 +177,8 @@ class FullscreenActivity : AppCompatActivity() {
     }
 
     private fun callJSInterfaceFunctionIfExists(fnName: String, objectPath: String) {
-        val fnFullName = "window.$INTERFACE_PROPERTY.$objectPath.$fnName"
-        val fullObjectPath = "window.$INTERFACE_PROPERTY.$objectPath"
+        val fnFullName = "window.$WINDOW_INTERFACE_PROPERTY.$objectPath.$fnName"
+        val fullObjectPath = "window.$WINDOW_INTERFACE_PROPERTY.$objectPath"
         callJavaScriptFunction("if($fullObjectPath && $fnFullName)$fnFullName()")
     }
 
@@ -200,7 +201,7 @@ class FullscreenActivity : AppCompatActivity() {
     }
 
     companion object {
-        const val INTERFACE_PROPERTY: String = "SUPAndroid"
-        const val INTERFACE_PROPERTY_F_DROID: String = "SUPFDroid"
+        const val WINDOW_INTERFACE_PROPERTY: String = "SUPAndroid"
+        const val WINDOW_PROPERTY_F_DROID: String = "SUPFDroid"
     }
 }
