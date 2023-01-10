@@ -6,12 +6,7 @@ import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
-import android.webkit.JsResult
-import android.webkit.WebChromeClient
-import android.webkit.WebResourceRequest
-import android.webkit.WebResourceResponse
-import android.webkit.WebView
-import android.webkit.WebViewClient
+import android.webkit.*
 import android.widget.FrameLayout
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -83,9 +78,12 @@ class FullscreenActivity : AppCompatActivity() {
         val url: String
         if (BuildConfig.DEBUG) {
             url = "https://app.super-productivity.com"
+            // for debugging locally run web server
+//            url = "http://10.0.2.2:4200"
             Toast.makeText(this, "DEBUG: $url", Toast.LENGTH_SHORT).show()
             webView.clearCache(true)
             webView.clearHistory()
+            WebView.setWebContentsDebuggingEnabled(true);
         } else {
             url = "https://app.super-productivity.com"
         }
@@ -132,6 +130,7 @@ class FullscreenActivity : AppCompatActivity() {
                 return null
             }
         }
+
         webView.webChromeClient = object : WebChromeClient() {
             override fun onJsAlert(
                 view: WebView,
