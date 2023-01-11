@@ -2,7 +2,7 @@
 import { T } from '../../../t.const';
 import { ConfigFormSection, DropboxSyncConfig, SyncConfig } from '../global-config.model';
 import { SyncProvider } from '../../../imex/sync/sync-provider.model';
-import { IS_F_DROID_APP, IS_ANDROID_WEB_VIEW } from '../../../util/is-android-web-view';
+import { IS_ANDROID_WEB_VIEW } from '../../../util/is-android-web-view';
 import { IS_ELECTRON } from '../../../app.constants';
 import { androidInterface } from '../../android/android-interface';
 
@@ -44,9 +44,6 @@ export const SYNC_FORM: ConfigFormSection<SyncConfig> = {
         required: true,
         options: [
           { label: SyncProvider.Dropbox, value: SyncProvider.Dropbox },
-          ...(IS_F_DROID_APP
-            ? []
-            : [{ label: SyncProvider.GoogleDrive, value: SyncProvider.GoogleDrive }]),
           { label: SyncProvider.WebDAV, value: SyncProvider.WebDAV },
           ...(IS_ELECTRON ||
           (IS_ANDROID_WEB_VIEW &&

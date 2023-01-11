@@ -38,8 +38,9 @@ import { environment } from '../environments/environment';
 import { ActivatedRoute, RouterOutlet } from '@angular/router';
 import { ipcRenderer } from 'electron';
 import { TrackingReminderService } from './features/tracking-reminder/tracking-reminder.service';
-import { first, map } from 'rxjs/operators';
+import { first, map, skip, take } from 'rxjs/operators';
 import { IS_MOBILE } from './util/is-mobile';
+import { SyncProvider } from './imex/sync/sync-provider.model';
 
 const w = window as any;
 const productivityTip: string[] = w.productivityTips && w.productivityTips[w.randomIndex];
@@ -129,6 +130,14 @@ export class AppComponent implements OnDestroy {
     if (IS_ANDROID_WEB_VIEW) {
       this._androidService.init();
     }
+
+    this._globalConfigService.cfg$.pipe(skip(1), take(1)).subscribe((v) => {
+      if (v.sync.syncProvider === SyncProvider.GoogleDrive) {
+        alert(
+          "Please note that synchronization wia google drive will stop to work within a month, due to changes on Google's end. Please switch to another solution for syncing before that.",
+        );
+      }
+    });
 
     if (IS_ELECTRON) {
       (this._electronService.ipcRenderer as typeof ipcRenderer).send(IPC.APP_READY);
