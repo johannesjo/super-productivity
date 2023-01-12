@@ -61,6 +61,15 @@
 <mat-menu #menu="matMenu">
   <ng-template matMenuContent>
     <button
+      [matMenuTriggerFor]="projectMenu"
+      mat-menu-item
+    >
+      <mat-icon>forward</mat-icon>
+      {{(note.projectId ? T.F.TASK.CMP.MOVE_TO_OTHER_PROJECT :
+      T.F.TASK.CMP.ADD_TO_PROJECT)|translate}}
+    </button>
+
+    <button
       (click)="toggleLock()"
       *ngIf="!note.imgUrl"
       mat-menu-item
@@ -79,5 +88,17 @@
       <mat-icon style="color: #e15d63">delete_forever</mat-icon>
       {{T.G.DELETE|translate}}
     </button>
+
+    <mat-menu #projectMenu="matMenu">
+      <ng-template matMenuContent>
+        <button
+          (click)="moveNoteToProject(project.id)"
+          *ngFor="let project of (moveToProjectList$|async); trackBy:trackByProjectId;"
+          mat-menu-item
+        >
+          {{project.title}}
+        </button>
+      </ng-template>
+    </mat-menu>
   </ng-template>
 </mat-menu>

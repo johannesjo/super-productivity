@@ -25,3 +25,8 @@ export const deleteNote = createAction(
   '[Note] Delete Note',
   props<{ id: string; projectId: string | null; isPinnedToToday: boolean }>(),
 );
+
+export const moveNoteToOtherProject = createAction(
+  '[Note] Move to other project',
+  props<{ note: Note; targetProjectId: string }>(),
+);

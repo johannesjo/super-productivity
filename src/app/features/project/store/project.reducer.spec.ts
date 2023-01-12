@@ -2,6 +2,7 @@ import { projectReducer } from './project.reducer';
 import { fakeEntityStateFromArray } from '../../../util/fake-entity-state-from-array';
 import { Project } from '../project.model';
 import { updateProjectOrder } from './project.actions';
+import { moveNoteToOtherProject } from '../../note/store/note.actions';
 
 describe('projectReducer', () => {
   describe('UpdateProjectOrder', () => {
@@ -63,6 +64,26 @@ describe('projectReducer', () => {
       const ids = ['D', 'C'];
       const r = projectReducer(s as any, updateProjectOrder({ ids }) as any);
       expect(r.ids).toEqual(['A', 'B', 'D', 'C']);
+    });
+  });
+
+  describe('moveNoteToOtherProject', () => {
+    it('should update project note list accordingly', () => {
+      const s = fakeEntityStateFromArray([
+        { id: 'P1', noteIds: ['A', 'B'] },
+        { id: 'P2', noteIds: ['C'] },
+      ] as Partial<Project>[]);
+
+      const r = projectReducer(
+        s as any,
+        moveNoteToOtherProject({
+          note: {
+            id: 'A',
+          } as any,
+          targetProjectId: 'P2',
+        }) as any,
+      );
+      expect((r.entities as any).P2.noteIds).toEqual(['C', 'A']);
     });
   });
 });

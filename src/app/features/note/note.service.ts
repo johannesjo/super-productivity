@@ -2,7 +2,13 @@ import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { Note, NoteState } from './note.model';
 import { select, Store } from '@ngrx/store';
-import { addNote, deleteNote, updateNote, updateNoteOrder } from './store/note.actions';
+import {
+  addNote,
+  deleteNote,
+  moveNoteToOtherProject,
+  updateNote,
+  updateNoteOrder,
+} from './store/note.actions';
 import { nanoid } from 'nanoid';
 import {
   selectAllNotes,
@@ -86,6 +92,15 @@ export class NoteService {
         activeContextType: this._workContextService
           .activeWorkContextType as WorkContextType,
         activeContextId: this._workContextService.activeWorkContextId as string,
+      }),
+    );
+  }
+
+  moveToOtherProject(note: Note, targetProjectId: string): void {
+    this._store$.dispatch(
+      moveNoteToOtherProject({
+        note,
+        targetProjectId,
       }),
     );
   }

@@ -1,6 +1,12 @@
-import { createEntityAdapter, EntityAdapter } from '@ngrx/entity';
+import { createEntityAdapter, EntityAdapter, Update } from '@ngrx/entity';
 import { Note, NoteState } from '../note.model';
-import { addNote, deleteNote, updateNote, updateNoteOrder } from './note.actions';
+import {
+  addNote,
+  deleteNote,
+  moveNoteToOtherProject,
+  updateNote,
+  updateNoteOrder,
+} from './note.actions';
 import {
   Action,
   createFeatureSelector,
@@ -13,6 +19,9 @@ import { devError } from '../../../util/dev-error';
 import { WorkContextType } from '../../work-context/work-context.model';
 import { MODEL_VERSION_KEY } from '../../../app.constants';
 import { MODEL_VERSION } from '../../../core/model-version';
+import { moveToOtherProject } from '../../tasks/store/task.actions';
+import { Task } from '../../tasks/task.model';
+import { taskAdapter } from '../../tasks/store/task.adapter';
 
 export const adapter: EntityAdapter<Note> = createEntityAdapter<Note>();
 
@@ -104,6 +113,18 @@ const _reducer = createReducer<NoteState>(
       todayOrder: state.todayOrder.filter((i) => i !== id),
     };
   }),
+
+  on(moveNoteToOtherProject, (state, { targetProjectId, note }) =>
+    adapter.updateOne(
+      {
+        id: note.id,
+        changes: {
+          projectId: targetProjectId,
+        },
+      },
+      state,
+    ),
+  ),
 );
 
 export const noteReducer = (
