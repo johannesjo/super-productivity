@@ -3,7 +3,13 @@ import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { PersistenceService } from '../../../core/persistence/persistence.service';
 import { select, Store } from '@ngrx/store';
 import { first, switchMap, tap } from 'rxjs/operators';
-import { addNote, deleteNote, updateNote, updateNoteOrder } from './note.actions';
+import {
+  addNote,
+  deleteNote,
+  moveNoteToOtherProject,
+  updateNote,
+  updateNoteOrder,
+} from './note.actions';
 import { selectNoteFeatureState } from './note.reducer';
 import { WorkContextService } from '../../work-context/work-context.service';
 import { Observable } from 'rxjs';
@@ -14,7 +20,7 @@ export class NoteEffects {
   updateNote$: Observable<any> = createEffect(
     () =>
       this._actions$.pipe(
-        ofType(addNote, deleteNote, updateNote, updateNoteOrder),
+        ofType(addNote, deleteNote, updateNote, updateNoteOrder, moveNoteToOtherProject),
         switchMap(() => this._store$.pipe(select(selectNoteFeatureState)).pipe(first())),
         tap((state) => this._saveToLs(state)),
       ),
