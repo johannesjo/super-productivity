@@ -79,11 +79,33 @@ describe('projectReducer', () => {
         moveNoteToOtherProject({
           note: {
             id: 'A',
+            projectId: 'P1',
           } as any,
           targetProjectId: 'P2',
         }) as any,
       );
+      expect((r.entities as any).P1.noteIds).toEqual(['B']);
       expect((r.entities as any).P2.noteIds).toEqual(['C', 'A']);
+    });
+
+    it('should update project note list correctly for no project notes', () => {
+      const s = fakeEntityStateFromArray([
+        { id: 'P1', noteIds: ['A', 'B'] },
+        { id: 'P2', noteIds: ['C'] },
+      ] as Partial<Project>[]);
+
+      const r = projectReducer(
+        s as any,
+        moveNoteToOtherProject({
+          note: {
+            id: 'NEW',
+            projectId: null,
+          } as any,
+          targetProjectId: 'P2',
+        }) as any,
+      );
+      expect((r.entities as any).P1.noteIds).toEqual(['A', 'B']);
+      expect((r.entities as any).P2.noteIds).toEqual(['C', 'NEW']);
     });
   });
 });
