@@ -1,28 +1,40 @@
 {
+  "ANDROID": {
+    "NOTIFICATIONS": {
+      "SYNC_CONFLICT_TITLE": "Bir senkronizasyon çakışması oldu.",
+      "SYNC_CONFLICT_MSG": "Lütfen kontrol edin ve ne yapacağınıza karar verin."
+    },
+    "PERMANENT_NOTIFICATION_MSGS": {
+      "INITIAL": "Eğer etkinse, senkronizasyonu kabul etmek için arka planda çalışır.",
+      "NO_ACTIVE_TASKS": "Aktif görevler yok",
+      "SYNCING": "Senkronize ediliyor"
+    }
+  },
+{
   "APP": {
     "B_INSTALL": {
-      "IGNORE": "Aldırmamak",
-      "INSTALL": "kurmak",
+      "IGNORE": "Görmezden gel",
+      "INSTALL": "Kur",
       "MSG": "Süper Verimliliği PWA olarak kurmak ister misiniz?"
     },
-    "B_OFFLINE": "İnternet bağlantınız kesildi. Sorun sağlayıcı verilerini senkronize etmek ve istemek işe yaramaz.",
+    "B_OFFLINE": "İnternet bağlantınız kesildi. Verileri senkronize etmek ve sağlayıcıdan sorunları istemek işe yaramaz.",
     "UPDATE_MAIN_MODEL": "Süper Verimlilik büyük bir güncelleme aldı! Verileriniz için bazı taşıma işlemleri gerekiyor. Bunun verilerinizi uygulamanın eski sürümleriyle uyumsuz hale getirdiğini lütfen unutmayın.",
-    "UPDATE_MAIN_MODEL_NO_UPDATE": "Hiçbir model güncellemesi seçilmedi. Model yükseltmesini gerçekleştirmek istemiyorsanız, ya son sürüme geçmeniz gerektiğini lütfen unutmayın.",
-    "UPDATE_WEB_APP": "Yeni sürüm mevcut. Yeni Sürüm Yükle?"
+    "UPDATE_MAIN_MODEL_NO_UPDATE": "Hiçbir model güncellemesi seçilmedi. Model yükseltmesini gerçekleştirmek istemiyorsanız, son sürüme geçmek zorunda olduğunuzu lütfen unutmayın.",
+    "UPDATE_WEB_APP": "Yeni sürüm mevcut. Yeni Sürüm Yüklensin Mi?"
   },
   "BL": {
-    "NO_TASKS": "İş günlüğünüzde şu anda görev yok"
+    "NO_TASKS": "Birikmiş işler günlüğünüzde şu anda görev yok"
   },
   "CONFIRM": {
-    "AUTO_FIX": "Verileriniz zarar görmüş görünüyor. Otomatik olarak düzeltmeyi denemek ister misiniz? Bu, kısmi veri kaybına neden olabilir.",
+    "AUTO_FIX": "Verileriniz zarar görmüş görünüyor (\"{{validityError}}\"). Otomatik olarak düzeltmeyi denemek ister misiniz? Bu, kısmi veri kaybına neden olabilir.",
     "DELETE_STRAY_BACKUP": "Bu iletişim kutusunu görmemek için arka tarafı silmek istiyor musunuz?",
-    "RELOAD_AFTER_IDB_ERROR": "Veritabanına erişilemiyor :( Olası nedenler, arka planda uygulama güncellemesi veya düşük disk alanıdır. Uygulamayı yeniden yüklemek için Tamam'a basın (bazı platformlarda uygulamanın manuel olarak yeniden başlatılması gerekebilir).",
-    "RESTORE_FILE_BACKUP": "VERİ YOK gibi görünüyor, ancak \"{{dir}}\" adresinde yedeklemeler var. En son yedeklemeyi {{from}}kaynağından geri yüklemek istiyor musunuz?",
-    "RESTORE_FILE_BACKUP_ANDROID": "HİÇBİR VERİ yok gibi görünüyor, ancak bir yedek mevcut. Yüklemek istiyor musun?",
+    "RELOAD_AFTER_IDB_ERROR": "Veritabanına erişilemiyor :( Olası nedenler, arka planda uygulama güncellemesi veya düşük disk alanıdır.Eğer uygulamayı linux da snap aracılığıyla yüklediyseniz, onlar bu sorunu kendi taraflarında çözene kadar haberdar olma yenilemesini 'snap set core experimental.refresh-app-awareness=true' etkinleştirmeyi isteyebilirsiniz. Uygulamayı yeniden yüklemek için Tamam'a basın (bazı platformlarda uygulamanın manuel olarak yeniden başlatılması gerekebilir).",
+    "RESTORE_FILE_BACKUP": "HİÇ VERİ YOK gibi görünüyor, ancak \"{{dir}}\" adresinde yedeklemeler var. En son yedeklemeyi {{from}}kaynağından geri yüklemek istiyor musunuz?",
+    "RESTORE_FILE_BACKUP_ANDROID": "HİÇ VERİ yok gibi görünüyor, ancak bir yedek mevcut. Yüklemek istiyor musun?",
     "RESTORE_STRAY_BACKUP": "Son senkronizasyon sırasında bazı hatalar olabilir. Son yedeği geri yüklemek istiyor musunuz?"
   },
   "DATETIME_INPUT": {
-    "IN": " {{time}}içinde",
+    "IN": "{{time}} içinde",
     "TOMORROW": "yarın {{time}}"
   },
   "DATETIME_SCHEDULE": {
@@ -39,7 +51,7 @@
         "EDIT_ATTACHMENT": "Eki Düzenle",
         "LABELS": {
           "FILE": "Dosya yolu",
-          "IMG": "görüntü",
+          "IMG": "Resim",
           "LINK": "Url"
         },
         "SELECT_TYPE": "Bir tür seçin",
@@ -58,15 +70,15 @@
         "NO_BOOKMARKS": "Proje yer imleriniz yok. Sürükle ve bırak yöntemiyle veya '' simgesini tıklatarak ekleyin."
       },
       "DIALOG_EDIT": {
-        "ADD_BOOKMARK": "İmi eklemek",
-        "EDIT_BOOKMARK": "Yer İşaretini Düzenle",
+        "ADD_BOOKMARK": "Yer imini ekle",
+        "EDIT_BOOKMARK": "Yer imini Düzenle",
         "LABELS": {
-          "COMMAND": "komuta",
+          "COMMAND": "Komut",
           "FILE": "Dosya yolu",
-          "IMG": "görüntü",
+          "IMG": "Resim",
           "LINK": "Url"
         },
-        "SELECT_ICON": "Bir simge seçin",
+        "SELECT_ICON": "Bir ikon seçin",
         "SELECT_TYPE": "Bir tür seçin",
         "TYPES": {
           "COMMAND": "Komut (özel kabuk komutu)",
@@ -78,7 +90,7 @@
     },
     "CALDAV": {
       "DIALOG_INITIAL": {
-        "TITLE": "Project için CalDav Kurulumu"
+        "TITLE": "Projeler için CalDav Kurulumu"
       },
       "FORM": {
         "CALDAV_CATEGORY_FILTER": "Sorunların filtreleneceği kategori (hiçbiri için boş bırakın)",
@@ -86,26 +98,26 @@
         "CALDAV_RESOURCE": "CalDav kaynağının adı (takvim)",
         "CALDAV_URL": "CalDav URL'si (temel URL)",
         "CALDAV_USER": "CalDav kullanıcı adınız",
-        "IS_AUTO_ADD_TO_BACKLOG": "Tamamlanmamış CalDav todos'larını birikiminize otomatik olarak ekleyin",
+        "IS_AUTO_ADD_TO_BACKLOG": "Tamamlanmamış CalDav yapılacaklarını birikim günlüğüne otomatik olarak ekleyin",
         "IS_AUTO_POLL": "Değişiklikler için içe aktarılan görevleri otomatik olarak yoklayın",
-        "IS_SEARCH_ISSUES_FROM_CALDAV": "Yeni görevler eklerken tamamlanmamış CalDav işlemlerini öneri olarak göster",
-        "IS_TRANSITION_ISSUES_ENABLED": "Görev tamamlandığında CalDav todos'unu otomatik olarak tamamlayın"
+        "IS_SEARCH_ISSUES_FROM_CALDAV": "Yeni görevler eklerken tamamlanmamış CalDav yapılacaklarını öneri olarak göster",
+        "IS_TRANSITION_ISSUES_ENABLED": "Görev tamamlandığında CalDav yapılacaklarını otomatik olarak tamamlayın"
       },
       "FORM_SECTION": {
-        "HELP": "<p>Burada, SuperProductivity'yi günlük planlama görünümündeki görev oluşturma panelinde belirli bir proje için tamamlanmamış CalDav yapılacak işleri listeleyecek şekilde yapılandırabilirsiniz. Öneriler olarak listelenecekler ve yapılacaklar için bir bağlantı ve bununla ilgili daha fazla bilgi sağlayacaklar.</p> <p>Ek olarak, tamamlanmamış tüm görevleri görev birikiminize otomatik olarak ekleyebilir ve senkronize edebilirsiniz.</p>",
+        "HELP": "<p>Burada, SuperProductivity'yi günlük planlama görünümündeki görev oluşturma panelinde belirli bir proje için tamamlanmamış CalDav yapılacak işleri listeleyecek şekilde yapılandırabilirsiniz. Öneriler olarak listelenecekler ve yapılacaklar için bir bağlantı ve bununla ilgili daha fazla bilgi sağlayacaklar.</p> <p>Ek olarak, tamamlanmamış tüm görevleri görev birikim günlüğünüze otomatik olarak ekleyebilir ve senkronize edebilirsiniz.</p>",
         "TITLE": "CalDav"
       },
       "ISSUE_CONTENT": {
         "DESCRIPTION": "Açıklama",
         "LABELS": "Kategoriler",
         "MARK_AS_CHECKED": "Güncellemeleri işaretli olarak işaretle",
-        "STATUS": "durum",
-        "SUMMARY": "özet"
+        "STATUS": "Durum",
+        "SUMMARY": "Özet"
       },
       "S": {
         "CALENDAR_NOT_FOUND": "CalDav: \"{{calendarName}}\" takvimi bulunamadı",
         "CALENDAR_READ_ONLY": "CalDav: \"{{calendarName}}\" takvimi salt okunur",
-        "ISSUE_NOT_FOUND": "CalDav: Yapılacak \"{{issueId}}\" sunucuda silinmiş görünüyor."
+        "ISSUE_NOT_FOUND": "CalDav: Yapılacak \"{{issueId}}\" sunucudan silinmiş görünüyor."
       }
     },
     "CONFIG": {
@@ -115,8 +127,8 @@
     },
     "DROPBOX": {
       "S": {
-        "ACCESS_TOKEN_ERROR": "Dropbox: Yetkilendirme Kodundan Erişim Simgesi oluşturulamıyor",
-        "ACCESS_TOKEN_GENERATED": "Dropbox: Yetkilendirme Kodundan oluşturulan Erişim Simgesi",
+        "ACCESS_TOKEN_ERROR": "Dropbox: Erişim Jetonu Yetkilendirme Kodundan Oluşturulamıyor",
+        "ACCESS_TOKEN_GENERATED": "Dropbox: Yetkinlendirme Kodundan Oluşturulan Erişim Jetonu",
         "AUTH_ERROR": "Dropbox: Geçersiz erişim belirteci sağlandı",
         "AUTH_ERROR_ACTION": "Jeton Değiştir",
         "OFFLINE": "Dropbox: Senkronize edilemiyor, çünkü çevrimdışı",
