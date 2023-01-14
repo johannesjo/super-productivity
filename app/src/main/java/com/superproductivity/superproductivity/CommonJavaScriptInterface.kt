@@ -55,10 +55,14 @@ abstract class CommonJavaScriptInterface(
     open fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent) {
         // Additional callback for scoped storage permission management on Android 10+
         // Mandatory for Activity, but not for Fragment & ComponentActivity
+        Log.d("SuperProductivity", "onActivityResult")
         activity.storageHelper.storage.onActivityResult(requestCode, resultCode, data)
-        callJavaScriptFunction(
-            FN_PREFIX + "grantFilePermissionCallBack('" + requestCode + "')"
-        )
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
+            // Once permissions are granted, callback web application to continue execution
+            callJavaScriptFunction(
+                FN_PREFIX + "grantFilePermissionCallBack('" + requestCode + "')"
+            )
+        }
     }
 
     @Suppress("unused")
@@ -419,6 +423,11 @@ abstract class CommonJavaScriptInterface(
     fun isGrantedFilePermission(): Boolean = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
         val grantedPaths = DocumentFileCompat.getAccessibleAbsolutePaths(activity)
         Log.d("SuperProductivity", "isGrantedFilePermission grantedPaths: " + grantedPaths.toString())
+        /*
+        val sp = activity.getPreferences(Context.MODE_PRIVATE)
+        val folderPath = sp.getString("filesyncFolder", "") ?: ""
+        Log.d("SuperProductivity", "isGrantedFilePermission filesyncFolder: $folderPath")
+        */
         grantedPaths.isNotEmpty()
     } else {
         val result = ContextCompat.checkSelfPermission(
@@ -439,13 +448,17 @@ abstract class CommonJavaScriptInterface(
             Log.d("SuperProductivity", "Before SimpleStorageHelper callback func def")
             // Register a callback with SimpleStorage when a folder is picked
             activity.storageHelper.onFolderSelected =
-                { _, root -> // could also use simpleStorageHelper.onStorageAccessGranted()
+                { requestCode, root -> // could also use simpleStorageHelper.onStorageAccessGranted()
                     Log.d("SuperProductivity", "Success Folder Pick! Now saving...")
                     // Get absolute path to folder
                     val fpath = root.getAbsolutePath(activity)
                     // Open preferences to save folder to path
                     val sp = activity.getPreferences(Context.MODE_PRIVATE)
                     sp.edit().putString("filesyncFolder", fpath).apply()
+                    // Once permissions are granted, callback web application to continue execution
+                    callJavaScriptFunction(
+                        FN_PREFIX + "grantFilePermissionCallBack('" + requestCode + "')"
+                    )
                 }
             // Open folder picker via SimpleStorage, this will request the necessary scoped storage permission
             // Note that even though we get permissions, we need to only write DocumentFile files, not MediaStore files, because the latter are not meant to be reopened in the future so we can lose permission at anytime once they are written once, see: https://github.com/anggrayudi/SimpleStorage/issues/103
@@ -456,7 +469,8 @@ abstract class CommonJavaScriptInterface(
                     activity,
                     StorageId.PRIMARY,
                     "SupProd"
-                ), // SimpleStorage.externalStoragePath
+                ), // SimpleStorage.externalStoragePath if we want to default to sdcard
+                // to force pick a specific folder and none others, use these arguments for simpleStorageHelper.requestStorageAccess():
                 //expectedStorageType = StorageType.EXTERNAL,
                 //expectedBasePath = "SupProd"
             )
