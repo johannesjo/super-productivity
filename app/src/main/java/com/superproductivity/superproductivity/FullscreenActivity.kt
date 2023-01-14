@@ -10,6 +10,7 @@ import android.webkit.*
 import android.widget.FrameLayout
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import com.anggrayudi.storage.SimpleStorageHelper
 
 /**
  * An example full-screen activity that shows and hides the system UI (i.e.
@@ -20,6 +21,7 @@ class FullscreenActivity : AppCompatActivity() {
     private lateinit var webView: WebView
     private lateinit var wvContainer: FrameLayout
     var isInForeground: Boolean = false
+    val storageHelper = SimpleStorageHelper(this) // for scoped storage permission management on Android 10+
 
     @Suppress("ReplaceCallWithBinaryOperator")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -79,7 +81,8 @@ class FullscreenActivity : AppCompatActivity() {
         if (BuildConfig.DEBUG) {
 //            url = "https://app.super-productivity.com"
             // for debugging locally run web server
-            url = "http://10.0.2.2:4200"
+            //url = "http://10.0.2.2:4200"
+            url = "https://app.super-productivity.com"
             Toast.makeText(this, "DEBUG: $url", Toast.LENGTH_SHORT).show()
             webView.clearCache(true)
             webView.clearHistory()
@@ -203,5 +206,24 @@ class FullscreenActivity : AppCompatActivity() {
     companion object {
         const val WINDOW_INTERFACE_PROPERTY: String = "SUPAndroid"
         const val WINDOW_PROPERTY_F_DROID: String = "SUPFDroid"
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        // Save scoped storage permission on Android 10+
+        storageHelper.onSaveInstanceState(outState)
+        super.onSaveInstanceState(outState)
+    }
+
+    override fun onRestoreInstanceState(savedInstanceState: Bundle) {
+        // Restore scoped storage permission on Android 10+
+        super.onRestoreInstanceState(savedInstanceState)
+        storageHelper.onRestoreInstanceState(savedInstanceState)
+    }
+
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
+        // Restore scoped storage permission on Android 10+
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        // Mandatory for Activity, but not for Fragment & ComponentActivity
+        storageHelper.onRequestPermissionsResult(requestCode, permissions, grantResults)
     }
 }

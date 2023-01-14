@@ -12,6 +12,7 @@ import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Build
 import android.os.Environment
+import android.preference.PreferenceManager
 import android.provider.Settings
 import android.util.Base64
 import android.util.Log
@@ -20,6 +21,8 @@ import android.widget.Toast
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
+import com.anggrayudi.storage.SimpleStorageHelper
+import com.anggrayudi.storage.file.*
 import com.superproductivity.superproductivity.FullscreenActivity.Companion.WINDOW_INTERFACE_PROPERTY
 import org.json.JSONException
 import org.json.JSONObject
@@ -32,6 +35,7 @@ import java.io.FileReader
 import java.io.FileWriter
 import java.io.IOException
 import java.io.InputStream
+import java.io.Writer
 import java.net.HttpURLConnection
 import java.net.MalformedURLException
 import java.net.URL
@@ -44,17 +48,17 @@ import javax.net.ssl.SSLHandshakeException
 abstract class CommonJavaScriptInterface(
     private val activity: FullscreenActivity,
 ) {
-    private val requestIds: HashMap<Int, String> = HashMap()
 
     /**
      * Instantiate the interface and set the context
      */
     open fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent) {
-        if (requestIds.containsKey(requestCode)) {
-            callJavaScriptFunction(
-                FN_PREFIX + "grantFilePermissionCallBack('" + requestIds[requestCode] + "')"
-            )
-        }
+        // Additional callback for scoped storage permission management on Android 10+
+        // Mandatory for Activity, but not for Fragment & ComponentActivity
+        activity.storageHelper.storage.onActivityResult(requestCode, resultCode, data)
+        callJavaScriptFunction(
+            FN_PREFIX + "grantFilePermissionCallBack('" + requestCode + "')"
+        )
     }
 
     @Suppress("unused")
@@ -322,39 +326,100 @@ abstract class CommonJavaScriptInterface(
     @Suppress("unused")
     @JavascriptInterface
     fun getFileRev(filePath: String): String {
-        val file = File(filePath)
-        return file.lastModified().toString()
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            // Scoped storage permission management for Android 10+
+            val file = DocumentFileCompat.fromFullPath(activity, filePath, requiresWriteAccess = false)
+            file?.lastModified().toString()
+        } else {
+            val file = File(filePath)
+            file.lastModified().toString()
+        }
     }
 
     @Suppress("unused")
     @JavascriptInterface
     fun readFile(filePath: String): String {
-        val reader = BufferedReader(FileReader(filePath))
+        val reader =
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                // Scoped storage permission management for Android 10+
+                // Get folder path
+                val sp = activity.getPreferences(Context.MODE_PRIVATE)
+                val folderPath = sp.getString("filesyncFolder", "") ?: ""
+                // Build fullFilePath from folder path and filepath
+                val fullFilePath = "$folderPath/filePath"
+                Log.d("SuperProductivity", "readFile: trying to save to fullFilePath: " + fullFilePath)
+                val file = DocumentFileCompat.fromFullPath(activity, fullFilePath, requiresWriteAccess=false)
+                file?.openInputStream(activity)?.reader()
+            } else {
+                BufferedReader(FileReader(filePath))
+            }
         val sb = StringBuilder()
-        var line: String? = reader.readLine()
-        val ls = System.getProperty("line.separator")
-        while (line != null) {
-            sb.append(line)
-            sb.append(ls)
-            line = reader.readLine()
+
+        if (reader == null) {
+            Log.d("SuperProductivity", "readFile warning: tried to open file, but file does not exist or we do not have permission! This may be normal if file does not exist yet, it will be created when some tasks will be added.")
+        } else {
+            try {
+                val lines: List<String> = reader.readLines()
+                val ls = System.getProperty("line.separator")
+                for (line in lines) {
+                    sb.append(line)
+                    sb.append(ls)
+                }
+                sb.deleteCharAt(sb.length - 1)
+            } catch (e: Exception) {
+                Log.d("SuperProductivity", "readFile error: " + e.stackTraceToString())
+            } finally {
+                reader.close()
+            }
         }
-        sb.deleteCharAt(sb.length - 1)
-        reader.close()
         return sb.toString()
     }
 
     @Suppress("unused")
     @JavascriptInterface
     fun writeFile(filePath: String, data: String) {
-        val writer = BufferedWriter(FileWriter(filePath))
-        writer.write(data)
-        writer.close()
+        val writer: Writer =
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                // Scoped storage permission management for Android 10+
+                Log.d("SuperProductivity", "writeFile: trying to save to filePath: " + filePath)
+                // Get folder path
+                val sp = activity.getPreferences(Context.MODE_PRIVATE)
+                val folderPath = sp.getString("filesyncFolder", "") ?: ""
+                // Build fullFilePath from folder path and filepath
+                val fullFilePath = "$folderPath/filePath"
+                Log.d("SuperProductivity", "writeFile: trying to save to fullFilePath: " + fullFilePath)
+                // Open file with write access, using SimpleStorage helper wrapper DocumentFileCompat
+                var file = DocumentFileCompat.fromFullPath(activity, fullFilePath, requiresWriteAccess=true, considerRawFile=true)
+                if ((file == null) || (!file.exists())) {  // if file does not exist, we create it
+                    Log.d("SuperProductivity", "writeFile: file does not exist, try to create it")
+                    val folder = DocumentFileCompat.fromFullPath(activity, folderPath, requiresWriteAccess=true)
+                    Log.d("SuperProductivity", "writeFile: do we have access to parentFolder? " + folder.toString())
+                    file = folder!!.makeFile(activity, filePath, mode=CreateMode.REPLACE) // do NOT specify a mimeType, otherwise Android will force a file extension
+                }
+                Log.d("SuperProductivity", "writeFile: erase file content by recreating it")
+                file = file?.recreateFile(activity)  // erase content first by recreating file. For some reason, DocumentFileCompat.fromFullPath(requiresWriteAccess=true) and openOutputStream(append=false) only open the file in append mode, so we need to recreate the file to truncate its content first
+                Log.d("SuperProductivity", "writeFile: try to openOutputStream")
+                file?.openOutputStream(activity, append=false)!!.writer()
+            } else {
+                BufferedWriter(FileWriter(filePath))
+            }
+        try {
+            Log.d("SuperProductivity", "writeFile: try to write data into file: " + data)
+            writer.write(data)
+            Log.d("SuperProductivity", "writeFile: write apparently successful!")
+        } catch (e: Exception) {
+            Log.d("SuperProductivity", "writeFile error: " + e.stackTraceToString())
+        } finally {
+            writer.close()
+        }
     }
 
     @Suppress("unused")
     @JavascriptInterface
-    fun isGrantedFilePermission(): Boolean = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-        Environment.isExternalStorageManager()
+    fun isGrantedFilePermission(): Boolean = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+        val grantedPaths = DocumentFileCompat.getAccessibleAbsolutePaths(activity)
+        Log.d("SuperProductivity", "isGrantedFilePermission grantedPaths: " + grantedPaths.toString())
+        grantedPaths.isNotEmpty()
     } else {
         val result = ContextCompat.checkSelfPermission(
             activity, Manifest.permission.READ_EXTERNAL_STORAGE
@@ -368,28 +433,33 @@ abstract class CommonJavaScriptInterface(
     @Suppress("unused")
     @JavascriptInterface
     fun grantFilePermission(requestId: String) {
-        if (this.isGrantedFilePermission()) {
-            callJavaScriptFunction(FN_PREFIX + "grantFilePermissionCallBack('" + requestId + "')")
-            return
-        }
-        var intent: Intent
-        val requestCode = ThreadLocalRandom.current().nextInt(0, 65535 + 1)
-        requestIds[requestCode] = requestId
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            try {
-                intent = Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION)
-                intent.addCategory("android.intent.category.DEFAULT")
-                intent.data = Uri.parse(
-                    String.format(
-                        "package:%s", activity.applicationContext.packageName
-                    )
-                )
-            } catch (e: Exception) {
-                intent = Intent()
-                intent.action = Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION
-            }
-
-            activity.startActivityForResult(intent, requestCode)
+        // For Android >= 10, use scoped storage via SimpleStorage library to get the permission to write files in a folder
+        // Note that SimpleStorage takes care of all the gritty technical details, including whether the user must pick a root path BEFORE selecting the folder they want to store in, everything is explained to the user
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            Log.d("SuperProductivity", "Before SimpleStorageHelper callback func def")
+            // Register a callback with SimpleStorage when a folder is picked
+            activity.storageHelper.onFolderSelected =
+                { _, root -> // could also use simpleStorageHelper.onStorageAccessGranted()
+                    Log.d("SuperProductivity", "Success Folder Pick! Now saving...")
+                    // Get absolute path to folder
+                    val fpath = root.getAbsolutePath(activity)
+                    // Open preferences to save folder to path
+                    val sp = activity.getPreferences(Context.MODE_PRIVATE)
+                    sp.edit().putString("filesyncFolder", fpath).apply()
+                }
+            // Open folder picker via SimpleStorage, this will request the necessary scoped storage permission
+            // Note that even though we get permissions, we need to only write DocumentFile files, not MediaStore files, because the latter are not meant to be reopened in the future so we can lose permission at anytime once they are written once, see: https://github.com/anggrayudi/SimpleStorage/issues/103
+            Log.d("SuperProductivity", "Get Storage Access permission")
+            activity.storageHelper.openFolderPicker(
+                // We could also use simpleStorageHelper.requestStorageAccess()
+                initialPath = FileFullPath(
+                    activity,
+                    StorageId.PRIMARY,
+                    "SupProd"
+                ), // SimpleStorage.externalStoragePath
+                //expectedStorageType = StorageType.EXTERNAL,
+                //expectedBasePath = "SupProd"
+            )
         } else {
             ActivityCompat.requestPermissions(
                 activity, arrayOf(
