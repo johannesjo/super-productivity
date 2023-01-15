@@ -224,6 +224,6 @@ class FullscreenActivity : AppCompatActivity() {
         // Restore scoped storage permission on Android 10+
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         // Mandatory for Activity, but not for Fragment & ComponentActivity
-        storageHelper.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        //storageHelper.onRequestPermissionsResult(requestCode, permissions, grantResults)
     }
 }

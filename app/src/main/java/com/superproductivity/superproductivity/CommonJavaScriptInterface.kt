@@ -339,7 +339,7 @@ abstract class CommonJavaScriptInterface(
             // Build fullFilePath from folder path and filepath
             val fullFilePath = "$folderPath/$filePath"
             // Load file
-            val file = DocumentFileCompat.fromFullPath(activity, fullFilePath, requiresWriteAccess = false)
+            val file = DocumentFileCompat.fromFullPath(activity, fullFilePath, requiresWriteAccess=false)
             // Get last modified date
             val lastModif = file?.lastModified().toString()
             Log.d("SuperProductivity", "getFileRev lastModified: $lastModif")
