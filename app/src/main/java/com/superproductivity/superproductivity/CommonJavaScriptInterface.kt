@@ -330,10 +330,20 @@ abstract class CommonJavaScriptInterface(
     @Suppress("unused")
     @JavascriptInterface
     fun getFileRev(filePath: String): String {
+        Log.d("SuperProductivity", "getFileRev")
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             // Scoped storage permission management for Android 10+
-            val file = DocumentFileCompat.fromFullPath(activity, filePath, requiresWriteAccess = false)
-            file?.lastModified().toString()
+            // Get folder path
+            val sp = activity.getPreferences(Context.MODE_PRIVATE)
+            val folderPath = sp.getString("filesyncFolder", "") ?: ""
+            // Build fullFilePath from folder path and filepath
+            val fullFilePath = "$folderPath/$filePath"
+            // Load file
+            val file = DocumentFileCompat.fromFullPath(activity, fullFilePath, requiresWriteAccess = false)
+            // Get last modified date
+            val lastModif = file?.lastModified().toString()
+            Log.d("SuperProductivity", "getFileRev lastModified: $lastModif")
+            lastModif
         } else {
             val file = File(filePath)
             file.lastModified().toString()
@@ -343,6 +353,7 @@ abstract class CommonJavaScriptInterface(
     @Suppress("unused")
     @JavascriptInterface
     fun readFile(filePath: String): String {
+        Log.d("SuperProductivity", "readFile")
         val reader =
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                 // Scoped storage permission management for Android 10+
@@ -350,8 +361,9 @@ abstract class CommonJavaScriptInterface(
                 val sp = activity.getPreferences(Context.MODE_PRIVATE)
                 val folderPath = sp.getString("filesyncFolder", "") ?: ""
                 // Build fullFilePath from folder path and filepath
-                val fullFilePath = "$folderPath/filePath"
-                Log.d("SuperProductivity", "readFile: trying to save to fullFilePath: " + fullFilePath)
+                val fullFilePath = "$folderPath/$filePath"
+                Log.d("SuperProductivity", "readFile: trying to read from fullFilePath: " + fullFilePath)
+                // Open file in read only mode and an InputStream
                 val file = DocumentFileCompat.fromFullPath(activity, fullFilePath, requiresWriteAccess=false)
                 file?.openInputStream(activity)?.reader()
             } else {
@@ -390,7 +402,7 @@ abstract class CommonJavaScriptInterface(
                 val sp = activity.getPreferences(Context.MODE_PRIVATE)
                 val folderPath = sp.getString("filesyncFolder", "") ?: ""
                 // Build fullFilePath from folder path and filepath
-                val fullFilePath = "$folderPath/filePath"
+                val fullFilePath = "$folderPath/$filePath"
                 Log.d("SuperProductivity", "writeFile: trying to save to fullFilePath: " + fullFilePath)
                 // Open file with write access, using SimpleStorage helper wrapper DocumentFileCompat
                 var file = DocumentFileCompat.fromFullPath(activity, fullFilePath, requiresWriteAccess=true, considerRawFile=true)
@@ -402,6 +414,7 @@ abstract class CommonJavaScriptInterface(
                 }
                 Log.d("SuperProductivity", "writeFile: erase file content by recreating it")
                 file = file?.recreateFile(activity)  // erase content first by recreating file. For some reason, DocumentFileCompat.fromFullPath(requiresWriteAccess=true) and openOutputStream(append=false) only open the file in append mode, so we need to recreate the file to truncate its content first
+                // Open an OutputStream to the file without append mode (so we write from the start of the file)
                 Log.d("SuperProductivity", "writeFile: try to openOutputStream")
                 file?.openOutputStream(activity, append=false)!!.writer()
             } else {
