@@ -1,4 +1,4 @@
-import { createEntityAdapter, EntityAdapter, Update } from '@ngrx/entity';
+import { createEntityAdapter, EntityAdapter } from '@ngrx/entity';
 import { Note, NoteState } from '../note.model';
 import {
   addNote,
@@ -19,9 +19,6 @@ import { devError } from '../../../util/dev-error';
 import { WorkContextType } from '../../work-context/work-context.model';
 import { MODEL_VERSION_KEY } from '../../../app.constants';
 import { MODEL_VERSION } from '../../../core/model-version';
-import { moveToOtherProject } from '../../tasks/store/task.actions';
-import { Task } from '../../tasks/task.model';
-import { taskAdapter } from '../../tasks/store/task.adapter';
 
 export const adapter: EntityAdapter<Note> = createEntityAdapter<Note>();
 
