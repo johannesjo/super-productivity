@@ -374,31 +374,27 @@ abstract class CommonJavaScriptInterface(
             }
 
         // Use a StringBuilder to rebuild the input file's content but replace the line returns with current OS's line returns
-        val sb = StringBuilder()
-        if (reader == null) {
-            Log.d("SuperProductivity", "readFile warning: tried to open file, but file does not exist or we do not have permission! This may be normal if file does not exist yet, it will be created when some tasks will be added.")
-        } else {
-            // Read input file
-            val lines: List<String> =
-                try {
-                    reader.readLines()
-                } catch (e: Exception) {
-                    Log.d("SuperProductivity", "readFile error: " + e.stackTraceToString())
-                    // Return an empty list if there is an error (maybe file does not exist yet)
-                    emptyList()
-                } finally {
-                    reader.close()
-                }
-            // Get current OS's line return character
-            val ls = System.getProperty("line.separator")
-            // Rebuild input file's content but replacing line returns
-            for (line in lines) {
-                sb.append(line)
-                sb.append(ls)
+        val sb: String =
+            if (reader == null) {
+                Log.d("SuperProductivity", "readFile warning: tried to open file, but file does not exist or we do not have permission! This may be normal if file does not exist yet, it will be created when some tasks will be added.")
+                ""
+            } else {
+                // Read input file
+                val lines: List<String> =
+                    try {
+                        reader.readLines()
+                    } catch (e: Exception) {
+                        Log.d("SuperProductivity", "readFile error: " + e.stackTraceToString())
+                        // Return an empty list if there is an error (maybe file does not exist yet)
+                        emptyList()
+                    } finally {
+                        reader.close()
+                    }
+                // Rebuild input file's content but replacing line returns with current OS's line return character
+                lines.joinToString(System.getProperty("line.separator"))
             }
-        }
-        // Return file content
-        return sb.toString()
+        // Return file's content
+        return sb
     }
 
     @Suppress("unused")
