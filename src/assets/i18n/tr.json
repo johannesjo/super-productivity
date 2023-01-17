@@ -210,7 +210,7 @@
           "ERR_UNKNOWN": "Redmine: Bilinmeyen hata {{statusCode}} {{errorMsg}}."
         }
       },
-      "GITHUB: {
+      "GITHUB": {
         "DIALOG_INITIAL": {
           "TITLE": "Proje için Github Kurulumu"
         },
