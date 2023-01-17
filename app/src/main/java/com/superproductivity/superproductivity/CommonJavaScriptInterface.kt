@@ -353,7 +353,10 @@ abstract class CommonJavaScriptInterface(
     @Suppress("unused")
     @JavascriptInterface
     fun readFile(filePath: String): String {
+        // Read a file, most likely the filesync database
         Log.d("SuperProductivity", "readFile")
+        
+        // Make a reader pointing to the input file
         val reader =
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                 // Scoped storage permission management for Android 10+
@@ -369,25 +372,32 @@ abstract class CommonJavaScriptInterface(
             } else {
                 BufferedReader(FileReader(filePath))
             }
-        val sb = StringBuilder()
 
+        // Use a StringBuilder to rebuild the input file's content but replace the line returns with current OS's line returns
+        val sb = StringBuilder()
         if (reader == null) {
             Log.d("SuperProductivity", "readFile warning: tried to open file, but file does not exist or we do not have permission! This may be normal if file does not exist yet, it will be created when some tasks will be added.")
         } else {
-            try {
-                val lines: List<String> = reader.readLines()
-                val ls = System.getProperty("line.separator")
-                for (line in lines) {
-                    sb.append(line)
-                    sb.append(ls)
+            // Read input file
+            val lines: List<String> =
+                try {
+                    reader.readLines()
+                } catch (e: Exception) {
+                    Log.d("SuperProductivity", "readFile error: " + e.stackTraceToString())
+                    // Return an empty list if there is an error (maybe file does not exist yet)
+                    emptyList()
+                } finally {
+                    reader.close()
                 }
-                sb.deleteCharAt(sb.length - 1)
-            } catch (e: Exception) {
-                Log.d("SuperProductivity", "readFile error: " + e.stackTraceToString())
-            } finally {
-                reader.close()
+            // Get current OS's line return character
+            val ls = System.getProperty("line.separator")
+            // Rebuild input file's content but replacing line returns
+            for (line in lines) {
+                sb.append(line)
+                sb.append(ls)
             }
         }
+        // Return file content
         return sb.toString()
     }
 
