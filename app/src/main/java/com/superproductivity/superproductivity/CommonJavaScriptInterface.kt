@@ -380,18 +380,15 @@ abstract class CommonJavaScriptInterface(
                 ""
             } else {
                 // Read input file
-                val lines: List<String> =
-                    try {
-                        reader.readLines()
-                    } catch (e: Exception) {
-                        Log.d("SuperProductivity", "readFile error: " + e.stackTraceToString())
-                        // Return an empty list if there is an error (maybe file does not exist yet)
-                        emptyList()
-                    } finally {
-                        reader.close()
-                    }
-                // Rebuild input file's content but replacing line returns with current OS's line return character
-                lines.joinToString(System.getProperty("line.separator"))
+                try {
+                    reader.readText()
+                } catch (e: Exception) {
+                    Log.d("SuperProductivity", "readFile error: " + e.stackTraceToString())
+                    // Return an empty string if there is an error (maybe file does not exist yet)
+                    ""
+                } finally {
+                    reader.close()
+                }
             }
         // Return file's content
         return sb
