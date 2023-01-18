@@ -436,6 +436,41 @@ abstract class CommonJavaScriptInterface(
 
     @Suppress("unused")
     @JavascriptInterface
+    fun allowedFolderPath(): String {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            val grantedPaths = DocumentFileCompat.getAccessibleAbsolutePaths(activity)
+            Log.d("SuperProductivity", "allowedFolderPath grantedPaths: " + grantedPaths.toString())
+            val sp = activity.getPreferences(Context.MODE_PRIVATE)
+            val folderPath = sp.getString("filesyncFolder", "") ?: ""
+            Log.d("SuperProductivity", "allowedFolderPath filesyncFolder: $folderPath")
+
+            // Check if stored path is in the list of granted path, if true, then return it, else return an empty string
+            val vpaths: List<String> = grantedPaths.values.toList().flatten()
+            Log.d("SuperProductivity", "allowedFolderPath flattened values: " + vpaths.toString())
+            if (folderPath.isNotEmpty() && grantedPaths.isNotEmpty() && vpaths.contains(folderPath)) {
+                return folderPath
+            } else {
+                return ""
+            }
+        } else {
+            val result = ContextCompat.checkSelfPermission(
+                activity, Manifest.permission.READ_EXTERNAL_STORAGE
+            )
+            val result1 = ContextCompat.checkSelfPermission(
+                activity, Manifest.permission.WRITE_EXTERNAL_STORAGE
+            )
+
+            // For older versions of Android, check if we have access to any folder, then return "<any>" otherwise return an empty string
+            if ((result == PackageManager.PERMISSION_GRANTED) && (result1 == PackageManager.PERMISSION_GRANTED)) {
+                return "<any>"
+            } else {
+                return ""
+            }
+        }
+    }
+
+    @Suppress("unused")
+    @JavascriptInterface
     fun isGrantedFilePermission(): Boolean = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
         val grantedPaths = DocumentFileCompat.getAccessibleAbsolutePaths(activity)
         Log.d("SuperProductivity", "isGrantedFilePermission grantedPaths: " + grantedPaths.toString())
