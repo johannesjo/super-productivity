@@ -112,6 +112,22 @@ export const SYNC_FORM: ConfigFormSection<SyncConfig> = {
     },
     {
       hideExpression: (m, v, field) =>
+        !IS_ANDROID_WEB_VIEW ||
+        field?.parent?.model.syncProvider !== SyncProvider.LocalFile ||
+        !androidInterface?.isGrantedFilePermission() ||
+        !androidInterface?.allowedFolderPath,
+      type: 'tpl',
+      className: `tpl`,
+      expressionProperties: {
+        template: () =>
+          // NOTE: hard to translate here, that's why we don't
+          `<div>Granted file access permission:<br />${
+            androidInterface.allowedFolderPath && androidInterface.allowedFolderPath()
+          }</div>`,
+      },
+    },
+    {
+      hideExpression: (m, v, field) =>
         field?.parent?.model.syncProvider !== SyncProvider.LocalFile,
       key: 'localFileSync',
       fieldGroup: [

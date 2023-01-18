@@ -79,6 +79,7 @@ export interface AndroidInterface {
   makeHttpRequestCallback(rId: string, result: { [key: string]: any }): void;
 
   isGrantedFilePermission(): boolean;
+  allowedFolderPath(): string;
   grantFilePermissionWrapped(): Promise<object>;
   grantFilePermission(rId: string): void;
   grantFilePermissionCallBack(rId: string): void;
