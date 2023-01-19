@@ -508,7 +508,7 @@ abstract class CommonJavaScriptInterface(
                     sp.edit().putString("filesyncFolder", fpath).apply()
                     // Once permissions are granted, callback web application to continue execution
                     callJavaScriptFunction(
-                        FN_PREFIX + "grantFilePermissionCallBack('" + requestCode + "')"
+                        FN_PREFIX + "grantFilePermissionCallBack('" + requestId + "')"
                     )
                 }
             // Open folder picker via SimpleStorage, this will request the necessary scoped storage permission
