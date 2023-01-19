@@ -79,10 +79,9 @@ class FullscreenActivity : AppCompatActivity() {
         webView = (application as App).wv
         val url: String
         if (BuildConfig.DEBUG) {
-//            url = "https://app.super-productivity.com"
+            //url = "https://app.super-productivity.com"
             // for debugging locally run web server
-            //url = "http://10.0.2.2:4200"
-            url = "https://app.super-productivity.com"
+            url = "http://10.0.2.2:4200"
             Toast.makeText(this, "DEBUG: $url", Toast.LENGTH_SHORT).show()
             webView.clearCache(true)
             webView.clearHistory()
@@ -224,6 +223,6 @@ class FullscreenActivity : AppCompatActivity() {
         // Restore scoped storage permission on Android 10+
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         // Mandatory for Activity, but not for Fragment & ComponentActivity
-        storageHelper.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        //storageHelper.onRequestPermissionsResult(requestCode, permissions, grantResults)
     }
 }

@@ -6,8 +6,10 @@
             <certificates src="user"
                 tools:ignore="AcceptsUserCertificates" />
             <certificates src="system" />
-
         </trust-anchors>
-
     </base-config>
+
+    <domain-config cleartextTrafficPermitted="true">
+        <domain includeSubdomains="true">10.0.2.2</domain>
+    </domain-config>
 </network-security-config>
