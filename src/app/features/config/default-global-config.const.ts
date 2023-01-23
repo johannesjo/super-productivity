@@ -164,7 +164,7 @@ export const DEFAULT_GLOBAL_CONFIG: GlobalConfigState = {
     },
 
     localFileSync: {
-      syncFilePath: null,
+      syncFilePath: 'super-productivity-sync.json',
     },
   },
 };

@@ -214,15 +214,12 @@ const _migrateSyncCfg = (config: GlobalConfigState): GlobalConfigState => {
             ...(config.sync as any)?.googleDriveSync,
           },
           webDav: {
-            password: null,
-            syncFilePath: null,
-            userName: null,
-            baseUrl: null,
+            ...DEFAULT_GLOBAL_CONFIG.sync.webDav,
             // copy existing values if any
             ...(config.sync as any)?.webDav,
           },
           localFileSync: {
-            syncFilePath: null,
+            ...DEFAULT_GLOBAL_CONFIG.sync.localFileSync,
             // copy existing values if any
             ...(config.sync as any)?.localFileSync,
           },
