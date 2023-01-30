@@ -10,7 +10,6 @@ directories:
   output: './app-builds'
 
 win:
-  artifactName: ${productName}-${version}-${arch}.${ext}
   target:
     - target: nsis
       arch:
@@ -22,13 +21,17 @@ win:
         - x64
   publish:
     - github
-
+nsis:
+  artifactName: ${productName} Setup ${version}-${arch}.${ext}
+portable:
+  artifactName: ${productName}-${version}-${arch}.${ext}
 appx:
   applicationId: SuperProductivity
   displayName: Super Productivity
   publisherDisplayName: johannesjo
   publisher: CN=___-___
   identityName: ___johannesjo.SuperProductivity
+
 linux:
   category: Productivity
   target:
