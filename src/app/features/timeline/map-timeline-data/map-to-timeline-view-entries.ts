@@ -182,7 +182,10 @@ export const mapToTimelineViewEntries = (
     }
   });
 
-  if (!isSameDay(now, cleanedUpExcessWorkDays[0].start)) {
+  if (
+    cleanedUpExcessWorkDays.length > 0 &&
+    !isSameDay(now, cleanedUpExcessWorkDays[0].start)
+  ) {
     const start = getDateTimeFromClockString('0:00', cleanedUpExcessWorkDays[0].start);
     cleanedUpExcessWorkDays.unshift({
       type: TimelineViewEntryType.DayCrossing,
