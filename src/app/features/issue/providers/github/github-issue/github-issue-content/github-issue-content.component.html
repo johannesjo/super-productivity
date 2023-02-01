@@ -51,7 +51,7 @@
           </mat-chip-list>
         </td>
       </tr>
-      <tr *ngIf="issue?.body">
+      <tr *ngIf="issue?.body && !isCollapsedIssueSummary()">
         <th>{{T.F.GITHUB.ISSUE_CONTENT.DESCRIPTION|translate}}</th>
         <td class="issue-description">
           <div
@@ -63,28 +63,93 @@
       </tr>
     </table>
 
-    <div *ngIf="issue?.comments">
-      <div
-        *ngFor="let comment of (issue?.comments|sort:'created_at'); trackBy: trackByIndex"
-        class="comment"
-      >
-        <!--<img [src]="comment.author.avatarUrl"-->
-        <!--class="author-avatar">-->
-        <div class="name-and-comment-content">
-          <div>
-            <span class="author-name">{{comment.user?.login}}</span>
-            <span class="when"
-              >{{T.F.GITHUB.ISSUE_CONTENT.AT|translate}}
-              {{comment.created_at|date:'short'}}</span
+    <div *ngIf="issue?.comments?.length">
+      <ng-container *ngIf="isCollapsedIssueComments()">
+        <div style="text-align: center">
+          <button
+            mat-stroked-button
+            (click)="isForceShowDescription=true; isForceShowAllComments= true"
+          >
+            <mat-icon>download</mat-icon>
+            <ng-container *ngIf="isCollapsedIssueSummary()"
+              >{{T.F.GITHUB.ISSUE_CONTENT.LOAD_DESCRIPTION_AND_ALL_COMMENTS|translate}}</ng-container
             >
-          </div>
-          <div
-            *ngIf="comment.body"
-            [innerHTML]="comment?.body|markdown"
-            class="markdown"
-          ></div>
+            <ng-container *ngIf="!isCollapsedIssueSummary()"
+              >{{T.F.GITHUB.ISSUE_CONTENT.LOAD_ALL_COMMENTS|translate:{nr:
+              issue?.comments?.length} }}</ng-container
+            >
+          </button>
         </div>
-      </div>
+
+        <h3 class="last-comment-headline">
+          {{T.F.GITHUB.ISSUE_CONTENT.LAST_COMMENT|translate}}
+        </h3>
+
+        <div class="comment isLastComment">
+          <!--<img [src]="comment.author.avatarUrl"-->
+          <!--class="author-avatar">-->
+          <div class="name-and-comment-content">
+            <div>
+              <span class="author-name">{{lastComment().user?.login}}</span>
+              <span class="when"
+                >{{T.F.GITHUB.ISSUE_CONTENT.AT|translate}}
+                {{lastComment().created_at|date:'short'}}</span
+              >
+            </div>
+            <div
+              *ngIf="lastComment().body"
+              [innerHTML]="lastComment().body|markdown"
+              class="markdown"
+            ></div>
+          </div>
+        </div>
+      </ng-container>
+
+      <ng-container *ngIf="!isCollapsedIssueComments()">
+        <div
+          *ngFor="let comment of (issue?.comments|sort:'created_at'); trackBy: trackByIndex"
+          class="comment"
+        >
+          <!--<img [src]="comment.author.avatarUrl"-->
+          <!--class="author-avatar">-->
+          <div class="name-and-comment-content">
+            <div>
+              <span class="author-name">{{comment.user?.login}}</span>
+              <span class="when"
+                >{{T.F.GITHUB.ISSUE_CONTENT.AT|translate}}
+                {{comment.created_at|date:'short'}}</span
+              >
+            </div>
+            <div
+              *ngIf="comment.body"
+              [innerHTML]="comment?.body|markdown"
+              class="markdown"
+            ></div>
+          </div>
+        </div>
+      </ng-container>
+
+      <!--      <div-->
+      <!--        *ngFor="let comment of (issue?.comments|sort:'created_at'); trackBy: trackByIndex"-->
+      <!--        class="comment"-->
+      <!--      >-->
+      <!--        &lt;!&ndash;<img [src]="comment.author.avatarUrl"&ndash;&gt;-->
+      <!--        &lt;!&ndash;class="author-avatar">&ndash;&gt;-->
+      <!--        <div class="name-and-comment-content">-->
+      <!--          <div>-->
+      <!--            <span class="author-name">{{comment.user?.login}}</span>-->
+      <!--            <span class="when"-->
+      <!--              >{{T.F.GITHUB.ISSUE_CONTENT.AT|translate}}-->
+      <!--              {{comment.created_at|date:'short'}}</span-->
+      <!--            >-->
+      <!--          </div>-->
+      <!--          <div-->
+      <!--            *ngIf="comment.body"-->
+      <!--            [innerHTML]="comment?.body|markdown"-->
+      <!--            class="markdown"-->
+      <!--          ></div>-->
+      <!--        </div>-->
+      <!--      </div>-->
     </div>
 
     <div style="text-align: center">
