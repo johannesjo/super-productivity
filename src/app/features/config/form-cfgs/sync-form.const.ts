@@ -95,21 +95,6 @@ export const SYNC_FORM: ConfigFormSection<SyncConfig> = {
         },
       ],
     },
-    {
-      hideExpression: (m, v, field) =>
-        field?.parent?.model.syncProvider !== SyncProvider.GoogleDrive,
-      key: 'googleDriveSync',
-      fieldGroup: [
-        {
-          key: 'syncFileName',
-          type: 'input',
-          templateOptions: {
-            required: true,
-            label: T.F.SYNC.FORM.GOOGLE.L_SYNC_FILE_NAME,
-          },
-        },
-      ],
-    },
     IS_ANDROID_WEB_VIEW
       ? {
           hideExpression: (m, v, field) =>

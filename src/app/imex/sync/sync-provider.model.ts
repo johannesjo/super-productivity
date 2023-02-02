@@ -3,7 +3,6 @@ import { AppDataComplete, SyncGetRevResult } from './sync.model';
 
 // NOTE: do not change!!
 export enum SyncProvider {
-  'GoogleDrive' = 'GoogleDrive',
   'Dropbox' = 'Dropbox',
   'WebDAV' = 'WebDAV',
   'LocalFile' = 'LocalFile',

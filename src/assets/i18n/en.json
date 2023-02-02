@@ -283,26 +283,6 @@
         "ERR_UNKNOWN": "GitLab: Unknown error {{statusCode}} {{errorMsg}}"
       }
     },
-    "GOOGLE": {
-      "BANNER": {
-        "AUTH_FAIL": "GoogleApi: Failed to authenticate please try logging in again!"
-      },
-      "DIALOG": {
-        "CREATE_SYNC_FILE": "Google Drive: No file with the name <strong>\"{{fileName}}\"</strong> was found. <strong>Create</strong> it as sync file on Google Drive?",
-        "USE_EXISTING_SYNC_FILE": "Google Drive: Use <strong>existing</strong> file <strong>\"{{fileName}}\"</strong> as sync file? If not please change the Sync file name."
-      },
-      "S": {
-        "MULTIPLE_SYNC_FILES_WITH_SAME_NAME": "Multiple files with the name \"{{newFileName}}\" found. Please delete all but one or choose a different name.",
-        "SYNC_FILE_CREATION_ERROR": "Google Drive: Error while creating sync file. {{err}}",
-        "UPDATED_SYNC_FILE_NAME": "Google Drive: Updated sync file name"
-      },
-      "S_API": {
-        "ERR": "GoogleApi Error: {{errStr}}",
-        "ERR_NO_FILE_ID": "GoogleApi: No file id specified",
-        "ERR_NO_FILE_NAME": "GoogleApi: No file name specified",
-        "SUCCESS_LOGIN": "GoogleApi: Login successful"
-      }
-    },
     "ISSUE": {
       "DEFAULT": {
         "ISSUES_STR": "issues",
@@ -1401,8 +1381,6 @@
     "DBX_GEN_TOKEN": "Dropbox: Generate token...",
     "DBX_META": "Dropbox: Get file meta...",
     "DBX_UPLOAD": "Dropbox: Upload file...",
-    "GDRIVE_DOWNLOAD": "Google Drive: Download file...",
-    "GDRIVE_UPLOAD": "Google Drive: Upload file...",
     "GITHUB_LOAD_ISSUE": "GitHub: Load issue data...",
     "JIRA_LOAD_ISSUE": "Jira: Load issue data...",
     "UNKNOWN": "Loading remote data",

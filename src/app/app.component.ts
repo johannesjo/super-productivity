@@ -40,7 +40,6 @@ import { ipcRenderer } from 'electron';
 import { TrackingReminderService } from './features/tracking-reminder/tracking-reminder.service';
 import { first, map, skip, take } from 'rxjs/operators';
 import { IS_MOBILE } from './util/is-mobile';
-import { SyncProvider } from './imex/sync/sync-provider.model';
 
 const w = window as any;
 const productivityTip: string[] = w.productivityTips && w.productivityTips[w.randomIndex];
@@ -132,9 +131,9 @@ export class AppComponent implements OnDestroy {
     }
 
     this._globalConfigService.cfg$.pipe(skip(1), take(1)).subscribe((v) => {
-      if (v.sync.syncProvider === SyncProvider.GoogleDrive) {
+      if ((v.sync.syncProvider as any) === 'GoogleDrive') {
         alert(
-          "Please note that synchronization wia google drive will stop to work within a month, due to changes on Google's end. Please switch to another solution for syncing before that.",
+          'Please note that synchronization wia google drive is removed in this release. You can use the file sync provider as an alternative and configure syncing in the background yourself',
         );
       }
     });

@@ -149,13 +149,6 @@ export const DEFAULT_GLOBAL_CONFIG: GlobalConfigState = {
       _tokenExpiresAt: undefined,
     },
 
-    googleDriveSync: {
-      isCompressData: true,
-      syncFileName: 'SUPER_PRODUCTIVITY_SYNC.json',
-      _syncFileNameForBackupDocId: null,
-      _backupDocId: null,
-    },
-
     webDav: {
       baseUrl: null,
       userName: null,

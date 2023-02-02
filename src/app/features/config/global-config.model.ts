@@ -64,12 +64,6 @@ export type PomodoroConfig = Readonly<{
 }>;
 
 // NOTE: needs to be writable due to how we use it
-export interface GoogleDriveSyncConfig {
-  isCompressData: boolean;
-  syncFileName: string;
-  _syncFileNameForBackupDocId: string | null;
-  _backupDocId: string | null;
-}
 
 export interface DropboxSyncConfig {
   accessToken: string | null;
@@ -110,7 +104,6 @@ export type SyncConfig = Readonly<{
   syncInterval: number;
 
   dropboxSync: DropboxSyncConfig;
-  googleDriveSync: GoogleDriveSyncConfig;
   webDav: WebDavConfig;
   localFileSync: LocalFileSyncConfig;
 }>;

@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { LS, DB } from './storage-keys.const';
+import { DB, LS } from './storage-keys.const';
 import { DatabaseService } from './database.service';
 import { LocalSyncMetaModel } from '../../imex/sync/sync.model';
 import { SyncProvider } from '../../imex/sync/sync-provider.model';
@@ -19,7 +19,6 @@ export class PersistenceLocalService {
     if (
       r &&
       r[SyncProvider.Dropbox] &&
-      r[SyncProvider.GoogleDrive] &&
       r[SyncProvider.WebDAV] &&
       r[SyncProvider.LocalFile]
     ) {
@@ -29,10 +28,6 @@ export class PersistenceLocalService {
       [SyncProvider.Dropbox]: {
         rev: this._getLegacyLocalRev(SyncProvider.Dropbox) || null,
         lastSync: this._getLegacyLocalLastSync(SyncProvider.Dropbox) || 0,
-      },
-      [SyncProvider.GoogleDrive]: {
-        rev: this._getLegacyLocalRev(SyncProvider.GoogleDrive) || null,
-        lastSync: this._getLegacyLocalLastSync(SyncProvider.GoogleDrive) || 0,
       },
       [SyncProvider.WebDAV]: {
         rev: this._getLegacyLocalRev(SyncProvider.WebDAV) || null,
