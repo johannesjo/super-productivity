@@ -4,7 +4,6 @@ import { GithubComment, GithubIssue } from '../github-issue.model';
 import { expandAnimation } from '../../../../../../ui/animations/expand.ani';
 import { T } from '../../../../../../t.const';
 import { TaskService } from '../../../../../tasks/task.service';
-import { truncate } from '../../../../../../util/truncate';
 
 @Component({
   selector: 'github-issue-content',
