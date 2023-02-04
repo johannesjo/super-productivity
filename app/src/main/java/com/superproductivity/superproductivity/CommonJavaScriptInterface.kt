@@ -375,7 +375,12 @@ abstract class CommonJavaScriptInterface(
                 file?.openInputStream(activity)?.reader()
             } else {
                 // Older versions of Android <= 9 don't need scoped storage management
-                BufferedReader(FileReader(fullFilePath))
+                try {
+                    BufferedReader(FileReader(fullFilePath))
+                } catch (e: Exception) {
+                    // File does not exist, that's normal if it's the first time, we simply return null
+                    null
+                }
             }
 
         // Use a StringBuilder to rebuild the input file's content but replace the line returns with current OS's line returns
@@ -494,6 +499,7 @@ abstract class CommonJavaScriptInterface(
     @JavascriptInterface
     fun grantFilePermission(requestId: String) {
         // For Android < 10, ask for permission to access the whole storage
+        /* DEPRECATED: if we use this to get the permissions, then we need to use another folder picker than SimpleStorage, because otherwise SimpleStorage also asks for permissions, but Android does not accept asking for two different set of permissions in a single call: "Can reqeust only one set of permissions at a time"
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
             ActivityCompat.requestPermissions(
                 activity, arrayOf(
@@ -502,6 +508,7 @@ abstract class CommonJavaScriptInterface(
                 ), 1
             )
         }
+        */
         // For Android >= 10, use scoped storage via SimpleStorage library to get the permission to write files in a folder
         // For Android < 10, SimpleStorage serves as a simple folder path picker, so that we still save where the user want look for a database file
         // Note that SimpleStorage takes care of all the gritty technical details, including whether the user must pick a root path BEFORE selecting the folder they want to store in, everything is explained to the user
