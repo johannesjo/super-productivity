@@ -85,7 +85,7 @@ class FullscreenActivity : AppCompatActivity() {
             Toast.makeText(this, "DEBUG: $url", Toast.LENGTH_SHORT).show()
             webView.clearCache(true)
             webView.clearHistory()
-            WebView.setWebContentsDebuggingEnabled(true);
+            WebView.setWebContentsDebuggingEnabled(true); // necessary to enable chrome://inspect of webviews on physical remote Android devices, but not for AVD emulator, as the latter automatically enables debug build features
         } else {
             url = "https://app.super-productivity.com"
         }
