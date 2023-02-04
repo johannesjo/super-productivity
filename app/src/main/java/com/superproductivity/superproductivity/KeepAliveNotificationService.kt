@@ -117,7 +117,9 @@ class KeepAliveNotificationService : Service() {
         if (message == "") {
             builder.setContentText(null)
         }
-        notificationManager.notify(NOTIFY_ID, builder.build())
+        if (::notificationManager.isInitialized) {
+            notificationManager.notify(NOTIFY_ID, builder.build())
+        }
     }
 
     private fun startForeground() {
@@ -131,8 +133,10 @@ class KeepAliveNotificationService : Service() {
                 importance
             )
             channel.description = description
-            notificationManager = getSystemService(NotificationManager::class.java)
-            notificationManager.createNotificationChannel(channel)
+            if (::notificationManager.isInitialized) {
+                notificationManager = getSystemService(NotificationManager::class.java)
+                notificationManager.createNotificationChannel(channel)
+            }
 
             // create notification
             val notificationIntent = Intent(this, FullscreenActivity::class.java)
