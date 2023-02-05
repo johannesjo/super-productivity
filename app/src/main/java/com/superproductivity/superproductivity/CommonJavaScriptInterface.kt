@@ -451,9 +451,22 @@ abstract class CommonJavaScriptInterface(
         val pathGranted: Boolean =
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                 // If scoped storage, check if stored path is in the list of granted path, if true, then return it, else return an empty string
-                val vpaths: List<String> = grantedPaths.values.toList().flatten()
-                Log.d("SuperProductivity", "allowedFolderPath flattened values: " + vpaths.toString())
-                grantedPaths.isNotEmpty() && vpaths.contains(folderPath)
+                if (grantedPaths.isNullOrEmpty() || folderPath.isEmpty()) {
+                    // list of granted paths is empty, then we have no permission
+                    false
+                } else {
+                    // otherwise we loop through each path in the granted paths list, and check if the currently selected folderPath is a subfolder of a granted path
+                    val vpaths: List<String> = grantedPaths.values.toList().flatten()
+                    Log.d("SuperProductivity", "allowedFolderPath flattened values: $vpaths")
+                    var innerCond: Boolean = false
+                    for (p in vpaths) {
+                        if (folderPath.contains(p)) { // granted path is always a root path and hence a parent path to a user selected folderPath
+                            innerCond = true
+                            break
+                        }
+                    }
+                    innerCond
+                }
             } else {
                 // For older versions of Android, check if we have access to any folder
                 val permissionRead = ContextCompat.checkSelfPermission(activity, Manifest.permission.READ_EXTERNAL_STORAGE)
@@ -461,6 +474,7 @@ abstract class CommonJavaScriptInterface(
 
                 (permissionRead == PackageManager.PERMISSION_GRANTED) && (permissionWrite == PackageManager.PERMISSION_GRANTED)
             }
+        Log.d("SuperProductivity", "allowedFolderPath folderPath.isNotEmpty(): ${folderPath.isNotEmpty()} pathGranted: ${pathGranted.toString()}")
         return if (folderPath.isNotEmpty() && pathGranted) {
             folderPath
         } else {
