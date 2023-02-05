@@ -19,9 +19,9 @@
  */
 
 /* IE9, IE10 and IE11 requires all of the following polyfills. **/
-/*import 'core-js/es/symbol';
-import 'core-js/es/object';
-import 'core-js/es/function';
+//import 'core-js/es/symbol';
+import 'core-js/es/object'; // Support for Chrome mobile <= 69, which is the default browser for Android <= 9, especially the following error: TypeError: Object.fromEntries is not a function
+/*import 'core-js/es/function';
 import 'core-js/es/parse-int';
 import 'core-js/es/parse-float';
 import 'core-js/es/number';
