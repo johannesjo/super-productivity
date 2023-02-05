@@ -117,7 +117,7 @@ class KeepAliveNotificationService : Service() {
         if (message == "") {
             builder.setContentText(null)
         }
-        if (::notificationManager.isInitialized) { // check if lateinit object is initialized, avoids Android <= 7.1 crashes
+        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.N_MR1 || ::notificationManager.isInitialized) { // check if lateinit object is initialized, avoids Android <= 7.1 crashes, but for higher Android versions, checking causes a crash so we just pass
             notificationManager.notify(NOTIFY_ID, builder.build())
         }
     }
@@ -133,7 +133,7 @@ class KeepAliveNotificationService : Service() {
                 importance
             )
             channel.description = description
-            if (::notificationManager.isInitialized) { // check if lateinit object is initialized, avoids Android <= 7.1 crashes
+            if (Build.VERSION.SDK_INT > Build.VERSION_CODES.N_MR1 || ::notificationManager.isInitialized) { // check if lateinit object is initialized, avoids Android <= 7.1 crashes, but for higher Android versions, checking causes a crash so we just pass
                 notificationManager = getSystemService(NotificationManager::class.java)
                 notificationManager.createNotificationChannel(channel)
             }
