@@ -117,7 +117,9 @@ class KeepAliveNotificationService : Service() {
         if (message == "") {
             builder.setContentText(null)
         }
-        notificationManager.notify(NOTIFY_ID, builder.build())
+        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.N_MR1 || ::notificationManager.isInitialized) { // check if lateinit object is initialized, avoids Android <= 7.1 crashes, but for higher Android versions, checking causes a crash so we just pass
+            notificationManager.notify(NOTIFY_ID, builder.build())
+        }
     }
 
     private fun startForeground() {
@@ -131,8 +133,10 @@ class KeepAliveNotificationService : Service() {
                 importance
             )
             channel.description = description
-            notificationManager = getSystemService(NotificationManager::class.java)
-            notificationManager.createNotificationChannel(channel)
+            if (Build.VERSION.SDK_INT > Build.VERSION_CODES.N_MR1 || ::notificationManager.isInitialized) { // check if lateinit object is initialized, avoids Android <= 7.1 crashes, but for higher Android versions, checking causes a crash so we just pass
+                notificationManager = getSystemService(NotificationManager::class.java)
+                notificationManager.createNotificationChannel(channel)
+            }
 
             // create notification
             val notificationIntent = Intent(this, FullscreenActivity::class.java)
