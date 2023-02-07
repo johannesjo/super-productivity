@@ -361,7 +361,13 @@ export class WorkContextService {
 
   getTimeWorkedForDayForAllNonArchiveTasks$(day: string): Observable<number> {
     return this._store$.pipe(select(selectAllTasks)).pipe(
-      map((tasks) => getTimeSpentForDay(tasks, day)),
+      map((tasks) =>
+        getTimeSpentForDay(
+          // avoid double counting parent and sub tasks
+          tasks.filter((task) => !task.parentId),
+          day,
+        ),
+      ),
       distinctUntilChanged(),
     );
   }
