@@ -231,6 +231,9 @@
         "AT": "pri",
         "DESCRIPTION": "Opis",
         "LABELS": "Etikete",
+        "LAST_COMMENT": "Zadnji komentar",
+        "LOAD_ALL_COMMENTS": "Učitaj sve komentare ({{nr}})",
+        "LOAD_DESCRIPTION_AND_ALL_COMMENTS": "Učitaj opis i sve komentare",
         "MARK_AS_CHECKED": "Označi aktualiziranja kao provjerena",
         "STATUS": "Stanje",
         "SUMMARY": "Sažetak",
@@ -1363,7 +1366,7 @@
       "TITLE": "Podsjetnik za pauzu"
     },
     "TIMELINE": {
-      "CAL_PROVIDERS": "Pružatelji usluge kalendara (eksperimentalno i opcijonalno)",
+      "CAL_PROVIDERS": "Pružatelji usluge kalendara (eksperimentalno i opcionalno)",
       "CAL_PROVIDERS_ADD": "Dodaj ical izvor",
       "CAL_PROVIDERS_INFO": "Opcionalno možeš konfigurirati vremensku traku da također učitava i prikazuje iCal podatke (npr. Google Calendar).",
       "HELP": "Vremenska traka omogućuje brzi pregled kako se tvoji terminirani zadaci odvijaju tijekom vremena. Nalazi se u lijevom izborniku pod <a href='#/timeline'>„Vremenska traka”</a>. ",
