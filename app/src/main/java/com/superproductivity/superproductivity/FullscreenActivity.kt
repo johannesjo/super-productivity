@@ -79,7 +79,7 @@ class FullscreenActivity : AppCompatActivity() {
         webView = (application as App).wv
         val url: String
         if (BuildConfig.DEBUG) {
-            //url = "https://app.super-productivity.com"
+//            url = "https://test-app.super-productivity.com/"
             // for debugging locally run web server
             url = "http://10.0.2.2:4200"
             Toast.makeText(this, "DEBUG: $url", Toast.LENGTH_SHORT).show()
