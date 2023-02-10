@@ -9,30 +9,22 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.BitmapFactory
-import android.net.Uri
 import android.os.Build
-import android.os.Environment
-import android.preference.PreferenceManager
-import android.provider.Settings
 import android.util.Base64
 import android.util.Log
 import android.webkit.JavascriptInterface
 import android.widget.Toast
-import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
-import com.anggrayudi.storage.SimpleStorageHelper
 import com.anggrayudi.storage.file.*
 import com.superproductivity.superproductivity.FullscreenActivity.Companion.WINDOW_INTERFACE_PROPERTY
 import org.json.JSONException
 import org.json.JSONObject
 import java.io.BufferedOutputStream
 import java.io.BufferedReader
-import java.io.BufferedWriter
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.FileReader
-import java.io.FileWriter
 import java.io.IOException
 import java.io.InputStream
 import java.io.Writer
@@ -42,10 +34,9 @@ import java.net.URL
 import java.nio.charset.StandardCharsets
 import java.security.cert.CertPathValidatorException
 import java.util.Locale
-import java.util.concurrent.ThreadLocalRandom
 import javax.net.ssl.SSLHandshakeException
 
-abstract class CommonJavaScriptInterface(
+class JavaScriptInterface(
     private val activity: FullscreenActivity,
 ) {
 

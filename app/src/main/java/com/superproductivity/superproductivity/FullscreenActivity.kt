@@ -17,7 +17,7 @@ import com.anggrayudi.storage.SimpleStorageHelper
  * status bar and navigation/system bar) with user interaction.
  */
 class FullscreenActivity : AppCompatActivity() {
-    private lateinit var javaScriptInterface: CommonJavaScriptInterface
+    private lateinit var javaScriptInterface: JavaScriptInterface
     private lateinit var webView: WebView
     private lateinit var wvContainer: FrameLayout
     var isInForeground: Boolean = false
