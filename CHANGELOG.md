@@ -1,3 +1,27 @@
+## [7.12.2](https://github.com/johannesjo/super-productivity/compare/v7.12.1...v7.12.2) (2023-02-10)
+
+### Bug Fixes
+
+- **i18n:** update the portuguese translation ([890656c](https://github.com/johannesjo/super-productivity/commit/890656c3d136e54e967efc5aeaafd60fa64d8a4c))
+- lint ([9a3de1e](https://github.com/johannesjo/super-productivity/commit/9a3de1e4adc3a36101427e37745fb496935431bb))
+- lint ([2286607](https://github.com/johannesjo/super-productivity/commit/22866075e872fe241bb7bd85f93c9398f0e7beff))
+- **note:** add missing save for action ([b47f73e](https://github.com/johannesjo/super-productivity/commit/b47f73e5222f7e6fb63dc4f610a1118376544aee))
+- **note:** save for note list updates ([d2ccfc3](https://github.com/johannesjo/super-productivity/commit/d2ccfc3f8874623d98ea8b861f0fbb862ba4f2b3))
+- short syntax edge case ([ec65fda](https://github.com/johannesjo/super-productivity/commit/ec65fda5217d9c849fec2e7230baf0ddf0efd92e))
+- sync form throwing error for non android context ([9e1e9f9](https://github.com/johannesjo/super-productivity/commit/9e1e9f9da9270fca39a5af5d8b59a59d7edc40d0))
+- time worked not including non-listed task on today view ([4a1d632](https://github.com/johannesjo/super-productivity/commit/4a1d6321a23f862e4db6c3b4254b90a65efbbf45))
+- **timeline:** possible undefined case [#2429](https://github.com/johannesjo/super-productivity/issues/2429) ([227a93d](https://github.com/johannesjo/super-productivity/commit/227a93da99acc69c6ce4647181bdc0902e1b3a40))
+- working today not calculated correctly for sub tasks ([15430e7](https://github.com/johannesjo/super-productivity/commit/15430e73ef1abc7ed32eed69f9c0b5f924fa6a90))
+
+### Features
+
+- add default syncFilePath for local file sync [#2334](https://github.com/johannesjo/super-productivity/issues/2334) ([c636647](https://github.com/johannesjo/super-productivity/commit/c63664737a71b4e55b1113c6697749ca6921b7cc))
+- **github:** only show last comment and collapse description if there are many comments ([4c60644](https://github.com/johannesjo/super-productivity/commit/4c60644cb81df86b557e7e05db1da0705e597aed))
+- **note:** allow assigning different projects to notes ([ce589a9](https://github.com/johannesjo/super-productivity/commit/ce589a9c85f51fd331ca3527de62b9c729ab2549))
+- remove google drive sync :( ([e68f23e](https://github.com/johannesjo/super-productivity/commit/e68f23e6c6e46bcf6f52280178d4bf1cda4d4785))
+- show allowedFolderPath to user [#2001](https://github.com/johannesjo/super-productivity/issues/2001) ([1814dc7](https://github.com/johannesjo/super-productivity/commit/1814dc7d7a95646597111e620ab4a2c583b9f166))
+- upgrade electron [#2355](https://github.com/johannesjo/super-productivity/issues/2355) ([c54b26f](https://github.com/johannesjo/super-productivity/commit/c54b26fe89a7789ef905662889bff522d4b1b2b7))
+
 ## [7.12.1](https://github.com/johannesjo/super-productivity/compare/v7.12.0...v7.12.1) (2023-01-11)
 
 ### Bug Fixes
