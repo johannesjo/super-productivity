@@ -62,8 +62,7 @@ jobs:
 
       - name: Install Snapcraft
         uses: samuelmeuli/action-snapcraft@v1
-        with:
-          # Log in to Snap Store
-          snapcraft_token: ${{ secrets.snapcraft_token }}
+        env:
+          SNAPCRAFT_STORE_CREDENTIALS: ${{ secrets.snapcraft_token }}
 
       - run: snapcraft push app-builds/superProductivity*.snap --release stable
