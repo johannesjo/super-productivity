@@ -87,19 +87,20 @@ export class TaskSummaryTablesComponent {
     });
   }
 
-  roundTimeForTasks(
+  async roundTimeForTasks(
     projectId: string,
     roundTo: RoundTimeOption,
     isRoundUp: boolean = false,
-  ): void {
+  ): Promise<void> {
     const taskIds = this.flatTasks.map((task) => task.id);
-    this._taskService.roundTimeSpentForDay({
+    await this._taskService.roundTimeSpentForDayEverywhere({
       day: this.dayStr,
       taskIds,
       roundTo,
       isRoundUp,
       projectId,
     });
+    this._worklogService.refreshWorklog();
   }
 
   trackById(i: number, item: Project): string {

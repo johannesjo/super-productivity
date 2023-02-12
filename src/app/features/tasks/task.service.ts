@@ -541,7 +541,7 @@ export class TaskService {
     this._store.dispatch(restoreTask({ task, subTasks }));
   }
 
-  roundTimeSpentForDay({
+  async roundTimeSpentForDayEverywhere({
     day,
     taskIds,
     roundTo,
@@ -553,9 +553,28 @@ export class TaskService {
     roundTo: RoundTimeOption;
     isRoundUp: boolean;
     projectId?: string | null;
-  }): void {
+  }): Promise<void> {
+    // NOTE: doing it this way round is quicker since it only has to be calculated when the action is triggered
+    const taskState = await this.taskFeatureState$.pipe(first()).toPromise();
+    const archivedIds: string[] = [];
+    const todayIds: string[] = [];
+    taskIds.forEach((id) => {
+      if (taskState.ids.includes(id)) {
+        todayIds.push(id);
+      } else {
+        // NOTE we don't check if they actually exist there
+        archivedIds.push(id);
+      }
+    });
+
+    // today
     this._store.dispatch(
-      roundTimeSpentForDay({ day, taskIds, roundTo, isRoundUp, projectId }),
+      roundTimeSpentForDay({ day, taskIds: todayIds, roundTo, isRoundUp, projectId }),
+    );
+
+    // archive
+    await this._persistenceService.taskArchive.execAction(
+      roundTimeSpentForDay({ day, taskIds: archivedIds, roundTo, isRoundUp, projectId }),
     );
   }
 
