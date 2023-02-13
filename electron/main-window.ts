@@ -146,8 +146,7 @@ export const createWindow = ({
 
 // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
 function initWinEventListeners(app: any): void {
-  const handleRedirect = (event: Event, url: string): void => {
-    event.preventDefault();
+  const openUrlInBrowser = (url: string): void => {
     // needed for mac; especially for jira urls we might have a host like this www.host.de//
     const urlObj = new URL(url);
     urlObj.pathname = urlObj.pathname.replace('//', '/');
@@ -159,8 +158,14 @@ function initWinEventListeners(app: any): void {
   };
 
   // open new window links in browser
-  mainWin.webContents.on('new-window', handleRedirect);
-  mainWin.webContents.on('will-navigate', handleRedirect);
+  mainWin.webContents.on('will-navigate', (ev, url) => {
+    ev.preventDefault();
+    openUrlInBrowser(url);
+  });
+  mainWin.webContents.setWindowOpenHandler((details) => {
+    openUrlInBrowser(details.url);
+    return { action: 'deny' };
+  });
 
   // TODO refactor quiting mess
   appCloseHandler(app);

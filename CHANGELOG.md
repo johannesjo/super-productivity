@@ -1,3 +1,72 @@
+## [7.12.2](https://github.com/johannesjo/super-productivity/compare/v7.12.1...v7.12.2) (2023-02-10)
+
+### Bug Fixes
+
+- **i18n:** update the portuguese translation ([890656c](https://github.com/johannesjo/super-productivity/commit/890656c3d136e54e967efc5aeaafd60fa64d8a4c))
+- lint ([9a3de1e](https://github.com/johannesjo/super-productivity/commit/9a3de1e4adc3a36101427e37745fb496935431bb))
+- lint ([2286607](https://github.com/johannesjo/super-productivity/commit/22866075e872fe241bb7bd85f93c9398f0e7beff))
+- **note:** add missing save for action ([b47f73e](https://github.com/johannesjo/super-productivity/commit/b47f73e5222f7e6fb63dc4f610a1118376544aee))
+- **note:** save for note list updates ([d2ccfc3](https://github.com/johannesjo/super-productivity/commit/d2ccfc3f8874623d98ea8b861f0fbb862ba4f2b3))
+- short syntax edge case ([ec65fda](https://github.com/johannesjo/super-productivity/commit/ec65fda5217d9c849fec2e7230baf0ddf0efd92e))
+- sync form throwing error for non android context ([9e1e9f9](https://github.com/johannesjo/super-productivity/commit/9e1e9f9da9270fca39a5af5d8b59a59d7edc40d0))
+- time worked not including non-listed task on today view ([4a1d632](https://github.com/johannesjo/super-productivity/commit/4a1d6321a23f862e4db6c3b4254b90a65efbbf45))
+- **timeline:** possible undefined case [#2429](https://github.com/johannesjo/super-productivity/issues/2429) ([227a93d](https://github.com/johannesjo/super-productivity/commit/227a93da99acc69c6ce4647181bdc0902e1b3a40))
+- working today not calculated correctly for sub tasks ([15430e7](https://github.com/johannesjo/super-productivity/commit/15430e73ef1abc7ed32eed69f9c0b5f924fa6a90))
+
+### Features
+
+- add default syncFilePath for local file sync [#2334](https://github.com/johannesjo/super-productivity/issues/2334) ([c636647](https://github.com/johannesjo/super-productivity/commit/c63664737a71b4e55b1113c6697749ca6921b7cc))
+- **github:** only show last comment and collapse description if there are many comments ([4c60644](https://github.com/johannesjo/super-productivity/commit/4c60644cb81df86b557e7e05db1da0705e597aed))
+- **note:** allow assigning different projects to notes ([ce589a9](https://github.com/johannesjo/super-productivity/commit/ce589a9c85f51fd331ca3527de62b9c729ab2549))
+- remove google drive sync :( ([e68f23e](https://github.com/johannesjo/super-productivity/commit/e68f23e6c6e46bcf6f52280178d4bf1cda4d4785))
+- show allowedFolderPath to user [#2001](https://github.com/johannesjo/super-productivity/issues/2001) ([1814dc7](https://github.com/johannesjo/super-productivity/commit/1814dc7d7a95646597111e620ab4a2c583b9f166))
+- upgrade electron [#2355](https://github.com/johannesjo/super-productivity/issues/2355) ([c54b26f](https://github.com/johannesjo/super-productivity/commit/c54b26fe89a7789ef905662889bff522d4b1b2b7))
+
+## [7.12.1](https://github.com/johannesjo/super-productivity/compare/v7.12.0...v7.12.1) (2023-01-11)
+
+### Bug Fixes
+
+- add missing translation for gitea ([1158a4b](https://github.com/johannesjo/super-productivity/commit/1158a4b6f7ac6b01cff16581758cda155de7cb3d))
+- button styling inside dialogs being weird ([270d3d4](https://github.com/johannesjo/super-productivity/commit/270d3d4223db99d0356f0ceeee631d8be9945b31))
+- **fullScreenBlocker:** error when window is manually closed ([fb62dd1](https://github.com/johannesjo/super-productivity/commit/fb62dd1d23458f137edb389750e32b69fa997e9f))
+- **fullScreenBlocker:** overlay not copied for build ([ff5413c](https://github.com/johannesjo/super-productivity/commit/ff5413c16c43750ecef235d1ae2f8391243cb285))
+- gitlab integration ([76bb650](https://github.com/johannesjo/super-productivity/commit/76bb65094cb94f15e3e87f3b8bf940d483f3ac4e))
+- **i18n:** update chinese translation ([615c8ad](https://github.com/johannesjo/super-productivity/commit/615c8ad1d949bff69ed4b47a95a51968775d2594))
+- **i18n:** update chinese translation ([91181cc](https://github.com/johannesjo/super-productivity/commit/91181cc49f918780d3274288b637cf8ccd658510))
+- **i18n:** update spanish translations ([0030532](https://github.com/johannesjo/super-productivity/commit/0030532e089084ffece30a88fe8752d1c73e9b20))
+- improve jira form button alignment with [#2301](https://github.com/johannesjo/super-productivity/issues/2301) ([036b344](https://github.com/johannesjo/super-productivity/commit/036b344e4fddbb1016a435f265417a8ca6544f33))
+- **jira setup:** jira form button styling enhancement [#2301](https://github.com/johannesjo/super-productivity/issues/2301) ([5d3f18a](https://github.com/johannesjo/super-productivity/commit/5d3f18a03e18c88e275b7f7d32ef55ba097f0f28))
+- make debugging electron work again ([b385a35](https://github.com/johannesjo/super-productivity/commit/b385a35ac73d81aaa1e79dc8ad8c6088b2c09130))
+- map gitlab issue id ([d6aabfe](https://github.com/johannesjo/super-productivity/commit/d6aabfe37ec5a8d766776b0362c2cb3beef973e4))
+- **markdown renderer:** quotes & lists display issue ([8a98c30](https://github.com/johannesjo/super-productivity/commit/8a98c3083452da12f76fb994abbfdbb19d9f56f9))
+- possible range error [#463](https://github.com/johannesjo/super-productivity/issues/463) ([5eb01d7](https://github.com/johannesjo/super-productivity/commit/5eb01d7b41ac69777ed768db1db3d839e5805a39))
+- potential weird race condition [#2371](https://github.com/johannesjo/super-productivity/issues/2371) ([44c0189](https://github.com/johannesjo/super-productivity/commit/44c01891c04907de397e801c03c768ed3ad25be1))
+- type ([0dce0a9](https://github.com/johannesjo/super-productivity/commit/0dce0a9e4a25cd24ff288ce503bcc7962c144a29))
+- Update Polish GitLab translations ([d5bc2da](https://github.com/johannesjo/super-productivity/commit/d5bc2da5a313c8bfa82f7e924bde55501db1d902))
+- Update Polish translations ([4f45e8e](https://github.com/johannesjo/super-productivity/commit/4f45e8e895628b82442b5bdc0879a82855be06a2))
+
+### Features
+
+- add link to explain ical for google calendar ([361a951](https://github.com/johannesjo/super-productivity/commit/361a9510fe7291c53979eac4ed43280bbc214149))
+- **docs:** add shortcut for adding task to bottom ([285eba6](https://github.com/johannesjo/super-productivity/commit/285eba6bdb0a81116eb1b9b1e2efc0a4554b2eba))
+- **fullScreenBlocker:** add config ([9f6add0](https://github.com/johannesjo/super-productivity/commit/9f6add0d50df1f6bacf90a74c246853b47798652))
+- **fullScreenBlocker:** adjust default duration ([2ce18d4](https://github.com/johannesjo/super-productivity/commit/2ce18d4fd59fb814383bbf398f323634391fcc19))
+- **fullScreenBlocker:** improve window and animation ([c4ccae6](https://github.com/johannesjo/super-productivity/commit/c4ccae6921b4de8fba531c9c6d5cc1a5c815e2f6))
+- **fullScreenBlocker:** make basic blocker work ([4b92a3f](https://github.com/johannesjo/super-productivity/commit/4b92a3f9ee931635023cf2e7c1d65504924871b4))
+- **fullScreenBlocker:** make seconds work for duration ([3d07ede](https://github.com/johannesjo/super-productivity/commit/3d07ede77e00ba5e568787b8e5f14590279d5b03))
+- **fullScreenBlocker:** update model version to set default values ([7b91db7](https://github.com/johannesjo/super-productivity/commit/7b91db768892ea2c1737cc964f67e6271f576869))
+- **google:** add warning for google drive sync [#2306](https://github.com/johannesjo/super-productivity/issues/2306) ([81db419](https://github.com/johannesjo/super-productivity/commit/81db4197eb25ab5193e38a47a637133fb0a96109))
+- **i18n:** add indonesian as language ([5db6969](https://github.com/johannesjo/super-productivity/commit/5db696982d3cc0ae08ceaf525676518334e77120))
+- improve repeat update instances wording for dialog ([f652ad9](https://github.com/johannesjo/super-productivity/commit/f652ad9f2b6bc6211faaccd3e08b4459f1ba44c5))
+- **jira:** always use original image if available rather than thumb ([e717a9b](https://github.com/johannesjo/super-productivity/commit/e717a9b0f0640b3fd01e12c9d286d81b863ed2c3))
+- make repeat formly type more flexible ([71668e2](https://github.com/johannesjo/super-productivity/commit/71668e282809637a1883053a680d51ea61b10368))
+- **takeABreak:** add translations ([49e9236](https://github.com/johannesjo/super-productivity/commit/49e9236c7b7cf1ccd32da40784d8ba70de2b852d))
+- **takeABreak:** downgrade formly and make it work ([f9a6188](https://github.com/johannesjo/super-productivity/commit/f9a6188bd33e3157e2b593840121532f1c94e878))
+- **takeABreak:** prepare multiple images and rotation ([fb7eec5](https://github.com/johannesjo/super-productivity/commit/fb7eec5cc5b2e9022ba5b5d7ca5a7e3262c376d0))
+- **takeABreak:** prevent closing of overlay ([d6b2f28](https://github.com/johannesjo/super-productivity/commit/d6b2f28da75b86afda33ced9b61d84301726b030))
+- **takeABreak:** prevent quick closing via keyboard shortcut ([43020ff](https://github.com/johannesjo/super-productivity/commit/43020ffd9b804a025b22faffd8243fcd246671f0))
+- update ngx formly ([0130933](https://github.com/johannesjo/super-productivity/commit/0130933bc06846caf6ddcdcc6d3ff4e9fde05c81))
+
 # [7.12.0](https://github.com/johannesjo/super-productivity/compare/v7.11.6...v7.12.0) (2022-09-02)
 
 ### Reverts

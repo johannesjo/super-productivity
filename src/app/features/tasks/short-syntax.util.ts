@@ -71,6 +71,7 @@ export const shortSyntax = (
   // TODO clean up this mess
   let taskChanges: Partial<TaskCopy>;
 
+  // NOTE: we do this twice... :-O ...it's weird, but required to make whitespaces work as separator and not as one
   taskChanges = parseTimeSpentChanges(task);
   const changesForScheduledDate = parseScheduledDate(task);
   taskChanges = {
@@ -98,6 +99,7 @@ export const shortSyntax = (
   };
   taskChanges = {
     ...taskChanges,
+    // NOTE: because we pass the new taskChanges here we need to assignments...
     ...parseTimeSpentChanges(taskChanges),
   };
 
@@ -144,18 +146,35 @@ const parseProjectChanges = (
 
   if (rr && rr[0]) {
     const projectTitle: string = rr[0].trim().replace(CH_PRO, '');
+    const projectTitleToMatch = projectTitle.replace(' ', '').toLowerCase();
     const existingProject = allProjects.find(
       (project) =>
-        project.title
-          .replace(' ', '')
-          .toLowerCase()
-          .indexOf(projectTitle.replace(' ', '').toLowerCase()) === 0,
+        project.title.replace(' ', '').toLowerCase().indexOf(projectTitleToMatch) === 0,
     );
 
     if (existingProject) {
       return {
         title: task.title?.replace(`${CH_PRO}${projectTitle}`, '').trim(),
         projectId: existingProject.id,
+      };
+    }
+
+    // also try only first word after special char
+    const projectTitleFirstWordOnly = projectTitle.split(' ')[0];
+    const projectTitleToMatch2 = projectTitleFirstWordOnly.replace(' ', '').toLowerCase();
+    const existingProjectForFirstWordOnly = allProjects.find(
+      (project) =>
+        project.title.replace(' ', '').toLowerCase().indexOf(projectTitleToMatch2) === 0,
+    );
+
+    if (existingProjectForFirstWordOnly) {
+      return {
+        title: task.title
+          ?.replace(`${CH_PRO}${projectTitleFirstWordOnly}`, '')
+          .trim()
+          // get rid of excess whitespaces
+          .replace('  ', ' '),
+        projectId: existingProjectForFirstWordOnly.id,
       };
     }
   }

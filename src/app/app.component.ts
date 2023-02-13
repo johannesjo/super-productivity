@@ -38,7 +38,7 @@ import { environment } from '../environments/environment';
 import { ActivatedRoute, RouterOutlet } from '@angular/router';
 import { ipcRenderer } from 'electron';
 import { TrackingReminderService } from './features/tracking-reminder/tracking-reminder.service';
-import { first, map } from 'rxjs/operators';
+import { first, map, skip, take } from 'rxjs/operators';
 import { IS_MOBILE } from './util/is-mobile';
 
 const w = window as any;
@@ -129,6 +129,14 @@ export class AppComponent implements OnDestroy {
     if (IS_ANDROID_WEB_VIEW) {
       this._androidService.init();
     }
+
+    this._globalConfigService.cfg$.pipe(skip(1), take(1)).subscribe((v) => {
+      if ((v.sync.syncProvider as any) === 'GoogleDrive') {
+        alert(
+          'Please note that synchronization wia google drive is removed in this release. You can use the file sync provider as an alternative and configure syncing in the background yourself',
+        );
+      }
+    });
 
     if (IS_ELECTRON) {
       (this._electronService.ipcRenderer as typeof ipcRenderer).send(IPC.APP_READY);

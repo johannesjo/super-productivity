@@ -57,7 +57,12 @@ import {
   updateProjectWorkStart,
   upsertProject,
 } from './project.actions';
-import { addNote, deleteNote, updateNoteOrder } from '../../note/store/note.actions';
+import {
+  addNote,
+  deleteNote,
+  moveNoteToOtherProject,
+  updateNoteOrder,
+} from '../../note/store/note.actions';
 import { MODEL_VERSION } from '../../../core/model-version';
 
 export const PROJECT_FEATURE_NAME = 'projects';
@@ -637,6 +642,37 @@ export const projectReducer = createReducer<ProjectState>(
         id: targetProjectId,
         changes: {
           taskIds: [...(state.entities[targetProjectId] as Project).taskIds, task.id],
+        },
+      });
+    }
+
+    return projectAdapter.updateMany(updates, state);
+  }),
+
+  on(moveNoteToOtherProject, (state, { note, targetProjectId }) => {
+    const srcProjectId = note.projectId;
+    const updates: Update<Project>[] = [];
+
+    if (srcProjectId === targetProjectId) {
+      devError('Moving task from same project to same project.');
+      return state;
+    }
+
+    if (srcProjectId) {
+      updates.push({
+        id: srcProjectId,
+        changes: {
+          noteIds: (state.entities[srcProjectId] as Project).noteIds.filter(
+            (id) => id !== note.id,
+          ),
+        },
+      });
+    }
+    if (targetProjectId) {
+      updates.push({
+        id: targetProjectId,
+        changes: {
+          noteIds: [...(state.entities[targetProjectId] as Project).noteIds, note.id],
         },
       });
     }

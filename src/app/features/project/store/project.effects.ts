@@ -60,7 +60,12 @@ import { TODAY_TAG } from '../../tag/tag.const';
 import { EMPTY, Observable, of } from 'rxjs';
 import { TaskRepeatCfg } from '../../task-repeat-cfg/task-repeat-cfg.model';
 import { projectSelectors } from './project.selectors';
-import { addNote, deleteNote, updateNoteOrder } from '../../note/store/note.actions';
+import {
+  addNote,
+  deleteNote,
+  moveNoteToOtherProject,
+  updateNoteOrder,
+} from '../../note/store/note.actions';
 import { DateService } from 'src/app/core/date/date.service';
 
 @Injectable()
@@ -83,6 +88,7 @@ export class ProjectEffects {
           archiveProject.type,
           unarchiveProject.type,
           moveToOtherProject.type,
+          moveNoteToOtherProject.type,
 
           moveProjectTaskInBacklogList.type,
           moveProjectTaskToBacklogList.type,

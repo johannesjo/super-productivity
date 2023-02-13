@@ -3,24 +3,34 @@
 // table styled by ./src/styles/components/issue-table.scss
 
 .table-wrapper {
-  margin: $s*2;
+  margin: $s * 2;
   margin-bottom: $s;
 }
-
 
 .issue-description {
   flex-grow: 1;
   width: 100%;
 }
 
+.last-comment-headline {
+  margin-top: $s * 2;
+  font-style: italic;
+  font-weight: bold;
+  margin-bottom: 0;
+}
+
 .comment {
   display: flex;
-  margin-bottom: $s*1;
-  padding-top: $s*1;
+  margin-bottom: $s * 1;
+  padding-top: $s * 1;
   border-top: 1px dashed $light-theme-extra-border-color;
 
   @include darkTheme {
     border-color: $dark-theme-extra-border-color;
+  }
+
+  &.isLastComment {
+    border-top: 0 !important;
   }
 
   .author-avatar {

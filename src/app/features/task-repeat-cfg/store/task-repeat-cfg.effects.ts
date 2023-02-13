@@ -153,6 +153,7 @@ export class TaskRepeatCfgEffects {
               restoreFocus: true,
               data: {
                 okTxt: T.F.TASK_REPEAT.D_CONFIRM_UPDATE_INSTANCES.OK,
+                cancelTxt: T.F.TASK_REPEAT.D_CONFIRM_UPDATE_INSTANCES.CANCEL,
                 message: T.F.TASK_REPEAT.D_CONFIRM_UPDATE_INSTANCES.MSG,
                 translateParams: { tasksNr: todayTasks.length + archiveTasks.length },
               },

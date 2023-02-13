@@ -11,12 +11,13 @@ import { NoteService } from '../note.service';
 import { MatDialog } from '@angular/material/dialog';
 import { T } from '../../../t.const';
 import { DialogFullscreenMarkdownComponent } from '../../../ui/dialog-fullscreen-markdown/dialog-fullscreen-markdown.component';
-import { Observable, of } from 'rxjs';
+import { Observable, of, ReplaySubject } from 'rxjs';
 import { TagComponentTag } from '../../tag/tag/tag.component';
-import { map, switchMap } from 'rxjs/operators';
+import { distinctUntilChanged, map, switchMap } from 'rxjs/operators';
 import { WorkContextType } from '../../work-context/work-context.model';
 import { WorkContextService } from '../../work-context/work-context.service';
 import { ProjectService } from '../../project/project.service';
+import { Project } from '../../project/project.model';
 
 @Component({
   selector: 'note',
@@ -26,7 +27,13 @@ import { ProjectService } from '../../project/project.service';
 })
 export class NoteComponent implements OnChanges {
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-  @Input() note!: Note;
+  note!: Note;
+
+  @Input('note') set noteSet(v: Note) {
+    this.note = v;
+    this._note$.next(v);
+  }
+
   @Input() isFocus?: boolean;
 
   @ViewChild('markdownEl') markdownEl?: HTMLElement;
@@ -38,20 +45,36 @@ export class NoteComponent implements OnChanges {
 
   projectTag$: Observable<TagComponentTag | null> =
     this._workContextService.activeWorkContextTypeAndId$.pipe(
-      switchMap(({ activeType }) =>
-        activeType === WorkContextType.TAG && this.note.projectId
-          ? this._projectService.getByIdOnce$(this.note.projectId).pipe(
-              map(
-                (project) =>
-                  project && {
-                    ...project,
-                    icon: 'list',
-                  },
+      switchMap(({ activeType }) => {
+        return activeType === WorkContextType.TAG
+          ? this._note$.pipe(
+              map((n) => n.projectId),
+              distinctUntilChanged(),
+              switchMap((pId) =>
+                pId
+                  ? this._projectService.getByIdOnce$(pId).pipe(
+                      map(
+                        (project) =>
+                          project && {
+                            ...project,
+                            icon: 'list',
+                          },
+                      ),
+                    )
+                  : of(null),
               ),
             )
-          : of(null),
-      ),
+          : of(null);
+      }),
     );
+
+  _note$: ReplaySubject<Note> = new ReplaySubject(1);
+
+  moveToProjectList$: Observable<Project[]> = this._note$.pipe(
+    map((note) => note.projectId),
+    distinctUntilChanged(),
+    switchMap((pid) => this._projectService.getProjectsWithoutId$(pid)),
+  );
 
   constructor(
     private readonly _matDialog: MatDialog,
@@ -121,6 +144,18 @@ export class NoteComponent implements OnChanges {
           this._noteService.update(this.note.id, { content });
         }
       });
+  }
+
+  trackByProjectId(i: number, project: Project): string {
+    return project.id;
+  }
+
+  moveNoteToProject(projectId: string): void {
+    if (projectId === this.note.projectId) {
+      return;
+    } else {
+      this._noteService.moveToOtherProject(this.note, projectId);
+    }
   }
 
   private _updateNoteTxt(): void {

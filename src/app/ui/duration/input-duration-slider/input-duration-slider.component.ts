@@ -160,6 +160,10 @@ export class InputDurationSliderComponent implements OnInit, OnDestroy {
     if (hours > 12) {
       hours = 12;
     }
+    // prevent errors for negative values
+    if (hours <= 0) {
+      hours = 0;
+    }
 
     this.dots = new Array(hours);
   }

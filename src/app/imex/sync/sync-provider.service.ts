@@ -13,7 +13,6 @@ import {
   take,
 } from 'rxjs/operators';
 import { SyncConfig } from '../../features/config/global-config.model';
-import { GoogleDriveSyncService } from './google/google-drive-sync.service';
 import {
   AppDataComplete,
   DialogConflictResolutionResult,
@@ -56,8 +55,6 @@ export class SyncProviderService {
       switch (syncProvider) {
         case SyncProvider.Dropbox:
           return this._dropboxSyncService;
-        case SyncProvider.GoogleDrive:
-          return this._googleDriveSyncService;
         case SyncProvider.WebDAV:
           return this._webDavSyncService;
         case SyncProvider.LocalFile:
@@ -95,7 +92,6 @@ export class SyncProviderService {
   constructor(
     private _dropboxSyncService: DropboxSyncService,
     private _dataImportService: DataImportService,
-    private _googleDriveSyncService: GoogleDriveSyncService,
     private _webDavSyncService: WebDavSyncService,
     private _localFileSyncElectronService: LocalFileSyncElectronService,
     private _localFileSyncAndroidService: LocalFileSyncAndroidService,

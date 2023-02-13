@@ -519,7 +519,7 @@ describe('shortSyntax', () => {
     it('should ignore non existing', () => {
       const t = {
         ...TASK,
-        title: 'Other fun title +Some non existing project',
+        title: 'Other fun title +Non existing project',
       };
       const r = shortSyntax(t, [], projects);
       expect(r).toEqual(undefined);
@@ -552,6 +552,30 @@ describe('shortSyntax', () => {
             [getWorklogStr()]: 600000,
           },
           timeEstimate: 3600000,
+        },
+      });
+    });
+
+    it('should work for project first', () => {
+      const projects = [
+        {
+          title: 'ProjectEasyShort',
+          id: 'ProjectEasyShortID',
+        },
+      ] as any;
+      const t = {
+        ...TASK,
+        title: 'Some task +ProjectEasyShort 30m #tag',
+      };
+      const r = shortSyntax(t, [], projects);
+      expect(r).toEqual({
+        newTagTitles: ['tag'],
+        remindAt: null,
+        projectId: 'ProjectEasyShortID',
+        taskChanges: {
+          title: 'Some task',
+          // timeSpent: 7200000,
+          timeEstimate: 1800000,
         },
       });
     });

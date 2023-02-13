@@ -167,19 +167,15 @@ const _migrateMotivationalImg = (config: GlobalConfigState): GlobalConfigState =
 
 const _migrateSyncCfg = (config: GlobalConfigState): GlobalConfigState => {
   if (config.sync) {
-    if (config.sync.isCompressionEnabled === undefined) {
-      return {
-        ...config,
-        sync: {
-          ...config.sync,
-          isCompressionEnabled:
-            config.sync.syncProvider === SyncProvider.GoogleDrive &&
-            config.sync.googleDriveSync.isCompressData,
-        },
-      };
+    let syncProvider: SyncProvider | null = config.sync.syncProvider;
+    if ((syncProvider as any) === 'GoogleDrive') {
+      syncProvider = null;
+    }
+    if ((config.sync as any).googleDriveSync) {
+      delete (config.sync as any).googleDriveSync;
     }
 
-    return config;
+    return { ...config, sync: { ...config.sync, syncProvider } };
   }
 
   let prevProvider: SyncProvider | null = null;
@@ -187,10 +183,6 @@ const _migrateSyncCfg = (config: GlobalConfigState): GlobalConfigState => {
   if ((config as any).dropboxSync?.isEnabled) {
     prevProvider = SyncProvider.Dropbox;
     syncInterval = (config as any).dropboxSync.syncInterval;
-  }
-  if ((config as any).googleDriveSync?.isEnabled) {
-    prevProvider = SyncProvider.GoogleDrive;
-    syncInterval = (config as any).googleDriveSync.syncInterval;
   }
 
   return {
@@ -207,22 +199,13 @@ const _migrateSyncCfg = (config: GlobalConfigState): GlobalConfigState => {
             // copy existing values if any
             ...(config.sync as any)?.dropboxSync,
           },
-          googleDriveSync: {
-            ...DEFAULT_GLOBAL_CONFIG.sync.googleDriveSync,
-            ...(config as any)?.googleDriveSync,
-            // copy existing values if any
-            ...(config.sync as any)?.googleDriveSync,
-          },
           webDav: {
-            password: null,
-            syncFilePath: null,
-            userName: null,
-            baseUrl: null,
+            ...DEFAULT_GLOBAL_CONFIG.sync.webDav,
             // copy existing values if any
             ...(config.sync as any)?.webDav,
           },
           localFileSync: {
-            syncFilePath: null,
+            ...DEFAULT_GLOBAL_CONFIG.sync.localFileSync,
             // copy existing values if any
             ...(config.sync as any)?.localFileSync,
           },

@@ -12,10 +12,6 @@ export interface AndroidInterface {
 
   updateTaskData(s: string): void;
 
-  triggerGetGoogleToken(): void;
-
-  getGoogleToken(): Promise<string>;
-
   // save
   saveToDbWrapped(key: string, value: string): Promise<void>;
 
@@ -79,6 +75,7 @@ export interface AndroidInterface {
   makeHttpRequestCallback(rId: string, result: { [key: string]: any }): void;
 
   isGrantedFilePermission(): boolean;
+  allowedFolderPath(): string;
   grantFilePermissionWrapped(): Promise<object>;
   grantFilePermission(rId: string): void;
   grantFilePermissionCallBack(rId: string): void;
@@ -205,35 +202,6 @@ if (IS_ANDROID_WEB_VIEW) {
   androidInterface.clearDbCallback = (rId: string) => {
     requestMap[rId].resolve();
     delete requestMap[rId];
-  };
-
-  // TODO also adjust to use promise map
-  androidInterface.getGoogleToken = () => {
-    androidInterface.triggerGetGoogleToken();
-
-    // TODO add map similar to jira api
-    return new Promise<string>((resolve, reject) => {
-      (window as any).googleGetTokenSuccessCallback = (token: string) => {
-        resolve(token);
-      };
-      (window as any).googleGetTokenErrorCallback = (token: string) => {
-        reject(token);
-      };
-    });
-  };
-
-  androidInterface.getGoogleToken = () => {
-    androidInterface.triggerGetGoogleToken();
-
-    // TODO add map similar to jira api
-    return new Promise<string>((resolve, reject) => {
-      (window as any).googleGetTokenSuccessCallback = (token: string) => {
-        resolve(token);
-      };
-      (window as any).googleGetTokenErrorCallback = (token: string) => {
-        reject(token);
-      };
-    });
   };
 
   if (androidInterface.makeHttpRequest) {

@@ -1,6 +1,12 @@
 import { createEntityAdapter, EntityAdapter } from '@ngrx/entity';
 import { Note, NoteState } from '../note.model';
-import { addNote, deleteNote, updateNote, updateNoteOrder } from './note.actions';
+import {
+  addNote,
+  deleteNote,
+  moveNoteToOtherProject,
+  updateNote,
+  updateNoteOrder,
+} from './note.actions';
 import {
   Action,
   createFeatureSelector,
@@ -104,6 +110,18 @@ const _reducer = createReducer<NoteState>(
       todayOrder: state.todayOrder.filter((i) => i !== id),
     };
   }),
+
+  on(moveNoteToOtherProject, (state, { targetProjectId, note }) =>
+    adapter.updateOne(
+      {
+        id: note.id,
+        changes: {
+          projectId: targetProjectId,
+        },
+      },
+      state,
+    ),
+  ),
 );
 
 export const noteReducer = (

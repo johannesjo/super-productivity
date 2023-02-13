@@ -173,7 +173,7 @@
         "FILTER_USER": "Nome de usuário (ex.: para filtrar as alterações sozinho)",
         "IS_AUTO_ADD_TO_BACKLOG": "Adicionar automaticamente problemas não resolvidos do GitHub para o backlog",
         "IS_AUTO_POLL": "Obter automaticamente issues do GitHub para alterações",
-        "IS_SEARCH_ISSUES_FROM_GITHUB": "Mostrar issues do GitHub como sugestões qando adicionar novas tarefas",
+        "IS_SEARCH_ISSUES_FROM_GITHUB": "Mostrar issues do GitHub como sugestões quando adicionar novas tarefas",
         "REPO": "\"username/repositoryName\" para o repositório git que você deseja rastrear",
         "TOKEN": "Token de acesso",
         "TOKEN_DESCRIPTION": "Necessário para acesso ao repositório privado"
@@ -205,7 +205,7 @@
         "GITLAB_BASE_URL": "URL base GitLab personalizado",
         "IS_AUTO_ADD_TO_BACKLOG": "Adicionar automaticamente problemas não resolvidos do GitLab para o backlog",
         "IS_AUTO_POLL": "Obter automaticamente issues do GitLab para alterações",
-        "IS_SEARCH_ISSUES_FROM_GITLAB": "Mostrar issues do GitLab como sugestões qando adicionar novas tarefas",
+        "IS_SEARCH_ISSUES_FROM_GITLAB": "Mostrar issues do GitLab como sugestões quando adicionar novas tarefas",
         "PROJECT": "Caminho completo ou nome de usuário / projeto",
         "SCOPE": "escopo",
         "SCOPE_ALL": "Todos",
@@ -331,7 +331,7 @@
       "FORM": {
         "IS_AUTO_ADD_TO_BACKLOG": "Adicionar automaticamente problemas não resolvidos do GitHub para o backlog",
         "IS_AUTO_POLL": "Pesquisar automaticamente problemas importados do git em busca de alterações",
-        "IS_SEARCH_ISSUES_FROM_GITHUB": "Mostrar issues do GitHub como sugestões qando adicionar novas tarefas",
+        "IS_SEARCH_ISSUES_FROM_GITHUB": "Mostrar issues do GitHub como sugestões quando adicionar novas tarefas",
         "REPO": "\"username/repositoryName\" para o repositório git que você deseja rastrear"
       },
       "FORM_ADV": {
@@ -1363,7 +1363,10 @@
     "TOGGLE_DARK_MODE": "Alternar modo escuro"
   },
   "SCHEDULE": {
-    "NO_SCHEDULED": "No momento, não há tarefas agendadas. Você pode agendar uma tarefa escolhendo \"Agendar tarefa\" no menu de contexto da tarefa. Para abri-lo, clique nos 3 pontinhos à direita de uma tarefa.",
+    "NO_SCHEDULED": "No momento, não há tarefas agendadas. Você pode agendar uma tarefa escolhendo \"Agendar Tarefa\" no menu de contexto da tarefa. Para abrí-lo, clique nos 3 pontinhos à direita de uma tarefa.",
+    "NO_REPEATABLE_TASKS": "No momento, não há tarefas recorrentes. Você pode agendar uma tarefa escolhendo \"Repetir Tarefa\" no menu de contexto da tarefa. Para abrí-lo clique nos 3 pontinhos à direita de uma tarefa.",
+    "REPEATED_TASKS": "Tarefas Recorrentes",
+    "SCHEDULED_TASKS": "Tarefas Agendadas",
     "START_TASK": "Iniciar tarefa agora e remover lembrete"
   },
   "THEMES": {

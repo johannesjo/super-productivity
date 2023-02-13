@@ -31,6 +31,7 @@ import { Task, TaskPlanned, TaskWithSubTasks } from '../tasks/task.model';
 import { hasTasksToWorkOn, mapEstimateRemainingFromTasks } from './work-context.util';
 import {
   flattenTasks,
+  selectAllTasks,
   selectTasksWithSubTasksByIds,
 } from '../tasks/store/task.selectors';
 import { Actions, ofType } from '@ngrx/effects';
@@ -66,6 +67,7 @@ import { distinctUntilChangedSimpleArray } from '../../util/distinct-until-chang
 import { isShallowEqual } from '../../util/is-shallow-equal';
 import { distinctUntilChangedObject } from '../../util/distinct-until-changed-object';
 import { DateService } from 'src/app/core/date/date.service';
+import { getTimeSpentForDay } from './get-time-spent-for-day.util';
 
 @Injectable({
   providedIn: 'root',
@@ -348,21 +350,31 @@ export class WorkContextService {
 
   // TODO could be done better
   getTimeWorkedForDay$(day: string = this._dateService.todayStr()): Observable<number> {
+    return this.isToday$.pipe(
+      switchMap((isToday) =>
+        isToday
+          ? this.getTimeWorkedForDayForAllNonArchiveTasks$(day)
+          : this.getTimeWorkedForDayTodaysTasks$(day),
+      ),
+    );
+  }
+
+  getTimeWorkedForDayForAllNonArchiveTasks$(day: string): Observable<number> {
+    return this._store$.pipe(select(selectAllTasks)).pipe(
+      map((tasks) =>
+        getTimeSpentForDay(
+          // avoid double counting parent and sub tasks
+          tasks.filter((task) => !task.parentId),
+          day,
+        ),
+      ),
+      distinctUntilChanged(),
+    );
+  }
+
+  getTimeWorkedForDayTodaysTasks$(day: string): Observable<number> {
     return this.todaysTasks$.pipe(
-      map((tasks) => {
-        return (
-          tasks &&
-          tasks.length &&
-          tasks.reduce((acc, task) => {
-            return (
-              acc +
-              (task.timeSpentOnDay && +task.timeSpentOnDay[day]
-                ? +task.timeSpentOnDay[day]
-                : 0)
-            );
-          }, 0)
-        );
-      }),
+      map((tasks) => getTimeSpentForDay(tasks, day)),
       distinctUntilChanged(),
     );
   }
