@@ -26,14 +26,13 @@ export class DialogAddTaskReminderComponent {
     ? this._reminderService.getById(this.task.reminderId) || undefined
     : undefined;
   isEdit: boolean = !!(this.reminder && this.reminder.id);
-  LS_KEY = this.isEdit
-    ? LS.LAST_IS_MOVE_SCHEDULED_TO_BACKLOG_EDIT
-    : LS.LAST_IS_MOVE_SCHEDULED_TO_BACKLOG_ADD;
+
+  isLastDateToday = true;
 
   dateTime?: number = this.task.plannedAt || undefined;
   isShowMoveToBacklog: boolean =
     !!this.task.projectId && this.task.parentId === null && !this.task.repeatCfgId;
-  isMoveToBacklog: boolean;
+  isMoveToBacklog: boolean = false;
   // TODO make translatable
   remindAvailableOptions: TaskReminderOption[] = TASK_REMINDER_OPTIONS;
   selectedReminderCfgId: TaskReminderOptionId;
@@ -54,20 +53,7 @@ export class DialogAddTaskReminderComponent {
       this.selectedReminderCfgId = TaskReminderOptionId.AtStart;
     }
 
-    // default move to backlog setting
-    // -------------------------------
-    const lsLastIsMoveToBacklog = localStorage.getItem(this.LS_KEY);
-    // NOTE: JSON.parse is good for parsing string booleans
-    const lastIsMoveToBacklog =
-      lsLastIsMoveToBacklog && JSON.parse(lsLastIsMoveToBacklog);
-    // if (this.isEdit) {
-    //   this.isMoveToBacklog = false;
-    // } else {
-    this.isMoveToBacklog =
-      this.isShowMoveToBacklog && typeof lastIsMoveToBacklog === 'boolean'
-        ? lastIsMoveToBacklog
-        : this.isShowMoveToBacklog;
-    // }
+    this.updateMoveToBacklog();
   }
 
   @HostListener('keydown', ['$event']) onKeyDown(ev: KeyboardEvent): void {
@@ -92,7 +78,7 @@ export class DialogAddTaskReminderComponent {
         remindCfg: this.selectedReminderCfgId,
         isMoveToBacklog: this.isMoveToBacklog,
       });
-      localStorage.setItem(this.LS_KEY, this.isMoveToBacklog + '');
+      localStorage.setItem(this.getLSKey(), this.isMoveToBacklog + '');
       this.close(true);
     } else {
       if (!!this.task.repeatCfgId && !isToday(timestamp)) {
@@ -113,7 +99,7 @@ export class DialogAddTaskReminderComponent {
                 this.selectedReminderCfgId,
                 this.isMoveToBacklog,
               );
-              localStorage.setItem(this.LS_KEY, this.isMoveToBacklog + '');
+              localStorage.setItem(this.getLSKey(), this.isMoveToBacklog + '');
               this.close(true);
             }
           });
@@ -124,7 +110,7 @@ export class DialogAddTaskReminderComponent {
           this.selectedReminderCfgId,
           this.isMoveToBacklog,
         );
-        localStorage.setItem(this.LS_KEY, this.isMoveToBacklog + '');
+        localStorage.setItem(this.getLSKey(), this.isMoveToBacklog + '');
         this.close(true);
       }
     }
@@ -147,5 +133,44 @@ export class DialogAddTaskReminderComponent {
 
   trackByIndex(i: number, p: any): number {
     return i;
+  }
+
+  onDateTimeChange(dateTime: number): void {
+    const isLastDateToday = isToday(dateTime);
+    if (isLastDateToday !== this.isLastDateToday) {
+      this.isLastDateToday = isLastDateToday;
+      this.updateMoveToBacklog();
+    }
+  }
+
+  private updateMoveToBacklog(): void {
+    // default move to backlog setting
+    // -------------------------------
+    const lsLastIsMoveToBacklog = localStorage.getItem(this.getLSKey());
+    // NOTE: JSON.parse is good for parsing string booleans
+    const lastIsMoveToBacklog =
+      lsLastIsMoveToBacklog && JSON.parse(lsLastIsMoveToBacklog);
+    // if (this.isEdit) {
+    //   this.isMoveToBacklog = false;
+    // } else {
+
+    this.isMoveToBacklog =
+      this.isShowMoveToBacklog && typeof lastIsMoveToBacklog === 'boolean'
+        ? lastIsMoveToBacklog
+        : this.isShowMoveToBacklog;
+    // }
+
+    console.log(this.isMoveToBacklog);
+  }
+
+  private getLSKey(): string {
+    const LS_KEY = this.isEdit
+      ? LS.LAST_IS_MOVE_SCHEDULED_TO_BACKLOG_EDIT
+      : LS.LAST_IS_MOVE_SCHEDULED_TO_BACKLOG_ADD;
+    const LS_KEY_TODAY = this.isEdit
+      ? LS.LAST_IS_MOVE_SCHEDULED_TO_BACKLOG_EDIT_TODAY
+      : LS.LAST_IS_MOVE_SCHEDULED_TO_BACKLOG_ADD_TODAY;
+
+    return this.isLastDateToday ? LS_KEY_TODAY : LS_KEY;
   }
 }

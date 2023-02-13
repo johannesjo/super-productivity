@@ -3,6 +3,7 @@
     <owl-wrapper
       (triggerSubmit)="save()"
       [(dateTime)]="dateTime"
+      (dateTimeChange)="onDateTimeChange($event)"
     ></owl-wrapper>
 
     <div class="additional-controls">
