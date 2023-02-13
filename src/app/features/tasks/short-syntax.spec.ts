@@ -587,5 +587,39 @@ describe('shortSyntax', () => {
         },
       });
     });
+    it('should correctly parse scheduled date, project, time spent and estimate', () => {
+      const projects = [
+        {
+          title: 'Project',
+          id: 'a1b2',
+        },
+        {
+          title: 'Another Project',
+          id: 'c3d4',
+        },
+      ] as any;
+      const taskInput = `Test @Friday 4pm +${projects[0].title} 2h/4h`;
+      const t = {
+        ...TASK,
+        title: taskInput,
+      };
+      const parsedDateInMilliseconds = getPlannedDateInMilliseconds(t);
+      const parsedDate = new Date(parsedDateInMilliseconds);
+      // The parsed day and time should be Friday, or 5, and time is 16 hours and 0 minute
+      expect(parsedDate.getDay()).toEqual(5);
+      const isTimeSetCorrectly = checkIfDateHasCorrectTime(parsedDate, 16, 0);
+      expect(isTimeSetCorrectly).toBeTrue();
+      const parsedTaskInfo = shortSyntax(t, [], projects);
+      expect(parsedTaskInfo?.projectId).toEqual(projects[0].id);
+      // The time spent value is stored to the property equal to today
+      // in format YYYY-MM-DD of the object `timeSpentOnDay`
+      const today = new Date();
+      const formatedToday = formatDateToISO(today);
+      // Time estimate and time spent should be correctly parsed in milliseconds
+      expect(parsedTaskInfo?.taskChanges.timeEstimate).toEqual(3600 * 4 * 1000);
+      expect(parsedTaskInfo?.taskChanges?.timeSpentOnDay?.[formatedToday]).toEqual(
+        3600 * 2 * 1000,
+      );
+    });
   });
 });
