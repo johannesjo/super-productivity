@@ -70,6 +70,14 @@ const checkIfDateHasCorrectTime = (date: Date, hour: number, minute: number): bo
   return date.getHours() === hour && date.getMinutes() === minute;
 };
 
+const formatDateToISO = (dateObj: Date): string => {
+  const year = dateObj.getFullYear();
+  const month = dateObj.getMonth() + 1;
+  const monthString = month < 10 ? `0${month}` : `${month}`;
+  const date = dateObj.getDate();
+  return `${year}-${monthString}-${date}`;
+};
+
 describe('shortSyntax', () => {
   it('should ignore for no short syntax', () => {
     const r = shortSyntax(TASK);
