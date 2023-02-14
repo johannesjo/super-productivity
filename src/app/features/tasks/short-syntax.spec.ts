@@ -644,5 +644,22 @@ describe('shortSyntax', () => {
         3600 * 2 * 1000,
       );
     });
+    it('should correctly parse scheduled date and multiple tags', () => {
+      const t = {
+        ...TASK,
+        title: 'Test @fri 4pm #html #css',
+      };
+      const plannedTimestamp = getPlannedDateTimestamp(t);
+      const isPlannedDateAndTimeCorrect = checkIfCorrectDateAndTime(
+        plannedTimestamp,
+        'friday',
+        16,
+        0,
+      );
+      expect(isPlannedDateAndTimeCorrect).toBeTrue();
+      const parsedTaskInfo = shortSyntax(t, []);
+      expect(parsedTaskInfo?.newTagTitles.includes('html')).toBeTrue();
+      expect(parsedTaskInfo?.newTagTitles.includes('css')).toBeTrue();
+    });
   });
 });
