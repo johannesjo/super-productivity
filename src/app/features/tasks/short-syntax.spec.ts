@@ -43,7 +43,7 @@ const ALL_TAGS: Tag[] = [
   { ...DEFAULT_TAG, id: 'multi_word_id', title: 'Multi Word Tag' },
 ];
 
-const getPlannedDateInMilliseconds = (taskInput: TaskCopy): number => {
+const getPlannedDateTimestamp = (taskInput: TaskCopy): number => {
   const r = shortSyntax(taskInput);
   const parsedDateInMilliseconds = r?.taskChanges?.plannedAt as number;
   return parsedDateInMilliseconds;
@@ -142,7 +142,7 @@ describe('shortSyntax', () => {
         ...TASK,
         title: 'Test @4pm',
       };
-      const parsedDateInMilliseconds = getPlannedDateInMilliseconds(t);
+      const parsedDateInMilliseconds = getPlannedDateTimestamp(t);
       const parsedDate = new Date(parsedDateInMilliseconds);
       const now = new Date();
       if (now.getHours() > 16 || (now.getHours() === 16 && now.getMinutes() > 0)) {
@@ -162,7 +162,7 @@ describe('shortSyntax', () => {
       };
       const date = new Date();
       date.setHours(23, 59, 59);
-      const parsedDateInMilliseconds = getPlannedDateInMilliseconds(t);
+      const parsedDateInMilliseconds = getPlannedDateTimestamp(t);
       const marginError = Math.abs(date.getTime() - parsedDateInMilliseconds);
       // There may be slight discrepancy between the plannedAt number
       // and the milliseconds representing today 23:59:59 here, so
@@ -175,7 +175,7 @@ describe('shortSyntax', () => {
         ...TASK,
         title: 'Test @tom',
       };
-      const parsedDateInMilliseconds = getPlannedDateInMilliseconds(t);
+      const parsedDateInMilliseconds = getPlannedDateTimestamp(t);
       const date = new Date();
       date.setDate(date.getDate() + 1);
       date.setHours(23, 59, 59);
@@ -187,7 +187,7 @@ describe('shortSyntax', () => {
         ...TASK,
         title: 'Test @tod 4pm',
       };
-      const parsedDateInMilliseconds = getPlannedDateInMilliseconds(t);
+      const parsedDateInMilliseconds = getPlannedDateTimestamp(t);
       const parsedDate = new Date(parsedDateInMilliseconds);
       const isTimeSetCorrectly = checkIfDateHasCorrectTime(parsedDate, 16, 0);
       expect(isTimeSetCorrectly).toBeTrue();
@@ -209,7 +209,7 @@ describe('shortSyntax', () => {
         ...TASK,
         title: 'Test @tom 4pm',
       };
-      const parsedDateInMilliseconds = getPlannedDateInMilliseconds(t);
+      const parsedDateInMilliseconds = getPlannedDateTimestamp(t);
       const parsedDate = new Date(parsedDateInMilliseconds);
       const now = new Date();
       const isSetToTomorrow = checkIfADateIsTomorrow(now, parsedDate);
@@ -222,7 +222,7 @@ describe('shortSyntax', () => {
         ...TASK,
         title: 'Test @Friday',
       };
-      const parsedDateInMilliseconds = getPlannedDateInMilliseconds(t);
+      const parsedDateInMilliseconds = getPlannedDateTimestamp(t);
       const parsedDate = new Date(parsedDateInMilliseconds);
       // 5 represents Friday
       expect(parsedDate.getDay()).toEqual(5);
@@ -603,7 +603,7 @@ describe('shortSyntax', () => {
         ...TASK,
         title: taskInput,
       };
-      const parsedDateInMilliseconds = getPlannedDateInMilliseconds(t);
+      const parsedDateInMilliseconds = getPlannedDateTimestamp(t);
       const parsedDate = new Date(parsedDateInMilliseconds);
       // The parsed day and time should be Friday, or 5, and time is 16 hours and 0 minute
       expect(parsedDate.getDay()).toEqual(5);
