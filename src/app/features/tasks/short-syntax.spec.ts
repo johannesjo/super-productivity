@@ -78,6 +78,29 @@ const formatDateToISO = (dateObj: Date): string => {
   return `${year}-${monthString}-${date}`;
 };
 
+const dayToNumberMap = {
+  sunday: 0,
+  monday: 1,
+  tuesday: 2,
+  wednesday: 3,
+  thursday: 4,
+  friday: 5,
+  saturday: 6,
+};
+
+const checkIfCorrectDateAndTime = (
+  timestamp: number,
+  day: string,
+  hour: number,
+  minute: number,
+): boolean => {
+  const date = new Date(timestamp);
+  const isDayCorrect = date.getDay() === dayToNumberMap[day.toLowerCase()];
+  const isHourCorrect = date.getHours() === hour;
+  const isMinuteCorrect = date.getMinutes() === minute;
+  return isDayCorrect && isHourCorrect && isMinuteCorrect;
+};
+
 describe('shortSyntax', () => {
   it('should ignore for no short syntax', () => {
     const r = shortSyntax(TASK);
