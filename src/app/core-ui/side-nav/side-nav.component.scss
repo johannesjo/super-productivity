@@ -14,8 +14,16 @@ $spacer: $s;
   // mobile viewport bug fix
   min-height: -webkit-fill-available;
 
+  transition: all $transition-duration-l $ease-in-out-quint;
+
   ::ng-deep .mat-menu-item mat-icon {
     margin-bottom: 2px;
+  }
+}
+@media (min-width: $side-nav-width-switch-l) {
+  :host {
+    max-width: $side-nav-width-l;
+    width: $side-nav-width-l;
   }
 }
 
@@ -83,6 +91,8 @@ section {
   align-items: stretch;
   justify-content: stretch;
 
+  transition: all $transition-duration-l $ease-in-out-quint;
+
   button .badge {
     display: none;
   }
@@ -142,6 +152,20 @@ section {
       display: block;
     }
   }
+}
+.project:hover button .text {
+  transform: translateX(100%); //translateX(calc(200px - 100%));
+  animation: all 10s linear infinite;
+  @keyframes this {
+    0% {
+      transform: translateX(100%);
+    }
+    100% {
+      transform: translateX(-100%);
+    }
+  }
+  background: red;
+  text-align: end;
 }
 
 // color bar left styles

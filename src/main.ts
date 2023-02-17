@@ -27,6 +27,7 @@ platformBrowserDynamic()
         .getRegistrations()
         .then((registrations) => {
           for (const registration of registrations) {
+            let loc = 0;
             registration.unregister();
           }
         })
