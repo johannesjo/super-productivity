@@ -118,7 +118,13 @@ mat-sidenav ::ng-deep .mat-drawer-inner-container {
 }
 
 mat-sidenav {
+  width: fit-content;
   z-index: $z-side-nav;
+}
+@media (min-width: 800px) {
+  button.mat-menu-item {
+    width: 600px;
+  }
 }
 
 .bg-image {

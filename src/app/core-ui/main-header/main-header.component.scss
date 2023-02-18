@@ -53,7 +53,7 @@ $macExtraPadding: (-8px + $mac-title-bar-padding);
   text-overflow: ellipsis;
   //flex-grow: 1;
   white-space: nowrap;
-  max-width: 220px;
+  max-width: 100%;
   cursor: pointer;
   border-radius: $card-border-radius;
   padding: $s 2 * $s $s $s;

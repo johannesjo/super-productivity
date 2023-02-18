@@ -14,8 +14,16 @@ $spacer: $s;
   // mobile viewport bug fix
   min-height: -webkit-fill-available;
 
+  transition: all $transition-duration-l $ease-in-out-quint;
+
   ::ng-deep .mat-menu-item mat-icon {
     margin-bottom: 2px;
+  }
+}
+@media (min-width: $side-nav-width-switch-l) {
+  :host {
+    max-width: $side-nav-width-l;
+    width: $side-nav-width-l;
   }
 }
 
