@@ -1,3 +1,37 @@
+# [7.13.0](https://github.com/johannesjo/super-productivity/compare/v7.12.2...v7.13.0) (2023-03-06)
+
+### Bug Fixes
+
+- rounding for archive tasks throws error [#2463](https://github.com/johannesjo/super-productivity/issues/2463) ([f9568f4](https://github.com/johannesjo/super-productivity/commit/f9568f4d90df3c7af1810d44fcb9bb2bfe0c106d))
+- turkish language not working [#2468](https://github.com/johannesjo/super-productivity/issues/2468) ([eadf771](https://github.com/johannesjo/super-productivity/commit/eadf77195a10c4c2096ab3c8449667b7e7f4efc8))
+
+### Features
+
+- add custom date parser using Chrono ([65c33b8](https://github.com/johannesjo/super-productivity/commit/65c33b8b5a2497db27693d482b36ee50cc59f80a))
+- add custom date parser using Chrono ([1a7d99b](https://github.com/johannesjo/super-productivity/commit/1a7d99b83e283f541c5beec862d6e5b468bc10b3))
+- add function for parsing date from short syntax ([49ad6ca](https://github.com/johannesjo/super-productivity/commit/49ad6cad7258c3cd9aeb659c25236e769ad238a5))
+- add function for parsing date from short syntax ([92ea60c](https://github.com/johannesjo/super-productivity/commit/92ea60cba676c6fadb230ad9d1b1079d44bd032c))
+- add helpers for comparing dates ([fab768b](https://github.com/johannesjo/super-productivity/commit/fab768b0994222d30b4edae1f59d79f1ae883881))
+- add helpers for comparing dates ([1417f1d](https://github.com/johannesjo/super-productivity/commit/1417f1ddf4d8fda48073b565e08540ed33f53cfd))
+- add test for short syntax with time only ([32849ce](https://github.com/johannesjo/super-productivity/commit/32849ce187e64761c616e51092a4b0de3f8890fe))
+- add test for short syntax with time only ([d3aebb5](https://github.com/johannesjo/super-productivity/commit/d3aebb5c0f18a4d8fb8d1aee9627e462f020ba13))
+- change pattern matching for planned date syntax ([f473586](https://github.com/johannesjo/super-productivity/commit/f473586dd4092072f4fe55a3ce64a958db26fff1))
+- change pattern matching for planned date syntax ([923575c](https://github.com/johannesjo/super-productivity/commit/923575c90f7b957959d92c7fb9de455578fbb230))
+- display parsed scheduled date in user-friendly format ([c06e412](https://github.com/johannesjo/super-productivity/commit/c06e41271cf43385c596836ffb9d33373c95735d))
+- display parsed scheduled date in user-friendly format ([410dbbe](https://github.com/johannesjo/super-productivity/commit/410dbbe9da675d35174fed0e7983aa81740e7cae))
+- handle move to backlog for reminder different for scheduling for today and other days ([d0c62ff](https://github.com/johannesjo/super-productivity/commit/d0c62ff50a7d0c13503ace93fd6fbf81d28788bd))
+- impliment [@media](https://github.com/media) for navbar ([f18012a](https://github.com/johannesjo/super-productivity/commit/f18012a1423fb99b3169b1426de740061cba95e6))
+- improve repeat update instances wording for dialog ([50b757b](https://github.com/johannesjo/super-productivity/commit/50b757b1667757b48ab43c6dae8962ab04ec1d48))
+- improve repeat update instances wording for dialog ([b2c95d7](https://github.com/johannesjo/super-productivity/commit/b2c95d7c711b75413f329ec16b1958a53cfae1ae))
+- install chrono for date parsing ([1083a5c](https://github.com/johannesjo/super-productivity/commit/1083a5c3893859c682188622d06aaeda4054fcc2))
+- install chrono for date parsing ([11e71e6](https://github.com/johannesjo/super-productivity/commit/11e71e6e0753a07e069e7d5e927f5ca47bfc2757))
+- only parse date when preceded by @ ([0f92e30](https://github.com/johannesjo/super-productivity/commit/0f92e30793b9bbadd4ae711e0aad4c9483894c71))
+- only parse date when preceded by @ ([48b48fc](https://github.com/johannesjo/super-productivity/commit/48b48fc5570a0d709b77c20507ccd1592a89ace8))
+- parse scheduled date from new task input ([e98c0ab](https://github.com/johannesjo/super-productivity/commit/e98c0ab5b9c815b78b2472f3305393d026c89870))
+- parse scheduled date from new task input ([dafec1e](https://github.com/johannesjo/super-productivity/commit/dafec1ebda9f1e542d30244144a5f017a05fdca5))
+- set reminder for new task with short syntax for schedule ([2880719](https://github.com/johannesjo/super-productivity/commit/2880719212dc5dd8bc724a1e93a9453b94e24414))
+- set reminder for new task with short syntax for schedule ([2a85932](https://github.com/johannesjo/super-productivity/commit/2a859321750481db9e407d3b803f2cb42202f84f))
+
 ## [7.12.2](https://github.com/johannesjo/super-productivity/compare/v7.12.1...v7.12.2) (2023-02-10)
 
 ### Bug Fixes
