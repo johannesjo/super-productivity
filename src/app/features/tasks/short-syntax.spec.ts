@@ -75,7 +75,8 @@ const formatDateToISO = (dateObj: Date): string => {
   const month = dateObj.getMonth() + 1;
   const monthString = month < 10 ? `0${month}` : `${month}`;
   const date = dateObj.getDate();
-  return `${year}-${monthString}-${date}`;
+  const dateString = date < 10 ? `0${date}` : `${date}`;
+  return `${year}-${monthString}-${dateString}`;
 };
 
 const dayToNumberMap = {
