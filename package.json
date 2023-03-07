@@ -105,7 +105,7 @@
     }
   ],
   "dependencies": {
-    "@electron/remote": "^2.0.8",
+    "@electron/remote": "^2.0.9",
     "electron-dl": "^3.3.1",
     "electron-localshortcut": "^3.2.1",
     "electron-log": "^4.4.8",
@@ -174,8 +174,8 @@
     "conventional-changelog-cli": "^2.2.2",
     "cross-env": "^7.0.3",
     "detect-it": "^4.0.1",
-    "electron": "^22.1.0",
-    "electron-builder": "23.3.3",
+    "electron": "^23.1.2",
+    "electron-builder": "23.6.0",
     "electron-builder-notarize": "^1.5.0",
     "electron-notarize": "^1.2.1",
     "eslint": "^8.23.0",
