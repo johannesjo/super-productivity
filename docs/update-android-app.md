@@ -1,7 +1,11 @@
 # How to release a new version of the android app
 
 1. Go to android studio
-2. Update app/build.gradle versionCode and versionName and commit
+2. Update app/build.gradle versionCode and versionName
+   To trigger F-Droid:
+   Add `changlogs/{version}.txt`
+   git commit
+   git tag
 3. Go to build/generate signed bundle apk
 4. (sup.jks)
 5. Choose playRelease
