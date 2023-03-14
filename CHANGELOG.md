@@ -22,7 +22,7 @@
 - display parsed scheduled date in user-friendly format ([c06e412](https://github.com/johannesjo/super-productivity/commit/c06e41271cf43385c596836ffb9d33373c95735d))
 - display parsed scheduled date in user-friendly format ([410dbbe](https://github.com/johannesjo/super-productivity/commit/410dbbe9da675d35174fed0e7983aa81740e7cae))
 - handle move to backlog for reminder different for scheduling for today and other days ([d0c62ff](https://github.com/johannesjo/super-productivity/commit/d0c62ff50a7d0c13503ace93fd6fbf81d28788bd))
-- impliment [@media](https://github.com/media) for navbar ([f18012a](https://github.com/johannesjo/super-productivity/commit/f18012a1423fb99b3169b1426de740061cba95e6))
+- implement [@media](https://github.com/media) for navbar ([f18012a](https://github.com/johannesjo/super-productivity/commit/f18012a1423fb99b3169b1426de740061cba95e6))
 - improve repeat update instances wording for dialog ([50b757b](https://github.com/johannesjo/super-productivity/commit/50b757b1667757b48ab43c6dae8962ab04ec1d48))
 - improve repeat update instances wording for dialog ([b2c95d7](https://github.com/johannesjo/super-productivity/commit/b2c95d7c711b75413f329ec16b1958a53cfae1ae))
 - install chrono for date parsing ([1083a5c](https://github.com/johannesjo/super-productivity/commit/1083a5c3893859c682188622d06aaeda4054fcc2))
