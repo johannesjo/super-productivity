@@ -432,8 +432,8 @@
         "NO_NOTES": "В настоящее время нет заметок"
       },
       "NOTE_CMP": {
-        "DISABLE_PARSE": "Отключить анализ уценки",
-        "ENABLE_PARSE": "Включить анализ уценки"
+        "DISABLE_PARSE": "Отключить Markdown для предварительного просмотра",
+        "ENABLE_PARSE": "Включить Markdown"
       }
     },
     "OPEN_PROJECT": {
@@ -1116,7 +1116,7 @@
       "IS_MINIMIZE_TO_TRAY": "Свернуть в трей (только для ПК)",
       "IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "Уведомлять, когда оценка времени была превышена",
       "IS_TRAY_SHOW_CURRENT_TASK": "Показать текущую задачу в трее / меню состояния (только на рабочем столе)",
-      "IS_TURN_OFF_MARKDOWN": "Отключить анализ уценки для заметок",
+      "IS_TURN_OFF_MARKDOWN": "Отключить Markdown для заметок",
       "TASK_NOTES_TPL": "Шаблон описания задачи",
       "TITLE": "Разные настройки"
     },
@@ -1316,7 +1316,7 @@
     "indigo": "индиго",
     "light-blue": "светло-синий",
     "light-green": "светло-зеленый",
-    "lime": "Лайм",
+    "lime": "лайм",
     "pink": "розовый",
     "purple": "пурпурный",
     "teal": "чирок",
