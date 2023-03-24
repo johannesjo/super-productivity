@@ -71,12 +71,14 @@
             (click)="isForceShowDescription=true; isForceShowAllComments= true"
           >
             <mat-icon>download</mat-icon>
-            <ng-container *ngIf="isCollapsedIssueSummary()"
-              >{{T.F.GITHUB.ISSUE_CONTENT.LOAD_DESCRIPTION_AND_ALL_COMMENTS|translate}}</ng-container
+            <span
+              *ngIf="isCollapsedIssueSummary()"
+              style="text-overflow: ellipsis; overflow: hidden; white-space: nowrap"
+              >{{T.F.GITHUB.ISSUE_CONTENT.LOAD_DESCRIPTION_AND_ALL_COMMENTS|translate}}</span
             >
             <ng-container *ngIf="!isCollapsedIssueSummary()"
-              >{{T.F.GITHUB.ISSUE_CONTENT.LOAD_ALL_COMMENTS|translate:{nr:
-              issue?.comments?.length} }}</ng-container
+              >{{T.F.GITHUB.ISSUE_CONTENT.LOAD_ALL_COMMENTS|translate:{ nr:
+              issue?.comments?.length } }}</ng-container
             >
           </button>
         </div>
