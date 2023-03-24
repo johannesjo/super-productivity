@@ -40,6 +40,8 @@ const PING_UPDATE_BANNER_INTERVAL = 60 * 1000;
 const DESKTOP_NOTIFICATION_THROTTLE = 60 * 1000;
 const LOCK_SCREEN_THROTTLE = 5 * 60 * 1000;
 const LOCK_SCREEN_DELAY = 30 * 1000;
+const FULLSCREEN_BLOCKER_THROTTLE = 5 * 60 * 1000;
+const FULLSCREEN_BLOCKER_DELAY = 30 * 1000;
 
 // required because typescript freaks out
 const reduceBreak = (acc: number, tick: Tick): number => {
@@ -133,15 +135,32 @@ export class TakeABreakService {
 
   private _triggerLockScreenCounter$: Subject<boolean> = new Subject();
   private _triggerLockScreenThrottledAndDelayed$: Observable<unknown | never> =
-    this._triggerLockScreenCounter$.pipe(
-      filter(() => IS_ELECTRON),
-      distinctUntilChanged(),
-      switchMap((v) =>
-        !!v
-          ? of(v).pipe(throttleTime(LOCK_SCREEN_THROTTLE), delay(LOCK_SCREEN_DELAY))
-          : EMPTY,
-      ),
-    );
+    IS_ELECTRON
+      ? this._triggerLockScreenCounter$.pipe(
+          distinctUntilChanged(),
+          switchMap((v) =>
+            !!v
+              ? of(v).pipe(throttleTime(LOCK_SCREEN_THROTTLE), delay(LOCK_SCREEN_DELAY))
+              : EMPTY,
+          ),
+        )
+      : EMPTY;
+
+  private _triggerFullscreenBlocker$: Subject<boolean> = new Subject();
+  private _triggerFullscreenBlockerThrottledAndDelayed$: Observable<unknown | never> =
+    IS_ELECTRON
+      ? this._triggerFullscreenBlocker$.pipe(
+          distinctUntilChanged(),
+          switchMap((v) =>
+            !!v
+              ? of(v).pipe(
+                  throttleTime(FULLSCREEN_BLOCKER_THROTTLE),
+                  delay(FULLSCREEN_BLOCKER_DELAY),
+                )
+              : EMPTY,
+          ),
+        )
+      : EMPTY;
 
   private _triggerBanner$: Observable<[number, GlobalConfigState, boolean, boolean]> =
     this.timeWorkingWithoutABreak$.pipe(
@@ -196,11 +215,26 @@ export class TakeABreakService {
         this._bannerService.dismiss(BANNER_ID);
       });
 
-    this._triggerLockScreenThrottledAndDelayed$.subscribe(() => {
-      if (IS_ELECTRON) {
+    if (IS_ELECTRON) {
+      this._triggerLockScreenThrottledAndDelayed$.subscribe(() => {
         (this._electronService.ipcRenderer as typeof ipcRenderer).send(IPC.LOCK_SCREEN);
-      }
-    });
+      });
+
+      this._triggerFullscreenBlockerThrottledAndDelayed$
+        .pipe(
+          withLatestFrom(this._configService.takeABreak$, this.timeWorkingWithoutABreak$),
+        )
+        .subscribe(([, takeABreakCfg, timeWorkingWithoutABreak]) => {
+          const msg = this._createMessage(timeWorkingWithoutABreak, takeABreakCfg);
+          (this._electronService.ipcRenderer as typeof ipcRenderer).send(
+            IPC.FULL_SCREEN_BLOCKER,
+            {
+              msg,
+              takeABreakCfg,
+            },
+          );
+        });
+    }
 
     this._triggerDesktopNotification$.subscribe(([timeWithoutBreak, cfg]) => {
       const msg = this._createMessage(timeWithoutBreak, cfg.takeABreak);
@@ -210,22 +244,15 @@ export class TakeABreakService {
         title: T.GCF.TAKE_A_BREAK.NOTIFICATION_TITLE,
         body: msg,
       });
-
-      if (IS_ELECTRON && cfg.takeABreak.isTimedFullScreenBlocker) {
-        (this._electronService.ipcRenderer as typeof ipcRenderer).send(
-          IPC.FULL_SCREEN_BLOCKER,
-          {
-            msg,
-            takeABreakCfg: cfg.takeABreak,
-          },
-        );
-      }
     });
 
     this._triggerBanner$.subscribe(([timeWithoutBreak, cfg]) => {
       const msg: string = this._createMessage(timeWithoutBreak, cfg.takeABreak) as string;
       if (IS_ELECTRON && cfg.takeABreak.isLockScreen) {
         this._triggerLockScreenCounter$.next(true);
+      }
+      if (IS_ELECTRON && cfg.takeABreak.isTimedFullScreenBlocker) {
+        this._triggerFullscreenBlocker$.next(true);
       }
       if (IS_ELECTRON && cfg.takeABreak.isFocusWindow) {
         this._uiHelperService.focusApp();
@@ -260,6 +287,7 @@ export class TakeABreakService {
   snooze(snoozeTime: number = 15 * 60 * 1000): void {
     this._triggerSnooze$.next(snoozeTime);
     this._triggerLockScreenCounter$.next(false);
+    this._triggerFullscreenBlocker$.next(false);
   }
 
   resetTimer(): void {
@@ -272,6 +300,7 @@ export class TakeABreakService {
     this.resetTimer();
 
     this._triggerLockScreenCounter$.next(false);
+    this._triggerFullscreenBlocker$.next(false);
   }
 
   private _createMessage(duration: number, cfg: TakeABreakConfig): string | undefined {
