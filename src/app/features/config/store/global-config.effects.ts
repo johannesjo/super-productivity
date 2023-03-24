@@ -24,7 +24,11 @@ export class GlobalConfigEffects {
       this._actions$.pipe(
         ofType(updateGlobalConfigSection),
         withLatestFrom(this._store),
-        tap(this._saveToLs.bind(this)),
+        tap(([action, store]) =>
+          this._saveToLs([action, store], {
+            isSkipSyncModelChangeUpdate: !!action.isSkipLastActiveUpdate,
+          }),
+        ),
       ),
     { dispatch: false },
   );
@@ -154,10 +158,13 @@ export class GlobalConfigEffects {
     private _store: Store<any>,
   ) {}
 
-  private _saveToLs([action, completeState]: [any, any]): void {
+  private _saveToLs(
+    [action, completeState]: [any, any],
+    { isSkipSyncModelChangeUpdate } = { isSkipSyncModelChangeUpdate: false },
+  ): void {
     const globalConfig = completeState[CONFIG_FEATURE_NAME];
     this._persistenceService.globalConfig.saveState(globalConfig, {
-      isSyncModelChange: true,
+      isSyncModelChange: !isSkipSyncModelChangeUpdate,
     });
   }
 }

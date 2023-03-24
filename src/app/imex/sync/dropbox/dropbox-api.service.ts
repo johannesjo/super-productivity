@@ -218,6 +218,7 @@ export class DropboxApiService {
         const sync = await this._globalConfigService.sync$.pipe(first()).toPromise();
         this._store.dispatch(
           updateGlobalConfigSection({
+            isSkipLastActiveUpdate: true,
             sectionKey: 'sync',
             sectionCfg: {
               ...sync,
