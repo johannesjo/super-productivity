@@ -87,7 +87,21 @@ const convertVEventToTimelineEvent = (vevent: any): TimelineFromCalendarEvent =>
 const getAllPossibleFutureEventsFromIcal = (icalData: string, now: Date): any[] => {
   const c = ICAL.parse(icalData);
   const comp = new ICAL.Component(c);
-  const vevents = comp.getAllSubcomponents('vevent');
+  const tzAdded = [];
+  if (comp.getFirstSubcomponent('vtimezone')) {
+    for (const vtz of comp.getAllSubcomponents('vtimezone')) {
+      const tz = new ICAL.Timezone({
+        tzid: vtz.getFirstPropertyValue('tzid'),
+        component: vtz,
+      });
+
+      if (!ICAL.TimezoneService.has(tz.tzid)) {
+        ICAL.TimezoneService.register(tz.tzid, tz);
+        tzAdded.push(tz.tzid);
+      }
+    }
+  }
+  const vevents = ICAL.helpers.updateTimezones(comp).getAllSubcomponents('vevent');
 
   const allPossibleFutureEvents = vevents.filter(
     (ve: any) =>
@@ -96,6 +110,10 @@ const getAllPossibleFutureEventsFromIcal = (icalData: string, now: Date): any[] 
         (!ve.getFirstPropertyValue('rrule')?.until?.toJSDate() ||
           ve.getFirstPropertyValue('rrule')?.until?.toJSDate() > now)),
   );
+
+  for (const tzid of tzAdded) {
+    ICAL.TimezoneService.remove(tzid);
+  }
 
   return allPossibleFutureEvents;
 };
