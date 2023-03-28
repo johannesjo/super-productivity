@@ -614,13 +614,15 @@
         "TITLE": "Self Compassion"
       },
       "CUR": {
-        "INTRO": "Procrastination is interesting, isn't it? It doesn't make sense to do it. Not in your long term interest at all. But still everybody does it. Enjoy and explore!",
+        "INTRO": "Procrastination is interesting, isn't it? It doesn't make sense to do it. Not in your long term interest at all. But still everybody does it. It helps a lot explore und gain a better understanding on how it works for you personally! Some basic questions to ask yourself could be:",
         "L1": "What feelings are eliciting your temptation to procrastinate?",
         "L2": "Where do you feel them in your body?",
         "L3": "What do they remind you of?",
         "L4": "What happens to the thought of procrastinating as you observe it? Does it intensify? Dissipate? Cause other emotions to arise?",
         "L5": "How are the sensations in your body shifting as you continue to rest your awareness on them?",
-        "TITLE": "Curiosity"
+        "TITLE": "Curiosity",
+        "PROCRASTINATION_TRIGGERS_TITLE": "Writing down your procrastination triggers",
+        "PROCRASTINATION_TRIGGERS_TEXT": "Another very effective method is to record, what triggered your urge to procrastinate. For example I personally often have the urge to quickly jump to reddit or my favorite news site whenever my browser window comes into focus. Since I started writing down my triggers in a simple empty text document, I became aware of how ingrained this pattern was and it helped me to experiment with different counter measures."
       },
       "H1": "Cut yourself some slack!",
       "INTRO": {
