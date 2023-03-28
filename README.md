@@ -59,6 +59,12 @@
        alt='Play Store Badge'
        height="50" />
 </a>
+<a href='//f-droid.org/en/packages/com.superproductivity.superproductivity' target="_blank">
+  <img src='https://f-droid.org/assets/fdroid-logo-text_S0MUfk_FsnAYL7n2MQye-34IoSNm6QM6xYjDnMqkufo=.svg'
+       align="center"
+       alt='F-Droid Badge'
+       height="50" />
+</a>
 
 Super Productivity is an advanced todo list app with integrated [Timeboxing](https://en.wikipedia.org/wiki/Timeboxing) and time tracking capabilities.
 
@@ -194,6 +200,12 @@ There is a [very early(!) Android version available](https://play.google.com/sto
   <img src='./screens/google-play-badge.png'
        align="center"
        alt='App Store Badge'
+       height="50" />
+</a>
+<a href='//f-droid.org/en/packages/com.superproductivity.superproductivity' target="_blank">
+  <img src='https://f-droid.org/assets/fdroid-logo-text_S0MUfk_FsnAYL7n2MQye-34IoSNm6QM6xYjDnMqkufo=.svg'
+       align="center"
+       alt='F-Droid Badge'
        height="50" />
 </a>
 
