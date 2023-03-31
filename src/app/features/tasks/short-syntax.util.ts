@@ -15,28 +15,6 @@ const CH_DUE = '@';
 const ALL_SPECIAL = `(\\${CH_PRO}|\\${CH_TAG}|\\${CH_DUE})`;
 
 const customDateParser = chrono.casual.clone();
-customDateParser.parsers.push(
-  {
-    // match tomorrow
-    pattern: () => /^tom| @tom/i,
-    extract: () => {
-      const today = new Date();
-      return {
-        day: today.getDate() + 1,
-      };
-    },
-  },
-  {
-    // match today
-    pattern: () => /^tod| @tod/i,
-    extract: () => {
-      const today = new Date();
-      return {
-        day: today.getDate(),
-      };
-    },
-  },
-);
 
 export const SHORT_SYNTAX_PROJECT_REG_EX = new RegExp(
   `\\${CH_PRO}[^${ALL_SPECIAL}]+`,
@@ -254,6 +232,7 @@ const parseScheduledDate = (task: Partial<TaskCopy>): Partial<Task> => {
     return {};
   }
   const rr = task.title.match(SHORT_SYNTAX_DUE_REG_EX);
+
   if (rr && rr[0]) {
     const now = new Date();
     const parsedDateArr = customDateParser.parse(task.title, new Date(), {

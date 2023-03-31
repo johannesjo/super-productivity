@@ -50,6 +50,10 @@ const getPlannedDateTimestamp = (taskInput: TaskCopy): number => {
 };
 
 const checkSameDay = (date1: Date, date2: Date): boolean => {
+  expect(date1.getFullYear()).toBe(date2.getFullYear());
+  expect(date1.getMonth()).toBe(date2.getMonth());
+  expect(date1.getDate()).toBe(date2.getDate());
+
   return (
     date1.getFullYear() === date2.getFullYear() &&
     date1.getMonth() === date2.getMonth() &&
@@ -57,16 +61,14 @@ const checkSameDay = (date1: Date, date2: Date): boolean => {
   );
 };
 
-const checkIfADateIsTomorrow = (date1: Date, date2: Date): boolean => {
-  const nextday = new Date(date1.getFullYear(), date1.getMonth(), date1.getDate() + 1);
-  return (
-    nextday.getFullYear() === date2.getFullYear() &&
-    nextday.getMonth() === date2.getMonth() &&
-    nextday.getDate() === date2.getDate()
-  );
+const checkIfADateIsTomorrow = (now: Date, tmrDate: Date): boolean => {
+  const nextday = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
+  return checkSameDay(nextday, tmrDate);
 };
 
 const checkIfDateHasCorrectTime = (date: Date, hour: number, minute: number): boolean => {
+  expect(date.getHours()).toBe(hour);
+  expect(date.getMinutes()).toBe(minute);
   return date.getHours() === hour && date.getMinutes() === minute;
 };
 
@@ -179,68 +181,7 @@ describe('shortSyntax', () => {
       const isTimeSetCorrectly = checkIfDateHasCorrectTime(parsedDate, 16, 0);
       expect(isTimeSetCorrectly).toBeTrue();
     });
-    it('should parse syntax "@tod" as today 23:59:59', () => {
-      const t = {
-        ...TASK,
-        title: 'Test @tod',
-      };
-      const date = new Date();
-      date.setHours(23, 59, 59);
-      const parsedDateInMilliseconds = getPlannedDateTimestamp(t);
-      const marginError = Math.abs(date.getTime() - parsedDateInMilliseconds);
-      // There may be slight discrepancy between the plannedAt number
-      // and the milliseconds representing today 23:59:59 here, so
-      // we accept the discrepancy to be equal or less than 1000
-      // milliseconds, or 1 second
-      expect(marginError).toBeLessThanOrEqual(1000);
-    });
-    it('should parse syntax "tom" as tomorrow 23:59:59', () => {
-      const t = {
-        ...TASK,
-        title: 'Test @tom',
-      };
-      const parsedDateInMilliseconds = getPlannedDateTimestamp(t);
-      const date = new Date();
-      date.setDate(date.getDate() + 1);
-      date.setHours(23, 59, 59);
-      const marginError = Math.abs(date.getTime() - parsedDateInMilliseconds);
-      expect(marginError).toBeLessThanOrEqual(1000);
-    });
-    it('should correctly parse syntax "tod 4pm', () => {
-      const t = {
-        ...TASK,
-        title: 'Test @tod 4pm',
-      };
-      const parsedDateInMilliseconds = getPlannedDateTimestamp(t);
-      const parsedDate = new Date(parsedDateInMilliseconds);
-      const isTimeSetCorrectly = checkIfDateHasCorrectTime(parsedDate, 16, 0);
-      expect(isTimeSetCorrectly).toBeTrue();
-      const now = new Date();
-      let implicitDate = now;
-      // If the current time is past the given time, it means the task is set for
-      // tomorrow and we need to set impliicit date to tomorrow
-      if (now.getHours() > 16 || (now.getHours() === 16 && now.getMinutes() > 0)) {
-        implicitDate = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
-      }
-      const matchedDate =
-        implicitDate.getFullYear() === parsedDate.getFullYear() &&
-        implicitDate.getMonth() === parsedDate.getMonth() &&
-        implicitDate.getDate() === parsedDate.getDate();
-      expect(matchedDate).toBeTrue();
-    });
-    it('should correctly parse syntax for tomorrow with time', () => {
-      const t = {
-        ...TASK,
-        title: 'Test @tom 4pm',
-      };
-      const parsedDateInMilliseconds = getPlannedDateTimestamp(t);
-      const parsedDate = new Date(parsedDateInMilliseconds);
-      const now = new Date();
-      const isSetToTomorrow = checkIfADateIsTomorrow(now, parsedDate);
-      const isTimeSetCorrectly = checkIfDateHasCorrectTime(parsedDate, 16, 0);
-      expect(isSetToTomorrow).toBeTrue();
-      expect(isTimeSetCorrectly).toBeTrue();
-    });
+
     it('should correctly parse day of the week', () => {
       const t = {
         ...TASK,
