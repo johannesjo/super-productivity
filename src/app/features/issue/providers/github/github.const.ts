@@ -14,6 +14,7 @@ export const DEFAULT_GITHUB_CFG: GithubCfg = {
   isAutoPoll: false,
   isAutoAddToBacklog: false,
   filterUsername: null,
+  filterIssuesAssignedToMe: false,
 };
 
 // NOTE: we need a high limit because git has low usage limits :(
