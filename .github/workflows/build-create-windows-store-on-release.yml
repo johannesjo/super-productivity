@@ -17,7 +17,7 @@ jobs:
           node-version: 16
       # required because setting via env.TZ does not work on windows
       - name: Set timezone to Europe Standard Time
-        uses: szenius/set-timezone@v1.1
+        uses: szenius/set-timezone@v1.2
         with:
           timezoneWindows: 'W. Europe Standard Time'
 
