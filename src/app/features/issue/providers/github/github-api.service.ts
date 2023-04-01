@@ -99,7 +99,9 @@ export class GithubApiService {
   }
 
   getLast100IssuesForRepo$(cfg: GithubCfg): Observable<GithubIssueReduced[]> {
-    const repo = cfg.repo;
+    const repo = cfg.repo
+    const assigneeFilter = cfg.filterIssuesAssignedToMe ? `&assignee=${cfg.filterUsername}` : '';
+
     // NOTE: alternate approach (but no caching :( )
     // return this._sendRequest$({
     //   url: `${BASE}search/issues?q=${encodeURI(`+repo:${cfg.repo}`)}`
@@ -123,12 +125,14 @@ export class GithubApiService {
     const split: any = cfg.repo?.split('/');
     const owner = encodeURIComponent(split[0]);
     const repo = encodeURIComponent(split[1]);
+    const assigneeFilter = cfg.filterIssuesAssignedToMe ? `, assignee: "${cfg.filterUsername}"` : '';
+
     return this.graphQl$(
       cfg,
       `
 query Issues {
   repository(owner: "${owner}", name: "${repo}") {
-    issues(last: 100, filterBy: {states: OPEN}, orderBy: {field: UPDATED_AT, direction:DESC}) {
+    issues(last: 100, filterBy: {states: OPEN${assigneeFilter}}, orderBy: {field: UPDATED_AT, direction:DESC}) {
       edges {
         node {
           number
