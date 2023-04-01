@@ -124,7 +124,7 @@
     "@angular/cdk": "^14.1.1",
     "@angular/cli": "^14.2.7",
     "@angular/common": "^14.1.1",
-    "@angular/compiler": "^14.1.1",
+    "@angular/compiler": "^15.2.5",
     "@angular/compiler-cli": "^14.1.1",
     "@angular/core": "^14.1.1",
     "@angular/forms": "^14.1.1",
