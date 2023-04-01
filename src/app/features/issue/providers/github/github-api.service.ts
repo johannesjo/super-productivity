@@ -130,6 +130,7 @@ export class GithubApiService {
     const assigneeFilter = cfg.filterIssuesAssignedToMe
       ? `, assignee: "${cfg.filterUsername}"`
       : '';
+
     return this.graphQl$(
       cfg,
       `
