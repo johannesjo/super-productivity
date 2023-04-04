@@ -14,6 +14,7 @@ export const DEFAULT_GITHUB_CFG: GithubCfg = {
   isAutoPoll: false,
   isAutoAddToBacklog: false,
   filterUsername: null,
+  filterIssuesAssignedToMe: false,
 };
 
 // NOTE: we need a high limit because git has low usage limits :(
@@ -77,6 +78,13 @@ export const GITHUB_CONFIG_FORM: LimitedFormlyFieldConfig<GithubCfg>[] = [
     hideExpression: (model: any) => !model.isEnabled,
     templateOptions: {
       label: T.F.GITHUB.FORM.FILTER_USER,
+    },
+  },
+  {
+    key: 'filterIssuesAssignedToMe',
+    type: 'checkbox',
+    templateOptions: {
+      label: T.F.GITHUB.FORM.FILTER_ASSIGNED,
     },
   },
 ];
