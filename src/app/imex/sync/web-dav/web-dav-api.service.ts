@@ -83,7 +83,7 @@ export class WebDavApiService {
       const result = (await androidInterface.makeHttpRequestWrapped(
         cfg.baseUrl + '/' + path,
         'PUT',
-        data,
+        JSON.stringify(data),
         cfg.userName,
         cfg.password,
         false,
@@ -144,7 +144,7 @@ export class WebDavApiService {
         true,
       )) as AndroidHttpResponse;
       this.checkErrorAndroid(result);
-      return result.data;
+      return JSON.parse(result.data);
     } else {
       const client = createClient(cfg.baseUrl, {
         username: cfg.userName,
