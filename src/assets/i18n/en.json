@@ -758,8 +758,8 @@
         "REMOTE": "Remote",
         "TEXT": "<p>Update from remote. Both local and remote data seem to be modified.</p>",
         "TITLE": "Sync: Conflicting Data",
-        "USE_LOCAL": "Use local",
-        "USE_REMOTE": "Use remote"
+        "USE_LOCAL": "Keep local",
+        "USE_REMOTE": "Keep remote"
       },
       "D_PERMISSION": {
         "DISABLE_SYNC": "Disable sync",
