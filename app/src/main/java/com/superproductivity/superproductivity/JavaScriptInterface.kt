@@ -245,14 +245,12 @@ class JavaScriptInterface(
                 out.close()
             }
             connection.headerFields.entries.forEach { entry ->
-                val output = buildString {
-                    entry.value.forEach {
-                        append(",$it")
-                    }
-                }
+                val output = entry.value.joinToString(separator = ", ")
+
                 // https://datatracker.ietf.org/doc/html/rfc7230#section-3.2.2
                 try {
-                    headers.put(entry.key.lowercase(Locale.ROOT), output)
+                    if (entry.key != null)
+                        headers.put(entry.key.lowercase(Locale.ROOT), output)
                 } catch (e: JSONException) {
                     e.printStackTrace()
                 }
