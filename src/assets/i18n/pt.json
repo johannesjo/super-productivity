@@ -1187,7 +1187,7 @@
       "CYCLES_BEFORE_LONGER_BREAK": "Iniciar pausa mais longa após X sessões de trabalho",
       "DURATION": "Duração das sessões de trabalho",
       "HELP": "<p>O temporizador pomodoro pode ser configurado através de algumas configurações. A duração de cada sessão de trabalho, a duração das quebras normais, o número de sessões de trabalho a serem executadas antes do início de uma pausa mais longa e a duração dessa pausa mais longa.</p> <p>Você também pode definir se deseja exibir suas distrações durante seus intervalos de pomodoro.</p> <p>Configurar \"Pausar o rastreamento do tempo no intervalo do pomodoro\" também acompanhará seus intervalos como o tempo de trabalho gasto em uma tarefa. </p> <p>Habilitando \"Pausar a sessão pomodoro quando nenhuma tarefa ativa\" também pausará a sessão pomodoro, quando você pausar uma tarefa.</p>",
-      "IS_ENABLED": "Ativar temporizador de tomate",
+      "IS_ENABLED": "Ativar temporizador pomodoro",
       "IS_MANUAL_CONTINUE": "Confirmar manualmente o início da próxima sessão de pomodoro",
       "IS_PLAY_SOUND": "Tocar som quando a sessão terminar",
       "IS_PLAY_SOUND_AFTER_BREAK": "Tocar som quando o intervalo estiver concluído",
