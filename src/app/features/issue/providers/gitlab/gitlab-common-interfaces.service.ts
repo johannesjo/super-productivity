@@ -9,11 +9,7 @@ import { IssueData, SearchResultItem } from '../../issue.model';
 import { GitlabCfg } from './gitlab';
 import { GitlabIssue } from './gitlab-issue/gitlab-issue.model';
 import { truncate } from '../../../../util/truncate';
-import {
-  GITLAB_BASE_URL,
-  GITLAB_INITIAL_POLL_DELAY,
-  GITLAB_POLL_INTERVAL,
-} from './gitlab.const';
+import { GITLAB_INITIAL_POLL_DELAY, GITLAB_POLL_INTERVAL } from './gitlab.const';
 import { isGitlabEnabled } from './is-gitlab-enabled';
 
 @Injectable({
@@ -44,17 +40,9 @@ export class GitlabCommonInterfacesService implements IssueServiceInterface {
   }
 
   issueLink$(issueId: string, projectId: string): Observable<string> {
-    return this._getCfgOnce$(projectId).pipe(
-      map((cfg) => {
-        const project: string = this._gitlabApiService.getProject$(cfg, issueId);
-        if (cfg.gitlabBaseUrl) {
-          const fixedUrl = cfg.gitlabBaseUrl.match(/.*\/$/)
-            ? cfg.gitlabBaseUrl
-            : `${cfg.gitlabBaseUrl}/`;
-          return `${fixedUrl}${project}/issues/${issueId}`;
-        } else {
-          return `${GITLAB_BASE_URL}${project}/issues/${issueId}`;
-        }
+    return this.getById$(issueId, projectId).pipe(
+      map((issue: GitlabIssue) => {
+        return issue.url;
       }),
     );
   }
