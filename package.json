@@ -86,6 +86,7 @@
     "dist:mac:mas": "cp tools/mac-profiles/mas.provisionprofile embedded.provisionprofile; electron-builder --mac mas --config=build/electron-builder.mas.yaml",
     "dist:mac:mas:buildOnly": "electron-builder --mac mas --config=build/electron-builder.mas.yaml",
     "dist:mac:mas:dev": "cp tools/mac-profiles/mas-dev.provisionprofile embedded.provisionprofile; electron-builder --mac mas-dev --config=build/electron-builder.mas-dev.yaml",
+    "dist:mac:mas:x64": "cp tools/mac-profiles/mas.provisionprofile embedded.provisionprofile; electron-builder --mac mas --config=build/electron-builder.mas.yaml --x64",
     "release": "npm run release.changelog && npm run dist",
     "release.changelog": "conventional-changelog -i CHANGELOG.md -s -p angular",
     "version": "npm run release.changelog && git add -A",
