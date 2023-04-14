@@ -1,3 +1,19 @@
+## [7.13.2](https://github.com/johannesjo/super-productivity/compare/v7.13.1...v7.13.2) (2023-04-14)
+
+### Bug Fixes
+
+- buttons not being centered ([96920a9](https://github.com/johannesjo/super-productivity/commit/96920a97596ce9367229994be081409d14617f19))
+- **dropbox:** avoid updating last active when updating token from refresh token to avoid initial sync conflict ([21971bd](https://github.com/johannesjo/super-productivity/commit/21971bddaa6549bd4f031ba634490f26d8885cc4))
+- **github:** load all button cut off text ([71d87ba](https://github.com/johannesjo/super-productivity/commit/71d87ba6872e27fb807ff283e25ed9663ae14783))
+- **i18n:** some fixes for russian translate ([899ac12](https://github.com/johannesjo/super-productivity/commit/899ac12ab687baf71d5558411590f6ec30b4d0bb))
+- remove custom date parsers since not working and unit tests are failing ([12a385e](https://github.com/johannesjo/super-productivity/commit/12a385e27bec9fbb095c570a9b076b25f90b7355))
+- remove sidebar transition to avoid problem [#2533](https://github.com/johannesjo/super-productivity/issues/2533) ([c9db586](https://github.com/johannesjo/super-productivity/commit/c9db58610f4818d7468ddd546031a89691cec67f))
+
+### Features
+
+- **procrastination:** add info about procrastination triggers ([9efed16](https://github.com/johannesjo/super-productivity/commit/9efed167a9d2b89be4f2389d1b58fec39a68732e))
+- **takeABreak:** delay full screen blocker to give time after using long idle to task ([d2f39d2](https://github.com/johannesjo/super-productivity/commit/d2f39d26e25e48f17164b77a4a3d21f25f896e70))
+
 ## [7.13.1](https://github.com/johannesjo/super-productivity/compare/v7.13.0...v7.13.1) (2023-03-06)
 
 # [7.13.0](https://github.com/johannesjo/super-productivity/compare/v7.12.2...v7.13.0) (2023-03-06)
