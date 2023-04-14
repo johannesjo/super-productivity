@@ -46,7 +46,7 @@ export class GitlabCommonInterfacesService implements IssueServiceInterface {
   issueLink$(issueId: string, projectId: string): Observable<string> {
     return this._getCfgOnce$(projectId).pipe(
       map((cfg) => {
-        const project: string = this._gitlabApiService.getProject$(cfg, issueId);
+        const project: string = this._gitlabApiService.getProject(cfg, issueId);
         if (cfg.gitlabBaseUrl) {
           const fixedUrl = cfg.gitlabBaseUrl.match(/.*\/$/)
             ? cfg.gitlabBaseUrl
@@ -93,7 +93,7 @@ export class GitlabCommonInterfacesService implements IssueServiceInterface {
     }
 
     const cfg = await this._getCfgOnce$(task.projectId).toPromise();
-    const fullIssueRef = this._gitlabApiService.getFullIssueRef$(task.issueId, cfg);
+    const fullIssueRef = this._gitlabApiService.getFullIssueRef(task.issueId, cfg);
     const idFormatChanged = task.issueId !== fullIssueRef;
     const issue = await this._gitlabApiService.getById$(fullIssueRef, cfg).toPromise();
 
@@ -145,7 +145,7 @@ export class GitlabCommonInterfacesService implements IssueServiceInterface {
       if (!task.issueId) {
         continue;
       }
-      const project = this._gitlabApiService.getProject$(cfg, task.issueId);
+      const project = this._gitlabApiService.getProject(cfg, task.issueId);
       if (!iidsByProject.has(project)) {
         iidsByProject.set(project, []);
       }
@@ -175,7 +175,7 @@ export class GitlabCommonInterfacesService implements IssueServiceInterface {
         continue;
       }
       let idFormatChanged = false;
-      const fullIssueRef = this._gitlabApiService.getFullIssueRef$(task.issueId, cfg);
+      const fullIssueRef = this._gitlabApiService.getFullIssueRef(task.issueId, cfg);
       idFormatChanged = task.issueId !== fullIssueRef;
       const issue = issues.get(fullIssueRef);
       if (issue) {
