@@ -181,6 +181,15 @@
       </ng-container>
     </div>
 
+    <div class="pomodoro-toggle-wrapper">
+      <button
+        [style.background-color]="toggle ? 'green' : 'red'"
+        (click)="pomodoroService.toggle();"
+      >
+        {{status}}
+      </button>
+    </div>
+
     <ng-container
       *ngIf="(simpleCounterService.enabledSimpleCounters$|async) as enabledSimpleCounters"
     >
