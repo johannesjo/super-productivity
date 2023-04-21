@@ -149,7 +149,20 @@ query Issues {
   }
 }
     `,
-    ).pipe(map((res) => mapGithubGraphQLSearchResult(res)));
+    ).pipe(
+      map((res) => {
+        try {
+          return mapGithubGraphQLSearchResult(res);
+        } catch (e) {
+          console.error(e);
+          this._snackService.open({
+            type: 'ERROR',
+            msg: T.F.GITHUB.S.CONFIG_ERROR,
+          });
+          return [];
+        }
+      }),
+    );
   }
 
   private _checkSettings(cfg: GithubCfg): void {
