@@ -3,7 +3,7 @@
 ### build ###
 
 # base image
-FROM node:12 as build
+FROM node:16 as build
 
 # add app
 COPY . /app
