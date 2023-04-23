@@ -155,7 +155,7 @@
         "REPO_FULL_NAME_DESCRIPTION": "Može se pronaći kao dio url-a prilikom pregledavanja projekta u pregledniku.",
         "SCOPE": "Opseg",
         "SCOPE_ALL": "Sve",
-        "SCOPE_ASSIGNED": "Dodijeljeno meni",
+        "SCOPE_ASSIGNED": "Meni dodijeljeno",
         "SCOPE_CREATED": "Od mene stvoreno"
       },
       "FORM_SECTION": {
@@ -171,10 +171,10 @@
         "PROJECT": "Projekt",
         "STATUS": "Stanje",
         "SUMMARY": "Sažetak",
-        "WRITE_A_COMMENT": "Zapiši komentar"
+        "WRITE_A_COMMENT": "Upiši komentar"
       },
       "S": {
-        "ERR_UNKNOWN": "Gitea: Nepoznata greška {{statusCode}} {{errorMsg}}. Je li prekoračeno API ograničenje?"
+        "ERR_UNKNOWN": "Gitea: Nepoznata greška {{statusCode}} {{errorMsg}}. Je li stopa API-ja prekoračena?"
       }
     },
     "REDMINE": {
@@ -221,6 +221,7 @@
         "REPO": "„korisničko ime/ime repozitorija” za git repozitorij koji želiš pratiti",
         "TOKEN": "Token za pristup",
         "TOKEN_DESCRIPTION": "Potrebno za pristup privatnom repozitoriju"
+        "IS_ASSIGNEE_FILTER": "Filtar za meni dodijelenje zadatke"
       },
       "FORM_SECTION": {
         "HELP": "<p>Ovdje možeš konfigurirati Super Productivity za prikaz popisa nezavršenih GitHub problema (online verzija ili instanca vlastitog histinga) za određeni projekt na ploči za stvaranje zadataka u prikazu dnevnog planiranja. U popisu će se ti problemi navesti kao prijedlozi s poveznicom na problem te s daljnjim informacija o problemu.</p> <p>Osim toga, sve neriješene probleme možeš automatski dodati u odlagalište zadataka i sinkronizirati ih.</p><p>Za zaobilaženje ograničenja upotrebe i za pristupanje, možeš zadati pristupni token. <a href='https://docs.github.com/en/free-pro-team@latest/developers/apps/scopes-for-oauth-apps'>Više informacija mogu se pronaći odvje</a>.",
@@ -237,10 +238,11 @@
         "MARK_AS_CHECKED": "Označi aktualiziranja kao provjerena",
         "STATUS": "Stanje",
         "SUMMARY": "Sažetak",
-        "WRITE_A_COMMENT": "Zapiši komentar"
+        "WRITE_A_COMMENT": "Upiši komentar"
       },
       "S": {
-        "ERR_UNKNOWN": "GitHub: Nepoznata greška {{statusCode}} {{errorMsg}}"
+        "ERR_UNKNOWN": "GitHub: Nepoznata greška {{statusCode}} {{errorMsg}}. Je li ograničenje API stope prekoračeno?",
+        "CONFIG_ERROR": "GitHub: Greška tijekom mapiranja podatka. Je li ime tvog repozitorija ispravno?"
       }
     },
     "GITLAB": {
@@ -277,30 +279,10 @@
         "PROJECT": "Projekt",
         "STATUS": "Stanje",
         "SUMMARY": "Sažetak",
-        "WRITE_A_COMMENT": "Zapiši komentar"
+        "WRITE_A_COMMENT": "Upiši komentar"
       },
       "S": {
         "ERR_UNKNOWN": "GitLab: Nepoznata greška {{statusCode}} {{errorMsg}}"
-      }
-    },
-    "GOOGLE": {
-      "BANNER": {
-        "AUTH_FAIL": "GoogleApi: Neuspjela autentifikacija. Pokušaj se ponovo prijaviti!"
-      },
-      "DIALOG": {
-        "CREATE_SYNC_FILE": "Google Drive: Pronađena je datoteka s imenom <strong>„{{fileName}}”</strong>. Želiš li je <strong>stvoriti</strong> kao datoteku sinkronizacije na Google Driveu?",
-        "USE_EXISTING_SYNC_FILE": "Google Drive: Želiš li koristiti <strong>postojeću</strong> datoteku <strong>„{{fileName}}”</strong> kao datoteku sinkronizacije? Ako ne, promijeni ime datoteke sinkronizacije."
-      },
-      "S": {
-        "MULTIPLE_SYNC_FILES_WITH_SAME_NAME": "Pronađeno je nekoliko datoteka s imenom „{{newFileName}}”. Izbriši sve osim jedne ili odaberi drugačije ime.",
-        "SYNC_FILE_CREATION_ERROR": "Google Drive: Greška tijekom stvaranja datoteke sinkronizacije. {{err}}",
-        "UPDATED_SYNC_FILE_NAME": "Google Drive: Ime datoteke sinkronizacije aktualizirano"
-      },
-      "S_API": {
-        "ERR": "GoogleApi greška: {{errStr}}",
-        "ERR_NO_FILE_ID": "GoogleApi: ID datoteke nije određena",
-        "ERR_NO_FILE_NAME": "GoogleApi: Ime datoteke nije određena",
-        "SUCCESS_LOGIN": "GoogleApi: Prijava uspjela"
       }
     },
     "ISSUE": {
@@ -332,17 +314,17 @@
       "CFG_CMP": {
         "ALWAYS_ASK": "Uvijek otvori dijaloški okvir",
         "DONE": "Stanje za završavanje zadatka",
-        "DO_NOT": "Nemoj promijeniti stanje niti izvršiti radnju",
+        "DO_NOT": "Nemoj izvršiti tranziciju",
         "ENABLE": "Aktiviraj Jira integraciju",
-        "ENABLE_TRANSITIONS": "Aktiviraj mogućnost mijenjanja stanja ili izvršavanje radnje",
+        "ENABLE_TRANSITIONS": "Aktiviraj baratanje tranzicijama",
         "IN_PROGRESS": "Stanje za započinjanje zadatka",
         "LOAD_SUGGESTIONS": "Učitaj prijedloge",
-        "MAP_CUSTOM_FIELDS": "Učitaj bodovanja",
-        "MAP_CUSTOM_FIELDS_INFO": "Nažalost, neki Jira podaci spremaju se u prilagođena polja koja su različita za svaku instalaciju. Ako želiš uključiti ove podatke, moraš odabrati odgovarajuće prilagođeno polje za njih. Trenutačno postoji samo polje bodovanja koja se mora mapirati.",
+        "MAP_CUSTOM_FIELDS": "Učitaj procjene potrebnog rada za obavljanje zadataka",
+        "MAP_CUSTOM_FIELDS_INFO": "Nažalost se neki Jira podaci spremaju u prilagođena polja koja su različita za svaku instalaciju. Ako želiš uključiti ove podatke, moraš odabrati odgovarajuće prilagođeno polje za njih. Trenutačno postoji samo polje procjene potrebnog rada za obavljanje zadataka koje se mora mapirati.",
         "OPEN": "Stanje za pauziranje zadatka",
-        "SELECT_ISSUE_FOR_TRANSITIONS": "Učitaj problem za učitavanje dostupnih mogućnosti mijenjanja stanja ili izvršavanja radnji",
-        "STORY_POINTS": "Ime polja bodovanja",
-        "TRANSITION": "Baratanje tranzicijom"
+        "SELECT_ISSUE_FOR_TRANSITIONS": "Odaberi problem za učitavanje dostupnih tranzicija",
+        "STORY_POINTS": "Ime polja procjene potrebnog rada za obavljanje zadataka",
+        "TRANSITION": "Baratanje tranzicijama"
       },
       "DIALOG_CONFIRM_ASSIGNMENT": {
         "MSG": "Sažetak <strong>{{summary}}</strong> je trenutačno dodijeljen odgovornoj osobi <strong>{{assignee}}</strong>. Želiš li ga dodijeliti sebi?",
@@ -409,7 +391,7 @@
         "HELP_ARR": {
           "H1": "Osnovna konfiguracija",
           "H2": "Postavke dnevnika rada",
-          "H3": "Standardni prijelazi",
+          "H3": "Standardne tranzicije",
           "P1_1": "Navedi ime za prijavu (može se pronaći na stranici tvog profila) i <a target=\"_blank\" href=\"https://confluence.atlassian.com/cloud/api-tokens-938839638.html\" target=\"_blank\">API token</a> ili lozinku, ako ga iz nekog razloga ne možeš generirati. Imaj na umu da novije Jira verzije ponekad rade samo s tokenom. ",
           "P1_2": "Također moraš navesti JQL upit koji se koristi za prijedloge za dodavanje Jira zadataka. Ako trebaš pomoć, pogledaj ovu poveznicu <a target=\"_blank\" href=\"https://confluence.atlassian.com/jirasoftwarecloud/advanced-searching-764478330.html\" target=\"_blank\">https://confluence.atlassian.com/jirasoftwarecloud/advanced-searching-764478330.html</a>.",
           "P1_3": "Ako želiš, također možeš konfigurirati automatsko dodavanje (npr. svaki put kad posjetiš prikaz planiranja) svih novih zadataka koji su određeni prilagođenim JQL upitom u odlagalište.",
@@ -417,7 +399,7 @@
           "P2_1": "Postoji nekoliko opcija za određivanje vremena i načina slanja dnevnika rada. Aktiviranje opcije <em>'Otvori dijaloški okvir dnevnika rada za dodavanje dnevnika rada u Jira kad je zadatak obavljen'</em> otvara dijaloški okvir za dodavanje dnevnika rada svaki put kad označiš Jira zadatak kao obavljen. Stoga imaj na umu da će se dnevnici rada dodati na vrh svega dosad praćenoga. Dakle, ako označiš zadatak kao obavljen po drugi put, možda nećeš htjeti ponovo poslati kompletno radno vrijeme za zadatak.",
           "P2_2": "<em>'Otvori dijaloški okvir dnevnika rada kad je podzadatak obavljen, a ne za same zadatke s podzadacima'</em> otvara dijaloški okvir dnevnika rada svaki put kad označiš Jira podzadatak kao obavljen. Budući da već pratiš tvoje vrijeme putem podzadataka, nijedan dijaloški okvir se neće otvoriti kad označiš sam Jira zadatak kao obavljen.",
           "P2_3": "<em>'Automatski pošalji aktualiziranja u dnevnik rada bez dijaloškog okvira'</em>, radi to što kaže. Budući da višestruko označavanje zadatka kao obavljenog dovodi do toga da se cijelo radno vrijeme prati dvaput. To se ne preporučuje.",
-          "P3_1": "Ovdje možeš ponovo konfigurirati standardne prijelaze. Jira omogućuje veliki broj konfiguracija prijelaza koji obično stupaju na snagu kao različiti stupci na tvojoj Jira ploči agilnih. Mi ne možemo pretpostaviti mjesto i vrijeme prijelaza tvojih zadataka te ih moraš to postaviti ručno."
+          "P3_1": "Ovdje možeš ponovo konfigurirati standardne tranzicije. Jira omogućuje veliki broj konfiguracija tranzicija koji obično stupaju na snagu kao različiti stupci na tvojoj Jira ploči agilnih. Mi ne možemo pretpostaviti mjesto i vrijeme tranzicija tvojih zadataka te ih moraš to postaviti ručno."
         }
       },
       "ISSUE_CONTENT": {
@@ -433,11 +415,11 @@
         "ON": "na",
         "RELATED": "Povezano",
         "STATUS": "Stanje",
-        "STORY_POINTS": "Bodovanja",
+        "STORY_POINTS": "Procjene potrebnog rada za obavljanje zadataka",
         "SUB_TASKS": "Podzadaci",
         "SUMMARY": "Sažetak",
         "WORKLOG": "Dnevnik rada",
-        "WRITE_A_COMMENT": "Zapiši komentar"
+        "WRITE_A_COMMENT": "Upiši komentar"
       },
       "S": {
         "ADDED_WORKLOG_FOR": "Jira: Dodan je dnevnik rada za {{issueKey}}",
@@ -448,10 +430,10 @@
         "MANUAL_UPDATE_ISSUE_SUCCESS": "Jira: Aktualizirani su podaci za „{{issueText}}”",
         "MISSING_ISSUE_DATA": "Jira: Pronađeni su zadaci s nedostajućim podacima problema. Učitavanje se ponavlja.",
         "NO_AUTO_IMPORT_JQL": "Jira: Upit za pretragu nije definiran za automatski uvoz",
-        "NO_VALID_TRANSITION": "Jira: Nema ispravno konfiguriranog prijelaza",
-        "TIMED_OUT": "Jira: Prekoračeno je vrijeme zahteva",
+        "NO_VALID_TRANSITION": "Jira: Nema ispravno konfigurirane tranzicije",
+        "TIMED_OUT": "Jira: Prekoračeno je vrijeme zahtjeva",
         "TRANSITION": "Jira: Postavi problem „{{issueKey}}” u „{{name}}”",
-        "TRANSITIONS_LOADED": "Jira: Prijelazi su učitani. Koristi donje mogućnosti za njihovo dodijeljivanje",
+        "TRANSITIONS_LOADED": "Jira: Tranzicije su učitane. Koristi donje mogućnosti za njihovo dodijeljivanje",
         "TRANSITION_SUCCESS": "Jira: Postavi problem {{issueKey}} na <strong>{{chosenTransition}}</strong>",
         "UNABLE_TO_REASSIGN": "Jira: Nije moguće ponovo sebi dodijeliti tiket, jer nisi odredio/la korisničko ime. Pogledaj postavke."
       },
@@ -531,14 +513,14 @@
       "CFG_CMP": {
         "ALWAYS_ASK": "Uvijek otvori dijalog",
         "DONE": "Stanje za obavljeni zadatak",
-        "DO_NOT": "Nemoj mijenjati oblik",
+        "DO_NOT": "Nemoj tranzitirati",
         "ENABLE": "Aktiviraj Openproject integraciju",
-        "ENABLE_TRANSITIONS": "Aktiviraj baratanje mijenjanja oblika",
+        "ENABLE_TRANSITIONS": "Aktiviraj baratanje tranzicijama",
         "IN_PROGRESS": "Stanje za započinjanje zadatka",
         "OPEN": "Stanje za pauziranje zadatka",
         "PROGRESS_ON_SAVE": "Standardni napredak pri spremanju",
-        "TRANSITION": "Baratanje mijenjanja oblika",
-        "SELECT_ISSUE_FOR_TRANSITIONS": "Odaberi problem za učitavanje dostupnih promjena oblika"
+        "TRANSITION": "Baratanje tranzicijama",
+        "SELECT_ISSUE_FOR_TRANSITIONS": "Odaberi problem za učitavanje dostupnih tranzicija"
       },
       "DIALOG_INITIAL": {
         "TITLE": "Postavi OpenProject za projekt"
@@ -555,7 +537,7 @@
       },
       "DIALOG_TRANSITION": {
         "CHOOSE_STATUS": "Odaberi stanje za dodjeljivanje",
-        "CURRENT_ASSIGNEE": "Trenutačna odgovorna osoba:",
+        "CURRENT_ASSIGNEE": "Trenutačno odgovorna osoba:",
         "CURRENT_STATUS": "Trenutačno stanje:",
         "PERCENTAGE_DONE": "Napredak:",
         "TASK_NAME": "Ime zadatka:",
@@ -600,7 +582,7 @@
         "POST_TIME_SUCCESS": "OpenProject: Unos vremena je uspješno stvoren za {{issueTitle}}",
         "TRANSITION": "OpenProject: Zadaj problemu „{{issueKey}}” ime „{{name}}”",
         "TRANSITION_SUCCESS": "OpenProject: Postavi problem {{issueKey}} kao <strong>{{chosenTransition}}</strong>",
-        "TRANSITIONS_LOADED": "Prijelazi su učitani. Koristi donje odabire za dodjeljivanje"
+        "TRANSITIONS_LOADED": "Tranzicije su učitane. Koristi donje odabire za dodjeljivanje"
       }
     },
     "POMODORO": {
