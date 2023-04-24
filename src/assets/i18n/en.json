@@ -241,7 +241,8 @@
         "WRITE_A_COMMENT": "Write a comment"
       },
       "S": {
-        "ERR_UNKNOWN": "GitHub: Unknown error {{statusCode}} {{errorMsg}}. Api Rate limit exceeded?"
+        "ERR_UNKNOWN": "GitHub: Unknown error {{statusCode}} {{errorMsg}}. Api Rate limit exceeded?",
+        "CONFIG_ERROR": "GitHub: Error while mapping data. Is your repository name correct?"
       }
     },
     "GITLAB": {

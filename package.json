@@ -1,7 +1,7 @@
 {
   "name": "superProductivity",
-  "version": "7.13.1",
-  "description": "Personal Task Management App to help you with your daily struggle with JIRA etc.",
+  "version": "7.13.2",
+  "description": "Super Productivity is an advanced todo list app with integrated Timeboxing and time tracking capabilities. It also comes with integrations for Jira, Gitlab, GitHub and Open Project.",
   "main": "./electron/main.js",
   "author": "Johannes Millan <contact@super-productivity.com> (http://super-productivity.com)",
   "license": "MIT",
@@ -86,6 +86,7 @@
     "dist:mac:mas": "cp tools/mac-profiles/mas.provisionprofile embedded.provisionprofile; electron-builder --mac mas --config=build/electron-builder.mas.yaml",
     "dist:mac:mas:buildOnly": "electron-builder --mac mas --config=build/electron-builder.mas.yaml",
     "dist:mac:mas:dev": "cp tools/mac-profiles/mas-dev.provisionprofile embedded.provisionprofile; electron-builder --mac mas-dev --config=build/electron-builder.mas-dev.yaml",
+    "dist:mac:mas:x64": "cp tools/mac-profiles/mas.provisionprofile embedded.provisionprofile; electron-builder --mac mas --config=build/electron-builder.mas.yaml --x64",
     "release": "npm run release.changelog && npm run dist",
     "release.changelog": "conventional-changelog -i CHANGELOG.md -s -p angular",
     "version": "npm run release.changelog && git add -A",

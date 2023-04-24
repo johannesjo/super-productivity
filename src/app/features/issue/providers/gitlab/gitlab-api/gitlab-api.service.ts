@@ -21,10 +21,10 @@ import {
   expand,
   filter,
   map,
+  mergeAll,
   mergeMap,
   reduce,
   take,
-  mergeAll,
 } from 'rxjs/operators';
 import { GitlabIssue } from '../gitlab-issue/gitlab-issue.model';
 import {
@@ -162,15 +162,15 @@ export class GitlabApiService {
     ).pipe(take(1));
   }
 
-  getFullIssueRef$(issue: string | number, projectConfig: GitlabCfg): string {
+  getFullIssueRef(issue: string | number, projectConfig: GitlabCfg): string {
     if (GitlabApiService.getPartsFromIssue(issue).length === 2) {
       return issue.toString();
     } else {
-      return this.getProject$(projectConfig, issue) + '#' + this._getIidFromIssue(issue);
+      return this.getProject(projectConfig, issue) + '#' + this._getIidFromIssue(issue);
     }
   }
 
-  getProject$(projectConfig: GitlabCfg, issue?: string | number | undefined): string {
+  getProject(projectConfig: GitlabCfg, issue?: string | number | undefined): string {
     if (issue) {
       const parts: string[] = GitlabApiService.getPartsFromIssue(issue);
       if (parts.length === 2) {
@@ -370,7 +370,7 @@ export class GitlabApiService {
   private _issueApiLink(cfg: GitlabCfg, issue: string | number): string {
     return `${this._apiLink(
       cfg,
-      this.getProject$(cfg, issue),
+      this.getProject(cfg, issue),
     )}/issues/${this._getIidFromIssue(issue)}`;
   }
 
@@ -389,7 +389,7 @@ export class GitlabApiService {
     let projectURL = project;
 
     if (!projectURL) {
-      projectURL = this.getProject$(projectConfig);
+      projectURL = this.getProject(projectConfig);
     }
 
     projectURL = (projectURL as string).replace(/\//gi, '%2F');

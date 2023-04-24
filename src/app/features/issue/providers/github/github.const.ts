@@ -84,7 +84,7 @@ export const GITHUB_CONFIG_FORM: LimitedFormlyFieldConfig<GithubCfg>[] = [
     key: 'filterIssuesAssignedToMe',
     type: 'checkbox',
     templateOptions: {
-      label: T.F.GITHUB.FORM.FILTER_ASSIGNED,
+      label: T.F.GITHUB.FORM.IS_ASSIGNEE_FILTER,
     },
   },
 ];

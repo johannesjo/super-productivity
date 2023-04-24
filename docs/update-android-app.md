@@ -5,7 +5,7 @@
    (To trigger F-Droid)
    Add `fastlane/metadata/android/<locale>/changelogs/<versionCode>.txt`
 3. git commit
-4. git tag (To trigger F-Droid)
+4. git tag (To trigger F-Droid), e.g.: `git tag -a "v21.0" -m"Release 21"`
 5. Go to build/generate signed bundle apk
 6. (sup.jks)
 7. Choose playRelease
