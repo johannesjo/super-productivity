@@ -183,10 +183,12 @@
 
     <div class="pomodoro-toggle-wrapper">
       <button
+        class="play-btn"
         [style.background-color]="toggle ? 'green' : 'red'"
         (click)="pomodoroService.toggle();"
+        mat-mini-fab
       >
-        {{status}}
+        Pom. {{pomodoroService.status}}
       </button>
     </div>
 
