@@ -25,6 +25,7 @@ import {
   deleteTask,
   deleteTasks,
   moveToArchive,
+  persistTimeTracked,
   removeTagsForAllTasks,
   restoreTask,
   updateTaskTags,
@@ -69,8 +70,9 @@ export class TagEffects {
           updateTagOrder,
 
           updateAdvancedConfigForTag,
-          updateWorkStartForTag,
-          updateWorkEndForTag,
+          // updateWorkStartForTag,
+          // updateWorkEndForTag,
+          persistTimeTracked,
           addToBreakTimeForTag,
 
           // TASK Actions

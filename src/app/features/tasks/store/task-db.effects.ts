@@ -3,7 +3,8 @@ import { Actions, createEffect, ofType } from '@ngrx/effects';
 import {
   addSubTask,
   addTask,
-  addTimeSpent,
+  // addTimeSpent,
+  persistTimeTracked,
   convertToMainTask,
   deleteTasks,
   deleteTask,
@@ -46,7 +47,8 @@ export class TaskDbEffects {
         ofType(
           addTask,
           restoreTask,
-          addTimeSpent,
+          // addTimeSpent,
+          persistTimeTracked,
           unScheduleTask,
           deleteTask,
           deleteTasks,

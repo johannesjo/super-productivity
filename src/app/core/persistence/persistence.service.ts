@@ -631,7 +631,7 @@ export class PersistenceService {
       const idbKey = this._getIDBKey(dbKey, projectId);
       this._store.dispatch(saveToDb({ dbKey, data }));
       const r = await this._databaseService.save(idbKey, data);
-
+      console.log(idbKey, data);
       if (isSyncModelChange) {
         this.updateLastLocalSyncModelChange();
       }

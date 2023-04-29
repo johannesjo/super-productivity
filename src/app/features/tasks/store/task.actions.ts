@@ -9,6 +9,7 @@ enum TaskActionTypes {
   'SetCurrentTask' = '[Task] SetCurrentTask',
   'SetSelectedTask' = '[Task] SetSelectedTask',
   'UnsetCurrentTask' = '[Task] UnsetCurrentTask',
+  'PersistTimeTracked' = '[Task] PersistTimeTracked',
 
   // Task Actions
   'AddTask' = '[Task][Issue] Add Task',
@@ -61,6 +62,8 @@ export const setSelectedTask = createAction(
 );
 
 export const unsetCurrentTask = createAction(TaskActionTypes.UnsetCurrentTask);
+
+export const persistTimeTracked = createAction(TaskActionTypes.PersistTimeTracked);
 
 export const addTask = createAction(
   TaskActionTypes.AddTask,
