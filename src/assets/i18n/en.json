@@ -598,8 +598,8 @@
       },
       "S": {
         "SESSION_X_START": "Pomodoro: Session {{nr}} started!",
-        "SESSION_SKIP": "Skip Pomodoro session",
-        "SESSION_END": "End Pomodoro session"
+        "SESSION_SKIP": "Skip to end of current Pomodoro Session",
+        "RESET": "Reset to first Pomodoro Session"
       },
       "SKIP_BREAK": "Skip break",
       "START_BREAK": "Start break"

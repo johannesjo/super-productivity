@@ -613,7 +613,7 @@
       "S": {
         "SESSION_X_START": "Pomodoro: Sesi {{nr}} dimulai!",
         "SESSION_SKIP": "Lewatkan sesi Pomodoro",
-        "SESSION_END": "Akhiri sesi Pomodoro"
+        "RESET": "Akhiri sesi Pomodoro"
       },
       "SKIP_BREAK": "Lewatkan istirahat",
       "START_BREAK": "Mulai istirahat"

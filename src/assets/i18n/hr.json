@@ -599,7 +599,7 @@
       "S": {
         "SESSION_X_START": "Pomodoro: {{nr}}. sesija je počela!",
         "SESSION_SKIP": "Preskoči Pomodoro sesiju",
-        "SESSION_END": "Završi Pomodoro sesiju"
+        "RESET": "Završi Pomodoro sesiju"
       },
       "SKIP_BREAK": "Preskoči pauzu",
       "START_BREAK": "Počni pauzu"

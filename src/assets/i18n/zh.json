@@ -504,7 +504,7 @@
         "SESSION_X_START": "番茄钟：会话 {{nr}} 开始了！"
       },
       "S": {
-        "SESSION_END": "终止番茄钟会话",
+        "RESET": "终止番茄钟会话",
         "SESSION_SKIP": "跳过当前番茄钟会话",
         "SESSION_X_START": "番茄钟：会话 {{nr}} 开始了！"
       },
