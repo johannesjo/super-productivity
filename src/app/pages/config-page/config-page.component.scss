@@ -1,4 +1,4 @@
-@import "../../../variables";
+@import '../../../variables';
 
 .page-settings {
   text-align: start;
@@ -23,7 +23,6 @@
     @include darkTheme {
       background-color: $dark-theme-card-bg;
     }
-
 
     .md-title {
       margin-top: 0;
@@ -51,7 +50,6 @@
     }
   }
 
-
   @include mq(xs, max) {
     .keyboard-settings {
       display: none;
@@ -63,9 +61,8 @@
   margin-top: auto;
   text-align: center;
   font-style: italic;
-  padding: $s*3;
+  padding: $s * 3;
 }
-
 
 .dark-mode-toggle {
   margin: 20px 0;
@@ -73,4 +70,8 @@
   :host-context(.isMac.isElectron) & {
     display: none;
   }
+}
+
+::ng-deep .ng-tns-c194-50 .ng-trigger {
+  max-height: fit-content;
 }
