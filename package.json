@@ -166,7 +166,7 @@
     "@typescript-eslint/parser": "5.27.0",
     "angular-material-css-vars": "^3.0.0",
     "angular2-promise-buttons": "^5.0.3",
-    "axios": "^0.21.4",
+    "axios": "^1.4.0",
     "chart.js": "^2.8.0",
     "chromedriver": ">=108.0.0",
     "chrono-node": "^2.6.2",
