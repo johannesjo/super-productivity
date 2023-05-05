@@ -172,3 +172,9 @@ body .mat-h1 {
 mat-option .mat-option-text > * {
   vertical-align: middle;
 }
+
+// SELECT
+// to make it fit monday-sunday
+.mat-select-panel {
+  max-height: fit-content !important;
+}
