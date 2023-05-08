@@ -220,7 +220,7 @@
         "IS_SEARCH_ISSUES_FROM_GITHUB": "Prikaži git probleme kao prijedloge prilikom dodavanja novih zadataka",
         "REPO": "„korisničko ime/ime repozitorija” za git repozitorij koji želiš pratiti",
         "TOKEN": "Token za pristup",
-        "TOKEN_DESCRIPTION": "Potrebno za pristup privatnom repozitoriju"
+        "TOKEN_DESCRIPTION": "Potrebno za pristup privatnom repozitoriju",
         "IS_ASSIGNEE_FILTER": "Filtar za meni dodijelenje zadatke"
       },
       "FORM_SECTION": {
