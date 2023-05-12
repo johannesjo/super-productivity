@@ -29,7 +29,7 @@ import { take } from 'rxjs/operators';
 import { TaskService } from '../tasks/task.service';
 import { TODAY_TAG } from '../tag/tag.const';
 import { Task, TaskPlanned } from '../tasks/task.model';
-import { addTask, scheduleTask, updateTask } from '../tasks/store/task.actions';
+import { addTask, scheduleTask } from '../tasks/store/task.actions';
 import { WorkContextService } from '../work-context/work-context.service';
 import { WorkContextType } from '../work-context/work-context.model';
 import { isValidSplitTime } from '../../util/is-valid-split-time';
@@ -177,7 +177,6 @@ export class TaskRepeatCfgService {
   ): // NOTE: updateTaskRepeatCfg missing as there is no way to declare it as action type
   Promise<
     (
-      | ReturnType<typeof updateTask>
       | ReturnType<typeof addTask>
       | ReturnType<typeof updateTaskRepeatCfg>
       | ReturnType<typeof scheduleTask>
@@ -201,25 +200,6 @@ export class TaskRepeatCfgService {
     if (!isCreateNew) {
       return [];
     }
-
-    // move all current left over instances to archive right away
-    const markAsDoneActions: ReturnType<typeof updateTask>[] = existingTaskInstances
-      .filter(
-        (taskI) =>
-          !taskI.isDone &&
-          !isSameDay(targetDayDate, taskI.created) &&
-          taskI.id !== currentTaskId,
-      )
-      .map((taskI) =>
-        updateTask({
-          task: {
-            id: taskI.id,
-            changes: {
-              isDone: true,
-            },
-          },
-        }),
-      );
 
     const { task, isAddToBottom } = this._getTaskRepeatTemplate(taskRepeatCfg);
 
@@ -263,7 +243,7 @@ export class TaskRepeatCfgService {
       );
     }
 
-    return [...markAsDoneActions, ...createNewActions];
+    return createNewActions;
   }
 
   private _getTaskRepeatTemplate(taskRepeatCfg: TaskRepeatCfg): {
