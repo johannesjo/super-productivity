@@ -99,13 +99,24 @@
         </mat-icon>
 
         <div class="type-ico-wrapper">
-          <mat-icon
+          <div
             *ngIf="task.repeatCfgId"
-            [style.transform]="isCurrent ? 'scale(1.4)': ''"
             class="task-type-ico"
-            svgIcon="repeat"
           >
-          </mat-icon>
+            <div
+              class="repeat-date-badge"
+              *ngIf="!isRepeatTaskCreatedToday"
+            >
+              {{task.created|date:'d.M'}}
+            </div>
+            <mat-icon
+              *ngIf="task.repeatCfgId"
+              [style.transform]="isCurrent ? 'scale(1.4)': ''"
+              class="task-type-ico"
+              svgIcon="repeat"
+            >
+            </mat-icon>
+          </div>
 
           <div
             *ngIf="task.issueId"

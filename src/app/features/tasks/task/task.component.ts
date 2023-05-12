@@ -58,6 +58,7 @@ import { TaskRepeatCfgService } from '../../task-repeat-cfg/task-repeat-cfg.serv
 import { DialogConfirmComponent } from '../../../ui/dialog-confirm/dialog-confirm.component';
 import { Update } from '@ngrx/entity';
 import { SnackService } from '../../../core/snack/snack.service';
+import { isToday } from '../../../util/is-today.util';
 
 @Component({
   selector: 'task',
@@ -133,6 +134,7 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
     : EMPTY;
 
   isFirstLineHover: boolean = false;
+  isRepeatTaskCreatedToday: boolean = false;
 
   private _dragEnterTarget?: HTMLElement;
   private _destroy$: Subject<boolean> = new Subject<boolean>();
@@ -162,6 +164,7 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
     this.taskIdWithPrefix = 't-' + this.task.id;
     this.isDone = v.isDone;
     this.isTodayTag = v.tagIds.includes(TODAY_TAG.id);
+    this.isRepeatTaskCreatedToday = !!(this.task.repeatCfgId && isToday(v.created));
     this._task$.next(v);
   }
 
