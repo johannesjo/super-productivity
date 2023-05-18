@@ -209,7 +209,12 @@ export class TaskRepeatCfgService {
       | ReturnType<typeof scheduleTask>
     )[] = [
       addTask({
-        task,
+        task: {
+          ...task,
+          // NOTE otherwise isCreateNew check above would not work as intended and
+          // we use created also for the repeat day label for past tasks
+          created: targetDayDate,
+        },
         workContextType: this._workContextService
           .activeWorkContextType as WorkContextType,
         workContextId: this._workContextService.activeWorkContextId as string,
