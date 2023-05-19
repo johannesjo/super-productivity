@@ -318,8 +318,13 @@ export const projectReducer = createReducer<ProjectState>(
   // MOVE TASK ACTIONS
   // -----------------
   on(moveProjectTaskToBacklogList, (state, { taskId, newOrderedIds, workContextId }) => {
-    const todaysTaskIdsBefore = (state.entities[workContextId] as Project).taskIds;
-    const backlogIdsBefore = (state.entities[workContextId] as Project).backlogTaskIds;
+    const project = state.entities[workContextId] as Project;
+    if (project.isBacklogDisabled) {
+      console.warn('Project backlog is disabled');
+      return state;
+    }
+    const todaysTaskIdsBefore = project.taskIds;
+    const backlogIdsBefore = project.backlogTaskIds;
 
     const filteredToday = todaysTaskIdsBefore.filter(filterOutId(taskId));
     const backlogTaskIds = moveItemInList(taskId, backlogIdsBefore, newOrderedIds);
@@ -436,8 +441,13 @@ export const projectReducer = createReducer<ProjectState>(
   ),
 
   on(moveProjectTaskToBacklogListAuto, (state, { taskId, projectId }) => {
-    const todaysTaskIdsBefore = (state.entities[projectId] as Project).taskIds;
-    const backlogIdsBefore = (state.entities[projectId] as Project).backlogTaskIds;
+    const project = state.entities[projectId] as Project;
+    if (project.isBacklogDisabled) {
+      console.warn('Project backlog is disabled');
+      return state;
+    }
+    const todaysTaskIdsBefore = project.taskIds;
+    const backlogIdsBefore = project.backlogTaskIds;
     return backlogIdsBefore.includes(taskId)
       ? state
       : projectAdapter.updateOne(
@@ -523,9 +533,8 @@ export const projectReducer = createReducer<ProjectState>(
     const affectedProject = task.projectId && state.entities[task.projectId];
     if (!affectedProject) return state; // if there is no projectId, no changes are needed
 
-    const prop: 'backlogTaskIds' | 'taskIds' = isAddToBacklog
-      ? 'backlogTaskIds'
-      : 'taskIds';
+    const prop: 'backlogTaskIds' | 'taskIds' =
+      isAddToBacklog && !affectedProject.isBacklogDisabled ? 'backlogTaskIds' : 'taskIds';
 
     const changes: { [x: string]: any[] } = {};
     if (isAddToBottom) {
