@@ -212,6 +212,8 @@ export class TakeABreakService {
         filter(([reset, cfg]) => cfg && cfg.isTakeABreakEnabled),
       )
       .subscribe(() => {
+        this._triggerLockScreenCounter$.next(false);
+        this._triggerFullscreenBlocker$.next(false);
         this._bannerService.dismiss(BANNER_ID);
       });
 
