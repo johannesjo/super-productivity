@@ -1,5 +1,7 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { WorkContextService } from '../../features/work-context/work-context.service';
+import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 
 @Component({
   selector: 'work-view-page',
@@ -8,5 +10,9 @@ import { WorkContextService } from '../../features/work-context/work-context.ser
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ProjectTaskPageComponent {
+  isShowBacklog$: Observable<boolean> = this.workContextService.activeWorkContext$.pipe(
+    map((workContext) => !workContext.isBacklogDisabled),
+  );
+
   constructor(public workContextService: WorkContextService) {}
 }

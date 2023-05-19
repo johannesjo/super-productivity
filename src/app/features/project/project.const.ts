@@ -11,6 +11,7 @@ export const DEFAULT_PROJECT: Project = {
   title: '',
   isHiddenFromMenu: false,
   isArchived: false,
+  isBacklogDisabled: false,
   issueIntegrationCfgs: DEFAULT_ISSUE_PROVIDER_CFGS,
   taskIds: [],
   backlogTaskIds: [],

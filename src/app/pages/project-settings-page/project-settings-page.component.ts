@@ -21,8 +21,8 @@ import { Subscription } from 'rxjs';
 import { ProjectService } from '../../features/project/project.service';
 import { BASIC_PROJECT_CONFIG_FORM_CONFIG } from '../../features/project/project-form-cfg.const';
 import {
-  ISSUE_PROVIDER_FORM_CFGS,
   DEFAULT_ISSUE_PROVIDER_CFGS,
+  ISSUE_PROVIDER_FORM_CFGS,
 } from '../../features/issue/issue.const';
 import { GLOBAL_CONFIG_FORM_CONFIG } from '../../features/config/global-config-form-config.const';
 import { IS_ELECTRON } from '../../app.constants';
@@ -143,6 +143,7 @@ export class ProjectSettingsPageComponent implements OnInit, OnDestroy {
       this.projectService.update(this.currentProject.id, {
         title: $event.config.title,
         isHiddenFromMenu: $event.config.isHiddenFromMenu,
+        isBacklogDisabled: $event.config.isBacklogDisabled,
       });
     }
   }
