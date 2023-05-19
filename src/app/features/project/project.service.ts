@@ -42,10 +42,10 @@ import {
   selectGitlabCfgByProjectId,
   selectJiraCfgByProjectId,
   selectOpenProjectCfgByProjectId,
-  selectRedmineCfgByProjectId,
   selectProjectBreakNrForProject,
   selectProjectBreakTimeForProject,
   selectProjectById,
+  selectRedmineCfgByProjectId,
   selectUnarchivedProjects,
   selectUnarchivedProjectsWithoutCurrent,
 } from './store/project.selectors';

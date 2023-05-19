@@ -40,6 +40,7 @@ import {
   deleteProject,
   deleteProjects,
   loadProjects,
+  moveAllProjectBacklogTasksToTodayList,
   moveProjectTaskDownInBacklogList,
   moveProjectTaskInBacklogList,
   moveProjectTaskToBacklogList,
@@ -687,6 +688,19 @@ export const projectReducer = createReducer<ProjectState>(
     }
 
     return projectAdapter.updateMany(updates, state);
+  }),
+  on(moveAllProjectBacklogTasksToTodayList, (state, { projectId }) => {
+    const project = state.entities[projectId] as Project;
+    return projectAdapter.updateOne(
+      {
+        id: projectId,
+        changes: {
+          taskIds: [...project.taskIds, ...project.backlogTaskIds],
+          backlogTaskIds: [],
+        },
+      },
+      state,
+    );
   }),
   // on(AAA, (state, {AAA})=> {  }),
 );

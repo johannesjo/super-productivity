@@ -9,6 +9,7 @@ import {
   archiveProject,
   deleteProject,
   loadProjectRelatedDataSuccess,
+  moveAllProjectBacklogTasksToTodayList,
   moveProjectTaskDownInBacklogList,
   moveProjectTaskInBacklogList,
   moveProjectTaskToBacklogList,
@@ -256,6 +257,19 @@ export class ProjectEffects {
         }),
       ),
     { dispatch: false },
+  );
+
+  moveAllProjectToTodayListWhenBacklogIsDisabled$: Observable<unknown> = createEffect(
+    () =>
+      this._actions$.pipe(
+        ofType(updateProject),
+        filter((a) => a.project.changes.isBacklogDisabled === true),
+        map((a) => {
+          return moveAllProjectBacklogTasksToTodayList({
+            projectId: a.project.id as string,
+          });
+        }),
+      ),
   );
 
   // CURRENTLY NOT IMPLEMENTED

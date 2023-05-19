@@ -146,3 +146,8 @@ export const moveProjectTaskToTodayList = createAction(
     target: DropListModelSource;
   }>(),
 );
+
+export const moveAllProjectBacklogTasksToTodayList = createAction(
+  '[Project] Move all backlog tasks to today',
+  props<{ projectId: string }>(),
+);
