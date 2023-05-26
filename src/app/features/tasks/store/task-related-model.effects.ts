@@ -13,7 +13,6 @@ import {
 import {
   concatMap,
   filter,
-  first,
   map,
   mapTo,
   mergeMap,
@@ -22,7 +21,7 @@ import {
   withLatestFrom,
 } from 'rxjs/operators';
 import { PersistenceService } from '../../../core/persistence/persistence.service';
-import { Task, TaskArchive, TaskWithSubTasks, TaskReminderOptionId } from '../task.model';
+import { Task, TaskArchive, TaskReminderOptionId, TaskWithSubTasks } from '../task.model';
 import { ReminderService } from '../../reminder/reminder.service';
 import { moveTaskInTodayList } from '../../work-context/store/work-context-meta.actions';
 import { taskAdapter } from './task.adapter';
@@ -65,29 +64,44 @@ export class TaskRelatedModelEffects {
     { dispatch: false },
   );
 
-  autoAddTodayTag: any = createEffect(() =>
-    this._actions$.pipe(
-      ofType(addTimeSpent),
-      switchMap(({ task }) =>
-        task.parentId ? this._taskService.getByIdOnce$(task.parentId) : of(task),
-      ),
-      filter((task: Task) => !task.tagIds.includes(TODAY_TAG.id)),
-      concatMap((task: Task) =>
-        this._globalConfigService.misc$.pipe(
-          first(),
-          map((miscCfg) => ({
-            miscCfg,
+  ifAutoAddTodayEnabled$ = <T>(obs: Observable<T>): Observable<T> =>
+    this._globalConfigService.misc$.pipe(
+      switchMap((misc) => (misc.isAutoAddWorkedOnToToday ? obs : EMPTY)),
+    );
+
+  autoAddTodayTagOnTracking: any = createEffect(() =>
+    this.ifAutoAddTodayEnabled$(
+      this._actions$.pipe(
+        ofType(addTimeSpent),
+        switchMap(({ task }) =>
+          task.parentId ? this._taskService.getByIdOnce$(task.parentId) : of(task),
+        ),
+        filter((task: Task) => !task.tagIds.includes(TODAY_TAG.id)),
+        map((task) =>
+          updateTaskTags({
             task,
-          })),
+            newTagIds: unique([...task.tagIds, TODAY_TAG.id]),
+            oldTagIds: task.tagIds,
+          }),
         ),
       ),
-      filter(({ miscCfg, task }) => miscCfg.isAutoAddWorkedOnToToday),
-      map(({ miscCfg, task }) =>
-        updateTaskTags({
-          task,
-          newTagIds: unique([...task.tagIds, TODAY_TAG.id]),
-          oldTagIds: task.tagIds,
-        }),
+    ),
+  );
+
+  autoAddTodayTagOnMarkAsDone: any = createEffect(() =>
+    this.ifAutoAddTodayEnabled$(
+      this._actions$.pipe(
+        ofType(updateTask),
+        filter((a) => a.task.changes.isDone === true),
+        switchMap(({ task }) => this._taskService.getByIdOnce$(task.id as string)),
+        filter((task: Task) => !task.parentId && !task.tagIds.includes(TODAY_TAG.id)),
+        map((task) =>
+          updateTaskTags({
+            task,
+            newTagIds: unique([...task.tagIds, TODAY_TAG.id]),
+            oldTagIds: task.tagIds,
+          }),
+        ),
       ),
     ),
   );
