@@ -11,7 +11,7 @@ import { map } from 'rxjs/operators';
 })
 export class ProjectTaskPageComponent {
   isShowBacklog$: Observable<boolean> = this.workContextService.activeWorkContext$.pipe(
-    map((workContext) => !workContext.isBacklogDisabled),
+    map((workContext) => !!workContext.isEnableBacklog),
   );
 
   constructor(public workContextService: WorkContextService) {}

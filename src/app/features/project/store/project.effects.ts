@@ -263,7 +263,7 @@ export class ProjectEffects {
     () =>
       this._actions$.pipe(
         ofType(updateProject),
-        filter((a) => a.project.changes.isBacklogDisabled === true),
+        filter((a) => a.project.changes.isEnableBacklog === false),
         map((a) => {
           return moveAllProjectBacklogTasksToTodayList({
             projectId: a.project.id as string,

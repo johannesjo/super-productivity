@@ -61,7 +61,7 @@ export const selectActiveWorkContext = createSelector(
         ...project,
         icon: null,
         taskIds: project.taskIds || [],
-        isBacklogDisabled: project.isBacklogDisabled,
+        isEnableBacklog: project.isEnableBacklog,
         backlogTaskIds: project.backlogTaskIds || [],
         type: WorkContextType.PROJECT,
         routerLink: `project/${project.id}`,

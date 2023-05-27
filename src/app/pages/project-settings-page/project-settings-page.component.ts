@@ -143,7 +143,7 @@ export class ProjectSettingsPageComponent implements OnInit, OnDestroy {
       this.projectService.update(this.currentProject.id, {
         title: $event.config.title,
         isHiddenFromMenu: $event.config.isHiddenFromMenu,
-        isBacklogDisabled: $event.config.isBacklogDisabled,
+        isEnableBacklog: $event.config.isEnableBacklog,
       });
     }
   }

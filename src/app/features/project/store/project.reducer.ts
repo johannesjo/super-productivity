@@ -320,7 +320,7 @@ export const projectReducer = createReducer<ProjectState>(
   // -----------------
   on(moveProjectTaskToBacklogList, (state, { taskId, newOrderedIds, workContextId }) => {
     const project = state.entities[workContextId] as Project;
-    if (project.isBacklogDisabled) {
+    if (!project.isEnableBacklog) {
       console.warn('Project backlog is disabled');
       return state;
     }
@@ -443,7 +443,7 @@ export const projectReducer = createReducer<ProjectState>(
 
   on(moveProjectTaskToBacklogListAuto, (state, { taskId, projectId }) => {
     const project = state.entities[projectId] as Project;
-    if (project.isBacklogDisabled) {
+    if (!project.isEnableBacklog) {
       console.warn('Project backlog is disabled');
       return state;
     }
@@ -535,7 +535,7 @@ export const projectReducer = createReducer<ProjectState>(
     if (!affectedProject) return state; // if there is no projectId, no changes are needed
 
     const prop: 'backlogTaskIds' | 'taskIds' =
-      isAddToBacklog && !affectedProject.isBacklogDisabled ? 'backlogTaskIds' : 'taskIds';
+      isAddToBacklog && affectedProject.isEnableBacklog ? 'backlogTaskIds' : 'taskIds';
 
     const changes: { [x: string]: any[] } = {};
     if (isAddToBottom) {

@@ -63,6 +63,11 @@ const _extendProjectDefaults = (project: Project): Project => {
   return {
     ...DEFAULT_PROJECT,
     ...project,
+    // enable backlog if value was never set
+    isEnableBacklog:
+      typeof (project.isEnableBacklog as unknown) === 'boolean'
+        ? project.isEnableBacklog
+        : project.isEnableBacklog === undefined,
     noteIds: project.noteIds || [],
     // also add missing issue integration cfgs
     issueIntegrationCfgs: {

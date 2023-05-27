@@ -12,7 +12,7 @@ export interface ProjectBasicCfg {
   title: string;
   isHiddenFromMenu: boolean;
   isArchived: boolean;
-  isBacklogDisabled: boolean;
+  isEnableBacklog: boolean;
   taskIds: string[];
   backlogTaskIds: string[];
   noteIds: string[];
