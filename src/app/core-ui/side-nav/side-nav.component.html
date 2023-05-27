@@ -102,8 +102,9 @@
         mat-menu-item
       >
         <span class="badge"
-          >{{project.taskIds.length}}/{{project.backlogTaskIds.length}}</span
-        >
+          >{{project.taskIds.length}}{{project.isEnableBacklog ? '/' +
+          project.backlogTaskIds.length : ''}}
+        </span>
         <mat-icon
           class="drag-handle"
           drag-handle
