@@ -21,9 +21,7 @@ export const BASIC_PROJECT_CONFIG_FORM_CONFIG: ConfigFormSection<Project> = {
       key: 'isEnableBacklog',
       type: 'checkbox',
       templateOptions: {
-        // label: T.F.PROJECT.FORM_THEME.L_THEME_COLOR,
-        label: 'Enable Project Backlog',
-        description: '(A backlog is another layer to store your future tasks in)',
+        label: T.F.PROJECT.FORM_BASIC.L_ENABLE_BACKLOG,
       },
     },
     {
@@ -64,9 +62,7 @@ export const CREATE_PROJECT_BASIC_CONFIG_FORM_CONFIG: GenericConfigFormSection =
       key: 'isBacklogDisabled',
       type: 'checkbox',
       templateOptions: {
-        // label: T.F.PROJECT.FORM_THEME.L_THEME_COLOR,
-        label: 'Enable Project Backlog',
-        description: '(A backlog is another layer to store your future tasks in)',
+        label: T.F.PROJECT.FORM_BASIC.L_ENABLE_BACKLOG,
       },
     },
   ],

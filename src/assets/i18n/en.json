@@ -662,6 +662,7 @@
         "SETUP_REDMINE_PROJECT": "Setup Redmine Integration"
       },
       "FORM_BASIC": {
+        "L_ENABLE_BACKLOG": "Enable Project Backlog",
         "L_IS_HIDDEN_FROM_MENU": "Hide project from menu",
         "L_TITLE": "Project Name",
         "TITLE": "Basic Settings"
