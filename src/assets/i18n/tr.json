@@ -97,7 +97,7 @@
         "CALDAV_RESOURCE": "CalDav kaynağının adı (takvim)",
         "CALDAV_URL": "CalDav URL'si (temel URL)",
         "CALDAV_USER": "CalDav kullanıcı adınız",
-        "IS_AUTO_ADD_TO_BACKLOG": "Tamamlanmamış CalDav yapılacaklarını görev biriktirme listesine otomatik olarak ekleyin",
+        "IS_AUTO_IMPORT_ISSUES": "Tamamlanmamış CalDav yapılacaklarını görev biriktirme listesine otomatik olarak ekleyin",
         "IS_AUTO_POLL": "Değişiklikler için içe aktarılan görevleri otomatik olarak yoklayın",
         "IS_SEARCH_ISSUES_FROM_CALDAV": "Yeni görevler eklerken tamamlanmamış CalDav yapılacaklarını öneri olarak göster",
         "IS_TRANSITION_ISSUES_ENABLED": "Görev tamamlandığında CalDav yapılacaklarını otomatik olarak tamamlayın"
@@ -145,7 +145,7 @@
       },
       "FORM": {
         "FILTER_USER": "Kullanıcı adı (örneğin, değişiklikleri kendiniz filtrelemek için)",
-        "IS_AUTO_ADD_TO_BACKLOG": "Çözülmeyen sorunları otomatik olarak GitHub'dan görev biriktirme listesine ekle",
+        "IS_AUTO_IMPORT_ISSUES": "Çözülmeyen sorunları otomatik olarak GitHub'dan görev biriktirme listesine ekle",
         "IS_AUTO_POLL": "İçe aktarılan git sorunlarını değişiklikler için otomatik olarak yokla",
         "IS_SEARCH_ISSUES_FROM_GITEA": "Yeni görevler eklerken git'in önerilerini öneri olarak göster",
         "REPO": "İzlemek istediğiniz git deposu için \"username / repositoryName\"",
@@ -193,7 +193,7 @@
         "SCOPE_CREATED": "Benim tarafımdan oluşturuldu",
         "IS_AUTO_POLL": "Değişiklikler için içe aktarılan redmine sorunlarını otomatik olarak yokla",
         "IS_SEARCH_ISSUES_FROM_REDMINE": "Yeni görevler eklerken, redmine'deki sorunları öneri olarak göster",
-        "IS_AUTO_ADD_TO_BACKLOG": "Açık sorunları redmine'den görev biriktirme listesine otomatik olarak ekle"
+        "IS_AUTO_IMPORT_ISSUES": "Açık sorunları redmine'den görev biriktirme listesine otomatik olarak ekle"
       },
       "FORM_SECTION": {
         "TITLE": "Redmine",
@@ -216,7 +216,7 @@
       },
       "FORM": {
         "FILTER_USER": "Kullanıcı adı (örneğin, değişiklikleri kendiniz filtrelemek için)",
-        "IS_AUTO_ADD_TO_BACKLOG": "Çözülmeyen sorunları otomatik olarak GitHub'dan görev biriktirme listesine ekle",
+        "IS_AUTO_IMPORT_ISSUES": "Çözülmeyen sorunları otomatik olarak GitHub'dan görev biriktirme listesine ekle",
         "IS_AUTO_POLL": "İçe aktarılan git sorunlarını değişiklikler için otomatik olarak yokla",
         "IS_SEARCH_ISSUES_FROM_GITHUB": "Yeni görevler eklerken git'in önerilerini öneri olarak göster",
         "REPO": "İzlemek istediğiniz git deposu için \"username / repositoryName\"",
@@ -248,7 +248,7 @@
       "FORM": {
         "FILTER_USER": "Kullanıcı adı (örneğin, değişiklikleri kendiniz filtrelemek için)",
         "GITLAB_BASE_URL": "Özel GitLab temel URL'si",
-        "IS_AUTO_ADD_TO_BACKLOG": "Çözülmeyen sorunları otomatik olarak GitLab'dan görev biriktirme listesine ekle",
+        "IS_AUTO_IMPORT_ISSUES": "Çözülmeyen sorunları otomatik olarak GitLab'dan görev biriktirme listesine ekle",
         "IS_AUTO_POLL": "İçe aktarılan git sorunlarını değişiklikler için otomatik olarak yokla",
         "IS_SEARCH_ISSUES_FROM_GITLAB": "Yeni görevler eklerken git'in önerilerini öneri olarak göster",
         "PROJECT": "Proje ID veya kullanıcı adı/projesi",
@@ -373,7 +373,7 @@
         "TITLE": "Jira: İş günlüğü Gönder"
       },
       "FORM": {
-        "IS_AUTO_ADD_TO_BACKLOG": "Çözülmeyen sorunları otomatik olarak GitHub'dan görev biriktirme listesine ekle",
+        "IS_AUTO_IMPORT_ISSUES": "Çözülmeyen sorunları otomatik olarak GitHub'dan görev biriktirme listesine ekle",
         "IS_AUTO_POLL": "İçe aktarılan git sorunlarını değişiklikler için otomatik olarak yokla",
         "IS_SEARCH_ISSUES_FROM_GITHUB": "Yeni görevler eklerken git'in önerilerini öneri olarak göster",
         "REPO": "İzlemek istediğiniz git deposu için \"username / repositoryName\""
@@ -381,7 +381,7 @@
       "FORM_ADV": {
         "AUTO_ADD_BACKLOG_JQL_QUERY": "JQL, görevler listesine otomatik olarak görev eklemek için kullanılır",
         "IS_ADD_WORKLOG_ON_SUB_TASK_DONE": "Alt görev tamamlandığında iş günlüğünü jira'ya göndermek için iletişim kutusunu aç",
-        "IS_AUTO_ADD_TO_BACKLOG": "Jira görev biriktirme listesine otomatik olarak sorun ekleme",
+        "IS_AUTO_IMPORT_ISSUES": "Jira görev biriktirme listesine otomatik olarak sorun ekleme",
         "IS_AUTO_POLL_TICKETS": "İçe aktarılan sorunları otomatik olarak kontrol et ve bildir",
         "IS_CHECK_TO_RE_ASSIGN_TICKET_ON_TASK_START": "Halen çalışılmakta olan sorun geçerli kullanıcıya atanmış mı kontrol edin",
         "IS_WORKLOG_ENABLED": "Görev tamamlandığında çalışma günlüğünü jira'ya göndermek için iletişim kutusunu aç",
@@ -535,7 +535,7 @@
       "FORM": {
         "FILTER_USER": "Kullanıcı adı (örneğin, değişiklikleri kendiniz filtrelemek için)",
         "HOST": "Ana bilgisayar (ör.: https://www.openproject.org/)",
-        "IS_AUTO_ADD_TO_BACKLOG": "Çözümlenmemiş iş paketlerini OpenProject'ten görev biriktirme listesine otomatik olarak ekleyin",
+        "IS_AUTO_IMPORT_ISSUES": "Çözümlenmemiş iş paketlerini OpenProject'ten görev biriktirme listesine otomatik olarak ekleyin",
         "IS_AUTO_POLL": "Değişiklikler için içe aktarılan OpenProject iş paketlerini otomatik olarak yokla",
         "IS_SEARCH_ISSUES_FROM_OPEN_PROJECT": "Yeni görevler eklerken iş paketlerini öneri olarak göster",
         "IS_SHOW_TIME_TRACKING_DIALOG": "OpenProject'e rapor vermek için zaman izleme iletişim kutusunu göster",

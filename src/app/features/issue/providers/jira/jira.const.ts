@@ -201,7 +201,7 @@ export const JIRA_ADVANCED_FORM_CFG: LimitedFormlyFieldConfig<JiraCfg>[] = [
     key: 'isAutoAddToBacklog',
     type: 'checkbox',
     templateOptions: {
-      label: T.F.JIRA.FORM_ADV.IS_AUTO_ADD_TO_BACKLOG,
+      label: T.F.JIRA.FORM_ADV.IS_AUTO_IMPORT_ISSUES,
     },
   },
   {

@@ -85,7 +85,7 @@ export const CALDAV_CONFIG_FORM: LimitedFormlyFieldConfig<CaldavCfg>[] = [
     type: 'checkbox',
     hideExpression: (model: any) => !model.isEnabled,
     templateOptions: {
-      label: T.F.CALDAV.FORM.IS_AUTO_ADD_TO_BACKLOG,
+      label: T.F.CALDAV.FORM.IS_AUTO_IMPORT_ISSUES,
     },
   },
   {

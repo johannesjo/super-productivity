@@ -97,7 +97,7 @@
         "CALDAV_RESOURCE": "Ime CalDav resursa (kalendar)",
         "CALDAV_URL": "CalDav URL (osnovni URL)",
         "CALDAV_USER": "Tvoje CalDav korisničko ime",
-        "IS_AUTO_ADD_TO_BACKLOG": "Automatski dodaj nezavršene CalDav zadatke u odlagalište",
+        "IS_AUTO_IMPORT_ISSUES": "Automatski dodaj nezavršene CalDav zadatke u odlagalište",
         "IS_AUTO_POLL": "Automatski preispitaj ima li promjena u uvezenim zadacima",
         "IS_SEARCH_ISSUES_FROM_CALDAV": "Pokaži nezavršene CalDav zadatke kao prijedloge tijekom dodavanja novih zadataka",
         "IS_TRANSITION_ISSUES_ENABLED": "Automatski završi CalDav zadatke nakon završavanja zadatka"
@@ -145,7 +145,7 @@
       },
       "FORM": {
         "FILTER_USER": "Korisničko ime (npr. za izdvajanje vlastito izrađenih promjena)",
-        "IS_AUTO_ADD_TO_BACKLOG": "Automatski dodaj popis neriješenih Gitea problema u odlagalište",
+        "IS_AUTO_IMPORT_ISSUES": "Automatski dodaj popis neriješenih Gitea problema u odlagalište",
         "IS_AUTO_POLL": "Automatski preispitaj uvezene git probleme za promjenama",
         "IS_SEARCH_ISSUES_FROM_GITEA": "Prikaži git probleme kao prijedloge prilikom dodavanja novih zadataka",
         "HOST": "Host računalo (npr.: https://try.gitea.io)",
@@ -192,7 +192,7 @@
         "SCOPE_CREATED": "Od mene stvoreno",
         "IS_AUTO_POLL": "Automatski preispitaj uvezene redmine probleme za promjenama",
         "IS_SEARCH_ISSUES_FROM_REDMINE": "Prikaži redmine probleme kao prijedloge prilikom dodavanja novih zadataka",
-        "IS_AUTO_ADD_TO_BACKLOG": "Automatski dodaj popis neriješenih redmine problema u odlagalište"
+        "IS_AUTO_IMPORT_ISSUES": "Automatski dodaj popis neriješenih redmine problema u odlagalište"
       },
       "FORM_SECTION": {
         "TITLE": "Redmine",
@@ -215,7 +215,7 @@
       },
       "FORM": {
         "FILTER_USER": "Korisničko ime (npr. za izdvajanje vlastitih promjena)",
-        "IS_AUTO_ADD_TO_BACKLOG": "Automatski dodaj neriješene GitHub probleme u odlagalište",
+        "IS_AUTO_IMPORT_ISSUES": "Automatski dodaj neriješene GitHub probleme u odlagalište",
         "IS_AUTO_POLL": "Automatski preispitaj uvezene git probleme za promjenama",
         "IS_SEARCH_ISSUES_FROM_GITHUB": "Prikaži git probleme kao prijedloge prilikom dodavanja novih zadataka",
         "REPO": "„korisničko ime/ime repozitorija” za git repozitorij koji želiš pratiti",
@@ -252,7 +252,7 @@
       "FORM": {
         "FILTER_USER": "Korisničko ime (npr. za izdvajanje vlastitih promjena)",
         "GITLAB_BASE_URL": "Prilagođeni osnovni GitLab URL (opcionalno)",
-        "IS_AUTO_ADD_TO_BACKLOG": "Automatski dodaj neriješene GitLab probleme u odlagalište",
+        "IS_AUTO_IMPORT_ISSUES": "Automatski dodaj neriješene GitLab probleme u odlagalište",
         "IS_AUTO_POLL": "Automatski preispitaj uvezene git probleme za promjenama",
         "IS_SEARCH_ISSUES_FROM_GITLAB": "Prikaži git probleme kao prijedloge prilikom dodavanja novih zadataka",
         "PROJECT": "(standardni) ID projekta ili korisničko ime/projekt",
@@ -358,7 +358,7 @@
         "TITLE": "Jira: Pošalji dnevnik rada"
       },
       "FORM": {
-        "IS_AUTO_ADD_TO_BACKLOG": "Automatski dodaj nezavršene GitHub probleme u odlagalište",
+        "IS_AUTO_IMPORT_ISSUES": "Automatski dodaj nezavršene GitHub probleme u odlagalište",
         "IS_AUTO_POLL": "Automatski preispitaj uvezene git porbleme za promjenama",
         "IS_SEARCH_ISSUES_FROM_GITHUB": "Prikaži git probleme kao prijedloge prilikom dodavanja novih zadataka",
         "REPO": "„username/repositoryName” za git repozitorij koji želiš pratiti"
@@ -366,7 +366,7 @@
       "FORM_ADV": {
         "AUTO_ADD_BACKLOG_JQL_QUERY": "Korišteni JQL za automatsko dodavanje zadataka u odlagalište",
         "IS_ADD_WORKLOG_ON_SUB_TASK_DONE": "Otvori dijaloški okvir za slanje dnevnika rada na Jira kad je podzadatak obavljen",
-        "IS_AUTO_ADD_TO_BACKLOG": "Automatski dodaj Jira probleme u odlagalište",
+        "IS_AUTO_IMPORT_ISSUES": "Automatski dodaj Jira probleme u odlagalište",
         "IS_AUTO_POLL_TICKETS": "Automatski preispitaj uvezene probleme za promjenama, te obavijesti",
         "IS_CHECK_TO_RE_ASSIGN_TICKET_ON_TASK_START": "Provjeri je li problem koji se trenutačno obrađuje dodijeljen trenutačnom korisniku",
         "IS_WORKLOG_ENABLED": "Otvori dijaloški okvir za slanje dnevnika rada na Jira kad je zadatak obavljen",
@@ -547,7 +547,7 @@
       "FORM": {
         "FILTER_USER": "Korisničko ime (npr. za izdvajanje tvojih promjena)",
         "HOST": "Host (npr.: https://www.openproject.org/)",
-        "IS_AUTO_ADD_TO_BACKLOG": "AUtomatski dodaj neriješene radne pakete OpenProjecta u odlagalište",
+        "IS_AUTO_IMPORT_ISSUES": "AUtomatski dodaj neriješene radne pakete OpenProjecta u odlagalište",
         "IS_AUTO_POLL": "AUtomatski preispitaj uvezene radne pakete OpenProjecta za promjenama",
         "IS_SEARCH_ISSUES_FROM_OPEN_PROJECT": "Prikaži radne pakete kao prijedloge prilikom dodavanja novih zadataka",
         "IS_SHOW_TIME_TRACKING_DIALOG": "Prikaži dijaloški okvir praćenja vremena za prijavu OpenProjectu",

@@ -124,7 +124,7 @@ export const GITLAB_CONFIG_FORM: LimitedFormlyFieldConfig<GitlabCfg>[] = [
     type: 'checkbox',
     hideExpression: (model: any) => !model.isEnabled,
     templateOptions: {
-      label: T.F.GITLAB.FORM.IS_AUTO_ADD_TO_BACKLOG,
+      label: T.F.GITLAB.FORM.IS_AUTO_IMPORT_ISSUES,
     },
   },
   {

@@ -86,7 +86,7 @@
         "CALDAV_RESOURCE": "O nome do recurso CalDav (o calendário)",
         "CALDAV_URL": "URL CalDav (o URL base)",
         "CALDAV_USER": "Seu nome de usuário CalDav",
-        "IS_AUTO_ADD_TO_BACKLOG": "Adicionar automaticamente CalDav todos incompletos à sua lista de pendências",
+        "IS_AUTO_IMPORT_ISSUES": "Adicionar automaticamente CalDav todos incompletos à sua lista de pendências",
         "IS_AUTO_POLL": "Pesquise automaticamente as tarefas importadas em busca de alterações",
         "IS_SEARCH_ISSUES_FROM_CALDAV": "Mostrar CalDav todos incompletos como sugestão ao adicionar novas tarefas",
         "IS_TRANSITION_ISSUES_ENABLED": "Concluir automaticamente o CalDav todos na conclusão da tarefa"
@@ -134,7 +134,7 @@
       },
       "FORM": {
         "FILTER_USER": "Nome de usuário (ex.: para filtrar suas próprias alterações)",
-        "IS_AUTO_ADD_TO_BACKLOG": "Adicionar automaticamente tarefas não resolvidas do Gitea para o backlog",
+        "IS_AUTO_IMPORT_ISSUES": "Adicionar automaticamente tarefas não resolvidas do Gitea para o backlog",
         "IS_AUTO_POLL": "Obter automaticamente tarefas do Gitea para atualizações",
         "IS_SEARCH_ISSUES_FROM_GITEA": "Mostrar tarefas do Gitea como sugestões ao adicionar novas tarefas",
         "HOST": "Endereço do servidor (ex: https://try.gitea.io)",
@@ -171,7 +171,7 @@
       },
       "FORM": {
         "FILTER_USER": "Nome de usuário (ex.: para filtrar as alterações sozinho)",
-        "IS_AUTO_ADD_TO_BACKLOG": "Adicionar automaticamente problemas não resolvidos do GitHub para o backlog",
+        "IS_AUTO_IMPORT_ISSUES": "Adicionar automaticamente problemas não resolvidos do GitHub para o backlog",
         "IS_AUTO_POLL": "Obter automaticamente issues do GitHub para alterações",
         "IS_SEARCH_ISSUES_FROM_GITHUB": "Mostrar issues do GitHub como sugestões quando adicionar novas tarefas",
         "REPO": "\"username/repositoryName\" para o repositório git que você deseja rastrear",
@@ -203,7 +203,7 @@
       "FORM": {
         "FILTER_USER": "Nome de usuário (ex.: para filtrar as alterações sozinho)",
         "GITLAB_BASE_URL": "URL base GitLab personalizado",
-        "IS_AUTO_ADD_TO_BACKLOG": "Adicionar automaticamente problemas não resolvidos do GitLab para o backlog",
+        "IS_AUTO_IMPORT_ISSUES": "Adicionar automaticamente problemas não resolvidos do GitLab para o backlog",
         "IS_AUTO_POLL": "Obter automaticamente issues do GitLab para alterações",
         "IS_SEARCH_ISSUES_FROM_GITLAB": "Mostrar issues do GitLab como sugestões quando adicionar novas tarefas",
         "PROJECT": "Caminho completo ou nome de usuário / projeto",
@@ -329,7 +329,7 @@
         "TITLE": "Jira: Enviar log de trabalho"
       },
       "FORM": {
-        "IS_AUTO_ADD_TO_BACKLOG": "Adicionar automaticamente problemas não resolvidos do GitHub para o backlog",
+        "IS_AUTO_IMPORT_ISSUES": "Adicionar automaticamente problemas não resolvidos do GitHub para o backlog",
         "IS_AUTO_POLL": "Pesquisar automaticamente problemas importados do git em busca de alterações",
         "IS_SEARCH_ISSUES_FROM_GITHUB": "Mostrar issues do GitHub como sugestões quando adicionar novas tarefas",
         "REPO": "\"username/repositoryName\" para o repositório git que você deseja rastrear"
@@ -337,7 +337,7 @@
       "FORM_ADV": {
         "AUTO_ADD_BACKLOG_JQL_QUERY": "JQL usado para adicionar tarefas automaticamente ao backlog",
         "IS_ADD_WORKLOG_ON_SUB_TASK_DONE": "Abrir caixa de diálogo para enviar o log de trabalho a jira quando a subtarefa for concluída",
-        "IS_AUTO_ADD_TO_BACKLOG": "Adicionar automaticamente problemas ao backlog do Jira",
+        "IS_AUTO_IMPORT_ISSUES": "Adicionar automaticamente problemas ao backlog do Jira",
         "IS_AUTO_POLL_TICKETS": "Verifique os problemas importados para alterações automaticamente e notificar",
         "IS_CHECK_TO_RE_ASSIGN_TICKET_ON_TASK_START": "Verifique se o problema atualmente trabalhado está atribuído ao usuário atual",
         "IS_WORKLOG_ENABLED": "Abrir caixa de diálogo para enviar o log de trabalho a Jira quando a tarefa estiver concluída",
@@ -512,7 +512,7 @@
       "FORM": {
         "FILTER_USER": "Nome de usuário (por exemplo, para filtrar as alterações você mesmo)",
         "HOST": "Host (por exemplo: https://www.openproject.org/)",
-        "IS_AUTO_ADD_TO_BACKLOG": "Adicionar automaticamente pacotes de trabalho não resolvidos do OpenProject ao backlog",
+        "IS_AUTO_IMPORT_ISSUES": "Adicionar automaticamente pacotes de trabalho não resolvidos do OpenProject ao backlog",
         "IS_AUTO_POLL": "Pesquise automaticamente pacotes de trabalho OpenProject importados para alterações",
         "IS_SEARCH_ISSUES_FROM_OPEN_PROJECT": "Mostrar pacotes de trabalho como sugestões ao adicionar novas tarefas",
         "IS_SHOW_TIME_TRACKING_DIALOG": "Mostrar caixa de diálogo de rastreamento de tempo para relatar ao OpenProject",

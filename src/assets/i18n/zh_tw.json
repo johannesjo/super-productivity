@@ -86,7 +86,7 @@
         "CALDAV_RESOURCE": "The name of the CalDav resource (the calendar)",
         "CALDAV_URL": "CalDav URL (the base URL)",
         "CALDAV_USER": "Your CalDav username",
-        "IS_AUTO_ADD_TO_BACKLOG": "Automatically add uncompleted CalDav todos to your backlog",
+        "IS_AUTO_IMPORT_ISSUES": "Automatically add uncompleted CalDav todos to your backlog",
         "IS_AUTO_POLL": "Automatically poll imported tasks for changes",
         "IS_SEARCH_ISSUES_FROM_CALDAV": "Show uncompleted CalDav todos as suggestion when adding new tasks",
         "IS_TRANSITION_ISSUES_ENABLED": "Automatically complete CalDav todos on task completion"
@@ -129,7 +129,7 @@
       },
       "FORM": {
         "FILTER_USER": "使用者名稱（請輸入您的使用者名稱）",
-        "IS_AUTO_ADD_TO_BACKLOG": "自動將 GitHub 未解決的 Issue 添加到待辦事項",
+        "IS_AUTO_IMPORT_ISSUES": "自動將 GitHub 未解決的 Issue 添加到待辦事項",
         "IS_AUTO_POLL": "自動拉取匯入的git Issue",
         "IS_SEARCH_ISSUES_FROM_GITHUB": "在添加新任務時，將 git 中的 Issue 顯示為建議",
         "REPO": "GitHub：\"username / repositoryName\"",
@@ -161,7 +161,7 @@
       "FORM": {
         "FILTER_USER": "使用者名稱（例如，自行過濾掉更改）",
         "GITLAB_BASE_URL": "Custom GitLab base URL",
-        "IS_AUTO_ADD_TO_BACKLOG": "自動將未解決的 Issue 從 GitLab 添加到待辦事項",
+        "IS_AUTO_IMPORT_ISSUES": "自動將未解決的 Issue 從 GitLab 添加到待辦事項",
         "IS_AUTO_POLL": "自動拉取匯入的 git 的 Issue 以進行更改",
         "IS_SEARCH_ISSUES_FROM_GITLAB": "在添加新任務時，將git中的 Issue 顯示為建議",
         "PROJECT": "GitLab 完整路徑或使用者名稱/repo",
@@ -286,7 +286,7 @@
         "TITLE": "Jira：提交工作日誌 Worklog"
       },
       "FORM": {
-        "IS_AUTO_ADD_TO_BACKLOG": "自動將未解決的 Issue 從GitHub添加到待辦事項",
+        "IS_AUTO_IMPORT_ISSUES": "自動將未解決的 Issue 從GitHub添加到待辦事項",
         "IS_AUTO_POLL": "自動拉取匯入的git Issue 進行的更改",
         "IS_SEARCH_ISSUES_FROM_GITHUB": "在添加新任務時，將git中的Issue顯示為建議",
         "REPO": "您要追蹤的gi儲存庫的\"username / repositoryName\""
@@ -294,7 +294,7 @@
       "FORM_ADV": {
         "AUTO_ADD_BACKLOG_JQL_QUERY": "JQL用於自動向待辦事項添加任務",
         "IS_ADD_WORKLOG_ON_SUB_TASK_DONE": "子任務完成後，打開對話框將工作日誌提交給Jira",
-        "IS_AUTO_ADD_TO_BACKLOG": "自動向Jira待辦事項添加 Issue ",
+        "IS_AUTO_IMPORT_ISSUES": "自動向Jira待辦事項添加 Issue ",
         "IS_AUTO_POLL_TICKETS": "自動檢查匯入的 Issue 以進行更改並通知",
         "IS_CHECK_TO_RE_ASSIGN_TICKET_ON_TASK_START": "檢查當前處理的 Issue 是否已分配給當前用戶",
         "IS_WORKLOG_ENABLED": "打開對話框，在任務完成時將工作日誌提交給 Jira",
@@ -447,7 +447,7 @@
       "FORM": {
         "FILTER_USER": "Username (e.g. to filter out changes by yourself)",
         "HOST": "Host (e.g.: https://www.openproject.org/)",
-        "IS_AUTO_ADD_TO_BACKLOG": "Automatically add unresolved work packages from OpenProject to backlog",
+        "IS_AUTO_IMPORT_ISSUES": "Automatically add unresolved work packages from OpenProject to backlog",
         "IS_AUTO_POLL": "Automatically poll imported OpenProject work packages for changes",
         "IS_SEARCH_ISSUES_FROM_OPEN_PROJECT": "Show work packages as suggestions when adding new tasks",
         "IS_SHOW_TIME_TRACKING_DIALOG": "Show time tracking dialog to report to OpenProject",

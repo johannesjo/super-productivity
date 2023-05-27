@@ -97,7 +97,7 @@
         "CALDAV_RESOURCE": "Der Name der CalDav-Ressource (der Kalender)",
         "CALDAV_URL": "CalDav-URL (die Basis-URL)",
         "CALDAV_USER": "Ihr CalDav-Benutzername",
-        "IS_AUTO_ADD_TO_BACKLOG": "Fügen Sie Ihrem Backlog automatisch unvollständige CalDav-Aufgaben hinzu",
+        "IS_AUTO_IMPORT_ISSUES": "Fügen Sie Ihrem Backlog automatisch unvollständige CalDav-Aufgaben hinzu",
         "IS_AUTO_POLL": "Importierte Aufgaben werden automatisch nach Änderungen abgefragt",
         "IS_SEARCH_ISSUES_FROM_CALDAV": "Zeigen Sie unvollständige CalDav-Aufgaben als Vorschlag an, wenn Sie neue Aufgaben hinzufügen",
         "IS_TRANSITION_ISSUES_ENABLED": "Führen Sie CalDav-Aufgaben nach Abschluss der Aufgabe automatisch aus"
@@ -145,7 +145,7 @@
       },
       "FORM": {
         "FILTER_USER": "Benutzername (z. B. um Änderungen selbst herauszufiltern)",
-        "IS_AUTO_ADD_TO_BACKLOG": "Fügen Sie ungelöste Issues aus GitHub automatisch zum Backlog hinzu",
+        "IS_AUTO_IMPORT_ISSUES": "Fügen Sie ungelöste Issues aus GitHub automatisch zum Backlog hinzu",
         "IS_AUTO_POLL": "Importierte Git-Issues automatisch nach Änderungen abfragen",
         "IS_SEARCH_ISSUES_FROM_GITHUB": "Zeigen Sie Issues von Git als Vorschläge an, wenn Sie neue Aufgaben hinzufügen",
         "REPO": "\"Benutzername / Repositoryname\" für das Git-Repository, das Sie verfolgen möchten",
@@ -177,7 +177,7 @@
       "FORM": {
         "FILTER_USER": "Benutzername (z. B. um Änderungen selbst herauszufiltern)",
         "GITLAB_BASE_URL": "Benutzerdefinierte GitLab-Basis-URL",
-        "IS_AUTO_ADD_TO_BACKLOG": "Fügen Sie ungelöste Issues aus GitLab automatisch zum Backlog hinzu",
+        "IS_AUTO_IMPORT_ISSUES": "Fügen Sie ungelöste Issues aus GitLab automatisch zum Backlog hinzu",
         "IS_AUTO_POLL": "Importierte Git-Issues automatisch nach Änderungen abfragen",
         "IS_SEARCH_ISSUES_FROM_GITLAB": "Zeigen Sie Issues von Git als Vorschläge an, wenn Sie neue Aufgaben hinzufügen",
         "PROJECT": "Vollständiger Pfad oder Benutzername / Projekt",
@@ -302,7 +302,7 @@
         "TITLE": "Jira: Worklog einreichen"
       },
       "FORM": {
-        "IS_AUTO_ADD_TO_BACKLOG": "Fügen Sie ungelöste Issues aus GitHub automatisch zum Backlog hinzu",
+        "IS_AUTO_IMPORT_ISSUES": "Fügen Sie ungelöste Issues aus GitHub automatisch zum Backlog hinzu",
         "IS_AUTO_POLL": "Importierte Git-Issues automatisch nach Änderungen abfragen",
         "IS_SEARCH_ISSUES_FROM_GITHUB": "Zeigen Sie Issues von Git als Vorschläge an, wenn Sie neue Aufgaben hinzufügen",
         "REPO": "\"Benutzername / Repositoryname\" für das Git-Repository, das Sie verfolgen möchten"
@@ -310,7 +310,7 @@
       "FORM_ADV": {
         "AUTO_ADD_BACKLOG_JQL_QUERY": "JQL wird zum automatischen Hinzufügen von Aufgaben zum Backlog verwendet",
         "IS_ADD_WORKLOG_ON_SUB_TASK_DONE": "Öffnen Sie das Dialogfeld, um das Worklog an jira zu senden, wenn die Unteraufgabe abgeschlossen ist",
-        "IS_AUTO_ADD_TO_BACKLOG": "Fügen Sie dem Jira-Backlog automatisch Issues hinzu",
+        "IS_AUTO_IMPORT_ISSUES": "Fügen Sie dem Jira-Backlog automatisch Issues hinzu",
         "IS_AUTO_POLL_TICKETS": "Überprüfen Sie importierte Issues automatisch auf Änderungen und benachrichtigen Sie",
         "IS_CHECK_TO_RE_ASSIGN_TICKET_ON_TASK_START": "Prüfen Sie, ob das aktuell bearbeitete Issue dem aktuellen Benutzer zugeordnet ist",
         "IS_WORKLOG_ENABLED": "Öffnen Sie das Dialogfeld, um das Arbeitsprotokoll an jira zu senden, wenn die Aufgabe erledigt ist",
@@ -466,7 +466,7 @@
       "FORM": {
         "FILTER_USER": "Benutzername (z. B. um Änderungen selbst herauszufiltern)",
         "HOST": "Host (z.B.: https://www.openproject.org/)",
-        "IS_AUTO_ADD_TO_BACKLOG": "Ungelöste Arbeitspakete aus OpenProject automatisch zum Backlog hinzufügen",
+        "IS_AUTO_IMPORT_ISSUES": "Ungelöste Arbeitspakete aus OpenProject automatisch zum Backlog hinzufügen",
         "IS_AUTO_POLL": "Importierte OpenProject-Arbeitspakete automatisch nach Änderungen abfragen",
         "IS_SEARCH_ISSUES_FROM_OPEN_PROJECT": "Arbeitspakete als Vorschläge beim Hinzufügen neuer Aufgaben anzeigen",
         "IS_SHOW_TIME_TRACKING_DIALOG": "Zeiterfassungsdialog anzeigen, um an OpenProject zu berichten",

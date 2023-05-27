@@ -87,7 +87,7 @@
         "CALDAV_RESOURCE": "Nazwa zasobu CalDav do synchronizacji (kalendarz)",
         "CALDAV_URL": "CalDav URL (podstawowy URL)",
         "CALDAV_USER": "Twój użytkownik CalDav",
-        "IS_AUTO_ADD_TO_BACKLOG": "Automatycznie dodaj niezrobione zadania CalDav do backlogu",
+        "IS_AUTO_IMPORT_ISSUES": "Automatycznie dodaj niezrobione zadania CalDav do backlogu",
         "IS_AUTO_POLL": "Automatycznie odpytuj importowane zadania CalDav pod kątem zmian",
         "IS_SEARCH_ISSUES_FROM_CALDAV": "Pokaż niedokończone zadania CalDav jako sugestie podczas dodawania nowych zadań",
         "IS_TRANSITION_ISSUES_ENABLED": "Automatycznie wypełniaj zadania CalDav po zakończeniu zadania"
@@ -136,7 +136,7 @@
       },
       "FORM": {
         "FILTER_USER": "Username (e.g. to filter out changes by yourself)",
-        "IS_AUTO_ADD_TO_BACKLOG": "Automatically add unresolved issues from GitHub to backlog",
+        "IS_AUTO_IMPORT_ISSUES": "Automatically add unresolved issues from GitHub to backlog",
         "IS_AUTO_POLL": "Automatically poll imported git issues for changes",
         "IS_SEARCH_ISSUES_FROM_GITHUB": "Show issues from git as suggestions when adding new tasks",
         "REPO": "\"username/repositoryName\" for the git repository you want to track",
@@ -180,7 +180,7 @@
       "FORM": {
         "FILTER_USER": "Username (e.g. to filter out changes by yourself)",
         "GITLAB_BASE_URL": "Custom GitLab base URL",
-        "IS_AUTO_ADD_TO_BACKLOG": "Automatycznie dodaj niezrobione zadania GitLab do backlogu",
+        "IS_AUTO_IMPORT_ISSUES": "Automatycznie dodaj niezrobione zadania GitLab do backlogu",
         "IS_AUTO_POLL": "Automatically poll imported git issues for changes",
         "IS_SEARCH_ISSUES_FROM_GITLAB": "Pokaż niedokończone zadania z git jako sugestie podczas dodawania nowych zadań",
         "PROJECT": "project ID or user name/project",
@@ -279,7 +279,7 @@
         "TITLE": "Jira: Submit Worklog"
       },
       "FORM": {
-        "IS_AUTO_ADD_TO_BACKLOG": "Automatically add unresolved issues from GitHub to backlog",
+        "IS_AUTO_IMPORT_ISSUES": "Automatically add unresolved issues from GitHub to backlog",
         "IS_AUTO_POLL": "Automatically poll imported git issues for changes",
         "IS_SEARCH_ISSUES_FROM_GITHUB": "Show issues from git as suggestions when adding new tasks",
         "REPO": "\"username/repositoryName\" for the git repository you want to track"
@@ -287,7 +287,7 @@
       "FORM_ADV": {
         "AUTO_ADD_BACKLOG_JQL_QUERY": "JQL used for adding tasks automatically to backlog",
         "IS_ADD_WORKLOG_ON_SUB_TASK_DONE": "Open dialog to submit worklog to jira when sub task is done",
-        "IS_AUTO_ADD_TO_BACKLOG": "Automatically add issues to Jira backlog",
+        "IS_AUTO_IMPORT_ISSUES": "Automatically add issues to Jira backlog",
         "IS_AUTO_POLL_TICKETS": "Check imported issues for changes automatically and notify",
         "IS_CHECK_TO_RE_ASSIGN_TICKET_ON_TASK_START": "Check if the currently worked on issue is assigned to current user",
         "IS_WORKLOG_ENABLED": "Open dialog to submit worklog to jira when task is done",

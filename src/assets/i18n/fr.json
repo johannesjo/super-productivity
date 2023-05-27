@@ -86,7 +86,7 @@
         "CALDAV_RESOURCE": "Le nom de la ressource CalDav (le calendrier)",
         "CALDAV_URL": "URL CalDav (l'URL de base)",
         "CALDAV_USER": "Votre nom d'utilisateur CalDav",
-        "IS_AUTO_ADD_TO_BACKLOG": "Ajoutez automatiquement les tâches CalDav incomplètes à votre backlog",
+        "IS_AUTO_IMPORT_ISSUES": "Ajoutez automatiquement les tâches CalDav incomplètes à votre backlog",
         "IS_AUTO_POLL": "Interroger automatiquement les tâches importées pour les modifications",
         "IS_SEARCH_ISSUES_FROM_CALDAV": "Afficher les tâches CalDav incomplètes comme suggestion lors de l'ajout de nouvelles tâches",
         "IS_TRANSITION_ISSUES_ENABLED": "Compléter automatiquement les tâches CalDav à la fin de la tâche"
@@ -134,7 +134,7 @@
       },
       "FORM": {
         "FILTER_USER": "Nom d'utilisateur (e.g. pour filtrer vos propres modifications)",
-        "IS_AUTO_ADD_TO_BACKLOG": "Ajouter automatiquement les Issues non résolus de GitHub au backlog",
+        "IS_AUTO_IMPORT_ISSUES": "Ajouter automatiquement les Issues non résolus de GitHub au backlog",
         "IS_AUTO_POLL": "Surveiller automatiquement les issues git importées pour avoir les modifications",
         "IS_SEARCH_ISSUES_FROM_GITHUB": "Afficher les issues de git sous forme de suggestions lors de l'ajout de nouvelles tâches",
         "REPO": "\"nom d'utilisateur / nom du repository\" pour le repository git que vous souhaitez suivre",
@@ -166,7 +166,7 @@
       "FORM": {
         "FILTER_USER": "Nom d'utilisateur (e.g. pour filtrer vos propres modifications)",
         "GITLAB_BASE_URL": "URL de base GitLab personnalisée",
-        "IS_AUTO_ADD_TO_BACKLOG": "Ajouter automatiquement les Issues non résolus de GitLab au backlog",
+        "IS_AUTO_IMPORT_ISSUES": "Ajouter automatiquement les Issues non résolus de GitLab au backlog",
         "IS_AUTO_POLL": "Surveiller automatiquement les issues git importées pour avoir les modifications",
         "IS_SEARCH_ISSUES_FROM_GITLAB": "Afficher les issues de git sous forme de suggestions lors de l'ajout de nouvelles tâches",
         "PROJECT": "Chemin complet ou nom d'utilisateur / projet",
@@ -291,7 +291,7 @@
         "TITLE": "Jira: Soumettre le temps de travail"
       },
       "FORM": {
-        "IS_AUTO_ADD_TO_BACKLOG": "Ajouter automatiquement les issues non résolus de GitHub au backlog",
+        "IS_AUTO_IMPORT_ISSUES": "Ajouter automatiquement les issues non résolus de GitHub au backlog",
         "IS_AUTO_POLL": "Surveiller periodiquement les issues git importés pour avoir les modifications",
         "IS_SEARCH_ISSUES_FROM_GITHUB": "Afficher les issues de git sous forme de suggestions lors de l'ajout de nouvelles tâches",
         "REPO": "\"nom d'utilisateur / nom du repository\" pour le repository git que vous souhaitez suivre"
@@ -299,7 +299,7 @@
       "FORM_ADV": {
         "AUTO_ADD_BACKLOG_JQL_QUERY": "JQL utilisé pour ajouter des tâches automatiquement au backlog",
         "IS_ADD_WORKLOG_ON_SUB_TASK_DONE": "Ouvrir la boîte de dialogue pour soumettre à Jira le temps de travail lorsque la sous-tâche est terminée",
-        "IS_AUTO_ADD_TO_BACKLOG": "Ajouter automatiquement les tickets au backlog de Jira",
+        "IS_AUTO_IMPORT_ISSUES": "Ajouter automatiquement les tickets au backlog de Jira",
         "IS_AUTO_POLL_TICKETS": "Surveiller periodiquement les modifications apportées aux tickets importés et m'en informer",
         "IS_CHECK_TO_RE_ASSIGN_TICKET_ON_TASK_START": "Vérifier si le ticket actuellement traité est affecté à l'utilisateur actuel",
         "IS_WORKLOG_ENABLED": "Ouvrir la boîte de dialogue pour soumettre à jira le temps de travail lorsque la tâche est terminée",
@@ -453,7 +453,7 @@
       "FORM": {
         "FILTER_USER": "Nom d'utilisateur (par exemple, pour filtrer vous-même les modifications)",
         "HOST": "Hébergeur (ex : https://www.openproject.org/)",
-        "IS_AUTO_ADD_TO_BACKLOG": "Ajouter automatiquement des lots de travaux non résolus d'OpenProject au backlog",
+        "IS_AUTO_IMPORT_ISSUES": "Ajouter automatiquement des lots de travaux non résolus d'OpenProject au backlog",
         "IS_AUTO_POLL": "Sondage automatique des packages de travail OpenProject importés pour les modifications",
         "IS_SEARCH_ISSUES_FROM_OPEN_PROJECT": "Afficher les lots de travaux sous forme de suggestions lors de l'ajout de nouvelles tâches",
         "IS_SHOW_TIME_TRACKING_DIALOG": "Afficher la boîte de dialogue de suivi du temps à signaler à OpenProject",

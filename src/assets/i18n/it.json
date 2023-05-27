@@ -86,7 +86,7 @@
         "CALDAV_RESOURCE": "Il nome della risorsa CalDav (il calendario)",
         "CALDAV_URL": "URL CalDav (l'URL di base)",
         "CALDAV_USER": "Il tuo nome utente CalDav",
-        "IS_AUTO_ADD_TO_BACKLOG": "Aggiungi automaticamente le attività CalDav non completate al tuo backlog",
+        "IS_AUTO_IMPORT_ISSUES": "Aggiungi automaticamente le attività CalDav non completate al tuo backlog",
         "IS_AUTO_POLL": "Esegui automaticamente il polling delle attività importate per le modifiche",
         "IS_SEARCH_ISSUES_FROM_CALDAV": "Mostra le attività di CalDav non completate come suggerimento quando si aggiungono nuove attività",
         "IS_TRANSITION_ISSUES_ENABLED": "Completa automaticamente le attività di CalDav al completamento dell'attività"
@@ -134,7 +134,7 @@
       },
       "FORM": {
         "FILTER_USER": "Nome utente (es. per filtrare le modifiche fatte da te)",
-        "IS_AUTO_ADD_TO_BACKLOG": "Aggiungi automaticamente gli issue non risolti da GitHub al backlog",
+        "IS_AUTO_IMPORT_ISSUES": "Aggiungi automaticamente gli issue non risolti da GitHub al backlog",
         "IS_AUTO_POLL": "Esegui il polling automatico delle modifiche sugli issue di git importati",
         "IS_SEARCH_ISSUES_FROM_GITHUB": "Mostra gli issue di git come suggerimenti quando aggiungi un nuovo task",
         "REPO": "\"username/repositoryName\" per il repository git che vuoi tracciare",
@@ -166,7 +166,7 @@
       "FORM": {
         "FILTER_USER": "Nome utente (es. per filtrare le modifiche fatte da te)",
         "GITLAB_BASE_URL": "URL di base GitLab personalizzato",
-        "IS_AUTO_ADD_TO_BACKLOG": "Aggiungi automaticamente gli issue non risolti da GitHub al backlog",
+        "IS_AUTO_IMPORT_ISSUES": "Aggiungi automaticamente gli issue non risolti da GitHub al backlog",
         "IS_AUTO_POLL": "Esegui il polling automatico delle modifiche sugli issue di git importati",
         "IS_SEARCH_ISSUES_FROM_GITLAB": "Mostra gli issue di git come suggerimenti quando aggiungi un nuovo task",
         "PROJECT": "Percorso completo o nome utente / progetto",
@@ -291,7 +291,7 @@
         "TITLE": "Jira: Invia worklog"
       },
       "FORM": {
-        "IS_AUTO_ADD_TO_BACKLOG": "Aggiungi automaticamente gli issue non risolti da git al backlog",
+        "IS_AUTO_IMPORT_ISSUES": "Aggiungi automaticamente gli issue non risolti da git al backlog",
         "IS_AUTO_POLL": "Esegui il polling automatico delle modifiche sugli issue di git importati",
         "IS_SEARCH_ISSUES_FROM_GITHUB": "Mostra gli issue di git come suggerimenti quando aggiungi un nuovo task",
         "REPO": "\"username/repositoryName\" per il repository git che vuoi tracciare"
@@ -299,7 +299,7 @@
       "FORM_ADV": {
         "AUTO_ADD_BACKLOG_JQL_QUERY": "JQL usato per aggiungere automaticamente task al tuo backlog",
         "IS_ADD_WORKLOG_ON_SUB_TASK_DONE": "Apri una finestra per inviare il worklog su jira quando un sotto-task è completato",
-        "IS_AUTO_ADD_TO_BACKLOG": "Aggiungi automaticamente gli issue al backlog di Jira",
+        "IS_AUTO_IMPORT_ISSUES": "Aggiungi automaticamente gli issue al backlog di Jira",
         "IS_AUTO_POLL_TICKETS": "Controlla automaticamente le modifiche sugli issue importati e notificamelo",
         "IS_CHECK_TO_RE_ASSIGN_TICKET_ON_TASK_START": "Controlla se l'issue sul quale correntemente si sta lavorando è assegnato all'utente corrente",
         "IS_WORKLOG_ENABLED": "Apri una finestra per sottomettere il worklog su jira quando un task è completato",
@@ -453,7 +453,7 @@
       "FORM": {
         "FILTER_USER": "Nome utente (ad es. per filtrare le modifiche da soli)",
         "HOST": "Host (es.: https://www.openproject.org/)",
-        "IS_AUTO_ADD_TO_BACKLOG": "Aggiungi automaticamente pacchetti di lavoro non risolti da OpenProject al backlog",
+        "IS_AUTO_IMPORT_ISSUES": "Aggiungi automaticamente pacchetti di lavoro non risolti da OpenProject al backlog",
         "IS_AUTO_POLL": "Interroga automaticamente i pacchetti di lavoro OpenProject importati per le modifiche",
         "IS_SEARCH_ISSUES_FROM_OPEN_PROJECT": "Mostra i pacchetti di lavoro come suggerimenti quando aggiungi nuove attività",
         "IS_SHOW_TIME_TRACKING_DIALOG": "Mostra la finestra di dialogo del monitoraggio del tempo per segnalare a OpenProject",

@@ -104,7 +104,7 @@ export const OPEN_PROJECT_CONFIG_FORM: LimitedFormlyFieldConfig<OpenProjectCfg>[
     type: 'checkbox',
     hideExpression: (model: any) => !model.isEnabled,
     templateOptions: {
-      label: T.F.OPEN_PROJECT.FORM.IS_AUTO_ADD_TO_BACKLOG,
+      label: T.F.OPEN_PROJECT.FORM.IS_AUTO_IMPORT_ISSUES,
     },
   },
   {

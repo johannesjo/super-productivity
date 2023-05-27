@@ -94,7 +94,7 @@ export const REDMINE_CONFIG_FORM: LimitedFormlyFieldConfig<RedmineCfg>[] = [
     type: 'checkbox',
     hideExpression: (model: any) => !model.isEnabled,
     templateOptions: {
-      label: T.F.REDMINE.FORM.IS_AUTO_ADD_TO_BACKLOG,
+      label: T.F.REDMINE.FORM.IS_AUTO_IMPORT_ISSUES,
     },
   },
 ];

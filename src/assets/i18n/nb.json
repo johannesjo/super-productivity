@@ -125,7 +125,7 @@
       },
       "FORM": {
         "FILTER_USER": "Brukernavn (f.eks. for å filtrere ut endringer selv)",
-        "IS_AUTO_ADD_TO_BACKLOG": "Legg automatisk uløste problemer fra GitHub til backloggen",
+        "IS_AUTO_IMPORT_ISSUES": "Legg automatisk uløste problemer fra GitHub til backloggen",
         "IS_AUTO_POLL": "Poll automatisk importerte gitproblemer for endringer",
         "IS_SEARCH_ISSUES_FROM_GITHUB": "Vis problemer fra git som forslag når du legger til nye oppgaver",
         "REPO": "\"brukernavn / repositoryName\" for git-depotet du vil spore",
@@ -167,7 +167,7 @@
       },
       "FORM": {
         "FILTER_USER": "Brukernavn (f.eks. For å filtrere ut endringer selv)",
-        "IS_AUTO_ADD_TO_BACKLOG": "Legg automatisk uløste problemer fra GitLab til backloggen",
+        "IS_AUTO_IMPORT_ISSUES": "Legg automatisk uløste problemer fra GitLab til backloggen",
         "IS_AUTO_POLL": "Poll automatisk importerte gitproblemer for endringer",
         "IS_SEARCH_ISSUES_FROM_GITLAB": "Vis problemer fra git som forslag når du legger til nye oppgaver",
         "PROJECT": "Full sti eller brukernavn / prosjekt",
@@ -307,7 +307,7 @@
         "TITLE": "Jira: Send inn arbeidslogg"
       },
       "FORM": {
-        "IS_AUTO_ADD_TO_BACKLOG": "Legg automatisk uløste problemer fra GitHub til backloggen",
+        "IS_AUTO_IMPORT_ISSUES": "Legg automatisk uløste problemer fra GitHub til backloggen",
         "IS_AUTO_POLL": "Hent automatisk importerte gitproblemer for endringer",
         "IS_SEARCH_ISSUES_FROM_GITHUB": "Vis problemer fra git som forslag når du legger til nye oppgaver",
         "REPO": "\"brukernavn / repositoryName\" for git-depotet du vil spore"
@@ -315,7 +315,7 @@
       "FORM_ADV": {
         "AUTO_ADD_BACKLOG_JQL_QUERY": "JQL brukes til å legge til oppgaver automatisk i backloggen",
         "IS_ADD_WORKLOG_ON_SUB_TASK_DONE": "Åpne dialogboksen for å sende arbeidsloggen til jira når underoppgaven er fullført",
-        "IS_AUTO_ADD_TO_BACKLOG": "Legg automatisk til problemer i Jira-backloggen",
+        "IS_AUTO_IMPORT_ISSUES": "Legg automatisk til problemer i Jira-backloggen",
         "IS_AUTO_POLL_TICKETS": "Sjekk importerte problemer for endringer automatisk og varsle",
         "IS_CHECK_TO_RE_ASSIGN_TICKET_ON_TASK_START": "Sjekk om det nåværende arbeidet med problemet er tildelt den nåværende brukeren",
         "IS_WORKLOG_ENABLED": "Åpne dialogboksen for å sende arbeidsloggen til Jira når oppgaven er fullført",

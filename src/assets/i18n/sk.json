@@ -97,7 +97,7 @@
         "CALDAV_RESOURCE": "Názov prostriedku CalDav (kalendár)",
         "CALDAV_URL": "CalDav URL (základná adresa URL)",
         "CALDAV_USER": "Vaše používateľské meno CalDav",
-        "IS_AUTO_ADD_TO_BACKLOG": "Automatické pridávanie nedokončených úloh CalDav do zoznamu nedokončených úloh",
+        "IS_AUTO_IMPORT_ISSUES": "Automatické pridávanie nedokončených úloh CalDav do zoznamu nedokončených úloh",
         "IS_AUTO_POLL": "Automatické vyhľadávanie zmien v importovaných úlohách",
         "IS_SEARCH_ISSUES_FROM_CALDAV": "Zobrazenie nedokončených úloh CalDav ako návrh pri pridávaní nových úloh",
         "IS_TRANSITION_ISSUES_ENABLED": "Automatické dokončenie úloh CalDav pri dokončení úlohy"
@@ -152,7 +152,7 @@
       "FORM": {
         "FILTER_USER": "Používateľské meno (napr. na odfiltrovanie vlastných zmien)",
         "GITLAB_BASE_URL": "Vlastná základná adresa URL aplikácie GitLab (voliteľné)",
-        "IS_AUTO_ADD_TO_BACKLOG": "Automatické pridávanie nevyriešených problémov zo služby GitLab do zoznamu nevyriešených problémov",
+        "IS_AUTO_IMPORT_ISSUES": "Automatické pridávanie nevyriešených problémov zo služby GitLab do zoznamu nevyriešených problémov",
         "IS_AUTO_POLL": "Automatically poll imported git issues for changes",
         "IS_SEARCH_ISSUES_FROM_GITLAB": "Zobrazenie problémov zo služby git ako návrhov pri pridávaní nových úloh",
         "PROJECT": "(predvolené) ID projektu alebo meno používateľa/projektu",
@@ -277,7 +277,7 @@
         "TITLE": "Jira: Odoslať pracovný denník"
       },
       "FORM": {
-        "IS_AUTO_ADD_TO_BACKLOG": "Automaticky pridajte nevyriešené problémy z GitHubu do nevybavených úloh ",
+        "IS_AUTO_IMPORT_ISSUES": "Automaticky pridajte nevyriešené problémy z GitHubu do nevybavených úloh ",
         "IS_AUTO_POLL": "Automaticky zisťovať zmeny v importovaných problémoch git",
         "IS_SEARCH_ISSUES_FROM_GITHUB": "Zobrazovať problémy z git ako návrhy pri pridávaní nových úloh",
         "REPO": "\"username/repositoryName\" pre úložisko git, ktoré chcete sledovať "
@@ -285,7 +285,7 @@
       "FORM_ADV": {
         "AUTO_ADD_BACKLOG_JQL_QUERY": "JQL používaný na automatické pridávanie úloh do nevybavených úloh",
         "IS_ADD_WORKLOG_ON_SUB_TASK_DONE": "Otvorenie dialógového okna na odoslanie pracovného denníka do Jira po dokončení čiastkovej úlohy",
-        "IS_AUTO_ADD_TO_BACKLOG": "Automaticky pridávať problémy od Jira do nevybavených vecí",
+        "IS_AUTO_IMPORT_ISSUES": "Automaticky pridávať problémy od Jira do nevybavených vecí",
         "IS_AUTO_POLL_TICKETS": "Automaticky kontrolujte zmeny v importovaných problémoch a informuje",
         "IS_CHECK_TO_RE_ASSIGN_TICKET_ON_TASK_START": "Check if the currently worked on issue is assigned to current user",
         "IS_WORKLOG_ENABLED": "Po dokončení úlohy otvorte dialógové okno na odoslanie pracovného protokolu spoločnosti Jira",
@@ -445,7 +445,7 @@
       "FORM": {
         "FILTER_USER": "Používateľské meno (napr. na odfiltrovanie vlastných zmien)",
         "HOST": "Hostiteľ (napr.: https://www.openproject.org/)",
-        "IS_AUTO_ADD_TO_BACKLOG": "Automatické pridávanie nevyriešených pracovných balíkov z OpenProject do backlogu",
+        "IS_AUTO_IMPORT_ISSUES": "Automatické pridávanie nevyriešených pracovných balíkov z OpenProject do backlogu",
         "IS_AUTO_POLL": "Automatické vyhľadávanie zmien v importovaných pracovných balíkoch OpenProject",
         "IS_SEARCH_ISSUES_FROM_OPEN_PROJECT": "Zobrazovať pracovné balíky ako návrhy pri pridávaní nových úloh",
         "IS_SHOW_TIME_TRACKING_DIALOG": "Zobrazenie dialógového okna na sledovanie času na nahlásenie do programu OpenProject",

@@ -86,7 +86,7 @@
         "CALDAV_RESOURCE": "CalDavリソースの名前（カレンダー）",
         "CALDAV_URL": "CalDav URL（ベースURL）",
         "CALDAV_USER": "CalDavユーザー名",
-        "IS_AUTO_ADD_TO_BACKLOG": "未完了のCalDavToDoをバックログに自動的に追加します",
+        "IS_AUTO_IMPORT_ISSUES": "未完了のCalDavToDoをバックログに自動的に追加します",
         "IS_AUTO_POLL": "インポートされたタスクの変更を自動的にポーリングします",
         "IS_SEARCH_ISSUES_FROM_CALDAV": "新しいタスクを追加するときの提案として、未完了のCalDavタスクを表示する",
         "IS_TRANSITION_ISSUES_ENABLED": "タスクの完了時にCalDavToDoを自動的に完了します"
@@ -134,7 +134,7 @@
       },
       "FORM": {
         "FILTER_USER": "ユーザー名（例：自分で変更を除外するため）",
-        "IS_AUTO_ADD_TO_BACKLOG": "未解決の課題をGitHubからバックログに自動的に追加",
+        "IS_AUTO_IMPORT_ISSUES": "未解決の課題をGitHubからバックログに自動的に追加",
         "IS_AUTO_POLL": "変更についてインポートされたGitの課題を自動的にポーリングします",
         "IS_SEARCH_ISSUES_FROM_GITHUB": "新しいタスクを追加するときにgitからの課題を提案として表示する",
         "REPO": "追跡したいgitリポジトリの \"username/repositoryName\"",
@@ -166,7 +166,7 @@
       "FORM": {
         "FILTER_USER": "ユーザー名（例：自分で変更を除外するため）",
         "GITLAB_BASE_URL": "カスタムGitLabベースURL",
-        "IS_AUTO_ADD_TO_BACKLOG": "未解決の課題をGitLabからバックログに自動的に追加",
+        "IS_AUTO_IMPORT_ISSUES": "未解決の課題をGitLabからバックログに自動的に追加",
         "IS_AUTO_POLL": "変更についてインポートされたGitの課題を自動的にポーリングします",
         "IS_SEARCH_ISSUES_FROM_GITLAB": "新しいタスクを追加するときにgitからの課題を提案として表示する",
         "PROJECT": "フルパスまたはユーザー名/プロジェクト",
@@ -291,7 +291,7 @@
         "TITLE": "Jira：作業記録を提出する"
       },
       "FORM": {
-        "IS_AUTO_ADD_TO_BACKLOG": "未解決の課題をGitHubからバックログに自動的に追加",
+        "IS_AUTO_IMPORT_ISSUES": "未解決の課題をGitHubからバックログに自動的に追加",
         "IS_AUTO_POLL": "変更についてインポートされたGitの課題を自動的にポーリングします",
         "IS_SEARCH_ISSUES_FROM_GITHUB": "新しいタスクを追加するときにgitからの課題を提案として表示する",
         "REPO": "追跡したいgitリポジトリの \"username / repositoryName\""
@@ -299,7 +299,7 @@
       "FORM_ADV": {
         "AUTO_ADD_BACKLOG_JQL_QUERY": "バックログにタスクを自動的に追加するために使用されるJQL",
         "IS_ADD_WORKLOG_ON_SUB_TASK_DONE": "サブタスクが完了したときに作業ログをJiraに送信するためのダイアログを開く",
-        "IS_AUTO_ADD_TO_BACKLOG": "Jiraバックログに自動的に課題を追加する",
+        "IS_AUTO_IMPORT_ISSUES": "Jiraバックログに自動的に課題を追加する",
         "IS_AUTO_POLL_TICKETS": "インポートされたissueに変更がないか自動的に確認して通知する",
         "IS_CHECK_TO_RE_ASSIGN_TICKET_ON_TASK_START": "現在作業中の課題が現在のユーザーに割り当てられているかどうかを確認してください",
         "IS_WORKLOG_ENABLED": "タスクが完了したら作業ログをJiraに送信するためのダイアログを開く",
@@ -453,7 +453,7 @@
       "FORM": {
         "FILTER_USER": "ユーザー名（例：自分で変更を除外するため）",
         "HOST": "ホスト（例：https：//www.openproject.org/）",
-        "IS_AUTO_ADD_TO_BACKLOG": "OpenProjectからバックログに未解決の作業パッケージを自動的に追加します",
+        "IS_AUTO_IMPORT_ISSUES": "OpenProjectからバックログに未解決の作業パッケージを自動的に追加します",
         "IS_AUTO_POLL": "インポートされたOpenProjectワークパッケージの変更を自動的にポーリングします",
         "IS_SEARCH_ISSUES_FROM_OPEN_PROJECT": "新しいタスクを追加するときに提案として作業パッケージを表示する",
         "IS_SHOW_TIME_TRACKING_DIALOG": "OpenProjectにレポートするタイムトラッキングダイアログを表示する",

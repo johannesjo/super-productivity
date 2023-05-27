@@ -86,7 +86,7 @@
         "CALDAV_RESOURCE": "نام منبع CalDav (تقویم)",
         "CALDAV_URL": "CalDav URL (URL پایه)",
         "CALDAV_USER": "نام کاربری CalDav شما",
-        "IS_AUTO_ADD_TO_BACKLOG": "به طور خودکار موارد خاموش CalDav را به پرونده خود اضافه کنید",
+        "IS_AUTO_IMPORT_ISSUES": "به طور خودکار موارد خاموش CalDav را به پرونده خود اضافه کنید",
         "IS_AUTO_POLL": "وظایف وارد شده را به طور خودکار برای تغییرات نظرسنجی کنید",
         "IS_SEARCH_ISSUES_FROM_CALDAV": "هنگام اضافه کردن کارهای جدید ، تالارهای CalDav ناقص را به عنوان پیشنهاد نشان دهید",
         "IS_TRANSITION_ISSUES_ENABLED": "در پایان کار به طور خودکار تالارهای CalDav را تکمیل کنید"
@@ -134,7 +134,7 @@
       },
       "FORM": {
         "FILTER_USER": "نام کاربری (مثلا برای فیلتر کردن تغییراتی که خودتان انجام دادید)",
-        "IS_AUTO_ADD_TO_BACKLOG": "بطور خودکار مشکلات گزارش شده در گیت هاب را به بک لاگ اضافه کن",
+        "IS_AUTO_IMPORT_ISSUES": "بطور خودکار مشکلات گزارش شده در گیت هاب را به بک لاگ اضافه کن",
         "IS_AUTO_POLL": "Automatically poll imported git issues for changes",
         "IS_SEARCH_ISSUES_FROM_GITHUB": "Show issues from git as suggestions when adding new tasks",
         "REPO": "\"نام کاربری / مخزن نام\" برای مخزن git مورد نظر برای پیگیری",
@@ -166,7 +166,7 @@
       "FORM": {
         "FILTER_USER": "نام کاربری (مثلا برای فیلتر کردن تغییراتی که خودتان انجام دادید)",
         "GITLAB_BASE_URL": "URL پایه GitLab سفارشی",
-        "IS_AUTO_ADD_TO_BACKLOG": "بطور خودکار مشکلات گزارش شده در گیت لاب را به بک لاگ اضافه کن",
+        "IS_AUTO_IMPORT_ISSUES": "بطور خودکار مشکلات گزارش شده در گیت لاب را به بک لاگ اضافه کن",
         "IS_AUTO_POLL": "Automatically poll imported git issues for changes",
         "IS_SEARCH_ISSUES_FROM_GITLAB": "Show issues from git as suggestions when adding new tasks",
         "PROJECT": "مسیر کامل یا نام کاربری / پروژه",
@@ -291,7 +291,7 @@
         "TITLE": "جیرا: ارسال گزارش کار"
       },
       "FORM": {
-        "IS_AUTO_ADD_TO_BACKLOG": "Automatically add unresolved issues from GitHub to backlog",
+        "IS_AUTO_IMPORT_ISSUES": "Automatically add unresolved issues from GitHub to backlog",
         "IS_AUTO_POLL": "Automatically poll imported git issues for changes",
         "IS_SEARCH_ISSUES_FROM_GITHUB": "Show issues from git as suggestions when adding new tasks",
         "REPO": "\"username/repositoryName\" for the git repository you want to track"
@@ -299,7 +299,7 @@
       "FORM_ADV": {
         "AUTO_ADD_BACKLOG_JQL_QUERY": "JQL used for adding tasks automatically to backlog",
         "IS_ADD_WORKLOG_ON_SUB_TASK_DONE": "Open dialog to submit worklog to jira when sub task is done",
-        "IS_AUTO_ADD_TO_BACKLOG": "Automatically add issues to Jira backlog",
+        "IS_AUTO_IMPORT_ISSUES": "Automatically add issues to Jira backlog",
         "IS_AUTO_POLL_TICKETS": "Check imported issues for changes automatically and notify",
         "IS_CHECK_TO_RE_ASSIGN_TICKET_ON_TASK_START": "Check if the currently worked on issue is assigned to current user",
         "IS_WORKLOG_ENABLED": "Open dialog to submit worklog to jira when task is done",
@@ -453,7 +453,7 @@
       "FORM": {
         "FILTER_USER": "نام کاربری (به عنوان مثال برای فیلتر کردن تغییرات توسط خودتان)",
         "HOST": "میزبان (به عنوان مثال: https://www.openproject.org/)",
-        "IS_AUTO_ADD_TO_BACKLOG": "به صورت خودکار بسته های کاری حل نشده از OpenProject را به backlog اضافه کنید",
+        "IS_AUTO_IMPORT_ISSUES": "به صورت خودکار بسته های کاری حل نشده از OpenProject را به backlog اضافه کنید",
         "IS_AUTO_POLL": "بسته های کاری OpenProject وارد شده را برای تغییرات به طور خودکار نظرسنجی کنید",
         "IS_SEARCH_ISSUES_FROM_OPEN_PROJECT": "هنگام افزودن کارهای جدید ، بسته های کاری را به عنوان پیشنهاد نشان دهید",
         "IS_SHOW_TIME_TRACKING_DIALOG": "نمایش گفتگوی ردیابی زمان برای گزارش به OpenProject",

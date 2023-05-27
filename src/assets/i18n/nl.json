@@ -86,7 +86,7 @@
         "CALDAV_RESOURCE": "De naam van de CalDav-resource (de kalender)",
         "CALDAV_URL": "CalDav-URL (de basis-URL)",
         "CALDAV_USER": "Uw CalDav-gebruikersnaam",
-        "IS_AUTO_ADD_TO_BACKLOG": "Voeg automatisch niet-voltooide CalDav-taken toe aan uw backlog",
+        "IS_AUTO_IMPORT_ISSUES": "Voeg automatisch niet-voltooide CalDav-taken toe aan uw backlog",
         "IS_AUTO_POLL": "Controleer geïmporteerde taken automatisch op wijzigingen",
         "IS_SEARCH_ISSUES_FROM_CALDAV": "Toon onvoltooide CalDav-taken als suggestie bij het toevoegen van nieuwe taken",
         "IS_TRANSITION_ISSUES_ENABLED": "Voltooi automatisch CalDav-taken na voltooiing van de taak"
@@ -134,7 +134,7 @@
       },
       "FORM": {
         "FILTER_USER": "Gebruikersnaam (bijv. Om wijzigingen zelf uit te filteren)",
-        "IS_AUTO_ADD_TO_BACKLOG": "Voeg automatisch onopgeloste problemen van GitHub toe aan de backlog",
+        "IS_AUTO_IMPORT_ISSUES": "Voeg automatisch onopgeloste problemen van GitHub toe aan de backlog",
         "IS_AUTO_POLL": "Poll automatisch geïmporteerde git-problemen voor wijzigingen",
         "IS_SEARCH_ISSUES_FROM_GITHUB": "Toon problemen van git als suggesties bij het toevoegen van nieuwe taken",
         "REPO": "\"gebruikersnaam/repositoryName\" voor de git repository die je wilt volgen",
@@ -166,7 +166,7 @@
       "FORM": {
         "FILTER_USER": "Gebruikersnaam (bijv. Om wijzigingen zelf uit te filteren)",
         "GITLAB_BASE_URL": "Aangepaste GitLab base URL",
-        "IS_AUTO_ADD_TO_BACKLOG": "Voeg automatisch onopgeloste problemen van GitLab toe aan de backlog",
+        "IS_AUTO_IMPORT_ISSUES": "Voeg automatisch onopgeloste problemen van GitLab toe aan de backlog",
         "IS_AUTO_POLL": "Poll automatisch geïmporteerde git-problemen voor wijzigingen",
         "IS_SEARCH_ISSUES_FROM_GITLAB": "Toon problemen van git als suggesties bij het toevoegen van nieuwe taken",
         "PROJECT": "Volledig pad of gebruikersnaam / project",
@@ -291,7 +291,7 @@
         "TITLE": "Jira: Werklogboek indienen"
       },
       "FORM": {
-        "IS_AUTO_ADD_TO_BACKLOG": "Voeg automatisch onopgeloste problemen van GitHub toe aan de backlog",
+        "IS_AUTO_IMPORT_ISSUES": "Voeg automatisch onopgeloste problemen van GitHub toe aan de backlog",
         "IS_AUTO_POLL": "Poll automatisch geïmporteerde git-problemen voor wijzigingen",
         "IS_SEARCH_ISSUES_FROM_GITHUB": "Toon problemen van git als suggesties bij het toevoegen van nieuwe taken",
         "REPO": "\"gebruikersnaam/repositoryName\" voor de git repository die je wilt volgen"
@@ -299,7 +299,7 @@
       "FORM_ADV": {
         "AUTO_ADD_BACKLOG_JQL_QUERY": "JQL gebruikt voor het automatisch toevoegen van taken aan backlog",
         "IS_ADD_WORKLOG_ON_SUB_TASK_DONE": "Open dialoogvenster om werklog naar jira te sturen wanneer de subtaak is voltooid",
-        "IS_AUTO_ADD_TO_BACKLOG": "Voeg automatisch problemen toe aan de Jira-backlog",
+        "IS_AUTO_IMPORT_ISSUES": "Voeg automatisch problemen toe aan de Jira-backlog",
         "IS_AUTO_POLL_TICKETS": "Controleer geïmporteerde problemen automatisch op wijzigingen en stel ze op de hoogte",
         "IS_CHECK_TO_RE_ASSIGN_TICKET_ON_TASK_START": "Controleer of het probleem waaraan momenteel is gewerkt, is toegewezen aan de huidige gebruiker",
         "IS_WORKLOG_ENABLED": "Open dialoogvenster om werklog naar jira te sturen wanneer de taak is voltooid",
@@ -453,7 +453,7 @@
       "FORM": {
         "FILTER_USER": "Gebruikersnaam (bijvoorbeeld om zelf wijzigingen uit te filteren)",
         "HOST": "Host (bijv.: https://www.openproject.org/)",
-        "IS_AUTO_ADD_TO_BACKLOG": "Automatisch onopgeloste werkpakketten van OpenProject toevoegen aan achterstand",
+        "IS_AUTO_IMPORT_ISSUES": "Automatisch onopgeloste werkpakketten van OpenProject toevoegen aan achterstand",
         "IS_AUTO_POLL": "Geïmporteerde OpenProject-werkpakketten automatisch op wijzigingen controleren",
         "IS_SEARCH_ISSUES_FROM_OPEN_PROJECT": "Werkpakketten weergeven als suggesties bij het toevoegen van nieuwe taken",
         "IS_SHOW_TIME_TRACKING_DIALOG": "Dialoogvenster voor tijdregistratie weergeven om te rapporteren aan OpenProject",

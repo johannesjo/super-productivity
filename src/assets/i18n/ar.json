@@ -86,7 +86,7 @@
         "CALDAV_RESOURCE": "اسم مورد CalDav (التقويم)",
         "CALDAV_URL": "عنوان URL لـ CalDav (عنوان URL الأساسي)",
         "CALDAV_USER": "اسم مستخدم CalDav الخاص بك",
-        "IS_AUTO_ADD_TO_BACKLOG": "قم تلقائيًا بإضافة مهام CalDav غير المكتملة إلى الأعمال المتأخرة",
+        "IS_AUTO_IMPORT_ISSUES": "قم تلقائيًا بإضافة مهام CalDav غير المكتملة إلى الأعمال المتأخرة",
         "IS_AUTO_POLL": "استقصاء المهام المستوردة تلقائيًا للتغييرات",
         "IS_SEARCH_ISSUES_FROM_CALDAV": "عرض CalDav todos غير المكتمل كاقتراح عند إضافة مهام جديدة",
         "IS_TRANSITION_ISSUES_ENABLED": "أكمل CalDav todos تلقائيًا عند اكتمال المهمة"
@@ -134,7 +134,7 @@
       },
       "FORM": {
         "FILTER_USER": "اسم المستخدم (مثل تصفية التغييرات بنفسك)",
-        "IS_AUTO_ADD_TO_BACKLOG": "إضافة المشكلات التي لم يتم حلها تلقائيًا من GitHub إلى العمل المتراكم",
+        "IS_AUTO_IMPORT_ISSUES": "إضافة المشكلات التي لم يتم حلها تلقائيًا من GitHub إلى العمل المتراكم",
         "IS_AUTO_POLL": "الاستطلاع تلقائيًا لقضايا git المستوردة للتغييرات",
         "IS_SEARCH_ISSUES_FROM_GITHUB": "إظهار المشكلات من git كاقتراحات عند إضافة مهام جديدة",
         "REPO": "\"اسم المستخدم / repositoryName\" لمستودع git الذي تريد تتبعه",
@@ -166,7 +166,7 @@
       "FORM": {
         "FILTER_USER": "اسم المستخدم (مثل تصفية التغييرات بنفسك)",
         "GITLAB_BASE_URL": "عنوان URL الأساسي المخصص لـ GitLab",
-        "IS_AUTO_ADD_TO_BACKLOG": "إضافة المشكلات التي لم يتم حلها تلقائيًا من GitLab إلى العمل المتراكم",
+        "IS_AUTO_IMPORT_ISSUES": "إضافة المشكلات التي لم يتم حلها تلقائيًا من GitLab إلى العمل المتراكم",
         "IS_AUTO_POLL": "الاستطلاع تلقائيًا لقضايا gitlab المستوردة للتغييرات",
         "IS_SEARCH_ISSUES_FROM_GITLAB": "إظهار المشكلات من gitlab كاقتراحات عند إضافة مهام جديدة",
         "PROJECT": "المسار الكامل أو اسم المستخدم / المشروع",
@@ -291,7 +291,7 @@
         "TITLE": "جيرا: إرسال العمل"
       },
       "FORM": {
-        "IS_AUTO_ADD_TO_BACKLOG": "إضافة المشكلات التي لم يتم حلها تلقائيًا من GitHub إلى العمل المتراكم",
+        "IS_AUTO_IMPORT_ISSUES": "إضافة المشكلات التي لم يتم حلها تلقائيًا من GitHub إلى العمل المتراكم",
         "IS_AUTO_POLL": "الاستطلاع تلقائيًا لقضايا git المستوردة للتغييرات",
         "IS_SEARCH_ISSUES_FROM_GITHUB": "إظهار المشكلات من git كاقتراحات عند إضافة مهام جديدة",
         "REPO": "\"اسم المستخدم / repositoryName\" لمستودع git الذي تريد تتبعه"
@@ -299,7 +299,7 @@
       "FORM_ADV": {
         "AUTO_ADD_BACKLOG_JQL_QUERY": "تستخدم JQL لإضافة المهام تلقائيًا إلى تراكم العمل",
         "IS_ADD_WORKLOG_ON_SUB_TASK_DONE": "افتح مربع حوار لتقديم worklog إلى jira عند الانتهاء من المهمة الفرعية",
-        "IS_AUTO_ADD_TO_BACKLOG": "إضافة القضايا تلقائيا إلى جيرا تراكم",
+        "IS_AUTO_IMPORT_ISSUES": "إضافة القضايا تلقائيا إلى جيرا تراكم",
         "IS_AUTO_POLL_TICKETS": "تحقق من المشكلات المستوردة بحثًا عن التغييرات تلقائيًا وأبلغ عنها",
         "IS_CHECK_TO_RE_ASSIGN_TICKET_ON_TASK_START": "تحقق مما إذا كان قد تم تعيين المشكلة قيد العمل حاليًا للمستخدم الحالي",
         "IS_WORKLOG_ENABLED": "فتح مربع حوار لتقديم worklog إلى جيرا عند الانتهاء من المهمة",
@@ -453,7 +453,7 @@
       "FORM": {
         "FILTER_USER": "اسم المستخدم (مثل تصفية التغييرات بنفسك)",
         "HOST": "المضيف (على سبيل المثال: https://www.openproject.org/)",
-        "IS_AUTO_ADD_TO_BACKLOG": "إضافة حزم العمل التي لم يتم حلها تلقائيًا من OpenProject إلى backlog",
+        "IS_AUTO_IMPORT_ISSUES": "إضافة حزم العمل التي لم يتم حلها تلقائيًا من OpenProject إلى backlog",
         "IS_AUTO_POLL": "استقصاء حزم عمل OpenProject المستوردة تلقائيًا للتغييرات",
         "IS_SEARCH_ISSUES_FROM_OPEN_PROJECT": "عرض حزم العمل كاقتراحات عند إضافة مهام جديدة",
         "IS_SHOW_TIME_TRACKING_DIALOG": "إظهار مربع حوار تعقب الوقت لتقديم تقرير إلى OpenProject",

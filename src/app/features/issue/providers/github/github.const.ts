@@ -69,7 +69,7 @@ export const GITHUB_CONFIG_FORM: LimitedFormlyFieldConfig<GithubCfg>[] = [
     type: 'checkbox',
     hideExpression: (model: any) => !model.isEnabled,
     templateOptions: {
-      label: T.F.GITHUB.FORM.IS_AUTO_ADD_TO_BACKLOG,
+      label: T.F.GITHUB.FORM.IS_AUTO_IMPORT_ISSUES,
     },
   },
   {

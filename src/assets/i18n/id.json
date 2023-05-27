@@ -97,7 +97,7 @@
         "CALDAV_RESOURCE": "Nama sumber daya CalDav (kalender)",
         "CALDAV_URL": "URL CalDav (URL dasar)",
         "CALDAV_USER": "Nama pengguna caldav Anda",
-        "IS_AUTO_ADD_TO_BACKLOG": "Secara otomatis menambahkan todos CalDav yang belum selesai ke backlog Anda",
+        "IS_AUTO_IMPORT_ISSUES": "Secara otomatis menambahkan todos CalDav yang belum selesai ke backlog Anda",
         "IS_AUTO_POLL": "Secara otomatis polling tugas yang diimpor untuk perubahan",
         "IS_SEARCH_ISSUES_FROM_CALDAV": "Tampilkan todos CalDav yang belum selesai sebagai saran saat menambahkan tugas baru",
         "IS_TRANSITION_ISSUES_ENABLED": "Selesaikan tugas CalDav secara otomatis saat menyelesaikan tugas"
@@ -145,7 +145,7 @@
       },
       "FORM": {
         "FILTER_USER": "Nama pengguna (misalnya untuk memfilter perubahan sendiri)",
-        "IS_AUTO_ADD_TO_BACKLOG": "Secara otomatis menambahkan masalah yang belum terselesaikan dari Gitea ke backlog",
+        "IS_AUTO_IMPORT_ISSUES": "Secara otomatis menambahkan masalah yang belum terselesaikan dari Gitea ke backlog",
         "IS_AUTO_POLL": "Secara otomatis polling Git issues yang diimpor untuk perubahan",
         "IS_SEARCH_ISSUES_FROM_GITEA": "Tampilkan issues dari Git sebagai saran saat menambahkan tugas baru",
         "HOST": "Host (contoh: https://try.gitea.io)",
@@ -191,7 +191,7 @@
         "SCOPE_CREATED": "Dibuat oleh saya",
         "IS_AUTO_POLL": "Secara otomatis polling masalah Redmine yang diimpor untuk perubahan",
         "IS_SEARCH_ISSUES_FROM_REDMINE": "Tampilkan Issues dari Redmine sebagai saran saat menambahkan tugas baru",
-        "IS_AUTO_ADD_TO_BACKLOG": "Secara otomatis menambahkan masalah terbuka dari Redmine ke backlog"
+        "IS_AUTO_IMPORT_ISSUES": "Secara otomatis menambahkan masalah terbuka dari Redmine ke backlog"
       },
       "FORM_SECTION": {
         "TITLE": "Redmine",
@@ -214,7 +214,7 @@
       },
       "FORM": {
         "FILTER_USER": "Nama pengguna (misalnya untuk memfilter perubahan sendiri)",
-        "IS_AUTO_ADD_TO_BACKLOG": "Secara otomatis menambahkan issues yang belum terselesaikan dari GitHub ke backlog",
+        "IS_AUTO_IMPORT_ISSUES": "Secara otomatis menambahkan issues yang belum terselesaikan dari GitHub ke backlog",
         "IS_AUTO_POLL": "Secara otomatis polling masalah git yang diimpor untuk perubahan",
         "IS_SEARCH_ISSUES_FROM_GITHUB": "Tampilkan masalah dari git sebagai saran saat menambahkan tugas baru",
         "REPO": "\"username/repositoryName\" untuk repositori git yang ingin Anda lacak",
@@ -246,7 +246,7 @@
       "FORM": {
         "FILTER_USER": "Nama pengguna (misalnya untuk memfilter perubahan sendiri)",
         "GITLAB_BASE_URL": "URL dasar GitLab khusus (opsional)",
-        "IS_AUTO_ADD_TO_BACKLOG": "Secara otomatis menambahkan masalah yang belum terselesaikan dari GitLab ke backlog",
+        "IS_AUTO_IMPORT_ISSUES": "Secara otomatis menambahkan masalah yang belum terselesaikan dari GitLab ke backlog",
         "IS_AUTO_POLL": "Secara otomatis polling Git issues yang diimpor untuk perubahan",
         "IS_SEARCH_ISSUES_FROM_GITLAB": "Tampilkan Git issues sebagai saran saat menambahkan tugas baru",
         "PROJECT": "(default) ID proyek atau nama pengguna/proyek",
@@ -372,7 +372,7 @@
         "TITLE": "Jira: Kirim worklog"
       },
       "FORM": {
-        "IS_AUTO_ADD_TO_BACKLOG": "Secara otomatis menambahkan issues yang belum terselesaikan dari GitHub ke backlog",
+        "IS_AUTO_IMPORT_ISSUES": "Secara otomatis menambahkan issues yang belum terselesaikan dari GitHub ke backlog",
         "IS_AUTO_POLL": "Secara otomatis polling masalah git yang diimpor untuk perubahan",
         "IS_SEARCH_ISSUES_FROM_GITHUB": "Tampilkan issues dari Git sebagai saran saat menambahkan tugas baru",
         "REPO": "\"username/repositoryName\" untuk repositori Git yang ingin Anda lacak"
@@ -380,7 +380,7 @@
       "FORM_ADV": {
         "AUTO_ADD_BACKLOG_JQL_QUERY": "JQL digunakan untuk menambahkan tugas secara otomatis ke backlog",
         "IS_ADD_WORKLOG_ON_SUB_TASK_DONE": "Buka dialog untuk mengirimkan worklog ke Jira ketika sub tugas selesai",
-        "IS_AUTO_ADD_TO_BACKLOG": "Secara otomatis menambahkan issues dari Jira ke backlog",
+        "IS_AUTO_IMPORT_ISSUES": "Secara otomatis menambahkan issues dari Jira ke backlog",
         "IS_AUTO_POLL_TICKETS": "Periksa issues yang diimpor untuk perubahan secara otomatis dan beri tahu",
         "IS_CHECK_TO_RE_ASSIGN_TICKET_ON_TASK_START": "Periksa apakah issues yang sedang dikerjakan ditugaskan ke pengguna saat ini",
         "IS_WORKLOG_ENABLED": "Buka dialog untuk mengirimkan worklog ke Jira saat tugas selesai",
@@ -561,7 +561,7 @@
       "FORM": {
         "FILTER_USER": "Nama pengguna (misalnya untuk memfilter perubahan sendiri)",
         "HOST": "Host (contoh.: https://www.openproject.org/)",
-        "IS_AUTO_ADD_TO_BACKLOG": "Secara otomatis menambahkan work packages yang belum terselesaikan dari OpenProject ke backlog",
+        "IS_AUTO_IMPORT_ISSUES": "Secara otomatis menambahkan work packages yang belum terselesaikan dari OpenProject ke backlog",
         "IS_AUTO_POLL": "Secara otomatis polling work packages OpenProject yang diimpor untuk perubahan",
         "IS_SEARCH_ISSUES_FROM_OPEN_PROJECT": "Tampilkan work packages sebagai saran saat menambahkan tugas baru",
         "IS_SHOW_TIME_TRACKING_DIALOG": "Tampilkan dialog pelacakan waktu untuk melapor ke OpenProject",
