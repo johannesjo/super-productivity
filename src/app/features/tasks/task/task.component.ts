@@ -133,6 +133,14 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
       )
     : EMPTY;
 
+  isShowMoveFromAndToBacklogBtns$: Observable<boolean> = this._task$.pipe(
+    take(1),
+    switchMap((task) =>
+      task.projectId ? this._projectService.getByIdOnce$(task.projectId) : EMPTY,
+    ),
+    map((project) => project.isEnableBacklog),
+  );
+
   isFirstLineHover: boolean = false;
   isRepeatTaskCreatedToday: boolean = false;
 

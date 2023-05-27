@@ -429,7 +429,7 @@
 
             <button
               (click)="moveToBacklog();"
-              *ngIf="!task.parentId && !isBacklog && task.projectId"
+              *ngIf="!task.parentId && !isBacklog && task.projectId && (isShowMoveFromAndToBacklogBtns$|async)"
               mat-menu-item
             >
               <mat-icon>arrow_downward</mat-icon>
@@ -438,7 +438,7 @@
 
             <button
               (click)="moveToToday();"
-              *ngIf="!task.parentId && isBacklog &&  task.projectId"
+              *ngIf="!task.parentId && isBacklog && task.projectId && (isShowMoveFromAndToBacklogBtns$|async)"
               mat-menu-item
             >
               <mat-icon>arrow_upward</mat-icon>
