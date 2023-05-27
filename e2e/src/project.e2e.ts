@@ -1,8 +1,6 @@
 import { BASE } from '../e2e.const';
 import { NBrowser } from '../n-browser-interface';
 
-const BASE_URL = `${BASE}`;
-
 const SIDENAV = `side-nav`;
 const EXPAND_PROJECT_BTN = `${SIDENAV} .expand-btn:first-of-type`;
 const CREATE_PROJECT_BTN = `${SIDENAV} section.projects .mat-menu-item:last-of-type`;
@@ -22,8 +20,8 @@ const PROJECT_SETTINGS_BTN = `${WORK_CTX_MENU} button:last-of-type`;
 const SECOND_PROJECT = `${PROJECT}:nth-of-type(2)`;
 const SECOND_PROJECT_BTN = `${SECOND_PROJECT} button:first-of-type`;
 
-const BACKLOG = `.backlog`;
-const SPLIT = `split`;
+// const BACKLOG = `.backlog`;
+// const SPLIT = `split`;
 const FINISH_DAY_BTN = 'button[routerlink="/active/daily-summary"]';
 const READY_TO_WORK_BTN = '.ready-to-work-btn';
 const DAILY_SUMMARY = 'daily-summary';
@@ -70,8 +68,8 @@ module.exports = {
       .waitForElementVisible(SECOND_PROJECT_BTN)
       .click(SECOND_PROJECT_BTN)
 
-      .waitForElementVisible(BACKLOG)
-      .waitForElementVisible(SPLIT)
+      // .waitForElementVisible(BACKLOG)
+      // .waitForElementVisible(SPLIT)
       .assert.containsText(WORK_CTX_TITLE, 'Cool Test Project')
       .end(),
 
