@@ -51,6 +51,7 @@ export interface TaskRepeatCfgCopy {
   // advanced
   notes: string | undefined;
   // ... possible sub tasks & attachments
+  subTaskIds: string[];
 }
 
 export type TaskRepeatCfg = Readonly<TaskRepeatCfgCopy>;
@@ -87,4 +88,5 @@ export const DEFAULT_TASK_REPEAT_CFG: Omit<TaskRepeatCfgCopy, 'id'> = {
   order: 0,
 
   notes: undefined,
+  subTaskIds: [],
 };

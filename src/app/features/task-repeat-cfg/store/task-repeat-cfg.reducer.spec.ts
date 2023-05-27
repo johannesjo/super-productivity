@@ -24,6 +24,7 @@ const DUMMY_REPEATABLE_TASK: TaskRepeatCfg = {
   sunday: false,
   tagIds: [],
   order: 0,
+  subTaskIds: ['SUB_TASK__DEFAULT'],
 };
 
 const HOUR = 60 * 60 * 1000;
@@ -53,6 +54,23 @@ describe('selectTaskRepeatCfgsDueOnDay', () => {
       );
       const resultIds = result.map((item) => item.id);
       expect(resultIds).toEqual(['R1']);
+    });
+
+    it('should return cfg for a far future task WITH sub tasks', () => {
+      const result = selectTaskRepeatCfgsDueOnDay.projector(
+        [
+          dummyRepeatable('R1', {
+            repeatCycle: 'DAILY',
+            startDate: '2022-01-10',
+            subTaskIds: ['ST-1', 'ST-2'],
+          }),
+        ],
+        {
+          dayDate: new Date('2025-11-11'),
+        },
+      );
+      const resultSubTaskIds = result.map((item) => item.subTaskIds);
+      expect(resultSubTaskIds).toEqual([['ST-1', 'ST-2']]);
     });
 
     [
