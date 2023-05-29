@@ -19,18 +19,12 @@ export const SOUND_FORM_CFG: ConfigFormSection<SoundConfig> = {
       },
     },
     {
-      key: 'isPlayDoneSound',
-      type: 'checkbox',
-      templateOptions: {
-        label: T.GCF.SOUND.IS_PLAY_DONE_SOUND,
-      },
-    },
-    {
       key: 'doneSound',
       type: 'select',
       templateOptions: {
         label: T.GCF.SOUND.DONE_SOUND,
         options: [
+          { label: 'NONE', value: null },
           { label: 'Sound 1', value: 'done1.mp3' },
           { label: 'Sound 2', value: 'done2.mp3' },
           { label: 'Sound 3', value: 'done3.mp3' },
@@ -39,9 +33,6 @@ export const SOUND_FORM_CFG: ConfigFormSection<SoundConfig> = {
           { label: 'Sound 6', value: 'done6.mp3' },
           { label: 'Sound 7', value: 'done7.mp3' },
         ],
-        hideExpression: (model: any) => {
-          return !model.isPlayDoneSound;
-        },
         change: ({ model }) => playDoneSound(model),
       },
     },
@@ -52,7 +43,7 @@ export const SOUND_FORM_CFG: ConfigFormSection<SoundConfig> = {
         label: T.GCF.SOUND.IS_INCREASE_DONE_PITCH,
       },
       hideExpression: (model: any) => {
-        return !model.isPlayDoneSound;
+        return !model.doneSound;
       },
     },
   ],

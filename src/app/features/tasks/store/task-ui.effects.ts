@@ -130,7 +130,7 @@ export class TaskUiEffects {
           this._workContextService.flatDoneTodayNr$,
           this._globalConfigService.sound$,
         ),
-        filter(([, , soundCfg]) => soundCfg.isPlayDoneSound),
+        filter(([, , soundCfg]) => !!soundCfg.doneSound),
         tap(([, doneToday, soundCfg]) => playDoneSound(soundCfg, doneToday)),
       ),
     { dispatch: false },

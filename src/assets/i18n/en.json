@@ -1328,9 +1328,8 @@
       "TITLE": "Pomodoro Timer"
     },
     "SOUND": {
-      "DONE_SOUND": "Task done sound",
+      "DONE_SOUND": "Task marked done sound",
       "IS_INCREASE_DONE_PITCH": "Increase pitch for every task done",
-      "IS_PLAY_DONE_SOUND": "Play sound when task is marked done",
       "TITLE": "Sound",
       "VOLUME": "Volume"
     },

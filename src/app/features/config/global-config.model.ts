@@ -91,9 +91,8 @@ export type LanguageConfig = Readonly<{
 }>;
 
 export type SoundConfig = Readonly<{
-  isPlayDoneSound: boolean;
   isIncreaseDoneSoundPitch: boolean;
-  doneSound: string;
+  doneSound: string | null;
   volume: number;
 }>;
 

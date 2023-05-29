@@ -119,7 +119,6 @@ export const DEFAULT_GLOBAL_CONFIG: GlobalConfigState = {
   },
   sound: {
     volume: 75,
-    isPlayDoneSound: true,
     isIncreaseDoneSoundPitch: true,
     doneSound: 'done2.mp3',
   },
