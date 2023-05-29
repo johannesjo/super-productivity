@@ -121,6 +121,7 @@ export const DEFAULT_GLOBAL_CONFIG: GlobalConfigState = {
     volume: 75,
     isIncreaseDoneSoundPitch: true,
     doneSound: 'done2.mp3',
+    breakReminderSound: null,
   },
   trackingReminder: {
     isEnabled: true,

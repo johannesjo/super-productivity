@@ -13,6 +13,7 @@ export const playDoneSound = (soundCfg: SoundConfig, nrOfDoneTasks: number = 0):
   // (a as any).mozPreservesPitch = false;
   // (a as any).webkitPreservesPitch = false;
   // a.play();
+  console.log(file);
 
   const pitchFactor = soundCfg.isIncreaseDoneSoundPitch
     ? // prettier-ignore

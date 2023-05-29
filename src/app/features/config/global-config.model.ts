@@ -93,6 +93,7 @@ export type LanguageConfig = Readonly<{
 export type SoundConfig = Readonly<{
   isIncreaseDoneSoundPitch: boolean;
   doneSound: string | null;
+  breakReminderSound: string | null;
   volume: number;
 }>;
 

@@ -34,6 +34,7 @@ import { ipcRenderer } from 'electron';
 import { PomodoroService } from '../pomodoro/pomodoro.service';
 import { Actions, ofType } from '@ngrx/effects';
 import { triggerResetBreakTimer } from '../idle/store/idle.actions';
+import { playSound } from '../../util/play-sound';
 
 const BREAK_TRIGGER_DURATION = 10 * 60 * 1000;
 const PING_UPDATE_BANNER_INTERVAL = 60 * 1000;
@@ -247,6 +248,19 @@ export class TakeABreakService {
         body: msg,
       });
     });
+
+    // handle sounds
+    this._configService.sound$
+      .pipe(
+        switchMap((soundCfg) =>
+          soundCfg.breakReminderSound
+            ? this._triggerBanner$.pipe(mapTo(soundCfg))
+            : EMPTY,
+        ),
+      )
+      .subscribe((soundCfg) => {
+        playSound(soundCfg.breakReminderSound as string);
+      });
 
     this._triggerBanner$.subscribe(([timeWithoutBreak, cfg]) => {
       const msg: string = this._createMessage(timeWithoutBreak, cfg.takeABreak) as string;

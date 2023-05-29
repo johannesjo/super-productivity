@@ -1328,6 +1328,7 @@
       "TITLE": "Pomodoro Timer"
     },
     "SOUND": {
+      "BREAK_REMINDER_SOUND": "Take a break reminder sound",
       "DONE_SOUND": "Task marked done sound",
       "IS_INCREASE_DONE_PITCH": "Increase pitch for every task done",
       "TITLE": "Sound",
