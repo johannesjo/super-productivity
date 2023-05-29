@@ -616,7 +616,7 @@
         "TITLE": "Self Compassion"
       },
       "CUR": {
-        "INTRO": "Procrastination is interesting, isn't it? It doesn't make sense to do it. Not in your long term interest at all. But still everybody does it. It helps a lot explore und gain a better understanding on how it works for you personally! Some basic questions to ask yourself could be:",
+        "INTRO": "Isn't procrastination interesting? It doesn't seem to make any sense to do it, since it is not in your long term interest at all. But still everybody does. It helps a lot explore und gain a better understanding on how it works for you personally! Some basic questions to ask yourself could be:",
         "L1": "What feelings are eliciting your temptation to procrastinate?",
         "L2": "Where do you feel them in your body?",
         "L3": "What do they remind you of?",
@@ -633,9 +633,8 @@
         "STRESSED": "Stressed about not getting things done",
         "TITLE": "Intro"
       },
-      "P1": "First of all relax! Everybody does it once in a while. And if you're not doing what you should, you should at least enjoy it! Then check out the other tab for some helpful methods.",
-      "P2": "If you want to know more about the science behind all here I can recommend <a target=\"_blank\" href=\"https://www.nytimes.com/2019/03/25/smarter-living/why-you-procrastinate-it-has-nothing-to-do-with-self-control.html\" target=\"_blank\">this article</a> from which are some of the exercises.",
-      "P3": "Remember: Procrastination is an emotion regulation problem, not a time management problem.",
+      "P1": "First of all: Relax! Everybody does procrastinate once in a while. And if you're not doing what you should, you should at least enjoy it!",
+      "P2": "Remember: <b>Procrastination is an emotion regulation problem, not a time management problem.</b> This means beating yourself up is not the solution, it is part of the problem. Let that sink in and then check the other tabs here for some further help.",
       "REFRAME": {
         "INTRO": "Think about what might be positive about the task despite its flaws.",
         "TITLE": "Reframing",
