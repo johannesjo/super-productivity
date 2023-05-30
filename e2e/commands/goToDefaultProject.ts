@@ -10,8 +10,7 @@ const PROJECT = `${SIDENAV} section.projects .project`;
 const DEFAULT_PROJECT = `${PROJECT}:nth-of-type(1)`;
 const DEFAULT_PROJECT_BTN = `${DEFAULT_PROJECT} .mat-menu-item`;
 
-const BACKLOG = `.backlog`;
-const SPLIT = `split`;
+const TASK_LIST = `task-list`;
 
 module.exports = {
   async command(this: NBrowser) {
@@ -20,7 +19,6 @@ module.exports = {
       .click(EXPAND_PROJECT_BTN)
       .waitForElementVisible(DEFAULT_PROJECT_BTN)
       .click(DEFAULT_PROJECT_BTN)
-      .waitForElementVisible(BACKLOG)
-      .waitForElementVisible(SPLIT);
+      .waitForElementVisible(TASK_LIST);
   },
 };
