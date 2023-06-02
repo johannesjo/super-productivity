@@ -26,11 +26,6 @@ class FullscreenActivity : AppCompatActivity() {
     @Suppress("ReplaceCallWithBinaryOperator")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            startForegroundService(Intent(this, KeepAliveNotificationService::class.java))
-        } else {
-            startService(Intent(this, KeepAliveNotificationService::class.java))
-        }
         initWebView()
         setContentView(R.layout.activity_fullscreen)
         wvContainer = findViewById(R.id.webview_container)
@@ -59,29 +54,15 @@ class FullscreenActivity : AppCompatActivity() {
         if (action == null) {
             return
         }
-        when (action) {
-            KeepAliveNotificationService.EXTRA_ACTION_PAUSE -> callJSInterfaceFunctionIfExists(
-                "next",
-                "onPauseCurrentTask$"
-            )
-            KeepAliveNotificationService.EXTRA_ACTION_DONE -> callJSInterfaceFunctionIfExists(
-                "next",
-                "onMarkCurrentTaskAsDone$"
-            )
-            KeepAliveNotificationService.EXTRA_ACTION_ADD_TASK -> callJSInterfaceFunctionIfExists(
-                "next",
-                "onAddNewTask$"
-            )
-        }
     }
 
     private fun initWebView() {
         webView = (application as App).wv
         val url: String
         if (BuildConfig.DEBUG) {
-//            url = "https://test-app.super-productivity.com/"
+            url = "https://test-app.super-productivity.com/"
             // for debugging locally run web server
-            url = "http://10.0.2.2:4200"
+//            url = "http://10.0.2.2:4200"
             Toast.makeText(this, "DEBUG: $url", Toast.LENGTH_SHORT).show()
             webView.clearCache(true)
             webView.clearHistory()

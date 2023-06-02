@@ -67,16 +67,11 @@ class JavaScriptInterface(
         activity.sendBroadcast(intent)
     }
 
+    // TODO remove for good after a while
     @Suppress("unused")
     @JavascriptInterface
     fun updatePermanentNotification(title: String, message: String, progress: Int) {
-        Log.w("TW", "JavascriptInterface: updateNotificationWidget")
-        // we need to use an explicit intent to make this work
-        val intent = Intent(KeepAliveNotificationService.UPDATE_PERMANENT_NOTIFICATION)
-        intent.putExtra("title", title)
-        intent.putExtra("message", message)
-        intent.putExtra("progress", progress)
-        activity.sendBroadcast(intent)
+        Log.w("TW", "JavascriptInterface: REMOVED updateNotificationWidget")
     }
 
     @Suppress("unused")

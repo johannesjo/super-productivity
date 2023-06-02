@@ -60,15 +60,6 @@ class TaskListWidget : AppWidgetProvider() {
 
         // tap button
         // ----------
-        val addTaskIntent = Intent(context, FullscreenActivity::class.java)
-        addTaskIntent.putExtra("action", KeepAliveNotificationService.EXTRA_ACTION_ADD_TASK)
-        val addTaskPI = PendingIntent.getActivity(
-            context,
-            3,
-            addTaskIntent,
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-        )
-        remoteViews.setOnClickPendingIntent(widgetAddTaskButton, addTaskPI)
         // Instruct the widget manager to update the widget
         appWidgetManager.updateAppWidget(appWidgetId, remoteViews)
         // Both views need to be notified for whatever reason
