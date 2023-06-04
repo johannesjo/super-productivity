@@ -154,7 +154,7 @@ export class PersistenceService {
 
   async getValidCompleteData(): Promise<AppDataComplete> {
     const d = await this.loadComplete();
-    // if we are very unlucky app data might not be valid. we never want to sync that! :)
+    // if we are very unlucky (e.g. a task has updated but not the related tag changes) app data might not be valid. we never want to sync that! :)
     if (isValidAppData(d)) {
       this._invalidDataCount = 0;
       return d;
