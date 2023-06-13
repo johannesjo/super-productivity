@@ -58,6 +58,8 @@ if (IS_DEV) {
   log('Starting in DEV Mode!!!');
 }
 
+app.commandLine.appendSwitch('enable-speech-dispatcher');
+
 // NOTE: needs to be executed before everything else
 process.argv.forEach((val) => {
   if (val && val.includes('--disable-tray')) {

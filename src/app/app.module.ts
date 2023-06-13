@@ -48,6 +48,7 @@ import { TrackingReminderModule } from './features/tracking-reminder/tracking-re
 import { FinishDayBeforeCloseModule } from './features/finish-day-before-close/finish-day-before-close.module';
 import { AndroidModule } from './features/android/android.module';
 import { WelcomeModule } from './features/welcome/welcome.module';
+import { DominaModeModule } from './features/domina-mode/domina-mode.module';
 
 // NOTE: export required for aot to work
 export const createTranslateLoader = (http: HttpClient): TranslateHttpLoader =>
@@ -81,6 +82,7 @@ export const createTranslateLoader = (http: HttpClient): TranslateHttpLoader =>
     MaterialCssVarsModule.forRoot(),
     SearchBarModule,
     FinishDayBeforeCloseModule,
+    DominaModeModule,
 
     AndroidModule,
     // throws build error ...(IS_ANDROID_WEB_VIEW ? [AndroidModule] : []),

@@ -48,6 +48,11 @@ export const selectTimelineConfig = createSelector(
   (cfg): TimelineConfig => cfg.timeline,
 );
 
+export const selectIsDominaModeEnabled = createSelector(
+  selectConfigFeatureState,
+  (cfg): boolean => true,
+);
+
 export const initialGlobalConfigState: GlobalConfigState = {
   ...DEFAULT_GLOBAL_CONFIG,
   [MODEL_VERSION_KEY]: MODEL_VERSION.GLOBAL_CONFIG,
