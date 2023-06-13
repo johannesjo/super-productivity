@@ -1,6 +1,7 @@
 import { updateGlobalConfigSection } from './global-config.actions';
 import { createFeatureSelector, createReducer, createSelector, on } from '@ngrx/store';
 import {
+  DominaModeConfig,
   EvaluationConfig,
   GlobalConfigState,
   IdleConfig,
@@ -48,9 +49,9 @@ export const selectTimelineConfig = createSelector(
   (cfg): TimelineConfig => cfg.timeline,
 );
 
-export const selectIsDominaModeEnabled = createSelector(
+export const selectIsDominaModeConfig = createSelector(
   selectConfigFeatureState,
-  (cfg): boolean => true,
+  (cfg): DominaModeConfig => cfg.dominaMode,
 );
 
 export const initialGlobalConfigState: GlobalConfigState = {

@@ -57,6 +57,12 @@ export const DEFAULT_GLOBAL_CONFIG: GlobalConfigState = {
     takeABreakSnoozeTime: 15 * minute,
     motivationalImgs: [],
   },
+  dominaMode: {
+    isEnabled: false,
+    interval: 5 * minute,
+    volume: 75,
+    text: 'Your current task is: ${taskTitle}',
+  },
   pomodoro: {
     isEnabled: false,
     duration: 25 * minute,
