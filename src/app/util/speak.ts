@@ -1,16 +1,9 @@
 const synth = window.speechSynthesis;
-console.log(synth);
-console.log(synth.getVoices());
 
-export const speak = (text: string): void => {
+export const speak = (text: string, volume: number): void => {
+  synth.cancel();
   const utter = new SpeechSynthesisUtterance();
-
-  console.log('SPEAK ', text);
-
   utter.text = text;
-  console.log(utter);
-  utter.onend = (event) => {
-    console.log('Speech complete');
-  };
+  utter.volume = volume;
   synth.speak(utter);
 };

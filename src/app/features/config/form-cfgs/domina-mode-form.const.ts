@@ -1,18 +1,28 @@
 /* eslint-disable max-len */
 import { ConfigFormSection, DominaModeConfig } from '../global-config.model';
 import { T } from '../../../t.const';
+import { speak } from '../../../util/speak';
 
 export const DOMINA_MODE_FORM: ConfigFormSection<DominaModeConfig> = {
-  // title: T.F.SIMPLE_COUNTER.FORM.TITLE,
-  title: 'DOMINA MODE',
+  title: T.F.DOMINA_MODE.FORM.TITLE,
   key: 'dominaMode',
-  help: T.F.SIMPLE_COUNTER.FORM.HELP,
+  help: T.F.DOMINA_MODE.FORM.HELP,
   items: [
     {
       key: 'isEnabled',
       type: 'checkbox',
       templateOptions: {
-        label: T.GCF.IDLE.IS_ENABLE_IDLE_TIME_TRACKING,
+        label: T.G.ENABLED,
+      },
+    },
+    {
+      key: 'text',
+      type: 'input',
+      hideExpression: '!model.isEnabled',
+      templateOptions: {
+        label: T.F.DOMINA_MODE.FORM.L_TEXT,
+        description: T.F.DOMINA_MODE.FORM.L_TEXT_DESCRIPTION,
+        required: true,
       },
     },
     {
@@ -22,29 +32,27 @@ export const DOMINA_MODE_FORM: ConfigFormSection<DominaModeConfig> = {
       templateOptions: {
         required: true,
         isAllowSeconds: true,
-        // label: T.GCF.IDLE.MIN_IDLE_TIME,
-        label: 'INTERVAL',
+        label: T.F.DOMINA_MODE.FORM.L_INTERVAL,
         description: T.G.DURATION_DESCRIPTION,
       },
     },
     {
       key: 'volume',
-      type: 'input',
+      type: 'slider',
       hideExpression: '!model.isEnabled',
       templateOptions: {
         type: 'number',
-        // label: T.GCF.IDLE.IS_ONLY_OPEN_IDLE_WHEN_CURRENT_TASK,
-        label: 'Volume',
-        description: 'E.g.: "Work on ${currentTaskTitle}"',
-      },
-    },
-    {
-      key: 'text',
-      type: 'input',
-      hideExpression: '!model.isEnabled',
-      templateOptions: {
-        label: T.GCF.IDLE.IS_ONLY_OPEN_IDLE_WHEN_CURRENT_TASK,
-        description: 'E.g.: "Work on ${currentTaskTitle}!"',
+        min: 0,
+        max: 100,
+        label: T.GCF.SOUND.VOLUME,
+        required: true,
+        change: ({ model }) => {
+          let txt = model.text.replace('${currentTaskTitle}', 'current task title');
+          if (txt.length <= 1) {
+            txt = 'No text configured for domina mode';
+          }
+          speak(txt, model.volume);
+        },
       },
     },
   ],

@@ -17,11 +17,15 @@ export class DominaModeEffects {
           cfg.isEnabled
             ? timer(1000, cfg.interval || 10000).pipe(
                 withLatestFrom(this._store$.select(selectCurrentTask)),
-                tap(
-                  ([, currentTask]) =>
-                    currentTask &&
-                    speak(cfg.text.replace('${currentTaskTitle}', currentTask.title)),
-                ),
+                tap(([, currentTask]) => {
+                  if (currentTask) {
+                    let txt = cfg.text.replace('${currentTaskTitle}', currentTask.title);
+                    if (txt.length <= 1) {
+                      txt = currentTask.title;
+                    }
+                    speak(txt, cfg.volume);
+                  }
+                }),
               )
             : EMPTY,
         ),

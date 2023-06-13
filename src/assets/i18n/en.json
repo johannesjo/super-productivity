@@ -285,6 +285,15 @@
         "ERR_UNKNOWN": "GitLab: Unknown error {{statusCode}} {{errorMsg}}"
       }
     },
+    "DOMINA_MODE": {
+      "FORM": {
+        "HELP": "Repeats the configured phrase every X when tracking time to a task.",
+        "L_INTERVAL": "Interval to repeat phrase",
+        "L_TEXT": "Text",
+        "L_TEXT_DESCRIPTION": "E.g.: \"Work on ${currentTaskTitle}!\"",
+        "TITLE": "Domina Mode"
+      }
+    },
     "ISSUE": {
       "DEFAULT": {
         "ISSUES_STR": "issues",
