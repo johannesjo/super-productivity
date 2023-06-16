@@ -62,6 +62,14 @@ export class GitlabApiService {
     }
   }
 
+  private getCustomFilterParam(cfg: GitlabCfg): string {
+    if (cfg.filter) {
+      return `&${cfg.filter}`;
+    } else {
+      return '';
+    }
+  }
+
   getByIds$(
     project: string,
     ids: string[] | number[],
@@ -76,7 +84,7 @@ export class GitlabApiService {
       {
         url: `${this._apiLink(cfg, project)}/issues?${queryParams}${this.getScopeParam(
           cfg,
-        )}`,
+        )}${this.getCustomFilterParam(cfg)}`,
       },
       cfg,
     ).pipe(
@@ -115,7 +123,7 @@ export class GitlabApiService {
       {
         url: `${this._apiLink(cfg)}/issues?search=${searchText}${this.getScopeParam(
           cfg,
-        )}&order_by=updated_at`,
+        )}&order_by=updated_at${this.getCustomFilterParam(cfg)}`,
       },
       cfg,
     ).pipe(
@@ -156,7 +164,9 @@ export class GitlabApiService {
       {
         url: `${this._apiLink(
           cfg,
-        )}/issues?state=opened&order_by=updated_at&${this.getScopeParam(cfg)}`,
+        )}/issues?state=opened&order_by=updated_at&${this.getScopeParam(
+          cfg,
+        )}${this.getCustomFilterParam(cfg)}`,
       },
       cfg,
     ).pipe(take(1));
