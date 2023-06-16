@@ -10,4 +10,5 @@ export interface GitlabCfg extends BaseIssueProviderCfg {
   project: string | null;
   token: string | null;
   scope: string | null;
+  filter: string | null;
 }
