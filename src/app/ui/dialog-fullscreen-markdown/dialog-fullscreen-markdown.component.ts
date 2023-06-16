@@ -26,9 +26,12 @@ export class DialogFullscreenMarkdownComponent implements OnDestroy {
     @Inject(MAT_DIALOG_DATA) public data: any,
   ) {
     const lastViewMode = localStorage.getItem(LS.LAST_FULLSCREEN_EDIT_VIEW_MODE);
-    if (ALL_VIEW_MODES.includes(lastViewMode as ViewMode)) {
+    if (
+      ALL_VIEW_MODES.includes(lastViewMode as ViewMode) &&
+      // empty notes should never be in preview mode
+      data.content.trim().length > 0
+    ) {
       this.viewMode = lastViewMode as ViewMode;
-      console.log(this.viewMode, isSmallScreen());
 
       if (this.viewMode === 'SPLIT' && isSmallScreen()) {
         this.viewMode = 'TEXT_ONLY';
