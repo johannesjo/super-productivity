@@ -860,7 +860,7 @@
         "ADD_TASK_TO_TOP_OF_BACKLOG": "Add task to top of backlog",
         "ADD_TASK_TO_TOP_OF_TODAY": "Add task to top of list",
         "CREATE_TASK": "Create new task",
-        "EXAMPLE": "Example: \"Some task title +projectName #some tag #some other tag 10m/3h\"",
+        "EXAMPLE": "Example: \"Some task title @fri 4pm +projectName #some tag #some other tag 10m/3h\"",
         "START": "Press enter one more time to start"
       },
       "B": {
