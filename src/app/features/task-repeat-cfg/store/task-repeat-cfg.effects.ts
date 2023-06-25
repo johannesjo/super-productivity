@@ -22,10 +22,14 @@ import {
 import { selectTaskRepeatCfgFeatureState } from './task-repeat-cfg.reducer';
 import { PersistenceService } from '../../../core/persistence/persistence.service';
 import { Task, TaskArchive, TaskCopy } from '../../tasks/task.model';
-import { updateTask } from '../../tasks/store/task.actions';
+import { addSubTask, updateTask } from '../../tasks/store/task.actions';
 import { TaskService } from '../../tasks/task.service';
 import { TaskRepeatCfgService } from '../task-repeat-cfg.service';
-import { TaskRepeatCfg, TaskRepeatCfgState } from '../task-repeat-cfg.model';
+import {
+  DEFAULT_TASK_REPEAT_CFG,
+  TaskRepeatCfg,
+  TaskRepeatCfgState,
+} from '../task-repeat-cfg.model';
 import { forkJoin, from, merge, of } from 'rxjs';
 import { setActiveWorkContext } from '../../work-context/store/work-context.actions';
 import { SyncTriggerService } from '../../../imex/sync/sync-trigger.service';
@@ -38,6 +42,8 @@ import { Update } from '@ngrx/entity';
 import { getDateTimeFromClockString } from '../../../util/get-date-time-from-clock-string';
 import { isToday } from '../../../util/is-today.util';
 import { DateService } from 'src/app/core/date/date.service';
+import { getWorklogStr } from 'src/app/util/get-work-log-str';
+import { getTaskById } from '../../tasks/store/task.reducer.util';
 
 @Injectable()
 export class TaskRepeatCfgEffects {
@@ -57,6 +63,83 @@ export class TaskRepeatCfgEffects {
       ),
     { dispatch: false },
   );
+
+  /*   addTaskRepeatCfgForSubTasksOf: any = createEffect(
+    () =>
+      this._actions$.pipe(
+        ofType(
+          addTaskRepeatCfgToTask
+        ),
+        tap(async (aAction) => {
+          // TODO: is there an easier way to get to the parent task?
+          const allTasks = await this._taskService.allTasks$.pipe(first()).toPromise();
+          const parentTask = allTasks.find((aTask) => aTask.id === aAction.taskId);
+
+          if (parentTask !== undefined && parentTask.subTaskIds.length > 0) {
+            parentTask.subTaskIds.forEach(aSubTaskId => {
+              const task = allTasks.find((aTask) => aTask.id === aSubTaskId)!;
+
+              const repeatCfg = {
+                ...DEFAULT_TASK_REPEAT_CFG,
+                startDate: getWorklogStr(), // TODO: What is happening here? Is this correct?
+                title: task.title,
+                notes: task.notes,
+                tagIds: task.tagIds,
+                defaultEstimate: task.timeEstimate
+              };
+
+              this._taskRepeatCfgService.addTaskRepeatCfgToTask(
+                task.id,
+                task.projectId,
+                repeatCfg
+              );
+            });
+          }
+        })
+      ),
+      { dispatch: false } // Question: What exactly does this do?
+  ); */
+
+  /**
+   * When adding a sub task, this function checks if the parent is a repeatable task and therefore the sub-task also has to be.
+   */
+  /*   addTaskRepeatCfgForSubTask: any = createEffect(
+    () =>
+      this._actions$.pipe(
+        ofType(
+          addSubTask
+        ),
+        tap(async (aAction) => {
+          const task = aAction.task;
+
+          console.log("A TASKKK");
+
+          // TODO: is there an easier way to get to the parent task?
+          const allTasks = await this._taskService.allTasks$.pipe(first()).toPromise();
+          const parentTask = allTasks.find((aTask) => aTask.id === aAction.parentId);
+
+          console.log("PARENT TASK", parentTask);
+
+          if (parentTask !== undefined && parentTask.repeatCfgId !== null) {
+            const repeatCfg = {
+              ...DEFAULT_TASK_REPEAT_CFG,
+              startDate: getWorklogStr(), // TODO: What is happening here? Is this correct?
+              title: task.title,
+              notes: task.notes || undefined,
+              tagIds: task.tagIds,
+              defaultEstimate: task.timeEstimate
+            };
+  
+            this._taskRepeatCfgService.addTaskRepeatCfgToTask(
+              task.id,
+              task.projectId,
+              repeatCfg
+            );
+          }
+        })
+      ),
+      { dispatch: false } // Question: What exactly does this do?
+  ); */
 
   private triggerRepeatableTaskCreation$ = merge(
     this._syncTriggerService.afterInitialSyncDoneAndDataLoadedInitially$,

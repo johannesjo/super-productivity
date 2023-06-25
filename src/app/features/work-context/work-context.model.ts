@@ -53,6 +53,7 @@ export type WorkContextThemeCfg = Readonly<{
   backgroundImageLight: string | null;
 }>;
 
+// TODO: do you mean tag = day? If yes, shouldn't we change this to English?
 export enum WorkContextType {
   PROJECT = 'PROJECT',
   TAG = 'TAG',
