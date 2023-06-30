@@ -5,6 +5,7 @@ import {
   delay,
   filter,
   first,
+  map,
   mergeMap,
   take,
   tap,
@@ -28,9 +29,10 @@ import { TaskRepeatCfgService } from '../task-repeat-cfg.service';
 import {
   DEFAULT_TASK_REPEAT_CFG,
   TaskRepeatCfg,
+  TaskRepeatCfgCopy,
   TaskRepeatCfgState,
 } from '../task-repeat-cfg.model';
-import { forkJoin, from, merge, of } from 'rxjs';
+import { Observable, forkJoin, from, merge, of } from 'rxjs';
 import { setActiveWorkContext } from '../../work-context/store/work-context.actions';
 import { SyncTriggerService } from '../../../imex/sync/sync-trigger.service';
 import { SyncProviderService } from '../../../imex/sync/sync-provider.service';
@@ -64,82 +66,130 @@ export class TaskRepeatCfgEffects {
     { dispatch: false },
   );
 
-  /*   addTaskRepeatCfgForSubTasksOf: any = createEffect(
+  /**
+   * Updates the repeatCfg of a task, if the task was updated.
+   */
+  updateRepeatCfgWhenTaskUpdates: any = createEffect(
     () =>
       this._actions$.pipe(
-        ofType(
-          addTaskRepeatCfgToTask
-        ),
+        ofType(updateTask),
+        tap(async (aAction) => {
+          const allTasks = await this._taskService.allTasks$.pipe(first()).toPromise();
+          const task = allTasks.find((aTask) => aTask.id === aAction.task.id)!;
+
+          if (task.repeatCfgId !== null) {
+            const repeatCfgForTask = await this._taskRepeatCfgService
+              .getTaskRepeatCfgById$(task.repeatCfgId)
+              .pipe(first())
+              .toPromise();
+
+            const taskChanges = aAction.task.changes;
+
+            // TODO: is there a better way to do this? Is there anything missing?
+            const repeatCfgChanges: Partial<TaskRepeatCfgCopy> = {
+              projectId: taskChanges.projectId ?? repeatCfgForTask.projectId,
+              title: taskChanges.title ?? repeatCfgForTask.title,
+              tagIds: taskChanges.tagIds ?? repeatCfgForTask.tagIds,
+              notes: taskChanges.notes ?? repeatCfgForTask.notes,
+            };
+
+            // TODO: Do we need to do this for all instances??
+            this._taskRepeatCfgService.updateTaskRepeatCfg(
+              task.repeatCfgId,
+              repeatCfgChanges,
+            );
+          }
+        }),
+      ),
+    { dispatch: false }, // Question: What exactly does this do?
+  );
+
+  /**
+   * When a main task is made repeatable, this function checks if there are subtasks.
+   * If that is the case, a repeat-cfg gets added for each subtask, too.
+   */
+  addTaskRepeatCfgForSubTasksOf: any = createEffect(
+    () =>
+      this._actions$.pipe(
+        ofType(addTaskRepeatCfgToTask),
         tap(async (aAction) => {
           // TODO: is there an easier way to get to the parent task?
           const allTasks = await this._taskService.allTasks$.pipe(first()).toPromise();
           const parentTask = allTasks.find((aTask) => aTask.id === aAction.taskId);
+          const parentTaskRepeatCfg = aAction.taskRepeatCfg;
 
           if (parentTask !== undefined && parentTask.subTaskIds.length > 0) {
-            parentTask.subTaskIds.forEach(aSubTaskId => {
+            for (const aSubTaskId of parentTask.subTaskIds) {
               const task = allTasks.find((aTask) => aTask.id === aSubTaskId)!;
 
               const repeatCfg = {
-                ...DEFAULT_TASK_REPEAT_CFG,
-                startDate: getWorklogStr(), // TODO: What is happening here? Is this correct?
+                ...parentTaskRepeatCfg,
+                // TODO: anything missing in this list that should not be overwritten by the parent?
                 title: task.title,
                 notes: task.notes,
-                tagIds: task.tagIds,
-                defaultEstimate: task.timeEstimate
+                defaultEstimate: task.timeEstimate, // is this correct?
+                parentId: parentTask.repeatCfgId,
               };
 
               this._taskRepeatCfgService.addTaskRepeatCfgToTask(
                 task.id,
                 task.projectId,
-                repeatCfg
+                repeatCfg,
               );
-            });
+            }
           }
-        })
+        }),
       ),
-      { dispatch: false } // Question: What exactly does this do?
-  ); */
+    { dispatch: false }, // Question: What exactly does this do?
+  );
 
   /**
    * When adding a sub task, this function checks if the parent is a repeatable task and therefore the sub-task also has to be.
+   * If that is the case, a repeat-cfg gets added for each subtask, too.
    */
-  /*   addTaskRepeatCfgForSubTask: any = createEffect(
+  addTaskRepeatCfgForSubTask: any = createEffect(
     () =>
       this._actions$.pipe(
-        ofType(
-          addSubTask
-        ),
+        ofType(addSubTask),
         tap(async (aAction) => {
           const task = aAction.task;
 
-          console.log("A TASKKK");
+          // we only want to continue if the task doesn't already have a repeatCfgId
+          if (task.repeatCfgId === null) {
+            console.log('A TASKKK', task);
 
-          // TODO: is there an easier way to get to the parent task?
-          const allTasks = await this._taskService.allTasks$.pipe(first()).toPromise();
-          const parentTask = allTasks.find((aTask) => aTask.id === aAction.parentId);
+            // TODO: is there an easier way to get to the parent task?
+            const allTasks = await this._taskService.allTasks$.pipe(first()).toPromise();
+            const parentTask = allTasks.find((aTask) => aTask.id === aAction.parentId);
 
-          console.log("PARENT TASK", parentTask);
+            console.log('PARENT TASK', parentTask);
 
-          if (parentTask !== undefined && parentTask.repeatCfgId !== null) {
-            const repeatCfg = {
-              ...DEFAULT_TASK_REPEAT_CFG,
-              startDate: getWorklogStr(), // TODO: What is happening here? Is this correct?
-              title: task.title,
-              notes: task.notes || undefined,
-              tagIds: task.tagIds,
-              defaultEstimate: task.timeEstimate
-            };
-  
-            this._taskRepeatCfgService.addTaskRepeatCfgToTask(
-              task.id,
-              task.projectId,
-              repeatCfg
-            );
+            if (parentTask !== undefined && parentTask.repeatCfgId !== null) {
+              const parentRepeatCfg = await this._taskRepeatCfgService
+                .getTaskRepeatCfgById$(parentTask.repeatCfgId)
+                .pipe(first())
+                .toPromise();
+
+              const repeatCfg = {
+                ...parentRepeatCfg,
+                // TODO: anything missing in this list that should not be overwritten by the parent?
+                title: task.title,
+                notes: task.notes || undefined,
+                defaultEstimate: task.timeEstimate, // is this correct?
+                parentId: parentRepeatCfg.id,
+              };
+
+              this._taskRepeatCfgService.addTaskRepeatCfgToTask(
+                task.id,
+                task.projectId,
+                repeatCfg,
+              );
+            }
           }
-        })
+        }),
       ),
-      { dispatch: false } // Question: What exactly does this do?
-  ); */
+    { dispatch: false }, // Question: What exactly does this do?
+  );
 
   private triggerRepeatableTaskCreation$ = merge(
     this._syncTriggerService.afterInitialSyncDoneAndDataLoadedInitially$,
@@ -168,8 +218,14 @@ export class TaskRepeatCfgEffects {
 
       // existing tasks with sub tasks are loaded, because need to move them to the archive
       mergeMap(([taskRepeatCfgs, currentTaskId]) => {
+        // we only want to work with parent tasks, so filter out sub tasks
+        const parentTasksRepeatCfgs = taskRepeatCfgs.filter(
+          (aTask) => aTask.parentId === null,
+        );
+
         // NOTE sorting here is important
-        const sorted = taskRepeatCfgs.sort(sortRepeatableTaskCfgs);
+        const sorted = parentTasksRepeatCfgs.sort(sortRepeatableTaskCfgs);
+
         return from(sorted).pipe(
           mergeMap((taskRepeatCfg: TaskRepeatCfg) =>
             this._taskRepeatCfgService.getActionsForTaskRepeatCfg(
@@ -189,16 +245,24 @@ export class TaskRepeatCfgEffects {
       ofType(deleteTaskRepeatCfg),
       concatMap(({ id }) => this._taskService.getTasksByRepeatCfgId$(id).pipe(take(1))),
       filter((tasks) => tasks && !!tasks.length),
-      mergeMap((tasks: Task[]) =>
-        tasks.map((task) =>
+      concatMap((value: TaskCopy[], index) => {
+        const tasks: Readonly<TaskCopy>[] = value;
+        const allSubIds = tasks.flatMap((aTask) => aTask.subTaskIds);
+
+        return this._taskService
+          .getByIdsLive$(allSubIds)
+          .pipe(map((aAllSubTasks: TaskCopy[]) => ({ aAllSubTasks, tasks })));
+      }),
+      mergeMap(({ aAllSubTasks, tasks }) => {
+        return [...aAllSubTasks, ...tasks].map((task) =>
           updateTask({
             task: {
               id: task.id,
               changes: { repeatCfgId: null },
             },
           }),
-        ),
-      ),
+        );
+      }),
     ),
   );
 
@@ -206,7 +270,22 @@ export class TaskRepeatCfgEffects {
     () =>
       this._actions$.pipe(
         ofType(deleteTaskRepeatCfg),
-        tap(({ id }) => {
+        tap(async ({ id }) => {
+          const subTasks = await this._taskRepeatCfgService
+            .getTaskRepeatCfgsByParentId$(id)
+            .pipe(first())
+            .toPromise();
+
+          if (subTasks.length > 0) {
+            const subTaskIds = subTasks.map((aTask) => aTask.id);
+
+            // remove repeat cfgs from sub tasks
+            for (const aId of subTaskIds) {
+              this._removeRepeatCfgFromArchiveTasks(aId);
+            }
+          }
+
+          // remove repeat cfg from main task
           this._removeRepeatCfgFromArchiveTasks(id);
         }),
       ),

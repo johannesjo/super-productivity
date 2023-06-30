@@ -4,6 +4,7 @@ import {
   selectAllTaskRepeatCfgs,
   selectTaskRepeatCfgById,
   selectTaskRepeatCfgByIdAllowUndefined,
+  selectTaskRepeatCfgByParentId,
   selectTaskRepeatCfgsDueOnDay,
   selectTaskRepeatCfgsWithStartTime,
 } from './store/task-repeat-cfg.reducer';
@@ -29,7 +30,7 @@ import { take } from 'rxjs/operators';
 import { TaskService } from '../tasks/task.service';
 import { TODAY_TAG } from '../tag/tag.const';
 import { Task, TaskPlanned } from '../tasks/task.model';
-import { addTask, scheduleTask } from '../tasks/store/task.actions';
+import { addSubTask, addTask, scheduleTask } from '../tasks/store/task.actions';
 import { WorkContextService } from '../work-context/work-context.service';
 import { WorkContextType } from '../work-context/work-context.model';
 import { isValidSplitTime } from '../../util/is-valid-split-time';
@@ -64,6 +65,10 @@ export class TaskRepeatCfgService {
 
   getTaskRepeatCfgById$(id: string): Observable<TaskRepeatCfg> {
     return this._store$.pipe(select(selectTaskRepeatCfgById, { id }));
+  }
+
+  getTaskRepeatCfgsByParentId$(id: string): Observable<TaskRepeatCfg[]> {
+    return this._store$.pipe(select(selectTaskRepeatCfgByParentId, { id }));
   }
 
   getTaskRepeatCfgByIdAllowUndefined$(id: string): Observable<TaskRepeatCfg | undefined> {
@@ -178,6 +183,7 @@ export class TaskRepeatCfgService {
   Promise<
     (
       | ReturnType<typeof addTask>
+      | ReturnType<typeof addSubTask>
       | ReturnType<typeof updateTaskRepeatCfg>
       | ReturnType<typeof scheduleTask>
     )[]
@@ -205,9 +211,17 @@ export class TaskRepeatCfgService {
 
     const createNewActions: (
       | ReturnType<typeof addTask>
+      | ReturnType<typeof addSubTask>
       | ReturnType<typeof updateTaskRepeatCfg>
       | ReturnType<typeof scheduleTask>
-    )[] = [
+    )[] = [];
+
+    // get subtasks if they exist
+    const taskRepeatSubTasks = (
+      await this.taskRepeatCfgs$.pipe(take(1)).toPromise()
+    ).filter((aSubTask) => aSubTask.parentId === taskRepeatCfg.id);
+
+    createNewActions.push(
       addTask({
         task: {
           ...task,
@@ -221,6 +235,27 @@ export class TaskRepeatCfgService {
         isAddToBacklog: false,
         isAddToBottom,
       }),
+    );
+
+    // actions to generate all sub tasks for parent task
+    taskRepeatSubTasks.forEach((aRepeatSubTask) => {
+      const subTask = this._getSubTaskRepeatTemplate(aRepeatSubTask, task.id);
+
+      console.log('GETTING SB TASK', subTask);
+
+      createNewActions.push(
+        addSubTask({
+          task: {
+            ...subTask,
+            created: targetDayDate,
+          },
+          parentId: task.id,
+        }),
+      );
+    });
+
+    // update parent repeatCfg
+    createNewActions.push(
       updateTaskRepeatCfg({
         taskRepeatCfg: {
           id: taskRepeatCfg.id,
@@ -230,7 +265,22 @@ export class TaskRepeatCfgService {
         },
         // TODO fix type
       }),
-    ];
+    );
+
+    // update sub-items repeat cfg
+    taskRepeatSubTasks.forEach((aRepeatSubTask) => {
+      createNewActions.push(
+        updateTaskRepeatCfg({
+          taskRepeatCfg: {
+            id: aRepeatSubTask.id,
+            changes: {
+              lastTaskCreation: targetDayDate,
+            },
+          },
+          // TODO fix type
+        }),
+      );
+    });
 
     // Schedule if given
     if (isValidSplitTime(taskRepeatCfg.startTime) && taskRepeatCfg.remindAt) {
@@ -270,5 +320,24 @@ export class TaskRepeatCfgService {
       }),
       isAddToBottom: taskRepeatCfg.order > 0,
     };
+  }
+
+  private _getSubTaskRepeatTemplate(
+    taskRepeatCfg: TaskRepeatCfg,
+    aParentId: string,
+  ): Task {
+    const isAddToTodayAsFallback =
+      !taskRepeatCfg.projectId && !taskRepeatCfg.tagIds.length;
+    return this._taskService.createNewTaskWithDefaults({
+      title: taskRepeatCfg.title,
+      additional: {
+        repeatCfgId: taskRepeatCfg.id,
+        timeEstimate: taskRepeatCfg.defaultEstimate,
+        projectId: taskRepeatCfg.projectId,
+        tagIds: isAddToTodayAsFallback ? [TODAY_TAG.id] : taskRepeatCfg.tagIds || [],
+        notes: taskRepeatCfg.notes || '',
+        parentId: aParentId,
+      },
+    });
   }
 }

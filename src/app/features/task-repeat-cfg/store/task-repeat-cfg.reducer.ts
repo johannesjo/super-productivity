@@ -45,6 +45,17 @@ export const selectTaskRepeatCfgById = createSelector(
   },
 );
 
+export const selectTaskRepeatCfgByParentId = createSelector(
+  selectAllTaskRepeatCfgs,
+  (taskRepeatCfgs: TaskRepeatCfg[], props: { id: string }): TaskRepeatCfg[] => {
+    const cfgs = taskRepeatCfgs.filter(
+      (aTaskRepeatCfg) => aTaskRepeatCfg.parentId === props.id,
+    );
+
+    return cfgs;
+  },
+);
+
 export const selectTaskRepeatCfgsWithStartTime = createSelector(
   selectAllTaskRepeatCfgs,
   (taskRepeatCfgs: TaskRepeatCfg[]): TaskRepeatCfg[] => {
@@ -55,7 +66,12 @@ export const selectTaskRepeatCfgsWithStartTime = createSelector(
 export const selectTaskRepeatCfgsSortedByTitleAndProject = createSelector(
   selectAllTaskRepeatCfgs,
   (taskRepeatCfgs: TaskRepeatCfg[]): TaskRepeatCfg[] => {
-    return taskRepeatCfgs.sort((a, b) => {
+    // we only want main tasks, no sub tasks
+    const mainTaskRepeatCfgs = taskRepeatCfgs.filter(
+      (aTaskRepeatCfg) => aTaskRepeatCfg.parentId === null,
+    );
+
+    return mainTaskRepeatCfgs.sort((a, b) => {
       if (a.projectId !== b.projectId) {
         if (a.projectId === null) {
           return -1;
