@@ -241,8 +241,6 @@ export class TaskRepeatCfgService {
     taskRepeatSubTasks.forEach((aRepeatSubTask) => {
       const subTask = this._getSubTaskRepeatTemplate(aRepeatSubTask, task.id);
 
-      console.log('GETTING SB TASK', subTask);
-
       createNewActions.push(
         addSubTask({
           task: {
