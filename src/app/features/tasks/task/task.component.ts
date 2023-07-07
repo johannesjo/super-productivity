@@ -875,23 +875,6 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
       }
     }
 
-    // move focus up
-    if (
-      (!isShiftOrCtrlPressed && ev.key === 'ArrowUp') ||
-      checkKeyCombo(ev, keys.selectPreviousTask)
-    ) {
-      ev.preventDefault();
-      this.focusPrevious();
-    }
-    // move focus down
-    if (
-      (!isShiftOrCtrlPressed && ev.key === 'ArrowDown') ||
-      checkKeyCombo(ev, keys.selectNextTask)
-    ) {
-      ev.preventDefault();
-      this.focusNext();
-    }
-
     // collapse sub tasks
     if (ev.key === 'ArrowLeft' || checkKeyCombo(ev, keys.collapseSubTasks)) {
       const hasSubTasks = this.task.subTasks && (this.task.subTasks as any).length > 0;
@@ -929,12 +912,35 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
       ev.stopPropagation();
       ev.preventDefault();
       // timeout required to let changes take place @TODO hacky
-      setTimeout(this.focusSelf.bind(this), 50);
+      setTimeout(this.focusSelf.bind(this));
+      setTimeout(this.focusSelf.bind(this), 10);
+      return;
     }
     if (checkKeyCombo(ev, keys.moveTaskDown)) {
       this._taskService.moveDown(this.task.id, this.task.parentId, this.isBacklog);
+      // timeout required to let changes take place @TODO hacky
+      setTimeout(this.focusSelf.bind(this));
+      setTimeout(this.focusSelf.bind(this), 10);
       ev.stopPropagation();
       ev.preventDefault();
+      return;
+    }
+
+    // move focus up
+    if (
+      (!isShiftOrCtrlPressed && ev.key === 'ArrowUp') ||
+      checkKeyCombo(ev, keys.selectPreviousTask)
+    ) {
+      ev.preventDefault();
+      this.focusPrevious();
+    }
+    // move focus down
+    if (
+      (!isShiftOrCtrlPressed && ev.key === 'ArrowDown') ||
+      checkKeyCombo(ev, keys.selectNextTask)
+    ) {
+      ev.preventDefault();
+      this.focusNext();
     }
   }
 }
