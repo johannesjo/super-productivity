@@ -96,10 +96,9 @@ export const selectTaskRepeatCfgsDueOnDay = createSelector(
           return false;
         }
 
-        let dateToCheckDate = new Date(dateToCheckTimestamp);
-        let numberOfDatesToCheck = getDiffInDays(
+        const numberOfDatesToCheck = getDiffInDays(
           new Date(taskRepeatCfg.lastTaskCreation),
-          dateToCheckDate,
+          new Date(dateToCheckTimestamp),
         );
 
         switch (taskRepeatCfg.repeatCycle) {
@@ -111,7 +110,11 @@ export const selectTaskRepeatCfgsDueOnDay = createSelector(
               throw new Error('Invalid repeatEvery value given for DAILY');
             }
             const startDateDate = new Date(taskRepeatCfg.startDate);
-            while (numberOfDatesToCheck > 0) {
+            for (let i = 0; i < numberOfDatesToCheck; i++) {
+              const dateToCheckDate = new Date(
+                // prettier-ignore
+                dateToCheckTimestamp - (i * 24 * 60 * 60 * 1000),
+              );
               const diffInDays = getDiffInDays(startDateDate, dateToCheckDate);
 
               if (
@@ -120,9 +123,6 @@ export const selectTaskRepeatCfgsDueOnDay = createSelector(
                 diffInDays % taskRepeatCfg.repeatEvery === 0
               )
                 return true;
-
-              dateToCheckDate.setDate(dateToCheckDate.getDate() - 1);
-              numberOfDatesToCheck -= 1;
             }
             return false;
           }
@@ -136,7 +136,11 @@ export const selectTaskRepeatCfgsDueOnDay = createSelector(
             }
             const startDateDate = new Date(taskRepeatCfg.startDate);
 
-            while (numberOfDatesToCheck > 0) {
+            for (let i = 0; i < numberOfDatesToCheck; i++) {
+              const dateToCheckDate = new Date(
+                // prettier-ignore
+                dateToCheckTimestamp - (i * 24 * 60 * 60 * 1000),
+              );
               const todayDay = dateToCheckDate.getDay();
               const todayDayStr: keyof TaskRepeatCfg = TASK_REPEAT_WEEKDAY_MAP[todayDay];
               const diffInWeeks = getDiffInWeeks(startDateDate, dateToCheckDate);
@@ -148,9 +152,6 @@ export const selectTaskRepeatCfgsDueOnDay = createSelector(
                 taskRepeatCfg[todayDayStr]
               )
                 return true;
-
-              dateToCheckDate.setDate(dateToCheckDate.getDate() - 1);
-              numberOfDatesToCheck -= 1;
             }
             return false;
           }
@@ -163,7 +164,11 @@ export const selectTaskRepeatCfgsDueOnDay = createSelector(
               throw new Error('Invalid repeatEvery value given for MONTHLY');
             }
             const startDateDate = new Date(taskRepeatCfg.startDate);
-            while (numberOfDatesToCheck > 0) {
+            for (let i = 0; i < numberOfDatesToCheck; i++) {
+              const dateToCheckDate = new Date(
+                // prettier-ignore
+                dateToCheckTimestamp - (i * 24 * 60 * 60 * 1000),
+              );
               const isCreationDayThisMonth =
                 dateToCheckDate.getDate() === startDateDate.getDate();
 
@@ -175,9 +180,6 @@ export const selectTaskRepeatCfgsDueOnDay = createSelector(
                 diffInMonth % taskRepeatCfg.repeatEvery === 0
               )
                 return true;
-
-              dateToCheckDate.setDate(dateToCheckDate.getDate() - 1);
-              numberOfDatesToCheck -= 1;
             }
             return false;
           }
@@ -190,7 +192,11 @@ export const selectTaskRepeatCfgsDueOnDay = createSelector(
               throw new Error('Invalid repeatEvery value given for YEARLY');
             }
             const startDateDate = new Date(taskRepeatCfg.startDate);
-            while (numberOfDatesToCheck > 0) {
+            for (let i = 0; i < numberOfDatesToCheck; i++) {
+              const dateToCheckDate = new Date(
+                // prettier-ignore
+                dateToCheckTimestamp - (i * 24 * 60 * 60 * 1000),
+              );
               const isRightMonthAndDay =
                 dateToCheckDate.getDate() === startDateDate.getDate() &&
                 dateToCheckDate.getMonth() === startDateDate.getMonth();
@@ -205,9 +211,6 @@ export const selectTaskRepeatCfgsDueOnDay = createSelector(
                 diffInYears % taskRepeatCfg.repeatEvery === 0
               )
                 return true;
-
-              dateToCheckDate.setDate(dateToCheckDate.getDate() - 1);
-              numberOfDatesToCheck -= 1;
             }
             return false;
           }
