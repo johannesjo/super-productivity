@@ -9,7 +9,7 @@
     "D_INITIAL": {
       "TITLE": "Witam w v{{nr}}"
     },
-    "UPDATE_MAIN_MODEL": "Super Productivity posiada ważną aktualizację! WYmagana jest migracja danych, która spowoduje że starsze wersje aplikacji nie będą mogły ich używać.",
+    "UPDATE_MAIN_MODEL": "Super Productivity posiada ważną aktualizację! Wymagana jest migracja danych, która spowoduje że starsze wersje aplikacji nie będą mogły ich używać.",
     "UPDATE_MAIN_MODEL_NO_UPDATE": "No model update chosen. Please note that you either have to downgrade to the last version, if you do not want to perform the model upgrade.",
     "UPDATE_WEB_APP": "Nowa wersja dostępna. Załadować ją?"
   },
@@ -1241,7 +1241,7 @@
     "ADD_MORE": "Dodaj więcej",
     "ADD_SCHEDULED_FOR_TODAY": "Dodaj zaplanowane zadania na dzisiaj ({{nr}})",
     "ADD_SCHEDULED_FOR_TOMORROW": "Dodaj zaplanowane zadania na jutro ({{nr}})",
-    "ADD_SOME_TASKS": "Dodaj zadania do dzisiejzego planu!",
+    "ADD_SOME_TASKS": "Dodaj zadania do dzisiejszego planu!",
     "COMPLETED_TASKS": "Zakończone Zadania",
     "ESTIMATE_REMAINING": "Pozostało zaplanowanego czasu:",
     "FINISH_DAY": "Zakończ Dzień",
