@@ -1410,7 +1410,7 @@
     "E_DATETIME": "Der eingegebene Wert ist keine Datums- / Uhrzeitangabe!",
     "E_MAX": "Sollte nicht größer als {{val}} sein",
     "E_MAX_LENGTH": "Darf maximal {{val}} Zeichen lang sein",
-    "E_MIN": "Sollte kleiner als {{val}} sein",
+    "E_MIN": "Darf nicht kleiner als {{val}} sein",
     "E_MIN_LENGTH": "Sollte mindestens {{val}} Zeichen lang sein",
     "E_PATTERN": "Ungültige Eingabe",
     "E_REQUIRED": "Dieses Feld wird benötigt"
