@@ -1,3 +1,48 @@
+# [7.14.0](https://github.com/johannesjo/super-productivity/compare/v7.13.1...v7.14.0) (2023-07-28)
+
+### Bug Fixes
+
+- buttons not being centered ([96920a9](https://github.com/johannesjo/super-productivity/commit/96920a97596ce9367229994be081409d14617f19))
+- **dominaMode:** default value being wrong ([95b88ea](https://github.com/johannesjo/super-productivity/commit/95b88ead78d969a8c7cdbc11996e7d571b082092))
+- **dropbox:** avoid updating last active when updating token from refresh token to avoid initial sync conflict ([21971bd](https://github.com/johannesjo/super-productivity/commit/21971bddaa6549bd4f031ba634490f26d8885cc4))
+- empty notes should never be displayed in preview mode ([79b891f](https://github.com/johannesjo/super-productivity/commit/79b891f84745a94a136168796efbdc87579c259d))
+- github error behaviour when repository is not configured correctly [#2582](https://github.com/johannesjo/super-productivity/issues/2582) ([4ef1cf6](https://github.com/johannesjo/super-productivity/commit/4ef1cf6fe3ef67758ca1e473c0c211dc3d130c64))
+- **github:** load all button cut off text ([71d87ba](https://github.com/johannesjo/super-productivity/commit/71d87ba6872e27fb807ff283e25ed9663ae14783))
+- **i18n:** some fixes for russian translate ([899ac12](https://github.com/johannesjo/super-productivity/commit/899ac12ab687baf71d5558411590f6ec30b4d0bb))
+- linux category [#2635](https://github.com/johannesjo/super-productivity/issues/2635) ([a74b801](https://github.com/johannesjo/super-productivity/commit/a74b801a0f0970c8fbee38d667436f7e15ffd6df))
+- not all weekdays being visible [#2581](https://github.com/johannesjo/super-productivity/issues/2581) ([1c4c28c](https://github.com/johannesjo/super-productivity/commit/1c4c28c61d8ed0ab8aea8ce4227df5fa35dc924a))
+- **pomodoro:** missleading wording ([edb5df6](https://github.com/johannesjo/super-productivity/commit/edb5df67ff8326b507e7e71c3330c71050e20ad9))
+- remove custom date parsers since not working and unit tests are failing ([12a385e](https://github.com/johannesjo/super-productivity/commit/12a385e27bec9fbb095c570a9b076b25f90b7355))
+- remove sidebar transition to avoid problem [#2533](https://github.com/johannesjo/super-productivity/issues/2533) ([c9db586](https://github.com/johannesjo/super-productivity/commit/c9db58610f4818d7468ddd546031a89691cec67f))
+- repeat label shown when repeat for today was created yesterday ([040aa86](https://github.com/johannesjo/super-productivity/commit/040aa86695efd5b7929a90b3281fcb3a032f3171))
+- **takeABreak:** don't show fullscreen when counter is reset ([0d06c83](https://github.com/johannesjo/super-productivity/commit/0d06c83f26bbeed93f74ef101d84f018f07c5bf4))
+- task move up/down shortcut not always working as expected ([13c03b1](https://github.com/johannesjo/super-productivity/commit/13c03b1ddf6a1e00f78d401f009d6544b466dd15))
+
+### Features
+
+- add configurable break reminder sound ([bdab131](https://github.com/johannesjo/super-productivity/commit/bdab131141b9c4b76a20f52f826cfd2dc0b119a2))
+- auto add today tag also when marking tasks as done ([a2d8811](https://github.com/johannesjo/super-productivity/commit/a2d8811c3349b9b0de4caef8be3c3fdda7f2fd7c))
+- **disableBacklog:** add simple setting ([98dd7c9](https://github.com/johannesjo/super-productivity/commit/98dd7c99665d46d750a94390db1c927e43da348b))
+- **disableBacklog:** copy over all backlog tasks to today list if disable is set ([d6708d8](https://github.com/johannesjo/super-productivity/commit/d6708d8d18e6cc34af5da4b07c78f4af205a9ed2))
+- **disableBacklog:** prevent adding new tasks to backlog ([2e77783](https://github.com/johannesjo/super-productivity/commit/2e777837637a5b86b62db441712217fd7a1b1899))
+- do not mark repeatable tasks as done when creating new instances ([cbc0ff4](https://github.com/johannesjo/super-productivity/commit/cbc0ff4c35cdbd0ef487da83e10f64580d07594b))
+- **dominaMode:** add migration ([2695fff](https://github.com/johannesjo/super-productivity/commit/2695fffb1efe4f2066b0462a099a4a60b9a04ba7))
+- **dominaMode:** add translations ([89d57a9](https://github.com/johannesjo/super-productivity/commit/89d57a9c545a3acea8e21bdcd0fc26ad21adc295))
+- **dominaMode:** don't show for snap release ([e7ed4e6](https://github.com/johannesjo/super-productivity/commit/e7ed4e694df23b46765916323b783525c852313b))
+- **dominaMode:** make feature configurable ([8e9151a](https://github.com/johannesjo/super-productivity/commit/8e9151a812cc17a7cdf23a6fb91c570b996684e2))
+- **dominaMode:** outline feature and make basics work ([d93c15d](https://github.com/johannesjo/super-productivity/commit/d93c15dc95add42c8cf88a8117271263ecd521cd))
+- **i18n:** add missing translations for new input ([2981371](https://github.com/johannesjo/super-productivity/commit/2981371adb82f458cdda3485dc67f6cb7f488313))
+- only show move to backlog button when a tasks project has backlog enabled ([1e2ea3b](https://github.com/johannesjo/super-productivity/commit/1e2ea3b99610e15808d6b8d79d121aca4e8a8d95))
+- **procrastination:** add info about procrastination triggers ([9efed16](https://github.com/johannesjo/super-productivity/commit/9efed167a9d2b89be4f2389d1b58fec39a68732e))
+- remove backlog count from menu for projects without one ([6c9c1fe](https://github.com/johannesjo/super-productivity/commit/6c9c1fea0f2f1278baa75ed7dbfb4d9c3ef4c6ce))
+- reverse project backlog setting from disabled to enabled ([a51f850](https://github.com/johannesjo/super-productivity/commit/a51f85009557b5895c0c080a2e4db388e7cbe3e8))
+- set default syncfile path for webdav [#2334](https://github.com/johannesjo/super-productivity/issues/2334) ([db603d5](https://github.com/johannesjo/super-productivity/commit/db603d5d95212c6af35f9c0780c4f21f25d4199f))
+- show badge with created for past instances of repeatable task ([08ec744](https://github.com/johannesjo/super-productivity/commit/08ec744e6e8cc6bbdb150750c2158a2f0e2dcf29))
+- simplify done sound setting to single select ([43ccc36](https://github.com/johannesjo/super-productivity/commit/43ccc364b0b34037db76f1a56292369c15abd4cb))
+- **takeABreak:** delay full screen blocker to give time after using long idle to task ([d2f39d2](https://github.com/johannesjo/super-productivity/commit/d2f39d26e25e48f17164b77a4a3d21f25f896e70))
+- update procrstination info ([a619d7b](https://github.com/johannesjo/super-productivity/commit/a619d7bb035c8a6f5905534a4bc85f252faf6892))
+- update working to reflect that not every project has a backlog anymore ([257ac11](https://github.com/johannesjo/super-productivity/commit/257ac116bc4421b70963fcd95321ee46900df056))
+
 ## [7.13.2](https://github.com/johannesjo/super-productivity/compare/v7.13.1...v7.13.2) (2023-04-14)
 
 ### Bug Fixes
