@@ -61,7 +61,7 @@ export const DEFAULT_GLOBAL_CONFIG: GlobalConfigState = {
     isEnabled: false,
     interval: 5 * minute,
     volume: 75,
-    text: 'Your current task is: ${taskTitle}',
+    text: 'Your current task is: ${currentTaskTitle}',
   },
   pomodoro: {
     isEnabled: false,
