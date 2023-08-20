@@ -132,6 +132,12 @@ jobs:
       - name: Test Unit
         run: npm run test
 
+      - uses: browser-actions/setup-chrome@v1
+        id: setup-chrome
+      - run: |
+          echo Installed chromium version: ${{ steps.setup-chrome.outputs.chrome-version }}
+          ${{ steps.setup-chrome.outputs.chrome-path }} --version
+
       - name: Test E2E
         run: npm run e2e
 
