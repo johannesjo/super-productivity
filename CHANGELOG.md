@@ -1,3 +1,5 @@
+## [7.14.1](https://github.com/johannesjo/super-productivity/compare/v7.14.0...v7.14.1) (2023-08-21)
+
 # [7.14.0](https://github.com/johannesjo/super-productivity/compare/v7.13.1...v7.14.0) (2023-07-28)
 
 ### Bug Fixes

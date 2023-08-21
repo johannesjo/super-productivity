@@ -1,6 +1,6 @@
 {
   "name": "superProductivity",
-  "version": "7.14.0",
+  "version": "7.14.1",
   "description": "Super Productivity is an advanced todo list app with integrated Timeboxing and time tracking capabilities. It also comes with integrations for Jira, Gitlab, GitHub and Open Project.",
   "main": "./electron/main.js",
   "author": "Johannes Millan <contact@super-productivity.com> (http://super-productivity.com)",
