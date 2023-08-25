@@ -1,4 +1,4 @@
-import { app, ipcMain } from 'electron';
+import { app, ipcMain, IpcMainEvent } from 'electron';
 import {
   existsSync,
   mkdirSync,
@@ -60,7 +60,7 @@ export function initBackupAdapter(backupDir: string): void {
 }
 
 // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
-function backupData(ev: Event, data: AppDataComplete): void {
+function backupData(ev: IpcMainEvent, data: AppDataComplete): void {
   if (!existsSync(BACKUP_DIR)) {
     mkdirSync(BACKUP_DIR);
   }
