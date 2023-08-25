@@ -842,6 +842,28 @@
       }
     },
     "TASK_REPEAT": {
+        "ADD_INFO_PANEL": {
+        "CUSTOM": "Configurar repetición personalizada",
+        "CUSTOM_AND_TIME": "Personalizada, {{timeStr}}",
+        "CUSTOM_WEEKLY": "{{daysStr}}",
+        "CUSTOM_WEEKLY_AND_TIME": "{{daysStr}}, {{timeStr}}",
+        "DAILY": "Todos los días",
+        "DAILY_AND_TIME": "Todos los días, {{timeStr}}",
+        "EVERY_X_DAILY": "Cada {{x}} día(s)",
+        "EVERY_X_DAILY_AND_TIME": "Cada {{x}} día(s), {{timeStr}}",
+        "EVERY_X_MONTHLY": "Cada {{x}} mes",
+        "EVERY_X_MONTHLY_AND_TIME": "Cada {{x}} mes(es), {{timeStr}}",
+        "EVERY_X_YEARLY": "Cada {{x}} año(s)",
+        "EVERY_X_YEARLY_AND_TIME": "Cada {{x}} año(s), {{timeStr}}",
+        "MONTHLY_CURRENT_DATE": "Mensualmente el día {{dateDayStr}}",
+        "MONTHLY_CURRENT_DATE_AND_TIME": "Mensualmente el día {{dateDayStr}}, {{timeStr}}",
+        "MONDAY_TO_FRIDAY": "Lun-Vie",
+        "MONDAY_TO_FRIDAY_AND_TIME": "Lun-Vie, {{timeStr}}",
+        "WEEKLY_CURRENT_WEEKDAY": "Semanalmente el {{weekdayStr}}",
+        "WEEKLY_CURRENT_WEEKDAY_AND_TIME": "Semanalmente el {{weekdayStr}}, {{timeStr}}",
+        "YEARLY_CURRENT_DATE": "Anualmente el {{dayAndMonthStr}}",
+        "YEARLY_CURRENT_DATE_AND_TIME": "Anualmente el {{dayAndMonthStr}}, {{timeStr}}"
+      },
       "D_CONFIRM_REMOVE": {
         "MSG": "Eliminar la configuración de repetición convertirá todas las instancias anteriores de esta tarea a tareas normales. Estás seguro que deseas continuar",
         "OK": "Quitar completamente"
@@ -1301,7 +1323,11 @@
   },
   "SCHEDULE": {
     "NO_SCHEDULED": "Actualmente no hay tareas programadas. Puede programar una tarea seleccionando \"Programar tarea\" en el menú de contexto de la tarea. Para abrirlo, haga clic en los 3 puntos pequeños a la derecha de una tarea.",
+    "NO_REPEATABLE_TASKS": "Actualmente no hay tareas repetidas. Puede programar una tarea seleccionando \"Repetir tarea\" en el panel lateral de la tarea. Para abrirlo, haga clic en el icono más a la derecha que aparece al pasar el cursor sobre una tarea (o simplemente toque la tarea en el dispositivo móvil).",
+    "REPEATED_TASKS": "Tareas repetidas",
+    "SCHEDULED_TASKS": "Tareas programadas",
     "START_TASK": "Inicie la tarea ahora y elimine el recordatorio"
+
   },
   "THEMES": {
     "SELECT_THEME": "Selecciona el tema",
@@ -1339,7 +1365,10 @@
     "COMPLETED_TASKS": "Tareas completadas",
     "ESTIMATE_REMAINING": "Estimación restante:",
     "FINISH_DAY": "Fin de día",
-    "HELP_PROCRASTINATION": "Ayuda, !estoy procrastinando!",
+    "FINISH_DAY_TOOLTIP": "Evalúa tu día, mueve todas las tareas realizadas al archivo (opcionalmente) y/o planifica tu día siguiente.",
+    "FINISH_DAY_FOR_PROJECT": "Fin de día pra este Proyecto",
+    "FINISH_DAY_FOR_TAG": "Fin de día pra esta Etiqueta",
+    "HELP_PROCRASTINATION": "Ayuda, ¡estoy procrastinando!",
     "NO_COMPLETED_TASKS": "Actualmente no hay tareas completadas.",
     "NO_PLANNED_TASKS": "No hay tareas planificadas",
     "READY_TO_WORK": "¡Listo para trabajar!",
