@@ -104,7 +104,8 @@ export class ContentEditableOnClickDirective implements OnInit, OnDestroy {
       if (data && data.length) {
         ev.stopPropagation();
         ev.preventDefault();
-        const text = data.trim();
+        // NOTE: we replace all linebreaks since they are not supported for tasks and cause text selection issues
+        const text = data.split('\n').join(' ').trim();
         this._insertAtCursor(el, text);
         this._setValueFromElement();
       }
@@ -229,6 +230,8 @@ export class ContentEditableOnClickDirective implements OnInit, OnDestroy {
 
     // reset caret to proper offset
     const range = document.createRange();
+    console.log(el.childNodes[0], start, newText.length);
+
     range.setStart(el.childNodes[0], start + newText.length);
     range.collapse(true);
 
