@@ -94,16 +94,6 @@ export const GITLAB_CONFIG_FORM: LimitedFormlyFieldConfig<GitlabCfg>[] = [
     },
   },
   {
-    key: 'filter',
-    type: 'input',
-    hideExpression: (model: any) => !model.isEnabled,
-    templateOptions: {
-      type: 'text',
-      label: T.F.GITLAB.FORM.FILTER,
-      description: T.F.GITLAB.FORM.FILTER_DESCRIPTION,
-    },
-  },
-  {
     key: 'gitlabBaseUrl',
     type: 'input',
     hideExpression: (model: any) => !model.isEnabled,
@@ -144,6 +134,16 @@ export const GITLAB_CONFIG_FORM: LimitedFormlyFieldConfig<GitlabCfg>[] = [
     hideExpression: (model: any) => !model.isEnabled,
     templateOptions: {
       label: T.F.GITLAB.FORM.FILTER_USER,
+    },
+  },
+  {
+    key: 'filter',
+    type: 'input',
+    hideExpression: (model: any) => !model.isEnabled,
+    templateOptions: {
+      type: 'text',
+      label: T.F.GITLAB.FORM.FILTER,
+      description: T.F.GITLAB.FORM.FILTER_DESCRIPTION,
     },
   },
 ];
