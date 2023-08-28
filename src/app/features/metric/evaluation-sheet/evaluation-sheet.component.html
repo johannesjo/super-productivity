@@ -58,21 +58,21 @@
     </div>
 
     <chip-list-input
-      (addItem)="addImprovement($event)"
-      (addNewItem)="addNewImprovement($event)"
-      (removeItem)="removeImprovement($event)"
-      [label]="T.F.METRIC.EVAL_FORM.IMPROVEMENTS|translate"
-      [model]="metricForDay.improvements"
-      [suggestions]="(improvementService.improvements$|async)"
-    ></chip-list-input>
-
-    <chip-list-input
       (addItem)="addObstruction($event)"
       (addNewItem)="addNewObstruction($event)"
       (removeItem)="removeObstruction($event)"
       [label]="T.F.METRIC.EVAL_FORM.OBSTRUCTIONS|translate"
       [model]="metricForDay.obstructions"
       [suggestions]="(obstructionService.obstructions$|async)"
+    ></chip-list-input>
+
+    <chip-list-input
+      (addItem)="addImprovement($event)"
+      (addNewItem)="addNewImprovement($event)"
+      (removeItem)="removeImprovement($event)"
+      [label]="T.F.METRIC.EVAL_FORM.IMPROVEMENTS|translate"
+      [model]="metricForDay.improvements"
+      [suggestions]="(improvementService.improvements$|async)"
     ></chip-list-input>
 
     <chip-list-input
