@@ -1,3 +1,15 @@
+## [7.14.3](https://github.com/johannesjo/super-productivity/compare/v7.14.2...v7.14.3) (2023-09-01)
+
+### Bug Fixes
+
+- IndexSizeError on copying multiline text [#2738](https://github.com/johannesjo/super-productivity/issues/2738) ([08a84cd](https://github.com/johannesjo/super-productivity/commit/08a84cd6b46f8092f9f3f1126d8b8ba6608eddd7))
+
+### Features
+
+- **evaluation:** put improvements after obstructions ([76f7535](https://github.com/johannesjo/super-productivity/commit/76f75353bfb8da6ceea95297bc717df575baa4d5))
+- move new gitlab feature down in form ([1f45c47](https://github.com/johannesjo/super-productivity/commit/1f45c471df3030ed98924da205ba8f0d8e2443f3))
+- **pomodoro:** do not stop time tracking before manual confirmation ([cd64701](https://github.com/johannesjo/super-productivity/commit/cd647019c17a754fef69310569ee53c7551d0c4a))
+
 ## [7.14.2](https://github.com/johannesjo/super-productivity/compare/v7.14.1...v7.14.2) (2023-08-21)
 
 ## [7.14.1](https://github.com/johannesjo/super-productivity/compare/v7.14.0...v7.14.1) (2023-08-21)
