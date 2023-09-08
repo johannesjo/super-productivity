@@ -99,7 +99,7 @@ export class AppComponent implements OnDestroy {
     this._snackService.open({
       ico: 'lightbulb',
       config: {
-        duration: 5000,
+        duration: 7000,
       },
       msg:
         '<strong>' +
