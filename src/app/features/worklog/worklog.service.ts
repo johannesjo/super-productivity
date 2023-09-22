@@ -219,11 +219,8 @@ export class WorklogService {
       createEmptyEntity();
 
     // console.time('calcTime');
-    const { completeStateForWorkContext, unarchivedIds } = getCompleteStateForWorkContext(
-      workContext,
-      taskState,
-      archive,
-    );
+    const { completeStateForWorkContext, nonArchiveTaskIds } =
+      getCompleteStateForWorkContext(workContext, taskState, archive);
     // console.timeEnd('calcTime');
 
     const startEnd = {
@@ -234,7 +231,7 @@ export class WorklogService {
     if (completeStateForWorkContext) {
       const { worklog, totalTimeSpent } = mapArchiveToWorklog(
         completeStateForWorkContext,
-        unarchivedIds,
+        nonArchiveTaskIds,
         startEnd,
         this._dateAdapter.getFirstDayOfWeek(),
       );
@@ -259,11 +256,8 @@ export class WorklogService {
       createEmptyEntity();
 
     // console.time('calcTime');
-    const { completeStateForWorkContext, unarchivedIds } = getCompleteStateForWorkContext(
-      workContext,
-      taskState,
-      archive,
-    );
+    const { completeStateForWorkContext, nonArchiveTaskIds } =
+      getCompleteStateForWorkContext(workContext, taskState, archive);
     // console.timeEnd('calcTime');
 
     const startEnd = {
@@ -274,7 +268,7 @@ export class WorklogService {
     if (completeStateForWorkContext) {
       return mapArchiveToWorklogWeeks(
         completeStateForWorkContext,
-        unarchivedIds,
+        nonArchiveTaskIds,
         startEnd,
         this._dateAdapter.getFirstDayOfWeek(),
       );

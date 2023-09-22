@@ -6,7 +6,7 @@ export interface WorklogDataForDay {
   timeSpent: number;
   task: WorklogTask;
   parentId: string;
-  isNoRestore?: boolean;
+  isNonArchiveTask?: boolean;
 }
 
 export interface WorklogDay {

@@ -9,7 +9,7 @@ export const getCompleteStateForWorkContext = (
   archive: EntityState<Task>,
 ): {
   completeStateForWorkContext: EntityState<Task>;
-  unarchivedIds: string[];
+  nonArchiveTaskIds: string[];
 } => {
   const wid = workContext.id;
 
@@ -22,7 +22,7 @@ export const getCompleteStateForWorkContext = (
           ...taskState.entities,
         },
       },
-      unarchivedIds: taskState.ids as string[],
+      nonArchiveTaskIds: taskState.ids as string[],
     };
   }
 
@@ -47,7 +47,7 @@ export const getCompleteStateForWorkContext = (
         ...archivedEntities,
       },
     },
-    unarchivedIds,
+    nonArchiveTaskIds: unarchivedIds,
   };
 };
 
