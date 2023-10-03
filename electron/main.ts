@@ -5,6 +5,7 @@ import {
   BrowserWindow,
   globalShortcut,
   ipcMain,
+  IpcMainEvent,
   powerMonitor,
   protocol,
 } from 'electron';
@@ -313,6 +314,7 @@ appIN.on('window-all-closed', () => {
 // ---------------
 ipcMain.on(IPC.SHUTDOWN_NOW, quitApp);
 
+// TODO check
 ipcMain.on(IPC.EXEC, execWithFrontendErrorHandlerInform);
 
 ipcMain.on(IPC.LOCK_SCREEN, () => {
@@ -494,7 +496,7 @@ function showOrFocus(passedWin: BrowserWindow): void {
 }
 
 // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
-function execWithFrontendErrorHandlerInform(ev: Event, command: string): void {
+function execWithFrontendErrorHandlerInform(ev: IpcMainEvent, command: string): void {
   log('running command ' + command);
   exec(command, (err) => {
     if (err) {

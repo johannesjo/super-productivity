@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { combineLatest, EMPTY, from, Observable } from 'rxjs';
 import { SimpleMetrics } from './metric.model';
-import { map, switchMap, take } from 'rxjs/operators';
+import { delay, map, switchMap, take } from 'rxjs/operators';
 import { WorkContextType } from '../work-context/work-context.model';
 import { mapSimpleMetrics } from './metric.util';
 import { TaskService } from '../tasks/task.service';
@@ -15,6 +15,8 @@ import { WorkContextService } from '../work-context/work-context.service';
 export class ProjectMetricsService {
   simpleMetrics$: Observable<SimpleMetrics> =
     this._workContextService.activeWorkContextTypeAndId$.pipe(
+      // wait for current projectId to settle in :(
+      delay(100),
       switchMap(({ activeType, activeId }) => {
         return activeType === WorkContextType.PROJECT
           ? combineLatest([

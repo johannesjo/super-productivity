@@ -13,6 +13,6 @@ import { TaskAttachmentListComponent } from './task-attachment-list/task-attachm
     TaskAttachmentLinkDirective,
     TaskAttachmentListComponent,
   ],
-  exports: [TaskAttachmentListComponent],
+  exports: [TaskAttachmentListComponent, TaskAttachmentLinkDirective],
 })
 export class TaskAttachmentModule {}

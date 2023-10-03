@@ -264,7 +264,9 @@
         "SOURCE_GLOBAL": "All",
         "SOURCE_GROUP": "Group",
         "SOURCE_PROJECT": "Project",
-        "TOKEN": "Access Token"
+        "TOKEN": "Access Token",
+        "FILTER": "Custom Filter",
+        "FILTER_DESCRIPTION": "See https://docs.gitlab.com/ee/api/issues.html#list-issues. Multiple can be combined by &"
       },
       "FORM_SECTION": {
         "HELP": "<p>Here you can configure SuperProductivity to list open GitLab (either its the online version or a self-hosted instance) issues for a specific project in the task creation panel in the daily planning view. They will be listed as suggestions and will provide a link to the issue as well as more information about it.</p> <p>In addition you can automatically import all open issues.</p>",
@@ -861,7 +863,9 @@
         "ADD_TASK_TO_TOP_OF_TODAY": "Add task to top of list",
         "CREATE_TASK": "Create new task",
         "EXAMPLE": "Example: \"Some task title @fri 4pm +projectName #some tag #some other tag 10m/3h\"",
-        "START": "Press enter one more time to start"
+        "START": "Press enter one more time to start",
+        "TOGGLE_ADD_TO_BACKLOG_TODAY": "Toggle adding task to backlog / today's list'",
+        "TOGGLE_ADD_TOP_OR_BOTTOM": "Toggle adding task to top & bottom of list"
       },
       "B": {
         "ADD_HALF_HOUR": "Add 1/2 hour",

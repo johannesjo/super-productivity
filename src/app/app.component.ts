@@ -96,6 +96,18 @@ export class AppComponent implements OnDestroy {
     public readonly layoutService: LayoutService,
     public readonly globalThemeService: GlobalThemeService,
   ) {
+    this._snackService.open({
+      ico: 'lightbulb',
+      config: {
+        duration: 7000,
+      },
+      msg:
+        '<strong>' +
+        (window as any).productivityTips[(window as any).randomIndex][0] +
+        ':</strong> ' +
+        (window as any).productivityTips[(window as any).randomIndex][1],
+    });
+
     this._subs = this._languageService.isLangRTL.subscribe((val) => {
       this.isRTL = val;
       document.dir = this.isRTL ? 'rtl' : 'ltr';

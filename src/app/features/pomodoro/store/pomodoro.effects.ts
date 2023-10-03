@@ -163,13 +163,13 @@ export class PomodoroEffects {
     { dispatch: false },
   );
 
-  pauseTimeTrackingForPause$: Observable<unknown> = createEffect(() =>
+  pauseTimeTrackingForBreak$: Observable<unknown> = createEffect(() =>
     this._pomodoroService.isEnabled$.pipe(
       switchMap((isEnabledI) =>
         !isEnabledI
           ? EMPTY
           : this._actions$.pipe(
-              ofType(pausePomodoro, pausePomodoroBreak),
+              ofType(startPomodoroBreak),
               withLatestFrom(this.currentTaskId$),
               filter(([, currentTaskId]) => !!currentTaskId),
               mapTo(unsetCurrentTask()),

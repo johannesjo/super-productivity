@@ -132,8 +132,14 @@ jobs:
       - name: Test Unit
         run: npm run test
 
-      - name: Test E2E
-        run: npm run e2e
+      #      - uses: browser-actions/setup-chrome@v1
+      #        id: setup-chrome
+      #      - run: |
+      #          echo Installed chromium version: ${{ steps.setup-chrome.outputs.chrome-version }}
+      #          ${{ steps.setup-chrome.outputs.chrome-path }} --version
+      # Disabled because not working atm: https://github.com/johannesjo/super-productivity/actions/runs/5924016145/job/16060737982
+      #      - name: Test E2E
+      #        run: npm run e2e
 
       - name: Build Frontend & Electron
         run: npm run build
@@ -146,10 +152,10 @@ jobs:
           mac_certs: ${{ secrets.mac_certs }}
           mac_certs_password: ${{ secrets.mac_certs_password }}
           release: ${{ startsWith(github.ref, 'refs/tags/v') }}
-        env:
+#        env:
           # macOS notarization API key
-          API_KEY_ID: ${{ secrets.mac_api_key_id }}
-          API_KEY_ISSUER_ID: ${{ secrets.mac_api_key_issuer_id }}
+#          API_KEY_ID: ${{ secrets.mac_api_key_id }}
+#          API_KEY_ISSUER_ID: ${{ secrets.mac_api_key_issuer_id }}
 
   windows-bin:
     runs-on: windows-latest

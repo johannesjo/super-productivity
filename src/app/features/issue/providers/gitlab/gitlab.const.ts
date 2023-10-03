@@ -18,6 +18,7 @@ export const DEFAULT_GITLAB_CFG: GitlabCfg = {
   filterUsername: null,
   scope: 'created-by-me',
   source: 'project',
+  filter: null,
 };
 
 // NOTE: we need a high limit because git has low usage limits :(
@@ -133,6 +134,16 @@ export const GITLAB_CONFIG_FORM: LimitedFormlyFieldConfig<GitlabCfg>[] = [
     hideExpression: (model: any) => !model.isEnabled,
     templateOptions: {
       label: T.F.GITLAB.FORM.FILTER_USER,
+    },
+  },
+  {
+    key: 'filter',
+    type: 'input',
+    hideExpression: (model: any) => !model.isEnabled,
+    templateOptions: {
+      type: 'text',
+      label: T.F.GITLAB.FORM.FILTER,
+      description: T.F.GITLAB.FORM.FILTER_DESCRIPTION,
     },
   },
 ];
