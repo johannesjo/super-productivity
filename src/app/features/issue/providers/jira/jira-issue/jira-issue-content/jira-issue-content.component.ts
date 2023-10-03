@@ -49,7 +49,7 @@ export class JiraIssueContentComponent {
         ? forkJoin(
             ...issue.subtasks.map((ist: any) => {
               return this._jiraCommonInterfacesService
-                .issueLink$(ist.id as string, task.projectId as string)
+                .issueLink$(ist.key as string, task.projectId as string)
                 .pipe(
                   map((issueUrl) => ({
                     ...ist,
@@ -71,7 +71,7 @@ export class JiraIssueContentComponent {
         ? forkJoin(
             ...issue.relatedIssues.map((ist: any) => {
               return this._jiraCommonInterfacesService
-                .issueLink$(ist.id as string, task.projectId as string)
+                .issueLink$(ist.key as string, task.projectId as string)
                 .pipe(
                   map((issueUrl) => ({
                     ...ist,
