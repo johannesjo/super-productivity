@@ -176,7 +176,7 @@
     "conventional-changelog-cli": "^2.2.2",
     "cross-env": "^7.0.3",
     "detect-it": "^4.0.1",
-    "electron": "^26.3.0",
+    "electron": "^25.9.0",
     "electron-builder": "24.6.4",
     "electron-builder-notarize": "^1.5.1",
     "eslint": "^8.23.0",
