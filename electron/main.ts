@@ -288,6 +288,10 @@ appIN.on('window-all-closed', () => {
   app.quit();
   // }
 });
+process.on('uncaughtException', (err) => {
+  console.log(err);
+  process.exit(333);
+});
 
 // AUTO-UPDATER
 // ------------
@@ -401,6 +405,7 @@ function registerShowAppShortCuts(cfg: KeyboardConfig): void {
   ];
 
   if (cfg) {
+    return;
     Object.keys(cfg)
       .filter((key: string) => GLOBAL_KEY_CFG_KEYS.includes(key as keyof KeyboardConfig))
       .forEach((key: string) => {

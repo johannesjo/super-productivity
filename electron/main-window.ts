@@ -256,6 +256,16 @@ const appCloseHandler = (app: App): void => {
       });
     }
   });
+
+  mainWin.webContents.on('render-process-gone', (event, detailed) => {
+    log('!crashed, reason: ' + detailed.reason + ', exitCode = ' + detailed.exitCode);
+    if (detailed.reason == 'crashed') {
+      process.exit(detailed.exitCode);
+      // relaunch app
+      // app.relaunch({ args: process.argv.slice(1).concat(['--relaunch']) });
+      // app.exit(0);
+    }
+  });
 };
 
 const appMinimizeHandler = (app: App): void => {
