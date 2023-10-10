@@ -745,6 +745,7 @@
         "ADD_TO_PROJECT": "Добавить в проект",
         "CONVERT_TO_PARENT_TASK": "Преобразовать в родительскую задачу",
         "DELETE": "Удалить задачу",
+        "DELETE_REPEAT_INSTANCE": "Удалить задачу",
         "DROP_ATTACHMENT": "Нажмите сюда, чтобы прикрепить к \"{{title}}\"",
         "EDIT_REMINDER": "Изменить напоминание",
         "EDIT_TAGS": "Редактировать теги",
