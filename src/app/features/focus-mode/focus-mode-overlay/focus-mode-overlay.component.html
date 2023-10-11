@@ -9,24 +9,30 @@
         [mode]="'determinate'"
         [value]="focusSessionProgress"
         [strokeWidth]="20"
-        [diameter]="220"
+        [diameter]="150"
       >
       </mat-progress-spinner>
       <div class="progress-label">{{focusSessionProgress}}min</div>
     </div>
 
     <section class="controls">
-      <button mat-icon-button>
-        <mat-icon>pause</mat-icon>
+      <button
+        mat-icon-button
+        matTooltip="Cancel focus session"
+        (click)="layoutService.hideFocusModeOverlay(); taskService.setCurrentId(null)"
+      >
+        <mat-icon>close</mat-icon>
       </button>
       <button
         mat-icon-button
+        matTooltip="Finish task and select next"
         (click)="layoutService.hideFocusModeOverlay(); "
       >
         <mat-icon>done</mat-icon>
       </button>
       <button
         mat-icon-button
+        matTooltip="Get help, when procrastinating"
         (click)="layoutService.hideFocusModeOverlay()"
         routerLink="/procrastination"
       >
@@ -46,7 +52,7 @@
     ></inline-markdown>
   </div>
 
-  <div class="link-list">
+  <div class="attachment-list-wrapper">
     <task-attachment-list
       [taskId]="task.id"
       [attachments]="task.attachments"

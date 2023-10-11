@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, OnDestroy } from '@angular/core';
 import { TaskService } from '../../tasks/task.service';
 import { LayoutService } from '../../../core-ui/layout/layout.service';
 import { Subject } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
+import { first, takeUntil } from 'rxjs/operators';
 import { GlobalConfigService } from '../../config/global-config.service';
 import { TaskCopy } from '../../tasks/task.model';
 
@@ -29,12 +29,16 @@ export class FocusModeOverlayComponent implements OnDestroy {
       .pipe(takeUntil(this._onDestroy$))
       .subscribe((misc) => (this.defaultTaskNotes = misc.taskNotesTpl));
     this.taskService.currentTask$.pipe(takeUntil(this._onDestroy$)).subscribe((task) => {
-      if (!task) {
-        this.taskService.startFirstStartable();
-      }
-
       this.task = task;
     });
+
+    this.taskService.currentTask$
+      .pipe(first(), takeUntil(this._onDestroy$))
+      .subscribe((task) => {
+        if (!task) {
+          this.taskService.startFirstStartable();
+        }
+      });
   }
 
   ngOnDestroy(): void {

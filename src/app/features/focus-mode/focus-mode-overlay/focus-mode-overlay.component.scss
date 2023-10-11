@@ -22,6 +22,11 @@
 
 .controls {
   margin-top: $s * 3;
+  visibility: hidden;
+
+  :host:hover & {
+    visibility: visible;
+  }
 }
 
 .wrapper {
@@ -42,4 +47,20 @@
   transform: translate(-50%, -50%);
   font-size: 20px;
   font-weight: bold;
+}
+
+.notes-panel {
+  //border: 1px solid #fff;
+  border-radius: 4px;
+  margin: $s * 2;
+  margin-top: $s * 3;
+}
+
+.attachment-list-wrapper {
+  margin-top: $s * 3;
+  visibility: hidden;
+
+  :host:hover & {
+    visibility: visible;
+  }
 }
