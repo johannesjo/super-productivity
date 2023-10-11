@@ -49,6 +49,7 @@ import { FinishDayBeforeCloseModule } from './features/finish-day-before-close/f
 import { AndroidModule } from './features/android/android.module';
 import { WelcomeModule } from './features/welcome/welcome.module';
 import { DominaModeModule } from './features/domina-mode/domina-mode.module';
+import { FocusModeModule } from './features/focus-mode/focus-mode.module';
 
 // NOTE: export required for aot to work
 export const createTranslateLoader = (http: HttpClient): TranslateHttpLoader =>
@@ -83,6 +84,7 @@ export const createTranslateLoader = (http: HttpClient): TranslateHttpLoader =>
     SearchBarModule,
     FinishDayBeforeCloseModule,
     DominaModeModule,
+    FocusModeModule,
 
     AndroidModule,
     // throws build error ...(IS_ANDROID_WEB_VIEW ? [AndroidModule] : []),

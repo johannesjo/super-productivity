@@ -26,7 +26,10 @@
     @fade
     class="backdrop"
   ></div>
-  <mat-sidenav-container [dir]="isRTL ? 'rtl' : 'ltr'">
+  <mat-sidenav-container
+    [dir]="isRTL ? 'rtl' : 'ltr'"
+    *ngIf="!(layoutService.isShowFocusModeOverlay$|async)"
+  >
     <mat-sidenav
       (closedStart)="layoutService.hideSideNav()"
       [mode]="(layoutService.isNavOver$|async) ? 'over' : 'side'"
@@ -60,6 +63,11 @@
       <global-progress-bar></global-progress-bar>
     </mat-sidenav-content>
   </mat-sidenav-container>
+
+  <focus-mode-overlay
+    @fade
+    *ngIf="layoutService.isShowFocusModeOverlay$|async"
+  ></focus-mode-overlay>
 </ng-container>
 
 <div

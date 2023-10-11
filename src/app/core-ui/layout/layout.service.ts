@@ -1,12 +1,15 @@
 import { Injectable } from '@angular/core';
 import {
   hideAddTaskBar,
+  hideFocusModeOverlay,
   hideNotes,
   hideSearchBar,
   hideSideNav,
   showAddTaskBar,
+  showFocusModeOverlay,
   showSearchBar,
   toggleAddTaskBar,
+  toggleFocusModeOverlay,
   toggleSearchBar,
   toggleShowNotes,
   toggleSideNav,
@@ -16,6 +19,7 @@ import { select, Store } from '@ngrx/store';
 import {
   LayoutState,
   selectIsShowAddTaskBar,
+  selectIsShowFocusModeOverlay,
   selectIsShowNotes,
   selectIsShowSearchBar,
   selectIsShowSideNav,
@@ -40,6 +44,9 @@ export class LayoutService {
 
   isShowAddTaskBar$: Observable<boolean> = this._store$.pipe(
     select(selectIsShowAddTaskBar),
+  );
+  isShowFocusModeOverlay$: Observable<boolean> = this._store$.pipe(
+    select(selectIsShowFocusModeOverlay),
   );
   isShowSearchBar$: Observable<boolean> = this._store$.pipe(
     select(selectIsShowSearchBar),
@@ -132,5 +139,17 @@ export class LayoutService {
 
   hideNotes(): void {
     this._store$.dispatch(hideNotes());
+  }
+
+  showFocusModeOverlay(): void {
+    this._store$.dispatch(showFocusModeOverlay());
+  }
+
+  hideFocusModeOverlay(): void {
+    this._store$.dispatch(hideFocusModeOverlay());
+  }
+
+  toggleFocusModeOverlay(): void {
+    this._store$.dispatch(toggleFocusModeOverlay());
   }
 }

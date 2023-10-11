@@ -129,4 +129,8 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
   isCounterRunning(counters: SimpleCounter[]): boolean {
     return !!(counters && counters.find((counter) => counter.isOn));
   }
+
+  enableFocusMode(): void {
+    this.layoutService.showFocusModeOverlay();
+  }
 }

@@ -1,0 +1,45 @@
+@import '../../../../variables';
+
+:host {
+  position: fixed;
+  z-index: $z-focus-mode-overlay;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  text-align: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+}
+
+.task-title {
+  font-size: 28px;
+  line-height: 1;
+  margin-bottom: $s * 3;
+}
+
+.controls {
+  margin-top: $s * 3;
+}
+
+.wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+}
+
+.progress-wrapper {
+  position: relative;
+}
+
+.progress-label {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 20px;
+  font-weight: bold;
+}

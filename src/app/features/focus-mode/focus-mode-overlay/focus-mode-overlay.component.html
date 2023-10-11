@@ -1,0 +1,55 @@
+<ng-container *ngIf="(taskService.currentTask$|async) as task">
+  <!--<ng-container>-->
+  <div class="wrapper">
+    <div class="task-title">{{task.title}}</div>
+
+    <div class="progress-wrapper">
+      <mat-progress-spinner
+        class="example-margin"
+        [mode]="'determinate'"
+        [value]="focusSessionProgress"
+        [strokeWidth]="20"
+        [diameter]="220"
+      >
+      </mat-progress-spinner>
+      <div class="progress-label">{{focusSessionProgress}}min</div>
+    </div>
+
+    <section class="controls">
+      <button mat-icon-button>
+        <mat-icon>pause</mat-icon>
+      </button>
+      <button
+        mat-icon-button
+        (click)="layoutService.hideFocusModeOverlay(); "
+      >
+        <mat-icon>done</mat-icon>
+      </button>
+      <button
+        mat-icon-button
+        (click)="layoutService.hideFocusModeOverlay()"
+        routerLink="/procrastination"
+      >
+        <mat-icon>flash_on</mat-icon>
+      </button>
+    </section>
+  </div>
+
+  <div class="notes-panel">
+    <inline-markdown
+      (blur)="isFocusNotes=false"
+      (blurred)="isFocusNotes=false"
+      (changed)="changeTaskNotes($event); isFocusNotes=false"
+      [isFocus]="isFocusNotes"
+      [isShowControls]="true"
+      [model]="task.notes|| defaultTaskNotes"
+    ></inline-markdown>
+  </div>
+
+  <div class="link-list">
+    <task-attachment-list
+      [taskId]="task.id"
+      [attachments]="task.attachments"
+    ></task-attachment-list>
+  </div>
+</ng-container>

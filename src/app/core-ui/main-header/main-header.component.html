@@ -89,12 +89,10 @@
     <!--    </button>-->
 
     <button
-      [matTooltip]="T.WW.HELP_PROCRASTINATION|translate"
-      class="hide-xs"
       mat-icon-button
-      routerLink="/procrastination"
+      (click)="enableFocusMode()"
     >
-      <mat-icon>flash_on</mat-icon>
+      <mat-icon>center_focus_strong</mat-icon>
     </button>
 
     <div class="play-btn-wrapper">
