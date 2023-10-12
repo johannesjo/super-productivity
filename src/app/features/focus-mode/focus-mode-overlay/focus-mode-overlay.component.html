@@ -1,100 +1,24 @@
-<ng-container *ngIf="(taskService.currentTask$|async) as task">
-  <button
-    class="close-btn"
-    mat-icon-button
-    matTooltip="Cancel focus session"
-    (click)="cancelFocusSession()"
-  >
-    <mat-icon>close</mat-icon>
-  </button>
+<button
+  class="close-btn"
+  mat-icon-button
+  matTooltip="Cancel focus session"
+  (click)="cancelFocusSession()"
+>
+  <mat-icon>close</mat-icon>
+</button>
 
-  <!--<ng-container>-->
-  <div class="wrapper">
-    <div class="task-title">{{task.title}}</div>
-
-    <div class="progress-wrapper">
-      <mat-progress-spinner
-        class="example-margin"
-        [mode]="'determinate'"
-        [value]="focusSessionProgress"
-        [strokeWidth]="20"
-        [diameter]="150"
-      >
-      </mat-progress-spinner>
-
-      <div class="progress-label-wrapper">
-        <div
-          class="focus-time"
-          title="Focus time"
-        >
-          {{focusSessionProgress}}min
-        </div>
-        <div class="task-times">
-          {{task.timeSpent|msToString}}/{{task.timeEstimate|msToString}}
-        </div>
-      </div>
-    </div>
-
-    <section class="controls">
-      <!--      <button-->
-      <!--        mat-icon-button-->
-      <!--        matTooltip="Cancel focus session"-->
-      <!--        (click)="cancelFocusSession()"-->
-      <!--      >-->
-      <!--        <mat-icon>close</mat-icon>-->
-      <!--      </button>-->
-      <button
-        mat-icon-button
-        matTooltip="Finish task and select next"
-        (click)="finishCurrentTask();"
-      >
-        <mat-icon>done</mat-icon>
-      </button>
-      <button
-        mat-icon-button
-        matTooltip="Get help, when procrastinating"
-        (click)="getProcrastinationHelp()"
-      >
-        <mat-icon>flash_on</mat-icon>
-      </button>
-
-      <button
-        (click)="isShowNotes=!isShowNotes"
-        matTooltip="Show/hide task notes and attachments"
-        class="ico-btn show-additional-info-btn"
-        color=""
-        mat-icon-button
-      >
-        <mat-icon *ngIf="!isShowNotes">chat</mat-icon>
-        <mat-icon *ngIf="isShowNotes">expand_less</mat-icon>
-      </button>
-    </section>
-  </div>
-
-  <ng-container *ngIf="isShowNotes">
-    <div
-      @expand
-      class="notes-panel"
-    >
-      <inline-markdown
-        (blur)="isFocusNotes=false"
-        (blurred)="isFocusNotes=false"
-        (changed)="changeTaskNotes($event); isFocusNotes=false"
-        [isFocus]="isFocusNotes"
-        [isShowControls]="true"
-        [model]="task.notes|| defaultTaskNotes"
-      ></inline-markdown>
-    </div>
-
-    <div
-      *ngIf="task.attachments.length"
-      class="attachment-list-wrapper"
-      @expand
-    >
-      <task-attachment-list
-        [taskId]="task.id"
-        [attachments]="task.attachments"
-      ></task-attachment-list>
-    </div>
-  </ng-container>
+<ng-container [ngSwitch]="activePage">
+  <focus-mode-task-selection
+    *ngSwitchCase="FocusModePage.TaskSelection"
+    [focusModeDuration]="focusModeDuration"
+    (focusModeDurationChanged)="onFocusModeDurationChanged($event)"
+    (taskSelected)="onTaskSelected($event)"
+  ></focus-mode-task-selection>
+  <focus-mode-main
+    *ngSwitchCase="FocusModePage.Main"
+    [focusModeDuration]="focusModeDuration"
+    [focusModeElapsed]="focusModeElapsed"
+    (taskDone)="onTaskDone()"
+  ></focus-mode-main>
+  <focus-mode-task-done *ngSwitchCase="FocusModePage.TaskDone"></focus-mode-task-done>
 </ng-container>

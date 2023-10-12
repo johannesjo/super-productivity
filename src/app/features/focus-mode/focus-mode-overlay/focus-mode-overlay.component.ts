@@ -4,9 +4,9 @@ import { LayoutService } from '../../../core-ui/layout/layout.service';
 import { Subject } from 'rxjs';
 import { first, takeUntil } from 'rxjs/operators';
 import { GlobalConfigService } from '../../config/global-config.service';
-import { TaskCopy } from '../../tasks/task.model';
 import { Router } from '@angular/router';
 import { expandAnimation } from '../../../ui/animations/expand.ani';
+import { FocusModePage } from '../focus-mode.const';
 
 @Component({
   selector: 'focus-mode-overlay',
@@ -16,13 +16,11 @@ import { expandAnimation } from '../../../ui/animations/expand.ani';
   animations: [expandAnimation],
 })
 export class FocusModeOverlayComponent implements OnDestroy {
-  task: TaskCopy | null = null;
-  isFocusNotes = false;
-  isShowNotes = false;
-  // defaultTaskNotes: string = '';
-  defaultTaskNotes: string = '';
-  focusSessionProgress: number = 66;
   _onDestroy$ = new Subject<void>();
+  activePage: FocusModePage | undefined;
+  FocusModePage: typeof FocusModePage = FocusModePage;
+  focusModeDuration: number = 60 * 25 * 1000;
+  focusModeElapsed: number = 60 * 12 * 1000;
 
   constructor(
     private readonly _globalConfigService: GlobalConfigService,
@@ -30,18 +28,15 @@ export class FocusModeOverlayComponent implements OnDestroy {
     public readonly layoutService: LayoutService,
     private _router: Router,
   ) {
-    this._globalConfigService.misc$
-      .pipe(takeUntil(this._onDestroy$))
-      .subscribe((misc) => (this.defaultTaskNotes = misc.taskNotesTpl));
-    this.taskService.currentTask$.pipe(takeUntil(this._onDestroy$)).subscribe((task) => {
-      this.task = task;
-    });
-
+    // TODO this needs to work differently
     this.taskService.currentTask$
       .pipe(first(), takeUntil(this._onDestroy$))
       .subscribe((task) => {
         if (!task) {
-          this.taskService.startFirstStartable();
+          // this.taskService.startFirstStartable();
+          this.activePage = FocusModePage.TaskSelection;
+        } else {
+          this.activePage = FocusModePage.Main;
         }
       });
   }
@@ -51,32 +46,25 @@ export class FocusModeOverlayComponent implements OnDestroy {
     this._onDestroy$.complete();
   }
 
-  changeTaskNotes($event: string): void {
-    if (
-      !this.defaultTaskNotes ||
-      !$event ||
-      $event.trim() !== this.defaultTaskNotes.trim()
-    ) {
-      if (this.task === null) {
-        throw new Error('Task is not loaded');
-      }
-      this.taskService.update(this.task.id, { notes: $event });
+  onTaskDone(): void {
+    this.activePage = FocusModePage.TaskDone;
+  }
+
+  onTaskSelected(task: Task | string): void {
+    console.log({ task });
+
+    if (typeof task === 'string') {
+    } else {
+      this.activePage = FocusModePage.Main;
     }
+  }
+
+  onFocusModeDurationChanged(duration: number): void {
+    this.focusModeDuration = duration;
   }
 
   cancelFocusSession(): void {
     this.layoutService.hideFocusModeOverlay();
     this.taskService.setCurrentId(null);
   }
-
-  finishCurrentTask(): void {
-    this.layoutService.hideFocusModeOverlay();
-  }
-
-  getProcrastinationHelp(): void {
-    this.layoutService.hideFocusModeOverlay();
-    this._router.navigateByUrl('/procrastination');
-  }
-
-  toggleNotes(): void {}
 }

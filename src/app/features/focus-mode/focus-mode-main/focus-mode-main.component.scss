@@ -1,0 +1,84 @@
+@import '../../../../variables';
+
+.task-title {
+  text-align: center;
+  font-size: 28px;
+  line-height: 1;
+  margin-top: $s * 2;
+  margin-bottom: $s * 2;
+}
+
+.controls {
+  margin-top: $s * 2;
+  visibility: hidden;
+
+  :host:hover & {
+    visibility: visible;
+  }
+
+  button {
+    width: 56px;
+    height: 56px;
+
+    mat-icon {
+      font-size: 32px !important; //make it bigger, the default being 24px.
+      width: 32px;
+      height: 32px;
+    }
+  }
+}
+
+.wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+}
+
+.progress-wrapper {
+  position: relative;
+}
+
+.progress-label-wrapper {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+
+  .focus-time {
+    font-size: 20px;
+    font-weight: bold;
+  }
+
+  .task-times {
+    font-size: 12px;
+  }
+}
+
+.notes-panel {
+  border-radius: 4px;
+  margin: $s * 2;
+  margin-top: $s * 2;
+  align-self: center;
+  max-width: 100%;
+  width: 600px;
+
+  inline-markdown {
+    @include noteStyle;
+
+    ::ng-deep .markdown-wrapper {
+      overflow-y: auto;
+      max-height: 40vh;
+    }
+  }
+}
+
+.attachment-list-wrapper {
+  margin-top: $s * 2;
+  visibility: hidden;
+
+  :host:hover & {
+    visibility: visible;
+  }
+}

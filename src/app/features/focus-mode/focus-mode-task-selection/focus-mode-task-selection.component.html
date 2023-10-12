@@ -1,0 +1,25 @@
+<form
+  (submit)="onSubmit($event)"
+  novalidate
+>
+  <p>Select focus session duration</p>
+  <input-duration-slider
+    [model]="focusModeDuration"
+    (modelChange)="onFocusModeDurationChanged($event)"
+  ></input-duration-slider>
+  <br />
+  <br />
+  <br />
+  <p>Select a task to focus on</p>
+  <select-task (taskChange)="onTaskChange($event)"></select-task>
+  <br />
+  <br />
+  <br />
+  <button
+    type="submit"
+    color="primary"
+    mat-raised-button
+  >
+    Start Focus Session
+  </button>
+</form>
