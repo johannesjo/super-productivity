@@ -7,14 +7,15 @@
   right: 0;
   bottom: 0;
   left: 0;
-  text-align: center;
   display: flex;
   justify-content: center;
   align-items: center;
   flex-direction: column;
+  overflow: auto;
 }
 
 .task-title {
+  text-align: center;
   font-size: 28px;
   line-height: 1;
   margin-bottom: $s * 3;
@@ -26,6 +27,17 @@
 
   :host:hover & {
     visibility: visible;
+  }
+
+  button {
+    width: 56px;
+    height: 56px;
+
+    mat-icon {
+      font-size: 32px !important; //make it bigger, the default being 24px.
+      width: 32px;
+      height: 32px;
+    }
   }
 }
 
@@ -50,15 +62,38 @@
 }
 
 .notes-panel {
-  //border: 1px solid #fff;
+  border: 1px solid #fff;
   border-radius: 4px;
   margin: $s * 2;
   margin-top: $s * 3;
+  //flex: 1;
+  align-self: center;
+  max-width: 100%;
+  width: 600px;
 }
 
 .attachment-list-wrapper {
   margin-top: $s * 3;
   visibility: hidden;
+
+  :host:hover & {
+    visibility: visible;
+  }
+}
+
+.close-btn {
+  position: absolute;
+  top: $s;
+  right: $s;
+  visibility: hidden;
+  width: 56px;
+  height: 56px;
+
+  mat-icon {
+    font-size: 32px !important; //make it bigger, the default being 24px.
+    width: 32px;
+    height: 32px;
+  }
 
   :host:hover & {
     visibility: visible;

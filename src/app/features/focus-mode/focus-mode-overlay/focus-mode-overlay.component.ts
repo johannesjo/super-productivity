@@ -5,16 +5,20 @@ import { Subject } from 'rxjs';
 import { first, takeUntil } from 'rxjs/operators';
 import { GlobalConfigService } from '../../config/global-config.service';
 import { TaskCopy } from '../../tasks/task.model';
+import { Router } from '@angular/router';
+import { expandAnimation } from '../../../ui/animations/expand.ani';
 
 @Component({
   selector: 'focus-mode-overlay',
   templateUrl: './focus-mode-overlay.component.html',
   styleUrls: ['./focus-mode-overlay.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  animations: [expandAnimation],
 })
 export class FocusModeOverlayComponent implements OnDestroy {
   task: TaskCopy | null = null;
   isFocusNotes = false;
+  isShowNotes = false;
   // defaultTaskNotes: string = '';
   defaultTaskNotes: string = '';
   focusSessionProgress: number = 66;
@@ -24,6 +28,7 @@ export class FocusModeOverlayComponent implements OnDestroy {
     private readonly _globalConfigService: GlobalConfigService,
     public readonly taskService: TaskService,
     public readonly layoutService: LayoutService,
+    private _router: Router,
   ) {
     this._globalConfigService.misc$
       .pipe(takeUntil(this._onDestroy$))
@@ -58,4 +63,20 @@ export class FocusModeOverlayComponent implements OnDestroy {
       this.taskService.update(this.task.id, { notes: $event });
     }
   }
+
+  cancelFocusSession(): void {
+    this.layoutService.hideFocusModeOverlay();
+    this.taskService.setCurrentId(null);
+  }
+
+  finishCurrentTask(): void {
+    this.layoutService.hideFocusModeOverlay();
+  }
+
+  getProcrastinationHelp(): void {
+    this.layoutService.hideFocusModeOverlay();
+    this._router.navigateByUrl('/procrastination');
+  }
+
+  toggleNotes(): void {}
 }
