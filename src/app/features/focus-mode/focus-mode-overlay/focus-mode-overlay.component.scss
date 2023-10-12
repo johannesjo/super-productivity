@@ -18,11 +18,12 @@
   text-align: center;
   font-size: 28px;
   line-height: 1;
-  margin-bottom: $s * 3;
+  margin-top: $s * 2;
+  margin-bottom: $s * 2;
 }
 
 .controls {
-  margin-top: $s * 3;
+  margin-top: $s * 2;
   visibility: hidden;
 
   :host:hover & {
@@ -52,28 +53,43 @@
   position: relative;
 }
 
-.progress-label {
+.progress-label-wrapper {
   position: absolute;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  font-size: 20px;
-  font-weight: bold;
+  text-align: center;
+
+  .focus-time {
+    font-size: 20px;
+    font-weight: bold;
+  }
+
+  .task-times {
+    font-size: 12px;
+  }
 }
 
 .notes-panel {
-  border: 1px solid #fff;
   border-radius: 4px;
   margin: $s * 2;
-  margin-top: $s * 3;
-  //flex: 1;
+  margin-top: $s * 2;
   align-self: center;
   max-width: 100%;
   width: 600px;
+
+  inline-markdown {
+    @include noteStyle;
+
+    ::ng-deep .markdown-wrapper {
+      overflow-y: auto;
+      max-height: 40vh;
+    }
+  }
 }
 
 .attachment-list-wrapper {
-  margin-top: $s * 3;
+  margin-top: $s * 2;
   visibility: hidden;
 
   :host:hover & {

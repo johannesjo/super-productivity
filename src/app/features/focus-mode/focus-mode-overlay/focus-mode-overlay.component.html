@@ -21,7 +21,18 @@
         [diameter]="150"
       >
       </mat-progress-spinner>
-      <div class="progress-label">{{focusSessionProgress}}min</div>
+
+      <div class="progress-label-wrapper">
+        <div
+          class="focus-time"
+          title="Focus time"
+        >
+          {{focusSessionProgress}}min
+        </div>
+        <div class="task-times">
+          {{task.timeSpent|msToString}}/{{task.timeEstimate|msToString}}
+        </div>
+      </div>
     </div>
 
     <section class="controls">
@@ -49,12 +60,13 @@
 
       <button
         (click)="isShowNotes=!isShowNotes"
-        matTooltip="Show/hide task notes"
+        matTooltip="Show/hide task notes and attachments"
         class="ico-btn show-additional-info-btn"
         color=""
         mat-icon-button
       >
-        <mat-icon>chat</mat-icon>
+        <mat-icon *ngIf="!isShowNotes">chat</mat-icon>
+        <mat-icon *ngIf="isShowNotes">expand_less</mat-icon>
       </button>
     </section>
   </div>
@@ -75,6 +87,7 @@
     </div>
 
     <div
+      *ngIf="task.attachments.length"
       class="attachment-list-wrapper"
       @expand
     >
