@@ -28,7 +28,7 @@
   ></div>
   <mat-sidenav-container
     [dir]="isRTL ? 'rtl' : 'ltr'"
-    *ngIf="!(layoutService.isShowFocusModeOverlay$|async)"
+    *ngIf="!(focusModeService.isShowFocusOverlay$|async)"
   >
     <mat-sidenav
       (closedStart)="layoutService.hideSideNav()"
@@ -66,7 +66,7 @@
 
   <focus-mode-overlay
     @fade
-    *ngIf="layoutService.isShowFocusModeOverlay$|async"
+    *ngIf="focusModeService.isShowFocusOverlay$|async"
   ></focus-mode-overlay>
 </ng-container>
 

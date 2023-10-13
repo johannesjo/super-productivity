@@ -1,12 +1,12 @@
 import { ChangeDetectionStrategy, Component, OnDestroy } from '@angular/core';
 import { TaskService } from '../../tasks/task.service';
-import { LayoutService } from '../../../core-ui/layout/layout.service';
 import { Subject } from 'rxjs';
 import { first, takeUntil } from 'rxjs/operators';
 import { GlobalConfigService } from '../../config/global-config.service';
 import { Router } from '@angular/router';
 import { expandAnimation } from '../../../ui/animations/expand.ani';
 import { FocusModePage } from '../focus-mode.const';
+import { FocusModeService } from '../focus-mode.service';
 
 @Component({
   selector: 'focus-mode-overlay',
@@ -25,7 +25,7 @@ export class FocusModeOverlayComponent implements OnDestroy {
   constructor(
     private readonly _globalConfigService: GlobalConfigService,
     public readonly taskService: TaskService,
-    public readonly layoutService: LayoutService,
+    private readonly _focusModeService: FocusModeService,
     private _router: Router,
   ) {
     // TODO this needs to work differently
@@ -65,7 +65,7 @@ export class FocusModeOverlayComponent implements OnDestroy {
   }
 
   cancelFocusSession(): void {
-    this.layoutService.hideFocusModeOverlay();
+    this._focusModeService.hideFocusOverlay();
     this.taskService.setCurrentId(null);
   }
 }

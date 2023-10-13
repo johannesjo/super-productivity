@@ -27,6 +27,7 @@ import { SyncProviderService } from '../../imex/sync/sync-provider.service';
 import { IS_TOUCH_ONLY } from 'src/app/util/is-touch-only';
 import { SnackService } from '../../core/snack/snack.service';
 import { NavigationEnd, Router } from '@angular/router';
+import { FocusModeService } from '../../features/focus-mode/focus-mode.service';
 
 @Component({
   selector: 'main-header',
@@ -91,6 +92,7 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
     private readonly _renderer: Renderer2,
     private readonly _snackService: SnackService,
     private readonly _router: Router,
+    private readonly _focusModeService: FocusModeService,
   ) {}
 
   ngOnDestroy(): void {
@@ -131,6 +133,6 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
   }
 
   enableFocusMode(): void {
-    this.layoutService.showFocusModeOverlay();
+    this._focusModeService.showFocusOverlay();
   }
 }

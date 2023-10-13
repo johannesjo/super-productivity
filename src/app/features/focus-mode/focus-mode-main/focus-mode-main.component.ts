@@ -13,7 +13,6 @@ import { TaskCopy } from '../../tasks/task.model';
 import { Subject } from 'rxjs';
 import { GlobalConfigService } from '../../config/global-config.service';
 import { TaskService } from '../../tasks/task.service';
-import { LayoutService } from '../../../core-ui/layout/layout.service';
 import { Router } from '@angular/router';
 import { first, takeUntil } from 'rxjs/operators';
 import { TaskAttachmentService } from '../../tasks/task-attachment/task-attachment.service';
@@ -48,7 +47,6 @@ export class FocusModeMainComponent implements OnDestroy {
   constructor(
     private readonly _globalConfigService: GlobalConfigService,
     public readonly taskService: TaskService,
-    public readonly layoutService: LayoutService,
     public readonly focusModeService: FocusModeService,
     private _router: Router,
     private _taskAttachmentService: TaskAttachmentService,
@@ -120,7 +118,7 @@ export class FocusModeMainComponent implements OnDestroy {
   }
 
   getProcrastinationHelp(): void {
-    this.layoutService.hideFocusModeOverlay();
+    this.focusModeService.hideFocusOverlay();
     this._router.navigateByUrl('/procrastination');
   }
 

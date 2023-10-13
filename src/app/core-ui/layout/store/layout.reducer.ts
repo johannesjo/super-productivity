@@ -1,14 +1,11 @@
 import {
   hideAddTaskBar,
-  hideFocusModeOverlay,
   hideNotes,
   hideSearchBar,
   hideSideNav,
   showAddTaskBar,
-  showFocusModeOverlay,
   showSearchBar,
   toggleAddTaskBar,
-  toggleFocusModeOverlay,
   toggleSearchBar,
   toggleShowNotes,
   toggleSideNav,
@@ -29,7 +26,6 @@ export interface LayoutState {
   isShowNotes: boolean;
   isShowSearchBar: boolean;
   isShowSideNav: boolean;
-  isShowFocusModeOverlay: boolean;
 }
 
 const _initialLayoutState: LayoutState = {
@@ -38,7 +34,6 @@ const _initialLayoutState: LayoutState = {
   isShowSideNav: false,
   isShowSearchBar: false,
   isShowNotes: false,
-  isShowFocusModeOverlay: false,
 };
 
 export const selectLayoutFeatureState =
@@ -47,10 +42,6 @@ export const selectLayoutFeatureState =
 export const selectIsShowAddTaskBar = createSelector(
   selectLayoutFeatureState,
   (state) => state.isShowAddTaskBar,
-);
-export const selectIsShowFocusModeOverlay = createSelector(
-  selectLayoutFeatureState,
-  (state) => state.isShowFocusModeOverlay,
 );
 
 export const selectIsShowSideNav = createSelector(
@@ -96,15 +87,6 @@ const _reducer = createReducer<LayoutState>(
   on(toggleShowNotes, (state) => ({ ...state, isShowNotes: !state.isShowNotes })),
 
   on(hideNotes, (state) => ({ ...state, isShowNotes: false })),
-
-  on(showFocusModeOverlay, (state) => ({ ...state, isShowFocusModeOverlay: true })),
-
-  on(hideFocusModeOverlay, (state) => ({ ...state, isShowFocusModeOverlay: false })),
-
-  on(toggleFocusModeOverlay, (state) => ({
-    ...state,
-    isShowFocusModeOverlay: !state.isShowFocusModeOverlay,
-  })),
 );
 
 export const layoutReducer = (

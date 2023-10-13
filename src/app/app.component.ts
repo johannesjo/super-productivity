@@ -40,6 +40,7 @@ import { ipcRenderer } from 'electron';
 import { TrackingReminderService } from './features/tracking-reminder/tracking-reminder.service';
 import { first, map, skip, take } from 'rxjs/operators';
 import { IS_MOBILE } from './util/is-mobile';
+import { FocusModeService } from './features/focus-mode/focus-mode.service';
 
 const w = window as any;
 const productivityTip: string[] = w.productivityTips && w.productivityTips[w.randomIndex];
@@ -94,6 +95,7 @@ export class AppComponent implements OnDestroy {
     public readonly imexMetaService: ImexMetaService,
     public readonly workContextService: WorkContextService,
     public readonly layoutService: LayoutService,
+    public readonly focusModeService: FocusModeService,
     public readonly globalThemeService: GlobalThemeService,
   ) {
     this._snackService.open({

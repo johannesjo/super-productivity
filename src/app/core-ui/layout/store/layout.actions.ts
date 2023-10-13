@@ -19,9 +19,3 @@ export const toggleSideNav = createAction('[Layout] Toggle SideBar');
 export const toggleShowNotes = createAction('[Layout] ToggleShow Notes');
 
 export const hideNotes = createAction('[Layout] Hide Notes');
-
-export const showFocusModeOverlay = createAction('[Layout] Show FocusModeOverlay');
-
-export const hideFocusModeOverlay = createAction('[Layout] Hide FocusModeOverlay');
-
-export const toggleFocusModeOverlay = createAction('[Layout] Toggle FocusModeOverlay');

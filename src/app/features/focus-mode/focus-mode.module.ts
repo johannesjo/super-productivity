@@ -9,6 +9,10 @@ import { FocusModeTaskSelectionComponent } from './focus-mode-task-selection/foc
 import { FocusModeTaskDoneComponent } from './focus-mode-task-done/focus-mode-task-done.component';
 import { TasksModule } from '../tasks/tasks.module';
 import { BannerModule } from '../../core/banner/banner.module';
+import { EffectsModule } from '@ngrx/effects';
+import { FocusModeEffects } from './store/focus-mode.effects';
+import { StoreModule } from '@ngrx/store';
+import { FOCUS_MODE_FEATURE_KEY, focusModeReducer } from './store/focus-mode.reducer';
 
 @NgModule({
   declarations: [
@@ -24,6 +28,8 @@ import { BannerModule } from '../../core/banner/banner.module';
     TaskAttachmentModule,
     TasksModule,
     BannerModule,
+    StoreModule.forFeature(FOCUS_MODE_FEATURE_KEY, focusModeReducer),
+    EffectsModule.forFeature([FocusModeEffects]),
   ],
   exports: [FocusModeOverlayComponent],
 })

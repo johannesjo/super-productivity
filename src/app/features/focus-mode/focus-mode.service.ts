@@ -9,6 +9,13 @@ import {
   switchMap,
   withLatestFrom,
 } from 'rxjs/operators';
+import { Store } from '@ngrx/store';
+import {
+  selectFocusSessionDuration,
+  selectIsFocusOverlayShown,
+  selectIsFocusSessionRunning,
+} from './store/focus-mode.selectors';
+import { toggleIsFocusOverlayShown } from './store/focus-mode.actions';
 
 const TICK_DURATION = 500;
 
@@ -16,14 +23,18 @@ const TICK_DURATION = 500;
   providedIn: 'root',
 })
 export class FocusModeService {
-  private _isRunning$ = of(true);
-  private _sessionDuration$ = of(1 * 60 * 1000);
+  private _isRunning$ = this._store.select(selectIsFocusSessionRunning);
+  private _sessionDuration$ = this._store.select(selectFocusSessionDuration);
+
   private _timer$: Observable<number> = interval(TICK_DURATION).pipe(
     switchMap(() => of(Date.now())),
     pairwise(),
     map(([a, b]) => b - a),
   );
 
+  isShowFocusOverlay$: Observable<boolean> = this._store.select(
+    selectIsFocusOverlayShown,
+  );
   tick$: Observable<number> = this._timer$.pipe(
     withLatestFrom(this._isRunning$),
     filter(([v, isRunning]) => isRunning),
@@ -46,7 +57,21 @@ export class FocusModeService {
     }),
   );
 
-  constructor() {
+  constructor(private _store: Store) {
     this.currentSessionTime$.subscribe((v) => console.log(`currentSessionTime$`, v));
+  }
+
+  hideFocusOverlay(): void {
+    // TODO right action
+    this._store.dispatch(toggleIsFocusOverlayShown());
+  }
+
+  toggleIsFocusOverlayShown(): void {
+    this._store.dispatch(toggleIsFocusOverlayShown());
+  }
+
+  showFocusOverlay(): void {
+    // TODO right action
+    this._store.dispatch(toggleIsFocusOverlayShown());
   }
 }
