@@ -2,6 +2,7 @@ import {
   ChangeDetectionStrategy,
   Component,
   EventEmitter,
+  HostBinding,
   HostListener,
   Input,
   OnDestroy,
@@ -17,21 +18,24 @@ import { Router } from '@angular/router';
 import { first, takeUntil } from 'rxjs/operators';
 import { TaskAttachmentService } from '../../tasks/task-attachment/task-attachment.service';
 import { T } from 'src/app/t.const';
+import { FocusModeService } from '../focus-mode.service';
+import { fadeAnimation } from '../../../ui/animations/fade.ani';
 
 @Component({
   selector: 'focus-mode-main',
   templateUrl: './focus-mode-main.component.html',
   styleUrls: ['./focus-mode-main.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  animations: [expandAnimation],
+  animations: [expandAnimation, fadeAnimation],
 })
 export class FocusModeMainComponent implements OnDestroy {
   @Input() focusModeDuration = 25 * 60 * 1000;
   @Input() focusModeElapsed = 0;
   @Output() taskDone: EventEmitter<void> = new EventEmitter();
+  @HostBinding('class.isShowNotes') isShowNotes: boolean = true;
+
   task: TaskCopy | null = null;
   isFocusNotes = false;
-  isShowNotes = true;
   isDragOver: boolean = false;
 
   // defaultTaskNotes: string = '';
@@ -45,6 +49,7 @@ export class FocusModeMainComponent implements OnDestroy {
     private readonly _globalConfigService: GlobalConfigService,
     public readonly taskService: TaskService,
     public readonly layoutService: LayoutService,
+    public readonly focusModeService: FocusModeService,
     private _router: Router,
     private _taskAttachmentService: TaskAttachmentService,
   ) {

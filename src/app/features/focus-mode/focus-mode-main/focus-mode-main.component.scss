@@ -23,10 +23,42 @@
 
 .task-title {
   text-align: center;
-  font-size: 28px;
+  font-size: 30px;
   line-height: 1;
+  margin: $s;
   margin-top: $s * 2;
-  margin-bottom: $s * 2;
+  margin-bottom: $s * 3;
+
+  :host.isShowNotes & {
+    font-size: 24px;
+    margin-top: $s * 5;
+    margin-bottom: $s * 2;
+  }
+}
+
+.progress-wrapper {
+  position: relative;
+}
+
+.progress-label-wrapper {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+
+  .focus-time {
+    font-size: 24px;
+    font-weight: bold;
+
+    :host.isShowNotes & {
+      font-size: 20px;
+    }
+  }
+
+  .task-times {
+    font-size: 12px;
+  }
 }
 
 .controls {
@@ -49,27 +81,6 @@
       width: 32px;
       height: 32px;
     }
-  }
-}
-
-.progress-wrapper {
-  position: relative;
-}
-
-.progress-label-wrapper {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  text-align: center;
-
-  .focus-time {
-    font-size: 20px;
-    font-weight: bold;
-  }
-
-  .task-times {
-    font-size: 12px;
   }
 }
 

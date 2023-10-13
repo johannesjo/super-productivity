@@ -1,14 +1,27 @@
 <ng-container *ngIf="(taskService.currentTask$|async) as task">
   <!--<ng-container>-->
-  <div class="task-title">{{task.title}}</div>
+  <div
+    class="task-title"
+    [class.smaller]="isShowNotes"
+  >
+    {{task.title}}
+  </div>
 
   <div class="progress-wrapper">
     <mat-progress-spinner
-      class="example-margin"
+      *ngIf="!isShowNotes"
       [mode]="'determinate'"
-      [value]="focusSessionProgress"
+      [value]="focusModeService.sessionProgress$|async"
       [strokeWidth]="20"
-      [diameter]="150"
+      [diameter]="150 "
+    >
+    </mat-progress-spinner>
+    <mat-progress-spinner
+      *ngIf="isShowNotes"
+      [mode]="'determinate'"
+      [value]="focusModeService.sessionProgress$|async"
+      [strokeWidth]=" 12"
+      [diameter]="110"
     >
     </mat-progress-spinner>
 
@@ -17,11 +30,12 @@
         class="focus-time"
         title="Focus time"
       >
-        {{focusModeElapsed / 60000}}min
+        <!--        {{focusModeElapsed / 60000}}min-->
+        {{(focusModeService.currentSessionTime$|async|msToMinuteClockString)}}
       </div>
-      <div class="task-times">
-        {{task.timeSpent|msToString}}/{{task.timeEstimate|msToString}}
-      </div>
+      <!--      <div class="task-times">-->
+      <!--        {{task.timeSpent|msToString}}/{{task.timeEstimate|msToString}}-->
+      <!--      </div>-->
     </div>
   </div>
 
@@ -79,7 +93,7 @@
     <div
       *ngIf="task.attachments.length"
       class="attachment-list-wrapper"
-      @expand
+      @fade
     >
       <task-attachment-list
         [taskId]="task.id"
