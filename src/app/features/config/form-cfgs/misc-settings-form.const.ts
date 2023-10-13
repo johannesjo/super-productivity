@@ -39,6 +39,14 @@ export const MISC_SETTINGS_FORM_CFG: ConfigFormSection<MiscConfig> = {
           },
         ]) as LimitedFormlyFieldConfig<MiscConfig>[]),
     {
+      key: 'isAlwaysUseFocusMode',
+      type: 'checkbox',
+      templateOptions: {
+        label: 'Always open focus mode, when tracking',
+        // label: T.GCF.MISC.IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED,
+      },
+    },
+    {
       key: 'isNotifyWhenTimeEstimateExceeded',
       type: 'checkbox',
       templateOptions: {

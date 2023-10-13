@@ -6,6 +6,7 @@ import { KeyboardConfig } from './keyboard-config.model';
 
 export type MiscConfig = Readonly<{
   isDarkMode: boolean;
+  isAlwaysUseFocusMode: boolean;
   isAutMarkParentAsDone: boolean;
   isAutoStartNextTask: boolean;
   isConfirmBeforeExit: boolean;

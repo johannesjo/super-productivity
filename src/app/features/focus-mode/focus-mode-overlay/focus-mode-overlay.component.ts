@@ -65,7 +65,7 @@ export class FocusModeOverlayComponent implements OnDestroy {
   }
 
   cancelFocusSession(): void {
-    this._focusModeService.hideFocusOverlay();
     this.taskService.setCurrentId(null);
+    this._focusModeService.hideFocusOverlay();
   }
 }

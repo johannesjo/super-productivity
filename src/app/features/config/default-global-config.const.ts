@@ -15,6 +15,7 @@ export const DEFAULT_GLOBAL_CONFIG: GlobalConfigState = {
   },
   misc: {
     isDarkMode: IS_USE_DARK_THEME_AS_DEFAULT,
+    isAlwaysUseFocusMode: false,
     isConfirmBeforeExit: false,
     isConfirmBeforeExitWithoutFinishDay: true,
     isNotifyWhenTimeEstimateExceeded: true,

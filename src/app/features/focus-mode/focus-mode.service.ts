@@ -15,7 +15,11 @@ import {
   selectIsFocusOverlayShown,
   selectIsFocusSessionRunning,
 } from './store/focus-mode.selectors';
-import { toggleIsFocusOverlayShown } from './store/focus-mode.actions';
+import {
+  hideFocusOverlay,
+  showFocusOverlay,
+  toggleIsFocusOverlayShown,
+} from './store/focus-mode.actions';
 
 const TICK_DURATION = 500;
 
@@ -61,17 +65,15 @@ export class FocusModeService {
     this.currentSessionTime$.subscribe((v) => console.log(`currentSessionTime$`, v));
   }
 
-  hideFocusOverlay(): void {
-    // TODO right action
-    this._store.dispatch(toggleIsFocusOverlayShown());
+  showFocusOverlay(): void {
+    this._store.dispatch(showFocusOverlay());
   }
 
   toggleIsFocusOverlayShown(): void {
     this._store.dispatch(toggleIsFocusOverlayShown());
   }
 
-  showFocusOverlay(): void {
-    // TODO right action
-    this._store.dispatch(toggleIsFocusOverlayShown());
+  hideFocusOverlay(): void {
+    this._store.dispatch(hideFocusOverlay());
   }
 }

@@ -28,6 +28,7 @@ import { IS_TOUCH_ONLY } from 'src/app/util/is-touch-only';
 import { SnackService } from '../../core/snack/snack.service';
 import { NavigationEnd, Router } from '@angular/router';
 import { FocusModeService } from '../../features/focus-mode/focus-mode.service';
+import { GlobalConfigService } from '../../features/config/global-config.service';
 
 @Component({
   selector: 'main-header',
@@ -88,6 +89,7 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
     public readonly layoutService: LayoutService,
     public readonly simpleCounterService: SimpleCounterService,
     public readonly syncProviderService: SyncProviderService,
+    public readonly globalConfigService: GlobalConfigService,
     private readonly _tagService: TagService,
     private readonly _renderer: Renderer2,
     private readonly _snackService: SnackService,

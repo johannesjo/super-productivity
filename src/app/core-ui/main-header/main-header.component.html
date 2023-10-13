@@ -89,7 +89,9 @@
     <!--    </button>-->
 
     <button
+      *ngIf="!(globalConfigService.misc$|async)?.isAlwaysUseFocusMode"
       mat-icon-button
+      [matTooltip]="'Enter focus mode'"
       (click)="enableFocusMode()"
     >
       <mat-icon>center_focus_strong</mat-icon>
