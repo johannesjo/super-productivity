@@ -2,6 +2,7 @@ import {
   ChangeDetectionStrategy,
   Component,
   EventEmitter,
+  HostListener,
   Input,
   OnDestroy,
   Output,
@@ -14,6 +15,8 @@ import { TaskService } from '../../tasks/task.service';
 import { LayoutService } from '../../../core-ui/layout/layout.service';
 import { Router } from '@angular/router';
 import { first, takeUntil } from 'rxjs/operators';
+import { TaskAttachmentService } from '../../tasks/task-attachment/task-attachment.service';
+import { T } from 'src/app/t.const';
 
 @Component({
   selector: 'focus-mode-main',
@@ -29,15 +32,21 @@ export class FocusModeMainComponent implements OnDestroy {
   task: TaskCopy | null = null;
   isFocusNotes = false;
   isShowNotes = false;
+  isDragOver: boolean = false;
+
   // defaultTaskNotes: string = '';
   defaultTaskNotes: string = '';
-  _onDestroy$ = new Subject<void>();
+  T: typeof T = T;
+
+  private _onDestroy$ = new Subject<void>();
+  private _dragEnterTarget?: HTMLElement;
 
   constructor(
     private readonly _globalConfigService: GlobalConfigService,
     public readonly taskService: TaskService,
     public readonly layoutService: LayoutService,
     private _router: Router,
+    private _taskAttachmentService: TaskAttachmentService,
   ) {
     this._globalConfigService.misc$
       .pipe(takeUntil(this._onDestroy$))
@@ -55,8 +64,28 @@ export class FocusModeMainComponent implements OnDestroy {
       });
   }
 
-  get focusRemaining(): number {
-    return Math.round((this.focusModeDuration - this.focusModeElapsed) / 1000 / 60);
+  @HostListener('dragenter', ['$event']) onDragEnter(ev: DragEvent): void {
+    this._dragEnterTarget = ev.target as HTMLElement;
+    ev.preventDefault();
+    ev.stopPropagation();
+    this.isDragOver = true;
+  }
+
+  @HostListener('dragleave', ['$event']) onDragLeave(ev: DragEvent): void {
+    if (this._dragEnterTarget === (ev.target as HTMLElement)) {
+      ev.preventDefault();
+      ev.stopPropagation();
+      this.isDragOver = false;
+    }
+  }
+
+  @HostListener('drop', ['$event']) onDrop(ev: DragEvent): void {
+    if (!this.task) {
+      return;
+    }
+    this._taskAttachmentService.createFromDrop(ev, this.task.id);
+    ev.stopPropagation();
+    this.isDragOver = false;
   }
 
   get focusSessionProgress(): number {

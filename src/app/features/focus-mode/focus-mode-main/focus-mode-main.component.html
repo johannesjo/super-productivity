@@ -88,4 +88,12 @@
       ></task-attachment-list>
     </div>
   </ng-container>
+
+  <div
+    *ngIf="isDragOver"
+    class="bgc-accent drag-over-msg"
+  >
+    <mat-icon>add</mat-icon>
+    {{T.F.TASK.CMP.DROP_ATTACHMENT|translate:{title: task.title} }}
+  </div>
 </ng-container>

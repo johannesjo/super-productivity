@@ -10,10 +10,13 @@
 
 .controls {
   margin-top: $s * 2;
-  visibility: hidden;
 
-  :host:hover & {
-    visibility: visible;
+  @include mq('xs') {
+    visibility: hidden;
+
+    :host:hover & {
+      visibility: visible;
+    }
   }
 
   button {
@@ -62,7 +65,11 @@
   margin-top: $s * 2;
   align-self: center;
   max-width: 100%;
-  width: 600px;
+  width: auto;
+
+  @include mq('xs') {
+    width: 600px;
+  }
 
   inline-markdown {
     @include noteStyle;
@@ -76,9 +83,28 @@
 
 .attachment-list-wrapper {
   margin-top: $s * 2;
-  visibility: hidden;
 
-  :host:hover & {
-    visibility: visible;
+  @include mq('xs') {
+    width: 600px;
+    visibility: hidden;
+
+    :host:hover & {
+      visibility: visible;
+    }
   }
+}
+
+.drag-over-msg {
+  pointer-events: none;
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  bottom: 0;
+  opacity: 1;
+  justify-content: center;
+  align-items: center;
+  font-weight: bold;
+  display: flex;
+  z-index: 31;
 }

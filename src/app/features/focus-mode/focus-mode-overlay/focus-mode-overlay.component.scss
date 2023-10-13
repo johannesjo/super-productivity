@@ -18,17 +18,20 @@
   position: absolute;
   top: $s;
   right: $s;
-  visibility: hidden;
   width: 56px;
   height: 56px;
+
+  @include mq('xs') {
+    visibility: hidden;
+
+    :host:hover & {
+      visibility: visible;
+    }
+  }
 
   mat-icon {
     font-size: 32px !important; //make it bigger, the default being 24px.
     width: 32px;
     height: 32px;
-  }
-
-  :host:hover & {
-    visibility: visible;
   }
 }
