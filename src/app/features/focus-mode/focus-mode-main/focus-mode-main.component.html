@@ -1,66 +1,64 @@
 <ng-container *ngIf="(taskService.currentTask$|async) as task">
   <!--<ng-container>-->
-  <div class="wrapper">
-    <div class="task-title">{{task.title}}</div>
+  <div class="task-title">{{task.title}}</div>
 
-    <div class="progress-wrapper">
-      <mat-progress-spinner
-        class="example-margin"
-        [mode]="'determinate'"
-        [value]="focusSessionProgress"
-        [strokeWidth]="20"
-        [diameter]="150"
+  <div class="progress-wrapper">
+    <mat-progress-spinner
+      class="example-margin"
+      [mode]="'determinate'"
+      [value]="focusSessionProgress"
+      [strokeWidth]="20"
+      [diameter]="150"
+    >
+    </mat-progress-spinner>
+
+    <div class="progress-label-wrapper">
+      <div
+        class="focus-time"
+        title="Focus time"
       >
-      </mat-progress-spinner>
-
-      <div class="progress-label-wrapper">
-        <div
-          class="focus-time"
-          title="Focus time"
-        >
-          {{focusModeElapsed / 60000}}min
-        </div>
-        <div class="task-times">
-          {{task.timeSpent|msToString}}/{{task.timeEstimate|msToString}}
-        </div>
+        {{focusModeElapsed / 60000}}min
+      </div>
+      <div class="task-times">
+        {{task.timeSpent|msToString}}/{{task.timeEstimate|msToString}}
       </div>
     </div>
-
-    <section class="controls">
-      <!--      <button-->
-      <!--        mat-icon-button-->
-      <!--        matTooltip="Cancel focus session"-->
-      <!--        (click)="cancelFocusSession()"-->
-      <!--      >-->
-      <!--        <mat-icon>close</mat-icon>-->
-      <!--      </button>-->
-      <button
-        mat-icon-button
-        matTooltip="Finish task and select next"
-        (click)="finishCurrentTask();"
-      >
-        <mat-icon>done</mat-icon>
-      </button>
-      <button
-        mat-icon-button
-        matTooltip="Get help, when procrastinating"
-        (click)="getProcrastinationHelp()"
-      >
-        <mat-icon>flash_on</mat-icon>
-      </button>
-
-      <button
-        (click)="isShowNotes=!isShowNotes"
-        matTooltip="Show/hide task notes and attachments"
-        class="ico-btn show-additional-info-btn"
-        color=""
-        mat-icon-button
-      >
-        <mat-icon *ngIf="!isShowNotes">chat</mat-icon>
-        <mat-icon *ngIf="isShowNotes">expand_less</mat-icon>
-      </button>
-    </section>
   </div>
+
+  <section class="controls">
+    <!--      <button-->
+    <!--        mat-icon-button-->
+    <!--        matTooltip="Cancel focus session"-->
+    <!--        (click)="cancelFocusSession()"-->
+    <!--      >-->
+    <!--        <mat-icon>close</mat-icon>-->
+    <!--      </button>-->
+    <button
+      mat-icon-button
+      matTooltip="Finish task and select next"
+      (click)="finishCurrentTask();"
+    >
+      <mat-icon>done</mat-icon>
+    </button>
+    <button
+      mat-icon-button
+      matTooltip="Get help, when procrastinating"
+      (click)="getProcrastinationHelp()"
+    >
+      <mat-icon>flash_on</mat-icon>
+    </button>
+
+    <button
+      (click)="isShowNotes=!isShowNotes"
+      matTooltip="Show/hide task notes and attachments"
+      class="ico-btn show-additional-info-btn"
+      color=""
+      mat-icon-button
+    >
+      <mat-icon *ngIf="!isShowNotes">chat</mat-icon>
+      <mat-icon *ngIf="isShowNotes">expand_less</mat-icon>
+    </button>
+  </section>
 
   <ng-container *ngIf="isShowNotes">
     <div

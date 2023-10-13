@@ -20,13 +20,13 @@
   right: $s;
   width: 56px;
   height: 56px;
-
-  @include mq('xs') {
+  z-index: 3;
+  @include mousePrimaryDevice {
     visibility: hidden;
+  }
 
-    :host:hover & {
-      visibility: visible;
-    }
+  :host:hover & {
+    visibility: visible;
   }
 
   mat-icon {

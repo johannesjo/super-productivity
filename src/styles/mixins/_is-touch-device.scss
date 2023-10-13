@@ -10,3 +10,15 @@
     @content;
   }
 }
+
+@mixin touchPrimaryDevice {
+  :host-context(.isTouchPrimary) & {
+    @content;
+  }
+}
+
+@mixin mousePrimaryDevice {
+  :host-context(.isMousePrimary) & {
+    @content;
+  }
+}

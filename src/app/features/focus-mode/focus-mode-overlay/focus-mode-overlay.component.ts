@@ -33,8 +33,9 @@ export class FocusModeOverlayComponent implements OnDestroy {
       .pipe(first(), takeUntil(this._onDestroy$))
       .subscribe((task) => {
         if (!task) {
-          // this.taskService.startFirstStartable();
-          this.activePage = FocusModePage.TaskSelection;
+          this.taskService.startFirstStartable();
+          this.activePage = FocusModePage.Main;
+          // this.activePage = FocusModePage.TaskSelection;
         } else {
           this.activePage = FocusModePage.Main;
         }

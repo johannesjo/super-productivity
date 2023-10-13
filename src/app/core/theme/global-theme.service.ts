@@ -16,6 +16,7 @@ import { WorkContextService } from '../../features/work-context/work-context.ser
 import { combineLatest, Observable } from 'rxjs';
 import { IS_FIREFOX } from '../../util/is-firefox';
 import { ImexMetaService } from '../../imex/imex-meta/imex-meta.service';
+import { IS_MOUSE_PRIMARY, IS_TOUCH_PRIMARY } from '../../util/is-mouse-primary';
 
 @Injectable({ providedIn: 'root' })
 export class GlobalThemeService {
@@ -182,6 +183,12 @@ export class GlobalThemeService {
       this.document.body.classList.add(BodyClass.isTouchOnly);
     } else {
       this.document.body.classList.add(BodyClass.isNoTouchOnly);
+    }
+
+    if (IS_MOUSE_PRIMARY) {
+      this.document.body.classList.add(BodyClass.isMousePrimary);
+    } else if (IS_TOUCH_PRIMARY) {
+      this.document.body.classList.add(BodyClass.isTouchPrimary);
     }
   }
 

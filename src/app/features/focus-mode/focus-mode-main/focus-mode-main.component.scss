@@ -1,5 +1,24 @@
 @import '../../../../variables';
 
+:host {
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  bottom: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+}
+
+.wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+}
+
 .task-title {
   text-align: center;
   font-size: 28px;
@@ -11,12 +30,12 @@
 .controls {
   margin-top: $s * 2;
 
-  @include mq('xs') {
+  @include mousePrimaryDevice {
     visibility: hidden;
+  }
 
-    :host:hover & {
-      visibility: visible;
-    }
+  :host:hover & {
+    visibility: visible;
   }
 
   button {
@@ -29,13 +48,6 @@
       height: 32px;
     }
   }
-}
-
-.wrapper {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  flex-direction: column;
 }
 
 .progress-wrapper {
@@ -82,14 +94,27 @@
 }
 
 .attachment-list-wrapper {
-  margin-top: $s * 2;
+  margin-top: $s;
+  max-width: 100vw;
+  padding: 0 $s;
+  overflow-x: auto;
 
-  @include mq('xs') {
-    width: 600px;
+  @include mousePrimaryDevice {
     visibility: hidden;
+  }
 
-    :host:hover & {
-      visibility: visible;
+  :host:hover & {
+    visibility: visible;
+  }
+
+  ::ng-deep ul {
+    display: block;
+    white-space: nowrap;
+    text-align: center;
+    margin: 0;
+
+    li {
+      display: inline-block;
     }
   }
 }

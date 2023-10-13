@@ -101,6 +101,9 @@ export enum BodyClass {
   isNoAdvancedFeatures = 'isNoAdvancedFeatures',
   isTouchOnly = 'isTouchOnly',
   isNoTouchOnly = 'isNoTouchOnly',
+
+  isTouchPrimary = 'isTouchPrimary',
+  isMousePrimary = 'isMousePrimary',
   isLightTheme = 'isLightTheme',
   isDarkTheme = 'isDarkTheme',
   isDisableBackgroundGradient = 'isDisableBackgroundGradient',
