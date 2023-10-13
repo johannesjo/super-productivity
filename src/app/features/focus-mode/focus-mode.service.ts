@@ -17,8 +17,8 @@ import {
 } from './store/focus-mode.selectors';
 import {
   hideFocusOverlay,
+  setFocusSessionDuration,
   showFocusOverlay,
-  toggleIsFocusOverlayShown,
 } from './store/focus-mode.actions';
 
 const TICK_DURATION = 500;
@@ -28,7 +28,7 @@ const TICK_DURATION = 500;
 })
 export class FocusModeService {
   private _isRunning$ = this._store.select(selectIsFocusSessionRunning);
-  private _sessionDuration$ = this._store.select(selectFocusSessionDuration);
+  sessionDuration$ = this._store.select(selectFocusSessionDuration);
 
   private _timer$: Observable<number> = interval(TICK_DURATION).pipe(
     switchMap(() => of(Date.now())),
@@ -45,17 +45,14 @@ export class FocusModeService {
     map(([tick]) => tick * -1),
   );
 
-  currentSessionTime$: Observable<number> = merge(
-    this._sessionDuration$,
-    this.tick$,
-  ).pipe(
+  currentSessionTime$: Observable<number> = merge(this.sessionDuration$, this.tick$).pipe(
     scan((acc, value) => {
       return value < 0 ? acc + value : value;
     }),
     shareReplay(1),
   );
   sessionProgress$: Observable<number> = this.currentSessionTime$.pipe(
-    withLatestFrom(this._sessionDuration$),
+    withLatestFrom(this.sessionDuration$),
     map(([currentTime, initialTime]) => {
       return ((initialTime - currentTime) * 100) / initialTime;
     }),
@@ -69,11 +66,11 @@ export class FocusModeService {
     this._store.dispatch(showFocusOverlay());
   }
 
-  toggleIsFocusOverlayShown(): void {
-    this._store.dispatch(toggleIsFocusOverlayShown());
-  }
-
   hideFocusOverlay(): void {
     this._store.dispatch(hideFocusOverlay());
+  }
+
+  setFocusSessionDuration(focusSessionDuration: number): void {
+    this._store.dispatch(setFocusSessionDuration({ focusSessionDuration }));
   }
 }

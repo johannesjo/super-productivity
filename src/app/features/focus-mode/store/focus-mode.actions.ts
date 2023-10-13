@@ -9,9 +9,5 @@ export const setFocusSessionRunning = createAction(
   props<{ isFocusSessionRunning: boolean }>(),
 );
 
-export const toggleIsFocusOverlayShown = createAction(
-  '[FocusMode] Toggle isFocusOverlayShown',
-);
-
 export const showFocusOverlay = createAction('[FocusMode] Show Focus Overlay');
 export const hideFocusOverlay = createAction('[FocusMode] Hide Focus Overlay');

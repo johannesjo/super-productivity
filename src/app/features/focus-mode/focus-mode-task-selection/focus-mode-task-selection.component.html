@@ -4,14 +4,6 @@
 >
   <h1>Start a focus session</h1>
 
-  <p>Select focus session duration</p>
-  <input-duration-slider
-    [model]="focusModeDuration"
-    (modelChange)="onFocusModeDurationChanged($event)"
-  ></input-duration-slider>
-  <br />
-  <br />
-  <br />
   <p>Select a task to focus on</p>
   <select-task (taskChange)="onTaskChange($event)"></select-task>
   <br />
@@ -22,6 +14,6 @@
     color="primary"
     mat-raised-button
   >
-    Start Focus Session
+    Next
   </button>
 </form>

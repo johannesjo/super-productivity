@@ -10,17 +10,25 @@
   >
     <mat-icon>close</mat-icon>
   </button>
+
   <focus-mode-task-selection
     *ngSwitchCase="FocusModePage.TaskSelection"
-    [focusModeDuration]="focusModeDuration"
-    (focusModeDurationChanged)="onFocusModeDurationChanged($event)"
     (taskSelected)="onTaskSelected($event)"
   ></focus-mode-task-selection>
+
+  <focus-mode-duration-selection
+    *ngSwitchCase="FocusModePage.DurationSelection"
+    [task]="taskService.currentTask$|async"
+    [focusModeDuration]="focusModeService.sessionDuration$|async"
+    (focusModeDurationSelected)="onFocusModeDurationSelected($event)"
+  ></focus-mode-duration-selection>
+
   <focus-mode-main
     *ngSwitchCase="FocusModePage.Main"
-    [focusModeDuration]="focusModeDuration"
+    [focusModeDuration]="focusModeService.sessionDuration$|async"
     [focusModeElapsed]="focusModeElapsed"
     (taskDone)="onTaskDone()"
   ></focus-mode-main>
+
   <focus-mode-task-done *ngSwitchCase="FocusModePage.TaskDone"></focus-mode-task-done>
 </main>

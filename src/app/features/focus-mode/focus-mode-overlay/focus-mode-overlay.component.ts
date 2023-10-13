@@ -19,13 +19,12 @@ export class FocusModeOverlayComponent implements OnDestroy {
   _onDestroy$ = new Subject<void>();
   activePage: FocusModePage | undefined;
   FocusModePage: typeof FocusModePage = FocusModePage;
-  focusModeDuration: number = 60 * 25 * 1000;
   focusModeElapsed: number = 60 * 12 * 1000;
 
   constructor(
     private readonly _globalConfigService: GlobalConfigService,
     public readonly taskService: TaskService,
-    private readonly _focusModeService: FocusModeService,
+    public readonly focusModeService: FocusModeService,
     private _router: Router,
   ) {
     // TODO this needs to work differently
@@ -33,11 +32,11 @@ export class FocusModeOverlayComponent implements OnDestroy {
       .pipe(first(), takeUntil(this._onDestroy$))
       .subscribe((task) => {
         if (!task) {
-          this.taskService.startFirstStartable();
-          this.activePage = FocusModePage.Main;
-          // this.activePage = FocusModePage.TaskSelection;
+          // this.taskService.startFirstStartable();
+          // this.activePage = FocusModePage.Main;
+          this.activePage = FocusModePage.TaskSelection;
         } else {
-          this.activePage = FocusModePage.Main;
+          this.activePage = FocusModePage.DurationSelection;
         }
       });
   }
@@ -55,17 +54,19 @@ export class FocusModeOverlayComponent implements OnDestroy {
     console.log({ task });
 
     if (typeof task === 'string') {
+      // TODO create task
     } else {
-      this.activePage = FocusModePage.Main;
+      this.activePage = FocusModePage.DurationSelection;
     }
   }
 
-  onFocusModeDurationChanged(duration: number): void {
-    this.focusModeDuration = duration;
+  onFocusModeDurationSelected(duration: number): void {
+    this.focusModeService.setFocusSessionDuration(duration);
+    this.activePage = FocusModePage.Main;
   }
 
   cancelFocusSession(): void {
     this.taskService.setCurrentId(null);
-    this._focusModeService.hideFocusOverlay();
+    this.focusModeService.hideFocusOverlay();
   }
 }

@@ -1,10 +1,4 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  EventEmitter,
-  Input,
-  Output,
-} from '@angular/core';
+import { ChangeDetectionStrategy, Component, EventEmitter, Output } from '@angular/core';
 import { Task } from '../../tasks/task.model';
 
 @Component({
@@ -14,9 +8,7 @@ import { Task } from '../../tasks/task.model';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class FocusModeTaskSelectionComponent {
-  @Input() focusModeDuration = 25 * 60 * 1000;
   @Output() taskSelected: EventEmitter<string | Task> = new EventEmitter();
-  @Output() focusModeDurationChanged: EventEmitter<number> = new EventEmitter();
 
   selectedTask: string | Task | undefined;
 
@@ -25,11 +17,6 @@ export class FocusModeTaskSelectionComponent {
   onTaskChange(taskOrNewTask: Task | string): void {
     console.log(taskOrNewTask);
     this.selectedTask = taskOrNewTask;
-  }
-
-  onFocusModeDurationChanged(duration: number): void {
-    this.focusModeDuration = duration;
-    this.focusModeDurationChanged.emit(duration);
   }
 
   onSubmit($event: SubmitEvent): void {

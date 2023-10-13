@@ -13,12 +13,14 @@ import { EffectsModule } from '@ngrx/effects';
 import { FocusModeEffects } from './store/focus-mode.effects';
 import { StoreModule } from '@ngrx/store';
 import { FOCUS_MODE_FEATURE_KEY, focusModeReducer } from './store/focus-mode.reducer';
+import { FocusModeDurationSelectionComponent } from './focus-mode-duration-selection/focus-mode-duration-selection.component';
 
 @NgModule({
   declarations: [
     FocusModeOverlayComponent,
     FocusModeMainComponent,
     FocusModeTaskSelectionComponent,
+    FocusModeDurationSelectionComponent,
     FocusModeTaskDoneComponent,
   ],
   imports: [
