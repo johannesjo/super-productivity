@@ -31,7 +31,7 @@ export class FocusModeMainComponent implements OnDestroy {
   @Output() taskDone: EventEmitter<void> = new EventEmitter();
   task: TaskCopy | null = null;
   isFocusNotes = false;
-  isShowNotes = false;
+  isShowNotes = true;
   isDragOver: boolean = false;
 
   // defaultTaskNotes: string = '';

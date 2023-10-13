@@ -10,6 +10,8 @@
   justify-content: center;
   align-items: center;
   flex-direction: column;
+  padding-top: $s * 2;
+  padding-bottom: $s * 2;
 }
 
 .wrapper {
@@ -71,24 +73,59 @@
   }
 }
 
+.notes-and-attachments {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
 .notes-panel {
   border-radius: 4px;
   margin: $s * 2;
-  margin-top: $s * 2;
-  align-self: center;
+  //margin-top: $s * 2;
   max-width: 100%;
   width: auto;
+  flex-grow: 1;
+  overflow: hidden;
+  min-height: 60px;
 
-  @include mq('xs') {
+  @include mq(xs) {
     width: 600px;
   }
 
   inline-markdown {
+    max-height: 100%;
+    overflow-y: auto;
     @include noteStyle;
+    text-align: right;
 
     ::ng-deep .markdown-wrapper {
-      overflow-y: auto;
-      max-height: 40vh;
+      text-align: left;
+      max-height: 100%;
+      height: 300px !important;
+      height: 100% !important;
+    }
+
+    ::ng-deep .controls {
+      position: sticky;
+      display: inline-block;
+    }
+
+    ::ng-deep textarea {
+      background: inherit;
+      color: inherit;
+      border: none;
+      box-sizing: border-box;
+      word-wrap: break-word;
+      display: block;
+      resize: none;
+      min-height: inherit;
+      overflow: auto;
+      padding: $s $s * 2;
+
+      &:focus {
+        outline: none;
+      }
     }
   }
 }
@@ -98,6 +135,7 @@
   max-width: 100vw;
   padding: 0 $s;
   overflow-x: auto;
+  min-height: 111px;
 
   @include mousePrimaryDevice {
     visibility: hidden;

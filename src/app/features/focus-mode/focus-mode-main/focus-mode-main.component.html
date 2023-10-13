@@ -60,11 +60,12 @@
     </button>
   </section>
 
-  <ng-container *ngIf="isShowNotes">
-    <div
-      @expand
-      class="notes-panel"
-    >
+  <div
+    class="notes-and-attachments"
+    *ngIf="isShowNotes"
+    @expand
+  >
+    <div class="notes-panel">
       <inline-markdown
         (blur)="isFocusNotes=false"
         (blurred)="isFocusNotes=false"
@@ -85,7 +86,7 @@
         [attachments]="task.attachments"
       ></task-attachment-list>
     </div>
-  </ng-container>
+  </div>
 
   <div
     *ngIf="isDragOver"
