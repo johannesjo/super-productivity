@@ -1,13 +1,15 @@
-<button
-  class="close-btn"
-  mat-icon-button
-  matTooltip="Cancel focus session"
-  (click)="cancelFocusSession()"
->
-  <mat-icon>close</mat-icon>
-</button>
-
-<ng-container [ngSwitch]="activePage">
+<header>
+  <banner></banner>
+</header>
+<main [ngSwitch]="activePage">
+  <button
+    class="close-btn"
+    mat-icon-button
+    matTooltip="Cancel focus session"
+    (click)="cancelFocusSession()"
+  >
+    <mat-icon>close</mat-icon>
+  </button>
   <focus-mode-task-selection
     *ngSwitchCase="FocusModePage.TaskSelection"
     [focusModeDuration]="focusModeDuration"
@@ -21,4 +23,4 @@
     (taskDone)="onTaskDone()"
   ></focus-mode-main>
   <focus-mode-task-done *ngSwitchCase="FocusModePage.TaskDone"></focus-mode-task-done>
-</ng-container>
+</main>

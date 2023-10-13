@@ -8,6 +8,7 @@ import { FocusModeMainComponent } from './focus-mode-main/focus-mode-main.compon
 import { FocusModeTaskSelectionComponent } from './focus-mode-task-selection/focus-mode-task-selection.component';
 import { FocusModeTaskDoneComponent } from './focus-mode-task-done/focus-mode-task-done.component';
 import { TasksModule } from '../tasks/tasks.module';
+import { BannerModule } from '../../core/banner/banner.module';
 
 @NgModule({
   declarations: [
@@ -16,7 +17,14 @@ import { TasksModule } from '../tasks/tasks.module';
     FocusModeTaskSelectionComponent,
     FocusModeTaskDoneComponent,
   ],
-  imports: [CommonModule, UiModule, RouterModule, TaskAttachmentModule, TasksModule],
+  imports: [
+    CommonModule,
+    UiModule,
+    RouterModule,
+    TaskAttachmentModule,
+    TasksModule,
+    BannerModule,
+  ],
   exports: [FocusModeOverlayComponent],
 })
 export class FocusModeModule {}
