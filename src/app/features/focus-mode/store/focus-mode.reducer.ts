@@ -23,10 +23,13 @@ export const initialState: State = {
 export const focusModeReducer = createReducer(
   initialState,
 
-  on(FocusModeActions.setFocusSessionActivePage, (state, { focusActivePage }) => ({
-    ...state,
-    focusActivePage,
-  })),
+  on(
+    FocusModeActions.setFocusSessionActivePage,
+    (state, { focusActivePage: focusSessionActivePage }) => ({
+      ...state,
+      focusSessionActivePage,
+    }),
+  ),
   on(FocusModeActions.setFocusSessionDuration, (state, { focusSessionDuration }) => ({
     ...state,
     focusSessionDuration,

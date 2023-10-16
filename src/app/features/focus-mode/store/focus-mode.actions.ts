@@ -2,7 +2,7 @@ import { createAction, props } from '@ngrx/store';
 import { FocusModePage } from '../focus-mode.const';
 
 export const setFocusSessionActivePage = createAction(
-  '[FocusMode] Set Focus Session Duration',
+  '[FocusMode] Set Focus Active Page',
   props<{ focusActivePage: FocusModePage }>(),
 );
 
