@@ -1,4 +1,15 @@
 {
+  "ANDROID": {
+    "NOTIFICATIONS": {
+      "SYNC_CONFLICT_TITLE": "Houve um conflito de sincronização",
+      "SYNC_CONFLICT_MSG": "Por favor, cheque de decida oque fazer."
+    },
+    "PERMANENT_NOTIFICATION_MSGS": {
+      "INITIAL": "Aplicativo sendo executado em segundo plano para permitir a sincronização, se ativado",
+      "NO_ACTIVE_TASKS": "Nenhuma tarefa ativa",
+      "SYNCING": "Sincronizando"
+    }
+  },
   "APP": {
     "B_INSTALL": {
       "IGNORE": "Ignorar",
@@ -157,12 +168,45 @@
         "DESCRIPTION": "Descrição",
         "LABELS": "Etiquetas",
         "MARK_AS_CHECKED": "Marcar atualizações como verificadas",
+        "PROJECT": "Projeto",
         "STATUS": "Estado",
         "SUMMARY": "Resumo",
         "WRITE_A_COMMENT": "Escreva um comentário"
       },
       "S": {
         "ERR_UNKNOWN": "Gitea: Erro desconhecido {{statusCode}} {{errorMsg}}. Limit de uso da api excedido?"
+      }
+    },
+    "REDMINE": {
+      "DIALOG_INITIAL": {
+        "TITLE": "Configurar Redmine para projeto"
+      },
+      "FORM": {
+        "PROJECT_ID": "Identificador do projeto",
+        "PROJECT_ID_DESCRIPTION": "Pode ser encontrado como parte da url, ao visualizar o projeto no Navegador.",
+        "HOST": "Hospedar (e.g.: https://redmine.org)",
+        "API_KEY": "Chave de acesso API",
+        "SCOPE": "Escopo",
+        "SCOPE_ALL": "Todos",
+        "SCOPE_ASSIGNED": "Definido para mim",
+        "SCOPE_CREATED": "Criado por mim",
+        "IS_AUTO_POLL": "Pesquisar automaticamente problemas importados do Redmine em busca de alterações",
+        "IS_SEARCH_ISSUES_FROM_REDMINE": "Mostrar problemas do redmine como sugestões ao adicionar novas tarefas",
+        "IS_AUTO_IMPORT_ISSUES": "Adicionar problemas abertos automaticamente do redmine"
+      },
+      "FORM_SECTION": {
+        "TITLE": "Redmine",
+        "HELP": "<p>Aqui você pode configurar o SuperProductivity para listar problemas abertos do Redmine (seja a versão online ou uma instância auto-hospedada) para um projeto específico no painel de criação de tarefas na visualização de planejamento diário. Eles serão listados como sugestões e fornecerão um link para o problema, bem como mais informações sobre ele.</p><p>Além disso, você pode importar automaticamente todos os problemas em aberto.</p>"
+      },
+      "ISSUE_CONTENT": {
+        "AUTHOR": "Autor",
+        "STATUS": "Status",
+        "PRIORITY": "Prioridade",
+        "DESCRIPTION": "Descrição",
+        "MARK_AS_CHECKED": "Marcar atualizações como checadas"
+      },
+      "S": {
+        "ERR_UNKNOWN": "Redmine: Erro desconhecido {{statusCode}} {{errorMsg}}."
       }
     },
     "GITHUB": {
@@ -176,7 +220,8 @@
         "IS_SEARCH_ISSUES_FROM_GITHUB": "Mostrar issues do GitHub como sugestões quando adicionar novas tarefas",
         "REPO": "\"username/repositoryName\" para o repositório git que você deseja rastrear",
         "TOKEN": "Token de acesso",
-        "TOKEN_DESCRIPTION": "Necessário para acesso ao repositório privado"
+        "TOKEN_DESCRIPTION": "Necessário para acesso ao repositório privado",
+        "IS_ASSIGNEE_FILTER": "Filtrar problemas atribuídos a mim"
       },
       "FORM_SECTION": {
         "HELP": "<p>Aqui você pode configurar o SuperProductivity para listar os problemas abertos do GitHub para um repositório específico no painel de criação de tarefas na visualização de planejamento diário. Eles serão listados como sugestões e fornecerão um link para o problema, além de mais informações sobre ele. </p> <p> Além disso, você pode adicionar e sincronizar automaticamente todos os problemas em aberto no seu log de tarefas.</p>",
@@ -187,13 +232,17 @@
         "AT": "em",
         "DESCRIPTION": "Descrição",
         "LABELS": "Etiquetas",
+        "LAST_COMMENT": "Último comentário",
+        "LOAD_ALL_COMMENTS": "Carregar todos os {{nr}} comentários",
+        "LOAD_DESCRIPTION_AND_ALL_COMMENTS": "Carregar descrição e todos os comentários",
         "MARK_AS_CHECKED": "Marcar atualizações como checadas",
         "STATUS": "Status",
         "SUMMARY": "Índice",
         "WRITE_A_COMMENT": "Comentar"
       },
       "S": {
-        "ERR_UNKNOWN": "GitHub: Erro desconhecido {{statusCode}} {{errorMsg}}. Limite de taxa de API excedido?"
+        "ERR_UNKNOWN": "GitHub: Erro desconhecido {{statusCode}} {{errorMsg}}. Limite de taxa de API excedido?",
+        "CONFIG_ERROR": "GitHub: Erro ao mapear dados. O nome do seu repositório está correto?"
       }
     },
     "GITLAB": {
@@ -215,7 +264,9 @@
         "SOURCE_GLOBAL": "Todos",
         "SOURCE_GROUP": "grupo",
         "SOURCE_PROJECT": "projeto",
-        "TOKEN": "Token de acesso"
+        "TOKEN": "Token de acesso",
+        "FILTER": "Filtro customizado",
+        "FILTER_DESCRIPTION": "Consulte https://docs.gitlab.com/ee/api/issues.html#list-issues. Vários podem ser combinados por &"
       },
       "FORM_SECTION": {
         "HELP": "<p> Aqui você pode configurar o SuperProductivity para listar problemas abertos do GitLab (seja a versão on-line ou uma instância auto-hospedada) para um projeto específico no painel de criação de tarefas na exibição de planejamento diário. Eles serão listados como sugestões e fornecerão um link para o problema, além de mais informações sobre o assunto. </p> <p> Além disso, você pode adicionar e sincronizar automaticamente todos os problemas em aberto no backlog de tarefas. </p>",
@@ -234,6 +285,15 @@
       },
       "S": {
         "ERR_UNKNOWN": "GitLab: Erro desconhecido {{statusCode}} {{errorMsg}}"
+      }
+    },
+    "DOMINA_MODE": {
+      "FORM": {
+        "HELP": "Repete a frase configurada a cada X ao monitorar o tempo de uma tarefa.",
+        "L_INTERVAL": "Intervalo para repetir frase",
+        "L_TEXT": "Texto",
+        "L_TEXT_DESCRIPTION": "Ex.: \"Trabalhar em ${currentTaskTitle}!\"",
+        "TITLE": "Modo Domina"
       }
     },
     "GOOGLE": {
@@ -384,8 +444,10 @@
         "LIST_OF_CHANGES": "Lista de mudanças",
         "MARK_AS_CHECKED": "Marcar atualizações como checadas",
         "ON": "em",
+        "RELATED": "Relacionado",
         "STATUS": "Status",
         "STORY_POINTS": "Story Points",
+        "SUB_TASKS": "Sub Tarefas",
         "SUMMARY": "Indíce",
         "WORKLOG": "Log de Trabalho",
         "WRITE_A_COMMENT": "Comentar"
@@ -463,7 +525,11 @@
       "D_ADD": {
         "NOTE_LABEL": "Digite algum texto para salvar como nota ..."
       },
-      "EDIT_FULLSCREEN": "Editar em tela cheia",
+      "D_FULLSCREEN": {
+        "VIEW_TEXT_ONLY": "Ver como texto não analisado",
+        "VIEW_SPLIT": "Ver markdown analisado e não analisado em visualização dividida",
+        "VIEW_PARSED": "Ver como marcação analisada (não editável)"
+      },
       "NOTES_CMP": {
         "ADD_BTN": "Adicionar nova nota",
         "DROP_TO_ADD": "Solte aqui para adicionar nova nota",
@@ -557,13 +623,17 @@
       "FINISH_SESSION_X": "Você terminou a sessão com sucesso <strong>{{nr}}</strong>!",
       "NOTIFICATION": {
         "BREAK_X_START": "Pomodoro: Pausa {{nr}} iniciada!",
+        "BREAK_TIME": "Pomodoro: Hora do intervalo {{nr}}!",
         "NO_TASKS": "Você precisa adicionar tarefas antes que o cronômetro Pomodoro possa iniciar.",
         "SESSION_X_START": "Pomodoro: Sessão {{nr}} iniciada!"
       },
       "S": {
-        "SESSION_X_START": "Pomodoro: Sessão {{nr}} iniciada!"
+        "SESSION_X_START": "Pomodoro: Sessão {{nr}} iniciada!",
+        "SESSION_SKIP": "Pular para o final da Sessão Pomodoro atual",
+        "RESET": "Redefinir para a primeira sessão Pomodoro"
       },
-      "SKIP_BREAK": "Pular pausa"
+      "SKIP_BREAK": "Pular pausa",
+      "START_BREAK": "Começar break"
     },
     "PROCRASTINATION": {
       "BACK_TO_WORK": "Voltar ao trabalho!",
@@ -583,11 +653,11 @@
         "L3": "O que eles lembram?",
         "L4": "O que acontece com o pensamento de procrastinar enquanto você o observa? Ele se intensifica? Dissipa? Faz com que surjam outras emoções?",
         "L5": "Como as sensações em seu corpo estão mudando à medida que você repousa sua consciência nelas?",
-        "TITLE": "Curiosidade"
+        "TITLE": "Curiosidade",
+        "PROCRASTINATION_TRIGGERS_TITLE": "Anotando seus gatilhos de procrastinação",
+        "PROCRASTINATION_TRIGGERS_TEXT": "Outro método muito eficaz é registrar o que desencadeou sua vontade de procrastinar. Por exemplo, muitas vezes tenho vontade de ir rapidamente para o Reddit ou para o meu site de notícias favorito sempre que a janela do meu navegador entra em foco. Desde que comecei a escrever meus gatilhos em um simples documento de texto vazio, percebi como esse padrão estava arraigado e isso me ajudou a experimentar diferentes contra-medidas."
       },
       "H1": "Dê uma folga!",
-      "P1": "Antes de tudo, relaxe! Todo mundo faz isso de vez em quando. E se você não estiver fazendo o que deveria, pelo menos aproveite! Em seguida, verifique as seções abaixo para obter algo útil.",
-      "P2": "Lembre-se: a procrastinação é um problema de regulação emocional, não um problema de gerenciamento de tempo.",
       "REFRAME": {
         "INTRO": "Pense no que pode ser positivo sobre a tarefa.",
         "TITLE": "Reenquadrando",
@@ -595,6 +665,8 @@
         "TL2": "O que você ganha se você completá-lo?",
         "TL3": "Como você se sentirá sobre isso se concluir o processo?"
       },
+      "P1": "Antes de tudo, relaxe! Todo mundo faz isso de vez em quando. E se você não estiver fazendo o que deveria, pelo menos aproveite! Em seguida, verifique as seções abaixo para obter algo útil.",
+      "P2": "Lembre-se: a procrastinação é um problema de regulação emocional, não um problema de gerenciamento de tempo.",
       "SPLIT_UP": {
         "INTRO": "Divida a tarefa em tantos pequenos pedaços quanto possível.",
         "OUTRO": "Concluído? Então pense sobre isso. Qual seria -estritamente teórica- a primeira coisa que você faria se você começasse a trabalhar na tarefa? Pense nisso ...",
@@ -1166,6 +1238,8 @@
     "MISC": {
       "DEFAULT_PROJECT": "Projeto padrão a ser usado para tarefas se nenhum for especificado",
       "FIRST_DAY_OF_WEEK": "Primeiro dia da semana",
+      "START_OF_NEXT_DAY": "Hora de início do dia seguinte",
+      "START_OF_NEXT_DAY_HINT": "a partir de quando (em horas) você deseja contar o dia seguinte começou. o padrão é meia-noite, que é 0.",
       "HELP": "<p><strong>Não está vendo as notificações da área de trabalho?</strong> Para janelas, convém verificar Sistema> Notificações e ações, e verificar se as notificações necessárias foram ativadas.</p>",
       "IS_AUTO_ADD_WORKED_ON_TO_TODAY": "Adicionar automaticamente a tag hoje às tarefas trabalhadas",
       "IS_AUTO_MARK_PARENT_AS_DONE": "Marque a tarefa pai como concluída, quando todas as subtarefas estiverem concluídas",
@@ -1173,6 +1247,7 @@
       "IS_CONFIRM_BEFORE_EXIT": "Confirme antes de sair do aplicativo",
       "IS_CONFIRM_BEFORE_EXIT_WITHOUT_FINISH_DAY": "Confirme antes de sair do aplicativo sem terminar o dia primeiro",
       "IS_DARK_MODE": "Modo escuro",
+      "IS_DISABLE_ANIMATIONS": "Desativat todas as animações",
       "IS_HIDE_NAV": "Ocultar a navegação até passar o mouse no cabeçalho principal (somente na área de trabalho)",
       "IS_MINIMIZE_TO_TRAY": "Minimize para a bandeja (somente desktop)",
       "IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "Notificar quando a estimativa de tempo foi excedida",
@@ -1188,6 +1263,7 @@
       "HELP": "<p>O temporizador pomodoro pode ser configurado através de algumas configurações. A duração de cada sessão de trabalho, a duração das quebras normais, o número de sessões de trabalho a serem executadas antes do início de uma pausa mais longa e a duração dessa pausa mais longa.</p> <p>Você também pode definir se deseja exibir suas distrações durante seus intervalos de pomodoro.</p> <p>Configurar \"Pausar o rastreamento do tempo no intervalo do pomodoro\" também acompanhará seus intervalos como o tempo de trabalho gasto em uma tarefa. </p> <p>Habilitando \"Pausar a sessão pomodoro quando nenhuma tarefa ativa\" também pausará a sessão pomodoro, quando você pausar uma tarefa.</p>",
       "IS_ENABLED": "Ativar temporizador pomodoro",
       "IS_MANUAL_CONTINUE": "Confirmar manualmente o início da próxima sessão de pomodoro",
+      "IS_MANUAL_CONTINUE_BREAK": "Confirme manualmente o início do próximo intervalo",
       "IS_PLAY_SOUND": "Tocar som quando a sessão terminar",
       "IS_PLAY_SOUND_AFTER_BREAK": "Tocar som quando o intervalo estiver concluído",
       "IS_PLAY_TICK": "Tocar som de tick a cada segundo",
@@ -1203,10 +1279,13 @@
       "VOLUME": "Volume"
     },
     "TAKE_A_BREAK": {
+      "ADD_NEW_IMG": "Adicione uma imagem motivacional",
       "HELP": "<div> <p>Permite configurar um lembrete recorrente quando você trabalha por um período de tempo especificado sem fazer uma pausa.</p> <p>Você pode modificar a mensagem exibida. ${duration} será substituído pelo tempo gasto sem interrupção.</p> </div>",
       "IS_ENABLED": "Ativar lembrete de pausa",
       "IS_FOCUS_WINDOW": "Focar a janela do aplicativo quando o lembrete estiver ativo (somente desktop)",
       "IS_LOCK_SCREEN": "Bloquear a tela quando iniciar um intervalo (somente desktop)",
+      "IS_FULL_SCREEN_BLOCKER": "Aparece uma mensagem em tela cheia na tela (apenas para computador)",
+      "FULL_SCREEN_BLOCKER_DURATION": "Duração para exibir a janela em tela cheia (somente desktop)",
       "MESSAGE": "Mensagem de pausa",
       "MIN_WORKING_TIME": "Acionar notificação de pausa após trabalhar X sem uma",
       "MOTIVATIONAL_IMGS": "Imagem motivacional (URL da Web)",
