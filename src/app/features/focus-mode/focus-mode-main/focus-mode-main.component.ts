@@ -30,6 +30,7 @@ import { fadeAnimation } from '../../../ui/animations/fade.ani';
 export class FocusModeMainComponent implements OnDestroy {
   @Input() focusModeDuration = 25 * 60 * 1000;
   @Input() focusModeElapsed = 0;
+  @Input() sessionProgress = 0;
   @Output() taskDone: EventEmitter<void> = new EventEmitter();
   @HostBinding('class.isShowNotes') isShowNotes: boolean = true;
 

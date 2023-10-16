@@ -11,7 +11,7 @@
     <mat-progress-spinner
       *ngIf="!isShowNotes"
       [mode]="'determinate'"
-      [value]="focusModeService.sessionProgress$|async"
+      [value]="sessionProgress"
       [strokeWidth]="20"
       [diameter]="150 "
     >
@@ -19,7 +19,7 @@
     <mat-progress-spinner
       *ngIf="isShowNotes"
       [mode]="'determinate'"
-      [value]="focusModeService.sessionProgress$|async"
+      [value]="sessionProgress"
       [strokeWidth]=" 12"
       [diameter]="110"
     >
@@ -31,7 +31,7 @@
         title="Focus time"
       >
         <!--        {{focusModeElapsed / 60000}}min-->
-        {{(focusModeService.currentSessionTime$|async|msToMinuteClockString)}}
+        {{(focusModeElapsed|msToMinuteClockString)}}
       </div>
       <!--      <div class="task-times">-->
       <!--        {{task.timeSpent|msToString}}/{{task.timeEstimate|msToString}}-->

@@ -7,6 +7,18 @@ import { Router } from '@angular/router';
 import { expandAnimation } from '../../../ui/animations/expand.ani';
 import { FocusModePage } from '../focus-mode.const';
 import { FocusModeService } from '../focus-mode.service';
+import { Store } from '@ngrx/store';
+import {
+  selectFocusSessionActivePage,
+  selectFocusSessionDuration,
+  selectFocusSessionProgress,
+  selectFocusSessionTimeToGo,
+} from '../store/focus-mode.selectors';
+import {
+  setFocusSessionActivePage,
+  setFocusSessionDuration,
+  startFocusSession,
+} from '../store/focus-mode.actions';
 
 @Component({
   selector: 'focus-mode-overlay',
@@ -16,15 +28,21 @@ import { FocusModeService } from '../focus-mode.service';
   animations: [expandAnimation],
 })
 export class FocusModeOverlayComponent implements OnDestroy {
-  _onDestroy$ = new Subject<void>();
-  activePage: FocusModePage | undefined;
   FocusModePage: typeof FocusModePage = FocusModePage;
-  focusModeElapsed: number = 60 * 12 * 1000;
+
+  activePage$ = this._store.select(selectFocusSessionActivePage);
+
+  elapsedTime$ = this._store.select(selectFocusSessionTimeToGo);
+  sessionDuration$ = this._store.select(selectFocusSessionDuration);
+  sessionProgress$ = this._store.select(selectFocusSessionProgress);
+
+  private _onDestroy$ = new Subject<void>();
 
   constructor(
     private readonly _globalConfigService: GlobalConfigService,
     public readonly taskService: TaskService,
     public readonly focusModeService: FocusModeService,
+    private readonly _store: Store,
     private _router: Router,
   ) {
     // TODO this needs to work differently
@@ -34,9 +52,15 @@ export class FocusModeOverlayComponent implements OnDestroy {
         if (!task) {
           // this.taskService.startFirstStartable();
           // this.activePage = FocusModePage.Main;
-          this.activePage = FocusModePage.TaskSelection;
+          this._store.dispatch(
+            setFocusSessionActivePage({ focusActivePage: FocusModePage.TaskSelection }),
+          );
         } else {
-          this.activePage = FocusModePage.DurationSelection;
+          this._store.dispatch(
+            setFocusSessionActivePage({
+              focusActivePage: FocusModePage.DurationSelection,
+            }),
+          );
         }
       });
   }
@@ -47,7 +71,8 @@ export class FocusModeOverlayComponent implements OnDestroy {
   }
 
   onTaskDone(): void {
-    this.activePage = FocusModePage.TaskDone;
+    // TODO better define
+    setFocusSessionActivePage({ focusActivePage: FocusModePage.TaskDone });
   }
 
   onTaskSelected(task: Task | string): void {
@@ -56,13 +81,14 @@ export class FocusModeOverlayComponent implements OnDestroy {
     if (typeof task === 'string') {
       // TODO create task
     } else {
-      this.activePage = FocusModePage.DurationSelection;
+      setFocusSessionActivePage({ focusActivePage: FocusModePage.DurationSelection });
     }
   }
 
-  onFocusModeDurationSelected(duration: number): void {
-    this.focusModeService.setFocusSessionDuration(duration);
-    this.activePage = FocusModePage.Main;
+  onFocusModeDurationSelected(focusSessionDuration: number): void {
+    this._store.dispatch(setFocusSessionDuration({ focusSessionDuration }));
+    this._store.dispatch(startFocusSession());
+    setFocusSessionActivePage({ focusActivePage: FocusModePage.Main });
   }
 
   cancelFocusSession(): void {

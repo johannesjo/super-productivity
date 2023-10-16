@@ -1,7 +1,7 @@
 <header>
   <banner></banner>
 </header>
-<main [ngSwitch]="activePage">
+<main [ngSwitch]="activePage$|async">
   <button
     class="close-btn"
     mat-icon-button
@@ -19,14 +19,15 @@
   <focus-mode-duration-selection
     *ngSwitchCase="FocusModePage.DurationSelection"
     [task]="taskService.currentTask$|async"
-    [focusModeDuration]="focusModeService.sessionDuration$|async"
+    [focusModeDuration]="sessionDuration$|async"
     (focusModeDurationSelected)="onFocusModeDurationSelected($event)"
   ></focus-mode-duration-selection>
 
   <focus-mode-main
     *ngSwitchCase="FocusModePage.Main"
-    [focusModeDuration]="focusModeService.sessionDuration$|async"
-    [focusModeElapsed]="focusModeElapsed"
+    [focusModeDuration]="sessionDuration$|async"
+    [focusModeElapsed]="elapsedTime$|async"
+    [sessionProgress]="sessionProgress$|async"
     (taskDone)="onTaskDone()"
   ></focus-mode-main>
 
