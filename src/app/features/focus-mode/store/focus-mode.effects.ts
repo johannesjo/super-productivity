@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Actions, createEffect } from '@ngrx/effects';
+import { Actions, createEffect, ofType } from '@ngrx/effects';
 import {
   focusSessionDone,
   setFocusSessionTimeToGo,
@@ -10,6 +10,7 @@ import {
   distinctUntilChanged,
   filter,
   map,
+  mapTo,
   pairwise,
   scan,
   switchMap,
@@ -23,6 +24,7 @@ import {
   selectIsFocusSessionRunning,
 } from './focus-mode.selectors';
 import { Store } from '@ngrx/store';
+import { unsetCurrentTask } from '../../tasks/store/task.actions';
 
 const TICK_DURATION = 500;
 
@@ -75,6 +77,9 @@ export class FocusModeEffects {
           : focusSessionDone(),
       ),
     );
+  });
+  stopTrackingOnSessionDone$ = createEffect(() => {
+    return this.actions$.pipe(ofType(focusSessionDone), mapTo(unsetCurrentTask()));
   });
 
   constructor(
