@@ -1,1 +1,13 @@
-<p>focus-mode-task-done works!</p>
+<div class="pyro">
+  <div class="pyro-before"></div>
+  <div class="pyro-after"></div>
+</div>
+
+<h1>Congrats for completing this <em>{{focusModeDuration|msToString}}</em> session</h1>
+
+<button
+  mat-button
+  (click)="closeFocusOverlay()"
+>
+  Back to planing
+</button>

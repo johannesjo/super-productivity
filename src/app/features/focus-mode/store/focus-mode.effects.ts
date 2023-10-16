@@ -4,11 +4,13 @@ import {
   focusSessionDone,
   setFocusSessionTimeToGo,
   showFocusOverlay,
+  startFocusSession,
 } from './focus-mode.actions';
 import { GlobalConfigService } from '../../config/global-config.service';
 import {
   distinctUntilChanged,
   filter,
+  first,
   map,
   mapTo,
   pairwise,
@@ -48,6 +50,11 @@ export class FocusModeEffects {
   private _currentSessionTime$: Observable<number> = merge(
     this._sessionDuration$,
     this._tick$,
+    this.actions$.pipe(
+      ofType(startFocusSession),
+      switchMap(() => this._sessionDuration$),
+      first(),
+    ),
   ).pipe(
     scan((acc, value) => {
       return value < 0 ? acc + value : value;

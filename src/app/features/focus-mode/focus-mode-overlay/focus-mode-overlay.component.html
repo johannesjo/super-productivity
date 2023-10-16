@@ -31,5 +31,8 @@
     (taskDone)="onTaskDone()"
   ></focus-mode-main>
 
-  <focus-mode-task-done *ngSwitchCase="FocusModePage.TaskDone"></focus-mode-task-done>
+  <focus-mode-task-done
+    *ngSwitchCase="FocusModePage.TaskDone"
+    [focusModeDuration]="sessionDuration$|async"
+  ></focus-mode-task-done>
 </main>
