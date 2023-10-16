@@ -1,6 +1,10 @@
 import { Injectable } from '@angular/core';
 import { Actions, createEffect } from '@ngrx/effects';
-import { setFocusSessionTimeToGo, showFocusOverlay } from './focus-mode.actions';
+import {
+  focusSessionDone,
+  setFocusSessionTimeToGo,
+  showFocusOverlay,
+} from './focus-mode.actions';
 import { GlobalConfigService } from '../../config/global-config.service';
 import {
   distinctUntilChanged,
@@ -65,7 +69,11 @@ export class FocusModeEffects {
   });
   setElapsedTime$ = createEffect(() => {
     return this._currentSessionTime$.pipe(
-      map((focusSessionTimeToGo) => setFocusSessionTimeToGo({ focusSessionTimeToGo })),
+      map((focusSessionTimeToGo) =>
+        focusSessionTimeToGo >= 0
+          ? setFocusSessionTimeToGo({ focusSessionTimeToGo })
+          : focusSessionDone(),
+      ),
     );
   });
 
