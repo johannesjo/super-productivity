@@ -1,5 +1,14 @@
-import { ChangeDetectionStrategy, Component, EventEmitter, Output } from '@angular/core';
+import {
+  AfterViewInit,
+  ChangeDetectionStrategy,
+  Component,
+  EventEmitter,
+  OnDestroy,
+  Output,
+} from '@angular/core';
 import { Task } from '../../tasks/task.model';
+import { TaskService } from '../../tasks/task.service';
+import { first } from 'rxjs/operators';
 
 @Component({
   selector: 'focus-mode-task-selection',
@@ -7,15 +16,28 @@ import { Task } from '../../tasks/task.model';
   styleUrls: ['./focus-mode-task-selection.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class FocusModeTaskSelectionComponent {
+export class FocusModeTaskSelectionComponent implements AfterViewInit, OnDestroy {
   @Output() taskSelected: EventEmitter<string | Task> = new EventEmitter();
 
   selectedTask: string | Task | undefined;
+  initialTask$ = this.taskService.firstStartableTask$.pipe(first());
+  focusTimeout = 0;
 
-  constructor() {}
+  constructor(public readonly taskService: TaskService) {}
+
+  ngAfterViewInit(): void {
+    this.focusTimeout = window.setTimeout(() => {
+      const el = document.querySelector('input');
+      (el as HTMLElement).focus();
+      (el as any).select();
+    }, 200);
+  }
+
+  ngOnDestroy(): void {
+    window.clearTimeout(this.focusTimeout);
+  }
 
   onTaskChange(taskOrNewTask: Task | string): void {
-    console.log(taskOrNewTask);
     this.selectedTask = taskOrNewTask;
   }
 

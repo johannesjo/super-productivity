@@ -1,9 +1,4 @@
-import {
-  ChangeDetectionStrategy,
-  ChangeDetectorRef,
-  Component,
-  OnDestroy,
-} from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnDestroy } from '@angular/core';
 import { TaskService } from '../../tasks/task.service';
 import { Subject } from 'rxjs';
 import { first, takeUntil } from 'rxjs/operators';
@@ -47,7 +42,6 @@ export class FocusModeOverlayComponent implements OnDestroy {
     private readonly _globalConfigService: GlobalConfigService,
     private readonly _store: Store,
     private readonly _router: Router,
-    private _cd: ChangeDetectorRef,
   ) {
     // TODO this needs to work differently
     this.taskService.currentTask$
@@ -69,9 +63,6 @@ export class FocusModeOverlayComponent implements OnDestroy {
       });
 
     this.activePage$.subscribe((v) => console.log(`activePage$`, v));
-    this.activePage$.subscribe((v) => {
-      this._cd.markForCheck();
-    });
   }
 
   ngOnDestroy(): void {

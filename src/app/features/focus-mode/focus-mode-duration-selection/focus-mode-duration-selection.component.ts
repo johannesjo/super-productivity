@@ -1,8 +1,10 @@
 import {
+  AfterViewInit,
   ChangeDetectionStrategy,
   Component,
   EventEmitter,
   Input,
+  OnDestroy,
   Output,
 } from '@angular/core';
 import { Task } from '../../tasks/task.model';
@@ -13,12 +15,25 @@ import { Task } from '../../tasks/task.model';
   styleUrls: ['./focus-mode-duration-selection.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class FocusModeDurationSelectionComponent {
+export class FocusModeDurationSelectionComponent implements AfterViewInit, OnDestroy {
   @Input() focusModeDuration = 25 * 60 * 1000;
   @Input() task: Task | null = null;
   @Output() focusModeDurationSelected: EventEmitter<number> = new EventEmitter();
+  focusTimeout = 0;
 
   constructor() {}
+
+  ngAfterViewInit(): void {
+    this.focusTimeout = window.setTimeout(() => {
+      const el = document.querySelector('input');
+      (el as HTMLElement).focus();
+      (el as any).select();
+    }, 200);
+  }
+
+  ngOnDestroy(): void {
+    window.clearTimeout(this.focusTimeout);
+  }
 
   onFocusModeDurationChanged(duration: number): void {
     this.focusModeDuration = duration;

@@ -88,21 +88,19 @@
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  width: 100%;
 }
 
 .notes-panel {
   border-radius: 4px;
-  margin: $s * 2;
-  //margin-top: $s * 2;
-  max-width: 100%;
+  margin: auto;
+  padding: $s * 2;
   width: auto;
+  width: 100%;
   flex-grow: 1;
+  max-width: $component-max-width;
   overflow: hidden;
   min-height: 60px;
-
-  @include mq(xs) {
-    width: 600px;
-  }
 
   inline-markdown {
     max-height: 100%;

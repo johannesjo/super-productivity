@@ -127,6 +127,11 @@ export class TaskService {
     // NOTE: we can't use share here, as we need the last emitted value
   );
 
+  firstStartableTask$: Observable<Task | undefined> =
+    this._workContextService.startableTasksForActiveContext$.pipe(
+      map((tasks) => tasks[0]),
+    );
+
   taskAdditionalInfoTargetPanel$: Observable<TaskAdditionalInfoTargetPanel | null> =
     this._store.pipe(
       select(selectTaskAdditionalInfoTargetPanel),

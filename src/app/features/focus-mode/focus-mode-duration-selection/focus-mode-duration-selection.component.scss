@@ -1,3 +1,5 @@
+@import '../../../../variables';
+
 :host {
   width: 500px;
   max-width: 100%;
@@ -12,4 +14,13 @@ form {
   flex-direction: column;
   justify-content: center;
   align-items: center;
+}
+
+.for-task {
+  font-size: 18px;
+  margin-bottom: $s;
+}
+
+input-duration-slider {
+  margin-bottom: $s * 2;
 }

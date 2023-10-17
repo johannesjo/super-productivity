@@ -2,17 +2,18 @@
   (submit)="onSubmit($event)"
   novalidate
 >
-  <h1>Start a focus session</h1>
-  <div *ngIf="task">on task "<em>{{task?.title}}</em>"</div>
-  <br />
+  <h1>Set Focus Session Duration</h1>
+  <div
+    class="for-task"
+    *ngIf="task"
+  >
+    for task "<em>{{task?.title}}</em>"
+  </div>
 
-  <p>Select focus session duration</p>
   <input-duration-slider
     [model]="focusModeDuration"
     (modelChange)="onFocusModeDurationChanged($event)"
   ></input-duration-slider>
-  <br />
-  <br />
 
   <button
     type="submit"

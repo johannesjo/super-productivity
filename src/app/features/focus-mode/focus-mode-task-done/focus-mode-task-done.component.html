@@ -3,11 +3,19 @@
   <div class="pyro-after"></div>
 </div>
 
-<h1>Congrats for completing this <em>{{focusModeDuration|msToString}}</em> session</h1>
+<h1>Congrats for completing this session!</h1>
 
-<button
-  mat-button
-  (click)="closeFocusOverlay()"
->
-  Back to planing
-</button>
+<div style="text-align: center">
+  <button
+    mat-stroked-button
+    (click)="closeFocusOverlay()"
+  >
+    Back to planing
+  </button>
+  <button
+    mat-stroked-button
+    (click)="closeFocusOverlay()"
+  >
+    Start next task
+  </button>
+</div>
