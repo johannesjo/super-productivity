@@ -26,7 +26,7 @@
   <focus-mode-main
     *ngSwitchCase="FocusModePage.Main"
     [focusModeDuration]="sessionDuration$|async"
-    [focusModeElapsed]="elapsedTime$|async"
+    [focusModeTimeToGo]="timeToGo$|async"
     [sessionProgress]="sessionProgress$|async"
     (taskDone)="onTaskDone()"
   ></focus-mode-main>

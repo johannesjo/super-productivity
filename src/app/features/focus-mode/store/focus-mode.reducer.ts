@@ -20,7 +20,7 @@ export const initialState: State = {
   focusSessionActivePage: FocusModePage.TaskSelection,
 };
 
-export const focusModeReducer = createReducer(
+export const focusModeReducer = createReducer<State>(
   initialState,
 
   on(
@@ -35,11 +35,6 @@ export const focusModeReducer = createReducer(
     focusSessionDuration,
   })),
 
-  on(FocusModeActions.setFocusSessionRunning, (state, { isFocusSessionRunning }) => ({
-    ...state,
-    isFocusSessionRunning,
-  })),
-
   on(FocusModeActions.setFocusSessionTimeToGo, (state, { focusSessionTimeToGo }) => ({
     ...state,
     focusSessionTimeToGo,
@@ -48,22 +43,24 @@ export const focusModeReducer = createReducer(
   on(FocusModeActions.startFocusSession, (state) => ({
     ...state,
     isFocusSessionRunning: true,
-    focusSessionElapsedTime: 0,
+    focusSessionTimeToGo: 0,
     focusSessionActivePage: FocusModePage.Main,
   })),
   on(FocusModeActions.focusSessionDone, (state) => ({
     ...state,
     isFocusSessionRunning: false,
-    focusSessionElapsedTime: 0,
+    focusSessionTimeToGo: 0,
     focusSessionActivePage: FocusModePage.TaskDone,
   })),
 
   on(FocusModeActions.showFocusOverlay, (state) => ({
     ...state,
     isFocusOverlayShown: true,
+    isFocusSessionRunning: false,
   })),
   on(FocusModeActions.hideFocusOverlay, (state) => ({
     ...state,
     isFocusOverlayShown: false,
+    isFocusSessionRunning: false,
   })),
 );

@@ -29,10 +29,10 @@ import { fadeAnimation } from '../../../ui/animations/fade.ani';
 })
 export class FocusModeMainComponent implements OnDestroy {
   @Input() focusModeDuration = 25 * 60 * 1000;
-  @Input() focusModeElapsed = 0;
+  @Input() focusModeTimeToGo = 0;
   @Input() sessionProgress = 0;
   @Output() taskDone: EventEmitter<void> = new EventEmitter();
-  @HostBinding('class.isShowNotes') isShowNotes: boolean = true;
+  @HostBinding('class.isShowNotes') isShowNotes: boolean = false;
 
   task: TaskCopy | null = null;
   isFocusNotes = false;
@@ -93,7 +93,7 @@ export class FocusModeMainComponent implements OnDestroy {
   }
 
   get focusSessionProgress(): number {
-    return (this.focusModeElapsed * 100) / this.focusModeDuration;
+    return (this.focusModeTimeToGo * 100) / this.focusModeDuration;
   }
 
   ngOnDestroy(): void {

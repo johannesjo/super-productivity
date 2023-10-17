@@ -36,7 +36,7 @@ export class FocusModeOverlayComponent implements OnDestroy {
   FocusModePage: typeof FocusModePage = FocusModePage;
 
   activePage$ = this._store.select(selectFocusSessionActivePage);
-  elapsedTime$ = this._store.select(selectFocusSessionTimeToGo);
+  timeToGo$ = this._store.select(selectFocusSessionTimeToGo);
   sessionDuration$ = this._store.select(selectFocusSessionDuration);
   sessionProgress$ = this._store.select(selectFocusSessionProgress);
 

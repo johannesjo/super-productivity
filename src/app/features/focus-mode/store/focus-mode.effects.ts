@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import {
   focusSessionDone,
+  hideFocusOverlay,
   setFocusSessionTimeToGo,
   showFocusOverlay,
   startFocusSession,
@@ -9,15 +10,12 @@ import {
 import { GlobalConfigService } from '../../config/global-config.service';
 import {
   distinctUntilChanged,
-  filter,
   first,
   map,
   mapTo,
   pairwise,
   scan,
   switchMap,
-  tap,
-  withLatestFrom,
 } from 'rxjs/operators';
 import { EMPTY, interval, merge, Observable, of } from 'rxjs';
 import { TaskService } from '../../tasks/task.service';
@@ -41,19 +39,17 @@ export class FocusModeEffects {
     map(([a, b]) => b - a),
   );
 
-  private _tick$: Observable<number> = this._timer$.pipe(
-    withLatestFrom(this._isRunning$),
-    filter(([v, isRunning]) => isRunning),
-    map(([tick]) => tick * -1),
+  private _tick$: Observable<number> = this._isRunning$.pipe(
+    switchMap((isRunning) => (isRunning ? this._timer$ : EMPTY)),
+    map((tick) => tick * -1),
   );
 
   private _currentSessionTime$: Observable<number> = merge(
     this._sessionDuration$,
     this._tick$,
     this.actions$.pipe(
-      ofType(startFocusSession),
-      switchMap(() => this._sessionDuration$),
-      first(),
+      ofType(startFocusSession, hideFocusOverlay),
+      switchMap(() => this._sessionDuration$.pipe(first())),
     ),
   ).pipe(
     scan((acc, value) => {
@@ -67,7 +63,6 @@ export class FocusModeEffects {
         misc.isAlwaysUseFocusMode
           ? this.taskService.currentTaskId$.pipe(
               distinctUntilChanged(),
-              tap(console.log),
               switchMap((currentTaskId) =>
                 currentTaskId ? of(showFocusOverlay()) : EMPTY,
               ),

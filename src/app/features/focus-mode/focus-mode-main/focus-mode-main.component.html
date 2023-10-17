@@ -1,5 +1,4 @@
 <ng-container *ngIf="(taskService.currentTask$|async) as task">
-  <!--<ng-container>-->
   <div
     class="task-title"
     [class.smaller]="isShowNotes"
@@ -30,8 +29,8 @@
         class="focus-time"
         title="Focus time"
       >
-        <!--        {{focusModeElapsed / 60000}}min-->
-        {{(focusModeElapsed|msToMinuteClockString)}}
+        <!--        {{focusModeTimeToGo / 60000}}min-->
+        {{(focusModeTimeToGo|msToMinuteClockString)}}
       </div>
       <!--      <div class="task-times">-->
       <!--        {{task.timeSpent|msToString}}/{{task.timeEstimate|msToString}}-->
