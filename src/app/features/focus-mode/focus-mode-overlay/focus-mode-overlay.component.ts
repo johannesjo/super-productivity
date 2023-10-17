@@ -19,6 +19,7 @@ import {
   setFocusSessionDuration,
   startFocusSession,
 } from '../store/focus-mode.actions';
+import { updateTask } from '../../tasks/store/task.actions';
 
 @Component({
   selector: 'focus-mode-overlay',
@@ -70,10 +71,20 @@ export class FocusModeOverlayComponent implements OnDestroy {
     this._onDestroy$.complete();
   }
 
-  onTaskDone(): void {
+  onTaskDone(taskId: string): void {
     // TODO better define
     this._store.dispatch(
       setFocusSessionActivePage({ focusActivePage: FocusModePage.TaskDone }),
+    );
+    this._store.dispatch(
+      updateTask({
+        task: {
+          id: taskId,
+          changes: {
+            isDone: true,
+          },
+        },
+      }),
     );
   }
 

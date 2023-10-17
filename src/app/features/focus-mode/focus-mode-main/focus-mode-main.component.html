@@ -1,26 +1,12 @@
 <ng-container *ngIf="(taskService.currentTask$|async) as task">
-  <div
-    class="task-title"
-    [class.smaller]="isShowNotes"
-  >
-    {{task.title}}
-  </div>
+  <div class="task-title">{{task.title}}</div>
 
   <div class="progress-wrapper">
     <mat-progress-spinner
-      *ngIf="!isShowNotes"
       [mode]="'determinate'"
       [value]="sessionProgress"
       [strokeWidth]="20"
       [diameter]="150 "
-    >
-    </mat-progress-spinner>
-    <mat-progress-spinner
-      *ngIf="isShowNotes"
-      [mode]="'determinate'"
-      [value]="sessionProgress"
-      [strokeWidth]=" 12"
-      [diameter]="110"
     >
     </mat-progress-spinner>
 

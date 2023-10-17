@@ -28,7 +28,7 @@
     [focusModeDuration]="sessionDuration$|async"
     [focusModeTimeToGo]="timeToGo$|async"
     [sessionProgress]="sessionProgress$|async"
-    (taskDone)="onTaskDone()"
+    (taskDone)="onTaskDone($event)"
   ></focus-mode-main>
 
   <focus-mode-task-done

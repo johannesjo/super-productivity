@@ -31,7 +31,7 @@ export class FocusModeMainComponent implements OnDestroy {
   @Input() focusModeDuration = 25 * 60 * 1000;
   @Input() focusModeTimeToGo = 0;
   @Input() sessionProgress = 0;
-  @Output() taskDone: EventEmitter<void> = new EventEmitter();
+  @Output() taskDone: EventEmitter<string> = new EventEmitter();
   @HostBinding('class.isShowNotes') isShowNotes: boolean = false;
 
   task: TaskCopy | null = null;
@@ -115,7 +115,7 @@ export class FocusModeMainComponent implements OnDestroy {
   }
 
   finishCurrentTask(): void {
-    this.taskDone.emit();
+    this.taskDone.emit(this.task?.id);
   }
 
   getProcrastinationHelp(): void {
