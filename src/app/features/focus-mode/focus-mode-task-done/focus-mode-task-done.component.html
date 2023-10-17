@@ -5,16 +5,18 @@
 
 <h1>Congrats for completing this session!</h1>
 
-<div style="text-align: center">
+<div class="btn-wrapper">
   <button
-    mat-stroked-button
+    mat-raised-button
+    color="primary"
     (click)="closeFocusOverlay()"
   >
     Back to planing
   </button>
   <button
-    mat-stroked-button
-    (click)="closeFocusOverlay()"
+    mat-raised-button
+    color="primary"
+    (click)="startNextTask()"
   >
     Start next task
   </button>

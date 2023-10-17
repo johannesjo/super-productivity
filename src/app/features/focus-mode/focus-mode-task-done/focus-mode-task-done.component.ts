@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { hideFocusOverlay } from '../store/focus-mode.actions';
+import { hideFocusOverlay, setFocusSessionActivePage } from '../store/focus-mode.actions';
+import { FocusModePage } from '../focus-mode.const';
 
 @Component({
   selector: 'focus-mode-task-done',
@@ -15,5 +16,11 @@ export class FocusModeTaskDoneComponent {
 
   closeFocusOverlay(): void {
     this._store.dispatch(hideFocusOverlay());
+  }
+
+  startNextTask(): void {
+    this._store.dispatch(
+      setFocusSessionActivePage({ focusActivePage: FocusModePage.TaskSelection }),
+    );
   }
 }
