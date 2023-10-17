@@ -47,6 +47,21 @@
       <mat-icon>flash_on</mat-icon>
     </button>
 
+    <a
+      mat-icon-button
+      matTooltip="Open issue in Browser"
+      target="_blank"
+      [href]="issueUrl$|async"
+    >
+      <div
+        *ngIf="task.issuePoints"
+        class="mini-badge bgc-primary"
+      >
+        {{task.issuePoints}}
+      </div>
+      <mat-icon [svgIcon]="task.issueType|issueIcon"></mat-icon>
+    </a>
+
     <button
       (click)="isShowNotes=!isShowNotes"
       matTooltip="Show/hide task notes and attachments"

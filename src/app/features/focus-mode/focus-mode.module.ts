@@ -14,6 +14,7 @@ import { FocusModeEffects } from './store/focus-mode.effects';
 import { StoreModule } from '@ngrx/store';
 import { FOCUS_MODE_FEATURE_KEY, focusModeReducer } from './store/focus-mode.reducer';
 import { FocusModeDurationSelectionComponent } from './focus-mode-duration-selection/focus-mode-duration-selection.component';
+import { IssueModule } from '../issue/issue.module';
 
 @NgModule({
   declarations: [
@@ -29,6 +30,7 @@ import { FocusModeDurationSelectionComponent } from './focus-mode-duration-selec
     RouterModule,
     TaskAttachmentModule,
     TasksModule,
+    IssueModule,
     BannerModule,
     StoreModule.forFeature(FOCUS_MODE_FEATURE_KEY, focusModeReducer),
     EffectsModule.forFeature([FocusModeEffects]),

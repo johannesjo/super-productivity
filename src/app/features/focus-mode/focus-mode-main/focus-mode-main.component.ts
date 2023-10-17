@@ -10,15 +10,16 @@ import {
 } from '@angular/core';
 import { expandAnimation } from '../../../ui/animations/expand.ani';
 import { TaskCopy } from '../../tasks/task.model';
-import { Subject } from 'rxjs';
+import { Observable, of, Subject } from 'rxjs';
 import { GlobalConfigService } from '../../config/global-config.service';
 import { TaskService } from '../../tasks/task.service';
 import { Router } from '@angular/router';
-import { first, takeUntil } from 'rxjs/operators';
+import { first, switchMap, take, takeUntil } from 'rxjs/operators';
 import { TaskAttachmentService } from '../../tasks/task-attachment/task-attachment.service';
 import { T } from 'src/app/t.const';
 import { FocusModeService } from '../focus-mode.service';
 import { fadeAnimation } from '../../../ui/animations/fade.ani';
+import { IssueService } from '../../issue/issue.service';
 
 @Component({
   selector: 'focus-mode-main',
@@ -41,6 +42,17 @@ export class FocusModeMainComponent implements OnDestroy {
   // defaultTaskNotes: string = '';
   defaultTaskNotes: string = '';
   T: typeof T = T;
+  issueUrl$: Observable<string | null> = this.taskService.currentTask$.pipe(
+    switchMap((v) => {
+      if (!v) {
+        return of(null);
+      }
+      return v.issueType && v.issueId && v.projectId
+        ? this._issueService.issueLink$(v.issueType, v.issueId, v.projectId)
+        : of(null);
+    }),
+    take(1),
+  );
 
   private _onDestroy$ = new Subject<void>();
   private _dragEnterTarget?: HTMLElement;
@@ -51,6 +63,7 @@ export class FocusModeMainComponent implements OnDestroy {
     public readonly focusModeService: FocusModeService,
     private _router: Router,
     private _taskAttachmentService: TaskAttachmentService,
+    private _issueService: IssueService,
   ) {
     this._globalConfigService.misc$
       .pipe(takeUntil(this._onDestroy$))
