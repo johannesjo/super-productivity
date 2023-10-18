@@ -83,9 +83,6 @@ export class FocusModeEffects {
   stopTrackingOnOnCancel$ = createEffect(() => {
     return this._actions$.pipe(ofType(cancelFocusSession), mapTo(unsetCurrentTask()));
   });
-  stopTrackingOnSessionDone$ = createEffect(() => {
-    return this._actions$.pipe(ofType(focusSessionDone), mapTo(unsetCurrentTask()));
-  });
 
   constructor(
     private _store: Store,

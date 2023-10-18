@@ -23,7 +23,7 @@ import { selectCurrentTask } from '../../tasks/store/task.selectors';
 export class FocusModeDurationSelectionComponent implements AfterViewInit, OnDestroy {
   sessionDuration$ = this._store.select(selectFocusSessionDuration);
   task$ = this._store.select(selectCurrentTask);
-  focusModeDuration = 25 * 60 * 1000;
+  updatedFocusModeDuration?: number;
   focusTimeout = 0;
 
   constructor(private readonly _store: Store) {}
@@ -41,19 +41,19 @@ export class FocusModeDurationSelectionComponent implements AfterViewInit, OnDes
   }
 
   onFocusModeDurationChanged(duration: number): void {
-    this.focusModeDuration = duration;
+    this.updatedFocusModeDuration = duration;
   }
 
   onSubmit($event: SubmitEvent): void {
     $event.preventDefault();
-    if (this.focusModeDuration) {
+    if (this.updatedFocusModeDuration) {
       this._store.dispatch(
-        setFocusSessionDuration({ focusSessionDuration: this.focusModeDuration }),
-      );
-      this._store.dispatch(startFocusSession());
-      this._store.dispatch(
-        setFocusSessionActivePage({ focusActivePage: FocusModePage.Main }),
+        setFocusSessionDuration({ focusSessionDuration: this.updatedFocusModeDuration }),
       );
     }
+    this._store.dispatch(startFocusSession());
+    this._store.dispatch(
+      setFocusSessionActivePage({ focusActivePage: FocusModePage.Main }),
+    );
   }
 }

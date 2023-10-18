@@ -133,6 +133,7 @@ export class FocusModeMainComponent implements OnDestroy {
           id: this.task?.id as string,
           changes: {
             isDone: true,
+            doneOn: Date.now(),
           },
         },
       }),
