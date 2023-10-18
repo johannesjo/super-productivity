@@ -23,6 +23,8 @@ import {
 } from '../store/focus-mode.selectors';
 import { focusSessionDone } from '../store/focus-mode.actions';
 import { updateTask } from '../../tasks/store/task.actions';
+import { SimpleCounterService } from '../../simple-counter/simple-counter.service';
+import { SimpleCounter } from '../../simple-counter/simple-counter.model';
 
 @Component({
   selector: 'focus-mode-main',
@@ -60,6 +62,7 @@ export class FocusModeMainComponent implements OnDestroy {
   private _dragEnterTarget?: HTMLElement;
 
   constructor(
+    public readonly simpleCounterService: SimpleCounterService,
     private readonly _globalConfigService: GlobalConfigService,
     private readonly _taskService: TaskService,
     private readonly _router: Router,
@@ -142,5 +145,9 @@ export class FocusModeMainComponent implements OnDestroy {
 
   getProcrastinationHelp(): void {
     this._router.navigateByUrl('/procrastination');
+  }
+
+  trackById(i: number, item: SimpleCounter): string {
+    return item.id;
   }
 }

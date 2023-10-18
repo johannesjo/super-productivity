@@ -24,14 +24,22 @@
     </div>
   </div>
 
+  <ng-container
+    *ngIf="(simpleCounterService.enabledSimpleCounters$|async) as enabledSimpleCounters"
+  >
+    <section
+      class="simple-counter-buttons"
+      *ngIf="enabledSimpleCounters.length"
+    >
+      <simple-counter-button
+        *ngFor="let simpleCounter of enabledSimpleCounters; trackBy: trackById"
+        [class.isHiddenWithoutFocus]="!simpleCounter.isOn"
+        [simpleCounter]="simpleCounter"
+      ></simple-counter-button>
+    </section>
+  </ng-container>
+
   <section class="controls">
-    <!--      <button-->
-    <!--        mat-icon-button-->
-    <!--        matTooltip="Cancel focus session"-->
-    <!--        (click)="cancelFocusSession()"-->
-    <!--      >-->
-    <!--        <mat-icon>close</mat-icon>-->
-    <!--      </button>-->
     <button
       mat-icon-button
       matTooltip="Finish task and select next"

@@ -61,6 +61,24 @@
   }
 }
 
+.simple-counter-buttons {
+  display: flex;
+  position: absolute;
+  top: 14px;
+  left: 50%;
+  transform: translateX(-50%);
+
+  simple-counter-button.isHiddenWithoutFocus {
+    @include mousePrimaryDevice {
+      display: none;
+    }
+
+    :host:hover & {
+      display: block;
+    }
+  }
+}
+
 .controls {
   margin-top: $s * 2;
   // to fix weird a + mat-icon behavior
