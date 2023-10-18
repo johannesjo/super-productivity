@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import {
+  cancelFocusSession,
   focusSessionDone,
-  hideFocusOverlay,
   setFocusSessionTimeToGo,
   showFocusOverlay,
   startFocusSession,
@@ -48,7 +48,7 @@ export class FocusModeEffects {
     this._sessionDuration$,
     this._tick$,
     this.actions$.pipe(
-      ofType(startFocusSession, hideFocusOverlay),
+      ofType(startFocusSession, cancelFocusSession),
       switchMap(() => this._sessionDuration$.pipe(first())),
     ),
   ).pipe(
@@ -79,6 +79,9 @@ export class FocusModeEffects {
           : focusSessionDone(),
       ),
     );
+  });
+  stopTrackingOnOnCancel$ = createEffect(() => {
+    return this.actions$.pipe(ofType(cancelFocusSession), mapTo(unsetCurrentTask()));
   });
   stopTrackingOnSessionDone$ = createEffect(() => {
     return this.actions$.pipe(ofType(focusSessionDone), mapTo(unsetCurrentTask()));

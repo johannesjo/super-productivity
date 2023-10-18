@@ -16,6 +16,8 @@ export const setFocusSessionTimeToGo = createAction(
   props<{ focusSessionTimeToGo: number }>(),
 );
 export const startFocusSession = createAction('[FocusMode] Start focus session');
+export const cancelFocusSession = createAction('[FocusMode] Cancel Focus Session');
+
 export const focusSessionDone = createAction('[FocusMode] Focus session done');
 
 export const showFocusOverlay = createAction('[FocusMode] Show Focus Overlay');

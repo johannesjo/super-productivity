@@ -105,10 +105,6 @@ export class FocusModeMainComponent implements OnDestroy {
     this.isDragOver = false;
   }
 
-  get focusSessionProgress(): number {
-    return (this.focusModeTimeToGo * 100) / this.focusModeDuration;
-  }
-
   ngOnDestroy(): void {
     this._onDestroy$.next();
     this._onDestroy$.complete();
@@ -132,7 +128,6 @@ export class FocusModeMainComponent implements OnDestroy {
   }
 
   getProcrastinationHelp(): void {
-    this.focusModeService.hideFocusOverlay();
     this._router.navigateByUrl('/procrastination');
   }
 

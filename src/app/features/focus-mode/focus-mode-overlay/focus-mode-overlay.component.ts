@@ -14,7 +14,8 @@ import {
   selectFocusSessionTimeToGo,
 } from '../store/focus-mode.selectors';
 import {
-  hideFocusOverlay,
+  cancelFocusSession,
+  focusSessionDone,
   setFocusSessionActivePage,
   setFocusSessionDuration,
   startFocusSession,
@@ -72,10 +73,7 @@ export class FocusModeOverlayComponent implements OnDestroy {
   }
 
   onTaskDone(taskId: string): void {
-    // TODO better define
-    this._store.dispatch(
-      setFocusSessionActivePage({ focusActivePage: FocusModePage.TaskDone }),
-    );
+    this._store.dispatch(focusSessionDone());
     this._store.dispatch(
       updateTask({
         task: {
@@ -109,7 +107,6 @@ export class FocusModeOverlayComponent implements OnDestroy {
   }
 
   cancelFocusSession(): void {
-    this.taskService.setCurrentId(null);
-    this._store.dispatch(hideFocusOverlay());
+    this._store.dispatch(cancelFocusSession());
   }
 }

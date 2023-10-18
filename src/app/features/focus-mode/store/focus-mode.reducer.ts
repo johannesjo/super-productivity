@@ -49,6 +49,7 @@ export const focusModeReducer = createReducer<State>(
   on(FocusModeActions.focusSessionDone, (state) => ({
     ...state,
     isFocusSessionRunning: false,
+    focusSessionDuration: state.focusSessionTimeToGo,
     focusSessionTimeToGo: 0,
     focusSessionActivePage: FocusModePage.TaskDone,
   })),
