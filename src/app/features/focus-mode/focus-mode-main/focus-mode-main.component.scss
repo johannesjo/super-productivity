@@ -63,6 +63,10 @@
 
 .controls {
   margin-top: $s * 2;
+  // to fix weird a + mat-icon behavior
+  display: flex;
+  justify-content: center;
+  align-items: center;
 
   @include mousePrimaryDevice {
     visibility: hidden;
@@ -70,6 +74,13 @@
 
   :host:hover & {
     visibility: visible;
+  }
+
+  // to fix weird a + mat-icon behavior
+  a {
+    justify-content: center;
+    align-items: center;
+    display: inline-flex;
   }
 
   a,

@@ -51,6 +51,7 @@
       mat-icon-button
       matTooltip="Open issue in Browser"
       target="_blank"
+      *ngIf="task.issueId"
       [href]="issueUrl$|async"
     >
       <div
