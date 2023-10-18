@@ -47,7 +47,7 @@ export class FocusModeEffects {
   private _currentSessionTime$: Observable<number> = merge(
     this._sessionDuration$,
     this._tick$,
-    this.actions$.pipe(
+    this._actions$.pipe(
       ofType(startFocusSession, cancelFocusSession),
       switchMap(() => this._sessionDuration$.pipe(first())),
     ),
@@ -58,10 +58,10 @@ export class FocusModeEffects {
   );
 
   autoStartFocusMode$ = createEffect(() => {
-    return this.globalConfigService.misc$.pipe(
+    return this._globalConfigService.misc$.pipe(
       switchMap((misc) =>
         misc.isAlwaysUseFocusMode
-          ? this.taskService.currentTaskId$.pipe(
+          ? this._taskService.currentTaskId$.pipe(
               distinctUntilChanged(),
               switchMap((currentTaskId) =>
                 currentTaskId ? of(showFocusOverlay()) : EMPTY,
@@ -81,16 +81,16 @@ export class FocusModeEffects {
     );
   });
   stopTrackingOnOnCancel$ = createEffect(() => {
-    return this.actions$.pipe(ofType(cancelFocusSession), mapTo(unsetCurrentTask()));
+    return this._actions$.pipe(ofType(cancelFocusSession), mapTo(unsetCurrentTask()));
   });
   stopTrackingOnSessionDone$ = createEffect(() => {
-    return this.actions$.pipe(ofType(focusSessionDone), mapTo(unsetCurrentTask()));
+    return this._actions$.pipe(ofType(focusSessionDone), mapTo(unsetCurrentTask()));
   });
 
   constructor(
     private _store: Store,
-    private actions$: Actions,
-    private globalConfigService: GlobalConfigService,
-    private taskService: TaskService,
+    private _actions$: Actions,
+    private _globalConfigService: GlobalConfigService,
+    private _taskService: TaskService,
   ) {}
 }

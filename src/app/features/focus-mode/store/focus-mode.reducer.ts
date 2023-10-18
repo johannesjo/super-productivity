@@ -2,6 +2,7 @@ import { createReducer, on } from '@ngrx/store';
 import * as FocusModeActions from './focus-mode.actions';
 import { FocusModePage } from '../focus-mode.const';
 
+const DEFAULT_FOCUS_SESSION_DURATION = 25 * 60 * 1000;
 export const FOCUS_MODE_FEATURE_KEY = 'focusMode';
 
 export interface State {
@@ -15,7 +16,7 @@ export interface State {
 export const initialState: State = {
   isFocusOverlayShown: false,
   isFocusSessionRunning: false,
-  focusSessionDuration: 20 * 60 * 1000,
+  focusSessionDuration: DEFAULT_FOCUS_SESSION_DURATION,
   focusSessionTimeToGo: 0,
   focusSessionActivePage: FocusModePage.TaskSelection,
 };
@@ -45,6 +46,10 @@ export const focusModeReducer = createReducer<State>(
     isFocusSessionRunning: true,
     focusSessionTimeToGo: 0,
     focusSessionActivePage: FocusModePage.Main,
+    focusSessionDuration:
+      state.focusSessionDuration > 0
+        ? state.focusSessionDuration
+        : DEFAULT_FOCUS_SESSION_DURATION,
   })),
   on(FocusModeActions.focusSessionDone, (state) => ({
     ...state,
@@ -63,5 +68,11 @@ export const focusModeReducer = createReducer<State>(
     ...state,
     isFocusOverlayShown: false,
     isFocusSessionRunning: false,
+  })),
+  on(FocusModeActions.cancelFocusSession, (state) => ({
+    ...state,
+    isFocusOverlayShown: false,
+    isFocusSessionRunning: false,
+    focusSessionDuration: DEFAULT_FOCUS_SESSION_DURATION,
   })),
 );

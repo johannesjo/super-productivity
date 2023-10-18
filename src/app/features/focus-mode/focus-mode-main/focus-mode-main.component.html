@@ -1,10 +1,10 @@
-<ng-container *ngIf="(taskService.currentTask$|async) as task">
+<ng-container *ngIf="task">
   <div class="task-title">{{task.title}}</div>
 
   <div class="progress-wrapper">
     <mat-progress-spinner
       [mode]="'determinate'"
-      [value]="sessionProgress"
+      [value]="sessionProgress$|async"
       [strokeWidth]="20"
       [diameter]="150 "
     >
@@ -16,7 +16,7 @@
         title="Focus time"
       >
         <!--        {{focusModeTimeToGo / 60000}}min-->
-        {{(focusModeTimeToGo|msToMinuteClockString)}}
+        {{(timeToGo$|async|msToMinuteClockString)}}
       </div>
       <!--      <div class="task-times">-->
       <!--        {{task.timeSpent|msToString}}/{{task.timeEstimate|msToString}}-->

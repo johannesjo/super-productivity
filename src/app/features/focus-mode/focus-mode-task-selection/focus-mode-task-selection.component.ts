@@ -2,13 +2,14 @@ import {
   AfterViewInit,
   ChangeDetectionStrategy,
   Component,
-  EventEmitter,
   OnDestroy,
-  Output,
 } from '@angular/core';
 import { Task } from '../../tasks/task.model';
 import { TaskService } from '../../tasks/task.service';
 import { first } from 'rxjs/operators';
+import { Store } from '@ngrx/store';
+import { setFocusSessionActivePage } from '../store/focus-mode.actions';
+import { FocusModePage } from '../focus-mode.const';
 
 @Component({
   selector: 'focus-mode-task-selection',
@@ -17,13 +18,11 @@ import { first } from 'rxjs/operators';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class FocusModeTaskSelectionComponent implements AfterViewInit, OnDestroy {
-  @Output() taskSelected: EventEmitter<string | Task> = new EventEmitter();
-
   selectedTask: string | Task | undefined;
   initialTask$ = this.taskService.firstStartableTask$.pipe(first());
   focusTimeout = 0;
 
-  constructor(public readonly taskService: TaskService) {}
+  constructor(public readonly taskService: TaskService, private readonly _store: Store) {}
 
   ngAfterViewInit(): void {
     this.focusTimeout = window.setTimeout(() => {
@@ -46,7 +45,13 @@ export class FocusModeTaskSelectionComponent implements AfterViewInit, OnDestroy
 
     $event.preventDefault();
     if (this.selectedTask) {
-      this.taskSelected.emit(this.selectedTask);
+      if (typeof this.selectedTask === 'string') {
+        // TODO create task
+      } else {
+        this._store.dispatch(
+          setFocusSessionActivePage({ focusActivePage: FocusModePage.DurationSelection }),
+        );
+      }
     }
   }
 }

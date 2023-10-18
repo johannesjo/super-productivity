@@ -2,12 +2,17 @@ import {
   AfterViewInit,
   ChangeDetectionStrategy,
   Component,
-  EventEmitter,
-  Input,
   OnDestroy,
-  Output,
 } from '@angular/core';
-import { Task } from '../../tasks/task.model';
+import { Store } from '@ngrx/store';
+import { selectFocusSessionDuration } from '../store/focus-mode.selectors';
+import {
+  setFocusSessionActivePage,
+  setFocusSessionDuration,
+  startFocusSession,
+} from '../store/focus-mode.actions';
+import { FocusModePage } from '../focus-mode.const';
+import { selectCurrentTask } from '../../tasks/store/task.selectors';
 
 @Component({
   selector: 'focus-mode-duration-selection',
@@ -16,12 +21,12 @@ import { Task } from '../../tasks/task.model';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class FocusModeDurationSelectionComponent implements AfterViewInit, OnDestroy {
-  @Input() focusModeDuration = 25 * 60 * 1000;
-  @Input() task: Task | null = null;
-  @Output() focusModeDurationSelected: EventEmitter<number> = new EventEmitter();
+  sessionDuration$ = this._store.select(selectFocusSessionDuration);
+  task$ = this._store.select(selectCurrentTask);
+  focusModeDuration = 25 * 60 * 1000;
   focusTimeout = 0;
 
-  constructor() {}
+  constructor(private readonly _store: Store) {}
 
   ngAfterViewInit(): void {
     this.focusTimeout = window.setTimeout(() => {
@@ -40,11 +45,15 @@ export class FocusModeDurationSelectionComponent implements AfterViewInit, OnDes
   }
 
   onSubmit($event: SubmitEvent): void {
-    console.log('duration selected', this.focusModeDuration);
-
     $event.preventDefault();
     if (this.focusModeDuration) {
-      this.focusModeDurationSelected.emit(this.focusModeDuration);
+      this._store.dispatch(
+        setFocusSessionDuration({ focusSessionDuration: this.focusModeDuration }),
+      );
+      this._store.dispatch(startFocusSession());
+      this._store.dispatch(
+        setFocusSessionActivePage({ focusActivePage: FocusModePage.Main }),
+      );
     }
   }
 }

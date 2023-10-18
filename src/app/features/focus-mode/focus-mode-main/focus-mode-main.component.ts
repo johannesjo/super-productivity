@@ -1,12 +1,9 @@
 import {
   ChangeDetectionStrategy,
   Component,
-  EventEmitter,
   HostBinding,
   HostListener,
-  Input,
   OnDestroy,
-  Output,
 } from '@angular/core';
 import { expandAnimation } from '../../../ui/animations/expand.ani';
 import { TaskCopy } from '../../tasks/task.model';
@@ -17,9 +14,15 @@ import { Router } from '@angular/router';
 import { first, switchMap, take, takeUntil } from 'rxjs/operators';
 import { TaskAttachmentService } from '../../tasks/task-attachment/task-attachment.service';
 import { T } from 'src/app/t.const';
-import { FocusModeService } from '../focus-mode.service';
 import { fadeAnimation } from '../../../ui/animations/fade.ani';
 import { IssueService } from '../../issue/issue.service';
+import { Store } from '@ngrx/store';
+import {
+  selectFocusSessionProgress,
+  selectFocusSessionTimeToGo,
+} from '../store/focus-mode.selectors';
+import { focusSessionDone } from '../store/focus-mode.actions';
+import { updateTask } from '../../tasks/store/task.actions';
 
 @Component({
   selector: 'focus-mode-main',
@@ -29,10 +32,9 @@ import { IssueService } from '../../issue/issue.service';
   animations: [expandAnimation, fadeAnimation],
 })
 export class FocusModeMainComponent implements OnDestroy {
-  @Input() focusModeDuration = 25 * 60 * 1000;
-  @Input() focusModeTimeToGo = 0;
-  @Input() sessionProgress = 0;
-  @Output() taskDone: EventEmitter<string> = new EventEmitter();
+  timeToGo$ = this._store.select(selectFocusSessionTimeToGo);
+  sessionProgress$ = this._store.select(selectFocusSessionProgress);
+
   @HostBinding('class.isShowNotes') isShowNotes: boolean = false;
 
   task: TaskCopy | null = null;
@@ -42,7 +44,7 @@ export class FocusModeMainComponent implements OnDestroy {
   // defaultTaskNotes: string = '';
   defaultTaskNotes: string = '';
   T: typeof T = T;
-  issueUrl$: Observable<string | null> = this.taskService.currentTask$.pipe(
+  issueUrl$: Observable<string | null> = this._taskService.currentTask$.pipe(
     switchMap((v) => {
       if (!v) {
         return of(null);
@@ -59,24 +61,24 @@ export class FocusModeMainComponent implements OnDestroy {
 
   constructor(
     private readonly _globalConfigService: GlobalConfigService,
-    public readonly taskService: TaskService,
-    public readonly focusModeService: FocusModeService,
-    private _router: Router,
-    private _taskAttachmentService: TaskAttachmentService,
-    private _issueService: IssueService,
+    private readonly _taskService: TaskService,
+    private readonly _router: Router,
+    private readonly _taskAttachmentService: TaskAttachmentService,
+    private readonly _issueService: IssueService,
+    private readonly _store: Store,
   ) {
     this._globalConfigService.misc$
       .pipe(takeUntil(this._onDestroy$))
       .subscribe((misc) => (this.defaultTaskNotes = misc.taskNotesTpl));
-    this.taskService.currentTask$.pipe(takeUntil(this._onDestroy$)).subscribe((task) => {
+    this._taskService.currentTask$.pipe(takeUntil(this._onDestroy$)).subscribe((task) => {
       this.task = task;
     });
 
-    this.taskService.currentTask$
+    this._taskService.currentTask$
       .pipe(first(), takeUntil(this._onDestroy$))
       .subscribe((task) => {
         if (!task) {
-          this.taskService.startFirstStartable();
+          this._taskService.startFirstStartable();
         }
       });
   }
@@ -119,17 +121,25 @@ export class FocusModeMainComponent implements OnDestroy {
       if (this.task === null) {
         throw new Error('Task is not loaded');
       }
-      this.taskService.update(this.task.id, { notes: $event });
+      this._taskService.update(this.task.id, { notes: $event });
     }
   }
 
   finishCurrentTask(): void {
-    this.taskDone.emit(this.task?.id);
+    this._store.dispatch(focusSessionDone());
+    this._store.dispatch(
+      updateTask({
+        task: {
+          id: this.task?.id as string,
+          changes: {
+            isDone: true,
+          },
+        },
+      }),
+    );
   }
 
   getProcrastinationHelp(): void {
     this._router.navigateByUrl('/procrastination');
   }
-
-  toggleNotes(): void {}
 }

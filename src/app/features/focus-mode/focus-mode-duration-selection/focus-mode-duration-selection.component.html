@@ -5,13 +5,13 @@
   <h1>Set Focus Session Duration</h1>
   <div
     class="for-task"
-    *ngIf="task"
+    *ngIf="task$|async as task"
   >
     for task "<em>{{task?.title}}</em>"
   </div>
 
   <input-duration-slider
-    [model]="focusModeDuration"
+    [model]="sessionDuration$|async"
     (modelChange)="onFocusModeDurationChanged($event)"
   ></input-duration-slider>
 

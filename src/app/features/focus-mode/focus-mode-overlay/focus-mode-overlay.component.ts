@@ -15,12 +15,8 @@ import {
 } from '../store/focus-mode.selectors';
 import {
   cancelFocusSession,
-  focusSessionDone,
   setFocusSessionActivePage,
-  setFocusSessionDuration,
-  startFocusSession,
 } from '../store/focus-mode.actions';
-import { updateTask } from '../../tasks/store/task.actions';
 
 @Component({
   selector: 'focus-mode-overlay',
@@ -50,8 +46,6 @@ export class FocusModeOverlayComponent implements OnDestroy {
       .pipe(first(), takeUntil(this._onDestroy$))
       .subscribe((task) => {
         if (!task) {
-          // this.taskService.startFirstStartable();
-          // this.activePage = FocusModePage.Main;
           this._store.dispatch(
             setFocusSessionActivePage({ focusActivePage: FocusModePage.TaskSelection }),
           );
@@ -63,47 +57,11 @@ export class FocusModeOverlayComponent implements OnDestroy {
           );
         }
       });
-
-    this.activePage$.subscribe((v) => console.log(`activePage$`, v));
   }
 
   ngOnDestroy(): void {
     this._onDestroy$.next();
     this._onDestroy$.complete();
-  }
-
-  onTaskDone(taskId: string): void {
-    this._store.dispatch(focusSessionDone());
-    this._store.dispatch(
-      updateTask({
-        task: {
-          id: taskId,
-          changes: {
-            isDone: true,
-          },
-        },
-      }),
-    );
-  }
-
-  onTaskSelected(task: Task | string): void {
-    console.log({ task });
-
-    if (typeof task === 'string') {
-      // TODO create task
-    } else {
-      this._store.dispatch(
-        setFocusSessionActivePage({ focusActivePage: FocusModePage.DurationSelection }),
-      );
-    }
-  }
-
-  onFocusModeDurationSelected(focusSessionDuration: number): void {
-    this._store.dispatch(setFocusSessionDuration({ focusSessionDuration }));
-    this._store.dispatch(startFocusSession());
-    this._store.dispatch(
-      setFocusSessionActivePage({ focusActivePage: FocusModePage.Main }),
-    );
   }
 
   cancelFocusSession(): void {
