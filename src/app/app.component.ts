@@ -41,6 +41,7 @@ import { TrackingReminderService } from './features/tracking-reminder/tracking-r
 import { first, map, skip, take } from 'rxjs/operators';
 import { IS_MOBILE } from './util/is-mobile';
 import { FocusModeService } from './features/focus-mode/focus-mode.service';
+import { warpAnimation, warpInAnimation } from './ui/animations/warp.ani';
 
 const w = window as any;
 const productivityTip: string[] = w.productivityTips && w.productivityTips[w.randomIndex];
@@ -49,7 +50,13 @@ const productivityTip: string[] = w.productivityTips && w.productivityTips[w.ran
   selector: 'app-root',
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss'],
-  animations: [expandAnimation, warpRouteAnimation, fadeAnimation],
+  animations: [
+    expandAnimation,
+    warpRouteAnimation,
+    fadeAnimation,
+    warpAnimation,
+    warpInAnimation,
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AppComponent implements OnDestroy {

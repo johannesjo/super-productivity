@@ -13,13 +13,21 @@
 
   <focus-mode-task-selection
     *ngSwitchCase="FocusModePage.TaskSelection"
+    @warpIn
   ></focus-mode-task-selection>
 
   <focus-mode-duration-selection
     *ngSwitchCase="FocusModePage.DurationSelection"
+    @warpIn
   ></focus-mode-duration-selection>
 
-  <focus-mode-main *ngSwitchCase="FocusModePage.Main"></focus-mode-main>
+  <focus-mode-main
+    *ngSwitchCase="FocusModePage.Main"
+    @warpIn
+  ></focus-mode-main>
 
-  <focus-mode-task-done *ngSwitchCase="FocusModePage.TaskDone"></focus-mode-task-done>
+  <focus-mode-task-done
+    *ngSwitchCase="FocusModePage.TaskDone"
+    @warpIn
+  ></focus-mode-task-done>
 </main>

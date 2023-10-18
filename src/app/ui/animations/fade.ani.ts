@@ -39,3 +39,12 @@ export const fadeOutAnimation = [
     ]),
   ]),
 ];
+
+export const fadeInAnimation = [
+  trigger('fadeIn', [
+    transition(':enter', [
+      style({ opacity: 0 }),
+      animate(ANI_ENTER_TIMING, style({ opacity: '*' })),
+    ]), // void => *
+  ]),
+];

@@ -17,13 +17,15 @@ import {
   cancelFocusSession,
   setFocusSessionActivePage,
 } from '../store/focus-mode.actions';
+import { fadeInAnimation } from '../../../ui/animations/fade.ani';
+import { warpAnimation, warpInAnimation } from '../../../ui/animations/warp.ani';
 
 @Component({
   selector: 'focus-mode-overlay',
   templateUrl: './focus-mode-overlay.component.html',
   styleUrls: ['./focus-mode-overlay.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  animations: [expandAnimation],
+  animations: [expandAnimation, fadeInAnimation, warpAnimation, warpInAnimation],
 })
 export class FocusModeOverlayComponent implements OnDestroy {
   FocusModePage: typeof FocusModePage = FocusModePage;
