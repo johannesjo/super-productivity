@@ -56,4 +56,10 @@ export class FocusModeDurationSelectionComponent implements AfterViewInit, OnDes
       setFocusSessionActivePage({ focusActivePage: FocusModePage.Main }),
     );
   }
+
+  selectDifferentTask(): void {
+    this._store.dispatch(
+      setFocusSessionActivePage({ focusActivePage: FocusModePage.TaskSelection }),
+    );
+  }
 }

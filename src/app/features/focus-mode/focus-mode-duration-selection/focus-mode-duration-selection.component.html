@@ -3,13 +3,21 @@
   novalidate
 >
   <h1>Set Focus Session Duration</h1>
-  <div
-    class="for-task"
-    *ngIf="task$|async as task"
-  >
-    for task "<em>{{task?.title}}</em>"
-  </div>
-
+  <ng-container *ngIf="task$|async as task">
+    <div class="for-task">
+      <div>for task "<em>{{task?.title}}</em>"</div>
+    </div>
+    <div style="text-align: center; margin-bottom: 8px">
+      <button
+        mat-stroked-button
+        type="button"
+        (click)="selectDifferentTask()"
+      >
+        <!--      <mat-icon>arrow_back_ios</mat-icon>-->
+        Select another task
+      </button>
+    </div>
+  </ng-container>
   <input-duration-slider
     [model]="sessionDuration$|async"
     (modelChange)="onFocusModeDurationChanged($event)"
