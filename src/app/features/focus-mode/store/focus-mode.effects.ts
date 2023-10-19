@@ -16,6 +16,7 @@ import {
   pairwise,
   scan,
   switchMap,
+  tap,
 } from 'rxjs/operators';
 import { EMPTY, interval, merge, Observable, of } from 'rxjs';
 import { TaskService } from '../../tasks/task.service';
@@ -25,8 +26,12 @@ import {
 } from './focus-mode.selectors';
 import { Store } from '@ngrx/store';
 import { unsetCurrentTask } from '../../tasks/store/task.actions';
+import { playSound } from '../../../util/play-sound';
 
 const TICK_DURATION = 500;
+const SESSION_DONE_SOUND = 'positive.ogg';
+
+// const DEFAULT_TICK_SOUND = 'tick.mp3';
 
 @Injectable()
 export class FocusModeEffects {
@@ -84,10 +89,30 @@ export class FocusModeEffects {
     return this._actions$.pipe(ofType(cancelFocusSession), mapTo(unsetCurrentTask()));
   });
 
+  playSessionDoneSoundIfEnabled$: Observable<unknown> = createEffect(
+    () =>
+      this._globalConfigService.sound$.pipe(
+        switchMap((sndCfg) =>
+          sndCfg.volume > 0
+            ? this._actions$.pipe(
+                ofType(focusSessionDone),
+                tap(() => playSound(SESSION_DONE_SOUND, sndCfg.volume)),
+              )
+            : EMPTY,
+        ),
+      ),
+    { dispatch: false },
+  );
+
   constructor(
     private _store: Store,
     private _actions$: Actions,
     private _globalConfigService: GlobalConfigService,
     private _taskService: TaskService,
-  ) {}
+  ) {
+    playSound(SESSION_DONE_SOUND);
+    setTimeout(() => {
+      playSound(SESSION_DONE_SOUND);
+    }, 9000);
+  }
 }
