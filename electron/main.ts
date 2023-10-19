@@ -339,8 +339,9 @@ ipcMain.on(IPC.SET_PROGRESS_BAR, (ev, { progress, mode }) => {
   }
 });
 
-ipcMain.on(IPC.FLASH_PROGRESS_BAR, (ev) => {
+ipcMain.on(IPC.FLASH_FRAME, (ev) => {
   if (mainWin) {
+    mainWin.flashFrame(false);
     mainWin.flashFrame(true);
 
     mainWin.once('focus', () => {

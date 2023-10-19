@@ -103,7 +103,7 @@ export class FocusModeEffects {
           sndCfg.volume > 0
             ? this._actions$.pipe(
                 ofType(focusSessionDone),
-                tap(() => playSound(SESSION_DONE_SOUND, sndCfg.volume)),
+                tap(() => playSound(SESSION_DONE_SOUND, 100)),
               )
             : EMPTY,
         ),
@@ -142,7 +142,7 @@ export class FocusModeEffects {
               IPC.SHOW_OR_FOCUS,
             );
             (this._electronService.ipcRenderer as typeof ipcRenderer).send(
-              IPC.FLASH_PROGRESS_BAR,
+              IPC.FLASH_FRAME,
             );
             (this._electronService.ipcRenderer as typeof ipcRenderer).send(
               IPC.SET_PROGRESS_BAR,
