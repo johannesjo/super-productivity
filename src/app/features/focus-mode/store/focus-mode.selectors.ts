@@ -13,6 +13,10 @@ export const selectFocusSessionDuration = createSelector(
   selectFocusModeState,
   (state) => state.focusSessionDuration,
 );
+export const selectLastFocusSessionDuration = createSelector(
+  selectFocusModeState,
+  (state) => state.lastFocusSessionDuration,
+);
 export const selectIsFocusOverlayShown = createSelector(
   selectFocusModeState,
   (state) => state.isFocusOverlayShown,

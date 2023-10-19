@@ -5,19 +5,35 @@
 
 <h1>Congrats for completing this session!</h1>
 
+<div class="msg">
+  You worked for <em>{{lastSessionDuration$|async|msToString}}</em> on
+  "<em>{{taskTitle$|async}}</em>"
+</div>
+
 <div class="btn-wrapper">
   <button
-    mat-raised-button
+    mat-stroked-button
     color="primary"
     (click)="closeFocusOverlay()"
   >
     Back to planing
   </button>
+
   <button
+    *ngIf="!(currentTask$|async)"
     mat-raised-button
     color="primary"
-    (click)="startNextTask()"
+    (click)="startNextFocusSession()"
   >
-    Start next task
+    Start next Focus Session
+  </button>
+
+  <button
+    *ngIf="(currentTask$|async)"
+    mat-raised-button
+    color="primary"
+    (click)="continueWithFocusSession()"
+  >
+    Continue Focus Session
   </button>
 </div>

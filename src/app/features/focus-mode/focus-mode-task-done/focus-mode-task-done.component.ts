@@ -2,6 +2,13 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { hideFocusOverlay, setFocusSessionActivePage } from '../store/focus-mode.actions';
 import { FocusModePage } from '../focus-mode.const';
+import {
+  selectCurrentTask,
+  selectLastCurrentTask,
+} from '../../tasks/store/task.selectors';
+import { selectLastFocusSessionDuration } from '../store/focus-mode.selectors';
+import { map, switchMap, take } from 'rxjs/operators';
+import { of } from 'rxjs';
 
 @Component({
   selector: 'focus-mode-task-done',
@@ -10,15 +17,33 @@ import { FocusModePage } from '../focus-mode.const';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class FocusModeTaskDoneComponent {
+  currentTask$ = this._store.select(selectCurrentTask);
+  lastCurrentTask$ = this._store.select(selectLastCurrentTask);
+  taskTitle$ = this.lastCurrentTask$.pipe(
+    switchMap((lastCurrentTask) =>
+      lastCurrentTask
+        ? of(lastCurrentTask.title)
+        : this.currentTask$.pipe(map((task) => task?.title)),
+    ),
+    take(1),
+  );
+  lastSessionDuration$ = this._store.select(selectLastFocusSessionDuration);
+
   constructor(private _store: Store) {}
 
   closeFocusOverlay(): void {
     this._store.dispatch(hideFocusOverlay());
   }
 
-  startNextTask(): void {
+  startNextFocusSession(): void {
     this._store.dispatch(
       setFocusSessionActivePage({ focusActivePage: FocusModePage.TaskSelection }),
+    );
+  }
+
+  continueWithFocusSession(): void {
+    this._store.dispatch(
+      setFocusSessionActivePage({ focusActivePage: FocusModePage.DurationSelection }),
     );
   }
 }

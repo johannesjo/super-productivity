@@ -1,5 +1,14 @@
 @import '../../../../variables';
 
+:host {
+  text-align: center;
+}
+
+.msg {
+  font-size: 20px;
+  margin-bottom: $s * 3;
+}
+
 .btn-wrapper {
   display: flex;
   align-items: center;

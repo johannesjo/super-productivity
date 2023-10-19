@@ -67,6 +67,9 @@ export const selectIsTaskDataLoaded = createSelector(
 export const selectCurrentTask = createSelector(selectTaskFeatureState, (s) =>
   s.currentTaskId ? (s.entities[s.currentTaskId] as Task) : null,
 );
+export const selectLastCurrentTask = createSelector(selectTaskFeatureState, (s) =>
+  s.lastCurrentTaskId ? (s.entities[s.lastCurrentTaskId] as Task) : null,
+);
 
 export const selectCurrentTaskOrParentWithData = createSelector(
   selectTaskFeatureState,
