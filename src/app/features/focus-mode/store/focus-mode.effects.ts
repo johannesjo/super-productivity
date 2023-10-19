@@ -17,16 +17,22 @@ import {
   scan,
   switchMap,
   tap,
+  withLatestFrom,
 } from 'rxjs/operators';
 import { EMPTY, interval, merge, Observable, of } from 'rxjs';
 import { TaskService } from '../../tasks/task.service';
 import {
   selectFocusSessionDuration,
+  selectFocusSessionProgress,
   selectIsFocusSessionRunning,
 } from './focus-mode.selectors';
 import { Store } from '@ngrx/store';
 import { unsetCurrentTask } from '../../tasks/store/task.actions';
 import { playSound } from '../../../util/play-sound';
+import { IS_ELECTRON } from '../../../app.constants';
+import { ipcRenderer } from 'electron';
+import { IPC } from '../../../../../electron/shared-with-frontend/ipc-events.const';
+import { ElectronService } from '../../../core/electron/electron.service';
 
 const TICK_DURATION = 500;
 const SESSION_DONE_SOUND = 'positive.ogg';
@@ -37,6 +43,7 @@ const SESSION_DONE_SOUND = 'positive.ogg';
 export class FocusModeEffects {
   private _isRunning$ = this._store.select(selectIsFocusSessionRunning);
   private _sessionDuration$ = this._store.select(selectFocusSessionDuration);
+  private _sessionProgress$ = this._store.select(selectFocusSessionProgress);
 
   private _timer$: Observable<number> = interval(TICK_DURATION).pipe(
     switchMap(() => of(Date.now())),
@@ -104,11 +111,33 @@ export class FocusModeEffects {
     { dispatch: false },
   );
 
+  setTaskBarIconProgress$: any =
+    IS_ELECTRON &&
+    createEffect(
+      () =>
+        this._sessionProgress$.pipe(
+          withLatestFrom(this._isRunning$),
+          // we display pomodoro progress for pomodoro
+          tap(([progress, isRunning]: [number, boolean]) => {
+            const progressBarMode: 'normal' | 'pause' = isRunning ? 'normal' : 'pause';
+            (this._electronService.ipcRenderer as typeof ipcRenderer).send(
+              IPC.SET_PROGRESS_BAR,
+              {
+                progress,
+                progressBarMode,
+              },
+            );
+          }),
+        ),
+      { dispatch: false },
+    );
+
   constructor(
     private _store: Store,
     private _actions$: Actions,
     private _globalConfigService: GlobalConfigService,
     private _taskService: TaskService,
+    private _electronService: ElectronService,
   ) {
     playSound(SESSION_DONE_SOUND);
     setTimeout(() => {
