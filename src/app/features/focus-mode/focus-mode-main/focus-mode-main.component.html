@@ -2,13 +2,7 @@
   <div class="task-title">{{task.title}}</div>
 
   <div class="progress-wrapper">
-    <mat-progress-spinner
-      [mode]="'determinate'"
-      [value]="sessionProgress$|async"
-      [strokeWidth]="20"
-      [diameter]="150 "
-    >
-    </mat-progress-spinner>
+    <progress-circle [progress]="sessionProgress$|async"></progress-circle>
 
     <div class="progress-label-wrapper">
       <div

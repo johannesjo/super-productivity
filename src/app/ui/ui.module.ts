@@ -94,6 +94,7 @@ import { RoundDurationPipe } from './pipes/round-duration.pipe';
 import { ShortPlannedAtPipe } from './pipes/short-planned-at.pipe';
 import { LongPressIOSDirective } from './longpress/longpress-ios.directive';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
+import { ProgressCircleComponent } from './progress-circle/progress-circle.component';
 
 const DIALOG_COMPONENTS = [
   DialogConfirmComponent,
@@ -130,6 +131,7 @@ const COMPONENT_AND_PIPES = [
   MsToStringPipe,
   NumberToMonthPipe,
   ProgressBarComponent,
+  ProgressCircleComponent,
   SimpleDownloadDirective,
   StringToMsPipe,
   ThemeSelectComponent,

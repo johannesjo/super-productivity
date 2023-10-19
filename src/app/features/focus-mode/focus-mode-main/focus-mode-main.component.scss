@@ -40,6 +40,26 @@
   position: relative;
 }
 
+progress-circle {
+  width: 150px;
+  height: 150px;
+
+  :host.isShowNotes & {
+    width: 120px;
+    height: 120px;
+  }
+
+  @media (min-height: 800px) and (min-width: 500px) {
+    width: 200px;
+    height: 200px;
+
+    :host.isShowNotes & {
+      width: 150px;
+      height: 150px;
+    }
+  }
+}
+
 .progress-label-wrapper {
   position: absolute;
   top: 50%;
