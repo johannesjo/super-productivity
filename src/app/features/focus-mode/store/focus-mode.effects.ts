@@ -117,7 +117,6 @@ export class FocusModeEffects {
       () =>
         this._sessionProgress$.pipe(
           withLatestFrom(this._isRunning$),
-          // we display pomodoro progress for pomodoro
           tap(([progress, isRunning]: [number, boolean]) => {
             const progressBarMode: 'normal' | 'pause' = isRunning ? 'normal' : 'pause';
             (this._electronService.ipcRenderer as typeof ipcRenderer).send(
@@ -132,16 +131,36 @@ export class FocusModeEffects {
       { dispatch: false },
     );
 
+  focusWindowOnSessionDone$: any =
+    IS_ELECTRON &&
+    createEffect(
+      () =>
+        this._actions$.pipe(
+          ofType(focusSessionDone),
+          tap(() => {
+            (this._electronService.ipcRenderer as typeof ipcRenderer).send(
+              IPC.SHOW_OR_FOCUS,
+            );
+            (this._electronService.ipcRenderer as typeof ipcRenderer).send(
+              IPC.FLASH_PROGRESS_BAR,
+            );
+            (this._electronService.ipcRenderer as typeof ipcRenderer).send(
+              IPC.SET_PROGRESS_BAR,
+              {
+                progress: 100,
+                progressBarMode: 'normal',
+              },
+            );
+          }),
+        ),
+      { dispatch: false },
+    );
+
   constructor(
     private _store: Store,
     private _actions$: Actions,
     private _globalConfigService: GlobalConfigService,
     private _taskService: TaskService,
     private _electronService: ElectronService,
-  ) {
-    playSound(SESSION_DONE_SOUND);
-    setTimeout(() => {
-      playSound(SESSION_DONE_SOUND);
-    }, 9000);
-  }
+  ) {}
 }
