@@ -5,7 +5,6 @@ import { ProjectOverviewPageComponent } from './pages/project-overview-page/proj
 import { DailySummaryComponent } from './pages/daily-summary/daily-summary.component';
 import { WorklogComponent } from './features/worklog/worklog.component';
 import { MetricPageComponent } from './pages/metric-page/metric-page.component';
-import { ProcrastinationComponent } from './features/procrastination/procrastination.component';
 import { SchedulePageComponent } from './pages/schedule-page/schedule-page.component';
 import { ProjectSettingsPageComponent } from './pages/project-settings-page/project-settings-page.component';
 import { TagTaskPageComponent } from './pages/tag-task-page/tag-task-page.component';
@@ -31,13 +30,6 @@ export const APP_ROUTES: Routes = [
     path: 'schedule',
     component: SchedulePageComponent,
     data: { page: 'schedule' },
-    canActivate: [FocusOverlayOpenGuard],
-  },
-  // TODO remove
-  {
-    path: 'procrastination',
-    component: ProcrastinationComponent,
-    data: { page: 'procrastination' },
     canActivate: [FocusOverlayOpenGuard],
   },
   {

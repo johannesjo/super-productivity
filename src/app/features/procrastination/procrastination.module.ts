@@ -8,5 +8,6 @@ import { RouterModule } from '@angular/router';
 @NgModule({
   imports: [CommonModule, UiModule, TasksModule, RouterModule],
   declarations: [ProcrastinationComponent],
+  exports: [ProcrastinationComponent],
 })
 export class ProcrastinationModule {}

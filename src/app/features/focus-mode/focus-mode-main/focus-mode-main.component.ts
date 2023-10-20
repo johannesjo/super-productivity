@@ -21,10 +21,11 @@ import {
   selectFocusSessionProgress,
   selectFocusSessionTimeToGo,
 } from '../store/focus-mode.selectors';
-import { focusSessionDone } from '../store/focus-mode.actions';
+import { focusSessionDone, setFocusSessionActivePage } from '../store/focus-mode.actions';
 import { updateTask } from '../../tasks/store/task.actions';
 import { SimpleCounterService } from '../../simple-counter/simple-counter.service';
 import { SimpleCounter } from '../../simple-counter/simple-counter.model';
+import { FocusModePage } from '../focus-mode.const';
 
 @Component({
   selector: 'focus-mode-main',
@@ -144,7 +145,9 @@ export class FocusModeMainComponent implements OnDestroy {
   }
 
   getProcrastinationHelp(): void {
-    this._router.navigateByUrl('/procrastination');
+    this._store.dispatch(
+      setFocusSessionActivePage({ focusActivePage: FocusModePage.ProcrastinationHelp }),
+    );
   }
 
   trackById(i: number, item: SimpleCounter): string {

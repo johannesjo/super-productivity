@@ -4,4 +4,5 @@ export enum FocusModePage {
   TaskSelection,
   DurationSelection,
   Break,
+  ProcrastinationHelp = 5,
 }

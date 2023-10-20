@@ -16,6 +16,7 @@ import { FOCUS_MODE_FEATURE_KEY, focusModeReducer } from './store/focus-mode.red
 import { FocusModeDurationSelectionComponent } from './focus-mode-duration-selection/focus-mode-duration-selection.component';
 import { IssueModule } from '../issue/issue.module';
 import { SimpleCounterModule } from '../simple-counter/simple-counter.module';
+import { ProcrastinationModule } from '../procrastination/procrastination.module';
 
 @NgModule({
   declarations: [
@@ -36,6 +37,7 @@ import { SimpleCounterModule } from '../simple-counter/simple-counter.module';
     SimpleCounterModule,
     StoreModule.forFeature(FOCUS_MODE_FEATURE_KEY, focusModeReducer),
     EffectsModule.forFeature([FocusModeEffects]),
+    ProcrastinationModule,
   ],
   exports: [FocusModeOverlayComponent],
 })
