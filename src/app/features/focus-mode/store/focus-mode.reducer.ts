@@ -68,7 +68,6 @@ export const focusModeReducer = createReducer<State>(
   on(FocusModeActions.showFocusOverlay, (state) => ({
     ...state,
     isFocusOverlayShown: true,
-    isFocusSessionRunning: false,
   })),
   on(FocusModeActions.hideFocusOverlay, (state) => ({
     ...state,

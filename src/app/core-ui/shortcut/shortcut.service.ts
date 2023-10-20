@@ -17,6 +17,8 @@ import { WorkContextType } from '../../features/work-context/work-context.model'
 import { SnackService } from '../../core/snack/snack.service';
 import { TranslateService } from '@ngx-translate/core';
 import { T } from '../../t.const';
+import { Store } from '@ngrx/store';
+import { showFocusOverlay } from '../../features/focus-mode/store/focus-mode.actions';
 
 @Injectable({
   providedIn: 'root',
@@ -38,6 +40,7 @@ export class ShortcutService {
     private _bookmarkService: BookmarkService,
     private _translateService: TranslateService,
     private _ngZone: NgZone,
+    private _store: Store,
   ) {
     this._activatedRoute.queryParams.subscribe((params) => {
       if (params && params.backlogPos) {
@@ -112,6 +115,8 @@ export class ShortcutService {
       this._router.navigate(['/active/tasks'], {
         queryParams: { backlogPos },
       });
+    } else if (checkKeyCombo(ev, keys.goToFocusMode)) {
+      this._store.dispatch(showFocusOverlay());
     } else if (checkKeyCombo(ev, keys.goToWorkView)) {
       this._router.navigate(['/active/tasks']);
     } else if (checkKeyCombo(ev, keys.goToTimeline)) {

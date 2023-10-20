@@ -92,6 +92,7 @@ export const DEFAULT_GLOBAL_CONFIG: GlobalConfigState = {
     showSearchBar: 'Shift+F',
     toggleBookmarks: 'Shift+V',
     toggleBacklog: 'b',
+    goToFocusMode: 'f',
     goToWorkView: 'w',
     goToScheduledView: 'Shift+S',
     goToTimeline: 'Shift+T',
