@@ -13,6 +13,8 @@ import { WorkContextType } from './features/work-context/work-context.model';
 import { TagService } from './features/tag/tag.service';
 import { ProjectService } from './features/project/project.service';
 import { DataInitService } from './core/data-init/data-init.service';
+import { Store } from '@ngrx/store';
+import { selectIsFocusOverlayShown } from './features/focus-mode/store/focus-mode.selectors';
 
 @Injectable({ providedIn: 'root' })
 export class ActiveWorkContextGuard implements CanActivate {
@@ -53,6 +55,18 @@ export class ValidTagIdGuard implements CanActivate {
       take(1),
       map((tag) => !!tag),
     );
+  }
+}
+
+@Injectable({ providedIn: 'root' })
+export class FocusOverlayOpenGuard implements CanActivate {
+  constructor(private _store: Store) {}
+
+  canActivate(
+    next: ActivatedRouteSnapshot,
+    state: RouterStateSnapshot,
+  ): Observable<boolean> {
+    return this._store.select(selectIsFocusOverlayShown).pipe(map((isShown) => !isShown));
   }
 }
 
