@@ -47,7 +47,7 @@ export class FocusModeMainComponent implements OnDestroy {
   // defaultTaskNotes: string = '';
   defaultTaskNotes: string = '';
   T: typeof T = T;
-  issueUrl$: Observable<string | null> = this._taskService.currentTask$.pipe(
+  issueUrl$: Observable<string | null> = this.taskService.currentTask$.pipe(
     switchMap((v) => {
       if (!v) {
         return of(null);
@@ -65,7 +65,7 @@ export class FocusModeMainComponent implements OnDestroy {
   constructor(
     public readonly simpleCounterService: SimpleCounterService,
     private readonly _globalConfigService: GlobalConfigService,
-    private readonly _taskService: TaskService,
+    public readonly taskService: TaskService,
     private readonly _router: Router,
     private readonly _taskAttachmentService: TaskAttachmentService,
     private readonly _issueService: IssueService,
@@ -74,15 +74,15 @@ export class FocusModeMainComponent implements OnDestroy {
     this._globalConfigService.misc$
       .pipe(takeUntil(this._onDestroy$))
       .subscribe((misc) => (this.defaultTaskNotes = misc.taskNotesTpl));
-    this._taskService.currentTask$.pipe(takeUntil(this._onDestroy$)).subscribe((task) => {
+    this.taskService.currentTask$.pipe(takeUntil(this._onDestroy$)).subscribe((task) => {
       this.task = task;
     });
 
-    this._taskService.currentTask$
+    this.taskService.currentTask$
       .pipe(first(), takeUntil(this._onDestroy$))
       .subscribe((task) => {
         if (!task) {
-          this._taskService.startFirstStartable();
+          this.taskService.startFirstStartable();
         }
       });
   }
@@ -125,7 +125,7 @@ export class FocusModeMainComponent implements OnDestroy {
       if (this.task === null) {
         throw new Error('Task is not loaded');
       }
-      this._taskService.update(this.task.id, { notes: $event });
+      this.taskService.update(this.task.id, { notes: $event });
     }
   }
 

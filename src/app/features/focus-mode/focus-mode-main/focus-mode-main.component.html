@@ -1,4 +1,4 @@
-<ng-container *ngIf="task">
+<ng-container *ngIf="taskService.currentTask$|async as task">
   <div class="task-title">{{task.title}}</div>
 
   <div class="progress-wrapper">

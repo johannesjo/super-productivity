@@ -3,19 +3,23 @@ import { Actions, createEffect, ofType } from '@ngrx/effects';
 import {
   cancelFocusSession,
   focusSessionDone,
+  setFocusSessionActivePage,
   setFocusSessionTimeToGo,
   showFocusOverlay,
   startFocusSession,
 } from './focus-mode.actions';
 import { GlobalConfigService } from '../../config/global-config.service';
 import {
+  delay,
   distinctUntilChanged,
+  filter,
   first,
   map,
   mapTo,
   pairwise,
   scan,
   switchMap,
+  switchMapTo,
   tap,
   withLatestFrom,
 } from 'rxjs/operators';
@@ -33,6 +37,8 @@ import { IS_ELECTRON } from '../../../app.constants';
 import { ipcRenderer } from 'electron';
 import { IPC } from '../../../../../electron/shared-with-frontend/ipc-events.const';
 import { ElectronService } from '../../../core/electron/electron.service';
+import { IdleService } from '../../idle/idle.service';
+import { FocusModePage } from '../focus-mode.const';
 
 const TICK_DURATION = 500;
 const SESSION_DONE_SOUND = 'positive.ogg';
@@ -111,6 +117,22 @@ export class FocusModeEffects {
     { dispatch: false },
   );
 
+  handleIdleCurrentTaskDeSelection$: Observable<unknown> = createEffect(() =>
+    this._isRunning$.pipe(
+      switchMap((isRunning) => (isRunning ? this._idleService.isIdle$ : EMPTY)),
+      switchMap((isIdle) =>
+        !isIdle ? this._idleService.isIdle$.pipe(distinctUntilChanged()) : EMPTY,
+      ),
+      // give time to let task be started again
+      delay(500),
+      switchMapTo(this._taskService.currentTaskId$.pipe(first())),
+      filter((currentTaskId) => !currentTaskId),
+      map(() =>
+        setFocusSessionActivePage({ focusActivePage: FocusModePage.TaskSelection }),
+      ),
+    ),
+  );
+
   setTaskBarIconProgress$: any =
     IS_ELECTRON &&
     createEffect(
@@ -159,6 +181,7 @@ export class FocusModeEffects {
   constructor(
     private _store: Store,
     private _actions$: Actions,
+    private _idleService: IdleService,
     private _globalConfigService: GlobalConfigService,
     private _taskService: TaskService,
     private _electronService: ElectronService,

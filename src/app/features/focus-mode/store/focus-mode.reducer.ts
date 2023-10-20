@@ -62,7 +62,7 @@ export const focusModeReducer = createReducer<State>(
       state.focusSessionTimeToGo >= USE_REMAINING_SESSION_TIME_THRESHOLD
         ? state.focusSessionTimeToGo
         : DEFAULT_FOCUS_SESSION_DURATION,
-    focusSessionActivePage: FocusModePage.TaskDone,
+    focusSessionActivePage: FocusModePage.SessionDone,
   })),
 
   on(FocusModeActions.showFocusOverlay, (state) => ({

@@ -1,6 +1,6 @@
 export enum FocusModePage {
   Main,
-  TaskDone,
+  SessionDone,
   TaskSelection,
   DurationSelection,
   Break,
