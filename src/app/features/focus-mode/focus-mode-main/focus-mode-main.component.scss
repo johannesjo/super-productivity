@@ -24,15 +24,20 @@
 .task-title {
   text-align: center;
   font-size: 30px;
-  line-height: 1;
+  line-height: 1.1;
   margin: $s;
-  margin-top: $s * 2;
+  margin-top: $s * 3;
   margin-bottom: $s * 3;
 
   :host.isShowNotes & {
-    font-size: 24px;
-    margin-top: $s * 5;
-    margin-bottom: $s * 2;
+    margin-top: $s * 7;
+  }
+
+  @media (max-height: 799px) and (max-width: 499px) {
+    :host.isShowNotes & {
+      font-size: 24px;
+      margin-bottom: $s * 2;
+    }
   }
 }
 
@@ -43,19 +48,18 @@
 progress-circle {
   width: 150px;
   height: 150px;
-
-  :host.isShowNotes & {
-    width: 120px;
-    height: 120px;
-  }
-
   @media (min-height: 800px) and (min-width: 500px) {
-    width: 200px;
-    height: 200px;
-
+    width: 180px;
+    height: 180px;
+  }
+  @media (min-height: 900px) and (min-width: 600px) {
+    width: 220px;
+    height: 220px;
+  }
+  @media (max-height: 799px) and (max-width: 499px) {
     :host.isShowNotes & {
-      width: 150px;
-      height: 150px;
+      width: 120px;
+      height: 120px;
     }
   }
 }
