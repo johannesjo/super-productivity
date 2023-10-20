@@ -36,6 +36,11 @@ export class FocusModeOverlayComponent implements OnDestroy {
   sessionProgress$ = this._store.select(selectFocusSessionProgress);
 
   private _onDestroy$ = new Subject<void>();
+  private _closeOnEscapeKeyListener = (ev: KeyboardEvent): void => {
+    if (ev.key === 'Escape') {
+      this.cancelFocusSession();
+    }
+  };
 
   constructor(
     public readonly taskService: TaskService,
@@ -43,7 +48,8 @@ export class FocusModeOverlayComponent implements OnDestroy {
     private readonly _store: Store,
     private readonly _router: Router,
   ) {
-    // TODO this needs to work differently
+    document.addEventListener('keydown', this._closeOnEscapeKeyListener);
+
     this.taskService.currentTask$
       .pipe(first(), takeUntil(this._onDestroy$))
       .subscribe((task) => {
@@ -64,6 +70,7 @@ export class FocusModeOverlayComponent implements OnDestroy {
   ngOnDestroy(): void {
     this._onDestroy$.next();
     this._onDestroy$.complete();
+    document.removeEventListener('keydown', this._closeOnEscapeKeyListener);
   }
 
   cancelFocusSession(): void {
