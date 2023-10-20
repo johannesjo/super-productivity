@@ -46,7 +46,11 @@ export class FocusModeTaskSelectionComponent implements AfterViewInit, OnDestroy
     $event.preventDefault();
     if (this.selectedTask) {
       if (typeof this.selectedTask === 'string') {
-        // TODO create task
+        const taskId = this.taskService.add(this.selectedTask);
+        this.taskService.setCurrentId(taskId);
+        this._store.dispatch(
+          setFocusSessionActivePage({ focusActivePage: FocusModePage.DurationSelection }),
+        );
       } else {
         this._store.dispatch(
           setFocusSessionActivePage({ focusActivePage: FocusModePage.DurationSelection }),
