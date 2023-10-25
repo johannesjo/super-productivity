@@ -448,7 +448,11 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
     }
 
     const taskEls = Array.from(document.querySelectorAll('task'));
-    const currentIndex = taskEls.findIndex((el) => document.activeElement === el);
+    const activeEl =
+      document.activeElement?.tagName.toLowerCase() === 'task'
+        ? document.activeElement
+        : document.activeElement?.closest('task');
+    const currentIndex = taskEls.findIndex((el) => el === activeEl);
     const prevEl = taskEls[currentIndex - 1] as HTMLElement;
 
     if (prevEl) {
@@ -470,7 +474,11 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
     }
 
     const taskEls = Array.from(document.querySelectorAll('task'));
-    const currentIndex = taskEls.findIndex((el) => document.activeElement === el);
+    const activeEl =
+      document.activeElement?.tagName.toLowerCase() === 'task'
+        ? document.activeElement
+        : document.activeElement?.closest('task');
+    const currentIndex = taskEls.findIndex((el) => el === activeEl);
     const nextEl = taskEls[currentIndex + 1] as HTMLElement;
 
     if (nextEl) {

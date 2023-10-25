@@ -114,4 +114,18 @@ module.exports = {
 
         .assert.containsText(TASK + ':nth-child(1)', '1 test task hihi')
         .end(),
+
+  'should focus previous subtask when marking last subtask done': (browser: NBrowser) =>
+    browser
+      .loadAppAndClickAwayWelcomeDialog(WORK_VIEW_URL)
+      .addTask('task1')
+      .addTask('task2')
+      .setValue('task:last-child', 'a')
+      .keys(['task3', browser.Keys.ENTER])
+      .setValue('[listid="SUB"] task:nth-child(1)', 'a')
+      .keys(['task4', browser.Keys.ENTER])
+      .moveToElement('[listid="SUB"] task:nth-child(2)', 10, 30)
+      .click('.task-done-btn')
+      .assert.containsText(':focus', 'task3')
+      .end(),
 };
