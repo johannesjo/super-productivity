@@ -21,11 +21,11 @@ In case you want to contribute, but you wouldn't know how, here are some suggest
 
 4. **[Provide your opinion](https://github.com/johannesjo/super-productivity/issues?q=is%3Aissue+is%3Aopen+sort%3Areactions-%2B1-desc+label%3A%22community+feedback+wanted%22):** Some community suggestions are controversial. Your input might be helpful even if it is just an up- or down-vote.
 
-5. **[Provide a more refined ui spec for existing feature requests](https://github.com/johannesjo/super-productivity/issues?q=is%3Aissue+is%3Aopen+label%3A%22needs+concept+and%2For+ui+spec%22)**
+5. **[Provide a more refined UI spec for existing feature requests](https://github.com/johannesjo/super-productivity/issues?q=is%3Aissue+is%3Aopen+label%3A%22needs+concept+and%2For+ui+spec%22)**
 
 6. **[Report bugs](https://github.com/johannesjo/super-productivity/issues/new)**
 
-7. **[Make a feature or improvement request](https://github.com/johannesjo/super-productivity/issues/new)**: Something can be be done better? Something essential missing? Let us know!
+7. **[Make a feature or improvement request](https://github.com/johannesjo/super-productivity/issues/new)**: Something can be done better? Something essential missing? Let us know!
 
 8. **[Translations](https://github.com/johannesjo/super-productivity/tree/master/src/assets/i18n), Icons, etc.**: You don't have to be programmer to help. Some of the icons really need improvement and many of the translations could use some love.
 

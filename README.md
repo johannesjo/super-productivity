@@ -133,7 +133,7 @@ Can be used when adding a task.
 
 Check out the web version even though it is a bit limited: Time tracking only works if the app is open and for idle time tracking to work, the chrome extension has to be installed.
 
-If you want the Jira integration and idle time tracking to work, you have to also download and install the [Super Productivity Chrome Extension](https://chrome.google.com/webstore/detail/super-productivity/ljkbjodfmekklcoibdnhahlaalhihmlb).
+If you want the Jira integration and idle time tracking to work, you also have to download and install the [Super Productivity Chrome Extension](https://chrome.google.com/webstore/detail/super-productivity/ljkbjodfmekklcoibdnhahlaalhihmlb).
 
 ## :computer: Downloads & Install
 
@@ -224,11 +224,11 @@ There are several ways to help.
 
 4. **[Provide your opinion](https://github.com/johannesjo/super-productivity/issues?q=is%3Aissue+is%3Aopen+sort%3Areactions-%2B1-desc+label%3A%22community+feedback+wanted%22):** Some community suggestions are controversial. Your input might be helpful and if it is just an up- or down-vote.
 
-5. **[Provide a more refined ui spec for existing feature requests](https://github.com/johannesjo/super-productivity/issues?q=is%3Aissue+is%3Aopen+label%3A%22needs+concept+and%2For+ui+spec%22)**
+5. **[Provide a more refined UI spec for existing feature requests](https://github.com/johannesjo/super-productivity/issues?q=is%3Aissue+is%3Aopen+label%3A%22needs+concept+and%2For+ui+spec%22)**
 
 6. **[Report bugs](https://github.com/johannesjo/super-productivity/issues/new)**
 
-7. **[Make a feature or improvement request](https://github.com/johannesjo/super-productivity/issues/new)**: Something can be be done better? Something essential missing? Let us know!
+7. **[Make a feature or improvement request](https://github.com/johannesjo/super-productivity/issues/new)**: Something can be done better? Something essential missing? Let us know!
 
 8. **[Translations](https://github.com/johannesjo/super-productivity/tree/master/src/assets/i18n), Icons, etc.**: You don't have to be programmer to help. Some of the icons really need improvement and many of the translations could use some love.
 
@@ -295,7 +295,7 @@ For the desktop version automatic backups are stored per default in the `backup`
 
 ## User Data Folder
 
-Where user data is stored differs from os to os. The most common locations are:
+Where user data is stored differs from OS to OS. The most common locations are:
 
 | OS | Location |
 | - | - |
@@ -305,7 +305,7 @@ Where user data is stored differs from os to os. The most common locations are:
 
 The path should be shown when you go to the "Automatic Backups` section on the configuration page (minus the "backup" sub folder). You can also see it printed out when you start the app from the command line.
 
-For web browsers data is simply stored for the current user inside the browser storage.
+For web browsers, data is simply stored for the current user inside the browser storage.
 
 ### Using a custom folder to save user data
 
