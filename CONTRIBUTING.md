@@ -19,7 +19,7 @@ In case you want to contribute, but you wouldn't know how, here are some suggest
 
 3. **[Answer questions](https://github.com/johannesjo/super-productivity/discussions)**: You know the answer to another user's problem? Share your knowledge!
 
-4. **[Provide your opinion](https://github.com/johannesjo/super-productivity/issues?q=is%3Aissue+is%3Aopen+sort%3Areactions-%2B1-desc+label%3A%22community+feedback+wanted%22):** Some community suggestions are controversial. Your input might be helpful and if it is just an up- or down-vote.
+4. **[Provide your opinion](https://github.com/johannesjo/super-productivity/issues?q=is%3Aissue+is%3Aopen+sort%3Areactions-%2B1-desc+label%3A%22community+feedback+wanted%22):** Some community suggestions are controversial. Your input might be helpful even if it is just an up- or down-vote.
 
 5. **[Provide a more refined ui spec for existing feature requests](https://github.com/johannesjo/super-productivity/issues?q=is%3Aissue+is%3Aopen+label%3A%22needs+concept+and%2For+ui+spec%22)**
 
