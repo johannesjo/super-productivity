@@ -131,7 +131,7 @@
     "@angular/forms": "^14.1.1",
     "@angular/language-service": "^14.2.4",
     "@angular/material": "^14.1.1",
-    "@angular/material-moment-adapter": "^14.1.1",
+    "@angular/material-moment-adapter": "^16.2.10",
     "@angular/platform-browser": "^14.1.1",
     "@angular/platform-browser-dynamic": "^14.1.1",
     "@angular/platform-server": "^14.1.1",
