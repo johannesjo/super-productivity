@@ -169,11 +169,6 @@ progress-circle {
       height: 100% !important;
     }
 
-    ::ng-deep .controls {
-      position: sticky;
-      display: inline-block;
-    }
-
     ::ng-deep textarea {
       background: inherit;
       color: inherit;
