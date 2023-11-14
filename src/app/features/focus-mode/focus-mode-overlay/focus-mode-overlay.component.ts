@@ -34,11 +34,17 @@ export class FocusModeOverlayComponent implements OnDestroy {
   timeToGo$ = this._store.select(selectFocusSessionTimeToGo);
   sessionDuration$ = this._store.select(selectFocusSessionDuration);
   sessionProgress$ = this._store.select(selectFocusSessionProgress);
+  activatePage?: FocusModePage;
 
   private _onDestroy$ = new Subject<void>();
   private _closeOnEscapeKeyListener = (ev: KeyboardEvent): void => {
     if (ev.key === 'Escape') {
-      this.cancelFocusSession();
+      if (
+        this.activatePage === FocusModePage.TaskSelection ||
+        this.activatePage === FocusModePage.DurationSelection
+      ) {
+        this.cancelFocusSession();
+      }
     }
   };
 
@@ -65,6 +71,9 @@ export class FocusModeOverlayComponent implements OnDestroy {
           );
         }
       });
+    this.activePage$.pipe(takeUntil(this._onDestroy$)).subscribe((activePage) => {
+      this.activatePage = activePage;
+    });
   }
 
   ngOnDestroy(): void {
