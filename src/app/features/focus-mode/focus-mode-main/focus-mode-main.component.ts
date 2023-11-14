@@ -153,4 +153,13 @@ export class FocusModeMainComponent implements OnDestroy {
   trackById(i: number, item: SimpleCounter): string {
     return item.id;
   }
+
+  updateTaskTitleIfChanged(isChanged: boolean, newTitle: string): void {
+    if (isChanged) {
+      if (!this.task) {
+        throw new Error('No task data');
+      }
+      this.taskService.update(this.task.id, { title: newTitle });
+    }
+  }
 }
