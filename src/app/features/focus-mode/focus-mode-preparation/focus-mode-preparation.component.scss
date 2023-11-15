@@ -1,0 +1,17 @@
+@import '../../../../variables';
+
+.action-msg {
+  text-align: center;
+  font-size: 22px;
+  font-weight: bold;
+}
+
+.countdown-timer {
+  font-size: 34px;
+  text-align: center;
+  margin: $s * 4;
+}
+
+:host li {
+  font-size: 18px;
+}

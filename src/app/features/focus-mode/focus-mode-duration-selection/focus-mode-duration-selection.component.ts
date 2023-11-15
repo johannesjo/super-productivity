@@ -13,6 +13,10 @@ import {
 } from '../store/focus-mode.actions';
 import { FocusModePage } from '../focus-mode.const';
 import { selectCurrentTask } from '../../tasks/store/task.selectors';
+import { Observable, Subject } from 'rxjs';
+import { FocusModeConfig } from '../../config/global-config.model';
+import { selectFocusModeConfig } from '../../config/store/global-config.reducer';
+import { takeUntil } from 'rxjs/operators';
 
 @Component({
   selector: 'focus-mode-duration-selection',
@@ -25,8 +29,13 @@ export class FocusModeDurationSelectionComponent implements AfterViewInit, OnDes
   task$ = this._store.select(selectCurrentTask);
   updatedFocusModeDuration?: number;
   focusTimeout = 0;
+  cfg$: Observable<FocusModeConfig> = this._store.select(selectFocusModeConfig);
+  cfg?: FocusModeConfig;
+  private _onDestroy$ = new Subject<void>();
 
-  constructor(private readonly _store: Store) {}
+  constructor(private readonly _store: Store) {
+    this.cfg$.pipe(takeUntil(this._onDestroy$)).subscribe((v) => (this.cfg = v));
+  }
 
   ngAfterViewInit(): void {
     this.focusTimeout = window.setTimeout(() => {
@@ -38,6 +47,8 @@ export class FocusModeDurationSelectionComponent implements AfterViewInit, OnDes
 
   ngOnDestroy(): void {
     window.clearTimeout(this.focusTimeout);
+    this._onDestroy$.next();
+    this._onDestroy$.complete();
   }
 
   onFocusModeDurationChanged(duration: number): void {
@@ -51,10 +62,16 @@ export class FocusModeDurationSelectionComponent implements AfterViewInit, OnDes
         setFocusSessionDuration({ focusSessionDuration: this.updatedFocusModeDuration }),
       );
     }
-    this._store.dispatch(startFocusSession());
-    this._store.dispatch(
-      setFocusSessionActivePage({ focusActivePage: FocusModePage.Main }),
-    );
+    if (this.cfg?.isSkipPreparation) {
+      this._store.dispatch(startFocusSession());
+      this._store.dispatch(
+        setFocusSessionActivePage({ focusActivePage: FocusModePage.Main }),
+      );
+    } else {
+      this._store.dispatch(
+        setFocusSessionActivePage({ focusActivePage: FocusModePage.Preparation }),
+      );
+    }
   }
 
   selectDifferentTask(): void {

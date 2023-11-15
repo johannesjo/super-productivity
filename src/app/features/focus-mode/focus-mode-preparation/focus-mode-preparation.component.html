@@ -1,0 +1,29 @@
+<section *ngIf="(countdown$|async)> 0">
+  <div class="action-msg">Get ready for your focus session!!!</div>
+
+  <ol>
+    <li>Do some mild stretching</li>
+    <li>Sit (or stand) upright</li>
+    <li>Get mentally ready to be focused and productive</li>
+  </ol>
+
+  <div class="countdown-timer">{{(countdown$|async)}}</div>
+
+  <!--  <div style="text-align: center">-->
+  <!--    <button-->
+  <!--      type="submit"-->
+  <!--      color="primary"-->
+  <!--      mat-raised-button-->
+  <!--      (click)="startSession()"-->
+  <!--    >-->
+  <!--      Start Focus Session-->
+  <!--    </button>-->
+  <!--  </div>-->
+</section>
+
+<section
+  *ngIf="(countdown$|async)<= 0"
+  @fade
+>
+  <div class="action-msg">Go go go!!!</div>
+</section>

@@ -17,6 +17,7 @@ import { FocusModeDurationSelectionComponent } from './focus-mode-duration-selec
 import { IssueModule } from '../issue/issue.module';
 import { SimpleCounterModule } from '../simple-counter/simple-counter.module';
 import { ProcrastinationModule } from '../procrastination/procrastination.module';
+import { FocusModePreparationComponent } from './focus-mode-preparation/focus-mode-preparation.component';
 
 @NgModule({
   declarations: [
@@ -25,6 +26,7 @@ import { ProcrastinationModule } from '../procrastination/procrastination.module
     FocusModeTaskSelectionComponent,
     FocusModeDurationSelectionComponent,
     FocusModeTaskDoneComponent,
+    FocusModePreparationComponent,
   ],
   imports: [
     CommonModule,

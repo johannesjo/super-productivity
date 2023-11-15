@@ -26,6 +26,11 @@
     @warpIn
   ></focus-mode-duration-selection>
 
+  <focus-mode-preparation
+    *ngSwitchCase="FocusModePage.Preparation"
+    @warpIn
+  ></focus-mode-preparation>
+
   <focus-mode-main
     *ngSwitchCase="FocusModePage.Main"
     @warpIn
