@@ -3,10 +3,11 @@
   <div class="pyro-after"></div>
 </div>
 
-<h1>Congrats for completing this session!</h1>
+<h1>{{T.F.FOCUS_MODE.CONGRATS|translate}}</h1>
 
 <div class="msg">
-  You worked for <em>{{lastSessionDuration$|async|msToString}}</em> on
+  {{T.F.FOCUS_MODE.WORKED_FOR|translate}}
+  <em>{{lastSessionDuration$|async|msToString}}</em> {{T.F.FOCUS_MODE.ON|translate}}
   "<em>{{taskTitle$|async}}</em>"
 </div>
 
@@ -16,7 +17,7 @@
     color="primary"
     (click)="closeFocusOverlay()"
   >
-    Back to planing
+    {{T.F.FOCUS_MODE.BACK_TO_PLANNING|translate}}
   </button>
 
   <button
@@ -25,7 +26,7 @@
     color="primary"
     (click)="startNextFocusSession()"
   >
-    Start next Focus Session
+    {{T.F.FOCUS_MODE.START_NEXT_FOCUS_SESSION|translate}}
   </button>
 
   <button
@@ -34,6 +35,6 @@
     color="primary"
     (click)="continueWithFocusSession()"
   >
-    Continue Focus Session
+    {{T.F.FOCUS_MODE.CONTINUE_FOCUS_SESSION|translate}}
   </button>
 </div>

@@ -2,7 +2,8 @@
   (submit)="onSubmit($event)"
   novalidate
 >
-  <h1>Set Focus Session Duration</h1>
+  <h1>{{T.F.FOCUS_MODE.SET_FOCUS_SESSION_DURATION|translate}}</h1>
+
   <ng-container *ngIf="task$|async as task">
     <div class="for-task">
       <div>for task "<em>{{task?.title}}</em>"</div>
@@ -14,7 +15,7 @@
         (click)="selectDifferentTask()"
       >
         <!--      <mat-icon>arrow_back_ios</mat-icon>-->
-        Select another task
+        {{T.F.FOCUS_MODE.SELECT_ANOTHER_TASK|translate}}
       </button>
     </div>
   </ng-container>
@@ -28,6 +29,6 @@
     color="primary"
     mat-raised-button
   >
-    Start Focus Session
+    {{T.F.FOCUS_MODE.START_FOCUS_SESSION|translate}}
   </button>
 </form>

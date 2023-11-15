@@ -17,6 +17,7 @@ import { Observable, Subject } from 'rxjs';
 import { FocusModeConfig } from '../../config/global-config.model';
 import { selectFocusModeConfig } from '../../config/store/global-config.reducer';
 import { takeUntil } from 'rxjs/operators';
+import { T } from 'src/app/t.const';
 
 @Component({
   selector: 'focus-mode-duration-selection',
@@ -25,6 +26,7 @@ import { takeUntil } from 'rxjs/operators';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class FocusModeDurationSelectionComponent implements AfterViewInit, OnDestroy {
+  T: typeof T = T;
   sessionDuration$ = this._store.select(selectFocusSessionDuration);
   task$ = this._store.select(selectCurrentTask);
   updatedFocusModeDuration?: number;

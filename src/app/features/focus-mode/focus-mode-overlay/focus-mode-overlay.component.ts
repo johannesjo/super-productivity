@@ -19,6 +19,7 @@ import {
 } from '../store/focus-mode.actions';
 import { fadeInAnimation } from '../../../ui/animations/fade.ani';
 import { warpAnimation, warpInAnimation } from '../../../ui/animations/warp.ani';
+import { T } from 'src/app/t.const';
 
 @Component({
   selector: 'focus-mode-overlay',
@@ -35,6 +36,7 @@ export class FocusModeOverlayComponent implements OnDestroy {
   sessionDuration$ = this._store.select(selectFocusSessionDuration);
   sessionProgress$ = this._store.select(selectFocusSessionProgress);
   activatePage?: FocusModePage;
+  T: typeof T = T;
 
   private _onDestroy$ = new Subject<void>();
   private _closeOnEscapeKeyListener = (ev: KeyboardEvent): void => {

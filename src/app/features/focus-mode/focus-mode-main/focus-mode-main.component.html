@@ -43,14 +43,14 @@
   <section class="controls">
     <button
       mat-icon-button
-      matTooltip="Finish task and select next"
+      [matTooltip]="T.F.FOCUS_MODE.FINISH_TASK_AND_SELECT_NEXT|translate"
       (click)="finishCurrentTask();"
     >
       <mat-icon>done</mat-icon>
     </button>
     <button
       mat-icon-button
-      matTooltip="Get help, when procrastinating"
+      [matTooltip]="T.F.FOCUS_MODE.GO_TO_PROCRASTINATION|translate"
       (click)="getProcrastinationHelp()"
     >
       <mat-icon>flash_on</mat-icon>
@@ -58,7 +58,7 @@
 
     <a
       mat-icon-button
-      matTooltip="Open issue in Browser"
+      [matTooltip]="T.F.FOCUS_MODE.OPEN_ISSUE_IN_BROWSER|translate"
       target="_blank"
       *ngIf="task.issueId"
       [href]="issueUrl$|async"
@@ -74,7 +74,7 @@
 
     <button
       (click)="isShowNotes=!isShowNotes"
-      matTooltip="Show/hide task notes and attachments"
+      [matTooltip]="T.F.FOCUS_MODE.SHOW_HIDE_NOTES_AND_ATTACHMENTS|translate"
       class="ico-btn show-additional-info-btn"
       color=""
       mat-icon-button

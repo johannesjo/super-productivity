@@ -8,6 +8,7 @@ import { Store } from '@ngrx/store';
 import { interval, Observable, Subject } from 'rxjs';
 import { delay, map, startWith, takeUntil, takeWhile } from 'rxjs/operators';
 import { fadeAnimation } from '../../../ui/animations/fade.ani';
+import { T } from 'src/app/t.const';
 
 const COUNTDOWN_DURATION = 5;
 
@@ -19,6 +20,8 @@ const COUNTDOWN_DURATION = 5;
   animations: [fadeAnimation],
 })
 export class FocusModePreparationComponent implements OnDestroy {
+  T: typeof T = T;
+
   private _onDestroy$ = new Subject<void>();
   countdown$: Observable<number> = interval(1000).pipe(
     takeUntil(this._onDestroy$),

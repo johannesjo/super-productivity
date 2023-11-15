@@ -1,10 +1,10 @@
 <section *ngIf="(countdown$|async)> 0">
-  <div class="action-msg">Get ready for your focus session!!!</div>
+  <div class="action-msg">{{T.F.FOCUS_MODE.GET_READY|translate}}</div>
 
   <ol>
-    <li>Do some mild stretching</li>
-    <li>Sit (or stand) upright</li>
-    <li>Get mentally ready to be focused and productive</li>
+    <li>{{T.F.FOCUS_MODE.PREP_STRETCH|translate}}</li>
+    <li>{{T.F.FOCUS_MODE.PREP_SIT_UPRIGHT|translate}}</li>
+    <li>{{T.F.FOCUS_MODE.PREP_GET_MENTALLY_READY|translate}}</li>
   </ol>
 
   <div class="countdown-timer">{{(countdown$|async)}}</div>
@@ -25,5 +25,5 @@
   *ngIf="(countdown$|async)<= 0"
   @fade
 >
-  <div class="action-msg">Go go go!!!</div>
+  <div class="action-msg">{{T.F.FOCUS_MODE.GOGOGO|translate}}</div>
 </section>

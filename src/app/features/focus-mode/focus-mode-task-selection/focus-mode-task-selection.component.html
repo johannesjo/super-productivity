@@ -2,7 +2,7 @@
   (submit)="onSubmit($event)"
   novalidate
 >
-  <h1>Select a Task to focus on</h1>
+  <h1>{{T.F.FOCUS_MODE.SELECT_TASK|translate}}</h1>
 
   <select-task
     (taskChange)="onTaskChange($event)"
@@ -16,6 +16,6 @@
     color="primary"
     mat-raised-button
   >
-    Next
+    {{T.F.FOCUS_MODE.NEXT|translate}}
   </button>
 </form>

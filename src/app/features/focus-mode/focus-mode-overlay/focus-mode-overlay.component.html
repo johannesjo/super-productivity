@@ -5,7 +5,7 @@
   <button
     class="close-btn"
     mat-icon-button
-    matTooltip="Cancel focus session"
+    [matTooltip]="T.F.FOCUS_MODE.CANCEL_FOCUS_SESSION|translate"
     (click)="cancelFocusSession()"
   >
     <mat-icon>close</mat-icon>

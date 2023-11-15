@@ -9,6 +9,7 @@ import {
 import { selectLastFocusSessionDuration } from '../store/focus-mode.selectors';
 import { map, switchMap, take } from 'rxjs/operators';
 import { of } from 'rxjs';
+import { T } from 'src/app/t.const';
 
 @Component({
   selector: 'focus-mode-task-done',
@@ -28,6 +29,7 @@ export class FocusModeTaskDoneComponent {
     take(1),
   );
   lastSessionDuration$ = this._store.select(selectLastFocusSessionDuration);
+  T: typeof T = T;
 
   constructor(private _store: Store) {}
 

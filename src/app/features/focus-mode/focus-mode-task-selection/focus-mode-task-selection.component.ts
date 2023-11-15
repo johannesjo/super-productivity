@@ -10,6 +10,7 @@ import { first } from 'rxjs/operators';
 import { Store } from '@ngrx/store';
 import { setFocusSessionActivePage } from '../store/focus-mode.actions';
 import { FocusModePage } from '../focus-mode.const';
+import { T } from 'src/app/t.const';
 
 @Component({
   selector: 'focus-mode-task-selection',
@@ -21,6 +22,7 @@ export class FocusModeTaskSelectionComponent implements AfterViewInit, OnDestroy
   selectedTask: string | Task | undefined;
   initialTask$ = this.taskService.firstStartableTask$.pipe(first());
   focusTimeout = 0;
+  T: typeof T = T;
 
   constructor(public readonly taskService: TaskService, private readonly _store: Store) {}
 
