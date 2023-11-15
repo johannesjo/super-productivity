@@ -31,7 +31,7 @@ export class FocusModePreparationComponent implements OnDestroy {
   );
 
   constructor(private readonly _store: Store) {
-    this.countdown$.pipe(delay(1000)).subscribe((v) => {
+    this.countdown$.pipe(delay(1000), takeUntil(this._onDestroy$)).subscribe((v) => {
       if (v <= 0) {
         this.startSession();
       }
