@@ -20,7 +20,7 @@ import {
   OPEN_PROJECT_TYPE,
 } from './issue.const';
 import { TaskService } from '../tasks/task.service';
-import { Task } from '../tasks/task.model';
+import { Task, TaskCopy } from '../tasks/task.model';
 import { IssueServiceInterface } from './issue-service-interface';
 import { JiraCommonInterfacesService } from './providers/jira/jira-common-interfaces.service';
 import { GithubCommonInterfacesService } from './providers/github/github-common-interfaces.service';
@@ -255,7 +255,7 @@ export class IssueService {
   async refreshIssueTasks(tasks: Task[]): Promise<void> {
     // dynamic map that has a list of tasks for every entry where the entry is an issue type
     const tasksIssueIdsByIssueProviderKey: any = {};
-    const tasksWithoutIssueId = [];
+    const tasksWithoutIssueId: Readonly<Task>[] = [];
 
     for (const task of tasks) {
       if (!task.issueId || !task.issueType) {
