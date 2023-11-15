@@ -27,7 +27,6 @@
   &.isDarkTheme {
     scrollbar-color: #333 #222;
 
-
     ::-webkit-scrollbar-track {
       background: #222;
       border-radius: 4px;
@@ -35,7 +34,7 @@
 
     /* Handle */
     ::-webkit-scrollbar-thumb {
-      background: #333;
+      background: rgb(74, 74, 74);
       border-radius: 16px;
     }
 
@@ -43,7 +42,6 @@
     ::-webkit-scrollbar-thumb:hover {
       background: #444;
     }
-
   }
 }
 
