@@ -56,26 +56,26 @@ export class JiraIssueEffects {
         concatMap(({ mainTask, subTask }) =>
           mainTask.issueType === JIRA_TYPE && mainTask.issueId && mainTask.projectId
             ? this._getCfgOnce$(mainTask.projectId).pipe(
-                tap((openProjectCfg) => {
+                tap((jiraProjectCfg) => {
                   if (
                     subTask &&
-                    openProjectCfg.isWorklogEnabled &&
-                    openProjectCfg.isAddWorklogOnSubTaskDone
+                    jiraProjectCfg.isWorklogEnabled &&
+                    jiraProjectCfg.isAddWorklogOnSubTaskDone
                   ) {
                     this._openWorklogDialog(
                       subTask,
                       mainTask.issueId as string,
-                      openProjectCfg,
+                      jiraProjectCfg,
                     );
                   } else if (
-                    openProjectCfg.isAddWorklogOnSubTaskDone &&
+                    jiraProjectCfg.isAddWorklogOnSubTaskDone &&
                     !subTask &&
-                    (!openProjectCfg.isWorklogEnabled || !mainTask.subTaskIds.length)
+                    (!jiraProjectCfg.isWorklogEnabled || !mainTask.subTaskIds.length)
                   ) {
                     this._openWorklogDialog(
                       mainTask,
                       mainTask.issueId as string,
-                      openProjectCfg,
+                      jiraProjectCfg,
                     );
                   }
                 }),
