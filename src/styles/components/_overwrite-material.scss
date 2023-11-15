@@ -1,6 +1,6 @@
 // DIALOGS
 body .mat-dialog-content {
-  @include scroll;
+  overflow: auto;
 }
 
 .big {

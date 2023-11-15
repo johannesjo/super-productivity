@@ -3,85 +3,19 @@
 @mixin scroll() {
   -webkit-overflow-scrolling: touch;
   overflow: auto;
-  -ms-overflow-style: -ms-autohiding-scrollbar;
-
-  :host-context(.isNoMac.isNoFirefox) & {
-    @include mq(xs) {
-      overflow: hidden;
-
-      &:hover {
-        overflow: auto;
-        overflow: overlay;
-      }
-
-      @-moz-document url-prefix() {
-        overflow: auto;
-      }
-    }
-  }
 }
 
 @mixin scrollY() {
   -webkit-overflow-scrolling: touch;
-  -ms-overflow-style: -ms-autohiding-scrollbar;
-  overflow-y: scroll;
+  overflow-y: auto;
   // important for touch events like hammer swipe to work
   touch-action: pan-y;
-
-  .isNoMac.isNoFirefox &,
-  :host-context(.isNoMac.isNoFirefox) & {
-    overflow-y: overlay;
-
-    @include mq(xs) {
-      overflow-y: overlay;
-    }
-  }
-
-  :host-context(.isMac) & {
-    overflow-y: auto;
-  }
 }
 
 @mixin scrollYImportant() {
   -webkit-overflow-scrolling: touch;
-  -ms-overflow-style: -ms-autohiding-scrollbar;
   overflow-x: hidden;
-  overflow-y: scroll !important;
+  overflow-y: auto !important;
   // important for touch events like hammer swipe to work
   touch-action: pan-y;
-
-  :host-context(.isNoMac.isNoFirefox) & {
-    @include mq(xs) {
-      overflow-y: hidden !important;
-      &:hover {
-        overflow-y: scroll !important;
-        overflow-y: overlay !important;
-      }
-
-      @-moz-document url-prefix() {
-        overflow-y: auto;
-      }
-    }
-  }
-
-  :host-context(.isMac) & {
-    overflow-y: auto !important;
-  }
-}
-
-@mixin scrollX() {
-  -webkit-overflow-scrolling: touch;
-  -ms-overflow-style: -ms-autohiding-scrollbar;
-  overflow-x: scroll;
-
-  :host-context(.isNoMac.isNoFirefox) & {
-    @include mq(xs) {
-      overflow-x: hidden;
-
-      &:hover {
-        overflow-x: scroll;
-        overflow-x: overlay;
-      }
-    }
-  }
 }
