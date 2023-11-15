@@ -3,6 +3,7 @@ import { createFeatureSelector, createReducer, createSelector, on } from '@ngrx/
 import {
   DominaModeConfig,
   EvaluationConfig,
+  FocusModeConfig,
   GlobalConfigState,
   IdleConfig,
   MiscConfig,
@@ -52,6 +53,11 @@ export const selectTimelineConfig = createSelector(
 export const selectIsDominaModeConfig = createSelector(
   selectConfigFeatureState,
   (cfg): DominaModeConfig => cfg.dominaMode,
+);
+
+export const selectFocusModeConfig = createSelector(
+  selectConfigFeatureState,
+  (cfg): FocusModeConfig => cfg.focusMode,
 );
 
 export const initialGlobalConfigState: GlobalConfigState = {

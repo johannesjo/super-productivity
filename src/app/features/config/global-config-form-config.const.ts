@@ -17,6 +17,7 @@ import { IS_ANDROID_WEB_VIEW } from '../../util/is-android-web-view';
 import { TIMELINE_FORM_CFG } from './form-cfgs/timeline-form.const';
 import { DOMINA_MODE_FORM } from './form-cfgs/domina-mode-form.const';
 import { isSnap } from '../../util/is-snap';
+import { FOCUS_MODE_FORM_CFG } from './form-cfgs/focus-mode-form.const';
 
 export const GLOBAL_CONFIG_FORM_CONFIG: ConfigFormConfig = [
   LANGUAGE_SELECTION_FORM_FORM as GenericConfigFormSection,
@@ -37,6 +38,7 @@ export const GLOBAL_SYNC_FORM_CONFIG: ConfigFormConfig = [
 ].filter((cfg) => IS_ELECTRON || !cfg.isElectronOnly);
 
 export const GLOBAL_PRODUCTIVITY_FORM_CONFIG: ConfigFormConfig = [
+  FOCUS_MODE_FORM_CFG as GenericConfigFormSection,
   TAKE_A_BREAK_FORM_CFG as GenericConfigFormSection,
   POMODORO_FORM_CFG as GenericConfigFormSection,
   EVALUATION_SETTINGS_FORM_CFG as GenericConfigFormSection,

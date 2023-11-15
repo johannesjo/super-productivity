@@ -39,6 +39,7 @@ import { IPC } from '../../../../../electron/shared-with-frontend/ipc-events.con
 import { ElectronService } from '../../../core/electron/electron.service';
 import { IdleService } from '../../idle/idle.service';
 import { FocusModePage } from '../focus-mode.const';
+import { selectFocusModeConfig } from '../../config/store/global-config.reducer';
 
 const TICK_DURATION = 500;
 const SESSION_DONE_SOUND = 'positive.ogg';
@@ -76,9 +77,9 @@ export class FocusModeEffects {
   );
 
   autoStartFocusMode$ = createEffect(() => {
-    return this._globalConfigService.misc$.pipe(
-      switchMap((misc) =>
-        misc.isAlwaysUseFocusMode
+    return this._store.select(selectFocusModeConfig).pipe(
+      switchMap((cfg) =>
+        cfg.isAlwaysUseFocusMode
           ? this._taskService.currentTaskId$.pipe(
               distinctUntilChanged(),
               switchMap((currentTaskId) =>

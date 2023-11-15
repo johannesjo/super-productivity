@@ -6,7 +6,6 @@ import { KeyboardConfig } from './keyboard-config.model';
 
 export type MiscConfig = Readonly<{
   isDarkMode: boolean;
-  isAlwaysUseFocusMode: boolean;
   isAutMarkParentAsDone: boolean;
   isAutoStartNextTask: boolean;
   isConfirmBeforeExit: boolean;
@@ -135,6 +134,11 @@ export type DominaModeConfig = Readonly<{
   volume: number;
 }>;
 
+export type FocusModeConfig = Readonly<{
+  isAlwaysUseFocusMode: boolean;
+  isSkipPreparation: boolean;
+}>;
+
 // NOTE: config properties being undefined always means that they should be overwritten with the default value
 export type GlobalConfigState = Readonly<{
   lang: LanguageConfig;
@@ -149,6 +153,7 @@ export type GlobalConfigState = Readonly<{
   trackingReminder: TrackingReminderConfig;
   timeline: TimelineConfig;
   dominaMode: DominaModeConfig;
+  focusMode: FocusModeConfig;
 
   sync: SyncConfig;
 

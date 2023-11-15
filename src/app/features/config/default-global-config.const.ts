@@ -15,7 +15,6 @@ export const DEFAULT_GLOBAL_CONFIG: GlobalConfigState = {
   },
   misc: {
     isDarkMode: IS_USE_DARK_THEME_AS_DEFAULT,
-    isAlwaysUseFocusMode: false,
     isConfirmBeforeExit: false,
     isConfirmBeforeExitWithoutFinishDay: true,
     isNotifyWhenTimeEstimateExceeded: true,
@@ -63,6 +62,10 @@ export const DEFAULT_GLOBAL_CONFIG: GlobalConfigState = {
     interval: 5 * minute,
     volume: 75,
     text: 'Your current task is: ${currentTaskTitle}',
+  },
+  focusMode: {
+    isAlwaysUseFocusMode: false,
+    isSkipPreparation: false,
   },
   pomodoro: {
     isEnabled: false,
