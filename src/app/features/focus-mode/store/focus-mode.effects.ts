@@ -145,7 +145,7 @@ export class FocusModeEffects {
             (this._electronService.ipcRenderer as typeof ipcRenderer).send(
               IPC.SET_PROGRESS_BAR,
               {
-                progress,
+                progress: progress / 100,
                 progressBarMode,
               },
             );
