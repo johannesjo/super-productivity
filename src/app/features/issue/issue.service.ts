@@ -10,7 +10,6 @@ import { from, merge, Observable, of, Subject, zip } from 'rxjs';
 import {
   CALDAV_TYPE,
   GITEA_TYPE,
-  REDMINE_TYPE,
   GITHUB_TYPE,
   GITLAB_TYPE,
   ISSUE_PROVIDER_HUMANIZED,
@@ -18,9 +17,10 @@ import {
   ISSUE_STR_MAP,
   JIRA_TYPE,
   OPEN_PROJECT_TYPE,
+  REDMINE_TYPE,
 } from './issue.const';
 import { TaskService } from '../tasks/task.service';
-import { Task, TaskCopy } from '../tasks/task.model';
+import { Task } from '../tasks/task.model';
 import { IssueServiceInterface } from './issue-service-interface';
 import { JiraCommonInterfacesService } from './providers/jira/jira-common-interfaces.service';
 import { GithubCommonInterfacesService } from './providers/github/github-common-interfaces.service';
