@@ -80,7 +80,15 @@ export class FocusModeOverlayComponent implements OnDestroy {
     document.removeEventListener('keydown', this._closeOnEscapeKeyListener);
   }
 
+  back(): void {
+    window.history.back();
+  }
+
   cancelFocusSession(): void {
     this._store.dispatch(cancelFocusSession());
+  }
+
+  deactivatePomodoro(): void {
+    this._globalConfigService.updateSection('pomodoro', { isEnabled: false });
   }
 }

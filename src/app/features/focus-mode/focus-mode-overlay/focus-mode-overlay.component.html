@@ -1,4 +1,4 @@
-<ng-container *ngIf="!(isPomodoroEnabled$|async); else deactivatePomodoro">
+<ng-container *ngIf="!(isPomodoroEnabled$|async); else deactivatePomodoroEl">
   <header>
     <banner></banner>
   </header>
@@ -44,31 +44,32 @@
   </main>
 </ng-container>
 
-<ng-template #deactivatePomodoro>
-  <div
-    style="
-      text-align: center;
-      max-width: 500px;
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-    "
+<ng-template #deactivatePomodoroEl>
+  <button
+    class="close-btn"
+    mat-icon-button
+    [matTooltip]="T.F.FOCUS_MODE.CANCEL_FOCUS_SESSION|translate"
+    (click)="cancelFocusSession()"
   >
-    <div style="font-size: 20px; margin-bottom: 16px">
-      It's recommended not to use the focus session together with the pomodoro timer.
-    </div>
+    <mat-icon>close</mat-icon>
+  </button>
+  <div class="pomodoro-info-wrapper">
+    <div class="pomodoro-info-msg">{{T.F.FOCUS_MODE.POMODORO_INFO|translate}}</div>
     <div style="text-align: center">
       <button
         mat-stroked-button
         color="primary"
+        (click)="deactivatePomodoro()"
       >
         <mat-icon>alarm_off</mat-icon>
-        Deactivate Pomodoro
+        {{T.F.FOCUS_MODE.POMODORO_DISABLE|translate}}
       </button>
-      <button mat-stroked-button>
+      <button
+        mat-stroked-button
+        (click)="cancelFocusSession()"
+      >
         <mat-icon>arrow_back</mat-icon>
-        Back
+        {{T.F.FOCUS_MODE.BACK|translate}}
       </button>
     </div>
   </div>
