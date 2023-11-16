@@ -1,18 +1,13 @@
 import { ChangeDetectionStrategy, Component, OnDestroy } from '@angular/core';
 import { TaskService } from '../../tasks/task.service';
-import { Subject } from 'rxjs';
+import { Observable, Subject } from 'rxjs';
 import { first, takeUntil } from 'rxjs/operators';
 import { GlobalConfigService } from '../../config/global-config.service';
 import { Router } from '@angular/router';
 import { expandAnimation } from '../../../ui/animations/expand.ani';
 import { FocusModePage } from '../focus-mode.const';
 import { Store } from '@ngrx/store';
-import {
-  selectFocusSessionActivePage,
-  selectFocusSessionDuration,
-  selectFocusSessionProgress,
-  selectFocusSessionTimeToGo,
-} from '../store/focus-mode.selectors';
+import { selectFocusSessionActivePage } from '../store/focus-mode.selectors';
 import {
   cancelFocusSession,
   setFocusSessionActivePage,
@@ -20,6 +15,7 @@ import {
 import { fadeInAnimation } from '../../../ui/animations/fade.ani';
 import { warpAnimation, warpInAnimation } from '../../../ui/animations/warp.ani';
 import { T } from 'src/app/t.const';
+import { selectIsPomodoroEnabled } from '../../config/store/global-config.reducer';
 
 @Component({
   selector: 'focus-mode-overlay',
@@ -32,9 +28,9 @@ export class FocusModeOverlayComponent implements OnDestroy {
   FocusModePage: typeof FocusModePage = FocusModePage;
 
   activePage$ = this._store.select(selectFocusSessionActivePage);
-  timeToGo$ = this._store.select(selectFocusSessionTimeToGo);
-  sessionDuration$ = this._store.select(selectFocusSessionDuration);
-  sessionProgress$ = this._store.select(selectFocusSessionProgress);
+
+  isPomodoroEnabled$: Observable<boolean> = this._store.select(selectIsPomodoroEnabled);
+
   activatePage?: FocusModePage;
   T: typeof T = T;
 

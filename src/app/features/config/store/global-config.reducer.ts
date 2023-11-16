@@ -7,6 +7,7 @@ import {
   GlobalConfigState,
   IdleConfig,
   MiscConfig,
+  PomodoroConfig,
   SoundConfig,
   SyncConfig,
   TakeABreakConfig,
@@ -58,6 +59,14 @@ export const selectIsDominaModeConfig = createSelector(
 export const selectFocusModeConfig = createSelector(
   selectConfigFeatureState,
   (cfg): FocusModeConfig => cfg.focusMode,
+);
+export const selectPomodoroConfig = createSelector(
+  selectConfigFeatureState,
+  (cfg): PomodoroConfig => cfg.pomodoro,
+);
+export const selectIsPomodoroEnabled = createSelector(
+  selectConfigFeatureState,
+  (cfg): boolean => cfg.pomodoro.isEnabled,
 );
 
 export const initialGlobalConfigState: GlobalConfigState = {

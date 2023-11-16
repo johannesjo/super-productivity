@@ -1,43 +1,75 @@
-<header>
-  <banner></banner>
-</header>
-<main [ngSwitch]="activePage$|async">
-  <button
-    class="close-btn"
-    mat-icon-button
-    [matTooltip]="T.F.FOCUS_MODE.CANCEL_FOCUS_SESSION|translate"
-    (click)="cancelFocusSession()"
+<ng-container *ngIf="!(isPomodoroEnabled$|async); else deactivatePomodoro">
+  <header>
+    <banner></banner>
+  </header>
+  <main [ngSwitch]="activePage$|async">
+    <button
+      class="close-btn"
+      mat-icon-button
+      [matTooltip]="T.F.FOCUS_MODE.CANCEL_FOCUS_SESSION|translate"
+      (click)="cancelFocusSession()"
+    >
+      <mat-icon>close</mat-icon>
+    </button>
+
+    <procrastination
+      *ngSwitchCase="FocusModePage.ProcrastinationHelp"
+      @warpIn
+    ></procrastination>
+
+    <focus-mode-task-selection
+      *ngSwitchCase="FocusModePage.TaskSelection"
+      @warpIn
+    ></focus-mode-task-selection>
+
+    <focus-mode-duration-selection
+      *ngSwitchCase="FocusModePage.DurationSelection"
+      @warpIn
+    ></focus-mode-duration-selection>
+
+    <focus-mode-preparation
+      *ngSwitchCase="FocusModePage.Preparation"
+      @warpIn
+    ></focus-mode-preparation>
+
+    <focus-mode-main
+      *ngSwitchCase="FocusModePage.Main"
+      @warpIn
+    ></focus-mode-main>
+
+    <focus-mode-task-done
+      *ngSwitchCase="FocusModePage.SessionDone"
+      @warpIn
+    ></focus-mode-task-done>
+  </main>
+</ng-container>
+
+<ng-template #deactivatePomodoro>
+  <div
+    style="
+      text-align: center;
+      max-width: 500px;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    "
   >
-    <mat-icon>close</mat-icon>
-  </button>
-
-  <procrastination
-    *ngSwitchCase="FocusModePage.ProcrastinationHelp"
-    @warpIn
-  ></procrastination>
-
-  <focus-mode-task-selection
-    *ngSwitchCase="FocusModePage.TaskSelection"
-    @warpIn
-  ></focus-mode-task-selection>
-
-  <focus-mode-duration-selection
-    *ngSwitchCase="FocusModePage.DurationSelection"
-    @warpIn
-  ></focus-mode-duration-selection>
-
-  <focus-mode-preparation
-    *ngSwitchCase="FocusModePage.Preparation"
-    @warpIn
-  ></focus-mode-preparation>
-
-  <focus-mode-main
-    *ngSwitchCase="FocusModePage.Main"
-    @warpIn
-  ></focus-mode-main>
-
-  <focus-mode-task-done
-    *ngSwitchCase="FocusModePage.SessionDone"
-    @warpIn
-  ></focus-mode-task-done>
-</main>
+    <div style="font-size: 20px; margin-bottom: 16px">
+      It's recommended not to use the focus session together with the pomodoro timer.
+    </div>
+    <div style="text-align: center">
+      <button
+        mat-stroked-button
+        color="primary"
+      >
+        <mat-icon>alarm_off</mat-icon>
+        Deactivate Pomodoro
+      </button>
+      <button mat-stroked-button>
+        <mat-icon>arrow_back</mat-icon>
+        Back
+      </button>
+    </div>
+  </div>
+</ng-template>
