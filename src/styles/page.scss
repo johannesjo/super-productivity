@@ -112,26 +112,26 @@ body {
 }
 
 .task-list-wrapper {
-  padding: 0 0 $s * 9;
+  padding: 0 0 $s * 7;
   // for a little bit of extra space for 800 width
   max-width: #{$component-max-width - 40};
   margin: auto;
 
   @include mq(xxs) {
-    padding: 0 $s * 1 $s * 9;
+    padding: 0 $s * 1 $s * 7;
   }
 
   @include mq(xs) {
-    padding: 0 $s * 1.5 $s * 9;
+    padding: 0 $s * 1.5 $s * 7;
   }
 
   @include mq(sm) {
-    padding: 0 3 * $s $s * 9;
+    padding: 0 3 * $s $s * 7;
     max-width: $component-max-width;
   }
 
   @include mq(lg) {
-    padding: 0 3 * $s $s * 9;
+    padding: 0 3 * $s $s * 7;
     max-width: $component-max-width + 100;
   }
 
