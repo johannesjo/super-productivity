@@ -634,8 +634,8 @@
         "FORCE_UPLOAD": "Télécharger quand même des données locales?",
         "FORCE_UPLOAD_AFTER_ERROR": "Une erreur s'est produite lors du téléchargement de vos données locales. Essayez de forcer la mise à jour?",
         "MIGRATE_LEGACY": "Données héritées détectées lors de l'importation, voulez-vous essayer de les migrer ?",
-        "NO_REMOTE_DATA": "Aucune donnée distante trouvée. Télécharger local vers distant?",
-        "TRY_LOAD_REMOTE_AGAIN": "Essayez à nouveau de recharger les données depuis la télécommande?"
+        "NO_REMOTE_DATA": "Aucune donnée sur le serveur distant trouvée. Télécharger local vers le serveur distant?",
+        "TRY_LOAD_REMOTE_AGAIN": "Essayez à nouveau de recharger les données depuis le serveur distant?"
       },
       "D_AUTH_CODE": {
         "FOLLOW_LINK": "Veuillez ouvrir le lien suivant et copier le code d'authentification qui y est fourni dans le champ de saisie ci-dessous.",
@@ -648,11 +648,11 @@
         "LAST_SYNC": "Dernière synchronisation:",
         "LOCAL": "Local",
         "LOCAL_REMOTE": "local -> distant",
-        "REMOTE": "éloigné",
+        "REMOTE": "Distant",
         "TEXT": "<p>Mise à jour depuis Dropbox. Les données locales et distantes semblent avoir été modifiées.</p>",
         "TITLE": "Dropbox: données en conflit",
-        "USE_LOCAL": "Utiliser local",
-        "USE_REMOTE": "Utiliser la télécommande"
+        "USE_LOCAL": "Conserver la version local",
+        "USE_REMOTE": "Utiliser le serveur distant"
       },
       "FORM": {
         "DROPBOX": {
