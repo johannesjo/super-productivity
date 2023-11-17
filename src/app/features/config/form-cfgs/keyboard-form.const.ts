@@ -290,6 +290,20 @@ export const KEYBOARD_SETTINGS_FORM_CFG: ConfigFormSection<KeyboardConfig> = {
       },
     },
     {
+      key: 'moveTaskToTop',
+      type: 'keyboard',
+      templateOptions: {
+        label: T.GCF.KEYBOARD.MOVE_TASK_TO_TOP,
+      },
+    },
+    {
+      key: 'moveTaskToBottom',
+      type: 'keyboard',
+      templateOptions: {
+        label: T.GCF.KEYBOARD.MOVE_TASK_TO_BOTTOM,
+      },
+    },
+    {
       key: 'moveToBacklog',
       type: 'keyboard',
       templateOptions: {

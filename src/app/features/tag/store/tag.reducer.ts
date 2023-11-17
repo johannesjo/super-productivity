@@ -16,10 +16,17 @@ import { WorkContextType } from '../../work-context/work-context.model';
 import {
   moveTaskDownInTodayList,
   moveTaskInTodayList,
+  moveTaskToBottomInTodayList,
+  moveTaskToTopInTodayList,
   moveTaskUpInTodayList,
 } from '../../work-context/store/work-context-meta.actions';
 import { moveTaskForWorkContextLikeState } from '../../work-context/store/work-context-meta.helper';
-import { arrayMoveLeftUntil, arrayMoveRightUntil } from '../../../util/array-move';
+import {
+  arrayMoveLeftUntil,
+  arrayMoveRightUntil,
+  arrayMoveToEnd,
+  arrayMoveToStart,
+} from '../../../util/array-move';
 import { Update } from '@ngrx/entity/src/models';
 import { unique } from '../../../util/unique';
 import { loadAllData } from '../../../root-store/meta/load-all-data.action';
@@ -174,6 +181,40 @@ export const tagReducer = createReducer<TagState>(
           )
         : state,
   ),
+
+  on(moveTaskToTopInTodayList, (state, { taskId, workContextType, workContextId }) => {
+    return workContextType === WORK_CONTEXT_TYPE
+      ? tagAdapter.updateOne(
+          {
+            id: workContextId,
+            changes: {
+              taskIds: arrayMoveToStart(
+                (state.entities[workContextId] as Tag).taskIds,
+                taskId,
+              ),
+            },
+          },
+          state,
+        )
+      : state;
+  }),
+
+  on(moveTaskToBottomInTodayList, (state, { taskId, workContextType, workContextId }) => {
+    return workContextType === WORK_CONTEXT_TYPE
+      ? tagAdapter.updateOne(
+          {
+            id: workContextId,
+            changes: {
+              taskIds: arrayMoveToEnd(
+                (state.entities[workContextId] as Tag).taskIds,
+                taskId,
+              ),
+            },
+          },
+          state,
+        )
+      : state;
+  }),
 
   // INTERNAL
   // --------

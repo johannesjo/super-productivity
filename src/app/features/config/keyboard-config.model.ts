@@ -34,6 +34,8 @@ export type KeyboardConfig = Readonly<{
   selectNextTask: string | null;
   moveTaskUp: string | null;
   moveTaskDown: string | null;
+  moveTaskToTop: string | null;
+  moveTaskToBottom: string | null;
   moveToBacklog: string | null;
   moveToTodaysTasks: string | null;
   expandSubTasks: string | null;

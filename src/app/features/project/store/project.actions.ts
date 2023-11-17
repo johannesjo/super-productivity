@@ -126,6 +126,16 @@ export const moveProjectTaskDownInBacklogList = createAction(
   props<{ taskId: string; workContextId: string; doneBacklogTaskIds: string[] }>(),
 );
 
+export const moveProjectTaskToTopInBacklogList = createAction(
+  '[Project] Move Task to Top in Backlog',
+  props<{ taskId: string; workContextId: string; doneBacklogTaskIds: string[] }>(),
+);
+
+export const moveProjectTaskToBottomInBacklogList = createAction(
+  '[Project] Move Task to Bottom in Backlog',
+  props<{ taskId: string; workContextId: string; doneBacklogTaskIds: string[] }>(),
+);
+
 export const moveProjectTaskInBacklogList = createAction(
   '[Project] Move Task in Backlog',
   props<{ taskId: string; newOrderedIds: string[]; workContextId: string }>(),

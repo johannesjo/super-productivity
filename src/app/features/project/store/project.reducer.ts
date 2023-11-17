@@ -17,13 +17,20 @@ import {
 import {
   moveTaskDownInTodayList,
   moveTaskInTodayList,
+  moveTaskToBottomInTodayList,
+  moveTaskToTopInTodayList,
   moveTaskUpInTodayList,
 } from '../../work-context/store/work-context-meta.actions';
 import {
   moveItemInList,
   moveTaskForWorkContextLikeState,
 } from '../../work-context/store/work-context-meta.helper';
-import { arrayMoveLeftUntil, arrayMoveRightUntil } from '../../../util/array-move';
+import {
+  arrayMoveLeftUntil,
+  arrayMoveRightUntil,
+  arrayMoveToEnd,
+  arrayMoveToStart,
+} from '../../../util/array-move';
 import { filterOutId } from '../../../util/filter-out-id';
 import { unique } from '../../../util/unique';
 
@@ -45,8 +52,10 @@ import {
   moveProjectTaskInBacklogList,
   moveProjectTaskToBacklogList,
   moveProjectTaskToBacklogListAuto,
+  moveProjectTaskToBottomInBacklogList,
   moveProjectTaskToTodayList,
   moveProjectTaskToTodayListAuto,
+  moveProjectTaskToTopInBacklogList,
   moveProjectTaskUpInBacklogList,
   toggleHideFromMenu,
   unarchiveProject,
@@ -403,6 +412,40 @@ export const projectReducer = createReducer<ProjectState>(
     },
   ),
 
+  on(moveTaskToTopInTodayList, (state, { taskId, workContextType, workContextId }) => {
+    return workContextType === WORK_CONTEXT_TYPE
+      ? projectAdapter.updateOne(
+          {
+            id: workContextId,
+            changes: {
+              taskIds: arrayMoveToStart(
+                (state.entities[workContextId] as Project).taskIds,
+                taskId,
+              ),
+            },
+          },
+          state,
+        )
+      : state;
+  }),
+
+  on(moveTaskToBottomInTodayList, (state, { taskId, workContextType, workContextId }) => {
+    return workContextType === WORK_CONTEXT_TYPE
+      ? projectAdapter.updateOne(
+          {
+            id: workContextId,
+            changes: {
+              taskIds: arrayMoveToEnd(
+                (state.entities[workContextId] as Project).taskIds,
+                taskId,
+              ),
+            },
+          },
+          state,
+        )
+      : state;
+  }),
+
   on(
     moveProjectTaskUpInBacklogList,
     (state, { taskId, workContextId, doneBacklogTaskIds }) => {
@@ -440,6 +483,39 @@ export const projectReducer = createReducer<ProjectState>(
       );
     },
   ),
+
+  on(
+    moveProjectTaskToTopInBacklogList,
+    (state, { taskId, workContextId, doneBacklogTaskIds }) => {
+      return projectAdapter.updateOne(
+        {
+          id: workContextId,
+          changes: {
+            backlogTaskIds: arrayMoveToStart(
+              (state.entities[workContextId] as Project).backlogTaskIds,
+              taskId,
+            ),
+          },
+        },
+        state,
+      );
+    },
+  ),
+
+  on(moveProjectTaskToBottomInBacklogList, (state, { taskId, workContextId }) => {
+    return projectAdapter.updateOne(
+      {
+        id: workContextId,
+        changes: {
+          backlogTaskIds: arrayMoveToEnd(
+            (state.entities[workContextId] as Project).backlogTaskIds,
+            taskId,
+          ),
+        },
+      },
+      state,
+    );
+  }),
 
   on(moveProjectTaskToBacklogListAuto, (state, { taskId, projectId }) => {
     const project = state.entities[projectId] as Project;

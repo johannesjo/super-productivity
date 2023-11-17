@@ -25,6 +25,8 @@ import {
   deleteTasks,
   moveSubTask,
   moveSubTaskDown,
+  moveSubTaskToBottom,
+  moveSubTaskToTop,
   moveSubTaskUp,
   moveToArchive,
   moveToOtherProject,
@@ -76,6 +78,8 @@ import { WorkContextType } from '../work-context/work-context.model';
 import {
   moveTaskDownInTodayList,
   moveTaskInTodayList,
+  moveTaskToBottomInTodayList,
+  moveTaskToTopInTodayList,
   moveTaskUpInTodayList,
 } from '../work-context/store/work-context-meta.actions';
 import { Router } from '@angular/router';
@@ -90,7 +94,9 @@ import {
   moveProjectTaskDownInBacklogList,
   moveProjectTaskInBacklogList,
   moveProjectTaskToBacklogList,
+  moveProjectTaskToBottomInBacklogList,
   moveProjectTaskToTodayList,
+  moveProjectTaskToTopInBacklogList,
   moveProjectTaskUpInBacklogList,
 } from '../project/store/project.actions';
 import { Update } from '@ngrx/entity';
@@ -465,6 +471,82 @@ export class TaskService {
         this._workContextService.doneTaskIds$.pipe(take(1)).subscribe((doneTaskIds) => {
           this._store.dispatch(
             moveTaskDownInTodayList({
+              taskId: id,
+              workContextType,
+              workContextId,
+              doneTaskIds,
+            }),
+          );
+        });
+      }
+    }
+  }
+
+  moveToTop(id: string, parentId: string | null = null, isBacklog: boolean): void {
+    if (parentId) {
+      this._store.dispatch(moveSubTaskToTop({ id, parentId }));
+    } else {
+      const workContextId = this._workContextService.activeWorkContextId as string;
+      const workContextType = this._workContextService
+        .activeWorkContextType as WorkContextType;
+
+      if (isBacklog) {
+        this._workContextService.doneBacklogTaskIds$
+          .pipe(take(1))
+          .subscribe((doneBacklogTaskIds) => {
+            if (!doneBacklogTaskIds) {
+              throw new Error('No doneBacklogTaskIds found');
+            }
+            this._store.dispatch(
+              moveProjectTaskToTopInBacklogList({
+                taskId: id,
+                workContextId,
+                doneBacklogTaskIds,
+              }),
+            );
+          });
+      } else {
+        this._workContextService.doneTaskIds$.pipe(take(1)).subscribe((doneTaskIds) => {
+          this._store.dispatch(
+            moveTaskToTopInTodayList({
+              taskId: id,
+              workContextType,
+              workContextId,
+              doneTaskIds,
+            }),
+          );
+        });
+      }
+    }
+  }
+
+  moveToBottom(id: string, parentId: string | null = null, isBacklog: boolean): void {
+    if (parentId) {
+      this._store.dispatch(moveSubTaskToBottom({ id, parentId }));
+    } else {
+      const workContextId = this._workContextService.activeWorkContextId as string;
+      const workContextType = this._workContextService
+        .activeWorkContextType as WorkContextType;
+
+      if (isBacklog) {
+        this._workContextService.doneBacklogTaskIds$
+          .pipe(take(1))
+          .subscribe((doneBacklogTaskIds) => {
+            if (!doneBacklogTaskIds) {
+              throw new Error('No doneBacklogTaskIds found');
+            }
+            this._store.dispatch(
+              moveProjectTaskToBottomInBacklogList({
+                taskId: id,
+                workContextId,
+                doneBacklogTaskIds,
+              }),
+            );
+          });
+      } else {
+        this._workContextService.doneTaskIds$.pipe(take(1)).subscribe((doneTaskIds) => {
+          this._store.dispatch(
+            moveTaskToBottomInTodayList({
               taskId: id,
               workContextType,
               workContextId,

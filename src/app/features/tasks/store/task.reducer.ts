@@ -7,6 +7,8 @@ import {
   deleteTasks,
   moveSubTask,
   moveSubTaskDown,
+  moveSubTaskToBottom,
+  moveSubTaskToTop,
   moveSubTaskUp,
   moveToArchive,
   moveToOtherProject,
@@ -46,7 +48,12 @@ import {
 } from './task.reducer.util';
 import { taskAdapter } from './task.adapter';
 import { moveItemInList } from '../../work-context/store/work-context-meta.helper';
-import { arrayMoveLeft, arrayMoveRight } from '../../../util/array-move';
+import {
+  arrayMoveLeft,
+  arrayMoveRight,
+  arrayMoveToEnd,
+  arrayMoveToStart,
+} from '../../../util/array-move';
 import { filterOutId } from '../../../util/filter-out-id';
 import {
   addTaskAttachment,
@@ -322,6 +329,32 @@ export const taskReducer = createReducer<TaskState>(
         id: parentId,
         changes: {
           subTaskIds: arrayMoveRight(parentSubTaskIds, id),
+        },
+      },
+      state,
+    );
+  }),
+
+  on(moveSubTaskToTop, (state, { id, parentId }) => {
+    const parentSubTaskIds = getTaskById(parentId, state).subTaskIds;
+    return taskAdapter.updateOne(
+      {
+        id: parentId,
+        changes: {
+          subTaskIds: arrayMoveToStart(parentSubTaskIds, id),
+        },
+      },
+      state,
+    );
+  }),
+
+  on(moveSubTaskToBottom, (state, { id, parentId }) => {
+    const parentSubTaskIds = getTaskById(parentId, state).subTaskIds;
+    return taskAdapter.updateOne(
+      {
+        id: parentId,
+        changes: {
+          subTaskIds: arrayMoveToEnd(parentSubTaskIds, id),
         },
       },
       state,

@@ -118,6 +118,8 @@ export const DEFAULT_GLOBAL_CONFIG: GlobalConfigState = {
     selectNextTask: 'j',
     moveTaskUp: 'Ctrl+Shift+ArrowUp',
     moveTaskDown: 'Ctrl+Shift+ArrowDown',
+    moveTaskToTop: 'Ctrl+Alt+ArrowUp',
+    moveTaskToBottom: 'Ctrl+Alt+ArrowDown',
     moveToBacklog: 'Shift+B',
     moveToTodaysTasks: 'Shift+T',
     expandSubTasks: null,
