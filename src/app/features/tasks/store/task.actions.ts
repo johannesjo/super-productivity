@@ -25,6 +25,8 @@ enum TaskActionTypes {
   'MoveSubTask' = '[Task] Move sub task',
   'MoveSubTaskUp' = '[Task] Move up',
   'MoveSubTaskDown' = '[Task] Move down',
+  'MoveSubTaskToTop' = '[Task] Move to top',
+  'MoveSubTaskToBottom' = '[Task] Move to bottom',
   'AddTimeSpent' = '[Task] Add time spent',
   'RemoveTimeSpent' = '[Task] Remove time spent',
 
@@ -135,6 +137,18 @@ export const moveSubTaskUp = createAction(
 
 export const moveSubTaskDown = createAction(
   TaskActionTypes.MoveSubTaskDown,
+
+  props<{ id: string; parentId: string }>(),
+);
+
+export const moveSubTaskToTop = createAction(
+  TaskActionTypes.MoveSubTaskToTop,
+
+  props<{ id: string; parentId: string }>(),
+);
+
+export const moveSubTaskToBottom = createAction(
+  TaskActionTypes.MoveSubTaskToBottom,
 
   props<{ id: string; parentId: string }>(),
 );

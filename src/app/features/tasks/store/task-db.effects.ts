@@ -24,6 +24,8 @@ import {
   updateTask,
   updateTaskTags,
   updateTaskUi,
+  moveSubTaskToTop,
+  moveSubTaskToBottom,
 } from './task.actions';
 import { select, Store } from '@ngrx/store';
 import { tap, withLatestFrom } from 'rxjs/operators';
@@ -61,6 +63,8 @@ export class TaskDbEffects {
           moveSubTask,
           moveSubTaskUp,
           moveSubTaskDown,
+          moveSubTaskToTop,
+          moveSubTaskToBottom,
           moveToArchive,
           moveToOtherProject,
           toggleStart,

@@ -916,6 +916,7 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
       setTimeout(this.focusSelf.bind(this), 10);
       return;
     }
+
     if (checkKeyCombo(ev, keys.moveTaskDown)) {
       this._taskService.moveDown(this.task.id, this.task.parentId, this.isBacklog);
       // timeout required to let changes take place @TODO hacky
@@ -923,6 +924,26 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
       setTimeout(this.focusSelf.bind(this), 10);
       ev.stopPropagation();
       ev.preventDefault();
+      return;
+    }
+
+    if (checkKeyCombo(ev, keys.moveTaskToTop)) {
+      this._taskService.moveToTop(this.task.id, this.task.parentId, this.isBacklog);
+      ev.stopPropagation();
+      ev.preventDefault();
+      // timeout required to let changes take place @TODO hacky
+      setTimeout(this.focusSelf.bind(this));
+      setTimeout(this.focusSelf.bind(this), 10);
+      return;
+    }
+
+    if (checkKeyCombo(ev, keys.moveTaskToBottom)) {
+      this._taskService.moveToBottom(this.task.id, this.task.parentId, this.isBacklog);
+      ev.stopPropagation();
+      ev.preventDefault();
+      // timeout required to let changes take place @TODO hacky
+      setTimeout(this.focusSelf.bind(this));
+      setTimeout(this.focusSelf.bind(this), 10);
       return;
     }
 
