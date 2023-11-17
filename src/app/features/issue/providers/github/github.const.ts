@@ -44,6 +44,7 @@ export const GITHUB_CONFIG_FORM: LimitedFormlyFieldConfig<GithubCfg>[] = [
     hideExpression: (model: any) => !model.isEnabled,
     templateOptions: {
       label: T.F.GITHUB.FORM.TOKEN,
+      required: true,
       description: T.F.GITHUB.FORM.TOKEN_DESCRIPTION,
       type: 'password',
     },
