@@ -46,7 +46,7 @@
           <th
             *matHeaderCellDef
             mat-header-cell
-            matTooltip="Already tracked time for toda on GitLab"
+            matTooltip="Already tracked time for Issue on GitLab"
           >
             <!--            {{T.F.TASK.SUMMARY_TABLE.SPENT_TOTAL|translate}}-->
             Already Tracked
@@ -145,7 +145,10 @@
       mat-stroked-button
       type="submit"
     >
-      <mat-icon>save</mat-icon>
+      <mat-icon
+        class="dialog-header-icon"
+        svgIcon="gitlab"
+      ></mat-icon>
       Submit
       <!--      {{T.G.SUBMIT|translate}}-->
     </button>

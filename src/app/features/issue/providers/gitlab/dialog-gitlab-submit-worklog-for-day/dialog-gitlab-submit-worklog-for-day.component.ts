@@ -7,6 +7,7 @@ import { Task } from '../../../../tasks/task.model';
 import { Observable } from 'rxjs';
 import { Store } from '@ngrx/store';
 import { selectAllTasks } from '../../../../tasks/store/task.selectors';
+import { GitlabApiService } from '../gitlab-api/gitlab-api.service';
 
 @Component({
   selector: 'dialog-gitlab-submit-worklog-for-day',
@@ -25,6 +26,7 @@ export class DialogGitlabSubmitWorklogForDayComponent {
     private _taskService: TaskService,
     private _dateService: DateService,
     private _store: Store,
+    private _gitlabApiService: GitlabApiService,
   ) {}
 
   updateTimeSpentTodayForTask(task: Task, newVal: number | string): void {
