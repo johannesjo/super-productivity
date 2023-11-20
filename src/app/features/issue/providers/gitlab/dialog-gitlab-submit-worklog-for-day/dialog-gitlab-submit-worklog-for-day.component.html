@@ -1,0 +1,153 @@
+<h1 mat-dialog-title>
+  <mat-icon
+    class="dialog-header-icon"
+    svgIcon="gitlab"
+  ></mat-icon>
+  <!--  <span>{{T.F.GITLAB.DIALOG_INITIAL.TITLE|translate}}</span>-->
+  <span>Submit Time Spent on Issues to GitLab</span>
+</h1>
+
+<form (submit)="submit()">
+  <mat-dialog-content>
+    <div class="table-wrapper mat-elevation-z1">
+      <table
+        [dataSource]="gitlabTasks$|async"
+        class="summary-table"
+        mat-table
+      >
+        <ng-container matColumnDef="title">
+          <th
+            *matHeaderCellDef
+            mat-header-cell
+          >
+            <!--            {{T.F.TASK.SUMMARY_TABLE.TASK|translate}}-->
+            Title
+          </th>
+          <td
+            *matCellDef="let task"
+            mat-cell
+          >
+            <div
+              [class.isDone]="task.isDone"
+              [class.isSubTask]="task.parentId"
+              class="task-title"
+            >
+              <mat-icon
+                *ngIf="task.repeatCfgId"
+                class="repeat-task-icon"
+                >repeat
+              </mat-icon>
+              {{task.title}}
+            </div>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="timeTrackedTodayRemote">
+          <th
+            *matHeaderCellDef
+            mat-header-cell
+            matTooltip="Already tracked time for toda on GitLab"
+          >
+            <!--            {{T.F.TASK.SUMMARY_TABLE.SPENT_TOTAL|translate}}-->
+            Already Tracked
+          </th>
+          <td
+            *matCellDef="let task"
+            mat-cell
+          >
+            -
+          </td>
+        </ng-container>
+
+        <!--        <ng-container matColumnDef="timeSpentToday">-->
+        <!--          <th-->
+        <!--            *matHeaderCellDef-->
+        <!--            mat-header-cell-->
+        <!--            matTooltip="Time spent today as logged in Super Productivity"-->
+        <!--          >-->
+        <!--            &lt;!&ndash;            {{T.F.TASK.SUMMARY_TABLE.SPENT_TODAY|translate}}&ndash;&gt;-->
+        <!--            Time Spent-->
+        <!--          </th>-->
+        <!--          <td-->
+        <!--            *matCellDef="let task"-->
+        <!--            mat-cell-->
+        <!--          >-->
+        <!--            <inline-input-->
+        <!--              (changed)="updateTimeSpentTodayForTask(task, $event)"-->
+        <!--              *ngIf="!task.subTaskIds?.length"-->
+        <!--              [displayValue]="task.timeSpentOnDay[day]|msToClockString"-->
+        <!--              [type]="'duration'"-->
+        <!--              [value]="task.timeSpentOnDay[day]"-->
+        <!--            >-->
+        <!--            </inline-input>-->
+        <!--            <span *ngIf="task.subTaskIds?.length"-->
+        <!--              >{{task.timeSpentOnDay[day]|msToClockString}}</span-->
+        <!--            >-->
+        <!--          </td>-->
+        <!--        </ng-container>-->
+
+        <ng-container matColumnDef="timeToLogToday">
+          <th
+            *matHeaderCellDef
+            mat-header-cell
+            matTooltip="Time that will be tracked on issue if you hit submit"
+          >
+            <!--            {{T.F.TASK.SUMMARY_TABLE.SPENT_TODAY|translate}}-->
+            To be submitted
+          </th>
+          <td
+            *matCellDef="let task"
+            mat-cell
+          >
+            <inline-input
+              (changed)="updateTimeSpentTodayForTask(task, $event)"
+              *ngIf="!task.subTaskIds?.length"
+              [displayValue]="task.timeSpentOnDay[day]|msToClockString"
+              [type]="'duration'"
+              [value]="task.timeSpentOnDay[day]"
+            >
+            </inline-input>
+            <span *ngIf="task.subTaskIds?.length"
+              >{{task.timeSpentOnDay[day]|msToClockString}}</span
+            >
+          </td>
+        </ng-container>
+
+        <tr
+          *matHeaderRowDef="['title', 'timeTrackedTodayRemote','timeToLogToday']"
+          mat-header-row
+        ></tr>
+        <tr
+          *matRowDef="let row; columns: ['title','timeTrackedTodayRemote','timeToLogToday']"
+          mat-row
+        ></tr>
+      </table>
+    </div>
+
+    <div class="total-msg">
+      You will submit <strong>3h</strong> work time for today in total to 3 different
+      issues.
+    </div>
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end">
+    <button
+      (click)="close()"
+      color="primary"
+      mat-button
+      type="button"
+    >
+      {{T.G.CANCEL|translate}}
+    </button>
+
+    <button
+      color="primary"
+      mat-stroked-button
+      type="submit"
+    >
+      <mat-icon>save</mat-icon>
+      Submit
+      <!--      {{T.G.SUBMIT|translate}}-->
+    </button>
+  </mat-dialog-actions>
+</form>

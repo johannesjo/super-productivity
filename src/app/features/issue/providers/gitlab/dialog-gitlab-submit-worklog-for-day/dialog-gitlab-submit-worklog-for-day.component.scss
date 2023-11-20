@@ -1,0 +1,65 @@
+@import '../../../../../../variables';
+
+.summary-table {
+  width: 100%;
+
+  @include darkTheme {
+    background: $dark-theme-bg-lighter;
+  }
+
+  tr {
+    height: 36px !important;
+  }
+
+  td {
+    @include lightTheme() {
+      //color: $light-theme-text-color-muted;
+    }
+    @include darkTheme {
+      //color: $dark-theme-text-color-muted;
+    }
+
+    inline-input {
+      @include lightTheme() {
+        color: $light-theme-text-color;
+      }
+      @include darkTheme {
+        color: $dark-theme-text-color;
+      }
+    }
+  }
+
+  //th {
+  //  text-align: center;
+  //}
+
+  th,
+  td {
+    min-width: 50px;
+  }
+
+  td {
+    text-align: right;
+  }
+
+  td:first-child {
+    text-align: start;
+    min-width: 220px;
+    text-align: left;
+  }
+
+  .cdk-column-timeSpentToday ::ng-deep .inline-input-wrapper {
+    padding: $s;
+
+    input {
+      width: 100px;
+    }
+  }
+}
+
+.total-msg {
+  text-align: center;
+  font-size: 18px;
+  margin: $s 0;
+  margin-top: $s * 2;
+}
