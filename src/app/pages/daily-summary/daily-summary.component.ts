@@ -39,6 +39,8 @@ import { EntityState } from '@ngrx/entity';
 import { TODAY_TAG } from '../../features/tag/tag.const';
 import { shareReplayUntil } from '../../util/share-replay-until';
 import { DateService } from 'src/app/core/date/date.service';
+import { Action } from '@ngrx/store';
+import { BeforeFinishDayService } from '../../features/before-finish-day/before-finish-day.service';
 
 const SUCCESS_ANIMATION_DURATION = 500;
 const MAGIC_YESTERDAY_MARGIN = 4 * 60 * 60 * 1000;
@@ -152,6 +154,8 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
     map((cfg) => cfg && cfg.isEnableIdleTimeTracking),
   );
 
+  actionsToExecuteBeforeFinishDay: Action[] = [{ type: 'FINISH_DAY' }];
+
   private _successAnimationTimeout?: number;
 
   constructor(
@@ -166,7 +170,8 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
     private readonly _cd: ChangeDetectorRef,
     private readonly _activatedRoute: ActivatedRoute,
     private readonly _syncProviderService: SyncProviderService,
-    private _dateService: DateService,
+    private readonly _beforeFinishDayService: BeforeFinishDayService,
+    private readonly _dateService: DateService,
   ) {
     this._taskService.setSelectedId(null);
     const todayStart = new Date();
@@ -210,6 +215,8 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
   }
 
   async finishDay(): Promise<void> {
+    await this._beforeFinishDayService.executeActions();
+
     const doneTasks = await this.workContextService.doneTasks$.pipe(take(1)).toPromise();
 
     this._taskService.moveToArchive(doneTasks);
