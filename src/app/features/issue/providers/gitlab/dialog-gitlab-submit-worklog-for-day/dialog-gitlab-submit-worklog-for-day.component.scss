@@ -3,50 +3,36 @@
 .summary-table {
   width: 100%;
 
-  @include darkTheme {
-    background: $dark-theme-bg-lighter;
-  }
-
   tr {
     height: 36px !important;
   }
 
-  td {
-    @include lightTheme() {
-      //color: $light-theme-text-color-muted;
-    }
-    @include darkTheme {
-      //color: $dark-theme-text-color-muted;
-    }
+  th {
+    text-align: right;
 
-    inline-input {
-      @include lightTheme() {
-        color: $light-theme-text-color;
-      }
-      @include darkTheme {
-        color: $dark-theme-text-color;
-      }
+    &:first-child {
+      text-align: left;
     }
   }
-
-  //th {
-  //  text-align: center;
-  //}
 
   th,
   td {
     min-width: 50px;
-    padding: $s;
   }
 
   td {
     text-align: right;
+    font-size: 16px;
   }
 
   td:first-child {
     text-align: start;
     min-width: 220px;
-    text-align: left;
+    font-size: 14px;
+  }
+
+  td:last-child {
+    font-weight: bold;
   }
 
   .cdk-column-timeSpentToday ::ng-deep .inline-input-wrapper {
@@ -63,11 +49,11 @@
   font-size: 18px;
   margin: $s 0;
   margin-top: $s * 4;
-  width: 720px;
+  width: 740px;
   max-width: 100%;
 
   em {
-    font-size: 22px;
+    font-size: 24px;
     font-weight: bold;
     font-style: normal;
   }
