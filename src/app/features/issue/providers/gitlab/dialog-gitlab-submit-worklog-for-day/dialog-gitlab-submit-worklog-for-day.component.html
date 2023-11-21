@@ -81,8 +81,8 @@
   </div>
 
   <div class="total-msg">
-    You will submit <strong>{{totalTimeToSubmit$|msToString}}</strong> work time for today
-    in total to <strong>{{(tmpTasksToTrack$|async)?.length}}</strong> different issues.
+    You will submit <em>{{totalTimeToSubmit$|async|msToString}}</em> work time for today
+    in total to <em>{{(tmpTasksToTrack$|async)?.length}}</em> different issues.
   </div>
 </mat-dialog-content>
 

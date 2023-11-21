@@ -63,4 +63,12 @@
   font-size: 18px;
   margin: $s 0;
   margin-top: $s * 4;
+  width: 720px;
+  max-width: 100%;
+
+  em {
+    font-size: 22px;
+    font-weight: bold;
+    font-style: normal;
+  }
 }
