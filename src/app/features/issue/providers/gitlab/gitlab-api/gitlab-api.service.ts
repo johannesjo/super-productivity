@@ -197,7 +197,7 @@ export class GitlabApiService {
     return projectURL;
   }
 
-  addTimeSpentToIssue(
+  addTimeSpentToIssue$(
     issueId: string,
     // NOTE: duration format is without space, e.g.: 1h23m
     duration: string,
@@ -223,6 +223,26 @@ export class GitlabApiService {
       },
       cfg,
     );
+  }
+
+  getTimeTrackingStats$(
+    issueId: string,
+    cfg: GitlabCfg,
+  ): Observable<{
+    human_time_estimate: null | string;
+    human_total_time_spent: null | string;
+    time_estimate: null | number;
+    total_time_spent: null | number;
+  }> {
+    return this._sendRawRequest$(
+      {
+        url: `${this._apiLink(
+          cfg,
+          cfg.project || undefined,
+        )}/issues/${issueId}/time_stats`,
+      },
+      cfg,
+    ).pipe(map((res) => (res as any).body));
   }
 
   private _getIidFromIssue(issue: string | number): string {

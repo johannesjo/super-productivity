@@ -16,6 +16,7 @@ interface TmpTask {
   issueId: string;
   title: string;
   timeSpentToday: number;
+  timeTrackedAlready: number;
 }
 
 @Component({
@@ -33,6 +34,7 @@ export class DialogGitlabSubmitWorklogForDayComponent {
       issueId: t.issueId as string,
       title: t.title,
       timeSpentToday: t.timeSpentOnDay[this.day],
+      timeTrackedAlready: 0,
     })),
   );
   tmpTasksToTrack$: Observable<TmpTask[]> = this.tmpTasks$.pipe(
@@ -60,6 +62,7 @@ export class DialogGitlabSubmitWorklogForDayComponent {
     private readonly _snackService: SnackService,
   ) {
     _matDialogRef.disableClose = true;
+    void this._loadAlreadyTrackedData();
   }
 
   updateTimeSpentTodayForTask(task: TmpTask, newVal: number | string): void {
@@ -95,7 +98,7 @@ export class DialogGitlabSubmitWorklogForDayComponent {
       await Promise.all(
         tasksToTrack.map((t) =>
           this._gitlabApiService
-            .addTimeSpentToIssue(
+            .addTimeSpentToIssue$(
               t.issueId as string,
               msToString(t.timeSpentToday).replace(' ', ''),
               gitlabCfg,
@@ -137,5 +140,30 @@ export class DialogGitlabSubmitWorklogForDayComponent {
       ...changes,
     };
     this.tmpTasks$.next([...tasks]);
+  }
+
+  private async _loadAlreadyTrackedData(): Promise<void> {
+    const tmpTasks = this.tmpTasks$.getValue();
+    const gitlabCfg = await this._projectService
+      .getGitlabCfgForProject$(this.data.projectId)
+      .pipe(first())
+      .toPromise();
+    const dataForAll = await Promise.all(
+      tmpTasks.map((t) =>
+        this._gitlabApiService
+          .getTimeTrackingStats$(t.issueId, gitlabCfg)
+          .pipe(first())
+          .toPromise(),
+      ),
+    );
+    this.tmpTasks$.next(
+      tmpTasks.map((t, i) => ({
+        ...t,
+        timeTrackedAlready:
+          typeof dataForAll[i].total_time_spent === 'number'
+            ? (dataForAll[i].total_time_spent as number) * 1000
+            : 0 || 0,
+      })),
+    );
   }
 }
