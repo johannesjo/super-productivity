@@ -201,7 +201,6 @@ export class GitlabApiService {
     issueId: string,
     // NOTE: duration format is without space, e.g.: 1h23m
     duration: string,
-    project: string,
     cfg: GitlabCfg,
   ): Observable<unknown> {
     /* {
@@ -212,7 +211,11 @@ export class GitlabApiService {
   }*/
     return this._sendRawRequest$(
       {
-        url: `${this._apiLink(cfg, project)}/issues/${issueId}`,
+        url: `${this._apiLink(
+          cfg,
+          cfg.project || undefined,
+        )}/issues/${issueId}/add_spent_time`,
+        method: 'POST',
         data: {
           duration,
           summary: 'Submitted via Super Productivity on ' + new Date(),

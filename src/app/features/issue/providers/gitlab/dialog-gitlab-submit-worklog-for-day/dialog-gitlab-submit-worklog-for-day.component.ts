@@ -1,20 +1,15 @@
-import {
-  ChangeDetectionStrategy,
-  ChangeDetectorRef,
-  Component,
-  Inject,
-} from '@angular/core';
+import { ChangeDetectionStrategy, Component, Inject } from '@angular/core';
 import { T } from 'src/app/t.const';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-import { TaskService } from '../../../../tasks/task.service';
 import { DateService } from '../../../../../core/date/date.service';
 import { Task } from '../../../../tasks/task.model';
-import { BehaviorSubject, interval, Observable } from 'rxjs';
-import { Store } from '@ngrx/store';
+import { BehaviorSubject, Observable } from 'rxjs';
 import { GitlabApiService } from '../gitlab-api/gitlab-api.service';
-import { GitlabCfg } from '../gitlab';
 import { ProjectService } from '../../../../project/project.service';
-import { map } from 'rxjs/operators';
+import { first, map } from 'rxjs/operators';
+import { msToString } from '../../../../../ui/duration/ms-to-string.pipe';
+import { throttle } from 'helpful-decorators';
+import { SnackService } from '../../../../../core/snack/snack.service';
 
 @Component({
   selector: 'dialog-gitlab-submit-worklog-for-day',
@@ -43,16 +38,17 @@ export class DialogGitlabSubmitWorklogForDayComponent {
 
   constructor(
     @Inject(MAT_DIALOG_DATA)
-    public data: { gitlabCfg: GitlabCfg; projectId: string; tasksForProject: Task[] },
-    private _matDialogRef: MatDialogRef<DialogGitlabSubmitWorklogForDayComponent>,
-    private _taskService: TaskService,
-    private _dateService: DateService,
-    private _store: Store,
-    private _projectService: ProjectService,
-    private _gitlabApiService: GitlabApiService,
+    public readonly data: {
+      projectId: string;
+      tasksForProject: Task[];
+    },
+    private readonly _matDialogRef: MatDialogRef<DialogGitlabSubmitWorklogForDayComponent>,
+    private readonly _dateService: DateService,
+    private readonly _projectService: ProjectService,
+    private readonly _gitlabApiService: GitlabApiService,
+    private readonly _snackService: SnackService,
   ) {
     _matDialogRef.disableClose = true;
-    this.totalTimeToSubmit$.subscribe((v) => console.log(`totalTimeToSubmit$`, v));
   }
 
   updateTimeSpentTodayForTask(task: Task, newVal: number | string): void {
@@ -64,7 +60,62 @@ export class DialogGitlabSubmitWorklogForDayComponent {
     });
   }
 
-  submit(): void {}
+  // quick way to prevent multiple submits
+  @throttle(2000, { leading: true, trailing: false })
+  async submit(): Promise<void> {
+    try {
+      const tasksToTrack = await this.tmpTasksToTrack$.pipe(first()).toPromise();
+      const project = await this.project$.pipe(first()).toPromise();
+      if (tasksToTrack.length === 0) {
+        this._snackService.open({
+          type: 'SUCCESS',
+          // TODO translate
+          msg: 'Gitlab: No time tracking data submitted for project ' + project.title,
+        });
+        this.close();
+        return;
+      }
+
+      const gitlabCfg = await this._projectService
+        .getGitlabCfgForProject$(this.data.projectId)
+        .pipe(first())
+        .toPromise();
+      if (!gitlabCfg) {
+        throw new Error('No gitlab cfg');
+      }
+
+      await Promise.all(
+        tasksToTrack.map((t) =>
+          this._gitlabApiService
+            .addTimeSpentToIssue(
+              t.issueId as string,
+              msToString(t.timeSpentOnDay[this.day]).replace(' ', ''),
+              gitlabCfg,
+            )
+            .pipe(first())
+            .toPromise(),
+        ),
+      );
+
+      this._snackService.open({
+        type: 'SUCCESS',
+        ico: 'file_upload',
+        // TODO translate
+        msg: 'Gitlab: Successfully posted time tracking data for project' + project.title,
+      });
+      this.close();
+    } catch (e) {
+      console.error(e);
+      this._snackService.open({
+        type: 'ERROR',
+        // TODO translate
+        translateParams: {
+          errorMsg: 'Error while submitting data to gitlab',
+        },
+        msg: T.F.OPEN_PROJECT.S.ERR_UNKNOWN,
+      });
+    }
+  }
 
   close(): void {
     this._matDialogRef.close();
