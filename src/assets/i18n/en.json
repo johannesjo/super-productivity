@@ -1444,6 +1444,7 @@
     "CREATE_TAG": "Create Tag",
     "DELETE_TAG": "Delete Tag",
     "GO_TO_TASK_LIST": "Go to task list",
+    "HELP": "Help",
     "MANAGE_PROJECTS": "Manage Projects",
     "METRICS": "Metrics",
     "NOTES": "Notes",
