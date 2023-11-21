@@ -8,10 +8,11 @@
 </h1>
 
 <form (submit)="submit()">
+  <h3>For project: <strong>{{(project$|async)?.title}}</strong></h3>
   <mat-dialog-content>
-    <div class="table-wrapper mat-elevation-z1">
+    <div class="table-wrapper">
       <table
-        [dataSource]="gitlabTasks$|async"
+        [dataSource]="tmpTasks$|async"
         class="summary-table"
         mat-table
       >
@@ -27,18 +28,7 @@
             *matCellDef="let task"
             mat-cell
           >
-            <div
-              [class.isDone]="task.isDone"
-              [class.isSubTask]="task.parentId"
-              class="task-title"
-            >
-              <mat-icon
-                *ngIf="task.repeatCfgId"
-                class="repeat-task-icon"
-                >repeat
-              </mat-icon>
-              {{task.title}}
-            </div>
+            <div class="task-title">{{task.title}}</div>
           </td>
         </ng-container>
 
@@ -46,7 +36,6 @@
           <th
             *matHeaderCellDef
             mat-header-cell
-            matTooltip="Already tracked time for Issue on GitLab"
           >
             <!--            {{T.F.TASK.SUMMARY_TABLE.SPENT_TOTAL|translate}}-->
             Already Tracked
@@ -59,38 +48,10 @@
           </td>
         </ng-container>
 
-        <!--        <ng-container matColumnDef="timeSpentToday">-->
-        <!--          <th-->
-        <!--            *matHeaderCellDef-->
-        <!--            mat-header-cell-->
-        <!--            matTooltip="Time spent today as logged in Super Productivity"-->
-        <!--          >-->
-        <!--            &lt;!&ndash;            {{T.F.TASK.SUMMARY_TABLE.SPENT_TODAY|translate}}&ndash;&gt;-->
-        <!--            Time Spent-->
-        <!--          </th>-->
-        <!--          <td-->
-        <!--            *matCellDef="let task"-->
-        <!--            mat-cell-->
-        <!--          >-->
-        <!--            <inline-input-->
-        <!--              (changed)="updateTimeSpentTodayForTask(task, $event)"-->
-        <!--              *ngIf="!task.subTaskIds?.length"-->
-        <!--              [displayValue]="task.timeSpentOnDay[day]|msToClockString"-->
-        <!--              [type]="'duration'"-->
-        <!--              [value]="task.timeSpentOnDay[day]"-->
-        <!--            >-->
-        <!--            </inline-input>-->
-        <!--            <span *ngIf="task.subTaskIds?.length"-->
-        <!--              >{{task.timeSpentOnDay[day]|msToClockString}}</span-->
-        <!--            >-->
-        <!--          </td>-->
-        <!--        </ng-container>-->
-
         <ng-container matColumnDef="timeToLogToday">
           <th
             *matHeaderCellDef
             mat-header-cell
-            matTooltip="Time that will be tracked on issue if you hit submit"
           >
             <!--            {{T.F.TASK.SUMMARY_TABLE.SPENT_TODAY|translate}}-->
             To be submitted
@@ -101,15 +62,11 @@
           >
             <inline-input
               (changed)="updateTimeSpentTodayForTask(task, $event)"
-              *ngIf="!task.subTaskIds?.length"
               [displayValue]="task.timeSpentOnDay[day]|msToClockString"
               [type]="'duration'"
               [value]="task.timeSpentOnDay[day]"
             >
             </inline-input>
-            <span *ngIf="task.subTaskIds?.length"
-              >{{task.timeSpentOnDay[day]|msToClockString}}</span
-            >
           </td>
         </ng-container>
 
@@ -125,7 +82,8 @@
     </div>
 
     <div class="total-msg">
-      You will submit <strong>3h</strong> work time for today in total to 3 different
+      You will submit <strong>{{totalTimeToSubmit$|msToString}}</strong> work time for
+      today in total to <strong>{{(tmpTasksToTrack$|async)?.length}}</strong> different
       issues.
     </div>
   </mat-dialog-content>

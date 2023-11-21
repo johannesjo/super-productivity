@@ -66,8 +66,10 @@ export class GitlabIssueModule {
               await this._matDialog
                 .open(DialogGitlabSubmitWorklogForDayComponent, {
                   restoreFocus: true,
+                  disableClose: true,
+                  closeOnNavigation: false,
                   data: {
-                    cfg: gitlabCfgForProject,
+                    gitlabCfg: gitlabCfgForProject,
                     projectId,
                     tasksForProject,
                   },
