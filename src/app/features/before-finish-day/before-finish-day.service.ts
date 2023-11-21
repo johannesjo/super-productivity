@@ -1,25 +1,24 @@
 import { Injectable } from '@angular/core';
-import { Action } from '@ngrx/store';
+import { BeforeFinishDayAction } from './before-finish-day.model';
 
 @Injectable({
   providedIn: 'root',
 })
 export class BeforeFinishDayService {
-  private _actions: Action[] = [];
+  private _actions: BeforeFinishDayAction[] = [];
 
   constructor() {}
 
-  addActionIfNotAddedAlready(actionToAdd: Action): void {
-    if (!this._actions.find((a) => a.type === actionToAdd.type)) {
-      this._actions.push(actionToAdd);
+  addAction(actionToAdd: BeforeFinishDayAction): void {
+    this._actions.push(actionToAdd);
+  }
+
+  async executeActions(): Promise<'SUCCESS' | 'ERROR'> {
+    const results = await Promise.all(this._actions.map((action) => action()));
+    if (results.includes('ERROR')) {
+      return 'ERROR';
     }
-  }
 
-  removeActionType(actionTypeToRemove: string): void {
-    this._actions = this._actions.filter((a) => a.type !== actionTypeToRemove);
-  }
-
-  async executeActions(): Promise<'SUCCESS' | false> {
     return 'SUCCESS';
   }
 }
