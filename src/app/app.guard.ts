@@ -8,7 +8,7 @@ import {
 } from '@angular/router';
 import { WorkContextService } from './features/work-context/work-context.service';
 import { Observable, of } from 'rxjs';
-import { catchError, concatMap, map, switchMap, take, tap } from 'rxjs/operators';
+import { catchError, concatMap, map, switchMap, take } from 'rxjs/operators';
 import { WorkContextType } from './features/work-context/work-context.model';
 import { TagService } from './features/tag/tag.service';
 import { ProjectService } from './features/project/project.service';
