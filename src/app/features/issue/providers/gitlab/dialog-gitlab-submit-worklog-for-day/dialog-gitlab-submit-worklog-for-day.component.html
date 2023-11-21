@@ -24,10 +24,10 @@
           Title
         </th>
         <td
-          *matCellDef="let task"
+          *matCellDef="let tmpTask"
           mat-cell
         >
-          <div class="task-title">{{task.title}}</div>
+          <div class="task-title">{{tmpTask.title}}</div>
         </td>
       </ng-container>
 
@@ -40,7 +40,7 @@
           Already Tracked
         </th>
         <td
-          *matCellDef="let task"
+          *matCellDef="let tmpTask"
           mat-cell
         >
           -
@@ -56,14 +56,14 @@
           To be submitted
         </th>
         <td
-          *matCellDef="let task"
+          *matCellDef="let tmpTask"
           mat-cell
         >
           <inline-input
-            (changed)="updateTimeSpentTodayForTask(task, $event)"
-            [displayValue]="task.timeSpentOnDay[day]|msToClockString"
+            (changed)="updateTimeSpentTodayForTask(tmpTask, $event)"
+            [displayValue]="tmpTask.timeSpentToday|msToClockString"
             [type]="'duration'"
-            [value]="task.timeSpentOnDay[day]"
+            [value]="tmpTask.timeSpentToday"
           >
           </inline-input>
         </td>

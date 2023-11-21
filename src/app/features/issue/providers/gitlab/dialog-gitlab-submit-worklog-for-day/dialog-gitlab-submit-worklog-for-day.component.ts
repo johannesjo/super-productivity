@@ -11,6 +11,13 @@ import { msToString } from '../../../../../ui/duration/ms-to-string.pipe';
 import { throttle } from 'helpful-decorators';
 import { SnackService } from '../../../../../core/snack/snack.service';
 
+interface TmpTask {
+  id: string;
+  issueId: string;
+  title: string;
+  timeSpentToday: number;
+}
+
 @Component({
   selector: 'dialog-gitlab-submit-worklog-for-day',
   templateUrl: './dialog-gitlab-submit-worklog-for-day.component.html',
@@ -20,18 +27,22 @@ import { SnackService } from '../../../../../core/snack/snack.service';
 export class DialogGitlabSubmitWorklogForDayComponent {
   day: string = this._dateService.todayStr();
 
-  private _tmpTasks$: BehaviorSubject<Task[]> = new BehaviorSubject<Task[]>(
-    this.data.tasksForProject,
+  tmpTasks$: BehaviorSubject<TmpTask[]> = new BehaviorSubject<TmpTask[]>(
+    this.data.tasksForProject.map((t) => ({
+      id: t.id,
+      issueId: t.issueId as string,
+      title: t.title,
+      timeSpentToday: t.timeSpentOnDay[this.day],
+    })),
   );
-  tmpTasks$: Observable<Task[]> = this._tmpTasks$.asObservable();
-  tmpTasksToTrack$: Observable<Task[]> = this.tmpTasks$.pipe(
-    map((tasks) => tasks.filter((t) => t.timeSpentOnDay[this.day] > 0)),
+  tmpTasksToTrack$: Observable<TmpTask[]> = this.tmpTasks$.pipe(
+    map((tasks) => tasks.filter((t) => t.timeSpentToday > 0)),
   );
   project$ = this._projectService.getByIdOnce$(this.data.projectId);
 
   totalTimeToSubmit$: Observable<number> = this.tmpTasksToTrack$.pipe(
-    map((tasks) =>
-      tasks.reduce((acc, task) => acc + (task.timeSpentOnDay[this.day] || 0), 0),
+    map((tmpTasks) =>
+      tmpTasks.reduce((acc, tmpTask) => acc + (tmpTask.timeSpentToday || 0), 0),
     ),
   );
   T: typeof T = T;
@@ -51,12 +62,9 @@ export class DialogGitlabSubmitWorklogForDayComponent {
     _matDialogRef.disableClose = true;
   }
 
-  updateTimeSpentTodayForTask(task: Task, newVal: number | string): void {
+  updateTimeSpentTodayForTask(task: TmpTask, newVal: number | string): void {
     this.updateTmpTask(task.id, {
-      timeSpentOnDay: {
-        ...task.timeSpentOnDay,
-        [this.day]: +newVal,
-      },
+      timeSpentToday: +newVal,
     });
   }
 
@@ -89,7 +97,7 @@ export class DialogGitlabSubmitWorklogForDayComponent {
           this._gitlabApiService
             .addTimeSpentToIssue(
               t.issueId as string,
-              msToString(t.timeSpentOnDay[this.day]).replace(' ', ''),
+              msToString(t.timeSpentToday).replace(' ', ''),
               gitlabCfg,
             )
             .pipe(first())
@@ -121,13 +129,13 @@ export class DialogGitlabSubmitWorklogForDayComponent {
     this._matDialogRef.close();
   }
 
-  updateTmpTask(taskId: string, changes: Partial<Task>): void {
-    const tasks = this._tmpTasks$.getValue();
+  updateTmpTask(taskId: string, changes: Partial<TmpTask>): void {
+    const tasks = this.tmpTasks$.getValue();
     const taskToUpdateIndex = tasks.findIndex((t) => t.id === taskId);
     tasks[taskToUpdateIndex] = {
       ...tasks[taskToUpdateIndex],
       ...changes,
     };
-    this._tmpTasks$.next([...tasks]);
+    this.tmpTasks$.next([...tasks]);
   }
 }
