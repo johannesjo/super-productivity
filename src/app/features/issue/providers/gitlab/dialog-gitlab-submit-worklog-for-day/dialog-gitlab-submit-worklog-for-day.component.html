@@ -7,8 +7,21 @@
   <span>Submit Time Spent on Issues to GitLab</span>
 </h1>
 
-<h3>For project: <strong>{{(project$|async)?.title}}</strong></h3>
 <mat-dialog-content>
+  <div
+    *ngIf="isLoading"
+    class="loading-wrapper"
+  >
+    <mat-progress-spinner
+      class="example-margin"
+      [color]="'primary'"
+      [mode]="'indeterminate'"
+    >
+    </mat-progress-spinner>
+  </div>
+
+  <h3>For project: <strong>{{(project$|async)?.title}}</strong></h3>
+
   <div class="table-wrapper">
     <table
       [dataSource]="tmpTasks$|async"

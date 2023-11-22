@@ -26,6 +26,7 @@ interface TmpTask {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class DialogGitlabSubmitWorklogForDayComponent {
+  isLoading = false;
   day: string = this._dateService.todayStr();
 
   tmpTasks$: BehaviorSubject<TmpTask[]> = new BehaviorSubject<TmpTask[]>(
@@ -74,6 +75,7 @@ export class DialogGitlabSubmitWorklogForDayComponent {
   // quick way to prevent multiple submits
   @throttle(2000, { leading: true, trailing: false })
   async submit(): Promise<void> {
+    this.isLoading = true;
     try {
       const tasksToTrack = await this.tmpTasksToTrack$.pipe(first()).toPromise();
       const project = await this.project$.pipe(first()).toPromise();
@@ -126,6 +128,7 @@ export class DialogGitlabSubmitWorklogForDayComponent {
         msg: T.F.OPEN_PROJECT.S.ERR_UNKNOWN,
       });
     }
+    this.isLoading = false;
   }
 
   close(): void {

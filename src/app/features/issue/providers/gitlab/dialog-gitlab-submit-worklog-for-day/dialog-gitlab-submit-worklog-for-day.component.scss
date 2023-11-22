@@ -1,5 +1,9 @@
 @import '../../../../../../variables';
 
+:host {
+  position: relative;
+}
+
 .summary-table {
   width: 100%;
 
@@ -56,5 +60,22 @@
     font-size: 24px;
     font-weight: bold;
     font-style: normal;
+  }
+}
+
+.loading-wrapper {
+  position: absolute;
+  top: -24px;
+  right: -24px;
+  bottom: 0;
+  left: -24px;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 10;
+
+  mat-progress-spinner {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
   }
 }
