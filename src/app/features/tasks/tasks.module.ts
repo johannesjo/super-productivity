@@ -33,6 +33,7 @@ import { TagService } from '../tag/tag.service';
 import { DialogViewTaskRemindersComponent } from './dialog-view-task-reminders/dialog-view-task-reminders.component';
 import { TaskSummaryTablesComponent } from './task-summary-tables/task-summary-tables.component';
 import { IS_ELECTRON } from '../../app.constants';
+import { TasksByTagComponent } from './tasks-by-tag/tasks-by-tag.component';
 
 @NgModule({
   imports: [
@@ -71,6 +72,7 @@ import { IS_ELECTRON } from '../../app.constants';
     SubTaskTotalTimeEstimatePipe,
     TaskAdditionalInfoItemComponent,
     TaskSummaryTablesComponent,
+    TasksByTagComponent,
   ],
   exports: [
     TaskComponent,
@@ -80,6 +82,7 @@ import { IS_ELECTRON } from '../../app.constants';
     TaskSummaryTableComponent,
     TaskSummaryTablesComponent,
     TaskAdditionalInfoComponent,
+    TasksByTagComponent,
   ],
   providers: [TagService],
 })
