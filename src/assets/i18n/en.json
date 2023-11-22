@@ -1498,6 +1498,7 @@
     "TASK_LIST": "Task List",
     "TIME_SPENT_AND_ESTIMATE_LABEL": "Time Spent / Estimated",
     "TIME_SPENT_ESTIMATE_TITLE": "Time Spent: Total time spent today. Archived tasks not included. – Time Estimated: Time estimated for tasks worked on today minus the time already spent with them on other days.",
+    "TIME_SPENT_TODAY_BY_TAG": "Time Spent today by Tag",
     "TODAY": "Today",
     "WEEK": "Week"
   },

@@ -1,0 +1,18 @@
+@import '../../../../variables';
+
+:host {
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  margin-top: 5 * $s;
+  margin-bottom: $s;
+
+  h3 {
+    margin-bottom: $s;
+    font-weight: bold;
+  }
+}
+
+td {
+  text-align: left;
+}

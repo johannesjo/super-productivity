@@ -110,6 +110,14 @@
               [isForToday]="isForToday"
               [isShowYesterday]="isForToday && isIncludeYesterday"
             ></task-summary-tables>
+
+            <tasks-by-tag
+              *ngIf="tasks?.length;"
+              [dayStr]="dayStr"
+              [flatTasks]="tasks"
+              [isForToday]="isForToday"
+              [isShowYesterday]="isForToday && isIncludeYesterday"
+            ></tasks-by-tag>
           </ng-container>
 
           <ng-template #loading>
