@@ -9,6 +9,7 @@ import { MetricModule } from '../../features/metric/metric.module';
 import { TasksModule } from '../../features/tasks/tasks.module';
 import { PlanTasksTomorrowComponent } from './plan-tasks-tomorrow/plan-tasks-tomorrow.component';
 import { RightPanelModule } from '../../features/right-panel/right-panel.module';
+import { DialogGitlabSubmitWorklogForDayModule } from '../../features/issue/providers/gitlab/dialog-gitlab-submit-worklog-for-day/dialog-gitlab-submit-worklog-for-day.module';
 
 @NgModule({
   imports: [
@@ -20,6 +21,7 @@ import { RightPanelModule } from '../../features/right-panel/right-panel.module'
     MetricModule,
     TasksModule,
     RightPanelModule,
+    DialogGitlabSubmitWorklogForDayModule,
   ],
   declarations: [DailySummaryComponent, PlanTasksTomorrowComponent],
 })
