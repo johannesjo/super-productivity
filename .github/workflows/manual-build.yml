@@ -41,11 +41,15 @@ jobs:
         #  if: steps.npm-cache.outputs.cache-hit != 'true'
         run: npm i
 
-      - name: Build Frontend & Electron
+      - name: Build Frontend & Electron TS
         run: npm run buildAllElectron:noTests:prod
 
-      - name: Build Electron
-        run: npm run dist:win:only
+      - name: Build Electron app
+        uses: samuelmeuli/action-electron-builder@v1
+        with:
+          build_script_name: empty
+          github_token: ${{ secrets.github_token }}
+          release: false
 
       - name: 'Upload Artifact'
         uses: actions/upload-artifact@v3
