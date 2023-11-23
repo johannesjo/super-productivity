@@ -42,7 +42,7 @@ jobs:
         run: npm i
 
       - name: Build Frontend & Electron
-        run: npm run dist:win
+        run: npm run buildAllElectron:noTests:prod
 
       - name: 'Upload Artifact'
         uses: actions/upload-artifact@v3
