@@ -1108,6 +1108,7 @@
     "MISC": {
       "DEFAULT_PROJECT": "Projet par défaut à utiliser pour les tâches si aucun n'est spécifié",
       "FIRST_DAY_OF_WEEK": "Premier jour de la semaine",
+      "START_OF_NEXT_DAY_HINT": "À partir de quelle heure souhaitez-vous considérer que le jour suivant commence. Par défaut, minuit correspond à 0 heure.",
       "HELP": "<p><strong>Vous ne voyez pas les notifications de bureau ?</strong> Pour Windows, vous pouvez vérifier Système> Notifications et actions et vérifier si les notifications requises ont été activées.</p>",
       "IS_AUTO_ADD_WORKED_ON_TO_TODAY": "Ajouter automatiquement la balise d'aujourd'hui aux tâches travaillées",
       "IS_AUTO_MARK_PARENT_AS_DONE": "Marquer la tâche parent comme terminée lorsque toutes les sous-tâches sont terminées",
@@ -1115,6 +1116,7 @@
       "IS_CONFIRM_BEFORE_EXIT": "Confirmez avant de quitter l'application",
       "IS_CONFIRM_BEFORE_EXIT_WITHOUT_FINISH_DAY": "Confirmez avant de quitter l'application sans terminer le jour en premier",
       "IS_DARK_MODE": "Mode sombre",
+      "IS_DISABLE_ANIMATIONS": "Désactiver toutes les animations",
       "IS_HIDE_NAV": "Masquer la navigation jusqu'à ce que l'en-tête principal soit survolé (bureau uniquement)",
       "IS_MINIMIZE_TO_TRAY": "Réduire dans le bac (bureau uniquement)",
       "IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "Notifier quand le temps estimé a été dépassé",
@@ -1139,7 +1141,8 @@
       "TITLE": "Pomodoro Timer"
     },
     "SOUND": {
-      "DONE_SOUND": "Tâche terminée son",
+      "BREAK_REMINDER_SOUND": "Son pour rappel de prise de pause",
+      "DONE_SOUND": "Son pour tâche terminée",
       "IS_INCREASE_DONE_PITCH": "Augmentez la hauteur pour chaque tâche effectuée",
       "IS_PLAY_DONE_SOUND": "Jouer le son lorsque la tâche est marquée comme terminée",
       "TITLE": "Du son",
