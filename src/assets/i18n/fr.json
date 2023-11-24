@@ -128,6 +128,31 @@
         "FINISH_DAY_BEFORE_EXIT": "Il y a {{nr}} tâches terminées dans votre liste d'aujourd'hui qui ne sont pas encore déplacées vers l'archive. Voulez-vous vraiment arrêter sans finir votre journée ?"
       }
     },
+    "FOCUS_MODE": {
+      "BACK_TO_PLANNING": "Retour à la planification",
+      "CANCEL_FOCUS_SESSION": "Annuler la session de concentration",
+      "CONGRATS": "Félicitations pour avoir terminé cette session !",
+      "CONTINUE_FOCUS_SESSION": "Continuer la session de concentration",
+      "FINISH_TASK_AND_SELECT_NEXT": "Terminer la tâche et sélectionner la suivante",
+      "GET_READY": "Préparez-vous pour votre session de concentration !!!",
+      "GO_TO_PROCRASTINATION": "Obtenir de l'aide en cas de procrastination",
+      "NEXT": "Suivant",
+      "ON": "activé",
+      "OPEN_ISSUE_IN_BROWSER": "Ouvrir le problème dans un navigateur",
+      "POMODORO_BACK": "Retour",
+      "POMODORO_DISABLE": "Désactiver Pomodoro",
+      "POMODORO_INFO": "Les sessions de concentration ne peuvent pas être utilisées avec le minuteur Pomodoro activé",
+      "PREP_STRETCH": "Faire quelques étirements légers",
+      "PREP_SIT_UPRIGHT": "Asseyez-vous (ou tenez-vous debout) droit",
+      "PREP_GET_MENTALLY_READY": "Préparez-vous mentalement à être concentré et productif",
+      "SELECT_ANOTHER_TASK": "Sélectionner une autre tâche",
+      "SELECT_TASK": "Sélectionner une tâche sur laquelle se concentrer",
+      "SET_FOCUS_SESSION_DURATION": "Définir la durée de la session de concentration",
+      "SHOW_HIDE_NOTES_AND_ATTACHMENTS": "Afficher/masquer les notes et pièces jointes de la tâche",
+      "START_FOCUS_SESSION": "Débuter la session de concentration",
+      "START_NEXT_FOCUS_SESSION": "Débuter la prochaine session de concentration",
+      "WORKED_FOR": "Vous avez travaillé pendant"
+    },
     "GITHUB": {
       "DIALOG_INITIAL": {
         "TITLE": "Configurer GitHub pour le projet"
