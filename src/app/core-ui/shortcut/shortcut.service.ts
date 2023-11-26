@@ -144,6 +144,8 @@ export class ShortcutService {
         });
         ev.preventDefault();
       }
+    } else if (checkKeyCombo(ev, keys.saveNote)) {
+      ev.preventDefault();
     } else if (checkKeyCombo(ev, keys.openProjectNotes)) {
       ev.preventDefault();
       this._layoutService.toggleNotes();

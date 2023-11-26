@@ -97,4 +97,11 @@ export class NotesComponent implements OnInit, OnDestroy {
       restoreFocus: true,
     });
   }
+  saveNote(): void {
+    this._matDialog.open(DialogAddNoteComponent, {
+      minWidth: '100vw',
+      height: '100vh',
+      restoreFocus: true,
+    });
+  }
 }

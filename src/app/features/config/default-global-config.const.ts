@@ -109,6 +109,7 @@ export const DEFAULT_GLOBAL_CONFIG: GlobalConfigState = {
     taskDelete: 'Backspace',
     taskMoveToProject: 'e',
     taskOpenContextMenu: 'q',
+    saveNote: 'Ctrl+s',
     selectPreviousTask: 'k',
     selectNextTask: 'j',
     moveTaskUp: 'Ctrl+Shift+ArrowUp',

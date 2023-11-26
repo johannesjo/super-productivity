@@ -76,6 +76,13 @@ export const KEYBOARD_SETTINGS_FORM_CFG: ConfigFormSection<KeyboardConfig> = {
       },
     },
     {
+      key: 'saveNote',
+      type: 'keyboard',
+      templateOptions: {
+        label: T.GCF.KEYBOARD.SAVE_NOTE,
+      },
+    },
+    {
       key: 'toggleSideNav',
       type: 'keyboard',
       templateOptions: {
