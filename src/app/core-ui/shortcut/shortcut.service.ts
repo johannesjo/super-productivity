@@ -146,9 +146,8 @@ export class ShortcutService {
         });
         ev.preventDefault();
       }
-    } else if (checkKeyCombo(ev, keys.triggerSync)) {
+    } else if (checkKeyCombo(ev, keys.saveNote)) {
       this._syncProviderService.sync();
-      console.log('syncing');
       ev.preventDefault();
     } else if (checkKeyCombo(ev, keys.openProjectNotes)) {
       ev.preventDefault();
