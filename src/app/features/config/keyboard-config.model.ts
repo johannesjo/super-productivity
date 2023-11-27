@@ -30,6 +30,7 @@ export type KeyboardConfig = Readonly<{
   taskDelete: string | null;
   taskSchedule: string | null;
   saveNote: string | null;
+  triggerSync: string | null;
   selectPreviousTask: string | null;
   selectNextTask: string | null;
   moveTaskUp: string | null;

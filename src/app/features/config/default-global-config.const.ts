@@ -110,6 +110,7 @@ export const DEFAULT_GLOBAL_CONFIG: GlobalConfigState = {
     taskMoveToProject: 'e',
     taskOpenContextMenu: 'q',
     saveNote: 'Ctrl+s',
+    triggerSync: 'Ctrl+s',
     selectPreviousTask: 'k',
     selectNextTask: 'j',
     moveTaskUp: 'Ctrl+Shift+ArrowUp',

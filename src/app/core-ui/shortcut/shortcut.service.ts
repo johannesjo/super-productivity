@@ -17,6 +17,7 @@ import { WorkContextType } from '../../features/work-context/work-context.model'
 import { SnackService } from '../../core/snack/snack.service';
 import { TranslateService } from '@ngx-translate/core';
 import { T } from '../../t.const';
+import { SyncProviderService } from '../../../app/imex/sync/sync-provider.service';
 
 @Injectable({
   providedIn: 'root',
@@ -33,6 +34,7 @@ export class ShortcutService {
     private _taskService: TaskService,
     private _workContextService: WorkContextService,
     private _snackService: SnackService,
+    private _syncProviderService: SyncProviderService,
     private _activatedRoute: ActivatedRoute,
     private _uiHelperService: UiHelperService,
     private _bookmarkService: BookmarkService,
@@ -144,7 +146,9 @@ export class ShortcutService {
         });
         ev.preventDefault();
       }
-    } else if (checkKeyCombo(ev, keys.saveNote)) {
+    } else if (checkKeyCombo(ev, keys.triggerSync)) {
+      this._syncProviderService.sync();
+      console.log('syncing');
       ev.preventDefault();
     } else if (checkKeyCombo(ev, keys.openProjectNotes)) {
       ev.preventDefault();

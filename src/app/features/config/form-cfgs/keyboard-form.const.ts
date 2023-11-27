@@ -83,6 +83,13 @@ export const KEYBOARD_SETTINGS_FORM_CFG: ConfigFormSection<KeyboardConfig> = {
       },
     },
     {
+      key: 'triggerSync',
+      type: 'keyboard',
+      templateOptions: {
+        label: T.GCF.KEYBOARD.TRIGGER_SYNC,
+      },
+    },
+    {
       key: 'toggleSideNav',
       type: 'keyboard',
       templateOptions: {
