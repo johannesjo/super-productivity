@@ -6,7 +6,12 @@ import { IS_ELECTRON } from '../../../app.constants';
 
 const backupPath =
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-  IS_ELECTRON && `${getElectronRemoteModule()!.app.getPath('userData')}/backups`;
+  (IS_ELECTRON &&
+    `${getElectronRemoteModule()!.app.getPath('userData')}` + process.platform ==
+      'linux') ||
+  process.platform === 'darwin'
+    ? `/backups`
+    : `\\backups`;
 
 export const AUTOMATIC_BACKUPS_FORM: ConfigFormSection<LocalBackupConfig> = {
   title: T.GCF.AUTO_BACKUPS.TITLE,
