@@ -150,7 +150,10 @@ if (
   app.setAppLogsPath();
 }
 
-const BACKUP_DIR = `${app.getPath('userData')}/backups`;
+const BACKUP_DIR =
+  `${app.getPath('userData')}` + process.platform == 'linux' || IS_MAC
+    ? `/`
+    : `\\` + `backups`;
 
 interface MyApp extends App {
   isQuiting?: boolean;
