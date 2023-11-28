@@ -123,9 +123,9 @@ export class DialogGitlabSubmitWorklogForDayComponent {
         type: 'ERROR',
         // TODO translate
         translateParams: {
-          errorMsg: 'Error while submitting data to gitlab',
+          errorMsg: 'Error while submitting data to GitLab',
         },
-        msg: T.F.OPEN_PROJECT.S.ERR_UNKNOWN,
+        msg: T.F.GITLAB.S.ERR_UNKNOWN,
       });
     }
     this.isLoading = false;
