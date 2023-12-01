@@ -30,7 +30,7 @@ jobs:
 
       - name: Extract metadata (tags, labels) for Docker
         id: meta
-        uses: docker/metadata-action@818d4b7b91585d195f67373fd9cb0332e31a7175
+        uses: docker/metadata-action@e6428a5c4e294a61438ed7f43155db912025b6b3
         with:
           images: johannesjo/super-productivity
 
