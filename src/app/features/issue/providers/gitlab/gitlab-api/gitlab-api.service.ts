@@ -458,7 +458,6 @@ export class GitlabApiService {
       apiURL += 'groups/' + projectURL;
     }
 
-    // replace last slash
-    return apiURL.replace(/\/(?=[^\/]*$)/, '');
+    return apiURL;
   }
 }
