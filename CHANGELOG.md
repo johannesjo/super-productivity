@@ -1,3 +1,18 @@
+## [7.15.1](https://github.com/johannesjo/super-productivity/compare/v7.15.0...v7.15.1) (2023-12-05)
+
+### Bug Fixes
+
+- arm64 mac build not working [#2503](https://github.com/johannesjo/super-productivity/issues/2503) ([d1bcba2](https://github.com/johannesjo/super-productivity/commit/d1bcba29df7dba3b59cfec8cee835a7c9d99b68c))
+- bug introduced by PR ([7e57304](https://github.com/johannesjo/super-productivity/commit/7e5730405c6a7de9631d4eee3bcbfb53ed77bda3))
+- error when navigating to non-existing tag or project [#2860](https://github.com/johannesjo/super-productivity/issues/2860) ([069d0d0](https://github.com/johannesjo/super-productivity/commit/069d0d0490a6e67cf1583cc4d8286c7d87e156c0))
+- windows backup path [#2869](https://github.com/johannesjo/super-productivity/issues/2869) ([72be16e](https://github.com/johannesjo/super-productivity/commit/72be16ed35d37ee8827f08749277fed76c423253))
+- windows backup path [#2869](https://github.com/johannesjo/super-productivity/issues/2869) ([fb659dd](https://github.com/johannesjo/super-productivity/commit/fb659ddf26f96d229b41027068c47c00ed70e824))
+
+### Features
+
+- add help to menu ([0bd8490](https://github.com/johannesjo/super-productivity/commit/0bd84909dae3c209137ef7bb4f65e6cf83551cff))
+- **dailySummary:** show time spent by tag ([43ce680](https://github.com/johannesjo/super-productivity/commit/43ce68040d529bc89a9bfbd6fb408f90272632db))
+
 # [7.15.0](https://github.com/johannesjo/super-productivity/compare/v7.14.3...v7.15.0) (2023-11-17)
 
 ### Bug Fixes
