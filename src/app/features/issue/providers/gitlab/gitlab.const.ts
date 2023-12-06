@@ -19,6 +19,7 @@ export const DEFAULT_GITLAB_CFG: GitlabCfg = {
   scope: 'created-by-me',
   source: 'project',
   filter: null,
+  isEnableTimeTracking: false,
 };
 
 // NOTE: we need a high limit because git has low usage limits :(
@@ -144,6 +145,15 @@ export const GITLAB_CONFIG_FORM: LimitedFormlyFieldConfig<GitlabCfg>[] = [
       type: 'text',
       label: T.F.GITLAB.FORM.FILTER,
       description: T.F.GITLAB.FORM.FILTER_DESCRIPTION,
+    },
+  },
+  {
+    key: 'isEnableTimeTracking',
+    type: 'checkbox',
+    hideExpression: (model: any) => !model.isEnabled,
+    templateOptions: {
+      label: T.F.GITLAB.FORM.SUBMIT_TIMELOGS,
+      description: T.F.GITLAB.FORM.SUBMIT_TIMELOGS_DESCRIPTION,
     },
   },
 ];

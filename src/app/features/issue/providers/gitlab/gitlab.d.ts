@@ -11,4 +11,5 @@ export interface GitlabCfg extends BaseIssueProviderCfg {
   token: string | null;
   scope: string | null;
   filter: string | null;
+  isEnableTimeTracking: boolean;
 }

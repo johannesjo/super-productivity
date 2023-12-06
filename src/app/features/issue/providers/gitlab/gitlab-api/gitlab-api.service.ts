@@ -197,6 +197,54 @@ export class GitlabApiService {
     return projectURL;
   }
 
+  addTimeSpentToIssue$(
+    issueId: string,
+    // NOTE: duration format is without space, e.g.: 1h23m
+    duration: string,
+    cfg: GitlabCfg,
+  ): Observable<unknown> {
+    /* {
+    human_time_estimate: null | string;
+    human_total_time_spent: null | string;
+    time_estimate: null | number;
+    total_time_spent: null | number;
+  }*/
+    return this._sendRawRequest$(
+      {
+        url: `${this._apiLink(
+          cfg,
+          cfg.project || undefined,
+        )}/issues/${issueId}/add_spent_time`,
+        method: 'POST',
+        data: {
+          duration,
+          summary: 'Submitted via Super Productivity on ' + new Date(),
+        },
+      },
+      cfg,
+    );
+  }
+
+  getTimeTrackingStats$(
+    issueId: string,
+    cfg: GitlabCfg,
+  ): Observable<{
+    human_time_estimate: null | string;
+    human_total_time_spent: null | string;
+    time_estimate: null | number;
+    total_time_spent: null | number;
+  }> {
+    return this._sendRawRequest$(
+      {
+        url: `${this._apiLink(
+          cfg,
+          cfg.project || undefined,
+        )}/issues/${issueId}/time_stats`,
+      },
+      cfg,
+    ).pipe(map((res) => (res as any).body));
+  }
+
   private _getIidFromIssue(issue: string | number): string {
     const parts: string[] = GitlabApiService.getPartsFromIssue(issue);
     if (parts.length === 2) {

@@ -275,6 +275,13 @@
       "DIALOG_INITIAL": {
         "TITLE": "Setup GitLab for Project"
       },
+      "DIALOG_SUBMIT_WORKLOG": {
+        "TITLE": "Submit Time Spent on Issues to GitLab",
+        "T_ALREADY_TRACKED": "Already Tracked",
+        "T_TITLE": "Title",
+        "T_TO_BE_SUBMITTED": "To be submitted",
+        "TOTAL_MSG": "You will submit <em>{{totalTimeToSubmit}}</em> work time for today in total to <em>{{nrOfTasksToSubmit}}</em> different issues."
+      },
       "FORM": {
         "FILTER_USER": "Username (e.g. to filter out changes by yourself)",
         "GITLAB_BASE_URL": "Custom GitLab base URL (optional)",
@@ -290,6 +297,8 @@
         "SOURCE_GLOBAL": "All",
         "SOURCE_GROUP": "Group",
         "SOURCE_PROJECT": "Project",
+        "SUBMIT_TIMELOGS": "Submit timelogs to Gitlab",
+        "SUBMIT_TIMELOGS_DESCRIPTION": "Show Time Tracking Dialog at after clicking on finish day",
         "TOKEN": "Access Token",
         "FILTER": "Custom Filter",
         "FILTER_DESCRIPTION": "See https://docs.gitlab.com/ee/api/issues.html#list-issues. Multiple can be combined by &"
@@ -1229,6 +1238,7 @@
     "REMOVE": "Remove",
     "RESET": "Reset",
     "SAVE": "Save",
+    "SUBMIT": "Submit",
     "TITLE": "Title",
     "TODAY_TAG_TITLE": "Today",
     "UNDO": "Undo",
