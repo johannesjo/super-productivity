@@ -1,3 +1,26 @@
+# [7.16.0](https://github.com/johannesjo/super-productivity/compare/v7.15.1...v7.16.0) (2023-12-06)
+
+### Bug Fixes
+
+- **gitlab:** dialog error [#2776](https://github.com/johannesjo/super-productivity/issues/2776) ([b762a4e](https://github.com/johannesjo/super-productivity/commit/b762a4e986b7e1af32d35e5cbae450e3f6576aa7))
+- **gitlab:** wrong error msg [#2776](https://github.com/johannesjo/super-productivity/issues/2776) ([48b9bc6](https://github.com/johannesjo/super-productivity/commit/48b9bc6998bc5ce7bc4e4f184618c2d4ff8d4218))
+
+### Features
+
+- **gitlab:** add loading spinner for submit worklog dialog [#2776](https://github.com/johannesjo/super-productivity/issues/2776) ([9dd0eb6](https://github.com/johannesjo/super-productivity/commit/9dd0eb6559cbe69510f5b96a37238944c595fe19))
+- **gitlab:** add mechanism to trigger dialog before finish day [#2776](https://github.com/johannesjo/super-productivity/issues/2776) ([9f908db](https://github.com/johannesjo/super-productivity/commit/9f908db687246ae45381be0725f4eaa124950701))
+- **gitlab:** add setting for timelogs [#2776](https://github.com/johannesjo/super-productivity/issues/2776) ([752f9cb](https://github.com/johannesjo/super-productivity/commit/752f9cb2e9bcdc2826d1e9705c55fa749414d19e))
+- **gitlab:** add translations [#2776](https://github.com/johannesjo/super-productivity/issues/2776) ([f3fed22](https://github.com/johannesjo/super-productivity/commit/f3fed22e48a45fe94fe98f294c394464b33ed148))
+- **gitlab:** also show already tracked data [#2776](https://github.com/johannesjo/super-productivity/issues/2776) ([fb848e6](https://github.com/johannesjo/super-productivity/commit/fb848e62337c1c00d41d88d2cb71322ea3138531))
+- **gitlab:** make total estimate work [#2776](https://github.com/johannesjo/super-productivity/issues/2776) ([7a4189c](https://github.com/johannesjo/super-productivity/commit/7a4189cc04073fa0684d2096b9c62e4979325a25))
+- **gitlab:** make worklog submit dialog internals work [#2776](https://github.com/johannesjo/super-productivity/issues/2776) ([923c233](https://github.com/johannesjo/super-productivity/commit/923c233f5b0f3150fc5ee25ed640563e9a2088b0))
+- **gitlab:** outline api call [#2776](https://github.com/johannesjo/super-productivity/issues/2776) ([a3d83f3](https://github.com/johannesjo/super-productivity/commit/a3d83f3acfb8310a74b61dacfec065ebba742476))
+- **gitlab:** outline before finish day handler [#2776](https://github.com/johannesjo/super-productivity/issues/2776) ([0f9ceb8](https://github.com/johannesjo/super-productivity/commit/0f9ceb89282b37905ed05e8b3a8e1cb7bc632b2d))
+- **gitlab:** outline dialog ui for worklog submit [#2776](https://github.com/johannesjo/super-productivity/issues/2776) ([3158712](https://github.com/johannesjo/super-productivity/commit/3158712eef33119a55d0de01079debd7d256ae7c))
+- **gitlab:** outline new add worklog feature [#2776](https://github.com/johannesjo/super-productivity/issues/2776) ([4b7ab37](https://github.com/johannesjo/super-productivity/commit/4b7ab37d77b9802c5b544f9124ea41c2121060a7))
+- **gitlab:** polish UI [#2776](https://github.com/johannesjo/super-productivity/issues/2776) ([108891a](https://github.com/johannesjo/super-productivity/commit/108891a7018da3d041278239836637074b5edc36))
+- **gitlab:** submit data to gitlab [#2776](https://github.com/johannesjo/super-productivity/issues/2776) ([f5e3607](https://github.com/johannesjo/super-productivity/commit/f5e3607816e3eb4133c0a6cb64c19265c0edf892))
+
 ## [7.15.1](https://github.com/johannesjo/super-productivity/compare/v7.15.0...v7.15.1) (2023-12-05)
 
 ### Bug Fixes
