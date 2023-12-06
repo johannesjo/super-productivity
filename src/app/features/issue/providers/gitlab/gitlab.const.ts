@@ -152,10 +152,8 @@ export const GITLAB_CONFIG_FORM: LimitedFormlyFieldConfig<GitlabCfg>[] = [
     type: 'checkbox',
     hideExpression: (model: any) => !model.isEnabled,
     templateOptions: {
-      // label: T.F.GITLAB.FORM.FILTER,
-      label: 'Submit timelogs to Gitlab',
-      // description: T.F.GITLAB.FORM.FILTER_DESCRIPTION,
-      description: 'Show Time Tracking Dialog at after clicking on finish day',
+      label: T.F.GITLAB.FORM.SUBMIT_TIMELOGS,
+      description: T.F.GITLAB.FORM.SUBMIT_TIMELOGS_DESCRIPTION,
     },
   },
 ];
