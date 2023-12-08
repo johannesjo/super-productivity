@@ -153,6 +153,7 @@ const _makeNullAndArraysConsistent = (task: Task): Task => {
     issueLastUpdated: task.issueLastUpdated ?? null,
     issueAttachmentNr: task.issueAttachmentNr ?? null,
     issuePoints: task.issuePoints ?? null,
+    issueTimeTracked: task.issueTimeTracked ?? null,
   };
 };
 

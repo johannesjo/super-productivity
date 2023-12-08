@@ -2,21 +2,25 @@ import { ChangeDetectionStrategy, Component, Inject } from '@angular/core';
 import { T } from 'src/app/t.const';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { DateService } from '../../../../../core/date/date.service';
-import { Task } from '../../../../tasks/task.model';
+import { IssueTaskTimeTracked, Task, TimeSpentOnDay } from '../../../../tasks/task.model';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { GitlabApiService } from '../gitlab-api/gitlab-api.service';
 import { ProjectService } from '../../../../project/project.service';
-import { first, map } from 'rxjs/operators';
+import { first, map, tap } from 'rxjs/operators';
 import { msToString } from '../../../../../ui/duration/ms-to-string.pipe';
 import { throttle } from 'helpful-decorators';
 import { SnackService } from '../../../../../core/snack/snack.service';
+import { Store } from '@ngrx/store';
+import { updateTask } from '../../../../tasks/store/task.actions';
 
 interface TmpTask {
   id: string;
   issueId: string;
   title: string;
-  timeSpentToday: number;
-  timeTrackedAlready: number;
+  timeToSubmit: number;
+  timeSpentOnDay: TimeSpentOnDay;
+  issueTimeTracked: IssueTaskTimeTracked | null;
+  timeTrackedAlreadyRemote: number;
 }
 
 @Component({
@@ -34,18 +38,27 @@ export class DialogGitlabSubmitWorklogForDayComponent {
       id: t.id,
       issueId: t.issueId as string,
       title: t.title,
-      timeSpentToday: t.timeSpentOnDay[this.day],
-      timeTrackedAlready: 0,
+      issueTimeTracked: t.issueTimeTracked,
+      timeSpentOnDay: t.timeSpentOnDay,
+      timeTrackedAlreadyRemote: 0,
+      timeToSubmit: Object.keys(t.timeSpentOnDay).reduce((acc, dayStr) => {
+        if (t.issueTimeTracked && t.issueTimeTracked[dayStr]) {
+          const diff = t.timeSpentOnDay[dayStr] - t.issueTimeTracked[dayStr];
+          return diff > 0 ? diff + acc : acc;
+        } else {
+          return acc + t.timeSpentOnDay[dayStr];
+        }
+      }, 0),
     })),
   );
   tmpTasksToTrack$: Observable<TmpTask[]> = this.tmpTasks$.pipe(
-    map((tasks) => tasks.filter((t) => t.timeSpentToday >= 60000)),
+    map((tasks) => tasks.filter((t) => t.timeToSubmit >= 60000)),
   );
   project$ = this._projectService.getByIdOnce$(this.data.projectId);
 
   totalTimeToSubmit$: Observable<number> = this.tmpTasksToTrack$.pipe(
     map((tmpTasks) =>
-      tmpTasks.reduce((acc, tmpTask) => acc + (tmpTask.timeSpentToday || 0), 0),
+      tmpTasks.reduce((acc, tmpTask) => acc + (tmpTask.timeToSubmit || 0), 0),
     ),
   );
   T: typeof T = T;
@@ -61,15 +74,15 @@ export class DialogGitlabSubmitWorklogForDayComponent {
     private readonly _projectService: ProjectService,
     private readonly _gitlabApiService: GitlabApiService,
     private readonly _snackService: SnackService,
+    private readonly _store: Store,
   ) {
     _matDialogRef.disableClose = true;
     void this._loadAlreadyTrackedData();
-    this.tmpTasksToTrack$.subscribe((v) => console.log(`tmpTasksToTrack$`, v));
   }
 
   updateTimeSpentTodayForTask(task: TmpTask, newVal: number | string): void {
     this.updateTmpTask(task.id, {
-      timeSpentToday: +newVal,
+      timeToSubmit: +newVal,
     });
   }
 
@@ -103,10 +116,25 @@ export class DialogGitlabSubmitWorklogForDayComponent {
           this._gitlabApiService
             .addTimeSpentToIssue$(
               t.issueId as string,
-              msToString(t.timeSpentToday).replace(' ', ''),
+              msToString(t.timeToSubmit).replace(' ', ''),
               gitlabCfg,
             )
-            .pipe(first())
+            .pipe(
+              first(),
+              tap(() =>
+                this._store.dispatch(
+                  updateTask({
+                    task: {
+                      id: t.id,
+                      changes: {
+                        // null all diffs as clean afterwards (regardless of amount of time submitted)
+                        issueTimeTracked: { ...t.timeSpentOnDay },
+                      },
+                    },
+                  }),
+                ),
+              ),
+            )
             .toPromise(),
         ),
       );
@@ -163,7 +191,7 @@ export class DialogGitlabSubmitWorklogForDayComponent {
     this.tmpTasks$.next(
       tmpTasks.map((t, i) => ({
         ...t,
-        timeTrackedAlready:
+        timeTrackedAlreadyRemote:
           typeof dataForAll[i].total_time_spent === 'number'
             ? (dataForAll[i].total_time_spent as number) * 1000
             : 0 || 0,

@@ -42,7 +42,7 @@
         </td>
       </ng-container>
 
-      <ng-container matColumnDef="timeTrackedTodayRemote">
+      <ng-container matColumnDef="timeTrackedAlreadyRemote">
         <th
           *matHeaderCellDef
           mat-header-cell
@@ -53,11 +53,11 @@
           *matCellDef="let tmpTask"
           mat-cell
         >
-          {{tmpTask.timeTrackedAlready|msToClockString}}
+          {{tmpTask.timeTrackedAlreadyRemote|msToClockString}}
         </td>
       </ng-container>
 
-      <ng-container matColumnDef="timeToLogToday">
+      <ng-container matColumnDef="timeToSubmit">
         <th
           *matHeaderCellDef
           mat-header-cell
@@ -70,20 +70,20 @@
         >
           <inline-input
             (changed)="updateTimeSpentTodayForTask(tmpTask, $event)"
-            [displayValue]="tmpTask.timeSpentToday|msToClockString"
+            [displayValue]="tmpTask.timeToSubmit|msToClockString"
             [type]="'duration'"
-            [value]="tmpTask.timeSpentToday"
+            [value]="tmpTask.timeToSubmit"
           >
           </inline-input>
         </td>
       </ng-container>
 
       <tr
-        *matHeaderRowDef="['title', 'timeTrackedTodayRemote','timeToLogToday']"
+        *matHeaderRowDef="['title', 'timeTrackedAlreadyRemote','timeToSubmit']"
         mat-header-row
       ></tr>
       <tr
-        *matRowDef="let row; columns: ['title','timeTrackedTodayRemote','timeToLogToday']"
+        *matRowDef="let row; columns: ['title','timeTrackedAlreadyRemote','timeToSubmit']"
         mat-row
       ></tr>
     </table>
