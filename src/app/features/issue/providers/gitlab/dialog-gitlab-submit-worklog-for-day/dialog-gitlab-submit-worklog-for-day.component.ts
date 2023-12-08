@@ -21,6 +21,7 @@ interface TmpTask {
   timeSpentOnDay: TimeSpentOnDay;
   issueTimeTracked: IssueTaskTimeTracked | null;
   timeTrackedAlreadyRemote: number;
+  isPastTrackedData: boolean;
 }
 
 @Component({
@@ -41,6 +42,12 @@ export class DialogGitlabSubmitWorklogForDayComponent {
       issueTimeTracked: t.issueTimeTracked,
       timeSpentOnDay: t.timeSpentOnDay,
       timeTrackedAlreadyRemote: 0,
+      isPastTrackedData: !!Object.keys(t.timeSpentOnDay).find(
+        (dayStr) =>
+          dayStr !== this.day &&
+          t.timeSpentOnDay[dayStr] >
+            ((t.issueTimeTracked && t.issueTimeTracked[dayStr]) || 0),
+      ),
       timeToSubmit: Object.keys(t.timeSpentOnDay).reduce((acc, dayStr) => {
         if (t.issueTimeTracked && t.issueTimeTracked[dayStr]) {
           const diff = t.timeSpentOnDay[dayStr] - t.issueTimeTracked[dayStr];
@@ -83,6 +90,7 @@ export class DialogGitlabSubmitWorklogForDayComponent {
   updateTimeSpentTodayForTask(task: TmpTask, newVal: number | string): void {
     this.updateTmpTask(task.id, {
       timeToSubmit: +newVal,
+      isPastTrackedData: false,
     });
   }
 

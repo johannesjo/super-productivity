@@ -276,6 +276,7 @@
         "TITLE": "Setup GitLab for Project"
       },
       "DIALOG_SUBMIT_WORKLOG": {
+        "PAST_DAY_INFO": "The prefilled duration contains untracked data from past days.",
         "TITLE": "Submit Time Spent on Issues to GitLab",
         "T_ALREADY_TRACKED": "Already Tracked",
         "T_TITLE": "Title",

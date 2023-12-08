@@ -68,6 +68,12 @@
           *matCellDef="let tmpTask"
           mat-cell
         >
+          <span
+            class="past-info-ico"
+            *ngIf="tmpTask.isPastTrackedData"
+            [matTooltip]="T.F.GITLAB.DIALOG_SUBMIT_WORKLOG.PAST_DAY_INFO|translate"
+            >!!!</span
+          >
           <inline-input
             (changed)="updateTimeSpentTodayForTask(tmpTask, $event)"
             [displayValue]="tmpTask.timeToSubmit|msToClockString"
