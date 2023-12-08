@@ -39,7 +39,7 @@ export class DialogGitlabSubmitWorklogForDayComponent {
     })),
   );
   tmpTasksToTrack$: Observable<TmpTask[]> = this.tmpTasks$.pipe(
-    map((tasks) => tasks.filter((t) => t.timeSpentToday > 0)),
+    map((tasks) => tasks.filter((t) => t.timeSpentToday >= 60000)),
   );
   project$ = this._projectService.getByIdOnce$(this.data.projectId);
 
@@ -64,6 +64,7 @@ export class DialogGitlabSubmitWorklogForDayComponent {
   ) {
     _matDialogRef.disableClose = true;
     void this._loadAlreadyTrackedData();
+    this.tmpTasksToTrack$.subscribe((v) => console.log(`tmpTasksToTrack$`, v));
   }
 
   updateTimeSpentTodayForTask(task: TmpTask, newVal: number | string): void {
