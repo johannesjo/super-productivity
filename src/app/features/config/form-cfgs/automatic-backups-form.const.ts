@@ -7,7 +7,7 @@ import { IS_ELECTRON } from '../../../app.constants';
 const backupPath =
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   IS_ELECTRON &&
-  `${getElectronRemoteModule()!.app.getPath('userData')}${
+  `${getElectronRemoteModule()?.app.getPath('userData')}${
     navigator?.userAgent?.search('Windows') ? '\\' : '/'
   }backups`;
 
