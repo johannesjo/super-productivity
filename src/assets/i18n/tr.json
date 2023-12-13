@@ -1216,23 +1216,26 @@
       "TITLE": "Pomodoro Zamanlayıcı"
     },
     "SOUND": {
+      "BREAK_REMINDER_SOUND": "Mola hatırlatma sesi",
       "DONE_SOUND": "Görev tamamlandı sesi",
-      "IS_INCREASE_DONE_PITCH": "Yapılan her görev için perdeyi artırın",
-      "IS_PLAY_DONE_SOUND": "Görev tamamlandı olarak işaretlendiğinde ses çal",
+      "IS_INCREASE_DONE_PITCH": "Yapılan her görev için ses seviyesini artırın",
       "TITLE": "Ses",
-      "VOLUME": "hacim"
+      "VOLUME": "Ses Seviyesi"
     },
     "TAKE_A_BREAK": {
+      "ADD_NEW_IMG": "Add motivational image",
       "HELP": "<div> <p>Mola vermeden belirli bir süre çalıştığınızda tekrar eden bir hatırlatıcı yapılandırmanıza izin verir.</p> <p>Görüntülenen mesajı değiştirebilirsiniz. ${duration} , ara vermeden harcadığınız zamanla değiştirilecektir.</p> </div>",
       "IS_ENABLED": "Ara ver hatırlatma yapmayı etkinleştir",
       "IS_FOCUS_WINDOW": "Hatırlatıcı aktifken uygulama penceresine odaklan (yalnızca masaüstü)",
       "IS_LOCK_SCREEN": "Bir mola verilmesi gerektiğinde ekranı kilitle (yalnızca masaüstü)",
-      "MESSAGE": "Bir ara mesajı al",
-      "MIN_WORKING_TIME": "Tetiksiz, X'in bir olmadan çalıştıktan sonra bir mola bildirimi almasını sağlar",
+      "IS_FULL_SCREEN_BLOCKER": "Mesajı tam ekran pencerede görüntüle (yalnızca masaüstü)",
+      "FULL_SCREEN_BLOCKER_DURATION": "Tam ekran penceresini görüntüleme süresi (yalnızca masaüstü)",
+      "MESSAGE": "Bir mola mesajı al",
+      "MIN_WORKING_TIME": "X bir tane olmadan çalıştıktan sonra bir mola verme bildirimini tetikleyin",
       "MOTIVATIONAL_IMGS": "Motivasyonel resim (web url'si)",
       "NOTIFICATION_TITLE": "Ara ver!",
-      "SNOOZE_TIME": "Mola vermeniz istendiğinde zamanı erteleme",
-      "TITLE": "Hatırlatma Arası"
+      "SNOOZE_TIME": "Mola vermeniz istendiğinde zamanı ertele",
+      "TITLE": "Mola Hatırlatması"
     },
     "TIMELINE": {
       "CAL_PROVIDERS": "Takvim sağlayıcıları (deneysel ve isteğe bağlı)",
@@ -1244,7 +1247,7 @@
       "L_WORK_END": "İş Günü Sonu",
       "L_WORK_START": "İş Günü Başlangıcı",
       "TITLE": "Zaman çizelgesi",
-      "WORK_START_END_DESCRIPTION": "Örneğin. 17:00"
+      "WORK_START_END_DESCRIPTION": "örn. 17:00"
     },
     "TRACKING_REMINDER": {
       "HELP": "Zaman izlemeyi başlatmayı unutmanız Durumunda görünecek bir başlık yapılandırın.",
@@ -1258,7 +1261,7 @@
     "COPY_TO_CLIPPBOARD": "Panoya kopyalandı",
     "ERR_COMPRESSION": "Sıkıştırma arayüzü için hata",
     "FILE_DOWNLOADED": "{{fileName}} indirildi",
-    "FILE_DOWNLOADED_BTN": "Açık dosya",
+    "FILE_DOWNLOADED_BTN": "Açılan dosya",
     "PERSISTENCE_DISALLOWED": "Veri kalıcı olarak sürdürülmeyecek. Bunun veri kaybına neden olabileceğini unutmayın!",
     "PERSISTENCE_ERROR": "Verilerin kalıcı hale getirilmesi istenirken hata oluştu: {{err}}",
     "RUNNING_X": "\"{{str}}\" çalıştırılıyor.",
@@ -1270,8 +1273,6 @@
     "DBX_GEN_TOKEN": "Dropbox: Jeton oluştur ...",
     "DBX_META": "Dropbox: Dosya meta al ...",
     "DBX_UPLOAD": "Dropbox: Dosya yükle ...",
-    "GDRIVE_DOWNLOAD": "Google Drive: Dosya indir ...",
-    "GDRIVE_UPLOAD": "Google Drive: Dosya yükle ...",
     "GITHUB_LOAD_ISSUE": "GitHub: Sorun verilerini yükle ...",
     "JIRA_LOAD_ISSUE": "Jira: Sorun verilerini yükle ...",
     "UNKNOWN": "Uzak verileri yükleme",
@@ -1284,16 +1285,18 @@
     "CREATE_TAG": "Etiket Oluştur",
     "DELETE_TAG": "Etiketi Sil",
     "GO_TO_TASK_LIST": "Görev listesine git",
+    "HELP": "Yardım",
     "MANAGE_PROJECTS": "Projeleri Yönet",
-    "METRICS": "Metrik",
+    "METRICS": "İstatistikler",
     "NOTES": "Notlar",
-    "PROCRASTINATE": "ertelemek",
+    "NOTES_PANEL_INFO": "Notlar yalnızca zaman çizelgesinden ve normal görev listesi görünümlerinden gösterilebilir.",
+    "PROCRASTINATE": "Ertelemek",
     "PROJECTS": "Projeler",
     "PROJECT_MENU": "Proje Menüsü",
-    "PROJECT_SETTINGS": "Proje ayarları",
+    "PROJECT_SETTINGS": "Proje Ayarları",
     "QUICK_HISTORY": "Hızlı Geçmiş",
-    "SCHEDULED": "tarifeli",
-    "SETTINGS": "ayarlar",
+    "SCHEDULED": "Planlanmış",
+    "SETTINGS": "Ayarlar",
     "SHOW_SEARCH_BAR": "Arama çubuğunu göster",
     "TAGS": "Etiketler",
     "TASKS": "Görevler",
@@ -1302,22 +1305,22 @@
     "TOGGLE_SHOW_NOTES": "Proje Notlarını Göster / Gizle",
     "TOGGLE_TRACK_TIME": "Başlat / Durdur takip süresi",
     "TRIGGER_SYNC": "Senkronizasyonu manuel olarak tetikle",
-    "WORKLOG": "worklog"
+    "WORKLOG": "Görev günlüğü"
   },
   "PDS": {
     "BACK": "Bekle bir şey unuttum!",
-    "BREAK_LABEL": "Sonları (saat / saat)",
-    "CELEBRATE": " <i>kutlamak için bir dakikanızı ayırın!</i>",
+    "BREAK_LABEL": "Molalar (saat / saat)",
+    "CELEBRATE": "<i>Kutlamak</i> için bir dakikanızı ayırın!",
     "CLEAR_ALL_CONTINUE": "Hepsini temizle ve devam et",
     "D_CONFIRM_APP_CLOSE": {
       "CANCEL": "Hayır, sadece görevleri temizleyin",
-      "MSG": "Sen iş bitti Eve gitme zamanı!",
+      "MSG": "Görevlerin bitti. Eve gitme zamanı!",
       "OK": "Hay hay! Kapat!"
     },
     "ESTIMATE_TOTAL": "Toplam tahmin:",
     "EVALUATION": "Değerlendirme",
     "EXPORT_TASK_LIST": "Görev Listesini Dışa Aktar",
-    "NO_TASKS": "Bu gün için görev yok",
+    "NO_TASKS": "Bugün için görev yok",
     "PLAN": "Plan",
     "ROUND_15M": "Tüm görevleri 15 dakikaya yuvarlayın",
     "ROUND_30M": "Tüm görevleri 30 dakikaya yuvarlayın",
@@ -1329,12 +1332,14 @@
     "ROUND_UP_30M": "Tüm görevleri 30 dakikaya tamamlayın",
     "ROUND_UP_5M": "Tüm görevleri 5 dakikaya tamamlayın",
     "SAVE_AND_GO_HOME": "Kaydet ve eve git",
+    "SAVE_AND_GO_HOME_TOOLTIP": "Yapılan tüm görevleri arşive (iş günlüğü) taşıyın ve isteğe bağlı olarak tüm verileri senkronize edip uygulamayı kapatın.",
     "START_END": "Başlangıç - Bitiş",
-    "SUMMARY_FOR": " {{dayStr}}Günlük Özeti",
+    "SUMMARY_FOR": " {{dayStr}} Günlük Özeti",
     "TASKS_COMPLETED": "Tamamlanan Görevler",
     "TASK_LIST": "Görev listesi",
     "TIME_SPENT_AND_ESTIMATE_LABEL": "Harcanan Zaman / Tahmini",
     "TIME_SPENT_ESTIMATE_TITLE": "Harcanan Zaman: Bugün harcanan toplam süre. Arşivlenmiş görevler dahil değildir. - Tahmini Süre: Günümüzde çalışılan görevler için tahmini süre eksi diğer günlerde onlarla harcanan zaman.",
+    "TIME_SPENT_TODAY_BY_TAG": "Etikete Göre Bugün Harcanan Zaman",
     "TODAY": "Bugün",
     "WEEK": "Hafta"
   },
@@ -1349,18 +1354,18 @@
     "DELETE_PROJECT": "Projeyi Sil",
     "D_CONFIRM_ARCHIVE": {
       "MSG": "Bu projeyi arşivlemek istediğinize emin misiniz? Arşivlenmiş Projeler artık menüde gösterilmeyecek ve verilerinin hiçbirini geri yüklemeden erişemezsiniz. Bunu yapmadan önce verilerinizi yedeklemeniz önerilir.",
-      "OK": "arşiv"
+      "OK": "Arşivle"
     },
     "D_CONFIRM_DELETE": {
       "MSG": "Bu projeyi silmek istediğinize emin misiniz? Bunu yapmadan önce verilerinizi yedeklemeniz önerilir.",
-      "OK": "silmek"
+      "OK": "Sil"
     },
     "D_CONFIRM_UNARCHIVE": {
       "MSG": "Bu projeyi silahsızlandırmak istediğinize emin misiniz?",
       "OK": "Arşivden Çıkar"
     },
     "EDIT_PROJECT": "Projeyi Düzenle",
-    "EXPORT_PROJECT": "İhracat Projesi",
+    "EXPORT_PROJECT": "Projeyi Dışa Aktar",
     "GITHUB_CONFIGURED": "GitHub Entegrasyonu Yapılandırıldı",
     "GITLAB_CONFIGURED": "GitLab Entegrasyonu Yapılandırıldı",
     "IMPORT_FROM_FILE": "Dosyadan içe aktar",
@@ -1368,7 +1373,7 @@
     "OPEN_PROJECT_CONFIGURED": "OpenProject Entegrasyonu Yapılandırıldı",
     "S_INVALID_JSON": "Proje dosyası için geçersiz json",
     "TITLE": "Projeye Genel Bakış",
-    "UN_ARCHIVE_PROJECT": "Silahsız Proje"
+    "UN_ARCHIVE_PROJECT": "Arşivlenmemiş Proje"
   },
   "PS": {
     "GLOBAL_SETTINGS": "Genel Ayarlar",
