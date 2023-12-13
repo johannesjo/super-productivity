@@ -938,33 +938,46 @@
         "TAG_LABEL": "Eklenecek etiketler"
       },
       "F": {
+        "C_DAY": "Gün",
+        "C_MONTH": "Ay",
+        "C_WEEK": "Hafta",
+        "C_YEAR": "Yıl",
         "DEFAULT_ESTIMATE": "Varsayılan Tahmini",
         "FRIDAY": "Cuma",
         "IS_ADD_TO_BOTTOM": "Görevi listenin altına taşı",
         "MONDAY": "Pazartesi",
+        "NOTES": "Varsayılan notlar",
         "ORDER": "Sipariş",
         "ORDER_DESCRIPTION": "Tekrarlanabilir görevlerin oluşturulma sırası. Yalnızca aynı anda oluşturulan tekrarlanabilir görevleri etkiler. Daha düşük bir değer, bir görevin listenin yukarısında oluşturulacağı, daha düşük bir sayı ise daha aşağıda olacağı anlamına gelir. 0'dan büyük bir değer, öğelerin normal görevlerin altında oluşturulduğu anlamına gelir.",
-        "REMIND_AT": "Şurada hatırlat:",
+        "Q_CUSTOM": "Özel tekrar yapılandırması",
+        "Q_DAILY": "Her gün",
+        "Q_MONTHLY_CURRENT_DATE": "Her ayın {{dateDayStr}}. günü",
+        "Q_MONDAY_TO_FRIDAY": "Her pazartesiden cumaya",
+        "Q_WEEKLY_CURRENT_WEEKDAY": "Her hafta {{weekdayStr}} günü",
+        "Q_YEARLY_CURRENT_DATE": "Her yıl {{dayAndMonthStr}} tarihinde",
+        "QUICK_SETTING": "Yapılandırmayı Tekrarla",
+        "REMIND_AT": "Şu saatte hatırlat:",
         "REMIND_AT_PLACEHOLDER": "Ne zaman hatırlatılacağını seçin",
         "SATURDAY": "Cumartesi",
+        "START_DATE": "Başlangıç ​​tarihi",
         "START_TIME": "Planlanan başlangıç zamanı",
         "START_TIME_DESCRIPTION": "Örneğin. 15:00. Tüm gün süren bir görev için boş bırakın",
         "SUNDAY": "Pazar",
         "THURSDAY": "Perşembe",
-        "TITLE": "Görev Başlığı",
+        "TITLE": "Görevin Başlığı",
         "TUESDAY": "Salı",
         "WEDNESDAY": "Çarşamba"
       }
     },
     "TIMELINE": {
-      "CONTINUED": "devam etti",
+      "CONTINUED": "Devam eden",
       "D_INITIAL": {
         "TEXT": "<p>Zaman Çizelgesi'nin amacı, planlanan görevlerin zaman içinde nasıl sonuçlanacağına dair daha iyi bir resim sağlamaktır. Görevlerinizden otomatik olarak oluşturulur ve iki farklı şeyi ayırt eder: Planlandıkları zamanda gösterilen <strong>Zamanlanmış Görevler</strong>ve bu sabit olayların etrafında akması gereken <strong>Normal Görevler</strong> . Tüm görevler, onlara atadığınız zaman tahminlerini dikkate alır.</p><p>Buna ek olarak, bir iş başlangıç ve bitiş zamanı da sağlayabilirsiniz. Yapılandırılmışsa, normal görevler asla bunların dışında görünmez. Zaman çizelgesinin yalnızca önümüzdeki 30 günü içerdiğini lütfen unutmayın.</p>",
         "TITLE": "Zaman çizelgesi"
       },
       "END": "İş Bitişi",
       "MENU_TITLE": "Zaman çizelgesi",
-      "NOW": "şimdi",
+      "NOW": "Şimdi",
       "NO_TASKS": "Şu anda görev yok. Lütfen üst çubuktaki + Düğmesi aracılığıyla bazı görevler ekleyin.",
       "S": {
         "CAL_PROVIDER_ERROR": "Zaman Çizelgesi Cal Sağlayıcı Hatası: {{errTxt}}"
@@ -974,61 +987,73 @@
     },
     "TIME_TRACKING": {
       "B": {
-        "ALREADY_DID": "zaten yaptım",
-        "SNOOZE": "Erteleme {{time}}"
+        "ALREADY_DID": "Zaten yaptım",
+        "SNOOZE": "{{time}} ertele"
       },
       "B_TTR": {
         "ADD_TO_TASK": "Göreve Ekle",
-        "MSG": " {{time}}için zamanı takip etmiyorsunuz"
+        "MSG": "{{time}} süredir, süreyi takip etmiyorsunuz"
       },
       "D_IDLE": {
-        "BREAK": "mola",
-        "CREATE_AND_TRACK": "<em></em> oluşturun ve takip edin:",
-        "IDLE_FOR": "Boşta kaldınız:",
-        "SIMPLE_CONFIRM_COUNTER_CANCEL": "atlamak",
-        "SIMPLE_CONFIRM_COUNTER_OK": "Izlemek",
+        "BREAK": "Mola",
+        "CREATE_AND_TRACK": "<em>Oluşturun</em> ve takip edin:",
+        "IDLE_FOR": "Şu süre boyunca boşta kaldınız:",
+        "SIMPLE_CONFIRM_COUNTER_CANCEL": "Atla",
+        "SIMPLE_CONFIRM_COUNTER_OK": "İzle",
         "SIMPLE_COUNTER_CONFIRM_TXT": "Atlamayı seçtiniz, ancak {{nr}} basit sayaç düğmesini etkinleştirdiniz. Onlara boşta kalma süresini izlemek istiyor musunuz?",
-        "SIMPLE_COUNTER_TOOLTIP": " {{title}}için takip etmek için tıklayın",
-        "SIMPLE_COUNTER_TOOLTIP_DISABLE": " {{title}}TAKİP ETMEMEK için tıklayın",
-        "SKIP": "atlamak",
-        "TASK": "görev",
+        "SIMPLE_COUNTER_TOOLTIP": " {{title}}'i takip etmek için tıklayın",
+        "SIMPLE_COUNTER_TOOLTIP_DISABLE": " {{title}} TAKİP ETMEMEK için tıklayın",
+        "SKIP": "Atla",
+        "TASK": "Görev",
         "TASK_BREAK": "Görev Arası",
         "TRACK_TO": "Takip et:"
       },
       "D_TRACKING_REMINDER": {
-        "CREATE_AND_TRACK": "<em>Oluşturun</em> ve izleyin",
-        "IDLE_FOR": "Boşta kaldınız:",
-        "TASK": "görev",
+        "CREATE_AND_TRACK": "<em>Oluşturun</em> ve takip edin",
+        "IDLE_FOR": "Şu süre boyunca boşta kaldınız:",
+        "TASK": "Görev",
         "TRACK_TO": "Takip et:",
         "UNTRACKED_TIME": "İzlenmeyen süre:"
       }
     },
+    "WELCOME": {
+      "D_WELCOME": {
+        "L1": "Başlamadan önce",
+        "L2": "Youtube'daki tanıtım videosu",
+        "L3": "Bir soru sor",
+        "LETS_GO": "Hadi gidelim!!",
+        "MOBILE_INFO": "Oluşturulan görevleri <strong>tamamlandı olarak işaretlemek için</strong> sağa doğru <strong>kaydırın</strong>.\n Planlamak için sola kaydırın. Daha fazla eylem için onlara uzun basın.",
+        "T1": "Bu uygulamaya bir şans vermeye karar verdiğinizi görmek harika! \uD83E\uDD84",
+        "T2": "Burada yolunuzu bulmakta sorun yaşıyorsanız yardım bulabileceğiniz\n birkaç yer vardır:",
+        "TITLE": "Süper Verimliliğe Hoş Geldiniz!"
+      }
+    },
     "WORKLOG": {
       "CMP": {
-        "DAYS_WORKED": "Günler çalıştı:",
-        "MONTH_WORKED": "Ay çalıştı:",
+        "DAYS_WORKED": "Çalışılan günler:",
+        "MONTH_WORKED": "Çalışılan ay:",
         "REPEATING_TASK": "Tekrar eden görev",
         "RESTORE_TASK_FROM_ARCHIVE": "Görevi Arşivden Geri Yükle",
         "TASKS": "Görevler",
         "TOTAL_TIME": "Toplam harcanan zaman:",
         "WEEK_NR": "{{nr}} haftası",
-        "WORKED": "işlenmiş"
+        "WORKED": "Çalışılmış"
       },
       "D_CONFIRM_RESTORE": " <strong>\"{{title}}\"</strong> görevini bugünün görev listenize taşımak istediğinizden emin misiniz?",
-      "D_EXPORT_TITLE": " {{start}}-{{end}}Worklog Dışa Aktarma",
-      "D_EXPORT_TITLE_SINGLE": "Worklog Dışa Aktarma {{day}}",
+      "D_EXPORT_TITLE": " {{start}}-{{end}}Görev Günlüğünü Dışa Aktarma",
+      "D_EXPORT_TITLE_SINGLE": "Görev Günlüğünü Dışa Aktarma {{day}}",
       "EXPORT": {
         "ADD_COL": "Sütun ekle",
         "COPY_TO_CLIPBOARD": "Panoya kopyala",
-        "DONT_ROUND": "yuvarlama",
+        "DONT_ROUND": "Yuvarlama",
         "EDIT_COL": "Sütunu düzenle",
         "GROUP_BY": "Grupla",
         "O": {
-          "DATE": "tarih",
+          "DATE": "Tarih",
           "ENDED_WORKING": "Çalışmaya Son Verildi",
-          "ESTIMATE_AS_CLOCK": "Saat olarak tahmin et (ör. 5:23)",
+          "ESTIMATE_AS_CLOCK": "Saat olarak tahmin et (örn. 5:23)",
           "ESTIMATE_AS_MILLISECONDS": "Milisaniye olarak tahmin et",
-          "ESTIMATE_AS_STRING": "Dize olarak tahmin et (ör. 5sa 23m)",
+          "ESTIMATE_AS_STRING": "Dize olarak tahmin et (örn. 5sa 23m)",
           "FULL_HALF_HOURS": "tam yarım saat",
           "FULL_HOURS": "tam saatler",
           "FULL_QUARTERS": "tam çeyrek",
@@ -1039,11 +1064,11 @@
           "STARTED_WORKING": "Çalışmaya başladım",
           "TAGS": "Etiketler",
           "TASK_SUBTASK": "Görev / alt görev",
-          "TIME_AS_CLOCK": "Saat olarak zaman (ör. 5:23)",
+          "TIME_AS_CLOCK": "Saat olarak zaman (örn. 5:23)",
           "TIME_AS_MILLISECONDS": "Milisaniye olarak zaman",
-          "TIME_AS_STRING": "Dize olarak geçen süre (örneğin, 5sa 23m)",
+          "TIME_AS_STRING": "Dize olarak geçen süre (örn. 5sa 23m)",
           "TITLES_AND_SUB_TASK_TITLES": "Başlıklar ve Alt Görev Başlıkları",
-          "WORKLOG": "worklog"
+          "WORKLOG": "Görev Günlüğü"
         },
         "OPTIONS": "Seçenekler",
         "ROUND_END_TIME_TO": "Gidiş zamanı",
@@ -1054,8 +1079,8 @@
         "SHOW_AS_TEXT": "Metin olarak göster"
       },
       "WEEK": {
-        "EXPORT": "İhracat Haftası Verileri",
-        "NO_DATA": "Henüz bu hafta görev yok.",
+        "EXPORT": "Haftalık veriyi dışa aktar",
+        "NO_DATA": "Henüz bu haftanın görevleri yok.",
         "TITLE": "Başlık"
       }
     }
@@ -1066,27 +1091,29 @@
     "S_ERR_INVALID_DATA": "İçe aktarma başarısız oldu: Geçersiz JSON"
   },
   "G": {
-    "CANCEL": "İptal etmek",
+    "CANCEL": "İptal",
     "CLICK_TO_EDIT": "düzenlemek için tıkla",
     "CLOSE": "Kapat",
-    "DELETE": "silmek",
+    "DELETE": "Sil",
     "DISMISS": "Reddet",
+    "DURATION_DESCRIPTION": "Örneğin. \"5h 23m\", yani 5 saat 23 dakika",
     "DO_IT": "Yap!",
     "EDIT": "Düzenle",
     "ENABLED": "Etkin",
-    "EXTENSION_INFO": "Jira Api ve Idle Time Handling ile iletişime izin vermek için lütfen <a target=\"_blank\" href=\"https://chrome.google.com/webstore/detail/super-productivity/ljkbjodfmekklcoibdnhahlaalhihmlb\"> krom uzantısını</a> indirin. Bunun mobil cihazlar için işe yaramadığını unutmayın.",
+    "EXTENSION_INFO": "Jira Api ve Boş Vakit Takibi ile iletişime izin vermek için lütfen <a target=\"_blank\" href=\"https://chrome.google.com/webstore/detail/super-productivity/ljkbjodfmekklcoibdnhahlaalhihmlb\"> krom uzantısını</a> indirin. Bunun mobil cihazlar için işe yaramadığını unutmayın.",
     "LOGIN": "Oturum aç",
     "LOGOUT": "Çıkış Yap",
     "MINUTES": "{{m}} dakika",
     "NEXT": "Sonraki",
     "NONE": "Yok",
     "NO_CON": "Şu anda çevrimdışısınız. Lütfen internete tekrar bağlanın.",
-    "OK": "tamam",
+    "OK": "Tamam",
     "PREVIOUS": "Önceki",
     "REMOVE": "Kaldır",
-    "RESET": "Reset",
+    "RESET": "Sıfırla",
     "SAVE": "Kayıt etmek",
     "TITLE": "Başlık",
+    "TODAY_TAG_TITLE": "Bugün",
     "UNDO": "Geri alma",
     "UPDATE": "Güncelleştirme",
     "WITHOUT_PROJECT": "Proje Olmadan",
@@ -1100,20 +1127,26 @@
       "TITLE": "Otomatik Yedeklemeler"
     },
     "EVALUATION": {
-      "IS_HIDE_EVALUATION_SHEET": "Değerlendirme Özetini günlük Özette gizle",
-      "TITLE": "Değerlendirme ve Metrikler"
+      "IS_HIDE_EVALUATION_SHEET": "Değerlendirme özetini günlük özette gizle",
+      "TITLE": "Değerlendirme ve İstatistikler"
+    },
+    "FOCUS_MODE": {
+      "HELP": "Odak Modu, mevcut görevinize odaklanmanıza yardımcı olmak için dikkatinizi dağıtmayan bir ekran açar.",
+      "L_ALWAYS_OPEN_FOCUS_MODE": "İzleme sırasında her zaman odak modunu açın",
+      "L_SKIP_PREPARATION_SCREEN": "Hazırlık ekranını atlayın (esnetme vb.)",
+      "TITLE": "Odak modu"
     },
     "IDLE": {
       "HELP": "<div><p>Boşta kalma süresi işleme etkinleştirildiğinde, boşta olduğunuzda, hangi görevi ve zamanınızı izlemek istediğinizi kontrol etmek için belirli bir süre sonra bir iletişim kutusu açılır.</p></div>",
       "IS_ENABLE_IDLE_TIME_TRACKING": "Boşta kalma süresini işlemeyi etkinleştir",
       "IS_ONLY_OPEN_IDLE_WHEN_CURRENT_TASK": "Yalnızca geçerli bir görev seçildiğinde boşta kalma zamanını tetikle",
-      "IS_UN_TRACKED_IDLE_RESETS_BREAK_TIMER": "İzlenmeyen rölanti süresi sıfırlama zamanlayıcısı",
-      "MIN_IDLE_TIME": "X'ten sonra boşta tetikleme",
-      "TITLE": "Boşta Taşıma"
+      "IS_UN_TRACKED_IDLE_RESETS_BREAK_TIMER": "İzlenmeyen boş vakit süresi sıfırlama zamanlayıcısı",
+      "MIN_IDLE_TIME": "X'ten sonra boşta tektikle",
+      "TITLE": "Boş vakit takibi"
     },
     "IMEX": {
       "HELP": "<p>Burada tüm verilerinizi yedeklemeler için <strong>JSON</strong> olarak dışa aktarabilirsiniz, ancak farklı bir bağlamda da kullanabilirsiniz (örneğin, projelerinizi tarayıcıda dışa aktarabilir ve bunları masaüstü sürümüne alabilirsiniz. ). </p> <p>Alma, geçerli JSON'un metin alanına kopyalanmasını bekler. <strong>NOT: İçe aktar düğmesine bastığınızda mevcut ayarların ve verilerin üzerine yazılır!</strong></p>",
-      "TITLE": "İthalat ihracat"
+      "TITLE": "İçe Aktar/Dışa Aktar"
     },
     "KEYBOARD": {
       "ADD_NEW_NOTE": "Yeni not ekle",
@@ -1134,13 +1167,15 @@
       "HELP": "<p>Burada tüm klavye kısayollarını yapılandırabilirsiniz.</p> <p>Metin girişine tıklayın ve istediğiniz klavye kombinasyonunu girin. Kaydetmek için Enter'a, iptal etmek için Escape'e basın.</p> <p>Üç tür kısayol vardır:</p> <ul> <li> <strong>Genel kısayollar:</strong> Uygulama çalışırken, uygulama diğer tüm uygulamalardan eylemi tetikler. </li> <li> <strong>Uygulama düzeyinde kısayollar:</strong> Uygulamanın her ekranından tetiklenir, ancak şu anda bir metin alanı düzenliyorsanız değil. </li> <li> <strong>Görev seviyesi kısayolları:</strong> Yalnızca fare veya klavye yoluyla bir görev seçtiyseniz tetiklenirler ve genellikle bu görevle ilgili bir eylemi tetiklerler. </li> </ul>",
       "MOVE_TASK_DOWN": "Görevi Listede Aşağı Taşı",
       "MOVE_TASK_UP": "Listede Görevi Yukarı Taşı",
-      "MOVE_TO_BACKLOG": "Görevi Görev Listesine Taşı",
+      "MOVE_TASK_TO_BOTTOM": "Görevi Listenin en altına taşı",
+      "MOVE_TASK_TO_TOP": "Görevi Listenin en üstüne taşı",
+      "MOVE_TO_BACKLOG": "Görevi biriktirme listesine taşı",
       "MOVE_TO_TODAYS_TASKS": "Görevi Bugünün Görev Listesine Taşı",
       "OPEN_PROJECT_NOTES": "Proje Notlarını Göster / Gizle",
       "SELECT_NEXT_TASK": "Sonraki görevi seç",
       "SELECT_PREVIOUS_TASK": "Önceki Görevi Seç",
       "SHOW_SEARCH_BAR": "Arama çubuğunu göster",
-      "SYSTEM_SHORTCUTS": "Global Kısayollar (sistem genelinde)",
+      "SYSTEM_SHORTCUTS": "Genel Kısayollar (sistem genelinde)",
       "TASK_ADD_SUB_TASK": "Alt Görev ekle",
       "TASK_DELETE": "Görevi Sil",
       "TASK_EDIT_TAGS": "Etiketleri düzenle",
@@ -1157,7 +1192,7 @@
       "TOGGLE_BACKLOG": "Görev Listesini Göster / Gizle",
       "TOGGLE_BOOKMARKS": "Yer İşareti Çubuğunu Göster / Gizle",
       "TOGGLE_PLAY": "Görevi Başlat / Durdur",
-      "TOGGLE_SIDE_NAV": "Göster ve Odaklan / Sidenav'ı Gizle",
+      "TOGGLE_SIDE_NAV": "Yan navigasyon çubuğunu Göster ve Odakla/Gizle",
       "ZOOM_DEFAULT": "Varsayılan yakınlaştırma (Yalnızca masaüstü)",
       "ZOOM_IN": "Yakınlaştır (Yalnızca masaüstü)",
       "ZOOM_OUT": "Uzaklaştır (Yalnızca masaüstü)"
