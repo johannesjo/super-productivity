@@ -1,5 +1,4 @@
 import { Observable, Subject } from 'rxjs';
-import { ElectronAPI } from '../../../electron/electronAPI.d';
 import { IS_ELECTRON } from '../app.constants';
 import { finalize } from 'rxjs/operators';
 
@@ -8,6 +7,8 @@ export const ipcEvent$ = (evName: string): Observable<unknown[]> => {
   if (!IS_ELECTRON) {
     throw new Error('Not possible outside electron context');
   }
+  console.log(window.electronAPI);
+  console.log(evName);
 
   const subject = new Subject<unknown[]>();
 
@@ -15,12 +16,13 @@ export const ipcEvent$ = (evName: string): Observable<unknown[]> => {
     // console.log('HANNDLER');
     subject.next([...args]);
   };
-  ((window as any).electronAPI as ElectronAPI).on(evName, handler);
+  console.log({ evName });
+  window.electronAPI.on(evName, handler);
 
   return subject.pipe(
     finalize(() => {
       // console.log('FINALIZE');
-      ((window as any).electronAPI as ElectronAPI).off(evName, handler);
+      window.electronAPI.off(evName, handler);
     }),
   );
 };

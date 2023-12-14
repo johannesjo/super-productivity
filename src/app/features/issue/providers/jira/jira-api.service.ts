@@ -39,13 +39,12 @@ import * as moment from 'moment';
 import { BannerService } from '../../../../core/banner/banner.service';
 import { BannerId } from '../../../../core/banner/banner.model';
 import { T } from '../../../../t.const';
-import { ElectronService } from '../../../../core/electron/electron.service';
 import { stringify } from 'query-string';
 import { fromPromise } from 'rxjs/internal-compatibility';
 import { getErrorTxt } from '../../../../util/get-error-text';
 import { isOnline } from '../../../../util/is-online';
 import { GlobalProgressBarService } from '../../../../core-ui/global-progress-bar/global-progress-bar.service';
-import { ipcRenderer, IpcRendererEvent } from 'electron';
+import { IpcRendererEvent } from 'electron';
 import { SS } from '../../../../core/persistence/storage-keys.const';
 import { MatDialog } from '@angular/material/dialog';
 import { DialogPromptComponent } from '../../../../ui/dialog-prompt/dialog-prompt.component';
@@ -89,7 +88,6 @@ export class JiraApiService {
 
   constructor(
     private _chromeExtensionInterfaceService: ChromeExtensionInterfaceService,
-    private _electronService: ElectronService,
     private _globalProgressBarService: GlobalProgressBarService,
     private _snackService: SnackService,
     private _bannerService: BannerService,

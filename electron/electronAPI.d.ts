@@ -2,8 +2,6 @@ import { IpcRenderer, IpcRendererEvent, OpenExternalOptions } from 'electron';
 import { Observable } from 'rxjs';
 
 export interface ElectronAPI {
-  ipcRenderer: () => IpcRenderer;
-
   // IPC STUFF
   ipcEvent$(evName: string): Observable<unknown>;
 
@@ -38,5 +36,6 @@ export interface ElectronAPI {
   relaunch(): void;
 
   exit(exitCode: number): void;
+
   isSystemDarkMode(): boolean;
 }

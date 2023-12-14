@@ -4,8 +4,6 @@ import { TaskAttachmentType } from '../task-attachment.model';
 import { SnackService } from '../../../../core/snack/snack.service';
 import { IPC } from '../../../../../../electron/shared-with-frontend/ipc-events.const';
 import { T } from '../../../../t.const';
-import { ElectronService } from '../../../../core/electron/electron.service';
-import { ipcRenderer } from 'electron';
 
 @Directive({
   selector: '[taskAttachmentLink]',
@@ -14,10 +12,7 @@ export class TaskAttachmentLinkDirective {
   @Input() type?: TaskAttachmentType;
   @Input() href?: string;
 
-  constructor(
-    private _electronService: ElectronService,
-    private _snackService: SnackService,
-  ) {}
+  constructor(private _snackService: SnackService) {}
 
   @HostListener('click', ['$event']) onClick(ev: Event): void {
     if (!this.href) {

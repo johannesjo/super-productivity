@@ -26,11 +26,9 @@ import { GlobalConfigState, TakeABreakConfig } from '../config/global-config.mod
 import { T } from '../../t.const';
 import { IPC } from '../../../../electron/shared-with-frontend/ipc-events.const';
 import { NotifyService } from '../../core/notify/notify.service';
-import { ElectronService } from '../../core/electron/electron.service';
 import { UiHelperService } from '../ui-helper/ui-helper.service';
 import { WorkContextService } from '../work-context/work-context.service';
 import { Tick } from '../../core/global-tracking-interval/tick.model';
-import { ipcRenderer } from 'electron';
 import { PomodoroService } from '../pomodoro/pomodoro.service';
 import { Actions, ofType } from '@ngrx/effects';
 import { triggerResetBreakTimer } from '../idle/store/idle.actions';
@@ -200,7 +198,6 @@ export class TakeABreakService {
     private _actions$: Actions,
     private _configService: GlobalConfigService,
     private _workContextService: WorkContextService,
-    private _electronService: ElectronService,
     private _notifyService: NotifyService,
     private _pomodoroService: PomodoroService,
     private _bannerService: BannerService,

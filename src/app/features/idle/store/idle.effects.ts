@@ -2,7 +2,6 @@ import { Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { ChromeExtensionInterfaceService } from '../../../core/chrome-extension-interface/chrome-extension-interface.service';
 import { WorkContextService } from '../../work-context/work-context.service';
-import { ElectronService } from '../../../core/electron/electron.service';
 import { TaskService } from '../../tasks/task.service';
 import { GlobalConfigService } from '../../config/global-config.service';
 import { MatDialog } from '@angular/material/dialog';
@@ -279,7 +278,6 @@ export class IdleEffects {
     private actions$: Actions,
     private _chromeExtensionInterfaceService: ChromeExtensionInterfaceService,
     private _workContextService: WorkContextService,
-    private _electronService: ElectronService,
     private _taskService: TaskService,
     private _simpleCounterService: SimpleCounterService,
     private _configService: GlobalConfigService,

@@ -1,4 +1,3 @@
-import { ElectronService } from '../electron/electron.service';
 import { HANDLED_ERROR_PROP_STR, IS_ELECTRON } from '../../app.constants';
 import { environment } from '../../../environments/environment';
 import * as StackTrace from 'stacktrace-js';
@@ -66,7 +65,6 @@ const _cleanHtml = (str: string): string => {
 };
 
 export const createErrorAlert = (
-  eSvc: ElectronService,
   err: string = '',
   stackTrace: string,
   origErr: any,

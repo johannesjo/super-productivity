@@ -10,8 +10,6 @@ import { DialogAddNoteComponent } from '../../features/note/dialog-add-note/dial
 import { BookmarkService } from '../../features/bookmark/bookmark.service';
 import { IPC } from '../../../../electron/shared-with-frontend/ipc-events.const';
 import { UiHelperService } from '../../features/ui-helper/ui-helper.service';
-import { ElectronService } from '../../core/electron/electron.service';
-import { ipcRenderer } from 'electron';
 import { WorkContextService } from '../../features/work-context/work-context.service';
 import { WorkContextType } from '../../features/work-context/work-context.model';
 import { SnackService } from '../../core/snack/snack.service';
@@ -29,7 +27,6 @@ export class ShortcutService {
   constructor(
     private _configService: GlobalConfigService,
     private _router: Router,
-    private _electronService: ElectronService,
     private _layoutService: LayoutService,
     private _matDialog: MatDialog,
     private _taskService: TaskService,

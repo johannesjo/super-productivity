@@ -1,5 +1,4 @@
 import { Injectable } from '@angular/core';
-import { ElectronService } from './electron.service';
 import { IPC } from '../../../../electron/shared-with-frontend/ipc-events.const';
 import { Observable, of } from 'rxjs';
 import { map } from 'rxjs/operators';
@@ -12,7 +11,7 @@ export class ExecBeforeCloseService {
     ? ipcEvent$(IPC.NOTIFY_ON_CLOSE).pipe(map(([, ids]: any) => ids))
     : of([]);
 
-  constructor(private _electronService: ElectronService) {}
+  constructor() {}
 
   schedule(id: string): void {
     window.electronAPI.send(IPC.REGISTER_BEFORE_CLOSE, { id });

@@ -1,5 +1,4 @@
 import { Injectable } from '@angular/core';
-import { ElectronService } from '../electron/electron.service';
 import { IS_ELECTRON } from '../../app.constants';
 import { devError } from '../../util/dev-error';
 import { TranslateService } from '@ngx-translate/core';
@@ -20,7 +19,6 @@ export class DatabaseService {
   private _adapter: DBAdapter = this._indexedDbAdapterService;
 
   constructor(
-    private _electronService: ElectronService,
     private _translateService: TranslateService,
     private _indexedDbAdapterService: IndexedDBAdapterService,
     private _androidDbAdapterService: AndroidDbAdapterService,

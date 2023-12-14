@@ -66,9 +66,7 @@ import { JIRA_TYPE } from '../../issue/issue.const';
 import { ProjectService } from '../../project/project.service';
 import { IS_ELECTRON } from '../../../app.constants';
 import { IPC } from '../../../../../electron/shared-with-frontend/ipc-events.const';
-import { ElectronService } from '../../../core/electron/electron.service';
 import { LayoutService } from '../../../core-ui/layout/layout.service';
-import { ipcRenderer } from 'electron';
 import { devError } from '../../../util/dev-error';
 import { SS } from '../../../core/persistence/storage-keys.const';
 import { IS_MOBILE } from '../../../util/is-mobile';
@@ -230,7 +228,6 @@ export class TaskAdditionalInfoComponent implements AfterViewInit, OnDestroy {
     private _matDialog: MatDialog,
     private _projectService: ProjectService,
     private readonly _attachmentService: TaskAttachmentService,
-    private _electronService: ElectronService,
     private _translateService: TranslateService,
     @Inject(LOCALE_ID) private locale: string,
     private _cd: ChangeDetectorRef,

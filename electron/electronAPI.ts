@@ -1,6 +1,5 @@
 import {
   app,
-  IpcRenderer,
   ipcRenderer,
   IpcRendererEvent,
   nativeTheme,
@@ -14,7 +13,6 @@ import { getWin } from './main-window';
 export const electronAPI: Partial<ElectronAPI> = {
   // TODO use full interface
   // const electronAPI: ElectronAPI = {
-  ipcRenderer: (): IpcRenderer => ipcRenderer,
 
   send: (channel: string, ...args: any[]) => ipcRenderer.send(channel, ...args),
 
@@ -36,8 +34,11 @@ export const electronAPI: Partial<ElectronAPI> = {
   openPath: (path: string) => shell.openPath(path),
   openExternal: (url: string, options?: OpenExternalOptions) => shell.openExternal(url),
   isMacOS: () => process.platform === 'darwin',
-  reloadMainWin: () => getWin().reload(),
-  openDevTools: () => getWin().webContents.openDevTools(),
+  // TODO implement in a way that throws no error
+  // reloadMainWin: () => getWin().reload(),
+  // openDevTools: () => getWin().webContents.openDevTools(),
+  reloadMainWin: () => undefined,
+  openDevTools: () => undefined,
   relaunch: () => app.relaunch(),
   exit: (exitCode: number) => app.exit(exitCode),
   isSystemDarkMode: () => nativeTheme.shouldUseDarkColors,

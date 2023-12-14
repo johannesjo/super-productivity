@@ -2,7 +2,6 @@ import { ErrorHandler, Inject, Injectable, Injector } from '@angular/core';
 import { isObject } from '../../util/is-object';
 import { getErrorTxt } from '../../util/get-error-text';
 import { IS_ELECTRON } from '../../app.constants';
-import { ElectronService } from '../electron/electron.service';
 import {
   createErrorAlert,
   isHandledError,
@@ -16,12 +15,11 @@ import { PersistenceService } from '../persistence/persistence.service';
 export class GlobalErrorHandler implements ErrorHandler {
   private _electronLogger: any;
 
-  constructor(
-    private _electronService: ElectronService,
-    @Inject(Injector) private injector: Injector,
-  ) {
+  constructor(@Inject(Injector) private injector: Injector) {
     if (IS_ELECTRON) {
+      // TODO make it work
       // this._electronLogger = this._electronService.remote.require('electron-log');
+      this._electronLogger = { log: () => undefined, error: () => undefined };
     }
   }
 
@@ -36,13 +34,7 @@ export class GlobalErrorHandler implements ErrorHandler {
     if (!isHandledError(err)) {
       const errorStr = this._getErrorStr(err) || errStr;
       saveBeforeLastErrorActionLog();
-      createErrorAlert(
-        this._electronService,
-        errorStr,
-        simpleStack,
-        err,
-        await this._getUserData(),
-      );
+      createErrorAlert(errorStr, simpleStack, err, await this._getUserData());
     }
 
     if (IS_ELECTRON) {

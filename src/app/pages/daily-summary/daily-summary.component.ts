@@ -26,10 +26,8 @@ import {
 } from 'rxjs/operators';
 import * as moment from 'moment';
 import { T } from '../../t.const';
-import { ElectronService } from '../../core/electron/electron.service';
 import { WorkContextService } from '../../features/work-context/work-context.service';
 import { Task, TaskWithSubTasks } from '../../features/tasks/task.model';
-import { ipcRenderer } from 'electron';
 import { SyncProviderService } from '../../imex/sync/sync-provider.service';
 import { isToday, isYesterday } from '../../util/is-today.util';
 import { WorklogService } from '../../features/worklog/worklog.service';
@@ -166,7 +164,6 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
     private readonly _matDialog: MatDialog,
     private readonly _persistenceService: PersistenceService,
     private readonly _worklogService: WorklogService,
-    private readonly _electronService: ElectronService,
     private readonly _cd: ChangeDetectorRef,
     private readonly _activatedRoute: ActivatedRoute,
     private readonly _syncProviderService: SyncProviderService,

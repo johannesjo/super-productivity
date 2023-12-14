@@ -4,7 +4,6 @@ import { Observable, of } from 'rxjs';
 import { IS_ELECTRON } from '../../../app.constants';
 import { SyncGetRevResult } from '../sync.model';
 import { IPC } from '../../../../../electron/shared-with-frontend/ipc-events.const';
-import { ElectronService } from '../../../core/electron/electron.service';
 import { concatMap, first, map } from 'rxjs/operators';
 import { GlobalConfigService } from '../../../features/config/global-config.service';
 
@@ -24,23 +23,17 @@ export class LocalFileSyncElectronService implements SyncProviderServiceInterfac
   );
   private _filePathOnce$: Observable<string | null> = this._filePath$.pipe(first());
 
-  constructor(
-    private _electronService: ElectronService,
-    private _globalConfigService: GlobalConfigService,
-  ) {}
+  constructor(private _globalConfigService: GlobalConfigService) {}
 
   async getRevAndLastClientUpdate(
     localRev: string | null,
   ): Promise<{ rev: string; clientUpdate?: number } | SyncGetRevResult> {
     const filePath = await this._filePathOnce$.toPromise();
     try {
-      const r = await this._electronService.callMain(
-        IPC.FILE_SYNC_GET_REV_AND_CLIENT_UPDATE,
-        {
-          filePath,
-          localRev,
-        },
-      );
+      const r = await window.electronAPI.invoke(IPC.FILE_SYNC_GET_REV_AND_CLIENT_UPDATE, {
+        filePath,
+        localRev,
+      });
       return r as any;
     } catch (e) {
       throw new Error(e as any);
@@ -55,7 +48,7 @@ export class LocalFileSyncElectronService implements SyncProviderServiceInterfac
   ): Promise<string | Error> {
     const filePath = await this._filePathOnce$.toPromise();
     try {
-      const r = (await this._electronService.callMain(IPC.FILE_SYNC_SAVE, {
+      const r = (await window.electronAPI.invoke(IPC.FILE_SYNC_SAVE, {
         localRev,
         filePath,
         dataStr,
@@ -71,7 +64,7 @@ export class LocalFileSyncElectronService implements SyncProviderServiceInterfac
   ): Promise<{ rev: string; dataStr: string | undefined }> {
     const filePath = await this._filePathOnce$.toPromise();
     try {
-      const r = (await this._electronService.callMain(IPC.FILE_SYNC_LOAD, {
+      const r = (await window.electronAPI.invoke(IPC.FILE_SYNC_LOAD, {
         localRev,
         filePath,
       })) as Promise<{ rev: string; dataStr: string | undefined }>;

@@ -1,9 +1,7 @@
 import { Injectable } from '@angular/core';
 import { createEffect } from '@ngrx/effects';
-import { fromEvent, Observable } from 'rxjs';
+import { Observable } from 'rxjs';
 import { IS_ELECTRON } from '../../app.constants';
-import { ElectronService } from './electron.service';
-import { IpcRenderer } from 'electron';
 import { IPC } from '../../../../electron/shared-with-frontend/ipc-events.const';
 import { tap } from 'rxjs/operators';
 import { SnackService } from '../snack/snack.service';
@@ -40,8 +38,5 @@ export class ElectronEffects {
       { dispatch: false },
     );
 
-  constructor(
-    private _electronService: ElectronService,
-    private _snackService: SnackService,
-  ) {}
+  constructor(private _snackService: SnackService) {}
 }

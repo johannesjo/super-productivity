@@ -10,7 +10,6 @@ import { T } from '../../../t.const';
 import { LanguageService } from '../../../core/language/language.service';
 import { DateService } from 'src/app/core/date/date.service';
 import { SnackService } from '../../../core/snack/snack.service';
-import { ElectronService } from '../../../core/electron/electron.service';
 import { loadAllData } from '../../../root-store/meta/load-all-data.action';
 import { DEFAULT_GLOBAL_CONFIG } from '../default-global-config.const';
 import { KeyboardConfig } from '../keyboard-config.model';
@@ -144,7 +143,6 @@ export class GlobalConfigEffects {
   constructor(
     private _actions$: Actions,
     private _persistenceService: PersistenceService,
-    private _electronService: ElectronService,
     private _languageService: LanguageService,
     private _dateService: DateService,
     private _snackService: SnackService,

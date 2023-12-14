@@ -33,8 +33,6 @@ import { NotifyService } from '../../../core/notify/notify.service';
 import { IS_ELECTRON } from '../../../app.constants';
 import { T } from '../../../t.const';
 import { SnackService } from '../../../core/snack/snack.service';
-import { ElectronService } from '../../../core/electron/electron.service';
-import { ipcRenderer } from 'electron';
 import { IPC } from '../../../../../electron/shared-with-frontend/ipc-events.const';
 import { TaskService } from '../../tasks/task.service';
 
@@ -275,7 +273,6 @@ export class PomodoroEffects {
     private _actions$: Actions,
     private _notifyService: NotifyService,
     private _matDialog: MatDialog,
-    private _electronService: ElectronService,
     private _snackService: SnackService,
     private _store$: Store<any>,
     private _taskService: TaskService,

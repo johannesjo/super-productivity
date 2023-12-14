@@ -8,8 +8,6 @@ import { Observable } from 'rxjs';
 import { IPC } from '../../../../../electron/shared-with-frontend/ipc-events.const';
 import { IS_ELECTRON } from '../../../app.constants';
 import { GlobalConfigService } from '../../config/global-config.service';
-import { ElectronService } from '../../../core/electron/electron.service';
-import { ipcRenderer } from 'electron';
 
 // TODO send message to electron when current task changes here
 
@@ -69,6 +67,5 @@ export class TaskElectronEffects {
     private _actions$: Actions,
     private _store$: Store<any>,
     private _configService: GlobalConfigService,
-    private _electronService: ElectronService,
   ) {}
 }

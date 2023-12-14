@@ -34,9 +34,7 @@ import { Store } from '@ngrx/store';
 import { unsetCurrentTask } from '../../tasks/store/task.actions';
 import { playSound } from '../../../util/play-sound';
 import { IS_ELECTRON } from '../../../app.constants';
-import { ipcRenderer } from 'electron';
 import { IPC } from '../../../../../electron/shared-with-frontend/ipc-events.const';
-import { ElectronService } from '../../../core/electron/electron.service';
 import { IdleService } from '../../idle/idle.service';
 import { FocusModePage } from '../focus-mode.const';
 import { selectFocusModeConfig } from '../../config/store/global-config.reducer';
@@ -175,6 +173,5 @@ export class FocusModeEffects {
     private _idleService: IdleService,
     private _globalConfigService: GlobalConfigService,
     private _taskService: TaskService,
-    private _electronService: ElectronService,
   ) {}
 }

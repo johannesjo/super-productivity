@@ -27,7 +27,6 @@ import { TranslateService } from '@ngx-translate/core';
 import { GlobalThemeService } from './core/theme/global-theme.service';
 import { UiHelperService } from './features/ui-helper/ui-helper.service';
 import { LanguageService } from './core/language/language.service';
-import { ElectronService } from './core/electron/electron.service';
 import { WorkContextService } from './features/work-context/work-context.service';
 import { ImexMetaService } from './imex/imex-meta/imex-meta.service';
 import { AndroidService } from './features/android/android.service';
@@ -86,7 +85,6 @@ export class AppComponent implements OnDestroy {
     private _globalConfigService: GlobalConfigService,
     private _shortcutService: ShortcutService,
     private _bannerService: BannerService,
-    private _electronService: ElectronService,
     private _snackService: SnackService,
     private _chromeExtensionInterfaceService: ChromeExtensionInterfaceService,
     private _translateService: TranslateService,

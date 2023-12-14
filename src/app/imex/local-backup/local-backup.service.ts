@@ -4,8 +4,6 @@ import { interval, Observable } from 'rxjs';
 import { LocalBackupConfig } from '../../features/config/global-config.model';
 import { filter, map, switchMap, tap } from 'rxjs/operators';
 import { IPC } from '../../../../electron/shared-with-frontend/ipc-events.const';
-import { ElectronService } from '../../core/electron/electron.service';
-import { ipcRenderer } from 'electron';
 import { PersistenceService } from '../../core/persistence/persistence.service';
 import { LocalBackupMeta } from './local-backup.model';
 import { IS_ANDROID_WEB_VIEW } from '../../util/is-android-web-view';
@@ -31,7 +29,6 @@ export class LocalBackupService {
   constructor(
     private _configService: GlobalConfigService,
     private _persistenceService: PersistenceService,
-    private _electronService: ElectronService,
   ) {}
 
   init(): void {
@@ -41,16 +38,13 @@ export class LocalBackupService {
   isBackupAvailable(): Promise<boolean | LocalBackupMeta> {
     return IS_ANDROID_WEB_VIEW
       ? androidInterface.loadFromDbWrapped(ANDROID_DB_KEY).then((r) => !!r)
-      : (this._electronService.callMain(IPC.BACKUP_IS_AVAILABLE, null) as Promise<
+      : (window.electronAPI.invoke(IPC.BACKUP_IS_AVAILABLE, null) as Promise<
           false | LocalBackupMeta
         >);
   }
 
   loadBackupElectron(backupPath: string): Promise<string> {
-    return this._electronService.callMain(
-      IPC.BACKUP_LOAD_DATA,
-      backupPath,
-    ) as Promise<string>;
+    return window.electronAPI.invoke(IPC.BACKUP_LOAD_DATA, backupPath) as Promise<string>;
   }
 
   loadBackupAndroid(): Promise<string> {

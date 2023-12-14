@@ -4,7 +4,6 @@ import { BookmarkType } from '../bookmark.model';
 import { SnackService } from '../../../core/snack/snack.service';
 import { IPC } from '../../../../../electron/shared-with-frontend/ipc-events.const';
 import { T } from '../../../t.const';
-import { ElectronService } from '../../../core/electron/electron.service';
 
 @Directive({
   selector: '[bookmarkLink]',
@@ -13,10 +12,7 @@ export class BookmarkLinkDirective {
   @Input() type?: BookmarkType;
   @Input() href?: BookmarkType;
 
-  constructor(
-    private _electronService: ElectronService,
-    private _snackService: SnackService,
-  ) {}
+  constructor(private _snackService: SnackService) {}
 
   @HostListener('click', ['$event']) onClick(ev: Event): void {
     if (!this.type || !this.href) {
