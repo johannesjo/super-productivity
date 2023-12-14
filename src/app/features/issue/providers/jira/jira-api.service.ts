@@ -428,7 +428,7 @@ export class JiraApiService {
     });
 
     const requestToSend = { requestId, requestInit, url };
-    if (this._electronService.isElectronApp) {
+    if (IS_ELECTRON) {
       window.electronAPI.send(IPC.JIRA_MAKE_REQUEST_EVENT, {
         ...requestToSend,
         jiraCfg,

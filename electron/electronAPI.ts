@@ -1,12 +1,15 @@
 import {
+  app,
   IpcRenderer,
   ipcRenderer,
   IpcRendererEvent,
+  nativeTheme,
   OpenExternalOptions,
   shell,
   webFrame,
 } from 'electron';
 import { ElectronAPI } from './electronAPI.d';
+import { getWin } from './main-window';
 
 export const electronAPI: Partial<ElectronAPI> = {
   // TODO use full interface
@@ -32,4 +35,10 @@ export const electronAPI: Partial<ElectronAPI> = {
   getZoomFactor: () => webFrame.getZoomFactor(),
   openPath: (path: string) => shell.openPath(path),
   openExternal: (url: string, options?: OpenExternalOptions) => shell.openExternal(url),
+  isMacOS: () => process.platform === 'darwin',
+  reloadMainWin: () => getWin().reload(),
+  openDevTools: () => getWin().webContents.openDevTools(),
+  relaunch: () => app.relaunch(),
+  exit: (exitCode: number) => app.exit(exitCode),
+  isSystemDarkMode: () => nativeTheme.shouldUseDarkColors,
 };

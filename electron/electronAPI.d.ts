@@ -6,6 +6,7 @@ export interface ElectronAPI {
 
   // IPC STUFF
   ipcEvent$(evName: string): Observable<unknown>;
+
   send(channel: string, ...args: any[]): void;
 
   invoke(channel: string, ...args: any[]): Promise<any>;
@@ -26,4 +27,16 @@ export interface ElectronAPI {
   openPath(path: string): Promise<string>;
 
   openExternal(url: string, options?: OpenExternalOptions): Promise<void>;
+
+  isMacOS(): boolean;
+
+  // TODO implement
+  reloadMainWin(): void;
+
+  openDevTools(): void;
+
+  relaunch(): void;
+
+  exit(exitCode: number): void;
+  isSystemDarkMode(): boolean;
 }

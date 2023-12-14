@@ -21,16 +21,16 @@ import { IS_MOUSE_PRIMARY, IS_TOUCH_PRIMARY } from '../../util/is-mouse-primary'
 @Injectable({ providedIn: 'root' })
 export class GlobalThemeService {
   isDarkTheme$: Observable<boolean> =
-    IS_ELECTRON && this._electronService.isMacOS
+    IS_ELECTRON && window.electronAPI.isMacOS()
       ? new Observable((subscriber) => {
-          subscriber.next(this._electronService.remote.nativeTheme.shouldUseDarkColors);
-          this._electronService.remote.systemPreferences.subscribeNotification(
-            'AppleInterfaceThemeChangedNotification',
-            () =>
-              subscriber.next(
-                this._electronService.remote.nativeTheme.shouldUseDarkColors,
-              ),
-          );
+          subscriber.next(window.electronAPI.isSystemDarkMode());
+          // this._electronService.remote.systemPreferences.subscribeNotification(
+          //   'AppleInterfaceThemeChangedNotification',
+          //   () =>
+          //     subscriber.next(
+          //       this._electronService.remote.nativeTheme.shouldUseDarkColors,
+          //     ),
+          // );
         })
       : this._globalConfigService.misc$.pipe(
           map((cfg) => cfg.isDarkMode),
@@ -50,7 +50,6 @@ export class GlobalThemeService {
   constructor(
     @Inject(DOCUMENT) private document: Document,
     private _materialCssVarsService: MaterialCssVarsService,
-    private _electronService: ElectronService,
     private _workContextService: WorkContextService,
     private _globalConfigService: GlobalConfigService,
     private _matIconRegistry: MatIconRegistry,
