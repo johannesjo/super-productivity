@@ -85,7 +85,7 @@ export const createWindow = ({
       backgroundThrottling: false,
       webSecurity: !IS_DEV,
       preload: path.join(__dirname, 'preload.js'),
-      nodeIntegration: true,
+      nodeIntegration: false,
       // make remote module work with those two settings
       contextIsolation: true,
     },

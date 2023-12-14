@@ -7,8 +7,6 @@ export const ipcEvent$ = (evName: string): Observable<unknown[]> => {
   if (!IS_ELECTRON) {
     throw new Error('Not possible outside electron context');
   }
-  console.log(window.electronAPI);
-  console.log(evName);
 
   const subject = new Subject<unknown[]>();
 
