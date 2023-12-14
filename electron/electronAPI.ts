@@ -42,4 +42,6 @@ export const electronAPI: Partial<ElectronAPI> = {
   relaunch: () => app.relaunch(),
   exit: (exitCode: number) => app.exit(exitCode),
   isSystemDarkMode: () => nativeTheme.shouldUseDarkColors,
+
+  getUserDataPath: () => app.getPath('userData'),
 };

@@ -1,13 +1,12 @@
 /* eslint-disable max-len */
 import { ConfigFormSection, LocalBackupConfig } from '../global-config.model';
 import { T } from '../../../t.const';
-import { getElectronRemoteModule } from '../../../util/get-electron-remote-module';
 import { IS_ELECTRON } from '../../../app.constants';
 
 const backupPath =
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   IS_ELECTRON &&
-  `${getElectronRemoteModule()?.app.getPath('userData')}${
+  `${window.electronAPI.getUserDataPath()}${
     navigator?.userAgent?.search('Windows') ? '\\' : '/'
   }backups`;
 
