@@ -17,6 +17,7 @@ import { readFileSync, stat } from 'fs';
 import { error, log } from 'electron-log';
 import { GlobalConfigState } from '../src/app/features/config/global-config.model';
 import { enable as enableRemote } from '@electron/remote/main';
+import * as path from 'path';
 
 let mainWin: BrowserWindow;
 
@@ -83,9 +84,10 @@ export const createWindow = ({
       scrollBounce: true,
       backgroundThrottling: false,
       webSecurity: !IS_DEV,
+      preload: path.join(__dirname, 'preload.js'),
       nodeIntegration: true,
       // make remote module work with those two settings
-      contextIsolation: false,
+      contextIsolation: true,
     },
     icon: ICONS_FOLDER + '/icon_256x256.png',
   });

@@ -105,6 +105,9 @@ export class AppComponent implements OnDestroy {
     public readonly focusModeService: FocusModeService,
     public readonly globalThemeService: GlobalThemeService,
   ) {
+    console.log(window);
+    console.log((window as any).electronAPI);
+
     this._snackService.open({
       ico: 'lightbulb',
       config: {

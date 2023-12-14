@@ -3,7 +3,7 @@ import { createEffect } from '@ngrx/effects';
 import { fromEvent, Observable } from 'rxjs';
 import { IS_ELECTRON } from '../../app.constants';
 import { ElectronService } from './electron.service';
-import { IpcRenderer, shell } from 'electron';
+import { IpcRenderer } from 'electron';
 import { IPC } from '../../../../electron/shared-with-frontend/ipc-events.const';
 import { tap } from 'rxjs/operators';
 import { SnackService } from '../snack/snack.service';
@@ -34,7 +34,7 @@ export class ElectronEffects {
               },
               actionStr: T.GLOBAL_SNACK.FILE_DOWNLOADED_BTN,
               actionFn: () => {
-                (this._electronService.shell as typeof shell).openPath(dir);
+                window.electronAPI.openPath(dir);
               },
             });
           }),

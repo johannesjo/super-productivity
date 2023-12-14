@@ -1,10 +1,9 @@
 import { Injectable } from '@angular/core';
 // If you import a module but never use any of the imported values other than as TypeScript types,
 // the resulting javascript file will look as if you never imported the module at all.
-import { ipcRenderer, shell, webFrame } from 'electron';
+import { ipcRenderer } from 'electron';
 import { IS_ELECTRON } from '../../app.constants';
 import { getElectronRemoteModule } from '../../util/get-electron-remote-module';
-import { getElectron } from '../../util/get-electron';
 import * as remote from '@electron/remote';
 
 // TODO make available for both
@@ -31,22 +30,18 @@ const getResponseChannels = (
 @Injectable({ providedIn: 'root' })
 export class ElectronService {
   ipcRenderer?: typeof ipcRenderer;
-  webFrame?: typeof webFrame;
   remote!: typeof remote;
-  shell?: typeof shell;
 
   // fs: typeof fs;
 
   constructor() {
     // Conditional imports
     if (IS_ELECTRON) {
-      const electron = getElectron() as typeof Electron.Renderer;
-      this.ipcRenderer = electron.ipcRenderer;
-      this.webFrame = electron.webFrame;
+      // this.ipcRenderer = electron.ipcRenderer;
+      this.ipcRenderer = window.electronAPI.ipcRenderer();
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       this.remote = getElectronRemoteModule()!;
       // NOTE: works for non-sandboxed electron only
-      this.shell = (electron as any).shell;
 
       // log to file for production
       // if (environment.production || environment.stage) {
@@ -71,10 +66,6 @@ export class ElectronService {
     //   },
     //   getZoomFactor: () => 1
     // };
-  }
-
-  get isElectron(): boolean {
-    return !!(window && window.process && window.process.type);
   }
 
   public get isElectronApp(): boolean {

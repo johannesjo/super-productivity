@@ -9,12 +9,10 @@ import { IPC } from '../../../../electron/shared-with-frontend/ipc-events.const'
 import { IS_ELECTRON } from '../../app.constants';
 import { fromEvent } from 'rxjs';
 import { throttleTime } from 'rxjs/operators';
-import { ipcRenderer, webFrame } from 'electron';
+import { ipcRenderer } from 'electron';
 
 @Injectable({ providedIn: 'root' })
 export class UiHelperService {
-  private _webFrame: typeof webFrame = this._electronService.webFrame as typeof webFrame;
-
   constructor(
     @Inject(DOCUMENT) private _document: Document,
     private _electronService: ElectronService,
@@ -30,7 +28,7 @@ export class UiHelperService {
       return;
     }
 
-    this._webFrame.setZoomFactor(zoomFactor);
+    window.electronAPI.setZoomFactor(zoomFactor);
     this._updateLocalUiHelperSettings({ zoomFactor });
   }
 
@@ -39,10 +37,12 @@ export class UiHelperService {
       console.error('Invalid zoom factor', zoomBy);
       return;
     }
-    const currentZoom = this._webFrame.getZoomFactor();
+    const currentZoom = window.electronAPI.getZoomFactor();
+    console.log({ currentZoom });
+
     const zoomFactor = currentZoom + zoomBy;
 
-    this._webFrame.setZoomFactor(zoomFactor);
+    window.electronAPI.setZoomFactor(zoomFactor);
     this._updateLocalUiHelperSettings({ zoomFactor });
   }
 
@@ -72,7 +72,7 @@ export class UiHelperService {
           // this does not prevent scrolling unfortunately
           // event.preventDefault();
 
-          let zoomFactor = this._webFrame.getZoomFactor();
+          let zoomFactor = window.electronAPI.getZoomFactor();
           if (event.deltaY > 0) {
             zoomFactor -= ZOOM_DELTA;
           } else if (event.deltaY < 0) {

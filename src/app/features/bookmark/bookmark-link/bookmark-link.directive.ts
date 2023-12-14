@@ -6,6 +6,7 @@ import { IPC } from '../../../../../electron/shared-with-frontend/ipc-events.con
 import { T } from '../../../t.const';
 import { ElectronService } from '../../../core/electron/electron.service';
 import { ipcRenderer, shell } from 'electron';
+import { electronAPI } from '../../../../../electron/electronAPI';
 
 @Directive({
   selector: '[bookmarkLink]',
@@ -33,7 +34,7 @@ export class BookmarkLinkDirective {
       if (!this.type || this.type === 'LINK') {
         this._openExternalUrl(this.href);
       } else if (this.type === 'FILE') {
-        (this._electronService.shell as typeof shell).openPath(this.href);
+        window.electronAPI.openPath(this.href);
       } else if (this.type === 'COMMAND') {
         this._snackService.open({
           msg: T.GLOBAL_SNACK.RUNNING_X,
@@ -54,7 +55,7 @@ export class BookmarkLinkDirective {
       .replace('http://http://', 'http://');
 
     if (IS_ELECTRON) {
-      (this._electronService.shell as typeof shell).openExternal(url);
+      window.electronAPI.openExternal(url);
     } else {
       const win = window.open(url, '_blank');
       if (win) {
