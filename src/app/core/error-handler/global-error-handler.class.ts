@@ -21,7 +21,7 @@ export class GlobalErrorHandler implements ErrorHandler {
     @Inject(Injector) private injector: Injector,
   ) {
     if (IS_ELECTRON) {
-      this._electronLogger = this._electronService.remote.require('electron-log');
+      // this._electronLogger = this._electronService.remote.require('electron-log');
     }
   }
 
