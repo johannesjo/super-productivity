@@ -220,7 +220,7 @@ export class TakeABreakService {
 
     if (IS_ELECTRON) {
       this._triggerLockScreenThrottledAndDelayed$.subscribe(() => {
-        (this._electronService.ipcRenderer as typeof ipcRenderer).send(IPC.LOCK_SCREEN);
+        window.electronAPI.send(IPC.LOCK_SCREEN);
       });
 
       this._triggerFullscreenBlockerThrottledAndDelayed$
@@ -229,13 +229,10 @@ export class TakeABreakService {
         )
         .subscribe(([, takeABreakCfg, timeWorkingWithoutABreak]) => {
           const msg = this._createMessage(timeWorkingWithoutABreak, takeABreakCfg);
-          (this._electronService.ipcRenderer as typeof ipcRenderer).send(
-            IPC.FULL_SCREEN_BLOCKER,
-            {
-              msg,
-              takeABreakCfg,
-            },
-          );
+          window.electronAPI.send(IPC.FULL_SCREEN_BLOCKER, {
+            msg,
+            takeABreakCfg,
+          });
         });
     }
 

@@ -8,6 +8,7 @@ import { IPC } from '../../../../electron/shared-with-frontend/ipc-events.const'
 import { tap } from 'rxjs/operators';
 import { SnackService } from '../snack/snack.service';
 import { T } from '../../t.const';
+import { ipcEvent$ } from '../../util/ipc-event';
 
 @Injectable()
 export class ElectronEffects {
@@ -15,10 +16,7 @@ export class ElectronEffects {
     IS_ELECTRON &&
     createEffect(
       () =>
-        fromEvent(
-          this._electronService.ipcRenderer as IpcRenderer,
-          IPC.ANY_FILE_DOWNLOADED,
-        ).pipe(
+        ipcEvent$(IPC.ANY_FILE_DOWNLOADED).pipe(
           tap((args) => {
             const fileParam = (args as any)[1];
             const path = fileParam.path;

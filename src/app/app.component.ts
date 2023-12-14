@@ -36,7 +36,6 @@ import { isOnline$ } from './util/is-online';
 import { SyncTriggerService } from './imex/sync/sync-trigger.service';
 import { environment } from '../environments/environment';
 import { ActivatedRoute, RouterOutlet } from '@angular/router';
-import { ipcRenderer } from 'electron';
 import { TrackingReminderService } from './features/tracking-reminder/tracking-reminder.service';
 import { first, map, skip, take } from 'rxjs/operators';
 import { IS_MOBILE } from './util/is-mobile';
@@ -105,9 +104,6 @@ export class AppComponent implements OnDestroy {
     public readonly focusModeService: FocusModeService,
     public readonly globalThemeService: GlobalThemeService,
   ) {
-    console.log(window);
-    console.log((window as any).electronAPI);
-
     this._snackService.open({
       ico: 'lightbulb',
       config: {
@@ -163,19 +159,16 @@ export class AppComponent implements OnDestroy {
     });
 
     if (IS_ELECTRON) {
-      (this._electronService.ipcRenderer as typeof ipcRenderer).send(IPC.APP_READY);
+      window.electronAPI.send(IPC.APP_READY);
       this._initElectronErrorHandler();
       this._uiHelperService.initElectron();
 
-      (this._electronService.ipcRenderer as typeof ipcRenderer).on(
-        IPC.TRANSFER_SETTINGS_REQUESTED,
-        () => {
-          (this._electronService.ipcRenderer as typeof ipcRenderer).send(
-            IPC.TRANSFER_SETTINGS_TO_ELECTRON,
-            this._globalConfigService.cfg,
-          );
-        },
-      );
+      window.electronAPI.on(IPC.TRANSFER_SETTINGS_REQUESTED, () => {
+        window.electronAPI.send(
+          IPC.TRANSFER_SETTINGS_TO_ELECTRON,
+          this._globalConfigService.cfg,
+        );
+      });
     } else {
       // WEB VERSION
       this._chromeExtensionInterfaceService.init();
@@ -255,7 +248,7 @@ export class AppComponent implements OnDestroy {
   }
 
   private _initElectronErrorHandler(): void {
-    (this._electronService.ipcRenderer as typeof ipcRenderer).on(
+    window.electronAPI.on(
       IPC.ERROR,
       (
         ev,

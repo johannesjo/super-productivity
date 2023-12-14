@@ -235,9 +235,7 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
         .subscribe((isConfirm: boolean) => {
           if (isConfirm) {
             this._finishDayForGood(() => {
-              (this._electronService.ipcRenderer as typeof ipcRenderer).send(
-                IPC.SHUTDOWN_NOW,
-              );
+              window.electronAPI.send(IPC.SHUTDOWN_NOW);
             });
           } else if (isConfirm === false) {
             this._finishDayForGood(() => {

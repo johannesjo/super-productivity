@@ -22,12 +22,9 @@ export class TaskElectronEffects {
         withLatestFrom(this._store$.pipe(select(selectCurrentTask))),
         tap(([action, current]) => {
           if (IS_ELECTRON) {
-            (this._electronService.ipcRenderer as typeof ipcRenderer).send(
-              IPC.CURRENT_TASK_UPDATED,
-              {
-                current,
-              },
-            );
+            window.electronAPI.send(IPC.CURRENT_TASK_UPDATED, {
+              current,
+            });
           }
         }),
       ),
@@ -41,12 +38,9 @@ export class TaskElectronEffects {
         filter(() => IS_ELECTRON),
         tap(({ id }) => {
           if (!id) {
-            (this._electronService.ipcRenderer as typeof ipcRenderer).send(
-              IPC.SET_PROGRESS_BAR,
-              {
-                progress: 0,
-              },
-            );
+            window.electronAPI.send(IPC.SET_PROGRESS_BAR, {
+              progress: 0,
+            });
           }
         }),
       ),
@@ -63,12 +57,9 @@ export class TaskElectronEffects {
         filter(([a, cfg]) => !cfg || !cfg.pomodoro.isEnabled),
         tap(([{ task }]) => {
           const progress = task.timeSpent / task.timeEstimate;
-          (this._electronService.ipcRenderer as typeof ipcRenderer).send(
-            IPC.SET_PROGRESS_BAR,
-            {
-              progress,
-            },
-          );
+          window.electronAPI.send(IPC.SET_PROGRESS_BAR, {
+            progress,
+          });
         }),
       ),
     { dispatch: false },

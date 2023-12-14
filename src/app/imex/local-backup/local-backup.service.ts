@@ -60,7 +60,7 @@ export class LocalBackupService {
   private async _backup(): Promise<void> {
     const data = await this._persistenceService.loadComplete();
     if (IS_ELECTRON) {
-      (this._electronService.ipcRenderer as typeof ipcRenderer).send(IPC.BACKUP, data);
+      window.electronAPI.send(IPC.BACKUP, data);
     }
     if (IS_ANDROID_WEB_VIEW) {
       androidInterface.saveToDbWrapped(ANDROID_DB_KEY, JSON.stringify(data));

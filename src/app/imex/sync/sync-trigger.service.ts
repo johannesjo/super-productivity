@@ -34,6 +34,7 @@ import { GlobalConfigState } from '../../features/config/global-config.model';
 import { IS_ANDROID_WEB_VIEW } from '../../util/is-android-web-view';
 import { androidInterface } from '../../features/android/android-interface';
 import { IS_TOUCH_ONLY } from '../../util/is-touch-only';
+import { ipcEvent$ } from '../../util/ipc-event';
 
 const MAX_WAIT_FOR_INITIAL_SYNC = 25000;
 const USER_INTERACTION_SYNC_CHECK_THROTTLE_TIME = 15 * 60 * 10000;
@@ -104,17 +105,11 @@ export class SyncTriggerService {
   );
 
   private _onElectronResumeTrigger$: Observable<string | never> = IS_ELECTRON
-    ? fromEvent(this._electronService.ipcRenderer as IpcRenderer, IPC.RESUME).pipe(
-        mapTo('I_IPC_RESUME'),
-      )
+    ? ipcEvent$(IPC.RESUME).pipe(mapTo('I_IPC_RESUME'))
     : EMPTY;
 
   private _beforeGoingToSleepTriggers$: Observable<string> = merge(
-    IS_ELECTRON
-      ? fromEvent(this._electronService.ipcRenderer as IpcRenderer, IPC.SUSPEND).pipe(
-          mapTo('I_IPC_SUSPEND'),
-        )
-      : EMPTY,
+    IS_ELECTRON ? ipcEvent$(IPC.SUSPEND).pipe(mapTo('I_IPC_SUSPEND')) : EMPTY,
   ).pipe(throttleTime(SYNC_BEFORE_GOING_TO_SLEEP_THROTTLE_TIME));
 
   private _isOnlineTrigger$: Observable<string> = isOnline$.pipe(

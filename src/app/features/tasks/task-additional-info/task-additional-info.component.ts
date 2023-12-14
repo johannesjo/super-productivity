@@ -267,15 +267,11 @@ export class TaskAdditionalInfoComponent implements AfterViewInit, OnDestroy {
         )
         .subscribe((jiraCfg) => {
           if (jiraCfg.isEnabled) {
-            (this._electronService.ipcRenderer as typeof ipcRenderer).send(
-              IPC.JIRA_SETUP_IMG_HEADERS,
-              {
-                jiraCfg,
-                wonkyCookie:
-                  jiraCfg.isWonkyCookieMode &&
-                  sessionStorage.getItem(SS.JIRA_WONKY_COOKIE),
-              },
-            );
+            window.electronAPI.send(IPC.JIRA_SETUP_IMG_HEADERS, {
+              jiraCfg,
+              wonkyCookie:
+                jiraCfg.isWonkyCookieMode && sessionStorage.getItem(SS.JIRA_WONKY_COOKIE),
+            });
           }
         });
     }

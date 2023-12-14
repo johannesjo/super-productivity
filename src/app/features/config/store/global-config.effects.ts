@@ -13,7 +13,6 @@ import { SnackService } from '../../../core/snack/snack.service';
 import { ElectronService } from '../../../core/electron/electron.service';
 import { loadAllData } from '../../../root-store/meta/load-all-data.action';
 import { DEFAULT_GLOBAL_CONFIG } from '../default-global-config.const';
-import { ipcRenderer } from 'electron';
 import { KeyboardConfig } from '../keyboard-config.model';
 import { updateGlobalConfigSection } from './global-config.actions';
 
@@ -61,10 +60,7 @@ export class GlobalConfigEffects {
         filter(({ sectionKey, sectionCfg }) => IS_ELECTRON && sectionKey === 'keyboard'),
         tap(({ sectionKey, sectionCfg }) => {
           const keyboardCfg: KeyboardConfig = sectionCfg as KeyboardConfig;
-          (this._electronService.ipcRenderer as typeof ipcRenderer).send(
-            IPC.REGISTER_GLOBAL_SHORTCUTS_EVENT,
-            keyboardCfg,
-          );
+          window.electronAPI.send(IPC.REGISTER_GLOBAL_SHORTCUTS_EVENT, keyboardCfg);
         }),
       ),
     { dispatch: false },
@@ -80,10 +76,7 @@ export class GlobalConfigEffects {
           const keyboardCfg: KeyboardConfig = (
             appDataComplete.globalConfig || DEFAULT_GLOBAL_CONFIG
           ).keyboard;
-          (this._electronService.ipcRenderer as typeof ipcRenderer).send(
-            IPC.REGISTER_GLOBAL_SHORTCUTS_EVENT,
-            keyboardCfg,
-          );
+          window.electronAPI.send(IPC.REGISTER_GLOBAL_SHORTCUTS_EVENT, keyboardCfg);
         }),
       ),
     { dispatch: false },

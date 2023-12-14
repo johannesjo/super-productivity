@@ -88,7 +88,7 @@ export class DialogIdleComponent implements OnInit, OnDestroy {
     );
 
     if (IS_ELECTRON) {
-      (this._electronService.ipcRenderer as typeof ipcRenderer).send(IPC.FLASH_FRAME);
+      window.electronAPI.send(IPC.FLASH_FRAME);
     }
   }
 

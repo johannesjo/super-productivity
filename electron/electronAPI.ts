@@ -1,10 +1,31 @@
-import { IpcRenderer, OpenExternalOptions, ipcRenderer, webFrame, shell } from 'electron';
+import {
+  IpcRenderer,
+  ipcRenderer,
+  IpcRendererEvent,
+  OpenExternalOptions,
+  shell,
+  webFrame,
+} from 'electron';
 import { ElectronAPI } from './electronAPI.d';
 
 export const electronAPI: Partial<ElectronAPI> = {
-  // TODO use full
+  // TODO use full interface
   // const electronAPI: ElectronAPI = {
   ipcRenderer: (): IpcRenderer => ipcRenderer,
+
+  send: (channel: string, ...args: any[]) => ipcRenderer.send(channel, ...args),
+
+  invoke: (channel: string, ...args: any[]) => ipcRenderer.invoke(channel, ...args),
+
+  off: (channel: string, listener: (event: IpcRendererEvent, ...args: any[]) => void) =>
+    ipcRenderer.off(channel, listener),
+
+  on: (channel: string, listener: (event: IpcRendererEvent, ...args: any[]) => void) =>
+    ipcRenderer.on(channel, listener),
+
+  once: (channel: string, listener: (event: IpcRendererEvent, ...args: any[]) => void) =>
+    ipcRenderer.once(channel, listener),
+
   setZoomFactor: (zoomFactor: number) => {
     webFrame.setZoomFactor(zoomFactor);
   },

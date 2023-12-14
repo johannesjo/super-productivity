@@ -68,6 +68,6 @@ export class TaskAttachmentLinkDirective {
   }
 
   private _exec(command: string): void {
-    (this._electronService.ipcRenderer as typeof ipcRenderer).send(IPC.EXEC, command);
+    window.electronAPI.send(IPC.EXEC, command);
   }
 }

@@ -50,20 +50,17 @@ export class ShortcutService {
 
     // GLOBAL SHORTCUTS
     if (IS_ELECTRON) {
-      (this._electronService.ipcRenderer as typeof ipcRenderer).on(
-        IPC.TASK_TOGGLE_START,
-        () => {
-          this._ngZone.run(() => {
-            this._taskService.toggleStartTask();
-          });
-        },
-      );
-      (this._electronService.ipcRenderer as typeof ipcRenderer).on(IPC.ADD_TASK, () => {
+      window.electronAPI.on(IPC.TASK_TOGGLE_START, () => {
+        this._ngZone.run(() => {
+          this._taskService.toggleStartTask();
+        });
+      });
+      window.electronAPI.on(IPC.ADD_TASK, () => {
         this._ngZone.run(() => {
           this._layoutService.showAddTaskBar();
         });
       });
-      (this._electronService.ipcRenderer as typeof ipcRenderer).on(IPC.ADD_NOTE, () => {
+      window.electronAPI.on(IPC.ADD_NOTE, () => {
         if (this._matDialog.openDialogs.length === 0) {
           this._ngZone.run(() => {
             this._matDialog.open(DialogAddNoteComponent, {
@@ -175,9 +172,7 @@ export class ShortcutService {
     // special hidden dev tools combo to use them for production
     if (IS_ELECTRON) {
       if (checkKeyCombo(ev, 'Ctrl+Shift+J')) {
-        (this._electronService.ipcRenderer as typeof ipcRenderer).send(
-          'TOGGLE_DEV_TOOLS',
-        );
+        window.electronAPI.send('TOGGLE_DEV_TOOLS');
       } else if (checkKeyCombo(ev, keys.zoomIn)) {
         this._uiHelperService.zoomBy(0.05);
       } else if (checkKeyCombo(ev, keys.zoomOut)) {

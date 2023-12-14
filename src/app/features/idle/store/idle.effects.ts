@@ -29,8 +29,7 @@ import {
   withLatestFrom,
 } from 'rxjs/operators';
 import { lazySetInterval } from '../../../../../electron/shared-with-frontend/lazy-set-interval';
-import { EMPTY, fromEvent, iif, Observable, of } from 'rxjs';
-import { IpcRenderer } from 'electron';
+import { EMPTY, iif, Observable, of } from 'rxjs';
 import { IPC } from '../../../../../electron/shared-with-frontend/ipc-events.const';
 import { SimpleCounterService } from '../../simple-counter/simple-counter.service';
 import { selectIdleTime, selectIsIdle } from './idle.selectors';
@@ -49,6 +48,7 @@ import { isNotNullOrUndefined } from '../../../util/is-not-null-or-undefined';
 import { DialogConfirmComponent } from '../../../ui/dialog-confirm/dialog-confirm.component';
 import { T } from '../../../t.const';
 import { DateService } from 'src/app/core/date/date.service';
+import { ipcEvent$ } from '../../../util/ipc-event';
 
 const DEFAULT_MIN_IDLE_TIME = 60000;
 const IDLE_POLL_INTERVAL = 1000;
@@ -60,7 +60,7 @@ export class IdleEffects {
   private _isDialogOpen: boolean = false;
 
   private _triggerIdleApis$ = IS_ELECTRON
-    ? fromEvent(this._electronService.ipcRenderer as IpcRenderer, IPC.IDLE_TIME).pipe(
+    ? ipcEvent$(IPC.IDLE_TIME).pipe(
         map(([ev, idleTimeInMs]: any) => idleTimeInMs as number),
       )
     : this._chromeExtensionInterfaceService.onReady$.pipe(

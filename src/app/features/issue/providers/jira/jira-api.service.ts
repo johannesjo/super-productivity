@@ -97,12 +97,9 @@ export class JiraApiService {
   ) {
     // set up callback listener for electron
     if (IS_ELECTRON) {
-      (this._electronService.ipcRenderer as typeof ipcRenderer).on(
-        IPC.JIRA_CB_EVENT,
-        (ev: IpcRendererEvent, res: any) => {
-          this._handleResponse(res);
-        },
-      );
+      window.electronAPI.on(IPC.JIRA_CB_EVENT, (ev: IpcRendererEvent, res: any) => {
+        this._handleResponse(res);
+      });
     }
 
     this._chromeExtensionInterfaceService.onReady$.subscribe(() => {
@@ -432,13 +429,10 @@ export class JiraApiService {
 
     const requestToSend = { requestId, requestInit, url };
     if (this._electronService.isElectronApp) {
-      (this._electronService.ipcRenderer as typeof ipcRenderer).send(
-        IPC.JIRA_MAKE_REQUEST_EVENT,
-        {
-          ...requestToSend,
-          jiraCfg,
-        },
-      );
+      window.electronAPI.send(IPC.JIRA_MAKE_REQUEST_EVENT, {
+        ...requestToSend,
+        jiraCfg,
+      });
     } else if (this._isExtension) {
       this._chromeExtensionInterfaceService.dispatchEvent(
         'SP_JIRA_REQUEST',

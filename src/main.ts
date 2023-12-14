@@ -17,6 +17,7 @@ declare global {
     electronAPI: ElectronAPI;
   }
 }
+console.log((window as any).electronAPI);
 
 platformBrowserDynamic()
   .bootstrapModule(AppModule)

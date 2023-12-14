@@ -9,7 +9,6 @@ import { IPC } from '../../../../electron/shared-with-frontend/ipc-events.const'
 import { IS_ELECTRON } from '../../app.constants';
 import { fromEvent } from 'rxjs';
 import { throttleTime } from 'rxjs/operators';
-import { ipcRenderer } from 'electron';
 
 @Injectable({ providedIn: 'root' })
 export class UiHelperService {
@@ -53,7 +52,7 @@ export class UiHelperService {
         (document.activeElement as HTMLElement).blur();
       }
 
-      (this._electronService.ipcRenderer as typeof ipcRenderer).send(IPC.SHOW_OR_FOCUS);
+      window.electronAPI.send(IPC.SHOW_OR_FOCUS);
     } else {
       console.error('Cannot execute focus app window in browser');
     }

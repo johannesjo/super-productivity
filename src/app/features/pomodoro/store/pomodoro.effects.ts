@@ -261,13 +261,10 @@ export class PomodoroEffects {
           tap(([progress, isPause, isPauseBreak]: [number, boolean, boolean]) => {
             const progressBarMode: 'normal' | 'pause' =
               isPause || isPauseBreak ? 'pause' : 'normal';
-            (this._electronService.ipcRenderer as typeof ipcRenderer).send(
-              IPC.SET_PROGRESS_BAR,
-              {
-                progress,
-                progressBarMode,
-              },
-            );
+            window.electronAPI.send(IPC.SET_PROGRESS_BAR, {
+              progress,
+              progressBarMode,
+            });
           }),
         ),
       { dispatch: false },

@@ -142,13 +142,10 @@ export class FocusModeEffects {
           withLatestFrom(this._isRunning$),
           tap(([progress, isRunning]: [number, boolean]) => {
             const progressBarMode: 'normal' | 'pause' = isRunning ? 'normal' : 'pause';
-            (this._electronService.ipcRenderer as typeof ipcRenderer).send(
-              IPC.SET_PROGRESS_BAR,
-              {
-                progress: progress / 100,
-                progressBarMode,
-              },
-            );
+            window.electronAPI.send(IPC.SET_PROGRESS_BAR, {
+              progress: progress / 100,
+              progressBarMode,
+            });
           }),
         ),
       { dispatch: false },
@@ -161,19 +158,12 @@ export class FocusModeEffects {
         this._actions$.pipe(
           ofType(focusSessionDone),
           tap(() => {
-            (this._electronService.ipcRenderer as typeof ipcRenderer).send(
-              IPC.SHOW_OR_FOCUS,
-            );
-            (this._electronService.ipcRenderer as typeof ipcRenderer).send(
-              IPC.FLASH_FRAME,
-            );
-            (this._electronService.ipcRenderer as typeof ipcRenderer).send(
-              IPC.SET_PROGRESS_BAR,
-              {
-                progress: 100,
-                progressBarMode: 'normal',
-              },
-            );
+            window.electronAPI.send(IPC.SHOW_OR_FOCUS);
+            window.electronAPI.send(IPC.FLASH_FRAME);
+            window.electronAPI.send(IPC.SET_PROGRESS_BAR, {
+              progress: 100,
+              progressBarMode: 'normal',
+            });
           }),
         ),
       { dispatch: false },

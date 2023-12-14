@@ -5,8 +5,6 @@ import { SnackService } from '../../../core/snack/snack.service';
 import { IPC } from '../../../../../electron/shared-with-frontend/ipc-events.const';
 import { T } from '../../../t.const';
 import { ElectronService } from '../../../core/electron/electron.service';
-import { ipcRenderer, shell } from 'electron';
-import { electronAPI } from '../../../../../electron/electronAPI';
 
 @Directive({
   selector: '[bookmarkLink]',
@@ -65,6 +63,6 @@ export class BookmarkLinkDirective {
   }
 
   private _exec(command: string): void {
-    (this._electronService.ipcRenderer as typeof ipcRenderer).send(IPC.EXEC, command);
+    window.electronAPI.send(IPC.EXEC, command);
   }
 }
