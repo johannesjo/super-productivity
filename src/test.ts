@@ -6,8 +6,14 @@ import {
   BrowserDynamicTestingModule,
   platformBrowserDynamicTesting,
 } from '@angular/platform-browser-dynamic/testing';
+import { ElectronAPI } from '../electron/electronAPI';
 
 declare const require: any;
+declare global {
+  interface Window {
+    electronAPI: ElectronAPI;
+  }
+}
 
 // First, initialize the Angular testing environment.
 getTestBed().initTestEnvironment(
