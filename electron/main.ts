@@ -409,7 +409,6 @@ function registerShowAppShortCuts(cfg: KeyboardConfig): void {
   ];
 
   if (cfg) {
-    return;
     Object.keys(cfg)
       .filter((key: string) => GLOBAL_KEY_CFG_KEYS.includes(key as keyof KeyboardConfig))
       .forEach((key: string) => {
