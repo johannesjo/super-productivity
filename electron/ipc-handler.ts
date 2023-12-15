@@ -14,37 +14,17 @@ import { quitApp, showOrFocus } from './various-shared';
 
 // HANDLER
 // -------
-ipcMain.handle(
-  IPC.GET_PATH,
-  (
-    ev,
-    name:
-      | 'home'
-      | 'appData'
-      | 'userData'
-      | 'sessionData'
-      | 'temp'
-      | 'exe'
-      | 'module'
-      | 'desktop'
-      | 'documents'
-      | 'downloads'
-      | 'music'
-      | 'pictures'
-      | 'videos'
-      | 'recent'
-      | 'logs'
-      | 'crashDumps',
-  ) => {
-    return app.getPath(name);
-  },
-);
+ipcMain.handle(IPC.GET_PATH, (ev, name: string) => {
+  return app.getPath(name as any);
+});
 
 // ON EVENTS
 // ---------
 ipcMain.on(IPC.SHUTDOWN_NOW, quitApp);
 ipcMain.on(IPC.EXIT, (ev, exitCode: number) => app.exit(exitCode));
 ipcMain.on(IPC.RELAUCNH, () => app.relaunch());
+ipcMain.on(IPC.OPEN_DEV_TOOLS, () => getWin().webContents.openDevTools());
+ipcMain.on(IPC.RELOAD_MAIN_WIN, () => getWin().reload());
 
 // TODO check
 ipcMain.on(IPC.EXEC, execWithFrontendErrorHandlerInform);

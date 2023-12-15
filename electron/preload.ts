@@ -33,16 +33,14 @@ const electronAPI: Partial<ElectronAPI> = {
   openPath: (path: string) => shell.openPath(path),
   openExternal: (url: string, options?: OpenExternalOptions) => shell.openExternal(url),
   isMacOS: () => process.platform === 'darwin',
-  // TODO implement in a way that throws no error
-  // reloadMainWin: () => getWin().reload(),
-  // openDevTools: () => getWin().webContents.openDevTools(),
-  reloadMainWin: () => undefined,
-  openDevTools: () => undefined,
 
   isSystemDarkMode: () => nativeTheme.shouldUseDarkColors,
+
   getUserDataPath: () => ipcRenderer.invoke('GET_PATH' /*IPC.GET_PATH*/, 'userData'),
   relaunch: () => ipcRenderer.send('RELAUNCH') /*IPC.RELAUNCH*/,
   exit: () => ipcRenderer.send('EXIT') /*IPC.EXIT*/,
+  reloadMainWin: () => ipcRenderer.send('RELOAD_MAIN_WIN') /*IPC.RELOAD_MAIN_WIN*/,
+  openDevTools: () => ipcRenderer.send('OPEN_DEV_TOOLS') /*IPC.OPEN_DEV_TOOLS*/,
 };
 
 contextBridge.exposeInMainWorld('electronAPI', electronAPI);
