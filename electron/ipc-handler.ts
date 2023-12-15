@@ -15,8 +15,7 @@ import { quitApp, showOrFocus } from './various-shared';
 // HANDLER
 // -------
 ipcMain.handle(
-  // IPC.GET_PATH,
-  'GET_PATH',
+  IPC.GET_PATH,
   (
     ev,
     name:
@@ -44,6 +43,8 @@ ipcMain.handle(
 // ON EVENTS
 // ---------
 ipcMain.on(IPC.SHUTDOWN_NOW, quitApp);
+ipcMain.on(IPC.EXIT, (ev, exitCode: number) => app.exit(exitCode));
+ipcMain.on(IPC.RELAUCNH, () => app.relaunch());
 
 // TODO check
 ipcMain.on(IPC.EXEC, execWithFrontendErrorHandlerInform);

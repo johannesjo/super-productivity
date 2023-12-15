@@ -1,6 +1,8 @@
 // TODO sort by direction
 export enum IPC {
   SHUTDOWN_NOW = 'SHUTDOWN_NOW',
+  EXIT = 'EXIT',
+  RELAUCNH = 'RELAUCNH',
 
   JIRA_CB_EVENT = 'JIRA_RESPONSE',
   JIRA_MAKE_REQUEST_EVENT = 'JIRA',

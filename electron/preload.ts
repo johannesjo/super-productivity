@@ -1,5 +1,4 @@
 import {
-  app,
   contextBridge,
   ipcRenderer,
   IpcRendererEvent,
@@ -39,11 +38,11 @@ const electronAPI: Partial<ElectronAPI> = {
   // openDevTools: () => getWin().webContents.openDevTools(),
   reloadMainWin: () => undefined,
   openDevTools: () => undefined,
-  // TODO implement
-  relaunch: () => app.relaunch(),
-  exit: (exitCode: number) => app.exit(exitCode),
+
   isSystemDarkMode: () => nativeTheme.shouldUseDarkColors,
   getUserDataPath: () => ipcRenderer.invoke('GET_PATH' /*IPC.GET_PATH*/, 'userData'),
+  relaunch: () => ipcRenderer.send('RELAUNCH') /*IPC.RELAUNCH*/,
+  exit: () => ipcRenderer.send('EXIT') /*IPC.EXIT*/,
 };
 
 contextBridge.exposeInMainWorld('electronAPI', electronAPI);
