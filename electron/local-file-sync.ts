@@ -1,21 +1,24 @@
-import { answerRenderer } from './better-ipc';
 import { IPC } from './shared-with-frontend/ipc-events.const';
 import { SyncGetRevResult } from '../src/app/imex/sync/sync.model';
 import { readFileSync, statSync, writeFileSync } from 'fs';
 import { error, log } from 'electron-log';
+import { ipcMain } from 'electron';
 
 export const initLocalFileSyncAdapter = (): void => {
-  answerRenderer(
+  ipcMain.handle(
     IPC.FILE_SYNC_SAVE,
-    ({
-      filePath,
-      dataStr,
-      localRev,
-    }: {
-      filePath: string;
-      dataStr: string;
-      localRev: string | null;
-    }): string | Error => {
+    (
+      ev,
+      {
+        filePath,
+        dataStr,
+        localRev,
+      }: {
+        filePath: string;
+        dataStr: string;
+        localRev: string | null;
+      },
+    ): string | Error => {
       try {
         writeFileSync(filePath, dataStr);
         return getRev(filePath);
@@ -27,15 +30,18 @@ export const initLocalFileSyncAdapter = (): void => {
     },
   );
 
-  answerRenderer(
+  ipcMain.handle(
     IPC.FILE_SYNC_GET_REV_AND_CLIENT_UPDATE,
-    ({
-      filePath,
-      localRev,
-    }: {
-      filePath: string;
-      localRev: string | null;
-    }): { rev: string; clientUpdate?: number } | SyncGetRevResult => {
+    (
+      ev,
+      {
+        filePath,
+        localRev,
+      }: {
+        filePath: string;
+        localRev: string | null;
+      },
+    ): { rev: string; clientUpdate?: number } | SyncGetRevResult => {
       try {
         readFileSync(filePath);
         return {
@@ -50,15 +56,18 @@ export const initLocalFileSyncAdapter = (): void => {
     },
   );
 
-  answerRenderer(
+  ipcMain.handle(
     IPC.FILE_SYNC_LOAD,
-    ({
-      filePath,
-      localRev,
-    }: {
-      filePath: string;
-      localRev: string | null;
-    }): { rev: string; dataStr: string | undefined } | Error => {
+    (
+      ev,
+      {
+        filePath,
+        localRev,
+      }: {
+        filePath: string;
+        localRev: string | null;
+      },
+    ): { rev: string; dataStr: string | undefined } | Error => {
       try {
         const dataStr = readFileSync(filePath, { encoding: 'utf-8' });
         return {
