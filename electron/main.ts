@@ -4,8 +4,6 @@ import {
   app,
   BrowserWindow,
   globalShortcut,
-  ipcMain,
-  IpcMainEvent,
   powerMonitor,
   protocol,
 } from 'electron';
@@ -16,17 +14,11 @@ import { CONFIG } from './CONFIG';
 
 import { initIndicator } from './indicator';
 import { createWindow } from './main-window';
-
-import { sendJiraRequest, setupRequestHeadersForImages } from './jira';
-import { errorHandlerWithFrontendInform } from './error-handler-with-frontend-inform';
 import { initDebug } from './debug';
 import { IPC } from './shared-with-frontend/ipc-events.const';
 import { initBackupAdapter } from './backup';
 import { initLocalFileSyncAdapter } from './local-file-sync';
-import { JiraCfg } from '../src/app/features/issue/providers/jira/jira.model';
-import { lockscreen } from './lockscreen';
 import { lazySetInterval } from './shared-with-frontend/lazy-set-interval';
-import { KeyboardConfig } from '../src/app/features/config/keyboard-config.model';
 
 import { join } from 'path';
 import {
@@ -37,8 +29,11 @@ import {
   statSync,
   writeFileSync,
 } from 'fs';
-import { exec } from 'child_process';
 import { initFullScreenBlocker } from './full-screen-blocker';
+import { quitApp, showOrFocus } from './various-shared';
+
+// LOAD IPC STUFF
+import './ipc-handler';
 
 const ICONS_FOLDER = __dirname + '/assets/icons/';
 const IS_MAC = process.platform === 'darwin';
@@ -156,6 +151,7 @@ const BACKUP_DIR =
 
 interface MyApp extends App {
   isQuiting?: boolean;
+  isLocked?: boolean;
 }
 
 const appIN: MyApp = app;
@@ -224,8 +220,6 @@ appIN.on('activate', () => {
   }
 });
 
-let isLocked = false;
-
 appIN.on('ready', () => {
   let suspendStart: number;
   const sendIdleMsgIfOverMin = (idleTime: number): void => {
@@ -250,25 +244,25 @@ appIN.on('ready', () => {
   lazySetInterval(checkIdle, CONFIG.IDLE_PING_INTERVAL);
 
   powerMonitor.on('suspend', () => {
-    isLocked = true;
+    appIN.isLocked = true;
     suspendStart = Date.now();
     mainWin.webContents.send(IPC.SUSPEND);
   });
 
   powerMonitor.on('lock-screen', () => {
-    isLocked = true;
+    appIN.isLocked = true;
     suspendStart = Date.now();
     mainWin.webContents.send(IPC.SUSPEND);
   });
 
   powerMonitor.on('resume', () => {
-    isLocked = false;
+    appIN.isLocked = false;
     sendIdleMsgIfOverMin(Date.now() - suspendStart);
     mainWin.webContents.send(IPC.RESUME);
   });
 
   powerMonitor.on('unlock-screen', () => {
-    isLocked = false;
+    appIN.isLocked = false;
     sendIdleMsgIfOverMin(Date.now() - suspendStart);
     mainWin.webContents.send(IPC.RESUME);
   });
@@ -316,61 +310,6 @@ process.on('uncaughtException', (err) => {
 //  }, 5000)
 // });
 
-// FRONTEND EVENTS
-// ---------------
-ipcMain.on(IPC.SHUTDOWN_NOW, quitApp);
-
-// TODO check
-ipcMain.on(IPC.EXEC, execWithFrontendErrorHandlerInform);
-
-ipcMain.on(IPC.LOCK_SCREEN, () => {
-  if (isLocked) {
-    return;
-  }
-
-  try {
-    lockscreen();
-  } catch (e) {
-    errorHandlerWithFrontendInform(e);
-  }
-});
-
-ipcMain.on(IPC.SET_PROGRESS_BAR, (ev, { progress, mode }) => {
-  if (mainWin) {
-    mainWin.setProgressBar(Math.min(Math.max(progress, 0), 1), { mode });
-  }
-});
-
-ipcMain.on(IPC.FLASH_FRAME, (ev) => {
-  if (mainWin) {
-    mainWin.flashFrame(false);
-    mainWin.flashFrame(true);
-
-    mainWin.once('focus', () => {
-      mainWin.flashFrame(false);
-    });
-  }
-});
-
-ipcMain.on(IPC.REGISTER_GLOBAL_SHORTCUTS_EVENT, (ev, cfg) => {
-  registerShowAppShortCuts(cfg);
-});
-
-ipcMain.on(
-  IPC.JIRA_SETUP_IMG_HEADERS,
-  (ev, { jiraCfg, wonkyCookie }: { jiraCfg: JiraCfg; wonkyCookie?: string }) => {
-    setupRequestHeadersForImages(jiraCfg, wonkyCookie);
-  },
-);
-
-ipcMain.on(IPC.JIRA_MAKE_REQUEST_EVENT, (ev, request) => {
-  sendJiraRequest(request);
-});
-
-ipcMain.on(IPC.SHOW_OR_FOCUS, () => {
-  showOrFocus(mainWin);
-});
-
 // HELPER FUNCTIONS
 // ----------------
 // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
@@ -397,119 +336,8 @@ function createMainWin(): void {
 }
 
 // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
-function registerShowAppShortCuts(cfg: KeyboardConfig): void {
-  // unregister all previous
-  globalShortcut.unregisterAll();
-  const GLOBAL_KEY_CFG_KEYS: (keyof KeyboardConfig)[] = [
-    'globalShowHide',
-    'globalToggleTaskStart',
-    'globalAddNote',
-    'globalAddTask',
-  ];
-
-  if (cfg) {
-    Object.keys(cfg)
-      .filter((key: string) => GLOBAL_KEY_CFG_KEYS.includes(key as keyof KeyboardConfig))
-      .forEach((key: string) => {
-        let actionFn: () => void;
-        const shortcut = cfg[key as keyof KeyboardConfig];
-
-        switch (key) {
-          case 'globalShowHide':
-            actionFn = () => {
-              if (mainWin.isFocused()) {
-                // we need to blur the window for windows
-                mainWin.blur();
-                mainWin.hide();
-              } else {
-                showOrFocus(mainWin);
-              }
-            };
-            break;
-
-          case 'globalToggleTaskStart':
-            actionFn = () => {
-              mainWin.webContents.send(IPC.TASK_TOGGLE_START);
-            };
-            break;
-
-          case 'globalAddNote':
-            actionFn = () => {
-              showOrFocus(mainWin);
-              mainWin.webContents.send(IPC.ADD_NOTE);
-            };
-            break;
-
-          case 'globalAddTask':
-            actionFn = () => {
-              showOrFocus(mainWin);
-              // NOTE: delay slightly to make sure app is ready
-              mainWin.webContents.send(IPC.ADD_TASK);
-            };
-            break;
-
-          default:
-            actionFn = () => undefined;
-        }
-
-        if (shortcut && shortcut.length > 0) {
-          const ret = globalShortcut.register(shortcut, actionFn) as unknown;
-          if (!ret) {
-            errorHandlerWithFrontendInform(
-              'Global Shortcut registration failed: ' + shortcut,
-              shortcut,
-            );
-          }
-        }
-      });
-  }
-}
-
-// eslint-disable-next-line prefer-arrow/prefer-arrow-functions
 function showApp(): void {
   showOrFocus(mainWin);
-}
-
-// eslint-disable-next-line prefer-arrow/prefer-arrow-functions
-function quitApp(): void {
-  // tslint:disable-next-line
-  appIN.isQuiting = true;
-  appIN.quit();
-}
-
-// eslint-disable-next-line prefer-arrow/prefer-arrow-functions
-function showOrFocus(passedWin: BrowserWindow): void {
-  // default to main winpc
-  const win = passedWin || mainWin;
-
-  // sometimes when starting a second instance we get here although we don't want to
-  if (!win) {
-    info(
-      'special case occurred when showOrFocus is called even though, this is a second instance of the app',
-    );
-    return;
-  }
-
-  if (win.isVisible()) {
-    win.focus();
-  } else {
-    win.show();
-  }
-
-  // focus window afterwards always
-  setTimeout(() => {
-    win.focus();
-  }, 60);
-}
-
-// eslint-disable-next-line prefer-arrow/prefer-arrow-functions
-function execWithFrontendErrorHandlerInform(ev: IpcMainEvent, command: string): void {
-  log('running command ' + command);
-  exec(command, (err) => {
-    if (err) {
-      errorHandlerWithFrontendInform(err);
-    }
-  });
 }
 
 // required for graceful closing
