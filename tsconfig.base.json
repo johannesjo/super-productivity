@@ -13,6 +13,7 @@
     "forceConsistentCasingInFileNames": true,
     "noImplicitReturns": true,
     "noUnusedLocals": false,
+    "noImplicitAny": false,
     "strictPropertyInitialization": true,
     "target": "ES2015",
     "resolveJsonModule": true,

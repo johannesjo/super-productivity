@@ -1,7 +1,7 @@
 'use strict';
 
 import { IPC } from './shared-with-frontend/ipc-events.const';
-import { error, log } from 'electron-log';
+import { error, log } from 'electron-log/main';
 
 const errorHandler = require('./error-handler-with-frontend-inform');
 const mainWinMod = require('./main-window');

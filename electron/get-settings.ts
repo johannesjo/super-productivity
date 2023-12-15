@@ -1,6 +1,6 @@
 import { BrowserWindow, ipcMain, IpcMainEvent } from 'electron';
 import { IPC } from './shared-with-frontend/ipc-events.const';
-import { warn } from 'electron-log';
+import { warn } from 'electron-log/main';
 import { GlobalConfigState } from '../src/app/features/config/global-config.model';
 
 let cbs: ((settings: GlobalConfigState) => void)[] = [];

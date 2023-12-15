@@ -1,6 +1,6 @@
 import { getIsAppReady, getWin } from './main-window';
 import { IPC } from './shared-with-frontend/ipc-events.const';
-import { error, log } from 'electron-log';
+import { error, log } from 'electron-log/main';
 
 const WAIT_FOR_WIN_TIMEOUT_DURATION = 4000;
 

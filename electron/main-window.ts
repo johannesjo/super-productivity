@@ -9,15 +9,14 @@ import {
   shell,
 } from 'electron';
 import { errorHandlerWithFrontendInform } from './error-handler-with-frontend-inform';
+import * as path from 'path';
 import { join, normalize } from 'path';
 import { format } from 'url';
 import { IPC } from './shared-with-frontend/ipc-events.const';
 import { getSettings } from './get-settings';
 import { readFileSync, stat } from 'fs';
-import { error, log } from 'electron-log';
+import { error, log } from 'electron-log/main';
 import { GlobalConfigState } from '../src/app/features/config/global-config.model';
-import { enable as enableRemote } from '@electron/remote/main';
-import * as path from 'path';
 
 let mainWin: BrowserWindow;
 
@@ -91,9 +90,6 @@ export const createWindow = ({
     },
     icon: ICONS_FOLDER + '/icon_256x256.png',
   });
-
-  // enable remote module
-  enableRemote(mainWin.webContents);
 
   mainWindowState.manage(mainWin);
 

@@ -35,7 +35,7 @@ const getForReoccurring = (
   nowTimestamp: number,
   endTimeStamp: number,
 ): TimelineFromCalendarEvent[] => {
-  const title = vevent.getFirstPropertyValue('summary');
+  const title: string = vevent.getFirstPropertyValue('summary');
   const start = vevent.getFirstPropertyValue('dtstart');
   const startDate = start.toJSDate();
   const startTimeStamp = startDate.getTime();
@@ -53,7 +53,7 @@ const getForReoccurring = (
 
   const iter = recur.iterator(start);
 
-  const evs = [];
+  const evs: { title: string; start: number; duration: number }[] = [];
   for (let next = iter.next(); next; next = iter.next()) {
     const nextTimestamp = next.toJSDate().getTime();
     if (nextTimestamp <= endTimeStamp && nextTimestamp >= nowTimestamp) {
@@ -87,7 +87,7 @@ const convertVEventToTimelineEvent = (vevent: any): TimelineFromCalendarEvent =>
 const getAllPossibleFutureEventsFromIcal = (icalData: string, now: Date): any[] => {
   const c = ICAL.parse(icalData);
   const comp = new ICAL.Component(c);
-  const tzAdded = [];
+  const tzAdded: string[] = [];
   if (comp.getFirstSubcomponent('vtimezone')) {
     for (const vtz of comp.getAllSubcomponents('vtimezone')) {
       const tz = new ICAL.Timezone({

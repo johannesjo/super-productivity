@@ -11,7 +11,7 @@ import {
 } from 'electron';
 import * as electronDl from 'electron-dl';
 
-import { info, log } from 'electron-log';
+import { info, log } from 'electron-log/main';
 import { CONFIG } from './CONFIG';
 
 import { initIndicator } from './indicator';
@@ -28,7 +28,6 @@ import { lockscreen } from './lockscreen';
 import { lazySetInterval } from './shared-with-frontend/lazy-set-interval';
 import { KeyboardConfig } from '../src/app/features/config/keyboard-config.model';
 
-import { initialize } from '@electron/remote/main';
 import { join } from 'path';
 import {
   existsSync,
@@ -40,8 +39,6 @@ import {
 } from 'fs';
 import { exec } from 'child_process';
 import { initFullScreenBlocker } from './full-screen-blocker';
-
-initialize();
 
 const ICONS_FOLDER = __dirname + '/assets/icons/';
 const IS_MAC = process.platform === 'darwin';
@@ -58,6 +55,8 @@ let wasUserDataDirSet = false;
 if (IS_DEV) {
   log('Starting in DEV Mode!!!');
 }
+
+// TODO INITIALIZE ELECTRON LOGGER :/
 
 app.commandLine.appendSwitch('enable-speech-dispatcher');
 

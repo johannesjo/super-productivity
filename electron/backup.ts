@@ -10,7 +10,7 @@ import {
 import { IPC } from './shared-with-frontend/ipc-events.const';
 import { LocalBackupMeta } from '../src/app/imex/local-backup/local-backup.model';
 import * as path from 'path';
-import { error, log } from 'electron-log';
+import { error, log } from 'electron-log/main';
 import { AppDataComplete } from '../src/app/imex/sync/sync.model';
 
 let BACKUP_DIR =
