@@ -12,6 +12,37 @@ import { exec } from 'child_process';
 import { getWin } from './main-window';
 import { quitApp, showOrFocus } from './various-shared';
 
+// HANDLER
+// -------
+ipcMain.handle(
+  // IPC.GET_PATH,
+  'GET_PATH',
+  (
+    ev,
+    name:
+      | 'home'
+      | 'appData'
+      | 'userData'
+      | 'sessionData'
+      | 'temp'
+      | 'exe'
+      | 'module'
+      | 'desktop'
+      | 'documents'
+      | 'downloads'
+      | 'music'
+      | 'pictures'
+      | 'videos'
+      | 'recent'
+      | 'logs'
+      | 'crashDumps',
+  ) => {
+    return app.getPath(name);
+  },
+);
+
+// ON EVENTS
+// ---------
 ipcMain.on(IPC.SHUTDOWN_NOW, quitApp);
 
 // TODO check

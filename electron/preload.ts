@@ -39,13 +39,11 @@ const electronAPI: Partial<ElectronAPI> = {
   // openDevTools: () => getWin().webContents.openDevTools(),
   reloadMainWin: () => undefined,
   openDevTools: () => undefined,
+  // TODO implement
   relaunch: () => app.relaunch(),
   exit: (exitCode: number) => app.exit(exitCode),
   isSystemDarkMode: () => nativeTheme.shouldUseDarkColors,
-
-  // TODO implement
-  // getUserDataPath: () => app.getPath('userData'),
-  getUserDataPath: () => "app.getPath('userData')",
+  getUserDataPath: () => ipcRenderer.invoke('GET_PATH' /*IPC.GET_PATH*/, 'userData'),
 };
 
 contextBridge.exposeInMainWorld('electronAPI', electronAPI);

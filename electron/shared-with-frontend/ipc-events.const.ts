@@ -54,6 +54,8 @@ export enum IPC {
 
   FULL_SCREEN_BLOCKER = 'FULL_SCREEN_BLOCKER',
 
+  GET_PATH = 'GET_PATH',
+
   // maybe_UPDATE_CURRENT_TASK = 'UPDATE_CURRENT_TASK',
   // maybe_IS_IDLE = 'IS_IDLE',
   // maybe_IS_BUSY = 'IS_BUSY',

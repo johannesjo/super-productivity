@@ -14,6 +14,7 @@ import {
 import {
   ConfigFormConfig,
   ConfigFormSection,
+  GenericConfigFormSection,
   GlobalConfigSectionKey,
   GlobalConfigState,
   GlobalSectionConfig,
@@ -24,6 +25,9 @@ import { environment } from '../../../environments/environment';
 import { T } from '../../t.const';
 import { MatSlideToggleChange } from '@angular/material/slide-toggle';
 import { versions } from '../../../environments/versions';
+import { IS_ELECTRON } from '../../app.constants';
+import { IS_ANDROID_WEB_VIEW } from '../../util/is-android-web-view';
+import { getAutomaticBackUpFormCfg } from '../../features/config/form-cfgs/automatic-backups-form.const';
 
 @Component({
   selector: 'config-page',
@@ -52,6 +56,24 @@ export class ConfigPageComponent implements OnInit, OnDestroy {
     this.globalConfigFormCfg = GLOBAL_CONFIG_FORM_CONFIG;
     this.globalSyncProviderFormCfg = GLOBAL_SYNC_FORM_CONFIG;
     this.globalProductivityConfigFormCfg = GLOBAL_PRODUCTIVITY_FORM_CONFIG;
+
+    // NOTE: needs special handling cause of the async stuff
+    if (IS_ANDROID_WEB_VIEW) {
+      this.globalSyncProviderFormCfg = [
+        ...this.globalSyncProviderFormCfg,
+        getAutomaticBackUpFormCfg(),
+      ];
+    } else if (IS_ELECTRON) {
+      window.electronAPI.getUserDataPath().then((userDataPath) => {
+        const backupPath = `${userDataPath}${
+          navigator?.userAgent?.search('Windows') ? '\\' : '/'
+        }backups`;
+        this.globalSyncProviderFormCfg = [
+          ...this.globalSyncProviderFormCfg,
+          getAutomaticBackUpFormCfg(backupPath),
+        ];
+      });
+    }
   }
 
   ngOnInit(): void {

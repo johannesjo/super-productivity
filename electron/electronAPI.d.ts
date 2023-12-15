@@ -38,5 +38,6 @@ export interface ElectronAPI {
   exit(exitCode: number): void;
 
   isSystemDarkMode(): boolean;
-  getUserDataPath(): string;
+
+  getUserDataPath(): Promise<string>;
 }
