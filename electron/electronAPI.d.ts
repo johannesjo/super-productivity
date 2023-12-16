@@ -1,4 +1,4 @@
-import { IpcRenderer, IpcRendererEvent, OpenExternalOptions } from 'electron';
+import { IpcRendererEvent, OpenExternalOptions } from 'electron';
 import { Observable } from 'rxjs';
 
 export interface ElectronAPI {
