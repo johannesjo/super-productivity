@@ -59,6 +59,6 @@ export class BookmarkLinkDirective {
   }
 
   private _exec(command: string): void {
-    window.electronAPI.send(IPC.EXEC, command);
+    window.electronAPI.exec(command);
   }
 }

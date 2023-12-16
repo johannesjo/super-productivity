@@ -10,7 +10,6 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { IS_ELECTRON } from '../../app.constants';
 import { MatDialog } from '@angular/material/dialog';
 import { combineLatest, from, merge, Observable, Subject } from 'rxjs';
-import { IPC } from '../../../../electron/shared-with-frontend/ipc-events.const';
 import { DialogConfirmComponent } from '../../ui/dialog-confirm/dialog-confirm.component';
 import { GlobalConfigService } from '../../features/config/global-config.service';
 import {
@@ -232,7 +231,7 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
         .subscribe((isConfirm: boolean) => {
           if (isConfirm) {
             this._finishDayForGood(() => {
-              window.electronAPI.send(IPC.SHUTDOWN_NOW);
+              window.electronAPI.shutdownNow();
             });
           } else if (isConfirm === false) {
             this._finishDayForGood(() => {

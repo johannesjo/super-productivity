@@ -11,7 +11,6 @@ import { EMPTY, Observable, Subscription } from 'rxjs';
 import { Task } from '../../tasks/task.model';
 import { GlobalConfigService } from '../../config/global-config.service';
 import { T } from '../../../t.const';
-import { IPC } from '../../../../../electron/shared-with-frontend/ipc-events.const';
 import { SimpleCounterService } from '../../simple-counter/simple-counter.service';
 import { IS_ELECTRON } from '../../../app.constants';
 import { SimpleCounter } from '../../simple-counter/simple-counter.model';
@@ -85,7 +84,7 @@ export class DialogIdleComponent implements OnInit, OnDestroy {
     );
 
     if (IS_ELECTRON) {
-      window.electronAPI.send(IPC.FLASH_FRAME);
+      window.electronAPI.flashFrame();
     }
   }
 

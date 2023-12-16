@@ -71,8 +71,7 @@ function initListeners(): void {
     }
   });
 
-  ipcMain.on(IPC.CURRENT_TASK_UPDATED, (ev, params) => {
-    const currentTask = params.current;
+  ipcMain.on(IPC.CURRENT_TASK_UPDATED, (ev, currentTask) => {
     const mainWin = getWin();
     getSettings(mainWin, (settings: GlobalConfigState) => {
       const isTrayShowCurrentTask = settings.misc.isTrayShowCurrentTask;

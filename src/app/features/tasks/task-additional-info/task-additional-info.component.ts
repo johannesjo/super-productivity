@@ -65,7 +65,6 @@ import { IssueData, IssueProviderKey } from '../../issue/issue.model';
 import { JIRA_TYPE } from '../../issue/issue.const';
 import { ProjectService } from '../../project/project.service';
 import { IS_ELECTRON } from '../../../app.constants';
-import { IPC } from '../../../../../electron/shared-with-frontend/ipc-events.const';
 import { LayoutService } from '../../../core-ui/layout/layout.service';
 import { devError } from '../../../util/dev-error';
 import { SS } from '../../../core/persistence/storage-keys.const';
@@ -264,10 +263,11 @@ export class TaskAdditionalInfoComponent implements AfterViewInit, OnDestroy {
         )
         .subscribe((jiraCfg) => {
           if (jiraCfg.isEnabled) {
-            window.electronAPI.send(IPC.JIRA_SETUP_IMG_HEADERS, {
+            window.electronAPI.jiraSetupImgHeaders({
               jiraCfg,
-              wonkyCookie:
-                jiraCfg.isWonkyCookieMode && sessionStorage.getItem(SS.JIRA_WONKY_COOKIE),
+              wonkyCookie: jiraCfg.isWonkyCookieMode
+                ? sessionStorage.getItem(SS.JIRA_WONKY_COOKIE) || undefined
+                : undefined,
             });
           }
         });

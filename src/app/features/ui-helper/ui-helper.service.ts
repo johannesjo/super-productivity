@@ -48,7 +48,7 @@ export class UiHelperService {
         (document.activeElement as HTMLElement).blur();
       }
 
-      window.electronAPI.send(IPC.SHOW_OR_FOCUS);
+      window.electronAPI.showOrFocus();
     } else {
       console.error('Cannot execute focus app window in browser');
     }

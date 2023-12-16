@@ -217,7 +217,7 @@ export class TakeABreakService {
 
     if (IS_ELECTRON) {
       this._triggerLockScreenThrottledAndDelayed$.subscribe(() => {
-        window.electronAPI.send(IPC.LOCK_SCREEN);
+        window.electronAPI.lockScreen();
       });
 
       this._triggerFullscreenBlockerThrottledAndDelayed$
@@ -226,7 +226,7 @@ export class TakeABreakService {
         )
         .subscribe(([, takeABreakCfg, timeWorkingWithoutABreak]) => {
           const msg = this._createMessage(timeWorkingWithoutABreak, takeABreakCfg);
-          window.electronAPI.send(IPC.FULL_SCREEN_BLOCKER, {
+          window.electronAPI.showFullScreenBlocker({
             msg,
             takeABreakCfg,
           });

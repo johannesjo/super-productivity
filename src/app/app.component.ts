@@ -40,6 +40,7 @@ import { first, map, skip, take } from 'rxjs/operators';
 import { IS_MOBILE } from './util/is-mobile';
 import { FocusModeService } from './features/focus-mode/focus-mode.service';
 import { warpAnimation, warpInAnimation } from './ui/animations/warp.ani';
+import { GlobalConfigState } from './features/config/global-config.model';
 
 const w = window as any;
 const productivityTip: string[] = w.productivityTips && w.productivityTips[w.randomIndex];
@@ -157,14 +158,13 @@ export class AppComponent implements OnDestroy {
     });
 
     if (IS_ELECTRON) {
-      window.electronAPI.send(IPC.APP_READY);
+      window.electronAPI.informAboutAppReady();
       this._initElectronErrorHandler();
       this._uiHelperService.initElectron();
 
       window.electronAPI.on(IPC.TRANSFER_SETTINGS_REQUESTED, () => {
-        window.electronAPI.send(
-          IPC.TRANSFER_SETTINGS_TO_ELECTRON,
-          this._globalConfigService.cfg,
+        window.electronAPI.sendAppSettingsToElectron(
+          this._globalConfigService.cfg as GlobalConfigState,
         );
       });
     } else {

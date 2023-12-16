@@ -33,7 +33,6 @@ import { NotifyService } from '../../../core/notify/notify.service';
 import { IS_ELECTRON } from '../../../app.constants';
 import { T } from '../../../t.const';
 import { SnackService } from '../../../core/snack/snack.service';
-import { IPC } from '../../../../../electron/shared-with-frontend/ipc-events.const';
 import { TaskService } from '../../tasks/task.service';
 
 @Injectable()
@@ -259,7 +258,7 @@ export class PomodoroEffects {
           tap(([progress, isPause, isPauseBreak]: [number, boolean, boolean]) => {
             const progressBarMode: 'normal' | 'pause' =
               isPause || isPauseBreak ? 'pause' : 'normal';
-            window.electronAPI.send(IPC.SET_PROGRESS_BAR, {
+            window.electronAPI.setProgressBar({
               progress,
               progressBarMode,
             });

@@ -59,7 +59,7 @@ export class GlobalConfigEffects {
         filter(({ sectionKey, sectionCfg }) => IS_ELECTRON && sectionKey === 'keyboard'),
         tap(({ sectionKey, sectionCfg }) => {
           const keyboardCfg: KeyboardConfig = sectionCfg as KeyboardConfig;
-          window.electronAPI.send(IPC.REGISTER_GLOBAL_SHORTCUTS_EVENT, keyboardCfg);
+          window.electronAPI.registerGlobalShortcuts(keyboardCfg);
         }),
       ),
     { dispatch: false },
@@ -75,7 +75,7 @@ export class GlobalConfigEffects {
           const keyboardCfg: KeyboardConfig = (
             appDataComplete.globalConfig || DEFAULT_GLOBAL_CONFIG
           ).keyboard;
-          window.electronAPI.send(IPC.REGISTER_GLOBAL_SHORTCUTS_EVENT, keyboardCfg);
+          window.electronAPI.registerGlobalShortcuts(keyboardCfg);
         }),
       ),
     { dispatch: false },

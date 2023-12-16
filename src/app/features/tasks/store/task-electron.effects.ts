@@ -5,7 +5,6 @@ import { select, Store } from '@ngrx/store';
 import { filter, tap, withLatestFrom } from 'rxjs/operators';
 import { selectCurrentTask } from './task.selectors';
 import { Observable } from 'rxjs';
-import { IPC } from '../../../../../electron/shared-with-frontend/ipc-events.const';
 import { IS_ELECTRON } from '../../../app.constants';
 import { GlobalConfigService } from '../../config/global-config.service';
 
@@ -20,30 +19,30 @@ export class TaskElectronEffects {
         withLatestFrom(this._store$.pipe(select(selectCurrentTask))),
         tap(([action, current]) => {
           if (IS_ELECTRON) {
-            window.electronAPI.send(IPC.CURRENT_TASK_UPDATED, {
-              current,
-            });
+            window.electronAPI.updateCurrentTask(current);
           }
         }),
       ),
     { dispatch: false },
   );
 
-  setTaskBarNoProgress$: Observable<any> = createEffect(
-    () =>
-      this._actions$.pipe(
-        ofType(setCurrentTask),
-        filter(() => IS_ELECTRON),
-        tap(({ id }) => {
-          if (!id) {
-            window.electronAPI.send(IPC.SET_PROGRESS_BAR, {
-              progress: 0,
-            });
-          }
-        }),
-      ),
-    { dispatch: false },
-  );
+  setTaskBarNoProgress$ =
+    IS_ELECTRON &&
+    createEffect(
+      () =>
+        this._actions$.pipe(
+          ofType(setCurrentTask),
+          tap(({ id }) => {
+            if (!id) {
+              window.electronAPI.setProgressBar({
+                progress: 0,
+                progressBarMode: 'pause',
+              });
+            }
+          }),
+        ),
+      { dispatch: false },
+    );
 
   setTaskBarProgress$: Observable<any> = createEffect(
     () =>
@@ -55,8 +54,9 @@ export class TaskElectronEffects {
         filter(([a, cfg]) => !cfg || !cfg.pomodoro.isEnabled),
         tap(([{ task }]) => {
           const progress = task.timeSpent / task.timeEstimate;
-          window.electronAPI.send(IPC.SET_PROGRESS_BAR, {
+          window.electronAPI.setProgressBar({
             progress,
+            progressBarMode: 'normal',
           });
         }),
       ),
