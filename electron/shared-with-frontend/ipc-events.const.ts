@@ -2,7 +2,7 @@
 export enum IPC {
   SHUTDOWN_NOW = 'SHUTDOWN_NOW',
   EXIT = 'EXIT',
-  RELAUCNH = 'RELAUCNH',
+  RELAUNCH = 'RELAUNCH',
 
   JIRA_CB_EVENT = 'JIRA_RESPONSE',
   JIRA_MAKE_REQUEST_EVENT = 'JIRA',
@@ -68,3 +68,5 @@ export enum IPC {
   // maybe_PROJECT_CHANGED = 'PROJECT_CHANGED',
   // maybe_COMPLETE_DATA_RELOAD = 'COMPLETE_DATA_RELOAD',
 }
+
+export type IPCEventValue = `${IPC}`;

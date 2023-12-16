@@ -35,7 +35,7 @@ if (process.platform === 'darwin') {
 // ---------
 ipcMain.on(IPC.SHUTDOWN_NOW, quitApp);
 ipcMain.on(IPC.EXIT, (ev, exitCode: number) => app.exit(exitCode));
-ipcMain.on(IPC.RELAUCNH, () => app.relaunch());
+ipcMain.on(IPC.RELAUNCH, () => app.relaunch());
 ipcMain.on(IPC.OPEN_DEV_TOOLS, () => getWin().webContents.openDevTools());
 ipcMain.on(IPC.RELOAD_MAIN_WIN, () => getWin().reload());
 

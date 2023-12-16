@@ -8,6 +8,14 @@ import {
   webFrame,
 } from 'electron';
 import { ElectronAPI } from './electronAPI.d';
+import { IPCEventValue } from './shared-with-frontend/ipc-events.const';
+
+const send: (channel: IPCEventValue, ...args: any[]) => void = (channel, ...args) =>
+  ipcRenderer.send(channel, ...args);
+const invoke: (channel: IPCEventValue, ...args: any[]) => Promise<unknown> = (
+  channel,
+  ...args
+) => ipcRenderer.invoke(channel, ...args);
 
 const electronAPI: Partial<ElectronAPI> = {
   // TODO use full interface
@@ -36,19 +44,17 @@ const electronAPI: Partial<ElectronAPI> = {
 
   isSystemDarkMode: () => nativeTheme.shouldUseDarkColors,
 
-  getUserDataPath: () => ipcRenderer.invoke('GET_PATH', 'userData'),
-  relaunch: () => ipcRenderer.send('RELAUNCH'),
-  exit: () => ipcRenderer.send('EXIT'),
-  reloadMainWin: () => ipcRenderer.send('RELOAD_MAIN_WIN'),
-  openDevTools: () => ipcRenderer.send('OPEN_DEV_TOOLS'),
+  getUserDataPath: () => invoke('GET_PATH', 'userData') as Promise<string>,
+  relaunch: () => send('RELAUNCH'),
+  exit: () => send('EXIT'),
+  reloadMainWin: () => send('RELOAD_MAIN_WIN'),
+  openDevTools: () => send('OPEN_DEV_TOOLS'),
 
   // ALL EVENTS
-  scheduleRegisterBeforeClose: (id) => ipcRenderer.send('REGISTER_BEFORE_CLOSE', { id }),
-  unscheduleRegisterBeforeClose: (id) =>
-    ipcRenderer.send('UNREGISTER_BEFORE_CLOSE', { id }),
-  setDoneRegisterBeforeClose: (id) => ipcRenderer.send('BEFORE_CLOSE_DONE', { id }),
+  scheduleRegisterBeforeClose: (id) => send('REGISTER_BEFORE_CLOSE', { id }),
+  unscheduleRegisterBeforeClose: (id) => send('UNREGISTER_BEFORE_CLOSE', { id }),
+  setDoneRegisterBeforeClose: (id) => send('BEFORE_CLOSE_DONE', { id }),
 };
-
 contextBridge.exposeInMainWorld('electronAPI', electronAPI);
 
 // contextBridge.exposeInIsolatedWorld();
