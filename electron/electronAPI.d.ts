@@ -40,4 +40,10 @@ export interface ElectronAPI {
   isSystemDarkMode(): boolean;
 
   getUserDataPath(): Promise<string>;
+
+  scheduleRegisterBeforeClose(id: string): void;
+
+  unscheduleRegisterBeforeClose(id: string): void;
+
+  setDoneRegisterBeforeClose(id: string): void;
 }

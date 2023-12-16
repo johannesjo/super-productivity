@@ -36,11 +36,17 @@ const electronAPI: Partial<ElectronAPI> = {
 
   isSystemDarkMode: () => nativeTheme.shouldUseDarkColors,
 
-  getUserDataPath: () => ipcRenderer.invoke('GET_PATH' /*IPC.GET_PATH*/, 'userData'),
-  relaunch: () => ipcRenderer.send('RELAUNCH') /*IPC.RELAUNCH*/,
-  exit: () => ipcRenderer.send('EXIT') /*IPC.EXIT*/,
-  reloadMainWin: () => ipcRenderer.send('RELOAD_MAIN_WIN') /*IPC.RELOAD_MAIN_WIN*/,
-  openDevTools: () => ipcRenderer.send('OPEN_DEV_TOOLS') /*IPC.OPEN_DEV_TOOLS*/,
+  getUserDataPath: () => ipcRenderer.invoke('GET_PATH', 'userData'),
+  relaunch: () => ipcRenderer.send('RELAUNCH'),
+  exit: () => ipcRenderer.send('EXIT'),
+  reloadMainWin: () => ipcRenderer.send('RELOAD_MAIN_WIN'),
+  openDevTools: () => ipcRenderer.send('OPEN_DEV_TOOLS'),
+
+  // ALL EVENTS
+  scheduleRegisterBeforeClose: (id) => ipcRenderer.send('REGISTER_BEFORE_CLOSE', { id }),
+  unscheduleRegisterBeforeClose: (id) =>
+    ipcRenderer.send('UNREGISTER_BEFORE_CLOSE', { id }),
+  setDoneRegisterBeforeClose: (id) => ipcRenderer.send('BEFORE_CLOSE_DONE', { id }),
 };
 
 contextBridge.exposeInMainWorld('electronAPI', electronAPI);
