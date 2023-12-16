@@ -19,7 +19,7 @@ export const ipcEvent$ = (evName: string): Observable<unknown[]> => {
       console.log('FINALIZE', evName);
       // NOTE doesn't work due to the different contexts
       // window.electronAPI.off(evName, handler);
-      throw new Error('ipcEvent$ observables live forever');
+      throw new Error(`ipcEvent$[${evName}] observables live forever`);
     }),
   );
 };

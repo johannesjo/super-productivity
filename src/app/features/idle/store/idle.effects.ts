@@ -23,6 +23,7 @@ import {
   first,
   map,
   mapTo,
+  shareReplay,
   switchMap,
   tap,
   withLatestFrom,
@@ -58,10 +59,17 @@ export class IdleEffects {
   private _clearIdlePollInterval?: () => void;
   private _isDialogOpen: boolean = false;
 
-  private _triggerIdleApis$ = IS_ELECTRON
+  // NOTE: needs to live forever since we can't unsubscribe from ipcEvent$
+  // TODO check if this works as expected
+  private _electronIdleTime$: Observable<number> = IS_ELECTRON
     ? ipcEvent$(IPC.IDLE_TIME).pipe(
+        shareReplay(1),
         map(([ev, idleTimeInMs]: any) => idleTimeInMs as number),
       )
+    : EMPTY;
+
+  private _triggerIdleApis$ = IS_ELECTRON
+    ? this._electronIdleTime$
     : this._chromeExtensionInterfaceService.onReady$.pipe(
         first(),
         switchMap(() => {
