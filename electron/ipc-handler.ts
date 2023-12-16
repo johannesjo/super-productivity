@@ -1,6 +1,6 @@
 // FRONTEND EVENTS
 // ---------------
-import { app, globalShortcut, ipcMain, IpcMainEvent } from 'electron';
+import { app, globalShortcut, ipcMain, IpcMainEvent, systemPreferences } from 'electron';
 import { IPC } from './shared-with-frontend/ipc-events.const';
 import { lockscreen } from './lockscreen';
 import { errorHandlerWithFrontendInform } from './error-handler-with-frontend-inform';
@@ -17,6 +17,19 @@ import { quitApp, showOrFocus } from './various-shared';
 ipcMain.handle(IPC.GET_PATH, (ev, name: string) => {
   return app.getPath(name as any);
 });
+
+// BACKEND EVENTS
+// --------------
+
+if (process.platform === 'darwin') {
+  // nativeTheme.on('updated', () => {});
+  systemPreferences.subscribeNotification(
+    'AppleInterfaceThemeChangedNotification',
+    () => {
+      getWin().webContents.send(IPC.MAC_OS_THEME_UPDATED);
+    },
+  );
+}
 
 // ON EVENTS
 // ---------

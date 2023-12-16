@@ -16,6 +16,7 @@ import { combineLatest, Observable } from 'rxjs';
 import { IS_FIREFOX } from '../../util/is-firefox';
 import { ImexMetaService } from '../../imex/imex-meta/imex-meta.service';
 import { IS_MOUSE_PRIMARY, IS_TOUCH_PRIMARY } from '../../util/is-mouse-primary';
+import { IPC } from '../../../../electron/shared-with-frontend/ipc-events.const';
 
 @Injectable({ providedIn: 'root' })
 export class GlobalThemeService {
@@ -23,13 +24,9 @@ export class GlobalThemeService {
     IS_ELECTRON && window.electronAPI.isMacOS()
       ? new Observable((subscriber) => {
           subscriber.next(window.electronAPI.isSystemDarkMode());
-          // this._electronService.remote.systemPreferences.subscribeNotification(
-          //   'AppleInterfaceThemeChangedNotification',
-          //   () =>
-          //     subscriber.next(
-          //       this._electronService.remote.nativeTheme.shouldUseDarkColors,
-          //     ),
-          // );
+          window.electronAPI.on(IPC.MAC_OS_THEME_UPDATED, () => {
+            subscriber.next(window.electronAPI.isSystemDarkMode());
+          });
         })
       : this._globalConfigService.misc$.pipe(
           map((cfg) => cfg.isDarkMode),
