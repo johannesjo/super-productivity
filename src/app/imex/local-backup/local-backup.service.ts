@@ -38,13 +38,11 @@ export class LocalBackupService {
   isBackupAvailable(): Promise<boolean | LocalBackupMeta> {
     return IS_ANDROID_WEB_VIEW
       ? androidInterface.loadFromDbWrapped(ANDROID_DB_KEY).then((r) => !!r)
-      : (window.electronAPI.invoke(IPC.BACKUP_IS_AVAILABLE, null) as Promise<
-          false | LocalBackupMeta
-        >);
+      : window.electronAPI.checkBackupAvailable();
   }
 
   loadBackupElectron(backupPath: string): Promise<string> {
-    return window.electronAPI.invoke(IPC.BACKUP_LOAD_DATA, backupPath) as Promise<string>;
+    return window.electronAPI.loadBackupData(backupPath) as Promise<string>;
   }
 
   loadBackupAndroid(): Promise<string> {

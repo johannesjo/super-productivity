@@ -3,7 +3,6 @@ import { SyncProvider, SyncProviderServiceInterface } from '../sync-provider.mod
 import { Observable, of } from 'rxjs';
 import { IS_ELECTRON } from '../../../app.constants';
 import { SyncGetRevResult } from '../sync.model';
-import { IPC } from '../../../../../electron/shared-with-frontend/ipc-events.const';
 import { concatMap, first, map } from 'rxjs/operators';
 import { GlobalConfigService } from '../../../features/config/global-config.service';
 
@@ -30,7 +29,10 @@ export class LocalFileSyncElectronService implements SyncProviderServiceInterfac
   ): Promise<{ rev: string; clientUpdate?: number } | SyncGetRevResult> {
     const filePath = await this._filePathOnce$.toPromise();
     try {
-      const r = await window.electronAPI.invoke(IPC.FILE_SYNC_GET_REV_AND_CLIENT_UPDATE, {
+      if (!filePath) {
+        throw new Error('No file path given for getRevAndLastClientUpdate');
+      }
+      const r = await window.electronAPI.fileSyncGetRevAndClientUpdate({
         filePath,
         localRev,
       });
@@ -48,11 +50,14 @@ export class LocalFileSyncElectronService implements SyncProviderServiceInterfac
   ): Promise<string | Error> {
     const filePath = await this._filePathOnce$.toPromise();
     try {
-      const r = (await window.electronAPI.invoke(IPC.FILE_SYNC_SAVE, {
+      if (!filePath) {
+        throw new Error('No file path given for uploadAppData');
+      }
+      const r = await window.electronAPI.fileSyncSave({
         localRev,
         filePath,
         dataStr,
-      })) as Promise<string | Error>;
+      });
       return r as any;
     } catch (e) {
       throw new Error(e as any);
@@ -64,10 +69,13 @@ export class LocalFileSyncElectronService implements SyncProviderServiceInterfac
   ): Promise<{ rev: string; dataStr: string | undefined }> {
     const filePath = await this._filePathOnce$.toPromise();
     try {
-      const r = (await window.electronAPI.invoke(IPC.FILE_SYNC_LOAD, {
+      if (!filePath) {
+        throw new Error('No file path given for downloadAppData');
+      }
+      const r = await window.electronAPI.fileSyncLoad({
         localRev,
         filePath,
-      })) as Promise<{ rev: string; dataStr: string | undefined }>;
+      });
       return r as any;
     } catch (e) {
       throw new Error(e as any);

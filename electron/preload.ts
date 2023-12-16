@@ -9,6 +9,8 @@ import {
 } from 'electron';
 import { ElectronAPI } from './electronAPI.d';
 import { IPCEventValue } from './shared-with-frontend/ipc-events.const';
+import { LocalBackupMeta } from '../src/app/imex/local-backup/local-backup.model';
+import { SyncGetRevResult } from '../src/app/imex/sync/sync.model';
 
 const _send: (channel: IPCEventValue, ...args: any[]) => void = (channel, ...args) =>
   ipcRenderer.send(channel, ...args);
@@ -21,17 +23,30 @@ const electronAPI: Partial<ElectronAPI> = {
   // TODO use full interface
   // const electronAPI: ElectronAPI = {
 
-  invoke: (channel: string, ...args: any[]) => ipcRenderer.invoke(channel, ...args),
-
-  off: (channel: string, listener: (event: IpcRendererEvent, ...args: any[]) => void) =>
-    ipcRenderer.off(channel, listener),
-
   on: (channel: string, listener: (event: IpcRendererEvent, ...args: any[]) => void) =>
     ipcRenderer.on(channel, listener),
 
-  once: (channel: string, listener: (event: IpcRendererEvent, ...args: any[]) => void) =>
-    ipcRenderer.once(channel, listener),
+  // INVOKE
+  // ------
+  getUserDataPath: () => _invoke('GET_PATH', 'userData') as Promise<string>,
+  checkBackupAvailable: () =>
+    _invoke('BACKUP_IS_AVAILABLE') as Promise<false | LocalBackupMeta>,
+  loadBackupData: (backupPath) =>
+    _invoke('BACKUP_LOAD_DATA', backupPath) as Promise<string>,
+  fileSyncGetRevAndClientUpdate: (backupPath) =>
+    _invoke('FILE_SYNC_GET_REV_AND_CLIENT_UPDATE', backupPath) as Promise<
+      { rev: string; clientUpdate?: number } | SyncGetRevResult
+    >,
+  fileSyncSave: (backupPath) =>
+    _invoke('FILE_SYNC_SAVE', backupPath) as Promise<string | Error>,
+  fileSyncLoad: (backupPath) =>
+    _invoke('FILE_SYNC_LOAD', backupPath) as Promise<{
+      rev: string;
+      dataStr: string | undefined;
+    }>,
 
+  // STANDARD
+  // --------
   setZoomFactor: (zoomFactor: number) => {
     webFrame.setZoomFactor(zoomFactor);
   },
@@ -42,7 +57,8 @@ const electronAPI: Partial<ElectronAPI> = {
 
   isSystemDarkMode: () => nativeTheme.shouldUseDarkColors,
 
-  getUserDataPath: () => _invoke('GET_PATH', 'userData') as Promise<string>,
+  // SEND
+  // ----
   relaunch: () => _send('RELAUNCH'),
   exit: () => _send('EXIT'),
   flashFrame: () => _send('FLASH_FRAME'),

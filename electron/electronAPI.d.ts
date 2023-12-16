@@ -1,29 +1,43 @@
 import { IpcRendererEvent, OpenExternalOptions } from 'electron';
-import { Observable } from 'rxjs';
 import {
   GlobalConfigState,
   TakeABreakConfig,
 } from '../src/app/features/config/global-config.model';
 import { KeyboardConfig } from '../src/app/features/config/keyboard-config.model';
 import { JiraCfg } from '../src/app/features/issue/providers/jira/jira.model';
-import { AppDataComplete } from '../src/app/imex/sync/sync.model';
+import { AppDataComplete, SyncGetRevResult } from '../src/app/imex/sync/sync.model';
 import { Task } from '../src/app/features/tasks/task.model';
+import { LocalBackupMeta } from '../src/app/imex/local-backup/local-backup.model';
 
 export interface ElectronAPI {
-  // IPC STUFF
-  ipcEvent$(evName: string): Observable<unknown>;
-
-  invoke(channel: string, ...args: any[]): Promise<any>;
-
-  off(channel: string, listener: (event: IpcRendererEvent, ...args: any[]) => void): void;
-
   on(channel: string, listener: (event: IpcRendererEvent, ...args: any[]) => void): void;
 
-  once(
-    channel: string,
-    listener: (event: IpcRendererEvent, ...args: any[]) => void,
-  ): void;
+  // INVOKE
+  // ------
+  getUserDataPath(): Promise<string>;
 
+  checkBackupAvailable(): Promise<false | LocalBackupMeta>;
+
+  loadBackupData(backupPath: string): Promise<string>;
+
+  fileSyncGetRevAndClientUpdate(args: {
+    filePath: string;
+    localRev: string | null;
+  }): Promise<{ rev: string; clientUpdate?: number } | SyncGetRevResult>;
+
+  fileSyncSave(args: {
+    filePath: string;
+    localRev: string | null;
+    dataStr: string;
+  }): Promise<string | Error>;
+
+  fileSyncLoad(args: {
+    filePath: string;
+    localRev: string | null;
+  }): Promise<{ rev: string; dataStr: string | undefined }>;
+
+  // STANDARD
+  // --------
   setZoomFactor(zoomFactor: number): void;
 
   getZoomFactor(): number;
@@ -34,7 +48,8 @@ export interface ElectronAPI {
 
   isMacOS(): boolean;
 
-  // TODO implement
+  // SEND
+  // ----
   reloadMainWin(): void;
 
   openDevTools(): void;
@@ -54,8 +69,6 @@ export interface ElectronAPI {
   informAboutAppReady(): void;
 
   isSystemDarkMode(): boolean;
-
-  getUserDataPath(): Promise<string>;
 
   scheduleRegisterBeforeClose(id: string): void;
 
