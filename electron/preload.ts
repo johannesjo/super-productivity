@@ -77,8 +77,7 @@ const ea: ElectronAPI = {
 
   updateCurrentTask: (task) => _send('CURRENT_TASK_UPDATED', task),
 
-  // TODO make secure
-  exec: () => _send('EXEC'),
+  exec: (command: string) => _send('EXEC', command),
 };
 contextBridge.exposeInMainWorld('ea', ea);
 

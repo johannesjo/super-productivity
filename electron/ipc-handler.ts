@@ -2,6 +2,7 @@
 // ---------------
 import {
   app,
+  dialog,
   globalShortcut,
   ipcMain,
   IpcMainEvent,
@@ -19,6 +20,7 @@ import { log } from 'electron-log/main';
 import { exec } from 'child_process';
 import { getWin } from './main-window';
 import { quitApp, showOrFocus } from './various-shared';
+import { loadSimpleStoreAll, saveSimpleStore } from './simple-store';
 
 // HANDLER
 // -------
@@ -54,9 +56,6 @@ ipcMain.on(IPC.OPEN_DEV_TOOLS, () => getWin().webContents.openDevTools());
 ipcMain.on(IPC.RELOAD_MAIN_WIN, () => getWin().reload());
 ipcMain.on(IPC.OPEN_PATH, (ev, path: string) => shell.openPath(path));
 ipcMain.on(IPC.OPEN_EXTERNAL, (ev, url: string) => shell.openExternal(url));
-
-// TODO check
-ipcMain.on(IPC.EXEC, execWithFrontendErrorHandlerInform);
 
 ipcMain.on(IPC.LOCK_SCREEN, () => {
   if ((app as any).isLocked) {
@@ -108,6 +107,8 @@ ipcMain.on(IPC.SHOW_OR_FOCUS, () => {
   const mainWin = getWin();
   showOrFocus(mainWin);
 });
+
+ipcMain.on(IPC.EXEC, execWithFrontendErrorHandlerInform);
 
 // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
 function registerShowAppShortCuts(cfg: KeyboardConfig): void {
@@ -179,12 +180,49 @@ function registerShowAppShortCuts(cfg: KeyboardConfig): void {
   }
 }
 
+const COMMAND_MAP_PROP = 'allowedCommands';
+
 // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
-function execWithFrontendErrorHandlerInform(ev: IpcMainEvent, command: string): void {
-  log('running command ' + command);
-  exec(command, (err) => {
-    if (err) {
-      errorHandlerWithFrontendInform(err);
+async function execWithFrontendErrorHandlerInform(
+  ev: IpcMainEvent,
+  command: string,
+): Promise<void> {
+  log('trying to run command ' + command);
+  const existingData = await loadSimpleStoreAll();
+  const allowedCommands: string[] = (existingData[COMMAND_MAP_PROP] as string[]) || [];
+
+  if (!Array.isArray(allowedCommands)) {
+    throw new Error('allowedCommands is no array ???');
+  }
+  if (allowedCommands.includes(command)) {
+    exec(command, (err) => {
+      if (err) {
+        errorHandlerWithFrontendInform(err);
+      }
+    });
+  } else {
+    const res = await dialog.showMessageBox(null, {
+      type: 'question',
+      buttons: ['Cancel', 'Yes, execute!'],
+      defaultId: 2,
+      title: 'Super Productivity – Exec',
+      message:
+        'Do you want to execute this command? ONLY confirm if you are sure you know what you are doing!!',
+      detail: command,
+      checkboxLabel: 'Remember my answer',
+      checkboxChecked: true,
+    });
+    const { response, checkboxChecked } = res;
+
+    if (response === 1) {
+      if (checkboxChecked) {
+        await saveSimpleStore(COMMAND_MAP_PROP, [...allowedCommands, command]);
+      }
+      exec(command, (err) => {
+        if (err) {
+          errorHandlerWithFrontendInform(err);
+        }
+      });
     }
-  });
+  }
 }
