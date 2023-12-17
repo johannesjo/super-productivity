@@ -3,8 +3,6 @@ import {
   ipcRenderer,
   IpcRendererEvent,
   nativeTheme,
-  OpenExternalOptions,
-  shell,
   webFrame,
 } from 'electron';
 import { ElectronAPI } from './electronAPI.d';
@@ -20,9 +18,6 @@ const _invoke: (channel: IPCEventValue, ...args: any[]) => Promise<unknown> = (
 ) => ipcRenderer.invoke(channel, ...args);
 
 const ea: ElectronAPI = {
-  // TODO use full interface
-  // const ea: ElectronAPI = {
-
   on: (channel: string, listener: (event: IpcRendererEvent, ...args: any[]) => void) =>
     ipcRenderer.on(channel, listener),
 
@@ -51,8 +46,6 @@ const ea: ElectronAPI = {
     webFrame.setZoomFactor(zoomFactor);
   },
   getZoomFactor: () => webFrame.getZoomFactor(),
-  openPath: (path: string) => shell.openPath(path),
-  openExternal: (url: string, options?: OpenExternalOptions) => shell.openExternal(url),
   isMacOS: () => process.platform === 'darwin',
 
   isSystemDarkMode: () => nativeTheme.shouldUseDarkColors,
@@ -69,7 +62,8 @@ const ea: ElectronAPI = {
   openDevTools: () => _send('OPEN_DEV_TOOLS'),
   informAboutAppReady: () => _send('APP_READY'),
 
-  // ALL EVENTS
+  openPath: (path: string) => _send('OPEN_PATH', path),
+  openExternalUrl: (url: string) => _send('OPEN_EXTERNAL', url),
   scheduleRegisterBeforeClose: (id) => _send('REGISTER_BEFORE_CLOSE', { id }),
   unscheduleRegisterBeforeClose: (id) => _send('UNREGISTER_BEFORE_CLOSE', { id }),
   setDoneRegisterBeforeClose: (id) => _send('BEFORE_CLOSE_DONE', { id }),

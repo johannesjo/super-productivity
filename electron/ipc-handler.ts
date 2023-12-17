@@ -1,6 +1,13 @@
 // FRONTEND EVENTS
 // ---------------
-import { app, globalShortcut, ipcMain, IpcMainEvent, systemPreferences } from 'electron';
+import {
+  app,
+  globalShortcut,
+  ipcMain,
+  IpcMainEvent,
+  shell,
+  systemPreferences,
+} from 'electron';
 import { IPC } from './shared-with-frontend/ipc-events.const';
 import { lockscreen } from './lockscreen';
 import { errorHandlerWithFrontendInform } from './error-handler-with-frontend-inform';
@@ -38,6 +45,8 @@ ipcMain.on(IPC.EXIT, (ev, exitCode: number) => app.exit(exitCode));
 ipcMain.on(IPC.RELAUNCH, () => app.relaunch());
 ipcMain.on(IPC.OPEN_DEV_TOOLS, () => getWin().webContents.openDevTools());
 ipcMain.on(IPC.RELOAD_MAIN_WIN, () => getWin().reload());
+ipcMain.on(IPC.OPEN_PATH, (ev, path: string) => shell.openPath(path));
+ipcMain.on(IPC.OPEN_EXTERNAL, (ev, url: string) => shell.openExternal(url));
 
 // TODO check
 ipcMain.on(IPC.EXEC, execWithFrontendErrorHandlerInform);

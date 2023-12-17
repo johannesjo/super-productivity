@@ -42,9 +42,9 @@ export interface ElectronAPI {
 
   getZoomFactor(): number;
 
-  openPath(path: string): Promise<string>;
+  openPath(path: string): void;
 
-  openExternal(url: string, options?: OpenExternalOptions): Promise<void>;
+  openExternalUrl(url: string): void;
 
   isMacOS(): boolean;
 

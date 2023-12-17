@@ -49,7 +49,7 @@ export class BookmarkLinkDirective {
       .replace('http://http://', 'http://');
 
     if (IS_ELECTRON) {
-      window.ea.openExternal(url);
+      window.ea.openExternalUrl(url);
     } else {
       const win = window.open(url, '_blank');
       if (win) {
