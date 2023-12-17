@@ -23,9 +23,11 @@ export class GlobalThemeService {
   isDarkTheme$: Observable<boolean> =
     IS_ELECTRON && window.ea.isMacOS()
       ? new Observable((subscriber) => {
-          subscriber.next(window.ea.isSystemDarkMode());
-          window.ea.on(IPC.MAC_OS_THEME_UPDATED, () => {
-            subscriber.next(window.ea.isSystemDarkMode());
+          window.ea.isSystemDarkMode().then((v) => {
+            subscriber.next(v);
+          });
+          window.ea.on(IPC.MAC_OS_THEME_UPDATED, (ev, isDarkMode) => {
+            subscriber.next(isDarkMode);
           });
         })
       : this._globalConfigService.misc$.pipe(

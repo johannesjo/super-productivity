@@ -5,6 +5,7 @@ import {
   globalShortcut,
   ipcMain,
   IpcMainEvent,
+  nativeTheme,
   shell,
   systemPreferences,
 } from 'electron';
@@ -24,6 +25,9 @@ import { quitApp, showOrFocus } from './various-shared';
 ipcMain.handle(IPC.GET_PATH, (ev, name: string) => {
   return app.getPath(name as any);
 });
+ipcMain.handle(IPC.IS_SYSTEM_DARK_MODE, (ev) => {
+  return nativeTheme.shouldUseDarkColors;
+});
 
 // BACKEND EVENTS
 // --------------
@@ -33,7 +37,10 @@ if (process.platform === 'darwin') {
   systemPreferences.subscribeNotification(
     'AppleInterfaceThemeChangedNotification',
     () => {
-      getWin().webContents.send(IPC.MAC_OS_THEME_UPDATED);
+      getWin().webContents.send(
+        IPC.MAC_OS_THEME_UPDATED,
+        nativeTheme.shouldUseDarkColors,
+      );
     },
   );
 }

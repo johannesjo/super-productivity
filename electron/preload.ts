@@ -1,10 +1,4 @@
-import {
-  contextBridge,
-  ipcRenderer,
-  IpcRendererEvent,
-  nativeTheme,
-  webFrame,
-} from 'electron';
+import { contextBridge, ipcRenderer, IpcRendererEvent, webFrame } from 'electron';
 import { ElectronAPI } from './electronAPI.d';
 import { IPCEventValue } from './shared-with-frontend/ipc-events.const';
 import { LocalBackupMeta } from '../src/app/imex/local-backup/local-backup.model';
@@ -39,6 +33,7 @@ const ea: ElectronAPI = {
       rev: string;
       dataStr: string | undefined;
     }>,
+  isSystemDarkMode: () => _invoke('IS_SYSTEM_DARK_MODE') as Promise<boolean>,
 
   // STANDARD
   // --------
@@ -47,8 +42,6 @@ const ea: ElectronAPI = {
   },
   getZoomFactor: () => webFrame.getZoomFactor(),
   isMacOS: () => process.platform === 'darwin',
-
-  isSystemDarkMode: () => nativeTheme.shouldUseDarkColors,
 
   // SEND
   // ----
