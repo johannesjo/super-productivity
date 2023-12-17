@@ -202,7 +202,7 @@ const OTHER_3RD_PARTY_MODS_WITHOUT_CFG = [
           };
         },
       },
-      sanitize: SecurityContext.NONE,
+      sanitize: SecurityContext.HTML,
     }),
     FormsModule,
     ReactiveFormsModule,
