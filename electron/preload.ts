@@ -19,9 +19,9 @@ const _invoke: (channel: IPCEventValue, ...args: any[]) => Promise<unknown> = (
   ...args
 ) => ipcRenderer.invoke(channel, ...args);
 
-const electronAPI: Partial<ElectronAPI> = {
+const ea: ElectronAPI = {
   // TODO use full interface
-  // const electronAPI: ElectronAPI = {
+  // const ea: ElectronAPI = {
 
   on: (channel: string, listener: (event: IpcRendererEvent, ...args: any[]) => void) =>
     ipcRenderer.on(channel, listener),
@@ -92,7 +92,7 @@ const electronAPI: Partial<ElectronAPI> = {
   // TODO make secure
   exec: () => _send('EXEC'),
 };
-contextBridge.exposeInMainWorld('electronAPI', electronAPI);
+contextBridge.exposeInMainWorld('ea', ea);
 
 // contextBridge.exposeInIsolatedWorld();
 console.log('preload script loading complete');

@@ -23,7 +23,7 @@ export class UiHelperService {
       return;
     }
 
-    window.electronAPI.setZoomFactor(zoomFactor);
+    window.ea.setZoomFactor(zoomFactor);
     this._updateLocalUiHelperSettings({ zoomFactor });
   }
 
@@ -32,12 +32,12 @@ export class UiHelperService {
       console.error('Invalid zoom factor', zoomBy);
       return;
     }
-    const currentZoom = window.electronAPI.getZoomFactor();
+    const currentZoom = window.ea.getZoomFactor();
     console.log({ currentZoom });
 
     const zoomFactor = currentZoom + zoomBy;
 
-    window.electronAPI.setZoomFactor(zoomFactor);
+    window.ea.setZoomFactor(zoomFactor);
     this._updateLocalUiHelperSettings({ zoomFactor });
   }
 
@@ -48,7 +48,7 @@ export class UiHelperService {
         (document.activeElement as HTMLElement).blur();
       }
 
-      window.electronAPI.showOrFocus();
+      window.ea.showOrFocus();
     } else {
       console.error('Cannot execute focus app window in browser');
     }
@@ -67,7 +67,7 @@ export class UiHelperService {
           // this does not prevent scrolling unfortunately
           // event.preventDefault();
 
-          let zoomFactor = window.electronAPI.getZoomFactor();
+          let zoomFactor = window.ea.getZoomFactor();
           if (event.deltaY > 0) {
             zoomFactor -= ZOOM_DELTA;
           } else if (event.deltaY < 0) {

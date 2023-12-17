@@ -30,7 +30,7 @@ export class ElectronEffects {
               },
               actionStr: T.GLOBAL_SNACK.FILE_DOWNLOADED_BTN,
               actionFn: () => {
-                window.electronAPI.openPath(dir);
+                window.ea.openPath(dir);
               },
             });
           }),

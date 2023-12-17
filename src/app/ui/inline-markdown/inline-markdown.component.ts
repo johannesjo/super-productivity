@@ -230,7 +230,7 @@ export class InlineMarkdownComponent implements OnInit, OnDestroy {
         const href = target.getAttribute('href');
         if (href !== null) {
           ev.preventDefault();
-          window.electronAPI.openExternal(href);
+          window.ea.openExternal(href);
         }
       }
     });

@@ -158,12 +158,12 @@ export class AppComponent implements OnDestroy {
     });
 
     if (IS_ELECTRON) {
-      window.electronAPI.informAboutAppReady();
+      window.ea.informAboutAppReady();
       this._initElectronErrorHandler();
       this._uiHelperService.initElectron();
 
-      window.electronAPI.on(IPC.TRANSFER_SETTINGS_REQUESTED, () => {
-        window.electronAPI.sendAppSettingsToElectron(
+      window.ea.on(IPC.TRANSFER_SETTINGS_REQUESTED, () => {
+        window.ea.sendAppSettingsToElectron(
           this._globalConfigService.cfg as GlobalConfigState,
         );
       });
@@ -246,7 +246,7 @@ export class AppComponent implements OnDestroy {
   }
 
   private _initElectronErrorHandler(): void {
-    window.electronAPI.on(
+    window.ea.on(
       IPC.ERROR,
       (
         ev,

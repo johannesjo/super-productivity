@@ -14,14 +14,14 @@ export class ExecBeforeCloseService {
   constructor() {}
 
   schedule(id: string): void {
-    window.electronAPI.scheduleRegisterBeforeClose(id);
+    window.ea.scheduleRegisterBeforeClose(id);
   }
 
   unschedule(id: string): void {
-    window.electronAPI.unscheduleRegisterBeforeClose(id);
+    window.ea.unscheduleRegisterBeforeClose(id);
   }
 
   setDone(id: string): void {
-    window.electronAPI.setDoneRegisterBeforeClose(id);
+    window.ea.setDoneRegisterBeforeClose(id);
   }
 }

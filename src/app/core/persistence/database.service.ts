@@ -98,8 +98,8 @@ export class DatabaseService {
 
   private _restartApp(): void {
     if (IS_ELECTRON) {
-      window.electronAPI.relaunch();
-      window.electronAPI.exit(0);
+      window.ea.relaunch();
+      window.ea.exit(0);
     } else {
       window.location.reload();
     }

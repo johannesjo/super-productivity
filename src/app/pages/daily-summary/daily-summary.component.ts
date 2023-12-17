@@ -231,7 +231,7 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
         .subscribe((isConfirm: boolean) => {
           if (isConfirm) {
             this._finishDayForGood(() => {
-              window.electronAPI.shutdownNow();
+              window.ea.shutdownNow();
             });
           } else if (isConfirm === false) {
             this._finishDayForGood(() => {

@@ -14,7 +14,7 @@ if (environment.production || environment.stage) {
 
 declare global {
   interface Window {
-    electronAPI: ElectronAPI;
+    ea: ElectronAPI;
   }
 }
 console.log((window as any).electronAPI);

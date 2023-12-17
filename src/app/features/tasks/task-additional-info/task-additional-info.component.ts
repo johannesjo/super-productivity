@@ -263,7 +263,7 @@ export class TaskAdditionalInfoComponent implements AfterViewInit, OnDestroy {
         )
         .subscribe((jiraCfg) => {
           if (jiraCfg.isEnabled) {
-            window.electronAPI.jiraSetupImgHeaders({
+            window.ea.jiraSetupImgHeaders({
               jiraCfg,
               wonkyCookie: jiraCfg.isWonkyCookieMode
                 ? sessionStorage.getItem(SS.JIRA_WONKY_COOKIE) || undefined

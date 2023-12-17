@@ -32,7 +32,7 @@ export class LocalFileSyncElectronService implements SyncProviderServiceInterfac
       if (!filePath) {
         throw new Error('No file path given for getRevAndLastClientUpdate');
       }
-      const r = await window.electronAPI.fileSyncGetRevAndClientUpdate({
+      const r = await window.ea.fileSyncGetRevAndClientUpdate({
         filePath,
         localRev,
       });
@@ -53,7 +53,7 @@ export class LocalFileSyncElectronService implements SyncProviderServiceInterfac
       if (!filePath) {
         throw new Error('No file path given for uploadAppData');
       }
-      const r = await window.electronAPI.fileSyncSave({
+      const r = await window.ea.fileSyncSave({
         localRev,
         filePath,
         dataStr,
@@ -72,7 +72,7 @@ export class LocalFileSyncElectronService implements SyncProviderServiceInterfac
       if (!filePath) {
         throw new Error('No file path given for downloadAppData');
       }
-      const r = await window.electronAPI.fileSyncLoad({
+      const r = await window.ea.fileSyncLoad({
         localRev,
         filePath,
       });

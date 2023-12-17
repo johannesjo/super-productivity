@@ -140,7 +140,7 @@ export class FocusModeEffects {
           withLatestFrom(this._isRunning$),
           tap(([progress, isRunning]: [number, boolean]) => {
             const progressBarMode: 'normal' | 'pause' = isRunning ? 'normal' : 'pause';
-            window.electronAPI.setProgressBar({
+            window.ea.setProgressBar({
               progress: progress / 100,
               progressBarMode,
             });
@@ -156,9 +156,9 @@ export class FocusModeEffects {
         this._actions$.pipe(
           ofType(focusSessionDone),
           tap(() => {
-            window.electronAPI.showOrFocus();
-            window.electronAPI.flashFrame();
-            window.electronAPI.setProgressBar({
+            window.ea.showOrFocus();
+            window.ea.flashFrame();
+            window.ea.setProgressBar({
               progress: 100,
               progressBarMode: 'normal',
             });

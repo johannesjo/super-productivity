@@ -103,7 +103,7 @@ export const createErrorAlert = (
   btnReload.innerText = 'Reload App';
   btnReload.addEventListener('click', () => {
     if (IS_ELECTRON) {
-      window.electronAPI.reloadMainWin();
+      window.ea.reloadMainWin();
     } else {
       window.location.reload();
     }
@@ -153,7 +153,7 @@ export const createErrorAlert = (
   }, 1500);
 
   if (IS_ELECTRON) {
-    window.electronAPI.openDevTools();
+    window.ea.openDevTools();
   }
 };
 

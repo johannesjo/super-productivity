@@ -64,7 +64,7 @@ export class ConfigPageComponent implements OnInit, OnDestroy {
         getAutomaticBackUpFormCfg(),
       ];
     } else if (IS_ELECTRON) {
-      window.electronAPI.getUserDataPath().then((userDataPath) => {
+      window.ea.getUserDataPath().then((userDataPath) => {
         const backupPath = `${userDataPath}${
           navigator?.userAgent?.search('Windows') ? '\\' : '/'
         }backups`;

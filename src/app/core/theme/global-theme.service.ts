@@ -21,11 +21,11 @@ import { IPC } from '../../../../electron/shared-with-frontend/ipc-events.const'
 @Injectable({ providedIn: 'root' })
 export class GlobalThemeService {
   isDarkTheme$: Observable<boolean> =
-    IS_ELECTRON && window.electronAPI.isMacOS()
+    IS_ELECTRON && window.ea.isMacOS()
       ? new Observable((subscriber) => {
-          subscriber.next(window.electronAPI.isSystemDarkMode());
-          window.electronAPI.on(IPC.MAC_OS_THEME_UPDATED, () => {
-            subscriber.next(window.electronAPI.isSystemDarkMode());
+          subscriber.next(window.ea.isSystemDarkMode());
+          window.ea.on(IPC.MAC_OS_THEME_UPDATED, () => {
+            subscriber.next(window.ea.isSystemDarkMode());
           });
         })
       : this._globalConfigService.misc$.pipe(

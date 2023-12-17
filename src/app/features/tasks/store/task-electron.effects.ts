@@ -19,7 +19,7 @@ export class TaskElectronEffects {
         withLatestFrom(this._store$.pipe(select(selectCurrentTask))),
         tap(([action, current]) => {
           if (IS_ELECTRON) {
-            window.electronAPI.updateCurrentTask(current);
+            window.ea.updateCurrentTask(current);
           }
         }),
       ),
@@ -34,7 +34,7 @@ export class TaskElectronEffects {
           ofType(setCurrentTask),
           tap(({ id }) => {
             if (!id) {
-              window.electronAPI.setProgressBar({
+              window.ea.setProgressBar({
                 progress: 0,
                 progressBarMode: 'pause',
               });
@@ -54,7 +54,7 @@ export class TaskElectronEffects {
         filter(([a, cfg]) => !cfg || !cfg.pomodoro.isEnabled),
         tap(([{ task }]) => {
           const progress = task.timeSpent / task.timeEstimate;
-          window.electronAPI.setProgressBar({
+          window.ea.setProgressBar({
             progress,
             progressBarMode: 'normal',
           });

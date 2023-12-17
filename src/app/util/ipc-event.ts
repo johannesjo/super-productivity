@@ -12,13 +12,13 @@ export const ipcEvent$ = (evName: string): Observable<unknown[]> => {
   const handler: (...args: any[]) => void = (...args): void => {
     subject.next([...args]);
   };
-  window.electronAPI.on(evName, handler);
+  window.ea.on(evName, handler);
 
   return subject.pipe(
     finalize(() => {
       console.log('FINALIZE', evName);
       // NOTE doesn't work due to the different contexts
-      // window.electronAPI.off(evName, handler);
+      // window.ea.off(evName, handler);
       throw new Error(`ipcEvent$[${evName}] observables live forever`);
     }),
   );

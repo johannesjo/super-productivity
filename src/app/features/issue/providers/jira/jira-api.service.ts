@@ -95,7 +95,7 @@ export class JiraApiService {
   ) {
     // set up callback listener for electron
     if (IS_ELECTRON) {
-      window.electronAPI.on(IPC.JIRA_CB_EVENT, (ev: IpcRendererEvent, res: any) => {
+      window.ea.on(IPC.JIRA_CB_EVENT, (ev: IpcRendererEvent, res: any) => {
         this._handleResponse(res);
       });
     }
@@ -427,7 +427,7 @@ export class JiraApiService {
 
     const requestToSend = { requestId, requestInit, url };
     if (IS_ELECTRON) {
-      window.electronAPI.makeJiraRequest({
+      window.ea.makeJiraRequest({
         ...requestToSend,
         jiraCfg,
       });

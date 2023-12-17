@@ -27,7 +27,7 @@ export class TaskAttachmentLinkDirective {
       if (!this.type || this.type === 'LINK') {
         this._openExternalUrl(this.href);
       } else if (this.type === 'FILE') {
-        window.electronAPI.openPath(this.href);
+        window.ea.openPath(this.href);
       } else if (this.type === 'COMMAND') {
         this._snackService.open({
           msg: T.GLOBAL_SNACK.RUNNING_X,
@@ -52,7 +52,7 @@ export class TaskAttachmentLinkDirective {
       .replace('http://http://', 'http://');
 
     if (IS_ELECTRON) {
-      window.electronAPI.openExternal(url);
+      window.ea.openExternal(url);
     } else {
       const win = window.open(url, '_blank');
       if (win) {
@@ -62,6 +62,6 @@ export class TaskAttachmentLinkDirective {
   }
 
   private _exec(command: string): void {
-    window.electronAPI.exec(command);
+    window.ea.exec(command);
   }
 }

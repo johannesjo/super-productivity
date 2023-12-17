@@ -258,7 +258,7 @@ export class PomodoroEffects {
           tap(([progress, isPause, isPauseBreak]: [number, boolean, boolean]) => {
             const progressBarMode: 'normal' | 'pause' =
               isPause || isPauseBreak ? 'pause' : 'normal';
-            window.electronAPI.setProgressBar({
+            window.ea.setProgressBar({
               progress,
               progressBarMode,
             });

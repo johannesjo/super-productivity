@@ -38,11 +38,11 @@ export class LocalBackupService {
   isBackupAvailable(): Promise<boolean | LocalBackupMeta> {
     return IS_ANDROID_WEB_VIEW
       ? androidInterface.loadFromDbWrapped(ANDROID_DB_KEY).then((r) => !!r)
-      : window.electronAPI.checkBackupAvailable();
+      : window.ea.checkBackupAvailable();
   }
 
   loadBackupElectron(backupPath: string): Promise<string> {
-    return window.electronAPI.loadBackupData(backupPath) as Promise<string>;
+    return window.ea.loadBackupData(backupPath) as Promise<string>;
   }
 
   loadBackupAndroid(): Promise<string> {
@@ -52,7 +52,7 @@ export class LocalBackupService {
   private async _backup(): Promise<void> {
     const data = await this._persistenceService.loadComplete();
     if (IS_ELECTRON) {
-      window.electronAPI.backupAppData(data);
+      window.ea.backupAppData(data);
     }
     if (IS_ANDROID_WEB_VIEW) {
       androidInterface.saveToDbWrapped(ANDROID_DB_KEY, JSON.stringify(data));

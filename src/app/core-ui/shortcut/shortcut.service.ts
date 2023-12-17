@@ -47,17 +47,17 @@ export class ShortcutService {
 
     // GLOBAL SHORTCUTS
     if (IS_ELECTRON) {
-      window.electronAPI.on(IPC.TASK_TOGGLE_START, () => {
+      window.ea.on(IPC.TASK_TOGGLE_START, () => {
         this._ngZone.run(() => {
           this._taskService.toggleStartTask();
         });
       });
-      window.electronAPI.on(IPC.ADD_TASK, () => {
+      window.ea.on(IPC.ADD_TASK, () => {
         this._ngZone.run(() => {
           this._layoutService.showAddTaskBar();
         });
       });
-      window.electronAPI.on(IPC.ADD_NOTE, () => {
+      window.ea.on(IPC.ADD_NOTE, () => {
         if (this._matDialog.openDialogs.length === 0) {
           this._ngZone.run(() => {
             this._matDialog.open(DialogAddNoteComponent, {
@@ -169,7 +169,7 @@ export class ShortcutService {
     // special hidden dev tools combo to use them for production
     if (IS_ELECTRON) {
       if (checkKeyCombo(ev, 'Ctrl+Shift+J')) {
-        window.electronAPI.openDevTools();
+        window.ea.openDevTools();
       } else if (checkKeyCombo(ev, keys.zoomIn)) {
         this._uiHelperService.zoomBy(0.05);
       } else if (checkKeyCombo(ev, keys.zoomOut)) {
