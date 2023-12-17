@@ -12,9 +12,10 @@ const _invoke: (channel: IPCEventValue, ...args: any[]) => Promise<unknown> = (
 ) => ipcRenderer.invoke(channel, ...args);
 
 const ea: ElectronAPI = {
-  on: (channel: string, listener: (event: IpcRendererEvent, ...args: any[]) => void) =>
-    ipcRenderer.on(channel, listener),
-
+  on: (channel: string, listener: (event: IpcRendererEvent, ...args: any[]) => void) => {
+    // NOTE: there is no proper way to unsubscribe apart from unsusbscribing all
+    ipcRenderer.on(channel, listener);
+  },
   // INVOKE
   // ------
   getUserDataPath: () => _invoke('GET_PATH', 'userData') as Promise<string>,
