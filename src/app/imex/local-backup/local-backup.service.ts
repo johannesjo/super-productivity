@@ -35,7 +35,7 @@ export class LocalBackupService {
     this._triggerBackupSave$.subscribe();
   }
 
-  isBackupAvailable(): Promise<boolean | LocalBackupMeta> {
+  checkBackupAvailable(): Promise<boolean | LocalBackupMeta> {
     return IS_ANDROID_WEB_VIEW
       ? androidInterface.loadFromDbWrapped(ANDROID_DB_KEY).then((r) => !!r)
       : window.ea.checkBackupAvailable();

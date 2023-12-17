@@ -41,7 +41,7 @@ export class LocalBackupEffects {
       appDataComplete.taskArchive.ids.length === 0 &&
       !appDataComplete.lastLocalSyncModelChange
     ) {
-      const backupMeta = await this._localBackupService.isBackupAvailable();
+      const backupMeta = await this._localBackupService.checkBackupAvailable();
 
       // ELECTRON
       // --------
