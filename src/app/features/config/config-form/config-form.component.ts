@@ -41,14 +41,18 @@ export class ConfigFormComponent {
     this.fields = val && [...val];
   }
 
-  submit(): void {
-    if (!this.config) {
+  updateCfg(cfg: Record<string, unknown>): void {
+    if (!cfg) {
       throw new Error('No config for ' + this.sectionKey);
-    } else {
+    }
+    this.config = cfg;
+    if (this.form.valid) {
       this.save.emit({
         sectionKey: exists(this.sectionKey),
         config: this.config,
       });
+    } else {
+      this.form.updateValueAndValidity();
     }
   }
 }
