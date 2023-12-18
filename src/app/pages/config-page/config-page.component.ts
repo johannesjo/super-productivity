@@ -14,7 +14,6 @@ import {
 import {
   ConfigFormConfig,
   ConfigFormSection,
-  GenericConfigFormSection,
   GlobalConfigSectionKey,
   GlobalConfigState,
   GlobalSectionConfig,

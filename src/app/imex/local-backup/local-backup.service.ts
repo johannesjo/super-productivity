@@ -3,7 +3,6 @@ import { GlobalConfigService } from '../../features/config/global-config.service
 import { interval, Observable } from 'rxjs';
 import { LocalBackupConfig } from '../../features/config/global-config.model';
 import { filter, map, switchMap, tap } from 'rxjs/operators';
-import { IPC } from '../../../../electron/shared-with-frontend/ipc-events.const';
 import { PersistenceService } from '../../core/persistence/persistence.service';
 import { LocalBackupMeta } from './local-backup.model';
 import { IS_ANDROID_WEB_VIEW } from '../../util/is-android-web-view';
