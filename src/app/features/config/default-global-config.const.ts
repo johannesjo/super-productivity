@@ -1,5 +1,6 @@
 import { GlobalConfigState } from './global-config.model';
 import { IS_MAC } from '../../util/is-mac';
+import { DEFAULT_PROJECT_ID } from '../project/project.const';
 
 export const IS_USE_DARK_THEME_AS_DEFAULT: boolean =
   !IS_MAC ||
@@ -24,7 +25,7 @@ export const DEFAULT_GLOBAL_CONFIG: GlobalConfigState = {
     isAutoAddWorkedOnToToday: true,
     isMinimizeToTray: false,
     isTrayShowCurrentTask: true,
-    defaultProjectId: null,
+    defaultProjectId: DEFAULT_PROJECT_ID,
     firstDayOfWeek: 1,
     startOfNextDay: 0,
     isDisableAnimations: false,

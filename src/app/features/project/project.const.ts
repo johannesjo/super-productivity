@@ -23,12 +23,12 @@ export const DEFAULT_PROJECT: Project = {
   },
 };
 
-export const DEFAULT_PROJECT_ID = 'DEFAULT';
+export const DEFAULT_PROJECT_ID = 'INBOX';
 
 export const FIRST_PROJECT: Project = {
   ...DEFAULT_PROJECT,
   id: DEFAULT_PROJECT_ID,
-  title: 'Super Productivity',
+  title: 'Inbox',
   workStart: {},
   workEnd: {},
 };
