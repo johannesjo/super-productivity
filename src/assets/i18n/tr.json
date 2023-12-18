@@ -722,34 +722,41 @@
         "TITLE": "Giriş: {{provider}}"
       },
       "D_CONFLICT": {
-        "LAST_CHANGE": "son değişiklik:",
-        "LAST_SYNC": "son senkronizasyon:",
-        "LOCAL": "yerel",
+        "LAST_CHANGE": "Son Değişiklik:",
+        "LAST_SYNC": "Son Senkronizasyon:",
+        "LOCAL": "Yerel",
         "LOCAL_REMOTE": "yerel -> uzaktan",
-        "REMOTE": "uzak",
+        "REMOTE": "Uzak",
         "TEXT": "<p>Dropbox'tan güncelleme. Hem yerel hem de uzak veriler değiştirilmiş gibi görünüyor.</p>",
         "TITLE": "Dropbox: Çakışan Veriler",
-        "USE_LOCAL": "Yerel kullan",
-        "USE_REMOTE": "Uzaktan kumandayı kullan"
+        "USE_LOCAL": "Yerel Verileri Kullan",
+        "USE_REMOTE": "Uzak Verileri Kullan"
+      },
+      "D_PERMISSION": {
+        "DISABLE_SYNC": "Senkronizasyonu devre dışı bırak",
+        "PERM_FILE": "İzin ver",
+        "TEXT": "<p>Yerel senkronizasyona ilişkin dosya izniniz iptal edildi.</p>",
+        "TITLE": "Senkronizasyon: Yerel dosya izni reddedildi"
       },
       "FORM": {
         "DROPBOX": {
-          "L_ACCESS_TOKEN": "Erişim Jetonu (Kimlik Doğrulama Kodundan üretilir)"
+          "L_ACCESS_TOKEN": "Erişim Jetonu (Yetkilendirme Kodundan oluşturulan)"
         },
         "GOOGLE": {
-          "L_IS_COMPRESS_DATA": "Veriyi Sıkıştır",
           "L_SYNC_FILE_NAME": "Dosya adını senkronize et"
         },
         "LOCAL_FILE": {
           "L_SYNC_FILE_PATH": "Dosya Yolunu Senkronize Et",
-          "L_SYNC_FILE_PATH_DESCRIPTION": "Senkronizasyon için kullanılması gereken (oluşturulacak) dosyanın mutlak yolu."
+          "L_SYNC_FILE_PATH_DESCRIPTION": "Senkronizasyon için kullanılması gereken (oluşturulacak) dosyanın mutlak yolu.",
+          "L_SYNC_FILE_PATH_PERMISSION_VALIDATION": "Dosya erişim izni gerekir"
+
         },
-        "L_ENABLE_SYNCING": "Eşitlemeyi Etkinleştir",
-        "L_SYNC_INTERVAL": "Senkron aralığı",
+        "L_ENABLE_SYNCING": "Senkronizasyonu Etkinleştir",
+        "L_SYNC_INTERVAL": "Senkron Aralığı",
         "L_SYNC_PROVIDER": "Senkronizasyon Sağlayıcı",
-        "TITLE": "Sync",
+        "TITLE": "Senkronize et",
         "WEB_DAV": {
-          "CORS_INFO": "<strong>Deneysel !!</strong> Bunun çalışmasını sağlamak için, Nextcloud örneğiniz için CORS'u devre dışı bırakmanız veya sınırlamanız gerekir; bu, olumsuz güvenlik sonuçlarına neden olabilir! Daha fazla bilgi için lütfen <a href='https://github.com/nextcloud/server/issues/3131'>bu konu başlığına bakın</a> . Kendi sorumluluğunuzdadır kullanın!",
+          "CORS_INFO": "<strong>Tarayıcıda çalışmasını sağlamak:</strong> Bunun tarayıcıda çalışmasını sağlamak için Nextcloud örneğiniz için CORS isteklerine yönelik Süper Üretkenliği beyaz listeye almanız gerekir. Bunun olumsuz güvenlik etkileri olabilir! Lütfen <a href='https://github.com/nextcloud/server/issues/3131'>daha fazla bilgi için bu konuya bakın</a>. Bunun mobil cihazlarda çalışmasını sağlamanın bir yolu, nextcloud uygulaması <a href='https://apps.nextcloud.com/apps/webapppassword'>webapppassword aracılığıyla \"https://app.super-productivity.com\" adresini beyaz listeye eklemektir. <a>. Kullanım riski size aittir!</p>",
           "L_BASE_URL": "Temel URL",
           "L_PASSWORD": "Parola",
           "L_SYNC_FILE_PATH": "Dosya Yolunu Senkronize Et",
@@ -759,12 +766,12 @@
       "S": {
         "ERROR_FALLBACK_TO_BACKUP": "Veriler alınırken bir şeyler ters gitti. Yerel yedeklemeye geri dönüyorum.",
         "ERROR_INVALID_DATA": "Senkronizasyon sırasında hata oluştu. Geçersiz veri",
-        "IMPORTING": "Veri alınıyor",
+        "IMPORTING": "Veriler içeri aktarılıyor",
         "INCOMPLETE_CFG": "Senkronizasyon için kimlik doğrulama başarısız oldu. Lütfen Yapılandırmanızı kontrol edin!",
         "INITIAL_SYNC_ERROR": "İlk Senkronizasyon başarısız oldu",
         "SUCCESS_IMPORT": "Alınan veri",
         "SUCCESS_VIA_BUTTON": "Veriler başarıyla senkronize edildi",
-        "UNKNOWN_ERROR": "Senkronizasyon sırasında bilinmeyen hata. Lütfen konsolu kontrol edin.",
+        "UNKNOWN_ERROR": "Bilinmeyen senkronizasyon hatası: {{err}}",
         "UPLOAD_ERROR": "Bilinmeyen Yükleme Hatası (Ayarlar doğru mu?): {{err}}"
       }
     },
@@ -783,7 +790,7 @@
       },
       "FORM_BASIC": {
         "L_COLOR": "Renk (tanımlanmamış ana tema rengi kullanılıyorsa)",
-        "L_ICON": "ikon",
+        "L_ICON": "İkon",
         "L_TITLE": "Etiket adı",
         "TITLE": "Temel ayarlar"
       },
@@ -799,7 +806,7 @@
         "FROM_PARENT": "(Ebeveynden)",
         "LOCAL_ATTACHMENTS": "Yerel Ekler",
         "NOTES": "Notlar",
-        "PARENT": "ebeveyn",
+        "PARENT": "Ebeveyn",
         "REMINDER": "Hatırlatma",
         "REPEAT": "Tekrar et",
         "SCHEDULE_TASK": "Görev Takvimi",
