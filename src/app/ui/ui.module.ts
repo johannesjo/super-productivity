@@ -95,6 +95,7 @@ import { ShortPlannedAtPipe } from './pipes/short-planned-at.pipe';
 import { LongPressIOSDirective } from './longpress/longpress-ios.directive';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { ProgressCircleComponent } from './progress-circle/progress-circle.component';
+import { FormlyLinkWidgetComponent } from './formly-link-widget/formly-link-widget.component';
 
 const DIALOG_COMPONENTS = [
   DialogConfirmComponent,
@@ -208,6 +209,7 @@ const OTHER_3RD_PARTY_MODS_WITHOUT_CFG = [
     ReactiveFormsModule,
     FormlyModule.forChild({
       types: [
+        { name: 'link', component: FormlyLinkWidgetComponent },
         {
           name: 'duration',
           component: InputDurationFormlyComponent,
@@ -235,7 +237,7 @@ const OTHER_3RD_PARTY_MODS_WITHOUT_CFG = [
     ValidationModule,
     BetterDrawerModule,
   ],
-  declarations: [...COMPONENT_AND_PIPES, OwlWrapperComponent],
+  declarations: [...COMPONENT_AND_PIPES, OwlWrapperComponent, FormlyLinkWidgetComponent],
   exports: [
     ...COMPONENT_AND_PIPES,
     ...MAT_MODULES,

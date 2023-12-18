@@ -58,6 +58,14 @@ export const OPEN_PROJECT_CONFIG_FORM: LimitedFormlyFieldConfig<OpenProjectCfg>[
     },
   },
   {
+    type: 'link',
+    hideExpression: (model: any) => !model.isEnabled,
+    templateOptions: {
+      url: 'https://www.openproject.org/docs/getting-started/my-account/#access-tokens',
+      txt: T.F.ISSUE.HOW_TO_GET_A_TOKEN,
+    },
+  },
+  {
     key: 'projectId',
     type: 'input',
     hideExpression: (model: any) => !model.isEnabled,

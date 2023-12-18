@@ -65,6 +65,14 @@ export const GITLAB_CONFIG_FORM: LimitedFormlyFieldConfig<GitlabCfg>[] = [
     },
   },
   {
+    type: 'link',
+    hideExpression: (model: any) => !model.isEnabled,
+    templateOptions: {
+      url: 'https://docs.gitlab.com/ee/user/profile/personal_access_tokens.html',
+      txt: T.F.ISSUE.HOW_TO_GET_A_TOKEN,
+    },
+  },
+  {
     key: 'source',
     type: 'select',
     defaultValue: 'project',

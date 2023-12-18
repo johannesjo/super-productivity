@@ -155,7 +155,14 @@ export const JIRA_CREDENTIALS_FORM_CFG: LimitedFormlyFieldConfig<JiraCfg>[] = [
       required: true,
       label: T.F.JIRA.FORM_CRED.PASSWORD,
       type: 'password',
-      description: '* https://confluence.atlassian.com/cloud/api-tokens-938839638.html',
+    },
+  },
+  {
+    type: 'link',
+    hideExpression: (model: any) => !model.isEnabled,
+    templateOptions: {
+      url: 'https://confluence.atlassian.com/cloud/api-tokens-938839638.html',
+      txt: T.F.ISSUE.HOW_TO_GET_A_TOKEN,
     },
   },
   {

@@ -48,6 +48,14 @@ export const GITEA_CONFIG_FORM: LimitedFormlyFieldConfig<GiteaCfg>[] = [
     },
   },
   {
+    type: 'link',
+    hideExpression: (model: any) => !model.isEnabled,
+    templateOptions: {
+      url: 'https://www.jetbrains.com/help/youtrack/cloud/integration-with-gitea.html#enable-youtrack-integration-gitea',
+      txt: T.F.ISSUE.HOW_TO_GET_A_TOKEN,
+    },
+  },
+  {
     key: 'repoFullname',
     type: 'input',
     hideExpression: (model: any) => !model.isEnabled,

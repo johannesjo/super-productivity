@@ -334,6 +334,7 @@ const T = {
       },
     },
     ISSUE: {
+      HOW_TO_GET_A_TOKEN: 'F.ISSUE.HOW_TO_GET_A_TOKEN',
       DEFAULT: {
         ISSUES_STR: 'F.ISSUE.DEFAULT.ISSUES_STR',
         ISSUE_STR: 'F.ISSUE.DEFAULT.ISSUE_STR',

@@ -176,7 +176,6 @@
         "IS_SEARCH_ISSUES_FROM_GITEA": "Show issues from git as suggestions when adding new tasks",
         "HOST": "Host (e.g.: https://try.gitea.io)",
         "TOKEN": "Access Token",
-        "TOKEN_DESCRIPTION": "Required for private repository access",
         "REPO_FULL_NAME": "Username or Organization name/project",
         "REPO_FULL_NAME_DESCRIPTION": "Can be found as part of the url, when viewing the project in the Browser.",
         "SCOPE": "Scope",
@@ -333,6 +332,7 @@
       }
     },
     "ISSUE": {
+      "HOW_TO_GET_A_TOKEN": "How to get a token?",
       "DEFAULT": {
         "ISSUES_STR": "issues",
         "ISSUE_STR": "issue"
