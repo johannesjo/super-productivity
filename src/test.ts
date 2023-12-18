@@ -11,7 +11,7 @@ import { ElectronAPI } from '../electron/electronAPI';
 declare const require: any;
 declare global {
   interface Window {
-    electronAPI: ElectronAPI;
+    ea: ElectronAPI;
   }
 }
 
