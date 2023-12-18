@@ -102,13 +102,22 @@ export class SyncTriggerService {
     ),
   );
 
+  // TODO check if those two work as expected
   private _onElectronResumeTrigger$: Observable<string | never> = IS_ELECTRON
-    ? ipcEvent$(IPC.RESUME).pipe(mapTo('I_IPC_RESUME'))
+    ? ipcEvent$(IPC.RESUME).pipe(
+        // because ipcEvents live forever
+        shareReplay(1),
+        mapTo('I_IPC_RESUME'),
+      )
     : EMPTY;
-
-  private _beforeGoingToSleepTriggers$: Observable<string> = merge(
-    IS_ELECTRON ? ipcEvent$(IPC.SUSPEND).pipe(mapTo('I_IPC_SUSPEND')) : EMPTY,
-  ).pipe(throttleTime(SYNC_BEFORE_GOING_TO_SLEEP_THROTTLE_TIME));
+  private _beforeGoingToSleepTriggers$: Observable<string | never> = IS_ELECTRON
+    ? ipcEvent$(IPC.SUSPEND).pipe(
+        // because ipcEvents live forever
+        shareReplay(1),
+        mapTo('I_IPC_SUSPEND'),
+        throttleTime(SYNC_BEFORE_GOING_TO_SLEEP_THROTTLE_TIME),
+      )
+    : EMPTY;
 
   private _isOnlineTrigger$: Observable<string> = isOnline$.pipe(
     // skip initial online which always fires on page load
