@@ -125,6 +125,15 @@ export const SYNC_FORM: ConfigFormSection<SyncConfig> = {
             required: true,
             label: T.F.SYNC.FORM.LOCAL_FILE.L_SYNC_FILE_PATH,
             description: T.F.SYNC.FORM.LOCAL_FILE.L_SYNC_FILE_PATH_DESCRIPTION,
+            change: (field) => {
+              const lastChar = field?.model.syncFilePath?.trim().slice(-1);
+              if (lastChar === '/' || lastChar === '\\') {
+                field.formControl?.setValue(
+                  (field.model.syncFilePath += 'SP_SYNC_FILE.json'),
+                );
+                field.formControl?.updateValueAndValidity();
+              }
+            },
           },
         },
       ],
