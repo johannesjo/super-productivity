@@ -5,7 +5,6 @@ import { POMODORO_FORM_CFG } from './form-cfgs/pomodoro-form.const';
 import { IDLE_FORM_CFG } from './form-cfgs/idle-form.const';
 import { TAKE_A_BREAK_FORM_CFG } from './form-cfgs/take-a-break-form.const';
 import { IMEX_FORM } from './form-cfgs/imex-form.const';
-import { getAutomaticBackUpFormCfg } from './form-cfgs/automatic-backups-form.const';
 import { LANGUAGE_SELECTION_FORM_FORM } from './form-cfgs/language-selection-form.const';
 import { EVALUATION_SETTINGS_FORM_CFG } from './form-cfgs/evaluation-settings-form.const';
 import { SIMPLE_COUNTER_FORM } from './form-cfgs/simple-counter-form.const';
@@ -31,6 +30,7 @@ export const GLOBAL_CONFIG_FORM_CONFIG: ConfigFormConfig = [
 
 export const GLOBAL_SYNC_FORM_CONFIG: ConfigFormConfig = [
   SYNC_FORM as GenericConfigFormSection,
+  // NOTE: the backup form is added dynamically due to async prop required
   ...(IS_ANDROID_WEB_VIEW ? [] : [IMEX_FORM as GenericConfigFormSection]),
 ].filter((cfg) => IS_ELECTRON || !cfg.isElectronOnly);
 

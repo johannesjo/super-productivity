@@ -4,7 +4,6 @@ import { filter, tap, withLatestFrom } from 'rxjs/operators';
 import { Store } from '@ngrx/store';
 import { CONFIG_FEATURE_NAME } from './global-config.reducer';
 import { PersistenceService } from '../../../core/persistence/persistence.service';
-import { IPC } from '../../../../../electron/shared-with-frontend/ipc-events.const';
 import { IS_ELECTRON, LanguageCode } from '../../../app.constants';
 import { T } from '../../../t.const';
 import { LanguageService } from '../../../core/language/language.service';

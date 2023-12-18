@@ -24,7 +24,6 @@ import { BannerService } from '../../core/banner/banner.service';
 import { BannerId } from '../../core/banner/banner.model';
 import { GlobalConfigState, TakeABreakConfig } from '../config/global-config.model';
 import { T } from '../../t.const';
-import { IPC } from '../../../../electron/shared-with-frontend/ipc-events.const';
 import { NotifyService } from '../../core/notify/notify.service';
 import { UiHelperService } from '../ui-helper/ui-helper.service';
 import { WorkContextService } from '../work-context/work-context.service';
