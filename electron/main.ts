@@ -31,6 +31,7 @@ import {
 } from 'fs';
 import { initFullScreenBlocker } from './full-screen-blocker';
 import { quitApp, showOrFocus } from './various-shared';
+import electronLog from 'electron-log/main';
 
 // LOAD IPC STUFF
 import './ipc-handler';
@@ -51,7 +52,7 @@ if (IS_DEV) {
   log('Starting in DEV Mode!!!');
 }
 
-// TODO INITIALIZE ELECTRON LOGGER :/
+electronLog.initialize();
 
 app.commandLine.appendSwitch('enable-speech-dispatcher');
 

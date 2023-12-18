@@ -67,5 +67,3 @@ export class GlobalErrorHandler implements ErrorHandler {
     }
   }
 }
-
-error('LAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAaa');
