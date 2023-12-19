@@ -20,7 +20,7 @@ import { warpRouteAnimation } from './ui/animations/warp-route';
 import { combineLatest, Observable, Subscription } from 'rxjs';
 import { fadeAnimation } from './ui/animations/fade.ani';
 import { BannerService } from './core/banner/banner.service';
-import { SS } from './core/persistence/storage-keys.const';
+import { LS } from './core/persistence/storage-keys.const';
 import { BannerId } from './core/banner/banner.model';
 import { T } from './t.const';
 import { TranslateService } from '@ngx-translate/core';
@@ -209,7 +209,7 @@ export class AppComponent implements OnDestroy {
   @HostListener('window:beforeinstallprompt', ['$event']) onBeforeInstallPrompt(
     e: any,
   ): void {
-    if (IS_ELECTRON || sessionStorage.getItem(SS.WEB_APP_INSTALL)) {
+    if (IS_ELECTRON || localStorage.getItem(LS.WEB_APP_INSTALL)) {
       return;
     }
 
@@ -229,7 +229,7 @@ export class AppComponent implements OnDestroy {
         action2: {
           label: T.APP.B_INSTALL.IGNORE,
           fn: () => {
-            sessionStorage.setItem(SS.WEB_APP_INSTALL, 'true');
+            localStorage.setItem(LS.WEB_APP_INSTALL, 'true');
           },
         },
       });
