@@ -315,6 +315,7 @@
             (click)="toggleShowAdditionalInfoOpen()"
             *ngIf="task.notes||task.issueId||isSelected"
             [title]="T.F.TASK.CMP.TOGGLE_ADDITIONAL|translate"
+            [class.closeBtn]="!task.issueWasUpdated && isSelected"
             class="ico-btn show-additional-info-btn"
             color=""
             mat-icon-button

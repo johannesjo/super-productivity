@@ -943,3 +943,10 @@ $min-badge-size: $s * 2.25;
     background: $dark-theme-bg-lighter;
   }
 }
+
+@media (min-width: $layout-sm) and (max-width: #{-1 + $layout-xl }) {
+  .closeBtn {
+    min-width: 40px;
+    margin-right: -29px !important;
+  }
+}
