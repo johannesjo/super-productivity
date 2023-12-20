@@ -14,7 +14,6 @@ import {
 import {
   ConfigFormConfig,
   ConfigFormSection,
-  DarkModeCfg,
   GlobalConfigSectionKey,
   GlobalConfigState,
   GlobalSectionConfig,
