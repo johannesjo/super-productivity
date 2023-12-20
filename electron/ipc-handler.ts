@@ -27,25 +27,10 @@ import { loadSimpleStoreAll, saveSimpleStore } from './simple-store';
 ipcMain.handle(IPC.GET_PATH, (ev, name: string) => {
   return app.getPath(name as any);
 });
-ipcMain.handle(IPC.IS_SYSTEM_DARK_MODE, (ev) => {
-  return nativeTheme.shouldUseDarkColors;
-});
 
 // BACKEND EVENTS
 // --------------
-
-if (process.platform === 'darwin') {
-  // nativeTheme.on('updated', () => {});
-  systemPreferences.subscribeNotification(
-    'AppleInterfaceThemeChangedNotification',
-    () => {
-      getWin().webContents.send(
-        IPC.MAC_OS_THEME_UPDATED,
-        nativeTheme.shouldUseDarkColors,
-      );
-    },
-  );
-}
+// ...
 
 // ON EVENTS
 // ---------

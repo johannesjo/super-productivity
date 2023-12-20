@@ -34,7 +34,6 @@ const ea: ElectronAPI = {
       rev: string;
       dataStr: string | undefined;
     }>,
-  isSystemDarkMode: () => _invoke('IS_SYSTEM_DARK_MODE') as Promise<boolean>,
 
   // STANDARD
   // --------

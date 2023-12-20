@@ -6,7 +6,6 @@ import {
   WORK_CONTEXT_DEFAULT_THEME,
 } from '../work-context/work-context.const';
 import { WorkContextThemeCfg } from '../work-context/work-context.model';
-import { IS_USE_DARK_THEME_AS_DEFAULT } from '../config/default-global-config.const';
 
 export const TODAY_TAG: Tag = {
   id: 'TODAY',
@@ -21,7 +20,7 @@ export const TODAY_TAG: Tag = {
     primary: DEFAULT_TODAY_TAG_COLOR,
     backgroundImageDark: 'assets/bg/NIGHT_manuel-will.jpg',
 
-    ...((IS_USE_DARK_THEME_AS_DEFAULT
+    ...((window.matchMedia('(prefers-color-scheme: dark)').matches
       ? {
           isDisableBackgroundGradient: false,
         }

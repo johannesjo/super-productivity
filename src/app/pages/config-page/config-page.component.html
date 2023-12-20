@@ -3,13 +3,32 @@
     <div class="section-wrapper component-wrapper">
       <h1 class="mat-h1">{{T.PS.GLOBAL_SETTINGS|translate}}</h1>
 
-      <div class="dark-mode-toggle">
-        <mat-slide-toggle
-          (change)="toggleDarkMode($event)"
-          [checked]="(configService.misc$|async)?.isDarkMode"
-        >
-          {{T.PS.TOGGLE_DARK_MODE|translate}}
-        </mat-slide-toggle>
+      <div
+        class="dark-mode-select"
+        style="display: flex"
+      >
+        <h3 style="margin-bottom: 0">Dark Mode</h3>
+        <div style="display: flex">
+          <mat-button-toggle-group
+            name="darkMode"
+            aria-label="darkMode"
+            [value]="globalCfg?.misc.darkMode"
+            (change)="updateDarkMode($event)"
+          >
+            <mat-button-toggle value="system">
+              <mat-icon>computer</mat-icon>
+              System
+            </mat-button-toggle>
+            <mat-button-toggle value="dark">
+              <mat-icon>dark_mode</mat-icon>
+              Dark
+            </mat-button-toggle>
+            <mat-button-toggle value="light">
+              <mat-icon>light_mode</mat-icon>
+              Light
+            </mat-button-toggle>
+          </mat-button-toggle-group>
+        </div>
       </div>
 
       <section
