@@ -500,7 +500,8 @@ describe('shortSyntax', () => {
     });
   });
 
-  describe('due:', () => {});
+  // TODO
+  // describe('due:', () => {});
 
   describe('combined', () => {
     it('should work when time comes first', () => {

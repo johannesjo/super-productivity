@@ -5,6 +5,7 @@ import { CompressionService } from '../compression/compression.service';
 import { PersistenceService } from './persistence.service';
 import { createEmptyEntity } from '../../util/create-empty-entity';
 import { provideMockStore } from '@ngrx/store/testing';
+import { first } from 'rxjs/operators';
 
 describe('PersistenceService', () => {
   beforeEach(() => {
@@ -37,14 +38,15 @@ describe('PersistenceService', () => {
     });
   });
 
-  it('database update should trigger onAfterSave$', async (done) => {
+  it('database update should trigger onAfterSave$', (done) => {
     const service: PersistenceService = TestBed.inject(PersistenceService);
     // once is required to fill up data
-    await service.loadComplete();
-    service.onAfterSave$.subscribe(({ data }) => {
-      expect(data).toEqual(createEmptyEntity());
-      done();
+    service.loadComplete().then(() => {
+      service.onAfterSave$.subscribe(({ data }) => {
+        expect(data).toEqual(createEmptyEntity());
+        done();
+      });
+      service.tag.saveState(createEmptyEntity(), { isSyncModelChange: true });
     });
-    service.tag.saveState(createEmptyEntity(), { isSyncModelChange: true });
   });
 });

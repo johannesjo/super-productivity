@@ -240,9 +240,9 @@ describe('mapToViewEntries()', () => {
     });
   });
 
-  describe('sortingEntries', () => {
-    // it('should sort entries according to map if they have the same time', () => {});
-  });
+  // describe('sortingEntries', () => {
+  // it('should sort entries according to map if they have the same time', () => {});
+  // });
 
   describe('scheduledTasks', () => {
     it('should work for just a scheduled task', () => {
