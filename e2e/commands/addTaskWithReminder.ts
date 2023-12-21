@@ -29,21 +29,25 @@ module.exports = {
     const h = d.getHours();
     const m = d.getMinutes();
 
-    return this.addTask(title)
-      .openPanelForTask(taskSel)
-      .waitForElementVisible(SCHEDULE_TASK_ITEM)
-      .click(SCHEDULE_TASK_ITEM)
-      .waitForElementVisible(DIALOG)
-      .pause(30)
-      .waitForElementVisible(TIME_INP_H)
-      .pause(50)
-      .setValue(TIME_INP_H, h.toString())
-      .pause(50)
-      .setValue(TIME_INP_H, this.Keys.ARROW_RIGHT)
-      .pause(50)
-      .setValue(TIME_INP_M, m.toString())
-      .waitForElementVisible(DIALOG_SUBMIT)
-      .click(DIALOG_SUBMIT)
-      .waitForElementNotPresent(DIALOG);
+    return (
+      this.addTask(title)
+        .openPanelForTask(taskSel)
+        .waitForElementVisible(SCHEDULE_TASK_ITEM)
+        .click(SCHEDULE_TASK_ITEM)
+        .waitForElementVisible(DIALOG)
+        .pause(30)
+        .waitForElementVisible(TIME_INP_H)
+        .pause(50)
+        .setValue(TIME_INP_H, h.toString())
+        .pause(50)
+        .setValue(TIME_INP_H, this.Keys.ARROW_RIGHT)
+        .pause(50)
+        .setValue(TIME_INP_M, m.toString())
+        // avoid element form being moved to backlog or away from today
+        .click('mat-checkbox')
+        .waitForElementVisible(DIALOG_SUBMIT)
+        .click(DIALOG_SUBMIT)
+        .waitForElementNotPresent(DIALOG)
+    );
   },
 };
