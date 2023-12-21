@@ -24,8 +24,6 @@ import {
   DEFAULT_ISSUE_PROVIDER_CFGS,
   ISSUE_PROVIDER_FORM_CFGS,
 } from '../../features/issue/issue.const';
-import { GLOBAL_CONFIG_FORM_CONFIG } from '../../features/config/global-config-form-config.const';
-import { IS_ELECTRON } from '../../app.constants';
 import {
   WorkContextAdvancedCfg,
   WorkContextThemeCfg,
@@ -45,7 +43,6 @@ export class ProjectSettingsPageComponent implements OnInit, OnDestroy {
   T: typeof T = T;
   projectThemeSettingsFormCfg: ConfigFormSection<WorkContextThemeCfg>;
   issueIntegrationFormCfg: ConfigFormConfig;
-  globalConfigFormCfg: ConfigFormConfig;
   basicFormCfg: ConfigFormSection<Project>;
 
   currentProject?: Project | null;
@@ -64,9 +61,6 @@ export class ProjectSettingsPageComponent implements OnInit, OnDestroy {
     this.projectThemeSettingsFormCfg = WORK_CONTEXT_THEME_CONFIG_FORM_CONFIG;
     this.issueIntegrationFormCfg = ISSUE_PROVIDER_FORM_CFGS;
     this.basicFormCfg = BASIC_PROJECT_CONFIG_FORM_CONFIG;
-    this.globalConfigFormCfg = GLOBAL_CONFIG_FORM_CONFIG.filter(
-      (cfg) => IS_ELECTRON || !cfg.isElectronOnly,
-    );
   }
 
   ngOnInit(): void {

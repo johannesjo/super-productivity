@@ -208,20 +208,6 @@ const OTHER_3RD_PARTY_MODS_WITHOUT_CFG = [
     FormsModule,
     ReactiveFormsModule,
     FormlyModule.forChild({
-      extensions: [
-        {
-          name: 'defaultOptions',
-          extension: {
-            prePopulate: (field) => {
-              if (field.key && !field.modelOptions && field.type === 'input') {
-                field.modelOptions = {
-                  debounce: { default: 1500 },
-                };
-              }
-            },
-          },
-        },
-      ],
       types: [
         { name: 'link', component: FormlyLinkWidgetComponent },
         {
