@@ -18,6 +18,7 @@ $spacer: $s;
     margin-bottom: 2px;
   }
 }
+
 @media (min-width: $side-nav-width-switch-l) {
   :host {
     max-width: $side-nav-width-l;
@@ -26,9 +27,21 @@ $spacer: $s;
 }
 
 :host {
+  a,
   button {
     height: 44px !important;
     line-height: 44px !important;
+  }
+
+  a {
+    color: rgba(var(--palette-foreground-text), var(--palette-foreground-text-alpha));
+
+    @include darkTheme() {
+      color: rgba(
+        var(--palette-foreground-text-dark),
+        var(--palette-foreground-text-dark-alpha)
+      );
+    }
   }
 }
 
