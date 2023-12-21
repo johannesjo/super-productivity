@@ -5,7 +5,6 @@ import { CompressionService } from '../compression/compression.service';
 import { PersistenceService } from './persistence.service';
 import { createEmptyEntity } from '../../util/create-empty-entity';
 import { provideMockStore } from '@ngrx/store/testing';
-import { first } from 'rxjs/operators';
 
 describe('PersistenceService', () => {
   beforeEach(() => {
