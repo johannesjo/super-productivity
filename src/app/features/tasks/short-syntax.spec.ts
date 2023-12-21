@@ -263,6 +263,34 @@ describe('shortSyntax', () => {
       });
     });
 
+    it('should not trigger for # without space before', () => {
+      const t = {
+        ...TASK,
+        title: 'Fun title#blu',
+      };
+      const r = shortSyntax(t, ALL_TAGS);
+
+      expect(r).toEqual(undefined);
+    });
+
+    it('should not trigger for # without space before but parse other tags', () => {
+      const t = {
+        ...TASK,
+        title: 'Fun title#blu #bla',
+      };
+      const r = shortSyntax(t, ALL_TAGS);
+
+      expect(r).toEqual({
+        newTagTitles: [],
+        remindAt: null,
+        projectId: undefined,
+        taskChanges: {
+          title: 'Fun title#blu',
+          tagIds: ['bla_id'],
+        },
+      });
+    });
+
     it('should not overwrite existing tags', () => {
       const t = {
         ...TASK,
