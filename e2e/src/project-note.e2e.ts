@@ -6,7 +6,7 @@ const FIRST_NOTE = `${NOTE}:first-of-type`;
 const TOGGLE_NOTES_BTN = '.toggle-notes-btn';
 
 module.exports = {
-  '@tags': ['project', 'note'],
+  '@tags': ['note'],
 
   'create a note': (browser: NBrowser) =>
     browser

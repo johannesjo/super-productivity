@@ -13,7 +13,7 @@ const BOOKMARK = '.global-bookmark-list-inner .global-bookmark';
 const FIRST_BOOKMARK = `${BOOKMARK}:first-of-type`;
 
 module.exports = {
-  '@tags': ['project', 'bookmark'],
+  '@tags': ['bookmark'],
 
   'create a bookmark': (browser: NBrowser) =>
     browser

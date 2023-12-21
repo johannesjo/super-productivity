@@ -29,10 +29,10 @@ import { DialogGithubInitialSetupComponent } from '../../../issue/providers/gith
 import {
   CALDAV_TYPE,
   GITEA_TYPE,
-  REDMINE_TYPE,
   GITHUB_TYPE,
   GITLAB_TYPE,
   OPEN_PROJECT_TYPE,
+  REDMINE_TYPE,
 } from '../../../issue/issue.const';
 import { T } from '../../../../t.const';
 import { DEFAULT_JIRA_CFG } from '../../../issue/providers/jira/jira.const';
@@ -52,6 +52,7 @@ import { DEFAULT_REDMINE_CFG } from '../../../issue/providers/redmine/redmine.co
 import { getRandomWorkContextColor } from '../../../work-context/work-context-color';
 import { DialogGiteaInitialSetupComponent } from 'src/app/features/issue/providers/gitea/gitea-view-components/dialog-gitea-initial-setup/dialog-gitea-initial-setup.component';
 import { DialogRedmineInitialSetupComponent } from 'src/app/features/issue/providers/redmine/redmine-view-components/redmine-initial-setup/dialog-redmine-initial-setup.component';
+import { removeDebounceFromFormItems } from '../../../../util/remove-debounce-from-form-items';
 
 @Component({
   selector: 'dialog-create-project',
@@ -100,8 +101,12 @@ export class DialogCreateProjectComponent implements OnInit, OnDestroy {
     private _cd: ChangeDetectorRef,
   ) {
     // somehow they are only unproblematic if assigned here,
-    this.basicSettingsFormCfg = CREATE_PROJECT_BASIC_CONFIG_FORM_CONFIG.items as any;
-    this.themeFormCfg = WORK_CONTEXT_THEME_CONFIG_FORM_CONFIG.items as any;
+    this.basicSettingsFormCfg = removeDebounceFromFormItems(
+      CREATE_PROJECT_BASIC_CONFIG_FORM_CONFIG.items as FormlyFieldConfig[],
+    );
+    this.themeFormCfg = removeDebounceFromFormItems(
+      WORK_CONTEXT_THEME_CONFIG_FORM_CONFIG.items as FormlyFieldConfig[],
+    );
   }
 
   ngOnInit(): void {
