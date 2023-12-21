@@ -76,9 +76,8 @@ module.exports = {
   'navigate to default': (browser: NBrowser) =>
     browser
       .goToDefaultProject()
-
-      .assert.urlEquals(`${BASE}/#/project/DEFAULT/tasks`)
-      .assert.containsText(WORK_CTX_TITLE, 'Super Productivity')
+      .assert.urlEquals(`${BASE}/#/project/INBOX/tasks`)
+      .assert.containsText(WORK_CTX_TITLE, 'Inbox')
       .end(),
 
   'navigate to daily summary from project without error': (browser: NBrowser) =>
@@ -93,7 +92,7 @@ module.exports = {
       .click(FINISH_DAY_BTN)
 
       .waitForElementPresent(DAILY_SUMMARY)
-      .assert.urlEquals(`${BASE}/#/project/DEFAULT/daily-summary`)
+      .assert.urlEquals(`${BASE}/#/project/INBOX/daily-summary`)
       .assert.elementNotPresent(GLOBAL_ERROR_ALERT)
       .end(),
 };
