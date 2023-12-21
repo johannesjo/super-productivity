@@ -11,7 +11,7 @@ import { GlobalConfigSectionKey } from '../global-config.model';
 import { ProjectCfgFormKey } from '../../project/project.model';
 import { T } from '../../../t.const';
 import { exists } from '../../../util/exists';
-import { addDebounceToFormlyInputs } from '../../../util/add-debounce-to-formly-inputs';
+import { adjustToLiveFormlyForm } from '../../../util/adjust-to-live-formly-form';
 
 @Component({
   selector: 'config-form',
@@ -41,7 +41,7 @@ export class ConfigFormComponent {
   // NOTE2: since we don't have a save button anymore we need to debounce inputs
 
   @Input() set formCfg(val: FormlyFieldConfig[]) {
-    this.fields = addDebounceToFormlyInputs(val);
+    this.fields = adjustToLiveFormlyForm(val);
   }
 
   updateCfg(cfg: Record<string, unknown>): void {
