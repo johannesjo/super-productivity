@@ -433,6 +433,15 @@ describe('shortSyntax', () => {
       });
     });
 
+    it('should not parse without missing whitespace before', () => {
+      const t = {
+        ...TASK,
+        title: 'Fun title+ProjectEasyShort',
+      };
+      const r = shortSyntax(t, [], projects);
+      expect(r).toEqual(undefined);
+    });
+
     it('should work together with time estimates', () => {
       const t = {
         ...TASK,

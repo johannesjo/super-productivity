@@ -129,6 +129,15 @@ const parseProjectChanges = (
   if (rr && rr[0]) {
     const projectTitle: string = rr[0].trim().replace(CH_PRO, '');
     const projectTitleToMatch = projectTitle.replace(' ', '').toLowerCase();
+    const indexBeforePlus =
+      task.title.toLowerCase().lastIndexOf(CH_PRO + projectTitleToMatch) - 1;
+    const charBeforePlus = task.title.charAt(indexBeforePlus);
+
+    // don't parse Fun title+blu as project
+    if (charBeforePlus && charBeforePlus !== ' ') {
+      return {};
+    }
+
     const existingProject = allProjects.find(
       (project) =>
         project.title.replace(' ', '').toLowerCase().indexOf(projectTitleToMatch) === 0,
