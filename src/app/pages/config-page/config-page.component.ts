@@ -65,7 +65,13 @@ export class ConfigPageComponent implements OnInit, OnDestroy {
     } else if (IS_ELECTRON) {
       window.ea.getUserDataPath().then((userDataPath) => {
         const backupPath = `${userDataPath}${
-          navigator?.userAgent?.search('Windows') ? '\\' : '/'
+          (
+            navigator.platform
+              ? navigator.platform.indexOf('Win') > -1
+              : navigator.userAgent?.indexOf('Windows') > -1
+          )
+            ? '\\'
+            : '/'
         }backups`;
         this.globalSyncProviderFormCfg = [
           ...this.globalSyncProviderFormCfg,
