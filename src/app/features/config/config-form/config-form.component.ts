@@ -11,6 +11,7 @@ import { GlobalConfigSectionKey } from '../global-config.model';
 import { ProjectCfgFormKey } from '../../project/project.model';
 import { T } from '../../../t.const';
 import { exists } from '../../../util/exists';
+import { adjustToLiveFormlyForm } from '../../../util/adjust-to-live-formly-form';
 
 @Component({
   selector: 'config-form',
@@ -36,9 +37,11 @@ export class ConfigFormComponent {
     this.config = { ...cfg };
   }
 
-  // somehow needed for the form to work
+  // NOTE: updating the input before assigning to local var is somehow needed for the form to work
+  // NOTE2: since we don't have a save button anymore we need to debounce inputs
+
   @Input() set formCfg(val: FormlyFieldConfig[]) {
-    this.fields = val && [...val];
+    this.fields = adjustToLiveFormlyForm(val);
   }
 
   updateCfg(cfg: Record<string, unknown>): void {

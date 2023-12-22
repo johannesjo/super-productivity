@@ -13,9 +13,9 @@ module.exports = {
     browser
       .loadAppAndClickAwayWelcomeDialog(WORK_VIEW_URL)
       .waitForElementVisible(READY_TO_WORK_BTN)
-      .addTask('0 test task koko +s')
+      .addTask('0 test task koko +i')
       .waitForElementVisible(TASK)
       .assert.visible(TASK)
-      .assert.containsText(TASK_TAGS, 'Super Productivity')
+      .assert.containsText(TASK_TAGS, 'Inbox')
       .end(),
 };

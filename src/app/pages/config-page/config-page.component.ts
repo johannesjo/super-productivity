@@ -22,11 +22,11 @@ import { Subscription } from 'rxjs';
 import { ProjectCfgFormKey } from '../../features/project/project.model';
 import { environment } from '../../../environments/environment';
 import { T } from '../../t.const';
-import { MatSlideToggleChange } from '@angular/material/slide-toggle';
 import { versions } from '../../../environments/versions';
 import { IS_ELECTRON } from '../../app.constants';
 import { IS_ANDROID_WEB_VIEW } from '../../util/is-android-web-view';
 import { getAutomaticBackUpFormCfg } from '../../features/config/form-cfgs/automatic-backups-form.const';
+import { MatButtonToggleChange } from '@angular/material/button-toggle';
 
 @Component({
   selector: 'config-page',
@@ -65,7 +65,13 @@ export class ConfigPageComponent implements OnInit, OnDestroy {
     } else if (IS_ELECTRON) {
       window.ea.getUserDataPath().then((userDataPath) => {
         const backupPath = `${userDataPath}${
-          navigator?.userAgent?.search('Windows') ? '\\' : '/'
+          (
+            navigator.platform
+              ? navigator.platform.indexOf('Win') > -1
+              : navigator.userAgent?.indexOf('Windows') > -1
+          )
+            ? '\\'
+            : '/'
         }backups`;
         this.globalSyncProviderFormCfg = [
           ...this.globalSyncProviderFormCfg,
@@ -109,8 +115,11 @@ export class ConfigPageComponent implements OnInit, OnDestroy {
     }
   }
 
-  toggleDarkMode(change: MatSlideToggleChange): void {
-    this.configService.updateSection('misc', { isDarkMode: change.checked });
+  updateDarkMode(ev: MatButtonToggleChange): void {
+    console.log(ev.value);
+    if (ev.value) {
+      this.configService.updateSection('misc', { darkMode: ev.value });
+    }
   }
 
   getGlobalCfgSection(

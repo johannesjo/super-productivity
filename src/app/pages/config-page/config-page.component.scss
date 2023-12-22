@@ -64,10 +64,14 @@
   padding: $s * 3;
 }
 
-.dark-mode-toggle {
+.dark-mode-select {
   margin: 20px 0;
 
-  :host-context(.isMac.isElectron) & {
-    display: none;
+  display: flex;
+  justify-content: stretch;
+  align-items: center;
+
+  h3 {
+    margin-right: $s * 2;
   }
 }

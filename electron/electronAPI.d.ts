@@ -36,8 +36,6 @@ export interface ElectronAPI {
     localRev: string | null;
   }): Promise<{ rev: string; dataStr: string | undefined }>;
 
-  isSystemDarkMode(): Promise<boolean>;
-
   // STANDARD
   // --------
   setZoomFactor(zoomFactor: number): void;

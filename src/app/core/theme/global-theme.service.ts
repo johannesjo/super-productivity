@@ -1,7 +1,7 @@
 import { Inject, Injectable } from '@angular/core';
 import { BodyClass, IS_ELECTRON } from '../../app.constants';
 import { IS_MAC } from '../../util/is-mac';
-import { distinctUntilChanged, map, take } from 'rxjs/operators';
+import { distinctUntilChanged, map, startWith, switchMap, take } from 'rxjs/operators';
 import { IS_TOUCH_ONLY } from '../../util/is-touch-only';
 import { MaterialCssVarsService } from 'angular-material-css-vars';
 import { DOCUMENT } from '@angular/common';
@@ -12,28 +12,30 @@ import { ThemeService as NgChartThemeService } from 'ng2-charts';
 import { GlobalConfigService } from '../../features/config/global-config.service';
 import { WorkContextThemeCfg } from '../../features/work-context/work-context.model';
 import { WorkContextService } from '../../features/work-context/work-context.service';
-import { combineLatest, Observable } from 'rxjs';
+import { combineLatest, fromEvent, Observable, of } from 'rxjs';
 import { IS_FIREFOX } from '../../util/is-firefox';
 import { ImexMetaService } from '../../imex/imex-meta/imex-meta.service';
 import { IS_MOUSE_PRIMARY, IS_TOUCH_PRIMARY } from '../../util/is-mouse-primary';
-import { IPC } from '../../../../electron/shared-with-frontend/ipc-events.const';
 
 @Injectable({ providedIn: 'root' })
 export class GlobalThemeService {
-  isDarkTheme$: Observable<boolean> =
-    IS_ELECTRON && window.ea.isMacOS()
-      ? new Observable((subscriber) => {
-          window.ea.isSystemDarkMode().then((v) => {
-            subscriber.next(v);
-          });
-          window.ea.on(IPC.MAC_OS_THEME_UPDATED, (ev, isDarkMode) => {
-            subscriber.next(isDarkMode);
-          });
-        })
-      : this._globalConfigService.misc$.pipe(
-          map((cfg) => cfg.isDarkMode),
-          distinctUntilChanged(),
-        );
+  isDarkTheme$: Observable<boolean> = this._globalConfigService.misc$.pipe(
+    switchMap((cfg) => {
+      switch (cfg.darkMode) {
+        case 'dark':
+          return of(true);
+        case 'light':
+          return of(false);
+        default:
+          const darkModePreference = window.matchMedia('(prefers-color-scheme: dark)');
+          return fromEvent(darkModePreference, 'change').pipe(
+            map((e: any) => e.matches),
+            startWith(darkModePreference.matches),
+          );
+      }
+    }),
+    distinctUntilChanged(),
+  );
 
   backgroundImg$: Observable<string | null> = combineLatest([
     this._workContextService.currentTheme$,

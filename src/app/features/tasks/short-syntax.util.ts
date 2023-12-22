@@ -20,7 +20,10 @@ export const SHORT_SYNTAX_PROJECT_REG_EX = new RegExp(
   `\\${CH_PRO}[^${ALL_SPECIAL}]+`,
   'gi',
 );
-export const SHORT_SYNTAX_TAGS_REG_EX = new RegExp(`\\${CH_TAG}[^${ALL_SPECIAL}]+`, 'gi');
+export const SHORT_SYNTAX_TAGS_REG_EX = new RegExp(
+  `\\${CH_TAG}[^${ALL_SPECIAL}|\\s]+`,
+  'gi',
+);
 
 // Literal notation: /\@[^\+|\#|\@]/gi
 // Match string starting with the literal @ and followed by 1 or more of the characters
@@ -79,6 +82,7 @@ export const shortSyntax = (
     ...taskChanges,
     // NOTE: because we pass the new taskChanges here we need to assignments...
     ...parseTimeSpentChanges(taskChanges),
+    // title: taskChanges.title?.trim(),
   };
 
   // const changesForDue = parseDueChanges({...task, title: taskChanges.title || task.title});
@@ -125,6 +129,15 @@ const parseProjectChanges = (
   if (rr && rr[0]) {
     const projectTitle: string = rr[0].trim().replace(CH_PRO, '');
     const projectTitleToMatch = projectTitle.replace(' ', '').toLowerCase();
+    const indexBeforePlus =
+      task.title.toLowerCase().lastIndexOf(CH_PRO + projectTitleToMatch) - 1;
+    const charBeforePlus = task.title.charAt(indexBeforePlus);
+
+    // don't parse Fun title+blu as project
+    if (charBeforePlus && charBeforePlus !== ' ') {
+      return {};
+    }
+
     const existingProject = allProjects.find(
       (project) =>
         project.title.replace(' ', '').toLowerCase().indexOf(projectTitleToMatch) === 0,
@@ -175,15 +188,25 @@ const parseTagChanges = (
   if (Array.isArray(task.tagIds) && Array.isArray(allTags)) {
     const initialTitle = task.title as string;
     const regexTagTitles = initialTitle.match(SHORT_SYNTAX_TAGS_REG_EX);
+
     if (regexTagTitles && regexTagTitles.length) {
       const regexTagTitlesTrimmedAndFiltered: string[] = regexTagTitles
         .map((title) => title.trim().replace(CH_TAG, ''))
-        .filter(
-          (newTagTitle) =>
+        .filter((newTagTitle) => {
+          const charBeforeTag = initialTitle.charAt(
+            initialTitle.lastIndexOf(CH_TAG + newTagTitle) - 1,
+          );
+          // don't parse Fun title#blu as tag
+          if (charBeforeTag && charBeforeTag !== ' ') {
+            return false;
+          }
+
+          return (
             newTagTitle.length >= 1 &&
             // NOTE: we check this to not trigger for "#123 blasfs dfasdf"
-            initialTitle.trim().lastIndexOf(newTagTitle) > 4,
-        );
+            initialTitle.trim().lastIndexOf(newTagTitle) > 4
+          );
+        });
 
       const tagIdsToAdd: string[] = [];
       regexTagTitlesTrimmedAndFiltered.forEach((newTagTitle) => {

@@ -4,8 +4,10 @@ import { LanguageCode, MODEL_VERSION_KEY } from '../../app.constants';
 import { SyncProvider } from '../../imex/sync/sync-provider.model';
 import { KeyboardConfig } from './keyboard-config.model';
 
+export type DarkModeCfg = 'dark' | 'light' | 'system';
+
 export type MiscConfig = Readonly<{
-  isDarkMode: boolean;
+  darkMode: DarkModeCfg;
   isAutMarkParentAsDone: boolean;
   isAutoStartNextTask: boolean;
   isConfirmBeforeExit: boolean;
