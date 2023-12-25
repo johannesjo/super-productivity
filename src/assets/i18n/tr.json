@@ -38,7 +38,7 @@
   },
   "DATETIME_SCHEDULE": {
     "LATER_TODAY": "Bugün Daha Sonra",
-    "NEXT_WEEK": "Gelecek hafta",
+    "NEXT_WEEK": "Gelecek Hafta",
     "PLACEHOLDER": "Lütfen bir tarih seçin",
     "PRESS_ENTER_AGAIN": "Kaydetmek için tekrar enter tuşuna basın",
     "TOMORROW": "Yarın"
@@ -63,10 +63,10 @@
     },
     "BOOKMARK": {
       "BAR": {
-        "ADD": "İmi eklemek",
-        "DROP": "Yer imi eklemek için buraya bırakın",
-        "EDIT": "Yer İşaretlerini Düzenle",
-        "NO_BOOKMARKS": "Proje yer imleriniz yok. Sürükle ve bırak yöntemiyle veya '' simgesini tıklatarak ekleyin."
+        "ADD": "Yer imini ekle",
+        "DROP": "Yer imini eklemek için buraya bırakın",
+        "EDIT": "Yer İmlerini Düzenle",
+        "NO_BOOKMARKS": "Proje yer imleriniz yok. Sürükle ve bırak yöntemiyle veya '+' düğmesine tıklatarak ekleyin."
       },
       "DIALOG_EDIT": {
         "ADD_BOOKMARK": "Yer imini ekle",
@@ -109,7 +109,7 @@
       "ISSUE_CONTENT": {
         "DESCRIPTION": "Açıklama",
         "LABELS": "Kategoriler",
-        "MARK_AS_CHECKED": "Güncellemeleri işaretli olarak işaretle",
+        "MARK_AS_CHECKED": "Güncellemeleri işaretlendi olarak işaretle",
         "STATUS": "Durum",
         "SUMMARY": "Özet"
       },
@@ -139,9 +139,35 @@
         "FINISH_DAY_BEFORE_EXIT": "Bugün listenizde henüz arşive taşınmamış {{nr}} tamamlanmış görev var. Gününüzü bitirmeden gerçekten çıkış yapmak istiyor musunuz?"
       }
     },
+    "FOCUS_MODE": {
+      "BACK_TO_PLANNING": "Planlamaya Geri Dön",
+      "CANCEL_FOCUS_SESSION": "Odaklanma Oturumunu İptal Et",
+      "CONGRATS": "Bu oturumu tamamladığınız için tebrikler!",
+      "CONTINUE_FOCUS_SESSION": "Odaklanma Oturumuna Devam Et",
+      "FINISH_TASK_AND_SELECT_NEXT": "Görevi bitirin ve sonrakini seçin",
+      "GET_READY": "Odaklanma oturumunuza hazır olun!!!",
+      "GOGOGO": "Hadi hadi hadi!!!",
+      "GO_TO_PROCRASTINATION": "Ertelediğinizde yardım alın",
+      "NEXT": "Sonraki",
+      "ON": "on",
+      "OPEN_ISSUE_IN_BROWSER": "Sorunu Tarayıcıda aç",
+      "POMODORO_BACK": "Geri",
+      "POMODORO_DISABLE": "Pomodoro'yu devre dışı bırak",
+      "POMODORO_INFO": "Odaklanma oturumları pomodoro zamanlayıcı etkinken birlikte kullanılamaz.",
+      "PREP_STRETCH": "Hafifçe esneme hareketleri yapın",
+      "PREP_SIT_UPRIGHT": "Dik durun",
+      "PREP_GET_MENTALLY_READY": "Odaklanmaya ve üretken olmaya zihinsel olarak hazır olun",
+      "SELECT_ANOTHER_TASK": "Başka bir Görev seç",
+      "SELECT_TASK": "Odaklanmak için Görevi seçin",
+      "SET_FOCUS_SESSION_DURATION": "Odaklanma Oturumu Süresini Ayarlayın",
+      "SHOW_HIDE_NOTES_AND_ATTACHMENTS": "Görev notlarını ve eklerini göster/gizle",
+      "START_FOCUS_SESSION": "Odaklanma Oturumunu Başlat",
+      "START_NEXT_FOCUS_SESSION": "Sonraki Odak Oturumunu başlat",
+      "WORKED_FOR": "Şunun için çalıştın"
+    },
     "GITEA": {
       "DIALOG_INITIAL": {
-        "TITLE": "Proje için Gitea Kurulumu"
+        "TITLE": "Proje için Gitea'yı Kur"
       },
       "FORM": {
         "FILTER_USER": "Kullanıcı adı (örneğin, değişiklikleri kendiniz filtrelemek için)",
@@ -156,7 +182,7 @@
         "REPO_FULL_NAME_DESCRIPTION": "Projeyi Tarayıcıda görüntülerken url'nin bir parçası olarak bulunabilir.",
         "SCOPE": "Kapsam",
         "SCOPE_ALL": "Hepsi",
-        "SCOPE_ASSIGNED": "Beni görevlendirdi",
+        "SCOPE_ASSIGNED": "Bana atanan",
         "SCOPE_CREATED": "Benim tarafımdan oluşturuldu"
       },
       "FORM_SECTION": {
@@ -164,7 +190,7 @@
         "TITLE": "Gitea"
       },
       "ISSUE_CONTENT": {
-        "ASSIGNEE": "Vekil",
+        "ASSIGNEE": "Atanan",
         "AT": "de",
         "DESCRIPTION": "Açıklama",
         "LABELS": "Etiketler",
@@ -189,7 +215,7 @@
         "API_KEY": "API erişim anahtarı",
         "SCOPE": "Kapsam",
         "SCOPE_ALL": "Hepsi",
-        "SCOPE_ASSIGNED": "Bana görevlendirildi",
+        "SCOPE_ASSIGNED": "Bana atanan",
         "SCOPE_CREATED": "Benim tarafımdan oluşturuldu",
         "IS_AUTO_POLL": "Değişiklikler için içe aktarılan redmine sorunlarını otomatik olarak yokla",
         "IS_SEARCH_ISSUES_FROM_REDMINE": "Yeni görevler eklerken, redmine'deki sorunları öneri olarak göster",
@@ -221,14 +247,15 @@
         "IS_SEARCH_ISSUES_FROM_GITHUB": "Yeni görevler eklerken git'in önerilerini öneri olarak göster",
         "REPO": "İzlemek istediğiniz git deposu için \"username / repositoryName\"",
         "TOKEN": "Erişim Jetonu",
-        "TOKEN_DESCRIPTION": "Özel depo erişimi için gerekli"
+        "TOKEN_DESCRIPTION": "Özel depo erişimi için gerekli",
+        "IS_ASSIGNEE_FILTER": "Bana Atanan Sorunları Filtrele"
       },
       "FORM_SECTION": {
         "HELP": "<p>Burada Süper Verimliliği, günlük planlama görünümünde görev oluşturma panelinde belirli bir depo için açık GitHub sorunlarını listeleyecek şekilde yapılandırabilirsiniz. Öneriler olarak listelenecekler ve konuyla ilgili daha fazla bilgi sunacaklar.</p> <p>Ek olarak, tüm açık sorunları otomatik olarak görev biriktirme listesine ekleyebilir ve senkronize edebilirsiniz.</p>",
         "TITLE": "GitHub"
       },
       "ISSUE_CONTENT": {
-        "ASSIGNEE": "vekil",
+        "ASSIGNEE": "Atanan",
         "AT": "de",
         "DESCRIPTION": "Açıklama",
         "LABELS": "Etiketler",
@@ -245,6 +272,14 @@
       "DIALOG_INITIAL": {
         "TITLE": "Project için GitLab Kurulumu"
       },
+      "DIALOG_SUBMIT_WORKLOG": {
+        "PAST_DAY_INFO": "Önceden doldurulmuş süre, geçmiş günlere ait izlenmeyen verileri içeriyor.",
+        "TITLE": "Sorunlara Harcanan Zamanı GitLab'a Gönderin",
+        "T_ALREADY_TRACKED": "Zaten Takip Edildi",
+        "T_TITLE": "Başlık",
+        "T_TO_BE_SUBMITTED": "Gönderilecek",
+        "TOTAL_MSG": "Bugünkü toplam <em>{{totalTimeToSubmit}</em> çalışma süresini <em>{{nrOfTasksToSubmit}</em> farklı sorunlara göndereceksiniz."
+      },
       "FORM": {
         "FILTER_USER": "Kullanıcı adı (örneğin, değişiklikleri kendiniz filtrelemek için)",
         "GITLAB_BASE_URL": "Özel GitLab temel URL'si",
@@ -259,20 +294,24 @@
         "SOURCE": "Kaynak",
         "SOURCE_GLOBAL": "Herşey",
         "SOURCE_GROUP": "Grup",
-        "SOURCE_PROJECT": "proje",
-        "TOKEN": "Erişim Jetonu"
+        "SOURCE_PROJECT": "Proje",
+        "SUBMIT_TIMELOGS": "Zaman günlüklerini Gitlab'a gönderin",
+        "SUBMIT_TIMELOGS_DESCRIPTION": "Bitiş gününe tıkladıktan sonra Zaman İzleme İletişim Kutusunu göster",
+        "TOKEN": "Erişim Jetonu",
+        "FILTER": "Özel Filtre",
+        "FILTER_DESCRIPTION": "Bkz. https://docs.gitlab.com/ee/api/issues.html#list-issues.Birden çok '&' işaretiyle birleştirilebilir "
       },
       "FORM_SECTION": {
         "HELP": "<p> Burada SuperProductivity'yi günlük planlama görünümünde görev oluşturma panelinde belirli bir proje için açık GitLab (çevrimiçi sürümü veya kendi kendine barındırılan bir örnek) sorunlarını listeleyecek şekilde yapılandırabilirsiniz. Bunlar öneri olarak listelenecek ve sorunla ilgili bir bağlantı ve bununla ilgili daha fazla bilgi sağlayacaktır. </p> <p> Buna ek olarak, tüm açık sorunları otomatik olarak görev biriktirme listesine ekleyebilir ve senkronize edebilirsiniz. </p>",
         "TITLE": "GitLab"
       },
       "ISSUE_CONTENT": {
-        "ASSIGNEE": "vekil",
-        "AT": "en",
+        "ASSIGNEE": "Atanan",
+        "AT": "de",
         "DESCRIPTION": "Açıklama",
         "LABELS": "Etiketler",
         "MARK_AS_CHECKED": "Güncellemeleri işaretli olarak işaretle",
-        "PROJECT": "proje",
+        "PROJECT": "Proje",
         "STATUS": "Durum",
         "SUMMARY": "Özet",
         "WRITE_A_COMMENT": "Bir yorum Yaz"
@@ -281,30 +320,20 @@
         "ERR_UNKNOWN": "GitLab: Bilinmeyen hata {{statusCode}} {{errorMsg}}"
       }
     },
-    "GOOGLE": {
-      "BANNER": {
-        "AUTH_FAIL": "GoogleApi: Kimlik doğrulaması başarısız oldu, lütfen tekrar giriş yapmayı deneyin!"
-      },
-      "DIALOG": {
-        "CREATE_SYNC_FILE": "Google Drive: <strong>\"{{fileName}}\"</strong> adında bir dosya bulunamadı. <strong>Oluştur</strong> Google Drive’da senkronizasyon dosyası olarak?",
-        "USE_EXISTING_SYNC_FILE": "Google Drive: Senkronizasyon dosyası olarak <strong>var olan</strong> dosyayı <strong>\"{{fileName}}\"</strong> kullanıyor musunuz? Değilse, lütfen Eşitleme dosya adını değiştirin."
-      },
-      "S": {
-        "MULTIPLE_SYNC_FILES_WITH_SAME_NAME": "\"{{newFileName}}\" adında birden fazla dosya bulundu. Lütfen birini hariç tümünü silin veya farklı bir ad seçin.",
-        "SYNC_FILE_CREATION_ERROR": "Google Drive: Senkronizasyon dosyası oluşturulurken hata meydana geldi. {{err}}",
-        "UPDATED_SYNC_FILE_NAME": "Google Drive: Güncellenmiş senkronizasyon dosyası adı"
-      },
-      "S_API": {
-        "ERR": "GoogleApi Hatası: {{errStr}}",
-        "ERR_NO_FILE_ID": "GoogleApi: Belirtilen dosya kimliği yok",
-        "ERR_NO_FILE_NAME": "GoogleApi: Belirtilen dosya adı yok",
-        "SUCCESS_LOGIN": "GoogleApi: Giriş başarılı"
+    "DOMINA_MODE": {
+      "FORM": {
+        "HELP": "Bir göreve ilişkin süreyi izlerken, yapılandırılmış cümleyi her X'te tekrarlar.",
+        "L_INTERVAL": "İfadeyi tekrarlama aralığı",
+        "L_TEXT": "Metin",
+        "L_TEXT_DESCRIPTION": "Örn.: \"${currentTaskTitle} üzerinde çalış!\"",
+        "TITLE": "Domina Mode"
       }
     },
     "ISSUE": {
+      "HOW_TO_GET_A_TOKEN": "Jeton nasıl alınır?",
       "DEFAULT": {
         "ISSUES_STR": "Sorunlar",
-        "ISSUE_STR": "Konu"
+        "ISSUE_STR": "Sorun"
       },
       "S": {
         "ERR_NETWORK": "{{issueProviderName}}: İstemci tarafı ağ hatası nedeniyle istek başarısız oldu",
@@ -325,7 +354,7 @@
     "JIRA": {
       "BANNER": {
         "BLOCK_ACCESS_MSG": "Jira: Api'nin kapatılmasını önlemek için erişim Super Productivity tarafından engellendi. Muhtemelen jira ayarlarınızı kontrol etmelisiniz!",
-        "BLOCK_ACCESS_UNBLOCK": "engeli kaldırmak"
+        "BLOCK_ACCESS_UNBLOCK": "Engeli kaldır"
       },
       "CFG_CMP": {
         "ALWAYS_ASK": "Her zaman iletişim kutusunu aç",
@@ -339,7 +368,8 @@
         "MAP_CUSTOM_FIELDS_INFO": "Ne yazık ki, Jira'nın verilerinin bir kısmı, her kurulum için farklı olan özel alanlar altında saklanmaktadır. Bu verileri dahil etmek istiyorsanız, bunun için uygun özel alanı seçmeniz gerekir.",
         "OPEN": "Duraklatma görevinin Durumu",
         "SELECT_ISSUE_FOR_TRANSITIONS": "Kullanılabilir geçişleri yüklemek için sorun seç",
-        "STORY_POINTS": "Öykü Noktaları"
+        "STORY_POINTS": "Öykü Noktaları",
+        "TRANSITION": "Geçiş İdaresi"
       },
       "DIALOG_CONFIRM_ASSIGNMENT": {
         "MSG": "<strong>{{summary}}</strong> şu anda <strong>{{assignee}}</strong>için atanmıştır. Kendine atamak ister misin?",
@@ -350,8 +380,8 @@
       },
       "DIALOG_TRANSITION": {
         "CHOOSE_STATUS": "Atanacak Durumu seçin",
-        "CURRENT_ASSIGNEE": "Güncel Görevli:",
-        "CURRENT_STATUS": "Şu anki Durum:",
+        "CURRENT_ASSIGNEE": "Mevcut Atanan:",
+        "CURRENT_STATUS": "Mevcut Durum:",
         "TASK_NAME": "Görev adı:",
         "TITLE": "Jira: Güncelleme Durumu",
         "UPDATE_STATUS": "Güncelleme Durumu"
@@ -394,7 +424,7 @@
       },
       "FORM_CRED": {
         "ALLOW_SELF_SIGNED": "Kendinden imzalı sertifikaya izin ver",
-        "HOST": "Ev sahibi (örneğin: http://my-host.de:1234)",
+        "HOST": "Host (örneğin: http://my-host.de:1234)",
         "PASSWORD": "Jeton / Şifre",
         "USER_NAME": "Email / Kullanıcı Adı",
         "USE_PAT": "Şifre yerine Kişisel Erişim Jetonu kullanın",
@@ -405,7 +435,7 @@
         "CREDENTIALS": "Kimlik bilgileri",
         "HELP_ARR": {
           "H1": "Temel yapılandırma",
-          "H2": "Worklog ayarları",
+          "H2": "İş Günlüğü ayarları",
           "H3": "Varsayılan geçişler",
           "P1_1": "Herhangi bir nedenden bir tane oluşturamazsanız lütfen bir giriş adı (profil sayfanızda bulunabilir) ve bir <a target=\"_blank\" href=\"https://confluence.atlassian.com/cloud/api-tokens-938839638.html\" target=\"_blank\">API belirteci</a> veya şifre belirtin. Lütfen jira'nın yeni sürümlerinin bazen yalnızca belirteçle çalıştığını unutmayın.",
           "P1_2": "Ayrıca, Jira'dan görev eklemek için önerilerde kullanılacak bir JQL sorgusu belirtmeniz gerekir. Yardıma ihtiyacınız varsa bu bağlantıyı <a target=\"_blank\" href=\"https://confluence.atlassian.com/jirasoftwarecloud/advanced-searching-764478330.html\" target=\"_blank\">kontrol edin https://confluence.atlassian.com/jirasoftwarecloud/advanced-searching-764478330.html</a>",
@@ -418,11 +448,11 @@
         }
       },
       "ISSUE_CONTENT": {
-        "ASSIGNEE": "vekil",
-        "AT": "en",
+        "ASSIGNEE": "Atanan",
+        "AT": "de",
         "ATTACHMENTS": "Ekler",
-        "CHANGED": "değişmiş",
-        "COMMENTS": "yorumlar",
+        "CHANGED": "Değişmiş",
+        "COMMENTS": "Yorumlar",
         "COMPONENTS": "Bileşenler",
         "DESCRIPTION": "Açıklama",
         "LIST_OF_CHANGES": "Değişikliklerin listesi",
@@ -430,12 +460,13 @@
         "ON": "üzerinde",
         "STATUS": "Durum",
         "STORY_POINTS": "Öykü Noktaları",
+        "SUB_TASKS": "Alt görevler",
         "SUMMARY": "Özet",
-        "WORKLOG": "iş günlüğü",
+        "WORKLOG": "İş Günlüğü",
         "WRITE_A_COMMENT": "Bir yorum Yaz"
       },
       "S": {
-        "ADDED_WORKLOG_FOR": "Jira: {{issueKey}}için çalışma grubu eklendi",
+        "ADDED_WORKLOG_FOR": "Jira: {{issueKey}} için İş Günlüğüne eklendi",
         "EXTENSION_NOT_LOADED": "Süper Verimlilik Uzantısı yüklenmedi. Sayfayı yeniden yüklemek yardımcı olabilir",
         "INSUFFICIENT_SETTINGS": "Jira için Yetersiz Ayarlar",
         "INVALID_RESPONSE": "Jira: Yanıt geçersiz veriler içeriyor",
