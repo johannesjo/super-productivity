@@ -494,33 +494,33 @@
         "CHECK": "Yaptım!"
       },
       "CMP": {
-        "AVG_BREAKS_PER_DAY": "Ort. günde molalar",
-        "AVG_TASKS_PER_DAY_WORKED": "Ort. günde görevler çalıştı",
+        "AVG_BREAKS_PER_DAY": "Ort. günlük molalar",
+        "AVG_TASKS_PER_DAY_WORKED": "Ort. çalışılan günlük görevler",
         "AVG_TIME_SPENT_ON_BREAKS": "Ort. molalara harcanan zaman",
         "AVG_TIME_SPENT_PER_DAY": "Ort. günde harcanan zaman",
         "AVG_TIME_SPENT_PER_TASK": "Ort. görev başına harcanan zaman",
         "COUNTING_SUBTASKS": "(alt görevler sayılıyor)",
-        "DAYS_WORKED": "Günler çalıştı",
-        "GLOBAL_METRICS": "Global Metrikler",
+        "DAYS_WORKED": "Çalışılan günler",
+        "GLOBAL_METRICS": "Küresel İstatistikler",
         "IMPROVEMENT_SELECTION_COUNT": "Bir iyileştirme faktörü seçilme sayısı",
-        "MOOD_PRODUCTIVITY_OVER_TIME": "Zaman içinde ruh hali ve verimlilik",
+        "MOOD_PRODUCTIVITY_OVER_TIME": "Zaman içindeki ruh hali ve verimlilik",
         "NO_ADDITIONAL_DATA_YET": "Henüz ek veri toplanmadı. Bunu yapmak için günlük değerlendirme \"Değerlendirme\" panelindeki formu kullanın.",
         "OBSTRUCTION_SELECTION_COUNT": "Engelleyici bir faktörün seçilme sayısı",
-        "SIMPLE_CLICK_COUNTERS_OVER_TIME": "Zamanla Sayaçlar'ı tıklayın",
+        "SIMPLE_CLICK_COUNTERS_OVER_TIME": "Zaman içindeki Sayaçlar'a tıklayın",
         "SIMPLE_COUNTERS": "Basit Sayaçlar",
-        "SIMPLE_STOPWATCH_COUNTERS_OVER_TIME": "Zaman içinde kronometre Sayaçları",
-        "TASKS_DONE_CREATED": "Görevler (yapıldı / oluşturuldu)",
+        "SIMPLE_STOPWATCH_COUNTERS_OVER_TIME": "Zaman içindeki kronometre Sayaçları",
+        "TASKS_DONE_CREATED": "Görevler (yapıldı/oluşturuldu)",
         "TIME_ESTIMATED": "Tahmini Süre",
         "TIME_SPENT": "Harcanan zaman"
       },
       "EVAL_FORM": {
         "ADD_NOTE_FOR_TOMORROW": "Yarın için not ekle",
-        "DISABLE_REPEAT_EVERY_DAY": "Her gün tekrarı devre dışı bırak",
+        "DISABLE_REPEAT_EVERY_DAY": "Her gün tekrarlamayı devre dışı bırak",
         "ENABLE_REPEAT_EVERY_DAY": "Her gün tekrarla",
         "HELP_H1": "Neden umursayayım?",
-        "HELP_LINK_TXT": "Metrikler bölümüne git",
+        "HELP_LINK_TXT": "İstatistikler bölümüne git",
         "HELP_P1": "Küçük bir öz değerlendirme zamanı! Buradaki cevaplarınız kaydedilir ve ölçümler bölümünde nasıl çalıştığınızla ilgili size biraz istatistik sunar. Ayrıca, yarın için öneriler ertesi gün görev listenizin üstünde görünecektir.",
-        "HELP_P2": "Bu, kesin ölçümleri hesaplamak veya yaptığınız her işte makine gibi verimli olmaktan, işiniz hakkında nasıl hissettiğinizi geliştirmekten daha az olması amaçlanmıştır. Günlük rutininizdeki ağrı noktalarını değerlendirmek ve ayrıca size yardımcı olacak faktörleri bulmak yararlı olabilir. Bu konuda biraz sistematik olmak umarım bunları daha iyi kavramak ve yapabileceklerinizi geliştirmek için yardımcı olur.",
+        "HELP_P2": "Bunun amacı, kesin ölçümleri hesaplamak veya yaptığınız her şeyde makine gibi verimli olmak değil, işinizle ilgili duygularınızı iyileştirmektir. Günlük rutininizdeki sıkıntılı/dertli noktaları değerlendirmenin yanı sıra size yardımcı olacak faktörleri bulmak da yararlı olabilir. Bu konuda biraz sistematik olmanın, bunları daha iyi kavramanıza ve yapabileceklerinizi geliştirmenize yardımcı olacağını umuyoruz.",
         "IMPROVEMENTS": "Verimliliğinizi ne arttırdı?",
         "IMPROVEMENTS_TOMORROW": "Yarını geliştirmek için ne yapabilirsin?",
         "MOOD": "Nasıl hissediyorsun?",
@@ -531,25 +531,41 @@
         "PRODUCTIVITY_HINT": "1: Başlamadım bile - 10: Son derece verimli"
       },
       "S": {
-        "SAVE_METRIC": "Metrik başarıyla kaydedildi"
+        "SAVE_METRIC": "İstatistik başarıyla kaydedildi"
       }
     },
     "NOTE": {
       "D_ADD": {
-        "NOTE_LABEL": "Not olarak kaydetmek için bir metin girin ..."
+        "NOTE_LABEL": "Not olarak kaydetmek için bir metin girin (markdown kullanabilirsiniz)..."
       },
-      "EDIT_FULLSCREEN": "Tam ekranda düzenle",
+      "D_FULLSCREEN": {
+        "VIEW_TEXT_ONLY": "Ayrıştırılmamış metin olarak görüntüle",
+        "VIEW_SPLIT": "Ayrıştırılmış ve ayrıştırılmamış markdown'ı bölünmüş görünümde görüntüleyin",
+        "VIEW_PARSED": "Ayrıştırılmış (düzenlenemez) markdown olarak görüntüle"
+      },
       "NOTES_CMP": {
         "ADD_BTN": "Yeni not ekle",
         "DROP_TO_ADD": "Yeni not eklemek için buraya bırakın",
         "NO_NOTES": "Şu anda not yok"
       },
       "NOTE_CMP": {
-        "DISABLE_PARSE": "Marka aşağı ayrıştırmayı devre dışı bırak",
+        "DISABLE_PARSE": "Önizleme için markdown ayrıştırmayı devre dışı bırak",
         "ENABLE_PARSE": "Markdown ayrıştırmayı etkinleştir"
       }
     },
     "OPEN_PROJECT": {
+      "CFG_CMP": {
+        "ALWAYS_ASK": "İletişim kutusunu her zaman aç",
+        "DONE": " Görevi tamamlama durumu ",
+        "DO_NOT": "Geçiş yapma",
+        "ENABLE": "Openproject entegrasyonunu etkinleştir",
+        "ENABLE_TRANSITIONS": "Geçiş İdaresini Etkinleştir",
+        "IN_PROGRESS": "Status for starting task",
+        "OPEN": "Status for pausing task",
+        "PROGRESS_ON_SAVE": "Default progress on save",
+        "TRANSITION": "Geçiş İdaresi",
+        "SELECT_ISSUE_FOR_TRANSITIONS": "Mevcut geçişleri yüklemek için sorunu seçin"
+      },
       "DIALOG_INITIAL": {
         "TITLE": "OpenProject for Project Kurulumu"
       },
@@ -562,6 +578,15 @@
         "SUBMIT_TIME_FOR": "için OpenProject'e zaman gönderin",
         "TIME_SPENT": "Harcanan zaman",
         "TITLE": "OpenProject: İş Günlüğünü Gönder"
+      },
+      "DIALOG_TRANSITION": {
+        "CHOOSE_STATUS": "Atanacak durumu seçin",
+        "CURRENT_ASSIGNEE": "Mevcut Atanan:",
+        "CURRENT_STATUS": "Şu anki durum:",
+        "PERCENTAGE_DONE": "İlerleme:",
+        "TASK_NAME": "Görev adı:",
+        "TITLE": "OpenProject: Durumu Güncelle",
+        "UPDATE_STATUS": "Durumu Güncelle"
       },
       "FORM": {
         "FILTER_USER": "Kullanıcı adı (örneğin, değişiklikleri kendiniz filtrelemek için)",
@@ -1457,7 +1482,7 @@
     "WEEK": "Hafta"
   },
   "PM": {
-    "TITLE": "Proje Metrikleri"
+    "TITLE": "Proje İstatistikleri"
   },
   "PP": {
     "ARCHIVED_PROJECTS": "Arşivlenmiş Projeler",
