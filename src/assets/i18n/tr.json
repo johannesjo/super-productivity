@@ -602,7 +602,7 @@
         "TOKEN": "Erişim Jetonu",
         "SCOPE": "Kapsam",
         "SCOPE_ALL": "Herşey",
-        "SCOPE_ASSIGNED": "Beni görevlendirdi",
+        "SCOPE_ASSIGNED": "Bana Atanan",
         "SCOPE_CREATED": "Benim tarafımdan oluşturuldu"
       },
       "FORM_SECTION": {
@@ -610,70 +610,83 @@
         "TITLE": "OpenProject"
       },
       "ISSUE_CONTENT": {
-        "ASSIGNEE": "vekil",
+        "ASSIGNEE": "Atanan",
         "DESCRIPTION": "Açıklama",
         "MARK_AS_CHECKED": "Güncellemeleri işaretli olarak işaretle",
         "STATUS": "Durum",
         "SUMMARY": "Özet",
-        "TYPE": "tip"
+        "TYPE": "Tip"
       },
       "ISSUE_STRINGS": {
         "ISSUES_STR": "iş paketleri",
-        "ISSUE_STR": "calisma paketi"
+        "ISSUE_STR": "iş paketi"
       },
       "S": {
         "ERR_UNKNOWN": "OpenProject: Bilinmeyen hata {{statusCode}} {{errorMsg}}. CORS, sunucu için uygun şekilde yapılandırılmış mı?",
-        "POST_TIME_SUCCESS": "OpenProject: {{issueTitle}}için başarıyla oluşturulan zaman girişi"
+        "POST_TIME_SUCCESS": "OpenProject: {{issueTitle}}için başarıyla oluşturulan zaman girişi",
+        "TRANSITION": "OpenProject: \"{{issueKey}}\" sorununu \"{{name}}\" olarak ayarlayın",
+        "TRANSITION_SUCCESS": "OpenProject: {{issueKey}} sorununu <strong>{{chosenTransition}}</strong> olarak ayarlayın",
+        "TRANSITIONS_LOADED": "Geçişler yüklendi. Bunları atamak için aşağıdaki seçimleri kullanın"
       }
     },
     "POMODORO": {
-      "BACK_TO_WORK": "İşe geri dön!",
-      "BREAK_IS_DONE": "Mola bitti!",
-      "ENJOY_YOURSELF": "Keyfinize bakın, harekete geçin, geri gelin:",
-      "FINISH_SESSION_X": " <strong>{{nr}}</strong>oturumunu başarıyla tamamladınız!",
+      "BACK_TO_WORK": "Çalışmaya geri dön!",
+      "BREAK_IS_DONE": "Molan bitti!",
+      "ENJOY_YOURSELF": "Eğlenin, harekete geçin, tekrar gelin:",
+      "FINISH_SESSION_X": " <strong>{{nr}}</strong> oturumunu başarıyla tamamladınız!",
       "NOTIFICATION": {
-        "BREAK_X_START": "Pomodoro: Arası {{nr}} başladı!",
-        "NO_TASKS": "Pomodoro zamanlayıcısının başlayabilmesi için önce görevler eklemeniz gerekir.",
+        "BREAK_X_START": "Pomodoro: {{nr}} molası başladı!",
+        "BREAK_TIME": "Pomodoro: Mola zamanı {{nr}}!",
+        "NO_TASKS": "Pomodoro zamanlayıcısının başlayabilmesi için görevleri eklemeniz gerekir.",
         "SESSION_X_START": "Pomodoro: {{nr}} oturumu başladı!"
       },
       "S": {
-        "SESSION_X_START": "Pomodoro: {{nr}} oturumu başladı!"
+        "SESSION_X_START": "Pomodoro: {{nr}} oturumu başladı!",
+        "SESSION_SKIP": "Mevcut Pomodoro Oturumunun sonuna atla",
+        "RESET": "İlk Pomodoro Oturumuna Sıfırla"
       },
-      "SKIP_BREAK": "Arayı atla"
+      "SKIP_BREAK": "Molayı atla",
+      "START_BREAK": "Molayı başlat"
     },
     "PROCRASTINATION": {
-      "BACK_TO_WORK": "İşe geri dön!",
+      "BACK_TO_WORK": "Çalışmaya geri dön!",
       "COMP": {
-        "INTRO": "Kendine biraz şefkat göstermek her zaman harika bir fikir. Kendine değer hissini arttırır, olumlu duyguları teşvik eder ve erteleme, elbette ertelemeye yardımcı olabilir. Biraz egzersiz yapmayı deneyin:",
-        "L1": "Biraz otur ve kendini biraz uzat, istersen biraz sakin ol",
+        "INTRO": "Erteleme düzeyi yüksek olan kişilerin öz-şefkati genellikle düşüktür. O halde pratik yapın! Kendinize verdiğiniz değer duygusunu geliştirir, olumlu duyguları teşvik eder ve elbette ertelemenin üstesinden gelmenize yardımcı olabilir. Biraz egzersiz yapmayı deneyin:",
+        "L1": "Biraz otur ve kendini biraz esnet, istersen biraz sakin ol",
         "L2": "Ortaya çıkan düşünce ve duyguları dinlemeye çalışın",
-        "L3": "Bir arkadaşınıza cevap verecek şekilde kendinize cevap mı veriyorsunuz?",
-        "L4": "Cevabınız hayır ise, Durumunuzu arkadaşınızı düşünün. Onlara ne söyleyeceksin? Onlar için ne yapardın?",
+        "L3": "Kendinize bir arkadaşınıza yanıt vereceğiniz şekilde yanıt veriyor musunuz?",
+        "L4": "Cevabınız hayırsa arkadaşınızın sizin durumunuzda olduğunu hayal edin. Onlara ne söylerdin? Onlar için ne yapardın?",
         "OUTRO": "Daha fazla <a target=\"_blank\" href=\"https://drsoph.com/blog/2018/9/17/3-exercises-in-self-compassion\" target=\"_blank\">alıştırması burada</a> veya <a target=\"_blank\" href=\"https://www.google.com/search?q=self+compassion+exercises&oq=self+compassion+excers&aqs=chrome.1.69i57j0l5.4303j0j7&sourceid=chrome&ie=UTF-8\" target=\"_blank\">google</a>sitesinde bulunabilir.",
-        "TITLE": "Kendinden Şefkat"
+        "TITLE": "Öz Şefkat"
       },
       "CUR": {
-        "INTRO": "Erteleme ilginç, değil mi? Bunu yapmak mantıklı değil. Hiç uzun vadeli ilginize değil. Ama yine de herkes yapıyor. Zevk ve keşfetmek!",
-        "L1": "Ertelemek için hangi duyguları uyandırıyorsunuz?",
-        "L2": "Onları vücudunda nerede hissediyorsun?",
+        "INTRO": "Ertelemek ilginç değil mi? Uzun vadede sizin çıkarınıza hiç uygun olmadığından, bunu yapmanın bir anlamı yok gibi görünüyor. Ama yine de herkes bunu yapıyor. Kişisel olarak sizin için nasıl çalıştığını keşfetmenize ve daha iyi anlamanıza yardımcı olur! Kendinize sormanız gereken bazı temel sorular şunlar olabilir:",
+        "L1": "Hangi duygular erteleme isteğinizi ortaya çıkarıyor?",
+        "L2": "Onları vücudunuzun neresinde hissediyorsunuz?",
         "L3": "Size neyi hatırlatıyorlar?",
-        "L4": "Bunu izlerken, erteleme düşüncesine ne olur? Yoğunlaşıyor mu? Dağıtmak? Diğer duyguların ortaya çıkmasına neden olur mu?",
-        "L5": "Farkındalığınızı dinlendirmeye devam ederken vücudunuzdaki duygular nasıl değişiyor?",
+        "L4": "Gözlemlediğinizde erteleme düşüncesine ne olur? Yoğunlaşıyor mu? Kayboluyor mu? Başka duyguların ortaya çıkmasına neden mi oluyor?",
+        "L5": "Farkındalığınızı onlara dayandırmaya devam ettikçe bedeninizdeki hisler nasıl değişiyor?",
         "TITLE": "Merak"
       },
-      "H1": "Kendine biraz gevşek ol!",
-      "P1": "Her şeyden önce rahatla! Herkes arada bir yapar. Yapmanız gerekeni yapmıyorsanız, en azından tadını çıkarmalısınız! Sonra yararlı bir şey için aşağıdaki bölümleri kontrol edin.",
-      "P2": "Unutmayın: Erteleme bir zaman yönetimi problemi değil bir duygu düzenleme sorunudur.",
+      "H1": "Kendini biraz rahat bırak!",
+      "INTRO": {
+        "AVOIDING": "Görevden kaçınmak",
+        "FEAR": "Başarısızlık korkusu",
+        "STRESSED": "İşleri tamamlayamama konusunda stresli",
+        "TITLE": "Giriş"
+      },
+      "P1": "Her şeyden önce: Rahatlayın! Herkes arada bir erteler. Ve eğer yapmanız gerekeni yapmıyorsanız, en azından bundan keyif almalısınız!",
+      "P2": "Unutmayın: <b>Erteleme bir zaman yönetimi sorunu değil, bir duygu düzenleme sorunudur.</b> Bu, kendinizi hırpalamanın çözüm olmadığı, sorunun bir parçası olduğu anlamına gelir. Bunu iyice anlayın ve daha fazla yardım için buradaki diğer sekmeleri kontrol edin.",
       "REFRAME": {
-        "INTRO": "Göreve rağmen görevde neyin olumlu olabileceğini düşünün.",
-        "TITLE": "çerçeveye oturtmak",
-        "TL1": "Bu konuda ilginç ne olabilir?",
+        "INTRO": "Kusurlarına rağmen görevle ilgili neyin olumlu olabileceğini düşünün.",
+        "TITLE": "Yeniden Çerçeveleme",
+        "TL1": "Bunda ilginç olan ne olabilir?",
         "TL2": "Tamamlarsan ne kazanacaksın?",
         "TL3": "Tamamlarsan nasıl hissedeceksin?"
       },
       "SPLIT_UP": {
         "INTRO": "Görevi, olabildiğince küçük parçalara bölün.",
-        "OUTRO": "Bitti? O zaman düşün. Ne olur - kesinlikle teorik - eğer</i> görev üzerinde çalışmaya başlarsanız <i>ilk yapacağınız şey? Bunun hakkında düşün...",
+        "OUTRO": "Yaptın? O zaman bir düşün. Eğer görev üzerinde çalışmaya başlasaydınız, kesinlikle teorik olarak yapacağınız ilk şey ne olurdu? Bunun hakkında düşün...",
         "TITLE": "Ayır!"
       }
     },
