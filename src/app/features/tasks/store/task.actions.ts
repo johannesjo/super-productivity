@@ -73,12 +73,16 @@ export const addTask = createAction(
     workContextType: WorkContextType;
     isAddToBacklog: boolean;
     isAddToBottom: boolean;
+    isIgnoreShortSyntax?: boolean;
   }>(),
 );
 
 export const updateTask = createAction(
   TaskActionTypes.UpdateTask,
-  props<{ task: Update<Task> }>(),
+  props<{
+    task: Update<Task>;
+    isIgnoreShortSyntax?: boolean;
+  }>(),
 );
 
 export const updateTaskUi = createAction(
