@@ -24,7 +24,7 @@ export const initFullScreenBlocker = (IS_DEV: boolean): void => {
         skipTaskbar: true,
         frame: false,
       });
-      const randomImgUrl = takeABreakCfg.motivationalImgs.length
+      const randomImgUrl = takeABreakCfg.motivationalImgs?.length
         ? takeABreakCfg.motivationalImgs[
             Math.floor(Math.random() * takeABreakCfg.motivationalImgs.length)
           ]
