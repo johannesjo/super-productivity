@@ -13,11 +13,10 @@ import * as path from 'path';
 import { error, log } from 'electron-log/main';
 import { AppDataComplete } from '../src/app/imex/sync/sync.model';
 
-let BACKUP_DIR = path.join(app.getPath('userData'), `backups`);
+export const BACKUP_DIR = path.join(app.getPath('userData'), `backups`);
 
 // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
-export function initBackupAdapter(backupDir: string): void {
-  BACKUP_DIR = backupDir;
+export function initBackupAdapter(): void {
   console.log('Saving backups to', BACKUP_DIR);
   log('Saving backups to', BACKUP_DIR);
 

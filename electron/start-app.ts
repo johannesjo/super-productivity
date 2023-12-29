@@ -151,11 +151,6 @@ export const startApp = (): void => {
     app.setAppLogsPath();
   }
 
-  const BACKUP_DIR =
-    `${app.getPath('userData')}` + process.platform == 'linux' || IS_MAC
-      ? `/`
-      : `\\` + `backups`;
-
   initDebug({ showDevTools: isShowDevTools }, IS_DEV);
 
   // NOTE: opening the folder crashes the mas build
@@ -180,7 +175,7 @@ export const startApp = (): void => {
   // APP EVENT LISTENERS
   // -------------------
   appIN.on('ready', createMainWin);
-  appIN.on('ready', () => initBackupAdapter(BACKUP_DIR));
+  appIN.on('ready', () => initBackupAdapter());
   appIN.on('ready', () => initLocalFileSyncAdapter());
   appIN.on('ready', () => initFullScreenBlocker(IS_DEV));
 

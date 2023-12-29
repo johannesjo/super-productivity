@@ -12,6 +12,7 @@ import { exec } from 'child_process';
 import { getWin } from './main-window';
 import { quitApp, showOrFocus } from './various-shared';
 import { loadSimpleStoreAll, saveSimpleStore } from './simple-store';
+import { BACKUP_DIR } from './backup';
 
 export const initIpcInterfaces = (): void => {
   // HANDLER
@@ -19,6 +20,7 @@ export const initIpcInterfaces = (): void => {
   ipcMain.handle(IPC.GET_PATH, (ev, name: string) => {
     return app.getPath(name as any);
   });
+  ipcMain.handle(IPC.GET_BACKUP_PATH, () => BACKUP_DIR);
 
   // BACKEND EVENTS
   // --------------
