@@ -20,7 +20,6 @@ import {
 } from '../../imex/sync/sync.model';
 import { Reminder } from '../../features/reminder/reminder.model';
 import { DatabaseService } from './database.service';
-import { DEFAULT_PROJECT_ID } from '../../features/project/project.const';
 import {
   ExportedProject,
   ProjectArchive,
@@ -338,7 +337,7 @@ export class PersistenceService {
     console.log('LOAD COMPLETE', isMigrate);
 
     const projectState = await this.project.loadState();
-    const pids = projectState ? (projectState.ids as string[]) : [DEFAULT_PROJECT_ID];
+    const pids = projectState ? (projectState.ids as string[]) : [];
     if (!pids) {
       throw new Error('Project State is broken');
     }
