@@ -1,3 +1,10 @@
+## [7.17.2](https://github.com/johannesjo/super-productivity/compare/v7.17.1...v7.17.2) (2023-12-30)
+
+### Bug Fixes
+
+- default project issue [#2950](https://github.com/johannesjo/super-productivity/issues/2950) ([500189b](https://github.com/johannesjo/super-productivity/commit/500189b971f1f42bb101e82fa33c7512f7d58d46))
+- problematic ipcEvent$ case [#2949](https://github.com/johannesjo/super-productivity/issues/2949) ([127a597](https://github.com/johannesjo/super-productivity/commit/127a5976be02971a6e110185b76ec84f62217786))
+
 ## [7.17.1](https://github.com/johannesjo/super-productivity/compare/v7.16.0...v7.17.1) (2023-12-29)
 
 ### Bug Fixes
