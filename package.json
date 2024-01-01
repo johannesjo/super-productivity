@@ -173,7 +173,7 @@
     "chrono-node": "^2.6.2",
     "clipboard": "^2.0.8",
     "codelyzer": "^6.0.2",
-    "conventional-changelog-cli": "^2.2.2",
+    "conventional-changelog-cli": "^4.1.0",
     "cross-env": "^7.0.3",
     "detect-it": "^4.0.1",
     "electron": "^28.1.0",
