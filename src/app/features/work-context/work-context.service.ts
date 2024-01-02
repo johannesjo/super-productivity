@@ -27,7 +27,7 @@ import {
 } from 'rxjs/operators';
 import { TODAY_TAG } from '../tag/tag.const';
 import { TagService } from '../tag/tag.service';
-import { Task, TaskPlanned, TaskWithSubTasks } from '../tasks/task.model';
+import { ArchiveTask, Task, TaskPlanned, TaskWithSubTasks } from '../tasks/task.model';
 import { hasTasksToWorkOn, mapEstimateRemainingFromTasks } from './work-context.util';
 import {
   flattenTasks,
@@ -68,6 +68,7 @@ import { isShallowEqual } from '../../util/is-shallow-equal';
 import { distinctUntilChangedObject } from '../../util/distinct-until-changed-object';
 import { DateService } from 'src/app/core/date/date.service';
 import { getTimeSpentForDay } from './get-time-spent-for-day.util';
+import { PersistenceService } from '../../core/persistence/persistence.service';
 
 @Injectable({
   providedIn: 'root',
@@ -262,6 +263,13 @@ export class WorkContextService {
     switchMap((worklogStrDate) => this.getTimeWorkedForDay$(worklogStrDate)),
   );
 
+  workingTodayArchived$: Observable<number> =
+    this._globalTrackingIntervalService.todayDateStr$.pipe(
+      switchMap((worklogStrDate) =>
+        this.getTimeWorkedForDayForArchivedTasks(worklogStrDate),
+      ),
+    );
+
   isHasTasksToWorkOn$: Observable<boolean> = this.todaysTasks$.pipe(
     map(hasTasksToWorkOn),
     distinctUntilChanged(),
@@ -304,6 +312,7 @@ export class WorkContextService {
     private _dateService: DateService,
     private _router: Router,
     private _translateService: TranslateService,
+    private _persistenceService: PersistenceService,
   ) {
     this.isToday$.subscribe((v) => (this.isToday = v));
 
@@ -356,6 +365,36 @@ export class WorkContextService {
           ? this.getTimeWorkedForDayForAllNonArchiveTasks$(day)
           : this.getTimeWorkedForDayTodaysTasks$(day),
       ),
+    );
+  }
+
+  async getTimeWorkedForDayForArchivedTasks(
+    day: string = this._dateService.todayStr(),
+  ): Promise<number> {
+    const isToday = await this.isToday$.pipe(first()).toPromise();
+    const { activeId, activeType } = await this.activeWorkContextTypeAndId$
+      .pipe(first())
+      .toPromise();
+    const { ids, entities } = await this._persistenceService.taskArchive.loadState();
+    const tasksWorkedOnToday: ArchiveTask[] = ids
+      .map((id) => entities[id])
+      .filter((t) => t?.timeSpentOnDay[day]) as ArchiveTask[];
+
+    let tasksToConsider: ArchiveTask[] = [];
+    if (isToday) {
+      tasksToConsider = tasksWorkedOnToday;
+    } else {
+      if (activeType === WorkContextType.PROJECT) {
+        tasksToConsider = tasksWorkedOnToday.filter((t) => t.projectId === activeId);
+      } else {
+        tasksToConsider = tasksWorkedOnToday.filter((t) => t.tagIds.includes(activeId));
+      }
+    }
+
+    return getTimeSpentForDay(
+      // avoid double counting parent and sub tasks
+      tasksToConsider.filter((task) => !task.parentId),
+      day,
     );
   }
 
