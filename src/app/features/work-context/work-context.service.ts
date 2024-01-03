@@ -371,9 +371,6 @@ export class WorkContextService {
       .pipe(first())
       .toPromise();
     const taskArchiveState = await this._persistenceService.taskArchive.loadState();
-    if(!taskArchiveState) {
-      return 0;
-    }
 
     const {ids, entities} = taskArchiveState;
     const tasksWorkedOnToday: ArchiveTask[] = ids
