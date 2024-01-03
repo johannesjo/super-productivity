@@ -203,6 +203,7 @@
           [class.isVisibleMobile]="isShowSimpleCounterBtnsMobile"
         >
           <simple-counter-button
+            [matTooltip]="simpleCounter.title"
             *ngFor="let simpleCounter of enabledSimpleCounters; trackBy: trackById"
             [simpleCounter]="simpleCounter"
           ></simple-counter-button>
