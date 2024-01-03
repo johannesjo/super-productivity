@@ -428,13 +428,16 @@ export class PersistenceService {
     const model = {
       appDataKey,
       loadState: async (isSkipMigrate = false) => {
-        const modelData = await (this._loadFromDb({dbKey: appDataKey, legacyDBKey: legacyKey}));
+        const modelData = await this._loadFromDb({
+          dbKey: appDataKey,
+          legacyDBKey: legacyKey,
+        });
         return modelData
           ? isSkipMigrate
             ? modelData
             : migrateFn(modelData)
-          // we want to be sure there is always a valid value returned
-          : DEFAULT_APP_BASE_DATA[appDataKey];
+          : // we want to be sure there is always a valid value returned
+            DEFAULT_APP_BASE_DATA[appDataKey];
       },
       // In case we want to check on load
       // loadState: async (isSkipMigrate = false) => {
