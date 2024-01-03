@@ -29,11 +29,7 @@ import { TODAY_TAG } from '../tag/tag.const';
 import { TagService } from '../tag/tag.service';
 import { ArchiveTask, Task, TaskPlanned, TaskWithSubTasks } from '../tasks/task.model';
 import { hasTasksToWorkOn, mapEstimateRemainingFromTasks } from './work-context.util';
-import {
-  flattenTasks,
-  selectAllTasks,
-  selectTasksWithSubTasksByIds,
-} from '../tasks/store/task.selectors';
+import { flattenTasks, selectAllTasks, selectTasksWithSubTasksByIds, } from '../tasks/store/task.selectors';
 import { Actions, ofType } from '@ngrx/effects';
 import { WorklogExportSettings } from '../worklog/worklog.model';
 import {
@@ -105,22 +101,21 @@ export class WorkContextService {
     activeId: string;
     activeType: WorkContextType;
   }> = this._isAllDataLoaded$.pipe(
-    switchMap(() => this._store$),
-    select(selectActiveContextTypeAndId),
+    switchMap(() => this._store$.select(selectActiveContextTypeAndId)),
     // NOTE: checking for id should be enough
     distinctUntilChanged((a, b): boolean => a.activeId === b.activeId),
     shareReplay(1),
   );
   isActiveWorkContextProject$: Observable<boolean> =
     this.activeWorkContextTypeAndId$.pipe(
-      map(({ activeType }) => activeType === WorkContextType.PROJECT),
+      map(({activeType}) => activeType === WorkContextType.PROJECT),
       shareReplay(1),
     );
 
   activeWorkContextIdIfProject$: Observable<string> =
     this.activeWorkContextTypeAndId$.pipe(
-      map(({ activeType, activeId }) => {
-        if (activeType !== WorkContextType.PROJECT) {
+      map(({activeType, activeId}) => {
+        if(activeType !== WorkContextType.PROJECT) {
           throw Error('Not in project context');
         }
         return activeId;
@@ -140,9 +135,9 @@ export class WorkContextService {
     switchMap((activeContext) =>
       activeContext.id === TODAY_TAG.id && activeContext.title === TODAY_TAG.title
         ? this._translateService.onLangChange.pipe(
-            startWith(this._translateService.currentLang),
-            map(() => this._translateService.instant(T.G.TODAY_TAG_TITLE)),
-          )
+          startWith(this._translateService.currentLang),
+          map(() => this._translateService.instant(T.G.TODAY_TAG_TITLE)),
+        )
         : of(activeContext.title),
     ),
   );
@@ -162,12 +157,12 @@ export class WorkContextService {
     switchMap((mainWorkContext) =>
       mainWorkContext.id === TODAY_TAG.id && mainWorkContext.title === TODAY_TAG.title
         ? this._translateService.onLangChange.pipe(
-            startWith(this._translateService.currentLang),
-            map(() => ({
-              ...mainWorkContext,
-              title: this._translateService.instant(T.G.TODAY_TAG_TITLE),
-            })),
-          )
+          startWith(this._translateService.currentLang),
+          map(() => ({
+            ...mainWorkContext,
+            title: this._translateService.instant(T.G.TODAY_TAG_TITLE),
+          })),
+        )
         : of(mainWorkContext),
     ),
   );
@@ -332,26 +327,26 @@ export class WorkContextService {
           isAllDataLoaded
             ? of(next as NavigationEnd)
             : this._isAllDataLoaded$.pipe(
-                filter((isLoaded) => isLoaded),
-                take(1),
-                mapTo(next as NavigationEnd),
-              ),
+              filter((isLoaded) => isLoaded),
+              take(1),
+              mapTo(next as NavigationEnd),
+            ),
         ),
       )
-      .subscribe(({ urlAfterRedirects }: NavigationEnd) => {
+      .subscribe(({urlAfterRedirects}: NavigationEnd) => {
         const split = urlAfterRedirects.split('/');
         const id = split[2];
 
         // prevent issue when setActiveContext is called directly
-        if (this.activeWorkContextId === id) {
+        if(this.activeWorkContextId === id) {
           return;
         }
 
-        if (urlAfterRedirects.match(/tag\/.+/)) {
+        if(urlAfterRedirects.match(/tag\/.+/)) {
           this._setActiveContext(id, WorkContextType.TAG);
-        } else if (urlAfterRedirects.match(/project\/.+/)) {
+        } else if(urlAfterRedirects.match(/project\/.+/)) {
           this._setActiveContext(id, WorkContextType.PROJECT);
-        } else if (urlAfterRedirects.match(/timeline/)) {
+        } else if(urlAfterRedirects.match(/timeline/)) {
           this._setActiveContext(TODAY_TAG.id, WorkContextType.TAG);
         }
       });
@@ -372,19 +367,24 @@ export class WorkContextService {
     day: string = this._dateService.todayStr(),
   ): Promise<number> {
     const isToday = await this.isToday$.pipe(first()).toPromise();
-    const { activeId, activeType } = await this.activeWorkContextTypeAndId$
+    const {activeId, activeType} = await this.activeWorkContextTypeAndId$
       .pipe(first())
       .toPromise();
-    const { ids, entities } = await this._persistenceService.taskArchive.loadState();
+    const taskArchiveState = await this._persistenceService.taskArchive.loadState();
+    if(!taskArchiveState) {
+      return 0;
+    }
+
+    const {ids, entities} = taskArchiveState;
     const tasksWorkedOnToday: ArchiveTask[] = ids
       .map((id) => entities[id])
       .filter((t) => t?.timeSpentOnDay[day]) as ArchiveTask[];
 
     let tasksToConsider: ArchiveTask[] = [];
-    if (isToday) {
+    if(isToday) {
       tasksToConsider = tasksWorkedOnToday;
     } else {
-      if (activeType === WorkContextType.PROJECT) {
+      if(activeType === WorkContextType.PROJECT) {
         tasksToConsider = tasksWorkedOnToday.filter((t) => t.projectId === activeId);
       } else {
         tasksToConsider = tasksWorkedOnToday.filter((t) => t.tagIds.includes(activeId));
@@ -493,7 +493,7 @@ export class WorkContextService {
     sectionKey: WorkContextAdvancedCfgKey,
     data: any,
   ): void {
-    if (this.activeWorkContextType === WorkContextType.PROJECT) {
+    if(this.activeWorkContextType === WorkContextType.PROJECT) {
       this._store$.dispatch(
         updateProjectAdvancedCfg({
           projectId: this.activeWorkContextId as string,
@@ -501,7 +501,7 @@ export class WorkContextService {
           data,
         }),
       );
-    } else if (this.activeWorkContextType === WorkContextType.TAG) {
+    } else if(this.activeWorkContextType === WorkContextType.TAG) {
       this._store$.dispatch(
         updateAdvancedConfigForTag({
           tagId: this.activeWorkContextId as string,
@@ -514,24 +514,24 @@ export class WorkContextService {
 
   // we don't want a circular dependency that's why we do it here...
   private _getTasksByIds$(ids: string[]): Observable<TaskWithSubTasks[]> {
-    if (!Array.isArray(ids)) {
-      console.log({ ids });
+    if(!Array.isArray(ids)) {
+      console.log({ids});
       throw new Error('Invalid param provided for getByIds$ :(');
     }
-    return this._store$.select(selectTasksWithSubTasksByIds, { ids });
+    return this._store$.select(selectTasksWithSubTasksByIds, {ids});
   }
 
   // we don't want a circular dependency that's why we do it here...
   private _getNotesByIds$(ids: string[]): Observable<Note[]> {
-    if (!Array.isArray(ids)) {
-      console.log({ ids });
+    if(!Array.isArray(ids)) {
+      console.log({ids});
       throw new Error('Invalid param provided for getByIds$ :(');
     }
-    return this._store$.select(selectNotesById, { ids });
+    return this._store$.select(selectNotesById, {ids});
   }
 
   // NOTE: NEVER call this from some place other than the route change stuff
   private _setActiveContext(activeId: string, activeType: WorkContextType): void {
-    this._store$.dispatch(setActiveWorkContext({ activeId, activeType }));
+    this._store$.dispatch(setActiveWorkContext({activeId, activeType}));
   }
 }
