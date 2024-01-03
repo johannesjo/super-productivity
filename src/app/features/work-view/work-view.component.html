@@ -34,6 +34,10 @@
             <span class="no-wrap">
               <strong class="time-val"
                 >{{workContextService.workingToday$|async|msToString}}</strong
+              ><span
+                *ngIf="(workContextService.workingTodayArchived$|async) as workingTodayArchived"
+                [matTooltip]="T.WW.WORKING_TODAY_ARCHIVED|translate"
+                >(+{{workingTodayArchived|msToString}})</span
               >
               <mat-icon svgIcon="working_today"></mat-icon>
             </span>

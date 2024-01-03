@@ -27,12 +27,11 @@ import {
 import { AllowedDBKeys } from '../../core/persistence/storage-keys.const';
 import { IdleService } from '../../features/idle/idle.service';
 import { IS_ELECTRON } from '../../app.constants';
-import { IPC } from '../../../../electron/shared-with-frontend/ipc-events.const';
 import { GlobalConfigState } from '../../features/config/global-config.model';
 import { IS_ANDROID_WEB_VIEW } from '../../util/is-android-web-view';
 import { androidInterface } from '../../features/android/android-interface';
 import { IS_TOUCH_ONLY } from '../../util/is-touch-only';
-import { ipcEvent$ } from '../../util/ipc-event';
+import { ipcResume$, ipcSuspend$ } from '../../core/ipc-events';
 
 const MAX_WAIT_FOR_INITIAL_SYNC = 25000;
 const USER_INTERACTION_SYNC_CHECK_THROTTLE_TIME = 15 * 60 * 10000;
@@ -104,16 +103,14 @@ export class SyncTriggerService {
 
   // TODO check if those two work as expected
   private _onElectronResumeTrigger$: Observable<string | never> = IS_ELECTRON
-    ? ipcEvent$(IPC.RESUME).pipe(
+    ? ipcResume$.pipe(
         // because ipcEvents live forever
-        shareReplay(1),
         mapTo('I_IPC_RESUME'),
       )
     : EMPTY;
   private _beforeGoingToSleepTriggers$: Observable<string | never> = IS_ELECTRON
-    ? ipcEvent$(IPC.SUSPEND).pipe(
+    ? ipcSuspend$.pipe(
         // because ipcEvents live forever
-        shareReplay(1),
         mapTo('I_IPC_SUSPEND'),
         throttleTime(SYNC_BEFORE_GOING_TO_SLEEP_THROTTLE_TIME),
       )

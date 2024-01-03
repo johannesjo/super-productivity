@@ -23,7 +23,6 @@ import {
   first,
   map,
   mapTo,
-  shareReplay,
   switchMap,
   tap,
   withLatestFrom,
@@ -48,7 +47,7 @@ import { isNotNullOrUndefined } from '../../../util/is-not-null-or-undefined';
 import { DialogConfirmComponent } from '../../../ui/dialog-confirm/dialog-confirm.component';
 import { T } from '../../../t.const';
 import { DateService } from 'src/app/core/date/date.service';
-import { ipcEvent$ } from '../../../util/ipc-event';
+import { ipcIdleTime$ } from '../../../core/ipc-events';
 
 const DEFAULT_MIN_IDLE_TIME = 60000;
 const IDLE_POLL_INTERVAL = 1000;
@@ -61,12 +60,7 @@ export class IdleEffects {
 
   // NOTE: needs to live forever since we can't unsubscribe from ipcEvent$
   // TODO check if this works as expected
-  private _electronIdleTime$: Observable<number> = IS_ELECTRON
-    ? ipcEvent$(IPC.IDLE_TIME).pipe(
-        shareReplay(1),
-        map(([ev, idleTimeInMs]: any) => idleTimeInMs as number),
-      )
-    : EMPTY;
+  private _electronIdleTime$: Observable<number> = IS_ELECTRON ? ipcIdleTime$ : EMPTY;
 
   private _triggerIdleApis$ = IS_ELECTRON
     ? this._electronIdleTime$

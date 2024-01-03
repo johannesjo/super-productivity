@@ -151,6 +151,9 @@ export class TaskRelatedModelEffects {
     this._actions$.pipe(
       ofType(addTask, updateTask),
       filter((action): boolean => {
+        if (action.isIgnoreShortSyntax) {
+          return false;
+        }
         if (action.type !== updateTask.type) {
           return true;
         }
@@ -221,6 +224,7 @@ export class TaskRelatedModelEffects {
               id: task.id,
               changes: r.taskChanges,
             },
+            isIgnoreShortSyntax: true,
           }),
         );
         if (taskChanges.plannedAt && !taskChanges.reminderId) {

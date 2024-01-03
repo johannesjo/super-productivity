@@ -1610,6 +1610,7 @@
     "RESET_BREAK_TIMER": "Reset without break timer",
     "TIME_ESTIMATED": "Time Estimated:",
     "WITHOUT_BREAK": "Without break:",
-    "WORKING_TODAY": "Working today:"
+    "WORKING_TODAY": "Working today:",
+    "WORKING_TODAY_ARCHIVED": "Time worked today on archived tasks"
   }
 }

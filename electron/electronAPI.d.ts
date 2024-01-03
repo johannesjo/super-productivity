@@ -16,6 +16,8 @@ export interface ElectronAPI {
   // ------
   getUserDataPath(): Promise<string>;
 
+  getBackupPath(): Promise<string>;
+
   checkBackupAvailable(): Promise<false | LocalBackupMeta>;
 
   loadBackupData(backupPath: string): Promise<string>;

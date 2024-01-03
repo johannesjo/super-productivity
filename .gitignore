@@ -31,6 +31,8 @@
 .history
 
 # misc
+\\backups
+/backups
 /.angular/cache
 /.sass-cache
 /connect.lock
