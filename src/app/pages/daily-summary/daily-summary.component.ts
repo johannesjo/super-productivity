@@ -15,6 +15,7 @@ import { GlobalConfigService } from '../../features/config/global-config.service
 import {
   delay,
   filter,
+  first,
   map,
   shareReplay,
   startWith,
@@ -212,13 +213,8 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
 
   async finishDay(): Promise<void> {
     await this._beforeFinishDayService.executeActions();
-
-    const doneTasks = await this.workContextService.doneTasks$.pipe(take(1)).toPromise();
-
-    this._taskService.moveToArchive(doneTasks);
-
     if (IS_ELECTRON && this.isForToday) {
-      this._matDialog
+      const isConfirm = await this._matDialog
         .open(DialogConfirmComponent, {
           restoreFocus: true,
           data: {
@@ -228,18 +224,25 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
           },
         })
         .afterClosed()
-        .subscribe((isConfirm: boolean) => {
-          if (isConfirm) {
-            this._finishDayForGood(() => {
-              window.ea.shutdownNow();
-            });
-          } else if (isConfirm === false) {
-            this._finishDayForGood(() => {
-              this._router.navigate(['/active/tasks']);
-            });
-          }
+        .pipe(first())
+        .toPromise();
+
+      // dialog was just clicked away
+      if (isConfirm === undefined) {
+        return;
+      } else if (isConfirm === true) {
+        await this._moveDoneToArchive();
+        this._finishDayForGood(() => {
+          window.ea.shutdownNow();
         });
+      } else if (isConfirm === false) {
+        await this._moveDoneToArchive();
+        this._finishDayForGood(() => {
+          this._router.navigate(['/active/tasks']);
+        });
+      }
     } else {
+      await this._moveDoneToArchive();
       this._finishDayForGood(() => {
         this._router.navigate(['/active/tasks']);
       });
@@ -262,6 +265,11 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
 
   onTabIndexChange(i: number): void {
     this.selectedTabIndex = i;
+  }
+
+  private async _moveDoneToArchive(): Promise<void> {
+    const doneTasks = await this.workContextService.doneTasks$.pipe(take(1)).toPromise();
+    this._taskService.moveToArchive(doneTasks);
   }
 
   private async _finishDayForGood(cb?: any): Promise<void> {
