@@ -215,7 +215,11 @@ const _migrateSyncCfg = (config: GlobalConfigState): GlobalConfigState => {
 };
 
 const _fixDefaultProjectId = (config: GlobalConfigState): GlobalConfigState => {
-  if (config.misc.defaultProjectId === 'G.NONE' || config.misc.defaultProjectId === '') {
+  if (
+    config.misc.defaultProjectId === 'DEFAULT' ||
+    config.misc.defaultProjectId === 'G.NONE' ||
+    config.misc.defaultProjectId === ''
+  ) {
     return {
       ...config,
       misc: {

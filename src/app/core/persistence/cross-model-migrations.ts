@@ -20,6 +20,13 @@ export const crossModelMigrations = (data: AppDataComplete): AppDataComplete => 
   if (!data.metric[MODEL_VERSION_KEY]) {
     newData = migrateGlobalMetricModel(newData);
   }
+  if (
+    data.project?.entities['DEFAULT'] &&
+    !data.project?.entities['INBOX'] &&
+    data.globalConfig?.misc.defaultProjectId === 'INBOX'
+  ) {
+    newData = migrateDefaultProjectIdChange(newData);
+  }
   return newData;
 };
 
@@ -142,6 +149,21 @@ const migrateGlobalMetricModel = (data: AppDataComplete): AppDataComplete => {
   data.improvement = newI;
   data.obstruction = newO;
   console.log('[M] metricMigration:', { newM, newI, newO });
+
+  return data;
+};
+const migrateDefaultProjectIdChange = (data: AppDataComplete): AppDataComplete => {
+  console.log(
+    '[M] Migrating default project id state to make it work with legacy default',
+  );
+
+  data.globalConfig = {
+    ...data.globalConfig,
+    misc: {
+      ...data.globalConfig.misc,
+      defaultProjectId: 'DEFAULT',
+    },
+  };
 
   return data;
 };
