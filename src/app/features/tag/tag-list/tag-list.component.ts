@@ -36,15 +36,19 @@ export class TagListComponent implements OnDestroy {
   tags: Tag[] = [];
   private _isShowProjectTagAlways$: BehaviorSubject<boolean> =
     new BehaviorSubject<boolean>(false);
+  private _isShowProjectTagNever$: BehaviorSubject<boolean> =
+    new BehaviorSubject<boolean>(false);
   private _projectId$: BehaviorSubject<string | null> = new BehaviorSubject<
     string | null
   >(null);
   projectTag$: Observable<TagComponentTag | null> = combineLatest([
     this._workContextService.activeWorkContextTypeAndId$,
     this._isShowProjectTagAlways$,
+    this._isShowProjectTagNever$,
   ]).pipe(
-    switchMap(([{ activeType }, isShowAlways]) =>
-      isShowAlways || activeType === WorkContextType.TAG
+    switchMap(([{ activeType }, isShowProjectTagAlways, isShowProjectTagNever]) =>
+      !isShowProjectTagNever &&
+      (isShowProjectTagAlways || activeType === WorkContextType.TAG)
         ? this._projectId$.pipe(
             switchMap((id) => (id ? this._projectService.getByIdOnce$(id) : of(null))),
             map(
@@ -86,6 +90,10 @@ export class TagListComponent implements OnDestroy {
 
   @Input() set isShowProjectTagAlways(v: boolean) {
     this._isShowProjectTagAlways$.next(v);
+  }
+
+  @Input() set isShowProjectTagNever(v: boolean) {
+    this._isShowProjectTagNever$.next(v);
   }
 
   // NOTE: should normally be enough

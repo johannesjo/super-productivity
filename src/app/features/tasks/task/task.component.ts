@@ -1,6 +1,5 @@
 import {
   AfterViewInit,
-  Attribute,
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
@@ -52,7 +51,6 @@ import { AddTaskReminderInterface } from '../dialog-add-task-reminder/add-task-r
 import { TODAY_TAG } from '../../tag/tag.const';
 import { DialogEditTagsForTaskComponent } from '../../tag/dialog-edit-tags/dialog-edit-tags-for-task.component';
 import { WorkContextService } from '../../work-context/work-context.service';
-import { environment } from '../../../../environments/environment';
 import { throttle } from 'helpful-decorators';
 import { TaskRepeatCfgService } from '../../task-repeat-cfg/task-repeat-cfg.service';
 import { DialogConfirmComponent } from '../../../ui/dialog-confirm/dialog-confirm.component';
@@ -69,7 +67,7 @@ import { isToday } from '../../../util/is-today.util';
 })
 export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
   @Input() isBacklog: boolean = false;
-  isShowParentTitle: boolean = !!this.showParentTitle;
+  @Input() isInSubTaskList: boolean = false;
 
   task!: TaskWithSubTasks;
   T: typeof T = T;
@@ -82,7 +80,6 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
   ShowSubTasksMode: typeof ShowSubTasksMode = ShowSubTasksMode;
   contextMenuPosition: { x: string; y: string } = { x: '0px', y: '0px' };
   progress: number = 0;
-  isDev: boolean = !(environment.production || environment.stage);
   isTodayTag: boolean = false;
   @ViewChild('contentEditableOnClickEl', { static: true })
   contentEditableOnClickEl?: ElementRef;
@@ -115,23 +112,22 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
     switchMap((pid) => this._projectService.getProjectsWithoutId$(pid)),
   );
 
-  parentTitle$: Observable<string> = this.isShowParentTitle
-    ? this._task$.pipe(
-        take(1),
-        switchMap((task) => this._taskService.getByIdLive$(task.parentId as string)),
-        map((task) => task.title),
-      )
-    : EMPTY;
+  parentTask$: Observable<TaskCopy | null> = this._task$.pipe(
+    switchMap((task) =>
+      task.parentId ? this._taskService.getByIdLive$(task.parentId) : of(null),
+    ),
+  );
+  parentTitle$: Observable<string | null> = this.parentTask$.pipe(
+    map((task) => task && task.title),
+  );
 
-  projectColor$: Observable<string> = this.isShowParentTitle
-    ? this._task$.pipe(
-        take(1),
-        switchMap((task) =>
-          task.projectId ? this._projectService.getByIdOnce$(task.projectId) : EMPTY,
-        ),
-        map((project) => project.theme.primary),
-      )
-    : EMPTY;
+  projectColor$: Observable<string> = this._task$.pipe(
+    take(1),
+    switchMap((task) =>
+      task.projectId ? this._projectService.getByIdOnce$(task.projectId) : EMPTY,
+    ),
+    map((project) => project.theme.primary),
+  );
 
   isShowMoveFromAndToBacklogBtns$: Observable<boolean> = this._task$.pipe(
     take(1),
@@ -162,7 +158,6 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
     private readonly _cd: ChangeDetectorRef,
     private readonly _projectService: ProjectService,
     public readonly workContextService: WorkContextService,
-    @Attribute('showParentTitle') private showParentTitle: string,
   ) {}
 
   @Input('task') set taskSet(v: TaskWithSubTasks) {

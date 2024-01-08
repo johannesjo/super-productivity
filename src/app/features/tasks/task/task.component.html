@@ -139,7 +139,7 @@
       >
         <div
           class="parent-title"
-          *ngIf="isShowParentTitle && task.parentId"
+          *ngIf="!isInSubTaskList && task.parentId"
         >
           <div
             class="dot"
@@ -162,8 +162,8 @@
         <div class="task-title show-only-on-touch-only">{{task.title}}</div>
 
         <tag-list
-          *ngIf="!task.parentId || isDev"
           [task]="task"
+          [isShowProjectTagNever]="isInSubTaskList"
         ></tag-list>
       </div>
     </div>
@@ -237,7 +237,7 @@
 
           <button
             (click)="addToMyDay()"
-            *ngIf="!task.parentId && !isTodayTag"
+            *ngIf="!isTodayTag"
             [title]="T.F.TASK.CMP.ADD_TO_MY_DAY|translate"
             class="ico-btn"
             color=""
@@ -248,7 +248,7 @@
 
           <button
             (click)="removeFromMyDay()"
-            *ngIf="!task.parentId && !task.isDone && isTodayTag && (task.projectId || task.tagIds?.length > 1)"
+            *ngIf="!task.isDone && isTodayTag && (task.projectId || task.tagIds?.length > 1)"
             [title]="T.F.TASK.CMP.REMOVE_FROM_MY_DAY|translate"
             class="ico-btn"
             color=""
@@ -536,6 +536,7 @@
       [@expand]
       [isHideAll]="(task._showSubTasksMode!==ShowSubTasksMode.Show)"
       [isHideDone]="(task._showSubTasksMode===ShowSubTasksMode.HideDone)"
+      [isSubTaskList]="true"
       [listModelId]="task.id"
       [parentId]="task.id"
       [tasks]="task.subTasks"

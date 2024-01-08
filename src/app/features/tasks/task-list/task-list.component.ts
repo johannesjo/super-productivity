@@ -1,4 +1,5 @@
 import {
+  Attribute,
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
@@ -45,6 +46,7 @@ export class TaskListComponent implements OnDestroy, OnInit {
   @Input() listModelId?: string;
   @Input() noTasksMsg?: string;
   @Input() isBacklog: boolean = false;
+  @Input() isSubTaskList: boolean = false;
   listId?: string;
   @ViewChild('listEl', { static: true }) listEl?: ElementRef;
   isBlockAni: boolean = false;
@@ -69,6 +71,7 @@ export class TaskListComponent implements OnDestroy, OnInit {
     private _taskService: TaskService,
     private _dragulaService: DragulaService,
     private _cd: ChangeDetectorRef,
+    @Attribute('subTaskList') private subTaskList: string,
   ) {}
 
   @Input('listId') set listIdIn(v: string) {

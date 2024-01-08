@@ -296,17 +296,10 @@ export class TaskService {
   }
 
   addTodayTag(t: Task): void {
-    if (t.parentId) {
-      throw new Error('Sub task cannot be added a today tag');
-    }
     this.updateTags(t, [TODAY_TAG.id, ...t.tagIds], t.tagIds);
   }
 
   updateTags(task: Task, newTagIds: string[], oldTagIds: string[]): void {
-    if (task.parentId) {
-      throw new Error('Editing sub task tags should not be possible.');
-    }
-
     if (!task.projectId && newTagIds.length === 0) {
       this._snackService.open({
         type: 'ERROR',

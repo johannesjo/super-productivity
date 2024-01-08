@@ -179,10 +179,6 @@ const parseTagChanges = (
 ): { taskChanges: Partial<TaskCopy>; newTagTitlesToCreate: string[] } => {
   const taskChanges: Partial<TaskCopy> = {};
 
-  if (task.parentId) {
-    return { taskChanges, newTagTitlesToCreate: [] };
-  }
-
   const newTagTitlesToCreate: string[] = [];
   // only exec if previous ones are also passed
   if (Array.isArray(task.tagIds) && Array.isArray(allTags)) {
