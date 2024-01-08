@@ -372,31 +372,32 @@ export class ProjectEffects {
     { dispatch: false },
   );
 
-  moveToTodayListOnAddTodayTag: Observable<unknown> = createEffect(() =>
-    this._actions$.pipe(
-      ofType(updateTaskTags),
-      filter(
-        ({ task, newTagIds }) => !!task.projectId && newTagIds.includes(TODAY_TAG.id),
-      ),
-      concatMap(({ task, newTagIds }) =>
-        this._projectService.getByIdOnce$(task.projectId as string).pipe(
-          map((project) => ({
-            project,
-            task,
-            newTagIds,
-          })),
-        ),
-      ),
-      filter(({ project }) => !project.taskIds.includes(TODAY_TAG.id)),
-      map(({ task, newTagIds, project }) =>
-        moveProjectTaskToTodayListAuto({
-          projectId: project.id,
-          taskId: task.id,
-          isMoveToTop: false,
-        }),
-      ),
-    ),
-  );
+  // NOTE: does not seem to be necessary any more
+  // moveToTodayListOnAddTodayTag: Observable<unknown> = createEffect(() =>
+  //   this._actions$.pipe(
+  //     ofType(updateTaskTags),
+  //     filter(
+  //       ({ task, newTagIds }) => !!task.projectId && newTagIds.includes(TODAY_TAG.id),
+  //     ),
+  //     concatMap(({ task, newTagIds }) =>
+  //       this._projectService.getByIdOnce$(task.projectId as string).pipe(
+  //         map((project) => ({
+  //           project,
+  //           task,
+  //           newTagIds,
+  //         })),
+  //       ),
+  //     ),
+  //     filter(({ project }) => !project.taskIds.includes(TODAY_TAG.id)),
+  //     map(({ task, newTagIds, project }) =>
+  //       moveProjectTaskToTodayListAuto({
+  //         projectId: project.id,
+  //         taskId: task.id,
+  //         isMoveToTop: false,
+  //       }),
+  //     ),
+  //   ),
+  // );
 
   // @Effect()
   // moveToBacklogOnRemoveTodayTag: Observable<unknown> = this._actions$.pipe(

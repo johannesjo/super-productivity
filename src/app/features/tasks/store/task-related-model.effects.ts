@@ -13,6 +13,7 @@ import {
 import {
   concatMap,
   filter,
+  first,
   map,
   mapTo,
   mergeMap,
@@ -21,7 +22,13 @@ import {
   withLatestFrom,
 } from 'rxjs/operators';
 import { PersistenceService } from '../../../core/persistence/persistence.service';
-import { Task, TaskArchive, TaskReminderOptionId, TaskWithSubTasks } from '../task.model';
+import {
+  Task,
+  TaskArchive,
+  TaskCopy,
+  TaskReminderOptionId,
+  TaskWithSubTasks,
+} from '../task.model';
 import { ReminderService } from '../../reminder/reminder.service';
 import { moveTaskInTodayList } from '../../work-context/store/work-context-meta.actions';
 import { taskAdapter } from './task.adapter';
@@ -74,10 +81,21 @@ export class TaskRelatedModelEffects {
       this._actions$.pipe(
         ofType(addTimeSpent),
         switchMap(({ task }) =>
-          task.parentId ? this._taskService.getByIdOnce$(task.parentId) : of(task),
+          task.parentId
+            ? this._taskService.getByIdOnce$(task.parentId).pipe(
+                map((parent) => ({
+                  parent,
+                  task,
+                })),
+              )
+            : of({ parent: undefined, task }),
         ),
-        filter((task: Task) => !task.tagIds.includes(TODAY_TAG.id)),
-        map((task) =>
+        filter(
+          ({ task, parent }: { task: TaskCopy; parent?: TaskCopy }) =>
+            !task.tagIds.includes(TODAY_TAG.id) &&
+            (!parent || !parent.tagIds.includes(TODAY_TAG.id)),
+        ),
+        map(({ task }) =>
           updateTaskTags({
             task,
             newTagIds: unique([...task.tagIds, TODAY_TAG.id]),
@@ -144,6 +162,55 @@ export class TaskRelatedModelEffects {
           },
         }),
       ),
+    ),
+  );
+
+  excludeNewTagsFromParentOrChildren$: any = createEffect(() =>
+    this._actions$.pipe(
+      ofType(updateTaskTags),
+      filter(({ isSkipExcludeCheck }) => !isSkipExcludeCheck),
+      switchMap(({ task, newTagIds, oldTagIds }) => {
+        if (task.parentId) {
+          return this._taskService.getByIdOnce$(task.parentId).pipe(
+            switchMap((parentTask) => {
+              // when parent includes one of the added tag ids remove
+              // const sameTagIdsOnParent = newTagIds.filter((id) =>
+              //   parentTask.tagIds.includes(id),
+              // );
+              if (parentTask) {
+                return of(
+                  updateTaskTags({
+                    task: parentTask,
+                    oldTagIds: parentTask.tagIds,
+                    newTagIds: parentTask.tagIds.filter((id) => !newTagIds.includes(id)),
+                    isSkipExcludeCheck: true,
+                  }),
+                );
+              }
+              return EMPTY;
+            }),
+          );
+        }
+        if (task.subTaskIds.length) {
+          return this._taskService.getByIdsLive$(task.subTaskIds).pipe(
+            first(),
+            concatMap((subTasks) => {
+              return subTasks
+                .filter((subTask) => subTask.tagIds.length)
+                .map((subTask) => {
+                  return updateTaskTags({
+                    task: subTask,
+                    oldTagIds: subTask.tagIds,
+                    newTagIds: subTask.tagIds.filter((id) => !newTagIds.includes(id)),
+                    isSkipExcludeCheck: true,
+                  });
+                });
+            }),
+          );
+        }
+
+        return EMPTY;
+      }),
     ),
   );
 

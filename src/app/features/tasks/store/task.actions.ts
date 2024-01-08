@@ -92,7 +92,12 @@ export const updateTaskUi = createAction(
 
 export const updateTaskTags = createAction(
   TaskActionTypes.UpdateTaskTags,
-  props<{ task: Task; newTagIds: string[]; oldTagIds: string[] }>(),
+  props<{
+    task: Task;
+    newTagIds: string[];
+    oldTagIds: string[];
+    isSkipExcludeCheck?: boolean;
+  }>(),
 );
 
 export const removeTagsForAllTasks = createAction(
