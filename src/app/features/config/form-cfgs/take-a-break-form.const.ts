@@ -83,7 +83,8 @@ export const TAKE_A_BREAK_FORM_CFG: ConfigFormSection<TakeABreakConfig> = {
     },
     {
       type: 'tpl',
-      hideExpression: (model: any) => !model.isTakeABreakEnabled,
+      // NOTE: does never show for repeat for some weird reason
+      // hideExpression: (model: any) => !model.isTakeABreakEnabled,
       className: 'tpl',
       templateOptions: {
         tag: 'h3',
@@ -93,7 +94,8 @@ export const TAKE_A_BREAK_FORM_CFG: ConfigFormSection<TakeABreakConfig> = {
     },
     {
       key: 'motivationalImgs',
-      hideExpression: (model: any) => !model.isTakeABreakEnabled,
+      // NOTE: does never show for some weird reason
+      // hideExpression: (model: any) => !model.isTakeABreakEnabled,
       expressionProperties: { 'templateOptions.required': 'model.isTakeABreakEnabled' },
       type: 'repeat',
       templateOptions: {
