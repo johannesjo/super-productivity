@@ -141,11 +141,6 @@
           class="parent-title"
           *ngIf="!isInSubTaskList && task.parentId"
         >
-          <div
-            class="dot"
-            *ngIf="(projectColor$|async) as projectColor"
-            [style.backgroundColor]="projectColor"
-          ></div>
           <div class="title">{{parentTitle$|async}}</div>
         </div>
 
@@ -237,7 +232,7 @@
 
           <button
             (click)="addToMyDay()"
-            *ngIf="!isTodayTag"
+            *ngIf="!isTodayTag && (!task.parentId || (parentTask$|async))"
             [title]="T.F.TASK.CMP.ADD_TO_MY_DAY|translate"
             class="ico-btn"
             color=""
@@ -248,7 +243,7 @@
 
           <button
             (click)="removeFromMyDay()"
-            *ngIf="!task.isDone && isTodayTag && (task.projectId || task.tagIds?.length > 1)"
+            *ngIf="!task.isDone && isTodayTag && (task.projectId || task.tagIds?.length > 1 || task.parentId)"
             [title]="T.F.TASK.CMP.REMOVE_FROM_MY_DAY|translate"
             class="ico-btn"
             color=""

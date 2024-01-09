@@ -121,14 +121,6 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
     map((task) => task && task.title),
   );
 
-  projectColor$: Observable<string> = this._task$.pipe(
-    take(1),
-    switchMap((task) =>
-      task.projectId ? this._projectService.getByIdOnce$(task.projectId) : EMPTY,
-    ),
-    map((project) => project.theme.primary),
-  );
-
   isShowMoveFromAndToBacklogBtns$: Observable<boolean> = this._task$.pipe(
     take(1),
     switchMap((task) =>

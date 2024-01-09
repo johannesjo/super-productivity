@@ -335,7 +335,7 @@ export class TaskService {
   }
 
   updateTags(task: Task, newTagIds: string[], oldTagIds: string[]): void {
-    if (!task.projectId && newTagIds.length === 0) {
+    if (!task.projectId && newTagIds.length === 0 && !task.parentId) {
       this._snackService.open({
         type: 'ERROR',
         msg: T.F.TASK.S.LAST_TAG_DELETION_WARNING,

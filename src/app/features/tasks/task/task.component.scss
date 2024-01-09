@@ -902,13 +902,6 @@ $min-badge-size: $s * 2.25;
   padding-top: $s * 0.5;
   margin-bottom: -2px;
 
-  .dot {
-    height: 8px;
-    width: 8px;
-    border-radius: 50%;
-    margin-right: $s * 0.5;
-  }
-
   .title {
     font-size: 12px;
     text-overflow: ellipsis;
