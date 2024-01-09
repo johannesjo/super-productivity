@@ -173,19 +173,43 @@ export class TaskRelatedModelEffects {
         if (task.parentId) {
           return this._taskService.getByIdOnce$(task.parentId).pipe(
             switchMap((parentTask) => {
-              // when parent includes one of the added tag ids remove
-              // const sameTagIdsOnParent = newTagIds.filter((id) =>
-              //   parentTask.tagIds.includes(id),
-              // );
-              if (parentTask) {
-                return of(
-                  updateTaskTags({
-                    task: parentTask,
-                    oldTagIds: parentTask.tagIds,
-                    newTagIds: parentTask.tagIds.filter((id) => !newTagIds.includes(id)),
-                    isSkipExcludeCheck: true,
-                  }),
+              const isNewTagsConflictWithParent = !!(
+                parentTask && parentTask.tagIds.find((ptid) => newTagIds.includes(ptid))
+              );
+
+              if (isNewTagsConflictWithParent) {
+                const freeTags = parentTask.tagIds.filter(
+                  (ptid) => !newTagIds.includes(ptid),
                 );
+                const isTagCanBeRemoved = parentTask.projectId || freeTags.length;
+
+                if (isTagCanBeRemoved) {
+                  return of(
+                    updateTaskTags({
+                      task: parentTask,
+                      oldTagIds: parentTask.tagIds,
+                      newTagIds: freeTags,
+                      isSkipExcludeCheck: true,
+                    }),
+                  );
+                } else {
+                  this._snackService.open({
+                    type: 'ERROR',
+                    msg: T.F.TASK.S.LAST_TAG_DELETION_WARNING,
+                  });
+                  const freeTagsForSub = task.tagIds.filter(
+                    (sttid) => !parentTask.tagIds.includes(sttid),
+                  );
+                  // reverse previous updateTaskTags action since not possible
+                  return of(
+                    updateTaskTags({
+                      task: task,
+                      oldTagIds: newTagIds,
+                      newTagIds: freeTagsForSub,
+                      isSkipExcludeCheck: true,
+                    }),
+                  );
+                }
               }
               return EMPTY;
             }),
