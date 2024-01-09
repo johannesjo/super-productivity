@@ -232,7 +232,7 @@
 
           <button
             (click)="addToMyDay()"
-            *ngIf="!isTodayTag && (!task.parentId || (parentTask$|async))"
+            *ngIf="isShowAddToToday"
             [title]="T.F.TASK.CMP.ADD_TO_MY_DAY|translate"
             class="ico-btn"
             color=""
@@ -243,7 +243,7 @@
 
           <button
             (click)="removeFromMyDay()"
-            *ngIf="!task.isDone && isTodayTag && (task.projectId || task.tagIds?.length > 1 || task.parentId)"
+            *ngIf="isShowRemoveFromToday"
             [title]="T.F.TASK.CMP.REMOVE_FROM_MY_DAY|translate"
             class="ico-btn"
             color=""

@@ -81,6 +81,9 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
   contextMenuPosition: { x: string; y: string } = { x: '0px', y: '0px' };
   progress: number = 0;
   isTodayTag: boolean = false;
+  isShowAddToToday: boolean = false;
+  isShowRemoveFromToday: boolean = false;
+
   @ViewChild('contentEditableOnClickEl', { static: true })
   contentEditableOnClickEl?: ElementRef;
   @ViewChild('blockLeftEl') blockLeftElRef?: ElementRef;
@@ -158,8 +161,21 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
     this.progress = v && v.timeEstimate && (v.timeSpent / v.timeEstimate) * 100;
     this.taskIdWithPrefix = 't-' + this.task.id;
     this.isDone = v.isDone;
-    this.isTodayTag = v.tagIds.includes(TODAY_TAG.id);
     this.isRepeatTaskCreatedToday = !!(this.task.repeatCfgId && isToday(v.created));
+
+    const isTodayTag = v.tagIds.includes(TODAY_TAG.id);
+
+    this.isShowRemoveFromToday = !!(
+      !v.isDone &&
+      isTodayTag &&
+      (v.projectId || v.tagIds?.length > 1 || v.parentId)
+    );
+
+    this.isShowAddToToday =
+      !this.isShowRemoveFromToday &&
+      !(v.parentId && this.workContextService.isToday) &&
+      !isTodayTag;
+
     this._task$.next(v);
   }
 
