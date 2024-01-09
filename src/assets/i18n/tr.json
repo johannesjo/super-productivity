@@ -694,15 +694,18 @@
       "D_CREATE": {
         "CREATE": "Proje Yarat",
         "EDIT": "Projeyi Düzenle",
-        "SETUP_CALDAV": "Caldav Entegrasyonunu Kurun",
+        "SETUP_CALDAV": "Caldav Entegrasyonunu Kur",
         "SETUP_GIT": "GitHub Entegrasyonunu Ayarla",
         "SETUP_GITLAB": "GitLab Entegrasyonunu Ayarla",
         "SETUP_JIRA": "Jira Entegrasyonunu Kur",
-        "SETUP_OPEN_PROJECT": "OpenProject Entegrasyonunu Kurma"
+        "SETUP_OPEN_PROJECT": "OpenProject Entegrasyonunu Kur",
+        "SETUP_GITEA_PROJECT": "Gitea Entegrasyonunu Kur",
+        "SETUP_REDMINE_PROJECT": "Redmine Entegrasyonunu Kur"
       },
       "FORM_BASIC": {
+        "L_ENABLE_BACKLOG": "Proje İş Biriktirme Listesini Etkinleştir",
         "L_IS_HIDDEN_FROM_MENU": "Menüden projeyi gizle",
-        "L_TITLE": "proje Adı",
+        "L_TITLE": "Proje Adı",
         "TITLE": "Temel ayarlar"
       },
       "FORM_THEME": {
@@ -721,7 +724,7 @@
         "L_IS_REDUCED_THEME": "Azaltılmış kullanıcı arayüzü kullanın (görevlerin etrafında kutu yok)",
         "L_THEME_COLOR": "Tema Rengi",
         "L_TITLE": "Başlık",
-        "TITLE": "tema"
+        "TITLE": "Tema"
       },
       "S": {
         "ARCHIVED": "Arşivlenmiş Proje",
@@ -729,15 +732,15 @@
         "DELETED": "Silinmiş Proje",
         "E_EXISTS": "\"{{title}}\" projesi zaten var",
         "E_INVALID_FILE": "Proje dosyası için geçersiz veri",
-        "ISSUE_PROVIDER_UPDATED": " <strong>{{issueProviderKey}}</strong>için güncellenmiş proje ayarları",
+        "ISSUE_PROVIDER_UPDATED": " <strong>{{issueProviderKey}}</strong> için güncellenmiş proje ayarları",
         "UNARCHIVED": "Arşivlenmemiş proje",
         "UPDATED": "Güncellenen proje ayarları"
       }
     },
     "QUICK_HISTORY": {
-      "NO_DATA": "Cari yıl için veri yok",
+      "NO_DATA": "Bu yıl için veri yok",
       "PAGE_TITLE": "Hızlı Geçmiş",
-      "WEEK_TITLE": " {{nr}} . Hafta ({{timeSpent}})"
+      "WEEK_TITLE": " {{nr}}. Hafta ({{timeSpent}})"
     },
     "REMINDER": {
       "S_REMINDER_ERR": "Hatırlatma arayüzü hatası"
@@ -755,20 +758,20 @@
         "OK": "Yap!"
       },
       "D_EDIT": {
-        "L_COUNTER": "saymak",
+        "L_COUNTER": "Sayım",
         "TITLE": "Basit Sayacı Düzenle"
       },
       "FORM": {
         "ADD_NEW": "Basit sayaç ekle",
         "HELP": "Burada sağ üstte görünecek basit düğmeleri yapılandırabilirsiniz. Ya zamanlayıcılar ya da sadece sayılan basit bir sayaç olabilirler.",
         "L_AUTO_COUNT_UP": "İçin otomatik tetikleme sayımı",
-        "L_AUTO_SWITCH_OFF": "İçin otomatik tetik kapatma",
-        "L_AUTO_SWITCH_ON": "İçin otomatik tetik anahtarı açık",
-        "L_ICON": "ikon",
+        "L_AUTO_SWITCH_OFF": "İçin otomatik tetik kapatılması",
+        "L_AUTO_SWITCH_ON": "İçin otomatik tetik anahtarı açılması",
+        "L_ICON": "İkon",
         "L_ICON_ON": "Değiştirildiğinde simge",
         "L_IS_ENABLED": "Etkin",
         "L_TITLE": "Başlık",
-        "L_TYPE": "tip",
+        "L_TYPE": "Tip",
         "TITLE": "Basit Sayaçlar",
         "TYPE_CLICK_COUNTER": "Tıklama Sayacı",
         "TYPE_STOPWATCH": "Kronometre"
@@ -778,10 +781,10 @@
       "C": {
         "EMPTY_SYNC": "Boş bir veri nesnesini senkronize etmeye çalışıyorsunuz. Bu, (neredeyse) bakir bir uygulamanın ilk senkronizasyonunuz mu?",
         "FORCE_IMPORT": "Yine de uzak veriler içe aktarılsın mı?",
-        "FORCE_UPLOAD": "Yine de yerel veriler yüklensin mi?",
-        "FORCE_UPLOAD_AFTER_ERROR": "Yerel verilerinizi yüklerken bir hata oluştu. Güncellemeyi zorlamaya mı çalışıyorsunuz?",
+        "FORCE_UPLOAD": "Yine de Lokal veriler yüklensin mi?",
+        "FORCE_UPLOAD_AFTER_ERROR": "Lokal verilerinizi yüklerken bir hata oluştu. Güncellemeyi zorlamaya mı çalışıyorsunuz?",
         "MIGRATE_LEGACY": "İçe aktarılırken eski veriler algılandı, taşımayı denemek istiyor musunuz?",
-        "NO_REMOTE_DATA": "Uzak veri bulunamadı. Uzak'a yerel yüklensin mi?",
+        "NO_REMOTE_DATA": "Uzak veri bulunamadı. Uzak'a Lokal yüklensin mi?",
         "TRY_LOAD_REMOTE_AGAIN": "Verileri bir kez daha uzaktan kumandadan yeniden yüklemeyi mi deneyin?"
       },
       "D_AUTH_CODE": {
@@ -793,19 +796,19 @@
       "D_CONFLICT": {
         "LAST_CHANGE": "Son Değişiklik:",
         "LAST_SYNC": "Son Senkronizasyon:",
-        "LOCAL": "Yerel",
-        "LOCAL_REMOTE": "yerel -> uzaktan",
+        "LOCAL": "Lokal",
+        "LOCAL_REMOTE": "Lokal -> Uzak",
         "REMOTE": "Uzak",
-        "TEXT": "<p>Dropbox'tan güncelleme. Hem yerel hem de uzak veriler değiştirilmiş gibi görünüyor.</p>",
+        "TEXT": "<p>Dropbox'tan güncelleme. Hem Lokal hem de uzak veriler değiştirilmiş gibi görünüyor.</p>",
         "TITLE": "Dropbox: Çakışan Veriler",
-        "USE_LOCAL": "Yerel Verileri Kullan",
+        "USE_LOCAL": "Lokal Verileri Kullan",
         "USE_REMOTE": "Uzak Verileri Kullan"
       },
       "D_PERMISSION": {
         "DISABLE_SYNC": "Senkronizasyonu devre dışı bırak",
         "PERM_FILE": "İzin ver",
-        "TEXT": "<p>Yerel senkronizasyona ilişkin dosya izniniz iptal edildi.</p>",
-        "TITLE": "Senkronizasyon: Yerel dosya izni reddedildi"
+        "TEXT": "<p>Lokal senkronizasyona ilişkin dosya izniniz iptal edildi.</p>",
+        "TITLE": "Senkronizasyon: Lokal dosya izni reddedildi"
       },
       "FORM": {
         "DROPBOX": {
@@ -821,6 +824,7 @@
 
         },
         "L_ENABLE_SYNCING": "Senkronizasyonu Etkinleştir",
+        "L_ENABLE_COMPRESSION": "Sıkıştırmayı Etkinleştir (daha hızlı veri aktarımı)",
         "L_SYNC_INTERVAL": "Senkron Aralığı",
         "L_SYNC_PROVIDER": "Senkronizasyon Sağlayıcı",
         "TITLE": "Senkronize et",
@@ -833,7 +837,7 @@
         }
       },
       "S": {
-        "ERROR_FALLBACK_TO_BACKUP": "Veriler alınırken bir şeyler ters gitti. Yerel yedeklemeye geri dönüyorum.",
+        "ERROR_FALLBACK_TO_BACKUP": "Veriler alınırken bir şeyler ters gitti. Lokal yedeklemeye geri dönüyorum.",
         "ERROR_INVALID_DATA": "Senkronizasyon sırasında hata oluştu. Geçersiz veri",
         "IMPORTING": "Veriler içeri aktarılıyor",
         "INCOMPLETE_CFG": "Senkronizasyon için kimlik doğrulama başarısız oldu. Lütfen Yapılandırmanızı kontrol edin!",
@@ -853,7 +857,7 @@
         "CONFIRM_MSG": "\"{{tagName}}\" etiketini gerçekten silmek istiyor musunuz? Tüm görevlerden kaldırılacak. Bu geri alınamaz."
       },
       "D_EDIT": {
-        "ADD": "\"{{title}}\" için etiket ekle",
+        "ADD": "\"{{title}}\" için etiketler ekle",
         "EDIT": "\"{{title}}\" için etiketleri düzenleyin",
         "LABEL": "Etiketler"
       },
@@ -872,8 +876,8 @@
         "ADD_ATTACHMENT": "Eklenti ekle",
         "ADD_SUB_TASK": "Alt Görev ekle",
         "ATTACHMENTS": "Ekler {{nr}}",
-        "FROM_PARENT": "(Ebeveynden)",
-        "LOCAL_ATTACHMENTS": "Yerel Ekler",
+        "FROM_PARENT": "(Ana görevden)",
+        "LOCAL_ATTACHMENTS": "Lokal Ekler",
         "NOTES": "Notlar",
         "PARENT": "Ebeveyn",
         "REMINDER": "Hatırlatma",
@@ -890,7 +894,7 @@
         "ADD_TASK_TO_TOP_OF_BACKLOG": "Biriktirme listesinin en üstüne görev ekle",
         "ADD_TASK_TO_TOP_OF_TODAY": "Listenin başına görev ekle",
         "CREATE_TASK": "Yeni görev oluştur",
-        "EXAMPLE": "Örnek: \"Bir görev başlığı @cuma 4pm +projeAdı #bir etiket #başka bir etiket 10m/3h\"",
+        "EXAMPLE": "Örnek: \"Bir görev başlığı @friday 4pm +projeAdı #bir etiket #başka bir etiket 10m/3h\"",
         "START": "Başlamak için bir kez daha enter tuşuna basın",
         "TOGGLE_ADD_TO_BACKLOG_TODAY": "Görevi biriktirme listesine/bugünün listesine eklemeyi aç/kapat'",
         "TOGGLE_ADD_TOP_OR_BOTTOM": "Görev eklemeyi listenin en üstüne ve en altına değiştir"
@@ -1204,10 +1208,10 @@
   },
   "G": {
     "CANCEL": "İptal",
-    "CLICK_TO_EDIT": "düzenlemek için tıkla",
+    "CLICK_TO_EDIT": "Düzenlemek için tıkla",
     "CLOSE": "Kapat",
     "DELETE": "Sil",
-    "DISMISS": "Reddet",
+    "DISMISS": "Görmezden gel",
     "DURATION_DESCRIPTION": "Örneğin. \"5h 23m\", yani 5 saat 23 dakika",
     "DO_IT": "Yap!",
     "EDIT": "Düzenle",
@@ -1223,11 +1227,11 @@
     "PREVIOUS": "Önceki",
     "REMOVE": "Kaldır",
     "RESET": "Sıfırla",
-    "SAVE": "Kayıt etmek",
+    "SAVE": "Kaydet",
     "TITLE": "Başlık",
     "TODAY_TAG_TITLE": "Bugün",
-    "UNDO": "Geri alma",
-    "UPDATE": "Güncelleştirme",
+    "UNDO": "Geri Al",
+    "UPDATE": "Güncelle",
     "WITHOUT_PROJECT": "Proje Olmadan",
     "YESTERDAY": "Dün"
   },
