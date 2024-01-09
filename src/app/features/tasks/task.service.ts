@@ -10,6 +10,7 @@ import {
   Task,
   TaskAdditionalInfoTargetPanel,
   TaskArchive,
+  TaskCopy,
   TaskPlanned,
   TaskReminderOptionId,
   TaskState,
@@ -101,6 +102,7 @@ import {
 } from '../project/store/project.actions';
 import { Update } from '@ngrx/entity';
 import { DateService } from 'src/app/core/date/date.service';
+import { setActiveWorkContext } from '../work-context/store/work-context.actions';
 
 @Injectable({
   providedIn: 'root',
@@ -233,6 +235,39 @@ export class TaskService {
     taskAdditionalInfoTargetPanel: TaskAdditionalInfoTargetPanel = TaskAdditionalInfoTargetPanel.Default,
   ): void {
     this._store.dispatch(setSelectedTask({ id, taskAdditionalInfoTargetPanel }));
+  }
+
+  async setSelectedIdToParentAndSwitchContextIfNecessary(task: TaskCopy): Promise<void> {
+    if (!task.parentId) {
+      throw new Error('No task with parent task given');
+    }
+    const parentTask = await this.getByIdOnce$(task.parentId).toPromise();
+    const { activeId, activeType } =
+      await this._workContextService.activeWorkContextTypeAndId$
+        .pipe(first())
+        .toPromise();
+
+    const isParentOnSameList =
+      activeType === WorkContextType.PROJECT
+        ? parentTask.projectId === activeId
+        : parentTask.tagIds.includes(activeId);
+
+    if (!isParentOnSameList) {
+      if (parentTask.projectId) {
+        await this._router.navigate([`project/${parentTask.projectId}/tasks`]);
+      } else if (parentTask.tagIds[0]) {
+        await this._router.navigate([`tag/${parentTask.tagIds[0]}/tasks`]);
+      } else {
+        throw new Error('No valid context found for parent task');
+      }
+    }
+
+    this._store.dispatch(
+      setSelectedTask({
+        id: task.parentId,
+        taskAdditionalInfoTargetPanel: TaskAdditionalInfoTargetPanel.Default,
+      }),
+    );
   }
 
   startFirstStartable(): void {

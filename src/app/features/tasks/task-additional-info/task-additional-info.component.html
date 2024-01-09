@@ -62,7 +62,7 @@
 
   <task-additional-info-item
     (collapseParent)="collapseParent()"
-    (editActionTriggered)="taskService.setSelectedId(task.parentId)"
+    (editActionTriggered)="taskService.setSelectedIdToParentAndSwitchContextIfNecessary(task)"
     (keyPress)="onItemKeyPress($event)"
     *ngIf="task.parentId"
     [inputIcon]="'arrow_forward'"
