@@ -138,30 +138,30 @@ export class TimelineComponent implements OnDestroy {
   }
 
   async moveUp(task: Task): Promise<void> {
-    if (task.parentId) {
-      const parentTask = await this.taskService.getByIdOnce$(task.parentId).toPromise();
-      if (parentTask.subTaskIds[0] === task.id) {
-        this.taskService.moveUp(task.parentId, undefined, false);
-        window.clearTimeout(this._moveUpTimeout);
-        window.setTimeout(() => this.taskService.focusTask(task.id), 50);
-        return;
-      }
-    }
+    // if (task.parentId) {
+    //   const parentTask = await this.taskService.getByIdOnce$(task.parentId).toPromise();
+    //   if (parentTask.subTaskIds[0] === task.id) {
+    //     this.taskService.moveUp(task.parentId, undefined, false);
+    //     window.clearTimeout(this._moveUpTimeout);
+    //     window.setTimeout(() => this.taskService.focusTask(task.id), 50);
+    //     return;
+    //   }
+    // }
     this.taskService.moveUp(task.id, task.parentId, false);
     window.clearTimeout(this._moveUpTimeout);
     window.setTimeout(() => this.taskService.focusTask(task.id), 50);
   }
 
   async moveDown(task: Task): Promise<void> {
-    if (task.parentId) {
-      const parentTask = await this.taskService.getByIdOnce$(task.parentId).toPromise();
-      if (parentTask.subTaskIds[parentTask.subTaskIds.length - 1] === task.id) {
-        this.taskService.moveDown(task.parentId, undefined, false);
-        window.clearTimeout(this._moveDownTimeout);
-        window.setTimeout(() => this.taskService.focusTask(task.id), 50);
-        return;
-      }
-    }
+    // if (task.parentId) {
+    //   const parentTask = await this.taskService.getByIdOnce$(task.parentId).toPromise();
+    //   if (parentTask.subTaskIds[parentTask.subTaskIds.length - 1] === task.id) {
+    //     this.taskService.moveDown(task.parentId, undefined, false);
+    //     window.clearTimeout(this._moveDownTimeout);
+    //     window.setTimeout(() => this.taskService.focusTask(task.id), 50);
+    //     return;
+    //   }
+    // }
 
     this.taskService.moveDown(task.id, task.parentId, false);
     window.clearTimeout(this._moveDownTimeout);

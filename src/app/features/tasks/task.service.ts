@@ -398,47 +398,77 @@ export class TaskService {
     }
   }
 
-  moveUp(id: string, parentId: string | null = null, isBacklog: boolean): void {
-    if (parentId) {
-      this._store.dispatch(moveSubTaskUp({ id, parentId }));
+  async moveUp(
+    id: string,
+    parentId: string | null = null,
+    isBacklog: boolean,
+  ): Promise<void> {
+    const allMainTaskIds = [
+      ...(await this._workContextService.todaysTaskIds$.pipe(first()).toPromise()),
+      ...(await this._workContextService.backlogTaskIds$.pipe(first()).toPromise()),
+    ];
+    const isSubTaskAsMain = parentId && allMainTaskIds.includes(id);
+
+    if (parentId && !isSubTaskAsMain) {
+      const parentTask = await this.getByIdOnce$(parentId).toPromise();
+      if (parentTask.subTaskIds[0] === id) {
+        return await this.moveUp(parentId, undefined, false);
+      } else {
+        this._store.dispatch(moveSubTaskUp({ id, parentId }));
+      }
     } else {
       const workContextId = this._workContextService.activeWorkContextId as string;
       const workContextType = this._workContextService
         .activeWorkContextType as WorkContextType;
 
       if (isBacklog) {
-        this._workContextService.doneBacklogTaskIds$
+        const doneBacklogTaskIds = await this._workContextService.doneBacklogTaskIds$
           .pipe(take(1))
-          .subscribe((doneBacklogTaskIds) => {
-            if (!doneBacklogTaskIds) {
-              throw new Error('No doneBacklogTaskIds found');
-            }
-            this._store.dispatch(
-              moveProjectTaskUpInBacklogList({
-                taskId: id,
-                workContextId,
-                doneBacklogTaskIds,
-              }),
-            );
-          });
+          .toPromise();
+        if (!doneBacklogTaskIds) {
+          throw new Error('No doneBacklogTaskIds found');
+        }
+        this._store.dispatch(
+          moveProjectTaskUpInBacklogList({
+            taskId: id,
+            workContextId,
+            doneBacklogTaskIds,
+          }),
+        );
       } else {
-        this._workContextService.doneTaskIds$.pipe(take(1)).subscribe((doneTaskIds) => {
-          this._store.dispatch(
-            moveTaskUpInTodayList({
-              taskId: id,
-              workContextType,
-              workContextId,
-              doneTaskIds,
-            }),
-          );
-        });
+        const doneTaskIds = await this._workContextService.doneTaskIds$
+          .pipe(take(1))
+          .toPromise();
+        this._store.dispatch(
+          moveTaskUpInTodayList({
+            taskId: id,
+            workContextType,
+            workContextId,
+            doneTaskIds,
+          }),
+        );
       }
     }
   }
 
-  moveDown(id: string, parentId: string | null = null, isBacklog: boolean): void {
-    if (parentId) {
-      this._store.dispatch(moveSubTaskDown({ id, parentId }));
+  async moveDown(
+    id: string,
+    parentId: string | null = null,
+    isBacklog: boolean,
+  ): Promise<void> {
+    const allMainTaskIds = [
+      ...(await this._workContextService.todaysTaskIds$.pipe(first()).toPromise()),
+      ...(await this._workContextService.backlogTaskIds$.pipe(first()).toPromise()),
+    ];
+    const isSubTaskAsMain = parentId && allMainTaskIds.includes(id);
+
+    if (parentId && !isSubTaskAsMain) {
+      const parentTask = await this.getByIdOnce$(parentId).toPromise();
+      if (parentTask.subTaskIds[parentTask.subTaskIds.length - 1] === id) {
+        return await this.moveDown(parentId, undefined, false);
+      } else {
+        this._store.dispatch(moveSubTaskDown({ id, parentId }));
+      }
     } else {
       const workContextId = this._workContextService.activeWorkContextId as string;
       const workContextType = this._workContextService
@@ -446,31 +476,31 @@ export class TaskService {
 
       // this.
       if (isBacklog) {
-        this._workContextService.doneBacklogTaskIds$
+        const doneBacklogTaskIds = await this._workContextService.doneBacklogTaskIds$
           .pipe(take(1))
-          .subscribe((doneBacklogTaskIds) => {
-            if (!doneBacklogTaskIds) {
-              throw new Error('No doneBacklogTaskIds found');
-            }
-            this._store.dispatch(
-              moveProjectTaskDownInBacklogList({
-                taskId: id,
-                workContextId,
-                doneBacklogTaskIds,
-              }),
-            );
-          });
+          .toPromise();
+        if (!doneBacklogTaskIds) {
+          throw new Error('No doneBacklogTaskIds found');
+        }
+        this._store.dispatch(
+          moveProjectTaskDownInBacklogList({
+            taskId: id,
+            workContextId,
+            doneBacklogTaskIds,
+          }),
+        );
       } else {
-        this._workContextService.doneTaskIds$.pipe(take(1)).subscribe((doneTaskIds) => {
-          this._store.dispatch(
-            moveTaskDownInTodayList({
-              taskId: id,
-              workContextType,
-              workContextId,
-              doneTaskIds,
-            }),
-          );
-        });
+        const doneTaskIds = await this._workContextService.doneTaskIds$
+          .pipe(take(1))
+          .toPromise();
+        this._store.dispatch(
+          moveTaskDownInTodayList({
+            taskId: id,
+            workContextType,
+            workContextId,
+            doneTaskIds,
+          }),
+        );
       }
     }
   }
