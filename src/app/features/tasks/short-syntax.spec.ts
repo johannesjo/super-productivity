@@ -347,7 +347,7 @@ describe('shortSyntax', () => {
       });
     });
 
-    it('should not add tags for sub tasks', () => {
+    it('should add tags for sub tasks', () => {
       const t = {
         ...TASK,
         parentId: 'SOMEPARENT',
@@ -356,10 +356,14 @@ describe('shortSyntax', () => {
       };
       const r = shortSyntax(t, ALL_TAGS);
 
-      expect(r).toEqual(undefined);
+      expect(r).toEqual({
+        newTagTitles: ['idontexist'],
+        projectId: undefined,
+        remindAt: null,
+        taskChanges: { tagIds: ['blu_id'], title: 'Fun title' },
+      });
     });
   });
-
   describe('should work with all combined', () => {
     it('', () => {
       const t = {
