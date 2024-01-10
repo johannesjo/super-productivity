@@ -41,7 +41,6 @@ import {
   moveToArchive,
   moveToOtherProject,
   restoreTask,
-  updateTaskTags,
 } from '../../tasks/store/task.actions';
 import { ReminderService } from '../../reminder/reminder.service';
 import { ProjectService } from '../project.service';
@@ -59,7 +58,6 @@ import { TaskService } from '../../tasks/task.service';
 import { Task, TaskArchive, TaskState } from '../../tasks/task.model';
 import { unique } from '../../../util/unique';
 import { TaskRepeatCfgService } from '../../task-repeat-cfg/task-repeat-cfg.service';
-import { TODAY_TAG } from '../../tag/tag.const';
 import { EMPTY, Observable, of } from 'rxjs';
 import { TaskRepeatCfg } from '../../task-repeat-cfg/task-repeat-cfg.model';
 import { projectSelectors } from './project.selectors';
