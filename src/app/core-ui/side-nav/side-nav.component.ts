@@ -29,6 +29,7 @@ import { LayoutService } from '../layout/layout.service';
 import { TaskService } from '../../features/tasks/task.service';
 import { LS } from '../../core/persistence/storage-keys.const';
 import { TODAY_TAG } from '../../features/tag/tag.const';
+import { DialogTimelineSetupComponent } from '../../features/timeline/dialog-timeline-setup/dialog-timeline-setup.component';
 
 @Component({
   selector: 'side-nav',
@@ -251,5 +252,9 @@ export class SideNavComponent implements OnDestroy {
         this.keyManager?.setActiveItem(targetIndex);
       }
     }
+  }
+
+  openTimelineSettings(): void {
+    this._matDialog.open(DialogTimelineSetupComponent);
   }
 }

@@ -1,5 +1,5 @@
-import { ChangeDetectionStrategy, Component, OnDestroy } from '@angular/core';
-import { MatDialogRef } from '@angular/material/dialog';
+import { ChangeDetectionStrategy, Component, Inject, OnDestroy } from '@angular/core';
+import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { UntypedFormGroup } from '@angular/forms';
 import { FormlyFieldConfig } from '@ngx-formly/core';
 import { TIMELINE_FORM_CFG } from '../../config/form-cfgs/timeline-form.const';
@@ -9,14 +9,16 @@ import { T } from '../../../t.const';
 import { GlobalConfigService } from '../../config/global-config.service';
 import { Subscription } from 'rxjs';
 import { LS } from '../../../core/persistence/storage-keys.const';
+import { Task } from '../../tasks/task.model';
+import { TaskRepeatCfg } from '../../task-repeat-cfg/task-repeat-cfg.model';
 
 @Component({
-  selector: 'dialog-timeline-initial-setup',
-  templateUrl: './dialog-timeline-initial-setup.component.html',
-  styleUrls: ['./dialog-timeline-initial-setup.component.scss'],
+  selector: 'dialog-timeline-setup',
+  templateUrl: './dialog-timeline-setup.component.html',
+  styleUrls: ['./dialog-timeline-setup.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class DialogTimelineInitialSetupComponent implements OnDestroy {
+export class DialogTimelineSetupComponent implements OnDestroy {
   T: typeof T = T;
   timelineCfg: TimelineConfig;
   formGroup: UntypedFormGroup = new UntypedFormGroup({});
@@ -24,7 +26,8 @@ export class DialogTimelineInitialSetupComponent implements OnDestroy {
   private _subs = new Subscription();
 
   constructor(
-    private _matDialogRef: MatDialogRef<DialogTimelineInitialSetupComponent>,
+    private _matDialogRef: MatDialogRef<DialogTimelineSetupComponent>,
+    @Inject(MAT_DIALOG_DATA) public data: { isInfoShownInitially: boolean },
     private _globalConfigService: GlobalConfigService,
   ) {
     this.timelineCfg = DEFAULT_GLOBAL_CONFIG.timeline;

@@ -4,7 +4,7 @@ import { TimelineComponent } from './timeline.component';
 import { TasksModule } from '../tasks/tasks.module';
 import { UiModule } from '../../ui/ui.module';
 import { TimelineRepeatTaskProjectionComponent } from './timeline-repeat-task-projection/timeline-repeat-task-projection.component';
-import { DialogTimelineInitialSetupComponent } from './dialog-timeline-initial-setup/dialog-timeline-initial-setup.component';
+import { DialogTimelineSetupComponent } from './dialog-timeline-setup/dialog-timeline-setup.component';
 import { TimelineCustomEventComponent } from './timeline-custom-event/timeline-custom-event.component';
 import { TimelineCalendarEventComponent } from './timeline-calendar-event/timeline-calendar-event.component';
 import { RightPanelModule } from '../right-panel/right-panel.module';
@@ -15,7 +15,7 @@ import { RightPanelModule } from '../right-panel/right-panel.module';
     TimelineCustomEventComponent,
     TimelineRepeatTaskProjectionComponent,
     TimelineCalendarEventComponent,
-    DialogTimelineInitialSetupComponent,
+    DialogTimelineSetupComponent,
   ],
   exports: [TimelineComponent],
   imports: [CommonModule, UiModule, TasksModule, RightPanelModule],

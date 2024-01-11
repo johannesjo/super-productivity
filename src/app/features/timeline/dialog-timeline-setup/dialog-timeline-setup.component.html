@@ -9,9 +9,17 @@
 >
   <mat-dialog-content>
     <div
+      *ngIf="data?.isInfoShownInitially"
       class="text"
       [innerHTML]="T.F.TIMELINE.D_INITIAL.TEXT|translate"
     ></div>
+
+    <help-section *ngIf="!data?.isInfoShownInitially">
+      <div
+        [innerHTML]="T.F.TIMELINE.D_INITIAL.TEXT|translate"
+        class="side-info"
+      ></div>
+    </help-section>
 
     <formly-form
       (modelChange)="timelineCfg=$event"

@@ -5,3 +5,7 @@
 h1 > * {
   vertical-align: middle;
 }
+
+:host {
+  position: relative;
+}

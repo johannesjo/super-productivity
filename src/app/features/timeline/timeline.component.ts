@@ -15,7 +15,7 @@ import { TimelineViewEntryType } from './timeline.const';
 import { GlobalConfigService } from '../config/global-config.service';
 import { MatDialog } from '@angular/material/dialog';
 import { LS } from '../../core/persistence/storage-keys.const';
-import { DialogTimelineInitialSetupComponent } from './dialog-timeline-initial-setup/dialog-timeline-initial-setup.component';
+import { DialogTimelineSetupComponent } from './dialog-timeline-setup/dialog-timeline-setup.component';
 import { WorkContextService } from '../work-context/work-context.service';
 import { TaskRepeatCfgService } from '../task-repeat-cfg/task-repeat-cfg.service';
 import { Task } from '../tasks/task.model';
@@ -123,7 +123,9 @@ export class TimelineComponent implements OnDestroy {
     private _snackService: SnackService,
   ) {
     if (!localStorage.getItem(LS.WAS_TIMELINE_INITIAL_DIALOG_SHOWN)) {
-      this._matDialog.open(DialogTimelineInitialSetupComponent);
+      this._matDialog.open(DialogTimelineSetupComponent, {
+        data: { isInfoShownInitially: true },
+      });
     }
     this.icalEvents$.subscribe((v) => console.log(`icalEvents$`, v));
   }
