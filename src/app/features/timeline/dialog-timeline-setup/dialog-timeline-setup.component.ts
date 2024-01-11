@@ -9,8 +9,6 @@ import { T } from '../../../t.const';
 import { GlobalConfigService } from '../../config/global-config.service';
 import { Subscription } from 'rxjs';
 import { LS } from '../../../core/persistence/storage-keys.const';
-import { Task } from '../../tasks/task.model';
-import { TaskRepeatCfg } from '../../task-repeat-cfg/task-repeat-cfg.model';
 
 @Component({
   selector: 'dialog-timeline-setup',
