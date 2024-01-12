@@ -15,8 +15,8 @@ import { IS_ELECTRON } from '../../app.constants';
 import { IS_ANDROID_WEB_VIEW } from '../../util/is-android-web-view';
 import { TIMELINE_FORM_CFG } from './form-cfgs/timeline-form.const';
 import { DOMINA_MODE_FORM } from './form-cfgs/domina-mode-form.const';
-import { isSnap } from '../../util/is-snap';
 import { FOCUS_MODE_FORM_CFG } from './form-cfgs/focus-mode-form.const';
+import { IS_FIREFOX } from '../../util/is-firefox';
 
 export const GLOBAL_CONFIG_FORM_CONFIG: ConfigFormConfig = [
   LANGUAGE_SELECTION_FORM_FORM as GenericConfigFormSection,
@@ -40,5 +40,7 @@ export const GLOBAL_PRODUCTIVITY_FORM_CONFIG: ConfigFormConfig = [
   POMODORO_FORM_CFG as GenericConfigFormSection,
   EVALUATION_SETTINGS_FORM_CFG as GenericConfigFormSection,
   SIMPLE_COUNTER_FORM as GenericConfigFormSection,
-  ...(!IS_ELECTRON || !isSnap() ? [DOMINA_MODE_FORM as GenericConfigFormSection] : []),
+  ...(!window.ea?.isSnap() && !IS_FIREFOX
+    ? [DOMINA_MODE_FORM as GenericConfigFormSection]
+    : []),
 ].filter((cfg) => IS_ELECTRON || !cfg.isElectronOnly);

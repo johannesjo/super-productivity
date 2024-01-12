@@ -1,4 +1,4 @@
-import { IpcRendererEvent, OpenExternalOptions } from 'electron';
+import { IpcRendererEvent } from 'electron';
 import {
   GlobalConfigState,
   TakeABreakConfig,
@@ -49,6 +49,8 @@ export interface ElectronAPI {
   openExternalUrl(url: string): void;
 
   isMacOS(): boolean;
+
+  isSnap(): boolean;
 
   // SEND
   // ----

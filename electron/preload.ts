@@ -43,6 +43,7 @@ const ea: ElectronAPI = {
   },
   getZoomFactor: () => webFrame.getZoomFactor(),
   isMacOS: () => process.platform === 'darwin',
+  isSnap: () => process && process.env && !!process.env.SNAP,
 
   // SEND
   // ----
