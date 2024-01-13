@@ -1,6 +1,7 @@
 import { ConfigFormSection, TimelineConfig } from '../global-config.model';
 import { T } from '../../../t.const';
 import { isValidSplitTime } from '../../../util/is-valid-split-time';
+import { IS_ELECTRON } from '../../../app.constants';
 
 export const TIMELINE_FORM_CFG: ConfigFormSection<TimelineConfig> = {
   title: T.GCF.TIMELINE.TITLE,
@@ -61,6 +62,18 @@ export const TIMELINE_FORM_CFG: ConfigFormSection<TimelineConfig> = {
         text: T.GCF.TIMELINE.CAL_PROVIDERS_INFO,
       },
     },
+    ...(!IS_ELECTRON
+      ? [
+          {
+            type: 'tpl',
+            className: 'tpl',
+            templateOptions: {
+              tag: 'p',
+              text: T.GCF.TIMELINE.BROWSER_WARNING,
+            },
+          },
+        ]
+      : []),
     {
       key: 'calendarProviders',
       type: 'repeat',
