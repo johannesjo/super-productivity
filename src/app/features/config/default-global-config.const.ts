@@ -136,6 +136,9 @@ export const DEFAULT_GLOBAL_CONFIG: GlobalConfigState = {
     isShowOnMobile: false,
     minTime: minute * 2,
   },
+  calendarIntegration: {
+    calendarProviders: [],
+  },
   timeline: {
     isWorkStartEndEnabled: true,
     workStart: DEFAULT_DAY_START,

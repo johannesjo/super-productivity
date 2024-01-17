@@ -110,6 +110,18 @@ export type SyncConfig = Readonly<{
   localFileSync: LocalFileSyncConfig;
 }>;
 
+export type CalendarIntegrationConfig = Readonly<{
+  calendarProviders: CalendarProvider[];
+}>;
+export type CalendarProvider = Readonly<{
+  isEnabled: boolean;
+  icalUrl: string;
+  icon: string | null;
+  defaultProjectId: string | null;
+  checkUpdatesEvery: number;
+  showBannerBeforeThreshold: null | number;
+}>;
+
 export type TimelineCalendarProvider = Readonly<{
   icalUrl: string;
   icon: string | null;
@@ -153,6 +165,7 @@ export type GlobalConfigState = Readonly<{
   localBackup: LocalBackupConfig;
   sound: SoundConfig;
   trackingReminder: TrackingReminderConfig;
+  calendarIntegration: CalendarIntegrationConfig;
   timeline: TimelineConfig;
   dominaMode: DominaModeConfig;
   focusMode: FocusModeConfig;
@@ -168,6 +181,7 @@ export type GlobalSectionConfig =
   | MiscConfig
   | PomodoroConfig
   | KeyboardConfig
+  | CalendarIntegrationConfig
   | TimelineConfig
   | SyncConfig;
 type Omit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>;

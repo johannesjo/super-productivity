@@ -1,6 +1,6 @@
 // import { ComponentFixture, TestBed } from '@angular/core/testing';
 //
-// import { TimelineCalendarEventComponent } from './timeline-calendar-event.component';
+// import { TimelineCalendarEventComponent } from './timeline-calendarIntegration-event.component';
 //
 // describe('TimelineCustomEventComponent', () => {
 //   let component: TimelineCalendarEventComponent;

@@ -5,6 +5,7 @@ export enum BannerId {
   InstallWebApp = 'InstallWebApp',
   Offline = 'Offline',
   TimeEstimateExceeded = 'TimeEstimateExceeded',
+  CalendarEvent = 'CalendarEvent',
 }
 
 export type BannerType = 'ERROR';
@@ -15,7 +16,7 @@ export interface BannerAction {
 }
 
 export interface Banner {
-  id: BannerId;
+  id: BannerId | string;
   msg: string;
   ico?: string;
   svgIco?: string;
