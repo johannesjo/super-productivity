@@ -25,6 +25,7 @@ import { HttpClient } from '@angular/common/http';
 import { getRelevantEventsFromIcal } from './ical/get-relevant-events-from-ical';
 import { SnackService } from '../../core/snack/snack.service';
 import { loadFromRealLs, saveToRealLs } from '../../core/persistence/local-storage';
+const TWO_MONTHS = 60 * 60 * 1000 * 24 * 62;
 
 @Component({
   selector: 'timeline',
@@ -45,7 +46,9 @@ export class TimelineComponent implements OnDestroy {
                 .filter((calProvider) => calProvider.isEnabled)
                 .map((calProvider) =>
                   this._http.get(calProvider.icalUrl, { responseType: 'text' }).pipe(
-                    map(getRelevantEventsFromIcal),
+                    map((icalStrData) =>
+                      getRelevantEventsFromIcal(icalStrData, Date.now() + TWO_MONTHS),
+                    ),
                     map((items: TimelineFromCalendarEvent[]) => ({
                       items,
                       icon: calProvider.icon,

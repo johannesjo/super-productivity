@@ -50,6 +50,7 @@ import { AndroidModule } from './features/android/android.module';
 import { WelcomeModule } from './features/welcome/welcome.module';
 import { DominaModeModule } from './features/domina-mode/domina-mode.module';
 import { FocusModeModule } from './features/focus-mode/focus-mode.module';
+import { CalendarIntegrationModule } from './features/calendar-integration/calendar-integration.module';
 
 // NOTE: export required for aot to work
 export const createTranslateLoader = (http: HttpClient): TranslateHttpLoader =>
@@ -85,6 +86,7 @@ export const createTranslateLoader = (http: HttpClient): TranslateHttpLoader =>
     FinishDayBeforeCloseModule,
     DominaModeModule,
     FocusModeModule,
+    CalendarIntegrationModule,
 
     AndroidModule,
     // throws build error ...(IS_ANDROID_WEB_VIEW ? [AndroidModule] : []),
