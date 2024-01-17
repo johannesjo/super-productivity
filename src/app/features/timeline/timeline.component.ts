@@ -47,7 +47,11 @@ export class TimelineComponent implements OnDestroy {
                 .map((calProvider) =>
                   this._http.get(calProvider.icalUrl, { responseType: 'text' }).pipe(
                     map((icalStrData) =>
-                      getRelevantEventsFromIcal(icalStrData, Date.now() + TWO_MONTHS),
+                      getRelevantEventsFromIcal(
+                        icalStrData,
+                        Date.now(),
+                        Date.now() + TWO_MONTHS,
+                      ),
                     ),
                     map((items: TimelineFromCalendarEvent[]) => ({
                       items,

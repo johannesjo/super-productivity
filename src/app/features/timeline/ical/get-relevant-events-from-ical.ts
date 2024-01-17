@@ -7,18 +7,19 @@ import { CalendarIntegrationEvent } from '../../calendar-integration/calendar-in
 
 export const getRelevantEventsForCalendarIntegrationFromIcal = (
   icalData: string,
+  startTimestamp: number,
   endTimestamp: number,
 ): CalendarIntegrationEvent[] => {
   // console.time('TEST');
-  const now = new Date();
-  const nowTimestamp = now.getTime();
-  const icalNow = ICAL.Time.now();
   let calendarIntegrationEvents: CalendarIntegrationEvent[] = [];
-  const allPossibleFutureEvents = getAllPossibleFutureEventsFromIcal(icalData, now);
+  const allPossibleFutureEvents = getAllPossibleEventsAfterStartFromIcal(
+    icalData,
+    new Date(startTimestamp),
+  );
   allPossibleFutureEvents.forEach((ve) => {
     if (ve.getFirstPropertyValue('rrule')) {
       calendarIntegrationEvents = calendarIntegrationEvents.concat(
-        getForRecurring(ve, icalNow, nowTimestamp, endTimestamp),
+        getForRecurring(ve, startTimestamp, endTimestamp),
       );
     } else if (ve.getFirstPropertyValue('dtstart').toJSDate().getTime() < endTimestamp) {
       calendarIntegrationEvents.push(convertVEventToCalendarIntegrationEvent(ve));
@@ -30,18 +31,19 @@ export const getRelevantEventsForCalendarIntegrationFromIcal = (
 
 export const getRelevantEventsFromIcal = (
   icalData: string,
+  startTimestamp: number,
   endTimestamp: number,
 ): TimelineFromCalendarEvent[] => {
   // console.time('TEST');
-  const now = new Date();
-  const nowTimestamp = now.getTime();
-  const icalNow = ICAL.Time.now();
   let timelineEvents: TimelineFromCalendarEvent[] = [];
-  const allPossibleFutureEvents = getAllPossibleFutureEventsFromIcal(icalData, now);
+  const allPossibleFutureEvents = getAllPossibleEventsAfterStartFromIcal(
+    icalData,
+    new Date(startTimestamp),
+  );
   allPossibleFutureEvents.forEach((ve) => {
     if (ve.getFirstPropertyValue('rrule')) {
       timelineEvents = timelineEvents.concat(
-        getForRecurring(ve, icalNow, nowTimestamp, endTimestamp),
+        getForRecurring(ve, startTimestamp, endTimestamp),
       );
     } else if (ve.getFirstPropertyValue('dtstart').toJSDate().getTime() < endTimestamp) {
       timelineEvents.push(convertVEventToTimelineEvent(ve));
@@ -53,8 +55,7 @@ export const getRelevantEventsFromIcal = (
 
 const getForRecurring = (
   vevent: any,
-  weirdIcalStart: ICAL.Time,
-  nowTimestamp: number,
+  startTimestamp: number,
   endTimeStamp: number,
 ): CalendarIntegrationEvent[] => {
   const title: string = vevent.getFirstPropertyValue('summary');
@@ -72,7 +73,7 @@ const getForRecurring = (
   const evs: CalendarIntegrationEvent[] = [];
   for (let next = iter.next(); next; next = iter.next()) {
     const nextTimestamp = next.toJSDate().getTime();
-    if (nextTimestamp <= endTimeStamp && nextTimestamp >= nowTimestamp) {
+    if (nextTimestamp <= endTimeStamp && nextTimestamp >= startTimestamp) {
       evs.push({
         title,
         start: nextTimestamp,
@@ -119,7 +120,7 @@ const convertVEventToCalendarIntegrationEvent = (
   };
 };
 
-const getAllPossibleFutureEventsFromIcal = (icalData: string, now: Date): any[] => {
+const getAllPossibleEventsAfterStartFromIcal = (icalData: string, start: Date): any[] => {
   const c = ICAL.parse(icalData);
   const comp = new ICAL.Component(c);
   const tzAdded: string[] = [];
@@ -140,10 +141,10 @@ const getAllPossibleFutureEventsFromIcal = (icalData: string, now: Date): any[] 
 
   const allPossibleFutureEvents = vevents.filter(
     (ve: any) =>
-      ve.getFirstPropertyValue('dtstart').toJSDate() >= now ||
+      ve.getFirstPropertyValue('dtstart').toJSDate() >= start ||
       (ve.getFirstPropertyValue('rrule') &&
         (!ve.getFirstPropertyValue('rrule')?.until?.toJSDate() ||
-          ve.getFirstPropertyValue('rrule')?.until?.toJSDate() > now)),
+          ve.getFirstPropertyValue('rrule')?.until?.toJSDate() > start)),
   );
 
   for (const tzid of tzAdded) {
