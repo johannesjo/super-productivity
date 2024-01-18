@@ -122,17 +122,10 @@ export type CalendarProvider = Readonly<{
   showBannerBeforeThreshold: null | number;
 }>;
 
-export type TimelineCalendarProvider = Readonly<{
-  icalUrl: string;
-  icon: string | null;
-  isEnabled: boolean;
-}>;
-
 export type TimelineConfig = Readonly<{
   isWorkStartEndEnabled: boolean;
   workStart: string;
   workEnd: string;
-  calendarProviders: TimelineCalendarProvider[];
 }>;
 
 export type TrackingReminderConfig = Readonly<{

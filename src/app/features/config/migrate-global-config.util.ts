@@ -1,4 +1,5 @@
 import {
+  CalendarProvider,
   GlobalConfigState,
   IdleConfig,
   SyncConfig,
@@ -24,6 +25,8 @@ export const migrateGlobalConfigState = (
   globalConfigState = _migrateUndefinedShortcutsToNull(globalConfigState);
 
   globalConfigState = _migrateSyncCfg(globalConfigState);
+
+  globalConfigState = _migrateTimelineCalendarsToCalendarIntegration(globalConfigState);
 
   globalConfigState = _migrateMotivationalImg(globalConfigState);
 
@@ -212,6 +215,40 @@ const _migrateSyncCfg = (config: GlobalConfigState): GlobalConfigState => {
         } as SyncConfig)
       : DEFAULT_GLOBAL_CONFIG.sync,
   };
+};
+
+const _migrateTimelineCalendarsToCalendarIntegration = (
+  config: GlobalConfigState,
+): GlobalConfigState => {
+  if ((config.timeline as any)?.calendarProviders?.length) {
+    const convertedCalendars: CalendarProvider[] = (
+      config.timeline as any
+    ).calendarProviders.map((oldCalProvider) => ({
+      isEnabled: oldCalProvider.isEnabled,
+      icalUrl: oldCalProvider.icalUrl,
+      icon: oldCalProvider.icon,
+      defaultProjectId: null,
+      checkUpdatesEvery: 60 * 60 * 1000,
+      showBannerBeforeThreshold: 15 * 60 * 1000,
+    }));
+
+    delete (config.timeline as any).calendarProviders;
+    return {
+      ...config,
+      timeline: {
+        ...config.timeline,
+        ...({ calendarProviders: undefined } as any),
+      },
+      calendarIntegration: {
+        ...config.calendarIntegration,
+        calendarProviders: [
+          ...config.calendarIntegration.calendarProviders,
+          ...convertedCalendars,
+        ],
+      },
+    };
+  }
+  return config;
 };
 
 const _fixDefaultProjectId = (config: GlobalConfigState): GlobalConfigState => {

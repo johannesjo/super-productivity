@@ -97,7 +97,7 @@ export const CALENDAR_FORM_CFG: ConfigFormSection<CalendarIntegrationConfig> = {
             hooks: {
               onInit: (field) => {
                 if (field?.formControl?.value === null) {
-                  field.formControl.setValue(5 * 60000);
+                  field.formControl.setValue(15 * 60000);
                 }
               },
             },

@@ -1,10 +1,6 @@
 import { ChangeDetectionStrategy, Component, OnDestroy } from '@angular/core';
-import {
-  TimelineCalendarMapEntry,
-  TimelineFromCalendarEvent,
-  TimelineViewEntry,
-} from './timeline.model';
-import { catchError, debounceTime, map, startWith, switchMap, tap } from 'rxjs/operators';
+import { TimelineCalendarMapEntry, TimelineViewEntry } from './timeline.model';
+import { debounceTime, map, startWith, switchMap, tap } from 'rxjs/operators';
 import { TaskService } from '../tasks/task.service';
 import { combineLatest, forkJoin, Observable, of } from 'rxjs';
 import { mapToTimelineViewEntries } from './map-timeline-data/map-to-timeline-view-entries';
@@ -21,11 +17,10 @@ import { TaskRepeatCfgService } from '../task-repeat-cfg/task-repeat-cfg.service
 import { Task } from '../tasks/task.model';
 import { DialogAddTaskReminderComponent } from '../tasks/dialog-add-task-reminder/dialog-add-task-reminder.component';
 import { AddTaskReminderInterface } from '../tasks/dialog-add-task-reminder/add-task-reminder-interface';
-import { HttpClient } from '@angular/common/http';
-import { getRelevantEventsFromIcal } from './ical/get-relevant-events-from-ical';
-import { SnackService } from '../../core/snack/snack.service';
 import { loadFromRealLs, saveToRealLs } from '../../core/persistence/local-storage';
-const TWO_MONTHS = 60 * 60 * 1000 * 24 * 62;
+import { Store } from '@ngrx/store';
+import { selectCalendarProviders } from '../config/store/global-config.reducer';
+import { CalendarIntegrationService } from '../calendar-integration/calendar-integration.service';
 
 @Component({
   selector: 'timeline',
@@ -37,45 +32,16 @@ const TWO_MONTHS = 60 * 60 * 1000 * 24 * 62;
 export class TimelineComponent implements OnDestroy {
   T: typeof T = T;
   TimelineViewEntryType: typeof TimelineViewEntryType = TimelineViewEntryType;
-  icalEvents$: Observable<TimelineCalendarMapEntry[]> =
-    this._globalConfigService.timelineCfg$.pipe(
-      switchMap((cfg) => {
-        return cfg.calendarProviders && cfg.calendarProviders.length
+  icalEvents$: Observable<TimelineCalendarMapEntry[]> = this._store
+    .select(selectCalendarProviders)
+    .pipe(
+      switchMap((calendarProviders) => {
+        return calendarProviders && calendarProviders.length
           ? forkJoin(
-              cfg.calendarProviders
+              calendarProviders
                 .filter((calProvider) => calProvider.isEnabled)
                 .map((calProvider) =>
-                  this._http.get(calProvider.icalUrl, { responseType: 'text' }).pipe(
-                    map((icalStrData) =>
-                      getRelevantEventsFromIcal(
-                        icalStrData,
-                        Date.now(),
-                        Date.now() + TWO_MONTHS,
-                      ),
-                    ),
-                    map((items: TimelineFromCalendarEvent[]) => ({
-                      items,
-                      icon: calProvider.icon,
-                    })),
-                    catchError((err) => {
-                      console.error(err);
-                      this._snackService.open({
-                        type: 'ERROR',
-                        msg: T.F.TIMELINE.S.CAL_PROVIDER_ERROR,
-                        translateParams: {
-                          errTxt:
-                            err?.toString() ||
-                            err?.status ||
-                            err?.message ||
-                            'UNKNOWN :(',
-                        },
-                      });
-                      return of({
-                        items: [],
-                        icon: '',
-                      });
-                    }),
-                  ),
+                  this._calendarIntegrationService.requestForTimeline(calProvider),
                 ),
             ).pipe(
               tap((val) => {
@@ -126,8 +92,8 @@ export class TimelineComponent implements OnDestroy {
     private _workContextService: WorkContextService,
     private _globalConfigService: GlobalConfigService,
     private _matDialog: MatDialog,
-    private _http: HttpClient,
-    private _snackService: SnackService,
+    private _store: Store,
+    private _calendarIntegrationService: CalendarIntegrationService,
   ) {
     if (!localStorage.getItem(LS.WAS_TIMELINE_INITIAL_DIALOG_SHOWN)) {
       this._matDialog.open(DialogTimelineSetupComponent, {
