@@ -36,7 +36,12 @@ export class CalendarIntegrationEffects {
 
           return forkJoin(
             activatedProviders.map((calProvider) =>
-              this._http.get(calProvider.icalUrl, { responseType: 'text' }).pipe(
+              timer(0, calProvider.checkUpdatesEvery).pipe(
+                // timer(0, 10000).pipe(
+                tap(() => console.log('REQUEST CALENDAR', calProvider)),
+                switchMap(() =>
+                  this._http.get(calProvider.icalUrl, { responseType: 'text' }),
+                ),
                 map((icalStrData) => {
                   // allEventsToday
                   return getRelevantEventsForCalendarIntegrationFromIcal(
