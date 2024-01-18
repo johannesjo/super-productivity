@@ -41,6 +41,7 @@ export const CALDAV_TYPE: IssueProviderKey = 'CALDAV';
 export const OPEN_PROJECT_TYPE: IssueProviderKey = 'OPEN_PROJECT';
 export const GITEA_TYPE: IssueProviderKey = 'GITEA';
 export const REDMINE_TYPE: IssueProviderKey = 'REDMINE';
+export const CALENDAR_TYPE: IssueProviderKey = 'CALENDAR';
 
 export const ISSUE_PROVIDER_TYPES: IssueProviderKey[] = [
   GITLAB_TYPE,
@@ -50,6 +51,7 @@ export const ISSUE_PROVIDER_TYPES: IssueProviderKey[] = [
   OPEN_PROJECT_TYPE,
   GITEA_TYPE,
   REDMINE_TYPE,
+  CALENDAR_TYPE,
 ];
 
 export const ISSUE_PROVIDER_ICON_MAP = {
@@ -60,6 +62,7 @@ export const ISSUE_PROVIDER_ICON_MAP = {
   [OPEN_PROJECT_TYPE]: 'open_project',
   [GITEA_TYPE]: 'gitea',
   [REDMINE_TYPE]: 'redmine',
+  [CALENDAR_TYPE]: 'calendar',
 };
 
 export const ISSUE_PROVIDER_HUMANIZED = {
@@ -70,6 +73,7 @@ export const ISSUE_PROVIDER_HUMANIZED = {
   [OPEN_PROJECT_TYPE]: 'OpenProject',
   [GITEA_TYPE]: 'Gitea',
   [REDMINE_TYPE]: 'Redmine',
+  [CALENDAR_TYPE]: 'Calendar',
 };
 
 export const DEFAULT_ISSUE_PROVIDER_CFGS = {

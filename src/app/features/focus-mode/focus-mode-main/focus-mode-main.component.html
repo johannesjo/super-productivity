@@ -60,7 +60,7 @@
       mat-icon-button
       [matTooltip]="T.F.FOCUS_MODE.OPEN_ISSUE_IN_BROWSER|translate"
       target="_blank"
-      *ngIf="task.issueId"
+      *ngIf="task.issueId && task.issueType !=='CALENDAR'"
       [href]="issueUrl$|async"
     >
       <div

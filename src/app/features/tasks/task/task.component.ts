@@ -631,7 +631,7 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
   moveTaskToProject(projectId: string): void {
     if (projectId === this.task.projectId) {
       return;
-    } else if (this.task.issueId) {
+    } else if (this.task.issueId && this.task.issueType !== 'CALENDAR') {
       this._snackService.open({
         type: 'CUSTOM',
         ico: 'block',

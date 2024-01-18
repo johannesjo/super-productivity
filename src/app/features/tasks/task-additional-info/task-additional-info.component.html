@@ -138,7 +138,7 @@
   <task-additional-info-item
     (collapseParent)="collapseParent()"
     (keyPress)="onItemKeyPress($event)"
-    *ngIf="task.issueId"
+    *ngIf="task.issueId && task.issueType !=='CALENDAR'"
     [expanded]="isExpandedIssuePanel"
     [type]="'panel'"
   >

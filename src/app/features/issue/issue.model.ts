@@ -36,7 +36,8 @@ export type IssueProviderKey =
   | 'CALDAV'
   | 'OPEN_PROJECT'
   | 'GITEA'
-  | 'REDMINE';
+  | 'REDMINE'
+  | 'CALENDAR';
 
 export type IssueIntegrationCfg =
   | JiraCfg

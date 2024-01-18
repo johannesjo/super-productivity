@@ -404,7 +404,7 @@
 
             <!--TODO maybe handle dynamically -->
             <a
-              *ngIf="task.issueId"
+              *ngIf="task.issueId && task.issueType !=='CALENDAR'"
               [href]="issueUrl$|async"
               mat-menu-item
               style="color: inherit"
@@ -416,7 +416,7 @@
 
             <button
               (click)="updateIssueData()"
-              *ngIf="task.issueId"
+              *ngIf="task.issueId && task.issueType !=='CALENDAR'"
               mat-menu-item
             >
               <mat-icon [svgIcon]="task.issueType|issueIcon"></mat-icon>
@@ -451,7 +451,7 @@
             </button>
 
             <button
-              *ngIf="!task.parentId && !task.issueId && !task.repeatCfgId"
+              *ngIf="!task.parentId && (!task.issueId || task.issueType ==='CALENDAR') && !task.repeatCfgId"
               [matMenuTriggerFor]="projectMenu"
               mat-menu-item
             >

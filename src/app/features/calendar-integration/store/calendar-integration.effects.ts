@@ -80,6 +80,7 @@ export class CalendarIntegrationEffects {
   );
 
   private _skippedEventIds: string[] = [];
+  private _currentlyShownBanners: string[] = [];
 
   constructor(
     private _actions$: Actions,
@@ -99,23 +100,44 @@ export class CalendarIntegrationEffects {
     const start = this._datePipe.transform(calEv.start, 'shortTime');
     const startShortSyntax = this._datePipe.transform(calEv.start, 'H:mm');
     const durationInMin = Math.round(calEv.duration / 60 / 1000);
+
+    if (!this._currentlyShownBanners.includes(calEv.id)) {
+      this._currentlyShownBanners.push(calEv.id);
+    }
+    const nrOfOtherBanners = this._currentlyShownBanners.length;
+    console.log(this._currentlyShownBanners);
+
     this._bannerService.open({
       id: calEv.id,
       ico: calProvider.icon || undefined,
-      msg: `<strong>${calEv.title}</strong> starts at <strong>${start}</strong>!`,
+      msg: `<strong>${calEv.title}</strong> starts at <strong>${start}</strong>!${
+        nrOfOtherBanners > 1
+          ? `<br> (and ${nrOfOtherBanners - 1} other events are due)`
+          : ''
+      }`,
       action: {
         label: 'Dismiss',
-        fn: () => this._skippedEventIds.push(calEv.id),
+        fn: () => {
+          this._currentlyShownBanners = this._currentlyShownBanners.filter(
+            (evId) => evId !== calEv.id,
+          );
+          this._skippedEventIds.push(calEv.id);
+        },
       },
       action2: {
         label: 'Add as Task',
         fn: () => {
+          this._currentlyShownBanners = this._currentlyShownBanners.filter(
+            (evId) => evId !== calEv.id,
+          );
           this._skippedEventIds.push(calEv.id);
           this._taskService.add(
             `${calEv.title} @${startShortSyntax} ${durationInMin}m`,
             undefined,
             {
               projectId: calProvider.defaultProjectId,
+              issueId: calEv.id,
+              issueType: 'CALENDAR',
             },
           );
         },
