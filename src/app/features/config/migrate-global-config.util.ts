@@ -241,10 +241,7 @@ const _migrateTimelineCalendarsToCalendarIntegration = (
       },
       calendarIntegration: {
         ...config.calendarIntegration,
-        calendarProviders: [
-          ...config.calendarIntegration.calendarProviders,
-          ...convertedCalendars,
-        ],
+        calendarProviders: [...convertedCalendars],
       },
     };
   }
