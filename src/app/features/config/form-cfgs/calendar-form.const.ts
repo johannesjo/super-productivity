@@ -60,20 +60,20 @@ export const CALENDAR_FORM_CFG: ConfigFormSection<CalendarIntegrationConfig> = {
               label: 'URL or File path for calendarIntegration ICAL',
             },
           },
-          {
-            type: 'icon',
-            key: 'icon',
-            hooks: {
-              onInit: (field) => {
-                if (field?.formControl?.value === null) {
-                  field.formControl.setValue('event');
-                }
-              },
-            },
-            templateOptions: {
-              label: T.F.SIMPLE_COUNTER.FORM.L_ICON,
-            },
-          },
+          // {
+          //   type: 'icon',
+          //   key: 'icon',
+          //   hooks: {
+          //     onInit: (field) => {
+          //       if (field?.formControl?.value === null) {
+          //         field.formControl.setValue('event');
+          //       }
+          //     },
+          //   },
+          //   templateOptions: {
+          //     label: T.F.SIMPLE_COUNTER.FORM.L_ICON,
+          //   },
+          // },
           {
             type: 'duration',
             key: 'checkUpdatesEvery',

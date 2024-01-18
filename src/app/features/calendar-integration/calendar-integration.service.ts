@@ -31,7 +31,7 @@ export class CalendarIntegrationService {
       ),
       map((items: TimelineFromCalendarEvent[]) => ({
         items,
-        icon: calProvider.icon,
+        icon: calProvider.icon || null,
       })),
       catchError((err) => {
         console.error(err);
