@@ -41,7 +41,7 @@ export class TimelineComponent implements OnDestroy {
               calendarProviders
                 .filter((calProvider) => calProvider.isEnabled)
                 .map((calProvider) =>
-                  this._calendarIntegrationService.requestForTimeline(calProvider),
+                  this._calendarIntegrationService.requestEventsForTimeline(calProvider),
                 ),
             ).pipe(
               tap((val) => {

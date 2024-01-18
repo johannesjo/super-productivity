@@ -15,6 +15,7 @@ import { CalendarIntegrationEvent } from '../calendar-integration.model';
 import { getStartOfDayTimestamp } from '../../../util/get-start-of-day-timestamp';
 import { TaskService } from '../../tasks/task.service';
 import { isCalenderEventDue } from '../is-calender-event-due';
+import { CalendarIntegrationService } from '../calendar-integration.service';
 
 const CHECK_TO_SHOW_INTERVAL = 6 * 1000;
 
@@ -40,21 +41,8 @@ export class CalendarIntegrationEffects {
                 // timer(0, 10000).pipe(
                 tap(() => console.log('REQUEST CALENDAR', calProvider)),
                 switchMap(() =>
-                  this._http.get(calProvider.icalUrl, { responseType: 'text' }),
+                  this._calendarIntegrationService.requestEvents(calProvider),
                 ),
-                map((icalStrData) => {
-                  // allEventsToday
-                  return getRelevantEventsForCalendarIntegrationFromIcal(
-                    icalStrData,
-                    getStartOfDayTimestamp(),
-                    getEndOfDayTimestamp(),
-                  );
-                }),
-                catchError((err) => {
-                  console.error(err);
-                  // TODO show error snack
-                  return of([]);
-                }),
                 switchMap((allEventsToday) =>
                   timer(0, CHECK_TO_SHOW_INTERVAL).pipe(
                     tap((t) => console.log('________', t, allEventsToday)),
@@ -68,7 +56,6 @@ export class CalendarIntegrationEffects {
                         ),
                       );
                       console.log({ eventsToShowBannerFor });
-
                       eventsToShowBannerFor.forEach((calEv) =>
                         this._showBanner(calEv, calProvider),
                       );
@@ -95,6 +82,7 @@ export class CalendarIntegrationEffects {
     private _bannerService: BannerService,
     private _datePipe: DatePipe,
     private _taskService: TaskService,
+    private _calendarIntegrationService: CalendarIntegrationService,
     @Inject(LOCALE_ID) private locale: string,
   ) {}
 
