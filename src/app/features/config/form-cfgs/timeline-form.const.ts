@@ -1,7 +1,6 @@
 import { ConfigFormSection, TimelineConfig } from '../global-config.model';
 import { T } from '../../../t.const';
 import { isValidSplitTime } from '../../../util/is-valid-split-time';
-import { IS_ELECTRON } from '../../../app.constants';
 
 export const TIMELINE_FORM_CFG: ConfigFormSection<TimelineConfig> = {
   title: T.GCF.TIMELINE.TITLE,
