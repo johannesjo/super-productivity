@@ -3,9 +3,8 @@ import { T } from '../../../t.const';
 import { IS_ELECTRON } from '../../../app.constants';
 
 export const CALENDAR_FORM_CFG: ConfigFormSection<CalendarIntegrationConfig> = {
-  // title: T.GCF.TIMELINE.TITLE,
-  title: 'Calendar',
-  help: T.GCF.TIMELINE.HELP,
+  title: T.GCF.CALENDARS.TITLE,
+  help: T.GCF.CALENDARS.HELP,
   key: 'calendarIntegration',
   items: [
     {
@@ -13,7 +12,7 @@ export const CALENDAR_FORM_CFG: ConfigFormSection<CalendarIntegrationConfig> = {
       className: 'tpl',
       templateOptions: {
         tag: 'p',
-        text: T.GCF.TIMELINE.CAL_PROVIDERS_INFO,
+        text: T.GCF.CALENDARS.CAL_PROVIDERS_INFO,
       },
     },
     ...(!IS_ELECTRON
@@ -23,7 +22,7 @@ export const CALENDAR_FORM_CFG: ConfigFormSection<CalendarIntegrationConfig> = {
             className: 'tpl',
             templateOptions: {
               tag: 'p',
-              text: T.GCF.TIMELINE.BROWSER_WARNING,
+              text: T.GCF.CALENDARS.BROWSER_WARNING,
             },
           },
         ]
@@ -32,8 +31,7 @@ export const CALENDAR_FORM_CFG: ConfigFormSection<CalendarIntegrationConfig> = {
       key: 'calendarProviders',
       type: 'repeat',
       templateOptions: {
-        // addText: T.GCF.TIMELINE.CAL_PROVIDERS_ADD,
-        addText: 'Add calendarIntegration',
+        addText: T.GCF.CALENDARS.CAL_PROVIDERS_ADD,
       },
       fieldArray: {
         fieldGroup: [
@@ -48,7 +46,7 @@ export const CALENDAR_FORM_CFG: ConfigFormSection<CalendarIntegrationConfig> = {
               },
             },
             templateOptions: {
-              label: T.F.SIMPLE_COUNTER.FORM.L_IS_ENABLED,
+              label: T.G.ENABLED,
             },
           },
           {
@@ -56,8 +54,7 @@ export const CALENDAR_FORM_CFG: ConfigFormSection<CalendarIntegrationConfig> = {
             key: 'icalUrl',
             templateOptions: {
               required: true,
-              // label: T.GCF.TIMELINE.L_CAL_PATH,
-              label: 'URL or File path for calendarIntegration ICAL',
+              label: T.GCF.CALENDARS.CAL_PATH,
             },
           },
           {
@@ -86,8 +83,7 @@ export const CALENDAR_FORM_CFG: ConfigFormSection<CalendarIntegrationConfig> = {
             },
             templateOptions: {
               required: false,
-              // label: T.F.SIMPLE_COUNTER.FORM.L_ICON,
-              label: 'Check for remote updates every X',
+              label: T.GCF.CALENDARS.CHECK_UPDATES,
               description: T.G.DURATION_DESCRIPTION,
             },
           },
@@ -103,8 +99,7 @@ export const CALENDAR_FORM_CFG: ConfigFormSection<CalendarIntegrationConfig> = {
             },
             templateOptions: {
               isAllowSeconds: true,
-              // label: T.F.SIMPLE_COUNTER.FORM.L_ICON,
-              label: 'Show a notification X before the event (blank for disabled)',
+              label: T.GCF.CALENDARS.SHOW_BANNER_THRESHOLD,
               description: T.G.DURATION_DESCRIPTION,
             },
           },
@@ -112,8 +107,7 @@ export const CALENDAR_FORM_CFG: ConfigFormSection<CalendarIntegrationConfig> = {
             type: 'project-select',
             key: 'defaultProjectId',
             templateOptions: {
-              // label: T.F.SIMPLE_COUNTER.FORM.L_ICON,
-              label: 'Default project id when adding tasks',
+              label: T.GCF.CALENDARS.DEFAULT_PROJECT,
             },
           },
         ],

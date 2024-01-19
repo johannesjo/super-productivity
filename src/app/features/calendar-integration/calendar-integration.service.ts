@@ -37,7 +37,7 @@ export class CalendarIntegrationService {
         console.error(err);
         this._snackService.open({
           type: 'ERROR',
-          msg: T.F.TIMELINE.S.CAL_PROVIDER_ERROR,
+          msg: T.F.CALENDARS.S.CAL_PROVIDER_ERROR,
           translateParams: {
             errTxt: err?.toString() || err?.status || err?.message || 'UNKNOWN :(',
           },
@@ -63,7 +63,7 @@ export class CalendarIntegrationService {
         console.error(err);
         this._snackService.open({
           type: 'ERROR',
-          msg: T.F.TIMELINE.S.CAL_PROVIDER_ERROR,
+          msg: T.F.CALENDARS.S.CAL_PROVIDER_ERROR,
           translateParams: {
             errTxt: err?.toString() || err?.status || err?.message || 'UNKNOWN :(',
           },

@@ -119,6 +119,17 @@
         "ISSUE_NOT_FOUND": "CalDav: Todo \"{{issueId}}\" seems to be deleted on server."
       }
     },
+    "CALENDARS": {
+      "BANNER": {
+        "TXT": "<strong>{{title}}</strong> starts at <strong>{{start}}</strong>!",
+        "TXT_MULTIPLE": "<strong>{{title}}</strong> starts at <strong>{{start}}</strong>!<br> (and {{nrOfOtherBanners}} other events are due)",
+        "ADD_AS_TASK": "Add as Task",
+        "FOCUS_TASK": "Focus Task"
+      },
+      "S": {
+        "CAL_PROVIDER_ERROR": "Calendar Provider Error: {{errTxt}}"
+      }
+    },
     "CONFIG": {
       "S": {
         "UPDATE_SECTION": "Updated settings for <strong>{{sectionKey}}</strong>"
@@ -1103,9 +1114,6 @@
       "MENU_TITLE": "Timeline",
       "NOW": "Now",
       "NO_TASKS": "Currently there are no tasks. Please add some tasks via the + Button in the top bar.",
-      "S": {
-        "CAL_PROVIDER_ERROR": "Timeline Cal Provider Error: {{errTxt}}"
-      },
       "START": "Work Start",
       "TASK_PROJECTION_INFO": "Future projection of a scheduled repeatable task"
     },
@@ -1253,6 +1261,18 @@
       "LABEL_IS_ENABLED": "Enable automatic backups",
       "LOCATION_INFO": "Backups are saved to:",
       "TITLE": "Automatic Backups"
+    },
+    "CALENDARS": {
+      "BROWSER_WARNING": "<b>This will likely NOT work with the Browser version of Super Productivity.<br /> Please <a href=\"https://super-productivity.com/download/\">download the desktop version</a> to use this feature!</b>",
+      "CAL_PATH": "Url of the iCal source",
+      "CAL_PROVIDERS": "Calendar providers (experimental and optional)",
+      "CAL_PROVIDERS_ADD": "Add Calendar iCal source",
+      "CAL_PROVIDERS_INFO": "You can optionally configure the timeline to also load and display data from iCal (e.g. <a href=\"https://support.google.com/calendar/answer/37648?hl=en#zippy=%2Csync-your-google-calendar-view-edit%2Cget-your-calendar-view-only\">Google Calendar</a>, <a href=\"https://support.pushpay.com/s/article/How-do-I-get-an-iCal-link-from-Office-365\">Outlook 365</a>).",
+      "CHECK_UPDATES": "Check for remote updates every X",
+      "DEFAULT_PROJECT": "Default Project for added calendar tasks",
+      "HELP": "You can integrate calendars to be reminded and add them as tasks within Super Productivity. The integration works by using the Ical format. For this to work your calendars need to be accessible either over the internet or via file system.",
+      "SHOW_BANNER_THRESHOLD": "Show a notification X before the event (blank for disabled)",
+      "TITLE": "Calendars"
     },
     "EVALUATION": {
       "IS_HIDE_EVALUATION_SHEET": "Hide evaluation sheet on daily summary",
@@ -1409,12 +1429,7 @@
       "TITLE": "Break Reminder"
     },
     "TIMELINE": {
-      "BROWSER_WARNING": "<b>This will likely NOT work with the Browser version of Super Productivity.<br /> Please <a href=\"https://super-productivity.com/download/\">download the desktop version</a> to use this feature!</b>",
-      "CAL_PROVIDERS": "Calendar providers (experimental and optional)",
-      "CAL_PROVIDERS_ADD": "Add ical source",
-      "CAL_PROVIDERS_INFO": "You can optionally configure the timeline to also load and display data from iCal (e.g. <a href=\"https://support.google.com/calendar/answer/37648?hl=en#zippy=%2Csync-your-google-calendar-view-edit%2Cget-your-calendar-view-only\">Google Calendar</a>, <a href=\"https://support.pushpay.com/s/article/How-do-I-get-an-iCal-link-from-Office-365\">Outlook 365</a>).",
       "HELP": "The timeline feature should provide you with a quick overview over how your planned tasks play out over time. You can find it in the left hand menu under <a href='#/timeline'>'Timeline'</a>. ",
-      "L_CAL_PATH": "Url/File path for calendar ICAL (optional)",
       "L_IS_WORK_START_END_ENABLED": "Limit unscheduled task flow to specific work times",
       "L_WORK_END": "Work Day End",
       "L_WORK_START": "Work Day Start",
@@ -1434,6 +1449,7 @@
     "ERR_COMPRESSION": "Error for compression interface",
     "FILE_DOWNLOADED": "{{fileName}} downloaded",
     "FILE_DOWNLOADED_BTN": "Open folder",
+    "NAVIGATE_TO_TASK_ERR": "Could not focus to task. Did you delete it?",
     "PERSISTENCE_DISALLOWED": "Data will be not persisted permanently. Be aware that this can lead to data loss!!",
     "PERSISTENCE_ERROR": "Error when requesting to persist data: {{err}}",
     "RUNNING_X": "Running \"{{str}}\".",

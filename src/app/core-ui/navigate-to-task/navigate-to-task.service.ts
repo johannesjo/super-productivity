@@ -41,9 +41,7 @@ export class NavigateToTaskService {
       console.error(err);
       this._snackService.open({
         type: 'ERROR',
-        // msg: T.F.TIMELINE.S.CAL_PROVIDER_ERROR,
-        // TODO add message
-        msg: 'Could not focus to task. Did you delete it?',
+        msg: T.GLOBAL_SNACK.NAVIGATE_TO_TASK_ERR,
       });
     }
   }

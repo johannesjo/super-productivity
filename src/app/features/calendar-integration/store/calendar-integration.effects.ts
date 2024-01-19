@@ -18,6 +18,7 @@ import { getWorklogStr } from '../../../util/get-work-log-str';
 import { BannerId } from '../../../core/banner/banner.model';
 import { selectTaskByIssueId } from '../../tasks/store/task.selectors';
 import { NavigateToTaskService } from '../../../core-ui/navigate-to-task/navigate-to-task.service';
+import { T } from '../../../t.const';
 
 const CHECK_TO_SHOW_INTERVAL = 60 * 1000;
 
@@ -158,37 +159,39 @@ export class CalendarIntegrationEffects {
       .pipe(first())
       .toPromise();
 
-    const start = this._datePipe.transform(calEv.start, 'shortTime');
+    const start = this._datePipe.transform(calEv.start, 'shortTime') as string;
     const startShortSyntax = this._datePipe.transform(calEv.start, 'H:mm');
     const durationInMin = Math.round(calEv.duration / 60 / 1000);
 
-    const nrOfOtherBanners = allEvsToShow.length;
+    const nrOfAllBanners = allEvsToShow.length;
     console.log({ taskForEvent, allEvsToShow });
 
     this._bannerService.open({
       id: BannerId.CalendarEvent,
       ico: calProvider.icon || 'event',
-      msg: `<strong>${calEv.title}</strong> starts at <strong>${start}</strong>!${
-        nrOfOtherBanners > 1
-          ? `<br> (and ${nrOfOtherBanners - 1} other events are due)`
-          : ''
-      }`,
+      msg:
+        nrOfAllBanners > 1 ? T.F.CALENDARS.BANNER.TXT_MULTIPLE : T.F.CALENDARS.BANNER.TXT,
+      translateParams: {
+        title: calEv.title,
+        start,
+        nrOfOtherBanners: nrOfAllBanners - 1,
+      },
       action: {
-        label: 'Dismiss',
+        label: T.G.DISMISS,
         fn: () => {
           this._skipEv(calEv.id);
         },
       },
       action2: taskForEvent
         ? {
-            label: 'Focus Task',
+            label: T.F.CALENDARS.BANNER.FOCUS_TASK,
             fn: () => {
               this._skipEv(calEv.id);
               this._navigateToTaskService.navigate(taskForEvent.id);
             },
           }
         : {
-            label: 'Add as Task',
+            label: T.F.CALENDARS.BANNER.ADD_AS_TASK,
             fn: () => {
               this._skipEv(calEv.id);
               this._taskService.add(
