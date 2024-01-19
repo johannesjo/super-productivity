@@ -265,7 +265,7 @@
 
           <button
             (click)="toggleShowAdditionalInfoOpen()"
-            *ngIf="!task.notes&&!task.issueId&&!isSelected"
+            *ngIf="!task.notes && (!task.issueId||task.issueType==='CALENDAR') && !isSelected"
             [title]="T.F.TASK.CMP.TOGGLE_ADDITIONAL|translate"
             class="ico-btn show-additional-info-btn"
             color=""
@@ -308,7 +308,7 @@
         <div>
           <button
             (click)="toggleShowAdditionalInfoOpen()"
-            *ngIf="task.notes||task.issueId||isSelected"
+            *ngIf="task.notes|| (task.issueId&&task.issueType!=='CALENDAR') || isSelected"
             [title]="T.F.TASK.CMP.TOGGLE_ADDITIONAL|translate"
             [class.closeBtn]="!task.issueWasUpdated && isSelected"
             class="ico-btn show-additional-info-btn"
