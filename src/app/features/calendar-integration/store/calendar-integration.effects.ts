@@ -162,6 +162,7 @@ export class CalendarIntegrationEffects {
     const start = this._datePipe.transform(calEv.start, 'shortTime') as string;
     const startShortSyntax = this._datePipe.transform(calEv.start, 'H:mm');
     const durationInMin = Math.round(calEv.duration / 60 / 1000);
+    const isInPast = calEv.start < Date.now();
 
     const nrOfAllBanners = allEvsToShow.length;
     console.log({ taskForEvent, allEvsToShow });
@@ -169,8 +170,13 @@ export class CalendarIntegrationEffects {
     this._bannerService.open({
       id: BannerId.CalendarEvent,
       ico: calProvider.icon || 'event',
-      msg:
-        nrOfAllBanners > 1 ? T.F.CALENDARS.BANNER.TXT_MULTIPLE : T.F.CALENDARS.BANNER.TXT,
+      msg: isInPast
+        ? nrOfAllBanners > 1
+          ? T.F.CALENDARS.BANNER.TXT_PAST_MULTIPLE
+          : T.F.CALENDARS.BANNER.TXT_PAST
+        : nrOfAllBanners > 1
+        ? T.F.CALENDARS.BANNER.TXT_MULTIPLE
+        : T.F.CALENDARS.BANNER.TXT,
       translateParams: {
         title: calEv.title,
         start,
