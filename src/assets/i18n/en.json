@@ -1408,6 +1408,11 @@
       "LONGER_BREAK_DURATION": "Duration of longer breaks",
       "TITLE": "Pomodoro Timer"
     },
+    "REMINDER": {
+      "IS_COUNTDOWN_BANNER_ENABLED": "Show countdown banner before reminders are due",
+      "COUNTDOWN_DURATION": "Show banner X before the actual reminder",
+      "TITLE": "Reminders"
+    },
     "SOUND": {
       "BREAK_REMINDER_SOUND": "Take a break reminder sound",
       "DONE_SOUND": "Task marked done sound",

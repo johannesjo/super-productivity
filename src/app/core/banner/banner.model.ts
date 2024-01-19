@@ -6,6 +6,7 @@ export enum BannerId {
   Offline = 'Offline',
   TimeEstimateExceeded = 'TimeEstimateExceeded',
   CalendarEvent = 'CalendarEvent',
+  ReminderCountdown = 'ReminderCountdown',
 }
 
 export type BannerType = 'ERROR';

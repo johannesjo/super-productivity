@@ -18,6 +18,7 @@ import { DOMINA_MODE_FORM } from './form-cfgs/domina-mode-form.const';
 import { FOCUS_MODE_FORM_CFG } from './form-cfgs/focus-mode-form.const';
 import { IS_FIREFOX } from '../../util/is-firefox';
 import { CALENDAR_FORM_CFG } from './form-cfgs/calendar-form.const';
+import { REMINDER_FORM_CFG } from './form-cfgs/reminder-form.const';
 
 export const GLOBAL_CONFIG_FORM_CONFIG: ConfigFormConfig = [
   LANGUAGE_SELECTION_FORM_FORM,
@@ -26,6 +27,7 @@ export const GLOBAL_CONFIG_FORM_CONFIG: ConfigFormConfig = [
   KEYBOARD_SETTINGS_FORM_CFG,
   TRACKING_REMINDER_FORM_CFG,
   CALENDAR_FORM_CFG,
+  REMINDER_FORM_CFG,
   TIMELINE_FORM_CFG,
   SOUND_FORM_CFG,
 ].filter((cfg) => IS_ELECTRON || !cfg.isElectronOnly);

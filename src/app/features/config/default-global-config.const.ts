@@ -139,6 +139,10 @@ export const DEFAULT_GLOBAL_CONFIG: GlobalConfigState = {
   calendarIntegration: {
     calendarProviders: [],
   },
+  reminder: {
+    isCountdownBannerEnabled: true,
+    countdownDuration: minute * 5,
+  },
   timeline: {
     isWorkStartEndEnabled: true,
     workStart: DEFAULT_DAY_START,

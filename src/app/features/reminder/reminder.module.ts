@@ -23,10 +23,17 @@ import { throttle } from 'helpful-decorators';
 import { SyncTriggerService } from '../../imex/sync/sync-trigger.service';
 import { LayoutService } from '../../core-ui/layout/layout.service';
 import { from, merge, of, timer } from 'rxjs';
+import { EffectsModule } from '@ngrx/effects';
+import { ReminderCountdownEffects } from './store/reminder-countdown.effects';
 
 @NgModule({
   declarations: [],
-  imports: [CommonModule, NoteModule, TasksModule],
+  imports: [
+    CommonModule,
+    NoteModule,
+    TasksModule,
+    EffectsModule.forFeature([ReminderCountdownEffects]),
+  ],
 })
 export class ReminderModule {
   constructor(

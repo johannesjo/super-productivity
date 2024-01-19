@@ -9,6 +9,7 @@ import {
   IdleConfig,
   MiscConfig,
   PomodoroConfig,
+  ReminderConfig,
   SoundConfig,
   SyncConfig,
   TakeABreakConfig,
@@ -73,6 +74,11 @@ export const selectIsPomodoroEnabled = createSelector(
 export const selectCalendarProviders = createSelector(
   selectConfigFeatureState,
   (cfg): CalendarProvider[] => cfg.calendarIntegration.calendarProviders,
+);
+
+export const selectReminderConfig = createSelector(
+  selectConfigFeatureState,
+  (cfg): ReminderConfig => cfg.reminder,
 );
 
 export const initialGlobalConfigState: GlobalConfigState = {

@@ -1,5 +1,9 @@
 @import '../../../../variables';
 
+:host {
+  padding-bottom: $s * 2;
+}
+
 :host::ng-deep .tpl {
   clear: both !important;
   width: auto !important;
@@ -7,7 +11,7 @@
 }
 
 :host::ng-deep .sub-section-heading {
-  margin-top: $s*3 !important;
+  margin-top: $s * 3 !important;
   margin-bottom: $s;
 }
 

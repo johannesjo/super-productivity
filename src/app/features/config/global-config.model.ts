@@ -128,6 +128,11 @@ export type TimelineConfig = Readonly<{
   workEnd: string;
 }>;
 
+export type ReminderConfig = Readonly<{
+  isCountdownBannerEnabled: boolean;
+  countdownDuration: number;
+}>;
+
 export type TrackingReminderConfig = Readonly<{
   isEnabled: boolean;
   isShowOnMobile: boolean;
@@ -159,6 +164,7 @@ export type GlobalConfigState = Readonly<{
   sound: SoundConfig;
   trackingReminder: TrackingReminderConfig;
   calendarIntegration: CalendarIntegrationConfig;
+  reminder: ReminderConfig;
   timeline: TimelineConfig;
   dominaMode: DominaModeConfig;
   focusMode: FocusModeConfig;
@@ -176,6 +182,7 @@ export type GlobalSectionConfig =
   | KeyboardConfig
   | CalendarIntegrationConfig
   | TimelineConfig
+  | ReminderConfig
   | SyncConfig;
 type Omit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>;
 
