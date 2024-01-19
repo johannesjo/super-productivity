@@ -2,7 +2,7 @@ import { Inject, Injectable, LOCALE_ID } from '@angular/core';
 import { Actions, createEffect } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { selectCalendarProviders } from '../../config/store/global-config.reducer';
-import { switchMap, tap } from 'rxjs/operators';
+import { first, switchMap, tap } from 'rxjs/operators';
 import { BehaviorSubject, EMPTY, forkJoin, timer } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
 import { GlobalTrackingIntervalService } from '../../../core/global-tracking-interval/global-tracking-interval.service';
@@ -16,6 +16,8 @@ import { CalendarIntegrationService } from '../calendar-integration.service';
 import { LS } from '../../../core/persistence/storage-keys.const';
 import { getWorklogStr } from '../../../util/get-work-log-str';
 import { BannerId } from '../../../core/banner/banner.model';
+import { selectTaskByIssueId } from '../../tasks/store/task.selectors';
+import { NavigateToTaskService } from '../../../core-ui/navigate-to-task/navigate-to-task.service';
 
 const CHECK_TO_SHOW_INTERVAL = 60 * 1000;
 
@@ -95,6 +97,7 @@ export class CalendarIntegrationEffects {
     private _datePipe: DatePipe,
     private _taskService: TaskService,
     private _calendarIntegrationService: CalendarIntegrationService,
+    private _navigateToTaskService: NavigateToTaskService,
     @Inject(LOCALE_ID) private locale: string,
   ) {
     if (localStorage.getItem(LS.CALENDER_EVENTS_LAST_SKIP_DAY) === getWorklogStr()) {
@@ -136,13 +139,13 @@ export class CalendarIntegrationEffects {
     );
   }
 
-  private _showBanner(
+  private async _showBanner(
     allEvsToShow: {
       id: string;
       calEv: CalendarIntegrationEvent;
       calProvider: CalendarProvider;
     }[],
-  ): void {
+  ): Promise<void> {
     console.log('SHOW BANNER');
 
     const firstEntry = allEvsToShow[0];
@@ -150,13 +153,17 @@ export class CalendarIntegrationEffects {
       return;
     }
     const { calEv, calProvider } = firstEntry;
+    const taskForEvent = await this._store
+      .select(selectTaskByIssueId, { issueId: calEv.id })
+      .pipe(first())
+      .toPromise();
 
     const start = this._datePipe.transform(calEv.start, 'shortTime');
     const startShortSyntax = this._datePipe.transform(calEv.start, 'H:mm');
     const durationInMin = Math.round(calEv.duration / 60 / 1000);
 
     const nrOfOtherBanners = allEvsToShow.length;
-    console.log({ allEvsToShow });
+    console.log({ taskForEvent, allEvsToShow });
 
     this._bannerService.open({
       id: BannerId.CalendarEvent,
@@ -172,21 +179,29 @@ export class CalendarIntegrationEffects {
           this._skipEv(calEv.id);
         },
       },
-      action2: {
-        label: 'Add as Task',
-        fn: () => {
-          this._skipEv(calEv.id);
-          this._taskService.add(
-            `${calEv.title} @${startShortSyntax} ${durationInMin}m`,
-            undefined,
-            {
-              projectId: calProvider.defaultProjectId,
-              issueId: calEv.id,
-              issueType: 'CALENDAR',
+      action2: taskForEvent
+        ? {
+            label: 'Focus Task',
+            fn: () => {
+              this._skipEv(calEv.id);
+              this._navigateToTaskService.navigate(taskForEvent.id);
             },
-          );
-        },
-      },
+          }
+        : {
+            label: 'Add as Task',
+            fn: () => {
+              this._skipEv(calEv.id);
+              this._taskService.add(
+                `${calEv.title} @${startShortSyntax} ${durationInMin}m`,
+                undefined,
+                {
+                  projectId: calProvider.defaultProjectId,
+                  issueId: calEv.id,
+                  issueType: 'CALENDAR',
+                },
+              );
+            },
+          },
     });
   }
 }

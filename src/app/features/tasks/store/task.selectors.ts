@@ -175,6 +175,12 @@ export const selectTaskById = createSelector(
   (state: TaskState, props: { id: string }): Task => state.entities[props.id] as Task,
 );
 
+export const selectTaskByIssueId = createSelector(
+  selectAllTasks,
+  (tasks: Task[], props: { issueId: string }): Task | undefined =>
+    tasks.find((t) => t.issueId === props.issueId),
+);
+
 export const selectTasksById = createSelector(
   selectTaskFeatureState,
   (state: TaskState, props: { ids: string[] }): Task[] =>

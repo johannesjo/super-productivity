@@ -8,6 +8,9 @@ import { ProjectService } from '../../features/project/project.service';
 import { Router } from '@angular/router';
 import { Task } from '../../features/tasks/task.model';
 import { getWorklogStr } from '../../util/get-work-log-str';
+import { WorkContextService } from '../../features/work-context/work-context.service';
+import { SnackService } from '../../core/snack/snack.service';
+import { T } from '../../t.const';
 
 @Injectable({
   providedIn: 'root',
@@ -17,19 +20,31 @@ export class NavigateToTaskService {
     private _taskService: TaskService,
     private _projectService: ProjectService,
     private _router: Router,
+    private _workContextService: WorkContextService,
+    private _snackService: SnackService,
   ) {}
 
   async navigate(taskId: string, isArchiveTask: boolean = false): Promise<void> {
-    const task = await this._taskService.getByIdFromEverywhere(taskId);
-    const location = await this._getLocation(task, isArchiveTask);
+    try {
+      const task = await this._taskService.getByIdFromEverywhere(taskId);
+      const location = await this._getLocation(task, isArchiveTask);
 
-    const queryParams: SearchQueryParams = { focusItem: taskId };
-    if (isArchiveTask) {
-      queryParams.dateStr = await this._getArchivedDate(task);
-      await this._router.navigate([location], { queryParams });
-    } else {
-      queryParams.isInBacklog = await this._isInBacklog(task);
-      await this._router.navigate([location], { queryParams });
+      const queryParams: SearchQueryParams = { focusItem: taskId };
+      if (isArchiveTask) {
+        queryParams.dateStr = await this._getArchivedDate(task);
+        await this._router.navigate([location], { queryParams });
+      } else {
+        queryParams.isInBacklog = await this._isInBacklog(task);
+        await this._router.navigate([location], { queryParams });
+      }
+    } catch (err) {
+      console.error(err);
+      this._snackService.open({
+        type: 'ERROR',
+        // msg: T.F.TIMELINE.S.CAL_PROVIDER_ERROR,
+        // TODO add message
+        msg: 'Could not focus to task. Did you delete it?',
+      });
     }
   }
 
@@ -39,6 +54,14 @@ export class NavigateToTaskService {
     const taskToCheck = task.parentId
       ? await this._taskService.getByIdFromEverywhere(task.parentId, isArchiveTask)
       : task;
+
+    if (
+      taskToCheck.projectId &&
+      taskToCheck.tagIds[0] === TODAY_TAG.id &&
+      this._workContextService.isToday
+    ) {
+      return `/tag/TODAY/${tasksOrWorklog}`;
+    }
 
     if (taskToCheck.projectId) {
       return `/project/${taskToCheck.projectId}/${tasksOrWorklog}`;
