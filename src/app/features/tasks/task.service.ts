@@ -872,11 +872,19 @@ export class TaskService {
     );
   }
 
-  async getByIdFromEverywhere(id: string): Promise<Task> {
-    return (
-      (await this._persistenceService.task.getById(id)) ||
-      (await this._persistenceService.taskArchive.getById(id))
-    );
+  async getByIdFromEverywhere(id: string, isArchive?: boolean): Promise<Task> {
+    if (isArchive === undefined) {
+      return (
+        (await this._persistenceService.task.getById(id)) ||
+        (await this._persistenceService.taskArchive.getById(id))
+      );
+    }
+
+    if (isArchive) {
+      return await this._persistenceService.taskArchive.getById(id);
+    } else {
+      return await this._persistenceService.task.getById(id);
+    }
   }
 
   async getAllTasksForProject(projectId: string): Promise<Task[]> {

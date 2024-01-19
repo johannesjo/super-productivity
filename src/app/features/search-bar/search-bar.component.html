@@ -59,7 +59,7 @@
         *ngIf="item.issueType"
         [svgIcon]="item.issueType|issueIcon"
       ></mat-icon>
-      <mat-icon *ngIf="!item.isNonArchiveTask">archive</mat-icon>
+      <mat-icon *ngIf="item.isArchiveTask">archive</mat-icon>
     </mat-option>
   </mat-autocomplete>
 </form>

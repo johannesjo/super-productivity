@@ -1,0 +1,77 @@
+import { Injectable } from '@angular/core';
+import { SearchQueryParams } from '../../features/search-bar/search-bar.model';
+import { first } from 'rxjs/operators';
+import { TODAY_TAG } from '../../features/tag/tag.const';
+import { devError } from '../../util/dev-error';
+import { TaskService } from '../../features/tasks/task.service';
+import { ProjectService } from '../../features/project/project.service';
+import { Router } from '@angular/router';
+import { Task } from '../../features/tasks/task.model';
+import { getWorklogStr } from '../../util/get-work-log-str';
+
+@Injectable({
+  providedIn: 'root',
+})
+export class NavigateToTaskService {
+  constructor(
+    private _taskService: TaskService,
+    private _projectService: ProjectService,
+    private _router: Router,
+  ) {}
+
+  async navigate(taskId: string, isArchiveTask: boolean = false): Promise<void> {
+    const task = await this._taskService.getByIdFromEverywhere(taskId);
+    const location = await this._getLocation(task, isArchiveTask);
+
+    const queryParams: SearchQueryParams = { focusItem: taskId };
+    if (isArchiveTask) {
+      queryParams.dateStr = await this._getArchivedDate(task);
+      await this._router.navigate([location], { queryParams });
+    } else {
+      queryParams.isInBacklog = await this._isInBacklog(task);
+      await this._router.navigate([location], { queryParams });
+    }
+  }
+
+  private async _getLocation(task: Task, isArchiveTask: boolean): Promise<string> {
+    const tasksOrWorklog = isArchiveTask ? 'worklog' : 'tasks';
+
+    const taskToCheck = task.parentId
+      ? await this._taskService.getByIdFromEverywhere(task.parentId, isArchiveTask)
+      : task;
+
+    if (taskToCheck.projectId) {
+      return `/project/${taskToCheck.projectId}/${tasksOrWorklog}`;
+    } else if (taskToCheck.tagIds[0] === TODAY_TAG.id) {
+      return `/tag/TODAY/${tasksOrWorklog}`;
+    } else if (taskToCheck.tagIds[0]) {
+      return `/tag/${taskToCheck.tagIds[0]}/${tasksOrWorklog}`;
+    } else {
+      devError("Couldn't find task location");
+      return '';
+    }
+  }
+
+  private async _isInBacklog(task: Task): Promise<boolean> {
+    if (!task.projectId) return false;
+    const projects = await this._projectService.list$.pipe(first()).toPromise();
+    const project = projects.find((p) => p.id === task.projectId);
+    return project ? project.backlogTaskIds.includes(task.id) : false;
+  }
+
+  private async _getArchivedDate(task: Task): Promise<string> {
+    let dateStr = Object.keys(task.timeSpentOnDay)[0];
+    if (dateStr) return dateStr;
+
+    if (task.parentId) {
+      const tasks = await this._taskService.getArchivedTasks();
+      const parentTask = tasks.find(
+        (innerTask) => innerTask.id === task.parentId,
+      ) as Task;
+      dateStr = Object.keys(parentTask.timeSpentOnDay)[0];
+      return dateStr ?? getWorklogStr(parentTask.created);
+    }
+
+    return getWorklogStr(task.created);
+  }
+}

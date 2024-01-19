@@ -15,7 +15,7 @@ export interface SearchItem {
   created: number;
   tagId: string;
   // NOTE: probably faster this way round
-  isNonArchiveTask: boolean;
+  isArchiveTask: boolean;
 
   // for the icons
   issueType: IssueProviderKey | null;
