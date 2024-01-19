@@ -13,8 +13,10 @@ import { CalendarIntegrationEvent } from '../calendar-integration.model';
 import { TaskService } from '../../tasks/task.service';
 import { isCalenderEventDue } from '../is-calender-event-due';
 import { CalendarIntegrationService } from '../calendar-integration.service';
+import { LS } from '../../../core/persistence/storage-keys.const';
+import { getWorklogStr } from '../../../util/get-work-log-str';
 
-const CHECK_TO_SHOW_INTERVAL = 6 * 1000;
+const CHECK_TO_SHOW_INTERVAL = 60 * 1000;
 
 @Injectable()
 export class CalendarIntegrationEffects {
@@ -68,7 +70,7 @@ export class CalendarIntegrationEffects {
     { dispatch: false },
   );
 
-  private _skippedEventIds: string[] = [];
+  private readonly _skippedEventIds: string[] = [];
   private _currentlyShownBanners: string[] = [];
 
   constructor(
@@ -81,7 +83,26 @@ export class CalendarIntegrationEffects {
     private _taskService: TaskService,
     private _calendarIntegrationService: CalendarIntegrationService,
     @Inject(LOCALE_ID) private locale: string,
-  ) {}
+  ) {
+    if (localStorage.getItem(LS.CALENDER_EVENTS_LAST_SKIP_DAY) === getWorklogStr()) {
+      try {
+        const skippedEvIds = JSON.parse(
+          localStorage.getItem(LS.CALENDER_EVENTS_SKIPPED_TODAY) as string,
+        );
+        this._skippedEventIds = skippedEvIds;
+      } catch (e) {}
+    }
+    this._skippedEventIds = [];
+  }
+
+  private _skipEv(evId: string): void {
+    this._skippedEventIds.push(evId);
+    localStorage.setItem(
+      LS.CALENDER_EVENTS_SKIPPED_TODAY,
+      JSON.stringify(this._skippedEventIds),
+    );
+    localStorage.setItem(LS.CALENDER_EVENTS_LAST_SKIP_DAY, getWorklogStr());
+  }
 
   private _showBanner(
     calEv: CalendarIntegrationEvent,
@@ -111,7 +132,7 @@ export class CalendarIntegrationEffects {
           this._currentlyShownBanners = this._currentlyShownBanners.filter(
             (evId) => evId !== calEv.id,
           );
-          this._skippedEventIds.push(calEv.id);
+          this._skipEv(calEv.id);
         },
       },
       action2: {
@@ -120,7 +141,7 @@ export class CalendarIntegrationEffects {
           this._currentlyShownBanners = this._currentlyShownBanners.filter(
             (evId) => evId !== calEv.id,
           );
-          this._skippedEventIds.push(calEv.id);
+          this._skipEv(calEv.id);
           this._taskService.add(
             `${calEv.title} @${startShortSyntax} ${durationInMin}m`,
             undefined,
