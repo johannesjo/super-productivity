@@ -16,7 +16,7 @@ export interface BannerAction {
 }
 
 export interface Banner {
-  id: BannerId | string;
+  id: BannerId;
   msg: string;
   ico?: string;
   svgIco?: string;

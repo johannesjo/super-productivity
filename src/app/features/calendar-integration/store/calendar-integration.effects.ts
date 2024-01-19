@@ -3,7 +3,7 @@ import { Actions, createEffect } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { selectCalendarProviders } from '../../config/store/global-config.reducer';
 import { switchMap, tap } from 'rxjs/operators';
-import { EMPTY, forkJoin, timer } from 'rxjs';
+import { BehaviorSubject, EMPTY, forkJoin, timer } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
 import { GlobalTrackingIntervalService } from '../../../core/global-tracking-interval/global-tracking-interval.service';
 import { BannerService } from '../../../core/banner/banner.service';
@@ -15,6 +15,7 @@ import { isCalenderEventDue } from '../is-calender-event-due';
 import { CalendarIntegrationService } from '../calendar-integration.service';
 import { LS } from '../../../core/persistence/storage-keys.const';
 import { getWorklogStr } from '../../../util/get-work-log-str';
+import { BannerId } from '../../../core/banner/banner.model';
 
 const CHECK_TO_SHOW_INTERVAL = 60 * 1000;
 
@@ -44,7 +45,6 @@ export class CalendarIntegrationEffects {
                 ),
                 switchMap((allEventsToday) =>
                   timer(0, CHECK_TO_SHOW_INTERVAL).pipe(
-                    tap((t) => console.log('________', t, allEventsToday)),
                     tap(() => {
                       const eventsToShowBannerFor = allEventsToday.filter((calEv) =>
                         isCalenderEventDue(
@@ -54,10 +54,10 @@ export class CalendarIntegrationEffects {
                           now,
                         ),
                       );
-                      console.log({ eventsToShowBannerFor });
-                      eventsToShowBannerFor.forEach((calEv) =>
-                        this._showBanner(calEv, calProvider),
-                      );
+                      eventsToShowBannerFor.forEach((calEv) => {
+                        this._addEvToShow(calEv, calProvider);
+                      });
+                      // this._showBanner(calEv, calProvider),
                     }),
                   ),
                 ),
@@ -70,8 +70,21 @@ export class CalendarIntegrationEffects {
     { dispatch: false },
   );
 
+  private _currentlyShownBanners$ = new BehaviorSubject<
+    { id: string; calEv: CalendarIntegrationEvent; calProvider: CalendarProvider }[]
+  >([]);
+  showBanner = createEffect(
+    () =>
+      this._currentlyShownBanners$.pipe(
+        tap((v) => console.log('this._currentlyShownBanners$', v)),
+        tap((v) => this._showBanner(v)),
+      ),
+    {
+      dispatch: false,
+    },
+  );
+
   private readonly _skippedEventIds: string[] = [];
-  private _currentlyShownBanners: string[] = [];
 
   constructor(
     private _actions$: Actions,
@@ -89,10 +102,26 @@ export class CalendarIntegrationEffects {
         const skippedEvIds = JSON.parse(
           localStorage.getItem(LS.CALENDER_EVENTS_SKIPPED_TODAY) as string,
         );
+        // TODO comment in after dev
         this._skippedEventIds = skippedEvIds;
       } catch (e) {}
     }
     this._skippedEventIds = [];
+  }
+
+  private _addEvToShow(
+    calEv: CalendarIntegrationEvent,
+    calProvider: CalendarProvider,
+  ): void {
+    const curVal = this._currentlyShownBanners$.getValue();
+    console.log('addEvToShow', curVal, calEv);
+    if (!curVal.map((val) => val.id).includes(calEv.id)) {
+      const newBanners = [...curVal, { id: calEv.id, calEv, calProvider }];
+      newBanners.sort((a, b) => a.calEv.start - b.calEv.start);
+      console.log('UDATE _currentlyShownBanners$');
+
+      this._currentlyShownBanners$.next(newBanners);
+    }
   }
 
   private _skipEv(evId: string): void {
@@ -102,25 +131,36 @@ export class CalendarIntegrationEffects {
       JSON.stringify(this._skippedEventIds),
     );
     localStorage.setItem(LS.CALENDER_EVENTS_LAST_SKIP_DAY, getWorklogStr());
+    this._currentlyShownBanners$.next(
+      this._currentlyShownBanners$.getValue().filter((v) => v.id !== evId),
+    );
   }
 
   private _showBanner(
-    calEv: CalendarIntegrationEvent,
-    calProvider: CalendarProvider,
+    allEvsToShow: {
+      id: string;
+      calEv: CalendarIntegrationEvent;
+      calProvider: CalendarProvider;
+    }[],
   ): void {
+    console.log('SHOW BANNER');
+
+    const firstEntry = allEvsToShow[0];
+    if (!firstEntry) {
+      return;
+    }
+    const { calEv, calProvider } = firstEntry;
+
     const start = this._datePipe.transform(calEv.start, 'shortTime');
     const startShortSyntax = this._datePipe.transform(calEv.start, 'H:mm');
     const durationInMin = Math.round(calEv.duration / 60 / 1000);
 
-    if (!this._currentlyShownBanners.includes(calEv.id)) {
-      this._currentlyShownBanners.push(calEv.id);
-    }
-    const nrOfOtherBanners = this._currentlyShownBanners.length;
-    console.log(this._currentlyShownBanners);
+    const nrOfOtherBanners = allEvsToShow.length;
+    console.log({ allEvsToShow });
 
     this._bannerService.open({
-      id: calEv.id,
-      ico: calProvider.icon || undefined,
+      id: BannerId.CalendarEvent,
+      ico: calProvider.icon || 'event',
       msg: `<strong>${calEv.title}</strong> starts at <strong>${start}</strong>!${
         nrOfOtherBanners > 1
           ? `<br> (and ${nrOfOtherBanners - 1} other events are due)`
@@ -129,18 +169,12 @@ export class CalendarIntegrationEffects {
       action: {
         label: 'Dismiss',
         fn: () => {
-          this._currentlyShownBanners = this._currentlyShownBanners.filter(
-            (evId) => evId !== calEv.id,
-          );
           this._skipEv(calEv.id);
         },
       },
       action2: {
         label: 'Add as Task',
         fn: () => {
-          this._currentlyShownBanners = this._currentlyShownBanners.filter(
-            (evId) => evId !== calEv.id,
-          );
           this._skipEv(calEv.id);
           this._taskService.add(
             `${calEv.title} @${startShortSyntax} ${durationInMin}m`,
