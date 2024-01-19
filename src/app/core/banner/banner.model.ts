@@ -1,3 +1,5 @@
+import { Observable } from 'rxjs';
+
 export enum BannerId {
   TakeABreak = 'TakeABreak',
   StartTrackingReminder = 'StartTrackingReminder',
@@ -26,5 +28,6 @@ export interface Banner {
   action?: BannerAction;
   action2?: BannerAction;
   action3?: BannerAction;
+  progress$?: Observable<number>;
   img?: string;
 }

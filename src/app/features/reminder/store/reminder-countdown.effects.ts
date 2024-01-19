@@ -10,12 +10,13 @@ import { Store } from '@ngrx/store';
 import { BannerService } from '../../../core/banner/banner.service';
 import { Reminder } from '../reminder.model';
 import { selectReminderConfig } from '../../config/store/global-config.reducer';
-import { EMPTY } from 'rxjs';
+import { EMPTY, timer } from 'rxjs';
 import { DataInitService } from '../../../core/data-init/data-init.service';
 import { TaskService } from '../../tasks/task.service';
-import { TaskWithReminder, TaskWithReminderData } from '../../tasks/task.model';
+import { TaskWithReminder } from '../../tasks/task.model';
 import { ProjectService } from '../../project/project.service';
 import { Router } from '@angular/router';
+import { ReminderConfig } from '../../config/global-config.model';
 
 @Injectable()
 export class ReminderCountdownEffects {
@@ -37,7 +38,7 @@ export class ReminderCountdownEffects {
                       !this._skippedReminderIds.includes(reminder.id),
                   );
                 }),
-                tap((dueReminders) => this._showBanner(dueReminders)),
+                tap((dueReminders) => this._showBanner(dueReminders, reminderCfg)),
               )
             : EMPTY,
         ),
@@ -65,7 +66,10 @@ export class ReminderCountdownEffects {
     this._skippedReminderIds.push(reminderId);
   }
 
-  private async _showBanner(dueReminders: Reminder[]): Promise<void> {
+  private async _showBanner(
+    dueReminders: Reminder[],
+    reminderCfg: ReminderConfig,
+  ): Promise<void> {
     console.log('SHOW REMINDER BANNER', dueReminders);
 
     const firstDueReminder = dueReminders[0];
@@ -117,6 +121,17 @@ export class ReminderCountdownEffects {
           this._startTask(firstDueTask as TaskWithReminder);
         },
       },
+      progress$: timer(0, 1000).pipe(
+        map(() => {
+          const now = Date.now();
+          // NOTE: works, but math is unclear xD
+          const somethingLikeElapsedTime = firstDueReminder.remindAt - now;
+          const percentage =
+            // eslint-disable-next-line no-mixed-operators
+            100 - (somethingLikeElapsedTime / reminderCfg.countdownDuration) * 100;
+          return percentage;
+        }),
+      ),
       // action2:
     });
   }

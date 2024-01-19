@@ -4,6 +4,12 @@
   [class.isError]="banner.type==='ERROR'"
   class="content-wrapper"
 >
+  <mat-progress-bar
+    *ngIf="banner.progress$ && (banner.progress$|async) as progress"
+    mode="determinate"
+    [value]="progress"
+  ></mat-progress-bar>
+
   <div class="inner-content-wrapper">
     <div
       *ngIf="banner.img"
