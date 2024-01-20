@@ -5,13 +5,14 @@ import { concatMap, mapTo } from 'rxjs/operators';
 import { merge, Observable, of, timer } from 'rxjs';
 import { T } from '../../../t.const';
 import { bannerAnimation } from './banner.ani';
+import { fadeAnimation } from '../../../ui/animations/fade.ani';
 
 @Component({
   selector: 'banner',
   templateUrl: './banner.component.html',
   styleUrls: ['./banner.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  animations: [bannerAnimation],
+  animations: [bannerAnimation, fadeAnimation],
 })
 export class BannerComponent {
   T: typeof T = T;

@@ -4,6 +4,7 @@ $vertical-button-margin: $s;
 
 :host {
   display: block;
+  position: relative;
 }
 
 .content-wrapper {

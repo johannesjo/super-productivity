@@ -17,6 +17,10 @@ import { TaskWithReminder } from '../../tasks/task.model';
 import { ProjectService } from '../../project/project.service';
 import { Router } from '@angular/router';
 
+const UPDATE_PERCENTAGE_INTERVAL = 250;
+// since the reminder modal doesn't show instantly we adjust a little for that
+const COUNTDOWN_MAGIC_GAP = 500;
+
 @Injectable()
 export class ReminderCountdownEffects {
   reminderCountdownBanner$ = createEffect(
@@ -111,10 +115,10 @@ export class ReminderCountdownEffects {
           this._startTask(firstDueTask as TaskWithReminder);
         },
       },
-      progress$: timer(0, 250).pipe(
+      progress$: timer(0, UPDATE_PERCENTAGE_INTERVAL).pipe(
         map(() => {
           const now = Date.now();
-          const elapsedTime = now - showBannerStart;
+          const elapsedTime = now - showBannerStart - COUNTDOWN_MAGIC_GAP;
           const percentage = (elapsedTime / remainingAtBannerStart) * 100;
           return percentage;
         }),
