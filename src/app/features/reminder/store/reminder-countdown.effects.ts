@@ -83,11 +83,13 @@ export class ReminderCountdownEffects {
       .pipe(first())
       .toPromise();
 
-    const start = this._datePipe.transform(
+    const showBannerStart = Date.now();
+    const remainingAtBannerStart = firstDueReminder.remindAt - showBannerStart;
+
+    const startsAt = this._datePipe.transform(
       firstDueReminder.remindAt,
       'shortTime',
     ) as string;
-    const isInPast = firstDueReminder.remindAt < Date.now();
 
     const nrOfAllBanners = dueReminders.length;
     console.log({ firstDueTask, firstDueReminder, dueReminders });
@@ -95,16 +97,11 @@ export class ReminderCountdownEffects {
     this._bannerService.open({
       id: BannerId.ReminderCountdown,
       ico: 'alarm',
-      msg: isInPast
-        ? nrOfAllBanners > 1
-          ? T.F.CALENDARS.BANNER.TXT_PAST_MULTIPLE
-          : T.F.CALENDARS.BANNER.TXT_PAST
-        : nrOfAllBanners > 1
-        ? T.F.CALENDARS.BANNER.TXT_MULTIPLE
-        : T.F.CALENDARS.BANNER.TXT,
+      msg:
+        nrOfAllBanners > 1 ? T.F.CALENDARS.BANNER.TXT_MULTIPLE : T.F.CALENDARS.BANNER.TXT,
       translateParams: {
         title: firstDueTask.title,
-        start,
+        start: startsAt,
         nrOfOtherBanners: nrOfAllBanners - 1,
       },
       action: {
@@ -124,11 +121,10 @@ export class ReminderCountdownEffects {
       progress$: timer(0, 1000).pipe(
         map(() => {
           const now = Date.now();
-          // NOTE: works, but math is unclear xD
-          const somethingLikeElapsedTime = firstDueReminder.remindAt - now;
-          const percentage =
-            // eslint-disable-next-line no-mixed-operators
-            100 - (somethingLikeElapsedTime / reminderCfg.countdownDuration) * 100;
+          const elapsedTime = now - showBannerStart;
+          const percentage = (elapsedTime / remainingAtBannerStart) * 100;
+          console.log({ elapsedTime, percentage });
+
           return percentage;
         }),
       ),
