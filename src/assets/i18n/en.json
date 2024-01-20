@@ -761,7 +761,13 @@
       "WEEK_TITLE": "Week {{nr}} ({{timeSpent}})"
     },
     "REMINDER": {
-      "S_REMINDER_ERR": "Error for reminder interface"
+      "S_REMINDER_ERR": "Error for reminder interface",
+      "COUNTDOWN_BANNER": {
+        "START_NOW": "Start now",
+        "HIDE": "Hide",
+        "TXT": "<strong>{{title}}</strong> starts at <strong>{{start}}</strong>!",
+        "TXT_MULTIPLE": "<strong>{{title}}</strong> starts at <strong>{{start}}</strong>!<br> (and {{nrOfOtherBanners}} other tasks are due)"
+      }
     },
     "SEARCH_BAR": {
       "INFO": "Click on the list icon to search for archived tasks",
@@ -1238,6 +1244,7 @@
     "EDIT": "Edit",
     "ENABLED": "Enabled",
     "EXTENSION_INFO": "Please <a target=\"_blank\" href=\"https://chrome.google.com/webstore/detail/super-productivity/ljkbjodfmekklcoibdnhahlaalhihmlb\"> download the chrome extension</a> in order to allow communication with the Jira Api and Idle Time Handling. Note that this doesn't work for mobile.",
+    "HIDE": "Hide",
     "LOGIN": "Login",
     "LOGOUT": "Logout",
     "MINUTES": "{{m}} minutes",

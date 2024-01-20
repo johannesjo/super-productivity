@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Actions, createEffect } from '@ngrx/effects';
 import { ReminderService } from '../reminder.service';
-import { selectAllTasks, selectTaskById } from '../../tasks/store/task.selectors';
+import { selectTaskById } from '../../tasks/store/task.selectors';
 import { concatMap, first, map, switchMap, tap } from 'rxjs/operators';
 import { BannerId } from '../../../core/banner/banner.model';
 import { T } from '../../../t.const';
@@ -16,7 +16,6 @@ import { TaskService } from '../../tasks/task.service';
 import { TaskWithReminder } from '../../tasks/task.model';
 import { ProjectService } from '../../project/project.service';
 import { Router } from '@angular/router';
-import { ReminderConfig } from '../../config/global-config.model';
 
 @Injectable()
 export class ReminderCountdownEffects {
@@ -38,7 +37,7 @@ export class ReminderCountdownEffects {
                       !this._skippedReminderIds.includes(reminder.id),
                   );
                 }),
-                tap((dueReminders) => this._showBanner(dueReminders, reminderCfg)),
+                tap((dueReminders) => this._showBanner(dueReminders)),
               )
             : EMPTY,
         ),
@@ -66,18 +65,11 @@ export class ReminderCountdownEffects {
     this._skippedReminderIds.push(reminderId);
   }
 
-  private async _showBanner(
-    dueReminders: Reminder[],
-    reminderCfg: ReminderConfig,
-  ): Promise<void> {
-    console.log('SHOW REMINDER BANNER', dueReminders);
-
+  private async _showBanner(dueReminders: Reminder[]): Promise<void> {
     const firstDueReminder = dueReminders[0];
     if (!firstDueReminder) {
       return;
     }
-    console.log(await this._store.select(selectAllTasks).pipe(first()).toPromise());
-
     const firstDueTask = await this._store
       .select(selectTaskById, { id: firstDueReminder.relatedId })
       .pipe(first())
@@ -98,33 +90,32 @@ export class ReminderCountdownEffects {
       id: BannerId.ReminderCountdown,
       ico: 'alarm',
       msg:
-        nrOfAllBanners > 1 ? T.F.CALENDARS.BANNER.TXT_MULTIPLE : T.F.CALENDARS.BANNER.TXT,
+        nrOfAllBanners > 1
+          ? T.F.REMINDER.COUNTDOWN_BANNER.TXT_MULTIPLE
+          : T.F.REMINDER.COUNTDOWN_BANNER.TXT,
       translateParams: {
         title: firstDueTask.title,
         start: startsAt,
         nrOfOtherBanners: nrOfAllBanners - 1,
       },
       action: {
-        label: T.G.DISMISS,
+        label: T.G.HIDE,
         fn: () => {
           this._skipReminder(firstDueReminder.id);
         },
       },
       action2: {
-        // label: T.G.DISMISS,
-        label: 'Start now',
+        label: T.F.REMINDER.COUNTDOWN_BANNER.START_NOW,
         fn: () => {
           this._skipReminder(firstDueReminder.id);
           this._startTask(firstDueTask as TaskWithReminder);
         },
       },
-      progress$: timer(0, 1000).pipe(
+      progress$: timer(0, 250).pipe(
         map(() => {
           const now = Date.now();
           const elapsedTime = now - showBannerStart;
           const percentage = (elapsedTime / remainingAtBannerStart) * 100;
-          console.log({ elapsedTime, percentage });
-
           return percentage;
         }),
       ),
