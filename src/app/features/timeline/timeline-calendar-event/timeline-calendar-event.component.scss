@@ -12,6 +12,7 @@
   border: 1px solid $dark-theme-separator-color;
   border-radius: $task-border-radius;
   opacity: 0.9;
+  cursor: pointer;
 
   @include lightTheme {
     border-color: $light-theme-separator-color;
@@ -20,11 +21,28 @@
     border-color: $dark-theme-separator-color;
   }
 
+  &:hover {
+    border-color: $c-accent;
+    color: $c-accent;
+
+    mat-icon.add {
+      display: block;
+    }
+
+    mat-icon.default {
+      display: none;
+    }
+  }
+
   mat-icon {
     margin-left: $s;
     margin-right: $s * 1.5;
     min-width: 24px;
     opacity: 0.8;
+
+    &.add {
+      display: none;
+    }
   }
 }
 

@@ -109,6 +109,7 @@
           <timeline-calendar-event
             *ngSwitchCase="TimelineViewEntryType.CalendarEvent"
             [calendarEvent]="row.data"
+            [matTooltip]="'Add event as task'"
           ></timeline-calendar-event>
 
           <timeline-task-repeat-projection

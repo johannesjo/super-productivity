@@ -1,6 +1,7 @@
 import { TaskCopy, TaskPlanned } from '../tasks/task.model';
 import { TimelineViewEntryType } from './timeline.const';
 import { TaskRepeatCfg } from '../task-repeat-cfg/task-repeat-cfg.model';
+import { CalendarIntegrationEvent } from '../calendar-integration/calendar-integration.model';
 
 interface TimelineViewEntryBase {
   id: string;
@@ -35,10 +36,7 @@ export interface TimelineViewEntrySplitTaskContinued extends TimelineViewEntryBa
   };
 }
 
-export interface TimelineFromCalendarEvent {
-  title: string;
-  start: number;
-  duration: number;
+export interface TimelineFromCalendarEvent extends CalendarIntegrationEvent {
   icon?: string;
 }
 

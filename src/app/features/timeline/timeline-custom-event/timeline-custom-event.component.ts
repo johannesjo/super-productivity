@@ -9,6 +9,7 @@ import { TimelineCustomEvent } from '../timeline.model';
 })
 export class TimelineCustomEventComponent {
   @Input() event: TimelineCustomEvent = {
+    id: 'XXX',
     title: '',
     icon: '',
     start: 0,

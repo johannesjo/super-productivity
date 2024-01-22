@@ -10,7 +10,6 @@ export const getRelevantEventsForCalendarIntegrationFromIcal = (
   startTimestamp: number,
   endTimestamp: number,
 ): CalendarIntegrationEvent[] => {
-  // console.time('TEST');
   let calendarIntegrationEvents: CalendarIntegrationEvent[] = [];
   const allPossibleFutureEvents = getAllPossibleEventsAfterStartFromIcal(
     icalData,
@@ -27,30 +26,6 @@ export const getRelevantEventsForCalendarIntegrationFromIcal = (
   });
   // console.timeEnd('TEST');
   return calendarIntegrationEvents;
-};
-
-export const getRelevantEventsFromIcal = (
-  icalData: string,
-  startTimestamp: number,
-  endTimestamp: number,
-): TimelineFromCalendarEvent[] => {
-  // console.time('TEST');
-  let timelineEvents: TimelineFromCalendarEvent[] = [];
-  const allPossibleFutureEvents = getAllPossibleEventsAfterStartFromIcal(
-    icalData,
-    new Date(startTimestamp),
-  );
-  allPossibleFutureEvents.forEach((ve) => {
-    if (ve.getFirstPropertyValue('rrule')) {
-      timelineEvents = timelineEvents.concat(
-        getForRecurring(ve, startTimestamp, endTimestamp),
-      );
-    } else if (ve.getFirstPropertyValue('dtstart').toJSDate().getTime() < endTimestamp) {
-      timelineEvents.push(convertVEventToTimelineEvent(ve));
-    }
-  });
-  // console.timeEnd('TEST');
-  return timelineEvents;
 };
 
 const getForRecurring = (
@@ -85,21 +60,6 @@ const getForRecurring = (
     }
   }
   return evs;
-};
-
-const convertVEventToTimelineEvent = (vevent: any): TimelineFromCalendarEvent => {
-  const start = vevent.getFirstPropertyValue('dtstart').toJSDate().getTime();
-  // NOTE: if dtend is missing, it defaults to dtstart; @see #1814 and RFC 2455
-  // detailed comment in #1814:
-  // https://github.com/johannesjo/super-productivity/issues/1814#issuecomment-1008132824
-  const endVal = vevent.getFirstPropertyValue('dtend');
-  const end = endVal ? endVal.toJSDate().getTime() : start;
-
-  return {
-    title: vevent.getFirstPropertyValue('summary'),
-    start,
-    duration: end - start,
-  };
 };
 
 const convertVEventToCalendarIntegrationEvent = (

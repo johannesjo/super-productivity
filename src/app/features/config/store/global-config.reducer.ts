@@ -70,15 +70,14 @@ export const selectIsPomodoroEnabled = createSelector(
   selectConfigFeatureState,
   (cfg): boolean => cfg.pomodoro.isEnabled,
 );
+export const selectReminderConfig = createSelector(
+  selectConfigFeatureState,
+  (cfg): ReminderConfig => cfg.reminder,
+);
 
 export const selectCalendarProviders = createSelector(
   selectConfigFeatureState,
   (cfg): CalendarProvider[] => cfg.calendarIntegration.calendarProviders,
-);
-
-export const selectReminderConfig = createSelector(
-  selectConfigFeatureState,
-  (cfg): ReminderConfig => cfg.reminder,
 );
 
 export const initialGlobalConfigState: GlobalConfigState = {

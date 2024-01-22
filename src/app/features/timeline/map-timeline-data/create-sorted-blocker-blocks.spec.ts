@@ -1023,6 +1023,7 @@ describe('createBlockerBlocks()', () => {
           icon: '',
           items: [
             {
+              id: 'EventId',
               start: getDateTimeFromClockString('10:00', 24 * 60 * 60 * 1000),
               title: 'XXX',
               icon: 'aaa',
@@ -1066,7 +1067,13 @@ describe('createBlockerBlocks()', () => {
           end: 122400000,
           entries: [
             {
-              data: { duration: 3600000, icon: '', start: 118800000, title: 'XXX' },
+              data: {
+                duration: 3600000,
+                icon: '',
+                start: 118800000,
+                title: 'XXX',
+                id: 'EventId',
+              },
               end: 122400000,
               start: 118800000,
               type: 'CalendarEvent',

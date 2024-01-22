@@ -160,8 +160,6 @@ export class CalendarIntegrationEffects {
       .toPromise();
 
     const start = this._datePipe.transform(calEv.start, 'shortTime') as string;
-    const startShortSyntax = this._datePipe.transform(calEv.start, 'H:mm');
-    const durationInMin = Math.round(calEv.duration / 60 / 1000);
     const isInPast = calEv.start < Date.now();
 
     const nrOfAllBanners = allEvsToShow.length;
@@ -200,14 +198,15 @@ export class CalendarIntegrationEffects {
             label: T.F.CALENDARS.BANNER.ADD_AS_TASK,
             fn: () => {
               this._skipEv(calEv.id);
-              this._taskService.add(
-                `${calEv.title} @${startShortSyntax} ${durationInMin}m`,
-                undefined,
+              this._taskService.addAndSchedule(
+                calEv.title,
                 {
                   projectId: calProvider.defaultProjectId,
                   issueId: calEv.id,
                   issueType: 'CALENDAR',
+                  timeEstimate: calEv.duration,
                 },
+                calEv.start,
               );
             },
           },
