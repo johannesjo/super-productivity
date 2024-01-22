@@ -1,6 +1,8 @@
 <!-- TODO make this work -->
 <!--<mat-icon matSuffix="">{{formControl.value}}</mat-icon>-->
 
+<mat-icon *ngIf="formControl.value">{{formControl.value}}</mat-icon>
+
 <input
   [formControl]="formControl"
   [formlyAttributes]="field"
@@ -8,6 +10,7 @@
   matInput
   type="text"
 />
+<!--<span matPrefix>+1 &nbsp;</span>-->
 
 <mat-autocomplete
   #auto="matAutocomplete"
