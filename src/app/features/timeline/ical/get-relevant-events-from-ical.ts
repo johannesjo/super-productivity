@@ -1,6 +1,5 @@
 // @ts-ignore
 import ICAL from 'ical.js';
-import { TimelineFromCalendarEvent } from '../timeline.model';
 import { CalendarIntegrationEvent } from '../../calendar-integration/calendar-integration.model';
 
 // NOTE: this sucks and is slow, but writing a new ical parser would be very hard... :(
