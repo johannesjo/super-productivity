@@ -23,7 +23,12 @@ main {
   justify-content: center;
   align-items: center;
   flex-direction: column;
+}
+
+.scroll-container {
   overflow: auto;
+  max-height: 100%;
+  width: 100%;
 }
 
 .close-btn {

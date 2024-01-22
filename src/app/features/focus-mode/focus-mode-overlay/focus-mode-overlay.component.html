@@ -12,10 +12,13 @@
       <mat-icon>close</mat-icon>
     </button>
 
-    <procrastination
+    <div
+      class="scroll-container"
       *ngSwitchCase="FocusModePage.ProcrastinationHelp"
       @warpIn
-    ></procrastination>
+    >
+      <procrastination></procrastination>
+    </div>
 
     <focus-mode-task-selection
       *ngSwitchCase="FocusModePage.TaskSelection"
