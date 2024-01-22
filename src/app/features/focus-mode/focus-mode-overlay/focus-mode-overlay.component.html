@@ -2,8 +2,17 @@
   <header>
     <banner></banner>
   </header>
-  <main [ngSwitch]="activePage$|async">
+  <main *ngIf="(activePage$|async) as activePage">
     <button
+      *ngIf="activePage === FocusModePage.ProcrastinationHelp"
+      class="close-btn"
+      mat-icon-button
+      (click)="leaveProcrastinationHelp()"
+    >
+      <mat-icon>close</mat-icon>
+    </button>
+    <button
+      *ngIf="activePage !== FocusModePage.ProcrastinationHelp"
       class="close-btn"
       mat-icon-button
       [matTooltip]="T.F.FOCUS_MODE.CANCEL_FOCUS_SESSION|translate"
@@ -12,38 +21,40 @@
       <mat-icon>close</mat-icon>
     </button>
 
-    <div
-      class="scroll-container"
-      *ngSwitchCase="FocusModePage.ProcrastinationHelp"
-      @warpIn
-    >
-      <procrastination></procrastination>
-    </div>
+    <ng-container [ngSwitch]="activatePage">
+      <div
+        class="scroll-container"
+        *ngSwitchCase="FocusModePage.ProcrastinationHelp"
+        @warpIn
+      >
+        <procrastination></procrastination>
+      </div>
 
-    <focus-mode-task-selection
-      *ngSwitchCase="FocusModePage.TaskSelection"
-      @warpIn
-    ></focus-mode-task-selection>
+      <focus-mode-task-selection
+        *ngSwitchCase="FocusModePage.TaskSelection"
+        @warpIn
+      ></focus-mode-task-selection>
 
-    <focus-mode-duration-selection
-      *ngSwitchCase="FocusModePage.DurationSelection"
-      @warpIn
-    ></focus-mode-duration-selection>
+      <focus-mode-duration-selection
+        *ngSwitchCase="FocusModePage.DurationSelection"
+        @warpIn
+      ></focus-mode-duration-selection>
 
-    <focus-mode-preparation
-      *ngSwitchCase="FocusModePage.Preparation"
-      @warpIn
-    ></focus-mode-preparation>
+      <focus-mode-preparation
+        *ngSwitchCase="FocusModePage.Preparation"
+        @warpIn
+      ></focus-mode-preparation>
 
-    <focus-mode-main
-      *ngSwitchCase="FocusModePage.Main"
-      @warpIn
-    ></focus-mode-main>
+      <focus-mode-main
+        *ngSwitchCase="FocusModePage.Main"
+        @warpIn
+      ></focus-mode-main>
 
-    <focus-mode-task-done
-      *ngSwitchCase="FocusModePage.SessionDone"
-      @warpIn
-    ></focus-mode-task-done>
+      <focus-mode-task-done
+        *ngSwitchCase="FocusModePage.SessionDone"
+        @warpIn
+      ></focus-mode-task-done>
+    </ng-container>
   </main>
 </ng-container>
 

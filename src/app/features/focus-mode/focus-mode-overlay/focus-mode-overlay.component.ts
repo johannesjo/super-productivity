@@ -91,4 +91,10 @@ export class FocusModeOverlayComponent implements OnDestroy {
   deactivatePomodoro(): void {
     this._globalConfigService.updateSection('pomodoro', { isEnabled: false });
   }
+
+  leaveProcrastinationHelp(): void {
+    this._store.dispatch(
+      setFocusSessionActivePage({ focusActivePage: FocusModePage.Main }),
+    );
+  }
 }

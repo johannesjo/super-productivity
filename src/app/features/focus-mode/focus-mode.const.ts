@@ -1,9 +1,9 @@
 export enum FocusModePage {
-  Main,
-  SessionDone,
-  TaskSelection,
-  DurationSelection,
-  Preparation,
-  Break,
-  ProcrastinationHelp = 5,
+  Main = 'Main',
+  SessionDone = 'SessionDone',
+  TaskSelection = 'TaskSelection',
+  DurationSelection = 'DurationSelection',
+  Preparation = 'Preparation',
+  Break = 'Break',
+  ProcrastinationHelp = 'ProcrastinationHelp',
 }
