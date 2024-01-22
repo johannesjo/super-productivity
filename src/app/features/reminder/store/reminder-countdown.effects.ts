@@ -86,6 +86,7 @@ export class ReminderCountdownEffects {
   ): Promise<void> {
     const firstDue = dueRemindersAndTasks[0];
     if (!firstDue) {
+      this._bannerService.dismiss(BannerId.ReminderCountdown);
       return;
     }
     const firstDueTask = await this._store

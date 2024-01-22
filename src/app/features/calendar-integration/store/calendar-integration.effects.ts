@@ -151,6 +151,7 @@ export class CalendarIntegrationEffects {
 
     const firstEntry = allEvsToShow[0];
     if (!firstEntry) {
+      this._bannerService.dismiss(BannerId.CalendarEvent);
       return;
     }
     const { calEv, calProvider } = firstEntry;
