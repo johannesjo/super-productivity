@@ -23,7 +23,6 @@ import {
   startWith,
   switchMap,
   take,
-  tap,
   withLatestFrom,
 } from 'rxjs/operators';
 import { TODAY_TAG } from '../tag/tag.const';
