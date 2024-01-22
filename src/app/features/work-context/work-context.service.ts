@@ -23,6 +23,7 @@ import {
   startWith,
   switchMap,
   take,
+  tap,
   withLatestFrom,
 } from 'rxjs/operators';
 import { TODAY_TAG } from '../tag/tag.const';
@@ -160,11 +161,11 @@ export class WorkContextService {
     ),
     switchMap((mainWorkContext) =>
       mainWorkContext.id === TODAY_TAG.id && mainWorkContext.title === TODAY_TAG.title
-        ? this._translateService.onLangChange.pipe(
-            startWith(this._translateService.currentLang),
-            map(() => ({
+        ? this._translateService.stream(T.G.TODAY_TAG_TITLE).pipe(
+            distinctUntilChanged(),
+            map((translation) => ({
               ...mainWorkContext,
-              title: this._translateService.instant(T.G.TODAY_TAG_TITLE),
+              title: translation,
             })),
           )
         : of(mainWorkContext),
