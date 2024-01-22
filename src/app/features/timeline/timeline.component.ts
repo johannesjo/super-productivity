@@ -1,6 +1,13 @@
 import { ChangeDetectionStrategy, Component, OnDestroy } from '@angular/core';
 import { TimelineCalendarMapEntry, TimelineViewEntry } from './timeline.model';
-import { debounceTime, map, startWith, switchMap, tap } from 'rxjs/operators';
+import {
+  debounceTime,
+  distinctUntilChanged,
+  map,
+  startWith,
+  switchMap,
+  tap,
+} from 'rxjs/operators';
 import { TaskService } from '../tasks/task.service';
 import { combineLatest, forkJoin, Observable, of } from 'rxjs';
 import { mapToTimelineViewEntries } from './map-timeline-data/map-to-timeline-view-entries';
@@ -23,6 +30,7 @@ import { selectCalendarProviders } from '../config/store/global-config.reducer';
 import { CalendarIntegrationService } from '../calendar-integration/calendar-integration.service';
 import { selectAllCalendarTaskEventIds } from '../tasks/store/task.selectors';
 import { CalendarIntegrationEvent } from '../calendar-integration/calendar-integration.model';
+import { distinctUntilChangedObject } from '../../util/distinct-until-changed-object';
 
 @Component({
   selector: 'timeline',
@@ -45,6 +53,7 @@ export class TimelineComponent implements OnDestroy {
           })),
         ),
       ),
+      distinctUntilChanged(distinctUntilChangedObject),
       switchMap(({ allCalendarTaskEventIds, calendarProviders }) => {
         return calendarProviders && calendarProviders.length
           ? forkJoin(
@@ -123,7 +132,6 @@ export class TimelineComponent implements OnDestroy {
         data: { isInfoShownInitially: true },
       });
     }
-    this.icalEvents$.subscribe((v) => console.log(`icalEvents$`, v));
   }
 
   ngOnDestroy(): void {
