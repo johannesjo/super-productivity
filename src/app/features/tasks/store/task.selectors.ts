@@ -216,6 +216,12 @@ export const selectMainTasksWithoutTag = createSelector(
     tasks.filter((task) => !task.parentId && !task.tagIds.includes(props.tagId)),
 );
 
+export const selectAllCalendarTaskEventIds = createSelector(
+  selectAllTasks,
+  (tasks: Task[]): string[] =>
+    tasks.filter((task) => task.issueType === 'CALENDAR').map((t) => t.issueId as string),
+);
+
 export const selectTasksWorkedOnOrDoneFlat = createSelector(
   selectAllTasks,
   (tasks: Task[], props: { day: string }) => {

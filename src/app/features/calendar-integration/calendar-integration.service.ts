@@ -20,13 +20,8 @@ export class CalendarIntegrationService {
 
   requestEventsForTimeline(
     calProvider: CalendarProvider,
-  ): Observable<{ items: CalendarIntegrationEvent[]; icon: string | null }> {
-    return this.requestEvents(calProvider, Date.now(), Date.now() + TWO_MONTHS).pipe(
-      map((items: CalendarIntegrationEvent[]) => ({
-        items,
-        icon: calProvider.icon || null,
-      })),
-    );
+  ): Observable<CalendarIntegrationEvent[]> {
+    return this.requestEvents(calProvider, Date.now(), Date.now() + TWO_MONTHS);
   }
 
   requestEvents(

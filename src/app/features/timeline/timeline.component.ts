@@ -21,6 +21,8 @@ import { loadFromRealLs, saveToRealLs } from '../../core/persistence/local-stora
 import { Store } from '@ngrx/store';
 import { selectCalendarProviders } from '../config/store/global-config.reducer';
 import { CalendarIntegrationService } from '../calendar-integration/calendar-integration.service';
+import { selectAllCalendarTaskEventIds } from '../tasks/store/task.selectors';
+import { CalendarIntegrationEvent } from '../calendar-integration/calendar-integration.model';
 
 @Component({
   selector: 'timeline',
@@ -35,13 +37,34 @@ export class TimelineComponent implements OnDestroy {
   icalEvents$: Observable<TimelineCalendarMapEntry[]> = this._store
     .select(selectCalendarProviders)
     .pipe(
-      switchMap((calendarProviders) => {
+      switchMap((calendarProviders) =>
+        this._store.select(selectAllCalendarTaskEventIds).pipe(
+          map((allCalendarTaskEventIds) => ({
+            allCalendarTaskEventIds,
+            calendarProviders,
+          })),
+        ),
+      ),
+      switchMap(({ allCalendarTaskEventIds, calendarProviders }) => {
         return calendarProviders && calendarProviders.length
           ? forkJoin(
               calendarProviders
                 .filter((calProvider) => calProvider.isEnabled)
                 .map((calProvider) =>
-                  this._calendarIntegrationService.requestEventsForTimeline(calProvider),
+                  this._calendarIntegrationService
+                    .requestEventsForTimeline(calProvider)
+                    .pipe(
+                      // filter out items already added as tasks
+                      map((calEvs) =>
+                        calEvs.filter(
+                          (calEv) => !allCalendarTaskEventIds.includes(calEv.id),
+                        ),
+                      ),
+                      map((items: CalendarIntegrationEvent[]) => ({
+                        items,
+                        icon: calProvider.icon || null,
+                      })),
+                    ),
                 ),
             ).pipe(
               tap((val) => {
