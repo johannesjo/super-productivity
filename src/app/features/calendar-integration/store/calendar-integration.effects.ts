@@ -110,7 +110,6 @@ export class CalendarIntegrationEffects {
         this._skippedEventIds = skippedEvIds;
       } catch (e) {}
     }
-    this._skippedEventIds = [];
   }
 
   private _addEvToShow(
