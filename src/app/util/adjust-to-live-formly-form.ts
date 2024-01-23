@@ -1,4 +1,5 @@
 import { FormlyFieldConfig } from '@ngx-formly/core';
+import { isArray } from 'rxjs/internal-compatibility';
 
 export const adjustToLiveFormlyForm = (
   items: FormlyFieldConfig[],
@@ -10,7 +11,7 @@ export const adjustToLiveFormlyForm = (
         type: 'toggle',
       };
     }
-    if (item.type === 'input') {
+    if (item.type === 'input' || item.type === 'textarea' || item.type === 'duration') {
       return {
         ...item,
         modelOptions: {
@@ -18,6 +19,27 @@ export const adjustToLiveFormlyForm = (
           debounce: {
             default: 1500,
           },
+        },
+      };
+    }
+
+    if (item.type === 'repeat' && isArray(item?.fieldGroup)) {
+      return {
+        ...item,
+        fieldGroup: adjustToLiveFormlyForm(item?.fieldGroup),
+      };
+    }
+
+    if (
+      item.type === 'repeat' &&
+      item?.fieldArray?.fieldGroup &&
+      isArray(item.fieldArray.fieldGroup)
+    ) {
+      return {
+        ...item,
+        fieldArray: {
+          ...item.fieldArray,
+          fieldGroup: adjustToLiveFormlyForm(item?.fieldArray?.fieldGroup),
         },
       };
     }
