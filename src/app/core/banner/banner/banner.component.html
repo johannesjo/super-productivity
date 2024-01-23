@@ -4,11 +4,13 @@
   [class.isError]="banner.type==='ERROR'"
   class="content-wrapper"
 >
-  <mat-progress-bar
-    *ngIf="banner.progress$ && (banner.progress$|async) as progress"
-    mode="determinate"
-    [value]="progress"
-  ></mat-progress-bar>
+  <ng-container *ngIf="banner.progress$ && (banner.progress$|async) as progress">
+    <mat-progress-bar
+      *ngIf="progress>0"
+      mode="determinate"
+      [value]="progress"
+    ></mat-progress-bar>
+  </ng-container>
 
   <div class="inner-content-wrapper">
     <div

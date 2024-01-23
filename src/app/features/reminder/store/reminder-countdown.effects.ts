@@ -1,8 +1,19 @@
 import { Injectable } from '@angular/core';
 import { Actions, createEffect } from '@ngrx/effects';
 import { ReminderService } from '../reminder.service';
-import { selectTaskById, selectTasksById } from '../../tasks/store/task.selectors';
-import { concatMap, first, map, switchMap, tap } from 'rxjs/operators';
+import {
+  selectCurrentTaskId,
+  selectTaskById,
+  selectTasksById,
+} from '../../tasks/store/task.selectors';
+import {
+  concatMap,
+  distinctUntilChanged,
+  first,
+  map,
+  switchMap,
+  tap,
+} from 'rxjs/operators';
 import { BannerId } from '../../../core/banner/banner.model';
 import { T } from '../../../t.const';
 import { DatePipe } from '@angular/common';
@@ -16,6 +27,7 @@ import { TaskService } from '../../tasks/task.service';
 import { Task, TaskWithReminder } from '../../tasks/task.model';
 import { ProjectService } from '../../project/project.service';
 import { Router } from '@angular/router';
+import { distinctUntilChangedObject } from '../../../util/distinct-until-changed-object';
 
 const UPDATE_PERCENTAGE_INTERVAL = 250;
 // since the reminder modal doesn't show instantly we adjust a little for that
@@ -41,8 +53,16 @@ export class ReminderCountdownEffects {
                       !this._skippedReminderIds.includes(reminder.id),
                   );
                 }),
-                switchMap((dueReminders) => {
-                  const taskIds = dueReminders.map((dr) => dr.relatedId);
+                switchMap((dueReminders) =>
+                  this._store
+                    .select(selectCurrentTaskId)
+                    .pipe(distinctUntilChanged())
+                    .pipe(map((currentId) => ({ currentId, dueReminders }))),
+                ),
+                switchMap(({ dueReminders, currentId }) => {
+                  const taskIds = dueReminders
+                    .map((dr) => dr.relatedId)
+                    .filter((id) => id !== currentId);
                   return this._store.select(selectTasksById, { ids: taskIds }).pipe(
                     map((tasks) => {
                       return dueReminders
@@ -64,6 +84,7 @@ export class ReminderCountdownEffects {
   );
 
   private _skippedReminderIds: string[] = [];
+  private _currentBannerReminder?: Reminder;
 
   constructor(
     private actions$: Actions,
@@ -87,8 +108,19 @@ export class ReminderCountdownEffects {
     const firstDue = dueRemindersAndTasks[0];
     if (!firstDue) {
       this._bannerService.dismiss(BannerId.ReminderCountdown);
+      this._currentBannerReminder = undefined;
       return;
     }
+    if (
+      this._currentBannerReminder &&
+      this._currentBannerReminder.id === firstDue.reminder.id &&
+      this._currentBannerReminder.remindAt === firstDue.reminder.remindAt
+    ) {
+      // just leave banner as
+      return;
+    }
+    this._currentBannerReminder = firstDue.reminder;
+
     const firstDueTask = await this._store
       .select(selectTaskById, { id: firstDue.reminder.relatedId })
       .pipe(first())
@@ -125,12 +157,14 @@ export class ReminderCountdownEffects {
         label: T.G.HIDE,
         fn: () => {
           this._skipReminder(firstDue.reminder.id);
+          this._currentBannerReminder = undefined;
         },
       },
       action2: {
         label: T.F.REMINDER.COUNTDOWN_BANNER.START_NOW,
         fn: () => {
           this._skipReminder(firstDue.reminder.id);
+          this._currentBannerReminder = undefined;
           this._startTask(firstDue.task as TaskWithReminder);
         },
       },
