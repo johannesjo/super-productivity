@@ -31,7 +31,12 @@ export class CalendarIntegrationService {
   ): Observable<CalendarIntegrationEvent[]> {
     return this._http.get(calProvider.icalUrl, { responseType: 'text' }).pipe(
       map((icalStrData) =>
-        getRelevantEventsForCalendarIntegrationFromIcal(icalStrData, start, end),
+        getRelevantEventsForCalendarIntegrationFromIcal(
+          icalStrData,
+          calProvider.id,
+          start,
+          end,
+        ),
       ),
       catchError((err) => {
         console.error(err);

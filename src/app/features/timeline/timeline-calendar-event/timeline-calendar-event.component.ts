@@ -2,6 +2,8 @@ import { ChangeDetectionStrategy, Component, HostListener, Input } from '@angula
 import { TimelineFromCalendarEvent } from '../timeline.model';
 import { TaskService } from '../../tasks/task.service';
 import { Store } from '@ngrx/store';
+import { selectCalendarProviderById } from '../../config/store/global-config.reducer';
+import { first } from 'rxjs/operators';
 
 @Component({
   selector: 'timeline-calendar-event',
@@ -15,11 +17,19 @@ export class TimelineCalendarEventComponent {
   @HostListener('click', ['$event'])
   async onClick(): Promise<void> {
     if (this.calendarEvent) {
+      const getCalProvider = this.calendarEvent.calProviderId
+        ? await this._store
+            .select(selectCalendarProviderById, { id: this.calendarEvent.calProviderId })
+            .pipe(first())
+            .toPromise()
+        : undefined;
+
       this._taskService.addAndSchedule(
         this.calendarEvent.title,
         {
-          projectId: null,
+          projectId: getCalProvider?.defaultProjectId || null,
           issueId: this.calendarEvent.id,
+          issueProviderId: this.calendarEvent.calProviderId,
           issueType: 'CALENDAR',
           timeEstimate: this.calendarEvent.duration,
         },

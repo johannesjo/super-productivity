@@ -2,7 +2,7 @@ import { Inject, Injectable, LOCALE_ID } from '@angular/core';
 import { Actions, createEffect } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { selectCalendarProviders } from '../../config/store/global-config.reducer';
-import { first, switchMap, tap } from 'rxjs/operators';
+import { distinctUntilChanged, first, map, switchMap, tap } from 'rxjs/operators';
 import { BehaviorSubject, EMPTY, forkJoin, timer } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
 import { GlobalTrackingIntervalService } from '../../../core/global-tracking-interval/global-tracking-interval.service';
@@ -19,6 +19,8 @@ import { BannerId } from '../../../core/banner/banner.model';
 import { selectTaskByIssueId } from '../../tasks/store/task.selectors';
 import { NavigateToTaskService } from '../../../core-ui/navigate-to-task/navigate-to-task.service';
 import { T } from '../../../t.const';
+import { isValidUrl } from '../../../util/is-valid-url';
+import { distinctUntilChangedObject } from '../../../util/distinct-until-changed-object';
 
 const CHECK_TO_SHOW_INTERVAL = 60 * 1000;
 
@@ -28,10 +30,16 @@ export class CalendarIntegrationEffects {
     () =>
       this._globalTrackingIntervalService.todayDateStr$.pipe(
         switchMap(() => this._store.select(selectCalendarProviders)),
-        switchMap((calProviders) => {
-          const activatedProviders = calProviders.filter(
-            (calProvider) => calProvider.isEnabled && calProvider.icalUrl,
+        map((calProviders) => {
+          return calProviders.filter(
+            (calProvider) =>
+              calProvider.isEnabled &&
+              calProvider.icalUrl &&
+              isValidUrl(calProvider.icalUrl),
           );
+        }),
+        distinctUntilChanged(distinctUntilChangedObject),
+        switchMap((activatedProviders) => {
           if (!activatedProviders.length) {
             return EMPTY;
           }
@@ -203,6 +211,7 @@ export class CalendarIntegrationEffects {
                 {
                   projectId: calProvider.defaultProjectId,
                   issueId: calEv.id,
+                  issueProviderId: calProvider.id,
                   issueType: 'CALENDAR',
                   timeEstimate: calEv.duration,
                 },

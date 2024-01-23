@@ -115,6 +115,7 @@ export type CalendarIntegrationConfig = Readonly<{
 }>;
 export type CalendarProvider = Readonly<{
   isEnabled: boolean;
+  id: string;
   icalUrl: string;
   icon?: string;
   defaultProjectId: string | null;

@@ -40,7 +40,8 @@ export interface TimelineFromCalendarEvent extends CalendarIntegrationEvent {
   icon?: string;
 }
 
-export interface TimelineCustomEvent extends TimelineFromCalendarEvent {
+export interface TimelineCustomEvent
+  extends Omit<TimelineFromCalendarEvent, 'calProviderId'> {
   icon: string;
 }
 

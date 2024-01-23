@@ -74,6 +74,8 @@ const _addNewIssueFields = (task: Task): Task => {
           issueLastUpdated: null,
           // @ts-ignore
           issueWasUpdated: null,
+          // @ts-ignore
+          issueProviderId: null,
           ...task,
         };
   } else {

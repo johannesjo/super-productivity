@@ -53,6 +53,7 @@ export interface IssueTaskTimeTracked {
 export interface IssueFieldsForTask {
   // NOTE: keep in mind that the issueId is not unique (especially for github)
   issueId: string | null;
+  issueProviderId: string | null;
   issueType: IssueProviderKey | null;
   issueWasUpdated: boolean | null;
   issueLastUpdated: number | null;
@@ -149,6 +150,7 @@ export const DEFAULT_TASK: Task = {
   attachments: [],
 
   issueId: null,
+  issueProviderId: null,
   issuePoints: null,
   issueType: null,
   issueAttachmentNr: null,

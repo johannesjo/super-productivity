@@ -6,6 +6,7 @@ import { CalendarIntegrationEvent } from '../../calendar-integration/calendar-in
 
 export const getRelevantEventsForCalendarIntegrationFromIcal = (
   icalData: string,
+  calProviderId: string,
   startTimestamp: number,
   endTimestamp: number,
 ): CalendarIntegrationEvent[] => {
@@ -17,10 +18,12 @@ export const getRelevantEventsForCalendarIntegrationFromIcal = (
   allPossibleFutureEvents.forEach((ve) => {
     if (ve.getFirstPropertyValue('rrule')) {
       calendarIntegrationEvents = calendarIntegrationEvents.concat(
-        getForRecurring(ve, startTimestamp, endTimestamp),
+        getForRecurring(ve, calProviderId, startTimestamp, endTimestamp),
       );
     } else if (ve.getFirstPropertyValue('dtstart').toJSDate().getTime() < endTimestamp) {
-      calendarIntegrationEvents.push(convertVEventToCalendarIntegrationEvent(ve));
+      calendarIntegrationEvents.push(
+        convertVEventToCalendarIntegrationEvent(ve, calProviderId),
+      );
     }
   });
   // console.timeEnd('TEST');
@@ -29,6 +32,7 @@ export const getRelevantEventsForCalendarIntegrationFromIcal = (
 
 const getForRecurring = (
   vevent: any,
+  calProviderId: string,
   startTimestamp: number,
   endTimeStamp: number,
 ): CalendarIntegrationEvent[] => {
@@ -53,6 +57,7 @@ const getForRecurring = (
         start: nextTimestamp,
         duration,
         id: baseId + '_' + next,
+        calProviderId,
       });
     } else if (nextTimestamp > endTimeStamp) {
       return evs;
@@ -63,6 +68,7 @@ const getForRecurring = (
 
 const convertVEventToCalendarIntegrationEvent = (
   vevent: any,
+  calProviderId: string,
 ): CalendarIntegrationEvent => {
   const start = vevent.getFirstPropertyValue('dtstart').toJSDate().getTime();
   // NOTE: if dtend is missing, it defaults to dtstart; @see #1814 and RFC 2455
@@ -76,6 +82,7 @@ const convertVEventToCalendarIntegrationEvent = (
     title: vevent.getFirstPropertyValue('summary'),
     start,
     duration: end - start,
+    calProviderId,
   };
 };
 

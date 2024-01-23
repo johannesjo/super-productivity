@@ -80,6 +80,12 @@ export const selectCalendarProviders = createSelector(
   (cfg): CalendarProvider[] => cfg.calendarIntegration.calendarProviders,
 );
 
+export const selectCalendarProviderById = createSelector(
+  selectCalendarProviders,
+  (calProviders, props: { id: string }): CalendarProvider | undefined =>
+    calProviders.find((calProvider) => calProvider.id === props.id),
+);
+
 export const initialGlobalConfigState: GlobalConfigState = {
   ...DEFAULT_GLOBAL_CONFIG,
   [MODEL_VERSION_KEY]: MODEL_VERSION.GLOBAL_CONFIG,

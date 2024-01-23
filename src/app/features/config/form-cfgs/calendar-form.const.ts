@@ -1,6 +1,7 @@
 import { CalendarIntegrationConfig, ConfigFormSection } from '../global-config.model';
 import { T } from '../../../t.const';
 import { IS_ELECTRON } from '../../../app.constants';
+import { nanoid } from 'nanoid';
 
 export const CALENDAR_FORM_CFG: ConfigFormSection<CalendarIntegrationConfig> = {
   title: T.GCF.CALENDARS.TITLE,
@@ -36,12 +37,24 @@ export const CALENDAR_FORM_CFG: ConfigFormSection<CalendarIntegrationConfig> = {
       fieldArray: {
         fieldGroup: [
           {
+            hide: true,
+            type: 'input',
+            key: 'id',
+            hooks: {
+              onInit: (field) => {
+                if (!field?.formControl?.value) {
+                  field?.formControl?.setValue(nanoid());
+                }
+              },
+            },
+          },
+          {
             type: 'toggle',
             key: 'isEnabled',
             hooks: {
               onInit: (field) => {
-                if (field?.formControl?.value === null) {
-                  field.formControl.setValue(true);
+                if (!field?.formControl?.value) {
+                  field?.formControl?.setValue(true);
                 }
               },
             },
@@ -54,6 +67,7 @@ export const CALENDAR_FORM_CFG: ConfigFormSection<CalendarIntegrationConfig> = {
             key: 'icalUrl',
             templateOptions: {
               required: true,
+              type: 'url',
               label: T.GCF.CALENDARS.CAL_PATH,
             },
           },
@@ -62,8 +76,8 @@ export const CALENDAR_FORM_CFG: ConfigFormSection<CalendarIntegrationConfig> = {
             key: 'icon',
             hooks: {
               onInit: (field) => {
-                if (field?.formControl?.value === null) {
-                  field.formControl.setValue('event');
+                if (!field?.formControl?.value) {
+                  field?.formControl?.setValue('event');
                 }
               },
             },
@@ -76,8 +90,8 @@ export const CALENDAR_FORM_CFG: ConfigFormSection<CalendarIntegrationConfig> = {
             key: 'checkUpdatesEvery',
             hooks: {
               onInit: (field) => {
-                if (field?.formControl?.value === null) {
-                  field.formControl.setValue(60 * 60000);
+                if (!field?.formControl?.value) {
+                  field?.formControl?.setValue(60 * 60000);
                 }
               },
             },
@@ -92,8 +106,8 @@ export const CALENDAR_FORM_CFG: ConfigFormSection<CalendarIntegrationConfig> = {
             key: 'showBannerBeforeThreshold',
             hooks: {
               onInit: (field) => {
-                if (field?.formControl?.value === null) {
-                  field.formControl.setValue(60 * 60000);
+                if (!field?.formControl?.value) {
+                  field?.formControl?.setValue(60 * 60000);
                 }
               },
             },

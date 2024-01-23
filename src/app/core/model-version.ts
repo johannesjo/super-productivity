@@ -1,7 +1,7 @@
 export enum MODEL_VERSION {
-  TASK = 3.4,
+  TASK = 3.5,
   // needs to be always the same as TASK !!!
-  TASK_ARCHIVE = 3.4,
+  TASK_ARCHIVE = 3.5,
   PROJECT = 6.12,
   GLOBAL_CONFIG = 3.01,
   METRIC = 1.0,
