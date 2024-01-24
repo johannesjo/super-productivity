@@ -47,7 +47,6 @@ import { IdleModule } from './features/idle/idle.module';
 import { TrackingReminderModule } from './features/tracking-reminder/tracking-reminder.module';
 import { FinishDayBeforeCloseModule } from './features/finish-day-before-close/finish-day-before-close.module';
 import { AndroidModule } from './features/android/android.module';
-import { WelcomeModule } from './features/welcome/welcome.module';
 import { DominaModeModule } from './features/domina-mode/domina-mode.module';
 import { FocusModeModule } from './features/focus-mode/focus-mode.module';
 import { CalendarIntegrationModule } from './features/calendar-integration/calendar-integration.module';
@@ -80,7 +79,6 @@ export const createTranslateLoader = (http: HttpClient): TranslateHttpLoader =>
     NoteModule,
     BookmarkModule,
     TasksModule,
-    WelcomeModule,
     SyncModule,
     MaterialCssVarsModule.forRoot(),
     SearchBarModule,

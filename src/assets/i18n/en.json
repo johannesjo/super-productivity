@@ -1158,18 +1158,6 @@
         "UNTRACKED_TIME": "Untracked time:"
       }
     },
-    "WELCOME": {
-      "D_WELCOME": {
-        "L1": "Getting started",
-        "L2": "Introductory video on youtube",
-        "L3": "Ask a question",
-        "LETS_GO": "Let's go!!",
-        "MOBILE_INFO": "<strong>Swipe</strong> created tasks <strong>right, to mark them as done</strong>.\n    Swipe them left to schedule. Longpress them for more actions.",
-        "T1": "Great to see, that you decided to give this app a go! \uD83E\uDD84",
-        "T2": "If you're having trouble to find your way around here, there are several places you\n    can find help:",
-        "TITLE": "Welcome to Super Productivity!"
-      }
-    },
     "WORKLOG": {
       "CMP": {
         "DAYS_WORKED": "Days, worked:",

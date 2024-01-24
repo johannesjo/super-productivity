@@ -5,7 +5,13 @@ import { LayoutService } from '../../core-ui/layout/layout.service';
 import { TaskService } from '../tasks/task.service';
 import { Actions } from '@ngrx/effects';
 import { GlobalConfigService } from '../config/global-config.service';
-import { first } from 'rxjs/operators';
+import { concatMap, first, switchMap } from 'rxjs/operators';
+import { MatDialog } from '@angular/material/dialog';
+import { Store } from '@ngrx/store';
+import { ProjectService } from '../project/project.service';
+import { DataInitService } from '../../core/data-init/data-init.service';
+import { LS } from '../../core/persistence/storage-keys.const';
+import { EMPTY } from 'rxjs';
 
 @Component({
   selector: 'shepherd',
@@ -21,6 +27,10 @@ export class ShepherdComponent implements AfterViewInit {
     private taskService: TaskService,
     private actions$: Actions,
     private globalConfigService: GlobalConfigService,
+    private _matDialog: MatDialog,
+    private _store: Store,
+    private _projectService: ProjectService,
+    private _dataInitService: DataInitService,
   ) {}
 
   ngAfterViewInit(): void {
@@ -33,20 +43,34 @@ export class ShepherdComponent implements AfterViewInit {
       },
       buttons: [],
     };
-    // this.shepherdService.modal = true;
-    // this.shepherdService.confirmCancel = false;
 
-    this.globalConfigService.cfg$.pipe(first()).subscribe((cfg) => {
-      this.shepherdService.addSteps(
-        SHEPHERD_STEPS(
-          this.shepherdService,
-          cfg,
-          this.actions$,
-          this.layoutService,
-          this.taskService,
-        ) as any,
-      );
-      this.shepherdService.start();
-    });
+    this.shepherdService.modal = false;
+    this.shepherdService.confirmCancel = false;
+
+    if (
+      !localStorage.getItem(LS.HAS_WELCOME_DIALOG_BEEN_SHOWN) &&
+      navigator.userAgent !== 'NIGHTWATCH'
+    ) {
+      this._dataInitService.isAllDataLoadedInitially$
+        .pipe(concatMap(() => this._projectService.list$.pipe(first())))
+        .subscribe((projectList) => {
+          if (projectList.length <= 2) {
+            this.globalConfigService.cfg$.pipe(first()).subscribe((cfg) => {
+              this.shepherdService.addSteps(
+                SHEPHERD_STEPS(
+                  this.shepherdService,
+                  cfg,
+                  this.actions$,
+                  this.layoutService,
+                  this.taskService,
+                ) as any,
+              );
+              this.shepherdService.start();
+            });
+          } else {
+            localStorage.setItem(LS.HAS_WELCOME_DIALOG_BEEN_SHOWN, 'true');
+          }
+        });
+    }
   }
 }

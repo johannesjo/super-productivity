@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Observable, of } from 'rxjs';
+import { EMPTY, Observable, of } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { IS_ELECTRON } from '../../app.constants';
 import { ipcNotifyOnClose$ } from '../ipc-events';
@@ -8,7 +8,7 @@ import { ipcNotifyOnClose$ } from '../ipc-events';
 export class ExecBeforeCloseService {
   onBeforeClose$: Observable<string[]> = IS_ELECTRON
     ? ipcNotifyOnClose$.pipe(map(([, ids]: any) => ids))
-    : of([]);
+    : EMPTY;
 
   constructor() {}
 

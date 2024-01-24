@@ -6,7 +6,7 @@ import { TaskService } from '../tasks/task.service';
 import { filter, first } from 'rxjs/operators';
 import { promiseTimeout } from '../../util/promise-timeout';
 import { Actions, ofType } from '@ngrx/effects';
-import { deleteTask } from '../tasks/store/task.actions';
+import { addTask, deleteTask } from '../tasks/store/task.actions';
 import { GlobalConfigState } from '../config/global-config.model';
 
 const NEXT_BTN = {
@@ -37,23 +37,23 @@ export const SHEPHERD_STEPS = (
   taskService: TaskService,
 ): Array<Step.StepOptions> => [
   // TODO remove
-  {
-    title: 'YXXXXO',
-    // beforeShowPromise: () => promiseTimeout(200),
-    when: {
-      show: () => {
-        setTimeout(() => {
-          shepherdService.next();
-        }, 500);
-      },
-    },
-    buttons: [],
-  },
-  {
-    title: 'Welcome to Super Productivity!!',
-    text: 'Super Productivity is a ToDo app that helps you to improve your personal workflows.',
-    buttons: SHEPHERD_STANDARD_BTNS,
-  },
+  // {
+  //   title: 'YXXXXO',
+  //   // beforeShowPromise: () => promiseTimeout(200),
+  //   when: {
+  //     show: () => {
+  //       setTimeout(() => {
+  //         shepherdService.next();
+  //       }, 500);
+  //     },
+  //   },
+  //   buttons: [],
+  // },
+  // {
+  //   title: 'Welcome to Super Productivity!!',
+  //   text: 'Super Productivity is a ToDo app that helps you to improve your personal workflows.',
+  //   buttons: SHEPHERD_STANDARD_BTNS,
+  // },
   {
     attachTo: {
       element: '.action-nav button',
@@ -64,9 +64,8 @@ export const SHEPHERD_STEPS = (
         waitForEl('app-root > add-task-bar input', () => shepherdService.next());
       },
     },
-    scrollTo: false,
     title: "Let's add your first task!",
-    text: `Click on this button or press <kbd>${cfg.keyboard.addNewTask}</kbd>`,
+    text: `Click on this button or press <kbd>${cfg.keyboard.addNewTask}</kbd>.`,
     advanceOn: {
       selector: '.action-nav button',
       event: 'click',
@@ -74,22 +73,21 @@ export const SHEPHERD_STEPS = (
   },
 
   {
+    title: 'Enter a title!',
+    text: 'Enter the title you want to give your task and hit the <kbd>Enter</kbd> key. After that you can press the <kbd>Escape</kbd> key or click anywhere on the grayed out backdrop to leave the add task bar.',
     attachTo: {
       element: 'add-task-bar',
       on: 'bottom',
     },
-    beforeShowPromise: () => promiseTimeout(1000),
+    // beforeShowPromise: () => promiseTimeout(200),
     when: {
       show: () => {
-        waitForEl('task', () => {
+        actions$.pipe(ofType(addTask), first()).subscribe(() => {
           layoutService.hideAddTaskBar();
           shepherdService.next();
         });
       },
     },
-    scrollTo: false,
-    title: 'Enter a title!',
-    text: 'Enter the title you want to give your task and hit the <kbd>Enter</kbd> key. After that you can press the <kbd>Escape</kbd> key or click anywhere on the grayed out backdrop to leave the add task bar.',
   },
   {
     title: 'Congrats! This is your first task!',
@@ -98,7 +96,7 @@ export const SHEPHERD_STEPS = (
       element: 'task',
       on: 'bottom',
     },
-    beforeShowPromise: () => promiseTimeout(1000),
+    beforeShowPromise: () => promiseTimeout(400),
     when: {
       show: () => {
         setTimeout(() => {
@@ -108,7 +106,7 @@ export const SHEPHERD_STEPS = (
     },
   },
   {
-    title: 'Start Tracking',
+    title: 'Start Tracking Time',
     attachTo: {
       element: '.start-task-btn',
       on: 'bottom',
@@ -124,7 +122,7 @@ export const SHEPHERD_STEPS = (
     ),
   },
   {
-    title: 'Stop Tracking',
+    title: 'Stop Tracking Time',
     text: 'To stop tracking click on the pause button.',
     attachTo: {
       element: '.start-task-btn',
@@ -154,7 +152,6 @@ export const SHEPHERD_STEPS = (
       element: 'task',
       on: 'bottom',
     },
-    beforeShowPromise: () => promiseTimeout(500),
     when: {
       show: () => {
         setTimeout(() => {
@@ -180,6 +177,7 @@ export const SHEPHERD_STEPS = (
     title: 'The Task Side Panel',
     text: 'In the task side panel you can adjust estimates, schedule your task, add a description or attachments or configure your task to be repeated.',
     buttons: [NEXT_BTN],
+    beforeShowPromise: () => promiseTimeout(1000),
   },
   {
     title: 'Closing the Task Side Panel',
@@ -203,12 +201,18 @@ export const SHEPHERD_STEPS = (
     },
     when: {
       show: () => {
+        setTimeout(() => {
+          (document.querySelector('task') as HTMLElement)?.focus();
+        }, 200);
+        setTimeout(() => {
+          (document.querySelector('task') as HTMLElement)?.focus();
+        }, 1000);
         waitForEl('.mat-menu-panel', () => {
           shepherdService.hide();
-          actions$
-            .pipe(ofType(deleteTask), first())
-            .subscribe(() => shepherdService.next());
         });
+        actions$
+          .pipe(ofType(deleteTask), first())
+          .subscribe(() => shepherdService.next());
       },
     },
   },
