@@ -245,7 +245,8 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
       const { className } = relatedTarget;
       isUIelement =
         className.includes('switch-add-to-btn') ||
-        className.includes('switch-add-to-bot-btn');
+        className.includes('switch-add-to-bot-btn') ||
+        className.includes('shepherd-enabled');
     }
 
     if (

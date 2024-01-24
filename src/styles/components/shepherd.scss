@@ -1,0 +1,35 @@
+.shepherd-modal-overlay-container {
+  width: 100%;
+  height: 100% !important;
+  //opacity: .2 !important;
+}
+
+.shepherd-highlight {
+  outline: 3px solid $c-accent !important;
+}
+
+.shepherd-text kbd {
+  background-color: #eee;
+  border-radius: 3px;
+  border: 1px solid #b4b4b4;
+  box-shadow: 0 1px 1px rgba(0, 0, 0, 0.2), 0 2px 0 0 rgba(255, 255, 255, 0.7) inset;
+  color: #333;
+  display: inline-block;
+  font-size: 0.85em;
+  font-weight: 700;
+  line-height: 1;
+  padding: 2px 4px;
+  white-space: nowrap;
+}
+
+.shepherd-header {
+  h3 {
+    margin: 0;
+    font-weight: bold;
+  }
+}
+
+.shepherd-element[data-popper-reference-hidden]:not(.shepherd-centered) {
+  opacity: 1 !important;
+  visibility: visible !important;
+}
