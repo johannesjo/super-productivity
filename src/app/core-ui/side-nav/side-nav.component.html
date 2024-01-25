@@ -239,16 +239,41 @@
 </section>
 
 <section class="app">
-  <a
+  <button
     #menuEntry
+    [mat-menu-trigger-for]="helpMenu"
     class="route-link"
     mat-menu-item
-    href="https://github.com/johannesjo/super-productivity/blob/master/README.md#question-how-to-use-it"
-    target="_blank"
   >
     <mat-icon>help_center</mat-icon>
     <span class="text">{{T.MH.HELP|translate}}</span>
-  </a>
+  </button>
+
+  <mat-menu #helpMenu="matMenu">
+    <ng-template matMenuContent>
+      <a
+        #menuEntry
+        class="route-link"
+        mat-menu-item
+        href="https://github.com/johannesjo/super-productivity/blob/master/README.md#question-how-to-use-it"
+        target="_blank"
+      >
+        <mat-icon>help_center</mat-icon>
+        <!--        <span class="text">{{T.MH.HELP|translate}}</span>-->
+        <span class="text">Get help online</span>
+      </a>
+
+      <button
+        (click)="startTour(TourId.Welcome)"
+        mat-menu-item
+      >
+        <mat-icon>directions</mat-icon>
+        <!--        <span class="text">{{T.MH.WORKLOG|translate}}</span>-->
+        <span class="text">Start Welcome Tour</span>
+      </button>
+    </ng-template>
+  </mat-menu>
+
   <button
     #menuEntry
     class="route-link"

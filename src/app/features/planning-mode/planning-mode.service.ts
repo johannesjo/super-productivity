@@ -32,7 +32,7 @@ export class PlanningModeService {
       ([t, isHasTasksToWorkOn, isPlanningEndedByUser]) =>
         !isHasTasksToWorkOn &&
         !isPlanningEndedByUser &&
-        !!localStorage.getItem(LS.HAS_WELCOME_DIALOG_BEEN_SHOWN),
+        !!localStorage.getItem(LS.IS_SHOW_TOUR),
     ),
   );
 

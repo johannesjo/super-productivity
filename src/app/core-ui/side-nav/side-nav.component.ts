@@ -30,6 +30,8 @@ import { TaskService } from '../../features/tasks/task.service';
 import { LS } from '../../core/persistence/storage-keys.const';
 import { TODAY_TAG } from '../../features/tag/tag.const';
 import { DialogTimelineSetupComponent } from '../../features/timeline/dialog-timeline-setup/dialog-timeline-setup.component';
+import { TourId } from '../../features/shepherd/shepherd-steps.const';
+import { ShepherdMyService } from '../../features/shepherd/shepherd-my.service';
 
 @Component({
   selector: 'side-nav',
@@ -76,6 +78,7 @@ export class SideNavComponent implements OnDestroy {
   readonly TAG_SIDE_NAV: string = 'TAG_SIDE_NAV';
   activeWorkContextId?: string | null;
   WorkContextType: typeof WorkContextType = WorkContextType;
+  TourId: typeof TourId = TourId;
   private keyManager?: FocusKeyManager<MatMenuItem>;
   private _subs: Subscription = new Subscription();
 
@@ -87,6 +90,7 @@ export class SideNavComponent implements OnDestroy {
     private readonly _layoutService: LayoutService,
     private readonly _taskService: TaskService,
     private readonly _dragulaService: DragulaService,
+    private readonly _shepherdMyService: ShepherdMyService,
   ) {
     this._dragulaService.createGroup(this.PROJECTS_SIDE_NAV, {
       direction: 'vertical',
@@ -256,5 +260,10 @@ export class SideNavComponent implements OnDestroy {
 
   openTimelineSettings(): void {
     this._matDialog.open(DialogTimelineSetupComponent);
+  }
+
+  startTour(id: TourId): void {
+    console.log(this._shepherdMyService);
+    this._shepherdMyService.show(id);
   }
 }

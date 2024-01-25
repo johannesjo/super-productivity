@@ -1,6 +1,6 @@
 import Step from 'shepherd.js/src/types/step';
 import { ShepherdService } from 'angular-shepherd';
-import { nextOnObs, twoWayObs, waitForEl, waitForElRemove } from './shepherd-helper';
+import { nextOnObs, twoWayObs, waitForEl } from './shepherd-helper';
 import { LayoutService } from '../../core-ui/layout/layout.service';
 import { TaskService } from '../tasks/task.service';
 import { filter, first, map, startWith } from 'rxjs/operators';
@@ -11,6 +11,7 @@ import { IS_MOUSE_PRIMARY } from '../../util/is-mouse-primary';
 import { NavigationEnd, Router } from '@angular/router';
 import { promiseTimeout } from '../../util/promise-timeout';
 import { hideAddTaskBar } from '../../core-ui/layout/store/layout.actions';
+import { LS } from '../../core/persistence/storage-keys.const';
 
 const NEXT_BTN = {
   classes: 'shepherd-button-primary',
@@ -18,19 +19,13 @@ const NEXT_BTN = {
   type: 'next',
 };
 
-export const SHEPHERD_STANDARD_BTNS = [
-  {
-    classes: 'shepherd-button-secondary',
-    text: 'Exit Tour',
-    type: 'cancel',
+const CANCEL_BTN: any = (shepherdService: ShepherdService) => ({
+  classes: 'shepherd-button-secondary',
+  text: 'Exit Tour',
+  action: () => {
+    shepherdService.show(TourId.StartTourAgain);
   },
-  {
-    classes: 'shepherd-button-primary',
-    text: 'Back',
-    type: 'back',
-  },
-  NEXT_BTN,
-];
+});
 
 const CLICK = IS_MOUSE_PRIMARY ? '<em>click</em>' : '<em>tap</em>';
 const CLICK_B = IS_MOUSE_PRIMARY ? '<em>Click</em>' : '<em>Tap</em>';
@@ -44,6 +39,7 @@ export enum TourId {
   IssueProviders = 'IssueProviders',
   Project = 'Project',
   FinishDay = 'FinishDay',
+  StartTourAgain = 'StartTourAgain',
 }
 
 export const SHEPHERD_STEPS = (
@@ -59,14 +55,7 @@ export const SHEPHERD_STEPS = (
       id: TourId.Welcome,
       title: 'Welcome to Super Productivity!!',
       text: '<p>Super Productivity is a ToDo app that helps you to improve your personal workflows.</p><p>Let`s do a little tour!</p>',
-      buttons: [
-        {
-          classes: 'shepherd-button-secondary',
-          text: 'Exit Tour',
-          type: 'cancel',
-        },
-        NEXT_BTN,
-      ],
+      buttons: [CANCEL_BTN(shepherdService), NEXT_BTN],
     },
     {
       id: TourId.AddTask,
@@ -316,38 +305,54 @@ export const SHEPHERD_STEPS = (
       text: 'This covers syncing. If you have any questions you can always ask them <a href="https://github.com/johannesjo/super-productivity/discussions">on the projects GitHub page</a>. ',
       buttons: [NEXT_BTN],
     },
+    //     {
+    //       id: TourId.AdvancedStuffChoice,
+    //       title: 'Advanced Tutorials',
+    //       classes: 'shepherd-wider',
+    //       text: `<p>This covers the most important stuff. There are more advanced tutorials for the following subjects available:</p>
+    // <ul class="shepherd-nav-list">
+    // <li><a href="${TourId.Calendars}">Connect your to your Calendars (e.g. Google Calendar, Outlook)</a></li>
+    // <li><a href="${TourId.IssueProviders}">Connect to Issue Providers like Jira, OpenProject, GitHub, GitLab, Redmine or Gitea</a></li>
+    // <!--<li><a href="#">How to manage Projects</a></li>-->
+    // <!--<li><a href="#">How to use keyboard shortcuts in the most efficient way</a></li>-->
+    // </ul>
+    // <p class="shepherd-nav-list">Or <a href="${TourId.Welcome}">restart the welcome tour</a>.</p>
+    // `,
+    //       when: {
+    //         show: () => {
+    //           const nl = document.querySelectorAll('.shepherd-nav-list a');
+    //           if (!nl?.length) {
+    //             return;
+    //           }
+    //           const goTo = (ev: Event): void => {
+    //             ev.preventDefault();
+    //             const el = ev.target as HTMLElement;
+    //             shepherdService.show(el.getAttribute('href') as string);
+    //           };
+    //           Array.from(nl).forEach((node) => node.addEventListener('click', goTo));
+    //         },
+    //       },
+    //       CANCEL_BTN
+    //     },
     {
-      id: TourId.AdvancedStuffChoice,
-      title: 'Advanced Tutorials',
-      classes: 'shepherd-wider',
-      text: `<p>This covers the most important stuff. There are more advanced tutorials for the following subjects available:</p>
-<ul class="shepherd-nav-list">
-<li><a href="${TourId.Calendars}">Connect your to your Calendars (e.g. Google Calendar, Outlook)</a></li>
-<li><a href="${TourId.IssueProviders}">Connect to Issue Providers like Jira, OpenProject, GitHub, GitLab, Redmine or Gitea</a></li>
-<!--<li><a href="#">How to manage Projects</a></li>-->
-<!--<li><a href="#">How to use keyboard shortcuts in the most efficient way</a></li>-->
-</ul>
-<p class="shepherd-nav-list">Or <a href="${TourId.Welcome}">restart the welcome tour</a>.</p>
-`,
-      when: {
-        show: () => {
-          const nl = document.querySelectorAll('.shepherd-nav-list a');
-          if (!nl?.length) {
-            return;
-          }
-          const goTo = (ev: Event): void => {
-            ev.preventDefault();
-            const el = ev.target as HTMLElement;
-            shepherdService.show(el.getAttribute('href') as string);
-          };
-          Array.from(nl).forEach((node) => node.addEventListener('click', goTo));
-        },
-      },
+      id: TourId.StartTourAgain,
+      title: 'Show again?',
+      text: 'Do you want to show the tour again the next time you start the app? You can always show the tour again via the help button in the left menu.',
       buttons: [
         {
           classes: 'shepherd-button-secondary',
-          text: 'End Tour',
-          type: 'cancel',
+          text: 'Never show again',
+          action: () => {
+            localStorage.setItem(LS.IS_SHOW_TOUR, 'true');
+            shepherdService.complete();
+          },
+        } as any,
+        {
+          text: 'Show it again',
+          action: () => {
+            localStorage.removeItem(LS.IS_SHOW_TOUR);
+            shepherdService.complete();
+          },
         } as any,
       ],
     },
