@@ -43,6 +43,8 @@ export class ShepherdMyService {
 
     this.shepherdService.modal = false;
     this.shepherdService.confirmCancel = false;
+    // TODO does not work yet
+    // (this.shepherdService.tourObject as any).keyboardNavigation = false;
 
     this._dataInitService.isAllDataLoadedInitially$
       .pipe(concatMap(() => this._projectService.list$.pipe(first())))

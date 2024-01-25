@@ -206,8 +206,8 @@
         <mat-icon
           class="drag-handle"
           drag-handle
-          >style</mat-icon
-        >
+          >style
+        </mat-icon>
         <span class="text">{{tag.title}}</span>
       </button>
 
@@ -270,6 +270,14 @@
         <mat-icon>directions</mat-icon>
         <!--        <span class="text">{{T.MH.WORKLOG|translate}}</span>-->
         <span class="text">Start Welcome Tour</span>
+      </button>
+      <button
+        (click)="startTour(TourId.Sync)"
+        mat-menu-item
+      >
+        <mat-icon>directions</mat-icon>
+        <!--        <span class="text">{{T.MH.WORKLOG|translate}}</span>-->
+        <span class="text">Configure Sync</span>
       </button>
     </ng-template>
   </mat-menu>

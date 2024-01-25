@@ -249,17 +249,14 @@ export const SHEPHERD_STEPS = (
     {
       id: TourId.Sync,
       title: 'Syncing & Data Privacy',
-      text: "<p>Super Productivity takes your data privacy very serious. This means that <strong>you decide what will be saved and where</strong>. <strong>The app does NOT collect any data </strong> and there are no user accounts or registration required. It's free and open source and always will be.</p><p>This is important since data is often sold for marketing purposes and leaks happen more often than you would think.</p><p>With Super Productivity <strong>you can save and sync your data with a cloud provider of your choosing</strong> or even host it in your own cloud.</p><p>Let me show you where to configure this!!</p>",
-      buttons: [
-        {
-          classes: 'shepherd-button-secondary',
-          text: 'Skip',
-          action: () => {
-            shepherdService.show(TourId.Welcome);
-          },
-        } as any,
-        NEXT_BTN,
-      ],
+      text: "<p>Super Productivity takes your data privacy very serious. This means that <strong>you decide what will be saved and where</strong>. <strong>The app does NOT collect any data </strong> and there are no user accounts or registration required. It's free and open source and always will be.</p><p>This is important since data is often sold for marketing purposes and leaks happen more often than you would think.</p>",
+      buttons: [NEXT_BTN],
+    },
+    {
+      id: TourId.Sync,
+      title: 'Syncing & Data Privacy',
+      text: '<p>With Super Productivity <strong>you can save and sync your data with a cloud provider of your choosing</strong> or even host it in your own cloud.</p><p>Let me show you where to configure this!!</p>',
+      buttons: [NEXT_BTN],
     },
     {
       title: 'Configure Sync',
@@ -343,6 +340,13 @@ export const SHEPHERD_STEPS = (
       id: TourId.StartTourAgain,
       title: 'Show again?',
       text: 'Do you want to show the tour again the next time you start the app? You can always show the tour again via the help button in the left menu.',
+      when: {
+        show: () => {
+          if (localStorage.getItem(LS.IS_SHOW_TOUR)) {
+            shepherdService.complete();
+          }
+        },
+      },
       buttons: [
         {
           classes: 'shepherd-button-secondary',
@@ -353,7 +357,7 @@ export const SHEPHERD_STEPS = (
           },
         } as any,
         {
-          text: 'Show it again',
+          text: 'Show again next time',
           action: () => {
             localStorage.removeItem(LS.IS_SHOW_TOUR);
             shepherdService.complete();

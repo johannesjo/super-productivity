@@ -263,7 +263,6 @@ export class SideNavComponent implements OnDestroy {
   }
 
   startTour(id: TourId): void {
-    console.log(this._shepherdMyService);
     this._shepherdMyService.show(id);
   }
 }
