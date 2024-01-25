@@ -452,7 +452,7 @@
             </button>
 
             <button
-              *ngIf="!task.parentId && (!task.issueId || task.issueType ==='CALENDAR') && !task.repeatCfgId"
+              *ngIf="!task.parentId && (!task.issueId || task.issueType ==='CALENDAR') && !task.repeatCfgId && (moveToProjectList$|async)?.length > 0"
               [matMenuTriggerFor]="projectMenu"
               mat-menu-item
             >

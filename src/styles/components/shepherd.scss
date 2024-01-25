@@ -33,3 +33,9 @@
   opacity: 1 !important;
   visibility: visible !important;
 }
+
+.shepherd-colored {
+  border: 2px solid $c-primary;
+  color: $c-primary;
+  font-weight: bold;
+}

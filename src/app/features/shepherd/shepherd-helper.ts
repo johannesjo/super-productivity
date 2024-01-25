@@ -33,15 +33,19 @@ export const waitForElRemove = (
 export const nextOnObs = (
   obs: Observable<any>,
   shepherdService: ShepherdService,
+  additionalOnShow?: () => void,
 ): Partial<Step.StepOptions> => {
   let _onDestroy$;
   return {
     when: {
       show: () => {
+        if (additionalOnShow) {
+          additionalOnShow();
+        }
         _onDestroy$ = new Subject<void>();
         obs
           .pipe(
-            tap((v) => console.log('waitForObs', v)),
+            tap((v) => console.log('nextOnObs', v)),
             first(),
             takeUntil(_onDestroy$),
           )

@@ -6,7 +6,7 @@ import { TaskService } from '../tasks/task.service';
 import { filter, first } from 'rxjs/operators';
 import { promiseTimeout } from '../../util/promise-timeout';
 import { Actions, ofType } from '@ngrx/effects';
-import { addTask, deleteTask } from '../tasks/store/task.actions';
+import { addTask, deleteTask, updateTask } from '../tasks/store/task.actions';
 import { GlobalConfigState } from '../config/global-config.model';
 import { IS_MOUSE_PRIMARY } from '../../util/is-mouse-primary';
 import { hideAddTaskBar } from '../../core-ui/layout/store/layout.actions';
@@ -20,7 +20,7 @@ const NEXT_BTN = {
 export const SHEPHERD_STANDARD_BTNS = [
   {
     classes: 'shepherd-button-secondary',
-    text: 'Exit',
+    text: 'Exit Tour',
     type: 'cancel',
   },
   {
@@ -38,11 +38,18 @@ export const SHEPHERD_STEPS = (
   layoutService: LayoutService,
   taskService: TaskService,
 ): Array<Step.StepOptions> => [
-  // {
-  //   title: 'Welcome to Super Productivity!!',
-  //   text: 'Super Productivity is a ToDo app that helps you to improve your personal workflows.',
-  //   buttons: SHEPHERD_STANDARD_BTNS,
-  // },
+  {
+    title: 'Welcome to Super Productivity!!',
+    text: '<p>Super Productivity is a ToDo app that helps you to improve your personal workflows.</p><p>Let`s do a little tour!</p>',
+    buttons: [
+      {
+        classes: 'shepherd-button-secondary',
+        text: 'Exit Tour',
+        type: 'cancel',
+      },
+      NEXT_BTN,
+    ],
+  },
   {
     title: "Let's add your first task!",
     text: IS_MOUSE_PRIMARY
@@ -87,7 +94,7 @@ export const SHEPHERD_STEPS = (
   },
   {
     title: 'Congrats! This is your first task!',
-    text: "Let's continue with another subject.",
+    text: 'Let`s start tracking time to it!',
     attachTo: {
       element: 'task',
       on: 'bottom' as any,
@@ -103,7 +110,7 @@ export const SHEPHERD_STEPS = (
   },
   {
     title: 'Time Tracking',
-    text: 'Time tracking is useful as it allows you to get a better idea on how you spend your time. It will enable you to make better estimates and can improve how you work.<br>Pressing the play button in the top right corner will start your first time tracking session.',
+    text: '<p>Time tracking is useful as it allows you to get a better idea on how you spend your time. It will enable you to make better estimates and can improve how you work.</p><p>Pressing the play button in the top right corner will start your first time tracking session.</p>',
     attachTo: {
       element: '.play-btn',
       on: 'bottom',
@@ -123,18 +130,17 @@ export const SHEPHERD_STEPS = (
     ? [
         {
           title: 'Edit Task Title',
-          text: 'You can edit the task title by clicking on it. Do this now and change the title to something else!',
+          text: IS_MOUSE_PRIMARY
+            ? '<p>You can edit the task title by clicking on it.'
+            : '<p>You can edit the task title by tapping on it. Do this now and <strong>change the title to something else!</strong></p>',
           attachTo: {
             element: '.task-title',
             on: 'bottom' as any,
           },
-          advanceOn: {
-            selector: '.task-title',
-            event: 'blur',
-          },
+          ...nextOnObs(actions$.pipe(ofType(updateTask)), shepherdService, () => {}),
         },
         {
-          title: 'Task Side Panel',
+          title: 'Task Hover Menu',
           text: 'There is more you you can do with task. Hover over the task you created with your mouse again.',
           attachTo: {
             element: 'task',
@@ -144,7 +150,7 @@ export const SHEPHERD_STEPS = (
             show: () => {
               setTimeout(() => {
                 waitForEl('task .hover-controls', () => shepherdService.next());
-              }, 200);
+              }, 3000);
             },
           },
         },
@@ -154,7 +160,7 @@ export const SHEPHERD_STEPS = (
             element: '.show-additional-info-btn',
             on: 'bottom' as any,
           },
-          text: 'You can open a panel with additional controls by clicking on the button. Alternatively you can press the <kbd>➔</kbd> key when a task is focused.',
+          text: 'You can open a panel with additional controls by clicking on the button.',
           ...nextOnObs(
             taskService.selectedTask$.pipe(filter((selectedTask) => !!selectedTask)),
             shepherdService,
@@ -177,15 +183,15 @@ export const SHEPHERD_STEPS = (
       ]),
   {
     title: 'The Task Side Panel',
-    text: 'This is the task side panel.Here you can adjust estimates, schedule your task, add a description or attachments or configure your task to be repeated.',
+    text: 'This is the task side panel.Here you can adjust estimates, schedule your task, add some notes or attachments or configure your task to be repeated.',
     buttons: [NEXT_BTN],
-    beforeShowPromise: () => promiseTimeout(1000),
+    beforeShowPromise: () => promiseTimeout(500),
   },
   {
     title: 'Closing the Task Side Panel',
     text: IS_MOUSE_PRIMARY
-      ? 'You can close the panel by clicking the X or by pressing <kbd>←</kbd>. Do this now!'
-      : 'You can close the panel by tapping on the x',
+      ? 'You can close the panel by clicking the X. Do this now!'
+      : 'You can close the panel by tapping on the X. Do this now!',
     attachTo: {
       element: '.show-additional-info-btn',
       on: 'bottom',
@@ -199,20 +205,14 @@ export const SHEPHERD_STEPS = (
     title: 'Deleting a Task',
     text: IS_MOUSE_PRIMARY
       ? // eslint-disable-next-line max-len
-        `To delete a task you need to open the task context menu. To do so right click (or long press on Mac and Mobile) and select "Delete Task". Alternatively you can focus the task by clicking on it and pressing the <kbd>${cfg.keyboard.taskDelete}</kbd> key`
-      : 'To delete a task you need to open the task context menu. To do so long press and select "Delete Task" in the menu that opens up.',
+        `To delete a task you need to open the task context menu. To do so right click (or long press on Mac and Mobile) and select "Delete Task".`
+      : 'To delete a task you need to open the task context menu. To do so long press and select "<strong>Delete Task</strong>" in the menu that opens up.',
     attachTo: {
       element: 'task',
       on: 'bottom',
     },
     when: {
       show: () => {
-        setTimeout(() => {
-          (document.querySelector('task') as HTMLElement)?.focus();
-        }, 200);
-        setTimeout(() => {
-          (document.querySelector('task') as HTMLElement)?.focus();
-        }, 1000);
         waitForEl('.mat-menu-panel', () => {
           shepherdService.hide();
         });
@@ -223,7 +223,17 @@ export const SHEPHERD_STEPS = (
     },
   },
   {
-    title: 'Th are the basics',
-    text: 'Best',
+    title: 'That covers the basics',
+    text: 'Let`s continue with another subject <strong>Syncing</strong>',
+    buttons: [NEXT_BTN],
   },
 ];
+
+/*
+Or by pressing <kbd>Enter</kbd> when a task is focused with the keyboard which is indicated by a <span class="shepherd-colored">colored border</span>.</p><p>Do this now and <strong>change the title to something else!</strong></p>
+ Alternatively you can press the <kbd>➔</kbd> key when a task is focused.
+
+ Alternatively you can focus the task by clicking on it and pressing the <kbd>${cfg.keyboard.taskDelete}</kbd> key
+
+  or by pressing <kbd>←</kbd>
+ */
