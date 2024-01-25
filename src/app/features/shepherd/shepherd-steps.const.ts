@@ -143,15 +143,6 @@ export const SHEPHERD_STEPS = (
     ...(IS_MOUSE_PRIMARY
       ? [
           {
-            title: 'Edit Task Title',
-            text: '<p>You can edit the task title by clicking on it. Do this now and change the task title to something else.',
-            attachTo: {
-              element: '.task-title',
-              on: 'bottom' as any,
-            },
-            ...nextOnObs(actions$.pipe(ofType(updateTask)), shepherdService, () => {}),
-          },
-          {
             title: 'Task Hover Menu',
             text: 'There is more you you can do with a task. Hover over the task you created with your mouse again.',
             attachTo: {
@@ -214,6 +205,20 @@ export const SHEPHERD_STEPS = (
         shepherdService,
       ),
     },
+    ...(IS_MOUSE_PRIMARY
+      ? [
+          {
+            title: 'Edit Task Title',
+            text: '<p>You can edit the task title by clicking on it. Do this now and change the task title to something else.',
+            attachTo: {
+              element: '.task-title',
+              on: 'bottom' as any,
+            },
+            beforeShowPromise: () => promiseTimeout(500),
+            ...nextOnObs(actions$.pipe(ofType(updateTask)), shepherdService, () => {}),
+          },
+        ]
+      : []),
     {
       id: 'DDDD',
       title: 'Deleting a Task',
