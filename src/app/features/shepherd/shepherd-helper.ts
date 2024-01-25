@@ -71,16 +71,18 @@ export const twoWayObs = (
     when: {
       show: () => {
         onDestroy$ = new Subject();
-        fwd.obs.pipe(ofType(addTask), first(), takeUntil(onDestroy$)).subscribe(() => {
+        fwd.obs.pipe(first(), takeUntil(onDestroy$)).subscribe(() => {
+          console.log('FWD');
           fwd.cbAfter?.();
           shepherdService.next();
         });
-        back.obs
-          .pipe(ofType(hideAddTaskBar), first(), takeUntil(onDestroy$))
-          .subscribe(() => {
+        if (back) {
+          back.obs.pipe(first(), takeUntil(onDestroy$)).subscribe(() => {
+            console.log('BACK');
             back.cbAfter?.();
             shepherdService.back();
           });
+        }
       },
       hide: () => {
         onDestroy$.next();

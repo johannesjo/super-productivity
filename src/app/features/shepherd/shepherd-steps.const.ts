@@ -8,6 +8,7 @@ import { promiseTimeout } from '../../util/promise-timeout';
 import { Actions, ofType } from '@ngrx/effects';
 import { addTask, deleteTask } from '../tasks/store/task.actions';
 import { GlobalConfigState } from '../config/global-config.model';
+import { IS_MOUSE_PRIMARY } from '../../util/is-mouse-primary';
 import { hideAddTaskBar } from '../../core-ui/layout/store/layout.actions';
 
 const NEXT_BTN = {
@@ -37,147 +38,154 @@ export const SHEPHERD_STEPS = (
   layoutService: LayoutService,
   taskService: TaskService,
 ): Array<Step.StepOptions> => [
-  // TODO remove
-  // {
-  //   title: 'YXXXXO',
-  //   // beforeShowPromise: () => promiseTimeout(200),
-  //   when: {
-  //     show: () => {
-  //       setTimeout(() => {
-  //         shepherdService.next();
-  //       }, 500);
-  //     },
-  //   },
-  //   buttons: [],
-  // },
   // {
   //   title: 'Welcome to Super Productivity!!',
   //   text: 'Super Productivity is a ToDo app that helps you to improve your personal workflows.',
   //   buttons: SHEPHERD_STANDARD_BTNS,
   // },
   {
+    title: "Let's add your first task!",
+    text: IS_MOUSE_PRIMARY
+      ? `Click on this button or press <kbd>${cfg.keyboard.addNewTask}</kbd>.`
+      : 'Tap on the button with the +',
     attachTo: {
       element: '.action-nav button',
       on: 'bottom',
     },
-    when: {
-      show: () => {
-        waitForEl('app-root > add-task-bar input', () => shepherdService.next());
-      },
-    },
-    title: "Let's add your first task!",
-    text: `Click on this button or press <kbd>${cfg.keyboard.addNewTask}</kbd>.`,
-    advanceOn: {
-      selector: '.action-nav button',
-      event: 'click',
-    },
+    ...nextOnObs(layoutService.isShowAddTaskBar$.pipe(filter((v) => v)), shepherdService),
   },
-
   {
     title: 'Enter a title!',
-    text: 'Enter the title you want to give your task and hit the <kbd>Enter</kbd> key. After that you can press the <kbd>Escape</kbd> key or click anywhere on the grayed out backdrop to leave the add task bar.',
+    text: 'Enter the title you want to give your task and hit the <kbd>Enter</kbd> key.',
     attachTo: {
       element: 'add-task-bar',
       on: 'bottom',
     },
+    beforeShowPromise: () => promiseTimeout(200),
     ...twoWayObs(
-      {
-        obs: actions$.pipe(ofType(addTask)),
-        cbAfter: () => layoutService.hideAddTaskBar(),
-      },
+      { obs: actions$.pipe(ofType(addTask)) },
+      // delay because other hide should trigger first
       { obs: actions$.pipe(ofType(hideAddTaskBar)) },
       shepherdService,
     ),
   },
   {
-    title: 'Congrats! This is your first task!',
-    text: 'Hover over it with your mouse',
+    title: 'Close the Add Task Bar!',
+    text: IS_MOUSE_PRIMARY
+      ? 'Press the <kbd>Escape</kbd> key twice or click anywhere on the grayed out backdrop to leave the add task bar.'
+      : 'Tap anywhere on the grayed out backdrop to leave the add task bar.',
     attachTo: {
-      element: 'task',
+      element: 'add-task-bar',
       on: 'bottom',
     },
-    beforeShowPromise: () => promiseTimeout(400),
+    beforeShowPromise: () => promiseTimeout(200),
+    ...nextOnObs(
+      actions$.pipe(ofType(hideAddTaskBar)),
+      // delay because other hide should trigger first
+      shepherdService,
+    ),
+  },
+  {
+    title: 'Congrats! This is your first task!',
+    text: "Let's continue with another subject.",
+    attachTo: {
+      element: 'task',
+      on: 'bottom' as any,
+    },
     when: {
       show: () => {
         setTimeout(() => {
-          waitForEl('task .hover-controls', () => shepherdService.next());
-        }, 1000);
+          shepherdService.next();
+        }, 3000);
       },
     },
+    beforeShowPromise: () => promiseTimeout(200),
   },
   {
-    title: 'Start Tracking Time',
+    title: 'Time Tracking',
+    text: 'Time tracking is useful as it allows you to get a better idea on how you spend your time. It will enable you to make better estimates and can improve how you work.<br>Pressing the play button in the top right corner will start your first time tracking session.',
     attachTo: {
-      element: '.start-task-btn',
+      element: '.play-btn',
       on: 'bottom',
     },
-    text: 'Pressing the play button will start your first time tracking session. Time tracking is useful since it allows you to get a better idea on how you spend your time.',
-    //   attachTo: {
-    //     element: 'add-task-bar',
-    //     on: 'bottom',
-    //   },
-
     ...nextOnObs(taskService.currentTaskId$.pipe(filter((id) => !!id)), shepherdService),
   },
   {
     title: 'Stop Tracking Time',
     text: 'To stop tracking click on the pause button.',
     attachTo: {
-      element: '.start-task-btn',
+      element: '.play-btn',
       on: 'bottom',
     },
     ...nextOnObs(taskService.currentTaskId$.pipe(filter((id) => !id)), shepherdService),
   },
-  {
-    title: 'Edit Task Title',
-    text: 'You can edit the task title by clicking on it. Do this now and change the title to something else!',
-    attachTo: {
-      element: '.task-title',
-      on: 'bottom',
-    },
-    advanceOn: {
-      selector: '.task-title',
-      event: 'blur',
-    },
-  },
-  {
-    title: 'Task Side Panel',
-    text: 'There is more you you can do with task. Hover over the task you created with your mouse again.',
-    buttons: [],
-    attachTo: {
-      element: 'task',
-      on: 'bottom',
-    },
-    when: {
-      show: () => {
-        setTimeout(() => {
-          waitForEl('task .hover-controls', () => shepherdService.next());
-        }, 200);
-      },
-    },
-  },
-  {
-    title: 'Opening Task Side Panel',
-    attachTo: {
-      element: '.show-additional-info-btn',
-      on: 'bottom',
-    },
-    text: 'You can open a panel with additional controls by clicking on the button. Alternatively you can press the <kbd>➔</kbd> key when a task is focused.',
-    buttons: [],
-    ...nextOnObs(
-      taskService.selectedTask$.pipe(filter((selectedTask) => !!selectedTask)),
-      shepherdService,
-    ),
-  },
+  ...(IS_MOUSE_PRIMARY
+    ? [
+        {
+          title: 'Edit Task Title',
+          text: 'You can edit the task title by clicking on it. Do this now and change the title to something else!',
+          attachTo: {
+            element: '.task-title',
+            on: 'bottom' as any,
+          },
+          advanceOn: {
+            selector: '.task-title',
+            event: 'blur',
+          },
+        },
+        {
+          title: 'Task Side Panel',
+          text: 'There is more you you can do with task. Hover over the task you created with your mouse again.',
+          attachTo: {
+            element: 'task',
+            on: 'bottom' as any,
+          },
+          when: {
+            show: () => {
+              setTimeout(() => {
+                waitForEl('task .hover-controls', () => shepherdService.next());
+              }, 200);
+            },
+          },
+        },
+        {
+          title: 'Opening Task Side Panel',
+          attachTo: {
+            element: '.show-additional-info-btn',
+            on: 'bottom' as any,
+          },
+          text: 'You can open a panel with additional controls by clicking on the button. Alternatively you can press the <kbd>➔</kbd> key when a task is focused.',
+          ...nextOnObs(
+            taskService.selectedTask$.pipe(filter((selectedTask) => !!selectedTask)),
+            shepherdService,
+          ),
+        },
+      ]
+    : [
+        {
+          title: 'Task Side Panel',
+          text: 'There is more you you can do with task. Tap on the task.',
+          attachTo: {
+            element: 'task',
+            on: 'bottom' as any,
+          },
+          ...nextOnObs(
+            taskService.selectedTask$.pipe(filter((selectedTask) => !!selectedTask)),
+            shepherdService,
+          ),
+        },
+      ]),
   {
     title: 'The Task Side Panel',
-    text: 'In the task side panel you can adjust estimates, schedule your task, add a description or attachments or configure your task to be repeated.',
+    text: 'This is the task side panel.Here you can adjust estimates, schedule your task, add a description or attachments or configure your task to be repeated.',
     buttons: [NEXT_BTN],
     beforeShowPromise: () => promiseTimeout(1000),
   },
   {
     title: 'Closing the Task Side Panel',
-    text: 'You can close the panel by clicking the X or by pressing <kbd>←</kbd>. Do this now!',
+    text: IS_MOUSE_PRIMARY
+      ? 'You can close the panel by clicking the X or by pressing <kbd>←</kbd>. Do this now!'
+      : 'You can close the panel by tapping on the x',
     attachTo: {
       element: '.show-additional-info-btn',
       on: 'bottom',
@@ -189,8 +197,10 @@ export const SHEPHERD_STEPS = (
   },
   {
     title: 'Deleting a Task',
-    // eslint-disable-next-line max-len
-    text: `To delete a task you need to open the task context menu. To do so right click (or long press on Mac and Mobile) and select "Delete Task". Alternatively you can focus the task by clicking on it and pressing the <kbd>${cfg.keyboard.taskDelete}</kbd> key`,
+    text: IS_MOUSE_PRIMARY
+      ? // eslint-disable-next-line max-len
+        `To delete a task you need to open the task context menu. To do so right click (or long press on Mac and Mobile) and select "Delete Task". Alternatively you can focus the task by clicking on it and pressing the <kbd>${cfg.keyboard.taskDelete}</kbd> key`
+      : 'To delete a task you need to open the task context menu. To do so long press and select "Delete Task" in the menu that opens up.',
     attachTo: {
       element: 'task',
       on: 'bottom',
@@ -213,9 +223,7 @@ export const SHEPHERD_STEPS = (
     },
   },
   {
-    title: 'These are the basics',
+    title: 'Th are the basics',
     text: 'Best',
-
-    buttons: [],
   },
 ];
