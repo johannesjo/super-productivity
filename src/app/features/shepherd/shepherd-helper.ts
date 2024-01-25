@@ -1,7 +1,11 @@
 import { Observable, Subject } from 'rxjs';
 import Shepherd from 'shepherd.js';
-import Step = Shepherd.Step;
 import { first, takeUntil, tap } from 'rxjs/operators';
+import { ShepherdService } from 'angular-shepherd';
+import Step = Shepherd.Step;
+import { ofType } from '@ngrx/effects';
+import { addTask } from '../tasks/store/task.actions';
+import { hideAddTaskBar } from '../../core-ui/layout/store/layout.actions';
 
 export const waitForEl = (selector: string, cb: () => void): void => {
   const int = window.setInterval(() => {
@@ -26,9 +30,9 @@ export const waitForElRemove = (
   }, 50);
 };
 
-export const waitForObs = (
+export const nextOnObs = (
   obs: Observable<any>,
-  cb: () => void,
+  shepherdService: ShepherdService,
 ): Partial<Step.StepOptions> => {
   let _onDestroy$;
   return {
@@ -37,15 +41,50 @@ export const waitForObs = (
         _onDestroy$ = new Subject<void>();
         obs
           .pipe(
-            takeUntil(_onDestroy$),
             tap((v) => console.log('waitForObs', v)),
             first(),
+            takeUntil(_onDestroy$),
           )
-          .subscribe(() => cb());
+          .subscribe(() => shepherdService.next());
       },
       hide: () => {
         _onDestroy$.next();
         _onDestroy$.complete();
+      },
+    },
+  };
+};
+
+export const twoWayObs = (
+  fwd: {
+    obs: Observable<any>;
+    cbAfter?: () => void;
+  },
+  back: {
+    obs: Observable<any>;
+    cbAfter?: () => void;
+  },
+  shepherdService: ShepherdService,
+): Partial<Step.StepOptions> => {
+  let onDestroy$;
+  return {
+    when: {
+      show: () => {
+        onDestroy$ = new Subject();
+        fwd.obs.pipe(ofType(addTask), first(), takeUntil(onDestroy$)).subscribe(() => {
+          fwd.cbAfter?.();
+          shepherdService.next();
+        });
+        back.obs
+          .pipe(ofType(hideAddTaskBar), first(), takeUntil(onDestroy$))
+          .subscribe(() => {
+            back.cbAfter?.();
+            shepherdService.back();
+          });
+      },
+      hide: () => {
+        onDestroy$.next();
+        onDestroy$.complete();
       },
     },
   };

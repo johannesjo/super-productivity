@@ -292,9 +292,9 @@ export class PersistenceService {
   // BACKUP AND SYNC RELATED
   // -----------------------
   updateLastLocalSyncModelChange(date: number = Date.now()): void {
-    if (!environment || !environment.production) {
-      console.log('Save Last Local Sync Model Change', date);
-    }
+    // if (!environment || !environment.production) {
+    //   console.log('Save Last Local Sync Model Change', date);
+    // }
     localStorage.setItem(LS.LAST_LOCAL_SYNC_MODEL_CHANGE, date.toString());
   }
 

@@ -1,6 +1,6 @@
 import Step from 'shepherd.js/src/types/step';
 import { ShepherdService } from 'angular-shepherd';
-import { waitForEl, waitForObs } from './shepherd-helper';
+import { nextOnObs, twoWayObs, waitForEl } from './shepherd-helper';
 import { LayoutService } from '../../core-ui/layout/layout.service';
 import { TaskService } from '../tasks/task.service';
 import { filter, first } from 'rxjs/operators';
@@ -8,6 +8,7 @@ import { promiseTimeout } from '../../util/promise-timeout';
 import { Actions, ofType } from '@ngrx/effects';
 import { addTask, deleteTask } from '../tasks/store/task.actions';
 import { GlobalConfigState } from '../config/global-config.model';
+import { hideAddTaskBar } from '../../core-ui/layout/store/layout.actions';
 
 const NEXT_BTN = {
   classes: 'shepherd-button-primary',
@@ -79,15 +80,14 @@ export const SHEPHERD_STEPS = (
       element: 'add-task-bar',
       on: 'bottom',
     },
-    // beforeShowPromise: () => promiseTimeout(200),
-    when: {
-      show: () => {
-        actions$.pipe(ofType(addTask), first()).subscribe(() => {
-          layoutService.hideAddTaskBar();
-          shepherdService.next();
-        });
+    ...twoWayObs(
+      {
+        obs: actions$.pipe(ofType(addTask)),
+        cbAfter: () => layoutService.hideAddTaskBar(),
       },
-    },
+      { obs: actions$.pipe(ofType(hideAddTaskBar)) },
+      shepherdService,
+    ),
   },
   {
     title: 'Congrats! This is your first task!',
@@ -117,9 +117,7 @@ export const SHEPHERD_STEPS = (
     //     on: 'bottom',
     //   },
 
-    ...waitForObs(taskService.currentTaskId$.pipe(filter((id) => !!id)), () =>
-      shepherdService.next(),
-    ),
+    ...nextOnObs(taskService.currentTaskId$.pipe(filter((id) => !!id)), shepherdService),
   },
   {
     title: 'Stop Tracking Time',
@@ -128,9 +126,7 @@ export const SHEPHERD_STEPS = (
       element: '.start-task-btn',
       on: 'bottom',
     },
-    ...waitForObs(taskService.currentTaskId$.pipe(filter((id) => !id)), () =>
-      shepherdService.next(),
-    ),
+    ...nextOnObs(taskService.currentTaskId$.pipe(filter((id) => !id)), shepherdService),
   },
   {
     title: 'Edit Task Title',
@@ -168,9 +164,9 @@ export const SHEPHERD_STEPS = (
     },
     text: 'You can open a panel with additional controls by clicking on the button. Alternatively you can press the <kbd>➔</kbd> key when a task is focused.',
     buttons: [],
-    ...waitForObs(
+    ...nextOnObs(
       taskService.selectedTask$.pipe(filter((selectedTask) => !!selectedTask)),
-      () => shepherdService.next(),
+      shepherdService,
     ),
   },
   {
@@ -186,9 +182,9 @@ export const SHEPHERD_STEPS = (
       element: '.show-additional-info-btn',
       on: 'bottom',
     },
-    ...waitForObs(
+    ...nextOnObs(
       taskService.selectedTask$.pipe(filter((selectedTask) => !selectedTask)),
-      () => shepherdService.next(),
+      shepherdService,
     ),
   },
   {
