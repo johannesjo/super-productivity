@@ -67,8 +67,8 @@ export const SHEPHERD_STEPS = (
     {
       title: "Let's add your first task!",
       text: IS_MOUSE_PRIMARY
-        ? `Click on this button or press <kbd>${cfg.keyboard.addNewTask}</kbd>.`
-        : 'Tap on the button with the +',
+        ? `<em>Click</em> on this button or press <kbd>${cfg.keyboard.addNewTask}</kbd>.`
+        : '<em>Tap</em> on the button with the +',
       attachTo: {
         element: '.tour-addBtn',
         on: 'bottom',
@@ -88,7 +88,6 @@ export const SHEPHERD_STEPS = (
       beforeShowPromise: () => promiseTimeout(200),
       ...twoWayObs(
         { obs: actions$.pipe(ofType(addTask)) },
-        // delay because other hide should trigger first
         { obs: actions$.pipe(ofType(hideAddTaskBar)) },
         shepherdService,
       ),
@@ -96,7 +95,7 @@ export const SHEPHERD_STEPS = (
     {
       title: 'Close the Add Task Bar!',
       text: IS_MOUSE_PRIMARY
-        ? 'Press the <kbd>Escape</kbd> key or click anywhere on the grayed out backdrop to leave the add task bar.'
+        ? 'Press the <kbd>Escape</kbd> key or <em>click</em >anywhere on the grayed out backdrop to leave the add task bar.'
         : 'Tap anywhere on the grayed out backdrop to leave the add task bar.',
       attachTo: {
         element: 'add-task-bar',
@@ -225,7 +224,7 @@ export const SHEPHERD_STEPS = (
       title: 'Deleting a Task',
       text: IS_MOUSE_PRIMARY
         ? // eslint-disable-next-line max-len
-          `To delete a task you need to open the task context menu. To do so right click (or long press on Mac and Mobile) and select "Delete Task".`
+          `To delete a task you need to open the task context menu. To do so right <em>click</click>(or long press on Mac and Mobile) and select "Delete Task".`
         : 'To delete a task you need to open the task context menu. To do so long press and select "<strong>Delete Task</strong>" in the menu that opens up.',
       attachTo: {
         element: 'task',
@@ -243,8 +242,8 @@ export const SHEPHERD_STEPS = (
       },
     },
     {
-      title: 'That covers the basics',
-      text: 'Great job! Let`s continue with another subject: <strong>Syncing</strong>!',
+      title: 'Great job!',
+      text: 'That covers the basics. Let`s continue with another subject: <strong>Syncing</strong>!',
       buttons: [NEXT_BTN],
     },
     {
