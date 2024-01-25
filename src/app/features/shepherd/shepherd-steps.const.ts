@@ -11,8 +11,6 @@ import { GlobalConfigState } from '../config/global-config.model';
 import { IS_MOUSE_PRIMARY } from '../../util/is-mouse-primary';
 import { hideAddTaskBar } from '../../core-ui/layout/store/layout.actions';
 import { NavigationEnd, Router } from '@angular/router';
-import Shepherd from 'shepherd.js';
-import Tour = Shepherd.Tour;
 
 const NEXT_BTN = {
   classes: 'shepherd-button-primary',
@@ -37,9 +35,15 @@ export const SHEPHERD_STANDARD_BTNS = [
 const CLICK = IS_MOUSE_PRIMARY ? '<em>click</em>' : '<em>tap</em>';
 const CLICK_B = IS_MOUSE_PRIMARY ? '<em>Click</em>' : '<em>Tap</em>';
 
-export enum TOUR_ID {
+export enum TourId {
   Welcome = 'Welcome',
-  Sync = 'Snyc',
+  AddTask = 'AddTask',
+  Sync = 'Sync',
+  AdvancedStuffChoice = 'AdvancedStuffChoice',
+  Calendars = 'Calendars',
+  IssueProviders = 'IssueProviders',
+  Project = 'Project',
+  FinishDay = 'FinishDay',
 }
 
 export const SHEPHERD_STEPS = (
@@ -52,7 +56,7 @@ export const SHEPHERD_STEPS = (
 ): Array<Step.StepOptions> => {
   return [
     {
-      id: TOUR_ID.Welcome,
+      id: TourId.Welcome,
       title: 'Welcome to Super Productivity!!',
       text: '<p>Super Productivity is a ToDo app that helps you to improve your personal workflows.</p><p>Let`s do a little tour!</p>',
       buttons: [
@@ -65,6 +69,7 @@ export const SHEPHERD_STEPS = (
       ],
     },
     {
+      id: TourId.AddTask,
       title: "Let's add your first task!",
       text: IS_MOUSE_PRIMARY
         ? `<em>Click</em> on this button or press <kbd>${cfg.keyboard.addNewTask}</kbd>.`
@@ -95,8 +100,8 @@ export const SHEPHERD_STEPS = (
     {
       title: 'Close the Add Task Bar!',
       text: IS_MOUSE_PRIMARY
-        ? 'Press the <kbd>Escape</kbd> key or <em>click</em >anywhere on the grayed out backdrop to leave the add task bar.'
-        : 'Tap anywhere on the grayed out backdrop to leave the add task bar.',
+        ? 'Press the <kbd>Escape</kbd> key or <em>click</em> anywhere on the grayed out backdrop to leave the add task bar.'
+        : '<em>Tap</em> anywhere on the grayed out backdrop to leave the add task bar.',
       attachTo: {
         element: 'add-task-bar',
         on: 'bottom',
@@ -243,18 +248,18 @@ export const SHEPHERD_STEPS = (
     },
     {
       title: 'Great job!',
-      text: 'That covers the basics. Let`s continue with another subject: <strong>Syncing</strong>!',
+      text: 'That covers the basics. Let`s continue with another important subject: <strong>Syncing</strong>!',
       buttons: [NEXT_BTN],
     },
     {
-      id: TOUR_ID.Sync,
+      id: TourId.Sync,
       title: 'Syncing & Data Privacy',
-      text: "<p>Super Productivity takes your data privacy serious. This means that <strong>you decide what will be saved and where</strong>. <strong>The app does NOT collect any data </strong> and there are no user accounts or registration required. It's free and open source and always will be.</p><p>This is important since data is often sold for marketing purposes and leaks happen more often than you would think.</p><p>With Super Productivity you can save and sync your data with a cloud provider of your choosing or even host it in your own cloud.</p><p>Let me show you where to configure this!!</p>",
+      text: "<p>Super Productivity takes your data privacy serious. This means that <strong>you decide what will be saved and where</strong>. <strong>The app does NOT collect any data </strong> and there are no user accounts or registration required. It's free and open source and always will be.</p><p>This is important since data is often sold for marketing purposes and leaks happen more often than you would think.</p><p>With Super Productivity <strong>you can save and sync your data with a cloud provider of your choosing</strong> or even host it in your own cloud.</p><p>Let me show you where to configure this!!</p>",
       buttons: [
         {
           text: 'Skip',
           action: () => {
-            shepherdService.show(TOUR_ID.Welcome);
+            shepherdService.show(TourId.Welcome);
           },
         } as any,
         NEXT_BTN,
@@ -306,8 +311,43 @@ export const SHEPHERD_STEPS = (
     },
     {
       title: 'Configure Sync',
-      text: 'This covers syncing. If you have any questions you can always ask them <a href="https://github.com/johannesjo/super-productivity/discussions">on the projects GitHub page</a>.',
+      text: 'This covers syncing. If you have any questions you can always ask them <a href="https://github.com/johannesjo/super-productivity/discussions">on the projects GitHub page</a>. ',
       buttons: [NEXT_BTN],
+    },
+    {
+      id: TourId.AdvancedStuffChoice,
+      title: 'Advanced Tutorials',
+      classes: 'shepherd-wider',
+      text: `<p>This covers the most important stuff. There are more advanced tutorials for the following subjects available:</p>
+<ul class="shepherd-nav-list">
+<li><a href="${TourId.Calendars}">Connect your to your Calendars (e.g. Google Calendar, Outlook)</a></li>
+<li><a href="${TourId.IssueProviders}">Connect to Issue Providers like Jira, OpenProject, GitHub, GitLab, Redmine or Gitea</a></li>
+<!--<li><a href="#">How to manage Projects</a></li>-->
+<!--<li><a href="#">How to use keyboard shortcuts in the most efficient way</a></li>-->
+</ul>
+<p class="shepherd-nav-list">Or <a href="${TourId.Welcome}">restart the welcome tour</a>.</p>
+`,
+      when: {
+        show: () => {
+          const nl = document.querySelectorAll('.shepherd-nav-list a');
+          if (!nl?.length) {
+            return;
+          }
+          const goTo = (ev: Event): void => {
+            ev.preventDefault();
+            const el = ev.target as HTMLElement;
+            shepherdService.show(el.getAttribute('href') as string);
+          };
+          Array.from(nl).forEach((node) => node.addEventListener('click', goTo));
+        },
+      },
+      buttons: [
+        {
+          classes: 'shepherd-button-secondary',
+          text: 'Exit Tour',
+          type: 'cancel',
+        } as any,
+      ],
     },
   ];
 };

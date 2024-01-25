@@ -22,6 +22,16 @@
   white-space: nowrap;
 }
 
+.shepherd-nav-list {
+  li {
+    margin-bottom: $s;
+  }
+
+  a {
+    font-weight: bold;
+  }
+}
+
 .shepherd-header {
   h3 {
     margin: 0;
