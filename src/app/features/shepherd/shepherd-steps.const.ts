@@ -36,6 +36,7 @@ export enum TourId {
   Sync = 'Sync',
   AdvancedStuffChoice = 'AdvancedStuffChoice',
   Calendars = 'Calendars',
+  ProductivityHelper = 'ProductivityHelper',
   IssueProviders = 'IssueProviders',
   Project = 'Project',
   FinishDay = 'FinishDay',
@@ -307,35 +308,81 @@ export const SHEPHERD_STEPS = (
       text: 'This covers syncing. If you have any questions you can always ask them <a href="https://github.com/johannesjo/super-productivity/discussions">on the projects GitHub page</a>. ',
       buttons: [NEXT_BTN],
     },
-    //     {
-    //       id: TourId.AdvancedStuffChoice,
-    //       title: 'Advanced Tutorials',
-    //       classes: 'shepherd-wider',
-    //       text: `<p>This covers the most important stuff. There are more advanced tutorials for the following subjects available:</p>
-    // <ul class="shepherd-nav-list">
-    // <li><a href="${TourId.Calendars}">Connect your to your Calendars (e.g. Google Calendar, Outlook)</a></li>
-    // <li><a href="${TourId.IssueProviders}">Connect to Issue Providers like Jira, OpenProject, GitHub, GitLab, Redmine or Gitea</a></li>
-    // <!--<li><a href="#">How to manage Projects</a></li>-->
-    // <!--<li><a href="#">How to use keyboard shortcuts in the most efficient way</a></li>-->
-    // </ul>
-    // <p class="shepherd-nav-list">Or <a href="${TourId.Welcome}">restart the welcome tour</a>.</p>
-    // `,
-    //       when: {
-    //         show: () => {
-    //           const nl = document.querySelectorAll('.shepherd-nav-list a');
-    //           if (!nl?.length) {
-    //             return;
-    //           }
-    //           const goTo = (ev: Event): void => {
-    //             ev.preventDefault();
-    //             const el = ev.target as HTMLElement;
-    //             shepherdService.show(el.getAttribute('href') as string);
-    //           };
-    //           Array.from(nl).forEach((node) => node.addEventListener('click', goTo));
-    //         },
-    //       },
-    //       CANCEL_BTN
-    //     },
+
+    {
+      id: TourId.Calendars,
+      when: {
+        show: () => {
+          router.navigate(['config']).then(() => {
+            shepherdService.next();
+          });
+        },
+      },
+    },
+    {
+      title: 'Connect Calendars',
+      text: `On the settings page, you can also find the <strong>Calendars</strong> section. ${CLICK_B} on it!`,
+      beforeShowPromise: () => promiseTimeout(500),
+      attachTo: {
+        element: '.config-section:nth-of-type(6)',
+        on: 'top',
+      },
+      when: {
+        show: () => {
+          waitForEl('.tour-calendarSectionOpen', () => shepherdService.next());
+        },
+      },
+      scrollTo: true,
+    },
+    {
+      title: 'Connect Calendars',
+      // eslint-disable-next-line max-len
+      text: `<p>You will need a link or file path to your calendar to show it's events when they are due and within the timeline. You can load calendar data as iCal.</p><ul>
+<li><a target="_blank" href=\"https://support.google.com/calendar/answer/37648?hl=en#zippy=%2Csync-your-google-calendar-view-edit%2Cget-your-calendar-view-only\">Get iCal Link for Google Calendar</a></li>
+<li><a target="_blank" href=\"https://support.pushpay.com/s/article/How-do-I-get-an-iCal-link-from-Office-365\">Get iCal Link for Outlook 365</a></li>
+</ul>`,
+      attachTo: {
+        element: '.config-section:nth-of-type(6)',
+        on: 'top',
+      },
+      buttons: [NEXT_BTN],
+    },
+
+    {
+      id: TourId.ProductivityHelper,
+      when: {
+        show: () => {
+          router.navigate(['config']).then(() => {
+            shepherdService.next();
+          });
+        },
+      },
+    },
+    {
+      title: 'Productivity Helper',
+      // eslint-disable-next-line max-len
+      text: `Another thing you might want to check out is the <strong>Productivity Helper</strong> section. Here you can configure a variety of little tools to your needs.`,
+      beforeShowPromise: () => promiseTimeout(500),
+      attachTo: {
+        element: '.tour-productivityHelper',
+        on: 'top',
+      },
+      scrollTo: true,
+      buttons: [NEXT_BTN],
+    },
+
+    {
+      title: 'Congratulations!',
+      text: '<p>This concludes the tour. Remember that you can always start it again via the Help button in the menu.</p><p>Best way to get familiar with the app, is to play around with it. Have fun!</p>',
+      buttons: [
+        {
+          text: 'End Tour',
+          action: () => {
+            shepherdService.complete();
+          },
+        } as any,
+      ],
+    },
     {
       id: TourId.StartTourAgain,
       title: 'Show again?',
@@ -368,6 +415,35 @@ export const SHEPHERD_STEPS = (
   ];
 };
 
+//     {
+//       id: TourId.AdvancedStuffChoice,
+//       title: 'Advanced Tutorials',
+//       classes: 'shepherd-wider',
+//       text: `<p>This covers the most important stuff. There are more advanced tutorials for the following subjects available:</p>
+// <ul class="shepherd-nav-list">
+// <li><a href="${TourId.Calendars}">Connect your to your Calendars (e.g. Google Calendar, Outlook)</a></li>
+// <li><a href="${TourId.IssueProviders}">Connect to Issue Providers like Jira, OpenProject, GitHub, GitLab, Redmine or Gitea</a></li>
+// <!--<li><a href="#">How to manage Projects</a></li>-->
+// <!--<li><a href="#">How to use keyboard shortcuts in the most efficient way</a></li>-->
+// </ul>
+// <p class="shepherd-nav-list">Or <a href="${TourId.Welcome}">restart the welcome tour</a>.</p>
+// `,
+//       when: {
+//         show: () => {
+//           const nl = document.querySelectorAll('.shepherd-nav-list a');
+//           if (!nl?.length) {
+//             return;
+//           }
+//           const goTo = (ev: Event): void => {
+//             ev.preventDefault();
+//             const el = ev.target as HTMLElement;
+//             shepherdService.show(el.getAttribute('href') as string);
+//           };
+//           Array.from(nl).forEach((node) => node.addEventListener('click', goTo));
+//         },
+//       },
+//       CANCEL_BTN
+//     },
 /*
 Or by pressing <kbd>Enter</kbd> when a task is focused with the keyboard which is indicated by a <span class="shepherd-colored">colored border</span>.</p><p>Do this now and <strong>change the title to something else!</strong></p>
  Alternatively you can press the <kbd>➔</kbd> key when a task is focused.

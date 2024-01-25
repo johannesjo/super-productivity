@@ -10,7 +10,7 @@ export const CALENDAR_FORM_CFG: ConfigFormSection<CalendarIntegrationConfig> = {
   items: [
     {
       type: 'tpl',
-      className: 'tpl',
+      className: 'tpl tour-calendarSectionOpen',
       templateOptions: {
         tag: 'p',
         text: T.GCF.CALENDARS.CAL_PROVIDERS_INFO,

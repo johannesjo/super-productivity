@@ -42,22 +42,24 @@
         ></config-section>
       </section>
 
-      <h2
-        class="mat-h2"
-        style="margin-top: 32px"
-      >
-        {{T.PS.PRODUCTIVITY_HELPER|translate}}
-      </h2>
-      <section
-        *ngFor="let section of globalProductivityConfigFormCfg; trackBy:trackBySectionKey;"
-        class="config-section"
-      >
-        <config-section
-          (save)="saveGlobalCfg($event)"
-          [cfg]="getGlobalCfgSection(section.key)"
-          [section]="section"
-        ></config-section>
-      </section>
+      <div class="tour-productivityHelper">
+        <h2
+          class="mat-h2"
+          style="margin-top: 32px"
+        >
+          {{T.PS.PRODUCTIVITY_HELPER|translate}}
+        </h2>
+        <section
+          *ngFor="let section of globalProductivityConfigFormCfg; trackBy:trackBySectionKey;"
+          class="config-section"
+        >
+          <config-section
+            (save)="saveGlobalCfg($event)"
+            [cfg]="getGlobalCfgSection(section.key)"
+            [section]="section"
+          ></config-section>
+        </section>
+      </div>
 
       <h2
         class="mat-h2"

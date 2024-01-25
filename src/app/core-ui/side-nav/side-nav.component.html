@@ -117,8 +117,8 @@
         <mat-icon
           class="drag-handle"
           drag-handle
-          >list</mat-icon
-        >
+          >list
+        </mat-icon>
         <span class="text">{{project.title}}</span>
       </button>
 
@@ -278,6 +278,22 @@
         <mat-icon>directions</mat-icon>
         <!--        <span class="text">{{T.MH.WORKLOG|translate}}</span>-->
         <span class="text">Configure Sync</span>
+      </button>
+      <button
+        (click)="startTour(TourId.Calendars)"
+        mat-menu-item
+      >
+        <mat-icon>directions</mat-icon>
+        <!--        <span class="text">{{T.MH.WORKLOG|translate}}</span>-->
+        <span class="text">Connect Calendars</span>
+      </button>
+      <button
+        (click)="startTour(TourId.ProductivityHelper)"
+        mat-menu-item
+      >
+        <mat-icon>directions</mat-icon>
+        <!--        <span class="text">{{T.MH.WORKLOG|translate}}</span>-->
+        <span class="text">Productivity Helper</span>
       </button>
     </ng-template>
   </mat-menu>
