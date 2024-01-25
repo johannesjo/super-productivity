@@ -1,6 +1,6 @@
 import { AfterViewInit, ChangeDetectionStrategy, Component } from '@angular/core';
 import { ShepherdService } from 'angular-shepherd';
-import { SHEPHERD_STANDARD_BTNS, SHEPHERD_STEPS } from './shepherd-steps.const';
+import { SHEPHERD_STANDARD_BTNS, SHEPHERD_STEPS, TOUR_ID } from './shepherd-steps.const';
 import { LayoutService } from '../../core-ui/layout/layout.service';
 import { TaskService } from '../tasks/task.service';
 import { Actions } from '@ngrx/effects';
@@ -12,6 +12,7 @@ import { ProjectService } from '../project/project.service';
 import { DataInitService } from '../../core/data-init/data-init.service';
 import { LS } from '../../core/persistence/storage-keys.const';
 import { EMPTY } from 'rxjs';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'shepherd',
@@ -31,6 +32,7 @@ export class ShepherdComponent implements AfterViewInit {
     private _store: Store,
     private _projectService: ProjectService,
     private _dataInitService: DataInitService,
+    private _router: Router,
   ) {}
 
   ngAfterViewInit(): void {
@@ -63,9 +65,11 @@ export class ShepherdComponent implements AfterViewInit {
                   this.actions$,
                   this.layoutService,
                   this.taskService,
+                  this._router,
                 ) as any,
               );
               this.shepherdService.start();
+              this.shepherdService.show(TOUR_ID.Sync);
             });
           } else {
             localStorage.setItem(LS.HAS_WELCOME_DIALOG_BEEN_SHOWN, 'true');

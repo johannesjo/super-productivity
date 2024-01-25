@@ -3,7 +3,7 @@
   <button
     (click)="layoutService.toggleSideNav()"
     *ngIf="!(layoutService.isNavAlwaysVisible$|async)"
-    class="burger-trigger"
+    class="burger-trigger tour-burgerTrigger"
     mat-icon-button
   >
     <mat-icon>menu</mat-icon>
@@ -45,7 +45,7 @@
     <button
       (click)="layoutService.showAddTaskBar()"
       [matTooltip]="T.MH.ADD_NEW_TASK|translate"
-      class="hide-xs"
+      class="hide-xs tour-addBtn"
       mat-icon-button
     >
       <mat-icon>add</mat-icon>
@@ -116,7 +116,7 @@
         [color]="(taskService.currentTaskId$|async)? 'accent': 'primary'"
         [matTooltip]="T.MH.TOGGLE_TRACK_TIME|translate"
         [matTooltipPosition]="(pomodoroService.isEnabled$|async)? 'left': 'below'"
-        class="play-btn mat-elevation-z3"
+        class="play-btn tour-playBtn mat-elevation-z3"
         mat-mini-fab
       >
         <ng-container *ngIf="(pomodoroService.isEnabled$|async)">

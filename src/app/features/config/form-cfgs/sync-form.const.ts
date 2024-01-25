@@ -12,6 +12,7 @@ export const SYNC_FORM: ConfigFormSection<SyncConfig> = {
   items: [
     {
       key: 'isEnabled',
+      className: 'tour-isSyncEnabledToggle',
       type: 'checkbox',
       templateOptions: {
         label: T.F.SYNC.FORM.L_ENABLE_SYNCING,
