@@ -40,8 +40,41 @@
   font-weight: bold;
 }
 
+.shepherd-title,
+.shepherd-text {
+  font-size: 16px;
+  line-height: 1.5;
+  @include darkTheme(true) {
+    color: $dark-theme-text-color;
+  }
+}
+
+.shepherd-header {
+  padding: $s 1rem !important;
+  //background: transparent !important;
+  @include darkTheme(true) {
+    background: $dark8 !important;
+  }
+}
+
 .shepherd-element {
+  border-radius: 8px;
+
+  @include darkTheme(true) {
+    background: $dark24 !important;
+  }
+
   .material-icons {
     vertical-align: middle;
   }
+}
+
+.shepherd-arrow:before {
+  @include darkTheme(true) {
+    background: $dark24 !important;
+  }
+}
+
+.shepherd-button {
+  font-weight: bold;
 }

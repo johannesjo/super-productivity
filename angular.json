@@ -36,8 +36,8 @@
               "src/static"
             ],
             "styles": [
-              "src/styles.scss",
-              "node_modules/shepherd.js/dist/css/shepherd.css"
+              "node_modules/shepherd.js/dist/css/shepherd.css",
+              "src/styles.scss"
             ],
             "scripts": [],
             "webWorkerTsConfig": "src/tsconfig.worker.json"
@@ -214,8 +214,8 @@
             "preserveSymlinks": true,
             "karmaConfig": "src/karma.conf.js",
             "styles": [
-              "src/styles.scss",
-              "node_modules/shepherd.js/dist/css/shepherd.css"
+              "node_modules/shepherd.js/dist/css/shepherd.css",
+              "src/styles.scss"
             ],
             "scripts": [],
             "assets": ["src/favicon.ico", "src/assets", "src/manifest.json"]
