@@ -69,7 +69,7 @@ export class ShepherdComponent implements AfterViewInit {
                 ) as any,
               );
               this.shepherdService.start();
-              this.shepherdService.show(TourId.AdvancedStuffChoice);
+              // this.shepherdService.show(TourId.AdvancedStuffChoice);
             });
           } else {
             localStorage.setItem(LS.HAS_WELCOME_DIALOG_BEEN_SHOWN, 'true');

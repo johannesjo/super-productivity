@@ -1,16 +1,16 @@
 import Step from 'shepherd.js/src/types/step';
 import { ShepherdService } from 'angular-shepherd';
-import { nextOnObs, twoWayObs, waitForEl } from './shepherd-helper';
+import { nextOnObs, twoWayObs, waitForEl, waitForElRemove } from './shepherd-helper';
 import { LayoutService } from '../../core-ui/layout/layout.service';
 import { TaskService } from '../tasks/task.service';
 import { filter, first, map, startWith } from 'rxjs/operators';
-import { promiseTimeout } from '../../util/promise-timeout';
 import { Actions, ofType } from '@ngrx/effects';
 import { addTask, deleteTask, updateTask } from '../tasks/store/task.actions';
 import { GlobalConfigState } from '../config/global-config.model';
 import { IS_MOUSE_PRIMARY } from '../../util/is-mouse-primary';
-import { hideAddTaskBar } from '../../core-ui/layout/store/layout.actions';
 import { NavigationEnd, Router } from '@angular/router';
+import { promiseTimeout } from '../../util/promise-timeout';
+import { hideAddTaskBar } from '../../core-ui/layout/store/layout.actions';
 
 const NEXT_BTN = {
   classes: 'shepherd-button-primary',
@@ -155,7 +155,7 @@ export const SHEPHERD_STEPS = (
       ? [
           {
             title: 'Edit Task Title',
-            text: '<p>You can edit the task title by clicking on it.',
+            text: '<p>You can edit the task title by clicking on it. Do this now and change the task title to something else.',
             attachTo: {
               element: '.task-title',
               on: 'bottom' as any,
@@ -164,7 +164,7 @@ export const SHEPHERD_STEPS = (
           },
           {
             title: 'Task Hover Menu',
-            text: 'There is more you you can do with task. Hover over the task you created with your mouse again.',
+            text: 'There is more you you can do with a task. Hover over the task you created with your mouse again.',
             attachTo: {
               element: 'task',
               on: 'bottom' as any,
@@ -226,10 +226,11 @@ export const SHEPHERD_STEPS = (
       ),
     },
     {
+      id: 'DDDD',
       title: 'Deleting a Task',
       text: IS_MOUSE_PRIMARY
         ? // eslint-disable-next-line max-len
-          `To delete a task you need to open the task context menu. To do so right <em>click</click>(or long press on Mac and Mobile) and select "Delete Task".`
+          `To delete a task you need to open the task context menu. To do so right <em>click</em> on it (or long press on Mac and Mobile) and select "<strong>Delete Task</strong>".`
         : 'To delete a task you need to open the task context menu. To do so long press and select "<strong>Delete Task</strong>" in the menu that opens up.',
       attachTo: {
         element: 'task',
@@ -254,9 +255,10 @@ export const SHEPHERD_STEPS = (
     {
       id: TourId.Sync,
       title: 'Syncing & Data Privacy',
-      text: "<p>Super Productivity takes your data privacy serious. This means that <strong>you decide what will be saved and where</strong>. <strong>The app does NOT collect any data </strong> and there are no user accounts or registration required. It's free and open source and always will be.</p><p>This is important since data is often sold for marketing purposes and leaks happen more often than you would think.</p><p>With Super Productivity <strong>you can save and sync your data with a cloud provider of your choosing</strong> or even host it in your own cloud.</p><p>Let me show you where to configure this!!</p>",
+      text: "<p>Super Productivity takes your data privacy very serious. This means that <strong>you decide what will be saved and where</strong>. <strong>The app does NOT collect any data </strong> and there are no user accounts or registration required. It's free and open source and always will be.</p><p>This is important since data is often sold for marketing purposes and leaks happen more often than you would think.</p><p>With Super Productivity <strong>you can save and sync your data with a cloud provider of your choosing</strong> or even host it in your own cloud.</p><p>Let me show you where to configure this!!</p>",
       buttons: [
         {
+          classes: 'shepherd-button-secondary',
           text: 'Skip',
           action: () => {
             shepherdService.show(TourId.Welcome);
@@ -306,7 +308,7 @@ export const SHEPHERD_STEPS = (
     },
     {
       title: 'Configure Sync',
-      text: '<p>Here you should be able to configure a sync provider of your choosing. For most people <a href="https://www.dropbox.com/" target="_blank"><strong>Dropbox</strong></a> is probably the easiest solution, that also will offer you automatic backups in the cloud.</p><p>If you have the desktop or Android version of Super Productivity <strong>LocalFile</strong> is another good option. It will let you configure a file path to sync to. You can in turn sync this file with any provider you like.</p><p>The option <strong>WebDAV</strong> can be used to sync with Nextcloud and others.</p>',
+      text: '<p>Here you should be able to configure a sync provider of your choosing. For most people <a href="https://www.dropbox.com/" target="_blank"><strong>Dropbox</strong></a> is probably the easiest solution, that also will offer you automatic backups in the cloud.</p><p>If you have the desktop or Android version of Super Productivity <strong>LocalFile</strong> is another good option. It will let you configure a file path to sync to. You can then sync this file with any provider you like.</p><p>The option <strong>WebDAV</strong> can be used to sync with Nextcloud and others.</p>',
       buttons: [NEXT_BTN],
     },
     {
@@ -344,7 +346,7 @@ export const SHEPHERD_STEPS = (
       buttons: [
         {
           classes: 'shepherd-button-secondary',
-          text: 'Exit Tour',
+          text: 'End Tour',
           type: 'cancel',
         } as any,
       ],

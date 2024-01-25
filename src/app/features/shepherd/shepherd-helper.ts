@@ -3,22 +3,20 @@ import Shepherd from 'shepherd.js';
 import { first, takeUntil, tap } from 'rxjs/operators';
 import { ShepherdService } from 'angular-shepherd';
 import Step = Shepherd.Step;
-import { ofType } from '@ngrx/effects';
-import { addTask } from '../tasks/store/task.actions';
-import { hideAddTaskBar } from '../../core-ui/layout/store/layout.actions';
 
-export const waitForEl = (selector: string, cb: () => void): void => {
+export const waitForEl = (selector: string, cb: () => void): number => {
   const int = window.setInterval(() => {
     if (document.querySelector(selector)) {
       window.clearInterval(int);
       cb();
     }
   }, 50);
+  return int;
 };
 export const waitForElRemove = (
   el: HTMLElement | Element | null,
   cb: () => void,
-): void => {
+): number => {
   if (!el) {
     throw new Error('No el provided');
   }
@@ -28,6 +26,7 @@ export const waitForElRemove = (
       cb();
     }
   }, 50);
+  return int;
 };
 
 export const nextOnObs = (
@@ -76,13 +75,11 @@ export const twoWayObs = (
       show: () => {
         onDestroy$ = new Subject();
         fwd.obs.pipe(first(), takeUntil(onDestroy$)).subscribe(() => {
-          console.log('FWD');
           fwd.cbAfter?.();
           shepherdService.next();
         });
         if (back) {
           back.obs.pipe(first(), takeUntil(onDestroy$)).subscribe(() => {
-            console.log('BACK');
             back.cbAfter?.();
             shepherdService.back();
           });
