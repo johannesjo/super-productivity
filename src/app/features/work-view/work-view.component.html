@@ -218,6 +218,7 @@
           </button>
         </div>
         <task-list
+          class="tour-undoneList"
           [tasks]="undoneTasks"
           listId="PARENT"
           listModelId="UNDONE"
@@ -231,6 +232,7 @@
             {{T.WW.COMPLETED_TASKS|translate}}
           </h2>
           <task-list
+            class="tour-doneList"
             [noTasksMsg]="T.WW.NO_COMPLETED_TASKS|translate"
             [tasks]="doneTasks"
             listId="PARENT"

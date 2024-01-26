@@ -6,7 +6,7 @@ import { filter, first, map, switchMap } from 'rxjs/operators';
 import { Actions, ofType } from '@ngrx/effects';
 import { addTask, deleteTask, updateTask } from '../tasks/store/task.actions';
 import { GlobalConfigState } from '../config/global-config.model';
-import { IS_MOUSE_PRIMARY } from '../../util/is-mouse-primary';
+import { IS_MOUSE_PRIMARY, IS_TOUCH_PRIMARY } from '../../util/is-mouse-primary';
 import { NavigationEnd, Router } from '@angular/router';
 import { promiseTimeout } from '../../util/promise-timeout';
 import { hideAddTaskBar } from '../../core-ui/layout/store/layout.actions';
@@ -234,13 +234,37 @@ export const SHEPHERD_STEPS = (
       ? [
           {
             title: 'Edit Task Title',
-            text: '<p>You can edit the task title by clicking on it. Do this now and change the task title to something else.',
+            text: '<p>You can edit the task title by clicking on it. Do this now and change the task title to something else.</p>',
             attachTo: {
               element: '.task-title',
               on: 'bottom' as any,
             },
             beforeShowPromise: () => promiseTimeout(500),
-            ...nextOnObs(actions$.pipe(ofType(updateTask)), shepherdService, () => {}),
+            ...nextOnObs(actions$.pipe(ofType(updateTask)), shepherdService),
+          },
+        ]
+      : []),
+    //
+    ...(IS_TOUCH_PRIMARY
+      ? [
+          {
+            title: 'Marking tasks as done',
+            text: '<p>You can mark tasks as done by swiping them to the right</p><p>Swiping to the left will open up the schedule Dialog.</p><p><em>Swipe right</em> now to mark the task as done!</p>',
+            attachTo: {
+              element: '.tour-undoneList task',
+              on: 'bottom' as any,
+            },
+            ...nextOnObs(actions$.pipe(ofType(updateTask)), shepherdService),
+          },
+          {
+            title: 'Marking tasks as undone',
+            text: '<p>You can mark tasks as undone again by swiping it to the right</p>',
+            attachTo: {
+              element: '.tour-doneList task',
+              on: 'bottom' as any,
+            },
+            beforeShowPromise: () => promiseTimeout(500),
+            ...nextOnObs(actions$.pipe(ofType(updateTask)), shepherdService),
           },
         ]
       : []),
@@ -257,7 +281,7 @@ export const SHEPHERD_STEPS = (
         element: 'task',
         on: 'bottom',
       },
-      beforeShowPromise: () => promiseTimeout(1500),
+      beforeShowPromise: () => promiseTimeout(300),
       when: (() => {
         let intId: number;
         return {
@@ -282,7 +306,7 @@ export const SHEPHERD_STEPS = (
     {
       id: TourId.Projects,
       title: 'Projects',
-      text: 'You can create different task lists by using projects.',
+      text: 'If you have lots of tasks, you probably need more than a single task list. One way of creating different lists is by using projects.',
       buttons: [NEXT_BTN],
     },
     {
