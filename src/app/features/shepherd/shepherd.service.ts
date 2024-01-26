@@ -15,7 +15,7 @@ import Step = Shepherd.Step;
 @Injectable({
   providedIn: 'root',
 })
-export class ShepherdMyService {
+export class ShepherdService {
   isActive = false;
   tour?: Shepherd.Tour;
 

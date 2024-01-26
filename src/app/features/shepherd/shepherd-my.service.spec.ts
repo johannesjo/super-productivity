@@ -1,13 +1,13 @@
 // import { TestBed } from '@angular/core/testing';
 //
-// import { ShepherdMyService } from './shepherd-my.service';
+// import { ShepherdService } from './shepherd-my.service';
 //
-// describe('ShepherdMyService', () => {
-//   let service: ShepherdMyService;
+// describe('ShepherdService', () => {
+//   let service: ShepherdService;
 //
 //   beforeEach(() => {
 //     TestBed.configureTestingModule({});
-//     service = TestBed.inject(ShepherdMyService);
+//     service = TestBed.inject(ShepherdService);
 //   });
 //
 //   it('should be created', () => {

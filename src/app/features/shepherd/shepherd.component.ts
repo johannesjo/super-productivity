@@ -1,5 +1,5 @@
 import { AfterViewInit, ChangeDetectionStrategy, Component } from '@angular/core';
-import { ShepherdMyService } from './shepherd-my.service';
+import { ShepherdService } from './shepherd.service';
 import { LS } from '../../core/persistence/storage-keys.const';
 import { concatMap, first } from 'rxjs/operators';
 import { DataInitService } from '../../core/data-init/data-init.service';
@@ -14,7 +14,7 @@ import { ProjectService } from '../project/project.service';
 })
 export class ShepherdComponent implements AfterViewInit {
   constructor(
-    private shepherdMyService: ShepherdMyService,
+    private shepherdMyService: ShepherdService,
     private _dataInitService: DataInitService,
     private _projectService: ProjectService,
   ) {}

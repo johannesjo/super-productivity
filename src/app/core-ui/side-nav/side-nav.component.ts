@@ -31,7 +31,7 @@ import { LS } from '../../core/persistence/storage-keys.const';
 import { TODAY_TAG } from '../../features/tag/tag.const';
 import { DialogTimelineSetupComponent } from '../../features/timeline/dialog-timeline-setup/dialog-timeline-setup.component';
 import { TourId } from '../../features/shepherd/shepherd-steps.const';
-import { ShepherdMyService } from '../../features/shepherd/shepherd-my.service';
+import { ShepherdService } from '../../features/shepherd/shepherd.service';
 import { getGithubErrorUrl } from 'src/app/core/error-handler/global-error-handler.util';
 import { IS_MOUSE_PRIMARY } from '../../util/is-mouse-primary';
 
@@ -94,7 +94,7 @@ export class SideNavComponent implements OnDestroy {
     private readonly _layoutService: LayoutService,
     private readonly _taskService: TaskService,
     private readonly _dragulaService: DragulaService,
-    private readonly _shepherdMyService: ShepherdMyService,
+    private readonly _shepherdService: ShepherdService,
   ) {
     this._dragulaService.createGroup(this.PROJECTS_SIDE_NAV, {
       direction: 'vertical',
@@ -267,7 +267,7 @@ export class SideNavComponent implements OnDestroy {
   }
 
   startTour(id: TourId): void {
-    this._shepherdMyService.show(id);
+    this._shepherdService.show(id);
   }
 
   getGithubErrorUrl(): string {

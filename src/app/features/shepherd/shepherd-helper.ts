@@ -1,7 +1,7 @@
 import { Observable, Subject } from 'rxjs';
 import Shepherd from 'shepherd.js';
 import { first, takeUntil, tap } from 'rxjs/operators';
-import { ShepherdMyService } from './shepherd-my.service';
+import { ShepherdService } from './shepherd.service';
 import Step = Shepherd.Step;
 
 export const waitForEl = (selector: string, cb: () => void): number => {
@@ -33,7 +33,7 @@ export const waitForElRemove = (
 
 export const nextOnObs = (
   obs: Observable<any>,
-  shepherdService: ShepherdMyService,
+  shepherdService: ShepherdService,
   additionalOnShow?: () => void,
 ): Partial<Step.StepOptions> => {
   let _onDestroy$;
@@ -69,7 +69,7 @@ export const twoWayObs = (
     obs: Observable<any>;
     cbAfter?: () => void;
   },
-  shepherdService: ShepherdMyService,
+  shepherdService: ShepherdService,
 ): Partial<Step.StepOptions> => {
   let onDestroy$;
   return {

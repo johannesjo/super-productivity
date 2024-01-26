@@ -1,5 +1,4 @@
 import Step from 'shepherd.js/src/types/step';
-import { ShepherdService } from 'angular-shepherd';
 import { nextOnObs, twoWayObs, waitForEl } from './shepherd-helper';
 import { LayoutService } from '../../core-ui/layout/layout.service';
 import { TaskService } from '../tasks/task.service';
@@ -14,7 +13,7 @@ import { hideAddTaskBar } from '../../core-ui/layout/store/layout.actions';
 import { LS } from '../../core/persistence/storage-keys.const';
 import { KeyboardConfig } from '../config/keyboard-config.model';
 import { WorkContextService } from '../work-context/work-context.service';
-import { ShepherdMyService } from './shepherd-my.service';
+import { ShepherdService } from './shepherd.service';
 
 const NEXT_BTN = {
   classes: 'shepherd-button-primary',
@@ -50,7 +49,7 @@ export enum TourId {
 }
 
 export const SHEPHERD_STEPS = (
-  shepherdService: ShepherdMyService,
+  shepherdService: ShepherdService,
   cfg: GlobalConfigState,
   actions$: Actions,
   layoutService: LayoutService,
