@@ -46,7 +46,7 @@ export class ShepherdMyService {
       ) as any,
     );
     this.start();
-    this.show(TourId.KeyboardNav);
+    // this.show(TourId.XXX);
   }
 
   async show(id: TourId): Promise<void> {

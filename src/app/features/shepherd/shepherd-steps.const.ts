@@ -38,7 +38,6 @@ export enum TourId {
   AddTask = 'AddTask',
   DeleteTask = 'DeleteTask',
   Sync = 'Sync',
-  AdvancedStuffChoice = 'AdvancedStuffChoice',
   Calendars = 'Calendars',
   ProductivityHelper = 'ProductivityHelper',
   IssueProviders = 'IssueProviders',
@@ -47,6 +46,7 @@ export enum TourId {
   StartTourAgain = 'StartTourAgain',
   KeyboardNav = 'KeyboardNav',
   FinalCongrats = 'FinalCongrats',
+  XXX = 'XXX',
 }
 
 export const SHEPHERD_STEPS = (
@@ -421,6 +421,16 @@ export const SHEPHERD_STEPS = (
       title: 'Congratulations!',
       text: '<p>This concludes the tour. Remember that you can always start it again via the Help button in the menu.</p><p>Best way to get familiar with the app, is to play around with it. Have fun!</p>',
       buttons: [
+        ...(IS_MOUSE_PRIMARY
+          ? [
+              {
+                text: 'Tour Keyboard Shortcuts',
+                action: () => {
+                  shepherdService.show(TourId.KeyboardNav);
+                },
+              } as any,
+            ]
+          : []),
         {
           text: 'End Tour',
           action: () => {
@@ -459,7 +469,7 @@ export const SHEPHERD_STEPS = (
       ],
     },
     {
-      // id: TourId.KeyboardNav,
+      id: TourId.KeyboardNav,
       title: 'Keyboard Navigation',
       text: '<p>The most efficient way to user Super Productivity is to make use of the keyboard shortcuts. Don`t worry there just a handful of important ones :)</p><p>You can configure most of them under "Settings / Keyboard Shortcuts", but let`s start more practical.</p>',
       buttons: [NEXT_BTN],
@@ -509,7 +519,10 @@ export const SHEPHERD_STEPS = (
     },
     {
       title: 'A focused task',
-      text: 'Do you see the <span class="shepherd-colored-border">colored border</span> around the first task? This means the task is focused. To unfocus it click somewhere else in the the document.',
+      text: 'Do you see the <span class="shepherd-colored-border">colored border</span> around the first task? This means the task is focused. To unfocus it click somewhere else in the document.',
+      when: {
+        show: () => taskService.focusFirstTaskIfVisible(),
+      },
       buttons: [NEXT_BTN],
     },
     {
@@ -520,10 +533,13 @@ export const SHEPHERD_STEPS = (
       buttons: [NEXT_BTN],
     },
     {
-      id: TourId.KeyboardNav,
+      id: 'XXX',
       title: 'Moving around',
       // eslint-disable-next-line max-len
       text: `<p>When a task was focused in the first place you can navigate to other tasks by pressing he arrow keys <kbd>↑</kbd> and <kbd>↓</kbd>.</p>`,
+      when: {
+        show: () => taskService.focusFirstTaskIfVisible(),
+      },
       buttons: [NEXT_BTN],
     },
     {
@@ -531,27 +547,40 @@ export const SHEPHERD_STEPS = (
       text: `You can move the focused task itself around by pressing ${KEY_COMBO(
         'moveTaskUp',
       )} and ${KEY_COMBO('moveTaskDown')}.`,
+      when: {
+        show: () => taskService.focusFirstTaskIfVisible(),
+      },
       buttons: [NEXT_BTN],
     },
     {
       title: 'Edit Task Title',
       text: `You can edit the task by pressing the <kbd>Enter</kbd> key.`,
+      when: {
+        show: () => taskService.focusFirstTaskIfVisible(),
+      },
       buttons: [NEXT_BTN],
     },
     {
       title: 'Open, close and navigate the Task Side Panel',
       // eslint-disable-next-line max-len
-      text: `<p>You can open the task side panel for a task by pressing <kbd>→</kbd> while it is focused. You can close it again by pressing <kbd>←</kbd></p><p>You can also navigate and activate it's items by using the arrow keys <kbd>→</kbd> <kbd>↑</kbd> and <kbd>↓</kbd>.</p>`,
+      text: `<p>You can open the task side panel for a task by pressing <kbd>→</kbd> while it is focused. You can close it again by pressing <kbd>←</kbd></p><p>You can also navigate and activate it's items by using the arrow keys <kbd>→</kbd> <kbd>↑</kbd> and <kbd>↓</kbd>.</p><p>You can leave most contexts that open up this way by pressing <kbd>Escape</kbd>.</p>`,
+      when: {
+        show: () => taskService.focusFirstTaskIfVisible(),
+      },
       buttons: [NEXT_BTN],
     },
     {
       title: 'More Task Shortcuts',
+      when: {
+        show: () => taskService.focusFirstTaskIfVisible(),
+      },
       // eslint-disable-next-line max-len
       text: `<p>There are more task related shortcuts that can be used when a task is focused. Best you check them all out under <strong>Settings/Keyboard Shortcuts /Tasks</strong>. The most useful are probably:</p>
           <ul>
           <li>${KEY_COMBO(
             'taskSchedule',
           )}: Schedule task (which can also be navigated by keyboard)</li>
+          <li>${KEY_COMBO('taskDelete')}: Delete Task</li>
           <li>${KEY_COMBO('taskToggleDone')}: Toggle done</li>
           <li>${KEY_COMBO('taskAddSubTask')}: Add new sub task</li>
           <li>${KEY_COMBO('togglePlay')}: Toggle tracking</li>
