@@ -44,5 +44,7 @@ export const GLOBAL_PRODUCTIVITY_FORM_CONFIG: ConfigFormConfig = [
   POMODORO_FORM_CFG,
   EVALUATION_SETTINGS_FORM_CFG,
   SIMPLE_COUNTER_FORM,
-  ...(!window.ea?.isSnap() && !IS_FIREFOX ? [DOMINA_MODE_FORM] : []),
+  ...(!window.ea?.isSnap() && !IS_FIREFOX && !!window.speechSynthesis
+    ? [DOMINA_MODE_FORM]
+    : []),
 ].filter((cfg) => IS_ELECTRON || !cfg.isElectronOnly);
