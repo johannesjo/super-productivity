@@ -2,20 +2,11 @@ import Step from 'shepherd.js/src/types/step';
 import { nextOnObs, twoWayObs, waitForEl } from './shepherd-helper';
 import { LayoutService } from '../../core-ui/layout/layout.service';
 import { TaskService } from '../tasks/task.service';
-import {
-  concatMap,
-  delay,
-  filter,
-  first,
-  map,
-  skipWhile,
-  switchMap,
-  tap,
-} from 'rxjs/operators';
+import { delay, filter, first, map, switchMap } from 'rxjs/operators';
 import { Actions, ofType } from '@ngrx/effects';
 import { addTask, deleteTask, updateTask } from '../tasks/store/task.actions';
 import { GlobalConfigState } from '../config/global-config.model';
-import { IS_MOUSE_PRIMARY, IS_TOUCH_PRIMARY } from '../../util/is-mouse-primary';
+import { IS_MOUSE_PRIMARY } from '../../util/is-mouse-primary';
 import { NavigationEnd, Router } from '@angular/router';
 import { promiseTimeout } from '../../util/promise-timeout';
 import { hideAddTaskBar } from '../../core-ui/layout/store/layout.actions';
@@ -23,8 +14,7 @@ import { LS } from '../../core/persistence/storage-keys.const';
 import { KeyboardConfig } from '../config/keyboard-config.model';
 import { WorkContextService } from '../work-context/work-context.service';
 import { ShepherdService } from './shepherd.service';
-import { fromEvent, of, timer } from 'rxjs';
-import { Element } from '@angular/compiler';
+import { timer } from 'rxjs';
 
 const PRIMARY_CLASSES = 'mat-flat-button mat-button-base mat-primary';
 const SECONDARY_CLASSES = 'mat-button mat-button-base';
@@ -163,7 +153,6 @@ export const SHEPHERD_STEPS = (
       ),
     },
     {
-      id: 'XXX',
       title: 'Stop Tracking Time',
       text: `To stop tracking ${CLICK} on the pause button.`,
       attachTo: {
@@ -278,8 +267,26 @@ export const SHEPHERD_STEPS = (
         ]
       : []),
     //
-    ...(IS_TOUCH_PRIMARY
+    ...(IS_MOUSE_PRIMARY
       ? [
+          {
+            id: 'XXX',
+            title: 'Marking tasks as done',
+            text: '<p>You can mark tasks as done by <em>hovering</em> over it and then <em>clicking</em> the <span class="material-icons">check</span> icon. Do this now!</p>',
+            attachTo: {
+              element: '.tour-undoneList task',
+              on: 'bottom' as any,
+            },
+            when: nextOnObs(
+              actions$.pipe(
+                ofType(updateTask),
+                filter(({ task }) => !!task.changes.isDone),
+              ),
+              shepherdService,
+            ),
+          },
+        ]
+      : [
           {
             title: 'Marking tasks as done',
             text: '<p>You can mark tasks as done by swiping them to the right</p><p>Swiping to the left will open up the schedule Dialog.</p><p><em>Swipe right</em> now to mark the task as done!</p>',
@@ -287,7 +294,13 @@ export const SHEPHERD_STEPS = (
               element: '.tour-undoneList task',
               on: 'bottom' as any,
             },
-            when: nextOnObs(actions$.pipe(ofType(updateTask)), shepherdService),
+            when: nextOnObs(
+              actions$.pipe(
+                ofType(updateTask),
+                filter(({ task }) => !!task.changes.isDone),
+              ),
+              shepherdService,
+            ),
           },
           {
             title: 'Marking tasks as undone',
@@ -297,10 +310,15 @@ export const SHEPHERD_STEPS = (
               on: 'bottom' as any,
             },
             beforeShowPromise: () => promiseTimeout(500),
-            when: nextOnObs(actions$.pipe(ofType(updateTask)), shepherdService),
+            when: nextOnObs(
+              actions$.pipe(
+                ofType(updateTask),
+                filter(({ task }) => task.changes.isDone === false),
+              ),
+              shepherdService,
+            ),
           },
-        ]
-      : []),
+        ]),
 
     // ------------------------------
     {
