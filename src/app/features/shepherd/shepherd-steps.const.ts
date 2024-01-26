@@ -3,7 +3,7 @@ import { ShepherdService } from 'angular-shepherd';
 import { nextOnObs, twoWayObs, waitForEl } from './shepherd-helper';
 import { LayoutService } from '../../core-ui/layout/layout.service';
 import { TaskService } from '../tasks/task.service';
-import { filter, first, map, startWith } from 'rxjs/operators';
+import { filter, first, map, startWith, takeUntil, tap } from 'rxjs/operators';
 import { Actions, ofType } from '@ngrx/effects';
 import { addTask, deleteTask, updateTask } from '../tasks/store/task.actions';
 import { GlobalConfigState } from '../config/global-config.model';
@@ -12,6 +12,7 @@ import { NavigationEnd, Router } from '@angular/router';
 import { promiseTimeout } from '../../util/promise-timeout';
 import { hideAddTaskBar } from '../../core-ui/layout/store/layout.actions';
 import { LS } from '../../core/persistence/storage-keys.const';
+import { Subject } from 'rxjs';
 
 const NEXT_BTN = {
   classes: 'shepherd-button-primary',
@@ -33,6 +34,7 @@ const CLICK_B = IS_MOUSE_PRIMARY ? '<em>Click</em>' : '<em>Tap</em>';
 export enum TourId {
   Welcome = 'Welcome',
   AddTask = 'AddTask',
+  DeleteTask = 'DeleteTask',
   Sync = 'Sync',
   AdvancedStuffChoice = 'AdvancedStuffChoice',
   Calendars = 'Calendars',
@@ -151,13 +153,23 @@ export const SHEPHERD_STEPS = (
               on: 'bottom' as any,
             },
             beforeShowPromise: () => promiseTimeout(500),
-            when: {
-              show: () => {
-                setTimeout(() => {
-                  waitForEl('task .hover-controls', () => shepherdService.next());
-                }, 3200);
-              },
-            },
+            when: (() => {
+              let timeOutId: number;
+              let intId: number;
+              return {
+                show: () => {
+                  timeOutId = window.setTimeout(() => {
+                    intId = waitForEl('task .hover-controls', () =>
+                      shepherdService.next(),
+                    );
+                  }, 3200);
+                },
+                hide: () => {
+                  window.clearInterval(intId);
+                  window.clearTimeout(timeOutId);
+                },
+              };
+            })(),
           },
           {
             title: 'Opening Task Side Panel',
@@ -221,7 +233,7 @@ export const SHEPHERD_STEPS = (
         ]
       : []),
     {
-      id: 'DDDD',
+      id: TourId.DeleteTask,
       title: 'Deleting a Task',
       text: IS_MOUSE_PRIMARY
         ? // eslint-disable-next-line max-len
@@ -231,16 +243,25 @@ export const SHEPHERD_STEPS = (
         element: 'task',
         on: 'bottom',
       },
-      when: {
-        show: () => {
-          waitForEl('.mat-menu-panel', () => {
-            shepherdService.hide();
-          });
-          actions$
-            .pipe(ofType(deleteTask), first())
-            .subscribe(() => shepherdService.next());
-        },
-      },
+      beforeShowPromise: () => promiseTimeout(1500),
+      when: (() => {
+        let intId: number;
+        return {
+          show: () => {
+            intId = waitForEl('.mat-menu-panel', () => {
+              shepherdService.hide();
+            });
+            actions$
+              .pipe(ofType(deleteTask), first())
+              .subscribe(() => shepherdService.next());
+          },
+          hide: () => {
+            // NOTE this is the exception since we use hide as part of the flow
+            // _onDestroy$.complete();
+            window.clearInterval(intId);
+          },
+        };
+      })(),
     },
     {
       title: 'Great job!',
@@ -254,7 +275,6 @@ export const SHEPHERD_STEPS = (
       buttons: [NEXT_BTN],
     },
     {
-      id: TourId.Sync,
       title: 'Syncing & Data Privacy',
       text: '<p>With Super Productivity <strong>you can save and sync your data with a cloud provider of your choosing</strong> or even host it in your own cloud.</p><p>Let me show you where to configure this!!</p>',
       buttons: [NEXT_BTN],
@@ -278,10 +298,11 @@ export const SHEPHERD_STEPS = (
         router.events.pipe(
           filter((event: any) => event instanceof NavigationEnd),
           map((event) => !!event.url.includes('config')),
-          startWith(router.url.includes('config')),
           filter((v) => !!v),
         ),
         shepherdService,
+        // make sure we are not on config page already
+        () => router.navigate(['']),
       ),
     },
     {
@@ -292,14 +313,24 @@ export const SHEPHERD_STEPS = (
         on: 'top',
       },
       scrollTo: true,
-      when: {
-        show: () => {
-          waitForEl('.tour-isSyncEnabledToggle', () => shepherdService.next());
-        },
-      },
+      when: (() => {
+        let intId: number;
+        return {
+          show: () => {
+            intId = waitForEl('.tour-isSyncEnabledToggle', () => shepherdService.next());
+          },
+          hide: () => {
+            window.clearInterval(intId);
+          },
+        };
+      })(),
     },
     {
       title: 'Configure Sync',
+      attachTo: {
+        element: '.tour-syncSection',
+        on: 'top',
+      },
       text: '<p>Here you should be able to configure a sync provider of your choosing. For most people <a href="https://www.dropbox.com/" target="_blank"><strong>Dropbox</strong></a> is probably the easiest solution, that also will offer you automatic backups in the cloud.</p><p>If you have the desktop or Android version of Super Productivity <strong>LocalFile</strong> is another good option. It will let you configure a file path to sync to. You can then sync this file with any provider you like.</p><p>The option <strong>WebDAV</strong> can be used to sync with Nextcloud and others.</p>',
       buttons: [NEXT_BTN],
     },
@@ -327,11 +358,17 @@ export const SHEPHERD_STEPS = (
         element: '.config-section:nth-of-type(6)',
         on: 'top',
       },
-      when: {
-        show: () => {
-          waitForEl('.tour-calendarSectionOpen', () => shepherdService.next());
-        },
-      },
+      when: (() => {
+        let intId: number;
+        return {
+          show: () => {
+            intId = waitForEl('.tour-calendarSectionOpen', () => shepherdService.next());
+          },
+          hide: () => {
+            window.clearInterval(intId);
+          },
+        };
+      })(),
       scrollTo: true,
     },
     {

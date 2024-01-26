@@ -6,6 +6,8 @@ import Step = Shepherd.Step;
 
 export const waitForEl = (selector: string, cb: () => void): number => {
   const int = window.setInterval(() => {
+    console.log('INT');
+
     if (document.querySelector(selector)) {
       window.clearInterval(int);
       cb();

@@ -1,6 +1,5 @@
 import { Injectable } from '@angular/core';
-import { LS } from '../../core/persistence/storage-keys.const';
-import { concatMap, first } from 'rxjs/operators';
+import { first } from 'rxjs/operators';
 import { SHEPHERD_STEPS, TourId } from './shepherd-steps.const';
 import { ShepherdService } from 'angular-shepherd';
 import { LayoutService } from '../../core-ui/layout/layout.service';
@@ -30,51 +29,43 @@ export class ShepherdMyService {
     private _router: Router,
   ) {}
 
-  init(): void {
+  async init(): Promise<void> {
     this.shepherdService.defaultStepOptions = {
       scrollTo: false,
       highlightClass: 'shepherd-highlight',
       arrow: true,
       cancelIcon: {
-        enabled: true,
+        enabled: false,
       },
       buttons: [],
     };
 
     this.shepherdService.modal = false;
-    this.shepherdService.confirmCancel = false;
+
     // TODO does not work yet
     // (this.shepherdService.tourObject as any).keyboardNavigation = false;
 
-    this._dataInitService.isAllDataLoadedInitially$
-      .pipe(concatMap(() => this._projectService.list$.pipe(first())))
-      .subscribe((projectList) => {
-        if (projectList.length <= 2) {
-          this.globalConfigService.cfg$.pipe(first()).subscribe((cfg) => {
-            this.shepherdService.addSteps(
-              SHEPHERD_STEPS(
-                this.shepherdService,
-                cfg,
-                this.actions$,
-                this.layoutService,
-                this.taskService,
-                this._router,
-              ) as any,
-            );
-            this.shepherdService.start();
-            // this.shepherdService.show(TourId.AdvancedStuffChoice);
-          });
-        } else {
-          localStorage.setItem(LS.IS_SHOW_TOUR, 'true');
-        }
-      });
+    const cfg = await this.globalConfigService.cfg$.pipe(first()).toPromise();
+    this.shepherdService.addSteps(
+      SHEPHERD_STEPS(
+        this.shepherdService,
+        cfg,
+        this.actions$,
+        this.layoutService,
+        this.taskService,
+        this._router,
+      ) as any,
+    );
+    this.shepherdService.start();
   }
 
   async show(id: TourId): Promise<void> {
     if (!this.shepherdService.isActive) {
-      this.init();
+      await this.init();
     }
-    await this._router.navigateByUrl('/');
+    if (id !== TourId.Calendars && id !== TourId.ProductivityHelper) {
+      await this._router.navigateByUrl('/');
+    }
     this.shepherdService.show(id);
   }
 }

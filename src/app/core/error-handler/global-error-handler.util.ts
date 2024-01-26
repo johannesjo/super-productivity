@@ -185,8 +185,6 @@ export const getGithubErrorUrl = (
   stackTrace?: string,
   isHideActionsBeforeError = false,
 ): string => {
-  console.log('GET _URL');
-
   return newGithubIssueUrl({
     user: 'johannesjo',
     repo: 'super-productivity',

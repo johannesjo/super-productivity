@@ -1,6 +1,9 @@
 import { AfterViewInit, ChangeDetectionStrategy, Component } from '@angular/core';
 import { ShepherdMyService } from './shepherd-my.service';
 import { LS } from '../../core/persistence/storage-keys.const';
+import { concatMap, first } from 'rxjs/operators';
+import { DataInitService } from '../../core/data-init/data-init.service';
+import { ProjectService } from '../project/project.service';
 
 @Component({
   selector: 'shepherd',
@@ -10,11 +13,23 @@ import { LS } from '../../core/persistence/storage-keys.const';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ShepherdComponent implements AfterViewInit {
-  constructor(private shepherdMyService: ShepherdMyService) {}
+  constructor(
+    private shepherdMyService: ShepherdMyService,
+    private _dataInitService: DataInitService,
+    private _projectService: ProjectService,
+  ) {}
 
   ngAfterViewInit(): void {
     if (!localStorage.getItem(LS.IS_SHOW_TOUR) && navigator.userAgent !== 'NIGHTWATCH') {
-      this.shepherdMyService.init();
+      this._dataInitService.isAllDataLoadedInitially$
+        .pipe(concatMap(() => this._projectService.list$.pipe(first())))
+        .subscribe((projectList) => {
+          if (projectList.length <= 2) {
+            this.shepherdMyService.init();
+          } else {
+            localStorage.setItem(LS.IS_SHOW_TOUR, 'true');
+          }
+        });
     }
   }
 }
