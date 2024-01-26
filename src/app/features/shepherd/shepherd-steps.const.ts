@@ -81,6 +81,9 @@ export const SHEPHERD_STEPS = (
       ...nextOnObs(
         layoutService.isShowAddTaskBar$.pipe(filter((v) => v)),
         shepherdService,
+        () => {
+          router.navigate(['/']);
+        },
       ),
     },
     {
