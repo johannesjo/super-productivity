@@ -30,9 +30,7 @@ export class PlanningModeService {
     ),
     map(
       ([t, isHasTasksToWorkOn, isPlanningEndedByUser]) =>
-        !isHasTasksToWorkOn &&
-        !isPlanningEndedByUser &&
-        !!localStorage.getItem(LS.IS_SHOW_TOUR),
+        !isHasTasksToWorkOn && !isPlanningEndedByUser,
     ),
   );
 
