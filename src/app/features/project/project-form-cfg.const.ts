@@ -4,7 +4,6 @@ import {
 } from '../config/global-config.model';
 import { T } from '../../t.const';
 import { Project } from './project.model';
-import { nanoid } from 'nanoid';
 
 export const BASIC_PROJECT_CONFIG_FORM_CONFIG: ConfigFormSection<Project> = {
   title: T.F.PROJECT.FORM_BASIC.TITLE,
