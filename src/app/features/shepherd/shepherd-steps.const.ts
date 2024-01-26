@@ -14,7 +14,6 @@ import { LS } from '../../core/persistence/storage-keys.const';
 import { KeyboardConfig } from '../config/keyboard-config.model';
 import { WorkContextService } from '../work-context/work-context.service';
 import { ShepherdService } from './shepherd.service';
-import { fromEvent } from 'rxjs';
 
 const PRIMARY_CLASSES = 'mat-flat-button mat-button-base mat-primary';
 const SECONDARY_CLASSES = 'mat-button mat-button-base';
@@ -86,7 +85,7 @@ export const SHEPHERD_STEPS = (
         element: '.tour-addBtn',
         on: 'bottom',
       },
-      ...nextOnObs(
+      when: nextOnObs(
         layoutService.isShowAddTaskBar$.pipe(filter((v) => v)),
         shepherdService,
         () => {
@@ -102,7 +101,7 @@ export const SHEPHERD_STEPS = (
         on: 'bottom',
       },
       beforeShowPromise: () => promiseTimeout(200),
-      ...twoWayObs(
+      when: twoWayObs(
         { obs: actions$.pipe(ofType(addTask)) },
         { obs: actions$.pipe(ofType(hideAddTaskBar)) },
         shepherdService,
@@ -118,7 +117,7 @@ export const SHEPHERD_STEPS = (
         on: 'bottom',
       },
       beforeShowPromise: () => promiseTimeout(200),
-      ...nextOnObs(
+      when: nextOnObs(
         actions$.pipe(ofType(hideAddTaskBar)),
         // delay because other hide should trigger first
         shepherdService,
@@ -147,7 +146,7 @@ export const SHEPHERD_STEPS = (
         element: '.tour-playBtn',
         on: 'bottom',
       },
-      ...nextOnObs(
+      when: nextOnObs(
         taskService.currentTaskId$.pipe(filter((id) => !!id)),
         shepherdService,
       ),
@@ -160,7 +159,10 @@ export const SHEPHERD_STEPS = (
         on: 'bottom',
       },
       beforeShowPromise: () => promiseTimeout(500),
-      ...nextOnObs(taskService.currentTaskId$.pipe(filter((id) => !id)), shepherdService),
+      when: nextOnObs(
+        taskService.currentTaskId$.pipe(filter((id) => !id)),
+        shepherdService,
+      ),
     },
     ...(IS_MOUSE_PRIMARY
       ? [
@@ -197,7 +199,7 @@ export const SHEPHERD_STEPS = (
               on: 'bottom' as any,
             },
             text: 'You can open a panel with additional controls by clicking on the button.',
-            ...nextOnObs(
+            when: nextOnObs(
               taskService.selectedTask$.pipe(filter((selectedTask) => !!selectedTask)),
               shepherdService,
             ),
@@ -211,7 +213,7 @@ export const SHEPHERD_STEPS = (
               element: 'task',
               on: 'bottom' as any,
             },
-            ...nextOnObs(
+            when: nextOnObs(
               taskService.selectedTask$.pipe(filter((selectedTask) => !!selectedTask)),
               shepherdService,
             ),
@@ -232,7 +234,7 @@ export const SHEPHERD_STEPS = (
         element: '.show-additional-info-btn',
         on: 'bottom',
       },
-      ...nextOnObs(
+      when: nextOnObs(
         taskService.selectedTask$.pipe(filter((selectedTask) => !selectedTask)),
         shepherdService,
       ),
@@ -247,7 +249,7 @@ export const SHEPHERD_STEPS = (
               on: 'bottom' as any,
             },
             beforeShowPromise: () => promiseTimeout(500),
-            ...nextOnObs(actions$.pipe(ofType(updateTask)), shepherdService),
+            when: nextOnObs(actions$.pipe(ofType(updateTask)), shepherdService),
           },
         ]
       : []),
@@ -261,7 +263,7 @@ export const SHEPHERD_STEPS = (
               element: '.tour-undoneList task',
               on: 'bottom' as any,
             },
-            ...nextOnObs(actions$.pipe(ofType(updateTask)), shepherdService),
+            when: nextOnObs(actions$.pipe(ofType(updateTask)), shepherdService),
           },
           {
             title: 'Marking tasks as undone',
@@ -271,7 +273,7 @@ export const SHEPHERD_STEPS = (
               on: 'bottom' as any,
             },
             beforeShowPromise: () => promiseTimeout(500),
-            ...nextOnObs(actions$.pipe(ofType(updateTask)), shepherdService),
+            when: nextOnObs(actions$.pipe(ofType(updateTask)), shepherdService),
           },
         ]
       : []),
@@ -323,7 +325,7 @@ export const SHEPHERD_STEPS = (
         on: 'bottom',
       },
       text: 'Open the menu (<span class="material-icons">menu</span>)',
-      ...nextOnObs(
+      when: nextOnObs(
         layoutService.isShowSideNav$.pipe(filter((v) => !!v)),
         shepherdService,
       ),
@@ -359,7 +361,7 @@ export const SHEPHERD_STEPS = (
       },
       beforeShowPromise: () => router.navigate(['']),
       text: 'Open the menu (<span class="material-icons">menu</span>)',
-      ...nextOnObs(
+      when: nextOnObs(
         layoutService.isShowSideNav$.pipe(filter((v) => !!v)),
         shepherdService,
       ),
@@ -367,7 +369,7 @@ export const SHEPHERD_STEPS = (
     {
       title: 'Configure Sync',
       text: `${CLICK_B} on <span class="material-icons">settings</span> <strong>Settings</strong>!`,
-      ...nextOnObs(
+      when: nextOnObs(
         router.events.pipe(
           filter((event: any) => event instanceof NavigationEnd),
           map((event) => !!event.url.includes('config')),
@@ -551,7 +553,7 @@ export const SHEPHERD_STEPS = (
     {
       title: 'Keyboard Navigation',
       text: `Let\`s add a couple of tasks. Press ${KEY_COMBO('addNewTask')}.`,
-      ...nextOnObs(
+      when: nextOnObs(
         layoutService.isShowAddTaskBar$.pipe(filter((v) => v)),
         shepherdService,
       ),
@@ -564,7 +566,7 @@ export const SHEPHERD_STEPS = (
         on: 'bottom',
       },
       beforeShowPromise: () => promiseTimeout(200),
-      ...twoWayObs(
+      when: twoWayObs(
         {
           obs: actions$.pipe(
             ofType(addTask),
@@ -585,7 +587,7 @@ export const SHEPHERD_STEPS = (
         on: 'bottom',
       },
       beforeShowPromise: () => promiseTimeout(200),
-      ...nextOnObs(
+      when: nextOnObs(
         actions$.pipe(ofType(hideAddTaskBar)),
         // delay because other hide should trigger first
         shepherdService,
@@ -607,7 +609,6 @@ export const SHEPHERD_STEPS = (
       buttons: [NEXT_BTN],
     },
     {
-      id: 'XXX',
       title: 'Moving around',
       // eslint-disable-next-line max-len
       text: `<p>When a task is focused you can navigate to other tasks by pressing the arrow keys <kbd>↑</kbd> and <kbd>↓</kbd>.</p>`,
