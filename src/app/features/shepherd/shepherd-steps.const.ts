@@ -562,9 +562,7 @@ export const SHEPHERD_STEPS = (
     },
     {
       title: 'Edit Task Title',
-      text: `You can edit the task by pressing the <kbd>Enter</kbd> or the configured ${KEY_COMBO(
-        'taskEditTitle',
-      )}key.`,
+      text: `You can edit the task by pressing the <kbd>Enter</kbd>.`,
       when: {
         show: () => taskService.focusFirstTaskIfVisible(),
       },
