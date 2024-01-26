@@ -52,7 +52,6 @@ import { Bookmark, BookmarkState } from '../../features/bookmark/bookmark.model'
 import { Note, NoteState } from '../../features/note/note.model';
 import { Action, Store } from '@ngrx/store';
 import { Tag, TagState } from '../../features/tag/tag.model';
-import { environment } from '../../../environments/environment';
 import { checkFixEntityStateConsistency } from '../../util/check-fix-entity-state-consistency';
 import {
   SimpleCounter,

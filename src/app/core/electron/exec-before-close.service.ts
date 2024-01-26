@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { EMPTY, Observable, of } from 'rxjs';
+import { EMPTY, Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { IS_ELECTRON } from '../../app.constants';
 import { ipcNotifyOnClose$ } from '../ipc-events';

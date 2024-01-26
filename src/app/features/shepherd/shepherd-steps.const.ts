@@ -60,7 +60,7 @@ export const SHEPHERD_STEPS = (
   router: Router,
   workContextService: WorkContextService,
 ): Array<Step.StepOptions> => {
-  const KEY_COMBO = (action: keyof KeyboardConfig) =>
+  const KEY_COMBO = (action: keyof KeyboardConfig): string =>
     `<kbd>${cfg.keyboard[action]}</kbd>`;
 
   return [

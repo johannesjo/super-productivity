@@ -5,7 +5,6 @@ import {
   ComponentFactory,
   ComponentFactoryResolver,
   EventEmitter,
-  HostBinding,
   Input,
   OnDestroy,
   OnInit,

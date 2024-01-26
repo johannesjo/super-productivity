@@ -27,7 +27,6 @@ import { TaskService } from '../../tasks/task.service';
 import { Task, TaskWithReminder } from '../../tasks/task.model';
 import { ProjectService } from '../../project/project.service';
 import { Router } from '@angular/router';
-import { distinctUntilChangedObject } from '../../../util/distinct-until-changed-object';
 
 const UPDATE_PERCENTAGE_INTERVAL = 250;
 // since the reminder modal doesn't show instantly we adjust a little for that
