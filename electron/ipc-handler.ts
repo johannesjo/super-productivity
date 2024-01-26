@@ -149,11 +149,18 @@ export const initIpcInterfaces = (): void => {
           }
 
           if (shortcut && shortcut.length > 0) {
-            const ret = globalShortcut.register(shortcut, actionFn) as unknown;
-            if (!ret) {
+            try {
+              const ret = globalShortcut.register(shortcut, actionFn) as unknown;
+              if (!ret) {
+                errorHandlerWithFrontendInform(
+                  'Global Shortcut registration failed: ' + shortcut,
+                  shortcut,
+                );
+              }
+            } catch (e) {
               errorHandlerWithFrontendInform(
                 'Global Shortcut registration failed: ' + shortcut,
-                shortcut,
+                { e, shortcut },
               );
             }
           }
