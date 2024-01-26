@@ -7,6 +7,9 @@
 .shepherd-highlight {
   outline: 3px solid $c-accent !important;
 }
+.shepherd-highlight-inner {
+  border: 3px solid $c-accent !important;
+}
 
 .shepherd-text kbd {
   background-color: #eee;

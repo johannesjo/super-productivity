@@ -37,13 +37,12 @@ const CLICK_B = IS_MOUSE_PRIMARY ? '<em>Click</em>' : '<em>Tap</em>';
 
 export enum TourId {
   Welcome = 'Welcome',
-  AddTask = 'AddTask',
   DeleteTask = 'DeleteTask',
   Sync = 'Sync',
+  Projects = 'Projects',
   Calendars = 'Calendars',
   ProductivityHelper = 'ProductivityHelper',
   IssueProviders = 'IssueProviders',
-  Project = 'Project',
   FinishDay = 'FinishDay',
   StartTourAgain = 'StartTourAgain',
   KeyboardNav = 'KeyboardNav',
@@ -64,6 +63,7 @@ export const SHEPHERD_STEPS = (
     `<kbd>${cfg.keyboard[action]}</kbd>`;
 
   return [
+    // ------------------------------
     {
       id: TourId.Welcome,
       title: 'Welcome to Super Productivity!!',
@@ -71,7 +71,6 @@ export const SHEPHERD_STEPS = (
       buttons: [CANCEL_BTN(shepherdService), NEXT_BTN],
     },
     {
-      id: TourId.AddTask,
       title: "Let's add your first task!",
       text: IS_MOUSE_PRIMARY
         ? `<em>Click</em> on this button or press ${KEY_COMBO('addNewTask')}.`
@@ -245,6 +244,8 @@ export const SHEPHERD_STEPS = (
           },
         ]
       : []),
+
+    // ------------------------------
     {
       id: TourId.DeleteTask,
       title: 'Deleting a Task',
@@ -276,11 +277,38 @@ export const SHEPHERD_STEPS = (
         };
       })(),
     },
+
+    // ------------------------------
     {
-      title: 'Great job!',
-      text: 'That covers the basics. Let`s continue with another important subject: <strong>Syncing</strong>!',
+      id: TourId.Projects,
+      title: 'Projects',
+      text: 'You can create different task lists by using projects.',
       buttons: [NEXT_BTN],
     },
+    {
+      title: 'Projects',
+      attachTo: {
+        element: '.tour-burgerTrigger',
+        on: 'bottom',
+      },
+      text: 'Open the menu (<span class="material-icons">menu</span>)',
+      ...nextOnObs(
+        layoutService.isShowSideNav$.pipe(filter((v) => !!v)),
+        shepherdService,
+      ),
+    },
+    {
+      title: 'Projects',
+      attachTo: {
+        element: '.tour-projects',
+        on: 'bottom',
+      },
+      highlightClass: 'shepherd-highlight-inner',
+      text: '<p>Projects are also used to import tasks from issue providers like Jira, OpenProject, GitHub, GitLab, Redmine and Gitea.</p>',
+      buttons: [NEXT_BTN],
+    },
+
+    // ------------------------------
     {
       id: TourId.Sync,
       title: 'Syncing & Data Privacy',
@@ -298,6 +326,7 @@ export const SHEPHERD_STEPS = (
         element: '.tour-burgerTrigger',
         on: 'bottom',
       },
+      beforeShowPromise: () => router.navigate(['']),
       text: 'Open the menu (<span class="material-icons">menu</span>)',
       ...nextOnObs(
         layoutService.isShowSideNav$.pipe(filter((v) => !!v)),
@@ -315,7 +344,6 @@ export const SHEPHERD_STEPS = (
         ),
         shepherdService,
         // make sure we are not on config page already
-        () => router.navigate(['']),
       ),
     },
     {
@@ -353,6 +381,7 @@ export const SHEPHERD_STEPS = (
       buttons: [NEXT_BTN],
     },
 
+    // ------------------------------
     {
       id: TourId.Calendars,
       when: {
@@ -398,6 +427,7 @@ export const SHEPHERD_STEPS = (
       buttons: [NEXT_BTN],
     },
 
+    // ------------------------------
     {
       id: TourId.ProductivityHelper,
       when: {
@@ -421,6 +451,7 @@ export const SHEPHERD_STEPS = (
       buttons: [NEXT_BTN],
     },
 
+    // ------------------------------
     {
       id: TourId.FinalCongrats,
       title: 'Congratulations!',
@@ -446,6 +477,8 @@ export const SHEPHERD_STEPS = (
         } as any,
       ],
     },
+
+    // ------------------------------
     {
       id: TourId.StartTourAgain,
       title: 'Show again?',
@@ -476,6 +509,8 @@ export const SHEPHERD_STEPS = (
         } as any,
       ],
     },
+
+    // ------------------------------
     {
       id: TourId.KeyboardNav,
       title: 'Keyboard Navigation',

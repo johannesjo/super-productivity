@@ -46,7 +46,7 @@ export class ShepherdService {
       ) as any,
     );
     this.start();
-    // this.show(TourId.XXX);
+    // this.show(TourId.Projects);
     // this.show(TourId.FinalCongrats);
   }
 
