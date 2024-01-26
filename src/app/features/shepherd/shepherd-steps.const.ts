@@ -15,14 +15,17 @@ import { KeyboardConfig } from '../config/keyboard-config.model';
 import { WorkContextService } from '../work-context/work-context.service';
 import { ShepherdService } from './shepherd.service';
 
+const PRIMARY_CLASSES = 'mat-flat-button mat-button-base mat-primary';
+const SECONDARY_CLASSES = 'mat-button mat-button-base';
+
 const NEXT_BTN = {
-  classes: 'shepherd-button-primary',
+  classes: PRIMARY_CLASSES,
   text: 'Next',
   type: 'next',
 };
 
 const CANCEL_BTN: any = (shepherdService: ShepherdService) => ({
-  classes: 'shepherd-button-secondary',
+  classes: SECONDARY_CLASSES,
   text: 'Exit Tour',
   action: () => {
     shepherdService.show(TourId.StartTourAgain);
@@ -427,6 +430,7 @@ export const SHEPHERD_STEPS = (
           ? [
               {
                 text: 'Tour Keyboard Shortcuts',
+                classes: PRIMARY_CLASSES,
                 action: () => {
                   shepherdService.show(TourId.KeyboardNav);
                 },
@@ -435,6 +439,7 @@ export const SHEPHERD_STEPS = (
           : []),
         {
           text: 'End Tour',
+          classes: PRIMARY_CLASSES,
           action: () => {
             shepherdService.complete();
           },
@@ -454,8 +459,8 @@ export const SHEPHERD_STEPS = (
       },
       buttons: [
         {
-          classes: 'shepherd-button-secondary',
           text: 'Never show again',
+          classes: SECONDARY_CLASSES,
           action: () => {
             localStorage.setItem(LS.IS_SHOW_TOUR, 'true');
             shepherdService.complete();
@@ -463,6 +468,7 @@ export const SHEPHERD_STEPS = (
         } as any,
         {
           text: 'Show again next time',
+          classes: PRIMARY_CLASSES,
           action: () => {
             localStorage.removeItem(LS.IS_SHOW_TOUR);
             shepherdService.complete();
@@ -597,6 +603,7 @@ export const SHEPHERD_STEPS = (
       buttons: [
         {
           text: 'End Tour',
+          classes: PRIMARY_CLASSES,
           action: () => {
             shepherdService.complete();
           },
