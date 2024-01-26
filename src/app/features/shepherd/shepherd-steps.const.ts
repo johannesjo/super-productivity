@@ -544,7 +544,7 @@ export const SHEPHERD_STEPS = (
       id: 'XXX',
       title: 'Moving around',
       // eslint-disable-next-line max-len
-      text: `<p>When a task was focused in the first place you can navigate to other tasks by pressing he arrow keys <kbd>↑</kbd> and <kbd>↓</kbd>.</p>`,
+      text: `<p>When a task is focused you can navigate to other tasks by pressing the arrow keys <kbd>↑</kbd> and <kbd>↓</kbd>.</p>`,
       when: {
         show: () => taskService.focusFirstTaskIfVisible(),
       },
@@ -562,7 +562,9 @@ export const SHEPHERD_STEPS = (
     },
     {
       title: 'Edit Task Title',
-      text: `You can edit the task by pressing the <kbd>Enter</kbd> key.`,
+      text: `You can edit the task by pressing the <kbd>Enter</kbd> or the configured ${KEY_COMBO(
+        'taskEditTitle',
+      )}key.`,
       when: {
         show: () => taskService.focusFirstTaskIfVisible(),
       },
