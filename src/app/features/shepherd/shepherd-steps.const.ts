@@ -14,6 +14,7 @@ import { LS } from '../../core/persistence/storage-keys.const';
 import { KeyboardConfig } from '../config/keyboard-config.model';
 import { WorkContextService } from '../work-context/work-context.service';
 import { ShepherdService } from './shepherd.service';
+import { fromEvent } from 'rxjs';
 
 const PRIMARY_CLASSES = 'mat-flat-button mat-button-base mat-primary';
 const SECONDARY_CLASSES = 'mat-button mat-button-base';
@@ -68,7 +69,13 @@ export const SHEPHERD_STEPS = (
       id: TourId.Welcome,
       title: 'Welcome to Super Productivity!!',
       text: '<p>Super Productivity is a ToDo app that helps you to improve your personal workflows.</p><p>Let`s do a little tour!</p>',
-      buttons: [CANCEL_BTN(shepherdService), NEXT_BTN],
+      buttons: [
+        CANCEL_BTN(shepherdService),
+        {
+          ...NEXT_BTN,
+          title: 'Start',
+        },
+      ],
     },
     {
       title: "Let's add your first task!",
@@ -104,7 +111,7 @@ export const SHEPHERD_STEPS = (
     {
       title: 'Close the Add Task Bar!',
       text: IS_MOUSE_PRIMARY
-        ? 'Press the <kbd>Escape</kbd> key or <em>click</em> anywhere on the grayed out backdrop to leave the add task bar.'
+        ? 'Press the <kbd>Escape</kbd> key or <em>click</em> anywhere on the backdrop to leave the add task bar.'
         : '<em>Tap</em> anywhere on the grayed out backdrop to leave the add task bar.',
       attachTo: {
         element: 'add-task-bar',
@@ -128,14 +135,14 @@ export const SHEPHERD_STEPS = (
         show: () => {
           setTimeout(() => {
             shepherdService.next();
-          }, 3000);
+          }, 4000);
         },
       },
       beforeShowPromise: () => promiseTimeout(200),
     },
     {
       title: 'Time Tracking',
-      text: '<p>Time tracking is useful as it allows you to get a better idea on how you spend your time. It will enable you to make better estimates and can improve how you work.</p><p>Pressing the play button in the top right corner will start your first time tracking session.</p>',
+      text: '<p>Pressing the play button in the top right corner will start your first time tracking session.</p><p>Time tracking is useful as it allows you to get a better idea on how you spend your time. It will enable you to make better estimates and can improve how you work.</p>',
       attachTo: {
         element: '.tour-playBtn',
         on: 'bottom',
@@ -198,7 +205,7 @@ export const SHEPHERD_STEPS = (
         ]
       : [
           {
-            title: 'Task Side Panel',
+            title: 'Task Details',
             text: 'There is more you you can do with task. Tap on the task.',
             attachTo: {
               element: 'task',
@@ -211,13 +218,13 @@ export const SHEPHERD_STEPS = (
           },
         ]),
     {
-      title: 'The Task Side Panel',
+      title: 'The Task Details',
       text: 'This is the task side panel.Here you can adjust estimates, schedule your task, add some notes or attachments or configure your task to be repeated.',
       buttons: [NEXT_BTN],
       beforeShowPromise: () => promiseTimeout(500),
     },
     {
-      title: 'Closing the Task Side Panel',
+      title: 'Closing the Task Details',
       text: IS_MOUSE_PRIMARY
         ? 'You can close the panel by clicking the X. Do this now!'
         : 'You can close the panel by tapping on the X. Do this now!',
@@ -341,7 +348,7 @@ export const SHEPHERD_STEPS = (
     },
     {
       title: 'Syncing & Data Privacy',
-      text: '<p>With Super Productivity <strong>you can save and sync your data with a cloud provider of your choosing</strong> or even host it in your own cloud.</p><p>Let me show you where to configure this!!</p>',
+      text: '<p>With Super Productivity <strong>you can save and sync your data with a cloud provider of your choice</strong> or even host it in your own cloud.</p><p>Let me show you where to configure this!!</p>',
       buttons: [NEXT_BTN],
     },
     {
@@ -628,9 +635,9 @@ export const SHEPHERD_STEPS = (
       buttons: [NEXT_BTN],
     },
     {
-      title: 'Open, close and navigate the Task Side Panel',
+      title: 'Open, close and navigate the Task Details',
       // eslint-disable-next-line max-len
-      text: `<p>You can open the task side panel for a task by pressing <kbd>→</kbd> while it is focused. You can close it again by pressing <kbd>←</kbd></p><p>You can also navigate and activate it's items by using the arrow keys <kbd>→</kbd> <kbd>↑</kbd> and <kbd>↓</kbd>.</p><p>You can leave most contexts that open up this way by pressing <kbd>Escape</kbd>.</p>`,
+      text: `<p>You can open the task details panel for a task by pressing <kbd>→</kbd> while it is focused. You can close it again by pressing <kbd>←</kbd></p><p>You can also navigate and activate its items by using the arrow keys <kbd>→</kbd> <kbd>↑</kbd> and <kbd>↓</kbd>.</p><p>You can leave most contexts that open up this way by pressing <kbd>Escape</kbd>.</p>`,
       when: {
         show: () => taskService.focusFirstTaskIfVisible(),
       },
