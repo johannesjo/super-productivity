@@ -2,7 +2,16 @@ import Step from 'shepherd.js/src/types/step';
 import { nextOnObs, twoWayObs, waitForEl } from './shepherd-helper';
 import { LayoutService } from '../../core-ui/layout/layout.service';
 import { TaskService } from '../tasks/task.service';
-import { filter, first, map, switchMap } from 'rxjs/operators';
+import {
+  concatMap,
+  delay,
+  filter,
+  first,
+  map,
+  skipWhile,
+  switchMap,
+  tap,
+} from 'rxjs/operators';
 import { Actions, ofType } from '@ngrx/effects';
 import { addTask, deleteTask, updateTask } from '../tasks/store/task.actions';
 import { GlobalConfigState } from '../config/global-config.model';
@@ -14,6 +23,8 @@ import { LS } from '../../core/persistence/storage-keys.const';
 import { KeyboardConfig } from '../config/keyboard-config.model';
 import { WorkContextService } from '../work-context/work-context.service';
 import { ShepherdService } from './shepherd.service';
+import { fromEvent, of, timer } from 'rxjs';
+import { Element } from '@angular/compiler';
 
 const PRIMARY_CLASSES = 'mat-flat-button mat-button-base mat-primary';
 const SECONDARY_CLASSES = 'mat-button mat-button-base';
@@ -152,6 +163,7 @@ export const SHEPHERD_STEPS = (
       ),
     },
     {
+      id: 'XXX',
       title: 'Stop Tracking Time',
       text: `To stop tracking ${CLICK} on the pause button.`,
       attachTo: {
@@ -160,7 +172,10 @@ export const SHEPHERD_STEPS = (
       },
       beforeShowPromise: () => promiseTimeout(500),
       when: nextOnObs(
-        taskService.currentTaskId$.pipe(filter((id) => !id)),
+        taskService.currentTaskId$.pipe(
+          filter((id) => !id),
+          delay(100),
+        ),
         shepherdService,
       ),
     },
@@ -168,39 +183,48 @@ export const SHEPHERD_STEPS = (
       ? [
           {
             title: 'Task Hover Menu',
-            text: 'There is more you you can do with a task. Hover over the task you created with your mouse again.',
+            text: 'There is more you can do with a task. Hover over the task you created with your mouse again.',
             attachTo: {
               element: 'task',
               on: 'bottom' as any,
             },
-            beforeShowPromise: () => promiseTimeout(500),
             when: (() => {
-              let timeOutId: number;
               let intId: number;
               return {
                 show: () => {
-                  timeOutId = window.setTimeout(() => {
-                    intId = waitForEl('task .hover-controls', () =>
-                      shepherdService.next(),
-                    );
-                  }, 3200);
+                  intId = waitForEl('task.shepherd-highlight .hover-controls', () =>
+                    shepherdService.next(),
+                  );
                 },
                 hide: () => {
                   window.clearInterval(intId);
-                  window.clearTimeout(timeOutId);
                 },
               };
             })(),
           },
           {
-            title: 'Opening Task Side Panel',
+            title: 'Open Task Details',
             attachTo: {
               element: '.show-additional-info-btn',
               on: 'bottom' as any,
             },
             text: 'You can open a panel with additional controls by clicking on the button.',
-            when: nextOnObs(
-              taskService.selectedTask$.pipe(filter((selectedTask) => !!selectedTask)),
+            when: twoWayObs(
+              {
+                obs: taskService.selectedTask$.pipe(
+                  filter((selectedTask) => !!selectedTask),
+                ),
+              },
+              {
+                obs: timer(30, 30).pipe(
+                  map(() => {
+                    return document.querySelector(
+                      '.show-additional-info-btn.shepherd-highlight',
+                    );
+                  }),
+                  filter((el) => !el),
+                ),
+              },
               shepherdService,
             ),
           },
