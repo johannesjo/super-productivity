@@ -72,20 +72,6 @@ export const CALENDAR_FORM_CFG: ConfigFormSection<CalendarIntegrationConfig> = {
             },
           },
           {
-            type: 'icon',
-            key: 'icon',
-            hooks: {
-              onInit: (field) => {
-                if (!field?.formControl?.value) {
-                  field?.formControl?.setValue('event');
-                }
-              },
-            },
-            templateOptions: {
-              label: T.F.SIMPLE_COUNTER.FORM.L_ICON,
-            },
-          },
-          {
             type: 'duration',
             key: 'checkUpdatesEvery',
             hooks: {
@@ -122,6 +108,20 @@ export const CALENDAR_FORM_CFG: ConfigFormSection<CalendarIntegrationConfig> = {
             key: 'defaultProjectId',
             templateOptions: {
               label: T.GCF.CALENDARS.DEFAULT_PROJECT,
+            },
+          },
+          {
+            type: 'icon',
+            key: 'icon',
+            hooks: {
+              onInit: (field) => {
+                if (!field?.formControl?.value) {
+                  field?.formControl?.setValue('event');
+                }
+              },
+            },
+            templateOptions: {
+              label: T.GCF.CALENDARS.ICON,
             },
           },
         ],

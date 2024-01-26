@@ -1268,6 +1268,7 @@
       "CHECK_UPDATES": "Check for remote updates every X",
       "DEFAULT_PROJECT": "Default Project for added calendar tasks",
       "HELP": "You can integrate calendars to be reminded and add them as tasks within Super Productivity. The integration works by using the iCal format. For this to work your calendars need to be accessible either over the internet or via file system.",
+      "ICON": "Icon for Timeline",
       "SHOW_BANNER_THRESHOLD": "Show a notification X before the event (blank for disabled)",
       "TITLE": "Calendars"
     },
