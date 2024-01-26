@@ -1475,8 +1475,17 @@
     "CREATE_TAG": "Create Tag",
     "DELETE_TAG": "Delete Tag",
     "GO_TO_TASK_LIST": "Go to task list",
-    "HELP": "Help",
+    "HM": {
+      "CALENDARS": "Howto: Connect Calendars",
+      "CONTRIBUTE": "Contribute",
+      "GET_HELP_ONLINE": "Get help online",
+      "KEYBOARD": "Howto: Advanced Keyboard",
+      "REPORT_A_PROBLEM": "Report a problem",
+      "START_WELCOME": "Start Welcome Tour",
+      "SYNC": "Howto: Configure Sync"
+    },
     "MANAGE_PROJECTS": "Manage Projects",
+    "HELP": "Help",
     "METRICS": "Metrics",
     "NOTES": "Notes",
     "NOTES_PANEL_INFO": "Notes can only be shown from the timeline and the regular task list views.",
