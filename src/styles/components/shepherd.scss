@@ -44,10 +44,12 @@
   visibility: visible !important;
 }
 
-.shepherd-colored {
-  border: 2px solid $c-primary;
+.shepherd-colored-border {
+  border: 1px solid $c-primary;
+  padding: 0 4px;
   color: $c-primary;
   font-weight: bold;
+  border-radius: 4px;
 }
 
 .shepherd-title,

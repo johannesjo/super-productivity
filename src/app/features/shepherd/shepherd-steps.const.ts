@@ -3,7 +3,7 @@ import { ShepherdService } from 'angular-shepherd';
 import { nextOnObs, twoWayObs, waitForEl } from './shepherd-helper';
 import { LayoutService } from '../../core-ui/layout/layout.service';
 import { TaskService } from '../tasks/task.service';
-import { filter, first, map, startWith, switchMap, takeUntil, tap } from 'rxjs/operators';
+import { filter, first, map, switchMap } from 'rxjs/operators';
 import { Actions, ofType } from '@ngrx/effects';
 import { addTask, deleteTask, updateTask } from '../tasks/store/task.actions';
 import { GlobalConfigState } from '../config/global-config.model';
@@ -12,7 +12,6 @@ import { NavigationEnd, Router } from '@angular/router';
 import { promiseTimeout } from '../../util/promise-timeout';
 import { hideAddTaskBar } from '../../core-ui/layout/store/layout.actions';
 import { LS } from '../../core/persistence/storage-keys.const';
-import { Subject } from 'rxjs';
 import { KeyboardConfig } from '../config/keyboard-config.model';
 import { WorkContextService } from '../work-context/work-context.service';
 import { ShepherdMyService } from './shepherd-my.service';
@@ -460,13 +459,12 @@ export const SHEPHERD_STEPS = (
       ],
     },
     {
-      id: TourId.KeyboardNav,
+      // id: TourId.KeyboardNav,
       title: 'Keyboard Navigation',
       text: '<p>The most efficient way to user Super Productivity is to make use of the keyboard shortcuts. Don`t worry there just a handful of important ones :)</p><p>You can configure most of them under "Settings / Keyboard Shortcuts", but let`s start more practical.</p>',
       buttons: [NEXT_BTN],
     },
     {
-      id: TourId.KeyboardNav,
       title: 'Keyboard Navigation',
       text: `Let\`s add a couple of tasks. Press ${KEY_COMBO('addNewTask')}.`,
       ...nextOnObs(
@@ -511,26 +509,68 @@ export const SHEPHERD_STEPS = (
     },
     {
       title: 'A focused task',
-      text: 'Do you see the blue border around the task? ',
-      attachTo: {
-        element: 'add-task-bar',
-        on: 'bottom',
-      },
-      beforeShowPromise: () => promiseTimeout(200),
-      ...nextOnObs(
-        actions$.pipe(ofType(hideAddTaskBar)),
-        // delay because other hide should trigger first
-        shepherdService,
-      ),
+      text: 'Do you see the <span class="shepherd-colored-border">colored border</span> around the first task? This means the task is focused. To unfocus it click somewhere else in the the document.',
+      buttons: [NEXT_BTN],
+    },
+    {
+      title: 'Focussing Tasks',
+      text: `If you lost focus you can always use the ${KEY_COMBO(
+        'goToWorkView',
+      )} key to go to the main list view and focus the first task.`,
+      buttons: [NEXT_BTN],
+    },
+    {
+      id: TourId.KeyboardNav,
+      title: 'Moving around',
+      // eslint-disable-next-line max-len
+      text: `<p>When a task was focused in the first place you can navigate to other tasks by pressing he arrow keys <kbd>↑</kbd> and <kbd>↓</kbd>.</p>`,
+      buttons: [NEXT_BTN],
+    },
+    {
+      title: 'Moving tasks around',
+      text: `You can move the focused task itself around by pressing ${KEY_COMBO(
+        'moveTaskUp',
+      )} and ${KEY_COMBO('moveTaskDown')}.`,
+      buttons: [NEXT_BTN],
+    },
+    {
+      title: 'Edit Task Title',
+      text: `You can edit the task by pressing the <kbd>Enter</kbd> key.`,
+      buttons: [NEXT_BTN],
+    },
+    {
+      title: 'Open, close and navigate the Task Side Panel',
+      // eslint-disable-next-line max-len
+      text: `<p>You can open the task side panel for a task by pressing <kbd>→</kbd> while it is focused. You can close it again by pressing <kbd>←</kbd></p><p>You can also navigate and activate it's items by using the arrow keys <kbd>→</kbd> <kbd>↑</kbd> and <kbd>↓</kbd>.</p>`,
+      buttons: [NEXT_BTN],
+    },
+    {
+      title: 'More Task Shortcuts',
+      // eslint-disable-next-line max-len
+      text: `<p>There are more task related shortcuts that can be used when a task is focused. Best you check them all out under <strong>Settings/Keyboard Shortcuts /Tasks</strong>. The most useful are probably:</p>
+          <ul>
+          <li>${KEY_COMBO(
+            'taskSchedule',
+          )}: Schedule task (which can also be navigated by keyboard)</li>
+          <li>${KEY_COMBO('taskToggleDone')}: Toggle done</li>
+          <li>${KEY_COMBO('taskAddSubTask')}: Add new sub task</li>
+          <li>${KEY_COMBO('togglePlay')}: Toggle tracking</li>
+          </ul>
+
+      `,
+      buttons: [NEXT_BTN],
+    },
+    {
+      title: 'Congratulations!',
+      text: '<p>This concludes the keyboard navigation tour. Remember that you can always start it again via the Help button in the menu.</p><p>Best way to get familiar with the app, is to play around with it. Have fun!</p>',
+      buttons: [
+        {
+          text: 'End Tour',
+          action: () => {
+            shepherdService.complete();
+          },
+        } as any,
+      ],
     },
   ];
 };
-
-/*
-Or by pressing <kbd>Enter</kbd> when a task is focused with the keyboard which is indicated by a <span class="shepherd-colored">colored border</span>.</p><p>Do this now and <strong>change the title to something else!</strong></p>
- Alternatively you can press the <kbd>➔</kbd> key when a task is focused.
-
- Alternatively you can focus the task by clicking on it and pressing the <kbd>${cfg.keyboard.taskDelete}</kbd> key
-
-  or by pressing <kbd>←</kbd>
- */
