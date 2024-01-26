@@ -112,7 +112,11 @@ export class ShortcutService {
     } else if (checkKeyCombo(ev, keys.goToFocusMode)) {
       this._store.dispatch(showFocusOverlay());
     } else if (checkKeyCombo(ev, keys.goToWorkView)) {
-      this._router.navigate(['/active/tasks']);
+      this._router.navigate(['/active/tasks']).then(() => {
+        window.setTimeout(() => {
+          (document.querySelector('task') as HTMLElement)?.focus();
+        });
+      });
     } else if (checkKeyCombo(ev, keys.goToTimeline)) {
       this._router.navigate(['/timeline']);
     } else if (checkKeyCombo(ev, keys.goToSettings)) {

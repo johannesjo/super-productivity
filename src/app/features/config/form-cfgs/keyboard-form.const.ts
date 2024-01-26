@@ -118,6 +118,13 @@ export const KEYBOARD_SETTINGS_FORM_CFG: ConfigFormSection<KeyboardConfig> = {
       },
     },
     {
+      key: 'goToWorkView',
+      type: 'keyboard',
+      templateOptions: {
+        label: T.GCF.KEYBOARD.GO_TO_WORK_VIEW,
+      },
+    },
+    {
       key: 'goToFocusMode',
       type: 'keyboard',
       templateOptions: {

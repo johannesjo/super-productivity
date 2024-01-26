@@ -1308,7 +1308,7 @@
       "GO_TO_SCHEDULED_VIEW": "Go to scheduled Tasks",
       "GO_TO_SETTINGS": "Go to Settings",
       "GO_TO_TIMELINE": "Go to Timeline",
-      "GO_TO_WORK_VIEW": "Go to Work View",
+      "GO_TO_WORK_VIEW": "Go to Work View and focus first task",
       "HELP": "<p>Here you can configure all keyboard shortcuts.</p> <p>Click on the text input and enter the desired keyboard combination. Hit enter to save and Escape to abort.</p> <p>There are three types of shortcuts:</p> <ul> <li> <strong>Global shortcuts:</strong> When the app is running it will trigger the action from every other application. </li> <li> <strong>Application level shortcuts:</strong> Will trigger from every screen of the application, but not if you're currently editing a text field. </li> <li> <strong>Task level shortcuts:</strong> They will only trigger if you have selected a task via mouse or keyboard and usually trigger an action specifically related to that one task. </li> </ul><p>You can <strong>press Escape to remove a shortcut.</strong>",
       "MOVE_TASK_DOWN": "Move Task down in List",
       "MOVE_TASK_UP": "Move Task up in List",
