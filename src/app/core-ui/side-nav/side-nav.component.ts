@@ -33,6 +33,7 @@ import { DialogTimelineSetupComponent } from '../../features/timeline/dialog-tim
 import { TourId } from '../../features/shepherd/shepherd-steps.const';
 import { ShepherdMyService } from '../../features/shepherd/shepherd-my.service';
 import { getGithubErrorUrl } from 'src/app/core/error-handler/global-error-handler.util';
+import { IS_MOUSE_PRIMARY } from '../../util/is-mouse-primary';
 
 @Component({
   selector: 'side-nav',
@@ -43,6 +44,7 @@ import { getGithubErrorUrl } from 'src/app/core/error-handler/global-error-handl
 })
 export class SideNavComponent implements OnDestroy {
   @ViewChildren('menuEntry') navEntries?: QueryList<MatMenuItem>;
+  IS_MOUSE_PRIMARY = IS_MOUSE_PRIMARY;
   keyboardFocusTimeout?: number;
   @ViewChild('projectExpandBtn', { read: ElementRef }) projectExpandBtn?: ElementRef;
   isProjectsExpanded: boolean = this.fetchProjectListState();

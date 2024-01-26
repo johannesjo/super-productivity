@@ -3,7 +3,7 @@ import { ShepherdService } from 'angular-shepherd';
 import { nextOnObs, twoWayObs, waitForEl } from './shepherd-helper';
 import { LayoutService } from '../../core-ui/layout/layout.service';
 import { TaskService } from '../tasks/task.service';
-import { filter, first, map, startWith, takeUntil, tap } from 'rxjs/operators';
+import { filter, first, map, startWith, switchMap, takeUntil, tap } from 'rxjs/operators';
 import { Actions, ofType } from '@ngrx/effects';
 import { addTask, deleteTask, updateTask } from '../tasks/store/task.actions';
 import { GlobalConfigState } from '../config/global-config.model';
@@ -13,6 +13,9 @@ import { promiseTimeout } from '../../util/promise-timeout';
 import { hideAddTaskBar } from '../../core-ui/layout/store/layout.actions';
 import { LS } from '../../core/persistence/storage-keys.const';
 import { Subject } from 'rxjs';
+import { KeyboardConfig } from '../config/keyboard-config.model';
+import { WorkContextService } from '../work-context/work-context.service';
+import { ShepherdMyService } from './shepherd-my.service';
 
 const NEXT_BTN = {
   classes: 'shepherd-button-primary',
@@ -43,16 +46,22 @@ export enum TourId {
   Project = 'Project',
   FinishDay = 'FinishDay',
   StartTourAgain = 'StartTourAgain',
+  KeyboardNav = 'KeyboardNav',
+  FinalCongrats = 'FinalCongrats',
 }
 
 export const SHEPHERD_STEPS = (
-  shepherdService: ShepherdService,
+  shepherdService: ShepherdMyService,
   cfg: GlobalConfigState,
   actions$: Actions,
   layoutService: LayoutService,
   taskService: TaskService,
   router: Router,
+  workContextService: WorkContextService,
 ): Array<Step.StepOptions> => {
+  const KEY_COMBO = (action: keyof KeyboardConfig) =>
+    `<kbd>${cfg.keyboard[action]}</kbd>`;
+
   return [
     {
       id: TourId.Welcome,
@@ -64,7 +73,7 @@ export const SHEPHERD_STEPS = (
       id: TourId.AddTask,
       title: "Let's add your first task!",
       text: IS_MOUSE_PRIMARY
-        ? `<em>Click</em> on this button or press <kbd>${cfg.keyboard.addNewTask}</kbd>.`
+        ? `<em>Click</em> on this button or press ${KEY_COMBO('addNewTask')}.`
         : '<em>Tap</em> on the button with the +',
       attachTo: {
         element: '.tour-addBtn',
@@ -409,6 +418,7 @@ export const SHEPHERD_STEPS = (
     },
 
     {
+      id: TourId.FinalCongrats,
       title: 'Congratulations!',
       text: '<p>This concludes the tour. Remember that you can always start it again via the Help button in the menu.</p><p>Best way to get familiar with the app, is to play around with it. Have fun!</p>',
       buttons: [
@@ -449,38 +459,73 @@ export const SHEPHERD_STEPS = (
         } as any,
       ],
     },
+    {
+      id: TourId.KeyboardNav,
+      title: 'Keyboard Navigation',
+      text: '<p>The most efficient way to user Super Productivity is to make use of the keyboard shortcuts. Don`t worry there just a handful of important ones :)</p><p>You can configure most of them under "Settings / Keyboard Shortcuts", but let`s start more practical.</p>',
+      buttons: [NEXT_BTN],
+    },
+    {
+      id: TourId.KeyboardNav,
+      title: 'Keyboard Navigation',
+      text: `Let\`s add a couple of tasks. Press ${KEY_COMBO('addNewTask')}.`,
+      ...nextOnObs(
+        layoutService.isShowAddTaskBar$.pipe(filter((v) => v)),
+        shepherdService,
+      ),
+    },
+    {
+      title: 'Enter a title!',
+      text: 'Enter the title you want to give your task and hit the <kbd>Enter</kbd> key. <strong>Do this a couple of times until you have at least 4 tasks with different titles</strong>.',
+      attachTo: {
+        element: 'add-task-bar',
+        on: 'bottom',
+      },
+      beforeShowPromise: () => promiseTimeout(200),
+      ...twoWayObs(
+        {
+          obs: actions$.pipe(
+            ofType(addTask),
+            switchMap(() =>
+              workContextService.todaysTasks$.pipe(filter((tasks) => tasks.length >= 4)),
+            ),
+          ),
+        },
+        { obs: actions$.pipe(ofType(hideAddTaskBar)) },
+        shepherdService,
+      ),
+    },
+    {
+      title: 'Close the Add Task Bar!',
+      text: 'Press the <kbd>Escape</kbd> key to leave the add task bar.',
+      attachTo: {
+        element: 'add-task-bar',
+        on: 'bottom',
+      },
+      beforeShowPromise: () => promiseTimeout(200),
+      ...nextOnObs(
+        actions$.pipe(ofType(hideAddTaskBar)),
+        // delay because other hide should trigger first
+        shepherdService,
+      ),
+    },
+    {
+      title: 'A focused task',
+      text: 'Do you see the blue border around the task? ',
+      attachTo: {
+        element: 'add-task-bar',
+        on: 'bottom',
+      },
+      beforeShowPromise: () => promiseTimeout(200),
+      ...nextOnObs(
+        actions$.pipe(ofType(hideAddTaskBar)),
+        // delay because other hide should trigger first
+        shepherdService,
+      ),
+    },
   ];
 };
 
-//     {
-//       id: TourId.AdvancedStuffChoice,
-//       title: 'Advanced Tutorials',
-//       classes: 'shepherd-wider',
-//       text: `<p>This covers the most important stuff. There are more advanced tutorials for the following subjects available:</p>
-// <ul class="shepherd-nav-list">
-// <li><a href="${TourId.Calendars}">Connect your to your Calendars (e.g. Google Calendar, Outlook)</a></li>
-// <li><a href="${TourId.IssueProviders}">Connect to Issue Providers like Jira, OpenProject, GitHub, GitLab, Redmine or Gitea</a></li>
-// <!--<li><a href="#">How to manage Projects</a></li>-->
-// <!--<li><a href="#">How to use keyboard shortcuts in the most efficient way</a></li>-->
-// </ul>
-// <p class="shepherd-nav-list">Or <a href="${TourId.Welcome}">restart the welcome tour</a>.</p>
-// `,
-//       when: {
-//         show: () => {
-//           const nl = document.querySelectorAll('.shepherd-nav-list a');
-//           if (!nl?.length) {
-//             return;
-//           }
-//           const goTo = (ev: Event): void => {
-//             ev.preventDefault();
-//             const el = ev.target as HTMLElement;
-//             shepherdService.show(el.getAttribute('href') as string);
-//           };
-//           Array.from(nl).forEach((node) => node.addEventListener('click', goTo));
-//         },
-//       },
-//       CANCEL_BTN
-//     },
 /*
 Or by pressing <kbd>Enter</kbd> when a task is focused with the keyboard which is indicated by a <span class="shepherd-colored">colored border</span>.</p><p>Do this now and <strong>change the title to something else!</strong></p>
  Alternatively you can press the <kbd>➔</kbd> key when a task is focused.

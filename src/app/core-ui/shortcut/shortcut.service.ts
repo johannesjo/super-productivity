@@ -114,7 +114,7 @@ export class ShortcutService {
     } else if (checkKeyCombo(ev, keys.goToWorkView)) {
       this._router.navigate(['/active/tasks']).then(() => {
         window.setTimeout(() => {
-          (document.querySelector('task') as HTMLElement)?.focus();
+          this._taskService.focusFirstTaskIfVisible();
         });
       });
     } else if (checkKeyCombo(ev, keys.goToTimeline)) {

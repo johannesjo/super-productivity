@@ -281,6 +281,15 @@
         <span class="text">Start Welcome Tour</span>
       </button>
       <button
+        *ngIf="IS_MOUSE_PRIMARY"
+        (click)="startTour(TourId.KeyboardNav)"
+        mat-menu-item
+      >
+        <mat-icon>directions</mat-icon>
+        <!--        <span class="text">{{T.MH.WORKLOG|translate}}</span>-->
+        <span class="text">Howto: Advanced Keyboard</span>
+      </button>
+      <button
         (click)="startTour(TourId.Sync)"
         mat-menu-item
       >

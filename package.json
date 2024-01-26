@@ -167,7 +167,6 @@
     "@typescript-eslint/parser": "5.62.0",
     "angular-material-css-vars": "^3.0.0",
     "angular2-promise-buttons": "^5.0.3",
-    "angular-shepherd": "^14.0.0",
     "axios": "^1.6.0",
     "chart.js": "^2.8.0",
     "chromedriver": "^119.0.1",
