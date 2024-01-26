@@ -17,7 +17,7 @@ import Step = Shepherd.Step;
 })
 export class ShepherdMyService {
   isActive = false;
-  tourObject?: Shepherd.Tour;
+  tour?: Shepherd.Tour;
 
   constructor(
     private layoutService: LayoutService,
@@ -45,34 +45,8 @@ export class ShepherdMyService {
         this.workContextService,
       ) as any,
     );
-
-    // this.shepherdService.tourObject.steps.forEach((step) => {
-    //   const prevWhenShow = step.options.when?.show;
-    //   const prevWhenHide = step.options.when?.hide;
-    //   console.log(step.options);
-    //
-    //   step.updateStepOptions({
-    //     ...step.options,
-    //     // when: {
-    //     //   show: () => {
-    //     //     console.log('XXXXXXX');
-    //     //
-    //     //     if (typeof prevWhenShow === 'function') {
-    //     //       // @ts-ignore
-    //     //       prevWhenShow();
-    //     //     }
-    //     //   },
-    //     //   hide: prevWhenHide,
-    //     // } as any,
-    //     when: undefined,
-    //   });
-    //   console.log(step);
-    //
-    //   // const el = step.getElement();
-    //   // console.log(el);
-    //   // (el as any).focus = () => undefined;
-    // });
     this.start();
+    // this.show(TourId.KeyboardNav);
   }
 
   async show(id: TourId): Promise<void> {
@@ -83,32 +57,32 @@ export class ShepherdMyService {
       await this._router.navigateByUrl('/');
     }
 
-    this.tourObject?.show(id);
+    this.tour?.show(id);
   }
 
   back(): void {
-    this.tourObject?.back();
+    this.tour?.back();
   }
 
   cancel(): void {
-    this.tourObject?.cancel();
+    this.tour?.cancel();
   }
 
   complete(): void {
-    this.tourObject?.complete();
+    this.tour?.complete();
   }
 
   hide(): void {
-    this.tourObject?.hide();
+    this.tour?.hide();
   }
 
   next(): void {
-    this.tourObject?.next();
+    this.tour?.next();
   }
 
   start(): void {
     this.isActive = true;
-    this.tourObject?.start();
+    this.tour?.start();
   }
 
   /**
@@ -117,7 +91,7 @@ export class ShepherdMyService {
    */
   addSteps(steps: Array<Step.StepOptions>): void {
     this._initialize();
-    const tour = this.tourObject;
+    const tour = this.tour;
     if (!tour) {
       throw new Error('Tour not ready');
     }
@@ -126,7 +100,21 @@ export class ShepherdMyService {
       if (step.buttons) {
         step.buttons = step.buttons.map(this._makeButton.bind(this), this);
       }
-
+      const prevWhenShow = step.when?.show;
+      if (!step.when) {
+        step.when = {};
+      }
+      step.when.show = () => {
+        // We do this since we don't want the default focus behavior
+        const el = tour.getCurrentStep()?.getElement();
+        if (el) {
+          (el as any).focus = () => undefined;
+        }
+        if (typeof prevWhenShow === 'function') {
+          // @ts-ignore
+          prevWhenShow();
+        }
+      };
       tour.addStep(step);
     });
   }
@@ -150,7 +138,7 @@ export class ShepherdMyService {
     });
     tourObject.on('complete', this._onTourFinish.bind(this, 'complete'));
     tourObject.on('cancel', this._onTourFinish.bind(this, 'cancel'));
-    this.tourObject = tourObject;
+    this.tour = tourObject;
   }
 
   private _makeButton(button): any {
