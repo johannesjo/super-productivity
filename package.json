@@ -109,7 +109,7 @@
     "@electron/remote": "^2.0.12",
     "electron-dl": "^3.5.1",
     "electron-localshortcut": "^3.2.1",
-    "electron-log": "^5.0.1",
+    "electron-log": "^5.1.0",
     "electron-window-state": "^5.0.3",
     "fs-extra": "^11.1.1",
     "node-fetch": "^2.7.0"
@@ -176,7 +176,7 @@
     "conventional-changelog-cli": "^4.1.0",
     "cross-env": "^7.0.3",
     "detect-it": "^4.0.1",
-    "electron": "^28.1.0",
+    "electron": "^28.2.0",
     "electron-builder": "24.9.1",
     "electron-builder-notarize": "^1.5.1",
     "eslint": "^8.23.0",
