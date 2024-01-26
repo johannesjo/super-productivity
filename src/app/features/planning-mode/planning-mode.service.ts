@@ -3,7 +3,6 @@ import { BehaviorSubject, merge, Observable } from 'rxjs';
 import { delay, distinctUntilChanged, filter, map, withLatestFrom } from 'rxjs/operators';
 import { WorkContextService } from '../work-context/work-context.service';
 import { TaskService } from '../tasks/task.service';
-import { LS } from '../../core/persistence/storage-keys.const';
 
 @Injectable({ providedIn: 'root' })
 export class PlanningModeService {
