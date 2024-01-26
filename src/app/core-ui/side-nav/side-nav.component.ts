@@ -32,6 +32,7 @@ import { TODAY_TAG } from '../../features/tag/tag.const';
 import { DialogTimelineSetupComponent } from '../../features/timeline/dialog-timeline-setup/dialog-timeline-setup.component';
 import { TourId } from '../../features/shepherd/shepherd-steps.const';
 import { ShepherdMyService } from '../../features/shepherd/shepherd-my.service';
+import { getGithubErrorUrl } from 'src/app/core/error-handler/global-error-handler.util';
 
 @Component({
   selector: 'side-nav',
@@ -81,6 +82,7 @@ export class SideNavComponent implements OnDestroy {
   TourId: typeof TourId = TourId;
   private keyManager?: FocusKeyManager<MatMenuItem>;
   private _subs: Subscription = new Subscription();
+  private _cachedIssueUrl?: string;
 
   constructor(
     public readonly tagService: TagService,
@@ -264,5 +266,12 @@ export class SideNavComponent implements OnDestroy {
 
   startTour(id: TourId): void {
     this._shepherdMyService.show(id);
+  }
+
+  getGithubErrorUrl(): string {
+    if (!this._cachedIssueUrl) {
+      this._cachedIssueUrl = getGithubErrorUrl('', undefined, true);
+    }
+    return this._cachedIssueUrl;
   }
 }

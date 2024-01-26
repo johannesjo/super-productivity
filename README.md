@@ -94,14 +94,14 @@ If you need some help, [this article on dev.to is the best place to start](https
 
 If you prefer, there is also a (long) [youtube video available](https://www.youtube.com/watch?v=VoF2_RSdNXA).
 
-There is another [article](https://dev.to/johannesjo/super-productivity-how-to-grow-fond-of-time-tracking-and-task-management-22ee) on how I personally might use the app - and still [another one](https://dev.to/johannesjo/the-prioritising-scheme-how-to-eat-the-frog-with-super-productivity-mlk) on how I implement the 'eat the frog' prioritizing scheme in the app.
+There is another older – the app looks and feels much better now ;) – [article](https://dev.to/johannesjo/super-productivity-how-to-grow-fond-of-time-tracking-and-task-management-22ee) on how I personally might use the app - and still [another one](https://dev.to/johannesjo/the-prioritising-scheme-how-to-eat-the-frog-with-super-productivity-mlk) on how I implement the 'eat the frog' prioritizing scheme in the app.
 
 [If you have further questions, please refer to the discussions page](https://github.com/johannesjo/super-productivity/discussions).
 
 <details>
 <summary> <b>⌨ Keyboard shortcuts and short-syntax</b></summary>
 
-### Keyboard shortcuts (most importan)
+### Keyboard shortcuts (most important)
 
 - `Shift`+`A`: Open add task bar
 - `Enter`: Edit currently focussed task title
@@ -148,6 +148,7 @@ Due to certification issues it's recommended to download the app from the Micros
 <a href='//www.microsoft.com/store/apps/9nhfvg8361tw?cid=storebadge&ocid=badge'><img src='https://developer.microsoft.com/store/badges/images/English_get-it-from-MS.png' alt='English badge' width="127" height="52"/></a>
 
 You can also install the app using [Chocolatey](https://community.chocolatey.org/packages/super-productivity):
+
 ```powershell
 choco install super-productivity
 ```
@@ -155,7 +156,9 @@ choco install super-productivity
 ### Linux
 
 #### Snap - Most distributions
+
 Install via command-line:
+
 ```bash
 # stable
 sudo snap install superproductivity
@@ -166,6 +169,7 @@ sudo snap install --channel=edge superproductivity
 # it is also recommended to disable updates to the app while it is running:
 sudo snap set core experimental.refresh-app-awareness=true
 ```
+
 <a href="https://snapcraft.io/superproductivity">
   <img alt="Get it from the Snap Store" src="https://snapcraft.io/static/images/badges/en/snap-store-black.svg" />
 </a>
@@ -297,11 +301,11 @@ For the desktop version automatic backups are stored per default in the `backup`
 
 Where user data is stored differs from OS to OS. The most common locations are:
 
-| OS | Location |
-| - | - |
-| **Mac OS** | `~/Library/Application Support/superProductivity/` |
+| OS          | Location                                                                                        |
+| ----------- | ----------------------------------------------------------------------------------------------- |
+| **Mac OS**  | `~/Library/Application Support/superProductivity/`                                              |
 | **Windows** | `C:\Users\<YOUR_USER_NAME>\AppData\Roaming\superProductivity/` or `%APPDATA%\superProductivity` |
-| **Linux** | `~/.config/superProductivity/` |
+| **Linux**   | `~/.config/superProductivity/`                                                                  |
 
 The path should be shown when you go to the "Automatic Backups` section on the configuration page (minus the "backup" sub folder). You can also see it printed out when you start the app from the command line.
 

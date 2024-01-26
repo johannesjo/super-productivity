@@ -51,7 +51,7 @@ export const logAdvancedStacktrace = (
 
       if (githubIssueLink) {
         const errEscaped = _cleanHtml(origErr as string);
-        githubIssueLink.setAttribute('href', getGithubUrl(errEscaped, stack));
+        githubIssueLink.setAttribute('href', getGithubErrorUrl(errEscaped, stack));
       }
 
       // NOTE: there is an issue with this sometimes -> https://github.com/stacktracejs/stacktrace.js/issues/202
@@ -75,7 +75,7 @@ export const createErrorAlert = (
   }
   // it seems for whatever reasons, sometimes we get tags in our error which break the html
   const errEscaped = _cleanHtml(err);
-  const githubUrl = getGithubUrl(errEscaped, stackTrace);
+  const githubUrl = getGithubErrorUrl(errEscaped, stackTrace);
 
   const errorAlert = document.createElement('div');
   errorAlert.classList.add('global-error-alert');
@@ -180,25 +180,33 @@ export const isHandledError = (err: unknown): boolean => {
   );
 };
 
-const getGithubUrl = (errEscaped: string, stackTrace: string): string => {
+export const getGithubErrorUrl = (
+  title: string,
+  stackTrace?: string,
+  isHideActionsBeforeError = false,
+): string => {
+  console.log('GET _URL');
+
   return newGithubIssueUrl({
     user: 'johannesjo',
     repo: 'super-productivity',
-    title: errEscaped,
-    body: getGithubIssueErrorMarkdown(stackTrace),
+    title: title,
+    body: getGithubIssueErrorMarkdown(stackTrace, isHideActionsBeforeError),
   });
 };
 
-const getGithubIssueErrorMarkdown = (stacktrace: string): string => {
+const getGithubIssueErrorMarkdown = (
+  stacktrace?: string,
+  isHideActionsBeforeError = false,
+): string => {
   const code = '```';
-  return `### Steps to Reproduce
+  let txt = `### Steps to Reproduce
 <!-- !!! Please provide an unambiguous set of steps to reproduce this bug! !!! -->
 <!-- !!! Please provide an unambiguous set of steps to reproduce this bug! !!! -->
 1.
 2.
 3.
 4.
-
 
 
 ### Error Log (Desktop only)
@@ -212,17 +220,28 @@ on Windows: %USERPROFILE%/AppData/Roaming/superProductivity/logs/main.log
 ### Console Output
 <!-- Is there any output if you press Ctrl+Shift+i (Cmd+Alt+i for mac) in the console tab? If so please post it here. -->
 
+### Meta Info
+${getSimpleMeta()}
+`;
+
+  if (stacktrace) {
+    txt += `
+
 ### Stacktrace
 ${code}
 ${stacktrace}
 ${code}
+`;
+  }
 
-### Meta Info
-${getSimpleMeta()}
+  if (!isHideActionsBeforeError) {
+    txt += `
 
 ### Actions Before Error
 ${code}
 ${getBeforeLastErrorActionLog().join(' \n')}
-${code}
-`;
+${code}`;
+  }
+
+  return txt;
 };
