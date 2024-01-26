@@ -7,6 +7,7 @@
 .shepherd-highlight {
   outline: 3px solid $c-accent !important;
 }
+
 .shepherd-highlight-inner {
   border: 3px solid $c-accent !important;
 }
@@ -74,6 +75,8 @@
 
 .shepherd-element {
   border-radius: 8px;
+  box-shadow: $whiteframe-shadow-24dp;
+  z-index: $z-tour;
 
   @include darkTheme(true) {
     background: $dark24 !important;
