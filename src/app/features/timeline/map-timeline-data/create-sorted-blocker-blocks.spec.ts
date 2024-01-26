@@ -1024,6 +1024,7 @@ describe('createBlockerBlocks()', () => {
           items: [
             {
               id: 'EventId',
+              calProviderId: 'PR',
               start: getDateTimeFromClockString('10:00', 24 * 60 * 60 * 1000),
               title: 'XXX',
               icon: 'aaa',
@@ -1068,6 +1069,7 @@ describe('createBlockerBlocks()', () => {
           entries: [
             {
               data: {
+                calProviderId: 'PR',
                 duration: 3600000,
                 icon: '',
                 start: 118800000,

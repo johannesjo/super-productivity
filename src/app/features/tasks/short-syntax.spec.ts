@@ -28,6 +28,7 @@ const TASK: TaskCopy = {
   attachments: [],
 
   issueId: null,
+  issueProviderId: null,
   issuePoints: null,
   issueType: null,
   issueAttachmentNr: null,
