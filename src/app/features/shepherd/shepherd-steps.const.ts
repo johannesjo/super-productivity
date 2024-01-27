@@ -564,6 +564,7 @@ export const SHEPHERD_STEPS = (
                 classes: PRIMARY_CLASSES,
                 action: () => {
                   shepherdService.show(TourId.KeyboardNav);
+                  localStorage.setItem(LS.IS_SHOW_TOUR, 'true');
                 },
               } as any,
             ]
@@ -573,6 +574,7 @@ export const SHEPHERD_STEPS = (
           classes: PRIMARY_CLASSES,
           action: () => {
             shepherdService.complete();
+            localStorage.setItem(LS.IS_SHOW_TOUR, 'true');
           },
         } as any,
       ],
@@ -592,7 +594,7 @@ export const SHEPHERD_STEPS = (
       },
       buttons: [
         {
-          text: 'Never show again',
+          text: 'Never again',
           classes: SECONDARY_CLASSES,
           action: () => {
             localStorage.setItem(LS.IS_SHOW_TOUR, 'true');
@@ -600,7 +602,7 @@ export const SHEPHERD_STEPS = (
           },
         } as any,
         {
-          text: 'Show again next time',
+          text: 'Again next time',
           classes: PRIMARY_CLASSES,
           action: () => {
             localStorage.removeItem(LS.IS_SHOW_TOUR);
