@@ -68,7 +68,7 @@ export const SHEPHERD_STEPS = (
     {
       id: TourId.Welcome,
       title: 'Welcome to Super Productivity!!',
-      text: '<p>Super Productivity is a ToDo app that helps you to improve your personal workflows.</p><p>Let`s do a little tour!</p>',
+      text: "<p>Super Productivity is a ToDo app that helps you to improve your personal workflows.</p><p>Let's do a little tour!</p>",
       buttons: [
         CANCEL_BTN(shepherdService),
         {
@@ -126,7 +126,7 @@ export const SHEPHERD_STEPS = (
     },
     {
       title: 'Congrats! This is your first task!',
-      text: 'Let`s start tracking time to it!',
+      text: "Let's start tracking time to it!",
       attachTo: {
         element: 'task',
         on: 'bottom' as any,
@@ -270,7 +270,6 @@ export const SHEPHERD_STEPS = (
     ...(IS_MOUSE_PRIMARY
       ? [
           {
-            id: 'XXX',
             title: 'Marking tasks as done',
             text: '<p>You can mark tasks as done by <em>hovering</em> over it and then <em>clicking</em> the <span class="material-icons">check</span> icon. Do this now!</p>',
             attachTo: {
@@ -589,12 +588,13 @@ export const SHEPHERD_STEPS = (
     {
       id: TourId.KeyboardNav,
       title: 'Keyboard Navigation',
-      text: '<p>The most efficient way to user Super Productivity is to make use of the keyboard shortcuts. Don`t worry there just a handful of important ones :)</p><p>You can configure most of them under "Settings / Keyboard Shortcuts", but let`s start more practical.</p>',
+      // eslint-disable-next-line max-len
+      text: `<p>The most efficient way to user Super Productivity is to make use of the keyboard shortcuts. Don't worry there just a handful of important ones :)</p><p>You can configure most of them under "Settings / Keyboard Shortcuts", but let's start more practical.</p>`,
       buttons: [NEXT_BTN],
     },
     {
       title: 'Keyboard Navigation',
-      text: `Let\`s add a couple of tasks. Press ${KEY_COMBO('addNewTask')}.`,
+      text: `Let's add a couple of tasks. Press ${KEY_COMBO('addNewTask')}.`,
       when: nextOnObs(
         layoutService.isShowAddTaskBar$.pipe(filter((v) => v)),
         shepherdService,
