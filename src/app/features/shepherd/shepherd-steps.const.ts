@@ -617,7 +617,7 @@ export const SHEPHERD_STEPS = (
       id: TourId.KeyboardNav,
       title: 'Keyboard Navigation',
       // eslint-disable-next-line max-len
-      text: `<p>The most efficient way to user Super Productivity is to make use of the keyboard shortcuts. Don't worry there just a handful of important ones :)</p><p>You can configure most of them under <strong>Settings/Keyboard Shortcuts</strong>, but let's start more practical.</p>`,
+      text: `<p>The most efficient way to use Super Productivity is to make use of the keyboard shortcuts. Don't worry there just a handful of important ones :)</p><p>You can configure most of them under <strong>Settings/Keyboard Shortcuts</strong>, but let's start more practical.</p>`,
       buttons: [NEXT_BTN],
     },
     {
