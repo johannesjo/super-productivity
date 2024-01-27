@@ -36,8 +36,9 @@ export class TaskAdditionalInfoItemComponent {
     }
 
     this.keyPress.emit(ev);
-
-    if (ev.key === 'ArrowRight' || ev.key === 'Enter') {
+    if (ev.code === 'Escape') {
+      this.collapseParent.emit();
+    } else if (ev.key === 'ArrowRight' || ev.key === 'Enter') {
       if (this.type === 'panel') {
         if (this.expanded) {
           this.editActionTriggered.emit();
