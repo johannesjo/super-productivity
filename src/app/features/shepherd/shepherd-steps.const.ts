@@ -27,7 +27,7 @@ const NEXT_BTN = {
 
 const CANCEL_BTN: any = (shepherdService: ShepherdService) => ({
   classes: SECONDARY_CLASSES,
-  text: 'Exit Tour',
+  text: 'No thanks',
   action: () => {
     shepherdService.show(TourId.StartTourAgain);
   },
@@ -51,6 +51,14 @@ export enum TourId {
   XXX = 'XXX',
 }
 
+const HIDE_QUICK = (shepherdService: ShepherdService): Step.StepOptionsWhen => ({
+  show: () => {
+    setTimeout(() => {
+      shepherdService.next();
+    }, 800);
+  },
+});
+
 export const SHEPHERD_STEPS = (
   shepherdService: ShepherdService,
   cfg: GlobalConfigState,
@@ -68,12 +76,12 @@ export const SHEPHERD_STEPS = (
     {
       id: TourId.Welcome,
       title: 'Welcome to Super Productivity!!',
-      text: "<p>Super Productivity is a ToDo app that helps you to improve your personal workflows.</p><p>Let's do a little tour!</p>",
+      text: "<p>Super Productivity is a ToDo app that helps you to organize yourself and to improve your personal workflows.</p><p>Let's do a little tour! 🎉</p>",
       buttons: [
         CANCEL_BTN(shepherdService),
         {
           ...NEXT_BTN,
-          title: 'Start',
+          text: 'Start',
         },
       ],
     },
@@ -125,7 +133,7 @@ export const SHEPHERD_STEPS = (
       ),
     },
     {
-      title: 'Congrats! This is your first task!',
+      title: 'Congrats! 🎉 This is your first task!',
       text: "Let's start tracking time to it!",
       attachTo: {
         element: 'task',
@@ -197,7 +205,7 @@ export const SHEPHERD_STEPS = (
               element: '.show-additional-info-btn',
               on: 'bottom' as any,
             },
-            text: 'You can open a panel with additional controls by clicking on the button.',
+            text: 'You can open a panel with additional controls by <em>clicking</em> on the button.',
             when: twoWayObs(
               {
                 obs: taskService.selectedTask$.pipe(
@@ -234,15 +242,15 @@ export const SHEPHERD_STEPS = (
         ]),
     {
       title: 'The Task Details',
-      text: 'This is the task side panel.Here you can adjust estimates, schedule your task, add some notes or attachments or configure your task to be repeated.',
+      text: 'This is the task detail panel.Here you can adjust estimates, schedule your task, add some notes or attachments or configure your task to be repeated.',
       buttons: [NEXT_BTN],
       beforeShowPromise: () => promiseTimeout(500),
     },
     {
       title: 'Closing the Task Details',
       text: IS_MOUSE_PRIMARY
-        ? 'You can close the panel by clicking the X. Do this now!'
-        : 'You can close the panel by tapping on the X. Do this now!',
+        ? 'You can close the panel by <em>clicking</em> on <span class="material-icons">close</span>. Do this now!'
+        : 'You can close the panel by <em>tapping</em> on <span class="material-icons">close</span>. Do this now!',
       attachTo: {
         element: '.show-additional-info-btn',
         on: 'bottom',
@@ -256,7 +264,7 @@ export const SHEPHERD_STEPS = (
       ? [
           {
             title: 'Edit Task Title',
-            text: '<p>You can edit the task title by clicking on it. Do this now and change the task title to something else.</p>',
+            text: '<p>You can edit the task title by <em>clicking</em> on it. Do this now and change the task title to something else.</p>',
             attachTo: {
               element: '.task-title',
               on: 'bottom' as any,
@@ -264,9 +272,18 @@ export const SHEPHERD_STEPS = (
             beforeShowPromise: () => promiseTimeout(500),
             when: nextOnObs(actions$.pipe(ofType(updateTask)), shepherdService),
           },
+          {
+            title: 'Well done!  🎉',
+            attachTo: {
+              element: 'task',
+              on: 'bottom' as any,
+            },
+            when: HIDE_QUICK(shepherdService),
+          },
         ]
       : []),
-    //
+
+    // ------------------
     ...(IS_MOUSE_PRIMARY
       ? [
           {
@@ -318,7 +335,6 @@ export const SHEPHERD_STEPS = (
             ),
           },
         ]),
-
     // ------------------------------
     {
       id: TourId.DeleteTask,
@@ -350,6 +366,10 @@ export const SHEPHERD_STEPS = (
           },
         };
       })(),
+    },
+    {
+      title: 'Excellent!  🎉',
+      when: HIDE_QUICK(shepherdService),
     },
 
     // ------------------------------
@@ -386,7 +406,7 @@ export const SHEPHERD_STEPS = (
     {
       id: TourId.Sync,
       title: 'Syncing & Data Privacy',
-      text: "<p>Super Productivity takes your data privacy very serious. This means that <strong>you decide what will be saved and where</strong>. <strong>The app does NOT collect any data </strong> and there are no user accounts or registration required. It's free and open source and always will be.</p><p>This is important since data is often sold for marketing purposes and leaks happen more often than you would think.</p>",
+      text: "<p>Super Productivity takes your data privacy very serious. This means that <strong>you decide what will be saved and where</strong>. <strong>The app does NOT collect any data </strong> and there are no user accounts or registration required.</p><p>It's free and open source and always will be.</p><p>This is important since data is often sold for marketing purposes and leaks happen more often than you would think.</p>",
       buttons: [NEXT_BTN],
     },
     {
@@ -490,7 +510,7 @@ export const SHEPHERD_STEPS = (
     {
       title: 'Connect Calendars',
       // eslint-disable-next-line max-len
-      text: `<p>You will need a link or file path to your calendar to show it's events when they are due and within the timeline. You can load calendar data as iCal.</p><ul>
+      text: `<p>You will need a link or file path to your calendar to show its events when they are due and within the timeline. You can load calendar data as iCal.</p><ul>
 <li><a target="_blank" href=\"https://support.google.com/calendar/answer/37648?hl=en#zippy=%2Csync-your-google-calendar-view-edit%2Cget-your-calendar-view-only\">Get iCal Link for Google Calendar</a></li>
 <li><a target="_blank" href=\"https://support.pushpay.com/s/article/How-do-I-get-an-iCal-link-from-Office-365\">Get iCal Link for Outlook 365</a></li>
 </ul>`,
@@ -528,7 +548,7 @@ export const SHEPHERD_STEPS = (
     // ------------------------------
     {
       id: TourId.FinalCongrats,
-      title: 'Congratulations!',
+      title: '🎉 Congratulations! 🎉',
       text: '<p>This concludes the tour. Remember that you can always start it again via the Help button in the menu.</p><p>Best way to get familiar with the app, is to play around with it. Have fun!</p>',
       buttons: [
         ...(IS_MOUSE_PRIMARY
@@ -589,7 +609,7 @@ export const SHEPHERD_STEPS = (
       id: TourId.KeyboardNav,
       title: 'Keyboard Navigation',
       // eslint-disable-next-line max-len
-      text: `<p>The most efficient way to user Super Productivity is to make use of the keyboard shortcuts. Don't worry there just a handful of important ones :)</p><p>You can configure most of them under "Settings / Keyboard Shortcuts", but let's start more practical.</p>`,
+      text: `<p>The most efficient way to user Super Productivity is to make use of the keyboard shortcuts. Don't worry there just a handful of important ones :)</p><p>You can configure most of them under "<strong>Settings / Keyboard Shortcuts</strong>", but let's start more practical.</p>`,
       buttons: [NEXT_BTN],
     },
     {
@@ -707,7 +727,7 @@ export const SHEPHERD_STEPS = (
       buttons: [NEXT_BTN],
     },
     {
-      title: 'Congratulations!',
+      title: '🎉 Congratulations! 🎉',
       text: '<p>This concludes the keyboard navigation tour. Remember that you can always start it again via the Help button in the menu.</p><p>Best way to get familiar with the app, is to play around with it. Have fun!</p>',
       buttons: [
         {
