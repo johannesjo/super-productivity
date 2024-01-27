@@ -81,7 +81,7 @@ export const SHEPHERD_STEPS = (
         CANCEL_BTN(shepherdService),
         {
           ...NEXT_BTN,
-          text: 'Start',
+          text: "Let's go!",
         },
       ],
     },
@@ -242,15 +242,21 @@ export const SHEPHERD_STEPS = (
         ]),
     {
       title: 'The Task Details',
-      text: 'This is the task detail panel.Here you can adjust estimates, schedule your task, add some notes or attachments or configure your task to be repeated.',
-      buttons: [NEXT_BTN],
+      text: `<p>This is the task detail panel. Here you can:</p><ul>
+<li>adjust estimates</li>
+<li>schedule your task</li>
+<li>add notes or attachments</li>
+<li>configure your task to be repeated</li>
+<li>and view issue data for issue tasks (more about that later)</li>
+</ul>`,
+      buttons: [{ ...NEXT_BTN, text: 'Cool!' }],
       beforeShowPromise: () => promiseTimeout(500),
     },
     {
       title: 'Closing the Task Details',
       text: IS_MOUSE_PRIMARY
-        ? 'You can close the panel by <em>clicking</em> on <span class="material-icons">close</span>. Do this now!'
-        : 'You can close the panel by <em>tapping</em> on <span class="material-icons">close</span>. Do this now!',
+        ? 'You can close the panel by <em>clicking</em> on the <span class="material-icons">close</span>. Do this now!'
+        : 'You can close the panel by <em>tapping</em> on the <span class="material-icons">close</span>. Do this now!',
       attachTo: {
         element: '.show-additional-info-btn',
         on: 'bottom',
@@ -377,7 +383,7 @@ export const SHEPHERD_STEPS = (
       id: TourId.Projects,
       title: 'Projects',
       text: 'If you have lots of tasks, you probably need more than a single task list. One way of creating different lists is by using projects.',
-      buttons: [NEXT_BTN],
+      buttons: [{ ...NEXT_BTN, text: 'Good to know!' }],
     },
     {
       title: 'Projects',
@@ -398,7 +404,7 @@ export const SHEPHERD_STEPS = (
         on: 'bottom',
       },
       highlightClass: 'shepherd-highlight-inner',
-      text: '<p>Projects are also used to import tasks from issue providers like Jira, OpenProject, GitHub, GitLab, Redmine and Gitea.</p>',
+      text: '<p>Projects are also used to import tasks from <strong>issue providers</strong> like <strong>Jira, OpenProject, GitHub, GitLab, Redmine and Gitea</strong>.</p>',
       buttons: [NEXT_BTN],
     },
 
@@ -407,12 +413,12 @@ export const SHEPHERD_STEPS = (
       id: TourId.Sync,
       title: 'Syncing & Data Privacy',
       text: "<p>Super Productivity takes your data privacy very serious. This means that <strong>you decide what will be saved and where</strong>. <strong>The app does NOT collect any data </strong> and there are no user accounts or registration required.</p><p>It's free and open source and always will be.</p><p>This is important since data is often sold for marketing purposes and leaks happen more often than you would think.</p>",
-      buttons: [NEXT_BTN],
+      buttons: [{ ...NEXT_BTN, text: 'That is cool, I guess' }],
     },
     {
       title: 'Syncing & Data Privacy',
       text: '<p>With Super Productivity <strong>you can save and sync your data with a cloud provider of your choice</strong> or even host it in your own cloud.</p><p>Let me show you where to configure this!!</p>',
-      buttons: [NEXT_BTN],
+      buttons: [{ ...NEXT_BTN, text: "Let's go!" }],
     },
     {
       title: 'Configure Sync',
@@ -542,14 +548,14 @@ export const SHEPHERD_STEPS = (
         on: 'top',
       },
       scrollTo: true,
-      buttons: [NEXT_BTN],
+      buttons: [{ ...NEXT_BTN, text: 'Will do!' }],
     },
 
     // ------------------------------
     {
       id: TourId.FinalCongrats,
       title: '🎉 Congratulations! 🎉',
-      text: '<p>This concludes the tour. Remember that you can always start it again via the Help button in the menu.</p><p>Best way to get familiar with the app, is to play around with it. Have fun!</p>',
+      text: '<p>This concludes the tour. Remember that you can always start it again via the Help button in the menu.</p><p>Best way to get familiar with the app, is to play around with it. Have fun! 😄</p>',
       buttons: [
         ...(IS_MOUSE_PRIMARY
           ? [
@@ -609,7 +615,7 @@ export const SHEPHERD_STEPS = (
       id: TourId.KeyboardNav,
       title: 'Keyboard Navigation',
       // eslint-disable-next-line max-len
-      text: `<p>The most efficient way to user Super Productivity is to make use of the keyboard shortcuts. Don't worry there just a handful of important ones :)</p><p>You can configure most of them under "<strong>Settings / Keyboard Shortcuts</strong>", but let's start more practical.</p>`,
+      text: `<p>The most efficient way to user Super Productivity is to make use of the keyboard shortcuts. Don't worry there just a handful of important ones :)</p><p>You can configure most of them under <strong>Settings/Keyboard Shortcuts</strong>, but let's start more practical.</p>`,
       buttons: [NEXT_BTN],
     },
     {
@@ -678,6 +684,11 @@ export const SHEPHERD_STEPS = (
         show: () => taskService.focusFirstTaskIfVisible(),
       },
       buttons: [NEXT_BTN],
+      attachTo: {
+        element: 'task-list',
+        on: 'bottom',
+      },
+      highlightClass: '',
     },
     {
       title: 'Moving tasks around',
@@ -688,6 +699,11 @@ export const SHEPHERD_STEPS = (
         show: () => taskService.focusFirstTaskIfVisible(),
       },
       buttons: [NEXT_BTN],
+      attachTo: {
+        element: 'task-list',
+        on: 'bottom',
+      },
+      highlightClass: '',
     },
     {
       title: 'Edit Task Title',
@@ -696,15 +712,25 @@ export const SHEPHERD_STEPS = (
         show: () => taskService.focusFirstTaskIfVisible(),
       },
       buttons: [NEXT_BTN],
+      attachTo: {
+        element: 'task-list',
+        on: 'bottom',
+      },
+      highlightClass: '',
     },
     {
       title: 'Open, close and navigate the Task Details',
       // eslint-disable-next-line max-len
-      text: `<p>You can open the task details panel for a task by pressing <kbd>→</kbd> while it is focused. You can close it again by pressing <kbd>←</kbd></p><p>You can also navigate and activate its items by using the arrow keys <kbd>→</kbd> <kbd>↑</kbd> and <kbd>↓</kbd>.</p><p>You can leave most contexts that open up this way by pressing <kbd>Escape</kbd>.</p>`,
+      text: `<p>You can open the task details panel for a task by pressing <kbd>→</kbd> while it is focused.</p><p>You can close it again by pressing <kbd>←</kbd>.</p><p>You can also navigate and activate its items by using the arrow keys <kbd>→</kbd> <kbd>↑</kbd> and <kbd>↓</kbd>.</p><p>You can leave most contexts that open up this way by pressing <kbd>Escape</kbd>.</p>`,
       when: {
         show: () => taskService.focusFirstTaskIfVisible(),
       },
       buttons: [NEXT_BTN],
+      attachTo: {
+        element: 'task-list',
+        on: 'bottom',
+      },
+      highlightClass: '',
     },
     {
       title: 'More Task Shortcuts',
@@ -712,11 +738,9 @@ export const SHEPHERD_STEPS = (
         show: () => taskService.focusFirstTaskIfVisible(),
       },
       // eslint-disable-next-line max-len
-      text: `<p>There are more task related shortcuts that can be used when a task is focused. Best you check them all out under <strong>Settings/Keyboard Shortcuts /Tasks</strong>. The most useful are probably:</p>
+      text: `<p>There are more task related shortcuts that can be used when a task is focused. Best you check them all out under <strong>Settings/Keyboard Shortcuts/Tasks</strong>. The most useful are probably:</p>
           <ul>
-          <li>${KEY_COMBO(
-            'taskSchedule',
-          )}: Schedule task (which can also be navigated by keyboard)</li>
+          <li>${KEY_COMBO('taskSchedule')}: Schedule task</li>
           <li>${KEY_COMBO('taskDelete')}: Delete Task</li>
           <li>${KEY_COMBO('taskToggleDone')}: Toggle done</li>
           <li>${KEY_COMBO('taskAddSubTask')}: Add new sub task</li>
@@ -725,10 +749,15 @@ export const SHEPHERD_STEPS = (
 
       `,
       buttons: [NEXT_BTN],
+      attachTo: {
+        element: 'task-list',
+        on: 'bottom',
+      },
+      highlightClass: '',
     },
     {
       title: '🎉 Congratulations! 🎉',
-      text: '<p>This concludes the keyboard navigation tour. Remember that you can always start it again via the Help button in the menu.</p><p>Best way to get familiar with the app, is to play around with it. Have fun!</p>',
+      text: '<p>This concludes the keyboard navigation tour. Remember that you can always start it again via the Help button in the menu.</p><p>Best way to get familiar with the app, is to play around with it. Have fun! 😄</p>',
       buttons: [
         {
           text: 'End Tour',
