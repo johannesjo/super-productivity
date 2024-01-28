@@ -1,5 +1,5 @@
-import { Observable, Subject } from 'rxjs';
-import { first, takeUntil, tap } from 'rxjs/operators';
+import { Observable, Subject, timer } from 'rxjs';
+import { filter, first, map, takeUntil, tap } from 'rxjs/operators';
 import { ShepherdService } from './shepherd.service';
 import Step from 'shepherd.js/src/types/step';
 import StepOptionsWhen = Step.StepOptionsWhen;
@@ -15,20 +15,12 @@ export const waitForEl = (selector: string, cb: () => void): number => {
   }, 50);
   return int;
 };
-export const waitForElRemove = (
-  el: HTMLElement | Element | null,
-  cb: () => void,
-): number => {
-  if (!el) {
-    throw new Error('No el provided');
-  }
-  const int = window.setInterval(() => {
-    if (!document.contains(el)) {
-      window.clearInterval(int);
-      cb();
-    }
-  }, 50);
-  return int;
+
+export const waitForElObs$ = (selector: string): Observable<any> => {
+  return timer(50, 50).pipe(
+    map(() => document.querySelector(selector)),
+    filter((el) => !!el),
+  );
 };
 
 export const nextOnObs = (

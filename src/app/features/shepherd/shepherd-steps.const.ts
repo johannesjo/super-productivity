@@ -1,5 +1,5 @@
 import Step from 'shepherd.js/src/types/step';
-import { nextOnObs, twoWayObs, waitForEl } from './shepherd-helper';
+import { nextOnObs, twoWayObs, waitForEl, waitForElObs$ } from './shepherd-helper';
 import { LayoutService } from '../../core-ui/layout/layout.service';
 import { TaskService } from '../tasks/task.service';
 import { delay, filter, first, map, switchMap } from 'rxjs/operators';
@@ -14,7 +14,7 @@ import { LS } from '../../core/persistence/storage-keys.const';
 import { KeyboardConfig } from '../config/keyboard-config.model';
 import { WorkContextService } from '../work-context/work-context.service';
 import { ShepherdService } from './shepherd.service';
-import { timer } from 'rxjs';
+import { merge, timer } from 'rxjs';
 
 const PRIMARY_CLASSES = 'mat-flat-button mat-button-base mat-primary';
 const SECONDARY_CLASSES = 'mat-button mat-button-base';
@@ -112,7 +112,12 @@ export const SHEPHERD_STEPS = (
       beforeShowPromise: () => promiseTimeout(200),
       when: twoWayObs(
         { obs: actions$.pipe(ofType(addTask)) },
-        { obs: actions$.pipe(ofType(hideAddTaskBar)) },
+        {
+          obs: merge(
+            actions$.pipe(ofType(hideAddTaskBar)),
+            workContextService.todaysTasks$.pipe(filter((tt) => tt.length < 1)),
+          ),
+        },
         shepherdService,
       ),
     },
@@ -126,9 +131,11 @@ export const SHEPHERD_STEPS = (
         on: 'bottom',
       },
       beforeShowPromise: () => promiseTimeout(200),
-      when: nextOnObs(
-        actions$.pipe(ofType(hideAddTaskBar)),
-        // delay because other hide should trigger first
+      when: twoWayObs(
+        { obs: actions$.pipe(ofType(hideAddTaskBar)) },
+        {
+          obs: workContextService.todaysTasks$.pipe(filter((tt) => tt.length < 1)),
+        },
         shepherdService,
       ),
     },
@@ -139,13 +146,13 @@ export const SHEPHERD_STEPS = (
         element: 'task',
         on: 'bottom' as any,
       },
-      when: {
-        show: () => {
-          setTimeout(() => {
-            shepherdService.next();
-          }, 4000);
+      when: twoWayObs(
+        { obs: timer(4000) },
+        {
+          obs: workContextService.todaysTasks$.pipe(filter((tt) => tt.length < 1)),
         },
-      },
+        shepherdService,
+      ),
       beforeShowPromise: () => promiseTimeout(200),
     },
     {
@@ -155,8 +162,11 @@ export const SHEPHERD_STEPS = (
         element: '.tour-playBtn',
         on: 'bottom',
       },
-      when: nextOnObs(
-        taskService.currentTaskId$.pipe(filter((id) => !!id)),
+      when: twoWayObs(
+        { obs: taskService.currentTaskId$.pipe(filter((id) => !!id)) },
+        {
+          obs: workContextService.todaysTasks$.pipe(filter((tt) => tt.length < 1)),
+        },
         shepherdService,
       ),
     },
@@ -168,11 +178,16 @@ export const SHEPHERD_STEPS = (
         on: 'bottom',
       },
       beforeShowPromise: () => promiseTimeout(500),
-      when: nextOnObs(
-        taskService.currentTaskId$.pipe(
-          filter((id) => !id),
-          delay(100),
-        ),
+      when: twoWayObs(
+        {
+          obs: taskService.currentTaskId$.pipe(
+            filter((id) => !id),
+            delay(100),
+          ),
+        },
+        {
+          obs: workContextService.todaysTasks$.pipe(filter((tt) => tt.length < 1)),
+        },
         shepherdService,
       ),
     },
@@ -185,19 +200,15 @@ export const SHEPHERD_STEPS = (
               element: 'task',
               on: 'bottom' as any,
             },
-            when: (() => {
-              let intId: number;
-              return {
-                show: () => {
-                  intId = waitForEl('task.shepherd-highlight .hover-controls', () =>
-                    shepherdService.next(),
-                  );
-                },
-                hide: () => {
-                  window.clearInterval(intId);
-                },
-              };
-            })(),
+            when: twoWayObs(
+              {
+                obs: waitForElObs$('task.shepherd-highlight .hover-controls'),
+              },
+              {
+                obs: workContextService.todaysTasks$.pipe(filter((tt) => tt.length < 1)),
+              },
+              shepherdService,
+            ),
           },
           {
             title: 'Open Task Details',
@@ -213,13 +224,16 @@ export const SHEPHERD_STEPS = (
                 ),
               },
               {
-                obs: timer(30, 30).pipe(
-                  map(() => {
-                    return document.querySelector(
-                      '.show-additional-info-btn.shepherd-highlight',
-                    );
-                  }),
-                  filter((el) => !el),
+                obs: merge(
+                  workContextService.todaysTasks$.pipe(filter((tt) => tt.length < 1)),
+                  timer(30, 30).pipe(
+                    map(() => {
+                      return document.querySelector(
+                        '.show-additional-info-btn.shepherd-highlight',
+                      );
+                    }),
+                    filter((el) => !el),
+                  ),
                 ),
               },
               shepherdService,
@@ -234,8 +248,15 @@ export const SHEPHERD_STEPS = (
               element: 'task',
               on: 'bottom' as any,
             },
-            when: nextOnObs(
-              taskService.selectedTask$.pipe(filter((selectedTask) => !!selectedTask)),
+            when: twoWayObs(
+              {
+                obs: taskService.selectedTask$.pipe(
+                  filter((selectedTask) => !!selectedTask),
+                ),
+              },
+              {
+                obs: workContextService.todaysTasks$.pipe(filter((tt) => tt.length < 1)),
+              },
               shepherdService,
             ),
           },
@@ -454,17 +475,19 @@ export const SHEPHERD_STEPS = (
         on: 'top',
       },
       scrollTo: true,
-      when: (() => {
-        let intId: number;
-        return {
-          show: () => {
-            intId = waitForEl('.tour-isSyncEnabledToggle', () => shepherdService.next());
-          },
-          hide: () => {
-            window.clearInterval(intId);
-          },
-        };
-      })(),
+      when: twoWayObs(
+        {
+          obs: waitForElObs$('.tour-isSyncEnabledToggle'),
+        },
+        {
+          obs: router.events.pipe(
+            filter((event: any) => event instanceof NavigationEnd),
+            map((event) => !event.url.includes('config')),
+            filter((v) => !!v),
+          ),
+        },
+        shepherdService,
+      ),
     },
     {
       title: 'Configure Sync',
