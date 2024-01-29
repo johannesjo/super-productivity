@@ -130,7 +130,7 @@ button {
     transform: scale(0.7);
   }
   25% {
-    transform: scale(0.7);
+    transform: scale(1);
   }
   50% {
     transform: scale(1);
@@ -159,10 +159,10 @@ button {
     border-radius: 50%;
     margin: auto;
     transform: scale(1, 1);
-    animation-timing-function: ease;
+    animation-timing-function: ease-in-out;
     animation: pulse 2s infinite;
     background: $c-accent;
-    opacity: 0.5;
+    opacity: 0.6;
   }
 
   .play-btn {
