@@ -224,6 +224,7 @@
         "lint": {
           "builder": "@angular-eslint/builder:lint",
           "options": {
+            "cache": true,
             "lintFilePatterns": ["src/**/*.ts", "src/**/*.html"]
           }
         }
