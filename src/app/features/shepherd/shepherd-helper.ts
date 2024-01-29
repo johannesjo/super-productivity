@@ -3,6 +3,7 @@ import { filter, first, map, takeUntil, tap } from 'rxjs/operators';
 import { ShepherdService } from './shepherd.service';
 import Step from 'shepherd.js/src/types/step';
 import StepOptionsWhen = Step.StepOptionsWhen;
+import { TourId } from './shepherd-steps.const';
 
 export const waitForEl = (selector: string, cb: () => void): number => {
   const int = window.setInterval(() => {
@@ -27,6 +28,7 @@ export const nextOnObs = (
   obs: Observable<any>,
   shepherdService: ShepherdService,
   additionalOnShow?: () => void,
+  debugTitle?: string,
 ): StepOptionsWhen => {
   let _onDestroy$;
   return {
@@ -37,7 +39,11 @@ export const nextOnObs = (
       _onDestroy$ = new Subject<void>();
       obs
         .pipe(
-          tap((v) => console.log('nextOnObs', v)),
+          tap((v) => {
+            if (debugTitle) {
+              console.log('nextOnObs', v, debugTitle);
+            }
+          }),
           first(),
           takeUntil(_onDestroy$),
         )
@@ -58,21 +64,33 @@ export const twoWayObs = (
   back: {
     obs: Observable<any>;
     cbAfter?: () => void;
+    backToId?: TourId;
   },
   shepherdService: ShepherdService,
+  debugTitle?: string,
 ): StepOptionsWhen => {
   let onDestroy$;
   return {
     show: () => {
       onDestroy$ = new Subject();
-      fwd.obs.pipe(first(), takeUntil(onDestroy$)).subscribe(() => {
+      fwd.obs.pipe(first(), takeUntil(onDestroy$)).subscribe((v) => {
+        if (debugTitle) {
+          console.log(debugTitle, 'fwd', v);
+        }
         fwd.cbAfter?.();
         shepherdService.next();
       });
       if (back) {
-        back.obs.pipe(first(), takeUntil(onDestroy$)).subscribe(() => {
+        back.obs.pipe(first(), takeUntil(onDestroy$)).subscribe((v) => {
+          if (debugTitle) {
+            console.log(debugTitle, 'back', v);
+          }
           back.cbAfter?.();
-          shepherdService.back();
+          if (back.backToId) {
+            shepherdService.show(back.backToId);
+          } else {
+            shepherdService.back();
+          }
         });
       }
     },

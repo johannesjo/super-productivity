@@ -38,6 +38,7 @@ const CLICK_B = IS_MOUSE_PRIMARY ? '<em>Click</em>' : '<em>Tap</em>';
 
 export enum TourId {
   Welcome = 'Welcome',
+  AddTask = 'AddTask',
   DeleteTask = 'DeleteTask',
   Sync = 'Sync',
   Projects = 'Projects',
@@ -86,6 +87,7 @@ export const SHEPHERD_STEPS = (
       ],
     },
     {
+      id: TourId.AddTask,
       title: "Let's add your first task!",
       text: IS_MOUSE_PRIMARY
         ? `<em>Click</em> on this button or press ${KEY_COMBO('addNewTask')}.`
@@ -109,16 +111,14 @@ export const SHEPHERD_STEPS = (
         element: 'add-task-bar',
         on: 'bottom',
       },
-      beforeShowPromise: () => promiseTimeout(100),
+      beforeShowPromise: () => promiseTimeout(200),
       when: twoWayObs(
         { obs: actions$.pipe(ofType(addTask)) },
         {
-          obs: merge(
-            actions$.pipe(ofType(hideAddTaskBar)),
-            workContextService.todaysTasks$.pipe(filter((tt) => tt.length < 1)),
-          ),
+          obs: merge(actions$.pipe(ofType(hideAddTaskBar))),
         },
         shepherdService,
+        // 'A',
       ),
     },
     {
@@ -135,8 +135,10 @@ export const SHEPHERD_STEPS = (
         { obs: actions$.pipe(ofType(hideAddTaskBar)) },
         {
           obs: workContextService.todaysTasks$.pipe(filter((tt) => tt.length < 1)),
+          backToId: TourId.AddTask,
         },
         shepherdService,
+        // 'B',
       ),
     },
     {
@@ -150,8 +152,10 @@ export const SHEPHERD_STEPS = (
         { obs: timer(4000) },
         {
           obs: workContextService.todaysTasks$.pipe(filter((tt) => tt.length < 1)),
+          backToId: TourId.AddTask,
         },
         shepherdService,
+        // 'C',
       ),
       beforeShowPromise: () => promiseTimeout(200),
     },
@@ -166,8 +170,10 @@ export const SHEPHERD_STEPS = (
         { obs: taskService.currentTaskId$.pipe(filter((id) => !!id)) },
         {
           obs: workContextService.todaysTasks$.pipe(filter((tt) => tt.length < 1)),
+          backToId: TourId.AddTask,
         },
         shepherdService,
+        // 'D',
       ),
     },
     {
@@ -187,8 +193,10 @@ export const SHEPHERD_STEPS = (
         },
         {
           obs: workContextService.todaysTasks$.pipe(filter((tt) => tt.length < 1)),
+          backToId: TourId.AddTask,
         },
         shepherdService,
+        // 'E',
       ),
     },
     ...(IS_MOUSE_PRIMARY
@@ -206,8 +214,10 @@ export const SHEPHERD_STEPS = (
               },
               {
                 obs: workContextService.todaysTasks$.pipe(filter((tt) => tt.length < 1)),
+                backToId: TourId.AddTask,
               },
               shepherdService,
+              // 'F',
             ),
           },
           {
@@ -237,6 +247,7 @@ export const SHEPHERD_STEPS = (
                 ),
               },
               shepherdService,
+              // 'G',
             ),
           },
         ]
@@ -256,8 +267,10 @@ export const SHEPHERD_STEPS = (
               },
               {
                 obs: workContextService.todaysTasks$.pipe(filter((tt) => tt.length < 1)),
+                backToId: TourId.AddTask,
               },
               shepherdService,
+              // 'H',
             ),
           },
         ]),
@@ -457,6 +470,10 @@ export const SHEPHERD_STEPS = (
     {
       title: 'Configure Sync',
       text: `${CLICK_B} on <span class="material-icons">settings</span> <strong>Settings</strong>!`,
+      attachTo: {
+        element: '.tour-settingsMenuBtn',
+        on: 'right',
+      },
       when: nextOnObs(
         router.events.pipe(
           filter((event: any) => event instanceof NavigationEnd),
