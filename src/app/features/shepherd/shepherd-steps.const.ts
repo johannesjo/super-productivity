@@ -109,7 +109,7 @@ export const SHEPHERD_STEPS = (
         element: 'add-task-bar',
         on: 'bottom',
       },
-      beforeShowPromise: () => promiseTimeout(200),
+      beforeShowPromise: () => promiseTimeout(100),
       when: twoWayObs(
         { obs: actions$.pipe(ofType(addTask)) },
         {
