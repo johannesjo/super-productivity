@@ -411,7 +411,7 @@ export class TaskAdditionalInfoComponent implements AfterViewInit, OnDestroy {
 
   editTaskRepeatCfg(): void {
     this._matDialog.open(DialogEditTaskRepeatCfgComponent, {
-      restoreFocus: false,
+      restoreFocus: true,
       data: {
         task: this.task,
       },
