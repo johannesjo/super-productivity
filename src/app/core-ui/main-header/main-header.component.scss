@@ -125,12 +125,44 @@ button {
   }
 }
 
+@keyframes pulse {
+  0% {
+    transform: scale(0.7);
+  }
+  25% {
+    transform: scale(0.7);
+  }
+  50% {
+    transform: scale(1);
+  }
+  100% {
+    transform: scale(0.7);
+  }
+}
+
 .play-btn-wrapper {
   position: relative;
   margin-left: $s * 0.5;
 
   @include mq(xs) {
     margin-left: $s;
+  }
+
+  .pulse-circle {
+    width: 48px;
+    height: 48px;
+    position: absolute;
+    top: 0;
+    left: -4px;
+    right: 0;
+    bottom: 0;
+    border-radius: 50%;
+    margin: auto;
+    transform: scale(1, 1);
+    animation-timing-function: ease;
+    animation: pulse 2s infinite;
+    background: $c-accent;
+    opacity: 0.5;
   }
 
   .play-btn {

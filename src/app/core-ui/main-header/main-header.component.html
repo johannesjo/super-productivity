@@ -111,6 +111,11 @@
           class="project"
         ></tag>
       </div>
+      <div
+        *ngIf="(taskService.currentTaskId$|async)"
+        class="pulse-circle"
+      ></div>
+
       <button
         (click)="taskService.toggleStartTask()"
         [color]="(taskService.currentTaskId$|async)? 'accent': 'primary'"
