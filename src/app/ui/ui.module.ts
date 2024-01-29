@@ -189,13 +189,13 @@ const OTHER_3RD_PARTY_MODS_WITHOUT_CFG = [
         provide: MarkedOptions,
         useFactory: (): MarkedOptions => {
           const renderer = new MarkedRenderer();
+
           renderer.checkbox = (isChecked: boolean) => {
             return `<span class="checkbox material-icons">${
               isChecked ? 'check_box ' : 'check_box_outline_blank '
             }</span>`;
           };
           renderer.listitem = (text: string) => {
-            console.log(text, text.includes('checkbox'));
             return text.includes('checkbox')
               ? '<li class="checkbox-wrapper">' + text + '</li>'
               : '<li>' + text + '</li>';
