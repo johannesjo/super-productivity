@@ -18,13 +18,19 @@
   }
 
   ul {
-    padding-left: 20px;
+    margin: 0 $s;
+    padding-left: $s * 2;
     padding-inline-start: 20px;
+  }
 
-    ul {
-      padding-left: 16px;
-      padding-inline-start: 16px;
-    }
+  > ul {
+    padding-left: $s * 2;
+  }
+
+  ul ul {
+    padding-top: 0;
+    padding-left: $s * 2;
+    padding-inline-start: $s * 2;
   }
 
   h1,
@@ -35,6 +41,21 @@
   h6 {
     line-height: 1;
     margin-top: 16px;
+  }
+
+  h1,
+  h2,
+  h3 {
+    &,
+    .mat-typography & {
+      margin-bottom: $s;
+      margin-top: $s * 2;
+
+      &:first-child {
+        margin-top: 0;
+        padding-top: 0;
+      }
+    }
   }
 
   h1 {
@@ -61,5 +82,21 @@
   input[type='checkbox'] {
     margin-left: -20px;
     pointer-events: none;
+  }
+
+  .checkbox {
+    display: inline-block;
+    font-size: 20px;
+    width: 20px;
+    line-height: 1;
+    text-align: center;
+    margin-left: -28px;
+    vertical-align: middle;
+    margin-right: $s;
+  }
+
+  .checkbox-wrapper {
+    list-style: none;
+    margin-bottom: $s;
   }
 }

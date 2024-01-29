@@ -47,56 +47,8 @@
   cursor: text;
 }
 
-.markdown-parsed ::ng-deep {
-  *:first-child {
-    margin-top: 0;
-    padding-top: 0;
-  }
-
-  h1,
-  h2,
-  h3 {
-    &,
-    .mat-typography & {
-      margin-bottom: $s;
-      margin-top: $s * 2;
-
-      &:first-child {
-        margin-top: 0;
-        padding-top: 0;
-      }
-    }
-  }
-
-  ul {
-    margin: 0 $s;
-    padding-left: $s * 2;
-  }
-
-  > ul {
-    padding-left: $s * 2;
-  }
-
-  ul ul {
-    padding-top: 0;
-  }
-
-  .checkbox {
-    display: inline-block;
-    font-size: 20px;
-    width: 20px;
-    line-height: 1;
-    text-align: center;
-    margin-left: -28px;
-    vertical-align: middle;
-    margin-right: $s;
-  }
-
-  .checkbox-wrapper {
-    list-style: none;
-    margin-bottom: $s;
-  }
-}
+// NOTE:
+// see global marked.scss for more styles
 
 textarea {
   outline: none;
