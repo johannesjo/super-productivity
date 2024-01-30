@@ -113,13 +113,10 @@ export class InlineMarkdownComponent implements OnInit, OnDestroy {
   }
 
   toggleShowEdit($event?: MouseEvent): void {
-    // check if anchor link was clicked
-    console.log(($event?.target as any).className);
-
     if (
       !$event ||
-      (($event.target as HTMLElement).tagName !== 'A' &&
-        !($event.target as HTMLElement).className.includes('marked-checkbox'))
+      // check if anchor link was clicked
+      ($event.target as HTMLElement).tagName !== 'A'
     ) {
       this.isShowEdit = true;
       this.modelCopy = this.model || '';
