@@ -182,6 +182,7 @@
   </button>
 
   <div
+    *ngIf="tagList.length"
     [@standardList]="tagList?.length"
     [dragulaModel]="tagList"
     [dragula]="TAG_SIDE_NAV"
@@ -230,6 +231,13 @@
       </mat-menu>
     </div>
   </div>
+  <div
+    *ngIf="!tagList.length && isTagsExpanded"
+    class="no-tags-info"
+  >
+    {{T.MH.NO_TAG_INFO|translate}}
+  </div>
+
   <!--  <button (click)="addTag()"-->
   <!--          *ngIf="isTagsExpanded"-->
   <!--   #menuEntry mat-menu-item>-->

@@ -1513,6 +1513,7 @@ const T = {
       SYNC: 'MH.HM.SYNC',
     },
     MANAGE_PROJECTS: 'MH.MANAGE_PROJECTS',
+    NO_TAG_INFO: 'MH.NO_TAG_INFO',
     HELP: 'MH.HELP',
     METRICS: 'MH.METRICS',
     NOTES: 'MH.NOTES',

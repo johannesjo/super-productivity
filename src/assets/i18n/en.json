@@ -1486,6 +1486,7 @@
       "SYNC": "Howto: Configure Sync"
     },
     "MANAGE_PROJECTS": "Manage Projects",
+    "NO_TAG_INFO": "There are currently no tags. You can add tags by entering `#yourTagName` when adding or editing tasks.",
     "HELP": "Help",
     "METRICS": "Metrics",
     "NOTES": "Notes",
