@@ -46,7 +46,7 @@ export class ShepherdService {
       ) as any,
     );
     this.start();
-    // this.show('XXX' as TourId);
+    this.show('XXX' as TourId);
   }
 
   async show(id: TourId): Promise<void> {

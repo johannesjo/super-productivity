@@ -14,7 +14,7 @@ import { LS } from '../../core/persistence/storage-keys.const';
 import { KeyboardConfig } from '../config/keyboard-config.model';
 import { WorkContextService } from '../work-context/work-context.service';
 import { ShepherdService } from './shepherd.service';
-import { merge, timer } from 'rxjs';
+import { fromEvent, merge, of, timer } from 'rxjs';
 
 const PRIMARY_CLASSES = 'mat-flat-button mat-button-base mat-primary';
 const SECONDARY_CLASSES = 'mat-button mat-button-base';
@@ -236,13 +236,17 @@ export const SHEPHERD_STEPS = (
               {
                 obs: merge(
                   workContextService.todaysTasks$.pipe(filter((tt) => tt.length < 1)),
-                  timer(30, 30).pipe(
-                    map(() => {
-                      return document.querySelector(
+                  of(true).pipe(
+                    switchMap(() => {
+                      const btnEl = document.querySelector(
                         '.show-additional-info-btn.shepherd-highlight',
                       );
+                      if (btnEl) {
+                        const taskEl = (btnEl as HTMLElement).closest('task .first-line');
+                        return fromEvent(taskEl as HTMLElement, 'mouseleave');
+                      }
+                      return of(true);
                     }),
-                    filter((el) => !el),
                   ),
                 ),
               },
