@@ -35,10 +35,7 @@
               "src/manifest.json",
               "src/static"
             ],
-            "styles": [
-              "node_modules/shepherd.js/dist/css/shepherd.css",
-              "src/styles.scss"
-            ],
+            "styles": ["src/styles.scss"],
             "scripts": [],
             "webWorkerTsConfig": "src/tsconfig.worker.json"
           },
@@ -213,10 +210,7 @@
             "tsConfig": "src/tsconfig.spec.json",
             "preserveSymlinks": true,
             "karmaConfig": "src/karma.conf.js",
-            "styles": [
-              "node_modules/shepherd.js/dist/css/shepherd.css",
-              "src/styles.scss"
-            ],
+            "styles": ["src/styles.scss"],
             "scripts": [],
             "assets": ["src/favicon.ico", "src/assets", "src/manifest.json"]
           }
