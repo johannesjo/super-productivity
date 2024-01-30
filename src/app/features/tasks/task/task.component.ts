@@ -486,7 +486,7 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
           // we don't want to focus the next sub-task, but the next main task instead
           if (this.task.subTaskIds.length) {
             return taskEls.find((el, i) => {
-              return i > currentIndex && !el.parentElement!.closest('task');
+              return i > currentIndex && el.parentElement?.closest('task');
             }) as HTMLElement | undefined;
           }
           return taskEls[currentIndex + 1] as HTMLElement;
