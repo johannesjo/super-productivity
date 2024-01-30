@@ -299,14 +299,14 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
     if (this._isTaskDeleteTriggered) {
       return;
     }
-
-    this._isTaskDeleteTriggered = true;
-    this._taskService.remove(this.task);
     // NOTE: in case we want the focus behaviour on click we could use:
     // this.focusSelf();
     if (!isClick) {
       this.focusNext(true);
     }
+
+    this._isTaskDeleteTriggered = true;
+    this._taskService.remove(this.task);
   }
 
   startTask(): void {
@@ -366,15 +366,10 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
   @throttle(200, { leading: true, trailing: false })
   toggleDoneKeyboard(): void {
     this.toggleTaskDone();
-    if (!this.task.parentId) {
-      this.focusNext(true);
-    }
   }
 
   toggleTaskDone(): void {
-    if (this.task.parentId) {
-      this.focusNext(true);
-    }
+    this.focusNext(true, true);
 
     if (this.task.isDone) {
       this._taskService.setUnDone(this.task.id);
@@ -471,7 +466,10 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
     }
   }
 
-  focusNext(isFocusReverseIfNotPossible: boolean = false): void {
+  focusNext(
+    isFocusReverseIfNotPossible: boolean = false,
+    isTaskMovedInList = false,
+  ): void {
     if (IS_TOUCH_ONLY) {
       return;
     }
@@ -482,7 +480,18 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
         ? document.activeElement
         : document.activeElement?.closest('task');
     const currentIndex = taskEls.findIndex((el) => el === activeEl);
-    const nextEl = taskEls[currentIndex + 1] as HTMLElement;
+    const nextEl = isTaskMovedInList
+      ? (() => {
+          // if a parent task is moved in list, as it is for when toggling done,
+          // we don't want to focus the next sub-task, but the next main task instead
+          if (this.task.subTaskIds.length) {
+            return taskEls.find((el, i) => {
+              return i > currentIndex && !el.parentElement!.closest('task');
+            }) as HTMLElement | undefined;
+          }
+          return taskEls[currentIndex + 1] as HTMLElement;
+        })()
+      : (taskEls[currentIndex + 1] as HTMLElement);
 
     if (nextEl) {
       nextEl.focus();
@@ -881,7 +890,7 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
         ev.preventDefault();
         // same default shortcut as timeline so we stop propagation
         ev.stopPropagation();
-        this.focusNext(true);
+        this.focusNext(true, true);
         this.moveToToday();
       }
     }
