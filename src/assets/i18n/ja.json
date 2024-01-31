@@ -732,7 +732,7 @@
         "ADD_TASK_TO_TOP_OF_BACKLOG": "バックログの先頭にタスクを追加",
         "ADD_TASK_TO_TOP_OF_TODAY": "リストの一番上にタスクを追加",
         "CREATE_TASK": "新しいタスクを作成する",
-        "EXAMPLE": "例：「Some task title + projectName #some tag #some other tag 10m / 3h」",
+        "EXAMPLE": "例：「Some task title + projectName #some-tag #some-other-tag 10m / 3h」",
         "START": "もう一度Enterキーを押して開始します"
       },
       "B": {

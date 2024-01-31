@@ -663,7 +663,7 @@
         "ADD_TASK": "Add task",
         "ADD_TASK_TO_BACKLOG": "Add task to backlog",
         "CREATE_TASK": "Create new task",
-        "EXAMPLE": "Example: \"Some task title +projectName #some tag #some other tag 10m/3h\"",
+        "EXAMPLE": "Example: \"Some task title +projectName #some-tag #some-other-tag 10m/3h\"",
         "START": "Press enter one more time to start"
       },
       "B": {
