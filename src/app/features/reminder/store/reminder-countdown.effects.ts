@@ -21,7 +21,7 @@ import { Store } from '@ngrx/store';
 import { BannerService } from '../../../core/banner/banner.service';
 import { Reminder } from '../reminder.model';
 import { selectReminderConfig } from '../../config/store/global-config.reducer';
-import { EMPTY, timer } from 'rxjs';
+import { BehaviorSubject, combineLatest, EMPTY, timer } from 'rxjs';
 import { DataInitService } from '../../../core/data-init/data-init.service';
 import { TaskService } from '../../tasks/task.service';
 import { Task, TaskWithReminder } from '../../tasks/task.model';
@@ -40,8 +40,11 @@ export class ReminderCountdownEffects {
         concatMap(() => this._store.select(selectReminderConfig)),
         switchMap((reminderCfg) =>
           reminderCfg.isCountdownBannerEnabled
-            ? this._reminderService.reminders$.pipe(
-                map((reminders) => {
+            ? combineLatest([
+                this._reminderService.reminders$,
+                this._skippedReminderIds$,
+              ]).pipe(
+                map(([reminders, skippedReminderIds]) => {
                   const now = Date.now();
                   return reminders.filter(
                     (reminder) =>
@@ -49,7 +52,7 @@ export class ReminderCountdownEffects {
                       reminder.remindAt - reminderCfg.countdownDuration < now &&
                       // reminders due will show as an alert anyway
                       reminder.remindAt > now &&
-                      !this._skippedReminderIds.includes(reminder.id),
+                      !skippedReminderIds.includes(reminder.id),
                   );
                 }),
                 switchMap((dueReminders) =>
@@ -82,7 +85,7 @@ export class ReminderCountdownEffects {
     },
   );
 
-  private _skippedReminderIds: string[] = [];
+  private _skippedReminderIds$ = new BehaviorSubject<string[]>([]);
   private _currentBannerReminder?: Reminder;
 
   constructor(
@@ -98,7 +101,7 @@ export class ReminderCountdownEffects {
   ) {}
 
   private _skipReminder(reminderId: string): void {
-    this._skippedReminderIds.push(reminderId);
+    this._skippedReminderIds$.next([...this._skippedReminderIds$.getValue(), reminderId]);
   }
 
   private async _showBanner(
