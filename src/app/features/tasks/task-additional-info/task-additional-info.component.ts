@@ -155,6 +155,9 @@ export class TaskAdditionalInfoComponent implements AfterViewInit, OnDestroy {
     this.issueDataTrigger$.pipe(
       switchMap((args) => {
         if (args && args.id && args.type) {
+          if (this._taskData?.issueType === 'CALENDAR') {
+            return of(null);
+          }
           if (!this._taskData || !this._taskData.projectId) {
             throw new Error('task data not ready');
           }
@@ -170,7 +173,7 @@ export class TaskAdditionalInfoComponent implements AfterViewInit, OnDestroy {
                   ? { issueData: issueDataIfGiven, issueType: args.type }
                   : issueDataIfGiven,
               ),
-            ) as Observable<false | IssueDataAndType>;
+            ) as Observable<false | null | IssueDataAndType>;
         }
         return of(null);
       }),
