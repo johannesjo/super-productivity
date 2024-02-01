@@ -19,11 +19,11 @@ export class DialogAddNoteComponent
   extends DialogFullscreenMarkdownComponent
   implements OnDestroy
 {
-  T: typeof T = T;
-  data: { content: string };
+  override T: typeof T = T;
+  override data: { content: string };
 
   constructor(
-    public _matDialogRef: MatDialogRef<DialogAddNoteComponent>,
+    public override _matDialogRef: MatDialogRef<DialogAddNoteComponent>,
     private _noteService: NoteService,
   ) {
     const data = { content: sessionStorage.getItem(SS.NOTE_TMP) || '' };
@@ -31,7 +31,7 @@ export class DialogAddNoteComponent
     this.data = data;
   }
 
-  close(isSkipSave: boolean = false): void {
+  override close(isSkipSave: boolean = false): void {
     if (!isSkipSave && this.data.content && this.data.content.trim().length > 0) {
       this._noteService.add({ content: this.data.content }, true);
       this._clearSessionStorage();
@@ -39,7 +39,7 @@ export class DialogAddNoteComponent
     this._matDialogRef.close();
   }
 
-  ngModelChange(val: string = this.data.content || ''): void {
+  override ngModelChange(val: string = this.data.content || ''): void {
     sessionStorage.setItem(SS.NOTE_TMP, val);
   }
 
