@@ -18,6 +18,12 @@ const KEY_TO_REPLACE = [
   'originalImgPath',
   'path',
   'content',
+
+  'repo',
+  'repoFullname',
+  'filterUserName',
+  'caldavUrl',
+  'api_key',
 ];
 
 const maskString = (key: string, val: string, counter: number): string => {
