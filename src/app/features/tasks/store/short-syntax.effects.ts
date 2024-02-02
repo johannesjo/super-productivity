@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import {
+  addNewTagsFromShortSyntax,
   addTask,
   moveToOtherProject,
   scheduleTask,
@@ -28,6 +29,9 @@ import { remindOptionToMilliseconds } from '../util/remind-option-to-millisecond
 import { environment } from '../../../../environments/environment';
 import { SnackService } from '../../../core/snack/snack.service';
 import { T } from '../../../t.const';
+import { MatDialog } from '@angular/material/dialog';
+import { DialogConfirmComponent } from '../../../ui/dialog-confirm/dialog-confirm.component';
+import { LayoutService } from '../../../core-ui/layout/layout.service';
 
 @Injectable()
 export class ShortSyntaxEffects {
@@ -145,13 +149,7 @@ export class ShortSyntaxEffects {
         }
 
         if (r.newTagTitles.length) {
-          r.newTagTitles.forEach((newTagTitle) => {
-            const { action, id } = this._tagService.getAddTagActionAndId({
-              title: newTagTitle,
-            });
-            tagIds.push(id);
-            actions.push(action);
-          });
+          actions.push(addNewTagsFromShortSyntax({ task, newTitles: r.newTagTitles }));
         }
 
         if (tagIds && tagIds.length) {
@@ -175,6 +173,58 @@ export class ShortSyntaxEffects {
     ),
   );
 
+  shortSyntaxAddNewTags$: any = createEffect(() =>
+    this._actions$.pipe(
+      ofType(addNewTagsFromShortSyntax),
+      // needed cause otherwise task gets the focus after blur & hide
+      tap((v) => this._layoutService.hideAddTaskBar()),
+      concatMap(({ task, newTitles }) => {
+        return this._matDialog
+          .open(DialogConfirmComponent, {
+            restoreFocus: true,
+            autoFocus: true,
+            data: {
+              okTxt:
+                newTitles.length > 1
+                  ? T.F.TASK.D_CONFIRM_SHORT_SYNTAX_NEW_TAGS.OK
+                  : T.F.TASK.D_CONFIRM_SHORT_SYNTAX_NEW_TAG.OK,
+              message:
+                newTitles.length > 1
+                  ? T.F.TASK.D_CONFIRM_SHORT_SYNTAX_NEW_TAGS.MSG
+                  : T.F.TASK.D_CONFIRM_SHORT_SYNTAX_NEW_TAG.MSG,
+              translateParams: {
+                tagsTxt: `<strong>${newTitles.join(', ')}</strong>`,
+              },
+            },
+          })
+          .afterClosed()
+          .pipe(
+            mergeMap((isConfirm: boolean) => {
+              const actions: any[] = [];
+              if (isConfirm) {
+                const newTagIds = [...task.tagIds];
+                newTitles.forEach((newTagTitle) => {
+                  const { action, id } = this._tagService.getAddTagActionAndId({
+                    title: newTagTitle,
+                  });
+                  actions.push(action);
+                  newTagIds.push(id);
+                });
+                actions.push(
+                  updateTaskTags({
+                    task,
+                    newTagIds: unique(newTagIds),
+                    oldTagIds: task.tagIds,
+                  }),
+                );
+              }
+              return of(...actions);
+            }),
+          );
+      }),
+    ),
+  );
+
   constructor(
     private _actions$: Actions,
     private _taskService: TaskService,
@@ -182,5 +232,7 @@ export class ShortSyntaxEffects {
     private _projectService: ProjectService,
     private _globalConfigService: GlobalConfigService,
     private _snackService: SnackService,
+    private _matDialog: MatDialog,
+    private _layoutService: LayoutService,
   ) {}
 }

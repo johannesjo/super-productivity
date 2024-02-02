@@ -956,6 +956,14 @@
         "TRACK_TIME_STOP": "Pause tracking time",
         "UPDATE_ISSUE_DATA": "Update issue data"
       },
+      "D_CONFIRM_SHORT_SYNTAX_NEW_TAG": {
+        "MSG": "Do you want to create the new tag {{tagsTxt}}?",
+        "OK": "Create tag"
+      },
+      "D_CONFIRM_SHORT_SYNTAX_NEW_TAGS": {
+        "MSG": "Do you want to create the new tags {{tagsTxt}}?",
+        "OK": "Create tags"
+      },
       "D_REMINDER_ADD": {
         "CONFIRM_REPEAT_OK": "Schedule",
         "CONFIRM_REPEAT_TXT": "You're trying to schedule this repeated task to another day. Repeated tasks are usually meant to be re-created on specified days and only scheduled on that day. Do you want to proceed anyway?",

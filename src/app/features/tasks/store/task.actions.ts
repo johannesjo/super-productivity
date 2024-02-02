@@ -45,6 +45,7 @@ enum TaskActionTypes {
   'MoveToOtherProject' = '[Task] Move tasks to other project',
   'ToggleStart' = '[Task] Toggle start',
   'RoundTimeSpentForDay' = '[Task] RoundTimeSpentForDay',
+  'AddNewTagsFromShortSyntax' = '[Task] Add new tags form short syntax',
 }
 
 export const setCurrentTask = createAction(
@@ -244,5 +245,14 @@ export const roundTimeSpentForDay = createAction(
     roundTo: RoundTimeOption;
     isRoundUp: boolean;
     projectId?: string | null;
+  }>(),
+);
+
+export const addNewTagsFromShortSyntax = createAction(
+  TaskActionTypes.AddNewTagsFromShortSyntax,
+
+  props<{
+    task: Task;
+    newTitles: string[];
   }>(),
 );
