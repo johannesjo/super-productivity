@@ -1,16 +1,28 @@
-@import "src/variables";
+@import '../../../../variables';
 
 .row {
   display: flex;
-  margin-bottom: $s;
+  margin-bottom: $s * 2;
   padding-bottom: $s;
-  //border-bottom: 1px dashed $light-theme-extra-border-color;
+  border: 1px solid $light-theme-extra-border-color;
+  padding: $s * 2;
+  padding-top: 0;
+  box-shadow: $whiteframe-shadow-2dp;
+  border-radius: 4px;
+  position: relative;
 
   @include darkTheme() {
+    background: $dark-theme-bg-slightly-lighter;
     border-color: $dark-theme-extra-border-color;
   }
 }
 
 .field {
   flex-grow: 1;
+}
+
+.remove-btn {
+  position: absolute;
+  right: $s;
+  top: $s;
 }
