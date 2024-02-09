@@ -27,6 +27,7 @@ export const shortSyntax = (
   task: Task | Partial<Task>,
   allTags?: Tag[],
   allProjects?: Project[],
+  now = new Date(),
 ):
   | {
       taskChanges: Partial<Task>;
@@ -47,7 +48,7 @@ export const shortSyntax = (
 
   // NOTE: we do this twice... :-O ...it's weird, but required to make whitespaces work as separator and not as one
   taskChanges = parseTimeSpentChanges(task);
-  const changesForScheduledDate = parseScheduledDate(task);
+  const changesForScheduledDate = parseScheduledDate(task, now);
   taskChanges = {
     ...taskChanges,
     ...changesForScheduledDate,
@@ -239,15 +240,14 @@ const parseTagChanges = (
   };
 };
 
-const parseScheduledDate = (task: Partial<TaskCopy>): Partial<Task> => {
+const parseScheduledDate = (task: Partial<TaskCopy>, now: Date): Partial<Task> => {
   if (!task.title) {
     return {};
   }
   const rr = task.title.match(SHORT_SYNTAX_DUE_REG_EX);
 
   if (rr && rr[0]) {
-    const now = new Date();
-    const parsedDateArr = customDateParser.parse(task.title, new Date(), {
+    const parsedDateArr = customDateParser.parse(task.title, now, {
       forwardDate: true,
     });
 

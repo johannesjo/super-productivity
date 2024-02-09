@@ -47,8 +47,9 @@ const ALL_TAGS: Tag[] = [
 
 const getPlannedDateTimestampFromShortSyntaxReturnValue = (
   taskInput: TaskCopy,
+  now: Date = new Date(),
 ): number => {
-  const r = shortSyntax(taskInput);
+  const r = shortSyntax(taskInput, undefined, undefined, now);
   const parsedDateInMilliseconds = r?.taskChanges?.plannedAt as number;
   return parsedDateInMilliseconds;
 };
@@ -192,13 +193,46 @@ describe('shortSyntax', () => {
         ...TASK,
         title: 'Test @Friday',
       };
-      const parsedDateInMilliseconds =
-        getPlannedDateTimestampFromShortSyntaxReturnValue(t);
+      const now = new Date('Fri Feb 09 2024 13:31:29 ');
+      const parsedDateInMilliseconds = getPlannedDateTimestampFromShortSyntaxReturnValue(
+        t,
+        now,
+      );
       const parsedDate = new Date(parsedDateInMilliseconds);
       // 5 represents Friday
       expect(parsedDate.getDay()).toEqual(5);
-      const now = new Date();
-      const nextFriday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      const dayIncrement = 7;
+      // If today happens to be Friday, the parsed date will be the next Friday,
+      // 7 days from today
+      const nextFriday = new Date(
+        now.getFullYear(),
+        now.getMonth(),
+        now.getDate() + dayIncrement,
+      );
+      const isDateSetCorrectly = checkSameDay(parsedDate, nextFriday);
+      expect(isDateSetCorrectly).toBeTrue();
+    });
+
+    it('should correctly parse day of the week', () => {
+      const t = {
+        ...TASK,
+        title: 'Test @Friday',
+      };
+      const now = new Date('Fri Feb 09 2024 11:31:29 ');
+      const parsedDateInMilliseconds = getPlannedDateTimestampFromShortSyntaxReturnValue(
+        t,
+        now,
+      );
+      const parsedDate = new Date(parsedDateInMilliseconds);
+      expect(parsedDate.getDay()).toEqual(5);
+      const dayIncrement = 0;
+      // If today happens to be Friday, the parsed date will be the next Friday,
+      // 7 days from today only when after 12
+      const nextFriday = new Date(
+        now.getFullYear(),
+        now.getMonth(),
+        now.getDate() + dayIncrement,
+      );
       const isDateSetCorrectly = checkSameDay(parsedDate, nextFriday);
       expect(isDateSetCorrectly).toBeTrue();
     });
