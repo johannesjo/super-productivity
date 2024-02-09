@@ -1,3 +1,19 @@
+# [8.0.0](https://github.com/johannesjo/super-productivity/compare/v8.0.0-rc.0...v8.0.0) (2024-02-09)
+
+### Bug Fixes
+
+- privacy export not masking all the properties [#3005](https://github.com/johannesjo/super-productivity/issues/3005) ([632b0cb](https://github.com/johannesjo/super-productivity/commit/632b0cbf557f7c524c9244bd0f7da50dddfa5f6f))
+- redmine initial dialog btn ([fc7ef3f](https://github.com/johannesjo/super-productivity/commit/fc7ef3f9bf18b96d1c60867215c6bc2424f8658c))
+- **reminderCountdown:** not reacting right away to skipped reminders ([b8ef950](https://github.com/johannesjo/super-productivity/commit/b8ef9509b7d5bc8b2839d3099750a095ac611eb3))
+- task data not ready for calendar issue tasks [#3004](https://github.com/johannesjo/super-productivity/issues/3004) ([d7124ca](https://github.com/johannesjo/super-productivity/commit/d7124cabb4dcad6f1904769a7e021060ee24a293))
+- **tour:** weird modal container pushing content bug ([60a3423](https://github.com/johannesjo/super-productivity/commit/60a34233b0dd9e32cd23eb40140384efe1fb252c))
+- wrong short syntax style ([17cdbfe](https://github.com/johannesjo/super-productivity/commit/17cdbfebe11de055e415944cd91a8255f6bcb495))
+
+### Features
+
+- improve repeat section styling ([0cbdb1c](https://github.com/johannesjo/super-productivity/commit/0cbdb1c789c64a22836417c6a6195e2a1b0695c9))
+- **shortSyntax:** ask before creating new tags ([d362783](https://github.com/johannesjo/super-productivity/commit/d36278331ebcaceb9d78e11ce78a47f096c4dc90))
+
 # [8.0.0-rc.0](https://github.com/johannesjo/super-productivity/compare/v7.17.2...v8.0.0-rc.0) (2024-01-31)
 
 ### Bug Fixes
