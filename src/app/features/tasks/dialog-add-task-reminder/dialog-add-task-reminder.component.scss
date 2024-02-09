@@ -6,7 +6,7 @@
   justify-content: stretch;
   align-items: stretch;
 
-  :host-context([dir=rtl]) {
+  :host-context([dir='rtl']) {
     direction: rtl;
   }
 }
@@ -57,16 +57,21 @@
   .additional-controls {
     padding-top: $s;
     // same as $owl-divider-color
-    border-top: 1px solid rgba(0, 0, 0, .12);
+    border-top: 1px solid rgba(0, 0, 0, 0.12);
     @include darkTheme(true) {
       // same as $owl-dark-divider-color
-      border-color: rgba(255, 255, 255, .12);
+      border-color: rgba(255, 255, 255, 0.12);
     }
   }
 
   .move-to-backlog-wrapper,
   mat-form-field {
     margin: 0 $s;
+  }
+
+  .move-to-backlog-wrapper {
+    // somehow fixes scrollbar issue???
+    margin-bottom: 8px;
   }
 }
 
