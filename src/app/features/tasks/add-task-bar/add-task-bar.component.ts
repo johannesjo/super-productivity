@@ -38,7 +38,7 @@ import { TagService } from '../../tag/tag.service';
 import { ProjectService } from '../../project/project.service';
 import { Tag } from '../../tag/tag.model';
 import { Project } from '../../project/project.model';
-import { shortSyntaxToTags } from './short-syntax-to-tags.util';
+import { shortSyntaxToTags } from './short-syntax-to-tags';
 import { slideAnimation } from '../../../ui/animations/slide.ani';
 import { blendInOutAnimation } from 'src/app/ui/animations/blend-in-out.ani';
 import { fadeAnimation } from '../../../ui/animations/fade.ani';

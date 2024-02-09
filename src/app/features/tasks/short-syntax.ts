@@ -5,8 +5,7 @@ import { stringToMs } from '../../ui/duration/string-to-ms.pipe';
 import { Tag } from '../tag/tag.model';
 import { Project } from '../project/project.model';
 
-export const SHORT_SYNTAX_TIME_REG_EX =
-  / t?(([0-9]+(m|h|d)+)? *\/ *)?([0-9]+(m|h|d)+) *$/i;
+const SHORT_SYNTAX_TIME_REG_EX = / t?(([0-9]+(m|h|d)+)? *\/ *)?([0-9]+(m|h|d)+) *$/i;
 // NOTE: should come after the time reg ex is executed so we don't have to deal with those strings too
 
 const CH_PRO = '+';
@@ -16,19 +15,13 @@ const ALL_SPECIAL = `(\\${CH_PRO}|\\${CH_TAG}|\\${CH_DUE})`;
 
 const customDateParser = chrono.casual.clone();
 
-export const SHORT_SYNTAX_PROJECT_REG_EX = new RegExp(
-  `\\${CH_PRO}[^${ALL_SPECIAL}]+`,
-  'gi',
-);
-export const SHORT_SYNTAX_TAGS_REG_EX = new RegExp(
-  `\\${CH_TAG}[^${ALL_SPECIAL}|\\s]+`,
-  'gi',
-);
+const SHORT_SYNTAX_PROJECT_REG_EX = new RegExp(`\\${CH_PRO}[^${ALL_SPECIAL}]+`, 'gi');
+const SHORT_SYNTAX_TAGS_REG_EX = new RegExp(`\\${CH_TAG}[^${ALL_SPECIAL}|\\s]+`, 'gi');
 
 // Literal notation: /\@[^\+|\#|\@]/gi
 // Match string starting with the literal @ and followed by 1 or more of the characters
 // not in the ALL_SPECIAL
-export const SHORT_SYNTAX_DUE_REG_EX = new RegExp(`\\${CH_DUE}[^${ALL_SPECIAL}]+`, 'gi');
+const SHORT_SYNTAX_DUE_REG_EX = new RegExp(`\\${CH_DUE}[^${ALL_SPECIAL}]+`, 'gi');
 
 export const shortSyntax = (
   task: Task | Partial<Task>,
@@ -257,15 +250,17 @@ const parseScheduledDate = (task: Partial<TaskCopy>): Partial<Task> => {
     const parsedDateArr = customDateParser.parse(task.title, new Date(), {
       forwardDate: true,
     });
+
     if (parsedDateArr.length) {
       const parsedDateResult = parsedDateArr[0];
       console.log({ parsedDateResult });
       const start = parsedDateResult.start;
       let plannedAt = start.date().getTime();
       // If user doesn't explicitly enter time, set the scheduled date
-      // to 23:59:59 of the given day
+      // to 9:00:00 of the given day
+
       if (!start.isCertain('hour')) {
-        plannedAt = start.date().setHours(23, 59, 59);
+        plannedAt = start.date().setHours(9, 0, 0, 0);
       } else if (start.date().getTime() < now.getTime()) {
         plannedAt = start.date().setDate(start.date().getDate() + 1);
       }
@@ -308,29 +303,3 @@ const parseTimeSpentChanges = (task: Partial<TaskCopy>): Partial<Task> => {
 
   return {};
 };
-
-// const parseDueChanges = (task: Partial<TaskCopy>): {
-//   title?: string;
-//   remindAt?: number;
-// } => {
-//   if (!task.title) {
-//     return {};
-//   }
-//
-//   const matches = SHORT_SYNTAX_DUE_REG_EX.exec(task.title);
-//   console.log(matches);
-//
-//   if (matches && matches[0]) {
-//     const dateStr = matches[0].replace(CH_DUE, '');
-//     console.log(dateStr);
-//     const m = moment(dateStr);
-//     if (m.isValid()) {
-//       const title = task.title.replace(matches[0], '');
-//       console.log(m);
-//       console.log(title);
-//     } else {
-//       // TODO parse clock string here
-//     }
-//   }
-//   return {};
-// };

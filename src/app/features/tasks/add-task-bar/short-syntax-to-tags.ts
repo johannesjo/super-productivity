@@ -1,4 +1,4 @@
-import { shortSyntax } from '../short-syntax.util';
+import { shortSyntax } from '../short-syntax';
 import { msToString } from '../../../ui/duration/ms-to-string.pipe';
 import { DEFAULT_TODAY_TAG_COLOR } from '../../work-context/work-context.const';
 import { Tag } from '../../tag/tag.model';

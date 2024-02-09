@@ -1,5 +1,5 @@
 import { ShowSubTasksMode, TaskCopy } from './task.model';
-import { shortSyntax } from './short-syntax.util';
+import { shortSyntax } from './short-syntax';
 import { getWorklogStr } from '../../util/get-work-log-str';
 import { Tag } from '../tag/tag.model';
 import { DEFAULT_TAG } from '../tag/tag.const';
@@ -45,7 +45,9 @@ const ALL_TAGS: Tag[] = [
   { ...DEFAULT_TAG, id: 'multi_word_id', title: 'Multi Word Tag' },
 ];
 
-const getPlannedDateTimestamp = (taskInput: TaskCopy): number => {
+const getPlannedDateTimestampFromShortSyntaxReturnValue = (
+  taskInput: TaskCopy,
+): number => {
   const r = shortSyntax(taskInput);
   const parsedDateInMilliseconds = r?.taskChanges?.plannedAt as number;
   return parsedDateInMilliseconds;
@@ -170,7 +172,8 @@ describe('shortSyntax', () => {
         ...TASK,
         title: 'Test @4pm',
       };
-      const parsedDateInMilliseconds = getPlannedDateTimestamp(t);
+      const parsedDateInMilliseconds =
+        getPlannedDateTimestampFromShortSyntaxReturnValue(t);
       const parsedDate = new Date(parsedDateInMilliseconds);
       const now = new Date();
       if (now.getHours() > 16 || (now.getHours() === 16 && now.getMinutes() > 0)) {
@@ -189,7 +192,8 @@ describe('shortSyntax', () => {
         ...TASK,
         title: 'Test @Friday',
       };
-      const parsedDateInMilliseconds = getPlannedDateTimestamp(t);
+      const parsedDateInMilliseconds =
+        getPlannedDateTimestampFromShortSyntaxReturnValue(t);
       const parsedDate = new Date(parsedDateInMilliseconds);
       // 5 represents Friday
       expect(parsedDate.getDay()).toEqual(5);
@@ -612,7 +616,8 @@ describe('shortSyntax', () => {
         ...TASK,
         title: taskInput,
       };
-      const parsedDateInMilliseconds = getPlannedDateTimestamp(t);
+      const parsedDateInMilliseconds =
+        getPlannedDateTimestampFromShortSyntaxReturnValue(t);
       const parsedDate = new Date(parsedDateInMilliseconds);
       // The parsed day and time should be Friday, or 5, and time is 16 hours and 0 minute
       expect(parsedDate.getDay()).toEqual(5);
@@ -635,7 +640,7 @@ describe('shortSyntax', () => {
         ...TASK,
         title: 'Test @fri 4pm #html #css',
       };
-      const plannedTimestamp = getPlannedDateTimestamp(t);
+      const plannedTimestamp = getPlannedDateTimestampFromShortSyntaxReturnValue(t);
       const isPlannedDateAndTimeCorrect = checkIfCorrectDateAndTime(
         plannedTimestamp,
         'friday',

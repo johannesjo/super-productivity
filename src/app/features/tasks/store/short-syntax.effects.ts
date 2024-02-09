@@ -24,7 +24,7 @@ import { TaskService } from '../task.service';
 import { EMPTY, Observable, of } from 'rxjs';
 import { ProjectService } from '../../project/project.service';
 import { TagService } from '../../tag/tag.service';
-import { shortSyntax } from '../short-syntax.util';
+import { shortSyntax } from '../short-syntax';
 import { remindOptionToMilliseconds } from '../util/remind-option-to-milliseconds';
 import { environment } from '../../../../environments/environment';
 import { SnackService } from '../../../core/snack/snack.service';
