@@ -198,24 +198,7 @@ describe('shortSyntax', () => {
       // 5 represents Friday
       expect(parsedDate.getDay()).toEqual(5);
       const now = new Date();
-      const todayInNumber = now.getDay();
-      let dayIncrement = 0;
-      // If today happens to be Friday, the parsed date will be the next Friday,
-      // 7 days from today
-      if (todayInNumber === 5) {
-        dayIncrement = 7;
-      } else {
-        if (todayInNumber < 5) {
-          dayIncrement = 5 - todayInNumber;
-        } else {
-          dayIncrement = 7 - todayInNumber + 5;
-        }
-      }
-      const nextFriday = new Date(
-        now.getFullYear(),
-        now.getMonth(),
-        now.getDate() + dayIncrement,
-      );
+      const nextFriday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
       const isDateSetCorrectly = checkSameDay(parsedDate, nextFriday);
       expect(isDateSetCorrectly).toBeTrue();
     });
