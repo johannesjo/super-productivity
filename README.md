@@ -1,4 +1,7 @@
 [![Stand With Ukraine](https://raw.githubusercontent.com/vshymanskyy/StandWithUkraine/main/banner2-direct.svg)](https://vshymanskyy.github.io/StandWithUkraine)
+<a href="https://github.com/Safouene1/support-palestine-banner">
+  <img alt="Stand With Palestine" src="https://raw.githubusercontent.com/Safouene1/support-palestine-banner/master/banner-support.svg" width="100%">
+</a>
 
 <a href="https://super-productivity.com/">
   <img align="center" alt="Banner" src="screens/banner-bw.png" />
