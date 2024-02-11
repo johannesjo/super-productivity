@@ -1,4 +1,4 @@
-name: Manual Build Windows Release
+name: Manual Build Windows Release & Mac
 on:
   workflow_dispatch:
     inputs:
