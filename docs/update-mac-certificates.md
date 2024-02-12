@@ -17,10 +17,12 @@ Mac access required!
 
 # Profiles
 
+IMPORTANT NOTE: These must be created after the certificate step, since they include the certificates!
+
 1. Go to https://developer.apple.com/account/resources/profiles/list
-2. Create new "Mac App Store" (store) and "Developer ID" (dmg) Profile
+2. Create new "Mac App Store Connect" (store) and "Developer ID" (dmg) Profile
 3. Download and move to tools/mac-profiles (HINT: take care that the IDE or editor does not mess up the white-spaces) and rename them to `dl.provisionprofile` and `mas.provisionprofile`.
-4. Use `base64 -i dl.provisionprofile -o dmg-profile.txt` and `base64 -i mas.provisionprofile -o MAS-profile.txt` to get string for CI
+4. Use `base64 -i dl.provisionprofile -o dmg-profile.txt && base64 -i mas.provisionprofile -o MAS-profile.txt` to get string for CI
 5. Update `DL_PROVISION_PROFILE` and `MAS_PROVISION_PROFILE`
 
 See:
