@@ -137,6 +137,11 @@ jobs:
           API_KEY_ID: ${{ secrets.mac_api_key_id }}
           API_KEY_ISSUER_ID: ${{ secrets.mac_api_key_issuer_id }}
 
-      - name: notary log
-        if: always()
-        run: ls -la && cat notarization-error.log
+      # - name: notary log
+      #  if: always()
+      # run: ls -la && cat notarization-error.log
+      - name: 'Upload Artifact'
+        uses: actions/upload-artifact@v3
+        with:
+          name: dmg
+          path: app-builds/*.dmg
