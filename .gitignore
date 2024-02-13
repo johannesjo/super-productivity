@@ -62,6 +62,7 @@ electron/**/*.js.map
 # mac os deployment
 *.provisionprofile
 *.Xprovisionprofile
+tools/mac-profiles
 all-certs.p12
 mac-cert.tar
 build/electron-builder.appx.yaml
