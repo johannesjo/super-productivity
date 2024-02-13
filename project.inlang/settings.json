@@ -1,0 +1,38 @@
+{
+    "$schema": "https://inlang.com/schema/project-settings",
+    "sourceLanguageTag": "en",
+    "languageTags": [
+      "ar",
+      "cz",
+      "de",
+      "en",
+      "es",
+      "fa",
+      "fr",
+      "hr",
+      "id",
+      "it",
+      "ja",
+      "ko",
+      "nb",
+      "nl",
+      "pl",
+      "pt",
+      "ru",
+      "sk",
+      "tr",
+      "zh",
+      "zh-tw"
+    ],
+    "modules": [
+      "https://cdn.jsdelivr.net/npm/@inlang/plugin-json@4/dist/index.js",
+      "https://cdn.jsdelivr.net/npm/@inlang/message-lint-rule-empty-pattern@latest/dist/index.js",
+      "https://cdn.jsdelivr.net/npm/@inlang/message-lint-rule-identical-pattern@latest/dist/index.js",
+      "https://cdn.jsdelivr.net/npm/@inlang/message-lint-rule-missing-translation@latest/dist/index.js",
+      "https://cdn.jsdelivr.net/npm/@inlang/message-lint-rule-without-source@latest/dist/index.js"
+    ],
+    "plugin.inlang.json": {
+      "pathPattern": "./src/assets/i18n/{languageTag}.json"
+    }
+}
+
