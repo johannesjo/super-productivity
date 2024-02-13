@@ -11,7 +11,7 @@ Mac access required!
 - (???) Mac Installer Distribution => Distribute to store
 
 2. Import new certificates into keychain
-3. Use mac "Keychain Access" app to generate `all-certs.cer` from all 3 certs and the 3 key private keys: `Mac Installer Submission`, `Apple Distribution`, `Apple Development`, `3rd Party Mac Developer Installer`, `Apple Distribution`, `Apple Development` and remember to copy certs password to GitHub ENV. ALSO DON'T WORRY! YOU NEED TO ENTER YOUR PASSWORD ABOUT 7 TIMES.
+3. Use mac "Keychain Access" app to generate `all-certs.cer` from all 4 certs and the 3 key private keys: `Mac Installer Submission`, `Apple Distribution`, `Apple Development`, `3rd Party Mac Developer Installer`, `Apple Distribution`, `Apple Development` and `Developer ID Application` (maybe 2 of the certs and 1 of the keys is not needed) and remember to copy certs password to GitHub ENV. ALSO DON'T WORRY! YOU NEED TO ENTER YOUR PASSWORD ABOUT 7 TIMES. HINT: Select "My Certificates" from tab-bar to show what certificate belongs to which key.
 4. `base64 -i all-certs.p12 -o all-certs.txt`
 5. Update `MAC_CERTS` with value
 
