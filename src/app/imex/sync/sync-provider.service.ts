@@ -191,6 +191,11 @@ export class SyncProviderService {
       local = await this._persistenceService.getValidCompleteData();
       if (lastSync === local.lastLocalSyncModelChange) {
         this._log(cp, 'PRE1: No local changes to sync');
+        this._snackService.open({
+          type: 'SUCCESS',
+          msg: T.F.SYNC.S.ALREADY_IN_SYNC_NO_LOCAL_CHANGES,
+          config: { duration: 1600 },
+        });
         return 'NO_UPDATE_REQUIRED';
       }
     }
@@ -262,6 +267,11 @@ export class SyncProviderService {
     switch (checkForUpdate(timestamps)) {
       case UpdateCheckResult.InSync: {
         this._log(cp, '↔ In Sync => No Update');
+        this._snackService.open({
+          type: 'SUCCESS',
+          msg: T.F.SYNC.S.ALREADY_IN_SYNC,
+          config: { duration: 1600 },
+        });
         return 'NO_UPDATE_REQUIRED';
       }
 
