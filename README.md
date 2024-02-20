@@ -238,6 +238,8 @@ There are several ways to help.
 
 [![inlang status badge](https://badge.inlang.com/?url=github.com/johannesjo/super-productivity)](https://fink.inlang.com/github.com/johannesjo/super-productivity?ref=badge)
 
+You can use the Fink Localization Editor to edit, lint, and add translations for different languages. [Contribute via fink Guide](https://inlang.com/g/6ddyhpoi).
+
 9. **[Sponsor the project](https://github.com/sponsors/johannesjo)**
 
 ### Running the development server
