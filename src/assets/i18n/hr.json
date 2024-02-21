@@ -119,6 +119,19 @@
         "ISSUE_NOT_FOUND": "CalDav: Čini se da je zadatak „{{issueId}}” izbrisan s poslužitelja."
       }
     },
+    "CALENDARS": {
+      "BANNER": {
+        "TXT": "<strong>{{title}}</strong> počinje <strong>{{start}}</strong>!",
+        "TXT_MULTIPLE": "<strong>{{title}}</strong> počinje <strong>{{start}}</strong>!<br> (i {{nrOfOtherBanners}} druga događaja su u tijeku)",
+        "TXT_PAST": "<strong>{{title}}</strong> je počeo <strong>{{start}}</strong>!",
+        "TXT_PAST_MULTIPLE": "<strong>{{title}}</strong> je počeo <strong>{{start}}</strong>!<br> (i {{nrOfOtherBanners}} druga događaja su u tijeku)",
+        "ADD_AS_TASK": "Dodaj kao zadatak",
+        "FOCUS_TASK": "Fokusiraj zadatak"
+      },
+      "S": {
+        "CAL_PROVIDER_ERROR": "Greška puržatelja kalendara: {{errTxt}}"
+      }
+    },
     "CONFIG": {
       "S": {
         "UPDATE_SECTION": "Aktualizirane postavke za <strong>{{sectionKey}}</strong>"
@@ -139,6 +152,32 @@
         "FINISH_DAY_BEFORE_EXIT": "Broj obavljenih zadataka u tvom popisu za danas koji još nisu premješteni u arhivu: {{nr}}. Želiš li stvarno zatvoriti program bez završavanja tvog dana?"
       }
     },
+    "FOCUS_MODE": {
+      "BACK_TO_PLANNING": "Natrag na planiranje",
+      "CANCEL_FOCUS_SESSION": "Otkaži sesiju fokusa",
+      "CONGRATS": "Čestitamo na obavljanju ove sesije!",
+      "CONTINUE_FOCUS_SESSION": "Nastavi sesiju fokusa",
+      "FINISH_TASK_AND_SELECT_NEXT": "Završi zadatak i odaberi sljedeći",
+      "GET_READY": "Pripremi se za tvoju sesiju fokusa!!!",
+      "GOGOGO": "Kreni!!!",
+      "GO_TO_PROCRASTINATION": "Dobij pomoć kad odugovlačiš",
+      "NEXT": "Sljedeći",
+      "ON": "na",
+      "OPEN_ISSUE_IN_BROWSER": "Otvori problem u pregledniku",
+      "POMODORO_BACK": "Natrag",
+      "POMODORO_DISABLE": "Deaktiviraj Pomodoro",
+      "POMODORO_INFO": "Sesije fokusiranja se ne mogu koristiti zajedno s aktiviranim timerom.",
+      "PREP_STRETCH": "Malo se protegni",
+      "PREP_SIT_UPRIGHT": "Sjedni (ili ustani) uspravno",
+      "PREP_GET_MENTALLY_READY": "Mentalno se pripremi na fokusiran i produktivan rad",
+      "SELECT_ANOTHER_TASK": "Odaberi jedan drugi zadatak",
+      "SELECT_TASK": "Odaberi zadatak na koji se želiš fokusirati",
+      "SET_FOCUS_SESSION_DURATION": "Postavi trajanje sesije fokusa",
+      "SHOW_HIDE_NOTES_AND_ATTACHMENTS": "Prikaži/Sakrij bilješke zadataka i priloge",
+      "START_FOCUS_SESSION": "Pokreni sesiju fokusa",
+      "START_NEXT_FOCUS_SESSION": "Pokreni sljedeću sesiju fokusa",
+      "WORKED_FOR": "Radio/la si"
+    },
     "GITEA": {
       "DIALOG_INITIAL": {
         "TITLE": "Postavi Gitea za projekt"
@@ -150,7 +189,6 @@
         "IS_SEARCH_ISSUES_FROM_GITEA": "Prikaži git probleme kao prijedloge prilikom dodavanja novih zadataka",
         "HOST": "Host računalo (npr.: https://try.gitea.io)",
         "TOKEN": "Token za pristup",
-        "TOKEN_DESCRIPTION": "Potreban je za pristup privatnom repozitoriju",
         "REPO_FULL_NAME": "Korisničko ime ili ime organizacije/projekta",
         "REPO_FULL_NAME_DESCRIPTION": "Može se pronaći kao dio url-a prilikom pregledavanja projekta u pregledniku.",
         "SCOPE": "Opseg",
@@ -249,6 +287,14 @@
       "DIALOG_INITIAL": {
         "TITLE": "Postavi GitLab za projekt"
       },
+      "DIALOG_SUBMIT_WORKLOG": {
+        "PAST_DAY_INFO": "Unaprijed zapisano trajanje sadrži nepraćene podatke od prošlih dana.",
+        "TITLE": "Pošalji vrijeme provedeno u rješavanju problema na GitLab",
+        "T_ALREADY_TRACKED": "Već je pračeno",
+        "T_TITLE": "Naslov",
+        "T_TO_BE_SUBMITTED": "Podložno podnošenju",
+        "TOTAL_MSG": "Poslat ćeš <em>{{totalTimeToSubmit}}</em> ukupnog radnog vremena za danas <em>{{nrOfTasksToSubmit}}</em> različitim problemima."
+      },
       "FORM": {
         "FILTER_USER": "Korisničko ime (npr. za izdvajanje vlastitih promjena)",
         "GITLAB_BASE_URL": "Prilagođeni osnovni GitLab URL (opcionalno)",
@@ -264,7 +310,11 @@
         "SOURCE_GLOBAL": "Sve",
         "SOURCE_GROUP": "Grupa",
         "SOURCE_PROJECT": "Projekt",
-        "TOKEN": "Token za pristup"
+        "SUBMIT_TIMELOGS": "Pošalji vremenske zapise na Gitlab",
+        "SUBMIT_TIMELOGS_DESCRIPTION": "Prikaži dijalog evidentiranja vremena nakon pritiska na gumb „Završi dan”",
+        "TOKEN": "Token za pristup",
+        "FILTER": "Prilagođeni filtar",
+        "FILTER_DESCRIPTION": "Pogledaj https://docs.gitlab.com/ee/api/issues.html#list-issues. Višestruki se mogu združiti sa znakom „&”"
       },
       "FORM_SECTION": {
         "HELP": "<p>Ovdje možeš konfigurirati Super Productivity za prikaz popisa nezavršenih GitLab problema (online verzija ili instanca vlastitog histinga) za određeni projekt na ploči za stvaranje zadataka u prikazu dnevnog planiranja. U popisu će se ti problemi navesti kao prijedlozi s poveznicom na problem te s daljnjim informacija o problemu.</p> <p>Osim toga, sve neriješene probleme možeš automatski dodati u odlagalište zadataka i sinkronizirati ih.</p>",
@@ -285,7 +335,17 @@
         "ERR_UNKNOWN": "GitLab: Nepoznata greška {{statusCode}} {{errorMsg}}"
       }
     },
+    "DOMINA_MODE": {
+      "FORM": {
+        "HELP": "Ponavlja konfiguriranu frazu svakih X tijekom praćenja vremena zadatka.",
+        "L_INTERVAL": "Interval za ponavljanje fraze",
+        "L_TEXT": "Tekst",
+        "L_TEXT_DESCRIPTION": "Npr.: \"Rad na zadatku ${currentTaskTitle}!\"",
+        "TITLE": "Domina modus"
+      }
+    },
     "ISSUE": {
+      "HOW_TO_GET_A_TOKEN": "Kako dobiti token?",
       "DEFAULT": {
         "ISSUES_STR": "problemi",
         "ISSUE_STR": "problem"
@@ -622,7 +682,9 @@
         "L3": "Na što te podsjećaju?",
         "L4": "Što se događa tijekom pomisli o odgađanju? Pojačava li se? Raspršuje se? Izaziva druge emocije?",
         "L5": "Kako se mijenjanju osjećaji u tvom tijelu dok se i dalje fokusiraš na njih?",
-        "TITLE": "Znatiželja"
+        "TITLE": "Znatiželja",
+        "PROCRASTINATION_TRIGGERS_TITLE": "Zapisivanje tvojih okidače odugovlačenja",
+        "PROCRASTINATION_TRIGGERS_TEXT": "Još jedna vrlo učinkovita metoda je zapisivanje onoga što te je natjeralo da odugovlačiš. Na primjer, osobno često imam potrebu za brzim prelaskom na reddit ili moju omiljenu stranicu s vijestima kad god mi se prikaže prozor preglednika. Otkako sam počeo zapisivati svoje okidače u prazan tekstualni dokument, shvatio sam problematiku i to mi je pomoglo u eksperimentiranju s različitim protumjerama."
       },
       "H1": "Oslobodi se pritiska!",
       "INTRO": {
@@ -659,6 +721,7 @@
         "SETUP_REDMINE_PROJECT": "Postavi Redmine integraciju"
       },
       "FORM_BASIC": {
+        "L_ENABLE_BACKLOG": "Aktiviraj zapise projekta",
         "L_IS_HIDDEN_FROM_MENU": "Sakrij projekt iz izbornika",
         "L_TITLE": "Ime projekta",
         "TITLE": "Osnovne ostavke"
@@ -698,7 +761,13 @@
       "WEEK_TITLE": "{{nr}}. tjedan ({{timeSpent}})"
     },
     "REMINDER": {
-      "S_REMINDER_ERR": "Greška za sučelje podsjetnika"
+      "S_REMINDER_ERR": "Greška za sučelje podsjetnika",
+      "COUNTDOWN_BANNER": {
+        "START_NOW": "Pokreni sada",
+        "HIDE": "Sakrij",
+        "TXT": "<strong>{{title}}</strong> počinje <strong>{{start}}</strong>!",
+        "TXT_MULTIPLE": "<strong>{{title}}</strong> počinje <strong>{{start}}</strong>!<br> (i {{nrOfOtherBanners}} drugih zadataka u tijeku)"
+      }
     },
     "SEARCH_BAR": {
       "INFO": "Pritisni ikonu popisa za traženje arhiviranih zadataka",
@@ -791,6 +860,8 @@
         }
       },
       "S": {
+        "ALREADY_IN_SYNC": "Već je sinkronizirano",
+        "ALREADY_IN_SYNC_NO_LOCAL_CHANGES": "Nema lokalnih promjena – Već je sinkronizirano",
         "ERROR_FALLBACK_TO_BACKUP": "Greška tijekom sinkronizacije uvoza podataka. Obnavlja se lokalna sigurnosna kopija.",
         "ERROR_INVALID_DATA": "Greška tijekom sinkronizacije. Neispravni podaci",
         "IMPORTING": "Uvoz podataka",
@@ -849,7 +920,9 @@
         "ADD_TASK_TO_TOP_OF_TODAY": "Dodaj zadatak na vrh popisa",
         "CREATE_TASK": "Stvori novi zadatak",
         "EXAMPLE": "Primjer: „Naslov nekog zadatka +ime projekta #jedna oznaka #jedna druga oznaka 10 m/3 h”",
-        "START": "Za pokretanje pritisni tipku enter još jednom"
+        "START": "Za pokretanje pritisni tipku enter još jednom",
+        "TOGGLE_ADD_TO_BACKLOG_TODAY": "Toggle adding task to backlog / today's list'",
+        "TOGGLE_ADD_TOP_OR_BOTTOM": "Toggle adding task to top & bottom of list"
       },
       "B": {
         "ADD_HALF_HOUR": "Dodaj pola sata",
@@ -884,6 +957,14 @@
         "TRACK_TIME": "Počni pratiti vrijeme",
         "TRACK_TIME_STOP": "Zaustavi praćenje vremena",
         "UPDATE_ISSUE_DATA": "Aktualiziraj podatke problema"
+      },
+      "D_CONFIRM_SHORT_SYNTAX_NEW_TAG": {
+        "MSG": "Želiš li stvoriti novu oznaku {{tagsTxt}}?",
+        "OK": "Stvori oznaku"
+      },
+      "D_CONFIRM_SHORT_SYNTAX_NEW_TAG": {
+        "MSG": "Želiš li stvoriti novu oznaku {{tagsTxt}}?",
+        "OK": "Stvori oznaku"
       },
       "D_REMINDER_ADD": {
         "CONFIRM_REPEAT_OK": "Terminiraj",
@@ -1051,9 +1132,6 @@
       "MENU_TITLE": "Vremenska traka",
       "NOW": "Sada",
       "NO_TASKS": "Trenutačno nema zadataka. Dodaj zadatke putem gumba + u gornjoj traci.",
-      "S": {
-        "CAL_PROVIDER_ERROR": "Greška vremenske trake pružatelja usluge za Cal: {{errTxt}}"
-      },
       "START": "Početak rada",
       "TASK_PROJECTION_INFO": "Projekcija u budućnosti terminiranog ponavljajućeg zadatka"
     },
@@ -1083,23 +1161,11 @@
         "TRACK_TO": "Prati za"
       },
       "D_TRACKING_REMINDER": {
-        "CREATE_AND_TRACK": "<em>Stvori</em> i prati za",
+        "CREATE_AND_TRACK": "<em>Stvori</em> i prati do",
         "IDLE_FOR": "Vrijeme tvoje neaktivnosti:",
         "TASK": "Zadatak",
-        "TRACK_TO": "Prati za:",
+        "TRACK_TO": "Prati do:",
         "UNTRACKED_TIME": "Nepraćeno vrijeme:"
-      }
-    },
-    "WELCOME": {
-      "D_WELCOME": {
-        "L1": "Prvi koraci",
-        "L2": "Uvodni video na youtube",
-        "L3": "Postavi pitanje",
-        "LETS_GO": "Krenimo!!",
-        "MOBILE_INFO": "Za označavanje stvorenih zadtaka kao obavljene <strong>povuci ih prema desno</strong>.\n Za terminiranje zadataka povuci ih prema lijevo. Za daljnje radnje pritisni ih dugo.",
-        "T1": "Radujemo se da želiš isprobati ovaj program! \uD83E\uDD84",
-        "T2": "Ako se ovdje ne možeš snaći, postoji nekoliko mjesta gdje\n možeš pronaći pomoć:",
-        "TITLE": "Dobro došao, dobro došla u Super Productivity!"
       }
     },
     "WORKLOG": {
@@ -1176,6 +1242,7 @@
     "EDIT": "Uredi",
     "ENABLED": "Aktivirano",
     "EXTENSION_INFO": "Preuzmi <a target=\"_blank\" href=\"https://chrome.google.com/webstore/detail/super-productivity/ljkbjodfmekklcoibdnhahlaalhihmlb\"> chrome proširenje</a> za omogućivanje komunikacije s Jira Api-jem i baratanje vremenom neaktivnosti. Napomena: To ne radi s mobilnim uređajima.",
+    "HIDE": "Sakrij",
     "LOGIN": "Prijava",
     "LOGOUT": "Odjava",
     "MINUTES": "{{m}} min",
@@ -1187,6 +1254,7 @@
     "REMOVE": "Ukloni",
     "RESET": "Obnovi",
     "SAVE": "Spremi",
+    "SUBMIT": "Pošalji",
     "TITLE": "Naslov",
     "TODAY_TAG_TITLE": "Danas",
     "UNDO": "Poništi",
@@ -1201,9 +1269,28 @@
       "LOCATION_INFO": "Sigurnosne kopije spremaju se u:",
       "TITLE": "Automatske sigurnosne kopije"
     },
+    "CALENDARS": {
+      "BROWSER_WARNING": "<b>Ovo vjerojatno NEĆE funkcionirati s verzijom preglednika Super Productivity.<br/> Za korištenje ove funkcije <a href=\"https://super-productivity.com/download/\">preuzmi desktop verziju</a>!</b>",
+      "CAL_PATH": "Url iCal izvora",
+      "CAL_PROVIDERS": "Pružatelji kalendara (eksperimentalno i opcionalno)",
+      "CAL_PROVIDERS_ADD": "Dodaj iCal izvor za kalendar",
+      "CAL_PROVIDERS_INFO": "Podatke kalendara možeš učitati kao iCal (npr. <a href=\"https://support.google.com/calendar/answer/37648?hl=en#zippy=%2Csync-your-google-calendar-view-edit %2Cget-your-calendar-view-only\">Google Kalendar</a>, <a href=\"https://support.pushpay.com/s/article/How-do-I-get-an- iCal-link-from-Office-365\">Outlook 365</a>). Podaci će se integrirati u vremensku traku i ćeš morati izraditi zadatke za događaje u kalendaru, ako su dospjeli.",
+      "CHECK_UPDATES": "Traži eksterna aktualiziranja svakih X",
+      "DEFAULT_PROJECT": "Standardni projekt za dodane zadatke kalendara",
+      "HELP": "Kalendare za podsjetnik možeš integrirati i dodati ih kao zadatke unutar Super Productivity. Integracija radi pomoću iCal formata. Da bi ovo funkcioniralo, tvoji kalendari moraju biti dostupni putem interneta ili putem sustava datoteka.",
+      "ICON": "Ikona za vremensku traku",
+      "SHOW_BANNER_THRESHOLD": "Prikaži obavijest X prije događaja (prazno za deaktivirano)",
+      "TITLE": "Kalendari"
+    },
     "EVALUATION": {
       "IS_HIDE_EVALUATION_SHEET": "Sakrij stranicu evaluacije u dnevnom sažetku",
       "TITLE": "Evaluacija i mjerni podaci"
+    },
+    "FOCUS_MODE": {
+      "HELP": "Modus fokusa otvara jednostavan ekran koji ti pomaže pri fokusiranju na tvoj zadatak.",
+      "L_ALWAYS_OPEN_FOCUS_MODE": "Uvijek otvori modus fokusa, kada pratiš",
+      "L_SKIP_PREPARATION_SCREEN": "Preskoči ekran pripreme (rastezanje itd.)",
+      "TITLE": "Modus fokusa"
     },
     "IDLE": {
       "HELP": "<div><p>Kad je baratanje neaktivnim vremenom aktivirano, nakon određenog vremena otvorit će se dijaloški okvir za provjeru je li želiš, i pri kojem zadatku želiš pratiti tvoje neaktivno vrijeme.</p></div>",
@@ -1236,6 +1323,8 @@
       "HELP": "<p>Ovdje možeš konfigurirati sve tipkovne prečace.</p> <p>Pritisni na unos teksta i upiši željenu kombinaciju tipkovnice. Pritisni enter za spremanje i Escape za prekidanje.</p> <p>Postoje tri vrste prečaca:</p> <ul> <li> <strong>Globalni prečaci:</strong> Kad se program pokrene, pokrenut će radnju iz svakog drugog programa. </li> <li> <strong>Prečaci na razini programa:</strong> Pokrenut će se iz svakog ekrana programa, ali ne ako trenutačno uređuješ tekstualno polje. </li> <li> <strong>Prečaci na razini zadatka:</strong> Pokrenut će se samo ako se zadatak odabere putem miša ili tipkovnice i obično pokreću radnju koja je posebno povezana s tim zadatkom. </li> </ul><p><strong>Pritisni Escape za uklanjanje prečaca.</strong>",
       "MOVE_TASK_DOWN": "Premjesti zadatak prema dolje u popisu",
       "MOVE_TASK_UP": "Premjesti zadatak prema gore u popisu",
+      "MOVE_TASK_TO_BOTTOM": "Premjesti zadatak na kraj popisa",
+      "MOVE_TASK_TO_TOP": "Premjesti zadatak na početak popisa",
       "MOVE_TO_BACKLOG": "Premjesti zadatak u odlagalište",
       "MOVE_TO_TODAYS_TASKS": "Premjesti zadatak u popis današnjih zadataka",
       "OPEN_PROJECT_NOTES": "Prikaži/Sakrij bilješke",
@@ -1266,6 +1355,7 @@
     },
     "LANG": {
       "AR": "Arapski",
+      "CZ": "Češki",
       "DE": "Njemački",
       "EN": "Engleski",
       "ES": "Španjolski",
@@ -1281,7 +1371,7 @@
       "NL": "Nizozemski",
       "PL": "Poljski",
       "PT": "Portugalski",
-      "RU": "Ruskie",
+      "RU": "Ruski",
       "SK": "Slovački",
       "TITLE": "Jezik",
       "TR": "Turski",
@@ -1324,6 +1414,11 @@
       "LONGER_BREAK_DURATION": "Trajanje dužih pauza",
       "TITLE": "Pomodoro timer"
     },
+    "REMINDER": {
+      "IS_COUNTDOWN_BANNER_ENABLED": "Prikaži traku odbrojavanja prije dospijeća podsjetnika",
+      "COUNTDOWN_DURATION": "Prikaži traku X prije podsjetnika",
+      "TITLE": "Podsjetnici"
+    },
     "SOUND": {
       "DONE_SOUND": "Zvuk za obavljeni zadatak",
       "IS_INCREASE_DONE_PITCH": "Pojačaj visinu zvuka za svaki obavljeni zadatak",
@@ -1347,11 +1442,7 @@
       "TITLE": "Podsjetnik za pauzu"
     },
     "TIMELINE": {
-      "CAL_PROVIDERS": "Pružatelji usluge kalendara (eksperimentalno i opcionalno)",
-      "CAL_PROVIDERS_ADD": "Dodaj ical izvor",
-      "CAL_PROVIDERS_INFO": "Opcionalno možeš konfigurirati vremensku traku da također učitava i prikazuje iCal podatke (npr. Google Calendar).",
       "HELP": "Vremenska traka omogućuje brzi pregled kako se tvoji terminirani zadaci odvijaju tijekom vremena. Nalazi se u lijevom izborniku pod <a href='#/timeline'>„Vremenska traka”</a>. ",
-      "L_CAL_PATH": "Url/staza datoteke za ICAL kalendar (opcionalno)",
       "L_IS_WORK_START_END_ENABLED": "Ograniči tijek neterminiranog zadatka na određena radna vremena",
       "L_WORK_END": "Kraj radnog dana",
       "L_WORK_START": "Početak radnog dana",
@@ -1371,6 +1462,7 @@
     "ERR_COMPRESSION": "Greška za komprimiranje sučelja",
     "FILE_DOWNLOADED": "{{fileName}} preuzeto",
     "FILE_DOWNLOADED_BTN": "Otvori mapu",
+    "NAVIGATE_TO_TASK_ERR": "Neuspjelo fokusiranje na zadatak. Jesi li ga izrisao/la?",
     "PERSISTENCE_DISALLOWED": "Podaci se neće trajno zadržati. Imaj na umu da to može dovesti do gubitka podataka!!",
     "PERSISTENCE_ERROR": "Greška prilikom traženja zadržavanja podataka: {{err}}",
     "RUNNING_X": "Pokreće se „{{str}}”.",
@@ -1382,8 +1474,6 @@
     "DBX_GEN_TOKEN": "Dropbox: Generiraj token …",
     "DBX_META": "Dropbox: Preuzmi metapodatke datoteke …",
     "DBX_UPLOAD": "Dropbox: Prenesi datoteku …",
-    "GDRIVE_DOWNLOAD": "Google Drive: Preuzmi datoteku …",
-    "GDRIVE_UPLOAD": "Google Drive: Prenesi datoteku …",
     "GITHUB_LOAD_ISSUE": "GitHub: Učitaj podatke problema …",
     "JIRA_LOAD_ISSUE": "Jira: Učitaj podatke problema …",
     "UNKNOWN": "Učitavanje vanjskih podataka",
@@ -1396,7 +1486,18 @@
     "CREATE_TAG": "Stvori oznaku",
     "DELETE_TAG": "Izbriši oznaku",
     "GO_TO_TASK_LIST": "Idi na popis zadataka",
+    "HM": {
+      "CALENDARS": "Kako: Poveži kalendare",
+      "CONTRIBUTE": "Doprinesi",
+      "GET_HELP_ONLINE": "Get help online",
+      "KEYBOARD": "Kako: Napredna tipkovnica",
+      "REPORT_A_PROBLEM": "Prijavi problem",
+      "START_WELCOME": "Pokreni uvod",
+      "SYNC": "Kako: Konfiguriraj sinkronizaciju"
+    },
     "MANAGE_PROJECTS": "Upravljaj projektima",
+    "NO_TAG_INFO": "Trenutačno nema oznaka. Oznake možeš dodati unosom `#yourTagName` prilikom dodavanja ili uređivanja zadataka.",
+    "HELP": "Pomoć",
     "METRICS": "Mjerni podaci",
     "NOTES": "Bilješke",
     "NOTES_PANEL_INFO": "Bilješke se mogu prikazati samo u prikazima vremenske trake i uobičajenih popisa zadataka.",
@@ -1449,6 +1550,7 @@
     "TASK_LIST": "Popis zadataka",
     "TIME_SPENT_AND_ESTIMATE_LABEL": "Utrošeno / Procijenjeno vrijeme",
     "TIME_SPENT_ESTIMATE_TITLE": "Utrošeno vrijeme: Danas ukupno utrošeno vrijeme. Arhivirani zadaci su iključeni iz računice. – Procijenjeno vrijeme: Procijenjeno vrijeme za danas obrađene zadatke minus već utrošeno vrijeme prethodnih dana.",
+    "TIME_SPENT_TODAY_BY_TAG": "Danas utrošeno vrijeme na osnovi oznake",
     "TODAY": "Danas",
     "WEEK": "Tjedan"
   },
@@ -1474,7 +1576,7 @@
       "OK": "Ukloni iz arhive"
     },
     "EDIT_PROJECT": "Uredi projekt",
-    "EXPORT_PROJECT": "Ozvezi projekt",
+    "EXPORT_PROJECT": "Izvezi projekt",
     "GITHUB_CONFIGURED": "GitHub integracija je konfigurirana",
     "GITLAB_CONFIGURED": "GitLab integracija je konfigurirana",
     "IMPORT_FROM_FILE": "Uvezi iz datoteke",
