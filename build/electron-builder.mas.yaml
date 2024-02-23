@@ -3,17 +3,17 @@ afterSign: electron-builder-notarize
 productName: Super Productivity
 files:
   - electron/**/*
-  - "!electron/**/*.ts"
-  - "!electron/**/*.js.map"
+  - '!electron/**/*.ts'
+  - '!electron/**/*.js.map'
   - dist/**/*
   - 'embedded.provisionprofile'
 directories:
-  output: "./app-builds"
+  output: './app-builds'
 
 mas:
   appId: com.super-productivity.app
   category: public.app-category.productivity
-  icon: build/icon.icns
+  icon: build/icon-mac.icns
   gatekeeperAssess: false
   darkModeSupport: true
   target:
