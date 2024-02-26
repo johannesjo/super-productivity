@@ -144,7 +144,8 @@
         "AUTH_ERROR": "Dropbox: Invalid access token provided",
         "AUTH_ERROR_ACTION": "Change Token",
         "OFFLINE": "Dropbox: Unable to sync, because offline",
-        "SYNC_ERROR": "Dropbox: Error while syncing"
+        "SYNC_ERROR": "Dropbox: Error while syncing",
+        "UNABLE_TO_GENERATE_PKCE_CHALLENGE": "Dropbox: Unable to generate PKCE challenge."
       }
     },
     "FINISH_DAY_BEFORE_EXIT": {
