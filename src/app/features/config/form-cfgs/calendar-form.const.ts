@@ -53,7 +53,10 @@ export const CALENDAR_FORM_CFG: ConfigFormSection<CalendarIntegrationConfig> = {
             key: 'isEnabled',
             hooks: {
               onInit: (field) => {
-                if (!field?.formControl?.value) {
+                if (
+                  field?.formControl?.value === null ||
+                  field?.formControl?.value === undefined
+                ) {
                   field?.formControl?.setValue(true);
                 }
               },
