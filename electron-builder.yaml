@@ -64,6 +64,7 @@ mac:
       arch:
         - arm64
         - x64
+        - universal
 
 dmg:
   sign: false
