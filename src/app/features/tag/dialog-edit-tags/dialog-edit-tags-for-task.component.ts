@@ -54,7 +54,11 @@ export class DialogEditTagsForTaskComponent implements OnDestroy {
   }
 
   addNewTag(title: string): void {
-    const id = this._tagService.addTag({ title });
+    const cleanTitle = (t: string): string => {
+      return t.replace('#', '');
+    };
+
+    const id = this._tagService.addTag({ title: cleanTitle(title) });
     this._updateTags(unique([...this.tagIds, id]));
   }
 
