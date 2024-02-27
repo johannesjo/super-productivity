@@ -25,6 +25,7 @@ import { nanoid } from 'nanoid';
 import { distinctUntilChanged } from 'rxjs/operators';
 import { isEqualSimpleCounterCfg } from './is-equal-simple-counter-cfg.util';
 import { DateService } from 'src/app/core/date/date.service';
+import { persistTimeTracked } from '../tasks/store/task.actions';
 
 @Injectable({
   providedIn: 'root',
@@ -67,6 +68,7 @@ export class SimpleCounterService {
   increaseCounterToday(id: string, increaseBy: number): void {
     const today = this._dateService.todayStr();
     this._store$.dispatch(increaseSimpleCounterCounterToday({ id, increaseBy, today }));
+    this._store$.dispatch(persistTimeTracked());
   }
 
   decreaseCounterToday(id: string, decreaseBy: number): void {
@@ -76,6 +78,7 @@ export class SimpleCounterService {
 
   toggleCounter(id: string): void {
     this._store$.dispatch(toggleSimpleCounterCounter({ id }));
+    this._store$.dispatch(persistTimeTracked());
   }
 
   turnOffAll(): void {

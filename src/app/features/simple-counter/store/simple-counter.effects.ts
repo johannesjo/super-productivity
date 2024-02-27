@@ -37,6 +37,7 @@ import { loadAllData } from '../../../root-store/meta/load-all-data.action';
 import { ImexMetaService } from '../../../imex/imex-meta/imex-meta.service';
 import { IdleService } from '../../idle/idle.service';
 import { DateService } from 'src/app/core/date/date.service';
+import { persistTimeTracked } from '../../tasks/store/task.actions';
 
 @Injectable()
 export class SimpleCounterEffects {
@@ -46,7 +47,8 @@ export class SimpleCounterEffects {
         ofType(
           updateAllSimpleCounters,
           setSimpleCounterCounterToday,
-          increaseSimpleCounterCounterToday,
+          // increaseSimpleCounterCounterToday,
+          persistTimeTracked,
           setSimpleCounterCounterOn,
           setSimpleCounterCounterOff,
           // toggleSimpleCounterCounter,

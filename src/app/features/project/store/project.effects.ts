@@ -40,6 +40,7 @@ import {
   deleteTasks,
   moveToArchive,
   moveToOtherProject,
+  persistTimeTracked,
   restoreTask,
 } from '../../tasks/store/task.actions';
 import { ReminderService } from '../../reminder/reminder.service';
@@ -82,8 +83,9 @@ export class ProjectEffects {
           updateProject.type,
           updateProjectAdvancedCfg.type,
           updateProjectIssueProviderCfg.type,
-          updateProjectWorkStart.type,
-          updateProjectWorkEnd.type,
+          //updateProjectWorkStart.type,
+          //updateProjectWorkEnd.type,
+          persistTimeTracked,
           addToProjectBreakTime.type,
           updateProjectOrder.type,
           archiveProject.type,

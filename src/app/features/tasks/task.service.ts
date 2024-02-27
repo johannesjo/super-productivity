@@ -31,6 +31,7 @@ import {
   moveSubTaskUp,
   moveToArchive,
   moveToOtherProject,
+  persistTimeTracked,
   removeTagsForAllTasks,
   removeTimeSpent,
   reScheduleTask,
@@ -280,6 +281,7 @@ export class TaskService {
 
   pauseCurrent(): void {
     this._store.dispatch(unsetCurrentTask());
+    this._store.dispatch(persistTimeTracked());
   }
 
   // Tasks
