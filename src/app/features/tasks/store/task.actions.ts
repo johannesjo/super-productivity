@@ -222,7 +222,8 @@ export const convertToMainTask = createAction(
   props<{ task: Task; parentTagIds: string[] }>(),
 );
 
-export const moveToArchive = createAction(
+// the _ indicates that it should not be used directly, but always over the service instead
+export const moveToArchive_ = createAction(
   TaskActionTypes.MoveToArchive,
 
   props<{ tasks: TaskWithSubTasks[] }>(),

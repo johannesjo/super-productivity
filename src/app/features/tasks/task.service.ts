@@ -29,7 +29,7 @@ import {
   moveSubTaskToBottom,
   moveSubTaskToTop,
   moveSubTaskUp,
-  moveToArchive,
+  moveToArchive_,
   moveToOtherProject,
   removeTagsForAllTasks,
   removeTimeSpent,
@@ -670,7 +670,24 @@ export class TaskService {
     if (!Array.isArray(tasks)) {
       tasks = [tasks];
     }
-    this._store.dispatch(moveToArchive({ tasks }));
+    // NOTE: we only update real parents since otherwise we move sub-tasks without their parent into the archive
+    const subTasks = tasks.filter((t) => t.parentId);
+    if (subTasks.length) {
+      if (this._workContextService.activeWorkContextType !== WorkContextType.TAG) {
+        throw new Error('Trying to move sub tasks into archive for project');
+      }
+
+      // when on a tag such as today, we simply remove the tag instead of attempting to move to archive
+      const tagToRemove = this._workContextService.activeWorkContextId;
+      subTasks.forEach((st) => {
+        this.updateTags(
+          st,
+          st.tagIds.filter((tid) => tid !== tagToRemove),
+          st.tagIds,
+        );
+      });
+    }
+    this._store.dispatch(moveToArchive_({ tasks: tasks.filter((t) => !t.parentId) }));
   }
 
   moveToProject(task: TaskWithSubTasks, projectId: string): void {

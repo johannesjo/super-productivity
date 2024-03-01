@@ -10,7 +10,7 @@ import {
   addTask,
   convertToMainTask,
   deleteTask,
-  moveToArchive,
+  moveToArchive_,
   moveToOtherProject,
   restoreTask,
 } from '../../tasks/store/task.actions';
@@ -666,7 +666,7 @@ export const projectReducer = createReducer<ProjectState>(
       : state;
   }),
 
-  on(moveToArchive, (state, { tasks }) => {
+  on(moveToArchive_, (state, { tasks }) => {
     const taskIdsToMoveToArchive = tasks.map((t: Task) => t.id);
     const projectIds = unique<string>(
       tasks

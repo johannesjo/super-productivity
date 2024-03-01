@@ -10,7 +10,7 @@ import {
   moveSubTaskToBottom,
   moveSubTaskToTop,
   moveSubTaskUp,
-  moveToArchive,
+  moveToArchive_,
   moveToOtherProject,
   removeTagsForAllTasks,
   removeTimeSpent,
@@ -515,7 +515,7 @@ export const taskReducer = createReducer<TaskState>(
   // TASK ARCHIVE STUFF
   // ------------------
   // TODO fix
-  on(moveToArchive, (state, { tasks }) => {
+  on(moveToArchive_, (state, { tasks }) => {
     let copyState = state;
     tasks.forEach((task) => {
       copyState = deleteTaskHelper(copyState, task);

@@ -38,7 +38,7 @@ import {
   convertToMainTask,
   deleteTask,
   deleteTasks,
-  moveToArchive,
+  moveToArchive_,
   moveToOtherProject,
   restoreTask,
 } from '../../tasks/store/task.actions';
@@ -149,7 +149,7 @@ export class ProjectEffects {
           deleteTask,
           moveToOtherProject,
           restoreTask,
-          moveToArchive,
+          moveToArchive_,
           convertToMainTask,
         ),
         switchMap((a) => {
@@ -164,7 +164,7 @@ export class ProjectEffects {
             case moveToOtherProject.type:
               isChange = !!a.task.projectId;
               break;
-            case moveToArchive.type:
+            case moveToArchive_.type:
               isChange = !!a.tasks.find((task) => !!task.projectId);
               break;
             case restoreTask.type:

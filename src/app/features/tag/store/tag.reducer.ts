@@ -5,9 +5,9 @@ import { createFeatureSelector, createReducer, createSelector, on } from '@ngrx/
 import {
   addTask,
   convertToMainTask,
-  deleteTasks,
   deleteTask,
-  moveToArchive,
+  deleteTasks,
+  moveToArchive_,
   restoreTask,
   updateTaskTags,
 } from '../../tasks/store/task.actions';
@@ -355,7 +355,7 @@ export const tagReducer = createReducer<TagState>(
     return tagAdapter.updateMany(updates, state);
   }),
 
-  on(moveToArchive, (state, { tasks }) => {
+  on(moveToArchive_, (state, { tasks }) => {
     const taskIdsToMoveToArchive = tasks.map((t) => t.id);
     const tagIds = unique(
       tasks.reduce((acc: string[], t: TaskWithSubTasks) => [...acc, ...t.tagIds], []),
