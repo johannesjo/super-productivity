@@ -101,6 +101,7 @@ import {
 } from '../project/store/project.actions';
 import { Update } from '@ngrx/entity';
 import { DateService } from 'src/app/core/date/date.service';
+import { T } from 'src/app/t.const';
 
 @Injectable({
   providedIn: 'root',
@@ -344,6 +345,14 @@ export class TaskService {
   }
 
   updateTags(task: Task, newTagIds: string[], oldTagIds: string[]): void {
+    if (!task.parentId && !task.projectId && newTagIds.length === 0) {
+      this._snackService.open({
+        type: 'ERROR',
+        msg: T.F.TASK.S.LAST_TAG_DELETION_WARNING,
+      });
+      return;
+    }
+
     this._store.dispatch(
       updateTaskTags({
         task,
