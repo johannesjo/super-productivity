@@ -915,6 +915,7 @@
         "RO_30M": "30 minutos antes de começar",
         "RO_5M": "5 minutos antes de começar",
         "RO_START": "quando começa",
+        "RO_NEVER": "Nunca",
         "SCHEDULE": "Agendar",
         "UNSCHEDULE": "Cancelar agendamento"
       },

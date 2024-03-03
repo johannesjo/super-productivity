@@ -950,6 +950,7 @@
         "RO_30M": "30 minut před začátkem",
         "RO_5M": "5 minut před začátkem",
         "RO_START": "kdy začíná",
+        "RO_NEVER": "Nikdy",
         "SCHEDULE": "Naplánovat",
         "UNSCHEDULE": "Zrušit naplánování"
       },

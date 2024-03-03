@@ -772,6 +772,7 @@
         "RO_30M": "開始前 30 分鐘",
         "RO_5M": "開始前 5 分鐘",
         "RO_START": "開始時",
+        "RO_NEVER": "Never",
         "SCHEDULE": "計劃時間",
         "UNSCHEDULE": "取消計劃"
       },

@@ -781,6 +781,7 @@
         "RO_30M": "시작 30 분 전",
         "RO_5M": "시작 5 분 전",
         "RO_START": "시작될 때",
+        "RO_NEVER": "Never",
         "SCHEDULE": "시간표",
         "UNSCHEDULE": "일정 잡기"
       },

@@ -710,6 +710,7 @@
         "RO_30M": "30 minutes before it starts",
         "RO_5M": "5 minutes before it starts",
         "RO_START": "when it starts",
+        "RO_NEVER": "Never",
         "SCHEDULE": "Schedule",
         "UNSCHEDULE": "Unschedule"
       },

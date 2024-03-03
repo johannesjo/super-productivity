@@ -781,6 +781,7 @@
         "RO_30M": "30 minuti prima che inizi",
         "RO_5M": "5 minuti prima che inizi",
         "RO_START": "quando inizia",
+        "RO_NEVER": "Mai",
         "SCHEDULE": "Pianifica",
         "UNSCHEDULE": "Rimuovi pianificazione"
       },

@@ -821,7 +821,6 @@
           "L_SYNC_FILE_PATH": "Dosya Yolunu Senkronize Et",
           "L_SYNC_FILE_PATH_DESCRIPTION": "Senkronizasyon için kullanılması gereken (oluşturulacak) dosyanın mutlak yolu.",
           "L_SYNC_FILE_PATH_PERMISSION_VALIDATION": "Dosya erişim izni gerekir"
-
         },
         "L_ENABLE_SYNCING": "Senkronizasyonu Etkinleştir",
         "L_ENABLE_COMPRESSION": "Sıkıştırmayı Etkinleştir (daha hızlı veri aktarımı)",
@@ -945,6 +944,7 @@
         "RO_30M": "Başlamadan 30 dakika önce",
         "RO_5M": "Başlamadan 5 dakika önce",
         "RO_START": "başladığında",
+        "RO_NEVER": "Never",
         "SCHEDULE": "Planla",
         "UNSCHEDULE": "Planlamayı iptal et"
       },

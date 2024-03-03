@@ -781,6 +781,7 @@
         "RO_30M": "30 minutos antes de que comience",
         "RO_5M": "5 minutos antes de que comience",
         "RO_START": "cuando empieza",
+        "RO_NEVER": "Nunca",
         "SCHEDULE": "Programar",
         "UNSCHEDULE": "Desprogramar"
       },
@@ -842,7 +843,7 @@
       }
     },
     "TASK_REPEAT": {
-        "ADD_INFO_PANEL": {
+      "ADD_INFO_PANEL": {
         "CUSTOM": "Configurar repetición personalizada",
         "CUSTOM_AND_TIME": "Personalizada, {{timeStr}}",
         "CUSTOM_WEEKLY": "{{daysStr}}",
@@ -1327,7 +1328,6 @@
     "REPEATED_TASKS": "Tareas repetidas",
     "SCHEDULED_TASKS": "Tareas programadas",
     "START_TASK": "Inicie la tarea ahora y elimine el recordatorio"
-
   },
   "THEMES": {
     "SELECT_THEME": "Selecciona el tema",

@@ -781,6 +781,7 @@
         "RO_30M": "30 minuten voordat het begint",
         "RO_5M": "5 minuten voordat het begint",
         "RO_START": "wanneer het begint",
+        "RO_NEVER": "Nooit",
         "SCHEDULE": "Schema",
         "UNSCHEDULE": "Ongepland"
       },

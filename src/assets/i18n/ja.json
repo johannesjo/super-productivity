@@ -781,6 +781,7 @@
         "RO_30M": "開始の30分前",
         "RO_5M": "開始の5分前",
         "RO_START": "それが始まるとき",
+        "RO_NEVER": "Never",
         "SCHEDULE": "スケジュール",
         "UNSCHEDULE": "予定外"
       },
