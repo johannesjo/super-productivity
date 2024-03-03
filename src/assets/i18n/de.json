@@ -794,6 +794,7 @@
         "RO_30M": "30 Minuten bevor es losgeht",
         "RO_5M": "5 Minuten bevor es losgeht",
         "RO_START": "wenn es beginnt",
+        "RO_NEVER": "Nie",
         "SCHEDULE": "Planen",
         "UNSCHEDULE": "Planung entfernen"
       },

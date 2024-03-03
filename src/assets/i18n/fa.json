@@ -781,6 +781,7 @@
         "RO_30M": "30 دقیقه قبل از شروع آن",
         "RO_5M": "5 دقیقه قبل از شروع آن",
         "RO_START": "وقتی شروع می شود",
+        "RO_NEVER": "Never",
         "SCHEDULE": "Schedule",
         "UNSCHEDULE": "Unschedule"
       },

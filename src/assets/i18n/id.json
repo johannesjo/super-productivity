@@ -912,6 +912,7 @@
         "RO_30M": "30 menit sebelum dimulai",
         "RO_5M": "5 menit sebelum dimulai",
         "RO_START": "ketika itu dimulai",
+        "RO_NEVER": "Never",
         "SCHEDULE": "Jadwalkan",
         "UNSCHEDULE": "Batalkan jadwal"
       },

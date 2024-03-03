@@ -783,6 +783,7 @@
         "RO_30M": "30 دقيقة قبل أن يبدأ",
         "RO_5M": "5 دقائق قبل أن يبدأ",
         "RO_START": "عندما تبدأ",
+        "RO_NEVER": "أبداً",
         "SCHEDULE": "جدول",
         "UNSCHEDULE": "Unschedule"
       },
@@ -1354,6 +1355,5 @@
     "WITHOUT_BREAK": "بدون انقطاع:",
     "WORKING_TODAY": "عمل اليوم:",
     "WORKING_TODAY_ARCHIVED": "وقت العمل اليوم على المهام المؤرشفة"
-
   }
 }

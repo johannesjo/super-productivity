@@ -979,6 +979,7 @@
         "RO_30M": "30 minuta prije početka",
         "RO_5M": "5 minuta prije početka",
         "RO_START": "u vrijeme početka",
+        "RO_NEVER": "Nikdy",
         "SCHEDULE": "Terminiraj",
         "UNSCHEDULE": "Ukloni termin"
       },

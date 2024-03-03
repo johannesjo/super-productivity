@@ -3,9 +3,10 @@ import { T } from '../../../t.const';
 
 export const TASK_REMINDER_OPTIONS: TaskReminderOption[] = [
   {
-    // id: TaskReminderOptionId.DoNotRemind,
-    // title: 'Dont show reminder',
-    // }, {
+    value: TaskReminderOptionId.DoNotRemind,
+    label: T.F.TASK.D_REMINDER_ADD.RO_NEVER,
+  },
+  {
     value: TaskReminderOptionId.AtStart,
     label: T.F.TASK.D_REMINDER_ADD.RO_START,
   },

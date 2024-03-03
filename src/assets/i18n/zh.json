@@ -799,6 +799,7 @@
         "RO_30M": "开始前30分钟",
         "RO_5M": "开始前5分钟",
         "RO_START": "当它开始的时候",
+        "RO_NEVER": "Never",
         "SCHEDULE": "计划时间",
         "UNSCHEDULE": "取消计划"
       },
