@@ -346,6 +346,7 @@ export class SyncProviderService {
     cp: SyncProviderServiceInterface,
     data: AppDataComplete,
     isForceOverwrite: boolean = false,
+    retryAttempts = 0,
   ): Promise<void> {
     if (!isValidAppData(data)) {
       console.log(data);
@@ -375,8 +376,11 @@ export class SyncProviderService {
       );
     } else {
       this._log(cp, 'X Upload Request Error');
-      if (cp.isUploadForcePossible && this._c(T.F.SYNC.C.FORCE_UPLOAD_AFTER_ERROR)) {
-        return await this._uploadAppData(cp, data, true);
+      if (
+        cp.isUploadForcePossible &&
+        (!retryAttempts || this._c(T.F.SYNC.C.FORCE_UPLOAD_AFTER_ERROR))
+      ) {
+        return await this._uploadAppData(cp, data, true, retryAttempts + 1);
       } else {
         this._snackService.open({
           msg: T.F.SYNC.S.UPLOAD_ERROR,

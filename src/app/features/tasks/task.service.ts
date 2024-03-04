@@ -29,7 +29,7 @@ import {
   moveSubTaskToBottom,
   moveSubTaskToTop,
   moveSubTaskUp,
-  moveToArchive,
+  moveToArchive_,
   moveToOtherProject,
   removeTagsForAllTasks,
   removeTimeSpent,
@@ -101,6 +101,7 @@ import {
 } from '../project/store/project.actions';
 import { Update } from '@ngrx/entity';
 import { DateService } from 'src/app/core/date/date.service';
+import { T } from 'src/app/t.const';
 
 @Injectable({
   providedIn: 'root',
@@ -344,6 +345,14 @@ export class TaskService {
   }
 
   updateTags(task: Task, newTagIds: string[], oldTagIds: string[]): void {
+    if (!task.parentId && !task.projectId && newTagIds.length === 0) {
+      this._snackService.open({
+        type: 'ERROR',
+        msg: T.F.TASK.S.LAST_TAG_DELETION_WARNING,
+      });
+      return;
+    }
+
     this._store.dispatch(
       updateTaskTags({
         task,
@@ -670,7 +679,24 @@ export class TaskService {
     if (!Array.isArray(tasks)) {
       tasks = [tasks];
     }
-    this._store.dispatch(moveToArchive({ tasks }));
+    // NOTE: we only update real parents since otherwise we move sub-tasks without their parent into the archive
+    const subTasks = tasks.filter((t) => t.parentId);
+    if (subTasks.length) {
+      if (this._workContextService.activeWorkContextType !== WorkContextType.TAG) {
+        throw new Error('Trying to move sub tasks into archive for project');
+      }
+
+      // when on a tag such as today, we simply remove the tag instead of attempting to move to archive
+      const tagToRemove = this._workContextService.activeWorkContextId;
+      subTasks.forEach((st) => {
+        this.updateTags(
+          st,
+          st.tagIds.filter((tid) => tid !== tagToRemove),
+          st.tagIds,
+        );
+      });
+    }
+    this._store.dispatch(moveToArchive_({ tasks: tasks.filter((t) => !t.parentId) }));
   }
 
   moveToProject(task: TaskWithSubTasks, projectId: string): void {

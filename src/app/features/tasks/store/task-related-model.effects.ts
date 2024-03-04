@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import {
   addTimeSpent,
-  moveToArchive,
+  moveToArchive_,
   restoreTask,
   updateTask,
   updateTaskTags,
@@ -32,7 +32,7 @@ export class TaskRelatedModelEffects {
   moveToArchive$: any = createEffect(
     () =>
       this._actions$.pipe(
-        ofType(moveToArchive),
+        ofType(moveToArchive_),
         tap(({ tasks }) => this._moveToArchive(tasks)),
       ),
     { dispatch: false },

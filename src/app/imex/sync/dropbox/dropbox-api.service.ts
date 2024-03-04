@@ -169,7 +169,18 @@ export class DropboxApiService {
     refreshToken: string;
     expiresAt: number;
   } | null> {
-    const { codeVerifier, codeChallenge } = await generatePKCECodes(128);
+    let codeVerifier: string, codeChallenge: string;
+
+    try {
+      ({ codeVerifier, codeChallenge } = await generatePKCECodes(128));
+    } catch (e) {
+      this._snackService.open({
+        msg: T.F.DROPBOX.S.UNABLE_TO_GENERATE_PKCE_CHALLENGE,
+        type: 'ERROR',
+      });
+      return null;
+    }
+
     const DROPBOX_AUTH_CODE_URL =
       `https://www.dropbox.com/oauth2/authorize` +
       `?response_type=code&client_id=${DROPBOX_APP_KEY}` +

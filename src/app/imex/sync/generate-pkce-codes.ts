@@ -3,6 +3,12 @@
 // Generate a secure random string using the browser crypto functions
 const generateRandomString = (length: number): string => {
   const array = new Uint32Array(length / 2);
+  if (!window.crypto?.getRandomValues) {
+    alert(
+      'WebCrypto API (getRandomValues) not supported in your browser. Please update to the latest version or use a different one',
+    );
+  }
+
   window.crypto.getRandomValues(array);
   return Array.from(array, (dec) => ('0' + dec.toString(16)).substr(-2)).join('');
 };
@@ -14,6 +20,10 @@ const sha256 = (plain: string): Promise<ArrayBuffer> => {
   const data = encoder.encode(plain);
   // NOTE: crypto.subtle is supposed to be undefined in insecure contexts
   // @see https://www.chromium.org/blink/webcrypto
+  if (window.crypto?.subtle === undefined) {
+    alert('WebCrypto API (subtle.digest) is only supported in secure contexts.');
+  }
+
   return window.crypto.subtle.digest('SHA-256', data);
 };
 
