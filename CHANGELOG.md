@@ -1,3 +1,23 @@
+## [8.0.1](https://github.com/johannesjo/super-productivity/compare/v8.0.0...v8.0.1) (2024-03-04)
+
+### Bug Fixes
+
+- calendar disable not working ([34ba6ae](https://github.com/johannesjo/super-productivity/commit/34ba6aec956cc1d61ef677eca31bc7a03129a9db))
+- issue when trying to move sub-task to archive [#3059](https://github.com/johannesjo/super-productivity/issues/3059) ([ba2cc3c](https://github.com/johannesjo/super-productivity/commit/ba2cc3c81a806150d3b7922941d56b230846f6f9))
+- issue when trying to remove last tag [#3060](https://github.com/johannesjo/super-productivity/issues/3060) ([b40397a](https://github.com/johannesjo/super-productivity/commit/b40397a7b5135e31c2fe65e5345e9d4852fdbdce))
+
+### Features
+
+- add productivity tip ([03b0080](https://github.com/johannesjo/super-productivity/commit/03b0080a41f1d0aa967ebac79ae9b0304306a873))
+- close app if user selects NOT to fix data [#3052](https://github.com/johannesjo/super-productivity/issues/3052) ([67a5758](https://github.com/johannesjo/super-productivity/commit/67a57580661dffbe34e22b2b41aa04e05e0cad6f))
+- **i18n:** update Croatian translation [#3044](https://github.com/johannesjo/super-productivity/issues/3044) ([398ef21](https://github.com/johannesjo/super-productivity/commit/398ef217764cf3e350f547449d4901c869557555))
+- improve error handling for failed pkce challenge [#3039](https://github.com/johannesjo/super-productivity/issues/3039) ([7ccf5b3](https://github.com/johannesjo/super-productivity/commit/7ccf5b3c7d99f7ed53485899f7244b70e9222ee6))
+- improve new tag handling [#3035](https://github.com/johannesjo/super-productivity/issues/3035) ([1bbe671](https://github.com/johannesjo/super-productivity/commit/1bbe6712c276239eebaf1c3ccedc007a4205cff4))
+- improve windows store icon [#2549](https://github.com/johannesjo/super-productivity/issues/2549) ([3c94c81](https://github.com/johannesjo/super-productivity/commit/3c94c810fbc955fcc4aeade534d26004f4abec2c))
+- **sync:** retry upload once without confirm and only then ask [#3058](https://github.com/johannesjo/super-productivity/issues/3058) ([9d30b32](https://github.com/johannesjo/super-productivity/commit/9d30b3211ba12c98382c7d8bfe6f1472c9aba49d))
+- **sync:** show snack if already in sync ([1394e43](https://github.com/johannesjo/super-productivity/commit/1394e437253d0623ba6d45bf7a5a8124915bbabb))
+- use different icon for mac and linux [#3033](https://github.com/johannesjo/super-productivity/issues/3033) ([53f57dc](https://github.com/johannesjo/super-productivity/commit/53f57dcf0360d2049561046d2498e5230665ee65))
+
 # [8.0.0](https://github.com/johannesjo/super-productivity/compare/v8.0.0-rc.0...v8.0.0) (2024-02-09)
 
 ### Bug Fixes
