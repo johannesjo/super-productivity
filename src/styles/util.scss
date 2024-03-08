@@ -27,6 +27,18 @@
   }
 }
 
+.show-only-on-touch-primary {
+  .isMousePrimary & {
+    display: none !important;
+  }
+}
+
+.show-only-on-mouse-primary {
+  .isTouchPrimary & {
+    display: none !important;
+  }
+}
+
 .show-only-on-touch-only {
   .isNoTouchOnly & {
     display: none !important;

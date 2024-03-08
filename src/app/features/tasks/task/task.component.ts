@@ -40,7 +40,6 @@ import { TaskAttachmentService } from '../task-attachment/task-attachment.servic
 import { IssueService } from '../../issue/issue.service';
 import { DialogEditTaskAttachmentComponent } from '../task-attachment/dialog-edit-attachment/dialog-edit-task-attachment.component';
 import { swirlAnimation } from '../../../ui/animations/swirl-in-out.ani';
-import { IS_TOUCH_ONLY, isTouchOnly } from '../../../util/is-touch-only';
 import { DialogAddTaskReminderComponent } from '../dialog-add-task-reminder/dialog-add-task-reminder.component';
 import { DialogEditTaskRepeatCfgComponent } from '../../task-repeat-cfg/dialog-edit-task-repeat-cfg/dialog-edit-task-repeat-cfg.component';
 import { ProjectService } from '../../project/project.service';
@@ -57,6 +56,7 @@ import { DialogConfirmComponent } from '../../../ui/dialog-confirm/dialog-confir
 import { Update } from '@ngrx/entity';
 import { SnackService } from '../../../core/snack/snack.service';
 import { isToday } from '../../../util/is-today.util';
+import { IS_TOUCH_PRIMARY } from '../../../util/is-mouse-primary';
 
 @Component({
   selector: 'task',
@@ -71,7 +71,7 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
 
   task!: TaskWithSubTasks;
   T: typeof T = T;
-  IS_TOUCH_ONLY: boolean = IS_TOUCH_ONLY;
+  IS_TOUCH_PRIMARY: boolean = IS_TOUCH_PRIMARY;
   isDragOver: boolean = false;
   isLockPanLeft: boolean = false;
   isLockPanRight: boolean = false;
@@ -337,7 +337,7 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
     this._matDialog
       .open(DialogTimeEstimateComponent, {
         data: { task: this.task },
-        autoFocus: !isTouchOnly(),
+        autoFocus: !IS_TOUCH_PRIMARY,
       })
       .afterClosed()
       .pipe(takeUntil(this._destroy$))
@@ -441,7 +441,7 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   focusPrevious(isFocusReverseIfNotPossible: boolean = false): void {
-    if (IS_TOUCH_ONLY) {
+    if (IS_TOUCH_PRIMARY) {
       return;
     }
 
@@ -470,7 +470,7 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
     isFocusReverseIfNotPossible: boolean = false,
     isTaskMovedInList = false,
   ): void {
-    if (IS_TOUCH_ONLY) {
+    if (IS_TOUCH_PRIMARY) {
       return;
     }
 
@@ -507,7 +507,7 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   focusSelf(): void {
-    if (IS_TOUCH_ONLY) {
+    if (IS_TOUCH_PRIMARY) {
       return;
     }
 
@@ -546,7 +546,7 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   onPanStart(ev: any): void {
-    if (!IS_TOUCH_ONLY) {
+    if (!IS_TOUCH_PRIMARY) {
       return;
     }
     if (!this.contentEditableOnClickEl) {
@@ -571,7 +571,7 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   onPanEnd(): void {
-    if (!IS_TOUCH_ONLY || (!this.isLockPanLeft && !this.isLockPanRight)) {
+    if (!IS_TOUCH_PRIMARY || (!this.isLockPanLeft && !this.isLockPanRight)) {
       return;
     }
     if (!this.blockLeftElRef || !this.blockRightElRef) {
@@ -757,7 +757,7 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
 
   private _handlePan(ev: any): void {
     if (
-      !IS_TOUCH_ONLY ||
+      !IS_TOUCH_PRIMARY ||
       (!this.isLockPanLeft && !this.isLockPanRight) ||
       ev.eventType === 8
     ) {

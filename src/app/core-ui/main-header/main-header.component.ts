@@ -24,7 +24,6 @@ import { expandFadeHorizontalAnimation } from '../../ui/animations/expand.ani';
 import { SimpleCounterService } from '../../features/simple-counter/simple-counter.service';
 import { SimpleCounter } from '../../features/simple-counter/simple-counter.model';
 import { SyncProviderService } from '../../imex/sync/sync-provider.service';
-import { IS_TOUCH_ONLY } from 'src/app/util/is-touch-only';
 import { SnackService } from '../../core/snack/snack.service';
 import { NavigationEnd, Router } from '@angular/router';
 import { FocusModeService } from '../../features/focus-mode/focus-mode.service';
@@ -41,7 +40,6 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
   T: typeof T = T;
   progressCircleRadius: number = 10;
   circumference: number = this.progressCircleRadius * Math.PI * 2;
-  IS_TOUCH_ONLY: boolean = IS_TOUCH_ONLY;
   isShowSimpleCounterBtnsMobile: boolean = false;
 
   @ViewChild('circleSvg', { static: true }) circleSvg?: ElementRef;

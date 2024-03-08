@@ -8,10 +8,11 @@
 // }
 // export const IS_TOUCH = isTouch();
 import { primaryInput } from 'detect-it';
+import { IS_TOUCH_ONLY } from './is-touch-only';
 
 // @see https://css-tricks.com/interaction-media-features-and-their-potential-for-incorrect-assumptions/
 
 export const IS_MOUSE_PRIMARY = primaryInput === 'mouse';
-export const IS_TOUCH_PRIMARY = primaryInput === 'touch';
+export const IS_TOUCH_PRIMARY = IS_TOUCH_ONLY || primaryInput === 'touch';
 
 console.log({ IS_MOUSE_PRIMARY, IS_TOUCH_PRIMARY });

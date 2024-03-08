@@ -1,4 +1,4 @@
-<ng-container *ngIf="IS_TOUCH_ONLY">
+<ng-container *ngIf="IS_TOUCH_PRIMARY">
   <div
     #blockLeftEl
     class="block-left bg-400"
@@ -134,7 +134,7 @@
       </div>
 
       <div
-        (click)="IS_TOUCH_ONLY && toggleShowAdditionalInfoOpen($event)"
+        (click)="IS_TOUCH_PRIMARY && toggleShowAdditionalInfoOpen($event)"
         class="title-and-tags-wrapper"
       >
         <div
@@ -150,12 +150,12 @@
           [isResetAfterEdit]="true"
           [value]="task.title"
           spellcheck="false"
-          class="task-title show-only-on-no-touch-only"
+          class="task-title show-only-on-mouse-primary"
           contentEditableOnClick
           contenteditable="true"
         ></div>
 
-        <div class="task-title show-only-on-touch-only">{{task.title}}</div>
+        <div class="task-title show-only-on-touch-primary">{{task.title}}</div>
 
         <tag-list
           [task]="task"
@@ -203,7 +203,7 @@
 
       <div class="controls">
         <div
-          *ngIf="isFirstLineHover && !IS_TOUCH_ONLY"
+          *ngIf="isFirstLineHover && !IS_TOUCH_PRIMARY"
           class="hover-controls"
         >
           <button
@@ -334,7 +334,7 @@
           <ng-template matMenuContent>
             <button
               (click)="startTask()"
-              *ngIf="IS_TOUCH_ONLY && !task.isDone && !isCurrent && !task.subTasks?.length"
+              *ngIf="IS_TOUCH_PRIMARY && !task.isDone && !isCurrent && !task.subTasks?.length"
               mat-menu-item
             >
               <mat-icon
@@ -345,7 +345,7 @@
             </button>
             <button
               (click)="pauseTask()"
-              *ngIf="IS_TOUCH_ONLY && !task.isDone && isCurrent && !task.subTasks?.length"
+              *ngIf="IS_TOUCH_PRIMARY && !task.isDone && isCurrent && !task.subTasks?.length"
               mat-menu-item
             >
               <mat-icon>pause</mat-icon>
@@ -354,7 +354,7 @@
 
             <button
               (click)="removeFromMyDay()"
-              *ngIf="IS_TOUCH_ONLY && !task.parentId && !task.isDone && isTodayTag && (task.projectId || task.tagIds?.length > 1)"
+              *ngIf="IS_TOUCH_PRIMARY && !task.parentId && !task.isDone && isTodayTag && (task.projectId || task.tagIds?.length > 1)"
               mat-menu-item
             >
               <mat-icon svgIcon="remove_today"></mat-icon>

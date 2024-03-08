@@ -52,7 +52,7 @@ import { fadeAnimation } from '../../../ui/animations/fade.ani';
 import { swirlAnimation } from '../../../ui/animations/swirl-in-out.ani';
 import { DialogTimeEstimateComponent } from '../dialog-time-estimate/dialog-time-estimate.component';
 import { MatDialog } from '@angular/material/dialog';
-import { IS_TOUCH_ONLY, isTouchOnly } from '../../../util/is-touch-only';
+import { isTouchOnly } from '../../../util/is-touch-only';
 import { DialogAddTaskReminderComponent } from '../dialog-add-task-reminder/dialog-add-task-reminder.component';
 import { AddTaskReminderInterface } from '../dialog-add-task-reminder/add-task-reminder-interface';
 import { ReminderCopy } from '../../reminder/reminder.model';
@@ -73,6 +73,7 @@ import { GlobalConfigService } from '../../config/global-config.service';
 import { shareReplayUntil } from '../../../util/share-replay-until';
 import { TranslateService } from '@ngx-translate/core';
 import { getTaskRepeatInfoText } from './get-task-repeat-info-text.util';
+import { IS_TOUCH_PRIMARY } from '../../../util/is-mouse-primary';
 
 interface IssueAndType {
   id: string | number | null;
@@ -98,7 +99,7 @@ export class TaskAdditionalInfoComponent implements AfterViewInit, OnDestroy {
   itemEls?: QueryList<TaskAdditionalInfoItemComponent>;
   @ViewChild('attachmentPanelElRef')
   attachmentPanelElRef?: TaskAdditionalInfoItemComponent;
-  IS_TOUCH_ONLY = IS_TOUCH_ONLY;
+  IS_TOUCH_PRIMARY = IS_TOUCH_PRIMARY;
 
   _onDestroy$ = new Subject<void>();
 

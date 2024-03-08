@@ -30,8 +30,8 @@ import { IS_ELECTRON } from '../../app.constants';
 import { GlobalConfigState } from '../../features/config/global-config.model';
 import { IS_ANDROID_WEB_VIEW } from '../../util/is-android-web-view';
 import { androidInterface } from '../../features/android/android-interface';
-import { IS_TOUCH_ONLY } from '../../util/is-touch-only';
 import { ipcResume$, ipcSuspend$ } from '../../core/ipc-events';
+import { IS_TOUCH_PRIMARY } from '../../util/is-mouse-primary';
 
 const MAX_WAIT_FOR_INITIAL_SYNC = 25000;
 const USER_INTERACTION_SYNC_CHECK_THROTTLE_TIME = 15 * 60 * 10000;
@@ -76,7 +76,7 @@ export class SyncTriggerService {
           )
         : // FALLBACK we check if there was any kind of user interaction
         // (otherwise sync might never be checked if there are no local data changes)
-        IS_TOUCH_ONLY
+        IS_TOUCH_PRIMARY
         ? merge(
             fromEvent(window, 'touchstart'),
             fromEvent(window, 'visibilitychange'),
