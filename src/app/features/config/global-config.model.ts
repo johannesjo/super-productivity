@@ -101,6 +101,8 @@ export type SoundConfig = Readonly<{
 
 export type SyncConfig = Readonly<{
   isEnabled: boolean;
+  isEncryptionEnabled: boolean;
+  encryptionPassword: string | null;
   isCompressionEnabled: boolean;
   syncProvider: SyncProvider | null;
   syncInterval: number;

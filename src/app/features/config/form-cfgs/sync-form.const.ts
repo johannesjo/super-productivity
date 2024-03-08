@@ -19,6 +19,36 @@ export const SYNC_FORM: ConfigFormSection<SyncConfig> = {
       },
     },
     {
+      key: 'isEncryptionEnabled',
+      type: 'checkbox',
+      templateOptions: {
+        // TODO translation
+        label: 'Enable end-to-end encryption (experimental)',
+        // label: T.F.SYNC.FORM.L_ENABLE_COMPRESSION,
+      },
+    },
+    {
+      hideExpression: (model: any) => !model.isEncryptionEnabled,
+      type: 'tpl',
+      className: `tpl`,
+      templateOptions: {
+        tag: 'p',
+        // TODO translation
+        // text: T.GCF.AUTO_BACKUPS.LOCATION_INFO,
+        text: 'IMPORTANT NOTES: Please select a password that is secure (at least 8 characters long). Please also note that <strong>you will NOT be able to access your data, if you forget this password. There is no recovery.</strong>',
+      },
+    },
+    {
+      hideExpression: (model: any) => !model.isEncryptionEnabled,
+      type: 'input',
+      templateOptions: {
+        type: 'password',
+        // TODO translation
+        // label: T.F.SYNC.FORM.L_ENABLE_COMPRESSION,
+        label: 'Encryption Password (DO NOT FORGET)',
+      },
+    },
+    {
       key: 'isCompressionEnabled',
       type: 'checkbox',
       templateOptions: {
