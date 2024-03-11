@@ -546,7 +546,23 @@ export class SyncProviderService {
               dataString = await decrypt(backupStr, encryptionPassword);
             } catch (eDecryption) {
               console.error(eDecryption);
-              throw new Error('SP Decryption Error');
+              console.log(eDecryption);
+              console.log(
+                eDecryption &&
+                  (eDecryption as any).toString &&
+                  (eDecryption as any).toString(),
+              );
+              // we try to handle if string was compressed before but encryption is enabled in the meantime locally
+              if (
+                eDecryption &&
+                (eDecryption as any).toString &&
+                (eDecryption as any).toString() ===
+                  "InvalidCharacterError: Failed to execute 'atob' on 'Window': The string to be decoded contains characters outside of the Latin1 range."
+              ) {
+                dataString = await this._compressionService.decompressUTF16(dataString);
+              } else {
+                throw new Error('SP Decryption Error – Password wrong?');
+              }
             }
           }
           try {
@@ -572,7 +588,6 @@ export class SyncProviderService {
     const { isCompressionEnabled, isEncryptionEnabled, encryptionPassword } =
       await this.syncCfg$.pipe(first()).toPromise();
     let dataToWrite = JSON.stringify(data);
-    console.log({ isCompressionEnabled, isEncryptionEnabled, encryptionPassword });
 
     // compress first since random data can't be compressed
     if (isCompressionEnabled) {
@@ -580,7 +595,6 @@ export class SyncProviderService {
     }
     if (isEncryptionEnabled && encryptionPassword?.length) {
       dataToWrite = await encrypt(dataToWrite, encryptionPassword);
-      console.log('ENCRYPTED DATA', dataToWrite);
     }
     return dataToWrite;
   }
