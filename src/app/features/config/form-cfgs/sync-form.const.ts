@@ -40,6 +40,7 @@ export const SYNC_FORM: ConfigFormSection<SyncConfig> = {
     },
     {
       hideExpression: (model: any) => !model.isEncryptionEnabled,
+      key: 'encryptionPassword',
       type: 'input',
       templateOptions: {
         type: 'password',

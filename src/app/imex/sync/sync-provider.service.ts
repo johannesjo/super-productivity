@@ -39,6 +39,7 @@ import { LocalFileSyncElectronService } from './local-file-sync/local-file-sync-
 import { IS_ANDROID_WEB_VIEW } from '../../util/is-android-web-view';
 import { androidInterface } from '../../features/android/android-interface';
 import { CompressionService } from '../../core/compression/compression.service';
+import { decrypt, encrypt } from './encryption';
 
 @Injectable({
   providedIn: 'root',
@@ -162,6 +163,8 @@ export class SyncProviderService {
     // --------------------------------------------
     const revRes = await cp.getRevAndLastClientUpdate(localRev);
     if (typeof revRes === 'string') {
+      // TODO remove
+      console.log('XX_HRE');
       if (revRes === 'NO_REMOTE_DATA' && this._c(T.F.SYNC.C.NO_REMOTE_DATA)) {
         this._log(cp, '↑ Update Remote after no getRevAndLastClientUpdate()');
         const localLocal = await this._persistenceService.getValidCompleteData();
@@ -247,6 +250,8 @@ export class SyncProviderService {
       typeof remote.lastLocalSyncModelChange !== 'number' ||
       !remote.lastLocalSyncModelChange
     ) {
+      // TODO remove
+      console.log('XX_TEEEHRE', remote);
       if (this._c(T.F.SYNC.C.NO_REMOTE_DATA)) {
         this._log(cp, '↑ PRE4: Update Remote');
         await this._uploadAppData(cp, local);
@@ -338,7 +343,7 @@ export class SyncProviderService {
     const { dataStr, rev } = await cp.downloadAppData(localRev);
     return {
       rev,
-      data: await this._decompressAppDataIfNeeded(dataStr),
+      data: await this._decompressAndDecryptAppDataIfNeeded(dataStr),
     };
   }
 
@@ -359,7 +364,7 @@ export class SyncProviderService {
       throw new Error('lastLocalSyncModelChange is not defined');
     }
 
-    const dataStrToUpload = await this._compressAppDataIfEnabled(data);
+    const dataStrToUpload = await this._compressAndEncryptAppDataIfEnabled(data);
     const localRev = await this._getLocalRev(cp);
     const successRev = await cp.uploadAppData(
       dataStrToUpload,
@@ -519,7 +524,7 @@ export class SyncProviderService {
       .afterClosed();
   }
 
-  private async _decompressAppDataIfNeeded(
+  private async _decompressAndDecryptAppDataIfNeeded(
     backupStr: AppDataComplete | string | undefined,
   ): Promise<AppDataComplete | undefined> {
     // if the data was a json string it happens (for dropbox) that the data is returned as object
@@ -527,29 +532,57 @@ export class SyncProviderService {
       return backupStr as AppDataComplete;
     }
     if (typeof backupStr === 'string') {
+      const { isEncryptionEnabled, encryptionPassword } = await this.syncCfg$
+        .pipe(first())
+        .toPromise();
+
       try {
         return JSON.parse(backupStr) as AppDataComplete;
-      } catch (e) {
+      } catch (eIgnored) {
         try {
-          const decompressedData = await this._compressionService.decompressUTF16(
-            backupStr,
-          );
-          return JSON.parse(decompressedData) as AppDataComplete;
-        } catch (ex) {
+          let dataString = backupStr;
+          if (isEncryptionEnabled && encryptionPassword?.length) {
+            try {
+              dataString = await decrypt(backupStr, encryptionPassword);
+            } catch (eDecryption) {
+              console.error(eDecryption);
+              throw new Error('SP Decryption Error');
+            }
+          }
+          try {
+            return JSON.parse(dataString) as AppDataComplete;
+          } catch (eIgnoredInner) {
+            // try to decompress anyway
+            dataString = await this._compressionService.decompressUTF16(dataString);
+          }
+          return JSON.parse(dataString) as AppDataComplete;
+        } catch (eDecompression) {
           console.error('Sync, invalid data');
-          console.warn(ex);
+          console.warn(eDecompression);
+          throw new Error(eDecompression as any);
         }
       }
     }
     return undefined;
   }
 
-  private async _compressAppDataIfEnabled(data: AppDataComplete): Promise<string> {
-    const isCompressionEnabled = (await this.syncCfg$.pipe(first()).toPromise())
-      .isCompressionEnabled;
-    return isCompressionEnabled
-      ? this._compressionService.compressUTF16(JSON.stringify(data))
-      : JSON.stringify(data);
+  private async _compressAndEncryptAppDataIfEnabled(
+    data: AppDataComplete,
+  ): Promise<string> {
+    const { isCompressionEnabled, isEncryptionEnabled, encryptionPassword } =
+      await this.syncCfg$.pipe(first()).toPromise();
+    let dataToWrite = JSON.stringify(data);
+    console.log({ isCompressionEnabled, isEncryptionEnabled, encryptionPassword });
+
+    // compress first since random data can't be compressed
+    if (isCompressionEnabled) {
+      dataToWrite = await this._compressionService.compressUTF16(dataToWrite);
+    }
+    if (isEncryptionEnabled && encryptionPassword?.length) {
+      dataToWrite = await encrypt(dataToWrite, encryptionPassword);
+      console.log('ENCRYPTED DATA', dataToWrite);
+    }
+    return dataToWrite;
   }
 
   private _c(str: string): boolean {
