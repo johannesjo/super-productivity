@@ -560,7 +560,9 @@ export class SyncProviderService {
           let dataString = backupStr;
           if (isEncryptionEnabled && encryptionPassword?.length) {
             try {
+              console.time('decrypt');
               dataString = await decrypt(backupStr, encryptionPassword);
+              console.timeEnd('decrypt');
             } catch (eDecryption) {
               console.error(eDecryption);
               // we try to handle if string was compressed before but encryption is enabled in the meantime locally
@@ -585,9 +587,7 @@ export class SyncProviderService {
           }
           if (!dataString) {
             alert(
-              this._translateService.instant(
-                T.F.SYNC.S.ERROR_UNABLE_TO_READ_REMOTE_DATA,
-              ) + (isEncryptionEnabled ? ' – Is your password correct?' : ''),
+              this._translateService.instant(T.F.SYNC.S.ERROR_UNABLE_TO_READ_REMOTE_DATA),
             );
             throw new Error('Unable to parse remote data');
           }
@@ -614,7 +614,9 @@ export class SyncProviderService {
       dataToWrite = await this._compressionService.compressUTF16(dataToWrite);
     }
     if (isEncryptionEnabled && encryptionPassword?.length) {
+      console.time('encrypt');
       dataToWrite = await encrypt(dataToWrite, encryptionPassword);
+      console.timeEnd('encrypt');
     }
     return dataToWrite;
   }

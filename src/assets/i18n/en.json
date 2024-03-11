@@ -866,7 +866,7 @@
         "ALREADY_IN_SYNC_NO_LOCAL_CHANGES": "No local changes – Already in sync",
         "ERROR_FALLBACK_TO_BACKUP": "Something went wrong while importing the data. Falling back to local backup.",
         "ERROR_INVALID_DATA": "Error while syncing. Invalid data",
-        "ERROR_UNABLE_TO_READ_REMOTE_DATA": "Error while syncing. Unable to read remote data.",
+        "ERROR_UNABLE_TO_READ_REMOTE_DATA": "Error while syncing. Unable to read remote data. Maybe you enabled encryption and your local password does not match the one used to encrypt the remote data?",
         "IMPORTING": "Importing data",
         "INCOMPLETE_CFG": "Authentication for sync failed. Please check your Config!",
         "INITIAL_SYNC_ERROR": "Initial Sync failed",
