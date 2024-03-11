@@ -163,8 +163,6 @@ export class SyncProviderService {
     // --------------------------------------------
     const revRes = await cp.getRevAndLastClientUpdate(localRev);
     if (typeof revRes === 'string') {
-      // TODO remove
-      console.log('XX_HRE');
       if (revRes === 'NO_REMOTE_DATA' && this._c(T.F.SYNC.C.NO_REMOTE_DATA)) {
         this._log(cp, '↑ Update Remote after no getRevAndLastClientUpdate()');
         const localLocal = await this._persistenceService.getValidCompleteData();
@@ -238,8 +236,29 @@ export class SyncProviderService {
       return 'SUCCESS';
     }
 
-    // DOWNLOAD OF REMOTE
-    const r = await this._downloadAppData(cp);
+    // PRE CHECK 4
+    // DOWNLOAD OF REMOTE (and possible error)
+    let r;
+    try {
+      r = await this._downloadAppData(cp);
+    } catch (e) {
+      console.error('Download Data failed');
+      this._snackService.open({
+        msg: T.F.SYNC.S.ERROR_UNABLE_TO_READ_REMOTE_DATA,
+        translateParams: {
+          err: getSyncErrorStr(revRes),
+        },
+        type: 'ERROR',
+      });
+
+      if (this._c(T.F.SYNC.C.UNABLE_TO_LOAD_REMOTE_DATA)) {
+        this._log(cp, '↑ PRE4: Update Remote after download error');
+        await this._uploadAppData(cp, local);
+        return 'SUCCESS';
+      } else {
+        return 'USER_ABORT';
+      }
+    }
 
     // PRE CHECK 4
     // check if there is no data or no valid remote data
@@ -250,10 +269,8 @@ export class SyncProviderService {
       typeof remote.lastLocalSyncModelChange !== 'number' ||
       !remote.lastLocalSyncModelChange
     ) {
-      // TODO remove
-      console.log('XX_TEEEHRE', remote);
       if (this._c(T.F.SYNC.C.NO_REMOTE_DATA)) {
-        this._log(cp, '↑ PRE4: Update Remote');
+        this._log(cp, '↑ PRE5: Update Remote');
         await this._uploadAppData(cp, local);
         return 'SUCCESS';
       } else {
@@ -526,7 +543,7 @@ export class SyncProviderService {
 
   private async _decompressAndDecryptAppDataIfNeeded(
     backupStr: AppDataComplete | string | undefined,
-  ): Promise<AppDataComplete | undefined> {
+  ): Promise<AppDataComplete> {
     // if the data was a json string it happens (for dropbox) that the data is returned as object
     if (typeof backupStr === 'object' && backupStr?.task) {
       return backupStr as AppDataComplete;
@@ -546,12 +563,6 @@ export class SyncProviderService {
               dataString = await decrypt(backupStr, encryptionPassword);
             } catch (eDecryption) {
               console.error(eDecryption);
-              console.log(eDecryption);
-              console.log(
-                eDecryption &&
-                  (eDecryption as any).toString &&
-                  (eDecryption as any).toString(),
-              );
               // we try to handle if string was compressed before but encryption is enabled in the meantime locally
               if (
                 eDecryption &&
@@ -568,8 +579,17 @@ export class SyncProviderService {
           try {
             return JSON.parse(dataString) as AppDataComplete;
           } catch (eIgnoredInner) {
+            console.error(eIgnoredInner);
             // try to decompress anyway
             dataString = await this._compressionService.decompressUTF16(dataString);
+          }
+          if (!dataString) {
+            alert(
+              this._translateService.instant(
+                T.F.SYNC.S.ERROR_UNABLE_TO_READ_REMOTE_DATA,
+              ) + (isEncryptionEnabled ? ' – Is your password correct?' : ''),
+            );
+            throw new Error('Unable to parse remote data');
           }
           return JSON.parse(dataString) as AppDataComplete;
         } catch (eDecompression) {
@@ -579,7 +599,7 @@ export class SyncProviderService {
         }
       }
     }
-    return undefined;
+    throw new Error('Unable to parse remote data due to unknown reasons');
   }
 
   private async _compressAndEncryptAppDataIfEnabled(

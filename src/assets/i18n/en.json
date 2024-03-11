@@ -810,7 +810,8 @@
         "FORCE_UPLOAD_AFTER_ERROR": "An Error occurred while uploading your local data. Try to force the update?",
         "MIGRATE_LEGACY": "Legacy data detected while importing, do you want to try to migrate it?",
         "NO_REMOTE_DATA": "No remote data found. Upload local to Remote?",
-        "TRY_LOAD_REMOTE_AGAIN": "Try to re-load data from remote once again?"
+        "TRY_LOAD_REMOTE_AGAIN": "Try to re-load data from remote once again?",
+        "UNABLE_TO_LOAD_REMOTE_DATA": "Unable to load data from remote. Do you want to try to overwrite the remote data with your local data? All remote data will be lost in the process."
       },
       "D_AUTH_CODE": {
         "FOLLOW_LINK": "Please open the following link and copy the auth code provided there into the the input field below.",
@@ -865,6 +866,7 @@
         "ALREADY_IN_SYNC_NO_LOCAL_CHANGES": "No local changes – Already in sync",
         "ERROR_FALLBACK_TO_BACKUP": "Something went wrong while importing the data. Falling back to local backup.",
         "ERROR_INVALID_DATA": "Error while syncing. Invalid data",
+        "ERROR_UNABLE_TO_READ_REMOTE_DATA": "Error while syncing. Unable to read remote data.",
         "IMPORTING": "Importing data",
         "INCOMPLETE_CFG": "Authentication for sync failed. Please check your Config!",
         "INITIAL_SYNC_ERROR": "Initial Sync failed",
