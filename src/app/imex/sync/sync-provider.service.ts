@@ -39,6 +39,7 @@ import { LocalFileSyncElectronService } from './local-file-sync/local-file-sync-
 import { IS_ANDROID_WEB_VIEW } from '../../util/is-android-web-view';
 import { androidInterface } from '../../features/android/android-interface';
 import { CompressionService } from '../../core/compression/compression.service';
+import { decrypt, encrypt } from './encryption';
 
 @Injectable({
   providedIn: 'root',
@@ -235,8 +236,29 @@ export class SyncProviderService {
       return 'SUCCESS';
     }
 
-    // DOWNLOAD OF REMOTE
-    const r = await this._downloadAppData(cp);
+    // PRE CHECK 4
+    // DOWNLOAD OF REMOTE (and possible error)
+    let r;
+    try {
+      r = await this._downloadAppData(cp);
+    } catch (e) {
+      console.error('Download Data failed');
+      this._snackService.open({
+        msg: T.F.SYNC.S.ERROR_UNABLE_TO_READ_REMOTE_DATA,
+        translateParams: {
+          err: getSyncErrorStr(revRes),
+        },
+        type: 'ERROR',
+      });
+
+      if (this._c(T.F.SYNC.C.UNABLE_TO_LOAD_REMOTE_DATA)) {
+        this._log(cp, '↑ PRE4: Update Remote after download error');
+        await this._uploadAppData(cp, local);
+        return 'SUCCESS';
+      } else {
+        return 'USER_ABORT';
+      }
+    }
 
     // PRE CHECK 4
     // check if there is no data or no valid remote data
@@ -248,7 +270,7 @@ export class SyncProviderService {
       !remote.lastLocalSyncModelChange
     ) {
       if (this._c(T.F.SYNC.C.NO_REMOTE_DATA)) {
-        this._log(cp, '↑ PRE4: Update Remote');
+        this._log(cp, '↑ PRE5: Update Remote');
         await this._uploadAppData(cp, local);
         return 'SUCCESS';
       } else {
@@ -338,7 +360,7 @@ export class SyncProviderService {
     const { dataStr, rev } = await cp.downloadAppData(localRev);
     return {
       rev,
-      data: await this._decompressAppDataIfNeeded(dataStr),
+      data: await this._decompressAndDecryptAppDataIfNeeded(dataStr),
     };
   }
 
@@ -359,7 +381,7 @@ export class SyncProviderService {
       throw new Error('lastLocalSyncModelChange is not defined');
     }
 
-    const dataStrToUpload = await this._compressAppDataIfEnabled(data);
+    const dataStrToUpload = await this._compressAndEncryptAppDataIfEnabled(data);
     const localRev = await this._getLocalRev(cp);
     const successRev = await cp.uploadAppData(
       dataStrToUpload,
@@ -519,37 +541,84 @@ export class SyncProviderService {
       .afterClosed();
   }
 
-  private async _decompressAppDataIfNeeded(
+  private async _decompressAndDecryptAppDataIfNeeded(
     backupStr: AppDataComplete | string | undefined,
-  ): Promise<AppDataComplete | undefined> {
+  ): Promise<AppDataComplete> {
     // if the data was a json string it happens (for dropbox) that the data is returned as object
     if (typeof backupStr === 'object' && backupStr?.task) {
       return backupStr as AppDataComplete;
     }
     if (typeof backupStr === 'string') {
+      const { isEncryptionEnabled, encryptionPassword } = await this.syncCfg$
+        .pipe(first())
+        .toPromise();
+
       try {
         return JSON.parse(backupStr) as AppDataComplete;
-      } catch (e) {
+      } catch (eIgnored) {
         try {
-          const decompressedData = await this._compressionService.decompressUTF16(
-            backupStr,
-          );
-          return JSON.parse(decompressedData) as AppDataComplete;
-        } catch (ex) {
+          let dataString = backupStr;
+          if (isEncryptionEnabled && encryptionPassword?.length) {
+            try {
+              console.time('decrypt');
+              dataString = await decrypt(backupStr, encryptionPassword);
+              console.timeEnd('decrypt');
+            } catch (eDecryption) {
+              console.error(eDecryption);
+              // we try to handle if string was compressed before but encryption is enabled in the meantime locally
+              if (
+                eDecryption &&
+                (eDecryption as any).toString &&
+                (eDecryption as any).toString() ===
+                  "InvalidCharacterError: Failed to execute 'atob' on 'Window': The string to be decoded contains characters outside of the Latin1 range."
+              ) {
+                dataString = await this._compressionService.decompressUTF16(dataString);
+              } else {
+                throw new Error('SP Decryption Error – Password wrong?');
+              }
+            }
+          }
+          try {
+            return JSON.parse(dataString) as AppDataComplete;
+          } catch (eIgnoredInner) {
+            console.error(eIgnoredInner);
+            // try to decompress anyway
+            dataString = await this._compressionService.decompressUTF16(dataString);
+          }
+          if (!dataString) {
+            alert(
+              this._translateService.instant(T.F.SYNC.S.ERROR_UNABLE_TO_READ_REMOTE_DATA),
+            );
+            throw new Error('Unable to parse remote data');
+          }
+          return JSON.parse(dataString) as AppDataComplete;
+        } catch (eDecompression) {
           console.error('Sync, invalid data');
-          console.warn(ex);
+          console.warn(eDecompression);
+          throw new Error(eDecompression as any);
         }
       }
     }
-    return undefined;
+    throw new Error('Unable to parse remote data due to unknown reasons');
   }
 
-  private async _compressAppDataIfEnabled(data: AppDataComplete): Promise<string> {
-    const isCompressionEnabled = (await this.syncCfg$.pipe(first()).toPromise())
-      .isCompressionEnabled;
-    return isCompressionEnabled
-      ? this._compressionService.compressUTF16(JSON.stringify(data))
-      : JSON.stringify(data);
+  private async _compressAndEncryptAppDataIfEnabled(
+    data: AppDataComplete,
+  ): Promise<string> {
+    const { isCompressionEnabled, isEncryptionEnabled, encryptionPassword } =
+      await this.syncCfg$.pipe(first()).toPromise();
+    let dataToWrite = JSON.stringify(data);
+
+    // compress first since random data can't be compressed
+    if (isCompressionEnabled) {
+      dataToWrite = await this._compressionService.compressUTF16(dataToWrite);
+    }
+    if (isEncryptionEnabled && encryptionPassword?.length) {
+      console.time('encrypt');
+      dataToWrite = await encrypt(dataToWrite, encryptionPassword);
+      console.timeEnd('encrypt');
+    }
+    return dataToWrite;
   }
 
   private _c(str: string): boolean {

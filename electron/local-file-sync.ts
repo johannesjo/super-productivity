@@ -20,6 +20,9 @@ export const initLocalFileSyncAdapter = (): void => {
       },
     ): string | Error => {
       try {
+        console.log(IPC.FILE_SYNC_SAVE, filePath);
+        console.log('writeFileSync', filePath, !!dataStr);
+
         writeFileSync(filePath, dataStr);
         return getRev(filePath);
       } catch (e) {
@@ -43,6 +46,8 @@ export const initLocalFileSyncAdapter = (): void => {
       },
     ): { rev: string; clientUpdate?: number } | SyncGetRevResult => {
       try {
+        console.log(IPC.FILE_SYNC_GET_REV_AND_CLIENT_UPDATE, filePath, localRev);
+        console.log('getRev and stuuff');
         readFileSync(filePath);
         return {
           rev: getRev(filePath),
@@ -69,7 +74,9 @@ export const initLocalFileSyncAdapter = (): void => {
       },
     ): { rev: string; dataStr: string | undefined } | Error => {
       try {
+        console.log(IPC.FILE_SYNC_LOAD, filePath, localRev);
         const dataStr = readFileSync(filePath, { encoding: 'utf-8' });
+        console.log('READ ', dataStr.length);
         return {
           rev: getRev(filePath),
           dataStr,

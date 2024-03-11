@@ -26,6 +26,32 @@ export const SYNC_FORM: ConfigFormSection<SyncConfig> = {
       },
     },
     {
+      key: 'isEncryptionEnabled',
+      type: 'checkbox',
+      templateOptions: {
+        label: T.F.SYNC.FORM.L_ENABLE_ENCRYPTION,
+      },
+    },
+    {
+      hideExpression: (model: any) => !model.isEncryptionEnabled,
+      type: 'tpl',
+      className: `tpl`,
+      templateOptions: {
+        tag: 'div',
+        text: T.F.SYNC.FORM.L_ENCRYPTION_NOTES,
+      },
+    },
+    {
+      hideExpression: (model: any) => !model.isEncryptionEnabled,
+      key: 'encryptionPassword',
+      type: 'input',
+      templateOptions: {
+        required: true,
+        type: 'password',
+        label: T.F.SYNC.FORM.L_ENCRYPTION_PASSWORD,
+      },
+    },
+    {
       key: 'syncInterval',
       type: 'duration',
       // NOTE: we don't hide because model updates don't seem to work properly for this
