@@ -178,7 +178,7 @@
     "cross-env": "^7.0.3",
     "detect-it": "^4.0.1",
     "electron": "^28.2.0",
-    "electron-builder": "24.9.1",
+    "electron-builder": "24.13.3",
     "electron-builder-notarize": "^1.5.1",
     "eslint": "^8.23.0",
     "eslint-config-prettier": "^8.5.0",
