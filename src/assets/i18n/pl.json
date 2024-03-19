@@ -125,7 +125,7 @@
       "S": {
         "ACCESS_TOKEN_ERROR": "Dropbox: Nie można wygenerować kodu dostępu z kodu uwieżytelniającego",
         "ACCESS_TOKEN_GENERATED": "Dropbox: Access Token generated from Auth Code",
-        "AUTH_ERROR": "Dropbox: Wprowadzono nie poprawny kod dostępu",
+        "AUTH_ERROR": "Dropbox: Wprowadzono niepoprawny kod dostępu",
         "OFFLINE": "Dropbox: Jesteś offline - nie mogę szynchronizować",
         "SYNC_ERROR": "Dropbox: Wystąpił błąd podczas synchronizacji"
       }
@@ -238,45 +238,45 @@
     },
     "JIRA": {
       "BANNER": {
-        "BLOCK_ACCESS_MSG": "Jira: Aby zapobiec blokady api, Super Productivity zablokował dostęp. Sprawdź swoje ustawienia konta Jiry!",
+        "BLOCK_ACCESS_MSG": "Jira: Aby zapobiec blokadzie api, Super Productivity zablokował dostęp. Sprawdź swoje ustawienia konta Jira!",
         "BLOCK_ACCESS_UNBLOCK": "Odblokuj"
       },
       "CFG_CMP": {
         "ALWAYS_ASK": "Zawsze otwieraj okno dialogowe",
         "DONE": "Status zakończonego zadania",
         "DO_NOT": "Don't transition",
-        "ENABLE": "Włącz integrację z Jirą",
+        "ENABLE": "Włącz integrację z plstformą Jira",
         "ENABLE_TRANSITIONS": "Enable Transition Handling",
         "IN_PROGRESS": "Status rozpoczętego zadania",
-        "LOAD_SUGGESTIONS": "Załaduj Sugestie",
-        "MAP_CUSTOM_FIELDS": "Zmapuj Niestandardowe Pola",
+        "LOAD_SUGGESTIONS": "Załaduj sugestie",
+        "MAP_CUSTOM_FIELDS": "Dopasuj niestandardowe pola",
         "MAP_CUSTOM_FIELDS_INFO": "Unfortunately some of Jira's data is saved under custom fields which are different for every installation. If you want to include this data you need to select the proper custom field for it.",
         "OPEN": "Status zatrzymanego zadania",
         "SELECT_ISSUE_FOR_TRANSITIONS": "Select issue to load available transitions",
         "STORY_POINTS": "Story Points"
       },
       "DIALOG_CONFIRM_ASSIGNMENT": {
-        "MSG": "<strong>{{summary}}</strong> jest przypisane do <strong>{{assignee}}</strong>. Czy chcesz się przypisać?",
+        "MSG": "<strong>{{summary}}</strong> jest przypisane do <strong>{{assignee}}</strong>. Czy chcesz przypisać zadanie do siebie?",
         "OK": "Zrób to!"
       },
       "DIALOG_INITIAL": {
         "TITLE": "Ustawenia Jiry dla projektu"
       },
       "DIALOG_TRANSITION": {
-        "CHOOSE_STATUS": "Wybierz status na przypisanie",
+        "CHOOSE_STATUS": "Wybierz status do przypisania",
         "CURRENT_ASSIGNEE": "Aktualnie przypisany:",
-        "CURRENT_STATUS": "Aktualny Status:",
-        "TITLE": "Jira: Status Aktualizacji",
-        "UPDATE_STATUS": "Status Aktualizacji"
+        "CURRENT_STATUS": "Aktualny status:",
+        "TITLE": "Jira: Status aktualizacji",
+        "UPDATE_STATUS": "Status aktualizacji"
       },
       "DIALOG_WORKLOG": {
-        "CURRENTLY_LOGGED": "Aktualny czas zalogowany: ",
+        "CURRENTLY_LOGGED": "Zaraportowany czas: ",
         "INVALID_DATE": "Wprowadzono błędną datę!",
-        "SAVE_WORKLOG": "Zapisz Worklog",
+        "SAVE_WORKLOG": "Zapisz dziennik pracy (worklog)",
         "STARTED": "Rozpoczęto",
-        "SUBMIT_WORKLOG_FOR": "Wyślij worklog do Jiry dla",
+        "SUBMIT_WORKLOG_FOR": "Wyślij dziennik pracy (worklog) na platformę Jira do Jiry dla",
         "TIME_SPENT": "Spędzono",
-        "TITLE": "Jira: Wyślij Worklog"
+        "TITLE": "Jira: Wyślij dziennik pracy (worklog)"
       },
       "FORM": {
         "IS_AUTO_IMPORT_ISSUES": "Automatically add unresolved issues from GitHub to backlog",
@@ -294,7 +294,7 @@
         "SEARCH_JQL_QUERY": "JQL Query for limiting searching tasks"
       },
       "FORM_CRED": {
-        "ALLOW_SELF_SIGNED": "Pozwól na osobisty certyfikat",
+        "ALLOW_SELF_SIGNED": "Pozwól na certyfikat z podpisem własnym",
         "HOST": "Host (e.g.: http://my-host.de:1234)",
         "PASSWORD": "Token / Hasło",
         "USER_NAME": "Email / Nazwa użytkownika",
