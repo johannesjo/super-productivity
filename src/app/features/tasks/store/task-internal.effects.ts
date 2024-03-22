@@ -8,17 +8,20 @@ import {
   unsetCurrentTask,
   updateTask,
 } from './task.actions';
+import { stopPomodoro } from '../../pomodoro/store/pomodoro.actions';
 import { select, Store } from '@ngrx/store';
-import { filter, map, mergeMap, withLatestFrom } from 'rxjs/operators';
-import { selectTaskFeatureState } from './task.selectors';
+import { filter, map, mapTo, mergeMap, switchMap, withLatestFrom } from 'rxjs/operators';
+import { selectCurrentTask, selectTaskFeatureState } from './task.selectors';
 import { selectMiscConfig } from '../../config/store/global-config.reducer';
 import { Task, TaskState } from '../task.model';
 import { EMPTY, of } from 'rxjs';
+import { PomodoroService } from '../../pomodoro/pomodoro.service';
 import { WorkContextService } from '../../work-context/work-context.service';
 import {
   moveProjectTaskToBacklogList,
   moveProjectTaskToBacklogListAuto,
 } from '../../project/store/project.actions';
+import { M } from '@angular/cdk/keycodes';
 
 @Injectable()
 export class TaskInternalEffects {
@@ -142,9 +145,28 @@ export class TaskInternalEffects {
     ),
   );
 
+  stopPomodoroOnTaskDone$: any = createEffect(() =>
+    this._actions$.pipe(
+      ofType(updateTask),
+      withLatestFrom(this._store$.pipe(select(selectCurrentTask))),
+      filter(
+        ([
+          {
+            task: { changes, id },
+          },
+          currentTask,
+        ]) => !!changes.isDone && id === currentTask?.id,
+      ),
+      withLatestFrom(this._pomodoroService.isEnabled$),
+      filter(([changes, isEnabled]) => !!isEnabled),
+      mapTo(stopPomodoro()),
+    ),
+  );
+
   constructor(
     private _actions$: Actions,
     private _store$: Store<any>,
+    private _pomodoroService: PomodoroService,
     private _workContextSession: WorkContextService,
   ) {}
 
