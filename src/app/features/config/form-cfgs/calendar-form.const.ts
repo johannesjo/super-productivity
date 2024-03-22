@@ -80,7 +80,7 @@ export const CALENDAR_FORM_CFG: ConfigFormSection<CalendarIntegrationConfig> = {
             hooks: {
               onInit: (field) => {
                 if (!field?.formControl?.value) {
-                  field?.formControl?.setValue(60 * 60000);
+                  field?.formControl?.setValue(2 * 60 * 60000);
                 }
               },
             },
@@ -96,7 +96,7 @@ export const CALENDAR_FORM_CFG: ConfigFormSection<CalendarIntegrationConfig> = {
             hooks: {
               onInit: (field) => {
                 if (!field?.formControl?.value) {
-                  field?.formControl?.setValue(60 * 60000);
+                  field?.formControl?.setValue(2 * 60 * 60000);
                 }
               },
             },

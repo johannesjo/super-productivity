@@ -141,7 +141,7 @@ export const DEFAULT_GLOBAL_CONFIG: GlobalConfigState = {
   },
   reminder: {
     isCountdownBannerEnabled: true,
-    countdownDuration: minute * 5,
+    countdownDuration: minute * 10,
   },
   timeline: {
     isWorkStartEndEnabled: true,

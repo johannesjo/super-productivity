@@ -17,7 +17,7 @@ const ab2base64 = (buffer: ArrayBuffer): string => {
   return window.btoa(binary);
 };
 
-const generateKey = async (password: string): Promise<CryptoKey> => {
+const _generateKey = async (password: string): Promise<CryptoKey> => {
   const enc = new TextEncoder();
   const passwordBuffer = enc.encode(password);
   const ops = {
@@ -45,11 +45,17 @@ const generateKey = async (password: string): Promise<CryptoKey> => {
   );
 };
 
+export const generateKey = async (password: string): Promise<string> => {
+  const cryptoKey = await _generateKey(password);
+  const exportKey = await window.crypto.subtle.exportKey('raw', cryptoKey);
+  return ab2base64(exportKey);
+};
+
 // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
 export async function encrypt(data: string, password: string): Promise<string> {
   const enc = new TextEncoder();
   const dataBuffer = enc.encode(data);
-  const key = await generateKey(password);
+  const key = await _generateKey(password);
   const iv = window.crypto.getRandomValues(new Uint8Array(12));
   const encryptedContent = await window.crypto.subtle.encrypt(
     { name: ALGORITHM, iv: iv },
@@ -67,7 +73,7 @@ export async function decrypt(data: string, password: string): Promise<string> {
   const dataBuffer = base642ab(data);
   const iv = new Uint8Array(dataBuffer, 0, 12);
   const encryptedData = new Uint8Array(dataBuffer, 12);
-  const key = await generateKey(password);
+  const key = await _generateKey(password);
   const decryptedContent = await window.crypto.subtle.decrypt(
     { name: ALGORITHM, iv: iv },
     key,
