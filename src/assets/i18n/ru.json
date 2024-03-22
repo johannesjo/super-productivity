@@ -711,7 +711,7 @@
     },
     "TASK": {
       "ADDITIONAL_INFO": {
-        "ADD_ATTACHMENT": "Добавить приложение",
+        "ADD_ATTACHMENT": "Добавить вложение",
         "ADD_SUB_TASK": "Добавить подзадачу",
         "ATTACHMENTS": "Вложения {{nr}}",
         "FROM_PARENT": "(от родителя)",
