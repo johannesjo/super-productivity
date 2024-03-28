@@ -154,13 +154,13 @@
       }
     },
     "FOCUS_MODE": {
-      "BACK_TO_PLANNING": "Back to Planing",
+      "BACK_TO_PLANNING": "Back to Planning",
       "CANCEL_FOCUS_SESSION": "Cancel Focus Session",
       "CONGRATS": "Congrats for completing this session!",
       "CONTINUE_FOCUS_SESSION": "Continue Focus Session",
       "FINISH_TASK_AND_SELECT_NEXT": "Finish task and select next",
-      "GET_READY": "Get ready for your focus session!!!",
-      "GOGOGO": "Go go go!!!",
+      "GET_READY": "Get ready for your focus session!",
+      "GOGOGO": "Go, go, go!!!",
       "GO_TO_PROCRASTINATION": "Get help, when procrastinating",
       "NEXT": "Next",
       "ON": "on",
@@ -312,7 +312,7 @@
         "SOURCE_GROUP": "Group",
         "SOURCE_PROJECT": "Project",
         "SUBMIT_TIMELOGS": "Submit timelogs to Gitlab",
-        "SUBMIT_TIMELOGS_DESCRIPTION": "Show Time Tracking Dialog at after clicking on finish day",
+        "SUBMIT_TIMELOGS_DESCRIPTION": "Show Time Tracking Dialog after clicking on finish day",
         "TOKEN": "Access Token",
         "FILTER": "Custom Filter",
         "FILTER_DESCRIPTION": "See https://docs.gitlab.com/ee/api/issues.html#list-issues. Multiple can be combined by &"

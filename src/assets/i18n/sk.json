@@ -142,8 +142,7 @@
     "GITHUB": {
       "DIALOG_INITIAL": {
         "TITLE": "Nastaviť GitHub pre Projekt"
-      },
-      "FORM": {}
+      }
     },
     "GITLAB": {
       "DIALOG_INITIAL": {
@@ -183,26 +182,6 @@
       },
       "S": {
         "ERR_UNKNOWN": "GitLab: Neznáma chyba {{statusCode}} {{errorMsg}}"
-      }
-    },
-    "GOOGLE": {
-      "BANNER": {
-        "AUTH_FAIL": "GoogleApi: Nepodarilo sa overiť, skúste sa prihlásiť znova!"
-      },
-      "DIALOG": {
-        "CREATE_SYNC_FILE": "Google Drive: Súbor s názvom <strong>\"{{fileName}}\"</strong> nebol nájdený. <strong>Vytvoriť</strong> to ako synchronizačný súbor na disku Google?",
-        "USE_EXISTING_SYNC_FILE": "Google Drive: Použiť <strong>existujúci</strong> súbor <strong>\"{{fileName}}\"</strong> ako synchronizačný súbor? Ak nie, prosím zmeňte názov synchronizačného súboru."
-      },
-      "S": {
-        "MULTIPLE_SYNC_FILES_WITH_SAME_NAME": "Nájdených viacero súborov s názvom \"{{newFileName}}\". Odstráňte všetky okrem jedného alebo vyberte iný názov.",
-        "SYNC_FILE_CREATION_ERROR": "Google Drive: Chyba pri vytváraní synchronizačného súboru. {{err}}",
-        "UPDATED_SYNC_FILE_NAME": "Google Drive: Aktualizovaný názov synchronizačného súboru"
-      },
-      "S_API": {
-        "ERR": "GoogleApi Error: {{errStr}}",
-        "ERR_NO_FILE_ID": "GoogleApi: Nie je zadané žiadne id súboru",
-        "ERR_NO_FILE_NAME": "GoogleApi: Nie je zadaný žiadny názov súboru",
-        "SUCCESS_LOGIN": "GoogleApi: Prihlásenie bolo úspešné"
       }
     },
     "ISSUE": {
@@ -653,8 +632,8 @@
           "L_SYNC_FILE_PATH": "Cesta k synchronizovanému súboru",
           "L_SYNC_FILE_PATH_DESCRIPTION": "Absolútna cesta k súboru, ktorý sa má použiť na synchronizáciu (vytvorí sa)."
         },
-        "L_ENABLE_SYNCING": "Povoliť synchronizáciu",
         "L_ENABLE_COMPRESSION": "Povoliť kompresie (rýchlejší prenos údajov)",
+        "L_ENABLE_SYNCING": "Povoliť synchronizáciu",
         "L_SYNC_INTERVAL": "Interval synchronizácie",
         "L_SYNC_PROVIDER": "Poskytovateľ synchronizácie",
         "TITLE": "Synchronizácia",
@@ -926,11 +905,11 @@
       "MENU_TITLE": "Časová os",
       "NOW": "Teraz",
       "NO_TASKS": "V súčasnosti nie sú k dispozícii žiadne úlohy. Prosím, pridajte nejaké úlohy pomocou tlačidla + v hornej lište.",
+      "START": "Začiatok práce",
+      "TASK_PROJECTION_INFO": "Budúca projekcia naplánovanej opakovateľnej úlohy",
       "S": {
         "CAL_PROVIDER_ERROR": "Timeline Cal Provider Error: {{errTxt}}"
-      },
-      "START": "Začiatok práce",
-      "TASK_PROJECTION_INFO": "Budúca projekcia naplánovanej opakovateľnej úlohy"
+      }
     },
     "TIME_TRACKING": {
       "B": {
@@ -963,18 +942,6 @@
         "TASK": "Úloha",
         "TRACK_TO": "Track to:",
         "UNTRACKED_TIME": "Nesledovaný čas:"
-      }
-    },
-    "WELCOME": {
-      "D_WELCOME": {
-        "L1": "Začíname",
-        "L2": "Úvodné video na youtube",
-        "L3": "Spýtajte sa",
-        "LETS_GO": "Poďme na to!!",
-        "MOBILE_INFO": "<strong>Swipe</strong> created tasks <strong>right, to mark them as done</strong>.\n    Swipe them left to schedule. Longpress them for more actions.",
-        "T1": "Great to see, that you decided to give this app a go! \uD83E\uDD84",
-        "T2": "If you're having trouble to find your way around here, there are several places you\n    can find help:",
-        "TITLE": "Vitajte v Super Productivity!"
       }
     },
     "WORKLOG": {
@@ -1031,6 +998,38 @@
         "EXPORT": "Export Week Data",
         "NO_DATA": "No tasks this week yet.",
         "TITLE": "Title"
+      }
+    },
+    "GOOGLE": {
+      "BANNER": {
+        "AUTH_FAIL": "GoogleApi: Nepodarilo sa overiť, skúste sa prihlásiť znova!"
+      },
+      "DIALOG": {
+        "CREATE_SYNC_FILE": "Google Drive: Súbor s názvom <strong>\"{{fileName}}\"</strong> nebol nájdený. <strong>Vytvoriť</strong> to ako synchronizačný súbor na disku Google?",
+        "USE_EXISTING_SYNC_FILE": "Google Drive: Použiť <strong>existujúci</strong> súbor <strong>\"{{fileName}}\"</strong> ako synchronizačný súbor? Ak nie, prosím zmeňte názov synchronizačného súboru."
+      },
+      "S": {
+        "MULTIPLE_SYNC_FILES_WITH_SAME_NAME": "Nájdených viacero súborov s názvom \"{{newFileName}}\". Odstráňte všetky okrem jedného alebo vyberte iný názov.",
+        "SYNC_FILE_CREATION_ERROR": "Google Drive: Chyba pri vytváraní synchronizačného súboru. {{err}}",
+        "UPDATED_SYNC_FILE_NAME": "Google Drive: Aktualizovaný názov synchronizačného súboru"
+      },
+      "S_API": {
+        "ERR": "GoogleApi Error: {{errStr}}",
+        "ERR_NO_FILE_ID": "GoogleApi: Nie je zadané žiadne id súboru",
+        "ERR_NO_FILE_NAME": "GoogleApi: Nie je zadaný žiadny názov súboru",
+        "SUCCESS_LOGIN": "GoogleApi: Prihlásenie bolo úspešné"
+      }
+    },
+    "WELCOME": {
+      "D_WELCOME": {
+        "L1": "Začíname",
+        "L2": "Úvodné video na youtube",
+        "L3": "Spýtajte sa",
+        "LETS_GO": "Poďme na to!!",
+        "MOBILE_INFO": "<strong>Swipe</strong> created tasks <strong>right, to mark them as done</strong>.\n    Swipe them left to schedule. Longpress them for more actions.",
+        "T1": "Great to see, that you decided to give this app a go! 🦄",
+        "T2": "If you're having trouble to find your way around here, there are several places you\n    can find help:",
+        "TITLE": "Vitajte v Super Productivity!"
       }
     }
   },
@@ -1198,9 +1197,9 @@
     "SOUND": {
       "DONE_SOUND": "Zvuk dokončenia úlohy",
       "IS_INCREASE_DONE_PITCH": "Zvýšiť výšku tónu za každú vykonanú úlohu",
-      "IS_PLAY_DONE_SOUND": "Prehrať zvuk, keď je úloha označená ako hotová",
       "TITLE": "Zvuk",
-      "VOLUME": "Volume"
+      "VOLUME": "Volume",
+      "IS_PLAY_DONE_SOUND": "Prehrať zvuk, keď je úloha označená ako hotová"
     },
     "TAKE_A_BREAK": {
       "HELP": "<div> <p>Allows you to configure a reoccurring reminder when you have worked for a specified amount of time without taking a break.</p> <p>You can modify the message displayed. ${duration} will be replaced with the time spent without a break.</p> </div>",
@@ -1215,16 +1214,16 @@
       "TITLE": "Break Reminder"
     },
     "TIMELINE": {
-      "CAL_PROVIDERS": "Calendar providers (experimental and optional)",
-      "CAL_PROVIDERS_ADD": "Add ical source",
-      "CAL_PROVIDERS_INFO": "You can optionally configure the timeline to also load and display data from iCal (e.g. Google Calendar).",
       "HELP": "The timeline feature should provide you with a quick overview over how your planned tasks play out over time. You can find it in the left hand menu under <a href='#/timeline'>'Timeline'</a>. ",
-      "L_CAL_PATH": "Url/File path for calendar ICAL (optional)",
       "L_IS_WORK_START_END_ENABLED": "Limit unscheduled task flow to specific work times",
       "L_WORK_END": "Work Day End",
       "L_WORK_START": "Work Day Start",
       "TITLE": "Timeline",
-      "WORK_START_END_DESCRIPTION": "e.g. 17:00"
+      "WORK_START_END_DESCRIPTION": "e.g. 17:00",
+      "CAL_PROVIDERS": "Calendar providers (experimental and optional)",
+      "CAL_PROVIDERS_ADD": "Add ical source",
+      "CAL_PROVIDERS_INFO": "You can optionally configure the timeline to also load and display data from iCal (e.g. Google Calendar).",
+      "L_CAL_PATH": "Url/File path for calendar ICAL (optional)"
     },
     "TRACKING_REMINDER": {
       "HELP": "Configure a banner to show up in case you forgot to start time tracking.",
@@ -1250,13 +1249,13 @@
     "DBX_GEN_TOKEN": "Dropbox: Generate token...",
     "DBX_META": "Dropbox: Get file meta...",
     "DBX_UPLOAD": "Dropbox: Upload file...",
-    "GDRIVE_DOWNLOAD": "Google Drive: Download file...",
-    "GDRIVE_UPLOAD": "Google Drive: Upload file...",
     "GITHUB_LOAD_ISSUE": "GitHub: Load issue data...",
     "JIRA_LOAD_ISSUE": "Jira: Load issue data...",
     "UNKNOWN": "Loading remote data",
     "WEB_DAV_DOWNLOAD": "WebDAV: Downloading data...",
-    "WEB_DAV_UPLOAD": "WebDAV: Uploading data..."
+    "WEB_DAV_UPLOAD": "WebDAV: Uploading data...",
+    "GDRIVE_DOWNLOAD": "Google Drive: Download file...",
+    "GDRIVE_UPLOAD": "Google Drive: Upload file..."
   },
   "MH": {
     "ADD_NEW_TASK": "Pridať novú úlohu",

@@ -1,4 +1,9 @@
 {
+  "ANDROID": {
+    "NOTIFICATIONS": {
+      "SYNC_CONFLICT_TITLE": "Se produjo un conflicto de sincronización"
+    }
+  },
   "APP": {
     "B_INSTALL": {
       "IGNORE": "Ignorar",
@@ -197,26 +202,6 @@
       },
       "S": {
         "ERR_UNKNOWN": "GitLab: error desconocido {{statusCode}} {{errorMsg}}"
-      }
-    },
-    "GOOGLE": {
-      "BANNER": {
-        "AUTH_FAIL": "GoogleApi: no se pudo autenticar, por favor intente iniciar sesión nuevamente."
-      },
-      "DIALOG": {
-        "CREATE_SYNC_FILE": "Google Drive: no se encontró ningún archivo con el nombre <strong>\"{{fileName}}\"</strong> . <strong>¿Crear</strong> como archivo de sincronización en Google Drive?",
-        "USE_EXISTING_SYNC_FILE": "Google Drive: usar <strong>archivo</strong> existente <strong>\"{{fileName}}\"</strong> como archivo de sincronización? Si no es así, cambie el nombre del archivo de sincronización."
-      },
-      "S": {
-        "MULTIPLE_SYNC_FILES_WITH_SAME_NAME": "Se encontraron varios archivos con el nombre \"{{newFileName}}\". Elimine todos menos uno o elija un nombre diferente.",
-        "SYNC_FILE_CREATION_ERROR": "Google Drive: Error al crear el archivo de sincronización. {{err}}",
-        "UPDATED_SYNC_FILE_NAME": "Google Drive: nombre de archivo de sincronización actualizado"
-      },
-      "S_API": {
-        "ERR": "Error de GoogleApi: {{errStr}}",
-        "ERR_NO_FILE_ID": "GoogleApi: no se ha especificado ningún ID de archivo",
-        "ERR_NO_FILE_NAME": "GoogleApi: no se ha especificado ningún nombre de archivo",
-        "SUCCESS_LOGIN": "GoogleApi: Inicio de sesión exitoso"
       }
     },
     "ISSUE": {
@@ -425,7 +410,6 @@
       "D_ADD": {
         "NOTE_LABEL": "Introduzca algún texto para guardar como nota ..."
       },
-      "EDIT_FULLSCREEN": "Editar en pantalla completa",
       "NOTES_CMP": {
         "ADD_BTN": "Agregar nueva nota",
         "DROP_TO_ADD": "Suelta aquí para agregar una nueva nota",
@@ -434,7 +418,8 @@
       "NOTE_CMP": {
         "DISABLE_PARSE": "Deshabilitar el análisis de rebajas",
         "ENABLE_PARSE": "Habilitar el análisis de rebajas"
-      }
+      },
+      "EDIT_FULLSCREEN": "Editar en pantalla completa"
     },
     "OPEN_PROJECT": {
       "DIALOG_INITIAL": {
@@ -655,8 +640,8 @@
           "L_ACCESS_TOKEN": "Token de acceso (generado a partir del código de autenticación)"
         },
         "GOOGLE": {
-          "L_IS_COMPRESS_DATA": "Comprimir datos",
-          "L_SYNC_FILE_NAME": "Sincronizar nombre de archivo"
+          "L_SYNC_FILE_NAME": "Sincronizar nombre de archivo",
+          "L_IS_COMPRESS_DATA": "Comprimir datos"
         },
         "LOCAL_FILE": {
           "L_SYNC_FILE_PATH": "Ruta del archivo de sincronización",
@@ -907,11 +892,11 @@
       "MENU_TITLE": "Línea de tiempo",
       "NOW": "ahora",
       "NO_TASKS": "Actualmente no hay tareas. Agregue algunas tareas a través del botón + en la barra superior.",
+      "START": "Inicio del trabajo",
+      "TASK_PROJECTION_INFO": "Proyección futura de una tarea repetible programada",
       "S": {
         "CAL_PROVIDER_ERROR": "Error del proveedor de la escala de tiempo: {{errTxt}}"
-      },
-      "START": "Inicio del trabajo",
-      "TASK_PROJECTION_INFO": "Proyección futura de una tarea repetible programada"
+      }
     },
     "TIME_TRACKING": {
       "B": {
@@ -998,6 +983,26 @@
         "EXPORT": "Exportar datos de la semana",
         "NO_DATA": "No hay tareas esta semana todavía.",
         "TITLE": "Título"
+      }
+    },
+    "GOOGLE": {
+      "BANNER": {
+        "AUTH_FAIL": "GoogleApi: no se pudo autenticar, por favor intente iniciar sesión nuevamente."
+      },
+      "DIALOG": {
+        "CREATE_SYNC_FILE": "Google Drive: no se encontró ningún archivo con el nombre <strong>\"{{fileName}}\"</strong> . <strong>¿Crear</strong> como archivo de sincronización en Google Drive?",
+        "USE_EXISTING_SYNC_FILE": "Google Drive: usar <strong>archivo</strong> existente <strong>\"{{fileName}}\"</strong> como archivo de sincronización? Si no es así, cambie el nombre del archivo de sincronización."
+      },
+      "S": {
+        "MULTIPLE_SYNC_FILES_WITH_SAME_NAME": "Se encontraron varios archivos con el nombre \"{{newFileName}}\". Elimine todos menos uno o elija un nombre diferente.",
+        "SYNC_FILE_CREATION_ERROR": "Google Drive: Error al crear el archivo de sincronización. {{err}}",
+        "UPDATED_SYNC_FILE_NAME": "Google Drive: nombre de archivo de sincronización actualizado"
+      },
+      "S_API": {
+        "ERR": "Error de GoogleApi: {{errStr}}",
+        "ERR_NO_FILE_ID": "GoogleApi: no se ha especificado ningún ID de archivo",
+        "ERR_NO_FILE_NAME": "GoogleApi: no se ha especificado ningún nombre de archivo",
+        "SUCCESS_LOGIN": "GoogleApi: Inicio de sesión exitoso"
       }
     }
   },
@@ -1159,9 +1164,9 @@
     "SOUND": {
       "DONE_SOUND": "Sonido de tarea realizada",
       "IS_INCREASE_DONE_PITCH": "Aumente el tono para cada tarea realizada",
-      "IS_PLAY_DONE_SOUND": "Reproducir sonido cuando la tarea esté marcada como terminada",
       "TITLE": "Sonido",
-      "VOLUME": "Volumen"
+      "VOLUME": "Volumen",
+      "IS_PLAY_DONE_SOUND": "Reproducir sonido cuando la tarea esté marcada como terminada"
     },
     "TAKE_A_BREAK": {
       "HELP": "<div> <p>Le permite configurar un recordatorio recurrente cuando ha trabajado durante un período de tiempo específico sin tomar un descanso.</p> <p>Puede modificar el mensaje que se muestra. ${duration} será reemplazado con el tiempo dedicado sin descanso.</p> </div>",
@@ -1176,16 +1181,16 @@
       "TITLE": "Recordatorio de descanso"
     },
     "TIMELINE": {
-      "CAL_PROVIDERS": "Proveedores de calendario (experimentales y opcionales)",
-      "CAL_PROVIDERS_ADD": "Agregar fuente ical",
-      "CAL_PROVIDERS_INFO": "Opcionalmente, puede configurar la línea de tiempo para que también cargue y muestre datos de iCal (por ejemplo, Google Calendar).",
       "HELP": "La función de línea de tiempo debe proporcionarle una descripción general rápida de cómo se desarrollan sus tareas planificadas a lo largo del tiempo. Puede encontrarlo en el menú de la izquierda en <a href='#/timeline'>\"Cronología\"</a>.",
-      "L_CAL_PATH": "URL / ruta de archivo para el calendario ICAL (opcional)",
       "L_IS_WORK_START_END_ENABLED": "Limite el flujo de tareas no programadas a tiempos de trabajo específicos",
       "L_WORK_END": "Fin del día laboral",
       "L_WORK_START": "Inicio del día laboral",
       "TITLE": "Línea de tiempo",
-      "WORK_START_END_DESCRIPTION": "p.ej. 17:00"
+      "WORK_START_END_DESCRIPTION": "p.ej. 17:00",
+      "CAL_PROVIDERS": "Proveedores de calendario (experimentales y opcionales)",
+      "CAL_PROVIDERS_ADD": "Agregar fuente ical",
+      "CAL_PROVIDERS_INFO": "Opcionalmente, puede configurar la línea de tiempo para que también cargue y muestre datos de iCal (por ejemplo, Google Calendar).",
+      "L_CAL_PATH": "URL / ruta de archivo para el calendario ICAL (opcional)"
     },
     "TRACKING_REMINDER": {
       "HELP": "Establecer un recordatorio para que aparezca en caso de que haya olvidado iniciar el seguimiento del tiempo.",
@@ -1211,13 +1216,13 @@
     "DBX_GEN_TOKEN": "Dropbox: Generar token ...",
     "DBX_META": "Dropbox: Obtener meta del archivo ...",
     "DBX_UPLOAD": "Dropbox: Subir archivo ...",
-    "GDRIVE_DOWNLOAD": "Google Drive: Descargar archivo ...",
-    "GDRIVE_UPLOAD": "Google Drive: Subir archivo ...",
     "GITHUB_LOAD_ISSUE": "GitHub: cargar datos de problemas ...",
     "JIRA_LOAD_ISSUE": "Jira: cargar datos de problemas ...",
     "UNKNOWN": "Cargando datos remotos",
     "WEB_DAV_DOWNLOAD": "WebDAV: Descargando datos ...",
-    "WEB_DAV_UPLOAD": "WebDAV: Subiendo datos ..."
+    "WEB_DAV_UPLOAD": "WebDAV: Subiendo datos ...",
+    "GDRIVE_DOWNLOAD": "Google Drive: Descargar archivo ...",
+    "GDRIVE_UPLOAD": "Google Drive: Subir archivo ..."
   },
   "MH": {
     "ADD_NEW_TASK": "Agregar nueva tarea",

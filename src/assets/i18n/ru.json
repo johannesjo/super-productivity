@@ -199,26 +199,6 @@
         "ERR_UNKNOWN": "GitLab: неизвестная ошибка {{statusCode}} {{errorMsg}}"
       }
     },
-    "GOOGLE": {
-      "BANNER": {
-        "AUTH_FAIL": "GoogleApi: Не удалось пройти аутентификацию, попробуйте войти снова!"
-      },
-      "DIALOG": {
-        "CREATE_SYNC_FILE": "Диск Google: не найден файл с именем <strong>\"{{fileName}}\"</strong>. <strong>Создать</strong> файл синхронизации на Google Диске?",
-        "USE_EXISTING_SYNC_FILE": "Google Диск: использовать <strong>существующий</strong> файл <strong>\"{{fileName}}\"</strong> в качестве файла синхронизации? Если нет, измените имя файла синхронизации."
-      },
-      "S": {
-        "MULTIPLE_SYNC_FILES_WITH_SAME_NAME": "Найдено несколько файлов с именем \"{{newFileName}}\". Пожалуйста, удалите все кроме одного или выберите другое имя.",
-        "SYNC_FILE_CREATION_ERROR": "Google Диск: ошибка при создании файла синхронизации. {{err}}",
-        "UPDATED_SYNC_FILE_NAME": "Google Диск: обновленно имя файла синхронизации"
-      },
-      "S_API": {
-        "ERR": "Ошибка GoogleApi: {{errStr}}",
-        "ERR_NO_FILE_ID": "GoogleApi: идентификатор файла не указан",
-        "ERR_NO_FILE_NAME": "GoogleApi: имя файла не указано",
-        "SUCCESS_LOGIN": "GoogleApi: вход выполнен успешно"
-      }
-    },
     "ISSUE": {
       "DEFAULT": {
         "ISSUES_STR": "вопросы",
@@ -425,7 +405,6 @@
       "D_ADD": {
         "NOTE_LABEL": "Введите текст, чтобы сохранить как заметку ..."
       },
-      "EDIT_FULLSCREEN": "Редактировать в полноэкранном режиме",
       "NOTES_CMP": {
         "ADD_BTN": "Добавить новую заметку",
         "DROP_TO_ADD": "Зайдите сюда, чтобы добавить новую заметку",
@@ -434,7 +413,8 @@
       "NOTE_CMP": {
         "DISABLE_PARSE": "Отключить Markdown для предварительного просмотра",
         "ENABLE_PARSE": "Включить Markdown"
-      }
+      },
+      "EDIT_FULLSCREEN": "Редактировать в полноэкранном режиме"
     },
     "OPEN_PROJECT": {
       "DIALOG_INITIAL": {
@@ -655,8 +635,8 @@
           "L_ACCESS_TOKEN": "Токен доступа (генерируется из кода авторизации)"
         },
         "GOOGLE": {
-          "L_IS_COMPRESS_DATA": "Сжать данные",
-          "L_SYNC_FILE_NAME": "Синхронизировать имя файла"
+          "L_SYNC_FILE_NAME": "Синхронизировать имя файла",
+          "L_IS_COMPRESS_DATA": "Сжать данные"
         },
         "LOCAL_FILE": {
           "L_SYNC_FILE_PATH": "Путь к файлу синхронизации",
@@ -887,11 +867,11 @@
       "MENU_TITLE": "Временная шкала",
       "NOW": "Сейчас",
       "NO_TASKS": "На данный момент нет задач. Пожалуйста, добавьте несколько задач с помощью кнопки + на верхней панели.",
+      "START": "Начало работы",
+      "TASK_PROJECTION_INFO": "Будущая проекция запланированной повторяемой задачи",
       "S": {
         "CAL_PROVIDER_ERROR": "Ошибка поставщика временной шкалы: {{errTxt}}"
-      },
-      "START": "Начало работы",
-      "TASK_PROJECTION_INFO": "Будущая проекция запланированной повторяемой задачи"
+      }
     },
     "TIME_TRACKING": {
       "B": {
@@ -980,6 +960,26 @@
         "EXPORT": "Экспорт данных за неделю",
         "NO_DATA": "На этой неделе пока нет заданий.",
         "TITLE": "Заголовок"
+      }
+    },
+    "GOOGLE": {
+      "BANNER": {
+        "AUTH_FAIL": "GoogleApi: Не удалось пройти аутентификацию, попробуйте войти снова!"
+      },
+      "DIALOG": {
+        "CREATE_SYNC_FILE": "Диск Google: не найден файл с именем <strong>\"{{fileName}}\"</strong>. <strong>Создать</strong> файл синхронизации на Google Диске?",
+        "USE_EXISTING_SYNC_FILE": "Google Диск: использовать <strong>существующий</strong> файл <strong>\"{{fileName}}\"</strong> в качестве файла синхронизации? Если нет, измените имя файла синхронизации."
+      },
+      "S": {
+        "MULTIPLE_SYNC_FILES_WITH_SAME_NAME": "Найдено несколько файлов с именем \"{{newFileName}}\". Пожалуйста, удалите все кроме одного или выберите другое имя.",
+        "SYNC_FILE_CREATION_ERROR": "Google Диск: ошибка при создании файла синхронизации. {{err}}",
+        "UPDATED_SYNC_FILE_NAME": "Google Диск: обновленно имя файла синхронизации"
+      },
+      "S_API": {
+        "ERR": "Ошибка GoogleApi: {{errStr}}",
+        "ERR_NO_FILE_ID": "GoogleApi: идентификатор файла не указан",
+        "ERR_NO_FILE_NAME": "GoogleApi: имя файла не указано",
+        "SUCCESS_LOGIN": "GoogleApi: вход выполнен успешно"
       }
     }
   },
@@ -1148,9 +1148,9 @@
     "SOUND": {
       "DONE_SOUND": "Звук выполненной задачи",
       "IS_INCREASE_DONE_PITCH": "Увеличивать высоту звука для каждой выполненной задачи",
-      "IS_PLAY_DONE_SOUND": "Воспроизвести звук, когда задача отмечена как выполненная",
       "TITLE": "Звук",
-      "VOLUME": "Громкость"
+      "VOLUME": "Громкость",
+      "IS_PLAY_DONE_SOUND": "Воспроизвести звук, когда задача отмечена как выполненная"
     },
     "TAKE_A_BREAK": {
       "ADD_NEW_IMG": "Добавить мотивационное изображение",
@@ -1168,16 +1168,16 @@
       "TITLE": "Напоминание о перерыве"
     },
     "TIMELINE": {
-      "CAL_PROVIDERS": "Поставщики календаря (экспериментальные и необязательные)",
-      "CAL_PROVIDERS_ADD": "Добавить источник ical",
-      "CAL_PROVIDERS_INFO": "Вы можете дополнительно настроить временную шкалу, чтобы также загружать и отображать данные из iCal (например, <a href=\"https://support.google.com/calendar/answer/37648?hl=ru#zippy=%2Csync-your-google-calendar-view-edit%2Cget-your-calendar-view-only\">Google Календарь</a>).",
       "HELP": "Функция временной шкалы должна предоставить вам быстрый обзор того, как ваши запланированные задачи выполняются с течением времени. Вы можете найти её в левом меню в разделе <a href='#/timeline'>«Временная шкала»</a>.",
-      "L_CAL_PATH": "URL / путь к файлу календаря ICAL (необязательно)",
       "L_IS_WORK_START_END_ENABLED": "Ограничить поток незапланированных задач определенным временем работы",
       "L_WORK_END": "Конец рабочего дня",
       "L_WORK_START": "Начало рабочего дня",
       "TITLE": "Временная шкала",
-      "WORK_START_END_DESCRIPTION": "например 17:00"
+      "WORK_START_END_DESCRIPTION": "например 17:00",
+      "CAL_PROVIDERS": "Поставщики календаря (экспериментальные и необязательные)",
+      "CAL_PROVIDERS_ADD": "Добавить источник ical",
+      "CAL_PROVIDERS_INFO": "Вы можете дополнительно настроить временную шкалу, чтобы также загружать и отображать данные из iCal (например, <a href=\"https://support.google.com/calendar/answer/37648?hl=ru#zippy=%2Csync-your-google-calendar-view-edit%2Cget-your-calendar-view-only\">Google Календарь</a>).",
+      "L_CAL_PATH": "URL / путь к файлу календаря ICAL (необязательно)"
     },
     "TRACKING_REMINDER": {
       "HELP": "Настройте баннер, который будет отображаться на случай, если вы забыли включить отслеживание времени.",
@@ -1203,13 +1203,13 @@
     "DBX_GEN_TOKEN": "Dropbox: Создание токена...",
     "DBX_META": "Dropbox: Получение мета-файла...",
     "DBX_UPLOAD": "Dropbox: Загрузка файла...",
-    "GDRIVE_DOWNLOAD": "Google Диск: Скачивание файла...",
-    "GDRIVE_UPLOAD": "Google Диск: Загрузка файла...",
     "GITHUB_LOAD_ISSUE": "GitHub: Загрузка данных о проблеме ...",
     "JIRA_LOAD_ISSUE": "Jira: Загрузка данных о проблеме...",
     "UNKNOWN": "Загрузка удаленных данных",
     "WEB_DAV_DOWNLOAD": "WebDAV: Скачивание данных...",
-    "WEB_DAV_UPLOAD": "WebDAV: Загрузка данных..."
+    "WEB_DAV_UPLOAD": "WebDAV: Загрузка данных...",
+    "GDRIVE_DOWNLOAD": "Google Диск: Скачивание файла...",
+    "GDRIVE_UPLOAD": "Google Диск: Загрузка файла..."
   },
   "MH": {
     "ADD_NEW_TASK": "Добавить новую задачу",

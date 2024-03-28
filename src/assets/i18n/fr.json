@@ -1,4 +1,9 @@
 {
+  "ANDROID": {
+    "NOTIFICATIONS": {
+      "SYNC_CONFLICT_TITLE": "Un conflit de synchronisation s'est produit"
+    }
+  },
   "APP": {
     "B_INSTALL": {
       "IGNORE": "Ignorer",
@@ -164,13 +169,13 @@
         "IS_SEARCH_ISSUES_FROM_GITEA": "Afficher les problèmes de Git comme suggestions lors de l'ajout de nouvelles tâches.",
         "HOST": "Höte (e.g.: https://try.gitea.io)",
         "TOKEN": "Jeton d'accès",
-        "TOKEN_DESCRIPTION": "Nécessaire pour l'accès aux dépôts privés",
         "REPO_FULL_NAME": "Nom d'utilisateur ou nom de l'organisation/projet",
         "REPO_FULL_NAME_DESCRIPTION": "Peut être trouvé comme partie de l'URL, lors de la visualisation du projet dans le navigateur.",
         "SCOPE": "Portée",
         "SCOPE_ALL": "Tout",
         "SCOPE_ASSIGNED": "Attribués à moi",
-        "SCOPE_CREATED": "Créé par moi"
+        "SCOPE_CREATED": "Créé par moi",
+        "TOKEN_DESCRIPTION": "Nécessaire pour l'accès aux dépôts privés"
       },
       "FORM_SECTION": {
         "HELP": "<p>Ici, vous pouvez configurer SuperProductivity pour lister les problèmes ouverts de Gitea pour un dépôt spécifique dans le panneau de création de tâches dans la vue de planification quotidienne. Ils seront listés comme suggestions et fourniront un lien vers le problème ainsi que plus d'informations à son sujet.</p> <p>En plus, vous pouvez automatiquement ajouter et importer tous les problèmes ouverts.</p><p>Pour contourner les limites d'utilisation et pour accéder, vous pouvez fournir un jeton d'accès.</p>",
@@ -260,26 +265,6 @@
       },
       "S": {
         "ERR_UNKNOWN": "GitLab: erreur inconnue {{statusCode}} {{errorMsg}}"
-      }
-    },
-    "GOOGLE": {
-      "BANNER": {
-        "AUTH_FAIL": "GoogleApi : Échec de l'authentification, essayez de vous reconnecter!"
-      },
-      "DIALOG": {
-        "CREATE_SYNC_FILE": "Google Drive : Aucun fichier nommé <strong>\"{{fileName}}\"</strong> n'a été trouvé. <strong>créer</strong> un fichier de synchronisation sur Google Drive?",
-        "USE_EXISTING_SYNC_FILE": "Google Drive : utiliser le <strong>fichier</strong> existant <strong>\"{{fileName}}\"</strong> comme fichier de synchronisation? Sinon, veuillez changer le nom du fichier de synchronisation."
-      },
-      "S": {
-        "MULTIPLE_SYNC_FILES_WITH_SAME_NAME": "Plusieurs fichiers portant le nom \"{{newFileName}}\" ont été trouvés. Veuillez les supprimer tous sauf un ou choisir un nom différent.",
-        "SYNC_FILE_CREATION_ERROR": "Google Drive: erreur lors de la création du fichier de synchronisation. {{err}}",
-        "UPDATED_SYNC_FILE_NAME": "Google Drive: nom du fichier de synchronisation mis à jour"
-      },
-      "S_API": {
-        "ERR": "Erreur GoogleApi: {{errStr}}",
-        "ERR_NO_FILE_ID": "GoogleApi: aucun identifiant de fichier spécifié",
-        "ERR_NO_FILE_NAME": "GoogleApi: aucun nom de fichier spécifié",
-        "SUCCESS_LOGIN": "GoogleApi: connexion réussie"
       }
     },
     "ISSUE": {
@@ -488,7 +473,6 @@
       "D_ADD": {
         "NOTE_LABEL": "Entrez le texte à enregistrer en tant que note ..."
       },
-      "EDIT_FULLSCREEN": "Modifier en plein écran",
       "NOTES_CMP": {
         "ADD_BTN": "Ajouter une nouvelle note",
         "DROP_TO_ADD": "Déposer ici pour ajouter une nouvelle note",
@@ -497,7 +481,8 @@
       "NOTE_CMP": {
         "DISABLE_PARSE": "Désactiver le markdown",
         "ENABLE_PARSE": "Activer le markdown"
-      }
+      },
+      "EDIT_FULLSCREEN": "Modifier en plein écran"
     },
     "OPEN_PROJECT": {
       "DIALOG_INITIAL": {
@@ -722,8 +707,8 @@
           "L_ACCESS_TOKEN": "Jeton d'accès (généré à partir du code d'authentification)"
         },
         "GOOGLE": {
-          "L_IS_COMPRESS_DATA": "Compresser les données",
-          "L_SYNC_FILE_NAME": "Nom du fichier de synchronisation"
+          "L_SYNC_FILE_NAME": "Nom du fichier de synchronisation",
+          "L_IS_COMPRESS_DATA": "Compresser les données"
         },
         "LOCAL_FILE": {
           "L_SYNC_FILE_PATH": "Chemin du fichier de synchronisation",
@@ -952,11 +937,11 @@
       "MENU_TITLE": "Chronologie",
       "NOW": "À présent",
       "NO_TASKS": "Il n'y a actuellement aucune tâche. Veuillez ajouter quelques tâches via le bouton + dans la barre supérieure.",
+      "START": "Début des travaux",
+      "TASK_PROJECTION_INFO": "Projection future d'une tâche répétable planifiée",
       "S": {
         "CAL_PROVIDER_ERROR": "Erreur du fournisseur d'appel dans la chronologie : {{errTxt}}"
-      },
-      "START": "Début des travaux",
-      "TASK_PROJECTION_INFO": "Projection future d'une tâche répétable planifiée"
+      }
     },
     "TIME_TRACKING": {
       "B": {
@@ -1043,6 +1028,26 @@
         "EXPORT": "Exporter les données de la semaine",
         "NO_DATA": "Pas encore de tâche cette semaine.",
         "TITLE": "Titre"
+      }
+    },
+    "GOOGLE": {
+      "BANNER": {
+        "AUTH_FAIL": "GoogleApi : Échec de l'authentification, essayez de vous reconnecter!"
+      },
+      "DIALOG": {
+        "CREATE_SYNC_FILE": "Google Drive : Aucun fichier nommé <strong>\"{{fileName}}\"</strong> n'a été trouvé. <strong>créer</strong> un fichier de synchronisation sur Google Drive?",
+        "USE_EXISTING_SYNC_FILE": "Google Drive : utiliser le <strong>fichier</strong> existant <strong>\"{{fileName}}\"</strong> comme fichier de synchronisation? Sinon, veuillez changer le nom du fichier de synchronisation."
+      },
+      "S": {
+        "MULTIPLE_SYNC_FILES_WITH_SAME_NAME": "Plusieurs fichiers portant le nom \"{{newFileName}}\" ont été trouvés. Veuillez les supprimer tous sauf un ou choisir un nom différent.",
+        "SYNC_FILE_CREATION_ERROR": "Google Drive: erreur lors de la création du fichier de synchronisation. {{err}}",
+        "UPDATED_SYNC_FILE_NAME": "Google Drive: nom du fichier de synchronisation mis à jour"
+      },
+      "S_API": {
+        "ERR": "Erreur GoogleApi: {{errStr}}",
+        "ERR_NO_FILE_ID": "GoogleApi: aucun identifiant de fichier spécifié",
+        "ERR_NO_FILE_NAME": "GoogleApi: aucun nom de fichier spécifié",
+        "SUCCESS_LOGIN": "GoogleApi: connexion réussie"
       }
     }
   },
@@ -1208,9 +1213,9 @@
       "BREAK_REMINDER_SOUND": "Son pour rappel de prise de pause",
       "DONE_SOUND": "Son pour tâche terminée",
       "IS_INCREASE_DONE_PITCH": "Augmentez la hauteur pour chaque tâche effectuée",
-      "IS_PLAY_DONE_SOUND": "Jouer le son lorsque la tâche est marquée comme terminée",
       "TITLE": "Du son",
-      "VOLUME": "Le volume"
+      "VOLUME": "Le volume",
+      "IS_PLAY_DONE_SOUND": "Jouer le son lorsque la tâche est marquée comme terminée"
     },
     "TAKE_A_BREAK": {
       "HELP": "<div> <p>vous permet de configurer un rappel récurrent lorsque vous avez travaillé pendant une durée déterminée sans prendre de pause.</p> <p>Vous pouvez modifier le message affiché. ${duration} sera remplacé par le temps passé sans pause.</p> </div>",
@@ -1225,16 +1230,16 @@
       "TITLE": "Rappel de pause"
     },
     "TIMELINE": {
-      "CAL_PROVIDERS": "Fournisseurs de calendriers (expérimentaux et facultatifs)",
-      "CAL_PROVIDERS_ADD": "Ajouter une source ical",
-      "CAL_PROVIDERS_INFO": "Vous pouvez éventuellement configurer la chronologie pour charger et afficher également les données d'iCal (par exemple, Google Calendar).",
       "HELP": "La fonction de chronologie devrait vous fournir un aperçu rapide de la façon dont vos tâches planifiées se déroulent au fil du temps. Vous pouvez le trouver dans le menu de gauche sous <a href='#/timeline'>\"Chronologie\"</a>.",
-      "L_CAL_PATH": "URL/chemin d'accès au calendrier ICAL (facultatif)",
       "L_IS_WORK_START_END_ENABLED": "Limitez le flux de tâches non planifiées à des heures de travail spécifiques",
       "L_WORK_END": "Fin de la journée de travail",
       "L_WORK_START": "Début de la journée de travail",
       "TITLE": "Chronologie",
-      "WORK_START_END_DESCRIPTION": "par exemple. 17h00"
+      "WORK_START_END_DESCRIPTION": "par exemple. 17h00",
+      "CAL_PROVIDERS": "Fournisseurs de calendriers (expérimentaux et facultatifs)",
+      "CAL_PROVIDERS_ADD": "Ajouter une source ical",
+      "CAL_PROVIDERS_INFO": "Vous pouvez éventuellement configurer la chronologie pour charger et afficher également les données d'iCal (par exemple, Google Calendar).",
+      "L_CAL_PATH": "URL/chemin d'accès au calendrier ICAL (facultatif)"
     },
     "TRACKING_REMINDER": {
       "HELP": "Configurez une bannière pour qu'elle s'affiche au cas où vous auriez oublié de démarrer le suivi du temps.",
@@ -1260,13 +1265,13 @@
     "DBX_GEN_TOKEN": "Dropbox: générer un jeton ...",
     "DBX_META": "Dropbox: Obtenir la méta du fichier ...",
     "DBX_UPLOAD": "Dropbox: Importer un fichier ...",
-    "GDRIVE_DOWNLOAD": "Google Drive: Télécharger le fichier ...",
-    "GDRIVE_UPLOAD": "Google Drive: importer un fichier ...",
     "GITHUB_LOAD_ISSUE": "GitHub: Charger les données de problème ...",
     "JIRA_LOAD_ISSUE": "Jira: Charger les données du problème ...",
     "UNKNOWN": "Chargement des données à distance",
     "WEB_DAV_DOWNLOAD": "WebDAV: Téléchargement de données ...",
-    "WEB_DAV_UPLOAD": "WebDAV: Téléchargement de données ..."
+    "WEB_DAV_UPLOAD": "WebDAV: Téléchargement de données ...",
+    "GDRIVE_DOWNLOAD": "Google Drive: Télécharger le fichier ...",
+    "GDRIVE_UPLOAD": "Google Drive: importer un fichier ..."
   },
   "MH": {
     "ADD_NEW_TASK": "Ajouter une nouvelle tâche",

@@ -150,13 +150,13 @@
         "IS_SEARCH_ISSUES_FROM_GITEA": "Mostrar tarefas do Gitea como sugestões ao adicionar novas tarefas",
         "HOST": "Endereço do servidor (ex: https://try.gitea.io)",
         "TOKEN": "Token de acesso",
-        "TOKEN_DESCRIPTION": "Requerido para acessar repositórios privados",
         "REPO_FULL_NAME": "Nome do usuário ou organização/projeto",
         "REPO_FULL_NAME_DESCRIPTION": "Pode ser encontrado como parte da url, ao acessar o projeto no navegador",
         "SCOPE": "Escopo",
         "SCOPE_ALL": "Todos",
         "SCOPE_ASSIGNED": "Atribuídos a mim",
-        "SCOPE_CREATED": "Criados por mim"
+        "SCOPE_CREATED": "Criados por mim",
+        "TOKEN_DESCRIPTION": "Requerido para acessar repositórios privados"
       },
       "FORM_SECTION": {
         "HELP": "<p>Aqui você pode configurar o SuperProductivity para listar tarefas do Gitea de um repositório específico no painel de tarefas na tela de planejamento diário. Elas também serão listadas como sugestões e será disponibilizado um link para a tarefa bem como mais informações sobre a mesma.</p> <p>Além disso você pode adicionar e sincronizar todas as tarefas abertas para o seu backlog.</p><p>",
@@ -294,26 +294,6 @@
         "L_TEXT": "Texto",
         "L_TEXT_DESCRIPTION": "Ex.: \"Trabalhar em ${currentTaskTitle}!\"",
         "TITLE": "Modo Domina"
-      }
-    },
-    "GOOGLE": {
-      "BANNER": {
-        "AUTH_FAIL": "GoogleApi: Falha ao autenticar. Tente fazer login novamente!"
-      },
-      "DIALOG": {
-        "CREATE_SYNC_FILE": "Google Drive: Nenhum arquivo com o nome <strong>\"{{ fileName }}\"<strong> foi encontrado. <strong>Criar</strong> como arquivo de sincronização no Google Drive?",
-        "USE_EXISTING_SYNC_FILE": "Google Drive: usar <strong>arquivo</strong> existente <strong>\"{{fileName}}\"</strong> como arquivo de sincronização? Caso contrário, altere o nome do arquivo de sincronização."
-      },
-      "S": {
-        "MULTIPLE_SYNC_FILES_WITH_SAME_NAME": "Vários arquivos com o nome \"{{newFileName}}\" foram encontrados. Exclua todos, exceto um, ou escolha um nome diferente.",
-        "SYNC_FILE_CREATION_ERROR": "Google Drive: Erro ao criar arquivo de sincronização. {{err}}",
-        "UPDATED_SYNC_FILE_NAME": "Google Drive: nome do arquivo de sincronização atualizado"
-      },
-      "S_API": {
-        "ERR": "Erro do GoogleApi: {{errStr}}",
-        "ERR_NO_FILE_ID": "GoogleApi: Nenhum ID de arquivo especificado",
-        "ERR_NO_FILE_NAME": "GoogleApi: Nenhum nome de arquivo especificado",
-        "SUCCESS_LOGIN": "GoogleApi: login bem-sucedido"
       }
     },
     "ISSUE": {
@@ -550,8 +530,8 @@
         "IN_PROGRESS": "Status para iniciar a tarefa",
         "OPEN": "Status para pausar tarefa",
         "PROGRESS_ON_SAVE": "Progresso padrão ao salvar",
-        "SELECT_ISSUE_FOR_TRANSITIONS": "Selecione uma tarefa para carregar as transições disponíveis",
-        "TRANSITION": "Ativar transição"
+        "TRANSITION": "Ativar transição",
+        "SELECT_ISSUE_FOR_TRANSITIONS": "Selecione uma tarefa para carregar as transições disponíveis"
       },
       "DIALOG_INITIAL": {
         "TITLE": "Configurar OpenProject para Projeto"
@@ -658,6 +638,8 @@
         "PROCRASTINATION_TRIGGERS_TEXT": "Outro método muito eficaz é registrar o que desencadeou sua vontade de procrastinar. Por exemplo, muitas vezes tenho vontade de ir rapidamente para o Reddit ou para o meu site de notícias favorito sempre que a janela do meu navegador entra em foco. Desde que comecei a escrever meus gatilhos em um simples documento de texto vazio, percebi como esse padrão estava arraigado e isso me ajudou a experimentar diferentes contra-medidas."
       },
       "H1": "Dê uma folga!",
+      "P1": "Antes de tudo, relaxe! Todo mundo faz isso de vez em quando. E se você não estiver fazendo o que deveria, pelo menos aproveite! Em seguida, verifique as seções abaixo para obter algo útil.",
+      "P2": "Lembre-se: a procrastinação é um problema de regulação emocional, não um problema de gerenciamento de tempo.",
       "REFRAME": {
         "INTRO": "Pense no que pode ser positivo sobre a tarefa.",
         "TITLE": "Reenquadrando",
@@ -665,8 +647,6 @@
         "TL2": "O que você ganha se você completá-lo?",
         "TL3": "Como você se sentirá sobre isso se concluir o processo?"
       },
-      "P1": "Antes de tudo, relaxe! Todo mundo faz isso de vez em quando. E se você não estiver fazendo o que deveria, pelo menos aproveite! Em seguida, verifique as seções abaixo para obter algo útil.",
-      "P2": "Lembre-se: a procrastinação é um problema de regulação emocional, não um problema de gerenciamento de tempo.",
       "SPLIT_UP": {
         "INTRO": "Divida a tarefa em tantos pequenos pedaços quanto possível.",
         "OUTRO": "Concluído? Então pense sobre isso. Qual seria -estritamente teórica- a primeira coisa que você faria se você começasse a trabalhar na tarefa? Pense nisso ...",
@@ -789,8 +769,8 @@
           "L_ACCESS_TOKEN": "Token de acesso (gerado a partir do código de autenticação)"
         },
         "GOOGLE": {
-          "L_IS_COMPRESS_DATA": "Comprimir dados",
-          "L_SYNC_FILE_NAME": "Nome do arquivo de sincronização"
+          "L_SYNC_FILE_NAME": "Nome do arquivo de sincronização",
+          "L_IS_COMPRESS_DATA": "Comprimir dados"
         },
         "LOCAL_FILE": {
           "L_SYNC_FILE_PATH": "Caminho do arquivo de sincronização",
@@ -1019,11 +999,11 @@
       "MENU_TITLE": "Timeline",
       "NOW": "agora",
       "NO_TASKS": "Atualmente não há tarefas. Adicione algumas tarefas através do botão + na barra superior.",
+      "START": "Início do Trabalho",
+      "TASK_PROJECTION_INFO": "Projeção futura de uma tarefa repetível programada",
       "S": {
         "CAL_PROVIDER_ERROR": "Erro do provedor de calibração da linha do tempo: {{errTxt}}"
-      },
-      "START": "Início do Trabalho",
-      "TASK_PROJECTION_INFO": "Projeção futura de uma tarefa repetível programada"
+      }
     },
     "TIME_TRACKING": {
       "B": {
@@ -1110,6 +1090,26 @@
         "EXPORT": "Exportar dados da semana",
         "NO_DATA": "Ainda não há tarefas nesta semana.",
         "TITLE": "Título"
+      }
+    },
+    "GOOGLE": {
+      "BANNER": {
+        "AUTH_FAIL": "GoogleApi: Falha ao autenticar. Tente fazer login novamente!"
+      },
+      "DIALOG": {
+        "CREATE_SYNC_FILE": "Google Drive: Nenhum arquivo com o nome <strong>\"{{ fileName }}\"<strong> foi encontrado. <strong>Criar</strong> como arquivo de sincronização no Google Drive?",
+        "USE_EXISTING_SYNC_FILE": "Google Drive: usar <strong>arquivo</strong> existente <strong>\"{{fileName}}\"</strong> como arquivo de sincronização? Caso contrário, altere o nome do arquivo de sincronização."
+      },
+      "S": {
+        "MULTIPLE_SYNC_FILES_WITH_SAME_NAME": "Vários arquivos com o nome \"{{newFileName}}\" foram encontrados. Exclua todos, exceto um, ou escolha um nome diferente.",
+        "SYNC_FILE_CREATION_ERROR": "Google Drive: Erro ao criar arquivo de sincronização. {{err}}",
+        "UPDATED_SYNC_FILE_NAME": "Google Drive: nome do arquivo de sincronização atualizado"
+      },
+      "S_API": {
+        "ERR": "Erro do GoogleApi: {{errStr}}",
+        "ERR_NO_FILE_ID": "GoogleApi: Nenhum ID de arquivo especificado",
+        "ERR_NO_FILE_NAME": "GoogleApi: Nenhum nome de arquivo especificado",
+        "SUCCESS_LOGIN": "GoogleApi: login bem-sucedido"
       }
     }
   },
@@ -1275,9 +1275,9 @@
     "SOUND": {
       "DONE_SOUND": "Som de tarefa concluída",
       "IS_INCREASE_DONE_PITCH": "Aumente o tom para cada tarefa realizada",
-      "IS_PLAY_DONE_SOUND": "Tocar som quando a tarefa for marcada como concluída",
       "TITLE": "Som",
-      "VOLUME": "Volume"
+      "VOLUME": "Volume",
+      "IS_PLAY_DONE_SOUND": "Tocar som quando a tarefa for marcada como concluída"
     },
     "TAKE_A_BREAK": {
       "ADD_NEW_IMG": "Adicione uma imagem motivacional",
@@ -1295,16 +1295,16 @@
       "TITLE": "Lembrete de Pausa"
     },
     "TIMELINE": {
-      "CAL_PROVIDERS": "Provedores de calendário (experimental e opcional)",
-      "CAL_PROVIDERS_ADD": "Adicionar fonte ical",
-      "CAL_PROVIDERS_INFO": "Você pode opcionalmente configurar a linha do tempo para também carregar e exibir dados do iCal (por exemplo, Google Agenda).",
       "HELP": "O recurso de linha do tempo deve fornecer uma visão geral rápida sobre como suas tarefas planejadas se desenrolam ao longo do tempo. Você pode encontrá-lo no menu à esquerda em <a href='#/timeline'>'Linha do tempo'</a>.",
-      "L_CAL_PATH": "Url / caminho do arquivo para o calendário ICAL (opcional)",
       "L_IS_WORK_START_END_ENABLED": "Limite o fluxo de tarefas não programadas a horários de trabalho específicos",
       "L_WORK_END": "Fim do dia de trabalho",
       "L_WORK_START": "Início do dia de trabalho",
       "TITLE": "Timeline",
-      "WORK_START_END_DESCRIPTION": "por exemplo. 17:00"
+      "WORK_START_END_DESCRIPTION": "por exemplo. 17:00",
+      "CAL_PROVIDERS": "Provedores de calendário (experimental e opcional)",
+      "CAL_PROVIDERS_ADD": "Adicionar fonte ical",
+      "CAL_PROVIDERS_INFO": "Você pode opcionalmente configurar a linha do tempo para também carregar e exibir dados do iCal (por exemplo, Google Agenda).",
+      "L_CAL_PATH": "Url / caminho do arquivo para o calendário ICAL (opcional)"
     },
     "TRACKING_REMINDER": {
       "HELP": "Configure um banner para ser exibido no caso de você se esquecer de iniciar o rastreamento de tempo.",
@@ -1330,13 +1330,13 @@
     "DBX_GEN_TOKEN": "Dropbox: gerar token ...",
     "DBX_META": "Dropbox: Obter meta ...",
     "DBX_UPLOAD": "Dropbox: Carregar arquivo ...",
-    "GDRIVE_DOWNLOAD": "Google Drive: baixar arquivo ...",
-    "GDRIVE_UPLOAD": "Google Drive: Carregar arquivo ...",
     "GITHUB_LOAD_ISSUE": "GitHub: Carregar dados do problema ...",
     "JIRA_LOAD_ISSUE": "Jira: Carregar dados do problema ...",
     "UNKNOWN": "Carregando dados remotos",
     "WEB_DAV_DOWNLOAD": "WebDAV: Baixando dados ...",
-    "WEB_DAV_UPLOAD": "WebDAV: Carregando dados ..."
+    "WEB_DAV_UPLOAD": "WebDAV: Carregando dados ...",
+    "GDRIVE_DOWNLOAD": "Google Drive: baixar arquivo ...",
+    "GDRIVE_UPLOAD": "Google Drive: Carregar arquivo ..."
   },
   "MH": {
     "ADD_NEW_TASK": "Adicionar nova tarefa",

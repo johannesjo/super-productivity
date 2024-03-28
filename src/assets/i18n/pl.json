@@ -6,12 +6,12 @@
       "MSG": "Czy chcesz zinstalować Super Productivity jako PWA?"
     },
     "B_OFFLINE": "Zostałeś odłączony od internetu. Synchronizacja nie będzie działać.",
-    "D_INITIAL": {
-      "TITLE": "Witam w v{{nr}}"
-    },
     "UPDATE_MAIN_MODEL": "Super Productivity posiada ważną aktualizację! Wymagana jest migracja danych, która spowoduje że starsze wersje aplikacji nie będą mogły ich używać.",
     "UPDATE_MAIN_MODEL_NO_UPDATE": "No model update chosen. Please note that you either have to downgrade to the last version, if you do not want to perform the model upgrade.",
-    "UPDATE_WEB_APP": "Nowa wersja dostępna. Załadować ją?"
+    "UPDATE_WEB_APP": "Nowa wersja dostępna. Załadować ją?",
+    "D_INITIAL": {
+      "TITLE": "Witam w v{{nr}}"
+    }
   },
   "BL": {
     "NO_TASKS": "Backlog nie zawiera zadań"
@@ -106,11 +106,11 @@
       "S": {
         "CALENDAR_NOT_FOUND": "CalDav: Calendar \"{{calendarName}}\" not found",
         "CALENDAR_READ_ONLY": "CalDav: Calendar \"{{calendarName}}\" is readonly",
+        "ISSUE_NOT_FOUND": "CalDav: Todo \"{{issueId}}\" seems to be deleted on server.",
         "ERR_NETWORK": "CalDav: Request failed because of a client side network error",
         "ERR_NOT_CONFIGURED": "CalDav: Not properly configured",
         "IMPORTED_MULTIPLE_ISSUES": "calDav: Imported {{issuesLength}} new issues from git to backlog",
         "IMPORTED_SINGLE_ISSUE": "CalDav: Imported issue \"{{issueText}}\" from to backlog",
-        "ISSUE_NOT_FOUND": "CalDav: Todo \"{{issueId}}\" seems to be deleted on server.",
         "ISSUE_NO_UPDATE_REQUIRED": "CalDav: No update required.",
         "ISSUE_UPDATE": "Caldav: Uodated data for \"{{issueText}}\"",
         "POLLING": "Caldav: Polling changes for todos"
@@ -158,9 +158,9 @@
         "WRITE_A_COMMENT": "Napisz komentarz"
       },
       "S": {
+        "ERR_UNKNOWN": "GitHub: Unknown error {{statusCode}} {{errorMsg}}. Api Rate limit exceeded?",
         "ERR_NETWORK": "GitHub: Request failed because of a client side network error",
         "ERR_NOT_CONFIGURED": "GitHub: Is not properly configured",
-        "ERR_UNKNOWN": "GitHub: Unknown error {{statusCode}} {{errorMsg}}. Api Rate limit exceeded?",
         "IMPORTED_MULTIPLE_ISSUES": "GitHub: Imported {{issuesLength}} new issues from git to backlog",
         "IMPORTED_SINGLE_ISSUE": "GitHub: Imported issue \"{{issueText}}\" from git to backlog",
         "ISSUE_DELETED_OR_CLOSED": "GitHub: Issue \"{{issueText}}\" seems to be deleted or closed on git",
@@ -201,9 +201,9 @@
         "WRITE_A_COMMENT": "Napisz komentarz"
       },
       "S": {
+        "ERR_UNKNOWN": "GitLab: Unknown error {{statusCode}} {{errorMsg}}",
         "ERR_NETWORK": "GitLab: Request failed because of a client side network error",
         "ERR_NOT_CONFIGURED": "GitLab: Is not properly configured",
-        "ERR_UNKNOWN": "GitLab: Unknown error {{statusCode}} {{errorMsg}}",
         "IMPORTED_MULTIPLE_ISSUES": "GitLab: Imported {{issuesLength}} new issues from git to backlog",
         "IMPORTED_SINGLE_ISSUE": "GitLab: Imported issue \"{{issueText}}\" from git to backlog",
         "ISSUE_DELETED_OR_CLOSED": "GitLab: Issue \"{{issueText}}\" seems to be deleted or closed on git",
@@ -214,26 +214,6 @@
         "NEW_COMMENT": "GitLab: New comment for \"{{issueText}}\"",
         "POLLING": "GitLab: Polling Changes for issues",
         "SHOW_ISSUE_BTN": "Show me"
-      }
-    },
-    "GOOGLE": {
-      "BANNER": {
-        "AUTH_FAIL": "GoogleApi: Failed to authenticate please try logging in again!"
-      },
-      "DIALOG": {
-        "CREATE_SYNC_FILE": "Google Drive: No file with the name <strong>\"{{fileName}}\"</strong> was found. <strong>Create</strong> it as sync file on Google Drive?",
-        "USE_EXISTING_SYNC_FILE": "Google Drive: Use <strong>existing</strong> file <strong>\"{{fileName}}\"</strong> as sync file? If not please change the Sync file name."
-      },
-      "S": {
-        "MULTIPLE_SYNC_FILES_WITH_SAME_NAME": "Multiple files with the name \"{{newFileName}}\" found. Please delete all but one or choose a different name.",
-        "SYNC_FILE_CREATION_ERROR": "Google Drive: Error while creating sync file. {{err}}",
-        "UPDATED_SYNC_FILE_NAME": "Google Drive: Updated sync file name"
-      },
-      "S_API": {
-        "ERR": "GoogleApi Error: {{errStr}}",
-        "ERR_NO_FILE_ID": "GoogleApi: No file id specified",
-        "ERR_NO_FILE_NAME": "GoogleApi: No file name specified",
-        "SUCCESS_LOGIN": "GoogleApi: Login successful"
       }
     },
     "JIRA": {
@@ -337,21 +317,21 @@
       "S": {
         "ADDED_WORKLOG_FOR": "Jira: Added worklog for {{issueKey}}",
         "EXTENSION_NOT_LOADED": "Super Productivity Extension not loaded. Reloading the page might help",
-        "IMPORTED_MULTIPLE_ISSUES": "Jira: Imported {{issuesLength}} new issues from jira to backlog",
-        "IMPORTED_SINGLE_ISSUE": "Jira: Imported issue \"{{issueText}}\" from jira to backlog",
         "INSUFFICIENT_SETTINGS": "Insufficient Settings provided for Jira",
         "ISSUE_NO_UPDATE_REQUIRED": "Jira: \"{{issueText}}\" already up to date",
-        "ISSUE_UPDATE": "Jira: Updated data for \"{{issueText}}\"",
         "MANUAL_UPDATE_ISSUE_SUCCESS": "Jira: Updated data for \"{{issueText}}\"",
         "MISSING_ISSUE_DATA": "Jira: Tasks with missing issue data found. Reloading.",
         "NO_AUTO_IMPORT_JQL": "Jira: No search query defined for auto import",
         "NO_VALID_TRANSITION": "Jira: No valid transition configured",
-        "POLLING": "Jira: Polling Changes for issues",
         "TIMED_OUT": "Jira: Request timed out",
         "TRANSITION": "Jira: Set issue \"{{issueKey}}\" to \"{{name}}\"",
         "TRANSITIONS_LOADED": "Jira: Transitions loaded. Use the selects below to assign them",
         "TRANSITION_SUCCESS": "Jira: Set issue {{issueKey}} to <strong>{{chosenTransition}}</strong>",
-        "UNABLE_TO_REASSIGN": "Jira: Unable to reassign ticket to yourself, because you didn't specify a username. Please visit the settings."
+        "UNABLE_TO_REASSIGN": "Jira: Unable to reassign ticket to yourself, because you didn't specify a username. Please visit the settings.",
+        "IMPORTED_MULTIPLE_ISSUES": "Jira: Imported {{issuesLength}} new issues from jira to backlog",
+        "IMPORTED_SINGLE_ISSUE": "Jira: Imported issue \"{{issueText}}\" from jira to backlog",
+        "ISSUE_UPDATE": "Jira: Updated data for \"{{issueText}}\"",
+        "POLLING": "Jira: Polling Changes for issues"
       },
       "STEPPER": {
         "CREDENTIALS": "Credentials",
@@ -404,11 +384,20 @@
       }
     },
     "NOTE": {
-      "ADD_REMINDER": "Dodaj przypomnienie",
       "D_ADD": {
-        "DATETIME_LABEL": "Datetime for reminder (optional)",
-        "NOTE_LABEL": "Enter some text to save as note..."
+        "NOTE_LABEL": "Enter some text to save as note...",
+        "DATETIME_LABEL": "Datetime for reminder (optional)"
       },
+      "NOTES_CMP": {
+        "ADD_BTN": "Add new Note",
+        "DROP_TO_ADD": "Drop here to add new note"
+      },
+      "NOTE_CMP": {
+        "DISABLE_PARSE": "Disable markdown parsing",
+        "ENABLE_PARSE": "Enable markdown parse"
+      },
+      "EDIT_FULLSCREEN": "Edit in fullscreen",
+      "ADD_REMINDER": "Dodaj przypomnienie",
       "D_ADD_REMINDER": {
         "E_ENTER_TITLE": "You need to enter a title",
         "L_DATETIME": "Datetime for reminder",
@@ -418,16 +407,7 @@
         "SNOOZE": "Snooze",
         "TITLE": "Note"
       },
-      "EDIT_FULLSCREEN": "Edit in fullscreen",
       "EDIT_REMINDER": "Edit reminder",
-      "NOTES_CMP": {
-        "ADD_BTN": "Add new Note",
-        "DROP_TO_ADD": "Drop here to add new note"
-      },
-      "NOTE_CMP": {
-        "DISABLE_PARSE": "Disable markdown parsing",
-        "ENABLE_PARSE": "Enable markdown parse"
-      },
       "REMOVE_REMINDER": "Remove reminder",
       "S": {
         "ADDED_REMINDER": "Added reminder for note",
@@ -534,6 +514,13 @@
     "REMINDER": {
       "S_REMINDER_ERR": "Error for reminder interface"
     },
+    "SEARCH_BAR": {
+      "INFO": "Click on the list icon to search for archived tasks",
+      "INFO_ARCHIVED": "Click on the archive icon to search for normal tasks",
+      "PLACEHOLDER": "Search for task or task description",
+      "PLACEHOLDER_ARCHIVED": "Search for archived tasks",
+      "TOO_MANY_RESULTS": "Too many results, please narrow your search"
+    },
     "SIMPLE_COUNTER": {
       "D_CONFIRM_REMOVE": {
         "MSG": "Deleting a simple counter, will also delete all past data tracked on it. Are you sure you want to proceed?",
@@ -587,14 +574,14 @@
       },
       "FORM": {
         "DROPBOX": {
+          "L_ACCESS_TOKEN": "Access Token (generated from Auth Code)",
           "B_GENERATE_TOKEN": "Generate Token",
           "FOLLOW_LINK": "Please open the following link and copy the auth code provided there into the the input field.",
-          "L_ACCESS_TOKEN": "Access Token (generated from Auth Code)",
           "L_AUTH_CODE": "Auth Code"
         },
         "GOOGLE": {
-          "L_IS_COMPRESS_DATA": "Compress data",
-          "L_SYNC_FILE_NAME": "Sync File Name"
+          "L_SYNC_FILE_NAME": "Sync File Name",
+          "L_IS_COMPRESS_DATA": "Compress data"
         },
         "L_ENABLE_SYNCING": "Enable Syncing",
         "L_SYNC_INTERVAL": "Sync Interval",
@@ -614,9 +601,9 @@
         "IMPORTING": "Importing data",
         "INCOMPLETE_CFG": "Authentication for sync failed. Please check your Config!",
         "INITIAL_SYNC_ERROR": "Initial Sync failed",
-        "SUCCESS": "Data imported",
         "UNKNOWN_ERROR": "Unknown Sync Error: {{err}}",
-        "UPLOAD_ERROR": "Unknown Upload Error (Settings correct?): {{err}}"
+        "UPLOAD_ERROR": "Unknown Upload Error (Settings correct?): {{err}}",
+        "SUCCESS": "Data imported"
       }
     },
     "TAG": {
@@ -660,11 +647,11 @@
       "ADD_TASK_BAR": {
         "ADD_EXISTING_TASK": "Add existing task \"{{taskTitle}}\"",
         "ADD_ISSUE_TASK": "Add issue #{{issueNr}} from {{issueType}}",
-        "ADD_TASK": "Add task",
-        "ADD_TASK_TO_BACKLOG": "Add task to backlog",
         "CREATE_TASK": "Create new task",
         "EXAMPLE": "Example: \"Some task title +projectName #some-tag #some-other-tag 10m/3h\"",
-        "START": "Press enter one more time to start"
+        "START": "Press enter one more time to start",
+        "ADD_TASK": "Add task",
+        "ADD_TASK_TO_BACKLOG": "Add task to backlog"
       },
       "B": {
         "ADD_HALF_HOUR": "Add 1/2 hour",
@@ -890,12 +877,25 @@
         "TITLE": "Title"
       }
     },
-    "SEARCH_BAR": {
-      "TOO_MANY_RESULTS": "Too many results, please narrow your search",
-      "PLACEHOLDER": "Search for task or task description",
-      "PLACEHOLDER_ARCHIVED": "Search for archived tasks",
-      "INFO": "Click on the list icon to search for archived tasks",
-      "INFO_ARCHIVED": "Click on the archive icon to search for normal tasks"
+    "GOOGLE": {
+      "BANNER": {
+        "AUTH_FAIL": "GoogleApi: Failed to authenticate please try logging in again!"
+      },
+      "DIALOG": {
+        "CREATE_SYNC_FILE": "Google Drive: No file with the name <strong>\"{{fileName}}\"</strong> was found. <strong>Create</strong> it as sync file on Google Drive?",
+        "USE_EXISTING_SYNC_FILE": "Google Drive: Use <strong>existing</strong> file <strong>\"{{fileName}}\"</strong> as sync file? If not please change the Sync file name."
+      },
+      "S": {
+        "MULTIPLE_SYNC_FILES_WITH_SAME_NAME": "Multiple files with the name \"{{newFileName}}\" found. Please delete all but one or choose a different name.",
+        "SYNC_FILE_CREATION_ERROR": "Google Drive: Error while creating sync file. {{err}}",
+        "UPDATED_SYNC_FILE_NAME": "Google Drive: Updated sync file name"
+      },
+      "S_API": {
+        "ERR": "GoogleApi Error: {{errStr}}",
+        "ERR_NO_FILE_ID": "GoogleApi: No file id specified",
+        "ERR_NO_FILE_NAME": "GoogleApi: No file name specified",
+        "SUCCESS_LOGIN": "GoogleApi: Login successful"
+      }
     }
   },
   "FILE_IMEX": {
@@ -969,7 +969,6 @@
       "GO_TO_TIMELINE": "Go to Timeline",
       "GO_TO_WORK_VIEW": "Go to Work View",
       "HELP": "<p>Here you can configure all keyboard shortcuts.</p> <p>Click on the text input and enter the desired keyboard combination. Hit enter to save and Escape to abort.</p> <p>There are three types of shortcuts:</p> <ul> <li> <strong>Global shortcuts:</strong> When the app is running it will trigger the action from every other application. </li> <li> <strong>Application level shortcuts:</strong> Will trigger from every screen of the application, but not if you're currently editing a text field. </li> <li> <strong>Task level shortcuts:</strong> They will only trigger if you have selected a task via mouse or keyboard and usually trigger an action specifically related to that one task. </li> </ul><p>You can <strong>press Escape to remove a shortcut.</strong>",
-      "SHOW_SEARCH_BAR": "Show search bar",
       "MOVE_TASK_DOWN": "Move Task down in List",
       "MOVE_TASK_UP": "Move Task up in List",
       "MOVE_TO_BACKLOG": "Move Task to Task Backlog",
@@ -977,6 +976,7 @@
       "OPEN_PROJECT_NOTES": "Show/Hide Project Notes",
       "SELECT_NEXT_TASK": "Select next Task",
       "SELECT_PREVIOUS_TASK": "Select previous Task",
+      "SHOW_SEARCH_BAR": "Show search bar",
       "SYSTEM_SHORTCUTS": "Global Shortcuts (system wide)",
       "TASK_ADD_SUB_TASK": "Add sub Task",
       "TASK_DELETE": "Delete Task",
@@ -1028,14 +1028,14 @@
       "IS_AUTO_START_NEXT_TASK": "Start tracking next task when marking current as done",
       "IS_CONFIRM_BEFORE_EXIT": "Confirm before exiting the app",
       "IS_DARK_MODE": "Dark Mode",
-      "IS_DISABLE_INITIAL_DIALOG": "Disable initial info dialog (you might miss important updates!)",
       "IS_HIDE_NAV": "Hide navigation until main header is hovered (desktop only)",
       "IS_MINIMIZE_TO_TRAY": "Minimize to tray (desktop only)",
       "IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "Notify when time estimate was exceeded",
       "IS_TRAY_SHOW_CURRENT_TASK": "Show current task in the tray / status menu (desktop mac/windows only)",
       "IS_TURN_OFF_MARKDOWN": "Turn off markdown parsing for notes",
       "TASK_NOTES_TPL": "Task description template",
-      "TITLE": "Ustawienia różne"
+      "TITLE": "Ustawienia różne",
+      "IS_DISABLE_INITIAL_DIALOG": "Disable initial info dialog (you might miss important updates!)"
     },
     "POMODORO": {
       "BREAK_DURATION": "Duration of short breaks",
@@ -1055,9 +1055,9 @@
     "SOUND": {
       "DONE_SOUND": "Dźwięk zrobionego zadania",
       "IS_INCREASE_DONE_PITCH": "Zwiększaj tonację dla każdego wykonanego zadania",
-      "IS_PLAY_DONE_SOUND": "Odtwórz dźwięk kiedy zadanie zostanie zrobione",
       "TITLE": "Dźwięk",
-      "VOLUME": "Głośność"
+      "VOLUME": "Głośność",
+      "IS_PLAY_DONE_SOUND": "Odtwórz dźwięk kiedy zadanie zostanie zrobione"
     },
     "TAKE_A_BREAK": {
       "HELP": "<div> <p>Allows you to configure a reoccurring reminder when you have worked for a specified amount of time without taking a break.</p> <p>You can modify the message displayed. ${duration} will be replaced with the time spent without a break.</p> </div>",
@@ -1065,9 +1065,9 @@
       "IS_FOCUS_WINDOW": "Focus app window when reminder is active (desktop only)",
       "IS_LOCK_SCREEN": "Lock screen when a break is due (desktop only)",
       "MESSAGE": "Take a break message",
-      "SNOOZE_TIME": "Snooze time when prompted to take a break",
       "MIN_WORKING_TIME": "Trigger take a break notification after X working without one",
       "MOTIVATIONAL_IMGS": "Motivational image (web url)",
+      "SNOOZE_TIME": "Snooze time when prompted to take a break",
       "TITLE": "Break Reminder"
     },
     "TIMELINE": {
@@ -1100,13 +1100,13 @@
     "DBX_GEN_TOKEN": "Dropbox: Generate token...",
     "DBX_META": "Dropbox: Get file meta...",
     "DBX_UPLOAD": "Dropbox: Upload file...",
-    "GDRIVE_DOWNLOAD": "Google Drive: Download file...",
-    "GDRIVE_UPLOAD": "Google Drive: Upload file...",
     "GITHUB_LOAD_ISSUE": "GitHub: Load issue data...",
     "JIRA_LOAD_ISSUE": "Jira: Load issue data...",
     "UNKNOWN": "Loading remote data",
     "WEB_DAV_DOWNLOAD": "WebDAV: Downloading data...",
-    "WEB_DAV_UPLOAD": "WebDAV: Uploading data..."
+    "WEB_DAV_UPLOAD": "WebDAV: Uploading data...",
+    "GDRIVE_DOWNLOAD": "Google Drive: Download file...",
+    "GDRIVE_UPLOAD": "Google Drive: Upload file..."
   },
   "MH": {
     "ADD_NEW_TASK": "Dodaj nowe Zadanie",
@@ -1123,14 +1123,14 @@
     "PROJECT_SETTINGS": "Ustawienia projektów",
     "SCHEDULED": "Zaplanowane",
     "SETTINGS": "Ustawienia",
+    "SHOW_SEARCH_BAR": "Pokaż pasek wyszukiwania",
     "TAGS": "Tagi",
     "TASKS": "Zadania",
     "TASK_LIST": "Lista zadań",
     "TOGGLE_SHOW_BOOKMARKS": "Pokaż/Ukryj Zakładki",
     "TOGGLE_SHOW_NOTES": "Pokaż/Ukryj Notatki Projektu",
     "TOGGLE_TRACK_TIME": "Start/Stop zliczania czasu",
-    "WORKLOG": "Czas pracy",
-    "SHOW_SEARCH_BAR": "Pokaż pasek wyszukiwania"
+    "WORKLOG": "Czas pracy"
   },
   "PDS": {
     "BACK": "Poczekaj! Zapomniałem czegoś...",
@@ -1171,7 +1171,6 @@
   "PP": {
     "ARCHIVED_PROJECTS": "Zarchiwizowane projekty",
     "ARCHIVE_PROJECT": "Archiwizuj Projekt",
-    "CREATE_NEW": "Stwórz Nowy",
     "DELETE_PROJECT": "Usuń Projekt",
     "D_CONFIRM_ARCHIVE": {
       "MSG": "Jesteś pewien że chcesz zarchiwizować projekt? Nie bedzie się pojawiał na liście projektów dopóki nie zostanie przywrócony. Polecamy zrobić kopię zapasową przed wykonaniem akcji.",
@@ -1193,7 +1192,8 @@
     "JIRA_CONFIGURED": "Integracja z Jira Skonfigutowana",
     "S_INVALID_JSON": "Niepoprawny plik JSON projektu",
     "TITLE": "Podgląd Projektu",
-    "UN_ARCHIVE_PROJECT": "Przywróć Projekt"
+    "UN_ARCHIVE_PROJECT": "Przywróć Projekt",
+    "CREATE_NEW": "Stwórz Nowy"
   },
   "PS": {
     "GLOBAL_SETTINGS": "Ustawienia Globalne",

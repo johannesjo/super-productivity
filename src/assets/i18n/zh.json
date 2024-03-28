@@ -199,26 +199,6 @@
         "ERR_UNKNOWN": "GitLab：未知错误 {{statusCode}} {{errorMsg}}"
       }
     },
-    "GOOGLE": {
-      "BANNER": {
-        "AUTH_FAIL": "GoogleApi：无法验证，请尝试重新登录！"
-      },
-      "DIALOG": {
-        "CREATE_SYNC_FILE": "Google Drive：找不到名称为 <strong>“{{fileName}}”</strong> 的文件。是否在<strong>Google Drive</strong> 上将其创建为同步文件？",
-        "USE_EXISTING_SYNC_FILE": "Google Drive：使用 <strong>现有</strong> 文件 <strong>“{{fileName}}”</strong> 作为同步文件？如果没有，请更改同步文件名。"
-      },
-      "S": {
-        "MULTIPLE_SYNC_FILES_WITH_SAME_NAME": "找到名为“{{newFileName}}”的多个文件。请进保留一个文件或选择其他名称。",
-        "SYNC_FILE_CREATION_ERROR": "Google云端硬盘：创建同步文件时出错。 {{err}}",
-        "UPDATED_SYNC_FILE_NAME": "Google云端硬盘：更新的同步文件名"
-      },
-      "S_API": {
-        "ERR": "GoogleApi错误： {{errStr}}",
-        "ERR_NO_FILE_ID": "GoogleApi：未指定文件ID",
-        "ERR_NO_FILE_NAME": "GoogleApi：未指定文件名",
-        "SUCCESS_LOGIN": "GoogleApi：登录成功"
-      }
-    },
     "ISSUE": {
       "DEFAULT": {
         "ISSUES_STR": "问题",
@@ -426,9 +406,9 @@
         "NOTE_LABEL": "请输入提醒的内容..."
       },
       "D_FULLSCREEN": {
-        "VIEW_PARSED": "展示转换后的(不可编辑)markdown文本",
+        "VIEW_TEXT_ONLY": "展示未转换的文本",
         "VIEW_SPLIT": "分屏展示转换前和转换后的markdown文本",
-        "VIEW_TEXT_ONLY": "展示未转换的文本"
+        "VIEW_PARSED": "展示转换后的(不可编辑)markdown文本"
       },
       "NOTES_CMP": {
         "ADD_BTN": "添加新笔记",
@@ -465,11 +445,11 @@
         "IS_SHOW_TIME_TRACKING_DIALOG_FOR_EACH_SUB_TASK": "子任务完成时显示时间跟踪对话框",
         "PROJECT_ID": "项目编号",
         "PROJECT_ID_DESCRIPTION": "在浏览器中查看项目时，可以作为 url 的一部分找到。",
+        "TOKEN": "访问令牌",
         "SCOPE": "范围",
         "SCOPE_ALL": "所有",
         "SCOPE_ASSIGNED": "分配给我",
-        "SCOPE_CREATED": "由我创建",
-        "TOKEN": "访问令牌"
+        "SCOPE_CREATED": "由我创建"
       },
       "FORM_SECTION": {
         "HELP": "<p>您可以在此处配置 SuperProductivity 以列出打开的 OpenProject 工作包。请注意，要使其在浏览器中工作，您可能需要为 OpenProject 服务器配置 CORS，以允许从 app.super-productivity.com 访问</p>",
@@ -498,15 +478,15 @@
       "ENJOY_YOURSELF": "放松一会再继续吧！",
       "FINISH_SESSION_X": "您已成功完成会话 <strong>{{nr}}</strong>！",
       "NOTIFICATION": {
-        "BREAK_TIME": "番茄钟：休息 {{nr}} 的时间到了！",
         "BREAK_X_START": "番茄钟：休息 {{nr}} 开始了！",
+        "BREAK_TIME": "番茄钟：休息 {{nr}} 的时间到了！",
         "NO_TASKS": "您需要在番茄钟计时器启动之前添加任务。",
         "SESSION_X_START": "番茄钟：会话 {{nr}} 开始了！"
       },
       "S": {
-        "RESET": "终止番茄钟会话",
+        "SESSION_X_START": "番茄钟：会话 {{nr}} 开始了！",
         "SESSION_SKIP": "跳过当前番茄钟会话",
-        "SESSION_X_START": "番茄钟：会话 {{nr}} 开始了！"
+        "RESET": "终止番茄钟会话"
       },
       "SKIP_BREAK": "跳过休息",
       "START_BREAK": "开始休息"
@@ -559,10 +539,10 @@
         "EDIT": "编辑项目",
         "SETUP_CALDAV": "关联 Caldav",
         "SETUP_GIT": "关联 GitHub",
-        "SETUP_GITEA_PROJECT": "关联 Gitea",
         "SETUP_GITLAB": "关联 GitLab",
         "SETUP_JIRA": "关联 Jira",
         "SETUP_OPEN_PROJECT": "关联 OpenProject",
+        "SETUP_GITEA_PROJECT": "关联 Gitea",
         "SETUP_REDMINE_PROJECT": "关联 Redmine"
       },
       "FORM_BASIC": {
@@ -877,18 +857,14 @@
         "EVERY_X_MONTHLY_AND_TIME": "每 {{x}} 月, {{timeStr}}",
         "EVERY_X_YEARLY": "每 {{x}} 年",
         "EVERY_X_YEARLY_AND_TIME": "每 {{x}} 年, {{timeStr}}",
-        "MONDAY_TO_FRIDAY": "周一-周五",
-        "MONDAY_TO_FRIDAY_AND_TIME": "周一-周五, {{timeStr}}",
         "MONTHLY_CURRENT_DATE": "每月 {{dateDayStr}}日",
         "MONTHLY_CURRENT_DATE_AND_TIME": "每月 {{dateDayStr}}日, {{timeStr}}",
+        "MONDAY_TO_FRIDAY": "周一-周五",
+        "MONDAY_TO_FRIDAY_AND_TIME": "周一-周五, {{timeStr}}",
         "WEEKLY_CURRENT_WEEKDAY": "每周 {{weekdayStr}}",
         "WEEKLY_CURRENT_WEEKDAY_AND_TIME": "每周 {{weekdayStr}}, {{timeStr}}",
         "YEARLY_CURRENT_DATE": "每年 {{dayAndMonthStr}}",
         "YEARLY_CURRENT_DATE_AND_TIME": "每年 {{dayAndMonthStr}}, {{timeStr}}"
-      },
-      "D_CONFIRM_MOVE_TO_PROJECT": {
-        "MSG": "当前重复任务已有 {{tasksNr}} 个已创建的实例，您想要将他们全部移动到项目 \"{{projectName}}\" 吗?",
-        "OK": "更新所有实例"
       },
       "D_CONFIRM_REMOVE": {
         "MSG": "删除重复配置会将此任务的所有先前实例转换为常规任务，是否继续？",
@@ -896,6 +872,10 @@
       },
       "D_CONFIRM_UPDATE_INSTANCES": {
         "MSG": "当前重复任务已有 {{tasksNr}} 个已创建的实例，您想要使用新的默认值更新所有的实例还是仅更新未来创建的任务?",
+        "OK": "更新所有实例"
+      },
+      "D_CONFIRM_MOVE_TO_PROJECT": {
+        "MSG": "当前重复任务已有 {{tasksNr}} 个已创建的实例，您想要将他们全部移动到项目 \"{{projectName}}\" 吗?",
         "OK": "更新所有实例"
       },
       "D_EDIT": {
@@ -920,13 +900,13 @@
         "NOTES": "默认笔记",
         "ORDER": "顺序",
         "ORDER_DESCRIPTION": "可重复任务的创建顺序。仅影响同时创建的可重复任务。较低的值意味着任务将在列表的更高位置创建，较低的数字将进一步向下。大于 0 的值表示在正常任务的底部创建项目。",
-        "QUICK_SETTING": "重复设置",
         "Q_CUSTOM": "自定义重复设置",
         "Q_DAILY": "每天",
-        "Q_MONDAY_TO_FRIDAY": "每周一到周五",
         "Q_MONTHLY_CURRENT_DATE": "每月 {{dateDayStr}}日",
+        "Q_MONDAY_TO_FRIDAY": "每周一到周五",
         "Q_WEEKLY_CURRENT_WEEKDAY": "每周 {{weekdayStr}}",
         "Q_YEARLY_CURRENT_DATE": "每年 {{dayAndMonthStr}}",
+        "QUICK_SETTING": "重复设置",
         "REMIND_AT": "提醒在",
         "REMIND_AT_PLACEHOLDER": "选择提醒时间",
         "REPEAT_CYCLE": "重复周期",
@@ -952,11 +932,11 @@
       "MENU_TITLE": "时间线",
       "NOW": "现在",
       "NO_TASKS": "当前没有任务。请通过顶部栏中的+按钮添加一些任务。",
+      "START": "工作开始",
+      "TASK_PROJECTION_INFO": "计划的可重复任务的未来预测",
       "S": {
         "CAL_PROVIDER_ERROR": "时间线校准提供程序错误： {{errTxt}}"
-      },
-      "START": "工作开始",
-      "TASK_PROJECTION_INFO": "计划的可重复任务的未来预测"
+      }
     },
     "TIME_TRACKING": {
       "B": {
@@ -987,18 +967,6 @@
         "TASK": "任务",
         "TRACK_TO": "记录到：",
         "UNTRACKED_TIME": "未记录时间："
-      }
-    },
-    "WELCOME": {
-      "D_WELCOME": {
-        "L1": "入门指引",
-        "L2": "youtube指引视频",
-        "L3": "发起提问",
-        "LETS_GO": "让我们开始吧！！",
-        "MOBILE_INFO": "<strong>向右滑动</strong>已创建的任务，<strong>可将他们设为完成</strong>。\n    向左滑动来计划任务。长按选择更多操作",
-        "T1": "很高兴看到您决定尝试本应用程序！ 🦄",
-        "T2": "如果您在使用时遇到问题，您可以在下列位置找到帮助：",
-        "TITLE": "欢迎使用 Super Productivity！"
       }
     },
     "WORKLOG": {
@@ -1056,6 +1024,38 @@
         "NO_DATA": "本周还没有任务。",
         "TITLE": "标题"
       }
+    },
+    "GOOGLE": {
+      "BANNER": {
+        "AUTH_FAIL": "GoogleApi：无法验证，请尝试重新登录！"
+      },
+      "DIALOG": {
+        "CREATE_SYNC_FILE": "Google Drive：找不到名称为 <strong>“{{fileName}}”</strong> 的文件。是否在<strong>Google Drive</strong> 上将其创建为同步文件？",
+        "USE_EXISTING_SYNC_FILE": "Google Drive：使用 <strong>现有</strong> 文件 <strong>“{{fileName}}”</strong> 作为同步文件？如果没有，请更改同步文件名。"
+      },
+      "S": {
+        "MULTIPLE_SYNC_FILES_WITH_SAME_NAME": "找到名为“{{newFileName}}”的多个文件。请进保留一个文件或选择其他名称。",
+        "SYNC_FILE_CREATION_ERROR": "Google云端硬盘：创建同步文件时出错。 {{err}}",
+        "UPDATED_SYNC_FILE_NAME": "Google云端硬盘：更新的同步文件名"
+      },
+      "S_API": {
+        "ERR": "GoogleApi错误： {{errStr}}",
+        "ERR_NO_FILE_ID": "GoogleApi：未指定文件ID",
+        "ERR_NO_FILE_NAME": "GoogleApi：未指定文件名",
+        "SUCCESS_LOGIN": "GoogleApi：登录成功"
+      }
+    },
+    "WELCOME": {
+      "D_WELCOME": {
+        "L1": "入门指引",
+        "L2": "youtube指引视频",
+        "L3": "发起提问",
+        "LETS_GO": "让我们开始吧！！",
+        "MOBILE_INFO": "<strong>向右滑动</strong>已创建的任务，<strong>可将他们设为完成</strong>。\n    向左滑动来计划任务。长按选择更多操作",
+        "T1": "很高兴看到您决定尝试本应用程序！ 🦄",
+        "T2": "如果您在使用时遇到问题，您可以在下列位置找到帮助：",
+        "TITLE": "欢迎使用 Super Productivity！"
+      }
     }
   },
   "FILE_IMEX": {
@@ -1070,8 +1070,8 @@
     "CLOSE": "关闭",
     "DELETE": "删除",
     "DISMISS": "取消",
-    "DO_IT": "开始吧！",
     "DURATION_DESCRIPTION": "例如 \"5h 23m\" 表示5小时23分钟",
+    "DO_IT": "开始吧！",
     "EDIT": "编辑",
     "ENABLED": "启用",
     "EXTENSION_INFO": "请 <a target=\"_blank\" href=\"https://chrome.google.com/webstore/detail/super-productivity/ljkbjodfmekklcoibdnhahlaalhihmlb\"> 下载Chrome扩展程序</a> ，以便与Jira Api和空闲时间处理进行通信。请注意，这不适用于移动设备。",
@@ -1189,6 +1189,8 @@
     "MISC": {
       "DEFAULT_PROJECT": "如果未指定，则用于任务的默认项目",
       "FIRST_DAY_OF_WEEK": "一周的第一天",
+      "START_OF_NEXT_DAY": "第二天开始时间",
+      "START_OF_NEXT_DAY_HINT": "您想要开始计算第二天的时间（以小时为单位）。 默认为午夜，即 0。",
       "HELP": "<p><strong>没有看到桌面通知？</strong>对于Windows，您可能需要检查 系统>通知和操作 ，并检查是否已启用所需的通知。</p>",
       "IS_AUTO_ADD_WORKED_ON_TO_TODAY": "自动添加今日标签以处理任务",
       "IS_AUTO_MARK_PARENT_AS_DONE": "完成所有子任务后，将父任务标记为已完成",
@@ -1202,8 +1204,6 @@
       "IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "在超出时间估算时发送通知",
       "IS_TRAY_SHOW_CURRENT_TASK": "在任务栏/状态菜单中显示当前任务（仅限桌面）",
       "IS_TURN_OFF_MARKDOWN": "停止在任务备注中解析Markdown",
-      "START_OF_NEXT_DAY": "第二天开始时间",
-      "START_OF_NEXT_DAY_HINT": "您想要开始计算第二天的时间（以小时为单位）。 默认为午夜，即 0。",
       "TASK_NOTES_TPL": "任务描述模板",
       "TITLE": "其他设置"
     },
@@ -1225,9 +1225,9 @@
     "SOUND": {
       "DONE_SOUND": "任务完成声音",
       "IS_INCREASE_DONE_PITCH": "为完成的每项任务增加音调",
-      "IS_PLAY_DONE_SOUND": "任务标记为完成时播放声音",
       "TITLE": "声音",
-      "VOLUME": "音量"
+      "VOLUME": "音量",
+      "IS_PLAY_DONE_SOUND": "任务标记为完成时播放声音"
     },
     "TAKE_A_BREAK": {
       "HELP": "<div><p>允许您在工作了指定的时间而不休息时配置重复提醒。</p> <p>您可以修改显示的消息。 ${duration}将被替换为连续工作时长。</p></div>",
@@ -1242,16 +1242,16 @@
       "TITLE": "休息提醒"
     },
     "TIMELINE": {
-      "CAL_PROVIDERS": "日历提供程序（实验性和可选）",
-      "CAL_PROVIDERS_ADD": "添加 ical 源",
-      "CAL_PROVIDERS_INFO": "您可以选择将时间线配置为还从 iCal（例如 Google 日历）加载和显示数据。",
       "HELP": "时间轴功能应为您提供有关计划任务如何随时间推移进行快速浏览的概述。您可以在 <a href='#/timeline'>'时间轴'</a>下的左侧菜单中找到它。",
-      "L_CAL_PATH": "日历 ICAL 的 URL/文件路径（可选）",
       "L_IS_WORK_START_END_ENABLED": "将计划外的任务流限制为特定的工作时间",
       "L_WORK_END": "工作日结束",
       "L_WORK_START": "工作日开始",
       "TITLE": "时间线",
-      "WORK_START_END_DESCRIPTION": "例如17:00"
+      "WORK_START_END_DESCRIPTION": "例如17:00",
+      "CAL_PROVIDERS": "日历提供程序（实验性和可选）",
+      "CAL_PROVIDERS_ADD": "添加 ical 源",
+      "CAL_PROVIDERS_INFO": "您可以选择将时间线配置为还从 iCal（例如 Google 日历）加载和显示数据。",
+      "L_CAL_PATH": "日历 ICAL 的 URL/文件路径（可选）"
     },
     "TRACKING_REMINDER": {
       "HELP": "配置横幅以在您忘记开始时间记录的情况下显示。",
@@ -1277,13 +1277,13 @@
     "DBX_GEN_TOKEN": "Dropbox：生成令牌...",
     "DBX_META": "Dropbox：获取文件元数据...",
     "DBX_UPLOAD": "Dropbox：上传文件...",
-    "GDRIVE_DOWNLOAD": "Google Drive：下载文件...",
-    "GDRIVE_UPLOAD": "Google Drive：上传文件...",
     "GITHUB_LOAD_ISSUE": "GitHub：加载 Issue 数据...",
     "JIRA_LOAD_ISSUE": "Jira：加载 Issue 数据...",
     "UNKNOWN": "加载远程数据",
     "WEB_DAV_DOWNLOAD": "WebDAV：正在下载数据...",
-    "WEB_DAV_UPLOAD": "WebDAV：正在上传数据..."
+    "WEB_DAV_UPLOAD": "WebDAV：正在上传数据...",
+    "GDRIVE_DOWNLOAD": "Google Drive：下载文件...",
+    "GDRIVE_UPLOAD": "Google Drive：上传文件..."
   },
   "MH": {
     "ADD_NEW_TASK": "添加新任务",
@@ -1391,8 +1391,8 @@
     "TOGGLE_DARK_MODE": "切换深色模式"
   },
   "SCHEDULE": {
-    "NO_REPEATABLE_TASKS": "目前没有重复的任务。您可以在任务侧边栏选择\"重复\"来规划任务。要打开它，请单击在任务最右侧的\"显示/隐藏其他信息\"按钮 (移动端只需单击任务).",
     "NO_SCHEDULED": "目前没有计划任务。您可以通过在任务上下文菜单中选择“计划任务”来计划任务。要打开它，请右键点击任务（移动端长按任务）。",
+    "NO_REPEATABLE_TASKS": "目前没有重复的任务。您可以在任务侧边栏选择\"重复\"来规划任务。要打开它，请单击在任务最右侧的\"显示/隐藏其他信息\"按钮 (移动端只需单击任务).",
     "REPEATED_TASKS": "重复任务",
     "SCHEDULED_TASKS": "计划任务",
     "START_TASK": "立即开始任务并删除提醒"
@@ -1433,9 +1433,9 @@
     "COMPLETED_TASKS": "完成的任务",
     "ESTIMATE_REMAINING": "预估剩余时间：",
     "FINISH_DAY": "完成本日",
+    "FINISH_DAY_TOOLTIP": "评估你今天的工作，归档所有已完成的任务（可选）并计划明天的工作。",
     "FINISH_DAY_FOR_PROJECT": "完成当前项目本日工作",
     "FINISH_DAY_FOR_TAG": "完成当前标签本日工作",
-    "FINISH_DAY_TOOLTIP": "评估你今天的工作，归档所有已完成的任务（可选）并计划明天的工作。",
     "HELP_PROCRASTINATION": "帮帮我！我在拖延！",
     "NO_COMPLETED_TASKS": "目前还没有完成的任务",
     "NO_PLANNED_TASKS": "没有计划的任务",

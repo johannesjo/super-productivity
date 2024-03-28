@@ -199,26 +199,6 @@
         "ERR_UNKNOWN": "GitLab：不明なエラー {{statusCode}} {{errorMsg}}"
       }
     },
-    "GOOGLE": {
-      "BANNER": {
-        "AUTH_FAIL": "GoogleApi：認証に失敗しましたもう一度ログインしてください。"
-      },
-      "DIALOG": {
-        "CREATE_SYNC_FILE": "Googleドライブ： <strong>\"{{fileName}}\"</strong> という名前のファイルが見つかりませんでした。 <strong>Googleドライブに同期ファイルとして</strong> を作成しますか？",
-        "USE_EXISTING_SYNC_FILE": "Googleドライブ：同期ファイルとして <strong>既存の</strong> ファイル <strong>\"{{fileName}}\"</strong> を使用しますか？そうでない場合は、同期ファイル名を変更してください。"
-      },
-      "S": {
-        "MULTIPLE_SYNC_FILES_WITH_SAME_NAME": "\"{{newFileName}}\"という名前のファイルが複数見つかりました。 1つを除いてすべて削除するか、別の名前を選択してください。",
-        "SYNC_FILE_CREATION_ERROR": "Googleドライブ：同期ファイル作成中にエラーが発生しました。 {{err}}",
-        "UPDATED_SYNC_FILE_NAME": "Googleドライブ：同期ファイル名を更新しました"
-      },
-      "S_API": {
-        "ERR": "GoogleApiエラー： {{errStr}}",
-        "ERR_NO_FILE_ID": "GoogleApi：ファイルIDが指定されていません",
-        "ERR_NO_FILE_NAME": "GoogleApi：ファイル名が指定されていません",
-        "SUCCESS_LOGIN": "GoogleApi：ログイン成功"
-      }
-    },
     "ISSUE": {
       "DEFAULT": {
         "ISSUES_STR": "課題",
@@ -425,7 +405,6 @@
       "D_ADD": {
         "NOTE_LABEL": "メモとして保存するテキストを入力してください..."
       },
-      "EDIT_FULLSCREEN": "全画面で編集する",
       "NOTES_CMP": {
         "ADD_BTN": "新しいメモを追加",
         "DROP_TO_ADD": "新しいメモを追加するには、ここにドロップしてください",
@@ -434,7 +413,8 @@
       "NOTE_CMP": {
         "DISABLE_PARSE": "マークダウン解析を無効にする",
         "ENABLE_PARSE": "マークダウン解析を有効にする"
-      }
+      },
+      "EDIT_FULLSCREEN": "全画面で編集する"
     },
     "OPEN_PROJECT": {
       "DIALOG_INITIAL": {
@@ -655,8 +635,8 @@
           "L_ACCESS_TOKEN": "アクセストークン（認証コードから生成）"
         },
         "GOOGLE": {
-          "L_IS_COMPRESS_DATA": "データを圧縮する",
-          "L_SYNC_FILE_NAME": "同期ファイル名"
+          "L_SYNC_FILE_NAME": "同期ファイル名",
+          "L_IS_COMPRESS_DATA": "データを圧縮する"
         },
         "LOCAL_FILE": {
           "L_SYNC_FILE_PATH": "同期ファイルパス",
@@ -885,11 +865,11 @@
       "MENU_TITLE": "タイムライン",
       "NOW": "今",
       "NO_TASKS": "現在、タスクはありません。トップバーの+ボタンからいくつかのタスクを追加してください。",
+      "START": "作業開始",
+      "TASK_PROJECTION_INFO": "スケジュールされた反復可能なタスクの将来の予測",
       "S": {
         "CAL_PROVIDER_ERROR": "タイムライン校正プロバイダーエラー： {{errTxt}}"
-      },
-      "START": "作業開始",
-      "TASK_PROJECTION_INFO": "スケジュールされた反復可能なタスクの将来の予測"
+      }
     },
     "TIME_TRACKING": {
       "B": {
@@ -976,6 +956,26 @@
         "EXPORT": "週データのエクスポート",
         "NO_DATA": "今週はまだタスクがありません。",
         "TITLE": "タイトル"
+      }
+    },
+    "GOOGLE": {
+      "BANNER": {
+        "AUTH_FAIL": "GoogleApi：認証に失敗しましたもう一度ログインしてください。"
+      },
+      "DIALOG": {
+        "CREATE_SYNC_FILE": "Googleドライブ： <strong>\"{{fileName}}\"</strong> という名前のファイルが見つかりませんでした。 <strong>Googleドライブに同期ファイルとして</strong> を作成しますか？",
+        "USE_EXISTING_SYNC_FILE": "Googleドライブ：同期ファイルとして <strong>既存の</strong> ファイル <strong>\"{{fileName}}\"</strong> を使用しますか？そうでない場合は、同期ファイル名を変更してください。"
+      },
+      "S": {
+        "MULTIPLE_SYNC_FILES_WITH_SAME_NAME": "\"{{newFileName}}\"という名前のファイルが複数見つかりました。 1つを除いてすべて削除するか、別の名前を選択してください。",
+        "SYNC_FILE_CREATION_ERROR": "Googleドライブ：同期ファイル作成中にエラーが発生しました。 {{err}}",
+        "UPDATED_SYNC_FILE_NAME": "Googleドライブ：同期ファイル名を更新しました"
+      },
+      "S_API": {
+        "ERR": "GoogleApiエラー： {{errStr}}",
+        "ERR_NO_FILE_ID": "GoogleApi：ファイルIDが指定されていません",
+        "ERR_NO_FILE_NAME": "GoogleApi：ファイル名が指定されていません",
+        "SUCCESS_LOGIN": "GoogleApi：ログイン成功"
       }
     }
   },
@@ -1137,9 +1137,9 @@
     "SOUND": {
       "DONE_SOUND": "タスク完了音",
       "IS_INCREASE_DONE_PITCH": "実行するすべてのタスクのピッチを上げる",
-      "IS_PLAY_DONE_SOUND": "タスクが完了とマークされたときに音を鳴らす",
       "TITLE": "音",
-      "VOLUME": "ボリューム"
+      "VOLUME": "ボリューム",
+      "IS_PLAY_DONE_SOUND": "タスクが完了とマークされたときに音を鳴らす"
     },
     "TAKE_A_BREAK": {
       "HELP": "<div> <p>指定した時間休憩せずに作業したときに、繰り返し発生するリマインダーを設定できます。</p> <p>表示するメッセージは変更できます。 ${duration} は休憩せずに作業した時間に置き換えられます。</p> </div>",
@@ -1154,16 +1154,16 @@
       "TITLE": "休憩リマインダー"
     },
     "TIMELINE": {
-      "CAL_PROVIDERS": "カレンダープロバイダー（実験的およびオプション）",
-      "CAL_PROVIDERS_ADD": "icalソースを追加する",
-      "CAL_PROVIDERS_INFO": "オプションで、iCal（Googleカレンダーなど）からデータを読み込んで表示するようにタイムラインを構成できます。",
       "HELP": "タイムライン機能は、計画されたタスクが時間の経過とともにどのように実行されるかについての簡単な概要を提供する必要があります。左側のメニューの <a href='#/timeline'>'タイムライン'</a>の下にあります。",
-      "L_CAL_PATH": "カレンダーICALのURL /ファイルパス（オプション）",
       "L_IS_WORK_START_END_ENABLED": "予定外のタスクフローを特定の作業時間に制限する",
       "L_WORK_END": "就業日の終わり",
       "L_WORK_START": "就業日開始",
       "TITLE": "タイムライン",
-      "WORK_START_END_DESCRIPTION": "例えば17:00"
+      "WORK_START_END_DESCRIPTION": "例えば17:00",
+      "CAL_PROVIDERS": "カレンダープロバイダー（実験的およびオプション）",
+      "CAL_PROVIDERS_ADD": "icalソースを追加する",
+      "CAL_PROVIDERS_INFO": "オプションで、iCal（Googleカレンダーなど）からデータを読み込んで表示するようにタイムラインを構成できます。",
+      "L_CAL_PATH": "カレンダーICALのURL /ファイルパス（オプション）"
     },
     "TRACKING_REMINDER": {
       "HELP": "時間追跡の開始を忘れた場合に表示されるようにバナーを構成します。",
@@ -1189,13 +1189,13 @@
     "DBX_GEN_TOKEN": "Dropbox：トークンを生成...",
     "DBX_META": "Dropbox：ファイルメタを取得...",
     "DBX_UPLOAD": "Dropbox：ファイルをアップロード...",
-    "GDRIVE_DOWNLOAD": "Googleドライブ：ファイルをダウンロード...",
-    "GDRIVE_UPLOAD": "Googleドライブ：ファイルをアップロード...",
     "GITHUB_LOAD_ISSUE": "GitHub：課題データをロード...",
     "JIRA_LOAD_ISSUE": "Jira：課題データをロード...",
     "UNKNOWN": "リモートデータの読み込み",
     "WEB_DAV_DOWNLOAD": "WebDAV：データのダウンロード中...",
-    "WEB_DAV_UPLOAD": "WebDAV：データのアップロード中..."
+    "WEB_DAV_UPLOAD": "WebDAV：データのアップロード中...",
+    "GDRIVE_DOWNLOAD": "Googleドライブ：ファイルをダウンロード...",
+    "GDRIVE_UPLOAD": "Googleドライブ：ファイルをアップロード..."
   },
   "MH": {
     "ADD_NEW_TASK": "新しいタスクを追加する",

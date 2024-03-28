@@ -176,13 +176,13 @@
         "IS_SEARCH_ISSUES_FROM_GITEA": "Zobrazit problémy z gitu jako návrhy při přidávání nových úkolů",
         "HOST": "Hostitel (např.: https://try.gitea.io)",
         "TOKEN": "Přístupový token",
-        "TOKEN_DESCRIPTION": "Vyžadováno pro přístup k soukromým repozitářům",
         "REPO_FULL_NAME": "Uživatelské jméno nebo název organizace/projektu",
         "REPO_FULL_NAME_DESCRIPTION": "Lze nalézt jako část adresy URL při prohlížení projektu v prohlížeči.",
         "SCOPE": "Rozsah",
         "SCOPE_ALL": "Všechny",
         "SCOPE_ASSIGNED": "Přiřazeno mně",
-        "SCOPE_CREATED": "Vytvořeno mnou"
+        "SCOPE_CREATED": "Vytvořeno mnou",
+        "TOKEN_DESCRIPTION": "Vyžadováno pro přístup k soukromým repozitářům"
       },
       "FORM_SECTION": {
         "HELP": "<p>Zde můžete nakonfigurovat SuperProductivity tak, aby zobrazoval otevřené problémy Gitea pro konkrétní repozitář v panelu vytváření úkolů v denním plánovacím zobrazení. Budou uvedeny jako návrhy a poskytnou odkaz na problém a další informace o něm.</p> <p>Kromě toho můžete automaticky přidat a importovat všechny otevřené problémy.</p><p>Pro překročení omezení a přístup můžete poskytnout přístupový token.",
@@ -225,11 +225,11 @@
         "HELP": "<p>Zde můžete nakonfigurovat SuperProductivity tak, aby zobrazoval otevřené problémy Redmine (buď online verze, nebo samonosné instance) pro konkrétní projekt v panelu vytváření úkolů v denním plánovacím zobrazení. Budou uvedeny jako návrhy a poskytnou odkaz na problém a další informace o něm.</p><p>Kromě toho můžete automaticky importovat všechny otevřené problémy.</p>"
       },
       "ISSUE_CONTENT": {
-        "AUTOR": "Autor",
-        "STAV": "Stav",
         "PRIORITY": "Priorita",
         "DESCRIPTION": "Popis",
-        "MARK_AS_CHECKED": "Označit změny jako zkontrolované"
+        "MARK_AS_CHECKED": "Označit změny jako zkontrolované",
+        "AUTOR": "Autor",
+        "STAV": "Stav"
       },
       "S": {
         "ERR_UNKNOWN": "Redmine: Neznámá chyba {{statusCode}} {{errorMsg}}."
@@ -254,14 +254,14 @@
         "TITLE": "GitHub"
       },
       "ISSUE_CONTENT": {
+        "DESCRIPTION": "Popis",
+        "MARK_AS_CHECKED": "Označit změny jako zkontrolované",
         "PRIRAZENY": "Přiřazeno",
         "U": "na",
-        "DESCRIPTION": "Popis",
         "STITKY": "Štítky",
         "POSLEDNI_KOMENTAR": "Poslední komentář",
         "NAHRAJT_VSECHNY_KOMENTARE": "Načíst všechny {{nr}} komentáře",
         "NAHRAJT_POPIS_A_VSECHNY_KOMENTARE": "Načíst popis a všechny komentáře",
-        "MARK_AS_CHECKED": "Označit změny jako zkontrolované",
         "STAV": "Stav",
         "SHRNUJ": "Shrnutí",
         "NAPSAT_KOMENTAR": "Napsat komentář"
@@ -827,8 +827,8 @@
           "L_SYNC_FILE_PATH_DESCRIPTION": "Absolutní cesta k souboru, který by měl být použit pro synchronizaci (bude vytvořen).",
           "L_SYNC_FILE_PATH_PERMISSION_VALIDATION": "Vyžaduje oprávnění k přístupu k souboru"
         },
-        "L_ENABLE_SYNCING": "Povolit synchronizaci",
         "L_ENABLE_COMPRESSION": "Povolit kompresi (rychlejší přenos dat)",
+        "L_ENABLE_SYNCING": "Povolit synchronizaci",
         "L_SYNC_INTERVAL": "Interval synchronizace",
         "L_SYNC_PROVIDER": "Poskytovatel synchronizace",
         "TITLE": "Synchronizace",
@@ -1104,11 +1104,11 @@
       "MENU_TITLE": "Časová osa",
       "NOW": "Nyní",
       "NO_TASKS": "Momentálně zde nejsou žádné úkoly. Přidejte nějaké úkoly pomocí tlačítka + v horní liště.",
+      "START": "Začátek práce",
+      "TASK_PROJECTION_INFO": "Budoucí projekce naplánovaného opakovatelného úkolu",
       "S": {
         "CAL_PROVIDER_ERROR": "Chyba poskytovatele kalendáře Časové osy: {{errTxt}}"
-      },
-      "START": "Začátek práce",
-      "TASK_PROJECTION_INFO": "Budoucí projekce naplánovaného opakovatelného úkolu"
+      }
     },
     "TIME_TRACKING": {
       "B": {
@@ -1141,18 +1141,6 @@
         "TASK": "Úkol",
         "TRACK_TO": "Sledovat k:",
         "UNTRACKED_TIME": "Nesledovaný čas:"
-      }
-    },
-    "WELCOME": {
-      "D_WELCOME": {
-        "L1": "Začínáme",
-        "L2": "Úvodní video na YouTube",
-        "L3": "Zeptejte se na otázku",
-        "LETS_GO": "Jdeme na to!",
-        "MOBILE_INFO": "<strong>Přejetím</strong> vytvořených úkolů <strong>doprava, abyste je označili jako hotové</strong>.\n    Přejetím doleva je naplánujete. Dlouhým stisknutím získáte další možnosti.",
-        "T1": "Je skvělé vidět, že jste se rozhodli vyzkoušet tuto aplikaci! \uD83E\uDD84",
-        "T2": "Pokud máte potíže s orientací, existuje několik míst, kde můžete najít pomoc:",
-        "TITLE": "Vítejte v Super Productivity!"
       }
     },
     "WORKLOG": {
@@ -1209,6 +1197,18 @@
         "EXPORT": "Export dat za týden",
         "NO_DATA": "Tento týden zatím nejsou žádné úkoly.",
         "TITLE": "Název"
+      }
+    },
+    "WELCOME": {
+      "D_WELCOME": {
+        "L1": "Začínáme",
+        "L2": "Úvodní video na YouTube",
+        "L3": "Zeptejte se na otázku",
+        "LETS_GO": "Jdeme na to!",
+        "MOBILE_INFO": "<strong>Přejetím</strong> vytvořených úkolů <strong>doprava, abyste je označili jako hotové</strong>.\n    Přejetím doleva je naplánujete. Dlouhým stisknutím získáte další možnosti.",
+        "T1": "Je skvělé vidět, že jste se rozhodli vyzkoušet tuto aplikaci! 🦄",
+        "T2": "Pokud máte potíže s orientací, existuje několik míst, kde můžete najít pomoc:",
+        "TITLE": "Vítejte v Super Productivity!"
       }
     }
   },
@@ -1410,16 +1410,16 @@
       "TITLE": "Připomenutí o přestávce"
     },
     "TIMELINE": {
-      "CAL_PROVIDERS": "Poskytovatelé kalendáře (experimentální a volitelní)",
-      "CAL_PROVIDERS_ADD": "Přidat zdroj iCal",
-      "CAL_PROVIDERS_INFO": "Můžete volitelně nakonfigurovat časovou osu tak, aby také načítala a zobrazovala data z iCal (např. <a href=\"https://support.google.com/calendar/answer/37648?hl=cs#zippy=%2Csync-your-google-calendar-view-edit%2Cget-your-calendar-view-only\">Google Calendar</a>).",
       "HELP": "Funkce časové osy by vám měla poskytnout rychlý přehled o tom, jak se plánované úkoly vyvíjejí v čase. Najdete ji v levém bočním menu pod <a href='#/timeline'>‘Časová osa’</a>.",
-      "L_CAL_PATH": "URL/cesta k souboru pro kalendář ICAL (volitelně)",
       "L_IS_WORK_START_END_ENABLED": "Omezit tok nerozvržených úkolů na konkrétní pracovní časy",
       "L_WORK_END": "Konec pracovního dne",
       "L_WORK_START": "Začátek pracovního dne",
       "TITLE": "Časová osa",
-      "WORK_START_END_DESCRIPTION": "např. 17:00"
+      "WORK_START_END_DESCRIPTION": "např. 17:00",
+      "CAL_PROVIDERS": "Poskytovatelé kalendáře (experimentální a volitelní)",
+      "CAL_PROVIDERS_ADD": "Přidat zdroj iCal",
+      "CAL_PROVIDERS_INFO": "Můžete volitelně nakonfigurovat časovou osu tak, aby také načítala a zobrazovala data z iCal (např. <a href=\"https://support.google.com/calendar/answer/37648?hl=cs#zippy=%2Csync-your-google-calendar-view-edit%2Cget-your-calendar-view-only\">Google Calendar</a>).",
+      "L_CAL_PATH": "URL/cesta k souboru pro kalendář ICAL (volitelně)"
     },
     "TRACKING_REMINDER": {
       "HELP": "Nakonfigurujte banner, který se zobrazí, pokud jste zapomněli spustit sledování času.",
@@ -1457,8 +1457,8 @@
     "CREATE_TAG": "Vytvořit štítek",
     "DELETE_TAG": "Smazat štítek",
     "GO_TO_TASK_LIST": "Přejít na seznam úkolů",
-    "HELP": "Nápověda",
     "MANAGE_PROJECTS": "Spravovat projekty",
+    "HELP": "Nápověda",
     "METRICS": "Metryky",
     "NOTES": "Poznámky",
     "NOTES_PANEL_INFO": "Poznámky lze zobrazit pouze z časové osy a standardního pohledu na seznam úkolů.",

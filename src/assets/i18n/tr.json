@@ -174,16 +174,16 @@
         "IS_AUTO_IMPORT_ISSUES": "Çözülmeyen sorunları otomatik olarak GitHub'dan görev biriktirme listesine ekle",
         "IS_AUTO_POLL": "İçe aktarılan git sorunlarını değişiklikler için otomatik olarak yokla",
         "IS_SEARCH_ISSUES_FROM_GITEA": "Yeni görevler eklerken git'in önerilerini öneri olarak göster",
-        "REPO": "İzlemek istediğiniz git deposu için \"username / repositoryName\"",
-        "TOKEN": "Erişim Jetonu",
-        "TOKEN_DESCRIPTION": "Özel depo erişimi için gerekli",
         "HOST": "Sağlayıcı (örneğin: https://try.gitea.io)",
+        "TOKEN": "Erişim Jetonu",
         "REPO_FULL_NAME": "Kullanıcı adı veya Organizasyon adı/projesi",
         "REPO_FULL_NAME_DESCRIPTION": "Projeyi Tarayıcıda görüntülerken url'nin bir parçası olarak bulunabilir.",
         "SCOPE": "Kapsam",
         "SCOPE_ALL": "Hepsi",
         "SCOPE_ASSIGNED": "Bana atanan",
-        "SCOPE_CREATED": "Benim tarafımdan oluşturuldu"
+        "SCOPE_CREATED": "Benim tarafımdan oluşturuldu",
+        "TOKEN_DESCRIPTION": "Özel depo erişimi için gerekli",
+        "REPO": "İzlemek istediğiniz git deposu için \"username / repositoryName\""
       },
       "FORM_SECTION": {
         "HELP": "<p>Burada SuperProductivity'yi, günlük planlama görünümündeki görev oluşturma panelinde belirli bir depo için açık Gitea sorunlarını listeleyecek şekilde yapılandırabilirsiniz. Öneriler olarak listelenecekler ve konuyla ilgili bir bağlantının yanı sıra konuyla ilgili daha fazla bilgi sağlayacaklar.</p> <p>Ek olarak, tüm açık sorunları otomatik olarak görev biriktirme listenize ekleyebilir ve senkronize edebilirsiniz.</p><p>Kullanım sınırlarını aşmak ve erişim sağlamak için bir erişim jetonu sağlayabilirsiniz.",
@@ -822,8 +822,8 @@
           "L_SYNC_FILE_PATH_DESCRIPTION": "Senkronizasyon için kullanılması gereken (oluşturulacak) dosyanın mutlak yolu.",
           "L_SYNC_FILE_PATH_PERMISSION_VALIDATION": "Dosya erişim izni gerekir"
         },
-        "L_ENABLE_SYNCING": "Senkronizasyonu Etkinleştir",
         "L_ENABLE_COMPRESSION": "Sıkıştırmayı Etkinleştir (daha hızlı veri aktarımı)",
+        "L_ENABLE_SYNCING": "Senkronizasyonu Etkinleştir",
         "L_SYNC_INTERVAL": "Senkron Aralığı",
         "L_SYNC_PROVIDER": "Senkronizasyon Sağlayıcı",
         "TITLE": "Senkronize et",
@@ -1095,11 +1095,11 @@
       "MENU_TITLE": "Zaman çizelgesi",
       "NOW": "Şimdi",
       "NO_TASKS": "Şu anda görev yok. Lütfen üst çubuktaki + Düğmesi aracılığıyla bazı görevler ekleyin.",
+      "START": "İş Başlangıcı",
+      "TASK_PROJECTION_INFO": "Zamanlanmış tekrarlanabilir bir görevin gelecek projeksiyonu",
       "S": {
         "CAL_PROVIDER_ERROR": "Zaman Çizelgesi Cal Sağlayıcı Hatası: {{errTxt}}"
-      },
-      "START": "İş Başlangıcı",
-      "TASK_PROJECTION_INFO": "Zamanlanmış tekrarlanabilir bir görevin gelecek projeksiyonu"
+      }
     },
     "TIME_TRACKING": {
       "B": {
@@ -1130,18 +1130,6 @@
         "TASK": "Görev",
         "TRACK_TO": "Takip et:",
         "UNTRACKED_TIME": "İzlenmeyen süre:"
-      }
-    },
-    "WELCOME": {
-      "D_WELCOME": {
-        "L1": "Başlamadan önce",
-        "L2": "Youtube'daki tanıtım videosu",
-        "L3": "Bir soru sor",
-        "LETS_GO": "Hadi gidelim!!",
-        "MOBILE_INFO": "Oluşturulan görevleri <strong>tamamlandı olarak işaretlemek için</strong> sağa doğru <strong>kaydırın</strong>.\n Planlamak için sola kaydırın. Daha fazla eylem için onlara uzun basın.",
-        "T1": "Bu uygulamaya bir şans vermeye karar verdiğinizi görmek harika! \uD83E\uDD84",
-        "T2": "Burada yolunuzu bulmakta sorun yaşıyorsanız yardım bulabileceğiniz\n birkaç yer vardır:",
-        "TITLE": "Süper Verimliliğe Hoş Geldiniz!"
       }
     },
     "WORKLOG": {
@@ -1198,6 +1186,18 @@
         "EXPORT": "Haftalık veriyi dışa aktar",
         "NO_DATA": "Henüz bu haftanın görevleri yok.",
         "TITLE": "Başlık"
+      }
+    },
+    "WELCOME": {
+      "D_WELCOME": {
+        "L1": "Başlamadan önce",
+        "L2": "Youtube'daki tanıtım videosu",
+        "L3": "Bir soru sor",
+        "LETS_GO": "Hadi gidelim!!",
+        "MOBILE_INFO": "Oluşturulan görevleri <strong>tamamlandı olarak işaretlemek için</strong> sağa doğru <strong>kaydırın</strong>.\n Planlamak için sola kaydırın. Daha fazla eylem için onlara uzun basın.",
+        "T1": "Bu uygulamaya bir şans vermeye karar verdiğinizi görmek harika! 🦄",
+        "T2": "Burada yolunuzu bulmakta sorun yaşıyorsanız yardım bulabileceğiniz\n birkaç yer vardır:",
+        "TITLE": "Süper Verimliliğe Hoş Geldiniz!"
       }
     }
   },
@@ -1393,16 +1393,16 @@
       "TITLE": "Mola Hatırlatması"
     },
     "TIMELINE": {
-      "CAL_PROVIDERS": "Takvim sağlayıcıları (deneysel ve isteğe bağlı)",
-      "CAL_PROVIDERS_ADD": "ical kaynağı ekle",
-      "CAL_PROVIDERS_INFO": "İsteğe bağlı olarak zaman çizelgesini, iCal'den (ör. Google Takvim) verileri de yükleyecek ve görüntüleyecek şekilde yapılandırabilirsiniz.",
       "HELP": "Zaman çizelgesi özelliği, planlanan görevlerinizin zaman içinde nasıl oynandığına dair size hızlı bir genel bakış sağlamalıdır. Bunu sol taraftaki menüde <a href='#/timeline'>\"Zaman çizelgesi\"</a>altında bulabilirsiniz.",
-      "L_CAL_PATH": "ICAL takvimi için URL/Dosya yolu (isteğe bağlı)",
       "L_IS_WORK_START_END_ENABLED": "Planlanmamış görev akışını belirli çalışma süreleriyle sınırlandırın",
       "L_WORK_END": "İş Günü Sonu",
       "L_WORK_START": "İş Günü Başlangıcı",
       "TITLE": "Zaman çizelgesi",
-      "WORK_START_END_DESCRIPTION": "örn. 17:00"
+      "WORK_START_END_DESCRIPTION": "örn. 17:00",
+      "CAL_PROVIDERS": "Takvim sağlayıcıları (deneysel ve isteğe bağlı)",
+      "CAL_PROVIDERS_ADD": "ical kaynağı ekle",
+      "CAL_PROVIDERS_INFO": "İsteğe bağlı olarak zaman çizelgesini, iCal'den (ör. Google Takvim) verileri de yükleyecek ve görüntüleyecek şekilde yapılandırabilirsiniz.",
+      "L_CAL_PATH": "ICAL takvimi için URL/Dosya yolu (isteğe bağlı)"
     },
     "TRACKING_REMINDER": {
       "HELP": "Zaman izlemeyi başlatmayı unutmanız Durumunda görünecek bir başlık yapılandırın.",
@@ -1440,8 +1440,8 @@
     "CREATE_TAG": "Etiket Oluştur",
     "DELETE_TAG": "Etiketi Sil",
     "GO_TO_TASK_LIST": "Görev listesine git",
-    "HELP": "Yardım",
     "MANAGE_PROJECTS": "Projeleri Yönet",
+    "HELP": "Yardım",
     "METRICS": "İstatistikler",
     "NOTES": "Notlar",
     "NOTES_PANEL_INFO": "Notlar yalnızca zaman çizelgesinden ve normal görev listesi görünümlerinden gösterilebilir.",

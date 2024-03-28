@@ -846,8 +846,8 @@
           "L_SYNC_FILE_PATH_DESCRIPTION": "Apsolutna staza do datoteke, koja se treba koristiti za sinkronizaciju (stvorit će se).",
           "L_SYNC_FILE_PATH_PERMISSION_VALIDATION": "Treba dozvolu za pristup datotekama"
         },
-        "L_ENABLE_SYNCING": "Aktiviraj sinkronizaciju",
         "L_ENABLE_COMPRESSION": "Aktiviraj komprimiranje (brži prijenos podataka)",
+        "L_ENABLE_SYNCING": "Aktiviraj sinkronizaciju",
         "L_SYNC_INTERVAL": "Interval sinkronizacije",
         "L_SYNC_PROVIDER": "Usluga sinkronizacije",
         "TITLE": "Sinkronizacija",
@@ -957,10 +957,6 @@
         "TRACK_TIME": "Počni pratiti vrijeme",
         "TRACK_TIME_STOP": "Zaustavi praćenje vremena",
         "UPDATE_ISSUE_DATA": "Aktualiziraj podatke problema"
-      },
-      "D_CONFIRM_SHORT_SYNTAX_NEW_TAG": {
-        "MSG": "Želiš li stvoriti novu oznaku {{tagsTxt}}?",
-        "OK": "Stvori oznaku"
       },
       "D_CONFIRM_SHORT_SYNTAX_NEW_TAG": {
         "MSG": "Želiš li stvoriti novu oznaku {{tagsTxt}}?",
@@ -1423,9 +1419,9 @@
     "SOUND": {
       "DONE_SOUND": "Zvuk za obavljeni zadatak",
       "IS_INCREASE_DONE_PITCH": "Pojačaj visinu zvuka za svaki obavljeni zadatak",
-      "IS_PLAY_DONE_SOUND": "Sviraj zvuk kad se zadatak označi kao obavljen",
       "TITLE": "Zvuk",
-      "VOLUME": "Glasnoća"
+      "VOLUME": "Glasnoća",
+      "IS_PLAY_DONE_SOUND": "Sviraj zvuk kad se zadatak označi kao obavljen"
     },
     "TAKE_A_BREAK": {
       "ADD_NEW_IMG": "Dodaj motivacijsku sliku",

@@ -199,26 +199,6 @@
         "ERR_UNKNOWN": "GitLab: Errore sconosciuto {{statusCode}} {{errorMsg}}"
       }
     },
-    "GOOGLE": {
-      "BANNER": {
-        "AUTH_FAIL": "GoogleApi: Autenticazione fallita, per favore effettua nuovamente il login!"
-      },
-      "DIALOG": {
-        "CREATE_SYNC_FILE": "Google Drive: Nessun file con nome <strong>\"{{fileName}}\"</strong> è stato trovato. Vuoi <strong>crearlo</strong> come un file sincronizzato su Google Drive?",
-        "USE_EXISTING_SYNC_FILE": "Google Drive: Usare il file <strong>esistente</strong> <strong>\"{{fileName}}\"</strong> come file sincronizzato? Se non lo desideri cambia il nome del file sincronizzato, per favore."
-      },
-      "S": {
-        "MULTIPLE_SYNC_FILES_WITH_SAME_NAME": "File multipli con il nome \"{{newFileName}}\" trovati. Per favore rimuovili tutti tranne uno o scegli un nome diverso.",
-        "SYNC_FILE_CREATION_ERROR": "Google Drive: errore durante la creazione del file di sincronizzazione. {{err}}",
-        "UPDATED_SYNC_FILE_NAME": "Google Drive: nome del file di sincronizzazione aggiornato"
-      },
-      "S_API": {
-        "ERR": "GoogleApi Errore: {{errStr}}",
-        "ERR_NO_FILE_ID": "GoogleApi: Nessun id file specificato",
-        "ERR_NO_FILE_NAME": "GoogleApi: Nessun nome file spiecificato",
-        "SUCCESS_LOGIN": "GoogleApi: Login avvenuta con successo"
-      }
-    },
     "ISSUE": {
       "DEFAULT": {
         "ISSUES_STR": "problemi",
@@ -425,7 +405,6 @@
       "D_ADD": {
         "NOTE_LABEL": "Scrivi del testo per salvarlo come nota..."
       },
-      "EDIT_FULLSCREEN": "Modifica in schermo intero",
       "NOTES_CMP": {
         "ADD_BTN": "Aggiungi nuova nota",
         "DROP_TO_ADD": "Trascina qui per aggiungere una nuova nota",
@@ -434,7 +413,8 @@
       "NOTE_CMP": {
         "DISABLE_PARSE": "Disabilita parsing markdown",
         "ENABLE_PARSE": "Abilita parsing markdown"
-      }
+      },
+      "EDIT_FULLSCREEN": "Modifica in schermo intero"
     },
     "OPEN_PROJECT": {
       "DIALOG_INITIAL": {
@@ -655,8 +635,8 @@
           "L_ACCESS_TOKEN": "Token di accesso (generato dal codice di autenticazione)"
         },
         "GOOGLE": {
-          "L_IS_COMPRESS_DATA": "Comprimi i dati",
-          "L_SYNC_FILE_NAME": "Nome file di sincronizzazione"
+          "L_SYNC_FILE_NAME": "Nome file di sincronizzazione",
+          "L_IS_COMPRESS_DATA": "Comprimi i dati"
         },
         "LOCAL_FILE": {
           "L_SYNC_FILE_PATH": "Sincronizza percorso file",
@@ -885,11 +865,11 @@
       "MENU_TITLE": "Sequenza temporale",
       "NOW": "Adesso",
       "NO_TASKS": "Attualmente non ci sono attività. Aggiungi alcune attività tramite il pulsante + nella barra in alto.",
+      "START": "Inizio del lavoro",
+      "TASK_PROJECTION_INFO": "Proiezione futura di un'attività ripetibile pianificata",
       "S": {
         "CAL_PROVIDER_ERROR": "Errore del provider di cal. cronologica: {{errTxt}}"
-      },
-      "START": "Inizio del lavoro",
-      "TASK_PROJECTION_INFO": "Proiezione futura di un'attività ripetibile pianificata"
+      }
     },
     "TIME_TRACKING": {
       "B": {
@@ -976,6 +956,26 @@
         "EXPORT": "Esporta dati della settimana",
         "NO_DATA": "Ancora nessun task questa settimana.",
         "TITLE": "Titolo"
+      }
+    },
+    "GOOGLE": {
+      "BANNER": {
+        "AUTH_FAIL": "GoogleApi: Autenticazione fallita, per favore effettua nuovamente il login!"
+      },
+      "DIALOG": {
+        "CREATE_SYNC_FILE": "Google Drive: Nessun file con nome <strong>\"{{fileName}}\"</strong> è stato trovato. Vuoi <strong>crearlo</strong> come un file sincronizzato su Google Drive?",
+        "USE_EXISTING_SYNC_FILE": "Google Drive: Usare il file <strong>esistente</strong> <strong>\"{{fileName}}\"</strong> come file sincronizzato? Se non lo desideri cambia il nome del file sincronizzato, per favore."
+      },
+      "S": {
+        "MULTIPLE_SYNC_FILES_WITH_SAME_NAME": "File multipli con il nome \"{{newFileName}}\" trovati. Per favore rimuovili tutti tranne uno o scegli un nome diverso.",
+        "SYNC_FILE_CREATION_ERROR": "Google Drive: errore durante la creazione del file di sincronizzazione. {{err}}",
+        "UPDATED_SYNC_FILE_NAME": "Google Drive: nome del file di sincronizzazione aggiornato"
+      },
+      "S_API": {
+        "ERR": "GoogleApi Errore: {{errStr}}",
+        "ERR_NO_FILE_ID": "GoogleApi: Nessun id file specificato",
+        "ERR_NO_FILE_NAME": "GoogleApi: Nessun nome file spiecificato",
+        "SUCCESS_LOGIN": "GoogleApi: Login avvenuta con successo"
       }
     }
   },
@@ -1137,9 +1137,9 @@
     "SOUND": {
       "DONE_SOUND": "Compito fatto suono",
       "IS_INCREASE_DONE_PITCH": "Aumenta il tono per ogni attività svolta",
-      "IS_PLAY_DONE_SOUND": "Riproduci un suono quando l'attività è contrassegnata come completata",
       "TITLE": "Suono",
-      "VOLUME": "Volume"
+      "VOLUME": "Volume",
+      "IS_PLAY_DONE_SOUND": "Riproduci un suono quando l'attività è contrassegnata come completata"
     },
     "TAKE_A_BREAK": {
       "HELP": "<div> <p>Ti permette di configurare un promemoria ricorrente quando hai lavorato per uno specifica quantità di tempo senza prenderti una pausa.</p> <p>Puoi modificare il messaggio mostrato. ${duration} sarà rimpiazzata con il tempo speso senza una pausa.</p> </div>",
@@ -1154,16 +1154,16 @@
       "TITLE": "Promemoria pausa"
     },
     "TIMELINE": {
-      "CAL_PROVIDERS": "Fornitori di calendari (sperimentali e facoltativi)",
-      "CAL_PROVIDERS_ADD": "Aggiungi fonte ical",
-      "CAL_PROVIDERS_INFO": "Puoi facoltativamente configurare la sequenza temporale per caricare e visualizzare anche i dati da iCal (ad es. Google Calendar).",
       "HELP": "La funzione cronologia dovrebbe fornirti una rapida panoramica su come le attività pianificate si svolgono nel tempo. Puoi trovarlo nel menu a sinistra sotto <a href='#/timeline'>\"Cronologia\"</a>.",
-      "L_CAL_PATH": "Percorso URL/file per il calendario ICAL (opzionale)",
       "L_IS_WORK_START_END_ENABLED": "Limita il flusso di attività non pianificate a orari di lavoro specifici",
       "L_WORK_END": "Fine giornata lavorativa",
       "L_WORK_START": "Inizio giornata lavorativa",
       "TITLE": "Sequenza temporale",
-      "WORK_START_END_DESCRIPTION": "per esempio. 17:00"
+      "WORK_START_END_DESCRIPTION": "per esempio. 17:00",
+      "CAL_PROVIDERS": "Fornitori di calendari (sperimentali e facoltativi)",
+      "CAL_PROVIDERS_ADD": "Aggiungi fonte ical",
+      "CAL_PROVIDERS_INFO": "Puoi facoltativamente configurare la sequenza temporale per caricare e visualizzare anche i dati da iCal (ad es. Google Calendar).",
+      "L_CAL_PATH": "Percorso URL/file per il calendario ICAL (opzionale)"
     },
     "TRACKING_REMINDER": {
       "HELP": "Configura un banner da mostrare nel caso ti fossi dimenticato di avviare il monitoraggio del tempo.",
@@ -1189,13 +1189,13 @@
     "DBX_GEN_TOKEN": "Dropbox: genera token ...",
     "DBX_META": "Dropbox: ottieni meta file ...",
     "DBX_UPLOAD": "Dropbox: carica file ...",
-    "GDRIVE_DOWNLOAD": "Google Drive: scarica il file ...",
-    "GDRIVE_UPLOAD": "Google Drive: carica il file ...",
     "GITHUB_LOAD_ISSUE": "GitHub: caricamento dati problema ...",
     "JIRA_LOAD_ISSUE": "Jira: caricamento dati problema ...",
     "UNKNOWN": "Caricamento dei dati remoti",
     "WEB_DAV_DOWNLOAD": "WebDAV: Download dei dati ...",
-    "WEB_DAV_UPLOAD": "WebDAV: caricamento dei dati ..."
+    "WEB_DAV_UPLOAD": "WebDAV: caricamento dei dati ...",
+    "GDRIVE_DOWNLOAD": "Google Drive: scarica il file ...",
+    "GDRIVE_UPLOAD": "Google Drive: carica il file ..."
   },
   "MH": {
     "ADD_NEW_TASK": "Aggiungi nuovo task",

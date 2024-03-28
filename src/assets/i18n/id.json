@@ -150,13 +150,13 @@
         "IS_SEARCH_ISSUES_FROM_GITEA": "Tampilkan issues dari Git sebagai saran saat menambahkan tugas baru",
         "HOST": "Host (contoh: https://try.gitea.io)",
         "TOKEN": "Akses Token",
-        "TOKEN_DESCRIPTION": "Diperlukan untuk akses repositori pribadi",
         "REPO_FULL_NAME": "Nama pengguna atau nama/proyek Organisasi",
         "REPO_FULL_NAME_DESCRIPTION": "Dapat ditemukan sebagai bagian dari url, saat melihat proyek di Browser.",
         "SCOPE": "Cakupan",
         "SCOPE_ALL": "Semua",
         "SCOPE_ASSIGNED": "Ditugaskan kepada saya",
-        "SCOPE_CREATED": "Dibuat oleh saya"
+        "SCOPE_CREATED": "Dibuat oleh saya",
+        "TOKEN_DESCRIPTION": "Diperlukan untuk akses repositori pribadi"
       },
       "FORM_SECTION": {
         "HELP": "<p>Di sini Anda dapat mengonfigurasi SuperProductivity untuk membuat daftar open Gitea issues untuk repositori tertentu di panel pembuatan tugas dalam tampilan perencanaan harian. Mereka akan dicantumkan sebagai saran dan akan memberikan tautan ke masalah tersebut serta informasi lebih lanjut tentangnya.</p> <p>Selain itu, Anda dapat secara otomatis menambahkan dan menyinkronkan semua open issues ke backlog tugas Anda.</p><p>Untuk mencapai batas penggunaan dan untuk mengakses, Anda dapat memberikan token akses.</p>",
@@ -277,26 +277,6 @@
       },
       "S": {
         "ERR_UNKNOWN": "GitLab: Error tidak diketahui {{statusCode}} {{errorMsg}}"
-      }
-    },
-    "GOOGLE": {
-      "BANNER": {
-        "AUTH_FAIL": "GoogleApi: Gagal mengautentikasi, coba masuk lagi!"
-      },
-      "DIALOG": {
-        "CREATE_SYNC_FILE": "Google Drive: Tidak ada file dengan nama <strong>\"{{fileName}}\"</strong> yang ditemukan. <strong>Buat</strong> apakah itu file sinkronisasi di Google Drive?",
-        "USE_EXISTING_SYNC_FILE": "Google Drive: Ingin gunakan file <strong>\"{{fileName}}\"</strong> <strong>yang ada</strong>  sebagai file sinkronasi? Jika tidak, silakan ubah nama file sinkronasinya."
-      },
-      "S": {
-        "MULTIPLE_SYNC_FILES_WITH_SAME_NAME": "Beberapa file dengan nama \"{{newFileName}}\" ditemukan. Hapus semua kecuali satu atau pilih nama lain.",
-        "SYNC_FILE_CREATION_ERROR": "Google Drive: Error saat membuat file sinkronasi. {{err}}",
-        "UPDATED_SYNC_FILE_NAME": "Google Drive: Nama file sinkronisasi yang diperbarui!"
-      },
-      "S_API": {
-        "ERR": "GoogleApi Error: {{errStr}}",
-        "ERR_NO_FILE_ID": "GoogleApi: Tidak ada id file yang ditentukan",
-        "ERR_NO_FILE_NAME": "GoogleApi: Tidak ada nama file yang ditentukan",
-        "SUCCESS_LOGIN": "GoogleApi: Login berhasil"
       }
     },
     "ISSUE": {
@@ -791,8 +771,8 @@
           "L_SYNC_FILE_PATH_DESCRIPTION": "Jalur absolut ke file yang harus digunakan untuk sinkronisasi (akan dibuat).",
           "L_SYNC_FILE_PATH_PERMISSION_VALIDATION": "Memerlukan izin akses file"
         },
-        "L_ENABLE_SYNCING": "Aktifkan Sinkronasi",
         "L_ENABLE_COMPRESSION": "Aktifkan Kompresi (transfer data lebih cepat)",
+        "L_ENABLE_SYNCING": "Aktifkan Sinkronasi",
         "L_SYNC_INTERVAL": "Interval Sinkronisasi",
         "L_SYNC_PROVIDER": "Penyedia Sinkronisasi",
         "TITLE": "Sinkronisasi",
@@ -1065,11 +1045,11 @@
       "MENU_TITLE": "Linimasa",
       "NOW": "Sekarang",
       "NO_TASKS": "Saat ini tidak ada tugas. Silakan tambahkan beberapa tugas melalui Tombol + di bilah atas.",
+      "START": "Pekerjaan dimulai",
+      "TASK_PROJECTION_INFO": "Proyeksi masa depan dari tugas berulang yang dijadwalkan",
       "S": {
         "CAL_PROVIDER_ERROR": "Kesalahan Penyedia Panggilan Linimasa: {{errTxt}}"
-      },
-      "START": "Pekerjaan dimulai",
-      "TASK_PROJECTION_INFO": "Proyeksi masa depan dari tugas berulang yang dijadwalkan"
+      }
     },
     "TIME_TRACKING": {
       "B": {
@@ -1102,18 +1082,6 @@
         "TASK": "Tugas",
         "TRACK_TO": "Lacak ke",
         "UNTRACKED_TIME": "Waktu tidak terlacak:"
-      }
-    },
-    "WELCOME": {
-      "D_WELCOME": {
-        "L1": "Mulai",
-        "L2": "Video perkenalan di youtube",
-        "L3": "Tanya sebuah pertanyaan",
-        "LETS_GO": "Ayo!!",
-        "MOBILE_INFO": "<strong>Gesek</strong> tugas yang dibuat <strong>kanan, untuk menandainya sebagai selesai</strong>.\n    Gesek ke kiri untuk menjadwalkannya. Tekan lama mereka untuk lebih banyak tindakan.",
-        "T1": "Senang melihatnya, Anda memutuskan untuk mencoba aplikasi ini! \uD83E\uDD84",
-        "T2": "Jika Anda kesulitan menemukan jalan di sekitar sini, ada beberapa tempat yang\n    dapat Anda cari bantuan:",
-        "TITLE": "Selamat Datang di Super Productivity!"
       }
     },
     "WORKLOG": {
@@ -1170,6 +1138,38 @@
         "EXPORT": "Ekspor",
         "NO_DATA": "Belum ada tugas minggu ini.",
         "TITLE": "Judul"
+      }
+    },
+    "GOOGLE": {
+      "BANNER": {
+        "AUTH_FAIL": "GoogleApi: Gagal mengautentikasi, coba masuk lagi!"
+      },
+      "DIALOG": {
+        "CREATE_SYNC_FILE": "Google Drive: Tidak ada file dengan nama <strong>\"{{fileName}}\"</strong> yang ditemukan. <strong>Buat</strong> apakah itu file sinkronisasi di Google Drive?",
+        "USE_EXISTING_SYNC_FILE": "Google Drive: Ingin gunakan file <strong>\"{{fileName}}\"</strong> <strong>yang ada</strong>  sebagai file sinkronasi? Jika tidak, silakan ubah nama file sinkronasinya."
+      },
+      "S": {
+        "MULTIPLE_SYNC_FILES_WITH_SAME_NAME": "Beberapa file dengan nama \"{{newFileName}}\" ditemukan. Hapus semua kecuali satu atau pilih nama lain.",
+        "SYNC_FILE_CREATION_ERROR": "Google Drive: Error saat membuat file sinkronasi. {{err}}",
+        "UPDATED_SYNC_FILE_NAME": "Google Drive: Nama file sinkronisasi yang diperbarui!"
+      },
+      "S_API": {
+        "ERR": "GoogleApi Error: {{errStr}}",
+        "ERR_NO_FILE_ID": "GoogleApi: Tidak ada id file yang ditentukan",
+        "ERR_NO_FILE_NAME": "GoogleApi: Tidak ada nama file yang ditentukan",
+        "SUCCESS_LOGIN": "GoogleApi: Login berhasil"
+      }
+    },
+    "WELCOME": {
+      "D_WELCOME": {
+        "L1": "Mulai",
+        "L2": "Video perkenalan di youtube",
+        "L3": "Tanya sebuah pertanyaan",
+        "LETS_GO": "Ayo!!",
+        "MOBILE_INFO": "<strong>Gesek</strong> tugas yang dibuat <strong>kanan, untuk menandainya sebagai selesai</strong>.\n    Gesek ke kiri untuk menjadwalkannya. Tekan lama mereka untuk lebih banyak tindakan.",
+        "T1": "Senang melihatnya, Anda memutuskan untuk mencoba aplikasi ini! 🦄",
+        "T2": "Jika Anda kesulitan menemukan jalan di sekitar sini, ada beberapa tempat yang\n    dapat Anda cari bantuan:",
+        "TITLE": "Selamat Datang di Super Productivity!"
       }
     }
   },
@@ -1286,6 +1286,7 @@
       "FA": "Persia",
       "FR": "Perancis",
       "HR": "Kroasia",
+      "ID": "Indonesia",
       "IT": "Italia",
       "JA": "Jepang",
       "KO": "Korea",
@@ -1299,8 +1300,7 @@
       "TITLE": "Bahasa",
       "TR": "Turki",
       "ZH": "Cina disederhanakan",
-      "ZH_TW": "Cina tradisional",
-      "ID": "Indonesia"
+      "ZH_TW": "Cina tradisional"
     },
     "MISC": {
       "DEFAULT_PROJECT": "Proyek default untuk digunakan untuk tugas jika tidak ada yang ditentukan",
@@ -1341,9 +1341,9 @@
     "SOUND": {
       "DONE_SOUND": "Suara tugas selesai",
       "IS_INCREASE_DONE_PITCH": "Tingkatkan nada untuk setiap tugas yang diselesaikan",
-      "IS_PLAY_DONE_SOUND": "Putar suara saat tugas ditandai selesai",
       "TITLE": "Suara",
-      "VOLUME": "Volume"
+      "VOLUME": "Volume",
+      "IS_PLAY_DONE_SOUND": "Putar suara saat tugas ditandai selesai"
     },
     "TAKE_A_BREAK": {
       "HELP": "<div> <p>Memungkinkan Anda untuk mengonfigurasi pengingat yang berulang saat Anda telah bekerja selama jangka waktu tertentu tanpa istirahat.</p> <p>Anda dapat mengubah pesan yang ditampilkan. ${duration} akan diganti dengan waktu yang dihabiskan tanpa istirahat.</p> </div>",
@@ -1352,22 +1352,22 @@
       "IS_LOCK_SCREEN": "Kunci layar saat jeda (khusus desktop)",
       "MESSAGE": "Pesan istirahat",
       "MIN_WORKING_TIME": "Pemicu pemberitahuan istirahat setelah X bekerja tanpa satu",
-      "MOTIVATIONAL_IMG": "Gambar motivasi (url web)",
       "NOTIFICATION_TITLE": "Istirahat!",
       "SNOOZE_TIME": "Tunda waktu saat diminta untuk istirahat",
-      "TITLE": "Pengingat istirahat"
+      "TITLE": "Pengingat istirahat",
+      "MOTIVATIONAL_IMG": "Gambar motivasi (url web)"
     },
     "TIMELINE": {
-      "CAL_PROVIDERS": "Penyedia kalender (eksperimental dan opsional)",
-      "CAL_PROVIDERS_ADD": "Tambahkan sumber iCal",
-      "CAL_PROVIDERS_INFO": "Anda juga dapat mengonfigurasi timeline untuk memuat dan menampilkan data dari iCal (contoh. Google Kalender).",
       "HELP": "Fitur garis waktu akan memberi Anda gambaran singkat tentang bagaimana tugas yang Anda rencanakan berjalan dari waktu ke waktu. Anda dapat menemukannya di menu sebelah kiri di bawah <a href='#/timeline'>'Timeline'</a>. ",
-      "L_CAL_PATH": "Jalur Url/File untuk kalender ICAL (opsional)",
       "L_IS_WORK_START_END_ENABLED": "Batasi alur tugas yang tidak terjadwal ke waktu kerja tertentu",
       "L_WORK_END": "Hari Kerja Berakhir",
       "L_WORK_START": "Mulai Hari Kerja",
       "TITLE": "Linimasa",
-      "WORK_START_END_DESCRIPTION": "contoh. 17:00"
+      "WORK_START_END_DESCRIPTION": "contoh. 17:00",
+      "CAL_PROVIDERS": "Penyedia kalender (eksperimental dan opsional)",
+      "CAL_PROVIDERS_ADD": "Tambahkan sumber iCal",
+      "CAL_PROVIDERS_INFO": "Anda juga dapat mengonfigurasi timeline untuk memuat dan menampilkan data dari iCal (contoh. Google Kalender).",
+      "L_CAL_PATH": "Jalur Url/File untuk kalender ICAL (opsional)"
     },
     "TRACKING_REMINDER": {
       "HELP": "Konfigurasikan spanduk agar muncul jika Anda lupa memulai pelacakan waktu.",
@@ -1393,13 +1393,13 @@
     "DBX_GEN_TOKEN": "Dropbox: Buat token...",
     "DBX_META": "Dropbox: Dapatkan file meta...",
     "DBX_UPLOAD": "Dropbox: Unggah file...",
-    "GDRIVE_DOWNLOAD": "Google Drive: Unduh file...",
-    "GDRIVE_UPLOAD": "Google Drive: Unggah file...",
     "GITHUB_LOAD_ISSUE": "GitHub: Muat data issue...",
     "JIRA_LOAD_ISSUE": "Jira: Muat data issue...",
     "UNKNOWN": "Memuat data jarak jauh",
     "WEB_DAV_DOWNLOAD": "WebDAV: Mengunduh data...",
-    "WEB_DAV_UPLOAD": "WebDAV: Mengunggah data..."
+    "WEB_DAV_UPLOAD": "WebDAV: Mengunggah data...",
+    "GDRIVE_DOWNLOAD": "Google Drive: Unduh file...",
+    "GDRIVE_UPLOAD": "Google Drive: Unggah file..."
   },
   "MH": {
     "ADD_NEW_TASK": "Tambah Tugas Baru",

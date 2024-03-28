@@ -1,4 +1,9 @@
 {
+  "ANDROID": {
+    "NOTIFICATIONS": {
+      "SYNC_CONFLICT_TITLE": "حدث تعارض في المزامنة"
+    }
+  },
   "APP": {
     "B_INSTALL": {
       "IGNORE": "تجاهل",
@@ -197,26 +202,6 @@
       },
       "S": {
         "ERR_UNKNOWN": "جيتلاب: خطأ غير معروف {{statusCode}} {{errorMsg}}"
-      }
-    },
-    "GOOGLE": {
-      "BANNER": {
-        "AUTH_FAIL": "GoogleApi: فشل في المصادقة ، يرجى محاولة تسجيل الدخول مرة أخرى!"
-      },
-      "DIALOG": {
-        "CREATE_SYNC_FILE": "Google Drive: لم يتم العثور على ملف يحمل الاسم <strong>\"{{fileName}}\"</strong> . <strong>إنشاء</strong> كملف مزامنة على Google Drive؟",
-        "USE_EXISTING_SYNC_FILE": "Google Drive: استخدم <strong>ملف</strong> موجود <strong>\"{{fileName}}\"</strong> كملف مزامنة؟ إذا لم يكن الأمر كذلك ، يرجى تغيير اسم ملف المزامنة."
-      },
-      "S": {
-        "MULTIPLE_SYNC_FILES_WITH_SAME_NAME": "تم العثور على ملفات متعددة بالاسم \"{{newFileName}}\". يرجى حذف الكل ما عدا واحدًا أو اختيار اسم مختلف.",
-        "SYNC_FILE_CREATION_ERROR": "Google Drive: حدث خطأ أثناء إنشاء ملف المزامنة. {{err}}",
-        "UPDATED_SYNC_FILE_NAME": "Google Drive: تم تحديث اسم ملف المزامنة"
-      },
-      "S_API": {
-        "ERR": "خطأ GoogleApi: {{errStr}}",
-        "ERR_NO_FILE_ID": "GoogleApi: لم يتم تحديد معرف الملف",
-        "ERR_NO_FILE_NAME": "GoogleApi: لم يتم تحديد اسم ملف",
-        "SUCCESS_LOGIN": "GoogleApi: تم تسجيل الدخول بنجاح"
       }
     },
     "ISSUE": {
@@ -425,7 +410,6 @@
       "D_ADD": {
         "NOTE_LABEL": "أدخل نصًا لحفظه كملاحظة ..."
       },
-      "EDIT_FULLSCREEN": "تحرير في وضع ملء الشاشة",
       "NOTES_CMP": {
         "ADD_BTN": "إضافة ملاحظة جديدة",
         "DROP_TO_ADD": "إسقاط هنا لإضافة ملاحظة جديدة",
@@ -434,7 +418,8 @@
       "NOTE_CMP": {
         "DISABLE_PARSE": "تعطيل تحليل تخفيض السعر",
         "ENABLE_PARSE": "تمكين تحليل تخفيض السعر"
-      }
+      },
+      "EDIT_FULLSCREEN": "تحرير في وضع ملء الشاشة"
     },
     "OPEN_PROJECT": {
       "DIALOG_INITIAL": {
@@ -657,8 +642,8 @@
           "L_ACCESS_TOKEN": "رمز الوصول (تم إنشاؤه من كود المصادقة)"
         },
         "GOOGLE": {
-          "L_IS_COMPRESS_DATA": "ضغط البيانات",
-          "L_SYNC_FILE_NAME": "مزامنة اسم الملف"
+          "L_SYNC_FILE_NAME": "مزامنة اسم الملف",
+          "L_IS_COMPRESS_DATA": "ضغط البيانات"
         },
         "LOCAL_FILE": {
           "L_SYNC_FILE_PATH": "مسار ملف المزامنة",
@@ -887,11 +872,11 @@
       "MENU_TITLE": "الجدول الزمني",
       "NOW": "الآن",
       "NO_TASKS": "حاليا لا توجد مهام. الرجاء إضافة بعض المهام عبر زر + في الشريط العلوي.",
+      "START": "بدء العمل",
+      "TASK_PROJECTION_INFO": "الإسقاط المستقبلي لمهمة مجدولة قابلة للتكرار",
       "S": {
         "CAL_PROVIDER_ERROR": "خطأ في موفر حساب الجدول الزمني: {{errTxt}}"
-      },
-      "START": "بدء العمل",
-      "TASK_PROJECTION_INFO": "الإسقاط المستقبلي لمهمة مجدولة قابلة للتكرار"
+      }
     },
     "TIME_TRACKING": {
       "B": {
@@ -978,6 +963,26 @@
         "EXPORT": "تصدير بيانات الأسبوع",
         "NO_DATA": "لا توجد مهام هذا الأسبوع حتى الآن.",
         "TITLE": "عنوان"
+      }
+    },
+    "GOOGLE": {
+      "BANNER": {
+        "AUTH_FAIL": "GoogleApi: فشل في المصادقة ، يرجى محاولة تسجيل الدخول مرة أخرى!"
+      },
+      "DIALOG": {
+        "CREATE_SYNC_FILE": "Google Drive: لم يتم العثور على ملف يحمل الاسم <strong>\"{{fileName}}\"</strong> . <strong>إنشاء</strong> كملف مزامنة على Google Drive؟",
+        "USE_EXISTING_SYNC_FILE": "Google Drive: استخدم <strong>ملف</strong> موجود <strong>\"{{fileName}}\"</strong> كملف مزامنة؟ إذا لم يكن الأمر كذلك ، يرجى تغيير اسم ملف المزامنة."
+      },
+      "S": {
+        "MULTIPLE_SYNC_FILES_WITH_SAME_NAME": "تم العثور على ملفات متعددة بالاسم \"{{newFileName}}\". يرجى حذف الكل ما عدا واحدًا أو اختيار اسم مختلف.",
+        "SYNC_FILE_CREATION_ERROR": "Google Drive: حدث خطأ أثناء إنشاء ملف المزامنة. {{err}}",
+        "UPDATED_SYNC_FILE_NAME": "Google Drive: تم تحديث اسم ملف المزامنة"
+      },
+      "S_API": {
+        "ERR": "خطأ GoogleApi: {{errStr}}",
+        "ERR_NO_FILE_ID": "GoogleApi: لم يتم تحديد معرف الملف",
+        "ERR_NO_FILE_NAME": "GoogleApi: لم يتم تحديد اسم ملف",
+        "SUCCESS_LOGIN": "GoogleApi: تم تسجيل الدخول بنجاح"
       }
     }
   },
@@ -1140,9 +1145,9 @@
     "SOUND": {
       "DONE_SOUND": "المهمة تمت الصوت",
       "IS_INCREASE_DONE_PITCH": "زيادة الملعب لكل مهمة يتم القيام بها",
-      "IS_PLAY_DONE_SOUND": "تشغيل الصوت عندما يتم وضع علامة على المهمة \"تم\"",
       "TITLE": "صوت",
-      "VOLUME": "الصوت"
+      "VOLUME": "الصوت",
+      "IS_PLAY_DONE_SOUND": "تشغيل الصوت عندما يتم وضع علامة على المهمة \"تم\""
     },
     "TAKE_A_BREAK": {
       "HELP": "<div> <p>يتيح لك تكوين تذكير متكرر عندما تعمل لفترة زمنية محددة دون أخذ استراحة.</p> <p>يمكنك تعديل الرسالة المعروضة. سيتم استبدال ${duration} بالوقت الذي يستغرقه دون انقطاع.</p> </div>",
@@ -1157,16 +1162,16 @@
       "TITLE": "التذكير بالاستراحة"
     },
     "TIMELINE": {
-      "CAL_PROVIDERS": "موفرو التقويم (تجريبي واختياري)",
-      "CAL_PROVIDERS_ADD": "أضف مصدرًا",
-      "CAL_PROVIDERS_INFO": "يمكنك بشكل اختياري تكوين المخطط الزمني لتحميل البيانات وعرضها أيضًا من iCal (مثل تقويم Google).",
       "HELP": "يجب أن توفر لك ميزة الجدول الزمني نظرة عامة سريعة على كيفية أداء المهام المخططة بمرور الوقت. يمكنك العثور عليه في القائمة اليمنى ضمن <a href='#/timeline'>\"المخطط الزمني\"</a>.",
-      "L_CAL_PATH": "عنوان URL / مسار الملف لتقويم ICAL (اختياري)",
       "L_IS_WORK_START_END_ENABLED": "قصر تدفق المهام غير المجدولة على أوقات عمل محددة",
       "L_WORK_END": "نهاية يوم العمل",
       "L_WORK_START": "بداية يوم العمل",
       "TITLE": "الجدول الزمني",
-      "WORK_START_END_DESCRIPTION": "على سبيل المثال 17:00"
+      "WORK_START_END_DESCRIPTION": "على سبيل المثال 17:00",
+      "CAL_PROVIDERS": "موفرو التقويم (تجريبي واختياري)",
+      "CAL_PROVIDERS_ADD": "أضف مصدرًا",
+      "CAL_PROVIDERS_INFO": "يمكنك بشكل اختياري تكوين المخطط الزمني لتحميل البيانات وعرضها أيضًا من iCal (مثل تقويم Google).",
+      "L_CAL_PATH": "عنوان URL / مسار الملف لتقويم ICAL (اختياري)"
     },
     "TRACKING_REMINDER": {
       "HELP": "قم بتكوين لافتة لتظهر في حالة نسيان بدء تتبع الوقت.",
@@ -1192,13 +1197,13 @@
     "DBX_GEN_TOKEN": "Dropbox: إنشاء رمز مميز ...",
     "DBX_META": "Dropbox: احصل على ملف تعريف ...",
     "DBX_UPLOAD": "Dropbox: تحميل ملف ...",
-    "GDRIVE_DOWNLOAD": "Google Drive: تنزيل الملف ...",
-    "GDRIVE_UPLOAD": "Google Drive: تحميل ملف ...",
     "GITHUB_LOAD_ISSUE": "GitHub: تحميل بيانات العدد ...",
     "JIRA_LOAD_ISSUE": "Jira: تحميل بيانات العدد ...",
     "UNKNOWN": "تحميل البيانات البعيدة",
     "WEB_DAV_DOWNLOAD": "WebDAV: جاري تنزيل البيانات ...",
-    "WEB_DAV_UPLOAD": "WebDAV: تحميل البيانات ..."
+    "WEB_DAV_UPLOAD": "WebDAV: تحميل البيانات ...",
+    "GDRIVE_DOWNLOAD": "Google Drive: تنزيل الملف ...",
+    "GDRIVE_UPLOAD": "Google Drive: تحميل ملف ..."
   },
   "MH": {
     "ADD_NEW_TASK": "إضافة مهمة جديدة",
