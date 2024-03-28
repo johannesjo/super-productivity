@@ -2,11 +2,13 @@ import { Project, ProjectState } from '../project.model';
 import { createFeatureSelector, createSelector } from '@ngrx/store';
 import { JiraCfg } from '../../issue/providers/jira/jira.model';
 import { GithubCfg } from '../../issue/providers/github/github.model';
+import { AzuredevopsCfg } from '../../issue/providers/azuredevops/azuredevops.model';
 import {
   CALDAV_TYPE,
   GITEA_TYPE,
   GITHUB_TYPE,
   GITLAB_TYPE,
+  AZUREDEVOPS_TYPE,
   JIRA_TYPE,
   OPEN_PROJECT_TYPE,
   REDMINE_TYPE,
@@ -54,6 +56,12 @@ export const selectJiraCfgByProjectId = createSelector(
 export const selectGithubCfgByProjectId = createSelector(
   selectProjectById,
   (p: Project): GithubCfg => p.issueIntegrationCfgs[GITHUB_TYPE] as GithubCfg,
+);
+
+export const selectAzuredevopsCfgByProjectId = createSelector(
+  selectProjectById,
+  (p: Project): AzuredevopsCfg =>
+    p.issueIntegrationCfgs[AZUREDEVOPS_TYPE] as AzuredevopsCfg,
 );
 
 export const selectRedmineCfgByProjectId = createSelector(

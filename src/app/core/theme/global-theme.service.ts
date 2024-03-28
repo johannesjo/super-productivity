@@ -104,6 +104,7 @@ export class GlobalThemeService {
       ['sp', 'assets/icons/sp.svg'],
       ['play', 'assets/icons/play.svg'],
       ['github', 'assets/icons/github.svg'],
+      ['azuredevops', 'assets/icons/azuredevops.svg'],
       ['gitlab', 'assets/icons/gitlab.svg'],
       ['jira', 'assets/icons/jira.svg'],
       ['caldav', 'assets/icons/caldav.svg'],
