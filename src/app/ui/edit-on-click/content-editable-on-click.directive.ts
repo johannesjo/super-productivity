@@ -231,8 +231,16 @@ export class ContentEditableOnClickDirective implements OnInit, OnDestroy {
     // reset caret to proper offset
     const range = document.createRange();
     console.log(el.childNodes[0], start, newText.length);
+    console.log(el.childNodes, start, newText.length, newText, start + newText.length);
 
-    range.setStart(el.childNodes[0], start + newText.length);
+    // TODO find the real cause of this failing
+    try {
+      range.setStart(el.childNodes[0], start + newText.length);
+    } catch (e) {
+      console.error(e);
+      console.log(el.childNodes[0].textContent?.length);
+      range.setStart(el.childNodes[0], el.childNodes[0].textContent?.length || 0);
+    }
     range.collapse(true);
 
     const sel2 = window.getSelection();
