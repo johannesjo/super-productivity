@@ -1,4 +1,15 @@
 {
+  "ANDROID": {
+    "NOTIFICATIONS": {
+      "SYNC_CONFLICT_TITLE": "发生了一个同步冲突。",
+      "SYNC_CONFLICT_MSG": "请检查并决定该怎么做。"
+    },
+    "PERMANENT_NOTIFICATION_MSGS": {
+      "INITIAL": "应用程序在后台运行时允许同步(如果启用)",
+      "NO_ACTIVE_TASKS": "没有活动任务",
+      "SYNCING": "正在同步中"
+    }
+  },
   "APP": {
     "B_INSTALL": {
       "IGNORE": "忽略",
@@ -127,6 +138,32 @@
       "C": {
         "FINISH_DAY_BEFORE_EXIT": "您今天的列表中有 {{nr}} 个已完成的任务尚未移至存档。你真的想在没有完成一天的情况下退出吗？"
       }
+    },
+    "FOCUS_MODE": {
+      "BACK_TO_PLANNING": "返回到计划",
+      "CANCEL_FOCUS_SESSION": "取消聚焦会话",
+      "CONGRATS": "恭喜您完成本次聚焦会话!",
+      "CONTINUE_FOCUS_SESSION": "继续聚焦会话",
+      "FINISH_TASK_AND_SELECT_NEXT": "完成聚焦会话，选择下一个",
+      "GET_READY": "准备好进行您的聚焦会话!",
+      "GOGOGO": "开始吧!!!",
+      "GO_TO_PROCRASTINATION": "当您正在拖延时，请点击寻求帮助",
+      "NEXT": "下一步",
+      "ON": "开始",
+      "OPEN_ISSUE_IN_BROWSER": "在浏览器中打开问题",
+      "POMODORO_BACK": "返回",
+      "POMODORO_DISABLE": "禁用番茄钟",
+      "POMODORO_INFO": "聚焦会话不能与番茄计时器一起使用。",
+      "PREP_STRETCH": "做一些轻微的拉伸运动",
+      "PREP_SIT_UPRIGHT": "请坐直(站好)",
+      "PREP_GET_MENTALLY_READY": "请做好精神上的准备，集中精力，提高效率",
+      "SELECT_ANOTHER_TASK": "选择其他任务",
+      "SELECT_TASK": "选择要进行聚焦会话的任务",
+      "SET_FOCUS_SESSION_DURATION": "设置聚焦会话的持续时间",
+      "SHOW_HIDE_NOTES_AND_ATTACHMENTS": "显示/隐藏任务注释和附件",
+      "START_FOCUS_SESSION": "开始聚焦会话",
+      "START_NEXT_FOCUS_SESSION": "开始下一个聚焦会话",
+      "WORKED_FOR": "您正在进行"
     },
     "GITHUB": {
       "DIALOG_INITIAL": {
@@ -1103,6 +1140,12 @@
     "EVALUATION": {
       "IS_HIDE_EVALUATION_SHEET": "隐藏每日摘要的评估表",
       "TITLE": "评估与指标"
+    },
+    "FOCUS_MODE": {
+      "HELP": "专注模式会打开一个无干扰的屏幕，帮助您专注于当前的任务。",
+      "L_ALWAYS_OPEN_FOCUS_MODE": "开始任务时始终打开专注模式",
+      "L_SKIP_PREPARATION_SCREEN": "跳过准备屏幕(拉伸等)",
+      "TITLE": "聚焦模式"
     },
     "IDLE": {
       "HELP": "<div><p>启用空闲时间处理后，将在指定的时间后打开一个对话框，以检查您在空闲时是否以及在哪个任务上记录您的时间。</p></div>",
