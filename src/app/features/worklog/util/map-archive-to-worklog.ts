@@ -5,6 +5,7 @@ import { getWeekNumber } from '../../../util/get-week-number';
 import * as moment from 'moment';
 import {
   Worklog,
+  WorklogDataForDay,
   WorklogDay,
   WorklogMonth,
   WorklogWeek,
@@ -87,8 +88,8 @@ export const mapArchiveToWorklog = (
       }
 
       // TODO real types
-      const newItem: any = {
-        task,
+      const newItem: WorklogDataForDay = {
+        task: task,
         parentId: task.parentId,
         isNoRestore: noRestoreIds.includes(task.id),
         timeSpent: timeSpentOnDay[dateStr],

@@ -157,7 +157,7 @@
                               <td class="actions">
                                 <button
                                   (click)="restoreTask(logEntry.task);"
-                                  *ngIf="!logEntry.task?.parentId && !logEntry.isNonArchiveTask"
+                                  *ngIf="!logEntry.task?.parentId && !logEntry.isNoRestore"
                                   [title]="T.F.WORKLOG.CMP.RESTORE_TASK_FROM_ARCHIVE|translate"
                                   aria-label="restore"
                                   color=""

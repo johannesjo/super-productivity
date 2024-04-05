@@ -1,12 +1,12 @@
-import { WorklogTask } from '../tasks/task.model';
+import { Task } from '../tasks/task.model';
 import { RoundTimeOption } from '../project/project.model';
 import { WeeksInMonth } from '../../util/get-week-in-month-model';
 
 export interface WorklogDataForDay {
   timeSpent: number;
-  task: WorklogTask;
-  parentId: string;
-  isNonArchiveTask?: boolean;
+  task: Task;
+  parentId: string | null;
+  isNoRestore: boolean;
 }
 
 export interface WorklogDay {
