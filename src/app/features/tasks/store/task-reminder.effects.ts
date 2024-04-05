@@ -197,14 +197,12 @@ export class TaskReminderEffects {
     () =>
       this._actions$.pipe(
         ofType(updateTaskTags),
-        filter(
-          ({ newTagIds, oldTagIds }) =>
-            newTagIds.includes(TODAY_TAG.id) && !oldTagIds.includes(TODAY_TAG.id),
-        ),
-        tap(({ task }) => {
+        tap(({ task, newTagIds, oldTagIds }) => {
           if (
             task.reminderId &&
             task.plannedAt &&
+            newTagIds.includes(TODAY_TAG.id) &&
+            !oldTagIds.includes(TODAY_TAG.id) &&
             task.plannedAt === getDateTimeFromClockString(DEFAULT_DAY_START, new Date())
           ) {
             console.log('unscheduleScheduledForDayWhenAddedToToday$ special case <3');
