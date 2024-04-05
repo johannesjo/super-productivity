@@ -197,16 +197,17 @@ export class TaskReminderEffects {
     () =>
       this._actions$.pipe(
         ofType(updateTaskTags),
-        filter(({ newTagIds }) => !!newTagIds && newTagIds.includes(TODAY_TAG.id)),
+        filter(
+          ({ newTagIds, oldTagIds }) =>
+            newTagIds.includes(TODAY_TAG.id) && !oldTagIds.includes(TODAY_TAG.id),
+        ),
         tap(({ task }) => {
           if (
             task.reminderId &&
             task.plannedAt &&
-            // NOTE this could be an alternative approach
-            // task.plannedAt === getDateTimeFromClockString(DEFAULT_DAY_START, new Date())
-            task.plannedAt ===
-              getDateTimeFromClockString(DEFAULT_DAY_START, task.plannedAt)
+            task.plannedAt === getDateTimeFromClockString(DEFAULT_DAY_START, new Date())
           ) {
+            console.log('unscheduleScheduledForDayWhenAddedToToday$ special case <3');
             this._taskService.unScheduleTask(task.id, task.reminderId, true);
           }
         }),
