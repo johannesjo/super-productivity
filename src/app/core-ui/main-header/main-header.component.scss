@@ -24,6 +24,8 @@ $macExtraPadding: (-8px + $mac-title-bar-padding);
     cursor: grabbing;
   }
 
+  ::ng-deep button,
+  ::ng-deep a,
   button,
   a {
     -webkit-app-region: no-drag;
