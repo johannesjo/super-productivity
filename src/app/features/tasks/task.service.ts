@@ -759,12 +759,6 @@ export class TaskService {
     remindCfg: TaskReminderOptionId,
     isMoveToBacklog: boolean = false,
   ): void {
-    console.log(remindOptionToMilliseconds(plannedAt, remindCfg), plannedAt);
-    console.log((remindOptionToMilliseconds(plannedAt, remindCfg) as number) - plannedAt);
-    console.log({
-      plannedAt,
-      remindCfg,
-    });
     this._store.dispatch(
       scheduleTask({
         task,

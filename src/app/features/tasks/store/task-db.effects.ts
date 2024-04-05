@@ -49,7 +49,6 @@ export class TaskDbEffects {
           addTask,
           restoreTask,
           addTimeSpent,
-          unScheduleTask,
           deleteTask,
           deleteTasks,
           undoDeleteTask,

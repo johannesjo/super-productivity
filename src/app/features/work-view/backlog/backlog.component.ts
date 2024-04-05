@@ -61,11 +61,4 @@ export class BacklogComponent implements AfterViewInit {
   trackByFn(i: number, task: TaskWithReminderData): string {
     return task.id;
   }
-
-  removeReminder(task: TaskWithReminderData): void {
-    if (!task.reminderId) {
-      throw new Error('Task without reminder');
-    }
-    this.taskService.unScheduleTask(task.id, task.reminderId);
-  }
 }
