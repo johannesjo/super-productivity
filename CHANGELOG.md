@@ -1,3 +1,25 @@
+## [8.0.3](https://github.com/johannesjo/super-productivity/compare/v8.0.1...v8.0.3) (2024-04-09)
+
+### Bug Fixes
+
+- cursor positioning error for special case [#3104](https://github.com/johannesjo/super-productivity/issues/3104) ([c4bf4b0](https://github.com/johannesjo/super-productivity/commit/c4bf4b0cb3668321fdb0d1ee0994287f1b808d62))
+- restore task button appearing for every task [#3121](https://github.com/johannesjo/super-productivity/issues/3121) ([b312050](https://github.com/johannesjo/super-productivity/commit/b312050b8433f7e659567a0d56a89b7b0918ccd5))
+- schedule of task is removed when another tag is added [#2937](https://github.com/johannesjo/super-productivity/issues/2937) ([7ef1fa9](https://github.com/johannesjo/super-productivity/commit/7ef1fa9decd9a51fe8d5443a2fd4eb3db4b5fb00))
+- select content not being scrollable ([cf032ee](https://github.com/johannesjo/super-productivity/commit/cf032eed56fe4ad11998cce7ea7fe8ab45d05b6a))
+- simple counter btns not working on mac [#3075](https://github.com/johannesjo/super-productivity/issues/3075) ([9fd8679](https://github.com/johannesjo/super-productivity/commit/9fd86796d9e19fec6372f761316caecc5f268367))
+
+### Features
+
+- adjust default values ([ea32b6d](https://github.com/johannesjo/super-productivity/commit/ea32b6d831ebc12384892e3d075389a13fb119d6))
+- **encryption:** add config form ([21de69a](https://github.com/johannesjo/super-productivity/commit/21de69ad22f1d2930c1144902801cc3fc3ec3d1b))
+- **encryption:** handle special case ([48032e6](https://github.com/johannesjo/super-productivity/commit/48032e6625b40c030bb2083e40adb3c56721bee7))
+- **encryption:** handle special case 2 ([a5837e1](https://github.com/johannesjo/super-productivity/commit/a5837e179ce43e20c2fecc7a629c51dc31a073cf))
+- **encryption:** improve wording ([3a767dd](https://github.com/johannesjo/super-productivity/commit/3a767dd4eb15fa4e179c37984ea0a7495c288c62))
+- **encryption:** improve wording 2 ([7f32086](https://github.com/johannesjo/super-productivity/commit/7f320865f379cdfe324e75f709e3b6d1d17f10f1))
+- **encryption:** make basic encryption work ([6aa0e0b](https://github.com/johannesjo/super-productivity/commit/6aa0e0b2d7675d89e0f1bf16f2a398083a444f0e))
+- **i18n:** update Chinese translation ([3d3fb77](https://github.com/johannesjo/super-productivity/commit/3d3fb77d0d584d6a65be0688ab82d4c4ec5df47d))
+- improve behavior on touch primary devices ([07e5d05](https://github.com/johannesjo/super-productivity/commit/07e5d05aa94927edd47ad5d79880987069ee3c79))
+
 ## [8.0.2](https://github.com/johannesjo/super-productivity/compare/v8.0.1...v8.0.2) (2024-04-09)
 
 ### Bug Fixes
