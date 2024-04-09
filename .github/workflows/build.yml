@@ -12,7 +12,7 @@ jobs:
     steps:
       - uses: actions/setup-node@v3
         with:
-          node-version: 16
+          node-version: 20
       - name: Check out Git repository
         uses: actions/checkout@v4
         with:
@@ -83,7 +83,7 @@ jobs:
     steps:
       - uses: actions/setup-node@v3
         with:
-          node-version: 16
+          node-version: 20
       - name: Echo is Release
         run: echo "IS_RELEASE $IS_RELEASE, ${{ startsWith(github.ref, 'refs/tags/v') }}"
         env:
@@ -164,7 +164,7 @@ jobs:
     steps:
       - uses: actions/setup-node@v3
         with:
-          node-version: 16
+          node-version: 20
       # required because setting via env.TZ does not work on windows
       - name: Set timezone to Europe Standard Time
         uses: szenius/set-timezone@v1.2

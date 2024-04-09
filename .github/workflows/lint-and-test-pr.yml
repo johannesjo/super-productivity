@@ -9,7 +9,7 @@ jobs:
     steps:
       - uses: actions/setup-node@v3
         with:
-          node-version: 16
+          node-version: 20
       - name: Check out Git repository
         uses: actions/checkout@v4
         with:
