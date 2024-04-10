@@ -15,7 +15,10 @@ import { T } from '../../../t.const';
 import { WorkContextService } from '../../work-context/work-context.service';
 import { TaskService } from '../task.service';
 import { Store } from '@ngrx/store';
-import { selectStartableTasksActiveContextFirst } from '../../work-context/store/work-context.selectors';
+import {
+  selectStartableTasksActiveContextFirst,
+  selectTrackableTasksActiveContextFirst,
+} from '../../work-context/store/work-context.selectors';
 import { Project } from '../../project/project.model';
 import { selectAllProjects } from '../../project/store/project.selectors';
 
@@ -33,6 +36,7 @@ export class SelectTaskComponent implements OnInit, OnDestroy {
   isCreate: boolean = false;
   @Output() taskChange: EventEmitter<Task | string> = new EventEmitter();
   @Input() isLimitToProject: boolean = false;
+  @Input() isIncludeDoneTasks: boolean = false;
   private _destroy$: Subject<boolean> = new Subject<boolean>();
 
   constructor(
@@ -58,7 +62,11 @@ export class SelectTaskComponent implements OnInit, OnDestroy {
         });
       });
     const tasks$: Observable<Task[]> = this.isLimitToProject
-      ? this._workContextService.startableTasksForActiveContext$
+      ? this.isIncludeDoneTasks
+        ? this._workContextService.trackableTasksForActiveContext$
+        : this._workContextService.startableTasksForActiveContext$
+      : this.isIncludeDoneTasks
+      ? this._store.select(selectTrackableTasksActiveContextFirst)
       : this._store.select(selectStartableTasksActiveContextFirst);
 
     this.taskSelectCtrl.valueChanges

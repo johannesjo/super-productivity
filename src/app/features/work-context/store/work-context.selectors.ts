@@ -77,11 +77,12 @@ export const selectActiveContextTheme = createSelector(
   selectActiveWorkContext,
   (workContext) => workContext.theme,
 );
-export const selectStartableTasksForActiveContext = createSelector(
+
+export const selectTrackableTasksForActiveContext = createSelector(
   selectActiveWorkContext,
   selectTaskEntities,
   (activeContext, entities): Task[] => {
-    let startableTasks: Task[] = [];
+    let trackableTasks: Task[] = [];
     activeContext.taskIds.forEach((id) => {
       const task: Task | undefined = entities[id];
       if (!task) {
@@ -90,18 +91,25 @@ export const selectStartableTasksForActiveContext = createSelector(
         // only use devError
         devError('Task not found');
       } else if (task.subTaskIds && task.subTaskIds.length) {
-        startableTasks = startableTasks.concat(
+        trackableTasks = trackableTasks.concat(
           task.subTaskIds.map((sid) => entities[sid] as Task),
         );
       } else {
-        startableTasks.push(task);
+        trackableTasks.push(task);
       }
     });
-    return startableTasks.filter((task) => !task.isDone);
+    return trackableTasks;
   },
 );
 
-export const selectStartableTasksActiveContextFirst = createSelector(
+export const selectStartableTasksForActiveContext = createSelector(
+  selectTrackableTasksForActiveContext,
+  (trackableTasks): Task[] => {
+    return trackableTasks.filter((task) => !task.isDone);
+  },
+);
+
+export const selectTrackableTasksActiveContextFirst = createSelector(
   selectTaskFeatureState,
   selectStartableTasksForActiveContext,
   (s, forActiveContext): Task[] => {
@@ -110,11 +118,17 @@ export const selectStartableTasksActiveContextFirst = createSelector(
       .map((id) => s.entities[id] as Task)
       .filter(
         (task) =>
-          !task.isDone &&
           (!!task.parentId || task.subTaskIds.length === 0) &&
           !activeContextIds.includes(task.id),
       );
     return [...forActiveContext, ...otherTasks];
+  },
+);
+
+export const selectStartableTasksActiveContextFirst = createSelector(
+  selectTrackableTasksActiveContextFirst,
+  (trackableTasks): Task[] => {
+    return trackableTasks.filter((task) => !task.isDone);
   },
 );
 

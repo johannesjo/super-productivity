@@ -57,6 +57,7 @@ import {
   selectDoneTaskIdsForActiveContext,
   selectStartableTasksForActiveContext,
   selectTimelineTasks,
+  selectTrackableTasksForActiveContext,
 } from './store/work-context.selectors';
 import { GlobalTrackingIntervalService } from '../../core/global-tracking-interval/global-tracking-interval.service';
 import { Note } from '../note/note.model';
@@ -251,6 +252,11 @@ export class WorkContextService {
     switchMap(() => this._store$),
     select(selectStartableTasksForActiveContext),
     shareReplay(1),
+  );
+
+  trackableTasksForActiveContext$: Observable<Task[]> = this._afterDataLoadedOnce$.pipe(
+    switchMap(() => this._store$),
+    select(selectTrackableTasksForActiveContext),
   );
 
   timelineTasks$: Observable<{

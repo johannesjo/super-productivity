@@ -33,6 +33,7 @@
 
     <select-task
       (taskChange)="onTaskChange($event)"
+      [isIncludeDoneTasks]="true"
       [initialTask]="selectedTask"
     ></select-task>
 
