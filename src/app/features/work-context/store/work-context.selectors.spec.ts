@@ -4,6 +4,7 @@ import {
   selectActiveWorkContext,
   selectStartableTasksForActiveContext,
   selectTimelineTasks,
+  selectTrackableTasksForActiveContext,
 } from './work-context.selectors';
 import { WorkContext, WorkContextType } from '../work-context.model';
 
@@ -59,7 +60,7 @@ describe('workContext selectors', () => {
       );
     });
   });
-  describe('selectStartableTasksForActiveContext', () => {
+  describe('selectTrackableTasksForActiveContext', () => {
     it('should select tasks for project', () => {
       const M1 = {
         id: 'M1',
@@ -77,12 +78,41 @@ describe('workContext selectors', () => {
         id: TODAY_TAG.id,
         taskIds: [M1.id, M2.id],
       };
-      const result = selectStartableTasksForActiveContext.projector(
+      const result = selectTrackableTasksForActiveContext.projector(
         ctx,
         fakeEntityStateFromArray([M2, M1]).entities,
       );
       expect(result).toEqual([
         { id: 'M1', subTaskIds: [], tagIds: ['TODAY'] },
+        {
+          id: 'M2',
+          plannedAt: 1234,
+          reminderId: 'asd',
+          subTaskIds: [],
+          tagIds: ['TODAY'],
+        },
+      ] as any[]);
+    });
+  });
+
+  describe('selectStartableTasksForActiveContext', () => {
+    it('should select tasks for project', () => {
+      const M1 = {
+        id: 'M1',
+        tagIds: [TODAY_TAG.id],
+        subTaskIds: [],
+        isDone: true,
+      };
+      const M2 = {
+        id: 'M2',
+        subTaskIds: [],
+        tagIds: [TODAY_TAG.id],
+        plannedAt: 1234,
+        reminderId: 'asd',
+      };
+
+      const result = selectStartableTasksForActiveContext.projector([M1, M2]);
+      expect(result).toEqual([
         {
           id: 'M2',
           plannedAt: 1234,
