@@ -51,6 +51,11 @@ jobs:
       - name: Build Frontend & Electron
         run: npm run build
 
+      - name: Install Snapcraft
+        uses: samuelmeuli/action-snapcraft@v2
+        env:
+          SNAPCRAFT_STORE_CREDENTIALS: ${{ secrets.SNAPCRAFT_STORE_CREDENTIALS }}
+
       - name: Build/Release Electron app
         uses: samuelmeuli/action-electron-builder@v1
         with:
@@ -60,10 +65,6 @@ jobs:
         env:
           SNAPCRAFT_STORE_CREDENTIALS: ${{ secrets.SNAPCRAFT_STORE_CREDENTIALS }}
 
-      - name: Install Snapcraft
-        uses: samuelmeuli/action-snapcraft@v2
-        env:
-          SNAPCRAFT_STORE_CREDENTIALS: ${{ secrets.SNAPCRAFT_STORE_CREDENTIALS }}
       # rename to possibly fix release issue
       - run: find ./app-builds -type f -name '*.snap' -exec sh -c 'x="{}"; mv "$x" "app-builds/sp.snap"' \;
       # Release to edge if no tag and to candidate if tag
