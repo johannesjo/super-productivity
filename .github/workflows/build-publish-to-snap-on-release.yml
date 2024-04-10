@@ -1,7 +1,7 @@
 name: Publish to snap store on release
 on:
   release:
-    types: [pub lished]
+    types: [published]
   workflow_dispatch:
     inputs: null
 
