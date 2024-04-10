@@ -1,5 +1,4 @@
 appId: com.super-productivity.app
-afterSign: electron-builder-notarize
 productName: Super Productivity
 files:
   - electron/**/*
@@ -11,6 +10,7 @@ directories:
   output: './app-builds'
 
 mas:
+  notarize: true
   appId: com.super-productivity.app
   category: public.app-category.productivity
   icon: build/icon-mac.icns

@@ -1,5 +1,4 @@
 appId: superProductivity
-afterSign: electron-builder-notarize
 files:
   - electron/**/*
   - '!electron/**/*.ts'
@@ -46,6 +45,7 @@ snap:
   allowNativeWayland: true
 
 mac:
+  notarize: true
   appId: com.super-productivity.app
   type: distribution
   category: public.app-category.productivity
