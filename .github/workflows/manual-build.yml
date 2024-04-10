@@ -45,7 +45,7 @@ jobs:
         run: npm run buildAllElectron:noTests:prod
 
       - name: Build Electron app
-        uses: samuelmeuli/action-electron-builder@v1
+        uses: johannesjo/action-electron-builder@v1
         with:
           build_script_name: empty
           github_token: ${{ secrets.github_token }}
@@ -125,7 +125,7 @@ jobs:
         run: npm run build
 
       - name: Build/Release Electron app
-        uses: samuelmeuli/action-electron-builder@v1
+        uses: johannesjo/action-electron-builder@v1
         with:
           build_script_name: empty
           github_token: ${{ secrets.github_token }}

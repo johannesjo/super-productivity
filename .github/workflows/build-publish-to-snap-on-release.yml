@@ -1,7 +1,7 @@
 name: Publish to snap store on release
 on:
   release:
-    types: [published]
+    types: [pub lished]
   workflow_dispatch:
     inputs: null
 
@@ -59,7 +59,7 @@ jobs:
           SNAPCRAFT_STORE_CREDENTIALS: ${{ secrets.SNAPCRAFT_STORE_CREDENTIALS }}
 
       - name: Build/Release Electron app
-        uses: samuelmeuli/action-electron-builder@v1
+        uses: johannesjo/action-electron-builder@v1
         with:
           build_script_name: empty
           github_token: ${{ secrets.github_token }}
