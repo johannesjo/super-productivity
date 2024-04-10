@@ -247,6 +247,7 @@ export class TaskRelatedModelEffects {
   }
 
   private async _moveToArchive(tasks: TaskWithSubTasks[]): Promise<unknown> {
+    const now = Date.now();
     const flatTasks = flattenTasks(tasks);
     if (!flatTasks.length) {
       return;
@@ -261,6 +262,12 @@ export class TaskRelatedModelEffects {
         reminderId: null,
         isDone: true,
         plannedAt: null,
+        doneOn:
+          task.isDone && task.doneOn
+            ? task.doneOn
+            : task.parentId
+            ? flatTasks.find((t) => t.id === task.parentId)?.doneOn || now
+            : now,
       })),
       currentArchive,
     );
