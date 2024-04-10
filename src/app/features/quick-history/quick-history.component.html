@@ -1,4 +1,4 @@
-<h1>{{T.F.QUICK_HISTORY.PAGE_TITLE|translate}}</h1>
+<h1>{{ T.F.QUICK_HISTORY.PAGE_TITLE|translate }}</h1>
 
 <div
   *ngIf="(worklogService.quickHistoryWeeks$|async) as weeks else spinner"
@@ -8,12 +8,12 @@
     class="no-data"
     *ngIf="weeks?.length===0"
   >
-    {{T.F.QUICK_HISTORY.NO_DATA|translate}}
+    {{ T.F.QUICK_HISTORY.NO_DATA|translate }}
   </div>
 
   <div *ngFor="let week of weeks; let j = index;">
     <h2>
-      {{T.F.QUICK_HISTORY.WEEK_TITLE|translate:{ nr: week.weekNr, timeSpent:
+      {{ T.F.QUICK_HISTORY.WEEK_TITLE|translate:{ nr: week.weekNr, timeSpent:
       (week.timeSpent|msToString) } }}
     </h2>
 
@@ -32,25 +32,25 @@
               <span
                 *ngIf="visibility[i+(j*100)]"
                 [@fade]
-                >{{T.F.WORKLOG.WEEK.TITLE|translate}}</span
+                >{{ T.F.WORKLOG.WEEK.TITLE|translate }}</span
               >
             </div>
             <div class="center-box">
               <div class="title">
-                <h3 class="mat-h3">{{day.value.dayStr}}</h3>
+                <h3 class="mat-h3">{{ day.value.dayStr }}</h3>
                 <div
                   *ngIf="!visibility[i+(j*100)]"
                   [@expandFade]
                   class="icon-indicator-bar"
                 >
-                  <strong>∑ {{day.value.timeSpent|msToClockString}}</strong>
+                  <strong>∑ {{ day.value.timeSpent|msToClockString }}</strong>
                   &nbsp;
                   <mat-icon>list</mat-icon>
-                  <strong>{{day.value.logEntries.length}}</strong>
+                  <strong>{{ day.value.logEntries.length }}</strong>
                   <em *ngIf="day.value.workStart"
-                    ><span class="spacer"></span
-                    >{{day.value.workStart|momentFormat:'HH:mm'}} -
-                    {{day.value.workEnd|momentFormat:'HH:mm'}}</em
+                    ><span class="spacer"></span>{{
+                    day.value.workStart|momentFormat:'HH:mm' }} - {{
+                    day.value.workEnd|momentFormat:'HH:mm' }}</em
                   >
 
                   <div class="simple-counter-items">
@@ -58,18 +58,18 @@
                       *ngFor="let sc of simpleCounterService.enabledSimpleCounters$|async"
                       class="simple-counter-item"
                     >
-                      <mat-icon inline="true">{{sc.iconOn || sc.icon}}</mat-icon>
+                      <mat-icon inline="true">{{ sc.iconOn || sc.icon }}</mat-icon>
                       <div
                         *ngIf="sc.type==='ClickCounter'"
                         class="count"
                       >
-                        {{sc.countOnDay[day.value.dateStr] || 0}}
+                        {{ sc.countOnDay[day.value.dateStr] || 0 }}
                       </div>
                       <div
                         *ngIf="sc.type==='StopWatch'"
                         class="count"
                       >
-                        {{sc.countOnDay[day.value.dateStr] || 0|msToMinuteClockString}}
+                        {{ sc.countOnDay[day.value.dateStr] || 0|msToMinuteClockString }}
                       </div>
                     </div>
                   </div>
@@ -90,19 +90,21 @@
             [@expandFade]
             class="task-summary-table"
           >
-            <tr *ngFor="let logEntry of day.value.logEntries; trackBy: trackByLogEntry;">
+            <tr
+              *ngFor="let logEntry of filterWorklogDataForDay(day.value.logEntries); trackBy: trackByLogEntry;"
+            >
               <td
                 [class.isSubTask]="logEntry.task.parentId"
                 class="title"
                 colspan
               >
-                <span class="task-title">{{logEntry.task.title}}</span>
+                <span class="task-title">{{ logEntry.task.title }}</span>
               </td>
               <td class="worked">
                 <span
                   *ngIf="logEntry.task.subTaskIds && logEntry.task.subTaskIds.length>0"
-                  >∑
-                  {{logEntry.task.timeSpentOnDay[day.value.dateStr]|msToClockString}}</span
+                  >∑ {{ logEntry.task.timeSpentOnDay[day.value.dateStr]|msToClockString
+                  }}</span
                 >
                 <inline-input
                   (changed)="updateTimeSpentTodayForTask(logEntry.task,day.value.dateStr, $event)"

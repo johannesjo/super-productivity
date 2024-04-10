@@ -50,6 +50,12 @@ export class QuickHistoryComponent {
     return day.key;
   }
 
+  filterWorklogDataForDay(worklogDataForDay: WorklogDataForDay[]): WorklogDataForDay[] {
+    return worklogDataForDay.filter(
+      (entry) => entry.task.isDone || entry.timeSpent > 1000,
+    );
+  }
+
   trackByLogEntry(i: number, logEntry: WorklogDataForDay): string {
     return logEntry.task.id;
   }
