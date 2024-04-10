@@ -25,10 +25,10 @@ const _getTimeSpentOnDay = (entities: any, task: Task): { [key: string]: number 
     const parentLogEntryDate =
       parentSpentOnDay &&
       (Object.keys(parentSpentOnDay)[0] ||
-        getWorklogStr(entities[task.parentId].created));
+        getWorklogStr(entities[task.parentId].doneOn || entities[task.parentId].created));
     return { [parentLogEntryDate]: 1 };
   } else {
-    return { [getWorklogStr(task.created)]: 1 };
+    return { [getWorklogStr(task.doneOn || task.created)]: 1 };
   }
 };
 
