@@ -1,3 +1,12 @@
+## [8.0.5](https://github.com/johannesjo/super-productivity/compare/v8.0.4...v8.0.5) (2024-04-12)
+
+### Features
+
+- also include done tasks for idle time dialog [#3135](https://github.com/johannesjo/super-productivity/issues/3135) ([2d04ede](https://github.com/johannesjo/super-productivity/commit/2d04ede28d25446f5574d41b29231a0efb07babb))
+- filter out undone tasks without time for worklog [#3122](https://github.com/johannesjo/super-productivity/issues/3122) ([840c243](https://github.com/johannesjo/super-productivity/commit/840c2438f6c4ff95273735c02f048e96be2c671a))
+- set doneOn date as parent date if sub task was not done when moving to archive [#3122](https://github.com/johannesjo/super-productivity/issues/3122) ([fb50e26](https://github.com/johannesjo/super-productivity/commit/fb50e26e7c6f82317b7bee71a2c6bf292334298f))
+- use doneOn over created date when creating worklog items [#3122](https://github.com/johannesjo/super-productivity/issues/3122) ([f3b0c66](https://github.com/johannesjo/super-productivity/commit/f3b0c665e6a505b392865cc4c1964e64e49a0e4b))
+
 ## [8.0.4](https://github.com/johannesjo/super-productivity/compare/v8.0.3...v8.0.4) (2024-04-10)
 
 ## [8.0.3](https://github.com/johannesjo/super-productivity/compare/v8.0.1...v8.0.3) (2024-04-09)
