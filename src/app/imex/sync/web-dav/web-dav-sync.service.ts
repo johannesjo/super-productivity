@@ -46,11 +46,13 @@ export class WebDavSyncService implements SyncProviderServiceInterface {
         clientUpdate: d.getTime(),
         rev: this._getRevFromMeta(meta),
       };
-    } catch (e: unknown) {
-      const isAxiosError = !!(e && (e as any).response && (e as any).response.status);
-      if (isAxiosError && (e as any).response.status === 404) {
+    } catch (e: any) {
+      const isAxiosError = !!(e?.response && e.response.status);
+
+      if ((isAxiosError && e.response.status === 404) || e.status === 404) {
         return 'NO_REMOTE_DATA';
       }
+
       console.error(e);
       return e as Error;
     }
