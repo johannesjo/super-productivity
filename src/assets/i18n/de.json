@@ -123,13 +123,13 @@
       "BANNER": {
         "TXT": "<strong>{{title}}</strong> beginnt um <strong>{{start}}</strong> !",
         "TXT_MULTIPLE": "<strong>{{title}}</strong> beginnt um <strong>{{start}}</strong> !<br> (und {{nrOfOtherBanners}} weitere Ereignisse sind fällig)",
-        "TXT_PAST": "<strong>{{title} }</strong> startete um <strong>{{start} }</strong> !",
-        "TXT_PAST_MULTIPLE": "<strong>{{title} }</strong> gestartet um <strong>{{start} }</strong> !<br> (und {{nrOfOtherBanners} } weitere Ereignisse sind fällig)",
+        "TXT_PAST": "<strong>{{title}}</strong> startete um <strong>{{start}}</strong> !",
+        "TXT_PAST_MULTIPLE": "<strong>{{title}}</strong> gestartet um <strong>{{start}}</strong> !<br> (und {{nrOfOtherBanners}} weitere Ereignisse sind fällig)",
         "ADD_AS_TASK": "Als Aufgabe hinzufügen",
         "FOCUS_TASK": "Fokusaufgabe"
       },
       "S": {
-        "CAL_PROVIDER_ERROR": "Fehler beim Kalender-Provider: {{errTxt} }"
+        "CAL_PROVIDER_ERROR": "Fehler beim Kalender-Provider: {{errTxt}}"
       }
     },
     "CONFIG": {
@@ -213,7 +213,7 @@
         "WRITE_A_COMMENT": "Schreibe einen Kommentar"
       },
       "S": {
-        "ERR_UNKNOWN": "Gitea: Unbekannter Fehler {{statusCode} } {{errorMsg} }. API-Ratenlimit überschritten?"
+        "ERR_UNKNOWN": "Gitea: Unbekannter Fehler {{statusCode}} {{errorMsg}}. API-Ratenlimit überschritten?"
       }
     },
     "REDMINE": {
@@ -245,7 +245,7 @@
         "MARK_AS_CHECKED": "Markieren Sie Updates als überprüft"
       },
       "S": {
-        "ERR_UNKNOWN": "Redmine: Unbekannter Fehler {{statusCode} } {{errorMsg} }."
+        "ERR_UNKNOWN": "Redmine: Unbekannter Fehler {{statusCode}} {{errorMsg}}."
       }
     },
     "GITHUB": {
@@ -272,7 +272,7 @@
         "DESCRIPTION": "Beschreibung",
         "LABELS": "Labels",
         "LAST_COMMENT": "Letzter Kommentar",
-        "LOAD_ALL_COMMENTS": "Alle {{nr} } Kommentare laden",
+        "LOAD_ALL_COMMENTS": "Alle {{nr}} Kommentare laden",
         "LOAD_DESCRIPTION_AND_ALL_COMMENTS": "Beschreibung und alle Kommentare laden",
         "MARK_AS_CHECKED": "Updates als erledigt markieren",
         "STATUS": "Status",
@@ -294,7 +294,7 @@
         "T_ALREADY_TRACKED": "Bereits erfasst",
         "T_TITLE": "Titel",
         "T_TO_BE_SUBMITTED": "Einzureichend",
-        "TOTAL_MSG": "Sie werden <em>{{totalTimeToSubmit} }</em> Arbeitszeit für heute insgesamt an <em>{{nrOfTasksToSubmit}</em> verschiedene Aufgaben übermitteln."
+        "TOTAL_MSG": "Sie werden <em>{{totalTimeToSubmit}}</em> Arbeitszeit für heute insgesamt an <em>{{nrOfTasksToSubmit}</em> verschiedene Aufgaben übermitteln."
       },
       "FORM": {
         "FILTER_USER": "Benutzername (z. B. um Änderungen selbst herauszufiltern)",
@@ -642,8 +642,8 @@
       "S": {
         "ERR_UNKNOWN": "OpenProject: Unbekannter Fehler {{statusCode}} {{errorMsg}}. Ist CORS für den Server richtig konfiguriert?",
         "POST_TIME_SUCCESS": "OpenProject: Zeiteintrag für {{issueTitle}}erfolgreich erstellt",
-        "TRANSITION": "OpenProject: Setzen Sie das Issue „ {{issueKey} }“ auf „ {{name} }“",
-        "TRANSITION_SUCCESS": "OpenProject: Das Issue {{issueKey} } wurde auf <strong>{{chosenTransition} }</strong> gesetzt",
+        "TRANSITION": "OpenProject: Setzen Sie das Issue „ {{issueKey}}“ auf „ {{name}}“",
+        "TRANSITION_SUCCESS": "OpenProject: Das Issue {{issueKey}} wurde auf <strong>{{chosenTransition}}</strong> gesetzt",
         "TRANSITIONS_LOADED": "Übergänge geladen. Verwenden Sie die Auswahl unten, um sie zuzuweisen"
       }
     },
@@ -654,7 +654,7 @@
       "FINISH_SESSION_X": "Sie haben die Sitzung <strong>{{nr}}</strong>erfolgreich beendet!",
       "NOTIFICATION": {
         "BREAK_X_START": "Pomodoro: Pause {{nr}} gestartet!",
-        "BREAK_TIME": "Pomodoro: Zeit für eine Pause {{nr} }!",
+        "BREAK_TIME": "Pomodoro: Zeit für eine Pause {{nr}}!",
         "NO_TASKS": "Sie müssen Aufgaben hinzufügen, bevor der Pomodoro-Timer starten kann.",
         "SESSION_X_START": "Pomodoro: Sitzung {{nr}} gestartet!"
       },
@@ -767,8 +767,8 @@
       "COUNTDOWN_BANNER": {
         "START_NOW": "Jetzt anfangen",
         "HIDE": "Verstecken",
-        "TXT": "<strong>{{title} }</strong> beginnt um <strong>{{start} }</strong> !",
-        "TXT_MULTIPLE": "<strong>{{title} }</strong> beginnt um <strong>{{start} }</strong> !<br> (und {{nrOfOtherBanners} } weitere Aufgaben sind fällig)"
+        "TXT": "<strong>{{title}}</strong> beginnt um <strong>{{start}}</strong> !",
+        "TXT_MULTIPLE": "<strong>{{title}}</strong> beginnt um <strong>{{start}}</strong> !<br> (und {{nrOfOtherBanners}} weitere Aufgaben sind fällig)"
       }
     },
     "SEARCH_BAR": {
