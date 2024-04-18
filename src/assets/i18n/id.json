@@ -1049,7 +1049,8 @@
       "TASK_PROJECTION_INFO": "Proyeksi masa depan dari tugas berulang yang dijadwalkan",
       "S": {
         "CAL_PROVIDER_ERROR": "Kesalahan Penyedia Panggilan Linimasa: {{errTxt}}"
-      }
+      },
+      "LUNCH_BREAK": "Istirahat makan siang"
     },
     "TIME_TRACKING": {
       "B": {

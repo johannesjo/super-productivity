@@ -1130,7 +1130,8 @@
       "NOW": "Sada",
       "NO_TASKS": "Trenutačno nema zadataka. Dodaj zadatke putem gumba + u gornjoj traci.",
       "START": "Početak rada",
-      "TASK_PROJECTION_INFO": "Projekcija u budućnosti terminiranog ponavljajućeg zadatka"
+      "TASK_PROJECTION_INFO": "Projekcija u budućnosti terminiranog ponavljajućeg zadatka",
+      "LUNCH_BREAK": "Pauza za ručak"
     },
     "TIME_TRACKING": {
       "B": {

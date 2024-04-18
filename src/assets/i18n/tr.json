@@ -1099,7 +1099,8 @@
       "TASK_PROJECTION_INFO": "Zamanlanmış tekrarlanabilir bir görevin gelecek projeksiyonu",
       "S": {
         "CAL_PROVIDER_ERROR": "Zaman Çizelgesi Cal Sağlayıcı Hatası: {{errTxt}}"
-      }
+      },
+      "LUNCH_BREAK": "Öğle Arası"
     },
     "TIME_TRACKING": {
       "B": {

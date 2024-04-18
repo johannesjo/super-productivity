@@ -7,6 +7,7 @@ import {
   TimelineViewEntrySplitTaskContinued,
   TimelineViewEntryTask,
   TimelineWorkStartEndCfg,
+  TimelineLunchBreakCfg,
 } from '../timeline.model';
 import { getDateTimeFromClockString } from '../../../util/get-date-time-from-clock-string';
 import { createSortedBlockerBlocks } from './create-sorted-blocker-blocks';
@@ -30,6 +31,7 @@ export const mapToTimelineViewEntries = (
   calenderWithItems: TimelineCalendarMapEntry[],
   currentId: string | null,
   workStartEndCfg?: TimelineWorkStartEndCfg,
+  lunchBreakCfg?: TimelineLunchBreakCfg,
   now: number = Date.now(),
 ): TimelineViewEntry[] => {
   let startTime = now;
@@ -42,7 +44,14 @@ export const mapToTimelineViewEntries = (
     return [];
   }
 
-  const params: any = { tasks, currentId, scheduledTasks, workStartEndCfg, now };
+  const params: any = {
+    tasks,
+    currentId,
+    scheduledTasks,
+    workStartEndCfg,
+    lunchBreakCfg,
+    now,
+  };
   console.log('mapToViewEntries', params, { asString: JSON.stringify(params) });
 
   if (workStartEndCfg) {
@@ -70,6 +79,7 @@ export const mapToTimelineViewEntries = (
     scheduledTaskRepeatCfgs,
     calenderWithItems,
     workStartEndCfg,
+    lunchBreakCfg,
     now,
   );
 
@@ -102,59 +112,9 @@ export const mapToTimelineViewEntries = (
     }
   }
 
-  // filter out first entry if dayEnd
-  if (viewEntries[0]?.type === TimelineViewEntryType.WorkdayEnd) {
-    viewEntries.splice(0, 1);
-  }
-
-  // remove dayStartEnd entries if last
-  let isWorkdayTypeLast = true;
-  while (isWorkdayTypeLast) {
-    const last = viewEntries[viewEntries.length - 1];
-    if (viewEntries.length <= 2) {
-      isWorkdayTypeLast = false;
-    }
-    if (
-      last &&
-      (last.type === TimelineViewEntryType.WorkdayEnd ||
-        last.type === TimelineViewEntryType.WorkdayStart)
-    ) {
-      viewEntries.splice(viewEntries.length - 1, 1);
-    } else {
-      isWorkdayTypeLast = false;
-    }
-  }
-
-  // filter out excess entries for start/end
-  // NOTE: not pretty but works
-  const cleanedUpExcessWorkDays: TimelineViewEntry[] = [];
-  let prevWasSkipped = false;
-  viewEntries.forEach((viewEntry, index, arr) => {
-    if (prevWasSkipped) {
-      prevWasSkipped = false;
-      return;
-    }
-
-    if (index > 0) {
-      const next = arr[index + 1];
-      if (
-        next &&
-        viewEntry.type === TimelineViewEntryType.WorkdayStart &&
-        next.type === TimelineViewEntryType.WorkdayEnd
-      ) {
-        prevWasSkipped = true;
-        return;
-      }
-    }
-    cleanedUpExcessWorkDays.push(viewEntry);
-  });
-
-  // debug('mapToViewEntriesE', cleanedUpExcessWorkDays, {
-  //   asString: JSON.stringify(cleanedUpExcessWorkDays),
-  // });
+  const cleanedUpExcessWorkDays = clearEntries(viewEntries, lunchBreakCfg != null);
 
   // add day split entries
-
   for (let i = 0; i < cleanedUpExcessWorkDays.length; i++) {
     const entry = cleanedUpExcessWorkDays[i];
     const prev = cleanedUpExcessWorkDays[i - 1];
@@ -208,6 +168,81 @@ const isSameDay = (dt1: number, dt2: number): boolean => {
   );
 };
 
+// This function cleans up the workdays start/ends and lunch breaks from days with no tasks
+export const clearEntries = (
+  entries: TimelineViewEntry[],
+  lunchBreakEnabled: boolean,
+): TimelineViewEntry[] => {
+  // filter out first entry if LunchBreak
+  if (entries[0]?.type === TimelineViewEntryType.LunchBreak) {
+    entries.splice(0, 1);
+  }
+
+  // filter out first entry if LunchBreak
+  if (entries[0]?.type === TimelineViewEntryType.WorkdayEnd) {
+    entries.splice(0, 1);
+  }
+
+  // remove dayStartEnd and lunchBreak entries if last
+  let isWorkdayTypeLast = true;
+  while (isWorkdayTypeLast) {
+    const last = entries[entries.length - 1];
+
+    // keep at least one day. To avoid empty timelines
+    if ((lunchBreakEnabled && entries.length <= 3) || entries.length <= 2) {
+      isWorkdayTypeLast = false;
+    }
+    if (
+      last &&
+      (last.type === TimelineViewEntryType.WorkdayEnd ||
+        last.type === TimelineViewEntryType.WorkdayStart ||
+        last.type === TimelineViewEntryType.LunchBreak)
+    ) {
+      entries.splice(entries.length - 1, 1);
+    } else {
+      isWorkdayTypeLast = false;
+    }
+  }
+
+  // filter out excess entries for start/end
+  // NOTE: not pretty but works
+  const cleanedUpExcessWorkDays: TimelineViewEntry[] = [];
+  let index = 0;
+
+  while (index < entries.length) {
+    const entry = entries[index];
+    // We skip the first entry because we'd like to keep at least one entry. To avoid empty timelines
+    if (index > 0) {
+      const next = entries[index + 1];
+      if (lunchBreakEnabled) {
+        const afterNext = entries[index + 2];
+        if (
+          entry.type === TimelineViewEntryType.WorkdayStart &&
+          next.type === TimelineViewEntryType.LunchBreak &&
+          afterNext.type === TimelineViewEntryType.WorkdayEnd
+        ) {
+          index += 3;
+          continue;
+        }
+      } else if (
+        entry.type === TimelineViewEntryType.WorkdayStart &&
+        next.type === TimelineViewEntryType.WorkdayEnd
+      ) {
+        index += 2;
+        continue;
+      }
+    }
+    ++index;
+    cleanedUpExcessWorkDays.push(entry);
+  }
+
+  //debug('mapToViewEntriesE', cleanedUpExcessWorkDays, {
+  //   asString: JSON.stringify(cleanedUpExcessWorkDays),
+  //});
+
+  return cleanedUpExcessWorkDays;
+};
+
 const createViewEntriesForBlock = (blockedBlock: BlockedBlock): TimelineViewEntry[] => {
   const viewEntriesForBock: TimelineViewEntry[] = [];
   blockedBlock.entries.forEach((entry) => {
@@ -258,6 +293,14 @@ const createViewEntriesForBlock = (blockedBlock: BlockedBlock): TimelineViewEntr
         start: entry.end,
         type: TimelineViewEntryType.WorkdayStart,
         data: workdayCfg,
+        isHideTime: false,
+      });
+    } else if (entry.type === BlockedBlockType.LunchBreak) {
+      viewEntriesForBock.push({
+        id: 'LUNCH_BREAK_' + entry.start,
+        start: entry.start,
+        type: TimelineViewEntryType.LunchBreak,
+        data: entry.data,
         isHideTime: false,
       });
     }

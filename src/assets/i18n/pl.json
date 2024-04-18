@@ -793,7 +793,8 @@
       "MENU_TITLE": "Timeline",
       "NOW": "Now",
       "NO_TASKS": "Currently there are no tasks. Please add some tasks via the + Button in the top bar.",
-      "START": "Work Start"
+      "START": "Work Start",
+      "LUNCH_BREAK": "Przerwa na lunch"
     },
     "TIME_TRACKING": {
       "B": {

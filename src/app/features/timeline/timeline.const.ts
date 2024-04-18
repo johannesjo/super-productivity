@@ -10,6 +10,7 @@ export enum TimelineViewEntryType {
   WorkdayStart = 'WorkdayStart',
   WorkdayEnd = 'WorkdayEnd',
   DayCrossing = 'DayCrossing',
+  LunchBreak = 'LunchBreak',
 }
 
 export const TIMELINE_VIEW_TYPE_ORDER: {
@@ -25,6 +26,7 @@ export const TIMELINE_VIEW_TYPE_ORDER: {
   [TimelineViewEntryType.SplitTask]: 5,
   [TimelineViewEntryType.SplitTaskContinued]: 6,
   [TimelineViewEntryType.SplitTaskContinuedLast]: 7,
+  [TimelineViewEntryType.LunchBreak]: 8,
 };
 
 export const TIMELINE_MOVEABLE_TYPES: TimelineViewEntryType[] = [

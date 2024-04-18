@@ -869,7 +869,8 @@
       "TASK_PROJECTION_INFO": "スケジュールされた反復可能なタスクの将来の予測",
       "S": {
         "CAL_PROVIDER_ERROR": "タイムライン校正プロバイダーエラー： {{errTxt}}"
-      }
+      },
+      "LUNCH_BREAK": "昼休憩"
     },
     "TIME_TRACKING": {
       "B": {

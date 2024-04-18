@@ -135,6 +135,13 @@
           </div>
 
           <div
+            *ngSwitchCase="TimelineViewEntryType.LunchBreak"
+            class="lunch-break"
+          >
+            {{T.F.TIMELINE.LUNCH_BREAK|translate}}
+          </div>
+
+          <div
             *ngSwitchCase="TimelineViewEntryType.DayCrossing"
             class="day-crossing separator"
           >

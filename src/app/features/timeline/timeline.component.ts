@@ -106,6 +106,12 @@ export class TimelineComponent implements OnDestroy {
               endTime: timelineCfg.workEnd,
             }
           : undefined,
+        timelineCfg?.isLunchBreakEnabled
+          ? {
+              startTime: timelineCfg.lunchBreakStart,
+              endTime: timelineCfg.lunchBreakEnd,
+            }
+          : undefined,
       ),
     ),
 

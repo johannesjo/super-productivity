@@ -896,7 +896,8 @@
       "TASK_PROJECTION_INFO": "Proyección futura de una tarea repetible programada",
       "S": {
         "CAL_PROVIDER_ERROR": "Error del proveedor de la escala de tiempo: {{errTxt}}"
-      }
+      },
+      "LUNCH_BREAK": "Pausa comida"
     },
     "TIME_TRACKING": {
       "B": {
@@ -1190,7 +1191,11 @@
       "CAL_PROVIDERS": "Proveedores de calendario (experimentales y opcionales)",
       "CAL_PROVIDERS_ADD": "Agregar fuente ical",
       "CAL_PROVIDERS_INFO": "Opcionalmente, puede configurar la línea de tiempo para que también cargue y muestre datos de iCal (por ejemplo, Google Calendar).",
-      "L_CAL_PATH": "URL / ruta de archivo para el calendario ICAL (opcional)"
+      "L_CAL_PATH": "URL / ruta de archivo para el calendario ICAL (opcional)",
+      "L_IS_LUNCH_BREAK_ENABLED": "Activar el descanso de la comida",
+      "L_LUNCH_BREAK_END": "Fin del descanso de la comida",
+      "L_LUNCH_BREAK_START": "Inicio del descanso de la comida",
+      "LUNCH_BREAK_START_END_DESCRIPTION": "p.ej. 13:00"
     },
     "TRACKING_REMINDER": {
       "HELP": "Establecer un recordatorio para que aparezca en caso de que haya olvidado iniciar el seguimiento del tiempo.",

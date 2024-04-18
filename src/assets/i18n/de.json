@@ -1145,7 +1145,8 @@
       "TASK_PROJECTION_INFO": "Zukunftsprojektion einer geplanten wiederkehrenden Aufgabe",
       "S": {
         "CAL_PROVIDER_ERROR": "Fehler beim Timeline-Kal.-Anbieter: {{errTxt}}"
-      }
+      },
+      "LUNCH_BREAK": "Mittagspause"
     },
     "TIME_TRACKING": {
       "B": {

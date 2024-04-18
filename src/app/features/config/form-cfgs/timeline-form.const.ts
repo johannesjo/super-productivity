@@ -44,5 +44,42 @@ export const TIMELINE_FORM_CFG: ConfigFormSection<TimelineConfig> = {
         },
       },
     },
+    {
+      key: 'isLunchBreakEnabled',
+      type: 'checkbox',
+      templateOptions: {
+        label: T.GCF.TIMELINE.L_IS_LUNCH_BREAK_ENABLED,
+      },
+    },
+    {
+      hideExpression: (m, v, field) => !field?.model.isLunchBreakEnabled,
+      key: 'lunchBreakStart',
+      type: 'input',
+      templateOptions: {
+        required: true,
+        label: T.GCF.TIMELINE.L_LUNCH_BREAK_START,
+        description: T.GCF.TIMELINE.LUNCH_BREAK_START_END_DESCRIPTION,
+      },
+      validators: {
+        validTimeString: (c: { value: string | undefined }) => {
+          return isValidSplitTime(c.value);
+        },
+      },
+    },
+    {
+      hideExpression: (m, v, field) => !field?.model.isLunchBreakEnabled,
+      key: 'lunchBreakEnd',
+      type: 'input',
+      templateOptions: {
+        required: true,
+        label: T.GCF.TIMELINE.L_LUNCH_BREAK_END,
+        description: T.GCF.TIMELINE.LUNCH_BREAK_START_END_DESCRIPTION,
+      },
+      validators: {
+        validTimeString: (c: { value: string | undefined }) => {
+          return isValidSplitTime(c.value);
+        },
+      },
+    },
   ],
 };

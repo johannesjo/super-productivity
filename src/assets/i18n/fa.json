@@ -874,7 +874,8 @@
       "TASK_PROJECTION_INFO": "پیش بینی آینده یک کار تکراری برنامه ریزی شده",
       "S": {
         "CAL_PROVIDER_ERROR": "خط زمان خطای ارائه دهنده Cal: {{errTxt}}"
-      }
+      },
+      "LUNCH_BREAK": "استراحت ناهار"
     },
     "TIME_TRACKING": {
       "B": {
