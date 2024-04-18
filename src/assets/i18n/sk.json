@@ -909,7 +909,8 @@
       "TASK_PROJECTION_INFO": "Budúca projekcia naplánovanej opakovateľnej úlohy",
       "S": {
         "CAL_PROVIDER_ERROR": "Timeline Cal Provider Error: {{errTxt}}"
-      }
+      },
+      "LUNCH_BREAK": "Obedová prestávka"
     },
     "TIME_TRACKING": {
       "B": {

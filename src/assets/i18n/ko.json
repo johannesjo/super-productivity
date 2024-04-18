@@ -869,7 +869,8 @@
       "TASK_PROJECTION_INFO": "예약된 반복 작업의 미래 예측",
       "S": {
         "CAL_PROVIDER_ERROR": "타임라인 Cal Provider 오류: {{errTxt}}"
-      }
+      },
+      "LUNCH_BREAK": "점심 휴식"
     },
     "TIME_TRACKING": {
       "B": {

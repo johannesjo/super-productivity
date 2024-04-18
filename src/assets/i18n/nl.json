@@ -869,7 +869,8 @@
       "TASK_PROJECTION_INFO": "Toekomstige projectie van een geplande herhaalbare taak",
       "S": {
         "CAL_PROVIDER_ERROR": "Tijdlijn Cal Provider-fout: {{errTxt}}"
-      }
+      },
+      "LUNCH_BREAK": "Lunchpauze"
     },
     "TIME_TRACKING": {
       "B": {

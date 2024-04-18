@@ -1,3 +1,4 @@
+@use 'sass:math';
 @import '../../../variables';
 @import '../tasks/task/task.component.mixins';
 
@@ -233,6 +234,12 @@ task.split-task::ng-deep .box {
   padding-top: $s;
   padding-bottom: $s;
   //font-weight: bold;
+}
+
+.lunch-break {
+  text-align: center;
+  padding-top: math.div($s, 4);
+  padding-bottom: math.div($s, 4);
 }
 
 .day-crossing {

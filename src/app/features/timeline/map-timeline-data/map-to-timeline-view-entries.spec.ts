@@ -1,6 +1,7 @@
-import { mapToTimelineViewEntries } from './map-to-timeline-view-entries';
+import { mapToTimelineViewEntries, clearEntries } from './map-to-timeline-view-entries';
 import { TaskCopy, TaskReminderOptionId } from '../../tasks/task.model';
 import { TimelineViewEntryType } from '../timeline.const';
+import { TimelineViewEntry } from '../timeline.model';
 import { getDateTimeFromClockString } from '../../../util/get-date-time-from-clock-string';
 import { getWorklogStr } from '../../../util/get-work-log-str';
 import {
@@ -43,6 +44,49 @@ const DUMMY_REPEATABLE_TASK: TaskRepeatCfg = {
   order: 0,
 };
 
+const generateTimelineViewEntry = (
+  day: number,
+  startTime: string,
+  endTime: string,
+  type: TimelineViewEntryType,
+): TimelineViewEntry => {
+  if (type === TimelineViewEntryType.WorkdayStart) {
+    return {
+      id: 'WorkdayStart_' + day,
+      type,
+      start: getDateTimeFromClockString(startTime, day * 24 * 60 * 60 * 1000),
+      data: { endTime, startTime },
+      isHideTime: false,
+    };
+  } else if (type === TimelineViewEntryType.WorkdayEnd) {
+    return {
+      id: 'WorkdayEnd_' + day,
+      type,
+      start: getDateTimeFromClockString(endTime, day * 24 * 60 * 60 * 1000),
+      data: { endTime, startTime },
+      isHideTime: false,
+    };
+  } else if (type === TimelineViewEntryType.LunchBreak) {
+    return {
+      id: 'LunchBreak_' + day,
+      type,
+      start: getDateTimeFromClockString(startTime, day * 24 * 60 * 60 * 1000),
+      data: { endTime, startTime },
+      isHideTime: false,
+    };
+  } else if (type === TimelineViewEntryType.Task) {
+    return {
+      id: 'TASK_ID',
+      type,
+      start: getDateTimeFromClockString(startTime, day * 24 * 60 * 60 * 1000),
+      data: { ...FAKE_TASK },
+      isHideTime: false,
+    };
+  } else {
+    throw 'generateWorkday: Unexpected type specified';
+  }
+};
+
 describe('mapToViewEntries()', () => {
   describe('basic', () => {
     it('should work for simple task list', () => {
@@ -54,6 +98,7 @@ describe('mapToViewEntries()', () => {
         [],
         [],
         null,
+        undefined,
         undefined,
         now,
       );
@@ -91,6 +136,7 @@ describe('mapToViewEntries()', () => {
         [],
         [],
         null,
+        undefined,
         undefined,
         now,
       );
@@ -157,6 +203,7 @@ describe('mapToViewEntries()', () => {
         [],
         null,
         undefined,
+        undefined,
         now,
       );
       expect(r).toEqual([
@@ -219,6 +266,7 @@ describe('mapToViewEntries()', () => {
         [],
         null,
         undefined,
+        undefined,
         now,
       );
       expect(r).toEqual([
@@ -263,6 +311,7 @@ describe('mapToViewEntries()', () => {
         [],
         null,
         undefined,
+        undefined,
         now,
       );
       expect(r.length).toBe(1);
@@ -287,6 +336,7 @@ describe('mapToViewEntries()', () => {
         [],
         null,
         undefined,
+        undefined,
         now,
       );
       expect(r.length).toBe(1);
@@ -310,6 +360,7 @@ describe('mapToViewEntries()', () => {
         [],
         [],
         null,
+        undefined,
         undefined,
         now,
       );
@@ -341,6 +392,7 @@ describe('mapToViewEntries()', () => {
         [],
         [],
         null,
+        undefined,
         undefined,
         now,
       );
@@ -426,6 +478,7 @@ describe('mapToViewEntries()', () => {
         [],
         null,
         undefined,
+        undefined,
         now,
       );
 
@@ -473,6 +526,7 @@ describe('mapToViewEntries()', () => {
         [],
         [],
         null,
+        undefined,
         undefined,
         now,
       );
@@ -553,6 +607,7 @@ describe('mapToViewEntries()', () => {
         [],
         [],
         null,
+        undefined,
         undefined,
         now,
       );
@@ -657,6 +712,7 @@ describe('mapToViewEntries()', () => {
         [],
         [],
         null,
+        undefined,
         undefined,
         now,
       );
@@ -820,6 +876,7 @@ describe('mapToViewEntries()', () => {
         [],
         null,
         undefined,
+        undefined,
         now,
       );
       expect(r.length).toEqual(3);
@@ -876,6 +933,7 @@ describe('mapToViewEntries()', () => {
         [],
         [],
         null,
+        undefined,
         undefined,
         now,
       );
@@ -945,6 +1003,7 @@ describe('mapToViewEntries()', () => {
         [],
         null,
         undefined,
+        undefined,
         now,
       );
       expect(r.length).toEqual(3);
@@ -1000,6 +1059,7 @@ describe('mapToViewEntries()', () => {
         [],
         null,
         { startTime: '9:00', endTime: '17:00' },
+        undefined,
         now,
       );
 
@@ -1129,6 +1189,7 @@ describe('mapToViewEntries()', () => {
         [],
         null,
         d.workStartEndCfg,
+        undefined,
         d.now,
       );
 
@@ -1175,6 +1236,7 @@ describe('mapToViewEntries()', () => {
         [],
         'SCHEDULED_CURRENT_ID',
         d.workStartEndCfg,
+        undefined,
         d.now,
       );
 
@@ -1218,6 +1280,7 @@ describe('mapToViewEntries()', () => {
         [],
         'SCHEDULED_CURRENT_ID',
         d.workStartEndCfg,
+        undefined,
         d.now,
       );
 
@@ -1275,6 +1338,7 @@ describe('mapToViewEntries()', () => {
         [],
         'SCHEDULED_CURRENT_ID',
         d.workStartEndCfg,
+        undefined,
         d.now,
       );
 
@@ -1287,6 +1351,186 @@ describe('mapToViewEntries()', () => {
       expect(r[3].start).toEqual(
         getDateTimeFromClockString('10:00', 24 * 60 * 60 * 1000),
       );
+    });
+  });
+
+  describe('lunchBreak', () => {
+    it('should work with one single task', () => {
+      const now = getDateTimeFromClockString('9:00', 0);
+      const singleTask = { ...FAKE_TASK, id: 'TASK_ID', timeEstimate: hours(5) };
+      const r = mapToTimelineViewEntries(
+        [singleTask],
+        [],
+        [],
+        [],
+        null,
+        { startTime: '9:00', endTime: '17:00' },
+        { startTime: '13:00', endTime: '14:00' },
+        now,
+      );
+
+      //expect(r.length).toEqual(3);
+
+      expect(r[0]).toEqual({
+        type: TimelineViewEntryType.SplitTask,
+        start: getDateTimeFromClockString('09:00', 0),
+        id: singleTask.id,
+        isHideTime: false,
+        data: singleTask,
+      });
+
+      expect(r[1]).toEqual({
+        type: TimelineViewEntryType.LunchBreak,
+        start: getDateTimeFromClockString('13:00', 0),
+        id: 'LUNCH_BREAK_43200000',
+        isHideTime: false,
+        data: { endTime: '14:00', startTime: '13:00' },
+      });
+
+      expect(r[2]).toEqual({
+        type: TimelineViewEntryType.SplitTaskContinuedLast,
+        start: getDateTimeFromClockString('14:00', 0),
+        id: singleTask.id + '__0',
+        isHideTime: false,
+        data: {
+          taskId: singleTask.id,
+          timeToGo: hours(1),
+          index: 0,
+          title: singleTask.title,
+        },
+      });
+    });
+
+    it('should work for very long tasks', () => {
+      const now = getDateTimeFromClockString('9:00', 0);
+
+      const longTask = { ...FAKE_TASK, id: 'LONG_ID', timeEstimate: hours(16) };
+
+      const scheduledTask = {
+        ...FAKE_TASK,
+        id: 'S_ID',
+        timeEstimate: hours(2),
+        reminderId: 'X',
+        plannedAt: getDateTimeFromClockString('14:00', 0),
+      };
+
+      const r = mapToTimelineViewEntries(
+        [longTask],
+        [scheduledTask],
+        [],
+        [],
+        null,
+        { startTime: '9:00', endTime: '17:00' },
+        { startTime: '13:00', endTime: '14:00' },
+        now,
+      );
+
+      expect(r[0]).toEqual({
+        type: TimelineViewEntryType.SplitTask,
+        start: now,
+        id: longTask.id,
+        data: longTask,
+        isHideTime: false,
+      });
+      expect(r[1]).toEqual({
+        type: TimelineViewEntryType.LunchBreak,
+        start: getDateTimeFromClockString('13:00', 0),
+        id: 'LUNCH_BREAK_43200000',
+        isHideTime: false,
+        data: { endTime: '14:00', startTime: '13:00' },
+      });
+      expect(r[2]).toEqual({
+        type: TimelineViewEntryType.ScheduledTask,
+        start: scheduledTask.plannedAt,
+        id: scheduledTask.id,
+        data: scheduledTask,
+        isHideTime: false,
+      });
+      expect(r[3]).toEqual({
+        type: TimelineViewEntryType.SplitTaskContinued,
+        start: now + hours(7),
+        id: longTask.id + '__0',
+        isHideTime: false,
+        data: {
+          taskId: longTask.id,
+          timeToGo: hours(1),
+          index: 0,
+          title: longTask.title,
+        },
+      });
+      expect(r[4]).toEqual({
+        type: TimelineViewEntryType.WorkdayEnd,
+        start: getDateTimeFromClockString('17:00', 0),
+        id: 'DAY_END_57600000',
+        isHideTime: false,
+        data: { endTime: '17:00', startTime: '9:00' },
+      });
+
+      // r[5] is a day crossing
+      expect(r[6]).toEqual({
+        type: TimelineViewEntryType.WorkdayStart,
+        start: getDateTimeFromClockString('9:00', 24 * 60 * 60000),
+        id: 'DAY_START_115200000',
+        isHideTime: false,
+        data: { endTime: '17:00', startTime: '9:00' },
+      });
+      expect(r[7]).toEqual({
+        type: TimelineViewEntryType.SplitTaskContinued,
+        start: getDateTimeFromClockString('9:00', 24 * 60 * 60000),
+        id: longTask.id + '__1',
+        isHideTime: true,
+        data: {
+          index: 1,
+          taskId: longTask.id,
+          timeToGo: hours(4),
+          title: longTask.title,
+        },
+      });
+      expect(r[8]).toEqual({
+        type: TimelineViewEntryType.LunchBreak,
+        start: getDateTimeFromClockString('13:00', 24 * 60 * 60000),
+        id: 'LUNCH_BREAK_129600000',
+        isHideTime: false,
+        data: { endTime: '14:00', startTime: '13:00' },
+      });
+      expect(r[9]).toEqual({
+        type: TimelineViewEntryType.SplitTaskContinued,
+        start: getDateTimeFromClockString('14:00', 24 * 60 * 60000),
+        id: longTask.id + '__2',
+        isHideTime: false,
+        data: {
+          index: 2,
+          taskId: longTask.id,
+          timeToGo: hours(3),
+          title: longTask.title,
+        },
+      });
+      expect(r[10]).toEqual({
+        type: TimelineViewEntryType.WorkdayEnd,
+        start: getDateTimeFromClockString('17:00', 24 * 60 * 60000),
+        id: 'DAY_END_144000000',
+        isHideTime: false,
+        data: { endTime: '17:00', startTime: '9:00' },
+      });
+      expect(r[12]).toEqual({
+        type: TimelineViewEntryType.WorkdayStart,
+        start: getDateTimeFromClockString('9:00', 2 * 24 * 60 * 60000),
+        id: 'DAY_START_201600000',
+        isHideTime: false,
+        data: { endTime: '17:00', startTime: '9:00' },
+      });
+      expect(r[13]).toEqual({
+        type: TimelineViewEntryType.SplitTaskContinuedLast,
+        start: getDateTimeFromClockString('9:00', 2 * 24 * 60 * 60000),
+        id: longTask.id + '__3',
+        isHideTime: true,
+        data: {
+          index: 3,
+          taskId: longTask.id,
+          timeToGo: hours(4),
+          title: longTask.title,
+        },
+      });
     });
   });
 
@@ -1326,6 +1570,7 @@ describe('mapToViewEntries()', () => {
         d.calendarWithItems,
         'SCHEDULED_CURRENT_ID',
         d.workStartEndCfg,
+        undefined,
         d.now,
       );
 
@@ -1375,6 +1620,7 @@ describe('mapToViewEntries()', () => {
         d.calendarWithItems,
         'SCHEDULED_CURRENT_ID',
         d.workStartEndCfg,
+        undefined,
         d.now,
       );
 
@@ -1384,5 +1630,82 @@ describe('mapToViewEntries()', () => {
       expect(r.length).toBe(3);
       expect(r[2].start).toEqual(r[1].start);
     });
+  });
+});
+
+describe('clearEntries', () => {
+  it('should remove workdayEnd if it is the first element', () => {
+    const entries: TimelineViewEntry[] = [
+      generateTimelineViewEntry(0, '17:00', '9:00', TimelineViewEntryType.WorkdayEnd),
+    ];
+    const result = clearEntries(entries, false);
+    expect(result.length).toEqual(0);
+  });
+
+  it('should remove workdayEnd if it is the last element', () => {
+    const entries: TimelineViewEntry[] = [
+      generateTimelineViewEntry(0, '9:00', '17:00', TimelineViewEntryType.WorkdayStart),
+      generateTimelineViewEntry(0, '12:00', '13:00', TimelineViewEntryType.Task),
+      generateTimelineViewEntry(0, '17:00', '9:00', TimelineViewEntryType.WorkdayEnd),
+    ];
+    const result = clearEntries(entries, false);
+    expect(result.length).toEqual(2);
+    expect(result[0].type).toEqual(TimelineViewEntryType.WorkdayStart);
+    expect(result[1].type).toEqual(TimelineViewEntryType.Task);
+  });
+
+  it('should remove empty days (at the end) containing only lunchBreaks and workdays', () => {
+    const entries: TimelineViewEntry[] = [
+      generateTimelineViewEntry(0, '9:00', '17:00', TimelineViewEntryType.WorkdayStart),
+      generateTimelineViewEntry(0, '12:00', '13:00', TimelineViewEntryType.Task),
+      generateTimelineViewEntry(0, '13:00', '14:00', TimelineViewEntryType.LunchBreak),
+      generateTimelineViewEntry(0, '17:00', '9:00', TimelineViewEntryType.WorkdayEnd),
+      generateTimelineViewEntry(1, '9:00', '17:00', TimelineViewEntryType.WorkdayStart),
+      generateTimelineViewEntry(1, '13:00', '14:00', TimelineViewEntryType.LunchBreak),
+      generateTimelineViewEntry(1, '17:00', '9:00', TimelineViewEntryType.WorkdayEnd),
+    ];
+    const result = clearEntries(entries, true);
+    expect(result.length).toEqual(2);
+    expect(result[0].type).toEqual(TimelineViewEntryType.WorkdayStart);
+    expect(result[1].type).toEqual(TimelineViewEntryType.Task);
+  });
+
+  it('should remove empty days (in the middle) containing only lunchBreaks and workdays', () => {
+    const entries: TimelineViewEntry[] = [
+      generateTimelineViewEntry(0, '9:00', '17:00', TimelineViewEntryType.WorkdayStart),
+      generateTimelineViewEntry(0, '12:00', '13:00', TimelineViewEntryType.Task),
+      generateTimelineViewEntry(0, '13:00', '14:00', TimelineViewEntryType.LunchBreak),
+      generateTimelineViewEntry(0, '17:00', '9:00', TimelineViewEntryType.WorkdayEnd),
+      generateTimelineViewEntry(1, '9:00', '17:00', TimelineViewEntryType.WorkdayStart),
+      generateTimelineViewEntry(1, '13:00', '14:00', TimelineViewEntryType.LunchBreak),
+      generateTimelineViewEntry(1, '17:00', '9:00', TimelineViewEntryType.WorkdayEnd),
+      generateTimelineViewEntry(2, '9:00', '17:00', TimelineViewEntryType.WorkdayStart),
+      generateTimelineViewEntry(2, '12:00', '13:00', TimelineViewEntryType.Task),
+      generateTimelineViewEntry(2, '13:00', '14:00', TimelineViewEntryType.LunchBreak),
+      generateTimelineViewEntry(2, '17:00', '9:00', TimelineViewEntryType.WorkdayEnd),
+    ];
+    const result = clearEntries(entries, true);
+    expect(result.length).toEqual(6);
+    expect(result[0].type).toEqual(TimelineViewEntryType.WorkdayStart);
+    expect(result[1].type).toEqual(TimelineViewEntryType.Task);
+    expect(result[2].type).toEqual(TimelineViewEntryType.LunchBreak);
+    expect(result[3].type).toEqual(TimelineViewEntryType.WorkdayEnd);
+    expect(result[4].type).toEqual(TimelineViewEntryType.WorkdayStart);
+    expect(result[5].type).toEqual(TimelineViewEntryType.Task);
+  });
+
+  it('should remove initial LunchBreak and WorkdayEnd', () => {
+    const entries: TimelineViewEntry[] = [
+      generateTimelineViewEntry(0, '13:00', '14:00', TimelineViewEntryType.LunchBreak),
+      generateTimelineViewEntry(0, '17:00', '9:00', TimelineViewEntryType.WorkdayEnd),
+      generateTimelineViewEntry(1, '9:00', '17:00', TimelineViewEntryType.WorkdayStart),
+      generateTimelineViewEntry(1, '12:00', '13:00', TimelineViewEntryType.Task),
+      generateTimelineViewEntry(1, '13:00', '14:00', TimelineViewEntryType.LunchBreak),
+      generateTimelineViewEntry(1, '17:00', '9:00', TimelineViewEntryType.WorkdayEnd),
+    ];
+    const result = clearEntries(entries, true);
+    expect(result.length).toEqual(2);
+    expect(result[0].type).toEqual(TimelineViewEntryType.WorkdayStart);
+    expect(result[1].type).toEqual(TimelineViewEntryType.Task);
   });
 });

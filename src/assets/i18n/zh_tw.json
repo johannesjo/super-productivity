@@ -877,7 +877,8 @@
       "NOW": "Now",
       "NO_TASKS": "Currently there are no tasks. Please add some tasks via the + Button in the top bar.",
       "START": "Work Start",
-      "TASK_PROJECTION_INFO": "Future projection of a scheduled repeatable task"
+      "TASK_PROJECTION_INFO": "Future projection of a scheduled repeatable task",
+      "LUNCH_BREAK": "午休"
     },
     "TIME_TRACKING": {
       "B": {

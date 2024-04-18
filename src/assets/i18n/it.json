@@ -869,7 +869,8 @@
       "TASK_PROJECTION_INFO": "Proiezione futura di un'attività ripetibile pianificata",
       "S": {
         "CAL_PROVIDER_ERROR": "Errore del provider di cal. cronologica: {{errTxt}}"
-      }
+      },
+      "LUNCH_BREAK": "Pausa pranzo"
     },
     "TIME_TRACKING": {
       "B": {

@@ -1003,7 +1003,8 @@
       "TASK_PROJECTION_INFO": "Projeção futura de uma tarefa repetível programada",
       "S": {
         "CAL_PROVIDER_ERROR": "Erro do provedor de calibração da linha do tempo: {{errTxt}}"
-      }
+      },
+      "LUNCH_BREAK": "Intervalo para o almoço"
     },
     "TIME_TRACKING": {
       "B": {

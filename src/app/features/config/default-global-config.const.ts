@@ -147,6 +147,9 @@ export const DEFAULT_GLOBAL_CONFIG: GlobalConfigState = {
     isWorkStartEndEnabled: true,
     workStart: DEFAULT_DAY_START,
     workEnd: '17:00',
+    isLunchBreakEnabled: false,
+    lunchBreakStart: '13:00',
+    lunchBreakEnd: '14:00',
   },
 
   sync: {

@@ -4,6 +4,7 @@ import {
   BlockedBlockType,
   TimelineCalendarMapEntry,
   TimelineWorkStartEndCfg,
+  TimelineLunchBreakCfg,
 } from '../timeline.model';
 import { getTimeLeftForTask } from '../../../util/get-time-left-for-task';
 import { getDateTimeFromClockString } from '../../../util/get-date-time-from-clock-string';
@@ -17,6 +18,7 @@ export const createSortedBlockerBlocks = (
   scheduledTaskRepeatCfgs: TaskRepeatCfg[],
   icalEventMap: TimelineCalendarMapEntry[],
   workStartEndCfg?: TimelineWorkStartEndCfg,
+  lunchBreakCfg?: TimelineLunchBreakCfg,
   now?: number,
 ): BlockedBlock[] => {
   if (typeof now !== 'number') {
@@ -30,6 +32,7 @@ export const createSortedBlockerBlocks = (
       scheduledTaskRepeatCfgs,
     ),
     ...createBlockerBlocksForWorkStartEnd(now as number, workStartEndCfg),
+    ...createBlockerBlocksForLunchBreak(now as number, lunchBreakCfg),
   ];
 
   blockedBlocks = mergeBlocksRecursively(blockedBlocks);
@@ -115,6 +118,45 @@ const createBlockerBlocksForWorkStartEnd = (
         {
           type: BlockedBlockType.WorkdayStartEnd,
           data: workStartEndCfg,
+          start,
+          end,
+        },
+      ],
+    });
+    i++;
+  }
+
+  return blockedBlocks;
+};
+
+const createBlockerBlocksForLunchBreak = (
+  now: number,
+  lunchBreakCfg?: TimelineLunchBreakCfg,
+): BlockedBlock[] => {
+  const blockedBlocks: BlockedBlock[] = [];
+
+  if (!lunchBreakCfg) {
+    return blockedBlocks;
+  }
+  let i: number = 0;
+  while (i <= PROJECTION_DAYS) {
+    const start = getDateTimeFromClockString(
+      lunchBreakCfg.startTime,
+      // prettier-ignore
+      now + (i * 24 * 60 * 60 * 1000),
+    );
+    const end = getDateTimeFromClockString(
+      lunchBreakCfg.endTime,
+      // prettier-ignore
+      now + (i * 24 * 60 * 60 * 1000),
+    );
+    blockedBlocks.push({
+      start,
+      end,
+      entries: [
+        {
+          type: BlockedBlockType.LunchBreak,
+          data: lunchBreakCfg,
           start,
           end,
         },

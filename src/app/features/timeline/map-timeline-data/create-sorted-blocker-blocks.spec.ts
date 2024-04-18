@@ -1,7 +1,7 @@
 import { createSortedBlockerBlocks } from './create-sorted-blocker-blocks';
 import { TaskReminderOptionId, TaskWithReminder } from '../../tasks/task.model';
 import { getDateTimeFromClockString } from '../../../util/get-date-time-from-clock-string';
-import { TimelineCalendarMapEntry } from '../timeline.model';
+import { TimelineCalendarMapEntry, BlockedBlockType } from '../timeline.model';
 import {
   DEFAULT_TASK_REPEAT_CFG,
   TaskRepeatCfg,
@@ -17,6 +17,78 @@ const BASE_REMINDER_TASK = (startTime: string, note?: string): any => ({
   plannedAt: getDateTimeFromClockString(startTime, 0),
   title: startTime + ' ' + (note ? note : ' – reminderTask'),
 });
+
+const generateBlockedBlocks = (
+  initialStart: number,
+  initialEnd: number,
+  numDays: number,
+  type: BlockedBlockType,
+  innerBlocks?: any[],
+): any[] => {
+  const blocks: any[] = [];
+
+  // extract the startTime as an string in this format HH:MM
+  let startTime = new Date(initialStart).toLocaleTimeString('en-US', {
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false,
+  });
+  startTime = startTime.padStart(5, '0');
+  let endTime = new Date(initialEnd).toLocaleTimeString('en-US', {
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false,
+  });
+  endTime = endTime.padStart(5, '0');
+
+  // if type is WorkdayStartEnd, swap start and end time
+  let stTime = startTime;
+  let ndTime = endTime;
+  if (type === BlockedBlockType.WorkdayStartEnd) {
+    stTime = endTime;
+    ndTime = startTime;
+  }
+
+  let currentStart = initialStart;
+  let currentEnd = initialEnd;
+
+  for (let i = 0; i < numDays; i++) {
+    const entries = [
+      {
+        data: {
+          startTime: stTime,
+          endTime: ndTime,
+        },
+        end: currentEnd,
+        start: currentStart,
+        type: type,
+      },
+    ];
+
+    if (innerBlocks && innerBlocks.length > 0) {
+      entries.push(innerBlocks[i]);
+    }
+
+    blocks.push({
+      start: currentStart,
+      end: currentEnd,
+      entries: entries,
+    });
+
+    // Increment currentStart and currentEnd for the next day
+    const oneDayInMilliseconds = 24 * 60 * 60 * 1000;
+    currentStart = getDateTimeFromClockString(
+      startTime,
+      new Date(currentStart + oneDayInMilliseconds),
+    );
+    currentEnd = getDateTimeFromClockString(
+      endTime,
+      new Date(currentEnd + oneDayInMilliseconds),
+    );
+  }
+
+  return blocks;
+};
 
 describe('createBlockerBlocks()', () => {
   it('should merge into single block if all overlapping', () => {
@@ -46,7 +118,7 @@ describe('createBlockerBlocks()', () => {
         plannedAt: getDateTimeFromClockString('12:30', 0),
       },
     ] as any;
-    const r = createSortedBlockerBlocks(fakeTasks, [], [], undefined, 0);
+    const r = createSortedBlockerBlocks(fakeTasks, [], [], undefined, undefined, 0);
     expect(r.length).toEqual(1);
     expect(r[0].start).toEqual(getDateTimeFromClockString('9:20', 0));
     expect(r[0].end).toEqual(getDateTimeFromClockString('14:30', 0));
@@ -95,7 +167,7 @@ describe('createBlockerBlocks()', () => {
         plannedAt: getDateTimeFromClockString('17:30', 0),
       },
     ] as any;
-    const r = createSortedBlockerBlocks(fakeTasks, [], [], undefined, 0);
+    const r = createSortedBlockerBlocks(fakeTasks, [], [], undefined, undefined, 0);
     expect(r.length).toEqual(2);
     expect(r[0].start).toEqual(getDateTimeFromClockString('9:20', 0));
     expect(r[0].end).toEqual(getDateTimeFromClockString('14:00', 0));
@@ -131,7 +203,7 @@ describe('createBlockerBlocks()', () => {
         plannedAt: getDateTimeFromClockString('17:00', 0),
       },
     ] as any;
-    const r = createSortedBlockerBlocks(fakeTasks, [], [], undefined, 0);
+    const r = createSortedBlockerBlocks(fakeTasks, [], [], undefined, undefined, 0);
     expect(r.length).toEqual(1);
     expect(r[0].start).toEqual(getDateTimeFromClockString('15:00', 0));
     expect(r[0].end).toEqual(getDateTimeFromClockString('19:00', 0));
@@ -161,7 +233,7 @@ describe('createBlockerBlocks()', () => {
       },
     ] as any;
 
-    const r = createSortedBlockerBlocks(fakeTasks, [], [], undefined, 0);
+    const r = createSortedBlockerBlocks(fakeTasks, [], [], undefined, undefined, 0);
 
     expect(r.length).toEqual(2);
     expect(r).toEqual([
@@ -235,7 +307,7 @@ describe('createBlockerBlocks()', () => {
       },
     ] as any;
 
-    const r = createSortedBlockerBlocks(fakeTasks, [], [], undefined, 0);
+    const r = createSortedBlockerBlocks(fakeTasks, [], [], undefined, undefined, 0);
 
     expect(r.length).toEqual(3);
 
@@ -333,7 +405,7 @@ describe('createBlockerBlocks()', () => {
         issueWasUpdated: null,
       },
     ] as any;
-    const r = createSortedBlockerBlocks(fakeTasks, [], [], undefined, 0);
+    const r = createSortedBlockerBlocks(fakeTasks, [], [], undefined, undefined, 0);
 
     expect(r.length).toEqual(1);
     expect(r[0].start).toEqual(
@@ -432,10 +504,18 @@ describe('createBlockerBlocks()', () => {
         [],
         [],
         {
-          startTime: '9:00',
+          startTime: '09:00',
           endTime: '17:00',
         },
+        undefined,
         getDateTimeFromClockString('20:45', 1620172800000),
+      );
+
+      const wStartEndBlocks = generateBlockedBlocks(
+        getDateTimeFromClockString('17:00', new Date(1620259200000)),
+        getDateTimeFromClockString('09:00', new Date(1620345600000)),
+        29,
+        BlockedBlockType.WorkdayStartEnd,
       );
 
       expect(r.length).toEqual(30);
@@ -444,7 +524,7 @@ describe('createBlockerBlocks()', () => {
           end: getDateTimeFromClockString('09:00', new Date(1620259200000)),
           entries: [
             {
-              data: { endTime: '17:00', startTime: '9:00' },
+              data: { endTime: '17:00', startTime: '09:00' },
               end: getDateTimeFromClockString('09:00', new Date(1620259200000)),
               start: getDateTimeFromClockString('17:00', new Date(1620172800000)),
               type: 'WorkdayStartEnd',
@@ -545,354 +625,116 @@ describe('createBlockerBlocks()', () => {
           ],
           start: getDateTimeFromClockString('17:00', new Date(1620172800000)),
         },
+        ...wStartEndBlocks,
+      ] as any);
+    });
+  });
+
+  describe('lunchBreak', () => {
+    it('should work for simple scenario', () => {
+      const fakeTasks = [
         {
-          end: getDateTimeFromClockString('09:00', new Date(1620345600000)),
-          entries: [
-            {
-              data: { endTime: '17:00', startTime: '9:00' },
-              end: getDateTimeFromClockString('09:00', new Date(1620345600000)),
-              start: getDateTimeFromClockString('17:00', new Date(1620259200000)),
-              type: 'WorkdayStartEnd',
-            },
-          ],
-          start: getDateTimeFromClockString('17:00', new Date(1620259200000)),
+          id: 'RlHPfiXYk',
+          projectId: null,
+          subTaskIds: [],
+          timeSpentOnDay: { '2021-05-05': 1999 },
+          timeSpent: 1999,
+          timeEstimate: 0,
+          isDone: false,
+          doneOn: null,
+          title: 'XXX',
+          notes: '',
+          tagIds: ['TODAY'],
+          parentId: null,
+          reminderId: 'wctU7fdUV',
+          created: 1620239185383,
+          repeatCfgId: null,
+          plannedAt: getDateTimeFromClockString('11:00', 1620172800000),
+          _showSubTasksMode: 2,
+          attachments: [],
+          issueId: null,
+          issuePoints: null,
+          issueType: null,
+          issueAttachmentNr: null,
+          issueLastUpdated: null,
+          issueWasUpdated: null,
+        },
+      ] as any;
+
+      const r = createSortedBlockerBlocks(
+        fakeTasks,
+        [],
+        [],
+        {
+          startTime: '09:00',
+          endTime: '17:00',
         },
         {
-          end: getDateTimeFromClockString('09:00', new Date(1620432000000)),
-          entries: [
-            {
-              data: { endTime: '17:00', startTime: '9:00' },
-              end: getDateTimeFromClockString('09:00', new Date(1620432000000)),
-              start: getDateTimeFromClockString('17:00', new Date(1620345600000)),
-              type: 'WorkdayStartEnd',
-            },
-          ],
-          start: getDateTimeFromClockString('17:00', new Date(1620345600000)),
+          startTime: '13:00',
+          endTime: '14:00',
         },
+        getDateTimeFromClockString('09:45', 1620172800000),
+      );
+
+      const wLunchBlocks = generateBlockedBlocks(
+        getDateTimeFromClockString('13:00', new Date(1620172800000)),
+        getDateTimeFromClockString('14:00', new Date(1620172800000)),
+        30,
+        BlockedBlockType.LunchBreak,
+      );
+
+      const wStartEndBlocks = generateBlockedBlocks(
+        getDateTimeFromClockString('17:00', new Date(1620172800000)),
+        getDateTimeFromClockString('09:00', new Date(1620259200000)),
+        30,
+        BlockedBlockType.WorkdayStartEnd,
+      );
+
+      const blocks = [...wStartEndBlocks, ...wLunchBlocks];
+
+      // sort blocks by date
+      blocks.sort((a, b) => a.start - b.start);
+
+      expect(r.length).toEqual(61);
+      expect(r).toEqual([
         {
-          end: getDateTimeFromClockString('09:00', new Date(1620518400000)),
+          end: getDateTimeFromClockString('11:00', new Date(1620172800000)),
           entries: [
             {
-              data: { endTime: '17:00', startTime: '9:00' },
-              end: getDateTimeFromClockString('09:00', new Date(1620518400000)),
-              start: getDateTimeFromClockString('17:00', new Date(1620432000000)),
-              type: 'WorkdayStartEnd',
+              data: {
+                _showSubTasksMode: 2,
+                attachments: [],
+                created: 1620239185383,
+                doneOn: null,
+                id: 'RlHPfiXYk',
+                isDone: false,
+                issueAttachmentNr: null,
+                issueId: null,
+                issueLastUpdated: null,
+                issuePoints: null,
+                issueType: null,
+                issueWasUpdated: null,
+                notes: '',
+                parentId: null,
+                plannedAt: getDateTimeFromClockString('11:00', new Date(1620172800000)),
+                projectId: null,
+                reminderId: 'wctU7fdUV',
+                repeatCfgId: null,
+                subTaskIds: [],
+                tagIds: ['TODAY'],
+                timeEstimate: 0,
+                timeSpent: 1999,
+                timeSpentOnDay: { '2021-05-05': 1999 },
+                title: 'XXX',
+              },
+              end: getDateTimeFromClockString('11:00', new Date(1620172800000)),
+              start: getDateTimeFromClockString('11:00', new Date(1620172800000)),
+              type: 'ScheduledTask',
             },
           ],
-          start: getDateTimeFromClockString('17:00', new Date(1620432000000)),
+          start: getDateTimeFromClockString('11:00', new Date(1620172800000)),
         },
-        {
-          end: getDateTimeFromClockString('09:00', new Date(1620604800000)),
-          entries: [
-            {
-              data: { endTime: '17:00', startTime: '9:00' },
-              end: getDateTimeFromClockString('09:00', new Date(1620604800000)),
-              start: getDateTimeFromClockString('17:00', new Date(1620518400000)),
-              type: 'WorkdayStartEnd',
-            },
-          ],
-          start: getDateTimeFromClockString('17:00', new Date(1620518400000)),
-        },
-        {
-          end: getDateTimeFromClockString('09:00', new Date(1620691200000)),
-          entries: [
-            {
-              data: { endTime: '17:00', startTime: '9:00' },
-              end: getDateTimeFromClockString('09:00', new Date(1620691200000)),
-              start: getDateTimeFromClockString('17:00', new Date(1620604800000)),
-              type: 'WorkdayStartEnd',
-            },
-          ],
-          start: getDateTimeFromClockString('17:00', new Date(1620604800000)),
-        },
-        {
-          end: getDateTimeFromClockString('09:00', new Date(1620777600000)),
-          entries: [
-            {
-              data: { endTime: '17:00', startTime: '9:00' },
-              end: getDateTimeFromClockString('09:00', new Date(1620777600000)),
-              start: getDateTimeFromClockString('17:00', new Date(1620691200000)),
-              type: 'WorkdayStartEnd',
-            },
-          ],
-          start: getDateTimeFromClockString('17:00', new Date(1620691200000)),
-        },
-        {
-          end: getDateTimeFromClockString('09:00', new Date(1620864000000)),
-          entries: [
-            {
-              data: { endTime: '17:00', startTime: '9:00' },
-              end: getDateTimeFromClockString('09:00', new Date(1620864000000)),
-              start: getDateTimeFromClockString('17:00', new Date(1620777600000)),
-              type: 'WorkdayStartEnd',
-            },
-          ],
-          start: getDateTimeFromClockString('17:00', new Date(1620777600000)),
-        },
-        {
-          end: getDateTimeFromClockString('09:00', new Date(1620950400000)),
-          entries: [
-            {
-              data: { endTime: '17:00', startTime: '9:00' },
-              end: getDateTimeFromClockString('09:00', new Date(1620950400000)),
-              start: getDateTimeFromClockString('17:00', new Date(1620864000000)),
-              type: 'WorkdayStartEnd',
-            },
-          ],
-          start: getDateTimeFromClockString('17:00', new Date(1620864000000)),
-        },
-        {
-          end: getDateTimeFromClockString('09:00', new Date(1621036800000)),
-          entries: [
-            {
-              data: { endTime: '17:00', startTime: '9:00' },
-              end: getDateTimeFromClockString('09:00', new Date(1621036800000)),
-              start: getDateTimeFromClockString('17:00', new Date(1620950400000)),
-              type: 'WorkdayStartEnd',
-            },
-          ],
-          start: getDateTimeFromClockString('17:00', new Date(1620950400000)),
-        },
-        {
-          end: getDateTimeFromClockString('09:00', new Date(1621123200000)),
-          entries: [
-            {
-              data: { endTime: '17:00', startTime: '9:00' },
-              end: getDateTimeFromClockString('09:00', new Date(1621123200000)),
-              start: getDateTimeFromClockString('17:00', new Date(1621036800000)),
-              type: 'WorkdayStartEnd',
-            },
-          ],
-          start: getDateTimeFromClockString('17:00', new Date(1621036800000)),
-        },
-        {
-          end: getDateTimeFromClockString('09:00', new Date(1621209600000)),
-          entries: [
-            {
-              data: { endTime: '17:00', startTime: '9:00' },
-              end: getDateTimeFromClockString('09:00', new Date(1621209600000)),
-              start: getDateTimeFromClockString('17:00', new Date(1621123200000)),
-              type: 'WorkdayStartEnd',
-            },
-          ],
-          start: getDateTimeFromClockString('17:00', new Date(1621123200000)),
-        },
-        {
-          end: getDateTimeFromClockString('09:00', new Date(1621296000000)),
-          entries: [
-            {
-              data: { endTime: '17:00', startTime: '9:00' },
-              end: getDateTimeFromClockString('09:00', new Date(1621296000000)),
-              start: getDateTimeFromClockString('17:00', new Date(1621209600000)),
-              type: 'WorkdayStartEnd',
-            },
-          ],
-          start: getDateTimeFromClockString('17:00', new Date(1621209600000)),
-        },
-        {
-          end: getDateTimeFromClockString('09:00', new Date(1621382400000)),
-          entries: [
-            {
-              data: { endTime: '17:00', startTime: '9:00' },
-              end: getDateTimeFromClockString('09:00', new Date(1621382400000)),
-              start: getDateTimeFromClockString('17:00', new Date(1621296000000)),
-              type: 'WorkdayStartEnd',
-            },
-          ],
-          start: getDateTimeFromClockString('17:00', new Date(1621296000000)),
-        },
-        {
-          end: getDateTimeFromClockString('09:00', new Date(1621468800000)),
-          entries: [
-            {
-              data: { endTime: '17:00', startTime: '9:00' },
-              end: getDateTimeFromClockString('09:00', new Date(1621468800000)),
-              start: getDateTimeFromClockString('17:00', new Date(1621382400000)),
-              type: 'WorkdayStartEnd',
-            },
-          ],
-          start: getDateTimeFromClockString('17:00', new Date(1621382400000)),
-        },
-        {
-          end: getDateTimeFromClockString('09:00', new Date(1621555200000)),
-          entries: [
-            {
-              data: { endTime: '17:00', startTime: '9:00' },
-              end: getDateTimeFromClockString('09:00', new Date(1621555200000)),
-              start: getDateTimeFromClockString('17:00', new Date(1621468800000)),
-              type: 'WorkdayStartEnd',
-            },
-          ],
-          start: getDateTimeFromClockString('17:00', new Date(1621468800000)),
-        },
-        {
-          end: getDateTimeFromClockString('09:00', new Date(1621641600000)),
-          entries: [
-            {
-              data: { endTime: '17:00', startTime: '9:00' },
-              end: getDateTimeFromClockString('09:00', new Date(1621641600000)),
-              start: getDateTimeFromClockString('17:00', new Date(1621555200000)),
-              type: 'WorkdayStartEnd',
-            },
-          ],
-          start: getDateTimeFromClockString('17:00', new Date(1621555200000)),
-        },
-        {
-          end: getDateTimeFromClockString('09:00', new Date(1621728000000)),
-          entries: [
-            {
-              data: { endTime: '17:00', startTime: '9:00' },
-              end: getDateTimeFromClockString('09:00', new Date(1621728000000)),
-              start: getDateTimeFromClockString('17:00', new Date(1621641600000)),
-              type: 'WorkdayStartEnd',
-            },
-          ],
-          start: getDateTimeFromClockString('17:00', new Date(1621641600000)),
-        },
-        {
-          end: getDateTimeFromClockString('09:00', new Date(1621814400000)),
-          entries: [
-            {
-              data: { endTime: '17:00', startTime: '9:00' },
-              end: getDateTimeFromClockString('09:00', new Date(1621814400000)),
-              start: getDateTimeFromClockString('17:00', new Date(1621728000000)),
-              type: 'WorkdayStartEnd',
-            },
-          ],
-          start: getDateTimeFromClockString('17:00', new Date(1621728000000)),
-        },
-        {
-          end: getDateTimeFromClockString('09:00', new Date(1621900800000)),
-          entries: [
-            {
-              data: { endTime: '17:00', startTime: '9:00' },
-              end: getDateTimeFromClockString('09:00', new Date(1621900800000)),
-              start: getDateTimeFromClockString('17:00', new Date(1621814400000)),
-              type: 'WorkdayStartEnd',
-            },
-          ],
-          start: getDateTimeFromClockString('17:00', new Date(1621814400000)),
-        },
-        {
-          end: getDateTimeFromClockString('09:00', new Date(1621987200000)),
-          entries: [
-            {
-              data: { endTime: '17:00', startTime: '9:00' },
-              end: getDateTimeFromClockString('09:00', new Date(1621987200000)),
-              start: getDateTimeFromClockString('17:00', new Date(1621900800000)),
-              type: 'WorkdayStartEnd',
-            },
-          ],
-          start: getDateTimeFromClockString('17:00', new Date(1621900800000)),
-        },
-        {
-          end: getDateTimeFromClockString('09:00', new Date(1622073600000)),
-          entries: [
-            {
-              data: { endTime: '17:00', startTime: '9:00' },
-              end: getDateTimeFromClockString('09:00', new Date(1622073600000)),
-              start: getDateTimeFromClockString('17:00', new Date(1621987200000)),
-              type: 'WorkdayStartEnd',
-            },
-          ],
-          start: getDateTimeFromClockString('17:00', new Date(1621987200000)),
-        },
-        {
-          end: getDateTimeFromClockString('09:00', new Date(1622160000000)),
-          entries: [
-            {
-              data: { endTime: '17:00', startTime: '9:00' },
-              end: getDateTimeFromClockString('09:00', new Date(1622160000000)),
-              start: getDateTimeFromClockString('17:00', new Date(1622073600000)),
-              type: 'WorkdayStartEnd',
-            },
-          ],
-          start: getDateTimeFromClockString('17:00', new Date(1622073600000)),
-        },
-        {
-          end: getDateTimeFromClockString('09:00', new Date(1622246400000)),
-          entries: [
-            {
-              data: { endTime: '17:00', startTime: '9:00' },
-              end: getDateTimeFromClockString('09:00', new Date(1622246400000)),
-              start: getDateTimeFromClockString('17:00', new Date(1622160000000)),
-              type: 'WorkdayStartEnd',
-            },
-          ],
-          start: getDateTimeFromClockString('17:00', new Date(1622160000000)),
-        },
-        {
-          end: getDateTimeFromClockString('09:00', new Date(1622332800000)),
-          entries: [
-            {
-              data: { endTime: '17:00', startTime: '9:00' },
-              end: getDateTimeFromClockString('09:00', new Date(1622332800000)),
-              start: getDateTimeFromClockString('17:00', new Date(1622246400000)),
-              type: 'WorkdayStartEnd',
-            },
-          ],
-          start: getDateTimeFromClockString('17:00', new Date(1622246400000)),
-        },
-        {
-          end: getDateTimeFromClockString('09:00', new Date(1622419200000)),
-          entries: [
-            {
-              data: { endTime: '17:00', startTime: '9:00' },
-              end: getDateTimeFromClockString('09:00', new Date(1622419200000)),
-              start: getDateTimeFromClockString('17:00', new Date(1622332800000)),
-              type: 'WorkdayStartEnd',
-            },
-          ],
-          start: getDateTimeFromClockString('17:00', new Date(1622332800000)),
-        },
-        {
-          end: getDateTimeFromClockString('09:00', new Date(1622505600000)),
-          entries: [
-            {
-              data: { endTime: '17:00', startTime: '9:00' },
-              end: getDateTimeFromClockString('09:00', new Date(1622505600000)),
-              start: getDateTimeFromClockString('17:00', new Date(1622419200000)),
-              type: 'WorkdayStartEnd',
-            },
-          ],
-          start: getDateTimeFromClockString('17:00', new Date(1622419200000)),
-        },
-        {
-          end: getDateTimeFromClockString('09:00', new Date(1622592000000)),
-          entries: [
-            {
-              data: { endTime: '17:00', startTime: '9:00' },
-              end: getDateTimeFromClockString('09:00', new Date(1622592000000)),
-              start: getDateTimeFromClockString('17:00', new Date(1622505600000)),
-              type: 'WorkdayStartEnd',
-            },
-          ],
-          start: getDateTimeFromClockString('17:00', new Date(1622505600000)),
-        },
-        {
-          end: getDateTimeFromClockString('09:00', new Date(1622678400000)),
-          entries: [
-            {
-              data: { endTime: '17:00', startTime: '9:00' },
-              end: getDateTimeFromClockString('09:00', new Date(1622678400000)),
-              start: getDateTimeFromClockString('17:00', new Date(1622592000000)),
-              type: 'WorkdayStartEnd',
-            },
-          ],
-          start: getDateTimeFromClockString('17:00', new Date(1622592000000)),
-        },
-        {
-          end: getDateTimeFromClockString('09:00', new Date(1622764800000)),
-          entries: [
-            {
-              data: { endTime: '17:00', startTime: '9:00' },
-              end: getDateTimeFromClockString('09:00', new Date(1622764800000)),
-              start: getDateTimeFromClockString('17:00', new Date(1622678400000)),
-              type: 'WorkdayStartEnd',
-            },
-          ],
-          start: getDateTimeFromClockString('17:00', new Date(1622678400000)),
-        },
+        ...blocks,
       ] as any);
     });
   });
@@ -935,7 +777,14 @@ describe('createBlockerBlocks()', () => {
           remindAt: TaskReminderOptionId.AtStart,
         },
       ];
-      const r = createSortedBlockerBlocks([], fakeRepeatTaskCfgs, [], undefined, 0);
+      const r = createSortedBlockerBlocks(
+        [],
+        fakeRepeatTaskCfgs,
+        [],
+        undefined,
+        undefined,
+        0,
+      );
       expect(r.length).toEqual(5);
       expect(r[0].start).toEqual(
         getDateTimeFromClockString('10:00', 24 * 60 * 60 * 1000),
@@ -983,7 +832,14 @@ describe('createBlockerBlocks()', () => {
           sunday: true,
         },
       ];
-      const r = createSortedBlockerBlocks([], fakeRepeatTaskCfgs, [], undefined, 0);
+      const r = createSortedBlockerBlocks(
+        [],
+        fakeRepeatTaskCfgs,
+        [],
+        undefined,
+        undefined,
+        0,
+      );
       expect(r.length).toEqual(58);
       expect(r[2].start).toEqual(205200000);
       expect(r[2].end).toEqual(208800000);
@@ -1001,7 +857,14 @@ describe('createBlockerBlocks()', () => {
           repeatCycle: 'DAILY',
         },
       ];
-      const r = createSortedBlockerBlocks([], fakeRepeatTaskCfgs, [], undefined, 0);
+      const r = createSortedBlockerBlocks(
+        [],
+        fakeRepeatTaskCfgs,
+        [],
+        undefined,
+        undefined,
+        0,
+      );
       expect(r.length).toEqual(29);
       expect(r[0].start).toEqual(
         getDateTimeFromClockString('10:00', 24 * 60 * 60 * 1000),
@@ -1043,7 +906,14 @@ describe('createBlockerBlocks()', () => {
           plannedAt: getDateTimeFromClockString('9:20', 0),
         },
       ] as any;
-      const r = createSortedBlockerBlocks(fakeTasks, [], icalEventMap, undefined, 0);
+      const r = createSortedBlockerBlocks(
+        fakeTasks,
+        [],
+        icalEventMap,
+        undefined,
+        undefined,
+        0,
+      );
       expect(r).toEqual([
         {
           end: 37200000,

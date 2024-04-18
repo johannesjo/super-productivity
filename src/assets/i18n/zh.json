@@ -973,7 +973,8 @@
       "TASK_PROJECTION_INFO": "计划的可重复任务的未来预测",
       "S": {
         "CAL_PROVIDER_ERROR": "时间线校准提供程序错误： {{errTxt}}"
-      }
+      },
+      "LUNCH_BREAK": "午休"
     },
     "TIME_TRACKING": {
       "B": {

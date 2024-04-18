@@ -1140,7 +1140,8 @@
       "NOW": "Now",
       "NO_TASKS": "Currently there are no tasks. Please add some tasks via the + Button in the top bar.",
       "START": "Work Start",
-      "TASK_PROJECTION_INFO": "Future projection of a scheduled repeatable task"
+      "TASK_PROJECTION_INFO": "Future projection of a scheduled repeatable task",
+      "LUNCH_BREAK": "Lunch Break"
     },
     "TIME_TRACKING": {
       "B": {
@@ -1454,7 +1455,11 @@
       "L_WORK_END": "Work Day End",
       "L_WORK_START": "Work Day Start",
       "TITLE": "Timeline",
-      "WORK_START_END_DESCRIPTION": "e.g. 17:00"
+      "WORK_START_END_DESCRIPTION": "e.g. 17:00",
+      "L_IS_LUNCH_BREAK_ENABLED": "Enable lunch break",
+      "L_LUNCH_BREAK_END": "Lunch break end",
+      "L_LUNCH_BREAK_START": "Lunch break start",
+      "LUNCH_BREAK_START_END_DESCRIPTION": "e.g. 13:00"
     },
     "TRACKING_REMINDER": {
       "HELP": "Configure a banner to show up in case you forgot to start time tracking.",

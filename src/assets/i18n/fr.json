@@ -941,7 +941,8 @@
       "TASK_PROJECTION_INFO": "Projection future d'une tâche répétable planifiée",
       "S": {
         "CAL_PROVIDER_ERROR": "Erreur du fournisseur d'appel dans la chronologie : {{errTxt}}"
-      }
+      },
+      "LUNCH_BREAK": "Pause déjeuner"
     },
     "TIME_TRACKING": {
       "B": {

@@ -129,6 +129,9 @@ export type TimelineConfig = Readonly<{
   isWorkStartEndEnabled: boolean;
   workStart: string;
   workEnd: string;
+  isLunchBreakEnabled: boolean;
+  lunchBreakStart: string;
+  lunchBreakEnd: string;
 }>;
 
 export type ReminderConfig = Readonly<{
