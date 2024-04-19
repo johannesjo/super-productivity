@@ -34,6 +34,19 @@
     />
 
     <div class="button-controls">
+      <div
+        *ngIf="taskSuggestionsCtrl?.value?.length"
+        class="separator-box"
+      >
+        <button
+          (mousedown)="addTask()"
+          type="submit"
+          mat-icon-button
+        >
+          <mat-icon>add</mat-icon>
+        </button>
+      </div>
+
       <button
         (click)="isAddToBacklog=!isAddToBacklog"
         [matTooltip]="T.F.TASK.ADD_TASK_BAR.TOGGLE_ADD_TO_BACKLOG_TODAY|translate"

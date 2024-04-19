@@ -109,6 +109,7 @@ $short-syntax-bar-height: 28px;
   transform: translateY(-50%);
   z-index: 2;
   margin-top: -0.5 * $short-syntax-bar-height;
+  display: flex;
 }
 
 .switch-add-to-bot-btn,
@@ -145,4 +146,12 @@ $short-syntax-bar-height: 28px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.separator-box {
+  border-right: 1px dashed $light-theme-extra-border-color;
+
+  @include darkTheme() {
+    border-color: $dark-theme-extra-border-color;
+  }
 }
