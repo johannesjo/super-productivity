@@ -39,11 +39,13 @@
         class="separator-box"
       >
         <button
+          class="switch-add-to-btn"
           (mousedown)="addTask()"
           type="submit"
           mat-icon-button
         >
-          <mat-icon>add</mat-icon>
+          <mat-icon *ngIf="activatedIssueTask">add_box</mat-icon>
+          <mat-icon *ngIf="!activatedIssueTask">add</mat-icon>
         </button>
       </div>
 
