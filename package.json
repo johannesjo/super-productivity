@@ -75,7 +75,7 @@
     "localInstall:prod": "sudo echo 'Starting local install PROD' && rm -Rf ./dist/ && rm -Rf ./app-builds/ && npm run buildAllElectron:prod && electron-builder --linux deb && sudo dpkg -i app-builds/superProductivity*.deb",
     "localInstall:quick": "sudo echo 'Starting local install QUICK' && rm -Rf ./dist/ && rm -Rf ./app-builds/ && npm run buildFrontend:stage:es6 && npm run electron:build && electron-builder --linux deb && sudo dpkg -i app-builds/superProductivity*.deb",
     "localInstall:test:snap": "sudo echo 'Starting local install SNAP QUICK' && rm -Rf ./dist/ && rm -Rf ./app-builds/ && npm run buildFrontend:stage:es6 && npm run electron:build && electron-builder --linux snap && sudo snap install --dangerous app-builds/superProductivity*.snap",
-    "localInstall:mac": "sudo echo 'Starting local install MAC. Don`t forget APPLEID & APPLEIDPASS !!' && npm run buildAllElectron:noTests:prod && sudo echo '' && electron-builder && sudo cp -rf app-builds/mac/Super\\ Productivity.app/ /Applications/superProductivity.app",
+    "localInstall:mac": "sudo echo 'Starting local install MAC. Don`t forget APPLEID & APPLEIDPASS !!' && npm run buildAllElectron:noTests:prod && sudo echo '' && electron-builder/ && sudo cp -rf app-builds/mac/superProductivity.app/ /Applications/superProductivity.app",
     "dist": "npm run buildAllElectron:prod && electron-builder",
     "dist:only": "electron-builder",
     "dist:linuxAndWin": "npm run buildAllElectron:prod && electron-builder --linux --win",
