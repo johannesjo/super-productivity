@@ -22,6 +22,8 @@ import { T } from '../../t.const';
 import { WorkContextService } from '../work-context/work-context.service';
 import { SearchQueryParams } from '../search-bar/search-bar.model';
 import { Subscription } from 'rxjs';
+import { Store } from '@ngrx/store';
+import { selectAllProjectColorsAndTitles } from '../project/store/project.selectors';
 
 @Component({
   selector: 'worklog',
@@ -33,6 +35,7 @@ import { Subscription } from 'rxjs';
 export class WorklogComponent implements AfterViewInit, OnDestroy {
   T: typeof T = T;
   expanded: { [key: string]: boolean } = {};
+  allProjectsColorAndTitle: { [key: string]: { title: string; color: string } } = {};
 
   private _subs: Subscription = new Subscription();
 
@@ -44,6 +47,7 @@ export class WorklogComponent implements AfterViewInit, OnDestroy {
     private readonly _matDialog: MatDialog,
     private readonly _router: Router,
     private readonly _route: ActivatedRoute,
+    private readonly _store: Store,
   ) {}
 
   ngAfterViewInit(): void {
@@ -54,6 +58,11 @@ export class WorklogComponent implements AfterViewInit, OnDestroy {
           this.expanded[dateStr] = true;
         }
       }),
+    );
+    this._subs.add(
+      this._store
+        .select(selectAllProjectColorsAndTitles)
+        .subscribe((colorMap) => (this.allProjectsColorAndTitle = colorMap)),
     );
   }
 

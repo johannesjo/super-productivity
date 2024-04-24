@@ -7,8 +7,8 @@
   [@fade]
 >
   <h1 class="mat-headline total-time">
-    {{T.F.WORKLOG.CMP.TOTAL_TIME|translate }} <br /><strong
-      >{{wData.totalTimeSpent|msToString}}</strong
+    {{ T.F.WORKLOG.CMP.TOTAL_TIME|translate }} <br /><strong
+      >{{ wData.totalTimeSpent|msToString }}</strong
     >
   </h1>
 
@@ -22,11 +22,11 @@
         class="year-title mat-headline"
       ></h1>
       <div class="year-time-spent">
-        {{T.F.WORKLOG.CMP.MONTH_WORKED|translate}}
-        <strong>{{year.value.monthWorked}}</strong><br />
-        {{T.F.WORKLOG.CMP.DAYS_WORKED|translate}}
-        <strong>{{year.value.daysWorked}}</strong><br />
-        {{T.F.WORKLOG.CMP.TOTAL_TIME|translate}}
+        {{ T.F.WORKLOG.CMP.MONTH_WORKED|translate }}
+        <strong>{{ year.value.monthWorked }}</strong><br />
+        {{ T.F.WORKLOG.CMP.DAYS_WORKED|translate }}
+        <strong>{{ year.value.daysWorked }}</strong><br />
+        {{ T.F.WORKLOG.CMP.TOTAL_TIME|translate }}
         <strong [innerHtml]="year.value.timeSpent|msToString"></strong>
       </div>
 
@@ -50,9 +50,9 @@
           </h2>
 
           <div class="month-time-spent">
-            {{T.F.WORKLOG.CMP.DAYS_WORKED|translate}}
-            <strong>{{month.value.daysWorked}}</strong><br />
-            {{T.F.WORKLOG.CMP.TOTAL_TIME|translate}}
+            {{ T.F.WORKLOG.CMP.DAYS_WORKED|translate }}
+            <strong>{{ month.value.daysWorked }}</strong><br />
+            {{ T.F.WORKLOG.CMP.TOTAL_TIME|translate }}
             <strong [innerHtml]="month.value.timeSpent|msToString"></strong>
           </div>
 
@@ -64,9 +64,9 @@
               <div class="week-header">
                 <div class="wrap">
                   <h3 class="week-title mat-h4">
-                    {{T.F.WORKLOG.CMP.WEEK_NR|translate:{nr: week.weekNr} }}
+                    {{ T.F.WORKLOG.CMP.WEEK_NR|translate:{ nr: week.weekNr } }}
                   </h3>
-                  <div>{{(week.timeSpent|msToString)}}</div>
+                  <div>{{ (week.timeSpent|msToString) }}</div>
                 </div>
                 <button
                   (click)="exportData(month.value,year.key, month.key, week.weekNr)"
@@ -84,8 +84,8 @@
                 <table class="week-table">
                   <tr>
                     <th></th>
-                    <td>{{T.F.WORKLOG.CMP.TASKS|translate}}</td>
-                    <td>{{T.F.WORKLOG.CMP.WORKED|translate}}</td>
+                    <td>{{ T.F.WORKLOG.CMP.TASKS|translate }}</td>
+                    <td>{{ T.F.WORKLOG.CMP.WORKED|translate }}</td>
                     <th></th>
                   </tr>
                   <ng-container
@@ -97,14 +97,10 @@
                       [class.isExpanded]="expanded[worklogForDay.value.dateStr]"
                       class="week-row"
                     >
-                      <td mat-ripple>
-                        {{worklogForDay.value.dayStr}} {{worklogForDay.key}}.
-                      </td>
-                      <td mat-ripple>{{worklogForDay.value.logEntries.length}}</td>
-                      <td mat-ripple>
-                        {{worklogForDay.value.timeSpent|msToClockString}}
-                      </td>
-                      <td mat-ripple>
+                      <td>{{ worklogForDay.value.dayStr }} {{ worklogForDay.key }}.</td>
+                      <td>{{ worklogForDay.value.logEntries.length }}</td>
+                      <td>{{ worklogForDay.value.timeSpent|msToClockString }}</td>
+                      <td>
                         <mat-icon *ngIf="!expanded[worklogForDay.value.dateStr]"
                           >list
                         </mat-icon>
@@ -131,19 +127,26 @@
                                 [class.isSubTask]="logEntry.task.parentId"
                                 class="title"
                               >
+                                <div
+                                  *ngIf="workContextService.isToday"
+                                  class="project-color"
+                                  [title]="allProjectsColorAndTitle[logEntry.task.projectId].title"
+                                  [style.background]="allProjectsColorAndTitle[logEntry.task.projectId].color"
+                                ></div>
                                 <mat-icon
                                   *ngIf="logEntry.task.repeatCfgId"
                                   [title]="T.F.WORKLOG.CMP.REPEATING_TASK|translate"
                                   class="repeat-task-icon"
                                   >repeat
                                 </mat-icon>
-                                <span class="task-title">{{logEntry.task.title}}</span>
+                                <span class="task-title">{{ logEntry.task.title }}</span>
                               </td>
                               <td class="worked">
                                 <span
                                   *ngIf="logEntry.task.subTaskIds && logEntry.task.subTaskIds.length>0"
-                                  >∑
-                                  {{logEntry.task.timeSpentOnDay[worklogForDay.value.dateStr]|msToClockString}}</span
+                                  >∑ {{
+                                  logEntry.task.timeSpentOnDay[worklogForDay.value.dateStr]|msToClockString
+                                  }}</span
                                 >
                                 <inline-input
                                   (changed)="updateTimeSpentTodayForTask(logEntry.task,worklogForDay.value.dateStr, $event)"

@@ -264,3 +264,12 @@ $this-table-outer-padding-left-right: $s * 6;
   transform: rotate(45deg);
   opacity: 0.7;
 }
+
+.project-color {
+  display: inline-block;
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  margin-right: $s;
+  vertical-align: middle;
+}

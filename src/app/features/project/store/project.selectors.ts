@@ -29,6 +29,20 @@ export const selectUnarchivedProjects = createSelector(selectAllProjects, (proje
 export const selectArchivedProjects = createSelector(selectAllProjects, (projects) =>
   projects.filter((p) => p.isArchived),
 );
+export const selectAllProjectColors = createSelector(selectAllProjects, (projects) =>
+  projects.reduce((prev, cur) => ({ ...prev, [cur.id]: cur.theme.primary }), {}),
+);
+export const selectAllProjectColorsAndTitles = createSelector(
+  selectAllProjects,
+  (projects) =>
+    projects.reduce(
+      (prev, cur) => ({
+        ...prev,
+        [cur.id]: { color: cur.theme.primary, title: cur.title },
+      }),
+      {},
+    ),
+);
 
 // DYNAMIC SELECTORS
 // -----------------
