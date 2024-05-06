@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { IDBPDatabase } from 'idb/build/esm/entry';
+import { IDBPDatabase } from 'idb/build';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { filter, shareReplay, take } from 'rxjs/operators';
 import { DBSchema, openDB } from 'idb';
