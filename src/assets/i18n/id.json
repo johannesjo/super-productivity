@@ -1047,10 +1047,10 @@
       "NO_TASKS": "Saat ini tidak ada tugas. Silakan tambahkan beberapa tugas melalui Tombol + di bilah atas.",
       "START": "Pekerjaan dimulai",
       "TASK_PROJECTION_INFO": "Proyeksi masa depan dari tugas berulang yang dijadwalkan",
+      "LUNCH_BREAK": "Istirahat makan siang",
       "S": {
         "CAL_PROVIDER_ERROR": "Kesalahan Penyedia Panggilan Linimasa: {{errTxt}}"
-      },
-      "LUNCH_BREAK": "Istirahat makan siang"
+      }
     },
     "TIME_TRACKING": {
       "B": {
