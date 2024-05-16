@@ -867,10 +867,10 @@
       "NO_TASKS": "Attualmente non ci sono attività. Aggiungi alcune attività tramite il pulsante + nella barra in alto.",
       "START": "Inizio del lavoro",
       "TASK_PROJECTION_INFO": "Proiezione futura di un'attività ripetibile pianificata",
+      "LUNCH_BREAK": "Pausa pranzo",
       "S": {
         "CAL_PROVIDER_ERROR": "Errore del provider di cal. cronologica: {{errTxt}}"
-      },
-      "LUNCH_BREAK": "Pausa pranzo"
+      }
     },
     "TIME_TRACKING": {
       "B": {

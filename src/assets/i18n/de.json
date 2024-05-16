@@ -1143,10 +1143,10 @@
       "NO_TASKS": "Derzeit gibt es keine Aufgaben. Bitte fügen Sie einige Aufgaben über die Schaltfläche + in der oberen Leiste hinzu.",
       "START": "Arbeitsbeginn",
       "TASK_PROJECTION_INFO": "Zukunftsprojektion einer geplanten wiederkehrenden Aufgabe",
+      "LUNCH_BREAK": "Mittagspause",
       "S": {
         "CAL_PROVIDER_ERROR": "Fehler beim Timeline-Kal.-Anbieter: {{errTxt}}"
-      },
-      "LUNCH_BREAK": "Mittagspause"
+      }
     },
     "TIME_TRACKING": {
       "B": {

@@ -939,10 +939,10 @@
       "NO_TASKS": "Il n'y a actuellement aucune tâche. Veuillez ajouter quelques tâches via le bouton + dans la barre supérieure.",
       "START": "Début des travaux",
       "TASK_PROJECTION_INFO": "Projection future d'une tâche répétable planifiée",
+      "LUNCH_BREAK": "Pause déjeuner",
       "S": {
         "CAL_PROVIDER_ERROR": "Erreur du fournisseur d'appel dans la chronologie : {{errTxt}}"
-      },
-      "LUNCH_BREAK": "Pause déjeuner"
+      }
     },
     "TIME_TRACKING": {
       "B": {

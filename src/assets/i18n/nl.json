@@ -1,4 +1,15 @@
 {
+  "ANDROID": {
+    "NOTIFICATIONS": {
+      "SYNC_CONFLICT_TITLE": "Een synchronisatieconflict is opgetreden",
+      "SYNC_CONFLICT_MSG": "Graag controleren en kijken wat te doen"
+    },
+    "PERMANENT_NOTIFICATION_MSGS": {
+      "INITIAL": "App draait op de achtergrond om synchronisatie mogelijk te maken als dit is ingeschakeld",
+      "NO_ACTIVE_TASKS": "Geen actieve taken",
+      "SYNCING": "Synchroniseren"
+    }
+  },
   "APP": {
     "B_INSTALL": {
       "IGNORE": "Negeren",
@@ -99,13 +110,26 @@
         "DESCRIPTION": "Omschrijving",
         "LABELS": "Categorieën",
         "MARK_AS_CHECKED": "Markeer updates als aangevinkt",
-        "STATUS": "staat",
+        "STATUS": "Status",
         "SUMMARY": "Samenvatting"
       },
       "S": {
         "CALENDAR_NOT_FOUND": "CalDav: agenda \"{{calendarName}}\" niet gevonden",
         "CALENDAR_READ_ONLY": "CalDav: Agenda \"{{calendarName}}\" is alleen-lezen",
         "ISSUE_NOT_FOUND": "CalDav: Todo \"{{issueId}}\" lijkt te zijn verwijderd op de server."
+      }
+    },
+    "CALENDARS": {
+      "BANNER": {
+        "TXT": "<strong>{{title}}</strong> begint om <strong>{{start}}</strong>!",
+        "TXT_MULTIPLE": "<strong>{{title}}</strong> begint om <strong>{{start}}</strong>!<br> (en {{nrOfOtherBanners}} andere taken zijn verschuldigd)",
+        "TXT_PAST": "<strong>{{title}}</strong> gestart om <strong>{{start}}</strong>!",
+        "TXT_PAST_MULTIPLE": "<strong>{{title}}</strong> gestart om <strong>{{start}}</strong>!<br> (en {{nrOfOtherBanners}} andere taken zijn verschuldigd)",
+        "ADD_AS_TASK": "Als Taak toevoegen",
+        "FOCUS_TASK": "Focus Taak"
+      },
+      "S": {
+        "CAL_PROVIDER_ERROR": "Calendar Provider Fout: {{errTxt}}"
       }
     },
     "CONFIG": {
@@ -116,16 +140,90 @@
     "DROPBOX": {
       "S": {
         "ACCESS_TOKEN_ERROR": "Dropbox: Onmogelijk om een Access Token van Auth Code te genereren",
-        "ACCESS_TOKEN_GENERATED": "Dropbox: Access Token generated from Auth Code",
+        "ACCESS_TOKEN_GENERATED": "Dropbox: Access Token gegenereerd van Auth Code",
         "AUTH_ERROR": "Dropbox: Ongeldige access token opgegeven",
         "AUTH_ERROR_ACTION": "Token wijzigen",
         "OFFLINE": "Dropbox: Kan niet worden gesynchroniseerd, vanwege offline",
-        "SYNC_ERROR": "Dropbox: Fout tijdens her synchroniseren"
+        "SYNC_ERROR": "Dropbox: Fout tijdens her synchroniseren",
+        "UNABLE_TO_GENERATE_PKCE_CHALLENGE": "Dropbox: Onmogelijk om PKCE uitdaging te genereren."
       }
     },
     "FINISH_DAY_BEFORE_EXIT": {
       "C": {
         "FINISH_DAY_BEFORE_EXIT": "Er zijn {{nr}} voltooide taken in uw lijst van vandaag die nog niet naar het archief zijn verplaatst. Wil je echt stoppen zonder je dag af te maken?"
+      }
+    },
+    "FOCUS_MODE": {
+      "BACK_TO_PLANNING": "Terug naar Planning",
+      "CANCEL_FOCUS_SESSION": "Focus Sessie Annuleren",
+      "CONGRATS": "Gefeliciteerd met het afronden van deze sessie!",
+      "CONTINUE_FOCUS_SESSION": "Focus Sessie Voortzetten",
+      "FINISH_TASK_AND_SELECT_NEXT": "Taak afmaken en volgende selecteren",
+      "GET_READY": "Maak je klaar voor je focus sessie!",
+      "GOGOGO": "Go, go, go!!!",
+      "GO_TO_PROCRASTINATION": "Krijg hulp als je aan het uitstellen bent",
+      "NEXT": "Volgende",
+      "ON": "aan",
+      "OPEN_ISSUE_IN_BROWSER": "Issue in Browser openen",
+      "POMODORO_BACK": "Terug",
+      "POMODORO_DISABLE": "Pomodoro uitschakelen",
+      "POMODORO_INFO": "Focus sessies kunnen niet tegelijk gebruikt worden met pomodoro timer ingeschakeld.",
+      "PREP_STRETCH": "Doe wat lichte stretches",
+      "PREP_SIT_UPRIGHT": "Zit (of sta) rechtop",
+      "SELECT_ANOTHER_TASK": "Selecteer een andere Taak",
+      "SELECT_TASK": "Selecteer een Taak om op te focussen",
+      "SET_FOCUS_SESSION_DURATION": "Selecteer een Focus Sessie duur",
+      "START_FOCUS_SESSION": "Start Focus Sessie",
+      "START_NEXT_FOCUS_SESSION": "Start volgende Focus Sessie",
+      "WORKED_FOR": "Je hebt gewerkt voor"
+    },
+    "GITEA": {
+      "DIALOG_INITIAL": {
+        "TITLE": "Configureer Gitea voor Project"
+      },
+      "FORM": {
+        "FILTER_USER": "Gebruikersnaam (bijv. om wijzigingen zelf te filteren)",
+        "HOST": "Host (bijv. https://try.gitea.io)",
+        "TOKEN": "Access Token",
+        "REPO_FULL_NAME": "Gebruikersnaam of Organisatie naam/project",
+        "REPO_FULL_NAME_DESCRIPTION": "Kan gevonden worden in deel van de URL, wanneer je het project open hebt in de Browser",
+        "SCOPE_ASSIGNED": "Aan mij toegewezen",
+        "SCOPE_CREATED": "Aangemaakt door mij"
+      },
+      "FORM_SECTION": {
+        "TITLE": "Gitea"
+      },
+      "ISSUE_CONTENT": {
+        "DESCRIPTION": "Omschrijving",
+        "LABELS": "Labels",
+        "MARK_AS_CHECKED": "Markeer wijzigingen als gecontroleerd",
+        "PROJECT": "Project",
+        "STATUS": "Status",
+        "SUMMARY": "Samenvatting",
+        "WRITE_A_COMMENT": "Schrijf een opmerking"
+      }
+    },
+    "REDMINE": {
+      "DIALOG_INITIAL": {
+        "TITLE": "Configureer Redmine voor Project"
+      },
+      "FORM": {
+        "PROJECT_ID": "Project identificatie",
+        "PROJECT_ID_DESCRIPTION": "Kan gevonden worden in deel van de URL, wanneer je het project open hebt in de Browser",
+        "HOST": "Host (e.g.: https://redmine.org)",
+        "SCOPE_ALL": "Allemaal",
+        "SCOPE_ASSIGNED": "Aan mij toegewezen",
+        "SCOPE_CREATED": "Aangemaakt door mij"
+      },
+      "FORM_SECTION": {
+        "TITLE": "Redmine"
+      },
+      "ISSUE_CONTENT": {
+        "AUTHOR": "Auteur",
+        "STATUS": "Status",
+        "PRIORITY": "Prioriteit",
+        "DESCRIPTION": "Omschrijving",
+        "MARK_AS_CHECKED": "Markeer wijzigingen als gecontroleerd"
       }
     },
     "GITHUB": {
@@ -150,6 +248,9 @@
         "AT": "Bij",
         "DESCRIPTION": "Omschrijving",
         "LABELS": "Etiketten",
+        "LAST_COMMENT": "Laatste opmerking",
+        "LOAD_ALL_COMMENTS": "Laad alle {{nr}} opmerkingen",
+        "LOAD_DESCRIPTION_AND_ALL_COMMENTS": "Laad opmerkingen & alle opmerkingen",
         "MARK_AS_CHECKED": "Markeer updates als aangevinkt",
         "STATUS": "Toestand",
         "SUMMARY": "Overzicht",
@@ -162,6 +263,9 @@
     "GITLAB": {
       "DIALOG_INITIAL": {
         "TITLE": "GitLab instellen voor Project"
+      },
+      "DIALOG_SUBMIT_WORKLOG": {
+        "T_TITLE": "Titel"
       },
       "FORM": {
         "FILTER_USER": "Gebruikersnaam (bijv. Om wijzigingen zelf uit te filteren)",
@@ -197,6 +301,11 @@
       },
       "S": {
         "ERR_UNKNOWN": "GitLab: onbekende fout {{statusCode}} {{errorMsg}}"
+      }
+    },
+    "DOMINA_MODE": {
+      "FORM": {
+        "L_TEXT": "Tekst"
       }
     },
     "ISSUE": {
@@ -326,6 +435,7 @@
         "LIST_OF_CHANGES": "Lijst met wijzigingen",
         "MARK_AS_CHECKED": "Markeer updates als aangevinkt",
         "ON": "Aan",
+        "RELATED": "Gerelateerd",
         "STATUS": "Toestand",
         "STORY_POINTS": "Verhaalpunten",
         "SUMMARY": "Overzicht",
@@ -430,6 +540,14 @@
         "TIME_SPENT": "Tijd besteed",
         "TITLE": "OpenProject: werklogboek indienen"
       },
+      "DIALOG_TRANSITION": {
+        "CHOOSE_STATUS": "Kies status om toe te wijzen",
+        "CURRENT_STATUS": "Huidige Status:",
+        "PERCENTAGE_DONE": "Vooruitgang:",
+        "TASK_NAME": "Taak naam:",
+        "TITLE": "OpenProject: Status Bijwerken",
+        "UPDATE_STATUS": "Status Bijwerken"
+      },
       "FORM": {
         "FILTER_USER": "Gebruikersnaam (bijvoorbeeld om zelf wijzigingen uit te filteren)",
         "HOST": "Host (bijv.: https://www.openproject.org/)",
@@ -475,13 +593,15 @@
       "FINISH_SESSION_X": "Sessie <strong>{{nr}}</strong>is succesvol afgerond!",
       "NOTIFICATION": {
         "BREAK_X_START": "Pomodoro: Break {{nr}} is begonnen!",
+        "BREAK_TIME": "Pomodoro: Tijd voor pauze {{nr}}!",
         "NO_TASKS": "Je moet taken toevoegen voordat de Pomodoro-timer kan starten.",
         "SESSION_X_START": "Pomodoro: Sessie {{nr}} is begonnen!"
       },
       "S": {
         "SESSION_X_START": "Pomodoro: Sessie {{nr}} is begonnen!"
       },
-      "SKIP_BREAK": "Pauze overslaan"
+      "SKIP_BREAK": "Pauze overslaan",
+      "START_BREAK": "Start pauze"
     },
     "PROCRASTINATION": {
       "BACK_TO_WORK": "Terug aan het werk!",
@@ -504,6 +624,11 @@
         "TITLE": "Nieuwsgierigheid"
       },
       "H1": "Geef jezelf wat ruimte!",
+      "INTRO": {
+        "AVOIDING": "De taak onwijken",
+        "FEAR": "Bang voor falen",
+        "TITLE": "Introductie"
+      },
       "P1": "Ontspan allereerst! Iedereen doet het af en toe. En als je niet doet wat je moet doen, moet je er in ieder geval van genieten! Bekijk dan de onderstaande secties voor iets nuttigs.",
       "P2": "Onthoud: uitstelgedrag is een probleem met emotieregulatie, geen tijdmanagementprobleem.",
       "REFRAME": {
@@ -527,7 +652,9 @@
         "SETUP_GIT": "GitHub-integratie instellen",
         "SETUP_GITLAB": "GitLab-integratie instellen",
         "SETUP_JIRA": "Jira-integratie instellen",
-        "SETUP_OPEN_PROJECT": "OpenProject-integratie instellen"
+        "SETUP_OPEN_PROJECT": "OpenProject-integratie instellen",
+        "SETUP_GITEA_PROJECT": "Configureer Gitea Integratie",
+        "SETUP_REDMINE_PROJECT": "Configureer Redmine Integratie"
       },
       "FORM_BASIC": {
         "L_IS_HIDDEN_FROM_MENU": "Project verbergen in menu",
@@ -569,7 +696,13 @@
       "WEEK_TITLE": "Week {{nr}} ({{timeSpent}})"
     },
     "REMINDER": {
-      "S_REMINDER_ERR": "Fout voor herinneringsinterface"
+      "S_REMINDER_ERR": "Fout voor herinneringsinterface",
+      "COUNTDOWN_BANNER": {
+        "START_NOW": "Nu beginnen",
+        "HIDE": "Verbergen",
+        "TXT": "<strong>{{title}}</strong> start om <strong>{{start}}</strong>!",
+        "TXT_MULTIPLE": "<strong>{{title}}</strong> start om <strong>{{start}}</strong>!<br> (en {{nrOfOtherBanners}} andere taken verschuldigd)"
+      }
     },
     "SEARCH_BAR": {
       "INFO": "Klik op het lijstpictogram om te zoeken naar gearchiveerde taken",
@@ -630,6 +763,10 @@
         "USE_LOCAL": "Gebruik lokaal",
         "USE_REMOTE": "Gebruik afstandsbediening"
       },
+      "D_PERMISSION": {
+        "DISABLE_SYNC": "Synchronisatie uitschakelen",
+        "PERM_FILE": "Geef permissies"
+      },
       "FORM": {
         "DROPBOX": {
           "L_ACCESS_TOKEN": "Toegangstoken (gegenereerd op basis van Auth Code)"
@@ -642,7 +779,10 @@
           "L_SYNC_FILE_PATH": "Synchroniseer bestandspad",
           "L_SYNC_FILE_PATH_DESCRIPTION": "Absoluut pad naar het bestand dat moet worden gebruikt voor synchronisatie (wordt gemaakt)."
         },
+        "L_ENABLE_COMPRESSION": "Compressie inschakelen (snellere data overdracht)",
+        "L_ENABLE_ENCRYPTION": "End-to-end encryptie inschakelen (experiment) - Maak je data ontoegankelijk voor je sync provider",
         "L_ENABLE_SYNCING": "Schakel synchronisatie in",
+        "L_ENCRYPTION_PASSWORD": "Encryptie Wachtwoord (NIET VERGETEN)",
         "L_SYNC_INTERVAL": "Synchronisatie-interval",
         "L_SYNC_PROVIDER": "Synchronisatieprovider",
         "TITLE": "Synchroniseren",
@@ -655,6 +795,8 @@
         }
       },
       "S": {
+        "ALREADY_IN_SYNC": "Al gesynchroniseerd",
+        "ALREADY_IN_SYNC_NO_LOCAL_CHANGES": "Geen locale wijzigingen - Al gesynchroniseerd",
         "ERROR_FALLBACK_TO_BACKUP": "Er is iets misgegaan tijdens het importeren van de gegevens. Terugvallen op lokale back-up.",
         "ERROR_INVALID_DATA": "Fout tijdens het synchroniseren. Onjuiste data",
         "IMPORTING": "Gegevens importeren",
@@ -823,12 +965,34 @@
       }
     },
     "TASK_REPEAT": {
+      "ADD_INFO_PANEL": {
+        "CUSTOM_WEEKLY": "{{daysStr}}",
+        "CUSTOM_WEEKLY_AND_TIME": "{{daysStr}}, {{timeStr}}",
+        "DAILY": "Iedere dag",
+        "DAILY_AND_TIME": "Iedere dag, {{timeStr}}",
+        "EVERY_X_DAILY": "Iedere {{x}} dagen",
+        "EVERY_X_DAILY_AND_TIME": "Iedere {{x}} dagen, {{timeStr}}",
+        "EVERY_X_MONTHLY": "Iedere {{x}} maand",
+        "EVERY_X_MONTHLY_AND_TIME": "Iedere {{x}} maanden, {{timeStr}}",
+        "EVERY_X_YEARLY": "Iedere {{x}} jaren",
+        "EVERY_X_YEARLY_AND_TIME": "Iedere {{x}} jaren, {{timeStr}}",
+        "MONDAY_TO_FRIDAY": "Ma-Vr",
+        "MONDAY_TO_FRIDAY_AND_TIME": "Ma-Vr, {{timeStr}}",
+        "WEEKLY_CURRENT_WEEKDAY": "Wekelijks op {{{weekdayStr}}",
+        "WEEKLY_CURRENT_WEEKDAY_AND_TIME": "Wekelijks op {{weekdayStr}}, {{timeStr}}",
+        "YEARLY_CURRENT_DATE": "Jaarlijks op {{dayAndMonthStr}}",
+        "YEARLY_CURRENT_DATE_AND_TIME": "Jaarlijks op {{dayAndMonthStr}}, {{timeStr}}"
+      },
       "D_CONFIRM_REMOVE": {
         "MSG": "Als u de herhaalconfiguratie verwijdert, worden alle eerdere instanties van deze taak geconverteerd naar alleen gewone taken. weet je zeker dat je verder wilt gaan",
         "OK": "Volledig verwijderen"
       },
+      "D_CONFIRM_UPDATE_INSTANCES": {
+        "CANCEL": "Alleen toekomstige taken"
+      },
       "D_EDIT": {
         "ADD": "Voeg herhaalde taakconfiguratie toe",
+        "ADVANCED_CFG": "Uitgebreide configuratie",
         "EDIT": "Herhaal taakconfiguratie bewerken",
         "HELP1": "Herhalende taken zijn bedoeld voor dagelijkse taken, bijvoorbeeld: \"Organisatie\", \"Dagelijkse vergadering\", \"Code review\", \"E-mails controleren\" of soortgelijke taken die waarschijnlijk steeds weer zullen voorkomen.",
         "HELP2": "Eenmaal geconfigureerd, wordt een herhalende taak opnieuw gemaakt op elke hieronder geselecteerde dag zodra u uw project opent en wordt automatisch gemarkeerd als voltooid aan het einde van de dag. Ze worden als verschillende instanties behandeld. U kunt dus vrijelijk subtaken toevoegen enz.",
@@ -837,15 +1001,26 @@
         "TAG_LABEL": "Tags om toe te voegen"
       },
       "F": {
+        "C_DAY": "Dag",
+        "C_MONTH": "Maand",
+        "C_WEEK": "Week",
+        "C_YEAR": "Jaar",
         "DEFAULT_ESTIMATE": "Standaardschatting",
         "FRIDAY": "vrijdag",
         "IS_ADD_TO_BOTTOM": "Verplaats taak naar de onderkant van de lijst",
         "MONDAY": "maandag",
+        "NOTES": "Standaard notities",
         "ORDER": "Bestellen",
         "ORDER_DESCRIPTION": "Aanmaakvolgorde van herhaalbare taken. Heeft alleen invloed op herhaalbare taken die tegelijkertijd zijn gemaakt. Een lagere waarde betekent dat een taak hoger in de lijst wordt gemaakt, een lager aantal dat het verderop in de lijst staat. Een waarde groter dan 0 betekent dat items onderaan normale taken worden gemaakt.",
+        "Q_DAILY": "Iedere dag",
+        "Q_MONDAY_TO_FRIDAY": "Iedere maandag tot vrijdag",
+        "Q_WEEKLY_CURRENT_WEEKDAY": "Iedere week op {{weekdayStr}}",
+        "Q_YEARLY_CURRENT_DATE": "Ieder jaar op {{dayAndMonthStr}}",
         "REMIND_AT": "Herinner bij",
         "REMIND_AT_PLACEHOLDER": "Selecteer wanneer u eraan wilt herinneren",
+        "REPEAT_EVERY": "Herhalen iedere",
         "SATURDAY": "zaterdag",
+        "START_DATE": "Start datum",
         "START_TIME": "Geplande starttijd",
         "START_TIME_DESCRIPTION": "bijv. 15:00 uur. Laat leeg voor een hele dagtaak",
         "SUNDAY": "zondag",
@@ -867,10 +1042,10 @@
       "NO_TASKS": "Momenteel zijn er geen taken. Voeg een aantal taken toe via de + knop in de bovenste balk.",
       "START": "werk start",
       "TASK_PROJECTION_INFO": "Toekomstige projectie van een geplande herhaalbare taak",
+      "LUNCH_BREAK": "Lunchpauze",
       "S": {
         "CAL_PROVIDER_ERROR": "Tijdlijn Cal Provider-fout: {{errTxt}}"
-      },
-      "LUNCH_BREAK": "Lunchpauze"
+      }
     },
     "TIME_TRACKING": {
       "B": {

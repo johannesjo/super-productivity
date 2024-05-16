@@ -907,10 +907,10 @@
       "NO_TASKS": "V súčasnosti nie sú k dispozícii žiadne úlohy. Prosím, pridajte nejaké úlohy pomocou tlačidla + v hornej lište.",
       "START": "Začiatok práce",
       "TASK_PROJECTION_INFO": "Budúca projekcia naplánovanej opakovateľnej úlohy",
+      "LUNCH_BREAK": "Obedová prestávka",
       "S": {
         "CAL_PROVIDER_ERROR": "Timeline Cal Provider Error: {{errTxt}}"
-      },
-      "LUNCH_BREAK": "Obedová prestávka"
+      }
     },
     "TIME_TRACKING": {
       "B": {

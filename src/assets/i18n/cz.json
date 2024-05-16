@@ -1106,10 +1106,10 @@
       "NO_TASKS": "Momentálně zde nejsou žádné úkoly. Přidejte nějaké úkoly pomocí tlačítka + v horní liště.",
       "START": "Začátek práce",
       "TASK_PROJECTION_INFO": "Budoucí projekce naplánovaného opakovatelného úkolu",
+      "LUNCH_BREAK": "Obední přestávka",
       "S": {
         "CAL_PROVIDER_ERROR": "Chyba poskytovatele kalendáře Časové osy: {{errTxt}}"
-      },
-      "LUNCH_BREAK": "Obední přestávka"
+      }
     },
     "TIME_TRACKING": {
       "B": {

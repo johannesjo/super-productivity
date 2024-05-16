@@ -867,10 +867,10 @@
       "NO_TASKS": "현재 작업이 없습니다. 상단 표시 줄의 + 버튼을 통해 몇 가지 작업을 추가하세요.",
       "START": "작업 시작",
       "TASK_PROJECTION_INFO": "예약된 반복 작업의 미래 예측",
+      "LUNCH_BREAK": "점심 휴식",
       "S": {
         "CAL_PROVIDER_ERROR": "타임라인 Cal Provider 오류: {{errTxt}}"
-      },
-      "LUNCH_BREAK": "점심 휴식"
+      }
     },
     "TIME_TRACKING": {
       "B": {

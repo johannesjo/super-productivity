@@ -867,10 +867,10 @@
       "NO_TASKS": "現在、タスクはありません。トップバーの+ボタンからいくつかのタスクを追加してください。",
       "START": "作業開始",
       "TASK_PROJECTION_INFO": "スケジュールされた反復可能なタスクの将来の予測",
+      "LUNCH_BREAK": "昼休憩",
       "S": {
         "CAL_PROVIDER_ERROR": "タイムライン校正プロバイダーエラー： {{errTxt}}"
-      },
-      "LUNCH_BREAK": "昼休憩"
+      }
     },
     "TIME_TRACKING": {
       "B": {

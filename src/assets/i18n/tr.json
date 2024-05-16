@@ -1097,10 +1097,10 @@
       "NO_TASKS": "Şu anda görev yok. Lütfen üst çubuktaki + Düğmesi aracılığıyla bazı görevler ekleyin.",
       "START": "İş Başlangıcı",
       "TASK_PROJECTION_INFO": "Zamanlanmış tekrarlanabilir bir görevin gelecek projeksiyonu",
+      "LUNCH_BREAK": "Öğle Arası",
       "S": {
         "CAL_PROVIDER_ERROR": "Zaman Çizelgesi Cal Sağlayıcı Hatası: {{errTxt}}"
-      },
-      "LUNCH_BREAK": "Öğle Arası"
+      }
     },
     "TIME_TRACKING": {
       "B": {
