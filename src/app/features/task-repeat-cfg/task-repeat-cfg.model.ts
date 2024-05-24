@@ -23,6 +23,7 @@ export type RepeatQuickSetting =
 
 export interface TaskRepeatCfgCopy {
   id: string;
+  parentId: string | null;
   projectId: string | null;
   lastTaskCreation: number;
   title: string | null;
@@ -66,6 +67,7 @@ export const DEFAULT_TASK_REPEAT_CFG: Omit<TaskRepeatCfgCopy, 'id'> = {
   defaultEstimate: undefined,
 
   // id: undefined,
+  parentId: null,
   projectId: null,
   // lastTaskCreation: Date.now() - 24 * 60 * 60 * 1000,
 
