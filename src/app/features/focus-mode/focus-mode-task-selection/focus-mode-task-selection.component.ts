@@ -54,6 +54,7 @@ export class FocusModeTaskSelectionComponent implements AfterViewInit, OnDestroy
           setFocusSessionActivePage({ focusActivePage: FocusModePage.DurationSelection }),
         );
       } else {
+        this.taskService.setCurrentId(this.selectedTask.id);
         this._store.dispatch(
           setFocusSessionActivePage({ focusActivePage: FocusModePage.DurationSelection }),
         );
