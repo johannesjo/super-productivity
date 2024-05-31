@@ -1,3 +1,25 @@
+## [8.0.6](https://github.com/johannesjo/super-productivity/compare/v8.0.4...v8.0.6) (2024-05-31)
+
+### Bug Fixes
+
+- accessibility issue [#3129](https://github.com/johannesjo/super-productivity/issues/3129) ([4557a5f](https://github.com/johannesjo/super-productivity/commit/4557a5f2a18a52657da4d40d8c0cc922fc4562fc))
+- make current work context title clickable on mac ([e914397](https://github.com/johannesjo/super-productivity/commit/e91439701870a610775e62dcf23f3118d93090e0))
+- status bar flickering [#3131](https://github.com/johannesjo/super-productivity/issues/3131) ([fc3dcc7](https://github.com/johannesjo/super-productivity/commit/fc3dcc7f07d5dc4573bdbba3869ffeb0ce32c314))
+- wrong task on focus mode [#3194](https://github.com/johannesjo/super-productivity/issues/3194) ([cba0b9f](https://github.com/johannesjo/super-productivity/commit/cba0b9f442c0d46c35e94767ac1ba522fcc0824e))
+
+### Features
+
+- add getNewestPossibleDueDate utility function for DAILY [#2694](https://github.com/johannesjo/super-productivity/issues/2694) ([3e5e305](https://github.com/johannesjo/super-productivity/commit/3e5e305e9fea2acf913e7d0c90d3fe1c397b4582))
+- added lunch break to timeline [#3125](https://github.com/johannesjo/super-productivity/issues/3125) ([03ade7e](https://github.com/johannesjo/super-productivity/commit/03ade7e5128ce7f26a7290aab87e494d361a0816))
+- also include done tasks for idle time dialog [#3135](https://github.com/johannesjo/super-productivity/issues/3135) ([2d04ede](https://github.com/johannesjo/super-productivity/commit/2d04ede28d25446f5574d41b29231a0efb07babb))
+- filter out undone tasks without time for worklog [#3122](https://github.com/johannesjo/super-productivity/issues/3122) ([840c243](https://github.com/johannesjo/super-productivity/commit/840c2438f6c4ff95273735c02f048e96be2c671a))
+- improve on add button [#3129](https://github.com/johannesjo/super-productivity/issues/3129) ([0920c8a](https://github.com/johannesjo/super-productivity/commit/0920c8af5e45287137958b94bdb54841c0a48676))
+- make add task bar smarter ([087be06](https://github.com/johannesjo/super-productivity/commit/087be0615cfb861ca50d8378f4ae0c06ffbb4434))
+- outline getNewestPossibleDueDate utility function for WEEKLY [#2694](https://github.com/johannesjo/super-productivity/issues/2694) ([eaac9b3](https://github.com/johannesjo/super-productivity/commit/eaac9b3fadd740145ebf41fa678d68e68bc61ef4))
+- set doneOn date as parent date if sub task was not done when moving to archive [#3122](https://github.com/johannesjo/super-productivity/issues/3122) ([fb50e26](https://github.com/johannesjo/super-productivity/commit/fb50e26e7c6f82317b7bee71a2c6bf292334298f))
+- show project color and title for today tag worklog ([5528cdd](https://github.com/johannesjo/super-productivity/commit/5528cdd6d56b3c5a5fa8072380cfc343046735d4)), closes [#2933](https://github.com/johannesjo/super-productivity/issues/2933)
+- use doneOn over created date when creating worklog items [#3122](https://github.com/johannesjo/super-productivity/issues/3122) ([f3b0c66](https://github.com/johannesjo/super-productivity/commit/f3b0c665e6a505b392865cc4c1964e64e49a0e4b))
+
 ## [8.0.5](https://github.com/johannesjo/super-productivity/compare/v8.0.4...v8.0.5) (2024-04-12)
 
 ### Features
