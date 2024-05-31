@@ -137,4 +137,74 @@ describe('getNewestPossibleDueDate()', () => {
       expect(getNewestPossibleDueDate(taskRepeatCfg, today)?.getDate()).toEqual(31);
     });
   });
+
+  // describe('WEEKLY', () => {
+  //   it('should return last week if last week was due and not set', () => {
+  //     const taskRepeatCfg: TaskRepeatCfg = dummyRepeatable('ID1', {
+  //       repeatCycle: 'WEEKLY',
+  //       repeatEvery: 1,
+  //       startDate: getWorklogStr(FAKE_MONDAY_THE_10TH - DAY * 7),
+  //     });
+  //     const today = new Date(FAKE_MONDAY_THE_10TH);
+  //     const expectedDate = new Date(FAKE_MONDAY_THE_10TH - DAY * 7);
+  //
+  //     expect(getNewestPossibleDueDate(taskRepeatCfg, today)?.getTime()).toEqual(
+  //       expectedDate.getTime(),
+  //     );
+  //   });
+  //
+  //   it('should return last week if last week was due and last creation is ages ago', () => {
+  //     const START = FAKE_MONDAY_THE_10TH - DAY * 31 * 7;
+  //
+  //     const taskRepeatCfg: TaskRepeatCfg = dummyRepeatable('ID1', {
+  //       repeatCycle: 'WEEKLY',
+  //       repeatEvery: 1,
+  //       startDate: getWorklogStr(START),
+  //       // eslint-disable-next-line no-mixed-operators
+  //       lastTaskCreation: START + DAY * 3 * 7,
+  //     });
+  //     const today = new Date(FAKE_MONDAY_THE_10TH);
+  //     const expectedDate = new Date(FAKE_MONDAY_THE_10TH - DAY * 7);
+  //
+  //     expect(getNewestPossibleDueDate(taskRepeatCfg, today)?.getTime()).toEqual(
+  //       expectedDate.getTime(),
+  //     );
+  //   });
+  //
+  //   it('should return NULL if not applicable', () => {
+  //     const repeatEvery = 2;
+  //     const START = FAKE_MONDAY_THE_10TH;
+  //     // eslint-disable-next-line no-mixed-operators
+  //     const LAST_CREATION = START + DAY * repeatEvery * 7;
+  //     // eslint-disable-next-line no-mixed-operators
+  //     const TODAY = START + DAY * (repeatEvery * 7 + 6);
+  //
+  //     const taskRepeatCfg: TaskRepeatCfg = dummyRepeatable('ID1', {
+  //       repeatCycle: 'WEEKLY',
+  //       repeatEvery,
+  //       startDate: getWorklogStr(START),
+  //       lastTaskCreation: LAST_CREATION,
+  //     });
+  //     const today = new Date(TODAY);
+  //     expect(getNewestPossibleDueDate(taskRepeatCfg, today)).toEqual(null);
+  //   });
+  //
+  //   it('should return date if applicable', () => {
+  //     const repeatEvery = 2;
+  //     const START = FAKE_MONDAY_THE_10TH;
+  //     // eslint-disable-next-line no-mixed-operators
+  //     const LAST_CREATION = START + DAY * repeatEvery * 7;
+  //     // eslint-disable-next-line no-mixed-operators
+  //     const TODAY = START + DAY * (repeatEvery * 3 * 7 + 1);
+  //
+  //     const taskRepeatCfg: TaskRepeatCfg = dummyRepeatable('ID1', {
+  //       repeatCycle: 'WEEKLY',
+  //       repeatEvery,
+  //       startDate: getWorklogStr(START),
+  //       lastTaskCreation: LAST_CREATION,
+  //     });
+  //     const today = new Date(TODAY);
+  //     expect(getNewestPossibleDueDate(taskRepeatCfg, today)?.getDate()).toEqual(31);
+  //   });
+  // });
 });
