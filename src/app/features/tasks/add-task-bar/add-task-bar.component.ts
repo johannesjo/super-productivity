@@ -38,7 +38,7 @@ import { TagService } from '../../tag/tag.service';
 import { ProjectService } from '../../project/project.service';
 import { Tag } from '../../tag/tag.model';
 import { Project } from '../../project/project.model';
-import { shortSyntaxToTags } from './short-syntax-to-tags';
+import { ShortSyntaxTag, shortSyntaxToTags } from './short-syntax-to-tags';
 import { slideAnimation } from '../../../ui/animations/slide.ani';
 import { blendInOutAnimation } from 'src/app/ui/animations/blend-in-out.ani';
 import { fadeAnimation } from '../../../ui/animations/fade.ani';
@@ -106,37 +106,46 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
     new BehaviorSubject<AddTaskSuggestion | null>(null);
   activatedIssueTask: AddTaskSuggestion | null = null;
 
-  shortSyntaxTags: {
-    title: string;
-    color: string;
-    icon: string;
-  }[] = [];
-  shortSyntaxTags$: Observable<
-    {
-      title: string;
-      color: string;
-      icon: string;
-    }[]
-  > = this.taskSuggestionsCtrl.valueChanges.pipe(
-    filter((val) => typeof val === 'string'),
-    withLatestFrom(
-      this._tagService.tags$,
-      this._projectService.list$,
-      this._workContextService.activeWorkContext$,
-    ),
-    map(([val, tags, projects, activeWorkContext]) =>
-      shortSyntaxToTags({
-        val,
-        tags,
-        projects,
-        defaultColor: activeWorkContext.theme.primary,
-      }),
-    ),
-    startWith([]),
-  );
+  shortSyntaxTags: ShortSyntaxTag[] = [];
+  shortSyntaxTags$: Observable<ShortSyntaxTag[]> =
+    this.taskSuggestionsCtrl.valueChanges.pipe(
+      filter((val) => typeof val === 'string'),
+      withLatestFrom(
+        this._tagService.tags$,
+        this._projectService.list$,
+        this._workContextService.activeWorkContext$,
+      ),
+      map(([val, tags, projects, activeWorkContext]) =>
+        shortSyntaxToTags({
+          val,
+          tags,
+          projects,
+          defaultColor: activeWorkContext.theme.primary,
+        }),
+      ),
+      startWith([]),
+    );
 
   inputVal: string = '';
   inputVal$: Observable<string> = this.taskSuggestionsCtrl.valueChanges;
+
+  isAddToBacklogAvailable$: Observable<boolean> = this.shortSyntaxTags$.pipe(
+    switchMap((shortSyntaxTags) => {
+      const shortSyntaxProjectId =
+        shortSyntaxTags.length &&
+        shortSyntaxTags.find((tag: ShortSyntaxTag) => tag.projectId)?.projectId;
+
+      if (typeof shortSyntaxProjectId === 'string') {
+        return this._projectService
+          .getByIdOnce$(shortSyntaxProjectId)
+          .pipe(map((project) => project.isEnableBacklog));
+      }
+
+      return this._workContextService.activeWorkContext$.pipe(
+        map((ctx) => !!ctx.isEnableBacklog),
+      );
+    }),
+  );
 
   private _isAddInProgress?: boolean;
   private _blurTimeout?: number;
@@ -228,10 +237,6 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
       this._taskService.focusTaskIfPossible(this._lastAddedTaskId);
     }
     this._subs.unsubscribe();
-  }
-
-  closeBtnClose(ev: Event): void {
-    this.blurred.emit(ev);
   }
 
   onOptionActivated(val: any): void {

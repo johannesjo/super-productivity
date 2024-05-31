@@ -5,6 +5,14 @@ import { Tag } from '../../tag/tag.model';
 import { Project } from '../../project/project.model';
 import { getWorklogStr } from '../../../util/get-work-log-str';
 
+export interface ShortSyntaxTag {
+  title: string;
+  color: string;
+  icon: string;
+  // needed for add task bar
+  projectId?: string;
+}
+
 export const shortSyntaxToTags = ({
   val,
   tags,
@@ -15,11 +23,7 @@ export const shortSyntaxToTags = ({
   tags: Tag[];
   projects: Project[];
   defaultColor: string;
-}): {
-  title: string;
-  color: string;
-  icon: string;
-}[] => {
+}): ShortSyntaxTag[] => {
   const r = shortSyntax(
     {
       title: val,
@@ -29,11 +33,7 @@ export const shortSyntaxToTags = ({
     tags,
     projects,
   );
-  const shortSyntaxTags: {
-    title: string;
-    color: string;
-    icon: string;
-  }[] = [];
+  const shortSyntaxTags: ShortSyntaxTag[] = [];
 
   if (!r) {
     return [];
@@ -47,6 +47,7 @@ export const shortSyntaxToTags = ({
     shortSyntaxTags.push({
       title: project.title,
       color: project.theme.primary,
+      projectId: r.projectId,
       icon: 'list',
     });
   }

@@ -50,6 +50,7 @@
       </div>
 
       <button
+        *ngIf="isAddToBacklogAvailable$|async"
         (click)="isAddToBacklog=!isAddToBacklog"
         [matTooltip]="T.F.TASK.ADD_TASK_BAR.TOGGLE_ADD_TO_BACKLOG_TODAY|translate"
         matTooltipPosition="above"
