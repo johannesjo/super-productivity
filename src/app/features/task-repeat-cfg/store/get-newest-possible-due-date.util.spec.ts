@@ -11,7 +11,7 @@ const DUMMY_REPEATABLE_TASK: TaskRepeatCfg = {
   id: 'REPEATABLE_DEFAULT',
   title: 'REPEATABLE_DEFAULT',
   quickSetting: 'DAILY',
-  lastTaskCreation: 60 * 60 * 1000,
+  lastTaskCreation: FAKE_MONDAY_THE_10TH,
   defaultEstimate: undefined,
   projectId: null,
   startTime: undefined,
@@ -46,6 +46,7 @@ describe('getNewestPossibleDueDate()', () => {
       const taskRepeatCfg: TaskRepeatCfg = dummyRepeatable('ID1', {
         repeatCycle: 'DAILY',
         repeatEvery: 1,
+        lastTaskCreation: 0,
         startDate: getWorklogStr(FAKE_MONDAY_THE_10TH),
       });
       const today = new Date(FAKE_MONDAY_THE_10TH + DAY);
@@ -138,73 +139,74 @@ describe('getNewestPossibleDueDate()', () => {
     });
   });
 
-  // describe('WEEKLY', () => {
-  //   it('should return last week if last week was due and not set', () => {
-  //     const taskRepeatCfg: TaskRepeatCfg = dummyRepeatable('ID1', {
-  //       repeatCycle: 'WEEKLY',
-  //       repeatEvery: 1,
-  //       startDate: getWorklogStr(FAKE_MONDAY_THE_10TH - DAY * 7),
-  //     });
-  //     const today = new Date(FAKE_MONDAY_THE_10TH);
-  //     const expectedDate = new Date(FAKE_MONDAY_THE_10TH - DAY * 7);
-  //
-  //     expect(getNewestPossibleDueDate(taskRepeatCfg, today)?.getTime()).toEqual(
-  //       expectedDate.getTime(),
-  //     );
-  //   });
-  //
-  //   it('should return last week if last week was due and last creation is ages ago', () => {
-  //     const START = FAKE_MONDAY_THE_10TH - DAY * 31 * 7;
-  //
-  //     const taskRepeatCfg: TaskRepeatCfg = dummyRepeatable('ID1', {
-  //       repeatCycle: 'WEEKLY',
-  //       repeatEvery: 1,
-  //       startDate: getWorklogStr(START),
-  //       // eslint-disable-next-line no-mixed-operators
-  //       lastTaskCreation: START + DAY * 3 * 7,
-  //     });
-  //     const today = new Date(FAKE_MONDAY_THE_10TH);
-  //     const expectedDate = new Date(FAKE_MONDAY_THE_10TH - DAY * 7);
-  //
-  //     expect(getNewestPossibleDueDate(taskRepeatCfg, today)?.getTime()).toEqual(
-  //       expectedDate.getTime(),
-  //     );
-  //   });
-  //
-  //   it('should return NULL if not applicable', () => {
-  //     const repeatEvery = 2;
-  //     const START = FAKE_MONDAY_THE_10TH;
-  //     // eslint-disable-next-line no-mixed-operators
-  //     const LAST_CREATION = START + DAY * repeatEvery * 7;
-  //     // eslint-disable-next-line no-mixed-operators
-  //     const TODAY = START + DAY * (repeatEvery * 7 + 6);
-  //
-  //     const taskRepeatCfg: TaskRepeatCfg = dummyRepeatable('ID1', {
-  //       repeatCycle: 'WEEKLY',
-  //       repeatEvery,
-  //       startDate: getWorklogStr(START),
-  //       lastTaskCreation: LAST_CREATION,
-  //     });
-  //     const today = new Date(TODAY);
-  //     expect(getNewestPossibleDueDate(taskRepeatCfg, today)).toEqual(null);
-  //   });
-  //
-  //   it('should return date if applicable', () => {
-  //     const repeatEvery = 2;
-  //     const START = FAKE_MONDAY_THE_10TH;
-  //     // eslint-disable-next-line no-mixed-operators
-  //     const LAST_CREATION = START + DAY * repeatEvery * 7;
-  //     // eslint-disable-next-line no-mixed-operators
-  //     const TODAY = START + DAY * (repeatEvery * 3 * 7 + 1);
-  //
-  //     const taskRepeatCfg: TaskRepeatCfg = dummyRepeatable('ID1', {
-  //       repeatCycle: 'WEEKLY',
-  //       repeatEvery,
-  //       startDate: getWorklogStr(START),
-  //       lastTaskCreation: LAST_CREATION,
-  //     });
-  //     const today = new Date(TODAY);
-  //     expect(getNewestPossibleDueDate(taskRepeatCfg, today)?.getDate()).toEqual(31);
-  //   });
-  // });
+  describe('WEEKLY', () => {
+    it('should return last week if last week was due and not set', () => {
+      const taskRepeatCfg: TaskRepeatCfg = dummyRepeatable('ID1', {
+        repeatCycle: 'WEEKLY',
+        repeatEvery: 1,
+        lastTaskCreation: 0,
+        // eslint-disable-next-line no-mixed-operators
+        startDate: getWorklogStr(FAKE_MONDAY_THE_10TH - DAY * 7),
+      });
+      const today = new Date(FAKE_MONDAY_THE_10TH);
+      // eslint-disable-next-line no-mixed-operators
+      const expectedDate = new Date(FAKE_MONDAY_THE_10TH - DAY * 7);
+
+      expect(getNewestPossibleDueDate(taskRepeatCfg, today)?.getTime()).toEqual(
+        expectedDate.getTime(),
+      );
+    });
+
+    it('should return last week if last week was due and last creation is long ago', () => {
+      // eslint-disable-next-line no-mixed-operators
+      const START = FAKE_MONDAY_THE_10TH;
+
+      const taskRepeatCfg: TaskRepeatCfg = dummyRepeatable('ID1', {
+        repeatCycle: 'WEEKLY',
+        repeatEvery: 1,
+        startDate: getWorklogStr(START),
+        // eslint-disable-next-line no-mixed-operators
+        lastTaskCreation: START + DAY * 7,
+      });
+      // eslint-disable-next-line no-mixed-operators
+      const today = new Date(START + DAY * 7 * 29 + DAY * 3);
+      // eslint-disable-next-line no-mixed-operators
+      const expectedDate = new Date(START + DAY * 7 * 29);
+
+      expect(getNewestPossibleDueDate(taskRepeatCfg, today)).toEqual(expectedDate);
+    });
+
+    it('should return NULL if not applicable', () => {
+      const repeatEvery = 5;
+      const START = FAKE_MONDAY_THE_10TH;
+      // eslint-disable-next-line no-mixed-operators
+      const LAST_CREATION = START + DAY * (7 * repeatEvery + 0);
+      // eslint-disable-next-line no-mixed-operators
+      const TODAY = START + DAY * (repeatEvery * 7 + 7);
+
+      const taskRepeatCfg: TaskRepeatCfg = dummyRepeatable('ID1', {
+        repeatCycle: 'WEEKLY',
+        repeatEvery,
+        startDate: getWorklogStr(START),
+        lastTaskCreation: LAST_CREATION,
+      });
+      const today = new Date(TODAY);
+      expect(getNewestPossibleDueDate(taskRepeatCfg, today)).toEqual(null);
+    });
+
+    it('should return NULL if start data is in the future', () => {
+      const START = FAKE_MONDAY_THE_10TH;
+
+      const taskRepeatCfg: TaskRepeatCfg = dummyRepeatable('ID1', {
+        repeatCycle: 'WEEKLY',
+        repeatEvery: 1,
+        startDate: getWorklogStr(START),
+        // eslint-disable-next-line no-mixed-operators
+        lastTaskCreation: START - DAY * 7,
+      });
+      // eslint-disable-next-line no-mixed-operators
+      const today = new Date(START - 1 * DAY);
+      expect(getNewestPossibleDueDate(taskRepeatCfg, today)).toEqual(null);
+    });
+  });
 });
