@@ -16,8 +16,9 @@ export const getNewestPossibleDueDate = (
       const checkDate = new Date(today);
       const startDateDate = new Date(taskRepeatCfg.startDate);
       const lastTaskCreation = new Date(taskRepeatCfg.lastTaskCreation);
+      const nrOfDayToCheck = taskRepeatCfg.repeatEvery;
 
-      for (let i = 0; i < taskRepeatCfg.repeatEvery; i++) {
+      for (let i = 0; i < nrOfDayToCheck; i++) {
         checkDate.setDate(checkDate.getDate() - 1);
         const diffInDays = getDiffInDays(startDateDate, checkDate);
         if (checkDate <= lastTaskCreation || diffInDays < 0) {
@@ -40,8 +41,9 @@ export const getNewestPossibleDueDate = (
       const checkDate = new Date(today);
       const startDateDate = new Date(taskRepeatCfg.startDate);
       const lastTaskCreation = new Date(taskRepeatCfg.lastTaskCreation);
+      const nrOfDayToCheck = taskRepeatCfg.repeatEvery * 7;
 
-      for (let i = 0; i < taskRepeatCfg.repeatEvery * 7; i++) {
+      for (let i = 0; i < nrOfDayToCheck; i++) {
         checkDate.setDate(checkDate.getDate() - 1);
         const diffInDays = getDiffInDays(startDateDate, checkDate);
         if (checkDate <= lastTaskCreation || diffInDays < 0) {
