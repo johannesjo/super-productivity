@@ -309,6 +309,17 @@
   }
 }
 
+.control-text {
+  text-align: left;
+  display: flex;
+  justify-content: space-between;
+}
+
+.keybindprev {
+  opacity: 0.6;
+  text-align: right;
+}
+
 .hover-controls {
   transform-origin: right center;
   position: absolute;

@@ -28,6 +28,7 @@ import { SnackService } from '../../core/snack/snack.service';
 import { NavigationEnd, Router } from '@angular/router';
 import { FocusModeService } from '../../features/focus-mode/focus-mode.service';
 import { GlobalConfigService } from '../../features/config/global-config.service';
+import { KeyboardConfig } from 'src/app/features/config/keyboard-config.model';
 
 @Component({
   selector: 'main-header',
@@ -93,6 +94,7 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
     private readonly _snackService: SnackService,
     private readonly _router: Router,
     private readonly _focusModeService: FocusModeService,
+    private readonly _configService: GlobalConfigService,
   ) {}
 
   ngOnDestroy(): void {
@@ -134,5 +136,9 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
 
   enableFocusMode(): void {
     this._focusModeService.showFocusOverlay();
+  }
+
+  private get _kb(): KeyboardConfig | undefined {
+    return this._configService.cfg?.keyboard;
   }
 }

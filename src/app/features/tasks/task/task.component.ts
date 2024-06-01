@@ -57,6 +57,7 @@ import { Update } from '@ngrx/entity';
 import { SnackService } from '../../../core/snack/snack.service';
 import { isToday } from '../../../util/is-today.util';
 import { IS_TOUCH_PRIMARY } from '../../../util/is-mouse-primary';
+import { KeyboardConfig } from '../../config/keyboard-config.model';
 
 @Component({
   selector: 'task',
@@ -814,6 +815,10 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
     this._renderer.removeClass(this.blockLeftElRef.nativeElement, 'isActive');
     this._renderer.removeClass(this.blockRightElRef.nativeElement, 'isActive');
     this._renderer.setStyle(this.innerWrapperElRef.nativeElement, 'transform', ``);
+  }
+
+  private get _kb(): KeyboardConfig | undefined {
+    return this._configService.cfg?.keyboard;
   }
 
   private _handleKeyboardShortcuts(ev: KeyboardEvent): void {
