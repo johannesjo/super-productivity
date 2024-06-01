@@ -191,7 +191,7 @@
     "hammerjs": "^2.0.8",
     "helpful-decorators": "^2.1.0",
     "husky": "^4.2.5",
-    "ical.js": "^1.5.0",
+    "ical.js": "^2.0.1",
     "idb": "^8.0.0",
     "jasmine-core": "^4.0.0",
     "jasmine-marbles": "^0.8.4",
