@@ -84,7 +84,6 @@ export const selectTaskRepeatCfgsDueOnDay = createSelector(
     { dayDate }: { dayDate: number },
   ): TaskRepeatCfg[] => {
     const dateToCheckTimestamp = dayDate;
-    const dateToCheckDate = new Date(dateToCheckTimestamp);
 
     return (
       taskRepeatCfgs &&
@@ -97,6 +96,11 @@ export const selectTaskRepeatCfgsDueOnDay = createSelector(
           return false;
         }
 
+        const numberOfDatesToCheck = getDiffInDays(
+          new Date(taskRepeatCfg.lastTaskCreation),
+          new Date(dateToCheckTimestamp),
+        );
+
         switch (taskRepeatCfg.repeatCycle) {
           case 'DAILY': {
             if (!taskRepeatCfg.startDate) {
@@ -106,12 +110,21 @@ export const selectTaskRepeatCfgsDueOnDay = createSelector(
               throw new Error('Invalid repeatEvery value given for DAILY');
             }
             const startDateDate = new Date(taskRepeatCfg.startDate);
-            const diffInDays = getDiffInDays(startDateDate, dateToCheckDate);
+            for (let i = 0; i < numberOfDatesToCheck; i++) {
+              const dateToCheckDate = new Date(
+                // prettier-ignore
+                dateToCheckTimestamp - (i * 24 * 60 * 60 * 1000),
+              );
+              const diffInDays = getDiffInDays(startDateDate, dateToCheckDate);
 
-            return (
-              // start date is not in the future
-              diffInDays >= 0 && diffInDays % taskRepeatCfg.repeatEvery === 0
-            );
+              if (
+                // start date is not in the future
+                diffInDays >= 0 &&
+                diffInDays % taskRepeatCfg.repeatEvery === 0
+              )
+                return true;
+            }
+            return false;
           }
 
           case 'WEEKLY': {
@@ -123,16 +136,24 @@ export const selectTaskRepeatCfgsDueOnDay = createSelector(
             }
             const startDateDate = new Date(taskRepeatCfg.startDate);
 
-            const todayDay = dateToCheckDate.getDay();
-            const todayDayStr: keyof TaskRepeatCfg = TASK_REPEAT_WEEKDAY_MAP[todayDay];
-            const diffInWeeks = getDiffInWeeks(startDateDate, dateToCheckDate);
+            for (let i = 0; i < numberOfDatesToCheck; i++) {
+              const dateToCheckDate = new Date(
+                // prettier-ignore
+                dateToCheckTimestamp - (i * 24 * 60 * 60 * 1000),
+              );
+              const todayDay = dateToCheckDate.getDay();
+              const todayDayStr: keyof TaskRepeatCfg = TASK_REPEAT_WEEKDAY_MAP[todayDay];
+              const diffInWeeks = getDiffInWeeks(startDateDate, dateToCheckDate);
 
-            return (
-              // start date is not in the future
-              diffInWeeks >= 0 &&
-              diffInWeeks % taskRepeatCfg.repeatEvery === 0 &&
-              taskRepeatCfg[todayDayStr]
-            );
+              if (
+                // start date is not in the future
+                diffInWeeks >= 0 &&
+                diffInWeeks % taskRepeatCfg.repeatEvery === 0 &&
+                taskRepeatCfg[todayDayStr]
+              )
+                return true;
+            }
+            return false;
           }
 
           case 'MONTHLY': {
@@ -143,16 +164,24 @@ export const selectTaskRepeatCfgsDueOnDay = createSelector(
               throw new Error('Invalid repeatEvery value given for MONTHLY');
             }
             const startDateDate = new Date(taskRepeatCfg.startDate);
-            const isCreationDayThisMonth =
-              dateToCheckDate.getDate() === startDateDate.getDate();
+            for (let i = 0; i < numberOfDatesToCheck; i++) {
+              const dateToCheckDate = new Date(
+                // prettier-ignore
+                dateToCheckTimestamp - (i * 24 * 60 * 60 * 1000),
+              );
+              const isCreationDayThisMonth =
+                dateToCheckDate.getDate() === startDateDate.getDate();
 
-            const diffInMonth = getDiffInMonth(startDateDate, dateToCheckDate);
-            return (
-              isCreationDayThisMonth &&
-              // start date is not in the future
-              diffInMonth >= 0 &&
-              diffInMonth % taskRepeatCfg.repeatEvery === 0
-            );
+              const diffInMonth = getDiffInMonth(startDateDate, dateToCheckDate);
+              if (
+                isCreationDayThisMonth &&
+                // start date is not in the future
+                diffInMonth >= 0 &&
+                diffInMonth % taskRepeatCfg.repeatEvery === 0
+              )
+                return true;
+            }
+            return false;
           }
 
           case 'YEARLY': {
@@ -163,19 +192,27 @@ export const selectTaskRepeatCfgsDueOnDay = createSelector(
               throw new Error('Invalid repeatEvery value given for YEARLY');
             }
             const startDateDate = new Date(taskRepeatCfg.startDate);
-            const isRightMonthAndDay =
-              dateToCheckDate.getDate() === startDateDate.getDate() &&
-              dateToCheckDate.getMonth() === startDateDate.getMonth();
+            for (let i = 0; i < numberOfDatesToCheck; i++) {
+              const dateToCheckDate = new Date(
+                // prettier-ignore
+                dateToCheckTimestamp - (i * 24 * 60 * 60 * 1000),
+              );
+              const isRightMonthAndDay =
+                dateToCheckDate.getDate() === startDateDate.getDate() &&
+                dateToCheckDate.getMonth() === startDateDate.getMonth();
 
-            const diffInYears =
-              dateToCheckDate.getFullYear() - startDateDate.getFullYear();
+              const diffInYears =
+                dateToCheckDate.getFullYear() - startDateDate.getFullYear();
 
-            return (
-              isRightMonthAndDay &&
-              // start date is not in the future
-              diffInYears >= 0 &&
-              diffInYears % taskRepeatCfg.repeatEvery === 0
-            );
+              if (
+                isRightMonthAndDay &&
+                // start date is not in the future
+                diffInYears >= 0 &&
+                diffInYears % taskRepeatCfg.repeatEvery === 0
+              )
+                return true;
+            }
+            return false;
           }
         }
       })
