@@ -145,7 +145,7 @@
     "@ngrx/data": "^14.0.2",
     "@ngrx/effects": "^14.0.2",
     "@ngrx/entity": "^14.0.2",
-    "@ngrx/schematics": "^15.1.0",
+    "@ngrx/schematics": "^17.2.0",
     "@ngrx/store": "14.0.2",
     "@ngrx/store-devtools": "^14.0.2",
     "@ngx-formly/core": "5.12.7",
