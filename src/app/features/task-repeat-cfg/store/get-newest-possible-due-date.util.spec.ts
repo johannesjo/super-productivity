@@ -46,6 +46,10 @@ const testCase = (
   startDate: Date | number,
   expected: Date | null,
 ): void => {
+  if (expected) {
+    expected.setHours(2, 0, 0, 0);
+  }
+
   expect(
     getNewestPossibleDueDate(
       {
@@ -117,8 +121,6 @@ describe('getNewestPossibleDueDate()', () => {
     testCases.forEach(
       ({ description, startDate, taskRepeatCfg, today, expectedDate }) => {
         it(description, () => {
-          if (expectedDate) {
-          }
           testCase(taskRepeatCfg, today, startDate, expectedDate);
         });
       },

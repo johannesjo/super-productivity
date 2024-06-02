@@ -15,15 +15,19 @@ export const getNewestPossibleDueDate = (
     throw new Error('Invalid repeatEvery value given');
   }
 
+  const checkDate = new Date(today);
+  const startDateDate = new Date(taskRepeatCfg.startDate);
+  const lastTaskCreation = new Date(taskRepeatCfg.lastTaskCreation);
+  // set to 2 to be safer(?) for summer/winter time affected comparisons
+  checkDate.setHours(2, 0, 0, 0);
+  lastTaskCreation.setHours(2, 0, 0, 0);
+
   switch (taskRepeatCfg.repeatCycle) {
     case 'DAILY': {
-      const checkDate = new Date(today);
-      const startDateDate = new Date(taskRepeatCfg.startDate);
-      const lastTaskCreation = new Date(taskRepeatCfg.lastTaskCreation);
-      const nrOfDayToCheck = taskRepeatCfg.repeatEvery + 1;
+      const nrOfDaysToCheck = taskRepeatCfg.repeatEvery + 1;
 
       // TODO add unit test for today
-      for (let i = 0; i < nrOfDayToCheck; i++) {
+      for (let i = 0; i < nrOfDaysToCheck; i++) {
         const diffInDays = getDiffInDays(startDateDate, checkDate);
         if (checkDate <= lastTaskCreation || diffInDays < 0) {
           break;
@@ -37,13 +41,10 @@ export const getNewestPossibleDueDate = (
     }
 
     case 'WEEKLY': {
-      const checkDate = new Date(today);
-      const startDateDate = new Date(taskRepeatCfg.startDate);
-      const lastTaskCreation = new Date(taskRepeatCfg.lastTaskCreation);
       // eslint-disable-next-line no-mixed-operators
-      const nrOfDayToCheck = taskRepeatCfg.repeatEvery * 7 + 1;
+      const nrOfDaysToCheck = taskRepeatCfg.repeatEvery * 7 + 1;
 
-      for (let i = 0; i < nrOfDayToCheck; i++) {
+      for (let i = 0; i < nrOfDaysToCheck; i++) {
         const diffInWeeks = getDiffInWeeks(startDateDate, checkDate);
         if (checkDate <= lastTaskCreation || diffInWeeks < 0) {
           break;
@@ -60,13 +61,9 @@ export const getNewestPossibleDueDate = (
     }
 
     case 'MONTHLY': {
-      const checkDate = new Date(today);
-      const startDateDate = new Date(taskRepeatCfg.startDate);
-      const lastTaskCreation = new Date(taskRepeatCfg.lastTaskCreation);
       const nrOfMonthsToCheck = taskRepeatCfg.repeatEvery;
       const dayOfMonthRepeat = startDateDate.getDate();
       checkDate.setDate(dayOfMonthRepeat);
-      checkDate.setHours(0, 0, 0, 0);
 
       for (let i = 0; i < nrOfMonthsToCheck; i++) {
         const diffInMonth = getDiffInMonth(startDateDate, checkDate);
@@ -83,15 +80,11 @@ export const getNewestPossibleDueDate = (
     }
 
     case 'YEARLY': {
-      const checkDate = new Date(today);
-      const startDateDate = new Date(taskRepeatCfg.startDate);
-      const lastTaskCreation = new Date(taskRepeatCfg.lastTaskCreation);
       const nrOfYearsToCheck = taskRepeatCfg.repeatEvery;
       const dayOfMonthRepeat = startDateDate.getDate();
       const monthOfMonthRepeat = startDateDate.getMonth();
       checkDate.setDate(dayOfMonthRepeat);
       checkDate.setMonth(monthOfMonthRepeat);
-      checkDate.setHours(0, 0, 0, 0);
 
       for (let i = 0; i < nrOfYearsToCheck; i++) {
         const diffInYears = getDiffInYears(startDateDate, checkDate);
