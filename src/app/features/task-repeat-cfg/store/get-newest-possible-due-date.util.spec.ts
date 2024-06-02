@@ -216,4 +216,63 @@ describe('getNewestPossibleDueDate()', () => {
       testCase(taskRepeatCfg, today, startDateDate, expectedDate);
     });
   });
+
+  describe('YEARLY', () => {
+    const testCases = [
+      {
+        description: 'should return date if applicable',
+        taskRepeatCfg: dummyRepeatable('ID1', {
+          repeatCycle: 'YEARLY',
+          lastTaskCreation: FAKE_MONDAY_THE_10TH,
+        }),
+        today: new Date(FAKE_MONDAY_THE_10TH + DAY * 366),
+        startDate: FAKE_MONDAY_THE_10TH,
+        expectedDate: new Date(FAKE_MONDAY_THE_10TH + DAY * 365),
+      },
+      {
+        description: 'should return null if not applicable',
+        taskRepeatCfg: dummyRepeatable('ID1', {
+          repeatCycle: 'YEARLY',
+          repeatEvery: 2,
+          lastTaskCreation: FAKE_MONDAY_THE_10TH,
+        }),
+        today: new Date(FAKE_MONDAY_THE_10TH + DAY * 365),
+        startDate: FAKE_MONDAY_THE_10TH,
+        expectedDate: null,
+      },
+      {
+        description: 'should return date if applicable 2',
+        taskRepeatCfg: dummyRepeatable('ID1', {
+          repeatCycle: 'YEARLY',
+          repeatEvery: 2,
+          lastTaskCreation: FAKE_MONDAY_THE_10TH,
+        }),
+        today: new Date(FAKE_MONDAY_THE_10TH + DAY * 365 * 3),
+        startDate: FAKE_MONDAY_THE_10TH,
+        expectedDate: new Date(FAKE_MONDAY_THE_10TH + DAY * 365 * 2),
+      },
+      {
+        description: 'should return date if applicable 3',
+        taskRepeatCfg: dummyRepeatable('ID1', {
+          repeatCycle: 'YEARLY',
+          repeatEvery: 3,
+          lastTaskCreation: new Date('2022-01-10').getTime(),
+        }),
+        today: new Date('2026-01-10'),
+        startDate: FAKE_MONDAY_THE_10TH,
+        expectedDate: new Date('2025-01-10'),
+      },
+    ];
+
+    testCases.forEach(
+      ({ description, startDate, taskRepeatCfg, today, expectedDate }) => {
+        it(description, () => {
+          if (expectedDate) {
+            expectedDate.setHours(0, 0, 0, 0);
+          }
+          testCase(taskRepeatCfg, today, startDate, expectedDate);
+        });
+      },
+    );
+  });
 });

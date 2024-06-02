@@ -1,6 +1,7 @@
 import { TaskRepeatCfg } from '../task-repeat-cfg.model';
 import { getDiffInDays } from '../../../util/get-diff-in-days';
 import { getDiffInMonth } from '../../../util/get-diff-in-month';
+import { getDiffInYears } from '../../../util/get-diff-in-years';
 
 export const getNewestPossibleDueDate = (
   taskRepeatCfg: TaskRepeatCfg,
@@ -90,12 +91,12 @@ export const getNewestPossibleDueDate = (
       checkDate.setHours(0, 0, 0, 0);
 
       for (let i = 0; i < nrOfYearsToCheck; i++) {
-        const diffInMonth = getDiffInMonth(startDateDate, checkDate);
+        const diffInYears = getDiffInYears(startDateDate, checkDate);
 
-        if (checkDate <= lastTaskCreation || diffInMonth < 0) {
+        if (checkDate <= lastTaskCreation || diffInYears < 0) {
           break;
         }
-        if (diffInMonth % taskRepeatCfg.repeatEvery === 0) {
+        if (diffInYears % taskRepeatCfg.repeatEvery === 0) {
           return checkDate;
         }
         checkDate.setFullYear(checkDate.getFullYear() - 1);
