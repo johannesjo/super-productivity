@@ -59,12 +59,12 @@ export const getNewestPossibleDueDate = (
       const checkDate = new Date(today);
       const startDateDate = new Date(taskRepeatCfg.startDate);
       const lastTaskCreation = new Date(taskRepeatCfg.lastTaskCreation);
-      const nrOfMonthToCheck = taskRepeatCfg.repeatEvery;
+      const nrOfMonthsToCheck = taskRepeatCfg.repeatEvery;
       const dayOfMonthRepeat = startDateDate.getDate();
       checkDate.setDate(dayOfMonthRepeat);
       checkDate.setHours(0, 0, 0, 0);
 
-      for (let i = 0; i < nrOfMonthToCheck; i++) {
+      for (let i = 0; i < nrOfMonthsToCheck; i++) {
         const diffInMonth = getDiffInMonth(startDateDate, checkDate);
 
         if (checkDate <= lastTaskCreation || diffInMonth < 0) {
@@ -79,6 +79,28 @@ export const getNewestPossibleDueDate = (
     }
 
     case 'YEARLY': {
+      const checkDate = new Date(today);
+      const startDateDate = new Date(taskRepeatCfg.startDate);
+      const lastTaskCreation = new Date(taskRepeatCfg.lastTaskCreation);
+      const nrOfYearsToCheck = taskRepeatCfg.repeatEvery;
+      const dayOfMonthRepeat = startDateDate.getDate();
+      const monthOfMonthRepeat = startDateDate.getMonth();
+      checkDate.setDate(dayOfMonthRepeat);
+      checkDate.setMonth(monthOfMonthRepeat);
+      checkDate.setHours(0, 0, 0, 0);
+
+      for (let i = 0; i < nrOfYearsToCheck; i++) {
+        const diffInMonth = getDiffInMonth(startDateDate, checkDate);
+
+        if (checkDate <= lastTaskCreation || diffInMonth < 0) {
+          break;
+        }
+        if (diffInMonth % taskRepeatCfg.repeatEvery === 0) {
+          return checkDate;
+        }
+        checkDate.setFullYear(checkDate.getFullYear() - 1);
+      }
+      return null;
     }
 
     default:
