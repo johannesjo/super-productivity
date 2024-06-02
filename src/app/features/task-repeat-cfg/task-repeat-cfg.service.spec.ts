@@ -70,6 +70,10 @@ describe('TaskRepeatCfgService', () => {
       const taskRepeatCfg: TaskRepeatCfg = {
         id: TRID,
         tagIds: [],
+        startDate: 24 * 60 * 60 * 1000,
+        repeatEvery: 1,
+        repeatCycle: 'DAILY',
+        lastTaskCreation: 24,
       } as any;
       taskServiceMock.createNewTaskWithDefaults.and.callThrough();
       taskServiceMock.getTasksWithSubTasksByRepeatCfgId$.and.callFake(() =>

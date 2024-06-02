@@ -74,7 +74,7 @@ export class TaskRepeatCfgEffects {
       concatMap(
         () =>
           this._taskRepeatCfgService
-            .getRepeatTableTasksDueForDayOnly$(
+            .getRepeatTableTasksDueForDayIncludingOverdue$(
               Date.now() - this._dateService.startOfNextDayDiff,
             )
             .pipe(first()),

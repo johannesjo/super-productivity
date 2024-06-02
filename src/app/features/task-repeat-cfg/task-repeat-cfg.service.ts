@@ -37,6 +37,7 @@ import { getDateTimeFromClockString } from '../../util/get-date-time-from-clock-
 import { isSameDay } from '../../util/is-same-day';
 import { remindOptionToMilliseconds } from '../tasks/util/remind-option-to-milliseconds';
 import { sortRepeatableTaskCfgs } from './sort-repeatable-task-cfg';
+import { getNewestPossibleDueDate } from './store/get-newest-possible-due-date.util';
 
 @Injectable({
   providedIn: 'root',
@@ -58,6 +59,13 @@ export class TaskRepeatCfgService {
   ) {}
 
   getRepeatTableTasksDueForDayOnly$(dayDate: number): Observable<TaskRepeatCfg[]> {
+    // ===> taskRepeatCfgs scheduled for today and not yet created already
+    return this._store$.pipe(select(selectTaskRepeatCfgsDueOnDayOnly, { dayDate }));
+  }
+
+  getRepeatTableTasksDueForDayIncludingOverdue$(
+    dayDate: number,
+  ): Observable<TaskRepeatCfg[]> {
     // ===> taskRepeatCfgs scheduled for today and not yet created already
     return this._store$.pipe(select(selectTaskRepeatCfgsDueOnDayOnly, { dayDate }));
   }
@@ -200,6 +208,13 @@ export class TaskRepeatCfgService {
     if (!isCreateNew) {
       return [];
     }
+    const targetCreated = getNewestPossibleDueDate(
+      taskRepeatCfg,
+      new Date(targetDayDate),
+    );
+    if (!targetCreated) {
+      throw new Error('Unable to getNewestPossibleDueDate()');
+    }
 
     const { task, isAddToBottom } = this._getTaskRepeatTemplate(taskRepeatCfg);
 
@@ -211,9 +226,9 @@ export class TaskRepeatCfgService {
       addTask({
         task: {
           ...task,
-          // NOTE otherwise isCreateNew check above would not work as intended and
+          // NOTE if moving this to top isCreateNew check above would not work as intended
           // we use created also for the repeat day label for past tasks
-          created: targetDayDate,
+          created: targetCreated.getTime(),
         },
         workContextType: this._workContextService
           .activeWorkContextType as WorkContextType,

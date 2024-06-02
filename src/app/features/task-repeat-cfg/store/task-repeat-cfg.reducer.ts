@@ -97,6 +97,34 @@ export const selectTaskRepeatCfgsDueOnDayOnly = createSelector(
     );
   },
 );
+
+export const selectTaskRepeatCfgsDueOnDayIncludingOverdue = createSelector(
+  selectAllTaskRepeatCfgs,
+  (
+    taskRepeatCfgs: TaskRepeatCfg[],
+    { dayDate }: { dayDate: number },
+  ): TaskRepeatCfg[] => {
+    const dateToCheckTimestamp = dayDate;
+    const dateToCheckDate = new Date(dateToCheckTimestamp);
+
+    return (
+      taskRepeatCfgs &&
+      taskRepeatCfgs.filter((taskRepeatCfg: TaskRepeatCfg) => {
+        if (
+          isSameDay(taskRepeatCfg.lastTaskCreation, dateToCheckTimestamp) ||
+          // also check for if future instance was already created via the work-view button
+          dateToCheckTimestamp < taskRepeatCfg.lastTaskCreation
+        ) {
+          return false;
+        }
+
+        const rd = getNewestPossibleDueDate(taskRepeatCfg, dateToCheckDate);
+        return !!rd;
+      })
+    );
+  },
+);
+
 export const selectTaskRepeatCfgByIdAllowUndefined = createSelector(
   selectTaskRepeatCfgFeatureState,
   (state: TaskRepeatCfgState, props: { id: string }): TaskRepeatCfg | undefined =>
