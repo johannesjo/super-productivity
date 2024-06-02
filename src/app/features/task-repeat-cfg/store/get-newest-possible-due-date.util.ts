@@ -1,7 +1,8 @@
-import { TaskRepeatCfg } from '../task-repeat-cfg.model';
+import { TASK_REPEAT_WEEKDAY_MAP, TaskRepeatCfg } from '../task-repeat-cfg.model';
 import { getDiffInDays } from '../../../util/get-diff-in-days';
 import { getDiffInMonth } from '../../../util/get-diff-in-month';
 import { getDiffInYears } from '../../../util/get-diff-in-years';
+import { getDiffInWeeks } from '../../../util/get-diff-in-weeks';
 
 export const getNewestPossibleDueDate = (
   taskRepeatCfg: TaskRepeatCfg,
@@ -36,22 +37,24 @@ export const getNewestPossibleDueDate = (
     }
 
     case 'WEEKLY': {
-      // TODO check if i move them up
       const checkDate = new Date(today);
       const startDateDate = new Date(taskRepeatCfg.startDate);
       const lastTaskCreation = new Date(taskRepeatCfg.lastTaskCreation);
-      const nrOfDayToCheck = taskRepeatCfg.repeatEvery * 7;
+      // eslint-disable-next-line no-mixed-operators
+      const nrOfDayToCheck = taskRepeatCfg.repeatEvery * 7 + 1;
 
-      // TODO add unit test for today
       for (let i = 0; i < nrOfDayToCheck; i++) {
-        checkDate.setDate(checkDate.getDate() - 1);
-        const diffInDays = getDiffInDays(startDateDate, checkDate);
-        if (checkDate <= lastTaskCreation || diffInDays < 0) {
+        const diffInWeeks = getDiffInWeeks(startDateDate, checkDate);
+        if (checkDate <= lastTaskCreation || diffInWeeks < 0) {
           break;
         }
-        if (diffInDays % (taskRepeatCfg.repeatEvery * 7) === 0) {
+        const todayDay = checkDate.getDay();
+        const todayDayStr: keyof TaskRepeatCfg = TASK_REPEAT_WEEKDAY_MAP[todayDay];
+
+        if (diffInWeeks % taskRepeatCfg.repeatEvery === 0 && taskRepeatCfg[todayDayStr]) {
           return checkDate;
         }
+        checkDate.setDate(checkDate.getDate() - 1);
       }
       return null;
     }

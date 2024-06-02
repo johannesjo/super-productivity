@@ -126,50 +126,159 @@ describe('getNewestPossibleDueDate()', () => {
   });
 
   describe('WEEKLY', () => {
-    it('should return last week if last week was due and not set', () => {
-      const taskRepeatCfg: TaskRepeatCfg = dummyRepeatable('ID1', {
-        repeatCycle: 'WEEKLY',
-        lastTaskCreation: 0,
-      });
-      const today = new Date(FAKE_MONDAY_THE_10TH);
-      const expectedDate = new Date(FAKE_MONDAY_THE_10TH - DAY * 7);
-      testCase(taskRepeatCfg, today, FAKE_MONDAY_THE_10TH - DAY * 7, expectedDate);
-    });
+    const testCases = [
+      {
+        // 1-10-22 is a monday
+        description: 'should return today date if today is due day',
+        taskRepeatCfg: dummyRepeatable('ID1', {
+          repeatCycle: 'WEEKLY',
+          lastTaskCreation: new Date('2022-01-10').getTime(),
+          monday: true,
+        }),
+        today: new Date('2022-01-17'),
+        startDate: new Date('2022-01-10'),
+        expectedDate: new Date('2022-01-17'),
+      },
+      {
+        // 1-10-22 is a monday
+        description: 'should return null if no weekday is set',
+        taskRepeatCfg: dummyRepeatable('ID1', {
+          repeatCycle: 'WEEKLY',
+          lastTaskCreation: new Date('2022-01-10').getTime(),
+        }),
+        today: new Date('2022-01-17'),
+        startDate: new Date('2022-01-10'),
+        expectedDate: null,
+      },
+      {
+        description: 'should work also if there is a weird lastTaskCreation date',
+        taskRepeatCfg: dummyRepeatable('ID1', {
+          repeatCycle: 'WEEKLY',
+          lastTaskCreation: new Date('2022-01-16').getTime(),
+          monday: true,
+        }),
+        today: new Date('2022-01-17'),
+        startDate: new Date('2022-01-10'),
+        expectedDate: new Date('2022-01-17'),
+      },
+      {
+        description: 'should return date for the proper weekday',
+        taskRepeatCfg: dummyRepeatable('ID1', {
+          repeatCycle: 'WEEKLY',
+          lastTaskCreation: new Date('2022-01-07').getTime(),
+          friday: true,
+        }),
+        // is a friday
+        startDate: new Date('2022-01-07'),
+        today: new Date('2022-03-24'),
+        // is a friday
+        expectedDate: new Date('2022-03-18'),
+      },
+      {
+        description: 'should work for repeat every 1',
+        taskRepeatCfg: dummyRepeatable('ID1', {
+          repeatCycle: 'WEEKLY',
+          repeatEvery: 2,
+          lastTaskCreation: new Date('2022-01-03').getTime(),
+          monday: true,
+        }),
+        // monday
+        startDate: new Date('2022-01-03'),
+        today: new Date('2022-01-24'),
+        expectedDate: new Date('2022-01-17'),
+      },
+      {
+        description: 'should work for repeat every 2',
+        taskRepeatCfg: dummyRepeatable('ID1', {
+          repeatCycle: 'WEEKLY',
+          repeatEvery: 2,
+          lastTaskCreation: new Date('2022-01-03').getTime(),
+          monday: true,
+          tuesday: true,
+        }),
+        // monday
+        startDate: new Date('2022-01-03'),
+        today: new Date('2022-01-24'),
+        expectedDate: new Date('2022-01-18'),
+      },
+      {
+        description: 'should return null if today and already created',
+        taskRepeatCfg: dummyRepeatable('ID1', {
+          repeatCycle: 'WEEKLY',
+          lastTaskCreation: new Date('2022-01-10').getTime(),
+          monday: true,
+        }),
+        today: new Date('2022-01-10'),
+        startDate: new Date('2022-01-10'),
+        expectedDate: null,
+      },
+      {
+        description: 'should return null if last applicable is already created',
+        taskRepeatCfg: dummyRepeatable('ID1', {
+          repeatCycle: 'WEEKLY',
+          repeatEvery: 2,
+          monday: true,
+          lastTaskCreation: new Date('2022-01-17').getTime(),
+        }),
+        today: new Date('2022-01-27'),
+        startDate: new Date('2022-01-03'),
+        expectedDate: null,
+      },
+      {
+        description: 'should return last week if last week was due and not set',
+        taskRepeatCfg: dummyRepeatable('ID1', {
+          repeatCycle: 'WEEKLY',
+          lastTaskCreation: 0,
+          monday: true,
+        }),
+        today: new Date(FAKE_MONDAY_THE_10TH - DAY),
+        startDate: new Date(FAKE_MONDAY_THE_10TH - DAY * 14),
+        expectedDate: new Date(FAKE_MONDAY_THE_10TH - DAY * 7),
+      },
+      {
+        description:
+          'should return last week if last week was due and last creation is long ago',
+        taskRepeatCfg: dummyRepeatable('ID1', {
+          repeatCycle: 'WEEKLY',
+          lastTaskCreation: FAKE_MONDAY_THE_10TH + DAY * 7,
+          monday: true,
+        }),
+        startDate: new Date(FAKE_MONDAY_THE_10TH),
+        today: new Date(FAKE_MONDAY_THE_10TH + DAY * 7 * 29 + DAY * 3),
+        expectedDate: new Date(FAKE_MONDAY_THE_10TH + DAY * 7 * 29),
+      },
+      {
+        description: 'should return NULL if not applicable',
+        taskRepeatCfg: dummyRepeatable('ID1', {
+          repeatCycle: 'WEEKLY',
+          repeatEvery: 5,
+          lastTaskCreation: FAKE_MONDAY_THE_10TH + DAY * (7 * 5 + 0),
+          monday: true,
+        }),
+        startDate: new Date(FAKE_MONDAY_THE_10TH),
+        today: new Date(FAKE_MONDAY_THE_10TH + DAY * (5 * 7 + 7)),
+        expectedDate: null,
+      },
+      {
+        description: 'should return NULL if start data is in the future',
+        taskRepeatCfg: dummyRepeatable('ID1', {
+          repeatCycle: 'WEEKLY',
+          lastTaskCreation: FAKE_MONDAY_THE_10TH - DAY * 7,
+          monday: true,
+        }),
+        startDate: new Date(FAKE_MONDAY_THE_10TH),
+        today: new Date(FAKE_MONDAY_THE_10TH - 1 * DAY),
+        expectedDate: null,
+      },
+    ];
 
-    it('should return last week if last week was due and last creation is long ago', () => {
-      const START = FAKE_MONDAY_THE_10TH;
-      const taskRepeatCfg: TaskRepeatCfg = dummyRepeatable('ID1', {
-        repeatCycle: 'WEEKLY',
-        lastTaskCreation: START + DAY * 7,
-      });
-      const today = new Date(START + DAY * 7 * 29 + DAY * 3);
-      const expectedDate = new Date(START + DAY * 7 * 29);
-      testCase(taskRepeatCfg, today, START, expectedDate);
-    });
-
-    it('should return NULL if not applicable', () => {
-      const repeatEvery = 5;
-      const START = FAKE_MONDAY_THE_10TH;
-      const LAST_CREATION = START + DAY * (7 * repeatEvery + 0);
-      const TODAY = START + DAY * (repeatEvery * 7 + 7);
-      const taskRepeatCfg: TaskRepeatCfg = dummyRepeatable('ID1', {
-        repeatCycle: 'WEEKLY',
-        repeatEvery,
-        lastTaskCreation: LAST_CREATION,
-      });
-      const today = new Date(TODAY);
-      testCase(taskRepeatCfg, today, START, null);
-    });
-
-    it('should return NULL if start data is in the future', () => {
-      const START = FAKE_MONDAY_THE_10TH;
-      const today = new Date(START - 1 * DAY);
-      const taskRepeatCfg: TaskRepeatCfg = dummyRepeatable('ID1', {
-        repeatCycle: 'WEEKLY',
-        lastTaskCreation: START - DAY * 7,
-      });
-      testCase(taskRepeatCfg, today, START, null);
-    });
+    testCases.forEach(
+      ({ description, taskRepeatCfg, startDate, today, expectedDate }) => {
+        it(description, () => {
+          testCase(taskRepeatCfg, today, startDate, expectedDate);
+        });
+      },
+    );
   });
 
   describe('MONTHLY', () => {
