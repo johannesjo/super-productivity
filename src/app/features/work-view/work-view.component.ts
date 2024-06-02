@@ -81,7 +81,7 @@ export class WorkViewComponent implements OnInit, OnDestroy, AfterContentInit {
   // eslint-disable-next-line no-mixed-operators
   private _tomorrow: number = Date.now() + 24 * 60 * 60 * 1000;
   repeatableScheduledForTomorrow$: Observable<TaskRepeatCfg[]> =
-    this._taskRepeatCfgService.getRepeatTableTasksDueForDay$(this._tomorrow);
+    this._taskRepeatCfgService.getRepeatTableTasksDueForDayOnly$(this._tomorrow);
 
   private _subs: Subscription = new Subscription();
   private _switchListAnimationTimeout?: number;

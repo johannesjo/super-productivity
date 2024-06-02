@@ -3,13 +3,13 @@ import {
   BlockedBlock,
   BlockedBlockType,
   TimelineCalendarMapEntry,
-  TimelineWorkStartEndCfg,
   TimelineLunchBreakCfg,
+  TimelineWorkStartEndCfg,
 } from '../timeline.model';
 import { getTimeLeftForTask } from '../../../util/get-time-left-for-task';
 import { getDateTimeFromClockString } from '../../../util/get-date-time-from-clock-string';
 import { TaskRepeatCfg } from '../../task-repeat-cfg/task-repeat-cfg.model';
-import { selectTaskRepeatCfgsDueOnDay } from '../../task-repeat-cfg/store/task-repeat-cfg.reducer';
+import { selectTaskRepeatCfgsDueOnDayOnly } from '../../task-repeat-cfg/store/task-repeat-cfg.reducer';
 
 const PROJECTION_DAYS: number = 29;
 
@@ -58,7 +58,7 @@ const createBlockerBlocksForScheduledRepeatProjections = (
   while (i <= PROJECTION_DAYS) {
     // eslint-disable-next-line no-mixed-operators
     const currentDayTimestamp = now + i * 24 * 60 * 60 * 1000;
-    const allRepeatableTasksForDay = selectTaskRepeatCfgsDueOnDay.projector(
+    const allRepeatableTasksForDay = selectTaskRepeatCfgsDueOnDayOnly.projector(
       scheduledTaskRepeatCfgs,
       {
         dayDate: currentDayTimestamp,

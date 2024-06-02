@@ -376,6 +376,17 @@ describe('getNewestPossibleDueDate()', () => {
         startDate: FAKE_MONDAY_THE_10TH,
         expectedDate: new Date('2025-01-10'),
       },
+      {
+        description: 'should return null if NOT applicable',
+        taskRepeatCfg: dummyRepeatable('ID1', {
+          repeatCycle: 'YEARLY',
+          repeatEvery: 2,
+          lastTaskCreation: new Date('2022-01-10').getTime(),
+        }),
+        today: new Date('2023-01-10'),
+        startDate: new Date('2022-01-10').getTime(),
+        expectedDate: null,
+      },
     ];
 
     testCases.forEach(

@@ -4,7 +4,7 @@ import {
   selectAllTaskRepeatCfgs,
   selectTaskRepeatCfgById,
   selectTaskRepeatCfgByIdAllowUndefined,
-  selectTaskRepeatCfgsDueOnDay,
+  selectTaskRepeatCfgsDueOnDayOnly,
   selectTaskRepeatCfgsWithStartTime,
 } from './store/task-repeat-cfg.reducer';
 import {
@@ -57,9 +57,9 @@ export class TaskRepeatCfgService {
     private _workContextService: WorkContextService,
   ) {}
 
-  getRepeatTableTasksDueForDay$(dayDate: number): Observable<TaskRepeatCfg[]> {
+  getRepeatTableTasksDueForDayOnly$(dayDate: number): Observable<TaskRepeatCfg[]> {
     // ===> taskRepeatCfgs scheduled for today and not yet created already
-    return this._store$.pipe(select(selectTaskRepeatCfgsDueOnDay, { dayDate }));
+    return this._store$.pipe(select(selectTaskRepeatCfgsDueOnDayOnly, { dayDate }));
   }
 
   getTaskRepeatCfgById$(id: string): Observable<TaskRepeatCfg> {

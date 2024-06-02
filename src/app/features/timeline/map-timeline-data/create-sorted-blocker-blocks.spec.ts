@@ -1,7 +1,7 @@
 import { createSortedBlockerBlocks } from './create-sorted-blocker-blocks';
 import { TaskReminderOptionId, TaskWithReminder } from '../../tasks/task.model';
 import { getDateTimeFromClockString } from '../../../util/get-date-time-from-clock-string';
-import { TimelineCalendarMapEntry, BlockedBlockType } from '../timeline.model';
+import { BlockedBlockType, TimelineCalendarMapEntry } from '../timeline.model';
 import {
   DEFAULT_TASK_REPEAT_CFG,
   TaskRepeatCfg,
@@ -785,6 +785,7 @@ describe('createBlockerBlocks()', () => {
         undefined,
         0,
       );
+
       expect(r.length).toEqual(5);
       expect(r[0].start).toEqual(
         getDateTimeFromClockString('10:00', 24 * 60 * 60 * 1000),
