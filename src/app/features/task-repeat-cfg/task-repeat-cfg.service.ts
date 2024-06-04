@@ -4,6 +4,7 @@ import {
   selectAllTaskRepeatCfgs,
   selectTaskRepeatCfgById,
   selectTaskRepeatCfgByIdAllowUndefined,
+  selectTaskRepeatCfgsDueOnDayIncludingOverdue,
   selectTaskRepeatCfgsDueOnDayOnly,
   selectTaskRepeatCfgsWithStartTime,
 } from './store/task-repeat-cfg.reducer';
@@ -60,22 +61,22 @@ export class TaskRepeatCfgService {
 
   getRepeatTableTasksDueForDayOnly$(dayDate: number): Observable<TaskRepeatCfg[]> {
     // ===> taskRepeatCfgs scheduled for today and not yet created already
-    return this._store$.pipe(select(selectTaskRepeatCfgsDueOnDayOnly, { dayDate }));
+    return this._store$.select(selectTaskRepeatCfgsDueOnDayOnly, { dayDate });
   }
 
   getRepeatTableTasksDueForDayIncludingOverdue$(
     dayDate: number,
   ): Observable<TaskRepeatCfg[]> {
     // ===> taskRepeatCfgs scheduled for today and not yet created already
-    return this._store$.pipe(select(selectTaskRepeatCfgsDueOnDayOnly, { dayDate }));
+    return this._store$.select(selectTaskRepeatCfgsDueOnDayIncludingOverdue, { dayDate });
   }
 
   getTaskRepeatCfgById$(id: string): Observable<TaskRepeatCfg> {
-    return this._store$.pipe(select(selectTaskRepeatCfgById, { id }));
+    return this._store$.select(selectTaskRepeatCfgById, { id });
   }
 
   getTaskRepeatCfgByIdAllowUndefined$(id: string): Observable<TaskRepeatCfg | undefined> {
-    return this._store$.pipe(select(selectTaskRepeatCfgByIdAllowUndefined, { id }));
+    return this._store$.select(selectTaskRepeatCfgByIdAllowUndefined, { id });
   }
 
   addTaskRepeatCfgToTask(
