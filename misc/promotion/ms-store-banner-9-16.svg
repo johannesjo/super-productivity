@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+  width="1440"
+  height="2160"
+  viewBox="0 0 1440 2160"
+  version="1.1"
+  id="svg1"
+  sodipodi:docname="ms-store-banner-9-16.svg"
+  inkscape:version="1.3.2 (091e20ef0f, 2023-11-25)"
+  inkscape:export-filename="ms-store-banner-9-16.png"
+  inkscape:export-xdpi="96"
+  inkscape:export-ydpi="96"
+  xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+  xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+  xmlns:xlink="http://www.w3.org/1999/xlink"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <sodipodi:namedview
+    id="namedview3"
+    pagecolor="#ffffff"
+    bordercolor="#000000"
+    borderopacity="0.25"
+    inkscape:showpageshadow="2"
+    inkscape:pageopacity="0.0"
+    inkscape:pagecheckerboard="0"
+    inkscape:deskcolor="#d1d1d1"
+    inkscape:zoom="0.22579422"
+    inkscape:cx="292.30155"
+    inkscape:cy="1483.6518"
+    inkscape:window-width="2560"
+    inkscape:window-height="1376"
+    inkscape:window-x="0"
+    inkscape:window-y="27"
+    inkscape:window-maximized="1"
+    inkscape:current-layer="svg1" />
+  <defs
+    id="defs1">
+    <linearGradient
+      id="linearGradient6-1">
+      <stop
+        style="stop-color:#5893f1;"
+        offset="0"
+        id="stop12" />
+      <stop
+        style="stop-color:#4385F4;"
+        offset="0.2"
+        id="stop10" />
+      <stop
+        style="stop-color:#3060b5;"
+        offset="0.9"
+        id="stop1" />
+      <stop
+        style="stop-color:#25519f;"
+        offset="1"
+        id="stop2" />
+    </linearGradient>
+    <linearGradient
+      id="linearGradient7"
+      x1="0"
+      y1="700"
+      gradientUnits="userSpaceOnUse"
+      xlink:href="#linearGradient6-1"
+      gradientTransform="translate(3.9295895)" />
+  </defs>
+  <g
+    id="layer1"
+    transform="translate(-3.9295895)">
+    <rect
+      style="fill:url(#linearGradient7)"
+      id="rect5"
+      width="1440"
+      height="2160"
+      x="3.9295895"
+      y="0" />
+    <text
+      y="239.32932"
+      text-anchor="middle"
+      dominant-baseline="middle"
+      style="font-weight:300;font-size:146.667px;font-family:Ubuntu;fill:#ffffff"
+      id="text2"
+      x="720.55621">
+      <tspan
+        sodipodi:role="line"
+        x="720.55621"
+        y="239.32932"
+        id="tspan11"
+        style="font-size:146.667px">the best
+      </tspan>
+      <tspan
+        sodipodi:role="line"
+        x="720.55621"
+        y="422.66309"
+        style="font-size:146.667px"
+        id="tspan3">todo app
+      </tspan>
+      <tspan
+        sodipodi:role="line"
+        x="720.55621"
+        y="605.99683"
+        style="font-size:146.667px"
+        id="tspan1">for
+      </tspan>
+      <tspan
+        sodipodi:role="line"
+        x="720.55621"
+        y="789.33057"
+        style="font-size:146.667px"
+        id="tspan2">digital
+      </tspan>
+      <tspan
+        sodipodi:role="line"
+        x="720.55621"
+        y="972.66431"
+        id="tspan7"
+        style="font-size:146.667px">professionals
+      </tspan>
+      <tspan
+        sodipodi:role="line"
+        x="720.55621"
+        y="1155.9982"
+        id="tspan12"
+        style="font-size:146.667px" />
+    </text>
+    <text
+      xml:space="preserve"
+      style="font-weight:bold;font-size:320px;font-family:sans-serif;-inkscape-font-specification:'sans-serif Bold';fill:#000000;stroke-width:2;stroke-opacity:0.0861015"
+      x="959.60553"
+      y="1123.34"
+      id="text9"><tspan
+         sodipodi:role="line"
+         id="tspan9"
+         x="959.60553"
+         y="1123.34" />
+      <tspan
+        sodipodi:role="line"
+        id="tspan10"
+        x="959.60553"
+        y="1523.34" /></text>
+  </g>
+  <g
+    id="layerIco"
+    transform="translate(-2761.9022,-688.92335)">
+    <path
+      d="M 3123.8044,2279.4277 3484.4977,2611.4855 3840,1897.8357 3459.2058,2428.4747 Z"
+      id="path3395"
+      style="fill:#ffffff;fill-opacity:1;fill-rule:evenodd;stroke:none;stroke-width:16.6482;stroke-linecap:butt;stroke-linejoin:bevel;stroke-miterlimit:13.8;stroke-dasharray:none;stroke-opacity:1" />
+  </g>
+</svg>
