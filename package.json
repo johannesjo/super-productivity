@@ -1,7 +1,7 @@
 {
   "name": "superProductivity",
   "version": "8.0.7",
-  "description": "Super Productivity is an advanced ToDo list app with integrated time-boxing and time tracking capabilities. You can load your task from your calendars and from Jira, Gitlab, GitHub, Open Project and others all into a single ToDo list.",
+  "description": "Experience the best ToDo app for digital professionals and get more done! Super Productivity comes with integrated time-boxing and time tracking capabilities and you can load your task from your calendars and from Jira, Gitlab, GitHub, Open Project and others all into a single ToDo list.",
   "main": "./electron/main.js",
   "author": "Johannes Millan <contact@super-productivity.com> (http://super-productivity.com)",
   "license": "MIT",
