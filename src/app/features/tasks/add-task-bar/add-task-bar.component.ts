@@ -195,6 +195,8 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
         (ev: KeyboardEvent) => {
           if (ev.key === 'Escape') {
             this.blurred.emit();
+            // needs to be set otherwise the activatedIssueTask won't reflect the task that is added
+            this.activatedIssueTask$.next(null);
           } else if (ev.key === '1' && ev.ctrlKey) {
             this.isAddToBacklog = !this.isAddToBacklog;
             this._cd.detectChanges();
