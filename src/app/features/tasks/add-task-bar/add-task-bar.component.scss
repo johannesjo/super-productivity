@@ -34,7 +34,7 @@
   bottom: $s;
 }
 
-$short-syntax-bar-height: 28px;
+$short-syntax-bar-height: 32px;
 .add-task-form {
   width: 100%;
   position: relative;
@@ -146,6 +146,20 @@ $short-syntax-bar-height: 28px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  vertical-align: middle;
+
+  &.add-existing {
+    font-weight: bold;
+    color: $light-theme-text-color;
+
+    @include darkTheme {
+      color: $dark-theme-text-color;
+    }
+  }
+
+  > mat-icon {
+    vertical-align: middle;
+  }
 }
 
 .separator-box {

@@ -87,16 +87,18 @@
       <ng-container *ngIf="activatedIssueTask">
         <div
           *ngIf="activatedIssueTask.issueType"
-          class="info-text"
+          class="info-text add-existing"
         >
+          <mat-icon>playlist_add</mat-icon>
           {{T.F.TASK.ADD_TASK_BAR.ADD_ISSUE_TASK|translate:{ issueType:
           activatedIssueTask.issueType, issueNr: activatedIssueTask.taskIssueId ||
           activatedIssueTask.issueData?.id } }}
         </div>
         <div
           *ngIf="activatedIssueTask.issueType=== undefined"
-          class="info-text"
+          class="info-text add-existing"
         >
+          <mat-icon>playlist_add</mat-icon>
           {{T.F.TASK.ADD_TASK_BAR.ADD_EXISTING_TASK|translate: { taskTitle:
           activatedIssueTask.title } }}
         </div>
