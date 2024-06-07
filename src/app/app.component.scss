@@ -29,6 +29,7 @@
   flex-grow: 1;
   position: relative;
   overflow: hidden;
+  -webkit-app-region: no-drag !important;
 
   > ::ng-deep router-outlet + * {
     position: absolute;

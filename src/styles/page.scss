@@ -15,6 +15,13 @@ app-root,
   font-family: 'Roboto', 'Comic Sans MS';
 }
 
+html {
+  button,
+  a {
+    -webkit-app-region: no-drag !important;
+  }
+}
+
 body {
   // to fix older android web view
   position: absolute;
