@@ -170,8 +170,25 @@ export class AppComponent implements OnDestroy {
     } else {
       // WEB VERSION
       this._chromeExtensionInterfaceService.init();
+      console.log(
+        'LS.WEB_APP_ACTIVE_INSTANCE',
+        localStorage.getItem(LS.WEB_APP_ACTIVE_INSTANCE),
+      );
+
+      if (localStorage.getItem(LS.WEB_APP_ACTIVE_INSTANCE)) {
+        // NOTE: translations not ready yet
+        const t =
+          'You are running multiple instances of Super Productivity (possibly over multiple tabs). This is not recommended and might lead to data loss!!';
+        const t2 = 'Please close all other instances, before you continue!';
+        // show in two dialogs to be sure the user didn't miss it
+        alert(t);
+        alert(t2);
+      }
+      localStorage.setItem(LS.WEB_APP_ACTIVE_INSTANCE, 'true');
 
       window.addEventListener('beforeunload', (e) => {
+        localStorage.removeItem(LS.WEB_APP_ACTIVE_INSTANCE);
+
         const gCfg = this._globalConfigService.cfg;
         if (!gCfg) {
           throw new Error();
