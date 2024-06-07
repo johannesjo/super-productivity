@@ -38,11 +38,24 @@ linux:
     - deb
     - snap
     - rpm
+  desktop:
+    Name: Super Productivity
+    Comment: A todo list and time tracking app
+    Exec: superProductivity
+    Terminal: false
+    Type: Application
+    Icon: build/icon.png
+    GenericName: ToDo List and Time Tracker
+
   publish:
     - github
+
 snap:
   grade: stable
   allowNativeWayland: true
+  autoStart: true
+  base: core22
+  confinement: strict
 
 mac:
   notarize: true
