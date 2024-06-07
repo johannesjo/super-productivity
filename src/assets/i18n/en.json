@@ -1014,7 +1014,7 @@
         "ESTIMATE": "Estimate",
         "TIME_SPENT": "Time Spent",
         "TIME_SPENT_ON": "Time Spent {{date}}",
-        "TITLE": "Time spent / Estimates"
+        "TITLE": "Duration"
       },
       "D_TIME_FOR_DAY": {
         "ADD_ENTRY_FOR": "Add new entry for {{date}}",
