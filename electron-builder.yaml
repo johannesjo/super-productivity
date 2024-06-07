@@ -69,6 +69,8 @@ mac:
   gatekeeperAssess: false
   provisioningProfile: embedded.provisionprofile
   darkModeSupport: true
+  extendInfo:
+    ITSAppUsesNonExemptEncryption: false
   publish:
     - github
   target:
