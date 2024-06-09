@@ -82,7 +82,7 @@ mac:
         - universal
 
 dmg:
-  sign: false
+  sign: true
   publish:
     - github
 
