@@ -108,6 +108,7 @@
   ],
   "dependencies": {
     "@electron/remote": "^2.0.12",
+    "angular-mentions": "^1.5.0",
     "electron-dl": "^3.5.1",
     "electron-localshortcut": "^3.2.1",
     "electron-log": "^5.1.2",
