@@ -30,7 +30,6 @@ import {
 import { Update } from '@ngrx/entity/src/models';
 import { unique } from '../../../util/unique';
 import { loadAllData } from '../../../root-store/meta/load-all-data.action';
-import { TaskWithSubTasks } from '../../tasks/task.model';
 import { migrateTagState } from '../migrate-tag-state.util';
 import { MODEL_VERSION_KEY } from '../../../app.constants';
 import { MODEL_VERSION } from '../../../core/model-version';
@@ -356,9 +355,12 @@ export const tagReducer = createReducer<TagState>(
   }),
 
   on(moveToArchive_, (state, { tasks }) => {
-    const taskIdsToMoveToArchive = tasks.map((t) => t.id);
+    const taskIdsToMoveToArchive = tasks.flatMap((t) => [
+      t.id,
+      ...t.subTasks.map((st) => st.id),
+    ]);
     const tagIds = unique(
-      tasks.reduce((acc: string[], t: TaskWithSubTasks) => [...acc, ...t.tagIds], []),
+      tasks.flatMap((t) => [...t.tagIds, ...t.subTasks.flatMap((st) => st.tagIds)]),
     );
     const updates: Update<Tag>[] = tagIds.map((pid: string) => ({
       id: pid,
