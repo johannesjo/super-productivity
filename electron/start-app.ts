@@ -9,14 +9,6 @@ import {
   protocol,
 } from 'electron';
 import { join } from 'path';
-import {
-  existsSync,
-  mkdirSync,
-  readdirSync,
-  readFileSync,
-  statSync,
-  writeFileSync,
-} from 'fs';
 import { initDebug } from './debug';
 import * as electronDl from 'electron-dl';
 import { IPC } from './shared-with-frontend/ipc-events.const';
@@ -92,6 +84,7 @@ export const startApp = (): void => {
   });
 
   // TODO remove at one point in the future and only leave the directory setting part
+  // Special handling for snaps, since default user folder will cause problems when updating
   if (
     !wasUserDataDirSet &&
     process.platform === 'linux' &&
@@ -102,47 +95,7 @@ export const startApp = (): void => {
     // -----------------------------------------
     const appName = app.getName();
     const commonDir = process.env.SNAP_USER_COMMON;
-    const currentDir = commonDir.replace(/common$/, 'current');
-    const oldPath = join(currentDir, '.config', appName);
     const newPath = join(commonDir, '.config', appName);
-    const isExistsOldPath = existsSync(oldPath);
-    const isExistsNewPath = existsSync(newPath);
-
-    if (isExistsOldPath && !isExistsNewPath) {
-      console.log('\n');
-      console.log('-------------------------------------------------------------');
-      console.log('Detected legacy snap user data. Copying it over to common...');
-      console.log('-------------------------------------------------------------');
-      console.log('oldPath', oldPath);
-      console.log('newPath', newPath);
-      console.log('isExistsOldPath', isExistsOldPath);
-      console.log('isExistsNewPath', isExistsNewPath);
-      console.log('\n');
-      mkdirSync(newPath, { recursive: true });
-
-      const copyDir = (srcDir: string, dstDir: string): string[] => {
-        let results: string[] = [];
-        const list = readdirSync(srcDir);
-        let src;
-        let dst;
-        list.forEach((file) => {
-          src = srcDir + '/' + file;
-          dst = dstDir + '/' + file;
-          const stat = statSync(src);
-          if (stat && stat.isDirectory()) {
-            mkdirSync(dst);
-            results = results.concat(copyDir(src, dst));
-          } else {
-            writeFileSync(dst, readFileSync(src));
-            results.push(src);
-          }
-        });
-        return results;
-      };
-      copyDir(oldPath, newPath);
-    } else {
-      console.log('SNAP: common directory is used');
-    }
 
     // SET COMMON DIRECTORY AS USER DATA DIRECTORY
     // -------------------------------------------
