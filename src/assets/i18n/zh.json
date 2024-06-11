@@ -37,7 +37,7 @@
     "TOMORROW": "明天 {{time}}"
   },
   "DATETIME_SCHEDULE": {
-    "LATER_TODAY": "今天晚些时候",
+    "LATER_TODAY": "今天稍后",
     "NEXT_WEEK": "下周",
     "PLACEHOLDER": "请选择一个日期",
     "PRESS_ENTER_AGAIN": "再次按 Enter 保存",
@@ -119,6 +119,11 @@
         "ISSUE_NOT_FOUND": "CalDav：待办事项“{{issueId}}”似乎已在服务器上删除。"
       }
     },
+    "CALENDARS": {
+      "S": {
+        "CAL_PROVIDER_ERROR": "日历提供方报错：{{errTxt}}"
+      }
+    },
     "CONFIG": {
       "S": {
         "UPDATE_SECTION": "已更新 <strong>{{sectionKey}}</strong> 的设置"
@@ -131,7 +136,8 @@
         "AUTH_ERROR": "Dropbox：提供了无效的访问令牌",
         "AUTH_ERROR_ACTION": "更改令牌",
         "OFFLINE": "Dropbox：已离线，无法同步",
-        "SYNC_ERROR": "Dropbox：同步时出错"
+        "SYNC_ERROR": "Dropbox：同步时出错",
+        "UNABLE_TO_GENERATE_PKCE_CHALLENGE": "Dropbox：无法生成PKCE挑战"
       }
     },
     "FINISH_DAY_BEFORE_EXIT": {
@@ -696,6 +702,7 @@
           "L_SYNC_FILE_PATH_PERMISSION_VALIDATION": "需要文件访问权限"
         },
         "L_ENABLE_COMPRESSION": "启用压缩（加快传输速度）",
+        "L_ENABLE_ENCRYPTION": "启用端对端加密（实验性功能）——使你的数据无法被同步提供者访问",
         "L_ENABLE_SYNCING": "启用同步",
         "L_SYNC_INTERVAL": "同步间隔",
         "L_SYNC_PROVIDER": "同步提供者",
@@ -1113,6 +1120,7 @@
     "EDIT": "编辑",
     "ENABLED": "启用",
     "EXTENSION_INFO": "请 <a target=\"_blank\" href=\"https://chrome.google.com/webstore/detail/super-productivity/ljkbjodfmekklcoibdnhahlaalhihmlb\"> 下载Chrome扩展程序</a> ，以便与Jira Api和空闲时间处理进行通信。请注意，这不适用于移动设备。",
+    "HIDE": "隐藏",
     "LOGIN": "登录",
     "LOGOUT": "登出",
     "MINUTES": "{{m}} 分钟",
@@ -1124,6 +1132,7 @@
     "REMOVE": "删除",
     "RESET": "重启",
     "SAVE": "保存",
+    "SUBMIT": "提交",
     "TITLE": "标题",
     "TODAY_TAG_TITLE": "今天",
     "UNDO": "撤销",
@@ -1137,6 +1146,10 @@
       "LABEL_IS_ENABLED": "启用自动备份",
       "LOCATION_INFO": "备份存储到：",
       "TITLE": "自动备份"
+    },
+    "CALENDARS": {
+      "CAL_PROVIDERS": "日历提供者（实验性，可选）",
+      "TITLE": "日历"
     },
     "EVALUATION": {
       "IS_HIDE_EVALUATION_SHEET": "隐藏每日摘要的评估表",
@@ -1179,6 +1192,8 @@
       "HELP": "<p>您可以在此处配置所有键盘快捷键。</p> <p>单击文本输入并输入所需的键盘组合。按Enter键保存，Escape退出。</p> <p>有三种类型的快捷方式：</p> <ul> <li> <strong>全局快捷方式：</strong> 当应用程序运行时，它将触发其他所有应用程序的操作。 </li> <li> <strong>应用程序级快捷方式：</strong> 将从应用程序的每个屏幕触发，但如果您当前正在编辑文本字段则不会。 </li> <li> <strong>任务级快捷方式：</strong> 只有通过鼠标或键盘选择任务并且通常会触发与该任务特定相关的操作时，它们才会触发。 </li> </ul>",
       "MOVE_TASK_DOWN": "在列表中向下移动任务",
       "MOVE_TASK_UP": "在列表中向上移动任务",
+      "MOVE_TASK_TO_BOTTOM": "将任务移至列表底部",
+      "MOVE_TASK_TO_TOP": "将任务移至列表顶部",
       "MOVE_TO_BACKLOG": "将任务移动到任务待办事项",
       "MOVE_TO_TODAYS_TASKS": "将任务移动到今天的任务列表",
       "OPEN_PROJECT_NOTES": "显示/隐藏项目笔记",
@@ -1301,7 +1316,7 @@
       "HELP": "配置横幅以在您忘记开始时间记录的情况下显示。",
       "L_IS_ENABLED": "启用",
       "L_IS_SHOW_ON_MOBILE": "在移动应用上显示",
-      "L_MIN_TIME": "等待显示横幅广告的时间",
+      "L_MIN_TIME": "等待显示横幅的时间",
       "TITLE": "时间记录提醒"
     }
   },
@@ -1335,7 +1350,16 @@
     "CREATE_TAG": "创建标签",
     "DELETE_TAG": "删除标签",
     "GO_TO_TASK_LIST": "转到任务列表",
+    "HM": {
+      "CALENDARS": "教程：连接日历",
+      "GET_HELP_ONLINE": "在线帮助",
+      "KEYBOARD": "教程：高级快捷键",
+      "REPORT_A_PROBLEM": "报告问题",
+      "SYNC": "教程：配置同步"
+    },
     "MANAGE_PROJECTS": "管理项目",
+    "NO_TAG_INFO": "目前没有任何标签。可以通过在新增/编辑任务时输入\"#标签名\"来添加标签",
+    "HELP": "帮助",
     "METRICS": "评估",
     "NOTES": "笔记",
     "NOTES_PANEL_INFO": "笔记仅在时间线和一般任务列表中展示。",
