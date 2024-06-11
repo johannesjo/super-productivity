@@ -1,7 +1,7 @@
 import { initialTagState, tagReducer } from './tag.reducer';
 import * as tagActions from './tag.actions';
 import { Tag, TagCopy } from '../tag.model';
-import { moveToArchive_ } from '../../tasks/store/task.actions';
+import { moveToArchive_, restoreTask } from '../../tasks/store/task.actions';
 import { TaskCopy, TaskWithSubTasks } from '../../tasks/task.model';
 
 describe('TagReducer', () => {
@@ -96,6 +96,49 @@ describe('TagReducer', () => {
       const state = tagReducer(initialState, action);
 
       expect((state.entities['1'] as TagCopy).taskIds).not.toContain('subTask1');
+    });
+  });
+
+  describe('restoreTask action', () => {
+    let initialState;
+
+    beforeEach(() => {
+      initialState = {
+        ...initialTagState,
+        entities: {
+          '1': {
+            id: '1',
+            title: 'Test Tag',
+            taskIds: ['task2'],
+          } as Tag,
+        },
+      };
+    });
+
+    it('should add task and subtask IDs back to tag', () => {
+      const subTasksToRestore: TaskCopy[] = [
+        {
+          id: 'subTask1',
+          tagIds: ['1'],
+        },
+        {
+          id: 'subTask2',
+          tagIds: ['1'],
+        },
+      ] as TaskCopy[];
+
+      const taskToRestore: TaskWithSubTasks = {
+        id: 'task1',
+        tagIds: ['1'],
+        subTasks: subTasksToRestore,
+      } as TaskWithSubTasks;
+
+      const action = restoreTask({ task: taskToRestore, subTasks: subTasksToRestore });
+      const state = tagReducer(initialState, action);
+
+      expect((state.entities['1'] as TagCopy).taskIds).toContain('task1');
+      expect((state.entities['1'] as TagCopy).taskIds).toContain('subTask1');
+      expect((state.entities['1'] as TagCopy).taskIds).toContain('subTask2');
     });
   });
 });

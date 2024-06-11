@@ -386,19 +386,31 @@ export const tagReducer = createReducer<TagState>(
     return tagAdapter.updateMany(updates, state);
   }),
 
-  on(restoreTask, (state, { task }) => {
-    return tagAdapter.updateMany(
-      task.tagIds
-        // NOTE: if the tag model is gone we don't update
-        .filter((tagId) => !!(state.entities[tagId] as Tag))
-        .map((tagId) => ({
-          id: tagId,
-          changes: {
-            taskIds: [...(state.entities[tagId] as Tag).taskIds, task.id],
-          },
-        })),
-      state,
-    );
+  on(restoreTask, (state, { task, subTasks }) => {
+    const allTasks = [task, ...subTasks];
+
+    // Create a map of tagIds to an array of associated task and subtask IDs
+    const tagTaskMap: { [tagId: string]: string[] } = {};
+    allTasks.forEach((t) => {
+      t.tagIds.forEach((tagId) => {
+        if (!tagTaskMap[tagId]) {
+          tagTaskMap[tagId] = [];
+        }
+        tagTaskMap[tagId].push(t.id);
+      });
+    });
+
+    // Create updates from the map
+    const updates = Object.entries(tagTaskMap)
+      .filter(([tagId]) => !!(state.entities[tagId] as Tag)) // If the tag model is gone we don't update
+      .map(([tagId, taskIds]) => ({
+        id: tagId,
+        changes: {
+          taskIds: [...(state.entities[tagId] as Tag).taskIds, ...taskIds],
+        },
+      }));
+
+    return tagAdapter.updateMany(updates, state);
   }),
 
   on(updateTaskTags, (state, { newTagIds = [], oldTagIds = [], task }) => {
