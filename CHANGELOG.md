@@ -1,3 +1,33 @@
+## [8.0.8](https://github.com/johannesjo/super-productivity/compare/v8.0.7...v8.0.8) (2024-6-13)
+
+### Bug Fixes
+
+- also consider subtask tags when restoring from archive [#3205](https://github.com/johannesjo/super-productivity/issues/3205) ([1057466](https://github.com/johannesjo/super-productivity/commit/10574665e7bff2131ddf92658bf6a55beefdc366))
+- also filter out subtask tags when moving a task to archive [#3205](https://github.com/johannesjo/super-productivity/issues/3205) ([eb2b08c](https://github.com/johannesjo/super-productivity/commit/eb2b08c73e97c678c0a7c3e9c58b1a2cc5515f20))
+- auto prefixer warning ([5026fcb](https://github.com/johannesjo/super-productivity/commit/5026fcb1f2956bcc979736c370a0420fb382dd77))
+- creation not working [#2694](https://github.com/johannesjo/super-productivity/issues/2694) ([8ddd703](https://github.com/johannesjo/super-productivity/commit/8ddd703a188cd4c96ad483af8b70d0bb1b9bcc90))
+- inconsistent display of info ([2a444f8](https://github.com/johannesjo/super-productivity/commit/2a444f80f949952d095f4686e78d79bd1fae537a))
+- mac icon [#3213](https://github.com/johannesjo/super-productivity/issues/3213) ([9a3de92](https://github.com/johannesjo/super-productivity/commit/9a3de9282fdaf3ab04d5c84764218b6b09055bbb))
+- remove copying over legacy snap data to avoid SingletonCookie issue [#326](https://github.com/johannesjo/super-productivity/issues/326) [#3069](https://github.com/johannesjo/super-productivity/issues/3069) [#3159](https://github.com/johannesjo/super-productivity/issues/3159) ([337a5fd](https://github.com/johannesjo/super-productivity/commit/337a5fd9d7d5afaff1b6af97c9aec88811cf9616))
+- some parts not being clickable for mac os ([a8a7d2e](https://github.com/johannesjo/super-productivity/commit/a8a7d2e07a6f83c201da833d0fe769f9a6d98fb1))
+
+### Features
+
+- add for YEARS [#2694](https://github.com/johannesjo/super-productivity/issues/2694) ([2e5b7e8](https://github.com/johannesjo/super-productivity/commit/2e5b7e89291f34a1ed35e6612044771e9cf0bd89))
+- add quote ([f3ecc74](https://github.com/johannesjo/super-productivity/commit/f3ecc74501d4bf73cba23744bb82e7ab8bdffd5a))
+- change wording [#3141](https://github.com/johannesjo/super-productivity/issues/3141) ([408cc77](https://github.com/johannesjo/super-productivity/commit/408cc7721ee5541f4c66a254bfd71fae7102a408))
+- implement new function into existing flows [#2694](https://github.com/johannesjo/super-productivity/issues/2694) ([d7ac79c](https://github.com/johannesjo/super-productivity/commit/d7ac79c3be7756fc13818c52c40847583f036c21))
+- improve test cases and fix edge case [#2694](https://github.com/johannesjo/super-productivity/issues/2694) ([2ad4b88](https://github.com/johannesjo/super-productivity/commit/2ad4b880b9a8e515c6d0a61867017eeb9733aa2e))
+- include overdue repeatable tasks in daily creation [#2694](https://github.com/johannesjo/super-productivity/issues/2694) ([8fab0f2](https://github.com/johannesjo/super-productivity/commit/8fab0f2e4ba111218797f6c9e683dd4123903070))
+- make another edge case work [#2694](https://github.com/johannesjo/super-productivity/issues/2694) ([f85fe28](https://github.com/johannesjo/super-productivity/commit/f85fe280eb0f1344c7d8ff12cbebb2b7f8d51710))
+- make it more clear when adding a task ([69540e4](https://github.com/johannesjo/super-productivity/commit/69540e41c69a36ed80fd2ed0f9dc8dc48157ff1b))
+- make weekly work [#2694](https://github.com/johannesjo/super-productivity/issues/2694) ([69a5fec](https://github.com/johannesjo/super-productivity/commit/69a5fec4ce328ffc9357e8d66141de49d362cccb))
+- make weekly work as it should [#2694](https://github.com/johannesjo/super-productivity/issues/2694) ([b91f6db](https://github.com/johannesjo/super-productivity/commit/b91f6db006139db6936db5f132d57752960844b6))
+- make yearly work and add test cases [#2694](https://github.com/johannesjo/super-productivity/issues/2694) ([2d405a0](https://github.com/johannesjo/super-productivity/commit/2d405a080a549d1d023dbe4d9f75b332eaa71df8))
+- outline monthly check [#2694](https://github.com/johannesjo/super-productivity/issues/2694) ([a7971e7](https://github.com/johannesjo/super-productivity/commit/a7971e706d6d2f8e5f7c9c6b0f9ff2e1bfab1574))
+- prevent multi instance in web [#2987](https://github.com/johannesjo/super-productivity/issues/2987) ([14fcefa](https://github.com/johannesjo/super-productivity/commit/14fcefaafa652492ab6c4db8125f85db95fdbb26))
+- update short description ([e59631b](https://github.com/johannesjo/super-productivity/commit/e59631bbb1526e793ba232085e648c5c054fb614))
+
 ## [8.0.7](https://github.com/johannesjo/super-productivity/compare/v8.0.6...v8.0.7) (2024-05-31)
 
 ## [8.0.6](https://github.com/johannesjo/super-productivity/compare/v8.0.4...v8.0.6) (2024-05-31)
