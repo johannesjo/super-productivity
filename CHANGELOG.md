@@ -1,3 +1,5 @@
+## [8.0.9](https://github.com/johannesjo/super-productivity/compare/v8.0.8...v8.0.9) (2024-6-13)
+
 ## [8.0.8](https://github.com/johannesjo/super-productivity/compare/v8.0.7...v8.0.8) (2024-6-13)
 
 ### Bug Fixes
