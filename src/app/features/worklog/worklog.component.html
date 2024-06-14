@@ -130,8 +130,8 @@
                                 <div
                                   *ngIf="workContextService.isToday"
                                   class="project-color"
-                                  [title]="allProjectsColorAndTitle[logEntry.task.projectId].title"
-                                  [style.background]="allProjectsColorAndTitle[logEntry.task.projectId].color"
+                                  [title]="(allProjectsColorAndTitle[logEntry.task.projectId])?.title"
+                                  [style.background]="(allProjectsColorAndTitle[logEntry.task.projectId])?.color"
                                 ></div>
                                 <mat-icon
                                   *ngIf="logEntry.task.repeatCfgId"
