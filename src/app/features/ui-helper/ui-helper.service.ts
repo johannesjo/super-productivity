@@ -22,7 +22,7 @@ export class UiHelperService {
       return;
     }
 
-    window.ea.setZoomFactor(zoomFactor);
+    window.ea.setZoomFactor(this._zoomFactorMinMax(zoomFactor));
     this._updateLocalUiHelperSettings({ zoomFactor });
   }
 
@@ -36,7 +36,7 @@ export class UiHelperService {
 
     const zoomFactor = currentZoom + zoomBy;
 
-    window.ea.setZoomFactor(zoomFactor);
+    window.ea.setZoomFactor(this._zoomFactorMinMax(zoomFactor));
     this._updateLocalUiHelperSettings({ zoomFactor });
   }
 
@@ -51,6 +51,12 @@ export class UiHelperService {
     } else {
       console.error('Cannot execute focus app window in browser');
     }
+  }
+
+  private _zoomFactorMinMax(zoomFactor: number): number {
+    zoomFactor = Math.min(Math.max(zoomFactor, 0.1), 4);
+    zoomFactor = Math.round(zoomFactor * 1000) / 1000;
+    return zoomFactor;
   }
 
   private _initMousewheelZoomForElectron(): void {
@@ -72,7 +78,6 @@ export class UiHelperService {
           } else if (event.deltaY < 0) {
             zoomFactor += ZOOM_DELTA;
           }
-          zoomFactor = Math.min(Math.max(zoomFactor, 0.1), 4);
           this.zoomTo(zoomFactor);
         }
       });
