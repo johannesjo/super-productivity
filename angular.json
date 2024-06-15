@@ -183,15 +183,15 @@
         "serve": {
           "builder": "@angular-devkit/build-angular:dev-server",
           "options": {
-            "browserTarget": "sp2:build",
-            "open": false
+            "open": false,
+            "buildTarget": "sp2:build"
           },
           "configurations": {
             "production": {
-              "browserTarget": "sp2:build:production"
+              "buildTarget": "sp2:build:production"
             },
             "development": {
-              "browserTarget": "sp2:build:development"
+              "buildTarget": "sp2:build:development"
             }
           },
           "defaultConfiguration": "development"
@@ -199,7 +199,7 @@
         "extract-i18n": {
           "builder": "@angular-devkit/build-angular:extract-i18n",
           "options": {
-            "browserTarget": "sp2:build"
+            "buildTarget": "sp2:build"
           }
         },
         "test": {
