@@ -8,7 +8,7 @@ import {
 } from '@angular/core';
 import { Note } from '../note.model';
 import { NoteService } from '../note.service';
-import { MatDialog } from '@angular/material/dialog';
+import { MatLegacyDialog as MatDialog } from '@angular/material/legacy-dialog';
 import { T } from '../../../t.const';
 import { DialogFullscreenMarkdownComponent } from '../../../ui/dialog-fullscreen-markdown/dialog-fullscreen-markdown.component';
 import { Observable, of, ReplaySubject } from 'rxjs';

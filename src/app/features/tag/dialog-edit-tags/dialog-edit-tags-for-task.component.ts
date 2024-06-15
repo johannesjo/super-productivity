@@ -1,5 +1,8 @@
 import { ChangeDetectionStrategy, Component, Inject, OnDestroy } from '@angular/core';
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import {
+  MAT_LEGACY_DIALOG_DATA as MAT_DIALOG_DATA,
+  MatLegacyDialogRef as MatDialogRef,
+} from '@angular/material/legacy-dialog';
 import { T } from '../../../t.const';
 import { TaskService } from '../../tasks/task.service';
 import { DialogEditTagsForTaskPayload } from './dialog-edit-tags-for-task.payload';

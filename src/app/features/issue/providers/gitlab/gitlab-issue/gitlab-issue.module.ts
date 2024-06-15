@@ -9,7 +9,7 @@ import { GitlabIssueEffects } from './gitlab-issue.effects';
 import { BeforeFinishDayService } from '../../../../before-finish-day/before-finish-day.service';
 import { first } from 'rxjs/operators';
 import { GITLAB_TYPE } from '../../../issue.const';
-import { MatDialog } from '@angular/material/dialog';
+import { MatLegacyDialog as MatDialog } from '@angular/material/legacy-dialog';
 import { TaskCopy } from '../../../../tasks/task.model';
 import { WorkContextService } from '../../../../work-context/work-context.service';
 import { DialogGitlabSubmitWorklogForDayComponent } from '../dialog-gitlab-submit-worklog-for-day/dialog-gitlab-submit-worklog-for-day.component';

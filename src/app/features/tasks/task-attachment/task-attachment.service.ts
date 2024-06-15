@@ -3,7 +3,7 @@ import { Store } from '@ngrx/store';
 import { TaskAttachment } from './task-attachment.model';
 import { nanoid } from 'nanoid';
 import { DialogEditTaskAttachmentComponent } from './dialog-edit-attachment/dialog-edit-task-attachment.component';
-import { MatDialog } from '@angular/material/dialog';
+import { MatLegacyDialog as MatDialog } from '@angular/material/legacy-dialog';
 import { DropPasteInput } from '../../../core/drop-paste-input/drop-paste.model';
 import {
   addTaskAttachment,

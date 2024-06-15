@@ -29,7 +29,7 @@ import { remindOptionToMilliseconds } from '../util/remind-option-to-millisecond
 import { environment } from '../../../../environments/environment';
 import { SnackService } from '../../../core/snack/snack.service';
 import { T } from '../../../t.const';
-import { MatDialog } from '@angular/material/dialog';
+import { MatLegacyDialog as MatDialog } from '@angular/material/legacy-dialog';
 import { DialogConfirmComponent } from '../../../ui/dialog-confirm/dialog-confirm.component';
 import { LayoutService } from '../../../core-ui/layout/layout.service';
 

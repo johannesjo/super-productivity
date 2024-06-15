@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { MatDialogRef } from '@angular/material/dialog';
+import { MatLegacyDialogRef as MatDialogRef } from '@angular/material/legacy-dialog';
 import { T } from 'src/app/t.const';
 import { androidInterface } from '../../../features/android/android-interface';
 import { GlobalConfigService } from '../../../features/config/global-config.service';

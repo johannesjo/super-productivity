@@ -7,7 +7,7 @@ import {
   ViewChild,
 } from '@angular/core';
 import { BookmarkService } from '../bookmark.service';
-import { MatDialog } from '@angular/material/dialog';
+import { MatLegacyDialog as MatDialog } from '@angular/material/legacy-dialog';
 import { DialogEditBookmarkComponent } from '../dialog-edit-bookmark/dialog-edit-bookmark.component';
 import { Bookmark } from '../bookmark.model';
 import { fadeAnimation } from '../../../ui/animations/fade.ani';

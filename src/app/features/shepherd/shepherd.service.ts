@@ -5,7 +5,7 @@ import { LayoutService } from '../../core-ui/layout/layout.service';
 import { TaskService } from '../tasks/task.service';
 import { Actions } from '@ngrx/effects';
 import { GlobalConfigService } from '../config/global-config.service';
-import { MatDialog } from '@angular/material/dialog';
+import { MatLegacyDialog as MatDialog } from '@angular/material/legacy-dialog';
 import { Store } from '@ngrx/store';
 import { Router } from '@angular/router';
 import { WorkContextService } from '../work-context/work-context.service';

@@ -18,7 +18,7 @@ import { SnackService } from '../../../../../core/snack/snack.service';
 import { Task } from '../../../../tasks/task.model';
 import { TaskService } from '../../../../tasks/task.service';
 import { BehaviorSubject, EMPTY, Observable, of, throwError, timer } from 'rxjs';
-import { MatDialog } from '@angular/material/dialog';
+import { MatLegacyDialog as MatDialog } from '@angular/material/legacy-dialog';
 import { DialogJiraTransitionComponent } from '../jira-view-components/dialog-jira-transition/dialog-jira-transition.component';
 import { IssueLocalState } from '../../../issue.model';
 import { ProjectService } from '../../../../project/project.service';

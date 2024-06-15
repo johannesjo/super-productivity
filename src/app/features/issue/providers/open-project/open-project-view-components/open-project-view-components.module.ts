@@ -6,7 +6,7 @@ import { DialogOpenProjectTrackTimeComponent } from './dialog-open-project-track
 import { FormsModule } from '@angular/forms';
 import { OpenprojectCfgComponent } from './openproject-cfg/openproject-cfg.component';
 import { DialogOpenprojectTransitionComponent } from './dialog-openproject-transition/dialog-openproject-transition.component';
-import { MatSliderModule } from '@angular/material/slider';
+import { MatLegacySliderModule as MatSliderModule } from '@angular/material/legacy-slider';
 
 @NgModule({
   imports: [CommonModule, UiModule, FormsModule, MatSliderModule],

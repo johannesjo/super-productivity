@@ -15,7 +15,7 @@ import { realTimer$ } from '../../util/real-timer';
 import { BannerService } from '../../core/banner/banner.service';
 import { BannerId } from '../../core/banner/banner.model';
 import { msToString } from '../../ui/duration/ms-to-string.pipe';
-import { MatDialog } from '@angular/material/dialog';
+import { MatLegacyDialog as MatDialog } from '@angular/material/legacy-dialog';
 import { DialogTrackingReminderComponent } from './dialog-tracking-reminder/dialog-tracking-reminder.component';
 import { Task } from '../tasks/task.model';
 import { T } from '../../t.const';

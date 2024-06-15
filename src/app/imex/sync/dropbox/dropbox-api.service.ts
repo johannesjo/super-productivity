@@ -9,7 +9,7 @@ import { stringify } from 'query-string';
 import { DropboxFileMetadata } from './dropbox.model';
 import { toDropboxIsoString } from './iso-date-without-ms.util.';
 import { DialogGetAndEnterAuthCodeComponent } from '../dialog-get-and-enter-auth-code/dialog-get-and-enter-auth-code.component';
-import { MatDialog } from '@angular/material/dialog';
+import { MatLegacyDialog as MatDialog } from '@angular/material/legacy-dialog';
 import { T } from '../../../t.const';
 import { SnackService } from '../../../core/snack/snack.service';
 import { generatePKCECodes } from '../generate-pkce-codes';

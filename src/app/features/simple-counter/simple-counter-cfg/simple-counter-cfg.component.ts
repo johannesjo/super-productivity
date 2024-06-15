@@ -18,7 +18,7 @@ import { T } from 'src/app/t.const';
 import { SimpleCounterService } from '../simple-counter.service';
 import { map } from 'rxjs/operators';
 import { Observable, Subscription } from 'rxjs';
-import { MatDialog } from '@angular/material/dialog';
+import { MatLegacyDialog as MatDialog } from '@angular/material/legacy-dialog';
 import { DialogConfirmComponent } from '../../../ui/dialog-confirm/dialog-confirm.component';
 
 @Component({

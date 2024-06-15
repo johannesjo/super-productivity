@@ -25,7 +25,7 @@ import { DialogSyncConflictComponent } from './dialog-dbx-sync-conflict/dialog-s
 import { DialogSyncPermissionComponent } from './dialog-sync-permission/dialog-sync-permission.component';
 import { TranslateService } from '@ngx-translate/core';
 import { SyncTriggerService } from './sync-trigger.service';
-import { MatDialog } from '@angular/material/dialog';
+import { MatLegacyDialog as MatDialog } from '@angular/material/legacy-dialog';
 import { DataImportService } from './data-import.service';
 import { WebDavSyncService } from './web-dav/web-dav-sync.service';
 import { SnackService } from '../../core/snack/snack.service';
