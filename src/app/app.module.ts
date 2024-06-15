@@ -20,7 +20,7 @@ import { ReactiveFormsModule } from '@angular/forms';
 import { FormlyModule } from '@ngx-formly/core';
 import { PagesModule } from './pages/pages.module';
 import { MainHeaderModule } from './core-ui/main-header/main-header.module';
-import { HttpClient, HttpClientModule } from '@angular/common/http';
+import { HttpClient, provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { TasksModule } from './features/tasks/tasks.module';
 import { BookmarkModule } from './features/bookmark/bookmark.module';
@@ -56,94 +56,86 @@ import { ShepherdComponent } from './features/shepherd/shepherd.component';
 export const createTranslateLoader = (http: HttpClient): TranslateHttpLoader =>
   new TranslateHttpLoader(http, './assets/i18n/', '.json');
 
-@NgModule({
-  declarations: [AppComponent, ShepherdComponent],
-  imports: [
-    // Those features need to be included first for store not to mess up, probably because we use it initially at many places
-    ConfigModule,
-    ProjectModule,
-    WorkContextModule,
-
-    // Local
-    CoreModule,
-    UiModule,
-    CoreUiModule,
-    PagesModule,
-    MainHeaderModule,
-    MatSidenavModule,
-    ProcrastinationModule,
-    IdleModule,
-    TrackingReminderModule,
-    ReminderModule,
-    CoreUiModule,
-    NoteModule,
-    BookmarkModule,
-    TasksModule,
-    SyncModule,
-    MaterialCssVarsModule.forRoot(),
-    SearchBarModule,
-    FinishDayBeforeCloseModule,
-    DominaModeModule,
-    FocusModeModule,
-    CalendarIntegrationModule,
-
-    AndroidModule,
-    // throws build error ...(IS_ANDROID_WEB_VIEW ? [AndroidModule] : []),
-
-    // External
-    BrowserModule,
-    BrowserAnimationsModule,
-    HttpClientModule,
-    HammerModule,
-    RouterModule.forRoot(APP_ROUTES, { useHash: true }),
-    // NOTE: both need to be present to use forFeature stores
-    StoreModule.forRoot(reducers, {
-      metaReducers: [undoTaskDeleteMetaReducer, actionLoggerReducer],
-      ...(environment.production
-        ? {
-            runtimeChecks: {
-              strictStateImmutability: false,
-              strictActionImmutability: false,
-              strictStateSerializability: false,
-              strictActionSerializability: false,
+@NgModule({ declarations: [AppComponent, ShepherdComponent],
+    bootstrap: [AppComponent], imports: [
+        // Those features need to be included first for store not to mess up, probably because we use it initially at many places
+        ConfigModule,
+        ProjectModule,
+        WorkContextModule,
+        // Local
+        CoreModule,
+        UiModule,
+        CoreUiModule,
+        PagesModule,
+        MainHeaderModule,
+        MatSidenavModule,
+        ProcrastinationModule,
+        IdleModule,
+        TrackingReminderModule,
+        ReminderModule,
+        CoreUiModule,
+        NoteModule,
+        BookmarkModule,
+        TasksModule,
+        SyncModule,
+        MaterialCssVarsModule.forRoot(),
+        SearchBarModule,
+        FinishDayBeforeCloseModule,
+        DominaModeModule,
+        FocusModeModule,
+        CalendarIntegrationModule,
+        AndroidModule,
+        // throws build error ...(IS_ANDROID_WEB_VIEW ? [AndroidModule] : []),
+        // External
+        BrowserModule,
+        BrowserAnimationsModule,
+        HammerModule,
+        RouterModule.forRoot(APP_ROUTES, { useHash: true }),
+        // NOTE: both need to be present to use forFeature stores
+        StoreModule.forRoot(reducers, {
+            metaReducers: [undoTaskDeleteMetaReducer, actionLoggerReducer],
+            ...(environment.production
+                ? {
+                    runtimeChecks: {
+                        strictStateImmutability: false,
+                        strictActionImmutability: false,
+                        strictStateSerializability: false,
+                        strictActionSerializability: false,
+                    },
+                }
+                : {
+                    runtimeChecks: {
+                        strictStateImmutability: true,
+                        strictActionImmutability: true,
+                        strictStateSerializability: true,
+                        strictActionSerializability: true,
+                    },
+                }),
+        }),
+        EffectsModule.forRoot([]),
+        !environment.production && !environment.stage ? StoreDevtoolsModule.instrument({ connectInZone: true }) : [],
+        ReactiveFormsModule,
+        FormlyModule.forRoot({
+            extras: {
+                immutable: true,
             },
-          }
-        : {
-            runtimeChecks: {
-              strictStateImmutability: true,
-              strictActionImmutability: true,
-              strictStateSerializability: true,
-              strictActionSerializability: true,
+            validationMessages: [{ name: 'pattern', message: 'Invalid input' }],
+        }),
+        ServiceWorkerModule.register('ngsw-worker.js', {
+            enabled: !IS_ELECTRON && (environment.production || environment.stage),
+        }),
+        TranslateModule.forRoot({
+            loader: {
+                provide: TranslateLoader,
+                useFactory: createTranslateLoader,
+                deps: [HttpClient],
             },
-          }),
-    }),
-    EffectsModule.forRoot([]),
-    !environment.production && !environment.stage ? StoreDevtoolsModule.instrument({connectInZone: true}) : [],
-    ReactiveFormsModule,
-    FormlyModule.forRoot({
-      extras: {
-        immutable: true,
-      },
-      validationMessages: [{ name: 'pattern', message: 'Invalid input' }],
-    }),
-    ServiceWorkerModule.register('ngsw-worker.js', {
-      enabled: !IS_ELECTRON && (environment.production || environment.stage),
-    }),
-    TranslateModule.forRoot({
-      loader: {
-        provide: TranslateLoader,
-        useFactory: createTranslateLoader,
-        deps: [HttpClient],
-      },
-    }),
-    EntityDataModule,
-  ],
-  bootstrap: [AppComponent],
-  providers: [
-    { provide: ErrorHandler, useClass: GlobalErrorHandler },
-    { provide: HAMMER_GESTURE_CONFIG, useClass: MyHammerConfig },
-  ],
-})
+        }),
+        EntityDataModule], providers: [
+        { provide: ErrorHandler, useClass: GlobalErrorHandler },
+        { provide: HAMMER_GESTURE_CONFIG, useClass: MyHammerConfig },
+        provideHttpClient(withInterceptorsFromDi()),
+    ] })
 export class AppModule {
   constructor(private _languageService: LanguageService) {
     this._languageService.setDefault(LanguageCode.en);
