@@ -23,7 +23,7 @@
 $dot-size: 15px;
 $ico-size: 13px;
 $line-height: 15px;
-$ico-pad: ($dot-size -$ico-size) * 0.5;
+$ico-pad: ($dot-size - $ico-size) * 0.5;
 $pad: ($ico-size - $line-height + $ico-pad * 2) * 0.5;
 
 .tag-title {
