@@ -75,7 +75,7 @@ export const SYNC_FORM: ConfigFormSection<SyncConfig> = {
           ...(IS_ELECTRON ||
           (IS_ANDROID_WEB_VIEW &&
             (androidInterface as any).grantFilePermission &&
-            androidInterface.isGrantedFilePermission)
+            (androidInterface as any).isGrantedFilePermission)
             ? [{ label: SyncProvider.LocalFile, value: SyncProvider.LocalFile }]
             : []),
         ],

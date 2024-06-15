@@ -118,7 +118,7 @@ export const createTranslateLoader = (http: HttpClient): TranslateHttpLoader =>
           }),
     }),
     EffectsModule.forRoot([]),
-    !environment.production && !environment.stage ? StoreDevtoolsModule.instrument() : [],
+    !environment.production && !environment.stage ? StoreDevtoolsModule.instrument({connectInZone: true}) : [],
     ReactiveFormsModule,
     FormlyModule.forRoot({
       extras: {

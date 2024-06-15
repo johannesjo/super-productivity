@@ -44,7 +44,6 @@ export class NotifyService {
       if (per === 'granted') {
         await svcReg.showNotification(title, {
           icon: 'assets/icons/icon-128x128.png',
-          vibrate: [100, 50, 100],
           silent: false,
           data: {
             dateOfArrival: Date.now(),
@@ -59,11 +58,10 @@ export class NotifyService {
     } else if (this._isBasicNotificationSupport()) {
       const permission = await Notification.requestPermission();
       // not supported for basic notifications so we delete them
-      delete options.actions;
+      // delete options.actions;
       if (permission === 'granted') {
         const instance = new Notification(title, {
           icon: 'assets/icons/icon-128x128.png',
-          vibrate: [100, 50, 100],
           silent: false,
           data: {
             dateOfArrival: Date.now(),
