@@ -38,6 +38,7 @@ import {
   MarkdownService,
   MarkedOptions,
   MarkedRenderer,
+  provideMarkdown,
 } from 'ngx-markdown';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { FORMLY_CONFIG, FormlyModule } from '@ngx-formly/core';
@@ -175,6 +176,29 @@ const OTHER_3RD_PARTY_MODS_WITHOUT_CFG = [
   TranslateModule,
 ];
 
+const markedOptionsFactory = (): MarkedOptions => {
+  const renderer = new MarkedRenderer();
+
+  renderer.checkbox = (isChecked: boolean) => {
+    return `<span class="checkbox material-icons">${
+      isChecked ? 'check_box ' : 'check_box_outline_blank '
+    }</span>`;
+  };
+  renderer.listitem = (text: string) => {
+    return text.includes('checkbox')
+      ? '<li class="checkbox-wrapper">' + text + '</li>'
+      : '<li>' + text + '</li>';
+  };
+  return {
+    renderer: renderer,
+    gfm: true,
+    breaks: false,
+    pedantic: false,
+    smartLists: true,
+    smartypants: false,
+  };
+};
+
 @NgModule({
   imports: [
     ...OTHER_3RD_PARTY_MODS_WITHOUT_CFG,
@@ -183,28 +207,7 @@ const OTHER_3RD_PARTY_MODS_WITHOUT_CFG = [
     MarkdownModule.forRoot({
       markedOptions: {
         provide: MarkedOptions,
-        useFactory: (): MarkedOptions => {
-          const renderer = new MarkedRenderer();
-
-          renderer.checkbox = (isChecked: boolean) => {
-            return `<span class="checkbox material-icons">${
-              isChecked ? 'check_box ' : 'check_box_outline_blank '
-            }</span>`;
-          };
-          renderer.listitem = (text: string) => {
-            return text.includes('checkbox')
-              ? '<li class="checkbox-wrapper">' + text + '</li>'
-              : '<li>' + text + '</li>';
-          };
-          return {
-            renderer: renderer,
-            gfm: true,
-            breaks: false,
-            pedantic: false,
-            smartLists: true,
-            smartypants: false,
-          };
-        },
+        useFactory: markedOptionsFactory,
       },
       sanitize: SecurityContext.HTML,
     }),
@@ -251,6 +254,7 @@ const OTHER_3RD_PARTY_MODS_WITHOUT_CFG = [
     OwlWrapperComponent,
   ],
   providers: [
+    provideMarkdown(),
     { provide: ErrorHandler, useClass: GlobalErrorHandler },
     {
       provide: MAT_FORM_FIELD_DEFAULT_OPTIONS,
