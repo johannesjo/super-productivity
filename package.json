@@ -120,7 +120,6 @@
     "@angular-eslint/builder": "^14.0.0",
     "@angular-eslint/eslint-plugin": "^14.1.2",
     "@angular-eslint/eslint-plugin-template": "^14.0.2",
-    "@angular-eslint/schematics": "^14.0.3",
     "@angular-eslint/template-parser": "^16.1.1",
     "@angular/animations": "^14.1.1",
     "@angular/cdk": "^14.1.1",
