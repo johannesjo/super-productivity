@@ -95,7 +95,7 @@ export const createTranslateLoader = (http: HttpClient): TranslateHttpLoader =>
     BrowserAnimationsModule,
     HttpClientModule,
     HammerModule,
-    RouterModule.forRoot(APP_ROUTES, { useHash: true, relativeLinkResolution: 'legacy' }),
+    RouterModule.forRoot(APP_ROUTES, { useHash: true }),
     // NOTE: both need to be present to use forFeature stores
     StoreModule.forRoot(reducers, {
       metaReducers: [undoTaskDeleteMetaReducer, actionLoggerReducer],
