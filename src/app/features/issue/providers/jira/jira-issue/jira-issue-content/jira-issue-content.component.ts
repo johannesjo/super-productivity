@@ -6,7 +6,7 @@ import { TaskAttachment } from '../../../../../tasks/task-attachment/task-attach
 import { T } from '../../../../../../t.const';
 import { TaskService } from '../../../../../tasks/task.service';
 // @ts-ignore
-import * as j2m from 'jira2md';
+import j2m from 'jira2md';
 import { combineLatest, forkJoin, Observable, of, ReplaySubject, Subject } from 'rxjs';
 import { map, switchMap } from 'rxjs/operators';
 import { JiraCommonInterfacesService } from '../../jira-common-interfaces.service';

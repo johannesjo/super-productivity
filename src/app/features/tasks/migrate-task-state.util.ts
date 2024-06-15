@@ -2,7 +2,7 @@ import { Dictionary } from '@ngrx/entity';
 import { Task, TaskArchive, TaskCopy, TaskState } from './task.model';
 import { GITHUB_TYPE } from '../issue/issue.const';
 import { MODEL_VERSION_KEY, WORKLOG_DATE_STR_FORMAT } from '../../app.constants';
-import * as moment from 'moment';
+import moment from 'moment';
 import { convertToWesternArabic } from '../../util/numeric-converter';
 import { isMigrateModel } from '../../util/model-version';
 import { MODEL_VERSION } from '../../core/model-version';

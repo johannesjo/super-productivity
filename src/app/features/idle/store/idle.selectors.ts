@@ -1,9 +1,7 @@
 import { createFeatureSelector, createSelector } from '@ngrx/store';
-import * as fromIdle from './idle.reducer';
+import { IDLE_FEATURE_KEY, IdleState } from './idle.reducer';
 
-export const selectIdleState = createFeatureSelector<fromIdle.IdleState>(
-  fromIdle.IDLE_FEATURE_KEY,
-);
+export const selectIdleState = createFeatureSelector<IdleState>(IDLE_FEATURE_KEY);
 
 export const selectIsIdle = createSelector(
   selectIdleState,

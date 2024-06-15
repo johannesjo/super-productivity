@@ -35,7 +35,7 @@ import {
   take,
 } from 'rxjs/operators';
 import { JiraIssue, JiraIssueReduced } from './jira-issue/jira-issue.model';
-import * as moment from 'moment';
+import moment from 'moment';
 import { BannerService } from '../../../../core/banner/banner.service';
 import { BannerId } from '../../../../core/banner/banner.model';
 import { T } from '../../../../t.const';

@@ -5,7 +5,7 @@ import {
 } from '@angular/material/legacy-dialog';
 import { WorklogExportSettingsCopy } from '../worklog.model';
 import { T } from '../../../t.const';
-import * as moment from 'moment';
+import moment from 'moment';
 import { WORKLOG_EXPORT_DEFAULTS } from '../../work-context/work-context.const';
 
 @Component({

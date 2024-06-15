@@ -1,4 +1,4 @@
-// import * as fromFocusMode from './focus-mode.reducer';
+// import fromFocusMode from './focus-mode.reducer';
 // import { selectFocusModeState } from './focus-mode.selectors';
 //
 // describe('FocusMode Selectors', () => {

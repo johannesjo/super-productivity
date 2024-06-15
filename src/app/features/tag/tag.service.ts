@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { select, Store } from '@ngrx/store';
+import { Action, select, Store } from '@ngrx/store';
 import {
   selectAllTags,
   selectAllTagsWithoutMyDay,
@@ -18,7 +18,6 @@ import { Observable } from 'rxjs';
 import { Tag, TagState } from './tag.model';
 import { nanoid } from 'nanoid';
 import { DEFAULT_TAG } from './tag.const';
-import { TypedAction } from '@ngrx/store/src/models';
 
 @Injectable({
   providedIn: 'root',
@@ -71,7 +70,7 @@ export class TagService {
     this._store$.dispatch(upsertTag({ tag }));
   }
 
-  getAddTagActionAndId(tag: Partial<Tag>): { action: TypedAction<any>; id: string } {
+  getAddTagActionAndId(tag: Partial<Tag>): { action: Action<any>; id: string } {
     const id = nanoid();
     return {
       id,

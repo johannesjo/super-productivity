@@ -2,7 +2,7 @@ import {
   TASK_REPEAT_WEEKDAY_MAP,
   TaskRepeatCfg,
 } from '../../task-repeat-cfg/task-repeat-cfg.model';
-import * as moment from 'moment';
+import moment from 'moment';
 import { T } from '../../../t.const';
 import { getDateTimeFromClockString } from '../../../util/get-date-time-from-clock-string';
 

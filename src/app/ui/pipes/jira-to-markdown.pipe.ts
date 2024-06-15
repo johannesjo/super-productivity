@@ -1,6 +1,6 @@
 import { Pipe, PipeTransform } from '@angular/core';
 // @ts-ignore
-import * as j2m from 'jira2md';
+import j2m from 'jira2md';
 
 @Pipe({
   name: 'jiraToMarkdown',

@@ -1,8 +1,8 @@
 import { initialTagState, tagReducer } from './tag.reducer';
-import * as tagActions from './tag.actions';
 import { Tag, TagCopy } from '../tag.model';
 import { moveToArchive_, restoreTask } from '../../tasks/store/task.actions';
 import { TaskCopy, TaskWithSubTasks } from '../../tasks/task.model';
+import { addTag } from './tag.actions';
 
 describe('TagReducer', () => {
   describe('standard', () => {
@@ -27,7 +27,7 @@ describe('TagReducer', () => {
         title: 'New Tag',
         taskIds: [],
       } as any as Tag;
-      const action = tagActions.addTag({ tag: newTag });
+      const action = addTag({ tag: newTag });
       const state = tagReducer(initialState, action);
 
       expect(state.entities['2']).toEqual(newTag);
@@ -39,7 +39,7 @@ describe('TagReducer', () => {
         title: 'New Tag',
         taskIds: [],
       } as any as Tag;
-      const action = tagActions.addTag({ tag: newTag });
+      const action = addTag({ tag: newTag });
       const state = tagReducer(initialState, action);
 
       expect(state.entities['2']).toEqual(newTag);

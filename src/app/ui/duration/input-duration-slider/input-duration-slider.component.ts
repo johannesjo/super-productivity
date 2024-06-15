@@ -11,7 +11,7 @@ import {
   ViewChild,
 } from '@angular/core';
 import { nanoid } from 'nanoid';
-import * as moment from 'moment';
+import moment from 'moment';
 import { dotAnimation } from './dot.ani';
 import { T } from '../../../t.const';
 

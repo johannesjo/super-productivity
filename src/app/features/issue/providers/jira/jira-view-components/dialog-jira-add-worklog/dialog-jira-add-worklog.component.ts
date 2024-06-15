@@ -10,7 +10,7 @@ import { Task } from '../../../../../tasks/task.model';
 import { T } from '../../../../../../t.const';
 import { ProjectService } from '../../../../../project/project.service';
 import { first } from 'rxjs/operators';
-import * as moment from 'moment';
+import moment from 'moment';
 import { expandFadeAnimation } from '../../../../../../ui/animations/expand.ani';
 import {
   JIRA_ISSUE_TYPE,

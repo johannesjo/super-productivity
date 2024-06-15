@@ -4,7 +4,7 @@ import {
   removeFromRealLs,
   saveToRealLs,
 } from '../../../core/persistence/local-storage';
-import * as moment from 'moment';
+import moment from 'moment';
 import { Duration } from 'moment';
 
 class CacheContent<T> {

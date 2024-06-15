@@ -1,4 +1,4 @@
-import * as chrono from 'chrono-node';
+import chrono from 'chrono-node';
 import { Task, TaskCopy } from './task.model';
 import { getWorklogStr } from '../../util/get-work-log-str';
 import { stringToMs } from '../../ui/duration/string-to-ms.pipe';
