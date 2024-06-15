@@ -27,9 +27,7 @@
               "base": "dist"
             },
             "index": "src/index.html",
-            "polyfills": [
-              "src/polyfills.ts"
-            ],
+            "polyfills": ["src/polyfills.ts"],
             "tsConfig": "src/tsconfig.app.json",
             "preserveSymlinks": true,
             "assets": [
@@ -43,9 +41,7 @@
             "webWorkerTsConfig": "src/tsconfig.worker.json",
             "browser": "src/main.ts",
             "stylePreprocessorOptions": {
-              "includePaths": [
-                "."
-              ]
+              "includePaths": ["."]
             }
           },
           "configurations": {
@@ -60,8 +56,7 @@
               "extractLicenses": false,
               "sourceMap": true,
               "namedChunks": false,
-              "aot": false,
-              "serviceWorker": true
+              "aot": false
             },
             "production": {
               "baseHref": "",
@@ -89,8 +84,7 @@
               "sourceMap": true,
               "namedChunks": false,
               "aot": true,
-              "extractLicenses": true,
-              "serviceWorker": false
+              "extractLicenses": true
             },
             "productionWeb": {
               "budgets": [
@@ -117,8 +111,7 @@
               "sourceMap": true,
               "namedChunks": false,
               "aot": true,
-              "extractLicenses": true,
-              "serviceWorker": true
+              "extractLicenses": true
             },
             "stage": {
               "baseHref": "",
@@ -146,8 +139,7 @@
               "sourceMap": true,
               "namedChunks": false,
               "aot": true,
-              "extractLicenses": true,
-              "serviceWorker": false
+              "extractLicenses": true
             },
             "stageWeb": {
               "budgets": [
@@ -174,8 +166,7 @@
               "sourceMap": true,
               "namedChunks": false,
               "aot": true,
-              "extractLicenses": true,
-              "serviceWorker": true
+              "extractLicenses": true
             }
           }
         },

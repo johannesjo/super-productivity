@@ -1,4 +1,4 @@
-import chrono from 'chrono-node';
+import { casual } from 'chrono-node';
 import { Task, TaskCopy } from './task.model';
 import { getWorklogStr } from '../../util/get-work-log-str';
 import { stringToMs } from '../../ui/duration/string-to-ms.pipe';
@@ -13,7 +13,7 @@ const CH_TAG = '#';
 const CH_DUE = '@';
 const ALL_SPECIAL = `(\\${CH_PRO}|\\${CH_TAG}|\\${CH_DUE})`;
 
-const customDateParser = chrono.casual.clone();
+const customDateParser = casual.clone();
 
 const SHORT_SYNTAX_PROJECT_REG_EX = new RegExp(`\\${CH_PRO}[^${ALL_SPECIAL}]+`, 'gi');
 const SHORT_SYNTAX_TAGS_REG_EX = new RegExp(`\\${CH_TAG}[^${ALL_SPECIAL}|\\s]+`, 'gi');
