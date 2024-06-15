@@ -16,6 +16,7 @@
     "noImplicitAny": false,
     "noImplicitOverride": true,
     "strictPropertyInitialization": true,
+    "useDefineForClassFields": false,
     "target": "ES2022",
     "resolveJsonModule": true,
     "typeRoots": ["node_modules/@types"],
