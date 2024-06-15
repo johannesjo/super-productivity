@@ -20,9 +20,6 @@ import { debounce } from 'helpful-decorators';
 })
 export class SnackService {
   private _ref?: MatSnackBarRef<SnackCustomComponent | SimpleSnackBar>;
-  private _onWorkContextChange$: Observable<unknown> = this._actions$.pipe(
-    ofType(setActiveWorkContext),
-  );
 
   constructor(
     private _store$: Store<any>,
@@ -31,7 +28,10 @@ export class SnackService {
     private _matSnackBar: MatSnackBar,
     private _ngZone: NgZone,
   ) {
-    this._onWorkContextChange$.subscribe(() => {
+    const _onWorkContextChange$: Observable<unknown> = this._actions$.pipe(
+      ofType(setActiveWorkContext),
+    );
+    _onWorkContextChange$.subscribe(() => {
       this.close();
     });
   }

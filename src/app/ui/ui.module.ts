@@ -50,7 +50,6 @@ import { CollapsibleComponent } from './collapsible/collapsible.component';
 import { HelpSectionComponent } from './help-section/help-section.component';
 import { NumberToMonthPipe } from './pipes/number-to-month.pipe';
 import { SimpleDownloadDirective } from './simple-download/simple-download.directive';
-import { Angular2PromiseButtonModule } from 'angular2-promise-buttons';
 import { DialogConfirmComponent } from './dialog-confirm/dialog-confirm.component';
 import { InputDurationFormlyComponent } from './duration/input-duration-formly/input-duration-formly.component';
 import { EnlargeImgDirective } from './enlarge-img/enlarge-img.directive';
@@ -231,9 +230,6 @@ const OTHER_3RD_PARTY_MODS_WITHOUT_CFG = [
     }),
     FormlyMatToggleModule,
     FormlyMaterialModule,
-    Angular2PromiseButtonModule.forRoot({
-      // handleCurrentBtnOnly: true,
-    }),
     // fix https://stackoverflow.com/questions/62755093/angular-error-generic-type-modulewithproviderst-requires-1-type-arguments
     (DragulaModule as any).forRoot(),
 
@@ -246,7 +242,6 @@ const OTHER_3RD_PARTY_MODS_WITHOUT_CFG = [
     ...COMPONENT_AND_PIPES,
     ...MAT_MODULES,
     ...OTHER_3RD_PARTY_MODS_WITHOUT_CFG,
-    Angular2PromiseButtonModule,
     DragulaModule,
     FormlyMaterialModule,
     FormlyModule,

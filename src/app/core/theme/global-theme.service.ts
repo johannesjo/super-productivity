@@ -16,6 +16,7 @@ import { combineLatest, fromEvent, Observable, of } from 'rxjs';
 import { IS_FIREFOX } from '../../util/is-firefox';
 import { ImexMetaService } from '../../imex/imex-meta/imex-meta.service';
 import { IS_MOUSE_PRIMARY, IS_TOUCH_PRIMARY } from '../../util/is-mouse-primary';
+import { ChartConfiguration } from 'chart.js';
 
 @Injectable({ providedIn: 'root' })
 export class GlobalThemeService {
@@ -60,7 +61,7 @@ export class GlobalThemeService {
   ) {}
 
   init(): void {
-    // This is here to make web page reloads on non work context pages at least usable
+    // This is here to make web page reloads on non-work-context pages at least usable
     this._setBackgroundGradient(true);
     this._initIcons();
     this._initHandlersForInitialBodyClasses();
@@ -193,11 +194,11 @@ export class GlobalThemeService {
   }
 
   private _setChartTheme(isDarkTheme: boolean): void {
-    const overrides = isDarkTheme
+    const overrides: ChartConfiguration['options'] = isDarkTheme
       ? {
-          legend: {
-            labels: { fontColor: 'white' },
-          },
+          // legend: {
+          //   labels: { fontColor: 'white' },
+          // },
           scales: {
             xAxes: [
               {
@@ -213,7 +214,7 @@ export class GlobalThemeService {
             ],
           },
         }
-      : {};
+      : ({} as any);
     this._chartThemeService.setColorschemesOptions(overrides);
   }
 }

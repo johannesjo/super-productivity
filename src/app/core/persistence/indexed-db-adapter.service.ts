@@ -28,7 +28,7 @@ export class IndexedDBAdapterService implements DBAdapter {
 
   constructor() {}
 
-  async init(): Promise<IDBPDatabase<MyDb>> {
+  public async init(): Promise<IDBPDatabase<MyDb>> {
     try {
       this._db = await openDB<MyDb>(DB_NAME, VERSION, {
         // upgrade(db: IDBPDatabase<MyDb>, oldVersion: number, newVersion: number | null, transaction: IDBPTransaction<MyDb>) {

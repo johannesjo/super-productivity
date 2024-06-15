@@ -31,11 +31,7 @@ import { distinctUntilChangedObject } from '../../util/distinct-until-changed-ob
   providedIn: 'root',
 })
 export class GlobalConfigService {
-  cfg$: Observable<GlobalConfigState> = this._store.pipe(
-    select(selectConfigFeatureState),
-    distinctUntilChanged(distinctUntilChangedObject),
-    shareReplay(1),
-  );
+  cfg$: Observable<GlobalConfigState>;
 
   misc$: Observable<MiscConfig> = this._store.pipe(
     select(selectMiscConfig),
@@ -73,6 +69,11 @@ export class GlobalConfigService {
   cfg?: GlobalConfigState;
 
   constructor(private readonly _store: Store<any>) {
+    this.cfg$ = this._store.pipe(
+      select(selectConfigFeatureState),
+      distinctUntilChanged(distinctUntilChangedObject),
+      shareReplay(1),
+    );
     this.cfg$.subscribe((cfg) => (this.cfg = cfg));
   }
 

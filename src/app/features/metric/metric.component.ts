@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { ChartOptions, ChartType } from 'chart.js';
 import { MetricService } from './metric.service';
-import { Color } from 'ng2-charts';
+// import { Color } from 'ng2-charts';
 import { Observable } from 'rxjs';
 import { LineChartData } from './metric.model';
 import { fadeAnimation } from '../../ui/animations/fade.ani';
@@ -30,9 +30,9 @@ export class MetricComponent {
 
   pieChartOptions: ChartOptions = {
     responsive: true,
-    legend: {
-      position: 'top',
-    },
+    // legend: {
+    //   position: 'top',
+    // },
   };
   pieChartType: ChartType = 'pie';
   pieChartPlugins: any[] = [];
@@ -40,7 +40,7 @@ export class MetricComponent {
   lineChartOptions: ChartOptions = {
     responsive: true,
   };
-  lineChartColors: Color[] = [];
+  // lineChartColors: Color[] = [];
   lineChartLegend: boolean = true;
   lineChartType: ChartType = 'line';
   lineChartPlugins: any[] = [];

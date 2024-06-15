@@ -30,19 +30,20 @@ export const adjustToLiveFormlyForm = (
       };
     }
 
-    if (
-      item.type === 'repeat' &&
-      item?.fieldArray?.fieldGroup &&
-      isArray(item.fieldArray.fieldGroup)
-    ) {
-      return {
-        ...item,
-        fieldArray: {
-          ...item.fieldArray,
-          fieldGroup: adjustToLiveFormlyForm(item?.fieldArray?.fieldGroup),
-        },
-      };
-    }
+    // TODO check if not working
+    // if (
+    //   item.type === 'repeat' &&
+    //   item?.fieldArray?.fieldGroup &&
+    //   isArray(item.fieldArray.fieldGroup)
+    // ) {
+    //   return {
+    //     ...item,
+    //     fieldArray: {
+    //       ...item.fieldArray,
+    //       fieldGroup: adjustToLiveFormlyForm(item?.fieldArray?.fieldGroup),
+    //     },
+    //   };
+    // }
     return item;
   });
 };
