@@ -97,6 +97,7 @@ import { LongPressIOSDirective } from './longpress/longpress-ios.directive';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { ProgressCircleComponent } from './progress-circle/progress-circle.component';
 import { FormlyLinkWidgetComponent } from './formly-link-widget/formly-link-widget.component';
+import { MaterialCssVarsModule } from 'angular-material-css-vars';
 
 const DIALOG_COMPONENTS = [
   DialogConfirmComponent,
@@ -217,6 +218,7 @@ const markedOptionsFactory = (): MarkedOptions => {
       sanitize: SecurityContext.HTML,
     }),
     FormsModule,
+    MaterialCssVarsModule.forRoot(),
     ReactiveFormsModule,
     FormlyModule.forChild({
       types: [
@@ -263,7 +265,7 @@ const markedOptionsFactory = (): MarkedOptions => {
     { provide: ErrorHandler, useClass: GlobalErrorHandler },
     {
       provide: MAT_FORM_FIELD_DEFAULT_OPTIONS,
-      useValue: { appearance: 'standard' },
+      useValue: { appearance: 'outline' },
     },
     { provide: HAMMER_GESTURE_CONFIG, useClass: MyHammerConfig },
     {

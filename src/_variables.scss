@@ -1,3 +1,5 @@
+@use 'angular-material-css-vars' as mat-css-vars;
+
 @import 'styles/config/shadows';
 @import 'styles/functions/_ddivide';
 
@@ -64,7 +66,7 @@ $light-theme-text-color-less-intense: transparentize($light-theme-text-color, 0.
 $light-theme-text-color-muted: transparentize($light-theme-text-color, 0.4);
 $light-theme-text-color-most-intense: rgb(0, 0, 0);
 
-$light-theme-selected-task-bg-color: mat-css-color-primary(100);
+$light-theme-selected-task-bg-color: mat-css-vars.mat-css-color-primary(100);
 $light-theme-selected-task-bg-color: #fff;
 $light-theme-extra-border-color: #dddddd;
 $dark-theme-extra-border-color: rgba(255, 255, 255, 0.12);
@@ -72,22 +74,22 @@ $dark-theme-extra-border-color: rgba(255, 255, 255, 0.12);
 $light-theme-separator-color: rgba(18, 18, 18, 0.3);
 $dark-theme-separator-color: rgba(255, 255, 255, 0.3);
 
-$c-accent: mat-css-color-accent();
-$c-warn: mat-css-color-warn();
+$c-accent: mat-css-vars.mat-css-color-accent();
+$c-warn: mat-css-vars.mat-css-color-warn();
 
-$c-primary: mat-css-color-primary();
-$c-primary-50: mat-css-color-primary(50);
-$c-primary-100: mat-css-color-primary(100);
-$c-primary-200: mat-css-color-primary(200);
-$c-primary-300: mat-css-color-primary(300);
-$c-primary-400: mat-css-color-primary(400);
-$c-primary-600: mat-css-color-primary(600);
-$c-primary-700: mat-css-color-primary(700);
-$c-primary-800: mat-css-color-primary(800);
-$c-primary-900: mat-css-color-primary(900);
+$c-primary: mat-css-vars.mat-css-color-primary();
+$c-primary-50: mat-css-vars.mat-css-color-primary(50);
+$c-primary-100: mat-css-vars.mat-css-color-primary(100);
+$c-primary-200: mat-css-vars.mat-css-color-primary(200);
+$c-primary-300: mat-css-vars.mat-css-color-primary(300);
+$c-primary-400: mat-css-vars.mat-css-color-primary(400);
+$c-primary-600: mat-css-vars.mat-css-color-primary(600);
+$c-primary-700: mat-css-vars.mat-css-color-primary(700);
+$c-primary-800: mat-css-vars.mat-css-color-primary(800);
+$c-primary-900: mat-css-vars.mat-css-color-primary(900);
 
-$c-contrast: mat-css-contrast-color();
-$c-contrast-600: mat-css-contrast-color(600);
+$c-contrast: mat-css-vars.mat-css-contrast-color();
+$c-contrast-600: mat-css-vars.mat-css-contrast-color(600);
 
 $c-focus-border: $c-primary-400;
 $c-backdrop-light-theme: rgba(0, 0, 0, 0.6);
