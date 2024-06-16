@@ -1,6 +1,6 @@
 @import '../../../../variables';
 
-:host-context([dir=rtl]) {
+:host-context([dir='rtl']) {
   direction: rtl;
 }
 
@@ -16,25 +16,30 @@
   }
 
   td {
+    /*TODO(mdc-migration): The following rule targets internal classes of select that may no longer apply for the MDC version.*/
     ::ng-deep .mat-select-value {
-      padding-left: $s*2.25;
-      padding-top: $s*1.25;
-      padding-bottom: $s*1.25;
+      padding-left: $s * 2.25;
+      padding-top: $s * 1.25;
+      padding-bottom: $s * 1.25;
     }
 
+    /*TODO(mdc-migration): The following rule targets internal classes of select that may no longer apply for the MDC version.*/
     &:first-of-type ::ng-deep .mat-select-value {
-      padding-left: $s*3;
+      padding-left: $s * 3;
     }
 
+    /*TODO(mdc-migration): The following rule targets internal classes of select that may no longer apply for the MDC version.*/
     ::ng-deep .mat-select-arrow-wrapper {
-      padding-right: $s*1.25;
+      padding-right: $s * 1.25;
     }
 
+    /*TODO(mdc-migration): The following rule targets internal classes of select that may no longer apply for the MDC version.*/
     &:last-of-type ::ng-deep .mat-select-arrow-wrapper {
-      padding-right: $s*3;
+      padding-right: $s * 3;
     }
   }
 
+  /*TODO(mdc-migration): The following rule targets internal classes of select that may no longer apply for the MDC version.*/
   mat-select {
     &:hover {
       &:after {
@@ -107,13 +112,11 @@
   }
 }
 
-
 .table-wrapper {
   overflow: auto;
   position: relative;
   z-index: 1;
   margin: 0 -20px $s;
-
 
   ::ng-deep table {
     width: 100%;
@@ -154,7 +157,7 @@
 }
 
 .options-collapsible {
-  margin-top: $s*2;
+  margin-top: $s * 2;
   text-align: center;
 }
 

@@ -19,7 +19,7 @@ import { Observable } from 'rxjs';
 import { Bookmark, BookmarkState } from './bookmark.model';
 import { nanoid } from 'nanoid';
 import { DialogEditBookmarkComponent } from './dialog-edit-bookmark/dialog-edit-bookmark.component';
-import { MatLegacyDialog as MatDialog } from '@angular/material/legacy-dialog';
+import { MatDialog } from '@angular/material/dialog';
 import { PersistenceService } from '../../core/persistence/persistence.service';
 import {
   createFromDrop,

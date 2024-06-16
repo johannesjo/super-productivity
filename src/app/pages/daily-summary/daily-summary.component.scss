@@ -3,6 +3,7 @@
 $summary-point-inner-margin: $s;
 
 :host {
+  /* TODO(mdc-migration): The following rule targets internal classes of tabs that may no longer apply for the MDC version. */
   ::ng-deep .mat-tab-labels {
     justify-content: center !important;
     user-select: none;
@@ -79,7 +80,7 @@ $summary-point-inner-margin: $s;
 
 .finish-day-opts {
   margin-top: 10px;
-
+  /* TODO(mdc-migration): The following rule targets internal classes of checkbox that may no longer apply for the MDC version. */
   mat-checkbox {
     display: block;
   }

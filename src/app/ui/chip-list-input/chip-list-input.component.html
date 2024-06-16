@@ -1,7 +1,7 @@
 <mat-form-field>
   <mat-label>{{label}}</mat-label>
-  <mat-chip-list #chipListElRef>
-    <mat-chip
+  <mat-chip-grid #chipListElRef>
+    <mat-chip-row
       (removed)="remove(modelItem.id)"
       *ngFor="let modelItem of modelItems; trackBy:trackById"
       [removable]="true"
@@ -24,7 +24,7 @@
       >
         <mat-icon style="transform: rotate(45deg)">{{additionalActionIcon}} </mat-icon>
       </button>
-    </mat-chip>
+    </mat-chip-row>
 
     <input
       #inputElRef
@@ -37,7 +37,7 @@
       [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
       (keydown)="triggerCtrlEnterSubmit($event)"
     />
-  </mat-chip-list>
+  </mat-chip-grid>
   <mat-autocomplete
     #autoElRef="matAutocomplete"
     (optionSelected)="selected($event)"

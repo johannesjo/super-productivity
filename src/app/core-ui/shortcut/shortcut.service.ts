@@ -5,7 +5,7 @@ import { GlobalConfigService } from '../../features/config/global-config.service
 import { ActivatedRoute, Router } from '@angular/router';
 import { LayoutService } from '../layout/layout.service';
 import { TaskService } from '../../features/tasks/task.service';
-import { MatLegacyDialog as MatDialog } from '@angular/material/legacy-dialog';
+import { MatDialog } from '@angular/material/dialog';
 import { DialogAddNoteComponent } from '../../features/note/dialog-add-note/dialog-add-note.component';
 import { BookmarkService } from '../../features/bookmark/bookmark.service';
 import { IPC } from '../../../../electron/shared-with-frontend/ipc-events.const';

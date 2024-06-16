@@ -6,11 +6,7 @@ import { takeUntil } from 'rxjs/operators';
 import { DEFAULT_SNACK_CFG } from './snack.const';
 import { SnackCustomComponent } from './snack-custom/snack-custom.component';
 import { TranslateService } from '@ngx-translate/core';
-import {
-  LegacySimpleSnackBar as SimpleSnackBar,
-  MatLegacySnackBar as MatSnackBar,
-  MatLegacySnackBarRef as MatSnackBarRef,
-} from '@angular/material/legacy-snack-bar';
+import { MatSnackBar, MatSnackBarRef, SimpleSnackBar } from '@angular/material/snack-bar';
 import { Actions, ofType } from '@ngrx/effects';
 import { setActiveWorkContext } from '../../features/work-context/store/work-context.actions';
 import { debounce } from 'helpful-decorators';

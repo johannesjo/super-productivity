@@ -5,7 +5,7 @@ import { concatMap, filter, first, map, take, tap, withLatestFrom } from 'rxjs/o
 import { select, Store } from '@ngrx/store';
 import { OPEN_PROJECT_TYPE } from '../../../../issue.const';
 import { ProjectService } from '../../../../../project/project.service';
-import { MatLegacyDialog as MatDialog } from '@angular/material/legacy-dialog';
+import { MatDialog } from '@angular/material/dialog';
 import { Task } from '../../../../../tasks/task.model';
 import { OpenProjectCfg, OpenProjectTransitionOption } from '../../open-project.model';
 import { EMPTY, Observable, of, timer } from 'rxjs';

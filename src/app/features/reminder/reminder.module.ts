@@ -2,7 +2,7 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReminderService } from './reminder.service';
 import { NoteModule } from '../note/note.module';
-import { MatLegacyDialog as MatDialog } from '@angular/material/legacy-dialog';
+import { MatDialog } from '@angular/material/dialog';
 import { IS_ELECTRON } from '../../app.constants';
 import { TasksModule } from '../tasks/tasks.module';
 import {

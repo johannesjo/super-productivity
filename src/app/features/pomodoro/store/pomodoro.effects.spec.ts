@@ -5,7 +5,7 @@ import { BehaviorSubject, EMPTY, Observable, of } from 'rxjs';
 import { PomodoroEffects } from './pomodoro.effects';
 import { provideMockStore } from '@ngrx/store/testing';
 import { NotifyService } from '../../../core/notify/notify.service';
-import { MatLegacyDialog as MatDialog } from '@angular/material/legacy-dialog';
+import { MatDialog } from '@angular/material/dialog';
 import { SnackService } from '../../../core/snack/snack.service';
 import { PomodoroService } from '../pomodoro.service';
 import { setCurrentTask, unsetCurrentTask } from '../../tasks/store/task.actions';

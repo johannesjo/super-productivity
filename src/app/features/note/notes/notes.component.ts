@@ -9,8 +9,8 @@ import {
 import { NoteService } from '../note.service';
 import { DragulaService } from 'ng2-dragula';
 import { Subscription } from 'rxjs';
-import { MatLegacyButton as MatButton } from '@angular/material/legacy-button';
-import { MatLegacyDialog as MatDialog } from '@angular/material/legacy-dialog';
+import { MatButton } from '@angular/material/button';
+import { MatDialog } from '@angular/material/dialog';
 import { DialogAddNoteComponent } from '../dialog-add-note/dialog-add-note.component';
 import { standardListAnimation } from '../../../ui/animations/standard-list.ani';
 import { fadeAnimation } from '../../../ui/animations/fade.ani';

@@ -1,5 +1,12 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpErrorResponse, HttpEvent, HttpHeaders, HttpParams, HttpRequest } from '@angular/common/http';
+import {
+  HttpClient,
+  HttpErrorResponse,
+  HttpEvent,
+  HttpHeaders,
+  HttpParams,
+  HttpRequest,
+} from '@angular/common/http';
 import { parseUrl, stringifyUrl } from 'query-string';
 import { EMPTY, forkJoin, Observable, ObservableInput, of, throwError } from 'rxjs';
 import { SnackService } from 'src/app/core/snack/snack.service';

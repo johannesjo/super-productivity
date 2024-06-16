@@ -1,6 +1,12 @@
 import { Injectable } from '@angular/core';
 import { SnackService } from '../../../../core/snack/snack.service';
-import { HttpClient, HttpErrorResponse, HttpHeaders, HttpParams, HttpRequest } from '@angular/common/http';
+import {
+  HttpClient,
+  HttpErrorResponse,
+  HttpHeaders,
+  HttpParams,
+  HttpRequest,
+} from '@angular/common/http';
 import { GiteaCfg } from './gitea.model';
 import { catchError, filter, map, switchMap } from 'rxjs/operators';
 import { Observable, ObservableInput, throwError } from 'rxjs';

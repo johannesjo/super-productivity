@@ -3,7 +3,7 @@ import { T } from '../../t.const';
 import { TaskService } from '../../features/tasks/task.service';
 import { ScheduledTaskService } from '../../features/tasks/scheduled-task.service';
 import { ReminderService } from '../../features/reminder/reminder.service';
-import { MatLegacyDialog as MatDialog } from '@angular/material/legacy-dialog';
+import { MatDialog } from '@angular/material/dialog';
 import { Task, TaskWithReminderData } from '../../features/tasks/task.model';
 import { DialogAddTaskReminderComponent } from '../../features/tasks/dialog-add-task-reminder/dialog-add-task-reminder.component';
 import { standardListAnimation } from '../../ui/animations/standard-list.ani';

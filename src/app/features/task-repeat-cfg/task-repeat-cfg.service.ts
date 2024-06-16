@@ -24,7 +24,7 @@ import {
 } from './task-repeat-cfg.model';
 import { nanoid } from 'nanoid';
 import { DialogConfirmComponent } from '../../ui/dialog-confirm/dialog-confirm.component';
-import { MatLegacyDialog as MatDialog } from '@angular/material/legacy-dialog';
+import { MatDialog } from '@angular/material/dialog';
 import { T } from '../../t.const';
 import { take } from 'rxjs/operators';
 import { TaskService } from '../tasks/task.service';

@@ -4,15 +4,14 @@
     .isSmallMainContainer & {
       @content;
     }
-  } @else if ($sel and $sel ==':host') {
+  } @else if ($sel and $sel == ':host') {
     @at-root :host-context(.isSmallMainContainer) {
       @content;
     }
-  } @else if ($sel and $sel !='') {
-    @at-root
-    .isSmallMainContainer &,
-    :host::ng-deep .isSmallMainContainer &,
-    :host-context(.isSmallMainContainer) & {
+  } @else if ($sel and $sel != '') {
+    @at-root .isSmallMainContainer &,
+      :host::ng-deep .isSmallMainContainer &,
+      :host-context(.isSmallMainContainer) & {
       //border: 2px solid red !important;
       @content;
     }
@@ -30,15 +29,14 @@
     .isVerySmallMainContainer & {
       @content;
     }
-  } @else if ($sel and $sel ==':host') {
+  } @else if ($sel and $sel == ':host') {
     @at-root :host-context(.isVerySmallMainContainer) {
       @content;
     }
-  } @else if ($sel and $sel !='') {
-    @at-root
-    .isVerySmallMainContainer &,
-    :host::ng-deep .isVerySmallMainContainer &,
-    :host-context(.isVerySmallMainContainer) & {
+  } @else if ($sel and $sel != '') {
+    @at-root .isVerySmallMainContainer &,
+      :host::ng-deep .isVerySmallMainContainer &,
+      :host-context(.isVerySmallMainContainer) & {
       //border: 2px solid greenyellow !important;
       @content;
     }
@@ -48,4 +46,3 @@
     }
   }
 }
-

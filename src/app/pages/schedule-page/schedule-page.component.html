@@ -22,6 +22,7 @@
       class="tasks"
     >
       <mat-card
+        appearance="outlined"
         *ngFor="let task of allScheduledTasks; trackBy: trackByFn;"
         class="scheduled-task"
       >
@@ -133,6 +134,7 @@
       class="repeat-task-cfgs"
     >
       <mat-card
+        appearance="outlined"
         *ngFor="let taskRepeatCfg of taskRepeatCfgs; trackBy: trackByFn;"
         class="repeat-task-cfg"
       >

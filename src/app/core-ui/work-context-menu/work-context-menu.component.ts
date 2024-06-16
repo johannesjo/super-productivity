@@ -4,7 +4,7 @@ import { T } from 'src/app/t.const';
 import { TODAY_TAG } from '../../features/tag/tag.const';
 import { from, Observable, of } from 'rxjs';
 import { DialogConfirmComponent } from '../../ui/dialog-confirm/dialog-confirm.component';
-import { MatLegacyDialog as MatDialog } from '@angular/material/legacy-dialog';
+import { MatDialog } from '@angular/material/dialog';
 import { TagService } from '../../features/tag/tag.service';
 import { filter, first, switchMap, take, tap } from 'rxjs/operators';
 import { Tag } from '../../features/tag/tag.model';

@@ -30,7 +30,7 @@ import { Task } from '../tasks/task.model';
 import { blendInOutAnimation } from 'src/app/ui/animations/blend-in-out.ani';
 import { AnimationEvent } from '@angular/animations';
 import { SearchItem } from './search-bar.model';
-import { MatLegacyAutocompleteTrigger as MatAutocompleteTrigger } from '@angular/material/legacy-autocomplete';
+import { MatAutocompleteTrigger } from '@angular/material/autocomplete';
 import { NavigateToTaskService } from '../../core-ui/navigate-to-task/navigate-to-task.service';
 
 const MAX_RESULTS = 100;

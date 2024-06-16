@@ -7,7 +7,7 @@ import {
 import { PersistenceService } from '../../core/persistence/persistence.service';
 import { expandFadeAnimation } from '../../ui/animations/expand.ani';
 import { WorklogDataForDay, WorklogMonth, WorklogWeek } from './worklog.model';
-import { MatLegacyDialog as MatDialog } from '@angular/material/legacy-dialog';
+import { MatDialog } from '@angular/material/dialog';
 import { Task, TaskCopy } from '../tasks/task.model';
 import { TaskService } from '../tasks/task.service';
 import { DialogWorklogExportComponent } from './dialog-worklog-export/dialog-worklog-export.component';

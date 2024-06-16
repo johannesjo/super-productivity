@@ -37,7 +37,7 @@
 
 button {
   margin: 0;
-  margin-left: 1.5* $s;
+  margin-left: 1.5 * $s;
 }
 
 .button-wrapper {
@@ -59,6 +59,7 @@ button {
   }
 }
 
+/*TODO(mdc-migration): The following rule targets internal classes of progress-bar that may no longer apply for the MDC version.*/
 mat-progress-bar {
   position: absolute;
   bottom: 2px;

@@ -1,9 +1,11 @@
 @import '../../../variables';
 
+/* TODO(mdc-migration): The following rule targets internal classes of form-field that may no longer apply for the MDC version. */
 :host::ng-deep .mat-form-field-flex {
   min-width: 250px;
 }
 
+/* TODO(mdc-migration): The following rule targets internal classes of chips that may no longer apply for the MDC version. */
 mat-chip {
   cursor: pointer;
 }

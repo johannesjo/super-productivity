@@ -11,7 +11,7 @@ import { Tag } from '../tag.model';
 import { TagService } from '../tag.service';
 import { BehaviorSubject, combineLatest, Observable, of, Subscription } from 'rxjs';
 import { map, switchMap } from 'rxjs/operators';
-import { MatLegacyDialog as MatDialog } from '@angular/material/legacy-dialog';
+import { MatDialog } from '@angular/material/dialog';
 import { Task } from '../../tasks/task.model';
 import { DialogEditTagsForTaskComponent } from '../dialog-edit-tags/dialog-edit-tags-for-task.component';
 import { ProjectService } from '../../project/project.service';

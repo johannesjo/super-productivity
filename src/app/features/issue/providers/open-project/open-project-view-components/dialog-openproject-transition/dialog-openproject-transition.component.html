@@ -29,16 +29,17 @@
     <tr>
       <th>{{T.F.OPEN_PROJECT.DIALOG_TRANSITION.PERCENTAGE_DONE|translate}}</th>
       <td>
+        <!-- TODO: The 'tickInterval' property no longer exists -->
         <mat-slider
           thumbLabel
           [(ngModel)]="percentageDone"
           [displayWith]="displayThumbWith"
-          tickInterval="5"
           step="5"
           min="0"
           max="100"
           aria-label="units"
-        ></mat-slider>
+          ><input matSliderThumb
+        /></mat-slider>
       </td>
     </tr>
   </table>

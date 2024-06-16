@@ -9,7 +9,7 @@
     border-left: 0;
     border-right: 0;
     border-style: solid;
-    padding: 0 $s*2;
+    padding: 0 $s * 2;
   }
 
   .help-btn {
@@ -19,7 +19,7 @@
     z-index: 1;
   }
 
-  :host-context([dir=rtl]) {
+  :host-context([dir='rtl']) {
     .help-btn {
       position: absolute;
       right: unset;

@@ -6,7 +6,7 @@
   *ngIf="worklogService.worklogData$|async as wData; else spinner"
   [@fade]
 >
-  <h1 class="mat-headline total-time">
+  <h1 class="mat-headline-5 total-time">
     {{ T.F.WORKLOG.CMP.TOTAL_TIME|translate }} <br /><strong
       >{{ wData.totalTimeSpent|msToString }}</strong
     >
@@ -19,7 +19,7 @@
     >
       <h1
         [innerHtml]="year.key"
-        class="year-title mat-headline"
+        class="year-title mat-headline-5"
       ></h1>
       <div class="year-time-spent">
         {{ T.F.WORKLOG.CMP.MONTH_WORKED|translate }}
@@ -35,7 +35,7 @@
           *ngFor="let month of year.value.ent|keyvalue:sortWorklogItems; trackBy: trackByKey;"
           class="month"
         >
-          <h2 class="month-title mat-headline">
+          <h2 class="month-title mat-headline-5">
             <span [innerHtml]="month.key|numberToMonth"></span>
 
             <button

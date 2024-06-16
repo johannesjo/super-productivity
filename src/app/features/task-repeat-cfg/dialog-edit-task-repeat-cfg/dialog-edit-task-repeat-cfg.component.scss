@@ -1,5 +1,6 @@
 @import '../../../../variables';
 
+/* TODO(mdc-migration): The following rule targets internal classes of dialog that may no longer apply for the MDC version. */
 h1,
 mat-dialog-actions,
 help-section {
@@ -13,7 +14,7 @@ help-section {
   max-width: 500px;
 }
 
-:host::ng-deep mat-form-field .mat-form-field {
+:host::ng-deep mat-form-field .mat-mdc-form-field {
   &-underline {
     position: relative;
     bottom: auto;
@@ -38,7 +39,7 @@ help-section {
 :host::ng-deep .weekdays {
   display: flex;
   flex-wrap: wrap;
-
+  /* TODO(mdc-migration): The following rule targets internal classes of form-field that may no longer apply for the MDC version. */
   .mat-form-field-infix {
     width: auto;
     min-width: 100px;
@@ -56,7 +57,7 @@ help-section {
     &:first-child {
       margin-left: 0;
       width: auto;
-
+      /* TODO(mdc-migration): The following rule targets internal classes of form-field that may no longer apply for the MDC version. */
       .mat-form-field-infix {
         width: 90px;
 

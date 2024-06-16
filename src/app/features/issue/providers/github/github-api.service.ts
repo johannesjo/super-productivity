@@ -1,7 +1,13 @@
 import { Injectable } from '@angular/core';
 import { GithubCfg } from './github.model';
 import { SnackService } from '../../../../core/snack/snack.service';
-import { HttpClient, HttpErrorResponse, HttpHeaders, HttpParams, HttpRequest } from '@angular/common/http';
+import {
+  HttpClient,
+  HttpErrorResponse,
+  HttpHeaders,
+  HttpParams,
+  HttpRequest,
+} from '@angular/common/http';
 import { GITHUB_API_BASE_URL } from './github.const';
 import { Observable, ObservableInput, of, throwError } from 'rxjs';
 import { GithubIssueSearchResult, GithubOriginalIssue } from './github-api-responses';

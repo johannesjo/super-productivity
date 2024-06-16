@@ -14,7 +14,7 @@ $spacer: $s;
   // mobile viewport bug fix
   min-height: -webkit-fill-available;
 
-  ::ng-deep .mat-menu-item mat-icon {
+  ::ng-deep .mat-mdc-menu-item mat-icon {
     margin-bottom: 2px;
   }
 }

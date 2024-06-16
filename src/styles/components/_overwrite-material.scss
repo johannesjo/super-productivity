@@ -1,5 +1,5 @@
 // DIALOGS
-body .mat-dialog-content {
+body .mat-mdc-dialog-content {
   overflow: auto;
 }
 
@@ -16,7 +16,7 @@ body .mat-dialog-content {
   }
 
   .dialog-content,
-  .mat-dialog-content {
+  .mat-mdc-dialog-content {
     max-height: 100%;
   }
 }
@@ -28,7 +28,7 @@ body .mat-dialog-content {
 }
 
 // overwrite mat typography
-.mat-dialog-title.mat-dialog-title {
+.mat-mdc-dialog-title.mat-dialog-title {
   font: 500 20px/32px Roboto, 'Helvetica Neue', sans-serif;
 }
 
@@ -53,7 +53,7 @@ body .mat-dialog-content {
 
 // SNACK
 // -----
-.mat-snack-bar-container.mat-snack-bar-container.mat-snack-bar-container {
+.mat-mdc-snack-bar-container.mat-snack-bar-container.mat-snack-bar-container {
   padding: 0 16px !important;
   pointer-events: all;
   min-height: 48px;
@@ -62,49 +62,52 @@ body .mat-dialog-content {
   margin-right: auto;
 }
 
-body .mat-snack-bar-handset {
+body .mat-mdc-snack-bar-handset {
   pointer-events: none;
 }
 
-body .mat-form-field {
+body .mat-mdc-form-field {
   display: block;
 }
 
 .polling-snack {
-  &.mat-snack-bar-container.mat-snack-bar-container.mat-snack-bar-container {
+  &.mat-mdc-snack-bar-container.mat-snack-bar-container.mat-snack-bar-container {
     padding-bottom: 8px;
   }
 }
 
 // FORMS
 // -----
+/* TODO(mdc-migration): The following rule targets internal classes of checkbox that may no longer apply for the MDC version.*/
 .mat-checkbox-layout {
   white-space: normal !important;
 }
 
 // TODO remove TMP fix for https://github.com/angular/components/pull/18467
+/* TODO(mdc-migration): The following rule targets internal classes of checkbox that may no longer apply for the MDC version.*/
 .mat-checkbox-checked .mat-checkbox-background {
   background-color: rgba(var(--palette-accent-500), 1);
 }
 
 // BUTTONS
 // -------
-.mat-button-base,
-.mat-button {
+.mat-mdc-button-base,
+.mat-mdc-button {
   overflow: hidden !important;
   text-overflow: ellipsis !important;
   max-width: 100%;
 }
 
-.mat-flat-button,
-.mat-stroked-button,
-.mat-raised-button,
-.mat-button {
+.mat-mdc-unelevated-button,
+.mat-mdc-outlined-button,
+.mat-mdc-raised-button,
+.mat-mdc-button {
   text-transform: uppercase;
   min-height: 36px;
   align-items: center;
 }
 
+/* TODO(mdc-migration): The following rule targets internal classes of button that may no longer apply for the MDC version.*/
 .mat-button-wrapper,
 .mat-button-wrapper > .mat-icon {
   display: flex;
@@ -114,7 +117,7 @@ body .mat-form-field {
 }
 
 // otherwise it's hard to see when an off-screen element gets focused via tab
-.mat-flat-button.mat-primary:focus {
+.mat-mdc-unelevated-button.mat-primary:focus {
   &:after {
     content: '';
     position: absolute;
@@ -129,7 +132,7 @@ body .mat-form-field {
 
 .mat-form-field:not(.mat-form-field-appearance-legacy)
   .mat-form-field-prefix
-  .mat-icon-button,
+  .mat-mdc-icon-button,
 .mat-form-field:not(.mat-form-field-appearance-legacy)
   .mat-form-field-suffix
   .mat-icon-button {
@@ -142,11 +145,11 @@ body .mat-form-field {
 }
 
 // CARD BG
-.isDarkTheme .mat-card {
+.isDarkTheme .mat-mdc-card {
   background: $dark-theme-card-bg;
 }
 
-.mat-card {
+.mat-mdc-card {
   box-shadow: none;
 
   @include flatBox(true);
@@ -169,12 +172,13 @@ body .mat-h1 {
 }
 
 // AUTOCOMPLETE
+/* TODO(mdc-migration): The following rule targets internal classes of option that may no longer apply for the MDC version.*/
 mat-option .mat-option-text > * {
   vertical-align: middle;
 }
 
 // SELECT
 // to make it fit monday-sunday
-.mat-select-panel {
+.mat-mdc-select-panel {
   //max-height: fit-content !important;
 }
