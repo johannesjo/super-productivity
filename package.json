@@ -154,7 +154,6 @@
     "@schematics/angular": "^14.1.3",
     "@types/electron-localshortcut": "^3.1.0",
     "@types/file-saver": "^2.0.5",
-    "@types/hammerjs": "^2.0.45",
     "@types/jasmine": "^3.10.2",
     "@types/jasminewd2": "~2.0.13",
     "@types/lz-string": "^1.5.0",
@@ -187,7 +186,6 @@
     "eslint-plugin-unused-imports": "^2.0.0",
     "file-saver": "^2.0.2",
     "glob": "^8.0.3",
-    "hammerjs": "^2.0.8",
     "helpful-decorators": "^2.1.0",
     "husky": "^4.2.5",
     "ical.js": "^2.0.1",
@@ -204,7 +202,7 @@
     "karma-jasmine": "~4.0.1",
     "karma-jasmine-html-reporter": "^1.6.0",
     "lz-string": "^1.5.0",
-    "marked": "^13.0.0",
+    "marked": "^12.0.2",
     "moment": "2.29.4",
     "moment-duration-format": "^2.2.2",
     "nanoid": "^4.0.0",
@@ -232,5 +230,12 @@
   },
   "resolutions": {
     "sass": "1.32.6"
+  },
+  "overrides": {
+    "ng2-dragula": {
+      "@angular/common": "$@angular/common",
+      "@angular/core": "$@angular/core",
+      "@angular/animations": "$@angular/animations"
+    }
   }
 }
