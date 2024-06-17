@@ -1,3 +1,7 @@
+:root {
+  --mdc-icon-button-state-layer-size: 40px;
+}
+
 // DIALOGS
 body .mat-mdc-dialog-content {
   overflow: auto;
@@ -15,6 +19,40 @@ body .mat-mdc-dialog-content {
     max-height: 95vh !important;
   }
 }
+
+// BUTTONS
+.mat-mdc-mini-fab,
+.mat-mdc-icon-button {
+  width: 40px !important;
+  height: 40px !important;
+  padding: 0 !important;
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+
+  //& > *[role=img] {
+  //  width: 24px;
+  //  height: 24px;
+  //  font-size: 24px;
+  //
+  //  svg {
+  //    width: 24px;
+  //    height: 24px;
+  //  }
+  //}
+
+  .mat-mdc-button-touch-target {
+    width: 40px !important;
+    height: 40px !important;
+  }
+}
+
+//.mat-mdc-icon-button {
+//  line-height: 40px !important;
+//  height: 40px !important;
+//  width: 40px !important;
+//  padding: 8px !important;
+//}
 
 //
 //  .dialog-content,
@@ -146,6 +184,7 @@ body .mat-mdc-dialog-content {
 //  }
 //}
 //
+
 //// CARD BG
 //.isDarkTheme .mat-mdc-card {
 //  background: $dark-theme-card-bg;

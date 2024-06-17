@@ -280,16 +280,22 @@
   button {
     margin-top: auto;
     margin-bottom: auto;
+    height: 100% !important;
     border-radius: $card-border-radius;
-    height: 100%;
+
+    ::ng-deep {
+      .mat-mdc-button-persistent-ripple {
+        border-radius: $card-border-radius;
+      }
+    }
 
     &:hover {
-      @include darkTheme() {
-        background: rgba(255, 255, 255, 0.1);
-      }
-      @include lightTheme() {
-        background: rgba(0, 0, 0, 0.05);
-      }
+      //@include darkTheme() {
+      //  background: rgba(255, 255, 255, 0.1);
+      //}
+      //@include lightTheme() {
+      //  background: rgba(0, 0, 0, 0.05);
+      //}
     }
   }
 
@@ -893,6 +899,7 @@ $this-play-size: 22px;
 }
 
 $min-badge-size: $s * 2.25;
+
 .mini-badge {
   line-height: $min-badge-size;
   width: $min-badge-size;

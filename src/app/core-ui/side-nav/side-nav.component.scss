@@ -195,7 +195,18 @@ section {
 .project-settings-btn {
   padding-top: 5px;
   padding-bottom: 5px;
-  //border-radius: 0 !important;
+  border-radius: 0 !important;
+
+  ::ng-deep {
+    .mat-mdc-button-persistent-ripple {
+      border-radius: 0 !important;
+    }
+  }
+
+  .project-settings-btn,
+  .tag-settings-btn {
+    border-radius: 0;
+  }
 }
 
 .route-link.isActiveRoute,
