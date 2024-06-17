@@ -7,6 +7,10 @@ body .mat-mdc-dialog-content {
   overflow: auto;
 }
 
+body .mat-mdc-dialog-surface {
+  overflow: visible;
+}
+
 .big {
   height: auto;
   max-height: 100vh !important;

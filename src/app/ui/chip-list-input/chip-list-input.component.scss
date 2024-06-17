@@ -1,5 +1,13 @@
 @import '../../../variables';
 
+:host {
+  display: block;
+
+  mat-form-field {
+    display: block;
+  }
+}
+
 .additional {
   transition: $transition-fast;
   opacity: 0;
