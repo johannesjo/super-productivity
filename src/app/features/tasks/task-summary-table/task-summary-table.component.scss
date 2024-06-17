@@ -16,6 +16,8 @@
   }
 
   td {
+    text-align: center;
+
     @include lightTheme() {
       color: $light-theme-text-color-muted;
     }

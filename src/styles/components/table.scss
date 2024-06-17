@@ -1,4 +1,11 @@
 table {
+  th,
+  td {
+    // overwrite material stuff for inline input
+    overflow-x: visible !important;
+    overflow-y: visible !important;
+  }
+
   @include mq(xs) {
     th,
     td {
@@ -8,13 +15,13 @@ table {
     th,
     td {
       &:first-child {
-        padding-left: 0;
+        //padding-left: 0;
       }
     }
     th,
     td {
       &:last-child {
-        padding-right: 0;
+        //padding-right: 0;
       }
     }
   }
