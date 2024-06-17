@@ -5,6 +5,10 @@
 // DIALOGS
 body .mat-mdc-dialog-content {
   overflow: auto;
+
+  mat-form-field {
+    display: block;
+  }
 }
 
 body .mat-mdc-dialog-surface {

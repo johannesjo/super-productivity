@@ -115,7 +115,7 @@ export const SYNC_FORM: ConfigFormSection<SyncConfig> = {
         {
           key: 'accessToken',
           type: 'input',
-          hideExpression: (model: DropboxSyncConfig) => !model.accessToken,
+          hideExpression: (model: DropboxSyncConfig) => !model?.accessToken,
           templateOptions: {
             label: T.F.SYNC.FORM.DROPBOX.L_ACCESS_TOKEN,
           },
