@@ -36,14 +36,7 @@ import { MatTableModule } from '@angular/material/table';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import {
-  MarkdownModule,
-  MarkdownService,
-  MARKED_OPTIONS,
-  MarkedOptions,
-  MarkedRenderer,
-  provideMarkdown,
-} from 'ngx-markdown';
+import { MarkdownModule, MARKED_OPTIONS, provideMarkdown } from 'ngx-markdown';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { FORMLY_CONFIG, FormlyModule } from '@ngx-formly/core';
 import { ThemeSelectComponent } from './theme-select/theme-select.component';
@@ -96,6 +89,7 @@ import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { ProgressCircleComponent } from './progress-circle/progress-circle.component';
 import { FormlyLinkWidgetComponent } from './formly-link-widget/formly-link-widget.component';
 import { MaterialCssVarsModule } from 'angular-material-css-vars';
+import { markedOptionsFactory } from './marked-options-factory';
 
 const DIALOG_COMPONENTS = [
   DialogConfirmComponent,
@@ -179,30 +173,6 @@ const OTHER_3RD_PARTY_MODS_WITHOUT_CFG = [
   TranslateModule,
 ];
 
-const markedOptionsFactory = (): MarkedOptions => {
-  const renderer = new MarkedRenderer();
-
-  // TODO migrate properly
-  // renderer.checkbox = (isChecked: boolean) => {
-  //   return `<span class="checkbox material-icons">${
-  //     isChecked ? 'check_box ' : 'check_box_outline_blank '
-  //   }</span>`;
-  // };
-  // renderer.listitem = (text: string) => {
-  //   return text.includes('checkbox')
-  //     ? '<li class="checkbox-wrapper">' + text + '</li>'
-  //     : '<li>' + text + '</li>';
-  // };
-  return {
-    renderer: renderer,
-    gfm: true,
-    breaks: false,
-    pedantic: false,
-    // smartLists: true,
-    // smartypants: false,
-  };
-};
-
 @NgModule({
   imports: [
     ...OTHER_3RD_PARTY_MODS_WITHOUT_CFG,
@@ -274,29 +244,4 @@ const markedOptionsFactory = (): MarkedOptions => {
     DatePipe,
   ],
 })
-export class UiModule {
-  constructor(private _markdownService: MarkdownService) {
-    // TODO properly migrate
-    // const linkRenderer = this._markdownService.renderer.link;
-    // this._markdownService.renderer.link = (href, title, text) => {
-    //   const html = linkRenderer.call(this._markdownService.renderer, href, title, text);
-    //   return html.replace(/^<a /, '<a target="_blank" ');
-    // };
-    // this._markdownService.renderer.paragraph = (text) => {
-    //   const split = text.split('\n');
-    //   return split.reduce((acc, p, i) => {
-    //     const result = /h(\d)\./.exec(p);
-    //     if (result !== null) {
-    //       const h = `h${result[1]}`;
-    //       return acc + `<${h}>${p.replace(result[0], '')}</${h}>`;
-    //     }
-    //
-    //     if (split.length === 1) {
-    //       return `<p>` + p + `</p>`;
-    //     }
-    //
-    //     return acc ? (split.length - 1 === i ? acc + p + `</p>` : acc + p) : `<p>` + p;
-    //   }, '');
-    // };
-  }
-}
+export class UiModule {}
