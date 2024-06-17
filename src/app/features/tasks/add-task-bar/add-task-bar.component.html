@@ -16,6 +16,8 @@
 
     <input
       #inputEl
+      [mention]="tagSuggestions"
+      [mentionConfig]="{triggerChar: '#', labelKey: 'title'}"
       [tabindex]="tabindex"
       (blur)="onBlur($event)"
       [formControl]="taskSuggestionsCtrl"
