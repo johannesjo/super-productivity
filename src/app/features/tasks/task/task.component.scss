@@ -828,14 +828,15 @@ $this-play-size: 22px;
   z-index: $z-toggle-sub-task-btn !important;
   min-width: 0;
   min-height: 0;
-  width: 32px;
-  height: 32px;
+  width: 32px !important;
+  height: 32px !important;
   margin-top: -1px !important;
   transform-origin: left top;
   transition-property: all;
+  box-shadow: $whiteframe-shadow-1dp;
 
   :host-context(.isNoTouchOnly) & {
-    opacity: 0;
+    //opacity: 0;
   }
 
   :host:hover & {
@@ -844,7 +845,6 @@ $this-play-size: 22px;
 
   mat-icon {
     transition: $transition-standard;
-    margin-top: -4px;
     opacity: $task-icon-default-opacity;
 
     &.isHideDoneTasks {

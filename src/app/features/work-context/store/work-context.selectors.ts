@@ -105,8 +105,6 @@ export const selectTrackableTasksForActiveContext = createSelector(
 export const selectStartableTasksForActiveContext = createSelector(
   selectTrackableTasksForActiveContext,
   (trackableTasks): Task[] => {
-    console.log(trackableTasks);
-
     return trackableTasks.filter((task) => !task.isDone);
   },
 );
