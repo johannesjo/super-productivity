@@ -4,6 +4,14 @@
   direction: rtl;
 }
 
+:host {
+  display: block;
+
+  mat-form-field {
+    display: block;
+  }
+}
+
 .dialog-content {
 }
 
@@ -13,33 +21,29 @@
     padding-top: 0;
     padding-bottom: 0;
     padding: 0;
+    border: 0 !important;
   }
 
   td {
-    /*TODO(mdc-migration): The following rule targets internal classes of select that may no longer apply for the MDC version.*/
-    ::ng-deep .mat-select-value {
+    ::ng-deep .mat-mdc-select-value {
       padding-left: $s * 2.25;
       padding-top: $s * 1.25;
       padding-bottom: $s * 1.25;
     }
 
-    /*TODO(mdc-migration): The following rule targets internal classes of select that may no longer apply for the MDC version.*/
-    &:first-of-type ::ng-deep .mat-select-value {
+    &:first-of-type ::ng-deep .mat-mdc-select-value {
       padding-left: $s * 3;
     }
 
-    /*TODO(mdc-migration): The following rule targets internal classes of select that may no longer apply for the MDC version.*/
-    ::ng-deep .mat-select-arrow-wrapper {
+    ::ng-deep .mat-mdc-select-arrow-wrapper {
       padding-right: $s * 1.25;
     }
 
-    /*TODO(mdc-migration): The following rule targets internal classes of select that may no longer apply for the MDC version.*/
-    &:last-of-type ::ng-deep .mat-select-arrow-wrapper {
+    &:last-of-type ::ng-deep .mat-mdc-select-arrow-wrapper {
       padding-right: $s * 3;
     }
   }
 
-  /*TODO(mdc-migration): The following rule targets internal classes of select that may no longer apply for the MDC version.*/
   mat-select {
     &:hover {
       &:after {
@@ -68,6 +72,7 @@
     justify-content: space-between;
     align-items: center;
     flex-wrap: wrap;
+    padding-top: $s * 2;
   }
   .col {
     width: 32%;
