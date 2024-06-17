@@ -20,6 +20,13 @@ body .mat-mdc-dialog-content {
   }
 }
 
+// FORMS
+.mdc-notched-outline__leading,
+.mdc-notched-outline__notch,
+.mdc-notched-outline__trailing {
+  //opacity: 0.2;
+}
+
 // BUTTONS
 .mat-mdc-mini-fab,
 .mat-mdc-icon-button {
