@@ -13,10 +13,6 @@ $spacer: $s;
   min-height: 100vh;
   // mobile viewport bug fix
   min-height: -webkit-fill-available;
-
-  ::ng-deep .mat-mdc-menu-item mat-icon {
-    margin-bottom: 2px;
-  }
 }
 
 @media (min-width: $side-nav-width-switch-l) {
@@ -31,6 +27,7 @@ $spacer: $s;
   button {
     height: 44px !important;
     line-height: 44px !important;
+    min-height: 44px !important;
   }
 
   a {
@@ -195,24 +192,10 @@ section {
 }
 
 .tag-settings-btn,
-.tag button:first-of-type,
-.project-settings-btn,
-.project button:first-of-type,
-.route-link {
-  &:focus,
-  &:hover {
-    font-weight: bold;
-
-    @include lightTheme {
-      background: rgba(
-        var(--palette-background-hover),
-        var(--palette-background-hover-alpha, 1)
-      );
-    }
-    @include darkTheme {
-      background: rgba(255, 255, 255, 0.1);
-    }
-  }
+.project-settings-btn {
+  padding-top: 5px;
+  padding-bottom: 5px;
+  //border-radius: 0 !important;
 }
 
 .route-link.isActiveRoute,
@@ -265,6 +248,7 @@ section {
     margin-left: auto;
     margin-right: 0;
     transition: $transition-standard;
+    order: 2;
   }
 
   &.isExpanded ::ng-deep mat-icon:last-of-type {
