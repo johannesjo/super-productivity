@@ -21,10 +21,14 @@ body .mat-mdc-dialog-content {
 }
 
 // FORMS
-.mdc-notched-outline__leading,
-.mdc-notched-outline__notch,
-.mdc-notched-outline__trailing {
-  //opacity: 0.2;
+// -----
+//.mdc-notched-outline__leading,
+//.mdc-notched-outline__notch,
+//.mdc-notched-outline__trailing {
+//  //opacity: 0.2;
+//}
+.mat-mdc-form-field {
+  margin-bottom: $s;
 }
 
 // BUTTONS
