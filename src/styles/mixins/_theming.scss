@@ -104,13 +104,10 @@
   border-width: $border-width;
 
   @include lightTheme($is-global) {
-    border-color: rgba(
-      var(--palette-foreground-divider),
-      var(--palette-foreground-divider-alpha, 1)
-    );
+    border-color: var(--dark-dividers);
   }
   @include darkTheme($is-global) {
-    border-color: rgba(255, 255, 255, 0.12);
+    border-color: var(--light-dividers);
   }
 }
 

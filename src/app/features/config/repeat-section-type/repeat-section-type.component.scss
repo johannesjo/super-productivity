@@ -2,11 +2,9 @@
 
 .row {
   display: flex;
-  margin-bottom: $s * 2;
-  padding-bottom: $s;
-  border: 1px solid $light-theme-extra-border-color;
+  margin-bottom: $s * 3;
+  border: 4px solid $light-theme-extra-border-color;
   padding: $s * 2;
-  padding-top: 0;
   box-shadow: $whiteframe-shadow-2dp;
   border-radius: 4px;
   position: relative;
