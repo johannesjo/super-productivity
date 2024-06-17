@@ -14,12 +14,11 @@
           name="type"
           required="true"
         >
-          <mat-option
-            *ngFor="let remindOption of remindAvailableOptions; trackBy: trackByIndex"
-            [innerHtml]="(remindOption.label|translate)"
-            [value]="remindOption.value"
-          >
+          @for (remindOption of remindAvailableOptions; track trackByIndex) {
+          <mat-option [value]="remindOption.value">
+            {{ (remindOption.label|translate) }}
           </mat-option>
+          }
         </mat-select>
       </mat-form-field>
 
