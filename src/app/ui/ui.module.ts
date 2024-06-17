@@ -39,7 +39,6 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MarkdownModule, MARKED_OPTIONS, provideMarkdown } from 'ngx-markdown';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { FORMLY_CONFIG, FormlyModule } from '@ngx-formly/core';
-import { ThemeSelectComponent } from './theme-select/theme-select.component';
 import { MsToStringPipe } from './duration/ms-to-string.pipe';
 import { StringToMsPipe } from './duration/string-to-ms.pipe';
 import { ProgressBarComponent } from './progress-bar/progress-bar.component';
@@ -129,7 +128,6 @@ const COMPONENT_AND_PIPES = [
   ProgressCircleComponent,
   SimpleDownloadDirective,
   StringToMsPipe,
-  ThemeSelectComponent,
   ToArrayPipe,
   SortPipe,
   RoundDurationPipe,
