@@ -1,3 +1,10 @@
+## [8.0.10](https://github.com/johannesjo/super-productivity/compare/v8.0.9...v8.0.10) (2024-06-17)
+
+### Bug Fixes
+
+- cannot read properties of undefined reading color [#3208](https://github.com/johannesjo/super-productivity/issues/3208) ([72a625a](https://github.com/johannesjo/super-productivity/commit/72a625ae7037ba03442c19c0477793a16e224b61))
+- zoomFactor error value [#3218](https://github.com/johannesjo/super-productivity/issues/3218) ([70f1f72](https://github.com/johannesjo/super-productivity/commit/70f1f725550a66f1a3390e0777bfaef4a0b71947))
+
 ## [8.0.9](https://github.com/johannesjo/super-productivity/compare/v8.0.8...v8.0.9) (2024-6-13)
 
 ## [8.0.8](https://github.com/johannesjo/super-productivity/compare/v8.0.7...v8.0.8) (2024-6-13)
