@@ -13,6 +13,7 @@ import { TaskAdditionalInfoComponent } from './task-additional-info/task-additio
 import { SelectTaskComponent } from './select-task/select-task.component';
 import { TaskAttachmentModule } from './task-attachment/task-attachment.module';
 import { IssueModule } from '../issue/issue.module';
+import { MentionModule } from 'angular-mentions';
 import { FilterDoneTasksPipe } from './filter-done-tasks.pipe';
 import { DialogAddTaskReminderComponent } from './dialog-add-task-reminder/dialog-add-task-reminder.component';
 import { TaskSummaryTableComponent } from './task-summary-table/task-summary-table.component';
@@ -39,6 +40,7 @@ import { ShortSyntaxEffects } from './store/short-syntax.effects';
 @NgModule({
   imports: [
     CommonModule,
+    MentionModule,
     IssueModule,
     UiModule,
     FormsModule,
