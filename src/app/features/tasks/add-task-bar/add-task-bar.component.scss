@@ -95,11 +95,6 @@ $short-syntax-bar-height: 32px;
 
 .is-loading {
   padding: $s;
-  /*TODO(mdc-migration): The following rule targets internal classes of option that may no longer apply for the MDC version.*/
-  ::ng-deep .mat-option-text {
-    display: flex;
-    justify-content: center;
-  }
 }
 
 .button-controls {

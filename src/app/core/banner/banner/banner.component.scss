@@ -81,7 +81,6 @@ $vertical-button-margin: $s;
 }
 
 :host {
-  /* TODO(mdc-migration): The following rule targets internal classes of progress-bar that may no longer apply for the MDC version.*/
   mat-progress-bar {
     position: absolute;
     bottom: 2px;

@@ -31,24 +31,3 @@
     max-height: 32px;
   }
 }
-
-/* TODO(mdc-migration): The following rule targets internal classes of chips that may no longer apply for the MDC version. */
-mat-chip {
-  user-select: none;
-  -webkit-user-select: none; /* Safari */
-}
-
-//mat-chip {
-.additional {
-  /* TODO(mdc-migration): The following rule targets internal classes of chips that may no longer apply for the MDC version. */
-  mat-chip:hover &,
-  &.isToggled {
-    opacity: 0.4;
-    transform: scale(1);
-    width: 32px;
-
-    &:hover {
-      opacity: 1;
-    }
-  }
-}

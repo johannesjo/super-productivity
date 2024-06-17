@@ -52,7 +52,6 @@ import { InputDurationFormlyComponent } from './duration/input-duration-formly/i
 import { EnlargeImgDirective } from './enlarge-img/enlarge-img.directive';
 import { DragulaModule } from 'ng2-dragula';
 import { MsToClockStringPipe } from './duration/ms-to-clock-string.pipe';
-import { DatetimeInputComponent } from './datetime-input/datetime-input.component';
 import { InputDurationSliderComponent } from './duration/input-duration-slider/input-duration-slider.component';
 import { MsToMinuteClockStringPipe } from './duration/ms-to-minute-clock-string.pipe';
 import { HumanizeTimestampPipe } from './pipes/humanize-timestamp.pipe';
@@ -101,7 +100,6 @@ const COMPONENT_AND_PIPES = [
   ChipListInputComponent,
   CollapsibleComponent,
   ContentEditableOnClickDirective,
-  DatetimeInputComponent,
   DurationFromStringPipe,
   DurationToStringPipe,
   EnlargeImgDirective,
