@@ -65,6 +65,10 @@ mat-expansion-panel::ng-deep .mat-expansion-panel-header:not(.mat-expanded),
 // PANEL
 // -----
 :host::ng-deep {
+  .mat-expansion-panel:not([class*='mat-elevation-z']) {
+    box-shadow: none;
+  }
+
   .mat-expansion-panel-body {
     padding: 0;
   }
@@ -75,7 +79,7 @@ mat-expansion-panel::ng-deep .mat-expansion-panel-header:not(.mat-expanded),
   }
 
   .mat-expansion-panel-header-title {
-    flex-grow: 0;
+    flex-grow: 1;
     display: flex;
     align-items: center;
     overflow: hidden;
