@@ -9,6 +9,7 @@ export interface AddTaskWithReminderParams {
 export interface NBrowser extends NightwatchBrowser {
   addTask: (taskTitle: string) => NBrowser;
   addNote: (noteTitle: string) => NBrowser;
+  draftTask: (taskContent: string) => NBrowser;
   goToDefaultProject: () => NBrowser;
   loadAppAndClickAwayWelcomeDialog: (url?: string) => NBrowser;
   openPanelForTask: (taskSel: string) => NBrowser;
