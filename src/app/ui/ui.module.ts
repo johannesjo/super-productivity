@@ -229,7 +229,7 @@ const OTHER_3RD_PARTY_MODS_WITHOUT_CFG = [
     { provide: ErrorHandler, useClass: GlobalErrorHandler },
     {
       provide: MAT_FORM_FIELD_DEFAULT_OPTIONS,
-      useValue: { appearance: 'fill' },
+      useValue: { appearance: 'fill', subscriptSizing: 'dynamic' },
     },
     {
       provide: FORMLY_CONFIG,

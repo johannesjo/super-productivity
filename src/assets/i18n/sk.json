@@ -1046,7 +1046,7 @@
     "CLOSE": "Close",
     "DELETE": "Delete",
     "DISMISS": "Dismiss",
-    "DURATION_DESCRIPTION": "e.g. \"5h 23m\" which results in 5 hours in 23 minutes",
+    "DURATION_DESCRIPTION": "e.g. \"5h 6m\" which results in 5 hours in 6 minutes",
     "DO_IT": "Do it!",
     "EDIT": "Edit",
     "ENABLED": "Enabled",

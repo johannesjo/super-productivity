@@ -13,17 +13,6 @@ help-section {
   max-width: 500px;
 }
 
-:host::ng-deep mat-form-field .mat-mdc-form-field {
-  &-underline {
-    position: relative;
-    bottom: auto;
-  }
-
-  &-subscript-wrapper {
-    position: static;
-  }
-}
-
 :host collapsible {
   margin-top: $s * 2;
   margin-bottom: $s * 2;
