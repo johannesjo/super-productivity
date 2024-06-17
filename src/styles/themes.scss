@@ -1,7 +1,6 @@
 @use '@angular/material' as mat;
 @use 'angular-material-css-vars' as mat-css-vars;
 
-
 //$custom-typography: mat.m2-define-typography-config(
 //  $font-family: null,
 //);
@@ -21,8 +20,7 @@
 }
 
 .bgc-primary {
-  // todo fix
-  //@include mat-css-color-and-contrast-primary(500);
+  @include mat-css-vars.mat-css-color-and-contrast-primary(500);
 }
 
 .bg-accent {
@@ -31,7 +29,7 @@
 
 .bgc-accent {
   // todo fix
-  //@include mat-css-color-and-contrast-accent(500);
+  @include mat-css-vars.mat-css-color-and-contrast-accent(500);
 }
 
 .bg-100 {
@@ -47,8 +45,7 @@
 }
 
 .bgc-400 {
-  // todo fix
-  //@include mat-css-color-and-contrast-primary(400);
+  @include mat-css-vars.mat-css-color-and-contrast-primary(400);
 }
 
 .bg-600 {
@@ -56,8 +53,7 @@
 }
 
 .bgc-600 {
-  // todo fix
-  //@include mat-css-color-and-contrast-primary(600);
+  @include mat-css-vars.mat-css-color-and-contrast-primary(600);
 }
 
 .cc-600 {
@@ -69,21 +65,18 @@
 }
 
 .bgc-800 {
-  // todo fix
-  //@include mat-css-color-and-contrast-primary(800);
+  @include mat-css-vars.mat-css-color-and-contrast-primary(800);
 }
 
 // for buttons
 .isDarkTheme .mat-lighter,
 .mat-lighter {
-  // todo fix
-  //@include mat-css-color-and-contrast-primary(300);
+  @include mat-css-vars.mat-css-color-and-contrast-primary(300);
 }
 
 .isDarkTheme .mat-darker,
 .mat-darker {
-  // todo fix
-  //@include mat-css-color-and-contrast-primary(600);
+  @include mat-css-vars.mat-css-color-and-contrast-primary(600);
 }
 
 .color-contrast {
