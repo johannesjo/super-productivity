@@ -4,6 +4,7 @@
 }
 
 // DIALOGS
+// ----------
 body .mat-mdc-dialog-content {
   overflow: auto;
 
@@ -48,17 +49,13 @@ body .mat-mdc-dialog-surface {
 }
 
 // FORMS
-// -----
-//.mdc-notched-outline__leading,
-//.mdc-notched-outline__notch,
-//.mdc-notched-outline__trailing {
-//  //opacity: 0.2;
-//}
+// --------
 .mat-mdc-form-field {
   margin-bottom: $s * 2;
 }
 
 // BUTTONS
+// -----------
 .mat-mdc-mini-fab,
 .mat-mdc-icon-button {
   width: 40px !important;
@@ -73,180 +70,3 @@ body .mat-mdc-dialog-surface {
     height: 40px !important;
   }
 }
-
-//.mat-mdc-icon-button {
-//  line-height: 40px !important;
-//  height: 40px !important;
-//  width: 40px !important;
-//  padding: 8px !important;
-//}
-
-//
-//  .dialog-content,
-//  .mat-mdc-dialog-content {
-//    max-height: 100%;
-//  }
-//}
-//
-//.cdk-overlay-pane {
-//  @include mq(xs, max) {
-//    max-width: 100vw !important;
-//  }
-//}
-//
-//// overwrite mat typography
-//.mat-mdc-dialog-title.mat-dialog-title {
-//  font: 500 20px/32px Roboto, 'Helvetica Neue', sans-serif;
-//}
-//
-//// NOTE: not really an overwrite but helpful
-//.dialog-header-icon {
-//  vertical-align: middle;
-//  margin-right: 8px;
-//
-//  + span {
-//    vertical-align: middle;
-//    display: inline-block;
-//  }
-//}
-//
-//.dialog-help-wrapper {
-//  position: relative;
-//
-//  .help-btn {
-//    margin-top: 3px;
-//  }
-//}
-//
-//// SNACK
-//// -----
-//.mat-mdc-snack-bar-container.mat-snack-bar-container.mat-snack-bar-container {
-//  padding: 0 16px !important;
-//  pointer-events: all;
-//  min-height: 48px;
-//  width: auto;
-//  margin-left: auto;
-//  margin-right: auto;
-//}
-//
-//body .mat-mdc-snack-bar-handset {
-//  pointer-events: none;
-//}
-//
-//body .mat-mdc-form-field {
-//  display: block;
-//}
-//
-//.polling-snack {
-//  &.mat-mdc-snack-bar-container.mat-snack-bar-container.mat-snack-bar-container {
-//    padding-bottom: 8px;
-//  }
-//}
-//
-//// FORMS
-//// -----
-///* TODO(mdc-migration): The following rule targets internal classes of checkbox that may no longer apply for the MDC version.*/
-//.mat-checkbox-layout {
-//  white-space: normal !important;
-//}
-//
-//// TODO remove TMP fix for https://github.com/angular/components/pull/18467
-///* TODO(mdc-migration): The following rule targets internal classes of checkbox that may no longer apply for the MDC version.*/
-//.mat-checkbox-checked .mat-checkbox-background {
-//  background-color: rgba(var(--palette-accent-500), 1);
-//}
-//
-//// BUTTONS
-//// -------
-//.mat-mdc-button-base,
-//.mat-mdc-button {
-//  overflow: hidden !important;
-//  text-overflow: ellipsis !important;
-//  max-width: 100%;
-//}
-//
-//.mat-mdc-unelevated-button,
-//.mat-mdc-outlined-button,
-//.mat-mdc-raised-button,
-//.mat-mdc-button {
-//  text-transform: uppercase;
-//  min-height: 36px;
-//  align-items: center;
-//}
-//
-///* TODO(mdc-migration): The following rule targets internal classes of button that may no longer apply for the MDC version.*/
-//.mat-button-wrapper,
-//.mat-button-wrapper > .mat-icon {
-//  display: flex;
-//  align-items: center;
-//  justify-content: center;
-//  gap: 5px;
-//}
-//
-//// otherwise it's hard to see when an off-screen element gets focused via tab
-//.mat-mdc-unelevated-button.mat-primary:focus {
-//  &:after {
-//    content: '';
-//    position: absolute;
-//    border: 2px solid $c-primary-300;
-//    left: 0;
-//    bottom: 0;
-//    top: 0;
-//    right: 0;
-//    pointer-events: none;
-//  }
-//}
-//
-//.mat-form-field:not(.mat-form-field-appearance-legacy)
-//  .mat-form-field-prefix
-//  .mat-mdc-icon-button,
-//.mat-form-field:not(.mat-form-field-appearance-legacy)
-//  .mat-form-field-suffix
-//  .mat-icon-button {
-//  width: 2.5em;
-//  height: 2.5em;
-//
-//  mat-icon {
-//    font-size: 24px;
-//  }
-//}
-//
-
-//// CARD BG
-//.isDarkTheme .mat-mdc-card {
-//  background: $dark-theme-card-bg;
-//}
-//
-//.mat-mdc-card {
-//  box-shadow: none;
-//
-//  @include flatBox(true);
-//}
-//
-//// HEADINGS
-//body .mat-h1 {
-//  margin-top: $s * 1.5;
-//}
-//
-//// BACKDROP FIX
-//.mat-drawer-backdrop.mat-drawer-backdrop.mat-drawer-backdrop {
-//  @include lightTheme(true) {
-//    background-color: $c-backdrop-light-theme;
-//  }
-//  @include darkTheme(true) {
-//    // NOTE: we use the light theme backdrop as a light backdrop doesn't make too much sense
-//    background-color: $c-backdrop-light-theme;
-//  }
-//}
-//
-//// AUTOCOMPLETE
-///* TODO(mdc-migration): The following rule targets internal classes of option that may no longer apply for the MDC version.*/
-//mat-option .mat-option-text > * {
-//  vertical-align: middle;
-//}
-//
-//// SELECT
-//// to make it fit monday-sunday
-//.mat-mdc-select-panel {
-//  //max-height: fit-content !important;
-//}
