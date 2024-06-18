@@ -19,7 +19,7 @@ body .mat-mdc-dialog-surface {
 
 .mat-mdc-dialog-panel {
   @include mq(xs) {
-    --mat-dialog-container-min-width: 450px;
+    //--mat-dialog-container-min-width: 350px;
   }
 }
 

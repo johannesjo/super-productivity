@@ -4,7 +4,7 @@ import { NBrowser } from '../n-browser-interface';
 const BASE_URL = `${BASE}`;
 
 const SIDENAV = `side-nav`;
-const EXPAND_PROJECT_BTN = `${SIDENAV} .expand-btn:first-of-type`;
+const EXPAND_PROJECT_BTN = `${SIDENAV} .projects .expand-btn`;
 
 const PROJECT = `${SIDENAV} section.projects .project`;
 const DEFAULT_PROJECT = `${PROJECT}:nth-of-type(1)`;

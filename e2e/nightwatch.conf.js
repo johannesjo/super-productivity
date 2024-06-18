@@ -20,6 +20,23 @@ module.exports = {
       launch_url: 'https://localhost:4200',
       desiredCapabilities: {
         browserName: 'chrome',
+        chromeOptions: {
+          args: [
+            '--headless',
+            '--disable-gpu',
+            '--window-size=1280,800',
+            '--no-sandbox',
+            '--disable-dev-shm-usage',
+            '--disable-browser-side-navigation',
+            '--user-agent=NIGHTWATCH',
+            `--binary=${process.env.CHROME_BIN}`,
+          ],
+          // w3c: false,
+          prefs: {
+            'profile.default_content_setting_values.geolocation': 1,
+            'profile.default_content_setting_values.notifications': 2,
+          },
+        },
       },
       screenshots: {
         enabled: true, // if you want to keep screenshots
@@ -31,40 +48,6 @@ module.exports = {
         waitForConditionPollInterval: 500,
         waitForConditionTimeout: 10000,
         retryAssertionTimeout: 1000,
-      },
-      webdriver: {
-        start_process: true,
-        server_path: '',
-      },
-    },
-    chrome: {
-      desiredCapabilities: {
-        browserName: 'chrome',
-        chromeOptions: {
-          args: [
-            '--headless',
-            '--disable-gpu',
-            '--window-size=1280,800',
-            '--no-sandbox',
-            '--disable-dev-shm-usage',
-            '--disable-browser-side-navigation',
-            '--user-agent=NIGHTWATCH',
-            // `--binary=${process.env.CHROME_BIN}`
-          ],
-          w3c: false,
-          prefs: {
-            'profile.default_content_setting_values.geolocation': 1,
-            'profile.default_content_setting_values.notifications': 2,
-          },
-        },
-      },
-
-      webdriver: {
-        start_process: true,
-        server_path: '',
-        cli_args: [
-          // --verbose
-        ],
       },
     },
   },
