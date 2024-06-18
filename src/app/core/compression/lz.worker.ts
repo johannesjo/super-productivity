@@ -1,5 +1,5 @@
 /// <reference lib="webworker" />
-import * as LZString from 'lz-string';
+import LZString from 'lz-string';
 
 const handleData = (msgData: any): string | null => {
   switch (msgData.type) {

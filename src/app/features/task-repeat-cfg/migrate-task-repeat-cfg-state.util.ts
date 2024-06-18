@@ -70,8 +70,8 @@ const _addNewFieldsToTaskRepeatCfgs = (taskRepeat: TaskRepeatCfg): TaskRepeatCfg
       typeof taskRepeat.order === 'number'
         ? taskRepeat.order
         : (taskRepeat as any).isAddToBottom
-        ? 1
-        : 0,
+          ? 1
+          : 0,
     quickSetting,
     repeatCycle: taskRepeat.repeatCycle || 'WEEKLY',
     repeatEvery: taskRepeat.repeatEvery || 1,

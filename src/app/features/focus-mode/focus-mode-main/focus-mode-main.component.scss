@@ -127,13 +127,13 @@ progress-circle {
 
   a,
   button {
-    width: 56px;
-    height: 56px;
+    width: 56px !important;
+    height: 56px !important;
 
     mat-icon {
       font-size: 32px !important; //make it bigger, the default being 24px.
-      width: 32px;
-      height: 32px;
+      width: 32px !important;
+      height: 32px !important;
     }
   }
 }

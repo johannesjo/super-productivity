@@ -75,19 +75,19 @@ export class SyncTriggerService {
             ),
           )
         : // FALLBACK we check if there was any kind of user interaction
-        // (otherwise sync might never be checked if there are no local data changes)
-        IS_TOUCH_PRIMARY
-        ? merge(
-            fromEvent(window, 'touchstart'),
-            fromEvent(window, 'visibilitychange'),
-          ).pipe(
-            mapTo('I_MOUSE_TOUCH_MOVE_OR_VISIBILITYCHANGE'),
-            throttleTime(USER_INTERACTION_SYNC_CHECK_THROTTLE_TIME),
-          )
-        : fromEvent(window, 'focus').pipe(
-            mapTo('I_FOCUS_THROTTLED'),
-            throttleTime(USER_INTERACTION_SYNC_CHECK_THROTTLE_TIME),
-          ),
+          // (otherwise sync might never be checked if there are no local data changes)
+          IS_TOUCH_PRIMARY
+          ? merge(
+              fromEvent(window, 'touchstart'),
+              fromEvent(window, 'visibilitychange'),
+            ).pipe(
+              mapTo('I_MOUSE_TOUCH_MOVE_OR_VISIBILITYCHANGE'),
+              throttleTime(USER_INTERACTION_SYNC_CHECK_THROTTLE_TIME),
+            )
+          : fromEvent(window, 'focus').pipe(
+              mapTo('I_FOCUS_THROTTLED'),
+              throttleTime(USER_INTERACTION_SYNC_CHECK_THROTTLE_TIME),
+            ),
     ),
   );
 

@@ -95,11 +95,6 @@ $short-syntax-bar-height: 32px;
 
 .is-loading {
   padding: $s;
-
-  ::ng-deep .mat-option-text {
-    display: flex;
-    justify-content: center;
-  }
 }
 
 .button-controls {

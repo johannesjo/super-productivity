@@ -130,9 +130,8 @@ export class DataImportService {
   private async _mergeWithLocalOmittedFields(
     newData: AppDataComplete,
   ): Promise<AppDataComplete> {
-    const oldLocalData: AppDataComplete = await this._persistenceService.loadComplete(
-      true,
-    );
+    const oldLocalData: AppDataComplete =
+      await this._persistenceService.loadComplete(true);
     const mergedData = { ...newData };
     GLOBAL_CONFIG_LOCAL_ONLY_FIELDS.forEach((op) => {
       const oldLocalValue = get(oldLocalData.globalConfig, op);

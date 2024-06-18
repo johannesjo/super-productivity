@@ -1,7 +1,15 @@
 @import '../../../../variables';
 
-:host-context([dir=rtl]) {
+:host-context([dir='rtl']) {
   direction: rtl;
+}
+
+:host {
+  display: block;
+
+  mat-form-field {
+    display: block;
+  }
 }
 
 .dialog-content {
@@ -13,25 +21,26 @@
     padding-top: 0;
     padding-bottom: 0;
     padding: 0;
+    border: 0 !important;
   }
 
   td {
-    ::ng-deep .mat-select-value {
-      padding-left: $s*2.25;
-      padding-top: $s*1.25;
-      padding-bottom: $s*1.25;
+    ::ng-deep .mat-mdc-select-value {
+      padding-left: $s * 2.25;
+      padding-top: $s * 1.25;
+      padding-bottom: $s * 1.25;
     }
 
-    &:first-of-type ::ng-deep .mat-select-value {
-      padding-left: $s*3;
+    &:first-of-type ::ng-deep .mat-mdc-select-value {
+      padding-left: $s * 3;
     }
 
-    ::ng-deep .mat-select-arrow-wrapper {
-      padding-right: $s*1.25;
+    ::ng-deep .mat-mdc-select-arrow-wrapper {
+      padding-right: $s * 1.25;
     }
 
-    &:last-of-type ::ng-deep .mat-select-arrow-wrapper {
-      padding-right: $s*3;
+    &:last-of-type ::ng-deep .mat-mdc-select-arrow-wrapper {
+      padding-right: $s * 3;
     }
   }
 
@@ -63,6 +72,7 @@
     justify-content: space-between;
     align-items: center;
     flex-wrap: wrap;
+    padding-top: $s * 2;
   }
   .col {
     width: 32%;
@@ -107,13 +117,11 @@
   }
 }
 
-
 .table-wrapper {
   overflow: auto;
   position: relative;
   z-index: 1;
   margin: 0 -20px $s;
-
 
   ::ng-deep table {
     width: 100%;
@@ -154,7 +162,7 @@
 }
 
 .options-collapsible {
-  margin-top: $s*2;
+  margin-top: $s * 2;
   text-align: center;
 }
 

@@ -67,11 +67,6 @@ export class SimpleCounterCfgComponent implements OnDestroy {
     this._subs.unsubscribe();
   }
 
-  onModelChange(changes: SimpleCounterConfig): void {
-    // NOTE: it's important to create a new object, otherwise only 1 update happens
-    this.editModel = { ...changes };
-  }
-
   submit(): void {
     if (!this._inModelCopy || !this.editModel) {
       throw new Error('Model not ready');

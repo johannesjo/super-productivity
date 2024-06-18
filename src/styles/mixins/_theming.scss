@@ -4,12 +4,12 @@
     .isDarkTheme & {
       @content;
     }
-  } @else if ($sel and $sel ==':host') {
-    @at-root  :host-context(.isDarkTheme) {
+  } @else if ($sel and $sel == ':host') {
+    @at-root :host-context(.isDarkTheme) {
       @content;
     }
-  } @else if ($sel and $sel !='') {
-    @at-root  :host-context(.isDarkTheme) & {
+  } @else if ($sel and $sel != '') {
+    @at-root :host-context(.isDarkTheme) & {
       @content;
     }
   } @else {
@@ -25,12 +25,12 @@
     .isLightTheme & {
       @content;
     }
-  } @else if ($sel and $sel ==':host') {
-    @at-root  :host-context(.isLightTheme) {
+  } @else if ($sel and $sel == ':host') {
+    @at-root :host-context(.isLightTheme) {
       @content;
     }
-  } @else if ($sel and $sel !='') {
-    @at-root  :host-context(.isLightTheme) & {
+  } @else if ($sel and $sel != '') {
+    @at-root :host-context(.isLightTheme) & {
       @content;
     }
   } @else {
@@ -49,7 +49,6 @@
   }
 }
 
-
 @mixin standardThemeTextColorLessIntense {
   @include darkTheme() {
     color: $dark-theme-text-color-less-intense;
@@ -58,7 +57,6 @@
     color: $light-theme-text-color-less-intense;
   }
 }
-
 
 @mixin standardThemeTextColorMostIntense {
   @include darkTheme() {
@@ -69,8 +67,7 @@
   }
 }
 
-
-@mixin extraBorder($sideSuffix:'') {
+@mixin extraBorder($sideSuffix: '') {
   @include darkTheme {
     #{'border'+$sideSuffix}: 1px solid $dark-theme-extra-border-color;
   }
@@ -90,7 +87,6 @@
   }
 }
 
-
 // e.g. nested cards / tabs etc
 @mixin layerTextAndBgHighest {
   @include darkTheme() {
@@ -108,10 +104,10 @@
   border-width: $border-width;
 
   @include lightTheme($is-global) {
-    border-color: rgba(var(--palette-foreground-divider), var(--palette-foreground-divider-alpha, 1));
+    border-color: var(--dark-dividers);
   }
   @include darkTheme($is-global) {
-    border-color: rgba(255, 255, 255, 0.12);
+    border-color: var(--light-dividers);
   }
 }
 

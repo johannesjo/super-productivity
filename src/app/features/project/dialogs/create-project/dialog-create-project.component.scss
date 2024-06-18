@@ -1,7 +1,7 @@
 @import '../../../../../variables';
 
 .issue-provider-cfg {
-  margin: $s*3 0 $s*1;
+  margin: $s * 3 0 $s * 1;
 
   .item {
     margin-bottom: $s;
@@ -10,12 +10,9 @@
   }
 }
 
-h1, mat-dialog-actions {
-  :host-context([dir=rtl]) & {
+h1,
+mat-dialog-actions {
+  :host-context([dir='rtl']) & {
     direction: rtl;
   }
-}
-
-:host::ng-deep .mat-form-field-infix {
-  width: auto !important;
 }

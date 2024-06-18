@@ -1,9 +1,7 @@
 import { createFeatureSelector, createSelector } from '@ngrx/store';
-import * as fromFocusMode from './focus-mode.reducer';
+import { FOCUS_MODE_FEATURE_KEY, State } from './focus-mode.reducer';
 
-export const selectFocusModeState = createFeatureSelector<fromFocusMode.State>(
-  fromFocusMode.FOCUS_MODE_FEATURE_KEY,
-);
+export const selectFocusModeState = createFeatureSelector<State>(FOCUS_MODE_FEATURE_KEY);
 
 export const selectIsFocusSessionRunning = createSelector(
   selectFocusModeState,

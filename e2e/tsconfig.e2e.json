@@ -2,13 +2,16 @@
   "extends": "../tsconfig.base.json",
   "compilerOptions": {
     "outDir": "../out-tsc/e2e",
+    "target": "esnext",
     "module": "commonjs",
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
     "moduleResolution": "node",
-    "target": "es5",
-    "types": [
-      "jasmine",
-      "jasminewd2",
-      "node"
-    ]
+    "resolveJsonModule": true,
+    "skipLibCheck": true,
+    "allowJs": true,
+    "forceConsistentCasingInFileNames": true,
+    "noEmit": false,
+    "typeRoots": ["node_modules/@types"]
   }
 }

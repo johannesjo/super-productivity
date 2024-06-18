@@ -6,7 +6,7 @@
   max-width: 600px;
   width: 70vw;
 
-  :host-context([dir=rtl]) {
+  :host-context([dir='rtl']) {
     direction: rtl;
   }
 }

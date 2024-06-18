@@ -4,11 +4,13 @@ import {
   removeFromRealLs,
   saveToRealLs,
 } from '../../../core/persistence/local-storage';
-import * as moment from 'moment';
-import { Duration } from 'moment';
+import moment, { Duration } from 'moment';
 
 class CacheContent<T> {
-  constructor(public expire: Date, public content: T) {}
+  constructor(
+    public expire: Date,
+    public content: T,
+  ) {}
 }
 
 @Injectable({

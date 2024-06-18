@@ -1,6 +1,10 @@
 @import './../../../_variables';
 @import './../../features/tasks/task/task.component.mixins';
 
+:host ::ng-deep mat-card-content {
+  padding: 0 !important;
+}
+
 .scheduled-task,
 .repeat-task-cfg {
   margin-bottom: $s;

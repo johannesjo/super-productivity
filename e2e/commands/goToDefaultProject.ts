@@ -4,11 +4,11 @@ import { NBrowser } from '../n-browser-interface';
 const BASE_URL = `${BASE}`;
 
 const SIDENAV = `side-nav`;
-const EXPAND_PROJECT_BTN = `${SIDENAV} .expand-btn:first-of-type`;
+const EXPAND_PROJECT_BTN = `${SIDENAV} .projects .expand-btn`;
 
 const PROJECT = `${SIDENAV} section.projects .project`;
 const DEFAULT_PROJECT = `${PROJECT}:nth-of-type(1)`;
-const DEFAULT_PROJECT_BTN = `${DEFAULT_PROJECT} .mat-menu-item`;
+const DEFAULT_PROJECT_BTN = `${DEFAULT_PROJECT} .mat-mdc-menu-item`;
 
 const TASK_LIST = `task-list`;
 

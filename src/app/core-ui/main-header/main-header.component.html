@@ -44,7 +44,7 @@
   <nav class="action-nav">
     <button
       (click)="layoutService.showAddTaskBar()"
-      [matTooltip]="T.MH.ADD_NEW_TASK|translate"
+      matTooltip="{{T.MH.ADD_NEW_TASK|translate}} {{kb.addNewTask?'['+kb.addNewTask+']':''}}"
       class="hide-xs tour-addBtn"
       mat-icon-button
     >
@@ -53,7 +53,7 @@
 
     <button
       (click)="layoutService.showSearchBar()"
-      [matTooltip]="T.MH.SHOW_SEARCH_BAR|translate"
+      matTooltip="{{T.MH.SHOW_SEARCH_BAR|translate}} {{kb.showSearchBar?'['+kb.showSearchBar+']':''}}"
       mat-icon-button
     >
       <mat-icon>search</mat-icon>
@@ -61,7 +61,7 @@
 
     <button
       *ngIf="(syncProviderService.isEnabled$|async)"
-      [matTooltip]="T.MH.TRIGGER_SYNC|translate"
+      matTooltip="T.MH.TRIGGER_SYNC|translate"
       (click)="sync()"
       mat-icon-button
     >
@@ -72,7 +72,7 @@
       (click)="bookmarkService.toggleBookmarks()"
       *ngIf="(workContextService.isActiveWorkContextProject$|async)"
       [class.isOpen]="bookmarkService.isShowBookmarks$|async"
-      [matTooltip]="T.MH.TOGGLE_SHOW_BOOKMARKS|translate"
+      matTooltip="{{T.MH.TOGGLE_SHOW_BOOKMARKS|translate}}{{kb.toggleBookmarks?'['+kb.toggleBookmarks+']':''}}"
       class="bookmark-btn"
       mat-icon-button
     >
@@ -89,9 +89,9 @@
     <!--    </button>-->
 
     <button
-      *ngIf="!(globalConfigService.misc$|async)?.isAlwaysUseFocusMode"
+      *ngIf="!(globalConfigService.cfg$|async)?.focusMode?.isAlwaysUseFocusMode"
       mat-icon-button
-      [matTooltip]="'Enter focus mode'"
+      matTooltip="Enter focus mode {{kb.goToFocusMode?'['+kb.goToFocusMode+']':''}}"
       (click)="enableFocusMode()"
     >
       <mat-icon>center_focus_strong</mat-icon>
@@ -119,7 +119,7 @@
       <button
         (click)="taskService.toggleStartTask()"
         [color]="(taskService.currentTaskId$|async)? 'accent': 'primary'"
-        [matTooltip]="T.MH.TOGGLE_TRACK_TIME|translate"
+        matTooltip="{{T.MH.TOGGLE_TRACK_TIME|translate}}"
         [matTooltipPosition]="(pomodoroService.isEnabled$|async)? 'left': 'below'"
         class="play-btn tour-playBtn mat-elevation-z3"
         mat-mini-fab
@@ -224,7 +224,7 @@
       [class.isRouteWithRightPanel]="(isRouteWithSplitAddtionalInfoPanel$|async)"
       (click)="layoutService.toggleNotes()"
       mat-icon-button
-      [matTooltip]="T.MH.TOGGLE_SHOW_NOTES|translate"
+      matTooltip="{{T.MH.TOGGLE_SHOW_NOTES|translate}} {{kb.openProjectNotes?'['+kb.openProjectNotes+']':''}}"
     >
       <mat-icon class="note-ico">comment</mat-icon>
     </button>

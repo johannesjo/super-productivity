@@ -32,14 +32,14 @@ export const adjustToLiveFormlyForm = (
 
     if (
       item.type === 'repeat' &&
-      item?.fieldArray?.fieldGroup &&
-      isArray(item.fieldArray.fieldGroup)
+      (item?.fieldArray as any)?.fieldGroup &&
+      isArray((item.fieldArray as any).fieldGroup)
     ) {
       return {
         ...item,
         fieldArray: {
           ...item.fieldArray,
-          fieldGroup: adjustToLiveFormlyForm(item?.fieldArray?.fieldGroup),
+          fieldGroup: adjustToLiveFormlyForm((item?.fieldArray as any)?.fieldGroup),
         },
       };
     }

@@ -6,10 +6,13 @@
   <p>{{T.F.SYNC.D_AUTH_CODE.FOLLOW_LINK|translate}}</p>
   <a
     mat-button
+    color="primary"
     target="_blank"
     mat-stroked-button
     [href]="data.url"
-    >{{T.F.SYNC.D_AUTH_CODE.GET_AUTH_CODE|translate}}</a
+  >
+    <mat-icon>open_in_new</mat-icon>
+    {{ T.F.SYNC.D_AUTH_CODE.GET_AUTH_CODE|translate }}</a
   >
   <br />
   <br />

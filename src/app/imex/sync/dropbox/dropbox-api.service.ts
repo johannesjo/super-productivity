@@ -17,6 +17,8 @@ import { Store } from '@ngrx/store';
 import { updateGlobalConfigSection } from '../../../features/config/store/global-config.actions';
 import { SyncConfig } from '../../../features/config/global-config.model';
 
+/* eslint-disable @typescript-eslint/naming-convention */
+
 @Injectable({ providedIn: 'root' })
 export class DropboxApiService {
   private _accessToken$: Observable<string | null> = this._globalConfigService.cfg$.pipe(

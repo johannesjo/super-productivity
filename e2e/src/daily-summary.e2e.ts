@@ -1,9 +1,9 @@
 import { BASE } from '../e2e.const';
 import { NBrowser } from '../n-browser-interface';
+/* eslint-disable @typescript-eslint/naming-convention */
 
 const URL = `${BASE}/#/tag/TODAY/daily-summary`;
-const ADD_TASK_BTN_SEL = '.action-nav > button:first-child';
-const ADD_TASK_GLOBAL_SEL = 'add-task-bar.global input';
+const SUMMARY_TABLE_TASK_EL = '.task-title .value-wrapper';
 
 module.exports = {
   '@tags': ['daily-summary'],
@@ -12,17 +12,14 @@ module.exports = {
     browser
       .loadAppAndClickAwayWelcomeDialog(URL)
       .waitForElementVisible('.done-headline')
-      .assert.containsText('.done-headline', 'Take a moment to celebrate')
+      .assert.textContains('.done-headline', 'Take a moment to celebrate')
       .end(),
 
   'show any added task in table': (browser: NBrowser) =>
     browser
       .loadAppAndClickAwayWelcomeDialog(URL)
-      .waitForElementVisible(ADD_TASK_BTN_SEL)
-      .click(ADD_TASK_BTN_SEL)
-      .waitForElementVisible(ADD_TASK_GLOBAL_SEL)
-
-      .setValue(ADD_TASK_GLOBAL_SEL, 'test task hohoho')
-      .setValue(ADD_TASK_GLOBAL_SEL, browser.Keys.ENTER)
+      .addTask('test task hohoho 1h/1h')
+      .waitForElementVisible(SUMMARY_TABLE_TASK_EL)
+      .assert.textContains(SUMMARY_TABLE_TASK_EL, 'test task hohoho')
       .end(),
 };

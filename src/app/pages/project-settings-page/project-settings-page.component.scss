@@ -1,4 +1,4 @@
-@import "../../../variables";
+@import '../../../variables';
 
 .section-wrapper {
   //display: grid;
@@ -16,7 +16,6 @@
   @include darkTheme {
     background-color: $dark-theme-card-bg;
   }
-
 
   .md-title {
     margin-top: 0;

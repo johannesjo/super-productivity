@@ -23,7 +23,10 @@ export class TaskSummaryTableComponent {
 
   T: typeof T = T;
 
-  constructor(private _taskService: TaskService, private _dateService: DateService) {}
+  constructor(
+    private _taskService: TaskService,
+    private _dateService: DateService,
+  ) {}
 
   updateTimeSpentTodayForTask(task: Task, newVal: number | string): void {
     this._taskService.updateEverywhere(task.id, {

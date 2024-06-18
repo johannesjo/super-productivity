@@ -18,7 +18,7 @@ import {
   TIMELINE_VIEW_TYPE_ORDER,
   TimelineViewEntryType,
 } from '../timeline.const';
-import * as moment from 'moment';
+import moment from 'moment';
 import { TaskRepeatCfg } from '../../task-repeat-cfg/task-repeat-cfg.model';
 
 // const debug = (...args: any) => console.log(...args);

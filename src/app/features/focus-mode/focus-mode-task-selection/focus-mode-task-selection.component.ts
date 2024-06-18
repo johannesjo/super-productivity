@@ -24,7 +24,10 @@ export class FocusModeTaskSelectionComponent implements AfterViewInit, OnDestroy
   focusTimeout = 0;
   T: typeof T = T;
 
-  constructor(public readonly taskService: TaskService, private readonly _store: Store) {}
+  constructor(
+    public readonly taskService: TaskService,
+    private readonly _store: Store,
+  ) {}
 
   ngAfterViewInit(): void {
     this.focusTimeout = window.setTimeout(() => {

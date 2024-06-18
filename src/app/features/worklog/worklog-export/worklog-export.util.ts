@@ -1,4 +1,4 @@
-import * as moment from 'moment';
+import moment from 'moment';
 import { msToClockString } from '../../../ui/duration/ms-to-clock-string.pipe';
 import { msToString } from '../../../ui/duration/ms-to-string.pipe';
 import { roundDuration } from '../../../util/round-duration';

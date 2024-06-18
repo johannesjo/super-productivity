@@ -1,4 +1,4 @@
-import * as moment from 'moment';
+import moment from 'moment';
 
 import { WORKLOG_DATE_STR_FORMAT } from '../app.constants';
 

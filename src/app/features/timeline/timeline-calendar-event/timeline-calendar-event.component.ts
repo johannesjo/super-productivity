@@ -38,5 +38,8 @@ export class TimelineCalendarEventComponent {
     }
   }
 
-  constructor(private _taskService: TaskService, private _store: Store) {}
+  constructor(
+    private _taskService: TaskService,
+    private _store: Store,
+  ) {}
 }

@@ -233,24 +233,27 @@ export class AppComponent implements OnDestroy {
     // Prevent Chrome 67 and earlier from automatically showing the prompt
     e.preventDefault();
 
-    window.setTimeout(() => {
-      this._bannerService.open({
-        id: BannerId.InstallWebApp,
-        msg: T.APP.B_INSTALL.MSG,
-        action: {
-          label: T.APP.B_INSTALL.INSTALL,
-          fn: () => {
-            e.prompt();
+    window.setTimeout(
+      () => {
+        this._bannerService.open({
+          id: BannerId.InstallWebApp,
+          msg: T.APP.B_INSTALL.MSG,
+          action: {
+            label: T.APP.B_INSTALL.INSTALL,
+            fn: () => {
+              e.prompt();
+            },
           },
-        },
-        action2: {
-          label: T.APP.B_INSTALL.IGNORE,
-          fn: () => {
-            localStorage.setItem(LS.WEB_APP_INSTALL, 'true');
+          action2: {
+            label: T.APP.B_INSTALL.IGNORE,
+            fn: () => {
+              localStorage.setItem(LS.WEB_APP_INSTALL, 'true');
+            },
           },
-        },
-      });
-    }, 2 * 60 * 1000);
+        });
+      },
+      2 * 60 * 1000,
+    );
   }
 
   getPage(outlet: RouterOutlet): string {

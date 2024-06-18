@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/naming-convention */
 const T = {
   ANDROID: {
     NOTIFICATIONS: {
@@ -1265,7 +1266,7 @@ const T = {
   },
   G: {
     CANCEL: 'G.CANCEL',
-    CLICK_TO_EDIT: 'G.CLICK_TO_EDIT',
+    EXAMPLE_VAL: 'G.EXAMPLE_VAL',
     CLOSE: 'G.CLOSE',
     DELETE: 'G.DELETE',
     DISMISS: 'G.DISMISS',

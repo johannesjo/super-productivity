@@ -47,7 +47,10 @@ export class MetricService {
 
   // productivityHappinessLineChartData$: Observable<LineChartData> = this._store$.pipe(select(selectProductivityHappinessLineChartDataComplete));
 
-  constructor(private _store$: Store<MetricState>, private _dateService: DateService) {}
+  constructor(
+    private _store$: Store<MetricState>,
+    private _dateService: DateService,
+  ) {}
 
   // getMetricForDay$(id: string = getWorklogStr()): Observable<Metric> {
   //   if (!id) {

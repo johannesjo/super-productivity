@@ -20,7 +20,11 @@ import { ReactiveFormsModule } from '@angular/forms';
 import { FormlyModule } from '@ngx-formly/core';
 import { PagesModule } from './pages/pages.module';
 import { MainHeaderModule } from './core-ui/main-header/main-header.module';
-import { HttpClient, HttpClientModule } from '@angular/common/http';
+import {
+  HttpClient,
+  provideHttpClient,
+  withInterceptorsFromDi,
+} from '@angular/common/http';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { TasksModule } from './features/tasks/tasks.module';
 import { BookmarkModule } from './features/bookmark/bookmark.module';
@@ -58,12 +62,12 @@ export const createTranslateLoader = (http: HttpClient): TranslateHttpLoader =>
 
 @NgModule({
   declarations: [AppComponent, ShepherdComponent],
+  bootstrap: [AppComponent],
   imports: [
     // Those features need to be included first for store not to mess up, probably because we use it initially at many places
     ConfigModule,
     ProjectModule,
     WorkContextModule,
-
     // Local
     CoreModule,
     UiModule,
@@ -86,16 +90,13 @@ export const createTranslateLoader = (http: HttpClient): TranslateHttpLoader =>
     DominaModeModule,
     FocusModeModule,
     CalendarIntegrationModule,
-
     AndroidModule,
     // throws build error ...(IS_ANDROID_WEB_VIEW ? [AndroidModule] : []),
-
     // External
     BrowserModule,
     BrowserAnimationsModule,
-    HttpClientModule,
     HammerModule,
-    RouterModule.forRoot(APP_ROUTES, { useHash: true, relativeLinkResolution: 'legacy' }),
+    RouterModule.forRoot(APP_ROUTES, { useHash: true }),
     // NOTE: both need to be present to use forFeature stores
     StoreModule.forRoot(reducers, {
       metaReducers: [undoTaskDeleteMetaReducer, actionLoggerReducer],
@@ -118,7 +119,9 @@ export const createTranslateLoader = (http: HttpClient): TranslateHttpLoader =>
           }),
     }),
     EffectsModule.forRoot([]),
-    !environment.production && !environment.stage ? StoreDevtoolsModule.instrument() : [],
+    !environment.production && !environment.stage
+      ? StoreDevtoolsModule.instrument({ connectInZone: true })
+      : [],
     ReactiveFormsModule,
     FormlyModule.forRoot({
       extras: {
@@ -128,6 +131,9 @@ export const createTranslateLoader = (http: HttpClient): TranslateHttpLoader =>
     }),
     ServiceWorkerModule.register('ngsw-worker.js', {
       enabled: !IS_ELECTRON && (environment.production || environment.stage),
+      // Register the ServiceWorker as soon as the application is stable
+      // or after 30 seconds (whichever comes first).
+      registrationStrategy: 'registerWhenStable:30000',
     }),
     TranslateModule.forRoot({
       loader: {
@@ -138,10 +144,10 @@ export const createTranslateLoader = (http: HttpClient): TranslateHttpLoader =>
     }),
     EntityDataModule,
   ],
-  bootstrap: [AppComponent],
   providers: [
     { provide: ErrorHandler, useClass: GlobalErrorHandler },
     { provide: HAMMER_GESTURE_CONFIG, useClass: MyHammerConfig },
+    provideHttpClient(withInterceptorsFromDi()),
   ],
 })
 export class AppModule {

@@ -1,7 +1,7 @@
-import * as contextActions from './work-context.actions';
 import { WorkContextState, WorkContextType } from '../work-context.model';
 import { Action, createReducer, on } from '@ngrx/store';
 import { TODAY_TAG } from '../../tag/tag.const';
+import { loadWorkContextState, setActiveWorkContext } from './work-context.actions';
 
 export const initialContextState: WorkContextState = {
   activeId: TODAY_TAG.id,
@@ -11,12 +11,12 @@ export const initialContextState: WorkContextState = {
 const _reducer = createReducer<WorkContextState>(
   initialContextState,
 
-  on(contextActions.setActiveWorkContext, (oldState, { activeId, activeType }) => ({
+  on(setActiveWorkContext, (oldState, { activeId, activeType }) => ({
     ...oldState,
     activeId,
     activeType,
   })),
-  on(contextActions.loadWorkContextState, (oldState, { state }) => ({
+  on(loadWorkContextState, (oldState, { state }) => ({
     ...oldState,
     ...state,
   })),

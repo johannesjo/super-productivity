@@ -13,17 +13,6 @@ help-section {
   max-width: 500px;
 }
 
-:host::ng-deep mat-form-field .mat-form-field {
-  &-underline {
-    position: relative;
-    bottom: auto;
-  }
-
-  &-subscript-wrapper {
-    position: static;
-  }
-}
-
 :host collapsible {
   margin-top: $s * 2;
   margin-bottom: $s * 2;
@@ -38,13 +27,7 @@ help-section {
 :host::ng-deep .weekdays {
   display: flex;
   flex-wrap: wrap;
-
-  .mat-form-field-infix {
-    width: auto;
-    min-width: 100px;
-    margin-right: $s * 2;
-    border-top: 0;
-  }
+  gap: 0 $s;
 }
 :host::ng-deep .repeat-cycle {
   display: flex;
@@ -56,14 +39,6 @@ help-section {
     &:first-child {
       margin-left: 0;
       width: auto;
-
-      .mat-form-field-infix {
-        width: 90px;
-
-        @include mq(xs) {
-          width: 120px;
-        }
-      }
     }
   }
 }

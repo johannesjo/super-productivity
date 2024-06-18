@@ -1,5 +1,14 @@
 import { createReducer, on } from '@ngrx/store';
-import * as FocusModeActions from './focus-mode.actions';
+import {
+  cancelFocusSession,
+  focusSessionDone,
+  hideFocusOverlay,
+  setFocusSessionActivePage,
+  setFocusSessionDuration,
+  setFocusSessionTimeToGo,
+  showFocusOverlay,
+  startFocusSession,
+} from './focus-mode.actions';
 import { FocusModePage } from '../focus-mode.const';
 
 const DEFAULT_FOCUS_SESSION_DURATION = 25 * 60 * 1000;
@@ -27,24 +36,21 @@ export const initialState: State = {
 export const focusModeReducer = createReducer<State>(
   initialState,
 
-  on(
-    FocusModeActions.setFocusSessionActivePage,
-    (state, { focusActivePage: focusSessionActivePage }) => ({
-      ...state,
-      focusSessionActivePage,
-    }),
-  ),
-  on(FocusModeActions.setFocusSessionDuration, (state, { focusSessionDuration }) => ({
+  on(setFocusSessionActivePage, (state, { focusActivePage: focusSessionActivePage }) => ({
+    ...state,
+    focusSessionActivePage,
+  })),
+  on(setFocusSessionDuration, (state, { focusSessionDuration }) => ({
     ...state,
     focusSessionDuration,
   })),
 
-  on(FocusModeActions.setFocusSessionTimeToGo, (state, { focusSessionTimeToGo }) => ({
+  on(setFocusSessionTimeToGo, (state, { focusSessionTimeToGo }) => ({
     ...state,
     focusSessionTimeToGo,
   })),
 
-  on(FocusModeActions.startFocusSession, (state) => ({
+  on(startFocusSession, (state) => ({
     ...state,
     isFocusSessionRunning: true,
     focusSessionTimeToGo: 0,
@@ -54,7 +60,7 @@ export const focusModeReducer = createReducer<State>(
         ? state.focusSessionDuration
         : DEFAULT_FOCUS_SESSION_DURATION,
   })),
-  on(FocusModeActions.focusSessionDone, (state) => ({
+  on(focusSessionDone, (state) => ({
     ...state,
     isFocusSessionRunning: false,
     lastFocusSessionDuration: state.focusSessionDuration,
@@ -65,16 +71,16 @@ export const focusModeReducer = createReducer<State>(
     focusSessionActivePage: FocusModePage.SessionDone,
   })),
 
-  on(FocusModeActions.showFocusOverlay, (state) => ({
+  on(showFocusOverlay, (state) => ({
     ...state,
     isFocusOverlayShown: true,
   })),
-  on(FocusModeActions.hideFocusOverlay, (state) => ({
+  on(hideFocusOverlay, (state) => ({
     ...state,
     isFocusOverlayShown: false,
     isFocusSessionRunning: false,
   })),
-  on(FocusModeActions.cancelFocusSession, (state) => ({
+  on(cancelFocusSession, (state) => ({
     ...state,
     isFocusOverlayShown: false,
     isFocusSessionRunning: false,

@@ -3,10 +3,9 @@
 // table styled by ./src/styles/components/issue-table.scss
 
 .table-wrapper {
-  margin: $s*2;
+  margin: $s * 2;
   margin-bottom: $s;
 }
-
 
 .issue-description {
   flex-grow: 1;
@@ -15,8 +14,8 @@
 
 .comment {
   display: flex;
-  margin-bottom: $s*1;
-  padding-top: $s*1;
+  margin-bottom: $s * 1;
+  padding-top: $s * 1;
   border-top: 1px dashed $light-theme-extra-border-color;
 
   @include darkTheme {

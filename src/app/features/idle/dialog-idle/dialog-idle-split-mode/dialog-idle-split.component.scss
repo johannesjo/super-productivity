@@ -4,6 +4,14 @@
   text-align: center;
 }
 
+:host {
+  ::ng-deep {
+    mat-pseudo-checkbox {
+      display: none !important;
+    }
+  }
+}
+
 .time {
   font-size: 20px;
   text-align: center;

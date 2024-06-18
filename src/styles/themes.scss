@@ -1,11 +1,11 @@
 @use '@angular/material' as mat;
-@import '~angular-material-css-vars/src/lib/public-util';
-@import '~angular-material-css-vars/src/lib/main';
+@use 'angular-material-css-vars' as mat-css-vars;
 
-$custom-typography: mat.define-typography-config(
-  $font-family: null,
-);
-@include init-material-css-vars($typography-config: $custom-typography);
+//$custom-typography: mat.m2-define-typography-config(
+//  $font-family: null,
+//);
+//@include mat-css-vars.init-material-css-vars($typography-config: $custom-typography);
+@include mat-css-vars.init-material-css-vars();
 
 .bg-card {
   background: #fff;
@@ -20,7 +20,7 @@ $custom-typography: mat.define-typography-config(
 }
 
 .bgc-primary {
-  @include mat-css-color-and-contrast-primary(500);
+  @include mat-css-vars.mat-css-color-and-contrast-primary(500);
 }
 
 .bg-accent {
@@ -28,7 +28,8 @@ $custom-typography: mat.define-typography-config(
 }
 
 .bgc-accent {
-  @include mat-css-color-and-contrast-accent(500);
+  // todo fix
+  @include mat-css-vars.mat-css-color-and-contrast-accent(500);
 }
 
 .bg-100 {
@@ -44,7 +45,7 @@ $custom-typography: mat.define-typography-config(
 }
 
 .bgc-400 {
-  @include mat-css-color-and-contrast-primary(400);
+  @include mat-css-vars.mat-css-color-and-contrast-primary(400);
 }
 
 .bg-600 {
@@ -52,7 +53,7 @@ $custom-typography: mat.define-typography-config(
 }
 
 .bgc-600 {
-  @include mat-css-color-and-contrast-primary(600);
+  @include mat-css-vars.mat-css-color-and-contrast-primary(600);
 }
 
 .cc-600 {
@@ -64,18 +65,18 @@ $custom-typography: mat.define-typography-config(
 }
 
 .bgc-800 {
-  @include mat-css-color-and-contrast-primary(800);
+  @include mat-css-vars.mat-css-color-and-contrast-primary(800);
 }
 
 // for buttons
 .isDarkTheme .mat-lighter,
 .mat-lighter {
-  @include mat-css-color-and-contrast-primary(300);
+  @include mat-css-vars.mat-css-color-and-contrast-primary(300);
 }
 
 .isDarkTheme .mat-darker,
 .mat-darker {
-  @include mat-css-color-and-contrast-primary(600);
+  @include mat-css-vars.mat-css-color-and-contrast-primary(600);
 }
 
 .color-contrast {

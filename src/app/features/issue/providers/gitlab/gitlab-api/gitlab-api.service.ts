@@ -38,7 +38,10 @@ import { GITLAB_TYPE, ISSUE_PROVIDER_HUMANIZED } from '../../../issue.const';
   providedIn: 'root',
 })
 export class GitlabApiService {
-  constructor(private _snackService: SnackService, private _http: HttpClient) {}
+  constructor(
+    private _snackService: SnackService,
+    private _http: HttpClient,
+  ) {}
 
   getById$(id: string, cfg: GitlabCfg): Observable<GitlabIssue> {
     return this._sendIssuePaginatedRequest$(

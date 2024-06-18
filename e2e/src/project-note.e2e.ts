@@ -1,4 +1,5 @@
 import { NBrowser } from '../n-browser-interface';
+/* eslint-disable @typescript-eslint/naming-convention */
 
 const NOTES_WRAPPER = 'notes';
 const NOTE = 'notes note';
@@ -15,13 +16,13 @@ module.exports = {
 
       .moveToElement(NOTES_WRAPPER, 10, 50)
       .waitForElementVisible(FIRST_NOTE)
-      .assert.elementPresent(FIRST_NOTE)
-      .assert.containsText(FIRST_NOTE, 'Some new Note')
+      .assert.textContains(FIRST_NOTE, 'Some new Note')
       .end(),
 
   'new note should be still available after reload': (browser: NBrowser) =>
     browser
       .goToDefaultProject()
+
       .addNote('Some new Note')
       // wait for save
       .pause(200)
@@ -32,6 +33,6 @@ module.exports = {
       .moveToElement(NOTES_WRAPPER, 10, 50)
       .waitForElementVisible(FIRST_NOTE)
       .assert.elementPresent(FIRST_NOTE)
-      .assert.containsText(FIRST_NOTE, 'Some new Note')
+      .assert.textContains(FIRST_NOTE, 'Some new Note')
       .end(),
 };

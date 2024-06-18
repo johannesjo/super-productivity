@@ -35,7 +35,10 @@ import { devError } from '../../../../util/dev-error';
   providedIn: 'root',
 })
 export class OpenProjectApiService {
-  constructor(private _snackService: SnackService, private _http: HttpClient) {}
+  constructor(
+    private _snackService: SnackService,
+    private _http: HttpClient,
+  ) {}
 
   getById$(
     workPackageId: number,

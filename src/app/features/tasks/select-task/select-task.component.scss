@@ -1,4 +1,8 @@
 :host {
   display: block;
+
+  mat-form-field {
+    display: block;
+  }
 }
 // NOTE!!! can't style mat option since it is inside cdk-overlay

@@ -78,21 +78,23 @@ body {
     }
 
     &:before {
+      content: '';
       opacity: 1;
       filter: brightness(0.7) saturate(0.6);
-      background: linear-gradient(
-        180deg,
-        $dark-theme-bg 0,
-        $c-primary-900 20%,
-        $c-primary-800 50%,
-        $c-primary-700 100%
-      );
+      //background: linear-gradient(
+      //  180deg,
+      //  $dark-theme-bg 0,
+      //  $c-primary-900 20%,
+      //  $c-primary-800 50%,
+      //  $c-primary-700 100%
+      //);
       background: linear-gradient(
         180deg,
         $dark-theme-bg 0,
         $c-primary-900 20%,
         $c-primary-800 100%
       );
+
       //background: linear-gradient(180deg, $c-primary-700 0, $c-primary-800 20%, $c-primary-900 30%, $dark-theme-bg 100%);
       //background: linear-gradient(180deg, $c-primary-900 0, $c-primary-800 80%, $c-primary-700 90%, $c-primary-600 100%);
     }
@@ -168,4 +170,39 @@ img {
   max-width: 100%;
   height: auto;
   display: block;
+}
+
+// scrollbars
+* {
+  --scrollbar-width: thin;
+  --scrollbar-width-legacy: 4px;
+  --scrollbar-color-thumb: #888;
+  --scrollbar-color-track: #f1f1f1;
+
+  .isDarkTheme & {
+    --scrollbar-color-thumb: #333;
+    --scrollbar-color-track: #222;
+  }
+
+  /* Modern browsers with `scrollbar-*` support */
+  @supports (scrollbar-width: auto) {
+    & {
+      scrollbar-color: var(--scrollbar-color-thumb) var(--scrollbar-color-track);
+      scrollbar-width: var(--scrollbar-width);
+    }
+  }
+
+  /* Legacy browsers with `::-webkit-scrollbar-*` support */
+  @supports selector(::-webkit-scrollbar) {
+    &::-webkit-scrollbar-thumb {
+      background: var(--scrollbar-color-thumb);
+    }
+    &::-webkit-scrollbar-track {
+      background: var(--scrollbar-color-track);
+    }
+    &::-webkit-scrollbar {
+      max-width: var(--scrollbar-width-legacy);
+      max-height: var(--scrollbar-width-legacy);
+    }
+  }
 }

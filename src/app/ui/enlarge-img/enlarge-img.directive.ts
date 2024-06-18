@@ -17,7 +17,10 @@ export class EnlargeImgDirective {
 
   @Input() enlargeImg?: string;
 
-  constructor(private _renderer: Renderer2, private _el: ElementRef) {
+  constructor(
+    private _renderer: Renderer2,
+    private _el: ElementRef,
+  ) {
     this.imageEl = this._el.nativeElement;
   }
 

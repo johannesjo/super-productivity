@@ -62,9 +62,8 @@ export class ProjectOverviewPageComponent implements OnInit, OnDestroy {
   }
 
   async export(projectId: string, projectTitle: string): Promise<void> {
-    const data: ExportedProject = await this._persistenceService.loadCompleteProject(
-      projectId,
-    );
+    const data: ExportedProject =
+      await this._persistenceService.loadCompleteProject(projectId);
     console.log(data);
     const dataString = JSON.stringify(data);
     download(`${projectTitle}.json`, dataString);

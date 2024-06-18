@@ -4,6 +4,7 @@ import { mapArchiveToWorklog } from './map-archive-to-worklog';
 import { Dictionary, EntityState } from '@ngrx/entity';
 import { Worklog } from '../worklog.model';
 
+/* eslint-disable @typescript-eslint/naming-convention */
 const START_END_ALL = {
   workStart: {
     '1200-05-05': 10713600000,

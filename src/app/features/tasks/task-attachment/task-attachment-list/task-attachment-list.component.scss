@@ -148,7 +148,7 @@ $thisLowerHeight: $thisHeight - $thisUpperHeight;
 }
 
 $larger-size: 65%;
-$smaller-size: 100% -$larger-size;
+$smaller-size: 100% - $larger-size;
 
 .view-btn {
   pointer-events: all;

@@ -75,7 +75,7 @@ export const SYNC_FORM: ConfigFormSection<SyncConfig> = {
           ...(IS_ELECTRON ||
           (IS_ANDROID_WEB_VIEW &&
             (androidInterface as any).grantFilePermission &&
-            androidInterface.isGrantedFilePermission)
+            (androidInterface as any).isGrantedFilePermission)
             ? [{ label: SyncProvider.LocalFile, value: SyncProvider.LocalFile }]
             : []),
         ],
@@ -115,7 +115,7 @@ export const SYNC_FORM: ConfigFormSection<SyncConfig> = {
         {
           key: 'accessToken',
           type: 'input',
-          hideExpression: (model: DropboxSyncConfig) => !model.accessToken,
+          hideExpression: (model: DropboxSyncConfig) => !model?.accessToken,
           templateOptions: {
             label: T.F.SYNC.FORM.DROPBOX.L_ACCESS_TOKEN,
           },

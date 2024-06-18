@@ -1,4 +1,5 @@
 import { T } from '../../t.const';
+/* eslint-disable @typescript-eslint/naming-convention */
 
 export const PROGRESS_BAR_LABEL_MAP: { [key: string]: string } = {
   'asset/': T.GPB.ASSETS,

@@ -15,7 +15,7 @@ import {
   WORKLOG_DATE_STR_FORMAT,
 } from '../../app.constants';
 import { isMigrateModel } from '../../util/model-version';
-import * as moment from 'moment';
+import moment from 'moment';
 import { convertToWesternArabic } from '../../util/numeric-converter';
 import { WORK_CONTEXT_DEFAULT_THEME } from '../work-context/work-context.const';
 import { dirtyDeepCopy } from '../../util/dirtyDeepCopy';

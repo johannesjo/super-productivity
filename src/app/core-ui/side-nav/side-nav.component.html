@@ -146,6 +146,7 @@
     #menuEntry
     *ngIf="isProjectsExpanded"
     mat-menu-item
+    class="route-link"
     routerLink="project-overview"
     routerLinkActive="isActiveRoute"
   >
@@ -157,6 +158,7 @@
     #menuEntry
     (click)="addProject()"
     *ngIf="isProjectsExpanded"
+    class="route-link"
     mat-menu-item
   >
     <mat-icon>add</mat-icon>

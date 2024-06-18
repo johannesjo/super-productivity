@@ -36,15 +36,9 @@ import { MatTableModule } from '@angular/material/table';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import {
-  MarkdownModule,
-  MarkdownService,
-  MarkedOptions,
-  MarkedRenderer,
-} from 'ngx-markdown';
+import { MarkdownModule, MARKED_OPTIONS, provideMarkdown } from 'ngx-markdown';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { FORMLY_CONFIG, FormlyModule } from '@ngx-formly/core';
-import { ThemeSelectComponent } from './theme-select/theme-select.component';
 import { MsToStringPipe } from './duration/ms-to-string.pipe';
 import { StringToMsPipe } from './duration/string-to-ms.pipe';
 import { ProgressBarComponent } from './progress-bar/progress-bar.component';
@@ -53,13 +47,11 @@ import { CollapsibleComponent } from './collapsible/collapsible.component';
 import { HelpSectionComponent } from './help-section/help-section.component';
 import { NumberToMonthPipe } from './pipes/number-to-month.pipe';
 import { SimpleDownloadDirective } from './simple-download/simple-download.directive';
-import { Angular2PromiseButtonModule } from 'angular2-promise-buttons';
 import { DialogConfirmComponent } from './dialog-confirm/dialog-confirm.component';
 import { InputDurationFormlyComponent } from './duration/input-duration-formly/input-duration-formly.component';
 import { EnlargeImgDirective } from './enlarge-img/enlarge-img.directive';
 import { DragulaModule } from 'ng2-dragula';
 import { MsToClockStringPipe } from './duration/ms-to-clock-string.pipe';
-import { DatetimeInputComponent } from './datetime-input/datetime-input.component';
 import { InputDurationSliderComponent } from './duration/input-duration-slider/input-duration-slider.component';
 import { MsToMinuteClockStringPipe } from './duration/ms-to-minute-clock-string.pipe';
 import { HumanizeTimestampPipe } from './pipes/humanize-timestamp.pipe';
@@ -96,6 +88,8 @@ import { LongPressIOSDirective } from './longpress/longpress-ios.directive';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { ProgressCircleComponent } from './progress-circle/progress-circle.component';
 import { FormlyLinkWidgetComponent } from './formly-link-widget/formly-link-widget.component';
+import { MaterialCssVarsModule } from 'angular-material-css-vars';
+import { markedOptionsFactory } from './marked-options-factory';
 
 const DIALOG_COMPONENTS = [
   DialogConfirmComponent,
@@ -108,7 +102,6 @@ const COMPONENT_AND_PIPES = [
   ChipListInputComponent,
   CollapsibleComponent,
   ContentEditableOnClickDirective,
-  DatetimeInputComponent,
   DurationFromStringPipe,
   DurationToStringPipe,
   EnlargeImgDirective,
@@ -135,7 +128,6 @@ const COMPONENT_AND_PIPES = [
   ProgressCircleComponent,
   SimpleDownloadDirective,
   StringToMsPipe,
-  ThemeSelectComponent,
   ToArrayPipe,
   SortPipe,
   RoundDurationPipe,
@@ -186,33 +178,13 @@ const OTHER_3RD_PARTY_MODS_WITHOUT_CFG = [
     CommonModule,
     MarkdownModule.forRoot({
       markedOptions: {
-        provide: MarkedOptions,
-        useFactory: (): MarkedOptions => {
-          const renderer = new MarkedRenderer();
-
-          renderer.checkbox = (isChecked: boolean) => {
-            return `<span class="checkbox material-icons">${
-              isChecked ? 'check_box ' : 'check_box_outline_blank '
-            }</span>`;
-          };
-          renderer.listitem = (text: string) => {
-            return text.includes('checkbox')
-              ? '<li class="checkbox-wrapper">' + text + '</li>'
-              : '<li>' + text + '</li>';
-          };
-          return {
-            renderer: renderer,
-            gfm: true,
-            breaks: false,
-            pedantic: false,
-            smartLists: true,
-            smartypants: false,
-          };
-        },
+        provide: MARKED_OPTIONS,
+        useFactory: markedOptionsFactory,
       },
       sanitize: SecurityContext.HTML,
     }),
     FormsModule,
+    MaterialCssVarsModule.forRoot(),
     ReactiveFormsModule,
     FormlyModule.forChild({
       types: [
@@ -234,9 +206,6 @@ const OTHER_3RD_PARTY_MODS_WITHOUT_CFG = [
     }),
     FormlyMatToggleModule,
     FormlyMaterialModule,
-    Angular2PromiseButtonModule.forRoot({
-      // handleCurrentBtnOnly: true,
-    }),
     // fix https://stackoverflow.com/questions/62755093/angular-error-generic-type-modulewithproviderst-requires-1-type-arguments
     (DragulaModule as any).forRoot(),
 
@@ -249,7 +218,6 @@ const OTHER_3RD_PARTY_MODS_WITHOUT_CFG = [
     ...COMPONENT_AND_PIPES,
     ...MAT_MODULES,
     ...OTHER_3RD_PARTY_MODS_WITHOUT_CFG,
-    Angular2PromiseButtonModule,
     DragulaModule,
     FormlyMaterialModule,
     FormlyModule,
@@ -259,10 +227,11 @@ const OTHER_3RD_PARTY_MODS_WITHOUT_CFG = [
     OwlWrapperComponent,
   ],
   providers: [
+    provideMarkdown(),
     { provide: ErrorHandler, useClass: GlobalErrorHandler },
     {
       provide: MAT_FORM_FIELD_DEFAULT_OPTIONS,
-      useValue: { appearance: 'standard' },
+      useValue: { appearance: 'fill', subscriptSizing: 'dynamic' },
     },
     { provide: HAMMER_GESTURE_CONFIG, useClass: MyHammerConfig },
     {
@@ -274,29 +243,4 @@ const OTHER_3RD_PARTY_MODS_WITHOUT_CFG = [
     DatePipe,
   ],
 })
-export class UiModule {
-  constructor(private _markdownService: MarkdownService) {
-    const linkRenderer = this._markdownService.renderer.link;
-    this._markdownService.renderer.link = (href, title, text) => {
-      const html = linkRenderer.call(this._markdownService.renderer, href, title, text);
-      return html.replace(/^<a /, '<a target="_blank" ');
-    };
-
-    this._markdownService.renderer.paragraph = (text) => {
-      const split = text.split('\n');
-      return split.reduce((acc, p, i) => {
-        const result = /h(\d)\./.exec(p);
-        if (result !== null) {
-          const h = `h${result[1]}`;
-          return acc + `<${h}>${p.replace(result[0], '')}</${h}>`;
-        }
-
-        if (split.length === 1) {
-          return `<p>` + p + `</p>`;
-        }
-
-        return acc ? (split.length - 1 === i ? acc + p + `</p>` : acc + p) : `<p>` + p;
-      }, '');
-    };
-  }
-}
+export class UiModule {}

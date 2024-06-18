@@ -157,7 +157,7 @@ export class WorkContextService {
           routerLink: `tag/${mainWorkContext.id}`,
           // TODO get pinned noteIds
           noteIds: [],
-        } as WorkContext),
+        }) as WorkContext,
     ),
     switchMap((mainWorkContext) =>
       mainWorkContext.id === TODAY_TAG.id && mainWorkContext.title === TODAY_TAG.title

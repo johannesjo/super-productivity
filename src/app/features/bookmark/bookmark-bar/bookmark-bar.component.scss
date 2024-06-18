@@ -1,4 +1,4 @@
-@use "sass:math";
+@use 'sass:math';
 
 @import '../../../../variables';
 
@@ -43,14 +43,14 @@ $bookmarkMinWidth: 56px;
   }
 
   > button {
-    display: flex;
+    display: flex !important;
     min-width: $listControlsWidth;
     padding-left: 0;
     padding-right: 0;
     text-align: center;
 
-    ::ng-deep .mat-button-wrapper {
-      width: 100%;
+    ::ng-deep .mat-icon {
+      margin: 0 auto;
     }
   }
 }
@@ -77,13 +77,9 @@ $bookmarkMinWidth: 56px;
 .list-controls button,
 .global-bookmark {
   flex: 1 1 auto;
+  display: flex;
   margin: $sTopBottom $sLeftRight 0;
   position: relative;
-
-  ::ng-deep mat-icon {
-    // center
-    margin-top: -3px;
-  }
 
   ::ng-deep .drag-handle {
     margin-top: 0;
@@ -118,14 +114,14 @@ $bookmarkMinWidth: 56px;
 }
 
 .global-bookmark > a {
-  text-decoration: none;
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   flex-direction: row;
   justify-content: center;
   text-transform: none;
   background-size: cover;
   background-position: center center;
+  flex: 1 1 auto;
 
   // allow them to be smaller to save space
   min-width: $bookmarkMinWidth;
@@ -179,13 +175,13 @@ $bookmarkMinWidth: 56px;
 }
 
 .edit-btn {
-  @include mq(xs) {
+  @include mousePrimaryDevice {
     transform: translate(-100%);
   }
 }
 
 .trash-btn {
-  @include mq(xs) {
+  @include mousePrimaryDevice {
     transform: translate(100%);
   }
 }

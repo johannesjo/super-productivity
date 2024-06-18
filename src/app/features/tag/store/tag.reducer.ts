@@ -1,5 +1,4 @@
 import { createEntityAdapter, EntityAdapter } from '@ngrx/entity';
-import * as tagActions from './tag.actions';
 import { Tag, TagState } from '../tag.model';
 import { createFeatureSelector, createReducer, createSelector, on } from '@ngrx/store';
 import {
@@ -33,6 +32,18 @@ import { loadAllData } from '../../../root-store/meta/load-all-data.action';
 import { migrateTagState } from '../migrate-tag-state.util';
 import { MODEL_VERSION_KEY } from '../../../app.constants';
 import { MODEL_VERSION } from '../../../core/model-version';
+import {
+  addTag,
+  addToBreakTimeForTag,
+  deleteTag,
+  deleteTags,
+  updateAdvancedConfigForTag,
+  updateTag,
+  updateTagOrder,
+  updateWorkEndForTag,
+  updateWorkStartForTag,
+  upsertTag,
+} from './tag.actions';
 
 export const TAG_FEATURE_NAME = 'tag';
 const WORK_CONTEXT_TYPE: WorkContextType = WorkContextType.TAG;
@@ -217,23 +228,17 @@ export const tagReducer = createReducer<TagState>(
 
   // INTERNAL
   // --------
-  on(tagActions.addTag, (state: TagState, { tag }) => tagAdapter.addOne(tag, state)),
+  on(addTag, (state: TagState, { tag }) => tagAdapter.addOne(tag, state)),
 
-  on(tagActions.updateTag, (state: TagState, { tag }) =>
-    tagAdapter.updateOne(tag, state),
-  ),
+  on(updateTag, (state: TagState, { tag }) => tagAdapter.updateOne(tag, state)),
 
-  on(tagActions.upsertTag, (state: TagState, { tag }) =>
-    tagAdapter.upsertOne(tag, state),
-  ),
+  on(upsertTag, (state: TagState, { tag }) => tagAdapter.upsertOne(tag, state)),
 
-  on(tagActions.deleteTag, (state: TagState, { id }) => tagAdapter.removeOne(id, state)),
+  on(deleteTag, (state: TagState, { id }) => tagAdapter.removeOne(id, state)),
 
-  on(tagActions.deleteTags, (state: TagState, { ids }) =>
-    tagAdapter.removeMany(ids, state),
-  ),
+  on(deleteTags, (state: TagState, { ids }) => tagAdapter.removeMany(ids, state)),
 
-  on(tagActions.updateTagOrder, (state: TagState, { ids }) => {
+  on(updateTagOrder, (state: TagState, { ids }) => {
     if (ids.length !== state.ids.length) {
       console.log({ state, ids });
       throw new Error('Tag length should not change on re-order');
@@ -244,7 +249,7 @@ export const tagReducer = createReducer<TagState>(
     };
   }),
 
-  on(tagActions.updateWorkStartForTag, (state: TagState, { id, newVal, date }) =>
+  on(updateWorkStartForTag, (state: TagState, { id, newVal, date }) =>
     tagAdapter.updateOne(
       {
         id,
@@ -259,7 +264,7 @@ export const tagReducer = createReducer<TagState>(
     ),
   ),
 
-  on(tagActions.updateWorkEndForTag, (state: TagState, { id, newVal, date }) =>
+  on(updateWorkEndForTag, (state: TagState, { id, newVal, date }) =>
     tagAdapter.updateOne(
       {
         id,
@@ -274,7 +279,7 @@ export const tagReducer = createReducer<TagState>(
     ),
   ),
 
-  on(tagActions.addToBreakTimeForTag, (state: TagState, { id, valToAdd, date }) => {
+  on(addToBreakTimeForTag, (state: TagState, { id, valToAdd, date }) => {
     const oldTag = state.entities[id] as Tag;
     const oldBreakTime = oldTag.breakTime[date] || 0;
     const oldBreakNr = oldTag.breakNr[date] || 0;
@@ -296,27 +301,24 @@ export const tagReducer = createReducer<TagState>(
     );
   }),
 
-  on(
-    tagActions.updateAdvancedConfigForTag,
-    (state: TagState, { tagId, sectionKey, data }) => {
-      const tagToUpdate = state.entities[tagId] as Tag;
-      return tagAdapter.updateOne(
-        {
-          id: tagId,
-          changes: {
-            advancedCfg: {
-              ...tagToUpdate.advancedCfg,
-              [sectionKey]: {
-                ...tagToUpdate.advancedCfg[sectionKey],
-                ...data,
-              },
+  on(updateAdvancedConfigForTag, (state: TagState, { tagId, sectionKey, data }) => {
+    const tagToUpdate = state.entities[tagId] as Tag;
+    return tagAdapter.updateOne(
+      {
+        id: tagId,
+        changes: {
+          advancedCfg: {
+            ...tagToUpdate.advancedCfg,
+            [sectionKey]: {
+              ...tagToUpdate.advancedCfg[sectionKey],
+              ...data,
             },
           },
         },
-        state,
-      );
-    },
-  ),
+      },
+      state,
+    );
+  }),
 
   // TASK STUFF
   // ---------

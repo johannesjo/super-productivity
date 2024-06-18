@@ -21,7 +21,7 @@ export class IconInputComponent extends FieldType<FormlyFieldConfig> implements 
     return this.to.type || 'text';
   }
 
-  override ngOnInit(): void {
+  ngOnInit(): void {
     this.filteredIcons$ = this.formControl.valueChanges.pipe(
       startWith(''),
       filter((searchTerm) => !!searchTerm),

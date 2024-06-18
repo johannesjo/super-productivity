@@ -1,5 +1,5 @@
 import { Pipe, PipeTransform } from '@angular/core';
-import * as moment from 'moment';
+import moment from 'moment';
 
 export const msToMinuteClockString = (value: any): string => {
   const md = moment.duration(value);

@@ -1,7 +1,7 @@
 import { EntityState } from '@ngrx/entity';
 import { Task } from '../../tasks/task.model';
 import { getWeekNumber } from '../../../util/get-week-number';
-import * as moment from 'moment';
+import moment from 'moment';
 import { WorklogYearsWithWeeks } from '../worklog.model';
 import { getWorklogStr } from '../../../util/get-work-log-str';
 import { WorkStartEnd } from '../../work-context/work-context.model';

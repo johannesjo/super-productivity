@@ -7,6 +7,7 @@ import {
   TaskRepeatCfg,
 } from '../../task-repeat-cfg/task-repeat-cfg.model';
 import { getWorklogStr } from '../../../util/get-work-log-str';
+/* eslint-disable @typescript-eslint/naming-convention */
 
 const minutes = (n: number): number => n * 60 * 1000;
 const hours = (n: number): number => 60 * minutes(n);

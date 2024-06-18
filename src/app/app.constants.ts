@@ -139,6 +139,7 @@ export const AUTO_SWITCH_LNGS: LanguageCode[] = [
 
 export const RTL_LANGUAGES: LanguageCode[] = [LanguageCode.ar, LanguageCode.fa];
 
+/* eslint-disable @typescript-eslint/naming-convention */
 export enum THEME_COLOR_MAP {
   'light-blue' = '#03a9f4',
   'pink' = '#e91e63',

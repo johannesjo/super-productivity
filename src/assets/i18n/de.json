@@ -1278,7 +1278,6 @@
   },
   "G": {
     "CANCEL": "Abbrechen",
-    "CLICK_TO_EDIT": "Editieren",
     "CLOSE": "Schließen",
     "DELETE": "Löschen",
     "DISMISS": "Verwerfen",
@@ -1286,6 +1285,7 @@
     "DO_IT": "Tu es!",
     "EDIT": "Bearbeiten",
     "ENABLED": "Aktiviert",
+    "EXAMPLE_VAL": "z.B. 32m",
     "EXTENSION_INFO": "Bitte <a target=\"_blank\" href=\"https://chrome.google.com/webstore/detail/super-productivity/ljkbjodfmekklcoibdnhahlaalhihmlb\"> laden Sie die Chrome-Erweiterung</a> herunter, um die Kommunikation mit dem Jira Api und Leerlaufzeitbehandlung zu ermöglichen. Beachten Sie, dass dies für Handys nicht funktioniert.",
     "HIDE": "Verstecken",
     "LOGIN": "Anmeldung",

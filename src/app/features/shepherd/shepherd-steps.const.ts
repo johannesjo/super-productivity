@@ -16,8 +16,10 @@ import { WorkContextService } from '../work-context/work-context.service';
 import { ShepherdService } from './shepherd.service';
 import { fromEvent, merge, of, timer } from 'rxjs';
 
-const PRIMARY_CLASSES = 'mat-flat-button mat-button-base mat-primary';
-const SECONDARY_CLASSES = 'mat-button mat-button-base';
+const PRIMARY_CLASSES =
+  'mdc-button mdc-button--unelevated mat-mdc-unelevated-button mat-primary mat-mdc-button-base';
+const SECONDARY_CLASSES =
+  'mdc-button mdc-button--unelevated mat-mdc-unelevated-button mat-mdc-button-base';
 
 const NEXT_BTN = {
   classes: PRIMARY_CLASSES,

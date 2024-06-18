@@ -17,7 +17,10 @@ import { createFromDrop } from 'src/app/core/drop-paste-input/drop-paste-input';
   providedIn: 'root',
 })
 export class TaskAttachmentService {
-  constructor(private _store$: Store<TaskState>, private _matDialog: MatDialog) {}
+  constructor(
+    private _store$: Store<TaskState>,
+    private _matDialog: MatDialog,
+  ) {}
 
   addAttachment(taskId: string, taskAttachment: TaskAttachment): void {
     if (!taskAttachment) {

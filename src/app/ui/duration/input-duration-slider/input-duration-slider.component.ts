@@ -11,7 +11,7 @@ import {
   ViewChild,
 } from '@angular/core';
 import { nanoid } from 'nanoid';
-import * as moment from 'moment';
+import moment from 'moment';
 import { dotAnimation } from './dot.ani';
 import { T } from '../../../t.const';
 
@@ -38,7 +38,10 @@ export class InputDurationSliderComponent implements OnInit, OnDestroy {
   @Input() label: string = '';
   @Output() modelChange: EventEmitter<number> = new EventEmitter();
 
-  constructor(private _el: ElementRef, private _cd: ChangeDetectorRef) {
+  constructor(
+    private _el: ElementRef,
+    private _cd: ChangeDetectorRef,
+  ) {
     this.el = this._el.nativeElement;
   }
 

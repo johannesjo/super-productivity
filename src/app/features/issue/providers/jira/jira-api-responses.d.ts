@@ -1,4 +1,5 @@
 // CHECK SWAGGER EXPORT IF MORE ARE NEEDED!!!
+/* eslint-disable @typescript-eslint/naming-convention */
 
 // Standard API responses
 export type JiraOriginalComponent = Readonly<{

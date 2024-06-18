@@ -5,7 +5,14 @@ import { DropboxApiService } from '../dropbox-api.service';
 import { DataInitService } from '../../../../core/data-init/data-init.service';
 import { SnackService } from '../../../../core/snack/snack.service';
 import { EMPTY, from, Observable, of } from 'rxjs';
-import { filter, map, mergeMap, switchMap, withLatestFrom } from 'rxjs/operators';
+import {
+  filter,
+  map,
+  mergeMap,
+  switchMap,
+  throttleTime,
+  withLatestFrom,
+} from 'rxjs/operators';
 import { SyncConfig } from '../../../../features/config/global-config.model';
 import { SyncProvider } from '../../sync-provider.model';
 import { triggerDropboxAuthDialog } from './dropbox.actions';
@@ -17,6 +24,7 @@ export class DropboxEffects {
   updateTokensFromDialog$: Observable<unknown> = createEffect(() =>
     this._actions$.pipe(
       ofType(triggerDropboxAuthDialog.type),
+      throttleTime(1000),
       withLatestFrom(this._globalConfigService.sync$),
       switchMap(([, sync]) => {
         return from(this._dropboxApiService.getAccessTokenViaDialog()).pipe(

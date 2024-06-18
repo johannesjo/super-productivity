@@ -13,7 +13,7 @@
     *ngIf="isShowEdit || (isTurnOffMarkdownParsing$|async)"
     [@fade]
     [ngModel]="modelCopy"
-    class="mat-body-1 markdown-unparsed"
+    class="mat-body-2 markdown-unparsed"
     rows="1"
   ></textarea>
 
@@ -24,7 +24,7 @@
     *ngIf="!(isTurnOffMarkdownParsing$|async)"
     [data]="model"
     [hidden]="isShowEdit"
-    class="mat-body-1 markdown-parsed markdown"
+    class="mat-body-2 markdown-parsed markdown"
     markdown
     tabindex="0"
   ></div>

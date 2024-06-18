@@ -1,6 +1,6 @@
-import { Component, ChangeDetectionStrategy, Inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Inject } from '@angular/core';
 import { UntypedFormGroup } from '@angular/forms';
-import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { FormlyFieldConfig } from '@ngx-formly/core';
 import { T } from 'src/app/t.const';
 import { DEFAULT_GITEA_CFG, GITEA_CONFIG_FORM } from '../../gitea.const';

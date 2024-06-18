@@ -42,13 +42,13 @@
       <tr *ngIf="issue?.labels?.length">
         <th>{{T.F.GITHUB.ISSUE_CONTENT.LABELS|translate}}</th>
         <td>
-          <mat-chip-list>
-            <mat-chip
+          <mat-chip-listbox>
+            <mat-chip-option
               *ngFor="let label of issue?.labels; trackBy: trackByIndex"
               [title]="label.description"
               >{{label.name}}
-            </mat-chip>
-          </mat-chip-list>
+            </mat-chip-option>
+          </mat-chip-listbox>
         </td>
       </tr>
       <tr *ngIf="issue?.body && !isCollapsedIssueSummary()">

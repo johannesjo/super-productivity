@@ -35,7 +35,7 @@ import {
   take,
 } from 'rxjs/operators';
 import { JiraIssue, JiraIssueReduced } from './jira-issue/jira-issue.model';
-import * as moment from 'moment';
+import moment from 'moment';
 import { BannerService } from '../../../../core/banner/banner.service';
 import { BannerId } from '../../../../core/banner/banner.model';
 import { T } from '../../../../t.const';
@@ -459,22 +459,23 @@ export class JiraApiService {
       ...(jr.body ? { body: JSON.stringify(jr.body) } : {}),
 
       headers: {
+        // eslint-disable-next-line @typescript-eslint/naming-convention
         'Content-Type': 'application/json',
         ...(IS_ELECTRON && cfg.isWonkyCookieMode
           ? {
               Cookie: sessionStorage.getItem(SS.JIRA_WONKY_COOKIE) as string,
             }
           : cfg.usePAT
-          ? {
-              Cookie: '',
-              authorization: `Bearer ${cfg.password}`,
-            }
-          : {
-              Cookie: '',
-              authorization: `Basic ${this._b64EncodeUnicode(
-                `${cfg.userName}:${cfg.password}`,
-              )}`,
-            }),
+            ? {
+                Cookie: '',
+                authorization: `Bearer ${cfg.password}`,
+              }
+            : {
+                Cookie: '',
+                authorization: `Basic ${this._b64EncodeUnicode(
+                  `${cfg.userName}:${cfg.password}`,
+                )}`,
+              }),
       },
     };
   }

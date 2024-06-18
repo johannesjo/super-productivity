@@ -48,7 +48,7 @@ describe('selectTaskRepeatCfgsDueOnDay', () => {
           }),
         ],
         {
-          dayDate: new Date('2025-11-11'),
+          dayDate: new Date('2025-11-11').getTime(),
         },
       );
       const resultIds = result.map((item) => item.id);
@@ -76,7 +76,7 @@ describe('selectTaskRepeatCfgsDueOnDay', () => {
             }),
           ],
           {
-            dayDate: new Date(dayDateStr),
+            dayDate: new Date(dayDateStr).getTime(),
           },
         );
         const resultIds = result.map((item) => item.id);
@@ -105,7 +105,7 @@ describe('selectTaskRepeatCfgsDueOnDay', () => {
             }),
           ],
           {
-            dayDate: new Date(dayDateStr),
+            dayDate: new Date(dayDateStr).getTime(),
           },
         );
         const resultIds = result.map((item) => item.id);
@@ -133,7 +133,7 @@ describe('selectTaskRepeatCfgsDueOnDay', () => {
             }),
           ],
           {
-            dayDate: new Date(dayDateStr),
+            dayDate: new Date(dayDateStr).getTime(),
           },
         );
         const resultIds = result.map((item) => item.id);

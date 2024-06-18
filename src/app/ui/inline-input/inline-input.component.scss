@@ -47,6 +47,7 @@ input {
   min-height: 100%;
 
   @include inlineEditElevation();
+  z-index: 999999;
 
   &.duration-input {
     width: 100%;

@@ -123,7 +123,7 @@ mat-sidenav {
   z-index: $z-side-nav;
 }
 @media (min-width: 800px) {
-  button.mat-menu-item {
+  button.mat-mdc-menu-item {
     width: 600px;
   }
 }
