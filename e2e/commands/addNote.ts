@@ -10,9 +10,10 @@ const ROUTER_WRAPPER = '.route-wrapper';
 module.exports = {
   async command(this: NightwatchBrowser, noteName: string) {
     return (
-      this
-        //
-        .waitForElementVisible(ROUTER_WRAPPER)
+      this.waitForElementVisible(ROUTER_WRAPPER)
+        // HERE TO AVOID:
+        // Error   Error while running .isElementDisplayed() protocol action: stale element reference: stale element not found in the current frame
+        .pause(200)
         .setValue('body', 'N')
 
         .waitForElementVisible(ADD_NOTE_BTN)

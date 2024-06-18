@@ -86,7 +86,9 @@ module.exports = {
     browser
       // Go to project page
       .goToDefaultProject()
-
+      // HERE TO: avoid Error   Error while running .clickElement() protocol action:
+      // stale element reference: stale element not found in the current frame
+      .pause(200)
       .click(READY_TO_WORK_BTN)
 
       // navigate to
