@@ -22,6 +22,7 @@
 
     @include darkTheme {
       background-color: $dark-theme-card-bg;
+      //background-color: $dark-theme-bg-slightly-lighter;
     }
 
     .md-title {
