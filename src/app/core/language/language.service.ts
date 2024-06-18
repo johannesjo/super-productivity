@@ -1,6 +1,5 @@
 import { Injectable } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
-import { DateTimeAdapter } from 'ngx-date-time-picker-schedule';
 import { DateAdapter } from '@angular/material/core';
 import moment from 'moment';
 import {
@@ -13,6 +12,7 @@ import { BehaviorSubject, Observable } from 'rxjs';
 import { GlobalConfigService } from 'src/app/features/config/global-config.service';
 import { map, startWith } from 'rxjs/operators';
 import { DEFAULT_GLOBAL_CONFIG } from 'src/app/features/config/default-global-config.const';
+import { DateTimeAdapter } from '../../ui/custom-datetime-picker/date-time/adapter/date-time-adapter.class';
 
 @Injectable({ providedIn: 'root' })
 export class LanguageService {

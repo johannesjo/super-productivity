@@ -11,7 +11,6 @@ import {
   Inject,
   Input,
   OnInit,
-  Optional,
   Output,
   ViewChild,
 } from '@angular/core';
@@ -36,6 +35,7 @@ export const OWL_DATETIME_VALUE_ACCESSOR: any = {
   templateUrl: './date-time-inline.component.html',
   styleUrls: ['./date-time-inline.component.scss'],
   host: {
+    // eslint-disable-next-line @typescript-eslint/naming-convention
     '[class.owl-dt-inline]': 'owlDTInlineClass',
   },
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -47,7 +47,7 @@ export class OwlDateTimeInlineComponent<T>
   implements OnInit, ControlValueAccessor
 {
   @ViewChild(OwlDateTimeContainerComponent, { static: true })
-  container: OwlDateTimeContainerComponent<T>;
+  container!: OwlDateTimeContainerComponent<T>;
   /**
    * Emits selected year in multi-year view
    * This doesn't imply a change on the selected date.
@@ -63,14 +63,17 @@ export class OwlDateTimeInlineComponent<T>
   @Output()
   ngModelChange = new EventEmitter<T>();
   /** The minimum valid date. */
-  private _min: T | null;
+  private _min!: T | null;
   /** The maximum valid date. */
-  private _max: T | null;
+  private _max!: T | null;
 
   constructor(
     protected changeDetector: ChangeDetectorRef,
-    @Optional() protected dateTimeAdapter: DateTimeAdapter<T>,
-    @Optional()
+    // @Optional()
+    protected override dateTimeAdapter: DateTimeAdapter<T>,
+    // @Optional()
+    // TODO check all
+    // @ts-ignore
     @Inject(OWL_DATE_TIME_FORMATS)
     protected dateTimeFormats: OwlDateTimeFormats,
   ) {
@@ -99,18 +102,18 @@ export class OwlDateTimeInlineComponent<T>
   private _disabled = false;
 
   @Input()
-  get disabled(): boolean {
+  override get disabled(): boolean {
     return !!this._disabled;
   }
 
-  set disabled(value: boolean) {
+  override set disabled(value: boolean) {
     this._disabled = coerceBooleanProperty(value);
   }
 
   private _selectMode: SelectMode = 'single';
 
   @Input()
-  get selectMode() {
+  get selectMode(): SelectMode {
     return this._selectMode;
   }
 
@@ -128,7 +131,7 @@ export class OwlDateTimeInlineComponent<T>
   }
 
   /** The date to open the calendar to initially. */
-  private _startAt: T | null;
+  private _startAt!: T | null;
 
   @Input()
   get startAt(): T | null {
@@ -152,7 +155,7 @@ export class OwlDateTimeInlineComponent<T>
   }
 
   /** The date to open for range calendar. */
-  private _endAt: T | null;
+  private _endAt!: T | null;
 
   @Input()
   get endAt(): T | null {
@@ -173,10 +176,10 @@ export class OwlDateTimeInlineComponent<T>
     this._endAt = this.getValidDate(this.dateTimeAdapter.deserialize(date));
   }
 
-  private _dateTimeFilter: (date: T | null) => boolean;
+  private _dateTimeFilter!: (date: T | null) => boolean;
 
   @Input('owlDateTimeFilter')
-  get dateTimeFilter() {
+  get dateTimeFilter(): (date: T | null) => boolean {
     return this._dateTimeFilter;
   }
 
@@ -204,10 +207,11 @@ export class OwlDateTimeInlineComponent<T>
     this.changeDetector.markForCheck();
   }
 
-  private _value: T | null;
+  private _value: T | null | undefined;
 
   @Input()
-  get value() {
+  get value(): T | null {
+    // @ts-ignore
     return this._value;
   }
 
@@ -221,14 +225,17 @@ export class OwlDateTimeInlineComponent<T>
   private _values: T[] = [];
 
   @Input()
-  get values() {
+  get values(): T[] {
     return this._values;
   }
 
   set values(values: T[]) {
     if (values && values.length > 0) {
+      // @ts-ignore
       values = values.map((v) => {
+        // @ts-ignore
         v = this.dateTimeAdapter.deserialize(v);
+        // @ts-ignore
         v = this.getValidDate(v);
         return v ? this.dateTimeAdapter.clone(v) : null;
       });
@@ -240,9 +247,9 @@ export class OwlDateTimeInlineComponent<T>
     }
   }
 
-  private _selected: T | null;
+  private _selected!: T | null;
 
-  get selected() {
+  get selected(): T | null {
     return this._selected;
   }
 
@@ -253,7 +260,7 @@ export class OwlDateTimeInlineComponent<T>
 
   private _selecteds: T[] = [];
 
-  get selecteds() {
+  get selecteds(): T[] {
     return this._selecteds;
   }
 
@@ -286,7 +293,7 @@ export class OwlDateTimeInlineComponent<T>
     return true;
   }
 
-  ngOnInit() {
+  ngOnInit(): void {
     this.container.picker = this;
   }
 
@@ -340,9 +347,10 @@ export class OwlDateTimeInlineComponent<T>
     this.monthSelected.emit(normalizedMonth);
   }
 
-  private onModelChange(date) {
+  private onModelChange(date): void {
     this.ngModelChange.emit(date);
   }
 
+  // eslint-disable-next-line @typescript-eslint/ban-types
   private onModelTouched: Function = () => {};
 }

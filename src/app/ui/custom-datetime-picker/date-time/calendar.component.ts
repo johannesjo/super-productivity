@@ -14,7 +14,6 @@ import {
   Input,
   NgZone,
   OnDestroy,
-  OnInit,
   Optional,
   Output,
 } from '@angular/core';
@@ -34,28 +33,30 @@ import { Subscription } from 'rxjs';
   templateUrl: './calendar.component.html',
   styleUrls: ['./calendar.component.scss'],
   host: {
+    // eslint-disable-next-line @typescript-eslint/naming-convention
     '[class.owl-dt-calendar]': 'owlDTCalendarClass',
   },
   preserveWhitespaces: false,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class OwlCalendarComponent<T>
-  implements OnInit, AfterContentInit, AfterViewChecked, OnDestroy
+  implements AfterContentInit, AfterViewChecked, OnDestroy
 {
   @Input()
-  isNoMonthSquares: boolean;
+  isNoMonthSquares: boolean = false;
   /**
    * Date filter for the month and year view
    * */
   @Input()
-  dateFilter: Function;
+  // eslint-disable-next-line @typescript-eslint/ban-types
+  dateFilter!: Function;
   /**
    * Set the first day of week
    */
   @Input()
-  firstDayOfWeek: number;
+  firstDayOfWeek: number = 0;
   @Input()
-  selectMode: SelectMode;
+  selectMode!: SelectMode;
   /**
    * The view that the calendar should start in.
    */
@@ -65,7 +66,7 @@ export class OwlCalendarComponent<T>
    * Whether to hide dates in other months at the start or end of the current month.
    * */
   @Input()
-  hideOtherMonths: boolean;
+  hideOtherMonths: boolean = false;
   /** Emits when the currently picker moment changes. */
   @Output()
   pickerMomentChange = new EventEmitter<T>();
@@ -123,7 +124,7 @@ export class OwlCalendarComponent<T>
       : this.pickerIntl.switchToMonthViewLabel;
   }
 
-  get prevButtonLabel(): string {
+  get prevButtonLabel(): string | null {
     if (this._currentView === 'month') {
       return this.pickerIntl.prevMonthLabel;
     } else if (this._currentView === 'year') {
@@ -133,7 +134,7 @@ export class OwlCalendarComponent<T>
     }
   }
 
-  get nextButtonLabel(): string {
+  get nextButtonLabel(): string | null {
     if (this._currentView === 'month') {
       return this.pickerIntl.nextMonthLabel;
     } else if (this._currentView === 'year') {
@@ -159,7 +160,7 @@ export class OwlCalendarComponent<T>
     return this._currentView !== 'multi-years';
   }
 
-  get isMonthView() {
+  get isMonthView(): boolean {
     return this._currentView === 'month';
   }
 
@@ -171,7 +172,7 @@ export class OwlCalendarComponent<T>
   }
 
   /** The minimum selectable date. */
-  private _minDate: T | null;
+  private _minDate!: T | null;
 
   @Input()
   get minDate(): T | null {
@@ -192,7 +193,7 @@ export class OwlCalendarComponent<T>
   }
 
   /** The maximum selectable date. */
-  private _maxDate: T | null;
+  private _maxDate!: T | null;
 
   @Input()
   get maxDate(): T | null {
@@ -213,20 +214,20 @@ export class OwlCalendarComponent<T>
   }
 
   /** The current picker moment */
-  private _pickerMoment: T;
+  private _pickerMoment!: T;
 
   @Input()
-  get pickerMoment() {
+  get pickerMoment(): T {
     return this._pickerMoment;
   }
 
   set pickerMoment(value: T) {
-    value = this.dateTimeAdapter.deserialize(value);
+    value = this.dateTimeAdapter.deserialize(value) as T;
     this._pickerMoment = this.getValidDate(value) || this.dateTimeAdapter.now();
   }
 
   /** The currently selected moment. */
-  private _selected: T | null;
+  private _selected!: T | null;
 
   @Input()
   get selected(): T | null {
@@ -247,12 +248,12 @@ export class OwlCalendarComponent<T>
 
   set selecteds(values: T[]) {
     this._selecteds = values.map((v) => {
-      v = this.dateTimeAdapter.deserialize(v);
+      v = this.dateTimeAdapter.deserialize(v) as T;
       return this.getValidDate(v);
-    });
+    }) as T[];
   }
 
-  private _currentView: 'month' | 'year' | 'multi-years';
+  private _currentView!: 'month' | 'year' | 'multi-years';
 
   get currentView(): 'month' | 'year' | 'multi-years' {
     return this._currentView;
@@ -266,7 +267,7 @@ export class OwlCalendarComponent<T>
   /**
    * Date filter for the month and year view
    */
-  dateFilterForViews = (date: T) => {
+  dateFilterForViews = (date: T): boolean => {
     return (
       !!date &&
       (!this.dateFilter || this.dateFilter(date)) &&
@@ -275,13 +276,11 @@ export class OwlCalendarComponent<T>
     );
   };
 
-  ngOnInit() {}
-
   ngAfterContentInit(): void {
     this._currentView = this.startView;
   }
 
-  ngAfterViewChecked() {
+  ngAfterViewChecked(): void {
     if (this.moveFocusOnNextTick) {
       this.moveFocusOnNextTick = false;
       this.focusActiveCell();
@@ -373,7 +372,7 @@ export class OwlCalendarComponent<T>
   /**
    * Focus to the host element
    * */
-  focusActiveCell() {
+  focusActiveCell(): void {
     this.ngZone.runOutsideAngular(() => {
       this.ngZone.onStable
         .asObservable()
@@ -397,14 +396,14 @@ export class OwlCalendarComponent<T>
    */
   private isSameView(date1: T, date2: T): boolean {
     if (this._currentView === 'month') {
-      return !!(
+      return (
         date1 &&
         date2 &&
         this.dateTimeAdapter.getYear(date1) === this.dateTimeAdapter.getYear(date2) &&
         this.dateTimeAdapter.getMonth(date1) === this.dateTimeAdapter.getMonth(date2)
       );
     } else if (this._currentView === 'year') {
-      return !!(
+      return (
         date1 &&
         date2 &&
         this.dateTimeAdapter.getYear(date1) === this.dateTimeAdapter.getYear(date2)

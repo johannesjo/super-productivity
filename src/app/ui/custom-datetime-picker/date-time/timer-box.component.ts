@@ -25,35 +25,45 @@ import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
   preserveWhitespaces: false,
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
+    // eslint-disable-next-line @typescript-eslint/naming-convention
     '[class.owl-dt-timer-box]': 'owlDTTimerBoxClass',
   },
 })
 export class OwlTimerBoxComponent implements OnInit, OnDestroy {
   @Input() showDivider = false;
 
-  @Input() upBtnAriaLabel: string;
+  @Input()
+  upBtnAriaLabel!: string;
 
-  @Input() upBtnDisabled: boolean;
+  @Input()
+  upBtnDisabled!: boolean;
 
-  @Input() downBtnAriaLabel: string;
+  @Input()
+  downBtnAriaLabel!: string;
 
-  @Input() downBtnDisabled: boolean;
+  @Input()
+  downBtnDisabled!: boolean;
 
   /**
    * Value would be displayed in the box
    * If it is null, the box would display [value]
    * */
-  @Input() boxValue: number;
+  @Input()
+  boxValue!: number;
 
-  @Input() value: number;
+  @Input()
+  value!: number;
 
-  @Input() min: number;
+  @Input()
+  min!: number;
 
-  @Input() max: number;
+  @Input()
+  max!: number;
 
   @Input() step = 1;
 
-  @Input() inputLabel: string;
+  @Input()
+  inputLabel!: string;
 
   @Output() valueChange = new EventEmitter<number>();
 
@@ -63,7 +73,7 @@ export class OwlTimerBoxComponent implements OnInit, OnDestroy {
 
   private inputStreamSub = Subscription.EMPTY;
   @ViewChild('valueInput', { static: true })
-  private valueInput: ElementRef;
+  private valueInput!: ElementRef;
   private onValueInputMouseWheelBind = this.onValueInputMouseWheel.bind(this);
 
   constructor() {}
@@ -76,7 +86,7 @@ export class OwlTimerBoxComponent implements OnInit, OnDestroy {
     return true;
   }
 
-  ngOnInit() {
+  ngOnInit(): void {
     this.inputStreamSub = this.inputStream
       .pipe(debounceTime(500), distinctUntilChanged())
       .subscribe((val: string) => {
@@ -130,6 +140,7 @@ export class OwlTimerBoxComponent implements OnInit, OnDestroy {
       }
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-expressions
     event.preventDefault ? event.preventDefault() : (event.returnValue = false);
   }
 

@@ -9,7 +9,6 @@ import {
   EventEmitter,
   Input,
   NgZone,
-  OnInit,
   Output,
 } from '@angular/core';
 import { SelectMode } from './date-time.class';
@@ -38,9 +37,9 @@ export class CalendarCell {
   preserveWhitespaces: false,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class OwlCalendarBodyComponent implements OnInit {
+export class OwlCalendarBodyComponent {
   @Input()
-  isNoMonthSquares: boolean;
+  isNoMonthSquares!: boolean;
 
   /**
    * The cell number of the active cell in the table.
@@ -52,7 +51,7 @@ export class OwlCalendarBodyComponent implements OnInit {
    * The cells to display in the table.
    * */
   @Input()
-  rows: CalendarCell[][];
+  rows!: CalendarCell[][];
 
   /**
    * The number of columns in the table.
@@ -70,24 +69,25 @@ export class OwlCalendarBodyComponent implements OnInit {
    * The value in the table that corresponds to today.
    * */
   @Input()
-  todayValue: number;
+  todayValue!: number;
 
   /**
    * The value in the table that is currently selected.
    * */
   @Input()
-  selectedValues: number[];
+  selectedValues!: number[];
 
   /**
    * Current picker select mode
    */
   @Input()
-  selectMode: SelectMode;
+  selectMode!: SelectMode;
 
   /**
    * Emit when a calendar cell is selected
    * */
   @Output()
+  // eslint-disable-next-line @angular-eslint/no-output-native
   readonly select = new EventEmitter<CalendarCell>();
 
   constructor(
@@ -111,13 +111,12 @@ export class OwlCalendarBodyComponent implements OnInit {
     );
   }
 
-  ngOnInit() {}
-
   selectCell(cell: CalendarCell): void {
     this.select.emit(cell);
   }
 
   isActiveCell(rowIndex: number, colIndex: number): boolean {
+    // eslint-disable-next-line no-mixed-operators
     const cellNumber = rowIndex * this.numCols + colIndex;
     return cellNumber === this.activeCell;
   }
@@ -140,6 +139,7 @@ export class OwlCalendarBodyComponent implements OnInit {
 
       return value === fromValue || value === toValue;
     }
+    return false;
   }
 
   /**
@@ -156,6 +156,7 @@ export class OwlCalendarBodyComponent implements OnInit {
         return value === fromValue || value === toValue;
       }
     }
+    return false;
   }
 
   /**
@@ -166,6 +167,7 @@ export class OwlCalendarBodyComponent implements OnInit {
       const fromValue = this.selectedValues[0];
       return fromValue !== null && value === fromValue;
     }
+    return false;
   }
 
   /**
@@ -176,6 +178,7 @@ export class OwlCalendarBodyComponent implements OnInit {
       const toValue = this.selectedValues[1];
       return toValue !== null && value === toValue;
     }
+    return false;
   }
 
   /**

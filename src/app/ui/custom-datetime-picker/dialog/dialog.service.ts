@@ -37,9 +37,11 @@ export const OWL_DIALOG_SCROLL_STRATEGY = new InjectionToken<() => ScrollStrateg
   'owl-dialog-scroll-strategy',
 );
 
+// eslint-disable-next-line prefer-arrow/prefer-arrow-functions
 export function OWL_DIALOG_SCROLL_STRATEGY_PROVIDER_FACTORY(
   overlay: Overlay,
 ): () => ScrollStrategy {
+  // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
   const fn = () => overlay.scrollStrategies.block();
   return fn;
 }
@@ -68,7 +70,7 @@ export class OwlDialogService {
    * Will emit on subscribe if there are no open dialogs to begin with.
    */
 
-  afterAllClosed: Observable<{}> = defer(() =>
+  afterAllClosed: Observable<unknown> = defer(() =>
     this._openDialogsAtThisLevel.length
       ? this._afterAllClosed
       : this._afterAllClosed.pipe(startWith(undefined)),
@@ -77,15 +79,22 @@ export class OwlDialogService {
   private _afterAllClosedAtThisLevel = new Subject<void>();
   private readonly scrollStrategy: () => ScrollStrategy;
 
+  // TODO check all
   constructor(
     private overlay: Overlay,
     private injector: Injector,
+    // @ts-ignore
     @Optional() private location: Location,
+    // @ts-ignore
     @Inject(OWL_DIALOG_SCROLL_STRATEGY) scrollStrategy: any,
+    // @ts-ignore
     @Optional()
+    // @ts-ignore
     @Inject(OWL_DIALOG_DEFAULT_OPTIONS)
     private defaultOptions: OwlDialogConfigInterface,
+    // @ts-ignore
     @Optional()
+    // @ts-ignore
     @SkipSelf()
     private parentDialog: OwlDialogService,
     private overlayContainer: OverlayContainer,
@@ -163,6 +172,7 @@ export class OwlDialogService {
     return this.openDialogs.find((dialog) => dialog.id === id);
   }
 
+  // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
   private attachDialogContent<T>(
     componentOrTemplateRef: ComponentType<T> | TemplateRef<T>,
     dialogContainer: OwlDialogContainerComponent,
@@ -172,7 +182,7 @@ export class OwlDialogService {
     const dialogRef = new OwlDialogRef<T>(
       overlayRef,
       dialogContainer,
-      config.id,
+      config.id as string,
       this.location,
     );
 
@@ -198,6 +208,7 @@ export class OwlDialogService {
     return dialogRef;
   }
 
+  // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
   private createInjector<T>(
     config: OwlDialogConfigInterface,
     dialogRef: OwlDialogRef<T>,
@@ -278,6 +289,7 @@ export class OwlDialogService {
   /**
    * Hides all of the content that isn't an overlay from assistive technology.
    */
+  // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
   private hideNonDialogContentFromAssistiveTechnology() {
     const overlayContainer = this.overlayContainer.getContainerElement();
 
@@ -308,6 +320,7 @@ export class OwlDialogService {
  * @param defaultOptions Default config setting
  * @returns The new configuration object.
  */
+// eslint-disable-next-line prefer-arrow/prefer-arrow-functions
 function applyConfigDefaults(
   config?: OwlDialogConfigInterface,
   defaultOptions?: OwlDialogConfigInterface,

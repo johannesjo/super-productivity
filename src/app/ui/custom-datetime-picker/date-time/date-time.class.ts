@@ -1,7 +1,7 @@
 /**
  * date-time.class
  */
-import { Directive, EventEmitter, Inject, Input, Optional, Output } from '@angular/core';
+import { Directive, EventEmitter, Inject, Input, Output } from '@angular/core';
 import { coerceBooleanProperty, coerceNumberProperty } from '@angular/cdk/coercion';
 import { DateTimeAdapter } from './adapter/date-time-adapter.class';
 import {
@@ -20,13 +20,13 @@ export type SelectMode = 'single' | 'range' | 'rangeFrom' | 'rangeTo';
 @Directive()
 export abstract class OwlDateTime<T> {
   @Input()
-  isShowTopInput: boolean;
+  isShowTopInput!: boolean;
 
   @Input()
-  isHandleDoubleEnter: boolean;
+  isHandleDoubleEnter!: boolean;
 
   @Input()
-  isNoMonthSquares: boolean;
+  isNoMonthSquares!: boolean;
 
   @Input()
   dayStartsAt = '9:00';
@@ -67,8 +67,13 @@ export abstract class OwlDateTime<T> {
   private readonly _id: string;
 
   protected constructor(
-    @Optional() protected dateTimeAdapter: DateTimeAdapter<T>,
-    @Optional()
+    // TODO check
+    // @Optional()
+    protected dateTimeAdapter: DateTimeAdapter<T>,
+    // TODO check
+    // @Optional()
+    // TODO check
+    // @ts-ignore
     @Inject(OWL_DATE_TIME_FORMATS)
     protected dateTimeFormats: OwlDateTimeFormats,
   ) {
@@ -164,17 +169,17 @@ export abstract class OwlDateTime<T> {
   /**
    * Set the first day of week
    */
-  private _firstDayOfWeek: number;
+  private _firstDayOfWeek!: number;
 
   @Input()
-  get firstDayOfWeek() {
+  get firstDayOfWeek(): number {
     return this._firstDayOfWeek;
   }
 
   set firstDayOfWeek(value: number) {
     value = coerceNumberProperty(value);
     if (value > 6 || value < 0) {
-      this._firstDayOfWeek = undefined;
+      this._firstDayOfWeek = 0;
     } else {
       this._firstDayOfWeek = value;
     }
@@ -245,7 +250,7 @@ export abstract class OwlDateTime<T> {
   /**
    * Date Time Checker to check if the give dateTime is selectable
    */
-  dateTimeChecker = (dateTime: T) => {
+  dateTimeChecker = (dateTime: T): boolean => {
     return (
       !!dateTime &&
       (!this.dateTimeFilter || this.dateTimeFilter(dateTime)) &&

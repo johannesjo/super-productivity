@@ -15,6 +15,6 @@ import { OwlDialogContainerComponent } from './dialog-container.component';
   exports: [],
   declarations: [OwlDialogContainerComponent],
   providers: [OWL_DIALOG_SCROLL_STRATEGY_PROVIDER, OwlDialogService],
-  entryComponents: [OwlDialogContainerComponent],
+  // entryComponents: [OwlDialogContainerComponent],
 })
 export class OwlDialogModule {}

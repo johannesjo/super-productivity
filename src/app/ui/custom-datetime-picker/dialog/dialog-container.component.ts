@@ -10,7 +10,6 @@ import {
   EmbeddedViewRef,
   EventEmitter,
   Inject,
-  OnInit,
   Optional,
   ViewChild,
 } from '@angular/core';
@@ -80,27 +79,36 @@ const zoomFadeInFrom = {
     ]),
   ],
   host: {
+    // eslint-disable-next-line @typescript-eslint/naming-convention
     '(@slideModal.start)': 'onAnimationStart($event)',
+    // eslint-disable-next-line @typescript-eslint/naming-convention
     '(@slideModal.done)': 'onAnimationDone($event)',
+    // eslint-disable-next-line @typescript-eslint/naming-convention
     '[class.owl-dialog-container]': 'owlDialogContainerClass',
+    // eslint-disable-next-line @typescript-eslint/naming-convention
     '[attr.tabindex]': 'owlDialogContainerTabIndex',
+    // eslint-disable-next-line @typescript-eslint/naming-convention
     '[attr.id]': 'owlDialogContainerId',
+    // eslint-disable-next-line @typescript-eslint/naming-convention
     '[attr.role]': 'owlDialogContainerRole',
+    // eslint-disable-next-line @typescript-eslint/naming-convention
     '[attr.aria-labelledby]': 'owlDialogContainerAriaLabelledby',
+    // eslint-disable-next-line @typescript-eslint/naming-convention
     '[attr.aria-describedby]': 'owlDialogContainerAriaDescribedby',
+    // eslint-disable-next-line @typescript-eslint/naming-convention
     '[@slideModal]': 'owlDialogContainerAnimation',
   },
 })
-export class OwlDialogContainerComponent extends BasePortalOutlet implements OnInit {
+export class OwlDialogContainerComponent extends BasePortalOutlet {
   @ViewChild(CdkPortalOutlet, { static: true })
-  portalOutlet: CdkPortalOutlet;
+  portalOutlet!: CdkPortalOutlet;
   /** ID of the element that should be considered as the dialog's label. */
   public ariaLabelledBy: string | null = null;
   /** Emits when an animation state changes. */
   public animationStateChanged = new EventEmitter<AnimationEvent>();
   public isAnimating = false;
   /** The class that traps and manages focus within the dialog. */
-  private focusTrap: FocusTrap;
+  private focusTrap?: FocusTrap;
   private state: 'void' | 'enter' | 'exit' = 'enter';
   // for animation purpose
   private params: any = {
@@ -117,7 +125,10 @@ export class OwlDialogContainerComponent extends BasePortalOutlet implements OnI
     private changeDetector: ChangeDetectorRef,
     private elementRef: ElementRef,
     private focusTrapFactory: FocusTrapFactory,
+    // TODO check
+    // @ts-ignore
     @Optional()
+    // @ts-ignore
     @Inject(DOCUMENT)
     private document: any,
   ) {
@@ -126,7 +137,7 @@ export class OwlDialogContainerComponent extends BasePortalOutlet implements OnI
 
   // A variable to hold the focused element before the dialog was open.
 
-  private _config: OwlDialogConfigInterface;
+  private _config!: OwlDialogConfigInterface;
 
   get config(): OwlDialogConfigInterface {
     return this._config;
@@ -140,27 +151,25 @@ export class OwlDialogContainerComponent extends BasePortalOutlet implements OnI
     return -1;
   }
 
-  get owlDialogContainerId(): string {
-    return this._config.id;
+  get owlDialogContainerId(): string | unknown {
+    return this._config?.id;
   }
 
-  get owlDialogContainerRole(): string {
-    return this._config.role || null;
+  get owlDialogContainerRole(): string | null {
+    return this._config?.role || null;
   }
 
-  get owlDialogContainerAriaLabelledby(): string {
+  get owlDialogContainerAriaLabelledby(): string | null {
     return this.ariaLabelledBy;
   }
 
-  get owlDialogContainerAriaDescribedby(): string {
-    return this._config.ariaDescribedBy || null;
+  get owlDialogContainerAriaDescribedby(): string | null {
+    return this._config?.ariaDescribedBy || null;
   }
 
   get owlDialogContainerAnimation(): any {
     return { value: this.state, params: this.params };
   }
-
-  public ngOnInit() {}
 
   /**
    * Attach a ComponentPortal as content to this dialog container.
@@ -204,7 +213,7 @@ export class OwlDialogContainerComponent extends BasePortalOutlet implements OnI
     this.isAnimating = false;
   }
 
-  public startExitAnimation() {
+  public startExitAnimation(): void {
     this.state = 'exit';
     this.changeDetector.markForCheck();
   }
@@ -254,7 +263,7 @@ export class OwlDialogContainerComponent extends BasePortalOutlet implements OnI
       this.focusTrap = this.focusTrapFactory.create(this.elementRef.nativeElement);
     }
 
-    if (this._config.autoFocus) {
+    if (this._config?.autoFocus) {
       this.focusTrap.focusInitialElementWhenReady();
     }
   }

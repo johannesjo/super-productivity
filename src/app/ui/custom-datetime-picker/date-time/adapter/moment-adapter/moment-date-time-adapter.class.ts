@@ -37,6 +37,7 @@ export const OWL_MOMENT_DATE_TIME_ADAPTER_OPTIONS =
   );
 
 /** @docs-private */
+// eslint-disable-next-line prefer-arrow/prefer-arrow-functions
 export function OWL_MOMENT_DATE_TIME_ADAPTER_OPTIONS_FACTORY(): OwlMomentDateTimeAdapterOptions {
   return {
     useUtc: false,
@@ -45,6 +46,7 @@ export function OWL_MOMENT_DATE_TIME_ADAPTER_OPTIONS_FACTORY(): OwlMomentDateTim
 }
 
 /** Creates an array and fills it with values. */
+// eslint-disable-next-line prefer-arrow/prefer-arrow-functions
 function range<T>(length: number, valueFunction: (index: number) => T): T[] {
   const valuesArray = Array(length);
   for (let i = 0; i < length; i++) {
@@ -55,7 +57,7 @@ function range<T>(length: number, valueFunction: (index: number) => T): T[] {
 
 @Injectable()
 export class MomentDateTimeAdapter extends DateTimeAdapter<Moment> {
-  private _localeData: {
+  private _localeData!: {
     longMonths: string[];
     shortMonths: string[];
     longDaysOfWeek: string[];
@@ -65,8 +67,15 @@ export class MomentDateTimeAdapter extends DateTimeAdapter<Moment> {
   };
 
   constructor(
-    @Optional() @Inject(OWL_DATE_TIME_LOCALE) private owlDateTimeLocale: string,
+    // TODO check all
+    // @ts-ignore
     @Optional()
+    // @ts-ignore
+    @Inject(OWL_DATE_TIME_LOCALE)
+    private owlDateTimeLocale: string,
+    // @ts-ignore
+    @Optional()
+    // @ts-ignore
     @Inject(OWL_MOMENT_DATE_TIME_ADAPTER_OPTIONS)
     private options?: OwlMomentDateTimeAdapterOptions,
   ) {
@@ -74,11 +83,12 @@ export class MomentDateTimeAdapter extends DateTimeAdapter<Moment> {
     this.setLocale(owlDateTimeLocale || moment.locale());
   }
 
-  get parseStrict() {
+  get parseStrict(): boolean {
+    // @ts-ignore
     return this.options && this.options.parseStrict;
   }
 
-  setLocale(locale: string) {
+  override setLocale(locale: string): void {
     super.setLocale(locale);
 
     const momentLocaleData = moment.localeData(locale);
@@ -287,7 +297,7 @@ export class MomentDateTimeAdapter extends DateTimeAdapter<Moment> {
    * (https://www.ietf.org/rfc/rfc3339.txt) and valid Date objects into valid Moments and empty
    * string into null. Returns an invalid date for all other values.
    */
-  deserialize(value: any): Moment | null {
+  override deserialize(value: any): Moment | null {
     let date;
     if (value instanceof Date) {
       date = this.createMoment(value);

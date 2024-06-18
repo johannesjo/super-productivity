@@ -11,7 +11,6 @@ import {
   ElementRef,
   OnDestroy,
   OnInit,
-  Optional,
   ViewChild,
 } from '@angular/core';
 import { AnimationEvent } from '@angular/animations';
@@ -46,13 +45,21 @@ import { getWeekNumber } from './get-week-number';
     owlDateTimePickerAnimations.fade,
   ],
   host: {
+    // eslint-disable-next-line @typescript-eslint/naming-convention
     '(@transformPicker.done)': 'handleContainerAnimationDone($event)',
+    // eslint-disable-next-line @typescript-eslint/naming-convention
     '[class.owl-dt-container]': 'owlDTContainerClass',
+    // eslint-disable-next-line @typescript-eslint/naming-convention
     '[class.owl-dt-popup-container]': 'owlDTPopupContainerClass',
+    // eslint-disable-next-line @typescript-eslint/naming-convention
     '[class.owl-dt-dialog-container]': 'owlDTDialogContainerClass',
+    // eslint-disable-next-line @typescript-eslint/naming-convention
     '[class.owl-dt-inline-container]': 'owlDTInlineContainerClass',
+    // eslint-disable-next-line @typescript-eslint/naming-convention
     '[class.owl-dt-container-disabled]': 'owlDTContainerDisabledClass',
+    // eslint-disable-next-line @typescript-eslint/naming-convention
     '[attr.id]': 'owlDTContainerId',
+    // eslint-disable-next-line @typescript-eslint/naming-convention
     '[@transformPicker]': 'owlDTContainerAnimation',
   },
 })
@@ -60,10 +67,10 @@ export class OwlDateTimeContainerComponent<T>
   implements OnInit, AfterContentInit, AfterViewInit, OnDestroy
 {
   @ViewChild(OwlCalendarComponent)
-  calendar: OwlCalendarComponent<T>;
+  calendar!: OwlCalendarComponent<T>;
   @ViewChild(OwlTimerComponent)
-  timer: OwlTimerComponent<T>;
-  picker: OwlDateTime<T>;
+  timer!: OwlTimerComponent<T>;
+  picker!: OwlDateTime<T>;
   activeSelectedIndex = 0; // The current active SelectedIndex in range select mode (0: 'from', 1: 'to')
   private _triggerPopup$ = new Subject<boolean>();
   // typing aren't needed since TypeScript will get the type by parsing the code
@@ -78,8 +85,8 @@ export class OwlDateTimeContainerComponent<T>
     ),
   );
   // retain start and end time
-  private retainStartTime: T;
-  private retainEndTime: T;
+  private retainStartTime!: T;
+  private retainEndTime!: T;
 
   /**
    * Stream emits when try to hide picker
@@ -94,16 +101,18 @@ export class OwlDateTimeContainerComponent<T>
    * The current picker moment. This determines which time period is shown and which date is
    * highlighted when using keyboard navigation.
    */
-  private _clamPickerMoment: T;
-  private _lastFocusEl: HTMLInputElement | HTMLTableCellElement | HTMLButtonElement;
-  private _lastBtn: HTMLButtonElement;
+  private _clamPickerMoment!: T;
+  private _lastFocusEl!: HTMLInputElement | HTMLTableCellElement | HTMLButtonElement;
+  private _lastBtn!: HTMLButtonElement;
   private _subs = new Subscription();
 
   constructor(
     private cdRef: ChangeDetectorRef,
     private elmRef: ElementRef,
     private pickerIntl: OwlDateTimeIntl,
-    @Optional() private dateTimeAdapter: DateTimeAdapter<T>,
+    // todo check
+    // @Optional()
+    private dateTimeAdapter: DateTimeAdapter<T>,
   ) {}
 
   get hidePickerStream(): Observable<any> {
@@ -118,7 +127,7 @@ export class OwlDateTimeContainerComponent<T>
     return this.pickerOpened$.asObservable();
   }
 
-  get pickerMoment() {
+  get pickerMoment(): T {
     return this._clamPickerMoment;
   }
 
@@ -163,6 +172,7 @@ export class OwlDateTimeContainerComponent<T>
    * The range 'from' formatted value
    * */
   get fromFormattedValue(): string {
+    // @ts-ignore
     const value = this.picker.selecteds[0];
     return value ? this.dateTimeAdapter.format(value, this.picker.formatString) : '';
   }
@@ -171,6 +181,7 @@ export class OwlDateTimeContainerComponent<T>
    * The range 'to' formatted value
    * */
   get toFormattedValue(): string {
+    // @ts-ignore
     const value = this.picker.selecteds[1];
     return value ? this.dateTimeAdapter.format(value, this.picker.formatString) : '';
   }
@@ -236,7 +247,7 @@ export class OwlDateTimeContainerComponent<T>
     return this.dateTimeAdapter.isSameDay(this.picker.selected, tomorrow);
   }
 
-  get isNextWeek() {
+  get isNextWeek(): boolean {
     if (!this.picker.selected) {
       return false;
     }
@@ -247,12 +258,16 @@ export class OwlDateTimeContainerComponent<T>
     return weekDiff === 1;
   }
 
-  ngOnInit() {
+  ngOnInit(): void {
     if (this.picker.selectMode === 'range') {
+      // @ts-ignore
       if (this.picker.selecteds[0]) {
+        // @ts-ignore
         this.retainStartTime = this.dateTimeAdapter.clone(this.picker.selecteds[0]);
       }
+      // @ts-ignore
       if (this.picker.selecteds[1]) {
+        // @ts-ignore
         this.retainEndTime = this.dateTimeAdapter.clone(this.picker.selecteds[1]);
       }
     }
@@ -266,7 +281,7 @@ export class OwlDateTimeContainerComponent<T>
     this.focusPicker();
   }
 
-  ngOnDestroy() {
+  ngOnDestroy(): void {
     this._subs.unsubscribe();
   }
 
@@ -330,6 +345,7 @@ export class OwlDateTimeContainerComponent<T>
     }
 
     if (this.picker.isInRangeMode) {
+      // @ts-ignore
       const selecteds = [...this.picker.selecteds];
 
       // check if the 'from' is after 'to' or 'to'is before 'from'
@@ -531,7 +547,7 @@ export class OwlDateTimeContainerComponent<T>
     }
   }
 
-  setToLaterToday() {
+  setToLaterToday(): void {
     const closestToday = this._getClosestLaterToday();
     this.picker.select(closestToday);
     this.pickerMoment = closestToday;
@@ -539,18 +555,19 @@ export class OwlDateTimeContainerComponent<T>
     // this.dateSelected(closestToday);
   }
 
-  setToNone() {
+  setToNone(): void {
+    // @ts-ignore
     this.picker.select(null);
   }
 
-  setToTomorrow() {
+  setToTomorrow(): void {
     const today = new Date();
     const tomorrow = new Date(today);
     tomorrow.setDate(tomorrow.getDate() + 1);
     this._updateDateForNextDayOrWeekButtons(tomorrow as any);
   }
 
-  setToNextWeek() {
+  setToNextWeek(): void {
     const d = new Date();
     d.setDate(d.getDate() + ((7 - d.getDay()) % 7) + 1);
     this._updateDateForNextDayOrWeekButtons(d as any);
@@ -587,6 +604,7 @@ export class OwlDateTimeContainerComponent<T>
     if (this.picker.selectMode === 'range' && this.activeSelectedIndex !== index) {
       this.activeSelectedIndex = index;
 
+      // @ts-ignore
       const selected = this.picker.selecteds[this.activeSelectedIndex];
       if (this.picker.selecteds && selected) {
         this.pickerMoment = this.dateTimeAdapter.clone(selected);
@@ -605,6 +623,7 @@ export class OwlDateTimeContainerComponent<T>
    * it returns null when date is not selected.
    */
   private dateSelectedInSingleMode(date: T): T | null {
+    // @ts-ignore
     if (this.dateTimeAdapter.isSameDay(date, this.picker.selected)) {
       return null;
     }
@@ -616,7 +635,9 @@ export class OwlDateTimeContainerComponent<T>
    * Select dates in range Mode
    */
   private dateSelectedInRangeMode(date: T): T[] | null {
+    // @ts-ignore
     let from = this.picker.selecteds[0];
+    // @ts-ignore
     let to = this.picker.selecteds[1];
 
     const result = this.updateAndCheckCalendarDate(date);
@@ -680,6 +701,7 @@ export class OwlDateTimeContainerComponent<T>
         } else {
           from = result;
         }
+        // @ts-ignore
         to = null;
         this.activeSelectedIndex = 0;
       }
@@ -688,6 +710,7 @@ export class OwlDateTimeContainerComponent<T>
 
       // if the from value is after the to value, set the to value as null
       if (to && this.dateTimeAdapter.compare(from, to) > 0) {
+        // @ts-ignore
         to = null;
       }
     } else if (this.picker.selectMode === 'rangeTo') {
@@ -695,6 +718,7 @@ export class OwlDateTimeContainerComponent<T>
 
       // if the from value is after the to value, set the from value as null
       if (from && this.dateTimeAdapter.compare(from, to) > 0) {
+        // @ts-ignore
         from = null;
       }
     }
@@ -750,7 +774,7 @@ export class OwlDateTimeContainerComponent<T>
     }
   }
 
-  private _updateDateForNextDayOrWeekButtons(date: any) {
+  private _updateDateForNextDayOrWeekButtons(date: any): void {
     // if (this._isUserSetTime()) {
     //   this.dateSelected(date as any);
     // } else {
@@ -791,7 +815,7 @@ export class OwlDateTimeContainerComponent<T>
     return !this._isBetween(dN, nowN - m, nowN + m);
   }
 
-  private _isBetween(x, min, max) {
+  private _isBetween(x, min, max): boolean {
     // console.log(x, min, max);
     // console.log('min <= x', min <= x, x - min);
     // console.log('x <= max', x <= max, max - x);

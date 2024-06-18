@@ -9,6 +9,7 @@
  * @param dest The object which will have properties copied to it.
  * @param sources The source objects from which properties will be copied.
  */
+// eslint-disable-next-line prefer-arrow/prefer-arrow-functions
 export function extendObject(dest: any, ...sources: any[]): any {
   if (dest == null) {
     throw TypeError('Cannot convert undefined or null to object');

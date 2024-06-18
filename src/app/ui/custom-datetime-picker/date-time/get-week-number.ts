@@ -1,4 +1,4 @@
-export function getWeekNumber(timestamp: number): number {
+export const getWeekNumber = (timestamp: number): number => {
   let d = new Date(timestamp);
 
   // Copy date so don't modify original
@@ -9,8 +9,9 @@ export function getWeekNumber(timestamp: number): number {
   // Get first day of year
   const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
   // Calculate full weeks to nearest Thursday
+  // eslint-disable-next-line no-mixed-operators
   const weekNo = Math.ceil(((+d - +yearStart) / 86400000 + 1) / 7);
   // Return array of year and week number
   // return [d.getUTCFullYear(), weekNo];
   return weekNo;
-}
+};

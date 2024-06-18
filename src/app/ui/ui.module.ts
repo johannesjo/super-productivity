@@ -61,10 +61,7 @@ import { MomentFormatPipe } from './pipes/moment-format.pipe';
 import { InlineInputComponent } from './inline-input/inline-input.component';
 import { ChipListInputComponent } from './chip-list-input/chip-list-input.component';
 import { ValidationModule } from './validation/validation.module';
-import {
-  OwlDateTimeModule,
-  OwlNativeDateTimeModule,
-} from 'ngx-date-time-picker-schedule';
+
 import { FullPageSpinnerComponent } from './full-page-spinner/full-page-spinner.component';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { FormlyMaterialModule } from '@ngx-formly/material';
@@ -90,6 +87,10 @@ import { ProgressCircleComponent } from './progress-circle/progress-circle.compo
 import { FormlyLinkWidgetComponent } from './formly-link-widget/formly-link-widget.component';
 import { MaterialCssVarsModule } from 'angular-material-css-vars';
 import { markedOptionsFactory } from './marked-options-factory';
+import {
+  OwlDateTimeModule,
+  OwlNativeDateTimeModule,
+} from './custom-datetime-picker/public_api';
 
 const DIALOG_COMPONENTS = [
   DialogConfirmComponent,

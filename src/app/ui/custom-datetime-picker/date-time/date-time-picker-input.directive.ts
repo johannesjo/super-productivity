@@ -53,14 +53,23 @@ export const OWL_DATETIME_VALIDATORS: any = {
   selector: 'input[owlDateTime]',
   exportAs: 'owlDateTimeInput',
   host: {
+    // eslint-disable-next-line @typescript-eslint/naming-convention
     '(keydown)': 'handleKeydownOnHost($event)',
+    // eslint-disable-next-line @typescript-eslint/naming-convention
     '(blur)': 'handleBlurOnHost($event)',
+    // eslint-disable-next-line @typescript-eslint/naming-convention
     '(input)': 'handleInputOnHost($event)',
+    // eslint-disable-next-line @typescript-eslint/naming-convention
     '(change)': 'handleChangeOnHost($event)',
+    // eslint-disable-next-line @typescript-eslint/naming-convention
     '[attr.aria-haspopup]': 'owlDateTimeInputAriaHaspopup',
+    // eslint-disable-next-line @typescript-eslint/naming-convention
     '[attr.aria-owns]': 'owlDateTimeInputAriaOwns',
+    // eslint-disable-next-line @typescript-eslint/naming-convention
     '[attr.min]': 'minIso8601',
+    // eslint-disable-next-line @typescript-eslint/naming-convention
     '[attr.max]': 'maxIso8601',
+    // eslint-disable-next-line @typescript-eslint/naming-convention
     '[disabled]': 'owlDateTimeInputDisabled',
   },
   providers: [OWL_DATETIME_VALUE_ACCESSOR, OWL_DATETIME_VALIDATORS],
@@ -84,7 +93,7 @@ export class OwlDateTimeInputDirective<T>
   @Output()
   dateTimeInput = new EventEmitter<any>();
   /** The date-time-picker that this input is associated with. */
-  dtPicker: OwlDateTimeComponent<T>;
+  dtPicker!: OwlDateTimeComponent<T>;
   /** Emits when the value changes (either due to user input or programmatic change). */
   valueChange = new EventEmitter<T[] | T | null>();
   /** Emits when the disabled state has changed */
@@ -96,9 +105,13 @@ export class OwlDateTimeInputDirective<T>
   constructor(
     private elmRef: ElementRef,
     private renderer: Renderer2,
+    // TODO check all
+    // @ts-ignore
     @Optional()
     private dateTimeAdapter: DateTimeAdapter<T>,
+    // @ts-ignore
     @Optional()
+    // @ts-ignore
     @Inject(OWL_DATE_TIME_FORMATS)
     private dateTimeFormats: OwlDateTimeFormats,
   ) {
@@ -126,10 +139,10 @@ export class OwlDateTimeInputDirective<T>
   /**
    * Required flag to be used for range of [null, null]
    * */
-  private _required: boolean;
+  private _required!: boolean;
 
   @Input()
-  get required() {
+  get required(): boolean {
     return this._required;
   }
 
@@ -155,17 +168,17 @@ export class OwlDateTimeInputDirective<T>
     this.validatorOnChange();
   }
 
-  private _dateTimeFilter: (date: T | null) => boolean;
+  private _dateTimeFilter!: (date: T | null) => boolean;
 
-  get dateTimeFilter() {
+  get dateTimeFilter(): (date: T | null) => boolean {
     return this._dateTimeFilter;
   }
 
   /** Whether the date time picker's input is disabled. */
   @Input()
-  private _disabled: boolean;
+  private _disabled!: boolean;
 
-  get disabled() {
+  get disabled(): boolean {
     return !!this._disabled;
   }
 
@@ -188,7 +201,7 @@ export class OwlDateTimeInputDirective<T>
   }
 
   /** The minimum valid date. */
-  private _min: T | null;
+  private _min!: T | null;
 
   @Input()
   get min(): T | null {
@@ -201,7 +214,7 @@ export class OwlDateTimeInputDirective<T>
   }
 
   /** The maximum valid date. */
-  private _max: T | null;
+  private _max!: T | null;
 
   @Input()
   get max(): T | null {
@@ -219,7 +232,7 @@ export class OwlDateTimeInputDirective<T>
   private _selectMode: SelectMode = 'single';
 
   @Input()
-  get selectMode() {
+  get selectMode(): SelectMode {
     return this._selectMode;
   }
 
@@ -236,10 +249,10 @@ export class OwlDateTimeInputDirective<T>
     this._selectMode = mode;
   }
 
-  private _value: T | null;
+  private _value!: T | null;
 
   @Input()
-  get value() {
+  get value(): T | null {
     return this._value;
   }
 
@@ -254,6 +267,7 @@ export class OwlDateTimeInputDirective<T>
     this.formatNativeInputValue();
 
     // check if the input value changed
+    // @ts-ignore
     if (!this.dateTimeAdapter.isEqual(oldDate, value)) {
       this.valueChange.emit(value);
     }
@@ -262,13 +276,15 @@ export class OwlDateTimeInputDirective<T>
   private _values: T[] = [];
 
   @Input()
-  get values() {
+  get values(): T[] {
     return this._values;
   }
 
   set values(values: T[]) {
     if (values && values.length > 0) {
+      // @ts-ignore
       this._values = values.map((v) => {
+        // @ts-ignore
         v = this.dateTimeAdapter.deserialize(v);
         return this.getValidDate(v);
       });
@@ -307,14 +323,18 @@ export class OwlDateTimeInputDirective<T>
   }
 
   get owlDateTimeInputAriaOwns(): string {
+    // TODO checkall
+    // @ts-ignore
     return (this.dtPicker.opened && this.dtPicker.id) || null;
   }
 
   get minIso8601(): string {
+    // @ts-ignore
     return this.min ? this.dateTimeAdapter.toIso8601(this.min) : null;
   }
 
   get maxIso8601(): string {
+    // @ts-ignore
     return this.max ? this.dateTimeAdapter.toIso8601(this.max) : null;
   }
 
@@ -383,6 +403,7 @@ export class OwlDateTimeInputDirective<T>
   }
 
   validate(c: AbstractControl): { [key: string]: any } {
+    // @ts-ignore
     return this.validator ? this.validator(c) : null;
   }
 
@@ -477,10 +498,13 @@ export class OwlDateTimeInputDirective<T>
     return;
   }
 
+  // eslint-disable-next-line @typescript-eslint/ban-types
   private onModelChange: Function = () => {};
 
+  // eslint-disable-next-line @typescript-eslint/ban-types
   private onModelTouched: Function = () => {};
 
+  // eslint-disable-next-line @typescript-eslint/ban-types
   private validatorOnChange: Function = () => {};
 
   /** The form control validator for whether the input parses. */
@@ -493,6 +517,7 @@ export class OwlDateTimeInputDirective<T>
   /** The form control validator for the min date. */
   private minValidator: ValidatorFn = (
     control: AbstractControl,
+    // @ts-ignore
   ): ValidationErrors | null => {
     if (this.isInSingleMode) {
       const controlValue = this.getValidDate(
@@ -527,6 +552,7 @@ export class OwlDateTimeInputDirective<T>
   /** The form control validator for the max date. */
   private maxValidator: ValidatorFn = (
     control: AbstractControl,
+    // @ts-ignore
   ): ValidationErrors | null => {
     if (this.isInSingleMode) {
       const controlValue = this.getValidDate(
@@ -631,7 +657,7 @@ export class OwlDateTimeInputDirective<T>
   /**
    * Register the relationship between this input and its picker component
    */
-  private registerDateTimePicker(picker: OwlDateTimeComponent<T>) {
+  private registerDateTimePicker(picker: OwlDateTimeComponent<T>): void {
     if (picker) {
       this.dtPicker = picker;
       this.dtPicker.registerInput(this);
@@ -675,6 +701,7 @@ export class OwlDateTimeInputDirective<T>
   private changeInputInSingleMode(inputValue: string): void {
     let value = inputValue;
     if (this.dtPicker.pickerType === 'timer') {
+      // @ts-ignore
       value = this.convertTimeStringToDateTimeString(value, this.value);
     }
 
@@ -704,6 +731,7 @@ export class OwlDateTimeInputDirective<T>
       this._selectMode === 'rangeFrom' ? this._values[0] : this._values[1];
 
     if (this.dtPicker.pickerType === 'timer') {
+      // @ts-ignore
       inputValue = this.convertTimeStringToDateTimeString(inputValue, originalValue);
     }
 
@@ -723,6 +751,7 @@ export class OwlDateTimeInputDirective<T>
       return;
     }
 
+    // @ts-ignore
     this._values =
       this._selectMode === 'rangeFrom'
         ? [result, this._values[1]]
@@ -745,7 +774,9 @@ export class OwlDateTimeInputDirective<T>
     let toString = selecteds[1];
 
     if (this.dtPicker.pickerType === 'timer') {
+      // @ts-ignore
       fromString = this.convertTimeStringToDateTimeString(fromString, this.values[0]);
+      // @ts-ignore
       toString = this.convertTimeStringToDateTimeString(toString, this.values[1]);
     }
 
@@ -763,6 +794,7 @@ export class OwlDateTimeInputDirective<T>
       !this.isSameValue(to, this._values[1]) ||
       (from === null && to === null)
     ) {
+      // @ts-ignore
       this._values = [from, to];
       this.valueChange.emit(this._values);
       this.onModelChange(this._values);

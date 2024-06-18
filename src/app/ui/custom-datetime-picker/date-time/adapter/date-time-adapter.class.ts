@@ -11,6 +11,7 @@ export const OWL_DATE_TIME_LOCALE = new InjectionToken<string>('OWL_DATE_TIME_LO
 });
 
 /** @docs-private */
+// eslint-disable-next-line prefer-arrow/prefer-arrow-functions
 export function OWL_DATE_TIME_LOCALE_FACTORY(): string {
   return inject(LOCALE_ID);
 }
@@ -276,7 +277,7 @@ export abstract class DateTimeAdapter<T> {
   /**
    * Sets the locale used for all dates.
    */
-  setLocale(locale: string) {
+  setLocale(locale: string): void {
     this.locale = locale;
     this._localeChanges.next(locale);
   }
@@ -284,7 +285,7 @@ export abstract class DateTimeAdapter<T> {
   /**
    * Get the locale used for all dates.
    * */
-  getLocale() {
+  getLocale(): string {
     return this.locale;
   }
 

@@ -161,6 +161,8 @@ export class OwlDialogConfig implements OwlDialogConfigInterface {
   /**
    * Mouse Event
    * */
+  // TODO check
+  // @ts-ignore
   public event: MouseEvent = null;
 
   /**
@@ -183,13 +185,13 @@ export class OwlDialogConfig implements OwlDialogConfigInterface {
    * The min-width of the overlay panel.
    * If a number is provided, pixel units are assumed.
    * */
-  public minWidth: number | string;
+  public minWidth!: number | string;
 
   /**
    * The min-height of the overlay panel.
    * If a number is provided, pixel units are assumed.
    * */
-  public minHeight: number | string;
+  public minHeight!: number | string;
 
   /**
    * The max-width of the overlay panel.
@@ -201,10 +203,10 @@ export class OwlDialogConfig implements OwlDialogConfigInterface {
    * The max-height of the overlay panel.
    * If a number is provided, pixel units are assumed.
    * */
-  public maxHeight: number | string;
+  public maxHeight!: number | string;
 
   /** Position overrides. */
-  public position: DialogPosition;
+  public position!: DialogPosition;
 
   /**
    * The scroll strategy when the dialog is open
@@ -212,7 +214,7 @@ export class OwlDialogConfig implements OwlDialogConfigInterface {
    * */
   public scrollStrategy: ScrollStrategy = new NoopScrollStrategy();
 
-  public viewContainerRef: ViewContainerRef;
+  public viewContainerRef!: ViewContainerRef;
 
   constructor() {
     this.id = `owl-dialog-${uniqueId++}`;

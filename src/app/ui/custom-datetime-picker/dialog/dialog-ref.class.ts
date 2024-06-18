@@ -19,7 +19,7 @@ export class OwlDialogRef<T> {
   /**
    * The instance of component opened into modal
    * */
-  public componentInstance: T;
+  public componentInstance: T | null = null;
   /** Whether the user is allowed to close the dialog. */
   public disableClose = this.container.config.disableClose;
   private result: any;
@@ -78,7 +78,7 @@ export class OwlDialogRef<T> {
     }
   }
 
-  public close(dialogResult?: any) {
+  public close(dialogResult?: any): void {
     this.result = dialogResult;
 
     this.container.animationStateChanged
@@ -117,12 +117,14 @@ export class OwlDialogRef<T> {
     const strategy = this.getPositionStrategy();
 
     if (position && (position.left || position.right)) {
+      // eslint-disable-next-line @typescript-eslint/no-unused-expressions
       position.left ? strategy.left(position.left) : strategy.right(position.right);
     } else {
       strategy.centerHorizontally();
     }
 
     if (position && (position.top || position.bottom)) {
+      // eslint-disable-next-line @typescript-eslint/no-unused-expressions
       position.top ? strategy.top(position.top) : strategy.bottom(position.bottom);
     } else {
       strategy.centerVertically();

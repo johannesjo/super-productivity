@@ -61,6 +61,7 @@ const ISO_8601_REGEX =
   /^\d{4}-\d{2}-\d{2}(?:T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|(?:[+\-]\d{2}:\d{2}))?)?$/;
 
 /** Creates an array and fills it with values. */
+// eslint-disable-next-line prefer-arrow/prefer-arrow-functions
 function range<T>(length: number, valueFunction: (index: number) => T): T[] {
   const valuesArray = Array(length);
   for (let i = 0; i < length; i++) {
@@ -82,7 +83,10 @@ export class NativeDateTimeAdapter extends DateTimeAdapter<Date> {
   private readonly _clampDate: boolean;
 
   constructor(
+    // TODO check all
+    // @ts-ignore
     @Optional()
+    // @ts-ignore
     @Inject(OWL_DATE_TIME_LOCALE)
     private owlDateTimeLocale: string,
     platform: Platform,
@@ -151,13 +155,18 @@ export class NativeDateTimeAdapter extends DateTimeAdapter<Date> {
       );
 
       const timeStampLeft =
+        // eslint-disable-next-line no-mixed-operators
         this.getTime(dateLeftStartOfDay) -
+        // eslint-disable-next-line no-mixed-operators
         dateLeftStartOfDay.getTimezoneOffset() * this.milliseondsInMinute;
       const timeStampRight =
+        // eslint-disable-next-line no-mixed-operators
         this.getTime(dateRightStartOfDay) -
+        // eslint-disable-next-line no-mixed-operators
         dateRightStartOfDay.getTimezoneOffset() * this.milliseondsInMinute;
       return Math.round((timeStampLeft - timeStampRight) / this.millisecondsInDay);
     } else {
+      // @ts-ignore
       return null;
     }
   }
@@ -389,7 +398,7 @@ export class NativeDateTimeAdapter extends DateTimeAdapter<Date> {
    * (https://www.ietf.org/rfc/rfc3339.txt) into valid Dates and empty string into null. Returns an
    * invalid date for all other values.
    */
-  deserialize(value: any): Date | null {
+  override deserialize(value: any): Date | null {
     if (typeof value === 'string') {
       if (!value) {
         return null;
@@ -430,7 +439,7 @@ export class NativeDateTimeAdapter extends DateTimeAdapter<Date> {
    * other browsers do not. We remove them to make output consistent and because they interfere with
    * date parsing.
    */
-  private stripDirectionalityCharacters(str: string) {
+  private stripDirectionalityCharacters(str: string): string {
     return str.replace(/[\u200e\u200f]/g, '');
   }
 
@@ -441,7 +450,7 @@ export class NativeDateTimeAdapter extends DateTimeAdapter<Date> {
    * We work around this problem building a new Date object which has its internal UTC
    * representation with the local date and time.
    */
-  private _format(dtf: Intl.DateTimeFormat, date: Date) {
+  private _format(dtf: Intl.DateTimeFormat, date: Date): string {
     const d = new Date(
       Date.UTC(
         date.getFullYear(),

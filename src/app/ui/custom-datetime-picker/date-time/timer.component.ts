@@ -10,14 +10,13 @@ import {
   EventEmitter,
   Input,
   NgZone,
-  OnInit,
   Optional,
   Output,
 } from '@angular/core';
 import { OwlDateTimeIntl } from './date-time-picker-intl.service';
 import { DateTimeAdapter } from './adapter/date-time-adapter.class';
 import { take } from 'rxjs/operators';
-import { IS_TOUCH_ONLY } from './is-touch-only';
+import { IS_TOUCH_PRIMARY } from '../../../util/is-mouse-primary';
 
 @Component({
   exportAs: 'owlDateTimeTimer',
@@ -27,21 +26,23 @@ import { IS_TOUCH_ONLY } from './is-touch-only';
   preserveWhitespaces: false,
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
+    // eslint-disable-next-line @typescript-eslint/naming-convention
     '[class.owl-dt-timer]': 'owlDTTimerClass',
+    // eslint-disable-next-line @typescript-eslint/naming-convention
     '[attr.tabindex]': 'owlDTTimeTabIndex',
   },
 })
-export class OwlTimerComponent<T> implements OnInit {
+export class OwlTimerComponent<T> {
   /**
    * Whether to show the second's timer
    */
   @Input()
-  showSecondsTimer: boolean;
+  showSecondsTimer!: boolean;
   /**
    * Whether the timer is in hour12 format
    */
   @Input()
-  hour12Timer: boolean;
+  hour12Timer!: boolean;
   /**
    * Hours to change per step
    */
@@ -59,9 +60,9 @@ export class OwlTimerComponent<T> implements OnInit {
   stepSecond = 1;
   @Output()
   selectedChange = new EventEmitter<T>();
-  touchTimeValue: string;
+  touchTimeValue!: string;
 
-  IS_TOUCH_ONLY = IS_TOUCH_ONLY;
+  IS_TOUCH_PRIMARY = IS_TOUCH_PRIMARY;
 
   private isPM = false; // a flag indicates the current timer moment is in PM or AM
 
@@ -70,21 +71,22 @@ export class OwlTimerComponent<T> implements OnInit {
     private elmRef: ElementRef,
     private pickerIntl: OwlDateTimeIntl,
     private cdRef: ChangeDetectorRef,
+    // @ts-ignore
     @Optional() private dateTimeAdapter: DateTimeAdapter<T>,
   ) {}
 
   /** The current picker moment */
-  private _pickerMoment: T;
+  private _pickerMoment!: T;
 
   @Input()
-  get pickerMoment() {
+  get pickerMoment(): T {
     return this._pickerMoment;
   }
 
   set pickerMoment(value: T) {
-    value = this.dateTimeAdapter.deserialize(value);
+    value = this.dateTimeAdapter.deserialize(value) as T;
     this._pickerMoment = this.getValidDate(value) || this.dateTimeAdapter.now();
-    if (IS_TOUCH_ONLY) {
+    if (IS_TOUCH_PRIMARY) {
       const v = new Date(value as any);
       let hour: string | number = v.getHours();
       let min: string | number = v.getMinutes();
@@ -95,7 +97,7 @@ export class OwlTimerComponent<T> implements OnInit {
   }
 
   /** The minimum selectable date time. */
-  private _minDateTime: T | null;
+  private _minDateTime!: T | null;
 
   @Input()
   get minDateTime(): T | null {
@@ -108,7 +110,7 @@ export class OwlTimerComponent<T> implements OnInit {
   }
 
   /** The maximum selectable date time. */
-  private _maxDateTime: T | null;
+  private _maxDateTime!: T | null;
 
   @Input()
   get maxDateTime(): T | null {
@@ -195,9 +197,7 @@ export class OwlTimerComponent<T> implements OnInit {
     return -1;
   }
 
-  ngOnInit() {}
-
-  onTouchTimeChange($event) {
+  onTouchTimeChange($event): void {
     const inpDate = $event.target.value as string;
     if (!inpDate) {
       return;
@@ -221,7 +221,7 @@ export class OwlTimerComponent<T> implements OnInit {
   /**
    * Focus to the host element
    * */
-  focus() {
+  focus(): void {
     this.ngZone.runOutsideAngular(() => {
       this.ngZone.onStable
         .asObservable()

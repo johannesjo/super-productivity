@@ -1,4 +1,4 @@
-<!--<ng-container *ngIf="IS_TOUCH_ONLY">-->
+<!--<ng-container *ngIf="IS_TOUCH_PRIMARY">-->
 <!--<input type="time"-->
 <!--       [min]="minDateTime"-->
 <!--       [max]="minDateTime"-->
@@ -7,7 +7,7 @@
 <!--       class="owl-mobile-time-inp">-->
 <!--</ng-container>-->
 
-<!--<ng-container *ngIf="!IS_TOUCH_ONLY">-->
+<!--<ng-container *ngIf="!IS_TOUCH_PRIMARY">-->
 <owl-date-time-timer-box
   (inputChange)="setHourValueViaInput($event)"
   (valueChange)="setHourValue($event)"
