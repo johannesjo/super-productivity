@@ -63,7 +63,7 @@
     "lint": "ng lint",
     "prebuild": "node ./tools/git-version.js",
     "preCheck": "npm run lint && npm run test & npm run int:test && npm run e2e",
-    "e2e": "cross-env TZ='' DETECT_CHROMEDRIVER_VERSION=true SKIP_POST_INSTALL=true npm i -D chromedriver --legacy-peer-deps && tsc --project e2e/tsconfig.e2e.json && start-server-and-test 'ng serve --no-live-reload' 4200 'nightwatch -c ./e2e/nightwatch.conf.js --suiteRetries 1 --retries 0'",
+    "e2e": "cross-env TZ='' DETECT_CHROMEDRIVER_VERSION=true SKIP_POST_INSTALL=true npm i -D chromedriver --legacy-peer-deps && tsc --project e2e/tsconfig.e2e.json && start-server-and-test 'ng serve --no-live-reload' 4200 'nightwatch -c ./e2e/nightwatch.conf.js --suiteRetries 1 --retries 0 --headless'",
     "e2e:tag": "killall chromedriver; rm -R ./out-tsc; tsc --project e2e/tsconfig.e2e.json && nightwatch -c ./e2e/nightwatch.conf.js --suiteRetries 0 --retries 0 --tag ",
     "electron": "NODE_ENV=PROD electron .",
     "electron:build": "tsc -p electron/tsconfig.electron.json",
