@@ -44,7 +44,7 @@
   <nav class="action-nav">
     <button
       (click)="layoutService.showAddTaskBar()"
-      matTooltip="{{T.MH.ADD_NEW_TASK|translate}} {{_kb.addNewTask?'['+_kb.addNewTask+']':''}}"
+      matTooltip="{{T.MH.ADD_NEW_TASK|translate}} {{kb.addNewTask?'['+kb.addNewTask+']':''}}"
       class="hide-xs tour-addBtn"
       mat-icon-button
     >
@@ -53,7 +53,7 @@
 
     <button
       (click)="layoutService.showSearchBar()"
-      matTooltip="{{T.MH.SHOW_SEARCH_BAR|translate}} {{_kb.showSearchBar?'['+_kb.showSearchBar+']':''}}"
+      matTooltip="{{T.MH.SHOW_SEARCH_BAR|translate}} {{kb.showSearchBar?'['+kb.showSearchBar+']':''}}"
       mat-icon-button
     >
       <mat-icon>search</mat-icon>
@@ -72,7 +72,7 @@
       (click)="bookmarkService.toggleBookmarks()"
       *ngIf="(workContextService.isActiveWorkContextProject$|async)"
       [class.isOpen]="bookmarkService.isShowBookmarks$|async"
-      matTooltip="{{T.MH.TOGGLE_SHOW_BOOKMARKS|translate}}{{_kb.toggleBookmarks?'['+_kb.toggleBookmarks+']':''}}"
+      matTooltip="{{T.MH.TOGGLE_SHOW_BOOKMARKS|translate}}{{kb.toggleBookmarks?'['+kb.toggleBookmarks+']':''}}"
       class="bookmark-btn"
       mat-icon-button
     >
@@ -89,9 +89,9 @@
     <!--    </button>-->
 
     <button
-      *ngIf="!(globalConfigService.misc$|async)?.isAlwaysUseFocusMode"
+      *ngIf="!(globalConfigService.cfg$|async)?.focusMode?.isAlwaysUseFocusMode"
       mat-icon-button
-      matTooltip="Enter focus mode {{_kb.goToFocusMode?'['+_kb.goToFocusMode+']':''}}"
+      matTooltip="Enter focus mode {{kb.goToFocusMode?'['+kb.goToFocusMode+']':''}}"
       (click)="enableFocusMode()"
     >
       <mat-icon>center_focus_strong</mat-icon>
@@ -224,7 +224,7 @@
       [class.isRouteWithRightPanel]="(isRouteWithSplitAddtionalInfoPanel$|async)"
       (click)="layoutService.toggleNotes()"
       mat-icon-button
-      matTooltip="{{T.MH.TOGGLE_SHOW_NOTES|translate}} {{_kb.openProjectNotes?'['+_kb.openProjectNotes+']':''}}"
+      matTooltip="{{T.MH.TOGGLE_SHOW_NOTES|translate}} {{kb.openProjectNotes?'['+kb.openProjectNotes+']':''}}"
     >
       <mat-icon class="note-ico">comment</mat-icon>
     </button>
