@@ -16,6 +16,24 @@ body .mat-mdc-dialog-surface {
   overflow: visible;
 }
 
+.mat-mdc-dialog-panel {
+  @include mq(xs) {
+    --mat-dialog-container-min-width: 450px;
+  }
+}
+
+.mat-mdc-dialog-title {
+  vertical-align: middle;
+
+  > * {
+    vertical-align: middle;
+  }
+
+  > mat-icon:first-child {
+    margin-right: 8px;
+  }
+}
+
 .big {
   height: auto;
   max-height: 100vh !important;
