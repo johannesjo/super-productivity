@@ -8,6 +8,7 @@ import { Tag } from '../../features/tag/tag.model';
 import { createAppDataCompleteMock } from '../../util/app-data-mock';
 import { DEFAULT_PROJECT } from '../../features/project/project.const';
 import { Note } from '../../features/note/note.model';
+/* eslint-disable @typescript-eslint/naming-convention */
 
 // const BASE_STATE_KEYS: (keyof AppBaseData)[] = [
 //   'task',

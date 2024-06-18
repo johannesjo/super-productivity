@@ -16,7 +16,10 @@ const TWO_MONTHS = 60 * 60 * 1000 * 24 * 62;
   providedIn: 'root',
 })
 export class CalendarIntegrationService {
-  constructor(private _http: HttpClient, private _snackService: SnackService) {}
+  constructor(
+    private _http: HttpClient,
+    private _snackService: SnackService,
+  ) {}
 
   requestEventsForTimeline(
     calProvider: CalendarProvider,

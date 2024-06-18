@@ -14,7 +14,10 @@ import { FocusModePage } from '../focus-mode/focus-mode.const';
 export class ProcrastinationComponent {
   T: typeof T = T;
 
-  constructor(public taskService: TaskService, private _store: Store) {}
+  constructor(
+    public taskService: TaskService,
+    private _store: Store,
+  ) {}
 
   backToWork(): void {
     this._store.dispatch(

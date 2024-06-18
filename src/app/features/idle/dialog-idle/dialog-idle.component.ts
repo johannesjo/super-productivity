@@ -69,7 +69,7 @@ export class DialogIdleComponent implements OnInit, OnDestroy {
           title,
           isTrackTo: isOn,
           isWasEnabledBefore: isOn,
-        } as SimpleCounterIdleBtn),
+        }) as SimpleCounterIdleBtn,
     );
     _matDialogRef.disableClose = true;
   }

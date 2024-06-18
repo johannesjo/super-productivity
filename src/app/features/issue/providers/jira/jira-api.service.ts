@@ -459,22 +459,23 @@ export class JiraApiService {
       ...(jr.body ? { body: JSON.stringify(jr.body) } : {}),
 
       headers: {
+        // eslint-disable-next-line @typescript-eslint/naming-convention
         'Content-Type': 'application/json',
         ...(IS_ELECTRON && cfg.isWonkyCookieMode
           ? {
               Cookie: sessionStorage.getItem(SS.JIRA_WONKY_COOKIE) as string,
             }
           : cfg.usePAT
-          ? {
-              Cookie: '',
-              authorization: `Bearer ${cfg.password}`,
-            }
-          : {
-              Cookie: '',
-              authorization: `Basic ${this._b64EncodeUnicode(
-                `${cfg.userName}:${cfg.password}`,
-              )}`,
-            }),
+            ? {
+                Cookie: '',
+                authorization: `Bearer ${cfg.password}`,
+              }
+            : {
+                Cookie: '',
+                authorization: `Basic ${this._b64EncodeUnicode(
+                  `${cfg.userName}:${cfg.password}`,
+                )}`,
+              }),
       },
     };
   }

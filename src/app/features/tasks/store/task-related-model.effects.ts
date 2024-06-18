@@ -266,8 +266,8 @@ export class TaskRelatedModelEffects {
           task.isDone && task.doneOn
             ? task.doneOn
             : task.parentId
-            ? flatTasks.find((t) => t.id === task.parentId)?.doneOn || now
-            : now,
+              ? flatTasks.find((t) => t.id === task.parentId)?.doneOn || now
+              : now,
       })),
       currentArchive,
     );

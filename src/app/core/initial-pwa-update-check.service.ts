@@ -32,5 +32,8 @@ export class InitialPwaUpdateCheckService {
         )
       : of(undefined);
 
-  constructor(private _swUpdate: SwUpdate, private _translateService: TranslateService) {}
+  constructor(
+    private _swUpdate: SwUpdate,
+    private _translateService: TranslateService,
+  ) {}
 }

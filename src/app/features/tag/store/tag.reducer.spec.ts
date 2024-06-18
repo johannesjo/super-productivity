@@ -4,6 +4,8 @@ import { moveToArchive_, restoreTask } from '../../tasks/store/task.actions';
 import { TaskCopy, TaskWithSubTasks } from '../../tasks/task.model';
 import { addTag } from './tag.actions';
 
+/* eslint-disable @typescript-eslint/naming-convention */
+
 describe('TagReducer', () => {
   describe('standard', () => {
     let initialState;

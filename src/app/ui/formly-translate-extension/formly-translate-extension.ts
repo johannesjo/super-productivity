@@ -3,6 +3,8 @@ import { TranslateService } from '@ngx-translate/core';
 import { map } from 'rxjs/operators';
 import { T } from '../../t.const';
 
+/* eslint-disable @typescript-eslint/naming-convention */
+
 export class TranslateExtension {
   constructor(private translate: TranslateService) {}
 

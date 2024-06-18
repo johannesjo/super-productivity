@@ -39,7 +39,10 @@ export class RightPanelComponent implements OnDestroy {
 
   private _subs = new Subscription();
 
-  constructor(public taskService: TaskService, public layoutService: LayoutService) {
+  constructor(
+    public taskService: TaskService,
+    public layoutService: LayoutService,
+  ) {
     this._subs.add(
       this.isOpen$.subscribe((isOpen) => {
         if (!isOpen) {

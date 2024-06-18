@@ -15,20 +15,25 @@ import { HANDLED_ERROR_PROP_STR } from '../../../../app.constants';
 import { T } from '../../../../t.const';
 import { ISSUE_PROVIDER_HUMANIZED, REDMINE_TYPE } from '../../issue.const';
 import {
-  RedmineSearchResult,
   RedmineIssue,
   RedmineIssueResult,
+  RedmineSearchResult,
   RedmineSearchResultItem,
 } from './redmine-issue/redmine-issue.model';
 import { mapRedmineSearchResultItemToSearchResult } from './redmine-issue/redmine-issue-map.util';
 import { SearchResultItem } from '../../issue.model';
 import { ScopeOptions } from './redmine.const';
 
+/* eslint-disable @typescript-eslint/naming-convention */
+
 @Injectable({
   providedIn: 'root',
 })
 export class RedmineApiService {
-  constructor(private _snackService: SnackService, private _http: HttpClient) {}
+  constructor(
+    private _snackService: SnackService,
+    private _http: HttpClient,
+  ) {}
 
   searchIssuesInProject$(query: string, cfg: RedmineCfg): Observable<SearchResultItem[]> {
     return this._sendRequest$(

@@ -181,8 +181,8 @@ export class CalendarIntegrationEffects {
           ? T.F.CALENDARS.BANNER.TXT_PAST_MULTIPLE
           : T.F.CALENDARS.BANNER.TXT_PAST
         : nrOfAllBanners > 1
-        ? T.F.CALENDARS.BANNER.TXT_MULTIPLE
-        : T.F.CALENDARS.BANNER.TXT,
+          ? T.F.CALENDARS.BANNER.TXT_MULTIPLE
+          : T.F.CALENDARS.BANNER.TXT,
       translateParams: {
         title: calEv.title,
         start,

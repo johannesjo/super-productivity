@@ -1,5 +1,7 @@
 // TODO throws compile error :(
 // import { FileStat } from 'webdav/web/types';
+/* eslint-disable @typescript-eslint/naming-convention */
+
 import { IncomingHttpHeaders } from 'http';
 
 export interface FileStat {

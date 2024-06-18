@@ -33,5 +33,8 @@ export class DominaModeEffects {
     { dispatch: false },
   );
 
-  constructor(private actions$: Actions, private _store$: Store) {}
+  constructor(
+    private actions$: Actions,
+    private _store$: Store,
+  ) {}
 }

@@ -17,7 +17,10 @@ import { selectIsFocusOverlayShown } from './features/focus-mode/store/focus-mod
 
 @Injectable({ providedIn: 'root' })
 export class ActiveWorkContextGuard {
-  constructor(private _workContextService: WorkContextService, private _router: Router) {}
+  constructor(
+    private _workContextService: WorkContextService,
+    private _router: Router,
+  ) {}
 
   canActivate(
     next: ActivatedRouteSnapshot,

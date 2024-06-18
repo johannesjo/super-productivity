@@ -30,7 +30,7 @@ export class ScheduledTaskService {
                     reminderData: reminders.find(
                       (reminder) => reminder.relatedId === task.id,
                     ),
-                  } as TaskWithReminderData),
+                  }) as TaskWithReminderData,
               ),
           ),
           // NOTE: task length check is required, because otherwise the observable won't trigger for empty array
