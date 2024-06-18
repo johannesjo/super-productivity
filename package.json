@@ -12,7 +12,7 @@
   },
   "browserslist": {
     "production": [
-      "> 0.5%",
+      "> 0.8%",
       "last 2 versions",
       "not dead",
       "not IE 9-11",
@@ -25,6 +25,14 @@
       "not bb < 14",
       "not and_uc < 13",
       "not and_qq < 2"
+    ],
+    "TODO_USE_THOSE": [
+      "supports es6-module",
+      "not dead",
+      "not IE <= 11",
+      "not ios_saf 10.3",
+      "not safari 10.1",
+      "not edge 16-17"
     ],
     "modern": [
       "supports es6-module"

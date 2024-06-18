@@ -138,7 +138,7 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
     this._focusModeService.showFocusOverlay();
   }
 
-  get kb(): KeyboardConfig | undefined {
-    return this._configService.cfg?.keyboard;
+  get kb(): KeyboardConfig {
+    return (this._configService.cfg?.keyboard as KeyboardConfig) || {};
   }
 }

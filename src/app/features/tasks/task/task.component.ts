@@ -817,8 +817,8 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
     this._renderer.setStyle(this.innerWrapperElRef.nativeElement, 'transform', ``);
   }
 
-  private get _kb(): KeyboardConfig | undefined {
-    return this._configService.cfg?.keyboard;
+  get kb(): KeyboardConfig {
+    return (this._configService.cfg?.keyboard as KeyboardConfig) || {};
   }
 
   private _handleKeyboardShortcuts(ev: KeyboardEvent): void {

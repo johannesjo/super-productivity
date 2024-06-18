@@ -209,7 +209,7 @@
           <button
             (click)="startTask()"
             *ngIf="!task.isDone && !isCurrent && !task.subTasks?.length"
-            title="{{T.F.TASK.CMP.TRACK_TIME|translate}} {{_kb.togglePlay?'['+_kb.togglePlay+']':''}}"
+            title="{{T.F.TASK.CMP.TRACK_TIME|translate}} {{kb.togglePlay?'['+kb.togglePlay+']':''}}"
             class="ico-btn start-task-btn"
             color=""
             mat-icon-button
@@ -223,7 +223,7 @@
           <button
             (click)="pauseTask()"
             *ngIf="!task.isDone && isCurrent && !task.subTasks?.length"
-            title="{{T.F.TASK.CMP.TRACK_TIME_STOP|translate}} {{_kb.togglePlay?'['+_kb.togglePlay+']':''}}"
+            title="{{T.F.TASK.CMP.TRACK_TIME_STOP|translate}} {{kb.togglePlay?'['+kb.togglePlay+']':''}}"
             class="ico-btn"
             color="accent"
             mat-icon-button
@@ -234,7 +234,7 @@
           <button
             (click)="addToMyDay()"
             *ngIf="isShowAddToToday"
-            title="{{T.F.TASK.CMP.ADD_TO_MY_DAY|translate}} {{_kb.moveToTodaysTasks?'['+_kb.moveToTodaysTasks+']':''}}"
+            title="{{T.F.TASK.CMP.ADD_TO_MY_DAY|translate}} {{kb.moveToTodaysTasks?'['+kb.moveToTodaysTasks+']':''}}"
             class="ico-btn"
             color=""
             mat-icon-button
@@ -256,7 +256,7 @@
           <button
             *ngIf="!task.isDone"
             (click)="toggleTaskDone()"
-            title="{{T.F.TASK.CMP.TOGGLE_DONE|translate}} {{_kb.taskToggleDone?'['+_kb.taskToggleDone+']':''}}"
+            title="{{T.F.TASK.CMP.TOGGLE_DONE|translate}} {{kb.taskToggleDone?'['+kb.taskToggleDone+']':''}}"
             class="ico-btn task-done-btn"
             color=""
             mat-icon-button
@@ -267,7 +267,7 @@
           <button
             (click)="toggleShowAdditionalInfoOpen()"
             *ngIf="!task.notes && (!task.issueId||task.issueType==='CALENDAR') && !isSelected"
-            title="{{T.F.TASK.CMP.TOGGLE_ADDITIONAL|translate}} {{_kb.taskToggleAdditionalInfoOpen?'['+_kb.taskToggleAdditionalInfoOpen+']':''}}"
+            title="{{T.F.TASK.CMP.TOGGLE_ADDITIONAL|translate}} {{kb.taskToggleAdditionalInfoOpen?'['+kb.taskToggleAdditionalInfoOpen+']':''}}"
             class="ico-btn show-additional-info-btn"
             color=""
             mat-icon-button
@@ -310,7 +310,7 @@
           <button
             (click)="toggleShowAdditionalInfoOpen()"
             *ngIf="task.notes|| (task.issueId&&task.issueType!=='CALENDAR') || isSelected"
-            title="{{T.F.TASK.CMP.TOGGLE_ADDITIONAL|translate}}  {{_kb.taskToggleAdditionalInfoOpen?'['+_kb.taskToggleAdditionalInfoOpen+']':''}}"
+            title="{{T.F.TASK.CMP.TOGGLE_ADDITIONAL|translate}}  {{kb.taskToggleAdditionalInfoOpen?'['+kb.taskToggleAdditionalInfoOpen+']':''}}"
             [class.closeBtn]="!task.issueWasUpdated && isSelected"
             class="ico-btn show-additional-info-btn"
             color=""
@@ -346,7 +346,7 @@
                   {{T.F.TASK.CMP.TRACK_TIME|translate}}
                 </span>
                 <span class="keybindprev">
-                  {{_kb.togglePlay?'&emsp;['+_kb.togglePlay+']':''}}
+                  {{ kb.togglePlay ? '&emsp;[' + kb.togglePlay + ']' : '' }}
                 </span>
               </div>
             </button>
@@ -361,7 +361,7 @@
                   {{T.F.TASK.CMP.TRACK_TIME_STOP|translate}}
                 </span>
                 <span class="keybindprev">
-                  {{_kb.togglePlay?'&emsp;['+_kb.togglePlay+']':''}}
+                  {{ kb.togglePlay ? '&emsp;[' + kb.togglePlay + ']' : '' }}
                 </span>
               </div>
             </button>
@@ -387,7 +387,8 @@
                   {{T.F.TASK.CMP.OPEN_TIME|translate}}
                 </span>
                 <span class="keybindprev">
-                  {{_kb.taskOpenEstimationDialog?'&emsp;['+_kb.taskOpenEstimationDialog+']':''}}
+                  {{ kb.taskOpenEstimationDialog ? '&emsp;[' + kb.taskOpenEstimationDialog
+                  + ']' : '' }}
                 </span>
               </div>
             </button>
@@ -403,7 +404,7 @@
                     {{T.F.TASK.CMP.SCHEDULE|translate}}
                   </span>
                   <span class="keybindprev">
-                    {{_kb.taskSchedule?'&emsp;['+_kb.taskSchedule+']':''}}
+                    {{ kb.taskSchedule ? '&emsp;[' + kb.taskSchedule + ']' : '' }}
                   </span>
                 </div>
               </ng-container>
@@ -414,7 +415,7 @@
                     {{T.F.TASK.CMP.EDIT_REMINDER|translate}}
                   </span>
                   <span class="keybindprev">
-                    {{_kb.taskSchedule?'&emsp;['+_kb.taskSchedule+']':''}}
+                    {{ kb.taskSchedule ? '&emsp;[' + kb.taskSchedule + ']' : '' }}
                   </span>
                 </div>
               </ng-container>
@@ -431,7 +432,7 @@
                   {{T.F.TASK.CMP.ADD_SUB_TASK|translate}}
                 </span>
                 <span class="keybindprev">
-                  {{_kb.taskAddSubTask?'&emsp;['+_kb.taskAddSubTask+']':''}}
+                  {{ kb.taskAddSubTask ? '&emsp;[' + kb.taskAddSubTask + ']' : '' }}
                 </span>
               </div>
             </button>
@@ -477,7 +478,7 @@
                   {{T.F.TASK.CMP.MOVE_TO_BACKLOG|translate}}
                 </span>
                 <span class="keybindprev">
-                  {{_kb.moveToBacklog?'&emsp;['+_kb.moveToBacklog+']':''}}
+                  {{ kb.moveToBacklog ? '&emsp;[' + kb.moveToBacklog + ']' : '' }}
                 </span>
               </div>
             </button>
@@ -502,7 +503,7 @@
                   {{T.F.TASK.CMP.MOVE_TO_TODAY|translate}}
                 </span>
                 <span class="keybindprev">
-                  {{_kb.moveToTodaysTasks?'&emsp;['+_kb.moveToTodaysTasks+']':''}}
+                  {{ kb.moveToTodaysTasks ? '&emsp;[' + kb.moveToTodaysTasks + ']' : '' }}
                 </span>
               </div>
             </button>
@@ -518,7 +519,7 @@
                   {{T.F.TASK.CMP.EDIT_TAGS|translate}}
                 </span>
                 <span class="keybindprev">
-                  {{_kb.taskEditTags?'&emsp;['+_kb.taskEditTags+']':''}}
+                  {{ kb.taskEditTags ? '&emsp;[' + kb.taskEditTags + ']' : '' }}
                 </span>
               </div>
             </button>
@@ -535,7 +536,7 @@
                   T.F.TASK.CMP.ADD_TO_PROJECT)|translate}}
                 </span>
                 <span class="keybindprev">
-                  {{_kb.taskMoveToProject?'&emsp;['+_kb.taskMoveToProject+']':''}}
+                  {{ kb.taskMoveToProject ? '&emsp;[' + kb.taskMoveToProject + ']' : '' }}
                 </span>
               </div>
             </button>
@@ -561,7 +562,7 @@
                   T.F.TASK.CMP.DELETE)|translate}}
                 </span>
                 <span class="keybindprev">
-                  {{_kb.taskDelete?'&emsp;['+_kb.taskDelete+']':''}}
+                  {{ kb.taskDelete ? '&emsp;[' + kb.taskDelete + ']' : '' }}
                 </span>
               </div>
             </button>
