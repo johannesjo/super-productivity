@@ -16,7 +16,7 @@
         "plugin:@angular-eslint/recommended",
         "plugin:prettier/recommended"
       ],
-      "plugins": ["@typescript-eslint", "prettier", "unused-imports", "prefer-arrow"],
+      "plugins": ["@typescript-eslint", "prettier", "prefer-arrow"],
       "rules": {
         "@typescript-eslint/no-explicit-any": 0,
         "@typescript-eslint/ban-ts-comment": 0,
@@ -30,7 +30,6 @@
             "args": "none"
           }
         ],
-        "unused-imports/no-unused-imports": "error",
         "@typescript-eslint/explicit-function-return-type": [
           "error",
           {
