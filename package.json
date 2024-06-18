@@ -11,31 +11,14 @@
     "url": "git://github.com/johannesjo/super-productivity.git"
   },
   "browserslist": {
-    "production": [
-      "> 0.8%",
-      "last 2 versions",
-      "not dead",
-      "not IE 9-11",
-      "not edge < 79",
-      "not baidu < 10",
-      "not ie_mob < 12",
-      "not kaios < 5",
-      "not op_mini all",
-      "not op_mob < 60",
-      "not bb < 14",
-      "not and_uc < 13",
-      "not and_qq < 2"
+    "development": [
+      "defaults and fully supports es6-module"
     ],
-    "TODO_USE_THOSE": [
-      "supports es6-module",
-      "not dead",
-      "not IE <= 11",
-      "not ios_saf 10.3",
-      "not safari 10.1",
-      "not edge 16-17"
+    "production": [
+      "defaults and fully supports es6-module"
     ],
     "modern": [
-      "supports es6-module"
+      "defaults and fully supports es6-module"
     ]
   },
   "keywords": [
