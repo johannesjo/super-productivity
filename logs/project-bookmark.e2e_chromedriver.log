@@ -1,23 +1,259 @@
-Starting ChromeDriver 114.0.5735.90 (386bc09e8f4f2e025eddae123f36f6263096ae49-refs/branch-heads/5735@{#1052}) on port 9515
+Starting ChromeDriver 125.0.6422.141 (4b1e83937122185343ba92e909b021f307c719ca-refs/branch-heads/6422@{#1186}) on port 9515
 Only local connections are allowed.
 Please see https://chromedriver.chromium.org/security-considerations for suggestions on keeping ChromeDriver safe.
 ChromeDriver was started successfully.
-[1691165641,738][INFO]: [c07ffe72aa2795d01fb23aa9843bb598] COMMAND InitSession {
+[1718716172,322][INFO]: [1991090de61e2cb9dd3b269dc005bdd3] COMMAND InitSession {
    "capabilities": {
       "alwaysMatch": {
          "browserName": "chrome",
          "goog:chromeOptions": {
-            "args": [ "--headless", "--disable-gpu", "--window-size=1280,800", "--no-sandbox", "--disable-dev-shm-usage", "--disable-browser-side-navigation", "--user-agent=NIGHTWATCH" ],
-            "prefs": {
-               "profile.default_content_setting_values.geolocation": 1,
-               "profile.default_content_setting_values.notifications": 2
-            },
-            "w3c": false
          }
       },
       "firstMatch": [ {
       } ]
    }
 }
-[1691165641,738][INFO]: [c07ffe72aa2795d01fb23aa9843bb598] RESPONSE InitSession ERROR session not created: Missing or invalid capabilities
-[1691165641,738][DEBUG]: Log type 'driver' lost 1 entries on destruction
+[1718716172,322][INFO]: Browser search. Trying... /home/johannes/www/super-productivity/node_modules/chromedriver/lib/chromedriver/chrome
+[1718716172,322][INFO]: Browser search. Trying... /home/johannes/www/super-productivity/node_modules/chromedriver/lib/chromedriver/chrome
+[1718716172,322][INFO]: Browser search. Trying... /home/johannes/www/super-productivity/node_modules/chromedriver/lib/chromedriver/google-chrome
+[1718716172,322][INFO]: Browser search. Trying... /home/johannes/www/super-productivity/node_modules/chromedriver/lib/chromedriver/chromium
+[1718716172,322][INFO]: Browser search. Trying... /home/johannes/www/super-productivity/node_modules/chromedriver/lib/chromedriver/chromium-browser
+[1718716172,322][INFO]: Browser search. Trying... /usr/local/sbin/chrome
+[1718716172,322][INFO]: Browser search. Trying... /usr/local/bin/chrome
+[1718716172,322][INFO]: Browser search. Trying... /usr/sbin/chrome
+[1718716172,322][INFO]: Browser search. Trying... /usr/bin/chrome
+[1718716172,322][INFO]: Browser search. Trying... /sbin/chrome
+[1718716172,322][INFO]: Browser search. Trying... /bin/chrome
+[1718716172,322][INFO]: Browser search. Trying... /opt/google/chrome/chrome
+[1718716172,322][INFO]: Browser search. Found at  /opt/google/chrome/chrome
+[1718716172,322][INFO]: Populating Preferences file: {
+   "alternate_error_pages": {
+      "enabled": false
+   },
+   "autofill": {
+      "enabled": false
+   },
+   "browser": {
+      "check_default_browser": false
+   },
+   "distribution": {
+      "import_bookmarks": false,
+      "import_history": false,
+      "import_search_engine": false,
+      "make_chrome_default_for_user": false,
+      "skip_first_run_ui": true
+   },
+   "dns_prefetching": {
+      "enabled": false
+   },
+   "profile": {
+      "content_settings": {
+         "pattern_pairs": {
+            "https://*,*": {
+               "media-stream": {
+                  "audio": "Default",
+                  "video": "Default"
+               }
+            }
+         }
+      },
+      "default_content_setting_values": {
+         "geolocation": 1
+      },
+      "default_content_settings": {
+         "geolocation": 1,
+         "mouselock": 1,
+         "notifications": 1,
+         "popups": 1,
+         "ppapi-broker": 1
+      },
+      "password_manager_enabled": false
+   },
+   "safebrowsing": {
+      "enabled": false
+   },
+   "search": {
+      "suggest_enabled": false
+   },
+   "translate": {
+      "enabled": false
+   }
+}
+[1718716172,322][INFO]: Populating Local State file: {
+   "background_mode": {
+      "enabled": false
+   },
+   "ssl": {
+      "rev_checking": {
+         "enabled": false
+      }
+   }
+}
+[1718716172,322][INFO]: ChromeDriver supports communication with Chrome via pipes. This is more reliable and more secure.
+[1718716172,322][INFO]: Use the --remote-debugging-pipe Chrome switch instead of the default --remote-debugging-port to enable this communication mode.
+[1718716172,322][INFO]: Launching chrome: /opt/google/chrome/chrome --allow-pre-commit-input --disable-background-networking --disable-client-side-phishing-detection --disable-default-apps --disable-hang-monitor --disable-popup-blocking --disable-prompt-on-repost --disable-sync --enable-automation --enable-logging=stderr --log-level=0 --no-first-run --no-service-autorun --password-store=basic --remote-debugging-port=0 --test-type=webdriver --use-mock-keychain --user-data-dir=/tmp/.org.chromium.Chromium.eOQgtN data:,
+[0618/150932.346506:WARNING:chrome_main_linux.cc(80)] Read channel stable from /opt/google/chrome/CHROME_VERSION_EXTRA
+[1525612:1525612:0618/150932.347551:WARNING:chrome_main_delegate.cc(742)] This is Chrome version 126.0.6478.61 (not a warning)
+[1525612:1525612:0618/150932.536496:INFO:chrome_browser_cloud_management_controller.cc(196)] No machine level policy manager exists.
+
+DevTools listening on ws://127.0.0.1:33627/devtools/browser/2c65fba7-0a44-409a-b367-200025bd8618
+[1718716172,602][DEBUG]: DevTools HTTP Request: http://localhost:33627/json/version
+[1525612:1525612:0618/150932.622665:WARNING:browser_management_service.cc(128)] EnterpriseLogoUrl fetch failed with error code -1 and MIME type 
+[1525612:1525612:0618/150932.641563:WARNING:bluez_dbus_manager.cc(248)] Floss manager not present, cannot set Floss enable/disable.
+[1718716172,801][DEBUG]: DevTools HTTP Response: {
+   "Browser": "Chrome/126.0.6478.61",
+   "Protocol-Version": "1.3",
+   "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36",
+   "V8-Version": "12.6.228.16",
+   "WebKit-Version": "537.36 (@8dc092df54ce9b93406cb7fec530eb297bc0b332)",
+   "webSocketDebuggerUrl": "ws://localhost:33627/devtools/browser/2c65fba7-0a44-409a-b367-200025bd8618"
+}
+
+[1718716172,801][WARNING]: This version of ChromeDriver has not been tested with Chrome version 126.
+[1718716172,801][DEBUG]: DevTools HTTP Request: http://localhost:33627/json/list
+[1718716172,812][DEBUG]: DevTools HTTP Response: [ {
+   "description": "",
+   "devtoolsFrontendUrl": "/devtools/inspector.html?ws=localhost:33627/devtools/page/6E894677BB57FBC13EE1A44C419D67FA",
+   "id": "6E894677BB57FBC13EE1A44C419D67FA",
+   "title": "",
+   "type": "page",
+   "url": "data:,",
+   "webSocketDebuggerUrl": "ws://localhost:33627/devtools/page/6E894677BB57FBC13EE1A44C419D67FA"
+} ]
+
+[1718716172,812][INFO]: resolved localhost to ["127.0.0.1"]
+[1525612:1525612:0618/150932.813836:ERROR:object_proxy.cc(576)] Failed to call method: org.freedesktop.ScreenSaver.GetActive: object_path= /org/freedesktop/ScreenSaver: org.freedesktop.DBus.Error.NotSupported: This method is not implemented
+[1718716172,814][DEBUG]: DevTools WebSocket Command: Target.getTargets (id=1) (session_id=) browser {
+}
+[1718716172,815][DEBUG]: DevTools WebSocket Response: Target.getTargets (id=1) (session_id=) browser {
+   "targetInfos": [ {
+      "attached": false,
+      "browserContextId": "B04E1209BD0ECBDB30205D20511E174E",
+      "canAccessOpener": false,
+      "targetId": "6E894677BB57FBC13EE1A44C419D67FA",
+      "title": "",
+      "type": "page",
+      "url": "data:,"
+   } ]
+}
+[1718716172,815][DEBUG]: DevTools WebSocket Command: Target.attachToTarget (id=2) (session_id=) browser {
+   "flatten": true,
+   "targetId": "6E894677BB57FBC13EE1A44C419D67FA"
+}
+[1718716172,816][DEBUG]: DevTools WebSocket Event: Target.attachedToTarget (session_id=) browser {
+   "sessionId": "F23C3B40359ACF7F8BCCBD35CFC7790C",
+   "targetInfo": {
+      "attached": true,
+      "browserContextId": "B04E1209BD0ECBDB30205D20511E174E",
+      "canAccessOpener": false,
+      "targetId": "6E894677BB57FBC13EE1A44C419D67FA",
+      "title": "",
+      "type": "page",
+      "url": "data:,"
+   },
+   "waitingForDebugger": false
+}
+[1718716172,816][DEBUG]: DevTools WebSocket Response: Target.attachToTarget (id=2) (session_id=) browser {
+   "sessionId": "F23C3B40359ACF7F8BCCBD35CFC7790C"
+}
+[1718716172,816][DEBUG]: DevTools WebSocket Command: Page.enable (id=3) (session_id=F23C3B40359ACF7F8BCCBD35CFC7790C) 6E894677BB57FBC13EE1A44C419D67FA {
+}
+[1718716172,816][DEBUG]: DevTools WebSocket Command: Page.addScriptToEvaluateOnNewDocument (id=4) (session_id=F23C3B40359ACF7F8BCCBD35CFC7790C) 6E894677BB57FBC13EE1A44C419D67FA {
+   "source": "(function () {window.cdc_adoQpoasnfa76pfcZLmcfl_Array = window.Array;window.cdc_adoQpoasnfa76pfcZLmcfl_Object = window.Object;window.cdc_adoQpoasnfa76pfcZLmcfl_Promise = window.Promise;window.cdc_a..."
+}
+[1718716172,816][DEBUG]: DevTools WebSocket Command: Runtime.evaluate (id=5) (session_id=F23C3B40359ACF7F8BCCBD35CFC7790C) 6E894677BB57FBC13EE1A44C419D67FA {
+   "expression": "(function () {window.cdc_adoQpoasnfa76pfcZLmcfl_Array = window.Array;window.cdc_adoQpoasnfa76pfcZLmcfl_Object = window.Object;window.cdc_adoQpoasnfa76pfcZLmcfl_Promise = window.Promise;window.cdc_a..."
+}
+[1718716172,816][DEBUG]: DevTools WebSocket Command: Log.enable (id=6) (session_id=F23C3B40359ACF7F8BCCBD35CFC7790C) 6E894677BB57FBC13EE1A44C419D67FA {
+}
+[1718716172,816][DEBUG]: DevTools WebSocket Command: Target.setAutoAttach (id=7) (session_id=F23C3B40359ACF7F8BCCBD35CFC7790C) 6E894677BB57FBC13EE1A44C419D67FA {
+   "autoAttach": true,
+   "flatten": true,
+   "waitForDebuggerOnStart": false
+}
+[1525650:1525650:0618/150932.869402:WARNING:sandbox_linux.cc(430)] InitializeSandbox() called with multiple threads in process gpu-process.
+[1718716172,890][DEBUG]: DevTools WebSocket Response: Page.enable (id=3) (session_id=F23C3B40359ACF7F8BCCBD35CFC7790C) 6E894677BB57FBC13EE1A44C419D67FA {
+}
+[1718716172,890][DEBUG]: DevTools WebSocket Response: Page.addScriptToEvaluateOnNewDocument (id=4) (session_id=F23C3B40359ACF7F8BCCBD35CFC7790C) 6E894677BB57FBC13EE1A44C419D67FA {
+   "identifier": "1"
+}
+[1718716172,890][DEBUG]: DevTools WebSocket Response: Runtime.evaluate (id=5) (session_id=F23C3B40359ACF7F8BCCBD35CFC7790C) 6E894677BB57FBC13EE1A44C419D67FA {
+   "result": {
+      "type": "undefined"
+   }
+}
+[1718716172,890][DEBUG]: DevTools WebSocket Response: Log.enable (id=6) (session_id=F23C3B40359ACF7F8BCCBD35CFC7790C) 6E894677BB57FBC13EE1A44C419D67FA {
+}
+[1718716172,890][DEBUG]: DevTools WebSocket Response: Target.setAutoAttach (id=7) (session_id=F23C3B40359ACF7F8BCCBD35CFC7790C) 6E894677BB57FBC13EE1A44C419D67FA {
+}
+[1718716172,890][DEBUG]: DevTools WebSocket Command: Runtime.enable (id=8) (session_id=F23C3B40359ACF7F8BCCBD35CFC7790C) 6E894677BB57FBC13EE1A44C419D67FA {
+}
+[1718716172,890][DEBUG]: DevTools WebSocket Event: Page.domContentEventFired (session_id=F23C3B40359ACF7F8BCCBD35CFC7790C) 6E894677BB57FBC13EE1A44C419D67FA {
+   "timestamp": 19587.399834
+}
+[1718716172,890][DEBUG]: DevTools WebSocket Event: Page.loadEventFired (session_id=F23C3B40359ACF7F8BCCBD35CFC7790C) 6E894677BB57FBC13EE1A44C419D67FA {
+   "timestamp": 19587.400179
+}
+[1718716172,902][DEBUG]: DevTools WebSocket Event: Page.frameStoppedLoading (session_id=F23C3B40359ACF7F8BCCBD35CFC7790C) 6E894677BB57FBC13EE1A44C419D67FA {
+   "frameId": "6E894677BB57FBC13EE1A44C419D67FA"
+}
+[1718716172,902][DEBUG]: DevTools WebSocket Event: Page.frameResized (session_id=F23C3B40359ACF7F8BCCBD35CFC7790C) 6E894677BB57FBC13EE1A44C419D67FA {
+}
+[1718716172,902][DEBUG]: DevTools WebSocket Event: Runtime.executionContextCreated (session_id=F23C3B40359ACF7F8BCCBD35CFC7790C) 6E894677BB57FBC13EE1A44C419D67FA {
+   "context": {
+      "auxData": {
+         "frameId": "6E894677BB57FBC13EE1A44C419D67FA",
+         "isDefault": true,
+         "type": "default"
+      },
+      "id": 1,
+      "name": "",
+      "origin": "://",
+      "uniqueId": "1534790065778221208.-4155699682878758912"
+   }
+}
+[1718716172,902][DEBUG]: DevTools WebSocket Response: Runtime.enable (id=8) (session_id=F23C3B40359ACF7F8BCCBD35CFC7790C) 6E894677BB57FBC13EE1A44C419D67FA {
+}
+[1718716172,902][DEBUG]: DevTools WebSocket Command: Runtime.enable (id=9) (session_id=F23C3B40359ACF7F8BCCBD35CFC7790C) 6E894677BB57FBC13EE1A44C419D67FA {
+}
+[1718716172,903][DEBUG]: DevTools WebSocket Response: Runtime.enable (id=9) (session_id=F23C3B40359ACF7F8BCCBD35CFC7790C) 6E894677BB57FBC13EE1A44C419D67FA {
+}
+[1718716172,903][INFO]: [1991090de61e2cb9dd3b269dc005bdd3] RESPONSE InitSession {
+   "capabilities": {
+      "acceptInsecureCerts": false,
+      "browserName": "chrome",
+      "browserVersion": "126.0.6478.61",
+      "chrome": {
+         "chromedriverVersion": "125.0.6422.141 (4b1e83937122185343ba92e909b021f307c719ca-refs/branch-heads/6422@{#1186})",
+         "userDataDir": "/tmp/.org.chromium.Chromium.eOQgtN"
+      },
+      "fedcm:accounts": true,
+      "goog:chromeOptions": {
+         "debuggerAddress": "localhost:33627"
+      },
+      "networkConnectionEnabled": false,
+      "pageLoadStrategy": "normal",
+      "platformName": "linux",
+      "proxy": {
+      },
+      "setWindowRect": true,
+      "strictFileInteractability": false,
+      "timeouts": {
+         "implicit": 0,
+         "pageLoad": 300000,
+         "script": 30000
+      },
+      "unhandledPromptBehavior": "dismiss and notify",
+      "webauthn:extension:credBlob": true,
+      "webauthn:extension:largeBlob": true,
+      "webauthn:extension:minPinLength": true,
+      "webauthn:extension:prf": true,
+      "webauthn:virtualAuthenticators": true
+   },
+   "sessionId": "1991090de61e2cb9dd3b269dc005bdd3"
+}
+[1718716172,909][INFO]: [1991090de61e2cb9dd3b269dc005bdd3] COMMAND Quit {
+}
+[1718716173,010][INFO]: [1991090de61e2cb9dd3b269dc005bdd3] RESPONSE Quit
+[1718716173,010][DEBUG]: Log type 'driver' lost 1 entries on destruction
+[1718716173,010][DEBUG]: Log type 'browser' lost 0 entries on destruction

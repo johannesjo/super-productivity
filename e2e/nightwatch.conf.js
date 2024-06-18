@@ -20,6 +20,26 @@ module.exports = {
       launch_url: 'https://localhost:4200',
       desiredCapabilities: {
         browserName: 'chrome',
+      },
+      screenshots: {
+        enabled: true, // if you want to keep screenshots
+        on_failure: true,
+        on_error: true,
+        path: './e2e/screenshots', // save screenshots here
+      },
+      globals: {
+        waitForConditionPollInterval: 500,
+        waitForConditionTimeout: 10000,
+        retryAssertionTimeout: 1000,
+      },
+      webdriver: {
+        start_process: true,
+        server_path: '',
+      },
+    },
+    chrome: {
+      desiredCapabilities: {
+        browserName: 'chrome',
         chromeOptions: {
           args: [
             '--headless',
@@ -38,16 +58,13 @@ module.exports = {
           },
         },
       },
-      screenshots: {
-        enabled: true, // if you want to keep screenshots
-        on_failure: true,
-        on_error: true,
-        path: './e2e/screenshots', // save screenshots here
-      },
-      globals: {
-        waitForConditionPollInterval: 500,
-        waitForConditionTimeout: 10000,
-        retryAssertionTimeout: 1000,
+
+      webdriver: {
+        start_process: true,
+        server_path: '',
+        cli_args: [
+          // --verbose
+        ],
       },
     },
   },

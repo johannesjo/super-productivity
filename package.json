@@ -158,8 +158,7 @@
     "@types/jasmine": "^3.10.2",
     "@types/jasminewd2": "~2.0.13",
     "@types/lz-string": "^1.5.0",
-    "@types/moment-duration-format": "^2.2.2",
-    "@types/nightwatch": "^1.3.3",
+    "@types/moment-duration-format": "^2.2.6",
     "@types/node": "20.12.4",
     "@types/node-fetch": "^2.6.6",
     "@types/object-path": "^0.11.4",
@@ -167,6 +166,7 @@
     "@typescript-eslint/parser": "7.13.1",
     "angular-material-css-vars": "^7.0.0",
     "axios": "^1.6.0",
+    "chai": "^5.1.1",
     "chart.js": "^4.4.3",
     "chromedriver": "^125.0.3",
     "chrono-node": "^2.6.2",
@@ -212,7 +212,7 @@
     "ng2-dragula": "^5.1.0",
     "ngx-date-time-picker-schedule": "^9.4.17",
     "ngx-markdown": "^18.0.0",
-    "nightwatch": "^1.7.13",
+    "nightwatch": "^3.6.3",
     "object-path": "^0.11.8",
     "p-throttle": "^3.1.0",
     "prettier": "^3.3.2",
@@ -231,5 +231,12 @@
   },
   "resolutions": {
     "sass": "1.32.6"
+  },
+  "overrides": {
+    "ng2-dragula": {
+      "@angular/common": "$@angular/common",
+      "@angular/core": "$@angular/core",
+      "@angular/animations": "$@angular/animations"
+    }
   }
 }

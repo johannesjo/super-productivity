@@ -20,7 +20,6 @@
     "target": "ES2022",
     "resolveJsonModule": true,
     "typeRoots": ["node_modules/@types"],
-    "types": ["@types/moment-duration-format"],
     "lib": ["es2022", "dom"]
   }
 }
