@@ -18,7 +18,7 @@ module.exports = {
       .addTask('0 test task koko')
       .waitForElementVisible(TASK)
       .assert.visible(TASK)
-      .assert.containsText(TASK, '0 test task koko')
+      .assert.textContains(TASK, '0 test task koko')
       .end(),
 
   'should add a task from initial bar': (browser: NBrowser) =>
@@ -31,7 +31,7 @@ module.exports = {
 
       .waitForElementVisible(TASK)
       .assert.visible(TASK)
-      .assert.containsText(TASK, '1 test task hihi')
+      .assert.textContains(TASK, '1 test task hihi')
       .end(),
 
   'should add 2 tasks from initial bar': (browser: NBrowser) =>
@@ -46,28 +46,30 @@ module.exports = {
 
       .waitForElementVisible(TASK)
       .assert.visible(TASK)
-      .assert.containsText(TASK + ':nth-child(1)', '3 some other task')
-      .assert.containsText(TASK + ':nth-child(2)', '2 test task hihi')
+      .assert.textContains(TASK + ':nth-child(1)', '3 some other task')
+      .assert.textContains(TASK + ':nth-child(2)', '2 test task hihi')
       .end(),
 
-  // 'should add multiple tasks from header button': (browser: NBrowser) =>
-  //   browser
-  //     .loadAppAndClickAwayWelcomeDialog(WORK_VIEW_URL)
-  //     .waitForElementVisible(ADD_TASK_BTN)
-  //     .click(ADD_TASK_BTN)
-  //     .waitForElementVisible(ADD_TASK_GLOBAL)
-  //
-  //     .setValue(ADD_TASK_GLOBAL, '4 test task hohoho')
-  //     .setValue(ADD_TASK_GLOBAL, browser.Keys.ENTER)
-  //     .setValue(ADD_TASK_GLOBAL, '5 some other task xoxo')
-  //     .setValue(ADD_TASK_GLOBAL, browser.Keys.ENTER)
-  //
-  //     .waitForElementVisible(TASK)
-  //     .assert.visible(TASK)
-  //     // NOTE: global adds to top rather than bottom
-  //     .assert.containsText(TASK + ':nth-child(1)', '5 some other task xoxo')
-  //     .assert.containsText(TASK + ':nth-child(2)', '4 test task hohoho')
-  //     .end(),
+  'should add multiple tasks from header button': (browser: NBrowser) =>
+    browser
+      .loadAppAndClickAwayWelcomeDialog(WORK_VIEW_URL)
+      .waitForElementVisible(ADD_TASK_BTN)
+      .click(ADD_TASK_BTN)
+      .waitForElementVisible(ADD_TASK_GLOBAL)
+
+      .sendKeysToActiveEl([
+        '4 test task hohoho',
+        browser.Keys.ENTER,
+        '5 some other task xoxo',
+        browser.Keys.ENTER,
+      ])
+
+      .waitForElementVisible(TASK)
+      .assert.visible(TASK)
+      // NOTE: global adds to top rather than bottom
+      .assert.textContains(TASK + ':nth-child(1)', '5 some other task xoxo')
+      .assert.textContains(TASK + ':nth-child(2)', '4 test task hohoho')
+      .end(),
 
   'should still show created task after reload': (browser: NBrowser) =>
     browser
@@ -79,7 +81,7 @@ module.exports = {
 
       .waitForElementVisible(TASK)
       .assert.visible(TASK)
-      .assert.containsText(TASK, '0 test task lolo')
+      .assert.textContains(TASK, '0 test task lolo')
       .end(),
 
   'should add 3 tasks from initial bar and remove 2 of them via the default keyboard shortcut':
@@ -111,12 +113,18 @@ module.exports = {
       .loadAppAndClickAwayWelcomeDialog(WORK_VIEW_URL)
       .addTask('task1')
       .addTask('task2')
-      .setValue('task:last-child', 'a')
+      .sendKeysToActiveEl('a')
       .sendKeysToActiveEl(['task3', browser.Keys.ENTER])
-      .setValue('[listid="SUB"] task:nth-child(1)', 'a')
+      .setValue('task-list task-list task:nth-child(1)', 'a')
       .sendKeysToActiveEl(['task4', browser.Keys.ENTER])
-      .moveToElement('[listid="SUB"] task:nth-child(2)', 10, 30)
+      .waitForElementVisible('.sub-tasks task-list task:nth-child(2)')
+      // .moveToElement('.sub-tasks .task-list-inner task:nth-child(2)', 30, 30)
+      .moveToElement('.sub-tasks task:nth-child(1)', 30, 30)
       .click('.task-done-btn')
-      .assert.textContains(':focus', 'task3')
+      .execute(
+        () => document.activeElement,
+        (result) => browser.assert.textContains(result.value as any, 'task3'),
+      )
+      // .assert.textContains(':focus', 'task3')
       .end(),
 };
