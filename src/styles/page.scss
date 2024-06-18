@@ -171,3 +171,38 @@ img {
   height: auto;
   display: block;
 }
+
+// scrollbars
+* {
+  --scrollbar-width: thin;
+  --scrollbar-width-legacy: 4px;
+  --scrollbar-color-thumb: #888;
+  --scrollbar-color-track: #f1f1f1;
+
+  .isDarkTheme & {
+    --scrollbar-color-thumb: #333;
+    --scrollbar-color-track: #222;
+  }
+
+  /* Modern browsers with `scrollbar-*` support */
+  @supports (scrollbar-width: auto) {
+    & {
+      scrollbar-color: var(--scrollbar-color-thumb) var(--scrollbar-color-track);
+      scrollbar-width: var(--scrollbar-width);
+    }
+  }
+
+  /* Legacy browsers with `::-webkit-scrollbar-*` support */
+  @supports selector(::-webkit-scrollbar) {
+    &::-webkit-scrollbar-thumb {
+      background: var(--scrollbar-color-thumb);
+    }
+    &::-webkit-scrollbar-track {
+      background: var(--scrollbar-color-track);
+    }
+    &::-webkit-scrollbar {
+      max-width: var(--scrollbar-width-legacy);
+      max-height: var(--scrollbar-width-legacy);
+    }
+  }
+}
