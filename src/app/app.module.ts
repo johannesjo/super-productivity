@@ -126,6 +126,9 @@ export const createTranslateLoader = (http: HttpClient): TranslateHttpLoader =>
     }),
     ServiceWorkerModule.register('ngsw-worker.js', {
       enabled: !IS_ELECTRON && (environment.production || environment.stage),
+      // Register the ServiceWorker as soon as the application is stable
+      // or after 30 seconds (whichever comes first).
+      registrationStrategy: 'registerWhenStable:30000',
     }),
     TranslateModule.forRoot({
       loader: {

@@ -56,7 +56,8 @@
               "extractLicenses": false,
               "sourceMap": true,
               "namedChunks": false,
-              "aot": false
+              "aot": false,
+              "serviceWorker": "ngsw-config.json"
             },
             "production": {
               "baseHref": "",
@@ -84,7 +85,8 @@
               "sourceMap": true,
               "namedChunks": false,
               "aot": true,
-              "extractLicenses": true
+              "extractLicenses": true,
+              "serviceWorker": "ngsw-config.json"
             },
             "productionWeb": {
               "budgets": [
@@ -111,7 +113,8 @@
               "sourceMap": true,
               "namedChunks": false,
               "aot": true,
-              "extractLicenses": true
+              "extractLicenses": true,
+              "serviceWorker": "ngsw-config.json"
             },
             "stage": {
               "baseHref": "",
@@ -139,7 +142,8 @@
               "sourceMap": true,
               "namedChunks": false,
               "aot": true,
-              "extractLicenses": true
+              "extractLicenses": true,
+              "serviceWorker": false
             },
             "stageWeb": {
               "budgets": [
@@ -166,7 +170,8 @@
               "sourceMap": true,
               "namedChunks": false,
               "aot": true,
-              "extractLicenses": true
+              "extractLicenses": true,
+              "serviceWorker": "ngsw-config.json"
             }
           }
         },
