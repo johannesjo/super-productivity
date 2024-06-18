@@ -1,4 +1,8 @@
-import { BrowserModule, HammerModule } from '@angular/platform-browser';
+import {
+  BrowserModule,
+  HAMMER_GESTURE_CONFIG,
+  HammerModule,
+} from '@angular/platform-browser';
 import { ErrorHandler, NgModule } from '@angular/core';
 import { AppComponent } from './app.component';
 import { ServiceWorkerModule } from '@angular/service-worker';
@@ -28,6 +32,7 @@ import { NoteModule } from './features/note/note.module';
 import { ReminderModule } from './features/reminder/reminder.module';
 import { CoreUiModule } from './core-ui/core-ui.module';
 import { GlobalErrorHandler } from './core/error-handler/global-error-handler.class';
+import { MyHammerConfig } from '../hammer-config.class';
 import { ProcrastinationModule } from './features/procrastination/procrastination.module';
 import { TranslateLoader, TranslateModule } from '@ngx-translate/core';
 import { TranslateHttpLoader } from '@ngx-translate/http-loader';
@@ -141,6 +146,7 @@ export const createTranslateLoader = (http: HttpClient): TranslateHttpLoader =>
   ],
   providers: [
     { provide: ErrorHandler, useClass: GlobalErrorHandler },
+    { provide: HAMMER_GESTURE_CONFIG, useClass: MyHammerConfig },
     provideHttpClient(withInterceptorsFromDi()),
   ],
 })

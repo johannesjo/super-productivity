@@ -69,6 +69,8 @@ import { FullPageSpinnerComponent } from './full-page-spinner/full-page-spinner.
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { FormlyMaterialModule } from '@ngx-formly/material';
 import { GlobalErrorHandler } from '../core/error-handler/global-error-handler.class';
+import { HAMMER_GESTURE_CONFIG } from '@angular/platform-browser';
+import { MyHammerConfig } from '../../hammer-config.class';
 import { registerTranslateExtension } from './formly-translate-extension/formly-translate-extension';
 import { FormlyTranslatedTemplateComponent } from './formly-translated-template/formly-translated-template.component';
 import { MatMomentDateModule } from '@angular/material-moment-adapter';
@@ -231,6 +233,7 @@ const OTHER_3RD_PARTY_MODS_WITHOUT_CFG = [
       provide: MAT_FORM_FIELD_DEFAULT_OPTIONS,
       useValue: { appearance: 'fill', subscriptSizing: 'dynamic' },
     },
+    { provide: HAMMER_GESTURE_CONFIG, useClass: MyHammerConfig },
     {
       provide: FORMLY_CONFIG,
       multi: true,
