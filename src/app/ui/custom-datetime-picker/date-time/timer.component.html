@@ -1,0 +1,73 @@
+<!--<ng-container *ngIf="IS_TOUCH_ONLY">-->
+<!--<input type="time"-->
+<!--       [min]="minDateTime"-->
+<!--       [max]="minDateTime"-->
+<!--       [value]="touchTimeValue"-->
+<!--       (change)="onTouchTimeChange($event)"-->
+<!--       class="owl-mobile-time-inp">-->
+<!--</ng-container>-->
+
+<!--<ng-container *ngIf="!IS_TOUCH_ONLY">-->
+<owl-date-time-timer-box
+  (inputChange)="setHourValueViaInput($event)"
+  (valueChange)="setHourValue($event)"
+  [boxValue]="hourBoxValue"
+  [downBtnAriaLabel]="downHourButtonLabel"
+  [downBtnDisabled]="!downHourEnabled()"
+  [inputLabel]="'Hour'"
+  [max]="23"
+  [min]="0"
+  [step]="stepHour"
+  [upBtnAriaLabel]="upHourButtonLabel"
+  [upBtnDisabled]="!upHourEnabled()"
+  [value]="hourValue"
+></owl-date-time-timer-box>
+<owl-date-time-timer-box
+  (inputChange)="setMinuteValue($event)"
+  (valueChange)="setMinuteValue($event)"
+  [downBtnAriaLabel]="downMinuteButtonLabel"
+  [downBtnDisabled]="!downMinuteEnabled()"
+  [inputLabel]="'Minute'"
+  [max]="59"
+  [min]="0"
+  [showDivider]="true"
+  [step]="stepMinute"
+  [upBtnAriaLabel]="upMinuteButtonLabel"
+  [upBtnDisabled]="!upMinuteEnabled()"
+  [value]="minuteValue"
+></owl-date-time-timer-box>
+<owl-date-time-timer-box
+  (inputChange)="setSecondValue($event)"
+  (valueChange)="setSecondValue($event)"
+  *ngIf="showSecondsTimer"
+  [downBtnAriaLabel]="downSecondButtonLabel"
+  [downBtnDisabled]="!downSecondEnabled()"
+  [inputLabel]="'Second'"
+  [max]="59"
+  [min]="0"
+  [showDivider]="true"
+  [step]="stepSecond"
+  [upBtnAriaLabel]="upSecondButtonLabel"
+  [upBtnDisabled]="!upSecondEnabled()"
+  [value]="secondValue"
+></owl-date-time-timer-box>
+
+<div
+  *ngIf="hour12Timer"
+  class="owl-dt-timer-hour12"
+>
+  <button
+    (click)="setMeridiem($event)"
+    class="owl-dt-control-button owl-dt-timer-hour12-box"
+    tabindex="0"
+    type="button"
+  >
+    <span
+      class="owl-dt-control-button-content"
+      tabindex="-1"
+    >
+      {{ hour12ButtonLabel }}
+    </span>
+  </button>
+</div>
+<!--</ng-container>-->

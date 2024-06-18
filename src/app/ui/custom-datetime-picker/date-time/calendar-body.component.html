@@ -1,0 +1,32 @@
+<tr
+  *ngFor="let row of rows; let rowIndex = index"
+  role="row"
+>
+  <td
+    (click)="selectCell(item)"
+    *ngFor="let item of row; let colIndex = index"
+    [attr.aria-disabled]="!item.enabled || null"
+    [attr.aria-label]="item.ariaLabel"
+    [class.owl-dt-calendar-cell-active]="isActiveCell(rowIndex, colIndex)"
+    [class.owl-dt-calendar-cell-disabled]="!item.enabled"
+    [class.owl-dt-calendar-cell-in-range]="isInRange(item.value)"
+    [class.owl-dt-calendar-cell-range-from]="isRangeFrom(item.value)"
+    [class.owl-dt-calendar-cell-range-to]="isRangeTo(item.value)"
+    [style.paddingBottom.%]="isNoMonthSquares ? null: (50 * cellRatio / numCols)"
+    [style.paddingTop.%]="isNoMonthSquares ? null: (50 * cellRatio / numCols)"
+    [style.width.%]="100 / numCols"
+    [tabindex]="isActiveCell(rowIndex, colIndex) ? 0 : -1"
+    class="owl-dt-calendar-cell {{item.cellClass}}"
+  >
+    <span
+      [ngClass]="{
+                'owl-dt-calendar-cell-out': item.out,
+                'owl-dt-calendar-cell-today': item.value === todayValue,
+                'owl-dt-calendar-cell-selected': isSelected(item.value)
+              }"
+      class="owl-dt-calendar-cell-content"
+    >
+      {{ item.displayValue }}
+    </span>
+  </td>
+</tr>

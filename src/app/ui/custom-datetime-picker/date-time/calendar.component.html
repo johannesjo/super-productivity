@@ -1,0 +1,166 @@
+<div class="owl-dt-calendar-control">
+  <!-- focus when keyboard tab (http://kizu.ru/en/blog/keyboard-only-focus/#x) -->
+  <button
+    (click)="previousClicked()"
+    [attr.aria-label]="prevButtonLabel"
+    [disabled]="!prevButtonEnabled()"
+    [style.visibility]="showControlArrows? 'visible': 'hidden'"
+    class="owl-dt-control owl-dt-control-button owl-dt-control-arrow-button"
+    tabindex="0"
+    type="button"
+  >
+    <span
+      class="owl-dt-control-content owl-dt-control-button-content"
+      tabindex="-1"
+    >
+      <!-- <editor-fold desc="SVG Arrow Left"> -->
+      <svg
+        height="100%"
+        style="enable-background: new 0 0 250.738 250.738"
+        version="1.1"
+        viewBox="0 0 250.738 250.738"
+        width="100%"
+        x="0px"
+        xml:space="preserve"
+        xmlns="http://www.w3.org/2000/svg"
+        y="0px"
+      >
+        <path
+          d="M96.633,125.369l95.053-94.533c7.101-7.055,7.101-18.492,0-25.546   c-7.1-7.054-18.613-7.054-25.714,0L58.989,111.689c-3.784,3.759-5.487,8.759-5.238,13.68c-0.249,4.922,1.454,9.921,5.238,13.681   l106.983,106.398c7.101,7.055,18.613,7.055,25.714,0c7.101-7.054,7.101-18.491,0-25.544L96.633,125.369z"
+          style="fill-rule: evenodd; clip-rule: evenodd"
+        />
+      </svg>
+      <!-- </editor-fold> -->
+    </span>
+  </button>
+  <div class="owl-dt-calendar-control-content">
+    <button
+      (click)="toggleViews()"
+      [attr.aria-label]="periodButtonLabel"
+      class="owl-dt-control owl-dt-control-button owl-dt-control-period-button"
+      tabindex="0"
+      type="button"
+    >
+      <span
+        class="owl-dt-control-content owl-dt-control-button-content"
+        tabindex="-1"
+      >
+        {{ periodButtonText }}
+
+        <span
+          [style.transform]="'rotate(' + (isMonthView? 0 : 180) +'deg)'"
+          class="owl-dt-control-button-arrow"
+        >
+          <!-- <editor-fold desc="SVG Arrow"> -->
+          <svg
+            height="50%"
+            style="enable-background: new 0 0 292.362 292.362"
+            version="1.1"
+            viewBox="0 0 292.362 292.362"
+            width="50%"
+            x="0px"
+            xml:space="preserve"
+            xmlns="http://www.w3.org/2000/svg"
+            y="0px"
+          >
+            <g>
+              <path
+                d="M286.935,69.377c-3.614-3.617-7.898-5.424-12.848-5.424H18.274c-4.952,0-9.233,1.807-12.85,5.424
+                                C1.807,72.998,0,77.279,0,82.228c0,4.948,1.807,9.229,5.424,12.847l127.907,127.907c3.621,3.617,7.902,5.428,12.85,5.428
+                                s9.233-1.811,12.847-5.428L286.935,95.074c3.613-3.617,5.427-7.898,5.427-12.847C292.362,77.279,290.548,72.998,286.935,69.377z"
+              />
+            </g>
+          </svg>
+          <!-- </editor-fold> -->
+        </span>
+      </span>
+    </button>
+  </div>
+  <button
+    (click)="nextClicked()"
+    [attr.aria-label]="nextButtonLabel"
+    [disabled]="!nextButtonEnabled()"
+    [style.visibility]="showControlArrows? 'visible': 'hidden'"
+    class="owl-dt-control owl-dt-control-button owl-dt-control-arrow-button"
+    tabindex="0"
+    type="button"
+  >
+    <span
+      class="owl-dt-control-content owl-dt-control-button-content"
+      tabindex="-1"
+    >
+      <!-- <editor-fold desc="SVG Arrow Right"> -->
+      <svg
+        style="enable-background: new 0 0 250.738 250.738"
+        version="1.1"
+        viewBox="0 0 250.738 250.738"
+        x="0px"
+        xml:space="preserve"
+        xmlns="http://www.w3.org/2000/svg"
+        y="0px"
+      >
+        <path
+          d="M191.75,111.689L84.766,5.291c-7.1-7.055-18.613-7.055-25.713,0
+                    c-7.101,7.054-7.101,18.49,0,25.544l95.053,94.534l-95.053,94.533c-7.101,7.054-7.101,18.491,0,25.545
+                    c7.1,7.054,18.613,7.054,25.713,0L191.75,139.05c3.784-3.759,5.487-8.759,5.238-13.681
+                    C197.237,120.447,195.534,115.448,191.75,111.689z"
+          style="fill-rule: evenodd; clip-rule: evenodd"
+        />
+      </svg>
+      <!-- </editor-fold> -->
+    </span>
+  </button>
+</div>
+<div
+  [ngSwitch]="currentView"
+  cdkMonitorSubtreeFocus
+  class="owl-dt-calendar-main"
+  tabindex="-1"
+>
+  <owl-date-time-month-view
+    (pickerMomentChange)="handlePickerMomentChange($event)"
+    (selectedChange)="dateSelected($event)"
+    (userSelection)="userSelected()"
+    *ngSwitchCase="'month'"
+    [dateFilter]="dateFilter"
+    [firstDayOfWeek]="firstDayOfWeek"
+    [hideOtherMonths]="hideOtherMonths"
+    [isNoMonthSquares]="isNoMonthSquares"
+    [maxDate]="maxDate"
+    [minDate]="minDate"
+    [pickerMoment]="pickerMoment"
+    [selectMode]="selectMode"
+    [selected]="selected"
+    [selecteds]="selecteds"
+  ></owl-date-time-month-view>
+
+  <owl-date-time-year-view
+    (change)="goToDateInView($event, 'month')"
+    (keyboardEnter)="focusActiveCell()"
+    (monthSelected)="selectMonthInYearView($event)"
+    (pickerMomentChange)="handlePickerMomentChange($event)"
+    *ngSwitchCase="'year'"
+    [dateFilter]="dateFilter"
+    [maxDate]="maxDate"
+    [minDate]="minDate"
+    [pickerMoment]="pickerMoment"
+    [selectMode]="selectMode"
+    [selected]="selected"
+    [selecteds]="selecteds"
+  ></owl-date-time-year-view>
+
+  <owl-date-time-multi-year-view
+    (change)="goToDateInView($event, 'year')"
+    (keyboardEnter)="focusActiveCell()"
+    (pickerMomentChange)="handlePickerMomentChange($event)"
+    (yearSelected)="selectYearInMultiYearView($event)"
+    *ngSwitchCase="'multi-years'"
+    [dateFilter]="dateFilter"
+    [maxDate]="maxDate"
+    [minDate]="minDate"
+    [pickerMoment]="pickerMoment"
+    [selectMode]="selectMode"
+    [selected]="selected"
+    [selecteds]="selecteds"
+  ></owl-date-time-multi-year-view>
+</div>
