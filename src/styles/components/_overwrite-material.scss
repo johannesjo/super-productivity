@@ -55,6 +55,13 @@ body .mat-mdc-dialog-surface {
 
 // BUTTONS
 // -----------
+.mat-mdc-menu-item-text {
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  max-width: 100%;
+  white-space: nowrap;
+}
+
 .mat-mdc-icon-button.mat-mdc-button-base {
   --mdc-icon-button-state-layer-size: 40px;
 }

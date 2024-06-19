@@ -42,7 +42,6 @@ const MONTHS_PER_ROW = 3;
   selector: 'owl-date-time-year-view',
   exportAs: 'owlMonthView',
   templateUrl: './calendar-year-view.component.html',
-  styleUrls: ['./calendar-year-view.component.scss'],
   host: {
     // eslint-disable-next-line @typescript-eslint/naming-convention
     '[class.owl-dt-calendar-view]': 'owlDTCalendarView',

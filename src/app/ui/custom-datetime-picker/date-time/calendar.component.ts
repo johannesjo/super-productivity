@@ -31,7 +31,6 @@ import { Subscription } from 'rxjs';
   selector: 'owl-date-time-calendar',
   exportAs: 'owlDateTimeCalendar',
   templateUrl: './calendar.component.html',
-  styleUrls: ['./calendar.component.scss'],
   host: {
     // eslint-disable-next-line @typescript-eslint/naming-convention
     '[class.owl-dt-calendar]': 'owlDTCalendarClass',

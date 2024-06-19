@@ -22,7 +22,6 @@ import { IS_TOUCH_PRIMARY } from '../../../util/is-mouse-primary';
   exportAs: 'owlDateTimeTimer',
   selector: 'owl-date-time-timer',
   templateUrl: './timer.component.html',
-  styleUrls: ['./timer.component.scss'],
   preserveWhitespaces: false,
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {

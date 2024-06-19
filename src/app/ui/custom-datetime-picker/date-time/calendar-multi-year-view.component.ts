@@ -34,7 +34,6 @@ export const YEAR_ROWS = 7;
 @Component({
   selector: 'owl-date-time-multi-year-view',
   templateUrl: './calendar-multi-year-view.component.html',
-  styleUrls: ['./calendar-multi-year-view.component.scss'],
   host: {
     // eslint-disable-next-line @typescript-eslint/naming-convention
     '[class.owl-dt-calendar-view]': 'owlDTCalendarView',

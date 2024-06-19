@@ -29,7 +29,6 @@ export class CalendarCell {
   selector: '[owl-date-time-calendar-body]',
   exportAs: 'owlDateTimeCalendarBody',
   templateUrl: './calendar-body.component.html',
-  styleUrls: ['./calendar-body.component.scss'],
   host: {
     // eslint-disable-next-line @typescript-eslint/naming-convention
     '[class.owl-dt-calendar-body]': 'owlDTCalendarBodyClass',
