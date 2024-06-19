@@ -91,7 +91,6 @@ export const createTranslateLoader = (http: HttpClient): TranslateHttpLoader =>
     FocusModeModule,
     CalendarIntegrationModule,
     AndroidModule,
-    // throws build error ...(IS_ANDROID_WEB_VIEW ? [AndroidModule] : []),
     // External
     BrowserModule,
     BrowserAnimationsModule,

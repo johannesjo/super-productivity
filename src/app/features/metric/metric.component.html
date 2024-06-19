@@ -1,178 +1,166 @@
-<!--<div class="wrapper">-->
-<!--  <section-->
-<!--    class="basic-stats"-->
-<!--    *ngIf="projectMetricsService.simpleMetrics$|async as sm"-->
-<!--    [@fade]-->
-<!--  >-->
-<!--    <h1-->
-<!--      class="mat-h1"-->
-<!--      style="text-align: center"-->
-<!--    >-->
-<!--      {{T.PM.TITLE|translate}}-->
-<!--    </h1>-->
+<div class="wrapper">
+  <section
+    class="basic-stats"
+    *ngIf="projectMetricsService.simpleMetrics$|async as sm"
+    [@fade]
+  >
+    <h1
+      class="mat-h1"
+      style="text-align: center"
+    >
+      {{ T.PM.TITLE|translate }}
+    </h1>
 
-<!--    &lt;!&ndash;  <h2>Basic Metrics</h2>&ndash;&gt;-->
-<!--    <p><i>{{sm.start}} – {{sm.end}}</i></p>-->
-<!--    <div class="material-table">-->
-<!--      <table>-->
-<!--        <tr>-->
-<!--          <th>{{T.F.METRIC.CMP.TIME_SPENT|translate}}</th>-->
-<!--          <td>{{sm.timeSpent|msToString}}</td>-->
-<!--        </tr>-->
-<!--        <tr>-->
-<!--          <th>{{T.F.METRIC.CMP.TIME_ESTIMATED|translate}}</th>-->
-<!--          <td>{{sm.timeEstimate|msToString}}</td>-->
-<!--        </tr>-->
-<!--        <tr>-->
-<!--          <th>{{T.F.METRIC.CMP.TASKS_DONE_CREATED|translate}}</th>-->
-<!--          <td>{{sm.nrOfCompletedTasks}} / {{sm.nrOfAllTasks}}</td>-->
-<!--        </tr>-->
-<!--        <tr>-->
-<!--          <th>{{T.F.METRIC.CMP.DAYS_WORKED|translate}}</th>-->
-<!--          <td>{{sm.daysWorked}}</td>-->
-<!--        </tr>-->
-<!--        <tr>-->
-<!--          <th>{{T.F.METRIC.CMP.AVG_TASKS_PER_DAY_WORKED|translate}}</th>-->
-<!--          <td>{{sm.avgTasksPerDay|number:'1.0-1'}}</td>-->
-<!--        </tr>-->
-<!--        <tr>-->
-<!--          <th>{{T.F.METRIC.CMP.AVG_BREAKS_PER_DAY|translate}}</th>-->
-<!--          <td>{{sm.avgBreakNr|number:'1.0-1'}}</td>-->
-<!--        </tr>-->
-<!--        <tr>-->
-<!--          <th>{{T.F.METRIC.CMP.AVG_TIME_SPENT_PER_DAY|translate}}</th>-->
-<!--          <td>{{sm.avgTimeSpentOnDay|msToString}}</td>-->
-<!--        </tr>-->
-<!--        <tr>-->
-<!--          <th>{{T.F.METRIC.CMP.AVG_TIME_SPENT_PER_TASK|translate}}</th>-->
-<!--          <td>{{sm.avgTimeSpentOnTask|msToString}}</td>-->
-<!--        </tr>-->
-<!--        <tr>-->
-<!--          <th>-->
-<!--            {{T.F.METRIC.CMP.AVG_TIME_SPENT_PER_TASK|translate}}-->
-<!--            <br />{{T.F.METRIC.CMP.COUNTING_SUBTASKS|translate}}-->
-<!--          </th>-->
-<!--          <td>{{sm.avgTimeSpentOnTaskIncludingSubTasks|msToString}}</td>-->
-<!--        </tr>-->
-<!--        <tr>-->
-<!--          <th>{{T.F.METRIC.CMP.AVG_TIME_SPENT_ON_BREAKS|translate}}</th>-->
-<!--          <td>{{sm.avgBreakTime|msToString}}</td>-->
-<!--        </tr>-->
-<!--      </table>-->
-<!--    </div>-->
-<!--  </section>-->
+    <!--  <h2>Basic Metrics</h2>-->
+    <p><i>{{ sm.start }} – {{ sm.end }}</i></p>
+    <div class="material-table">
+      <table>
+        <tr>
+          <th>{{ T.F.METRIC.CMP.TIME_SPENT|translate }}</th>
+          <td>{{ sm.timeSpent|msToString }}</td>
+        </tr>
+        <tr>
+          <th>{{ T.F.METRIC.CMP.TIME_ESTIMATED|translate }}</th>
+          <td>{{ sm.timeEstimate|msToString }}</td>
+        </tr>
+        <tr>
+          <th>{{ T.F.METRIC.CMP.TASKS_DONE_CREATED|translate }}</th>
+          <td>{{ sm.nrOfCompletedTasks }} / {{ sm.nrOfAllTasks }}</td>
+        </tr>
+        <tr>
+          <th>{{ T.F.METRIC.CMP.DAYS_WORKED|translate }}</th>
+          <td>{{ sm.daysWorked }}</td>
+        </tr>
+        <tr>
+          <th>{{ T.F.METRIC.CMP.AVG_TASKS_PER_DAY_WORKED|translate }}</th>
+          <td>{{ sm.avgTasksPerDay|number:'1.0-1' }}</td>
+        </tr>
+        <tr>
+          <th>{{ T.F.METRIC.CMP.AVG_BREAKS_PER_DAY|translate }}</th>
+          <td>{{ sm.avgBreakNr|number:'1.0-1' }}</td>
+        </tr>
+        <tr>
+          <th>{{ T.F.METRIC.CMP.AVG_TIME_SPENT_PER_DAY|translate }}</th>
+          <td>{{ sm.avgTimeSpentOnDay|msToString }}</td>
+        </tr>
+        <tr>
+          <th>{{ T.F.METRIC.CMP.AVG_TIME_SPENT_PER_TASK|translate }}</th>
+          <td>{{ sm.avgTimeSpentOnTask|msToString }}</td>
+        </tr>
+        <tr>
+          <th>
+            {{ T.F.METRIC.CMP.AVG_TIME_SPENT_PER_TASK|translate }}
+            <br />{{ T.F.METRIC.CMP.COUNTING_SUBTASKS|translate }}
+          </th>
+          <td>{{ sm.avgTimeSpentOnTaskIncludingSubTasks|msToString }}</td>
+        </tr>
+        <tr>
+          <th>{{ T.F.METRIC.CMP.AVG_TIME_SPENT_ON_BREAKS|translate }}</th>
+          <td>{{ sm.avgBreakTime|msToString }}</td>
+        </tr>
+      </table>
+    </div>
+  </section>
 
-<!--  <p-->
-<!--    *ngIf="!(metricService.hasData$|async)"-->
-<!--    style="margin-top: 32px"-->
-<!--  >-->
-<!--    {{T.F.METRIC.CMP.NO_ADDITIONAL_DATA_YET|translate}}-->
-<!--  </p>-->
+  <p
+    *ngIf="!(metricService.hasData$|async)"
+    style="margin-top: 32px"
+  >
+    {{ T.F.METRIC.CMP.NO_ADDITIONAL_DATA_YET|translate }}
+  </p>
 
-<!--  <section-->
-<!--    *ngIf="(metricService.hasData$|async)"-->
-<!--    class="metric-metrics"-->
-<!--  >-->
-<!--    <h1>{{T.F.METRIC.CMP.GLOBAL_METRICS|translate}}</h1>-->
-<!--    <section class="pie-charts">-->
-<!--      <section-->
-<!--        *ngIf="(metricService.improvementCountsPieChartData$|async) as improvementCounts"-->
-<!--      >-->
-<!--        <h3>{{T.F.METRIC.CMP.IMPROVEMENT_SELECTION_COUNT|translate}}</h3>-->
-<!--        <canvas-->
-<!--          [chartType]="pieChartType"-->
-<!--          [data]="improvementCounts.data"-->
-<!--          [labels]="improvementCounts.labels"-->
-<!--          [legend]="(improvementCounts.data.length < 12)"-->
-<!--          [options]="pieChartOptions"-->
-<!--          [plugins]="pieChartPlugins"-->
-<!--          baseChart-->
-<!--        >-->
-<!--        </canvas>-->
-<!--      </section>-->
+  <section
+    *ngIf="(metricService.hasData$|async)"
+    class="metric-metrics"
+  >
+    <h1>{{ T.F.METRIC.CMP.GLOBAL_METRICS|translate }}</h1>
+    <section class="pie-charts">
+      <section
+        *ngIf="(metricService.improvementCountsPieChartData$|async) as improvementCounts"
+      >
+        <h3>{{ T.F.METRIC.CMP.IMPROVEMENT_SELECTION_COUNT|translate }}</h3>
 
-<!--      <section-->
-<!--        *ngIf="(metricService.obstructionCountsPieChartData$|async) as obstructionCounts"-->
-<!--      >-->
-<!--        <h3>{{T.F.METRIC.CMP.OBSTRUCTION_SELECTION_COUNT|translate}}</h3>-->
-<!--        <canvas-->
-<!--          [chartType]="pieChartType"-->
-<!--          [data]="obstructionCounts.data"-->
-<!--          [labels]="obstructionCounts.labels"-->
-<!--          [legend]="(obstructionCounts.data.length < 12)"-->
-<!--          [options]="pieChartOptions"-->
-<!--          [plugins]="pieChartPlugins"-->
-<!--          baseChart-->
-<!--        >-->
-<!--        </canvas>-->
-<!--      </section>-->
-<!--    </section>-->
+        <canvas
+          [type]="pieChartType"
+          [data]="improvementCounts"
+          [legend]="(improvementCounts?.datasets[0].data.length < 12)"
+          [options]="pieChartOptions"
+          baseChart
+        >
+        </canvas>
+      </section>
 
-<!--    <section class="line-charts">-->
-<!--      <section *ngIf="(productivityHappiness$|async) as productivityHappiness">-->
-<!--        <h3>{{T.F.METRIC.CMP.MOOD_PRODUCTIVITY_OVER_TIME|translate}}</h3>-->
-<!--        <div class="chart-wrapper">-->
-<!--          <div class="inner-chart-wrapper">-->
-<!--            <canvas-->
-<!--              [chartType]="lineChartType"-->
-<!--              [colors]="lineChartColors"-->
-<!--              [datasets]="productivityHappiness.data"-->
-<!--              [labels]="productivityHappiness.labels"-->
-<!--              [legend]="lineChartLegend"-->
-<!--              [options]="lineChartOptions"-->
-<!--              [plugins]="lineChartPlugins"-->
-<!--              baseChart-->
-<!--            >-->
-<!--            </canvas-->
-<!--            >&ndash;&gt;-->
-<!--          </div>-->
-<!--        </div>-->
-<!--      </section>-->
-<!--    </section>-->
-<!--  </section>-->
+      <section
+        *ngIf="(metricService.obstructionCountsPieChartData$|async) as obstructionCounts"
+      >
+        <h3>{{ T.F.METRIC.CMP.OBSTRUCTION_SELECTION_COUNT|translate }}</h3>
+        <canvas
+          [type]="pieChartType"
+          [data]="obstructionCounts"
+          [legend]="(obstructionCounts?.datasets[0].data.length < 12)"
+          [options]="pieChartOptions"
+          baseChart
+        >
+        </canvas>
+      </section>
+    </section>
 
-<!--  <section-->
-<!--    *ngIf="(metricService.hasData$|async)"-->
-<!--    class="metric-metrics"-->
-<!--  >-->
-<!--    <h2>{{T.F.METRIC.CMP.SIMPLE_COUNTERS|translate}}</h2>-->
-<!--    <section class="line-charts">-->
-<!--      <section *ngIf="(simpleClickCounterData$|async) as simpleCounterClickData">-->
-<!--        <h3>{{T.F.METRIC.CMP.SIMPLE_CLICK_COUNTERS_OVER_TIME|translate}}</h3>-->
-<!--        <div class="chart-wrapper">-->
-<!--          <div class="inner-chart-wrapper">-->
-<!--            <canvas-->
-<!--              [chartType]="lineChartType"-->
-<!--              [colors]="lineChartColors"-->
-<!--              [datasets]="simpleCounterClickData.data"-->
-<!--              [labels]="simpleCounterClickData.labels"-->
-<!--              [legend]="lineChartLegend"-->
-<!--              [options]="lineChartOptions"-->
-<!--              [plugins]="lineChartPlugins"-->
-<!--              baseChart-->
-<!--            >-->
-<!--            </canvas>-->
-<!--          </div>-->
-<!--        </div>-->
-<!--      </section>-->
-<!--      <section *ngIf="(simpleCounterStopWatchData$|async) as simpleCounterStopWatchData">-->
-<!--        <h3>{{T.F.METRIC.CMP.SIMPLE_STOPWATCH_COUNTERS_OVER_TIME|translate}}</h3>-->
-<!--        <div class="chart-wrapper">-->
-<!--          <div class="inner-chart-wrapper">-->
-<!--            <canvas-->
-<!--              [chartType]="lineChartType"-->
-<!--              [colors]="lineChartColors"-->
-<!--              [datasets]="simpleCounterStopWatchData.data"-->
-<!--              [labels]="simpleCounterStopWatchData.labels"-->
-<!--              [legend]="lineChartLegend"-->
-<!--              [options]="lineChartOptions"-->
-<!--              [plugins]="lineChartPlugins"-->
-<!--              baseChart-->
-<!--            >-->
-<!--            </canvas>-->
-<!--          </div>-->
-<!--        </div>-->
-<!--      </section>-->
-<!--    </section>-->
-<!--  </section>-->
-<!--</div>-->
+    <section class="line-charts">
+      <section *ngIf="(productivityHappiness$|async) as productivityHappiness">
+        <h3>{{ T.F.METRIC.CMP.MOOD_PRODUCTIVITY_OVER_TIME|translate }}</h3>
+        <div class="chart-wrapper">
+          <div class="inner-chart-wrapper">
+            <canvas
+              [type]="lineChartType"
+              [data]="productivityHappiness"
+              [legend]="true"
+              [options]="lineChartOptions"
+              baseChart
+            ></canvas>
+          </div>
+        </div>
+      </section>
+    </section>
+  </section>
+
+  <section
+    *ngIf="(metricService.hasData$|async)"
+    class="metric-metrics"
+  >
+    <h2>{{ T.F.METRIC.CMP.SIMPLE_COUNTERS|translate }}</h2>
+    <section class="line-charts">
+      <section *ngIf="(simpleClickCounterData$|async) as simpleCounterClickData">
+        <h3>{{ T.F.METRIC.CMP.SIMPLE_CLICK_COUNTERS_OVER_TIME|translate }}</h3>
+        <div class="chart-wrapper">
+          <div class="inner-chart-wrapper">
+            <canvas
+              [type]="lineChartType"
+              [data]="simpleCounterClickData"
+              [labels]="simpleCounterClickData.labels"
+              [options]="lineChartOptions"
+              [legend]="true"
+              baseChart
+            >
+            </canvas>
+          </div>
+        </div>
+      </section>
+      <section *ngIf="(simpleCounterStopWatchData$|async) as simpleCounterStopWatchData">
+        <h3>{{ T.F.METRIC.CMP.SIMPLE_STOPWATCH_COUNTERS_OVER_TIME|translate }}</h3>
+        <div class="chart-wrapper">
+          <div class="inner-chart-wrapper">
+            <canvas
+              [type]="lineChartType"
+              [data]="simpleCounterStopWatchData"
+              [labels]="simpleCounterStopWatchData.labels"
+              [options]="lineChartOptions"
+              [legend]="true"
+              baseChart
+            >
+            </canvas>
+          </div>
+        </div>
+      </section>
+    </section>
+  </section>
+</div>

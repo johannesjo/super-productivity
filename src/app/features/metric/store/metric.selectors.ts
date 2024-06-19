@@ -139,7 +139,7 @@ export const selectImprovementCountsPieChartData = createSelector(
       return null;
     }
 
-    const counts: any = {};
+    const counts: { [key: string]: number } = {};
     metrics.forEach((metric: Metric) => {
       metric.improvements.forEach((improvementId: string) => {
         counts[improvementId] = counts[improvementId] ? counts[improvementId] + 1 : 1;
@@ -147,13 +147,13 @@ export const selectImprovementCountsPieChartData = createSelector(
     });
     const chart: PieChartData = {
       labels: [],
-      data: [],
+      datasets: [{ data: [] }],
     };
     Object.keys(counts).forEach((id) => {
       const imp = improvementState.entities[id];
       if (imp) {
-        chart.labels.push(imp.title);
-        chart.data.push(counts[id]);
+        chart.labels?.push(imp.title);
+        chart.datasets[0].data.push(counts[id]);
       } else {
         console.warn('No improvement entity found');
       }
@@ -170,7 +170,7 @@ export const selectObstructionCountsPieChartData = createSelector(
       return null;
     }
 
-    const counts: any = {};
+    const counts: { [key: string]: number } = {};
     metrics.forEach((metric: Metric) => {
       metric.obstructions.forEach((obstructionId: string) => {
         counts[obstructionId] = counts[obstructionId] ? counts[obstructionId] + 1 : 1;
@@ -178,13 +178,13 @@ export const selectObstructionCountsPieChartData = createSelector(
     });
     const chart: PieChartData = {
       labels: [],
-      data: [],
+      datasets: [{ data: [] }],
     };
     Object.keys(counts).forEach((id) => {
       const obstr = obstructionState.entities[id];
       if (obstr) {
-        chart.labels.push(obstr.title);
-        chart.data.push(counts[id]);
+        chart.labels?.push(obstr.title);
+        chart.datasets[0].data.push(counts[id]);
       } else {
         console.warn('No obstruction entity found');
       }
@@ -198,19 +198,18 @@ export const selectProductivityHappinessLineChartDataComplete = createSelector(
   (state: MetricState): LineChartData => {
     const ids = state.ids as string[];
     const sorted = sortWorklogDates(ids);
-
-    const v: any = {
+    const v: LineChartData = {
       labels: [],
-      data: [
+      datasets: [
         { data: [], label: 'Mood' },
         { data: [], label: 'Productivity' },
       ],
     };
     sorted.forEach((id) => {
       const metric = state.entities[id] as Metric;
-      v.labels.push(metric.id);
-      v.data[0].data.push(metric.mood ? metric.mood - 5 : undefined);
-      v.data[1].data.push(metric.productivity ? metric.productivity - 5 : undefined);
+      v.labels?.push(metric.id);
+      v.datasets[0].data.push(metric.mood ? metric.mood - 5 : undefined);
+      v.datasets[1].data.push(metric.productivity ? metric.productivity - 5 : undefined);
     });
     return v;
   },
@@ -221,10 +220,10 @@ export const selectProductivityHappinessLineChartData = createSelector(
   (chart: LineChartData, props: { howMany: number }): LineChartData => {
     const f = -1 * props.howMany;
     return {
-      labels: chart.labels.slice(f),
-      data: [
-        { data: (chart.data[0] as any).data.slice(f), label: chart.data[0].label },
-        { data: (chart.data[1] as any).data.slice(f), label: chart.data[1].label },
+      labels: chart.labels?.slice(f),
+      datasets: [
+        { data: chart.datasets[0].data.slice(f), label: chart.datasets[0].label },
+        { data: chart.datasets[1].data.slice(f), label: chart.datasets[1].label },
       ],
     };
   },
@@ -236,7 +235,7 @@ export const selectSimpleCounterClickCounterLineChartData = createSelector(
     const f = -1 * props.howMany;
     const chart: LineChartData = {
       labels: [],
-      data: [],
+      datasets: [{ data: [] }],
     };
     const stopwatchItems = simpleCounterItems.filter(
       (item) => item.type === SimpleCounterType.ClickCounter,
@@ -249,10 +248,10 @@ export const selectSimpleCounterClickCounterLineChartData = createSelector(
     chart.labels = allDaysSorted;
 
     stopwatchItems.forEach((item, j) => {
-      chart.data[j] = { data: [], label: item.title };
+      chart.datasets[j] = { data: [], label: item.title };
       allDaysSorted.forEach((day) => {
         const valueForDay = item.countOnDay[day];
-        (chart as any).data[j].data.push(valueForDay ? valueForDay : undefined);
+        chart.datasets[j].data.push(valueForDay ? valueForDay : undefined);
       });
     });
     return chart;
@@ -265,7 +264,7 @@ export const selectSimpleCounterStopWatchLineChartData = createSelector(
     const f = -1 * props.howMany;
     const chart: LineChartData = {
       labels: [],
-      data: [],
+      datasets: [{ data: [] }],
     };
     const stopwatchItems = simpleCounterItems.filter(
       (item) => item.type === SimpleCounterType.StopWatch,
@@ -278,10 +277,10 @@ export const selectSimpleCounterStopWatchLineChartData = createSelector(
     chart.labels = allDaysSorted;
 
     stopwatchItems.forEach((item, j) => {
-      chart.data[j] = { data: [], label: item.title };
+      chart.datasets[j] = { data: [], label: item.title };
       allDaysSorted.forEach((day) => {
         const valueForDay = item.countOnDay[day];
-        (chart as any).data[j].data.push(
+        chart.datasets[j].data.push(
           valueForDay ? Math.round(valueForDay / 60000) : undefined,
         );
       });

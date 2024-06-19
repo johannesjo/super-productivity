@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { ChartOptions, ChartType } from 'chart.js';
+import { ChartConfiguration, ChartType } from 'chart.js';
 import { MetricService } from './metric.service';
 // import { Color } from 'ng2-charts';
 import { Observable } from 'rxjs';
@@ -28,22 +28,53 @@ export class MetricComponent {
   simpleCounterStopWatchData$: Observable<LineChartData> =
     this.metricService.getSimpleCounterStopwatchMetrics$();
 
-  pieChartOptions: ChartOptions = {
+  pieChartOptions: ChartConfiguration<
+    'pie' & 'pie' & 'pie',
+    Array<number>,
+    any
+  >['options'] = {
+    scales: {
+      x: {
+        ticks: {
+          display: false,
+        },
+        grid: {
+          display: false,
+        },
+      },
+      y: {
+        ticks: {
+          display: false,
+        },
+        grid: {
+          display: false,
+        },
+      },
+    },
+    plugins: {
+      legend: {
+        position: 'top',
+      },
+    },
     responsive: true,
-    // legend: {
-    //   position: 'top',
-    // },
   };
   pieChartType: ChartType = 'pie';
-  pieChartPlugins: any[] = [];
 
-  lineChartOptions: ChartOptions = {
+  lineChartOptions: ChartConfiguration<
+    'line' & 'line' & 'line',
+    (number | undefined)[],
+    string
+  >['options'] = {
     responsive: true,
+    scales: {
+      y: {
+        ticks: {
+          precision: 0,
+        },
+      },
+    },
   };
-  // lineChartColors: Color[] = [];
-  lineChartLegend: boolean = true;
   lineChartType: ChartType = 'line';
-  lineChartPlugins: any[] = [];
 
   constructor(
     public workContextService: WorkContextService,
