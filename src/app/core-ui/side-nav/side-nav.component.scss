@@ -141,11 +141,20 @@ section {
   button:last-of-type {
     border-radius: 0;
     align-self: stretch;
-    display: block;
-    height: auto;
+    display: inline-flex;
     min-width: 48px;
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    align-items: center;
+    justify-content: center;
 
-    @include mq(xs) {
+    .mat-mdc-button-touch-target {
+      width: 40px;
+      height: 40px;
+    }
+
+    @include mousePrimaryDevice {
       opacity: 0;
       display: none;
     }
@@ -154,8 +163,10 @@ section {
   &:focus,
   &:hover {
     button:last-of-type {
-      opacity: 0.8;
-      display: block;
+      @include mousePrimaryDevice {
+        opacity: 0.8;
+        display: inline-flex;
+      }
     }
   }
 }
@@ -193,8 +204,6 @@ section {
 
 .tag-settings-btn,
 .project-settings-btn {
-  padding-top: 5px;
-  padding-bottom: 5px;
   border-radius: 0 !important;
 
   ::ng-deep {
