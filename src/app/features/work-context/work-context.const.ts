@@ -22,6 +22,7 @@ export const WORK_CONTEXT_DEFAULT_THEME: WorkContextThemeCfg = {
   primary: DEFAULT_TAG_COLOR,
   huePrimary: '500',
   accent: '#ff4081',
+  // accent: 'rgb(180,14,225)',
   hueAccent: '500',
   warn: '#e11826',
   hueWarn: '500',
