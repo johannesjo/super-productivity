@@ -131,10 +131,6 @@ export class DialogAddTaskReminderComponent {
     this._matDialogRef.close(wasEdited);
   }
 
-  trackByIndex(i: number, p: any): number {
-    return i;
-  }
-
   onDateTimeChange(dateTime: number): void {
     const isLastDateToday = isToday(dateTime);
     if (isLastDateToday !== this.isLastDateToday) {

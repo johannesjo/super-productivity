@@ -14,7 +14,7 @@
           name="type"
           required="true"
         >
-          @for (remindOption of remindAvailableOptions; track trackByIndex) {
+          @for (remindOption of remindAvailableOptions; track remindOption.value) {
           <mat-option [value]="remindOption.value">
             {{ (remindOption.label|translate) }}
           </mat-option>
