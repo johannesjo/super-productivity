@@ -417,7 +417,7 @@ export class PersistenceService {
   // TODO maybe refactor to class?
 
   // ------------------
-  private _cmBase<T>({
+  private _cmBase<T extends Record<string, any>>({
     legacyKey,
     appDataKey,
     migrateFn = (v) => v,
@@ -449,7 +449,7 @@ export class PersistenceService {
       //   return data;
       // },
       saveState: (
-        data: any,
+        data: T,
         {
           isDataImport = false,
           isSyncModelChange,
@@ -472,7 +472,7 @@ export class PersistenceService {
     return model;
   }
 
-  private _cmBaseEntity<S, M>({
+  private _cmBaseEntity<S extends Record<string, any>, M>({
     legacyKey,
     appDataKey,
     modelVersion,
@@ -515,8 +515,7 @@ export class PersistenceService {
     return model;
   }
 
-  // TODO maybe find a way to exec effects here as well
-  private _cmProject<S, M>({
+  private _cmProject<S extends Record<string, any>, M>({
     legacyKey,
     appDataKey,
   }: // migrateFn = (v) => v,
@@ -532,7 +531,7 @@ export class PersistenceService {
       // }).then((v) => migrateFn(v, projectId)),
       save: (
         projectId: string,
-        data: any,
+        data: Record<string, any>,
         {
           isDataImport = false,
           isSyncModelChange,
@@ -626,7 +625,7 @@ export class PersistenceService {
     isSyncModelChange = false,
   }: {
     dbKey: AllowedDBKeys;
-    data: any;
+    data: Record<string, any>;
     projectId?: string;
     isDataImport?: boolean;
     isSyncModelChange?: boolean;
