@@ -789,9 +789,9 @@ $this-play-size: 22px;
     //left: 10px;
   }
 
-  .first-line:hover & {
-    display: none;
-  }
+  //.first-line:hover & {
+  //  display: none;
+  //}
 }
 
 .ico-btn {
@@ -822,6 +822,8 @@ $this-play-size: 22px;
 
 .toggle-sub-tasks-btn.toggle-sub-tasks-btn {
   position: absolute !important;
+  // overwrite any lower values set elsewhere
+  opacity: 1;
   transform: translateY(-50%);
   left: -24px;
   top: 50%;
