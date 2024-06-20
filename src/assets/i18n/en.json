@@ -915,7 +915,8 @@
         "REPEAT": "Repeat",
         "SCHEDULE_TASK": "Schedule Task",
         "SUB_TASKS": "Sub Tasks ({{nr}})",
-        "TIME": "Time"
+        "TIME": "Time",
+        "TITLE_PLACEHOLDER": "Enter a title"
       },
       "ADD_TASK_BAR": {
         "ADD_EXISTING_TASK": "Add existing task \"{{taskTitle}}\"",

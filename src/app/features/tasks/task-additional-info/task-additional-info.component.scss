@@ -70,9 +70,17 @@ progress-bar {
   flex-grow: 1;
   margin-top: 4px;
   line-height: 1.4;
+  min-height: 40px;
 
   &:focus {
     transform: scale(1);
+  }
+
+  &[contenteditable='true']:empty:before {
+    content: attr(placeholder);
+    pointer-events: none;
+    display: block;
+    opacity: 0.4;
   }
 }
 

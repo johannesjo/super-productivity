@@ -1,6 +1,11 @@
 {
   "root": true,
-  "ignorePatterns": ["app-builds/**/*", "dist/**", "node_modules/**/*"],
+  "ignorePatterns": [
+    "app-builds/**/*",
+    "dist/**",
+    "node_modules/**/*",
+    "src/app/t.const.ts"
+  ],
   "overrides": [
     {
       "files": ["*.ts"],

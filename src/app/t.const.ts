@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/naming-convention */
 const T = {
   ANDROID: {
     NOTIFICATIONS: {
@@ -932,6 +931,7 @@ const T = {
         SCHEDULE_TASK: 'F.TASK.ADDITIONAL_INFO.SCHEDULE_TASK',
         SUB_TASKS: 'F.TASK.ADDITIONAL_INFO.SUB_TASKS',
         TIME: 'F.TASK.ADDITIONAL_INFO.TIME',
+        TITLE_PLACEHOLDER: 'F.TASK.ADDITIONAL_INFO.TITLE_PLACEHOLDER',
       },
       ADD_TASK_BAR: {
         ADD_EXISTING_TASK: 'F.TASK.ADD_TASK_BAR.ADD_EXISTING_TASK',
@@ -1266,7 +1266,6 @@ const T = {
   },
   G: {
     CANCEL: 'G.CANCEL',
-    EXAMPLE_VAL: 'G.EXAMPLE_VAL',
     CLOSE: 'G.CLOSE',
     DELETE: 'G.DELETE',
     DISMISS: 'G.DISMISS',
@@ -1274,6 +1273,7 @@ const T = {
     DO_IT: 'G.DO_IT',
     EDIT: 'G.EDIT',
     ENABLED: 'G.ENABLED',
+    EXAMPLE_VAL: 'G.EXAMPLE_VAL',
     EXTENSION_INFO: 'G.EXTENSION_INFO',
     HIDE: 'G.HIDE',
     LOGIN: 'G.LOGIN',

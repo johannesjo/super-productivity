@@ -6,6 +6,40 @@
   &:focus {
     outline: none;
   }
+
+  &::ng-deep task ::ng-deep {
+    margin: 2px;
+
+    .parent-title {
+      display: none;
+    }
+
+    tag-list {
+      display: none;
+    }
+
+    .drag-handle {
+      // since not draggable
+      display: none;
+    }
+
+    .title-and-tags-wrapper {
+      margin-left: $s * 2;
+    }
+
+    .box {
+      @include lightTheme {
+        border-color: $light-theme-extra-border-color;
+        bottom: 0;
+        top: -1px;
+      }
+
+      @include darkTheme {
+        box-shadow: $whiteframe-shadow-1dp;
+        background: $dark12 !important;
+      }
+    }
+  }
 }
 
 // SHARED

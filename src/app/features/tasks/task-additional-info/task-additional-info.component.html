@@ -10,9 +10,8 @@
       class="task-title"
       contentEditableOnClick
       contenteditable="true"
-    >
-      {{task.title}}
-    </h2>
+      [attr.placeholder]="T.F.TASK.ADDITIONAL_INFO.TITLE_PLACEHOLDER|translate"
+    ></h2>
     <!--    <button mat-icon-button>-->
     <!--      <mat-icon>more_vert</mat-icon>-->
     <!--    </button>-->
