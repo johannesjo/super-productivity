@@ -24,6 +24,7 @@ export class PersistenceLocalService {
     ) {
       return r;
     }
+    // TODO remove that
     return {
       [SyncProvider.Dropbox]: {
         rev: this._getLegacyLocalRev(SyncProvider.Dropbox) || null,

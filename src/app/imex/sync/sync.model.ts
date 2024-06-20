@@ -40,6 +40,7 @@ export interface AppBaseData {
 export interface LocalSyncMetaForProvider {
   lastSync: number;
   rev: string | null;
+  revTaskArchive: string | null;
 }
 
 export interface LocalSyncMetaModel {

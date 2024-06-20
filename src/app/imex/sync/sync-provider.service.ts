@@ -381,6 +381,8 @@ export class SyncProviderService {
       throw new Error('lastLocalSyncModelChange is not defined');
     }
 
+    // TODO split data here
+
     const dataStrToUpload = await this._compressAndEncryptAppDataIfEnabled(data);
     const localRev = await this._getLocalRev(cp);
     const successRev = await cp.uploadAppData(

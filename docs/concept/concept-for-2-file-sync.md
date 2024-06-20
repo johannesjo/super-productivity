@@ -20,6 +20,12 @@ We also need to save any incomplete syncs, so that we can warn the user if closi
 
 ## sync flow
 
+### how to determine if local archive was updated?
+
+- calculate checksum of local archive or (faster) just save a timestamp every time the archive is updated und use that as a checksum
+- for local change check the timestamp should be enough
+- for comparing with remote the checksum might be better
+
 ### out
 
 #### only main file was updated
