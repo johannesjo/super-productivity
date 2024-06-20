@@ -173,6 +173,10 @@ $smaller-size: 100% - $larger-size;
       transform: translate(0, -50%);
     }
   }
+
+  mat-icon {
+    margin: 0 !important;
+  }
 }
 
 .edit-btn,
@@ -189,6 +193,8 @@ $smaller-size: 100% - $larger-size;
   border-bottom-right-radius: 0;
   flex-basis: $smaller-size;
   width: $smaller-size;
+  line-height: $thisUpperHeight;
+  height: $thisUpperHeight;
 
   @include mq(xs) {
     transform: translate(100%, -50%);
