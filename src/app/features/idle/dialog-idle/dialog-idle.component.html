@@ -67,6 +67,21 @@
     </button>
 
     <button
+      (click)="track(true)"
+      *ngIf="(configService.idle$|async)?.isUnTrackedIdleResetsBreakTimer"
+      [disabled]="!(selectedTask||newTaskTitle)"
+      color="primary"
+      mat-stroked-button
+      type="button"
+    >
+      <mat-icon *ngIf="!isCreate">track_changes</mat-icon>
+      <mat-icon *ngIf="isCreate">add</mat-icon>
+      <!--      <mat-icon style="margin-left: -4px;">free_breakfast</mat-icon>-->
+      {{ T.F.TIME_TRACKING.D_IDLE.TASK_BREAK|translate }}
+      <mat-icon>free_breakfast</mat-icon>
+    </button>
+
+    <button
       (click)="trackAsBreak()"
       color="primary"
       mat-stroked-button
@@ -85,21 +100,6 @@
       <mat-icon *ngIf="!isCreate">track_changes</mat-icon>
       <mat-icon *ngIf="isCreate">add</mat-icon>
       {{T.F.TIME_TRACKING.D_IDLE.TASK|translate}}
-    </button>
-
-    <button
-      (click)="track(true)"
-      *ngIf="(configService.idle$|async)?.isUnTrackedIdleResetsBreakTimer"
-      [disabled]="!(selectedTask||newTaskTitle)"
-      color="primary"
-      mat-stroked-button
-      type="button"
-    >
-      <mat-icon *ngIf="!isCreate">track_changes</mat-icon>
-      <mat-icon *ngIf="isCreate">add</mat-icon>
-      <!--      <mat-icon style="margin-left: -4px;">free_breakfast</mat-icon>-->
-      {{T.F.TIME_TRACKING.D_IDLE.TASK_BREAK|translate}}
-      <mat-icon>free_breakfast</mat-icon>
     </button>
   </div>
 </form>
