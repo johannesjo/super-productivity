@@ -345,11 +345,16 @@ export const tagReducer = createReducer<TagState>(
   }),
 
   on(deleteTask, (state, { task }) => {
-    const updates: Update<Tag>[] = task.tagIds.map((tagId) => ({
+    const affectedTagIds: string[] = [task, ...task.subTasks].reduce(
+      (acc, t) => [...acc, ...t.tagIds],
+      [] as string[],
+    );
+    const removedTasksIds: string[] = [task.id, ...task.subTaskIds];
+    const updates: Update<Tag>[] = affectedTagIds.map((tagId) => ({
       id: tagId,
       changes: {
         taskIds: (state.entities[tagId] as Tag).taskIds.filter(
-          (taskIdForTag) => taskIdForTag !== task.id,
+          (taskIdForTag) => !removedTasksIds.includes(taskIdForTag),
         ),
       },
     }));
