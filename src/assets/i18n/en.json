@@ -1158,6 +1158,7 @@
         "BREAK": "Break",
         "CREATE_AND_TRACK": "<em>Create</em> and track to",
         "IDLE_FOR": "You have been idle for:",
+        "RESET_BREAK_REMINDER_TIMER": "Reset break reminder timer",
         "SIMPLE_CONFIRM_COUNTER_CANCEL": "Skip",
         "SIMPLE_CONFIRM_COUNTER_OK": "Track",
         "SIMPLE_COUNTER_CONFIRM_TXT": "You selected skip, but activated {{nr}} simple counter button(s). Do you want to track the idle time to them?",
@@ -1166,7 +1167,6 @@
         "SKIP": "Skip",
         "SPLIT_TIME": "Split time into multiples tasks and breaks",
         "TASK": "Task",
-        "TASK_BREAK": "Task+Break",
         "TRACK_TO": "Track to"
       },
       "D_TRACKING_REMINDER": {

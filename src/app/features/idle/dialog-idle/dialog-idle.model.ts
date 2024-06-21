@@ -34,5 +34,6 @@ export interface IdleTrackItem {
   time: number | 'IDLE_TIME';
   simpleCounterToggleBtns: SimpleCounterIdleBtn[];
   task?: Task;
+  isResetBreakTimer?: boolean;
   title?: string;
 }

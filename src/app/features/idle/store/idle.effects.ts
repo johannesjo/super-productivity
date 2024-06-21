@@ -229,6 +229,7 @@ export class IdleEffects {
           return;
         }
 
+        // TODO remove TASK_AND_BREAK case completely
         const itemsWithMappedIdleTime = trackItems.map((trackItem) => ({
           ...trackItem,
           time: trackItem.time === 'IDLE_TIME' ? idleTime : trackItem.time,
@@ -247,6 +248,8 @@ export class IdleEffects {
           breakItems.forEach((item) => {
             this._workContextService.addToBreakTimeForActiveContext(undefined, item.time);
           });
+        } else if (itemsWithMappedIdleTime[0]?.isResetBreakTimer) {
+          this._workContextService.addToBreakTimeForActiveContext(undefined, 1);
         }
 
         const taskItems = itemsWithMappedIdleTime.filter(
@@ -289,9 +292,9 @@ export class IdleEffects {
     private _idleService: IdleService,
     private _dateService: DateService,
   ) {
-    // window.setTimeout(() => {
-    //   this._store.dispatch(triggerIdle({ idleTime: 60 * 1000 }));
-    // }, 2700);
+    window.setTimeout(() => {
+      this._store.dispatch(triggerIdle({ idleTime: 60 * 1000 }));
+    }, 2700);
   }
 
   private _initIdlePoll(initialIdleTime: number): void {

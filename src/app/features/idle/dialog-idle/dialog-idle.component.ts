@@ -47,6 +47,7 @@ export class DialogIdleComponent implements OnInit, OnDestroy {
 
   simpleCounterToggleBtns: SimpleCounterIdleBtn[] = [];
   isTaskDataLoadedIfNeeded: boolean = !this.data.lastCurrentTaskId;
+  isResetBreakTimer: boolean = false;
 
   private _subs = new Subscription();
 
@@ -145,12 +146,13 @@ export class DialogIdleComponent implements OnInit, OnDestroy {
     });
   }
 
-  track(isTrackAsBreak: boolean = false): void {
+  track(): void {
     this._matDialogRef.close({
       trackItems: [
         {
-          type: isTrackAsBreak ? 'TASK_AND_BREAK' : 'TASK',
+          type: 'TASK',
           time: 'IDLE_TIME',
+          isResetBreakTimer: this.isResetBreakTimer,
           simpleCounterToggleBtns: this.simpleCounterToggleBtns,
           ...(this.isCreate
             ? { title: this.newTaskTitle as string }

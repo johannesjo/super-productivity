@@ -1,6 +1,10 @@
 @import '../../../../variables';
 
 .dialog-content {
+  @include mq(xs) {
+    min-width: 400px;
+  }
+
   p,
   .track-to-label,
   .simple-counter-section,
