@@ -256,10 +256,7 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
         className.includes('shepherd-enabled');
     }
 
-    if (
-      !relatedTarget ||
-      (relatedTarget && !relatedTarget.className.includes('close-btn') && !isUIelement)
-    ) {
+    if (!relatedTarget || (relatedTarget && !isUIelement)) {
       sessionStorage.setItem(
         SS.TODO_TMP,
         (this.inputEl as ElementRef).nativeElement.value,
@@ -267,24 +264,21 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
     }
     if (relatedTarget && isUIelement) {
       (this.inputEl as ElementRef).nativeElement.focus();
-    } else if (relatedTarget && relatedTarget.className.includes('mat-option')) {
-      this._blurTimeout = window.setTimeout(() => {
-        if (!this._isAddInProgress) {
-          this.blurred.emit(ev);
-        }
-      }, 300);
     } else {
-      this.blurred.emit(ev);
+      // we need to wait since otherwise addTask is not working
+      this._blurTimeout = window.setTimeout(() => {
+        if (this._isAddInProgress) {
+          this._blurTimeout = window.setTimeout(() => {
+            this.blurred.emit(ev);
+          }, 300);
+        }
+      }, 20);
     }
   }
 
   displayWith(issue?: JiraIssue): string | undefined {
     // NOTE: apparently issue can be undefined for displayWith
     return issue?.summary;
-  }
-
-  trackByFn(i: number, item: AddTaskSuggestion): string | number | undefined {
-    return item.taskId || (item.issueData && item.issueData.id);
   }
 
   trackById(i: number, item: any): string {

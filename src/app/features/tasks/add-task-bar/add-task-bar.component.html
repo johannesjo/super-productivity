@@ -81,7 +81,7 @@
         *ngIf="!activatedIssueTask && !shortSyntaxTags.length"
         class="info-text"
       >
-        {{T.F.TASK.ADD_TASK_BAR.CREATE_TASK|translate}}
+        {{ T.F.TASK.ADD_TASK_BAR.CREATE_TASK|translate }}
       </div>
 
       <ng-container *ngIf="activatedIssueTask">
@@ -90,7 +90,7 @@
           class="info-text add-existing"
         >
           <mat-icon>playlist_add</mat-icon>
-          {{T.F.TASK.ADD_TASK_BAR.ADD_ISSUE_TASK|translate:{ issueType:
+          {{ T.F.TASK.ADD_TASK_BAR.ADD_ISSUE_TASK|translate:{ issueType:
           activatedIssueTask.issueType, issueNr: activatedIssueTask.taskIssueId ||
           activatedIssueTask.issueData?.id } }}
         </div>
@@ -99,21 +99,21 @@
           class="info-text add-existing"
         >
           <mat-icon>playlist_add</mat-icon>
-          {{T.F.TASK.ADD_TASK_BAR.ADD_EXISTING_TASK|translate: { taskTitle:
+          {{ T.F.TASK.ADD_TASK_BAR.ADD_EXISTING_TASK|translate: { taskTitle:
           activatedIssueTask.title } }}
         </div>
       </ng-container>
 
       <ng-container *ngIf="!activatedIssueTask && shortSyntaxTags.length">
-        <tag
-          *ngFor="let shortSyntaxTag of shortSyntaxTags; trackBy: trackById"
-          [tag]="shortSyntaxTag"
-        ></tag>
+        @for (shortSyntaxTag of (shortSyntaxTags); track shortSyntaxTag.title ||
+        shortSyntaxTag) {
+        <tag [tag]="shortSyntaxTag"></tag>
+        }
       </ng-container>
     </ng-container>
 
     <ng-container *ngIf="inputVal.length === 0">
-      <div class="info-text">{{T.F.TASK.ADD_TASK_BAR.EXAMPLE|translate}}</div>
+      <div class="info-text">{{ T.F.TASK.ADD_TASK_BAR.EXAMPLE|translate }}</div>
     </ng-container>
   </div>
 
@@ -125,10 +125,9 @@
     (optionSelected)="addTask()"
     [displayWith]="displayWith"
   >
-    <mat-option
-      *ngFor="let item of (filteredIssueSuggestions$|async); trackBy:trackByFn"
-      [value]="item"
-    >
+    @for (item of (filteredIssueSuggestions$|async); track item.taskId || (item.issueData
+    && item.issueData.id)) {
+    <mat-option [value]="item">
       <mat-icon
         *ngIf="item.issueType"
         [svgIcon]="item.issueType|issueIcon"
@@ -140,5 +139,6 @@
       ></tag>
       <span [innerHTML]="item?.titleHighlighted||item?.title"></span>
     </mat-option>
+    }
   </mat-autocomplete>
 </form>
