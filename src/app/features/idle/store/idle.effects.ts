@@ -292,9 +292,9 @@ export class IdleEffects {
     private _idleService: IdleService,
     private _dateService: DateService,
   ) {
-    window.setTimeout(() => {
-      this._store.dispatch(triggerIdle({ idleTime: 60 * 1000 }));
-    }, 2700);
+    // window.setTimeout(() => {
+    //   this._store.dispatch(triggerIdle({ idleTime: 60 * 1000 }));
+    // }, 2700);
   }
 
   private _initIdlePoll(initialIdleTime: number): void {
