@@ -800,6 +800,7 @@ $this-play-size: 22px;
   line-height: $this-play-size;
   opacity: 1 !important;
   z-index: 3;
+  pointer-events: none;
 
   @include mq(xs) {
     margin-top: 0;
