@@ -82,6 +82,12 @@ body .mat-mdc-dialog-surface {
   }
 }
 
+.mat-mdc-menu-item-text {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
 // ICONS
 // -----
 mat-icon,

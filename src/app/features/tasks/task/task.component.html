@@ -107,7 +107,7 @@
               class="repeat-date-badge"
               *ngIf="!isRepeatTaskCreatedToday"
             >
-              {{task.created|date:'d.M'}}
+              {{ task.created|date:'d.M' }}
             </div>
             <mat-icon
               *ngIf="task.repeatCfgId"
@@ -126,7 +126,7 @@
               *ngIf="task.issuePoints"
               class="mini-badge bgc-primary"
             >
-              {{task.issuePoints}}
+              {{ task.issuePoints }}
             </div>
             <mat-icon [svgIcon]="task.issueType|issueIcon"></mat-icon>
           </div>
@@ -141,7 +141,7 @@
           class="parent-title"
           *ngIf="!isInSubTaskList && task.parentId"
         >
-          <div class="title">{{parentTitle$|async}}</div>
+          <div class="title">{{ parentTitle$|async }}</div>
         </div>
 
         <div
@@ -155,7 +155,7 @@
           contenteditable="true"
         ></div>
 
-        <div class="task-title show-only-on-touch-primary">{{task.title}}</div>
+        <div class="task-title show-only-on-touch-primary">{{ task.title }}</div>
 
         <tag-list
           [task]="task"
@@ -303,7 +303,7 @@
           mat-icon-button
         >
           <mat-icon>alarm</mat-icon>
-          <div class="time-badge">{{task.plannedAt|shortPlannedAt}}</div>
+          <div class="time-badge">{{ task.plannedAt|shortPlannedAt }}</div>
         </button>
 
         <div>
@@ -337,29 +337,25 @@
               *ngIf="IS_TOUCH_PRIMARY && !task.isDone && !isCurrent && !task.subTasks?.length"
               mat-menu-item
             >
-              <div class="control-text">
-                <span>
-                  <mat-icon
-                    class="play-icon"
-                    svgIcon="play"
-                  ></mat-icon>
-                  {{T.F.TASK.CMP.TRACK_TIME|translate}}
-                </span>
-                <span class="keybindprev"> {{ kb.togglePlay }} </span>
-              </div>
+              <span class="menuItemLeft">
+                <mat-icon
+                  class="play-icon"
+                  svgIcon="play"
+                ></mat-icon>
+                {{ T.F.TASK.CMP.TRACK_TIME|translate }}
+              </span>
+              <span class="keyIndicator"> {{ kb.togglePlay }} </span>
             </button>
             <button
               (click)="pauseTask()"
               *ngIf="IS_TOUCH_PRIMARY && !task.isDone && isCurrent && !task.subTasks?.length"
               mat-menu-item
             >
-              <div class="control-text">
-                <span>
-                  <mat-icon>pause</mat-icon>
-                  {{T.F.TASK.CMP.TRACK_TIME_STOP|translate}}
-                </span>
-                <span class="keybindprev"> {{ kb.togglePlay }} </span>
-              </div>
+              <span class="menuItemLeft">
+                <mat-icon>pause</mat-icon>
+                {{ T.F.TASK.CMP.TRACK_TIME_STOP|translate }}
+              </span>
+              <span class="keyIndicator"> {{ kb.togglePlay }} </span>
             </button>
 
             <button
@@ -368,7 +364,7 @@
               mat-menu-item
             >
               <mat-icon svgIcon="remove_today"></mat-icon>
-              {{T.F.TASK.CMP.REMOVE_FROM_MY_DAY|translate}}
+              {{ T.F.TASK.CMP.REMOVE_FROM_MY_DAY|translate }}
             </button>
 
             <button
@@ -377,13 +373,11 @@
               class="hide-xs"
               mat-menu-item
             >
-              <div class="control-text">
-                <span>
-                  <mat-icon>timer</mat-icon>
-                  {{T.F.TASK.CMP.OPEN_TIME|translate}}
-                </span>
-                <span class="keybindprev"> {{ kb.taskOpenEstimationDialog }} </span>
-              </div>
+              <span class="menuItemLeft">
+                <mat-icon>timer</mat-icon>
+                {{ T.F.TASK.CMP.OPEN_TIME|translate }}
+              </span>
+              <span class="keyIndicator"> {{ kb.taskOpenEstimationDialog }} </span>
             </button>
 
             <button
@@ -391,22 +385,18 @@
               mat-menu-item
             >
               <ng-container *ngIf="!task.reminderId">
-                <div class="control-text">
-                  <span>
-                    <mat-icon>alarm_add</mat-icon>
-                    {{T.F.TASK.CMP.SCHEDULE|translate}}
-                  </span>
-                  <span class="keybindprev"> {{ kb.taskSchedule }} </span>
-                </div>
+                <span>
+                  <mat-icon>alarm_add</mat-icon>
+                  {{ T.F.TASK.CMP.SCHEDULE|translate }}
+                </span>
+                <span class="keyIndicator"> {{ kb.taskSchedule }} </span>
               </ng-container>
               <ng-container *ngIf="task.reminderId">
-                <div class="control-text">
-                  <span>
-                    <mat-icon>alarm</mat-icon>
-                    {{T.F.TASK.CMP.EDIT_REMINDER|translate}}
-                  </span>
-                  <span class="keybindprev"> {{ kb.taskSchedule }} </span>
-                </div>
+                <span>
+                  <mat-icon>alarm</mat-icon>
+                  {{ T.F.TASK.CMP.EDIT_REMINDER|translate }}
+                </span>
+                <span class="keyIndicator"> {{ kb.taskSchedule }} </span>
               </ng-container>
             </button>
 
@@ -415,13 +405,11 @@
               *ngIf="!task.parentId&&!task.isDone"
               mat-menu-item
             >
-              <div class="control-text">
-                <span>
-                  <mat-icon>playlist_add</mat-icon>
-                  {{T.F.TASK.CMP.ADD_SUB_TASK|translate}}
-                </span>
-                <span class="keybindprev"> {{ kb.taskAddSubTask }} </span>
-              </div>
+              <span class="menuItemLeft">
+                <mat-icon>playlist_add</mat-icon>
+                {{ T.F.TASK.CMP.ADD_SUB_TASK|translate }}
+              </span>
+              <span class="keyIndicator"> {{ kb.taskAddSubTask }} </span>
             </button>
 
             <button
@@ -430,7 +418,7 @@
               mat-menu-item
             >
               <mat-icon>attachment</mat-icon>
-              {{T.F.TASK.CMP.OPEN_ATTACH|translate}}
+              {{ T.F.TASK.CMP.OPEN_ATTACH|translate }}
             </button>
 
             <!--TODO maybe handle dynamically -->
@@ -442,7 +430,7 @@
               target="_blank"
             >
               <mat-icon [svgIcon]="task.issueType|issueIcon"></mat-icon>
-              {{T.F.TASK.CMP.OPEN_ISSUE|translate}}
+              {{ T.F.TASK.CMP.OPEN_ISSUE|translate }}
             </a>
 
             <button
@@ -451,7 +439,7 @@
               mat-menu-item
             >
               <mat-icon [svgIcon]="task.issueType|issueIcon"></mat-icon>
-              {{T.F.TASK.CMP.UPDATE_ISSUE_DATA|translate}}
+              {{ T.F.TASK.CMP.UPDATE_ISSUE_DATA|translate }}
             </button>
 
             <button
@@ -459,13 +447,11 @@
               *ngIf="!task.parentId && !isBacklog && task.projectId && (isShowMoveFromAndToBacklogBtns$|async)"
               mat-menu-item
             >
-              <div class="control-text">
-                <span>
-                  <mat-icon>arrow_downward</mat-icon>
-                  {{T.F.TASK.CMP.MOVE_TO_BACKLOG|translate}}
-                </span>
-                <span class="keybindprev"> {{ kb.moveToBacklog }} </span>
-              </div>
+              <span class="menuItemLeft">
+                <mat-icon>arrow_downward</mat-icon>
+                {{ T.F.TASK.CMP.MOVE_TO_BACKLOG|translate }}
+              </span>
+              <span class="keyIndicator"> {{ kb.moveToBacklog }} </span>
             </button>
 
             <!-- <mat-menu-item> -->
@@ -482,13 +468,11 @@
               *ngIf="!task.parentId && isBacklog && task.projectId && (isShowMoveFromAndToBacklogBtns$|async)"
               mat-menu-item
             >
-              <div class="control-text">
-                <span>
-                  <mat-icon>arrow_upward</mat-icon>
-                  {{T.F.TASK.CMP.MOVE_TO_TODAY|translate}}
-                </span>
-                <span class="keybindprev"> {{ kb.moveToTodaysTasks }} </span>
-              </div>
+              <span class="menuItemLeft">
+                <mat-icon>arrow_upward</mat-icon>
+                {{ T.F.TASK.CMP.MOVE_TO_TODAY|translate }}
+              </span>
+              <span class="keyIndicator"> {{ kb.moveToTodaysTasks }} </span>
             </button>
 
             <button
@@ -496,13 +480,11 @@
               *ngIf="!task.parentId"
               mat-menu-item
             >
-              <div class="control-text">
-                <span>
-                  <mat-icon>style</mat-icon>
-                  {{T.F.TASK.CMP.EDIT_TAGS|translate}}
-                </span>
-                <span class="keybindprev"> {{ kb.taskEditTags }} </span>
-              </div>
+              <span class="menuItemLeft">
+                <mat-icon>style</mat-icon>
+                {{ T.F.TASK.CMP.EDIT_TAGS|translate }}
+              </span>
+              <span class="keyIndicator"> {{ kb.taskEditTags }} </span>
             </button>
 
             <button
@@ -510,14 +492,12 @@
               [matMenuTriggerFor]="projectMenu"
               mat-menu-item
             >
-              <div class="control-text">
-                <span>
-                  <mat-icon>forward</mat-icon>
-                  {{(task.projectId ? T.F.TASK.CMP.MOVE_TO_OTHER_PROJECT :
-                  T.F.TASK.CMP.ADD_TO_PROJECT)|translate}}
-                </span>
-                <span class="keybindprev"> {{ kb.taskMoveToProject }} </span>
-              </div>
+              <span class="menuItemLeft">
+                <mat-icon>forward</mat-icon>
+                {{ (task.projectId ? T.F.TASK.CMP.MOVE_TO_OTHER_PROJECT :
+                T.F.TASK.CMP.ADD_TO_PROJECT)|translate }}
+              </span>
+              <span class="keyIndicator"> {{ kb.taskMoveToProject }} </span>
             </button>
 
             <button
@@ -526,7 +506,7 @@
               mat-menu-item
             >
               <mat-icon>subdirectory_arrow_left</mat-icon>
-              {{(T.F.TASK.CMP.CONVERT_TO_PARENT_TASK)|translate}}
+              {{ (T.F.TASK.CMP.CONVERT_TO_PARENT_TASK)|translate }}
             </button>
 
             <button
@@ -534,14 +514,12 @@
               class="color-warn"
               mat-menu-item
             >
-              <div class="control-text">
-                <span>
-                  <mat-icon class="color-warn-i">delete_forever</mat-icon>
-                  {{(task.repeatCfgId ? T.F.TASK.CMP.DELETE_REPEAT_INSTANCE :
-                  T.F.TASK.CMP.DELETE)|translate}}
-                </span>
-                <span class="keybindprev"> {{ kb.taskDelete }} </span>
-              </div>
+              <span class="menuItemLeft">
+                <mat-icon class="color-warn-i">delete_forever</mat-icon>
+                {{ (task.repeatCfgId ? T.F.TASK.CMP.DELETE_REPEAT_INSTANCE :
+                T.F.TASK.CMP.DELETE)|translate }}
+              </span>
+              <span class="keyIndicator"> {{ kb.taskDelete }} </span>
             </button>
           </ng-template>
         </mat-menu>
@@ -556,7 +534,7 @@
               *ngFor="let project of (moveToProjectList$|async); trackBy:trackByProjectId;"
               mat-menu-item
             >
-              {{project.title}}
+              {{ project.title }}
             </button>
           </ng-template>
         </mat-menu>
@@ -609,6 +587,6 @@
     class="bgc-accent drag-over-msg"
   >
     <mat-icon>add</mat-icon>
-    {{T.F.TASK.CMP.DROP_ATTACHMENT|translate:{title: task.title} }}
+    {{ T.F.TASK.CMP.DROP_ATTACHMENT|translate:{ title: task.title } }}
   </div>
 </div>

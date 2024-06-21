@@ -314,26 +314,20 @@
   }
 }
 
-.control-text {
+.menuItemLeft {
   text-align: left;
   display: flex;
-  justify-content: space-between;
   align-items: center;
-
-  span {
-    display: flex;
-    align-items: center;
-  }
 }
 
-.keybindprev {
+.keyIndicator {
+  margin-left: 4px;
   opacity: 0.6;
   text-align: right;
   max-width: 60px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  margin-left: 4px;
   padding: 0 4px;
 
   &:not(:empty) {
