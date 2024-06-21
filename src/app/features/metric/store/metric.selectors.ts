@@ -14,9 +14,13 @@ import {
 } from '../obstruction/store/obstruction.reducer';
 import { ObstructionState } from '../obstruction/obstruction.model';
 import { unique } from '../../../util/unique';
-import { selectAllSimpleCounters } from '../../simple-counter/store/simple-counter.reducer';
+import {
+  selectAllSimpleCounters,
+  selectSimpleCounterFeatureState,
+} from '../../simple-counter/store/simple-counter.reducer';
 import {
   SimpleCounter,
+  SimpleCounterState,
   SimpleCounterType,
 } from '../../simple-counter/simple-counter.model';
 
@@ -230,8 +234,15 @@ export const selectProductivityHappinessLineChartData = createSelector(
 );
 
 export const selectSimpleCounterClickCounterLineChartData = createSelector(
-  selectAllSimpleCounters,
-  (simpleCounterItems: SimpleCounter[], props: { howMany: number }): LineChartData => {
+  selectSimpleCounterFeatureState,
+  (simpleCounterState: SimpleCounterState, props: { howMany: number }): LineChartData => {
+    // NOTE: for the most weird reasons that fixes the problem with the page refreshing on every single action ???
+    // it doesn't matter if I use the alternative approach here or below for selectSimpleCounterStopWatchLineChartData
+    // just having this here fixes the issue for both and vice versa
+    const simpleCounterItems: SimpleCounter[] = Object.values(
+      simpleCounterState.entities,
+    ) as SimpleCounter[];
+
     const f = -1 * props.howMany;
     const chart: LineChartData = {
       labels: [],
