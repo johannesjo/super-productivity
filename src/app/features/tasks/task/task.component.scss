@@ -318,11 +318,28 @@
   text-align: left;
   display: flex;
   justify-content: space-between;
+  align-items: center;
+
+  span {
+    display: flex;
+    align-items: center;
+  }
 }
 
 .keybindprev {
   opacity: 0.6;
   text-align: right;
+  max-width: 60px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  margin-left: 4px;
+  padding: 0 4px;
+
+  &:not(:empty) {
+    border-left: 1px solid;
+    border-right: 1px solid;
+  }
 }
 
 .hover-controls {
