@@ -190,5 +190,21 @@ describe('TagReducer', () => {
       expect((state.entities['1'] as TagCopy).taskIds).toEqual(['someOtherTask1']);
       expect((state.entities['2'] as TagCopy).taskIds).toEqual(['someOtherTask2']);
     });
+
+    it('should  work when removing a sub task only', () => {
+      const taskToRemove: TaskWithSubTasks = {
+        id: 'task1',
+        tagIds: ['1'],
+      } as TaskWithSubTasks;
+
+      const action = deleteTask({ task: taskToRemove });
+      const state = tagReducer(initialState, action);
+
+      expect((state.entities['1'] as TagCopy).taskIds).toEqual(['someOtherTask1']);
+      expect((state.entities['2'] as TagCopy).taskIds).toEqual([
+        'subTask2',
+        'someOtherTask2',
+      ]);
+    });
   });
 });
