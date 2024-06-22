@@ -14,9 +14,12 @@ import {
 } from 'rxjs/operators';
 import { SyncConfig } from '../../features/config/global-config.model';
 import {
+  AppArchiveFileData,
   AppDataComplete,
+  AppMainFileData,
   DialogConflictResolutionResult,
   DialogPermissionResolutionResult,
+  LocalSyncMetaForProvider,
   SyncResult,
 } from './sync.model';
 import { T } from '../../t.const';
@@ -24,7 +27,6 @@ import { checkForUpdate, UpdateCheckResult } from './check-for-update.util';
 import { DialogSyncConflictComponent } from './dialog-dbx-sync-conflict/dialog-sync-conflict.component';
 import { DialogSyncPermissionComponent } from './dialog-sync-permission/dialog-sync-permission.component';
 import { TranslateService } from '@ngx-translate/core';
-import { SyncTriggerService } from './sync-trigger.service';
 import { MatDialog } from '@angular/material/dialog';
 import { DataImportService } from './data-import.service';
 import { WebDavSyncService } from './web-dav/web-dav-sync.service';
@@ -99,7 +101,6 @@ export class SyncProviderService {
     private _globalConfigService: GlobalConfigService,
     private _persistenceLocalService: PersistenceLocalService,
     private _translateService: TranslateService,
-    private _syncTriggerService: SyncTriggerService,
     private _persistenceService: PersistenceService,
     private _compressionService: CompressionService,
     private _snackService: SnackService,
@@ -161,10 +162,10 @@ export class SyncProviderService {
     // PRE CHECK 1
     // check if remote data & file revision changed
     // --------------------------------------------
-    const revRes = await cp.getRevAndLastClientUpdate(localRev);
+    const revRes = await cp.getMainFileRevAndLastClientUpdate(localRev);
     if (typeof revRes === 'string') {
       if (revRes === 'NO_REMOTE_DATA' && this._c(T.F.SYNC.C.NO_REMOTE_DATA)) {
-        this._log(cp, '↑ Update Remote after no getRevAndLastClientUpdate()');
+        this._log(cp, '↑ Update Remote after no getMainFileRevAndLastClientUpdate()');
         const localLocal = await this._persistenceService.getValidCompleteData();
         await this._uploadAppData(cp, localLocal);
         return 'SUCCESS';
@@ -240,7 +241,7 @@ export class SyncProviderService {
     // DOWNLOAD OF REMOTE (and possible error)
     let r;
     try {
-      r = await this._downloadAppData(cp);
+      r = await this._downloadMainFileAppData(cp);
     } catch (e) {
       console.error('Download Data failed');
       this._snackService.open({
@@ -299,7 +300,7 @@ export class SyncProviderService {
 
       case UpdateCheckResult.LocalUpdateRequired: {
         this._log(cp, '↓ Update Local');
-        await this._importAppData(cp, remote, r.rev as string);
+        await this._importMainFileAppData(cp, remote, r.rev as string);
         return 'SUCCESS';
       }
 
@@ -328,7 +329,13 @@ export class SyncProviderService {
 
       case UpdateCheckResult.LastSyncNotUpToDate: {
         this._log(cp, 'X Last Sync not up to date');
-        await this._setLocalRevAndLastSync(cp, r.rev, local.lastLocalSyncModelChange);
+        await this._setLocalRevsAndLastSync(
+          cp,
+          r.rev,
+          // TODO check if this is smart and maybe remove whole case
+          'NO_UPDATE',
+          local.lastLocalSyncModelChange,
+        );
         return 'SPECIAL';
       }
 
@@ -342,7 +349,7 @@ export class SyncProviderService {
           }
         } else {
           if (this._c(T.F.SYNC.C.FORCE_IMPORT)) {
-            await this._importAppData(cp, remote, r.rev as string);
+            await this._importMainFileAppData(cp, remote, r.rev as string);
             return 'SUCCESS';
           }
         }
@@ -353,14 +360,14 @@ export class SyncProviderService {
 
   // WRAPPER
   // -------
-  private async _downloadAppData(
+  private async _downloadMainFileAppData(
     cp: SyncProviderServiceInterface,
-  ): Promise<{ rev: string; data: AppDataComplete | undefined }> {
+  ): Promise<{ rev: string; data: AppMainFileData | undefined }> {
     const localRev = await this._getLocalRev(cp);
-    const { dataStr, rev } = await cp.downloadAppData(localRev);
+    const { dataStr, rev } = await cp.downloadMainFileData(localRev);
     return {
       rev,
-      data: await this._decompressAndDecryptAppDataIfNeeded(dataStr),
+      data: await this._decompressAndDecryptDataIfNeeded<AppMainFileData>(dataStr),
     };
   }
 
@@ -382,10 +389,12 @@ export class SyncProviderService {
     }
 
     // TODO split data here
+    // TODO check if archive data was updated and upload if needed
+    // TODO inform about incomplete remote update
 
-    const dataStrToUpload = await this._compressAndEncryptAppDataIfEnabled(data);
+    const dataStrToUpload = await this._compressAndEncryptDataIfEnabled(data);
     const localRev = await this._getLocalRev(cp);
-    const successRev = await cp.uploadAppData(
+    const successRev = await cp.uploadMainFileData(
       dataStrToUpload,
       data.lastLocalSyncModelChange as number,
       localRev,
@@ -393,9 +402,11 @@ export class SyncProviderService {
     );
     if (typeof successRev === 'string') {
       this._log(cp, '↑ Uploaded Data ↑ ✓');
-      return await this._setLocalRevAndLastSync(
+      // TODO handle correctly
+      return await this._setLocalRevsAndLastSync(
         cp,
         successRev,
+        'NO_UPDATE',
         data.lastLocalSyncModelChange,
       );
     } else {
@@ -420,14 +431,14 @@ export class SyncProviderService {
     }
   }
 
-  private async _importAppData(
+  private async _importMainFileAppData(
     cp: SyncProviderServiceInterface,
-    data: AppDataComplete,
+    data: AppMainFileData,
     rev: string,
   ): Promise<void> {
     if (!data) {
-      const r = await this._downloadAppData(cp);
-      data = r.data as AppDataComplete;
+      const r = await this._downloadMainFileAppData(cp);
+      data = r.data as AppMainFileData;
       rev = r.rev;
     }
     if (!rev) {
@@ -438,10 +449,25 @@ export class SyncProviderService {
       throw new Error('No valid lastLocalSyncModelChange given during import');
     }
 
-    await this._dataImportService.importCompleteSyncData(data, {
+    // TODO check archive data
+    /*
+    1. check if archive rev is different
+    2. if archive rev check remote archiveRevData
+    1. download archive data
+     */
+
+    // TODO remove as any
+    await this._dataImportService.importCompleteSyncData(data as any, {
       isOmitLocalFields: true,
     });
-    await this._setLocalRevAndLastSync(cp, rev, data.lastLocalSyncModelChange);
+
+    await this._setLocalRevsAndLastSync(
+      cp,
+      rev,
+      // TODO handle correctly
+      'NO_UPDATE',
+      data.lastLocalSyncModelChange,
+    );
   }
 
   // LS HELPER
@@ -452,9 +478,10 @@ export class SyncProviderService {
   }
 
   // NOTE: last sync should always equal localLastChange
-  private async _setLocalRevAndLastSync(
+  private async _setLocalRevsAndLastSync(
     cp: SyncProviderServiceInterface,
     rev: string,
+    revTaskArchive: string | 'NO_UPDATE',
     lastSync: number,
   ): Promise<void> {
     if (!rev) {
@@ -465,12 +492,17 @@ export class SyncProviderService {
       throw new Error('No correct localLastSync given ' + lastSync);
     }
     const localSyncMeta = await this._persistenceLocalService.load();
+    const localSyncMetaForProvider: LocalSyncMetaForProvider = {
+      rev,
+      revTaskArchive:
+        revTaskArchive === 'NO_UPDATE'
+          ? localSyncMeta[cp.id].revTaskArchive
+          : revTaskArchive,
+      lastSync,
+    };
     await this._persistenceLocalService.save({
       ...localSyncMeta,
-      [cp.id]: {
-        rev,
-        lastSync,
-      },
+      [cp.id]: localSyncMetaForProvider,
     });
   }
 
@@ -484,8 +516,12 @@ export class SyncProviderService {
       lastSync,
       rev,
     }: {
-      remote: AppDataComplete;
-      local: AppDataComplete;
+      // TODO properly handle all conflicts
+      remote: any;
+      local: any;
+      // TODO add proper type again
+      // remote: AppDataComplete;
+      // local: AppDataComplete;
       lastSync: number;
       rev: string;
     },
@@ -507,7 +543,7 @@ export class SyncProviderService {
       await this._uploadAppData(cp, local, true);
     } else if (dr === 'USE_REMOTE') {
       this._log(cp, 'Dialog => ↓ Update Local');
-      await this._importAppData(cp, remote, rev);
+      await this._importMainFileAppData(cp, remote, rev);
     }
     return;
   }
@@ -543,27 +579,30 @@ export class SyncProviderService {
       .afterClosed();
   }
 
-  private async _decompressAndDecryptAppDataIfNeeded(
-    backupStr: AppDataComplete | string | undefined,
-  ): Promise<AppDataComplete> {
+  private async _decompressAndDecryptDataIfNeeded<
+    T extends AppMainFileData | AppArchiveFileData,
+  >(dataInStr: T | string | undefined): Promise<T> {
     // if the data was a json string it happens (for dropbox) that the data is returned as object
-    if (typeof backupStr === 'object' && backupStr?.task) {
-      return backupStr as AppDataComplete;
+    if (
+      (typeof dataInStr === 'object' && (dataInStr as AppMainFileData)?.task) ||
+      (dataInStr as AppArchiveFileData)?.taskArchive
+    ) {
+      return dataInStr as T;
     }
-    if (typeof backupStr === 'string') {
+    if (typeof dataInStr === 'string') {
       const { isEncryptionEnabled, encryptionPassword } = await this.syncCfg$
         .pipe(first())
         .toPromise();
 
       try {
-        return JSON.parse(backupStr) as AppDataComplete;
+        return JSON.parse(dataInStr) as T;
       } catch (eIgnored) {
         try {
-          let dataString = backupStr;
+          let dataString = dataInStr;
           if (isEncryptionEnabled && encryptionPassword?.length) {
             try {
               console.time('decrypt');
-              dataString = await decrypt(backupStr, encryptionPassword);
+              dataString = await decrypt(dataInStr, encryptionPassword);
               console.timeEnd('decrypt');
             } catch (eDecryption) {
               console.error(eDecryption);
@@ -581,7 +620,7 @@ export class SyncProviderService {
             }
           }
           try {
-            return JSON.parse(dataString) as AppDataComplete;
+            return JSON.parse(dataString) as T;
           } catch (eIgnoredInner) {
             console.error(eIgnoredInner);
             // try to decompress anyway
@@ -593,7 +632,7 @@ export class SyncProviderService {
             );
             throw new Error('Unable to parse remote data');
           }
-          return JSON.parse(dataString) as AppDataComplete;
+          return JSON.parse(dataString) as T;
         } catch (eDecompression) {
           console.error('Sync, invalid data');
           console.warn(eDecompression);
@@ -604,8 +643,8 @@ export class SyncProviderService {
     throw new Error('Unable to parse remote data due to unknown reasons');
   }
 
-  private async _compressAndEncryptAppDataIfEnabled(
-    data: AppDataComplete,
+  private async _compressAndEncryptDataIfEnabled(
+    data: AppMainFileData | AppArchiveFileData,
   ): Promise<string> {
     const { isCompressionEnabled, isEncryptionEnabled, encryptionPassword } =
       await this.syncCfg$.pipe(first()).toPromise();

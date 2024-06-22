@@ -24,13 +24,13 @@ export class LocalFileSyncElectronService implements SyncProviderServiceInterfac
 
   constructor(private _globalConfigService: GlobalConfigService) {}
 
-  async getRevAndLastClientUpdate(
+  async getMainFileRevAndLastClientUpdate(
     localRev: string | null,
   ): Promise<{ rev: string; clientUpdate?: number } | SyncGetRevResult> {
     const filePath = await this._filePathOnce$.toPromise();
     try {
       if (!filePath) {
-        throw new Error('No file path given for getRevAndLastClientUpdate');
+        throw new Error('No file path given for getMainFileRevAndLastClientUpdate');
       }
       const r = await window.ea.fileSyncGetRevAndClientUpdate({
         filePath,
@@ -42,7 +42,7 @@ export class LocalFileSyncElectronService implements SyncProviderServiceInterfac
     }
   }
 
-  async uploadAppData(
+  async uploadMainFileData(
     dataStr: string,
     clientModified: number,
     localRev: string | null,
@@ -51,7 +51,7 @@ export class LocalFileSyncElectronService implements SyncProviderServiceInterfac
     const filePath = await this._filePathOnce$.toPromise();
     try {
       if (!filePath) {
-        throw new Error('No file path given for uploadAppData');
+        throw new Error('No file path given for uploadMainFileData');
       }
       const r = await window.ea.fileSyncSave({
         localRev,
@@ -64,13 +64,13 @@ export class LocalFileSyncElectronService implements SyncProviderServiceInterfac
     }
   }
 
-  async downloadAppData(
+  async downloadMainFileData(
     localRev: string | null,
   ): Promise<{ rev: string; dataStr: string | undefined }> {
     const filePath = await this._filePathOnce$.toPromise();
     try {
       if (!filePath) {
-        throw new Error('No file path given for downloadAppData');
+        throw new Error('No file path given for downloadMainFileData');
       }
       const r = await window.ea.fileSyncLoad({
         localRev,

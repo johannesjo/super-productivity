@@ -29,9 +29,9 @@ export class DropboxSyncService implements SyncProviderServiceInterface {
     private _store: Store,
   ) {}
 
-  // TODO refactor in a way that it doesn't need to trigger uploadAppData itself
+  // TODO refactor in a way that it doesn't need to trigger uploadMainFileData itself
   // NOTE: this does not include milliseconds, which could lead to uncool edge cases... :(
-  async getRevAndLastClientUpdate(
+  async getMainFileRevAndLastClientUpdate(
     localRev: string,
   ): Promise<{ rev: string; clientUpdate: number } | SyncGetRevResult> {
     try {
@@ -59,7 +59,7 @@ export class DropboxSyncService implements SyncProviderServiceInterface {
           const refreshResult =
             await this._dropboxApiService.updateAccessTokenFromRefreshTokenIfAvailable();
           if (refreshResult === 'SUCCESS') {
-            return this.getRevAndLastClientUpdate(localRev);
+            return this.getMainFileRevAndLastClientUpdate(localRev);
           }
         }
         this._snackService.open({
@@ -81,7 +81,9 @@ export class DropboxSyncService implements SyncProviderServiceInterface {
     }
   }
 
-  async downloadAppData(localRev: string): Promise<{ rev: string; dataStr: string }> {
+  async downloadMainFileData(
+    localRev: string,
+  ): Promise<{ rev: string; dataStr: string }> {
     const r = await this._dropboxApiService.download<string>({
       path: DROPBOX_SYNC_FILE_PATH,
       localRev,
@@ -92,7 +94,7 @@ export class DropboxSyncService implements SyncProviderServiceInterface {
     };
   }
 
-  async uploadAppData(
+  async uploadMainFileData(
     dataStr: string,
     clientModified: number,
     localRev: string,

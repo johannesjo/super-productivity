@@ -10,7 +10,7 @@ import { SyncProvider } from '../../imex/sync/sync-provider.model';
 export class PersistenceLocalService {
   constructor(private _databaseService: DatabaseService) {}
 
-  async save(data: LocalSyncMetaModel): Promise<any> {
+  async save(data: LocalSyncMetaModel): Promise<unknown> {
     return await this._databaseService.save(DB.LOCAL_NON_SYNC, data);
   }
 

@@ -33,7 +33,7 @@ export class WebDavSyncService implements SyncProviderServiceInterface {
     private _globalProgressBarService: GlobalProgressBarService,
   ) {}
 
-  async getRevAndLastClientUpdate(
+  async getMainFileRevAndLastClientUpdate(
     localRev: string,
   ): Promise<{ rev: string; clientUpdate: number } | SyncGetRevResult> {
     const cfg = await this._cfg$.pipe(first()).toPromise();
@@ -58,7 +58,9 @@ export class WebDavSyncService implements SyncProviderServiceInterface {
     }
   }
 
-  async downloadAppData(localRev: string): Promise<{ rev: string; dataStr: string }> {
+  async downloadMainFileData(
+    localRev: string,
+  ): Promise<{ rev: string; dataStr: string }> {
     this._globalProgressBarService.countUp(T.GPB.WEB_DAV_DOWNLOAD);
     const cfg = await this._cfg$.pipe(first()).toPromise();
     try {
@@ -79,7 +81,7 @@ export class WebDavSyncService implements SyncProviderServiceInterface {
     }
   }
 
-  async uploadAppData(
+  async uploadMainFileData(
     dataStr: string,
     clientModified: number,
     localRev: string,

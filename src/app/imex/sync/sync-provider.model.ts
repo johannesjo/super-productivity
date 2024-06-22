@@ -1,5 +1,5 @@
 import { Observable } from 'rxjs';
-import { AppDataComplete, SyncGetRevResult } from './sync.model';
+import { AppMainFileData, SyncGetRevResult } from './sync.model';
 
 // NOTE: do not change!!
 export enum SyncProvider {
@@ -13,18 +13,36 @@ export interface SyncProviderServiceInterface {
   isUploadForcePossible?: boolean;
   isReady$: Observable<boolean>;
 
-  getRevAndLastClientUpdate(
+  getMainFileRevAndLastClientUpdate(
     localRev: string | null,
   ): Promise<{ rev: string; clientUpdate?: number } | SyncGetRevResult>;
 
-  uploadAppData(
+  uploadMainFileData(
     dataStr: string,
     clientModified: number,
     localRev: string | null,
     isForceOverwrite?: boolean,
   ): Promise<string | Error>;
 
-  downloadAppData(
+  downloadMainFileData(
     localRev: string | null,
-  ): Promise<{ rev: string; dataStr: AppDataComplete | string | undefined }>;
+  ): Promise<{ rev: string; dataStr: AppMainFileData | string | undefined }>;
+
+  // TODO also add functions for archive
+
+  // TODO also add legacy data functions
+  // getRevAndLastClientUpdate(
+  //   localRev: string | null,
+  // ): Promise<{ rev: string; clientUpdate?: number } | SyncGetRevResult>;
+  //
+  // uploadAppData(
+  //   dataStr: string,
+  //   clientModified: number,
+  //   localRev: string | null,
+  //   isForceOverwrite?: boolean,
+  // ): Promise<string | Error>;
+  //
+  // downloadAppData(
+  //   localRev: string | null,
+  // ): Promise<{ rev: string; dataStr: AppDataComplete | string | undefined }>;
 }

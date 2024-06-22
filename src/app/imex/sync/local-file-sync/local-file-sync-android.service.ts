@@ -25,7 +25,7 @@ export class LocalFileSyncAndroidService implements SyncProviderServiceInterface
 
   constructor(private _globalConfigService: GlobalConfigService) {}
 
-  async getRevAndLastClientUpdate(
+  async getMainFileRevAndLastClientUpdate(
     localRev: string | null,
   ): Promise<{ rev: string; clientUpdate?: number } | SyncGetRevResult> {
     const filePath = await this._filePathOnce$.toPromise();
@@ -42,7 +42,7 @@ export class LocalFileSyncAndroidService implements SyncProviderServiceInterface
     }
   }
 
-  async uploadAppData(
+  async uploadMainFileData(
     dataStr: string,
     clientModified: number,
     localRev: string | null,
@@ -62,7 +62,7 @@ export class LocalFileSyncAndroidService implements SyncProviderServiceInterface
     }
   }
 
-  async downloadAppData(
+  async downloadMainFileData(
     localRev: string | null,
   ): Promise<{ rev: string; dataStr: string | undefined }> {
     const filePath = await this._filePathOnce$.toPromise();
