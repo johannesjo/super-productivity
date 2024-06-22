@@ -73,7 +73,7 @@
       *ngIf="(workContextService.isActiveWorkContextProject$|async)"
       [class.isOpen]="bookmarkService.isShowBookmarks$|async"
       matTooltip="{{T.MH.TOGGLE_SHOW_BOOKMARKS|translate}}{{kb.toggleBookmarks?'['+kb.toggleBookmarks+']':''}}"
-      class="bookmark-btn"
+      class="bookmark-btn e2e-bookmark-btn"
       mat-icon-button
     >
       <mat-icon>bookmark</mat-icon>
