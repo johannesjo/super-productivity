@@ -172,21 +172,8 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
   }
 
   ngAfterViewInit(): void {
-    // for android we need to make sure that a focus event is called to open the keyboard
     if (!this.isDisableAutoFocus) {
-      if (IS_ANDROID_WEB_VIEW) {
-        document.body.focus();
-        (this.inputEl as ElementRef).nativeElement.focus();
-        this._autofocusTimeout = window.setTimeout(() => {
-          document.body.focus();
-          (this.inputEl as ElementRef).nativeElement.focus();
-        }, 1000);
-      } else {
-        // for non mobile we don't need this, since it's much faster
-        this._autofocusTimeout = window.setTimeout(() => {
-          (this.inputEl as ElementRef).nativeElement.focus();
-        });
-      }
+      this._focusInput();
     }
 
     this._attachKeyDownHandlerTimeout = window.setTimeout(() => {
@@ -378,6 +365,7 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
 
     this.taskSuggestionsCtrl.setValue('');
     this._isAddInProgress = false;
+    this._focusInput();
   }
 
   private async _getCtxForTaskSuggestion({
@@ -392,6 +380,23 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
         throw new Error('No first tag');
       }
       return await this._tagService.getTagById$(firstTagId).pipe(first()).toPromise();
+    }
+  }
+
+  private _focusInput(): void {
+    // for android we need to make sure that a focus event is called to open the keyboard
+    if (IS_ANDROID_WEB_VIEW) {
+      document.body.focus();
+      (this.inputEl as ElementRef).nativeElement.focus();
+      this._autofocusTimeout = window.setTimeout(() => {
+        document.body.focus();
+        (this.inputEl as ElementRef).nativeElement.focus();
+      }, 1000);
+    } else {
+      // for non mobile we don't need this, since it's much faster
+      this._autofocusTimeout = window.setTimeout(() => {
+        (this.inputEl as ElementRef).nativeElement.focus();
+      });
     }
   }
 
