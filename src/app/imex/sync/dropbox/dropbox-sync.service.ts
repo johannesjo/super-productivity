@@ -2,7 +2,10 @@ import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { concatMap, distinctUntilChanged } from 'rxjs/operators';
 import { DropboxApiService } from './dropbox-api.service';
-import { DROPBOX_SYNC_MAIN_FILE_PATH } from './dropbox.const';
+import {
+  DROPBOX_SYNC_ARCHIVE_FILE_PATH,
+  DROPBOX_SYNC_MAIN_FILE_PATH,
+} from './dropbox.const';
 import { SyncGetRevResult } from '../sync.model';
 import { DataInitService } from '../../../core/data-init/data-init.service';
 import { SnackService } from '../../../core/snack/snack.service';
@@ -39,8 +42,10 @@ export class DropboxSyncService implements SyncProviderServiceInterface {
     syncTarget: SyncTarget,
     localRev: string,
   ): Promise<{ rev: string; clientUpdate: number } | SyncGetRevResult> {
+    const filePath = this._getFilePath(syncTarget);
+
     try {
-      const r = await this._dropboxApiService.getMetaData(DROPBOX_SYNC_MAIN_FILE_PATH);
+      const r = await this._dropboxApiService.getMetaData(filePath);
       const d = new Date(r.client_modified);
       return {
         clientUpdate: d.getTime(),
@@ -91,7 +96,7 @@ export class DropboxSyncService implements SyncProviderServiceInterface {
     localRev: string,
   ): Promise<{ rev: string; dataStr: string }> {
     const r = await this._dropboxApiService.download<string>({
-      path: DROPBOX_SYNC_MAIN_FILE_PATH,
+      path: this._getFilePath(syncTarget),
       localRev,
     });
     return {
@@ -109,7 +114,7 @@ export class DropboxSyncService implements SyncProviderServiceInterface {
   ): Promise<string | Error> {
     try {
       const r = await this._dropboxApiService.upload({
-        path: DROPBOX_SYNC_MAIN_FILE_PATH,
+        path: this._getFilePath(syncTarget),
         data: dataStr,
         clientModified,
         localRev,
@@ -123,36 +128,9 @@ export class DropboxSyncService implements SyncProviderServiceInterface {
     }
   }
 
-  private async _download(localRev: string): Promise<{ rev: string; dataStr: string }> {
-    const r = await this._dropboxApiService.download<string>({
-      path: DROPBOX_SYNC_MAIN_FILE_PATH,
-      localRev,
-    });
-    return {
-      rev: r.meta.rev,
-      dataStr: r.data,
-    };
-  }
-
-  private async upload(
-    dataStr: string,
-    clientModified: number,
-    localRev: string,
-    isForceOverwrite: boolean = false,
-  ): Promise<string | Error> {
-    try {
-      const r = await this._dropboxApiService.upload({
-        path: DROPBOX_SYNC_MAIN_FILE_PATH,
-        data: dataStr,
-        clientModified,
-        localRev,
-        isForceOverwrite,
-      });
-      return r.rev;
-    } catch (e) {
-      console.error(e);
-      // TODO fix this
-      return e as any;
-    }
+  private _getFilePath(syncTarget: SyncTarget): string {
+    return syncTarget === 'MAIN'
+      ? DROPBOX_SYNC_MAIN_FILE_PATH
+      : DROPBOX_SYNC_ARCHIVE_FILE_PATH;
   }
 }
