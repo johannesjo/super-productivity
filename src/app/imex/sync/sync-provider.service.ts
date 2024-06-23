@@ -300,7 +300,11 @@ export class SyncProviderService {
 
       case UpdateCheckResult.LocalUpdateRequired: {
         this._log(cp, '↓ Update Local');
-        await this._importMainFileAppData(cp, remote, r.rev as string);
+        await this._importMainFileAppDataAndArchiveIfNecessary(
+          cp,
+          remote,
+          r.rev as string,
+        );
         return 'SUCCESS';
       }
 
@@ -349,7 +353,11 @@ export class SyncProviderService {
           }
         } else {
           if (this._c(T.F.SYNC.C.FORCE_IMPORT)) {
-            await this._importMainFileAppData(cp, remote, r.rev as string);
+            await this._importMainFileAppDataAndArchiveIfNecessary(
+              cp,
+              remote,
+              r.rev as string,
+            );
             return 'SUCCESS';
           }
         }
@@ -371,6 +379,17 @@ export class SyncProviderService {
     };
   }
 
+  private async _downloadArchiveFileAppData(
+    cp: SyncProviderServiceInterface,
+  ): Promise<{ rev: string; data: AppArchiveFileData | undefined }> {
+    const localRev = await this._getLocalRev(cp);
+    const { dataStr, rev } = await cp.downloadFileData('ARCHIVE', localRev);
+    return {
+      rev,
+      data: await this._decompressAndDecryptDataIfNeeded<AppArchiveFileData>(dataStr),
+    };
+  }
+
   private async _uploadAppData(
     cp: SyncProviderServiceInterface,
     data: AppDataComplete,
@@ -388,6 +407,7 @@ export class SyncProviderService {
       throw new Error('lastLocalSyncModelChange is not defined');
     }
 
+    // TODO if archive update is required, update archive first to be able to have rev in main file data
     // TODO split data here
     // TODO check if archive data was updated and upload if needed
     // TODO inform about incomplete remote update
@@ -432,7 +452,7 @@ export class SyncProviderService {
     }
   }
 
-  private async _importMainFileAppData(
+  private async _importMainFileAppDataAndArchiveIfNecessary(
     cp: SyncProviderServiceInterface,
     data: AppMainFileData,
     rev: string,
@@ -494,12 +514,16 @@ export class SyncProviderService {
     }
     const localSyncMeta = await this._persistenceLocalService.load();
     const localSyncMetaForProvider: LocalSyncMetaForProvider = {
+      lastSync,
       rev,
       revTaskArchive:
         revTaskArchive === 'NO_UPDATE'
           ? localSyncMeta[cp.id].revTaskArchive
           : revTaskArchive,
-      lastSync,
+      lastArchiveUpdate:
+        revTaskArchive === 'NO_UPDATE'
+          ? localSyncMeta[cp.id].lastArchiveUpdate
+          : Date.now(),
     };
     await this._persistenceLocalService.save({
       ...localSyncMeta,
@@ -544,7 +568,7 @@ export class SyncProviderService {
       await this._uploadAppData(cp, local, true);
     } else if (dr === 'USE_REMOTE') {
       this._log(cp, 'Dialog => ↓ Update Local');
-      await this._importMainFileAppData(cp, remote, rev);
+      await this._importMainFileAppDataAndArchiveIfNecessary(cp, remote, rev);
     }
     return;
   }

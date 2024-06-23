@@ -1,5 +1,5 @@
 import { Observable } from 'rxjs';
-import { AppMainFileData, SyncGetRevResult } from './sync.model';
+import { AppArchiveFileData, AppMainFileData, SyncGetRevResult } from './sync.model';
 
 // NOTE: do not change!!
 export enum SyncProvider {
@@ -29,13 +29,16 @@ export interface SyncProviderServiceInterface {
   ): Promise<string | Error>;
 
   downloadFileData(
-    syncTarget: SyncTarget,
+    syncTarget: 'MAIN',
     localRev: string | null,
   ): Promise<{ rev: string; dataStr: AppMainFileData | string | undefined }>;
 
-  // TODO also add functions for archive
+  downloadFileData(
+    syncTarget: 'ARCHIVE',
+    localRev: string | null,
+  ): Promise<{ rev: string; dataStr: AppArchiveFileData | string | undefined }>;
 
-  // TODO also add legacy data functions
+  // TODO also add legacy data functions if needed
   // getRevAndLastClientUpdate(
   //   localRev: string | null,
   // ): Promise<{ rev: string; clientUpdate?: number } | SyncGetRevResult>;

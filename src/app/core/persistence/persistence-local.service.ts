@@ -43,6 +43,15 @@ export class PersistenceLocalService {
     };
   }
 
+  async updateLastArchiveUpdate(
+    lastArchiveUpdate: number = Date.now(),
+  ): Promise<unknown> {
+    return this.save({
+      ...(await this.load()),
+      lastArchiveUpdate,
+    });
+  }
+
   private _getLegacyLocalRev(p: SyncProvider): string | null {
     return localStorage.getItem(LS.SYNC_LAST_LOCAL_REVISION_PREFIX + p);
   }

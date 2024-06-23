@@ -33,6 +33,7 @@ export interface AppBaseWithoutLastSyncModelChange {
 export interface AppMainFileData extends AppBaseWithoutLastSyncModelChange {
   lastLocalSyncModelChange: number | null;
   archiveRev: string;
+  archiveLastUpdate: number;
 }
 
 export interface AppArchiveFileData {
@@ -48,9 +49,11 @@ export interface LocalSyncMetaForProvider {
   lastSync: number;
   rev: string | null;
   revTaskArchive: string | null;
+  lastArchiveUpdate: number;
 }
 
 export interface LocalSyncMetaModel {
+  lastArchiveUpdate: number;
   [SyncProvider.WebDAV]: LocalSyncMetaForProvider;
   [SyncProvider.Dropbox]: LocalSyncMetaForProvider;
   [SyncProvider.LocalFile]: LocalSyncMetaForProvider;

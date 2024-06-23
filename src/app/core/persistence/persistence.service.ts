@@ -68,6 +68,7 @@ import {
   ENTITY_MODEL_CFGS,
   PROJECT_MODEL_CFGS,
 } from './persistence.const';
+import { PersistenceLocalService } from './persistence-local.service';
 
 const MAX_INVALID_DATA_ATTEMPTS = 10;
 
@@ -147,6 +148,7 @@ export class PersistenceService {
   constructor(
     private _databaseService: DatabaseService,
     private _compressionService: CompressionService,
+    private _persistenceLocal: PersistenceLocalService,
     private _store: Store<any>,
   ) {}
 
@@ -637,6 +639,9 @@ export class PersistenceService {
 
       if (isSyncModelChange) {
         this.updateLastLocalSyncModelChange();
+      }
+      if (dbKey === 'taskArchive') {
+        await this._persistenceLocal.updateLastArchiveUpdate();
       }
       this.onAfterSave$.next({
         appDataKey: dbKey,
