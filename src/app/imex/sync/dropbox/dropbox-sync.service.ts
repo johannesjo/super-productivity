@@ -2,13 +2,17 @@ import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { concatMap, distinctUntilChanged } from 'rxjs/operators';
 import { DropboxApiService } from './dropbox-api.service';
-import { DROPBOX_SYNC_FILE_PATH } from './dropbox.const';
+import { DROPBOX_SYNC_MAIN_FILE_PATH } from './dropbox.const';
 import { SyncGetRevResult } from '../sync.model';
 import { DataInitService } from '../../../core/data-init/data-init.service';
 import { SnackService } from '../../../core/snack/snack.service';
 import { environment } from '../../../../environments/environment';
 import { T } from '../../../t.const';
-import { SyncProvider, SyncProviderServiceInterface } from '../sync-provider.model';
+import {
+  SyncProvider,
+  SyncProviderServiceInterface,
+  SyncTarget,
+} from '../sync-provider.model';
 import { Store } from '@ngrx/store';
 import { triggerDropboxAuthDialog } from './store/dropbox.actions';
 
@@ -29,13 +33,14 @@ export class DropboxSyncService implements SyncProviderServiceInterface {
     private _store: Store,
   ) {}
 
-  // TODO refactor in a way that it doesn't need to trigger uploadMainFileData itself
+  // TODO refactor in a way that it doesn't need to trigger uploadFileData itself
   // NOTE: this does not include milliseconds, which could lead to uncool edge cases... :(
-  async getMainFileRevAndLastClientUpdate(
+  async getFileRevAndLastClientUpdate(
+    syncTarget: SyncTarget,
     localRev: string,
   ): Promise<{ rev: string; clientUpdate: number } | SyncGetRevResult> {
     try {
-      const r = await this._dropboxApiService.getMetaData(DROPBOX_SYNC_FILE_PATH);
+      const r = await this._dropboxApiService.getMetaData(DROPBOX_SYNC_MAIN_FILE_PATH);
       const d = new Date(r.client_modified);
       return {
         clientUpdate: d.getTime(),
@@ -59,7 +64,7 @@ export class DropboxSyncService implements SyncProviderServiceInterface {
           const refreshResult =
             await this._dropboxApiService.updateAccessTokenFromRefreshTokenIfAvailable();
           if (refreshResult === 'SUCCESS') {
-            return this.getMainFileRevAndLastClientUpdate(localRev);
+            return this.getFileRevAndLastClientUpdate(syncTarget, localRev);
           }
         }
         this._snackService.open({
@@ -81,11 +86,12 @@ export class DropboxSyncService implements SyncProviderServiceInterface {
     }
   }
 
-  async downloadMainFileData(
+  async downloadFileData(
+    syncTarget: SyncTarget,
     localRev: string,
   ): Promise<{ rev: string; dataStr: string }> {
     const r = await this._dropboxApiService.download<string>({
-      path: DROPBOX_SYNC_FILE_PATH,
+      path: DROPBOX_SYNC_MAIN_FILE_PATH,
       localRev,
     });
     return {
@@ -94,7 +100,8 @@ export class DropboxSyncService implements SyncProviderServiceInterface {
     };
   }
 
-  async uploadMainFileData(
+  async uploadFileData(
+    syncTarget: SyncTarget,
     dataStr: string,
     clientModified: number,
     localRev: string,
@@ -102,7 +109,40 @@ export class DropboxSyncService implements SyncProviderServiceInterface {
   ): Promise<string | Error> {
     try {
       const r = await this._dropboxApiService.upload({
-        path: DROPBOX_SYNC_FILE_PATH,
+        path: DROPBOX_SYNC_MAIN_FILE_PATH,
+        data: dataStr,
+        clientModified,
+        localRev,
+        isForceOverwrite,
+      });
+      return r.rev;
+    } catch (e) {
+      console.error(e);
+      // TODO fix this
+      return e as any;
+    }
+  }
+
+  private async _download(localRev: string): Promise<{ rev: string; dataStr: string }> {
+    const r = await this._dropboxApiService.download<string>({
+      path: DROPBOX_SYNC_MAIN_FILE_PATH,
+      localRev,
+    });
+    return {
+      rev: r.meta.rev,
+      dataStr: r.data,
+    };
+  }
+
+  private async upload(
+    dataStr: string,
+    clientModified: number,
+    localRev: string,
+    isForceOverwrite: boolean = false,
+  ): Promise<string | Error> {
+    try {
+      const r = await this._dropboxApiService.upload({
+        path: DROPBOX_SYNC_MAIN_FILE_PATH,
         data: dataStr,
         clientModified,
         localRev,

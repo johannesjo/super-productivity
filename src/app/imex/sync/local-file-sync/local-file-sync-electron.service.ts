@@ -1,5 +1,9 @@
 import { Injectable } from '@angular/core';
-import { SyncProvider, SyncProviderServiceInterface } from '../sync-provider.model';
+import {
+  SyncProvider,
+  SyncProviderServiceInterface,
+  SyncTarget,
+} from '../sync-provider.model';
 import { Observable, of } from 'rxjs';
 import { IS_ELECTRON } from '../../../app.constants';
 import { SyncGetRevResult } from '../sync.model';
@@ -22,15 +26,18 @@ export class LocalFileSyncElectronService implements SyncProviderServiceInterfac
   );
   private _filePathOnce$: Observable<string | null> = this._filePath$.pipe(first());
 
+  // TODO implement syncTarget handling
+
   constructor(private _globalConfigService: GlobalConfigService) {}
 
-  async getMainFileRevAndLastClientUpdate(
+  async getFileRevAndLastClientUpdate(
+    syncTarget: SyncTarget,
     localRev: string | null,
   ): Promise<{ rev: string; clientUpdate?: number } | SyncGetRevResult> {
     const filePath = await this._filePathOnce$.toPromise();
     try {
       if (!filePath) {
-        throw new Error('No file path given for getMainFileRevAndLastClientUpdate');
+        throw new Error('No file path given for getFileRevAndLastClientUpdate');
       }
       const r = await window.ea.fileSyncGetRevAndClientUpdate({
         filePath,
@@ -42,7 +49,8 @@ export class LocalFileSyncElectronService implements SyncProviderServiceInterfac
     }
   }
 
-  async uploadMainFileData(
+  async uploadFileData(
+    syncTarget: SyncTarget,
     dataStr: string,
     clientModified: number,
     localRev: string | null,
@@ -51,7 +59,7 @@ export class LocalFileSyncElectronService implements SyncProviderServiceInterfac
     const filePath = await this._filePathOnce$.toPromise();
     try {
       if (!filePath) {
-        throw new Error('No file path given for uploadMainFileData');
+        throw new Error('No file path given for uploadFileData');
       }
       const r = await window.ea.fileSyncSave({
         localRev,
@@ -64,13 +72,14 @@ export class LocalFileSyncElectronService implements SyncProviderServiceInterfac
     }
   }
 
-  async downloadMainFileData(
+  async downloadFileData(
+    syncTarget: SyncTarget,
     localRev: string | null,
   ): Promise<{ rev: string; dataStr: string | undefined }> {
     const filePath = await this._filePathOnce$.toPromise();
     try {
       if (!filePath) {
-        throw new Error('No file path given for downloadMainFileData');
+        throw new Error('No file path given for downloadFileData');
       }
       const r = await window.ea.fileSyncLoad({
         localRev,

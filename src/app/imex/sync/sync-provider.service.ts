@@ -162,10 +162,10 @@ export class SyncProviderService {
     // PRE CHECK 1
     // check if remote data & file revision changed
     // --------------------------------------------
-    const revRes = await cp.getMainFileRevAndLastClientUpdate(localRev);
+    const revRes = await cp.getFileRevAndLastClientUpdate('MAIN', localRev);
     if (typeof revRes === 'string') {
       if (revRes === 'NO_REMOTE_DATA' && this._c(T.F.SYNC.C.NO_REMOTE_DATA)) {
-        this._log(cp, '↑ Update Remote after no getMainFileRevAndLastClientUpdate()');
+        this._log(cp, '↑ Update Remote after no getFileRevAndLastClientUpdate()');
         const localLocal = await this._persistenceService.getValidCompleteData();
         await this._uploadAppData(cp, localLocal);
         return 'SUCCESS';
@@ -364,7 +364,7 @@ export class SyncProviderService {
     cp: SyncProviderServiceInterface,
   ): Promise<{ rev: string; data: AppMainFileData | undefined }> {
     const localRev = await this._getLocalRev(cp);
-    const { dataStr, rev } = await cp.downloadMainFileData(localRev);
+    const { dataStr, rev } = await cp.downloadFileData('MAIN', localRev);
     return {
       rev,
       data: await this._decompressAndDecryptDataIfNeeded<AppMainFileData>(dataStr),
@@ -394,7 +394,8 @@ export class SyncProviderService {
 
     const dataStrToUpload = await this._compressAndEncryptDataIfEnabled(data);
     const localRev = await this._getLocalRev(cp);
-    const successRev = await cp.uploadMainFileData(
+    const successRev = await cp.uploadFileData(
+      'MAIN',
       dataStrToUpload,
       data.lastLocalSyncModelChange as number,
       localRev,

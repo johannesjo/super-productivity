@@ -76,11 +76,15 @@ export interface WebDavConfig {
   baseUrl: string | null;
   userName: string | null;
   password: string | null;
-  syncFilePath: string | null;
+  // TODO remove and migrate
+  syncFilePath?: string | null;
+  syncFolderPath: string | null;
 }
 
 export interface LocalFileSyncConfig {
+  // TODO remove and migrate
   syncFilePath: string | null;
+  syncFolderPath: string | null;
 }
 
 export type LocalBackupConfig = Readonly<{

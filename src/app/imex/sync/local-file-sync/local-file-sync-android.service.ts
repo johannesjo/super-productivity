@@ -1,5 +1,9 @@
 import { Injectable } from '@angular/core';
-import { SyncProvider, SyncProviderServiceInterface } from '../sync-provider.model';
+import {
+  SyncProvider,
+  SyncProviderServiceInterface,
+  SyncTarget,
+} from '../sync-provider.model';
 import { Observable, of } from 'rxjs';
 import { IS_ANDROID_WEB_VIEW } from '../../../util/is-android-web-view';
 import { SyncGetRevResult } from '../sync.model';
@@ -23,9 +27,12 @@ export class LocalFileSyncAndroidService implements SyncProviderServiceInterface
   );
   private _filePathOnce$: Observable<string | null> = this._filePath$.pipe(first());
 
+  // TODO implement syncTarget handling
+
   constructor(private _globalConfigService: GlobalConfigService) {}
 
-  async getMainFileRevAndLastClientUpdate(
+  async getFileRevAndLastClientUpdate(
+    syncTarget: SyncTarget,
     localRev: string | null,
   ): Promise<{ rev: string; clientUpdate?: number } | SyncGetRevResult> {
     const filePath = await this._filePathOnce$.toPromise();
@@ -42,7 +49,8 @@ export class LocalFileSyncAndroidService implements SyncProviderServiceInterface
     }
   }
 
-  async uploadMainFileData(
+  async uploadFileData(
+    syncTarget: SyncTarget,
     dataStr: string,
     clientModified: number,
     localRev: string | null,
@@ -62,7 +70,8 @@ export class LocalFileSyncAndroidService implements SyncProviderServiceInterface
     }
   }
 
-  async downloadMainFileData(
+  async downloadFileData(
+    syncTarget: SyncTarget,
     localRev: string | null,
   ): Promise<{ rev: string; dataStr: string | undefined }> {
     const filePath = await this._filePathOnce$.toPromise();

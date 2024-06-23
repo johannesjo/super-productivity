@@ -1,5 +1,9 @@
 import { Injectable } from '@angular/core';
-import { SyncProvider, SyncProviderServiceInterface } from '../sync-provider.model';
+import {
+  SyncProvider,
+  SyncProviderServiceInterface,
+  SyncTarget,
+} from '../sync-provider.model';
 import { SyncGetRevResult } from '../sync.model';
 
 import { Observable } from 'rxjs';
@@ -33,7 +37,9 @@ export class WebDavSyncService implements SyncProviderServiceInterface {
     private _globalProgressBarService: GlobalProgressBarService,
   ) {}
 
-  async getMainFileRevAndLastClientUpdate(
+  // TODO implement syncTarget handling
+  async getFileRevAndLastClientUpdate(
+    syncTarget: SyncTarget,
     localRev: string,
   ): Promise<{ rev: string; clientUpdate: number } | SyncGetRevResult> {
     const cfg = await this._cfg$.pipe(first()).toPromise();
@@ -58,7 +64,8 @@ export class WebDavSyncService implements SyncProviderServiceInterface {
     }
   }
 
-  async downloadMainFileData(
+  async downloadFileData(
+    syncTarget: SyncTarget,
     localRev: string,
   ): Promise<{ rev: string; dataStr: string }> {
     this._globalProgressBarService.countUp(T.GPB.WEB_DAV_DOWNLOAD);
@@ -81,7 +88,8 @@ export class WebDavSyncService implements SyncProviderServiceInterface {
     }
   }
 
-  async uploadMainFileData(
+  async uploadFileData(
+    syncTarget: SyncTarget,
     dataStr: string,
     clientModified: number,
     localRev: string,

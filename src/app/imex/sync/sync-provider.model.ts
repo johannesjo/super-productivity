@@ -8,23 +8,28 @@ export enum SyncProvider {
   'LocalFile' = 'LocalFile',
 }
 
+export type SyncTarget = 'MAIN' | 'ARCHIVE';
+
 export interface SyncProviderServiceInterface {
   id: SyncProvider;
   isUploadForcePossible?: boolean;
   isReady$: Observable<boolean>;
 
-  getMainFileRevAndLastClientUpdate(
+  getFileRevAndLastClientUpdate(
+    syncTarget: SyncTarget,
     localRev: string | null,
   ): Promise<{ rev: string; clientUpdate?: number } | SyncGetRevResult>;
 
-  uploadMainFileData(
+  uploadFileData(
+    syncTarget: SyncTarget,
     dataStr: string,
     clientModified: number,
     localRev: string | null,
     isForceOverwrite?: boolean,
   ): Promise<string | Error>;
 
-  downloadMainFileData(
+  downloadFileData(
+    syncTarget: SyncTarget,
     localRev: string | null,
   ): Promise<{ rev: string; dataStr: AppMainFileData | string | undefined }>;
 
