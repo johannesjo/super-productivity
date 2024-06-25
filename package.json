@@ -167,6 +167,7 @@
     "@typescript-eslint/eslint-plugin": "5.8.1",
     "@typescript-eslint/parser": "5.62.0",
     "angular-material-css-vars": "^3.0.0",
+    "angular-mentions": "^1.5.0",
     "angular2-promise-buttons": "^5.0.3",
     "axios": "^1.6.0",
     "chart.js": "^2.8.0",
@@ -230,6 +231,11 @@
     "utils-decorators": "^2.0.3",
     "webdav": "~4.3.0",
     "zone.js": "~0.11.8"
+  },
+  "overrides": {
+    "angular-mentions": {
+      "@angular/common": "^18.0.0"
+    }
   },
   "resolutions": {
     "sass": "1.32.6"
