@@ -138,6 +138,9 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
   inputVal: string = '';
   inputVal$: Observable<string> = this.taskSuggestionsCtrl.valueChanges;
 
+  tagSuggestions$: Observable<Tag[]> = this._tagService.tagsNoMyDay$;
+  tagSuggestions: Tag[] = [];
+
   private _isAddInProgress?: boolean;
   private _blurTimeout?: number;
   private _autofocusTimeout?: number;
@@ -160,6 +163,7 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
     );
     this._subs.add(this.shortSyntaxTags$.subscribe((v) => (this.shortSyntaxTags = v)));
     this._subs.add(this.inputVal$.subscribe((v) => (this.inputVal = v)));
+    this._subs.add(this.tagSuggestions$.subscribe((v) => (this.tagSuggestions = v)));
   }
 
   ngAfterViewInit(): void {
