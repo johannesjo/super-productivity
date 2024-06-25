@@ -40,7 +40,7 @@ $short-syntax-bar-height: 28px;
   position: relative;
   color: #000000;
   border-radius: $card-border-radius;
-  overflow: hidden;
+  // overflow: hidden;
 
   @include darkTheme {
     color: #eeeeee;
