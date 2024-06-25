@@ -1,5 +1,6 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { MentionModule } from 'angular-mentions';
 import { TaskComponent } from './task/task.component';
 import { TaskListComponent } from './task-list/task-list.component';
 import { UiModule } from '../../ui/ui.module';
@@ -40,6 +41,7 @@ import { ShortSyntaxEffects } from './store/short-syntax.effects';
   imports: [
     CommonModule,
     IssueModule,
+    MentionModule,
     UiModule,
     FormsModule,
     TaskAttachmentModule,
