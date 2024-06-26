@@ -20,6 +20,8 @@
       (blur)="onBlur($event)"
       [formControl]="taskSuggestionsCtrl"
       [matAutocomplete]="autoEl"
+      [mention]="tagSuggestions"
+      [mentionConfig]="{triggerChar: '#', labelKey: 'title'}"
       spellcheck="false"
       [placeholder]="(doubleEnterCount > 0)
          ? (T.F.TASK.ADD_TASK_BAR.START|translate)
