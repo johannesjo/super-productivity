@@ -1,4 +1,15 @@
 {
+  "ANDROID": {
+    "NOTIFICATIONS": {
+      "SYNC_CONFLICT_TITLE": "Конфликт синхронизации",
+      "SYNC_CONFLICT_MSG": "Проверьте и решите, что делать"
+    },
+    "PERMANENT_NOTIFICATION_MSGS": {
+      "INITIAL": "Приложение работает в фоновом режиме, чтобы обеспечить синхронизацию, если она включена",
+      "NO_ACTIVE_TASKS": "Нет активных задач",
+      "SYNCING": "Синхронизация"
+    }
+  },
   "APP": {
     "B_INSTALL": {
       "IGNORE": "Игнорировать",
