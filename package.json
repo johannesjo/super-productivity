@@ -157,6 +157,7 @@
     "@typescript-eslint/eslint-plugin": "7.13.1",
     "@typescript-eslint/parser": "7.13.1",
     "angular-material-css-vars": "^7.0.0",
+    "angular-mentions": "^1.5.0",
     "axios": "^1.6.0",
     "chai": "^5.1.1",
     "chart.js": "^4.4.3",
@@ -228,6 +229,9 @@
       "@angular/common": "$@angular/common",
       "@angular/core": "$@angular/core",
       "@angular/animations": "$@angular/animations"
+    },
+    "angular-mentions": {
+      "@angular/common": "$@angular/common"
     }
   }
 }
