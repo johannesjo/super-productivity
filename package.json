@@ -161,7 +161,7 @@
     "chai": "^5.1.1",
     "chart.js": "^4.4.3",
     "chromedriver": "^125.0.3",
-    "chrono-node": "^2.6.2",
+    "chrono-node": "^2.7.6",
     "clipboard": "^2.0.8",
     "codelyzer": "^6.0.2",
     "conventional-changelog-cli": "^4.1.0",
