@@ -41,7 +41,7 @@
 
   <mat-autocomplete
     #autoEl="matAutocomplete"
-    (optionActivated)="navigateToItem($event?.option?.value)"
+    (optionSelected)="navigateToItem($event?.option?.value)"
     autoActiveFirstOption
     [displayWith]="getOptionText"
   >
