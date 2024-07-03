@@ -94,3 +94,11 @@ mat-icon,
 .mat-icon {
   vertical-align: middle;
 }
+
+// AUTOCOMPLETE
+// -----------------
+.mdc-list-item__primary-text {
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
