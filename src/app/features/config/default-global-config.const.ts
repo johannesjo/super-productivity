@@ -37,7 +37,6 @@ export const DEFAULT_GLOBAL_CONFIG: GlobalConfigState = {
     isOnlyOpenIdleWhenCurrentTask: false,
     isEnableIdleTimeTracking: true,
     minIdleTime: 5 * minute,
-    isUnTrackedIdleResetsBreakTimer: true,
   },
   takeABreak: {
     isTakeABreakEnabled: true,

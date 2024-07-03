@@ -31,7 +31,6 @@ export type EvaluationConfig = Readonly<{
 
 export type IdleConfig = Readonly<{
   isEnableIdleTimeTracking: boolean;
-  isUnTrackedIdleResetsBreakTimer: boolean;
   minIdleTime: number;
   isOnlyOpenIdleWhenCurrentTask: boolean;
 }>;

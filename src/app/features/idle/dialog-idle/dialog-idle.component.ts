@@ -39,7 +39,7 @@ export class DialogIdleComponent implements OnInit, OnDestroy {
     : EMPTY;
 
   idleTime$ = this._store.select(selectIdleTime);
-
+  TakeA;
   selectedTask: Task | null = null;
   newTaskTitle?: string;
   isCreate?: boolean;

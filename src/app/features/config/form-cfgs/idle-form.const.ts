@@ -45,14 +45,5 @@ export const IDLE_FORM_CFG: ConfigFormSection<IdleConfig> = {
         label: T.GCF.IDLE.IS_ONLY_OPEN_IDLE_WHEN_CURRENT_TASK,
       },
     },
-    {
-      key: 'isUnTrackedIdleResetsBreakTimer',
-      className: HelperClasses.isHideForNoAdvancedFeatures,
-      type: 'checkbox',
-      hideExpression: '!model.isEnableIdleTimeTracking',
-      templateOptions: {
-        label: T.GCF.IDLE.IS_UN_TRACKED_IDLE_RESETS_BREAK_TIMER,
-      },
-    },
   ],
 };
