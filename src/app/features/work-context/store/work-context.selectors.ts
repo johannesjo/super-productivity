@@ -13,7 +13,7 @@ import {
 } from '../../project/store/project.selectors';
 import { selectNoteTodayOrder } from '../../note/store/note.reducer';
 
-export const WORK_CONTEXT_FEATURE_NAME = 'context';
+export const WORK_CONTEXT_FEATURE_NAME = 'workContext';
 
 export const selectContextFeatureState = createFeatureSelector<WorkContextState>(
   WORK_CONTEXT_FEATURE_NAME,
