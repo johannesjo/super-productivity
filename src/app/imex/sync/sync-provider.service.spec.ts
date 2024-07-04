@@ -11,6 +11,7 @@ import { SyncProvider, SyncProviderServiceInterface } from './sync-provider.mode
 import { PersistenceLocalService } from '../../core/persistence/persistence-local.service';
 import { DataImportService } from './data-import.service';
 import { AppDataComplete, AppMainFileData } from './sync.model';
+import { createAppDataCompleteMock } from '../../util/app-data-mock';
 
 describe('SyncProviderService', () => {
   let service: SyncProviderService;
@@ -183,6 +184,65 @@ describe('SyncProviderService', () => {
           archivedProjects: 'archivedProjectsREMOTE',
         } as any,
         { isOmitLocalFields: true },
+      );
+    });
+  });
+
+  describe('_uploadAppData()', () => {
+    it('should throw an error if local data is invalid', async () => {
+      const cp: SyncProviderServiceInterface = {
+        id: SyncProvider.Dropbox,
+      } as Partial<SyncProviderServiceInterface> as SyncProviderServiceInterface;
+
+      const localDataComplete = {
+        lastArchiveUpdate: 999,
+      } as Partial<AppDataComplete> as AppDataComplete;
+
+      try {
+        await service['_uploadAppData'](cp, localDataComplete, false);
+      } catch (e) {
+        expect(e.message).toBe('The data you are trying to upload is invalid');
+      }
+    });
+
+    it('should upload main only if archive was not updated', async () => {
+      const cp: SyncProviderServiceInterface = jasmine.createSpyObj(
+        'SyncProviderServiceInterface',
+        ['uploadFileData'],
+        {
+          id: SyncProvider.Dropbox,
+        },
+      );
+
+      const localDataComplete = {
+        ...createAppDataCompleteMock(),
+        lastArchiveUpdate: 999,
+        lastLocalSyncModelChange: 5555,
+      } as Partial<AppDataComplete> as AppDataComplete;
+
+      persistenceLocalServiceMock.load.and.returnValue(
+        Promise.resolve({
+          [SyncProvider.Dropbox]: {
+            rev: 'syncProviderRev',
+            archiveRev: 'syncProviderRevArchive',
+          },
+        }) as any,
+      );
+
+      const { mainNoRevs } = service['_splitData'](localDataComplete);
+      const expectedAppMainData: AppMainFileData = {
+        ...mainNoRevs,
+        archiveLastUpdate: 999,
+        archiveRev: 'NO_UPDATE',
+      };
+
+      await service['_uploadAppData'](cp, localDataComplete, false);
+      expect(cp.uploadFileData).toHaveBeenCalledWith(
+        'MAIN',
+        JSON.stringify(expectedAppMainData),
+        5555,
+        'syncProviderRev',
+        false,
       );
     });
   });

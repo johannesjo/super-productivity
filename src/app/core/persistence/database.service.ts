@@ -24,7 +24,6 @@ export class DatabaseService {
     private _androidDbAdapterService: AndroidDbAdapterService,
   ) {
     this._adapter = this._indexedDbAdapterService;
-    console.log(this._indexedDbAdapterService);
     this._init().then();
   }
 

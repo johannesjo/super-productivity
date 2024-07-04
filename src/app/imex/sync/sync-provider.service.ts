@@ -395,7 +395,7 @@ export class SyncProviderService {
 
   private async _uploadAppData(
     cp: SyncProviderServiceInterface,
-    data: AppDataComplete,
+    localDataComplete: AppDataComplete,
     isForceOverwrite: boolean = false,
     retryAttempts = 0,
   ): Promise<void> {
@@ -407,7 +407,7 @@ export class SyncProviderService {
         cp.isUploadForcePossible &&
         (!retryAttempts || this._c(T.F.SYNC.C.FORCE_UPLOAD_AFTER_ERROR))
       ) {
-        return await this._uploadAppData(cp, data, true, retryAttempts + 1);
+        return await this._uploadAppData(cp, localDataComplete, true, retryAttempts + 1);
       } else {
         this._snackService.open({
           msg: T.F.SYNC.S.UPLOAD_ERROR,
@@ -424,32 +424,32 @@ export class SyncProviderService {
       }
     };
 
-    if (!isValidAppData(data)) {
-      console.log(data);
+    if (!isValidAppData(localDataComplete)) {
+      console.log(localDataComplete);
       alert('The data you are trying to upload is invalid');
       throw new Error('The data you are trying to upload is invalid');
     }
-    if (typeof data.lastLocalSyncModelChange !== 'number') {
-      console.log(data);
+    if (typeof localDataComplete.lastLocalSyncModelChange !== 'number') {
+      console.log(localDataComplete);
       alert('Error: lastLocalSyncModelChange is not defined');
       throw new Error('lastLocalSyncModelChange is not defined');
     }
 
     const localSyncProviderData = await this._getLocalSyncProviderData(cp);
-    const { archive, mainNoRevs } = this._splitData(data);
+    const { archive, mainNoRevs } = this._splitData(localDataComplete);
 
     let successRevArchive: string | Error | undefined = 'NO_UPDATE';
     // check if archive was updated and upload first if that is the case
     if (
-      data.lastArchiveUpdate &&
-      data.lastLocalSyncModelChange > localSyncProviderData.lastArchiveUpdate
+      localDataComplete.lastArchiveUpdate &&
+      localDataComplete.lastLocalSyncModelChange > localSyncProviderData.lastArchiveUpdate
     ) {
       const dataStrToUpload = await this._compressAndEncryptDataIfEnabled(archive);
 
       successRevArchive = await cp.uploadFileData(
         'ARCHIVE',
         dataStrToUpload,
-        data.lastArchiveUpdate as number,
+        localDataComplete.lastArchiveUpdate as number,
         localSyncProviderData.revTaskArchive,
         isForceOverwrite,
       );
@@ -461,15 +461,19 @@ export class SyncProviderService {
 
     const mainData: AppMainFileData = {
       ...mainNoRevs,
-      archiveLastUpdate: data.lastArchiveUpdate as number,
+      archiveLastUpdate: localDataComplete.lastArchiveUpdate as number,
       archiveRev: successRevArchive,
     };
     const dataStrToUpload = await this._compressAndEncryptDataIfEnabled(mainData);
 
+    console.log(cp);
+    console.log(dataStrToUpload);
+    console.log(localSyncProviderData);
+
     const successRevMain = await cp.uploadFileData(
       'MAIN',
       dataStrToUpload,
-      data.lastLocalSyncModelChange as number,
+      localDataComplete.lastLocalSyncModelChange as number,
       localSyncProviderData.rev,
       isForceOverwrite,
     );
@@ -480,7 +484,7 @@ export class SyncProviderService {
         cp,
         successRevMain,
         successRevArchive,
-        data.lastLocalSyncModelChange,
+        localDataComplete.lastLocalSyncModelChange,
       );
     } else {
       return await retryIfPossible();
@@ -490,7 +494,8 @@ export class SyncProviderService {
   private _splitData = (
     data: AppDataComplete,
   ): { archive: AppArchiveFileData; mainNoRevs: AppMainFileNoRevsData } => {
-    const { taskArchive, archivedProjects, ...mainNoRevs } = data;
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { taskArchive, archivedProjects, lastArchiveUpdate, ...mainNoRevs } = data;
 
     return {
       archive: {
