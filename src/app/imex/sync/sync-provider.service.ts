@@ -17,6 +17,7 @@ import {
   AppArchiveFileData,
   AppDataComplete,
   AppMainFileData,
+  AppMainFileNoRevsData,
   DialogConflictResolutionResult,
   DialogPermissionResolutionResult,
   LocalSyncMetaForProvider,
@@ -371,7 +372,7 @@ export class SyncProviderService {
   private async _downloadMainFileAppData(
     cp: SyncProviderServiceInterface,
   ): Promise<{ rev: string; data: AppMainFileData | undefined }> {
-    const localRev = await this._getLocalRev(cp);
+    const localRev = await this._getLocalMainFileRev(cp);
     const { dataStr, rev } = await cp.downloadFileData('MAIN', localRev);
     return {
       rev,
@@ -382,7 +383,7 @@ export class SyncProviderService {
   private async _downloadArchiveFileAppData(
     cp: SyncProviderServiceInterface,
   ): Promise<{ rev: string; data: AppArchiveFileData | undefined }> {
-    const localRev = await this._getLocalRev(cp);
+    const localRev = await this._getLocalMainFileRev(cp);
     const { dataStr, rev } = await cp.downloadFileData('ARCHIVE', localRev);
     return {
       rev,
@@ -396,41 +397,9 @@ export class SyncProviderService {
     isForceOverwrite: boolean = false,
     retryAttempts = 0,
   ): Promise<void> {
-    if (!isValidAppData(data)) {
-      console.log(data);
-      alert('The data you are trying to upload is invalid');
-      throw new Error('The data you are trying to upload is invalid');
-    }
-    if (typeof data.lastLocalSyncModelChange !== 'number') {
-      console.log(data);
-      alert('Error: lastLocalSyncModelChange is not defined');
-      throw new Error('lastLocalSyncModelChange is not defined');
-    }
-
-    // TODO if archive update is required, update archive first to be able to have rev in main file data
-    // TODO split data here
-    // TODO check if archive data was updated and upload if needed
     // TODO inform about incomplete remote update
-
-    const dataStrToUpload = await this._compressAndEncryptDataIfEnabled(data);
-    const localRev = await this._getLocalRev(cp);
-    const successRev = await cp.uploadFileData(
-      'MAIN',
-      dataStrToUpload,
-      data.lastLocalSyncModelChange as number,
-      localRev,
-      isForceOverwrite,
-    );
-    if (typeof successRev === 'string') {
-      this._log(cp, '↑ Uploaded Data ↑ ✓');
-      // TODO handle correctly
-      return await this._setLocalRevsAndLastSync(
-        cp,
-        successRev,
-        'NO_UPDATE',
-        data.lastLocalSyncModelChange,
-      );
-    } else {
+    // TODO handle error for archive only better
+    const retryIfPossible = async (): Promise<void> => {
       this._log(cp, 'X Upload Request Error');
       if (
         cp.isUploadForcePossible &&
@@ -442,15 +411,93 @@ export class SyncProviderService {
           msg: T.F.SYNC.S.UPLOAD_ERROR,
           translateParams: {
             err: truncate(
-              successRev?.toString ? successRev.toString() : (successRev as any),
+              successRevMain?.toString
+                ? successRevMain.toString()
+                : (successRevMain as any),
               100,
             ),
           },
           type: 'ERROR',
         });
       }
+    };
+
+    if (!isValidAppData(data)) {
+      console.log(data);
+      alert('The data you are trying to upload is invalid');
+      throw new Error('The data you are trying to upload is invalid');
+    }
+    if (typeof data.lastLocalSyncModelChange !== 'number') {
+      console.log(data);
+      alert('Error: lastLocalSyncModelChange is not defined');
+      throw new Error('lastLocalSyncModelChange is not defined');
+    }
+
+    const localSyncProviderData = await this._getLocalSyncProviderData(cp);
+    const { archive, mainNoRevs } = this._splitData(data);
+
+    let successRevArchive: string | Error | undefined = 'NO_UPDATE';
+    // check if archive was updated and upload first if that is the case
+    if (
+      data.lastArchiveUpdate &&
+      data.lastLocalSyncModelChange > localSyncProviderData.lastArchiveUpdate
+    ) {
+      const dataStrToUpload = await this._compressAndEncryptDataIfEnabled(archive);
+
+      successRevArchive = await cp.uploadFileData(
+        'ARCHIVE',
+        dataStrToUpload,
+        data.lastArchiveUpdate as number,
+        localSyncProviderData.revTaskArchive,
+        isForceOverwrite,
+      );
+      if (typeof successRevArchive !== 'string') {
+        return await retryIfPossible();
+      }
+      this._log(cp, '↑ Uploaded ARCHIVE Data ↑ ✓');
+    }
+
+    const mainData: AppMainFileData = {
+      ...mainNoRevs,
+      archiveLastUpdate: data.lastArchiveUpdate as number,
+      archiveRev: successRevArchive,
+    };
+    const dataStrToUpload = await this._compressAndEncryptDataIfEnabled(mainData);
+
+    const successRevMain = await cp.uploadFileData(
+      'MAIN',
+      dataStrToUpload,
+      data.lastLocalSyncModelChange as number,
+      localSyncProviderData.rev,
+      isForceOverwrite,
+    );
+
+    if (typeof successRevMain === 'string') {
+      this._log(cp, '↑ Uploaded all Data ↑ ✓');
+      return await this._setLocalRevsAndLastSync(
+        cp,
+        successRevMain,
+        successRevArchive,
+        data.lastLocalSyncModelChange,
+      );
+    } else {
+      return await retryIfPossible();
     }
   }
+
+  private _splitData = (
+    data: AppDataComplete,
+  ): { archive: AppArchiveFileData; mainNoRevs: AppMainFileNoRevsData } => {
+    const { taskArchive, archivedProjects, ...mainNoRevs } = data;
+
+    return {
+      archive: {
+        taskArchive,
+        archivedProjects,
+      },
+      mainNoRevs,
+    };
+  };
 
   private async _importMainFileAppDataAndArchiveIfNecessary(
     cp: SyncProviderServiceInterface,
@@ -493,9 +540,18 @@ export class SyncProviderService {
 
   // LS HELPER
   // ---------
-  private async _getLocalRev(cp: SyncProviderServiceInterface): Promise<string | null> {
-    const localSyncMeta = await this._persistenceLocalService.load();
+  private async _getLocalMainFileRev(
+    cp: SyncProviderServiceInterface,
+  ): Promise<string | null> {
+    const localSyncMeta = await this._getLocalSyncProviderData(cp);
     return localSyncMeta[cp.id].rev;
+  }
+
+  private async _getLocalSyncProviderData(
+    cp: SyncProviderServiceInterface,
+  ): Promise<LocalSyncMetaForProvider> {
+    const localSyncMeta = await this._persistenceLocalService.load();
+    return localSyncMeta[cp.id];
   }
 
   // NOTE: last sync should always equal localLastChange

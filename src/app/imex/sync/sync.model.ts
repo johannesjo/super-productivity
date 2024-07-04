@@ -30,8 +30,13 @@ export interface AppBaseWithoutLastSyncModelChange {
   taskRepeatCfg: TaskRepeatCfgState;
 }
 
-export interface AppMainFileData extends AppBaseWithoutLastSyncModelChange {
+export interface AppMainFileNoRevsData
+  extends AppBaseWithoutLastSyncModelChange,
+    AppDataForProjects {
   lastLocalSyncModelChange: number | null;
+}
+
+export interface AppMainFileData extends AppMainFileNoRevsData {
   archiveRev: string;
   archiveLastUpdate: number;
 }
@@ -75,6 +80,7 @@ export interface AppDataForProjects {
 
 export interface AppDataComplete extends AppBaseData, AppDataForProjects {
   lastLocalSyncModelChange: number | null;
+  lastArchiveUpdate: number | null;
 }
 
 export type DialogConflictResolutionResult = 'USE_LOCAL' | 'USE_REMOTE' | false;
