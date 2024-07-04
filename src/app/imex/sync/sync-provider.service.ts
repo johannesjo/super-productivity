@@ -385,7 +385,7 @@ export class SyncProviderService {
   private async _downloadArchiveFileAppData(
     cp: SyncProviderServiceInterface,
   ): Promise<{ rev: string; data: AppArchiveFileData | undefined }> {
-    const localRev = await this._getLocalMainFileRev(cp);
+    const localRev = await this._getLocalArchiveFileRev(cp);
     const { dataStr, rev } = await cp.downloadFileData('ARCHIVE', localRev);
     return {
       rev,
@@ -399,7 +399,7 @@ export class SyncProviderService {
     isForceOverwrite: boolean = false,
     retryAttempts = 0,
   ): Promise<void> {
-    // TODO inform about incomplete remote update
+    // TODO inform user about incomplete remote update
     // TODO handle error for archive only better
     const retryIfPossible = async (): Promise<void> => {
       this._log(cp, 'X Upload Request Error');
@@ -524,18 +524,21 @@ export class SyncProviderService {
 
     let archiveData: AppArchiveFileData | undefined;
     let archiveRev: string | 'NO_UPDATE' = 'NO_UPDATE';
-    if (mainFileData.archiveLastUpdate <= local.lastArchiveUpdate) {
-      this._log(cp, 'Archive was updated on remote');
+    if (mainFileData.archiveLastUpdate > local.lastArchiveUpdate) {
+      this._log(cp, 'Archive was updated on remote. Downloading...');
       const res = await this._downloadArchiveFileAppData(cp);
       archiveRev = res.rev;
       archiveData = res.data;
     }
 
+    // TODO we need to check for inconsistent archive data here, e.g. it doesn't match the one we expect given the main file data
+
     const completeData: AppDataComplete = {
       ...mainFileData,
       ...(archiveData && archiveRev
         ? {
-            ...archiveData,
+            taskArchive: archiveData.taskArchive,
+            archivedProjects: archiveData.archivedProjects,
             lastArchiveUpdate: mainFileData.archiveLastUpdate,
           }
         : {
@@ -563,7 +566,14 @@ export class SyncProviderService {
     cp: SyncProviderServiceInterface,
   ): Promise<string | null> {
     const localSyncMeta = await this._getLocalSyncProviderData(cp);
-    return localSyncMeta[cp.id].rev;
+    return localSyncMeta.rev;
+  }
+
+  private async _getLocalArchiveFileRev(
+    cp: SyncProviderServiceInterface,
+  ): Promise<string | null> {
+    const localSyncMeta = await this._getLocalSyncProviderData(cp);
+    return localSyncMeta.revTaskArchive;
   }
 
   private async _getLocalSyncProviderData(
@@ -736,6 +746,8 @@ export class SyncProviderService {
         } catch (eDecompression) {
           console.error('Sync, invalid data');
           console.warn(eDecompression);
+          console.log(dataInStr);
+
           throw new Error(eDecompression as any);
         }
       }
