@@ -229,6 +229,7 @@ describe('SyncProviderService', () => {
           },
         }) as any,
       );
+      cp.uploadFileData.and.returnValue(Promise.resolve('uploadFileReturnValueRev'));
 
       const { mainNoRevs } = service['_splitData'](localDataComplete);
       const expectedAppMainData: AppMainFileData = {
@@ -247,6 +248,7 @@ describe('SyncProviderService', () => {
       );
       expect(cp.uploadFileData).toHaveBeenCalledTimes(1);
     });
+
     it('should upload main and archive if archive was updated', async () => {
       const localDataComplete = {
         ...createAppDataCompleteMock(),
@@ -289,6 +291,46 @@ describe('SyncProviderService', () => {
         'syncProviderRevMain',
         false,
       ]);
+    });
+
+    it('should retry if unable to upload main file and warn after failure', async () => {
+      const localDataComplete = {
+        ...createAppDataCompleteMock(),
+        lastArchiveUpdate: 999,
+        lastLocalSyncModelChange: 5555,
+      } as Partial<AppDataComplete> as AppDataComplete;
+
+      persistenceLocalServiceMock.load.and.returnValue(
+        Promise.resolve({
+          [SyncProvider.Dropbox]: {
+            rev: 'syncProviderRevMain',
+            archiveRev: 'syncProviderRevArchive',
+            lastSync: 2000,
+          },
+        }) as any,
+      );
+      cp.uploadFileData.and.returnValue(Promise.resolve(new Error('Upload failed')));
+
+      const { mainNoRevs } = service['_splitData'](localDataComplete);
+      const expectedAppMainData: AppMainFileData = {
+        ...mainNoRevs,
+        archiveLastUpdate: 999,
+        archiveRev: 'NO_UPDATE',
+      };
+
+      await service['_uploadAppData']({ cp, localDataComplete });
+      expect(cp.uploadFileData).toHaveBeenCalledWith(
+        'MAIN',
+        JSON.stringify(expectedAppMainData),
+        5555,
+        'syncProviderRevMain',
+        false,
+      );
+      expect(cp.uploadFileData).toHaveBeenCalledTimes(2);
+      expect(snackServiceMock.open).toHaveBeenCalled();
+      expect((snackServiceMock.open.calls.mostRecent().args[0] as any).msg).toBe(
+        'F.SYNC.S.UPLOAD_ERROR',
+      );
     });
   });
 });

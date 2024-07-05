@@ -408,14 +408,16 @@ export class SyncProviderService {
     isForceOverwrite?: boolean;
     retryAttemptNr?: number;
   }): Promise<void> {
-    // TODO inform user about incomplete remote update
-    // TODO handle error for archive only better
+    const NR_OF_RETRIES = 1;
 
-    const retryIfPossible = async (revOrError: string | Error): Promise<void> => {
+    const retryIfPossibleOrWarnUser = async (
+      revOrError: string | Error,
+      isForMainFile: boolean,
+    ): Promise<void> => {
       this._log(cp, 'X Upload Request Error');
       if (
-        cp.isUploadForcePossible &&
-        (!retryAttemptNr || this._c(T.F.SYNC.C.FORCE_UPLOAD_AFTER_ERROR))
+        retryAttemptNr < NR_OF_RETRIES ||
+        (cp.isUploadForcePossible && this._c(T.F.SYNC.C.FORCE_UPLOAD_AFTER_ERROR))
       ) {
         return await this._uploadAppData({
           cp,
@@ -424,6 +426,14 @@ export class SyncProviderService {
           retryAttemptNr: retryAttemptNr + 1,
         });
       } else {
+        // inform user if archive was uploaded but main file wasn't
+        if (
+          isForMainFile &&
+          typeof successRevArchiveOrError === 'string' &&
+          successRevArchiveOrError !== 'NO_UPDATE'
+        ) {
+          alert(this._translateService.instant(T.F.SYNC.A.ARCHIVE_ONLY_UPLOADED));
+        }
         this._snackService.open({
           msg: T.F.SYNC.S.UPLOAD_ERROR,
           translateParams: {
@@ -467,7 +477,7 @@ export class SyncProviderService {
         isForceOverwrite,
       );
       if (typeof successRevArchiveOrError !== 'string') {
-        return await retryIfPossible(successRevArchiveOrError);
+        return await retryIfPossibleOrWarnUser(successRevArchiveOrError, false);
       }
       this._log(cp, '↑ Uploaded ARCHIVE Data ↑ ✓');
     }
@@ -496,7 +506,7 @@ export class SyncProviderService {
         localDataComplete.lastLocalSyncModelChange,
       );
     } else {
-      return await retryIfPossible(successRevMainOrError);
+      return await retryIfPossibleOrWarnUser(successRevMainOrError, true);
     }
   }
 

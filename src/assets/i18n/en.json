@@ -803,6 +803,9 @@
       }
     },
     "SYNC": {
+      "A": {
+        "ARCHIVE_ONLY_UPLOADED": "Your data was only partially uploaded. Please try again later! Otherwise you will not be able to sync your data to other devices."
+      },
       "C": {
         "EMPTY_SYNC": "You're trying to sync an empty data object. If you are trying to setup syncing from a new app instance, just press OK to load the data from the server. Otherwise, please check your data.",
         "FORCE_IMPORT": "Import remote data anyway?",
