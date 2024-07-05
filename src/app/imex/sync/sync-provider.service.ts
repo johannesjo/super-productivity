@@ -402,9 +402,11 @@ export class SyncProviderService {
     localDataComplete,
     isForceOverwrite = false,
     retryAttemptNr = 0,
+    isForceArchiveUpdate = false,
   }: {
     cp: SyncProviderServiceInterface;
     localDataComplete: AppDataComplete;
+    isForceArchiveUpdate?: boolean;
     isForceOverwrite?: boolean;
     retryAttemptNr?: number;
   }): Promise<void> {
@@ -464,15 +466,10 @@ export class SyncProviderService {
     let successRevArchiveOrError: string | Error | undefined = 'NO_UPDATE';
     // check if archive was updated and upload first if that is the case
     if (
-      localDataComplete.lastArchiveUpdate &&
-      localDataComplete.lastArchiveUpdate > localSyncProviderData.lastSync
+      isForceArchiveUpdate ||
+      (localDataComplete.lastArchiveUpdate &&
+        localDataComplete.lastArchiveUpdate > localSyncProviderData.lastSync)
     ) {
-      console.log(
-        localDataComplete.lastArchiveUpdate > localSyncProviderData.lastSync,
-        localDataComplete.lastArchiveUpdate,
-        localSyncProviderData.lastSync,
-      );
-
       const dataStrToUpload = await this._compressAndEncryptDataIfEnabled(archive);
 
       successRevArchiveOrError = await cp.uploadFileData(
@@ -539,10 +536,12 @@ export class SyncProviderService {
     remoteMainFileData,
     localComplete,
     mainFileRev,
+    isForceArchiveUpdate = false,
   }: {
     cp: SyncProviderServiceInterface;
     remoteMainFileData: AppMainFileData;
     localComplete: AppDataComplete;
+    isForceArchiveUpdate?: boolean;
     mainFileRev: string;
   }): Promise<void> {
     if (!remoteMainFileData) {
@@ -569,11 +568,17 @@ export class SyncProviderService {
     let remoteArchiveRev: string | 'NO_UPDATE' = 'NO_UPDATE';
     // NOTE initially there might never have been an archive
     if (
-      remoteMainFileData.archiveLastUpdate &&
-      (!localComplete.lastArchiveUpdate ||
-        remoteMainFileData.archiveLastUpdate > localComplete.lastArchiveUpdate)
+      isForceArchiveUpdate ||
+      (remoteMainFileData.archiveLastUpdate &&
+        (!localComplete.lastArchiveUpdate ||
+          remoteMainFileData.archiveLastUpdate > localComplete.lastArchiveUpdate))
     ) {
-      this._log(cp, 'Archive was updated on remote. Downloading...');
+      this._log(
+        cp,
+        isForceArchiveUpdate
+          ? 'Archive force update chosen. Downloading...'
+          : 'Archive was updated on remote. Downloading...',
+      );
       const res = await this._downloadArchiveFileAppData(cp);
       if (!res.rev) {
         throw new Error('No archive rev given during import');
@@ -708,6 +713,7 @@ export class SyncProviderService {
         cp,
         localDataComplete: local,
         isForceOverwrite: true,
+        isForceArchiveUpdate: true,
       });
     } else if (dr === 'USE_REMOTE') {
       this._log(cp, 'Dialog => ↓ Update Local');
@@ -716,6 +722,7 @@ export class SyncProviderService {
         remoteMainFileData: remote,
         localComplete: local,
         mainFileRev: rev,
+        isForceArchiveUpdate: true,
       });
     }
     return;
