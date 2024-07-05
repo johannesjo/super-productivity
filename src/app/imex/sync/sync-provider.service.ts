@@ -592,9 +592,15 @@ export class SyncProviderService {
 
     if (
       remoteArchiveRev !== 'NO_UPDATE' &&
+      // NOTE: main file archiveRev might be undefined when archive was never synced before with current data, but the file was created earlier
+      remoteMainFileData.archiveRev &&
       remoteArchiveRev !== remoteMainFileData.archiveRev
     ) {
-      console.log(remoteArchiveRev, remoteMainFileData.archiveRev);
+      console.log({
+        remoteArchiveRev,
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        'remoteMainFileData.archiveRev': remoteMainFileData.archiveRev,
+      });
       throw new Error('Remote archive rev does not match the one in remote main file');
     }
 
