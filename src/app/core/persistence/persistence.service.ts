@@ -290,12 +290,12 @@ export class PersistenceService {
 
   // BACKUP AND SYNC RELATED
   // -----------------------
-  updateLastLocalSyncModelChange(date: number = Date.now()): void {
+  private _updateLastLocalSyncModelChange(date: number = Date.now()): void {
     localStorage.setItem(LS.LAST_LOCAL_SYNC_MODEL_CHANGE, date.toString());
   }
 
   // TODO get rid of null return type and use 0 instead maybe
-  getLastLocalSyncModelChange(): number | null {
+  private _getLastLocalSyncModelChange(): number | null {
     const la = localStorage.getItem(LS.LAST_LOCAL_SYNC_MODEL_CHANGE);
     // NOTE: we need to parse because new Date('1570549698000') is "Invalid Date"
     const laParsed = Number.isNaN(Number(la)) ? la : +(la as string);
@@ -306,11 +306,11 @@ export class PersistenceService {
     return new Date(laParsed).getTime();
   }
 
-  updateLastLocalArchiveChange(date: number = Date.now()): void {
+  private _updateLastLocalArchiveChange(date: number = Date.now()): void {
     localStorage.setItem(LS.LAST_LOCAL_ARCHIVE_CHANGE, date.toString());
   }
 
-  getLastLocalArchiveChange(): number | null {
+  private _getLastLocalArchiveChange(): number | null {
     const la = localStorage.getItem(LS.LAST_LOCAL_ARCHIVE_CHANGE);
     // NOTE: we need to parse because new Date('1570549698000') is "Invalid Date"
     const laParsed = Number.isNaN(Number(la)) ? la : +(la as string);
@@ -364,8 +364,8 @@ export class PersistenceService {
 
     return {
       ...r,
-      lastLocalSyncModelChange: this.getLastLocalSyncModelChange(),
-      lastArchiveUpdate: this.getLastLocalArchiveChange(),
+      lastLocalSyncModelChange: this._getLastLocalSyncModelChange(),
+      lastArchiveUpdate: this._getLastLocalArchiveChange(),
     };
   }
 
@@ -400,8 +400,8 @@ export class PersistenceService {
 
     return await Promise.all([forBase, forProject])
       .then(() => {
-        this.updateLastLocalSyncModelChange(data.lastLocalSyncModelChange as number);
-        this.updateLastLocalArchiveChange(data.lastArchiveUpdate || 0);
+        this._updateLastLocalSyncModelChange(data.lastLocalSyncModelChange as number);
+        this._updateLastLocalArchiveChange(data.lastArchiveUpdate || 0);
       })
       .finally(() => {
         this._isBlockSaving = false;
@@ -649,10 +649,10 @@ export class PersistenceService {
       const r = await this._databaseService.save(idbKey, data);
 
       if (isSyncModelChange) {
-        this.updateLastLocalSyncModelChange();
+        this._updateLastLocalSyncModelChange();
       }
       if (dbKey === 'taskArchive' || dbKey === 'archivedProjects') {
-        this.updateLastLocalArchiveChange();
+        this._updateLastLocalArchiveChange();
       }
 
       this.onAfterSave$.next({
