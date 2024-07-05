@@ -119,12 +119,12 @@ describe('SyncProviderService', () => {
           [SyncProvider.Dropbox]: {},
         }) as any,
       );
-      await service['_importMainFileAppDataAndArchiveIfNecessary'](
+      await service['_importMainFileAppDataAndArchiveIfNecessary']({
         cp,
         mainFileData,
-        localData,
-        'localRev',
-      );
+        local: localData,
+        rev: 'localRev',
+      });
       expect(dataImportServiceMock.importCompleteSyncData).toHaveBeenCalledWith(
         {
           MAIN_FILE_DATA1: 'MAIN_FILE_DATA1',
@@ -171,12 +171,12 @@ describe('SyncProviderService', () => {
         }) as any,
       );
 
-      await service['_importMainFileAppDataAndArchiveIfNecessary'](
+      await service['_importMainFileAppDataAndArchiveIfNecessary']({
         cp,
         mainFileData,
-        localData,
-        'localRev',
-      );
+        local: localData,
+        rev: 'localRev',
+      });
 
       expect(dataImportServiceMock.importCompleteSyncData).toHaveBeenCalledWith(
         {
@@ -269,7 +269,6 @@ describe('SyncProviderService', () => {
       cp.uploadFileData.and.returnValue(Promise.resolve('uploadFileReturnValueRev'));
 
       await service['_uploadAppData']({ cp, localDataComplete });
-      console.log(cp.uploadFileData.calls.all()[0].args);
 
       expect(cp.uploadFileData).toHaveBeenCalledTimes(2);
       expect(cp.uploadFileData.calls.all()[0].args).toEqual([

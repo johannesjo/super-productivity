@@ -301,12 +301,12 @@ export class SyncProviderService {
 
       case UpdateCheckResult.LocalUpdateRequired: {
         this._log(cp, '↓ Update Local');
-        await this._importMainFileAppDataAndArchiveIfNecessary(
+        await this._importMainFileAppDataAndArchiveIfNecessary({
           cp,
-          remote,
+          mainFileData: remote,
           local,
-          r.rev as string,
-        );
+          rev: r.rev as string,
+        });
         return 'SUCCESS';
       }
 
@@ -359,12 +359,12 @@ export class SyncProviderService {
           }
         } else {
           if (this._c(T.F.SYNC.C.FORCE_IMPORT)) {
-            await this._importMainFileAppDataAndArchiveIfNecessary(
+            await this._importMainFileAppDataAndArchiveIfNecessary({
               cp,
-              remote,
+              mainFileData: remote,
               local,
-              r.rev as string,
-            );
+              rev: r.rev as string,
+            });
             return 'SUCCESS';
           }
         }
@@ -515,12 +515,17 @@ export class SyncProviderService {
     };
   };
 
-  private async _importMainFileAppDataAndArchiveIfNecessary(
-    cp: SyncProviderServiceInterface,
-    mainFileData: AppMainFileData,
-    local: AppDataComplete,
-    rev: string,
-  ): Promise<void> {
+  private async _importMainFileAppDataAndArchiveIfNecessary({
+    cp,
+    mainFileData,
+    local,
+    rev,
+  }: {
+    cp: SyncProviderServiceInterface;
+    mainFileData: AppMainFileData;
+    local: AppDataComplete;
+    rev: string;
+  }): Promise<void> {
     if (!mainFileData) {
       const r = await this._downloadMainFileAppData(cp);
       mainFileData = r.data as AppMainFileData;
@@ -667,7 +672,12 @@ export class SyncProviderService {
       });
     } else if (dr === 'USE_REMOTE') {
       this._log(cp, 'Dialog => ↓ Update Local');
-      await this._importMainFileAppDataAndArchiveIfNecessary(cp, remote, local, rev);
+      await this._importMainFileAppDataAndArchiveIfNecessary({
+        cp,
+        mainFileData: remote,
+        local,
+        rev,
+      });
     }
     return;
   }
