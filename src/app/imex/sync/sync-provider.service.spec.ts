@@ -117,7 +117,7 @@ describe('SyncProviderService', () => {
       persistenceLocalServiceMock.load.and.returnValue(
         Promise.resolve({
           [SyncProvider.Dropbox]: {},
-        }) as any,
+        } as Partial<LocalSyncMetaModel> as LocalSyncMetaModel),
       );
       // cp.uploadFileData.and.returnValue(Promise.resolve('uploadFileReturnValueRev'));
 
@@ -274,10 +274,10 @@ describe('SyncProviderService', () => {
         Promise.resolve({
           [SyncProvider.Dropbox]: {
             rev: 'syncProviderRevMain',
-            archiveRev: 'syncProviderRevArchive',
+            revTaskArchive: 'syncProviderRevArchive',
             lastSync: 2000,
           },
-        }) as any,
+        } as Partial<LocalSyncMetaModel> as LocalSyncMetaModel),
       );
       cp.uploadFileData.and.returnValue(Promise.resolve('uploadFileReturnValueRev'));
 
@@ -285,17 +285,18 @@ describe('SyncProviderService', () => {
       const expectedAppMainData: AppMainFileData = {
         ...mainNoRevs,
         archiveLastUpdate: 999,
-        archiveRev: 'NO_UPDATE',
+        archiveRev: 'syncProviderRevArchive',
       };
 
       await service['_uploadAppData']({ cp, localDataComplete });
-      expect(cp.uploadFileData).toHaveBeenCalledWith(
+      expect(cp.uploadFileData.calls.all()[0].args).toEqual([
         'MAIN',
         JSON.stringify(expectedAppMainData),
         5555,
         'syncProviderRevMain',
         false,
-      );
+      ]);
+
       expect(cp.uploadFileData).toHaveBeenCalledTimes(1);
     });
 
@@ -354,10 +355,10 @@ describe('SyncProviderService', () => {
         Promise.resolve({
           [SyncProvider.Dropbox]: {
             rev: 'syncProviderRevMain',
-            archiveRev: 'syncProviderRevArchive',
+            revTaskArchive: 'syncProviderRevArchive',
             lastSync: 2000,
           },
-        }) as any,
+        } as Partial<LocalSyncMetaModel> as LocalSyncMetaModel),
       );
       cp.uploadFileData.and.returnValue(Promise.resolve(new Error('Upload failed')));
 
@@ -365,7 +366,7 @@ describe('SyncProviderService', () => {
       const expectedAppMainData: AppMainFileData = {
         ...mainNoRevs,
         archiveLastUpdate: 999,
-        archiveRev: 'NO_UPDATE',
+        archiveRev: 'syncProviderRevArchive',
       };
 
       await service['_uploadAppData']({ cp, localDataComplete });

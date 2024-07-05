@@ -491,7 +491,10 @@ export class SyncProviderService {
     const mainData: AppMainFileData = {
       ...mainNoRevs,
       archiveLastUpdate: localDataComplete.lastArchiveUpdate as number,
-      archiveRev: successRevArchiveOrError,
+      archiveRev:
+        successRevArchiveOrError === 'NO_UPDATE'
+          ? (localSyncProviderData.revTaskArchive as string)
+          : successRevArchiveOrError,
     };
     const dataStrToUpload = await this._compressAndEncryptDataIfEnabled(mainData);
 
@@ -556,6 +559,11 @@ export class SyncProviderService {
     if (!localComplete.lastArchiveUpdate && localComplete.taskArchive.ids.length > 0) {
       throw new Error('No valid localComplete.lastArchiveUpdate given during import');
     }
+    if (remoteMainFileData.archiveRev === 'NO_UPDATE') {
+      throw new Error(
+        'No valid remoteMainFileData.archiveRev given during import – "NO_UPDATE"',
+      );
+    }
 
     let remoteArchiveData: AppArchiveFileData | undefined;
     let remoteArchiveRev: string | 'NO_UPDATE' = 'NO_UPDATE';
@@ -567,6 +575,12 @@ export class SyncProviderService {
     ) {
       this._log(cp, 'Archive was updated on remote. Downloading...');
       const res = await this._downloadArchiveFileAppData(cp);
+      if (!res.rev) {
+        throw new Error('No archive rev given during import');
+      }
+      if (!res.data) {
+        throw new Error('No archive data found in remote response for archive file');
+      }
       remoteArchiveRev = res.rev;
       remoteArchiveData = res.data;
     }
