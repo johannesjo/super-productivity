@@ -4,7 +4,6 @@ import {
   DB,
   DB_LEGACY,
   DB_LEGACY_PROJECT_PREFIX,
-  LS,
 } from './storage-keys.const';
 import { GlobalConfigState } from '../../features/config/global-config.model';
 import {
@@ -68,6 +67,7 @@ import {
   ENTITY_MODEL_CFGS,
   PROJECT_MODEL_CFGS,
 } from './persistence.const';
+import { PersistenceLocalService } from './persistence-local.service';
 
 const MAX_INVALID_DATA_ATTEMPTS = 10;
 
@@ -147,6 +147,7 @@ export class PersistenceService {
   constructor(
     private _databaseService: DatabaseService,
     private _compressionService: CompressionService,
+    private _persistenceLocalService: PersistenceLocalService,
     private _store: Store<any>,
   ) {}
 
@@ -290,37 +291,6 @@ export class PersistenceService {
 
   // BACKUP AND SYNC RELATED
   // -----------------------
-  private _updateLastLocalSyncModelChange(date: number = Date.now()): void {
-    localStorage.setItem(LS.LAST_LOCAL_SYNC_MODEL_CHANGE, date.toString());
-  }
-
-  // TODO get rid of null return type and use 0 instead maybe
-  private _getLastLocalSyncModelChange(): number | null {
-    const la = localStorage.getItem(LS.LAST_LOCAL_SYNC_MODEL_CHANGE);
-    // NOTE: we need to parse because new Date('1570549698000') is "Invalid Date"
-    const laParsed = Number.isNaN(Number(la)) ? la : +(la as string);
-    if (laParsed === null || laParsed === 0) {
-      return null;
-    }
-    // NOTE: to account for legacy string dates
-    return new Date(laParsed).getTime();
-  }
-
-  private _updateLastLocalArchiveChange(date: number = Date.now()): void {
-    localStorage.setItem(LS.LAST_LOCAL_ARCHIVE_CHANGE, date.toString());
-  }
-
-  private _getLastLocalArchiveChange(): number | null {
-    const la = localStorage.getItem(LS.LAST_LOCAL_ARCHIVE_CHANGE);
-    // NOTE: we need to parse because new Date('1570549698000') is "Invalid Date"
-    const laParsed = Number.isNaN(Number(la)) ? la : +(la as string);
-    if (laParsed === null || laParsed === 0) {
-      return null;
-    }
-    // NOTE: to account for legacy string dates
-    return new Date(laParsed).getTime();
-  }
-
   async loadBackup(): Promise<AppDataComplete> {
     return this._loadFromDb({ dbKey: DB.BACKUP, legacyDBKey: DB.BACKUP });
   }
@@ -364,8 +334,9 @@ export class PersistenceService {
 
     return {
       ...r,
-      lastLocalSyncModelChange: this._getLastLocalSyncModelChange(),
-      lastArchiveUpdate: this._getLastLocalArchiveChange(),
+      lastLocalSyncModelChange:
+        await this._persistenceLocalService.loadLastSyncModelChange(),
+      lastArchiveUpdate: await this._persistenceLocalService.loadLastArchiveChange(),
     };
   }
 
@@ -391,17 +362,23 @@ export class PersistenceService {
         return await this._saveForProjectIds(data[modelCfg.appDataKey], modelCfg, true);
       }),
     );
-
-    if (typeof data.lastLocalSyncModelChange !== 'number') {
-      // not necessarily a critical error as there might be other reasons for this error to popup
-      devError('No lastLocalSyncModelChange for imported data');
-      data.lastLocalSyncModelChange = Date.now();
-    }
-
     return await Promise.all([forBase, forProject])
       .then(() => {
-        this._updateLastLocalSyncModelChange(data.lastLocalSyncModelChange as number);
-        this._updateLastLocalArchiveChange(data.lastArchiveUpdate || 0);
+        if (typeof data.lastLocalSyncModelChange !== 'number') {
+          // not necessarily a critical error as there might be other reasons for this error to popup
+          devError('No lastLocalSyncModelChange for imported data');
+          data.lastLocalSyncModelChange = Date.now();
+        }
+
+        // TODO check this
+        return Promise.all([
+          this._persistenceLocalService.updateLastSyncModelChange(
+            data.lastLocalSyncModelChange as number,
+          ),
+          this._persistenceLocalService.updateLastArchiveChange(
+            data.lastArchiveUpdate || 0,
+          ),
+        ]);
       })
       .finally(() => {
         this._isBlockSaving = false;
@@ -647,12 +624,13 @@ export class PersistenceService {
       const idbKey = this._getIDBKey(dbKey, projectId);
       this._store.dispatch(saveToDb({ dbKey, data }));
       const r = await this._databaseService.save(idbKey, data);
+      const now = Date.now();
 
       if (isSyncModelChange) {
-        this._updateLastLocalSyncModelChange();
+        await this._persistenceLocalService.updateLastSyncModelChange(now);
       }
       if (dbKey === 'taskArchive' || dbKey === 'archivedProjects') {
-        this._updateLastLocalArchiveChange();
+        await this._persistenceLocalService.updateLastArchiveChange(now);
       }
 
       this.onAfterSave$.next({

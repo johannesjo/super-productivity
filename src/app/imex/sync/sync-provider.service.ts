@@ -555,7 +555,10 @@ export class SyncProviderService {
     if (!remoteMainFileData.lastLocalSyncModelChange) {
       throw new Error('No valid lastLocalSyncModelChange given during import');
     }
-    if (!localComplete.lastArchiveUpdate && localComplete.taskArchive.ids.length > 0) {
+    if (
+      typeof localComplete.lastArchiveUpdate !== 'number' &&
+      localComplete.taskArchive.ids.length > 0
+    ) {
       throw new Error('No valid localComplete.lastArchiveUpdate given during import');
     }
     if (remoteMainFileData.archiveRev === 'NO_UPDATE') {

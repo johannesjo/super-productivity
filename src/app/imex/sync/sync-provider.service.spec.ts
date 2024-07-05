@@ -25,6 +25,7 @@ describe('SyncProviderService', () => {
 
   beforeEach(() => {
     snackServiceMock = jasmine.createSpyObj('SnackService', ['open']);
+    snackServiceMock = jasmine.createSpyObj('SnackService', ['open']);
     matDialogMock = jasmine.createSpyObj('MatDialog', ['open']);
     translateServiceMock = jasmine.createSpyObj('TranslateService', ['instant']);
     dataImportServiceMock = jasmine.createSpyObj('DataImportService', [
@@ -33,6 +34,8 @@ describe('SyncProviderService', () => {
     persistenceLocalServiceMock = jasmine.createSpyObj('PersistenceLocalService', [
       'load',
       'save',
+      'loadLastSyncModelChange',
+      'loadLastArchiveChange',
     ]);
     compressionServiceMock = jasmine.createSpyObj('CompressionService', [
       'compressUTF16',
