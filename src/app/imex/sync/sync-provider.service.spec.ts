@@ -207,7 +207,7 @@ describe('SyncProviderService', () => {
       } as Partial<AppDataComplete> as AppDataComplete;
 
       try {
-        await service['_uploadAppData'](cp, localDataComplete, false);
+        await service['_uploadAppData']({ cp, localDataComplete });
       } catch (e) {
         expect(e.message).toBe('The data you are trying to upload is invalid');
       }
@@ -237,7 +237,7 @@ describe('SyncProviderService', () => {
         archiveRev: 'NO_UPDATE',
       };
 
-      await service['_uploadAppData'](cp, localDataComplete, false);
+      await service['_uploadAppData']({ cp, localDataComplete });
       expect(cp.uploadFileData).toHaveBeenCalledWith(
         'MAIN',
         JSON.stringify(expectedAppMainData),
@@ -268,7 +268,7 @@ describe('SyncProviderService', () => {
 
       cp.uploadFileData.and.returnValue(Promise.resolve('uploadFileReturnValueRev'));
 
-      await service['_uploadAppData'](cp, localDataComplete, false);
+      await service['_uploadAppData']({ cp, localDataComplete });
       console.log(cp.uploadFileData.calls.all()[0].args);
 
       expect(cp.uploadFileData).toHaveBeenCalledTimes(2);

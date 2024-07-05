@@ -168,7 +168,7 @@ export class SyncProviderService {
       if (revRes === 'NO_REMOTE_DATA' && this._c(T.F.SYNC.C.NO_REMOTE_DATA)) {
         this._log(cp, '↑ Update Remote after no getFileRevAndLastClientUpdate()');
         const localLocal = await this._persistenceService.getValidCompleteData();
-        await this._uploadAppData(cp, localLocal);
+        await this._uploadAppData({ cp, localDataComplete: localLocal });
         return 'SUCCESS';
       }
       // NOTE: includes HANDLED_ERROR and Error
@@ -234,7 +234,7 @@ export class SyncProviderService {
       lastSync < local.lastLocalSyncModelChange
     ) {
       this._log(cp, 'PRE3: ↑ Update Remote');
-      await this._uploadAppData(cp, local);
+      await this._uploadAppData({ cp, localDataComplete: local });
       return 'SUCCESS';
     }
 
@@ -255,7 +255,7 @@ export class SyncProviderService {
 
       if (this._c(T.F.SYNC.C.UNABLE_TO_LOAD_REMOTE_DATA)) {
         this._log(cp, '↑ PRE4: Update Remote after download error');
-        await this._uploadAppData(cp, local);
+        await this._uploadAppData({ cp, localDataComplete: local });
         return 'SUCCESS';
       } else {
         return 'USER_ABORT';
@@ -273,7 +273,7 @@ export class SyncProviderService {
     ) {
       if (this._c(T.F.SYNC.C.NO_REMOTE_DATA)) {
         this._log(cp, '↑ PRE5: Update Remote');
-        await this._uploadAppData(cp, local);
+        await this._uploadAppData({ cp, localDataComplete: local });
         return 'SUCCESS';
       } else {
         return 'USER_ABORT';
@@ -312,7 +312,7 @@ export class SyncProviderService {
 
       case UpdateCheckResult.RemoteUpdateRequired: {
         this._log(cp, '↑ Update Remote');
-        await this._uploadAppData(cp, local);
+        await this._uploadAppData({ cp, localDataComplete: local });
         return 'SUCCESS';
       }
 
@@ -350,7 +350,11 @@ export class SyncProviderService {
         this._log(cp, 'XXX Wrong Data');
         if (local.lastLocalSyncModelChange > remote.lastLocalSyncModelChange) {
           if (this._c(T.F.SYNC.C.FORCE_UPLOAD)) {
-            await this._uploadAppData(cp, local, true);
+            await this._uploadAppData({
+              cp,
+              localDataComplete: local,
+              isForceOverwrite: true,
+            });
             return 'SUCCESS';
           }
         } else {
@@ -393,12 +397,17 @@ export class SyncProviderService {
     };
   }
 
-  private async _uploadAppData(
-    cp: SyncProviderServiceInterface,
-    localDataComplete: AppDataComplete,
-    isForceOverwrite: boolean = false,
-    retryAttempts = 0,
-  ): Promise<void> {
+  private async _uploadAppData({
+    cp,
+    localDataComplete,
+    isForceOverwrite = false,
+    retryAttemptNr = 0,
+  }: {
+    cp: SyncProviderServiceInterface;
+    localDataComplete: AppDataComplete;
+    isForceOverwrite?: boolean;
+    retryAttemptNr?: number;
+  }): Promise<void> {
     // TODO inform user about incomplete remote update
     // TODO handle error for archive only better
 
@@ -406,9 +415,14 @@ export class SyncProviderService {
       this._log(cp, 'X Upload Request Error');
       if (
         cp.isUploadForcePossible &&
-        (!retryAttempts || this._c(T.F.SYNC.C.FORCE_UPLOAD_AFTER_ERROR))
+        (!retryAttemptNr || this._c(T.F.SYNC.C.FORCE_UPLOAD_AFTER_ERROR))
       ) {
-        return await this._uploadAppData(cp, localDataComplete, true, retryAttempts + 1);
+        return await this._uploadAppData({
+          cp,
+          localDataComplete,
+          isForceOverwrite: true,
+          retryAttemptNr: retryAttemptNr + 1,
+        });
       } else {
         this._snackService.open({
           msg: T.F.SYNC.S.UPLOAD_ERROR,
@@ -646,7 +660,11 @@ export class SyncProviderService {
 
     if (dr === 'USE_LOCAL') {
       this._log(cp, 'Dialog => ↑ Remote Update');
-      await this._uploadAppData(cp, local, true);
+      await this._uploadAppData({
+        cp,
+        localDataComplete: local,
+        isForceOverwrite: true,
+      });
     } else if (dr === 'USE_REMOTE') {
       this._log(cp, 'Dialog => ↓ Update Local');
       await this._importMainFileAppDataAndArchiveIfNecessary(cp, remote, local, rev);
