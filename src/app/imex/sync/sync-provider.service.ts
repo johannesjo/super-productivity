@@ -321,7 +321,7 @@ export class SyncProviderService {
         if (this._c(T.F.SYNC.C.TRY_LOAD_REMOTE_AGAIN)) {
           return this.sync();
         } else {
-          await this._handleConflict(cp, { remote, local, lastSync, rev: r.rev });
+          await this._handleMainFileConflict({ cp, remote, local, lastSync, rev: r.rev });
           return 'CONFLICT_DIALOG';
         }
       }
@@ -329,7 +329,7 @@ export class SyncProviderService {
       case UpdateCheckResult.DataDiverged: {
         this._log(cp, '^--------^-------^');
         this._log(cp, '⇎ X Diverged Data');
-        await this._handleConflict(cp, { remote, local, lastSync, rev: r.rev });
+        await this._handleMainFileConflict({ cp, remote, local, lastSync, rev: r.rev });
         return 'CONFLICT_DIALOG';
       }
 
@@ -643,24 +643,19 @@ export class SyncProviderService {
 
   // OTHER
   // -----
-  private async _handleConflict(
-    cp: SyncProviderServiceInterface,
-    {
-      remote,
-      local,
-      lastSync,
-      rev,
-    }: {
-      // TODO properly handle all conflicts
-      remote: any;
-      local: any;
-      // TODO add proper type again
-      // remote: AppDataComplete;
-      // localComplete: AppDataComplete;
-      lastSync: number;
-      rev: string;
-    },
-  ): Promise<void> {
+  private async _handleMainFileConflict({
+    cp,
+    remote,
+    local,
+    lastSync,
+    rev,
+  }: {
+    cp: SyncProviderServiceInterface;
+    remote: AppMainFileData;
+    local: AppDataComplete;
+    lastSync: number;
+    rev: string;
+  }): Promise<void> {
     if (IS_ANDROID_WEB_VIEW) {
       androidInterface.showNotificationIfAppIsNotOpen?.(
         this._translateService.instant(T.ANDROID.NOTIFICATIONS.SYNC_CONFLICT_TITLE),
