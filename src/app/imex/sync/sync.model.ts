@@ -57,7 +57,6 @@ export interface LocalSyncMetaForProvider {
 }
 
 export interface LocalSyncMetaModel {
-  lastArchiveUpdate: number;
   [SyncProvider.WebDAV]: LocalSyncMetaForProvider;
   [SyncProvider.Dropbox]: LocalSyncMetaForProvider;
   [SyncProvider.LocalFile]: LocalSyncMetaForProvider;
