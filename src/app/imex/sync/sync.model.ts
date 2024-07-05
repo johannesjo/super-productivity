@@ -54,7 +54,6 @@ export interface LocalSyncMetaForProvider {
   lastSync: number;
   rev: string | null;
   revTaskArchive: string | null;
-  lastArchiveUpdate: number;
 }
 
 export interface LocalSyncMetaModel {

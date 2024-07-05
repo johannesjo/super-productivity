@@ -401,7 +401,8 @@ export class SyncProviderService {
   ): Promise<void> {
     // TODO inform user about incomplete remote update
     // TODO handle error for archive only better
-    const retryIfPossible = async (): Promise<void> => {
+
+    const retryIfPossible = async (revOrError: string | Error): Promise<void> => {
       this._log(cp, 'X Upload Request Error');
       if (
         cp.isUploadForcePossible &&
@@ -413,9 +414,7 @@ export class SyncProviderService {
           msg: T.F.SYNC.S.UPLOAD_ERROR,
           translateParams: {
             err: truncate(
-              successRevMain?.toString
-                ? successRevMain.toString()
-                : (successRevMain as any),
+              revOrError?.toString ? revOrError.toString() : (revOrError as any),
               100,
             ),
           },
@@ -438,23 +437,23 @@ export class SyncProviderService {
     const localSyncProviderData = await this._getLocalSyncProviderData(cp);
     const { archive, mainNoRevs } = this._splitData(localDataComplete);
 
-    let successRevArchive: string | Error | undefined = 'NO_UPDATE';
+    let successRevArchiveOrError: string | Error | undefined = 'NO_UPDATE';
     // check if archive was updated and upload first if that is the case
     if (
       localDataComplete.lastArchiveUpdate &&
-      localDataComplete.lastLocalSyncModelChange > localSyncProviderData.lastArchiveUpdate
+      localDataComplete.lastArchiveUpdate > localSyncProviderData.lastSync
     ) {
       const dataStrToUpload = await this._compressAndEncryptDataIfEnabled(archive);
 
-      successRevArchive = await cp.uploadFileData(
+      successRevArchiveOrError = await cp.uploadFileData(
         'ARCHIVE',
         dataStrToUpload,
         localDataComplete.lastArchiveUpdate as number,
         localSyncProviderData.revTaskArchive,
         isForceOverwrite,
       );
-      if (typeof successRevArchive !== 'string') {
-        return await retryIfPossible();
+      if (typeof successRevArchiveOrError !== 'string') {
+        return await retryIfPossible(successRevArchiveOrError);
       }
       this._log(cp, '↑ Uploaded ARCHIVE Data ↑ ✓');
     }
@@ -462,15 +461,11 @@ export class SyncProviderService {
     const mainData: AppMainFileData = {
       ...mainNoRevs,
       archiveLastUpdate: localDataComplete.lastArchiveUpdate as number,
-      archiveRev: successRevArchive,
+      archiveRev: successRevArchiveOrError,
     };
     const dataStrToUpload = await this._compressAndEncryptDataIfEnabled(mainData);
 
-    console.log(cp);
-    console.log(dataStrToUpload);
-    console.log(localSyncProviderData);
-
-    const successRevMain = await cp.uploadFileData(
+    const successRevMainOrError = await cp.uploadFileData(
       'MAIN',
       dataStrToUpload,
       localDataComplete.lastLocalSyncModelChange as number,
@@ -478,16 +473,16 @@ export class SyncProviderService {
       isForceOverwrite,
     );
 
-    if (typeof successRevMain === 'string') {
+    if (typeof successRevMainOrError === 'string') {
       this._log(cp, '↑ Uploaded all Data ↑ ✓');
       return await this._setLocalRevsAndLastSync(
         cp,
-        successRevMain,
-        successRevArchive,
+        successRevMainOrError,
+        successRevArchiveOrError,
         localDataComplete.lastLocalSyncModelChange,
       );
     } else {
-      return await retryIfPossible();
+      return await retryIfPossible(successRevMainOrError);
     }
   }
 
@@ -610,10 +605,6 @@ export class SyncProviderService {
         revTaskArchive === 'NO_UPDATE'
           ? localSyncMeta[cp.id].revTaskArchive
           : revTaskArchive,
-      lastArchiveUpdate:
-        revTaskArchive === 'NO_UPDATE'
-          ? localSyncMeta[cp.id].lastArchiveUpdate
-          : Date.now(),
     };
     await this._persistenceLocalService.save({
       ...localSyncMeta,

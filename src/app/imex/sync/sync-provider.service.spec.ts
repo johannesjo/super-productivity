@@ -10,8 +10,9 @@ import { ReminderService } from '../../features/reminder/reminder.service';
 import { SyncProvider, SyncProviderServiceInterface } from './sync-provider.model';
 import { PersistenceLocalService } from '../../core/persistence/persistence-local.service';
 import { DataImportService } from './data-import.service';
-import { AppDataComplete, AppMainFileData } from './sync.model';
+import { AppDataComplete, AppMainFileData, LocalSyncMetaModel } from './sync.model';
 import { createAppDataCompleteMock } from '../../util/app-data-mock';
+import { SnackService } from '../../core/snack/snack.service';
 
 describe('SyncProviderService', () => {
   let service: SyncProviderService;
@@ -20,8 +21,10 @@ describe('SyncProviderService', () => {
   let compressionServiceMock: jasmine.SpyObj<CompressionService>;
   let persistenceLocalServiceMock: jasmine.SpyObj<PersistenceLocalService>;
   let dataImportServiceMock: jasmine.SpyObj<DataImportService>;
+  let snackServiceMock: jasmine.SpyObj<SnackService>;
 
   beforeEach(() => {
+    snackServiceMock = jasmine.createSpyObj('SnackService', ['open']);
     matDialogMock = jasmine.createSpyObj('MatDialog', ['open']);
     translateServiceMock = jasmine.createSpyObj('TranslateService', ['instant']);
     dataImportServiceMock = jasmine.createSpyObj('DataImportService', [
@@ -68,6 +71,7 @@ describe('SyncProviderService', () => {
         { provide: CompressionService, useValue: compressionServiceMock },
         { provide: PersistenceLocalService, useValue: persistenceLocalServiceMock },
         { provide: DataImportService, useValue: dataImportServiceMock },
+        { provide: SnackService, useValue: snackServiceMock },
         {
           provide: Actions,
           useValue: new Observable(),
@@ -189,11 +193,15 @@ describe('SyncProviderService', () => {
   });
 
   describe('_uploadAppData()', () => {
-    it('should throw an error if local data is invalid', async () => {
-      const cp: SyncProviderServiceInterface = {
-        id: SyncProvider.Dropbox,
-      } as Partial<SyncProviderServiceInterface> as SyncProviderServiceInterface;
+    let cp: jasmine.SpyObj<SyncProviderServiceInterface>;
 
+    beforeEach(() => {
+      cp = jasmine.createSpyObj('SyncProviderServiceInterface', ['uploadFileData'], {
+        id: SyncProvider.Dropbox,
+      });
+    });
+
+    it('should throw an error if local data is invalid', async () => {
       const localDataComplete = {
         lastArchiveUpdate: 999,
       } as Partial<AppDataComplete> as AppDataComplete;
@@ -206,14 +214,6 @@ describe('SyncProviderService', () => {
     });
 
     it('should upload main only if archive was not updated', async () => {
-      const cp: SyncProviderServiceInterface = jasmine.createSpyObj(
-        'SyncProviderServiceInterface',
-        ['uploadFileData'],
-        {
-          id: SyncProvider.Dropbox,
-        },
-      );
-
       const localDataComplete = {
         ...createAppDataCompleteMock(),
         lastArchiveUpdate: 999,
@@ -223,8 +223,9 @@ describe('SyncProviderService', () => {
       persistenceLocalServiceMock.load.and.returnValue(
         Promise.resolve({
           [SyncProvider.Dropbox]: {
-            rev: 'syncProviderRev',
+            rev: 'syncProviderRevMain',
             archiveRev: 'syncProviderRevArchive',
+            lastSync: 2000,
           },
         }) as any,
       );
@@ -241,9 +242,54 @@ describe('SyncProviderService', () => {
         'MAIN',
         JSON.stringify(expectedAppMainData),
         5555,
-        'syncProviderRev',
+        'syncProviderRevMain',
         false,
       );
+      expect(cp.uploadFileData).toHaveBeenCalledTimes(1);
+    });
+    it('should upload main and archive if archive was updated', async () => {
+      const localDataComplete = {
+        ...createAppDataCompleteMock(),
+        lastArchiveUpdate: 999,
+        lastLocalSyncModelChange: 5555,
+      } as Partial<AppDataComplete> as AppDataComplete;
+
+      persistenceLocalServiceMock.load.and.returnValue(
+        Promise.resolve({
+          [SyncProvider.Dropbox]: {
+            rev: 'syncProviderRevMain',
+            revTaskArchive: 'syncProviderRevArchive',
+            lastSync: 22,
+          },
+        } as Partial<LocalSyncMetaModel> as LocalSyncMetaModel),
+      );
+
+      const { mainNoRevs } = service['_splitData'](localDataComplete);
+
+      cp.uploadFileData.and.returnValue(Promise.resolve('uploadFileReturnValueRev'));
+
+      await service['_uploadAppData'](cp, localDataComplete, false);
+      console.log(cp.uploadFileData.calls.all()[0].args);
+
+      expect(cp.uploadFileData).toHaveBeenCalledTimes(2);
+      expect(cp.uploadFileData.calls.all()[0].args).toEqual([
+        'ARCHIVE',
+        '{"taskArchive":{"ids":[],"entities":{}},"archivedProjects":{}}',
+        999,
+        'syncProviderRevArchive',
+        false,
+      ]);
+      expect(cp.uploadFileData.calls.all()[1].args).toEqual([
+        'MAIN',
+        JSON.stringify({
+          ...mainNoRevs,
+          archiveLastUpdate: 999,
+          archiveRev: 'uploadFileReturnValueRev',
+        }),
+        5555,
+        'syncProviderRevMain',
+        false,
+      ]);
     });
   });
 });
