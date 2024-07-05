@@ -64,7 +64,11 @@
             "selector": "default",
             "format": ["camelCase", "snake_case", "UPPER_CASE", "PascalCase"],
             "leadingUnderscore": "allowSingleOrDouble",
-            "trailingUnderscore": "allow"
+            "trailingUnderscore": "allow",
+            "filter": {
+              "regex": "(should)|@tags",
+              "match": false
+            }
           },
           {
             "selector": "variable",
