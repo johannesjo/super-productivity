@@ -190,7 +190,7 @@ export class SyncProviderService {
 
     if (rev && rev === localRev) {
       this._log(cp, 'PRE1: ↔ Same Rev', rev);
-      // NOTE: same rev, doesn't mean. that we can't have local changes
+      // NOTE: same mainFileRev, doesn't mean. that we can't have local changes
       local = await this._persistenceService.getValidCompleteData();
       if (lastSync === local.lastLocalSyncModelChange) {
         this._log(cp, 'PRE1: No local changes to sync');
@@ -303,9 +303,9 @@ export class SyncProviderService {
         this._log(cp, '↓ Update Local');
         await this._importMainFileAppDataAndArchiveIfNecessary({
           cp,
-          mainFileData: remote,
-          local,
-          rev: r.rev as string,
+          remoteMainFileData: remote,
+          localComplete: local,
+          mainFileRev: r.rev as string,
         });
         return 'SUCCESS';
       }
@@ -361,9 +361,9 @@ export class SyncProviderService {
           if (this._c(T.F.SYNC.C.FORCE_IMPORT)) {
             await this._importMainFileAppDataAndArchiveIfNecessary({
               cp,
-              mainFileData: remote,
-              local,
-              rev: r.rev as string,
+              remoteMainFileData: remote,
+              localComplete: local,
+              mainFileRev: r.rev as string,
             });
             return 'SUCCESS';
           }
@@ -517,33 +517,33 @@ export class SyncProviderService {
 
   private async _importMainFileAppDataAndArchiveIfNecessary({
     cp,
-    mainFileData,
-    local,
-    rev,
+    remoteMainFileData,
+    localComplete,
+    mainFileRev,
   }: {
     cp: SyncProviderServiceInterface;
-    mainFileData: AppMainFileData;
-    local: AppDataComplete;
-    rev: string;
+    remoteMainFileData: AppMainFileData;
+    localComplete: AppDataComplete;
+    mainFileRev: string;
   }): Promise<void> {
-    if (!mainFileData) {
+    if (!remoteMainFileData) {
       const r = await this._downloadMainFileAppData(cp);
-      mainFileData = r.data as AppMainFileData;
-      rev = r.rev;
+      remoteMainFileData = r.data as AppMainFileData;
+      mainFileRev = r.rev;
     }
-    if (!rev) {
-      throw new Error('No rev given during import');
+    if (!mainFileRev) {
+      throw new Error('No mainFileRev given during import');
     }
-    if (!mainFileData.lastLocalSyncModelChange) {
+    if (!remoteMainFileData.lastLocalSyncModelChange) {
       throw new Error('No valid lastLocalSyncModelChange given during import');
     }
-    if (!local.lastArchiveUpdate) {
-      throw new Error('No valid local.lastArchiveUpdate given during import');
+    if (!localComplete.lastArchiveUpdate) {
+      throw new Error('No valid localComplete.lastArchiveUpdate given during import');
     }
 
     let archiveData: AppArchiveFileData | undefined;
     let archiveRev: string | 'NO_UPDATE' = 'NO_UPDATE';
-    if (mainFileData.archiveLastUpdate > local.lastArchiveUpdate) {
+    if (remoteMainFileData.archiveLastUpdate > localComplete.lastArchiveUpdate) {
       this._log(cp, 'Archive was updated on remote. Downloading...');
       const res = await this._downloadArchiveFileAppData(cp);
       archiveRev = res.rev;
@@ -553,17 +553,17 @@ export class SyncProviderService {
     // TODO we need to check for inconsistent archive data here, e.g. it doesn't match the one we expect given the main file data
 
     const completeData: AppDataComplete = {
-      ...mainFileData,
+      ...remoteMainFileData,
       ...(archiveData && archiveRev
         ? {
             taskArchive: archiveData.taskArchive,
             archivedProjects: archiveData.archivedProjects,
-            lastArchiveUpdate: mainFileData.archiveLastUpdate,
+            lastArchiveUpdate: remoteMainFileData.archiveLastUpdate,
           }
         : {
-            taskArchive: local.taskArchive,
-            archivedProjects: local.archivedProjects,
-            lastArchiveUpdate: local.lastArchiveUpdate,
+            taskArchive: localComplete.taskArchive,
+            archivedProjects: localComplete.archivedProjects,
+            lastArchiveUpdate: localComplete.lastArchiveUpdate,
           }),
     };
 
@@ -573,9 +573,9 @@ export class SyncProviderService {
 
     await this._setLocalRevsAndLastSync(
       cp,
-      rev,
+      mainFileRev,
       archiveRev,
-      mainFileData.lastLocalSyncModelChange,
+      remoteMainFileData.lastLocalSyncModelChange,
     );
   }
 
@@ -611,7 +611,7 @@ export class SyncProviderService {
   ): Promise<void> {
     if (!rev) {
       console.log(cp, rev);
-      throw new Error('No rev given');
+      throw new Error('No mainFileRev given');
     }
     if (typeof (lastSync as any) !== 'number') {
       throw new Error('No correct localLastSync given ' + lastSync);
@@ -646,7 +646,7 @@ export class SyncProviderService {
       local: any;
       // TODO add proper type again
       // remote: AppDataComplete;
-      // local: AppDataComplete;
+      // localComplete: AppDataComplete;
       lastSync: number;
       rev: string;
     },
@@ -674,9 +674,9 @@ export class SyncProviderService {
       this._log(cp, 'Dialog => ↓ Update Local');
       await this._importMainFileAppDataAndArchiveIfNecessary({
         cp,
-        mainFileData: remote,
-        local,
-        rev,
+        remoteMainFileData: remote,
+        localComplete: local,
+        mainFileRev: rev,
       });
     }
     return;

@@ -98,7 +98,7 @@ describe('SyncProviderService', () => {
   });
 
   describe('_importMainFileAppDataAndArchiveIfNecessary()', () => {
-    it('should import main with local data if archive was not updated', async () => {
+    it('should import main with localComplete data if archive was not updated', async () => {
       const cp: SyncProviderServiceInterface = {
         id: SyncProvider.Dropbox,
       } as Partial<SyncProviderServiceInterface> as SyncProviderServiceInterface;
@@ -121,9 +121,9 @@ describe('SyncProviderService', () => {
       );
       await service['_importMainFileAppDataAndArchiveIfNecessary']({
         cp,
-        mainFileData,
-        local: localData,
-        rev: 'localRev',
+        remoteMainFileData: mainFileData,
+        localComplete: localData,
+        mainFileRev: 'localRev',
       });
       expect(dataImportServiceMock.importCompleteSyncData).toHaveBeenCalledWith(
         {
@@ -138,7 +138,7 @@ describe('SyncProviderService', () => {
       );
     });
 
-    it('should import main and also load and import remote archive if newer than local', async () => {
+    it('should import main and also load and import remote archive if newer than localComplete', async () => {
       const cp: SyncProviderServiceInterface = {
         id: SyncProvider.Dropbox,
         downloadFileData: () =>
@@ -151,7 +151,7 @@ describe('SyncProviderService', () => {
           }),
       } as Partial<SyncProviderServiceInterface> as SyncProviderServiceInterface;
 
-      const mainFileData = {
+      const remoteMainFileData = {
         MAIN_FILE_DATA1: 'MAIN_FILE_DATA1',
         lastLocalSyncModelChange: 111,
         archiveLastUpdate: 2222,
@@ -173,9 +173,9 @@ describe('SyncProviderService', () => {
 
       await service['_importMainFileAppDataAndArchiveIfNecessary']({
         cp,
-        mainFileData,
-        local: localData,
-        rev: 'localRev',
+        remoteMainFileData,
+        localComplete: localData,
+        mainFileRev: 'localRev',
       });
 
       expect(dataImportServiceMock.importCompleteSyncData).toHaveBeenCalledWith(
@@ -201,7 +201,7 @@ describe('SyncProviderService', () => {
       });
     });
 
-    it('should throw an error if local data is invalid', async () => {
+    it('should throw an error if localComplete data is invalid', async () => {
       const localDataComplete = {
         lastArchiveUpdate: 999,
       } as Partial<AppDataComplete> as AppDataComplete;
