@@ -196,6 +196,7 @@ export class TagEffects {
           // remove from archive
           await this._persistenceService.taskArchive.execAction(
             removeTagsForAllTasks({ tagIdsToRemove }),
+            true,
           );
 
           const isOrphanedParentTask = (t: Task): boolean =>
@@ -227,6 +228,7 @@ export class TagEffects {
             deleteTasks({
               taskIds: [...archiveMainTaskIdsToDelete, ...archiveSubTaskIdsToDelete],
             }),
+            true,
           );
 
           // remove from task repeat

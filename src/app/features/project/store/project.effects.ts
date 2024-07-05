@@ -485,6 +485,7 @@ export class ProjectEffects {
     // remove archive
     await this._persistenceService.taskArchive.execAction(
       deleteTasks({ taskIds: archiveTaskIdsToDelete }),
+      true,
     );
   }
 

@@ -748,6 +748,7 @@ export class TaskService {
     // archive
     await this._persistenceService.taskArchive.execAction(
       roundTimeSpentForDay({ day, taskIds: archivedIds, roundTo, isRoundUp, projectId }),
+      true,
     );
   }
 
@@ -893,6 +894,7 @@ export class TaskService {
           changes: changedFields,
         },
       }),
+      true,
     );
   }
 
@@ -900,6 +902,7 @@ export class TaskService {
   async updateArchiveTasks(updates: Update<Task>[]): Promise<void> {
     await this._persistenceService.taskArchive.execActions(
       updates.map((upd) => updateTask({ task: upd })),
+      true,
     );
   }
 

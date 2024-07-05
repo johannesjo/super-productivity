@@ -184,7 +184,7 @@ export class PersistenceService {
       dbKey: 'archivedProjects',
       data,
       isDataImport,
-      isSyncModelChange: false,
+      isSyncModelChange: true,
     });
   }
 
@@ -401,7 +401,7 @@ export class PersistenceService {
     return await Promise.all([forBase, forProject])
       .then(() => {
         this.updateLastLocalSyncModelChange(data.lastLocalSyncModelChange as number);
-        this.updateLastLocalArchiveChange(data.lastArchiveUpdate as number);
+        this.updateLastLocalArchiveChange(data.lastArchiveUpdate || 0);
       })
       .finally(() => {
         this._isBlockSaving = false;
@@ -508,18 +508,18 @@ export class PersistenceService {
       },
 
       // NOTE: side effects are not executed!!!
-      execAction: async (action: Action): Promise<S> => {
+      execAction: async (action: Action, isSyncModelChange = false): Promise<S> => {
         const state: S = await model.loadState();
         const newState: S = reducerFn(state, action);
-        await model.saveState(newState, { isDataImport: false });
+        await model.saveState(newState, { isDataImport: false, isSyncModelChange });
         return newState;
       },
 
       // NOTE: side effects are not executed!!!
-      execActions: async (actions: Action[]): Promise<S> => {
+      execActions: async (actions: Action[], isSyncModelChange = false): Promise<S> => {
         const state: S = await model.loadState();
         const newState: S = actions.reduce((acc, act) => reducerFn(acc, act), state);
-        await model.saveState(newState, { isDataImport: false });
+        await model.saveState(newState, { isDataImport: false, isSyncModelChange });
         return newState;
       },
     };
@@ -654,6 +654,7 @@ export class PersistenceService {
       if (dbKey === 'taskArchive' || dbKey === 'archivedProjects') {
         this.updateLastLocalArchiveChange();
       }
+
       this.onAfterSave$.next({
         appDataKey: dbKey,
         data,

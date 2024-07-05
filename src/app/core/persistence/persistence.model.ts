@@ -17,10 +17,10 @@ export interface PersistenceBaseEntityModel<S, M> extends PersistenceBaseModel<S
   getById(id: string): Promise<M>;
 
   // NOTE: side effects are not executed!!!
-  execAction(action: Action): Promise<S>;
+  execAction(action: Action, isSyncModelChange?: boolean): Promise<S>;
 
   // NOTE: side effects are not executed!!!
-  execActions(actions: Action[]): Promise<S>;
+  execActions(actions: Action[], isSyncModelChange?: boolean): Promise<S>;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars

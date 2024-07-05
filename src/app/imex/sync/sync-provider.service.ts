@@ -467,6 +467,12 @@ export class SyncProviderService {
       localDataComplete.lastArchiveUpdate &&
       localDataComplete.lastArchiveUpdate > localSyncProviderData.lastSync
     ) {
+      console.log(
+        localDataComplete.lastArchiveUpdate > localSyncProviderData.lastSync,
+        localDataComplete.lastArchiveUpdate,
+        localSyncProviderData.lastSync,
+      );
+
       const dataStrToUpload = await this._compressAndEncryptDataIfEnabled(archive);
 
       successRevArchiveOrError = await cp.uploadFileData(
@@ -498,7 +504,7 @@ export class SyncProviderService {
     );
 
     if (typeof successRevMainOrError === 'string') {
-      this._log(cp, '↑ Uploaded all Data ↑ ✓');
+      this._log(cp, '↑ Uploaded MAIN Data ↑ ✓');
       return await this._setLocalRevsAndLastSync(
         cp,
         successRevMainOrError,
@@ -547,13 +553,18 @@ export class SyncProviderService {
     if (!remoteMainFileData.lastLocalSyncModelChange) {
       throw new Error('No valid lastLocalSyncModelChange given during import');
     }
-    if (!localComplete.lastArchiveUpdate) {
+    if (!localComplete.lastArchiveUpdate && localComplete.taskArchive.ids.length > 0) {
       throw new Error('No valid localComplete.lastArchiveUpdate given during import');
     }
 
     let remoteArchiveData: AppArchiveFileData | undefined;
     let remoteArchiveRev: string | 'NO_UPDATE' = 'NO_UPDATE';
-    if (remoteMainFileData.archiveLastUpdate > localComplete.lastArchiveUpdate) {
+    // NOTE initially there might never have been an archive
+    if (
+      remoteMainFileData.archiveLastUpdate &&
+      (!localComplete.lastArchiveUpdate ||
+        remoteMainFileData.archiveLastUpdate > localComplete.lastArchiveUpdate)
+    ) {
       this._log(cp, 'Archive was updated on remote. Downloading...');
       const res = await this._downloadArchiveFileAppData(cp);
       remoteArchiveRev = res.rev;
