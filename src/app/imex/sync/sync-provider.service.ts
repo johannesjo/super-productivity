@@ -551,23 +551,32 @@ export class SyncProviderService {
       throw new Error('No valid localComplete.lastArchiveUpdate given during import');
     }
 
-    let archiveData: AppArchiveFileData | undefined;
-    let archiveRev: string | 'NO_UPDATE' = 'NO_UPDATE';
+    let remoteArchiveData: AppArchiveFileData | undefined;
+    let remoteArchiveRev: string | 'NO_UPDATE' = 'NO_UPDATE';
     if (remoteMainFileData.archiveLastUpdate > localComplete.lastArchiveUpdate) {
       this._log(cp, 'Archive was updated on remote. Downloading...');
       const res = await this._downloadArchiveFileAppData(cp);
-      archiveRev = res.rev;
-      archiveData = res.data;
+      remoteArchiveRev = res.rev;
+      remoteArchiveData = res.data;
     }
 
-    // TODO we need to check for inconsistent archive data here, e.g. it doesn't match the one we expect given the main file data
+    if (
+      remoteArchiveRev !== 'NO_UPDATE' &&
+      remoteArchiveRev !== remoteMainFileData.archiveRev
+    ) {
+      console.log(remoteArchiveRev, remoteMainFileData.archiveRev);
+      throw new Error('Remote archive rev does not match the one in remote main file');
+    }
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { archiveRev, archiveLastUpdate, ...cleanedRemoteMainFile } =
+      remoteMainFileData;
     const completeData: AppDataComplete = {
-      ...remoteMainFileData,
-      ...(archiveData && archiveRev
+      ...cleanedRemoteMainFile,
+      ...(remoteArchiveData
         ? {
-            taskArchive: archiveData.taskArchive,
-            archivedProjects: archiveData.archivedProjects,
+            taskArchive: remoteArchiveData.taskArchive,
+            archivedProjects: remoteArchiveData.archivedProjects,
             lastArchiveUpdate: remoteMainFileData.archiveLastUpdate,
           }
         : {
@@ -584,7 +593,7 @@ export class SyncProviderService {
     await this._setLocalRevsAndLastSync(
       cp,
       mainFileRev,
-      archiveRev,
+      remoteArchiveRev,
       remoteMainFileData.lastLocalSyncModelChange,
     );
   }

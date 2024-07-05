@@ -119,6 +119,8 @@ describe('SyncProviderService', () => {
           [SyncProvider.Dropbox]: {},
         }) as any,
       );
+      // cp.uploadFileData.and.returnValue(Promise.resolve('uploadFileReturnValueRev'));
+
       await service['_importMainFileAppDataAndArchiveIfNecessary']({
         cp,
         remoteMainFileData: mainFileData,
@@ -132,7 +134,6 @@ describe('SyncProviderService', () => {
           taskArchive: 'localTaskArchive',
           archivedProjects: 'localArchivedProjects',
           lastArchiveUpdate: 999,
-          archiveLastUpdate: 999,
         } as any,
         { isOmitLocalFields: true },
       );
@@ -141,9 +142,9 @@ describe('SyncProviderService', () => {
     it('should import main and also load and import remote archive if newer than localComplete', async () => {
       const cp: SyncProviderServiceInterface = {
         id: SyncProvider.Dropbox,
-        downloadFileData: () =>
+        downloadFileData: (syncTarget) =>
           Promise.resolve({
-            rev: 'remoteRev',
+            rev: 'remoteRev_' + syncTarget,
             dataStr: {
               taskArchive: 'taskArchiveREMOTE' as any,
               archivedProjects: 'archivedProjectsREMOTE' as any,
@@ -155,6 +156,7 @@ describe('SyncProviderService', () => {
         MAIN_FILE_DATA1: 'MAIN_FILE_DATA1',
         lastLocalSyncModelChange: 111,
         archiveLastUpdate: 2222,
+        archiveRev: 'remoteRev_ARCHIVE',
       } as Partial<AppMainFileData> as AppMainFileData;
       const localData = {
         taskArchive: 'taskArchive' as any,
@@ -183,12 +185,60 @@ describe('SyncProviderService', () => {
           MAIN_FILE_DATA1: 'MAIN_FILE_DATA1',
           lastLocalSyncModelChange: 111,
           lastArchiveUpdate: 2222,
-          archiveLastUpdate: 2222,
           taskArchive: 'taskArchiveREMOTE',
           archivedProjects: 'archivedProjectsREMOTE',
         } as any,
         { isOmitLocalFields: true },
       );
+    });
+
+    it('should throw an error if archive rev does not match archive rev in main file', async () => {
+      const cp: SyncProviderServiceInterface = {
+        id: SyncProvider.Dropbox,
+        downloadFileData: (syncTarget) =>
+          Promise.resolve({
+            rev: 'remoteRev_' + syncTarget,
+            dataStr: {
+              taskArchive: 'taskArchiveREMOTE' as any,
+              archivedProjects: 'archivedProjectsREMOTE' as any,
+            } as any,
+          }),
+      } as Partial<SyncProviderServiceInterface> as SyncProviderServiceInterface;
+
+      const remoteMainFileData = {
+        MAIN_FILE_DATA1: 'MAIN_FILE_DATA1',
+        lastLocalSyncModelChange: 111,
+        archiveLastUpdate: 2222,
+        archiveRev: 'remoteRev_ARCHIVE_SOMETHING_ELSEEE',
+      } as Partial<AppMainFileData> as AppMainFileData;
+      const localData = {
+        taskArchive: 'taskArchive' as any,
+        archivedProjects: 'archivedProjects' as any,
+        lastArchiveUpdate: 44,
+      } as Partial<AppDataComplete> as AppDataComplete;
+
+      persistenceLocalServiceMock.load.and.returnValue(
+        Promise.resolve({
+          [SyncProvider.Dropbox]: {
+            taskArchive: 'taskArchiveREMOTE',
+            archivedProjects: 'archivedProjectsREMOTE',
+          },
+        }) as any,
+      );
+
+      try {
+        await service['_importMainFileAppDataAndArchiveIfNecessary']({
+          cp,
+          remoteMainFileData,
+          localComplete: localData,
+          mainFileRev: 'localRev',
+        });
+      } catch (e) {
+        expect(e.toString()).toContain(
+          'Remote archive rev does not match the one in remote main file',
+        );
+      }
+      expect(dataImportServiceMock.importCompleteSyncData).not.toHaveBeenCalled();
     });
   });
 
