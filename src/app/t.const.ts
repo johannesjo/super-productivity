@@ -818,6 +818,7 @@ const T = {
     SYNC: {
       A: {
         ARCHIVE_ONLY_UPLOADED: 'F.SYNC.A.ARCHIVE_ONLY_UPLOADED',
+        POSSIBLE_LEGACY_DATA: 'F.SYNC.A.POSSIBLE_LEGACY_DATA',
       },
       C: {
         EMPTY_SYNC: 'F.SYNC.C.EMPTY_SYNC',

@@ -43,6 +43,7 @@ import { IS_ANDROID_WEB_VIEW } from '../../util/is-android-web-view';
 import { androidInterface } from '../../features/android/android-interface';
 import { CompressionService } from '../../core/compression/compression.service';
 import { decrypt, encrypt } from './encryption';
+import { LS } from '../../core/persistence/storage-keys.const';
 
 @Injectable({
   providedIn: 'root',
@@ -165,11 +166,28 @@ export class SyncProviderService {
     // --------------------------------------------
     const revRes = await cp.getFileRevAndLastClientUpdate('MAIN', localRev);
     if (typeof revRes === 'string') {
-      if (revRes === 'NO_REMOTE_DATA' && this._c(T.F.SYNC.C.NO_REMOTE_DATA)) {
-        this._log(cp, '↑ Update Remote after no getFileRevAndLastClientUpdate()');
-        const localLocal = await this._persistenceService.getValidCompleteData();
-        await this._uploadAppData({ cp, localDataComplete: localLocal });
-        return 'SUCCESS';
+      if (revRes === 'NO_REMOTE_DATA') {
+        // TODO remove at some point
+        const isPossibleLegacyData =
+          !localSyncMeta[cp.id].revTaskArchive &&
+          localSyncMeta[cp.id].revTaskArchive !== null;
+        if (
+          isPossibleLegacyData &&
+          localStorage.getItem(LS.LAST_LOCAL_SYNC_MODEL_CHANGE)
+        ) {
+          alert(this._translateService.instant(T.F.SYNC.A.POSSIBLE_LEGACY_DATA));
+          // localStorage.removeItem(LS.LAST_LOCAL_SYNC_MODEL_CHANGE);
+        }
+        if (this._c(T.F.SYNC.C.NO_REMOTE_DATA)) {
+          this._log(cp, '↑ Update Remote after no getFileRevAndLastClientUpdate()');
+          const localLocal = await this._persistenceService.getValidCompleteData();
+          await this._uploadAppData({
+            cp,
+            localDataComplete: localLocal,
+            isForceArchiveUpdate: true,
+          });
+          return 'SUCCESS';
+        }
       }
       // NOTE: includes HANDLED_ERROR and Error
       return 'ERROR';
@@ -255,7 +273,11 @@ export class SyncProviderService {
 
       if (this._c(T.F.SYNC.C.UNABLE_TO_LOAD_REMOTE_DATA)) {
         this._log(cp, '↑ PRE4: Update Remote after download error');
-        await this._uploadAppData({ cp, localDataComplete: local });
+        await this._uploadAppData({
+          cp,
+          localDataComplete: local,
+          isForceArchiveUpdate: true,
+        });
         return 'SUCCESS';
       } else {
         return 'USER_ABORT';
@@ -273,7 +295,11 @@ export class SyncProviderService {
     ) {
       if (this._c(T.F.SYNC.C.NO_REMOTE_DATA)) {
         this._log(cp, '↑ PRE5: Update Remote');
-        await this._uploadAppData({ cp, localDataComplete: local });
+        await this._uploadAppData({
+          cp,
+          localDataComplete: local,
+          isForceArchiveUpdate: true,
+        });
         return 'SUCCESS';
       } else {
         return 'USER_ABORT';
@@ -364,6 +390,7 @@ export class SyncProviderService {
               remoteMainFileData: remote,
               localComplete: local,
               mainFileRev: r.rev as string,
+              isForceArchiveUpdate: true,
             });
             return 'SUCCESS';
           }
