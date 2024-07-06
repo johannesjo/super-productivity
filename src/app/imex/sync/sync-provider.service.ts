@@ -28,7 +28,7 @@ import { checkForUpdate, UpdateCheckResult } from './check-for-update.util';
 import { DialogSyncConflictComponent } from './dialog-dbx-sync-conflict/dialog-sync-conflict.component';
 import { DialogSyncPermissionComponent } from './dialog-sync-permission/dialog-sync-permission.component';
 import { TranslateService } from '@ngx-translate/core';
-import { MatDialog } from '@angular/material/dialog';
+import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { DataImportService } from './data-import.service';
 import { WebDavSyncService } from './web-dav/web-dav-sync.service';
 import { SnackService } from '../../core/snack/snack.service';
@@ -737,6 +737,8 @@ export class SyncProviderService {
     return;
   }
 
+  private lastDialog?: MatDialogRef<any, any>;
+
   private _openConflictDialog$({
     remote,
     local,
@@ -746,17 +748,19 @@ export class SyncProviderService {
     local: number | null;
     lastSync: number;
   }): Observable<DialogConflictResolutionResult> {
-    return this._matDialog
-      .open(DialogSyncConflictComponent, {
-        restoreFocus: true,
-        disableClose: true,
-        data: {
-          remote,
-          local,
-          lastSync,
-        },
-      })
-      .afterClosed();
+    if (this.lastDialog) {
+      this.lastDialog.close();
+    }
+    this.lastDialog = this._matDialog.open(DialogSyncConflictComponent, {
+      restoreFocus: true,
+      disableClose: true,
+      data: {
+        remote,
+        local,
+        lastSync,
+      },
+    });
+    return this.lastDialog.afterClosed();
   }
 
   private _openPermissionDialog$(): Observable<DialogPermissionResolutionResult> {
