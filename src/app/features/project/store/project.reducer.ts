@@ -74,6 +74,7 @@ import {
   updateNoteOrder,
 } from '../../note/store/note.actions';
 import { MODEL_VERSION } from '../../../core/model-version';
+import { roundTsToMinutes } from '../../../util/round-ts-to-minutes';
 
 export const PROJECT_FEATURE_NAME = 'projects';
 const WORK_CONTEXT_TYPE: WorkContextType = WorkContextType.PROJECT;
@@ -202,7 +203,7 @@ export const projectReducer = createReducer<ProjectState>(
         changes: {
           workStart: {
             ...oldP.workStart,
-            [date]: newVal,
+            [date]: roundTsToMinutes(newVal),
           },
         },
       },
@@ -217,7 +218,7 @@ export const projectReducer = createReducer<ProjectState>(
         changes: {
           workEnd: {
             ...oldP.workEnd,
-            [date]: newVal,
+            [date]: roundTsToMinutes(newVal),
           },
         },
       },
