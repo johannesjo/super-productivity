@@ -33,7 +33,6 @@ import { DataImportService } from './data-import.service';
 import { WebDavSyncService } from './web-dav/web-dav-sync.service';
 import { SnackService } from '../../core/snack/snack.service';
 import { isValidAppData } from './is-valid-app-data.util';
-import { truncate } from '../../util/truncate';
 import { PersistenceLocalService } from '../../core/persistence/persistence-local.service';
 import { getSyncErrorStr } from './get-sync-error-str';
 import { PersistenceService } from '../../core/persistence/persistence.service';
@@ -482,10 +481,7 @@ export class SyncProviderService {
         throw new Error(
           KNOWN_SYNC_ERROR_PREFIX +
             this._translateService.instant(T.F.SYNC.S.UPLOAD_ERROR, {
-              err: truncate(
-                revOrError?.toString ? revOrError.toString() : (revOrError as any),
-                140,
-              ),
+              err: getSyncErrorStr(revOrError),
             }),
         );
       }
