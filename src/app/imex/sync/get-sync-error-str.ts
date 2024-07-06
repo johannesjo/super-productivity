@@ -12,5 +12,5 @@ export const getSyncErrorStr = (err: unknown): string => {
   ) {
     errorAsString = (err as any)[HANDLED_ERROR_PROP_STR] as string;
   }
-  return truncate(errorAsString.toString(), 100);
+  return truncate(errorAsString.toString(), 140);
 };

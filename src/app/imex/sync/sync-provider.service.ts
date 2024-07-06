@@ -483,7 +483,7 @@ export class SyncProviderService {
             this._translateService.instant(T.F.SYNC.S.UPLOAD_ERROR, {
               err: truncate(
                 revOrError?.toString ? revOrError.toString() : (revOrError as any),
-                100,
+                140,
               ),
             }),
         );
