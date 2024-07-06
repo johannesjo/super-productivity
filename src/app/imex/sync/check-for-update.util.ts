@@ -26,7 +26,7 @@ export const checkForUpdate = (params: {
   if (lastSync > local) {
     console.error('This should not happen. lastSyncTo > local');
     alert(
-      'Sync Error: last sync value is newer than local, which should never happen if you weren`t manually manipulating the data!',
+      'Sync Error: lastSync value is newer than last local change, which should never happen if you were not manually manipulating the data!',
     );
     return UpdateCheckResult.ErrorLastSyncNewerThanLocal;
   }
