@@ -457,7 +457,7 @@ export class SyncProviderService {
       revOrError: string | Error,
       isForMainFile: boolean,
     ): Promise<void> => {
-      this._log(cp, 'X Upload Request Error');
+      this._log(cp, 'X Upload Request Error retryIfPossibleOrWarnUser()', revOrError);
       if (
         cp.id !== SyncProvider.LocalFile &&
         (retryAttemptNr < NR_OF_RETRIES ||
@@ -522,6 +522,7 @@ export class SyncProviderService {
           isForceOverwrite,
         );
         if (typeof successRevArchiveOrError !== 'string') {
+          console.log(successRevArchiveOrError);
           throw new Error('No rev returned from no error archive response');
         }
       } catch (e) {
@@ -548,7 +549,7 @@ export class SyncProviderService {
         localSyncProviderData.rev,
         isForceOverwrite,
       );
-      if (successRevMainOrError === 'string') {
+      if (typeof successRevMainOrError === 'string') {
         this._log(cp, '↑ Uploaded MAIN Data ↑ ✓');
         return await this._setLocalRevsAndLastSync(
           cp,
@@ -557,6 +558,7 @@ export class SyncProviderService {
           localDataComplete.lastLocalSyncModelChange,
         );
       } else {
+        console.log(successRevMainOrError);
         throw new Error('No rev returned from no error main response');
       }
     } catch (e) {
