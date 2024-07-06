@@ -49,7 +49,11 @@ export class ShepherdService {
     if (!this.isActive) {
       await this.init();
     }
-    if (id !== TourId.Calendars && id !== TourId.ProductivityHelper) {
+    if (
+      id !== TourId.Calendars &&
+      id !== TourId.ProductivityHelper &&
+      id !== TourId.StartTourAgain
+    ) {
       await this._router.navigateByUrl('/');
     }
 
