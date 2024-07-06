@@ -178,6 +178,7 @@ task.split-task::ng-deep .box {
 
 .task-continued {
   align-self: flex-start;
+  align-items: center;
   padding-left: 56px;
   padding-top: $s;
   padding-bottom: $s;
@@ -317,6 +318,46 @@ task.split-task::ng-deep .box {
     animation: fadeIn $transition-duration--enter $ani-enter-timing;
     display: block;
     //transform: translate(-50%, -50%) scale(1.5);
+  }
+}
+
+.row.l {
+  ::ng-deep {
+    .repeat-task-projection,
+    .task-continued,
+    task .first-line {
+      min-height: 80px;
+    }
+  }
+}
+
+.row.xl {
+  ::ng-deep {
+    .repeat-task-projection,
+    .task-continued,
+    task .first-line {
+      min-height: 120px;
+    }
+  }
+}
+
+.row.xxl {
+  ::ng-deep {
+    .repeat-task-projection,
+    .task-continued,
+    task .first-line {
+      min-height: 160px;
+    }
+  }
+}
+
+.row.xxxl {
+  ::ng-deep {
+    .repeat-task-projection,
+    .task-continued,
+    task .first-line {
+      min-height: 180px;
+    }
   }
 }
 

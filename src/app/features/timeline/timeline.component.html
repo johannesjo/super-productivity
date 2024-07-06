@@ -13,6 +13,7 @@
 
       <div
         class="row"
+        [class]="getSizeClass(row)"
         *ngFor="let row of timelineEntries; trackBy: trackByFn"
       >
         <div
