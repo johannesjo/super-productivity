@@ -45,6 +45,8 @@ import { CompressionService } from '../../core/compression/compression.service';
 import { decrypt, encrypt } from './encryption';
 import { LS } from '../../core/persistence/storage-keys.const';
 
+const KNOWN_SYNC_ERROR_PREFIX = 'KNOWN_SYNC_ERROR_SUP_';
+
 @Injectable({
   providedIn: 'root',
 })
@@ -133,13 +135,22 @@ export class SyncProviderService {
     } catch (e) {
       console.log('__error during sync__');
       console.error(e);
-      this._snackService.open({
-        msg: T.F.SYNC.S.UNKNOWN_ERROR,
-        type: 'ERROR',
-        translateParams: {
-          err: getSyncErrorStr(e),
-        },
-      });
+      const errStr = getSyncErrorStr(e);
+
+      if (errStr.includes(KNOWN_SYNC_ERROR_PREFIX)) {
+        this._snackService.open({
+          msg: errStr.replace(KNOWN_SYNC_ERROR_PREFIX, ''),
+          type: 'ERROR',
+        });
+      } else {
+        this._snackService.open({
+          msg: T.F.SYNC.S.UNKNOWN_ERROR,
+          type: 'ERROR',
+          translateParams: {
+            err: getSyncErrorStr(e),
+          },
+        });
+      }
       this.isSyncing$.next(false);
       return 'ERROR';
     }
@@ -447,8 +458,9 @@ export class SyncProviderService {
     ): Promise<void> => {
       this._log(cp, 'X Upload Request Error');
       if (
-        retryAttemptNr < NR_OF_RETRIES ||
-        (cp.isUploadForcePossible && this._c(T.F.SYNC.C.FORCE_UPLOAD_AFTER_ERROR))
+        cp.id !== SyncProvider.LocalFile &&
+        (retryAttemptNr < NR_OF_RETRIES ||
+          (cp.isUploadForcePossible && this._c(T.F.SYNC.C.FORCE_UPLOAD_AFTER_ERROR)))
       ) {
         return await this._uploadAppData({
           cp,
@@ -465,16 +477,15 @@ export class SyncProviderService {
         ) {
           alert(this._translateService.instant(T.F.SYNC.A.ARCHIVE_ONLY_UPLOADED));
         }
-        this._snackService.open({
-          msg: T.F.SYNC.S.UPLOAD_ERROR,
-          translateParams: {
-            err: truncate(
-              revOrError?.toString ? revOrError.toString() : (revOrError as any),
-              100,
-            ),
-          },
-          type: 'ERROR',
-        });
+        throw new Error(
+          KNOWN_SYNC_ERROR_PREFIX +
+            this._translateService.instant(T.F.SYNC.S.UPLOAD_ERROR, {
+              err: truncate(
+                revOrError?.toString ? revOrError.toString() : (revOrError as any),
+                100,
+              ),
+            }),
+        );
       }
     };
 
