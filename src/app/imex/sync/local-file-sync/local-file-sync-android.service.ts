@@ -27,22 +27,15 @@ export class LocalFileSyncAndroidService implements SyncProviderServiceInterface
   );
   private _folderPathOnce$: Observable<string | null> = this._folderPath$.pipe(first());
 
-  // TODO implement syncTarget handling
-
   constructor(private _globalConfigService: GlobalConfigService) {}
 
   async getFileRevAndLastClientUpdate(
     syncTarget: SyncTarget,
     localRev: string | null,
   ): Promise<{ rev: string; clientUpdate?: number } | SyncGetRevResult> {
-    try {
-      const filePath = await this._getFilePath(syncTarget);
-      const rev = androidInterface.getFileRev(filePath);
-
-      return { rev } as any;
-    } catch (e) {
-      throw new Error(e as any);
-    }
+    const filePath = await this._getFilePath(syncTarget);
+    const rev = androidInterface.getFileRev(filePath);
+    return { rev } as any;
   }
 
   async uploadFileData(
@@ -52,31 +45,23 @@ export class LocalFileSyncAndroidService implements SyncProviderServiceInterface
     localRev: string | null,
     isForceOverwrite?: boolean,
   ): Promise<string | Error> {
-    try {
-      const filePath = await this._getFilePath(syncTarget);
-      androidInterface.writeFile(filePath, dataStr);
-      return androidInterface.getFileRev(filePath);
-    } catch (e) {
-      throw new Error(e as any);
-    }
+    const filePath = await this._getFilePath(syncTarget);
+    androidInterface.writeFile(filePath, dataStr);
+    return androidInterface.getFileRev(filePath);
   }
 
   async downloadFileData(
     syncTarget: SyncTarget,
     localRev: string | null,
   ): Promise<{ rev: string; dataStr: string | undefined }> {
-    try {
-      const filePath = await this._getFilePath(syncTarget);
-      const rev = androidInterface.getFileRev(filePath);
-      const dataStr = androidInterface.readFile(filePath);
+    const filePath = await this._getFilePath(syncTarget);
+    const rev = androidInterface.getFileRev(filePath);
+    const dataStr = androidInterface.readFile(filePath);
 
-      return {
-        rev,
-        dataStr,
-      };
-    } catch (e) {
-      throw new Error(e as any);
-    }
+    return {
+      rev,
+      dataStr,
+    };
   }
 
   private async _getFilePath(syncTarget: SyncTarget): Promise<string> {

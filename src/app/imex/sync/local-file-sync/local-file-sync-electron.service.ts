@@ -32,15 +32,11 @@ export class LocalFileSyncElectronService implements SyncProviderServiceInterfac
     syncTarget: SyncTarget,
     localRev: string | null,
   ): Promise<{ rev: string; clientUpdate?: number } | SyncGetRevResult> {
-    try {
-      const r = await window.ea.fileSyncGetRevAndClientUpdate({
-        filePath: await this._getFilePath(syncTarget),
-        localRev,
-      });
-      return r as any;
-    } catch (e) {
-      throw new Error(e as any);
-    }
+    const r = await window.ea.fileSyncGetRevAndClientUpdate({
+      filePath: await this._getFilePath(syncTarget),
+      localRev,
+    });
+    return r as any;
   }
 
   async uploadFileData(
@@ -50,31 +46,23 @@ export class LocalFileSyncElectronService implements SyncProviderServiceInterfac
     localRev: string | null,
     isForceOverwrite?: boolean,
   ): Promise<string | Error> {
-    try {
-      const r = await window.ea.fileSyncSave({
-        localRev,
-        filePath: await this._getFilePath(syncTarget),
-        dataStr,
-      });
-      return r as any;
-    } catch (e) {
-      throw new Error(e as any);
-    }
+    const r = await window.ea.fileSyncSave({
+      localRev,
+      filePath: await this._getFilePath(syncTarget),
+      dataStr,
+    });
+    return r as any;
   }
 
   async downloadFileData(
     syncTarget: SyncTarget,
     localRev: string | null,
   ): Promise<{ rev: string; dataStr: string | undefined }> {
-    try {
-      const r = await window.ea.fileSyncLoad({
-        localRev,
-        filePath: await this._getFilePath(syncTarget),
-      });
-      return r as any;
-    } catch (e) {
-      throw new Error(e as any);
-    }
+    const r = await window.ea.fileSyncLoad({
+      localRev,
+      filePath: await this._getFilePath(syncTarget),
+    });
+    return r as any;
   }
 
   private async _getFilePath(syncTarget: SyncTarget): Promise<string> {

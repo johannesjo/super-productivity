@@ -12,8 +12,6 @@ import { WebDavApiService } from './web-dav-api.service';
 import { DataInitService } from '../../../core/data-init/data-init.service';
 import { WebDavConfig } from '../../../features/config/global-config.model';
 import { GlobalConfigService } from '../../../features/config/global-config.service';
-import { GlobalProgressBarService } from '../../../core-ui/global-progress-bar/global-progress-bar.service';
-import { T } from '../../../t.const';
 import { WebDavHeadResponse } from './web-dav.model';
 
 @Injectable({ providedIn: 'root' })
@@ -34,7 +32,6 @@ export class WebDavSyncService implements SyncProviderServiceInterface {
     private _webDavApiService: WebDavApiService,
     private _dataInitService: DataInitService,
     private _globalConfigService: GlobalConfigService,
-    private _globalProgressBarService: GlobalProgressBarService,
   ) {}
 
   async getFileRevAndLastClientUpdate(
@@ -55,7 +52,6 @@ export class WebDavSyncService implements SyncProviderServiceInterface {
       };
     } catch (e: any) {
       const isAxiosError = !!(e?.response && e.response.status);
-
       if ((isAxiosError && e.response.status === 404) || e.status === 404) {
         return 'NO_REMOTE_DATA';
       }
@@ -67,24 +63,17 @@ export class WebDavSyncService implements SyncProviderServiceInterface {
     syncTarget: SyncTarget,
     localRev: string,
   ): Promise<{ rev: string; dataStr: string }> {
-    this._globalProgressBarService.countUp(T.GPB.WEB_DAV_DOWNLOAD);
     const cfg = await this._cfg$.pipe(first()).toPromise();
-    try {
-      const filePath = this._getFilePath(syncTarget, cfg);
-      const r = await this._webDavApiService.download({
-        path: filePath,
-        localRev,
-      });
-      const meta = await this._webDavApiService.getMetaData(filePath);
-      this._globalProgressBarService.countDown();
-      return {
-        rev: this._getRevFromMeta(meta),
-        dataStr: r,
-      };
-    } catch (e) {
-      this._globalProgressBarService.countDown();
-      throw new Error(e as any);
-    }
+    const filePath = this._getFilePath(syncTarget, cfg);
+    const r = await this._webDavApiService.download({
+      path: filePath,
+      localRev,
+    });
+    const meta = await this._webDavApiService.getMetaData(filePath);
+    return {
+      rev: this._getRevFromMeta(meta),
+      dataStr: r,
+    };
   }
 
   async uploadFileData(
@@ -94,23 +83,15 @@ export class WebDavSyncService implements SyncProviderServiceInterface {
     localRev: string,
     isForceOverwrite: boolean = false,
   ): Promise<string | Error> {
-    this._globalProgressBarService.countUp(T.GPB.WEB_DAV_UPLOAD);
     const cfg = await this._cfg$.pipe(first()).toPromise();
-    try {
-      const filePath = this._getFilePath(syncTarget, cfg);
-      await this._webDavApiService.upload({
-        path: filePath,
-        data: dataStr,
-      });
+    const filePath = this._getFilePath(syncTarget, cfg);
+    await this._webDavApiService.upload({
+      path: filePath,
+      data: dataStr,
+    });
 
-      const meta = await this._webDavApiService.getMetaData(filePath);
-      this._globalProgressBarService.countDown();
-      return this._getRevFromMeta(meta);
-    } catch (e) {
-      console.error(e);
-      this._globalProgressBarService.countDown();
-      throw new Error(e as any);
-    }
+    const meta = await this._webDavApiService.getMetaData(filePath);
+    return this._getRevFromMeta(meta);
   }
 
   private _getRevFromMeta(meta: WebDavHeadResponse): string {

@@ -42,7 +42,6 @@ export class PersistenceLocalService {
     return DEFAULT_LOCAL_SYNC_META;
   }
 
-  // TODO check type after load
   async loadLastSyncModelChange(): Promise<number> {
     const r =
       ((await this._databaseService.load(
@@ -52,7 +51,6 @@ export class PersistenceLocalService {
     return this._parseTS(r);
   }
 
-  // TODO check type after load
   async loadLastArchiveChange(): Promise<number> {
     return this._parseTS(
       (await this._databaseService.load(DB.LOCAL_LAST_ARCHIVE_CHANGE)) as string,

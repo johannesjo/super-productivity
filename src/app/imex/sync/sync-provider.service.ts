@@ -377,7 +377,6 @@ export class SyncProviderService {
         await this._setLocalRevsAndLastSync(
           cp,
           r.rev,
-          // TODO check if this is smart and maybe remove whole case
           'NO_UPDATE',
           local.lastLocalSyncModelChange,
         );

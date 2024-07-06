@@ -75,7 +75,6 @@ export class DatabaseService {
       console.error('_lastParams', this._lastParams);
       console.error(e);
       alert('DB INIT Error');
-      // TODO fix typing issue
       throw new Error(e as any);
     }
   }

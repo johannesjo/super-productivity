@@ -370,10 +370,9 @@ export class PersistenceService {
           data.lastLocalSyncModelChange = Date.now();
         }
 
-        // TODO check this
         return Promise.all([
           this._persistenceLocalService.updateLastSyncModelChange(
-            data.lastLocalSyncModelChange as number,
+            data.lastLocalSyncModelChange,
           ),
           this._persistenceLocalService.updateLastArchiveChange(
             data.lastArchiveUpdate || 0,
