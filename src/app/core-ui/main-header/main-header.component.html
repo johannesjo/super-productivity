@@ -61,7 +61,7 @@
 
     <button
       *ngIf="(syncProviderService.isEnabled$|async)"
-      matTooltip="T.MH.TRIGGER_SYNC|translate"
+      matTooltip="{{T.MH.TRIGGER_SYNC|translate}}"
       (click)="sync()"
       mat-icon-button
     >
