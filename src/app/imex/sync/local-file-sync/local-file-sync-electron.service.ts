@@ -32,13 +32,9 @@ export class LocalFileSyncElectronService implements SyncProviderServiceInterfac
     syncTarget: SyncTarget,
     localRev: string | null,
   ): Promise<{ rev: string; clientUpdate?: number } | SyncGetRevResult> {
-    const filePath = await this._folderPathOnce$.toPromise();
     try {
-      if (!filePath) {
-        throw new Error('No file path given for getFileRevAndLastClientUpdate');
-      }
       const r = await window.ea.fileSyncGetRevAndClientUpdate({
-        filePath,
+        filePath: await this._getFilePath(syncTarget),
         localRev,
       });
       return r as any;

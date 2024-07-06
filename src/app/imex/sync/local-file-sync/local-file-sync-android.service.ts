@@ -35,12 +35,8 @@ export class LocalFileSyncAndroidService implements SyncProviderServiceInterface
     syncTarget: SyncTarget,
     localRev: string | null,
   ): Promise<{ rev: string; clientUpdate?: number } | SyncGetRevResult> {
-    const filePath = await this._folderPathOnce$.toPromise();
-    if (!filePath) {
-      throw new Error('File path is null');
-    }
-
     try {
+      const filePath = await this._getFilePath(syncTarget);
       const rev = androidInterface.getFileRev(filePath);
 
       return { rev } as any;

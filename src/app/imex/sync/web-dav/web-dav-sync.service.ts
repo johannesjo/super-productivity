@@ -37,7 +37,6 @@ export class WebDavSyncService implements SyncProviderServiceInterface {
     private _globalProgressBarService: GlobalProgressBarService,
   ) {}
 
-  // TODO implement syncTarget handling
   async getFileRevAndLastClientUpdate(
     syncTarget: SyncTarget,
     localRev: string,
@@ -45,7 +44,9 @@ export class WebDavSyncService implements SyncProviderServiceInterface {
     const cfg = await this._cfg$.pipe(first()).toPromise();
 
     try {
-      const meta = await this._webDavApiService.getMetaData(cfg.syncFilePath as string);
+      const meta = await this._webDavApiService.getMetaData(
+        this._getFilePath(syncTarget, cfg),
+      );
       // @ts-ignore
       const d = new Date(meta['last-modified']);
       return {
@@ -71,11 +72,12 @@ export class WebDavSyncService implements SyncProviderServiceInterface {
     this._globalProgressBarService.countUp(T.GPB.WEB_DAV_DOWNLOAD);
     const cfg = await this._cfg$.pipe(first()).toPromise();
     try {
+      const filePath = this._getFilePath(syncTarget, cfg);
       const r = await this._webDavApiService.download({
-        path: this._getFilePath(syncTarget, cfg),
+        path: filePath,
         localRev,
       });
-      const meta = await this._webDavApiService.getMetaData(cfg.syncFilePath as string);
+      const meta = await this._webDavApiService.getMetaData(filePath);
       this._globalProgressBarService.countDown();
       return {
         rev: this._getRevFromMeta(meta),
@@ -98,12 +100,13 @@ export class WebDavSyncService implements SyncProviderServiceInterface {
     this._globalProgressBarService.countUp(T.GPB.WEB_DAV_UPLOAD);
     const cfg = await this._cfg$.pipe(first()).toPromise();
     try {
+      const filePath = this._getFilePath(syncTarget, cfg);
       await this._webDavApiService.upload({
-        path: this._getFilePath(syncTarget, cfg),
+        path: filePath,
         data: dataStr,
       });
 
-      const meta = await this._webDavApiService.getMetaData(cfg.syncFilePath as string);
+      const meta = await this._webDavApiService.getMetaData(filePath);
       this._globalProgressBarService.countDown();
       return this._getRevFromMeta(meta);
     } catch (e) {
