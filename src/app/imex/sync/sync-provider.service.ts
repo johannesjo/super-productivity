@@ -176,6 +176,8 @@ export class SyncProviderService {
     // check if remote data & file revision changed
     // --------------------------------------------
     const revRes = await cp.getFileRevAndLastClientUpdate('MAIN', localRev);
+
+    // NOTE : in success cases it is an object
     if (typeof revRes === 'string') {
       if (revRes === 'NO_REMOTE_DATA') {
         // TODO remove at some point
@@ -451,7 +453,6 @@ export class SyncProviderService {
     retryAttemptNr?: number;
   }): Promise<void> {
     const NR_OF_RETRIES = 1;
-
     const retryIfPossibleOrWarnUser = async (
       revOrError: string | Error,
       isForMainFile: boolean,
@@ -512,15 +513,19 @@ export class SyncProviderService {
     ) {
       const dataStrToUpload = await this._compressAndEncryptDataIfEnabled(archive);
 
-      successRevArchiveOrError = await cp.uploadFileData(
-        'ARCHIVE',
-        dataStrToUpload,
-        localDataComplete.lastArchiveUpdate as number,
-        localSyncProviderData.revTaskArchive,
-        isForceOverwrite,
-      );
-      if (typeof successRevArchiveOrError !== 'string') {
-        return await retryIfPossibleOrWarnUser(successRevArchiveOrError, false);
+      try {
+        successRevArchiveOrError = await cp.uploadFileData(
+          'ARCHIVE',
+          dataStrToUpload,
+          localDataComplete.lastArchiveUpdate as number,
+          localSyncProviderData.revTaskArchive,
+          isForceOverwrite,
+        );
+        if (typeof successRevArchiveOrError !== 'string') {
+          throw new Error('No rev returned from no error archive response');
+        }
+      } catch (e) {
+        return await retryIfPossibleOrWarnUser(e as Error, false);
       }
       this._log(cp, '↑ Uploaded ARCHIVE Data ↑ ✓');
     }
@@ -535,24 +540,27 @@ export class SyncProviderService {
     };
     const dataStrToUpload = await this._compressAndEncryptDataIfEnabled(mainData);
 
-    const successRevMainOrError = await cp.uploadFileData(
-      'MAIN',
-      dataStrToUpload,
-      localDataComplete.lastLocalSyncModelChange as number,
-      localSyncProviderData.rev,
-      isForceOverwrite,
-    );
-
-    if (typeof successRevMainOrError === 'string') {
-      this._log(cp, '↑ Uploaded MAIN Data ↑ ✓');
-      return await this._setLocalRevsAndLastSync(
-        cp,
-        successRevMainOrError,
-        successRevArchiveOrError,
-        localDataComplete.lastLocalSyncModelChange,
+    try {
+      const successRevMainOrError = await cp.uploadFileData(
+        'MAIN',
+        dataStrToUpload,
+        localDataComplete.lastLocalSyncModelChange as number,
+        localSyncProviderData.rev,
+        isForceOverwrite,
       );
-    } else {
-      return await retryIfPossibleOrWarnUser(successRevMainOrError, true);
+      if (successRevMainOrError === 'string') {
+        this._log(cp, '↑ Uploaded MAIN Data ↑ ✓');
+        return await this._setLocalRevsAndLastSync(
+          cp,
+          successRevMainOrError,
+          successRevArchiveOrError,
+          localDataComplete.lastLocalSyncModelChange,
+        );
+      } else {
+        throw new Error('No rev returned from no error main response');
+      }
+    } catch (e) {
+      return await retryIfPossibleOrWarnUser(e as Error, false);
     }
   }
 

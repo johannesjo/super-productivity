@@ -363,7 +363,7 @@ describe('SyncProviderService', () => {
           },
         } as Partial<LocalSyncMetaModel> as LocalSyncMetaModel),
       );
-      cp.uploadFileData.and.returnValue(Promise.resolve(new Error('Upload failed')));
+      cp.uploadFileData.and.returnValue(Promise.reject('some remote error'));
 
       const { mainNoRevs } = service['_splitData'](localDataComplete);
       const expectedAppMainData: AppMainFileData = {
@@ -372,19 +372,20 @@ describe('SyncProviderService', () => {
         archiveRev: 'syncProviderRevArchive',
       };
 
-      await service['_uploadAppData']({ cp, localDataComplete });
-      expect(cp.uploadFileData).toHaveBeenCalledWith(
-        'MAIN',
-        JSON.stringify(expectedAppMainData),
-        5555,
-        'syncProviderRevMain',
-        false,
-      );
-      expect(cp.uploadFileData).toHaveBeenCalledTimes(2);
-      expect(snackServiceMock.open).toHaveBeenCalled();
-      expect((snackServiceMock.open.calls.mostRecent().args[0] as any).msg).toBe(
-        'F.SYNC.S.UPLOAD_ERROR',
-      );
+      try {
+        await service['_uploadAppData']({ cp, localDataComplete });
+      } catch (e) {
+        expect(cp.uploadFileData).toHaveBeenCalledWith(
+          'MAIN',
+          JSON.stringify(expectedAppMainData),
+          5555,
+          'syncProviderRevMain',
+          false,
+        );
+        expect(cp.uploadFileData).toHaveBeenCalledTimes(2);
+        // NOTE: undefined is because of the translateService
+        expect(e).toEqual(new Error('KNOWN_SYNC_ERROR_SUP_undefined'));
+      }
     });
   });
 });

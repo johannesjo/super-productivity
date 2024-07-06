@@ -9,7 +9,6 @@ import {
 import { SyncGetRevResult } from '../sync.model';
 import { DataInitService } from '../../../core/data-init/data-init.service';
 import { SnackService } from '../../../core/snack/snack.service';
-import { environment } from '../../../../environments/environment';
 import { T } from '../../../t.const';
 import {
   SyncProvider,
@@ -36,8 +35,6 @@ export class DropboxSyncService implements SyncProviderServiceInterface {
     private _store: Store,
   ) {}
 
-  // TODO refactor in a way that it doesn't need to trigger uploadFileData itself
-  // NOTE: this does not include milliseconds, which could lead to uncool edge cases... :(
   async getFileRevAndLastClientUpdate(
     syncTarget: SyncTarget,
     localRev: string,
@@ -46,6 +43,7 @@ export class DropboxSyncService implements SyncProviderServiceInterface {
 
     try {
       const r = await this._dropboxApiService.getMetaData(filePath);
+      // NOTE: response does not include milliseconds, which could lead to uncool edge cases... :(
       const d = new Date(r.client_modified);
       return {
         clientUpdate: d.getTime(),
@@ -81,12 +79,7 @@ export class DropboxSyncService implements SyncProviderServiceInterface {
         return 'HANDLED_ERROR';
       } else {
         console.error(e);
-        if (environment.production) {
-          // todo fix this
-          return e as any;
-        } else {
-          throw new Error('DBX: Unknown error');
-        }
+        throw new Error(e as any);
       }
     }
   }
@@ -112,20 +105,14 @@ export class DropboxSyncService implements SyncProviderServiceInterface {
     localRev: string,
     isForceOverwrite: boolean = false,
   ): Promise<string | Error> {
-    try {
-      const r = await this._dropboxApiService.upload({
-        path: this._getFilePath(syncTarget),
-        data: dataStr,
-        clientModified,
-        localRev,
-        isForceOverwrite,
-      });
-      return r.rev;
-    } catch (e) {
-      console.error(e);
-      // TODO fix this
-      return e as any;
-    }
+    const r = await this._dropboxApiService.upload({
+      path: this._getFilePath(syncTarget),
+      data: dataStr,
+      clientModified,
+      localRev,
+      isForceOverwrite,
+    });
+    return r.rev;
   }
 
   private _getFilePath(syncTarget: SyncTarget): string {

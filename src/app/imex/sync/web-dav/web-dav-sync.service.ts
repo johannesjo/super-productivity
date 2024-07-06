@@ -59,9 +59,7 @@ export class WebDavSyncService implements SyncProviderServiceInterface {
       if ((isAxiosError && e.response.status === 404) || e.status === 404) {
         return 'NO_REMOTE_DATA';
       }
-
-      console.error(e);
-      return e as Error;
+      throw new Error(e as any);
     }
   }
 
@@ -85,8 +83,7 @@ export class WebDavSyncService implements SyncProviderServiceInterface {
       };
     } catch (e) {
       this._globalProgressBarService.countDown();
-      // TODO fix error handling
-      return e as any;
+      throw new Error(e as any);
     }
   }
 
@@ -112,7 +109,7 @@ export class WebDavSyncService implements SyncProviderServiceInterface {
     } catch (e) {
       console.error(e);
       this._globalProgressBarService.countDown();
-      return e as Error;
+      throw new Error(e as any);
     }
   }
 
