@@ -848,8 +848,7 @@
           "L_SYNC_FILE_NAME": "Sync File Name"
         },
         "LOCAL_FILE": {
-          "L_SYNC_FILE_PATH": "Sync file path",
-          "L_SYNC_FILE_PATH_DESCRIPTION": "Absolute path to the file that should be used for syncing (will be created).",
+          "L_SYNC_FOLDER_PATH": "Sync folder path",
           "L_SYNC_FILE_PATH_PERMISSION_VALIDATION": "Needs file access permission"
         },
         "L_ENABLE_COMPRESSION": "Enable Compression (faster data transfer)",
@@ -864,7 +863,7 @@
           "CORS_INFO": "<strong>Making it work in the browser:</strong> To make this work in the browser you need to whitelist Super Productivity for CORS requests for your Nextcloud instance. This can have negative security implications! Please <a href='https://github.com/nextcloud/server/issues/3131'>refer to this thread for more information</a>. One approach to make this work on mobile is whitelisting \"https://app.super-productivity.com\" via the nextcloud app <a href='https://apps.nextcloud.com/apps/webapppassword'>webapppassword<a>. Use at your own risk!</p>",
           "L_BASE_URL": "Base Url",
           "L_PASSWORD": "Password",
-          "L_SYNC_FILE_PATH": "Sync File Path",
+          "L_SYNC_FOLDER_PATH": "Sync Folder Path",
           "L_USER_NAME": "Username"
         }
       },

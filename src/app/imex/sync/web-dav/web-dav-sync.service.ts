@@ -72,7 +72,7 @@ export class WebDavSyncService implements SyncProviderServiceInterface {
     const cfg = await this._cfg$.pipe(first()).toPromise();
     try {
       const r = await this._webDavApiService.download({
-        path: cfg.syncFilePath as string,
+        path: this._getFilePath(syncTarget, cfg),
         localRev,
       });
       const meta = await this._webDavApiService.getMetaData(cfg.syncFilePath as string);
@@ -99,7 +99,7 @@ export class WebDavSyncService implements SyncProviderServiceInterface {
     const cfg = await this._cfg$.pipe(first()).toPromise();
     try {
       await this._webDavApiService.upload({
-        path: cfg.syncFilePath as string,
+        path: this._getFilePath(syncTarget, cfg),
         data: dataStr,
       });
 
@@ -122,5 +122,9 @@ export class WebDavSyncService implements SyncProviderServiceInterface {
       throw new Error('Not able to get rev for WebDAV');
     }
     return rev;
+  }
+
+  private _getFilePath(syncTarget: SyncTarget, cfg: WebDavConfig): string {
+    return `${cfg.syncFolderPath as string}/${syncTarget}.json`;
   }
 }

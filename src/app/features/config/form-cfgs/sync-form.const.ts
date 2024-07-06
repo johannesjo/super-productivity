@@ -146,21 +146,11 @@ export const SYNC_FORM: ConfigFormSection<SyncConfig> = {
       key: 'localFileSync',
       fieldGroup: [
         {
-          key: 'syncFilePath',
+          key: 'syncFolderPath',
           type: 'input',
           templateOptions: {
             required: true,
-            label: T.F.SYNC.FORM.LOCAL_FILE.L_SYNC_FILE_PATH,
-            description: T.F.SYNC.FORM.LOCAL_FILE.L_SYNC_FILE_PATH_DESCRIPTION,
-            change: (field) => {
-              const lastChar = field?.model.syncFilePath?.trim().slice(-1);
-              if (lastChar === '/' || lastChar === '\\') {
-                field.formControl?.setValue(
-                  (field.model.syncFilePath += 'SP_SYNC_FILE.json'),
-                );
-                field.formControl?.updateValueAndValidity();
-              }
-            },
+            label: T.F.SYNC.FORM.LOCAL_FILE.L_SYNC_FOLDER_PATH,
           },
         },
       ],
@@ -206,12 +196,11 @@ export const SYNC_FORM: ConfigFormSection<SyncConfig> = {
           },
         },
         {
-          key: 'syncFilePath',
+          key: 'syncFolderPath',
           type: 'input',
           templateOptions: {
             required: true,
-            label: T.F.SYNC.FORM.WEB_DAV.L_SYNC_FILE_PATH,
-            description: '* my-sync-file.json',
+            label: T.F.SYNC.FORM.WEB_DAV.L_SYNC_FOLDER_PATH,
           },
         },
       ],

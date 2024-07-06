@@ -17,16 +17,14 @@ export class LocalFileSyncElectronService implements SyncProviderServiceInterfac
   id: SyncProvider = SyncProvider.LocalFile;
   isUploadForcePossible?: boolean;
   isReady$: Observable<boolean> = of(IS_ELECTRON).pipe(
-    concatMap(() => this._filePath$),
+    concatMap(() => this._folderPath$),
     map((v) => !!v),
   );
 
-  private _filePath$: Observable<string | null> = this._globalConfigService.sync$.pipe(
-    map((sync) => sync.localFileSync.syncFilePath),
+  private _folderPath$: Observable<string | null> = this._globalConfigService.sync$.pipe(
+    map((sync) => sync.localFileSync.syncFolderPath),
   );
-  private _filePathOnce$: Observable<string | null> = this._filePath$.pipe(first());
-
-  // TODO implement syncTarget handling
+  private _folderPathOnce$: Observable<string | null> = this._folderPath$.pipe(first());
 
   constructor(private _globalConfigService: GlobalConfigService) {}
 
@@ -34,7 +32,7 @@ export class LocalFileSyncElectronService implements SyncProviderServiceInterfac
     syncTarget: SyncTarget,
     localRev: string | null,
   ): Promise<{ rev: string; clientUpdate?: number } | SyncGetRevResult> {
-    const filePath = await this._filePathOnce$.toPromise();
+    const filePath = await this._folderPathOnce$.toPromise();
     try {
       if (!filePath) {
         throw new Error('No file path given for getFileRevAndLastClientUpdate');
@@ -56,14 +54,10 @@ export class LocalFileSyncElectronService implements SyncProviderServiceInterfac
     localRev: string | null,
     isForceOverwrite?: boolean,
   ): Promise<string | Error> {
-    const filePath = await this._filePathOnce$.toPromise();
     try {
-      if (!filePath) {
-        throw new Error('No file path given for uploadFileData');
-      }
       const r = await window.ea.fileSyncSave({
         localRev,
-        filePath,
+        filePath: await this._getFilePath(syncTarget),
         dataStr,
       });
       return r as any;
@@ -76,18 +70,22 @@ export class LocalFileSyncElectronService implements SyncProviderServiceInterfac
     syncTarget: SyncTarget,
     localRev: string | null,
   ): Promise<{ rev: string; dataStr: string | undefined }> {
-    const filePath = await this._filePathOnce$.toPromise();
     try {
-      if (!filePath) {
-        throw new Error('No file path given for downloadFileData');
-      }
       const r = await window.ea.fileSyncLoad({
         localRev,
-        filePath,
+        filePath: await this._getFilePath(syncTarget),
       });
       return r as any;
     } catch (e) {
       throw new Error(e as any);
     }
+  }
+
+  private async _getFilePath(syncTarget: SyncTarget): Promise<string> {
+    const folderPath = await this._folderPathOnce$.toPromise();
+    if (!folderPath) {
+      throw new Error('No folder path given');
+    }
+    return `${folderPath}/${syncTarget}.json`;
   }
 }

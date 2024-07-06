@@ -83,7 +83,7 @@ export interface WebDavConfig {
 
 export interface LocalFileSyncConfig {
   // TODO remove and migrate
-  syncFilePath: string | null;
+  syncFilePath?: string | null;
   syncFolderPath: string | null;
 }
 
