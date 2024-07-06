@@ -405,6 +405,7 @@ export class SyncProviderService {
   private async _downloadMainFileAppData(
     cp: SyncProviderServiceInterface,
   ): Promise<{ rev: string; data: AppMainFileData | undefined }> {
+    this._log(cp, '↓ downloading main file');
     const localRev = await this._getLocalMainFileRev(cp);
     const { dataStr, rev } = await cp.downloadFileData('MAIN', localRev);
     return {
@@ -416,6 +417,7 @@ export class SyncProviderService {
   private async _downloadArchiveFileAppData(
     cp: SyncProviderServiceInterface,
   ): Promise<{ rev: string; data: AppArchiveFileData | undefined }> {
+    this._log(cp, '↓ downloading archive file');
     const localRev = await this._getLocalArchiveFileRev(cp);
     const { dataStr, rev } = await cp.downloadFileData('ARCHIVE', localRev);
     return {
