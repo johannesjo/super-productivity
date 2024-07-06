@@ -460,7 +460,9 @@ export class SyncProviderService {
       if (
         cp.id !== SyncProvider.LocalFile &&
         (retryAttemptNr < NR_OF_RETRIES ||
-          (cp.isUploadForcePossible && this._c(T.F.SYNC.C.FORCE_UPLOAD_AFTER_ERROR)))
+          (cp.isUploadForcePossible &&
+            retryAttemptNr === 1 &&
+            this._c(T.F.SYNC.C.FORCE_UPLOAD_AFTER_ERROR)))
       ) {
         return await this._uploadAppData({
           cp,
