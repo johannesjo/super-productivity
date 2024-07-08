@@ -19,7 +19,7 @@
     grid-template-columns: repeat(3, 1fr);
 
     .day:nth-child(3) {
-      display: block;
+      display: flex;
     }
   }
 
@@ -27,7 +27,7 @@
     grid-template-columns: repeat(4, 1fr);
 
     .day:nth-child(4) {
-      display: block;
+      display: flex;
     }
   }
 
@@ -35,7 +35,14 @@
     grid-template-columns: repeat(5, 1fr);
 
     .day:nth-child(5) {
-      display: block;
+      display: flex;
+    }
+  }
+  @include mq(lg) {
+    grid-template-columns: repeat(5, 1fr);
+
+    .day:nth-child(5) {
+      display: flex;
     }
   }
 }
@@ -48,6 +55,8 @@
   //align-items: stretch; /* Adjusted: Ensure items stretch to fill the container */
   //border: 1px solid blue;
   margin-bottom: 32px;
+  display: flex;
+  flex-direction: column;
 }
 
 .day-title {
@@ -65,7 +74,7 @@
 .section-title {
   display: flex;
   justify-content: center;
-  margin: 12px 0 4px;
+  margin: 12px 0 8px;
 
   //> div:last-child {
   //  margin-left: 8px;
@@ -74,8 +83,19 @@
 
 .normal-tasks,
 .scheduled {
-  //border: 1px solid orange;
   padding: 4px;
+  display: flex;
+  flex-direction: column;
+}
+
+.scheduled {
+  flex-grow: 1;
+}
+
+.normal-tasks-items,
+.scheduled-items {
+  min-height: 80px;
+  flex-grow: 1;
 }
 
 .scheduled {

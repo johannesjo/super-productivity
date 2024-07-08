@@ -1,30 +1,42 @@
-<week-planner-plan-view></week-planner-plan-view>
+<better-drawer-container
+  [isOpen]="true"
+  [isOver]="false"
+  [sideWidth]="25"
+>
+  <ng-container better-drawer-content>
+    <week-planner-plan-view></week-planner-plan-view>
 
-<div class="controls">
-  <mat-button-toggle-group>
-    <mat-button-toggle
-      value="SPLIT"
-      class="hide-xs"
-    >
-      <mat-icon>vertical_split</mat-icon>
-      Plan
-    </mat-button-toggle>
-    <mat-button-toggle value="PARSED">
-      <mat-icon>photo</mat-icon>
-      Flow
-    </mat-button-toggle>
-  </mat-button-toggle-group>
+    <div class="controls">
+      <mat-button-toggle-group>
+        <mat-button-toggle
+          value="SPLIT"
+          class="hide-xs"
+        >
+          <mat-icon>vertical_split</mat-icon>
+          Plan
+        </mat-button-toggle>
+        <mat-button-toggle value="PARSED">
+          <mat-icon>photo</mat-icon>
+          Flow
+        </mat-button-toggle>
+      </mat-button-toggle-group>
 
-  <div class="day-selector">
-    <button mat-icon-button>
-      <mat-icon>chevron_left</mat-icon>
-    </button>
-    <div class="start-date">27.3</div>
-    <button mat-icon-button>
-      <mat-icon>chevron_right</mat-icon>
-    </button>
-  </div>
-  <!--  <button mat-icon-button>-->
-  <!--    <mat-icon>settings</mat-icon>-->
-  <!--  </button>-->
-</div>
+      <div class="day-selector">
+        <button mat-icon-button>
+          <mat-icon>chevron_left</mat-icon>
+        </button>
+        <div class="start-date">27.3</div>
+        <button mat-icon-button>
+          <mat-icon>chevron_right</mat-icon>
+        </button>
+      </div>
+      <!--  <button mat-icon-button>-->
+      <!--    <mat-icon>settings</mat-icon>-->
+      <!--  </button>-->
+    </div>
+  </ng-container>
+
+  <ng-container better-drawer-side>
+    <!--    <div class="right-panel"></div>-->
+  </ng-container>
+</better-drawer-container>

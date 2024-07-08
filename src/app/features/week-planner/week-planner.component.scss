@@ -1,6 +1,6 @@
 @import '../../../variables';
 
-:host {
+:host ::ng-deep better-drawer-container > .content {
   display: flex;
   flex-direction: column;
 
@@ -10,7 +10,7 @@
 }
 
 .controls {
-  flex-grow: 0;
+  flex-grow: 0 !important;
   margin-top: auto;
   display: flex;
   align-items: center;
