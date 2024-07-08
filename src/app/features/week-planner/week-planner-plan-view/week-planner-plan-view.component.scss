@@ -1,0 +1,49 @@
+@import '../../../../variables';
+
+.days {
+  margin: 24px;
+  display: grid;
+  gap: 10px; /* Adjust as needed */
+  grid-template-columns: repeat(5, 1fr);
+}
+
+.day {
+  //display: grid;
+  //grid-template-rows: auto 1fr; /* Adjusted: Explicitly define rows for title, tasks, and scheduled items */
+  //gap: 10px; /* Adjust as needed */
+  //padding: 10px; /* Optional: for spacing within each day */
+  //align-items: stretch; /* Adjusted: Ensure items stretch to fill the container */
+  //border: 1px solid blue;
+}
+
+.day-title {
+  font-size: 22px;
+}
+
+.normal-tasks,
+.scheduled {
+  //border: 1px solid orange;
+  padding: 4px;
+}
+
+.scheduled {
+  /* Additional styles if needed */
+  margin-top: 16px;
+}
+
+$task-text-c-dark: $dark-theme-text-color-most-intense;
+$task-text-c-dark: $dark-theme-text-color;
+// NOTE: light is just standard color
+
+$task-c-bg-light: #fff;
+$task-c-bg-dark: $dark1;
+
+.task {
+  background: $task-c-bg-dark;
+  border-radius: 6px;
+  color: $task-text-c-dark;
+  margin-bottom: 4px;
+  min-height: 40px;
+  line-height: 40px;
+  padding: 0 10px;
+}

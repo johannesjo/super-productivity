@@ -1,1 +1,44 @@
-<p>week-planner-plan-view works!</p>
+<div class="days">
+  @for (day of days$|async; track day.dayDate) {
+  <div class="day">
+    <div class="day-title">
+      {{ day.dayDate|date:'EEE' }} {{ day.timeEstimate }}h/{{ day.timeLimit }}h
+    </div>
+
+    <div class="normal-tasks">
+      <div class="title">Regular 3h</div>
+
+      <button mat-button>
+        <mat-icon>add</mat-icon>
+        Add
+      </button>
+      <div class="normal-tasks-items">
+        @for (tId of day.taskIds; track $index) {
+        <div class="task">aa{{ tId }}</div>
+        }
+      </div>
+    </div>
+
+    <div class="scheduled">
+      <div class="title">Scheduled 2h</div>
+      <button mat-button>
+        <mat-icon>add</mat-icon>
+        Add
+      </button>
+      <div class="scheduled-items">
+        @for (scheduledItem of day.scheduledIItems; track scheduledItem.id) {
+        <div class="scheduled-item">
+          @switch (scheduledItem.type) { @case ('TASK') {
+          <div class="task">{{ scheduledItem.id }}</div>
+          } @case ('event') {
+          <div class="event">{{ scheduledItem.id }}</div>
+          } @default {
+          <div class="default">{{ scheduledItem.id }}</div>
+          } }
+        </div>
+        }
+      </div>
+    </div>
+  </div>
+  }
+</div>
