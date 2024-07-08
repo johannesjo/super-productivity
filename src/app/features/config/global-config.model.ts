@@ -215,6 +215,7 @@ export interface ConfigFormSection<FormModel> {
   customSection?: CustomCfgSection;
   items?: LimitedFormlyFieldConfig<FormModel>[];
   isElectronOnly?: boolean;
+  isHideForAndroidApp?: boolean;
 }
 
 export interface GenericConfigFormSection
