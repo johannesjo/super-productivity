@@ -105,7 +105,7 @@ button {
   }
 
   button {
-    margin-left: $s * 0.5;
+    margin-left: $s * 0.25;
 
     @include mq(xs) {
       margin-left: $s;
