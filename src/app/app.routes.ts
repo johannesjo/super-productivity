@@ -18,6 +18,7 @@ import { TagSettingsPageComponent } from './pages/tag-settings-page/tag-settings
 import { TODAY_TAG } from './features/tag/tag.const';
 import { TimelinePageComponent } from './pages/timeline-page/timeline-page.component';
 import { QuickHistoryComponent } from './features/quick-history/quick-history.component';
+import { WeekPlannerComponent } from './features/week-planner/week-planner.component';
 
 export const APP_ROUTES: Routes = [
   {
@@ -36,6 +37,12 @@ export const APP_ROUTES: Routes = [
     path: 'timeline',
     component: TimelinePageComponent,
     data: { page: 'timeline' },
+    canActivate: [FocusOverlayOpenGuard],
+  },
+  {
+    path: 'week-planner',
+    component: WeekPlannerComponent,
+    data: { page: 'week-planner' },
     canActivate: [FocusOverlayOpenGuard],
   },
   {
