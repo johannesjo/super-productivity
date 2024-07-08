@@ -1,5 +1,9 @@
 import { animate, style, transition, trigger } from '@angular/animations';
-import { ANI_ENTER_TIMING, ANI_LEAVE_TIMING } from './animation.const';
+import {
+  ANI_ENTER_TIMING,
+  ANI_LEAVE_TIMING,
+  ANI_VERY_LONG_TIMING,
+} from './animation.const';
 
 export const fadeAnimation = [
   trigger('fade', [
@@ -45,6 +49,15 @@ export const fadeInAnimation = [
     transition(':enter', [
       style({ opacity: 0 }),
       animate(ANI_ENTER_TIMING, style({ opacity: '*' })),
+    ]), // void => *
+  ]),
+];
+
+export const fadeInSlowAnimation = [
+  trigger('fadeInSlow', [
+    transition(':enter', [
+      style({ opacity: 0 }),
+      animate(ANI_VERY_LONG_TIMING, style({ opacity: '*' })),
     ]), // void => *
   ]),
 ];
