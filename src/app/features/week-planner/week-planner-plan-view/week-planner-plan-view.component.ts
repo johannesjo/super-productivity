@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { of } from 'rxjs';
 import { TASK_REMINDER_OPTIONS } from '../../tasks/dialog-add-task-reminder/task-reminder-options.const';
 import { T } from '../../../t.const';
+import { CdkDragDrop, moveItemInArray, transferArrayItem } from '@angular/cdk/drag-drop';
 
 @Component({
   selector: 'week-planner-plan-view',
@@ -94,4 +95,20 @@ export class WeekPlannerPlanViewComponent {
   ]);
   protected readonly remindAvailableOptions = TASK_REMINDER_OPTIONS;
   protected readonly T = T;
+
+  // TODO type string not correct
+  drop(event: CdkDragDrop<string[]>): void {
+    console.log(event);
+
+    if (event.previousContainer === event.container) {
+      moveItemInArray(event.container.data, event.previousIndex, event.currentIndex);
+    } else {
+      transferArrayItem(
+        event.previousContainer.data,
+        event.container.data,
+        event.previousIndex,
+        event.currentIndex,
+      );
+    }
+  }
 }

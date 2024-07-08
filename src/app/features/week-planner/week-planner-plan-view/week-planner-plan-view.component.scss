@@ -46,4 +46,9 @@ $task-c-bg-dark: $dark1;
   min-height: 40px;
   line-height: 40px;
   padding: 0 10px;
+  cursor: grab;
+
+  &:active {
+    cursor: grabbing;
+  }
 }

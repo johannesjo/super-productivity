@@ -1,4 +1,7 @@
-<div class="days">
+<div
+  class="days"
+  cdkDropListGroup
+>
   @for (day of days$|async; track day.dayDate) {
   <div class="day">
     <div class="day-title">
@@ -12,9 +15,19 @@
         <mat-icon>add</mat-icon>
         Add
       </button>
-      <div class="normal-tasks-items">
+      <div
+        class="normal-tasks-items"
+        cdkDropList
+        [cdkDropListData]="day.taskIds"
+        (cdkDropListDropped)="drop($event)"
+      >
         @for (tId of day.taskIds; track $index) {
-        <div class="task">aa{{ tId }}</div>
+        <div
+          class="task"
+          cdkDrag
+        >
+          aa{{ tId }}
+        </div>
         }
       </div>
     </div>
@@ -25,15 +38,35 @@
         <mat-icon>add</mat-icon>
         Add
       </button>
-      <div class="scheduled-items">
+      <div
+        class="scheduled-items"
+        cdkDropList
+        [cdkDropListData]="day.scheduledIItems"
+        (cdkDropListDropped)="drop($event)"
+      >
         @for (scheduledItem of day.scheduledIItems; track scheduledItem.id) {
         <div class="scheduled-item">
           @switch (scheduledItem.type) { @case ('TASK') {
-          <div class="task">{{ scheduledItem.id }}</div>
+          <div
+            class="task"
+            cdkDrag
+          >
+            {{ scheduledItem.id }}
+          </div>
           } @case ('event') {
-          <div class="event">{{ scheduledItem.id }}</div>
+          <div
+            class="event"
+            cdkDrag
+          >
+            {{ scheduledItem.id }}
+          </div>
           } @default {
-          <div class="default">{{ scheduledItem.id }}</div>
+          <div
+            class="default"
+            cdkDrag
+          >
+            {{ scheduledItem.id }}
+          </div>
           } }
         </div>
         }
