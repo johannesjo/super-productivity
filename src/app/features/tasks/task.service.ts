@@ -186,6 +186,7 @@ export class TaskService {
     ),
   );
 
+  private _lastFocusedTaskEl: HTMLElement | null = null;
   private _allTasks$: Observable<Task[]> = this._store.pipe(select(selectAllTasks));
 
   constructor(
@@ -200,6 +201,20 @@ export class TaskService {
     private readonly _dateService: DateService,
     private readonly _router: Router,
   ) {
+    document.addEventListener(
+      'focus',
+      (ev) => {
+        if (
+          ev.target &&
+          ev.target instanceof HTMLElement &&
+          ev.target.tagName.toLowerCase() === 'task'
+        ) {
+          this._lastFocusedTaskEl = ev.target;
+        }
+      },
+      true,
+    );
+
     this.currentTaskId$.subscribe((val) => (this.currentTaskId = val));
 
     // time tracking
@@ -658,6 +673,12 @@ export class TaskService {
       throw new Error('Cannot find focus el');
     }
     el.focus();
+  }
+
+  focusLastFocusedTask(): void {
+    if (this._lastFocusedTaskEl) {
+      this._lastFocusedTaskEl.focus();
+    }
   }
 
   focusTaskIfPossible(id: string): void {
