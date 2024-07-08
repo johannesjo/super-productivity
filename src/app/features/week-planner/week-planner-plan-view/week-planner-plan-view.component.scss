@@ -3,7 +3,7 @@
 .days {
   margin: 24px;
   display: grid;
-  gap: 10px; /* Adjust as needed */
+  gap: 16px;
   grid-template-columns: repeat(5, 1fr);
 }
 
@@ -18,6 +18,24 @@
 
 .day-title {
   font-size: 22px;
+  text-align: center;
+  font-weight: bold;
+}
+
+.day-estimate {
+  margin-top: 8px;
+  font-size: 16px;
+  text-align: center;
+}
+
+.section-title {
+  display: flex;
+  justify-content: center;
+  margin: 12px 0 4px;
+
+  //> div:last-child {
+  //  margin-left: 8px;
+  //}
 }
 
 .normal-tasks,

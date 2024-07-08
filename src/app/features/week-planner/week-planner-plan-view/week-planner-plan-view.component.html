@@ -5,16 +5,23 @@
   @for (day of days$|async; track day.dayDate) {
   <div class="day">
     <div class="day-title">
-      {{ day.dayDate|date:'EEE' }} {{ day.timeEstimate }}h/{{ day.timeLimit }}h
+      {{ day.dayDate|date:'EEE' }} {{ day.dayDate|date:'d.M.' }}
     </div>
+    <div class="day-estimate">{{ day.timeEstimate }}h/{{ day.timeLimit }}h</div>
 
     <div class="normal-tasks">
-      <div class="title">Regular 3h</div>
+      <!--      <div class="section-title">-->
+      <!--        <div>regular</div>-->
+      <!--        &lt;!&ndash;        <div class="estimate">3h</div>&ndash;&gt;-->
+      <!--      </div>-->
 
-      <button mat-button>
-        <mat-icon>add</mat-icon>
-        Add
-      </button>
+      <div style="text-align: center">
+        <button mat-button>
+          <mat-icon>add</mat-icon>
+          Add
+        </button>
+      </div>
+
       <div
         class="normal-tasks-items"
         cdkDropList
@@ -33,11 +40,14 @@
     </div>
 
     <div class="scheduled">
-      <div class="title">Scheduled 2h</div>
-      <button mat-button>
-        <mat-icon>add</mat-icon>
-        Add
-      </button>
+      <div class="section-title">
+        <div>scheduled</div>
+        <!--        <div class="estimate">3h</div>-->
+      </div>
+      <!--      <button mat-button>-->
+      <!--        <mat-icon>add</mat-icon>-->
+      <!--        Add-->
+      <!--      </button>-->
       <div
         class="scheduled-items"
         cdkDropList

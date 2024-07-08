@@ -39,6 +39,18 @@
     </mat-menu>
   </div>
 
+  <button
+    #menuEntry
+    class="route-link"
+    mat-menu-item
+    routerLink="week-planner"
+    routerLinkActive="isActiveRoute"
+  >
+    <mat-icon>edit_calendar</mat-icon>
+    <!--    <span class="text">{{T.MH.SCHEDULED|translate}}</span>-->
+    <span class="text">Week</span>
+  </button>
+
   <!-- class title missleading, but works ;) -->
   <div class="tag">
     <button
@@ -58,18 +70,6 @@
       <mat-icon>settings</mat-icon>
     </button>
   </div>
-
-  <button
-    #menuEntry
-    class="route-link"
-    mat-menu-item
-    routerLink="week-planner"
-    routerLinkActive="isActiveRoute"
-  >
-    <mat-icon>edit_calendar</mat-icon>
-    <!--    <span class="text">{{T.MH.SCHEDULED|translate}}</span>-->
-    <span class="text">Week Planner</span>
-  </button>
 
   <button
     #menuEntry
