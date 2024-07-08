@@ -1,10 +1,43 @@
 @import '../../../../variables';
+@import '../../tasks/task/task.component.mixins';
 
 .days {
   margin: 24px;
   display: grid;
   gap: 16px;
-  grid-template-columns: repeat(5, 1fr);
+  grid-template-columns: repeat(1, 1fr);
+
+  @include mq(xs) {
+    grid-template-columns: repeat(2, 1fr);
+
+    .day:nth-child(1n + 3) {
+      display: none;
+    }
+  }
+
+  @include mq(sm) {
+    grid-template-columns: repeat(3, 1fr);
+
+    .day:nth-child(3) {
+      display: block;
+    }
+  }
+
+  @media (min-width: 1160px) {
+    grid-template-columns: repeat(4, 1fr);
+
+    .day:nth-child(4) {
+      display: block;
+    }
+  }
+
+  @include mq(md) {
+    grid-template-columns: repeat(5, 1fr);
+
+    .day:nth-child(5) {
+      display: block;
+    }
+  }
 }
 
 .day {
@@ -14,6 +47,7 @@
   //padding: 10px; /* Optional: for spacing within each day */
   //align-items: stretch; /* Adjusted: Ensure items stretch to fill the container */
   //border: 1px solid blue;
+  margin-bottom: 32px;
 }
 
 .day-title {
@@ -49,22 +83,20 @@
   margin-top: 16px;
 }
 
-$task-text-c-dark: $dark-theme-text-color-most-intense;
-$task-text-c-dark: $dark-theme-text-color;
-// NOTE: light is just standard color
-
-$task-c-bg-light: #fff;
-$task-c-bg-dark: $dark1;
-
 .task {
-  background: $task-c-bg-dark;
   border-radius: 6px;
-  color: $task-text-c-dark;
   margin-bottom: 4px;
   min-height: 40px;
   line-height: 40px;
   padding: 0 10px;
   cursor: grab;
+
+  background: $task-c-bg-light;
+
+  @include darkTheme() {
+    color: $task-text-c-dark;
+    background: $task-c-bg-dark;
+  }
 
   &:active {
     cursor: grabbing;
