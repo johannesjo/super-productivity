@@ -818,6 +818,9 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   get kb(): KeyboardConfig {
+    if (IS_TOUCH_PRIMARY) {
+      return {} as any;
+    }
     return (this._configService.cfg?.keyboard as KeyboardConfig) || {};
   }
 

@@ -8,6 +8,7 @@ export const KEYBOARD_SETTINGS_FORM_CFG: ConfigFormSection<KeyboardConfig> = {
   title: T.GCF.KEYBOARD.TITLE,
   key: 'keyboard',
   help: T.GCF.KEYBOARD.HELP,
+  isHideForAndroidApp: true,
   items: [
     // SYSTEM WIDE
     ...((IS_ELECTRON
