@@ -321,18 +321,21 @@
 }
 
 .keyIndicator {
-  margin-left: 4px;
-  opacity: 0.6;
-  text-align: right;
-  max-width: 60px;
+  opacity: 0.4;
+  font-size: 13px;
+  text-align: center;
+  border-radius: 20px;
+  max-width: 66px;
+  letter-spacing: -1px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  padding: 0 4px;
 
   &:not(:empty) {
-    border-left: 1px solid;
-    border-right: 1px solid;
+    min-width: 24px;
+    border: 1px solid;
+    padding: 0 4px;
+    margin-left: 4px;
   }
 }
 
@@ -779,7 +782,7 @@ progress-bar {
 }
 
 $this-play-size: 22px;
-
+//
 .play-icon-indicator {
   position: absolute;
   top: 50%;
