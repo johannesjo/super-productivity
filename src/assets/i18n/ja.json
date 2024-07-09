@@ -638,10 +638,6 @@
           "L_SYNC_FILE_NAME": "同期ファイル名",
           "L_IS_COMPRESS_DATA": "データを圧縮する"
         },
-        "LOCAL_FILE": {
-          "L_SYNC_FILE_PATH": "同期ファイルパス",
-          "L_SYNC_FILE_PATH_DESCRIPTION": "同期に使用する必要があるファイルへの絶対パス（作成されます）。"
-        },
         "L_ENABLE_SYNCING": "同期を有効にする",
         "L_SYNC_INTERVAL": "同期間隔",
         "L_SYNC_PROVIDER": "同期プロバイダー",
@@ -650,8 +646,12 @@
           "CORS_INFO": "<strong>実験的!!</strong> これを機能させるには、NextcloudインスタンスのCORSを無効にするか制限する必要があります。これは、セキュリティに悪影響を与える可能性があります。詳細については、 <a href='https://github.com/nextcloud/server/issues/3131'>このスレッド</a> を参照してください。自己責任！",
           "L_BASE_URL": "ベースURL",
           "L_PASSWORD": "パスワード",
+          "L_USER_NAME": "ユーザー名",
+          "L_SYNC_FILE_PATH": "同期ファイルパス"
+        },
+        "LOCAL_FILE": {
           "L_SYNC_FILE_PATH": "同期ファイルパス",
-          "L_USER_NAME": "ユーザー名"
+          "L_SYNC_FILE_PATH_DESCRIPTION": "同期に使用する必要があるファイルへの絶対パス（作成されます）。"
         }
       },
       "S": {
@@ -892,8 +892,8 @@
         "SIMPLE_COUNTER_TOOLTIP_DISABLE": "クリックして {{title}}を追跡しない",
         "SKIP": "スキップ",
         "TASK": "タスク",
-        "TASK_BREAK": "タスク+休憩",
-        "TRACK_TO": "以下に追加する："
+        "TRACK_TO": "以下に追加する：",
+        "TASK_BREAK": "タスク+休憩"
       },
       "D_TRACKING_REMINDER": {
         "CREATE_AND_TRACK": "<em>作成</em>して追加",
@@ -987,13 +987,13 @@
   },
   "G": {
     "CANCEL": "キャンセル",
-    "EXAMPLE_VAL": "クリックして編集する",
     "CLOSE": "閉じる",
     "DELETE": "削除",
     "DISMISS": "やめる",
     "DO_IT": "やれ！",
     "EDIT": "編集",
     "ENABLED": "有効",
+    "EXAMPLE_VAL": "クリックして編集する",
     "EXTENSION_INFO": "Jira ApiおよびIdle Time Handlingとの通信を可能にするために、<a target=\"_blank\" href=\"https://chrome.google.com/webstore/detail/super-productivity/ljkbjodfmekklcoibdnhahlaalhihmlb\">Chrome拡張機能をダウンロード</a>してください。これはモバイルでは機能しないことに注意してください。",
     "LOGIN": "ログイン",
     "LOGOUT": "ログアウト",
@@ -1027,9 +1027,9 @@
       "HELP": "<div><p>アイドル時間処理が有効になっていると、アイドル時間が経過したときに、どのタスクで時間を追跡するかを確認するために、指定した時間が経過した後にダイアログが開きます。</p></div>",
       "IS_ENABLE_IDLE_TIME_TRACKING": "アイドル時間処理を有効にする",
       "IS_ONLY_OPEN_IDLE_WHEN_CURRENT_TASK": "現在のタスクが選択されている場合にのみアイドル時間ダイアログを起動する",
-      "IS_UN_TRACKED_IDLE_RESETS_BREAK_TIMER": "追跡されていないアイドル時間のリセットは中断タイマーを取る",
       "MIN_IDLE_TIME": "アイドル状態になるまでの時間",
-      "TITLE": "アイドル処理"
+      "TITLE": "アイドル処理",
+      "IS_UN_TRACKED_IDLE_RESETS_BREAK_TIMER": "追跡されていないアイドル時間のリセットは中断タイマーを取る"
     },
     "IMEX": {
       "HELP": "<p>ここでは、すべてのデータをバックアップ用の <strong>JSON</strong> としてエクスポートできますが、それを別のコンテキストで使用することもできます（たとえば、プロジェクトをブラウザにエクスポートしてデスクトップバージョンにインポートできます） </p> <p>インポートは、有効なJSONがテキスト領域にコピーされることを期待しています。 <strong>注：インポートボタンを押すと、現在の設定とデータがすべて上書きされます。</strong></p>",
