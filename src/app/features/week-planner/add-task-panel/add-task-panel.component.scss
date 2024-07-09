@@ -1,0 +1,41 @@
+@import '../../../../variables';
+@import '../../tasks/task/task.component.mixins';
+
+:host {
+  display: block;
+  margin: 8px;
+}
+
+.filter-bar {
+  // TODO use style of add-task-bar
+  display: flex;
+  margin-bottom: 8px;
+
+  input {
+    flex-grow: 1;
+  }
+}
+
+.task {
+  border-radius: 6px;
+  margin-bottom: 4px;
+  min-height: 40px;
+  padding: 4px 10px;
+  cursor: grab;
+
+  background: $task-c-bg-light;
+
+  @include darkTheme() {
+    color: $task-text-c-dark;
+    background: $task-c-bg-dark;
+  }
+
+  &:active {
+    cursor: grabbing;
+  }
+
+  .title {
+    padding-left: 4px;
+    padding-right: 4px;
+  }
+}

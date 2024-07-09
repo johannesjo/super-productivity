@@ -8,9 +8,15 @@ import { BetterDrawerModule } from '../../ui/better-drawer/better-drawer.module'
 import { NoteModule } from '../note/note.module';
 import { TasksModule } from '../tasks/tasks.module';
 import { WorkViewModule } from '../work-view/work-view.module';
+import { AddTaskPanelComponent } from './add-task-panel/add-task-panel.component';
+import { TagModule } from '../tag/tag.module';
 
 @NgModule({
-  declarations: [WeekPlannerComponent, WeekPlannerPlanViewComponent],
+  declarations: [
+    WeekPlannerComponent,
+    WeekPlannerPlanViewComponent,
+    AddTaskPanelComponent,
+  ],
   imports: [
     CommonModule,
     UiModule,
@@ -21,6 +27,7 @@ import { WorkViewModule } from '../work-view/work-view.module';
     NoteModule,
     TasksModule,
     WorkViewModule,
+    TagModule,
   ],
 })
 export class WeekPlannerModule {}

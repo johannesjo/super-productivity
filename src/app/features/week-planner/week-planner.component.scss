@@ -3,9 +3,19 @@
 :host ::ng-deep better-drawer-container > .content {
   display: flex;
   flex-direction: column;
+  overflow: auto;
 
   > * {
     flex-grow: 1;
+  }
+}
+
+:host ::ng-deep .side-inner {
+  @include darkTheme() {
+    background: $dark-theme-bg-lighter;
+  }
+  @include lightTheme() {
+    background: $light-theme-bg-darker;
   }
 }
 
@@ -19,15 +29,16 @@
   padding-bottom: 8px;
   //gap: 16px;
 
-  border-top: 1px solid;
+  //border-top: 1px solid;
+  //border-bottom: 1px solid;
 
   @include darkTheme() {
-    border-color: $dark-theme-separator-color;
-    background: $dark-theme-bg-lighter;
+    //border-color: $dark-theme-separator-color;
+    //background: $dark-theme-bg-lighter;
   }
   @include lightTheme() {
-    background: $light-theme-bg-darker;
-    border-color: $light-theme-separator-color;
+    //border-color: $light-theme-separator-color;
+    //background: $light-theme-bg-darker;
   }
 }
 

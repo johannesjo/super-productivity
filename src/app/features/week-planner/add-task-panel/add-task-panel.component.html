@@ -1,0 +1,27 @@
+<div class="filter-bar"><mat-icon>filter_alt</mat-icon> <input type="text /" /></div>
+
+<!-- TODO
+* schedule tasks need to be indicated
+
+-->
+<div
+  class="tasks"
+  *ngIf="allTasks$|async as allTasks"
+  cdkDropList
+  [cdkDropListData]="allTasks"
+  (cdkDropListDropped)="drop($event)"
+>
+  @for (task of allTasks; track task.id) {
+  <div
+    class="task"
+    cdkDrag
+  >
+    <div class="title">{{task.title}}</div>
+    <tag-list
+      [isDisableEdit]="true"
+      [isShowProjectTagAlways]="true"
+      [task]="task"
+    ></tag-list>
+  </div>
+  }
+</div>

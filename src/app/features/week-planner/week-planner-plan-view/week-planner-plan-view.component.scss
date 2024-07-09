@@ -2,7 +2,7 @@
 @import '../../tasks/task/task.component.mixins';
 
 .days {
-  margin: 24px;
+  padding: 24px;
   display: grid;
   gap: 16px;
   grid-template-columns: repeat(1, 1fr);
