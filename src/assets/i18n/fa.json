@@ -643,10 +643,6 @@
           "L_SYNC_FILE_NAME": "نام پرونده همگام سازی کنید",
           "L_IS_COMPRESS_DATA": "فشرده سازی داده ها"
         },
-        "LOCAL_FILE": {
-          "L_SYNC_FILE_PATH": "مسیر پرونده همگام سازی",
-          "L_SYNC_FILE_PATH_DESCRIPTION": "مسیر مطلق به پرونده که باید برای همگام سازی استفاده شود (ایجاد می شود)."
-        },
         "L_ENABLE_SYNCING": "همگام سازی را فعال کنید",
         "L_SYNC_INTERVAL": "فاصله همگام سازی",
         "L_SYNC_PROVIDER": "ارائه دهنده همگام سازی",
@@ -655,8 +651,12 @@
           "CORS_INFO": "<strong>آزمایشی !!</strong> برای انجام این کار باید CORS را برای نمونه Nextcloud خود غیرفعال یا محدود کنید ، که این امر می تواند پیامدهای امنیتی منفی داشته باشد! لطفاً برای اطلاعات بیشتر <a href='https://github.com/nextcloud/server/issues/3131'>به این بخش مراجعه کنید</a> . با مسئولیت خود استفاده کنید!",
           "L_BASE_URL": "آدرس پایگاه",
           "L_PASSWORD": "کلمه عبور",
+          "L_USER_NAME": "نام کاربری",
+          "L_SYNC_FILE_PATH": "مسیر پرونده همگام سازی"
+        },
+        "LOCAL_FILE": {
           "L_SYNC_FILE_PATH": "مسیر پرونده همگام سازی",
-          "L_USER_NAME": "نام کاربری"
+          "L_SYNC_FILE_PATH_DESCRIPTION": "مسیر مطلق به پرونده که باید برای همگام سازی استفاده شود (ایجاد می شود)."
         }
       },
       "S": {
@@ -897,8 +897,8 @@
         "SIMPLE_COUNTER_TOOLTIP_DISABLE": "برای عدم ردیابی به {{title}}کلیک کنید",
         "SKIP": "رد شدن",
         "TASK": "کار",
-        "TASK_BREAK": "کار+استراحت",
-        "TRACK_TO": "تایین کنید:"
+        "TRACK_TO": "تایین کنید:",
+        "TASK_BREAK": "کار+استراحت"
       },
       "D_TRACKING_REMINDER": {
         "CREATE_AND_TRACK": "<em>ایجاد کنید</em> و پیگیری کنید",
@@ -992,13 +992,13 @@
   },
   "G": {
     "CANCEL": "لغو",
-    "EXAMPLE_VAL": "برای ویرایش کلیک کنید",
     "CLOSE": "بستن",
     "DELETE": "حذف",
     "DISMISS": "رد کردن",
     "DO_IT": "انجام بدهید!",
     "EDIT": "ویرایش",
     "ENABLED": "فعال شده است",
+    "EXAMPLE_VAL": "برای ویرایش کلیک کنید",
     "EXTENSION_INFO": "لطفا برای ارتباط با جیرا و مدیریت زمان <a target=\"_blank\" href=\"https://chrome.google.com/webstore/detail/super-productivity/ljkbjodfmekklcoibdnhahlaalhihmlb\"> افزونه گوگل کروم</a> را دانلود کنید. توجه این افزونه برای نسخه موبایل کروم کار نمی کند.",
     "LOGIN": "وارد شدن",
     "LOGOUT": "خارج شدن",
@@ -1032,9 +1032,9 @@
       "HELP": "<div><p>When idle time handling is enabled a dialog will open after a specified amount of time to check if and on which task you want to track your time, when you have been idle.</p></div>",
       "IS_ENABLE_IDLE_TIME_TRACKING": "Enable idle time handling",
       "IS_ONLY_OPEN_IDLE_WHEN_CURRENT_TASK": "Only trigger idle time dialog when a current task is selected",
-      "IS_UN_TRACKED_IDLE_RESETS_BREAK_TIMER": "Untracked idle time resets take a break timer",
       "MIN_IDLE_TIME": "Trigger idle after X",
-      "TITLE": "Idle Handling"
+      "TITLE": "Idle Handling",
+      "IS_UN_TRACKED_IDLE_RESETS_BREAK_TIMER": "Untracked idle time resets take a break timer"
     },
     "IMEX": {
       "HELP": "<p>Here you can export all your data as a <strong>JSON</strong> for backups, but also to use it in a different context (e.g. you might want to export your projects in the browser and import them into the desktop version). </p> <p>The import expects valid JSON to be copied into the text area. <strong>NOTE: Once you hit the import button all your current settings and data will be overwritten!</strong></p>",

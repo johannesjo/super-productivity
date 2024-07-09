@@ -842,9 +842,9 @@
           "L_SYNC_FILE_NAME": "Ime datoteke sinkronizacije"
         },
         "LOCAL_FILE": {
+          "L_SYNC_FILE_PATH_PERMISSION_VALIDATION": "Treba dozvolu za pristup datotekama",
           "L_SYNC_FILE_PATH": "Staza datoteke sinkronizacije",
-          "L_SYNC_FILE_PATH_DESCRIPTION": "Apsolutna staza do datoteke, koja se treba koristiti za sinkronizaciju (stvorit će se).",
-          "L_SYNC_FILE_PATH_PERMISSION_VALIDATION": "Treba dozvolu za pristup datotekama"
+          "L_SYNC_FILE_PATH_DESCRIPTION": "Apsolutna staza do datoteke, koja se treba koristiti za sinkronizaciju (stvorit će se)."
         },
         "L_ENABLE_COMPRESSION": "Aktiviraj komprimiranje (brži prijenos podataka)",
         "L_ENABLE_SYNCING": "Aktiviraj sinkronizaciju",
@@ -855,8 +855,8 @@
           "CORS_INFO": "<strong>Omogućavanje rada na mobilnom uređaju i u pregledniku:</strong> da bi ovo radilo na mobilnom uređaju ili pregledniku, Super Productivity moraš staviti na popis dopuštenih za CORS zahtjeve za tvoju Nextcloud instancu. To može negativno utjecati na sigurnost! <a href='https://github.com/nextcloud/server/issues/3131'>Pogledaj ovu razgovor za daljnje informacija</a>. Jedan od pristupa da bi ovo radilo na mobilnom uređaju je stavljanje adrese „https://app.super-productivity.com” na popis dopuštenih putem Nextcloud programa <a href='https://apps.nextcloud.com/apps/webapppassword'>webapppassword <a>. Koristi na vlastitu odgovornost!</p>",
           "L_BASE_URL": "Osnovni Url",
           "L_PASSWORD": "Lozinka",
-          "L_SYNC_FILE_PATH": "Staza datoteke sinkronizacije",
-          "L_USER_NAME": "Korisničko ime"
+          "L_USER_NAME": "Korisničko ime",
+          "L_SYNC_FILE_PATH": "Staza datoteke sinkronizacije"
         }
       },
       "S": {
@@ -1155,8 +1155,8 @@
         "SKIP": "Preskoči",
         "SPLIT_TIME": "Podijeli vrijeme na više zadataka i pauza",
         "TASK": "Zadatak",
-        "TASK_BREAK": "Zadatak+Pauza",
-        "TRACK_TO": "Prati za"
+        "TRACK_TO": "Prati za",
+        "TASK_BREAK": "Zadatak+Pauza"
       },
       "D_TRACKING_REMINDER": {
         "CREATE_AND_TRACK": "<em>Stvori</em> i prati do",
@@ -1231,7 +1231,6 @@
   },
   "G": {
     "CANCEL": "Odustani",
-    "EXAMPLE_VAL": "pritisni i uredi",
     "CLOSE": "Zatvori",
     "DELETE": "Izbriši",
     "DISMISS": "Odbaci",
@@ -1239,6 +1238,7 @@
     "DO_IT": "Obavi!",
     "EDIT": "Uredi",
     "ENABLED": "Aktivirano",
+    "EXAMPLE_VAL": "pritisni i uredi",
     "EXTENSION_INFO": "Preuzmi <a target=\"_blank\" href=\"https://chrome.google.com/webstore/detail/super-productivity/ljkbjodfmekklcoibdnhahlaalhihmlb\"> chrome proširenje</a> za omogućivanje komunikacije s Jira Api-jem i baratanje vremenom neaktivnosti. Napomena: To ne radi s mobilnim uređajima.",
     "HIDE": "Sakrij",
     "LOGIN": "Prijava",
@@ -1294,9 +1294,9 @@
       "HELP": "<div><p>Kad je baratanje neaktivnim vremenom aktivirano, nakon određenog vremena otvorit će se dijaloški okvir za provjeru je li želiš, i pri kojem zadatku želiš pratiti tvoje neaktivno vrijeme.</p></div>",
       "IS_ENABLE_IDLE_TIME_TRACKING": "Aktiviraj baratanje neaktivnim vremenom",
       "IS_ONLY_OPEN_IDLE_WHEN_CURRENT_TASK": "Pokreni dijaloški okvir za neaktivnost samo kad je odabran trenutačni zadatak",
-      "IS_UN_TRACKED_IDLE_RESETS_BREAK_TIMER": "Nepraćeno neaktivno vrijeme resetira timer pauza",
       "MIN_IDLE_TIME": "Pokreni neaktivno vrijeme nakon X",
-      "TITLE": "Baratanje neaktivnim vremenom"
+      "TITLE": "Baratanje neaktivnim vremenom",
+      "IS_UN_TRACKED_IDLE_RESETS_BREAK_TIMER": "Nepraćeno neaktivno vrijeme resetira timer pauza"
     },
     "IMEX": {
       "HELP": "<p>Ovdje možeš izvesti sve tvoje podatke kao <strong>JSON</strong> za sigurnosne kopije, ali ih koristiti i u drugom kontekstu (npr. možda želiš izvesti tvoje projekte u pregledniku i uvesti ih u desktop verziju). </p> <p>Uvoz očekuje ispravni JSON za kopiranje u područje teksta. <strong>NAPOMENA: Nakon što pritisneš gumb za uvoz, sve tvoje trenutačne postavke i podaci će se prepisati!</strong></p>",

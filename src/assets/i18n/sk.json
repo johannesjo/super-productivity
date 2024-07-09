@@ -628,10 +628,6 @@
         "GOOGLE": {
           "L_SYNC_FILE_NAME": "Názov synchronizačného súboru"
         },
-        "LOCAL_FILE": {
-          "L_SYNC_FILE_PATH": "Cesta k synchronizovanému súboru",
-          "L_SYNC_FILE_PATH_DESCRIPTION": "Absolútna cesta k súboru, ktorý sa má použiť na synchronizáciu (vytvorí sa)."
-        },
         "L_ENABLE_COMPRESSION": "Povoliť kompresie (rýchlejší prenos údajov)",
         "L_ENABLE_SYNCING": "Povoliť synchronizáciu",
         "L_SYNC_INTERVAL": "Interval synchronizácie",
@@ -641,8 +637,12 @@
           "CORS_INFO": "<strong>Making it work on MOBILE and in the browser:</strong> To make this work for mobile or the browser you need to whitelist Super Productivity for CORS requests for your Nextcloud instance. This can have negative security implications! Please <a href='https://github.com/nextcloud/server/issues/3131'>refer to this thread for more information</a>. One approach to make this work on mobile is whitelisting \"https://app.super-productivity.com\" via the nextcloud app <a href='https://apps.nextcloud.com/apps/webapppassword'>webapppassword<a>. Use at your own risk!</p>",
           "L_BASE_URL": "Základná URL adresa",
           "L_PASSWORD": "Heslo",
-          "L_SYNC_FILE_PATH": "Cesta k synchronizačnému súboru",
-          "L_USER_NAME": "Používateľské meno"
+          "L_USER_NAME": "Používateľské meno",
+          "L_SYNC_FILE_PATH": "Cesta k synchronizačnému súboru"
+        },
+        "LOCAL_FILE": {
+          "L_SYNC_FILE_PATH": "Cesta k synchronizovanému súboru",
+          "L_SYNC_FILE_PATH_DESCRIPTION": "Absolútna cesta k súboru, ktorý sa má použiť na synchronizáciu (vytvorí sa)."
         }
       },
       "S": {
@@ -934,8 +934,8 @@
         "SKIP": "Preskočiť",
         "SPLIT_TIME": "Split time into multiples tasks and breaks",
         "TASK": "Úloha",
-        "TASK_BREAK": "Task+Break",
-        "TRACK_TO": "Track to"
+        "TRACK_TO": "Track to",
+        "TASK_BREAK": "Task+Break"
       },
       "D_TRACKING_REMINDER": {
         "CREATE_AND_TRACK": "<em>Vytvoriť</em> a sledovať na",
@@ -1042,7 +1042,6 @@
   },
   "G": {
     "CANCEL": "Cancel",
-    "EXAMPLE_VAL": "click to edit",
     "CLOSE": "Close",
     "DELETE": "Delete",
     "DISMISS": "Dismiss",
@@ -1050,6 +1049,7 @@
     "DO_IT": "Do it!",
     "EDIT": "Edit",
     "ENABLED": "Enabled",
+    "EXAMPLE_VAL": "click to edit",
     "EXTENSION_INFO": "Please <a target=\"_blank\" href=\"https://chrome.google.com/webstore/detail/super-productivity/ljkbjodfmekklcoibdnhahlaalhihmlb\"> download the chrome extension</a> in order to allow communication with the Jira Api and Idle Time Handling. Note that this doesn't work for mobile.",
     "LOGIN": "Login",
     "LOGOUT": "Logout",
@@ -1084,9 +1084,9 @@
       "HELP": "<div><p>When idle time handling is enabled a dialog will open after a specified amount of time to check if and on which task you want to track your time, when you have been idle.</p></div>",
       "IS_ENABLE_IDLE_TIME_TRACKING": "Enable idle time handling",
       "IS_ONLY_OPEN_IDLE_WHEN_CURRENT_TASK": "Only trigger idle time dialog when a current task is selected",
-      "IS_UN_TRACKED_IDLE_RESETS_BREAK_TIMER": "Untracked idle time resets take a break timer",
       "MIN_IDLE_TIME": "Trigger idle after X",
-      "TITLE": "Idle Handling"
+      "TITLE": "Idle Handling",
+      "IS_UN_TRACKED_IDLE_RESETS_BREAK_TIMER": "Untracked idle time resets take a break timer"
     },
     "IMEX": {
       "HELP": "<p>Here you can export all your data as a <strong>JSON</strong> for backups, but also to use it in a different context (e.g. you might want to export your projects in the browser and import them into the desktop version). </p> <p>The import expects valid JSON to be copied into the text area. <strong>NOTE: Once you hit the import button all your current settings and data will be overwritten!</strong></p>",

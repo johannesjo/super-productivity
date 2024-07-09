@@ -645,10 +645,6 @@
           "L_SYNC_FILE_NAME": "مزامنة اسم الملف",
           "L_IS_COMPRESS_DATA": "ضغط البيانات"
         },
-        "LOCAL_FILE": {
-          "L_SYNC_FILE_PATH": "مسار ملف المزامنة",
-          "L_SYNC_FILE_PATH_DESCRIPTION": "المسار المطلق للملف الذي يجب استخدامه للمزامنة (سيتم إنشاؤه)."
-        },
         "L_ENABLE_SYNCING": "تمكين المزامنة",
         "L_SYNC_INTERVAL": "فترة المزامنة",
         "L_SYNC_PROVIDER": "مزود المزامنة",
@@ -657,8 +653,12 @@
           "CORS_INFO": "<strong>تجريبي !!</strong> لإنجاز هذا العمل ، تحتاج إلى تعطيل أو تقييد CORS لمثال Nextcloud الخاص بك ، والذي قد يكون له تداعيات أمنية سلبية! يرجى <a href='https://github.com/nextcloud/server/issues/3131'>الرجوع إلى هذا الموضوع</a> لمزيد من المعلومات. استخدام على مسؤوليتك الخاصة!",
           "L_BASE_URL": "عنوان Url الأساسي",
           "L_PASSWORD": "كلمه السر",
+          "L_USER_NAME": "اسم المستخدم",
+          "L_SYNC_FILE_PATH": "مسار ملف المزامنة"
+        },
+        "LOCAL_FILE": {
           "L_SYNC_FILE_PATH": "مسار ملف المزامنة",
-          "L_USER_NAME": "اسم المستخدم"
+          "L_SYNC_FILE_PATH_DESCRIPTION": "المسار المطلق للملف الذي يجب استخدامه للمزامنة (سيتم إنشاؤه)."
         }
       },
       "S": {
@@ -898,8 +898,8 @@
         "SIMPLE_COUNTER_TOOLTIP_DISABLE": "انقر لعدم التعقب إلى {{title}}",
         "SKIP": "تخطى",
         "TASK": "مهمة",
-        "TASK_BREAK": "استراحة المهمة",
-        "TRACK_TO": "تتبع إلى:"
+        "TRACK_TO": "تتبع إلى:",
+        "TASK_BREAK": "استراحة المهمة"
       },
       "D_TRACKING_REMINDER": {
         "CREATE_AND_TRACK": "<em>أنشئ</em> وتتبع إلى",
@@ -993,13 +993,13 @@
   },
   "G": {
     "CANCEL": "إلغاء",
-    "EXAMPLE_VAL": "إضغط للتعديل",
     "CLOSE": "قريب",
     "DELETE": "حذف",
     "DISMISS": "رفض",
     "DO_IT": "افعلها!",
     "EDIT": "تصحيح",
     "ENABLED": "تمكين",
+    "EXAMPLE_VAL": "إضغط للتعديل",
     "EXTENSION_INFO": "يرجى <a target=\"_blank\" href=\"https://chrome.google.com/webstore/detail/super-productivity/ljkbjodfmekklcoibdnhahlaalhihmlb'}\"> تنزيل ملحق chrome</a> للسماح بالتواصل مع Jira Api و Idle Time Handling. لاحظ أن هذا لا يعمل للجوال.",
     "LOGIN": "تسجيل الدخول",
     "LOGOUT": "الخروج",
@@ -1033,9 +1033,9 @@
       "HELP": "<div><p>عند تمكين معالجة وقت الخمول ، سيتم فتح مربع حوار بعد فترة زمنية محددة للتحقق مما إذا كانت المهمة التي ترغب في تتبع وقتك عليها ، وعندما تكون خاملة.</p></div>",
       "IS_ENABLE_IDLE_TIME_TRACKING": "تمكين معالجة وقت الخمول",
       "IS_ONLY_OPEN_IDLE_WHEN_CURRENT_TASK": "قم بتشغيل مربع حوار وقت الخمول فقط عند تحديد مهمة حالية",
-      "IS_UN_TRACKED_IDLE_RESETS_BREAK_TIMER": "إعادة تعيين وقت الخمول الذي لم يتم تتبعه تأخذ وقت استراحة",
       "MIN_IDLE_TIME": "الخمول الزناد بعد X",
-      "TITLE": "الخمول المناولة"
+      "TITLE": "الخمول المناولة",
+      "IS_UN_TRACKED_IDLE_RESETS_BREAK_TIMER": "إعادة تعيين وقت الخمول الذي لم يتم تتبعه تأخذ وقت استراحة"
     },
     "IMEX": {
       "HELP": "<p>هنا يمكنك تصدير جميع بياناتك كـ <strong>JSON</strong> للنسخ الاحتياطية ، ولكن أيضًا لاستخدامها في سياق مختلف (على سبيل المثال ، قد ترغب في تصدير مشاريعك في المتصفح واستيرادها في إصدار سطح المكتب ). </p> <p>يتوقع الاستيراد أن يتم نسخ JSON صالح في مساحة النص. <strong>ملاحظة: بمجرد الضغط على زر الاستيراد ، سيتم استبدال جميع الإعدادات والبيانات الحالية الخاصة بك!</strong></p>",
