@@ -1,5 +1,17 @@
 @import '../../../variables';
 
+:host ::ng-deep better-drawer-container > .side {
+  min-width: 160px;
+
+  @include mq(xs) {
+    min-width: 200px;
+  }
+
+  @include mq(sm) {
+    min-width: 240px;
+  }
+}
+
 :host ::ng-deep better-drawer-container > .content {
   display: flex;
   flex-direction: column;

@@ -1,9 +1,9 @@
 @import '../../../../variables';
-@import '../../tasks/task/task.component.mixins';
 
 :host {
   display: block;
   margin: 8px;
+  margin-top: 0;
   position: relative;
   background: inherit;
 }
@@ -13,10 +13,25 @@
   display: flex;
   margin-bottom: 8px;
   position: sticky;
+  border-bottom: 1px solid;
   top: 0;
+  z-index: 1;
+  padding-top: 8px;
+  padding-bottom: 4px;
+
+  @include darkTheme() {
+    border-color: $dark-theme-separator-color;
+    background: $dark-theme-bg-lighter;
+  }
+  @include lightTheme() {
+    border-color: $light-theme-separator-color;
+    background: $light-theme-bg-darker;
+  }
 
   input {
     flex-grow: 1;
     border-radius: 4px;
+    min-width: 0;
+    margin-left: 4px;
   }
 }

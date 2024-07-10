@@ -29,3 +29,10 @@
 .drag-placeholder {
   min-height: 40px;
 }
+
+.parent-title {
+  padding-top: $s * 0.5;
+  margin-bottom: -2px;
+  font-size: 12px;
+  text-overflow: ellipsis;
+}

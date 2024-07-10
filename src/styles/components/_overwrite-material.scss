@@ -126,6 +126,7 @@ mat-icon,
   box-shadow: $whiteframe-shadow-6dp;
   cursor: grab;
   cursor: grabbing;
+  //min-width: 200px;
 
   @include darkTheme(true) {
     background: $dark3 !important;

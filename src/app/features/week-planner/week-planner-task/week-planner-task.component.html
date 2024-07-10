@@ -2,6 +2,14 @@
   class="drag-placeholder"
   *cdkDragPlaceholder
 ></div>
+
+<div
+  class="parent-title"
+  *ngIf="parentTitle"
+>
+  <div class="title">{{ parentTitle }}</div>
+</div>
+
 <div class="title">{{ task.title }}</div>
 <tag-list
   [isDisableEdit]="true"
