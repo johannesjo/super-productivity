@@ -1,0 +1,31 @@
+@import '../../../../variables';
+@import '../../tasks/task/task.component.mixins';
+
+:host {
+  border-radius: 6px;
+  margin-bottom: 4px;
+  min-height: 40px;
+  padding: 4px 10px;
+  cursor: grab;
+  display: block;
+
+  background: $task-c-bg-light;
+
+  @include darkTheme() {
+    color: $task-text-c-dark;
+    background: $task-c-bg-dark;
+  }
+
+  &:active {
+    cursor: grabbing;
+  }
+
+  .title {
+    padding-left: 4px;
+    padding-right: 4px;
+  }
+}
+
+.drag-placeholder {
+  min-height: 40px;
+}

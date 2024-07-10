@@ -2,8 +2,8 @@
 
 <!-- TODO
 * schedule tasks need to be indicated
-
 -->
+
 <div
   class="tasks"
   *ngIf="allTasks$|async as allTasks"
@@ -12,16 +12,9 @@
   (cdkDropListDropped)="drop($event)"
 >
   @for (task of allTasks; track task.id) {
-  <div
-    class="task"
+  <week-planner-task
     cdkDrag
-  >
-    <div class="title">{{task.title}}</div>
-    <tag-list
-      [isDisableEdit]="true"
-      [isShowProjectTagAlways]="true"
-      [task]="task"
-    ></tag-list>
-  </div>
+    [task]="task"
+  ></week-planner-task>
   }
 </div>

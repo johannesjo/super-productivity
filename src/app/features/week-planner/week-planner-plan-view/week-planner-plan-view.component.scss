@@ -2,9 +2,14 @@
 @import '../../tasks/task/task.component.mixins';
 
 .days {
-  padding: 24px;
   display: grid;
   gap: 16px;
+  padding: 4px;
+
+  @include mq(xs) {
+    padding: 24px;
+  }
+
   grid-template-columns: repeat(1, 1fr);
 
   @include mq(xs) {
@@ -63,6 +68,11 @@
   font-size: 22px;
   text-align: center;
   font-weight: bold;
+  vertical-align: middle;
+
+  .date {
+    font-size: 12px;
+  }
 }
 
 .day-estimate {
@@ -121,4 +131,13 @@
   &:active {
     cursor: grabbing;
   }
+}
+
+.drag-placeholder {
+  min-height: 40px;
+}
+
+:host ::ng-deep .cdk-drag-preview {
+  background: red;
+  cursor: grab;
 }

@@ -109,3 +109,25 @@ mat-icon,
   overflow: hidden !important;
   text-overflow: ellipsis !important;
 }
+
+// CDK DRAG
+/* Animate items as they're being sorted. */
+.cdk-drop-list-dragging .cdk-drag {
+  transition: transform 100ms cubic-bezier(0, 0, 0.2, 1);
+}
+
+/* Animate an item that has been dropped. */
+.cdk-drag-animating {
+  transition: transform 100ms cubic-bezier(0, 0, 0.2, 1);
+}
+
+.cdk-drag-preview {
+  background: #fff !important;
+  box-shadow: $whiteframe-shadow-6dp;
+  cursor: grab;
+  cursor: grabbing;
+
+  @include darkTheme(true) {
+    background: $dark3 !important;
+  }
+}

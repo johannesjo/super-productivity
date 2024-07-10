@@ -2,7 +2,7 @@
   @for (day of days$|async; track day.dayDate) {
   <div class="day">
     <div class="day-title">
-      {{ day.dayDate|date:'EEE' }} {{ day.dayDate|date:'d.M.' }}
+      {{ day.dayDate|date:'EEE' }} <span class="date">{{ day.dayDate|date:'d.M.' }}</span>
     </div>
     <div class="day-estimate">{{ day.timeEstimate }}h/{{ day.timeLimit }}h</div>
 
@@ -22,16 +22,14 @@
       <div
         class="normal-tasks-items"
         cdkDropList
-        [cdkDropListData]="day.taskIds"
-        (cdkDropListDropped)="drop($event)"
+        [cdkDropListData]="day.tasks"
+        (cdkDropListDropped)="drop('TODO',$event)"
       >
-        @for (tId of day.taskIds; track $index) {
-        <div
-          class="task"
+        @for (task of day.tasks; track task.id) {
+        <week-planner-task
           cdkDrag
-        >
-          aa{{ tId }}
-        </div>
+          [task]="task"
+        ></week-planner-task>
         }
       </div>
     </div>
@@ -50,17 +48,15 @@
         class="scheduled-items"
         cdkDropList
         [cdkDropListData]="day.scheduledIItems"
-        (cdkDropListDropped)="drop($event)"
+        (cdkDropListDropped)="drop('SCHEDULED',$event)"
       >
         @for (scheduledItem of day.scheduledIItems; track scheduledItem.id) {
         <div class="scheduled-item">
           @switch (scheduledItem.type) { @case ('TASK') {
-          <div
-            class="task"
+          <week-planner-task
             cdkDrag
-          >
-            {{ scheduledItem.id }}
-          </div>
+            [task]="scheduledItem.task"
+          ></week-planner-task>
           } @case ('event') {
           <div
             class="event"
