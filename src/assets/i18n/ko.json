@@ -1,14 +1,19 @@
 {
+  "ANDROID": {
+    "PERMANENT_NOTIFICATION_MSGS": {
+      "SYNCING": "동기화"
+    }
+  },
   "APP": {
     "B_INSTALL": {
       "IGNORE": "무시",
       "INSTALL": "설치",
-      "MSG": "PWA로 Super Productivity를 설치 하시겠습니까?"
+      "MSG": "PWA로 Super Productivity를 설치하시겠습니까?"
     },
     "B_OFFLINE": "인터넷 연결이 끊어졌습니다. 문제 제공자 데이터 동기화 및 요청이 작동하지 않습니다.",
     "UPDATE_MAIN_MODEL": "슈퍼 생산성이 대폭 업데이트되었습니다! 데이터에 대한 일부 마이그레이션이 필요합니다. 이로 인해 데이터가 이전 버전의 앱과 호환되지 않습니다.",
-    "UPDATE_MAIN_MODEL_NO_UPDATE": "선택된 모델 업데이트가 없습니다. 모델 업그레이드를 수행하지 않으려면 마지막 버전으로 다운 그레이드해야합니다.",
-    "UPDATE_WEB_APP": "새 버전을 사용할 수 있습니다. 새 버전을로드 하시겠습니까?"
+    "UPDATE_MAIN_MODEL_NO_UPDATE": "선택된 모델 업데이트가 없습니다. 모델 업그레이드를 수행하지 않으려면 마지막 버전으로 다운그레이드해야합니다.",
+    "UPDATE_WEB_APP": "새 버전을 사용할 수 있습니다. 새 버전을 로드하시겠습니까?"
   },
   "BL": {
     "NO_TASKS": "현재 백 로그에 작업이 없습니다."
@@ -17,7 +22,7 @@
     "AUTO_FIX": "데이터가 손상된 것 같습니다. 자동으로 수정 하시겠습니까? 이로 인해 데이터가 부분적으로 손실 될 수 있습니다.",
     "DELETE_STRAY_BACKUP": "이 대화 상자가 표시되지 않도록 뒷면을 삭제 하시겠습니까?",
     "RELOAD_AFTER_IDB_ERROR": "데이터베이스에 액세스할 수 없음:(가능한 원인은 백그라운드에서 앱 업데이트 또는 디스크 공간 부족입니다. 앱을 다시 로드하려면 확인을 누르십시오(일부 플랫폼에서는 앱을 수동으로 다시 시작해야 할 수 있음).",
-    "RESTORE_FILE_BACKUP": "데이터가없는 것 같지만 \"{{dir}}\"에서 사용 가능한 백업이 있습니다. {{from}}에서 최신 백업을 복원 하시겠습니까?",
+    "RESTORE_FILE_BACKUP": "데이터가 없는 것 같지만 \"{{dir}}\"에서 사용 가능한 백업이 있습니다. {{from}}에서 최신 백업을 복원 하시겠습니까?",
     "RESTORE_FILE_BACKUP_ANDROID": "데이터가 없는 것 같지만 사용 가능한 백업이 있습니다. 로드하시겠습니까?",
     "RESTORE_STRAY_BACKUP": "마지막 동기화 중에 오류가 발생했을 수 있습니다. 마지막 백업을 복원 하시겠습니까?"
   },
@@ -27,7 +32,7 @@
   },
   "DATETIME_SCHEDULE": {
     "LATER_TODAY": "나중에 오늘",
-    "NEXT_WEEK": "다음주",
+    "NEXT_WEEK": "다음 주",
     "PLACEHOLDER": "날짜를 선택하십시오",
     "PRESS_ENTER_AGAIN": "Enter를 다시 눌러 저장하십시오.",
     "TOMORROW": "내일"
@@ -39,7 +44,7 @@
         "EDIT_ATTACHMENT": "첨부 파일 편집",
         "LABELS": {
           "FILE": "파일 경로",
-          "IMG": "영상",
+          "IMG": "이미지",
           "LINK": "URL"
         },
         "SELECT_TYPE": "유형 선택",
@@ -52,18 +57,18 @@
     },
     "BOOKMARK": {
       "BAR": {
-        "ADD": "북마크에 추가하다",
+        "ADD": "북마크에 추가",
         "DROP": "책갈피를 추가하려면 여기로 끌어다 놓으십시오.",
         "EDIT": "북마크 편집",
         "NO_BOOKMARKS": "프로젝트 북마크가 없습니다. 끌어서 놓기 또는 '더하기'버튼을 클릭하여 추가하십시오."
       },
       "DIALOG_EDIT": {
-        "ADD_BOOKMARK": "북마크에 추가하다",
+        "ADD_BOOKMARK": "북마크에 추가",
         "EDIT_BOOKMARK": "북마크 편집",
         "LABELS": {
           "COMMAND": "명령",
           "FILE": "파일 경로",
-          "IMG": "영상",
+          "IMG": "이미지",
           "LINK": "URL"
         },
         "SELECT_ICON": "아이콘 선택",
@@ -99,7 +104,7 @@
         "DESCRIPTION": "기술",
         "LABELS": "카테고리",
         "MARK_AS_CHECKED": "체크 된대로 업데이트 표시",
-        "STATUS": "지위",
+        "STATUS": "상태",
         "SUMMARY": "개요"
       },
       "S": {
@@ -125,12 +130,27 @@
     },
     "FINISH_DAY_BEFORE_EXIT": {
       "C": {
-        "FINISH_DAY_BEFORE_EXIT": "오늘 목록에 아직 아카이브로 이동되지 않은 완료된 작업이 {{nr}} 개 있습니다. 하루를 끝내지 않고 정말 그만두시겠습니까?"
+        "FINISH_DAY_BEFORE_EXIT": "오늘 목록에 아직 아카이브로 이동되지 않은 완료된 작업이 {{nr}} 개 있습니다. 하루를 끝내지 않고 정말 종료하시겠습니까?"
+      }
+    },
+    "GITEA": {
+      "FORM_SECTION": {
+        "TITLE": "Gitea"
+      },
+      "ISSUE_CONTENT": {
+        "ASSIGNEE": "담당자",
+        "STATUS": "상태"
+      }
+    },
+    "REDMINE": {
+      "ISSUE_CONTENT": {
+        "STATUS": "상태",
+        "PRIORITY": "우선순위"
       }
     },
     "GITHUB": {
       "DIALOG_INITIAL": {
-        "TITLE": "프로젝트를위한 GitHub 설정"
+        "TITLE": "프로젝트를 위한 GitHub 설정"
       },
       "FORM": {
         "FILTER_USER": "사용자 이름 (예 : 혼자서 변경 사항을 필터링)",
@@ -143,15 +163,15 @@
       },
       "FORM_SECTION": {
         "HELP": "<p>여기서는 일일 계획 보기의 작업 만들기 패널에서 특정 리포지토리에 대한 열린 GitHub 문제를 나열하도록 SuperProductivity를 구성할 수 있습니다. 제안으로 나열 되며 문제에 대 한 링크 뿐만 아니라 그것에 대 한 자세한 정보를 제공 합니다.</p> <p>또한 자동으로 추가하고 작업 백로그에 열려있는 모든 문제를 동기화 할 수 있습니다.</p>",
-        "TITLE": "기둥"
+        "TITLE": "Github"
       },
       "ISSUE_CONTENT": {
-        "ASSIGNEE": "양수인",
+        "ASSIGNEE": "담당자",
         "AT": "...에서",
         "DESCRIPTION": "기술",
         "LABELS": "레이블",
         "MARK_AS_CHECKED": "체크 된대로 업데이트 표시",
-        "STATUS": "지위",
+        "STATUS": "상태",
         "SUMMARY": "개요",
         "WRITE_A_COMMENT": "의견 쓰기"
       },
@@ -162,6 +182,9 @@
     "GITLAB": {
       "DIALOG_INITIAL": {
         "TITLE": "프로젝트를위한 GitLab 설정"
+      },
+      "DIALOG_SUBMIT_WORKLOG": {
+        "T_TITLE": "제목"
       },
       "FORM": {
         "FILTER_USER": "사용자 이름 (예 : 혼자서 변경 사항을 필터링)",
@@ -182,16 +205,16 @@
       },
       "FORM_SECTION": {
         "HELP": "<p> 일별 계획보기의 작업 생성 패널에서 특정 프로젝트에 대해 열린 GitLab (온라인 버전 또는 자체 호스팅 인스턴스) 문제를 나열하도록 SuperProductivity를 구성 할 수 있습니다. 제안으로 표시되며 문제에 대한 자세한 정보뿐만 아니라 문제에 대한 링크를 제공합니다. </p> <p> 또한 열려있는 모든 문제를 작업 백 로그에 자동으로 추가하고 동기화 할 수 있습니다. </p>",
-        "TITLE": "기둥"
+        "TITLE": "GitLab"
       },
       "ISSUE_CONTENT": {
-        "ASSIGNEE": "양수인",
+        "ASSIGNEE": "담당자",
         "AT": "...에서",
         "DESCRIPTION": "기술",
         "LABELS": "레이블",
         "MARK_AS_CHECKED": "체크 된대로 업데이트 표시",
         "PROJECT": "계획",
-        "STATUS": "지위",
+        "STATUS": "상태",
         "SUMMARY": "개요",
         "WRITE_A_COMMENT": "의견 쓰기"
       },
@@ -248,7 +271,7 @@
       },
       "DIALOG_TRANSITION": {
         "CHOOSE_STATUS": "할당 할 상태 선택",
-        "CURRENT_ASSIGNEE": "현재 양수인 :",
+        "CURRENT_ASSIGNEE": "현재 담당자 :",
         "CURRENT_STATUS": "현재 상태:",
         "TASK_NAME": "작업 이름:",
         "TITLE": "Jira : 업데이트 상태",
@@ -316,7 +339,7 @@
         }
       },
       "ISSUE_CONTENT": {
-        "ASSIGNEE": "양수인",
+        "ASSIGNEE": "담당자",
         "AT": "...에서",
         "ATTACHMENTS": "첨부 파일",
         "CHANGED": "변경된",
@@ -326,7 +349,7 @@
         "LIST_OF_CHANGES": "변경 목록",
         "MARK_AS_CHECKED": "체크 된대로 업데이트 표시",
         "ON": "에",
-        "STATUS": "지위",
+        "STATUS": "상태",
         "STORY_POINTS": "스토리 포인트",
         "SUMMARY": "개요",
         "WORKLOG": "작업 로그",
@@ -353,7 +376,7 @@
         "DONE": "이제 끝났어.",
         "LOGIN_SUCCESS": "성공적 로그인!",
         "TEST_CREDENTIALS": "자격증 명 테스트",
-        "WELCOME_USER": " {{user}}에 오신 것을 환영합니다!"
+        "WELCOME_USER": "환영합니다,  {{user}}!"
       }
     },
     "METRIC": {
@@ -430,6 +453,9 @@
         "TIME_SPENT": "지출 된 시간",
         "TITLE": "OpenProject: 작업 로그 제출"
       },
+      "DIALOG_TRANSITION": {
+        "CURRENT_ASSIGNEE": "현재 담당자:"
+      },
       "FORM": {
         "FILTER_USER": "사용자 이름 (예 : 혼자서 변경 사항을 필터링)",
         "HOST": "호스트(예: https://www.openproject.org/)",
@@ -452,10 +478,10 @@
         "TITLE": "오픈프로젝트"
       },
       "ISSUE_CONTENT": {
-        "ASSIGNEE": "양수인",
+        "ASSIGNEE": "담당자",
         "DESCRIPTION": "기술",
         "MARK_AS_CHECKED": "체크 된대로 업데이트 표시",
-        "STATUS": "지위",
+        "STATUS": "상태",
         "SUMMARY": "개요",
         "TYPE": "유형"
       },
@@ -503,7 +529,7 @@
         "L5": "당신이 그들에 대한 인식을 계속해서 쉬면서 몸의 감각은 어떻게 움직입니까?",
         "TITLE": "호기심"
       },
-      "H1": "자신을 자르십시오!",
+      "H1": "여유를 가져요!",
       "P1": "우선 긴장을 풀어 라! 모두가 한 번씩 그렇게합니다. 그리고 네가해야 할 일을하지 않는다면, 적어도 그것을 즐겨라! 그런 다음 아래 섹션에서 유용한 정보를 확인하십시오.",
       "P2": "기억하십시오 : 지연은 시간 관리 문제가 아닌 감정 조절 문제입니다.",
       "REFRAME": {
@@ -549,7 +575,7 @@
         "L_IS_DISABLE_BACKGROUND_GRADIENT": "컬러 배경 그라디언트 비활성화",
         "L_IS_REDUCED_THEME": "축소 된 UI 사용 (작업 주위의 상자 없음)",
         "L_THEME_COLOR": "테마 색",
-        "L_TITLE": "표제",
+        "L_TITLE": "제목",
         "TITLE": "테마"
       },
       "S": {
@@ -593,10 +619,10 @@
         "L_AUTO_COUNT_UP": "자동 트리거 카운트 업",
         "L_AUTO_SWITCH_OFF": "에 대한 자동 트리거 스위치 끄기",
         "L_AUTO_SWITCH_ON": "에 대한 자동 트리거 스위치",
-        "L_ICON": "상",
+        "L_ICON": "아이콘",
         "L_ICON_ON": "전환시 아이콘",
         "L_IS_ENABLED": "사용",
-        "L_TITLE": "표제",
+        "L_TITLE": "제목",
         "L_TYPE": "유형",
         "TITLE": "간단한 카운터",
         "TYPE_CLICK_COUNTER": "카운터 클릭",
@@ -622,13 +648,16 @@
       "D_CONFLICT": {
         "LAST_CHANGE": "마지막 변경:",
         "LAST_SYNC": "마지막 동기화 :",
-        "LOCAL": "노동 조합 지부",
+        "LOCAL": "로컬",
         "LOCAL_REMOTE": "로컬-> 원격",
-        "REMOTE": "먼",
+        "REMOTE": "원격",
         "TEXT": "<p>Dropbox에서 업데이트. 로컬 및 원격 데이터가 모두 수정 된 것 같습니다.</p>",
-        "TITLE": "보관 용 계정 : 데이터 충돌",
-        "USE_LOCAL": "현지 사용",
-        "USE_REMOTE": "리모컨 사용"
+        "TITLE": "동기화: 데이터 충돌",
+        "USE_LOCAL": "로컬 사용",
+        "USE_REMOTE": "원격 사용"
+      },
+      "D_PERMISSION": {
+        "DISABLE_SYNC": "동기화 비활성화"
       },
       "FORM": {
         "DROPBOX": {
@@ -638,20 +667,21 @@
           "L_SYNC_FILE_NAME": "파일 이름 동기화",
           "L_IS_COMPRESS_DATA": "데이터 압축"
         },
+        "LOCAL_FILE": {
+          "L_SYNC_FOLDER_PATH": "폴더 경로 동기화",
+          "L_SYNC_FILE_PATH": "동기화 파일 경로",
+          "L_SYNC_FILE_PATH_DESCRIPTION": "동기화에 사용해야 하는 파일의 절대 경로(생성 예정)."
+        },
         "L_ENABLE_SYNCING": "동기화 활성화",
         "L_SYNC_INTERVAL": "동기화 간격",
         "L_SYNC_PROVIDER": "동기화 제공자",
-        "TITLE": "동조",
+        "TITLE": "동기화",
         "WEB_DAV": {
           "CORS_INFO": "<strong>실험적 !!</strong> 이 작업을 수행하려면 Nextcloud 인스턴스에 대한 CORS를 비활성화하거나 제한해야합니다. 이는 보안에 부정적인 영향을 미칠 수 있습니다. 자세한 내용은 <a href='https://github.com/nextcloud/server/issues/3131'>이 스레드</a> 를 참조하십시오. 자신의 책임하에 사용하십시오!",
           "L_BASE_URL": "기본 URL",
           "L_PASSWORD": "암호",
           "L_USER_NAME": "사용자 이름",
           "L_SYNC_FILE_PATH": "동기화 파일 경로"
-        },
-        "LOCAL_FILE": {
-          "L_SYNC_FILE_PATH": "동기화 파일 경로",
-          "L_SYNC_FILE_PATH_DESCRIPTION": "동기화에 사용해야 하는 파일의 절대 경로(생성 예정)."
         }
       },
       "S": {
@@ -681,7 +711,7 @@
       },
       "FORM_BASIC": {
         "L_COLOR": "색상 (정의되지 않은 기본 테마 색상이 사용 된 경우)",
-        "L_ICON": "상",
+        "L_ICON": "아이콘",
         "L_TITLE": "태그 이름",
         "TITLE": "기본 설정"
       },
@@ -956,7 +986,7 @@
       "WEEK": {
         "EXPORT": "주 데이터 내보내기",
         "NO_DATA": "이번 주에는 아직 할 일이 없습니다.",
-        "TITLE": "표제"
+        "TITLE": "제목"
       }
     },
     "GOOGLE": {
@@ -993,21 +1023,23 @@
     "DO_IT": "해!",
     "EDIT": "편집하다",
     "ENABLED": "사용",
-    "EXAMPLE_VAL": "편집하려면 클릭하십시오.",
+    "EXAMPLE_VAL": "예. 32분",
     "EXTENSION_INFO": "Jira Api 및 Idle Time Handling과의 통신을 허용하려면 <a target=\"_blank\" href=\"https://chrome.google.com/webstore/detail/super-productivity/ljkbjodfmekklcoibdnhahlaalhihmlb\"> 크롬 확장</a> 을 다운로드하십시오. 이 기능은 모바일에서 작동하지 않습니다.",
+    "HIDE": "숨기기",
     "LOGIN": "로그인",
     "LOGOUT": "로그 아웃",
     "MINUTES": "{{m}} 분",
-    "NEXT": "다음 것",
+    "NEXT": "다음",
     "NONE": "없음",
     "NO_CON": "현재 오프라인 상태입니다. 인터넷에 다시 연결하십시오.",
     "OK": "승인",
-    "PREVIOUS": "너무 이른",
-    "REMOVE": "풀다",
-    "RESET": "다시 놓기",
-    "SAVE": "구하다",
-    "TITLE": "표제",
-    "UNDO": "끄르다",
+    "PREVIOUS": "이전",
+    "REMOVE": "삭제",
+    "RESET": "초기화",
+    "SAVE": "저장",
+    "TITLE": "제목",
+    "TODAY_TAG_TITLE": "오늘",
+    "UNDO": "취소",
     "UPDATE": "최신 정보",
     "WITHOUT_PROJECT": "프로젝트없이",
     "YESTERDAY": "어제"
@@ -1083,19 +1115,19 @@
       "ZOOM_OUT": "축소 (데스크톱에만 해당)"
     },
     "LANG": {
-      "AR": "아라비아 말",
-      "DE": "독일 사람",
+      "AR": "아랍어",
+      "DE": "독일어",
       "EN": "영어",
-      "ES": "스페인 사람",
+      "ES": "스페인어",
       "FA": "파르시",
-      "FR": "프랑스 국민",
-      "IT": "이탈리아 사람",
+      "FR": "프랑스어",
+      "IT": "이탈리아어",
       "JA": "일본어",
       "KO": "한국어",
-      "LABEL": "언어를 선택하십시오.",
+      "LABEL": "언어를 선택하세요.",
       "NB": "노르웨이 보크 몰",
-      "NL": "네덜란드 사람",
-      "PL": "광택",
+      "NL": "네덜란드어",
+      "PL": "폴란드어",
       "PT": "포르투갈 인",
       "RU": "러시아인",
       "TITLE": "언어",
@@ -1105,7 +1137,7 @@
     },
     "MISC": {
       "DEFAULT_PROJECT": "지정되지 않은 경우 작업에 사용할 기본 프로젝트",
-      "FIRST_DAY_OF_WEEK": "요일",
+      "FIRST_DAY_OF_WEEK": "주의 첫 요일",
       "HELP": "<p><strong>데스크톱 알림이 표시되지 않습니까?</strong> 창의 경우 시스템 > 알림 및 작업을 확인하고 필요한 알림이 활성화되었는지 확인할 수 있습니다.</p>",
       "IS_AUTO_ADD_WORKED_ON_TO_TODAY": "작업에 사용할 오늘 태그를 자동으로 추가",
       "IS_AUTO_MARK_PARENT_AS_DONE": "모든 하위 작업이 완료되면 상위 작업을 완료로 표시합니다.",
@@ -1114,7 +1146,7 @@
       "IS_CONFIRM_BEFORE_EXIT_WITHOUT_FINISH_DAY": "하루를 먼저 끝내지 않고 앱을 종료하기 전에 확인",
       "IS_DARK_MODE": "다크 모드",
       "IS_HIDE_NAV": "기본 헤더가 올라갈 때까지 탐색을 숨 깁니다 (데스크톱 만 해당).",
-      "IS_MINIMIZE_TO_TRAY": "트레이로 최소화 (데스크탑 만 해당)",
+      "IS_MINIMIZE_TO_TRAY": "트레이로 최소화 (데스크탑만 해당)",
       "IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "예상 시간을 초과했을 때 알림",
       "IS_TRAY_SHOW_CURRENT_TASK": "트레이 / 상태 메뉴에 현재 작업 표시 (데스크톱 전용)",
       "IS_TURN_OFF_MARKDOWN": "노트에 대한 마크 다운 파싱 끄기",
@@ -1133,7 +1165,7 @@
       "IS_PLAY_TICK": "매초마다 틱 소리 재생",
       "IS_STOP_TRACKING_ON_BREAK": "휴식 시간에 작업 중지 시간 추적",
       "LONGER_BREAK_DURATION": "긴 휴식 시간",
-      "TITLE": "포모 도로 타이머"
+      "TITLE": "포모도로 타이머"
     },
     "SOUND": {
       "DONE_SOUND": "작업 완료 소리",
@@ -1189,10 +1221,10 @@
     "DBX_DOWNLOAD": "Dropbox : 파일 다운로드 ...",
     "DBX_GEN_TOKEN": "보관 용 계정 : 토큰 생성 ...",
     "DBX_META": "Dropbox : 파일 메타 가져 오기 ...",
-    "DBX_UPLOAD": "보관 용 계정 : 파일 업로드 ...",
+    "DBX_UPLOAD": "Dropbox : 파일 업로드 ...",
     "GITHUB_LOAD_ISSUE": "GitHub : 이슈 데이터로드 ...",
     "JIRA_LOAD_ISSUE": "Jira : 이슈 데이터로드 중 ...",
-    "UNKNOWN": "원격 데이터로드",
+    "UNKNOWN": "원격 데이터 로드",
     "WEB_DAV_DOWNLOAD": "WebDAV : 데이터 다운로드 중 ...",
     "WEB_DAV_UPLOAD": "WebDAV : 데이터 업로드 중 ...",
     "GDRIVE_DOWNLOAD": "Google 드라이브 : 파일 다운로드 ...",
@@ -1273,7 +1305,7 @@
     },
     "D_CONFIRM_DELETE": {
       "MSG": "이 프로젝트를 삭제 하시겠습니까? 이렇게하기 전에 데이터를 백업하는 것이 좋습니다.",
-      "OK": "지우다"
+      "OK": "삭제"
     },
     "D_CONFIRM_UNARCHIVE": {
       "MSG": "이 프로젝트를 보관 취소 하시겠습니까?",
@@ -1319,7 +1351,7 @@
     "light-green": "연한 초록색",
     "lime": "라임",
     "pink": "담홍색",
-    "purple": "자",
+    "purple": "자주색",
     "teal": "물오리",
     "yellow": "노랑"
   },
