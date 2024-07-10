@@ -1,0 +1,45 @@
+@import '../../../../variables';
+@import '../../tasks/task/task.component.mixins';
+
+:host {
+  display: block;
+}
+
+:host > div {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  flex-direction: row;
+  padding-top: $s * 0.25;
+  padding-bottom: $s * 0.25;
+  border: 1px solid $dark-theme-separator-color;
+  border-radius: $task-border-radius;
+  opacity: 0.9;
+  cursor: pointer;
+
+  @include lightTheme {
+    border-color: $light-theme-separator-color;
+  }
+  @include darkTheme {
+    border-color: $dark-theme-separator-color;
+  }
+
+  mat-icon {
+    margin-left: $s;
+    margin-right: $s;
+    opacity: 0.8;
+    $ico-size: 24px;
+    font-size: $ico-size;
+    height: $ico-size;
+    width: $ico-size;
+  }
+}
+
+.estimate {
+  margin-left: auto;
+  margin-right: $s * 2;
+  opacity: 0.6;
+}
+
+.custom-event-title {
+}

@@ -68,6 +68,7 @@
   display: flex;
   flex-direction: column;
   //min-width: 200px;
+  width: 220px;
 }
 
 .day-title {
@@ -102,6 +103,7 @@
   padding: 4px;
   display: flex;
   flex-direction: column;
+  gap: 4px;
 }
 
 .scheduled {
@@ -119,26 +121,6 @@
   margin-top: 16px;
 }
 
-.task {
-  border-radius: 6px;
-  margin-bottom: 4px;
-  min-height: 40px;
-  line-height: 40px;
-  padding: 0 10px;
-  cursor: grab;
-
-  background: $task-c-bg-light;
-
-  @include darkTheme() {
-    color: $task-text-c-dark;
-    background: $task-c-bg-dark;
-  }
-
-  &:active {
-    cursor: grabbing;
-  }
-}
-
 .drag-placeholder {
   min-height: 40px;
 }
@@ -154,8 +136,10 @@
 
   .time {
     width: 40px;
+    min-width: 40px;
     margin-right: 4px;
-    font-size: 12px;
+    font-size: 10px;
+    flex-grow: 0;
   }
 
   > :nth-child(2) {

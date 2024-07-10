@@ -16,6 +16,8 @@ import { WorkViewModule } from '../work-view/work-view.module';
 import { AddTaskPanelComponent } from './add-task-panel/add-task-panel.component';
 import { TagModule } from '../tag/tag.module';
 import { WeekPlannerTaskComponent } from './week-planner-task/week-planner-task.component';
+import { WeekPlannerRepeatProjectionComponent } from './week-planner-repeat-projection/week-planner-repeat-projection.component';
+import { WeekPlannerCalendarEventComponent } from './week-planner-calendar-event/week-planner-calendar-event.component';
 
 @NgModule({
   declarations: [
@@ -23,6 +25,8 @@ import { WeekPlannerTaskComponent } from './week-planner-task/week-planner-task.
     WeekPlannerPlanViewComponent,
     AddTaskPanelComponent,
     WeekPlannerTaskComponent,
+    WeekPlannerRepeatProjectionComponent,
+    WeekPlannerCalendarEventComponent,
   ],
   imports: [
     CommonModule,

@@ -38,12 +38,18 @@ export const WEEK_PLANNER_DUMMY_DATA: WeekPlannerDay[] = [
         start: Date.now(),
         // eslint-disable-next-line no-mixed-operators
         end: Date.now() + 1000 * 60 * 60 * 2,
+        calendarEvent: {
+          title:
+            'Some  cal event from google calendar, as you know can have longer and weird titles',
+          duration: 1000 * 60 * 60 * 2,
+        },
       },
       {
         type: ScheduleItemType.RepeatProjection,
         id: 'aaa',
         repeatCfg: {
           ...DEFAULT_TASK_REPEAT_CFG,
+          title: 'Repeat task projection',
           id: 'asd',
         },
         // eslint-disable-next-line no-mixed-operators

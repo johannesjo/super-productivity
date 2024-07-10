@@ -55,9 +55,17 @@
             [task]="scheduledItem.task"
           ></week-planner-task>
           } @case (SCHEDULE_ITEM_TYPE.CalEvent) {
-          <div cdkDrag>{{ scheduledItem.id }} CalEv</div>
+          <week-planner-calendar-event
+            cdkDrag
+            cdkDragDisabled
+            [calendarEvent]="scheduledItem.calendarEvent"
+          ></week-planner-calendar-event>
           } @case (SCHEDULE_ITEM_TYPE.RepeatProjection) {
-          <div cdkDrag>{{ scheduledItem.id }} RepeatProjection</div>
+          <week-planner-repeat-projection
+            cdkDrag
+            cdkDragDisabled
+            [repeatCfg]="scheduledItem.repeatCfg"
+          ></week-planner-repeat-projection>
           } }
         </div>
         }

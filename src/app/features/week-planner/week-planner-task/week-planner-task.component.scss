@@ -12,7 +12,6 @@ $h: 40px;
   display: flex;
   align-items: center;
   background: $task-c-bg-light;
-  min-width: 180px;
 
   @include darkTheme() {
     color: $task-text-c-dark;

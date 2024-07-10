@@ -34,10 +34,17 @@ export interface ScheduleItemRepeatProjection extends ScheduleItemBase {
 
 export interface ScheduleItemEvent extends ScheduleItemBase {
   type: ScheduleItemType.CalEvent;
-  ico?: string;
+  calendarEvent: ScheduleItemCalendarEventData;
 }
 
 export type ScheduleItem =
   | ScheduleItemTask
   | ScheduleItemEvent
   | ScheduleItemRepeatProjection;
+
+export interface ScheduleItemCalendarEventData {
+  title: string;
+  duration: number;
+  provider?: any;
+  ico?: string;
+}
