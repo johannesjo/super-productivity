@@ -388,4 +388,32 @@ describe('SyncProviderService', () => {
       }
     });
   });
+
+  describe('_decompressAndDecryptDataIfNeeded()', () => {
+    it('should remove prepended encryption and compression identifiere', async () => {
+      const fakeAppData = {
+        someKey: 'someVal',
+      };
+      const data = `SP_ENC_SP_CPR_${JSON.stringify(fakeAppData)}`;
+      const result = await service['_decompressAndDecryptDataIfNeeded'](data);
+      expect(result).toEqual(fakeAppData as any);
+    });
+
+    it('should remove prepended encryption and compression identifiere', async () => {
+      const fakeAppData = {
+        someKey: 'someVal',
+      };
+      const data = `SP_ENC_${JSON.stringify(fakeAppData)}`;
+      const result = await service['_decompressAndDecryptDataIfNeeded'](data);
+      expect(result).toEqual(fakeAppData as any);
+    });
+    it('should remove prepended encryption and compression identifiere', async () => {
+      const fakeAppData = {
+        someKey: 'someVal',
+      };
+      const data = `SP_CPR_${JSON.stringify(fakeAppData)}`;
+      const result = await service['_decompressAndDecryptDataIfNeeded'](data);
+      expect(result).toEqual(fakeAppData as any);
+    });
+  });
 });

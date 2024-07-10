@@ -43,6 +43,7 @@ import { androidInterface } from '../../features/android/android-interface';
 import { CompressionService } from '../../core/compression/compression.service';
 import { decrypt, encrypt } from './encryption';
 import { LS } from '../../core/persistence/storage-keys.const';
+import { PREPEND_STR_COMPRESSION, PREPEND_STR_ENCRYPTION } from './sync.const';
 
 const KNOWN_SYNC_ERROR_PREFIX = 'KNOWN_SYNC_ERROR_SUP_';
 
@@ -829,7 +830,14 @@ export class SyncProviderService {
     ) {
       return dataInStr as T;
     }
+    // NOTE: we need then later to make sure that both strings are appended after encryption and compression
     if (typeof dataInStr === 'string') {
+      if (dataInStr.startsWith(PREPEND_STR_ENCRYPTION)) {
+        dataInStr = dataInStr.slice(PREPEND_STR_ENCRYPTION.length);
+      }
+      if (dataInStr.startsWith(PREPEND_STR_COMPRESSION)) {
+        dataInStr = dataInStr.slice(PREPEND_STR_COMPRESSION.length);
+      }
       const { isEncryptionEnabled, encryptionPassword } = await this.syncCfg$
         .pipe(first())
         .toPromise();
