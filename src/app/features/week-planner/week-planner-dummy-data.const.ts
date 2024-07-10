@@ -50,6 +50,7 @@ export const WEEK_PLANNER_DUMMY_DATA: WeekPlannerDay[] = [
         repeatCfg: {
           ...DEFAULT_TASK_REPEAT_CFG,
           title: 'Repeat task projection',
+          defaultEstimate: 1000 * 60 * 60 * 2.5,
           id: 'asd',
         },
         // eslint-disable-next-line no-mixed-operators

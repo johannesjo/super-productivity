@@ -58,16 +58,9 @@
 }
 
 .day {
-  //display: grid;
-  //grid-template-rows: auto 1fr; /* Adjusted: Explicitly define rows for title, tasks, and scheduled items */
-  //gap: 10px; /* Adjust as needed */
-  //padding: 10px; /* Optional: for spacing within each day */
-  //align-items: stretch; /* Adjusted: Ensure items stretch to fill the container */
-  //border: 1px solid blue;
   margin-bottom: 32px;
   display: flex;
   flex-direction: column;
-  //min-width: 200px;
   width: 220px;
 }
 
@@ -92,18 +85,13 @@
   display: flex;
   justify-content: center;
   margin: 12px 0 8px;
-
-  //> div:last-child {
-  //  margin-left: 8px;
-  //}
 }
 
 .normal-tasks,
 .scheduled {
-  padding: 4px;
+  margin-top: 4px;
   display: flex;
   flex-direction: column;
-  gap: 4px;
 }
 
 .scheduled {
@@ -116,6 +104,10 @@
   flex-grow: 1;
 }
 
+.normal-tasks-items > week-planner-task {
+  margin-bottom: 4px;
+}
+
 .scheduled {
   /* Additional styles if needed */
   margin-top: 16px;
@@ -125,20 +117,23 @@
   min-height: 40px;
 }
 
-:host ::ng-deep .cdk-drag-preview {
-  background: red;
-  cursor: grab;
-}
-
 .scheduled-item {
   display: flex;
   align-items: center;
+  margin-bottom: 8px;
 
   .time {
+    text-align: center;
+    border-radius: 50%;
+    border-radius: 8px;
+    border: 1px solid rgba(0, 0, 0, 0.2);
+
     width: 40px;
+    line-height: 40px;
     min-width: 40px;
     margin-right: 4px;
-    font-size: 10px;
+    cursor: pointer;
+    font-size: 11px;
     flex-grow: 0;
   }
 

@@ -2,12 +2,12 @@
 @import '../../tasks/task/task.component.mixins';
 
 $h: 40px;
+$minVertPad: 4px;
 
 :host {
   border-radius: 6px;
-  margin-bottom: 4px;
   min-height: $h;
-  padding: 4px 10px;
+  padding: $minVertPad 10px;
   cursor: grab;
   display: flex;
   align-items: center;
@@ -48,6 +48,8 @@ $h: 40px;
   min-width: 30px;
   min-height: $h;
   line-height: $h;
+  margin-top: -$minVertPad;
+  margin-right: -$minVertPad;
   text-align: right;
   white-space: nowrap;
   font-style: italic;
