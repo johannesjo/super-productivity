@@ -3,16 +3,28 @@
   *cdkDragPlaceholder
 ></div>
 
-<div
-  class="parent-title"
-  *ngIf="parentTitle"
->
-  <div class="title">{{ parentTitle }}</div>
+<div class="wrap">
+  <div
+    class="parent-title"
+    *ngIf="parentTitle"
+  >
+    <div class="title">{{ parentTitle }}</div>
+  </div>
+
+  <div class="title">{{ task.title }}</div>
+  <tag-list
+    [isDisableEdit]="true"
+    [isShowProjectTagAlways]="true"
+    [task]="task"
+  ></tag-list>
 </div>
 
-<div class="title">{{ task.title }}</div>
-<tag-list
-  [isDisableEdit]="true"
-  [isShowProjectTagAlways]="true"
-  [task]="task"
-></tag-list>
+<div
+  (click)="estimateTime()"
+  [class.hasNoTimeSpentOrEstimate]="!task.timeSpent && !task.timeEstimate"
+  [style.pointer-events]="task.subTaskIds?.length && 'none'"
+  class="time-remaining"
+>
+  <span *ngIf="task.subTaskIds?.length">∑</span>
+  {{ (task.timeEstimate - task.timeSpent)|msToString }}
+</div>

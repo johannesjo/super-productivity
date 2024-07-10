@@ -1,15 +1,18 @@
 @import '../../../../variables';
 @import '../../tasks/task/task.component.mixins';
 
+$h: 40px;
+
 :host {
   border-radius: 6px;
   margin-bottom: 4px;
-  min-height: 40px;
+  min-height: $h;
   padding: 4px 10px;
   cursor: grab;
-  display: block;
-
+  display: flex;
+  align-items: center;
   background: $task-c-bg-light;
+  min-width: 180px;
 
   @include darkTheme() {
     color: $task-text-c-dark;
@@ -27,7 +30,7 @@
 }
 
 .drag-placeholder {
-  min-height: 40px;
+  min-height: $h;
 }
 
 .parent-title {
@@ -35,4 +38,20 @@
   margin-bottom: -2px;
   font-size: 12px;
   text-overflow: ellipsis;
+}
+
+// TIME
+
+// TIME
+.time-remaining {
+  cursor: pointer;
+  margin-left: auto;
+  min-width: 30px;
+  min-height: $h;
+  line-height: $h;
+  text-align: right;
+  white-space: nowrap;
+  font-style: italic;
+  opacity: 0.8;
+  font-weight: 300;
 }

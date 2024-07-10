@@ -3,53 +3,58 @@
 
 .days {
   display: grid;
-  gap: 16px;
+  gap: 8px;
   padding: 4px;
+  grid-template-columns: repeat(5, 1fr);
 
   @include mq(xs) {
-    padding: 24px;
+    padding: 12px;
   }
-
-  grid-template-columns: repeat(1, 1fr);
-
-  @include mq(xs) {
-    grid-template-columns: repeat(2, 1fr);
-
-    .day:nth-child(1n + 3) {
-      display: none;
-    }
-  }
-
   @include mq(sm) {
-    grid-template-columns: repeat(3, 1fr);
-
-    .day:nth-child(3) {
-      display: flex;
-    }
+    padding: 24px;
+    gap: 16px;
   }
 
-  @media (min-width: 1160px) {
-    grid-template-columns: repeat(4, 1fr);
+  //grid-template-columns: repeat(1, 1fr);
 
-    .day:nth-child(4) {
-      display: flex;
-    }
-  }
-
-  @include mq(lg) {
-    grid-template-columns: repeat(5, 1fr);
-
-    .day:nth-child(5) {
-      display: flex;
-    }
-  }
-  @include mq(lg) {
-    grid-template-columns: repeat(5, 1fr);
-
-    .day:nth-child(5) {
-      display: flex;
-    }
-  }
+  //@include mq(xs) {
+  //  grid-template-columns: repeat(2, 1fr);
+  //
+  //  .day:nth-child(1n + 3) {
+  //    display: none;
+  //  }
+  //}
+  //
+  //@include mq(sm) {
+  //  grid-template-columns: repeat(3, 1fr);
+  //
+  //  .day:nth-child(3) {
+  //    display: flex;
+  //  }
+  //}
+  //
+  //@media (min-width: 1160px) {
+  //  grid-template-columns: repeat(4, 1fr);
+  //
+  //  .day:nth-child(4) {
+  //    display: flex;
+  //  }
+  //}
+  //
+  //@include mq(lg) {
+  //  grid-template-columns: repeat(5, 1fr);
+  //
+  //  .day:nth-child(5) {
+  //    display: flex;
+  //  }
+  //}
+  //@include mq(lg) {
+  //  grid-template-columns: repeat(5, 1fr);
+  //
+  //  .day:nth-child(5) {
+  //    display: flex;
+  //  }
+  //}
 }
 
 .day {
@@ -62,6 +67,7 @@
   margin-bottom: 32px;
   display: flex;
   flex-direction: column;
+  //min-width: 200px;
 }
 
 .day-title {
@@ -140,4 +146,19 @@
 :host ::ng-deep .cdk-drag-preview {
   background: red;
   cursor: grab;
+}
+
+.scheduled-item {
+  display: flex;
+  align-items: center;
+
+  .time {
+    width: 40px;
+    margin-right: 4px;
+    font-size: 12px;
+  }
+
+  > :nth-child(2) {
+    flex-grow: 1;
+  }
 }

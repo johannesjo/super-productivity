@@ -9,6 +9,9 @@ import {
 import { TaskCopy } from '../../tasks/task.model';
 import { Subscription } from 'rxjs';
 import { TaskService } from '../../tasks/task.service';
+import { DialogTimeEstimateComponent } from '../../tasks/dialog-time-estimate/dialog-time-estimate.component';
+import { IS_TOUCH_PRIMARY } from '../../../util/is-mouse-primary';
+import { MatDialog } from '@angular/material/dialog';
 
 @Component({
   selector: 'week-planner-task',
@@ -25,6 +28,7 @@ export class WeekPlannerTaskComponent implements OnInit, OnDestroy {
   constructor(
     private _taskService: TaskService,
     private _cd: ChangeDetectorRef,
+    private _matDialog: MatDialog,
   ) {}
 
   ngOnInit(): void {
@@ -42,5 +46,12 @@ export class WeekPlannerTaskComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this._subs.unsubscribe();
+  }
+
+  estimateTime(): void {
+    this._matDialog.open(DialogTimeEstimateComponent, {
+      data: { task: this.task },
+      autoFocus: !IS_TOUCH_PRIMARY,
+    });
   }
 }

@@ -1,11 +1,8 @@
 @import '../../../variables';
 
 :host ::ng-deep better-drawer-container > .side {
-  min-width: 160px;
-
-  @include mq(xs) {
-    min-width: 200px;
-  }
+  min-width: 200px;
+  max-width: 320px;
 
   @include mq(sm) {
     min-width: 240px;

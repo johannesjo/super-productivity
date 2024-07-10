@@ -1,15 +1,11 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { of } from 'rxjs';
+import { Observable, of } from 'rxjs';
 import { TASK_REMINDER_OPTIONS } from '../../tasks/dialog-add-task-reminder/task-reminder-options.const';
 import { T } from '../../../t.const';
 import { CdkDragDrop, moveItemInArray, transferArrayItem } from '@angular/cdk/drag-drop';
-import { DEFAULT_TASK, TaskCopy } from '../../tasks/task.model';
-
-const FAKE_TASK = {
-  ...DEFAULT_TASK,
-  id: '11',
-  title: 'Default fake task',
-};
+import { TaskCopy } from '../../tasks/task.model';
+import { ScheduleItemType, WeekPlannerDay } from '../week-planner.model';
+import { WEEK_PLANNER_DUMMY_DATA } from '../week-planner-dummy-data.const';
 
 @Component({
   selector: 'week-planner-plan-view',
@@ -18,98 +14,8 @@ const FAKE_TASK = {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class WeekPlannerPlanViewComponent {
-  days$ = of([
-    {
-      dayDate: '2021-09-01',
-      timeEstimate: 3,
-      timeLimit: 7,
-      tasks: [FAKE_TASK],
-      scheduledIItems: [
-        {
-          type: 'TASK',
-          id: 'aaa',
-          task: FAKE_TASK,
-        },
-      ],
-    },
-    {
-      dayDate: '2021-09-02',
-      timeEstimate: 3,
-      timeLimit: 7,
-      tasks: [FAKE_TASK],
-      scheduledIItems: [
-        {
-          type: 'TASK',
-          id: 'aaa',
-          task: FAKE_TASK,
-        },
-      ],
-    },
-    {
-      dayDate: '2021-09-03',
-      timeEstimate: 3,
-      timeLimit: 7,
-      tasks: [FAKE_TASK],
-      scheduledIItems: [
-        {
-          type: 'TASK',
-          id: 'aaa',
-          task: FAKE_TASK,
-        },
-        {
-          type: 'TASK',
-          id: 'aaa',
-          task: FAKE_TASK,
-        },
-      ],
-    },
-    {
-      dayDate: '2021-09-04',
-      timeEstimate: 3,
-      timeLimit: 7,
-      tasks: [FAKE_TASK],
-      scheduledIItems: [
-        {
-          type: 'TASK',
-          id: 'aaa',
-          task: FAKE_TASK,
-        },
-        {
-          type: 'TASK',
-          id: 'aaa',
-          task: FAKE_TASK,
-        },
-        {
-          type: 'TASK',
-          id: 'aaa',
-          task: FAKE_TASK,
-        },
-      ],
-    },
-    {
-      dayDate: '2021-09-05',
-      timeEstimate: 4,
-      timeLimit: 7,
-      tasks: [FAKE_TASK],
-      scheduledIItems: [
-        {
-          type: 'TASK',
-          id: 'aaa',
-          task: FAKE_TASK,
-        },
-        {
-          type: 'TASK',
-          id: 'aaa',
-          task: FAKE_TASK,
-        },
-        {
-          type: 'TASK',
-          id: 'aaa',
-          task: FAKE_TASK,
-        },
-      ],
-    },
-  ]);
+  SCHEDULE_ITEM_TYPE = ScheduleItemType;
+  days$: Observable<WeekPlannerDay[]> = of(WEEK_PLANNER_DUMMY_DATA);
   protected readonly remindAvailableOptions = TASK_REMINDER_OPTIONS;
   protected readonly T = T;
 

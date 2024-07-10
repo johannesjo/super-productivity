@@ -26,12 +26,12 @@
         }
       </div>
 
-      <div style="text-align: center">
-        <button mat-button>
-          <mat-icon>add</mat-icon>
-          Add new
-        </button>
-      </div>
+      <!--      <div style="text-align: center">-->
+      <!--        <button mat-button>-->
+      <!--          <mat-icon>add</mat-icon>-->
+      <!--          Add new-->
+      <!--        </button>-->
+      <!--      </div>-->
     </div>
 
     <div class="scheduled">
@@ -42,30 +42,22 @@
       <div
         class="scheduled-items"
         cdkDropList
+        cdkDropListSortingDisabled
         [cdkDropListData]="day.scheduledIItems"
         (cdkDropListDropped)="drop('SCHEDULED',$event)"
       >
         @for (scheduledItem of day.scheduledIItems; track scheduledItem.id) {
         <div class="scheduled-item">
-          @switch (scheduledItem.type) { @case ('TASK') {
+          <div class="time">{{ (scheduledItem.start|roundDuration|date:'HH:mm') }}</div>
+          @switch (scheduledItem.type) { @case (SCHEDULE_ITEM_TYPE.Task) {
           <week-planner-task
             cdkDrag
             [task]="scheduledItem.task"
           ></week-planner-task>
-          } @case ('event') {
-          <div
-            class="event"
-            cdkDrag
-          >
-            {{ scheduledItem.id }}
-          </div>
-          } @default {
-          <div
-            class="default"
-            cdkDrag
-          >
-            {{ scheduledItem.id }}
-          </div>
+          } @case (SCHEDULE_ITEM_TYPE.CalEvent) {
+          <div cdkDrag>{{ scheduledItem.id }} CalEv</div>
+          } @case (SCHEDULE_ITEM_TYPE.RepeatProjection) {
+          <div cdkDrag>{{ scheduledItem.id }} RepeatProjection</div>
           } }
         </div>
         }
