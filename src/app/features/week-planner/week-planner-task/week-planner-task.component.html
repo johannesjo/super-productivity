@@ -12,9 +12,11 @@
   </div>
 
   <div class="title">{{ task.title }}</div>
+
   <tag-list
     [isDisableEdit]="true"
     [isShowProjectTagAlways]="true"
+    [issueProviderType]="task.issueType"
     [task]="task"
   ></tag-list>
 </div>

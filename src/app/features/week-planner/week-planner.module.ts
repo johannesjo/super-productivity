@@ -18,6 +18,7 @@ import { TagModule } from '../tag/tag.module';
 import { WeekPlannerTaskComponent } from './week-planner-task/week-planner-task.component';
 import { WeekPlannerRepeatProjectionComponent } from './week-planner-repeat-projection/week-planner-repeat-projection.component';
 import { WeekPlannerCalendarEventComponent } from './week-planner-calendar-event/week-planner-calendar-event.component';
+import { IssueModule } from '../issue/issue.module';
 
 @NgModule({
   declarations: [
@@ -40,6 +41,7 @@ import { WeekPlannerCalendarEventComponent } from './week-planner-calendar-event
     WorkViewModule,
     TagModule,
     CdkDragPlaceholder,
+    IssueModule,
   ],
 })
 export class WeekPlannerModule {}
