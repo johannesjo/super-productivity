@@ -1,4 +1,15 @@
-<div class="filter-bar"><mat-icon>filter_alt</mat-icon> <input type="text /" /></div>
+<div class="filter-bar">
+  <button
+    mat-icon-button
+    (click)="closePanel.emit()"
+  >
+    <mat-icon>chevron_right</mat-icon>
+  </button>
+  <div class="filter-input">
+    <mat-icon class="filter-ico">filter_alt</mat-icon>
+    <input type="text /" />
+  </div>
+</div>
 
 <!-- TODO
 * schedule tasks need to be indicated

@@ -6,4 +6,6 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
   styleUrl: './week-planner.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class WeekPlannerComponent {}
+export class WeekPlannerComponent {
+  isPanelOpen = true;
+}

@@ -60,3 +60,10 @@
   align-items: center;
   justify-content: center;
 }
+
+.show-add-task-panel-btn {
+  position: fixed;
+  right: 32px;
+  bottom: 32px;
+  z-index: 333;
+}
