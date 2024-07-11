@@ -49,3 +49,5 @@ export interface ScheduleItemCalendarEventData {
   provider?: any;
   ico?: string;
 }
+
+export const ADD_TASK_PANEL_ID = 'ADD_TASK_PANEL' as const;

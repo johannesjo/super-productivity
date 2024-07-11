@@ -8,7 +8,9 @@
       <span class="date">{{ day.dayDate|date:'d.M.' }}</span>
     </div>
     <div class="day-estimate">
-      {{ day.timeEstimate |roundDuration|msToString }} / {{ day.timeLimit }}h
+      {{ day.timeEstimate |roundDuration|msToString }}
+      <!--      <mat-icon svgIcon="estimate_remaining"></mat-icon>-->
+      <!--      / {{ day.timeLimit }}h-->
     </div>
 
     <div class="normal-tasks">
@@ -59,6 +61,7 @@
           <week-planner-task
             cdkDrag
             [task]="scheduledItem.task"
+            [cdkDragData]="scheduledItem.task"
           ></week-planner-task>
           } @case (SCHEDULE_ITEM_TYPE.CalEvent) {
           <week-planner-calendar-event

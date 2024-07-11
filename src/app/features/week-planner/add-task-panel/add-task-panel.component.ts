@@ -3,6 +3,8 @@ import { Store } from '@ngrx/store';
 import { selectAllTasks } from '../../tasks/store/task.selectors';
 import { CdkDragDrop } from '@angular/cdk/drag-drop';
 import { TaskCopy } from '../../tasks/task.model';
+import { ADD_TASK_PANEL_ID } from '../week-planner.model';
+import { WeekPlannerActions } from '../store/week-planner.actions';
 
 @Component({
   selector: 'add-task-panel',
@@ -13,11 +15,25 @@ import { TaskCopy } from '../../tasks/task.model';
 export class AddTaskPanelComponent {
   @Output() closePanel = new EventEmitter<void>();
 
-  allTasks$ = this.store.select(selectAllTasks);
+  ADD_TASK_PANEL = ADD_TASK_PANEL_ID;
+  allTasks$ = this._store.select(selectAllTasks);
 
-  constructor(private store: Store) {}
+  constructor(private _store: Store) {}
 
-  drop(event: CdkDragDrop<TaskCopy[]>): void {
-    //TODO implement remove from list
+  drop(ev: CdkDragDrop<string, string, TaskCopy>): void {
+    const t = ev.item.data;
+
+    // TODO scheduled task case
+    if (t.reminderId) {
+    } else {
+      this._store.dispatch(
+        WeekPlannerActions.transferTask({
+          tId: t.id,
+          prevDay: ev.previousContainer.data,
+          newDay: ADD_TASK_PANEL_ID,
+          targetIndex: ev.currentIndex,
+        }),
+      );
+    }
   }
 }

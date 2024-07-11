@@ -9,6 +9,7 @@ import { selectWeekPlannerDays } from '../store/week-planner.selectors';
 import { getWorklogStr } from '../../../util/get-work-log-str';
 import { switchMap } from 'rxjs/operators';
 import { WeekPlannerActions } from '../store/week-planner.actions';
+import { TaskCopy } from '../../tasks/task.model';
 
 @Component({
   selector: 'week-planner-plan-view',
@@ -36,7 +37,10 @@ export class WeekPlannerPlanViewComponent {
   constructor(private _store: Store) {}
 
   // TODO correct type
-  drop(targetList: 'TODO' | 'SCHEDULED', ev: CdkDragDrop<string>): void {
+  drop(
+    targetList: 'TODO' | 'SCHEDULED',
+    ev: CdkDragDrop<string, string, TaskCopy>,
+  ): void {
     if (targetList === 'SCHEDULED') {
       console.log('SCHEDULED');
       console.log(ev);
@@ -45,7 +49,13 @@ export class WeekPlannerPlanViewComponent {
     }
 
     if (ev.previousContainer === ev.container) {
-      // moveItemInArray(ev.container.data, ev.previousIndex, ev.currentIndex);
+      this._store.dispatch(
+        WeekPlannerActions.moveInList({
+          targetDay: ev.container.data,
+          fromIndex: ev.previousIndex,
+          toIndex: ev.currentIndex,
+        }),
+      );
     } else {
       console.log(targetList, ev);
       this._store.dispatch(
@@ -56,7 +66,6 @@ export class WeekPlannerPlanViewComponent {
           targetIndex: ev.currentIndex,
         }),
       );
-
       // transferArrayItem(
       //   ev.previousContainer.data,
       //   ev.container.data,

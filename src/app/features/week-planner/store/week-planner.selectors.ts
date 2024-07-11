@@ -16,8 +16,6 @@ export const selectWeekPlannerDays = (dayDates: string[]) => {
     selectWeekPlannerState,
     (taskState, weekPlannerState): WeekPlannerDay[] => {
       return dayDates.map((dayDate, index) => {
-        console.log(weekPlannerState);
-
         const tIds = weekPlannerState.days[dayDate] || [];
         const normalTasks = tIds.map((id) => taskState.entities[id] as TaskCopy);
         const day: WeekPlannerDay = {
@@ -31,8 +29,6 @@ export const selectWeekPlannerDays = (dayDates: string[]) => {
             0,
           ),
         };
-        console.log(day);
-
         return day;
       });
     },
