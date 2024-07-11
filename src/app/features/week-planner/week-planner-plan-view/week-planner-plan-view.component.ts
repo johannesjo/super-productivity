@@ -60,7 +60,7 @@ export class WeekPlannerPlanViewComponent {
       console.log(targetList, ev);
       this._store.dispatch(
         WeekPlannerActions.transferTask({
-          tId: ev.item.data.id,
+          task: ev.item.data,
           prevDay: ev.previousContainer.data,
           newDay: ev.container.data,
           targetIndex: ev.currentIndex,

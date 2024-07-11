@@ -1,5 +1,6 @@
 import { createActionGroup, props } from '@ngrx/store';
 import { ADD_TASK_PANEL_ID } from '../week-planner.model';
+import { TaskCopy } from '../../tasks/task.model';
 
 /* eslint-disable @typescript-eslint/naming-convention */
 
@@ -12,7 +13,7 @@ export const WeekPlannerActions = createActionGroup({
       taskIds: string[];
     }>(),
     'Transfer Task': props<{
-      tId: string;
+      task: TaskCopy;
       prevDay: string | typeof ADD_TASK_PANEL_ID;
       newDay: string | typeof ADD_TASK_PANEL_ID;
       targetIndex: number;

@@ -28,7 +28,7 @@ export class AddTaskPanelComponent {
     } else {
       this._store.dispatch(
         WeekPlannerActions.transferTask({
-          tId: t.id,
+          task: t,
           prevDay: ev.previousContainer.data,
           newDay: ADD_TASK_PANEL_ID,
           targetIndex: ev.currentIndex,

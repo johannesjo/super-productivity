@@ -1,11 +1,15 @@
 import { Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { WeekPlannerActions } from './week-planner.actions';
-import { tap, withLatestFrom } from 'rxjs/operators';
+import { switchMap, tap, withLatestFrom } from 'rxjs/operators';
 import { PersistenceService } from '../../../core/persistence/persistence.service';
 import { select, Store } from '@ngrx/store';
 import { selectWeekPlannerState } from './week-planner.selectors';
 import { WeekPlannerState } from './week-planner.reducer';
+import { getWorklogStr } from '../../../util/get-work-log-str';
+import { updateTaskTags } from '../../tasks/store/task.actions';
+import { EMPTY, of } from 'rxjs';
+import { TODAY_TAG } from '../../tag/tag.const';
 
 @Injectable()
 export class WeekPlannerEffects {
@@ -24,18 +28,37 @@ export class WeekPlannerEffects {
     { dispatch: false },
   );
 
-  // loadWeekPlanners$ = createEffect(() => {
-  //   return this.actions$.pipe(
-  //
-  //     ofType(WeekPlannerActions.loadWeekPlanners),
-  //     concatMap(() =>
-  //       /** An EMPTY observable only emits completion. Replace with your own observable API request */
-  //       EMPTY.pipe(
-  //         map(data => WeekPlannerActions.loadWeekPlannersSuccess({ data })),
-  //         catchError(error => of(WeekPlannerActions.loadWeekPlannersFailure({ error }))))
-  //     )
-  //   );
-  // });
+  addOrRemoveTodayTag$ = createEffect(() => {
+    return this._actions$.pipe(
+      ofType(WeekPlannerActions.transferTask),
+      switchMap(({ prevDay, newDay, task }) => {
+        const todayDayStr = getWorklogStr();
+        if (prevDay === todayDayStr && newDay !== todayDayStr) {
+          const newTagIds = task.tagIds.filter((tagId) => tagId !== TODAY_TAG.id);
+          // NOTE: we need to prevent the NO tag NO project case
+          if (newTagIds.length > 0 || task.projectId) {
+            return of(
+              updateTaskTags({
+                task,
+                oldTagIds: task.tagIds,
+                newTagIds,
+              }),
+            );
+          }
+        }
+        if (prevDay !== todayDayStr && newDay === todayDayStr) {
+          return of(
+            updateTaskTags({
+              task,
+              oldTagIds: task.tagIds,
+              newTagIds: [TODAY_TAG.id, ...task.tagIds],
+            }),
+          );
+        }
+        return EMPTY;
+      }),
+    );
+  });
 
   constructor(
     private _actions$: Actions,

@@ -63,7 +63,7 @@ export const weekPlannerReducer = createReducer(
         ? {}
         : {
             [action.prevDay]: state.days[action.prevDay].filter(
-              (id) => id !== action.tId,
+              (id) => id !== action.task.id,
             ),
           };
 
@@ -73,7 +73,7 @@ export const weekPlannerReducer = createReducer(
         : {
             [action.newDay]: [
               ...targetDays.slice(0, action.targetIndex),
-              action.tId,
+              action.task.id,
               ...targetDays.slice(action.targetIndex),
             ],
           };
@@ -93,10 +93,12 @@ export const weekPlannerReducer = createReducer(
       ...state,
       days: {
         ...state.days,
-        [action.prevDay]: state.days[action.prevDay].filter((id) => id !== action.tId),
+        [action.prevDay]: state.days[action.prevDay].filter(
+          (id) => id !== action.task.id,
+        ),
         [action.newDay]: [
           ...targetDays.slice(0, action.targetIndex),
-          action.tId,
+          action.task.id,
           ...targetDays.slice(action.targetIndex),
         ],
       },
