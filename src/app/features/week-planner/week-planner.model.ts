@@ -13,7 +13,13 @@ export interface WeekPlannerDay {
   timeEstimate: number;
   timeLimit: number;
   tasks: TaskCopy[];
+  noStartTimeRepeatProjections: NoStartTimeRepeatProjection[];
   scheduledIItems: ScheduleItem[];
+}
+
+export interface NoStartTimeRepeatProjection {
+  id: string;
+  repeatCfg: TaskRepeatCfg;
 }
 
 export interface ScheduleItemBase {

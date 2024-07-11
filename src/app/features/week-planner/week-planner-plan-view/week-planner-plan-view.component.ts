@@ -1,15 +1,13 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { Observable, of } from 'rxjs';
+import { Observable } from 'rxjs';
 import { TASK_REMINDER_OPTIONS } from '../../tasks/dialog-add-task-reminder/task-reminder-options.const';
 import { T } from '../../../t.const';
 import { CdkDragDrop } from '@angular/cdk/drag-drop';
 import { ScheduleItemType, WeekPlannerDay } from '../week-planner.model';
 import { Store } from '@ngrx/store';
-import { selectWeekPlannerDays } from '../store/week-planner.selectors';
-import { getWorklogStr } from '../../../util/get-work-log-str';
-import { switchMap } from 'rxjs/operators';
 import { WeekPlannerActions } from '../store/week-planner.actions';
 import { TaskCopy } from '../../tasks/task.model';
+import { WeekPlannerPlanViewService } from './week-planner-plan-view.service';
 
 @Component({
   selector: 'week-planner-plan-view',
@@ -20,21 +18,16 @@ import { TaskCopy } from '../../tasks/task.model';
 export class WeekPlannerPlanViewComponent {
   SCHEDULE_ITEM_TYPE = ScheduleItemType;
   // days$: Observable<WeekPlannerDay[]> = of(WEEK_PLANNER_DUMMY_DATA);
-  daysToShow$ = of([
-    getWorklogStr(),
-    // eslint-disable-next-line no-mixed-operators
-    getWorklogStr(new Date().getTime() + 24 * 60 * 60 * 1000),
-    // eslint-disable-next-line no-mixed-operators
-    getWorklogStr(new Date().getTime() + 48 * 60 * 60 * 1000),
-  ]);
-  days$: Observable<WeekPlannerDay[]> = this.daysToShow$.pipe(
-    switchMap((daysToShow) => this._store.select(selectWeekPlannerDays(daysToShow))),
-  );
+
+  days$: Observable<WeekPlannerDay[]> = this._weekPlanViewService.days$;
 
   protected readonly remindAvailableOptions = TASK_REMINDER_OPTIONS;
   protected readonly T = T;
 
-  constructor(private _store: Store) {}
+  constructor(
+    private _store: Store,
+    private _weekPlanViewService: WeekPlannerPlanViewService,
+  ) {}
 
   // TODO correct type
   drop(
