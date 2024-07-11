@@ -2,7 +2,10 @@
   @for (day of days$|async; track day.dayDate) {
   <div class="day">
     <div class="day-title">
-      {{ day.dayDate|date:'EEE' }} <span class="date">{{ day.dayDate|date:'d.M.' }}</span>
+      @if (day.isToday) {
+      <mat-icon>wb_sunny</mat-icon>
+      } {{ day.dayDate|date:'EEE' }}
+      <span class="date">{{ day.dayDate|date:'d.M.' }}</span>
     </div>
     <div class="day-estimate">{{ day.timeEstimate }}h / {{ day.timeLimit }}h</div>
 

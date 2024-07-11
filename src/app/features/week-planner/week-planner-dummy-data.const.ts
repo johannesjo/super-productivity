@@ -10,6 +10,7 @@ const FAKE_TASK = {
 };
 export const WEEK_PLANNER_DUMMY_DATA: WeekPlannerDay[] = [
   {
+    isToday: true,
     dayDate: '2021-09-01',
     timeEstimate: 3,
     timeLimit: 7,

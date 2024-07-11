@@ -8,6 +8,7 @@ export enum ScheduleItemType {
 }
 
 export interface WeekPlannerDay {
+  isToday?: boolean;
   dayDate: string;
   timeEstimate: number;
   timeLimit: number;
