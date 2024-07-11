@@ -30,6 +30,9 @@ $minVertPad: 4px;
 
 .drag-placeholder {
   min-height: $h;
+  margin-bottom: 4px;
+  border-radius: 6px;
+  // NOTE bg color is set in material overwrite file since otherwise it does not seem to work
 }
 
 .parent-title {
