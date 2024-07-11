@@ -8,6 +8,9 @@ import { Store } from '@ngrx/store';
 import { WeekPlannerActions } from '../store/week-planner.actions';
 import { TaskCopy } from '../../tasks/task.model';
 import { WeekPlannerPlanViewService } from './week-planner-plan-view.service';
+import { DialogAddTaskReminderComponent } from '../../tasks/dialog-add-task-reminder/dialog-add-task-reminder.component';
+import { AddTaskReminderInterface } from '../../tasks/dialog-add-task-reminder/add-task-reminder-interface';
+import { MatDialog } from '@angular/material/dialog';
 
 @Component({
   selector: 'week-planner-plan-view',
@@ -27,6 +30,7 @@ export class WeekPlannerPlanViewComponent {
   constructor(
     private _store: Store,
     private _weekPlanViewService: WeekPlannerPlanViewService,
+    private _matDialog: MatDialog,
   ) {}
 
   // TODO correct type
@@ -73,5 +77,13 @@ export class WeekPlannerPlanViewComponent {
       //   }
       // }
     }
+  }
+
+  editTaskReminder(task: TaskCopy): void {
+    console.log(task);
+
+    this._matDialog.open(DialogAddTaskReminderComponent, {
+      data: { task } as AddTaskReminderInterface,
+    });
   }
 }

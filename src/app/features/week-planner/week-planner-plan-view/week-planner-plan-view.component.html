@@ -59,7 +59,12 @@
           class="scheduled-item"
           [ngClass]="scheduledItem.type"
         >
-          <div class="time">{{ (scheduledItem.start|roundDuration|date:'HH:mm') }}</div>
+          <div
+            class="time"
+            (click)="scheduledItem.type === SCHEDULE_ITEM_TYPE.Task && editTaskReminder(scheduledItem.task)"
+          >
+            {{ (scheduledItem.start|roundDuration|date:'HH:mm') }}
+          </div>
           @switch (scheduledItem.type) { @case (SCHEDULE_ITEM_TYPE.Task) {
           <week-planner-task
             cdkDrag
