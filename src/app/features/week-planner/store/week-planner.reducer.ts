@@ -37,10 +37,18 @@ export const weekPlannerReducer = createReducer(
   })),
 
   on(WeekPlannerActions.upsertWeekPlannerDayTodayAndCleanupOld, (state, action) => {
+    const daysCopy = { ...state.days };
+    Object.keys(daysCopy).forEach((day) => {
+      if (new Date(day) < new Date(action.today)) {
+        delete daysCopy[day];
+      } else {
+        // remove all ids that are in the new day
+        daysCopy[day] = daysCopy[day].filter((id) => !action.taskIds.includes(id));
+      }
+    });
     return {
-      ...state,
       days: {
-        ...state.days,
+        ...daysCopy,
         [action.today]: action.taskIds,
       },
     };
