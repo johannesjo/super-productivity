@@ -58,11 +58,13 @@ import { migrateSimpleCounterState } from '../../features/simple-counter/migrate
 import { migrateTagState } from '../../features/tag/migrate-tag-state.util';
 import { migrateNoteState } from '../../features/note/migrate-note-state.util';
 import { AppBaseData } from '../../imex/sync/sync.model';
+import { WeekPlannerState } from '../../features/week-planner/store/week-planner.reducer';
 
 interface PersistenceBaseModelCfgs {
   // [key: string]: PersistenceBaseModelCfg<any>;
   globalConfig: PersistenceBaseModelCfg<GlobalConfigState>;
   reminders: PersistenceBaseModelCfg<Reminder[]>;
+  weekPlanner: PersistenceBaseModelCfg<WeekPlannerState>;
 }
 
 interface PersistenceEntityModelCfgs {
@@ -97,6 +99,13 @@ export const BASE_MODEL_CFGS: PersistenceBaseModelCfgs = {
     modelVersion: MODEL_VERSION.___NOT_USED_YET___,
     // no migrations needed yet
     migrateFn: (s: Reminder[]) => s,
+  },
+  weekPlanner: {
+    legacyKey: 'WEEK_PLANNER_LEGACY_KEY',
+    appDataKey: 'weekPlanner',
+    modelVersion: MODEL_VERSION.___NOT_USED_YET___,
+    // no migrations needed yet
+    migrateFn: (s: WeekPlannerState): WeekPlannerState => s,
   },
 };
 

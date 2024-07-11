@@ -63,6 +63,7 @@ import {
   PROJECT_MODEL_CFGS,
 } from './persistence.const';
 import { PersistenceLocalService } from './persistence-local.service';
+import { WeekPlannerState } from '../../features/week-planner/store/week-planner.reducer';
 
 const MAX_INVALID_DATA_ATTEMPTS = 10;
 
@@ -80,6 +81,9 @@ export class PersistenceService {
   );
   reminders: PersistenceBaseModel<Reminder[]> = this._cmBase<Reminder[]>(
     BASE_MODEL_CFGS.reminders,
+  );
+  weekPlanner: PersistenceBaseModel<WeekPlannerState> = this._cmBase<WeekPlannerState>(
+    BASE_MODEL_CFGS.weekPlanner,
   );
 
   project: PersistenceBaseEntityModel<ProjectState, Project> = this._cmBaseEntity<

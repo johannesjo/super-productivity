@@ -23,7 +23,7 @@ export class WeekPlannerComponent extends BaseComponent {
       .pipe(takeUntil(this.onDestroy$), first())
       .subscribe(({ planned, done, normal }) => {
         this._store.dispatch(
-          WeekPlannerActions.upsertWeekPlannerDayToday({
+          WeekPlannerActions.upsertWeekPlannerDayTodayAndCleanupOld({
             today: getWorklogStr(),
             taskIds: normal.map((task) => task.id),
           }),

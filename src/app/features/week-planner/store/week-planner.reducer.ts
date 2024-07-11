@@ -2,6 +2,7 @@ import { createFeature, createReducer, on } from '@ngrx/store';
 import { WeekPlannerActions } from './week-planner.actions';
 import { moveItemInArray } from '../../../util/move-item-in-array';
 import { ADD_TASK_PANEL_ID } from '../week-planner.model';
+import { loadAllData } from '../../../root-store/meta/load-all-data.action';
 
 export const weekPlannerFeatureKey = 'weekPlanner';
 
@@ -11,12 +12,22 @@ export interface WeekPlannerState {
   };
 }
 
-export const initialState: WeekPlannerState = {
+export const weekPlannerInitialState: WeekPlannerState = {
   days: {},
 };
 
 export const weekPlannerReducer = createReducer(
-  initialState,
+  weekPlannerInitialState,
+
+  // META ACTIONS
+  // ------------
+  on(loadAllData, (state, { appDataComplete }) =>
+    appDataComplete.weekPlanner ? appDataComplete.weekPlanner : state,
+  ),
+
+  // STANDARD_ACTIONS
+  // ------------
+
   on(WeekPlannerActions.upsertWeekPlannerDay, (state, action) => ({
     ...state,
     days: {
@@ -25,13 +36,15 @@ export const weekPlannerReducer = createReducer(
     },
   })),
 
-  on(WeekPlannerActions.upsertWeekPlannerDayToday, (state, action) => ({
-    ...state,
-    days: {
-      ...state.days,
-      [action.today]: action.taskIds,
-    },
-  })),
+  on(WeekPlannerActions.upsertWeekPlannerDayTodayAndCleanupOld, (state, action) => {
+    return {
+      ...state,
+      days: {
+        ...state.days,
+        [action.today]: action.taskIds,
+      },
+    };
+  }),
 
   on(WeekPlannerActions.transferTask, (state, action) => {
     const targetDays = state.days[action.newDay] || [];
