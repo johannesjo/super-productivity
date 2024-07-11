@@ -5,10 +5,11 @@ import {
   NoStartTimeRepeatProjection,
   ScheduleItemEvent,
   ScheduleItemRepeatProjection,
+  ScheduleItemTask,
   ScheduleItemType,
   WeekPlannerDay,
 } from '../week-planner.model';
-import { TaskCopy } from '../../tasks/task.model';
+import { TaskCopy, TaskPlanned } from '../../tasks/task.model';
 import { TaskRepeatCfg } from '../../task-repeat-cfg/task-repeat-cfg.model';
 import { TimelineCalendarMapEntry } from '../../timeline/timeline.model';
 import { selectTaskRepeatCfgsDueOnDayOnly } from '../../task-repeat-cfg/store/task-repeat-cfg.reducer';
@@ -25,6 +26,7 @@ export const selectWeekPlannerDays = (
   taskRepeatCfgs: TaskRepeatCfg[],
   // TODO replace with better type
   icalEvents: TimelineCalendarMapEntry[],
+  allPlannedTasks: TaskPlanned[],
   // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 ) => {
   return createSelector(
@@ -38,6 +40,7 @@ export const selectWeekPlannerDays = (
         const normalTasks = tIds.map((id) => taskState.entities[id] as TaskCopy);
         const icalEventsForDay: ScheduleItemEvent[] = [];
         const repeatProjectionsForDay: ScheduleItemRepeatProjection[] = [];
+        const scheduledTaskItems: ScheduleItemTask[] = [];
         const noStartTimeRepeatProjections: NoStartTimeRepeatProjection[] = [];
 
         const allRepeatableTasksForDay = selectTaskRepeatCfgsDueOnDayOnly.projector(
@@ -87,15 +90,29 @@ export const selectWeekPlannerDays = (
           });
         });
 
-        // TODO get all scheduled tasks the days in question
+        allPlannedTasks.forEach((task) => {
+          const start = task.plannedAt;
+          if (isSameDay(start, currentDayDate)) {
+            const end = start + Math.max(task.timeEstimate - task.timeSpent, 0);
+            scheduledTaskItems.push({
+              id: task.id,
+              type: ScheduleItemType.Task,
+              start,
+              end,
+              task,
+            });
+          }
+        });
 
         const day: WeekPlannerDay = {
           isToday: dayIndex === 0,
           dayDate,
           timeLimit: 0,
-          scheduledIItems: [...repeatProjectionsForDay, ...icalEventsForDay].sort(
-            (a, b) => a.start - b.start,
-          ),
+          scheduledIItems: [
+            ...repeatProjectionsForDay,
+            ...icalEventsForDay,
+            ...scheduledTaskItems,
+          ].sort((a, b) => a.start - b.start),
           tasks: normalTasks,
           noStartTimeRepeatProjections,
           // TODO calc total time from different function
