@@ -25,8 +25,9 @@
   (click)="estimateTime()"
   [class.hasNoTimeSpentOrEstimate]="!task.timeSpent && !task.timeEstimate"
   [style.pointer-events]="task.subTaskIds?.length && 'none'"
-  class="time-remaining"
+  class="time-remaining-shared"
 >
   <span *ngIf="task.subTaskIds?.length">∑</span>
-  {{ (task.timeEstimate - task.timeSpent)|msToString }}
+  {{ (task.timeEstimate - task.timeSpent > 0 ? task.timeEstimate - task.timeSpent :
+  0)|msToString }}
 </div>

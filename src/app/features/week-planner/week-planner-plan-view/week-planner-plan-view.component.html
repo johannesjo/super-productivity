@@ -55,7 +55,10 @@
         (cdkDropListDropped)="drop('SCHEDULED', $event)"
       >
         @for (scheduledItem of day.scheduledIItems; track scheduledItem.id) {
-        <div class="scheduled-item">
+        <div
+          class="scheduled-item"
+          [ngClass]="scheduledItem.type"
+        >
           <div class="time">{{ (scheduledItem.start|roundDuration|date:'HH:mm') }}</div>
           @switch (scheduledItem.type) { @case (SCHEDULE_ITEM_TYPE.Task) {
           <week-planner-task

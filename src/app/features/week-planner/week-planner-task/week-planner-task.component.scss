@@ -2,12 +2,12 @@
 @import '../../tasks/task/task.component.mixins';
 
 $h: 40px;
-$minVertPad: 4px;
 
 :host {
   border-radius: 6px;
   min-height: $h;
-  padding: $minVertPad 10px;
+  padding: 4px 10px;
+  padding-right: 4px;
   cursor: grab;
   display: flex;
   align-items: center;
@@ -42,20 +42,28 @@ $minVertPad: 4px;
   text-overflow: ellipsis;
 }
 
-// TIME
-
-// TIME
-.time-remaining {
+.time-remaining-shared {
   cursor: pointer;
-  margin-left: auto;
-  min-width: 30px;
-  min-height: $h;
-  line-height: $h;
-  margin-top: -$minVertPad;
-  margin-right: -$minVertPad;
-  text-align: right;
-  white-space: nowrap;
-  font-style: italic;
-  opacity: 0.8;
-  font-weight: 300;
+  padding-top: 14px;
+  padding-bottom: 14px;
+  padding-right: 0;
+  border: 1px solid transparent;
+
+  &.hasNoTimeSpentOrEstimate {
+    text-align: center;
+  }
+
+  &:hover {
+    border: 1px solid transparent;
+    border-radius: 6px;
+
+    @include darkTheme() {
+      border-color: $dark-theme-separator-color;
+      background: $dark-theme-bg-lighter;
+    }
+    @include lightTheme() {
+      border-color: $light-theme-separator-color;
+      background: $light-theme-bg-darker;
+    }
+  }
 }

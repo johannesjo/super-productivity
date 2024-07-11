@@ -61,7 +61,7 @@
   margin-bottom: 32px;
   display: flex;
   flex-direction: column;
-  width: 220px;
+  width: 260px;
 }
 
 .day-title {
@@ -118,12 +118,17 @@
   align-items: center;
   margin-bottom: 8px;
 
+  &.Task .time {
+    cursor: pointer;
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+    border-radius: 50%;
+    background: #fff;
+  }
+
   .time {
     text-align: center;
     border-radius: 50%;
-    border-radius: 8px;
-    border: 1px solid rgba(0, 0, 0, 0.2);
-
     width: 40px;
     line-height: 40px;
     min-width: 40px;
