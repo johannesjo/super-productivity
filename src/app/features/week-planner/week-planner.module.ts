@@ -19,6 +19,10 @@ import { WeekPlannerTaskComponent } from './week-planner-task/week-planner-task.
 import { WeekPlannerRepeatProjectionComponent } from './week-planner-repeat-projection/week-planner-repeat-projection.component';
 import { WeekPlannerCalendarEventComponent } from './week-planner-calendar-event/week-planner-calendar-event.component';
 import { IssueModule } from '../issue/issue.module';
+import { StoreModule } from '@ngrx/store';
+import { EffectsModule } from '@ngrx/effects';
+import { weekPlannerFeature } from './store/week-planner.reducer';
+import { WeekPlannerEffects } from './store/week-planner.effects';
 
 @NgModule({
   declarations: [
@@ -30,6 +34,8 @@ import { IssueModule } from '../issue/issue.module';
     WeekPlannerCalendarEventComponent,
   ],
   imports: [
+    StoreModule.forFeature(weekPlannerFeature),
+    EffectsModule.forFeature([WeekPlannerEffects]),
     CommonModule,
     UiModule,
     CdkDropList,

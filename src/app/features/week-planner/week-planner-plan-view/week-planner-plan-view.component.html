@@ -7,7 +7,9 @@
       } {{ day.dayDate|date:'EEE' }}
       <span class="date">{{ day.dayDate|date:'d.M.' }}</span>
     </div>
-    <div class="day-estimate">{{ day.timeEstimate }}h / {{ day.timeLimit }}h</div>
+    <div class="day-estimate">
+      {{ day.timeEstimate |roundDuration|msToString }} / {{ day.timeLimit }}h
+    </div>
 
     <div class="normal-tasks">
       <!--      <div class="section-title">-->
@@ -18,12 +20,13 @@
       <div
         class="normal-tasks-items"
         cdkDropList
-        [cdkDropListData]="day.tasks"
-        (cdkDropListDropped)="drop('TODO',$event)"
+        [cdkDropListData]="day.dayDate"
+        (cdkDropListDropped)="drop('TODO', $event)"
       >
         @for (task of day.tasks; track task.id) {
         <week-planner-task
           cdkDrag
+          [cdkDragData]="task"
           [task]="task"
         ></week-planner-task>
         }
@@ -46,8 +49,8 @@
         class="scheduled-items"
         cdkDropList
         cdkDropListSortingDisabled
-        [cdkDropListData]="day.scheduledIItems"
-        (cdkDropListDropped)="drop('SCHEDULED',$event)"
+        [cdkDropListData]="day.dayDate"
+        (cdkDropListDropped)="drop('SCHEDULED', $event)"
       >
         @for (scheduledItem of day.scheduledIItems; track scheduledItem.id) {
         <div class="scheduled-item">

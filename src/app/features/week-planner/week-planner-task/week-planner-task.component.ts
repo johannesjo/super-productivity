@@ -32,7 +32,6 @@ export class WeekPlannerTaskComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
-    console.log(this.task);
     if (this.task.parentId) {
       this._subs.add(
         this._taskService.getByIdLive$(this.task.parentId).subscribe((parentTask) => {

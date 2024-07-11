@@ -12,6 +12,7 @@ import {
   selectProjectById,
 } from '../../project/store/project.selectors';
 import { selectNoteTodayOrder } from '../../note/store/note.reducer';
+import { TODAY_TAG } from '../../tag/tag.const';
 
 export const WORK_CONTEXT_FEATURE_NAME = 'workContext';
 
@@ -71,11 +72,6 @@ export const selectActiveWorkContext = createSelector(
       'Unable to select active work context: ' + activeType + ' ' + activeId,
     );
   },
-);
-
-export const selectActiveContextTheme = createSelector(
-  selectActiveWorkContext,
-  (workContext) => workContext.theme,
 );
 
 export const selectTrackableTasksForActiveContext = createSelector(
@@ -202,6 +198,41 @@ export const selectTimelineTasks = createSelector(
     return {
       planned: allPlannedTasks,
       unPlanned: startableTasks.filter((t) => !t.isDone && !allPlannedIds.includes(t.id)),
+    };
+  },
+);
+
+export const selectTodayTasksWithPlannedAndDoneSeperated = createSelector(
+  selectTagFeatureState,
+  selectTaskFeatureState,
+  (
+    tagState,
+    taskState,
+  ): {
+    planned: TaskPlanned[];
+    normal: Task[];
+    done: Task[];
+  } => {
+    const taskIds = tagState.entities[TODAY_TAG.id]?.taskIds || [];
+    const normalTasks: Task[] = [];
+    const allPlannedTasks: TaskPlanned[] = [];
+    const doneTasks: Task[] = [];
+    taskIds
+      .map((id) => taskState.entities[id] as Task)
+      .forEach((t) => {
+        if (t.plannedAt && t.reminderId) {
+          allPlannedTasks.push(t as TaskPlanned);
+        } else if (t.isDone) {
+          doneTasks.push(t);
+        } else {
+          normalTasks.push(t);
+        }
+      });
+
+    return {
+      planned: allPlannedTasks,
+      normal: normalTasks,
+      done: doneTasks,
     };
   },
 );
