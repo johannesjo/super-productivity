@@ -75,7 +75,7 @@
           @if (scheduledItem.type === SCHEDULE_ITEM_TYPE.Task) {
           <div
             class="time"
-            (click)="editTaskReminder(scheduledItem.task)"
+            (click)="editTaskReminderOrReScheduleIfPossible(scheduledItem.task)"
           >
             <span>{{ (scheduledItem.start|roundDuration|date:'HH:mm') }}</span>
             <mat-icon>alarm</mat-icon>

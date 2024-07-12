@@ -11,6 +11,11 @@ import { PlannerPlanViewService } from './planner-plan-view.service';
 import { DialogAddTaskReminderComponent } from '../../tasks/dialog-add-task-reminder/dialog-add-task-reminder.component';
 import { AddTaskReminderInterface } from '../../tasks/dialog-add-task-reminder/add-task-reminder-interface';
 import { MatDialog } from '@angular/material/dialog';
+import { DAY_STARTS_AT_DEFAULT_H } from '../../../app.constants';
+import { TaskService } from '../../tasks/task.service';
+import { ReminderCopy } from '../../reminder/reminder.model';
+import { ReminderService } from '../../reminder/reminder.service';
+import { millisecondsDiffToRemindOption } from '../../tasks/util/remind-option-to-milliseconds';
 
 @Component({
   selector: 'planner-plan-view',
@@ -31,6 +36,8 @@ export class PlannerPlanViewComponent {
     private _store: Store,
     private _plannerPlanViewService: PlannerPlanViewService,
     private _matDialog: MatDialog,
+    private _taskService: TaskService,
+    private _reminderService: ReminderService,
   ) {}
 
   // TODO correct type
@@ -38,8 +45,14 @@ export class PlannerPlanViewComponent {
     targetList: 'TODO' | 'SCHEDULED',
     ev: CdkDragDrop<string, string, TaskCopy>,
   ): void {
+    const newDay = ev.container.data;
+
     if (targetList === 'SCHEDULED') {
       // TODO show schedule dialog
+      if (ev.previousContainer !== ev.container) {
+        this.editTaskReminderOrReScheduleIfPossible(ev.item.data, ev.container.data);
+      }
+
       return;
     }
 
@@ -56,29 +69,59 @@ export class PlannerPlanViewComponent {
         PlannerActions.transferTask({
           task: ev.item.data,
           prevDay: ev.previousContainer.data,
-          newDay: ev.container.data,
+          newDay: newDay,
           targetIndex: ev.currentIndex,
         }),
       );
       // transferArrayItem(
       //   ev.previousContainer.data,
-      //   ev.container.data,
+      //   newDay,
       //   ev.previousIndex,
       //   ev.currentIndex,
       // );
       // if (targetList === 'TODO') {
-      //   const item = ev.container.data[ev.currentIndex];
+      //   const item = newDay[ev.currentIndex];
       //   if (item.type) {
       //     // TODO remove reminder
-      //     ev.container.data[ev.currentIndex] = item.task;
+      //     newDay[ev.currentIndex] = item.task;
       //   }
       // }
     }
   }
 
-  editTaskReminder(task: TaskCopy): void {
+  editTaskReminderOrReScheduleIfPossible(task: TaskCopy, newDay?: string): void {
+    let initialDateTime: number;
+    if (newDay) {
+      const newDate = new Date(newDay);
+      if (task.plannedAt) {
+        const taskPlannedAtDate = new Date(task.plannedAt);
+        newDate.setHours(
+          taskPlannedAtDate.getHours(),
+          taskPlannedAtDate.getMinutes(),
+          0,
+          0,
+        );
+        const reminder: ReminderCopy | undefined = task.reminderId
+          ? this._reminderService.getById(task.reminderId) || undefined
+          : undefined;
+        const selectedReminderCfgId = millisecondsDiffToRemindOption(
+          task.plannedAt as number,
+          reminder?.remindAt,
+        );
+        this._taskService.scheduleTask(task, newDate.getTime(), selectedReminderCfgId);
+        return;
+      } else {
+        newDate.setHours(DAY_STARTS_AT_DEFAULT_H, 0, 0, 0);
+      }
+      initialDateTime = newDate.getTime();
+    }
+
     this._matDialog.open(DialogAddTaskReminderComponent, {
-      data: { task } as AddTaskReminderInterface,
+      data: {
+        task,
+        // @ts-ignore
+        initialDateTime: initialDateTime,
+      } as AddTaskReminderInterface,
     });
   }
 }
