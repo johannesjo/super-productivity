@@ -32,6 +32,10 @@
           [task]="task"
         ></week-planner-task>
         }
+        <!-- -->
+        @if (day.tasks.length === 0) {
+        <div class="empty">No tasks</div>
+        }
       </div>
 
       <!--      <div style="text-align: center">-->
@@ -85,6 +89,11 @@
           ></week-planner-repeat-projection>
           } }
         </div>
+        }
+
+        <!-- -->
+        @if (day.scheduledIItems.length === 0) {
+        <div class="empty">No scheduled items</div>
         }
       </div>
     </div>

@@ -1,7 +1,7 @@
 @import '../../../../variables';
 @import '../../tasks/task/task.component.mixins';
 
-$h: 40px;
+$h: 48px;
 
 :host {
   border-radius: 6px;
@@ -44,8 +44,8 @@ $h: 40px;
 
 .time-remaining-shared {
   cursor: pointer;
-  padding-top: 14px;
-  padding-bottom: 14px;
+  padding-top: 12px;
+  padding-bottom: 12px;
   padding-right: 0;
   border: 1px solid transparent;
 
