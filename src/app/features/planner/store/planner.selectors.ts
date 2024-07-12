@@ -37,9 +37,10 @@ export const selectPlannerDays = (
         const currentDayDate = new Date(dayDate);
         const currentDayTimestamp = currentDayDate.getTime();
         const tIds = plannerState.days[dayDate] || [];
-        const normalTasks = tIds.map((id) => taskState.entities[id] as TaskCopy);
-        // filter out deleted tasks
-        // .filter((t) => !!t);
+        const normalTasks = tIds
+          .map((id) => taskState.entities[id] as TaskCopy)
+          // filter out deleted tasks
+          .filter((t) => !!t);
 
         const { repeatProjectionsForDay, noStartTimeRepeatProjections } =
           getAllRepeatableTasksForDay(taskRepeatCfgs, currentDayTimestamp);

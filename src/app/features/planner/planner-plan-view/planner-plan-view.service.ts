@@ -96,7 +96,8 @@ export class PlannerPlanViewService {
       >;
     }),
     // there is a short moment when the reminder is already there but the task is not
-    map((tasks) => tasks.filter((task) => !!task.plannedAt)),
+    // and there is another when a tasks get deleted
+    map((tasks) => tasks.filter((task) => !!task?.plannedAt)),
   );
 
   // TODO this needs to be more performant
