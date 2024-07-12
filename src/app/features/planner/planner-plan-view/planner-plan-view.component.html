@@ -32,6 +32,15 @@
           [task]="task"
         ></planner-task>
         }
+
+        <!-- -->
+        @for (repeatProjection of day.noStartTimeRepeatProjections; track
+        repeatProjection.id) {
+        <planner-repeat-projection
+          [repeatCfg]="repeatProjection.repeatCfg"
+        ></planner-repeat-projection>
+        }
+
         <!-- -->
         @if (day.tasks.length === 0) {
         <div class="empty">No tasks</div>
@@ -77,14 +86,10 @@
           ></planner-task>
           } @case (SCHEDULE_ITEM_TYPE.CalEvent) {
           <planner-calendar-event
-            cdkDrag
-            cdkDragDisabled
             [calendarEvent]="scheduledItem.calendarEvent"
           ></planner-calendar-event>
           } @case (SCHEDULE_ITEM_TYPE.RepeatProjection) {
           <planner-repeat-projection
-            cdkDrag
-            cdkDragDisabled
             [repeatCfg]="scheduledItem.repeatCfg"
           ></planner-repeat-projection>
           } }

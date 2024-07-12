@@ -11,7 +11,6 @@ import { distinctUntilChangedObject } from '../../../util/distinct-until-changed
 import { CalendarIntegrationEvent } from '../../calendar-integration/calendar-integration.model';
 import { loadFromRealLs, saveToRealLs } from '../../../core/persistence/local-storage';
 import { LS } from '../../../core/persistence/storage-keys.const';
-import { TaskRepeatCfgService } from '../../task-repeat-cfg/task-repeat-cfg.service';
 import { Store } from '@ngrx/store';
 import { CalendarIntegrationService } from '../../calendar-integration/calendar-integration.service';
 import { PlannerDay } from '../planner.model';
@@ -19,6 +18,7 @@ import { selectPlannerDays } from '../store/planner.selectors';
 import { getWorklogStr } from '../../../util/get-work-log-str';
 import { ReminderService } from '../../reminder/reminder.service';
 import { TaskPlanned } from '../../tasks/task.model';
+import { selectAllTaskRepeatCfgs } from '../../task-repeat-cfg/store/task-repeat-cfg.reducer';
 
 @Injectable({
   providedIn: 'root',
@@ -100,7 +100,7 @@ export class PlannerPlanViewService {
   days$: Observable<PlannerDay[]> = this.daysToShow$.pipe(
     switchMap((daysToShow) =>
       combineLatest([
-        this._taskRepeatCfgService.taskRepeatCfgsWithStartTime$,
+        this._store.select(selectAllTaskRepeatCfgs),
         this.icalEvents$,
         this.allPlannedTasks$,
       ]).pipe(
@@ -114,7 +114,6 @@ export class PlannerPlanViewService {
   );
 
   constructor(
-    private _taskRepeatCfgService: TaskRepeatCfgService,
     private _store: Store,
     private _reminderService: ReminderService,
     private _calendarIntegrationService: CalendarIntegrationService,

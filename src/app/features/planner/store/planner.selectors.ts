@@ -44,6 +44,8 @@ export const selectPlannerDays = (
         const { repeatProjectionsForDay, noStartTimeRepeatProjections } =
           getAllRepeatableTasksForDay(taskRepeatCfgs, currentDayTimestamp);
 
+        console.log({ noStartTimeRepeatProjections });
+
         // Inside selectPlannerDays, replace the relevant sections with:
         const scheduledTaskItems = getScheduledTaskItems(allPlannedTasks, currentDayDate);
         const icalEventsForDay = getIcalEventsForDay(icalEvents, currentDayDate);
@@ -99,6 +101,9 @@ const getAllRepeatableTasksForDay = (
       dayDate: currentDayTimestamp,
     },
   );
+
+  console.log(allRepeatableTasksForDay);
+
   allRepeatableTasksForDay.forEach((repeatCfg) => {
     if (repeatCfg.startTime) {
       const start = getDateTimeFromClockString(repeatCfg.startTime, currentDayTimestamp);
