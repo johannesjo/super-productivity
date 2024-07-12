@@ -1,0 +1,38 @@
+<h1 mat-dialog-title>
+  <!--  <mat-icon-->
+  <!--    class="dialog-header-icon"-->
+  <!--    svgIcon="caldav"-->
+  <!--  ></mat-icon>-->
+  <!--  <span>{{T.F.CALDAV.DIALOG_INITIAL.TITLE|translate}}</span>-->
+
+  <mat-icon class="dialog-header-icon">edit_calendar</mat-icon>
+  <span>Add planned tasks to Today</span>
+</h1>
+
+<mat-dialog-content>
+  @for (missingTask of data.missingTasks; track missingTask.id) {
+  <planner-task [task]="missingTask"></planner-task>
+  }
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button
+    (click)="dismiss()"
+    color="primary"
+    mat-button
+    type="button"
+  >
+    <!--    {{ T.G.CANCEL|translate }}-->
+    Dismiss
+  </button>
+
+  <button
+    color="primary"
+    mat-stroked-button
+    (click)="addTasksToToday()"
+  >
+    <mat-icon>wb_sunny</mat-icon>
+    <!--    {{ T.G.SAVE|translate }}-->
+    Add to today
+  </button>
+</mat-dialog-actions>

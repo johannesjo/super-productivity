@@ -24,6 +24,7 @@ import { EffectsModule } from '@ngrx/effects';
 import { plannerFeature } from './store/planner.reducer';
 import { PlannerEffects } from './store/planner.effects';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { DialogAddPlannedTasksComponent } from './dialog-add-planned-tasks/dialog-add-planned-tasks.component';
 
 @NgModule({
   declarations: [
@@ -33,6 +34,7 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
     PlannerTaskComponent,
     PlannerRepeatProjectionComponent,
     PlannerCalendarEventComponent,
+    DialogAddPlannedTasksComponent,
   ],
   imports: [
     StoreModule.forFeature(plannerFeature),
