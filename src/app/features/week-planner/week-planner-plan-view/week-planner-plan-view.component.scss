@@ -124,6 +124,10 @@
     border-bottom-right-radius: 0;
     border-radius: 50%;
     background: #fff;
+
+    @include darkTheme() {
+      background: $task-c-bg-dark;
+    }
   }
 
   .time {
