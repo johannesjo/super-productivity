@@ -3,7 +3,7 @@ import { Subject } from 'rxjs';
 
 @Component({
   selector: 'base',
-  template: undefined,
+  template: '',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class BaseComponent implements OnDestroy {

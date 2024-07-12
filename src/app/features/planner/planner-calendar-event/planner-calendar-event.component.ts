@@ -18,7 +18,7 @@ import { Store } from '@ngrx/store';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class PlannerCalendarEventComponent {
-  @Input() calendarEvent?: TimelineFromCalendarEvent;
+  @Input({ required: true }) calendarEvent!: TimelineFromCalendarEvent;
 
   @HostBinding('attr.title') title = `Convert to task`;
 
