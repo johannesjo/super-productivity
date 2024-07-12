@@ -15,6 +15,7 @@ import { TimelineCalendarMapEntry } from '../../timeline/timeline.model';
 import { selectTaskRepeatCfgsDueOnDayOnly } from '../../task-repeat-cfg/store/task-repeat-cfg.reducer';
 import { getDateTimeFromClockString } from '../../../util/get-date-time-from-clock-string';
 import { isSameDay } from '../../../util/is-same-day';
+import { getTimeLeftForTask } from '../../../util/get-time-left-for-task';
 
 export const selectWeekPlannerState =
   createFeatureSelector<fromWeekPlanner.WeekPlannerState>(
@@ -59,15 +60,28 @@ export const selectWeekPlannerDays = (
           ].sort((a, b) => a.start - b.start),
           tasks: normalTasks,
           noStartTimeRepeatProjections,
-          // TODO calc total time from different function
-          timeEstimate: normalTasks.reduce(
-            (acc, t) => acc + Math.max(t.timeEstimate - t.timeSpent, 0),
-            0,
+          // NOTE: calendar events are not considered
+          timeEstimate: getAllTimeSpent(
+            normalTasks,
+            repeatProjectionsForDay,
+            scheduledTaskItems,
           ),
         };
         return day;
       });
     },
+  );
+};
+
+const getAllTimeSpent = (
+  normalTasks: TaskCopy[],
+  taskRepeatProjections: ScheduleItemRepeatProjection[],
+  plannedTaskProjections: ScheduleItemTask[],
+): number => {
+  return (
+    normalTasks.reduce((acc, t) => acc + getTimeLeftForTask(t), 0) +
+    taskRepeatProjections.reduce((acc, rp) => acc + rp.end - rp.start, 0) +
+    plannedTaskProjections.reduce((acc, si) => acc + si.end - si.start, 0)
   );
 };
 
