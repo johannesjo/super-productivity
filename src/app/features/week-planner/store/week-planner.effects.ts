@@ -10,6 +10,7 @@ import { getWorklogStr } from '../../../util/get-work-log-str';
 import { updateTaskTags } from '../../tasks/store/task.actions';
 import { EMPTY, of } from 'rxjs';
 import { TODAY_TAG } from '../../tag/tag.const';
+import { unique } from '../../../util/unique';
 
 @Injectable()
 export class WeekPlannerEffects {
@@ -47,7 +48,7 @@ export class WeekPlannerEffects {
             updateTaskTags({
               task,
               oldTagIds: task.tagIds,
-              newTagIds: [TODAY_TAG.id, ...task.tagIds],
+              newTagIds: unique([TODAY_TAG.id, ...task.tagIds]),
             }),
           );
         }
