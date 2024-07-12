@@ -1,4 +1,10 @@
-import { ChangeDetectionStrategy, Component, HostListener, Input } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  HostBinding,
+  HostListener,
+  Input,
+} from '@angular/core';
 import { TimelineFromCalendarEvent } from '../../timeline/timeline.model';
 import { selectCalendarProviderById } from '../../config/store/global-config.reducer';
 import { first } from 'rxjs/operators';
@@ -13,6 +19,8 @@ import { Store } from '@ngrx/store';
 })
 export class PlannerCalendarEventComponent {
   @Input() calendarEvent?: TimelineFromCalendarEvent;
+
+  @HostBinding('attr.title') title = `Convert to task`;
 
   @HostListener('click', ['$event'])
   async onClick(): Promise<void> {
