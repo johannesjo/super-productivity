@@ -1,11 +1,17 @@
 @import '../../../../variables';
 @import '../../tasks/task/task.component.mixins';
 
+:host {
+  display: flex;
+}
+
 .days {
-  display: grid;
   gap: 8px;
   padding: 4px;
-  grid-template-columns: repeat(5, 1fr);
+  display: flex; /* or display: grid; */
+  overflow-x: auto;
+  box-sizing: border-box;
+  padding-right: 20px;
 
   @include mq(xs) {
     padding: 12px;
@@ -14,47 +20,6 @@
     padding: 24px;
     gap: 16px;
   }
-
-  //grid-template-columns: repeat(1, 1fr);
-
-  //@include mq(xs) {
-  //  grid-template-columns: repeat(2, 1fr);
-  //
-  //  .day:nth-child(1n + 3) {
-  //    display: none;
-  //  }
-  //}
-  //
-  //@include mq(sm) {
-  //  grid-template-columns: repeat(3, 1fr);
-  //
-  //  .day:nth-child(3) {
-  //    display: flex;
-  //  }
-  //}
-  //
-  //@media (min-width: 1160px) {
-  //  grid-template-columns: repeat(4, 1fr);
-  //
-  //  .day:nth-child(4) {
-  //    display: flex;
-  //  }
-  //}
-  //
-  //@include mq(lg) {
-  //  grid-template-columns: repeat(5, 1fr);
-  //
-  //  .day:nth-child(5) {
-  //    display: flex;
-  //  }
-  //}
-  //@include mq(lg) {
-  //  grid-template-columns: repeat(5, 1fr);
-  //
-  //  .day:nth-child(5) {
-  //    display: flex;
-  //  }
-  //}
 }
 
 .day {
@@ -62,6 +27,7 @@
   display: flex;
   flex-direction: column;
   width: 260px;
+  flex: 0 0 auto; /* For flex containers, prevent items from shrinking */
 }
 
 .day-title {

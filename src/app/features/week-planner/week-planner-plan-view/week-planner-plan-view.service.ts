@@ -73,6 +73,10 @@ export class WeekPlannerPlanViewService {
     getWorklogStr(new Date().getTime() + 24 * 60 * 60 * 1000),
     // eslint-disable-next-line no-mixed-operators
     getWorklogStr(new Date().getTime() + 48 * 60 * 60 * 1000),
+    // eslint-disable-next-line no-mixed-operators
+    getWorklogStr(new Date().getTime() + 72 * 60 * 60 * 1000),
+    // eslint-disable-next-line no-mixed-operators
+    getWorklogStr(new Date().getTime() + 96 * 60 * 60 * 1000),
   ]);
 
   allPlannedTasks$: Observable<TaskPlanned[]> = this._reminderService.reminders$.pipe(
