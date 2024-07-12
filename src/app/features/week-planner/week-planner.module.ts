@@ -23,6 +23,7 @@ import { StoreModule } from '@ngrx/store';
 import { EffectsModule } from '@ngrx/effects';
 import { weekPlannerFeature } from './store/week-planner.reducer';
 import { WeekPlannerEffects } from './store/week-planner.effects';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
 @NgModule({
   declarations: [
@@ -36,6 +37,8 @@ import { WeekPlannerEffects } from './store/week-planner.effects';
   imports: [
     StoreModule.forFeature(weekPlannerFeature),
     EffectsModule.forFeature([WeekPlannerEffects]),
+    FormsModule,
+    ReactiveFormsModule,
     CommonModule,
     UiModule,
     CdkDropList,

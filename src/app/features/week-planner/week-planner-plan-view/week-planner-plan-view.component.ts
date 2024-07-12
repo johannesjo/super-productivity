@@ -39,8 +39,6 @@ export class WeekPlannerPlanViewComponent {
     ev: CdkDragDrop<string, string, TaskCopy>,
   ): void {
     if (targetList === 'SCHEDULED') {
-      console.log('SCHEDULED');
-      console.log(ev);
       // TODO show schedule dialog
       return;
     }
@@ -54,7 +52,6 @@ export class WeekPlannerPlanViewComponent {
         }),
       );
     } else {
-      console.log(targetList, ev);
       this._store.dispatch(
         WeekPlannerActions.transferTask({
           task: ev.item.data,
@@ -80,8 +77,6 @@ export class WeekPlannerPlanViewComponent {
   }
 
   editTaskReminder(task: TaskCopy): void {
-    console.log(task);
-
     this._matDialog.open(DialogAddTaskReminderComponent, {
       data: { task } as AddTaskReminderInterface,
     });

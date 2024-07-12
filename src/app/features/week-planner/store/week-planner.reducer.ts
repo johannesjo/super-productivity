@@ -63,7 +63,6 @@ export const weekPlannerReducer = createReducer(
 
   on(WeekPlannerActions.transferTask, (state, action) => {
     const targetDays = state.days[action.newDay] || [];
-    console.log(action.prevDay);
 
     const updatePrevDay =
       action.prevDay === ADD_TASK_PANEL_ID

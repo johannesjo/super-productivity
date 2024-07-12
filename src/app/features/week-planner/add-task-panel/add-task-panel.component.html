@@ -9,6 +9,7 @@
     <mat-icon class="filter-ico">filter_alt</mat-icon>
     <input
       type="text"
+      [formControl]="taskSuggestionsCtrl"
       placeholder="Enter text to filter"
     />
   </div>
@@ -20,7 +21,7 @@
 
 <div
   class="tasks"
-  *ngIf="allTasks$|async as allTasks"
+  *ngIf="filteredTasks$|async as allTasks"
   cdkDropList
   cdkDropListSortingDisabled
   [cdkDropListData]="ADD_TASK_PANEL "
