@@ -113,6 +113,8 @@ export class PlannerPlanViewService {
         ),
       ),
     ),
+    // TODO maybe debounce, gets called very often
+    // tap((val) => console.log('days$', val)),
   );
 
   constructor(

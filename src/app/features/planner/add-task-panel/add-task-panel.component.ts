@@ -13,6 +13,8 @@ import { projectSelectors } from '../../project/store/project.selectors';
 import { Project } from '../../project/project.model';
 import { Tag } from '../../tag/tag.model';
 import { selectPlannerState } from '../store/planner.selectors';
+import { TaskService } from '../../tasks/task.service';
+import { PlannerPlanViewService } from '../planner-plan-view/planner-plan-view.service';
 
 @Component({
   selector: 'add-task-panel',
@@ -36,9 +38,11 @@ export class AddTaskPanelComponent {
       this.allTasks$,
       this._store.select(selectTagFeatureState),
       this._store.select(projectSelectors),
+      this._plannerPlanViewService.allPlannedTasks$,
     ),
     map(([[value, plannerState], tasks, tagFeatureState, projectFeatureState]) => {
       const lcv = value.toLowerCase();
+      console.log('MAP');
 
       const allAddedIds = Object.keys(plannerState.days)
         .filter((day) => day !== ADD_TASK_PANEL_ID)
@@ -76,13 +80,23 @@ export class AddTaskPanelComponent {
     }),
   );
 
-  constructor(private _store: Store) {}
+  constructor(
+    private _store: Store,
+    private _taskService: TaskService,
+    private _plannerPlanViewService: PlannerPlanViewService,
+  ) {}
 
   drop(ev: CdkDragDrop<string, string, TaskCopy>): void {
     const t = ev.item.data;
 
+    // do nothing on self drop
+    if (ev.previousContainer === ev.container) {
+      return;
+    }
+
     // TODO scheduled task case
-    if (t.reminderId) {
+    if (t.reminderId && t.plannedAt) {
+      this._taskService.unScheduleTask(t.id, t.reminderId);
     } else {
       this._store.dispatch(
         PlannerActions.transferTask({

@@ -37,6 +37,20 @@ export const plannerReducer = createReducer(
     },
   })),
 
+  on(PlannerActions.removeTaskFromDays, (state, action) => {
+    const daysCopy = { ...state.days };
+    Object.keys(daysCopy).forEach((day) => {
+      daysCopy[day] = daysCopy[day]
+        // remove all ids that are in the new day and remove all deleted or missing
+        .filter((id) => id !== action.taskId);
+    });
+    return {
+      days: {
+        ...daysCopy,
+      },
+    };
+  }),
+
   on(PlannerActions.upsertPlannerDayTodayAndCleanupOldAndUndefined, (state, action) => {
     const daysCopy = { ...state.days };
     Object.keys(daysCopy).forEach((day) => {

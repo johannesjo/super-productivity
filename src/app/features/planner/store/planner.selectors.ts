@@ -106,8 +106,6 @@ const getAllRepeatableTasksForDay = (
     },
   );
 
-  console.log(allRepeatableTasksForDay);
-
   allRepeatableTasksForDay.forEach((repeatCfg) => {
     if (repeatCfg.startTime) {
       const start = getDateTimeFromClockString(repeatCfg.startTime, currentDayTimestamp);

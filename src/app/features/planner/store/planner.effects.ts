@@ -1,13 +1,13 @@
 import { Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { PlannerActions } from './planner.actions';
-import { skip, switchMap, tap } from 'rxjs/operators';
+import { filter, skip, switchMap, tap } from 'rxjs/operators';
 import { PersistenceService } from '../../../core/persistence/persistence.service';
 import { select, Store } from '@ngrx/store';
 import { selectPlannerState } from './planner.selectors';
 import { PlannerState } from './planner.reducer';
 import { getWorklogStr } from '../../../util/get-work-log-str';
-import { updateTaskTags } from '../../tasks/store/task.actions';
+import { scheduleTask, updateTaskTags } from '../../tasks/store/task.actions';
 import { EMPTY, of } from 'rxjs';
 import { TODAY_TAG } from '../../tag/tag.const';
 import { unique } from '../../../util/unique';
@@ -53,6 +53,20 @@ export class PlannerEffects {
           );
         }
         return EMPTY;
+      }),
+    );
+  });
+
+  removeOnSchedule$ = createEffect(() => {
+    return this._actions$.pipe(
+      ofType(scheduleTask),
+      filter((action) => !!action.plannedAt),
+      switchMap(({ task }) => {
+        return of(
+          PlannerActions.removeTaskFromDays({
+            taskId: task.id,
+          }),
+        );
       }),
     );
   });
