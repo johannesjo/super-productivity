@@ -34,15 +34,21 @@
     }
   }
 
+  @include mq(xs, max) {
+    ::ng-deep better-drawer-container > .content {
+      min-height: 100%;
+      height: 100%;
+    }
+    ::ng-deep better-drawer-container.isOpen > .content {
+      min-height: 60%;
+      height: 60%;
+    }
+  }
+
   ::ng-deep better-drawer-container > .content {
     display: flex;
     flex-direction: column;
     overflow: auto;
-
-    @include mq(xs, max) {
-      min-height: 60%;
-      height: 60%;
-    }
 
     > * {
       flex-grow: 1;
