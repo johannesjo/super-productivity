@@ -1,38 +1,59 @@
 @import '../../../variables';
 
-:host ::ng-deep better-drawer-container > .side {
-  width: 220px;
-  min-width: 220px;
-  max-width: 220px;
-
-  @include mq(sm) {
-    width: 250px;
-    min-width: 250px;
-    max-width: 250px;
+:host {
+  better-drawer-container {
+    @include mq(xs, max) {
+      flex-direction: column;
+    }
   }
-  @include mq(lg) {
-    width: 320px;
-    min-width: 320px;
-    max-width: 320px;
-  }
-}
 
-:host ::ng-deep better-drawer-container > .content {
-  display: flex;
-  flex-direction: column;
-  overflow: auto;
+  ::ng-deep better-drawer-container > .side {
+    width: 220px;
+    min-width: 220px;
+    max-width: 220px;
 
-  > * {
-    flex-grow: 1;
-  }
-}
+    @include mq(sm) {
+      width: 250px;
+      min-width: 250px;
+      max-width: 250px;
+    }
+    @include mq(lg) {
+      width: 320px;
+      min-width: 320px;
+      max-width: 320px;
+    }
 
-:host ::ng-deep .side-inner {
-  @include darkTheme() {
-    background: $dark-theme-bg-lighter;
+    @include mq(xs, max) {
+      width: 100%;
+      min-width: 100%;
+      box-shadow: $whiteframe-shadow-18dp;
+      height: 40%;
+      max-height: 40%;
+    }
   }
-  @include lightTheme() {
-    background: $light-theme-bg-darker;
+
+  ::ng-deep better-drawer-container > .content {
+    display: flex;
+    flex-direction: column;
+    overflow: auto;
+
+    @include mq(xs, max) {
+      min-height: 60%;
+      height: 60%;
+    }
+
+    > * {
+      flex-grow: 1;
+    }
+  }
+
+  ::ng-deep .side-inner {
+    @include darkTheme() {
+      background: $dark-theme-bg-lighter;
+    }
+    @include lightTheme() {
+      background: $light-theme-bg-darker;
+    }
   }
 }
 
