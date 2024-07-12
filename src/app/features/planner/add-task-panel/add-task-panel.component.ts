@@ -33,16 +33,16 @@ export class AddTaskPanelComponent {
   filteredTasks$: Observable<TaskCopy[]> = combineLatest([
     this.taskSuggestionsCtrl.valueChanges.pipe(startWith('')),
     this._store.select(selectPlannerState),
+    // NOTE: needed as trigger only
+    this._plannerPlanViewService.allPlannedTasks$,
   ]).pipe(
     withLatestFrom(
       this.allTasks$,
       this._store.select(selectTagFeatureState),
       this._store.select(projectSelectors),
-      this._plannerPlanViewService.allPlannedTasks$,
     ),
     map(([[value, plannerState], tasks, tagFeatureState, projectFeatureState]) => {
       const lcv = value.toLowerCase();
-      console.log('MAP');
 
       const allAddedIds = Object.keys(plannerState.days)
         .filter((day) => day !== ADD_TASK_PANEL_ID)

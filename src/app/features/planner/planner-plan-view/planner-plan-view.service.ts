@@ -99,6 +99,7 @@ export class PlannerPlanViewService {
     map((tasks) => tasks.filter((task) => !!task.plannedAt)),
   );
 
+  // TODO this needs to be more performant
   days$: Observable<PlannerDay[]> = this.daysToShow$.pipe(
     switchMap((daysToShow) =>
       combineLatest([
@@ -113,8 +114,8 @@ export class PlannerPlanViewService {
         ),
       ),
     ),
-    // TODO maybe debounce, gets called very often
-    // tap((val) => console.log('days$', val)),
+    // TODO better solution, gets called very often
+    tap((val) => console.log('days$', val)),
   );
 
   constructor(
