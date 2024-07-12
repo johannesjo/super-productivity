@@ -50,7 +50,11 @@ export class AddTaskPanelComponent {
           !task.plannedAt &&
           !task.isDone &&
           task.repeatCfgId === null &&
-          !allAddedIds.includes(task.id);
+          !allAddedIds.includes(task.id) &&
+          // don't show sub-tasks if parent is sorted
+          !(task.parentId && allAddedIds.includes(task.parentId)) &&
+          // don't show parent if sub-tasks are sorted
+          !task.subTaskIds.find((sid) => allAddedIds.includes(sid));
         // NOTE unfortunately prettier gets this wrong, so we need to split it up
         if (!isViableTask) {
           return false;
