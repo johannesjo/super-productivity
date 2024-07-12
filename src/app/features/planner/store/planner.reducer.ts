@@ -74,7 +74,8 @@ export const plannerReducer = createReducer(
     const targetDays = state.days[action.newDay] || [];
 
     const updatePrevDay =
-      action.prevDay === ADD_TASK_PANEL_ID
+      // NOTE: it is possible that there is no data saved yet when moving from scheduled to unscheduled
+      action.prevDay === ADD_TASK_PANEL_ID || !state.days[action.prevDay]
         ? {}
         : {
             [action.prevDay]: state.days[action.prevDay].filter(
@@ -93,29 +94,12 @@ export const plannerReducer = createReducer(
             ]),
           };
 
-    if (action.newDay !== ADD_TASK_PANEL_ID) {
-      return {
-        ...state,
-        days: {
-          ...state.days,
-          ...updatePrevDay,
-          ...updateNextDay,
-        },
-      };
-    }
-
     return {
       ...state,
       days: {
         ...state.days,
-        [action.prevDay]: state.days[action.prevDay].filter(
-          (id) => id !== action.task.id,
-        ),
-        [action.newDay]: [
-          ...targetDays.slice(0, action.targetIndex),
-          action.task.id,
-          ...targetDays.slice(action.targetIndex),
-        ],
+        ...updatePrevDay,
+        ...updateNextDay,
       },
     };
   }),
