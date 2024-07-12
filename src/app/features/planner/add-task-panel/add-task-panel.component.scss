@@ -27,6 +27,12 @@
 
   box-shadow: $whiteframe-shadow-2dp;
 
+  button {
+    @include mq(xs, max) {
+      transform: rotate(90deg);
+    }
+  }
+
   @include darkTheme() {
     background: $dark-theme-bg-lighter;
   }
@@ -40,7 +46,10 @@
     background: #ffffff;
     border-radius: 4px;
     color: #000000;
-    overflow: hidden;
+    flex-grow: 1;
+    margin-top: 4px;
+    margin-bottom: 4px;
+    margin-right: 4px;
 
     @include darkTheme {
       background-color: $dark-theme-bg-lightest;
@@ -50,14 +59,19 @@
 
   .filter-ico {
     opacity: 0.5;
-    min-width: 28px;
-    padding-left: 4px;
+    width: 20px;
+    height: 20px;
+    line-height: 20px;
+    min-width: 20px;
+    max-width: 20px;
+    font-size: 20px;
+    margin-left: 8px;
+    margin-right: 8px;
   }
 
   input {
     flex-grow: 1;
     min-width: 0;
-    margin-left: 4px;
     padding-left: 8px;
     display: block;
     width: 100%;

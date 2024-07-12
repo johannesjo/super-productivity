@@ -69,8 +69,8 @@ $z-this-backdrop: -1 + $z-task-side-bar-over;
     }
   }
 
-  :host.isOpen & {
-    box-shadow: $whiteframe-shadow-2dp !important;
+  :host.isOpen.isOpen.isOpen & {
+    box-shadow: $whiteframe-shadow-2dp;
     opacity: 1;
     transition: $transition-enter;
   }
