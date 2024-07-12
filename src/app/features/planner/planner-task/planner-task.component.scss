@@ -1,13 +1,13 @@
 @import '../../../../variables';
 @import '../../tasks/task/task.component.mixins';
 
-$h: 48px;
+$h: $planner-item-height;
 
 :host {
   border-radius: 6px;
   min-height: $h;
   padding: 4px 10px;
-  padding-right: 4px;
+  padding-right: 0;
   cursor: grab;
   display: flex;
   align-items: center;
@@ -42,11 +42,10 @@ $h: 48px;
   text-overflow: ellipsis;
 }
 
-.time-remaining-shared {
+.planner-time-remaining-shared {
   cursor: pointer;
   padding-top: 12px;
   padding-bottom: 12px;
-  padding-right: 0;
   border: 1px solid transparent;
 
   &.hasNoTimeSpentOrEstimate {

@@ -66,7 +66,7 @@
 
 .normal-tasks-items,
 .scheduled-items {
-  min-height: 48px;
+  min-height: $planner-item-height;
   flex-grow: 1;
 }
 
@@ -115,6 +115,6 @@
 .empty {
   text-align: center;
   font-style: italic;
-  line-height: 48px;
+  line-height: $planner-item-height;
   height: 0;
 }

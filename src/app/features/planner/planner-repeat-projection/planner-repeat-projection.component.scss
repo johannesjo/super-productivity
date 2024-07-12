@@ -16,6 +16,7 @@
   border-radius: $task-border-radius;
   opacity: 0.9;
   cursor: pointer;
+  min-height: $planner-item-height;
 
   @include lightTheme {
     border-color: $light-theme-separator-color;
@@ -28,10 +29,11 @@
     margin-left: $s;
     margin-right: $s;
     opacity: 0.8;
-    $ico-size: 24px;
-    font-size: $ico-size;
-    height: $ico-size;
-    width: $ico-size;
+    font-size: $planner-item-ico-size;
+    height: $planner-item-ico-size;
+    width: $planner-item-ico-size;
+    min-width: $planner-item-ico-size;
+    max-width: $planner-item-ico-size;
   }
 }
 

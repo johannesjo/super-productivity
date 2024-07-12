@@ -80,6 +80,6 @@
 .empty {
   text-align: center;
   font-style: italic;
-  line-height: 48px;
+  line-height: $planner-item-height;
   height: 0;
 }

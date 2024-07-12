@@ -99,18 +99,3 @@
   bottom: 32px;
   z-index: 333;
 }
-
-// to share between planner-task and planner-calendar-event
-:host ::ng-deep .time-remaining-shared {
-  min-width: 40px;
-  text-align: right;
-  //white-space: nowrap;
-  padding-left: 4px;
-  padding-right: 8px;
-  font-style: italic;
-  font-weight: 300;
-  font-size: 13px;
-  line-height: 1;
-  opacity: 0.6;
-  margin-left: auto;
-}
