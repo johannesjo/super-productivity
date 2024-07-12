@@ -8,6 +8,7 @@
   }
 
   ::ng-deep better-drawer-container > .side {
+    z-index: $z-side-panel-week-planner;
     width: 220px;
     min-width: 220px;
     max-width: 220px;
