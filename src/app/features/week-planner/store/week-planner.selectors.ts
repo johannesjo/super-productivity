@@ -38,6 +38,8 @@ export const selectWeekPlannerDays = (
         const currentDayTimestamp = currentDayDate.getTime();
         const tIds = weekPlannerState.days[dayDate] || [];
         const normalTasks = tIds.map((id) => taskState.entities[id] as TaskCopy);
+        // filter out deleted tasks
+        // .filter((t) => !!t);
 
         const { repeatProjectionsForDay, noStartTimeRepeatProjections } =
           getAllRepeatableTasksForDay(taskRepeatCfgs, currentDayTimestamp);

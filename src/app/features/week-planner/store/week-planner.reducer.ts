@@ -3,6 +3,8 @@ import { WeekPlannerActions } from './week-planner.actions';
 import { moveItemInArray } from '../../../util/move-item-in-array';
 import { ADD_TASK_PANEL_ID } from '../week-planner.model';
 import { loadAllData } from '../../../root-store/meta/load-all-data.action';
+import { unique } from '../../../util/unique';
+import { deleteTask, deleteTasks } from '../../tasks/store/task.actions';
 
 export const weekPlannerFeatureKey = 'weekPlanner';
 
@@ -24,6 +26,27 @@ export const weekPlannerReducer = createReducer(
   on(loadAllData, (state, { appDataComplete }) =>
     appDataComplete.weekPlanner ? appDataComplete.weekPlanner : state,
   ),
+  on(deleteTask, (state, { task }) => {
+    const taskIds = [task.id, ...(task.subTaskIds || [])];
+    return {
+      ...state,
+      days: Object.keys(state.days).reduce((acc, day) => {
+        return {
+          ...acc,
+          [day]: state.days[day].filter((id) => !taskIds.includes(id)),
+        };
+      }, {}),
+    };
+  }),
+  on(deleteTasks, (state, { taskIds }) => ({
+    ...state,
+    days: Object.keys(state.days).reduce((acc, day) => {
+      return {
+        ...acc,
+        [day]: state.days[day].filter((id) => !taskIds.includes(id)),
+      };
+    }, {}),
+  })),
 
   // STANDARD_ACTIONS
   // ------------
@@ -71,11 +94,11 @@ export const weekPlannerReducer = createReducer(
       action.newDay === ADD_TASK_PANEL_ID
         ? {}
         : {
-            [action.newDay]: [
+            [action.newDay]: unique([
               ...targetDays.slice(0, action.targetIndex),
               action.task.id,
               ...targetDays.slice(action.targetIndex),
-            ],
+            ]),
           };
 
     if (action.newDay !== ADD_TASK_PANEL_ID) {

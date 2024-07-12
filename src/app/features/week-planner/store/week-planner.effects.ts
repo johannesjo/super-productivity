@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { WeekPlannerActions } from './week-planner.actions';
-import { switchMap, tap, withLatestFrom } from 'rxjs/operators';
+import { skip, switchMap, tap } from 'rxjs/operators';
 import { PersistenceService } from '../../../core/persistence/persistence.service';
 import { select, Store } from '@ngrx/store';
 import { selectWeekPlannerState } from './week-planner.selectors';
@@ -15,14 +15,10 @@ import { TODAY_TAG } from '../../tag/tag.const';
 export class WeekPlannerEffects {
   saveToDB$ = createEffect(
     () => {
-      return this._actions$.pipe(
-        ofType(
-          WeekPlannerActions.upsertWeekPlannerDay,
-          WeekPlannerActions.moveInList,
-          WeekPlannerActions.transferTask,
-        ),
-        withLatestFrom(this._store.pipe(select(selectWeekPlannerState))),
-        tap(([, weekPlannerState]) => this._saveToLs(weekPlannerState, true)),
+      return this._store.pipe(
+        select(selectWeekPlannerState),
+        skip(1),
+        tap((weekPlannerState) => this._saveToLs(weekPlannerState, true)),
       );
     },
     { dispatch: false },
