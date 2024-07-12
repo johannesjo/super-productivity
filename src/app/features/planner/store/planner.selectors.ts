@@ -65,6 +65,7 @@ export const selectPlannerDays = (
           timeEstimate: getAllTimeSpent(
             normalTasks,
             repeatProjectionsForDay,
+            noStartTimeRepeatProjections,
             scheduledTaskItems,
           ),
         };
@@ -77,12 +78,17 @@ export const selectPlannerDays = (
 const getAllTimeSpent = (
   normalTasks: TaskCopy[],
   taskRepeatProjections: ScheduleItemRepeatProjection[],
+  noStartTimeRepeatProjections: NoStartTimeRepeatProjection[],
   plannedTaskProjections: ScheduleItemTask[],
 ): number => {
   return (
     normalTasks.reduce((acc, t) => acc + getTimeLeftForTask(t), 0) +
     taskRepeatProjections.reduce((acc, rp) => acc + rp.end - rp.start, 0) +
-    plannedTaskProjections.reduce((acc, si) => acc + si.end - si.start, 0)
+    plannedTaskProjections.reduce((acc, si) => acc + si.end - si.start, 0) +
+    noStartTimeRepeatProjections.reduce(
+      (acc, rp) => acc + (rp.repeatCfg.defaultEstimate || 0),
+      0,
+    )
   );
 };
 
