@@ -72,12 +72,19 @@
           class="scheduled-item"
           [ngClass]="scheduledItem.type"
         >
+          @if (scheduledItem.type === SCHEDULE_ITEM_TYPE.Task) {
           <div
             class="time"
-            (click)="scheduledItem.type === SCHEDULE_ITEM_TYPE.Task && editTaskReminder(scheduledItem.task)"
+            (click)="editTaskReminder(scheduledItem.task)"
           >
-            {{ (scheduledItem.start|roundDuration|date:'HH:mm') }}
+            <span>{{ (scheduledItem.start|roundDuration|date:'HH:mm') }}</span>
+            <mat-icon>alarm</mat-icon>
           </div>
+          } @else {
+          <div class="time">{{ (scheduledItem.start|roundDuration|date:'HH:mm') }}</div>
+          }
+
+          <!-- -->
           @switch (scheduledItem.type) { @case (SCHEDULE_ITEM_TYPE.Task) {
           <planner-task
             cdkDrag

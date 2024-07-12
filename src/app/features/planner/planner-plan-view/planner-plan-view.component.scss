@@ -101,10 +101,28 @@
     border-radius: 50%;
     width: 40px;
     line-height: 40px;
+    height: 40px;
     min-width: 40px;
     margin-right: 4px;
     font-size: 11px;
     flex-grow: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    mat-icon {
+      display: none;
+    }
+
+    &:hover {
+      mat-icon {
+        display: block;
+      }
+
+      span {
+        display: none;
+      }
+    }
   }
 
   > :nth-child(2) {
