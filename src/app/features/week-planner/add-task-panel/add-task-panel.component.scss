@@ -2,7 +2,6 @@
 
 :host {
   display: block;
-  margin: 8px;
   margin-top: 0;
   position: relative;
   background: inherit;
@@ -13,19 +12,17 @@
   display: flex;
   margin-bottom: 8px;
   position: sticky;
-  border-bottom: 1px solid;
   align-items: center;
   top: 0;
   z-index: 1;
-  padding-top: 8px;
-  padding-bottom: 4px;
+  //padding: 8px 4px;
+
+  box-shadow: $whiteframe-shadow-2dp;
 
   @include darkTheme() {
-    border-color: $dark-theme-separator-color;
     background: $dark-theme-bg-lighter;
   }
   @include lightTheme() {
-    border-color: $light-theme-separator-color;
     background: $light-theme-bg-darker;
   }
 
@@ -36,13 +33,8 @@
     border-radius: 4px;
     color: #000000;
     overflow: hidden;
-    background: #ffffff;
-    border-color: $c-primary;
 
     @include darkTheme {
-      background-color: $dark-theme-bg-lighter;
-      color: $dark-theme-text-color-most-intense;
-
       background-color: $dark-theme-bg-lightest;
       color: $dark-theme-text-color-most-intense;
     }
@@ -52,27 +44,34 @@
     opacity: 0.5;
     min-width: 28px;
     padding-left: 4px;
-    @include darkTheme {
-      border-color: $dark-theme-separator-color;
-    }
   }
 
   input {
-    padding-left: 4px;
     flex-grow: 1;
     min-width: 0;
     margin-left: 4px;
+    padding-left: 8px;
     display: block;
     width: 100%;
-    font-size: 16px;
-    border: 0;
-    border-left: 1px solid $light-theme-separator-color;
     outline: 0;
-    line-height: 30px;
+    line-height: 40px;
+    appearance: none;
+    font-size: 12px;
+    background: transparent;
+    color: inherit;
+    border: 0;
+    border-left: 1px solid;
+    border-color: rgba(0, 0, 0, 0.1);
+
+    @include darkTheme {
+      border-color: rgba(255, 255, 255, 0.1);
+    }
   }
 }
 
 .tasks {
+  margin: 8px;
+
   week-planner-task {
     margin-bottom: 8px;
   }
