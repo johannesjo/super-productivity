@@ -84,7 +84,7 @@ export class PlannerPlanViewComponent {
     let initialDateTime: number;
     if (newDay) {
       const newDate = new Date(newDay);
-      if (task.plannedAt) {
+      if (task.plannedAt && task.reminderId) {
         this._rescheduleTask(task, newDate);
         return;
       } else {

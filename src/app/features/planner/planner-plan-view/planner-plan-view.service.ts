@@ -95,6 +95,8 @@ export class PlannerPlanViewService {
         TaskPlanned[]
       >;
     }),
+    // there is a short moment when the reminder is already there but the task is not
+    map((tasks) => tasks.filter((task) => !!task.plannedAt)),
   );
 
   days$: Observable<PlannerDay[]> = this.daysToShow$.pipe(
