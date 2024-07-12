@@ -49,6 +49,8 @@
   }
 
   ::ng-deep .side-inner {
+    display: flex;
+
     @include darkTheme() {
       background: $dark-theme-bg-lighter;
     }

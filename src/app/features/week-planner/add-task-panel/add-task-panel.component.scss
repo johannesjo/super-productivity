@@ -1,20 +1,28 @@
 @import '../../../../variables';
 
 :host {
-  display: block;
   margin-top: 0;
   position: relative;
   background: inherit;
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+}
+
+.tasks {
+  padding: 8px;
+  flex-grow: 1;
+  overflow: auto;
+
+  week-planner-task {
+    margin-bottom: 8px;
+  }
 }
 
 .filter-bar {
-  // TODO use style of add-task-bar
   display: flex;
-  margin-bottom: 8px;
-  position: sticky;
+  flex-grow: 0;
   align-items: center;
-  top: 0;
-  z-index: 1;
   //padding: 8px 4px;
 
   box-shadow: $whiteframe-shadow-2dp;
@@ -69,10 +77,9 @@
   }
 }
 
-.tasks {
-  margin: 8px;
-
-  week-planner-task {
-    margin-bottom: 8px;
-  }
+.empty {
+  text-align: center;
+  font-style: italic;
+  line-height: 48px;
+  height: 0;
 }

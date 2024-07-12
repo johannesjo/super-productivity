@@ -33,5 +33,7 @@
     [cdkDragData]="task"
     [task]="task"
   ></week-planner-task>
+  } @if (allTasks.length === 0) {
+  <div class="empty">No tasks</div>
   }
 </div>
