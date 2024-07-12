@@ -24,6 +24,25 @@ import { TaskPlanned } from '../../tasks/task.model';
   providedIn: 'root',
 })
 export class WeekPlannerPlanViewService {
+  // includedWeekDays$ = of([0, 1, 2, 3, 4, 5, 6]);
+  includedWeekDays$ = of([0, 1, 2, 3, 4, 5, 6]);
+
+  daysToShow$ = this.includedWeekDays$.pipe(
+    map((includedWeekDays) => {
+      const today = new Date().getTime();
+      const todayDayNr = new Date(today).getDay();
+      const nrOfDaysToShow = 15;
+      const daysToShow: string[] = [];
+      for (let i = 0; i < nrOfDaysToShow; i++) {
+        if (includedWeekDays.includes((i + todayDayNr) % 7)) {
+          // eslint-disable-next-line no-mixed-operators
+          daysToShow.push(getWorklogStr(today + i * 24 * 60 * 60 * 1000));
+        }
+      }
+      return daysToShow;
+    }),
+  );
+
   icalEvents$: Observable<TimelineCalendarMapEntry[]> = this._store
     .select(selectCalendarProviders)
     .pipe(
@@ -66,18 +85,6 @@ export class WeekPlannerPlanViewService {
       }),
       startWith(this._getCalProviderFromCache()),
     );
-
-  daysToShow$ = of([
-    getWorklogStr(),
-    // eslint-disable-next-line no-mixed-operators
-    getWorklogStr(new Date().getTime() + 24 * 60 * 60 * 1000),
-    // eslint-disable-next-line no-mixed-operators
-    getWorklogStr(new Date().getTime() + 48 * 60 * 60 * 1000),
-    // eslint-disable-next-line no-mixed-operators
-    getWorklogStr(new Date().getTime() + 72 * 60 * 60 * 1000),
-    // eslint-disable-next-line no-mixed-operators
-    getWorklogStr(new Date().getTime() + 96 * 60 * 60 * 1000),
-  ]);
 
   allPlannedTasks$: Observable<TaskPlanned[]> = this._reminderService.reminders$.pipe(
     switchMap((reminders) => {
