@@ -8,9 +8,10 @@ export const WeekPlannerActions = createActionGroup({
   source: 'WeekPlanner',
   events: {
     'Upsert Week Planner Day': props<{ day: string; taskIds: string[] }>(),
-    'Upsert Week Planner DayToday And Cleanup Old': props<{
+    'Upsert Week Planner DayToday And Cleanup Old And Undefined': props<{
       today: string;
       taskIds: string[];
+      allTaskIds: string[];
     }>(),
     'Transfer Task': props<{
       task: TaskCopy;

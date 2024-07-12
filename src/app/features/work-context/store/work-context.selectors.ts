@@ -236,3 +236,10 @@ export const selectTodayTasksWithPlannedAndDoneSeperated = createSelector(
     };
   },
 );
+
+export const selectTodayTaskIds = createSelector(
+  selectTagFeatureState,
+  (tagState): string[] => {
+    return tagState.entities[TODAY_TAG.id]?.taskIds || [];
+  },
+);
