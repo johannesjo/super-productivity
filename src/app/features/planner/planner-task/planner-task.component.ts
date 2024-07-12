@@ -49,7 +49,7 @@ export class PlannerTaskComponent implements OnInit, OnDestroy {
 
   estimateTime(): void {
     this._matDialog.open(DialogTimeEstimateComponent, {
-      data: { task: this.task },
+      data: { task: this.task, isFocusEstimateOnMousePrimaryDevice: true },
       autoFocus: !IS_TOUCH_PRIMARY,
     });
   }
