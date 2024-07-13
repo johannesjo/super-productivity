@@ -94,10 +94,6 @@ export class PlannerTaskComponent extends BaseComponent implements OnInit, OnDes
           this._cd.detectChanges();
         });
     }
-    this.task = {
-      ...this.task,
-      issuePoints: 8,
-    };
   }
 
   onTouchStart(event: TouchEvent): void {
