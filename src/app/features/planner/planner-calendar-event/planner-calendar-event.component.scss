@@ -51,4 +51,9 @@
 }
 
 .custom-event-title {
+  font-size: $planner-font-size-mobile;
+
+  @include mq(xs) {
+    font-size: $planner-font-size;
+  }
 }

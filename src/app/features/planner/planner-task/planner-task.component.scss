@@ -22,9 +22,23 @@ $h: $planner-item-height;
     cursor: grabbing;
   }
 
+  ::ng-deep .tag-title {
+    font-size: $planner-font-size-smaller-mobile !important;
+
+    @include mq(xs) {
+      font-size: $planner-font-size-smaller !important;
+    }
+  }
+
   .title {
     padding-left: 4px;
     padding-right: 4px;
+    line-height: 1.5;
+    font-size: $planner-font-size-mobile;
+
+    @include mq(xs) {
+      font-size: $planner-font-size;
+    }
   }
 }
 
@@ -38,8 +52,12 @@ $h: $planner-item-height;
 .parent-title {
   padding-top: $s * 0.5;
   margin-bottom: -2px;
-  font-size: 12px;
   text-overflow: ellipsis;
+  font-size: $planner-font-size-smaller-mobile;
+
+  @include mq(xs) {
+    font-size: $planner-font-size-smaller;
+  }
 }
 
 .planner-time-remaining-shared {
