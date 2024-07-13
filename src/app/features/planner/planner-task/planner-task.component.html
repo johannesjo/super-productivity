@@ -127,6 +127,26 @@
     </button>
 
     <button
+      *ngIf="!task.isDone"
+      (click)="markAsDone();"
+      mat-menu-item
+    >
+      <mat-icon>check</mat-icon>
+      Mark as done
+      <!--      {{ T.F.TASK.CMP.OPEN_ATTACH|translate }}-->
+    </button>
+
+    <button
+      *ngIf="task.isDone"
+      (click)="markAsUnDone();"
+      mat-menu-item
+    >
+      <mat-icon>undo</mat-icon>
+      Mark as undone
+      <!--      {{ T.F.TASK.CMP.OPEN_ATTACH|translate }}-->
+    </button>
+
+    <button
       (click)="addAttachment();"
       class="hide-xs"
       mat-menu-item

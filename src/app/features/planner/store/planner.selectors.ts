@@ -81,7 +81,7 @@ const getAllTimeSpent = (
   plannedTaskProjections: ScheduleItemTask[],
 ): number => {
   return (
-    normalTasks.reduce((acc, t) => acc + getTimeLeftForTask(t), 0) +
+    normalTasks.reduce((acc, t) => acc + (t.isDone ? 0 : getTimeLeftForTask(t)), 0) +
     taskRepeatProjections.reduce((acc, rp) => acc + rp.end - rp.start, 0) +
     plannedTaskProjections.reduce((acc, si) => acc + si.end - si.start, 0) +
     noStartTimeRepeatProjections.reduce(

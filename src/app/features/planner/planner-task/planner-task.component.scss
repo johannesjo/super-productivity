@@ -16,30 +16,38 @@ $h: $planner-item-height;
     background: $task-c-bg-dark;
   }
 
-  .no-drag {
-    padding: 4px 0;
-    display: flex;
-    align-items: center;
-    flex-grow: 1;
-  }
+  &.isDone {
+    opacity: $task-is-done-dim-opacity;
 
-  ::ng-deep .tag-title {
-    font-size: $planner-font-size-smaller-mobile !important;
-
-    @include mq(xs) {
-      font-size: $planner-font-size-smaller !important;
+    .title {
+      text-decoration: line-through;
     }
   }
+}
 
-  .title {
-    padding-left: 4px;
-    padding-right: 4px;
-    line-height: 1.5;
-    font-size: $planner-font-size-mobile;
+.no-drag {
+  padding: 4px 0;
+  display: flex;
+  align-items: center;
+  flex-grow: 1;
+}
 
-    @include mq(xs) {
-      font-size: $planner-font-size;
-    }
+::ng-deep .tag-title {
+  font-size: $planner-font-size-smaller-mobile !important;
+
+  @include mq(xs) {
+    font-size: $planner-font-size-smaller !important;
+  }
+}
+
+.title {
+  padding-left: 4px;
+  padding-right: 4px;
+  line-height: 1.5;
+  font-size: $planner-font-size-mobile;
+
+  @include mq(xs) {
+    font-size: $planner-font-size;
   }
 }
 

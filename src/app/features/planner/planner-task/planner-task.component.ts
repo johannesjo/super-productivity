@@ -2,6 +2,7 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
+  HostBinding,
   Input,
   OnDestroy,
   OnInit,
@@ -27,6 +28,7 @@ import { DialogEditTagsForTaskComponent } from '../../tag/dialog-edit-tags/dialo
 import { TaskAttachmentService } from '../../tasks/task-attachment/task-attachment.service';
 import { Store } from '@ngrx/store';
 import { selectTaskByIdWithSubTaskData } from '../../tasks/store/task.selectors';
+import { updateTask } from '../../tasks/store/task.actions';
 
 @Component({
   selector: 'planner-task',
@@ -36,6 +38,7 @@ import { selectTaskByIdWithSubTaskData } from '../../tasks/store/task.selectors'
 })
 export class PlannerTaskComponent extends BaseComponent implements OnInit, OnDestroy {
   @Input({ required: true }) task!: TaskCopy;
+
   isCurrent = false;
   isRepeatTaskCreatedToday = false;
 
@@ -49,6 +52,11 @@ export class PlannerTaskComponent extends BaseComponent implements OnInit, OnDes
 
   @ViewChild('contextMenuTriggerEl', { static: true, read: MatMenuTrigger })
   contextMenu!: MatMenuTrigger;
+
+  @HostBinding('class.isDone')
+  get isDone(): boolean {
+    return this.task.isDone;
+  }
 
   constructor(
     private _taskService: TaskService,
@@ -98,12 +106,6 @@ export class PlannerTaskComponent extends BaseComponent implements OnInit, OnDes
     event.stopImmediatePropagation();
   }
 
-  mouseDown(event: MouseEvent): void {
-    event.preventDefault();
-    event.stopPropagation();
-    event.stopImmediatePropagation();
-  }
-
   openContextMenu(event: TouchEvent | MouseEvent): void {
     event.preventDefault();
     event.stopPropagation();
@@ -120,6 +122,39 @@ export class PlannerTaskComponent extends BaseComponent implements OnInit, OnDes
       data: { task: this.task, isFocusEstimateOnMousePrimaryDevice: true },
       autoFocus: !IS_TOUCH_PRIMARY,
     });
+  }
+
+  markAsDone(): void {
+    this._store.dispatch(
+      updateTask({
+        task: {
+          id: this.task.id,
+          changes: {
+            isDone: true,
+          },
+        },
+      }),
+    );
+    // this._store.dispatch(
+    //   updateTaskTags({
+    //     task: this.task,
+    //     oldTagIds: this.task.tagIds,
+    //     newTagIds: unique([TODAY_TAG.id, ...this.task.tagIds]),
+    //   }),
+    // );
+  }
+
+  markAsUnDone(): void {
+    this._store.dispatch(
+      updateTask({
+        task: {
+          id: this.task.id,
+          changes: {
+            isDone: false,
+          },
+        },
+      }),
+    );
   }
 
   // TODO implement with keyboard support
