@@ -3,37 +3,51 @@
   *cdkDragPlaceholder
 ></div>
 
-<div
-  class="wrap"
-  (longPressIOS)="openContextMenu($event)"
-  (contextmenu)="openContextMenu($event)"
->
-  <div
-    class="parent-title"
-    *ngIf="parentTitle"
-  >
-    <div class="title">{{ parentTitle }}</div>
-  </div>
+<ng-content></ng-content>
 
-  <div class="title">{{ task.title }}</div>
-
-  <tag-list
-    [isDisableEdit]="true"
-    [isShowProjectTagAlways]="true"
-    [issueProviderType]="task.issueType"
-    [task]="task"
-  ></tag-list>
+<div class="drag-handle">
+  <mat-icon
+    class="drag-handle-ico"
+    svgIcon="drag_handle"
+  ></mat-icon>
 </div>
 
 <div
-  (click)="estimateTime()"
-  [class.hasNoTimeSpentOrEstimate]="!task.timeSpent && !task.timeEstimate"
-  [style.pointer-events]="task.subTaskIds?.length && 'none'"
-  class="planner-time-remaining-shared"
+  class="no-drag"
+  (touchstart)="onTouchStart($event)"
 >
-  <span *ngIf="task.subTaskIds?.length">∑</span>
-  {{ (task.timeEstimate - task.timeSpent > 0 ? task.timeEstimate - task.timeSpent :
-  0)|msToString }}
+  <div
+    class="wrap"
+    (longPressIOS)="openContextMenu($event)"
+    (contextmenu)="openContextMenu($event)"
+  >
+    <div
+      class="parent-title"
+      *ngIf="parentTitle"
+    >
+      <div class="title">{{ parentTitle }}</div>
+    </div>
+
+    <div class="title">{{ task.title }}</div>
+
+    <tag-list
+      [isDisableEdit]="true"
+      [isShowProjectTagAlways]="true"
+      [issueProviderType]="task.issueType"
+      [task]="task"
+    ></tag-list>
+  </div>
+
+  <div
+    (click)="estimateTime()"
+    [class.hasNoTimeSpentOrEstimate]="!task.timeSpent && !task.timeEstimate"
+    [style.pointer-events]="task.subTaskIds?.length && 'none'"
+    class="planner-time-remaining-shared"
+  >
+    <span *ngIf="task.subTaskIds?.length">∑</span>
+    {{ (task.timeEstimate - task.timeSpent > 0 ? task.timeEstimate - task.timeSpent :
+    0)|msToString }}
+  </div>
 </div>
 
 <div

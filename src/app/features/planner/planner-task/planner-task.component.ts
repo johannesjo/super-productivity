@@ -86,6 +86,18 @@ export class PlannerTaskComponent extends BaseComponent implements OnInit, OnDes
     }
   }
 
+  onTouchStart(event: TouchEvent): void {
+    console.log(event);
+    event.stopPropagation();
+    event.stopImmediatePropagation();
+  }
+
+  mouseDown(event: MouseEvent): void {
+    event.preventDefault();
+    event.stopPropagation();
+    event.stopImmediatePropagation();
+  }
+
   openContextMenu(event: TouchEvent | MouseEvent): void {
     event.preventDefault();
     event.stopPropagation();

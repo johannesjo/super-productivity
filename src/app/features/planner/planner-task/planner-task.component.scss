@@ -6,20 +6,21 @@ $h: $planner-item-height;
 :host {
   border-radius: 6px;
   min-height: $h;
-  padding: 4px 10px;
-  padding-right: 0;
-  cursor: grab;
   display: flex;
   align-items: center;
   background: $task-c-bg-light;
+  @include grabCursor();
 
   @include darkTheme() {
     color: $task-text-c-dark;
     background: $task-c-bg-dark;
   }
 
-  &:active {
-    cursor: grabbing;
+  .no-drag {
+    padding: 4px 0;
+    display: flex;
+    align-items: center;
+    flex-grow: 1;
   }
 
   ::ng-deep .tag-title {
@@ -76,4 +77,62 @@ $h: $planner-item-height;
       background: $light-theme-bg-darker;
     }
   }
+}
+
+.drag-handle {
+  width: 32px;
+  height: 32px;
+  min-width: 32px;
+  z-index: $z-drag-handle;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  // fixes drag and drop on mobile
+  touch-action: none;
+
+  .drag-handle-ico {
+    opacity: 0.4;
+
+    @include mq(xs) {
+      opacity: 0.15;
+    }
+  }
+
+  //
+  //> * {
+  //  position: absolute;
+  //  left: 50%;
+  //  top: 50%;
+  //  transform: translate(-50%, -50%);
+  //}
+  //
+  //.type-ico-wrapper {
+  //  width: 40px;
+  //  height: 40px;
+  //  min-width: 40px;
+  //  opacity: $task-icon-default-opacity;
+  //  position: absolute;
+  //  display: flex;
+  //  justify-content: center;
+  //  align-items: center;
+  //
+  //  //.first-line:hover & {
+  //  //  opacity: .7;
+  //  //}
+  //
+  //  :host.isCurrent &::ng-deep mat-icon {
+  //    transform: scale(1.4) !important;
+  //    transform-origin: center center;
+  //    opacity: 0.18;
+  //  }
+  //
+  //  @include mq(xs, max) {
+  //    display: none;
+  //  }
+  //
+  //  a {
+  //    opacity: 1;
+  //  }
+  //}
 }
