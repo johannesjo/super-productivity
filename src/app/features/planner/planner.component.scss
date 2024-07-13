@@ -24,14 +24,6 @@
       max-width: 320px;
     }
     box-shadow: $whiteframe-shadow-6dp !important;
-
-    @include mq(xs, max) {
-      width: 100%;
-      min-width: 100%;
-      box-shadow: $whiteframe-shadow-8dp !important;
-      height: 40%;
-      max-height: 40%;
-    }
   }
 
   @include mq(xs, max) {
@@ -42,6 +34,21 @@
     ::ng-deep better-drawer-container.isOpen > .content {
       min-height: 60%;
       height: 60%;
+    }
+  }
+  @include mq(xs, max) {
+    ::ng-deep better-drawer-container > .side {
+      min-height: 100%;
+      height: 100%;
+      display: none;
+    }
+    ::ng-deep better-drawer-container.isOpen > .side {
+      display: block;
+      width: 100%;
+      min-width: 100%;
+      box-shadow: $whiteframe-shadow-8dp !important;
+      height: 40%;
+      max-height: 40%;
     }
   }
 
