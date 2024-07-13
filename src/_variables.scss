@@ -68,9 +68,10 @@ $light-theme-text-color-most-intense: rgb(0, 0, 0);
 
 $light-theme-selected-task-bg-color: mat-css-vars.mat-css-color-primary(100);
 $light-theme-selected-task-bg-color: #fff;
+
+// TODO refactor names or how they are used
 $light-theme-extra-border-color: #dddddd;
 $dark-theme-extra-border-color: rgba(255, 255, 255, 0.12);
-
 $light-theme-separator-color: rgba(18, 18, 18, 0.3);
 $dark-theme-separator-color: rgba(255, 255, 255, 0.3);
 

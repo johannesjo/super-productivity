@@ -88,11 +88,11 @@
   //border-bottom: 1px solid;
 
   @include darkTheme() {
-    //border-color: $dark-theme-separator-color;
+    //border-color: $dark-theme-extra-border-color;
     //background: $dark-theme-bg-lighter;
   }
   @include lightTheme() {
-    //border-color: $light-theme-separator-color;
+    //border-color: $light-theme-extra-border-color;
     //background: $light-theme-bg-darker;
   }
 }

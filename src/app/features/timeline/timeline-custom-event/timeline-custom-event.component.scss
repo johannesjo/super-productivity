@@ -13,10 +13,10 @@
   border-radius: $task-border-radius;
 
   @include lightTheme {
-    border-color: $light-theme-separator-color;
+    border-color: $light-theme-extra-border-color;
   }
   @include darkTheme {
-    border-color: $dark-theme-separator-color;
+    border-color: $dark-theme-extra-border-color;
   }
 
   mat-icon {

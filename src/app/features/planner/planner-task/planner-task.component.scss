@@ -77,11 +77,11 @@ $h: $planner-item-height;
     border-radius: 6px;
 
     @include darkTheme() {
-      border-color: $dark-theme-separator-color;
+      border-color: $dark-theme-extra-border-color;
       background: $dark-theme-bg-lighter;
     }
     @include lightTheme() {
-      border-color: $light-theme-separator-color;
+      border-color: $dark-theme-extra-border-color;
       background: $light-theme-bg-darker;
     }
   }
