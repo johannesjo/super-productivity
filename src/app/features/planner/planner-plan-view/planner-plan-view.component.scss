@@ -3,13 +3,14 @@
 
 :host {
   display: flex;
+  overflow: auto;
+  padding-bottom: 32px;
 }
 
 .days {
   gap: 8px;
   padding: 4px;
   display: flex; /* or display: grid; */
-  overflow-x: auto;
   box-sizing: border-box;
   padding-right: 20px;
 

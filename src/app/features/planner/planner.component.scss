@@ -48,7 +48,7 @@
   ::ng-deep better-drawer-container > .content {
     display: flex;
     flex-direction: column;
-    overflow: auto;
+    overflow: hidden;
 
     > * {
       flex-grow: 1;
