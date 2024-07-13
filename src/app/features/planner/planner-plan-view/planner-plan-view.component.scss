@@ -2,15 +2,16 @@
 @import '../../tasks/task/task.component.mixins';
 
 :host {
-  display: flex;
   overflow: auto;
-  padding-bottom: 32px;
+  display: flex;
 }
 
 .days {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
   gap: 8px;
   padding: 4px;
-  display: flex; /* or display: grid; */
   box-sizing: border-box;
   padding-right: 20px;
 
@@ -24,11 +25,12 @@
 }
 
 .day {
-  margin-bottom: 32px;
   display: flex;
   flex-direction: column;
+  min-width: 260px;
   width: 260px;
-  flex: 0 0 auto; /* For flex containers, prevent items from shrinking */
+  padding-bottom: 32px;
+  margin-bottom: 32px;
 }
 
 .day-title {
