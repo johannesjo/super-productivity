@@ -36,6 +36,8 @@ import { selectTaskByIdWithSubTaskData } from '../../tasks/store/task.selectors'
 })
 export class PlannerTaskComponent extends BaseComponent implements OnInit, OnDestroy {
   @Input({ required: true }) task!: TaskCopy;
+  isCurrent = false;
+  isRepeatTaskCreatedToday = false;
 
   readonly T = T;
   readonly IS_TOUCH_PRIMARY = IS_TOUCH_PRIMARY;
@@ -84,6 +86,10 @@ export class PlannerTaskComponent extends BaseComponent implements OnInit, OnDes
           this._cd.detectChanges();
         });
     }
+    this.task = {
+      ...this.task,
+      issuePoints: 8,
+    };
   }
 
   onTouchStart(event: TouchEvent): void {

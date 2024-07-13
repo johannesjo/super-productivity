@@ -736,22 +736,14 @@ progress-bar {
     justify-content: center;
     align-items: center;
 
-    //.first-line:hover & {
-    //  opacity: .7;
-    //}
+    @include mq(xs, max) {
+      display: none;
+    }
 
     :host.isCurrent &::ng-deep mat-icon {
       transform: scale(1.4) !important;
       transform-origin: center center;
       opacity: 0.18;
-    }
-
-    @include mq(xs, max) {
-      display: none;
-    }
-
-    a {
-      opacity: 1;
     }
   }
 

@@ -82,6 +82,7 @@ $h: $planner-item-height;
 .drag-handle {
   width: 32px;
   height: 32px;
+  margin-left: 4px;
   min-width: 32px;
   z-index: $z-drag-handle;
   display: flex;
@@ -91,6 +92,10 @@ $h: $planner-item-height;
   // fixes drag and drop on mobile
   touch-action: none;
 
+  mat-ico {
+    font-size: 20px;
+  }
+
   .drag-handle-ico {
     opacity: 0.4;
 
@@ -99,40 +104,81 @@ $h: $planner-item-height;
     }
   }
 
-  //
-  //> * {
-  //  position: absolute;
-  //  left: 50%;
-  //  top: 50%;
-  //  transform: translate(-50%, -50%);
-  //}
-  //
-  //.type-ico-wrapper {
-  //  width: 40px;
-  //  height: 40px;
-  //  min-width: 40px;
-  //  opacity: $task-icon-default-opacity;
-  //  position: absolute;
-  //  display: flex;
-  //  justify-content: center;
-  //  align-items: center;
-  //
-  //  //.first-line:hover & {
-  //  //  opacity: .7;
-  //  //}
-  //
-  //  :host.isCurrent &::ng-deep mat-icon {
-  //    transform: scale(1.4) !important;
-  //    transform-origin: center center;
-  //    opacity: 0.18;
-  //  }
-  //
-  //  @include mq(xs, max) {
-  //    display: none;
-  //  }
-  //
-  //  a {
-  //    opacity: 1;
-  //  }
-  //}
+  > * {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+  }
+
+  .type-ico-wrapper {
+    width: 32px;
+    height: 32px;
+    min-width: 32px;
+    opacity: $task-icon-default-opacity;
+    position: absolute;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    @include mq(xs, max) {
+      //display: none;
+    }
+
+    mat-icon {
+      margin-left: $s;
+      margin-right: $s;
+      opacity: 0.8;
+      font-size: $planner-item-ico-size;
+      height: $planner-item-ico-size;
+      width: $planner-item-ico-size;
+      min-width: $planner-item-ico-size;
+      max-width: $planner-item-ico-size;
+    }
+
+    :host.isCurrent &::ng-deep mat-icon {
+      transform: scale(1.4) !important;
+      transform-origin: center center;
+      opacity: 0.18;
+    }
+  }
+}
+
+$min-badge-size: 14px;
+
+.mini-badge {
+  line-height: $min-badge-size;
+  width: $min-badge-size;
+  height: $min-badge-size;
+  font-size: 12px;
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  border-radius: 50%;
+  text-align: center;
+  z-index: 2;
+}
+
+.repeat-date-badge {
+  position: absolute;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  top: 50%;
+  margin-top: 10px;
+  font-size: 10px;
+  z-index: 10;
+  line-height: 1;
+  text-align: center;
+  padding: 1px 2px 0;
+  border: 1px solid $light-theme-extra-border-color;
+  background: #fff;
+  border-radius: $card-border-radius;
+
+  // avoid affecting drag handle
+  pointer-events: none;
+
+  @include darkTheme() {
+    border-color: $dark-theme-extra-border-color;
+    background: $dark-theme-bg-lighter;
+  }
 }
