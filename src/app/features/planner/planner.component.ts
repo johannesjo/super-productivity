@@ -1,21 +1,21 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { BaseComponent } from '../../core/base-component/base.component';
 import {
-  filter,
+  delay,
+  distinctUntilChanged,
   first,
-  startWith,
   switchMap,
   takeUntil,
   withLatestFrom,
 } from 'rxjs/operators';
 import { Store } from '@ngrx/store';
-import { selectTodayTasksWithPlannedAndDoneSeperated } from '../work-context/store/work-context.selectors';
+import {
+  selectTodayTaskIds,
+  selectTodayTasksWithPlannedAndDoneSeperated,
+} from '../work-context/store/work-context.selectors';
 import { PlannerActions } from './store/planner.actions';
-import { getWorklogStr } from '../../util/get-work-log-str';
 import { selectTaskFeatureState } from '../tasks/store/task.selectors';
-import { Actions, ofType } from '@ngrx/effects';
-import { addTask } from '../tasks/store/task.actions';
-import { TODAY_TAG } from '../tag/tag.const';
+import { DateService } from '../../core/date/date.service';
 
 @Component({
   selector: 'planner',
@@ -28,15 +28,18 @@ export class PlannerComponent extends BaseComponent {
 
   constructor(
     private _store: Store,
-    private _actions$: Actions,
+    private _dateService: DateService,
   ) {
     super();
 
-    this._actions$
+    this._store
+      .select(selectTodayTaskIds)
       .pipe(
-        ofType(addTask),
-        filter((a) => a.task.tagIds.includes(TODAY_TAG.id)),
-        startWith(undefined),
+        takeUntil(this.onDestroy$),
+        // TODO check if enough
+        distinctUntilChanged((a, b) => a.length === b.length),
+        // delay needed for all effects to be executed and task not being scheduled any more
+        delay(100),
       )
       .pipe(
         switchMap(() =>
@@ -52,9 +55,9 @@ export class PlannerComponent extends BaseComponent {
       .subscribe(([{ planned, done, normal }, taskState]) => {
         this._store.dispatch(
           PlannerActions.upsertPlannerDayTodayAndCleanupOldAndUndefined({
-            today: getWorklogStr(),
-            taskIds: normal.map((task) => task.id),
-            allTaskIds: taskState.ids as string[],
+            today: this._dateService.todayStr(),
+            taskIdsToAdd: normal.map((task) => task.id),
+            allTaskStateIds: taskState.ids as string[],
           }),
         );
       });

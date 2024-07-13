@@ -51,24 +51,27 @@ export const plannerReducer = createReducer(
     };
   }),
 
-  on(PlannerActions.upsertPlannerDayTodayAndCleanupOldAndUndefined, (state, action) => {
-    const daysCopy = { ...state.days };
-    Object.keys(daysCopy).forEach((day) => {
-      if (new Date(day) < new Date(action.today)) {
-        delete daysCopy[day];
-      } else {
-        daysCopy[day] = daysCopy[day]
-          // remove all ids that are in the new day and remove all deleted or missing
-          .filter((id) => !action.taskIds.includes(id) && action.allTaskIds.includes(id));
-      }
-    });
-    return {
-      days: {
-        ...daysCopy,
-        [action.today]: action.taskIds,
-      },
-    };
-  }),
+  on(
+    PlannerActions.upsertPlannerDayTodayAndCleanupOldAndUndefined,
+    (state, { today, taskIdsToAdd, allTaskStateIds }) => {
+      const daysCopy = { ...state.days };
+      Object.keys(daysCopy).forEach((day) => {
+        if (new Date(day) < new Date(today)) {
+          delete daysCopy[day];
+        } else {
+          daysCopy[day] = daysCopy[day]
+            // remove all ids that are in the new day and remove all deleted or missing
+            .filter((id) => !taskIdsToAdd.includes(id) && allTaskStateIds.includes(id));
+        }
+      });
+      return {
+        days: {
+          ...daysCopy,
+          [today]: taskIdsToAdd,
+        },
+      };
+    },
+  ),
 
   on(PlannerActions.transferTask, (state, action) => {
     const targetDays = state.days[action.newDay] || [];

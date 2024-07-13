@@ -10,6 +10,8 @@ export class BaseComponent implements OnDestroy {
   protected onDestroy$ = new Subject<void>();
 
   ngOnDestroy(): void {
+    console.log('DES');
+
     this.onDestroy$.next();
     this.onDestroy$.complete();
   }

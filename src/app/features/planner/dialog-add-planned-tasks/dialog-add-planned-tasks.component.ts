@@ -3,7 +3,6 @@ import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { T } from 'src/app/t.const';
 import { TaskService } from '../../tasks/task.service';
 import { Task } from '../../tasks/task.model';
-import { PlannerPlanViewService } from '../planner-plan-view/planner-plan-view.service';
 import { PlannerActions } from '../store/planner.actions';
 import { getWorklogStr } from '../../../util/get-work-log-str';
 import { Store } from '@ngrx/store';
@@ -24,7 +23,6 @@ export class DialogAddPlannedTasksComponent {
     @Inject(MAT_DIALOG_DATA) public data: { missingTasks: Task[] },
     private _matDialogRef: MatDialogRef<DialogAddPlannedTasksComponent>,
     private _taskService: TaskService,
-    private _plannerPlanViewService: PlannerPlanViewService,
     private _store: Store,
   ) {
     console.log('data', data);
@@ -38,8 +36,8 @@ export class DialogAddPlannedTasksComponent {
         this._store.dispatch(
           PlannerActions.upsertPlannerDayTodayAndCleanupOldAndUndefined({
             today: getWorklogStr(),
-            taskIds: normal.map((task) => task.id),
-            allTaskIds: taskState.ids as string[],
+            taskIdsToAdd: normal.map((task) => task.id),
+            allTaskStateIds: taskState.ids as string[],
           }),
         );
         this._close();
