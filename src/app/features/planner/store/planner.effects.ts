@@ -114,6 +114,11 @@ export class PlannerEffects {
             return this._store.select(selectTasksById, { ids: missingTasks }).pipe(
               first(),
               exhaustMap((tasks) => {
+                if (tasks.find((t) => !t)) {
+                  console.error('MISSING TASKS', tasks);
+                  throw new Error('Missing tasks for missing tasks');
+                }
+
                 return this._matDialog
                   .open(DialogAddPlannedTasksComponent, {
                     data: {
