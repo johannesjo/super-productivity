@@ -18,3 +18,15 @@
     font-size: $planner-font-size;
   }
 }
+
+.planner-drag-place-holder-shared {
+  min-height: $planner-item-height;
+  margin-bottom: 4px;
+  border-radius: 6px;
+  // NOTE bg color is set in material overwrite file since otherwise it does not seem to work
+  background: rgba(0, 0, 0, 0.05);
+
+  @include darkTheme(true) {
+    background: rgba(255, 255, 255, 0.05) !important;
+  }
+}

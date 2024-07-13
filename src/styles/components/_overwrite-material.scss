@@ -134,9 +134,4 @@ mat-icon,
 }
 
 .cdk-drag-placeholder {
-  background: rgba(0, 0, 0, 0.05);
-
-  @include darkTheme(true) {
-    background: rgba(255, 255, 255, 0.05) !important;
-  }
 }
