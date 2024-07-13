@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { PlannerActions } from './planner.actions';
 import {
+  delay,
   exhaustMap,
   filter,
   first,
@@ -101,6 +102,8 @@ export class PlannerEffects {
             this._globalTrackingIntervalService.todayDateStr$,
           );
         }),
+        // wait a bit for other stuff
+        delay(1000),
         withLatestFrom(
           this._store.pipe(select(selectPlannerState)),
           this._store.pipe(select(selectTodayTaskIds)),
@@ -110,22 +113,29 @@ export class PlannerEffects {
           const missingTasks = plannedTodayTaskIds.filter(
             (tid) => !todayTaskIds.includes(tid),
           );
+
           if (missingTasks.length > 0) {
             return this._store.select(selectTasksById, { ids: missingTasks }).pipe(
               first(),
               exhaustMap((tasks) => {
-                if (tasks.find((t) => !t)) {
-                  console.error('MISSING TASKS', tasks);
-                  throw new Error('Missing tasks for missing tasks');
+                // NOTE: some tasks might not be there anymore since we don't do live updates to the planner model
+                const existingTasks = tasks.filter((t) => !!t);
+                if (existingTasks.length) {
+                  return this._matDialog
+                    .open(DialogAddPlannedTasksComponent, {
+                      data: {
+                        missingTasks: tasks,
+                      },
+                    })
+                    .afterClosed();
+                } else {
+                  console.log(
+                    'Some tasks have been missing',
+                    existingTasks,
+                    missingTasks,
+                  );
+                  return EMPTY;
                 }
-
-                return this._matDialog
-                  .open(DialogAddPlannedTasksComponent, {
-                    data: {
-                      missingTasks: tasks,
-                    },
-                  })
-                  .afterClosed();
               }),
             );
           } else {
