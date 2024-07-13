@@ -45,13 +45,11 @@
 
 <div
   class="no-drag"
+  (longPressIOS)="openContextMenu($event)"
+  (contextmenu)="openContextMenu($event)"
   (touchstart)="onTouchStart($event)"
 >
-  <div
-    class="wrap"
-    (longPressIOS)="openContextMenu($event)"
-    (contextmenu)="openContextMenu($event)"
-  >
+  <div class="wrap">
     <div
       class="parent-title"
       *ngIf="parentTitle"
