@@ -168,43 +168,7 @@
             [isDoubleEnterMode]="true"
           ></add-task-bar>
 
-          <!-- NOTE workContextService.isToday should work as we only need the initial value -->
-          <ng-container
-            *ngIf="workContextService.isToday && (taskService.allPlannedForTodayNotOnToday$|async) as plannedForToday"
-          >
-            <button
-              *ngIf="plannedForToday?.length"
-              (click)="taskService.movePlannedTasksToToday(plannedForToday)"
-              class="add-scheduled"
-              color=""
-              mat-stroked-button
-              tabindex="1"
-            >
-              <mat-icon>playlist_add</mat-icon>
-              {{T.WW.ADD_SCHEDULED_FOR_TODAY|translate:{nr: plannedForToday.length} }}
-            </button>
-
-            <ng-container
-              *ngIf="plannedForToday.length === 0 && (taskService.allPlannedForTomorrowNotOnToday$|async) as plannedForTomorrow"
-            >
-              <ng-container
-                *ngIf="(repeatableScheduledForTomorrow$|async) as repeatableScheduledForTomorrow"
-              >
-                <button
-                  *ngIf="plannedForTomorrow.length || repeatableScheduledForTomorrow.length"
-                  (click)="addAllPlannedToDayAndCreateRepeatable(plannedForTomorrow, repeatableScheduledForTomorrow)"
-                  class="add-scheduled"
-                  color=""
-                  mat-stroked-button
-                  tabindex="1"
-                >
-                  <mat-icon>playlist_add</mat-icon>
-                  {{T.WW.ADD_SCHEDULED_FOR_TOMORROW|translate:{ nr:
-                  plannedForTomorrow.length + repeatableScheduledForTomorrow.length } }}
-                </button>
-              </ng-container>
-            </ng-container>
-          </ng-container>
+          <add-scheduled-for-tomorrow></add-scheduled-for-tomorrow>
 
           <button
             (click)="startWork()"

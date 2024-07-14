@@ -35,6 +35,7 @@ import { WorkContextService } from '../work-context/work-context.service';
 import { TaskRepeatCfgService } from '../task-repeat-cfg/task-repeat-cfg.service';
 import { TaskRepeatCfg } from '../task-repeat-cfg/task-repeat-cfg.model';
 import { ProjectService } from '../project/project.service';
+import { AddTasksForTomorrowService } from '../add-tasks-for-tomorrow/add-tasks-for-tomorrow.service';
 
 const SUB = 'SUB';
 const PARENT = 'PARENT';
@@ -98,6 +99,7 @@ export class WorkViewComponent implements OnInit, OnDestroy, AfterContentInit {
     private _activatedRoute: ActivatedRoute,
     private _projectService: ProjectService,
     private _cd: ChangeDetectorRef,
+    private _addTasksForTomorrowService: AddTasksForTomorrowService,
   ) {}
 
   @ViewChild('splitTopEl', { read: ElementRef }) set splitTopElRef(ref: ElementRef) {
@@ -185,7 +187,7 @@ export class WorkViewComponent implements OnInit, OnDestroy, AfterContentInit {
     plannedTasks: TaskPlanned[],
     repeatableScheduledForTomorrow: TaskRepeatCfg[],
   ): void {
-    this._taskRepeatCfgService.addAllPlannedToDayAndCreateRepeatable(
+    this._addTasksForTomorrowService.addAllPlannedToDayAndCreateRepeatable(
       plannedTasks,
       repeatableScheduledForTomorrow,
       this.taskService.currentTaskId,
