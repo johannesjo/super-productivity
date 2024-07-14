@@ -52,9 +52,12 @@ $h: $planner-item-height;
 }
 
 .parent-title {
-  padding-top: $s * 0.5;
-  margin-bottom: -2px;
+  padding-left: 4px;
+  padding-right: 4px;
+  padding-top: 4px;
+  padding-bottom: 4px;
   text-overflow: ellipsis;
+  line-height: 1.1;
   font-size: $planner-font-size-smaller-mobile;
 
   @include mq(xs) {
