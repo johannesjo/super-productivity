@@ -39,5 +39,6 @@ export const createAppDataCompleteMock = (): AppDataComplete => ({
   metric: createEmptyEntity(),
   improvement: createEmptyEntity() as any,
   obstruction: createEmptyEntity(),
+  planner: { days: {} },
   lastArchiveUpdate: 0,
 });
