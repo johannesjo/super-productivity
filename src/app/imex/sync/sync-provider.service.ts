@@ -165,6 +165,7 @@ export class SyncProviderService {
       isReady = false;
     }
     if (!isReady) {
+      console.log('syncProviderCfg', cp);
       this._snackService.open({
         msg: T.F.SYNC.S.INCOMPLETE_CFG,
         type: 'ERROR',
@@ -727,6 +728,7 @@ export class SyncProviderService {
     }
     const localSyncMeta = await this._persistenceLocalService.load();
     const localSyncMetaForProvider: LocalSyncMetaForProvider = {
+      ...localSyncMeta[cp.id],
       lastSync,
       rev,
       revTaskArchive:

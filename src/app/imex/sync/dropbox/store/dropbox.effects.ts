@@ -56,6 +56,27 @@ export class DropboxEffects {
     ),
   );
 
+  askToDeleteTokensOnDisable$: Observable<unknown> = createEffect(
+    () =>
+      this._actions$.pipe(
+        ofType(updateGlobalConfigSection),
+        filter(
+          ({ sectionKey, sectionCfg }): boolean =>
+            sectionKey === 'sync' &&
+            (sectionCfg as SyncConfig).syncProvider === SyncProvider.Dropbox &&
+            !(sectionCfg as SyncConfig).isEnabled,
+        ),
+        withLatestFrom(this._dropboxApiService.isTokenAvailable$),
+        filter(([, isTokenAvailable]) => isTokenAvailable),
+        tap(
+          () =>
+            confirm('You disabled sync. Do you want to delete your Dropbox tokens?') &&
+            this._dropboxApiService.deleteTokens(),
+        ),
+      ),
+    { dispatch: false },
+  );
+
   constructor(
     private _actions$: Actions,
     private _dropboxApiService: DropboxApiService,

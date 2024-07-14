@@ -289,6 +289,16 @@ export class DropboxApiService {
     });
   }
 
+  async deleteTokens(): Promise<void> {
+    await this._persistenceLocalService.updateDropboxSyncMeta({
+      accessToken: undefined,
+      _tokenExpiresAt: 0,
+      refreshToken: undefined,
+    });
+    this._accessToken$.next(null);
+    this._refreshToken$.next(null);
+  }
+
   private async _getTokensFromAuthCode(
     authCode: string,
     codeVerifier: string,
