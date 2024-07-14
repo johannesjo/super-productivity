@@ -53,9 +53,13 @@ export class AddTasksForTomorrowService {
         ? day.scheduledIItems.filter(
             (scheduledItem) =>
               scheduledItem.type !== ScheduleItemType.Task ||
-              !todaysTaskIds.includes(scheduledItem.task.id),
+              (!todaysTaskIds.includes(scheduledItem.task.id) &&
+                !todaysTaskIds.includes(scheduledItem.task.parentId)),
           ).length +
-          day.tasks.filter((task) => !todaysTaskIds.includes(task.id)).length +
+          day.tasks.filter(
+            (task) =>
+              !todaysTaskIds.includes(task.id) && !todaysTaskIds.includes(task.parentId),
+          ).length +
           day.noStartTimeRepeatProjections.length
         : 0,
     ),
@@ -105,19 +109,18 @@ export class AddTasksForTomorrowService {
   async movePlannedTasksToToday(plannedTasks: TaskCopy[]): Promise<unknown> {
     return Promise.all(
       plannedTasks.map(async (t) => {
-        if (t.parentId) {
-          if (t.projectId) {
-            this._projectService.moveTaskToTodayList(t.parentId, t.projectId);
-          }
-          // NOTE: no unsubscribe on purpose as we always want this to run until done
-          const parentTask = await this._taskService.getByIdOnce$(t.parentId).toPromise();
-          this._taskService.addTodayTag(parentTask);
-        } else {
-          if (t.projectId) {
-            this._projectService.moveTaskToTodayList(t.id, t.projectId);
-          }
-          this._taskService.addTodayTag(t);
+        // if (t.parentId) {
+        //   if (t.projectId) {
+        //     this._projectService.moveTaskToTodayList(t.parentId, t.projectId);
+        //   }
+        //   const parentTask = await this._taskService.getByIdOnce$(t.parentId).toPromise();
+        //   this._taskService.addTodayTag(parentTask);
+        // } else {
+        if (t.projectId) {
+          this._projectService.moveTaskToTodayList(t.id, t.projectId);
         }
+        this._taskService.addTodayTag(t);
+        // }
       }),
     );
   }
