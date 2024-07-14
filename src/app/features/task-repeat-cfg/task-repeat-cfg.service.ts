@@ -127,11 +127,9 @@ export class TaskRepeatCfgService {
   async createRepeatableTask(
     taskRepeatCfg: TaskRepeatCfg,
     targetDayDate: number,
-    currentTaskId: string | null,
   ): Promise<void> {
     const actionsForRepeatCfg = await this.getActionsForTaskRepeatCfg(
       taskRepeatCfg,
-      currentTaskId,
       targetDayDate,
     );
     actionsForRepeatCfg.forEach((act) => {
@@ -160,7 +158,6 @@ export class TaskRepeatCfgService {
 
   async getActionsForTaskRepeatCfg(
     taskRepeatCfg: TaskRepeatCfg,
-    currentTaskId: string | null,
     targetDayDate: number = Date.now(),
   ): // NOTE: updateTaskRepeatCfg missing as there is no way to declare it as action type
   Promise<

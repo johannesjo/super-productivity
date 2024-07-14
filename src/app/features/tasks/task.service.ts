@@ -11,7 +11,6 @@ import {
   TaskAdditionalInfoTargetPanel,
   TaskArchive,
   TaskCopy,
-  TaskPlanned,
   TaskReminderOptionId,
   TaskState,
   TaskWithSubTasks,
@@ -68,7 +67,6 @@ import {
   selectTasksById,
   selectTasksByRepeatConfigId,
   selectTasksByTag,
-  selectTasksPlannedForRangeNotOnToday,
   selectTaskWithSubTasksByRepeatConfigId,
 } from './store/task.selectors';
 import { RoundTimeOption } from '../project/project.model';
@@ -88,7 +86,6 @@ import { unique } from '../../util/unique';
 import { SnackService } from '../../core/snack/snack.service';
 import { ImexMetaService } from '../../imex/imex-meta/imex-meta.service';
 import { remindOptionToMilliseconds } from './util/remind-option-to-milliseconds';
-import { getDateRangeForDay } from '../../util/get-date-range-for-day';
 import { ProjectService } from '../project/project.service';
 import {
   moveProjectTaskDownInBacklogList,
@@ -160,22 +157,6 @@ export class TaskService {
   allTasks$: Observable<Task[]> = this._store.pipe(select(selectAllTasks));
 
   allStartableTasks$: Observable<Task[]> = this._store.pipe(select(selectStartableTasks));
-
-  // NOTE: this should work fine as long as the user restarts the app every day
-  // if not worst case is, that the buttons don't appear or today is shown as tomorrow
-  allPlannedForTodayNotOnToday$: Observable<TaskPlanned[]> = this._store.pipe(
-    select(selectTasksPlannedForRangeNotOnToday, getDateRangeForDay(Date.now())),
-  );
-
-  // NOTE: this should work fine as long as the user restarts the app every day
-  // if not worst case is, that the buttons don't appear or today is shown as tomorrow
-  allPlannedForTomorrowNotOnToday$: Observable<TaskPlanned[]> = this._store.pipe(
-    select(
-      selectTasksPlannedForRangeNotOnToday,
-      // eslint-disable-next-line no-mixed-operators
-      getDateRangeForDay(Date.now() + 24 * 60 * 60 * 1000),
-    ),
-  );
 
   // META FIELDS
   // -----------
@@ -1031,27 +1012,6 @@ export class TaskService {
       }
       return null;
     }
-  }
-
-  // NOTE: there is a duplicate of this in plan-tasks-tomorrow.component
-  async movePlannedTasksToToday(plannedTasks: TaskPlanned[]): Promise<unknown> {
-    return Promise.all(
-      plannedTasks.map(async (t) => {
-        if (t.parentId) {
-          if (t.projectId) {
-            this._projectService.moveTaskToTodayList(t.parentId, t.projectId);
-          }
-          // NOTE: no unsubscribe on purpose as we always want this to run until done
-          const parentTask = await this.getByIdOnce$(t.parentId).toPromise();
-          this.addTodayTag(parentTask);
-        } else {
-          if (t.projectId) {
-            this._projectService.moveTaskToTodayList(t.id, t.projectId);
-          }
-          this.addTodayTag(t);
-        }
-      }),
-    );
   }
 
   createNewTaskWithDefaults({

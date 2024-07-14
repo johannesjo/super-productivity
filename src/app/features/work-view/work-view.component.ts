@@ -24,7 +24,7 @@ import {
   timer,
   zip,
 } from 'rxjs';
-import { TaskPlanned, TaskWithSubTasks } from '../tasks/task.model';
+import { TaskWithSubTasks } from '../tasks/task.model';
 import { delay, filter, map, switchMap } from 'rxjs/operators';
 import { fadeAnimation } from '../../ui/animations/fade.ani';
 import { PlanningModeService } from '../planning-mode/planning-mode.service';
@@ -180,19 +180,6 @@ export class WorkViewComponent implements OnInit, OnDestroy, AfterContentInit {
 
   startWork(): void {
     this.planningModeService.leavePlanningMode();
-  }
-
-  // NOTE: there is a duplicate of this in plan-tasks-tomorrow.component
-  addAllPlannedToDayAndCreateRepeatable(
-    plannedTasks: TaskPlanned[],
-    repeatableScheduledForTomorrow: TaskRepeatCfg[],
-  ): void {
-    this._addTasksForTomorrowService.addAllPlannedToDayAndCreateRepeatable(
-      plannedTasks,
-      repeatableScheduledForTomorrow,
-      this.taskService.currentTaskId,
-      this._tomorrow,
-    );
   }
 
   resetBreakTimer(): void {

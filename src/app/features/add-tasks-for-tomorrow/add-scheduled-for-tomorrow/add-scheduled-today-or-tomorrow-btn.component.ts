@@ -6,11 +6,7 @@ import { MatIcon } from '@angular/material/icon';
 import { TranslateModule } from '@ngx-translate/core';
 import { WorkContextService } from '../../work-context/work-context.service';
 import { TaskService } from '../../tasks/task.service';
-import { TaskRepeatCfgService } from '../../task-repeat-cfg/task-repeat-cfg.service';
 import { AddTasksForTomorrowService } from '../add-tasks-for-tomorrow.service';
-import { Observable } from 'rxjs';
-import { TaskRepeatCfg } from '../../task-repeat-cfg/task-repeat-cfg.model';
-import { TaskPlanned } from '../../tasks/task.model';
 
 @Component({
   selector: 'add-scheduled-for-tomorrow',
@@ -21,30 +17,11 @@ import { TaskPlanned } from '../../tasks/task.model';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AddScheduledTodayOrTomorrowBtnComponent {
-  // eslint-disable-next-line no-mixed-operators
-  private _tomorrow: number = Date.now() + 24 * 60 * 60 * 1000;
-  repeatableScheduledForTomorrow$: Observable<TaskRepeatCfg[]> =
-    this._taskRepeatCfgService.getRepeatTableTasksDueForDayOnly$(this._tomorrow);
-
   protected readonly T = T;
 
   constructor(
     public workContextService: WorkContextService,
     public taskService: TaskService,
-    public _taskRepeatCfgService: TaskRepeatCfgService,
-    private _addTasksForTomorrowService: AddTasksForTomorrowService,
+    public addTasksForTomorrowService: AddTasksForTomorrowService,
   ) {}
-
-  // NOTE: there is a duplicate of this in plan-tasks-tomorrow.component
-  addAllPlannedToDayAndCreateRepeatable(
-    plannedTasks: TaskPlanned[],
-    repeatableScheduledForTomorrow: TaskRepeatCfg[],
-  ): void {
-    this._addTasksForTomorrowService.addAllPlannedToDayAndCreateRepeatable(
-      plannedTasks,
-      repeatableScheduledForTomorrow,
-      this.taskService.currentTaskId,
-      this._tomorrow,
-    );
-  }
 }
