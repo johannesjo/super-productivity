@@ -15,7 +15,6 @@ import { PersistenceService } from '../../../core/persistence/persistence.servic
 import { select, Store } from '@ngrx/store';
 import { selectPlannerState } from './planner.selectors';
 import { PlannerState } from './planner.reducer';
-import { getWorklogStr } from '../../../util/get-work-log-str';
 import { scheduleTask, updateTaskTags } from '../../tasks/store/task.actions';
 import { EMPTY, merge, of } from 'rxjs';
 import { TODAY_TAG } from '../../tag/tag.const';
@@ -27,6 +26,7 @@ import { selectTasksById } from '../../tasks/store/task.selectors';
 import { SyncTriggerService } from '../../../imex/sync/sync-trigger.service';
 import { GlobalTrackingIntervalService } from '../../../core/global-tracking-interval/global-tracking-interval.service';
 import { loadAllData } from '../../../root-store/meta/load-all-data.action';
+import { DateService } from '../../../core/date/date.service';
 
 @Injectable()
 export class PlannerEffects {
@@ -45,7 +45,7 @@ export class PlannerEffects {
     return this._actions$.pipe(
       ofType(PlannerActions.transferTask),
       switchMap(({ prevDay, newDay, task }) => {
-        const todayDayStr = getWorklogStr();
+        const todayDayStr = this._dateService.todayStr();
         if (prevDay === todayDayStr && newDay !== todayDayStr) {
           const newTagIds = task.tagIds.filter((tagId) => tagId !== TODAY_TAG.id);
           // NOTE: we need to prevent the NO tag NO project case
@@ -154,6 +154,7 @@ export class PlannerEffects {
     private _syncTriggerService: SyncTriggerService,
     private _matDialog: MatDialog,
     private _globalTrackingIntervalService: GlobalTrackingIntervalService,
+    private _dateService: DateService,
   ) {}
 
   private _saveToLs(

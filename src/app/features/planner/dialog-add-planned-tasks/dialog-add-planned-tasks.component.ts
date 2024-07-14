@@ -4,11 +4,11 @@ import { T } from 'src/app/t.const';
 import { TaskService } from '../../tasks/task.service';
 import { Task } from '../../tasks/task.model';
 import { PlannerActions } from '../store/planner.actions';
-import { getWorklogStr } from '../../../util/get-work-log-str';
 import { Store } from '@ngrx/store';
 import { first, withLatestFrom } from 'rxjs/operators';
 import { selectTodayTasksWithPlannedAndDoneSeperated } from '../../work-context/store/work-context.selectors';
 import { selectTaskFeatureState } from '../../tasks/store/task.selectors';
+import { DateService } from '../../../core/date/date.service';
 
 @Component({
   selector: 'dialog-add-planned-tasks',
@@ -24,6 +24,7 @@ export class DialogAddPlannedTasksComponent {
     private _matDialogRef: MatDialogRef<DialogAddPlannedTasksComponent>,
     private _taskService: TaskService,
     private _store: Store,
+    private _dateService: DateService,
   ) {
     console.log('data', data);
   }
@@ -35,7 +36,7 @@ export class DialogAddPlannedTasksComponent {
       .subscribe(([{ planned, done, normal }, taskState]) => {
         this._store.dispatch(
           PlannerActions.upsertPlannerDayTodayAndCleanupOldAndUndefined({
-            today: getWorklogStr(),
+            today: this._dateService.todayStr(),
             taskIdsToAdd: normal.map((task) => task.id),
             allTaskStateIds: taskState.ids as string[],
           }),

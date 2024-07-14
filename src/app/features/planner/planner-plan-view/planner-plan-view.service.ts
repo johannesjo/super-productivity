@@ -15,10 +15,10 @@ import { Store } from '@ngrx/store';
 import { CalendarIntegrationService } from '../../calendar-integration/calendar-integration.service';
 import { PlannerDay } from '../planner.model';
 import { selectPlannerDays } from '../store/planner.selectors';
-import { getWorklogStr } from '../../../util/get-work-log-str';
 import { ReminderService } from '../../reminder/reminder.service';
 import { TaskPlanned } from '../../tasks/task.model';
 import { selectAllTaskRepeatCfgs } from '../../task-repeat-cfg/store/task-repeat-cfg.reducer';
+import { DateService } from '../../../core/date/date.service';
 
 @Injectable({
   providedIn: 'root',
@@ -36,7 +36,7 @@ export class PlannerPlanViewService {
       for (let i = 0; i < nrOfDaysToShow; i++) {
         if (includedWeekDays.includes((i + todayDayNr) % 7)) {
           // eslint-disable-next-line no-mixed-operators
-          daysToShow.push(getWorklogStr(today + i * 24 * 60 * 60 * 1000));
+          daysToShow.push(this._dateService.todayStr(today + i * 24 * 60 * 60 * 1000));
         }
       }
       return daysToShow;
@@ -123,6 +123,7 @@ export class PlannerPlanViewService {
     private _store: Store,
     private _reminderService: ReminderService,
     private _calendarIntegrationService: CalendarIntegrationService,
+    private _dateService: DateService,
   ) {}
 
   private _getCalProviderFromCache(): TimelineCalendarMapEntry[] {
