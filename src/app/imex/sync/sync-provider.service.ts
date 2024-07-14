@@ -158,8 +158,12 @@ export class SyncProviderService {
 
   private async _sync(cp: SyncProviderServiceInterface): Promise<SyncResult> {
     let local: AppDataComplete | undefined;
-
-    const isReady = await cp.isReady$.pipe(first()).toPromise();
+    let isReady: boolean = false;
+    try {
+      isReady = await cp.isReady$.pipe(first()).toPromise();
+    } catch (e) {
+      isReady = false;
+    }
     if (!isReady) {
       this._snackService.open({
         msg: T.F.SYNC.S.INCOMPLETE_CFG,
@@ -167,7 +171,6 @@ export class SyncProviderService {
       });
       return 'ERROR';
     }
-
     const localSyncMeta = await this._persistenceLocalService.load();
     const lastSync = localSyncMeta[cp.id].lastSync;
     const localRev = localSyncMeta[cp.id].rev;
