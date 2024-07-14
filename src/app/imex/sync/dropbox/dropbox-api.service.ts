@@ -252,14 +252,14 @@ export class DropboxApiService {
     } else {
       console.log('LEGACY TOKENS');
       // TODO remove legacy stuff
-      this._globalConfigService.cfg$
+      this._dataInitService.isAllDataLoadedInitially$
         .pipe(
+          switchMap(() => this._globalConfigService.cfg$),
           map((cfg) => cfg?.sync.dropboxSync),
           first(),
         )
         .subscribe((v) => {
-          this._accessToken$.next((v as any)?.accessToken);
-          this._refreshToken$.next((v as any)?.refreshToken);
+          console.log('SETTING LEGACY TOKENS', v as any);
           this.updateTokens({
             accessToken: (v as any)?.accessToken,
             refreshToken: (v as any)?.refreshToken,
