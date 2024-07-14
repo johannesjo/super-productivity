@@ -29,6 +29,8 @@ describe('isValidAppData()', () => {
   beforeEach(() => {
     mock = createAppDataCompleteMock();
     spyOn(window, 'alert').and.stub();
+    // for mocking away dev error confirm
+    spyOn(window, 'confirm').and.returnValue(true);
   });
 
   it('should work for valid data', () => {
