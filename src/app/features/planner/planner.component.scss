@@ -7,11 +7,16 @@
     }
   }
 
+  ::ng-deep better-drawer-container.isOpen > .side {
+    width: 220px;
+    max-width: 220px;
+    min-width: 220px;
+  }
   ::ng-deep better-drawer-container > .side {
     z-index: $z-side-panel-planner;
     width: 220px;
-    min-width: 220px;
     max-width: 220px;
+    min-width: 25%;
 
     @include mq(sm) {
       width: 250px;
