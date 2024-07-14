@@ -21,12 +21,12 @@ import { SyncProvider } from '../sync-provider.model';
 @Injectable({ providedIn: 'root' })
 export class DropboxApiService {
   // keep as fallback
-  private _accessToken$: ReplaySubject<string | null> = new ReplaySubject<
-    string | null
-  >();
-  private _refreshToken$: ReplaySubject<string | null> = new ReplaySubject<
-    string | null
-  >();
+  private _accessToken$: ReplaySubject<string | null> = new ReplaySubject<string | null>(
+    1,
+  );
+  private _refreshToken$: ReplaySubject<string | null> = new ReplaySubject<string | null>(
+    1,
+  );
 
   isTokenAvailable$: Observable<boolean> = this._accessToken$.pipe(
     map((token) => !!token),
@@ -46,10 +46,6 @@ export class DropboxApiService {
     private _snackService: SnackService,
     private _persistenceLocalService: PersistenceLocalService,
   ) {
-    this._isReady$.subscribe((v) => console.log(`_isReady$`, v));
-    this.isTokenAvailable$.subscribe((v) => console.log(`isTokenAvailable$`, v));
-    this._accessToken$.subscribe((v) => console.log(`_accessToken$`, v));
-
     this._initTokens();
   }
 
