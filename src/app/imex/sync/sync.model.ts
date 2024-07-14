@@ -54,6 +54,10 @@ export interface LocalSyncMetaForProvider {
   lastSync: number;
   rev: string | null;
   revTaskArchive: string | null;
+  // currently dropbox only
+  accessToken?: string;
+  refreshToken?: string;
+  _tokenExpiresAt?: number;
 }
 
 export interface LocalSyncMetaModel {

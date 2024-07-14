@@ -66,11 +66,7 @@ export type PomodoroConfig = Readonly<{
 
 // NOTE: needs to be writable due to how we use it
 
-export interface DropboxSyncConfig {
-  accessToken: string | null;
-  refreshToken: string | null;
-  _tokenExpiresAt?: number;
-}
+export type DropboxSyncConfig = object;
 
 export interface WebDavConfig {
   baseUrl: string | null;

@@ -1,6 +1,6 @@
 /* eslint-disable max-len */
 import { T } from '../../../t.const';
-import { ConfigFormSection, DropboxSyncConfig, SyncConfig } from '../global-config.model';
+import { ConfigFormSection, SyncConfig } from '../global-config.model';
 import { SyncProvider } from '../../../imex/sync/sync-provider.model';
 import { IS_ANDROID_WEB_VIEW } from '../../../util/is-android-web-view';
 import { IS_ELECTRON } from '../../../app.constants';
@@ -105,23 +105,23 @@ export const SYNC_FORM: ConfigFormSection<SyncConfig> = {
         show: true,
       },
     },
-    {
-      // TODO animation maybe
-      hideExpression: (m, v, field) =>
-        field?.parent?.model.syncProvider !== SyncProvider.Dropbox,
-      key: 'dropboxSync',
-      templateOptions: { label: 'Address' },
-      fieldGroup: [
-        {
-          key: 'accessToken',
-          type: 'input',
-          hideExpression: (model: DropboxSyncConfig) => !model?.accessToken,
-          templateOptions: {
-            label: T.F.SYNC.FORM.DROPBOX.L_ACCESS_TOKEN,
-          },
-        },
-      ],
-    },
+    // TODO remove completely
+    // {
+    //   // TODO animation maybe
+    //   hideExpression: (m, v, field) =>
+    //     field?.parent?.model.syncProvider !== SyncProvider.Dropbox,
+    //   key: 'dropboxSync',
+    //   fieldGroup: [
+    //     {
+    //       key: 'accessToken',
+    //       type: 'input',
+    //       hideExpression: (model: DropboxSyncConfig) => !model?.accessToken,
+    //       templateOptions: {
+    //         label: T.F.SYNC.FORM.DROPBOX.L_ACCESS_TOKEN,
+    //       },
+    //     },
+    //   ],
+    // },
     IS_ANDROID_WEB_VIEW
       ? {
           hideExpression: (m, v, field) =>

@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { DB, LS } from './storage-keys.const';
 import { DatabaseService } from './database.service';
-import { LocalSyncMetaModel } from '../../imex/sync/sync.model';
+import { LocalSyncMetaForProvider, LocalSyncMetaModel } from '../../imex/sync/sync.model';
 import { SyncProvider } from 'src/app/imex/sync/sync-provider.model';
 
 const DEFAULT_LOCAL_SYNC_META: LocalSyncMetaModel = {
@@ -40,6 +40,19 @@ export class PersistenceLocalService {
       return r;
     }
     return DEFAULT_LOCAL_SYNC_META;
+  }
+
+  async updateDropboxSyncMeta(
+    dropboxSyncMeta: Partial<LocalSyncMetaForProvider>,
+  ): Promise<unknown> {
+    const localSyncMeta = await this.load();
+    return await this.save({
+      ...localSyncMeta,
+      Dropbox: {
+        ...localSyncMeta.Dropbox,
+        ...dropboxSyncMeta,
+      },
+    });
   }
 
   async loadLastSyncModelChange(): Promise<number> {
