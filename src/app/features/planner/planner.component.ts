@@ -16,6 +16,7 @@ import {
 import { PlannerActions } from './store/planner.actions';
 import { selectTaskFeatureState } from '../tasks/store/task.selectors';
 import { DateService } from '../../core/date/date.service';
+import { LayoutService } from '../../core-ui/layout/layout.service';
 
 @Component({
   selector: 'planner',
@@ -24,11 +25,12 @@ import { DateService } from '../../core/date/date.service';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class PlannerComponent extends BaseComponent {
-  isPanelOpen = true;
+  isPanelOpen = false;
 
   constructor(
     private _store: Store,
     private _dateService: DateService,
+    public layoutService: LayoutService,
   ) {
     super();
 

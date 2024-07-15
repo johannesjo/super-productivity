@@ -41,12 +41,25 @@
     <add-task-panel (closePanel)="isPanelOpen=false"></add-task-panel>
   </ng-container>
 </better-drawer-container>
-<button
+
+<div
+  class="fab-wrapper"
   *ngIf="!isPanelOpen"
-  mat-fab
-  color="primary"
-  class="show-add-task-panel-btn"
-  (click)="isPanelOpen = true"
 >
-  <mat-icon>playlist_add</mat-icon>
-</button>
+  <button
+    mat-fab
+    class="show-xs-only"
+    color="primary"
+    (click)="layoutService.showAddTaskBar()"
+  >
+    <mat-icon>add</mat-icon>
+  </button>
+
+  <button
+    mat-fab
+    color="primary"
+    (click)="isPanelOpen = true"
+  >
+    <mat-icon>playlist_add</mat-icon>
+  </button>
+</div>

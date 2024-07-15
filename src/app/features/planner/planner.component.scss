@@ -112,7 +112,7 @@
   justify-content: center;
 }
 
-.show-add-task-panel-btn {
+.fab-wrapper {
   position: fixed;
   right: 32px;
   bottom: 32px;
@@ -122,5 +122,9 @@
     right: 50%;
     transform: translateX(50%);
     bottom: 16px;
+  }
+
+  > button:nth-child(1n + 1) {
+    margin-left: 8px;
   }
 }
