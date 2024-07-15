@@ -31,6 +31,8 @@ import { SyncTriggerService } from '../../../imex/sync/sync-trigger.service';
 import { GlobalTrackingIntervalService } from '../../../core/global-tracking-interval/global-tracking-interval.service';
 import { loadAllData } from '../../../root-store/meta/load-all-data.action';
 import { DateService } from '../../../core/date/date.service';
+import { selectTagById } from '../../tag/store/tag.reducer';
+import { updateTag } from '../../tag/store/tag.actions';
 
 @Injectable()
 export class PlannerEffects {
@@ -50,6 +52,31 @@ export class PlannerEffects {
     },
     { dispatch: false },
   );
+
+  reOrderTodayWhenReOrderingInPlanner$ = createEffect(() => {
+    return this._actions$.pipe(
+      ofType(PlannerActions.moveInList),
+      filter((action) => action.targetDay === this._dateService.todayStr()),
+      withLatestFrom(
+        this._store.pipe(select(selectTagById, { id: TODAY_TAG.id })),
+        this._store.pipe(select(selectPlannerState)),
+      ),
+      map(([action, todayTag, plannerState]) => {
+        const plannedIds = plannerState.days[this._dateService.todayStr()] || [];
+        return updateTag({
+          tag: {
+            id: TODAY_TAG.id,
+            changes: {
+              taskIds: [
+                ...plannedIds,
+                ...todayTag.taskIds.filter((id) => !plannedIds.includes(id)),
+              ],
+            },
+          },
+        });
+      }),
+    );
+  });
 
   addOrRemoveTodayTag$ = createEffect(() => {
     return this._actions$.pipe(
