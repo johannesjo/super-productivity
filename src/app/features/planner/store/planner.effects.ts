@@ -6,7 +6,6 @@ import {
   exhaustMap,
   filter,
   first,
-  skip,
   switchMap,
   tap,
   withLatestFrom,
@@ -32,10 +31,16 @@ import { DateService } from '../../../core/date/date.service';
 export class PlannerEffects {
   saveToDB$ = createEffect(
     () => {
-      return this._store.pipe(
-        select(selectPlannerState),
-        skip(1),
-        tap((plannerState) => this._saveToLs(plannerState, true)),
+      return this._actions$.pipe(
+        ofType(
+          PlannerActions.upsertPlannerDay,
+          PlannerActions.upsertPlannerDayTodayAndCleanupOldAndUndefined,
+          PlannerActions.moveInList,
+          PlannerActions.transferTask,
+          PlannerActions.removeTaskFromDays,
+        ),
+        withLatestFrom(this._store.pipe(select(selectPlannerState))),
+        tap(([, plannerState]) => this._saveToLs(plannerState, true)),
       );
     },
     { dispatch: false },
