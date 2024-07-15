@@ -5,7 +5,7 @@ import { selectCalendarProviders } from '../../config/store/global-config.reduce
 import { distinctUntilChanged, map, startWith, switchMap, tap } from 'rxjs/operators';
 import {
   selectAllCalendarTaskEventIds,
-  selectTasksById,
+  selectPlannedTasksById,
 } from '../../tasks/store/task.selectors';
 import { distinctUntilChangedObject } from '../../../util/distinct-until-changed-object';
 import { CalendarIntegrationEvent } from '../../calendar-integration/calendar-integration.model';
@@ -91,13 +91,13 @@ export class PlannerPlanViewService {
       const tids = reminders
         .filter((reminder) => reminder.type === 'TASK')
         .map((reminder) => reminder.relatedId);
-      return this._store.select(selectTasksById, { ids: tids }) as Observable<
+      return this._store.select(selectPlannedTasksById, { ids: tids }) as Observable<
         TaskPlanned[]
       >;
     }),
-    // there is a short moment when the reminder is already there but the task is not
-    // and there is another when a tasks get deleted
-    map((tasks) => tasks.filter((task) => !!task?.plannedAt)),
+    distinctUntilChanged(
+      (a, b) => a.length === b.length && a.every((v, i) => v === b[i]),
+    ),
   );
 
   // TODO this needs to be more performant
