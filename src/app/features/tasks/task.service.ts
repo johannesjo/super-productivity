@@ -83,10 +83,8 @@ import {
 } from '../work-context/store/work-context-meta.actions';
 import { Router } from '@angular/router';
 import { unique } from '../../util/unique';
-import { SnackService } from '../../core/snack/snack.service';
 import { ImexMetaService } from '../../imex/imex-meta/imex-meta.service';
 import { remindOptionToMilliseconds } from './util/remind-option-to-milliseconds';
-import { ProjectService } from '../project/project.service';
 import {
   moveProjectTaskDownInBacklogList,
   moveProjectTaskInBacklogList,
@@ -175,8 +173,6 @@ export class TaskService {
     private readonly _tagService: TagService,
     private readonly _workContextService: WorkContextService,
     private readonly _imexMetaService: ImexMetaService,
-    private readonly _snackService: SnackService,
-    private readonly _projectService: ProjectService,
     private readonly _timeTrackingService: GlobalTrackingIntervalService,
     private readonly _dateService: DateService,
     private readonly _router: Router,
