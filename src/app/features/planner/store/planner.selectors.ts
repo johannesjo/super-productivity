@@ -33,7 +33,15 @@ export const selectPlannerDays = (
     selectTaskFeatureState,
     selectPlannerState,
     (taskState, plannerState): PlannerDay[] => {
-      return dayDates.map((dayDate, dayIndex) => {
+      const allDatesWithData = Object.keys(plannerState.days);
+      const dayDatesToUse = [
+        ...dayDates,
+        ...allDatesWithData.filter(
+          (d) => plannerState.days[d].length && !dayDates.includes(d),
+        ),
+      ];
+
+      return dayDatesToUse.map((dayDate, dayIndex) => {
         const currentDayDate = new Date(dayDate);
         const currentDayTimestamp = currentDayDate.getTime();
         const tIds = plannerState.days[dayDate] || [];
