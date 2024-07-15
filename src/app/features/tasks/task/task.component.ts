@@ -58,6 +58,7 @@ import { SnackService } from '../../../core/snack/snack.service';
 import { isToday } from '../../../util/is-today.util';
 import { IS_TOUCH_PRIMARY } from '../../../util/is-mouse-primary';
 import { KeyboardConfig } from '../../config/keyboard-config.model';
+import { DialogPlanForDayComponent } from '../../planner/dialog-plan-for-day/dialog-plan-for-day.component';
 
 @Component({
   selector: 'task',
@@ -280,6 +281,18 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
     this._matDialog
       .open(DialogAddTaskReminderComponent, {
         data: { task: this.task } as AddTaskReminderInterface,
+      })
+      .afterClosed()
+      .pipe(takeUntil(this._destroy$))
+      .subscribe(() => this.focusSelf());
+  }
+
+  planForDay(): void {
+    this._matDialog
+      .open(DialogPlanForDayComponent, {
+        // we focus inside dialog instead
+        autoFocus: false,
+        data: { task: this.task },
       })
       .afterClosed()
       .pipe(takeUntil(this._destroy$))
@@ -860,6 +873,9 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
     }
     if (checkKeyCombo(ev, keys.taskSchedule)) {
       this.editReminder();
+    }
+    if (checkKeyCombo(ev, keys.taskPlanForDay)) {
+      this.planForDay();
     }
     if (checkKeyCombo(ev, keys.taskToggleDone)) {
       this.toggleDoneKeyboard();

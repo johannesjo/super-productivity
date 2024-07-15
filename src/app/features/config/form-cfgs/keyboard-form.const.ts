@@ -251,6 +251,13 @@ export const KEYBOARD_SETTINGS_FORM_CFG: ConfigFormSection<KeyboardConfig> = {
       },
     },
     {
+      key: 'taskPlanForDay',
+      type: 'keyboard',
+      templateOptions: {
+        label: T.GCF.KEYBOARD.TASK_PLAN_FORDAY,
+      },
+    },
+    {
       key: 'taskToggleDone',
       type: 'keyboard',
       templateOptions: {

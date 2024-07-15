@@ -406,6 +406,15 @@
             </button>
 
             <button
+              (click)="planForDay()"
+              mat-menu-item
+            >
+              <mat-icon>edit_calendar</mat-icon>
+              {{ T.F.TASK.CMP.PLAN_FOR_DAY|translate }}
+              <span class="keyIndicator"> {{ kb.taskPlanForDay }} </span>
+            </button>
+
+            <button
               (click)="addSubTask();"
               *ngIf="!task.parentId&&!task.isDone"
               mat-menu-item
