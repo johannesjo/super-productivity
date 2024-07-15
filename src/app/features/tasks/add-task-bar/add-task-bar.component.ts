@@ -44,6 +44,9 @@ import { blendInOutAnimation } from 'src/app/ui/animations/blend-in-out.ani';
 import { fadeAnimation } from '../../../ui/animations/fade.ani';
 import { SS } from '../../../core/persistence/storage-keys.const';
 import { IS_ANDROID_WEB_VIEW } from '../../../util/is-android-web-view';
+import { Store } from '@ngrx/store';
+import { PlannerActions } from '../../planner/store/planner.actions';
+import { getWorklogStr } from '../../../util/get-work-log-str';
 
 @Component({
   selector: 'add-task-bar',
@@ -59,6 +62,7 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
   @Input() isDoubleEnterMode: boolean = false;
   @Input() isElevated: boolean = false;
   @Input() isDisableAutoFocus: boolean = false;
+  @Input() planForDay?: string;
   @Output() blurred: EventEmitter<any> = new EventEmitter();
   @Output() done: EventEmitter<any> = new EventEmitter();
 
@@ -166,6 +170,7 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
     private _projectService: ProjectService,
     private _tagService: TagService,
     private _cd: ChangeDetectorRef,
+    private _store: Store,
   ) {
     this._subs.add(
       this.activatedIssueTask$.subscribe((v) => (this.activatedIssueTask = v)),
@@ -239,6 +244,7 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
   onBlur(ev: FocusEvent): void {
     const relatedTarget: HTMLElement = ev.relatedTarget as HTMLElement;
     let isUIelement = false;
+
     if (relatedTarget) {
       const { className } = relatedTarget;
       isUIelement =
@@ -253,6 +259,7 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
         (this.inputEl as ElementRef).nativeElement.value,
       );
     }
+
     if (relatedTarget && isUIelement) {
       (this.inputEl as ElementRef).nativeElement.focus();
     } else {
@@ -262,6 +269,8 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
           this._blurTimeout = window.setTimeout(() => {
             this.blurred.emit(ev);
           }, 300);
+        } else {
+          this.blurred.emit(ev);
         }
       }, 20);
     }
@@ -369,7 +378,29 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
 
     this.taskSuggestionsCtrl.setValue('');
     this._isAddInProgress = false;
-    this._focusInput();
+
+    if (this._lastAddedTaskId) {
+      this._planForDayAfterAddTaskIfConfigured(this._lastAddedTaskId);
+    }
+
+    if (this.planForDay) {
+      this.blurred.emit();
+    } else {
+      this._focusInput();
+    }
+  }
+
+  private _planForDayAfterAddTaskIfConfigured(taskId: string): void {
+    const planForDay = this.planForDay;
+    if (planForDay) {
+      this._taskService.getByIdOnce$(taskId).subscribe((task) => {
+        if (getWorklogStr() !== planForDay) {
+          this._store.dispatch(
+            PlannerActions.planTaskForDay({ task: task, day: planForDay }),
+          );
+        }
+      });
+    }
   }
 
   private async _getCtxForTaskSuggestion({

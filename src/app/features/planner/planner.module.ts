@@ -25,6 +25,7 @@ import { plannerFeature } from './store/planner.reducer';
 import { PlannerEffects } from './store/planner.effects';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { DialogAddPlannedTasksComponent } from './dialog-add-planned-tasks/dialog-add-planned-tasks.component';
+import { AddTaskInlineComponent } from './add-task-inline/add-task-inline.component';
 
 @NgModule({
   declarations: [
@@ -53,6 +54,7 @@ import { DialogAddPlannedTasksComponent } from './dialog-add-planned-tasks/dialo
     TagModule,
     CdkDragPlaceholder,
     IssueModule,
+    AddTaskInlineComponent,
   ],
 })
 export class PlannerModule {}
