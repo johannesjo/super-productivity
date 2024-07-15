@@ -25,6 +25,17 @@ $h: $planner-item-height;
   }
 }
 
+:host-context(.isLightTheme).isCurrent {
+  border-color: $task-c-current !important;
+  border-width: 1px !important;
+  border-style: dashed;
+}
+
+:host-context(.isDarkTheme).isCurrent {
+  background: $task-c-current-bg-dark;
+  box-shadow: $task-current-shadow-dark;
+}
+
 .no-drag {
   padding: 4px 0;
   display: flex;
@@ -38,6 +49,10 @@ $h: $planner-item-height;
   @include mq(xs) {
     font-size: $planner-font-size-smaller !important;
   }
+}
+
+.play-icon-indicator {
+  color: $c-accent;
 }
 
 .title {

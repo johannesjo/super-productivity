@@ -39,7 +39,6 @@ import { updateTask } from '../../tasks/store/task.actions';
 export class PlannerTaskComponent extends BaseComponent implements OnInit, OnDestroy {
   @Input({ required: true }) task!: TaskCopy;
 
-  isCurrent = false;
   isRepeatTaskCreatedToday = false;
 
   readonly T = T;
@@ -56,6 +55,11 @@ export class PlannerTaskComponent extends BaseComponent implements OnInit, OnDes
   @HostBinding('class.isDone')
   get isDone(): boolean {
     return this.task.isDone;
+  }
+
+  @HostBinding('class.isCurrent')
+  get isCurrent(): boolean {
+    return this.task.id === this._taskService.currentTaskId;
   }
 
   constructor(
