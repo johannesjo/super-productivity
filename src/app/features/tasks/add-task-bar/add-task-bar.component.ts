@@ -155,7 +155,7 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
   );
 
   private _isAddInProgress?: boolean;
-  private _blurTimeout?: number;
+  private _delayBlurTimeout?: number;
   private _autofocusTimeout?: number;
   private _attachKeyDownHandlerTimeout?: number;
   private _saveTmpTodoTimeout?: number;
@@ -181,6 +181,7 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
   }
 
   ngAfterViewInit(): void {
+    this.isAddToBottom = !!this.planForDay || this.isAddToBottom;
     if (!this.isDisableAutoFocus) {
       this._focusInput();
     }
@@ -218,8 +219,8 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    if (this._blurTimeout) {
-      window.clearTimeout(this._blurTimeout);
+    if (this._delayBlurTimeout) {
+      window.clearTimeout(this._delayBlurTimeout);
     }
     if (this._attachKeyDownHandlerTimeout) {
       window.clearTimeout(this._attachKeyDownHandlerTimeout);
@@ -245,6 +246,10 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
     const relatedTarget: HTMLElement = ev.relatedTarget as HTMLElement;
     let isUIelement = false;
 
+    console.log(relatedTarget);
+    console.log(ev);
+    console.log(ev.target);
+
     if (relatedTarget) {
       const { className } = relatedTarget;
       isUIelement =
@@ -264,15 +269,15 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
       (this.inputEl as ElementRef).nativeElement.focus();
     } else {
       // we need to wait since otherwise addTask is not working
-      this._blurTimeout = window.setTimeout(() => {
+      this._delayBlurTimeout = window.setTimeout(() => {
         if (this._isAddInProgress) {
-          this._blurTimeout = window.setTimeout(() => {
+          this._delayBlurTimeout = window.setTimeout(() => {
             this.blurred.emit(ev);
           }, 300);
         } else {
           this.blurred.emit(ev);
         }
-      }, 20);
+      }, 150);
     }
   }
 
@@ -286,6 +291,8 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
   }
 
   async addTask(): Promise<void> {
+    console.log('XXX');
+
     this._isAddInProgress = true;
     const item: AddTaskSuggestion | string = this.taskSuggestionsCtrl.value;
 
