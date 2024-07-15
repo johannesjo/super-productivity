@@ -15,6 +15,7 @@ import { Store } from '@ngrx/store';
 import { PlannerActions } from '../store/planner.actions';
 import { getWorklogStr } from '../../../util/get-work-log-str';
 import { CommonModule } from '@angular/common';
+import { SnackService } from '../../../core/snack/snack.service';
 
 @Component({
   selector: 'dialog-plan-for-day',
@@ -35,6 +36,7 @@ export class DialogPlanForDayComponent implements AfterViewInit {
     private _matDialogRef: MatDialogRef<DialogPlanForDayComponent>,
     private _cd: ChangeDetectorRef,
     private _store: Store,
+    private _snackService: SnackService,
   ) {
     this.selectedDate = data.day || new Date().toISOString();
   }
@@ -56,10 +58,11 @@ export class DialogPlanForDayComponent implements AfterViewInit {
 
   dateSelected(ev: Date): void {
     console.log(ev);
+    const newDay = getWorklogStr(ev);
     this._store.dispatch(
-      PlannerActions.planTaskForDay({ task: this.data.task, day: getWorklogStr(ev) }),
+      PlannerActions.planTaskForDay({ task: this.data.task, day: newDay }),
     );
-
     this.close();
+    this._snackService.open({ type: 'SUCCESS', msg: `Task planned for ${newDay}` });
   }
 }
