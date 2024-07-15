@@ -30,6 +30,7 @@
           cdkDrag
           [cdkDragData]="task"
           [task]="task"
+          [day]="day.dayDate"
         ></planner-task>
         }
 
@@ -89,6 +90,7 @@
           <planner-task
             cdkDrag
             [task]="scheduledItem.task"
+            [day]="day.dayDate"
             [cdkDragData]="scheduledItem.task"
           ></planner-task>
           } @case (SCHEDULE_ITEM_TYPE.CalEvent) {

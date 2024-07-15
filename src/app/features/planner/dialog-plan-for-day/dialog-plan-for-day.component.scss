@@ -1,0 +1,34 @@
+@import '../../../../variables.scss';
+
+:host {
+  min-width: 320px;
+  max-width: 320px;
+  display: block;
+
+  ::ng-deep .mat-calendar-header {
+    padding-top: 0;
+  }
+
+  ::ng-deep .mat-calendar-body-selected {
+    //background: transparent;
+    //background: rgba(0,0,0,.1);
+  }
+
+  ::ng-deep .mat-calendar-body-cell:focus .mat-calendar-body-cell-content {
+    outline: 2px solid $c-accent;
+    background: $c-primary;
+  }
+}
+
+:host h4 {
+  text-align: center;
+  padding-top: 16px;
+  font-size: 14px;
+  font-weight: bold;
+}
+
+.msg {
+  text-align: center;
+  line-height: 40px;
+  opacity: 0.2;
+}

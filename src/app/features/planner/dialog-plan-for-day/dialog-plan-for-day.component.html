@@ -1,0 +1,26 @@
+<h4>Plan Task for Day</h4>
+<mat-calendar
+  [(selected)]="selectedDate"
+  (selectedChange)="dateSelected($event)"
+  #calendar
+></mat-calendar>
+
+<!--<div class="msg">Press enter to save</div>-->
+
+<!--<mat-dialog-actions align="end">-->
+<!--  <button-->
+<!--    color="primary"-->
+<!--    mat-button-->
+<!--    type="button"-->
+<!--    (click)="close()"-->
+<!--  >-->
+<!--    {{ T.G.CANCEL|translate }}-->
+<!--  </button>-->
+
+<!--  <button-->
+<!--    color="primary"-->
+<!--    mat-stroked-button-->
+<!--  >-->
+<!--    Plan for day-->
+<!--  </button>-->
+<!--</mat-dialog-actions>-->

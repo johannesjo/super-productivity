@@ -29,6 +29,7 @@ import { TaskAttachmentService } from '../../tasks/task-attachment/task-attachme
 import { Store } from '@ngrx/store';
 import { selectTaskByIdWithSubTaskData } from '../../tasks/store/task.selectors';
 import { updateTask } from '../../tasks/store/task.actions';
+import { DialogPlanForDayComponent } from '../dialog-plan-for-day/dialog-plan-for-day.component';
 
 @Component({
   selector: 'planner-task',
@@ -38,6 +39,7 @@ import { updateTask } from '../../tasks/store/task.actions';
 })
 export class PlannerTaskComponent extends BaseComponent implements OnInit, OnDestroy {
   @Input({ required: true }) task!: TaskCopy;
+  @Input() day?: string;
 
   isRepeatTaskCreatedToday = false;
 
@@ -167,6 +169,18 @@ export class PlannerTaskComponent extends BaseComponent implements OnInit, OnDes
     this._matDialog
       .open(DialogAddTaskReminderComponent, {
         data: { task: this.task } as AddTaskReminderInterface,
+      })
+      .afterClosed()
+      .pipe(takeUntil(this.onDestroy$))
+      .subscribe(() => this.focusSelf());
+  }
+
+  planForDay(): void {
+    this._matDialog
+      .open(DialogPlanForDayComponent, {
+        // we focus inside dialog instead
+        autoFocus: false,
+        data: { task: this.task, day: this.day },
       })
       .afterClosed()
       .pipe(takeUntil(this.onDestroy$))
