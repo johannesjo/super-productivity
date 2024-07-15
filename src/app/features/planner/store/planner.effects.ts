@@ -6,6 +6,7 @@ import {
   exhaustMap,
   filter,
   first,
+  map,
   switchMap,
   tap,
   withLatestFrom,
@@ -14,7 +15,11 @@ import { PersistenceService } from '../../../core/persistence/persistence.servic
 import { select, Store } from '@ngrx/store';
 import { selectPlannerState } from './planner.selectors';
 import { PlannerState } from './planner.reducer';
-import { scheduleTask, updateTaskTags } from '../../tasks/store/task.actions';
+import {
+  scheduleTask,
+  unScheduleTask,
+  updateTaskTags,
+} from '../../tasks/store/task.actions';
 import { EMPTY, merge, of } from 'rxjs';
 import { TODAY_TAG } from '../../tag/tag.const';
 import { unique } from '../../../util/unique';
@@ -82,12 +87,38 @@ export class PlannerEffects {
     return this._actions$.pipe(
       ofType(scheduleTask),
       filter((action) => !!action.plannedAt),
-      switchMap(({ task }) => {
-        return of(
-          PlannerActions.removeTaskFromDays({
-            taskId: task.id,
-          }),
-        );
+      map(({ task }) => {
+        return PlannerActions.removeTaskFromDays({
+          taskId: task.id,
+        });
+      }),
+    );
+  });
+
+  removeReminderForPlannedTask$ = createEffect(() => {
+    return this._actions$.pipe(
+      ofType(PlannerActions.planTaskForDay),
+      filter(({ task, day }) => !!task.reminderId),
+      map(({ task }) => {
+        return unScheduleTask({
+          id: task.id,
+          reminderId: task.reminderId as string,
+          isSkipToast: true,
+        });
+      }),
+    );
+  });
+
+  removeTodayTagForPlannedTask$ = createEffect(() => {
+    return this._actions$.pipe(
+      ofType(PlannerActions.planTaskForDay),
+      filter(({ task, day }) => task.tagIds.includes(TODAY_TAG.id)),
+      map(({ task }) => {
+        return updateTaskTags({
+          task,
+          oldTagIds: task.tagIds,
+          newTagIds: task.tagIds.filter((id) => id !== TODAY_TAG.id),
+        });
       }),
     );
   });

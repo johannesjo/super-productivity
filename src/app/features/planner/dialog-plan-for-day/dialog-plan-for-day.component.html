@@ -1,11 +1,18 @@
 <h4>Plan Task for Day</h4>
 <mat-calendar
   [(selected)]="selectedDate"
+  [minDate]="minDate"
   (selectedChange)="dateSelected($event)"
   #calendar
 ></mat-calendar>
 
-<!--<div class="msg">Press enter to save</div>-->
+<div
+  class="msg"
+  *ngIf="data.task.reminderId"
+>
+  This will remove the reminder from the task.<br />
+  Press Escape to cancel.
+</div>
 
 <!--<mat-dialog-actions align="end">-->
 <!--  <button-->

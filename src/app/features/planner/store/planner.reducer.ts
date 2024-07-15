@@ -117,6 +117,20 @@ export const plannerReducer = createReducer(
       },
     };
   }),
+
+  on(PlannerActions.planTaskForDay, (state, { task, day }) => {
+    const daysCopy = { ...state.days };
+    // filter out from other days
+    Object.keys(daysCopy).forEach((dayI) => {
+      daysCopy[dayI] = daysCopy[dayI].filter((id) => id !== task.id);
+    });
+    return {
+      days: {
+        ...daysCopy,
+        [day]: unique([...(daysCopy[day] || []), task.id]),
+      },
+    };
+  }),
 );
 
 export const plannerFeature = createFeature({
