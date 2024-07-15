@@ -403,7 +403,11 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
       this._taskService.getByIdOnce$(taskId).subscribe((task) => {
         if (getWorklogStr() !== planForDay) {
           this._store.dispatch(
-            PlannerActions.planTaskForDay({ task: task, day: planForDay }),
+            PlannerActions.planTaskForDay({
+              task: task,
+              day: planForDay,
+              isAddToTop: !this.isAddToBottom,
+            }),
           );
         }
       });

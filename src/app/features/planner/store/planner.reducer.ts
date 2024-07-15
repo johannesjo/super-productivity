@@ -118,7 +118,7 @@ export const plannerReducer = createReducer(
     };
   }),
 
-  on(PlannerActions.planTaskForDay, (state, { task, day }) => {
+  on(PlannerActions.planTaskForDay, (state, { task, day, isAddToTop }) => {
     const daysCopy = { ...state.days };
     // filter out from other days
     Object.keys(daysCopy).forEach((dayI) => {
@@ -127,7 +127,11 @@ export const plannerReducer = createReducer(
     return {
       days: {
         ...daysCopy,
-        [day]: unique([...(daysCopy[day] || []), task.id]),
+        [day]: unique(
+          isAddToTop
+            ? [task.id, ...(daysCopy[day] || [])]
+            : [...(daysCopy[day] || []), task.id],
+        ),
       },
     };
   }),
