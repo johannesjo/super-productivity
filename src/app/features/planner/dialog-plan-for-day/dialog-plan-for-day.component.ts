@@ -16,6 +16,8 @@ import { PlannerActions } from '../store/planner.actions';
 import { getWorklogStr } from '../../../util/get-work-log-str';
 import { CommonModule } from '@angular/common';
 import { SnackService } from '../../../core/snack/snack.service';
+import { updateTaskTags } from '../../tasks/store/task.actions';
+import { TODAY_TAG } from '../../tag/tag.const';
 
 @Component({
   selector: 'dialog-plan-for-day',
@@ -59,10 +61,22 @@ export class DialogPlanForDayComponent implements AfterViewInit {
   dateSelected(ev: Date): void {
     console.log(ev);
     const newDay = getWorklogStr(ev);
-    this._store.dispatch(
-      PlannerActions.planTaskForDay({ task: this.data.task, day: newDay }),
-    );
+
+    if (newDay === getWorklogStr()) {
+      this._store.dispatch(
+        updateTaskTags({
+          task: this.data.task,
+          newTagIds: [...this.data.task.tagIds, TODAY_TAG.id],
+          oldTagIds: this.data.task.tagIds,
+        }),
+      );
+      this._snackService.open({ type: 'SUCCESS', msg: `Task planned for ${newDay}` });
+    } else {
+      this._store.dispatch(
+        PlannerActions.planTaskForDay({ task: this.data.task, day: newDay }),
+      );
+      this._snackService.open({ type: 'SUCCESS', msg: `Task planned for ${newDay}` });
+    }
     this.close();
-    this._snackService.open({ type: 'SUCCESS', msg: `Task planned for ${newDay}` });
   }
 }
