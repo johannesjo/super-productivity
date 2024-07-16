@@ -1,4 +1,7 @@
-import { selectTaskRepeatCfgsDueOnDayOnly } from './task-repeat-cfg.reducer';
+import {
+  selectTaskRepeatCfgsDueOnDayIncludingOverdue,
+  selectTaskRepeatCfgsDueOnDayOnly,
+} from './task-repeat-cfg.reducer';
 import { DEFAULT_TASK_REPEAT_CFG, TaskRepeatCfg } from '../task-repeat-cfg.model';
 
 const DUMMY_REPEATABLE_TASK: TaskRepeatCfg = {
@@ -329,6 +332,24 @@ describe('selectTaskRepeatCfgsDueOnDay', () => {
       const resultIds = result.map((item) => item.id);
       expect(resultIds).toEqual([]);
     });
+
+    it("should not return values for marco's edge case", () => {
+      const result = selectTaskRepeatCfgsDueOnDayOnly.projector(
+        [
+          dummyRepeatable('R1', {
+            repeatCycle: 'MONTHLY',
+            repeatEvery: 1,
+            startDate: '2024-01-26',
+            lastTaskCreation: new Date('2024-05-10').getTime(),
+          }),
+        ],
+        {
+          dayDate: new Date('2024-07-16').getTime(),
+        },
+      );
+      const resultIds = result.map((item) => item.id);
+      expect(resultIds).toEqual([]);
+    });
   });
 
   describe('for YEARLY', () => {
@@ -401,5 +422,27 @@ describe('selectTaskRepeatCfgsDueOnDay', () => {
 
       expect(resultIds).toEqual([]);
     });
+  });
+});
+
+// -----------------------------------------------------------------------------------
+
+describe('selectTaskRepeatCfgsDueOnDayIncludingOverdue', () => {
+  it("should not return values for marco's edge case", () => {
+    const result = selectTaskRepeatCfgsDueOnDayIncludingOverdue.projector(
+      [
+        dummyRepeatable('R1', {
+          repeatCycle: 'MONTHLY',
+          repeatEvery: 1,
+          startDate: '2024-01-26',
+          lastTaskCreation: new Date('2024-01-26').getTime(),
+        }),
+      ],
+      {
+        dayDate: new Date('2024-07-16').getTime(),
+      },
+    );
+    const resultIds = result.map((item) => item.id);
+    expect(resultIds).toEqual([]);
   });
 });
