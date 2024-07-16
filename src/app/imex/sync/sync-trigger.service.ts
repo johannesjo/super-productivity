@@ -6,6 +6,7 @@ import {
   debounceTime,
   distinctUntilChanged,
   filter,
+  first,
   map,
   mapTo,
   shareReplay,
@@ -149,10 +150,11 @@ export class SyncTriggerService {
       concatMap(() => this._dataInitService.isAllDataLoadedInitially$),
     );
 
+  // NOTE: can be called multiple times apparently
   afterInitialSyncDoneAndDataLoadedInitially$: Observable<boolean> = merge(
     this._afterInitialSyncDoneAndDataLoadedInitially$,
-    timer(MAX_WAIT_FOR_INITIAL_SYNC).pipe(mapTo(true)).pipe(shareReplay(1)),
-  );
+    timer(MAX_WAIT_FOR_INITIAL_SYNC).pipe(mapTo(true)),
+  ).pipe(first(), shareReplay(1));
 
   constructor(
     private readonly _globalConfigService: GlobalConfigService,
