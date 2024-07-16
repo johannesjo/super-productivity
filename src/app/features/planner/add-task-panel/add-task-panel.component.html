@@ -34,6 +34,6 @@
     [task]="task"
   ></planner-task>
   } @if (allTasks.length === 0) {
-  <div class="empty">No tasks</div>
+  <div class="empty">{{ T.F.PLANNER.NO_TASKS|translate }}</div>
   }
 </div>

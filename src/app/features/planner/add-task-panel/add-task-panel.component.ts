@@ -15,6 +15,7 @@ import { Tag } from '../../tag/tag.model';
 import { selectPlannerState } from '../store/planner.selectors';
 import { TaskService } from '../../tasks/task.service';
 import { PlannerPlanViewService } from '../planner-plan-view/planner-plan-view.service';
+import { T } from 'src/app/t.const';
 
 @Component({
   selector: 'add-task-panel',
@@ -23,6 +24,7 @@ import { PlannerPlanViewService } from '../planner-plan-view/planner-plan-view.s
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AddTaskPanelComponent {
+  T: typeof T = T;
   @Output() closePanel = new EventEmitter<void>();
 
   ADD_TASK_PANEL = ADD_TASK_PANEL_ID;

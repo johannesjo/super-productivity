@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
 import { TasksModule } from '../../tasks/tasks.module';
 import { UiModule } from '../../../ui/ui.module';
 import { CommonModule } from '@angular/common';
+import { T } from 'src/app/t.const';
 
 @Component({
   selector: 'add-task-inline',
@@ -12,6 +13,8 @@ import { CommonModule } from '@angular/common';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AddTaskInlineComponent {
+  T: typeof T = T;
+
   @Input() planForDay?: string;
 
   isShowAddTask = false;

@@ -1,12 +1,6 @@
 <h1 mat-dialog-title>
-  <!--  <mat-icon-->
-  <!--    class="dialog-header-icon"-->
-  <!--    svgIcon="caldav"-->
-  <!--  ></mat-icon>-->
-  <!--  <span>{{T.F.CALDAV.DIALOG_INITIAL.TITLE|translate}}</span>-->
-
   <mat-icon class="dialog-header-icon">edit_calendar</mat-icon>
-  <span>Add planned tasks to Today</span>
+  <span>{{ T.F.PLANNER.D.ADD_PLANNED.TITLE|translate }}</span>
 </h1>
 
 <mat-dialog-content>
@@ -22,8 +16,7 @@
     mat-button
     type="button"
   >
-    <!--    {{ T.G.CANCEL|translate }}-->
-    Dismiss
+    {{ T.G.DISMISS|translate }}
   </button>
 
   <button
@@ -32,7 +25,6 @@
     (click)="addTasksToToday()"
   >
     <mat-icon>wb_sunny</mat-icon>
-    <!--    {{ T.G.SAVE|translate }}-->
-    Add to today
+    {{ T.F.PLANNER.D.ADD_PLANNED.ADD_TO_TODAY|translate }}
   </button>
 </mat-dialog-actions>

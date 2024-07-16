@@ -7,18 +7,9 @@
       } {{ day.dayDate|date:'EEE' }}
       <span class="date">{{ day.dayDate|date:'d.M.' }}</span>
     </div>
-    <div class="day-estimate">
-      {{ day.timeEstimate |roundDuration|msToString }}
-      <!--      <mat-icon svgIcon="estimate_remaining"></mat-icon>-->
-      <!--      / {{ day.timeLimit }}h-->
-    </div>
+    <div class="day-estimate">{{ day.timeEstimate |roundDuration|msToString }}</div>
 
     <div class="normal-tasks">
-      <!--      <div class="section-title">-->
-      <!--        <div>regular</div>-->
-      <!--        &lt;!&ndash;        <div class="estimate">3h</div>&ndash;&gt;-->
-      <!--      </div>-->
-
       <div
         class="normal-tasks-items"
         cdkDropList
@@ -44,7 +35,7 @@
 
         <!-- -->
         @if (day.tasks.length === 0 && day.noStartTimeRepeatProjections.length === 0) {
-        <div class="empty">No tasks</div>
+        <div class="empty">{{ T.F.PLANNER.NO_TASKS|translate }}</div>
         }
       </div>
 
@@ -102,7 +93,7 @@
 
         <!-- -->
         @if (day.scheduledIItems.length === 0) {
-        <div class="empty">No scheduled items</div>
+        <div class="empty">{{ T.F.PLANNER.PLAN_VIEW.NO_SCHEDULED_ITEMS|translate }}</div>
         }
       </div>
     </div>

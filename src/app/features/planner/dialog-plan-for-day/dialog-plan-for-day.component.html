@@ -1,4 +1,4 @@
-<h4>Plan Task for Day</h4>
+<h4>{{ T.F.PLANNER.D.PLAN_FOR_DAY.TITLE|translate }}</h4>
 <mat-calendar
   [(selected)]="selectedDate"
   [minDate]="minDate"
@@ -10,8 +10,7 @@
   class="msg"
   *ngIf="data.task.reminderId"
 >
-  This will remove the reminder from the task.<br />
-  Press Escape to cancel.
+  {{ T.F.PLANNER.D.PLAN_FOR_DAY.REMINDER_WARNING|translate }}
 </div>
 
 <!--<mat-dialog-actions align="end">-->

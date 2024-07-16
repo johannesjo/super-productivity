@@ -646,6 +646,25 @@
         "TRANSITIONS_LOADED": "Transitions loaded. Use the selects below to assign them"
       }
     },
+    "PLANNER": {
+      "NO_TASKS": "No tasks",
+      "D": {
+        "ADD_PLANNED": {
+          "ADD_TO_TODAY": "Add to Today",
+          "TITLE": "Add planned tasks to Today"
+        },
+        "PLAN_FOR_DAY": {
+          "REMINDER_WARNING": "This will remove the reminder from the task! Press Escape to cancel.",
+          "TITLE": "Plan Task for Day"
+        }
+      },
+      "PLAN_VIEW": {
+        "NO_SCHEDULED_ITEMS": "No scheduled items"
+      },
+      "S": {
+        "TASK_PLANNED_FOR": "Task planned for {{date}}"
+      }
+    },
     "POMODORO": {
       "BACK_TO_WORK": "Back to work!",
       "BREAK_IS_DONE": "Your break is done!",
@@ -1257,6 +1276,7 @@
     "S_ERR_INVALID_DATA": "Import failed: Invalid JSON"
   },
   "G": {
+    "ADD": "Add",
     "CANCEL": "Cancel",
     "CLOSE": "Close",
     "DELETE": "Delete",
@@ -1534,6 +1554,7 @@
     "METRICS": "Metrics",
     "NOTES": "Notes",
     "NOTES_PANEL_INFO": "Notes can only be shown from the timeline and the regular task list views.",
+    "PLANNER": "Plan",
     "PROCRASTINATE": "Procrastinate",
     "PROJECTS": "Projects",
     "PROJECT_MENU": "Project Menu",

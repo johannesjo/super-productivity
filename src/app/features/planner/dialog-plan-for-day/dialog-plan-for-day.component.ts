@@ -70,12 +70,20 @@ export class DialogPlanForDayComponent implements AfterViewInit {
           oldTagIds: this.data.task.tagIds,
         }),
       );
-      this._snackService.open({ type: 'SUCCESS', msg: `Task planned for ${newDay}` });
+      this._snackService.open({
+        type: 'SUCCESS',
+        msg: T.F.PLANNER.S.TASK_PLANNED_FOR,
+        translateParams: { date: newDay },
+      });
     } else {
       this._store.dispatch(
         PlannerActions.planTaskForDay({ task: this.data.task, day: newDay }),
       );
-      this._snackService.open({ type: 'SUCCESS', msg: `Task planned for ${newDay}` });
+      this._snackService.open({
+        type: 'SUCCESS',
+        msg: T.F.PLANNER.S.TASK_PLANNED_FOR,
+        translateParams: { date: newDay },
+      });
     }
     this.close();
   }
