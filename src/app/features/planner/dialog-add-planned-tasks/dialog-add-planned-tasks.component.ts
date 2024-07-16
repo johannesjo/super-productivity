@@ -1,14 +1,23 @@
-import { ChangeDetectionStrategy, Component, Inject } from '@angular/core';
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { MatDialogRef } from '@angular/material/dialog';
 import { T } from 'src/app/t.const';
 import { TaskService } from '../../tasks/task.service';
-import { Task } from '../../tasks/task.model';
 import { PlannerActions } from '../store/planner.actions';
-import { Store } from '@ngrx/store';
-import { first, withLatestFrom } from 'rxjs/operators';
-import { selectTodayTasksWithPlannedAndDoneSeperated } from '../../work-context/store/work-context.selectors';
-import { selectTaskFeatureState } from '../../tasks/store/task.selectors';
+import { select, Store } from '@ngrx/store';
+import { first, map, switchMap, withLatestFrom } from 'rxjs/operators';
+import {
+  selectTodayTaskIds,
+  selectTodayTasksWithPlannedAndDoneSeperated,
+} from '../../work-context/store/work-context.selectors';
+import {
+  selectTaskFeatureState,
+  selectTasksById,
+} from '../../tasks/store/task.selectors';
 import { DateService } from '../../../core/date/date.service';
+import { ScheduleItemType } from '../planner.model';
+import { PlannerService } from '../planner.service';
+import { combineLatest } from 'rxjs';
+import { getAllMissingPlannedTaskIdsForDay } from '../util/get-all-missing-planned-task-ids-for-day';
 
 @Component({
   selector: 'dialog-add-planned-tasks',
@@ -18,15 +27,30 @@ import { DateService } from '../../../core/date/date.service';
 })
 export class DialogAddPlannedTasksComponent {
   T: typeof T = T;
+  day$ = this._plannerService.days$.pipe(map((days) => days[0]));
+
+  private _missingTakIds$ = combineLatest(
+    this.day$,
+    this._store.pipe(select(selectTodayTaskIds)),
+  ).pipe(
+    map(([day, todayTaskIds]) => getAllMissingPlannedTaskIdsForDay(day, todayTaskIds)),
+  );
+
+  private _missingTasks$ = this._missingTakIds$.pipe(
+    switchMap((taskIds) => {
+      return this._store.select(selectTasksById, { ids: taskIds });
+    }),
+    // filter out missing tasks (e.g. deleted or archived)
+    map((tasks) => tasks.filter((task) => !!task)),
+  );
 
   constructor(
-    @Inject(MAT_DIALOG_DATA) public data: { missingTasks: Task[] },
     private _matDialogRef: MatDialogRef<DialogAddPlannedTasksComponent>,
+    private _plannerService: PlannerService,
     private _taskService: TaskService,
     private _store: Store,
     private _dateService: DateService,
   ) {
-    console.log('data', data);
     // prevent close since it does not reappear
     _matDialogRef.disableClose = true;
   }
@@ -47,8 +71,9 @@ export class DialogAddPlannedTasksComponent {
       });
   }
 
-  addTasksToToday(): void {
-    this.data.missingTasks.forEach((task) => {
+  async addTasksToToday(): Promise<void> {
+    const missingTasks = await this._missingTasks$.pipe(first()).toPromise();
+    missingTasks.reverse().forEach((task) => {
       this._taskService.addTodayTag(task);
     });
     this._close();
@@ -57,4 +82,6 @@ export class DialogAddPlannedTasksComponent {
   private _close(): void {
     this._matDialogRef.close();
   }
+
+  protected readonly SCHEDULE_ITEM_TYPE = ScheduleItemType;
 }

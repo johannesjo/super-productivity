@@ -34,6 +34,8 @@ import { loadAllData } from '../../../root-store/meta/load-all-data.action';
 import { DateService } from '../../../core/date/date.service';
 import { selectTagById } from '../../tag/store/tag.reducer';
 import { updateTag } from '../../tag/store/tag.actions';
+import { PlannerService } from '../planner.service';
+import { getAllMissingPlannedTaskIdsForDay } from '../util/get-all-missing-planned-task-ids-for-day';
 
 @Injectable()
 export class PlannerEffects {
@@ -184,19 +186,24 @@ export class PlannerEffects {
           );
         }),
         // wait a bit for other stuff
-        delay(1000),
+        delay(1200),
         withLatestFrom(
-          this._store.pipe(select(selectPlannerState)),
+          this._plannerService.days$,
           this._store.pipe(select(selectTodayTaskIds)),
         ),
-        exhaustMap(([todayStr, plannerState, todayTaskIds]) => {
-          const plannedTodayTaskIds = plannerState.days[todayStr] || [];
-          const missingTasks = plannedTodayTaskIds.filter(
-            (tid) => !todayTaskIds.includes(tid),
+        exhaustMap(([todayStr, plannerDays, todayTaskIds]) => {
+          const plannerDay = plannerDays[0];
+          if (plannerDay.dayDate !== todayStr) {
+            throw new Error('Wrong day given');
+          }
+
+          const missingTaskIds = getAllMissingPlannedTaskIdsForDay(
+            plannerDay,
+            todayTaskIds,
           );
 
-          if (missingTasks.length > 0) {
-            return this._store.select(selectTasksById, { ids: missingTasks }).pipe(
+          if (missingTaskIds.length > 0) {
+            return this._store.select(selectTasksById, { ids: missingTaskIds }).pipe(
               first(),
               exhaustMap((tasks) => {
                 // NOTE: some tasks might not be there anymore since we don't do live updates to the planner model
@@ -205,7 +212,7 @@ export class PlannerEffects {
                   return this._matDialog
                     .open(DialogAddPlannedTasksComponent, {
                       data: {
-                        missingTasks: tasks,
+                        missingTasks: existingTasks,
                       },
                     })
                     .afterClosed();
@@ -213,7 +220,7 @@ export class PlannerEffects {
                   console.log(
                     'Some tasks have been missing',
                     existingTasks,
-                    missingTasks,
+                    missingTaskIds,
                   );
                   return EMPTY;
                 }
@@ -236,6 +243,7 @@ export class PlannerEffects {
     private _matDialog: MatDialog,
     private _globalTrackingIntervalService: GlobalTrackingIntervalService,
     private _dateService: DateService,
+    private _plannerService: PlannerService,
   ) {}
 
   private _saveToLs(

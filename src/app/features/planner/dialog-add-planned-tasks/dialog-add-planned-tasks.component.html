@@ -4,9 +4,10 @@
 </h1>
 
 <mat-dialog-content>
-  @for (missingTask of data.missingTasks; track missingTask.id) {
-  <planner-task [task]="missingTask"></planner-task>
-  }
+  <planner-day
+    *ngIf="(day$|async) as day"
+    [day]="day"
+  ></planner-day>
 </mat-dialog-content>
 
 <mat-dialog-actions align="end">

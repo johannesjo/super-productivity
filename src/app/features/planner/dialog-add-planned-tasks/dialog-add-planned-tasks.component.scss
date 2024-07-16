@@ -1,4 +1,23 @@
+@import '../../../../variables';
+
 :host planner-task {
   pointer-events: none;
   margin-bottom: 8px;
+}
+
+:host ::ng-deep {
+  .scheduled-items,
+  .normal-tasks {
+    pointer-events: none;
+  }
+
+  .scheduled-items planner-calendar-event {
+    pointer-events: auto;
+  }
+
+  .day-estimate,
+  add-task-inline,
+  .day-title {
+    display: none;
+  }
 }
