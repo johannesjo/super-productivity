@@ -14,7 +14,7 @@ import { MatCalendar } from '@angular/material/datepicker';
 import { Store } from '@ngrx/store';
 import { PlannerActions } from '../store/planner.actions';
 import { getWorklogStr } from '../../../util/get-work-log-str';
-import { CommonModule } from '@angular/common';
+import { CommonModule, DatePipe } from '@angular/common';
 import { SnackService } from '../../../core/snack/snack.service';
 import { updateTaskTags } from '../../tasks/store/task.actions';
 import { TODAY_TAG } from '../../tag/tag.const';
@@ -39,6 +39,7 @@ export class DialogPlanForDayComponent implements AfterViewInit {
     private _cd: ChangeDetectorRef,
     private _store: Store,
     private _snackService: SnackService,
+    private _datePipe: DatePipe,
   ) {
     this.selectedDate = data.day || new Date().toISOString();
   }
@@ -62,6 +63,8 @@ export class DialogPlanForDayComponent implements AfterViewInit {
     console.log(ev);
     const newDay = getWorklogStr(ev);
 
+    const formattedDate = this._datePipe.transform(newDay, 'shortDate') as string;
+
     if (newDay === getWorklogStr()) {
       this._store.dispatch(
         updateTaskTags({
@@ -73,7 +76,7 @@ export class DialogPlanForDayComponent implements AfterViewInit {
       this._snackService.open({
         type: 'SUCCESS',
         msg: T.F.PLANNER.S.TASK_PLANNED_FOR,
-        translateParams: { date: newDay },
+        translateParams: { date: formattedDate },
       });
     } else {
       this._store.dispatch(
@@ -82,7 +85,7 @@ export class DialogPlanForDayComponent implements AfterViewInit {
       this._snackService.open({
         type: 'SUCCESS',
         msg: T.F.PLANNER.S.TASK_PLANNED_FOR,
-        translateParams: { date: newDay },
+        translateParams: { date: formattedDate },
       });
     }
     this.close();
