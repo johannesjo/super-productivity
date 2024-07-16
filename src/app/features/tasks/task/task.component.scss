@@ -320,7 +320,7 @@
   align-items: center;
 }
 
-.keyIndicator {
+.key-i {
   opacity: 0.4;
   font-size: 13px;
   text-align: center;
@@ -330,8 +330,10 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  display: none;
 
   &:not(:empty) {
+    display: block;
     min-width: 24px;
     border: 1px solid;
     padding: 0 4px;
