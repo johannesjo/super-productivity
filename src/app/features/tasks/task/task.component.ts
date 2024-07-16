@@ -623,7 +623,7 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
             if (this.task.repeatCfgId) {
               this.editTaskRepeatCfg();
             } else {
-              this.editReminder();
+              this.planForDay();
             }
           } else {
             if (this.task.parentId) {
