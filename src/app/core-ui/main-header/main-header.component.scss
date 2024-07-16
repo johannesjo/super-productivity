@@ -388,6 +388,12 @@ simple-counter-button {
       //border-color: $dark-theme-extra-border-color;
     }
   }
+
+  @include mq(xxxs, max) {
+    &:disabled {
+      display: none;
+    }
+  }
 }
 
 .note-ico {
