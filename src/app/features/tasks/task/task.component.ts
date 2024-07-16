@@ -295,8 +295,14 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
         data: { task: this.task },
       })
       .afterClosed()
-      .pipe(takeUntil(this._destroy$))
-      .subscribe(() => this.focusSelf());
+      // .pipe(takeUntil(this._destroy$))
+      .subscribe((isPlanned) => {
+        if (isPlanned) {
+          this.focusNext(true);
+        } else {
+          this.focusSelf();
+        }
+      });
   }
 
   updateIssueData(): void {

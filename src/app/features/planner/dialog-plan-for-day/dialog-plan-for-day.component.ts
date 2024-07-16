@@ -55,8 +55,8 @@ export class DialogPlanForDayComponent implements AfterViewInit {
 
   save(): void {}
 
-  close(): void {
-    this._matDialogRef.close();
+  close(isSuccess): void {
+    this._matDialogRef.close(isSuccess);
   }
 
   dateSelected(ev: Date): void {
@@ -88,6 +88,6 @@ export class DialogPlanForDayComponent implements AfterViewInit {
         translateParams: { date: formattedDate },
       });
     }
-    this.close();
+    this.close(true);
   }
 }
