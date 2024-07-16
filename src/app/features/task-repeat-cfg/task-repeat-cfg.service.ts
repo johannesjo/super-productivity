@@ -56,7 +56,42 @@ export class TaskRepeatCfgService {
     private _matDialog: MatDialog,
     private _taskService: TaskService,
     private _workContextService: WorkContextService,
-  ) {}
+  ) {
+    // FOR TESTING CREATION
+    // setTimeout(() => {
+    //   this._store$.dispatch(
+    //     upsertTaskRepeatCfg({
+    //       taskRepeatCfg: {
+    //         ...DEFAULT_TASK_REPEAT_CFG,
+    //         id: 'A1',
+    //         defaultEstimate: 1000 * 60 * 60,
+    //         // eslint-disable-next-line no-mixed-operators
+    //         startDate: getWorklogStr(Date.now() - 5 * 24 * 60 * 60 * 1000),
+    //         // eslint-disable-next-line no-mixed-operators
+    //         lastTaskCreation: Date.now() - 5 * 24 * 60 * 60 * 1000,
+    //         // startTime: '10:00',
+    //         title: 'My repeating task with no schedule',
+    //       },
+    //     }),
+    //   );
+    //   this._store$.dispatch(
+    //     upsertTaskRepeatCfg({
+    //       taskRepeatCfg: {
+    //         ...DEFAULT_TASK_REPEAT_CFG,
+    //         id: 'A2',
+    //         defaultEstimate: 1000 * 60 * 60,
+    //         // eslint-disable-next-line no-mixed-operators
+    //         startDate: getWorklogStr(Date.now() - 5 * 24 * 60 * 60 * 1000),
+    //         // eslint-disable-next-line no-mixed-operators
+    //         lastTaskCreation: Date.now() - 5 * 24 * 60 * 60 * 1000,
+    //         startTime: '20:00',
+    //         remindAt: TaskReminderOptionId.AtStart,
+    //         title: 'My repeating task with schedule at 20:00',
+    //       },
+    //     }),
+    //   );
+    // }, 500);
+  }
 
   getRepeatTableTasksDueForDayOnly$(dayDate: number): Observable<TaskRepeatCfg[]> {
     // ===> taskRepeatCfgs scheduled for today and not yet created already
