@@ -33,6 +33,12 @@
   }
 }
 
+.hide-xxxs {
+  @include mq(xxxs, max) {
+    display: none !important;
+  }
+}
+
 .show-only-on-touch-primary {
   .isMousePrimary & {
     display: none !important;
