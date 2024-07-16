@@ -1,13 +1,13 @@
 // import { TestBed } from '@angular/core/testing';
 //
-// import { PlannerPlanViewService } from './planner-plan-view.service';
+// import { PlannerService } from './planner-plan-view.service';
 //
-// describe('PlannerPlanViewService', () => {
-//   let service: PlannerPlanViewService;
+// describe('PlannerService', () => {
+//   let service: PlannerService;
 //
 //   beforeEach(() => {
 //     TestBed.configureTestingModule({});
-//     service = TestBed.inject(PlannerPlanViewService);
+//     service = TestBed.inject(PlannerService);
 //   });
 //
 //   it('should be created', () => {

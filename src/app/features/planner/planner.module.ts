@@ -26,6 +26,7 @@ import { PlannerEffects } from './store/planner.effects';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { DialogAddPlannedTasksComponent } from './dialog-add-planned-tasks/dialog-add-planned-tasks.component';
 import { AddTaskInlineComponent } from './add-task-inline/add-task-inline.component';
+import { PlannerDayComponent } from './planner-day/planner-day.component';
 
 @NgModule({
   declarations: [
@@ -33,6 +34,7 @@ import { AddTaskInlineComponent } from './add-task-inline/add-task-inline.compon
     PlannerPlanViewComponent,
     AddTaskPanelComponent,
     PlannerTaskComponent,
+    PlannerDayComponent,
     PlannerRepeatProjectionComponent,
     PlannerCalendarEventComponent,
     DialogAddPlannedTasksComponent,

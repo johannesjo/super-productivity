@@ -8,7 +8,7 @@ import { Observable } from 'rxjs';
 import { select, Store } from '@ngrx/store';
 import { selectTasksPlannedForRangeNotOnToday } from '../tasks/store/task.selectors';
 import { getDateRangeForDay } from '../../util/get-date-range-for-day';
-import { PlannerPlanViewService } from '../planner/planner-plan-view/planner-plan-view.service';
+import { PlannerService } from '../planner/planner.service';
 import { first, map, tap, withLatestFrom } from 'rxjs/operators';
 import { PlannerDay, ScheduleItemTask, ScheduleItemType } from '../planner/planner.model';
 import { selectTodayTaskIds } from '../work-context/store/work-context.selectors';
@@ -67,7 +67,7 @@ export class AddTasksForTomorrowService {
 
   constructor(
     private _taskService: TaskService,
-    private _plannerPlanViewService: PlannerPlanViewService,
+    private _plannerPlanViewService: PlannerService,
     private _taskRepeatCfgService: TaskRepeatCfgService,
     private _store: Store,
     private _projectService: ProjectService,

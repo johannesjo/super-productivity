@@ -1,29 +1,29 @@
 import { Injectable } from '@angular/core';
 import { combineLatest, forkJoin, Observable, of } from 'rxjs';
-import { TimelineCalendarMapEntry } from '../../timeline/timeline.model';
-import { selectCalendarProviders } from '../../config/store/global-config.reducer';
+import { TimelineCalendarMapEntry } from '../timeline/timeline.model';
+import { selectCalendarProviders } from '../config/store/global-config.reducer';
 import { distinctUntilChanged, map, startWith, switchMap, tap } from 'rxjs/operators';
 import {
   selectAllCalendarTaskEventIds,
   selectPlannedTasksById,
-} from '../../tasks/store/task.selectors';
-import { distinctUntilChangedObject } from '../../../util/distinct-until-changed-object';
-import { CalendarIntegrationEvent } from '../../calendar-integration/calendar-integration.model';
-import { loadFromRealLs, saveToRealLs } from '../../../core/persistence/local-storage';
-import { LS } from '../../../core/persistence/storage-keys.const';
+} from '../tasks/store/task.selectors';
+import { distinctUntilChangedObject } from '../../util/distinct-until-changed-object';
+import { CalendarIntegrationEvent } from '../calendar-integration/calendar-integration.model';
+import { loadFromRealLs, saveToRealLs } from '../../core/persistence/local-storage';
+import { LS } from '../../core/persistence/storage-keys.const';
 import { Store } from '@ngrx/store';
-import { CalendarIntegrationService } from '../../calendar-integration/calendar-integration.service';
-import { PlannerDay } from '../planner.model';
-import { selectPlannerDays } from '../store/planner.selectors';
-import { ReminderService } from '../../reminder/reminder.service';
-import { TaskPlanned } from '../../tasks/task.model';
-import { selectAllTaskRepeatCfgs } from '../../task-repeat-cfg/store/task-repeat-cfg.reducer';
-import { DateService } from '../../../core/date/date.service';
+import { CalendarIntegrationService } from '../calendar-integration/calendar-integration.service';
+import { PlannerDay } from './planner.model';
+import { selectPlannerDays } from './store/planner.selectors';
+import { ReminderService } from '../reminder/reminder.service';
+import { TaskPlanned } from '../tasks/task.model';
+import { selectAllTaskRepeatCfgs } from '../task-repeat-cfg/store/task-repeat-cfg.reducer';
+import { DateService } from '../../core/date/date.service';
 
 @Injectable({
   providedIn: 'root',
 })
-export class PlannerPlanViewService {
+export class PlannerService {
   // includedWeekDays$ = of([0, 1, 2, 3, 4, 5, 6]);
   includedWeekDays$ = of([0, 1, 2, 3, 4, 5, 6]);
 

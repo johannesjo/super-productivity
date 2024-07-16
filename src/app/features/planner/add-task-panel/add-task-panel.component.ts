@@ -14,7 +14,7 @@ import { Project } from '../../project/project.model';
 import { Tag } from '../../tag/tag.model';
 import { selectPlannerState } from '../store/planner.selectors';
 import { TaskService } from '../../tasks/task.service';
-import { PlannerPlanViewService } from '../planner-plan-view/planner-plan-view.service';
+import { PlannerService } from '../planner.service';
 import { T } from 'src/app/t.const';
 
 @Component({
@@ -85,7 +85,7 @@ export class AddTaskPanelComponent {
   constructor(
     private _store: Store,
     private _taskService: TaskService,
-    private _plannerPlanViewService: PlannerPlanViewService,
+    private _plannerPlanViewService: PlannerService,
   ) {}
 
   drop(ev: CdkDragDrop<string, string, TaskCopy>): void {
