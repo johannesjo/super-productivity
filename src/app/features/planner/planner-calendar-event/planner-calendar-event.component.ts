@@ -19,31 +19,40 @@ import { Store } from '@ngrx/store';
 })
 export class PlannerCalendarEventComponent {
   @Input({ required: true }) calendarEvent!: TimelineFromCalendarEvent;
+  isBeingSubmitted = false;
 
   @HostBinding('attr.title') title = `Convert to task`;
 
+  @HostBinding('class.isBeingSubmitted')
+  get isBeingSubmittedG(): boolean {
+    return this.isBeingSubmitted;
+  }
+
   @HostListener('click', ['$event'])
   async onClick(): Promise<void> {
-    if (this.calendarEvent) {
-      const getCalProvider = this.calendarEvent.calProviderId
-        ? await this._store
-            .select(selectCalendarProviderById, { id: this.calendarEvent.calProviderId })
-            .pipe(first())
-            .toPromise()
-        : undefined;
-
-      this._taskService.addAndSchedule(
-        this.calendarEvent.title,
-        {
-          projectId: getCalProvider?.defaultProjectId || null,
-          issueId: this.calendarEvent.id,
-          issueProviderId: this.calendarEvent.calProviderId,
-          issueType: 'CALENDAR',
-          timeEstimate: this.calendarEvent.duration,
-        },
-        this.calendarEvent.start,
-      );
+    if (this.isBeingSubmitted) {
+      return;
     }
+
+    this.isBeingSubmitted = true;
+    const getCalProvider = this.calendarEvent.calProviderId
+      ? await this._store
+          .select(selectCalendarProviderById, { id: this.calendarEvent.calProviderId })
+          .pipe(first())
+          .toPromise()
+      : undefined;
+
+    this._taskService.addAndSchedule(
+      this.calendarEvent.title,
+      {
+        projectId: getCalProvider?.defaultProjectId || null,
+        issueId: this.calendarEvent.id,
+        issueProviderId: this.calendarEvent.calProviderId,
+        issueType: 'CALENDAR',
+        timeEstimate: this.calendarEvent.duration,
+      },
+      this.calendarEvent.start,
+    );
   }
 
   constructor(

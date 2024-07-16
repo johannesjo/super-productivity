@@ -14,6 +14,11 @@
   min-height: $planner-item-height;
   cursor: pointer;
 
+  &.isBeingSubmitted {
+    opacity: 0.4;
+    pointer-events: none !important;
+  }
+
   @include lightTheme {
     border-color: $light-theme-extra-border-color;
   }
