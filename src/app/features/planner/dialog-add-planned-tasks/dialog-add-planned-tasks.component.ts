@@ -27,6 +27,8 @@ export class DialogAddPlannedTasksComponent {
     private _dateService: DateService,
   ) {
     console.log('data', data);
+    // prevent close since it does not reappear
+    _matDialogRef.disableClose = true;
   }
 
   dismiss(): void {
