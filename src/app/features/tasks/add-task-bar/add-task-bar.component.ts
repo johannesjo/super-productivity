@@ -250,6 +250,7 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
     console.log(ev);
     console.log(ev.target);
 
+    // NOTE: related target is null for all elements that are not focusable (e.g. items without tabindex, non-buttons, non-inputs etc.)
     if (relatedTarget) {
       const { className } = relatedTarget;
       isUIelement =
@@ -277,7 +278,7 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
         } else {
           this.blurred.emit(ev);
         }
-      }, 150);
+      }, 220);
     }
   }
 
@@ -286,13 +287,7 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
     return issue?.summary;
   }
 
-  trackById(i: number, item: any): string {
-    return item.id;
-  }
-
   async addTask(): Promise<void> {
-    console.log('XXX');
-
     this._isAddInProgress = true;
     const item: AddTaskSuggestion | string = this.taskSuggestionsCtrl.value;
 
@@ -383,9 +378,6 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
       }
     }
 
-    this.taskSuggestionsCtrl.setValue('');
-    this._isAddInProgress = false;
-
     if (this._lastAddedTaskId) {
       this._planForDayAfterAddTaskIfConfigured(this._lastAddedTaskId);
     }
@@ -395,6 +387,10 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
     } else {
       this._focusInput();
     }
+
+    this.taskSuggestionsCtrl.setValue('');
+    this._isAddInProgress = false;
+    sessionStorage.setItem(SS.TODO_TMP, '');
   }
 
   private _planForDayAfterAddTaskIfConfigured(taskId: string): void {
