@@ -4,7 +4,6 @@ import { TaskService } from '../../../features/tasks/task.service';
 import { T } from 'src/app/t.const';
 import { TaskRepeatCfgService } from '../../../features/task-repeat-cfg/task-repeat-cfg.service';
 import { expandAnimation } from '../../../ui/animations/expand.ani';
-import { AddTasksForTomorrowService } from '../../../features/add-tasks-for-tomorrow/add-tasks-for-tomorrow.service';
 
 @Component({
   selector: 'plan-tasks-tomorrow',
@@ -20,6 +19,5 @@ export class PlanTasksTomorrowComponent {
     public workContextService: WorkContextService,
     public taskService: TaskService,
     public _taskRepeatCfgService: TaskRepeatCfgService,
-    private _addTasksForTomorrowService: AddTasksForTomorrowService,
   ) {}
 }

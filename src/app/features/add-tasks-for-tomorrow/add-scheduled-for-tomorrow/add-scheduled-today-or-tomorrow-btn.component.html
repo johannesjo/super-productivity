@@ -1,6 +1,8 @@
 <div
   class="wrap-add-planned"
-  *ngIf="workContextService.isToday &&( workContextService.activeWorkContext$|async)?.taskIds.length ===0 && (addTasksForTomorrowService.allPlannedForTodayNotOnToday$|async) as plannedForToday"
+  *ngIf="workContextService.isToday
+  &&(isAlwaysShowIfAny || (workContextService.activeWorkContext$|async)?.taskIds.length ===0)
+  && (addTasksForTomorrowService.allPlannedForTodayNotOnToday$|async) as plannedForToday"
 >
   <button
     *ngIf="plannedForToday?.length"

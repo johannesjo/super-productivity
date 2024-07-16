@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
 import { T } from '../../../t.const';
 import { AsyncPipe, NgIf } from '@angular/common';
 import { MatButton } from '@angular/material/button';
@@ -18,6 +18,8 @@ import { AddTasksForTomorrowService } from '../add-tasks-for-tomorrow.service';
 })
 export class AddScheduledTodayOrTomorrowBtnComponent {
   protected readonly T = T;
+
+  @Input() public isAlwaysShowIfAny: boolean = false;
 
   constructor(
     public workContextService: WorkContextService,
