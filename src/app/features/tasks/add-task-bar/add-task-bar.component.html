@@ -5,6 +5,8 @@
   [class.mat-elevation-z3]="!isElevated"
   [class.mat-elevation-z4]="isElevated"
   class="add-task-form"
+  matAutocompleteOrigin
+  #origin="matAutocompleteOrigin"
 >
   <div class="input-wrapper">
     <div
@@ -20,6 +22,7 @@
       (blur)="onBlur($event)"
       [formControl]="taskSuggestionsCtrl"
       [matAutocomplete]="autoEl"
+      [matAutocompleteConnectedTo]="origin"
       [mention]="tagSuggestions"
       [mentionConfig]="{triggerChar: '#', labelKey: 'title'}"
       spellcheck="false"
