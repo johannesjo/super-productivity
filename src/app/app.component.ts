@@ -170,8 +170,6 @@ export class AppComponent implements OnDestroy {
     } else {
       // WEB VERSION
       window.addEventListener('beforeunload', (e) => {
-        localStorage.removeItem(LS.WEB_APP_ACTIVE_INSTANCE);
-
         const gCfg = this._globalConfigService.cfg;
         if (!gCfg) {
           throw new Error();
@@ -184,16 +182,7 @@ export class AppComponent implements OnDestroy {
 
       if (!IS_ANDROID_WEB_VIEW) {
         this._chromeExtensionInterfaceService.init();
-        if (localStorage.getItem(LS.WEB_APP_ACTIVE_INSTANCE)) {
-          // NOTE: translations not ready yet
-          const t =
-            'You are running multiple instances of Super Productivity (possibly over multiple tabs). This is not recommended and might lead to data loss!!';
-          const t2 = 'Please close all other instances, before you continue!';
-          // show in two dialogs to be sure the user didn't miss it
-          alert(t);
-          alert(t2);
-        }
-        localStorage.setItem(LS.WEB_APP_ACTIVE_INSTANCE, 'true');
+        this._initMultiInstanceWarning();
       }
     }
   }
@@ -260,6 +249,39 @@ export class AppComponent implements OnDestroy {
   ngOnDestroy(): void {
     this._subs.unsubscribe();
     if (this._intervalTimer) clearInterval(this._intervalTimer);
+  }
+
+  private _initMultiInstanceWarning(): void {
+    const channel = new BroadcastChannel('superProductivityTab');
+    let isOriginal = true;
+
+    enum Msg {
+      newTabOpened = 'newTabOpened',
+      alreadyOpenElsewhere = 'alreadyOpenElsewhere',
+    }
+
+    channel.postMessage(Msg.newTabOpened);
+    // note that listener is added after posting the message
+
+    channel.addEventListener('message', (msg) => {
+      if (msg.data === Msg.newTabOpened && isOriginal) {
+        // message received from 2nd tab
+        // reply to all new tabs that the website is already open
+        channel.postMessage(Msg.alreadyOpenElsewhere);
+      }
+      if (msg.data === Msg.alreadyOpenElsewhere) {
+        isOriginal = false;
+        // message received from original tab
+        // replace this with whatever logic you need
+        // NOTE: translations not ready yet
+        const t =
+          'You are running multiple instances of Super Productivity (possibly over multiple tabs). This is not recommended and might lead to data loss!!';
+        const t2 = 'Please close all other instances, before you continue!';
+        // show in two dialogs to be sure the user didn't miss it
+        alert(t);
+        alert(t2);
+      }
+    });
   }
 
   private _initElectronErrorHandler(): void {
