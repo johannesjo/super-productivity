@@ -8,6 +8,8 @@ module.exports = {
     return this.waitForElementVisible(ROUTER_WRAPPER)
       .setValue('body', 'A')
       .waitForElementVisible(ADD_TASK_GLOBAL_SEL)
-      .setValue(ADD_TASK_GLOBAL_SEL, taskName);
+      .setValue(ADD_TASK_GLOBAL_SEL, taskName.slice(0, -1))
+      .pause(200)
+      .sendKeys(ADD_TASK_GLOBAL_SEL, taskName.slice(-1));
   },
 };

@@ -6,7 +6,15 @@ const ADD_BTN = '.switch-add-to-btn';
 const BACKDROP = '.backdrop';
 
 module.exports = {
-  async command(this: NightwatchBrowser, taskName: string) {
+  async command(this: NightwatchBrowser, taskName: string, isSkipClose?: boolean) {
+    if (isSkipClose) {
+      return this.waitForElementVisible(ROUTER_WRAPPER)
+        .setValue('body', 'A')
+        .waitForElementVisible(ADD_TASK_GLOBAL_SEL)
+        .setValue(ADD_TASK_GLOBAL_SEL, taskName)
+        .click(ADD_BTN);
+    }
+
     return (
       this.waitForElementVisible(ROUTER_WRAPPER)
         .setValue('body', 'A')

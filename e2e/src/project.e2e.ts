@@ -96,6 +96,8 @@ module.exports = {
       .click(FINISH_DAY_BTN)
 
       .waitForElementPresent(DAILY_SUMMARY)
+      // wait a bit for route to be changed
+      .pause(500)
       .assert.urlEquals(`${BASE}/#/project/INBOX/daily-summary`)
       .assert.not.elementPresent(GLOBAL_ERROR_ALERT)
       .end(),
