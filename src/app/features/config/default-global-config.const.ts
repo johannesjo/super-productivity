@@ -99,6 +99,8 @@ export const DEFAULT_GLOBAL_CONFIG: GlobalConfigState = {
     zoomIn: 'Ctrl++',
     zoomOut: 'Ctrl+-',
     zoomDefault: 'Ctrl+0',
+    saveNote: 'Ctrl+s',
+    triggerSync: 'Ctrl+s',
     taskEditTitle: null,
     taskToggleAdditionalInfoOpen: 'i',
     taskOpenEstimationDialog: 't',

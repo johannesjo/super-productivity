@@ -188,6 +188,22 @@ export const KEYBOARD_SETTINGS_FORM_CFG: ConfigFormSection<KeyboardConfig> = {
         label: T.GCF.KEYBOARD.ZOOM_DEFAULT,
       },
     },
+    // TODO implement somehow
+    // {
+    //   key: 'saveNote',
+    //   type: 'keyboard',
+    //   templateOptions: {
+    //     label: T.GCF.KEYBOARD.SAVE_NOTE,
+    //   },
+    // },
+    {
+      key: 'triggerSync',
+      type: 'keyboard',
+      templateOptions: {
+        label: T.GCF.KEYBOARD.TRIGGER_SYNC,
+      },
+    },
+
     // TASKS
     {
       type: 'tpl',

@@ -1339,6 +1339,7 @@
       "MOVE_TO_BACKLOG": "Move Task to Task Backlog",
       "MOVE_TO_TODAYS_TASKS": "Move Task to Today\"s Task List",
       "OPEN_PROJECT_NOTES": "Show/Hide Notes",
+      "SAVE_NOTE": "Save note",
       "SELECT_NEXT_TASK": "Select next Task",
       "SELECT_PREVIOUS_TASK": "Select previous Task",
       "SHOW_SEARCH_BAR": "Show search bar",
@@ -1360,6 +1361,7 @@
       "TOGGLE_BOOKMARKS": "Show/Hide Bookmark Bar",
       "TOGGLE_PLAY": "Start/Stop Task",
       "TOGGLE_SIDE_NAV": "Show & Focus/Hide Sidenav",
+      "TRIGGER_SYNC": "Trigger sync (if configured)",
       "ZOOM_DEFAULT": "Zoom default (Desktop only)",
       "ZOOM_IN": "Zoom in (Desktop only)",
       "ZOOM_OUT": "Zoom out (Desktop only)"
