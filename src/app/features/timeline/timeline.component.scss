@@ -40,10 +40,8 @@
   align-items: stretch;
   justify-content: center;
   padding-bottom: $s;
-  flex-direction: column;
-  @include mq(xxs) {
-    flex-direction: row;
-  }
+  flex-direction: row;
+
   // TODO check if we might want this
   //&:first-child {
   //  top: 0;
@@ -63,46 +61,46 @@
     align-items: center;
     justify-content: center;
     position: relative;
-    min-width: 80px;
     text-align: center;
-
-    &.hasTime {
-      padding: $s * 2 0 $s;
-      font-weight: bold;
-      @include mq(xxs) {
-        padding: 0;
-        font-weight: normal;
-      }
-    }
+    min-width: 52px;
+    font-size: 10px;
 
     @include mq(xxs) {
-      margin-top: -$s * 0.5;
-      margin-bottom: -$s * 0.5;
-      border-right: 2px solid;
+      min-width: 80px;
+      font-size: unset;
+    }
+
+    &.hasTime {
+      padding: 0;
+      font-weight: normal;
+    }
+
+    margin-top: -$s * 0.5;
+    margin-bottom: -$s * 0.5;
+    border-right: 2px solid;
+
+    @include lightTheme() {
+      border-color: $light-theme-separator-color;
+    }
+    @include darkTheme() {
+      border-color: $dark-theme-separator-color;
+    }
+
+    &.hasTime:after {
+      display: block;
+      content: '';
+      width: 8px;
+      height: 2px;
+      right: -5px;
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
 
       @include lightTheme() {
-        border-color: $light-theme-separator-color;
+        background: $light-theme-separator-color;
       }
       @include darkTheme() {
-        border-color: $dark-theme-separator-color;
-      }
-
-      &.hasTime:after {
-        display: block;
-        content: '';
-        width: 8px;
-        height: 2px;
-        right: -5px;
-        position: absolute;
-        top: 50%;
-        transform: translateY(-50%);
-
-        @include lightTheme() {
-          background: $light-theme-separator-color;
-        }
-        @include darkTheme() {
-          background: $dark-theme-text-color;
-        }
+        background: $dark-theme-text-color;
       }
     }
 
@@ -225,6 +223,17 @@ task.split-task::ng-deep .box {
     opacity: 0.5;
     font-size: 14px;
     font-weight: 300;
+    text-align: right;
+
+    @include mq(xs, max) {
+      // wrap continued into two lines
+      font-size: 12px;
+      padding-right: $s * 3;
+
+      .continued {
+        display: none;
+      }
+    }
   }
 }
 
@@ -295,11 +304,15 @@ task.split-task::ng-deep .box {
 .up-down {
   position: absolute;
   flex-direction: column;
-  display: none;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
   z-index: 5;
+  display: flex;
+
+  @include mousePrimaryDevice {
+    display: none;
+  }
 
   .row:hover & {
     animation: fadeIn $transition-duration--enter $ani-enter-timing;
@@ -309,15 +322,50 @@ task.split-task::ng-deep .box {
 
 .scheduled-extra-btn {
   position: absolute;
-  display: none;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
+  display: flex;
+
+  @include mousePrimaryDevice {
+    display: none;
+  }
 
   .row:hover & {
+    display: flex;
     animation: fadeIn $transition-duration--enter $ani-enter-timing;
-    display: block;
     //transform: translate(-50%, -50%) scale(1.5);
+  }
+}
+
+.time-badge {
+  position: absolute;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  top: 50%;
+  margin-top: 10px;
+  font-size: 13px;
+  z-index: 10;
+  line-height: 1;
+  text-align: center;
+  padding: 1px 2px 0;
+  border: 1px solid $light-theme-extra-border-color;
+  background: #fff;
+  border-radius: $card-border-radius;
+
+  // avoid affecting drag handle
+  pointer-events: none;
+
+  @include darkTheme() {
+    color: $dark-theme-text-color;
+    border-color: $dark-theme-extra-border-color;
+    background: $dark-theme-bg-lighter;
+  }
+}
+
+:host ::ng-deep task .schedule-btn {
+  @include mq(xs, max) {
+    display: none !important;
   }
 }
 

@@ -18,7 +18,7 @@ export class ShortPlannedAtPipe implements PipeTransform {
 
     const locale = this.locale;
 
-    if (isToday(value)) {
+    if (isToday(value) || args[0] === 'timeOnly') {
       const str = `${new Date(value).toLocaleTimeString(locale, {
         hour: 'numeric',
         minute: 'numeric',
