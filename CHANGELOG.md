@@ -1,3 +1,35 @@
+# [9.0.0](https://github.com/johannesjo/super-productivity/compare/v9.0.0-rc.0...v9.0.0) (2024-07-17)
+
+### Bug Fixes
+
+- add task button overlapping with finish day button ([82e6835](https://github.com/johannesjo/super-productivity/commit/82e6835a1722bf360c8527f22def3eb6969e183b))
+- backlog task nr position ([573985c](https://github.com/johannesjo/super-productivity/commit/573985c7ca3e21fd091e2397e1f849ec7dfde268))
+- prevent add task bar overlapping over buttons to input ([50ec1bd](https://github.com/johannesjo/super-productivity/commit/50ec1bd26a5032caf210a25aedce4484b80a506c))
+- **repeat:** edge case leading to many wrong creations ([888534d](https://github.com/johannesjo/super-productivity/commit/888534dbaf51c59cd50829a9634b14219609c746))
+- sync show gitlab issue detail [#2115](https://github.com/johannesjo/super-productivity/issues/2115) ([9577c3e](https://github.com/johannesjo/super-productivity/commit/9577c3e76917218a38ec76fdfe3d0a6ed86b14fa))
+- **sync:** improve isReady handling ([e23e8cb](https://github.com/johannesjo/super-productivity/commit/e23e8cbb60e267098ef16878a47ad01232b796ea))
+- **sync:** initial sync not working ([47514d2](https://github.com/johannesjo/super-productivity/commit/47514d2b9edf74aed922582182009ab6c28f2fc7))
+- **sync:** issue when data when dropbox access token is saved initially which leads to a sync conflict ([8459e07](https://github.com/johannesjo/super-productivity/commit/8459e07704026c459ce44de62d8b8e3d8cc1737c))
+- **sync:** make using legacy dropbox token work ([a244d3f](https://github.com/johannesjo/super-productivity/commit/a244d3fb4cee307cf92903b448ac02f69899d939))
+
+### Features
+
+- add better solution for multi instance warning ([21e23ba](https://github.com/johannesjo/super-productivity/commit/21e23baa1bc4e7a3403d850f70cfa0c57e417054))
+- add shortcut for sync ([4f9effc](https://github.com/johannesjo/super-productivity/commit/4f9effcc2bb199934cd8343272b5f4a045aba06d))
+- always remove from today if scheduled for other day ([cd1ce32](https://github.com/johannesjo/super-productivity/commit/cd1ce32759b0357713b4443ae38eb54bae52a27f))
+- hide disabled notes button for very small mobile ([72ddf91](https://github.com/johannesjo/super-productivity/commit/72ddf9175445ff332c348f2fd2c35d35d362592b))
+- hide dot menu for very small mobile ([2133a16](https://github.com/johannesjo/super-productivity/commit/2133a163b5f724bcd404c74fe32c6a60580a9235))
+- improve show logic for add to backlog during schedule ([314cbb5](https://github.com/johannesjo/super-productivity/commit/314cbb5394ad2ae8ab86f027cca3502a6b72cb5a))
+- make dialogs wider on mobile ([d8f8017](https://github.com/johannesjo/super-productivity/commit/d8f80175545343ff10277cf5287f69fc424f72f3))
+- make mobile suer small even smaller ([5fda8c3](https://github.com/johannesjo/super-productivity/commit/5fda8c3c235f24b913aff6837e3b374b6b918411))
+- make ultra small screen smaller ([aaadf07](https://github.com/johannesjo/super-productivity/commit/aaadf07119aa50d1b6d50a1e461863c26aacd828))
+- properly hide key indicator for mobile ([896cbfb](https://github.com/johannesjo/super-productivity/commit/896cbfb0e39551afc56d01b925510234e4b0be28))
+- reverse history week items on mobile ([7fabae3](https://github.com/johannesjo/super-productivity/commit/7fabae390447660772a07408f42b74a952659092))
+- **sync:** prompt to delete dropbox tokens when sync is disabled ([642984a](https://github.com/johannesjo/super-productivity/commit/642984a85448a35e4b3bac89c18b8816c70b5175))
+- **sync:** remove compression and encryption strings from sync file ([75ec8c8](https://github.com/johannesjo/super-productivity/commit/75ec8c82388854d778adeb2226aceb63abb864de))
+- **timeline:** improve mobile styles ([fd66e7b](https://github.com/johannesjo/super-productivity/commit/fd66e7ba7960bc54e27a1c29425d6e449ad1172d))
+- **timeline:** improve mobile styles 2 ([73c56af](https://github.com/johannesjo/super-productivity/commit/73c56afe9e6b2d9e9eb88d2ed3afbc5a068a5802))
+
 # [9.0.0-rc.0](https://github.com/johannesjo/super-productivity/compare/v8.0.10...v9.0.0-rc.0) (2024-07-08)
 
 ### Bug Fixes
