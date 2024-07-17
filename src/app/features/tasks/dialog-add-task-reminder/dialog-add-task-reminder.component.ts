@@ -12,6 +12,10 @@ import { LS } from '../../../core/persistence/storage-keys.const';
 import { isToday } from '../../../util/is-today.util';
 import { DialogConfirmComponent } from '../../../ui/dialog-confirm/dialog-confirm.component';
 import { TASK_REMINDER_OPTIONS } from './task-reminder-options.const';
+import { Observable, of } from 'rxjs';
+import { first, map } from 'rxjs/operators';
+import { Store } from '@ngrx/store';
+import { selectProjectById } from '../../project/store/project.selectors';
 
 @Component({
   selector: 'dialog-add-task-reminder',
@@ -30,15 +34,22 @@ export class DialogAddTaskReminderComponent {
   isLastDateToday = true;
 
   dateTime?: number = this.task.plannedAt || undefined;
-  isShowMoveToBacklog: boolean =
-    !!this.task.projectId && this.task.parentId === null && !this.task.repeatCfgId;
   isMoveToBacklog: boolean = false;
   // TODO make translatable
   remindAvailableOptions: TaskReminderOption[] = TASK_REMINDER_OPTIONS;
   selectedReminderCfgId: TaskReminderOptionId;
 
+  isAddToBacklogAvailable$: Observable<boolean> =
+    !!this.task.projectId && this.task.parentId === null && !this.task.repeatCfgId
+      ? this._store.select(selectProjectById, { id: this.task.projectId }).pipe(
+          first(),
+          map((project) => project?.isEnableBacklog),
+        )
+      : of(false);
+
   constructor(
     private _taskService: TaskService,
+    private _store: Store,
     private _reminderService: ReminderService,
     private _matDialog: MatDialog,
     private _matDialogRef: MatDialogRef<DialogAddTaskReminderComponent>,
@@ -53,11 +64,16 @@ export class DialogAddTaskReminderComponent {
       this.selectedReminderCfgId = TaskReminderOptionId.AtStart;
     }
 
-    this.updateMoveToBacklog();
+    this._updateMoveToBacklog();
   }
 
-  @HostListener('keydown', ['$event']) onKeyDown(ev: KeyboardEvent): void {
-    if (this.isShowMoveToBacklog && ev.key.toLowerCase() === 'b') {
+  @HostListener('keydown', ['$event'])
+  async onKeyDown(ev: KeyboardEvent): Promise<void> {
+    const isShowMoveToBacklog = await this.isAddToBacklogAvailable$
+      .pipe(first())
+      .toPromise();
+
+    if (isShowMoveToBacklog && ev.key.toLowerCase() === 'b') {
       this.isMoveToBacklog = !this.isMoveToBacklog;
     }
   }
@@ -135,11 +151,11 @@ export class DialogAddTaskReminderComponent {
     const isLastDateToday = isToday(dateTime);
     if (isLastDateToday !== this.isLastDateToday) {
       this.isLastDateToday = isLastDateToday;
-      this.updateMoveToBacklog();
+      this._updateMoveToBacklog();
     }
   }
 
-  private updateMoveToBacklog(): void {
+  private async _updateMoveToBacklog(): Promise<void> {
     // default move to backlog setting
     // -------------------------------
     const lsLastIsMoveToBacklog = localStorage.getItem(this.getLSKey());
@@ -150,12 +166,15 @@ export class DialogAddTaskReminderComponent {
     //   this.isMoveToBacklog = false;
     // } else {
 
-    this.isMoveToBacklog =
-      this.isShowMoveToBacklog && typeof lastIsMoveToBacklog === 'boolean'
-        ? lastIsMoveToBacklog
-        : this.isShowMoveToBacklog;
-    // }
+    const isShowMoveToBacklog = await this.isAddToBacklogAvailable$
+      .pipe(first())
+      .toPromise();
 
+    this.isMoveToBacklog =
+      typeof lastIsMoveToBacklog === 'boolean'
+        ? lastIsMoveToBacklog
+        : isShowMoveToBacklog;
+    // }
     console.log(this.isMoveToBacklog);
   }
 
