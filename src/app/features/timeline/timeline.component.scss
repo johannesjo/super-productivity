@@ -309,6 +309,7 @@ task.split-task::ng-deep .box {
   transform: translate(-50%, -50%);
   z-index: 5;
   display: flex;
+  opacity: 0.5;
 
   @include mousePrimaryDevice {
     //display: none;
