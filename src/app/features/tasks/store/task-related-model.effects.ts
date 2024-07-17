@@ -3,11 +3,12 @@ import { Actions, createEffect, ofType } from '@ngrx/effects';
 import {
   addTimeSpent,
   moveToArchive_,
+  moveToOtherProject,
   restoreTask,
   updateTask,
   updateTaskTags,
 } from './task.actions';
-import { concatMap, filter, first, map, switchMap, tap } from 'rxjs/operators';
+import { concatMap, filter, first, map, mergeMap, switchMap, tap } from 'rxjs/operators';
 import { PersistenceService } from '../../../core/persistence/persistence.service';
 import { Task, TaskArchive, TaskCopy, TaskWithSubTasks } from '../task.model';
 import { ReminderService } from '../../reminder/reminder.service';
@@ -15,7 +16,7 @@ import { moveTaskInTodayList } from '../../work-context/store/work-context-meta.
 import { taskAdapter } from './task.adapter';
 import { flattenTasks } from './task.selectors';
 import { GlobalConfigService } from '../../config/global-config.service';
-import { TODAY_TAG } from '../../tag/tag.const';
+import { NO_LIST_TAG, TODAY_TAG } from '../../tag/tag.const';
 import { unique } from '../../../util/unique';
 import { TaskService } from '../task.service';
 import { EMPTY, Observable, of } from 'rxjs';
@@ -23,6 +24,7 @@ import { createEmptyEntity } from '../../../util/create-empty-entity';
 import { moveProjectTaskToTodayList } from '../../project/store/project.actions';
 import { SnackService } from '../../../core/snack/snack.service';
 import { T } from '../../../t.const';
+import { upsertTag } from '../../tag/store/tag.actions';
 
 @Injectable()
 export class TaskRelatedModelEffects {
@@ -136,6 +138,74 @@ export class TaskRelatedModelEffects {
               isDone: true,
             },
           },
+        }),
+      ),
+    ),
+  );
+
+  preventAndRevertLastTagDeletion$: any = createEffect(() =>
+    this._actions$.pipe(
+      ofType(updateTaskTags),
+      filter(
+        ({ newTagIds, task }) =>
+          newTagIds.length === 0 && !task.projectId && !task.parentId,
+      ),
+      // tap(() => console.log('preventAndRevertLastTagDeletion$')),
+      mergeMap(({ oldTagIds, newTagIds, task }) => [
+        upsertTag({
+          tag: NO_LIST_TAG,
+        }),
+        updateTaskTags({
+          task: task,
+          oldTagIds: newTagIds,
+          newTagIds: [NO_LIST_TAG.id],
+          isSkipExcludeCheck: true,
+        }),
+      ]),
+      // tap(() => {
+      //   // NOTE: timeout to make sure this is shown after other messages
+      //   setTimeout(() => {
+      //     this._snackService.open({
+      //       type: 'ERROR',
+      //       msg: T.F.TASK.S.LAST_TAG_DELETION_WARNING ,
+      //     });
+      //   }, 0);
+      // }),
+    ),
+  );
+
+  removeUnlistedTagWheneverTagIsAdded: any = createEffect(() =>
+    this._actions$.pipe(
+      ofType(updateTaskTags),
+      filter(
+        ({ newTagIds, task }) =>
+          newTagIds.includes(NO_LIST_TAG.id) && newTagIds.length >= 2,
+      ),
+      // tap(() => console.log('removeUnlistedTagWheneverTagIsAdded')),
+      map(({ oldTagIds, newTagIds, task }) =>
+        updateTaskTags({
+          task: task,
+          oldTagIds: newTagIds,
+          newTagIds: newTagIds.filter((id) => id !== NO_LIST_TAG.id),
+          isSkipExcludeCheck: true,
+        }),
+      ),
+    ),
+  );
+  removeUnlistedTagWheneverProjectIsAssigned: any = createEffect(() =>
+    this._actions$.pipe(
+      ofType(moveToOtherProject),
+      filter(
+        ({ targetProjectId, task }) =>
+          !!targetProjectId && task.tagIds.includes(NO_LIST_TAG.id),
+      ),
+      // tap(() => console.log('removeUnlistedTagWheneverProjectIsAssigned')),
+      map(({ task, targetProjectId }) =>
+        updateTaskTags({
+          task: { ...task, projectId: targetProjectId },
+          oldTagIds: task.tagIds,
+          newTagIds: task.tagIds.filter((id) => id !== NO_LIST_TAG.id),
+          isSkipExcludeCheck: true,
         }),
       ),
     ),

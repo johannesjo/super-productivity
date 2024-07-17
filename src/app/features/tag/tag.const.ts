@@ -41,3 +41,24 @@ export const DEFAULT_TAG: Tag = {
     primary: DEFAULT_TAG_COLOR,
   },
 };
+
+export const NO_LIST_TAG: Tag = {
+  id: 'NO_LIST',
+  icon: 'question_mark',
+  title: 'not listed',
+  color: null,
+  created: Date.now(),
+  taskIds: [],
+  ...WORK_CONTEXT_DEFAULT_COMMON,
+  theme: {
+    ...WORK_CONTEXT_DEFAULT_THEME,
+    primary: DEFAULT_TODAY_TAG_COLOR,
+    backgroundImageDark: 'assets/bg/NIGHT_manuel-will.jpg',
+
+    ...((window.matchMedia('(prefers-color-scheme: dark)').matches
+      ? {
+          isDisableBackgroundGradient: false,
+        }
+      : {}) as Partial<WorkContextThemeCfg>),
+  },
+};
