@@ -85,7 +85,7 @@ export class GitlabApiService {
 
     return this._sendIssuePaginatedRequest$(
       {
-        url: `${this._apiLink(cfg, project)}/issues?${queryParams}${this.getScopeParam(
+        url: `${this._apiLink(cfg, project, true)}/issues?${queryParams}${this.getScopeParam(
           cfg,
         )}${this.getCustomFilterParam(cfg)}`,
       },
@@ -104,7 +104,7 @@ export class GitlabApiService {
   }
 
   getIssueWithComments$(issue: GitlabIssue, cfg: GitlabCfg): Observable<GitlabIssue> {
-    return this._getIssueComments$(issue.id, cfg).pipe(
+    return this._getIssueComments$(issue, cfg).pipe(
       map((comments) => {
         return {
           ...issue,
@@ -266,7 +266,7 @@ export class GitlabApiService {
   }
 
   private _getIssueComments$(
-    issueid: number | string,
+    issue: GitlabIssue,
     cfg: GitlabCfg,
   ): Observable<GitlabOriginalComment[]> {
     if (!this._isValidSettings(cfg)) {
@@ -274,7 +274,7 @@ export class GitlabApiService {
     }
     return this._sendPaginatedRequest$(
       {
-        url: `${this._issueApiLink(cfg, issueid)}/notes`,
+        url: `${issue.links.self}/notes`,
       },
       cfg,
     ).pipe(
@@ -429,13 +429,14 @@ export class GitlabApiService {
   }
 
   private _issueApiLink(cfg: GitlabCfg, issue: string | number): string {
-    return `${this._apiLink(
-      cfg,
-      this.getProject(cfg, issue),
-    )}/issues/${this._getIidFromIssue(issue)}`;
+    return `${this._apiLink(cfg, this.getProject(cfg, issue), true)}/issues/${issue}`;
   }
 
-  private _apiLink(projectConfig: GitlabCfg, project?: string | number): string {
+  private _apiLink(
+    projectConfig: GitlabCfg,
+    project?: string | number,
+    onlyApiUrl = false,
+  ): string {
     let apiURL: string = '';
 
     if (projectConfig.gitlabBaseUrl) {
@@ -446,6 +447,7 @@ export class GitlabApiService {
     } else {
       apiURL = GITLAB_API_BASE_URL + '/';
     }
+    if (onlyApiUrl) return apiURL;
 
     let projectURL = project;
 
