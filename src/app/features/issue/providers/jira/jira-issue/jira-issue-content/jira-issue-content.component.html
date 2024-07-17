@@ -150,7 +150,7 @@
             </div>
             <div
               *ngIf="comment.body"
-              [innerHTML]="comment.body|jiraToMarkdown|markdown"
+              [innerHTML]="comment.body|jiraToMarkdown|markdown|async"
               class="markdown"
             ></div>
           </div>

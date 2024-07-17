@@ -30,6 +30,7 @@ import { OpenProjectCfg } from '../issue/providers/open-project/open-project.mod
 import { MODEL_VERSION } from '../../core/model-version';
 import { JiraCfg } from '../issue/providers/jira/jira.model';
 import { DEFAULT_JIRA_CFG } from '../issue/providers/jira/jira.const';
+import { roundTsToMinutes } from '../../util/round-ts-to-minutes';
 
 export const migrateProjectState = (projectState: ProjectState): ProjectState => {
   if (!isMigrateModel(projectState, MODEL_VERSION.PROJECT, 'Project')) {
@@ -42,6 +43,7 @@ export const migrateProjectState = (projectState: ProjectState): ProjectState =>
     projectEntities[key] = _convertToWesternArabicDateKeys(
       projectEntities[key] as Project,
     );
+    projectEntities[key] = _reduceWorkStartEndPrecision(projectEntities[key] as Project);
 
     // NOTE: absolutely needs to come last as otherwise the previous defaults won't work
     projectEntities[key] = _extendProjectDefaults(projectEntities[key] as Project);
@@ -147,6 +149,28 @@ const __convertToWesternArabicDateKeys = (workStartEnd: {
         };
       }, {})
     : workStartEnd;
+};
+const __reduceWorkStartEndPrecision = (workStartEnd: {
+  [key: string]: any;
+}): {
+  [key: string]: any;
+} => {
+  return workStartEnd
+    ? Object.keys(workStartEnd).reduce((acc, dateKey) => {
+        return {
+          ...acc,
+          [dateKey]: roundTsToMinutes(workStartEnd[dateKey]),
+        };
+      }, {})
+    : workStartEnd;
+};
+
+const _reduceWorkStartEndPrecision = (project: Project): Project => {
+  return {
+    ...project,
+    workStart: __reduceWorkStartEndPrecision(project.workStart),
+    workEnd: __reduceWorkStartEndPrecision(project.workEnd),
+  };
 };
 
 const _convertToWesternArabicDateKeys = (project: Project): Project => {

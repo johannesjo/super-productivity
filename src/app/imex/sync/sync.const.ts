@@ -53,3 +53,7 @@ export const GLOBAL_CONFIG_LOCAL_ONLY_FIELDS: string[][] = [
   // NOTE: googleDriveSync uses localStorage SUP_GOOGLE_SESSION instead
   // ['sync', 'googleDriveSync', 'authCode'],
 ];
+
+// NOTE: they should never be changed
+export const PREPEND_STR_ENCRYPTION = 'SP_ENC_';
+export const PREPEND_STR_COMPRESSION = 'SP_CPR_';

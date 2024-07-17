@@ -30,6 +30,7 @@ export const migrateTaskState = (taskState: TaskState, modelType = 'Task'): Task
 };
 
 export const migrateTaskArchiveState = (taskArchiveState: TaskArchive): TaskArchive => {
+  // @ts-ignore
   return migrateTaskState(taskArchiveState as TaskState, 'Task Archive') as TaskArchive;
 };
 

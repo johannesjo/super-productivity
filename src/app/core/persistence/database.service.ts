@@ -24,7 +24,6 @@ export class DatabaseService {
     private _androidDbAdapterService: AndroidDbAdapterService,
   ) {
     this._adapter = this._indexedDbAdapterService;
-    console.log(this._indexedDbAdapterService);
     this._init().then();
   }
 
@@ -76,7 +75,6 @@ export class DatabaseService {
       console.error('_lastParams', this._lastParams);
       console.error(e);
       alert('DB INIT Error');
-      // TODO fix typing issue
       throw new Error(e as any);
     }
   }

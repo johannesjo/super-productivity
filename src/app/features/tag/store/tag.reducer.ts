@@ -44,6 +44,7 @@ import {
   updateWorkStartForTag,
   upsertTag,
 } from './tag.actions';
+import { roundTsToMinutes } from '../../../util/round-ts-to-minutes';
 
 export const TAG_FEATURE_NAME = 'tag';
 const WORK_CONTEXT_TYPE: WorkContextType = WorkContextType.TAG;
@@ -256,7 +257,7 @@ export const tagReducer = createReducer<TagState>(
         changes: {
           workStart: {
             ...(state.entities[id] as Tag).workStart,
-            [date]: newVal,
+            [date]: roundTsToMinutes(newVal),
           },
         },
       },
@@ -271,7 +272,7 @@ export const tagReducer = createReducer<TagState>(
         changes: {
           workEnd: {
             ...(state.entities[id] as Tag).workEnd,
-            [date]: newVal,
+            [date]: roundTsToMinutes(newVal),
           },
         },
       },

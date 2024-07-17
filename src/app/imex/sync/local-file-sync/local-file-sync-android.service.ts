@@ -1,5 +1,9 @@
 import { Injectable } from '@angular/core';
-import { SyncProvider, SyncProviderServiceInterface } from '../sync-provider.model';
+import {
+  SyncProvider,
+  SyncProviderServiceInterface,
+  SyncTarget,
+} from '../sync-provider.model';
 import { Observable, of } from 'rxjs';
 import { IS_ANDROID_WEB_VIEW } from '../../../util/is-android-web-view';
 import { SyncGetRevResult } from '../sync.model';
@@ -14,72 +18,57 @@ export class LocalFileSyncAndroidService implements SyncProviderServiceInterface
   id: SyncProvider = SyncProvider.LocalFile;
   isUploadForcePossible?: boolean;
   isReady$: Observable<boolean> = of(IS_ANDROID_WEB_VIEW).pipe(
-    concatMap(() => this._filePath$),
+    concatMap(() => this._folderPath$),
     map((v) => !!v),
   );
 
-  private _filePath$: Observable<string | null> = this._globalConfigService.sync$.pipe(
-    map((sync) => sync.localFileSync.syncFilePath),
+  private _folderPath$: Observable<string | null> = this._globalConfigService.sync$.pipe(
+    map((sync) => sync.localFileSync.syncFolderPath),
   );
-  private _filePathOnce$: Observable<string | null> = this._filePath$.pipe(first());
+  private _folderPathOnce$: Observable<string | null> = this._folderPath$.pipe(first());
 
   constructor(private _globalConfigService: GlobalConfigService) {}
 
-  async getRevAndLastClientUpdate(
+  async getFileRevAndLastClientUpdate(
+    syncTarget: SyncTarget,
     localRev: string | null,
   ): Promise<{ rev: string; clientUpdate?: number } | SyncGetRevResult> {
-    const filePath = await this._filePathOnce$.toPromise();
-    if (!filePath) {
-      throw new Error('File path is null');
-    }
-
-    try {
-      const rev = androidInterface.getFileRev(filePath);
-
-      return { rev } as any;
-    } catch (e) {
-      throw new Error(e as any);
-    }
+    const filePath = await this._getFilePath(syncTarget);
+    const rev = androidInterface.getFileRev(filePath);
+    return { rev } as any;
   }
 
-  async uploadAppData(
+  async uploadFileData(
+    syncTarget: SyncTarget,
     dataStr: string,
     clientModified: number,
     localRev: string | null,
     isForceOverwrite?: boolean,
   ): Promise<string | Error> {
-    const filePath = await this._filePathOnce$.toPromise();
-    if (!filePath) {
-      throw new Error('File path is null');
-    }
-
-    try {
-      androidInterface.writeFile(filePath, dataStr);
-
-      return androidInterface.getFileRev(filePath);
-    } catch (e) {
-      throw new Error(e as any);
-    }
+    const filePath = await this._getFilePath(syncTarget);
+    androidInterface.writeFile(filePath, dataStr);
+    return androidInterface.getFileRev(filePath);
   }
 
-  async downloadAppData(
+  async downloadFileData(
+    syncTarget: SyncTarget,
     localRev: string | null,
   ): Promise<{ rev: string; dataStr: string | undefined }> {
-    const filePath = await this._filePathOnce$.toPromise();
-    if (!filePath) {
-      throw new Error('File path is null');
-    }
+    const filePath = await this._getFilePath(syncTarget);
+    const rev = androidInterface.getFileRev(filePath);
+    const dataStr = androidInterface.readFile(filePath);
 
-    try {
-      const rev = androidInterface.getFileRev(filePath);
-      const dataStr = androidInterface.readFile(filePath);
+    return {
+      rev,
+      dataStr,
+    };
+  }
 
-      return {
-        rev,
-        dataStr,
-      };
-    } catch (e) {
-      throw new Error(e as any);
+  private async _getFilePath(syncTarget: SyncTarget): Promise<string> {
+    const folderPath = await this._folderPathOnce$.toPromise();
+    if (!folderPath) {
+      throw new Error('No folder path given');
     }
+    return `${folderPath}/${syncTarget}.json`;
   }
 }

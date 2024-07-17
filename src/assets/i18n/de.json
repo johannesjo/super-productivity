@@ -846,9 +846,9 @@
           "L_IS_COMPRESS_DATA": "Daten komprimieren"
         },
         "LOCAL_FILE": {
+          "L_SYNC_FILE_PATH_PERMISSION_VALIDATION": "Benötigt Dateizugriffsberechtigung",
           "L_SYNC_FILE_PATH": "Dateipfad synchronisieren",
-          "L_SYNC_FILE_PATH_DESCRIPTION": "Absoluter Pfad zu der Datei, die für die Synchronisierung verwendet werden soll (wird erstellt).",
-          "L_SYNC_FILE_PATH_PERMISSION_VALIDATION": "Benötigt Dateizugriffsberechtigung"
+          "L_SYNC_FILE_PATH_DESCRIPTION": "Absoluter Pfad zu der Datei, die für die Synchronisierung verwendet werden soll (wird erstellt)."
         },
         "L_ENABLE_COMPRESSION": "Komprimierung aktivieren (schnellere Datenübertragung)",
         "L_ENABLE_ENCRYPTION": "Ende-zu-Ende-Verschlüsselung aktivieren (experimentell) – Machen Sie Ihre Daten für Ihren Synchronisierungsanbieter unzugänglich",
@@ -862,8 +862,8 @@
           "CORS_INFO": "<p><strong>Experimental!!</strong> <strong>Damit dies für Mobil oder den Browser funktioniert, müssen Sie Super Productivity für CORS-Anfragen bei Ihrer Nextcloud-Instanz auf die Whitelist setzen</strong>, dies kann negative Auswirkungen auf die Sicherheit haben! Bitte beziehen Sie sich <a href='https://github.com/nextcloud/server/issues/3131'>auf diesen Thread</a> für weitere Informationen. Ein Ansatz, um dies auch mobil zu ermöglichen, ist das Whitelisting \"https://app.super-productivity.com\" über die Nextcloud-App <a href='https://apps.nextcloud.com/apps/webapppassword'>webapppassword<a>. Benutzung auf eigene Gefahr!",
           "L_BASE_URL": "Basis-URL",
           "L_PASSWORD": "Passwort",
-          "L_SYNC_FILE_PATH": "Dateipfad synchronisieren",
-          "L_USER_NAME": "Nutzername"
+          "L_USER_NAME": "Nutzername",
+          "L_SYNC_FILE_PATH": "Dateipfad synchronisieren"
         }
       },
       "S": {
@@ -1170,8 +1170,8 @@
         "SKIP": "Überspringen",
         "SPLIT_TIME": "Zeit aufteilen in mehrere Aufgaben und Pausen",
         "TASK": "Aufgabe",
-        "TASK_BREAK": "Aufgabe+Pause",
-        "TRACK_TO": "Erfassen als:"
+        "TRACK_TO": "Erfassen als:",
+        "TASK_BREAK": "Aufgabe+Pause"
       },
       "D_TRACKING_REMINDER": {
         "CREATE_AND_TRACK": "<em>Erstelle</em> und erfasse zu",
@@ -1341,9 +1341,9 @@
       "HELP": "<div><p>Wenn die Behandlung von Leerlaufzeiten aktiviert ist, wird nach einer festgelegten Zeit ein Dialogfeld geöffnet, in dem überprüft wird, ob und für welche Aufgabe Sie Ihre Zeit erfassen möchten, wenn Sie im Leerlauf waren.</p></div>",
       "IS_ENABLE_IDLE_TIME_TRACKING": "Aktivieren Sie die Leerlaufbehandlung",
       "IS_ONLY_OPEN_IDLE_WHEN_CURRENT_TASK": "Triggern Sie den Leerlaufdialog nur, wenn eine aktuelle Aufgabe ausgewählt ist",
-      "IS_UN_TRACKED_IDLE_RESETS_BREAK_TIMER": "Durch Zurücksetzen der nicht verfolgten Leerlaufzeit wird ein Pausen-Timer ausgelöst",
       "MIN_IDLE_TIME": "Leerlauf nach X auslösen",
-      "TITLE": "Leerlaufbehandlung"
+      "TITLE": "Leerlaufbehandlung",
+      "IS_UN_TRACKED_IDLE_RESETS_BREAK_TIMER": "Durch Zurücksetzen der nicht verfolgten Leerlaufzeit wird ein Pausen-Timer ausgelöst"
     },
     "IMEX": {
       "HELP": "<p>Hier können Sie alle Ihre Daten als <strong>JSON</strong> für Backups exportieren, aber auch in einem anderen Kontext verwenden (z. B. möchten Sie Ihre Projekte möglicherweise im Browser exportieren und in die Desktop-Version importieren ). </p> <p>Der Import erwartet, dass gültiges JSON in den Textbereich kopiert wird. <strong>HINWEIS: Sobald Sie auf die Schaltfläche \"Importieren\" klicken, werden alle Ihre aktuellen Einstellungen und Daten überschrieben.</strong></p>",

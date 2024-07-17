@@ -34,25 +34,38 @@
   bottom: $s;
 }
 
-$short-syntax-bar-height: 32px;
 .add-task-form {
   width: 100%;
   position: relative;
   color: #000000;
   border-radius: $card-border-radius;
-  overflow: hidden;
+  background: #ffffff;
 
   @include darkTheme {
     color: #eeeeee;
+    // 58 overlay 53 normal
+    background-color: $dark-theme-bg-lighter;
+    color: $dark-theme-text-color-most-intense;
+  }
+
+  &.isElevated {
+    @include darkTheme {
+      background-color: $dark-theme-bg-lightest;
+      color: $dark-theme-text-color-most-intense;
+    }
   }
 
   .input-wrapper {
     position: relative;
+    display: flex;
+
+    @include darkTheme {
+      color: $dark-theme-text-color-most-intense;
+    }
   }
 
   input {
-    padding-bottom: $short-syntax-bar-height;
-
+    flex: 1;
     display: block;
     width: 100%;
     font-size: 16px;
@@ -60,28 +73,11 @@ $short-syntax-bar-height: 32px;
     border-style: solid;
     border-width: 0;
     outline: 0;
-    border-color: $c-primary;
-
-    padding-right: 96px !important;
+    padding-right: 4px;
     padding-left: $s * 2;
     line-height: 42px;
-
-    color: #000000;
-    background: #ffffff;
-  }
-
-  input {
-    @include darkTheme {
-      background-color: $dark-theme-bg-lighter;
-      color: $dark-theme-text-color-most-intense;
-    }
-  }
-
-  &.isElevated input {
-    @include darkTheme {
-      background-color: $dark-theme-bg-lightest;
-      color: $dark-theme-text-color-most-intense;
-    }
+    background: transparent;
+    color: inherit;
   }
 }
 
@@ -98,12 +94,8 @@ $short-syntax-bar-height: 32px;
 }
 
 .button-controls {
-  position: absolute;
-  right: $s * 0.5;
-  top: 50%;
-  transform: translateY(-50%);
+  margin-left: auto;
   z-index: 2;
-  margin-top: -0.5 * $short-syntax-bar-height;
   display: flex;
 }
 
@@ -116,22 +108,19 @@ $short-syntax-bar-height: 32px;
   }
 }
 
+$short-syntax-bar-height: 32px;
+
 .info-bar {
   padding: 0 1.75 * $s;
   height: $short-syntax-bar-height;
   line-height: $short-syntax-bar-height;
-  margin-top: -1 * $short-syntax-bar-height;
   color: $light-theme-text-color-muted;
-  background: #ffffff;
   border-top: 1px dashed $light-theme-extra-border-color;
   position: relative;
   z-index: 1;
-  //border-bottom-left-radius: $card-border-radius;
-  //border-bottom-right-radius: $card-border-radius;
   pointer-events: none;
 
   @include darkTheme {
-    background-color: $dark-theme-bg-lightest;
     border-color: $dark-theme-extra-border-color;
     color: $dark-theme-text-color-muted;
   }
@@ -159,6 +148,7 @@ $short-syntax-bar-height: 32px;
 
 .separator-box {
   border-right: 1px dashed $light-theme-extra-border-color;
+  border-left: 1px dashed $light-theme-extra-border-color;
 
   @include darkTheme() {
     border-color: $dark-theme-extra-border-color;

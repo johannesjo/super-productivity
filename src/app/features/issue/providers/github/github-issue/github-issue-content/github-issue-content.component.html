@@ -100,7 +100,7 @@
             </div>
             <div
               *ngIf="lastComment().body"
-              [innerHTML]="lastComment().body|markdown"
+              [innerHTML]="lastComment().body|markdown|async"
               class="markdown"
             ></div>
           </div>
@@ -124,7 +124,7 @@
             </div>
             <div
               *ngIf="comment.body"
-              [innerHTML]="comment?.body|markdown"
+              [innerHTML]="comment?.body|markdown|async"
               class="markdown"
             ></div>
           </div>

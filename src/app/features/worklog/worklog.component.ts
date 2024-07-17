@@ -17,7 +17,7 @@ import { standardListAnimation } from '../../ui/animations/standard-list.ani';
 import { WorklogService } from './worklog.service';
 import { getDateRangeForMonth } from '../../util/get-date-range-for-month';
 import { getDateRangeForWeek } from '../../util/get-date-range-for-week';
-import { fadeAnimation } from '../../ui/animations/fade.ani';
+import { fadeAnimation, fadeInSlowAnimation } from '../../ui/animations/fade.ani';
 import { T } from '../../t.const';
 import { WorkContextService } from '../work-context/work-context.service';
 import { SearchQueryParams } from '../search-bar/search-bar.model';
@@ -30,7 +30,12 @@ import { selectAllProjectColorsAndTitles } from '../project/store/project.select
   templateUrl: './worklog.component.html',
   styleUrls: ['./worklog.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  animations: [expandFadeAnimation, standardListAnimation, fadeAnimation],
+  animations: [
+    expandFadeAnimation,
+    standardListAnimation,
+    fadeAnimation,
+    fadeInSlowAnimation,
+  ],
 })
 export class WorklogComponent implements AfterViewInit, OnDestroy {
   T: typeof T = T;

@@ -6,6 +6,7 @@
 
   $width: map-get(
     (
+      'xxxs': $layout-xxxs,
       'xxs': $layout-xxs,
       'xs': $layout-xs,
       'sm': $layout-sm,

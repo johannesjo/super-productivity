@@ -344,7 +344,7 @@
                 ></mat-icon>
                 {{ T.F.TASK.CMP.TRACK_TIME|translate }}
               </span>
-              <span class="keyIndicator"> {{ kb.togglePlay }} </span>
+              <span class="key-i">{{ kb.togglePlay }}</span>
             </button>
             <button
               (click)="pauseTask()"
@@ -355,7 +355,7 @@
                 <mat-icon>pause</mat-icon>
                 {{ T.F.TASK.CMP.TRACK_TIME_STOP|translate }}
               </span>
-              <span class="keyIndicator"> {{ kb.togglePlay }} </span>
+              <span class="key-i">{{ kb.togglePlay }}</span>
             </button>
 
             <button
@@ -377,7 +377,7 @@
                 <mat-icon>timer</mat-icon>
                 {{ T.F.TASK.CMP.OPEN_TIME|translate }}
               </span>
-              <span class="keyIndicator"> {{ kb.taskOpenEstimationDialog }} </span>
+              <span class="key-i">{{ kb.taskOpenEstimationDialog }}</span>
             </button>
 
             <button
@@ -389,14 +389,14 @@
                   <mat-icon>alarm_add</mat-icon>
                   {{ T.F.TASK.CMP.SCHEDULE|translate }}
                 </span>
-                <span class="keyIndicator"> {{ kb.taskSchedule }} </span>
+                <span class="key-i">{{ kb.taskSchedule }}</span>
               </ng-container>
               <ng-container *ngIf="task.reminderId">
                 <span>
                   <mat-icon>alarm</mat-icon>
                   {{ T.F.TASK.CMP.EDIT_REMINDER|translate }}
                 </span>
-                <span class="keyIndicator"> {{ kb.taskSchedule }} </span>
+                <span class="key-i">{{ kb.taskSchedule }}</span>
               </ng-container>
             </button>
 
@@ -409,7 +409,7 @@
                 <mat-icon>playlist_add</mat-icon>
                 {{ T.F.TASK.CMP.ADD_SUB_TASK|translate }}
               </span>
-              <span class="keyIndicator"> {{ kb.taskAddSubTask }} </span>
+              <span class="key-i">{{ kb.taskAddSubTask }}</span>
             </button>
 
             <button
@@ -451,7 +451,7 @@
                 <mat-icon>arrow_downward</mat-icon>
                 {{ T.F.TASK.CMP.MOVE_TO_BACKLOG|translate }}
               </span>
-              <span class="keyIndicator"> {{ kb.moveToBacklog }} </span>
+              <span class="key-i">{{ kb.moveToBacklog }}</span>
             </button>
 
             <!-- <mat-menu-item> -->
@@ -472,7 +472,7 @@
                 <mat-icon>arrow_upward</mat-icon>
                 {{ T.F.TASK.CMP.MOVE_TO_TODAY|translate }}
               </span>
-              <span class="keyIndicator"> {{ kb.moveToTodaysTasks }} </span>
+              <span class="key-i">{{ kb.moveToTodaysTasks }}</span>
             </button>
 
             <button
@@ -484,7 +484,7 @@
                 <mat-icon>style</mat-icon>
                 {{ T.F.TASK.CMP.EDIT_TAGS|translate }}
               </span>
-              <span class="keyIndicator"> {{ kb.taskEditTags }} </span>
+              <span class="key-i">{{ kb.taskEditTags }}</span>
             </button>
 
             <button
@@ -497,7 +497,7 @@
                 {{ (task.projectId ? T.F.TASK.CMP.MOVE_TO_OTHER_PROJECT :
                 T.F.TASK.CMP.ADD_TO_PROJECT)|translate }}
               </span>
-              <span class="keyIndicator"> {{ kb.taskMoveToProject }} </span>
+              <span class="key-i">{{ kb.taskMoveToProject }}</span>
             </button>
 
             <button
@@ -519,7 +519,7 @@
                 {{ (task.repeatCfgId ? T.F.TASK.CMP.DELETE_REPEAT_INSTANCE :
                 T.F.TASK.CMP.DELETE)|translate }}
               </span>
-              <span class="keyIndicator"> {{ kb.taskDelete }} </span>
+              <span class="key-i">{{ kb.taskDelete }}</span>
             </button>
           </ng-template>
         </mat-menu>

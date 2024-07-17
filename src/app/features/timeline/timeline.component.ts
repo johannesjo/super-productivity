@@ -149,6 +149,24 @@ export class TimelineComponent implements OnDestroy {
     return item.id;
   }
 
+  getSizeClass(timelineEntry: TimelineViewEntry): string {
+    // TODO fix that this is being reRendered on every hover
+    const d =
+      // @ts-ignore
+      timelineEntry?.data?.timeEstimate ||
+      // @ts-ignore
+      timelineEntry?.data?.timeToGo ||
+      // @ts-ignore
+      timelineEntry?.data?.defaultEstimate;
+    const h = d && d / 60 / 60 / 1000;
+
+    // if (h && h >= 4.5) return 'xxxl row';
+    if (h && h >= 3.5) return 'xxl row';
+    if (h && h >= 2.5) return 'xl row';
+    if (h && h >= 1.5) return 'l row';
+    return 'row';
+  }
+
   async moveUp(task: Task): Promise<void> {
     // if (task.parentId) {
     //   const parentTask = await this.taskService.getByIdOnce$(task.parentId).toPromise();

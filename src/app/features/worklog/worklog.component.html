@@ -4,7 +4,7 @@
 
 <div
   *ngIf="worklogService.worklogData$|async as wData; else spinner"
-  [@fade]
+  [@fadeInSlow]
 >
   <h1 class="mat-headline-5 total-time">
     {{ T.F.WORKLOG.CMP.TOTAL_TIME|translate }} <br /><strong

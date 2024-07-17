@@ -6,8 +6,6 @@ import { ImprovementState } from '../../features/metric/improvement/improvement.
 import { ObstructionState } from '../../features/metric/obstruction/obstruction.model';
 import { TaskRepeatCfgState } from '../../features/task-repeat-cfg/task-repeat-cfg.model';
 import { TagState } from '../../features/tag/tag.model';
-import { TaskAttachment } from '../../features/tasks/task-attachment/task-attachment.model';
-import { EntityState } from '@ngrx/entity';
 import { SimpleCounterState } from '../../features/simple-counter/simple-counter.model';
 import { ProjectArchive } from '../../features/project/project-archive.model';
 import { SyncProvider } from './sync-provider.model';
@@ -15,12 +13,8 @@ import { ProjectState } from '../../features/project/project.model';
 import { BookmarkState } from '../../features/bookmark/bookmark.model';
 import { NoteState } from '../../features/note/note.model';
 
-/** @deprecated */
-export type TaskAttachmentState = EntityState<TaskAttachment>;
-
-export interface AppBaseData {
+export interface AppBaseWithoutLastSyncModelChange {
   project: ProjectState;
-  archivedProjects: ProjectArchive;
   globalConfig: GlobalConfigState;
   reminders: Reminder[];
   note: NoteState;
@@ -33,13 +27,37 @@ export interface AppBaseData {
   task: TaskState;
   tag: TagState;
   simpleCounter: SimpleCounterState;
-  taskArchive: TaskArchive;
   taskRepeatCfg: TaskRepeatCfgState;
 }
+
+export interface AppMainFileNoRevsData
+  extends AppBaseWithoutLastSyncModelChange,
+    AppDataForProjects {
+  lastLocalSyncModelChange: number | null;
+}
+
+export interface AppMainFileData extends AppMainFileNoRevsData {
+  archiveRev: string;
+  archiveLastUpdate: number;
+}
+
+export interface AppArchiveFileData {
+  taskArchive: TaskArchive;
+  archivedProjects: ProjectArchive;
+}
+
+export interface AppBaseData
+  extends AppBaseWithoutLastSyncModelChange,
+    AppArchiveFileData {}
 
 export interface LocalSyncMetaForProvider {
   lastSync: number;
   rev: string | null;
+  revTaskArchive: string | null;
+  // currently dropbox only
+  accessToken?: string;
+  refreshToken?: string;
+  _tokenExpiresAt?: number;
 }
 
 export interface LocalSyncMetaModel {
@@ -64,6 +82,7 @@ export interface AppDataForProjects {
 
 export interface AppDataComplete extends AppBaseData, AppDataForProjects {
   lastLocalSyncModelChange: number | null;
+  lastArchiveUpdate: number | null;
 }
 
 export type DialogConflictResolutionResult = 'USE_LOCAL' | 'USE_REMOTE' | false;

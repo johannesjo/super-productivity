@@ -63,7 +63,12 @@ export const getNewestPossibleDueDate = (
     case 'MONTHLY': {
       const nrOfMonthsToCheck = taskRepeatCfg.repeatEvery;
       const dayOfMonthRepeat = startDateDate.getDate();
+
       checkDate.setDate(dayOfMonthRepeat);
+
+      if (today.getDate() < dayOfMonthRepeat) {
+        checkDate.setMonth(checkDate.getMonth() - 1);
+      }
 
       for (let i = 0; i < nrOfMonthsToCheck; i++) {
         const diffInMonth = getDiffInMonth(startDateDate, checkDate);
@@ -85,6 +90,13 @@ export const getNewestPossibleDueDate = (
       const monthOfMonthRepeat = startDateDate.getMonth();
       checkDate.setDate(dayOfMonthRepeat);
       checkDate.setMonth(monthOfMonthRepeat);
+
+      if (today.getMonth() < monthOfMonthRepeat) {
+        checkDate.setFullYear(checkDate.getFullYear() - 1);
+      }
+      if (today.getMonth() === monthOfMonthRepeat && today.getDate() < dayOfMonthRepeat) {
+        checkDate.setFullYear(checkDate.getFullYear() - 1);
+      }
 
       for (let i = 0; i < nrOfYearsToCheck; i++) {
         const diffInYears = getDiffInYears(startDateDate, checkDate);

@@ -14,9 +14,13 @@ import {
 } from 'rxjs/operators';
 import { SyncConfig } from '../../features/config/global-config.model';
 import {
+  AppArchiveFileData,
   AppDataComplete,
+  AppMainFileData,
+  AppMainFileNoRevsData,
   DialogConflictResolutionResult,
   DialogPermissionResolutionResult,
+  LocalSyncMetaForProvider,
   SyncResult,
 } from './sync.model';
 import { T } from '../../t.const';
@@ -24,13 +28,11 @@ import { checkForUpdate, UpdateCheckResult } from './check-for-update.util';
 import { DialogSyncConflictComponent } from './dialog-dbx-sync-conflict/dialog-sync-conflict.component';
 import { DialogSyncPermissionComponent } from './dialog-sync-permission/dialog-sync-permission.component';
 import { TranslateService } from '@ngx-translate/core';
-import { SyncTriggerService } from './sync-trigger.service';
-import { MatDialog } from '@angular/material/dialog';
+import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { DataImportService } from './data-import.service';
 import { WebDavSyncService } from './web-dav/web-dav-sync.service';
 import { SnackService } from '../../core/snack/snack.service';
 import { isValidAppData } from './is-valid-app-data.util';
-import { truncate } from '../../util/truncate';
 import { PersistenceLocalService } from '../../core/persistence/persistence-local.service';
 import { getSyncErrorStr } from './get-sync-error-str';
 import { PersistenceService } from '../../core/persistence/persistence.service';
@@ -40,6 +42,10 @@ import { IS_ANDROID_WEB_VIEW } from '../../util/is-android-web-view';
 import { androidInterface } from '../../features/android/android-interface';
 import { CompressionService } from '../../core/compression/compression.service';
 import { decrypt, encrypt } from './encryption';
+import { LS } from '../../core/persistence/storage-keys.const';
+import { PREPEND_STR_COMPRESSION, PREPEND_STR_ENCRYPTION } from './sync.const';
+
+const KNOWN_SYNC_ERROR_PREFIX = 'KNOWN_SYNC_ERROR_SUP_';
 
 @Injectable({
   providedIn: 'root',
@@ -99,7 +105,6 @@ export class SyncProviderService {
     private _globalConfigService: GlobalConfigService,
     private _persistenceLocalService: PersistenceLocalService,
     private _translateService: TranslateService,
-    private _syncTriggerService: SyncTriggerService,
     private _persistenceService: PersistenceService,
     private _compressionService: CompressionService,
     private _snackService: SnackService,
@@ -130,13 +135,22 @@ export class SyncProviderService {
     } catch (e) {
       console.log('__error during sync__');
       console.error(e);
-      this._snackService.open({
-        msg: T.F.SYNC.S.UNKNOWN_ERROR,
-        type: 'ERROR',
-        translateParams: {
-          err: getSyncErrorStr(e),
-        },
-      });
+      const errStr = getSyncErrorStr(e);
+
+      if (errStr.includes(KNOWN_SYNC_ERROR_PREFIX)) {
+        this._snackService.open({
+          msg: errStr.replace(KNOWN_SYNC_ERROR_PREFIX, ''),
+          type: 'ERROR',
+        });
+      } else {
+        this._snackService.open({
+          msg: T.F.SYNC.S.UNKNOWN_ERROR,
+          type: 'ERROR',
+          translateParams: {
+            err: getSyncErrorStr(e),
+          },
+        });
+      }
       this.isSyncing$.next(false);
       return 'ERROR';
     }
@@ -144,16 +158,20 @@ export class SyncProviderService {
 
   private async _sync(cp: SyncProviderServiceInterface): Promise<SyncResult> {
     let local: AppDataComplete | undefined;
-
-    const isReady = await cp.isReady$.pipe(first()).toPromise();
+    let isReady: boolean = false;
+    try {
+      isReady = await cp.isReady$.pipe(first()).toPromise();
+    } catch (e) {
+      isReady = false;
+    }
     if (!isReady) {
+      console.log('syncProviderCfg', cp);
       this._snackService.open({
         msg: T.F.SYNC.S.INCOMPLETE_CFG,
         type: 'ERROR',
       });
       return 'ERROR';
     }
-
     const localSyncMeta = await this._persistenceLocalService.load();
     const lastSync = localSyncMeta[cp.id].lastSync;
     const localRev = localSyncMeta[cp.id].rev;
@@ -161,13 +179,32 @@ export class SyncProviderService {
     // PRE CHECK 1
     // check if remote data & file revision changed
     // --------------------------------------------
-    const revRes = await cp.getRevAndLastClientUpdate(localRev);
+    const revRes = await cp.getFileRevAndLastClientUpdate('MAIN', localRev);
+
+    // NOTE : in success cases it is an object
     if (typeof revRes === 'string') {
-      if (revRes === 'NO_REMOTE_DATA' && this._c(T.F.SYNC.C.NO_REMOTE_DATA)) {
-        this._log(cp, '↑ Update Remote after no getRevAndLastClientUpdate()');
-        const localLocal = await this._persistenceService.getValidCompleteData();
-        await this._uploadAppData(cp, localLocal);
-        return 'SUCCESS';
+      if (revRes === 'NO_REMOTE_DATA') {
+        // TODO remove at some point
+        const isPossibleLegacyData =
+          !localSyncMeta[cp.id].revTaskArchive &&
+          localSyncMeta[cp.id].revTaskArchive !== null;
+        if (
+          isPossibleLegacyData &&
+          localStorage.getItem(LS.LAST_LOCAL_SYNC_MODEL_CHANGE)
+        ) {
+          alert(this._translateService.instant(T.F.SYNC.A.POSSIBLE_LEGACY_DATA));
+          // localStorage.removeItem(LS.LAST_LOCAL_SYNC_MODEL_CHANGE);
+        }
+        if (this._c(T.F.SYNC.C.NO_REMOTE_DATA)) {
+          this._log(cp, '↑ Update Remote after no getFileRevAndLastClientUpdate()');
+          const localLocal = await this._persistenceService.getValidCompleteData();
+          await this._uploadAppData({
+            cp,
+            localDataComplete: localLocal,
+            isForceArchiveUpdate: true,
+          });
+          return 'SUCCESS';
+        }
       }
       // NOTE: includes HANDLED_ERROR and Error
       return 'ERROR';
@@ -188,7 +225,7 @@ export class SyncProviderService {
 
     if (rev && rev === localRev) {
       this._log(cp, 'PRE1: ↔ Same Rev', rev);
-      // NOTE: same rev, doesn't mean. that we can't have local changes
+      // NOTE: same mainFileRev, doesn't mean. that we can't have local changes
       local = await this._persistenceService.getValidCompleteData();
       if (lastSync === local.lastLocalSyncModelChange) {
         this._log(cp, 'PRE1: No local changes to sync');
@@ -232,7 +269,7 @@ export class SyncProviderService {
       lastSync < local.lastLocalSyncModelChange
     ) {
       this._log(cp, 'PRE3: ↑ Update Remote');
-      await this._uploadAppData(cp, local);
+      await this._uploadAppData({ cp, localDataComplete: local });
       return 'SUCCESS';
     }
 
@@ -240,7 +277,7 @@ export class SyncProviderService {
     // DOWNLOAD OF REMOTE (and possible error)
     let r;
     try {
-      r = await this._downloadAppData(cp);
+      r = await this._downloadMainFileAppData(cp);
     } catch (e) {
       console.error('Download Data failed');
       this._snackService.open({
@@ -253,7 +290,11 @@ export class SyncProviderService {
 
       if (this._c(T.F.SYNC.C.UNABLE_TO_LOAD_REMOTE_DATA)) {
         this._log(cp, '↑ PRE4: Update Remote after download error');
-        await this._uploadAppData(cp, local);
+        await this._uploadAppData({
+          cp,
+          localDataComplete: local,
+          isForceArchiveUpdate: true,
+        });
         return 'SUCCESS';
       } else {
         return 'USER_ABORT';
@@ -271,7 +312,11 @@ export class SyncProviderService {
     ) {
       if (this._c(T.F.SYNC.C.NO_REMOTE_DATA)) {
         this._log(cp, '↑ PRE5: Update Remote');
-        await this._uploadAppData(cp, local);
+        await this._uploadAppData({
+          cp,
+          localDataComplete: local,
+          isForceArchiveUpdate: true,
+        });
         return 'SUCCESS';
       } else {
         return 'USER_ABORT';
@@ -299,13 +344,18 @@ export class SyncProviderService {
 
       case UpdateCheckResult.LocalUpdateRequired: {
         this._log(cp, '↓ Update Local');
-        await this._importAppData(cp, remote, r.rev as string);
+        await this._importMainFileAppDataAndArchiveIfNecessary({
+          cp,
+          remoteMainFileData: remote,
+          localComplete: local,
+          mainFileRev: r.rev as string,
+        });
         return 'SUCCESS';
       }
 
       case UpdateCheckResult.RemoteUpdateRequired: {
         this._log(cp, '↑ Update Remote');
-        await this._uploadAppData(cp, local);
+        await this._uploadAppData({ cp, localDataComplete: local });
         return 'SUCCESS';
       }
 
@@ -314,7 +364,7 @@ export class SyncProviderService {
         if (this._c(T.F.SYNC.C.TRY_LOAD_REMOTE_AGAIN)) {
           return this.sync();
         } else {
-          await this._handleConflict(cp, { remote, local, lastSync, rev: r.rev });
+          await this._handleMainFileConflict({ cp, remote, local, lastSync, rev: r.rev });
           return 'CONFLICT_DIALOG';
         }
       }
@@ -322,13 +372,18 @@ export class SyncProviderService {
       case UpdateCheckResult.DataDiverged: {
         this._log(cp, '^--------^-------^');
         this._log(cp, '⇎ X Diverged Data');
-        await this._handleConflict(cp, { remote, local, lastSync, rev: r.rev });
+        await this._handleMainFileConflict({ cp, remote, local, lastSync, rev: r.rev });
         return 'CONFLICT_DIALOG';
       }
 
       case UpdateCheckResult.LastSyncNotUpToDate: {
         this._log(cp, 'X Last Sync not up to date');
-        await this._setLocalRevAndLastSync(cp, r.rev, local.lastLocalSyncModelChange);
+        await this._setLocalRevsAndLastSync(
+          cp,
+          r.rev,
+          'NO_UPDATE',
+          local.lastLocalSyncModelChange,
+        );
         return 'SPECIAL';
       }
 
@@ -337,12 +392,22 @@ export class SyncProviderService {
         this._log(cp, 'XXX Wrong Data');
         if (local.lastLocalSyncModelChange > remote.lastLocalSyncModelChange) {
           if (this._c(T.F.SYNC.C.FORCE_UPLOAD)) {
-            await this._uploadAppData(cp, local, true);
+            await this._uploadAppData({
+              cp,
+              localDataComplete: local,
+              isForceOverwrite: true,
+            });
             return 'SUCCESS';
           }
         } else {
           if (this._c(T.F.SYNC.C.FORCE_IMPORT)) {
-            await this._importAppData(cp, remote, r.rev as string);
+            await this._importMainFileAppDataAndArchiveIfNecessary({
+              cp,
+              remoteMainFileData: remote,
+              localComplete: local,
+              mainFileRev: r.rev as string,
+              isForceArchiveUpdate: true,
+            });
             return 'SUCCESS';
           }
         }
@@ -353,141 +418,345 @@ export class SyncProviderService {
 
   // WRAPPER
   // -------
-  private async _downloadAppData(
+  private async _downloadMainFileAppData(
     cp: SyncProviderServiceInterface,
-  ): Promise<{ rev: string; data: AppDataComplete | undefined }> {
-    const localRev = await this._getLocalRev(cp);
-    const { dataStr, rev } = await cp.downloadAppData(localRev);
+  ): Promise<{ rev: string; data: AppMainFileData | undefined }> {
+    this._log(cp, '↓ downloading main file');
+    const localRev = await this._getLocalMainFileRev(cp);
+    const { dataStr, rev } = await cp.downloadFileData('MAIN', localRev);
     return {
       rev,
-      data: await this._decompressAndDecryptAppDataIfNeeded(dataStr),
+      data: await this._decompressAndDecryptDataIfNeeded<AppMainFileData>(dataStr),
     };
   }
 
-  private async _uploadAppData(
+  private async _downloadArchiveFileAppData(
     cp: SyncProviderServiceInterface,
-    data: AppDataComplete,
-    isForceOverwrite: boolean = false,
-    retryAttempts = 0,
-  ): Promise<void> {
-    if (!isValidAppData(data)) {
-      console.log(data);
+  ): Promise<{ rev: string; data: AppArchiveFileData | undefined }> {
+    this._log(cp, '↓ downloading archive file');
+    const localRev = await this._getLocalArchiveFileRev(cp);
+    const { dataStr, rev } = await cp.downloadFileData('ARCHIVE', localRev);
+    return {
+      rev,
+      data: await this._decompressAndDecryptDataIfNeeded<AppArchiveFileData>(dataStr),
+    };
+  }
+
+  private async _uploadAppData({
+    cp,
+    localDataComplete,
+    isForceOverwrite = false,
+    retryAttemptNr = 0,
+    isForceArchiveUpdate = false,
+  }: {
+    cp: SyncProviderServiceInterface;
+    localDataComplete: AppDataComplete;
+    isForceArchiveUpdate?: boolean;
+    isForceOverwrite?: boolean;
+    retryAttemptNr?: number;
+  }): Promise<void> {
+    const NR_OF_RETRIES = 1;
+    const retryIfPossibleOrWarnUser = async (
+      revOrError: string | Error,
+      isForMainFile: boolean,
+    ): Promise<void> => {
+      this._log(cp, 'X Upload Request Error retryIfPossibleOrWarnUser()', revOrError);
+      if (
+        cp.id !== SyncProvider.LocalFile &&
+        (retryAttemptNr < NR_OF_RETRIES ||
+          (cp.isUploadForcePossible &&
+            retryAttemptNr === 1 &&
+            this._c(T.F.SYNC.C.FORCE_UPLOAD_AFTER_ERROR)))
+      ) {
+        return await this._uploadAppData({
+          cp,
+          localDataComplete,
+          isForceOverwrite: true,
+          retryAttemptNr: retryAttemptNr + 1,
+        });
+      } else {
+        // inform user if archive was uploaded but main file wasn't
+        if (
+          isForMainFile &&
+          typeof successRevArchiveOrError === 'string' &&
+          successRevArchiveOrError !== 'NO_UPDATE'
+        ) {
+          alert(this._translateService.instant(T.F.SYNC.A.ARCHIVE_ONLY_UPLOADED));
+        }
+        throw new Error(
+          KNOWN_SYNC_ERROR_PREFIX +
+            this._translateService.instant(T.F.SYNC.S.UPLOAD_ERROR, {
+              err: getSyncErrorStr(revOrError),
+            }),
+        );
+      }
+    };
+
+    if (!isValidAppData(localDataComplete)) {
+      console.log(localDataComplete);
       alert('The data you are trying to upload is invalid');
       throw new Error('The data you are trying to upload is invalid');
     }
-    if (typeof data.lastLocalSyncModelChange !== 'number') {
-      console.log(data);
+    if (typeof localDataComplete.lastLocalSyncModelChange !== 'number') {
+      console.log(localDataComplete);
       alert('Error: lastLocalSyncModelChange is not defined');
       throw new Error('lastLocalSyncModelChange is not defined');
     }
 
-    const dataStrToUpload = await this._compressAndEncryptAppDataIfEnabled(data);
-    const localRev = await this._getLocalRev(cp);
-    const successRev = await cp.uploadAppData(
-      dataStrToUpload,
-      data.lastLocalSyncModelChange as number,
-      localRev,
-      isForceOverwrite,
-    );
-    if (typeof successRev === 'string') {
-      this._log(cp, '↑ Uploaded Data ↑ ✓');
-      return await this._setLocalRevAndLastSync(
-        cp,
-        successRev,
-        data.lastLocalSyncModelChange,
-      );
-    } else {
-      this._log(cp, 'X Upload Request Error');
-      if (
-        cp.isUploadForcePossible &&
-        (!retryAttempts || this._c(T.F.SYNC.C.FORCE_UPLOAD_AFTER_ERROR))
-      ) {
-        return await this._uploadAppData(cp, data, true, retryAttempts + 1);
-      } else {
-        this._snackService.open({
-          msg: T.F.SYNC.S.UPLOAD_ERROR,
-          translateParams: {
-            err: truncate(
-              successRev?.toString ? successRev.toString() : (successRev as any),
-              100,
-            ),
-          },
-          type: 'ERROR',
-        });
+    const localSyncProviderData = await this._getLocalSyncProviderData(cp);
+    const { archive, mainNoRevs } = this._splitData(localDataComplete);
+
+    let successRevArchiveOrError: string | Error | undefined = 'NO_UPDATE';
+    // check if archive was updated and upload first if that is the case
+    if (
+      isForceArchiveUpdate ||
+      (localDataComplete.lastArchiveUpdate &&
+        localDataComplete.lastArchiveUpdate > localSyncProviderData.lastSync)
+    ) {
+      const dataStrToUpload = await this._compressAndEncryptDataIfEnabled(archive);
+
+      try {
+        successRevArchiveOrError = await cp.uploadFileData(
+          'ARCHIVE',
+          dataStrToUpload,
+          localDataComplete.lastArchiveUpdate as number,
+          localSyncProviderData.revTaskArchive,
+          isForceOverwrite,
+        );
+        if (typeof successRevArchiveOrError !== 'string') {
+          console.log(successRevArchiveOrError);
+          throw new Error('No rev returned from no error archive response');
+        }
+      } catch (e) {
+        return await retryIfPossibleOrWarnUser(e as Error, false);
       }
+      this._log(cp, '↑ Uploaded ARCHIVE Data ↑ ✓');
+    }
+
+    const mainData: AppMainFileData = {
+      ...mainNoRevs,
+      archiveLastUpdate: localDataComplete.lastArchiveUpdate as number,
+      archiveRev:
+        successRevArchiveOrError === 'NO_UPDATE'
+          ? (localSyncProviderData.revTaskArchive as string)
+          : successRevArchiveOrError,
+    };
+    const dataStrToUpload = await this._compressAndEncryptDataIfEnabled(mainData);
+
+    try {
+      const successRevMainOrError = await cp.uploadFileData(
+        'MAIN',
+        dataStrToUpload,
+        localDataComplete.lastLocalSyncModelChange as number,
+        localSyncProviderData.rev,
+        isForceOverwrite,
+      );
+      if (typeof successRevMainOrError === 'string') {
+        this._log(cp, '↑ Uploaded MAIN Data ↑ ✓');
+        return await this._setLocalRevsAndLastSync(
+          cp,
+          successRevMainOrError,
+          successRevArchiveOrError,
+          localDataComplete.lastLocalSyncModelChange,
+        );
+      } else {
+        console.log(successRevMainOrError);
+        throw new Error('No rev returned from no error main response');
+      }
+    } catch (e) {
+      return await retryIfPossibleOrWarnUser(e as Error, false);
     }
   }
 
-  private async _importAppData(
-    cp: SyncProviderServiceInterface,
+  private _splitData = (
     data: AppDataComplete,
-    rev: string,
-  ): Promise<void> {
-    if (!data) {
-      const r = await this._downloadAppData(cp);
-      data = r.data as AppDataComplete;
-      rev = r.rev;
-    }
-    if (!rev) {
-      throw new Error('No rev given during import');
-    }
+  ): { archive: AppArchiveFileData; mainNoRevs: AppMainFileNoRevsData } => {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { taskArchive, archivedProjects, lastArchiveUpdate, ...mainNoRevs } = data;
 
-    if (!data.lastLocalSyncModelChange) {
+    return {
+      archive: {
+        taskArchive,
+        archivedProjects,
+      },
+      mainNoRevs,
+    };
+  };
+
+  private async _importMainFileAppDataAndArchiveIfNecessary({
+    cp,
+    remoteMainFileData,
+    localComplete,
+    mainFileRev,
+    isForceArchiveUpdate = false,
+  }: {
+    cp: SyncProviderServiceInterface;
+    remoteMainFileData: AppMainFileData;
+    localComplete: AppDataComplete;
+    isForceArchiveUpdate?: boolean;
+    mainFileRev: string;
+  }): Promise<void> {
+    if (!remoteMainFileData) {
+      const r = await this._downloadMainFileAppData(cp);
+      remoteMainFileData = r.data as AppMainFileData;
+      mainFileRev = r.rev;
+    }
+    if (!mainFileRev) {
+      throw new Error('No mainFileRev given during import');
+    }
+    if (!remoteMainFileData.lastLocalSyncModelChange) {
       throw new Error('No valid lastLocalSyncModelChange given during import');
     }
+    if (
+      typeof localComplete.lastArchiveUpdate !== 'number' &&
+      localComplete.taskArchive.ids.length > 0
+    ) {
+      throw new Error('No valid localComplete.lastArchiveUpdate given during import');
+    }
+    if (remoteMainFileData.archiveRev === 'NO_UPDATE') {
+      throw new Error(
+        'No valid remoteMainFileData.archiveRev given during import – "NO_UPDATE"',
+      );
+    }
 
-    await this._dataImportService.importCompleteSyncData(data, {
+    let remoteArchiveData: AppArchiveFileData | undefined;
+    let remoteArchiveRev: string | 'NO_UPDATE' = 'NO_UPDATE';
+    // NOTE initially there might never have been an archive
+    if (
+      isForceArchiveUpdate ||
+      (remoteMainFileData.archiveLastUpdate &&
+        (!localComplete.lastArchiveUpdate ||
+          remoteMainFileData.archiveLastUpdate > localComplete.lastArchiveUpdate))
+    ) {
+      this._log(
+        cp,
+        isForceArchiveUpdate
+          ? 'Archive force update chosen. Downloading...'
+          : 'Archive was updated on remote. Downloading...',
+      );
+      const res = await this._downloadArchiveFileAppData(cp);
+      if (!res.rev) {
+        throw new Error('No archive rev given during import');
+      }
+      if (!res.data) {
+        throw new Error('No archive data found in remote response for archive file');
+      }
+      remoteArchiveRev = res.rev;
+      remoteArchiveData = res.data;
+    }
+
+    if (
+      remoteArchiveRev !== 'NO_UPDATE' &&
+      // NOTE: main file archiveRev might be undefined when archive was never synced before with current data, but the file was created earlier
+      remoteMainFileData.archiveRev &&
+      remoteArchiveRev !== remoteMainFileData.archiveRev
+    ) {
+      console.log({
+        remoteArchiveRev,
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        'remoteMainFileData.archiveRev': remoteMainFileData.archiveRev,
+      });
+      throw new Error('Remote archive rev does not match the one in remote main file');
+    }
+
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { archiveRev, archiveLastUpdate, ...cleanedRemoteMainFile } =
+      remoteMainFileData;
+    const completeData: AppDataComplete = {
+      ...cleanedRemoteMainFile,
+      ...(remoteArchiveData
+        ? {
+            taskArchive: remoteArchiveData.taskArchive,
+            archivedProjects: remoteArchiveData.archivedProjects,
+            lastArchiveUpdate: remoteMainFileData.archiveLastUpdate,
+          }
+        : {
+            taskArchive: localComplete.taskArchive,
+            archivedProjects: localComplete.archivedProjects,
+            lastArchiveUpdate: localComplete.lastArchiveUpdate,
+          }),
+    };
+
+    await this._dataImportService.importCompleteSyncData(completeData, {
       isOmitLocalFields: true,
     });
-    await this._setLocalRevAndLastSync(cp, rev, data.lastLocalSyncModelChange);
+
+    await this._setLocalRevsAndLastSync(
+      cp,
+      mainFileRev,
+      remoteArchiveRev,
+      remoteMainFileData.lastLocalSyncModelChange,
+    );
   }
 
   // LS HELPER
   // ---------
-  private async _getLocalRev(cp: SyncProviderServiceInterface): Promise<string | null> {
+  private async _getLocalMainFileRev(
+    cp: SyncProviderServiceInterface,
+  ): Promise<string | null> {
+    const localSyncMeta = await this._getLocalSyncProviderData(cp);
+    return localSyncMeta.rev;
+  }
+
+  private async _getLocalArchiveFileRev(
+    cp: SyncProviderServiceInterface,
+  ): Promise<string | null> {
+    const localSyncMeta = await this._getLocalSyncProviderData(cp);
+    return localSyncMeta.revTaskArchive;
+  }
+
+  private async _getLocalSyncProviderData(
+    cp: SyncProviderServiceInterface,
+  ): Promise<LocalSyncMetaForProvider> {
     const localSyncMeta = await this._persistenceLocalService.load();
-    return localSyncMeta[cp.id].rev;
+    return localSyncMeta[cp.id];
   }
 
   // NOTE: last sync should always equal localLastChange
-  private async _setLocalRevAndLastSync(
+  private async _setLocalRevsAndLastSync(
     cp: SyncProviderServiceInterface,
     rev: string,
+    revTaskArchive: string | 'NO_UPDATE',
     lastSync: number,
   ): Promise<void> {
     if (!rev) {
       console.log(cp, rev);
-      throw new Error('No rev given');
+      throw new Error('No mainFileRev given');
     }
     if (typeof (lastSync as any) !== 'number') {
       throw new Error('No correct localLastSync given ' + lastSync);
     }
     const localSyncMeta = await this._persistenceLocalService.load();
+    const localSyncMetaForProvider: LocalSyncMetaForProvider = {
+      ...localSyncMeta[cp.id],
+      lastSync,
+      rev,
+      revTaskArchive:
+        revTaskArchive === 'NO_UPDATE'
+          ? localSyncMeta[cp.id].revTaskArchive
+          : revTaskArchive,
+    };
     await this._persistenceLocalService.save({
       ...localSyncMeta,
-      [cp.id]: {
-        rev,
-        lastSync,
-      },
+      [cp.id]: localSyncMetaForProvider,
     });
   }
 
   // OTHER
   // -----
-  private async _handleConflict(
-    cp: SyncProviderServiceInterface,
-    {
-      remote,
-      local,
-      lastSync,
-      rev,
-    }: {
-      remote: AppDataComplete;
-      local: AppDataComplete;
-      lastSync: number;
-      rev: string;
-    },
-  ): Promise<void> {
+  private async _handleMainFileConflict({
+    cp,
+    remote,
+    local,
+    lastSync,
+    rev,
+  }: {
+    cp: SyncProviderServiceInterface;
+    remote: AppMainFileData;
+    local: AppDataComplete;
+    lastSync: number;
+    rev: string;
+  }): Promise<void> {
     if (IS_ANDROID_WEB_VIEW) {
       androidInterface.showNotificationIfAppIsNotOpen?.(
         this._translateService.instant(T.ANDROID.NOTIFICATIONS.SYNC_CONFLICT_TITLE),
@@ -502,13 +771,26 @@ export class SyncProviderService {
 
     if (dr === 'USE_LOCAL') {
       this._log(cp, 'Dialog => ↑ Remote Update');
-      await this._uploadAppData(cp, local, true);
+      await this._uploadAppData({
+        cp,
+        localDataComplete: local,
+        isForceOverwrite: true,
+        isForceArchiveUpdate: true,
+      });
     } else if (dr === 'USE_REMOTE') {
       this._log(cp, 'Dialog => ↓ Update Local');
-      await this._importAppData(cp, remote, rev);
+      await this._importMainFileAppDataAndArchiveIfNecessary({
+        cp,
+        remoteMainFileData: remote,
+        localComplete: local,
+        mainFileRev: rev,
+        isForceArchiveUpdate: true,
+      });
     }
     return;
   }
+
+  private lastDialog?: MatDialogRef<any, any>;
 
   private _openConflictDialog$({
     remote,
@@ -519,17 +801,19 @@ export class SyncProviderService {
     local: number | null;
     lastSync: number;
   }): Observable<DialogConflictResolutionResult> {
-    return this._matDialog
-      .open(DialogSyncConflictComponent, {
-        restoreFocus: true,
-        disableClose: true,
-        data: {
-          remote,
-          local,
-          lastSync,
-        },
-      })
-      .afterClosed();
+    if (this.lastDialog) {
+      this.lastDialog.close();
+    }
+    this.lastDialog = this._matDialog.open(DialogSyncConflictComponent, {
+      restoreFocus: true,
+      disableClose: true,
+      data: {
+        remote,
+        local,
+        lastSync,
+      },
+    });
+    return this.lastDialog.afterClosed();
   }
 
   private _openPermissionDialog$(): Observable<DialogPermissionResolutionResult> {
@@ -541,27 +825,37 @@ export class SyncProviderService {
       .afterClosed();
   }
 
-  private async _decompressAndDecryptAppDataIfNeeded(
-    backupStr: AppDataComplete | string | undefined,
-  ): Promise<AppDataComplete> {
+  private async _decompressAndDecryptDataIfNeeded<
+    T extends AppMainFileData | AppArchiveFileData,
+  >(dataInStr: T | string | undefined): Promise<T> {
     // if the data was a json string it happens (for dropbox) that the data is returned as object
-    if (typeof backupStr === 'object' && backupStr?.task) {
-      return backupStr as AppDataComplete;
+    if (
+      (typeof dataInStr === 'object' && (dataInStr as AppMainFileData)?.task) ||
+      (dataInStr as AppArchiveFileData)?.taskArchive
+    ) {
+      return dataInStr as T;
     }
-    if (typeof backupStr === 'string') {
+    // NOTE: we need then later to make sure that both strings are appended after encryption and compression
+    if (typeof dataInStr === 'string') {
+      if (dataInStr.startsWith(PREPEND_STR_ENCRYPTION)) {
+        dataInStr = dataInStr.slice(PREPEND_STR_ENCRYPTION.length);
+      }
+      if (dataInStr.startsWith(PREPEND_STR_COMPRESSION)) {
+        dataInStr = dataInStr.slice(PREPEND_STR_COMPRESSION.length);
+      }
       const { isEncryptionEnabled, encryptionPassword } = await this.syncCfg$
         .pipe(first())
         .toPromise();
 
       try {
-        return JSON.parse(backupStr) as AppDataComplete;
+        return JSON.parse(dataInStr) as T;
       } catch (eIgnored) {
         try {
-          let dataString = backupStr;
+          let dataString = dataInStr;
           if (isEncryptionEnabled && encryptionPassword?.length) {
             try {
               console.time('decrypt');
-              dataString = await decrypt(backupStr, encryptionPassword);
+              dataString = await decrypt(dataInStr, encryptionPassword);
               console.timeEnd('decrypt');
             } catch (eDecryption) {
               console.error(eDecryption);
@@ -579,7 +873,7 @@ export class SyncProviderService {
             }
           }
           try {
-            return JSON.parse(dataString) as AppDataComplete;
+            return JSON.parse(dataString) as T;
           } catch (eIgnoredInner) {
             console.error(eIgnoredInner);
             // try to decompress anyway
@@ -591,10 +885,12 @@ export class SyncProviderService {
             );
             throw new Error('Unable to parse remote data');
           }
-          return JSON.parse(dataString) as AppDataComplete;
+          return JSON.parse(dataString) as T;
         } catch (eDecompression) {
           console.error('Sync, invalid data');
           console.warn(eDecompression);
+          console.log(dataInStr);
+
           throw new Error(eDecompression as any);
         }
       }
@@ -602,8 +898,8 @@ export class SyncProviderService {
     throw new Error('Unable to parse remote data due to unknown reasons');
   }
 
-  private async _compressAndEncryptAppDataIfEnabled(
-    data: AppDataComplete,
+  private async _compressAndEncryptDataIfEnabled(
+    data: AppMainFileData | AppArchiveFileData,
   ): Promise<string> {
     const { isCompressionEnabled, isEncryptionEnabled, encryptionPassword } =
       await this.syncCfg$.pipe(first()).toPromise();

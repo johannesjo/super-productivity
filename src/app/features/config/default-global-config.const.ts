@@ -170,11 +170,11 @@ export const DEFAULT_GLOBAL_CONFIG: GlobalConfigState = {
       baseUrl: null,
       userName: null,
       password: null,
-      syncFilePath: 'super-productivity-backup.json',
+      syncFolderPath: 'super-productivity',
     },
 
     localFileSync: {
-      syncFilePath: 'super-productivity-sync.json',
+      syncFolderPath: 'super-productivity',
     },
   },
 };
