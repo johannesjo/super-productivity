@@ -1,3 +1,9 @@
+## [9.0.2](https://github.com/johannesjo/super-productivity/compare/v9.0.1...v9.0.2) (2024-07-17)
+
+### Features
+
+- **timeline:** make up down arrows a little less prominent ([9326811](https://github.com/johannesjo/super-productivity/commit/93268118e1728af5b3e6502bbc1900bf82d3e0c3))
+
 ## [9.0.1](https://github.com/johannesjo/super-productivity/compare/v9.0.0...v9.0.1) (2024-07-17)
 
 ### Bug Fixes
