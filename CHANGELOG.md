@@ -1,3 +1,13 @@
+## [9.0.1](https://github.com/johannesjo/super-productivity/compare/v9.0.0...v9.0.1) (2024-07-17)
+
+### Bug Fixes
+
+- error with task schedule ([1a57202](https://github.com/johannesjo/super-productivity/commit/1a57202e5ca06b525dc819954d6bdfcfe1a03f58))
+
+### Features
+
+- handle no project or tag by moving to special no list tag ([05f4cf7](https://github.com/johannesjo/super-productivity/commit/05f4cf7d2c960e7709255a4e7d7562452215a413))
+
 # [9.0.0](https://github.com/johannesjo/super-productivity/compare/v9.0.0-rc.0...v9.0.0) (2024-07-17)
 
 ### Bug Fixes
