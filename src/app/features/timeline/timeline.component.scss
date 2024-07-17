@@ -167,7 +167,7 @@ $sb-radius: 28px;
 $sb-radius-continued: 56px;
 $sb-radius-small: 4px;
 
-task.split-task::ng-deep .box {
+task.split-task::ng-deep > .inner-wrapper > .box {
   border-top-left-radius: $sb-radius !important;
   border-top-right-radius: $sb-radius !important;
   border-bottom-left-radius: $sb-radius-small;
@@ -373,43 +373,35 @@ task.split-task::ng-deep .box {
   }
 }
 
-.row.l {
-  ::ng-deep {
-    .repeat-task-projection,
-    .task-continued,
-    task .first-line {
-      min-height: 80px;
-    }
+.row.l > .col {
+  ::ng-deep .repeat-task-projection,
+  .task-continued,
+  > task.hasNoSubTasks::ng-deep > .inner-wrapper > .first-line {
+    min-height: 80px;
   }
 }
 
-.row.xl {
-  ::ng-deep {
-    .repeat-task-projection,
-    .task-continued,
-    task .first-line {
-      min-height: 120px;
-    }
+.row.xl > .col {
+  ::ng-deep .repeat-task-projection,
+  .task-continued,
+  > task.hasNoSubTasks::ng-deep > .inner-wrapper > .first-line {
+    min-height: 120px;
   }
 }
 
-.row.xxl {
-  ::ng-deep {
-    .repeat-task-projection,
-    .task-continued,
-    task .first-line {
-      min-height: 160px;
-    }
+.row.xxl > .col {
+  ::ng-deep .repeat-task-projection,
+  .task-continued,
+  > task.hasNoSubTasks::ng-deep > .inner-wrapper > .first-line {
+    min-height: 160px;
   }
 }
 
-.row.xxxl {
-  ::ng-deep {
-    .repeat-task-projection,
-    .task-continued,
-    task .first-line {
-      min-height: 180px;
-    }
+.row.xxxl > .col {
+  ::ng-deep .repeat-task-projection,
+  .task-continued,
+  > task.hasNoSubTasks::ng-deep > .inner-wrapper > .first-line {
+    min-height: 180px;
   }
 }
 

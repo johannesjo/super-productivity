@@ -101,6 +101,8 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
   // @see ngOnInit
   @HostBinding('class.isCurrent') isCurrent: boolean = false;
   @HostBinding('class.isSelected') isSelected: boolean = false;
+  @HostBinding('class.hasNoSubTasks') hasNoSubTasks: boolean = true;
+
   private _task$: ReplaySubject<TaskWithSubTasks> = new ReplaySubject(1);
   issueUrl$: Observable<string | null> = this._task$.pipe(
     switchMap((v) => {
@@ -162,6 +164,7 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
     this.progress = v && v.timeEstimate && (v.timeSpent / v.timeEstimate) * 100;
     this.taskIdWithPrefix = 't-' + this.task.id;
     this.isDone = v.isDone;
+    this.hasNoSubTasks = !v.subTaskIds.length;
     this.isRepeatTaskCreatedToday = !!(this.task.repeatCfgId && isToday(v.created));
 
     const isTodayTag = v.tagIds.includes(TODAY_TAG.id);

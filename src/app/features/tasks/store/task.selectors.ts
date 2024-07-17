@@ -23,7 +23,10 @@ const mapSubTasksToTasks = (tasksIN: any[]): TaskWithSubTasks[] => {
       }
     });
 };
-const mapSubTasksToTask = (task: Task | null, s: TaskState): TaskWithSubTasks | null => {
+export const mapSubTasksToTask = (
+  task: Task | null,
+  s: TaskState,
+): TaskWithSubTasks | null => {
   if (!task) {
     return null;
   }

@@ -27,7 +27,7 @@ import {
 } from 'rxjs/operators';
 import { TODAY_TAG } from '../tag/tag.const';
 import { TagService } from '../tag/tag.service';
-import { ArchiveTask, Task, TaskPlanned, TaskWithSubTasks } from '../tasks/task.model';
+import { ArchiveTask, Task, TaskWithSubTasks } from '../tasks/task.model';
 import { hasTasksToWorkOn, mapEstimateRemainingFromTasks } from './work-context.util';
 import {
   flattenTasks,
@@ -56,7 +56,6 @@ import {
   selectDoneBacklogTaskIdsForActiveContext,
   selectDoneTaskIdsForActiveContext,
   selectStartableTasksForActiveContext,
-  selectTimelineTasks,
   selectTrackableTasksForActiveContext,
 } from './store/work-context.selectors';
 import { GlobalTrackingIntervalService } from '../../core/global-tracking-interval/global-tracking-interval.service';
@@ -251,11 +250,6 @@ export class WorkContextService {
     switchMap(() => this._store$),
     select(selectTrackableTasksForActiveContext),
   );
-
-  timelineTasks$: Observable<{
-    planned: TaskPlanned[];
-    unPlanned: Task[];
-  }> = this._store$.pipe(select(selectTimelineTasks));
 
   workingToday$: Observable<any> = this._globalTrackingIntervalService.todayDateStr$.pipe(
     switchMap((worklogStrDate) => this.getTimeWorkedForDay$(worklogStrDate)),

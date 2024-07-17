@@ -68,17 +68,14 @@
         >
           <task
             *ngSwitchCase="TimelineViewEntryType.Task"
-            showParentTitle="yes"
             [task]="row.data"
           ></task>
           <task
             *ngSwitchCase="TimelineViewEntryType.ScheduledTask"
-            showParentTitle="yes"
             [task]="row.data"
           ></task>
           <task
             *ngSwitchCase="TimelineViewEntryType.SplitTask"
-            showParentTitle="yes"
             class="split-task"
             [task]="row.data"
           ></task>
