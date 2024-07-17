@@ -80,12 +80,16 @@ export class DialogAddTaskReminderComponent {
 
   // NOTE: throttle is used as quick way to prevent multiple submits
   @throttle(2000, { leading: true, trailing: false })
-  save(): void {
+  async save(): Promise<void> {
     const timestamp = this.dateTime;
 
     if (!timestamp) {
       return;
     }
+    const isShowMoveToBacklog = await this.isAddToBacklogAvailable$
+      .pipe(first())
+      .toPromise();
+    this.isMoveToBacklog = this.isMoveToBacklog && isShowMoveToBacklog;
 
     if (this.isEdit && this.reminder) {
       this._taskService.reScheduleTask({
