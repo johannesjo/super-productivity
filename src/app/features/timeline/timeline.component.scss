@@ -311,12 +311,15 @@ task.split-task::ng-deep .box {
   display: flex;
 
   @include mousePrimaryDevice {
-    display: none;
+    //display: none;
+    opacity: 0.1;
   }
 
   .row:hover & {
-    animation: fadeIn $transition-duration--enter $ani-enter-timing;
-    display: flex;
+    transition: opacity $transition-duration--enter $ani-enter-timing;
+    opacity: 1;
+    //animation: fadeIn $transition-duration--enter $ani-enter-timing;
+    //display: flex;
   }
 }
 
