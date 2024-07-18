@@ -1,3 +1,12 @@
-@for (day of timelineDays$|async; track day.dayDate) {
-<timeline-day [timelineDay]="day"></timeline-day>
-}
+<ng-container *ngIf="timelineDays$|async as timelineDays">
+  @for (day of timelineDays$|async; track day.dayDate) {
+  <timeline-day [timelineDay]="day"></timeline-day>
+  }
+
+  <div
+    *ngIf="!timelineDays.entries.length"
+    class="no-tasks-msg"
+  >
+    {{ T.F.TIMELINE.NO_TASKS|translate }}
+  </div>
+</ng-container>

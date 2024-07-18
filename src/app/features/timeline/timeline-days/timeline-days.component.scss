@@ -1,4 +1,5 @@
 @import '../../../../variables.scss';
+
 :host {
   display: block;
   padding: 4px;
@@ -21,4 +22,10 @@
     overflow: auto;
     gap: 16px;
   }
+}
+
+.no-tasks-msg {
+  margin-top: $s * 3;
+  padding: 0 $s * 2;
+  text-align: center;
 }
