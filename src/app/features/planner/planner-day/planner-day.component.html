@@ -4,7 +4,16 @@
   } {{ day.dayDate|date:'EEE' }}
   <span class="date">{{ day.dayDate|date:'d.M.' }}</span>
 </div>
-<div class="day-estimate">{{ day.timeEstimate |roundDuration|msToString }}</div>
+<!--<div class="day-estimate">{{ day.timeEstimate |roundDuration|msToString }}</div>-->
+
+<div class="day-counts">
+  <span>{{ day.timeEstimate |roundDuration|msToString }}</span>
+
+  <ng-container *ngIf="day.itemsTotal > 5 ">
+    <mat-icon inline="true">task_alt</mat-icon>
+    <span>{{ day.itemsTotal }}</span>
+  </ng-container>
+</div>
 
 <div class="normal-tasks">
   <div

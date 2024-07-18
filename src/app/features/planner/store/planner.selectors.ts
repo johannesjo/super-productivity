@@ -61,6 +61,11 @@ export const selectPlannerDays = (
           isToday: dayIndex === 0,
           dayDate,
           timeLimit: 0,
+          itemsTotal:
+            normalTasks.length +
+            noStartTimeRepeatProjections.length +
+            repeatProjectionsForDay.length +
+            scheduledTaskItems.length,
           scheduledIItems: [
             ...repeatProjectionsForDay,
             ...icalEventsForDay,

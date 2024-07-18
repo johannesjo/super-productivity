@@ -12,6 +12,7 @@ export interface PlannerDay {
   dayDate: string;
   timeEstimate: number;
   timeLimit: number;
+  itemsTotal: number;
   tasks: TaskCopy[];
   noStartTimeRepeatProjections: NoStartTimeRepeatProjection[];
   scheduledIItems: ScheduleItem[];

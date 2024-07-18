@@ -21,6 +21,19 @@
   }
 }
 
+.day-counts {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 8px 0;
+  font-size: 18px;
+
+  mat-icon:last-of-type {
+    margin-left: 8px;
+    font-size: 16px;
+  }
+}
+
 .day-estimate {
   margin-top: 8px;
   font-size: 16px;
