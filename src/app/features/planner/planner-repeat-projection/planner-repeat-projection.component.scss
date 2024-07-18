@@ -25,6 +25,10 @@
     border-color: $dark-theme-extra-border-color;
   }
 
+  &:hover {
+    border-color: $c-primary;
+  }
+
   mat-icon {
     margin-left: $s;
     margin-right: $s;
