@@ -37,6 +37,9 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-node-
 
+      - name: Workaround for nx issue
+        run: npm install @nx/nx-win32-x64-msvc
+
       - name: Install npm Packages
         #  if: steps.npm-cache.outputs.cache-hit != 'true'
         run: npm i
@@ -90,6 +93,9 @@ jobs:
           key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
           restore-keys: |
             ${{ runner.os }}-node-
+
+      - name: Workaround for nx issue
+        run: npm install @nx/nx-darwin-arm64
 
       - name: Install npm Packages
         #  if: steps.npm-cache.outputs.cache-hit != 'true'
