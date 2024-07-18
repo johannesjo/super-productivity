@@ -11,7 +11,8 @@
       *ngIf="!timelineDay.entries.length"
       class="no-tasks-msg"
     >
-      {{ T.F.TIMELINE.NO_TASKS|translate }}
+      <!--      {{ T.F.TIMELINE.NO_TASKS|translate }}-->
+      It is time to stop working and to relax!
     </div>
 
     @for (row of timelineDay.entries; track row.id) {
