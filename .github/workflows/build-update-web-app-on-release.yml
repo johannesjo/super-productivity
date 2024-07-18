@@ -63,7 +63,7 @@ jobs:
         env:
           SSH_PRIVATE_KEY: ${{ secrets.WEB_SERVER_SSH_KEY }}
           ARGS: '-rltgoDzvO --delete --exclude "news.json"'
-          SOURCE: 'dist/'
+          SOURCE: 'dist/browser/'
           REMOTE_HOST: ${{ secrets.WEB_REMOTE_HOST }}
           REMOTE_USER: ${{ secrets.WEB_REMOTE_USER }}
           TARGET: ${{ secrets.WEB_REMOTE_TARGET }}
