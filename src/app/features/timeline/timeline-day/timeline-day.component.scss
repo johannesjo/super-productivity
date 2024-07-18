@@ -288,34 +288,38 @@ planner-task.split-task {
 }
 
 .scheduled-extra-btn {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
+  //position: absolute;
+  //top: 50%;
+  //left: 50%;
+  //transform: translate(-50%, -50%);
+  width: 40px;
+  height: 40px;
   display: flex;
+  justify-content: center;
+  align-items: center;
 
   button {
     @include mousePrimaryDevice {
       display: none;
     }
+  }
 
-    .row:hover & {
-      display: flex;
-      animation: fadeIn $transition-duration--enter $ani-enter-timing;
-      //transform: translate(-50%, -50%) scale(1.5);
-    }
+  &:hover button {
+    display: flex !important;
+    animation: fadeIn $transition-duration--enter $ani-enter-timing;
+    //transform: translate(-50%, -50%) scale(1.5);
   }
 
   .ico {
-    opacity: 0.2;
+    opacity: 0.1;
 
     @include mousePrimaryDevice {
       display: block;
     }
+  }
 
-    .row:hover & {
-      display: none;
-    }
+  &:hover .ico {
+    display: none !important;
   }
 }
 
@@ -344,10 +348,10 @@ planner-task.split-task {
   }
 
   @include mousePrimaryDevice {
-    opacity: 0.6;
+    opacity: 0.5;
   }
 
-  .row:hover & {
+  .scheduled-extra-btn:hover & {
     opacity: 1;
   }
 }
