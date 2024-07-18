@@ -1,22 +1,7 @@
 import { Injectable } from '@angular/core';
-import { combineLatest, forkJoin, Observable, of } from 'rxjs';
-import { TimelineCalendarMapEntry } from '../timeline/timeline.model';
-import { selectCalendarProviders } from '../config/store/global-config.reducer';
-import {
-  distinctUntilChanged,
-  map,
-  shareReplay,
-  startWith,
-  switchMap,
-  tap,
-} from 'rxjs/operators';
-import {
-  selectAllCalendarTaskEventIds,
-  selectPlannedTasksById,
-} from '../tasks/store/task.selectors';
-import { CalendarIntegrationEvent } from '../calendar-integration/calendar-integration.model';
-import { loadFromRealLs, saveToRealLs } from '../../core/persistence/local-storage';
-import { LS } from '../../core/persistence/storage-keys.const';
+import { combineLatest, Observable, of } from 'rxjs';
+import { distinctUntilChanged, map, shareReplay, switchMap, tap } from 'rxjs/operators';
+import { selectPlannedTasksById } from '../tasks/store/task.selectors';
 import { Store } from '@ngrx/store';
 import { CalendarIntegrationService } from '../calendar-integration/calendar-integration.service';
 import { PlannerDay } from './planner.model';
@@ -50,57 +35,6 @@ export class PlannerService {
     }),
   );
 
-  private icalEvents$: Observable<TimelineCalendarMapEntry[]> = this._store
-    .select(selectCalendarProviders)
-    .pipe(
-      // tap(() => console.log('selectCalendarProviders')),
-      distinctUntilChanged(fastArrayCompare),
-      switchMap((calendarProviders) => {
-        return calendarProviders && calendarProviders.length
-          ? forkJoin(
-              calendarProviders
-                .filter((calProvider) => calProvider.isEnabled)
-                .map((calProvider) =>
-                  this._calendarIntegrationService
-                    .requestEventsForTimeline(calProvider)
-                    .pipe(
-                      // tap((v) =>
-                      //   console.log('calendarIntegrationService in forkjoin', v),
-                      // ),
-                      map((itemsForProvider: CalendarIntegrationEvent[]) => ({
-                        itemsForProvider,
-                        calProvider,
-                      })),
-                    ),
-                ),
-            ).pipe(
-              switchMap((resultForProviders) =>
-                this._store.select(selectAllCalendarTaskEventIds).pipe(
-                  distinctUntilChanged(fastArrayCompare),
-                  // tap((val) => console.log('selectAllCalendarTaskEventIds', val)),
-                  map((allCalendarTaskEventIds) => {
-                    return resultForProviders.map(({ itemsForProvider, calProvider }) => {
-                      return {
-                        ico: calProvider.icon || null,
-                        //   // filter out items already added as tasks
-                        items: itemsForProvider.filter(
-                          (calEv) => !allCalendarTaskEventIds.includes(calEv.id),
-                        ),
-                      };
-                    });
-                  }),
-                ),
-              ),
-              // tap((v) => console.log('icalEvents$ final', v)),
-              tap((val) => {
-                saveToRealLs(LS.TIMELINE_CACHE, val);
-              }),
-            )
-          : of([] as any);
-      }),
-      startWith(this._getCalProviderFromCache()),
-    );
-
   allPlannedTasks$: Observable<TaskPlanned[]> = this._reminderService.reminders$.pipe(
     switchMap((reminders) => {
       const tids = reminders
@@ -118,7 +52,7 @@ export class PlannerService {
     switchMap((daysToShow) =>
       combineLatest([
         this._store.select(selectAllTaskRepeatCfgs),
-        this.icalEvents$,
+        this._calendarIntegrationService.icalEvents$,
         this.allPlannedTasks$,
         // this._store
         //   .select(selectAllTaskRepeatCfgs)
@@ -152,16 +86,4 @@ export class PlannerService {
     private _calendarIntegrationService: CalendarIntegrationService,
     private _dateService: DateService,
   ) {}
-
-  private _getCalProviderFromCache(): TimelineCalendarMapEntry[] {
-    const now = Date.now();
-    return (
-      ((loadFromRealLs(LS.TIMELINE_CACHE) as TimelineCalendarMapEntry[]) || [])
-        // filter out cached past entries
-        .map((provider) => ({
-          ...provider,
-          items: provider.items.filter((item) => item.start + item.duration >= now),
-        }))
-    );
-  }
 }

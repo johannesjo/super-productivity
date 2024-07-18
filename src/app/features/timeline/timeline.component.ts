@@ -1,15 +1,8 @@
 import { ChangeDetectionStrategy, Component, OnDestroy } from '@angular/core';
 import { TimelineCalendarMapEntry, TimelineViewEntry } from './timeline.model';
-import {
-  debounceTime,
-  distinctUntilChanged,
-  map,
-  startWith,
-  switchMap,
-  tap,
-} from 'rxjs/operators';
+import { debounceTime, map, tap } from 'rxjs/operators';
 import { TaskService } from '../tasks/task.service';
-import { combineLatest, forkJoin, Observable, of } from 'rxjs';
+import { combineLatest, Observable } from 'rxjs';
 import { mapToTimelineViewEntries } from './map-timeline-data/map-to-timeline-view-entries';
 import { T } from 'src/app/t.const';
 import { standardListAnimation } from '../../ui/animations/standard-list.ani';
@@ -24,13 +17,8 @@ import { TaskRepeatCfgService } from '../task-repeat-cfg/task-repeat-cfg.service
 import { Task } from '../tasks/task.model';
 import { DialogAddTaskReminderComponent } from '../tasks/dialog-add-task-reminder/dialog-add-task-reminder.component';
 import { AddTaskReminderInterface } from '../tasks/dialog-add-task-reminder/add-task-reminder-interface';
-import { loadFromRealLs, saveToRealLs } from '../../core/persistence/local-storage';
-import { Store } from '@ngrx/store';
-import { selectCalendarProviders } from '../config/store/global-config.reducer';
+import { loadFromRealLs } from '../../core/persistence/local-storage';
 import { CalendarIntegrationService } from '../calendar-integration/calendar-integration.service';
-import { selectAllCalendarTaskEventIds } from '../tasks/store/task.selectors';
-import { CalendarIntegrationEvent } from '../calendar-integration/calendar-integration.model';
-import { distinctUntilChangedObject } from '../../util/distinct-until-changed-object';
 
 @Component({
   selector: 'timeline',
@@ -42,55 +30,13 @@ import { distinctUntilChangedObject } from '../../util/distinct-until-changed-ob
 export class TimelineComponent implements OnDestroy {
   T: typeof T = T;
   TimelineViewEntryType: typeof TimelineViewEntryType = TimelineViewEntryType;
-  icalEvents$: Observable<TimelineCalendarMapEntry[]> = this._store
-    .select(selectCalendarProviders)
-    .pipe(
-      switchMap((calendarProviders) =>
-        this._store.select(selectAllCalendarTaskEventIds).pipe(
-          map((allCalendarTaskEventIds) => ({
-            allCalendarTaskEventIds,
-            calendarProviders,
-          })),
-        ),
-      ),
-      distinctUntilChanged(distinctUntilChangedObject),
-      switchMap(({ allCalendarTaskEventIds, calendarProviders }) => {
-        return calendarProviders && calendarProviders.length
-          ? forkJoin(
-              calendarProviders
-                .filter((calProvider) => calProvider.isEnabled)
-                .map((calProvider) =>
-                  this._calendarIntegrationService
-                    .requestEventsForTimeline(calProvider)
-                    .pipe(
-                      // filter out items already added as tasks
-                      map((calEvs) =>
-                        calEvs.filter(
-                          (calEv) => !allCalendarTaskEventIds.includes(calEv.id),
-                        ),
-                      ),
-                      map((items: CalendarIntegrationEvent[]) => ({
-                        items,
-                        icon: calProvider.icon || null,
-                      })),
-                    ),
-                ),
-            ).pipe(
-              tap((val) => {
-                saveToRealLs(LS.TIMELINE_CACHE, val);
-              }),
-            )
-          : of([] as any);
-      }),
-      startWith(this._getCalProviderFromCache()),
-    );
 
   timelineEntries$: Observable<TimelineViewEntry[]> = combineLatest([
     this._workContextService.timelineTasks$,
     this._taskRepeatCfgService.taskRepeatCfgsWithStartTime$,
     this.taskService.currentTaskId$,
     this._globalConfigService.timelineCfg$,
-    this.icalEvents$,
+    this._calendarIntegrationService.icalEvents$,
   ]).pipe(
     debounceTime(50),
     map(([{ planned, unPlanned }, taskRepeatCfgs, currentId, timelineCfg, icalEvents]) =>
@@ -130,7 +76,6 @@ export class TimelineComponent implements OnDestroy {
     private _workContextService: WorkContextService,
     private _globalConfigService: GlobalConfigService,
     private _matDialog: MatDialog,
-    private _store: Store,
     private _calendarIntegrationService: CalendarIntegrationService,
   ) {
     if (!localStorage.getItem(LS.WAS_TIMELINE_INITIAL_DIALOG_SHOWN)) {
@@ -208,7 +153,7 @@ export class TimelineComponent implements OnDestroy {
   private _getCalProviderFromCache(): TimelineCalendarMapEntry[] {
     const now = Date.now();
     return (
-      ((loadFromRealLs(LS.TIMELINE_CACHE) as TimelineCalendarMapEntry[]) || [])
+      ((loadFromRealLs(LS.CAL_EVENTS_CACHE) as TimelineCalendarMapEntry[]) || [])
         // filter out cached past entries
         .map((provider) => ({
           ...provider,
