@@ -108,6 +108,9 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-node-
 
+      - name: Workaround for nx issue and dmg licence issue
+        run: npm install @nx/nx-darwin-arm64 dmg-license
+
       - name: Install npm Packages
         #  if: steps.npm-cache.outputs.cache-hit != 'true'
         run: npm i
