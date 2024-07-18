@@ -48,6 +48,8 @@ export class PlannerTaskComponent extends BaseComponent implements OnInit, OnDes
   parentTitle: string | null = null;
   issueUrl$!: Observable<string | null>;
 
+  isEditTitleMode = false;
+
   moveToProjectList$!: Observable<Project[]>;
   contextMenuPosition: { x: string; y: string } = { x: '0px', y: '0px' };
 
@@ -157,6 +159,14 @@ export class PlannerTaskComponent extends BaseComponent implements OnInit, OnDes
         },
       }),
     );
+  }
+
+  updateTaskTitleIfChanged(title: string): void {
+    if (this.task.title !== title) {
+      this._taskService.update(this.task.id, { title });
+      // this.focusSelf();
+    }
+    this.isEditTitleMode = false;
   }
 
   // TODO implement with keyboard support
