@@ -5,7 +5,10 @@ import { WorkContextAdvancedCfgKey } from '../../work-context/work-context.model
 
 export const addTag = createAction('[Tag] Add Tag', props<{ tag: Tag }>());
 
-export const updateTag = createAction('[Tag] Update Tag', props<{ tag: Update<Tag> }>());
+export const updateTag = createAction(
+  '[Tag] Update Tag',
+  props<{ tag: Update<Tag>; isSkipSnack?: boolean }>(),
+);
 
 export const upsertTag = createAction('[Tag] Upsert Tag', props<{ tag: Tag }>());
 

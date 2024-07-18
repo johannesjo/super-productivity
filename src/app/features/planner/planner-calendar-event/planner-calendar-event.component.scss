@@ -29,6 +29,7 @@
   &:hover {
     border-color: $c-accent;
     color: $c-accent;
+    //outline: 1px solid $c-accent;
 
     mat-icon.add {
       display: block;

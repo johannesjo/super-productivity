@@ -76,6 +76,7 @@ export class PlannerEffects {
               ],
             },
           },
+          isSkipSnack: true,
         });
       }),
     );
@@ -122,6 +123,7 @@ export class PlannerEffects {
                   ],
                 },
               },
+              isSkipSnack: true,
             }),
           ];
         }
