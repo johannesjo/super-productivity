@@ -1,0 +1,23 @@
+<div
+  #contentElRef
+  class="content"
+>
+  <ng-content select="[better-drawer-content]"></ng-content>
+</div>
+
+<div
+  (swiperight)="close()"
+  [style]="sideStyle"
+  class="side"
+  (transitionend)="updateStyleAfterTransition()"
+>
+  <button
+    (click)="close()"
+    class="close-btn"
+  >
+    &times;
+  </button>
+  <div class="side-inner">
+    <ng-content select="[better-drawer-side]"></ng-content>
+  </div>
+</div>

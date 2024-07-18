@@ -1,7 +1,6 @@
-<better-drawer-container
+<better-simple-drawer
   [isOpen]="isPanelOpen"
-  [isOver]="false"
-  [sideWidth]="25"
+  [sideWidth]="300"
   cdkDropListGroup
 >
   <ng-container better-drawer-content>
@@ -40,7 +39,7 @@
   <ng-container better-drawer-side>
     <add-task-panel (closePanel)="isPanelOpen=false"></add-task-panel>
   </ng-container>
-</better-drawer-container>
+</better-simple-drawer>
 
 <div
   class="fab-wrapper"

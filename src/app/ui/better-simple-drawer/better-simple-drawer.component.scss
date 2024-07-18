@@ -1,0 +1,163 @@
+@import '../../../variables';
+
+$z-this-content: $z-side-panel-task-and-notes + 1;
+$z-this-backdrop: -1 + $z-task-side-bar-over;
+$z-this-side: 2 + $z-this-content;
+
+:host {
+  display: flex;
+  flex-direction: row;
+  justify-content: stretch;
+  align-items: stretch;
+  height: 100%;
+
+  @include mq(xs, max) {
+    flex-direction: column;
+  }
+}
+
+//  @include mq(xs, max) {
+//    ::ng-deep better-drawer-container > .content {
+//      min-height: 100%;
+//      height: 100%;
+//    }
+//    ::ng-deep better-drawer-container.isOpen > .content {
+//      min-height: 60%;
+//      height: 60%;
+//    }
+//  }
+//  @include mq(xs, max) {
+//    ::ng-deep better-drawer-container > .side {
+//      min-height: 100%;
+//      height: 100%;
+//      display: none;
+//    }
+//    ::ng-deep better-drawer-container.isOpen > .side {
+//      display: block;
+//      width: 100%;
+//      min-width: 100%;
+//      box-shadow: $whiteframe-shadow-8dp !important;
+//      height: 40%;
+//      max-height: 40%;
+//    }
+//  }
+
+.content {
+  flex-grow: 1;
+  max-width: 100%;
+  position: relative;
+  z-index: $z-this-content;
+  min-width: 0;
+  min-height: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+
+  @include mq(xs, max) {
+    :host.isOpen > & {
+      min-height: 60%;
+      height: 60%;
+    }
+  }
+
+  :host.isOpen.isOpen.isOpen & {
+    transition: $transition-enter;
+  }
+
+  ::ng-deep > * {
+    flex-grow: 1;
+  }
+}
+
+.side {
+  position: relative;
+  z-index: $z-this-side;
+  transition: $transition-leave;
+  transition-property: opacity, margin-right, right, transform;
+  box-shadow: $whiteframe-shadow-6dp !important;
+  min-height: 100%;
+
+  @include mq(xs, max) {
+    height: 100%;
+    display: none;
+  }
+
+  :host.isOpen.isOpen.isOpen & {
+    box-shadow: $whiteframe-shadow-2dp;
+    opacity: 1;
+    transition: $transition-enter;
+
+    @include mq(xs, max) {
+      display: block;
+      width: 100%;
+      min-width: 100%;
+      box-shadow: $whiteframe-shadow-8dp !important;
+      height: 40%;
+      min-height: 40%;
+      max-height: 40%;
+    }
+  }
+}
+
+.side-inner {
+  @include scrollYImportant();
+  height: 100%;
+  position: relative;
+  z-index: 2;
+  display: flex;
+
+  @include darkTheme() {
+    background: $dark-theme-bg-lighter;
+  }
+  @include lightTheme() {
+    background: $light-theme-bg-darker;
+  }
+}
+
+.close-btn {
+  display: none;
+  font-size: 32px;
+  height: 48px;
+  width: 48px;
+  text-align: center;
+  line-height: 46px;
+  position: absolute;
+  background: inherit;
+  z-index: 23;
+  top: 5px;
+  cursor: pointer;
+  right: $s;
+  box-shadow: $whiteframe-shadow-2dp;
+  border-radius: 50%;
+  border: 1px solid;
+
+  @include mq(xs) {
+    top: 0;
+    border-radius: 0;
+    right: 100%;
+    box-shadow: $whiteframe-shadow-1dp;
+    border: 1px solid;
+  }
+
+  &,
+  &:focus,
+  &:active {
+    outline: none;
+  }
+
+  @include lightTheme() {
+    background: $light-theme-bg-darker;
+    border-color: rgba(0, 0, 0, 0.12);
+  }
+
+  @include darkTheme() {
+    color: $dark-theme-text-color;
+    background: $dark-theme-bg-lightest;
+    border-color: $dark-theme-extra-border-color;
+
+    @include mq(xs) {
+      background: $dark-theme-bg-slightly-lighter;
+    }
+  }
+}

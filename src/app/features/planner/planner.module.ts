@@ -27,6 +27,7 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { DialogAddPlannedTasksComponent } from './dialog-add-planned-tasks/dialog-add-planned-tasks.component';
 import { AddTaskInlineComponent } from './add-task-inline/add-task-inline.component';
 import { PlannerDayComponent } from './planner-day/planner-day.component';
+import { BetterSimpleDrawerComponent } from '../../ui/better-simple-drawer/better-simple-drawer.component';
 
 @NgModule({
   declarations: [
@@ -57,6 +58,7 @@ import { PlannerDayComponent } from './planner-day/planner-day.component';
     CdkDragPlaceholder,
     IssueModule,
     AddTaskInlineComponent,
+    BetterSimpleDrawerComponent,
   ],
 })
 export class PlannerModule {}
