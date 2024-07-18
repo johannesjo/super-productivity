@@ -294,14 +294,28 @@ planner-task.split-task {
   transform: translate(-50%, -50%);
   display: flex;
 
-  @include mousePrimaryDevice {
-    display: none;
+  button {
+    @include mousePrimaryDevice {
+      display: none;
+    }
+
+    .row:hover & {
+      display: flex;
+      animation: fadeIn $transition-duration--enter $ani-enter-timing;
+      //transform: translate(-50%, -50%) scale(1.5);
+    }
   }
 
-  .row:hover & {
-    display: flex;
-    animation: fadeIn $transition-duration--enter $ani-enter-timing;
-    //transform: translate(-50%, -50%) scale(1.5);
+  .ico {
+    opacity: 0.2;
+
+    @include mousePrimaryDevice {
+      display: block;
+    }
+
+    .row:hover & {
+      display: none;
+    }
   }
 }
 
@@ -327,6 +341,14 @@ planner-task.split-task {
     color: $dark-theme-text-color;
     border-color: $dark-theme-extra-border-color;
     background: $dark-theme-bg-lighter;
+  }
+
+  @include mousePrimaryDevice {
+    opacity: 0.6;
+  }
+
+  .row:hover & {
+    opacity: 1;
   }
 }
 
