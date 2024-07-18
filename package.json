@@ -87,8 +87,7 @@
     "int:watch": "node ./tools/extract-i18n-watch.js",
     "int:find": "ngx-translate-extract --input ./src --output ./src/assets/i18n/*.json  --sort --format namespaced-json --marker _",
     "int:clean": "ngx-translate-extract --input ./src --output ./src/assets/i18n/*.json --clean --sort --format namespaced-json --marker _",
-    "int:test": "node ./tools/test-lng-files.js",
-    "postinstall": "cross-env-shell node ./tools/is-skip-postinstall.js --env.SKIP_POST_INSTALL=$SKIP_POST_INSTALL || echo ''jooo"
+    "int:test": "node ./tools/test-lng-files.js"
   },
   "publish": [
     {
@@ -166,7 +165,7 @@
     "cross-env": "^7.0.3",
     "detect-it": "^4.0.1",
     "dragula": "^3.7.3",
-    "electron": "^29.4.2",
+    "electron": "^29.4.5",
     "electron-builder": "^24.13.3",
     "eslint": "^8.57.0",
     "eslint-config-prettier": "^9.1.0",
@@ -175,7 +174,7 @@
     "eslint-plugin-prefer-arrow": "1.2.3",
     "eslint-plugin-prettier": "^5.1.3",
     "file-saver": "^2.0.2",
-    "glob": "^8.0.3",
+    "glob": "^9.3.5",
     "hammerjs": "^2.0.8",
     "helpful-decorators": "^2.1.0",
     "husky": "^4.2.5",
