@@ -133,7 +133,7 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
   inputVal: string = '';
   inputVal$: Observable<string> = this.taskSuggestionsCtrl.valueChanges;
 
-  tagSuggestions$: Observable<Tag[]> = this._tagService.tagsNoMyDay$;
+  tagSuggestions$: Observable<Tag[]> = this._tagService.tagsNoMyDayAndNoList$;
   tagSuggestions: Tag[] = [];
 
   isAddToBacklogAvailable$: Observable<boolean> = this.shortSyntaxTags$.pipe(

@@ -69,9 +69,9 @@ export class SideNavComponent implements OnDestroy {
   tagList$: Observable<Tag[]> = this.isTagsExpanded$.pipe(
     switchMap((isExpanded) =>
       isExpanded
-        ? this.tagService.tagsNoMyDay$
+        ? this.tagService.tagsNoMyDayAndNoList$
         : combineLatest([
-            this.tagService.tagsNoMyDay$,
+            this.tagService.tagsNoMyDayAndNoList$,
             this.workContextService.activeWorkContextId$,
           ]).pipe(map(([tags, id]) => tags.filter((t) => t.id === id))),
     ),

@@ -10,7 +10,7 @@ import {
   restoreTask,
   updateTaskTags,
 } from '../../tasks/store/task.actions';
-import { TODAY_TAG } from '../tag.const';
+import { NO_LIST_TAG, TODAY_TAG } from '../tag.const';
 import { WorkContextType } from '../../work-context/work-context.model';
 import {
   moveTaskDownInTodayList,
@@ -54,9 +54,10 @@ export const selectTagFeatureState = createFeatureSelector<TagState>(TAG_FEATURE
 export const { selectIds, selectEntities, selectAll, selectTotal } =
   tagAdapter.getSelectors();
 export const selectAllTags = createSelector(selectTagFeatureState, selectAll);
-export const selectAllTagsWithoutMyDay = createSelector(
+export const selectAllTagsWithoutMyDayAndNoList = createSelector(
   selectAllTags,
-  (tags: Tag[]): Tag[] => tags.filter((tag) => tag.id !== TODAY_TAG.id),
+  (tags: Tag[]): Tag[] =>
+    tags.filter((tag) => tag.id !== TODAY_TAG.id && tag.id !== NO_LIST_TAG.id),
 );
 
 export const selectTagById = createSelector(

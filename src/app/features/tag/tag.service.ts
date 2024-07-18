@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { Action, select, Store } from '@ngrx/store';
 import {
   selectAllTags,
-  selectAllTagsWithoutMyDay,
+  selectAllTagsWithoutMyDayAndNoList,
   selectTagById,
   selectTagsByIds,
 } from './store/tag.reducer';
@@ -24,7 +24,9 @@ import { DEFAULT_TAG } from './tag.const';
 })
 export class TagService {
   tags$: Observable<Tag[]> = this._store$.pipe(select(selectAllTags));
-  tagsNoMyDay$: Observable<Tag[]> = this._store$.pipe(select(selectAllTagsWithoutMyDay));
+  tagsNoMyDayAndNoList$: Observable<Tag[]> = this._store$.pipe(
+    select(selectAllTagsWithoutMyDayAndNoList),
+  );
 
   constructor(private _store$: Store<TagState>) {}
 

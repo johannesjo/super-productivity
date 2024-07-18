@@ -20,6 +20,7 @@ import { WorkContextType } from '../../work-context/work-context.model';
 import { TagComponentTag } from '../tag/tag.component';
 import { expandFadeAnimation } from '../../../ui/animations/expand.ani';
 import { IssueProviderKey } from '../../issue/issue.model';
+import { NO_LIST_TAG } from '../tag.const';
 
 @Component({
   selector: 'tag-list',
@@ -81,7 +82,7 @@ export class TagListComponent implements OnDestroy {
     // TODO there should be a better way...
     switchMap(([ids, activeId]) =>
       this._tagService.getTagsByIds$(
-        ids.filter((id) => id !== activeId),
+        ids.filter((id) => id !== activeId && id !== NO_LIST_TAG.id),
         true,
       ),
     ),
