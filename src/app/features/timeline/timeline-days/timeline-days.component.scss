@@ -1,0 +1,15 @@
+:host {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
+  gap: 8px;
+  padding: 4px;
+  box-sizing: border-box;
+  padding-right: 20px;
+  overflow: auto;
+
+  > timeline-day {
+    min-width: 300px;
+    display: block;
+  }
+}

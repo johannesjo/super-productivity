@@ -3,6 +3,12 @@ import { TimelineViewEntryType } from './timeline.const';
 import { TaskRepeatCfg } from '../task-repeat-cfg/task-repeat-cfg.model';
 import { CalendarIntegrationEvent } from '../calendar-integration/calendar-integration.model';
 
+export interface TimelineDay {
+  dayDate: string;
+  entries: TimelineViewEntry[];
+  isToday: boolean;
+}
+
 interface TimelineViewEntryBase {
   id: string;
   type: TimelineViewEntryType;

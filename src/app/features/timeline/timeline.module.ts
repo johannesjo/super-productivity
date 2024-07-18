@@ -8,6 +8,8 @@ import { DialogTimelineSetupComponent } from './dialog-timeline-setup/dialog-tim
 import { TimelineCustomEventComponent } from './timeline-custom-event/timeline-custom-event.component';
 import { TimelineCalendarEventComponent } from './timeline-calendar-event/timeline-calendar-event.component';
 import { RightPanelModule } from '../right-panel/right-panel.module';
+import { TimelineDaysComponent } from './timeline-days/timeline-days.component';
+import { TimelineDayComponent } from './timeline-day/timeline-day.component';
 
 @NgModule({
   declarations: [
@@ -15,9 +17,11 @@ import { RightPanelModule } from '../right-panel/right-panel.module';
     TimelineCustomEventComponent,
     TimelineRepeatTaskProjectionComponent,
     TimelineCalendarEventComponent,
+    TimelineDaysComponent,
+    TimelineDayComponent,
     DialogTimelineSetupComponent,
   ],
-  exports: [TimelineComponent],
+  exports: [TimelineComponent, TimelineDaysComponent],
   imports: [CommonModule, UiModule, TasksModule, RightPanelModule],
 })
 export class TimelineModule {}
