@@ -6,7 +6,9 @@
   flex-direction: column;
   min-width: 260px;
   width: 260px;
-  padding-bottom: 32px;
+  // there needs to be enough space for the fab buttons
+
+  padding-bottom: 96px;
   margin-bottom: 32px;
 }
 
