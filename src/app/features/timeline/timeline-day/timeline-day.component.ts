@@ -48,7 +48,7 @@ export class TimelineDayComponent {
       timelineEntry?.data?.defaultEstimate;
     const h = d && d / 60 / 60 / 1000;
 
-    // if (h && h >= 4.5) return 'xxxl row';
+    if (h && h >= 4.5) return 'xxxl row';
     if (h && h >= 3.5) return 'xxl row';
     if (h && h >= 2.5) return 'xl row';
     if (h && h >= 1.5) return 'l row';

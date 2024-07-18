@@ -4,6 +4,7 @@
 
 :host {
   overflow: hidden !important;
+  padding-top: 16px;
 }
 
 .day-title {
@@ -17,7 +18,7 @@
   }
 }
 
-:host ::ng-deep task {
+:host ::ng-deep planner-task {
   .drag-handle {
     pointer-events: none;
 
@@ -329,7 +330,7 @@ planner-task.split-task {
   }
 }
 
-:host ::ng-deep task .schedule-btn {
+:host ::ng-deep planner-task .schedule-btn {
   @include mq(xs, max) {
     display: none !important;
   }
@@ -339,7 +340,7 @@ planner-task.split-task {
   ::ng-deep {
     .repeat-task-projection,
     .task-continued,
-    task .first-line {
+    planner-task {
       min-height: 80px;
     }
   }
@@ -349,7 +350,7 @@ planner-task.split-task {
   ::ng-deep {
     .repeat-task-projection,
     .task-continued,
-    task .first-line {
+    planner-task {
       min-height: 120px;
     }
   }
@@ -359,7 +360,7 @@ planner-task.split-task {
   ::ng-deep {
     .repeat-task-projection,
     .task-continued,
-    task .first-line {
+    planner-task {
       min-height: 160px;
     }
   }
@@ -369,8 +370,8 @@ planner-task.split-task {
   ::ng-deep {
     .repeat-task-projection,
     .task-continued,
-    task .first-line {
-      min-height: 180px;
+    planner-task {
+      min-height: 200px;
     }
   }
 }
