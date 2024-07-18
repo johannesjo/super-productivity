@@ -171,7 +171,7 @@ $sb-radius: 28px;
 $sb-radius-continued: 56px;
 $sb-radius-small: 4px;
 
-task.split-task::ng-deep .box {
+planner-task.split-task {
   border-top-left-radius: $sb-radius !important;
   border-top-right-radius: $sb-radius !important;
   border-bottom-left-radius: $sb-radius-small;
@@ -219,25 +219,27 @@ task.split-task::ng-deep .box {
     flex: 1;
   }
 
+  .continued,
   .time-to-go {
-    margin-left: auto;
-    padding-left: $s;
-    padding-right: $s * 2;
-    font-style: italic;
     opacity: 0.5;
     font-size: 14px;
     font-weight: 300;
-    text-align: right;
+    font-style: italic;
 
     @include mq(xs, max) {
-      // wrap continued into two lines
       font-size: 12px;
-      padding-right: $s * 3;
-
-      .continued {
-        display: none;
-      }
     }
+  }
+
+  .continued {
+    padding-bottom: 8px;
+  }
+
+  .time-to-go {
+    text-align: right;
+    margin-left: auto;
+    padding-left: $s;
+    padding-right: $s * 2;
   }
 }
 

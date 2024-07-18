@@ -62,5 +62,10 @@ import { PlannerTaskEditComponent } from './planner-task/planner-task-edit/plann
     AddTaskInlineComponent,
     BetterSimpleDrawerComponent,
   ],
+  exports: [
+    PlannerTaskComponent,
+    PlannerCalendarEventComponent,
+    PlannerRepeatProjectionComponent,
+  ],
 })
 export class PlannerModule {}

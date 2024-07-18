@@ -7,9 +7,10 @@
   box-sizing: border-box;
   padding-right: 20px;
   overflow: auto;
+  gap: 16px;
 
   > timeline-day {
-    min-width: 300px;
+    min-width: 340px;
     display: block;
   }
 }

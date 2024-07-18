@@ -3,6 +3,13 @@ import { TimelineDay, TimelineViewEntry } from '../timeline.model';
 import { T } from '../../../t.const';
 import { TimelineViewEntryType } from '../timeline.const';
 import { getTomorrow } from '../../../util/get-tomorrow';
+import { Task } from '../../tasks/task.model';
+import { DialogAddTaskReminderComponent } from '../../tasks/dialog-add-task-reminder/dialog-add-task-reminder.component';
+import { AddTaskReminderInterface } from '../../tasks/dialog-add-task-reminder/add-task-reminder-interface';
+import { TaskService } from '../../tasks/task.service';
+import { MatDialog } from '@angular/material/dialog';
+import { LS } from '../../../core/persistence/storage-keys.const';
+import { DialogTimelineSetupComponent } from '../dialog-timeline-setup/dialog-timeline-setup.component';
 
 @Component({
   selector: 'timeline-day',
@@ -18,6 +25,17 @@ export class TimelineDayComponent {
   now: number = Date.now();
   tomorrow: number = getTomorrow(0).getTime();
   currentTaskId: string | null = null;
+
+  constructor(
+    public taskService: TaskService,
+    private _matDialog: MatDialog,
+  ) {
+    if (!localStorage.getItem(LS.WAS_TIMELINE_INITIAL_DIALOG_SHOWN)) {
+      this._matDialog.open(DialogTimelineSetupComponent, {
+        data: { isInfoShownInitially: true },
+      });
+    }
+  }
 
   getSizeClass(timelineEntry: TimelineViewEntry): string {
     // TODO fix that this is being reRendered on every hover
@@ -35,5 +53,20 @@ export class TimelineDayComponent {
     if (h && h >= 2.5) return 'xl row';
     if (h && h >= 1.5) return 'l row';
     return 'row';
+  }
+
+  async moveUp(task: Task): Promise<void> {
+    this.taskService.moveUp(task.id, task.parentId, false);
+  }
+
+  async moveDown(task: Task): Promise<void> {
+    this.taskService.moveDown(task.id, task.parentId, false);
+  }
+
+  editTaskReminder(task: Task): void {
+    // NOTE: this also might schedule an unscheduled sub task of a scheduled parent
+    this._matDialog.open(DialogAddTaskReminderComponent, {
+      data: { task } as AddTaskReminderInterface,
+    });
   }
 }

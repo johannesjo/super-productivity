@@ -10,6 +10,7 @@ import { TimelineCalendarEventComponent } from './timeline-calendar-event/timeli
 import { RightPanelModule } from '../right-panel/right-panel.module';
 import { TimelineDaysComponent } from './timeline-days/timeline-days.component';
 import { TimelineDayComponent } from './timeline-day/timeline-day.component';
+import { PlannerModule } from '../planner/planner.module';
 
 @NgModule({
   declarations: [
@@ -22,6 +23,6 @@ import { TimelineDayComponent } from './timeline-day/timeline-day.component';
     DialogTimelineSetupComponent,
   ],
   exports: [TimelineComponent, TimelineDaysComponent],
-  imports: [CommonModule, UiModule, TasksModule, RightPanelModule],
+  imports: [CommonModule, UiModule, TasksModule, RightPanelModule, PlannerModule],
 })
 export class TimelineModule {}
