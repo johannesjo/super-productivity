@@ -191,17 +191,27 @@ planner-task.split-task {
   display: flex;
   position: relative;
 
+  border: 1px solid $dark-theme-separator-color;
+  opacity: 0.9;
+
+  @include lightTheme {
+    border-color: $light-theme-extra-border-color;
+  }
+  @include darkTheme {
+    border-color: $dark-theme-extra-border-color;
+  }
+
+  //@include lightTheme {
+  //  background: $task-c-bg-light;
+  //}
+  //
+  //@include darkTheme {
+  //  background: $task-c-bg-dark;
+  //}
+
   &.last {
     border-radius: $sb-radius-small $sb-radius-small $sb-radius-continued
       $sb-radius-continued;
-  }
-
-  @include lightTheme {
-    background: $task-c-bg-light;
-  }
-
-  @include darkTheme {
-    background: $task-c-bg-dark;
   }
 
   &:after {
@@ -234,6 +244,7 @@ planner-task.split-task {
 
   .continued {
     padding-bottom: 8px;
+    text-align: center;
   }
 
   .time-to-go {
