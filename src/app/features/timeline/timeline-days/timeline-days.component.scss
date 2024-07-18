@@ -4,6 +4,7 @@
   padding: 4px;
   box-sizing: border-box;
   overflow: auto;
+  max-height: 100%;
 
   > timeline-day {
     min-width: 340px;
