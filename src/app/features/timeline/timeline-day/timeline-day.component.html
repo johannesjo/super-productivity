@@ -108,14 +108,14 @@
           [title]="row.start|date:'medium'"
           class="work-start"
         >
-          {{ T.F.TIMELINE.START|translate }}
+          {{ row.start|date:'d.M.' }} {{ T.F.TIMELINE.START|translate }}
         </div>
         } @case (TimelineViewEntryType.WorkdayEnd) {
         <div
           [title]="row.start|date:'medium'"
           class="work-end"
         >
-          {{ T.F.TIMELINE.END|translate }}
+          {{ row.start|date:'d.M.' }} {{ T.F.TIMELINE.END|translate }}
         </div>
         } @case (TimelineViewEntryType.LunchBreak) {
         <div class="lunch-break">{{ T.F.TIMELINE.LUNCH_BREAK|translate }}</div>
