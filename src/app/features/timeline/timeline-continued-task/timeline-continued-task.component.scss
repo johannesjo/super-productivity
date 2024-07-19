@@ -20,9 +20,11 @@ $icon-wrapper-size: 38px;
   }
 
   @include lightTheme {
+    color: $light-theme-text-color;
     border-color: $light-theme-extra-border-color;
   }
   @include darkTheme {
+    color: $dark-theme-text-color;
     border-color: $dark-theme-extra-border-color;
   }
   //@include lightTheme {

@@ -1,5 +1,6 @@
 export enum TimelineViewEntryType {
   Task = 'Task',
+  TaskPlannedForDay = 'TaskPlannedForDay',
   ScheduledTask = 'ScheduledTask',
   ScheduledRepeatTaskProjection = 'ScheduledRepeatTaskProjection',
   SplitTask = 'SplitTask',
@@ -23,10 +24,11 @@ export const TIMELINE_VIEW_TYPE_ORDER: {
   [TimelineViewEntryType.CustomEvent]: 3,
   [TimelineViewEntryType.CalendarEvent]: 3,
   [TimelineViewEntryType.Task]: 4,
-  [TimelineViewEntryType.SplitTask]: 5,
-  [TimelineViewEntryType.SplitTaskContinued]: 6,
-  [TimelineViewEntryType.SplitTaskContinuedLast]: 7,
-  [TimelineViewEntryType.LunchBreak]: 8,
+  [TimelineViewEntryType.TaskPlannedForDay]: 5,
+  [TimelineViewEntryType.SplitTask]: 6,
+  [TimelineViewEntryType.SplitTaskContinued]: 7,
+  [TimelineViewEntryType.SplitTaskContinuedLast]: 8,
+  [TimelineViewEntryType.LunchBreak]: 9,
 };
 
 export const TIMELINE_MOVEABLE_TYPES: TimelineViewEntryType[] = [
@@ -34,4 +36,6 @@ export const TIMELINE_MOVEABLE_TYPES: TimelineViewEntryType[] = [
   TimelineViewEntryType.SplitTask,
   TimelineViewEntryType.SplitTaskContinued,
   TimelineViewEntryType.SplitTaskContinuedLast,
+  // TODO check if this is correct
+  TimelineViewEntryType.TaskPlannedForDay,
 ];

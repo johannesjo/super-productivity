@@ -187,6 +187,7 @@ export const createTimelineDays = (
       dayDate,
       entries: viewEntriesToRenderForDay,
       isToday: i === 0,
+      beyondBudgetTasks: plannerDayMap[dayDate] || [],
     };
   });
   return v;
@@ -222,13 +223,6 @@ export const createViewEntriesForDay = (
       start: startTime,
     });
   }
-
-  console.log({
-    viewEntries: JSON.parse(JSON.stringify(viewEntries)),
-    nonScheduledTasksForDay,
-    viewEntriesStart: viewEntries.map((ve) => new Date(ve.start)),
-  });
-  console.log(viewEntries.map((ve) => new Date(ve.start)));
 
   insertBlockedBlocksViewEntries(
     viewEntries as TimelineViewEntryTask[],

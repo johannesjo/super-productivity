@@ -2,6 +2,7 @@
 
 :host {
   display: block;
+  flex-grow: 1;
   padding: 4px;
   box-sizing: border-box;
   overflow: auto;
@@ -20,11 +21,11 @@
     display: grid;
     grid-auto-flow: column;
     grid-auto-columns: 1fr;
-    padding: 4px;
+    padding: 16px;
     box-sizing: border-box;
     padding-right: 20px;
     overflow: auto;
-    gap: 16px;
+    gap: 32px;
   }
 }
 

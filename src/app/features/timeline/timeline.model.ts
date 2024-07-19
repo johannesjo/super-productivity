@@ -6,6 +6,7 @@ import { CalendarIntegrationEvent } from '../calendar-integration/calendar-integ
 export interface TimelineDay {
   dayDate: string;
   entries: TimelineViewEntry[];
+  beyondBudgetTasks: TaskCopy[];
   isToday: boolean;
 }
 
@@ -25,6 +26,11 @@ export interface TimelineViewEntryTask extends TimelineViewEntryBase {
     | TimelineViewEntryType.Task
     | TimelineViewEntryType.ScheduledTask
     | TimelineViewEntryType.SplitTask;
+  data: TaskCopy;
+}
+
+export interface TimelineViewEntryTaskPlannedForDay extends TimelineViewEntryBase {
+  type: TimelineViewEntryType.TaskPlannedForDay;
   data: TaskCopy;
 }
 
@@ -96,6 +102,7 @@ export interface TimelineDayCrossing extends TimelineViewEntryBase {
 
 export type TimelineViewEntry =
   | TimelineViewEntryTask
+  | TimelineViewEntryTaskPlannedForDay
   | TimelineViewEntryTaskScheduledRepeatProjection
   | TimelineViewEntrySplitTaskContinued
   | TimelineViewEntryCustomEvent

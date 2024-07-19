@@ -168,6 +168,14 @@
   font-size: 13px;
 }
 
+.time-val {
+  color: $dark-theme-text-color;
+
+  @include lightTheme() {
+    color: $light-theme-text-color;
+  }
+}
+
 $sb-radius: 28px;
 $sb-radius-continued: 56px;
 $sb-radius-small: 4px;
@@ -309,5 +317,55 @@ planner-task.split-task {
   }
   to {
     opacity: 1;
+  }
+}
+
+.beyond-budget {
+  display: block;
+  margin-top: 48px;
+  //padding-left:  76px;
+  //padding-right: 8px;
+  //
+  //@include mq(xs) {
+  //  padding-left:  76px;;
+  //}
+
+  @include lightTheme {
+    border-color: $light-theme-separator-color;
+  }
+
+  .col.time {
+    border-color: transparent !important;
+    justify-content: flex-end;
+  }
+  .col {
+    &:before,
+    &:after {
+      display: none !important;
+    }
+  }
+}
+
+.beyond-budget-title {
+  text-align: center;
+  font-weight: bold;
+  padding-top: 16px;
+  margin-bottom: 16px;
+  border-top: 2px dashed $dark-theme-separator-color;
+
+
+  @include lightTheme {
+    color: $light-theme-text-color;
+    border-color: $light-theme-separator-color;
+  }
+  @include darkTheme {
+    color: $dark-theme-text-color;
+  }
+}
+
+.beyond-budget-tasks {
+
+  planner-task {
+    margin-top: 8px;
   }
 }

@@ -25,14 +25,10 @@
         [class.hasTime]="!row.isHideTime"
       >
         <div *ngIf="!row.isHideTime && row.type !==TimelineViewEntryType.ScheduledTask">
-          <div>
+          <div class="time-val">
             {{ row.start <= now ? (T.F.TIMELINE.NOW|translate) :
             (row.start|roundDuration|date:'HH:mm') }}
           </div>
-          <!--            <div *ngIf="row.start>= tomorrow" class="date">-->
-          <!--              {{ row.start <= now ? (T.F.TIMELINE.NOW|translate) :-->
-          <!--              (row.start|date:'shortDate')}}-->
-          <!--            </div>-->
         </div>
         <div
           *ngIf="(row.type ===TimelineViewEntryType.Task || row.type ===TimelineViewEntryType.SplitTask) && row.data.id !== currentTaskId"
@@ -65,6 +61,19 @@
             <mat-icon>alarm</mat-icon>
           </button>
         </div>
+
+        <div
+          *ngIf="(row.type ===TimelineViewEntryType.TaskPlannedForDay)"
+          class="scheduled-extra-btn"
+        >
+          <button
+            mat-icon-button
+            (click)="editTaskReminder(row.data)"
+            color="primary"
+          >
+            <mat-icon>edit_calendar</mat-icon>
+          </button>
+        </div>
       </div>
       <div class="col right">
         @switch (row.type) {
@@ -79,12 +88,19 @@
           [task]="row.data"
           [day]="timelineDay.dayDate"
         ></planner-task>
+        } @case (TimelineViewEntryType.TaskPlannedForDay) {
+        <planner-task
+          class="planned-for-day"
+          [task]="row.data"
+          [day]="timelineDay.dayDate"
+        ></planner-task>
         } @case (TimelineViewEntryType.SplitTask) {
         <planner-task
           class="split-task"
           [task]="row.data"
           [day]="timelineDay.dayDate"
         ></planner-task>
+        <!-- --->
         } @case (TimelineViewEntryType.SplitTaskContinuedLast) {
         <timeline-continued-task
           [splitTaskEntry]="row"
@@ -129,5 +145,39 @@
       </div>
     </div>
     }
+
+    <section
+      *ngIf="timelineDay.beyondBudgetTasks.length"
+      class="beyond-budget"
+    >
+      <div class="beyond-budget-title">
+        <!--        {{ T.F.TIMELINE.BEYOND_BUDGET|translate }}-->
+        tasks planned for day, but not enough time
+      </div>
+
+      <div class="beyond-budget-tasks">
+        @for (task of timelineDay.beyondBudgetTasks; track task.id) {
+        <div class="row">
+          <div class="col time">
+            <div class="scheduled-extra-btn">
+              <button
+                mat-icon-button
+                (click)="editTaskReminder(task)"
+                color=""
+              >
+                <mat-icon>edit_calendar</mat-icon>
+              </button>
+            </div>
+          </div>
+          <div class="col right">
+            <planner-task
+              [task]="task"
+              [day]="timelineDay.dayDate"
+            ></planner-task>
+          </div>
+        </div>
+        }
+      </div>
+    </section>
   </div>
 </div>
