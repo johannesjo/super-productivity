@@ -23,6 +23,7 @@ import { loadFromRealLs } from '../../../core/persistence/local-storage';
 import { TimelineViewEntryType } from '../timeline.const';
 import { T } from 'src/app/t.const';
 import { mapTimelineEntriesToDays } from '../map-timeline-data/map-timeline-entries-to-days';
+import { LayoutService } from '../../../core-ui/layout/layout.service';
 
 @Component({
   selector: 'timeline-days',
@@ -80,6 +81,7 @@ export class TimelineDaysComponent implements OnDestroy {
 
   constructor(
     public taskService: TaskService,
+    public layoutService: LayoutService,
     private _taskRepeatCfgService: TaskRepeatCfgService,
     private _workContextService: WorkContextService,
     private _globalConfigService: GlobalConfigService,

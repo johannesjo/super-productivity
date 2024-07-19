@@ -6,6 +6,8 @@
   box-sizing: border-box;
   overflow: auto;
   max-height: 100%;
+  // make room for fab-wrapper
+  padding-bottom: 92px;
 
   > timeline-day {
     min-width: 340px;
