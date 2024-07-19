@@ -1,10 +1,6 @@
-import { ChangeDetectionStrategy, Component, OnDestroy } from '@angular/core';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { combineLatest, Observable } from 'rxjs';
-import {
-  TimelineCalendarMapEntry,
-  TimelineDay,
-  TimelineViewEntry,
-} from '../timeline.model';
+import { TimelineDay, TimelineViewEntry } from '../timeline.model';
 import { debounceTime, map, tap } from 'rxjs/operators';
 import { mapToTimelineViewEntries } from '../map-timeline-data/map-to-timeline-view-entries';
 import { getTomorrow } from '../../../util/get-tomorrow';
@@ -16,10 +12,6 @@ import { MatDialog } from '@angular/material/dialog';
 import { CalendarIntegrationService } from '../../calendar-integration/calendar-integration.service';
 import { LS } from '../../../core/persistence/storage-keys.const';
 import { DialogTimelineSetupComponent } from '../dialog-timeline-setup/dialog-timeline-setup.component';
-import { Task } from '../../tasks/task.model';
-import { DialogAddTaskReminderComponent } from '../../tasks/dialog-add-task-reminder/dialog-add-task-reminder.component';
-import { AddTaskReminderInterface } from '../../tasks/dialog-add-task-reminder/add-task-reminder-interface';
-import { loadFromRealLs } from '../../../core/persistence/local-storage';
 import { TimelineViewEntryType } from '../timeline.const';
 import { T } from 'src/app/t.const';
 import { mapTimelineEntriesToDays } from '../map-timeline-data/map-timeline-entries-to-days';
@@ -31,7 +23,7 @@ import { LayoutService } from '../../../core-ui/layout/layout.service';
   styleUrl: './timeline-days.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class TimelineDaysComponent implements OnDestroy {
+export class TimelineDaysComponent {
   T: typeof T = T;
   TimelineViewEntryType: typeof TimelineViewEntryType = TimelineViewEntryType;
 
@@ -76,9 +68,6 @@ export class TimelineDaysComponent implements OnDestroy {
   now: number = Date.now();
   tomorrow: number = getTomorrow(0).getTime();
 
-  private _moveUpTimeout?: number;
-  private _moveDownTimeout?: number;
-
   constructor(
     public taskService: TaskService,
     public layoutService: LayoutService,
@@ -93,82 +82,5 @@ export class TimelineDaysComponent implements OnDestroy {
         data: { isInfoShownInitially: true },
       });
     }
-  }
-
-  ngOnDestroy(): void {
-    window.clearTimeout(this._moveUpTimeout);
-    window.clearTimeout(this._moveDownTimeout);
-  }
-
-  trackByFn(i: number, item: any): string {
-    return item.id;
-  }
-
-  getSizeClass(timelineEntry: TimelineViewEntry): string {
-    // TODO fix that this is being reRendered on every hover
-    const d =
-      // @ts-ignore
-      timelineEntry?.data?.timeEstimate ||
-      // @ts-ignore
-      timelineEntry?.data?.timeToGo ||
-      // @ts-ignore
-      timelineEntry?.data?.defaultEstimate;
-    const h = d && d / 60 / 60 / 1000;
-
-    // if (h && h >= 4.5) return 'xxxl row';
-    if (h && h >= 3.5) return 'xxl row';
-    if (h && h >= 2.5) return 'xl row';
-    if (h && h >= 1.5) return 'l row';
-    return 'row';
-  }
-
-  async moveUp(task: Task): Promise<void> {
-    // if (task.parentId) {
-    //   const parentTask = await this.taskService.getByIdOnce$(task.parentId).toPromise();
-    //   if (parentTask.subTaskIds[0] === task.id) {
-    //     this.taskService.moveUp(task.parentId, undefined, false);
-    //     window.clearTimeout(this._moveUpTimeout);
-    //     window.setTimeout(() => this.taskService.focusTask(task.id), 50);
-    //     return;
-    //   }
-    // }
-    this.taskService.moveUp(task.id, task.parentId, false);
-    window.clearTimeout(this._moveUpTimeout);
-    window.setTimeout(() => this.taskService.focusTask(task.id), 50);
-  }
-
-  async moveDown(task: Task): Promise<void> {
-    // if (task.parentId) {
-    //   const parentTask = await this.taskService.getByIdOnce$(task.parentId).toPromise();
-    //   if (parentTask.subTaskIds[parentTask.subTaskIds.length - 1] === task.id) {
-    //     this.taskService.moveDown(task.parentId, undefined, false);
-    //     window.clearTimeout(this._moveDownTimeout);
-    //     window.setTimeout(() => this.taskService.focusTask(task.id), 50);
-    //     return;
-    //   }
-    // }
-
-    this.taskService.moveDown(task.id, task.parentId, false);
-    window.clearTimeout(this._moveDownTimeout);
-    window.setTimeout(() => this.taskService.focusTask(task.id), 50);
-  }
-
-  editTaskReminder(task: Task): void {
-    // NOTE: this also might schedule an unscheduled sub task of a scheduled parent
-    this._matDialog.open(DialogAddTaskReminderComponent, {
-      data: { task } as AddTaskReminderInterface,
-    });
-  }
-
-  private _getCalProviderFromCache(): TimelineCalendarMapEntry[] {
-    const now = Date.now();
-    return (
-      ((loadFromRealLs(LS.CAL_EVENTS_CACHE) as TimelineCalendarMapEntry[]) || [])
-        // filter out cached past entries
-        .map((provider) => ({
-          ...provider,
-          items: provider.items.filter((item) => item.start + item.duration >= now),
-        }))
-    );
   }
 }
