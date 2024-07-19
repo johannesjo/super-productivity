@@ -18,6 +18,7 @@ import { Task } from '../tasks/task.model';
 import { DialogAddTaskReminderComponent } from '../tasks/dialog-add-task-reminder/dialog-add-task-reminder.component';
 import { AddTaskReminderInterface } from '../tasks/dialog-add-task-reminder/add-task-reminder-interface';
 import { CalendarIntegrationService } from '../calendar-integration/calendar-integration.service';
+import { Store } from '@ngrx/store';
 
 @Component({
   selector: 'timeline',
@@ -76,6 +77,7 @@ export class TimelineComponent implements OnDestroy {
     private _globalConfigService: GlobalConfigService,
     private _matDialog: MatDialog,
     private _calendarIntegrationService: CalendarIntegrationService,
+    private _store: Store,
   ) {
     if (!localStorage.getItem(LS.WAS_TIMELINE_INITIAL_DIALOG_SHOWN)) {
       this._matDialog.open(DialogTimelineSetupComponent, {

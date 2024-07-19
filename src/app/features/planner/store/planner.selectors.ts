@@ -4,6 +4,7 @@ import { selectTaskFeatureState } from '../../tasks/store/task.selectors';
 import {
   NoStartTimeRepeatProjection,
   PlannerDay,
+  PlannerDayMap,
   ScheduleItemEvent,
   ScheduleItemRepeatProjection,
   ScheduleItemTask,
@@ -86,6 +87,25 @@ export const selectPlannerDays = (
     },
   );
 };
+
+export const selectPlannerDayMap = createSelector(
+  selectTaskFeatureState,
+  selectPlannerState,
+  (taskState, plannerState): PlannerDayMap => {
+    const map: PlannerDayMap = {};
+
+    Object.keys(plannerState.days).forEach((dayDate) => {
+      const tids = plannerState.days[dayDate] || [];
+      const normalTasks = tids
+        .map((id) => taskState.entities[id] as TaskCopy)
+        // filter out deleted tasks
+        .filter((t) => !!t);
+      map[dayDate] = normalTasks;
+    });
+
+    return map;
+  },
+);
 
 const getAllTimeSpent = (
   normalTasks: TaskCopy[],

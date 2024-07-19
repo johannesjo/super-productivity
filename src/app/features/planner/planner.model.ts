@@ -18,6 +18,10 @@ export interface PlannerDay {
   scheduledIItems: ScheduleItem[];
 }
 
+export interface PlannerDayMap {
+  [dayDate: string]: TaskCopy[];
+}
+
 export interface NoStartTimeRepeatProjection {
   id: string;
   repeatCfg: TaskRepeatCfg;

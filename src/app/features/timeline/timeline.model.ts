@@ -9,6 +9,10 @@ export interface TimelineDay {
   isToday: boolean;
 }
 
+export interface BlockedBlockByDayMap {
+  [dayDate: string]: BlockedBlock[];
+}
+
 interface TimelineViewEntryBase {
   id: string;
   type: TimelineViewEntryType;
