@@ -21,8 +21,8 @@ import {
 import moment from 'moment';
 import { TaskRepeatCfg } from '../../task-repeat-cfg/task-repeat-cfg.model';
 
-const debug = (...args: any): void => console.log(...args);
-// const debug = (...args: any): void => undefined;
+// const debug = (...args: any): void => console.log(...args);
+const debug = (...args: any): void => undefined;
 
 export const mapToTimelineViewEntries = (
   tasks: Task[],

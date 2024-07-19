@@ -1,14 +1,12 @@
-import { Task, TaskCopy, TaskPlanned, TaskWithoutReminder } from '../../tasks/task.model';
+import { Task, TaskPlanned, TaskWithoutReminder } from '../../tasks/task.model';
 import { TaskRepeatCfg } from '../../task-repeat-cfg/task-repeat-cfg.model';
 import {
   BlockedBlock,
   BlockedBlockByDayMap,
-  BlockedBlockType,
   TimelineCalendarMapEntry,
   TimelineDay,
   TimelineLunchBreakCfg,
   TimelineViewEntry,
-  TimelineViewEntrySplitTaskContinued,
   TimelineViewEntryTask,
   TimelineWorkStartEndCfg,
 } from '../timeline.model';
@@ -16,12 +14,7 @@ import { PlannerDayMap } from '../../planner/planner.model';
 import { getDateTimeFromClockString } from '../../../util/get-date-time-from-clock-string';
 import { createSortedBlockerBlocks } from './create-sorted-blocker-blocks';
 import { getWorklogStr } from '../../../util/get-work-log-str';
-import {
-  TIMELINE_MOVEABLE_TYPES,
-  TIMELINE_VIEW_TYPE_ORDER,
-  TimelineViewEntryType,
-} from '../timeline.const';
-import moment from 'moment/moment';
+import { TIMELINE_VIEW_TYPE_ORDER, TimelineViewEntryType } from '../timeline.const';
 import {
   getTimeLeftForTask,
   getTimeLeftForTasks,
@@ -29,9 +22,6 @@ import {
 import { msLeftToday } from '../../../util/ms-left-today';
 import { createTimelineViewEntriesForNormalTasks } from './create-timeline-view-entries-for-normal-tasks';
 import { insertBlockedBlocksViewEntries } from './map-to-timeline-view-entries';
-
-// const debug = (...args: any) => console.log(...args);
-const debug = (...args: any): void => undefined;
 
 export const mapToTimelineDays = (
   dayDates: string[],
@@ -45,7 +35,6 @@ export const mapToTimelineDays = (
   lunchBreakCfg?: TimelineLunchBreakCfg,
   now: number = Date.now(),
 ): TimelineDay[] => {
-  let startTime = now;
   const plannerDayKeys = Object.keys(plannerDayMap);
   const plannerDayTasks = plannerDayKeys
     .map((key) => {
@@ -61,13 +50,6 @@ export const mapToTimelineDays = (
     !plannerDayTasks.length
   ) {
     return [];
-  }
-
-  if (workStartEndCfg) {
-    const startTimeToday = getDateTimeFromClockString(workStartEndCfg.startTime, now);
-    if (startTimeToday > now) {
-      startTime = startTimeToday;
-    }
   }
 
   const initialTasks: Task[] = currentId
@@ -144,7 +126,7 @@ export const createTimelineDays = (
     if (nonScheduledBudgetForDay - timeLeftForRegular > 0) {
       // we have enough budget for ALL nonScheduled and some left for other tasks like the planned for day ones
       viewEntries = createViewEntriesForDay(
-        now,
+        startTime,
         regularTasksLeftForDay,
         blockerBlocksForDay,
         viewEntriesForNextDay,
@@ -233,6 +215,12 @@ export const createViewEntriesForDay = (
     startTime,
     nonScheduledTasksForDay,
   );
+  console.log({
+    viewEntries: JSON.parse(JSON.stringify(viewEntries)),
+    nonScheduledTasksForDay,
+    viewEntriesStart: viewEntries.map((ve) => new Date(ve.start)),
+  });
+  console.log(viewEntries.map((ve) => new Date(ve.start)));
 
   insertBlockedBlocksViewEntries(
     viewEntries as TimelineViewEntryTask[],
