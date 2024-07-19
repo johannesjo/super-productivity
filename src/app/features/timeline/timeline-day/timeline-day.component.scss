@@ -250,8 +250,8 @@ planner-task.split-task {
   justify-content: center;
   align-items: center;
 
-  .plan-for-day {
-    opacity: 0.7;
+  &.plan-for-day {
+    opacity: 1;
 
     &:hover {
       opacity: 1;
