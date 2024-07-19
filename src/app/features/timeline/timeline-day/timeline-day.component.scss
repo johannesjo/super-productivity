@@ -3,8 +3,18 @@
 @import '../../tasks/task/task.component.mixins';
 
 :host {
-  overflow: hidden !important;
   padding-top: 16px;
+  //display: flex;
+  //flex-direction: column;
+  padding-bottom: 32px;
+
+  @include mq(xs) {
+    padding-bottom: 96px;
+  }
+
+  &:last-of-type {
+    padding-bottom: 96px;
+  }
 }
 
 .day-title {
@@ -340,6 +350,7 @@ planner-task.split-task {
     border-color: transparent !important;
     justify-content: flex-end;
   }
+
   .col {
     &:before,
     &:after {
@@ -355,7 +366,6 @@ planner-task.split-task {
   margin-bottom: 16px;
   border-top: 2px dashed $dark-theme-separator-color;
 
-
   @include lightTheme {
     color: $light-theme-text-color;
     border-color: $light-theme-separator-color;
@@ -366,7 +376,6 @@ planner-task.split-task {
 }
 
 .beyond-budget-tasks {
-
   planner-task {
     margin-top: 8px;
   }

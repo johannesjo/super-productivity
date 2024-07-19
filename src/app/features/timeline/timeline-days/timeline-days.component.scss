@@ -1,14 +1,18 @@
 @import '../../../../variables.scss';
 
 :host {
-  display: block;
+  overflow: auto;
+  display: flex;
   flex-grow: 1;
   padding: 4px;
   box-sizing: border-box;
   overflow: auto;
   max-height: 100%;
   // make room for fab-wrapper
-  padding-bottom: 92px;
+}
+
+.days-grid {
+  flex-grow: 1;
 
   > timeline-day {
     display: block;

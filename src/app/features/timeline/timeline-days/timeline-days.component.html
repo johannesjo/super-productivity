@@ -1,8 +1,9 @@
 <ng-container *ngIf="timelineDays$|async as timelineDays else loading">
-  @for (day of timelineDays; track day.dayDate) {
-  <timeline-day [timelineDay]="day"></timeline-day>
-  }
-
+  <div class="days-grid">
+    @for (day of timelineDays; track day.dayDate) {
+    <timeline-day [timelineDay]="day"></timeline-day>
+    }
+  </div>
   <div
     *ngIf="timelineDays.length === 0"
     class="no-tasks-msg"
