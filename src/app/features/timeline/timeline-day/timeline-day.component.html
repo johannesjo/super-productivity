@@ -56,7 +56,6 @@
           *ngIf="(row.type ===TimelineViewEntryType.ScheduledTask)"
           class="scheduled-extra-btn"
         >
-          <mat-icon class="ico">alarm</mat-icon>
           <div class="time-badge">{{ row.start|shortPlannedAt:'timeOnly' }}</div>
           <button
             mat-mini-fab

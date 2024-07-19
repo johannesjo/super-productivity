@@ -225,39 +225,11 @@ planner-task.split-task {
 }
 
 .scheduled-extra-btn {
-  //position: absolute;
-  //top: 50%;
-  //left: 50%;
-  //transform: translate(-50%, -50%);
   width: 40px;
   height: 40px;
   display: flex;
   justify-content: center;
   align-items: center;
-
-  button {
-    @include mousePrimaryDevice {
-      display: none;
-    }
-  }
-
-  &:hover button {
-    display: flex !important;
-    animation: fadeIn $transition-duration--enter $ani-enter-timing;
-    //transform: translate(-50%, -50%) scale(1.5);
-  }
-
-  .ico {
-    opacity: 0.1;
-
-    @include mousePrimaryDevice {
-      display: block;
-    }
-  }
-
-  &:hover .ico {
-    display: none !important;
-  }
 }
 
 .time-badge {
@@ -282,14 +254,6 @@ planner-task.split-task {
     color: $dark-theme-text-color;
     border-color: $dark-theme-extra-border-color;
     background: $dark-theme-bg-lighter;
-  }
-
-  @include mousePrimaryDevice {
-    opacity: 0.5;
-  }
-
-  .scheduled-extra-btn:hover & {
-    opacity: 1;
   }
 }
 
