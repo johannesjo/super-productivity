@@ -15,7 +15,7 @@
       It is time to stop working and to relax!
     </div>
 
-    @for (row of timelineDay.entries; track row.id) {
+    @for (row of timelineDay.entries; track row.id; let index = $index) {
     <div
       class="row"
       [class]="getSizeClass(row)"
@@ -107,7 +107,10 @@
           class="split-task"
           [task]="row.data"
           [day]="timelineDay.dayDate"
+          [overWriteTimeEstimate]="timelineDay.entries[index+1]?.start - row.start"
         ></planner-task>
+        <!--          [overWriteTimeEstimate]="row[index+1]?.start  ? row[index+1]?.start - row.start: null"-->
+
         <!-- --->
         } @case (TimelineViewEntryType.SplitTaskContinuedLast) {
         <timeline-continued-task

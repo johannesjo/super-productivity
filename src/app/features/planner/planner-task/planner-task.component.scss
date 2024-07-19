@@ -217,3 +217,9 @@ $min-badge-size: 14px;
     background: $dark-theme-bg-lighter;
   }
 }
+
+.original-time-remaining {
+  white-space: nowrap;
+  font-size: 10px;
+  margin-left: -6px;
+}

@@ -40,6 +40,7 @@ import { DialogPlanForDayComponent } from '../dialog-plan-for-day/dialog-plan-fo
 export class PlannerTaskComponent extends BaseComponent implements OnInit, OnDestroy {
   @Input({ required: true }) task!: TaskCopy;
   @Input() day?: string;
+  @Input() overWriteTimeEstimate?: number;
 
   isRepeatTaskCreatedToday = false;
 
