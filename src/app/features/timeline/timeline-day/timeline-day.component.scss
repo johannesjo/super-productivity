@@ -179,82 +179,6 @@ planner-task.split-task {
   border-bottom-right-radius: $sb-radius-small;
 }
 
-.task-continued {
-  align-self: flex-start;
-  align-items: center;
-  padding-left: 56px;
-  padding-top: $s;
-  padding-bottom: $s;
-  border-radius: $sb-radius-small $sb-radius-continued $sb-radius-small
-    $sb-radius-continued;
-
-  display: flex;
-  position: relative;
-
-  border: 1px solid $dark-theme-separator-color;
-  opacity: 0.9;
-
-  @include lightTheme {
-    border-color: $light-theme-extra-border-color;
-  }
-  @include darkTheme {
-    border-color: $dark-theme-extra-border-color;
-  }
-
-  //@include lightTheme {
-  //  background: $task-c-bg-light;
-  //}
-  //
-  //@include darkTheme {
-  //  background: $task-c-bg-dark;
-  //}
-
-  &.last {
-    border-radius: $sb-radius-small $sb-radius-small $sb-radius-continued
-      $sb-radius-continued;
-  }
-
-  &:after {
-    content: '...';
-    position: absolute;
-    top: 50%;
-    left: 0;
-    margin-top: -0.5 * $s;
-    transform: translateY(-50%);
-    text-align: center;
-    width: 56px;
-    font-size: 20px;
-  }
-
-  .title {
-    flex: 1;
-  }
-
-  .continued,
-  .time-to-go {
-    opacity: 0.5;
-    font-size: 14px;
-    font-weight: 300;
-    font-style: italic;
-
-    @include mq(xs, max) {
-      font-size: 12px;
-    }
-  }
-
-  .continued {
-    padding-bottom: 8px;
-    text-align: center;
-  }
-
-  .time-to-go {
-    text-align: right;
-    margin-left: auto;
-    padding-left: $s;
-    padding-right: $s * 2;
-  }
-}
-
 .work-start,
 .work-end {
   text-align: center;
@@ -378,7 +302,7 @@ planner-task.split-task {
 .row.l {
   ::ng-deep {
     .repeat-task-projection,
-    .task-continued,
+    timeline-continued-task,
     planner-task {
       min-height: 80px;
     }
@@ -388,7 +312,7 @@ planner-task.split-task {
 .row.xl {
   ::ng-deep {
     .repeat-task-projection,
-    .task-continued,
+    timeline-continued-task,
     planner-task {
       min-height: 120px;
     }
@@ -398,7 +322,7 @@ planner-task.split-task {
 .row.xxl {
   ::ng-deep {
     .repeat-task-projection,
-    .task-continued,
+    timeline-continued-task,
     planner-task {
       min-height: 160px;
     }
@@ -408,7 +332,7 @@ planner-task.split-task {
 .row.xxxl {
   ::ng-deep {
     .repeat-task-projection,
-    .task-continued,
+    timeline-continued-task,
     planner-task {
       min-height: 200px;
     }

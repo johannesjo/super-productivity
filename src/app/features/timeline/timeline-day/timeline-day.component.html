@@ -87,22 +87,12 @@
           [day]="timelineDay.dayDate"
         ></planner-task>
         } @case (TimelineViewEntryType.SplitTaskContinuedLast) {
-        <!-- TODO move to component -->
-        <div class="task-continued last">
-          <div class="wrap">
-            <div class="continued">continued</div>
-            <div class="title">{{ row.data.title }} ({{ row.data.index + 2 }})</div>
-          </div>
-          <div class="time-to-go">~{{ row.data.timeToGo|roundDuration|msToString }}</div>
-        </div>
+        <timeline-continued-task
+          [splitTaskEntry]="row"
+          [isLast]="true"
+        ></timeline-continued-task>
         } @case (TimelineViewEntryType.SplitTaskContinued) {
-        <div class="task-continued">
-          <div class="wrap">
-            <div class="continued">continued</div>
-            <div class="title">{{ row.data.title }} ({{ row.data.index + 2 }})</div>
-          </div>
-          <div class="time-to-go">~{{ row.data.timeToGo|roundDuration|msToString }}</div>
-        </div>
+        <timeline-continued-task [splitTaskEntry]="row"></timeline-continued-task>
         } @case (TimelineViewEntryType.CalendarEvent) {
         <planner-calendar-event
           [calendarEvent]="row.data"

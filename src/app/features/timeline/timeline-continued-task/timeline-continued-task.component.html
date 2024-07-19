@@ -1,0 +1,15 @@
+<div
+  class="task-continued"
+  [class.last]="isLast"
+>
+  <div class="continued">{{ T.F.TIMELINE.CONTINUED|translate }}</div>
+
+  <div class="wrap">
+    <div class="title">
+      {{ splitTaskEntry.data.title }} ({{ splitTaskEntry.data.index + 2 }})
+    </div>
+    <div class="time-to-go">
+      {{ splitTaskEntry.data.timeToGo|roundDuration|msToString }}
+    </div>
+  </div>
+</div>
