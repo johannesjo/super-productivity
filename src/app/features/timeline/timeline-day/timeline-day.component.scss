@@ -19,6 +19,8 @@
 }
 
 :host ::ng-deep planner-task {
+  cursor: auto;
+
   .drag-handle {
     pointer-events: none;
 

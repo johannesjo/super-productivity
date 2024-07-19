@@ -94,6 +94,7 @@ export const createTimelineDays = (
 ): TimelineDay[] => {
   let splitTaskEntryForNextDay: TimelineViewEntrySplitTaskContinued | undefined;
   let regularTasksLeftForDay: TaskWithoutReminder[] = nonScheduledTasks;
+  let beyondBudgetTasks: TaskWithoutReminder[];
 
   const v: TimelineDay[] = dayDates.map((dayDate, i) => {
     const nextDayStartDate = new Date(dayDate);
@@ -124,19 +125,40 @@ export const createTimelineDays = (
     );
 
     let viewEntries: TimelineViewEntry[] = [];
-    if (nonScheduledBudgetForDay - timeLeftForRegular > 0) {
+
+    const timeLeftAfterRegularTasksDone = nonScheduledBudgetForDay - timeLeftForRegular;
+    if (timeLeftAfterRegularTasksDone > 0) {
       // we have enough budget for ALL nonScheduled and some left for other tasks like the planned for day ones
+
+      console.log(
+        'budget',
+        'tAfter',
+        timeLeftAfterRegularTasksDone / 60 / 60 / 1000,
+        'bBefore',
+        nonScheduledBudgetForDay / 60 / 60 / 1000,
+        'tTime',
+        timeLeftForRegular / 60 / 60 / 1000,
+      );
+
+      const { beyond, within } = getTasksWithinAndBeyondBudget(
+        // TODO fix type
+        (plannerDayMap[dayDate] as TaskWithoutReminder[]) || [],
+        timeLeftAfterRegularTasksDone,
+      );
+      console.log({ beyond, within });
+
       viewEntries = createViewEntriesForDay(
         startTime,
-        regularTasksLeftForDay,
+        [...regularTasksLeftForDay, ...within],
         blockerBlocksForDay,
         splitTaskEntryForNextDay,
       );
+      beyondBudgetTasks = beyond;
       regularTasksLeftForDay = [];
-      // TODO  we sort the planned for today ones if any and split them as needed and create overdue tasks
     } else if (nonScheduledBudgetForDay - timeLeftForRegular === 0) {
       // no splitting is needed, all tasks planed for today are OVER_BUDGET
       regularTasksLeftForDay = [];
+      beyondBudgetTasks = (plannerDayMap[dayDate] as TaskWithoutReminder[]) || [];
       // TODO
     } else {
       // we have not enough budget left  for all remaining regular tasks, so we cut them off for the next today
@@ -151,6 +173,7 @@ export const createTimelineDays = (
         regularTasksLeftForDay,
         nonScheduledBudgetForDay,
       );
+      beyondBudgetTasks = (plannerDayMap[dayDate] as TaskWithoutReminder[]) || [];
     }
 
     const viewEntriesToRenderForDay: TimelineViewEntry[] = [];
@@ -180,6 +203,7 @@ export const createTimelineDays = (
       taskPlannedForDay,
       timeLeftForRegular,
       nonScheduledBudgetForDay,
+      beyondBudgetTasks,
       nonScheduledBudgetForDay2: nonScheduledBudgetForDay / 60 / 60 / 1000,
     });
 
@@ -187,7 +211,7 @@ export const createTimelineDays = (
       dayDate,
       entries: viewEntriesToRenderForDay,
       isToday: i === 0,
-      beyondBudgetTasks: plannerDayMap[dayDate] || [],
+      beyondBudgetTasks,
     };
   });
   return v;
@@ -257,6 +281,33 @@ export const createViewEntriesForDay = (
   return viewEntries;
 };
 
+export const getTasksWithinAndBeyondBudget = (
+  tasks: TaskWithoutReminder[],
+  budget: number,
+): {
+  beyond: TaskWithoutReminder[];
+  within: TaskWithoutReminder[];
+} => {
+  const beyond: TaskWithoutReminder[] = [];
+  const within: TaskWithoutReminder[] = [];
+
+  let remainingBudget = budget;
+  // TODO probably can be optimized
+  tasks.forEach((task) => {
+    console.log(remainingBudget / 60 / 60 / 1000);
+
+    const timeLeftForTask = getTimeLeftForTask(task);
+    if (timeLeftForTask > remainingBudget) {
+      beyond.push(task);
+    } else {
+      within.push(task);
+      remainingBudget -= timeLeftForTask;
+    }
+  });
+
+  return { beyond, within };
+};
+
 // TODO unit test
 export const getBudgetLeftForDay = (
   blockerBlocksForDay: BlockedBlock[],
@@ -308,20 +359,20 @@ const createBlockedBlocksByDayMap = (
     });
 
     // TODO handle case when blocker block spans multiple days
-    // const dayEndDate = getWorklogStr(block.end);
-    // if (dayStartDate !== dayEndDate) {
-    //   const dayStartBoundary2 = new Date(block.end).setHours(0, 0, 0, 0);
-    //   const dayEndBoundary2 = new Date(block.end).setHours(24, 0, 0, 0);
-    //
-    //   if (!blockedBlocksByDay[dayEndDate]) {
-    //     blockedBlocksByDay[dayEndDate] = [];
-    //   }
-    //   blockedBlocksByDay[dayEndDate].push({
-    //     ...block,
-    //     start: dayStartBoundary2,
-    //     end: Math.min(dayEndBoundary2, block.end),
-    //   });
-    // }
+    const dayEndDate = getWorklogStr(block.end);
+    if (dayStartDate !== dayEndDate) {
+      const dayStartBoundary2 = new Date(block.end).setHours(0, 0, 0, 0);
+      const dayEndBoundary2 = new Date(block.end).setHours(24, 0, 0, 0);
+
+      if (!blockedBlocksByDay[dayEndDate]) {
+        blockedBlocksByDay[dayEndDate] = [];
+      }
+      blockedBlocksByDay[dayEndDate].push({
+        ...block,
+        start: dayStartBoundary2,
+        end: Math.min(dayEndBoundary2, block.end),
+      });
+    }
   });
 
   return blockedBlocksByDay;
