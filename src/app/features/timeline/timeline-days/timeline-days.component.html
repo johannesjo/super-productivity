@@ -1,12 +1,16 @@
-<ng-container *ngIf="timelineDays$|async as timelineDays">
+<ng-container *ngIf="timelineDays$|async as timelineDays else loading">
   @for (day of timelineDays$|async; track day.dayDate) {
   <timeline-day [timelineDay]="day"></timeline-day>
   }
 
   <div
-    *ngIf="!timelineDays.entries.length"
+    *ngIf="timelineDays.length === 0"
     class="no-tasks-msg"
   >
     {{ T.F.TIMELINE.NO_TASKS|translate }}
   </div>
 </ng-container>
+
+<ng-template #loading>
+  <mat-spinner style="margin: auto"></mat-spinner>
+</ng-template>
