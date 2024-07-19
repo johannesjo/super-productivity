@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { combineLatest, Observable, of } from 'rxjs';
+import { combineLatest, Observable } from 'rxjs';
 import { TimelineDay } from '../timeline.model';
 import { debounceTime, map, tap } from 'rxjs/operators';
 import { getTomorrow } from '../../../util/get-tomorrow';
@@ -38,6 +38,7 @@ export class TimelineDaysComponent {
     this._store.pipe(select(selectPlannerDayMap)),
   ]).pipe(
     debounceTime(50),
+    // debounceTime(1250),
     map(
       ([
         { planned, unPlanned },
@@ -88,7 +89,6 @@ export class TimelineDaysComponent {
     private _globalConfigService: GlobalConfigService,
     private _matDialog: MatDialog,
     private _calendarIntegrationService: CalendarIntegrationService,
-    // private _plannerService: PlannerService,
     private _store: Store,
     private _dateService: DateService,
   ) {
@@ -100,7 +100,7 @@ export class TimelineDaysComponent {
   }
 
   private _getDaysToShow(): string[] {
-    const nrOfDaysToShow = 15;
+    const nrOfDaysToShow = 3;
     const today = new Date().getTime();
     const daysToShow: string[] = [];
     for (let i = 0; i < nrOfDaysToShow; i++) {
