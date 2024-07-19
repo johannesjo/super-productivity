@@ -75,7 +75,7 @@
             {{ row.start|shortPlannedAt:'timeOnly' }}
           </div>
           <button
-            mat-icon-button
+            mat-mini-fab
             (click)="planForDay(row.data, timelineDay.dayDate)"
             color=""
           >
@@ -177,7 +177,7 @@
           <div class="col time">
             <div class="col-extra-btn plan-for-day">
               <button
-                mat-icon-button
+                mat-mini-fab
                 (click)="planForDay(task, timelineDay.dayDate)"
                 color=""
               >
