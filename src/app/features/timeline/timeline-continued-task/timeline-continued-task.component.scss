@@ -13,6 +13,11 @@ $icon-wrapper-size: 38px;
     $sb-radius-continued;
   border: 1px solid $dark-theme-separator-color;
   //opacity: 0.9;
+  font-size: $planner-font-size-mobile;
+
+  @include mq(xs) {
+    font-size: $planner-font-size;
+  }
 
   @include lightTheme {
     border-color: $light-theme-extra-border-color;
@@ -51,19 +56,14 @@ $icon-wrapper-size: 38px;
   }
 
   .title {
-    flex: 1;
+    flex-grow: 1;
   }
 
   .continued,
   .time-to-go {
     opacity: 0.5;
-    font-size: 14px;
     font-weight: 300;
     font-style: italic;
-
-    @include mq(xs, max) {
-      font-size: 12px;
-    }
   }
 
   .continued {
