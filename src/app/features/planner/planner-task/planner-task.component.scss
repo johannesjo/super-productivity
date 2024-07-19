@@ -8,6 +8,7 @@ $h: $planner-item-height;
   min-height: $h;
   display: flex;
   align-items: center;
+  align-items: stretch;
   background: $task-c-bg-light;
   @include grabCursor();
 

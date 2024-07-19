@@ -6,6 +6,10 @@ $sb-radius-small: 4px;
 $icon-wrapper-size: 38px;
 
 :host {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
   position: relative;
   padding-top: $s;
   padding-bottom: $s;
@@ -55,6 +59,7 @@ $icon-wrapper-size: 38px;
     display: flex;
     align-items: center;
     padding-left: $icon-wrapper-size;
+    align-self: stretch;
   }
 
   .title {
