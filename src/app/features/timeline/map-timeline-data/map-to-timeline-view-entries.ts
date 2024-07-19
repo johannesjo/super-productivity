@@ -579,6 +579,7 @@ const isTaskDataType = (viewEntry: TimelineViewEntry): boolean => {
   return (
     viewEntry.type === TimelineViewEntryType.Task ||
     viewEntry.type === TimelineViewEntryType.SplitTask ||
+    viewEntry.type === TimelineViewEntryType.TaskPlannedForDay ||
     viewEntry.type === TimelineViewEntryType.ScheduledTask
   );
 };

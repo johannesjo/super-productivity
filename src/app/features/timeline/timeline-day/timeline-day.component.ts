@@ -10,6 +10,7 @@ import { TaskService } from '../../tasks/task.service';
 import { MatDialog } from '@angular/material/dialog';
 import { LS } from '../../../core/persistence/storage-keys.const';
 import { DialogTimelineSetupComponent } from '../dialog-timeline-setup/dialog-timeline-setup.component';
+import { DialogPlanForDayComponent } from '../../planner/dialog-plan-for-day/dialog-plan-for-day.component';
 
 @Component({
   selector: 'timeline-day',
@@ -64,9 +65,17 @@ export class TimelineDayComponent {
   }
 
   editTaskReminder(task: Task): void {
-    // NOTE: this also might schedule an unscheduled sub task of a scheduled parent
+    // NOTE: this also might schedule an unscheduled sub-task of a scheduled parent
     this._matDialog.open(DialogAddTaskReminderComponent, {
       data: { task } as AddTaskReminderInterface,
+    });
+  }
+
+  planForDay(task: Task, day: string): void {
+    this._matDialog.open(DialogPlanForDayComponent, {
+      // we focus inside dialog instead
+      autoFocus: false,
+      data: { task, day: day },
     });
   }
 }

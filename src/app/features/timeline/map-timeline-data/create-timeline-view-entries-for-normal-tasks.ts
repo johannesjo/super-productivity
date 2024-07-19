@@ -1,11 +1,14 @@
-import { TaskWithoutReminder } from '../../tasks/task.model';
+import {
+  TaskWithoutReminder,
+  TaskWithPlannedForDayIndication,
+} from '../../tasks/task.model';
 import { TimelineViewEntryTask } from '../timeline.model';
 import { getTimeLeftForTask } from '../../../util/get-time-left-for-task';
 import { TimelineViewEntryType } from '../timeline.const';
 
 export const createTimelineViewEntriesForNormalTasks = (
   startTime: number,
-  tasks: TaskWithoutReminder[],
+  tasks: (TaskWithoutReminder | TaskWithPlannedForDayIndication)[],
 ): TimelineViewEntryTask[] => {
   let lastTime: number;
   let prevTask: TaskWithoutReminder;
@@ -28,7 +31,9 @@ export const createTimelineViewEntriesForNormalTasks = (
 
     viewEntries.push({
       id: task.id,
-      type: TimelineViewEntryType.Task,
+      type: (task as TaskWithPlannedForDayIndication).plannedForADay
+        ? TimelineViewEntryType.TaskPlannedForDay
+        : TimelineViewEntryType.Task,
       start: time,
       data: task,
       isHideTime: time === lastTime,

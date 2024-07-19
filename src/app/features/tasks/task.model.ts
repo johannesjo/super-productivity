@@ -123,6 +123,10 @@ export interface TaskWithoutReminder extends Task {
   plannedAt: null;
 }
 
+export interface TaskWithPlannedForDayIndication extends TaskWithoutReminder {
+  plannedForADay: true;
+}
+
 export interface TaskWithSubTasks extends Task {
   readonly subTasks: Task[];
 }

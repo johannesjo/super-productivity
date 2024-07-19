@@ -31,6 +31,10 @@
 :host ::ng-deep planner-task {
   cursor: auto;
 
+  &:active {
+    cursor: auto;
+  }
+
   .drag-handle {
     pointer-events: none;
 
@@ -239,12 +243,20 @@ planner-task.split-task {
   }
 }
 
-.scheduled-extra-btn {
+.col-extra-btn {
   width: 40px;
   height: 40px;
   display: flex;
   justify-content: center;
   align-items: center;
+
+  .plan-for-day {
+    opacity: 0.7;
+
+    &:hover {
+      opacity: 1;
+    }
+  }
 }
 
 .time-badge {

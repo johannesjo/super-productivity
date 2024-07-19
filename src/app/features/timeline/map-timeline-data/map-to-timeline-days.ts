@@ -1,4 +1,9 @@
-import { Task, TaskPlanned, TaskWithoutReminder } from '../../tasks/task.model';
+import {
+  Task,
+  TaskPlanned,
+  TaskWithoutReminder,
+  TaskWithPlannedForDayIndication,
+} from '../../tasks/task.model';
 import { TaskRepeatCfg } from '../../task-repeat-cfg/task-repeat-cfg.model';
 import {
   BlockedBlock,
@@ -241,7 +246,7 @@ const getRemainingTasks = (
 
 export const createViewEntriesForDay = (
   startTime: number,
-  nonScheduledTasksForDay: TaskWithoutReminder[],
+  nonScheduledTasksForDay: (TaskWithoutReminder | TaskWithPlannedForDayIndication)[],
   blockedBlocksForDay: BlockedBlock[],
   prevDaySplitTaskEntry?: TimelineViewEntrySplitTaskContinued,
 ): TimelineViewEntry[] => {
@@ -294,10 +299,10 @@ export const getTasksWithinAndBeyondBudget = (
   budget: number,
 ): {
   beyond: TaskWithoutReminder[];
-  within: TaskWithoutReminder[];
+  within: TaskWithPlannedForDayIndication[];
 } => {
   const beyond: TaskWithoutReminder[] = [];
-  const within: TaskWithoutReminder[] = [];
+  const within: TaskWithPlannedForDayIndication[] = [];
 
   let remainingBudget = budget;
   // TODO probably can be optimized
@@ -308,7 +313,10 @@ export const getTasksWithinAndBeyondBudget = (
     if (timeLeftForTask > remainingBudget) {
       beyond.push(task);
     } else {
-      within.push(task);
+      within.push({
+        ...task,
+        plannedForADay: true,
+      });
       remainingBudget -= timeLeftForTask;
     }
   });
