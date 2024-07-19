@@ -1,8 +1,7 @@
 @import '../../../../variables';
 @import '../../tasks/task/task.component.mixins';
 
-$sb-radius: 28px;
-$sb-radius-continued: 56px;
+$sb-radius-continued: 28px;
 $sb-radius-small: 4px;
 $icon-wrapper-size: 38px;
 
@@ -70,13 +69,12 @@ $icon-wrapper-size: 38px;
   .continued {
     padding-bottom: 8px;
     text-align: center;
-    margin-left: -1 * ($icon-wrapper-size/2);
   }
 
   .time-to-go {
     text-align: right;
     margin-left: auto;
     padding-left: $s;
-    padding-right: $s * 2;
+    padding-right: $s;
   }
 }
