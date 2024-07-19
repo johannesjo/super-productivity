@@ -25,7 +25,7 @@
         [class.hasTime]="!row.isHideTime"
       >
         <div
-          *ngIf="!row.isHideTime && row.type !==TimelineViewEntryType.ScheduledTask && row.type !==TimelineViewEntryType.TaskPlannedForDay"
+          *ngIf="!row.isHideTime && row.type !==TimelineViewEntryType.ScheduledTask && row.type !==TimelineViewEntryType.TaskPlannedForDay && (row.type !==TimelineViewEntryType.SplitTask  || !row.data.plannedForADay)"
         >
           <div class="time-val">
             {{ row.start <= now ? (T.F.TIMELINE.NOW|translate) :
@@ -33,7 +33,7 @@
           </div>
         </div>
         <div
-          *ngIf="(row.type ===TimelineViewEntryType.Task || row.type ===TimelineViewEntryType.SplitTask) && row.data.id !== currentTaskId"
+          *ngIf="(row.type ===TimelineViewEntryType.Task || (row.type ===TimelineViewEntryType.SplitTask && !row.data.plannedForADay)) && row.data.id !== currentTaskId"
           class="up-down"
         >
           <button
@@ -65,7 +65,7 @@
         </div>
 
         <div
-          *ngIf="(row.type ===TimelineViewEntryType.TaskPlannedForDay)"
+          *ngIf="(row.type ===TimelineViewEntryType.TaskPlannedForDay) || row.type ===TimelineViewEntryType.SplitTask && row.data.plannedForADay"
           class="col-extra-btn plan-for-day"
         >
           <div

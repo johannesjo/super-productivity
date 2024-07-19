@@ -125,6 +125,7 @@ $h: $planner-item-height;
   position: relative;
   // fixes drag and drop on mobile
   touch-action: none;
+  align-self: center;
 
   mat-ico {
     font-size: 20px;
