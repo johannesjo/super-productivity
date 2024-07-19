@@ -10,8 +10,10 @@
   padding-bottom: 92px;
 
   > timeline-day {
-    min-width: 340px;
     display: block;
+    @include mq(xs) {
+      min-width: 480px;
+    }
   }
 
   @include mq(xs) {
