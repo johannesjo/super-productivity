@@ -118,7 +118,9 @@ export const createTimelineDays = (
     const blockerBlocksForDay = blockerBlocksDayMap[dayDate] || [];
     const taskPlannedForDay = plannerDayMap[dayDate] || [];
     // TODO also add split task value
-    const timeLeftForRegular = getTimeLeftForTasks(regularTasksLeftForDay);
+    const timeLeftForRegular =
+      getTimeLeftForTasks(regularTasksLeftForDay) +
+      (splitTaskEntryForNextDay?.data.timeToGo || 0);
     const nonScheduledBudgetForDay = getBudgetLeftForDay(
       blockerBlocksForDay,
       i === 0 ? now : undefined,
@@ -207,11 +209,16 @@ export const createTimelineDays = (
       nonScheduledBudgetForDay2: nonScheduledBudgetForDay / 60 / 60 / 1000,
     });
 
+    if (viewEntries[0] && viewEntries[0].type === TimelineViewEntryType.WorkdayEnd) {
+      // remove that entry
+      viewEntriesToRenderForDay.shift();
+    }
+
     return {
       dayDate,
       entries: viewEntriesToRenderForDay,
       isToday: i === 0,
-      beyondBudgetTasks,
+      beyondBudgetTasks: i === 0 ? [] : beyondBudgetTasks,
     };
   });
   return v;
