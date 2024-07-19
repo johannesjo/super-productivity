@@ -3,6 +3,7 @@ import { TaskRepeatCfg } from '../../task-repeat-cfg/task-repeat-cfg.model';
 import {
   BlockedBlock,
   BlockedBlockByDayMap,
+  BlockedBlockType,
   TimelineCalendarMapEntry,
   TimelineDay,
   TimelineLunchBreakCfg,
@@ -376,6 +377,7 @@ const createBlockedBlocksByDayMap = (
       }
       blockedBlocksByDay[dayEndDate].push({
         ...block,
+        entries: block.entries.filter((e) => e.type === BlockedBlockType.WorkdayStartEnd),
         start: dayStartBoundary2,
         end: Math.min(dayEndBoundary2, block.end),
       });

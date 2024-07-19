@@ -100,7 +100,7 @@ export class TimelineDaysComponent {
   }
 
   private _getDaysToShow(): string[] {
-    const nrOfDaysToShow = 3;
+    const nrOfDaysToShow = 15;
     const today = new Date().getTime();
     const daysToShow: string[] = [];
     for (let i = 0; i < nrOfDaysToShow; i++) {

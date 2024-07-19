@@ -123,17 +123,25 @@
           [title]="row.start|date:'medium'"
           class="work-start"
         >
-          {{ row.start|date:'d.M.' }} {{ T.F.TIMELINE.START|translate }}
+          <!--          {{ row.start|date:'d.M.' }} -->
+          <!--          <mat-icon>start</mat-icon>-->
+          <!--          <mat-icon>flag</mat-icon>-->
+          {{ T.F.TIMELINE.START|translate }}
         </div>
         } @case (TimelineViewEntryType.WorkdayEnd) {
         <div
           [title]="row.start|date:'medium'"
           class="work-end"
         >
-          {{ row.start|date:'d.M.' }} {{ T.F.TIMELINE.END|translate }}
+          <!--          <mat-icon>landscape_2</mat-icon>-->
+          <!--          {{ row.start|date:'d.M.' }} -->
+          {{ T.F.TIMELINE.END|translate }}
         </div>
         } @case (TimelineViewEntryType.LunchBreak) {
-        <div class="lunch-break">{{ T.F.TIMELINE.LUNCH_BREAK|translate }}</div>
+        <div class="lunch-break">
+          <mat-icon>restaurant</mat-icon>
+          {{ T.F.TIMELINE.LUNCH_BREAK|translate }}
+        </div>
         } @case (TimelineViewEntryType.DayCrossing) {
         <div class="day-crossing separator">
           {{ row.start|date:'d.M.' }}

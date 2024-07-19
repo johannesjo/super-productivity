@@ -199,19 +199,14 @@ planner-task.split-task {
   border-bottom-right-radius: $sb-radius-small;
 }
 
+.lunch-break,
 .work-start,
 .work-end {
   text-align: center;
   //border-bottom: 1px dashed;
-  padding-top: $s;
-  padding-bottom: $s;
+  padding-top: $s * 1.5;
+  padding-bottom: $s * 1.5;
   //font-weight: bold;
-}
-
-.lunch-break {
-  text-align: center;
-  padding-top: math.div($s, 4);
-  padding-bottom: math.div($s, 4);
 }
 
 .no-tasks-msg {
@@ -377,6 +372,6 @@ planner-task.split-task {
 
 .beyond-budget-tasks {
   planner-task {
-    margin-top: 8px;
+    //margin-top: 8px;
   }
 }
