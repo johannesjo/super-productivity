@@ -18,7 +18,7 @@ interface TimelineViewEntryBase {
   id: string;
   type: TimelineViewEntryType;
   start: number;
-  isHideTime: boolean;
+  isHideTime?: boolean;
 }
 
 export interface TimelineViewEntryTask extends TimelineViewEntryBase {

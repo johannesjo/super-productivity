@@ -23,8 +23,8 @@ import {
 import moment from 'moment';
 import { TaskRepeatCfg } from '../../task-repeat-cfg/task-repeat-cfg.model';
 
-const debug = (...args: any): void => console.log(...args);
-// const debug = (...args: any): void => undefined;
+// const debug = (...args: any): void => console.log(...args);
+const debug = (...args: any): void => undefined;
 
 export const mapToTimelineViewEntries = (
   tasks: Task[],
@@ -128,7 +128,6 @@ export const mapToTimelineViewEntries = (
         {
           type: TimelineViewEntryType.DayCrossing,
           start,
-          isHideTime: true,
           id: start.toString(),
         },
       );
@@ -140,7 +139,6 @@ export const mapToTimelineViewEntries = (
   cleanedUpExcessWorkDays.forEach((entry, i, arr) => {
     const prev = arr[i - 1];
     if (prev && prev.start === entry.start) {
-      entry.isHideTime = true;
     }
   });
 
@@ -152,7 +150,6 @@ export const mapToTimelineViewEntries = (
     cleanedUpExcessWorkDays.unshift({
       type: TimelineViewEntryType.DayCrossing,
       start,
-      isHideTime: true,
       id: start.toString(),
     });
   }
@@ -257,7 +254,6 @@ const createViewEntriesForBlock = (blockedBlock: BlockedBlock): TimelineViewEntr
         start: scheduledTask.plannedAt,
         type: TimelineViewEntryType.ScheduledTask,
         data: scheduledTask,
-        isHideTime: false,
       });
     } else if (entry.type === BlockedBlockType.ScheduledRepeatProjection) {
       const repeatCfg = entry.data;
@@ -266,7 +262,6 @@ const createViewEntriesForBlock = (blockedBlock: BlockedBlock): TimelineViewEntr
         start: entry.start,
         type: TimelineViewEntryType.ScheduledRepeatProjection,
         data: repeatCfg,
-        isHideTime: false,
       });
     } else if (entry.type === BlockedBlockType.CalendarEvent) {
       const calendarEvent = entry.data;
@@ -279,7 +274,6 @@ const createViewEntriesForBlock = (blockedBlock: BlockedBlock): TimelineViewEntr
           ...calendarEvent,
           icon: calendarEvent.icon || 'event',
         },
-        isHideTime: false,
       });
     } else if (entry.type === BlockedBlockType.WorkdayStartEnd) {
       // NOTE: day start and end are mixed up, because it is the opposite as the blocked range
@@ -290,14 +284,12 @@ const createViewEntriesForBlock = (blockedBlock: BlockedBlock): TimelineViewEntr
         start: entry.start,
         type: TimelineViewEntryType.WorkdayEnd,
         data: workdayCfg,
-        isHideTime: false,
       });
       viewEntriesForBock.push({
         id: 'DAY_START_' + entry.end,
         start: entry.end,
         type: TimelineViewEntryType.WorkdayStart,
         data: workdayCfg,
-        isHideTime: false,
       });
     } else if (entry.type === BlockedBlockType.LunchBreak) {
       viewEntriesForBock.push({
@@ -305,7 +297,6 @@ const createViewEntriesForBlock = (blockedBlock: BlockedBlock): TimelineViewEntr
         start: entry.start,
         type: TimelineViewEntryType.LunchBreak,
         data: entry.data,
-        isHideTime: false,
       });
     }
   });
@@ -615,7 +606,6 @@ const createSplitTask = ({
       taskId,
       index: splitIndex,
     },
-    isHideTime: false,
   };
 };
 const createSplitRepeat = ({
@@ -641,7 +631,6 @@ const createSplitRepeat = ({
       repeatCfgId,
       index: splitIndex,
     },
-    isHideTime: false,
   };
 };
 

@@ -340,7 +340,17 @@ export const createViewEntriesForDay = (
   //   }
   // }
 
-  return viewEntries;
+  return viewEntries.map((ve, index) => {
+    const prevEntry = viewEntries[index - 1];
+
+    if (prevEntry && ve.start === prevEntry.start) {
+      return {
+        ...ve,
+        isHideTime: true,
+      };
+    }
+    return ve;
+  });
 };
 
 const createViewEntriesForNonScheduledRepeatProjections = (
@@ -371,7 +381,6 @@ const createViewEntriesForNonScheduledRepeatProjections = (
       type: TimelineViewEntryType.RepeatProjection,
       start: time,
       data: taskRepeatCfg,
-      isHideTime: time === lastTime,
     });
 
     lastTime = time;

@@ -36,7 +36,6 @@ export const createTimelineViewEntriesForNormalTasks = (
         : TimelineViewEntryType.Task,
       start: time,
       data: task,
-      isHideTime: time === lastTime,
     });
 
     lastTime = time;

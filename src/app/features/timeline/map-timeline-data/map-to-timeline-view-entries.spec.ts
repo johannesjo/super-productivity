@@ -56,7 +56,6 @@ const generateTimelineViewEntry = (
       type,
       start: getDateTimeFromClockString(startTime, day * 24 * 60 * 60 * 1000),
       data: { endTime, startTime },
-      isHideTime: false,
     };
   } else if (type === TimelineViewEntryType.WorkdayEnd) {
     return {
@@ -64,7 +63,6 @@ const generateTimelineViewEntry = (
       type,
       start: getDateTimeFromClockString(endTime, day * 24 * 60 * 60 * 1000),
       data: { endTime, startTime },
-      isHideTime: false,
     };
   } else if (type === TimelineViewEntryType.LunchBreak) {
     return {
@@ -72,7 +70,6 @@ const generateTimelineViewEntry = (
       type,
       start: getDateTimeFromClockString(startTime, day * 24 * 60 * 60 * 1000),
       data: { endTime, startTime },
-      isHideTime: false,
     };
   } else if (type === TimelineViewEntryType.Task) {
     return {
@@ -80,7 +77,6 @@ const generateTimelineViewEntry = (
       type,
       start: getDateTimeFromClockString(startTime, day * 24 * 60 * 60 * 1000),
       data: { ...FAKE_TASK },
-      isHideTime: false,
     };
   } else {
     throw 'generateWorkday: Unexpected type specified';
@@ -108,14 +104,12 @@ describe('mapToViewEntries()', () => {
           type: TimelineViewEntryType.Task,
           start: now,
           data: nonScheduledTasks[0],
-          isHideTime: false,
         },
         {
           id: nonScheduledTasks[1].id,
           type: TimelineViewEntryType.Task,
           start: 5033,
           data: nonScheduledTasks[1],
-          isHideTime: false,
         },
       ]);
     });
@@ -146,42 +140,36 @@ describe('mapToViewEntries()', () => {
           type: TimelineViewEntryType.Task,
           start: now,
           data: nonScheduledTasks[0],
-          isHideTime: false,
         },
         {
           id: FID,
           type: TimelineViewEntryType.Task,
           start: now + hours(1),
           data: nonScheduledTasks[1],
-          isHideTime: false,
         },
         {
           id: FID,
           type: TimelineViewEntryType.Task,
           start: now + hours(2),
           data: nonScheduledTasks[2],
-          isHideTime: false,
         },
         {
           id: FID,
           type: TimelineViewEntryType.Task,
           start: now + hours(2.5),
           data: nonScheduledTasks[3],
-          isHideTime: false,
         },
         {
           id: FID,
           type: TimelineViewEntryType.Task,
           start: now + hours(2.5),
           data: nonScheduledTasks[4],
-          isHideTime: true,
         },
         {
           id: FID,
           type: TimelineViewEntryType.Task,
           start: now + hours(3.75),
           data: nonScheduledTasks[5],
-          isHideTime: false,
         },
       ]);
     });
@@ -212,42 +200,36 @@ describe('mapToViewEntries()', () => {
           type: TimelineViewEntryType.Task,
           start: now,
           data: nonScheduledTasks[0],
-          isHideTime: false,
         },
         {
           id: FID,
           type: TimelineViewEntryType.Task,
           start: now + 5000,
           data: nonScheduledTasks[1],
-          isHideTime: false,
         },
         {
           id: FID,
           type: TimelineViewEntryType.Task,
           start: now + 13000,
           data: nonScheduledTasks[2],
-          isHideTime: false,
         },
         {
           id: FID,
           type: TimelineViewEntryType.Task,
           start: now + 13000,
           data: nonScheduledTasks[3],
-          isHideTime: true,
         },
         {
           id: FID,
           type: TimelineViewEntryType.Task,
           start: now + 13000,
           data: nonScheduledTasks[4],
-          isHideTime: true,
         },
         {
           id: FID,
           type: TimelineViewEntryType.Task,
           start: now + 15000,
           data: nonScheduledTasks[5],
-          isHideTime: false,
         },
       ]);
     });
@@ -275,14 +257,12 @@ describe('mapToViewEntries()', () => {
           type: TimelineViewEntryType.Task,
           start: now,
           data: nonScheduledTasks[0],
-          isHideTime: false,
         },
         {
           id: FID,
           type: TimelineViewEntryType.Task,
           start: 1619983969838,
           data: nonScheduledTasks[1],
-          isHideTime: false,
         },
       ]);
     });
@@ -402,21 +382,18 @@ describe('mapToViewEntries()', () => {
           type: TimelineViewEntryType.Task,
           start: now,
           data: nonScheduledTasks[0],
-          isHideTime: false,
         },
         {
           id: FID,
           type: TimelineViewEntryType.SplitTask,
           start: now + hours(1),
           data: nonScheduledTasks[1],
-          isHideTime: false,
         },
         {
           id: 'S_ID',
           type: TimelineViewEntryType.ScheduledTask,
           start: plannedTaskStartTime,
           data: scheduledTasks[0],
-          isHideTime: false,
         },
         {
           data: {
@@ -426,7 +403,7 @@ describe('mapToViewEntries()', () => {
             index: 0,
           } as any,
           id: 'FAKE_TASK_ID__0',
-          isHideTime: false,
+
           start: 37500000,
           type: TimelineViewEntryType.SplitTaskContinuedLast,
         },
@@ -435,21 +412,18 @@ describe('mapToViewEntries()', () => {
           type: TimelineViewEntryType.Task,
           start: now + hours(2.5),
           data: nonScheduledTasks[2],
-          isHideTime: false,
         },
         {
           id: FID,
           type: TimelineViewEntryType.Task,
           start: now + hours(2.5),
           data: nonScheduledTasks[3],
-          isHideTime: true,
         },
         {
           id: FID,
           type: TimelineViewEntryType.Task,
           start: now + hours(3.75),
           data: nonScheduledTasks[4],
-          isHideTime: false,
         },
       ]);
     });
@@ -487,14 +461,12 @@ describe('mapToViewEntries()', () => {
         type: TimelineViewEntryType.Task,
         start: now,
         data: nonScheduledTasks.find((t) => t.id === 'OTHER_TASK_ID') as any,
-        isHideTime: false,
       });
       expect(r[1]).toEqual({
         id: 'ScheduledTask:ID',
         type: TimelineViewEntryType.ScheduledTask,
         start: plannedTaskStartTime,
         data: scheduledTasks.find((t) => t.id === 'ScheduledTask:ID') as any,
-        isHideTime: false,
       });
     });
 
@@ -535,7 +507,6 @@ describe('mapToViewEntries()', () => {
         type: TimelineViewEntryType.Task,
         start: now,
         data: nonScheduledTasks.find((t) => t.id === 'OTHER_TASK_ID') as any,
-        isHideTime: false,
       });
     });
 
@@ -616,14 +587,12 @@ describe('mapToViewEntries()', () => {
         type: TimelineViewEntryType.Task,
         start: now,
         data: nonScheduledTasks.find((t) => t.id === 'SOME_TASK_1_ID') as any,
-        isHideTime: false,
       });
       expect(r[1]).toEqual({
         id: 'SOME_TASK_2_ID',
         type: TimelineViewEntryType.SplitTask,
         start: now + hours(4),
         data: nonScheduledTasks.find((t) => t.id === 'SOME_TASK_2_ID') as any,
-        isHideTime: false,
       });
       expect(r[4].type).toEqual(TimelineViewEntryType.ScheduledTask);
     });
@@ -727,7 +696,7 @@ describe('mapToViewEntries()', () => {
             title: 'Scheduled before now',
           },
           id: 'X6NWaoxQ-',
-          isHideTime: false,
+
           start: 1620125601000,
           type: 'ScheduledTask',
         },
@@ -741,7 +710,7 @@ describe('mapToViewEntries()', () => {
             title: 'Some task 1',
           },
           id: 'uDGzrv9JO',
-          isHideTime: false,
+
           start: 1620127581000,
           type: 'Task',
         },
@@ -755,7 +724,7 @@ describe('mapToViewEntries()', () => {
             title: 'Some task 2',
           },
           id: 'mhsGdyzc_',
-          isHideTime: false,
+
           start: 1620131181000,
           type: 'SplitTask',
         },
@@ -769,7 +738,7 @@ describe('mapToViewEntries()', () => {
             title: 'Scheduled 1 15:00',
           },
           id: '68K0kYJ2s',
-          isHideTime: false,
+
           start: 1620133200000,
           type: 'ScheduledTask',
         },
@@ -783,7 +752,7 @@ describe('mapToViewEntries()', () => {
             title: 'Scheduled 2 16:00',
           },
           id: '9JTnZa-VW',
-          isHideTime: false,
+
           start: 1620136800000,
           type: 'ScheduledTask',
         },
@@ -797,7 +766,7 @@ describe('mapToViewEntries()', () => {
             title: 'Scheduled 3 17:00',
           },
           id: '0LtuSnH8s',
-          isHideTime: false,
+
           start: 1620140400000,
           type: 'ScheduledTask',
         },
@@ -811,7 +780,7 @@ describe('mapToViewEntries()', () => {
             title: 'Scheduled 4 (no duration) 18:00',
           },
           id: 'EYLy6C5_m',
-          isHideTime: false,
+
           start: 1620144000000,
           type: 'ScheduledTask',
         },
@@ -823,7 +792,7 @@ describe('mapToViewEntries()', () => {
             title: 'Some task 2',
           },
           id: 'mhsGdyzc___0',
-          isHideTime: false,
+
           start: 1620147600000,
           type: 'SplitTaskContinuedLast',
         },
@@ -837,7 +806,7 @@ describe('mapToViewEntries()', () => {
             title: 'Sched  no overlap 9:00 (10.)',
           },
           id: 'xgYNyslWC',
-          isHideTime: false,
+
           start: 1620152781000,
           type: 'Task',
         },
@@ -851,7 +820,7 @@ describe('mapToViewEntries()', () => {
             title: 'Sched no overlap 23:00',
           },
           id: '2nkBPQEny',
-          isHideTime: false,
+
           start: 1620162000000,
           type: 'ScheduledTask',
         },
@@ -886,14 +855,12 @@ describe('mapToViewEntries()', () => {
           type: TimelineViewEntryType.SplitTask,
           start: now,
           data: normalTask,
-          isHideTime: false,
         },
         {
           id: scheduledTask.id,
           type: TimelineViewEntryType.ScheduledTask,
           start: scheduledTask.plannedAt,
           data: scheduledTask,
-          isHideTime: false,
         },
         {
           id: normalTask.id + '__0',
@@ -905,7 +872,6 @@ describe('mapToViewEntries()', () => {
             timeToGo: hours(2),
             index: 0,
           },
-          isHideTime: false,
         },
       ]);
     });
@@ -944,14 +910,12 @@ describe('mapToViewEntries()', () => {
           type: TimelineViewEntryType.SplitTask,
           start: now,
           data: normalTask,
-          isHideTime: false,
         },
         {
           id: scheduledTask.id,
           type: TimelineViewEntryType.ScheduledTask,
           start: scheduledTask.plannedAt,
           data: scheduledTask,
-          isHideTime: false,
         },
         {
           id: normalTask.id + '__0',
@@ -963,14 +927,12 @@ describe('mapToViewEntries()', () => {
             taskId: normalTask.id,
             index: 0,
           },
-          isHideTime: false,
         },
         {
           id: scheduledTask2.id,
           type: TimelineViewEntryType.ScheduledTask,
           start: scheduledTask2.plannedAt,
           data: scheduledTask2,
-          isHideTime: false,
         },
         {
           id: normalTask.id + '__1',
@@ -982,7 +944,6 @@ describe('mapToViewEntries()', () => {
             taskId: normalTask.id,
             index: 1,
           },
-          isHideTime: false,
         },
       ]);
     });
@@ -1013,14 +974,12 @@ describe('mapToViewEntries()', () => {
           type: TimelineViewEntryType.SplitTask,
           start: now,
           data: normalTask,
-          isHideTime: false,
         },
         {
           id: scheduledTask.id,
           type: TimelineViewEntryType.ScheduledTask,
           start: scheduledTask.plannedAt,
           data: scheduledTask,
-          isHideTime: false,
         },
         {
           id: normalTask.id + '__0',
@@ -1032,7 +991,6 @@ describe('mapToViewEntries()', () => {
             timeToGo: hours(29),
             index: 0,
           },
-          isHideTime: false,
         },
       ]);
     });
@@ -1068,20 +1026,18 @@ describe('mapToViewEntries()', () => {
         start: now,
         id: longTask.id,
         data: longTask,
-        isHideTime: false,
       });
       expect(r[1]).toEqual({
         type: TimelineViewEntryType.ScheduledTask,
         start: scheduledTask.plannedAt,
         id: scheduledTask.id,
         data: scheduledTask,
-        isHideTime: false,
       });
       expect(r[2]).toEqual({
         type: TimelineViewEntryType.SplitTaskContinued,
         start: now + hours(7),
         id: longTask.id + '__0',
-        isHideTime: false,
+
         data: {
           taskId: longTask.id,
           timeToGo: hours(1),
@@ -1093,21 +1049,21 @@ describe('mapToViewEntries()', () => {
         type: TimelineViewEntryType.WorkdayEnd,
         start: getDateTimeFromClockString('17:00', 0),
         id: 'DAY_END_57600000',
-        isHideTime: false,
+
         data: { endTime: '17:00', startTime: '9:00' },
       });
       expect(r[5]).toEqual({
         type: TimelineViewEntryType.WorkdayStart,
         start: getDateTimeFromClockString('9:00', 24 * 60 * 60000),
         id: 'DAY_START_115200000',
-        isHideTime: false,
+
         data: { endTime: '17:00', startTime: '9:00' },
       });
       expect(r[6]).toEqual({
         type: TimelineViewEntryType.SplitTaskContinued,
         start: getDateTimeFromClockString('9:00', 24 * 60 * 60000),
         id: longTask.id + '__1',
-        isHideTime: true,
+
         data: {
           index: 1,
           taskId: longTask.id,
@@ -1120,21 +1076,21 @@ describe('mapToViewEntries()', () => {
         type: TimelineViewEntryType.WorkdayEnd,
         start: getDateTimeFromClockString('17:00', 24 * 60 * 60000),
         id: 'DAY_END_144000000',
-        isHideTime: false,
+
         data: { endTime: '17:00', startTime: '9:00' },
       });
       expect(r[9]).toEqual({
         type: TimelineViewEntryType.WorkdayStart,
         start: getDateTimeFromClockString('9:00', 2 * 24 * 60 * 60000),
         id: 'DAY_START_201600000',
-        isHideTime: false,
+
         data: { endTime: '17:00', startTime: '9:00' },
       });
       expect(r[10]).toEqual({
         type: TimelineViewEntryType.SplitTaskContinuedLast,
         start: getDateTimeFromClockString('9:00', 2 * 24 * 60 * 60000),
         id: longTask.id + '__2',
-        isHideTime: true,
+
         data: {
           index: 2,
           taskId: longTask.id,
@@ -1375,7 +1331,7 @@ describe('mapToViewEntries()', () => {
         type: TimelineViewEntryType.SplitTask,
         start: getDateTimeFromClockString('09:00', 0),
         id: singleTask.id,
-        isHideTime: false,
+
         data: singleTask,
       });
 
@@ -1383,7 +1339,7 @@ describe('mapToViewEntries()', () => {
         type: TimelineViewEntryType.LunchBreak,
         start: getDateTimeFromClockString('13:00', 0),
         id: 'LUNCH_BREAK_43200000',
-        isHideTime: false,
+
         data: { endTime: '14:00', startTime: '13:00' },
       });
 
@@ -1391,7 +1347,7 @@ describe('mapToViewEntries()', () => {
         type: TimelineViewEntryType.SplitTaskContinuedLast,
         start: getDateTimeFromClockString('14:00', 0),
         id: singleTask.id + '__0',
-        isHideTime: false,
+
         data: {
           taskId: singleTask.id,
           timeToGo: hours(1),
@@ -1430,13 +1386,12 @@ describe('mapToViewEntries()', () => {
         start: now,
         id: longTask.id,
         data: longTask,
-        isHideTime: false,
       });
       expect(r[1]).toEqual({
         type: TimelineViewEntryType.LunchBreak,
         start: getDateTimeFromClockString('13:00', 0),
         id: 'LUNCH_BREAK_43200000',
-        isHideTime: false,
+
         data: { endTime: '14:00', startTime: '13:00' },
       });
       expect(r[2]).toEqual({
@@ -1444,13 +1399,12 @@ describe('mapToViewEntries()', () => {
         start: scheduledTask.plannedAt,
         id: scheduledTask.id,
         data: scheduledTask,
-        isHideTime: false,
       });
       expect(r[3]).toEqual({
         type: TimelineViewEntryType.SplitTaskContinued,
         start: now + hours(7),
         id: longTask.id + '__0',
-        isHideTime: false,
+
         data: {
           taskId: longTask.id,
           timeToGo: hours(1),
@@ -1462,7 +1416,7 @@ describe('mapToViewEntries()', () => {
         type: TimelineViewEntryType.WorkdayEnd,
         start: getDateTimeFromClockString('17:00', 0),
         id: 'DAY_END_57600000',
-        isHideTime: false,
+
         data: { endTime: '17:00', startTime: '9:00' },
       });
 
@@ -1471,14 +1425,14 @@ describe('mapToViewEntries()', () => {
         type: TimelineViewEntryType.WorkdayStart,
         start: getDateTimeFromClockString('9:00', 24 * 60 * 60000),
         id: 'DAY_START_115200000',
-        isHideTime: false,
+
         data: { endTime: '17:00', startTime: '9:00' },
       });
       expect(r[7]).toEqual({
         type: TimelineViewEntryType.SplitTaskContinued,
         start: getDateTimeFromClockString('9:00', 24 * 60 * 60000),
         id: longTask.id + '__1',
-        isHideTime: true,
+
         data: {
           index: 1,
           taskId: longTask.id,
@@ -1490,14 +1444,14 @@ describe('mapToViewEntries()', () => {
         type: TimelineViewEntryType.LunchBreak,
         start: getDateTimeFromClockString('13:00', 24 * 60 * 60000),
         id: 'LUNCH_BREAK_129600000',
-        isHideTime: false,
+
         data: { endTime: '14:00', startTime: '13:00' },
       });
       expect(r[9]).toEqual({
         type: TimelineViewEntryType.SplitTaskContinued,
         start: getDateTimeFromClockString('14:00', 24 * 60 * 60000),
         id: longTask.id + '__2',
-        isHideTime: false,
+
         data: {
           index: 2,
           taskId: longTask.id,
@@ -1509,21 +1463,21 @@ describe('mapToViewEntries()', () => {
         type: TimelineViewEntryType.WorkdayEnd,
         start: getDateTimeFromClockString('17:00', 24 * 60 * 60000),
         id: 'DAY_END_144000000',
-        isHideTime: false,
+
         data: { endTime: '17:00', startTime: '9:00' },
       });
       expect(r[12]).toEqual({
         type: TimelineViewEntryType.WorkdayStart,
         start: getDateTimeFromClockString('9:00', 2 * 24 * 60 * 60000),
         id: 'DAY_START_201600000',
-        isHideTime: false,
+
         data: { endTime: '17:00', startTime: '9:00' },
       });
       expect(r[13]).toEqual({
         type: TimelineViewEntryType.SplitTaskContinuedLast,
         start: getDateTimeFromClockString('9:00', 2 * 24 * 60 * 60000),
         id: longTask.id + '__3',
-        isHideTime: true,
+
         data: {
           index: 3,
           taskId: longTask.id,
