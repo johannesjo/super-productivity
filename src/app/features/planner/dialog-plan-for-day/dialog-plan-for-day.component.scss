@@ -5,6 +5,16 @@
   max-width: 320px;
   display: block;
 
+  @media (min-width: 370px) {
+    min-width: 360px;
+    max-width: 360px;
+  }
+
+  @media (min-width: 390px) {
+    min-width: 380px;
+    max-width: 380px;
+  }
+
   ::ng-deep .mat-calendar-header {
     padding-top: 0;
   }
