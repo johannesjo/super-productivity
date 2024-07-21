@@ -1,5 +1,8 @@
 <ng-container *ngIf="timelineDays$|async as timelineDays else loading">
-  <div class="days-grid">
+  <div
+    class="days-grid"
+    *ngIf="timelineDays.length"
+  >
     @for (day of timelineDays; track day.dayDate) {
     <timeline-day [timelineDay]="day"></timeline-day>
     }
