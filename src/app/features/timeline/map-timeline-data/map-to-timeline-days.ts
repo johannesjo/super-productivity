@@ -14,6 +14,7 @@ import {
   TimelineLunchBreakCfg,
   TimelineViewEntry,
   TimelineViewEntryRepeatProjection,
+  TimelineViewEntryRepeatProjectionSplitContinued,
   TimelineViewEntrySplitTaskContinued,
   TimelineViewEntryTask,
   TimelineWorkStartEndCfg,
@@ -104,7 +105,10 @@ export const createTimelineDays = (
   workStartEndCfg: TimelineWorkStartEndCfg | undefined,
   now: number,
 ): TimelineDay[] => {
-  let splitTaskEntryForNextDay: TimelineViewEntrySplitTaskContinued | undefined;
+  let splitTaskOrRepeatEntryForNextDay:
+    | TimelineViewEntrySplitTaskContinued
+    | TimelineViewEntryRepeatProjectionSplitContinued
+    | undefined;
   let regularTasksLeftForDay: TaskWithoutReminder[] = nonScheduledTasks;
   let beyondBudgetTasks: TaskWithoutReminder[];
 
@@ -139,7 +143,7 @@ export const createTimelineDays = (
     // TODO also add split task value
     const timeLeftForRegular =
       getTimeLeftForTasks(regularTasksLeftForDay) +
-      (splitTaskEntryForNextDay?.data.timeToGo || 0);
+      (splitTaskOrRepeatEntryForNextDay?.data.timeToGo || 0);
     const nonScheduledBudgetForDay = getBudgetLeftForDay(
       blockerBlocksForDay,
       i === 0 ? now : undefined,
@@ -173,7 +177,7 @@ export const createTimelineDays = (
         nonScheduledRepeatCfgsDueOnDay,
         [...regularTasksLeftForDay, ...within],
         blockerBlocksForDay,
-        splitTaskEntryForNextDay,
+        splitTaskOrRepeatEntryForNextDay,
       );
       beyondBudgetTasks = beyond;
       regularTasksLeftForDay = [];
@@ -190,7 +194,7 @@ export const createTimelineDays = (
         nonScheduledRepeatCfgsDueOnDay,
         regularTasksLeftForDay,
         blockerBlocksForDay,
-        splitTaskEntryForNextDay,
+        splitTaskOrRepeatEntryForNextDay,
       );
       regularTasksLeftForDay = getRemainingTasks(
         regularTasksLeftForDay,
@@ -200,17 +204,19 @@ export const createTimelineDays = (
     }
 
     const viewEntriesToRenderForDay: TimelineViewEntry[] = [];
-    splitTaskEntryForNextDay = undefined;
+    splitTaskOrRepeatEntryForNextDay = undefined;
     viewEntries.forEach((entry) => {
       if (entry.start >= nextDayStart) {
         if (
           entry.type === TimelineViewEntryType.SplitTaskContinuedLast ||
-          entry.type === TimelineViewEntryType.SplitTaskContinued
+          entry.type === TimelineViewEntryType.SplitTaskContinued ||
+          entry.type === TimelineViewEntryType.RepeatProjectionSplitContinued ||
+          entry.type === TimelineViewEntryType.RepeatProjectionSplitContinuedLast
         ) {
-          if (splitTaskEntryForNextDay) {
+          if (splitTaskOrRepeatEntryForNextDay) {
             throw new Error('Timeline: More than one continued split task');
           }
-          splitTaskEntryForNextDay = entry;
+          splitTaskOrRepeatEntryForNextDay = entry;
         }
       } else {
         if (
@@ -230,7 +236,7 @@ export const createTimelineDays = (
     console.log({
       dayDate,
       startTime: new Date(startTime),
-      viewEntriesForNextDay: splitTaskEntryForNextDay,
+      viewEntriesForNextDay: splitTaskOrRepeatEntryForNextDay,
       regularTasksLeftForDay,
       blockerBlocksForDay,
       taskPlannedForDay,
@@ -274,7 +280,9 @@ export const createViewEntriesForDay = (
   nonScheduledRepeatCfgsDueOnDay: TaskRepeatCfg[],
   nonScheduledTasksForDay: (TaskWithoutReminder | TaskWithPlannedForDayIndication)[],
   blockedBlocksForDay: BlockedBlock[],
-  prevDaySplitTaskEntry?: TimelineViewEntrySplitTaskContinued,
+  prevDaySplitTaskEntry?:
+    | TimelineViewEntrySplitTaskContinued
+    | TimelineViewEntryRepeatProjectionSplitContinued,
 ): TimelineViewEntry[] => {
   let viewEntries: TimelineViewEntry[] = [];
   let startTime = initialStartTime;
