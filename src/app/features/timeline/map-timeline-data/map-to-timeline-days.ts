@@ -198,7 +198,17 @@ export const createTimelineDays = (
           splitTaskEntryForNextDay = entry;
         }
       } else {
-        viewEntriesToRenderForDay.push(entry);
+        if (
+          entry.type === TimelineViewEntryType.SplitTask &&
+          (entry.data as TaskWithPlannedForDayIndication).plannedForADay
+        ) {
+          viewEntriesToRenderForDay.push({
+            ...entry,
+            type: TimelineViewEntryType.SplitTaskPlannedForDay,
+          });
+        } else {
+          viewEntriesToRenderForDay.push(entry);
+        }
       }
     });
 

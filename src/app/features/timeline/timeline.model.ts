@@ -26,6 +26,7 @@ export interface TimelineViewEntryTask extends TimelineViewEntryBase {
     | TimelineViewEntryType.Task
     | TimelineViewEntryType.TaskPlannedForDay
     | TimelineViewEntryType.ScheduledTask
+    | TimelineViewEntryType.SplitTaskPlannedForDay
     | TimelineViewEntryType.SplitTask;
   data: TaskCopy;
 }
