@@ -655,6 +655,7 @@
         },
         "PLAN_FOR_DAY": {
           "REMINDER_WARNING": "This will remove the reminder from the task! Press Escape to cancel.",
+          "REMOVE_PLAN_DATE": "Remove plan date",
           "TITLE": "Plan Task for Day"
         }
       },
@@ -662,6 +663,7 @@
         "NO_SCHEDULED_ITEMS": "No scheduled items"
       },
       "S": {
+        "REMOVED_PLAN_DATE": "Removed plan date for task '{{taskTitle}}'",
         "TASK_PLANNED_FOR": "Task planned for {{date}}"
       }
     },

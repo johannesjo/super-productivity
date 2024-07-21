@@ -13,7 +13,30 @@
   {{ T.F.PLANNER.D.PLAN_FOR_DAY.REMINDER_WARNING|translate }}
 </div>
 
+@if (data.day) {
+
+<mat-dialog-actions align="center">
+  <button
+    (click)="remove()"
+    color="warn"
+    mat-stroked-button
+  >
+    <mat-icon>delete_forever</mat-icon>
+    {{ T.F.PLANNER.D.PLAN_FOR_DAY.REMOVE_PLAN_DATE|translate }}
+  </button>
+</mat-dialog-actions>
+}
+
 <!--<mat-dialog-actions align="end">-->
+<!--  <button-->
+<!--    (click)="remove()"-->
+<!--    color="warn"-->
+<!--    mat-stroked-button-->
+<!--  >-->
+<!--    <mat-icon>sync_disabled</mat-icon>-->
+<!--    {{T.F.SYNC.D_PERMISSION.DISABLE_SYNC|translate}}-->
+<!--  </button>-->
+
 <!--  <button-->
 <!--    color="primary"-->
 <!--    mat-button-->

@@ -18,6 +18,7 @@ import { CommonModule, DatePipe } from '@angular/common';
 import { SnackService } from '../../../core/snack/snack.service';
 import { updateTaskTags } from '../../tasks/store/task.actions';
 import { TODAY_TAG } from '../../tag/tag.const';
+import { truncate } from '../../../util/truncate';
 
 @Component({
   selector: 'dialog-plan-for-day',
@@ -41,6 +42,8 @@ export class DialogPlanForDayComponent implements AfterViewInit {
     private _snackService: SnackService,
     private _datePipe: DatePipe,
   ) {
+    console.log(this.data);
+
     this.selectedDate = data.day || new Date().toISOString();
   }
 
@@ -86,6 +89,33 @@ export class DialogPlanForDayComponent implements AfterViewInit {
         type: 'SUCCESS',
         msg: T.F.PLANNER.S.TASK_PLANNED_FOR,
         translateParams: { date: formattedDate },
+      });
+    }
+    this.close(true);
+  }
+
+  remove(): void {
+    if (this.data.day === getWorklogStr()) {
+      this._store.dispatch(
+        updateTaskTags({
+          task: this.data.task,
+          newTagIds: this.data.task.tagIds.filter((id) => id !== TODAY_TAG.id),
+          oldTagIds: this.data.task.tagIds,
+        }),
+      );
+      this._snackService.open({
+        type: 'SUCCESS',
+        msg: T.F.PLANNER.S.REMOVED_PLAN_DATE,
+        translateParams: { taskTitle: truncate(this.data.task.title) },
+      });
+    } else {
+      this._store.dispatch(
+        PlannerActions.removeTaskFromDays({ taskId: this.data.task.id }),
+      );
+      this._snackService.open({
+        type: 'SUCCESS',
+        msg: T.F.PLANNER.S.REMOVED_PLAN_DATE,
+        translateParams: { taskTitle: truncate(this.data.task.title) },
       });
     }
     this.close(true);
