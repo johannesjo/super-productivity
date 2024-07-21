@@ -136,6 +136,11 @@
           [title]="T.F.TIMELINE.TASK_PROJECTION_INFO|translate"
           [repeatCfg]="row.data"
         ></planner-repeat-projection>
+        } @case (TimelineViewEntryType.NonScheduledRepeatTaskProjection) {
+        <planner-repeat-projection
+          [title]="T.F.TIMELINE.TASK_PROJECTION_INFO|translate"
+          [repeatCfg]="row.data"
+        ></planner-repeat-projection>
         } @case (TimelineViewEntryType.WorkdayStart) {
         <div
           [title]="row.start|date:'medium'"

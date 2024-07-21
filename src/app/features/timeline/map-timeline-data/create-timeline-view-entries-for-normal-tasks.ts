@@ -44,3 +44,40 @@ export const createTimelineViewEntriesForNormalTasks = (
 
   return viewEntries;
 };
+
+// export const createTimelineViewEntriesForNonScheduledRepeatProjections = (
+//   startTime: number,
+//   taskRepeatCfgs: TaskRepeatCfg[],
+// ): TimelineViewEntryTaskNonScheduledRepeatProjection[] => {
+//   let lastTime: number;
+//   let prevRepeatCfg: TaskRepeatCfg;
+//
+//   const viewEntries: TimelineViewEntryTaskNonScheduledRepeatProjection[] = [];
+//   taskRepeatCfgs.forEach((taskRepeatCfg, index, arr) => {
+//     prevRepeatCfg = arr[index - 1];
+//
+//     let time: number;
+//
+//     if (lastTime) {
+//       if (prevRepeatCfg) {
+//         time = lastTime + (taskRepeatCfg?.defaultEstimate || 0);
+//       } else {
+//         throw new Error('Something weird happened');
+//       }
+//     } else {
+//       time = startTime;
+//     }
+//
+//     viewEntries.push({
+//       id: taskRepeatCfg.id,
+//       type: TimelineViewEntryType.NonScheduledRepeatTaskProjection,
+//       start: time,
+//       data: taskRepeatCfg,
+//       isHideTime: time === lastTime,
+//     });
+//
+//     lastTime = time;
+//   });
+//
+//   return viewEntries;
+// };

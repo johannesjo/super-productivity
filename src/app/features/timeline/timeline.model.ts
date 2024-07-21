@@ -42,6 +42,12 @@ export interface TimelineViewEntryTaskScheduledRepeatProjection
   data: TaskRepeatCfg;
 }
 
+export interface TimelineViewEntryTaskNonScheduledRepeatProjection
+  extends TimelineViewEntryBase {
+  type: TimelineViewEntryType.NonScheduledRepeatTaskProjection;
+  data: TaskRepeatCfg;
+}
+
 export interface TimelineViewEntrySplitTaskContinued extends TimelineViewEntryBase {
   type:
     | TimelineViewEntryType.SplitTaskContinued
@@ -106,6 +112,7 @@ export type TimelineViewEntry =
   | TimelineViewEntryTask
   | TimelineViewEntryTaskPlannedForDay
   | TimelineViewEntryTaskScheduledRepeatProjection
+  | TimelineViewEntryTaskNonScheduledRepeatProjection
   | TimelineViewEntrySplitTaskContinued
   | TimelineViewEntryCustomEvent
   | TimelineViewEntryCalendarEvent

@@ -18,6 +18,7 @@ import { selectTimelineTasks } from '../../work-context/store/work-context.selec
 import { selectPlannerDayMap } from '../../planner/store/planner.selectors';
 import { mapToTimelineDays } from '../map-timeline-data/map-to-timeline-days';
 import { DateService } from '../../../core/date/date.service';
+import { selectTaskRepeatCfgsWithAndWithoutStartTime } from '../../task-repeat-cfg/store/task-repeat-cfg.reducer';
 
 @Component({
   selector: 'timeline-days',
@@ -31,7 +32,7 @@ export class TimelineDaysComponent {
 
   timelineDays$: Observable<TimelineDay[]> = combineLatest([
     this._store.pipe(select(selectTimelineTasks)),
-    this._taskRepeatCfgService.taskRepeatCfgsWithStartTime$,
+    this._store.pipe(select(selectTaskRepeatCfgsWithAndWithoutStartTime)),
     this.taskService.currentTaskId$,
     this._globalConfigService.timelineCfg$,
     this._calendarIntegrationService.icalEvents$,
@@ -42,7 +43,7 @@ export class TimelineDaysComponent {
     map(
       ([
         { planned, unPlanned },
-        taskRepeatCfgs,
+        { withStartTime, withoutStartTime },
         currentId,
         timelineCfg,
         icalEvents,
@@ -52,7 +53,8 @@ export class TimelineDaysComponent {
           this._getDaysToShow(),
           unPlanned,
           planned,
-          taskRepeatCfgs,
+          withStartTime,
+          withoutStartTime,
           icalEvents,
           currentId,
           plannerDayMap,

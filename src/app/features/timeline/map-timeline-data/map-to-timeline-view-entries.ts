@@ -459,6 +459,12 @@ export const insertBlockedBlocksViewEntries = (
             // NOTE: we're not including a step for the current viewEntry as it might be split again
             veIndex += viewEntriesToAdd.length;
             break;
+          } else if (
+            viewEntry.type === TimelineViewEntryType.NonScheduledRepeatTaskProjection
+          ) {
+            // TODO handle
+            debug('CCC c) ' + viewEntry.type);
+            veIndex++;
           } else {
             throw new Error('Invalid type given ' + viewEntry.type);
           }
@@ -509,6 +515,8 @@ const getTimeLeftForViewEntry = (viewEntry: TimelineViewEntry): number => {
     return (viewEntry as TimelineViewEntrySplitTaskContinued).data.timeToGo;
     // } else if(viewEntry.type===TimelineViewEntryType.WorkdayEnd) {
     //   return viewEntry.data.
+  } else if (viewEntry.type === TimelineViewEntryType.NonScheduledRepeatTaskProjection) {
+    return viewEntry.data.defaultEstimate || 0;
   }
   throw new Error('Wrong type given: ' + viewEntry.type);
 };

@@ -15,6 +15,7 @@ import {
   TimelineViewEntry,
   TimelineViewEntrySplitTaskContinued,
   TimelineViewEntryTask,
+  TimelineViewEntryTaskNonScheduledRepeatProjection,
   TimelineWorkStartEndCfg,
 } from '../timeline.model';
 import { PlannerDayMap } from '../../planner/planner.model';
@@ -29,12 +30,14 @@ import {
 import { msLeftToday } from '../../../util/ms-left-today';
 import { createTimelineViewEntriesForNormalTasks } from './create-timeline-view-entries-for-normal-tasks';
 import { insertBlockedBlocksViewEntries } from './map-to-timeline-view-entries';
+import { selectTaskRepeatCfgsDueOnDayOnly } from '../../task-repeat-cfg/store/task-repeat-cfg.reducer';
 
 export const mapToTimelineDays = (
   dayDates: string[],
   tasks: Task[],
   scheduledTasks: TaskPlanned[],
   scheduledTaskRepeatCfgs: TaskRepeatCfg[],
+  unScheduledTaskRepeatCfgs: TaskRepeatCfg[],
   calenderWithItems: TimelineCalendarMapEntry[],
   currentId: string | null,
   plannerDayMap: PlannerDayMap,
@@ -53,6 +56,7 @@ export const mapToTimelineDays = (
     !tasks.length &&
     !scheduledTasks.length &&
     !scheduledTaskRepeatCfgs.length &&
+    !unScheduledTaskRepeatCfgs.length &&
     !calenderWithItems.length &&
     !plannerDayTasks.length
   ) {
@@ -79,6 +83,7 @@ export const mapToTimelineDays = (
 
   const v = createTimelineDays(
     nonScheduledTasks,
+    unScheduledTaskRepeatCfgs,
     dayDates,
     plannerDayMap,
     blockerBlocksDayMap,
@@ -92,6 +97,7 @@ export const mapToTimelineDays = (
 
 export const createTimelineDays = (
   nonScheduledTasks: TaskWithoutReminder[],
+  unScheduledTaskRepeatCfgs: TaskRepeatCfg[],
   dayDates: string[],
   plannerDayMap: PlannerDayMap,
   blockerBlocksDayMap: BlockedBlockByDayMap,
@@ -120,6 +126,13 @@ export const createTimelineDays = (
         startTime = startTimeToday;
       }
     }
+
+    const nonScheduledRepeatCfgsDueOnDay = selectTaskRepeatCfgsDueOnDayOnly.projector(
+      unScheduledTaskRepeatCfgs,
+      {
+        dayDate: startTime,
+      },
+    );
 
     const blockerBlocksForDay = blockerBlocksDayMap[dayDate] || [];
     const taskPlannedForDay = i > 0 ? plannerDayMap[dayDate] || [] : [];
@@ -157,6 +170,7 @@ export const createTimelineDays = (
 
       viewEntries = createViewEntriesForDay(
         startTime,
+        nonScheduledRepeatCfgsDueOnDay,
         [...regularTasksLeftForDay, ...within],
         blockerBlocksForDay,
         splitTaskEntryForNextDay,
@@ -173,6 +187,7 @@ export const createTimelineDays = (
       // AND we sort in the tasks that were planned for today ALL as OVER_BUDGET
       viewEntries = createViewEntriesForDay(
         startTime,
+        nonScheduledRepeatCfgsDueOnDay,
         regularTasksLeftForDay,
         blockerBlocksForDay,
         splitTaskEntryForNextDay,
@@ -255,20 +270,36 @@ const getRemainingTasks = (
 };
 
 export const createViewEntriesForDay = (
-  startTime: number,
+  initialStartTime: number,
+  nonScheduledRepeatCfgsDueOnDay: TaskRepeatCfg[],
   nonScheduledTasksForDay: (TaskWithoutReminder | TaskWithPlannedForDayIndication)[],
   blockedBlocksForDay: BlockedBlock[],
   prevDaySplitTaskEntry?: TimelineViewEntrySplitTaskContinued,
 ): TimelineViewEntry[] => {
-  const viewEntries: TimelineViewEntry[] = createTimelineViewEntriesForNormalTasks(
-    startTime + (prevDaySplitTaskEntry?.data.timeToGo || 0),
-    nonScheduledTasksForDay,
-  );
+  let viewEntries: TimelineViewEntry[] = [];
+  let startTime = initialStartTime;
+
   if (prevDaySplitTaskEntry) {
-    viewEntries.unshift({
+    viewEntries.push({
       ...prevDaySplitTaskEntry,
       start: startTime,
     });
+    startTime += prevDaySplitTaskEntry.data.timeToGo;
+  }
+
+  const { entries, startTimeAfter } = createViewEntriesForNonScheduledRepeatProjections(
+    nonScheduledRepeatCfgsDueOnDay,
+    startTime,
+  );
+  if (entries.length) {
+    startTime = startTimeAfter;
+    viewEntries = viewEntries.concat(entries);
+  }
+
+  if (nonScheduledTasksForDay.length) {
+    viewEntries = viewEntries.concat(
+      createTimelineViewEntriesForNormalTasks(startTime, nonScheduledTasksForDay),
+    );
   }
 
   insertBlockedBlocksViewEntries(
@@ -302,6 +333,52 @@ export const createViewEntriesForDay = (
   // }
 
   return viewEntries;
+};
+
+const createViewEntriesForNonScheduledRepeatProjections = (
+  nonScheduledRepeatCfgsDueOnDay: TaskRepeatCfg[],
+  startTime: number,
+): { entries: TimelineViewEntry[]; startTimeAfter: number } => {
+  let lastTime: number;
+  let prevRepeatCfg: TaskRepeatCfg;
+
+  const viewEntries: TimelineViewEntryTaskNonScheduledRepeatProjection[] = [];
+  nonScheduledRepeatCfgsDueOnDay.forEach((taskRepeatCfg, index, arr) => {
+    prevRepeatCfg = arr[index - 1];
+
+    let time: number;
+
+    if (lastTime) {
+      if (prevRepeatCfg) {
+        time = lastTime + (taskRepeatCfg?.defaultEstimate || 0);
+      } else {
+        throw new Error('Something weird happened');
+      }
+    } else {
+      time = startTime;
+    }
+
+    viewEntries.push({
+      id: taskRepeatCfg.id,
+      type: TimelineViewEntryType.NonScheduledRepeatTaskProjection,
+      start: time,
+      data: taskRepeatCfg,
+      isHideTime: time === lastTime,
+    });
+
+    lastTime = time;
+  });
+
+  const lastEntry = viewEntries[viewEntries.length - 1];
+
+  console.log(viewEntries);
+
+  return {
+    entries: viewEntries,
+    startTimeAfter: lastEntry
+      ? lastTime! + (lastEntry.data.defaultEstimate || 0)
+      : startTime,
+  };
 };
 
 export const getTasksWithinAndBeyondBudget = (

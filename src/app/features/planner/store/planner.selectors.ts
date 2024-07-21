@@ -124,7 +124,7 @@ const getAllTimeSpent = (
   );
 };
 
-const getAllRepeatableTasksForDay = (
+export const getAllRepeatableTasksForDay = (
   taskRepeatCfgs: TaskRepeatCfg[],
   currentDayTimestamp: number,
 ): {
