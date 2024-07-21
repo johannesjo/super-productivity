@@ -70,7 +70,7 @@ export const createTimelineViewEntriesForNormalTasks = (
 //
 //     viewEntries.push({
 //       id: taskRepeatCfg.id,
-//       type: TimelineViewEntryType.NonScheduledRepeatTaskProjection,
+//       type: TimelineViewEntryType.RepeatProjection,
 //       start: time,
 //       data: taskRepeatCfg,
 //       isHideTime: time === lastTime,

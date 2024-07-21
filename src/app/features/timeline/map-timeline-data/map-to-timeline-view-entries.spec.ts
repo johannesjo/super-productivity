@@ -1,4 +1,4 @@
-import { mapToTimelineViewEntries, clearEntries } from './map-to-timeline-view-entries';
+import { clearEntries, mapToTimelineViewEntries } from './map-to-timeline-view-entries';
 import { TaskCopy, TaskReminderOptionId } from '../../tasks/task.model';
 import { TimelineViewEntryType } from '../timeline.const';
 import { TimelineViewEntry } from '../timeline.model';
@@ -1286,11 +1286,11 @@ describe('mapToViewEntries()', () => {
 
       expect(r[0].type).toEqual(TimelineViewEntryType.DayCrossing);
       expect(r[1].type).toEqual(TimelineViewEntryType.WorkdayStart);
-      expect(r[2].type).toEqual(TimelineViewEntryType.ScheduledRepeatTaskProjection);
+      expect(r[2].type).toEqual(TimelineViewEntryType.ScheduledRepeatProjection);
       expect(r[3].type).toEqual(TimelineViewEntryType.WorkdayEnd);
       expect(r[4].type).toEqual(TimelineViewEntryType.DayCrossing);
       expect(r[5].type).toEqual(TimelineViewEntryType.WorkdayStart);
-      expect(r[6].type).toEqual(TimelineViewEntryType.ScheduledRepeatTaskProjection);
+      expect(r[6].type).toEqual(TimelineViewEntryType.ScheduledRepeatProjection);
       expect(r[7].type).toEqual(TimelineViewEntryType.WorkdayEnd);
     });
 
@@ -1345,7 +1345,7 @@ describe('mapToViewEntries()', () => {
       expect(r[0].type).toEqual(TimelineViewEntryType.Task);
       // expect(r[1].type).toEqual(TimelineViewEntryType.WorkdayEnd);
       expect(r[2].type).toEqual(TimelineViewEntryType.DayCrossing);
-      expect(r[3].type).toEqual(TimelineViewEntryType.ScheduledRepeatTaskProjection);
+      expect(r[3].type).toEqual(TimelineViewEntryType.ScheduledRepeatProjection);
       expect(r[4].type).toEqual(TimelineViewEntryType.DayCrossing);
 
       expect(r[3].start).toEqual(

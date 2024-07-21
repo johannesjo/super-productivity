@@ -12,6 +12,7 @@ import { TimelineDaysComponent } from './timeline-days/timeline-days.component';
 import { TimelineDayComponent } from './timeline-day/timeline-day.component';
 import { PlannerModule } from '../planner/planner.module';
 import { TimelineContinuedTaskComponent } from './timeline-continued-task/timeline-continued-task.component';
+import { TimelineRepeatTaskProjectionContinuedComponent } from './timeline-repeat-task-projection-continued/timeline-repeat-task-projection-continued.component';
 
 @NgModule({
   declarations: [
@@ -22,6 +23,7 @@ import { TimelineContinuedTaskComponent } from './timeline-continued-task/timeli
     TimelineDaysComponent,
     TimelineDayComponent,
     TimelineContinuedTaskComponent,
+    TimelineRepeatTaskProjectionContinuedComponent,
     DialogTimelineSetupComponent,
   ],
   exports: [TimelineComponent, TimelineDaysComponent],

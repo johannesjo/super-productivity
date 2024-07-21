@@ -5,6 +5,8 @@ import {
   TimelineCalendarMapEntry,
   TimelineLunchBreakCfg,
   TimelineViewEntry,
+  TimelineViewEntryRepeatProjection,
+  TimelineViewEntryRepeatProjectionSplitContinued,
   TimelineViewEntrySplitTaskContinued,
   TimelineViewEntryTask,
   TimelineWorkStartEndCfg,
@@ -21,8 +23,8 @@ import {
 import moment from 'moment';
 import { TaskRepeatCfg } from '../../task-repeat-cfg/task-repeat-cfg.model';
 
-// const debug = (...args: any): void => console.log(...args);
-const debug = (...args: any): void => undefined;
+const debug = (...args: any): void => console.log(...args);
+// const debug = (...args: any): void => undefined;
 
 export const mapToTimelineViewEntries = (
   tasks: Task[],
@@ -262,7 +264,7 @@ const createViewEntriesForBlock = (blockedBlock: BlockedBlock): TimelineViewEntr
       viewEntriesForBock.push({
         id: repeatCfg.id,
         start: entry.start,
-        type: TimelineViewEntryType.ScheduledRepeatTaskProjection,
+        type: TimelineViewEntryType.ScheduledRepeatProjection,
         data: repeatCfg,
         isHideTime: false,
       });
@@ -322,20 +324,23 @@ export const insertBlockedBlocksViewEntries = (
   let veIndex: number = 0;
   debug('################__insertBlockedBlocksViewEntries()_START__################');
   debug(blockedBlocks.length + ' BLOCKS');
+  debug('viewEntriesIn', JSON.parse(JSON.stringify(viewEntriesIn)));
 
   blockedBlocks.forEach((blockedBlock, blockIndex) => {
     debug(`**********BB:${blockIndex}***********`);
 
-    const viewEntriesToAdd: TimelineViewEntry[] = createViewEntriesForBlock(blockedBlock);
+    const viewEntriesToAddForBB: TimelineViewEntry[] =
+      createViewEntriesForBlock(blockedBlock);
 
     if (veIndex > viewEntries.length) {
       throw new Error('INDEX TOO LARGE');
     }
-    // we don't have any tasks to split any more so we just insert
+    // we don't have any tasks to split anymore, so we just insert
     if (veIndex === viewEntries.length) {
-      debug('JUST INSERT');
-      viewEntries.splice(veIndex, 0, ...viewEntriesToAdd);
-      veIndex += viewEntriesToAdd.length;
+      debug('JUST INSERT since no entries after');
+      viewEntries.splice(veIndex, 0, ...viewEntriesToAddForBB);
+      // skip to end of added entries
+      veIndex += viewEntriesToAddForBB.length;
     }
 
     for (; veIndex < viewEntries.length; ) {
@@ -348,6 +353,7 @@ export const insertBlockedBlocksViewEntries = (
           BEnd: moment(blockedBlock.end).format('DD/MM H:mm'),
           BTypes: blockedBlock.entries.map((v) => v.type).join(', '),
           blockedBlock,
+          viewEntriesToAddForBB,
         },
         { veIndex, veStart: moment(viewEntry.start).format('DD/MM H:mm'), viewEntry },
         { viewEntriesLength: viewEntries.length },
@@ -360,9 +366,9 @@ export const insertBlockedBlocksViewEntries = (
       // block before all tasks
       // => just insert
       if (blockedBlock.end <= viewEntry.start) {
-        viewEntries.splice(veIndex, 0, ...viewEntriesToAdd);
-        veIndex += viewEntriesToAdd.length;
-        debug('AAA');
+        viewEntries.splice(veIndex, 0, ...viewEntriesToAddForBB);
+        veIndex += viewEntriesToAddForBB.length;
+        debug('AAA insert blocked block and skip index to after added entries');
         break;
       }
       // block starts before task and lasts until after it starts
@@ -370,9 +376,9 @@ export const insertBlockedBlocksViewEntries = (
       else if (blockedBlock.start <= viewEntry.start) {
         const currentListTaskStart = viewEntry.start;
         moveEntries(viewEntries, blockedBlock.end - currentListTaskStart, veIndex);
-        viewEntries.splice(veIndex, 0, ...viewEntriesToAdd);
-        veIndex += viewEntriesToAdd.length;
-        debug('BBB');
+        viewEntries.splice(veIndex, 0, ...viewEntriesToAddForBB);
+        veIndex += viewEntriesToAddForBB.length;
+        debug('BBB insert and move all following entries');
         break;
       } else {
         const timeLeft = getTimeLeftForViewEntry(viewEntry);
@@ -412,9 +418,14 @@ export const insertBlockedBlocksViewEntries = (
             moveEntries(viewEntries, blockedBlockDuration, veIndex + 1);
 
             // insert new entries
-            viewEntries.splice(veIndex, 0, ...viewEntriesToAdd, newSplitContinuedEntry);
+            viewEntries.splice(
+              veIndex,
+              0,
+              ...viewEntriesToAddForBB,
+              newSplitContinuedEntry,
+            );
             // NOTE: we're not including a step for the current viewEntry as it might be split again
-            veIndex += viewEntriesToAdd.length;
+            veIndex += viewEntriesToAddForBB.length;
             break;
           } else if (isContinuedTaskType(viewEntry)) {
             debug('CCC b) ' + viewEntry.type);
@@ -455,24 +466,124 @@ export const insertBlockedBlocksViewEntries = (
             );
 
             // insert new entries
-            viewEntries.splice(veIndex, 0, ...viewEntriesToAdd, newSplitContinuedEntry);
+            viewEntries.splice(
+              veIndex,
+              0,
+              ...viewEntriesToAddForBB,
+              newSplitContinuedEntry,
+            );
             // NOTE: we're not including a step for the current viewEntry as it might be split again
-            veIndex += viewEntriesToAdd.length;
+            veIndex += viewEntriesToAddForBB.length;
             break;
           } else if (
-            viewEntry.type === TimelineViewEntryType.NonScheduledRepeatTaskProjection
+            viewEntry.type === TimelineViewEntryType.RepeatProjection ||
+            viewEntry.type === TimelineViewEntryType.RepeatProjectionSplit
           ) {
-            // TODO handle
-            debug('CCC c) ' + viewEntry.type);
-            veIndex++;
+            debug('CCC C) ' + viewEntry.type);
+            const currentViewEntry: TimelineViewEntryRepeatProjection =
+              viewEntry as TimelineViewEntryRepeatProjection;
+            const repeatCfg: TaskRepeatCfg = currentViewEntry.data as TaskRepeatCfg;
+
+            const timeLeftOnRepeatInstance = timeLeft;
+            const timePlannedForSplitStart = blockedBlock.start - currentViewEntry.start;
+            const timePlannedForSplitContinued =
+              timeLeftOnRepeatInstance - timePlannedForSplitStart;
+
+            // update type of current
+            // @ts-ignore
+            currentViewEntry.type = TimelineViewEntryType.RepeatProjectionSplit;
+
+            const newSplitContinuedEntry: TimelineViewEntry = createSplitRepeat({
+              start: blockedBlock.end,
+              repeatCfgId: repeatCfg.id,
+              timeToGo: timePlannedForSplitContinued,
+              splitIndex: 0,
+              title: repeatCfg.title || 'NO_TITLE',
+            });
+
+            // move entries
+            const blockedBlockDuration = blockedBlock.end - blockedBlock.start;
+            moveEntries(viewEntries, blockedBlockDuration, veIndex + 1);
+
+            // insert new entries
+            viewEntries.splice(
+              veIndex,
+              0,
+              ...viewEntriesToAddForBB,
+              newSplitContinuedEntry,
+            );
+            // NOTE: we're not including a step for the current viewEntry as it might be split again
+            veIndex += viewEntriesToAddForBB.length;
+            break;
+          } else if (
+            viewEntry.type === TimelineViewEntryType.RepeatProjectionSplitContinued ||
+            viewEntry.type === TimelineViewEntryType.RepeatProjectionSplitContinuedLast
+          ) {
+            debug('CCC D) ' + viewEntry.type);
+            const currentViewEntry: TimelineViewEntryRepeatProjectionSplitContinued =
+              viewEntry as TimelineViewEntryRepeatProjectionSplitContinued;
+            const timeLeftForCompleteSplitRepeatCfgProjection = timeLeft;
+            const timePlannedForSplitRepeatCfgProjectionBefore =
+              blockedBlock.start - currentViewEntry.start;
+            const timePlannedForSplitRepeatCfgProjectionContinued =
+              timeLeftForCompleteSplitRepeatCfgProjection -
+              timePlannedForSplitRepeatCfgProjectionBefore;
+
+            const splitInstances = viewEntries.filter(
+              (entry) =>
+                (entry.type ===
+                  TimelineViewEntryType.RepeatProjectionSplitContinuedLast ||
+                  entry.type === TimelineViewEntryType.RepeatProjectionSplitContinued) &&
+                entry.data.repeatCfgId === currentViewEntry.data.repeatCfgId,
+            );
+            // update type of current
+            currentViewEntry.type = TimelineViewEntryType.RepeatProjectionSplitContinued;
+            currentViewEntry.data.timeToGo -=
+              timePlannedForSplitRepeatCfgProjectionContinued;
+
+            // TODO there can be multiple repeat instances on a day if they are continued to the next day
+            const splitIndex = splitInstances.length;
+            const newSplitContinuedEntry: TimelineViewEntry = createSplitRepeat({
+              start: blockedBlock.end,
+              repeatCfgId: currentViewEntry.data.repeatCfgId,
+              timeToGo: timePlannedForSplitRepeatCfgProjectionContinued,
+              splitIndex,
+              title: currentViewEntry.data.title,
+            });
+
+            // move entries
+            // NOTE: needed because view entries might not be ordered at this point of time for some reason
+            const blockedBlockDuration = blockedBlock.end - blockedBlock.start;
+            moveAllEntriesAfterTime(
+              viewEntries,
+              blockedBlockDuration,
+              blockedBlock.start,
+            );
+
+            // insert new entries
+            viewEntries.splice(
+              veIndex,
+              0,
+              ...viewEntriesToAddForBB,
+              newSplitContinuedEntry,
+            );
+            // NOTE: we're not including a step for the current viewEntry as it might be split again
+            veIndex += viewEntriesToAddForBB.length;
+            break;
           } else {
             throw new Error('Invalid type given ' + viewEntry.type);
           }
         } else if (veIndex + 1 === viewEntries.length) {
-          viewEntries.splice(veIndex, 0, ...viewEntriesToAdd);
-          veIndex += viewEntriesToAdd.length + 1;
+          debug('DDD', veIndex, viewEntries.length, viewEntries[veIndex]);
+          viewEntries.splice(veIndex, 0, ...viewEntriesToAddForBB);
+          veIndex += viewEntriesToAddForBB.length + 1;
         } else {
-          debug('DDD', veIndex, viewEntries.length);
+          debug(
+            'EEEE insert, since entry ends before blocked block',
+            veIndex,
+            viewEntries.length,
+            viewEntries[veIndex],
+          );
           veIndex++;
         }
       }
@@ -507,15 +618,46 @@ const createSplitTask = ({
     isHideTime: false,
   };
 };
+const createSplitRepeat = ({
+  start,
+  repeatCfgId,
+  title,
+  splitIndex,
+  timeToGo,
+}: {
+  start: number;
+  repeatCfgId: string;
+  title: string;
+  splitIndex: number;
+  timeToGo: number;
+}): TimelineViewEntryRepeatProjectionSplitContinued => {
+  return {
+    id: `${repeatCfgId}__${splitIndex}`,
+    start,
+    type: TimelineViewEntryType.RepeatProjectionSplitContinuedLast,
+    data: {
+      title,
+      timeToGo,
+      repeatCfgId,
+      index: splitIndex,
+    },
+    isHideTime: false,
+  };
+};
 
 const getTimeLeftForViewEntry = (viewEntry: TimelineViewEntry): number => {
   if (isTaskDataType(viewEntry)) {
     return getTimeLeftForTask((viewEntry as any).data as Task);
-  } else if (isContinuedTaskType(viewEntry)) {
+  } else if (
+    isContinuedTaskType(viewEntry) ||
+    viewEntry.type === TimelineViewEntryType.RepeatProjectionSplitContinued ||
+    viewEntry.type === TimelineViewEntryType.RepeatProjectionSplitContinuedLast
+  ) {
     return (viewEntry as TimelineViewEntrySplitTaskContinued).data.timeToGo;
-    // } else if(viewEntry.type===TimelineViewEntryType.WorkdayEnd) {
-    //   return viewEntry.data.
-  } else if (viewEntry.type === TimelineViewEntryType.NonScheduledRepeatTaskProjection) {
+  } else if (
+    viewEntry.type === TimelineViewEntryType.RepeatProjection ||
+    viewEntry.type === TimelineViewEntryType.RepeatProjectionSplit
+  ) {
     return viewEntry.data.defaultEstimate || 0;
   }
   throw new Error('Wrong type given: ' + viewEntry.type);

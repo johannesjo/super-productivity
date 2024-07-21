@@ -36,16 +36,33 @@ export interface TimelineViewEntryTaskPlannedForDay extends TimelineViewEntryBas
   data: TaskCopy;
 }
 
-export interface TimelineViewEntryTaskScheduledRepeatProjection
+export interface TimelineViewEntryScheduledRepeatProjection
   extends TimelineViewEntryBase {
-  type: TimelineViewEntryType.ScheduledRepeatTaskProjection;
+  type: TimelineViewEntryType.ScheduledRepeatProjection;
   data: TaskRepeatCfg;
 }
 
-export interface TimelineViewEntryTaskNonScheduledRepeatProjection
-  extends TimelineViewEntryBase {
-  type: TimelineViewEntryType.NonScheduledRepeatTaskProjection;
+export interface TimelineViewEntryRepeatProjection extends TimelineViewEntryBase {
+  type: TimelineViewEntryType.RepeatProjection;
   data: TaskRepeatCfg;
+}
+
+export interface TimelineViewEntryRepeatProjectionSplit extends TimelineViewEntryBase {
+  type: TimelineViewEntryType.RepeatProjectionSplit;
+  data: TaskRepeatCfg;
+}
+
+export interface TimelineViewEntryRepeatProjectionSplitContinued
+  extends TimelineViewEntryBase {
+  type:
+    | TimelineViewEntryType.RepeatProjectionSplitContinued
+    | TimelineViewEntryType.RepeatProjectionSplitContinuedLast;
+  data: {
+    title: string;
+    timeToGo: number;
+    repeatCfgId: string;
+    index: number;
+  };
 }
 
 export interface TimelineViewEntrySplitTaskContinued extends TimelineViewEntryBase {
@@ -111,8 +128,10 @@ export interface TimelineDayCrossing extends TimelineViewEntryBase {
 export type TimelineViewEntry =
   | TimelineViewEntryTask
   | TimelineViewEntryTaskPlannedForDay
-  | TimelineViewEntryTaskScheduledRepeatProjection
-  | TimelineViewEntryTaskNonScheduledRepeatProjection
+  | TimelineViewEntryScheduledRepeatProjection
+  | TimelineViewEntryRepeatProjection
+  | TimelineViewEntryRepeatProjectionSplit
+  | TimelineViewEntryRepeatProjectionSplitContinued
   | TimelineViewEntrySplitTaskContinued
   | TimelineViewEntryCustomEvent
   | TimelineViewEntryCalendarEvent

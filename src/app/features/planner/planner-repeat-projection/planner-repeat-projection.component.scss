@@ -48,3 +48,9 @@
     font-size: $planner-font-size;
   }
 }
+
+.original-time-remaining {
+  white-space: nowrap;
+  font-size: 10px;
+  margin-left: -6px;
+}

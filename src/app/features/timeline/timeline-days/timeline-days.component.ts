@@ -4,7 +4,6 @@ import { TimelineDay } from '../timeline.model';
 import { debounceTime, map, tap } from 'rxjs/operators';
 import { getTomorrow } from '../../../util/get-tomorrow';
 import { TaskService } from '../../tasks/task.service';
-import { TaskRepeatCfgService } from '../../task-repeat-cfg/task-repeat-cfg.service';
 import { GlobalConfigService } from '../../config/global-config.service';
 import { MatDialog } from '@angular/material/dialog';
 import { CalendarIntegrationService } from '../../calendar-integration/calendar-integration.service';
@@ -87,7 +86,6 @@ export class TimelineDaysComponent {
   constructor(
     public taskService: TaskService,
     public layoutService: LayoutService,
-    private _taskRepeatCfgService: TaskRepeatCfgService,
     private _globalConfigService: GlobalConfigService,
     private _matDialog: MatDialog,
     private _calendarIntegrationService: CalendarIntegrationService,

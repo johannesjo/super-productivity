@@ -13,9 +13,9 @@ import {
   TimelineDay,
   TimelineLunchBreakCfg,
   TimelineViewEntry,
+  TimelineViewEntryRepeatProjection,
   TimelineViewEntrySplitTaskContinued,
   TimelineViewEntryTask,
-  TimelineViewEntryTaskNonScheduledRepeatProjection,
   TimelineWorkStartEndCfg,
 } from '../timeline.model';
 import { PlannerDayMap } from '../../planner/planner.model';
@@ -342,7 +342,7 @@ const createViewEntriesForNonScheduledRepeatProjections = (
   let lastTime: number;
   let prevRepeatCfg: TaskRepeatCfg;
 
-  const viewEntries: TimelineViewEntryTaskNonScheduledRepeatProjection[] = [];
+  const viewEntries: TimelineViewEntryRepeatProjection[] = [];
   nonScheduledRepeatCfgsDueOnDay.forEach((taskRepeatCfg, index, arr) => {
     prevRepeatCfg = arr[index - 1];
 
@@ -350,7 +350,7 @@ const createViewEntriesForNonScheduledRepeatProjections = (
 
     if (lastTime) {
       if (prevRepeatCfg) {
-        time = lastTime + (taskRepeatCfg?.defaultEstimate || 0);
+        time = lastTime + (prevRepeatCfg?.defaultEstimate || 0);
       } else {
         throw new Error('Something weird happened');
       }
@@ -360,7 +360,7 @@ const createViewEntriesForNonScheduledRepeatProjections = (
 
     viewEntries.push({
       id: taskRepeatCfg.id,
-      type: TimelineViewEntryType.NonScheduledRepeatTaskProjection,
+      type: TimelineViewEntryType.RepeatProjection,
       start: time,
       data: taskRepeatCfg,
       isHideTime: time === lastTime,

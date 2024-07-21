@@ -5,6 +5,11 @@
     <!--   {{event.start|date:'HH:mm'}} – {{(event.start + event.duration)|date:'HH:mm'}}-->
   </div>
   <div class="planner-time-remaining-shared">
-    {{ repeatCfg.defaultEstimate|msToString }}
+    @if (overWriteTimeEstimate > 0) { {{ overWriteTimeEstimate|msToString }} <br />
+    <span class="original-time-remaining"
+      >({{ repeatCfg.defaultEstimate|msToString }})</span
+    >
+    <!--- -->
+    } @else { {{ repeatCfg.defaultEstimate|msToString }} }
   </div>
 </div>

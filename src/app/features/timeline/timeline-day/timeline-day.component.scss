@@ -196,7 +196,8 @@ $sb-radius: 28px;
 $sb-radius-continued: 56px;
 $sb-radius-small: 4px;
 
-planner-task.split-task {
+planner-repeat-projection.split-item ::ng-deep > div,
+planner-task.split-item {
   border-top-left-radius: $sb-radius !important;
   border-top-right-radius: $sb-radius !important;
   border-bottom-left-radius: $sb-radius-small;

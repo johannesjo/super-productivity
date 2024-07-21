@@ -84,6 +84,9 @@
         </div>
       </div>
       <div class="col right">
+        <!--        {{row.type}}-->
+        <!-- -->
+
         @switch (row.type) {
         <!-- -->
         @case (TimelineViewEntryType.Task) {
@@ -104,14 +107,14 @@
         ></planner-task>
         } @case (TimelineViewEntryType.SplitTask) {
         <planner-task
-          class="split-task"
+          class="split-item"
           [task]="row.data"
           [day]="timelineDay.dayDate"
           [overWriteTimeEstimate]="timelineDay.entries[index+1]?.start - row.start"
         ></planner-task>
         } @case (TimelineViewEntryType.SplitTaskPlannedForDay) {
         <planner-task
-          class="split-task planned-for-day"
+          class="split-item planned-for-day"
           [task]="row.data"
           [day]="timelineDay.dayDate"
           [overWriteTimeEstimate]="timelineDay.entries[index+1]?.start - row.start"
@@ -126,19 +129,35 @@
         ></timeline-continued-task>
         } @case (TimelineViewEntryType.SplitTaskContinued) {
         <timeline-continued-task [splitTaskEntry]="row"></timeline-continued-task>
+        } @case (TimelineViewEntryType.RepeatProjectionSplitContinuedLast) {
+        <timeline-repeat-task-projection-continued
+          [splitRepeatEntry]="row"
+          [isLast]="true"
+        ></timeline-repeat-task-projection-continued>
+        } @case (TimelineViewEntryType.RepeatProjectionSplitContinued) {
+        <timeline-repeat-task-projection-continued
+          [splitRepeatEntry]="row"
+        ></timeline-repeat-task-projection-continued>
         } @case (TimelineViewEntryType.CalendarEvent) {
         <planner-calendar-event
           [calendarEvent]="row.data"
           [matTooltip]="'Add event as task'"
         ></planner-calendar-event>
-        } @case (TimelineViewEntryType.ScheduledRepeatTaskProjection) {
+        } @case (TimelineViewEntryType.ScheduledRepeatProjection) {
         <planner-repeat-projection
           [title]="T.F.TIMELINE.TASK_PROJECTION_INFO|translate"
           [repeatCfg]="row.data"
         ></planner-repeat-projection>
-        } @case (TimelineViewEntryType.NonScheduledRepeatTaskProjection) {
+        } @case (TimelineViewEntryType.RepeatProjection) {
         <planner-repeat-projection
           [title]="T.F.TIMELINE.TASK_PROJECTION_INFO|translate"
+          [repeatCfg]="row.data"
+        ></planner-repeat-projection>
+        } @case (TimelineViewEntryType.RepeatProjectionSplit) {
+        <planner-repeat-projection
+          class="split-item"
+          [title]="T.F.TIMELINE.TASK_PROJECTION_INFO|translate"
+          [overWriteTimeEstimate]="timelineDay.entries[index+1]?.start - row.start"
           [repeatCfg]="row.data"
         ></planner-repeat-projection>
         } @case (TimelineViewEntryType.WorkdayStart) {
@@ -170,7 +189,7 @@
           {{ row.start|date:'d.M.' }}
           <span class="day">{{ row.start|date:'(EEE)' }}</span>
         </div>
-        }
+        } @default { TYPE NOT FOUND {{ row.type }} }
         <!--- -->
         }
       </div>

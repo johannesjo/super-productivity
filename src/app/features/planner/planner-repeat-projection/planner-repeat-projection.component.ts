@@ -12,6 +12,7 @@ import { DialogEditTaskRepeatCfgComponent } from '../../task-repeat-cfg/dialog-e
 })
 export class PlannerRepeatProjectionComponent {
   @Input({ required: true }) repeatCfg!: TaskRepeatCfg;
+  @Input() overWriteTimeEstimate: number = 0;
 
   constructor(private _matDialog: MatDialog) {}
 
