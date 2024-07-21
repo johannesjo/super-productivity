@@ -122,7 +122,7 @@ export const createTimelineDays = (
     }
 
     const blockerBlocksForDay = blockerBlocksDayMap[dayDate] || [];
-    const taskPlannedForDay = plannerDayMap[dayDate] || [];
+    const taskPlannedForDay = i > 0 ? plannerDayMap[dayDate] || [] : [];
     // TODO also add split task value
     const timeLeftForRegular =
       getTimeLeftForTasks(regularTasksLeftForDay) +
