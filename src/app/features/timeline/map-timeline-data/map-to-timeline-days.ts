@@ -183,7 +183,15 @@ export const createTimelineDays = (
       regularTasksLeftForDay = [];
     } else if (nonScheduledBudgetForDay - timeLeftForRegular === 0) {
       // no splitting is needed, all tasks planed for today are OVER_BUDGET
-      regularTasksLeftForDay = [];
+      viewEntries = createViewEntriesForDay(
+        startTime,
+        nonScheduledRepeatCfgsDueOnDay,
+        regularTasksLeftForDay,
+        blockerBlocksForDay,
+        splitTaskOrRepeatEntryForNextDay,
+      );
+      regularTasksLeftForDay =
+        nonScheduledBudgetForDay === 0 ? regularTasksLeftForDay : [];
       beyondBudgetTasks = (plannerDayMap[dayDate] as TaskWithoutReminder[]) || [];
       // TODO
     } else {
@@ -246,6 +254,7 @@ export const createTimelineDays = (
       nonScheduledBudgetForDay2: nonScheduledBudgetForDay / 60 / 60 / 1000,
     });
 
+    // TODO there is probably a better way to do this
     if (viewEntries[0] && viewEntries[0].type === TimelineViewEntryType.WorkdayEnd) {
       // remove that entry
       viewEntriesToRenderForDay.shift();
