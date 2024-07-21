@@ -18,7 +18,7 @@
     @for (row of timelineDay.entries; track row.id; let index = $index) {
     <div
       class="row"
-      [class]="getSizeClass(row)"
+      [class]="getSizeClass(row, index, timelineDay.entries)"
     >
       <div
         class="col time"

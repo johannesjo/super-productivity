@@ -38,9 +38,15 @@ export class TimelineDayComponent {
     }
   }
 
-  getSizeClass(timelineEntry: TimelineViewEntry): string {
+  getSizeClass(
+    timelineEntry: TimelineViewEntry,
+    index: number,
+    allEntries: TimelineViewEntry[],
+  ): string {
     // TODO fix that this is being reRendered on every hover
     const d =
+      (timelineEntry.type === TimelineViewEntryType.SplitTask &&
+        allEntries[index + 1]?.start - timelineEntry.start) ||
       // @ts-ignore
       timelineEntry?.data?.timeEstimate ||
       // @ts-ignore
