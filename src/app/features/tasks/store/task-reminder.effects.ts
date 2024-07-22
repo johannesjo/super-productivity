@@ -53,7 +53,8 @@ export class TaskReminderEffects {
         );
 
         const isRemoveFromToday =
-          task.tagIds.includes(TODAY_TAG.id) && !isSameDay(new Date(), plannedAt);
+          task.tagIds.includes(TODAY_TAG.id) &&
+          (!isSameDay(new Date(), plannedAt) || isMoveToBacklog);
 
         return [
           updateTask({
@@ -110,7 +111,8 @@ export class TaskReminderEffects {
         }
 
         const isRemoveFromToday =
-          task.tagIds.includes(TODAY_TAG.id) && !isSameDay(new Date(), plannedAt);
+          task.tagIds.includes(TODAY_TAG.id) &&
+          (!isSameDay(new Date(), plannedAt) || isMoveToBacklog);
 
         return [
           ...(isMoveToBacklog
