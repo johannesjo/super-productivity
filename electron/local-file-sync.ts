@@ -24,7 +24,6 @@ export const initLocalFileSyncAdapter = (): void => {
         console.log('writeFileSync', filePath, !!dataStr);
 
         writeFileSync(filePath, dataStr);
-        console.log('I am here!');
 
         return getRev(filePath);
       } catch (e) {
