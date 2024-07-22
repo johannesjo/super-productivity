@@ -152,11 +152,6 @@ export const SYNC_FORM: ConfigFormSection<SyncConfig> = {
             required: true,
             label: T.F.SYNC.FORM.LOCAL_FILE.L_SYNC_FOLDER_PATH,
           },
-          modelOptions: {
-            debounce: {
-              default: 3000,
-            },
-          },
         },
       ],
     },
@@ -203,11 +198,6 @@ export const SYNC_FORM: ConfigFormSection<SyncConfig> = {
         {
           key: 'syncFolderPath',
           type: 'input',
-          modelOptions: {
-            debounce: {
-              default: 3000,
-            },
-          },
           templateOptions: {
             required: true,
             label: T.F.SYNC.FORM.WEB_DAV.L_SYNC_FOLDER_PATH,

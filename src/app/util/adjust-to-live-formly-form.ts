@@ -23,7 +23,7 @@ export const adjustToLiveFormlyForm = (
       };
     }
 
-    if (item.type === 'repeat' && isArray(item?.fieldGroup)) {
+    if (isArray(item?.fieldGroup)) {
       return {
         ...item,
         fieldGroup: adjustToLiveFormlyForm(item?.fieldGroup),
@@ -43,6 +43,7 @@ export const adjustToLiveFormlyForm = (
         },
       };
     }
+
     return item;
   });
 };
