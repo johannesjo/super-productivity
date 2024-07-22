@@ -11,6 +11,7 @@ import { IncomingHttpHeaders } from 'http';
 
 // Get the Type, but keep the actual bundle payload out
 import type { createClient } from 'webdav';
+
 type CreateClientType = typeof createClient;
 
 // Lazyload the webdav bundle (when requested)
@@ -111,6 +112,33 @@ export class WebDavApiService {
 
       await client.putFileContents(path, JSON.stringify(data), {
         contentLength: false,
+      });
+    }
+  }
+
+  async createFolder({ folderPath }: { folderPath: string }): Promise<void> {
+    await this._isReady$.toPromise();
+    const cfg = await this._cfg$.pipe(first()).toPromise();
+    if (IS_ANDROID_WEB_VIEW && androidInterface.makeHttpRequest) {
+      // TODO check on real android
+      const result = (await androidInterface.makeHttpRequestWrapped(
+        cfg.baseUrl + '/' + folderPath,
+        'MKCOL',
+        '',
+        cfg.userName,
+        cfg.password,
+        false,
+      )) as AndroidHttpResponse;
+      this.checkErrorAndroid(result);
+    } else {
+      const webDavClientCreator = await this.getWebDavClientCreator();
+
+      const client = webDavClientCreator(cfg.baseUrl, {
+        username: cfg.userName,
+        password: cfg.password,
+      });
+      await client.createDirectory(folderPath, {
+        recursive: true,
       });
     }
   }

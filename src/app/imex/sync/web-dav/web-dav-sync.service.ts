@@ -85,10 +85,26 @@ export class WebDavSyncService implements SyncProviderServiceInterface {
   ): Promise<string | Error> {
     const cfg = await this._cfg$.pipe(first()).toPromise();
     const filePath = this._getFilePath(syncTarget, cfg);
-    await this._webDavApiService.upload({
-      path: filePath,
-      data: dataStr,
-    });
+    try {
+      await this._webDavApiService.upload({
+        path: filePath,
+        data: dataStr,
+      });
+    } catch (e) {
+      console.log(e);
+      if (e?.toString?.().includes('404')) {
+        // folder might not exist, so we try to create it
+        await this._webDavApiService.createFolder({
+          folderPath: cfg.syncFolderPath as string,
+        });
+        await this._webDavApiService.upload({
+          path: filePath,
+          data: dataStr,
+        });
+      }
+
+      throw new Error(e as any);
+    }
 
     const meta = await this._webDavApiService.getMetaData(filePath);
     return this._getRevFromMeta(meta);

@@ -213,7 +213,7 @@
     "tslib": "^2.4.1",
     "typescript": "~5.4.5",
     "utils-decorators": "^2.0.8",
-    "webdav": "~4.3.0",
+    "webdav": "~4.11.3",
     "zone.js": "~0.14.7"
   },
   "resolutions": {
