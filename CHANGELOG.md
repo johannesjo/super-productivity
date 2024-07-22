@@ -1,3 +1,24 @@
+## [9.0.4](https://github.com/johannesjo/super-productivity/compare/v9.0.3...v9.0.4) (2024-07-22)
+
+### Bug Fixes
+
+- button edge case ([6680fff](https://github.com/johannesjo/super-productivity/commit/6680fff5d0e593886ee4084d953c627547c86f0c))
+- fieldGroup inputs updating instantly when typing ([239949a](https://github.com/johannesjo/super-productivity/commit/239949ae92a30adc5985b3f4d3bae7be2f0b5610))
+- folder path getting synced for local file sync [#3268](https://github.com/johannesjo/super-productivity/issues/3268) ([c250254](https://github.com/johannesjo/super-productivity/commit/c2502540ce136f532e82bfdbca37e6f1ba352ed3))
+- missing czech locale [#3262](https://github.com/johannesjo/super-productivity/issues/3262) ([fa72339](https://github.com/johannesjo/super-productivity/commit/fa7233974f851867ea62e687c3ae61b511cf8b76))
+- move to backlog checkbox having no effect ([c45aee4](https://github.com/johannesjo/super-productivity/commit/c45aee429485fc2c681ed7ff73df1a3f482c43aa))
+- shepherd tour error [#3270](https://github.com/johannesjo/super-productivity/issues/3270) ([9fa0da0](https://github.com/johannesjo/super-productivity/commit/9fa0da076270f3375aa81f1f8167cf4d27aa7ad4))
+- **timeline:** no error for edge case [#3276](https://github.com/johannesjo/super-productivity/issues/3276) ([cf1d460](https://github.com/johannesjo/super-productivity/commit/cf1d460113fb44111f9d29ae318e2d75c60243e6))
+
+### Features
+
+- improve sync indication ([760e6f2](https://github.com/johannesjo/super-productivity/commit/760e6f24337cb69c7d3ab01756870b2e651b12a1))
+- style angular mentions for dark theme ([041ac63](https://github.com/johannesjo/super-productivity/commit/041ac63f42773352628592a33fa3847d02e7e2be))
+- wait longer for sync folder path changes ([38a5652](https://github.com/johannesjo/super-productivity/commit/38a565213981023e56734ac62f802a118ec1a920))
+- **webDAV:** add extra logging ([bed545a](https://github.com/johannesjo/super-productivity/commit/bed545ac16484b588697268cb1855f566ee453f2))
+- **webDAV:** create folder automatically ([fcfed40](https://github.com/johannesjo/super-productivity/commit/fcfed407b5025386eb311c83f7b18df07100b41b))
+- **webDAV:** improve error handling for web dav [#3269](https://github.com/johannesjo/super-productivity/issues/3269) ([f2e4ebc](https://github.com/johannesjo/super-productivity/commit/f2e4ebcc335a71c9f012e7a447828e0d04bcc89a))
+
 ## [9.0.3](https://github.com/johannesjo/super-productivity/compare/v9.0.2...v9.0.3) (2024-07-18)
 
 ## [9.0.2](https://github.com/johannesjo/super-productivity/compare/v9.0.1...v9.0.2) (2024-07-17)
