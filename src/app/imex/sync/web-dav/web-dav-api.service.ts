@@ -10,15 +10,16 @@ import { androidInterface } from '../../../features/android/android-interface';
 import { IncomingHttpHeaders } from 'http';
 
 // Get the Type, but keep the actual bundle payload out
-import type { createClient } from 'webdav';
+// import type { createClient } from 'webdav';
+import { createClient } from 'webdav/web';
 
 type CreateClientType = typeof createClient;
 
 // Lazyload the webdav bundle (when requested)
-const LazyWebDavCreateClient = (): Promise<CreateClientType> =>
-  import(/* webpackChunkName: "webdav-web" */ 'webdav/web').then(
-    ({ createClient }) => createClient as CreateClientType,
-  );
+// const LazyWebDavCreateClient = (): Promise<CreateClientType> =>
+//   import(/* webpackChunkName: "webdav-web" */ 'webdav/web').then(
+//     ({ createClient }) => createClient as CreateClientType,
+//   );
 
 interface AndroidHttpResponse {
   data: string;
@@ -64,7 +65,7 @@ export class WebDavApiService {
       first(),
     );
 
-  private _lazyWebDavClientCache: Promise<CreateClientType> | null = null;
+  // private _lazyWebDavClientCache: Promise<CreateClientType> | null = null;
 
   constructor(
     private _globalConfigService: GlobalConfigService,
@@ -72,10 +73,11 @@ export class WebDavApiService {
   ) {}
 
   private getWebDavClientCreator(): Promise<CreateClientType> {
-    return (
-      this._lazyWebDavClientCache ??
-      (this._lazyWebDavClientCache = LazyWebDavCreateClient())
-    );
+    return Promise.resolve(createClient);
+    // return (
+    // this._lazyWebDavClientCache ??
+    // (this._lazyWebDavClientCache = LazyWebDavCreateClient())
+    // );
   }
 
   private checkErrorAndroid(result: AndroidHttpResponse): void {
