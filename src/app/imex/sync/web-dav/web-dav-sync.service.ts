@@ -55,6 +55,7 @@ export class WebDavSyncService implements SyncProviderServiceInterface {
       if ((isAxiosError && e.response.status === 404) || e.status === 404) {
         return 'NO_REMOTE_DATA';
       }
+      console.error(e);
       throw new Error(e as any);
     }
   }
@@ -91,7 +92,7 @@ export class WebDavSyncService implements SyncProviderServiceInterface {
         data: dataStr,
       });
     } catch (e) {
-      console.log(e);
+      console.error(e);
       if (e?.toString?.().includes('404')) {
         // folder might not exist, so we try to create it
         await this._webDavApiService.createFolder({
