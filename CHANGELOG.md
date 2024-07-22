@@ -1,3 +1,10 @@
+## [9.0.5](https://github.com/johannesjo/super-productivity/compare/v9.0.4...v9.0.5) (2024-07-22)
+
+### Bug Fixes
+
+- **webDAV:** content being double stringified [#3269](https://github.com/johannesjo/super-productivity/issues/3269) ([a24f5d6](https://github.com/johannesjo/super-productivity/commit/a24f5d65e43bac35e9364eb048c17dc761708e93))
+- **webDAV:** disable lazy loaded dep to fix problem [#3269](https://github.com/johannesjo/super-productivity/issues/3269) ([a02d6de](https://github.com/johannesjo/super-productivity/commit/a02d6debd6e59cf54fbce28235fa847b7bfb0c21))
+
 ## [9.0.4](https://github.com/johannesjo/super-productivity/compare/v9.0.3...v9.0.4) (2024-07-22)
 
 ### Bug Fixes
