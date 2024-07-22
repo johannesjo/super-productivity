@@ -44,6 +44,7 @@ import { CompressionService } from '../../core/compression/compression.service';
 import { decrypt, encrypt } from './encryption';
 import { LS } from '../../core/persistence/storage-keys.const';
 import { PREPEND_STR_COMPRESSION, PREPEND_STR_ENCRYPTION } from './sync.const';
+import { GlobalProgressBarService } from '../../core-ui/global-progress-bar/global-progress-bar.service';
 
 const KNOWN_SYNC_ERROR_PREFIX = 'KNOWN_SYNC_ERROR_SUP_';
 
@@ -109,6 +110,7 @@ export class SyncProviderService {
     private _compressionService: CompressionService,
     private _snackService: SnackService,
     private _matDialog: MatDialog,
+    private _globalProgressBarService: GlobalProgressBarService,
   ) {}
 
   async sync(): Promise<SyncResult> {
@@ -127,12 +129,15 @@ export class SyncProviderService {
       }
     }
 
+    this._globalProgressBarService.countUp('SYNC');
     this.isSyncing$.next(true);
     try {
       const r = await this._sync(currentProvider);
       this.isSyncing$.next(false);
+      this._globalProgressBarService.countDown();
       return r;
     } catch (e) {
+      this._globalProgressBarService.countDown();
       console.log('__error during sync__');
       console.error(e);
       const errStr = getSyncErrorStr(e);

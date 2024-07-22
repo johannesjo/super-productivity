@@ -1493,6 +1493,7 @@
     "DBX_UPLOAD": "Dropbox: Upload file...",
     "GITHUB_LOAD_ISSUE": "GitHub: Load issue data...",
     "JIRA_LOAD_ISSUE": "Jira: Load issue data...",
+    "SYNC": "Syncing data...",
     "UNKNOWN": "Loading remote data",
     "WEB_DAV_DOWNLOAD": "WebDAV: Downloading data...",
     "WEB_DAV_UPLOAD": "WebDAV: Uploading data..."
