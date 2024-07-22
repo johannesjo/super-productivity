@@ -56,7 +56,11 @@ export class WebDavSyncService implements SyncProviderServiceInterface {
         return 'NO_REMOTE_DATA';
       }
       console.error(e);
-      throw new Error(e as any);
+      if (e instanceof Error) {
+        throw new Error(e.message);
+      } else {
+        throw new Error('An unknown error occurred while getting file rev');
+      }
     }
   }
 
@@ -104,7 +108,12 @@ export class WebDavSyncService implements SyncProviderServiceInterface {
         });
       }
 
-      throw new Error(e as any);
+      console.error(e);
+      if (e instanceof Error) {
+        throw new Error(e.message);
+      } else {
+        throw new Error('An unknown error occurred while uploading file');
+      }
     }
 
     const meta = await this._webDavApiService.getMetaData(filePath);
