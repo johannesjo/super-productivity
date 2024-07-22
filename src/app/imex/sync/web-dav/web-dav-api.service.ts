@@ -112,7 +112,7 @@ export class WebDavApiService {
         password: cfg.password,
       });
 
-      await client.putFileContents(path, JSON.stringify(data), {
+      await client.putFileContents(path, data, {
         contentLength: false,
       });
     }
