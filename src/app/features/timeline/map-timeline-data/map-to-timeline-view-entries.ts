@@ -3,11 +3,11 @@ import {
   BlockedBlock,
   BlockedBlockType,
   TimelineCalendarMapEntry,
+  TimelineLunchBreakCfg,
   TimelineViewEntry,
   TimelineViewEntrySplitTaskContinued,
   TimelineViewEntryTask,
   TimelineWorkStartEndCfg,
-  TimelineLunchBreakCfg,
 } from '../timeline.model';
 import { getDateTimeFromClockString } from '../../../util/get-date-time-from-clock-string';
 import { createSortedBlockerBlocks } from './create-sorted-blocker-blocks';
@@ -211,22 +211,24 @@ export const clearEntries = (
 
   while (index < entries.length) {
     const entry = entries[index];
+
     // We skip the first entry because we'd like to keep at least one entry. To avoid empty timelines
     if (index > 0) {
       const next = entries[index + 1];
       if (lunchBreakEnabled) {
         const afterNext = entries[index + 2];
+
         if (
           entry.type === TimelineViewEntryType.WorkdayStart &&
-          next.type === TimelineViewEntryType.LunchBreak &&
-          afterNext.type === TimelineViewEntryType.WorkdayEnd
+          next?.type === TimelineViewEntryType.LunchBreak &&
+          afterNext?.type === TimelineViewEntryType.WorkdayEnd
         ) {
           index += 3;
           continue;
         }
       } else if (
         entry.type === TimelineViewEntryType.WorkdayStart &&
-        next.type === TimelineViewEntryType.WorkdayEnd
+        next?.type === TimelineViewEntryType.WorkdayEnd
       ) {
         index += 2;
         continue;
