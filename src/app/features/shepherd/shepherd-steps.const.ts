@@ -74,11 +74,6 @@ export const SHEPHERD_STEPS = (
   const KEY_COMBO = (action: keyof KeyboardConfig): string =>
     `<kbd>${cfg.keyboard[action]}</kbd>`;
 
-  // @ts-ignore
-  router.navigate = () => {
-    console.log('AAA');
-  };
-
   return [
     // ------------------------------
     {
