@@ -534,6 +534,24 @@
     white-space: nowrap;
   }
 
+  .time-val {
+    mat-icon {
+      vertical-align: middle;
+      height: 16px;
+      margin-right: 2px;
+      margin-top: -2px;
+
+      @include mq(xs, max) {
+        margin-right: 2px;
+        height: 14px;
+      }
+    }
+
+    span:not(:last-child) {
+      margin-right: 2px;
+    }
+  }
+
   .separator {
     padding: 0 $s * 0.5;
   }

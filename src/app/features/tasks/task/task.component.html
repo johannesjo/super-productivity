@@ -179,14 +179,21 @@
           class="time"
         >
           <div class="time-val">
-            <span>∑</span>
+            <mat-icon
+              inline="true"
+              style="margin-top: -6px"
+              >functions
+            </mat-icon>
             <span [innerHTML]="task.subTasks|subTaskTotalTimeSpent|msToString"></span>
           </div>
           <div class="separator">/</div>
-          <div
-            [innerHTML]="task.subTasks|subTaskTotalTimeEstimate|msToString"
-            class="time-val"
-          ></div>
+          <div class="time-val">
+            <mat-icon
+              svgIcon="estimate_remaining"
+              inline="true"
+            ></mat-icon>
+            {{ task.timeEstimate|msToString }}
+          </div>
         </div>
       </div>
 

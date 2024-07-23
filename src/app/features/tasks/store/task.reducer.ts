@@ -163,7 +163,7 @@ export const taskReducer = createReducer<TaskState>(
     stateCopy = timeSpentOnDay
       ? updateTimeSpentForTask(id, timeSpentOnDay, stateCopy)
       : stateCopy;
-    stateCopy = updateTimeEstimateForTask(id, timeEstimate, stateCopy);
+    stateCopy = updateTimeEstimateForTask(task, timeEstimate, stateCopy);
     stateCopy = updateDoneOnForTask(task, stateCopy);
     return taskAdapter.updateOne(task, stateCopy);
   }),
