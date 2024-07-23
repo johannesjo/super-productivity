@@ -1,6 +1,9 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { UiModule } from '../../../ui/ui.module';
 
+const FH = 12;
+const D_HOURS = 24;
+
 @Component({
   selector: 'schedule',
   standalone: true,
@@ -10,16 +13,23 @@ import { UiModule } from '../../../ui/ui.module';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ScheduleComponent {
-  hourFraction = 1;
-  numberOfRows = 24;
+  FH = FH;
   daysToShow = 7;
   colByNr = Array.from({ length: this.daysToShow }, (_, index) => index);
-  rowsByNr = Array.from({ length: this.numberOfRows }, (_, index) => index);
+  rowsByNr = Array.from({ length: D_HOURS * FH }, (_, index) => index);
+
   times: string[] = this.rowsByNr.map((_, index) => {
+    if (index % FH === 0) {
+      return (index / FH).toString() + ':00';
+    } else {
+      // eslint-disable-next-line no-mixed-operators
+      // return '  :' + (index % FH) * 5;
+      return '';
+    }
+
     // const hours = Math.floor(index / 2);
     // const minutes = index % 2 === 0 ? '00' : '30';
     // return `${hours}:${minutes}`;
-    return index.toString() + ':00';
   });
 
   events = [

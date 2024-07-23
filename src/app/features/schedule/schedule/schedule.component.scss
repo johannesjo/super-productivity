@@ -1,10 +1,12 @@
 $title-height: 3em;
 $days-height: 3em;
 $time-width: 3em;
-$time-height: 3em;
+$time-height: 4px;
 $grid-color: #dadce0;
 $calendar-template: $time-width 10px repeat(7, 1fr);
 $current-time-color: #ea4335;
+$fr: 12;
+$total-rows: 24 * $fr;
 
 .container {
   width: 100%;
@@ -40,7 +42,7 @@ $current-time-color: #ea4335;
 .content {
   display: grid;
   grid-template-columns: $calendar-template;
-  grid-template-rows: repeat(24, $time-height);
+  grid-template-rows: repeat($total-rows, $time-height);
 }
 
 .time {
@@ -56,7 +58,7 @@ $current-time-color: #ea4335;
 
 .col {
   border-right: 1px solid $grid-color;
-  grid-row: 1 / span 24;
+  grid-row: 1 / span $total-rows;
   grid-column: span 1;
 }
 
@@ -68,6 +70,9 @@ $current-time-color: #ea4335;
 
 .row {
   grid-column: 2 / -1;
+}
+
+.row:nth-child(#{$fr}n- 5) {
   border-bottom: 1px solid $grid-color;
 }
 
@@ -107,6 +112,11 @@ $current-time-color: #ea4335;
 .event2 {
   grid-column: 5;
   grid-row: 10 / span 6;
+}
+
+.event2b {
+  grid-column: 5;
+  grid-row: 11 / span 4;
 }
 
 .event3 {
