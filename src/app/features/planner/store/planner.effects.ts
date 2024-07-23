@@ -184,11 +184,13 @@ export class PlannerEffects {
                 this._globalTrackingIntervalService.todayDateStr$.pipe(first()),
               ),
             ),
-            this._globalTrackingIntervalService.todayDateStr$,
+            this._globalTrackingIntervalService.todayDateStr$.pipe(
+              // wait a bit for other stuff as days$ might not be up-to-date
+              delay(1400),
+            ),
           );
         }),
-        // wait a bit for other stuff
-        delay(1200),
+
         withLatestFrom(
           this._plannerService.days$,
           this._store.pipe(select(selectTodayTaskIds)),
@@ -196,7 +198,11 @@ export class PlannerEffects {
         exhaustMap(([todayStr, plannerDays, todayTaskIds]) => {
           const plannerDay = plannerDays[0];
           if (plannerDay.dayDate !== todayStr) {
-            throw new Error('Wrong day given');
+            // this might happen on day change
+            // devError('showDialogAfterAppLoad$(): Wrong day given');
+            // return EMPTY;
+
+            throw new Error('showDialogAfterAppLoad$(): Wrong day given');
           }
 
           const missingTaskIds = getAllMissingPlannedTaskIdsForDay(
