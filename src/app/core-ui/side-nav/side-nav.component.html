@@ -50,6 +50,18 @@
     <span class="text">{{ T.MH.PLANNER|translate }}</span>
   </button>
 
+  <button
+    #menuEntry
+    class="route-link"
+    mat-menu-item
+    routerLink="schedule"
+    routerLinkActive="isActiveRoute"
+  >
+    <mat-icon>calendar_view_week</mat-icon>
+    <!--    <span class="text">{{ T.MH.PLANNER|translate }}</span>-->
+    <span class="text">Schedule</span>
+  </button>
+
   <!-- class title missleading, but works ;) -->
   <div class="tag">
     <button
@@ -74,7 +86,7 @@
     #menuEntry
     class="route-link"
     mat-menu-item
-    routerLink="schedule"
+    routerLink="scheduled"
     routerLinkActive="isActiveRoute"
   >
     <mat-icon>access_alarms</mat-icon>
