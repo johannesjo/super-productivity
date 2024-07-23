@@ -9,10 +9,8 @@ export type DarkModeCfg = 'dark' | 'light' | 'system';
 export type MiscConfig = Readonly<{
   darkMode: DarkModeCfg;
   isAutMarkParentAsDone: boolean;
-  isAutoStartNextTask: boolean;
   isConfirmBeforeExit: boolean;
   isConfirmBeforeExitWithoutFinishDay: boolean;
-  isNotifyWhenTimeEstimateExceeded: boolean;
   isTurnOffMarkdown: boolean;
   isAutoAddWorkedOnToToday: boolean;
   isMinimizeToTray: boolean;
@@ -23,6 +21,14 @@ export type MiscConfig = Readonly<{
   startOfNextDay: number;
   taskNotesTpl: string;
   isDisableAnimations: boolean;
+}>;
+
+export type TimeTrackingConfig = Readonly<{
+  isAutoStartNextTask: boolean;
+  isNotifyWhenTimeEstimateExceeded: boolean;
+  isTrackingReminderEnabled: boolean;
+  isTrackingReminderShowOnMobile: boolean;
+  trackingReminderMinTime: number;
 }>;
 
 export type EvaluationConfig = Readonly<{
@@ -138,7 +144,7 @@ export type ReminderConfig = Readonly<{
   countdownDuration: number;
 }>;
 
-export type TrackingReminderConfig = Readonly<{
+export type TrackingReminderConfigOld = Readonly<{
   isEnabled: boolean;
   isShowOnMobile: boolean;
   minTime: number;
@@ -167,7 +173,7 @@ export type GlobalConfigState = Readonly<{
   keyboard: KeyboardConfig;
   localBackup: LocalBackupConfig;
   sound: SoundConfig;
-  trackingReminder: TrackingReminderConfig;
+  timeTracking: TimeTrackingConfig;
   calendarIntegration: CalendarIntegrationConfig;
   reminder: ReminderConfig;
   timeline: TimelineConfig;

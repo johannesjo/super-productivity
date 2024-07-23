@@ -12,9 +12,7 @@ export const DEFAULT_GLOBAL_CONFIG: GlobalConfigState = {
     darkMode: 'system',
     isConfirmBeforeExit: false,
     isConfirmBeforeExitWithoutFinishDay: true,
-    isNotifyWhenTimeEstimateExceeded: true,
     isAutMarkParentAsDone: false,
-    isAutoStartNextTask: false,
     isTurnOffMarkdown: false,
     isAutoAddWorkedOnToToday: true,
     isMinimizeToTray: false,
@@ -133,10 +131,12 @@ export const DEFAULT_GLOBAL_CONFIG: GlobalConfigState = {
     doneSound: 'done2.mp3',
     breakReminderSound: null,
   },
-  trackingReminder: {
-    isEnabled: true,
-    isShowOnMobile: false,
-    minTime: minute * 2,
+  timeTracking: {
+    isNotifyWhenTimeEstimateExceeded: true,
+    isAutoStartNextTask: false,
+    isTrackingReminderEnabled: true,
+    isTrackingReminderShowOnMobile: false,
+    trackingReminderMinTime: 2 * minute,
   },
   calendarIntegration: {
     calendarProviders: [],

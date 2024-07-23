@@ -4,6 +4,8 @@ import {
   IdleConfig,
   SyncConfig,
   TakeABreakConfig,
+  TimeTrackingConfig,
+  TrackingReminderConfigOld,
 } from './global-config.model';
 import { DEFAULT_GLOBAL_CONFIG } from './default-global-config.const';
 import { MODEL_VERSION_KEY } from '../../app.constants';
@@ -25,6 +27,8 @@ export const migrateGlobalConfigState = (
   globalConfigState = _migrateUndefinedShortcutsToNull(globalConfigState);
 
   globalConfigState = _migrateSyncCfg(globalConfigState);
+
+  globalConfigState = _migrateToNewTimeTrackingConfig(globalConfigState);
 
   globalConfigState = _migrateTimelineCalendarsToCalendarIntegration(globalConfigState);
 
@@ -136,6 +140,31 @@ const _migrateUndefinedShortcutsToNull = (
   return {
     ...config,
     keyboard: keyboardCopy,
+  };
+};
+
+const _migrateToNewTimeTrackingConfig = (
+  config: GlobalConfigState,
+): GlobalConfigState => {
+  if (config.timeTracking) {
+    return config;
+  }
+  const trackingOld = (config as any).trackingReminder as TrackingReminderConfigOld;
+  const miscOld = config.misc as any as Partial<TimeTrackingConfig>;
+
+  return {
+    ...config,
+    timeTracking: {
+      trackingReminderMinTime: trackingOld.minTime,
+      isTrackingReminderEnabled: trackingOld.isEnabled,
+      isTrackingReminderShowOnMobile: trackingOld.isShowOnMobile,
+      isAutoStartNextTask:
+        miscOld.isAutoStartNextTask ||
+        DEFAULT_GLOBAL_CONFIG.timeTracking.isAutoStartNextTask,
+      isNotifyWhenTimeEstimateExceeded:
+        miscOld.isNotifyWhenTimeEstimateExceeded ||
+        DEFAULT_GLOBAL_CONFIG.timeTracking.isNotifyWhenTimeEstimateExceeded,
+    },
   };
 };
 

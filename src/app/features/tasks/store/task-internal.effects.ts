@@ -11,7 +11,10 @@ import {
 import { select, Store } from '@ngrx/store';
 import { filter, map, mergeMap, withLatestFrom } from 'rxjs/operators';
 import { selectTaskFeatureState } from './task.selectors';
-import { selectMiscConfig } from '../../config/store/global-config.reducer';
+import {
+  selectConfigFeatureState,
+  selectMiscConfig,
+} from '../../config/store/global-config.reducer';
 import { Task, TaskState } from '../task.model';
 import { EMPTY, of } from 'rxjs';
 import { WorkContextService } from '../../work-context/work-context.service';
@@ -71,13 +74,13 @@ export class TaskInternalEffects {
         moveProjectTaskToBacklogListAuto.type,
       ),
       withLatestFrom(
-        this._store$.pipe(select(selectMiscConfig)),
+        this._store$.pipe(select(selectConfigFeatureState)),
         this._store$.pipe(select(selectTaskFeatureState)),
         this._workContextSession.todaysTaskIds$,
-        (action, miscCfg, state, todaysTaskIds) => ({
+        (action, globalCfg, state, todaysTaskIds) => ({
           action,
           state,
-          isAutoStartNextTask: miscCfg.isAutoStartNextTask,
+          isAutoStartNextTask: globalCfg.timeTracking.isAutoStartNextTask,
           todaysTaskIds,
         }),
       ),
