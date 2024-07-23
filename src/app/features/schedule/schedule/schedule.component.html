@@ -15,6 +15,7 @@
   <!-- https://codepen.io/kjellmf/pen/qgxyVJ -->
   <!-- https://codepen.io/una/pen/YzpgYRR -->
   <div class="content">
+    <!-- Time -->
     @for (time of times; track $index) {
     <div
       class="time"
@@ -39,15 +40,16 @@
     ></div>
     }
 
-    <div class="event event1 calendar1">Event 1</div>
-    <div class="event eventWrapper">
-      <div class="event calendar1">As dasdasd asdas das daA 1</div>
-      <div class="event calendar2">V asdasV 1</div>
+    <!-- Events -->
+    @for (event of events; track $index) {
+    <div
+      class="event calendar1"
+      [style]="event.style"
+    >
+      {{ event.title }}
     </div>
-    <div class="event event2 calendar2">Event 2</div>
-    <div class="event event2b calendar1">Event 2b</div>
-    <div class="event event3 calendar2">Event 3</div>
-    <div class="event event4 calendar1">Event 4</div>
+    }
+
     <div class="current-time">
       <div class="circle"></div>
     </div>

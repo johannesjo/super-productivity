@@ -109,26 +109,6 @@ $total-rows: 24 * $fr;
   display: flex;
 }
 
-.event2 {
-  grid-column: 5;
-  grid-row: 10 / span 6;
-}
-
-.event2b {
-  grid-column: 5;
-  grid-row: 11 / span 4;
-}
-
-.event3 {
-  grid-column: 7;
-  grid-row: 8 / span 10;
-}
-
-.event4 {
-  grid-column: 8;
-  grid-row: 21 / span 2;
-}
-
 .current-time {
   grid-column: 7;
   grid-row: 10;
