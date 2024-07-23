@@ -79,12 +79,15 @@
 .col {
   &.time {
     display: flex;
-    align-items: center;
-    justify-content: center;
+    align-items: flex-start;
+    justify-content: flex-end;
     position: relative;
     text-align: center;
     min-width: 52px;
     font-size: 10px;
+    font-weight: normal;
+    padding: 0;
+    padding-right: 4px;
 
     @include mq(xxs) {
       min-width: 60px;
@@ -92,8 +95,6 @@
     }
 
     &.hasTime {
-      padding: 0;
-      font-weight: normal;
     }
 
     margin-top: -$s * 0.5;
@@ -114,7 +115,7 @@
       height: 2px;
       right: -5px;
       position: absolute;
-      top: 50%;
+      top: 2px;
       transform: translateY(-50%);
 
       @include lightTheme() {
@@ -126,7 +127,7 @@
     }
 
     .row:first-child & {
-      &:before {
+      &:after {
         content: '';
         position: absolute;
         top: 0;
@@ -186,6 +187,13 @@
 
 .time-val {
   color: $dark-theme-text-color;
+  top: -8px;
+  right: 12px;
+  position: absolute;
+
+  @include mq(xs) {
+    right: 10px;
+  }
 
   @include lightTheme() {
     color: $light-theme-text-color;
@@ -230,6 +238,7 @@ planner-task.split-item {
   z-index: 5;
   display: flex;
   opacity: 0.5;
+  display: none;
 
   @include mousePrimaryDevice {
     //display: none;
@@ -245,11 +254,13 @@ planner-task.split-item {
 }
 
 .col-extra-btn {
+  margin: 16px 0;
   width: 40px;
   height: 40px;
   display: flex;
   justify-content: center;
   align-items: center;
+  align-self: center;
 
   &.plan-for-day {
     opacity: 1;
@@ -257,30 +268,6 @@ planner-task.split-item {
     &:hover {
       opacity: 1;
     }
-  }
-}
-
-.time-badge {
-  position: absolute;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  top: 50%;
-  margin-top: 10px;
-  z-index: 10;
-  line-height: 1;
-  text-align: center;
-  padding: 1px 2px 0;
-  border: 1px solid $light-theme-extra-border-color;
-  background: #fff;
-  border-radius: $card-border-radius;
-
-  // avoid affecting drag handle
-  pointer-events: none;
-
-  @include darkTheme() {
-    color: $dark-theme-text-color;
-    border-color: $dark-theme-extra-border-color;
-    background: $dark-theme-bg-lighter;
   }
 }
 

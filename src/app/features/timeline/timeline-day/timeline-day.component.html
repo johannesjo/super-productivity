@@ -24,9 +24,7 @@
         class="col time"
         [class.hasTime]="!row.isHideTime"
       >
-        <div
-          *ngIf="!row.isHideTime && row.type !==TimelineViewEntryType.ScheduledTask && row.type !==TimelineViewEntryType.TaskPlannedForDay && (row.type !==TimelineViewEntryType.SplitTaskPlannedForDay)"
-        >
+        <div *ngIf="!row.isHideTime ">
           <div class="time-val">
             {{ row.start <= now ? (T.F.TIMELINE.NOW|translate) :
             (row.start|roundDuration|date:'HH:mm') }}
@@ -54,7 +52,6 @@
           *ngIf="(row.type ===TimelineViewEntryType.ScheduledTask)"
           class="col-extra-btn"
         >
-          <div class="time-badge">{{ row.start|shortPlannedAt:'timeOnly' }}</div>
           <button
             mat-mini-fab
             (click)="editTaskReminder(row.data)"
@@ -68,12 +65,6 @@
           *ngIf="(row.type ===TimelineViewEntryType.TaskPlannedForDay) || row.type ===TimelineViewEntryType.SplitTaskPlannedForDay"
           class="col-extra-btn plan-for-day"
         >
-          <div
-            class="time-badge"
-            *ngIf="!row.isHideTime"
-          >
-            {{ row.start|shortPlannedAt:'timeOnly' }}
-          </div>
           <button
             mat-mini-fab
             (click)="planForDay(row.data, timelineDay.dayDate)"
