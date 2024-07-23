@@ -58,7 +58,10 @@
       {{ parentTitle }}
     </div>
 
-    <div class="title">
+    <div
+      class="title"
+      [style.overflow]="isEditTitleMode ? 'visible' : ''"
+    >
       {{ task.title }}
 
       <planner-task-edit

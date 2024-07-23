@@ -7,7 +7,6 @@ $h: $planner-item-height;
   border-radius: 6px;
   min-height: $h;
   display: flex;
-  align-items: center;
   align-items: stretch;
   background: $task-c-bg-light;
   @include grabCursor();
@@ -42,6 +41,8 @@ $h: $planner-item-height;
   display: flex;
   align-items: center;
   flex-grow: 1;
+  flex-shrink: 1;
+  min-width: 0;
   position: relative;
 }
 
@@ -59,6 +60,8 @@ $h: $planner-item-height;
 
 .wrap {
   flex-grow: 1;
+  flex-shrink: 1;
+  min-width: 0;
 }
 
 .title {
@@ -66,8 +69,11 @@ $h: $planner-item-height;
   padding-right: 4px;
   line-height: 1.5;
   position: relative;
+  overflow: hidden;
+  text-overflow: ellipsis;
   font-size: $planner-font-size-mobile;
   flex-grow: 1;
+  flex-shrink: 1;
 
   @include mq(xs) {
     font-size: $planner-font-size;

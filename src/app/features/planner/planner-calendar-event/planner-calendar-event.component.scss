@@ -56,7 +56,11 @@
   }
 }
 
-.custom-event-title {
+.title {
+  flex-shrink: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
   font-size: $planner-font-size-mobile;
 
   @include mq(xs) {

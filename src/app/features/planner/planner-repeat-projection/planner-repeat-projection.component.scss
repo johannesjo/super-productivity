@@ -43,6 +43,10 @@
 
 .title {
   font-size: $planner-font-size-mobile;
+  flex-shrink: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
 
   @include mq(xs) {
     font-size: $planner-font-size;
