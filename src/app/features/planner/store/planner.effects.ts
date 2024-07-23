@@ -36,6 +36,7 @@ import { selectTagById } from '../../tag/store/tag.reducer';
 import { updateTag } from '../../tag/store/tag.actions';
 import { PlannerService } from '../planner.service';
 import { getAllMissingPlannedTaskIdsForDay } from '../util/get-all-missing-planned-task-ids-for-day';
+import { devError } from '../../../util/dev-error';
 
 @Injectable()
 export class PlannerEffects {
@@ -196,13 +197,12 @@ export class PlannerEffects {
           this._store.pipe(select(selectTodayTaskIds)),
         ),
         exhaustMap(([todayStr, plannerDays, todayTaskIds]) => {
-          const plannerDay = plannerDays[0];
-          if (plannerDay.dayDate !== todayStr) {
-            // this might happen on day change
-            // devError('showDialogAfterAppLoad$(): Wrong day given');
-            // return EMPTY;
+          const plannerDay = plannerDays.find((day) => day.dayDate === todayStr);
 
-            throw new Error('showDialogAfterAppLoad$(): Wrong day given');
+          if (!plannerDay) {
+            devError('showDialogAfterAppLoad$(): No planner day found for today');
+            // might possibly happen if feature was never used?
+            return EMPTY;
           }
 
           const missingTaskIds = getAllMissingPlannedTaskIdsForDay(

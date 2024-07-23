@@ -27,7 +27,16 @@ import { getAllMissingPlannedTaskIdsForDay } from '../util/get-all-missing-plann
 })
 export class DialogAddPlannedTasksComponent {
   T: typeof T = T;
-  day$ = this._plannerService.days$.pipe(map((days) => days[0]));
+  day$ = this._plannerService.days$.pipe(
+    map((days) => {
+      const todayStr = this._dateService.todayStr();
+      const day = days.find((d) => d.dayDate === todayStr);
+      if (!day) {
+        throw new Error('Planner Day not found');
+      }
+      return day;
+    }),
+  );
 
   private _missingTakIds$ = combineLatest(
     this.day$,
