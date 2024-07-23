@@ -17,6 +17,17 @@
   @include mq(xs) {
     font-size: $planner-font-size;
   }
+
+  mat-icon {
+    vertical-align: middle;
+    margin-top: -2px;
+    height: 14px !important;
+
+    @include mq(xs) {
+      height: 16px !important;
+      font-size: $planner-font-size;
+    }
+  }
 }
 
 .planner-drag-place-holder-shared {

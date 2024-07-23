@@ -85,7 +85,11 @@
     [style.pointer-events]="task.subTaskIds?.length && 'none'"
     class="planner-time-remaining-shared"
   >
-    <span *ngIf="task.subTaskIds?.length">∑</span>
+    <mat-icon
+      *ngIf="task.subTaskIds?.length"
+      svgIcon="estimate_remaining"
+      inline="true"
+    ></mat-icon>
     @if (overWriteTimeEstimate > 0) { {{ overWriteTimeEstimate|msToString }} <br />
     <span class="original-time-remaining"
       >({{ (task.timeEstimate - task.timeSpent > 0 ? task.timeEstimate - task.timeSpent :
