@@ -1,9 +1,9 @@
 $title-height: 3em;
 $days-height: 3em;
 $time-width: 3em;
-$time-height: 4px;
+$time-height: 6px;
 $grid-color: #dadce0;
-$calendar-template: $time-width 10px repeat(7, 1fr);
+$calendar-template: $time-width 10px repeat(5, 1fr);
 $current-time-color: #ea4335;
 $fr: 12;
 $total-rows: 24 * $fr;
@@ -78,29 +78,16 @@ $total-rows: 24 * $fr;
 
 .event {
   border-radius: 5px;
-  padding: 5px;
+  padding: 0;
   margin-right: 10px;
   font-weight: bold;
-  font-size: 80%;
+  font-size: 10px;
+  border: 1px solid #000;
+  line-height: 1;
 }
 
 .weekend {
   background-color: #f1f3f4;
-}
-
-.calendar1 {
-  background-color: #d7dbef;
-  border-color: #bcc3e5;
-}
-
-.calendar2 {
-  background-color: #b3e1f7;
-  border-color: #81cdf2;
-}
-
-.event1 {
-  grid-column: 3;
-  grid-row: 9 / span 4;
 }
 
 .eventWrapper {

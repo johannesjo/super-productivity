@@ -634,7 +634,7 @@ const createSplitRepeat = ({
   };
 };
 
-const getTimeLeftForViewEntry = (viewEntry: TimelineViewEntry): number => {
+export const getTimeLeftForViewEntry = (viewEntry: TimelineViewEntry): number => {
   if (isTaskDataType(viewEntry)) {
     return getTimeLeftForTask((viewEntry as any).data as Task);
   } else if (
