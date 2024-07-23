@@ -155,6 +155,7 @@ const _migrateToNewTimeTrackingConfig = (
   return {
     ...config,
     timeTracking: {
+      ...DEFAULT_GLOBAL_CONFIG.timeTracking,
       trackingReminderMinTime: trackingOld.minTime,
       isTrackingReminderEnabled: trackingOld.isEnabled,
       isTrackingReminderShowOnMobile: trackingOld.isShowOnMobile,

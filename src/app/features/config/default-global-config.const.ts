@@ -132,6 +132,8 @@ export const DEFAULT_GLOBAL_CONFIG: GlobalConfigState = {
     breakReminderSound: null,
   },
   timeTracking: {
+    defaultEstimate: 0,
+    defaultEstimateSubTasks: 0,
     isNotifyWhenTimeEstimateExceeded: true,
     isAutoStartNextTask: false,
     isTrackingReminderEnabled: true,

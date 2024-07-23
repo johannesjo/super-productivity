@@ -1,6 +1,8 @@
 import { Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import {
+  addSubTask,
+  addTask,
   deleteTask,
   moveToArchive_,
   setCurrentTask,
@@ -56,6 +58,31 @@ export class TaskInternalEffects {
           task: {
             id: (state.entities[action.task.id] as Task).parentId as string,
             changes: { isDone: true },
+          },
+        }),
+      ),
+    ),
+  );
+
+  setDefaultValues$: any = createEffect(() =>
+    this._actions$.pipe(
+      ofType(addTask, addSubTask),
+      withLatestFrom(this._store$.pipe(select(selectConfigFeatureState))),
+      filter(
+        ([{ task }, cfg]) =>
+          (!task.timeEstimate && cfg.timeTracking.defaultEstimate > 0) ||
+          cfg.timeTracking.defaultEstimateSubTasks > 0,
+      ),
+      map(([action, cfg]) =>
+        updateTask({
+          task: {
+            id: action.task.id,
+            changes: {
+              timeEstimate:
+                action.task.parentId || (action as any).parentId
+                  ? cfg.timeTracking.defaultEstimateSubTasks
+                  : cfg.timeTracking.defaultEstimate,
+            },
           },
         }),
       ),

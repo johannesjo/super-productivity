@@ -8,6 +8,24 @@ export const TIME_TRACKING_FORM_CFG: ConfigFormSection<TimeTrackingConfig> = {
   key: 'timeTracking',
   items: [
     {
+      key: 'defaultEstimate',
+      type: 'duration',
+      templateOptions: {
+        label: T.GCF.TIME_TRACKING.L_DEFAULT_ESTIMATE,
+        description: T.G.DURATION_DESCRIPTION,
+        isShowZeroVal: true,
+      },
+    },
+    {
+      key: 'defaultEstimateSubTasks',
+      type: 'duration',
+      templateOptions: {
+        label: T.GCF.TIME_TRACKING.L_DEFAULT_ESTIMATE_SUB_TASKS,
+        description: T.G.DURATION_DESCRIPTION,
+        isShowZeroVal: true,
+      },
+    },
+    {
       key: 'isAutoStartNextTask',
       type: 'checkbox',
       templateOptions: {

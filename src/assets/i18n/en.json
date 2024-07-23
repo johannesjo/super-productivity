@@ -1503,11 +1503,13 @@
     },
     "TIME_TRACKING": {
       "HELP": "The time tracking reminder is a banner to show up in case you forgot to start time tracking.",
+      "L_DEFAULT_ESTIMATE": "Default time estimate for new tasks",
+      "L_DEFAULT_ESTIMATE_SUB_TASKS": "Default time estimate for new sub tasks",
+      "L_IS_AUTO_START_NEXT_TASK": "Start tracking next task when marking current as done",
+      "L_IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "Notify when time estimate was exceeded",
       "L_IS_TRACKING_REMINDER_ENABLED": "Tracking Reminder Enabled",
       "L_IS_TRACKING_REMINDER_SHOW_ON_MOBILE": "Show tracking reminder on mobile app",
       "L_TRACKING_REMINDER_MIN_TIME": "Time to wait before showing tracking reminder Banner",
-      "L_IS_AUTO_START_NEXT_TASK": "Start tracking next task when marking current as done",
-      "L_IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "Notify when time estimate was exceeded",
       "TITLE": "Time Tracking"
     }
   },
