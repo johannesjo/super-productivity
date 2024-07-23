@@ -63,29 +63,29 @@ export class TimelineComponent implements OnDestroy {
       switchMap(({ allCalendarTaskEventIds, calendarProviders }) => {
         return calendarProviders && calendarProviders.length
           ? forkJoin(
-            calendarProviders
-              .filter((calProvider) => calProvider.isEnabled)
-              .map((calProvider) =>
-                this._calendarIntegrationService
-                  .requestEventsForTimeline(calProvider)
-                  .pipe(
-                    // filter out items already added as tasks
-                    map((calEvs) =>
-                      calEvs.filter(
-                        (calEv) => !allCalendarTaskEventIds.includes(calEv.id),
+              calendarProviders
+                .filter((calProvider) => calProvider.isEnabled)
+                .map((calProvider) =>
+                  this._calendarIntegrationService
+                    .requestEventsForTimeline(calProvider)
+                    .pipe(
+                      // filter out items already added as tasks
+                      map((calEvs) =>
+                        calEvs.filter(
+                          (calEv) => !allCalendarTaskEventIds.includes(calEv.id),
+                        ),
                       ),
+                      map((items: CalendarIntegrationEvent[]) => ({
+                        items,
+                        icon: calProvider.icon || null,
+                      })),
                     ),
-                    map((items: CalendarIntegrationEvent[]) => ({
-                      items,
-                      icon: calProvider.icon || null,
-                    })),
-                  ),
-              ),
-          ).pipe(
-            tap((val) => {
-              saveToRealLs(LS.TIMELINE_CACHE, val);
-            }),
-          )
+                ),
+            ).pipe(
+              tap((val) => {
+                saveToRealLs(LS.TIMELINE_CACHE, val);
+              }),
+            )
           : of([] as any);
       }),
       startWith(this._getCalProviderFromCache()),
@@ -108,15 +108,15 @@ export class TimelineComponent implements OnDestroy {
         currentId,
         timelineCfg?.isWorkStartEndEnabled
           ? {
-            startTime: timelineCfg.workStart,
-            endTime: timelineCfg.workEnd,
-          }
+              startTime: timelineCfg.workStart,
+              endTime: timelineCfg.workEnd,
+            }
           : undefined,
         timelineCfg?.isLunchBreakEnabled
           ? {
-            startTime: timelineCfg.lunchBreakStart,
-            endTime: timelineCfg.lunchBreakEnd,
-          }
+              startTime: timelineCfg.lunchBreakStart,
+              endTime: timelineCfg.lunchBreakEnd,
+            }
           : undefined,
       ),
     ),
