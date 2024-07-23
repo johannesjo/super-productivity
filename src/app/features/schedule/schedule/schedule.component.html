@@ -11,266 +11,34 @@
     <div class="day">Sat 9</div>
     <div class="day">Sun 10</div>
   </div>
+
+  <!-- https://codepen.io/kjellmf/pen/qgxyVJ -->
+  <!-- https://codepen.io/una/pen/YzpgYRR -->
   <div class="content">
+    @for (time of times; track $index) {
     <div
       class="time"
-      style="grid-row: 1"
+      style="grid-row: {{ $index + 1 }}"
     >
-      01:00
+      {{ time }}
     </div>
-    <div
-      class="time"
-      style="grid-row: 2"
-    >
-      02:00
-    </div>
-    <div
-      class="time"
-      style="grid-row: 3"
-    >
-      03:00
-    </div>
-    <div
-      class="time"
-      style="grid-row: 4"
-    >
-      04:00
-    </div>
-    <div
-      class="time"
-      style="grid-row: 5"
-    >
-      05:00
-    </div>
-    <div
-      class="time"
-      style="grid-row: 6"
-    >
-      06:00
-    </div>
-    <div
-      class="time"
-      style="grid-row: 7"
-    >
-      07:00
-    </div>
-    <div
-      class="time"
-      style="grid-row: 8"
-    >
-      08:00
-    </div>
-    <div
-      class="time"
-      style="grid-row: 9"
-    >
-      09:00
-    </div>
-    <div
-      class="time"
-      style="grid-row: 10"
-    >
-      10:00
-    </div>
-    <div
-      class="time"
-      style="grid-row: 11"
-    >
-      11:00
-    </div>
-    <div
-      class="time"
-      style="grid-row: 12"
-    >
-      12:00
-    </div>
-    <div
-      class="time"
-      style="grid-row: 13"
-    >
-      13:00
-    </div>
-    <div
-      class="time"
-      style="grid-row: 14"
-    >
-      14:00
-    </div>
-    <div
-      class="time"
-      style="grid-row: 15"
-    >
-      15:00
-    </div>
-    <div
-      class="time"
-      style="grid-row: 16"
-    >
-      16:00
-    </div>
-    <div
-      class="time"
-      style="grid-row: 17"
-    >
-      17:00
-    </div>
-    <div
-      class="time"
-      style="grid-row: 18"
-    >
-      18:00
-    </div>
-    <div
-      class="time"
-      style="grid-row: 19"
-    >
-      19:00
-    </div>
-    <div
-      class="time"
-      style="grid-row: 20"
-    >
-      20:00
-    </div>
-    <div
-      class="time"
-      style="grid-row: 21"
-    >
-      21:00
-    </div>
-    <div
-      class="time"
-      style="grid-row: 22"
-    >
-      22:00
-    </div>
-    <div
-      class="time"
-      style="grid-row: 23"
-    >
-      23:00
-    </div>
-    <div class="filler-col"></div>
+    }
+    <!-- Grid Cols -->
+    @for (col of colByNr; track $index) {
     <div
       class="col"
-      style="grid-column: 3"
+      style="grid-column: {{ $index + 2 }}"
     ></div>
-    <div
-      class="col"
-      style="grid-column: 4"
-    ></div>
-    <div
-      class="col"
-      style="grid-column: 5"
-    ></div>
-    <div
-      class="col"
-      style="grid-column: 6"
-    ></div>
-    <div
-      class="col"
-      style="grid-column: 7"
-    ></div>
-    <div
-      class="col weekend"
-      style="grid-column: 8"
-    ></div>
-    <div
-      class="col weekend"
-      style="grid-column: 9"
-    ></div>
+    }
+
+    <!-- Grid Rows -->
+    @for (row of rowsByNr; track $index) {
     <div
       class="row"
-      style="grid-row: 1"
+      style="grid-row: {{ $index + 1 }}"
     ></div>
-    <div
-      class="row"
-      style="grid-row: 2"
-    ></div>
-    <div
-      class="row"
-      style="grid-row: 3"
-    ></div>
-    <div
-      class="row"
-      style="grid-row: 4"
-    ></div>
-    <div
-      class="row"
-      style="grid-row: 5"
-    ></div>
-    <div
-      class="row"
-      style="grid-row: 6"
-    ></div>
-    <div
-      class="row"
-      style="grid-row: 7"
-    ></div>
-    <div
-      class="row"
-      style="grid-row: 8"
-    ></div>
-    <div
-      class="row"
-      style="grid-row: 9"
-    ></div>
-    <div
-      class="row"
-      style="grid-row: 10"
-    ></div>
-    <div
-      class="row"
-      style="grid-row: 11"
-    ></div>
-    <div
-      class="row"
-      style="grid-row: 12"
-    ></div>
-    <div
-      class="row"
-      style="grid-row: 13"
-    ></div>
-    <div
-      class="row"
-      style="grid-row: 14"
-    ></div>
-    <div
-      class="row"
-      style="grid-row: 15"
-    ></div>
-    <div
-      class="row"
-      style="grid-row: 16"
-    ></div>
-    <div
-      class="row"
-      style="grid-row: 17"
-    ></div>
-    <div
-      class="row"
-      style="grid-row: 18"
-    ></div>
-    <div
-      class="row"
-      style="grid-row: 19"
-    ></div>
-    <div
-      class="row"
-      style="grid-row: 20"
-    ></div>
-    <div
-      class="row"
-      style="grid-row: 21"
-    ></div>
-    <div
-      class="row"
-      style="grid-row: 22"
-    ></div>
-    <div
-      class="row"
-      style="grid-row: 23"
-    ></div>
+    }
+
     <div class="event event1 calendar1">Event 1</div>
     <div class="event eventWrapper">
       <div class="event calendar1">As dasdasd asdas das daA 1</div>

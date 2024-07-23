@@ -6,14 +6,6 @@ $grid-color: #dadce0;
 $calendar-template: $time-width 10px repeat(7, 1fr);
 $current-time-color: #ea4335;
 
-* {
-  box-sizing: border-box;
-}
-
-body {
-  background: #fff;
-}
-
 .container {
   width: 100%;
   display: grid;
@@ -22,18 +14,15 @@ body {
 }
 
 .title {
-  background: #217346;
   text-align: center;
   display: grid;
   place-content: center;
-  color: #fff;
   position: sticky;
   top: 0;
   z-index: 10;
 }
 
 .days {
-  background: #f3f2f1;
   display: grid;
   place-content: center;
   text-align: center;
