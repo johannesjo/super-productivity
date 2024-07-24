@@ -127,7 +127,7 @@ header {
   grid-column: 2 / -1;
 }
 
-.row:nth-child(#{$fr}n- 5) {
+.row {
   border-bottom: 1px solid $grid-color;
 
   @include darkTheme() {

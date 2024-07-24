@@ -47,24 +47,15 @@ export class ScheduleComponent {
   FH = FH;
   nrOfDaysToShow = 5;
   colByNr = Array.from({ length: this.nrOfDaysToShow }, (_, index) => index);
-  rowsByNr = Array.from({ length: D_HOURS * FH }, (_, index) => index);
-
-  times: string[] = this.rowsByNr.map((_, index) => {
-    if (index % FH === 0) {
-      return (index / FH).toString() + ':00';
-    } else {
-      // eslint-disable-next-line no-mixed-operators
-      // return '  :' + (index % FH) * 5;
-      return '';
-    }
-  });
+  rowsByNr = Array.from({ length: D_HOURS * FH }, (_, index) => index).filter(
+    (v, index) => index % FH === 0,
+  );
 
   // events = [
-  //   {
-  //     title: 'Something',
-  //     style: 'grid-column: 5;  grid-row: 10 / span 6',
-  //   },
-  // ];
+
+  times: string[] = this.rowsByNr.map((rowVal, index) => {
+    return index.toString() + ':00';
+  });
 
   T: typeof T = T;
   TimelineViewEntryType: typeof TimelineViewEntryType = TimelineViewEntryType;

@@ -61,7 +61,7 @@
     @for (time of times; track $index) {
     <div
       class="time"
-      style="grid-row: {{ $index + 1 }}"
+      style="grid-row: {{ $index *FH + 1 }}"
     >
       {{ time }}
     </div>
@@ -78,7 +78,7 @@
     @for (row of rowsByNr; track $index) {
     <div
       class="row"
-      style="grid-row: {{ $index + 1 }}"
+      style="grid-row: {{ row + 1 }}"
     ></div>
     }
 
