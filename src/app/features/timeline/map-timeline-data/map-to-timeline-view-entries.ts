@@ -372,8 +372,8 @@ export const insertBlockedBlocksViewEntries = (
         debug('BBB insert and move all following entries');
         break;
       } else {
-        const timeLeft = getTimeLeftForViewEntry(viewEntry);
-        const veEnd = viewEntry.start + getTimeLeftForViewEntry(viewEntry);
+        const timeLeft = getDurationForViewEntry(viewEntry);
+        const veEnd = viewEntry.start + getDurationForViewEntry(viewEntry);
         debug(blockedBlock.start < veEnd, blockedBlock.start, veEnd);
 
         // NOTE: blockedBlock.start > viewEntry.start is implicated by above checks
@@ -634,7 +634,7 @@ const createSplitRepeat = ({
   };
 };
 
-export const getTimeLeftForViewEntry = (viewEntry: TimelineViewEntry): number => {
+export const getDurationForViewEntry = (viewEntry: TimelineViewEntry): number => {
   if (isTaskDataType(viewEntry)) {
     return getTimeLeftForTask((viewEntry as any).data as Task);
   } else if (
@@ -648,6 +648,12 @@ export const getTimeLeftForViewEntry = (viewEntry: TimelineViewEntry): number =>
     viewEntry.type === TimelineViewEntryType.RepeatProjectionSplit
   ) {
     return viewEntry.data.defaultEstimate || 0;
+  } else if (viewEntry.type === TimelineViewEntryType.LunchBreak) {
+    const d = new Date();
+    return (
+      getDateTimeFromClockString(viewEntry.data.endTime, d) -
+      getDateTimeFromClockString(viewEntry.data.startTime, d)
+    );
   }
   throw new Error('Wrong type given: ' + viewEntry.type);
 };

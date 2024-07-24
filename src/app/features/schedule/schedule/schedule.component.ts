@@ -27,7 +27,7 @@ import { DialogTimelineSetupComponent } from '../../timeline/dialog-timeline-set
 import { T } from 'src/app/t.const';
 import { TimelineViewEntryType } from '../../timeline/timeline.const';
 import { AsyncPipe, DatePipe, NgClass, NgStyle } from '@angular/common';
-import { getTimeLeftForViewEntry } from '../../timeline/map-timeline-data/map-to-timeline-view-entries';
+import { getDurationForViewEntry } from '../../timeline/map-timeline-data/map-to-timeline-view-entries';
 import { StuckDirective } from '../../../ui/stuck/stuck.directive';
 import { ScheduleEventComponent } from '../schedule-event/schedule-event.component';
 import { ScheduleEvent } from '../schedule.model';
@@ -141,8 +141,7 @@ export class ScheduleComponent implements AfterViewInit, OnDestroy {
         day.entries.forEach((entry, entryIndex) => {
           if (
             entry.type !== TimelineViewEntryType.WorkdayEnd &&
-            entry.type !== TimelineViewEntryType.WorkdayStart &&
-            entry.type !== TimelineViewEntryType.LunchBreak
+            entry.type !== TimelineViewEntryType.WorkdayStart
           ) {
             const entryAfter = day.entries[entryIndex + 1];
             const start = new Date(entry.start);
@@ -154,12 +153,16 @@ export class ScheduleComponent implements AfterViewInit, OnDestroy {
             const timeLeft =
               entryAfter && entryAfter.type !== TimelineViewEntryType.WorkdayEnd
                 ? entryAfter.start - entry.start
-                : getTimeLeftForViewEntry(entry);
+                : getDurationForViewEntry(entry);
             const timeLeftInHours = timeLeft / 1000 / 60 / 60;
             const rowSpan = Math.round(timeLeftInHours * FH);
             console.log(startHour, startMinute);
             daysFlat.push({
-              title: (entry as any)?.data?.title,
+              title:
+                (entry as any)?.data?.title ||
+                (entry.type === TimelineViewEntryType.LunchBreak
+                  ? 'Lunch Break'
+                  : 'TITLE'),
               type: entry.type,
               // title: entry.data.title,
               style: `grid-column: ${dayIndex + 3};  grid-row: ${startRow} / span ${rowSpan}`,

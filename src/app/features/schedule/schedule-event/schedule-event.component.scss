@@ -61,6 +61,23 @@ $split-extra-border-radius: 20px;
   }
 }
 
+:host.LunchBreak {
+  background: transparent !important;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border: 1px dashed $light-theme-separator-color;
+
+  @include darkTheme() {
+    border-color: $dark-theme-separator-color;
+  }
+
+  .title {
+    flex-grow: 0;
+    font-weight: bold;
+  }
+}
+
 // non draggable
 :host {
   &.SplitTaskContinued,

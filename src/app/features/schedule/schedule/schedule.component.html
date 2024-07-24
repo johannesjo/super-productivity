@@ -77,16 +77,6 @@
     ></div>
     }
 
-    <!--    &lt;!&ndash; Events &ndash;&gt;-->
-    <!--    @for (event of events; track $index) {-->
-    <!--    <div-->
-    <!--      class="event calendar1"-->
-    <!--      [style]="event.style"-->
-    <!--    >-->
-    <!--      {{ event.title }}-->
-    <!--    </div>-->
-    <!--    }-->
-
     <!-- Events -->
     @for (ev of (events$|async); track $index) {
     <!-- -->

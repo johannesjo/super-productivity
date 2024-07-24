@@ -78,7 +78,8 @@ export class ScheduleEventComponent extends BaseComponent implements OnInit, OnD
     | 'SCHEDULED_TASK'
     | 'PLANNED_FOR_DAY'
     | 'CAL_PROJECTION'
-    | 'SPLIT_CONTINUE' {
+    | 'SPLIT_CONTINUE'
+    | 'LUNCH_BREAK' {
     switch (this.se?.type) {
       case TimelineViewEntryType.RepeatProjection:
       case TimelineViewEntryType.RepeatProjectionSplit: {
@@ -97,6 +98,9 @@ export class ScheduleEventComponent extends BaseComponent implements OnInit, OnD
       }
       case TimelineViewEntryType.ScheduledTask: {
         return 'SCHEDULED_TASK';
+      }
+      case TimelineViewEntryType.LunchBreak: {
+        return 'LUNCH_BREAK';
       }
     }
     return 'SPLIT_CONTINUE';
