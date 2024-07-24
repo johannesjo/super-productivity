@@ -3,10 +3,13 @@
 <header stuck>
   <!-- TODO extract to component of its own? -->
   <div class="main-controls">
-    <button mat-icon-button>
+    <button
+      mat-icon-button
+      [disabled]="true"
+    >
       <mat-icon>chevron_left</mat-icon>
     </button>
-    <div>February Week 6</div>
+    <div>Current Week</div>
     <button mat-icon-button>
       <mat-icon>chevron_right</mat-icon>
     </button>
@@ -30,26 +33,13 @@
   <div class="days">
     <div class="filler"></div>
     <div class="filler"></div>
+
+    @for (day of daysToShow$|async; track $index) {
     <div class="day">
-      <div class="day-num">9</div>
-      <div class="day-day">Mon</div>
+      <div class="day-num">{{ day|date:'d' }}</div>
+      <div class="day-day">{{ day|date:'EEE' }}</div>
     </div>
-    <div class="day">
-      <div class="day-num">10</div>
-      <div class="day-day">Tue</div>
-    </div>
-    <div class="day">
-      <div class="day-num">11</div>
-      <div class="day-day">Wed</div>
-    </div>
-    <div class="day">
-      <div class="day-num">12</div>
-      <div class="day-day">Thu</div>
-    </div>
-    <div class="day">
-      <div class="day-num">13</div>
-      <div class="day-day">Fri</div>
-    </div>
+    }
   </div>
 </header>
 

@@ -17,7 +17,6 @@ import { GlobalTrackingIntervalService } from '../../core/global-tracking-interv
   providedIn: 'root',
 })
 export class PlannerService {
-  // includedWeekDays$ = of([0, 1, 2, 3, 4, 5, 6]);
   includedWeekDays$ = of([0, 1, 2, 3, 4, 5, 6]);
 
   daysToShow$ = this._globalTrackingIntervalService.todayDateStr$.pipe(

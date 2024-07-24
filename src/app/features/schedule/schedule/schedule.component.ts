@@ -19,7 +19,7 @@ import { LS } from '../../../core/persistence/storage-keys.const';
 import { DialogTimelineSetupComponent } from '../../timeline/dialog-timeline-setup/dialog-timeline-setup.component';
 import { T } from 'src/app/t.const';
 import { TimelineViewEntryType } from '../../timeline/timeline.const';
-import { AsyncPipe, NgClass, NgStyle } from '@angular/common';
+import { AsyncPipe, DatePipe, NgClass, NgStyle } from '@angular/common';
 import { getTimeLeftForViewEntry } from '../../timeline/map-timeline-data/map-to-timeline-view-entries';
 import { StuckDirective } from '../../../ui/stuck/stuck.directive';
 import { ScheduleEventComponent } from '../schedule-event/schedule-event.component';
@@ -31,7 +31,9 @@ import {
   CdkDragStart,
   CdkDropList,
 } from '@angular/cdk/drag-drop';
+import { GlobalTrackingIntervalService } from '../../../core/global-tracking-interval/global-tracking-interval.service';
 
+const DAYS_TO_SHOW = 5;
 const FH = 12;
 const D_HOURS = 24;
 const DRAG_OVER_CLASS = 'drag-over';
@@ -49,6 +51,7 @@ const IS_DRAGGING_CLASS = 'is-dragging';
     ScheduleEventComponent,
     CdkDrag,
     CdkDropList,
+    DatePipe,
   ],
   templateUrl: './schedule.component.html',
   styleUrl: './schedule.component.scss',
@@ -56,8 +59,7 @@ const IS_DRAGGING_CLASS = 'is-dragging';
 })
 export class ScheduleComponent {
   FH = FH;
-  nrOfDaysToShow = 5;
-  colByNr = Array.from({ length: this.nrOfDaysToShow }, (_, index) => index);
+  colByNr = Array.from({ length: DAYS_TO_SHOW }, (_, index) => index);
   rowsByNr = Array.from({ length: D_HOURS * FH }, (_, index) => index).filter(
     (v, index) => index % FH === 0,
   );
@@ -70,6 +72,12 @@ export class ScheduleComponent {
 
   T: typeof T = T;
   TimelineViewEntryType: typeof TimelineViewEntryType = TimelineViewEntryType;
+
+  daysToShow$ = this._globalTrackingIntervalService.todayDateStr$.pipe(
+    map(() => {
+      return this._getDaysToShow();
+    }),
+  );
 
   timelineDays$: Observable<TimelineDay[]> = combineLatest([
     this._store.pipe(select(selectTimelineTasks)),
@@ -189,6 +197,7 @@ export class ScheduleComponent {
     private _calendarIntegrationService: CalendarIntegrationService,
     private _store: Store,
     private _dateService: DateService,
+    private _globalTrackingIntervalService: GlobalTrackingIntervalService,
   ) {
     if (!localStorage.getItem(LS.WAS_TIMELINE_INITIAL_DIALOG_SHOWN)) {
       this._matDialog.open(DialogTimelineSetupComponent, {
@@ -248,7 +257,7 @@ export class ScheduleComponent {
   }
 
   private _getDaysToShow(): string[] {
-    const nrOfDaysToShow = this.nrOfDaysToShow;
+    const nrOfDaysToShow = DAYS_TO_SHOW;
     const today = new Date().getTime();
     const daysToShow: string[] = [];
     for (let i = 0; i < nrOfDaysToShow; i++) {
