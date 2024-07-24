@@ -35,6 +35,7 @@ import {
 const FH = 12;
 const D_HOURS = 24;
 const DRAG_OVER_CLASS = 'drag-over';
+const IS_DRAGGING_CLASS = 'is-dragging';
 
 @Component({
   selector: 'schedule',
@@ -197,18 +198,20 @@ export class ScheduleComponent {
   }
 
   dragMoved(ev: CdkDragMove<ScheduleEvent>): void {
-    console.log('dragMoved', ev);
+    // console.log('dragMoved', ev);
     ev.source.element.nativeElement.style.pointerEvents = 'none';
-
     const targetEl = document.elementFromPoint(
       ev.pointerPosition.x,
       ev.pointerPosition.y,
     ) as HTMLElement;
-    setTimeout(() => {
-      ev.source.element.nativeElement.style.pointerEvents = '';
-    });
+    // ev.source.element.nativeElement.style.pointerEvents = '';
+    if (!targetEl) {
+      return;
+    }
 
     if (targetEl !== this.prevDragOverEl) {
+      console.log('dragMoved targetElChanged', targetEl);
+
       if (this.prevDragOverEl) {
         this.prevDragOverEl.classList.remove(DRAG_OVER_CLASS);
       }
@@ -220,6 +223,8 @@ export class ScheduleComponent {
         targetEl.classList.contains(TimelineViewEntryType.TaskPlannedForDay)
       ) {
         this.prevDragOverEl.classList.add(DRAG_OVER_CLASS);
+      } else if (targetEl.classList.contains('col')) {
+        this.prevDragOverEl.classList.add(DRAG_OVER_CLASS);
       }
     }
   }
@@ -227,12 +232,13 @@ export class ScheduleComponent {
   dragStarted(ev: CdkDragStart<ScheduleEvent>): void {
     console.log('dragStart', ev);
     this.isDragging = true;
-    this.containerExtraClass = 'is-dragging ' + ev.source.data.type;
+    this.containerExtraClass = IS_DRAGGING_CLASS + '  ' + ev.source.data.type;
   }
 
   dragReleased(ev: CdkDragRelease): void {
     console.log('dragReleased', ev);
     ev.source.element.nativeElement.style.transform = 'translate3d(0, 0, 0)';
+    ev.source.element.nativeElement.style.pointerEvents = '';
     ev.source.reset();
     this.isDragging = false;
     this.containerExtraClass = '';

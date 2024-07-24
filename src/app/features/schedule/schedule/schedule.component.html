@@ -70,8 +70,13 @@
     @for (col of colByNr; track $index) {
     <div
       class="col"
-      style="grid-column: {{ $index + 2 }}"
-    ></div>
+      style="grid-column: {{ $index + 3 }}"
+    >
+      <div class="drop-on-col-info">
+        <mat-icon>add</mat-icon>
+        <div>Drop here to plan for day</div>
+      </div>
+    </div>
     }
 
     <!-- Grid Rows -->
