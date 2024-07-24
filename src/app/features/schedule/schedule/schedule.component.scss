@@ -62,11 +62,16 @@ header {
 }
 
 .day {
-  line-height: 40px;
+  line-height: 32px;
   font-size: 18px;
+  border-left: 1px solid $light-theme-extra-border-color;
+  @include darkTheme() {
+    border-color: $dark-theme-extra-border-color;
+  }
 
   @include mq(xs, max) {
     font-size: 14px;
+    line-height: 20px;
   }
 }
 
@@ -135,8 +140,6 @@ header {
 }
 
 .current-time {
-  grid-column: 7;
-  grid-row: 10;
   border-top: 2px solid $current-time-color;
   position: relative;
   top: calc(50% - 1px);
@@ -177,9 +180,6 @@ header {
   @include mq(xs, max) {
     background: $c-accent !important;
   }
-}
-
-.col {
 }
 
 .drop-on-col-info {

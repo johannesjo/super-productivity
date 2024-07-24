@@ -185,7 +185,7 @@ export class ScheduleComponent implements AfterViewInit, OnDestroy {
       // eslint-disable-next-line no-mixed-operators
       const hoursToday = hours + minutes / 60;
       const row = Math.round(hoursToday * FH);
-      return `grid-column: ${3};  grid-row: ${row} / span ${1}`;
+      return `grid-column: ${2};  grid-row: ${row} / span ${1}`;
     }),
   );
 

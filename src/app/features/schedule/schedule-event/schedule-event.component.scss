@@ -74,7 +74,6 @@ $split-extra-border-radius: 20px;
 
   .title {
     flex-grow: 0;
-    font-weight: bold;
   }
 }
 
@@ -89,7 +88,12 @@ $split-extra-border-radius: 20px;
   &.RepeatProjectionSplitContinuedLast,
   &.ScheduledRepeatProjection,
   &.ScheduledTask {
-    opacity: 0.6;
+    opacity: 0.5;
+
+    &:hover {
+      opacity: 1;
+      outline: 1px solid $c-accent;
+    }
   }
 }
 
