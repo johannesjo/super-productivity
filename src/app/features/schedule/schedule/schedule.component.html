@@ -56,7 +56,7 @@
 <div class="container">
   <!-- https://codepen.io/kjellmf/pen/qgxyVJ -->
   <!-- https://codepen.io/una/pen/YzpgYRR -->
-  <div class="content">
+  <div class="content {{containerExtraClass}}">
     <!-- Time -->
     @for (time of times; track $index) {
     <div
@@ -93,9 +93,22 @@
     <!--    }-->
 
     <!-- Events -->
-    @for (event of (events$|async); track $index) {
-    <schedule-event [event]="event"></schedule-event>
-    }
+    @for (ev of (events$|async); track $index) {
+    <!-- -->
+    @if (ev.type === 'Task' || ev.type === 'SplitTask' || ev.type === 'TaskPlannedForDay'
+    || ev.type === 'SplitTaskPlannedForDay' || ev.type === 'TaskScheduled') {
+    <schedule-event
+      class="draggable"
+      cdkDrag
+      [cdkDragData]="ev"
+      (cdkDragMoved)="dragMoved($event)"
+      (cdkDragStarted)="dragStarted($event)"
+      (cdkDragReleased)="dragReleased($event)"
+      [event]="ev"
+    ></schedule-event>
+    } @else {
+    <schedule-event [event]="ev"></schedule-event>
+    } }
 
     <div
       class="current-time"

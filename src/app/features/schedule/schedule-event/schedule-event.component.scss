@@ -25,8 +25,8 @@ $split-extra-border-radius: 20px;
   border-left: 4px solid var(--project-color);
 
   &:hover {
-    z-index: 3;
-    overflow: visible;
+    //z-index: 3;
+    //overflow: visible;
   }
 
   @include darkTheme() {
@@ -59,6 +59,14 @@ $split-extra-border-radius: 20px;
   }
 }
 
+:host > * {
+  pointer-events: none;
+}
+
+//:host-context(.is-dragging):hover {
+//  background: $dark24;
+//}
+
 .fake-ico,
 .ico {
   font-size: 14px;
@@ -85,12 +93,12 @@ $split-extra-border-radius: 20px;
   font-weight: 300;
   line-height: 1.2;
 
-  &:hover {
-    box-shadow: $whiteframe-shadow-3dp;
-    background: inherit;
-    //border: 1px solid $light-theme-separator-color;
-    border-radius: 4px;
-  }
+  //&:hover {
+  //  box-shadow: $whiteframe-shadow-3dp;
+  //  background: inherit;
+  //  //border: 1px solid $light-theme-separator-color;
+  //  border-radius: 4px;
+  //}
 
   :host.SplitTaskContinued &,
   :host.RepeatProjectionSplitContinued &,
@@ -99,5 +107,31 @@ $split-extra-border-radius: 20px;
     //white-space: nowrap;
     //max-width: 100%;
     line-clamp: 1;
+  }
+}
+
+// planner tasks
+:host-context(.is-dragging.TaskPlannedForDay) :host.TaskPlannedForDay,
+:host-context(.is-dragging.TaskPlannedForDay) :host.SplitTaskPlannedForDay,
+:host-context(.is-dragging.SplitTaskPlannedForDay) :host.TaskPlannedForDay,
+:host-context(.is-dragging.SplitTaskPlannedForDay) :host.SplitTaskPlannedForDay,
+  // normal tasks
+:host-context(.is-dragging.Task) :host.Task,
+:host-context(.is-dragging.Task) :host.SplitTask,
+:host-context(.is-dragging.SplitTask) :host.SplitTask,
+:host-context(.is-dragging.SplitTask) :host.Task {
+  background: $dark24;
+}
+
+:host.drag-over {
+  background: $c-accent !important;
+  color: $c-contrast !important;
+}
+
+:host.draggable {
+  cursor: grab;
+
+  &:active {
+    cursor: grabbing;
   }
 }

@@ -167,3 +167,9 @@ header {
 .current {
   font-weight: bold;
 }
+
+.cdk-drag-dragging {
+  position: relative;
+  z-index: 99;
+  box-shadow: $whiteframe-shadow-20dp;
+}

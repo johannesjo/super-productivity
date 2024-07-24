@@ -24,9 +24,17 @@ import { getTimeLeftForViewEntry } from '../../timeline/map-timeline-data/map-to
 import { StuckDirective } from '../../../ui/stuck/stuck.directive';
 import { ScheduleEventComponent } from '../schedule-event/schedule-event.component';
 import { ScheduleEvent } from '../schedule.model';
+import {
+  CdkDrag,
+  CdkDragMove,
+  CdkDragRelease,
+  CdkDragStart,
+  CdkDropList,
+} from '@angular/cdk/drag-drop';
 
 const FH = 12;
 const D_HOURS = 24;
+const DRAG_OVER_CLASS = 'drag-over';
 
 @Component({
   selector: 'schedule',
@@ -38,6 +46,8 @@ const D_HOURS = 24;
     NgClass,
     StuckDirective,
     ScheduleEventComponent,
+    CdkDrag,
+    CdkDropList,
   ],
   templateUrl: './schedule.component.html',
   styleUrl: './schedule.component.scss',
@@ -166,6 +176,9 @@ export class ScheduleComponent {
 
   now: number = Date.now();
   tomorrow: number = getTomorrow(0).getTime();
+  isDragging = false;
+  containerExtraClass = '';
+  prevDragOverEl: HTMLElement | null = null;
 
   constructor(
     public taskService: TaskService,
@@ -180,6 +193,51 @@ export class ScheduleComponent {
       this._matDialog.open(DialogTimelineSetupComponent, {
         data: { isInfoShownInitially: true },
       });
+    }
+  }
+
+  dragMoved(ev: CdkDragMove<ScheduleEvent>): void {
+    console.log('dragMoved', ev);
+    ev.source.element.nativeElement.style.pointerEvents = 'none';
+
+    const targetEl = document.elementFromPoint(
+      ev.pointerPosition.x,
+      ev.pointerPosition.y,
+    ) as HTMLElement;
+    setTimeout(() => {
+      ev.source.element.nativeElement.style.pointerEvents = '';
+    });
+
+    if (targetEl !== this.prevDragOverEl) {
+      if (this.prevDragOverEl) {
+        this.prevDragOverEl.classList.remove(DRAG_OVER_CLASS);
+      }
+      this.prevDragOverEl = targetEl;
+      if (
+        targetEl.classList.contains(TimelineViewEntryType.Task) ||
+        targetEl.classList.contains(TimelineViewEntryType.SplitTask) ||
+        targetEl.classList.contains(TimelineViewEntryType.SplitTaskPlannedForDay) ||
+        targetEl.classList.contains(TimelineViewEntryType.TaskPlannedForDay)
+      ) {
+        this.prevDragOverEl.classList.add(DRAG_OVER_CLASS);
+      }
+    }
+  }
+
+  dragStarted(ev: CdkDragStart<ScheduleEvent>): void {
+    console.log('dragStart', ev);
+    this.isDragging = true;
+    this.containerExtraClass = 'is-dragging ' + ev.source.data.type;
+  }
+
+  dragReleased(ev: CdkDragRelease): void {
+    console.log('dragReleased', ev);
+    ev.source.element.nativeElement.style.transform = 'translate3d(0, 0, 0)';
+    ev.source.reset();
+    this.isDragging = false;
+    this.containerExtraClass = '';
+    if (this.prevDragOverEl) {
+      this.prevDragOverEl.classList.remove(DRAG_OVER_CLASS);
     }
   }
 
