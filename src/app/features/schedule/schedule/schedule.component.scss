@@ -4,10 +4,11 @@ $title-height: 3em;
 $days-height: 3em;
 $time-width: 3em;
 $time-height: 8px;
+$time-height-mobile: 6px;
 //$grid-color: #dadce0;
 $grid-color: #dadce0;
 $grid-color-dark: rgba(255, 255, 255, 0.1);
-$calendar-template: $time-width 10px repeat(5, 1fr);
+$calendar-template: $time-width repeat(5, 1fr);
 $current-time-color: #ea4335;
 $current-time-color: $c-accent;
 $fr: 12;
@@ -61,12 +62,15 @@ header {
 }
 
 .day {
-  //border-left: 1px solid $grid-color;
   line-height: 40px;
+  font-size: 18px;
+
+  @include mq(xs, max) {
+    font-size: 14px;
+  }
 }
 
 .day-num {
-  font-size: 18px;
   font-weight: 600;
   display: inline;
   padding-right: 6px;
@@ -74,7 +78,6 @@ header {
 
 .day-day {
   display: inline;
-  font-size: 18px;
   font-weight: 100;
 }
 
@@ -82,6 +85,10 @@ header {
   display: grid;
   grid-template-columns: $calendar-template;
   grid-template-rows: repeat($total-rows, $time-height);
+
+  @include mq(xs, max) {
+    grid-template-rows: repeat($total-rows, $time-height-mobile);
+  }
 }
 
 .time {
@@ -90,9 +97,9 @@ header {
   align-self: end;
   font-size: 80%;
   position: relative;
-  bottom: -1ex;
+  margin-bottom: -10px;
   color: #70757a;
-  padding-right: 2px;
+  padding-right: 6px;
 }
 
 .col {
@@ -125,16 +132,6 @@ header {
   @include darkTheme() {
     border-color: $grid-color-dark;
   }
-}
-
-.weekend {
-  background-color: #f1f3f4;
-}
-
-.eventWrapper {
-  grid-column: 4;
-  grid-row: 9 / span 4;
-  display: flex;
 }
 
 .current-time {
@@ -176,6 +173,10 @@ header {
   border-right: 5px solid $c-accent !important;
   //outline: 5px solid $c-accent !important;
   //color: $c-contrast !important;
+
+  @include mq(xs, max) {
+    background: $c-accent !important;
+  }
 }
 
 .col {
@@ -196,6 +197,15 @@ header {
   z-index: 1111;
   pointer-events: none;
   box-shadow: $whiteframe-shadow-4dp;
+  width: inherit;
+
+  @include mq(xs, max) {
+    background: $c-accent;
+
+    div {
+      display: none;
+    }
+  }
 }
 
 .col.drag-over .drop-on-col-info {

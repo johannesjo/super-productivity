@@ -30,8 +30,7 @@
   </div>
 
   <div class="days">
-    <div class="filler"></div>
-    <div class="filler"></div>
+    <div class="filler"><!--for time --></div>
 
     @for (day of daysToShow$|async; track $index) {
     <div class="day">
@@ -60,7 +59,7 @@
     @for (col of colByNr; track $index) {
     <div
       class="col"
-      style="grid-column: {{ $index + 3 }}"
+      style="grid-column: {{ $index + 2 }}"
     >
       <div class="drop-on-col-info">
         <mat-icon>add</mat-icon>

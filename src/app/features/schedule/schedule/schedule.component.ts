@@ -165,7 +165,7 @@ export class ScheduleComponent implements AfterViewInit, OnDestroy {
                   : 'TITLE'),
               type: entry.type,
               // title: entry.data.title,
-              style: `grid-column: ${dayIndex + 3};  grid-row: ${startRow} / span ${rowSpan}`,
+              style: `grid-column: ${dayIndex + 2};  grid-row: ${startRow} / span ${rowSpan}`,
               data: entry.data,
             });
           }

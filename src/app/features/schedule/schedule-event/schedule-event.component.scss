@@ -117,6 +117,10 @@ $split-extra-border-radius: 20px;
   margin-left: 4px;
   margin-top: 5px;
   opacity: 0.8;
+
+  @include mq(xs, max) {
+    display: none;
+  }
 }
 
 .fake-ico {
@@ -133,6 +137,10 @@ $split-extra-border-radius: 20px;
   padding: 4px;
   font-weight: 300;
   line-height: 1.2;
+
+  @include mq(xs, max) {
+    font-size: 11px;
+  }
 
   //&:hover {
   //  box-shadow: $whiteframe-shadow-3dp;
