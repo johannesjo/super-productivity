@@ -1,3 +1,5 @@
+@import '../../../../variables.scss';
+
 $title-height: 3em;
 $days-height: 3em;
 $time-width: 3em;
@@ -15,13 +17,24 @@ $total-rows: 24 * $fr;
   position: absolute;
 }
 
-.title {
-  text-align: center;
-  display: grid;
-  place-content: center;
+header {
+  display: flex;
+  flex-direction: column;
+  background: white;
   position: sticky;
   top: 0;
+  left: 0;
+  right: 0;
   z-index: 10;
+  box-shadow: $whiteframe-shadow-2dp;
+}
+
+.main-controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-top: 1px solid $light-theme-extra-border-color;
+  border-bottom: 1px solid $light-theme-extra-border-color;
 }
 
 .days {
@@ -29,14 +42,24 @@ $total-rows: 24 * $fr;
   place-content: center;
   text-align: center;
   grid-template-columns: $calendar-template;
-  position: sticky;
-  top: $title-height;
-  z-index: 10;
-  border-bottom: 2px solid $grid-color;
 }
 
 .day {
-  border-left: 1px solid $grid-color;
+  //border-left: 1px solid $grid-color;
+  line-height: 40px;
+}
+
+.day-num {
+  font-size: 18px;
+  font-weight: 600;
+  display: inline;
+  padding-right: 6px;
+}
+
+.day-day {
+  display: inline;
+  font-size: 18px;
+  font-weight: 100;
 }
 
 .content {

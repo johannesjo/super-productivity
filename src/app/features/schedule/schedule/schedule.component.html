@@ -1,15 +1,58 @@
-<div class="container">
-  <div class="title">February 2019 Week 6</div>
+<!--  <div class="title">February 2019 Week 6</div>-->
+
+<header>
+  <!-- TODO extract to component of its own? -->
+  <div class="main-controls">
+    <button mat-icon-button>
+      <mat-icon>chevron_left</mat-icon>
+    </button>
+    <div>February Week 6</div>
+    <button mat-icon-button>
+      <mat-icon>chevron_right</mat-icon>
+    </button>
+
+    <div>~Flow from:</div>
+
+    <button
+      mat-button
+      [matMenuTriggerFor]="menu"
+    >
+      <mat-icon>wb_sunny</mat-icon>
+      Today
+    </button>
+    <mat-menu #menu="matMenu">
+      <button mat-menu-item>Only show appointments</button>
+      <button mat-menu-item>Show tasks from X</button>
+    </mat-menu>
+  </div>
+
   <div class="days">
     <div class="filler"></div>
     <div class="filler"></div>
-    <div class="day">Mon 4</div>
-    <div class="day">Tue 5</div>
-    <div class="day">Wed 6</div>
-    <div class="day">Thu 7</div>
-    <div class="day current">Fri 8</div>
+    <div class="day">
+      <div class="day-num">9</div>
+      <div class="day-day">Mon</div>
+    </div>
+    <div class="day">
+      <div class="day-num">10</div>
+      <div class="day-day">Tue</div>
+    </div>
+    <div class="day">
+      <div class="day-num">11</div>
+      <div class="day-day">Wed</div>
+    </div>
+    <div class="day">
+      <div class="day-num">12</div>
+      <div class="day-day">Thu</div>
+    </div>
+    <div class="day">
+      <div class="day-num">13</div>
+      <div class="day-day">Fri</div>
+    </div>
   </div>
+</header>
 
+<div class="container">
   <!-- https://codepen.io/kjellmf/pen/qgxyVJ -->
   <!-- https://codepen.io/una/pen/YzpgYRR -->
   <div class="content">
