@@ -180,8 +180,8 @@ header {
 
 .col.drag-over,
 .row.drag-over {
-  //background: $c-accent !important;
-  outline: 5px solid $c-accent !important;
+  background: $c-accent !important;
+  //outline: 5px solid $c-accent !important;
   //color: $c-contrast !important;
 }
 
@@ -191,17 +191,18 @@ header {
 
 .drop-on-col-info {
   padding: 0 8px;
+  margin-left: -2px;
   display: none;
   background: $c-accent;
   color: $c-contrast;
   text-align: center;
   position: fixed;
-  top: 50%;
+  top: 134px;
   line-height: 80px;
   align-items: center;
   justify-content: center;
   align-self: start;
-  z-index: 4;
+  z-index: 44;
   pointer-events: none;
 }
 
