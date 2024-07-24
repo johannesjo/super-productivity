@@ -90,8 +90,10 @@
     <!-- Events -->
     @for (ev of (events$|async); track $index) {
     <!-- -->
-    @if (ev.type === 'Task' || ev.type === 'SplitTask' || ev.type === 'TaskPlannedForDay'
-    || ev.type === 'SplitTaskPlannedForDay' || ev.type === 'TaskScheduled') {
+    @if (ev.type === TimelineViewEntryType.Task || ev.type ===
+    TimelineViewEntryType.SplitTask || ev.type === TimelineViewEntryType.TaskPlannedForDay
+    || ev.type === TimelineViewEntryType.SplitTaskPlannedForDay || ev.type ===
+    TimelineViewEntryType.ScheduledTask) {
     <schedule-event
       class="draggable"
       cdkDrag
