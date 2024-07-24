@@ -20,20 +20,28 @@ $total-rows: 24 * $fr;
 header {
   display: flex;
   flex-direction: column;
-  background: white;
   position: sticky;
-  top: 0;
+  background: white;
+  top: -1px;
   left: 0;
   right: 0;
   z-index: 10;
-  box-shadow: $whiteframe-shadow-2dp;
+
+  border-top: 1px solid $light-theme-extra-border-color;
+  border-bottom: 1px solid $light-theme-extra-border-color;
+
+  &.is-stuck {
+    border-top-width: 2px;
+    border-bottom-width: 0px;
+    box-shadow: $whiteframe-shadow-2dp;
+    z-index: 10;
+  }
 }
 
 .main-controls {
   display: flex;
   align-items: center;
   justify-content: center;
-  border-top: 1px solid $light-theme-extra-border-color;
   border-bottom: 1px solid $light-theme-extra-border-color;
 }
 

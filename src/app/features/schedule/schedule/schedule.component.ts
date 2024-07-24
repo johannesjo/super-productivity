@@ -21,6 +21,7 @@ import { T } from 'src/app/t.const';
 import { TimelineViewEntryType } from '../../timeline/timeline.const';
 import { AsyncPipe, NgClass, NgStyle } from '@angular/common';
 import { getTimeLeftForViewEntry } from '../../timeline/map-timeline-data/map-to-timeline-view-entries';
+import { StuckDirective } from '../../../ui/stuck/stuck.directive';
 
 const FH = 12;
 const D_HOURS = 24;
@@ -28,7 +29,7 @@ const D_HOURS = 24;
 @Component({
   selector: 'schedule',
   standalone: true,
-  imports: [UiModule, NgStyle, AsyncPipe, NgClass],
+  imports: [UiModule, NgStyle, AsyncPipe, NgClass, StuckDirective],
   templateUrl: './schedule.component.html',
   styleUrl: './schedule.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

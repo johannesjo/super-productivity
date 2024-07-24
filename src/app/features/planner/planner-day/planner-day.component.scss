@@ -12,11 +12,26 @@
   margin-bottom: 32px;
 }
 
+:host header {
+  margin-top: 16px;
+  margin-right: -4px;
+  margin-left: -4px;
+  border-radius: 8px;
+  //position: sticky;
+  //top: -2px;
+  //&.is-stuck {
+  //  background: white;
+  //  box-shadow: $whiteframe-shadow-2dp;
+  //  z-index: 10;
+  //}
+}
+
 .day-title {
   font-size: 22px;
   text-align: center;
   font-weight: bold;
   vertical-align: middle;
+  padding-top: 8px;
 
   .date {
     font-size: 12px;
@@ -27,7 +42,8 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  margin: 8px 0;
+  padding: 8px 0;
+  border-radius: 4px;
   font-size: 18px;
 
   mat-icon:last-of-type {
