@@ -1,20 +1,28 @@
 @import '../../../../variables.scss';
 
+$split-extra-border-radius: 20px;
+
 :host {
   border-radius: 8px;
-  padding: 0 4px;
   margin-right: 10px;
 
   line-height: 1;
-  overflow: hidden;
   min-height: 20px;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   // TODO evaluate
-  margin-bottom: 2px;
+  margin-bottom: 3px;
   border: 1px solid $light-theme-separator-color;
+  border-color: transparent;
   background: #fff;
   color: $light-theme-text-color;
+  overflow: hidden;
+  position: relative;
+
+  &:hover {
+    z-index: 3;
+    overflow: visible;
+  }
 
   @include darkTheme() {
     border-color: $dark-theme-separator-color;
@@ -23,12 +31,14 @@
   }
 
   &.split-start {
+    border-radius: $split-extra-border-radius;
     border-bottom-left-radius: 0;
     border-bottom-right-radius: 0;
     border-bottom-style: dashed;
   }
 
   &.split-continued {
+    border-radius: $split-extra-border-radius;
     border-top-left-radius: 0;
     border-bottom-right-radius: 0;
     border-bottom-style: dashed;
@@ -36,6 +46,7 @@
   }
 
   &.split-continued-last {
+    border-radius: $split-extra-border-radius;
     border-top-style: dashed;
     border-top-left-radius: 0;
     border-top-right-radius: 0;
@@ -47,9 +58,9 @@
   font-size: 14px;
   height: 14px;
   line-height: 14px;
-  margin-right: 4px;
   min-width: 14px;
-  align-self: center;
+  margin-left: 4px;
+  margin-top: 5px;
 }
 
 .fake-ico {
@@ -59,4 +70,16 @@
 
 .title {
   font-size: 13px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex-grow: 1;
+  flex-shrink: 1;
+  padding: 4px;
+
+  &:hover {
+    box-shadow: $whiteframe-shadow-3dp;
+    background: inherit;
+    //border: 1px solid $light-theme-separator-color;
+    border-radius: 4px;
+  }
 }
