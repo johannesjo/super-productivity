@@ -39,7 +39,7 @@ export class WebDavApiService {
     baseUrl: string;
     userName: string;
     password: string;
-    syncFilePath: string;
+    syncFolderPath: string;
   }> = this._globalConfigService.cfg$.pipe(
     map(
       (cfg) =>
@@ -47,14 +47,14 @@ export class WebDavApiService {
           baseUrl: string;
           userName: string;
           password: string;
-          syncFilePath: string;
+          syncFolderPath: string;
         },
     ),
   );
 
   isAllConfigDataAvailable$: Observable<boolean> = this._cfg$.pipe(
     map(
-      (cfg) => !!(cfg && cfg.userName && cfg.baseUrl && cfg.syncFilePath && cfg.password),
+      (cfg) => !!(cfg && cfg.userName && cfg.baseUrl && cfg.syncFolderPath && cfg.password),
     ),
   );
 
