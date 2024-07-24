@@ -1,4 +1,11 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import {
+  AfterViewInit,
+  ChangeDetectionStrategy,
+  Component,
+  ElementRef,
+  OnDestroy,
+  ViewChild,
+} from '@angular/core';
 import { UiModule } from '../../../ui/ui.module';
 import { combineLatest, Observable } from 'rxjs';
 import { TimelineDay } from '../../timeline/timeline.model';
@@ -57,7 +64,7 @@ const IS_DRAGGING_CLASS = 'is-dragging';
   styleUrl: './schedule.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class ScheduleComponent {
+export class ScheduleComponent implements AfterViewInit, OnDestroy {
   FH = FH;
   colByNr = Array.from({ length: DAYS_TO_SHOW }, (_, index) => index);
   rowsByNr = Array.from({ length: D_HOURS * FH }, (_, index) => index).filter(
@@ -188,6 +195,9 @@ export class ScheduleComponent {
   isDragging = false;
   containerExtraClass = '';
   prevDragOverEl: HTMLElement | null = null;
+  @ViewChild('gridContainer') gridContainer!: ElementRef;
+
+  private _scrollTopFirstElTimeout: number | undefined;
 
   constructor(
     public taskService: TaskService,
@@ -204,6 +214,35 @@ export class ScheduleComponent {
         data: { isInfoShownInitially: true },
       });
     }
+  }
+
+  ngAfterViewInit(): void {
+    this._scrollTopFirstElTimeout = window.setTimeout(() => {
+      this.scrollToTopElement();
+    }, 400);
+  }
+
+  ngOnDestroy(): void {
+    window.clearTimeout(this._scrollTopFirstElTimeout);
+  }
+
+  scrollToTopElement(): void {
+    const container: HTMLElement = this.gridContainer.nativeElement;
+    let topElement: HTMLElement | null = null;
+    let minOffsetTop = Number.MAX_SAFE_INTEGER;
+
+    for (const child of Array.from(container.children)) {
+      const childEl = child as HTMLElement;
+      if (
+        childEl.tagName.toLowerCase() === 'schedule-event' &&
+        childEl.offsetTop < minOffsetTop
+      ) {
+        minOffsetTop = childEl.offsetTop;
+        topElement = childEl;
+      }
+    }
+
+    topElement?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 
   dragMoved(ev: CdkDragMove<ScheduleEvent>): void {

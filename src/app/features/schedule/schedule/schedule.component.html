@@ -1,7 +1,6 @@
 <!--  <div class="title">February 2019 Week 6</div>-->
 
-<header stuck>
-  <!-- TODO extract to component of its own? -->
+<header>
   <div class="main-controls">
     <button
       mat-icon-button
@@ -43,10 +42,11 @@
   </div>
 </header>
 
-<div class="container">
-  <!-- https://codepen.io/kjellmf/pen/qgxyVJ -->
-  <!-- https://codepen.io/una/pen/YzpgYRR -->
-  <div class="content {{containerExtraClass}}">
+<div class="outer-container">
+  <div
+    #gridContainer
+    class="content {{containerExtraClass}}"
+  >
     <!-- Time -->
     @for (time of times; track $index) {
     <div

@@ -7,7 +7,9 @@ $split-extra-border-radius: 20px;
 
   border-radius: 4px;
   margin-right: 10px;
-
+  // size of sticky header
+  scroll-margin-top: 120px;
+  scroll-padding-top: 120px;
   line-height: 1;
   min-height: 20px;
   display: flex;
@@ -120,7 +122,22 @@ $split-extra-border-radius: 20px;
 :host-context(.is-dragging.Task) :host.SplitTask,
 :host-context(.is-dragging.SplitTask) :host.SplitTask,
 :host-context(.is-dragging.SplitTask) :host.Task {
+  //background: $light-theme-bg-darker;
+  outline: 1px solid $c-accent;
+  box-shadow: $whiteframe-shadow-3dp;
+}
+
+:host-context( .isDarkTheme .is-dragging.TaskPlannedForDay) :host.TaskPlannedForDay,
+:host-context( .isDarkTheme .is-dragging.TaskPlannedForDay) :host.SplitTaskPlannedForDay,
+:host-context( .isDarkTheme .is-dragging.SplitTaskPlannedForDay) :host.TaskPlannedForDay,
+:host-context( .isDarkTheme .is-dragging.SplitTaskPlannedForDay) :host.SplitTaskPlannedForDay,
+  // normal tasks
+:host-context( .isDarkTheme .is-dragging.Task) :host.Task,
+:host-context( .isDarkTheme .is-dragging.Task) :host.SplitTask,
+:host-context( .isDarkTheme .is-dragging.SplitTask) :host.SplitTask,
+:host-context( .isDarkTheme .is-dragging.SplitTask) :host.Task {
   background: $dark24;
+  outline: none;
 }
 
 :host.drag-over {

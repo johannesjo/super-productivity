@@ -13,7 +13,7 @@ $current-time-color: $c-accent;
 $fr: 12;
 $total-rows: 24 * $fr;
 
-.container {
+.outer-container {
   width: 100%;
   display: grid;
   grid-template-rows: $title-height $days-height auto;
@@ -24,7 +24,7 @@ header {
   display: flex;
   flex-direction: column;
   position: sticky;
-  top: -1px;
+  top: 0;
   left: 0;
   right: 0;
   z-index: 10;
@@ -32,21 +32,13 @@ header {
   border-bottom: 1px solid $light-theme-extra-border-color;
   background: #fff;
   color: $light-theme-text-color;
-
+  box-shadow: $whiteframe-shadow-3dp;
+  z-index: 10;
   @include darkTheme() {
     border-color: $dark-theme-extra-border-color;
     background: $dark-theme-bg-slightly-lighter;
     color: $dark-theme-text-color;
-  }
-
-  &.is-stuck {
-    border-top-width: 2px;
-    border-bottom-width: 1px;
-    box-shadow: $whiteframe-shadow-3dp;
-    z-index: 10;
-    @include darkTheme() {
-      background: $dark-theme-bg-lighter;
-    }
+    background: $dark-theme-bg-lighter;
   }
 }
 
@@ -180,18 +172,17 @@ header {
 
 .col.drag-over,
 .row.drag-over {
-  background: $c-accent !important;
+  //background: $c-accent !important;
+  border-right: 5px solid $c-accent !important;
   //outline: 5px solid $c-accent !important;
   //color: $c-contrast !important;
 }
 
 .col {
-  position: relative;
 }
 
 .drop-on-col-info {
-  padding: 0 8px;
-  margin-left: -2px;
+  padding: 0 7px;
   display: none;
   background: $c-accent;
   color: $c-contrast;
@@ -202,8 +193,9 @@ header {
   align-items: center;
   justify-content: center;
   align-self: start;
-  z-index: 44;
+  z-index: 1111;
   pointer-events: none;
+  box-shadow: $whiteframe-shadow-4dp;
 }
 
 .col.drag-over .drop-on-col-info {
