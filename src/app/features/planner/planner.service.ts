@@ -11,6 +11,7 @@ import { TaskPlanned } from '../tasks/task.model';
 import { selectAllTaskRepeatCfgs } from '../task-repeat-cfg/store/task-repeat-cfg.reducer';
 import { DateService } from '../../core/date/date.service';
 import { fastArrayCompare } from '../../util/fast-array-compare';
+import { GlobalTrackingIntervalService } from '../../core/global-tracking-interval/global-tracking-interval.service';
 
 @Injectable({
   providedIn: 'root',
@@ -19,7 +20,9 @@ export class PlannerService {
   // includedWeekDays$ = of([0, 1, 2, 3, 4, 5, 6]);
   includedWeekDays$ = of([0, 1, 2, 3, 4, 5, 6]);
 
-  daysToShow$ = this.includedWeekDays$.pipe(
+  daysToShow$ = this._globalTrackingIntervalService.todayDateStr$.pipe(
+    tap((val) => console.log('daysToShow$', val)),
+    switchMap(() => this.includedWeekDays$),
     map((includedWeekDays) => {
       const today = new Date().getTime();
       const todayDayNr = new Date(today).getDay();
@@ -85,5 +88,6 @@ export class PlannerService {
     private _reminderService: ReminderService,
     private _calendarIntegrationService: CalendarIntegrationService,
     private _dateService: DateService,
+    private _globalTrackingIntervalService: GlobalTrackingIntervalService,
   ) {}
 }
