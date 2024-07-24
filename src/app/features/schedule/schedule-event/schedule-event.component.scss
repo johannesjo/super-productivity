@@ -61,6 +61,28 @@ $split-extra-border-radius: 20px;
   }
 }
 
+// non draggable
+:host {
+  &.SplitTaskContinued,
+  &.SplitTaskContinuedLast,
+  &.CalendarEvent,
+  &.RepeatProjection,
+  &.RepeatProjectionSplit,
+  &.RepeatProjectionSplitContinued,
+  &.RepeatProjectionSplitContinuedLast,
+  &.ScheduledRepeatProjection,
+  &.ScheduledTask {
+    opacity: 0.6;
+  }
+}
+
+//  scheduable tasks
+:host {
+  &.ScheduledTask {
+    opacity: 1;
+  }
+}
+
 :host > * {
   pointer-events: none;
 }
