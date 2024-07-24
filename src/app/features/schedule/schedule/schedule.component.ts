@@ -146,6 +146,7 @@ export class ScheduleComponent {
               type: entry.type,
               // title: entry.data.title,
               style: `grid-column: ${dayIndex + 3};  grid-row: ${startRow} / span ${rowSpan}`,
+              data: entry.data,
             });
           }
         });

@@ -3,7 +3,9 @@
 $split-extra-border-radius: 20px;
 
 :host {
-  border-radius: 8px;
+  --project-color: $light-theme-separator-color;
+
+  border-radius: 4px;
   margin-right: 10px;
 
   line-height: 1;
@@ -13,11 +15,14 @@ $split-extra-border-radius: 20px;
   // TODO evaluate
   margin-bottom: 3px;
   border: 1px solid $light-theme-separator-color;
-  border-color: transparent;
+  //border-color:var(--project-color);
+  border-width: 0;
+
   background: #fff;
   color: $light-theme-text-color;
   overflow: hidden;
   position: relative;
+  border-left: 4px solid var(--project-color);
 
   &:hover {
     z-index: 3;
@@ -61,6 +66,7 @@ $split-extra-border-radius: 20px;
   min-width: 14px;
   margin-left: 4px;
   margin-top: 5px;
+  opacity: 0.8;
 }
 
 .fake-ico {
@@ -75,11 +81,22 @@ $split-extra-border-radius: 20px;
   flex-grow: 1;
   flex-shrink: 1;
   padding: 4px;
+  font-weight: 300;
+  line-height: 1.2;
 
   &:hover {
     box-shadow: $whiteframe-shadow-3dp;
     background: inherit;
     //border: 1px solid $light-theme-separator-color;
     border-radius: 4px;
+  }
+
+  :host.SplitTaskContinued &,
+  :host.RepeatProjectionSplitContinued &,
+  :host.SplitTaskContinuedLast &,
+  :host.RepeatProjectionSplitContinuedLast {
+    //white-space: nowrap;
+    //max-width: 100%;
+    line-clamp: 1;
   }
 }

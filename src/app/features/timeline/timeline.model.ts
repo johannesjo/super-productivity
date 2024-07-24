@@ -123,6 +123,7 @@ interface TimelineViewEntryLunchBreak extends TimelineViewEntryBase {
 
 export interface TimelineDayCrossing extends TimelineViewEntryBase {
   type: TimelineViewEntryType.DayCrossing;
+  data?: undefined;
 }
 
 export type TimelineViewEntry =
