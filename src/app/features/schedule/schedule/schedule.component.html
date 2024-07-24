@@ -11,7 +11,8 @@
       <mat-icon>chevron_right</mat-icon>
     </button>
 
-    <div>~Flow from:</div>
+    <div>~Flow source:</div>
+    <!--    <div><mat-icon>airwave</mat-icon> Flow from:</div>-->
 
     <button
       mat-button
@@ -93,21 +94,7 @@
 
     <!-- Events -->
     @for (event of (events$|async); track $index) {
-    <div
-      class="event calendar1"
-      [ngClass]="event.type"
-      [style]="event.style"
-    >
-      @if (event.type === TimelineViewEntryType.RepeatProjection) {
-      <mat-icon svgIcon="repeat"></mat-icon>
-      }
-      <!-- -->
-      @if (event.type === TimelineViewEntryType.TaskPlannedForDay) {
-      <mat-icon>calendar_today</mat-icon>
-      }
-      <!--- -->
-      {{ event.title }}
-    </div>
+    <schedule-event [event]="event"></schedule-event>
     }
 
     <div

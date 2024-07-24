@@ -22,6 +22,8 @@ import { TimelineViewEntryType } from '../../timeline/timeline.const';
 import { AsyncPipe, NgClass, NgStyle } from '@angular/common';
 import { getTimeLeftForViewEntry } from '../../timeline/map-timeline-data/map-to-timeline-view-entries';
 import { StuckDirective } from '../../../ui/stuck/stuck.directive';
+import { ScheduleEventComponent } from '../schedule-event/schedule-event.component';
+import { ScheduleEvent } from '../schedule.model';
 
 const FH = 12;
 const D_HOURS = 24;
@@ -29,7 +31,14 @@ const D_HOURS = 24;
 @Component({
   selector: 'schedule',
   standalone: true,
-  imports: [UiModule, NgStyle, AsyncPipe, NgClass, StuckDirective],
+  imports: [
+    UiModule,
+    NgStyle,
+    AsyncPipe,
+    NgClass,
+    StuckDirective,
+    ScheduleEventComponent,
+  ],
   templateUrl: './schedule.component.html',
   styleUrl: './schedule.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -107,7 +116,7 @@ export class ScheduleComponent {
     tap(() => (this.now = Date.now())),
   );
 
-  events$ = this.timelineDays$.pipe(
+  events$: Observable<ScheduleEvent[]> = this.timelineDays$.pipe(
     map((days) => {
       const daysFlat: any[] = [];
 

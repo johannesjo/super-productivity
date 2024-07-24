@@ -3,10 +3,13 @@
 $title-height: 3em;
 $days-height: 3em;
 $time-width: 3em;
-$time-height: 6px;
+$time-height: 8px;
+//$grid-color: #dadce0;
 $grid-color: #dadce0;
+$grid-color-dark: rgba(255, 255, 255, 0.1);
 $calendar-template: $time-width 10px repeat(5, 1fr);
 $current-time-color: #ea4335;
+$current-time-color: $c-accent;
 $fr: 12;
 $total-rows: 24 * $fr;
 
@@ -21,20 +24,29 @@ header {
   display: flex;
   flex-direction: column;
   position: sticky;
-  background: white;
   top: -1px;
   left: 0;
   right: 0;
   z-index: 10;
-
   border-top: 1px solid $light-theme-extra-border-color;
   border-bottom: 1px solid $light-theme-extra-border-color;
+  background: #fff;
+  color: $light-theme-text-color;
+
+  @include darkTheme() {
+    border-color: $dark-theme-extra-border-color;
+    background: $dark-theme-bg-slightly-lighter;
+    color: $dark-theme-text-color;
+  }
 
   &.is-stuck {
     border-top-width: 2px;
-    border-bottom-width: 0px;
-    box-shadow: $whiteframe-shadow-2dp;
+    border-bottom-width: 1px;
+    box-shadow: $whiteframe-shadow-3dp;
     z-index: 10;
+    @include darkTheme() {
+      background: $dark-theme-bg-lighter;
+    }
   }
 }
 
@@ -42,7 +54,11 @@ header {
   display: flex;
   align-items: center;
   justify-content: center;
+
   border-bottom: 1px solid $light-theme-extra-border-color;
+  @include darkTheme() {
+    border-color: $dark-theme-extra-border-color;
+  }
 }
 
 .days {
@@ -91,12 +107,20 @@ header {
   border-right: 1px solid $grid-color;
   grid-row: 1 / span $total-rows;
   grid-column: span 1;
+
+  @include darkTheme() {
+    border-color: $grid-color-dark;
+  }
 }
 
 .filler-col {
   grid-row: 1 / -1;
   grid-column: 2;
   border-right: 1px solid $grid-color;
+
+  @include darkTheme() {
+    border-color: $grid-color-dark;
+  }
 }
 
 .row {
@@ -105,16 +129,10 @@ header {
 
 .row:nth-child(#{$fr}n- 5) {
   border-bottom: 1px solid $grid-color;
-}
 
-.event {
-  border-radius: 5px;
-  padding: 0;
-  margin-right: 10px;
-  font-weight: bold;
-  font-size: 10px;
-  border: 1px solid #000;
-  line-height: 1;
+  @include darkTheme() {
+    border-color: $grid-color-dark;
+  }
 }
 
 .weekend {

@@ -1,0 +1,62 @@
+@import '../../../../variables.scss';
+
+:host {
+  border-radius: 8px;
+  padding: 0 4px;
+  margin-right: 10px;
+
+  line-height: 1;
+  overflow: hidden;
+  min-height: 20px;
+  display: flex;
+  align-items: center;
+  // TODO evaluate
+  margin-bottom: 2px;
+  border: 1px solid $light-theme-separator-color;
+  background: #fff;
+  color: $light-theme-text-color;
+
+  @include darkTheme() {
+    border-color: $dark-theme-separator-color;
+    background: $dark-theme-bg-slightly-lighter;
+    color: $dark-theme-text-color;
+  }
+
+  &.split-start {
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+    border-bottom-style: dashed;
+  }
+
+  &.split-continued {
+    border-top-left-radius: 0;
+    border-bottom-right-radius: 0;
+    border-bottom-style: dashed;
+    border-top-style: dashed;
+  }
+
+  &.split-continued-last {
+    border-top-style: dashed;
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+  }
+}
+
+.fake-ico,
+.ico {
+  font-size: 14px;
+  height: 14px;
+  line-height: 14px;
+  margin-right: 4px;
+  min-width: 14px;
+  align-self: center;
+}
+
+.fake-ico {
+  text-align: center;
+  font-weight: bold;
+}
+
+.title {
+  font-size: 13px;
+}

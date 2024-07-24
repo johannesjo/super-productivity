@@ -1,0 +1,29 @@
+@switch (icoType) {
+<!-- -->
+@case ('REPEAT') {
+<mat-icon
+  svgIcon="repeat"
+  class="ico"
+  inline="true"
+></mat-icon>
+} @case ('PLANNED_FOR_DAY') {
+<mat-icon
+  class="ico"
+  inline="true"
+  >calendar_today
+</mat-icon>
+} @case ('SCHEDULED_TASK') {
+<mat-icon
+  class="ico"
+  inline="true"
+  >alarm
+</mat-icon>
+} @case ('FLOW') {
+<div class="fake-ico">~</div>
+}
+<!--- --->
+
+}
+<!--- -->
+
+<div class="title">{{ se.title }}</div>
