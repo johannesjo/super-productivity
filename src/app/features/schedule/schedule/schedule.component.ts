@@ -363,7 +363,7 @@ export class ScheduleComponent implements AfterViewInit, OnDestroy {
         console.log('DISPATCH');
         this._store.dispatch(
           PlannerActions.moveBeforeTask({
-            fromTaskId: sourceTaskId,
+            fromTask: ev.source.data.data,
             toTaskId: targetTaskId,
           }),
         );

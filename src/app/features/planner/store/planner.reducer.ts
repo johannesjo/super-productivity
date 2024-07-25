@@ -124,11 +124,11 @@ export const plannerReducer = createReducer(
     // filter out from other days
     let wasIndexFound = false;
     Object.keys(daysCopy).forEach((dayI) => {
-      daysCopy[dayI] = daysCopy[dayI].filter((id) => id !== action.fromTaskId);
+      daysCopy[dayI] = daysCopy[dayI].filter((id) => id !== action.fromTask.id);
       const toIndex = daysCopy[dayI].indexOf(action.toTaskId);
       if (toIndex > -1) {
         console.log('toIndex', toIndex);
-        daysCopy[dayI].splice(toIndex, 0, action.fromTaskId);
+        daysCopy[dayI].splice(toIndex, 0, action.fromTask.id);
         wasIndexFound = true;
       }
     });

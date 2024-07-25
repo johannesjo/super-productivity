@@ -191,6 +191,20 @@ export class PlannerEffects {
     );
   });
 
+  removeTodayTagForPlannedTaskFriomSchedule$ = createEffect(() => {
+    return this._actions$.pipe(
+      ofType(PlannerActions.moveBeforeTask),
+      filter(({ fromTask }) => fromTask.tagIds.includes(TODAY_TAG.id)),
+      map(({ fromTask }) => {
+        return updateTaskTags({
+          task: fromTask,
+          oldTagIds: fromTask.tagIds,
+          newTagIds: fromTask.tagIds.filter((id) => id !== TODAY_TAG.id),
+        });
+      }),
+    );
+  });
+
   showDialogAfterAppLoad$ = createEffect(
     () => {
       return this._syncTriggerService.afterInitialSyncDoneAndDataLoadedInitially$.pipe(
