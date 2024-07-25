@@ -64,7 +64,7 @@
     <!-- todo move out here to make them sticky -->
     <div
       class="dropzones"
-      data-day="{{day}}"
+      [attr.data-day]="day"
     >
       <div>
         <mat-icon>add</mat-icon>
@@ -105,7 +105,7 @@
   </ng-container>
 
   <!-- Events -->
-  @for (ev of (events$|async); track $index) {
+  @for (ev of (events$|async); track ev.id) {
   <!-- -->
   @if (ev.type === TimelineViewEntryType.Task || ev.type ===
   TimelineViewEntryType.SplitTask || ev.type === TimelineViewEntryType.TaskPlannedForDay
@@ -140,7 +140,7 @@
     >
       <mat-icon>hourglass_disabled</mat-icon>
     </div>
-    @for (ev of beyondBudgetDay; track ev.data.id) {
+    @for (ev of beyondBudgetDay; track ev.id) {
     <schedule-event
       [event]="ev"
       class="draggable"
@@ -150,7 +150,6 @@
       (cdkDragStarted)="dragStarted($event)"
       (cdkDragReleased)="dragReleased($event)"
       [cdkDragStartDelay]="IS_TOUCH_PRIMARY ? 100 : 0"
-      [event]="ev"
     ></schedule-event>
     }
   </div>

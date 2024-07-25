@@ -155,6 +155,7 @@ export class ScheduleComponent implements AfterViewInit, OnDestroy {
           const timeLeftInHours = timeLeft / 1000 / 60 / 60;
           const rowSpan = Math.round(timeLeftInHours * FH);
           return {
+            id: taskPlannedForDay.id,
             data: taskPlannedForDay,
             title: taskPlannedForDay.title,
             type: TimelineViewEntryType.TaskPlannedForDay,
@@ -186,6 +187,7 @@ export class ScheduleComponent implements AfterViewInit, OnDestroy {
                 (entry.type === TimelineViewEntryType.LunchBreak
                   ? 'Lunch Break'
                   : 'TITLE'),
+              id: (entry.data as any)?.id || entry.id,
               type: entry.type,
               // title: entry.data.title,
               style: `grid-column: ${dayIndex + 2};  grid-row: ${startRow} / span ${rowSpan}`,
