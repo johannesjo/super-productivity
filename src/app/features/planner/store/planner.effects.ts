@@ -151,26 +151,12 @@ export class PlannerEffects {
     return this._actions$.pipe(
       ofType(PlannerActions.planTaskForDay),
       filter((action) => action.day === getWorklogStr()),
-      mergeMap(({ task }) => {
-        return [
-          updateTaskTags({
-            task,
-            oldTagIds: task.tagIds,
-            newTagIds: unique([TODAY_TAG.id, ...task.tagIds]),
-          }),
-          // updateTag({
-          //   tag: {
-          //     id: TODAY_TAG.id,
-          //     changes: {
-          //       taskIds: [
-          //         ...plannedIds,
-          //         ...todayTag.taskIds.filter((id) => !plannedIds.includes(id)),
-          //       ],
-          //     },
-          //   },
-          //   isSkipSnack: true,
-          // }),
-        ];
+      map(({ task }) => {
+        return updateTaskTags({
+          task,
+          oldTagIds: task.tagIds,
+          newTagIds: unique([TODAY_TAG.id, ...task.tagIds]),
+        });
       }),
     );
   });
@@ -192,7 +178,9 @@ export class PlannerEffects {
   removeTodayTagForPlannedTask$ = createEffect(() => {
     return this._actions$.pipe(
       ofType(PlannerActions.planTaskForDay),
-      filter(({ task, day }) => task.tagIds.includes(TODAY_TAG.id)),
+      filter(
+        ({ task, day }) => task.tagIds.includes(TODAY_TAG.id) && day !== getWorklogStr(),
+      ),
       map(({ task }) => {
         return updateTaskTags({
           task,
