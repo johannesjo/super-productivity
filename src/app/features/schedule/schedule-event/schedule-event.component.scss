@@ -75,6 +75,7 @@ $split-extra-border-radius: 20px;
   //background: transparent;
   @include darkTheme() {
     border-color: $dark-theme-separator-color;
+    background: $dark-theme-bg;
   }
 
   .title {
@@ -115,6 +116,11 @@ $split-extra-border-radius: 20px;
     background: $light-theme-bg;
     //border: 2px dashed $light-theme-separator-color;
     border: 1px solid $light-theme-separator-color;
+
+    @include darkTheme() {
+      border-color: $dark-theme-separator-color;
+      background: $dark-theme-bg;
+    }
 
     &:hover {
       opacity: 1;

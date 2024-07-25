@@ -10,7 +10,7 @@ $grid-color: #dadce0;
 $grid-color-dark: rgba(255, 255, 255, 0.1);
 $calendar-template: $time-width repeat(5, 1fr);
 $current-time-color: $c-accent;
-$current-time-color: $c-warn;
+//$current-time-color: $c-warn;
 $fr: 12;
 $total-rows: 24 * $fr;
 
@@ -223,9 +223,14 @@ header {
 .excess-entries {
   position: sticky;
   bottom: 0;
+  max-height: 120px;
+  padding-bottom: 30px;
   border-top: 3px solid $c-warn;
   background: $light-theme-bg;
-  max-height: 120px;
+
+  @include darkTheme() {
+    background: $dark-theme-bg;
+  }
 
   @media (min-height: 800px) {
     max-height: 200px;
