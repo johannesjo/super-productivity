@@ -307,3 +307,11 @@ header {
     margin-top: -8px;
   }
 }
+
+schedule-event:active + schedule-event {
+  transform: translateY(0);
+
+  &:after {
+    display: none;
+  }
+}

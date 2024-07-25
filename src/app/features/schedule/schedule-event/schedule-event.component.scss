@@ -1,7 +1,7 @@
 @import '../../../../variables.scss';
 
 $split-extra-border-radius: 20px;
-$margin-bottom: 3px;
+$margin-bottom: 4px;
 
 :host {
   --project-color: $light-theme-separator-color;
@@ -275,21 +275,21 @@ $margin-bottom: 3px;
 :host.drag-over {
   //background: $c-accent !important;
   //color: $c-contrast !important;
-  transform: translateY(100%);
+  transform: translateY(40px);
   z-index: 3;
 
   &:after {
+    // NOTE: there are some styles in the parent component since host:active + :host  is not working
     content: '';
     position: absolute;
-    //height: 100%;
-    border: 1px solid red;
-    transform: translateY(-100%);
-    top: 0;
-    bottom: -1 * $margin-bottom;
+    transform: translateY(-40px);
+    top: -1 * $margin-bottom;
+    height: 40px + $margin-bottom;
     left: 0;
     right: 0;
     z-index: 3;
-    //opacity: 0;
+    opacity: 0;
+    //border: 1px solid red;
   }
 }
 
