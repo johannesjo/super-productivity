@@ -50,4 +50,9 @@
 </button>
 }
 
-<div class="title">{{ se.title }}</div>
+<div class="title">
+  @if (se.type === TimelineViewEntryType.SplitTaskContinuedLast || se.type ===
+  TimelineViewEntryType.SplitTaskContinued) { ...
+  <!-- -->
+  } @else { {{ se.title }} }
+</div>

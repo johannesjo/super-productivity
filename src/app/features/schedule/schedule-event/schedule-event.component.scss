@@ -24,7 +24,7 @@ $split-extra-border-radius: 20px;
   color: $light-theme-text-color;
   overflow: visible;
   position: relative;
-  border-left: 4px solid var(--project-color);
+  border-left: 3px solid var(--project-color);
 
   @include mq(xs, max) {
     border-left-width: 2px;
@@ -70,40 +70,21 @@ $split-extra-border-radius: 20px;
   display: flex;
   justify-content: center;
   align-items: center;
-  border: 2px dashed $light-theme-separator-color;
-  background: $light-theme-bg;
-  //background: transparent;
-  @include darkTheme() {
-    border-color: $dark-theme-separator-color;
-    background: $dark-theme-bg;
-  }
+  background: transparent;
+  //border: 2px dashed $light-theme-separator-color;
+  //background: $light-theme-bg;
+  //@include darkTheme() {
+  //  border-color: $dark-theme-separator-color;
+  //  background: $dark-theme-bg;
+  //}
 
   .title {
     flex-grow: 0;
   }
 }
 
-// non draggable 1
-//:host {
-//  &.SplitTaskContinued,
-//  &.SplitTaskContinuedLast {
-//
-//    .title {
-//      opacity: 0
-//    }
-//
-//    &:hover {
-//      .title {
-//        opacity: 1;
-//      }
-//    }
-//  }
-//}
-
-// non draggable 2
+// non draggable
 :host {
-  &.SplitTaskContinued,
-  &.SplitTaskContinuedLast,
   &.CalendarEvent,
   &.RepeatProjection,
   &.RepeatProjectionSplit,
@@ -124,6 +105,21 @@ $split-extra-border-radius: 20px;
     &:hover {
       opacity: 1;
       outline: 1px solid $c-accent;
+    }
+  }
+}
+
+:host {
+  &.SplitTaskContinued,
+  &.SplitTaskContinuedLast {
+    //opacity: .7;
+    .title {
+      opacity: 0.4;
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      text-align: center;
+      font-style: italic;
     }
   }
 }

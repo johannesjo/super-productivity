@@ -399,6 +399,7 @@ export const insertBlockedBlocksViewEntries = (
             const newSplitContinuedEntry: TimelineViewEntry = createSplitTask({
               start: blockedBlock.end,
               taskId: splitTask.id,
+              projectId: splitTask.projectId,
               timeToGo: timePlannedForSplitContinued,
               splitIndex: 0,
               title: splitTask.title,
@@ -442,6 +443,7 @@ export const insertBlockedBlocksViewEntries = (
             const newSplitContinuedEntry: TimelineViewEntry = createSplitTask({
               start: blockedBlock.end,
               taskId: currentViewEntry.data.taskId,
+              projectId: currentViewEntry.data.projectId,
               timeToGo: timePlannedForSplitTaskContinued,
               splitIndex,
               title: currentViewEntry.data.title,
@@ -586,12 +588,14 @@ export const insertBlockedBlocksViewEntries = (
 const createSplitTask = ({
   start,
   taskId,
+  projectId,
   title,
   splitIndex,
   timeToGo,
 }: {
   start: number;
   taskId: string;
+  projectId: string | null;
   title: string;
   splitIndex: number;
   timeToGo: number;
@@ -604,6 +608,7 @@ const createSplitTask = ({
       title,
       timeToGo,
       taskId,
+      projectId,
       index: splitIndex,
     },
   };

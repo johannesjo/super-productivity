@@ -73,6 +73,7 @@ export interface TimelineViewEntrySplitTaskContinued extends TimelineViewEntryBa
     title: string;
     timeToGo: number;
     taskId: string;
+    projectId: string | null;
     index: number;
   };
 }
