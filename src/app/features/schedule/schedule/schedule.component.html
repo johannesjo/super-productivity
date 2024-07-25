@@ -41,68 +41,105 @@
   </div>
 </header>
 
-<div class="outer-container">
+<!--<div class="outer-container">-->
+<div
+  #gridContainer
+  class="main-grid-container {{containerExtraClass}}"
+>
+  <!-- Time -->
+  @for (time of times; track $index) {
   <div
-    #gridContainer
-    class="content {{containerExtraClass}}"
+    class="time"
+    style="grid-row: {{ $index *FH + 1 }}"
   >
-    <!-- Time -->
-    @for (time of times; track $index) {
-    <div
-      class="time"
-      style="grid-row: {{ $index *FH + 1 }}"
-    >
-      {{ time }}
-    </div>
-    }
-    <!-- Grid Cols -->
-    @for (col of colByNr; track $index) {
-    <div
-      class="col"
-      style="grid-column: {{ $index + 2 }}"
-    >
-      <!-- todo move out here to make them sticky -->
-      <div class="drop-on-col-info">
-        <mat-icon>add</mat-icon>
-        <div>Drop here to plan for day</div>
+    {{ time }}
+  </div>
+  }
+  <!-- Grid Cols -->
+  @for (col of colByNr; track $index) {
+  <div
+    class="col"
+    style="grid-column: {{ $index + 2 }}"
+  >
+    <!-- todo move out here to make them sticky -->
+    <div class="dropzones">
+      <!--      <div>-->
+      <!--        <mat-icon>add</mat-icon>-->
+      <!--        <div>Drop here to plan for day</div>-->
+      <!--      </div>-->
+      <div>
+        <mat-icon>alarm</mat-icon>
+        <div>Drop here to schedule task</div>
       </div>
     </div>
-    }
+  </div>
+  }
 
-    <!-- Grid Rows -->
-    @for (row of rowsByNr; track $index) {
+  <!-- Grid Rows -->
+  @for (row of rowsByNr; track $index) {
+  <div
+    class="row"
+    style="grid-row: {{ row + 1 }}"
+  ></div>
+  }
+
+  <!-- Work Start and End -->
+  <ng-container *ngIf="(workStartEnd$|async) as workStartEnd">
+    @if (workStartEnd) {
     <div
-      class="row"
-      style="grid-row: {{ row + 1 }}"
-    ></div>
+      class="work-start"
+      style="grid-row: {{workStartEnd.workStartRow}}"
+    >
+      <div>Work Start</div>
+    </div>
+    <div
+      class="work-end"
+      style="grid-row: {{workStartEnd.workEndRow}}"
+    >
+      <div>Work End</div>
+    </div>
     }
+  </ng-container>
 
-    <!-- Work Start and End -->
-    <ng-container *ngIf="(workStartEnd$|async) as workStartEnd">
-      @if (workStartEnd) {
-      <div
-        class="work-start"
-        style="grid-row: {{workStartEnd.workStartRow}}"
-      >
-        <div>Work Start</div>
-      </div>
-      <div
-        class="work-end"
-        style="grid-row: {{workStartEnd.workEndRow}}"
-      >
-        <div>Work End</div>
-      </div>
-      }
-    </ng-container>
+  <!-- Events -->
+  @for (ev of (events$|async); track $index) {
+  <!-- -->
+  @if (ev.type === TimelineViewEntryType.Task || ev.type ===
+  TimelineViewEntryType.SplitTask || ev.type === TimelineViewEntryType.TaskPlannedForDay
+  || ev.type === TimelineViewEntryType.SplitTaskPlannedForDay || ev.type ===
+  TimelineViewEntryType.ScheduledTask) {
+  <schedule-event
+    class="draggable"
+    cdkDrag
+    [cdkDragData]="ev"
+    (cdkDragMoved)="dragMoved($event)"
+    (cdkDragStarted)="dragStarted($event)"
+    (cdkDragReleased)="dragReleased($event)"
+    [cdkDragStartDelay]="IS_TOUCH_PRIMARY ? 100 : 0"
+    [event]="ev"
+  ></schedule-event>
+  } @else {
+  <schedule-event [event]="ev"></schedule-event>
+  } }
 
-    <!-- Events -->
-    @for (ev of (events$|async); track $index) {
-    <!-- -->
-    @if (ev.type === TimelineViewEntryType.Task || ev.type ===
-    TimelineViewEntryType.SplitTask || ev.type === TimelineViewEntryType.TaskPlannedForDay
-    || ev.type === TimelineViewEntryType.SplitTaskPlannedForDay || ev.type ===
-    TimelineViewEntryType.ScheduledTask) {
+  <!-- Excess tasks planned for day -->
+  @for (beyondBudgetDay of (beyondBudget$|async); track i; let i = $index) {
+  <!-- -->
+  @if (beyondBudgetDay.length > 0) {
+  <div
+    class="excess-entries"
+    style="grid-column: {{i + 2}}"
+  >
+    <div
+      class="excess-entries-header"
+      [matTooltipPosition]="'above'"
+      [matTooltip]="'Tasks planned for day, but that are beyond the available time budget'"
+    >
+      <mat-icon>hourglass_disabled</mat-icon>
+    </div>
+    @for (ev of beyondBudgetDay; track $index) {
     <schedule-event
+      [event]="ev"
       class="draggable"
       cdkDrag
       [cdkDragData]="ev"
@@ -112,48 +149,17 @@
       [cdkDragStartDelay]="IS_TOUCH_PRIMARY ? 100 : 0"
       [event]="ev"
     ></schedule-event>
-    } @else {
-    <schedule-event [event]="ev"></schedule-event>
-    } }
-
-    <!-- Excess tasks planned for day -->
-    @for (beyondBudgetDay of (beyondBudget$|async); track i; let i = $index) {
-    <!-- -->
-    @if (beyondBudgetDay.length > 0) {
-    <div
-      class="excess-entries"
-      style="grid-column: {{i + 2}}"
-    >
-      <div
-        class="excess-entries-header"
-        [matTooltipPosition]="'above'"
-        [matTooltip]="'Tasks planned for day, but that are beyond the available time budget'"
-      >
-        <mat-icon>hourglass_disabled</mat-icon>
-      </div>
-      @for (ev of beyondBudgetDay; track $index) {
-      <schedule-event
-        [event]="ev"
-        class="draggable"
-        cdkDrag
-        [cdkDragData]="ev"
-        (cdkDragMoved)="dragMoved($event)"
-        (cdkDragStarted)="dragStarted($event)"
-        (cdkDragReleased)="dragReleased($event)"
-        [cdkDragStartDelay]="IS_TOUCH_PRIMARY ? 100 : 0"
-        [event]="ev"
-      ></schedule-event>
-      }
-    </div>
     }
-    <!-- -->
-    }
+  </div>
+  }
+  <!-- -->
+  }
 
-    <div
-      class="current-time"
-      [style]="currentTimeStyle$|async"
-    >
-      <div class="circle"></div>
-    </div>
+  <div
+    class="current-time"
+    [style]="currentTimeStyle$|async"
+  >
+    <div class="circle"></div>
   </div>
 </div>
+<!--</div>-->

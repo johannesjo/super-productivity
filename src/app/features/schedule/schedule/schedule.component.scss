@@ -1,7 +1,5 @@
 @import '../../../../variables.scss';
 
-$title-height: 3em;
-$days-height: 3em;
 $time-width: 3em;
 $time-height: 8px;
 $time-height-mobile: 6px;
@@ -10,7 +8,6 @@ $grid-color: #dadce0;
 $grid-color-dark: rgba(255, 255, 255, 0.1);
 $calendar-template: $time-width repeat(5, 1fr);
 $current-time-color: $c-accent;
-//$current-time-color: $c-warn;
 $fr: 12;
 $total-rows: 24 * $fr;
 
@@ -22,11 +19,15 @@ $total-rows: 24 * $fr;
   }
 }
 
-.outer-container {
-  width: 100%;
+.main-grid-container {
+  //border: 3px dashed palevioletred;
   display: grid;
-  grid-template-rows: $title-height $days-height auto;
-  position: absolute;
+  grid-template-columns: $calendar-template;
+  grid-template-rows: repeat($total-rows, $time-height);
+
+  @include mq(xs, max) {
+    grid-template-rows: repeat($total-rows, $time-height-mobile);
+  }
 }
 
 header {
@@ -92,16 +93,6 @@ header {
 .day-day {
   display: inline;
   font-weight: 100;
-}
-
-.content {
-  display: grid;
-  grid-template-columns: $calendar-template;
-  grid-template-rows: repeat($total-rows, $time-height);
-
-  @include mq(xs, max) {
-    grid-template-rows: repeat($total-rows, $time-height-mobile);
-  }
 }
 
 .time {
@@ -181,7 +172,7 @@ header {
 .col.drag-over,
 .row.drag-over {
   //background: $c-accent !important;
-  border-right: 5px solid $c-accent !important;
+  //border-right: 5px solid $c-accent !important;
   //outline: 5px solid $c-accent !important;
   //color: $c-contrast !important;
 
@@ -190,34 +181,46 @@ header {
   }
 }
 
-.drop-on-col-info {
+.dropzones {
+  display: none !important;
   padding: 0 7px;
-  display: none;
-  background: $c-accent;
-  color: $c-contrast;
-  text-align: center;
-  position: fixed;
-  top: 134px;
-  line-height: 80px;
-  align-items: center;
-  justify-content: center;
+  top: 80px;
+  position: sticky;
+  line-height: 1.2;
+  justify-content: stretch;
   align-self: start;
-  z-index: 1111;
+  z-index: 33;
   pointer-events: none;
   box-shadow: $whiteframe-shadow-4dp;
   width: inherit;
+  flex-direction: column;
 
-  @include mq(xs, max) {
+  .col.drag-over & {
+    display: flex;
+  }
+
+  > div {
+    padding: 8px;
+    height: 120px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
     background: $c-accent;
+    background: $c-primary;
+    color: $c-contrast;
+    text-align: center;
+    margin-bottom: 4px;
 
-    div {
+    > mat-icon {
+      margin-right: 8px;
+    }
+  }
+
+  div > div {
+    @include mq(xs, max) {
       display: none;
     }
   }
-}
-
-.col.drag-over .drop-on-col-info {
-  display: flex;
 }
 
 .excess-entries {
