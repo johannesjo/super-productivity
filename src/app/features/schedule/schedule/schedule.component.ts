@@ -44,6 +44,7 @@ import {
   selectTimelineConfig,
   selectTimelineWorkStartEndHours,
 } from '../../config/store/global-config.reducer';
+import { PlannerActions } from '../../planner/store/planner.actions';
 
 const DAYS_TO_SHOW = 5;
 const FH = 12;
@@ -328,14 +329,39 @@ export class ScheduleComponent implements AfterViewInit, OnDestroy {
 
   dragReleased(ev: CdkDragRelease): void {
     console.log('dragReleased', ev);
-    ev.source.element.nativeElement.style.transform = 'translate3d(0, 0, 0)';
+    console.log('dra', {
+      target: ev.event.target,
+      source: ev.source.element.nativeElement,
+    });
+
     ev.source.element.nativeElement.style.pointerEvents = '';
-    ev.source.reset();
     this.isDragging = false;
     this.containerExtraClass = '';
     if (this.prevDragOverEl) {
       this.prevDragOverEl.classList.remove(DRAG_OVER_CLASS);
     }
+    const target = ev.event.target as HTMLElement;
+    if (target.tagName.toLowerCase() === 'schedule-event') {
+      console.log('target', target);
+      // const sourceTaskId = ev.source.data.data.id;
+      const sourceTaskId = ev.source.element.nativeElement.id.replace('t-', '');
+      const targetTaskId = target.id.replace('t-', '');
+      console.log('sourceTaskId', sourceTaskId, 'targetTaskId', targetTaskId);
+
+      if (sourceTaskId && targetTaskId && sourceTaskId !== targetTaskId) {
+        console.log('DISPATCH');
+        this._store.dispatch(
+          PlannerActions.moveBeforeTask({
+            fromTaskId: sourceTaskId,
+            toTaskId: targetTaskId,
+          }),
+        );
+        ev.source.element.nativeElement.style.transition = 'none';
+      }
+    }
+    ev.source.element.nativeElement.style.transform = 'translate3d(0, 0, 0)';
+    ev.source.element.nativeElement.style.transition = 'none';
+    ev.source.reset();
   }
 
   private _getDaysToShow(): string[] {

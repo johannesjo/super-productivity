@@ -24,6 +24,10 @@ export const PlannerActions = createActionGroup({
       fromIndex: number;
       toIndex: number;
     }>(),
+    'Move Before Task': props<{
+      fromTaskId: string;
+      toTaskId: string;
+    }>(),
     'Remove Task From Days': props<{
       taskId: string;
     }>(),

@@ -15,7 +15,9 @@ $split-extra-border-radius: 20px;
   display: flex;
   align-items: flex-start;
   // TODO evaluate
-  margin-bottom: 3px;
+  // TODO find better workaround
+  //margin-bottom: 3px;
+
   border: 1px solid $light-theme-separator-color;
   //border-color:var(--project-color);
   border-width: 0;

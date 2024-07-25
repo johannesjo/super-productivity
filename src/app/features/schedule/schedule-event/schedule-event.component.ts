@@ -28,6 +28,7 @@ export class ScheduleEventComponent extends BaseComponent implements OnInit, OnD
   @Input({ required: true })
   set event(event: ScheduleEvent) {
     this.se = event;
+    this._elRef.nativeElement.id = 't-' + (this.se.data as any).id;
   }
 
   se!: ScheduleEvent;
@@ -118,6 +119,13 @@ export class ScheduleEventComponent extends BaseComponent implements OnInit, OnD
 
   ngOnInit(): void {
     const pid = (this.se?.data as any)?.projectId;
+    if (
+      this.se.type === TimelineViewEntryType.SplitTask ||
+      this.se.type === TimelineViewEntryType.Task ||
+      this.se.type === TimelineViewEntryType.SplitTaskPlannedForDay ||
+      this.se.type === TimelineViewEntryType.TaskPlannedForDay
+    ) {
+    }
 
     if (pid) {
       this._store

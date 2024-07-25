@@ -118,6 +118,31 @@ export const plannerReducer = createReducer(
     };
   }),
 
+  on(PlannerActions.moveBeforeTask, (state, action) => {
+    // TODO check if we can mutate less
+    const daysCopy = { ...state.days };
+    // filter out from other days
+    let wasIndexFound = false;
+    Object.keys(daysCopy).forEach((dayI) => {
+      daysCopy[dayI] = daysCopy[dayI].filter((id) => id !== action.fromTaskId);
+      const toIndex = daysCopy[dayI].indexOf(action.toTaskId);
+      if (toIndex > -1) {
+        console.log('toIndex', toIndex);
+        daysCopy[dayI].splice(toIndex, 0, action.fromTaskId);
+        wasIndexFound = true;
+      }
+    });
+    if (!wasIndexFound) {
+      return state;
+    }
+
+    return {
+      days: {
+        ...daysCopy,
+      },
+    };
+  }),
+
   on(PlannerActions.planTaskForDay, (state, { task, day, isAddToTop }) => {
     const daysCopy = { ...state.days };
     // filter out from other days

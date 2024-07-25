@@ -80,7 +80,7 @@ export const mapToTimelineDays = (
     lunchBreakCfg,
     now,
   );
-  console.log({ blockerBlocksDayMap });
+  // console.log({ blockerBlocksDayMap });
 
   const v = createTimelineDays(
     nonScheduledTasks,
@@ -91,7 +91,7 @@ export const mapToTimelineDays = (
     workStartEndCfg,
     now,
   );
-  console.log(v);
+  // console.log(v);
 
   return v;
 };
@@ -139,7 +139,7 @@ export const createTimelineDays = (
     );
 
     const blockerBlocksForDay = blockerBlocksDayMap[dayDate] || [];
-    const taskPlannedForDay = i > 0 ? plannerDayMap[dayDate] || [] : [];
+    // const taskPlannedForDay = i > 0 ? plannerDayMap[dayDate] || [] : [];
     // TODO also add split task value
     const timeLeftForRegular =
       getTimeLeftForTasks(regularTasksLeftForDay) +
@@ -155,22 +155,22 @@ export const createTimelineDays = (
     if (timeLeftAfterRegularTasksDone > 0) {
       // we have enough budget for ALL nonScheduled and some left for other tasks like the planned for day ones
 
-      console.log(
-        'budget',
-        'tAfter',
-        timeLeftAfterRegularTasksDone / 60 / 60 / 1000,
-        'bBefore',
-        nonScheduledBudgetForDay / 60 / 60 / 1000,
-        'tTime',
-        timeLeftForRegular / 60 / 60 / 1000,
-      );
+      // console.log(
+      //   'budget',
+      //   'tAfter',
+      //   timeLeftAfterRegularTasksDone / 60 / 60 / 1000,
+      //   'bBefore',
+      //   nonScheduledBudgetForDay / 60 / 60 / 1000,
+      //   'tTime',
+      //   timeLeftForRegular / 60 / 60 / 1000,
+      // );
 
       const { beyond, within } = getTasksWithinAndBeyondBudget(
         // TODO fix type
         (plannerDayMap[dayDate] as TaskWithoutReminder[]) || [],
         timeLeftAfterRegularTasksDone,
       );
-      console.log({ beyond, within });
+      // console.log({ beyond, within });
 
       viewEntries = createViewEntriesForDay(
         startTime,
@@ -241,18 +241,18 @@ export const createTimelineDays = (
       }
     });
 
-    console.log({
-      dayDate,
-      startTime: new Date(startTime),
-      viewEntriesForNextDay: splitTaskOrRepeatEntryForNextDay,
-      regularTasksLeftForDay,
-      blockerBlocksForDay,
-      taskPlannedForDay,
-      timeLeftForRegular,
-      nonScheduledBudgetForDay,
-      beyondBudgetTasks,
-      nonScheduledBudgetForDay2: nonScheduledBudgetForDay / 60 / 60 / 1000,
-    });
+    // console.log({
+    //   dayDate,
+    //   startTime: new Date(startTime),
+    //   viewEntriesForNextDay: splitTaskOrRepeatEntryForNextDay,
+    //   regularTasksLeftForDay,
+    //   blockerBlocksForDay,
+    //   taskPlannedForDay,
+    //   timeLeftForRegular,
+    //   nonScheduledBudgetForDay,
+    //   beyondBudgetTasks,
+    //   nonScheduledBudgetForDay2: nonScheduledBudgetForDay / 60 / 60 / 1000,
+    // });
 
     // TODO there is probably a better way to do this
     if (viewEntries[0] && viewEntries[0].type === TimelineViewEntryType.WorkdayEnd) {
@@ -397,7 +397,7 @@ const createViewEntriesForNonScheduledRepeatProjections = (
 
   const lastEntry = viewEntries[viewEntries.length - 1];
 
-  console.log(viewEntries);
+  // console.log(viewEntries);
 
   return {
     entries: viewEntries,
@@ -420,7 +420,7 @@ export const getTasksWithinAndBeyondBudget = (
   let remainingBudget = budget;
   // TODO probably can be optimized
   tasks.forEach((task) => {
-    console.log(remainingBudget / 60 / 60 / 1000);
+    // console.log(remainingBudget / 60 / 60 / 1000);
 
     const timeLeftForTask = getTimeLeftForTask(task);
     if (timeLeftForTask > remainingBudget) {
