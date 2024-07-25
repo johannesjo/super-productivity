@@ -56,21 +56,24 @@
   </div>
   }
   <!-- Grid Cols -->
-  @for (col of colByNr; track $index) {
+  @for (day of daysToShow$|async; track $index) {
   <div
     class="col"
     style="grid-column: {{ $index + 2 }}"
   >
     <!-- todo move out here to make them sticky -->
-    <div class="dropzones">
-      <!--      <div>-->
-      <!--        <mat-icon>add</mat-icon>-->
-      <!--        <div>Drop here to plan for day</div>-->
-      <!--      </div>-->
+    <div
+      class="dropzones"
+      data-day="{{day}}"
+    >
       <div>
-        <mat-icon>alarm</mat-icon>
-        <div>Drop here to schedule task</div>
+        <mat-icon>add</mat-icon>
+        <div>drop to plan</div>
       </div>
+      <!--      <div>-->
+      <!--        <mat-icon>alarm</mat-icon>-->
+      <!--        <div>Drop here to schedule task</div>-->
+      <!--      </div>-->
     </div>
   </div>
   }
@@ -137,7 +140,7 @@
     >
       <mat-icon>hourglass_disabled</mat-icon>
     </div>
-    @for (ev of beyondBudgetDay; track $index) {
+    @for (ev of beyondBudgetDay; track ev.data.id) {
     <schedule-event
       [event]="ev"
       class="draggable"

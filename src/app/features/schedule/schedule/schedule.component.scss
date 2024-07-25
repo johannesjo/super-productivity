@@ -161,7 +161,7 @@ header {
 
 .cdk-drag-dragging {
   position: relative;
-  z-index: 99;
+  z-index: 99 !important;
   box-shadow: $whiteframe-shadow-20dp;
 }
 
@@ -169,20 +169,15 @@ header {
   pointer-events: none;
 }
 
-.col.drag-over,
-.row.drag-over {
-  //background: $c-accent !important;
+.col.drag-over {
+  //background: $c-primary !important;
   //border-right: 5px solid $c-accent !important;
   //outline: 5px solid $c-accent !important;
   //color: $c-contrast !important;
-
-  @include mq(xs, max) {
-    background: $c-accent !important;
-  }
 }
 
 .dropzones {
-  display: none !important;
+  display: none;
   padding: 0 7px;
   top: 80px;
   position: sticky;
@@ -190,29 +185,36 @@ header {
   justify-content: stretch;
   align-self: start;
   z-index: 33;
-  pointer-events: none;
   box-shadow: $whiteframe-shadow-4dp;
   width: inherit;
   flex-direction: column;
+  pointer-events: all;
+  border: 1px dashed $c-primary;
 
-  .col.drag-over & {
+  .is-dragging & {
     display: flex;
   }
 
+  &.drag-over {
+    background: $c-accent;
+  }
+
   > div {
+    pointer-events: none;
     padding: 8px;
-    height: 120px;
+    height: 40px;
     display: flex;
     justify-content: center;
     align-items: center;
-    background: $c-accent;
-    background: $c-primary;
-    color: $c-contrast;
+    //color: $c-contrast;
+    //color: $c-contrast;
     text-align: center;
     margin-bottom: 4px;
 
     > mat-icon {
-      margin-right: 8px;
+      @include mq(xs) {
+        margin-right: 8px;
+      }
     }
   }
 
@@ -275,7 +277,7 @@ header {
   }
 
   &:hover {
-    z-index: 100;
+    z-index: 22;
     border-color: #000;
     @include darkTheme() {
       border-color: #fff;

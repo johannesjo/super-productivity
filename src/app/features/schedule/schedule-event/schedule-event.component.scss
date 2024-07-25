@@ -81,6 +81,19 @@ $margin-bottom: 4px;
   }
 }
 
+:host::before {
+  // NOTE: there are some styles in the parent component since host:active + :host  is not working
+  content: '';
+  position: absolute;
+  top: 100%;
+  height: $margin-bottom;
+  left: 0;
+  right: 0;
+  z-index: 3;
+  opacity: 0;
+  background: red;
+}
+
 // non draggable
 :host {
   &.CalendarEvent,

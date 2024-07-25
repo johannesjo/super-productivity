@@ -74,7 +74,6 @@ const IS_DRAGGING_CLASS = 'is-dragging';
 export class ScheduleComponent implements AfterViewInit, OnDestroy {
   FH = FH;
   IS_TOUCH_PRIMARY = IS_TOUCH_PRIMARY;
-  colByNr = Array.from({ length: DAYS_TO_SHOW }, (_, index) => index);
   rowsByNr = Array.from({ length: D_HOURS * FH }, (_, index) => index).filter(
     (v, index) => index % FH === 0,
   );
@@ -315,7 +314,7 @@ export class ScheduleComponent implements AfterViewInit, OnDestroy {
         targetEl.classList.contains(TimelineViewEntryType.TaskPlannedForDay)
       ) {
         this.prevDragOverEl.classList.add(DRAG_OVER_CLASS);
-      } else if (targetEl.classList.contains('col')) {
+      } else if (targetEl.classList.contains('dropzones')) {
         this.prevDragOverEl.classList.add(DRAG_OVER_CLASS);
       }
     }
@@ -328,10 +327,10 @@ export class ScheduleComponent implements AfterViewInit, OnDestroy {
   }
 
   dragReleased(ev: CdkDragRelease): void {
-    console.log('dragReleased', ev);
-    console.log('dra', {
+    console.log('dragReleased', {
       target: ev.event.target,
       source: ev.source.element.nativeElement,
+      ev,
     });
 
     ev.source.element.nativeElement.style.pointerEvents = '';
@@ -341,14 +340,26 @@ export class ScheduleComponent implements AfterViewInit, OnDestroy {
       this.prevDragOverEl.classList.remove(DRAG_OVER_CLASS);
     }
     const target = ev.event.target as HTMLElement;
-    if (target.tagName.toLowerCase() === 'schedule-event') {
-      console.log('target', target);
+    if (
+      target.tagName.toLowerCase() === 'div' &&
+      target.classList.contains('dropzones')
+    ) {
+      const targetDay = (target as any).day || target.getAttribute('data-day');
+      console.log(targetDay);
+      if (targetDay) {
+        this._store.dispatch(
+          PlannerActions.planTaskForDay({
+            task: ev.source.data.data,
+            day: targetDay,
+          }),
+        );
+      }
+    } else if (target.tagName.toLowerCase() === 'schedule-event') {
       // const sourceTaskId = ev.source.data.data.id;
       const sourceTaskId = ev.source.element.nativeElement.id.replace('t-', '');
       const targetTaskId = target.id.replace('t-', '');
-      console.log('sourceTaskId', sourceTaskId, 'targetTaskId', targetTaskId);
-
       if (sourceTaskId && targetTaskId && sourceTaskId !== targetTaskId) {
+        console.log('sourceTaskId', sourceTaskId, 'targetTaskId', targetTaskId);
         console.log('DISPATCH');
         this._store.dispatch(
           PlannerActions.moveBeforeTask({
