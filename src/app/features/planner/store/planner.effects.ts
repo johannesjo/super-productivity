@@ -37,6 +37,7 @@ import { updateTag } from '../../tag/store/tag.actions';
 import { PlannerService } from '../planner.service';
 import { getAllMissingPlannedTaskIdsForDay } from '../util/get-all-missing-planned-task-ids-for-day';
 import { devError } from '../../../util/dev-error';
+import { getWorklogStr } from '../../../util/get-work-log-str';
 
 @Injectable()
 export class PlannerEffects {
@@ -142,6 +143,34 @@ export class PlannerEffects {
         return PlannerActions.removeTaskFromDays({
           taskId: task.id,
         });
+      }),
+    );
+  });
+
+  addTodayTagIfPlanedForToday$ = createEffect(() => {
+    return this._actions$.pipe(
+      ofType(PlannerActions.planTaskForDay),
+      filter((action) => action.day === getWorklogStr()),
+      mergeMap(({ task }) => {
+        return [
+          updateTaskTags({
+            task,
+            oldTagIds: task.tagIds,
+            newTagIds: unique([TODAY_TAG.id, ...task.tagIds]),
+          }),
+          // updateTag({
+          //   tag: {
+          //     id: TODAY_TAG.id,
+          //     changes: {
+          //       taskIds: [
+          //         ...plannedIds,
+          //         ...todayTag.taskIds.filter((id) => !plannedIds.includes(id)),
+          //       ],
+          //     },
+          //   },
+          //   isSkipSnack: true,
+          // }),
+        ];
       }),
     );
   });
