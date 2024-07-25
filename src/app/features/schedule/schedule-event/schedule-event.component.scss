@@ -1,6 +1,7 @@
 @import '../../../../variables.scss';
 
 $split-extra-border-radius: 20px;
+$margin-bottom: 3px;
 
 :host {
   --project-color: $light-theme-separator-color;
@@ -16,7 +17,7 @@ $split-extra-border-radius: 20px;
   align-items: flex-start;
   // TODO evaluate
   // TODO find better workaround
-  //margin-bottom: 3px;
+  margin-bottom: $margin-bottom;
 
   border: 1px solid $light-theme-separator-color;
   //border-color:var(--project-color);
@@ -249,7 +250,7 @@ $split-extra-border-radius: 20px;
 :host-context(.is-dragging.SplitTask) :host.SplitTask,
 :host-context(.is-dragging.SplitTask) :host.Task {
   //background: $light-theme-bg-darker;
-  outline: 1px solid $c-accent;
+  //outline: 1px solid $c-accent;
   box-shadow: $whiteframe-shadow-3dp;
 }
 
@@ -280,15 +281,15 @@ $split-extra-border-radius: 20px;
   &:after {
     content: '';
     position: absolute;
-    height: 100%;
+    //height: 100%;
     border: 1px solid red;
     transform: translateY(-100%);
     top: 0;
-    bottom: -10px;
+    bottom: -1 * $margin-bottom;
     left: 0;
     right: 0;
     z-index: 3;
-    opacity: 0;
+    //opacity: 0;
   }
 }
 
