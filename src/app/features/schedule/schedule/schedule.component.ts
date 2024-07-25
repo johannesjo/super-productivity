@@ -39,6 +39,7 @@ import {
   CdkDropList,
 } from '@angular/cdk/drag-drop';
 import { GlobalTrackingIntervalService } from '../../../core/global-tracking-interval/global-tracking-interval.service';
+import { IS_TOUCH_PRIMARY } from 'src/app/util/is-mouse-primary';
 
 const DAYS_TO_SHOW = 5;
 const FH = 12;
@@ -66,6 +67,7 @@ const IS_DRAGGING_CLASS = 'is-dragging';
 })
 export class ScheduleComponent implements AfterViewInit, OnDestroy {
   FH = FH;
+  IS_TOUCH_PRIMARY = IS_TOUCH_PRIMARY;
   colByNr = Array.from({ length: DAYS_TO_SHOW }, (_, index) => index);
   rowsByNr = Array.from({ length: D_HOURS * FH }, (_, index) => index).filter(
     (v, index) => index % FH === 0,
