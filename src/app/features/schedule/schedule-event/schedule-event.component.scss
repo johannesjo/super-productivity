@@ -74,15 +74,10 @@ $margin-bottom: 4px;
   justify-content: center;
   align-items: center;
   background: transparent;
-  //border: 2px dashed $light-theme-separator-color;
-  //background: $light-theme-bg;
-  //@include darkTheme() {
-  //  border-color: $dark-theme-separator-color;
-  //  background: $dark-theme-bg;
-  //}
 
   .title {
     flex-grow: 0;
+    column-width: auto;
   }
 }
 
@@ -207,7 +202,6 @@ $margin-bottom: 4px;
   font-weight: 300;
   line-height: 1.2;
   max-height: 100%;
-  height: 100%;
   // somehow this fixes the cut off lines problem
   column-width: 250px;
 
