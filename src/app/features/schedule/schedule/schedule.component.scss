@@ -219,3 +219,36 @@ header {
 .col.drag-over .drop-on-col-info {
   display: flex;
 }
+
+.excess-entries {
+  position: sticky;
+  bottom: 0;
+  border-top: 3px solid $c-warn;
+  background: $light-theme-bg;
+  max-height: 120px;
+
+  @media (min-height: 800px) {
+    max-height: 200px;
+  }
+}
+
+.excess-entries-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px;
+
+  @include mq(xs, max) {
+    padding: 4px;
+  }
+
+  mat-icon {
+    font-size: 20px;
+    height: 20px;
+
+    @include mq(xs, max) {
+      font-size: 16px;
+      height: 16px;
+    }
+  }
+}

@@ -40,6 +40,7 @@ import {
 } from '@angular/cdk/drag-drop';
 import { GlobalTrackingIntervalService } from '../../../core/global-tracking-interval/global-tracking-interval.service';
 import { IS_TOUCH_PRIMARY } from 'src/app/util/is-mouse-primary';
+import { getTimeLeftForTask } from '../../../util/get-time-left-for-task';
 
 const DAYS_TO_SHOW = 5;
 const FH = 12;
@@ -135,11 +136,28 @@ export class ScheduleComponent implements AfterViewInit, OnDestroy {
     tap(() => (this.now = Date.now())),
   );
 
-  events$: Observable<ScheduleEvent[]> = this.timelineDays$.pipe(
+  eventsAndBeyondBudget$: Observable<{
+    eventsFlat: ScheduleEvent[];
+    beyondBudgetDays: ScheduleEvent[][];
+  }> = this.timelineDays$.pipe(
     map((days) => {
-      const daysFlat: any[] = [];
+      const eventsFlat: ScheduleEvent[] = [];
+      const beyondBudgetDays: ScheduleEvent[][] = [];
 
       days.forEach((day, dayIndex) => {
+        beyondBudgetDays[dayIndex] = day.beyondBudgetTasks.map((taskPlannedForDay) => {
+          // eslint-disable-next-line no-mixed-operators
+          const timeLeft = getTimeLeftForTask(taskPlannedForDay);
+          const timeLeftInHours = timeLeft / 1000 / 60 / 60;
+          const rowSpan = Math.round(timeLeftInHours * FH);
+          return {
+            data: taskPlannedForDay,
+            title: taskPlannedForDay.title,
+            type: TimelineViewEntryType.TaskPlannedForDay,
+            style: `height: ${rowSpan * 8}px`,
+          };
+        });
+
         day.entries.forEach((entry, entryIndex) => {
           if (
             entry.type !== TimelineViewEntryType.WorkdayEnd &&
@@ -158,8 +176,7 @@ export class ScheduleComponent implements AfterViewInit, OnDestroy {
                 : getDurationForViewEntry(entry);
             const timeLeftInHours = timeLeft / 1000 / 60 / 60;
             const rowSpan = Math.round(timeLeftInHours * FH);
-            console.log(startHour, startMinute);
-            daysFlat.push({
+            eventsFlat.push({
               title:
                 (entry as any)?.data?.title ||
                 (entry.type === TimelineViewEntryType.LunchBreak
@@ -173,10 +190,17 @@ export class ScheduleComponent implements AfterViewInit, OnDestroy {
           }
         });
       });
-      console.log(daysFlat);
+      console.log(eventsFlat);
 
-      return daysFlat;
+      return { eventsFlat, beyondBudgetDays };
     }),
+  );
+
+  events$: Observable<ScheduleEvent[]> = this.eventsAndBeyondBudget$.pipe(
+    map(({ eventsFlat }) => eventsFlat),
+  );
+  beyondBudget$: Observable<ScheduleEvent[][]> = this.eventsAndBeyondBudget$.pipe(
+    map(({ beyondBudgetDays }) => beyondBudgetDays),
   );
 
   currentTimeStyle$ = this.timelineDays$.pipe(

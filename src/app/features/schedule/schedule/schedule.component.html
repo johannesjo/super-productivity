@@ -61,6 +61,7 @@
       class="col"
       style="grid-column: {{ $index + 2 }}"
     >
+      <!-- todo move out here to make them sticky -->
       <div class="drop-on-col-info">
         <mat-icon>add</mat-icon>
         <div>Drop here to plan for day</div>
@@ -96,6 +97,38 @@
     } @else {
     <schedule-event [event]="ev"></schedule-event>
     } }
+
+    <!-- Excess tasks planned for day -->
+    @for (beyondBudgetDay of (beyondBudget$|async); track i; let i = $index) {
+    <!-- -->
+    @if (beyondBudgetDay.length > 0) {
+    <div
+      class="excess-entries"
+      style="grid-column: {{i + 2}}"
+    >
+      <div
+        class="excess-entries-header"
+        [matTooltip]="'Tasks planned for day, but that are beyond the available time budget'"
+      >
+        <mat-icon>hourglass_disabled</mat-icon>
+      </div>
+      @for (ev of beyondBudgetDay; track $index) {
+      <schedule-event
+        [event]="ev"
+        class="draggable"
+        cdkDrag
+        [cdkDragData]="ev"
+        (cdkDragMoved)="dragMoved($event)"
+        (cdkDragStarted)="dragStarted($event)"
+        (cdkDragReleased)="dragReleased($event)"
+        [cdkDragStartDelay]="IS_TOUCH_PRIMARY ? 100 : 0"
+        [event]="ev"
+      ></schedule-event>
+      }
+    </div>
+    }
+    <!-- -->
+    }
 
     <div
       class="current-time"
