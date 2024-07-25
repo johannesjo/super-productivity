@@ -20,6 +20,7 @@ import { loadAllData } from '../../../root-store/meta/load-all-data.action';
 import { migrateGlobalConfigState } from '../migrate-global-config.util';
 import { MODEL_VERSION_KEY } from '../../../app.constants';
 import { MODEL_VERSION } from '../../../core/model-version';
+import { getHoursFromClockString } from '../../../util/get-hours-from-clock-string';
 
 export const CONFIG_FEATURE_NAME = 'globalConfig';
 export const selectConfigFeatureState =
@@ -108,4 +109,22 @@ export const globalConfigReducer = createReducer<GlobalConfigState>(
       ...sectionCfg,
     },
   })),
+);
+
+export const selectTimelineWorkStartEndHours = createSelector(
+  selectConfigFeatureState,
+  (
+    cfg,
+  ): {
+    workStart: number;
+    workEnd: number;
+  } | null => {
+    if (!cfg.timeline.isWorkStartEndEnabled) {
+      return null;
+    }
+    return {
+      workStart: getHoursFromClockString(cfg.timeline.workStart),
+      workEnd: getHoursFromClockString(cfg.timeline.workEnd),
+    };
+  },
 );

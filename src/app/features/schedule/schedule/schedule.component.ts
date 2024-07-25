@@ -26,7 +26,7 @@ import { LS } from '../../../core/persistence/storage-keys.const';
 import { DialogTimelineSetupComponent } from '../../timeline/dialog-timeline-setup/dialog-timeline-setup.component';
 import { T } from 'src/app/t.const';
 import { TimelineViewEntryType } from '../../timeline/timeline.const';
-import { AsyncPipe, DatePipe, NgClass, NgStyle } from '@angular/common';
+import { AsyncPipe, DatePipe, NgClass, NgIf, NgStyle } from '@angular/common';
 import { getDurationForViewEntry } from '../../timeline/map-timeline-data/map-to-timeline-view-entries';
 import { StuckDirective } from '../../../ui/stuck/stuck.directive';
 import { ScheduleEventComponent } from '../schedule-event/schedule-event.component';
@@ -41,6 +41,10 @@ import {
 import { GlobalTrackingIntervalService } from '../../../core/global-tracking-interval/global-tracking-interval.service';
 import { IS_TOUCH_PRIMARY } from 'src/app/util/is-mouse-primary';
 import { getTimeLeftForTask } from '../../../util/get-time-left-for-task';
+import {
+  selectTimelineConfig,
+  selectTimelineWorkStartEndHours,
+} from '../../config/store/global-config.reducer';
 
 const DAYS_TO_SHOW = 5;
 const FH = 12;
@@ -61,6 +65,7 @@ const IS_DRAGGING_CLASS = 'is-dragging';
     CdkDrag,
     CdkDropList,
     DatePipe,
+    NgIf,
   ],
   templateUrl: './schedule.component.html',
   styleUrl: './schedule.component.scss',
@@ -93,7 +98,7 @@ export class ScheduleComponent implements AfterViewInit, OnDestroy {
     this._store.pipe(select(selectTimelineTasks)),
     this._store.pipe(select(selectTaskRepeatCfgsWithAndWithoutStartTime)),
     this.taskService.currentTaskId$,
-    this._globalConfigService.timelineCfg$,
+    this._store.pipe(select(selectTimelineConfig)),
     this._calendarIntegrationService.icalEvents$,
     this._store.pipe(select(selectPlannerDayMap)),
   ]).pipe(
@@ -193,6 +198,17 @@ export class ScheduleComponent implements AfterViewInit, OnDestroy {
       console.log(eventsFlat);
 
       return { eventsFlat, beyondBudgetDays };
+    }),
+  );
+
+  workStartEnd$ = this._store.pipe(select(selectTimelineWorkStartEndHours)).pipe(
+    map((v) => {
+      return (
+        v && {
+          workStartRow: Math.round(FH * v.workStart),
+          workEndRow: Math.round(FH * v.workEnd),
+        }
+      );
     }),
   );
 
