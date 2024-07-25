@@ -205,6 +205,33 @@ export class PlannerEffects {
     );
   });
 
+  insertPlannedITaskIntoTodayList$ = createEffect(() => {
+    return this._actions$.pipe(
+      ofType(PlannerActions.moveBeforeTask),
+      // filter(({ fromTask, toTaskId }) => fromTask.tagIds.includes(TODAY_TAG.id)),
+      switchMap(({ fromTask, toTaskId }) => {
+        return this._store.select(selectTagById, { id: TODAY_TAG.id }).pipe(
+          first(),
+          filter((todayTag) => todayTag.taskIds.includes(toTaskId)),
+          map((todayTag) => {
+            const newTaskIds = [...todayTag.taskIds].filter((id) => id !== fromTask.id);
+            const toIndex = newTaskIds.indexOf(toTaskId);
+            newTaskIds.splice(toIndex, 0, fromTask.id);
+            return updateTag({
+              tag: {
+                id: TODAY_TAG.id,
+                changes: {
+                  taskIds: unique(newTaskIds),
+                },
+              },
+              isSkipSnack: true,
+            });
+          }),
+        );
+      }),
+    );
+  });
+
   showDialogAfterAppLoad$ = createEffect(
     () => {
       return this._syncTriggerService.afterInitialSyncDoneAndDataLoadedInitially$.pipe(
