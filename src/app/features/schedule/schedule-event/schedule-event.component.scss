@@ -67,12 +67,12 @@ $split-extra-border-radius: 20px;
 }
 
 :host.LunchBreak {
-  background: transparent !important;
   display: flex;
   justify-content: center;
   align-items: center;
-  border: 1px dashed $light-theme-separator-color;
-
+  border: 2px dashed $light-theme-separator-color;
+  background: $light-theme-bg;
+  //background: transparent;
   @include darkTheme() {
     border-color: $dark-theme-separator-color;
   }
@@ -82,7 +82,24 @@ $split-extra-border-radius: 20px;
   }
 }
 
-// non draggable
+// non draggable 1
+//:host {
+//  &.SplitTaskContinued,
+//  &.SplitTaskContinuedLast {
+//
+//    .title {
+//      opacity: 0
+//    }
+//
+//    &:hover {
+//      .title {
+//        opacity: 1;
+//      }
+//    }
+//  }
+//}
+
+// non draggable 2
 :host {
   &.SplitTaskContinued,
   &.SplitTaskContinuedLast,
@@ -93,7 +110,11 @@ $split-extra-border-radius: 20px;
   &.RepeatProjectionSplitContinuedLast,
   &.ScheduledRepeatProjection,
   &.ScheduledTask {
-    opacity: 0.5;
+    //opacity: 0.5;
+    //opacity: 0.9;
+    background: $light-theme-bg;
+    //border: 2px dashed $light-theme-separator-color;
+    border: 1px solid $light-theme-separator-color;
 
     &:hover {
       opacity: 1;

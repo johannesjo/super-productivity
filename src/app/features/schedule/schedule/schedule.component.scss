@@ -9,10 +9,18 @@ $time-height-mobile: 6px;
 $grid-color: #dadce0;
 $grid-color-dark: rgba(255, 255, 255, 0.1);
 $calendar-template: $time-width repeat(5, 1fr);
-$current-time-color: #ea4335;
 $current-time-color: $c-accent;
+$current-time-color: $c-warn;
 $fr: 12;
 $total-rows: 24 * $fr;
+
+:host {
+  background: $light-theme-bg;
+
+  @include darkTheme() {
+    background: $dark-theme-bg;
+  }
+}
 
 .outer-container {
   width: 100%;
