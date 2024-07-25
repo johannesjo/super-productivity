@@ -22,7 +22,7 @@ $split-extra-border-radius: 20px;
 
   background: #fff;
   color: $light-theme-text-color;
-  overflow: hidden;
+  overflow: visible;
   position: relative;
   border-left: 4px solid var(--project-color);
 
@@ -173,6 +173,7 @@ $split-extra-border-radius: 20px;
   padding: 4px;
   font-weight: 300;
   line-height: 1.2;
+  max-height: 100%;
 
   @include mq(xs, max) {
     font-size: 10px;
@@ -233,9 +234,30 @@ $split-extra-border-radius: 20px;
   outline: none;
 }
 
+:host {
+  transition: 200ms transform;
+  position: relative;
+}
+
 :host.drag-over {
-  background: $c-accent !important;
-  color: $c-contrast !important;
+  //background: $c-accent !important;
+  //color: $c-contrast !important;
+  transform: translateY(100%);
+  z-index: 3;
+
+  &:after {
+    content: '';
+    position: absolute;
+    height: 100%;
+    border: 1px solid red;
+    transform: translateY(-100%);
+    top: 0;
+    bottom: -10px;
+    left: 0;
+    right: 0;
+    z-index: 3;
+    opacity: 0;
+  }
 }
 
 :host.draggable {
@@ -243,5 +265,6 @@ $split-extra-border-radius: 20px;
 
   &:active {
     cursor: grabbing;
+    transition: none;
   }
 }

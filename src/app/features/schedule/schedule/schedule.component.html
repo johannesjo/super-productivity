@@ -77,6 +77,24 @@
     ></div>
     }
 
+    <!-- Work Start and End -->
+    <ng-container *ngIf="(workStartEnd$|async) as workStartEnd">
+      @if (workStartEnd) {
+      <div
+        class="work-start"
+        style="grid-row: {{workStartEnd.workStartRow}}"
+      >
+        <div>Work Start</div>
+      </div>
+      <div
+        class="work-end"
+        style="grid-row: {{workStartEnd.workEndRow}}"
+      >
+        <div>Work End</div>
+      </div>
+      }
+    </ng-container>
+
     <!-- Events -->
     @for (ev of (events$|async); track $index) {
     <!-- -->
@@ -130,23 +148,6 @@
     }
     <!-- -->
     }
-
-    <ng-container *ngIf="(workStartEnd$|async) as workStartEnd">
-      @if (workStartEnd) {
-      <div
-        class="work-start"
-        style="grid-row: {{workStartEnd.workStartRow}}"
-      >
-        <div>Work Start</div>
-      </div>
-      <div
-        class="work-end"
-        style="grid-row: {{workStartEnd.workEndRow}}"
-      >
-        <div>Work End</div>
-      </div>
-      }
-    </ng-container>
 
     <div
       class="current-time"

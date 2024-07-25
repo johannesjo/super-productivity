@@ -18,7 +18,6 @@ import { mapToTimelineDays } from '../../timeline/map-timeline-data/map-to-timel
 import { getTomorrow } from '../../../util/get-tomorrow';
 import { TaskService } from '../../tasks/task.service';
 import { LayoutService } from '../../../core-ui/layout/layout.service';
-import { GlobalConfigService } from '../../config/global-config.service';
 import { MatDialog } from '@angular/material/dialog';
 import { CalendarIntegrationService } from '../../calendar-integration/calendar-integration.service';
 import { DateService } from '../../../core/date/date.service';
@@ -247,7 +246,6 @@ export class ScheduleComponent implements AfterViewInit, OnDestroy {
   constructor(
     public taskService: TaskService,
     public layoutService: LayoutService,
-    private _globalConfigService: GlobalConfigService,
     private _matDialog: MatDialog,
     private _calendarIntegrationService: CalendarIntegrationService,
     private _store: Store,
