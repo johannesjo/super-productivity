@@ -207,6 +207,9 @@ $margin-bottom: 4px;
   font-weight: 300;
   line-height: 1.2;
   max-height: 100%;
+  height: 100%;
+  // somehow this fixes the cut off lines problem
+  column-width: 250px;
 
   @include mq(xs, max) {
     font-size: 10px;
