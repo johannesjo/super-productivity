@@ -109,13 +109,12 @@ $split-extra-border-radius: 20px;
   &.RepeatProjectionSplit,
   &.RepeatProjectionSplitContinued,
   &.RepeatProjectionSplitContinuedLast,
-  &.ScheduledRepeatProjection,
-  &.ScheduledTask {
+  &.ScheduledRepeatProjection {
     //opacity: 0.5;
     //opacity: 0.9;
     background: $light-theme-bg;
-    //border: 2px dashed $light-theme-separator-color;
-    border: 1px solid $light-theme-separator-color;
+    border: 1px dashed $light-theme-separator-color;
+    //border: 1px solid $light-theme-separator-color;
 
     @include darkTheme() {
       border-color: $dark-theme-separator-color;
@@ -132,7 +131,42 @@ $split-extra-border-radius: 20px;
 //  scheduable tasks
 :host {
   &.ScheduledTask {
-    opacity: 1;
+    border-radius: 0;
+
+    .ico {
+      color: $c-primary;
+      font-size: 22px;
+      height: 22px;
+      margin-left: 2px;
+      min-width: 22px;
+      margin-top: 4px;
+      opacity: 1;
+      //border: 1px solid;
+      //border-radius: 50%;
+      //padding: 4px;
+
+      @include mq(xs, max) {
+        display: block !important;
+        font-size: 12px;
+        height: 12px;
+        line-height: 12px;
+        min-width: 12px;
+        margin-left: 1px;
+        margin-top: 2px;
+      }
+    }
+
+    button {
+      display: none;
+      pointer-events: all;
+      cursor: pointer;
+      position: absolute;
+      //left: -10px;
+      //top: 50%;
+      //transform: translateY(-50%);
+      right: -4px;
+      bottom: -4px;
+    }
   }
 }
 
@@ -152,7 +186,7 @@ $split-extra-border-radius: 20px;
   min-width: 14px;
   margin-left: 4px;
   margin-top: 5px;
-  opacity: 0.8;
+  opacity: 0.6;
 
   @include mq(xs, max) {
     display: none;

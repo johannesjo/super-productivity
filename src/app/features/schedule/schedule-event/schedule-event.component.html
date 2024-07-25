@@ -41,4 +41,13 @@
 }
 <!--- -->
 
+@if (se.type === TimelineViewEntryType.ScheduledTask) {
+<button
+  mat-mini-fab
+  color="primary"
+>
+  <mat-icon>alarm</mat-icon>
+</button>
+}
+
 <div class="title">{{ se.title }}</div>

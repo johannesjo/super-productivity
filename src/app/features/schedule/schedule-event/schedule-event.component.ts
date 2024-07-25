@@ -14,11 +14,12 @@ import { takeUntil } from 'rxjs/operators';
 import { Store } from '@ngrx/store';
 import { selectProjectById } from '../../project/store/project.selectors';
 import { BaseComponent } from '../../../core/base-component/base.component';
+import { MatMiniFabButton } from '@angular/material/button';
 
 @Component({
   selector: 'schedule-event',
   standalone: true,
-  imports: [MatIcon],
+  imports: [MatIcon, MatMiniFabButton],
   templateUrl: './schedule-event.component.html',
   styleUrl: './schedule-event.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
