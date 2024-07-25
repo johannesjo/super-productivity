@@ -26,6 +26,11 @@ $split-extra-border-radius: 20px;
   position: relative;
   border-left: 4px solid var(--project-color);
 
+  @include mq(xs, max) {
+    border-left-width: 2px;
+    margin-right: 5px;
+  }
+
   &:hover {
     //z-index: 3;
     //overflow: visible;
@@ -143,9 +148,19 @@ $split-extra-border-radius: 20px;
   line-height: 1.2;
 
   @include mq(xs, max) {
-    font-size: 11px;
+    font-size: 10px;
+    line-height: 1.2;
   }
 
+  @include mq(xxs, max) {
+    font-size: 9px;
+    line-height: 1.1;
+  }
+
+  @include mq(xxxs, max) {
+    font-size: 8px;
+    line-height: 1.1;
+  }
   //&:hover {
   //  box-shadow: $whiteframe-shadow-3dp;
   //  background: inherit;
