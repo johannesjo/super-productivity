@@ -650,7 +650,8 @@ export const getDurationForViewEntry = (viewEntry: TimelineViewEntry): number =>
     return (viewEntry as TimelineViewEntrySplitTaskContinued).data.timeToGo;
   } else if (
     viewEntry.type === TimelineViewEntryType.RepeatProjection ||
-    viewEntry.type === TimelineViewEntryType.RepeatProjectionSplit
+    viewEntry.type === TimelineViewEntryType.RepeatProjectionSplit ||
+    viewEntry.type === TimelineViewEntryType.ScheduledRepeatProjection
   ) {
     return viewEntry.data.defaultEstimate || 0;
   } else if (viewEntry.type === TimelineViewEntryType.LunchBreak) {
