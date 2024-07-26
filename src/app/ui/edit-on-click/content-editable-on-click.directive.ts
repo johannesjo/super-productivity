@@ -9,6 +9,7 @@ import {
 } from '@angular/core';
 import { IS_FIREFOX } from '../../util/is-firefox';
 import { devError } from '../../util/dev-error';
+import { IS_TOUCH_PRIMARY } from '../../util/is-mouse-primary';
 
 // HELPER
 // -----------------------------------
@@ -76,8 +77,8 @@ export class ContentEditableOnClickDirective implements OnInit, OnDestroy {
       this._onEditDone(ev);
     });
 
-    // prevent keyboard shortcuts from firing when here
     el.addEventListener('keydown', (ev: KeyboardEvent) => {
+      // prevent keyboard shortcuts from firing when here
       ev.stopPropagation();
       // blur on escape
       if (ev.key === 'Enter' || ev.key === 'Escape') {
@@ -87,6 +88,19 @@ export class ContentEditableOnClickDirective implements OnInit, OnDestroy {
         });
       }
     });
+
+    if (IS_TOUCH_PRIMARY) {
+      el.addEventListener('textInput', (ev: any) => {
+        console.log(ev);
+        ev.preventDefault();
+        // const androidCode = (ev as any)?.originalEvent?.data.charCodeAt(0);
+        const androidCode = ev?.originalEvent?.data.charCodeAt(0);
+        console.log(androidCode);
+        setTimeout(() => {
+          el.blur();
+        });
+      });
+    }
 
     // blur on enter
     el.addEventListener('keypress', (ev: KeyboardEvent) => {
@@ -145,7 +159,7 @@ export class ContentEditableOnClickDirective implements OnInit, OnDestroy {
   }
 
   private _setValueFromElement(): void {
-    this._value = this._removeTags(this._el.innerText);
+    this._value = this._removeTagsAndCleanStr(this._el.innerText);
   }
 
   private _insertAtCursor(el: HTMLElement, newText: string): void {
@@ -250,13 +264,14 @@ export class ContentEditableOnClickDirective implements OnInit, OnDestroy {
     }
   }
 
-  private _removeTags(str: string): string {
+  private _removeTagsAndCleanStr(str: string): string {
     return str
-      .replace(/<\/?[^`]+?\/?>/gim, '\n') // replace all tags
-      .replace(/\n/gim, '') // replace line breaks
-      .replace(/&nbsp;/gim, '') // replace line breaks
+      .replace(/<\/?[^>]+(>|$)/g, '') // remove all HTML tags
+      .replace(/\r?\n|\r/g, '') // remove all types of line breaks
+      .replace(/&nbsp;/gi, ' ') // replace non-breaking spaces with regular spaces
       .replace('&nbsp;', '') // replace line breaks again because sometimes it doesn't work
-      .trim();
+      .replace(/\s\s+/g, ' ') // replace multiple spaces with a single space
+      .trim(); // trim leading and trailing spaces
   }
 
   private _moveCursorToEndForKeyboardFocus(): void {

@@ -134,7 +134,7 @@
       </div>
 
       <div
-        (click)="IS_TOUCH_PRIMARY && toggleShowAdditionalInfoOpen($event)"
+        (click)="IS_TOUCH_PRIMARY && (task.title.length ? toggleShowAdditionalInfoOpen($event) : focusTitleForEdit())"
         class="title-and-tags-wrapper"
       >
         <div
@@ -150,12 +150,10 @@
           [isResetAfterEdit]="true"
           [value]="task.title"
           spellcheck="false"
-          class="task-title show-only-on-mouse-primary"
+          class="task-title"
           contentEditableOnClick
           contenteditable="true"
         ></div>
-
-        <div class="task-title show-only-on-touch-primary">{{ task.title }}</div>
 
         <tag-list
           [task]="task"

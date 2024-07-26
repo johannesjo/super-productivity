@@ -249,9 +249,24 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
     //   });
 
     // hacky but relatively performant
-    if (this.task.parentId && Date.now() - 100 < this.task.created) {
+    if (
+      this.task.parentId &&
+      Date.now() - 200 < this.task.created &&
+      !this.task.title.length
+    ) {
       setTimeout(() => {
-        this.focusTitleForEdit();
+        // when there are multiple instances with the same task we should focus the last one, since it is the one in the
+        // task side panel
+        const otherTaskEl = document.querySelectorAll('#t-' + this.task.id);
+        if (
+          otherTaskEl?.length <= 1 ||
+          Array.from(otherTaskEl).findIndex(
+            (item) => item === this._elementRef.nativeElement,
+          ) ===
+            otherTaskEl.length - 1
+        ) {
+          this.focusTitleForEdit();
+        }
       });
     }
   }
@@ -259,10 +274,7 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
   ngOnDestroy(): void {
     this._destroy$.next(true);
     this._destroy$.unsubscribe();
-
-    if (this._currentPanTimeout) {
-      window.clearTimeout(this._currentPanTimeout);
-    }
+    window.clearTimeout(this._currentPanTimeout);
   }
 
   editReminder(): void {
