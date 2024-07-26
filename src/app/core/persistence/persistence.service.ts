@@ -1,10 +1,5 @@
 import { Injectable } from '@angular/core';
-import {
-  AllowedDBKeys,
-  DB,
-  DB_LEGACY,
-  DB_LEGACY_PROJECT_PREFIX,
-} from './storage-keys.const';
+import { AllowedDBKeys, DB, DB_LEGACY_PROJECT_PREFIX } from './storage-keys.const';
 import { GlobalConfigState } from '../../features/config/global-config.model';
 import {
   ArchiveTask,
@@ -173,7 +168,6 @@ export class PersistenceService {
   async loadProjectArchive(): Promise<ProjectArchive> {
     return await this._loadFromDb({
       dbKey: 'archivedProjects',
-      legacyDBKey: DB_LEGACY.PROJECT_ARCHIVE,
     });
   }
 
@@ -192,7 +186,6 @@ export class PersistenceService {
   async loadArchivedProject(projectId: string): Promise<ProjectArchivedRelatedData> {
     const archive = await this._loadFromDb({
       dbKey: 'project',
-      legacyDBKey: DB_LEGACY.PROJECT_ARCHIVE,
       projectId,
     });
     const projectDataCompressed = archive[projectId];
@@ -208,7 +201,6 @@ export class PersistenceService {
   async removeArchivedProject(projectId: string): Promise<void> {
     const archive = await this._loadFromDb({
       dbKey: 'archivedProjects',
-      legacyDBKey: DB_LEGACY.PROJECT_ARCHIVE,
     });
     delete archive[projectId];
     await this.saveProjectArchive(archive);
@@ -292,7 +284,7 @@ export class PersistenceService {
   // BACKUP AND SYNC RELATED
   // -----------------------
   async loadBackup(): Promise<AppDataComplete> {
-    return this._loadFromDb({ dbKey: DB.BACKUP, legacyDBKey: DB.BACKUP });
+    return this._loadFromDb({ dbKey: DB.BACKUP });
   }
 
   async saveBackup(backup?: AppDataComplete): Promise<unknown> {
@@ -407,7 +399,6 @@ export class PersistenceService {
 
   // ------------------
   private _cmBase<T extends Record<string, any>>({
-    legacyKey,
     appDataKey,
     migrateFn = (v) => v,
     // NOTE: isSkipPush is used to use this for _cmBaseEntity as well
@@ -418,7 +409,6 @@ export class PersistenceService {
       loadState: async (isSkipMigrate = false) => {
         const modelData = await this._loadFromDb({
           dbKey: appDataKey,
-          legacyDBKey: legacyKey,
         });
         return modelData
           ? isSkipMigrate
@@ -462,7 +452,6 @@ export class PersistenceService {
   }
 
   private _cmBaseEntity<S extends Record<string, any>, M>({
-    legacyKey,
     appDataKey,
     modelVersion,
     reducerFn,
@@ -471,7 +460,6 @@ export class PersistenceService {
     const model = {
       // NOTE: isSkipPush is true because we do it below after
       ...this._cmBase({
-        legacyKey: legacyKey,
         appDataKey,
         modelVersion,
         migrateFn,
@@ -505,7 +493,6 @@ export class PersistenceService {
   }
 
   private _cmProject<S extends Record<string, any>, M>({
-    legacyKey,
     appDataKey,
   }: // migrateFn = (v) => v,
   PersistenceProjectModelCfg<S, M>): PersistenceForProjectModel<S, M> {
@@ -515,7 +502,6 @@ export class PersistenceService {
         this._loadFromDb({
           dbKey: appDataKey,
           projectId,
-          legacyDBKey: this._makeLegacyProjectKey(projectId, legacyKey),
         }),
       // }).then((v) => migrateFn(v, projectId)),
       save: (
@@ -667,11 +653,9 @@ export class PersistenceService {
   }
 
   private async _loadFromDb({
-    legacyDBKey,
     dbKey,
     projectId,
   }: {
-    legacyDBKey: string;
     dbKey: AllowedDBKeys;
     projectId?: string;
   }): Promise<any> {
@@ -679,10 +663,6 @@ export class PersistenceService {
     // NOTE: too much clutter
     // this._store.dispatch(loadFromDb({dbKey}));
     // TODO remove legacy stuff
-    return (
-      (await this._databaseService.load(idbKey)) ||
-      (await this._databaseService.load(legacyDBKey)) ||
-      undefined
-    );
+    return (await this._databaseService.load(idbKey)) || undefined;
   }
 }
