@@ -84,6 +84,7 @@ export const SYNC_FORM: ConfigFormSection<SyncConfig> = {
             IS_ANDROID_WEB_VIEW &&
             field.model.syncProvider === SyncProvider.LocalFile
           ) {
+            // disable / enable is a workaround for the hide expression for the info file path info tpl
             field.formControl?.disable();
 
             androidInterface.grantFilePermissionWrapped().then(() => {

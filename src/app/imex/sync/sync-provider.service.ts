@@ -122,6 +122,11 @@ export class SyncProviderService {
       currentProvider === this._localFileSyncAndroidService &&
       !androidInterface.isGrantedFilePermission()
     ) {
+      if (androidInterface.isGrantFilePermissionInProgress) {
+        console.log('Abort sync since currently choosing folder to give access');
+        return 'USER_ABORT';
+      }
+
       const res = await this._openPermissionDialog$().toPromise();
       if (res === 'DISABLED_SYNC') {
         this._log(currentProvider, 'Dialog => Disable Sync');
