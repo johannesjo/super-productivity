@@ -187,30 +187,29 @@ export class SyncProviderService {
     const revRes = await cp.getFileRevAndLastClientUpdate('MAIN', localRev);
 
     // NOTE : in success cases it is an object
-    if (typeof revRes === 'string') {
-      if (revRes === 'NO_REMOTE_DATA') {
-        // TODO remove at some point
-        const isPossibleLegacyData =
-          !localSyncMeta[cp.id].revTaskArchive &&
-          localSyncMeta[cp.id].revTaskArchive !== null;
-        if (
-          isPossibleLegacyData &&
-          localStorage.getItem(LS.LAST_LOCAL_SYNC_MODEL_CHANGE)
-        ) {
-          alert(this._translateService.instant(T.F.SYNC.A.POSSIBLE_LEGACY_DATA));
-          // localStorage.removeItem(LS.LAST_LOCAL_SYNC_MODEL_CHANGE);
-        }
-        if (this._c(T.F.SYNC.C.NO_REMOTE_DATA)) {
-          this._log(cp, '↑ Update Remote after no getFileRevAndLastClientUpdate()');
-          const localLocal = await this._persistenceService.getValidCompleteData();
-          await this._uploadAppData({
-            cp,
-            localDataComplete: localLocal,
-            isForceArchiveUpdate: true,
-          });
-          return 'SUCCESS';
-        }
+    if (typeof revRes === 'string' && revRes === 'NO_REMOTE_DATA') {
+      console.log('revRes was', revRes);
+      // TODO remove at some point
+      const isPossibleLegacyData =
+        !localSyncMeta[cp.id].revTaskArchive &&
+        localSyncMeta[cp.id].revTaskArchive !== null;
+      if (isPossibleLegacyData && localStorage.getItem(LS.LAST_LOCAL_SYNC_MODEL_CHANGE)) {
+        alert(this._translateService.instant(T.F.SYNC.A.POSSIBLE_LEGACY_DATA));
+        // localStorage.removeItem(LS.LAST_LOCAL_SYNC_MODEL_CHANGE);
       }
+      if (this._c(T.F.SYNC.C.NO_REMOTE_DATA)) {
+        this._log(cp, '↑ Update Remote after no getFileRevAndLastClientUpdate()');
+        const localLocal = await this._persistenceService.getValidCompleteData();
+        await this._uploadAppData({
+          cp,
+          localDataComplete: localLocal,
+          isForceArchiveUpdate: true,
+        });
+        return 'SUCCESS';
+      }
+      // NOTE: includes HANDLED_ERROR and Error
+      return 'ERROR';
+    } else if (typeof revRes === 'string') {
       // NOTE: includes HANDLED_ERROR and Error
       return 'ERROR';
     } else if (revRes instanceof Error) {
@@ -224,7 +223,16 @@ export class SyncProviderService {
       return 'ERROR';
     }
 
-    const { rev, clientUpdate } = revRes as { rev: string; clientUpdate: number };
+    const { rev, clientUpdate } = revRes as { rev: string | null; clientUpdate: number };
+
+    if (!rev) {
+      console.error('No valid rev returned from remote');
+      console.log(revRes);
+      this._snackService.open({
+        type: 'ERROR',
+        msg: T.F.SYNC.S.ERROR_NO_REV,
+      });
+    }
 
     console.log({ rev, localRev });
 

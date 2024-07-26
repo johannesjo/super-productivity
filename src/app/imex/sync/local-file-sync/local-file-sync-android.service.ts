@@ -34,7 +34,10 @@ export class LocalFileSyncAndroidService implements SyncProviderServiceInterface
   ): Promise<{ rev: string; clientUpdate?: number } | SyncGetRevResult> {
     const filePath = await this._getFilePath(syncTarget);
     const rev = androidInterface.getFileRev(filePath);
-    return { rev } as any;
+    if (rev === 'null' || !rev) {
+      return 'NO_REMOTE_DATA';
+    }
+    return { rev };
   }
 
   async uploadFileData(
