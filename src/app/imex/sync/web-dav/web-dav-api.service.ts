@@ -54,7 +54,8 @@ export class WebDavApiService {
 
   isAllConfigDataAvailable$: Observable<boolean> = this._cfg$.pipe(
     map(
-      (cfg) => !!(cfg && cfg.userName && cfg.baseUrl && cfg.syncFolderPath && cfg.password),
+      (cfg) =>
+        !!(cfg && cfg.userName && cfg.baseUrl && cfg.syncFolderPath && cfg.password),
     ),
   );
 
