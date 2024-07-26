@@ -7,22 +7,19 @@
     </mat-icon>
   </div>
 
-  <p><strong>Last sync was incomplete!</strong></p>
+  <p><strong> {{ T.F.SYNC.D_INCOMPLETE_SYNC.T1|translate }} </strong></p>
 
   <p>
-    Your archive data was not properly uploaded during last sync:
+    {{ T.F.SYNC.D_INCOMPLETE_SYNC.T2|translate }}
     <code>mfRev: {{ data?.revMainFile }} & realRev: {{ data?.realRev }}</code>
   </p>
-  <p>You have 2 Options:</p>
+  <p>{{ T.F.SYNC.D_INCOMPLETE_SYNC.T3|translate }}</p>
 
-  <p>1. Go to your other device and complete the sync there.</p>
-  <p>
-    2. Or you can overwrite the remote data with your local one. All remote changes will
-    be lost!
-  </p>
+  <p>{{ T.F.SYNC.D_INCOMPLETE_SYNC.T4|translate }}</p>
+  <p>{{ T.F.SYNC.D_INCOMPLETE_SYNC.T5|translate }}</p>
 
   <p style="text-align: center; margin-top: 16px">
-    <strong>Creating a backup of the data you overwrite is recommended!!!</strong>
+    <strong> {{ T.F.SYNC.D_INCOMPLETE_SYNC.T6|translate }} </strong>
   </p>
 
   <div style="text-align: center; margin-bottom: 16px">
@@ -33,12 +30,9 @@
       type="button"
     >
       <mat-icon>file_download</mat-icon>
-      Download Local Backup
-      <!--      {{T.FILE_IMEX.EXPORT_DATA|translate}}-->
+      {{ T.F.SYNC.D_INCOMPLETE_SYNC.BTN_DOWNLOAD_BACKUP|translate }}
     </button>
   </div>
-
-  <!--  <p>{{T.F.SYNC.D_AUTH_CODE.FOLLOW_LINK|translate}}</p>-->
 </mat-dialog-content>
 
 <mat-dialog-actions align="end">
@@ -57,8 +51,7 @@
       mat-stroked-button
     >
       <mat-icon>power_settings_new</mat-icon>
-      Close App
-      <!--      {{T.G.CANCEL|translate}}-->
+      {{ T.F.SYNC.D_INCOMPLETE_SYNC.BTN_CLOSE_APP|translate }}
     </button>
 
     <button
@@ -67,8 +60,7 @@
       mat-stroked-button
     >
       <mat-icon>file_upload</mat-icon>
-      Force Upload Local
-      <!--      {{T.G.SAVE|translate}}-->
+      {{ T.F.SYNC.D_INCOMPLETE_SYNC.BTN_FORCE_UPLOAD|translate }}
     </button>
   </div>
 </mat-dialog-actions>

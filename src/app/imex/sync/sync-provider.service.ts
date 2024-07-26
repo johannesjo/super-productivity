@@ -115,13 +115,6 @@ export class SyncProviderService {
   ) {}
 
   async sync(): Promise<SyncResult> {
-    // const res = await this._matDialog
-    //    .open(DialogIncompleteSyncComponent, {
-    //      data: { revMainFile: 'revMainFile', realRev: 'realRev' },
-    //    })
-    //    .afterClosed()
-    //    .toPromise();
-
     const currentProvider = await this.currentProvider$.pipe(take(1)).toPromise();
     if (!currentProvider) {
       throw new Error('No Sync Provider for sync()');

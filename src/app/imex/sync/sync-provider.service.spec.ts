@@ -35,6 +35,7 @@ describe('SyncProviderService', () => {
     ]);
     persistenceServiceMock = jasmine.createSpyObj('PersistenceService', [
       'getValidCompleteData',
+      'loadComplete',
     ]);
     persistenceLocalServiceMock = jasmine.createSpyObj('PersistenceLocalService', [
       'load',
