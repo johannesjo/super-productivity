@@ -79,13 +79,21 @@ export const SYNC_FORM: ConfigFormSection<SyncConfig> = {
             ? [{ label: SyncProvider.LocalFile, value: SyncProvider.LocalFile }]
             : []),
         ],
-        change: (field) => {
+        change: (field, ev) => {
           if (
             IS_ANDROID_WEB_VIEW &&
             field.model.syncProvider === SyncProvider.LocalFile
           ) {
+            field.formControl?.disable();
+
             androidInterface.grantFilePermissionWrapped().then(() => {
+              field.formControl?.enable();
+              console.log('Granted file access permission for android');
+              console.log(androidInterface?.allowedFolderPath());
               field.formControl?.updateValueAndValidity();
+              field.formControl?.parent?.updateValueAndValidity();
+              field.formControl?.parent?.markAllAsTouched();
+              field.formControl?.markAllAsTouched();
             });
           }
         },
@@ -94,6 +102,10 @@ export const SYNC_FORM: ConfigFormSection<SyncConfig> = {
         validFileAccessPermission: {
           expression: (c: any) => {
             if (IS_ANDROID_WEB_VIEW && c.value === SyncProvider.LocalFile) {
+              console.log(
+                'Checking file access permission for android',
+                androidInterface.isGrantedFilePermission(),
+              );
               return androidInterface.isGrantedFilePermission();
             }
             return true;
@@ -124,11 +136,16 @@ export const SYNC_FORM: ConfigFormSection<SyncConfig> = {
     // },
     IS_ANDROID_WEB_VIEW
       ? {
-          hideExpression: (m, v, field) =>
-            !IS_ANDROID_WEB_VIEW ||
-            field?.parent?.model.syncProvider !== SyncProvider.LocalFile ||
-            !androidInterface?.isGrantedFilePermission() ||
-            !androidInterface?.allowedFolderPath,
+          hideExpression: (m, v, field) => {
+            console.log(androidInterface?.allowedFolderPath());
+
+            return (
+              !IS_ANDROID_WEB_VIEW ||
+              field?.parent?.model.syncProvider !== SyncProvider.LocalFile ||
+              !androidInterface?.isGrantedFilePermission() ||
+              !androidInterface?.allowedFolderPath()
+            );
+          },
           type: 'tpl',
           className: `tpl`,
           expressionProperties: {
@@ -142,7 +159,9 @@ export const SYNC_FORM: ConfigFormSection<SyncConfig> = {
       : {},
     {
       hideExpression: (m, v, field) =>
-        field?.parent?.model.syncProvider !== SyncProvider.LocalFile,
+        field?.parent?.model.syncProvider !== SyncProvider.LocalFile ||
+        // hide for android
+        IS_ANDROID_WEB_VIEW,
       key: 'localFileSync',
       fieldGroup: [
         {

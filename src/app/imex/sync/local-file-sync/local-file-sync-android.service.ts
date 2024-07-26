@@ -7,7 +7,7 @@ import {
 import { Observable, of } from 'rxjs';
 import { IS_ANDROID_WEB_VIEW } from '../../../util/is-android-web-view';
 import { SyncGetRevResult } from '../sync.model';
-import { concatMap, first, map } from 'rxjs/operators';
+import { concatMap, map } from 'rxjs/operators';
 import { GlobalConfigService } from '../../../features/config/global-config.service';
 import { androidInterface } from '../../../features/android/android-interface';
 
@@ -16,16 +16,15 @@ import { androidInterface } from '../../../features/android/android-interface';
 })
 export class LocalFileSyncAndroidService implements SyncProviderServiceInterface {
   id: SyncProvider = SyncProvider.LocalFile;
-  isUploadForcePossible?: boolean;
+  isUploadForcePossible?: boolean = false;
   isReady$: Observable<boolean> = of(IS_ANDROID_WEB_VIEW).pipe(
-    concatMap(() => this._folderPath$),
+    concatMap(() =>
+      this._globalConfigService.sync$.pipe(
+        map((sync) => sync.isEnabled && sync.syncProvider === SyncProvider.LocalFile),
+      ),
+    ),
     map((v) => !!v),
   );
-
-  private _folderPath$: Observable<string | null> = this._globalConfigService.sync$.pipe(
-    map((sync) => sync.localFileSync.syncFolderPath),
-  );
-  private _folderPathOnce$: Observable<string | null> = this._folderPath$.pipe(first());
 
   constructor(private _globalConfigService: GlobalConfigService) {}
 
@@ -65,10 +64,6 @@ export class LocalFileSyncAndroidService implements SyncProviderServiceInterface
   }
 
   private async _getFilePath(syncTarget: SyncTarget): Promise<string> {
-    const folderPath = await this._folderPathOnce$.toPromise();
-    if (!folderPath) {
-      throw new Error('No folder path given');
-    }
-    return `${folderPath}/${syncTarget}.json`;
+    return `${syncTarget}.json`;
   }
 }

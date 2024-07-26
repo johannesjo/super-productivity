@@ -881,6 +881,7 @@ export class SyncProviderService {
             return JSON.parse(dataString) as T;
           } catch (eIgnoredInner) {
             console.error(eIgnoredInner);
+            console.log('dataInStr', dataInStr);
             // try to decompress anyway
             dataString = await this._compressionService.decompressUTF16(dataString);
           }
