@@ -13,6 +13,7 @@ import { DataImportService } from './data-import.service';
 import { AppDataComplete, AppMainFileData, LocalSyncMetaModel } from './sync.model';
 import { createAppDataCompleteMock } from '../../util/app-data-mock';
 import { SnackService } from '../../core/snack/snack.service';
+import { PersistenceService } from '../../core/persistence/persistence.service';
 
 describe('SyncProviderService', () => {
   let service: SyncProviderService;
@@ -22,6 +23,7 @@ describe('SyncProviderService', () => {
   let persistenceLocalServiceMock: jasmine.SpyObj<PersistenceLocalService>;
   let dataImportServiceMock: jasmine.SpyObj<DataImportService>;
   let snackServiceMock: jasmine.SpyObj<SnackService>;
+  let persistenceServiceMock: jasmine.SpyObj<PersistenceService>;
 
   beforeEach(() => {
     snackServiceMock = jasmine.createSpyObj('SnackService', ['open']);
@@ -30,6 +32,9 @@ describe('SyncProviderService', () => {
     translateServiceMock = jasmine.createSpyObj('TranslateService', ['instant']);
     dataImportServiceMock = jasmine.createSpyObj('DataImportService', [
       'importCompleteSyncData',
+    ]);
+    persistenceServiceMock = jasmine.createSpyObj('PersistenceService', [
+      'getValidCompleteData',
     ]);
     persistenceLocalServiceMock = jasmine.createSpyObj('PersistenceLocalService', [
       'load',
@@ -73,6 +78,7 @@ describe('SyncProviderService', () => {
         { provide: TranslateService, useValue: translateServiceMock },
         { provide: CompressionService, useValue: compressionServiceMock },
         { provide: PersistenceLocalService, useValue: persistenceLocalServiceMock },
+        { provide: PersistenceService, useValue: persistenceServiceMock },
         { provide: DataImportService, useValue: dataImportServiceMock },
         { provide: SnackService, useValue: snackServiceMock },
         {
@@ -195,7 +201,9 @@ describe('SyncProviderService', () => {
       );
     });
 
-    it('should throw an error if archive rev does not match archive rev in main file', async () => {
+    it('should throw an error if archive rev does not match archive rev in main file and dialog was clicked away', async () => {
+      matDialogMock.open.and.returnValue({ afterClosed: () => of(undefined) } as any);
+
       const cp: SyncProviderServiceInterface = {
         id: SyncProvider.Dropbox,
         downloadFileData: (syncTarget) =>
@@ -244,6 +252,65 @@ describe('SyncProviderService', () => {
       expect(dataImportServiceMock.importCompleteSyncData).not.toHaveBeenCalled();
     });
   });
+
+  // it('should force upload if archive rev does not match archive rev in main file and force was chosen from dialog ', async () => {
+  //   matDialogMock.open.and.returnValue({
+  //     afterClosed: () => of('FORCE_UPDATE_REMOTE'),
+  //   } as any);
+  //   const localDataComplete = {
+  //     ...createAppDataCompleteMock(),
+  //     lastArchiveUpdate: 999,
+  //     lastLocalSyncModelChange: 5555,
+  //   } as Partial<AppDataComplete> as AppDataComplete;
+  //
+  //   persistenceServiceMock.getValidCompleteData.and.returnValue(
+  //     Promise.resolve(localDataComplete),
+  //   );
+  //
+  //   const cp: SyncProviderServiceInterface = {
+  //     id: SyncProvider.Dropbox,
+  //     downloadFileData: (syncTarget) =>
+  //       Promise.resolve({
+  //         rev: 'remoteRev_' + syncTarget,
+  //         dataStr: {
+  //           taskArchive: 'taskArchiveREMOTE' as any,
+  //           archivedProjects: 'archivedProjectsREMOTE' as any,
+  //         } as any,
+  //       }),
+  //   } as Partial<SyncProviderServiceInterface> as SyncProviderServiceInterface;
+  //
+  //   const remoteMainFileData = {
+  //     MAIN_FILE_DATA1: 'MAIN_FILE_DATA1',
+  //     lastLocalSyncModelChange: 111,
+  //     archiveLastUpdate: 2222,
+  //     archiveRev: 'remoteRev_ARCHIVE_SOMETHING_ELSEEE',
+  //   } as Partial<AppMainFileData> as AppMainFileData;
+  //   const localData = {
+  //     taskArchive: 'taskArchive' as any,
+  //     archivedProjects: 'archivedProjects' as any,
+  //     lastArchiveUpdate: 44,
+  //   } as Partial<AppDataComplete> as AppDataComplete;
+  //
+  //   persistenceLocalServiceMock.load.and.returnValue(
+  //     Promise.resolve({
+  //       [SyncProvider.Dropbox]: {
+  //         taskArchive: 'taskArchiveREMOTE',
+  //         archivedProjects: 'archivedProjectsREMOTE',
+  //       },
+  //     }) as any,
+  //   );
+  //
+  //   try {
+  //     await service['_importMainFileAppDataAndArchiveIfNecessary']({
+  //       cp,
+  //       remoteMainFileData,
+  //       localComplete: localData,
+  //       mainFileRev: 'localRev',
+  //     });
+  //   } catch (e) {
+  //     expect(dataImportServiceMock.importCompleteSyncData).toHaveBeenCalled();
+  //   }
+  // });
 
   describe('_uploadAppData()', () => {
     let cp: jasmine.SpyObj<SyncProviderServiceInterface>;

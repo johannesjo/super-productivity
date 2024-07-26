@@ -45,6 +45,7 @@ import { decrypt, encrypt } from './encryption';
 import { LS } from '../../core/persistence/storage-keys.const';
 import { PREPEND_STR_COMPRESSION, PREPEND_STR_ENCRYPTION } from './sync.const';
 import { GlobalProgressBarService } from '../../core-ui/global-progress-bar/global-progress-bar.service';
+import { DialogIncompleteSyncComponent } from './dialog-incomplete-sync/dialog-incomplete-sync.component';
 
 const KNOWN_SYNC_ERROR_PREFIX = 'KNOWN_SYNC_ERROR_SUP_';
 
@@ -114,6 +115,13 @@ export class SyncProviderService {
   ) {}
 
   async sync(): Promise<SyncResult> {
+    // const res = await this._matDialog
+    //    .open(DialogIncompleteSyncComponent, {
+    //      data: { revMainFile: 'revMainFile', realRev: 'realRev' },
+    //    })
+    //    .afterClosed()
+    //    .toPromise();
+
     const currentProvider = await this.currentProvider$.pipe(take(1)).toPromise();
     if (!currentProvider) {
       throw new Error('No Sync Provider for sync()');
@@ -674,7 +682,20 @@ export class SyncProviderService {
         // eslint-disable-next-line @typescript-eslint/naming-convention
         'remoteMainFileData.archiveRev': remoteMainFileData.archiveRev,
       });
-      throw new Error('Remote archive rev does not match the one in remote main file');
+      const res = await this._matDialog
+        .open(DialogIncompleteSyncComponent)
+        .afterClosed()
+        .toPromise();
+      if (res === 'FORCE_UPDATE_REMOTE') {
+        await this._uploadAppData({
+          cp,
+          localDataComplete: await this._persistenceService.getValidCompleteData(),
+          isForceOverwrite: true,
+          isForceArchiveUpdate: true,
+        });
+      } else {
+        throw new Error('Remote archive rev does not match the one in remote main file');
+      }
     }
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars

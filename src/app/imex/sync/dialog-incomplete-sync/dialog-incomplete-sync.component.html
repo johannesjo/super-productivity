@@ -1,0 +1,74 @@
+<mat-dialog-content>
+  <div style="text-align: center; margin-bottom: 16px">
+    <mat-icon
+      color="warn"
+      style="font-size: 48px; height: 48px; width: 48px"
+      >error
+    </mat-icon>
+  </div>
+
+  <p><strong>Last sync was incomplete!</strong></p>
+
+  <p>
+    Your archive data was not properly uploaded during last sync:
+    <code>mfRev: {{ data?.revMainFile }} & realRev: {{ data?.realRev }}</code>
+  </p>
+  <p>You have 2 Options:</p>
+
+  <p>1. Go to your other device and complete the sync there.</p>
+  <p>
+    2. Or you can overwrite the remote data with your local one. All remote changes will
+    be lost!
+  </p>
+
+  <p style="text-align: center; margin-top: 16px">
+    <strong>Creating a backup of the data you overwrite is recommended!!!</strong>
+  </p>
+
+  <div style="text-align: center; margin-bottom: 16px">
+    <button
+      (click)="downloadBackup()"
+      color="primary"
+      mat-stroked-button
+      type="button"
+    >
+      <mat-icon>file_download</mat-icon>
+      Download Local Backup
+      <!--      {{T.FILE_IMEX.EXPORT_DATA|translate}}-->
+    </button>
+  </div>
+
+  <!--  <p>{{T.F.SYNC.D_AUTH_CODE.FOLLOW_LINK|translate}}</p>-->
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <div class="wrap-buttons">
+    <button
+      (click)="close()"
+      color="primary"
+      mat-stroked-button
+    >
+      {{ T.G.CANCEL|translate }}
+    </button>
+    <button
+      *ngIf="IS_ELECTRON"
+      (click)="closeApp()"
+      color="primary"
+      mat-stroked-button
+    >
+      <mat-icon>power_settings_new</mat-icon>
+      Close App
+      <!--      {{T.G.CANCEL|translate}}-->
+    </button>
+
+    <button
+      (click)="close('FORCE_UPDATE_REMOTE')"
+      color="warn"
+      mat-stroked-button
+    >
+      <mat-icon>file_upload</mat-icon>
+      Force Upload Local
+      <!--      {{T.G.SAVE|translate}}-->
+    </button>
+  </div>
+</mat-dialog-actions>
