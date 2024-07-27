@@ -301,6 +301,7 @@ export class SyncProviderService {
     try {
       r = await this._downloadMainFileAppData(cp);
     } catch (e) {
+      console.error(e);
       console.error('Download Data failed');
       this._snackService.open({
         msg: T.F.SYNC.S.ERROR_UNABLE_TO_READ_REMOTE_DATA,
@@ -878,6 +879,7 @@ export class SyncProviderService {
     ) {
       return dataInStr as T;
     }
+    console.log('dd 1');
 
     // NOTE: we need then later to make sure that both strings are appended after encryption and compression
     if (typeof dataInStr !== 'string') {
@@ -887,6 +889,7 @@ export class SyncProviderService {
     if (dataInStr.trim().length === 0) {
       throw new Error('Empty data string');
     }
+    console.log('dd 2');
 
     if (dataInStr.startsWith(PREPEND_STR_ENCRYPTION)) {
       dataInStr = dataInStr.slice(PREPEND_STR_ENCRYPTION.length);
@@ -899,7 +902,14 @@ export class SyncProviderService {
       .toPromise();
 
     try {
-      return JSON.parse(dataInStr) as T;
+      console.log('dd 3');
+      // fix legacy data that got double stringified for web dav
+      const d = JSON.parse(dataInStr);
+      if (typeof d === 'string') {
+        console.log('dd 3.1 DOUBLE JSON.parse() needed');
+        return JSON.parse(d) as T;
+      }
+      return d as T;
     } catch (eIgnored) {
       try {
         let dataString = dataInStr;
@@ -926,7 +936,7 @@ export class SyncProviderService {
         try {
           return JSON.parse(dataString) as T;
         } catch (eIgnoredInner) {
-          console.error(eIgnoredInner);
+          console.warn(eIgnoredInner);
           console.log('dataInStr', dataInStr);
           // try to decompress anyway
           dataString = await this._compressionService.decompressUTF16(dataString);
@@ -937,6 +947,7 @@ export class SyncProviderService {
           );
           throw new Error('Unable to parse remote data');
         }
+        console.log('dd 4');
         return JSON.parse(dataString) as T;
       } catch (eDecompression) {
         console.error('Sync, invalid data');
