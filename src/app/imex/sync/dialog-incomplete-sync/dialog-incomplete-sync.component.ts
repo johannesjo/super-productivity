@@ -12,6 +12,11 @@ import { download } from '../../../util/download';
 import { DataImportService } from '../data-import.service';
 import { NgIf } from '@angular/common';
 
+export interface DialogIncompleteSyncData {
+  archiveRevInMainFile?: string;
+  archiveRevReal?: string;
+}
+
 @Component({
   selector: 'dialog-incomplete-sync',
   standalone: true,
@@ -29,7 +34,7 @@ export class DialogIncompleteSyncComponent {
     private _matDialogRef: MatDialogRef<DialogIncompleteSyncComponent>,
     private _dataImportService: DataImportService,
     @Inject(MAT_DIALOG_DATA)
-    public data?: { revMainFile?: string; realRev?: string },
+    public data?: DialogIncompleteSyncData,
   ) {
     _matDialogRef.disableClose = true;
   }

@@ -45,7 +45,10 @@ import { decrypt, encrypt } from './encryption';
 import { LS } from '../../core/persistence/storage-keys.const';
 import { PREPEND_STR_COMPRESSION, PREPEND_STR_ENCRYPTION } from './sync.const';
 import { GlobalProgressBarService } from '../../core-ui/global-progress-bar/global-progress-bar.service';
-import { DialogIncompleteSyncComponent } from './dialog-incomplete-sync/dialog-incomplete-sync.component';
+import {
+  DialogIncompleteSyncComponent,
+  DialogIncompleteSyncData,
+} from './dialog-incomplete-sync/dialog-incomplete-sync.component';
 
 const KNOWN_SYNC_ERROR_PREFIX = 'KNOWN_SYNC_ERROR_SUP_';
 
@@ -675,12 +678,13 @@ export class SyncProviderService {
         // eslint-disable-next-line @typescript-eslint/naming-convention
         'remoteMainFileData.archiveRev': remoteMainFileData.archiveRev,
       });
+      const data: DialogIncompleteSyncData = {
+        archiveRevReal: remoteArchiveRev,
+        archiveRevInMainFile: remoteMainFileData?.archiveRev,
+      };
       const res = await this._matDialog
         .open(DialogIncompleteSyncComponent, {
-          data: {
-            revMainFile: mainFileRev,
-            realRev: remoteMainFileData?.archiveRev,
-          },
+          data,
         })
         .afterClosed()
         .toPromise();
