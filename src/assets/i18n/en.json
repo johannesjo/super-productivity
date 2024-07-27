@@ -1523,7 +1523,8 @@
       "KEYBOARD": "Howto: Advanced Keyboard",
       "REPORT_A_PROBLEM": "Report a problem",
       "START_WELCOME": "Start Welcome Tour",
-      "SYNC": "Howto: Configure Sync"
+      "SYNC": "Howto: Configure Sync",
+      "REDDIT_COMMUNITY": "Reddit Community"
     },
     "MANAGE_PROJECTS": "Manage Projects",
     "NO_TAG_INFO": "There are currently no tags. You can add tags by entering `#yourTagName` when adding or editing tasks.",

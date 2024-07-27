@@ -25,6 +25,16 @@
        src="https://img.shields.io/badge/on-product%20hunt-blue.svg?style=flat-square"
        align="center">
 </a>
+<a href="https://www.reddit.com/r/superProductivity/">
+  <img alt="Reddit Community"
+       src="https://img.shields.io/badge/Reddit-%23FF4500.svg?style=for-the-badge&logo=Reddit&logoColor=white"
+       align="center">
+</a>
+<a href="https://mastodon.social/@superproductivity">
+  <img alt="Super Productivity on Mastodon"
+       src="https://img.shields.io/badge/-MASTODON-%232B90D9?style=for-the-badge&logo=mastodon&logoColor=white"
+       align="center">
+</a>
 <a href="https://twitter.com/intent/tweet?text=Super%20Productivity%20%20https%3A%2F%2Fsuper-productivity.com">
   <img alt="tweet"
        src="https://img.shields.io/twitter/url/https/github.com/ArmynC/ArminC-AutoExec.svg?style=flat-square&logo=twitter"
