@@ -37,9 +37,9 @@ export const selectPlannerDays = (
       const allDatesWithData = Object.keys(plannerState.days);
       const dayDatesToUse = [
         ...dayDates,
-        ...allDatesWithData.filter(
-          (d) => plannerState.days[d].length && !dayDates.includes(d),
-        ),
+        ...allDatesWithData
+          .filter((d) => plannerState.days[d].length && !dayDates.includes(d))
+          .sort((a, b) => a.localeCompare(b)),
       ];
 
       return dayDatesToUse.map((dayDate, dayIndex) => {
