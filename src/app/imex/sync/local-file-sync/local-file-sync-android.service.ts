@@ -10,6 +10,9 @@ import { SyncGetRevResult } from '../sync.model';
 import { concatMap, map } from 'rxjs/operators';
 import { GlobalConfigService } from '../../../features/config/global-config.service';
 import { androidInterface } from '../../../features/android/android-interface';
+import { createSha1Hash } from '../../../util/create-sha-1-hash';
+
+const ERROR_MSG_DOWNLOAD = 'Could not load file with android adapter';
 
 @Injectable({
   providedIn: 'root',
@@ -32,12 +35,17 @@ export class LocalFileSyncAndroidService implements SyncProviderServiceInterface
     syncTarget: SyncTarget,
     localRev: string | null,
   ): Promise<{ rev: string; clientUpdate?: number } | SyncGetRevResult> {
-    const filePath = await this._getFilePath(syncTarget);
-    const rev = androidInterface.getFileRev(filePath);
-    if (rev === 'null' || !rev) {
-      return 'NO_REMOTE_DATA';
+    try {
+      const r = await this.downloadFileData(syncTarget, localRev);
+      return {
+        rev: r.rev,
+      };
+    } catch (e) {
+      if (e?.toString?.().includes(ERROR_MSG_DOWNLOAD)) {
+        return 'NO_REMOTE_DATA';
+      }
+      throw e;
     }
-    return { rev };
   }
 
   async uploadFileData(
@@ -49,7 +57,7 @@ export class LocalFileSyncAndroidService implements SyncProviderServiceInterface
   ): Promise<string | Error> {
     const filePath = await this._getFilePath(syncTarget);
     androidInterface.writeFile(filePath, dataStr);
-    return androidInterface.getFileRev(filePath);
+    return this._getLocalRev(dataStr);
   }
 
   async downloadFileData(
@@ -57,16 +65,22 @@ export class LocalFileSyncAndroidService implements SyncProviderServiceInterface
     localRev: string | null,
   ): Promise<{ rev: string; dataStr: string | undefined }> {
     const filePath = await this._getFilePath(syncTarget);
-    const rev = androidInterface.getFileRev(filePath);
     const dataStr = androidInterface.readFile(filePath);
+    if (!dataStr) {
+      throw new Error(ERROR_MSG_DOWNLOAD);
+    }
 
     return {
-      rev,
+      rev: await this._getLocalRev(dataStr),
       dataStr,
     };
   }
 
   private async _getFilePath(syncTarget: SyncTarget): Promise<string> {
     return `${syncTarget}.json`;
+  }
+
+  private _getLocalRev(dataStr: string): Promise<string> {
+    return createSha1Hash(dataStr);
   }
 }

@@ -37,6 +37,7 @@ export class PersistenceLocalService {
       r[SyncProvider.WebDAV] &&
       r[SyncProvider.LocalFile]
     ) {
+      console.log(r);
       return r;
     }
     return DEFAULT_LOCAL_SYNC_META;

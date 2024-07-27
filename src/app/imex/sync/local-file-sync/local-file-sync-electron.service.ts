@@ -9,6 +9,7 @@ import { IS_ELECTRON } from '../../../app.constants';
 import { SyncGetRevResult } from '../sync.model';
 import { concatMap, first, map } from 'rxjs/operators';
 import { GlobalConfigService } from '../../../features/config/global-config.service';
+import { createSha1Hash } from '../../../util/create-sha-1-hash';
 
 @Injectable({
   providedIn: 'root',
@@ -32,11 +33,17 @@ export class LocalFileSyncElectronService implements SyncProviderServiceInterfac
     syncTarget: SyncTarget,
     localRev: string | null,
   ): Promise<{ rev: string; clientUpdate?: number } | SyncGetRevResult> {
-    const r = await window.ea.fileSyncGetRevAndClientUpdate({
-      filePath: await this._getFilePath(syncTarget),
-      localRev,
-    });
-    return r as any;
+    try {
+      const r = await this.downloadFileData(syncTarget, localRev);
+      return {
+        rev: r.rev,
+      };
+    } catch (e) {
+      if (e?.toString?.().includes('ENOENT')) {
+        return 'NO_REMOTE_DATA';
+      }
+      throw e;
+    }
   }
 
   async uploadFileData(
@@ -46,12 +53,12 @@ export class LocalFileSyncElectronService implements SyncProviderServiceInterfac
     localRev: string | null,
     isForceOverwrite?: boolean,
   ): Promise<string | Error> {
-    const r = await window.ea.fileSyncSave({
+    await window.ea.fileSyncSave({
       localRev,
       filePath: await this._getFilePath(syncTarget),
       dataStr,
     });
-    return r as any;
+    return this._getLocalRev(dataStr);
   }
 
   async downloadFileData(
@@ -62,7 +69,19 @@ export class LocalFileSyncElectronService implements SyncProviderServiceInterfac
       localRev,
       filePath: await this._getFilePath(syncTarget),
     });
-    return r as any;
+
+    if (r instanceof Error) {
+      throw r;
+    }
+
+    if (!r.dataStr) {
+      throw new Error('downloadFileData unknown error');
+    }
+
+    return {
+      rev: await this._getLocalRev(r.dataStr),
+      dataStr: r.dataStr,
+    };
   }
 
   private async _getFilePath(syncTarget: SyncTarget): Promise<string> {
@@ -71,5 +90,9 @@ export class LocalFileSyncElectronService implements SyncProviderServiceInterfac
       throw new Error('No folder path given');
     }
     return `${folderPath}/${syncTarget}.json`;
+  }
+
+  private _getLocalRev(dataStr: string): Promise<string> {
+    return createSha1Hash(dataStr);
   }
 }

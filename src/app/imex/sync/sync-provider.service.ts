@@ -478,6 +478,7 @@ export class SyncProviderService {
     retryAttemptNr?: number;
   }): Promise<void> {
     const NR_OF_RETRIES = 1;
+    // TODO extract
     const retryIfPossibleOrWarnUser = async (
       revOrError: string | Error,
       isForMainFile: boolean,
@@ -552,7 +553,7 @@ export class SyncProviderService {
       } catch (e) {
         return await retryIfPossibleOrWarnUser(e as Error, false);
       }
-      this._log(cp, '↑ Uploaded ARCHIVE Data ↑ ✓');
+      this._log(cp, '↑ Uploaded ARCHIVE Data ↑ ✓ +' + successRevArchiveOrError);
     }
 
     const mainData: AppMainFileData = {
@@ -677,6 +678,9 @@ export class SyncProviderService {
         remoteArchiveRev,
         // eslint-disable-next-line @typescript-eslint/naming-convention
         'remoteMainFileData.archiveRev': remoteMainFileData.archiveRev,
+        remoteArchiveRevD: new Date(+remoteArchiveRev),
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        'remoteMainFileData.archiveRevD': new Date(+remoteMainFileData.archiveRev),
       });
       const data: DialogIncompleteSyncData = {
         archiveRevReal: remoteArchiveRev,

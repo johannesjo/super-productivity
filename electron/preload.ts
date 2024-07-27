@@ -28,10 +28,10 @@ const ea: ElectronAPI = {
     _invoke('FILE_SYNC_GET_REV_AND_CLIENT_UPDATE', backupPath) as Promise<
       { rev: string; clientUpdate?: number } | SyncGetRevResult
     >,
-  fileSyncSave: (backupPath) =>
-    _invoke('FILE_SYNC_SAVE', backupPath) as Promise<string | Error>,
-  fileSyncLoad: (backupPath) =>
-    _invoke('FILE_SYNC_LOAD', backupPath) as Promise<{
+  fileSyncSave: (filePath) =>
+    _invoke('FILE_SYNC_SAVE', filePath) as Promise<string | Error>,
+  fileSyncLoad: (filePath) =>
+    _invoke('FILE_SYNC_LOAD', filePath) as Promise<{
       rev: string;
       dataStr: string | undefined;
     }>,

@@ -46,19 +46,20 @@ export const initLocalFileSyncAdapter = (): void => {
         localRev: string | null;
       },
     ): { rev: string; clientUpdate?: number } | SyncGetRevResult => {
-      try {
-        console.log(IPC.FILE_SYNC_GET_REV_AND_CLIENT_UPDATE, filePath, localRev);
-        console.log('getRev and stuuff');
-        readFileSync(filePath);
-        return {
-          rev: getRev(filePath),
-        };
-      } catch (e) {
-        log('ERR: Sync error while getting meta for ' + filePath);
-        error(e);
-        // TODO improve
-        return 'NO_REMOTE_DATA';
-      }
+      throw new Error('REMOVE AS IMPLEMENTED OTHERWISE');
+      // try {
+      //   console.log(IPC.FILE_SYNC_GET_REV_AND_CLIENT_UPDATE, filePath, localRev);
+      //   console.log('getRev and stuuff');
+      //   readFileSync(filePath);
+      //   return {
+      //     rev: getRev(filePath),
+      //   };
+      // } catch (e) {
+      //   log('ERR: Sync error while getting meta for ' + filePath);
+      //   error(e);
+      //   // TODO improve
+      //   return 'NO_REMOTE_DATA';
+      // }
     },
   );
 
@@ -93,5 +94,5 @@ export const initLocalFileSyncAdapter = (): void => {
 
 const getRev = (filePath: string): string => {
   const fileStat = statSync(filePath);
-  return fileStat.ctime.getTime().toString();
+  return fileStat.mtime.getTime().toString();
 };
