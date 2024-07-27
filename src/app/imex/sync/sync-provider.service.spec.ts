@@ -363,7 +363,6 @@ describe('SyncProviderService', () => {
       expect(cp.uploadFileData.calls.all()[0].args).toEqual([
         'MAIN',
         JSON.stringify(expectedAppMainData),
-        5555,
         'syncProviderRevMain',
         false,
       ]);
@@ -398,7 +397,6 @@ describe('SyncProviderService', () => {
       expect(cp.uploadFileData.calls.all()[0].args).toEqual([
         'ARCHIVE',
         '{"taskArchive":{"ids":[],"entities":{}},"archivedProjects":{}}',
-        999,
         'syncProviderRevArchive',
         false,
       ]);
@@ -409,7 +407,6 @@ describe('SyncProviderService', () => {
           archiveLastUpdate: 999,
           archiveRev: 'uploadFileReturnValueRev',
         }),
-        5555,
         'syncProviderRevMain',
         false,
       ]);
@@ -446,7 +443,6 @@ describe('SyncProviderService', () => {
         expect(cp.uploadFileData).toHaveBeenCalledWith(
           'MAIN',
           JSON.stringify(expectedAppMainData),
-          5555,
           'syncProviderRevMain',
           false,
         );
