@@ -148,6 +148,8 @@ export class PlannerEffects {
     );
   });
 
+  // PLAN TASK FOR DAY
+  // ---------------
   addTodayTagIfPlanedForToday$ = createEffect(() => {
     return this._actions$.pipe(
       ofType(PlannerActions.planTaskForDay),
@@ -176,6 +178,23 @@ export class PlannerEffects {
     );
   });
 
+  removeFromTodayIfPlannedForOtherDay$ = createEffect(() => {
+    return this._actions$.pipe(
+      ofType(PlannerActions.planTaskForDay),
+      tap((val) => console.log('planTaskForDay', val)),
+      filter(({ task, day }) => day !== getWorklogStr()),
+      map(({ task }) => {
+        console.log('I am here!');
+
+        return updateTaskTags({
+          task,
+          oldTagIds: task.tagIds,
+          newTagIds: task.tagIds.filter((id) => id !== TODAY_TAG.id),
+        });
+      }),
+    );
+  });
+
   removeTodayTagForPlannedTask$ = createEffect(() => {
     return this._actions$.pipe(
       ofType(PlannerActions.planTaskForDay),
@@ -192,7 +211,10 @@ export class PlannerEffects {
     );
   });
 
-  removeTodayTagForPlannedTaskFriomSchedule$ = createEffect(() => {
+  // MOVE BEFORE TASK
+  // ---------------
+
+  removeTodayTagForPlannedTaskFromSchedule$ = createEffect(() => {
     return this._actions$.pipe(
       ofType(PlannerActions.moveBeforeTask),
       filter(({ fromTask }) => fromTask.tagIds.includes(TODAY_TAG.id)),
@@ -214,25 +236,34 @@ export class PlannerEffects {
         return this._store.select(selectTagById, { id: TODAY_TAG.id }).pipe(
           first(),
           filter((todayTag) => todayTag.taskIds.includes(toTaskId)),
-          map((todayTag) => {
+          mergeMap((todayTag) => {
             const newTaskIds = [...todayTag.taskIds].filter((id) => id !== fromTask.id);
             const toIndex = newTaskIds.indexOf(toTaskId);
             newTaskIds.splice(toIndex, 0, fromTask.id);
-            return updateTag({
-              tag: {
-                id: TODAY_TAG.id,
-                changes: {
-                  taskIds: unique(newTaskIds),
+            return [
+              updateTag({
+                tag: {
+                  id: TODAY_TAG.id,
+                  changes: {
+                    taskIds: unique(newTaskIds),
+                  },
                 },
-              },
-              isSkipSnack: true,
-            });
+                isSkipSnack: true,
+              }),
+              updateTaskTags({
+                task: fromTask,
+                oldTagIds: fromTask.tagIds,
+                newTagIds: unique([TODAY_TAG.id, ...fromTask.tagIds]),
+              }),
+            ];
           }),
         );
       }),
     );
   });
 
+  // INITIAL DIALOG
+  // ---------------
   showDialogAfterAppLoad$ = createEffect(
     () => {
       return this._syncTriggerService.afterInitialSyncDoneAndDataLoadedInitially$.pipe(
