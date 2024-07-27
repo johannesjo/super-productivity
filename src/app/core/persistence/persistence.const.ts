@@ -101,7 +101,6 @@ export const BASE_MODEL_CFGS: PersistenceBaseModelCfgs = {
     migrateFn: (s: Reminder[]) => s,
   },
   planner: {
-    legacyKey: 'WEEK_PLANNER_LEGACY_KEY',
     appDataKey: 'planner',
     modelVersion: MODEL_VERSION.___NOT_USED_YET___,
     // no migrations needed yet
