@@ -868,6 +868,7 @@ describe('mapToViewEntries()', () => {
           start: now + hours(2),
           data: {
             taskId: normalTask.id,
+            projectId: null,
             title: normalTask.title,
             timeToGo: hours(2),
             index: 0,
@@ -923,6 +924,7 @@ describe('mapToViewEntries()', () => {
           start: getDateTimeFromClockString('11:00', 0),
           data: {
             title: normalTask.title,
+            projectId: null,
             timeToGo: hours(1),
             taskId: normalTask.id,
             index: 0,
@@ -939,6 +941,7 @@ describe('mapToViewEntries()', () => {
           type: TimelineViewEntryType.SplitTaskContinuedLast,
           start: getDateTimeFromClockString('13:00', 0),
           data: {
+            projectId: null,
             title: normalTask.title,
             timeToGo: hours(1),
             taskId: normalTask.id,
@@ -987,6 +990,7 @@ describe('mapToViewEntries()', () => {
           start: now + hours(2),
           data: {
             taskId: normalTask.id,
+            projectId: null,
             title: normalTask.title,
             timeToGo: hours(29),
             index: 0,
@@ -1039,6 +1043,7 @@ describe('mapToViewEntries()', () => {
         id: longTask.id + '__0',
 
         data: {
+          projectId: null,
           taskId: longTask.id,
           timeToGo: hours(1),
           index: 0,
@@ -1065,6 +1070,7 @@ describe('mapToViewEntries()', () => {
         id: longTask.id + '__1',
 
         data: {
+          projectId: null,
           index: 1,
           taskId: longTask.id,
           // timeToGo: hours(18),
@@ -1092,6 +1098,7 @@ describe('mapToViewEntries()', () => {
         id: longTask.id + '__2',
 
         data: {
+          projectId: null,
           index: 2,
           taskId: longTask.id,
           // timeToGo: hours(18),
@@ -1349,6 +1356,7 @@ describe('mapToViewEntries()', () => {
         id: singleTask.id + '__0',
 
         data: {
+          projectId: null,
           taskId: singleTask.id,
           timeToGo: hours(1),
           index: 0,
@@ -1406,6 +1414,7 @@ describe('mapToViewEntries()', () => {
         id: longTask.id + '__0',
 
         data: {
+          projectId: null,
           taskId: longTask.id,
           timeToGo: hours(1),
           index: 0,
@@ -1434,6 +1443,7 @@ describe('mapToViewEntries()', () => {
         id: longTask.id + '__1',
 
         data: {
+          projectId: null,
           index: 1,
           taskId: longTask.id,
           timeToGo: hours(4),
@@ -1453,6 +1463,7 @@ describe('mapToViewEntries()', () => {
         id: longTask.id + '__2',
 
         data: {
+          projectId: null,
           index: 2,
           taskId: longTask.id,
           timeToGo: hours(3),
@@ -1479,6 +1490,7 @@ describe('mapToViewEntries()', () => {
         id: longTask.id + '__3',
 
         data: {
+          projectId: null,
           index: 3,
           taskId: longTask.id,
           timeToGo: hours(4),

@@ -39,6 +39,6 @@ export const createAppDataCompleteMock = (): AppDataComplete => ({
   metric: createEmptyEntity(),
   improvement: createEmptyEntity() as any,
   obstruction: createEmptyEntity(),
-  planner: { days: {} },
+  planner: { days: {}, addPlannedTasksDialogLastShown: undefined },
   lastArchiveUpdate: 0,
 });
