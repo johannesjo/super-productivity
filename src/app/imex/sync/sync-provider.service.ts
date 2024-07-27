@@ -873,73 +873,75 @@ export class SyncProviderService {
   >(dataInStr: T | string | undefined): Promise<T> {
     // if the data was a json string it happens (for dropbox) that the data is returned as object
     if (
-      (typeof dataInStr === 'object' && (dataInStr as AppMainFileData)?.task) ||
+      (dataInStr && (dataInStr as AppMainFileData)?.task) ||
       (dataInStr as AppArchiveFileData)?.taskArchive
     ) {
       return dataInStr as T;
     }
-    // NOTE: we need then later to make sure that both strings are appended after encryption and compression
-    if (typeof dataInStr === 'string') {
-      if (dataInStr.startsWith(PREPEND_STR_ENCRYPTION)) {
-        dataInStr = dataInStr.slice(PREPEND_STR_ENCRYPTION.length);
-      }
-      if (dataInStr.startsWith(PREPEND_STR_COMPRESSION)) {
-        dataInStr = dataInStr.slice(PREPEND_STR_COMPRESSION.length);
-      }
-      const { isEncryptionEnabled, encryptionPassword } = await this.syncCfg$
-        .pipe(first())
-        .toPromise();
 
+    // NOTE: we need then later to make sure that both strings are appended after encryption and compression
+    if (typeof dataInStr !== 'string') {
+      console.log(typeof dataInStr);
+      throw new Error('Unable to parse remote data due to unknown reasons');
+    }
+    if (dataInStr.startsWith(PREPEND_STR_ENCRYPTION)) {
+      dataInStr = dataInStr.slice(PREPEND_STR_ENCRYPTION.length);
+    }
+    if (dataInStr.startsWith(PREPEND_STR_COMPRESSION)) {
+      dataInStr = dataInStr.slice(PREPEND_STR_COMPRESSION.length);
+    }
+    const { isEncryptionEnabled, encryptionPassword } = await this.syncCfg$
+      .pipe(first())
+      .toPromise();
+
+    try {
+      return JSON.parse(dataInStr) as T;
+    } catch (eIgnored) {
       try {
-        return JSON.parse(dataInStr) as T;
-      } catch (eIgnored) {
-        try {
-          let dataString = dataInStr;
-          if (isEncryptionEnabled && encryptionPassword?.length) {
-            try {
-              console.time('decrypt');
-              dataString = await decrypt(dataInStr, encryptionPassword);
-              console.timeEnd('decrypt');
-            } catch (eDecryption) {
-              console.error(eDecryption);
-              // we try to handle if string was compressed before but encryption is enabled in the meantime locally
-              if (
-                eDecryption &&
-                (eDecryption as any).toString &&
-                (eDecryption as any).toString() ===
-                  "InvalidCharacterError: Failed to execute 'atob' on 'Window': The string to be decoded contains characters outside of the Latin1 range."
-              ) {
-                dataString = await this._compressionService.decompressUTF16(dataString);
-              } else {
-                throw new Error('SP Decryption Error – Password wrong?');
-              }
+        let dataString = dataInStr;
+        if (isEncryptionEnabled && encryptionPassword?.length) {
+          try {
+            console.time('decrypt');
+            dataString = await decrypt(dataInStr, encryptionPassword);
+            console.timeEnd('decrypt');
+          } catch (eDecryption) {
+            console.error(eDecryption);
+            // we try to handle if string was compressed before but encryption is enabled in the meantime locally
+            if (
+              eDecryption &&
+              (eDecryption as any).toString &&
+              (eDecryption as any).toString() ===
+                "InvalidCharacterError: Failed to execute 'atob' on 'Window': The string to be decoded contains characters outside of the Latin1 range."
+            ) {
+              dataString = await this._compressionService.decompressUTF16(dataString);
+            } else {
+              throw new Error('SP Decryption Error – Password wrong?');
             }
           }
-          try {
-            return JSON.parse(dataString) as T;
-          } catch (eIgnoredInner) {
-            console.error(eIgnoredInner);
-            console.log('dataInStr', dataInStr);
-            // try to decompress anyway
-            dataString = await this._compressionService.decompressUTF16(dataString);
-          }
-          if (!dataString) {
-            alert(
-              this._translateService.instant(T.F.SYNC.S.ERROR_UNABLE_TO_READ_REMOTE_DATA),
-            );
-            throw new Error('Unable to parse remote data');
-          }
-          return JSON.parse(dataString) as T;
-        } catch (eDecompression) {
-          console.error('Sync, invalid data');
-          console.warn(eDecompression);
-          console.log(dataInStr);
-
-          throw new Error(eDecompression as any);
         }
+        try {
+          return JSON.parse(dataString) as T;
+        } catch (eIgnoredInner) {
+          console.error(eIgnoredInner);
+          console.log('dataInStr', dataInStr);
+          // try to decompress anyway
+          dataString = await this._compressionService.decompressUTF16(dataString);
+        }
+        if (!dataString) {
+          alert(
+            this._translateService.instant(T.F.SYNC.S.ERROR_UNABLE_TO_READ_REMOTE_DATA),
+          );
+          throw new Error('Unable to parse remote data');
+        }
+        return JSON.parse(dataString) as T;
+      } catch (eDecompression) {
+        console.error('Sync, invalid data');
+        console.warn(eDecompression);
+        console.log(dataInStr);
+
+        throw new Error(eDecompression as any);
       }
     }
-    throw new Error('Unable to parse remote data due to unknown reasons');
   }
 
   private async _compressAndEncryptDataIfEnabled(
