@@ -542,7 +542,6 @@ export class SyncProviderService {
         successRevArchiveOrError = await cp.uploadFileData(
           'ARCHIVE',
           dataStrToUpload,
-          localDataComplete.lastArchiveUpdate as number,
           localSyncProviderData.revTaskArchive,
           isForceOverwrite,
         );
@@ -570,7 +569,6 @@ export class SyncProviderService {
       const successRevMainOrError = await cp.uploadFileData(
         'MAIN',
         dataStrToUpload,
-        localDataComplete.lastLocalSyncModelChange as number,
         localSyncProviderData.rev,
         isForceOverwrite,
       );

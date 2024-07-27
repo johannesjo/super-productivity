@@ -84,7 +84,6 @@ export class WebDavSyncService implements SyncProviderServiceInterface {
   async uploadFileData(
     syncTarget: SyncTarget,
     dataStr: string,
-    clientModified: number,
     localRev: string,
     isForceOverwrite: boolean = false,
   ): Promise<string | Error> {

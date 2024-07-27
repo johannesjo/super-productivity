@@ -101,14 +101,12 @@ export class DropboxSyncService implements SyncProviderServiceInterface {
   async uploadFileData(
     syncTarget: SyncTarget,
     dataStr: string,
-    clientModified: number,
     localRev: string,
     isForceOverwrite: boolean = false,
   ): Promise<string | Error> {
     const r = await this._dropboxApiService.upload({
       path: this._getFilePath(syncTarget),
       data: dataStr,
-      clientModified,
       localRev,
       isForceOverwrite,
     });

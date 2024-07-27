@@ -23,7 +23,6 @@ export interface SyncProviderServiceInterface {
   uploadFileData(
     syncTarget: SyncTarget,
     dataStr: string,
-    clientModified: number,
     localRev: string | null,
     isForceOverwrite?: boolean,
   ): Promise<string | Error>;

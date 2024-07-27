@@ -49,7 +49,6 @@ export class LocalFileSyncElectronService implements SyncProviderServiceInterfac
   async uploadFileData(
     syncTarget: SyncTarget,
     dataStr: string,
-    clientModified: number,
     localRev: string | null,
     isForceOverwrite?: boolean,
   ): Promise<string | Error> {

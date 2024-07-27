@@ -7,7 +7,6 @@ import { Observable, ReplaySubject } from 'rxjs';
 import axios, { AxiosResponse, Method } from 'axios';
 import { stringify } from 'query-string';
 import { DropboxFileMetadata } from './dropbox.model';
-import { toDropboxIsoString } from './iso-date-without-ms.util.';
 import { DialogGetAndEnterAuthCodeComponent } from '../dialog-get-and-enter-auth-code/dialog-get-and-enter-auth-code.component';
 import { MatDialog } from '@angular/material/dialog';
 import { T } from '../../../t.const';
@@ -93,11 +92,9 @@ export class DropboxApiService {
     path,
     localRev,
     data,
-    clientModified,
     isForceOverwrite = false,
   }: {
     path: string;
-    clientModified?: number;
     localRev?: string | null;
     data: any;
     isForceOverwrite?: boolean;
@@ -108,10 +105,10 @@ export class DropboxApiService {
       mode: { '.tag': 'overwrite' },
       path,
       mute: true,
-      ...(typeof clientModified === 'number'
-        ? // we need to use ISO 8601 "combined date and time representation" format:
-          { client_modified: toDropboxIsoString(clientModified) }
-        : {}),
+      // ...(typeof clientModified === 'number'
+      //   ? // we need to use ISO 8601 "combined date and time representation" format:
+      //     { client_modified: toDropboxIsoString(clientModified) }
+      //   : {}),
     };
 
     if (localRev && !isForceOverwrite) {
