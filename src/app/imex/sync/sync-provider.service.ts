@@ -652,7 +652,7 @@ export class SyncProviderService {
       this._log(
         cp,
         isForceArchiveUpdate
-          ? 'Archive force update chosen. Downloading...'
+          ? 'Archive force update on local chosen. Downloading...'
           : 'Archive was updated on remote. Downloading...',
       );
       const res = await this._downloadArchiveFileAppData(cp);
