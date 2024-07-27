@@ -6,5 +6,7 @@ export interface ScheduleEvent {
   title: string;
   type: TimelineViewEntryType;
   style: string;
+  startHours: number;
+  timeLeftInHours: number;
   data?: TimelineViewEntry['data'];
 }

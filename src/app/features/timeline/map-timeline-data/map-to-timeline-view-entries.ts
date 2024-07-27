@@ -639,7 +639,7 @@ const createSplitRepeat = ({
   };
 };
 
-export const getDurationForViewEntry = (viewEntry: TimelineViewEntry): number => {
+const _getDurationForViewEntry = (viewEntry: TimelineViewEntry): number => {
   if (isTaskDataType(viewEntry)) {
     return getTimeLeftForTask((viewEntry as any).data as Task);
   } else if (
@@ -664,6 +664,10 @@ export const getDurationForViewEntry = (viewEntry: TimelineViewEntry): number =>
     );
   }
   throw new Error('Wrong type given: ' + viewEntry.type);
+};
+const TASK_MIN_DURATION_IN_MS = 5 * 60 * 1000;
+export const getDurationForViewEntry = (viewEntry: TimelineViewEntry): number => {
+  return Math.max(_getDurationForViewEntry(viewEntry), TASK_MIN_DURATION_IN_MS);
 };
 
 const moveAllEntriesAfterTime = (

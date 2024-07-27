@@ -15,6 +15,7 @@ import { Store } from '@ngrx/store';
 import { selectProjectById } from '../../project/store/project.selectors';
 import { BaseComponent } from '../../../core/base-component/base.component';
 import { MatMiniFabButton } from '@angular/material/button';
+import { getClockStringFromHours } from '../../../util/get-clock-string-from-hours';
 
 @Component({
   selector: 'schedule-event',
@@ -29,7 +30,12 @@ export class ScheduleEventComponent extends BaseComponent implements OnInit, OnD
   set event(event: ScheduleEvent) {
     this.se = event;
     this._elRef.nativeElement.id = 't-' + (this.se.data as any).id;
+    this.startClockString = getClockStringFromHours(this.se.startHours);
+    this.durationStr = (this.se.timeLeftInHours * 60).toString().substring(0, 4);
   }
+
+  startClockString: string = '';
+  durationStr: string = '';
 
   se!: ScheduleEvent;
 

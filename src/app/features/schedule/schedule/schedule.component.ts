@@ -153,13 +153,15 @@ export class ScheduleComponent implements AfterViewInit, OnDestroy {
           // eslint-disable-next-line no-mixed-operators
           const timeLeft = getTimeLeftForTask(taskPlannedForDay);
           const timeLeftInHours = timeLeft / 1000 / 60 / 60;
-          const rowSpan = Math.round(timeLeftInHours * FH);
+          const rowSpan = Math.max(Math.round(timeLeftInHours * FH), 1);
           return {
             id: taskPlannedForDay.id,
             data: taskPlannedForDay,
             title: taskPlannedForDay.title,
             type: TimelineViewEntryType.TaskPlannedForDay,
             style: `height: ${rowSpan * 8}px`,
+            timeLeftInHours,
+            startHours: 0,
           };
         });
 
@@ -174,13 +176,16 @@ export class ScheduleComponent implements AfterViewInit, OnDestroy {
             const startMinute = start.getMinutes();
             // eslint-disable-next-line no-mixed-operators
             const hoursToday = startHour + startMinute / 60;
+
             const startRow = Math.round(hoursToday * FH);
             const timeLeft =
               entryAfter && entryAfter.type !== TimelineViewEntryType.WorkdayEnd
                 ? entryAfter.start - entry.start
                 : getDurationForViewEntry(entry);
+
             const timeLeftInHours = timeLeft / 1000 / 60 / 60;
-            const rowSpan = Math.round(timeLeftInHours * FH);
+
+            const rowSpan = Math.max(1, Math.round(timeLeftInHours * FH));
             eventsFlat.push({
               title:
                 (entry as any)?.data?.title ||
@@ -189,6 +194,8 @@ export class ScheduleComponent implements AfterViewInit, OnDestroy {
                   : 'TITLE'),
               id: (entry.data as any)?.id || entry.id,
               type: entry.type,
+              startHours: hoursToday,
+              timeLeftInHours,
               // title: entry.data.title,
               style: `grid-column: ${dayIndex + 2};  grid-row: ${startRow} / span ${rowSpan}`,
               data: entry.data,
