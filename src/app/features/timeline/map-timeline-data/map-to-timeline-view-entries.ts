@@ -654,6 +654,8 @@ export const getDurationForViewEntry = (viewEntry: TimelineViewEntry): number =>
     viewEntry.type === TimelineViewEntryType.ScheduledRepeatProjection
   ) {
     return viewEntry.data.defaultEstimate || 0;
+  } else if (viewEntry.type === TimelineViewEntryType.CalendarEvent) {
+    return viewEntry.data.duration || 0;
   } else if (viewEntry.type === TimelineViewEntryType.LunchBreak) {
     const d = new Date();
     return (
