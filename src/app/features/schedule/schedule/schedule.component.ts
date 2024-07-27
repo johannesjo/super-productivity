@@ -369,11 +369,17 @@ export class ScheduleComponent implements AfterViewInit, OnDestroy {
             toTaskId: targetTaskId,
           }),
         );
+        ev.source.element.nativeElement.style.opacity = '0';
         ev.source.element.nativeElement.style.transition = 'none';
+        ev.source.element.nativeElement.style.transform = 'translate3d(0, 0, 0)';
+        ev.source.element.nativeElement.style.transition = '';
+
+        setTimeout(() => {
+          ev.source.element.nativeElement.style.opacity = '';
+        });
       }
     }
     ev.source.element.nativeElement.style.transform = 'translate3d(0, 0, 0)';
-    ev.source.element.nativeElement.style.transition = 'none';
     ev.source.reset();
   }
 
