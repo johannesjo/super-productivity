@@ -884,6 +884,10 @@ export class SyncProviderService {
       console.log(typeof dataInStr);
       throw new Error('Unable to parse remote data due to unknown reasons');
     }
+    if (dataInStr.trim().length === 0) {
+      throw new Error('Empty data string');
+    }
+
     if (dataInStr.startsWith(PREPEND_STR_ENCRYPTION)) {
       dataInStr = dataInStr.slice(PREPEND_STR_ENCRYPTION.length);
     }
