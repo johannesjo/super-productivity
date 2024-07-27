@@ -676,7 +676,12 @@ export class SyncProviderService {
         'remoteMainFileData.archiveRev': remoteMainFileData.archiveRev,
       });
       const res = await this._matDialog
-        .open(DialogIncompleteSyncComponent)
+        .open(DialogIncompleteSyncComponent, {
+          data: {
+            revMainFile: mainFileRev,
+            realRev: remoteMainFileData?.archiveRev,
+          },
+        })
         .afterClosed()
         .toPromise();
       if (res === 'FORCE_UPDATE_REMOTE') {
