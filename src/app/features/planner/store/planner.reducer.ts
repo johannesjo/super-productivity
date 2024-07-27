@@ -11,10 +11,13 @@ export interface PlannerState {
   days: {
     [dayDate: string]: string[];
   };
+  addPlannedTasksDialogLastShown: string | undefined;
 }
 
 export const plannerInitialState: PlannerState = {
   days: {},
+  addPlannedTasksDialogLastShown: undefined,
+  // addPlannedTasksDialogLastShown: undefined,
 };
 
 export const plannerReducer = createReducer(
@@ -45,6 +48,7 @@ export const plannerReducer = createReducer(
         .filter((id) => id !== action.taskId);
     });
     return {
+      ...state,
       days: {
         ...daysCopy,
       },
@@ -65,6 +69,7 @@ export const plannerReducer = createReducer(
         }
       });
       return {
+        ...state,
         days: {
           ...daysCopy,
           [today]: taskIdsToAdd,
@@ -137,6 +142,7 @@ export const plannerReducer = createReducer(
     }
 
     return {
+      ...state,
       days: {
         ...daysCopy,
       },
@@ -150,6 +156,7 @@ export const plannerReducer = createReducer(
       daysCopy[dayI] = daysCopy[dayI].filter((id) => id !== task.id);
     });
     return {
+      ...state,
       days: {
         ...daysCopy,
         [day]: unique(
@@ -160,6 +167,11 @@ export const plannerReducer = createReducer(
       },
     };
   }),
+
+  on(PlannerActions.updatePlannerDialogLastShown, (state, { today }) => ({
+    ...state,
+    addPlannedTasksDialogLastShown: today,
+  })),
 );
 
 export const plannerFeature = createFeature({

@@ -45,6 +45,7 @@ export class PlannerEffects {
     () => {
       return this._actions$.pipe(
         ofType(
+          PlannerActions.updatePlannerDialogLastShown,
           PlannerActions.upsertPlannerDay,
           PlannerActions.upsertPlannerDayTodayAndCleanupOldAndUndefined,
           PlannerActions.moveInList,
@@ -254,9 +255,14 @@ export class PlannerEffects {
         withLatestFrom(
           this._plannerService.days$,
           this._store.pipe(select(selectTodayTaskIds)),
+          this._store.pipe(select(selectPlannerState)),
         ),
-        exhaustMap(([todayStr, plannerDays, todayTaskIds]) => {
+        exhaustMap(([todayStr, plannerDays, todayTaskIds, plannerState]) => {
           const plannerDay = plannerDays.find((day) => day.dayDate === todayStr);
+
+          if (todayStr === plannerState.addPlannedTasksDialogLastShown) {
+            return EMPTY;
+          }
 
           if (!plannerDay) {
             devError('showDialogAfterAppLoad$(): No planner day found for today');
@@ -282,7 +288,12 @@ export class PlannerEffects {
                         missingTasks: existingTasks,
                       },
                     })
-                    .afterClosed();
+                    .afterClosed()
+                    .pipe(
+                      map(() =>
+                        PlannerActions.updatePlannerDialogLastShown({ today: todayStr }),
+                      ),
+                    );
                 } else {
                   console.log(
                     'Some tasks have been missing',
@@ -299,7 +310,7 @@ export class PlannerEffects {
         }),
       );
     },
-    { dispatch: false },
+    // { dispatch: false },
   );
 
   constructor(
