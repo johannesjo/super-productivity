@@ -24,10 +24,16 @@ export class InlineMultilineInputComponent {
   T: typeof T = T;
   @HostBinding('class.is-focused') isFocused = false;
 
+  // NOTE: we only need this for tasks since, sometimes with the short syntax there are no changes to the title as they are stripped away
+  @Input() set resetToInitialValueTrigger(value: unknown) {
+    this.tmpValue = this.initialValue;
+  }
+
   @Input() set value(value: string) {
     this.tmpValue = value;
     this.initialValue = value;
     this._setTxtHeight();
+    console.log(value);
   }
 
   initialValue?: string;
@@ -87,14 +93,12 @@ export class InlineMultilineInputComponent {
     } else if (ev.key === 'Enter') {
       this._forceBlur();
       ev.preventDefault();
-      this._submit();
     }
   }
 
   onTextInput(ev: Event): void {
     if ((ev as InputEvent)?.data?.slice(-1) === '\n') {
       console.log('android enter key press');
-      this._submit();
       this._forceBlur();
       ev.preventDefault();
       setTimeout(() => {
