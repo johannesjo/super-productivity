@@ -72,6 +72,15 @@ export class InlineMultilineInputComponent {
   focused(): void {
     this.isFocused = true;
     this._setTxtHeight();
+    try {
+      window.setTimeout(() => {
+        const el = this.textarea.nativeElement;
+        el.setSelectionRange(el.value.length, el.value.length);
+        el.selectionStart = el.selectionEnd = el.value.length;
+      });
+    } catch (e) {
+      console.warn(e);
+    }
   }
 
   blurred(): void {
