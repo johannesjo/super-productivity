@@ -85,8 +85,7 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
   isShowAddToToday: boolean = false;
   isShowRemoveFromToday: boolean = false;
 
-  @ViewChild('contentEditableOnClickEl', { static: true })
-  contentEditableOnClickEl?: ElementRef;
+  @ViewChild('taskTitleEditEl', { static: true }) taskTitleEditEl?: ElementRef;
   @ViewChild('blockLeftEl') blockLeftElRef?: ElementRef;
   @ViewChild('blockRightEl') blockRightElRef?: ElementRef;
   @ViewChild('innerWrapperEl', { static: true }) innerWrapperElRef?: ElementRef;
@@ -332,15 +331,13 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   updateTaskTitleIfChanged({
-    isChanged,
     newVal,
+    wasChanged,
   }: {
-    isChanged: boolean;
     newVal: string;
-    $taskEl: HTMLElement | null;
-    event: Event;
+    wasChanged: boolean;
   }): void {
-    if (isChanged) {
+    if (wasChanged) {
       this._taskService.update(this.task.id, { title: newVal });
     }
     this.focusSelf();
@@ -533,20 +530,22 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   focusTitleForEdit(): void {
-    if (!this.contentEditableOnClickEl) {
+    if (!this.taskTitleEditEl || !(this.taskTitleEditEl as any).textarea.nativeElement) {
+      console.log(this.taskTitleEditEl);
       throw new Error('No el');
     }
-    this.contentEditableOnClickEl.nativeElement.focus();
+    (this.taskTitleEditEl as any).textarea.nativeElement.focus();
+    //  (this.taskTitleEditEl as any).textarea.nativeElement.focus();
   }
 
   openContextMenu(event: TouchEvent | MouseEvent): void {
-    if (!this.contentEditableOnClickEl || !this.contextMenu) {
+    if (!this.taskTitleEditEl || !this.contextMenu) {
       throw new Error('No el');
     }
     event.preventDefault();
     event.stopPropagation();
     event.stopImmediatePropagation();
-    this.contentEditableOnClickEl.nativeElement.blur();
+    (this.taskTitleEditEl as any).textarea.nativeElement.blur();
     this.contextMenuPosition.x =
       ('touches' in event ? event.touches[0].clientX : event.clientX) + 'px';
     this.contextMenuPosition.y =
@@ -562,7 +561,7 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
     if (!IS_TOUCH_PRIMARY) {
       return;
     }
-    if (!this.contentEditableOnClickEl) {
+    if (!this.taskTitleEditEl) {
       throw new Error('No el');
     }
 
@@ -571,7 +570,7 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
     if (
       (targetEl.className.indexOf && targetEl.className.indexOf('drag-handle') > -1) ||
       Math.abs(ev.deltaY) > Math.abs(ev.deltaX) ||
-      document.activeElement === this.contentEditableOnClickEl.nativeElement ||
+      document.activeElement === (this.taskTitleEditEl as any).textarea.nativeElement ||
       ev.isFinal
     ) {
       return;
@@ -784,7 +783,7 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
 
     const MAGIC_FACTOR = 2;
     this.isPreventPointerEventsWhilePanning = true;
-    // this.contentEditableOnClickEl.nativeElement.blur();
+    //  (this.taskTitleEditEl as any).textarea.nativeElement.blur();
     if (targetRef) {
       let scale = (ev.deltaX / this._elementRef.nativeElement.offsetWidth) * MAGIC_FACTOR;
       scale = this.isLockPanLeft ? scale * -1 : scale;
@@ -809,7 +808,7 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
 
   private _resetAfterPan(): void {
     if (
-      !this.contentEditableOnClickEl ||
+      !this.taskTitleEditEl ||
       !this.blockLeftElRef ||
       !this.blockRightElRef ||
       !this.innerWrapperElRef

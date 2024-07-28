@@ -144,16 +144,12 @@
           <div class="title">{{ parentTitle$|async }}</div>
         </div>
 
-        <div
-          #contentEditableOnClickEl
-          (editFinished)="updateTaskTitleIfChanged($event)"
-          [isResetAfterEdit]="true"
+        <inline-multiline-input
+          #taskTitleEditEl
+          (valueEdited)="updateTaskTitleIfChanged($event)"
           [value]="task.title"
-          spellcheck="false"
           class="task-title"
-          contentEditableOnClick
-          contenteditable="true"
-        ></div>
+        ></inline-multiline-input>
 
         <tag-list
           [task]="task"

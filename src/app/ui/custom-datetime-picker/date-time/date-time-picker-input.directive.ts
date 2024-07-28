@@ -709,7 +709,7 @@ export class OwlDateTimeInputDirective<T>
     this.lastValueValid = !result || this.dateTimeAdapter.isValid(result);
     result = this.getValidDate(result);
 
-    // if the newValue is the same as the oldValue, we intend to not fire the valueChange event
+    // if the newValue is the same as the oldValue, we intend to not fire the valueEdited event
     // result equals to null means there is input event, but the input value is invalid
     if (!this.isSameValue(result, this._value) || result === null) {
       this._value = result;
@@ -739,7 +739,7 @@ export class OwlDateTimeInputDirective<T>
     this.lastValueValid = !result || this.dateTimeAdapter.isValid(result);
     result = this.getValidDate(result);
 
-    // if the newValue is the same as the oldValue, we intend to not fire the valueChange event
+    // if the newValue is the same as the oldValue, we intend to not fire the valueEdited event
     if (
       (this._selectMode === 'rangeFrom' &&
         this.isSameValue(result, this._values[0]) &&
@@ -788,7 +788,7 @@ export class OwlDateTimeInputDirective<T>
     from = this.getValidDate(from);
     to = this.getValidDate(to);
 
-    // if the newValue is the same as the oldValue, we intend to not fire the valueChange event
+    // if the newValue is the same as the oldValue, we intend to not fire the valueEdited event
     if (
       !this.isSameValue(from, this._values[0]) ||
       !this.isSameValue(to, this._values[1]) ||

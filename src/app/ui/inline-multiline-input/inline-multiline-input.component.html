@@ -1,0 +1,15 @@
+<textarea
+  #textAreaElement
+  class="edit-panel"
+  spellcheck="false"
+  rows="1"
+  tabindex="-1"
+  autofocus="false"
+  [ngModel]="tmpValue"
+  (blur)="blurred()"
+  (focus)="focused()"
+  (ngModelChange)="updateTmpValue($event)"
+  (input)="onInput($event)"
+  (keydown)="handleKeyDown($event)"
+  onInput="this.parentNode.dataset.replicatedValue = this.value"
+></textarea>

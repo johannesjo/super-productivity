@@ -36,6 +36,7 @@ import { TaskSummaryTablesComponent } from './task-summary-tables/task-summary-t
 import { IS_ELECTRON } from '../../app.constants';
 import { TasksByTagComponent } from './tasks-by-tag/tasks-by-tag.component';
 import { ShortSyntaxEffects } from './store/short-syntax.effects';
+import { InlineMultilineInputComponent } from '../../ui/inline-multiline-input/inline-multiline-input.component';
 
 @NgModule({
   imports: [
@@ -59,6 +60,7 @@ import { ShortSyntaxEffects } from './store/short-syntax.effects';
       ...(IS_ELECTRON ? [TaskElectronEffects] : []),
     ]),
     BetterDrawerModule,
+    InlineMultilineInputComponent,
   ],
   declarations: [
     TaskComponent,

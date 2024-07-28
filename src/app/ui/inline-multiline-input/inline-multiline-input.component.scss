@@ -1,0 +1,38 @@
+@import '../../../variables';
+//@import '../../../tasks/task/task.component.mixins';
+
+:host {
+  display: block;
+  pointer-events: none;
+}
+
+:host textarea {
+  pointer-events: auto;
+  line-height: inherit;
+  font-size: inherit;
+  letter-spacing: inherit;
+  font-family: inherit;
+  border-radius: inherit;
+  border: none;
+  outline: none;
+  color: inherit;
+  padding: inherit;
+
+  position: relative;
+  z-index: 4;
+  display: block;
+  min-height: 16px;
+  appearance: none;
+  background: transparent;
+  resize: none;
+  width: 100%;
+  overflow: hidden;
+}
+
+:host textarea:focus {
+  box-shadow: $whiteframe-shadow-4dp;
+
+  @include darkTheme() {
+    //background: $dark12;
+  }
+}
