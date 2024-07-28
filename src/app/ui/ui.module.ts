@@ -3,7 +3,6 @@ import { CommonModule, DatePipe } from '@angular/common';
 import { InputDurationDirective } from './duration/input-duration.directive';
 import { DurationFromStringPipe } from './duration/duration-from-string.pipe';
 import { DurationToStringPipe } from './duration/duration-to-string.pipe';
-import { ContentEditableOnClickDirective } from './edit-on-click/content-editable-on-click.directive';
 import { InlineMarkdownComponent } from './inline-markdown/inline-markdown.component';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatBadgeModule } from '@angular/material/badge';
@@ -102,7 +101,6 @@ const COMPONENT_AND_PIPES = [
   ...DIALOG_COMPONENTS,
   ChipListInputComponent,
   CollapsibleComponent,
-  ContentEditableOnClickDirective,
   DurationFromStringPipe,
   DurationToStringPipe,
   EnlargeImgDirective,
