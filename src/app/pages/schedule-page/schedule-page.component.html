@@ -140,7 +140,7 @@
             <div class="task-info">
               <div class="title">
                 <inline-multiline-input
-                  (valueEdited)="updateRepeatableTitleIfChanged($event.wasChanged, $event.newVal, repeatTaskCfg)"
+                  (valueEdited)="updateRepeatableTitleIfChanged($event.wasChanged, $event.newVal, taskRepeatCfg)"
                   [value]="taskRepeatCfg.title"
                   class="task-title"
                 ></inline-multiline-input>
