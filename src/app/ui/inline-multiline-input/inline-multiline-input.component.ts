@@ -59,16 +59,6 @@ export class InlineMultilineInputComponent {
 
   constructor() {}
 
-  handleKeyDown(ev: KeyboardEvent): void {
-    if (ev.key === 'Escape') {
-      this._forceBlur();
-    } else if (ev.key === 'Enter') {
-      this._forceBlur();
-      ev.preventDefault();
-      this._submit();
-    }
-  }
-
   focused(): void {
     this.isFocused = true;
     this._setTxtHeight();
@@ -89,13 +79,31 @@ export class InlineMultilineInputComponent {
     this._submit();
   }
 
-  onInput(ev: Event): void {
-    // on mobile android we use this as a workaround for an enter key press
-    if ((ev as InputEvent)?.data === null) {
+  handleKeyDown(ev: KeyboardEvent): void {
+    // prevent keyboard shortcuts from firing
+    ev.stopPropagation();
+    if (ev.key === 'Escape') {
       this._forceBlur();
+    } else if (ev.key === 'Enter') {
+      this._forceBlur();
+      ev.preventDefault();
       this._submit();
     }
+  }
 
+  onTextInput(ev: Event): void {
+    if ((ev as InputEvent)?.data?.slice(-1) === '\n') {
+      console.log('android enter key press');
+      this._submit();
+      this._forceBlur();
+      ev.preventDefault();
+      setTimeout(() => {
+        this._forceBlur();
+      });
+    }
+  }
+
+  onInput(ev: Event): void {
     this._setTxtHeight();
   }
 
@@ -105,7 +113,6 @@ export class InlineMultilineInputComponent {
 
   private _forceBlur(): void {
     this.textarea.nativeElement.blur();
-    window.focus();
   }
 
   private _submit(): void {
