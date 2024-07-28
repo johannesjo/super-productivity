@@ -28,6 +28,11 @@
   margin: $s;
   margin-top: $s * 3;
   margin-bottom: $s * 3;
+  border-radius: 8px;
+
+  &.is-focused {
+    outline: 2px solid $c-accent;
+  }
 
   :host.isShowNotes & {
     margin-top: $s * 7;

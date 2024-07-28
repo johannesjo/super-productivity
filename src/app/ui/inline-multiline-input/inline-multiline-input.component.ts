@@ -37,7 +37,6 @@ export class InlineMultilineInputComponent implements AfterViewInit {
     newVal: string;
     wasChanged: boolean;
   }>();
-  @Output() cancel: EventEmitter<void> = new EventEmitter<void>();
 
   constructor(private _el: ElementRef) {}
 
@@ -49,15 +48,31 @@ export class InlineMultilineInputComponent implements AfterViewInit {
 
   handleKeyDown(ev: KeyboardEvent): void {
     // prevent keyboard shortcuts from firing when here
-    ev.stopPropagation();
+    // ev.stopPropagation();
+
+    console.log('KEYDOWN', ev);
 
     if (ev.key === 'Escape') {
-      this.cancel.emit();
+      this._forceBlur();
     } else if (ev.key === 'Enter') {
+      this._forceBlur();
       ev.preventDefault();
       this._submit();
     }
   }
+
+  // handleKeyPress(ev: KeyboardEvent): void {
+  // console.log('PRESS', ev);
+  //
+  // // prevent keyboard shortcuts from firing when here
+  // if (ev.key === 'Escape') {
+  //   this._forceBlur();
+  // } else if (ev.key === 'Enter') {
+  //   this._forceBlur();
+  //   ev.preventDefault();
+  //   this._submit();
+  // }
+  // }
 
   focused(): void {
     this.isFocused = true;
@@ -68,7 +83,14 @@ export class InlineMultilineInputComponent implements AfterViewInit {
     this._submit();
   }
 
-  onInput(ev: Event): void {
+  onInput(ev: InputEvent): void {
+    console.log('INPUT', ev);
+    // on mobile android we use this as a workaround for an enter key press
+    if (ev.data === null) {
+      this._forceBlur();
+      this._submit();
+    }
+
     this._setTxtHeight();
   }
 
@@ -76,11 +98,21 @@ export class InlineMultilineInputComponent implements AfterViewInit {
     this.tmpValue = value;
   }
 
+  private _forceBlur(): void {
+    this.textarea.nativeElement.blur();
+    window.focus();
+  }
+
   private _submit(): void {
     const cleanVal = this._cleanValue(this.tmpValue);
     this.valueEdited.emit({
       newVal: cleanVal,
       wasChanged: cleanVal !== this.initialValue,
+    });
+    this.tmpValue = cleanVal;
+    // android needs the delay for the linebreaks to be removed
+    setTimeout(() => {
+      this._setTxtHeight();
     });
   }
 
@@ -90,10 +122,14 @@ export class InlineMultilineInputComponent implements AfterViewInit {
 
   private _setTxtHeight(): void {
     try {
+      // reset height
+      this.textarea.nativeElement.style.height = 'auto';
       this.textarea.nativeElement.style.height =
         this.textarea.nativeElement.scrollHeight + 'px';
     } catch (e) {
       setTimeout(() => {
+        // reset height
+        this.textarea.nativeElement.style.height = 'auto';
         this.textarea.nativeElement.style.height =
           this.textarea.nativeElement.scrollHeight + 'px';
       });
