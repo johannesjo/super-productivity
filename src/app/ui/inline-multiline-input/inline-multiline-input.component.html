@@ -5,6 +5,7 @@
   rows="1"
   tabindex="-1"
   autofocus="false"
+  placeholder="{{T.F.TASK.ADDITIONAL_INFO.TITLE_PLACEHOLDER|translate}}"
   [ngModel]="tmpValue"
   (blur)="blurred()"
   (focus)="focused()"
@@ -12,3 +13,5 @@
   (input)="onInput($event)"
   (keydown)="handleKeyDown($event)"
 ></textarea>
+
+<!--@if(isEditMode){} @else { {{tmpValue}} }-->

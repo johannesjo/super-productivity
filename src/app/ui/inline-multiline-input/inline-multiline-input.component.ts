@@ -1,5 +1,4 @@
 import {
-  AfterViewInit,
   ChangeDetectionStrategy,
   Component,
   ElementRef,
@@ -10,16 +9,19 @@ import {
   ViewChild,
 } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { T } from 'src/app/t.const';
+import { TranslateModule } from '@ngx-translate/core';
 
 @Component({
   selector: 'inline-multiline-input',
   standalone: true,
-  imports: [ReactiveFormsModule, FormsModule],
+  imports: [ReactiveFormsModule, FormsModule, TranslateModule],
   templateUrl: './inline-multiline-input.component.html',
   styleUrl: './inline-multiline-input.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class InlineMultilineInputComponent implements AfterViewInit {
+export class InlineMultilineInputComponent {
+  T: typeof T = T;
   @HostBinding('class.is-focused') isFocused = false;
 
   @Input() set value(value: string) {
@@ -40,18 +42,7 @@ export class InlineMultilineInputComponent implements AfterViewInit {
 
   constructor(private _el: ElementRef) {}
 
-  ngAfterViewInit(): void {
-    if (this._el.nativeElement) {
-      this._el.nativeElement.querySelector('textarea').focus();
-    }
-  }
-
   handleKeyDown(ev: KeyboardEvent): void {
-    // prevent keyboard shortcuts from firing when here
-    // ev.stopPropagation();
-
-    console.log('KEYDOWN', ev);
-
     if (ev.key === 'Escape') {
       this._forceBlur();
     } else if (ev.key === 'Enter') {
@@ -60,19 +51,6 @@ export class InlineMultilineInputComponent implements AfterViewInit {
       this._submit();
     }
   }
-
-  // handleKeyPress(ev: KeyboardEvent): void {
-  // console.log('PRESS', ev);
-  //
-  // // prevent keyboard shortcuts from firing when here
-  // if (ev.key === 'Escape') {
-  //   this._forceBlur();
-  // } else if (ev.key === 'Enter') {
-  //   this._forceBlur();
-  //   ev.preventDefault();
-  //   this._submit();
-  // }
-  // }
 
   focused(): void {
     this.isFocused = true;
@@ -83,10 +61,9 @@ export class InlineMultilineInputComponent implements AfterViewInit {
     this._submit();
   }
 
-  onInput(ev: InputEvent): void {
-    console.log('INPUT', ev);
+  onInput(ev: Event): void {
     // on mobile android we use this as a workaround for an enter key press
-    if (ev.data === null) {
+    if ((ev as InputEvent)?.data === null) {
       this._forceBlur();
       this._submit();
     }
