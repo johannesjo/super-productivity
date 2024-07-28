@@ -1,10 +1,10 @@
+<!--@if(isEditMode){-->
 <textarea
   #textAreaElement
   class="edit-panel"
   spellcheck="false"
   rows="1"
   tabindex="-1"
-  autofocus="false"
   placeholder="{{T.F.TASK.ADDITIONAL_INFO.TITLE_PLACEHOLDER|translate}}"
   [ngModel]="tmpValue"
   (blur)="blurred()"
@@ -14,4 +14,4 @@
   (keydown)="handleKeyDown($event)"
 ></textarea>
 
-<!--@if(isEditMode){} @else { {{tmpValue}} }-->
+<!--} @else { {{tmpValue}} }-->

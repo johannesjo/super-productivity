@@ -40,7 +40,17 @@ export class InlineMultilineInputComponent {
     wasChanged: boolean;
   }>();
 
-  constructor(private _el: ElementRef) {}
+  // isEditMode: boolean = false;
+  // @HostListener('focus') hostElFocus(): void {
+  //   this.isFocused = true;
+  //   this.isEditMode = true;
+  // }
+  // @HostListener('click') hostElClick(): void {
+  //   this.isFocused = true;
+  //   this.isEditMode = true;
+  // }
+
+  constructor() {}
 
   handleKeyDown(ev: KeyboardEvent): void {
     if (ev.key === 'Escape') {
@@ -54,6 +64,7 @@ export class InlineMultilineInputComponent {
 
   focused(): void {
     this.isFocused = true;
+    this._setTxtHeight();
   }
 
   blurred(): void {
