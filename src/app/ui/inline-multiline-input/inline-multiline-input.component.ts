@@ -40,14 +40,21 @@ export class InlineMultilineInputComponent {
     wasChanged: boolean;
   }>();
 
+  // @HostBinding('tabindex') tabindex = '1';
   // isEditMode: boolean = false;
   // @HostListener('focus') hostElFocus(): void {
   //   this.isFocused = true;
   //   this.isEditMode = true;
+  //   setTimeout(() => {
+  //     this.textarea.nativeElement.focus();
+  //   });
   // }
   // @HostListener('click') hostElClick(): void {
   //   this.isFocused = true;
   //   this.isEditMode = true;
+  //   setTimeout(() => {
+  //     this.textarea.nativeElement.focus();
+  //   });
   // }
 
   constructor() {}
@@ -69,6 +76,7 @@ export class InlineMultilineInputComponent {
 
   blurred(): void {
     this.isFocused = false;
+    // this.isEditMode = false;
     this._submit();
   }
 

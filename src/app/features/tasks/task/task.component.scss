@@ -240,7 +240,11 @@
   justify-content: center;
   min-height: 36px;
   flex-grow: 1;
+  flex-shrink: 1;
   flex-basis: 70%;
+  // we cannot do this since this cuts of the box shadow of the task edit
+  //overflow: hidden;
+
   @include mq(xs, max) {
     //margin-bottom: 5px;
     //flex-shrink: 0;
@@ -441,6 +445,9 @@
 // -----------------
 .title-and-tags-wrapper {
   flex-grow: 1;
+  flex-shrink: 1;
+  // we cannot do this since this cuts of the box shadow of the task edit
+  //overflow: hidden;
 
   > * {
     @include touchOnlyDevice {
