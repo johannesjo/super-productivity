@@ -251,6 +251,7 @@ export class ScheduleComponent implements AfterViewInit, OnDestroy {
   @ViewChild('gridContainer') gridContainer!: ElementRef;
 
   private _scrollTopFirstElTimeout: number | undefined;
+  private _currentAniTimeout: number | undefined;
 
   constructor(
     public taskService: TaskService,
@@ -276,6 +277,7 @@ export class ScheduleComponent implements AfterViewInit, OnDestroy {
 
   ngOnDestroy(): void {
     window.clearTimeout(this._scrollTopFirstElTimeout);
+    window.clearTimeout(this._currentAniTimeout);
   }
 
   scrollToTopElement(): void {
@@ -362,6 +364,9 @@ export class ScheduleComponent implements AfterViewInit, OnDestroy {
             day: targetDay,
           }),
         );
+
+        this._aniMoveToItem(ev.source.element.nativeElement, () => ev.source.reset());
+        return;
       }
     } else if (target.tagName.toLowerCase() === 'schedule-event') {
       // const sourceTaskId = ev.source.data.data.id;
@@ -386,8 +391,26 @@ export class ScheduleComponent implements AfterViewInit, OnDestroy {
         });
       }
     }
+
     ev.source.element.nativeElement.style.transform = 'translate3d(0, 0, 0)';
     ev.source.reset();
+  }
+
+  private _aniMoveToItem(targetEl: HTMLElement, resetFn: () => void): void {
+    // targetEl.style.opacity = '0';
+    targetEl.style.transition = 'none';
+    targetEl.style.transform = this._replaceFirstNumberInTranslate3d(
+      targetEl.style.transform,
+      0,
+    );
+
+    this._currentAniTimeout = window.setTimeout(() => {
+      targetEl.style.opacity = '';
+      targetEl.style.transition = '';
+      targetEl.style.transform = 'translate3d(0, 0, 0)';
+
+      resetFn();
+    }, 100);
   }
 
   private _getDaysToShow(): string[] {
@@ -401,6 +424,9 @@ export class ScheduleComponent implements AfterViewInit, OnDestroy {
     return daysToShow;
   }
 
-  protected readonly selectTaskRepeatCfgsWithAndWithoutStartTime =
-    selectTaskRepeatCfgsWithAndWithoutStartTime;
+  private _replaceFirstNumberInTranslate3d(input: string, newNumber: number): string {
+    const parts = input.split(',');
+    parts[0] = `translate3d(${newNumber}`;
+    return parts.join(',');
+  }
 }
