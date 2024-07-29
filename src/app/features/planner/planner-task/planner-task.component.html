@@ -91,13 +91,9 @@
       inline="true"
     ></mat-icon>
     @if (overWriteTimeEstimate > 0) { {{ overWriteTimeEstimate|msToString }} <br />
-    <span class="original-time-remaining"
-      >({{ (task.timeEstimate - task.timeSpent > 0 ? task.timeEstimate - task.timeSpent :
-      0)|msToString }})</span
-    >
+    <span class="original-time-remaining">({{ timeEstimate|msToString }})</span>
     <!--- -->
-    } @else { {{ (task.timeEstimate - task.timeSpent > 0 ? task.timeEstimate -
-    task.timeSpent : 0)|msToString }} }
+    } @else { {{ timeEstimate|msToString }} }
   </div>
 </div>
 

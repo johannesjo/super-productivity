@@ -67,6 +67,15 @@ export class PlannerTaskComponent extends BaseComponent implements OnInit, OnDes
     return this.task.id === this._taskService.currentTaskId;
   }
 
+  get timeEstimate(): number {
+    const t = this.task;
+    return this.task.subTaskIds
+      ? t.timeEstimate
+      : t.timeEstimate - t.timeSpent > 0
+        ? t.timeEstimate - t.timeSpent
+        : 0;
+  }
+
   constructor(
     private _taskService: TaskService,
     private _cd: ChangeDetectorRef,
