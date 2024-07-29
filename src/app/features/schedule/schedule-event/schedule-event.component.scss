@@ -212,26 +212,23 @@ $margin-bottom: 4px;
   flex-grow: 1;
   flex-shrink: 1;
   padding: 4px;
-  font-weight: 300;
+  font-weight: 400;
   line-height: 1.2;
   max-height: 100%;
   // somehow this fixes the cut off lines problem
   column-width: 250px;
+  //font-weight: bold;
 
   @include mq(xs, max) {
-    font-size: 10px;
+    font-size: 11px;
     line-height: 1.2;
   }
 
   @include mq(xxs, max) {
-    font-size: 9px;
+    font-size: 11px;
     line-height: 1.1;
   }
 
-  @include mq(xxxs, max) {
-    font-size: 8px;
-    line-height: 1.1;
-  }
   //&:hover {
   //  box-shadow: $whiteframe-shadow-3dp;
   //  background: inherit;
