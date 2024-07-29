@@ -4,7 +4,7 @@
     class="task-title-wrapper"
   >
     <inline-multiline-input
-      [resetToInitialValueTrigger]="task"
+      [resetToLastExternalValueTrigger]="task"
       (valueEdited)="updateTaskTitleIfChanged($event.wasChanged, $event.newVal)"
       [value]="task.title"
       class="task-title"

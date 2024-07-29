@@ -25,18 +25,27 @@ export class InlineMultilineInputComponent {
   @HostBinding('class.is-focused') isFocused = false;
 
   // NOTE: we only need this for tasks since, sometimes with the short syntax there are no changes to the title as they are stripped away
-  @Input() set resetToInitialValueTrigger(value: unknown) {
-    this.tmpValue = this.initialValue;
+  @Input() set resetToLastExternalValueTrigger(value: unknown) {
+    // console.log({
+    //   tmp: this.tmpValue,
+    //   last: this.lastExternalValue,
+    // });
+    // never update while editing
+    if (!this.isFocused && this.tmpValue !== this.lastExternalValue) {
+      // NOTE: this works because set value is called after this, for non-short syntax only changes
+      this.tmpValue = this.lastExternalValue;
+      console.log('new tmp', this.tmpValue);
+    }
   }
 
   @Input() set value(value: string) {
     this.tmpValue = value;
-    this.initialValue = value;
+    this.lastExternalValue = value;
     this._setTxtHeight();
-    console.log(value);
+    // console.log('setValue', value);
   }
 
-  initialValue?: string;
+  lastExternalValue?: string;
   tmpValue?: string;
 
   @ViewChild('textAreaElement') textarea!: ElementRef<HTMLTextAreaElement>;
@@ -123,9 +132,15 @@ export class InlineMultilineInputComponent {
     const cleanVal = this._cleanValue(this.tmpValue);
     this.valueEdited.emit({
       newVal: cleanVal,
-      wasChanged: cleanVal !== this.initialValue,
+      wasChanged: cleanVal !== this.lastExternalValue,
     });
-    this.tmpValue = cleanVal;
+    // console.log(
+    //   'submit',
+    //   this.tmpValue,
+    //   'wasChanged',
+    //   cleanVal !== this.lastExternalValue,
+    // );
+
     // android needs the delay for the linebreaks to be removed
     setTimeout(() => {
       this._setTxtHeight();

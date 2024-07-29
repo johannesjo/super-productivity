@@ -145,7 +145,7 @@
         </div>
 
         <inline-multiline-input
-          [resetToInitialValueTrigger]="task"
+          [resetToLastExternalValueTrigger]="task"
           [style.pointer-events]="IS_TOUCH_PRIMARY && (task.title.length) ? 'none' : 'auto'"
           #taskTitleEditEl
           (valueEdited)="updateTaskTitleIfChanged($event)"
