@@ -67,6 +67,10 @@ $h: $planner-item-height;
 .title {
   padding-left: 4px;
   padding-right: 4px;
+  // to have room for the coloured edit border
+  padding-top: 1px;
+  padding-bottom: 1px;
+
   line-height: 1.5;
   position: relative;
   overflow: hidden;
