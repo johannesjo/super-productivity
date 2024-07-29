@@ -4,7 +4,7 @@
 
 
 <p align="center">
-<strong>An advanced todo list app with timeboxing & time tracking capabilities that suports importing tasks from your calendar, jira, github and others</strong>
+<strong>An advanced todo list app with timeboxing & time tracking capabilities that supports importing tasks from your calendar, jira, github and others</strong>
 <p>
   
 <p align="center">:globe_with_meridians: <a href="https://app.super-productivity.com">Open Web App</a> or :computer: <a href="https://github.com/johannesjo/super-productivity/releases">Download</a></p>
@@ -121,7 +121,7 @@ And much more!
 
 If you need some help, [this article on dev.to is the best place to start](https://dev.to/johannesjo/getting-started-with-super-productivity-2791).
 
-If you prefer, there is also a (long) [youtube video available](https://www.youtube.com/watch?v=VoF2_RSdNXA).
+If you prefer, there is also a (long) [YouTube video available](https://www.youtube.com/watch?v=VoF2_RSdNXA).
 
 There is another older – the app looks and feels much better now ;) – [article](https://dev.to/johannesjo/super-productivity-how-to-grow-fond-of-time-tracking-and-task-management-22ee) on how I personally might use the app - and still [another one](https://dev.to/johannesjo/the-prioritising-scheme-how-to-eat-the-frog-with-super-productivity-mlk) on how I implement the 'eat the frog' prioritizing scheme in the app.
 
@@ -160,7 +160,7 @@ Can be used when adding a task.
 
 ## :globe_with_meridians: Web Version
 
-Check out the web version even though it is a bit limited: Time tracking only works if the app is open and for idle time tracking to work, the chrome extension has to be installed.
+Check out the web version even though it is a bit limited: Time tracking only works if the app is open and for idle time tracking to work, the chrome extension must be installed.
 
 If you want the Jira integration and idle time tracking to work, you also have to download and install the [Super Productivity Chrome Extension](https://chrome.google.com/webstore/detail/super-productivity/ljkbjodfmekklcoibdnhahlaalhihmlb).
 
@@ -248,7 +248,7 @@ Please check out the [CONTRIBUTING.md](CONTRIBUTING.md)
 
 There are several ways to help.
 
-1. **Spread the word:** More users means more people testing and contributing to the app which in turn means better stability and possibly more and better features. You can vote for Super Productivity on [Slant](https://www.slant.co/topics/14021/viewpoints/7/~productivity-tools-for-linux~super-productivity), [Product Hunt](https://www.producthunt.com/posts/super-productivity), [Softpedia](https://www.softpedia.com/get/Office-tools/Diary-Organizers-Calendar/Super-Productivity.shtml) or on [AlternativeTo](https://alternativeto.net/software/super-productivity/), you can [tweet about it](https://twitter.com/intent/tweet?text=I%20like%20Super%20Productivity%20%20https%3A%2F%2Fsuper-productivity.com), share it on [LinkedIn](http://www.linkedin.com/shareArticle?mini=true&url=https://super-productivity.com&title=I%20like%20Super%20Productivity&), [reddit](http://www.reddit.com/submit?url=https%3A%2F%2Fsuper-productivity.com&title=I%20like%20Super%20Productivity) or any of your favorite social media platforms. Every little bit helps!
+1. **Spread the word:** More users mean more people testing and contributing to the app which in turn means better stability and possibly more and better features. You can vote for Super Productivity on [Slant](https://www.slant.co/topics/14021/viewpoints/7/~productivity-tools-for-linux~super-productivity), [Product Hunt](https://www.producthunt.com/posts/super-productivity), [Softpedia](https://www.softpedia.com/get/Office-tools/Diary-Organizers-Calendar/Super-Productivity.shtml) or on [AlternativeTo](https://alternativeto.net/software/super-productivity/), you can [tweet about it](https://twitter.com/intent/tweet?text=I%20like%20Super%20Productivity%20%20https%3A%2F%2Fsuper-productivity.com), share it on [LinkedIn](http://www.linkedin.com/shareArticle?mini=true&url=https://super-productivity.com&title=I%20like%20Super%20Productivity&), [reddit](http://www.reddit.com/submit?url=https%3A%2F%2Fsuper-productivity.com&title=I%20like%20Super%20Productivity) or any of your favorite social media platforms. Every little bit helps!
 
 2. **Provide a Pull Request:** Here is a list of [the most popular community requests](https://github.com/johannesjo/super-productivity/issues?q=is%3Aissue+is%3Aopen+sort%3Areactions-%2B1-desc) and here some info on [how to run the development build](https://github.com/johannesjo/super-productivity#running-the-development-server).
    Please make sure that you're following the [angular commit guidelines](https://github.com/angular/angular.js/blob/master/DEVELOPERS.md#commits) and to also include the issue number in your commit message, if you're fixing a particular issue (e.g.: `feat: add nice feature with the number #31`).
@@ -320,7 +320,7 @@ docker run -d -p 80:80 johannesjo/super-productivity:latest
 
 In addition to color coding your projects and tags and to the dark and light theme you can also load completely custom css to restyle everything. To load a custom theme you simply need put them into a new file named `styles.css` directly in the [user data folder](#user-data-folder).
 
-There is a great set of [themes available for download in this repository](https://github.com/johannesjo/super-productivity-themes/tree/main/dist) as well as some [info on how to role out your own custom themes](https://github.com/johannesjo/super-productivity-themes).
+There is a great set of [themes available for download in this repository](https://github.com/johannesjo/super-productivity-themes/tree/main/dist) as well as some [info on how to create your own custom themes](https://github.com/johannesjo/super-productivity-themes).
 
 ## Custom WebDAV Syncing
 
