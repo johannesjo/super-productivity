@@ -9,7 +9,6 @@ const DIALOG_TASKS_WRAPPER = `${DIALOG} .tasks`;
 
 const DIALOG_TASK = `${DIALOG} .task`;
 const DIALOG_TASK1 = `${DIALOG_TASK}:first-of-type`;
-const DIALOG_TASK1_TEXTAREA = `${DIALOG_TASK1} textarea`;
 const DIALOG_TASK2 = `${DIALOG_TASK}:nth-of-type(2)`;
 const DIALOG_TASK3 = `${DIALOG_TASK}:nth-of-type(3)`;
 const TO_TODAY_SUF = ' .actions button:last-of-type';
@@ -85,7 +84,7 @@ module.exports = {
         .click(DIALOG_TASK1 + TO_TODAY_SUF)
         .click(DIALOG_TASK2 + TO_TODAY_SUF)
         .pause(50)
-        .assert.valueContains(DIALOG_TASK1_TEXTAREA, 'D task xyz')
+        .assert.textContains(DIALOG_TASK1, 'D task xyz')
         .end()
     );
   },
