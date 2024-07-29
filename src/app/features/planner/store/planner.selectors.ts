@@ -22,6 +22,19 @@ export const selectPlannerState = createFeatureSelector<fromPlanner.PlannerState
   fromPlanner.plannerFeatureKey,
 );
 
+export const selectTaskIdPlannedDayMap = createSelector(
+  selectPlannerState,
+  (state): { [taskId: string]: string } => {
+    const taskIdDayMap: { [taskId: string]: string } = {};
+    Object.keys(state.days).forEach((day) => {
+      state.days[day].forEach((taskId) => {
+        taskIdDayMap[taskId] = day;
+      });
+    });
+    return taskIdDayMap;
+  },
+);
+
 export const selectPlannerDays = (
   dayDates: string[],
   taskRepeatCfgs: TaskRepeatCfg[],

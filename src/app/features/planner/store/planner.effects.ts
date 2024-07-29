@@ -184,8 +184,6 @@ export class PlannerEffects {
       tap((val) => console.log('planTaskForDay', val)),
       filter(({ task, day }) => day !== getWorklogStr()),
       map(({ task }) => {
-        console.log('I am here!');
-
         return updateTaskTags({
           task,
           oldTagIds: task.tagIds,

@@ -5,7 +5,7 @@ import { selectPlannedTasksById } from '../tasks/store/task.selectors';
 import { Store } from '@ngrx/store';
 import { CalendarIntegrationService } from '../calendar-integration/calendar-integration.service';
 import { PlannerDay } from './planner.model';
-import { selectPlannerDays } from './store/planner.selectors';
+import { selectPlannerDays, selectTaskIdPlannedDayMap } from './store/planner.selectors';
 import { ReminderService } from '../reminder/reminder.service';
 import { TaskPlanned } from '../tasks/task.model';
 import { selectAllTaskRepeatCfgs } from '../task-repeat-cfg/store/task-repeat-cfg.reducer';
@@ -81,6 +81,11 @@ export class PlannerService {
     // tap((val) => console.log('days$ SIs', val[0]?.scheduledIItems)),
     shareReplay(1),
   );
+
+  plannedTaskDayMap$: Observable<{ [taskId: string]: string }> = this._store
+    .select(selectTaskIdPlannedDayMap)
+    // make this more performant by sharing stream
+    .pipe(shareReplay(1));
 
   constructor(
     private _store: Store,

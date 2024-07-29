@@ -59,6 +59,7 @@ import { isToday } from '../../../util/is-today.util';
 import { IS_TOUCH_PRIMARY } from '../../../util/is-mouse-primary';
 import { KeyboardConfig } from '../../config/keyboard-config.model';
 import { DialogPlanForDayComponent } from '../../planner/dialog-plan-for-day/dialog-plan-for-day.component';
+import { PlannerService } from '../../planner/planner.service';
 
 @Component({
   selector: 'task',
@@ -155,6 +156,7 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
     private readonly _renderer: Renderer2,
     private readonly _cd: ChangeDetectorRef,
     private readonly _projectService: ProjectService,
+    public readonly plannerService: PlannerService,
     public readonly workContextService: WorkContextService,
   ) {}
 
@@ -290,12 +292,15 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
       .subscribe(() => this.focusSelf());
   }
 
-  planForDay(): void {
+  async planForDay(): Promise<void> {
+    const plannedDayForTask = (
+      await this.plannerService.plannedTaskDayMap$.pipe(first()).toPromise()
+    )[this.task.id];
     this._matDialog
       .open(DialogPlanForDayComponent, {
         // we focus inside dialog instead
         autoFocus: false,
-        data: { task: this.task },
+        data: { task: this.task, day: plannedDayForTask },
       })
       .afterClosed()
       // .pipe(takeUntil(this._destroy$))
