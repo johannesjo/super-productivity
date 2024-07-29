@@ -1,8 +1,26 @@
-[![Stand With Ukraine](https://raw.githubusercontent.com/vshymanskyy/StandWithUkraine/main/banner2-direct.svg)](https://vshymanskyy.github.io/StandWithUkraine)
-
 <a href="https://super-productivity.com/">
   <img align="center" alt="Banner" src="screens/banner-bw.png" />
 </a>
+
+
+<p align="center">
+<strong>Super Productivity is an advanced todo list app with integrated timeboxing and time tracking capabilities.</strong>
+<p>
+  
+<p align="center"><a href="https://app.super-productivity.com">:globe_with_meridians: Open Web App</a> or <a href="https://github.com/johannesjo/super-productivity/releases">:computer: Download</a></p>
+
+<br>
+
+<p align="center">
+<a href="https://youtu.be/_mvMXWLsL-8">
+    <img src="https://github.com/user-attachments/assets/15384cae-8ba3-4474-bc2c-13e7765c2dd1" alt="animated" />
+</a>
+</p>
+<br>
+<br>
+
+[![Stand With Ukraine](https://raw.githubusercontent.com/vshymanskyy/StandWithUkraine/main/banner2-direct.svg)](https://vshymanskyy.github.io/StandWithUkraine)
+
 
 <p align="center" style="text-align: center;">
 <a href="https://lbesson.mit-license.org">
@@ -41,10 +59,9 @@
        target="_blank"
        align="center" />
 </a>
+</p>
 
-<br>
-<br>
-
+<p align="center" style="text-align: center;">
 <a href="https://snapcraft.io/superproductivity"        target="_blank">
   <img alt="Get it from the Snap Store"
        src="https://snapcraft.io/static/images/badges/en/snap-store-black.svg"
@@ -75,10 +92,11 @@
        alt='F-Droid Badge'
        height="50" />
 </a>
+</p>
 
-Super Productivity is an advanced todo list app with integrated [Timeboxing](https://en.wikipedia.org/wiki/Timeboxing) and time tracking capabilities.
+<br>
 
-<p align="center"><a href="https://app.super-productivity.com">:globe_with_meridians: Open Web App</a> or <a href="https://github.com/johannesjo/super-productivity/releases">:computer: Download</a></p>
+
 
 ## :heavy_check_mark: Features
 
@@ -97,6 +115,7 @@ Super Productivity is an advanced todo list app with integrated [Timeboxing](htt
 And much more!
 
 <a href="https://youtu.be/_mvMXWLsL-8"><img alt="Work View with global links" src="screens/screen_standard.png" width="100%"></a>
+
 
 ## :question: How to use it
 
