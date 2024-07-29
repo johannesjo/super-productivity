@@ -4,10 +4,10 @@
 
 
 <p align="center">
-<strong>Super Productivity is an advanced todo list app with integrated timeboxing and time tracking capabilities.</strong>
+<strong>An advanced todo list app with timeboxing & time tracking capabilities that suports importing tasks from your calendar, jira, github and others</strong>
 <p>
   
-<p align="center"><a href="https://app.super-productivity.com">:globe_with_meridians: Open Web App</a> or <a href="https://github.com/johannesjo/super-productivity/releases">:computer: Download</a></p>
+<p align="center">:globe_with_meridians: <a href="https://app.super-productivity.com">Open Web App</a> or :computer: <a href="https://github.com/johannesjo/super-productivity/releases">Download</a></p>
 
 <br>
 
