@@ -1,3 +1,37 @@
+## [9.0.6](https://github.com/johannesjo/super-productivity/compare/v9.0.5...v9.0.6) (2024-07-29)
+
+### Bug Fixes
+
+- backlog counter position ([943809c](https://github.com/johannesjo/super-productivity/commit/943809c253eded51095f8b663c2d38cc6542b1c5))
+- lint ([21c2fd2](https://github.com/johannesjo/super-productivity/commit/21c2fd21f0987ee3dcb4578113bc0a833124c52f))
+- **newTitleEdit:** backspace not working ([22ad353](https://github.com/johannesjo/super-productivity/commit/22ad353b06c070d64899fcf63aaa51f5500dd9e7))
+- **newTitleEdit:** short syntax not being removed ([94eea12](https://github.com/johannesjo/super-productivity/commit/94eea1268cc2642b0b38f02fba1b2b4df491bf54))
+- **newTitleEdit:** var name ([d8d2224](https://github.com/johannesjo/super-productivity/commit/d8d22240ccd81b221456afd558909a69cb6bfb2b))
+- progress circle position ([c5a7d37](https://github.com/johannesjo/super-productivity/commit/c5a7d374df4400e9e82c7c54eeadba56f3b85ac7))
+- **sync:** local file sync by using computed sha-1 hash rather than modified timestamp [#3284](https://github.com/johannesjo/super-productivity/issues/3284) ([43201aa](https://github.com/johannesjo/super-productivity/commit/43201aa65d06aeebfb783fddaf02a1cc986272a0))
+- **sync:** make compression work vor webDav [#3298](https://github.com/johannesjo/super-productivity/issues/3298) ([789f17e](https://github.com/johannesjo/super-productivity/commit/789f17e5d33c22935310a42dbeb0b5e34e5a241a))
+- **sync:** make initial android file sync work without error [#3297](https://github.com/johannesjo/super-productivity/issues/3297) ([25b48d7](https://github.com/johannesjo/super-productivity/commit/25b48d7a56be8373a04603d44a2094309717e7fe))
+- **webDAV:** update config entity ([8a99d24](https://github.com/johannesjo/super-productivity/commit/8a99d2465d5c17e0973c8117624633daefd99753))
+
+### Features
+
+- cleanup legacy db key handling ([32d8939](https://github.com/johannesjo/super-productivity/commit/32d8939b03fca2e72fa78e5a6d329567d51175c2))
+- make sub-task editing work better on mobile and hybrid devices [#3258](https://github.com/johannesjo/super-productivity/issues/3258) ([cf89024](https://github.com/johannesjo/super-productivity/commit/cf8902410ef15a5ae80b609d0179802ed5bcdf89))
+- **newTitleEdit:** add new component and make it work for most cases ([a2754aa](https://github.com/johannesjo/super-productivity/commit/a2754aa95585febd97a5c313b1232c37823c994a))
+- **newTitleEdit:** always put cursor at end ([627bcf4](https://github.com/johannesjo/super-productivity/commit/627bcf468d96ad0efc2aab83438a3603f8b73e9a))
+- **newTitleEdit:** further improve for android and add placeholder ([6fd2921](https://github.com/johannesjo/super-productivity/commit/6fd2921624676d973ab7e0174f1660c152af8551))
+- **newTitleEdit:** make enter press kind of work for android ([d903f4e](https://github.com/johannesjo/super-productivity/commit/d903f4eb9316e6405bb5da151fa29446998e9a55))
+- **newTitleEdit:** prevent autofocus ([aacedec](https://github.com/johannesjo/super-productivity/commit/aacedec7e27ca9e137f4e84078062abf38e74688))
+- **newTitleEdit:** several improvements ([48fd03b](https://github.com/johannesjo/super-productivity/commit/48fd03b8760813ed19a4dff2ff1bcd845b3face0))
+- **sync:** add additional error handling [#3295](https://github.com/johannesjo/super-productivity/issues/3295) ([67d47a3](https://github.com/johannesjo/super-productivity/commit/67d47a3eac70f256668f923d7232528af772cc85))
+- **sync:** add translations for new dialog and fix test [#3284](https://github.com/johannesjo/super-productivity/issues/3284) ([cd3a1c0](https://github.com/johannesjo/super-productivity/commit/cd3a1c057125b25e304b2411b016abe5427ea98a))
+- **sync:** handle archive mismatch more gracefully [#3284](https://github.com/johannesjo/super-productivity/issues/3284) ([a39e8f1](https://github.com/johannesjo/super-productivity/commit/a39e8f1f20223a5900d5c2de824ae337d1508a20))
+- **sync:** improve behavior on android ([89b9d16](https://github.com/johannesjo/super-productivity/commit/89b9d1688e72297d091bb7495fa7ea107dc7b81a))
+- **sync:** improve logging ([5521332](https://github.com/johannesjo/super-productivity/commit/5521332d3c6c7faf1a58cc7078ba8ab2b3634747))
+- **sync:** make permission dialog work much better for file sync on android [#3297](https://github.com/johannesjo/super-productivity/issues/3297) ([fa1f79f](https://github.com/johannesjo/super-productivity/commit/fa1f79f2c641338d3ed299b025169416fdab122f))
+- **sync:** show revs in incomplete dialog [#3284](https://github.com/johannesjo/super-productivity/issues/3284) ([b3559cc](https://github.com/johannesjo/super-productivity/commit/b3559cc5217163e67209d00706a6441cf94737ed))
+- **sync:** show revs in incomplete dialog 2 [#3284](https://github.com/johannesjo/super-productivity/issues/3284) ([f327549](https://github.com/johannesjo/super-productivity/commit/f3275499201eabe499bcee25bdd70905b448190b))
+
 ## [9.0.5](https://github.com/johannesjo/super-productivity/compare/v9.0.4...v9.0.5) (2024-07-22)
 
 ### Bug Fixes
