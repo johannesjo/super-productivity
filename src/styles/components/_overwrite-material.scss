@@ -123,8 +123,8 @@ mat-icon,
 
 .cdk-drag-preview {
   background: #fff !important;
-  box-shadow: $whiteframe-shadow-6dp;
-  cursor: grab;
+  box-shadow: $whiteframe-shadow-10dp;
+  //cursor: grab;
   cursor: grabbing;
   //min-width: 200px;
 
@@ -134,6 +134,7 @@ mat-icon,
 }
 
 .cdk-drag-placeholder {
+  cursor: grabbing;
 }
 
 .cdk-drop-list-dragging {
