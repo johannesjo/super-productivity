@@ -55,22 +55,27 @@ export const plannerReducer = createReducer(
     };
   }),
 
-  on(PlannerActions.cleanupOldAndUndefinedPlannerTasks, (state, { today }) => {
-    const daysCopy = { ...state.days };
-    const todayDate = new Date(today);
-    Object.keys(daysCopy).forEach((day) => {
-      // NOTE: also deletes today
-      if (new Date(day) <= todayDate) {
-        delete daysCopy[day];
-      }
-    });
-    return {
-      ...state,
-      days: {
-        ...daysCopy,
-      },
-    };
-  }),
+  on(
+    PlannerActions.cleanupOldAndUndefinedPlannerTasks,
+    (state, { today, allTaskIds }) => {
+      const daysCopy = { ...state.days };
+      const todayDate = new Date(today);
+      Object.keys(daysCopy).forEach((day) => {
+        // NOTE: also deletes today
+        if (new Date(day) <= todayDate) {
+          delete daysCopy[day];
+        }
+        // remove all deleted tasks
+        daysCopy[day] = daysCopy[day].filter((id) => allTaskIds.includes(id));
+      });
+      return {
+        ...state,
+        days: {
+          ...daysCopy,
+        },
+      };
+    },
+  ),
 
   on(PlannerActions.transferTask, (state, action) => {
     const targetDays = state.days[action.newDay] || [];
@@ -125,17 +130,20 @@ export const plannerReducer = createReducer(
     // TODO check if we can mutate less
     const daysCopy = { ...state.days };
     // filter out from other days
-    let wasIndexFound = false;
+    let wasMutated = false;
     Object.keys(daysCopy).forEach((dayI) => {
-      daysCopy[dayI] = daysCopy[dayI].filter((id) => id !== action.fromTask.id);
+      if (daysCopy[dayI].includes(action.fromTask.id)) {
+        daysCopy[dayI] = daysCopy[dayI].filter((id) => id !== action.fromTask.id);
+        wasMutated = true;
+      }
       const toIndex = daysCopy[dayI].indexOf(action.toTaskId);
       if (toIndex > -1) {
         console.log('toIndex', toIndex);
-        daysCopy[dayI].splice(toIndex, 0, action.fromTask.id);
-        wasIndexFound = true;
+        [...daysCopy[dayI]].splice(toIndex, 0, action.fromTask.id);
+        wasMutated = true;
       }
     });
-    if (!wasIndexFound) {
+    if (!wasMutated) {
       return state;
     }
 

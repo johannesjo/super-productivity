@@ -71,6 +71,7 @@ export class DialogAddPlannedTasksComponent {
         this._store.dispatch(
           PlannerActions.cleanupOldAndUndefinedPlannerTasks({
             today: this._dateService.todayStr(),
+            allTaskIds: taskState.ids as string[],
           }),
         );
         this._close();

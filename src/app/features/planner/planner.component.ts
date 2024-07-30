@@ -1,9 +1,10 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { BaseComponent } from '../../core/base-component/base.component';
 import { Store } from '@ngrx/store';
 import { DateService } from '../../core/date/date.service';
 import { LayoutService } from '../../core-ui/layout/layout.service';
 import { PlannerActions } from './store/planner.actions';
+import { selectTaskFeatureState } from '../tasks/store/task.selectors';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'planner',
@@ -11,7 +12,7 @@ import { PlannerActions } from './store/planner.actions';
   styleUrl: './planner.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class PlannerComponent extends BaseComponent {
+export class PlannerComponent {
   isPanelOpen = false;
 
   constructor(
@@ -19,11 +20,16 @@ export class PlannerComponent extends BaseComponent {
     private _dateService: DateService,
     public layoutService: LayoutService,
   ) {
-    super();
-    this._store.dispatch(
-      PlannerActions.cleanupOldAndUndefinedPlannerTasks({
-        today: this._dateService.todayStr(),
-      }),
-    );
+    this._store
+      .select(selectTaskFeatureState)
+      .pipe(takeUntilDestroyed())
+      .subscribe((taskState) => {
+        this._store.dispatch(
+          PlannerActions.cleanupOldAndUndefinedPlannerTasks({
+            today: this._dateService.todayStr(),
+            allTaskIds: taskState.ids as string[],
+          }),
+        );
+      });
   }
 }
