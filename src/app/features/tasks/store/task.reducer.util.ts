@@ -76,6 +76,17 @@ export const reCalcTimeEstimateForParentIfParent = (
       ? { ...(state.entities[id] as Task), ...upd.changes }
       : (state.entities[id] as Task),
   );
+  // console.log(
+  //   subTasks.reduce((acc: number, st: Task) => {
+  //     console.log(
+  //       (st.isDone ? 0 : Math.max(0, st.timeEstimate - st.timeSpent)) / 60 / 1000,
+  //     );
+  //
+  //     return acc + (st.isDone ? 0 : Math.max(0, st.timeEstimate - st.timeSpent));
+  //   }, 0) /
+  //     60 /
+  //     1000,
+  // );
 
   return taskAdapter.updateOne(
     {
