@@ -14,7 +14,6 @@ import {
   selectTasksById,
 } from '../../tasks/store/task.selectors';
 import { DateService } from '../../../core/date/date.service';
-import { ScheduleItemType } from '../planner.model';
 import { PlannerService } from '../planner.service';
 import { combineLatest } from 'rxjs';
 import { getAllMissingPlannedTaskIdsForDay } from '../util/get-all-missing-planned-task-ids-for-day';
@@ -70,10 +69,8 @@ export class DialogAddPlannedTasksComponent {
       .pipe(withLatestFrom(this._store.select(selectTaskFeatureState)), first())
       .subscribe(([{ planned, done, normal }, taskState]) => {
         this._store.dispatch(
-          PlannerActions.upsertPlannerDayTodayAndCleanupOldAndUndefined({
+          PlannerActions.cleanupOldAndUndefinedPlannerTasks({
             today: this._dateService.todayStr(),
-            taskIdsToAdd: normal.map((task) => task.id),
-            allTaskStateIds: taskState.ids as string[],
           }),
         );
         this._close();
@@ -91,6 +88,4 @@ export class DialogAddPlannedTasksComponent {
   private _close(): void {
     this._matDialogRef.close();
   }
-
-  protected readonly SCHEDULE_ITEM_TYPE = ScheduleItemType;
 }

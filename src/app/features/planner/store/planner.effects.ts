@@ -46,7 +46,7 @@ export class PlannerEffects {
         ofType(
           PlannerActions.updatePlannerDialogLastShown,
           PlannerActions.upsertPlannerDay,
-          PlannerActions.upsertPlannerDayTodayAndCleanupOldAndUndefined,
+          PlannerActions.cleanupOldAndUndefinedPlannerTasks,
           PlannerActions.moveInList,
           PlannerActions.transferTask,
           PlannerActions.removeTaskFromDays,

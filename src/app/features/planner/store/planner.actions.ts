@@ -8,11 +8,8 @@ export const PlannerActions = createActionGroup({
   source: 'Planner',
   events: {
     'Upsert Planner Day': props<{ day: string; taskIds: string[] }>(),
-    // TODO refactor to just cleanup old and undefined
-    'Upsert Planner DayToday And Cleanup Old And Undefined': props<{
+    'Cleanup Old And Undefined Planner Tasks': props<{
       today: string;
-      taskIdsToAdd: string[];
-      allTaskStateIds: string[];
     }>(),
     'Transfer Task': props<{
       task: TaskCopy;

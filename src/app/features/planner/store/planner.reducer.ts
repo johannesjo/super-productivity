@@ -55,28 +55,22 @@ export const plannerReducer = createReducer(
     };
   }),
 
-  on(
-    PlannerActions.upsertPlannerDayTodayAndCleanupOldAndUndefined,
-    (state, { today, taskIdsToAdd, allTaskStateIds }) => {
-      const daysCopy = { ...state.days };
-      Object.keys(daysCopy).forEach((day) => {
-        if (new Date(day) < new Date(today)) {
-          delete daysCopy[day];
-        } else {
-          daysCopy[day] = daysCopy[day]
-            // remove all ids that are in the new day and remove all deleted or missing
-            .filter((id) => !taskIdsToAdd.includes(id) && allTaskStateIds.includes(id));
-        }
-      });
-      return {
-        ...state,
-        days: {
-          ...daysCopy,
-          [today]: taskIdsToAdd,
-        },
-      };
-    },
-  ),
+  on(PlannerActions.cleanupOldAndUndefinedPlannerTasks, (state, { today }) => {
+    const daysCopy = { ...state.days };
+    const todayDate = new Date(today);
+    Object.keys(daysCopy).forEach((day) => {
+      // NOTE: also deletes today
+      if (new Date(day) <= todayDate) {
+        delete daysCopy[day];
+      }
+    });
+    return {
+      ...state,
+      days: {
+        ...daysCopy,
+      },
+    };
+  }),
 
   on(PlannerActions.transferTask, (state, action) => {
     const targetDays = state.days[action.newDay] || [];
