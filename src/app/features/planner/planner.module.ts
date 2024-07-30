@@ -29,6 +29,8 @@ import { AddTaskInlineComponent } from './add-task-inline/add-task-inline.compon
 import { PlannerDayComponent } from './planner-day/planner-day.component';
 import { BetterSimpleDrawerComponent } from '../../ui/better-simple-drawer/better-simple-drawer.component';
 import { PlannerTaskEditComponent } from './planner-task/planner-task-edit/planner-task-edit.component';
+import { PlannerScheduleEffects } from './store/planner-schedule.effects';
+import { PlannerInitialDialogEffects } from './store/planner-initial-dialog.effects';
 
 @NgModule({
   declarations: [
@@ -44,7 +46,11 @@ import { PlannerTaskEditComponent } from './planner-task/planner-task-edit/plann
   ],
   imports: [
     StoreModule.forFeature(plannerFeature),
-    EffectsModule.forFeature([PlannerEffects]),
+    EffectsModule.forFeature([
+      PlannerEffects,
+      PlannerScheduleEffects,
+      PlannerInitialDialogEffects,
+    ]),
     FormsModule,
     ReactiveFormsModule,
     CommonModule,
