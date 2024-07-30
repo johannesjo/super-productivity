@@ -95,6 +95,10 @@ export class DialogPlanForDayComponent implements AfterViewInit {
 
   remove(): void {
     if (this.data.day === getWorklogStr()) {
+      // to cover edge cases
+      this._store.dispatch(
+        PlannerActions.removeTaskFromDays({ taskId: this.data.task.id }),
+      );
       this._store.dispatch(
         updateTaskTags({
           task: this.data.task,
