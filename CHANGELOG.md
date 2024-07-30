@@ -1,3 +1,10 @@
+## [9.0.7](https://github.com/johannesjo/super-productivity/compare/v9.0.6...v9.0.7) (2024-07-30)
+
+### Bug Fixes
+
+- **newTitleEdit:** not being able to edit current task properly ([4cef14d](https://github.com/johannesjo/super-productivity/commit/4cef14d615d3db3db574b4de9a1edb409a5d036a))
+- **tour:** android settings button not tapable ([2c38b33](https://github.com/johannesjo/super-productivity/commit/2c38b336e131a07517bb84aec6d36025029d2b95))
+
 ## [9.0.6](https://github.com/johannesjo/super-productivity/compare/v9.0.5...v9.0.6) (2024-07-29)
 
 ### Bug Fixes
