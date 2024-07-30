@@ -65,8 +65,10 @@ export const plannerReducer = createReducer(
         if (new Date(day) <= todayDate) {
           delete daysCopy[day];
         }
-        // remove all deleted tasks
-        daysCopy[day] = daysCopy[day].filter((id) => allTaskIds.includes(id));
+        // remove all deleted tasks if day was not deleted
+        if (!!daysCopy[day]) {
+          daysCopy[day] = daysCopy[day].filter((id) => allTaskIds.includes(id));
+        }
       });
       return {
         ...state,
