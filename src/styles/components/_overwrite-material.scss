@@ -140,4 +140,5 @@ mat-icon,
 .cdk-drop-list-dragging {
   outline: 1px dashed $c-primary;
   border-radius: 6px;
+  cursor: grabbing;
 }
