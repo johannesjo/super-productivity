@@ -581,7 +581,7 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   onTagsUpdated(tagIds: string[]): void {
-    this._taskService.updateTags(this.task, tagIds, this.task.tagIds);
+    this._taskService.updateTags(this.task, tagIds);
   }
 
   onPanStart(ev: any): void {

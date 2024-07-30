@@ -312,11 +312,10 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
     } else if (item.taskId && item.isFromOtherContextAndTagOnlySearch) {
       this._lastAddedTaskId = item.taskId;
       const task = await this._taskService.getByIdOnce$(item.taskId).toPromise();
-      this._taskService.updateTags(
-        task,
-        [...task.tagIds, this._workContextService.activeWorkContextId as string],
-        task.tagIds,
-      );
+      this._taskService.updateTags(task, [
+        ...task.tagIds,
+        this._workContextService.activeWorkContextId as string,
+      ]);
 
       this._snackService.open({
         ico: 'playlist_add',

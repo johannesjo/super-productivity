@@ -206,7 +206,7 @@ export class TaskRepeatCfgEffects {
                       }
                     }
                     if (changes.tagIds) {
-                      this._taskService.updateTags(task, changes.tagIds, task.tagIds);
+                      this._taskService.updateTags(task, changes.tagIds);
                     }
                     if (changes.title || changes.notes) {
                       this._taskService.update(task.id, {

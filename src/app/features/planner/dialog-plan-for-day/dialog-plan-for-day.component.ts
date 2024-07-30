@@ -73,7 +73,6 @@ export class DialogPlanForDayComponent implements AfterViewInit {
         updateTaskTags({
           task: this.data.task,
           newTagIds: [...this.data.task.tagIds, TODAY_TAG.id],
-          oldTagIds: this.data.task.tagIds,
         }),
       );
       this._snackService.open({
@@ -100,7 +99,6 @@ export class DialogPlanForDayComponent implements AfterViewInit {
         updateTaskTags({
           task: this.data.task,
           newTagIds: this.data.task.tagIds.filter((id) => id !== TODAY_TAG.id),
-          oldTagIds: this.data.task.tagIds,
         }),
       );
       this._snackService.open({

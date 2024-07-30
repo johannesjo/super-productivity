@@ -96,7 +96,6 @@ export const updateTaskTags = createAction(
   props<{
     task: Task;
     newTagIds: string[];
-    oldTagIds: string[];
     isSkipExcludeCheck?: boolean;
   }>(),
 );

@@ -152,7 +152,6 @@ export class PlannerTaskComponent extends BaseComponent implements OnInit, OnDes
     // this._store.dispatch(
     //   updateTaskTags({
     //     task: this.task,
-    //     oldTagIds: this.task.tagIds,
     //     newTagIds: unique([TODAY_TAG.id, ...this.task.tagIds]),
     //   }),
     // );

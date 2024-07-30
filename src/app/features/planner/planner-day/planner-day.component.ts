@@ -121,12 +121,11 @@ export class PlannerDayComponent {
     const isToday = new Date().toDateString() === newDate.toDateString();
     this._taskService.scheduleTask(task, newDate.getTime(), selectedReminderCfgId, false);
     if (isToday) {
-      this._taskService.updateTags(task, [TODAY_TAG.id, ...task.tagIds], task.tagIds);
+      this._taskService.updateTags(task, [TODAY_TAG.id, ...task.tagIds]);
     } else {
       this._taskService.updateTags(
         task,
         task.tagIds.filter((tid) => tid !== TODAY_TAG.id),
-        task.tagIds,
       );
     }
   }

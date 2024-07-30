@@ -45,7 +45,6 @@ export class PlannerEffects {
       map(({ task }) => {
         return updateTaskTags({
           task,
-          oldTagIds: task.tagIds,
           newTagIds: unique([TODAY_TAG.id, ...task.tagIds]),
         });
       }),
@@ -59,7 +58,6 @@ export class PlannerEffects {
       map(({ task }) => {
         return updateTaskTags({
           task,
-          oldTagIds: task.tagIds,
           newTagIds: task.tagIds.filter((id) => id !== TODAY_TAG.id),
         });
       }),

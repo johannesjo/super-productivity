@@ -417,7 +417,6 @@ export class ProjectEffects {
   //   ofType(updateTaskTags),
   //   filter((action: UpdateTaskTags) =>
   //     task.projectId &&
-  //     oldTagIds.includes(TODAY_TAG.id)
   //   ),
   //   concatMap((action) => this._projectService.getByIdOnce$(task.projectId).pipe(
   //     map((project) => ({

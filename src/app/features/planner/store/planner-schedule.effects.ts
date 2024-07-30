@@ -20,7 +20,6 @@ export class PlannerScheduleEffects {
       map(({ fromTask }) => {
         return updateTaskTags({
           task: fromTask,
-          oldTagIds: fromTask.tagIds,
           newTagIds: fromTask.tagIds.filter((id) => id !== TODAY_TAG.id),
         });
       }),
@@ -51,7 +50,6 @@ export class PlannerScheduleEffects {
               }),
               updateTaskTags({
                 task: fromTask,
-                oldTagIds: fromTask.tagIds,
                 newTagIds: unique([TODAY_TAG.id, ...fromTask.tagIds]),
               }),
             ];

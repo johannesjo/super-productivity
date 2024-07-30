@@ -459,8 +459,9 @@ export const tagReducer = createReducer<TagState>(
     return tagAdapter.updateMany(updates, state);
   }),
 
-  on(updateTaskTags, (state, { newTagIds = [], oldTagIds = [], task }) => {
+  on(updateTaskTags, (state, { newTagIds = [], task }) => {
     const taskId = task.id;
+    const oldTagIds = task.tagIds;
     const removedFrom: string[] = oldTagIds.filter((oldId) => !newTagIds.includes(oldId));
     const addedTo: string[] = newTagIds.filter((newId) => !oldTagIds.includes(newId));
     const removeFrom: Update<Tag>[] = removedFrom.map((tagId) => ({

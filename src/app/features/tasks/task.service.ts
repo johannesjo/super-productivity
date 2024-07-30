@@ -332,15 +332,14 @@ export class TaskService {
   }
 
   addTodayTag(t: Task): void {
-    this.updateTags(t, [TODAY_TAG.id, ...t.tagIds], t.tagIds);
+    this.updateTags(t, [TODAY_TAG.id, ...t.tagIds]);
   }
 
-  updateTags(task: Task, newTagIds: string[], oldTagIds: string[]): void {
+  updateTags(task: Task, newTagIds: string[]): void {
     this._store.dispatch(
       updateTaskTags({
         task,
         newTagIds: unique(newTagIds),
-        oldTagIds,
       }),
     );
   }
@@ -681,7 +680,6 @@ export class TaskService {
         this.updateTags(
           st,
           st.tagIds.filter((tid) => tid !== tagToRemove),
-          st.tagIds,
         );
       });
     }

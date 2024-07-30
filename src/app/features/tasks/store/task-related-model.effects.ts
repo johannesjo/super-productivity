@@ -80,7 +80,6 @@ export class TaskRelatedModelEffects {
           updateTaskTags({
             task,
             newTagIds: unique([...task.tagIds, TODAY_TAG.id]),
-            oldTagIds: task.tagIds,
           }),
         ),
       ),
@@ -98,7 +97,6 @@ export class TaskRelatedModelEffects {
           updateTaskTags({
             task,
             newTagIds: unique([...task.tagIds, TODAY_TAG.id]),
-            oldTagIds: task.tagIds,
           }),
         ),
       ),
@@ -114,7 +112,6 @@ export class TaskRelatedModelEffects {
           updateTaskTags({
             task,
             newTagIds: task.tagIds.filter((id) => id !== TODAY_TAG.id),
-            oldTagIds: task.tagIds,
           }),
         ),
       ),
@@ -170,13 +167,12 @@ export class TaskRelatedModelEffects {
           newTagIds.length === 0 && !task.projectId && !task.parentId,
       ),
       // tap(() => console.log('preventAndRevertLastTagDeletion$')),
-      mergeMap(({ oldTagIds, newTagIds, task }) => [
+      mergeMap(({ newTagIds, task }) => [
         upsertTag({
           tag: NO_LIST_TAG,
         }),
         updateTaskTags({
           task: task,
-          oldTagIds: newTagIds,
           newTagIds: [NO_LIST_TAG.id],
           isSkipExcludeCheck: true,
         }),
@@ -202,7 +198,6 @@ export class TaskRelatedModelEffects {
         }),
         updateTaskTags({
           task: task,
-          oldTagIds: task.tagIds,
           newTagIds: [NO_LIST_TAG.id],
           isSkipExcludeCheck: true,
         }),
@@ -218,10 +213,12 @@ export class TaskRelatedModelEffects {
           newTagIds.includes(NO_LIST_TAG.id) && newTagIds.length >= 2,
       ),
       // tap(() => console.log('removeUnlistedTagWheneverTagIsAdded')),
-      map(({ oldTagIds, newTagIds, task }) =>
+      map(({ newTagIds, task }) =>
         updateTaskTags({
-          task: task,
-          oldTagIds: newTagIds,
+          task: {
+            ...task,
+            tagIds: newTagIds,
+          },
           newTagIds: newTagIds.filter((id) => id !== NO_LIST_TAG.id),
           isSkipExcludeCheck: true,
         }),
@@ -239,7 +236,6 @@ export class TaskRelatedModelEffects {
       map(({ task, targetProjectId }) =>
         updateTaskTags({
           task: { ...task, projectId: targetProjectId },
-          oldTagIds: task.tagIds,
           newTagIds: task.tagIds.filter((id) => id !== NO_LIST_TAG.id),
           isSkipExcludeCheck: true,
         }),
@@ -251,7 +247,7 @@ export class TaskRelatedModelEffects {
     this._actions$.pipe(
       ofType(updateTaskTags),
       filter(({ isSkipExcludeCheck }) => !isSkipExcludeCheck),
-      switchMap(({ task, newTagIds, oldTagIds }) => {
+      switchMap(({ task, newTagIds }) => {
         if (task.parentId) {
           return this._taskService.getByIdOnce$(task.parentId).pipe(
             switchMap((parentTask) => {
@@ -269,7 +265,6 @@ export class TaskRelatedModelEffects {
                   return of(
                     updateTaskTags({
                       task: parentTask,
-                      oldTagIds: parentTask.tagIds,
                       newTagIds: freeTags,
                       isSkipExcludeCheck: true,
                     }),
@@ -285,8 +280,10 @@ export class TaskRelatedModelEffects {
                   // reverse previous updateTaskTags action since not possible
                   return of(
                     updateTaskTags({
-                      task: task,
-                      oldTagIds: newTagIds,
+                      task: {
+                        ...task,
+                        tagIds: newTagIds,
+                      },
                       newTagIds: freeTagsForSub,
                       isSkipExcludeCheck: true,
                     }),
@@ -306,7 +303,6 @@ export class TaskRelatedModelEffects {
                 .map((subTask) => {
                   return updateTaskTags({
                     task: subTask,
-                    oldTagIds: subTask.tagIds,
                     newTagIds: subTask.tagIds.filter((id) => !newTagIds.includes(id)),
                     isSkipExcludeCheck: true,
                   });
