@@ -478,7 +478,7 @@ export const SHEPHERD_STEPS = (
       text: `${CLICK_B} on <span class="material-icons">settings</span> <strong>Settings</strong>!`,
       attachTo: {
         element: '.tour-settingsMenuBtn',
-        on: 'right',
+        on: 'top',
       },
       when: nextOnObs(
         router.events.pipe(
