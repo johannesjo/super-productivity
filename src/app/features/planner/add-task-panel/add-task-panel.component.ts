@@ -16,6 +16,8 @@ import { selectPlannerState } from '../store/planner.selectors';
 import { TaskService } from '../../tasks/task.service';
 import { PlannerService } from '../planner.service';
 import { T } from 'src/app/t.const';
+import { DateService } from '../../../core/date/date.service';
+import { TODAY_TAG } from '../../tag/tag.const';
 
 @Component({
   selector: 'add-task-panel',
@@ -36,7 +38,7 @@ export class AddTaskPanelComponent {
     this.taskSuggestionsCtrl.valueChanges.pipe(startWith('')),
     this._store.select(selectPlannerState),
     // NOTE: needed as trigger only
-    this._plannerPlanViewService.allPlannedTasks$,
+    this._plannerPlanViewService.allScheduledTasks$,
   ]).pipe(
     withLatestFrom(
       this.allTasks$,
@@ -55,6 +57,7 @@ export class AddTaskPanelComponent {
         const isViableTask = // pre filters
           !task.plannedAt &&
           !task.isDone &&
+          !task.tagIds.includes(TODAY_TAG.id) &&
           task.repeatCfgId === null &&
           !allAddedIds.includes(task.id) &&
           // don't show sub-tasks if parent is sorted
@@ -86,6 +89,7 @@ export class AddTaskPanelComponent {
     private _store: Store,
     private _taskService: TaskService,
     private _plannerPlanViewService: PlannerService,
+    private _dateService: DateService,
   ) {}
 
   drop(ev: CdkDragDrop<string, string, TaskCopy>): void {
@@ -106,6 +110,7 @@ export class AddTaskPanelComponent {
           prevDay: ev.previousContainer.data,
           newDay: ADD_TASK_PANEL_ID,
           targetIndex: ev.currentIndex,
+          today: this._dateService.todayStr(),
         }),
       );
     }

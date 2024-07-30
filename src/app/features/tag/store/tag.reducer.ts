@@ -37,6 +37,7 @@ import {
   addToBreakTimeForTag,
   deleteTag,
   deleteTags,
+  moveTaskInTagList,
   updateAdvancedConfigForTag,
   updateTag,
   updateTagOrder,
@@ -45,6 +46,8 @@ import {
   upsertTag,
 } from './tag.actions';
 import { roundTsToMinutes } from '../../../util/round-ts-to-minutes';
+import { moveItemInArray } from '../../../util/move-item-in-array';
+import { PlannerActions } from '../../planner/store/planner.actions';
 
 export const TAG_FEATURE_NAME = 'tag';
 const WORK_CONTEXT_TYPE: WorkContextType = WorkContextType.TAG;
@@ -120,6 +123,40 @@ export const tagReducer = createReducer<TagState>(
     _addMyDayTagIfNecessary(
       appDataComplete.tag ? migrateTagState({ ...appDataComplete.tag }) : oldState,
     ),
+  ),
+
+  on(
+    PlannerActions.transferTask,
+    (state, { task, today, targetIndex, newDay, prevDay }) => {
+      if (prevDay === today && newDay !== today) {
+        const tagToUpdate = state.entities[TODAY_TAG.id] as Tag;
+        return tagAdapter.updateOne(
+          {
+            id: TODAY_TAG.id,
+            changes: {
+              taskIds: tagToUpdate.taskIds.filter((id) => id !== task.id),
+            },
+          },
+          state,
+        );
+      }
+      if (prevDay !== today && newDay === today) {
+        const tagToUpdate = state.entities[TODAY_TAG.id] as Tag;
+        const taskIds = [...tagToUpdate.taskIds];
+        taskIds.splice(targetIndex, 0, task.id);
+        return tagAdapter.updateOne(
+          {
+            id: TODAY_TAG.id,
+            changes: {
+              taskIds,
+            },
+          },
+          state,
+        );
+      }
+
+      return state;
+    },
   ),
 
   on(
@@ -439,5 +476,18 @@ export const tagReducer = createReducer<TagState>(
       },
     }));
     return tagAdapter.updateMany([...removeFrom, ...addTo], state);
+  }),
+
+  on(moveTaskInTagList, (state, { tagId, toIndex, fromIndex }) => {
+    const tagToUpdate = state.entities[tagId] as Tag;
+    return tagAdapter.updateOne(
+      {
+        id: tagId,
+        changes: {
+          taskIds: moveItemInArray(tagToUpdate.taskIds, fromIndex, toIndex),
+        },
+      },
+      state,
+    );
   }),
 );

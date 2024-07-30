@@ -39,6 +39,7 @@ import {
   deleteTaskAttachment,
   updateTaskAttachment,
 } from '../task-attachment/task-attachment.actions';
+import { PlannerActions } from '../../planner/store/planner.actions';
 
 @Injectable()
 export class TaskDbEffects {
@@ -81,6 +82,9 @@ export class TaskDbEffects {
 
           // RELATED ACTIONS
           addTaskRepeatCfgToTask,
+
+          // PLANNER
+          PlannerActions.transferTask,
         ),
         withLatestFrom(this._store$.pipe(select(selectTaskFeatureState))),
         tap(([, taskState]) => this._saveToLs(taskState, true)),

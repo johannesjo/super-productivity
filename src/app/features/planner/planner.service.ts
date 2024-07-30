@@ -12,6 +12,7 @@ import { selectAllTaskRepeatCfgs } from '../task-repeat-cfg/store/task-repeat-cf
 import { DateService } from '../../core/date/date.service';
 import { fastArrayCompare } from '../../util/fast-array-compare';
 import { GlobalTrackingIntervalService } from '../../core/global-tracking-interval/global-tracking-interval.service';
+import { selectTodayTaskIds } from '../work-context/store/work-context.selectors';
 
 @Injectable({
   providedIn: 'root',
@@ -37,7 +38,7 @@ export class PlannerService {
     }),
   );
 
-  allPlannedTasks$: Observable<TaskPlanned[]> = this._reminderService.reminders$.pipe(
+  allScheduledTasks$: Observable<TaskPlanned[]> = this._reminderService.reminders$.pipe(
     switchMap((reminders) => {
       const tids = reminders
         .filter((reminder) => reminder.type === 'TASK')
@@ -54,24 +55,23 @@ export class PlannerService {
     switchMap((daysToShow) =>
       combineLatest([
         this._store.select(selectAllTaskRepeatCfgs),
+        this._store.select(selectTodayTaskIds),
         this._calendarIntegrationService.icalEvents$,
-        this.allPlannedTasks$,
-        // this._store
-        //   .select(selectAllTaskRepeatCfgs)
-        //   .pipe(
-        //     tap((val) =>
-        //       console.log('DI _store.select(selectAllTaskRepeatCfgs) for $days', val),
-        //     ),
-        //   ),
-        // this.icalEvents$.pipe(tap((val) => console.log('DI icalEvents$ for $days', val))),
-        // this.allPlannedTasks$.pipe(
-        //   tap((val) => console.log('DI allPlannedTasks$ for $days', val)),
-        // ),
+        this.allScheduledTasks$,
+        this._globalTrackingIntervalService.todayDateStr$,
       ]).pipe(
-        switchMap(([taskRepeatCfgs, icalEvents, allTasksPlanned]) =>
-          this._store.select(
-            selectPlannerDays(daysToShow, taskRepeatCfgs, icalEvents, allTasksPlanned),
-          ),
+        switchMap(
+          ([taskRepeatCfgs, todayListTaskIds, icalEvents, allTasksPlanned, todayStr]) =>
+            this._store.select(
+              selectPlannerDays(
+                daysToShow,
+                taskRepeatCfgs,
+                todayListTaskIds,
+                icalEvents,
+                allTasksPlanned,
+                todayStr,
+              ),
+            ),
         ),
       ),
     ),

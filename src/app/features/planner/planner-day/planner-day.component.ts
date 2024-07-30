@@ -11,10 +11,11 @@ import { ReminderCopy } from '../../reminder/reminder.model';
 import { millisecondsDiffToRemindOption } from '../../tasks/util/remind-option-to-milliseconds';
 import { TODAY_TAG } from '../../tag/tag.const';
 import { Store } from '@ngrx/store';
-import { PlannerService } from '../planner.service';
 import { MatDialog } from '@angular/material/dialog';
 import { TaskService } from '../../tasks/task.service';
 import { ReminderService } from '../../reminder/reminder.service';
+import { moveTaskInTagList } from '../../tag/store/tag.actions';
+import { DateService } from '../../../core/date/date.service';
 
 @Component({
   selector: 'planner-day',
@@ -30,10 +31,10 @@ export class PlannerDayComponent {
 
   constructor(
     private _store: Store,
-    private _plannerService: PlannerService,
     private _matDialog: MatDialog,
     private _taskService: TaskService,
     private _reminderService: ReminderService,
+    private _dateService: DateService,
   ) {}
 
   // TODO correct type
@@ -45,20 +46,29 @@ export class PlannerDayComponent {
     const task = ev.item.data;
 
     if (targetList === 'SCHEDULED') {
-      // TODO show schedule dialog
       if (ev.previousContainer !== ev.container) {
         this.editTaskReminderOrReScheduleIfPossible(task, ev.container.data);
       }
       return;
     } else if (targetList === 'TODO') {
       if (ev.previousContainer === ev.container) {
-        this._store.dispatch(
-          PlannerActions.moveInList({
-            targetDay: ev.container.data,
-            fromIndex: ev.previousIndex,
-            toIndex: ev.currentIndex,
-          }),
-        );
+        if (this.day.isToday) {
+          this._store.dispatch(
+            moveTaskInTagList({
+              tagId: TODAY_TAG.id,
+              fromIndex: ev.previousIndex,
+              toIndex: ev.currentIndex,
+            }),
+          );
+        } else {
+          this._store.dispatch(
+            PlannerActions.moveInList({
+              targetDay: ev.container.data,
+              fromIndex: ev.previousIndex,
+              toIndex: ev.currentIndex,
+            }),
+          );
+        }
       } else {
         this._store.dispatch(
           PlannerActions.transferTask({
@@ -66,6 +76,7 @@ export class PlannerDayComponent {
             prevDay: ev.previousContainer.data,
             newDay: newDay,
             targetIndex: ev.currentIndex,
+            today: this._dateService.todayStr(),
           }),
         );
         if (task.reminderId) {

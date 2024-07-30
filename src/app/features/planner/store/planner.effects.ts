@@ -31,7 +31,6 @@ import { selectTasksById } from '../../tasks/store/task.selectors';
 import { SyncTriggerService } from '../../../imex/sync/sync-trigger.service';
 import { GlobalTrackingIntervalService } from '../../../core/global-tracking-interval/global-tracking-interval.service';
 import { loadAllData } from '../../../root-store/meta/load-all-data.action';
-import { DateService } from '../../../core/date/date.service';
 import { selectTagById } from '../../tag/store/tag.reducer';
 import { updateTag } from '../../tag/store/tag.actions';
 import { PlannerService } from '../planner.service';
@@ -59,82 +58,6 @@ export class PlannerEffects {
     },
     { dispatch: false },
   );
-
-  reOrderTodayWhenReOrderingInPlanner$ = createEffect(() => {
-    return this._actions$.pipe(
-      ofType(PlannerActions.moveInList),
-      filter((action) => action.targetDay === this._dateService.todayStr()),
-      withLatestFrom(
-        this._store.pipe(select(selectTagById, { id: TODAY_TAG.id })),
-        this._store.pipe(select(selectPlannerState)),
-      ),
-      map(([action, todayTag, plannerState]) => {
-        const plannedIds = plannerState.days[this._dateService.todayStr()] || [];
-        return updateTag({
-          tag: {
-            id: TODAY_TAG.id,
-            changes: {
-              taskIds: [
-                ...plannedIds,
-                ...todayTag.taskIds.filter((id) => !plannedIds.includes(id)),
-              ],
-            },
-          },
-          isSkipSnack: true,
-        });
-      }),
-    );
-  });
-
-  addOrRemoveTodayTag$ = createEffect(() => {
-    return this._actions$.pipe(
-      ofType(PlannerActions.transferTask),
-      filter(({ prevDay, newDay }) => {
-        const wls = this._dateService.todayStr();
-        return prevDay === wls || newDay === wls;
-      }),
-      withLatestFrom(
-        this._store.pipe(select(selectTagById, { id: TODAY_TAG.id })),
-        this._store.pipe(select(selectPlannerState)),
-      ),
-      mergeMap(([{ prevDay, newDay, task }, todayTag, plannerState]) => {
-        const todayDayStr = this._dateService.todayStr();
-        if (prevDay === todayDayStr && newDay !== todayDayStr) {
-          const newTagIds = task.tagIds.filter((tagId) => tagId !== TODAY_TAG.id);
-          return [
-            updateTaskTags({
-              task,
-              oldTagIds: task.tagIds,
-              newTagIds,
-            }),
-          ];
-        }
-        if (prevDay !== todayDayStr && newDay === todayDayStr) {
-          const plannedIds = plannerState.days[this._dateService.todayStr()] || [];
-          return [
-            updateTaskTags({
-              task,
-              oldTagIds: task.tagIds,
-              newTagIds: unique([TODAY_TAG.id, ...task.tagIds]),
-            }),
-            updateTag({
-              tag: {
-                id: TODAY_TAG.id,
-                changes: {
-                  taskIds: [
-                    ...plannedIds,
-                    ...todayTag.taskIds.filter((id) => !plannedIds.includes(id)),
-                  ],
-                },
-              },
-              isSkipSnack: true,
-            }),
-          ];
-        }
-        return EMPTY;
-      }),
-    );
-  });
 
   removeOnSchedule$ = createEffect(() => {
     return this._actions$.pipe(
@@ -164,6 +87,20 @@ export class PlannerEffects {
     );
   });
 
+  removeFromTodayIfPlannedForOtherDay$ = createEffect(() => {
+    return this._actions$.pipe(
+      ofType(PlannerActions.planTaskForDay),
+      filter(({ task, day }) => day !== getWorklogStr()),
+      map(({ task }) => {
+        return updateTaskTags({
+          task,
+          oldTagIds: task.tagIds,
+          newTagIds: task.tagIds.filter((id) => id !== TODAY_TAG.id),
+        });
+      }),
+    );
+  });
+
   removeReminderForPlannedTask$ = createEffect(() => {
     return this._actions$.pipe(
       ofType(PlannerActions.planTaskForDay),
@@ -178,40 +115,9 @@ export class PlannerEffects {
     );
   });
 
-  removeFromTodayIfPlannedForOtherDay$ = createEffect(() => {
-    return this._actions$.pipe(
-      ofType(PlannerActions.planTaskForDay),
-      tap((val) => console.log('planTaskForDay', val)),
-      filter(({ task, day }) => day !== getWorklogStr()),
-      map(({ task }) => {
-        return updateTaskTags({
-          task,
-          oldTagIds: task.tagIds,
-          newTagIds: task.tagIds.filter((id) => id !== TODAY_TAG.id),
-        });
-      }),
-    );
-  });
-
-  removeTodayTagForPlannedTask$ = createEffect(() => {
-    return this._actions$.pipe(
-      ofType(PlannerActions.planTaskForDay),
-      filter(
-        ({ task, day }) => task.tagIds.includes(TODAY_TAG.id) && day !== getWorklogStr(),
-      ),
-      map(({ task }) => {
-        return updateTaskTags({
-          task,
-          oldTagIds: task.tagIds,
-          newTagIds: task.tagIds.filter((id) => id !== TODAY_TAG.id),
-        });
-      }),
-    );
-  });
-
+  // TODO move to separate effect
   // MOVE BEFORE TASK
   // ---------------
-
   removeTodayTagForPlannedTaskFromSchedule$ = createEffect(() => {
     return this._actions$.pipe(
       ofType(PlannerActions.moveBeforeTask),
@@ -319,6 +225,7 @@ export class PlannerEffects {
                     })
                     .afterClosed()
                     .pipe(
+                      // TODO add cleanup for plannerTasks
                       map(() =>
                         PlannerActions.updatePlannerDialogLastShown({ today: todayStr }),
                       ),
@@ -349,7 +256,6 @@ export class PlannerEffects {
     private _syncTriggerService: SyncTriggerService,
     private _matDialog: MatDialog,
     private _globalTrackingIntervalService: GlobalTrackingIntervalService,
-    private _dateService: DateService,
     private _plannerService: PlannerService,
   ) {}
 

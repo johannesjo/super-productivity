@@ -83,7 +83,10 @@ export const plannerReducer = createReducer(
 
     const updatePrevDay =
       // NOTE: it is possible that there is no data saved yet when moving from scheduled to unscheduled
-      action.prevDay === ADD_TASK_PANEL_ID || !state.days[action.prevDay]
+      // don't update for add task panel and today list
+      action.prevDay === ADD_TASK_PANEL_ID ||
+      !state.days[action.prevDay] ||
+      action.prevDay === action.today
         ? {}
         : {
             [action.prevDay]: state.days[action.prevDay].filter(
@@ -92,7 +95,8 @@ export const plannerReducer = createReducer(
           };
 
     const updateNextDay: Partial<any> =
-      action.newDay === ADD_TASK_PANEL_ID
+      // don't update for add task panel and today list
+      action.newDay === ADD_TASK_PANEL_ID || action.newDay === action.today
         ? {}
         : {
             [action.newDay]: unique([

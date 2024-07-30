@@ -11,6 +11,7 @@ import {
   addToBreakTimeForTag,
   deleteTag,
   deleteTags,
+  moveTaskInTagList,
   updateAdvancedConfigForTag,
   updateTag,
   updateTagOrder,
@@ -46,6 +47,7 @@ import {
 } from '../../work-context/store/work-context-meta.actions';
 import { TaskRepeatCfgService } from '../../task-repeat-cfg/task-repeat-cfg.service';
 import { DateService } from 'src/app/core/date/date.service';
+import { PlannerActions } from '../../planner/store/planner.actions';
 
 @Injectable()
 export class TagEffects {
@@ -72,10 +74,14 @@ export class TagEffects {
           updateWorkStartForTag,
           updateWorkEndForTag,
           addToBreakTimeForTag,
+          moveTaskInTagList,
 
           // TASK Actions
           deleteTasks,
           updateTaskTags,
+
+          // PLANNER
+          PlannerActions.transferTask,
         ),
         switchMap(() => this.saveToLs$),
       ),

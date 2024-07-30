@@ -43,3 +43,8 @@ export const addToBreakTimeForTag = createAction(
   '[Tag] Update Break Time for Tag',
   props<{ id: string; date: string; valToAdd: number }>(),
 );
+
+export const moveTaskInTagList = createAction(
+  '[Tag] Switch places of taskIds in tagList',
+  props<{ tagId: string; fromIndex: number; toIndex: number }>(),
+);

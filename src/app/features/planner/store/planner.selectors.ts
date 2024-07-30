@@ -38,9 +38,11 @@ export const selectTaskIdPlannedDayMap = createSelector(
 export const selectPlannerDays = (
   dayDates: string[],
   taskRepeatCfgs: TaskRepeatCfg[],
+  todayListTaskIds: string[],
   // TODO replace with better type
   icalEvents: TimelineCalendarMapEntry[],
   allPlannedTasks: TaskPlanned[],
+  todayStr: string,
   // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 ) => {
   return createSelector(
@@ -56,9 +58,10 @@ export const selectPlannerDays = (
       ];
 
       return dayDatesToUse.map((dayDate, dayIndex) => {
+        const isToday = dayDate === todayStr;
         const currentDayDate = new Date(dayDate);
         const currentDayTimestamp = currentDayDate.getTime();
-        const tIds = plannerState.days[dayDate] || [];
+        const tIds = isToday ? todayListTaskIds : plannerState.days[dayDate] || [];
         const normalTasks = tIds
           .map((id) => taskState.entities[id] as TaskCopy)
           // filter out deleted tasks
@@ -72,7 +75,7 @@ export const selectPlannerDays = (
         const icalEventsForDay = getIcalEventsForDay(icalEvents, currentDayDate);
 
         const day: PlannerDay = {
-          isToday: dayIndex === 0,
+          isToday: isToday,
           dayDate,
           timeLimit: 0,
           itemsTotal:

@@ -68,6 +68,8 @@ import { migrateTaskState } from '../migrate-task-state.util';
 import { createReducer, on } from '@ngrx/store';
 import { MODEL_VERSION_KEY } from '../../../app.constants';
 import { MODEL_VERSION } from '../../../core/model-version';
+import { PlannerActions } from '../../planner/store/planner.actions';
+import { TODAY_TAG } from '../../tag/tag.const';
 
 export const TASK_FEATURE_NAME = 'tasks';
 
@@ -597,6 +599,42 @@ export const taskReducer = createReducer<TaskState>(
       state,
     );
   }),
+
+  // PLANNER STUFF
+  // --------------
+  on(
+    PlannerActions.transferTask,
+    (state, { task, today, targetIndex, newDay, prevDay }) => {
+      if (prevDay === today && newDay !== today) {
+        const taskToUpdate = state.entities[task.id] as Task;
+        return taskAdapter.updateOne(
+          {
+            id: task.id,
+            changes: {
+              tagIds: taskToUpdate.tagIds.filter((id) => id !== TODAY_TAG.id),
+            },
+          },
+          state,
+        );
+      }
+      if (prevDay !== today && newDay === today) {
+        const taskToUpdate = state.entities[task.id] as Task;
+        const tagIds = [...taskToUpdate.tagIds];
+        tagIds.unshift(TODAY_TAG.id);
+        return taskAdapter.updateOne(
+          {
+            id: task.id,
+            changes: {
+              tagIds,
+            },
+          },
+          state,
+        );
+      }
+
+      return state;
+    },
+  ),
 
   // REMINDER STUFF
   // --------------
