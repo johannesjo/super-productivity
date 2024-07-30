@@ -14,6 +14,7 @@ const hours = (n: number): number => 60 * minutes(n);
 
 const BASE_REMINDER_TASK = (startTime: string, note?: string): any => ({
   timeSpent: 0,
+  subTaskIds: [],
   reminderId: 'xxx',
   plannedAt: getDateTimeFromClockString(startTime, 0),
   title: startTime + ' ' + (note ? note : ' – reminderTask'),
@@ -96,6 +97,7 @@ describe('createBlockerBlocks()', () => {
     const fakeTasks: TaskWithReminder[] = [
       {
         id: 'S1',
+        subTaskIds: [],
         timeSpent: 0,
         timeEstimate: hours(2),
         title: 'Scheduled 1 15:00',
@@ -104,6 +106,7 @@ describe('createBlockerBlocks()', () => {
       },
       {
         id: 'S3',
+        subTaskIds: [],
         timeSpent: 0,
         timeEstimate: hours(3),
         title: 'Scheduled 3 17:00',
@@ -112,6 +115,7 @@ describe('createBlockerBlocks()', () => {
       },
       {
         id: 'S2',
+        subTaskIds: [],
         timeSpent: 0,
         timeEstimate: hours(2),
         title: 'Scheduled 2 15:30',
@@ -129,6 +133,7 @@ describe('createBlockerBlocks()', () => {
     const fakeTasks: TaskWithReminder[] = [
       {
         id: 'S1',
+        subTaskIds: [],
         timeSpent: 0,
         timeEstimate: hours(2),
         title: 'Scheduled 1 15:00',
@@ -137,6 +142,7 @@ describe('createBlockerBlocks()', () => {
       },
       {
         id: 'S3',
+        subTaskIds: [],
         timeSpent: 0,
         timeEstimate: hours(3),
         title: 'Scheduled 3 17:00',
@@ -145,6 +151,7 @@ describe('createBlockerBlocks()', () => {
       },
       {
         id: 'S2',
+        subTaskIds: [],
         timeSpent: 0,
         timeEstimate: hours(1),
         title: 'Scheduled 2 15:30',
@@ -153,6 +160,7 @@ describe('createBlockerBlocks()', () => {
       },
       {
         id: 'S2',
+        subTaskIds: [],
         timeSpent: 0,
         timeEstimate: hours(2),
         title: 'Scheduled 2 15:30',
@@ -161,6 +169,7 @@ describe('createBlockerBlocks()', () => {
       },
       {
         id: 'S4',
+        subTaskIds: [],
         timeSpent: 0,
         timeEstimate: hours(2),
         title: 'Scheduled 2 17:30',
@@ -181,6 +190,7 @@ describe('createBlockerBlocks()', () => {
     const fakeTasks: TaskWithReminder[] = [
       {
         id: 'S1',
+        subTaskIds: [],
         timeSpent: 0,
         timeEstimate: hours(1),
         title: 'Scheduled 1 15:00',
@@ -189,6 +199,7 @@ describe('createBlockerBlocks()', () => {
       },
       {
         id: 'S2',
+        subTaskIds: [],
         timeSpent: 0,
         timeEstimate: minutes(185),
         title: 'Scheduled 2 15:30',
@@ -197,6 +208,7 @@ describe('createBlockerBlocks()', () => {
       },
       {
         id: 'S3',
+        subTaskIds: [],
         timeSpent: 0,
         timeEstimate: hours(2),
         title: 'Scheduled 3 17:00',
@@ -902,6 +914,7 @@ describe('createBlockerBlocks()', () => {
         {
           id: 'S1',
           timeSpent: 0,
+          subTaskIds: [],
           timeEstimate: hours(2),
           title: 'Scheduled 1 15:00',
           reminderId: 'rhCi_JJyP',
@@ -923,6 +936,7 @@ describe('createBlockerBlocks()', () => {
             {
               data: {
                 id: 'S1',
+                subTaskIds: [],
                 plannedAt: 30000000,
                 reminderId: 'rhCi_JJyP',
                 timeEstimate: 7200000,

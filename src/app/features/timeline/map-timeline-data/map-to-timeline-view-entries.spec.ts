@@ -12,6 +12,8 @@ import {
 const FID = 'FAKE_TASK_ID';
 const FAKE_TASK: TaskCopy = {
   id: FID,
+  projectId: null,
+  subTaskIds: [],
   timeSpent: 0,
   timeEstimate: 0,
   plannedAt: null,
@@ -398,6 +400,7 @@ describe('mapToViewEntries()', () => {
         {
           data: {
             timeToGo: minutes(25),
+            projectId: null,
             title: undefined,
             taskId: 'FAKE_TASK_ID',
             index: 0,
@@ -515,6 +518,7 @@ describe('mapToViewEntries()', () => {
       const scheduledTasks = [
         {
           id: 'S4_NO_DURATION',
+          subTaskIds: [],
           timeSpent: 0,
           timeEstimate: 0,
           title: 'Scheduled 4 (no duration) 16:00',
@@ -523,6 +527,7 @@ describe('mapToViewEntries()', () => {
         },
         {
           id: 'S_NO_OVERLAP',
+          subTaskIds: [],
           timeSpent: 0,
           timeEstimate: hours(1),
           title: 'Scheduled 5 no overlap 23:00',
@@ -531,6 +536,7 @@ describe('mapToViewEntries()', () => {
         },
         {
           id: 'S3',
+          subTaskIds: [],
           timeSpent: 0,
           timeEstimate: hours(2),
           title: 'Scheduled 3 17:00',
@@ -539,6 +545,7 @@ describe('mapToViewEntries()', () => {
         },
         {
           id: 'S1',
+          subTaskIds: [],
           timeSpent: 0,
           timeEstimate: hours(1),
           title: 'Scheduled 1 15:00',
@@ -547,6 +554,7 @@ describe('mapToViewEntries()', () => {
         },
         {
           id: 'S2',
+          subTaskIds: [],
           timeSpent: 0,
           timeEstimate: hours(2.5),
           title: 'Scheduled 2 15:30',
@@ -557,6 +565,7 @@ describe('mapToViewEntries()', () => {
       const nonScheduledTasks: TaskCopy[] = [
         {
           id: 'SOME_TASK_1_ID',
+          subTaskIds: [],
           timeSpent: 0,
           timeEstimate: hours(4),
           title: 'Some task 1',
@@ -565,6 +574,7 @@ describe('mapToViewEntries()', () => {
         },
         {
           id: 'SOME_TASK_2_ID',
+          subTaskIds: [],
           timeSpent: 0,
           timeEstimate: hours(3),
           title: 'Some task 2',
@@ -602,6 +612,7 @@ describe('mapToViewEntries()', () => {
       const scheduledTasks = [
         {
           id: 'X6NWaoxQ-',
+          subTaskIds: [],
           timeSpent: 0,
           timeEstimate: 1980000,
           title: 'Scheduled before now',
@@ -610,6 +621,7 @@ describe('mapToViewEntries()', () => {
         },
         {
           id: '2nkBPQEny',
+          subTaskIds: [],
           timeSpent: 0,
           timeEstimate: 0,
           title: 'Sched no overlap 23:00',
@@ -618,6 +630,7 @@ describe('mapToViewEntries()', () => {
         },
         {
           id: '0LtuSnH8s',
+          subTaskIds: [],
           timeSpent: 0,
           timeEstimate: 7200000,
           title: 'Scheduled 3 17:00',
@@ -626,6 +639,7 @@ describe('mapToViewEntries()', () => {
         },
         {
           id: '68K0kYJ2s',
+          subTaskIds: [],
           timeSpent: 0,
           timeEstimate: 7200000,
           title: 'Scheduled 1 15:00',
@@ -634,6 +648,7 @@ describe('mapToViewEntries()', () => {
         },
         {
           id: '9JTnZa-VW',
+          subTaskIds: [],
           timeSpent: 0,
           timeEstimate: 9000000,
           title: 'Scheduled 2 16:00',
@@ -642,6 +657,7 @@ describe('mapToViewEntries()', () => {
         },
         {
           id: 'EYLy6C5_m',
+          subTaskIds: [],
           timeSpent: 0,
           timeEstimate: 0,
           title: 'Scheduled 4 (no duration) 18:00',
@@ -652,6 +668,7 @@ describe('mapToViewEntries()', () => {
       const nonScheduledTasks: TaskCopy[] = [
         {
           id: 'uDGzrv9JO',
+          subTaskIds: [],
           timeSpent: 0,
           timeEstimate: 3600000,
           title: 'Some task 1',
@@ -660,6 +677,7 @@ describe('mapToViewEntries()', () => {
         },
         {
           id: 'mhsGdyzc_',
+          subTaskIds: [],
           timeSpent: 0,
           timeEstimate: 7200000,
           title: 'Some task 2',
@@ -668,6 +686,7 @@ describe('mapToViewEntries()', () => {
         },
         {
           id: 'xgYNyslWC',
+          subTaskIds: [],
           timeSpent: 0,
           timeEstimate: 7200000,
           title: 'Sched  no overlap 9:00 (10.)',
@@ -692,6 +711,7 @@ describe('mapToViewEntries()', () => {
             plannedAt: 1620125601000,
             reminderId: 'oejJdRc3Y',
             timeEstimate: 1980000,
+            subTaskIds: [],
             timeSpent: 0,
             title: 'Scheduled before now',
           },
@@ -706,6 +726,7 @@ describe('mapToViewEntries()', () => {
             plannedAt: null,
             reminderId: null,
             timeEstimate: 3600000,
+            subTaskIds: [],
             timeSpent: 0,
             title: 'Some task 1',
           },
@@ -720,11 +741,11 @@ describe('mapToViewEntries()', () => {
             plannedAt: null,
             reminderId: null,
             timeEstimate: 7200000,
+            subTaskIds: [],
             timeSpent: 0,
             title: 'Some task 2',
           },
           id: 'mhsGdyzc_',
-
           start: 1620131181000,
           type: 'SplitTask',
         },
@@ -734,11 +755,11 @@ describe('mapToViewEntries()', () => {
             plannedAt: 1620133200000,
             reminderId: 'SrgAGy8OX',
             timeEstimate: 7200000,
+            subTaskIds: [],
             timeSpent: 0,
             title: 'Scheduled 1 15:00',
           },
           id: '68K0kYJ2s',
-
           start: 1620133200000,
           type: 'ScheduledTask',
         },
@@ -748,6 +769,7 @@ describe('mapToViewEntries()', () => {
             plannedAt: 1620136800000,
             reminderId: 'avWZ5dKrW',
             timeEstimate: 9000000,
+            subTaskIds: [],
             timeSpent: 0,
             title: 'Scheduled 2 16:00',
           },
@@ -762,6 +784,7 @@ describe('mapToViewEntries()', () => {
             plannedAt: 1620140400000,
             reminderId: 'NnqlBieeB',
             timeEstimate: 7200000,
+            subTaskIds: [],
             timeSpent: 0,
             title: 'Scheduled 3 17:00',
           },
@@ -776,11 +799,11 @@ describe('mapToViewEntries()', () => {
             plannedAt: 1620144000000,
             reminderId: 'BNaRpF_SX',
             timeEstimate: 0,
+            subTaskIds: [],
             timeSpent: 0,
             title: 'Scheduled 4 (no duration) 18:00',
           },
           id: 'EYLy6C5_m',
-
           start: 1620144000000,
           type: 'ScheduledTask',
         },
@@ -788,11 +811,11 @@ describe('mapToViewEntries()', () => {
           data: {
             index: 0,
             taskId: 'mhsGdyzc_',
+            projectId: undefined,
             timeToGo: 5181000,
             title: 'Some task 2',
           },
           id: 'mhsGdyzc___0',
-
           start: 1620147600000,
           type: 'SplitTaskContinuedLast',
         },
@@ -802,11 +825,11 @@ describe('mapToViewEntries()', () => {
             plannedAt: null,
             reminderId: null,
             timeEstimate: 7200000,
+            subTaskIds: [],
             timeSpent: 0,
             title: 'Sched  no overlap 9:00 (10.)',
           },
           id: 'xgYNyslWC',
-
           start: 1620152781000,
           type: 'Task',
         },
@@ -816,11 +839,11 @@ describe('mapToViewEntries()', () => {
             plannedAt: 1620162000000,
             reminderId: 'K-1LvnNU5',
             timeEstimate: 0,
+            subTaskIds: [],
             timeSpent: 0,
             title: 'Sched no overlap 23:00',
           },
           id: '2nkBPQEny',
-
           start: 1620162000000,
           type: 'ScheduledTask',
         },
@@ -1112,6 +1135,7 @@ describe('mapToViewEntries()', () => {
       const d = {
         tasks: [
           {
+            subTaskIds: [],
             timeSpent: 0,
             timeEstimate: hours(4),
             title: 'Split Task',
@@ -1119,6 +1143,7 @@ describe('mapToViewEntries()', () => {
             plannedAt: null,
           },
           {
+            subTaskIds: [],
             timeSpent: 0,
             timeEstimate: 0,
             title: 'Task at a wrong place',
@@ -1128,6 +1153,7 @@ describe('mapToViewEntries()', () => {
         ],
         scheduledTasks: [
           {
+            subTaskIds: [],
             timeSpent: 0,
             timeEstimate: hours(1),
             title: 'Scheduled Inside Block',
@@ -1135,6 +1161,7 @@ describe('mapToViewEntries()', () => {
             plannedAt: getDateTimeFromClockString('19:00', 0),
           },
           {
+            subTaskIds: [],
             timeSpent: 0,
             timeEstimate: minutes(10),
             title: 'Scheduled Split Trigger Before Day End',
@@ -1172,6 +1199,7 @@ describe('mapToViewEntries()', () => {
       const d = {
         tasks: [
           {
+            subTaskIds: [],
             timeSpent: 0,
             timeEstimate: hours(5),
             title: 'Task',
@@ -1182,6 +1210,7 @@ describe('mapToViewEntries()', () => {
         scheduledTasks: [
           {
             id: 'SCHEDULED_CURRENT_ID',
+            subTaskIds: [],
             timeSpent: 0,
             timeEstimate: hours(0.5),
             title: 'Scheduled Tomorrow',
@@ -1261,6 +1290,7 @@ describe('mapToViewEntries()', () => {
       const d = {
         tasks: [
           {
+            subTaskIds: [],
             timeSpent: 0,
             timeEstimate: hours(5),
             title: 'Task',
@@ -1516,6 +1546,7 @@ describe('mapToViewEntries()', () => {
         ],
         tasks: [
           {
+            subTaskIds: [],
             timeSpent: 0,
             timeEstimate: hours(5),
             title: 'Task',
@@ -1566,6 +1597,7 @@ describe('mapToViewEntries()', () => {
         ],
         tasks: [
           {
+            subTaskIds: [],
             timeSpent: 0,
             timeEstimate: hours(5),
             title: 'Task',

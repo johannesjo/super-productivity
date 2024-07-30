@@ -32,7 +32,11 @@ import {
   ScheduleViewEntryTask,
   ScheduleWorkStartEndCfg,
 } from '../schedule.model';
-import { SCHEDULE_VIEW_TYPE_ORDER, ScheduleViewEntryType } from '../schedule.const';
+import {
+  SCHEDULE_TASK_MIN_DURATION_IN_MS,
+  SCHEDULE_VIEW_TYPE_ORDER,
+  ScheduleViewEntryType,
+} from '../schedule.const';
 import { createScheduleViewEntriesForNormalTasks } from './create-schedule-view-entries-for-normal-tasks';
 import { insertBlockedBlocksViewEntriesForSchedule } from './insert-blocked-blocks-view-entries-for-schedule';
 
@@ -321,7 +325,6 @@ export const createViewEntriesForDay = (
   if (nonScheduledTasksForDay.length) {
     viewEntries = viewEntries.concat(
       createScheduleViewEntriesForNormalTasks(startTime, nonScheduledTasksForDay),
-      // createTimelineViewEntriesForNormalTasks(startTime, nonScheduledTasksForDay),
     );
   }
 
@@ -428,7 +431,10 @@ export const getTasksWithinAndBeyondBudget = (
   tasks.forEach((task) => {
     // console.log(remainingBudget / 60 / 60 / 1000);
 
-    const timeLeftForTask = getTimeLeftForTask(task);
+    const timeLeftForTask = Math.max(
+      SCHEDULE_TASK_MIN_DURATION_IN_MS,
+      getTimeLeftForTask(task),
+    );
     if (timeLeftForTask > remainingBudget) {
       beyond.push(task);
     } else {
