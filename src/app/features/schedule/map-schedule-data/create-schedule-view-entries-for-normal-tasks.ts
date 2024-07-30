@@ -3,8 +3,11 @@ import {
   TaskWithPlannedForDayIndication,
 } from '../../tasks/task.model';
 import { ScheduleViewEntryTask } from '../schedule.model';
-import { getTimeLeftForTask } from '../../../util/get-time-left-for-task';
-import { ScheduleViewEntryType } from '../schedule.const';
+import { getTimeLeftForTaskWithMinVal } from '../../../util/get-time-left-for-task';
+import {
+  SCHEDULE_TASK_MIN_DURATION_IN_MS,
+  ScheduleViewEntryType,
+} from '../schedule.const';
 
 export const createScheduleViewEntriesForNormalTasks = (
   startTime: number,
@@ -21,7 +24,9 @@ export const createScheduleViewEntriesForNormalTasks = (
 
     if (lastTime) {
       if (prevTask) {
-        time = lastTime + getTimeLeftForTask(prevTask);
+        time =
+          lastTime +
+          getTimeLeftForTaskWithMinVal(prevTask, SCHEDULE_TASK_MIN_DURATION_IN_MS);
       } else {
         throw new Error('Something weird happened');
       }

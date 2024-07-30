@@ -52,4 +52,4 @@ export const SCHEDULE_MOVEABLE_TYPES: ScheduleViewEntryType[] = [
   ScheduleViewEntryType.RepeatProjectionSplitContinuedLast,
 ];
 
-export const SCHEDULE_TASK_MIN_DURATION_IN_MS = 5 * 60 * 1000;
+export const SCHEDULE_TASK_MIN_DURATION_IN_MS = 10 * 60 * 1000;

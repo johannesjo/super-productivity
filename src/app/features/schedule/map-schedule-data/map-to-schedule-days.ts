@@ -10,8 +10,8 @@ import { PlannerDayMap } from '../../planner/planner.model';
 import { getDateTimeFromClockString } from '../../../util/get-date-time-from-clock-string';
 import { getWorklogStr } from '../../../util/get-work-log-str';
 import {
-  getTimeLeftForTask,
-  getTimeLeftForTasks,
+  getTimeLeftForTasksWithMinVal,
+  getTimeLeftForTaskWithMinVal,
 } from '../../../util/get-time-left-for-task';
 import { msLeftToday } from '../../../util/ms-left-today';
 import { selectTaskRepeatCfgsDueOnDayOnly } from '../../task-repeat-cfg/store/task-repeat-cfg.reducer';
@@ -150,8 +150,10 @@ export const createScheduleDays = (
     // const taskPlannedForDay = i > 0 ? plannerDayMap[dayDate] || [] : [];
     // TODO also add split task value
     const timeLeftForRegular =
-      getTimeLeftForTasks(regularTasksLeftForDay) +
-      (splitTaskOrRepeatEntryForNextDay?.data.timeToGo || 0);
+      getTimeLeftForTasksWithMinVal(
+        regularTasksLeftForDay,
+        SCHEDULE_TASK_MIN_DURATION_IN_MS,
+      ) + (splitTaskOrRepeatEntryForNextDay?.data.timeToGo || 0);
     const nonScheduledBudgetForDay = getBudgetLeftForDay(
       blockerBlocksForDay,
       i === 0 ? now : undefined,
@@ -286,7 +288,7 @@ const getRemainingTasks = (
   let count = 0;
   return nonScheduledTasks.filter((task) => {
     if (count < budget) {
-      count += getTimeLeftForTask(task);
+      count += getTimeLeftForTaskWithMinVal(task, SCHEDULE_TASK_MIN_DURATION_IN_MS);
       return false;
     }
     return true;
@@ -431,9 +433,9 @@ export const getTasksWithinAndBeyondBudget = (
   tasks.forEach((task) => {
     // console.log(remainingBudget / 60 / 60 / 1000);
 
-    const timeLeftForTask = Math.max(
+    const timeLeftForTask = getTimeLeftForTaskWithMinVal(
+      task,
       SCHEDULE_TASK_MIN_DURATION_IN_MS,
-      getTimeLeftForTask(task),
     );
     if (timeLeftForTask > remainingBudget) {
       beyond.push(task);
