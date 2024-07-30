@@ -8,13 +8,11 @@ import {
 } from '@angular/core';
 import { UiModule } from '../../../ui/ui.module';
 import { combineLatest, Observable } from 'rxjs';
-import { TimelineDay } from '../../timeline/timeline.model';
 import { select, Store } from '@ngrx/store';
 import { selectTimelineTasks } from '../../work-context/store/work-context.selectors';
 import { selectTaskRepeatCfgsWithAndWithoutStartTime } from '../../task-repeat-cfg/store/task-repeat-cfg.reducer';
 import { selectPlannerDayMap } from '../../planner/store/planner.selectors';
 import { debounceTime, map, tap } from 'rxjs/operators';
-import { mapToTimelineDays } from '../../timeline/map-timeline-data/map-to-timeline-days';
 import { getTomorrow } from '../../../util/get-tomorrow';
 import { TaskService } from '../../tasks/task.service';
 import { LayoutService } from '../../../core-ui/layout/layout.service';
@@ -24,12 +22,10 @@ import { DateService } from '../../../core/date/date.service';
 import { LS } from '../../../core/persistence/storage-keys.const';
 import { DialogTimelineSetupComponent } from '../../timeline/dialog-timeline-setup/dialog-timeline-setup.component';
 import { T } from 'src/app/t.const';
-import { TimelineViewEntryType } from '../../timeline/timeline.const';
 import { AsyncPipe, DatePipe, NgClass, NgIf, NgStyle } from '@angular/common';
-import { getDurationForViewEntry } from '../../timeline/map-timeline-data/map-to-timeline-view-entries';
 import { StuckDirective } from '../../../ui/stuck/stuck.directive';
 import { ScheduleEventComponent } from '../schedule-event/schedule-event.component';
-import { ScheduleEvent } from '../schedule.model';
+import { ScheduleDay, ScheduleEvent } from '../schedule.model';
 import {
   CdkDrag,
   CdkDragMove,
@@ -45,6 +41,9 @@ import {
   selectTimelineWorkStartEndHours,
 } from '../../config/store/global-config.reducer';
 import { PlannerActions } from '../../planner/store/planner.actions';
+import { ScheduleViewEntryType } from '../schedule.const';
+import { mapToScheduleDays } from '../map-schedule-data/map-to-schedule-days';
+import { getDurationForViewEntry } from '../map-schedule-data/insert-blocked-blocks-view-entries-for-schedule';
 
 const DAYS_TO_SHOW = 5;
 const FH = 12;
@@ -85,7 +84,7 @@ export class ScheduleComponent implements AfterViewInit, OnDestroy {
   });
 
   T: typeof T = T;
-  TimelineViewEntryType: typeof TimelineViewEntryType = TimelineViewEntryType;
+  ScheduleViewEntryType: typeof ScheduleViewEntryType = ScheduleViewEntryType;
 
   daysToShow$ = this._globalTrackingIntervalService.todayDateStr$.pipe(
     map(() => {
@@ -93,7 +92,7 @@ export class ScheduleComponent implements AfterViewInit, OnDestroy {
     }),
   );
 
-  timelineDays$: Observable<TimelineDay[]> = combineLatest([
+  scheduleDays$: Observable<ScheduleDay[]> = combineLatest([
     this._store.pipe(select(selectTimelineTasks)),
     this._store.pipe(select(selectTaskRepeatCfgsWithAndWithoutStartTime)),
     this.taskService.currentTaskId$,
@@ -112,7 +111,7 @@ export class ScheduleComponent implements AfterViewInit, OnDestroy {
         icalEvents,
         plannerDayMap,
       ]) =>
-        mapToTimelineDays(
+        mapToScheduleDays(
           this._getDaysToShow(),
           unPlanned,
           planned,
@@ -143,7 +142,7 @@ export class ScheduleComponent implements AfterViewInit, OnDestroy {
   eventsAndBeyondBudget$: Observable<{
     eventsFlat: ScheduleEvent[];
     beyondBudgetDays: ScheduleEvent[][];
-  }> = this.timelineDays$.pipe(
+  }> = this.scheduleDays$.pipe(
     map((days) => {
       const eventsFlat: ScheduleEvent[] = [];
       const beyondBudgetDays: ScheduleEvent[][] = [];
@@ -158,7 +157,7 @@ export class ScheduleComponent implements AfterViewInit, OnDestroy {
             id: taskPlannedForDay.id,
             data: taskPlannedForDay,
             title: taskPlannedForDay.title,
-            type: TimelineViewEntryType.TaskPlannedForDay,
+            type: ScheduleViewEntryType.TaskPlannedForDay,
             style: `height: ${rowSpan * 8}px`,
             timeLeftInHours,
             startHours: 0,
@@ -167,8 +166,8 @@ export class ScheduleComponent implements AfterViewInit, OnDestroy {
 
         day.entries.forEach((entry, entryIndex) => {
           if (
-            entry.type !== TimelineViewEntryType.WorkdayEnd &&
-            entry.type !== TimelineViewEntryType.WorkdayStart
+            entry.type !== ScheduleViewEntryType.WorkdayEnd &&
+            entry.type !== ScheduleViewEntryType.WorkdayStart
           ) {
             const entryAfter = day.entries[entryIndex + 1];
             const start = new Date(entry.start);
@@ -179,7 +178,7 @@ export class ScheduleComponent implements AfterViewInit, OnDestroy {
 
             const startRow = Math.round(hoursToday * FH);
             const timeLeft =
-              entryAfter && entryAfter.type !== TimelineViewEntryType.WorkdayEnd
+              entryAfter && entryAfter.type !== ScheduleViewEntryType.WorkdayEnd
                 ? entryAfter.start - entry.start
                 : getDurationForViewEntry(entry);
 
@@ -189,11 +188,13 @@ export class ScheduleComponent implements AfterViewInit, OnDestroy {
             eventsFlat.push({
               title:
                 (entry as any)?.data?.title ||
-                (entry.type === TimelineViewEntryType.LunchBreak
+                (entry.type === ScheduleViewEntryType.LunchBreak
                   ? 'Lunch Break'
                   : 'TITLE'),
               id: (entry.data as any)?.id || entry.id,
-              type: entry.type,
+              // TODO fix
+              // type: entry.type as ScheduleViewEntryType,
+              type: entry.type as any as ScheduleViewEntryType,
               startHours: hoursToday,
               timeLeftInHours,
               // title: entry.data.title,
@@ -227,7 +228,7 @@ export class ScheduleComponent implements AfterViewInit, OnDestroy {
     map(({ beyondBudgetDays }) => beyondBudgetDays),
   );
 
-  currentTimeStyle$ = this.timelineDays$.pipe(
+  currentTimeStyle$ = this.scheduleDays$.pipe(
     map((days) => {
       const now = new Date();
       const hours = now.getHours();
@@ -239,7 +240,7 @@ export class ScheduleComponent implements AfterViewInit, OnDestroy {
     }),
   );
 
-  // timelineDays$: Observable<TimelineDay[]> = this.timelineEntries$.pipe(
+  // timelineDays$: Observable<ScheduleDay[]> = this.timelineEntries$.pipe(
   //   map((entries) => mapTimelineEntriesToDays(entries)),
   // );
 
@@ -319,10 +320,10 @@ export class ScheduleComponent implements AfterViewInit, OnDestroy {
       }
       this.prevDragOverEl = targetEl;
       if (
-        targetEl.classList.contains(TimelineViewEntryType.Task) ||
-        targetEl.classList.contains(TimelineViewEntryType.SplitTask) ||
-        targetEl.classList.contains(TimelineViewEntryType.SplitTaskPlannedForDay) ||
-        targetEl.classList.contains(TimelineViewEntryType.TaskPlannedForDay)
+        targetEl.classList.contains(ScheduleViewEntryType.Task) ||
+        targetEl.classList.contains(ScheduleViewEntryType.SplitTask) ||
+        targetEl.classList.contains(ScheduleViewEntryType.SplitTaskPlannedForDay) ||
+        targetEl.classList.contains(ScheduleViewEntryType.TaskPlannedForDay)
       ) {
         this.prevDragOverEl.classList.add(DRAG_OVER_CLASS);
       } else if (targetEl.classList.contains('dropzones')) {

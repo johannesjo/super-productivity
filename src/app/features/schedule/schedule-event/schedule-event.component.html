@@ -41,7 +41,7 @@
 }
 <!--- -->
 
-@if (se.type === TimelineViewEntryType.ScheduledTask) {
+@if (se.type === ScheduleViewEntryType.ScheduledTask) {
 <button
   mat-mini-fab
   color="primary"
@@ -54,8 +54,8 @@
   {{ startClockString }} ({{ durationStr }})
   <!--  {{se.data?.id}} __ -->
 
-  @if (se.type === TimelineViewEntryType.SplitTaskContinuedLast || se.type ===
-  TimelineViewEntryType.SplitTaskContinued) { ...
+  @if (se.type === ScheduleViewEntryType.SplitTaskContinuedLast || se.type ===
+  ScheduleViewEntryType.SplitTaskContinued) { ...
   <!-- -->
   } @else { {{ se.title }} }
 </div>

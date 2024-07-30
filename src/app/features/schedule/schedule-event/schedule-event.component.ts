@@ -8,7 +8,6 @@ import {
   OnInit,
 } from '@angular/core';
 import { ScheduleEvent } from '../schedule.model';
-import { TimelineViewEntryType } from '../../timeline/timeline.const';
 import { MatIcon } from '@angular/material/icon';
 import { takeUntil } from 'rxjs/operators';
 import { Store } from '@ngrx/store';
@@ -16,6 +15,7 @@ import { selectProjectById } from '../../project/store/project.selectors';
 import { BaseComponent } from '../../../core/base-component/base.component';
 import { MatMiniFabButton } from '@angular/material/button';
 import { getClockStringFromHours } from '../../../util/get-clock-string-from-hours';
+import { ScheduleViewEntryType } from '../schedule.const';
 
 @Component({
   selector: 'schedule-event',
@@ -60,23 +60,23 @@ export class ScheduleEventComponent extends BaseComponent implements OnInit, OnD
 
   get isSplitStart(): boolean {
     return (
-      this.se?.type === TimelineViewEntryType.SplitTask ||
-      this.se?.type === TimelineViewEntryType.RepeatProjectionSplit ||
-      this.se?.type === TimelineViewEntryType.SplitTaskPlannedForDay
+      this.se?.type === ScheduleViewEntryType.SplitTask ||
+      this.se?.type === ScheduleViewEntryType.RepeatProjectionSplit ||
+      this.se?.type === ScheduleViewEntryType.SplitTaskPlannedForDay
     );
   }
 
   get isSplitContinued(): boolean {
     return (
-      this.se?.type === TimelineViewEntryType.SplitTaskContinued ||
-      this.se?.type === TimelineViewEntryType.RepeatProjectionSplitContinued
+      this.se?.type === ScheduleViewEntryType.SplitTaskContinued ||
+      this.se?.type === ScheduleViewEntryType.RepeatProjectionSplitContinued
     );
   }
 
   get isSplitContinuedLast(): boolean {
     return (
-      this.se?.type === TimelineViewEntryType.SplitTaskContinuedLast ||
-      this.se?.type === TimelineViewEntryType.RepeatProjectionSplitContinuedLast
+      this.se?.type === ScheduleViewEntryType.SplitTaskContinuedLast ||
+      this.se?.type === ScheduleViewEntryType.RepeatProjectionSplitContinuedLast
     );
   }
 
@@ -89,32 +89,32 @@ export class ScheduleEventComponent extends BaseComponent implements OnInit, OnD
     | 'SPLIT_CONTINUE'
     | 'LUNCH_BREAK' {
     switch (this.se?.type) {
-      case TimelineViewEntryType.RepeatProjection:
-      case TimelineViewEntryType.RepeatProjectionSplit: {
+      case ScheduleViewEntryType.RepeatProjection:
+      case ScheduleViewEntryType.RepeatProjectionSplit: {
         return 'REPEAT';
       }
-      case TimelineViewEntryType.TaskPlannedForDay:
-      case TimelineViewEntryType.SplitTaskPlannedForDay: {
+      case ScheduleViewEntryType.TaskPlannedForDay:
+      case ScheduleViewEntryType.SplitTaskPlannedForDay: {
         return 'PLANNED_FOR_DAY';
       }
-      case TimelineViewEntryType.Task:
-      case TimelineViewEntryType.SplitTask: {
+      case ScheduleViewEntryType.Task:
+      case ScheduleViewEntryType.SplitTask: {
         return 'FLOW';
       }
-      case TimelineViewEntryType.CalendarEvent: {
+      case ScheduleViewEntryType.CalendarEvent: {
         return 'CAL_PROJECTION';
       }
-      case TimelineViewEntryType.ScheduledTask: {
+      case ScheduleViewEntryType.ScheduledTask: {
         return 'SCHEDULED_TASK';
       }
-      case TimelineViewEntryType.LunchBreak: {
+      case ScheduleViewEntryType.LunchBreak: {
         return 'LUNCH_BREAK';
       }
     }
     return 'SPLIT_CONTINUE';
   }
 
-  protected readonly TimelineViewEntryType = TimelineViewEntryType;
+  protected readonly ScheduleViewEntryType = ScheduleViewEntryType;
 
   constructor(
     private _store: Store,
@@ -126,10 +126,10 @@ export class ScheduleEventComponent extends BaseComponent implements OnInit, OnD
   ngOnInit(): void {
     const pid = (this.se?.data as any)?.projectId;
     if (
-      this.se.type === TimelineViewEntryType.SplitTask ||
-      this.se.type === TimelineViewEntryType.Task ||
-      this.se.type === TimelineViewEntryType.SplitTaskPlannedForDay ||
-      this.se.type === TimelineViewEntryType.TaskPlannedForDay
+      this.se.type === ScheduleViewEntryType.SplitTask ||
+      this.se.type === ScheduleViewEntryType.Task ||
+      this.se.type === ScheduleViewEntryType.SplitTaskPlannedForDay ||
+      this.se.type === ScheduleViewEntryType.TaskPlannedForDay
     ) {
     }
 
