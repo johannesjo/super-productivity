@@ -27,6 +27,7 @@ import { SnackService } from '../../../core/snack/snack.service';
 import { T } from '../../../t.const';
 import { isToday } from '../../../util/is-today.util';
 import { upsertTag } from '../../tag/store/tag.actions';
+import { PlannerActions } from '../../planner/store/planner.actions';
 
 @Injectable()
 export class TaskRelatedModelEffects {
@@ -180,15 +181,32 @@ export class TaskRelatedModelEffects {
           isSkipExcludeCheck: true,
         }),
       ]),
-      // tap(() => {
-      //   // NOTE: timeout to make sure this is shown after other messages
-      //   setTimeout(() => {
-      //     this._snackService.open({
-      //       type: 'ERROR',
-      //       msg: T.F.TASK.S.LAST_TAG_DELETION_WARNING ,
-      //     });
-      //   }, 0);
-      // }),
+    ),
+  );
+  preventAndRevertLastTagDeletion2$: any = createEffect(() =>
+    this._actions$.pipe(
+      ofType(PlannerActions.transferTask),
+      filter(
+        ({ task, newDay, prevDay, today }) =>
+          prevDay === today &&
+          newDay !== today &&
+          task.tagIds.includes(TODAY_TAG.id) &&
+          !task.parentId &&
+          !task.projectId &&
+          task.tagIds.length === 1,
+      ),
+      // tap(() => console.log('preventAndRevertLastTagDeletion$')),
+      mergeMap(({ task }) => [
+        upsertTag({
+          tag: NO_LIST_TAG,
+        }),
+        updateTaskTags({
+          task: task,
+          oldTagIds: task.tagIds,
+          newTagIds: [NO_LIST_TAG.id],
+          isSkipExcludeCheck: true,
+        }),
+      ]),
     ),
   );
 
