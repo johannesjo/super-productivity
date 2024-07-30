@@ -82,6 +82,7 @@ export class TagEffects {
 
           // PLANNER
           PlannerActions.transferTask,
+          PlannerActions.moveBeforeTask,
         ),
         switchMap(() => this.saveToLs$),
       ),

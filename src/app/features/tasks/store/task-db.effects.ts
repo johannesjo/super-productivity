@@ -85,6 +85,7 @@ export class TaskDbEffects {
 
           // PLANNER
           PlannerActions.transferTask,
+          PlannerActions.moveBeforeTask,
         ),
         withLatestFrom(this._store$.pipe(select(selectTaskFeatureState))),
         tap(([, taskState]) => this._saveToLs(taskState, true)),

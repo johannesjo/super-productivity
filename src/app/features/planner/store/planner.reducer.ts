@@ -139,7 +139,9 @@ export const plannerReducer = createReducer(
       const toIndex = daysCopy[dayI].indexOf(action.toTaskId);
       if (toIndex > -1) {
         console.log('toIndex', toIndex);
-        [...daysCopy[dayI]].splice(toIndex, 0, action.fromTask.id);
+        const tidsForDay = [...daysCopy[dayI]];
+        tidsForDay.splice(toIndex, 0, action.fromTask.id);
+        daysCopy[dayI] = tidsForDay;
         wasMutated = true;
       }
     });

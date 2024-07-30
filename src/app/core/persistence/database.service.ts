@@ -40,7 +40,7 @@ export class DatabaseService {
   async save(key: string, data: unknown): Promise<unknown> {
     this._lastParams = { a: 'save', key, data };
     // disable saving during testing
-    return Promise.resolve();
+    // return Promise.resolve();
     try {
       return await this._adapter.save(key, data);
     } catch (e) {

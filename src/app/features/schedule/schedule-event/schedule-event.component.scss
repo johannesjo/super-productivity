@@ -44,6 +44,8 @@ $margin-bottom: 4px;
     border-left-color: var(--project-color);
     background: $dark-theme-bg-slightly-lighter;
     color: $dark-theme-text-color;
+    border-top-width: 1px;
+    border-top-color: $dark-theme-bg;
   }
 
   &.split-start {

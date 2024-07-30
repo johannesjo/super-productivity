@@ -159,6 +159,38 @@ export const tagReducer = createReducer<TagState>(
     },
   ),
 
+  on(PlannerActions.moveBeforeTask, (state, { fromTask, toTaskId }) => {
+    const todayTag = state.entities[TODAY_TAG.id] as Tag;
+    if (todayTag.taskIds.includes(toTaskId)) {
+      const targetIndex = todayTag.taskIds.indexOf(toTaskId);
+      const taskIds = [...todayTag.taskIds];
+      taskIds.splice(targetIndex, 0, fromTask.id);
+      return tagAdapter.updateOne(
+        {
+          id: TODAY_TAG.id,
+          changes: {
+            taskIds: unique(taskIds),
+          },
+        },
+        state,
+      );
+    } else if (todayTag.taskIds.includes(fromTask.id)) {
+      return tagAdapter.updateOne(
+        {
+          id: TODAY_TAG.id,
+          changes: {
+            taskIds: todayTag.taskIds.filter((id) => id !== fromTask.id),
+          },
+        },
+        state,
+      );
+    }
+
+    return state;
+  }),
+
+  // REGULAR ACTIONS
+  // --------------------
   on(
     moveTaskInTodayList,
     (

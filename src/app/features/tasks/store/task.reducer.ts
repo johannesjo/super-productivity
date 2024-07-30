@@ -635,6 +635,37 @@ export const taskReducer = createReducer<TaskState>(
       return state;
     },
   ),
+  on(PlannerActions.moveBeforeTask, (state, { toTaskId, fromTask }) => {
+    const targetTask = state.entities[toTaskId] as Task;
+    if (
+      targetTask.tagIds.includes(TODAY_TAG.id) &&
+      !fromTask.tagIds.includes(TODAY_TAG.id)
+    ) {
+      return taskAdapter.updateOne(
+        {
+          id: fromTask.id,
+          changes: {
+            tagIds: unique([TODAY_TAG.id, ...fromTask.tagIds]),
+          },
+        },
+        state,
+      );
+    } else if (
+      !targetTask.tagIds.includes(TODAY_TAG.id) &&
+      fromTask.tagIds.includes(TODAY_TAG.id)
+    ) {
+      return taskAdapter.updateOne(
+        {
+          id: fromTask.id,
+          changes: {
+            tagIds: unique(fromTask.tagIds.filter((id) => id !== TODAY_TAG.id)),
+          },
+        },
+        state,
+      );
+    }
+    return state;
+  }),
 
   // REMINDER STUFF
   // --------------
