@@ -637,6 +637,10 @@ export const taskReducer = createReducer<TaskState>(
   ),
   on(PlannerActions.moveBeforeTask, (state, { toTaskId, fromTask }) => {
     const targetTask = state.entities[toTaskId] as Task;
+    if (!targetTask) {
+      return state;
+    }
+
     if (
       targetTask.tagIds.includes(TODAY_TAG.id) &&
       !fromTask.tagIds.includes(TODAY_TAG.id)
