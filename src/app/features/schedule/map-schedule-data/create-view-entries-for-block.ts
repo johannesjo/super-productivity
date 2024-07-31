@@ -1,8 +1,8 @@
 import { BlockedBlock, BlockedBlockType } from '../../timeline/timeline.model';
 import { SVE } from '../schedule.model';
-import { SCHEDULE_TASK_MIN_DURATION_IN_MS, SVEType } from '../schedule.const';
+import { SVEType } from '../schedule.const';
 import { nanoid } from 'nanoid';
-import { getTimeLeftForTaskWithMinVal } from '../../../util/get-time-left-for-task';
+import { getTimeLeftForTask } from '../../../util/get-time-left-for-task';
 
 export const createViewEntriesForBlock = (blockedBlock: BlockedBlock): SVE[] => {
   const viewEntriesForBock: SVE[] = [];
@@ -14,10 +14,11 @@ export const createViewEntriesForBlock = (blockedBlock: BlockedBlock): SVE[] => 
         start: scheduledTask.plannedAt,
         type: SVEType.ScheduledTask,
         data: scheduledTask,
-        timeToGo: getTimeLeftForTaskWithMinVal(
-          scheduledTask,
-          SCHEDULE_TASK_MIN_DURATION_IN_MS,
-        ),
+        timeToGo: getTimeLeftForTask(scheduledTask),
+        // timeToGo: getTimeLeftForTaskWithMinVal(
+        //   scheduledTask,
+        //   SCHEDULE_TASK_MIN_DURATION_IN_MS,
+        // ),
       });
     } else if (entry.type === BlockedBlockType.ScheduledRepeatProjection) {
       const repeatCfg = entry.data;
@@ -27,13 +28,15 @@ export const createViewEntriesForBlock = (blockedBlock: BlockedBlock): SVE[] => 
         type: SVEType.ScheduledRepeatProjection,
         data: repeatCfg,
         timeToGo: repeatCfg.defaultEstimate || 0,
+        // timeToGo: Math.max(
+        //   repeatCfg.defaultEstimate || 0,
+        //   SCHEDULE_TASK_MIN_DURATION_IN_MS,
+        // ),
       });
     } else if (entry.type === BlockedBlockType.CalendarEvent) {
       const calendarEvent = entry.data;
       viewEntriesForBock.push({
-        // TODO fix
-        // id: calendarEvent.title,
-        id: nanoid(),
+        id: calendarEvent.id || nanoid(),
         start: entry.start,
         type: SVEType.CalendarEvent,
         data: {
@@ -41,6 +44,7 @@ export const createViewEntriesForBlock = (blockedBlock: BlockedBlock): SVE[] => 
           icon: calendarEvent.icon || 'event',
         },
         timeToGo: calendarEvent.duration,
+        // timeToGo: Math.max(calendarEvent.duration, SCHEDULE_TASK_MIN_DURATION_IN_MS),
       });
       // TODO check if needed
     } else if (entry.type === BlockedBlockType.WorkdayStartEnd) {
