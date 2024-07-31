@@ -110,6 +110,7 @@ export class ScheduleComponent implements AfterViewInit, OnDestroy {
         plannerDayMap,
       ]) =>
         mapToScheduleDays(
+          Date.now(),
           this._getDaysToShow(),
           unPlanned,
           planned,

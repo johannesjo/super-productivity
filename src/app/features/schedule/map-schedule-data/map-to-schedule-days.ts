@@ -41,6 +41,7 @@ import { createScheduleViewEntriesForNormalTasks } from './create-schedule-view-
 import { insertBlockedBlocksViewEntriesForSchedule } from './insert-blocked-blocks-view-entries-for-schedule';
 
 export const mapToScheduleDays = (
+  now: number,
   dayDates: string[],
   tasks: Task[],
   scheduledTasks: TaskPlanned[],
@@ -52,7 +53,6 @@ export const mapToScheduleDays = (
   plannerDayMap: PlannerDayMap,
   workStartEndCfg?: ScheduleWorkStartEndCfg,
   lunchBreakCfg?: ScheduleLunchBreakCfg,
-  now: number = Date.now(),
 ): ScheduleDay[] => {
   const plannerDayKeys = Object.keys(plannerDayMap);
   const plannerDayTasks = plannerDayKeys
@@ -295,6 +295,7 @@ const getRemainingTasks = (
   });
 };
 
+// TODO extract to own file
 export const createViewEntriesForDay = (
   initialStartTime: number,
   nonScheduledRepeatCfgsDueOnDay: TaskRepeatCfg[],

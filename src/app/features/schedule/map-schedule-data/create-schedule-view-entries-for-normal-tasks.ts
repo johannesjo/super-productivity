@@ -10,7 +10,7 @@ export const createScheduleViewEntriesForNormalTasks = (
   startTime: number,
   tasks: (TaskWithoutReminder | TaskWithPlannedForDayIndication)[],
 ): SVETask[] => {
-  let lastTime: number;
+  let lastTime: number | undefined;
   let prevTask: TaskWithoutReminder;
 
   const viewEntries: SVETask[] = [];
@@ -19,7 +19,7 @@ export const createScheduleViewEntriesForNormalTasks = (
 
     let time: number;
 
-    if (lastTime) {
+    if (typeof lastTime === 'number') {
       if (prevTask) {
         time =
           lastTime +
