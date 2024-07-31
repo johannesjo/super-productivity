@@ -3,8 +3,11 @@
 $summary-point-inner-margin: $s;
 
 :host {
+  evaluation-sheet {
+    display: block;
+  }
+
   ::ng-deep .mat-mdc-tab-list {
-    margin-top: $s * 3;
     border-bottom: 1px solid $light-theme-separator-color;
 
     @include darkTheme {
@@ -43,13 +46,9 @@ $summary-point-inner-margin: $s;
 }
 
 .tab-inner {
-  padding: 0;
   margin: auto;
   max-width: $component-max-width;
-
-  @include mq(xs) {
-    padding: $s;
-  }
+  padding: $s;
 
   &.full-width {
     max-width: none;
@@ -66,7 +65,7 @@ $summary-point-inner-margin: $s;
 }
 
 .daily-summary-summary {
-  margin-bottom: $s * 2;
+  margin-bottom: $s * 5;
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
@@ -95,9 +94,6 @@ $summary-point-inner-margin: $s;
 }
 
 .tabs {
-  margin-left: -2 * $s;
-  margin-right: -2 * $s;
-
   @include mq(xs) {
     margin: 0;
   }

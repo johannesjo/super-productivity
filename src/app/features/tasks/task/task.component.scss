@@ -240,7 +240,11 @@
   justify-content: center;
   min-height: 36px;
   flex-grow: 1;
+  flex-shrink: 1;
   flex-basis: 70%;
+  // we cannot do this since this cuts of the box shadow of the task edit
+  //overflow: hidden;
+
   @include mq(xs, max) {
     //margin-bottom: 5px;
     //flex-shrink: 0;
@@ -320,19 +324,24 @@
   align-items: center;
 }
 
-.keyIndicator {
-  margin-left: 4px;
-  opacity: 0.6;
-  text-align: right;
-  max-width: 60px;
+.key-i {
+  opacity: 0.4;
+  font-size: 13px;
+  text-align: center;
+  border-radius: 20px;
+  max-width: 66px;
+  letter-spacing: -1px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  padding: 0 4px;
+  display: none;
 
   &:not(:empty) {
-    border-left: 1px solid;
-    border-right: 1px solid;
+    display: block;
+    min-width: 24px;
+    border: 1px solid;
+    padding: 0 4px;
+    margin-left: 4px;
   }
 }
 
@@ -436,6 +445,9 @@
 // -----------------
 .title-and-tags-wrapper {
   flex-grow: 1;
+  flex-shrink: 1;
+  // we cannot do this since this cuts of the box shadow of the task edit
+  //overflow: hidden;
 
   > * {
     @include touchOnlyDevice {
@@ -445,7 +457,7 @@
 }
 
 // TASK TITLE
-.task-title {
+.task-title.task-title {
   @include taskTitle;
 }
 
@@ -779,7 +791,7 @@ progress-bar {
 }
 
 $this-play-size: 22px;
-
+//
 .play-icon-indicator {
   position: absolute;
   top: 50%;

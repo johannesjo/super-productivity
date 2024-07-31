@@ -69,6 +69,6 @@ export class RightPanelComponent implements OnDestroy {
   }
 
   onClose(): void {
-    this.taskService.focusFirstTaskIfVisible();
+    this.taskService.focusLastFocusedTask();
   }
 }

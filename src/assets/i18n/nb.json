@@ -703,8 +703,8 @@
         "IDLE_FOR": "Du har vært inaktiv for:",
         "SKIP": "Hopp over",
         "TASK": "Oppgave",
-        "TASK_BREAK": "Oppgave + pause",
-        "TRACK_TO": "Spor til"
+        "TRACK_TO": "Spor til",
+        "TASK_BREAK": "Oppgave + pause"
       },
       "D_TRACKING_REMINDER": {
         "CREATE_AND_TRACK": "<em>Opprette</em> og spore til",
@@ -836,12 +836,12 @@
   },
   "G": {
     "CANCEL": "Avbryt",
-    "EXAMPLE_VAL": "klikk for å redigere",
     "CLOSE": "Lukk",
     "DELETE": "Slett",
     "DISMISS": "Avvis",
     "DO_IT": "Gjør det!",
     "EDIT": "Redigere",
+    "EXAMPLE_VAL": "klikk for å redigere",
     "EXTENSION_INFO": "Last <a target=\"_blank\" href=\"https://chrome.google.com/webstore/detail/super-productivity/ljkbjodfmekklcoibdnhahlaalhihmlb\">ned chrome-utvidelsen</a> for å tillate kommunikasjon med Jira Api og Idle Time Handling. Merk at dette ikke fungerer for mobil.",
     "LOGIN": "Logg Inn",
     "LOGOUT": "Logg ut",
@@ -874,9 +874,9 @@
       "HELP": "<div><p>Når håndtering av inaktiv tid er aktivert, åpnes en dialog etter en spesifisert tid for å sjekke om og på hvilken oppgave du vil spore tiden din, når du har vært inaktiv.</p></div>",
       "IS_ENABLE_IDLE_TIME_TRACKING": "Aktiver håndtering av inaktiv tid",
       "IS_ONLY_OPEN_IDLE_WHEN_CURRENT_TASK": "Bare utløs tomgangsdialog når en aktuell oppgave er valgt",
-      "IS_UN_TRACKED_IDLE_RESETS_BREAK_TIMER": "Usporet inaktiv tid tilbakestiller 'ta en pause'-timer",
       "MIN_IDLE_TIME": "Utløser tomgang etter X",
-      "TITLE": "Tomgangshåndtering"
+      "TITLE": "Tomgangshåndtering",
+      "IS_UN_TRACKED_IDLE_RESETS_BREAK_TIMER": "Usporet inaktiv tid tilbakestiller 'ta en pause'-timer"
     },
     "IMEX": {
       "HELP": "<p>Her kan du eksportere alle dataene dine som en <strong>JSON</strong> for sikkerhetskopiering, men også for å bruke dem i en annen kontekst (f.eks. Vil du kanskje eksportere prosjektene dine i nettleseren og importere dem til desktopversjonen).</p><p> Importen forventer at gyldig JSON kopieres til tekstområdet. <strong>MERKNAD: Når du trykker på importknappen, overskrives alle dine nåværende innstillinger og data!</strong></p>",

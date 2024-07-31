@@ -2,14 +2,12 @@ import { Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 
 import { DropboxApiService } from '../dropbox-api.service';
-import { DataInitService } from '../../../../core/data-init/data-init.service';
-import { SnackService } from '../../../../core/snack/snack.service';
-import { EMPTY, from, Observable, of } from 'rxjs';
+import { from, Observable } from 'rxjs';
 import {
   filter,
   map,
-  mergeMap,
   switchMap,
+  tap,
   throttleTime,
   withLatestFrom,
 } from 'rxjs/operators';
@@ -21,34 +19,27 @@ import { updateGlobalConfigSection } from '../../../../features/config/store/glo
 
 @Injectable()
 export class DropboxEffects {
-  updateTokensFromDialog$: Observable<unknown> = createEffect(() =>
-    this._actions$.pipe(
-      ofType(triggerDropboxAuthDialog.type),
-      throttleTime(1000),
-      withLatestFrom(this._globalConfigService.sync$),
-      switchMap(([, sync]) => {
-        return from(this._dropboxApiService.getAccessTokenViaDialog()).pipe(
-          mergeMap((res) =>
-            res
-              ? of(
-                  updateGlobalConfigSection({
-                    sectionKey: 'sync',
-                    sectionCfg: {
-                      ...sync,
-                      dropboxSync: {
-                        ...sync.dropboxSync,
-                        accessToken: res.accessToken,
-                        refreshToken: res.refreshToken,
-                        _tokenExpiresAt: res.expiresAt,
-                      },
-                    } as SyncConfig,
-                  }),
-                )
-              : EMPTY,
-          ),
-        );
-      }),
-    ),
+  updateTokensFromDialog$: Observable<unknown> = createEffect(
+    () =>
+      this._actions$.pipe(
+        ofType(triggerDropboxAuthDialog.type),
+        throttleTime(1000),
+        withLatestFrom(this._globalConfigService.sync$),
+        switchMap(([, sync]) => {
+          return from(this._dropboxApiService.getAccessTokenViaDialog()).pipe(
+            tap((res) => {
+              if (res) {
+                this._dropboxApiService.updateTokens({
+                  accessToken: res.accessToken,
+                  refreshToken: res.refreshToken,
+                  expiresAt: res.expiresAt,
+                });
+              }
+            }),
+          );
+        }),
+      ),
+    { dispatch: false },
   );
 
   triggerTokenDialog$: Observable<unknown> = createEffect(() =>
@@ -65,11 +56,30 @@ export class DropboxEffects {
     ),
   );
 
+  askToDeleteTokensOnDisable$: Observable<unknown> = createEffect(
+    () =>
+      this._actions$.pipe(
+        ofType(updateGlobalConfigSection),
+        filter(
+          ({ sectionKey, sectionCfg }): boolean =>
+            sectionKey === 'sync' &&
+            (sectionCfg as SyncConfig).syncProvider === SyncProvider.Dropbox &&
+            !(sectionCfg as SyncConfig).isEnabled,
+        ),
+        withLatestFrom(this._dropboxApiService.isTokenAvailable$),
+        filter(([, isTokenAvailable]) => isTokenAvailable),
+        tap(
+          () =>
+            confirm('You disabled sync. Do you want to delete your Dropbox tokens?') &&
+            this._dropboxApiService.deleteTokens(),
+        ),
+      ),
+    { dispatch: false },
+  );
+
   constructor(
     private _actions$: Actions,
     private _dropboxApiService: DropboxApiService,
     private _globalConfigService: GlobalConfigService,
-    private _snackService: SnackService,
-    private _dataInitService: DataInitService,
   ) {}
 }

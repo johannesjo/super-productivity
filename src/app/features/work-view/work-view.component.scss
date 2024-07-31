@@ -176,6 +176,8 @@ h2 {
   @include scrollYImportant();
   top: 0;
   bottom: 0;
+  // make space for add task bar button not overlapping 'finish day' button
+  padding-bottom: 64px;
 }
 
 .backlog {

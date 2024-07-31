@@ -30,7 +30,7 @@ export interface DialogIdleSplitReturnData {
 }
 
 export interface IdleTrackItem {
-  type: 'BREAK' | 'TASK' | 'TASK_AND_BREAK';
+  type: 'BREAK' | 'TASK';
   time: number | 'IDLE_TIME';
   simpleCounterToggleBtns: SimpleCounterIdleBtn[];
   task?: Task;

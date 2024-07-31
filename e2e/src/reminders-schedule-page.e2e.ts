@@ -16,6 +16,9 @@ const SCHEDULE_PAGE_TASKS = `${SCHEDULE_PAGE_CMP} .tasks mat-card`;
 const SCHEDULE_PAGE_TASK_1 = `${SCHEDULE_PAGE_TASKS}:first-of-type`;
 // Note: not sure why this is the second child, but it is
 const SCHEDULE_PAGE_TASK_2 = `${SCHEDULE_PAGE_TASKS}:nth-of-type(2)`;
+const SCHEDULE_PAGE_TASK_1_TEXT_AREA = `${SCHEDULE_PAGE_TASK_1} textarea`;
+// Note: not sure why this is the second child, but it is
+const SCHEDULE_PAGE_TASK_2_TEXTAREA = `${SCHEDULE_PAGE_TASK_2} textarea`;
 
 module.exports = {
   '@tags': ['task', 'reminder'],
@@ -33,7 +36,7 @@ module.exports = {
       .click(SCHEDULE_ROUTE_BTN)
       .waitForElementVisible(SCHEDULE_PAGE_CMP)
       .waitForElementVisible(SCHEDULE_PAGE_TASK_1)
-      .assert.textContains(SCHEDULE_PAGE_TASK_1, '0 test task koko')
+      .assert.valueContains(SCHEDULE_PAGE_TASK_1_TEXT_AREA, '0 test task koko')
       .end(),
 
   'should add multiple scheduled tasks': (browser: NBrowser) =>
@@ -51,7 +54,7 @@ module.exports = {
       .click(SCHEDULE_ROUTE_BTN)
       .waitForElementVisible(SCHEDULE_PAGE_CMP)
       .waitForElementVisible(SCHEDULE_PAGE_TASK_1)
-      .assert.textContains(SCHEDULE_PAGE_TASK_1, '0 test task koko')
-      .assert.textContains(SCHEDULE_PAGE_TASK_2, '2 hihihi')
+      .assert.valueContains(SCHEDULE_PAGE_TASK_1_TEXT_AREA, '0 test task koko')
+      .assert.valueContains(SCHEDULE_PAGE_TASK_2_TEXTAREA, '2 hihihi')
       .end(),
 };

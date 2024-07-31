@@ -1,10 +1,17 @@
 :root {
   //--mdc-fab-small-container-elevation-shadow: $whiteframe-shadow-4dp;
-  --mat-dialog-container-small-max-width: 92vw;
+  --mat-dialog-container-small-max-width: 94vw;
+  --mat-dialog-container-max-width: 85vw;
 }
 
 // DIALOGS
 // ----------
+.cdk-overlay-pane.mat-mdc-dialog-panel {
+  @include mq(xs, max) {
+    max-width: 96vw !important;
+  }
+}
+
 body .mat-mdc-dialog-content {
   overflow: auto;
 
@@ -93,4 +100,12 @@ body .mat-mdc-dialog-surface {
 mat-icon,
 .mat-icon {
   vertical-align: middle;
+}
+
+// AUTOCOMPLETE
+// -----------------
+.mdc-list-item__primary-text {
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
 }

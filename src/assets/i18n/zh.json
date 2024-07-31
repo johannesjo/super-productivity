@@ -697,9 +697,9 @@
           "L_SYNC_FILE_NAME": "同步文件名"
         },
         "LOCAL_FILE": {
+          "L_SYNC_FILE_PATH_PERMISSION_VALIDATION": "需要文件访问权限",
           "L_SYNC_FILE_PATH": "同步文件路径",
-          "L_SYNC_FILE_PATH_DESCRIPTION": "应该用于同步的文件的绝对路径（将被创建）。",
-          "L_SYNC_FILE_PATH_PERMISSION_VALIDATION": "需要文件访问权限"
+          "L_SYNC_FILE_PATH_DESCRIPTION": "应该用于同步的文件的绝对路径（将被创建）。"
         },
         "L_ENABLE_COMPRESSION": "启用压缩（加快传输速度）",
         "L_ENABLE_ENCRYPTION": "启用端对端加密（实验性功能）——使你的数据无法被同步提供者访问",
@@ -711,8 +711,8 @@
           "CORS_INFO": "<strong>实验！！</strong> 为了完成这项工作，您需要为Nextcloud实例禁用或限制CORS，这可能会对安全性造成负面影响！请 <a href='https://github.com/nextcloud/server/issues/3131'>参考该线程</a> 以获取更多信息。使用风险自负！",
           "L_BASE_URL": "基本网址",
           "L_PASSWORD": "密码",
-          "L_SYNC_FILE_PATH": "同步文件路径",
-          "L_USER_NAME": "用户名"
+          "L_USER_NAME": "用户名",
+          "L_SYNC_FILE_PATH": "同步文件路径"
         }
       },
       "S": {
@@ -1003,8 +1003,8 @@
         "SIMPLE_COUNTER_TOOLTIP_DISABLE": "单击以不跟踪到 {{title}}",
         "SKIP": "跳过",
         "TASK": "任务",
-        "TASK_BREAK": "任务中断",
-        "TRACK_TO": "记录到："
+        "TRACK_TO": "记录到：",
+        "TASK_BREAK": "任务中断"
       },
       "D_TRACKING_REMINDER": {
         "CREATE_AND_TRACK": "<em>创建</em> 并记录到",
@@ -1111,7 +1111,6 @@
   },
   "G": {
     "CANCEL": "取消",
-    "EXAMPLE_VAL": "点击编辑",
     "CLOSE": "关闭",
     "DELETE": "删除",
     "DISMISS": "取消",
@@ -1119,6 +1118,7 @@
     "DO_IT": "开始吧！",
     "EDIT": "编辑",
     "ENABLED": "启用",
+    "EXAMPLE_VAL": "点击编辑",
     "EXTENSION_INFO": "请 <a target=\"_blank\" href=\"https://chrome.google.com/webstore/detail/super-productivity/ljkbjodfmekklcoibdnhahlaalhihmlb\"> 下载Chrome扩展程序</a> ，以便与Jira Api和空闲时间处理进行通信。请注意，这不适用于移动设备。",
     "HIDE": "隐藏",
     "LOGIN": "登录",
@@ -1165,9 +1165,9 @@
       "HELP": "<div><p>启用空闲时间处理后，将在指定的时间后打开一个对话框，以检查您在空闲时是否以及在哪个任务上记录您的时间。</p></div>",
       "IS_ENABLE_IDLE_TIME_TRACKING": "启用空闲时间处理",
       "IS_ONLY_OPEN_IDLE_WHEN_CURRENT_TASK": "仅在选择当前任务时触发空闲时间对话框",
-      "IS_UN_TRACKED_IDLE_RESETS_BREAK_TIMER": "未记录的空闲时间重置需要休息计时器",
       "MIN_IDLE_TIME": "触发空闲的时间阈值",
-      "TITLE": "闲置处理"
+      "TITLE": "闲置处理",
+      "IS_UN_TRACKED_IDLE_RESETS_BREAK_TIMER": "未记录的空闲时间重置需要休息计时器"
     },
     "IMEX": {
       "HELP": "<p>在这里，您可以将所有数据导出为 <strong>JSON</strong> 进行备份，也可以在不同的上下文中使用它（例如，您可能希望在浏览器中导出项目并将其导入桌面版本）。 </p> <p>导入期望将有效的JSON复制到文本区域。 <strong>注意：点击导入按钮后，所有当前设置和数据都将被覆盖！</strong></p>",

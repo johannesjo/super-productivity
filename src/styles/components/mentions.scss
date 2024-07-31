@@ -1,0 +1,18 @@
+.mention-menu {
+  box-shadow: $whiteframe-shadow-4dp;
+
+  @include darkTheme(true) {
+    background: $dark24 !important;
+  }
+}
+
+.mention-item {
+  @include darkTheme(true) {
+    color: $dark-theme-text-color !important;
+  }
+}
+
+.mention-active > a {
+  background: $c-primary !important;
+  color: #fff !important;
+}

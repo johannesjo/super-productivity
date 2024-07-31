@@ -101,7 +101,6 @@ import {
 } from '../project/store/project.actions';
 import { Update } from '@ngrx/entity';
 import { DateService } from 'src/app/core/date/date.service';
-import { T } from 'src/app/t.const';
 
 @Injectable({
   providedIn: 'root',
@@ -186,6 +185,7 @@ export class TaskService {
     ),
   );
 
+  private _lastFocusedTaskEl: HTMLElement | null = null;
   private _allTasks$: Observable<Task[]> = this._store.pipe(select(selectAllTasks));
 
   constructor(
@@ -200,6 +200,20 @@ export class TaskService {
     private readonly _dateService: DateService,
     private readonly _router: Router,
   ) {
+    document.addEventListener(
+      'focus',
+      (ev) => {
+        if (
+          ev.target &&
+          ev.target instanceof HTMLElement &&
+          ev.target.tagName.toLowerCase() === 'task'
+        ) {
+          this._lastFocusedTaskEl = ev.target;
+        }
+      },
+      true,
+    );
+
     this.currentTaskId$.subscribe((val) => (this.currentTaskId = val));
 
     // time tracking
@@ -345,14 +359,6 @@ export class TaskService {
   }
 
   updateTags(task: Task, newTagIds: string[], oldTagIds: string[]): void {
-    if (!task.parentId && !task.projectId && newTagIds.length === 0) {
-      this._snackService.open({
-        type: 'ERROR',
-        msg: T.F.TASK.S.LAST_TAG_DELETION_WARNING,
-      });
-      return;
-    }
-
     this._store.dispatch(
       updateTaskTags({
         task,
@@ -660,6 +666,12 @@ export class TaskService {
     el.focus();
   }
 
+  focusLastFocusedTask(): void {
+    if (this._lastFocusedTaskEl) {
+      this._lastFocusedTaskEl.focus();
+    }
+  }
+
   focusTaskIfPossible(id: string): void {
     const tEl = document.getElementById('t-' + id);
 
@@ -748,6 +760,7 @@ export class TaskService {
     // archive
     await this._persistenceService.taskArchive.execAction(
       roundTimeSpentForDay({ day, taskIds: archivedIds, roundTo, isRoundUp, projectId }),
+      true,
     );
   }
 
@@ -893,6 +906,7 @@ export class TaskService {
           changes: changedFields,
         },
       }),
+      true,
     );
   }
 
@@ -900,6 +914,7 @@ export class TaskService {
   async updateArchiveTasks(updates: Update<Task>[]): Promise<void> {
     await this._persistenceService.taskArchive.execActions(
       updates.map((upd) => updateTask({ task: upd })),
+      true,
     );
   }
 

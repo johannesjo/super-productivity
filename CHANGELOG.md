@@ -1,3 +1,202 @@
+## [9.0.7](https://github.com/johannesjo/super-productivity/compare/v9.0.6...v9.0.7) (2024-07-30)
+
+### Bug Fixes
+
+- **newTitleEdit:** not being able to edit current task properly ([4cef14d](https://github.com/johannesjo/super-productivity/commit/4cef14d615d3db3db574b4de9a1edb409a5d036a))
+- **tour:** android settings button not tapable ([2c38b33](https://github.com/johannesjo/super-productivity/commit/2c38b336e131a07517bb84aec6d36025029d2b95))
+
+## [9.0.6](https://github.com/johannesjo/super-productivity/compare/v9.0.5...v9.0.6) (2024-07-29)
+
+### Bug Fixes
+
+- backlog counter position ([943809c](https://github.com/johannesjo/super-productivity/commit/943809c253eded51095f8b663c2d38cc6542b1c5))
+- lint ([21c2fd2](https://github.com/johannesjo/super-productivity/commit/21c2fd21f0987ee3dcb4578113bc0a833124c52f))
+- **newTitleEdit:** backspace not working ([22ad353](https://github.com/johannesjo/super-productivity/commit/22ad353b06c070d64899fcf63aaa51f5500dd9e7))
+- **newTitleEdit:** short syntax not being removed ([94eea12](https://github.com/johannesjo/super-productivity/commit/94eea1268cc2642b0b38f02fba1b2b4df491bf54))
+- **newTitleEdit:** var name ([d8d2224](https://github.com/johannesjo/super-productivity/commit/d8d22240ccd81b221456afd558909a69cb6bfb2b))
+- progress circle position ([c5a7d37](https://github.com/johannesjo/super-productivity/commit/c5a7d374df4400e9e82c7c54eeadba56f3b85ac7))
+- **sync:** local file sync by using computed sha-1 hash rather than modified timestamp [#3284](https://github.com/johannesjo/super-productivity/issues/3284) ([43201aa](https://github.com/johannesjo/super-productivity/commit/43201aa65d06aeebfb783fddaf02a1cc986272a0))
+- **sync:** make compression work vor webDav [#3298](https://github.com/johannesjo/super-productivity/issues/3298) ([789f17e](https://github.com/johannesjo/super-productivity/commit/789f17e5d33c22935310a42dbeb0b5e34e5a241a))
+- **sync:** make initial android file sync work without error [#3297](https://github.com/johannesjo/super-productivity/issues/3297) ([25b48d7](https://github.com/johannesjo/super-productivity/commit/25b48d7a56be8373a04603d44a2094309717e7fe))
+- **webDAV:** update config entity ([8a99d24](https://github.com/johannesjo/super-productivity/commit/8a99d2465d5c17e0973c8117624633daefd99753))
+
+### Features
+
+- cleanup legacy db key handling ([32d8939](https://github.com/johannesjo/super-productivity/commit/32d8939b03fca2e72fa78e5a6d329567d51175c2))
+- make sub-task editing work better on mobile and hybrid devices [#3258](https://github.com/johannesjo/super-productivity/issues/3258) ([cf89024](https://github.com/johannesjo/super-productivity/commit/cf8902410ef15a5ae80b609d0179802ed5bcdf89))
+- **newTitleEdit:** add new component and make it work for most cases ([a2754aa](https://github.com/johannesjo/super-productivity/commit/a2754aa95585febd97a5c313b1232c37823c994a))
+- **newTitleEdit:** always put cursor at end ([627bcf4](https://github.com/johannesjo/super-productivity/commit/627bcf468d96ad0efc2aab83438a3603f8b73e9a))
+- **newTitleEdit:** further improve for android and add placeholder ([6fd2921](https://github.com/johannesjo/super-productivity/commit/6fd2921624676d973ab7e0174f1660c152af8551))
+- **newTitleEdit:** make enter press kind of work for android ([d903f4e](https://github.com/johannesjo/super-productivity/commit/d903f4eb9316e6405bb5da151fa29446998e9a55))
+- **newTitleEdit:** prevent autofocus ([aacedec](https://github.com/johannesjo/super-productivity/commit/aacedec7e27ca9e137f4e84078062abf38e74688))
+- **newTitleEdit:** several improvements ([48fd03b](https://github.com/johannesjo/super-productivity/commit/48fd03b8760813ed19a4dff2ff1bcd845b3face0))
+- **sync:** add additional error handling [#3295](https://github.com/johannesjo/super-productivity/issues/3295) ([67d47a3](https://github.com/johannesjo/super-productivity/commit/67d47a3eac70f256668f923d7232528af772cc85))
+- **sync:** add translations for new dialog and fix test [#3284](https://github.com/johannesjo/super-productivity/issues/3284) ([cd3a1c0](https://github.com/johannesjo/super-productivity/commit/cd3a1c057125b25e304b2411b016abe5427ea98a))
+- **sync:** handle archive mismatch more gracefully [#3284](https://github.com/johannesjo/super-productivity/issues/3284) ([a39e8f1](https://github.com/johannesjo/super-productivity/commit/a39e8f1f20223a5900d5c2de824ae337d1508a20))
+- **sync:** improve behavior on android ([89b9d16](https://github.com/johannesjo/super-productivity/commit/89b9d1688e72297d091bb7495fa7ea107dc7b81a))
+- **sync:** improve logging ([5521332](https://github.com/johannesjo/super-productivity/commit/5521332d3c6c7faf1a58cc7078ba8ab2b3634747))
+- **sync:** make permission dialog work much better for file sync on android [#3297](https://github.com/johannesjo/super-productivity/issues/3297) ([fa1f79f](https://github.com/johannesjo/super-productivity/commit/fa1f79f2c641338d3ed299b025169416fdab122f))
+- **sync:** show revs in incomplete dialog [#3284](https://github.com/johannesjo/super-productivity/issues/3284) ([b3559cc](https://github.com/johannesjo/super-productivity/commit/b3559cc5217163e67209d00706a6441cf94737ed))
+- **sync:** show revs in incomplete dialog 2 [#3284](https://github.com/johannesjo/super-productivity/issues/3284) ([f327549](https://github.com/johannesjo/super-productivity/commit/f3275499201eabe499bcee25bdd70905b448190b))
+
+## [9.0.5](https://github.com/johannesjo/super-productivity/compare/v9.0.4...v9.0.5) (2024-07-22)
+
+### Bug Fixes
+
+- **webDAV:** content being double stringified [#3269](https://github.com/johannesjo/super-productivity/issues/3269) ([a24f5d6](https://github.com/johannesjo/super-productivity/commit/a24f5d65e43bac35e9364eb048c17dc761708e93))
+- **webDAV:** disable lazy loaded dep to fix problem [#3269](https://github.com/johannesjo/super-productivity/issues/3269) ([a02d6de](https://github.com/johannesjo/super-productivity/commit/a02d6debd6e59cf54fbce28235fa847b7bfb0c21))
+
+## [9.0.4](https://github.com/johannesjo/super-productivity/compare/v9.0.3...v9.0.4) (2024-07-22)
+
+### Bug Fixes
+
+- button edge case ([6680fff](https://github.com/johannesjo/super-productivity/commit/6680fff5d0e593886ee4084d953c627547c86f0c))
+- fieldGroup inputs updating instantly when typing ([239949a](https://github.com/johannesjo/super-productivity/commit/239949ae92a30adc5985b3f4d3bae7be2f0b5610))
+- folder path getting synced for local file sync [#3268](https://github.com/johannesjo/super-productivity/issues/3268) ([c250254](https://github.com/johannesjo/super-productivity/commit/c2502540ce136f532e82bfdbca37e6f1ba352ed3))
+- missing czech locale [#3262](https://github.com/johannesjo/super-productivity/issues/3262) ([fa72339](https://github.com/johannesjo/super-productivity/commit/fa7233974f851867ea62e687c3ae61b511cf8b76))
+- move to backlog checkbox having no effect ([c45aee4](https://github.com/johannesjo/super-productivity/commit/c45aee429485fc2c681ed7ff73df1a3f482c43aa))
+- shepherd tour error [#3270](https://github.com/johannesjo/super-productivity/issues/3270) ([9fa0da0](https://github.com/johannesjo/super-productivity/commit/9fa0da076270f3375aa81f1f8167cf4d27aa7ad4))
+- **timeline:** no error for edge case [#3276](https://github.com/johannesjo/super-productivity/issues/3276) ([cf1d460](https://github.com/johannesjo/super-productivity/commit/cf1d460113fb44111f9d29ae318e2d75c60243e6))
+
+### Features
+
+- improve sync indication ([760e6f2](https://github.com/johannesjo/super-productivity/commit/760e6f24337cb69c7d3ab01756870b2e651b12a1))
+- style angular mentions for dark theme ([041ac63](https://github.com/johannesjo/super-productivity/commit/041ac63f42773352628592a33fa3847d02e7e2be))
+- wait longer for sync folder path changes ([38a5652](https://github.com/johannesjo/super-productivity/commit/38a565213981023e56734ac62f802a118ec1a920))
+- **webDAV:** add extra logging ([bed545a](https://github.com/johannesjo/super-productivity/commit/bed545ac16484b588697268cb1855f566ee453f2))
+- **webDAV:** create folder automatically ([fcfed40](https://github.com/johannesjo/super-productivity/commit/fcfed407b5025386eb311c83f7b18df07100b41b))
+- **webDAV:** improve error handling for web dav [#3269](https://github.com/johannesjo/super-productivity/issues/3269) ([f2e4ebc](https://github.com/johannesjo/super-productivity/commit/f2e4ebcc335a71c9f012e7a447828e0d04bcc89a))
+
+## [9.0.3](https://github.com/johannesjo/super-productivity/compare/v9.0.2...v9.0.3) (2024-07-18)
+
+## [9.0.2](https://github.com/johannesjo/super-productivity/compare/v9.0.1...v9.0.2) (2024-07-17)
+
+### Features
+
+- **timeline:** make up down arrows a little less prominent ([9326811](https://github.com/johannesjo/super-productivity/commit/93268118e1728af5b3e6502bbc1900bf82d3e0c3))
+
+## [9.0.1](https://github.com/johannesjo/super-productivity/compare/v9.0.0...v9.0.1) (2024-07-17)
+
+### Bug Fixes
+
+- error with task schedule ([1a57202](https://github.com/johannesjo/super-productivity/commit/1a57202e5ca06b525dc819954d6bdfcfe1a03f58))
+
+### Features
+
+- handle no project or tag by moving to special no list tag ([05f4cf7](https://github.com/johannesjo/super-productivity/commit/05f4cf7d2c960e7709255a4e7d7562452215a413))
+
+# [9.0.0](https://github.com/johannesjo/super-productivity/compare/v9.0.0-rc.0...v9.0.0) (2024-07-17)
+
+### Bug Fixes
+
+- add task button overlapping with finish day button ([82e6835](https://github.com/johannesjo/super-productivity/commit/82e6835a1722bf360c8527f22def3eb6969e183b))
+- backlog task nr position ([573985c](https://github.com/johannesjo/super-productivity/commit/573985c7ca3e21fd091e2397e1f849ec7dfde268))
+- prevent add task bar overlapping over buttons to input ([50ec1bd](https://github.com/johannesjo/super-productivity/commit/50ec1bd26a5032caf210a25aedce4484b80a506c))
+- **repeat:** edge case leading to many wrong creations ([888534d](https://github.com/johannesjo/super-productivity/commit/888534dbaf51c59cd50829a9634b14219609c746))
+- sync show gitlab issue detail [#2115](https://github.com/johannesjo/super-productivity/issues/2115) ([9577c3e](https://github.com/johannesjo/super-productivity/commit/9577c3e76917218a38ec76fdfe3d0a6ed86b14fa))
+- **sync:** improve isReady handling ([e23e8cb](https://github.com/johannesjo/super-productivity/commit/e23e8cbb60e267098ef16878a47ad01232b796ea))
+- **sync:** initial sync not working ([47514d2](https://github.com/johannesjo/super-productivity/commit/47514d2b9edf74aed922582182009ab6c28f2fc7))
+- **sync:** issue when data when dropbox access token is saved initially which leads to a sync conflict ([8459e07](https://github.com/johannesjo/super-productivity/commit/8459e07704026c459ce44de62d8b8e3d8cc1737c))
+- **sync:** make using legacy dropbox token work ([a244d3f](https://github.com/johannesjo/super-productivity/commit/a244d3fb4cee307cf92903b448ac02f69899d939))
+
+### Features
+
+- add better solution for multi instance warning ([21e23ba](https://github.com/johannesjo/super-productivity/commit/21e23baa1bc4e7a3403d850f70cfa0c57e417054))
+- add shortcut for sync ([4f9effc](https://github.com/johannesjo/super-productivity/commit/4f9effcc2bb199934cd8343272b5f4a045aba06d))
+- always remove from today if scheduled for other day ([cd1ce32](https://github.com/johannesjo/super-productivity/commit/cd1ce32759b0357713b4443ae38eb54bae52a27f))
+- hide disabled notes button for very small mobile ([72ddf91](https://github.com/johannesjo/super-productivity/commit/72ddf9175445ff332c348f2fd2c35d35d362592b))
+- hide dot menu for very small mobile ([2133a16](https://github.com/johannesjo/super-productivity/commit/2133a163b5f724bcd404c74fe32c6a60580a9235))
+- improve show logic for add to backlog during schedule ([314cbb5](https://github.com/johannesjo/super-productivity/commit/314cbb5394ad2ae8ab86f027cca3502a6b72cb5a))
+- make dialogs wider on mobile ([d8f8017](https://github.com/johannesjo/super-productivity/commit/d8f80175545343ff10277cf5287f69fc424f72f3))
+- make mobile suer small even smaller ([5fda8c3](https://github.com/johannesjo/super-productivity/commit/5fda8c3c235f24b913aff6837e3b374b6b918411))
+- make ultra small screen smaller ([aaadf07](https://github.com/johannesjo/super-productivity/commit/aaadf07119aa50d1b6d50a1e461863c26aacd828))
+- properly hide key indicator for mobile ([896cbfb](https://github.com/johannesjo/super-productivity/commit/896cbfb0e39551afc56d01b925510234e4b0be28))
+- reverse history week items on mobile ([7fabae3](https://github.com/johannesjo/super-productivity/commit/7fabae390447660772a07408f42b74a952659092))
+- **sync:** prompt to delete dropbox tokens when sync is disabled ([642984a](https://github.com/johannesjo/super-productivity/commit/642984a85448a35e4b3bac89c18b8816c70b5175))
+- **sync:** remove compression and encryption strings from sync file ([75ec8c8](https://github.com/johannesjo/super-productivity/commit/75ec8c82388854d778adeb2226aceb63abb864de))
+- **timeline:** improve mobile styles ([fd66e7b](https://github.com/johannesjo/super-productivity/commit/fd66e7ba7960bc54e27a1c29425d6e449ad1172d))
+- **timeline:** improve mobile styles 2 ([73c56af](https://github.com/johannesjo/super-productivity/commit/73c56afe9e6b2d9e9eb88d2ed3afbc5a068a5802))
+
+# [9.0.0-rc.0](https://github.com/johannesjo/super-productivity/compare/v8.0.10...v9.0.0-rc.0) (2024-07-08)
+
+### Bug Fixes
+
+- **2FileSync:** tooltip not shown ([44dcf18](https://github.com/johannesjo/super-productivity/commit/44dcf1895519377463f0890ada8c40f65fa6cd05))
+- add task bar click on item not working ([10ccd07](https://github.com/johannesjo/super-productivity/commit/10ccd073c822cae53d74083b73ac36215117a862))
+- also handle task sub tasks tags for task deletion [#3205](https://github.com/johannesjo/super-productivity/issues/3205) ([4e2add5](https://github.com/johannesjo/super-productivity/commit/4e2add51b70f2a15cb10dbce7b2ba4dd091180e4))
+- autocomplete items being two lines ([7da8b85](https://github.com/johannesjo/super-productivity/commit/7da8b85b710724aaa24d88d5db7d464768c478f8))
+- cannot read properties of undefined reading color [#3208](https://github.com/johannesjo/super-productivity/issues/3208) ([cc193a0](https://github.com/johannesjo/super-productivity/commit/cc193a072cea6d381c74bf28d1048673c115a840))
+- don't error when deleting sub tasks ([54c0537](https://github.com/johannesjo/super-productivity/commit/54c05371d73c52f16fab7479dd5098ef9a4ab6bb))
+- focus mode styles ([70d1eab](https://github.com/johannesjo/super-productivity/commit/70d1eab7f735ca1cc8724ce4c408b57c9b9fd14c))
+- icons not always being centered ([b393d99](https://github.com/johannesjo/super-productivity/commit/b393d99274f040300e243d7a7965801cf385ac94))
+- mac icon [#3213](https://github.com/johannesjo/super-productivity/issues/3213) ([0763e2d](https://github.com/johannesjo/super-productivity/commit/0763e2dbcfb417eb002df8572ca5a53b7d2590a1))
+- markdown content not being parsed correctly ([0a78fc2](https://github.com/johannesjo/super-productivity/commit/0a78fc2ee86bc06de8a6f361cbddd5dd3c286acc))
+- metric page chart reloads when tracking ([5d58c53](https://github.com/johannesjo/super-productivity/commit/5d58c53fe1d514139d8e6b7b975c6cb735f2ca8d))
+- open issue not working anymore ([114cf5a](https://github.com/johannesjo/super-productivity/commit/114cf5a0cd86976ca5093d72e00d4a7455ee881b))
+- play indicator interfering with task drag ([cdffb5c](https://github.com/johannesjo/super-productivity/commit/cdffb5cb40106d4da8511d63bc4eeedd165d7a9f))
+- refocus after add task btn ([b3f0647](https://github.com/johannesjo/super-productivity/commit/b3f0647c4a592be56040501a2c143dfaf595af5f))
+- remove idle dialog showing every time ([8c04322](https://github.com/johannesjo/super-productivity/commit/8c043223ff8c70f2b0c050298d7e1c931e384309))
+- scroll jump after closing right panel ([01a8d4b](https://github.com/johannesjo/super-productivity/commit/01a8d4bc8448805962878f9fc4dcb37ed9ba4a23))
+- search bar not working as expected ([2dc08bd](https://github.com/johannesjo/super-productivity/commit/2dc08bde7c1768d729c3c82a8cb292f6df626381))
+- search bar not working correctly ([dbac733](https://github.com/johannesjo/super-productivity/commit/dbac733178cc3b281881eb441b42e1f449406595))
+- shepherd navigating initially ([6f6c626](https://github.com/johannesjo/super-productivity/commit/6f6c6266838f7738c3c2c26400d6c50dcb42bf93))
+- shepherd onboarding unwanted route change ([3e2f21d](https://github.com/johannesjo/super-productivity/commit/3e2f21d9dd8f7778c35635be44fd3f8095e67fa2))
+- styling for summary table ([2d01ec5](https://github.com/johannesjo/super-productivity/commit/2d01ec5b0942f94f0bb2f2c6aec584e91a6a6dcd))
+- task attachment btns ([3461bf6](https://github.com/johannesjo/super-productivity/commit/3461bf63a5d07cbb866519a0379b5941d9afe45f))
+- zoomFactor error value [#3218](https://github.com/johannesjo/super-productivity/issues/3218) ([24448e8](https://github.com/johannesjo/super-productivity/commit/24448e813ac181a42632f3ab16174c011310b31b))
+
+### Features
+
+- **2FileSync:** add first draft for \_importMainFileAppDataAndArchiveIfNecessary ([85057d2](https://github.com/johannesjo/super-productivity/commit/85057d2b80f6558e36a319c93887cdb435a3599b))
+- **2FileSync:** add first draft for upload data code ([d292c79](https://github.com/johannesjo/super-productivity/commit/d292c7916efc22baa08a2025d39394c49860ef51))
+- **2FileSync:** add more rigid error handling ([725609c](https://github.com/johannesjo/super-productivity/commit/725609c31859e7a9bd96100481c5ef3ffa2177f7))
+- **2FileSync:** allow for longer sync errors ([d0cfbf8](https://github.com/johannesjo/super-productivity/commit/d0cfbf845105af892ad0fb61bb93c20608a6e3a3))
+- **2FileSync:** also consider archive only changes for sync ([c33e5d1](https://github.com/johannesjo/super-productivity/commit/c33e5d16f830a92f77588480c58bd819a31983cb))
+- **2FileSync:** always force archive update after conflict ([c193243](https://github.com/johannesjo/super-productivity/commit/c193243a45d00d655f3d2ad559a47188abe6f726))
+- **2FileSync:** fix error with upload ([5af7ad2](https://github.com/johannesjo/super-productivity/commit/5af7ad296c66537e3f38a980b6895169fcd7ae26))
+- **2FileSync:** improve error msgs ([c53e049](https://github.com/johannesjo/super-productivity/commit/c53e0498d0d7eda6ba2e401585bea59d20af7745))
+- **2FileSync:** improve logging ([7612466](https://github.com/johannesjo/super-productivity/commit/7612466b764a84fe4100271c447a3c5ece997934))
+- **2FileSync:** improve wording ([3c26000](https://github.com/johannesjo/super-productivity/commit/3c260003f62885e05fd817e01e83ad856c80e15e))
+- **2FileSync:** make archive rev update in main file work properly ([a4dc4f4](https://github.com/johannesjo/super-productivity/commit/a4dc4f4d8c4708d98ca4c83ebfbd0dac78d017a2))
+- **2FileSync:** make basic conflict handling work again ([ab624ab](https://github.com/johannesjo/super-productivity/commit/ab624ab0b0a6865e043780531b42de4a4a57d5ab))
+- **2FileSync:** make new sync work for webDav and localFile ([3efe7b2](https://github.com/johannesjo/super-productivity/commit/3efe7b2e68e4b16b8c8d54387454010da2ecf06e))
+- **2FileSync:** make special edge case work ([1271392](https://github.com/johannesjo/super-productivity/commit/12713922f043a001ceb339a0eb73eb298e26db15))
+- **2FileSync:** make upload error actually error ([4fb3c5b](https://github.com/johannesjo/super-productivity/commit/4fb3c5b6c158d4ed0846ae6447343e075065696e))
+- **2FileSync:** make upload file behavior work better ([004d9ea](https://github.com/johannesjo/super-productivity/commit/004d9ead55288c376e79fc35446c272b3d398078))
+- **2FileSync:** more rigid error handling for all ([daf902d](https://github.com/johannesjo/super-productivity/commit/daf902d63aad307e0bb3ca5ffeffa854c921302a))
+- **2FileSync:** only ask once to force update ([0991b48](https://github.com/johannesjo/super-productivity/commit/0991b48c0d04dde274c672e398d96d223deae4eb))
+- **2FileSync:** outline basic stuff ([83ae398](https://github.com/johannesjo/super-productivity/commit/83ae398f3ec93aae0cfaa46ade6d4d5b65707755))
+- **2FileSync:** outline folder based sync flow ([0a889cb](https://github.com/johannesjo/super-productivity/commit/0a889cb50633f9cec9b3e106f9a6476f77a9f755))
+- **2FileSync:** outline more stuff ([30b71a1](https://github.com/johannesjo/super-productivity/commit/30b71a1f7de10dba34a63ca9557e6c798368833e))
+- **2FileSync:** prevent multiple conflict dialogs ([3f27de5](https://github.com/johannesjo/super-productivity/commit/3f27de585ea1d7caaccfef7a0c4bb491280a9c4f))
+- **2FileSync:** reduce precision for workStart and workEnd times ([857b53a](https://github.com/johannesjo/super-productivity/commit/857b53a5f1fbdae529c320d1a4d8b493b8760f99))
+- **2FileSync:** replace remaining occurrences of syncFilePath ([9fcc5c9](https://github.com/johannesjo/super-productivity/commit/9fcc5c92719a8a447a8170a08c7282e6e0dc7e51))
+- **2FileSync:** save update last archive update somewhere ([6ac46de](https://github.com/johannesjo/super-productivity/commit/6ac46dea349349a703b486fc5067f6d2ff58cff2))
+- **2FileSync:** show special warning when able to upload archive but not main file ([dc3bd6a](https://github.com/johannesjo/super-productivity/commit/dc3bd6aae56d56a1532dfd15c0527d7819a6c75a))
+- **2FileSync:** show warning to users that might have legacy data in the old cloud file and also force archive update for several conflict cases ([352f62a](https://github.com/johannesjo/super-productivity/commit/352f62acf8f5331c4bc520a68c53b3d25e4df4c6))
+- **2FileSync:** throw error when remote archive revs do not match ([d2c264b](https://github.com/johannesjo/super-productivity/commit/d2c264ba1d3d9af3643e2b4546d6f6330553d8ff))
+- **2FileSync:** write new sync provider functions for dropbox ([1fd1916](https://github.com/johannesjo/super-productivity/commit/1fd19169d03dfede642f6a7ecacf02bdc1458ea1))
+- Add current keyboard shortcuts to app menu's [#3063](https://github.com/johannesjo/super-productivity/issues/3063) ([7af695b](https://github.com/johannesjo/super-productivity/commit/7af695b04e95595cbf3957c48d56528e6ee6b0ce))
+- adjust label text for estimate dialog ([2b3450c](https://github.com/johannesjo/super-productivity/commit/2b3450c04008e8a1797f26b336c7cb422d84a7f6))
+- adjust scroll bar styles ([c9ff195](https://github.com/johannesjo/super-productivity/commit/c9ff195da2f46d9b6a673ad2d6bffed0d4e6b585))
+- change default accent color ([418ec54](https://github.com/johannesjo/super-productivity/commit/418ec547d08925e7888f311873c39b6c5db140b7))
+- don't show keyboard shortcuts on mobile ([242bae5](https://github.com/johannesjo/super-productivity/commit/242bae5acc246074149895898577d644e8f2830a))
+- hide focus mode on mobile ([3027c87](https://github.com/johannesjo/super-productivity/commit/3027c87e360f9da5d543688e8fc5cd4e8ec5aa82))
+- hide idle handling cfg on android ([579b643](https://github.com/johannesjo/super-productivity/commit/579b64336eaabd5f695702231c1f54db78396d45))
+- **idle:** change order of buttons ([d9cc580](https://github.com/johannesjo/super-productivity/commit/d9cc5807d741394cda642971259d9a8a2b2208d2))
+- **idle:** make reset break timer from idle dialog work again ([ff504e3](https://github.com/johannesjo/super-productivity/commit/ff504e321391acfcd923b035ad00887f52751468))
+- improve ani flow on pages with spinner ([21d9de9](https://github.com/johannesjo/super-productivity/commit/21d9de9aa5c663be1c4dab7c52392bfee502b6d6))
+- improve idle dialog by removing task + break case ([8b770b2](https://github.com/johannesjo/super-productivity/commit/8b770b286fa5ab11b8bc42eb61efd26c3a6883eb))
+- improve schedule styling ([a2accca](https://github.com/johannesjo/super-productivity/commit/a2accca0e46147c0cc969fd0a09adaced01e29ee))
+- improve shortcut preview styling ([63ea2c4](https://github.com/johannesjo/super-productivity/commit/63ea2c417149df6a0f5bca6e7ac7f399be906cf6))
+- improve styling 2 ([a8e4ab5](https://github.com/johannesjo/super-productivity/commit/a8e4ab55b30d750eb41d7ec88e0e705a708f0826))
+- improve task additional info mobile subtask and title styles ([12056ce](https://github.com/johannesjo/super-productivity/commit/12056ce48c4e7f1312382a9e7d92a063af08e46f))
+- make keyboard shortcuts less intense ([33e24e4](https://github.com/johannesjo/super-productivity/commit/33e24e4682cf413d9c14061da0eabf8b99681347))
+- never show multi instance warning on android ([10f8407](https://github.com/johannesjo/super-productivity/commit/10f84070b98fb08ef5bf3b01745517439ca225bb))
+- remove number of divs ([9b4b4b8](https://github.com/johannesjo/super-productivity/commit/9b4b4b82819f407eb5504ece0149c419fc0e2183))
+- **task:** improve styling ([19f39c4](https://github.com/johannesjo/super-productivity/commit/19f39c4226493d32383d4a89986fd44939166af0))
+- **timeline:** base item size on duration ([4f449a1](https://github.com/johannesjo/super-productivity/commit/4f449a17aa6f2d21b80cec2b52dbc09a51e332ce))
+
 ## [8.0.10](https://github.com/johannesjo/super-productivity/compare/v8.0.9...v8.0.10) (2024-06-17)
 
 ### Bug Fixes

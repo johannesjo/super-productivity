@@ -20,6 +20,7 @@ import { TaskService } from '../task.service';
 import { getDateTimeFromClockString } from '../../../util/get-date-time-from-clock-string';
 import { DEFAULT_DAY_START } from '../../config/default-global-config.const';
 import { moveProjectTaskToBacklogListAuto } from '../../project/store/project.actions';
+import { isSameDay } from '../../../util/is-same-day';
 
 @Injectable()
 export class TaskReminderEffects {
@@ -36,7 +37,7 @@ export class TaskReminderEffects {
           ico: 'schedule',
         }),
       ),
-      mergeMap(({ task, remindAt, isMoveToBacklog }) => {
+      mergeMap(({ task, remindAt, plannedAt, isMoveToBacklog }) => {
         if (isMoveToBacklog && !task.projectId) {
           throw new Error('Move to backlog not possible for non project tasks');
         }
@@ -50,7 +51,10 @@ export class TaskReminderEffects {
           truncate(task.title),
           remindAt,
         );
-        const isRemoveFromToday = isMoveToBacklog && task.tagIds.includes(TODAY_TAG.id);
+
+        const isRemoveFromToday =
+          task.tagIds.includes(TODAY_TAG.id) &&
+          (!isSameDay(new Date(), plannedAt) || isMoveToBacklog);
 
         return [
           updateTask({
@@ -98,14 +102,18 @@ export class TaskReminderEffects {
           ico: 'schedule',
         }),
       ),
-      mergeMap(({ task, remindAt, isMoveToBacklog }) => {
+      mergeMap(({ task, remindAt, plannedAt, isMoveToBacklog }) => {
         if (isMoveToBacklog && !task.projectId) {
           throw new Error('Move to backlog not possible for non project tasks');
         }
         if (typeof remindAt !== 'number') {
           return EMPTY;
         }
-        const isRemoveFromToday = isMoveToBacklog && task.tagIds.includes(TODAY_TAG.id);
+
+        const isRemoveFromToday =
+          task.tagIds.includes(TODAY_TAG.id) &&
+          (!isSameDay(new Date(), plannedAt) || isMoveToBacklog);
+
         return [
           ...(isMoveToBacklog
             ? [

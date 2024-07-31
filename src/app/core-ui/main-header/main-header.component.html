@@ -24,7 +24,7 @@
     <button
       [mat-menu-trigger-for]="activeWorkContextMenu"
       [matTooltip]="T.MH.PROJECT_MENU|translate"
-      class="project-settings-btn"
+      class="project-settings-btn hide-xxxs"
       mat-icon-button
     >
       <mat-icon>more_vert</mat-icon>
@@ -61,7 +61,7 @@
 
     <button
       *ngIf="(syncProviderService.isEnabled$|async)"
-      matTooltip="T.MH.TRIGGER_SYNC|translate"
+      matTooltip="{{T.MH.TRIGGER_SYNC|translate}}"
       (click)="sync()"
       mat-icon-button
     >
@@ -92,6 +92,7 @@
       *ngIf="!(globalConfigService.cfg$|async)?.focusMode?.isAlwaysUseFocusMode"
       mat-icon-button
       matTooltip="Enter focus mode {{kb.goToFocusMode?'['+kb.goToFocusMode+']':''}}"
+      class="hide-xxs"
       (click)="enableFocusMode()"
     >
       <mat-icon>center_focus_strong</mat-icon>

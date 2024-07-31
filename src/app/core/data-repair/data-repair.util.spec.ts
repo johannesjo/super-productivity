@@ -64,6 +64,7 @@ describe('dataRepair()', () => {
     ).toEqual({
       ...mock,
       task: taskState,
+      // TODO fix
       taskArchive: {
         ...createEmptyEntity(),
       },

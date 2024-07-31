@@ -8,65 +8,72 @@ on:
 jobs:
   snap-release:
     runs-on: ubuntu-latest
+    env:
+      SNAPCRAFT_STORE_CREDENTIALS: ${{ secrets.SNAPCRAFT_STORE_CREDENTIALS }}
 
     if: '!github.event.release.prerelease'
 
     steps:
-      - uses: actions/setup-node@v3
-        with:
-          node-version: 20
-      - name: Check out Git repository
-        uses: actions/checkout@v4
-        with:
-          persist-credentials: false
-      # work around for npm installs from git+https://github.com/johannesjo/J2M.git
-      - name: Reconfigure git to use HTTP authentication
-        run: >
-          git config --global url."https://github.com/".insteadOf
-          ssh://git@github.com/
-
-      - name: Get npm cache directory
-        id: npm-cache-dir
-        run: |
-          echo "::set-output name=dir::$(npm config get cache)"
-      - uses: actions/cache@v4
-        id: npm-cache # use this to check for `cache-hit` ==> if: steps.npm-cache.outputs.cache-hit != 'true'
-        with:
-          path: ${{ steps.npm-cache-dir.outputs.dir }}
-          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-node-
-
-      - name: Install npm Packages
-        #  if: steps.npm-cache.outputs.cache-hit != 'true'
-        run: npm i
-
-      - name: Lint
-        run: npm run lint
-
-      - name: Test Unit
-        run: npm run test
-
-      - name: Test E2E
-        run: npm run e2e
-
-      - name: Build Frontend & Electron
-        run: npm run build
-
       - name: Install Snapcraft
         uses: samuelmeuli/action-snapcraft@v2
-        env:
-          SNAPCRAFT_STORE_CREDENTIALS: ${{ secrets.SNAPCRAFT_STORE_CREDENTIALS }}
-
-      - name: Build/Release Electron app
-        uses: johannesjo/action-electron-builder@v1
-        with:
-          build_script_name: empty
-          github_token: ${{ secrets.github_token }}
-          release: ${{ startsWith(github.ref, 'refs/tags/v') }}
-        env:
-          SNAPCRAFT_STORE_CREDENTIALS: ${{ secrets.SNAPCRAFT_STORE_CREDENTIALS }}
-
-      - run: snapcraft push app-builds/superProductivity*.snap --release stable
-        env:
-          SNAPCRAFT_STORE_CREDENTIALS: ${{ secrets.SNAPCRAFT_STORE_CREDENTIALS }}
+      - run: yes | snapcraft promote superproductivity --from-channel latest/edge --to-channel latest/stable
+        env: # Workaround for https://github.com/snapcore/snapcraft/issues/4439
+          SNAPCRAFT_HAS_TTY: 'true'
+#      - uses: actions/setup-node@v3
+#        with:
+#          node-version: 20
+#      - name: Check out Git repository
+#        uses: actions/checkout@v4
+#        with:
+#          persist-credentials: false
+#      # work around for npm installs from git+https://github.com/johannesjo/J2M.git
+#      - name: Reconfigure git to use HTTP authentication
+#        run: >
+#          git config --global url."https://github.com/".insteadOf
+#          ssh://git@github.com/
+#
+#      - name: Get npm cache directory
+#        id: npm-cache-dir
+#        run: |
+#          echo "::set-output name=dir::$(npm config get cache)"
+#      - uses: actions/cache@v4
+#        id: npm-cache # use this to check for `cache-hit` ==> if: steps.npm-cache.outputs.cache-hit != 'true'
+#        with:
+#          path: ${{ steps.npm-cache-dir.outputs.dir }}
+#          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+#          restore-keys: |
+#            ${{ runner.os }}-node-
+#
+#      - name: Install npm Packages
+#        #  if: steps.npm-cache.outputs.cache-hit != 'true'
+#        run: npm i
+#
+#      - name: Lint
+#        run: npm run lint
+#
+#      - name: Test Unit
+#        run: npm run test
+#
+#      - name: Test E2E
+#        run: npm run e2e
+#
+#      - name: Build Frontend & Electron
+#        run: npm run build
+#
+#      - name: Install Snapcraft
+#        uses: samuelmeuli/action-snapcraft@v2
+#        env:
+#          SNAPCRAFT_STORE_CREDENTIALS: ${{ secrets.SNAPCRAFT_STORE_CREDENTIALS }}
+#
+#      - name: Build/Release Electron app
+#        uses: johannesjo/action-electron-builder@v1
+#        with:
+#          build_script_name: empty
+#          github_token: ${{ secrets.github_token }}
+#          release: ${{ startsWith(github.ref, 'refs/tags/v') }}
+#        env:
+#          SNAPCRAFT_STORE_CREDENTIALS: ${{ secrets.SNAPCRAFT_STORE_CREDENTIALS }}
+#
+#      - run: snapcraft push app-builds/superProductivity*.snap --release stable
+#        env:
+#          SNAPCRAFT_STORE_CREDENTIALS: ${{ secrets.SNAPCRAFT_STORE_CREDENTIALS }}

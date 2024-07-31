@@ -8,6 +8,7 @@ import '@angular/common/locales/global/en';
 import '@angular/common/locales/global/es';
 import '@angular/common/locales/global/de';
 import '@angular/common/locales/global/ar';
+import '@angular/common/locales/global/cs';
 import '@angular/common/locales/global/fa';
 import '@angular/common/locales/global/fr';
 import '@angular/common/locales/global/ja';
@@ -71,7 +72,7 @@ export enum LanguageCode {
 export enum LanguageCodeMomentMap {
   ar = 'ar',
   de = 'de',
-  cz = 'cz',
+  cz = 'cs',
   en = 'en',
   es = 'es',
   fa = 'fa',

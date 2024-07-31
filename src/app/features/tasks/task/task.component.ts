@@ -85,8 +85,7 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
   isShowAddToToday: boolean = false;
   isShowRemoveFromToday: boolean = false;
 
-  @ViewChild('contentEditableOnClickEl', { static: true })
-  contentEditableOnClickEl?: ElementRef;
+  @ViewChild('taskTitleEditEl', { static: true }) taskTitleEditEl?: ElementRef;
   @ViewChild('blockLeftEl') blockLeftElRef?: ElementRef;
   @ViewChild('blockRightEl') blockRightElRef?: ElementRef;
   @ViewChild('innerWrapperEl', { static: true }) innerWrapperElRef?: ElementRef;
@@ -249,9 +248,24 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
     //   });
 
     // hacky but relatively performant
-    if (this.task.parentId && Date.now() - 100 < this.task.created) {
+    if (
+      this.task.parentId &&
+      Date.now() - 200 < this.task.created &&
+      !this.task.title.length
+    ) {
       setTimeout(() => {
-        this.focusTitleForEdit();
+        // when there are multiple instances with the same task we should focus the last one, since it is the one in the
+        // task side panel
+        const otherTaskEl = document.querySelectorAll('#t-' + this.task.id);
+        if (
+          otherTaskEl?.length <= 1 ||
+          Array.from(otherTaskEl).findIndex(
+            (item) => item === this._elementRef.nativeElement,
+          ) ===
+            otherTaskEl.length - 1
+        ) {
+          this.focusTitleForEdit();
+        }
       });
     }
   }
@@ -259,10 +273,7 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
   ngOnDestroy(): void {
     this._destroy$.next(true);
     this._destroy$.unsubscribe();
-
-    if (this._currentPanTimeout) {
-      window.clearTimeout(this._currentPanTimeout);
-    }
+    window.clearTimeout(this._currentPanTimeout);
   }
 
   editReminder(): void {
@@ -320,15 +331,13 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   updateTaskTitleIfChanged({
-    isChanged,
     newVal,
+    wasChanged,
   }: {
-    isChanged: boolean;
     newVal: string;
-    $taskEl: HTMLElement | null;
-    event: Event;
+    wasChanged: boolean;
   }): void {
-    if (isChanged) {
+    if (wasChanged) {
       this._taskService.update(this.task.id, { title: newVal });
     }
     this.focusSelf();
@@ -521,20 +530,22 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   focusTitleForEdit(): void {
-    if (!this.contentEditableOnClickEl) {
+    if (!this.taskTitleEditEl || !(this.taskTitleEditEl as any).textarea.nativeElement) {
+      console.log(this.taskTitleEditEl);
       throw new Error('No el');
     }
-    this.contentEditableOnClickEl.nativeElement.focus();
+    (this.taskTitleEditEl as any).textarea.nativeElement.focus();
+    //  (this.taskTitleEditEl as any).textarea.nativeElement.focus();
   }
 
   openContextMenu(event: TouchEvent | MouseEvent): void {
-    if (!this.contentEditableOnClickEl || !this.contextMenu) {
+    if (!this.taskTitleEditEl || !this.contextMenu) {
       throw new Error('No el');
     }
     event.preventDefault();
     event.stopPropagation();
     event.stopImmediatePropagation();
-    this.contentEditableOnClickEl.nativeElement.blur();
+    (this.taskTitleEditEl as any).textarea.nativeElement.blur();
     this.contextMenuPosition.x =
       ('touches' in event ? event.touches[0].clientX : event.clientX) + 'px';
     this.contextMenuPosition.y =
@@ -550,7 +561,7 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
     if (!IS_TOUCH_PRIMARY) {
       return;
     }
-    if (!this.contentEditableOnClickEl) {
+    if (!this.taskTitleEditEl) {
       throw new Error('No el');
     }
 
@@ -559,7 +570,7 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
     if (
       (targetEl.className.indexOf && targetEl.className.indexOf('drag-handle') > -1) ||
       Math.abs(ev.deltaY) > Math.abs(ev.deltaX) ||
-      document.activeElement === this.contentEditableOnClickEl.nativeElement ||
+      document.activeElement === (this.taskTitleEditEl as any).textarea.nativeElement ||
       ev.isFinal
     ) {
       return;
@@ -772,7 +783,7 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
 
     const MAGIC_FACTOR = 2;
     this.isPreventPointerEventsWhilePanning = true;
-    // this.contentEditableOnClickEl.nativeElement.blur();
+    //  (this.taskTitleEditEl as any).textarea.nativeElement.blur();
     if (targetRef) {
       let scale = (ev.deltaX / this._elementRef.nativeElement.offsetWidth) * MAGIC_FACTOR;
       scale = this.isLockPanLeft ? scale * -1 : scale;
@@ -797,7 +808,7 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
 
   private _resetAfterPan(): void {
     if (
-      !this.contentEditableOnClickEl ||
+      !this.taskTitleEditEl ||
       !this.blockLeftElRef ||
       !this.blockRightElRef ||
       !this.innerWrapperElRef
@@ -818,6 +829,9 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   get kb(): KeyboardConfig {
+    if (IS_TOUCH_PRIMARY) {
+      return {} as any;
+    }
     return (this._configService.cfg?.keyboard as KeyboardConfig) || {};
   }
 

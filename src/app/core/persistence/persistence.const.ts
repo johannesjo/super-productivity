@@ -4,7 +4,6 @@ import {
   PersistenceProjectModelCfg,
 } from './persistence.model';
 import { GlobalConfigState } from '../../features/config/global-config.model';
-import { DB_LEGACY } from './storage-keys.const';
 import { migrateGlobalConfigState } from '../../features/config/migrate-global-config.util';
 import { Reminder } from '../../features/reminder/reminder.model';
 import { Project, ProjectState } from '../../features/project/project.model';
@@ -89,13 +88,11 @@ interface PersistenceProjectModelCfgs {
 
 export const BASE_MODEL_CFGS: PersistenceBaseModelCfgs = {
   globalConfig: {
-    legacyKey: DB_LEGACY.GLOBAL_CFG,
     appDataKey: 'globalConfig',
     modelVersion: MODEL_VERSION.GLOBAL_CONFIG,
     migrateFn: migrateGlobalConfigState,
   },
   reminders: {
-    legacyKey: DB_LEGACY.REMINDER,
     appDataKey: 'reminders',
     modelVersion: MODEL_VERSION.___NOT_USED_YET___,
     // no migrations needed yet
@@ -105,7 +102,6 @@ export const BASE_MODEL_CFGS: PersistenceBaseModelCfgs = {
 
 export const ENTITY_MODEL_CFGS: PersistenceEntityModelCfgs = {
   project: {
-    legacyKey: DB_LEGACY.PROJECT_META_LIST,
     appDataKey: 'project',
     modelVersion: MODEL_VERSION.PROJECT,
     reducerFn: projectReducer as any,
@@ -113,21 +109,18 @@ export const ENTITY_MODEL_CFGS: PersistenceEntityModelCfgs = {
   },
 
   tag: {
-    legacyKey: DB_LEGACY.TAG_STATE,
     appDataKey: 'tag',
     modelVersion: MODEL_VERSION.TAG,
     reducerFn: tagReducer,
     migrateFn: migrateTagState,
   },
   simpleCounter: {
-    legacyKey: DB_LEGACY.SIMPLE_COUNTER_STATE,
     appDataKey: 'simpleCounter',
     modelVersion: MODEL_VERSION.SIMPLE_COUNTER,
     reducerFn: simpleCounterReducer,
     migrateFn: migrateSimpleCounterState,
   },
   note: {
-    legacyKey: DB_LEGACY.NOTE_STATE,
     appDataKey: 'note',
     modelVersion: MODEL_VERSION.NOTE,
     reducerFn: noteReducer,
@@ -136,14 +129,12 @@ export const ENTITY_MODEL_CFGS: PersistenceEntityModelCfgs = {
 
   // METRIC MODELS
   metric: {
-    legacyKey: DB_LEGACY.METRIC_STATE,
     appDataKey: 'metric',
     modelVersion: MODEL_VERSION.METRIC,
     reducerFn: metricReducer as any,
     migrateFn: migrateMetricState,
   },
   improvement: {
-    legacyKey: DB_LEGACY.IMPROVEMENT_STATE,
     appDataKey: 'improvement',
     modelVersion: MODEL_VERSION.___NOT_USED_YET___,
     reducerFn: improvementReducer,
@@ -151,7 +142,6 @@ export const ENTITY_MODEL_CFGS: PersistenceEntityModelCfgs = {
   },
 
   obstruction: {
-    legacyKey: DB_LEGACY.OBSTRUCTION_STATE,
     appDataKey: 'obstruction',
     modelVersion: MODEL_VERSION.___NOT_USED_YET___,
     reducerFn: obstructionReducer as any,
@@ -160,21 +150,18 @@ export const ENTITY_MODEL_CFGS: PersistenceEntityModelCfgs = {
 
   // MAIN TASK MODELS
   task: {
-    legacyKey: DB_LEGACY.TASK_STATE,
     appDataKey: 'task',
     modelVersion: MODEL_VERSION.TASK,
     reducerFn: taskReducer,
     migrateFn: migrateTaskState,
   },
   taskArchive: {
-    legacyKey: DB_LEGACY.TASK_ARCHIVE,
     appDataKey: 'taskArchive',
     modelVersion: MODEL_VERSION.TASK_ARCHIVE,
     reducerFn: taskReducer as any,
     migrateFn: migrateTaskArchiveState,
   },
   taskRepeatCfg: {
-    legacyKey: DB_LEGACY.TASK_REPEAT_CFG_STATE,
     appDataKey: 'taskRepeatCfg',
     modelVersion: MODEL_VERSION.TASK_REPEAT,
     reducerFn: taskRepeatCfgReducer as any,
@@ -187,7 +174,6 @@ export const ALL_ENTITY_MODEL_KEYS: (keyof AppBaseData)[] = Object.entries(
 
 export const PROJECT_MODEL_CFGS: PersistenceProjectModelCfgs = {
   bookmark: {
-    legacyKey: DB_LEGACY.BOOKMARK_STATE,
     appDataKey: 'bookmark',
   },
 };

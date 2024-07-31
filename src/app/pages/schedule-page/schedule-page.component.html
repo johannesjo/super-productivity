@@ -30,14 +30,12 @@
           <div class="scheduled-task-content">
             <div class="task-info">
               <div class="title">
-                <div
-                  (editFinished)="updateTaskTitleIfChanged($event.isChanged, $event.newVal, task)"
+                <inline-multiline-input
+                  [resetToLastExternalValueTrigger]="task"
+                  (valueEdited)="updateTaskTitleIfChanged($event.wasChanged, $event.newVal, task)"
+                  [value]="task.title"
                   class="task-title"
-                  contentEditableOnClick
-                  contenteditable="true"
-                >
-                  {{task.title}}
-                </div>
+                ></inline-multiline-input>
                 <tag-list
                   [isShowProjectTagAlways]="true"
                   [task]="task"
@@ -142,14 +140,12 @@
           <div class="repeat-task-cfg-content">
             <div class="task-info">
               <div class="title">
-                <div
-                  (editFinished)="updateRepeatableTitleIfChanged($event.isChanged, $event.newVal, taskRepeatCfg)"
+                <inline-multiline-input
+                  (valueEdited)="updateRepeatableTitleIfChanged($event.wasChanged, $event.newVal, taskRepeatCfg)"
+                  [value]="taskRepeatCfg.title"
                   class="task-title"
-                  contentEditableOnClick
-                  contenteditable="true"
-                >
-                  {{taskRepeatCfg.title}}
-                </div>
+                ></inline-multiline-input>
+
                 <tag-list
                   [isShowProjectTagAlways]="true"
                   [task]="taskRepeatCfg"

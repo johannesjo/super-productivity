@@ -64,8 +64,8 @@ export class TakeABreakService {
 
   private _isIdleResetEnabled$: Observable<boolean> = this._configService.idle$.pipe(
     switchMap((idleCfg) => {
-      const isConfigured =
-        idleCfg.isEnableIdleTimeTracking && idleCfg.isUnTrackedIdleResetsBreakTimer;
+      const isConfigured = idleCfg.isEnableIdleTimeTracking;
+      // return [true];
       if (IS_ELECTRON) {
         return [isConfigured];
       } else if (isConfigured) {

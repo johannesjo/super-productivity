@@ -8,6 +8,8 @@ on:
 jobs:
   linux-bin-and-snap-release:
     runs-on: ubuntu-latest
+    env:
+      SNAPCRAFT_STORE_CREDENTIALS: ${{ secrets.SNAPCRAFT_STORE_CREDENTIALS }}
 
     steps:
       - uses: actions/setup-node@v3
@@ -53,8 +55,6 @@ jobs:
 
       - name: Install Snapcraft
         uses: samuelmeuli/action-snapcraft@v2
-        env:
-          SNAPCRAFT_STORE_CREDENTIALS: ${{ secrets.SNAPCRAFT_STORE_CREDENTIALS }}
 
       - name: Build/Release Electron app
         uses: johannesjo/action-electron-builder@v1
@@ -62,20 +62,21 @@ jobs:
           build_script_name: empty
           github_token: ${{ secrets.github_token }}
           release: ${{ startsWith(github.ref, 'refs/tags/v') }}
-        env:
-          SNAPCRAFT_STORE_CREDENTIALS: ${{ secrets.SNAPCRAFT_STORE_CREDENTIALS }}
 
       # rename to possibly fix release issue
       - run: find ./app-builds -type f -name '*.snap' -exec sh -c 'x="{}"; mv "$x" "app-builds/sp.snap"' \;
       # Release to edge if no tag and to candidate if tag
-      - run: snapcraft push app-builds/sp.snap --release edge
+      - #otherwise it would be executed twice
         if: false == startsWith(github.ref, 'refs/tags/v')
-        env:
-          SNAPCRAFT_STORE_CREDENTIALS: ${{ secrets.SNAPCRAFT_STORE_CREDENTIALS }}
-      - run: snapcraft push app-builds/sp.snap --release candidate
-        if: startsWith(github.ref, 'refs/tags/v')
-        env:
-          SNAPCRAFT_STORE_CREDENTIALS: ${{ secrets.SNAPCRAFT_STORE_CREDENTIALS }}
+        uses: nick-fields/retry@v3
+        with:
+          max_attempts: 2
+          timeout_minutes: 11
+          command: snapcraft push app-builds/sp.snap --release edge
+      #      - run: snapcraft push app-builds/sp.snap --release candidate
+      #        if: startsWith(github.ref, 'refs/tags/v')
+  #      - run: snapcraft promote superproductivity --from-channel latest/edge --to-channel latest/candidate --yes
+  #        if: startsWith(github.ref, 'refs/tags/v')
 
   mac-bin:
     runs-on: macos-latest
@@ -111,6 +112,9 @@ jobs:
           key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
           restore-keys: |
             ${{ runner.os }}-node-
+
+      - name: Workaround for nx issue and dmg licence issue
+        run: npm install @nx/nx-darwin-arm64 dmg-license
 
       - name: Install npm Packages
         #  if: steps.npm-cache.outputs.cache-hit != 'true'
@@ -193,6 +197,9 @@ jobs:
           key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
           restore-keys: |
             ${{ runner.os }}-node-
+
+      - name: Workaround for nx issue
+        run: npm install @nx/nx-win32-x64-msvc
 
       - name: Install npm Packages
         #  if: steps.npm-cache.outputs.cache-hit != 'true'

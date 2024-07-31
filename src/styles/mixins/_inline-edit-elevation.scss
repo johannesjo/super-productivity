@@ -8,12 +8,13 @@ $shadow-edit-on-click-light: $whiteframe-shadow-7dp;
   background: #fff;
   box-shadow: $shadow-edit-on-click-light;
   color: $light-theme-text-color-most-intense;
-  border: 1px solid $light-theme-extra-border-color;
+  border: 1px solid $c-accent;
+  //border: 1px solid $light-theme-extra-border-color;
 
   @include darkTheme() {
     background: $dark-theme-bg-lightest;
     box-shadow: $shadow-edit-on-click-dark;
     color: $dark-theme-text-color-most-intense;
-    border-color: $dark-theme-extra-border-color;
+    //border-color: $dark-theme-extra-border-color;
   }
 }

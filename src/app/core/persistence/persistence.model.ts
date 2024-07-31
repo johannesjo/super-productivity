@@ -17,10 +17,10 @@ export interface PersistenceBaseEntityModel<S, M> extends PersistenceBaseModel<S
   getById(id: string): Promise<M>;
 
   // NOTE: side effects are not executed!!!
-  execAction(action: Action): Promise<S>;
+  execAction(action: Action, isSyncModelChange?: boolean): Promise<S>;
 
   // NOTE: side effects are not executed!!!
-  execActions(actions: Action[]): Promise<S>;
+  execActions(actions: Action[], isSyncModelChange?: boolean): Promise<S>;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -46,7 +46,6 @@ export interface PersistenceForProjectModel<S, M> {
 }
 
 export interface PersistenceBaseModelCfg<S> {
-  legacyKey: string;
   appDataKey: keyof AppBaseData;
   modelVersion: number;
   migrateFn: (state: S) => S;
@@ -55,7 +54,6 @@ export interface PersistenceBaseModelCfg<S> {
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export interface PersistenceEntityModelCfg<S, M> {
-  legacyKey: string;
   appDataKey: keyof AppBaseData;
   modelVersion: number;
   reducerFn: ActionReducer<S, { type: string; payload?: any }>;
@@ -64,7 +62,6 @@ export interface PersistenceEntityModelCfg<S, M> {
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export interface PersistenceProjectModelCfg<S, M> {
-  legacyKey: string;
   appDataKey: keyof AppDataForProjects;
   // modelVersion: number;
   // migrateFn?: (state: S, projectId: string) => S;

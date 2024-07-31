@@ -3,15 +3,13 @@
     *ngIf="isOver|| IS_TOUCH_PRIMARY"
     class="task-title-wrapper"
   >
-    <h2
-      (editFinished)="updateTaskTitleIfChanged($event.isChanged, $event.newVal)"
-      [isResetAfterEdit]="true"
+    <inline-multiline-input
+      [resetToLastExternalValueTrigger]="task"
+      (valueEdited)="updateTaskTitleIfChanged($event.wasChanged, $event.newVal)"
       [value]="task.title"
       class="task-title"
-      contentEditableOnClick
-      contenteditable="true"
-      [attr.placeholder]="T.F.TASK.ADDITIONAL_INFO.TITLE_PLACEHOLDER|translate"
-    ></h2>
+    ></inline-multiline-input>
+
     <!--    <button mat-icon-button>-->
     <!--      <mat-icon>more_vert</mat-icon>-->
     <!--    </button>-->

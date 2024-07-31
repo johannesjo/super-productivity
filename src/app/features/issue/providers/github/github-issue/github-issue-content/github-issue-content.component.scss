@@ -65,3 +65,19 @@
   // needed for the box-shadow inside scrollable container
   margin-bottom: $s;
 }
+
+.load-comments-and-all-data {
+  max-width: 100%;
+
+  ::ng-deep .mdc-button__label {
+    max-width: 100%;
+  }
+
+  ::ng-deep .mdc-button__label > span {
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+    max-width: 100%;
+    display: block;
+  }
+}

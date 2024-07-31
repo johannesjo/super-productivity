@@ -4,6 +4,7 @@ import { TaskComponent } from './task/task.component';
 import { TaskListComponent } from './task-list/task-list.component';
 import { UiModule } from '../../ui/ui.module';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { MentionModule } from 'angular-mentions';
 import { AddTaskBarComponent } from './add-task-bar/add-task-bar.component';
 import { DialogTimeEstimateComponent } from './dialog-time-estimate/dialog-time-estimate.component';
 import { StoreModule } from '@ngrx/store';
@@ -35,11 +36,13 @@ import { TaskSummaryTablesComponent } from './task-summary-tables/task-summary-t
 import { IS_ELECTRON } from '../../app.constants';
 import { TasksByTagComponent } from './tasks-by-tag/tasks-by-tag.component';
 import { ShortSyntaxEffects } from './store/short-syntax.effects';
+import { InlineMultilineInputComponent } from '../../ui/inline-multiline-input/inline-multiline-input.component';
 
 @NgModule({
   imports: [
     CommonModule,
     IssueModule,
+    MentionModule,
     UiModule,
     FormsModule,
     TaskAttachmentModule,
@@ -57,6 +60,7 @@ import { ShortSyntaxEffects } from './store/short-syntax.effects';
       ...(IS_ELECTRON ? [TaskElectronEffects] : []),
     ]),
     BetterDrawerModule,
+    InlineMultilineInputComponent,
   ],
   declarations: [
     TaskComponent,

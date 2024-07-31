@@ -23,7 +23,7 @@
       </mat-form-field>
 
       <div
-        *ngIf="isShowMoveToBacklog"
+        *ngIf="isAddToBacklogAvailable$|async"
         class="move-to-backlog-wrapper"
       >
         <mat-checkbox

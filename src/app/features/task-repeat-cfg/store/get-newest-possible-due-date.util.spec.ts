@@ -317,6 +317,17 @@ describe('getNewestPossibleDueDate()', () => {
         startDate: new Date('2022-01-14'),
         expectedDate: null,
       },
+      {
+        description: "should not return values for marco's edge case",
+        taskRepeatCfg: dummyRepeatable('ID1', {
+          repeatCycle: 'MONTHLY',
+          repeatEvery: 1,
+          lastTaskCreation: new Date('2024-06-26').getTime(),
+        }),
+        today: new Date('2024-07-16'),
+        startDate: new Date('2024-01-26'),
+        expectedDate: null,
+      },
     ];
 
     testCases.forEach(
@@ -385,6 +396,28 @@ describe('getNewestPossibleDueDate()', () => {
         }),
         today: new Date('2023-01-10'),
         startDate: new Date('2022-01-10').getTime(),
+        expectedDate: null,
+      },
+      {
+        description: 'should not return values for Marco`s edge case for year',
+        taskRepeatCfg: dummyRepeatable('ID1', {
+          repeatCycle: 'YEARLY',
+          repeatEvery: 1,
+          lastTaskCreation: new Date('2024-01-26').getTime(),
+        }),
+        today: new Date('2024-07-16'),
+        startDate: new Date('2023-01-26'),
+        expectedDate: null,
+      },
+      {
+        description: 'should not return values for Marco`s edge case for year 2',
+        taskRepeatCfg: dummyRepeatable('ID1', {
+          repeatCycle: 'YEARLY',
+          repeatEvery: 1,
+          lastTaskCreation: new Date('2024-01-26').getTime(),
+        }),
+        today: new Date('2024-05-27'),
+        startDate: new Date('2023-01-26'),
         expectedDate: null,
       },
     ];

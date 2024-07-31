@@ -13,6 +13,7 @@
 
       <div
         class="row"
+        [class]="getSizeClass(row)"
         *ngFor="let row of timelineEntries; trackBy: trackByFn"
       >
         <div
@@ -57,6 +58,7 @@
               color="primary"
             >
               <mat-icon>alarm</mat-icon>
+              <div class="time-badge">{{ row.start|shortPlannedAt:'timeOnly' }}</div>
             </button>
           </div>
         </div>
@@ -87,7 +89,8 @@
           >
             <div class="title">{{row.data.title}} ({{row.data.index + 2}})</div>
             <div class="time-to-go">
-              continued ~{{row.data.timeToGo|roundDuration|msToString}}
+              <span class="continued">continued</span>
+              ~{{ row.data.timeToGo|roundDuration|msToString }}
             </div>
           </div>
 
@@ -97,7 +100,8 @@
           >
             <div class="title">{{row.data.title}} ({{row.data.index + 2}})</div>
             <div class="time-to-go">
-              continued ~{{row.data.timeToGo|roundDuration|msToString}}
+              <span class="continued">continued</span>
+              ~{{ row.data.timeToGo|roundDuration|msToString }}
             </div>
           </div>
 

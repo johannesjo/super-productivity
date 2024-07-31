@@ -1,10 +1,15 @@
 import { Injectable } from '@angular/core';
-import { SyncProvider, SyncProviderServiceInterface } from '../sync-provider.model';
+import {
+  SyncProvider,
+  SyncProviderServiceInterface,
+  SyncTarget,
+} from '../sync-provider.model';
 import { Observable, of } from 'rxjs';
 import { IS_ELECTRON } from '../../../app.constants';
 import { SyncGetRevResult } from '../sync.model';
 import { concatMap, first, map } from 'rxjs/operators';
 import { GlobalConfigService } from '../../../features/config/global-config.service';
+import { createSha1Hash } from '../../../util/create-sha-1-hash';
 
 @Injectable({
   providedIn: 'root',
@@ -13,72 +18,80 @@ export class LocalFileSyncElectronService implements SyncProviderServiceInterfac
   id: SyncProvider = SyncProvider.LocalFile;
   isUploadForcePossible?: boolean;
   isReady$: Observable<boolean> = of(IS_ELECTRON).pipe(
-    concatMap(() => this._filePath$),
+    concatMap(() => this._folderPath$),
     map((v) => !!v),
   );
 
-  private _filePath$: Observable<string | null> = this._globalConfigService.sync$.pipe(
-    map((sync) => sync.localFileSync.syncFilePath),
+  private _folderPath$: Observable<string | null> = this._globalConfigService.sync$.pipe(
+    map((sync) => sync.localFileSync.syncFolderPath),
   );
-  private _filePathOnce$: Observable<string | null> = this._filePath$.pipe(first());
+  private _folderPathOnce$: Observable<string | null> = this._folderPath$.pipe(first());
 
   constructor(private _globalConfigService: GlobalConfigService) {}
 
-  async getRevAndLastClientUpdate(
+  async getFileRevAndLastClientUpdate(
+    syncTarget: SyncTarget,
     localRev: string | null,
   ): Promise<{ rev: string; clientUpdate?: number } | SyncGetRevResult> {
-    const filePath = await this._filePathOnce$.toPromise();
     try {
-      if (!filePath) {
-        throw new Error('No file path given for getRevAndLastClientUpdate');
-      }
-      const r = await window.ea.fileSyncGetRevAndClientUpdate({
-        filePath,
-        localRev,
-      });
-      return r as any;
+      const r = await this.downloadFileData(syncTarget, localRev);
+      return {
+        rev: r.rev,
+      };
     } catch (e) {
-      throw new Error(e as any);
+      if (e?.toString?.().includes('ENOENT')) {
+        return 'NO_REMOTE_DATA';
+      }
+      throw e;
     }
   }
 
-  async uploadAppData(
+  async uploadFileData(
+    syncTarget: SyncTarget,
     dataStr: string,
-    clientModified: number,
     localRev: string | null,
     isForceOverwrite?: boolean,
   ): Promise<string | Error> {
-    const filePath = await this._filePathOnce$.toPromise();
-    try {
-      if (!filePath) {
-        throw new Error('No file path given for uploadAppData');
-      }
-      const r = await window.ea.fileSyncSave({
-        localRev,
-        filePath,
-        dataStr,
-      });
-      return r as any;
-    } catch (e) {
-      throw new Error(e as any);
-    }
+    await window.ea.fileSyncSave({
+      localRev,
+      filePath: await this._getFilePath(syncTarget),
+      dataStr,
+    });
+    return this._getLocalRev(dataStr);
   }
 
-  async downloadAppData(
+  async downloadFileData(
+    syncTarget: SyncTarget,
     localRev: string | null,
   ): Promise<{ rev: string; dataStr: string | undefined }> {
-    const filePath = await this._filePathOnce$.toPromise();
-    try {
-      if (!filePath) {
-        throw new Error('No file path given for downloadAppData');
-      }
-      const r = await window.ea.fileSyncLoad({
-        localRev,
-        filePath,
-      });
-      return r as any;
-    } catch (e) {
-      throw new Error(e as any);
+    const r = await window.ea.fileSyncLoad({
+      localRev,
+      filePath: await this._getFilePath(syncTarget),
+    });
+
+    if (r instanceof Error) {
+      throw r;
     }
+
+    if (!r.dataStr) {
+      throw new Error('downloadFileData unknown error');
+    }
+
+    return {
+      rev: await this._getLocalRev(r.dataStr),
+      dataStr: r.dataStr,
+    };
+  }
+
+  private async _getFilePath(syncTarget: SyncTarget): Promise<string> {
+    const folderPath = await this._folderPathOnce$.toPromise();
+    if (!folderPath) {
+      throw new Error('No folder path given');
+    }
+    return `${folderPath}/${syncTarget}.json`;
+  }
+
+  private _getLocalRev(dataStr: string): Promise<string> {
+    return createSha1Hash(dataStr);
   }
 }

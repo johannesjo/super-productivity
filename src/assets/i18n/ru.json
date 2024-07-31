@@ -144,7 +144,8 @@
         "AUTH_ERROR": "Dropbox: предоставлен неверный токен доступа",
         "AUTH_ERROR_ACTION": "Сменить токен",
         "OFFLINE": "Dropbox: невозможно синхронизироваться в автономном режиме",
-        "SYNC_ERROR": "Dropbox: ошибка при синхронизации"
+        "SYNC_ERROR": "Dropbox: ошибка при синхронизации",
+        "UNABLE_TO_GENERATE_PKCE_CHALLENGE": "Dropbox: невозможно создать запрос PKCE."
       }
     },
     "FINISH_DAY_BEFORE_EXIT": {
@@ -183,68 +184,54 @@
         "TITLE": "Настройка Gitea для проекта"
       },
       "FORM": {
-        "FILTER_USER": "Имя пользователя (чтобы отфильтровать изменения самостоятельно)",
+        "FILTER_USER": "Имя пользователя (например, чтобы найти ваши изменения)",
         "IS_AUTO_IMPORT_ISSUES": "Автоматически добавлять нерешенные проблемы из Gitea в бэклог",
         "IS_AUTO_POLL": "Автоматически опрашивать импортированные проблемы на предмет изменений",
         "IS_SEARCH_ISSUES_FROM_GITEA": "Show issues from git as suggestions when adding new tasks",
         "HOST": "Host (e.g.: https://try.gitea.io)",
-        "TOKEN": "Access Token",
-        "REPO_FULL_NAME": "Username or Organization name/project",
-        "REPO_FULL_NAME_DESCRIPTION": "Can be found as part of the url, when viewing the project in the Browser.",
-        "SCOPE": "Scope",
-        "SCOPE_ALL": "All",
-        "SCOPE_ASSIGNED": "Assigned to me",
-        "SCOPE_CREATED": "Created by me"
+        "TOKEN": "Токен доступа",
+        "REPO_FULL_NAME": "Имя пользователя или название организации/проекта",
+        "REPO_FULL_NAME_DESCRIPTION": "Его можно найти как часть URL-адреса при просмотре проекта в браузере.",
+        "SCOPE_ALL": "Все",
+        "SCOPE_ASSIGNED": "Назначено мне",
+        "SCOPE_CREATED": "Создано мной"
       },
       "FORM_SECTION": {
         "HELP": "<p>Here you can configure SuperProductivity to list open Gitea issues for a specific repository in the task creation panel in the daily planning view. They will be listed as suggestions and will provide a link to the issue as well as more information about it.</p> <p>In addition you can automatically add and import all open issues.</p><p>To get by usage limits and to access you can provide a an access token.",
         "TITLE": "Gitea"
       },
       "ISSUE_CONTENT": {
-        "ASSIGNEE": "Assignee",
-        "AT": "at",
-        "DESCRIPTION": "Description",
-        "LABELS": "Labels",
-        "MARK_AS_CHECKED": "Mark updates as checked",
-        "PROJECT": "Project",
-        "STATUS": "Status",
-        "SUMMARY": "Summary",
-        "WRITE_A_COMMENT": "Write a comment"
+        "DESCRIPTION": "Описание",
+        "LABELS": "Метки",
+        "PROJECT": "Проект",
+        "STATUS": "Положение дел",
+        "SUMMARY": "Краткое содержание",
+        "WRITE_A_COMMENT": "Написать комментарий"
       },
       "S": {
         "ERR_UNKNOWN": "Gitea: Unknown error {{statusCode}} {{errorMsg}}. Api Rate limit exceeded?"
-      }
+      },
     },
     "REDMINE": {
       "DIALOG_INITIAL": {
-        "TITLE": "Setup Redmine for Project"
+        "TITLE": "Настройка Redmine для проекта"
       },
       "FORM": {
-        "PROJECT_ID": "Project Identifier",
-        "PROJECT_ID_DESCRIPTION": "Can be found as part of the url, when viewing the project in the Browser.",
-        "HOST": "Host (e.g.: https://redmine.org)",
-        "API_KEY": "API access key",
-        "SCOPE": "Scope",
-        "SCOPE_ALL": "All",
-        "SCOPE_ASSIGNED": "Assigned to me",
-        "SCOPE_CREATED": "Created by me",
-        "IS_AUTO_POLL": "Automatically poll imported redmine issues for changes",
-        "IS_SEARCH_ISSUES_FROM_REDMINE": "Show issues from redmine as suggestions when adding new tasks",
-        "IS_AUTO_IMPORT_ISSUES": "Automatically add open issues from redmine"
+        "PROJECT_ID": "Идентификатор проекта",
+        "HOST": "Хост (например: https://redmine.org)",
+        "API_KEY": "ключ доступа к API",
+        "SCOPE_ALL": "Все",
+        "SCOPE_CREATED": "Создано мной"
       },
       "FORM_SECTION": {
-        "TITLE": "Redmine",
-        "HELP": "<p>Here you can configure SuperProductivity to list open Redmine (either its the online version or a self-hosted instance) issues for a specific project in the task creation panel in the daily planning view. They will be listed as suggestions and will provide a link to the issue as well as more information about it.</p><p>In addition you can automatically import all open issues.</p>"
+        "TITLE": "Redmine"
       },
       "ISSUE_CONTENT": {
-        "AUTHOR": "Author",
-        "STATUS": "Status",
-        "PRIORITY": "Priority",
-        "DESCRIPTION": "Description",
-        "MARK_AS_CHECKED": "Mark updates as checked"
-      },
-      "S": {
-        "ERR_UNKNOWN": "Redmine: Unknown error {{statusCode}} {{errorMsg}}."
+        "AUTHOR": "Автор",
+        "STATUS": "Статус",
+        "PRIORITY": "Приоритет",
+        "DESCRIPTION": "Описание",
+        "MARK_AS_CHECKED": "Отметить обновления как отмеченные"
       }
     },
     "GITHUB": {
@@ -258,7 +245,8 @@
         "IS_SEARCH_ISSUES_FROM_GITHUB": "Показывать проблемы из git в качестве подсказок при добавлении новых задач",
         "REPO": "\"username/repository\" для git-репозитория, который вы хотите отслеживать",
         "TOKEN": "Токен доступа",
-        "TOKEN_DESCRIPTION": "Требуется для доступа к частному репозиторию"
+        "TOKEN_DESCRIPTION": "Требуется для доступа к частному репозиторию",
+        "IS_ASSIGNEE_FILTER": "Фильтровать назначенные мне проблемы"
       },
       "FORM_SECTION": {
         "HELP": "<p>Здесь вы можете настроить Super Productivity, чтобы отображать открытые проблемы GitHub для определенного репозитория на панели создания задач в представлении ежедневного планирования. Они будут перечислены в качестве предложений и предоставят ссылку на проблему, а также дополнительную информацию о ней.</p><p>Кроме того, вы можете автоматически добавлять и синхронизировать все открытые проблемы в своей невыполненной задаче.</p><p>Чтобы получить доступ к закрытым репозиториям, вы можете предоставить токен доступа. <a href='https://docs.github.com/en/free-pro-team@latest/developers/apps/scopes-for-oauth-apps'>Более подробную информацию о его возможностях можно найти здесь</a>.",
@@ -269,6 +257,7 @@
         "AT": "в",
         "DESCRIPTION": "Описание",
         "LABELS": "Метки",
+        "LAST_COMMENT": "Последний комментарий",
         "MARK_AS_CHECKED": "Отметить обновления как отмеченные",
         "STATUS": "Статус",
         "SUMMARY": "Сводка",
@@ -281,6 +270,10 @@
     "GITLAB": {
       "DIALOG_INITIAL": {
         "TITLE": "Настройка GitLab для проекта"
+      },
+      "DIALOG_SUBMIT_WORKLOG": {
+        "T_ALREADY_TRACKED": "Уже отслеживается",
+        "T_TITLE": "Заголовок"
       },
       "FORM": {
         "FILTER_USER": "Имя пользователя (чтобы отфильтровать изменения самостоятельно)",
@@ -297,7 +290,8 @@
         "SOURCE_GLOBAL": "Все",
         "SOURCE_GROUP": "Группа",
         "SOURCE_PROJECT": "Проект",
-        "TOKEN": "Токен доступа"
+        "TOKEN": "Токен доступа",
+        "FILTER": "Пользовательский фильтр"
       },
       "FORM_SECTION": {
         "HELP": "<p>Здесь вы можете настроить Super Productivity для отображения списка открытых проблем GitLab (будь то онлайн-версия или автономный экземпляр) для конкретного проекта на панели создания задач в представлении ежедневного планирования. Они будут перечислены в качестве предложений и предоставят ссылку на проблему, а также дополнительную информацию о ней.</p><p>Кроме того, вы можете автоматически добавлять и синхронизировать все открытые проблемы со списком задач.</p>",
@@ -318,7 +312,13 @@
         "ERR_UNKNOWN": "GitLab: неизвестная ошибка {{statusCode}} {{errorMsg}}"
       }
     },
+    "DOMINA_MODE": {
+      "FORM": {
+        "L_TEXT": "Текст"
+      }
+    },
     "ISSUE": {
+      "HOW_TO_GET_A_TOKEN": "Как получить токен?",
       "DEFAULT": {
         "ISSUES_STR": "вопросы",
         "ISSUE_STR": "вопрос"
@@ -445,8 +445,10 @@
         "LIST_OF_CHANGES": "Список изменений",
         "MARK_AS_CHECKED": "Отметить обновления как отмеченные",
         "ON": "на",
+        "RELATED": "Связанный",
         "STATUS": "Статус",
         "STORY_POINTS": "Очки истории",
+        "SUB_TASKS": "Подзадачи",
         "SUMMARY": "Сводка",
         "WORKLOG": "Журнал событий",
         "WRITE_A_COMMENT": "Оставить комментарий"
@@ -536,6 +538,9 @@
       "EDIT_FULLSCREEN": "Редактировать в полноэкранном режиме"
     },
     "OPEN_PROJECT": {
+      "CFG_CMP": {
+        "PROGRESS_ON_SAVE": "Прогресс по умолчанию при сохранении"
+      },
       "DIALOG_INITIAL": {
         "TITLE": "Настроить OpenProject для проекта"
       },
@@ -757,10 +762,6 @@
           "L_SYNC_FILE_NAME": "Синхронизировать имя файла",
           "L_IS_COMPRESS_DATA": "Сжать данные"
         },
-        "LOCAL_FILE": {
-          "L_SYNC_FILE_PATH": "Путь к файлу синхронизации",
-          "L_SYNC_FILE_PATH_DESCRIPTION": "Абсолютный путь к файлу, который нужно использовать для синхронизации (будет создан)."
-        },
         "L_ENABLE_SYNCING": "Включить синхронизацию",
         "L_SYNC_INTERVAL": "Интервал синхронизации",
         "L_SYNC_PROVIDER": "Провайдер синхронизации",
@@ -769,8 +770,12 @@
           "CORS_INFO": "<strong>Экспериментальный!!</strong> Для работы, вам необходимо отключить или ограничить CORS для вашего экземпляра Nextcloud, что может негативно повлиять на безопасность! Пожалуйста, <a href='https://github.com/nextcloud/server/issues/3131'>обратитесь к этой теме</a> для получения дополнительной информации. Используйте на свой риск!",
           "L_BASE_URL": "Базовый URL",
           "L_PASSWORD": "Пароль",
+          "L_USER_NAME": "Имя пользователя",
+          "L_SYNC_FILE_PATH": "Путь к файлу синхронизации"
+        },
+        "LOCAL_FILE": {
           "L_SYNC_FILE_PATH": "Путь к файлу синхронизации",
-          "L_USER_NAME": "Имя пользователя"
+          "L_SYNC_FILE_PATH_DESCRIPTION": "Абсолютный путь к файлу, который нужно использовать для синхронизации (будет создан)."
         }
       },
       "S": {
@@ -1015,8 +1020,8 @@
         "SKIP": "Пропустить",
         "SPLIT_TIME": "Разделить время на несколько задач и/или перерывов",
         "TASK": "Задача",
-        "TASK_BREAK": "Задача + Перерыв",
-        "TRACK_TO": "Отследить до:"
+        "TRACK_TO": "Отследить до:",
+        "TASK_BREAK": "Задача + Перерыв"
       },
       "D_TRACKING_REMINDER": {
         "CREATE_AND_TRACK": "<em>Создать</em> и отслеживать",
@@ -1110,7 +1115,6 @@
   },
   "G": {
     "CANCEL": "Отменить",
-    "EXAMPLE_VAL": "Нажмите, чтобы редактировать",
     "CLOSE": "Закрыть",
     "DELETE": "Удалить",
     "DISMISS": "Отклонить",
@@ -1118,6 +1122,7 @@
     "DO_IT": "Сделать это!",
     "EDIT": "Редактировать",
     "ENABLED": "Включено",
+    "EXAMPLE_VAL": "Нажмите, чтобы редактировать",
     "EXTENSION_INFO": "Пожалуйста, <a target=\"_blank\" href=\"https://chrome.google.com/webstore/detail/super-productivity/ljkbjodfmekklcoibdnhahlaalhihmlb\"> загрузите расширение Chrome</a> , чтобы обеспечить связь с Jira Api и Idle Time Handling. Обратите внимание, что это не работает для мобильных устройств.",
     "LOGIN": "Авторизоваться",
     "LOGOUT": "Выйти",
@@ -1151,9 +1156,9 @@
       "HELP": "<div><p>Когда обработка режима ожидания включена, через определенное время открывается диалог, чтобы проверить, хотите ли вы отслеживать свое время бездействия, и если да, то по какой задаче.</p></div>",
       "IS_ENABLE_IDLE_TIME_TRACKING": "Включить обработку режима ожидания",
       "IS_ONLY_OPEN_IDLE_WHEN_CURRENT_TASK": "Вызывать диалог режима ожидания только тогда, когда выбрана текущая задача",
-      "IS_UN_TRACKED_IDLE_RESETS_BREAK_TIMER": "Неотслеживаемое время режима ожидания сбрасывает таймер перерыва",
       "MIN_IDLE_TIME": "Активировать режим ожидания после X",
-      "TITLE": "Режим ожидания"
+      "TITLE": "Режим ожидания",
+      "IS_UN_TRACKED_IDLE_RESETS_BREAK_TIMER": "Неотслеживаемое время режима ожидания сбрасывает таймер перерыва"
     },
     "IMEX": {
       "HELP": "<p>Здесь вы можете экспортировать все свои данные как <strong>JSON</strong> для резервных копий, а также использовать их в другом контексте (например, вы можете экспортировать свои проекты в браузер и импортировать их в настольную версию). </p> <p>При импорте ожидается, что допустимый JSON будет скопирован в текстовую область. <strong>ПРИМЕЧАНИЕ. После нажатия кнопки импорта все ваши текущие настройки и данные будут перезаписаны!</strong></p>",

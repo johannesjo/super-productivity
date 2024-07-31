@@ -37,7 +37,6 @@ export const DEFAULT_GLOBAL_CONFIG: GlobalConfigState = {
     isOnlyOpenIdleWhenCurrentTask: false,
     isEnableIdleTimeTracking: true,
     minIdleTime: 5 * minute,
-    isUnTrackedIdleResetsBreakTimer: true,
   },
   takeABreak: {
     isTakeABreakEnabled: true,
@@ -100,6 +99,8 @@ export const DEFAULT_GLOBAL_CONFIG: GlobalConfigState = {
     zoomIn: 'Ctrl++',
     zoomOut: 'Ctrl+-',
     zoomDefault: 'Ctrl+0',
+    saveNote: 'Ctrl+s',
+    triggerSync: 'Ctrl+s',
     taskEditTitle: null,
     taskToggleAdditionalInfoOpen: 'i',
     taskOpenEstimationDialog: 't',
@@ -171,11 +172,11 @@ export const DEFAULT_GLOBAL_CONFIG: GlobalConfigState = {
       baseUrl: null,
       userName: null,
       password: null,
-      syncFilePath: 'super-productivity-backup.json',
+      syncFolderPath: 'super-productivity',
     },
 
     localFileSync: {
-      syncFilePath: 'super-productivity-sync.json',
+      syncFolderPath: 'super-productivity',
     },
   },
 };

@@ -643,10 +643,6 @@
           "L_SYNC_FILE_NAME": "Sincronizar nombre de archivo",
           "L_IS_COMPRESS_DATA": "Comprimir datos"
         },
-        "LOCAL_FILE": {
-          "L_SYNC_FILE_PATH": "Ruta del archivo de sincronización",
-          "L_SYNC_FILE_PATH_DESCRIPTION": "Ruta absoluta al archivo que se debe utilizar para la sincronización (se creará)."
-        },
         "L_ENABLE_SYNCING": "Habilitar sincronización",
         "L_SYNC_INTERVAL": "Intervalo de sincronización",
         "L_SYNC_PROVIDER": "Proveedor de sincronización",
@@ -655,8 +651,12 @@
           "CORS_INFO": "<strong>¡Experimental!</strong> Para que esto funcione, debe deshabilitar o limitar CORS para su instancia de Nextcloud, lo que puede tener implicaciones de seguridad negativas. <a href='https://github.com/nextcloud/server/issues/3131'>Consulte este hilo</a> para obtener más información. ¡Úselo bajo su propio riesgo!",
           "L_BASE_URL": "URL base",
           "L_PASSWORD": "Contraseña",
+          "L_USER_NAME": "Nombre de usuario",
+          "L_SYNC_FILE_PATH": "Ruta del archivo de sincronización"
+        },
+        "LOCAL_FILE": {
           "L_SYNC_FILE_PATH": "Ruta del archivo de sincronización",
-          "L_USER_NAME": "Nombre de usuario"
+          "L_SYNC_FILE_PATH_DESCRIPTION": "Ruta absoluta al archivo que se debe utilizar para la sincronización (se creará)."
         }
       },
       "S": {
@@ -919,8 +919,8 @@
         "SIMPLE_COUNTER_TOOLTIP_DISABLE": "Haga clic para NO rastrear a {{title}}",
         "SKIP": "Saltar",
         "TASK": "Tarea",
-        "TASK_BREAK": "Pausa + tarea",
-        "TRACK_TO": "Seguimiento a:"
+        "TRACK_TO": "Seguimiento a:",
+        "TASK_BREAK": "Pausa + tarea"
       },
       "D_TRACKING_REMINDER": {
         "CREATE_AND_TRACK": "<em>Crear</em> y realizar un seguimiento de",
@@ -1014,13 +1014,13 @@
   },
   "G": {
     "CANCEL": "Cancelar",
-    "EXAMPLE_VAL": "Haz clic para editar",
     "CLOSE": "Cerrar",
     "DELETE": "Borrar",
     "DISMISS": "Descartar",
     "DO_IT": "¡Hazlo!",
     "EDIT": "Editar",
     "ENABLED": "Habilitado",
+    "EXAMPLE_VAL": "Haz clic para editar",
     "EXTENSION_INFO": "Por favor descargue <a target=\"_blank\" href=\"https://chrome.google.com/webstore/detail/super-productivity/ljkbjodfmekklcoibdnhahlaalhihmlb\"> la extensión de Chrome</a> para permitir la comunicación con Jira Api y Idle Time Handling. Tenga en cuenta que esto no funciona para móviles.",
     "LOGIN": "Iniciar sesión",
     "LOGOUT": "Cerrar sesión",
@@ -1054,9 +1054,9 @@
       "HELP": "<div><p>Cuando se habilita el manejo del tiempo de inactividad, se abrirá un cuadro de diálogo después de un período de tiempo específico para verificar si y en qué tarea desea realizar un seguimiento de su tiempo, cuando ha estado inactivo.</p></div>",
       "IS_ENABLE_IDLE_TIME_TRACKING": "Habilitar el manejo del tiempo de inactividad",
       "IS_ONLY_OPEN_IDLE_WHEN_CURRENT_TASK": "Solo se activa el diálogo de tiempo de inactividad cuando se selecciona una tarea actual",
-      "IS_UN_TRACKED_IDLE_RESETS_BREAK_TIMER": "El tiempo de inactividad no rastreado se restablece, toma un temporizador de interrupción",
       "MIN_IDLE_TIME": "Disparar inactividad después de",
-      "TITLE": "Manejo de inactividad"
+      "TITLE": "Manejo de inactividad",
+      "IS_UN_TRACKED_IDLE_RESETS_BREAK_TIMER": "El tiempo de inactividad no rastreado se restablece, toma un temporizador de interrupción"
     },
     "IMEX": {
       "HELP": "<p>Aquí puede exportar todos sus datos como <strong>JSON</strong> para copias de seguridad, pero también para usarlos en un contexto diferente (por ejemplo, es posible que desee exportar sus proyectos en el navegador e importarlos a la versión de escritorio) ). </p> <p>La importación espera que JSON válido se copie en el área de texto. <strong>NOTA: Una vez que presiona el botón de importación, se sobrescribirán todos sus ajustes y datos actuales.</strong></p>",
