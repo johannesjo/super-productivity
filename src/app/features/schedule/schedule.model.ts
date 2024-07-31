@@ -24,6 +24,7 @@ interface ScheduleViewEntryBase {
   id: string;
   type: ScheduleViewEntryType;
   start: number;
+  timeToGo: number;
 }
 
 export interface ScheduleViewEntryTask extends ScheduleViewEntryBase {
@@ -37,7 +38,6 @@ export interface ScheduleViewEntryTask extends ScheduleViewEntryBase {
 export interface ScheduleViewEntrySplitTaskStart extends ScheduleViewEntryBase {
   type: ScheduleViewEntryType.SplitTaskPlannedForDay | ScheduleViewEntryType.SplitTask;
   data: TaskCopy;
-  timeToGo: number;
 }
 
 export interface ScheduleViewEntryTaskPlannedForDay extends ScheduleViewEntryBase {
@@ -68,7 +68,6 @@ export interface ScheduleViewEntryRepeatProjectionSplitContinued
     | ScheduleViewEntryType.RepeatProjectionSplitContinuedLast;
   data: {
     title: string;
-    timeToGo: number;
     repeatCfgId: string;
     index: number;
   };
@@ -80,7 +79,6 @@ export interface ScheduleViewEntrySplitTaskContinued extends ScheduleViewEntryBa
     | ScheduleViewEntryType.SplitTaskContinuedLast;
   data: {
     title: string;
-    timeToGo: number;
     taskId: string;
     projectId: string | null;
     index: number;

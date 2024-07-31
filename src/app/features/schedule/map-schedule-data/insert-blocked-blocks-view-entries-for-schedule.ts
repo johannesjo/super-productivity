@@ -362,6 +362,7 @@ const createSplitTask = ({
     id: `${taskId}__${splitIndex}`,
     start,
     type: ScheduleViewEntryType.SplitTaskContinuedLast,
+    timeToGo,
     data: {
       title,
       timeToGo,
@@ -389,6 +390,7 @@ const createSplitRepeat = ({
     id: `${repeatCfgId}__${splitIndex}`,
     start,
     type: ScheduleViewEntryType.RepeatProjectionSplitContinuedLast,
+    timeToGo,
     data: {
       title,
       timeToGo,

@@ -15,12 +15,13 @@ const FAKE_TASK_ENTRY: ScheduleViewEntryTask = {
   id: 'XXX',
   data: {
     title: 'TITLE',
-    timeEstimate: H,
+    timeEstimate: 66,
     timeSpent: 0,
     id: 'XXX',
     tagIds: [],
     subTaskIds: [],
   } as Partial<TaskCopy> as TaskCopy,
+  timeToGo: H,
   start: new Date('2020-1-1 00:00').getUTCMilliseconds(),
   type: ScheduleViewEntryType.Task,
 };
@@ -56,25 +57,19 @@ describe('mapScheduleDaysToScheduleEvents()', () => {
     expect(res).toEqual({ eventsFlat: [], beyondBudgetDays: [] });
   });
 
-  fit('should return eventsFlat and beyondBudgetDays', () => {
+  it('should return eventsFlat and beyondBudgetDays', () => {
     const res = mapScheduleDaysToScheduleEvents(
       [
         fakeDay({
           entries: [
-            fakeTaskEntry(
-              'AAA',
-              {
-                start: new Date('2020-1-1 05:00').getTime(),
-              },
-              { timeEstimate: H },
-            ),
-            fakeTaskEntry(
-              'BBB',
-              {
-                start: new Date('2020-1-1 06:00').getTime(),
-              },
-              { timeEstimate: 0.5 * H },
-            ),
+            fakeTaskEntry('AAA', {
+              start: new Date('2020-1-1 05:00').getTime(),
+              timeToGo: H,
+            }),
+            fakeTaskEntry('BBB', {
+              start: new Date('2020-1-1 06:00').getTime(),
+              timeToGo: 0.5 * H,
+            }),
           ],
         }),
       ],
@@ -89,7 +84,7 @@ describe('mapScheduleDaysToScheduleEvents()', () => {
             title: 'AAA_TITLE',
             subTaskIds: [],
             tagIds: [],
-            timeEstimate: H,
+            timeEstimate: 66,
             timeSpent: 0,
           } as Partial<TaskCopy> as TaskCopy,
           id: 'AAA',
@@ -105,7 +100,7 @@ describe('mapScheduleDaysToScheduleEvents()', () => {
             id: 'BBB',
             subTaskIds: [],
             tagIds: [],
-            timeEstimate: 0.5 * H,
+            timeEstimate: 66,
             timeSpent: 0,
           } as Partial<TaskCopy> as TaskCopy,
           id: 'BBB',

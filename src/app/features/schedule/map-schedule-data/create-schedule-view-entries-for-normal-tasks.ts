@@ -41,6 +41,7 @@ export const createScheduleViewEntriesForNormalTasks = (
         : ScheduleViewEntryType.Task,
       start: time,
       data: task,
+      timeToGo: getTimeLeftForTaskWithMinVal(task, SCHEDULE_TASK_MIN_DURATION_IN_MS),
     });
 
     lastTime = time;

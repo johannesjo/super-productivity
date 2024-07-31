@@ -403,6 +403,7 @@ const createViewEntriesForNonScheduledRepeatProjections = (
       type: ScheduleViewEntryType.RepeatProjection,
       start: time,
       data: taskRepeatCfg,
+      timeToGo: taskRepeatCfg.defaultEstimate || 0,
     });
 
     lastTime = time;

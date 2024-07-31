@@ -1,6 +1,7 @@
 import { getDateTimeFromClockString } from '../../../util/get-date-time-from-clock-string';
 import { TaskCopy, TaskWithoutReminder } from '../../tasks/task.model';
 import { createScheduleViewEntriesForNormalTasks } from './create-schedule-view-entries-for-normal-tasks';
+import { SCHEDULE_TASK_MIN_DURATION_IN_MS } from '../schedule.const';
 
 const FID = 'FAKE_TASK_ID';
 const FAKE_TASK: TaskCopy = {
@@ -15,8 +16,7 @@ const minutes = (n: number): number => n * 60 * 1000;
 const hours = (n: number): number => 60 * minutes(n);
 
 describe('createScheduleViewEntriesForNormalTasks()', () => {
-  // TODO fix
-  xit('should work', () => {
+  it('should work', () => {
     const now = getDateTimeFromClockString('9:20', 0);
     const fakeTasks = [
       { ...FAKE_TASK, timeEstimate: hours(1) },
@@ -39,6 +39,7 @@ describe('createScheduleViewEntriesForNormalTasks()', () => {
         id: 'FAKE_TASK_ID',
         start: 30000000,
         type: 'Task',
+        timeToGo: 3600000,
       },
       {
         data: {
@@ -52,6 +53,7 @@ describe('createScheduleViewEntriesForNormalTasks()', () => {
         id: 'FAKE_TASK_ID',
         start: 33600000,
         type: 'Task',
+        timeToGo: 1800000,
       },
       {
         data: {
@@ -63,8 +65,9 @@ describe('createScheduleViewEntriesForNormalTasks()', () => {
           timeSpent: 0,
         },
         id: 'FAKE_TASK_ID',
-        start: 35400000,
         type: 'Task',
+        start: 35400000,
+        timeToGo: SCHEDULE_TASK_MIN_DURATION_IN_MS,
       },
       {
         data: {
@@ -76,8 +79,9 @@ describe('createScheduleViewEntriesForNormalTasks()', () => {
           timeSpent: 900000,
         },
         id: 'FAKE_TASK_ID',
-        start: 35400000,
         type: 'Task',
+        start: 36000000,
+        timeToGo: 4500000,
       },
       {
         data: {
@@ -89,8 +93,9 @@ describe('createScheduleViewEntriesForNormalTasks()', () => {
           timeSpent: 0,
         },
         id: 'FAKE_TASK_ID',
-        start: 39900000,
         type: 'Task',
+        start: 40500000,
+        timeToGo: SCHEDULE_TASK_MIN_DURATION_IN_MS,
       },
     ] as any);
   });
@@ -111,6 +116,7 @@ describe('createScheduleViewEntriesForNormalTasks()', () => {
           timeEstimate: hours(1),
           timeSpent: 0,
         },
+        timeToGo: hours(1),
         id: 'OTHER_TASK_ID',
 
         start: now,
@@ -137,6 +143,7 @@ describe('createScheduleViewEntriesForNormalTasks()', () => {
           timeEstimate: 3600000,
           timeSpent: 0,
         },
+        timeToGo: 3600000,
         id: 'T1',
         start: now,
         type: 'Task',
@@ -150,6 +157,7 @@ describe('createScheduleViewEntriesForNormalTasks()', () => {
           timeEstimate: 7200000,
           timeSpent: 0,
         },
+        timeToGo: 7200000,
         id: 'T2',
         start: now + hours(1),
         type: 'Task',
