@@ -187,29 +187,33 @@
         "FILTER_USER": "Имя пользователя (например, чтобы найти ваши изменения)",
         "IS_AUTO_IMPORT_ISSUES": "Автоматически добавлять нерешенные проблемы из Gitea в бэклог",
         "IS_AUTO_POLL": "Автоматически опрашивать импортированные проблемы на предмет изменений",
-        "IS_SEARCH_ISSUES_FROM_GITEA": "Show issues from git as suggestions when adding new tasks",
-        "HOST": "Host (e.g.: https://try.gitea.io)",
+        "IS_SEARCH_ISSUES_FROM_GITEA": "Показывать проблемы из git в качестве предложения при добавлении новых задач",
+        "HOST": "Хост (н-р: https://try.gitea.io)",
         "TOKEN": "Токен доступа",
         "REPO_FULL_NAME": "Имя пользователя или название организации/проекта",
         "REPO_FULL_NAME_DESCRIPTION": "Его можно найти как часть URL-адреса при просмотре проекта в браузере.",
+        "SCOPE": "Скоуп",
         "SCOPE_ALL": "Все",
         "SCOPE_ASSIGNED": "Назначено мне",
         "SCOPE_CREATED": "Создано мной"
       },
       "FORM_SECTION": {
-        "HELP": "<p>Here you can configure SuperProductivity to list open Gitea issues for a specific repository in the task creation panel in the daily planning view. They will be listed as suggestions and will provide a link to the issue as well as more information about it.</p> <p>In addition you can automatically add and import all open issues.</p><p>To get by usage limits and to access you can provide a an access token.",
+        "HELP": "<p>Здесь вы можете настроить SuperProductivity чтобы отображать проблемы Gitea для конкретного репозитория на панели создания задач в представлении ежедневного планирования. Они будут перечислены в качестве предложений и предоставят ссылку на проблему, а также дополнительную информацию о ней.</p> <p>Кроме того, вы можете автоматически добавлять и синхронизировать все открытые проблемы.</p></p>Чтобы получить доступ к закрытым репозиториям, вы можете предоставить токен доступа.",
         "TITLE": "Gitea"
       },
       "ISSUE_CONTENT": {
+        "ASSIGNEE": "Исполнитель",
+        "AT": "в",
         "DESCRIPTION": "Описание",
         "LABELS": "Метки",
+        "MARK_AS_CHECKED": "Отметить изменения как отмеченные",
         "PROJECT": "Проект",
         "STATUS": "Положение дел",
         "SUMMARY": "Краткое содержание",
         "WRITE_A_COMMENT": "Написать комментарий"
       },
       "S": {
-        "ERR_UNKNOWN": "Gitea: Unknown error {{statusCode}} {{errorMsg}}. Api Rate limit exceeded?"
+        "ERR_UNKNOWN": "Gitea: Неизвестная ошибка {{statusCode}} {{errorMsg}}. Превышен лимит ставок Api?"
       }
     },
     "REDMINE": {
@@ -218,10 +222,16 @@
       },
       "FORM": {
         "PROJECT_ID": "Идентификатор проекта",
+        "PROJECT_ID_DESCRIPTION": "Можно найти как часть URL-адреса при просмотре проекта в браузере.",
         "HOST": "Хост (например: https://redmine.org)",
         "API_KEY": "ключ доступа к API",
+        "SCOPE": "Скоуп",
         "SCOPE_ALL": "Все",
-        "SCOPE_CREATED": "Создано мной"
+        "SCOPE_ASSIGNED": "Назначено мне",
+        "SCOPE_CREATED": "Создано мной",
+        "IS_AUTO_POLL": "Автоматический опрос импортированных проблем Redmine на предмет внесения изменений",
+        "IS_SEARCH_ISSUES_FROM_REDMINE": "Отображать проблемы из Redmine в качестве предложений при добавлении новых задач",
+        "IS_AUTO_IMPORT_ISSUES": "Автоматически добавлять открытые задачи из Redmine"
       },
       "FORM_SECTION": {
         "TITLE": "Redmine"
@@ -232,6 +242,9 @@
         "PRIORITY": "Приоритет",
         "DESCRIPTION": "Описание",
         "MARK_AS_CHECKED": "Отметить обновления как отмеченные"
+      },
+      "S": {
+        "ERR_UNKNOWN": "Redmine: Неизвестная ошибка {{statusCode}} {{errorMsg}}."
       }
     },
     "GITHUB": {
@@ -258,6 +271,8 @@
         "DESCRIPTION": "Описание",
         "LABELS": "Метки",
         "LAST_COMMENT": "Последний комментарий",
+        "LOAD_ALL_COMMENTS": "Загрузить все {{nr}} комментарии",
+        "LOAD_DESCRIPTION_AND_ALL_COMMENTS": "Загрузить описание и все комментарии",
         "MARK_AS_CHECKED": "Отметить обновления как отмеченные",
         "STATUS": "Статус",
         "SUMMARY": "Сводка",
@@ -356,7 +371,8 @@
         "MAP_CUSTOM_FIELDS_INFO": "К сожалению, некоторые данные Jira сохраняются в пользовательских полях, которые различны для каждой установки. Если вы хотите включить эти данные, вам нужно выбрать подходящее поле для них.",
         "OPEN": "Состояние для приостановки задачи",
         "SELECT_ISSUE_FOR_TRANSITIONS": "Выберите проблему, чтобы загрузить доступные переходы",
-        "STORY_POINTS": "Story Points"
+        "STORY_POINTS": "Story Points",
+        "TRANSITION": "Обработка переходных процессов"
       },
       "DIALOG_CONFIRM_ASSIGNMENT": {
         "MSG": "<strong>{{summary}}</strong> в настоящее время назначено <strong>{{assignee}}</strong>. Вы хотите назначить это себе?",
@@ -526,6 +542,10 @@
       "D_ADD": {
         "NOTE_LABEL": "Введите текст, чтобы сохранить как заметку ..."
       },
+      "D_FULLSCREEN": {
+        "VIEW_TEXT_ONLY": "Просмотр в виде исходного текста",
+        "VIEW_SPLIT": "Просмотр полученного и исходного markdown в разделенном представлении"
+      },
       "NOTES_CMP": {
         "ADD_BTN": "Добавить новую заметку",
         "DROP_TO_ADD": "Зайдите сюда, чтобы добавить новую заметку",
@@ -534,8 +554,7 @@
       "NOTE_CMP": {
         "DISABLE_PARSE": "Отключить Markdown для предварительного просмотра",
         "ENABLE_PARSE": "Включить Markdown"
-      },
-      "EDIT_FULLSCREEN": "Редактировать в полноэкранном режиме"
+      }
     },
     "OPEN_PROJECT": {
       "CFG_CMP": {
@@ -759,8 +778,7 @@
           "L_ACCESS_TOKEN": "Токен доступа (генерируется из кода авторизации)"
         },
         "GOOGLE": {
-          "L_SYNC_FILE_NAME": "Синхронизировать имя файла",
-          "L_IS_COMPRESS_DATA": "Сжать данные"
+          "L_SYNC_FILE_NAME": "Синхронизировать имя файла"
         },
         "L_ENABLE_SYNCING": "Включить синхронизацию",
         "L_SYNC_INTERVAL": "Интервал синхронизации",
@@ -770,12 +788,7 @@
           "CORS_INFO": "<strong>Экспериментальный!!</strong> Для работы, вам необходимо отключить или ограничить CORS для вашего экземпляра Nextcloud, что может негативно повлиять на безопасность! Пожалуйста, <a href='https://github.com/nextcloud/server/issues/3131'>обратитесь к этой теме</a> для получения дополнительной информации. Используйте на свой риск!",
           "L_BASE_URL": "Базовый URL",
           "L_PASSWORD": "Пароль",
-          "L_USER_NAME": "Имя пользователя",
-          "L_SYNC_FILE_PATH": "Путь к файлу синхронизации"
-        },
-        "LOCAL_FILE": {
-          "L_SYNC_FILE_PATH": "Путь к файлу синхронизации",
-          "L_SYNC_FILE_PATH_DESCRIPTION": "Абсолютный путь к файлу, который нужно использовать для синхронизации (будет создан)."
+          "L_USER_NAME": "Имя пользователя"
         }
       },
       "S": {
@@ -886,7 +899,7 @@
         "RO_30M": "За 30 минут до начала",
         "RO_5M": "За 5 минут до начала",
         "RO_START": "Когда это начинается",
-        "RO_NEVER": "Never",
+        "RO_NEVER": "Никогда",
         "SCHEDULE": "Запланировать",
         "UNSCHEDULE": "Отменить планирование"
       },
@@ -993,10 +1006,7 @@
       "NO_TASKS": "На данный момент нет задач. Пожалуйста, добавьте несколько задач с помощью кнопки + на верхней панели.",
       "START": "Начало работы",
       "TASK_PROJECTION_INFO": "Будущая проекция запланированной повторяемой задачи",
-      "LUNCH_BREAK": "Обеденный перерыв",
-      "S": {
-        "CAL_PROVIDER_ERROR": "Ошибка поставщика временной шкалы: {{errTxt}}"
-      }
+      "LUNCH_BREAK": "Обеденный перерыв"
     },
     "TIME_TRACKING": {
       "B": {
@@ -1012,6 +1022,7 @@
         "BREAK": "Перерыв",
         "CREATE_AND_TRACK": "<em>Создать</em> и отследить до:",
         "IDLE_FOR": "Вы были без дела:",
+        "RESET_BREAK_REMINDER_TIMER": "Сбросить таймер перерыва",
         "SIMPLE_CONFIRM_COUNTER_CANCEL": "Пропустить",
         "SIMPLE_CONFIRM_COUNTER_OK": "Отследить",
         "SIMPLE_COUNTER_CONFIRM_TXT": "Вы выбрали \"Пропустить\", но активировали кнопки простого счетчика ({{nr}}). Хотите отследить в него время простоя?",
@@ -1020,8 +1031,7 @@
         "SKIP": "Пропустить",
         "SPLIT_TIME": "Разделить время на несколько задач и/или перерывов",
         "TASK": "Задача",
-        "TRACK_TO": "Отследить до:",
-        "TASK_BREAK": "Задача + Перерыв"
+        "TRACK_TO": "Отследить до:"
       },
       "D_TRACKING_REMINDER": {
         "CREATE_AND_TRACK": "<em>Создать</em> и отслеживать",
@@ -1086,26 +1096,6 @@
         "NO_DATA": "На этой неделе пока нет заданий.",
         "TITLE": "Заголовок"
       }
-    },
-    "GOOGLE": {
-      "BANNER": {
-        "AUTH_FAIL": "GoogleApi: Не удалось пройти аутентификацию, попробуйте войти снова!"
-      },
-      "DIALOG": {
-        "CREATE_SYNC_FILE": "Диск Google: не найден файл с именем <strong>\"{{fileName}}\"</strong>. <strong>Создать</strong> файл синхронизации на Google Диске?",
-        "USE_EXISTING_SYNC_FILE": "Google Диск: использовать <strong>существующий</strong> файл <strong>\"{{fileName}}\"</strong> в качестве файла синхронизации? Если нет, измените имя файла синхронизации."
-      },
-      "S": {
-        "MULTIPLE_SYNC_FILES_WITH_SAME_NAME": "Найдено несколько файлов с именем \"{{newFileName}}\". Пожалуйста, удалите все кроме одного или выберите другое имя.",
-        "SYNC_FILE_CREATION_ERROR": "Google Диск: ошибка при создании файла синхронизации. {{err}}",
-        "UPDATED_SYNC_FILE_NAME": "Google Диск: обновленно имя файла синхронизации"
-      },
-      "S_API": {
-        "ERR": "Ошибка GoogleApi: {{errStr}}",
-        "ERR_NO_FILE_ID": "GoogleApi: идентификатор файла не указан",
-        "ERR_NO_FILE_NAME": "GoogleApi: имя файла не указано",
-        "SUCCESS_LOGIN": "GoogleApi: вход выполнен успешно"
-      }
     }
   },
   "FILE_IMEX": {
@@ -1157,8 +1147,7 @@
       "IS_ENABLE_IDLE_TIME_TRACKING": "Включить обработку режима ожидания",
       "IS_ONLY_OPEN_IDLE_WHEN_CURRENT_TASK": "Вызывать диалог режима ожидания только тогда, когда выбрана текущая задача",
       "MIN_IDLE_TIME": "Активировать режим ожидания после X",
-      "TITLE": "Режим ожидания",
-      "IS_UN_TRACKED_IDLE_RESETS_BREAK_TIMER": "Неотслеживаемое время режима ожидания сбрасывает таймер перерыва"
+      "TITLE": "Режим ожидания"
     },
     "IMEX": {
       "HELP": "<p>Здесь вы можете экспортировать все свои данные как <strong>JSON</strong> для резервных копий, а также использовать их в другом контексте (например, вы можете экспортировать свои проекты в браузер и импортировать их в настольную версию). </p> <p>При импорте ожидается, что допустимый JSON будет скопирован в текстовую область. <strong>ПРИМЕЧАНИЕ. После нажатия кнопки импорта все ваши текущие настройки и данные будут перезаписаны!</strong></p>",
@@ -1274,8 +1263,7 @@
       "DONE_SOUND": "Звук выполненной задачи",
       "IS_INCREASE_DONE_PITCH": "Увеличивать высоту звука для каждой выполненной задачи",
       "TITLE": "Звук",
-      "VOLUME": "Громкость",
-      "IS_PLAY_DONE_SOUND": "Воспроизвести звук, когда задача отмечена как выполненная"
+      "VOLUME": "Громкость"
     },
     "TAKE_A_BREAK": {
       "ADD_NEW_IMG": "Добавить мотивационное изображение",
@@ -1298,11 +1286,7 @@
       "L_WORK_END": "Конец рабочего дня",
       "L_WORK_START": "Начало рабочего дня",
       "TITLE": "Временная шкала",
-      "WORK_START_END_DESCRIPTION": "например 17:00",
-      "CAL_PROVIDERS": "Поставщики календаря (экспериментальные и необязательные)",
-      "CAL_PROVIDERS_ADD": "Добавить источник ical",
-      "CAL_PROVIDERS_INFO": "Вы можете дополнительно настроить временную шкалу, чтобы также загружать и отображать данные из iCal (например, <a href=\"https://support.google.com/calendar/answer/37648?hl=ru#zippy=%2Csync-your-google-calendar-view-edit%2Cget-your-calendar-view-only\">Google Календарь</a>).",
-      "L_CAL_PATH": "URL / путь к файлу календаря ICAL (необязательно)"
+      "WORK_START_END_DESCRIPTION": "например 17:00"
     },
     "TRACKING_REMINDER": {
       "HELP": "Настройте баннер, который будет отображаться на случай, если вы забыли включить отслеживание времени.",
@@ -1332,9 +1316,7 @@
     "JIRA_LOAD_ISSUE": "Jira: Загрузка данных о проблеме...",
     "UNKNOWN": "Загрузка удаленных данных",
     "WEB_DAV_DOWNLOAD": "WebDAV: Скачивание данных...",
-    "WEB_DAV_UPLOAD": "WebDAV: Загрузка данных...",
-    "GDRIVE_DOWNLOAD": "Google Диск: Скачивание файла...",
-    "GDRIVE_UPLOAD": "Google Диск: Загрузка файла..."
+    "WEB_DAV_UPLOAD": "WebDAV: Загрузка данных..."
   },
   "MH": {
     "ADD_NEW_TASK": "Добавить новую задачу",
