@@ -1,7 +1,7 @@
 import { ScheduleDay, ScheduleEvent } from '../schedule.model';
 import { getTimeLeftForTask } from '../../../util/get-time-left-for-task';
-import { getDurationForViewEntry } from './insert-blocked-blocks-view-entries-for-schedule';
 import { ScheduleViewEntryType } from '../schedule.const';
+import { getDurationForScheduleViewEntry } from './get-duration-for-schedule-view-entry';
 
 export const mapScheduleDaysToScheduleEvents = (
   days: ScheduleDay[],
@@ -43,12 +43,12 @@ export const mapScheduleDaysToScheduleEvents = (
 
         // NOTE: +1 cause grids start on 1
         const startRow = Math.round(hoursToday * FH) + 1;
-        const timeLeft = getDurationForViewEntry(entry);
+        const timeLeft = getDurationForScheduleViewEntry(entry);
 
         // const entryAfter = day.entries[entryIndex + 1];
         // entryAfter && entryAfter.type !== ScheduleViewEntryType.WorkdayEnd
         //   ? entryAfter.start - entry.start
-        //   : getDurationForViewEntry(entry);
+        //   : getDurationForScheduleViewEntry(entry);
 
         const timeLeftInHours = timeLeft / 1000 / 60 / 60;
 

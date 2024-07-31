@@ -7,15 +7,16 @@ import {
 } from '../../schedule/schedule.model';
 import moment from 'moment/moment';
 import { TaskWithoutReminder } from '../../tasks/task.model';
-import {
-  SCHEDULE_MOVEABLE_TYPES,
-  SCHEDULE_TASK_MIN_DURATION_IN_MS,
-  ScheduleViewEntryType,
-} from '../../schedule/schedule.const';
+import { ScheduleViewEntryType } from '../../schedule/schedule.const';
 import { TaskRepeatCfg } from '../../task-repeat-cfg/task-repeat-cfg.model';
-import { BlockedBlock, BlockedBlockType } from '../../timeline/timeline.model';
-import { getTimeLeftForTask } from '../../../util/get-time-left-for-task';
-import { getDateTimeFromClockString } from '../../../util/get-date-time-from-clock-string';
+import { BlockedBlock } from '../../timeline/timeline.model';
+import { getDurationForScheduleViewEntry } from './get-duration-for-schedule-view-entry';
+import {
+  isContinuedTaskType,
+  isMoveableViewEntry,
+  isTaskDataType,
+} from './is-schedule-types-type';
+import { createViewEntriesForBlock } from './create-view-entries-for-block';
 
 // const debug = (...args: any): void => console.log(...args);
 const debug = (...args: any): void => undefined;
@@ -87,8 +88,8 @@ export const insertBlockedBlocksViewEntriesForSchedule = (
         debug('BBB insert and move all following entries');
         break;
       } else {
-        const timeLeft = getDurationForViewEntry(viewEntry);
-        const veEnd = viewEntry.start + getDurationForViewEntry(viewEntry);
+        const timeLeft = getDurationForScheduleViewEntry(viewEntry);
+        const veEnd = viewEntry.start + getDurationForScheduleViewEntry(viewEntry);
         debug(blockedBlock.start < veEnd, blockedBlock.start, veEnd);
 
         // NOTE: blockedBlock.start > viewEntry.start is implicated by above checks
@@ -300,67 +301,6 @@ export const insertBlockedBlocksViewEntriesForSchedule = (
   debug('################__insertBlockedBlocksViewEntries()_END__#################');
 };
 
-const createViewEntriesForBlock = (blockedBlock: BlockedBlock): ScheduleViewEntry[] => {
-  const viewEntriesForBock: ScheduleViewEntry[] = [];
-  blockedBlock.entries.forEach((entry) => {
-    if (entry.type === BlockedBlockType.ScheduledTask) {
-      const scheduledTask = entry.data;
-      viewEntriesForBock.push({
-        id: scheduledTask.id,
-        start: scheduledTask.plannedAt,
-        type: ScheduleViewEntryType.ScheduledTask,
-        data: scheduledTask,
-      });
-    } else if (entry.type === BlockedBlockType.ScheduledRepeatProjection) {
-      const repeatCfg = entry.data;
-      viewEntriesForBock.push({
-        id: repeatCfg.id,
-        start: entry.start,
-        type: ScheduleViewEntryType.ScheduledRepeatProjection,
-        data: repeatCfg,
-      });
-    } else if (entry.type === BlockedBlockType.CalendarEvent) {
-      const calendarEvent = entry.data;
-      viewEntriesForBock.push({
-        // TODO fix
-        id: calendarEvent.title,
-        start: entry.start,
-        type: ScheduleViewEntryType.CalendarEvent,
-        data: {
-          ...calendarEvent,
-          icon: calendarEvent.icon || 'event',
-        },
-      });
-    } else if (entry.type === BlockedBlockType.WorkdayStartEnd) {
-      // NOTE: day start and end are mixed up, because it is the opposite as the blocked range
-
-      const workdayCfg = entry.data;
-      viewEntriesForBock.push({
-        id: 'DAY_END_' + entry.start,
-        start: entry.start,
-        type: ScheduleViewEntryType.WorkdayEnd,
-        data: workdayCfg,
-      });
-      viewEntriesForBock.push({
-        id: 'DAY_START_' + entry.end,
-        start: entry.end,
-        type: ScheduleViewEntryType.WorkdayStart,
-        data: workdayCfg,
-      });
-    } else if (entry.type === BlockedBlockType.LunchBreak) {
-      viewEntriesForBock.push({
-        id: 'LUNCH_BREAK_' + entry.start,
-        start: entry.start,
-        type: ScheduleViewEntryType.LunchBreak,
-        data: entry.data,
-      });
-    }
-  });
-  viewEntriesForBock.sort((a, b) => a.start - b.start);
-
-  return viewEntriesForBock;
-};
-
 const moveAllEntriesAfterTime = (
   viewEntries: ScheduleViewEntry[],
   moveBy: number,
@@ -397,29 +337,6 @@ const moveEntries = (
       viewEntry.start = viewEntry.start + moveBy;
     }
   }
-};
-
-const isMoveableViewEntry = (viewEntry: ScheduleViewEntry): boolean => {
-  return !!SCHEDULE_MOVEABLE_TYPES.find(
-    (moveableType) => moveableType === viewEntry.type,
-  );
-};
-
-const isTaskDataType = (viewEntry: ScheduleViewEntry): boolean => {
-  return (
-    viewEntry.type === ScheduleViewEntryType.Task ||
-    viewEntry.type === ScheduleViewEntryType.SplitTask ||
-    viewEntry.type === ScheduleViewEntryType.TaskPlannedForDay ||
-    viewEntry.type === ScheduleViewEntryType.SplitTaskPlannedForDay ||
-    viewEntry.type === ScheduleViewEntryType.ScheduledTask
-  );
-};
-
-const isContinuedTaskType = (viewEntry: ScheduleViewEntry): boolean => {
-  return (
-    viewEntry.type === ScheduleViewEntryType.SplitTaskContinued ||
-    viewEntry.type === ScheduleViewEntryType.SplitTaskContinuedLast
-  );
 };
 
 const createSplitTask = ({
@@ -475,34 +392,4 @@ const createSplitRepeat = ({
       index: splitIndex,
     },
   };
-};
-
-const _getDurationForViewEntry = (viewEntry: ScheduleViewEntry): number => {
-  if (isTaskDataType(viewEntry)) {
-    return getTimeLeftForTask((viewEntry as ScheduleViewEntryTask).data);
-  } else if (
-    isContinuedTaskType(viewEntry) ||
-    viewEntry.type === ScheduleViewEntryType.RepeatProjectionSplitContinued ||
-    viewEntry.type === ScheduleViewEntryType.RepeatProjectionSplitContinuedLast
-  ) {
-    return (viewEntry as ScheduleViewEntrySplitTaskContinued).data.timeToGo;
-  } else if (
-    viewEntry.type === ScheduleViewEntryType.RepeatProjection ||
-    viewEntry.type === ScheduleViewEntryType.RepeatProjectionSplit ||
-    viewEntry.type === ScheduleViewEntryType.ScheduledRepeatProjection
-  ) {
-    return viewEntry.data.defaultEstimate || 0;
-  } else if (viewEntry.type === ScheduleViewEntryType.CalendarEvent) {
-    return viewEntry.data.duration || 0;
-  } else if (viewEntry.type === ScheduleViewEntryType.LunchBreak) {
-    const d = new Date();
-    return (
-      getDateTimeFromClockString(viewEntry.data.endTime, d) -
-      getDateTimeFromClockString(viewEntry.data.startTime, d)
-    );
-  }
-  throw new Error('Wrong type given: ' + viewEntry.type);
-};
-export const getDurationForViewEntry = (viewEntry: ScheduleViewEntry): number => {
-  return Math.max(_getDurationForViewEntry(viewEntry), SCHEDULE_TASK_MIN_DURATION_IN_MS);
 };
