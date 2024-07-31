@@ -316,3 +316,12 @@ schedule-event:active + schedule-event {
     display: none;
   }
 }
+
+// TODO enable again if we want to have animations
+.cdk-drag {
+  transition: none !important;
+}
+
+.cdk-drag-animating {
+  transition: none !important;
+}
