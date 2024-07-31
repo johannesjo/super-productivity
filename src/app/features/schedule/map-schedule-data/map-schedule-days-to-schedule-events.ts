@@ -35,7 +35,6 @@ export const mapScheduleDaysToScheduleEvents = (
         entry.type !== ScheduleViewEntryType.WorkdayEnd &&
         entry.type !== ScheduleViewEntryType.WorkdayStart
       ) {
-        const entryAfter = day.entries[entryIndex + 1];
         const start = new Date(entry.start);
         const startHour = start.getHours();
         const startMinute = start.getMinutes();
@@ -44,10 +43,12 @@ export const mapScheduleDaysToScheduleEvents = (
 
         // NOTE: +1 cause grids start on 1
         const startRow = Math.round(hoursToday * FH) + 1;
-        const timeLeft =
-          entryAfter && entryAfter.type !== ScheduleViewEntryType.WorkdayEnd
-            ? entryAfter.start - entry.start
-            : getDurationForViewEntry(entry);
+        const timeLeft = getDurationForViewEntry(entry);
+
+        // const entryAfter = day.entries[entryIndex + 1];
+        // entryAfter && entryAfter.type !== ScheduleViewEntryType.WorkdayEnd
+        //   ? entryAfter.start - entry.start
+        //   : getDurationForViewEntry(entry);
 
         const timeLeftInHours = timeLeft / 1000 / 60 / 60;
 

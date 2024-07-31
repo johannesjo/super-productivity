@@ -15,6 +15,9 @@ export const getTimeLeftForTaskWithMinVal = (task: Task, minVal: number): number
   if (task.subTaskIds.length > 0) {
     return Math.max(minVal, task.timeEstimate);
   }
+  if (typeof task.timeSpent !== 'number') {
+    throw new Error('timeSpent is not a number');
+  }
   return Math.max(minVal, task.timeEstimate - task.timeSpent) || 0;
 };
 

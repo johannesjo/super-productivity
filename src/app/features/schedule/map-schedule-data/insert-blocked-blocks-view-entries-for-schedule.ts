@@ -6,7 +6,7 @@ import {
   ScheduleViewEntryTask,
 } from '../../schedule/schedule.model';
 import moment from 'moment/moment';
-import { Task, TaskWithoutReminder } from '../../tasks/task.model';
+import { TaskWithoutReminder } from '../../tasks/task.model';
 import {
   SCHEDULE_MOVEABLE_TYPES,
   SCHEDULE_TASK_MIN_DURATION_IN_MS,
@@ -479,7 +479,7 @@ const createSplitRepeat = ({
 
 const _getDurationForViewEntry = (viewEntry: ScheduleViewEntry): number => {
   if (isTaskDataType(viewEntry)) {
-    return getTimeLeftForTask((viewEntry as any).data as Task);
+    return getTimeLeftForTask((viewEntry as ScheduleViewEntryTask).data);
   } else if (
     isContinuedTaskType(viewEntry) ||
     viewEntry.type === ScheduleViewEntryType.RepeatProjectionSplitContinued ||
