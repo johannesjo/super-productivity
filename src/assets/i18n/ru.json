@@ -210,7 +210,7 @@
       },
       "S": {
         "ERR_UNKNOWN": "Gitea: Unknown error {{statusCode}} {{errorMsg}}. Api Rate limit exceeded?"
-      },
+      }
     },
     "REDMINE": {
       "DIALOG_INITIAL": {
@@ -855,7 +855,7 @@
         "EDIT_TAGS": "Редактировать теги",
         "MARK_DONE": "Отметить как выполненное",
         "MARK_UNDONE": "Отметить как отмененное",
-        "MOVE_TO_BACKLOG": "Переместить в отставание",
+        "MOVE_TO_BACKLOG": "Переместить в бэклог",
         "MOVE_TO_OTHER_PROJECT": "Переместить в другой проект",
         "MOVE_TO_TODAY": "Перейти к сегодняшнему списку",
         "OPEN_ATTACH": "Прикрепить файл или ссылку",
