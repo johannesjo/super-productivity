@@ -5,11 +5,20 @@ import {
   ScheduleViewEntryType,
 } from '../schedule.const';
 import { getDateTimeFromClockString } from '../../../util/get-date-time-from-clock-string';
-import { isContinuedTaskType, isTaskDataType } from './is-schedule-types-type';
+import { isContinuedTaskType } from './is-schedule-types-type';
 
 const _getDurationForViewEntry = (viewEntry: ScheduleViewEntry): number => {
-  if (isTaskDataType(viewEntry)) {
+  if (
+    viewEntry.type === ScheduleViewEntryType.Task ||
+    viewEntry.type === ScheduleViewEntryType.TaskPlannedForDay ||
+    viewEntry.type === ScheduleViewEntryType.ScheduledTask
+  ) {
     return getTimeLeftForTask(viewEntry.data);
+  } else if (
+    viewEntry.type === ScheduleViewEntryType.SplitTask ||
+    viewEntry.type === ScheduleViewEntryType.SplitTaskPlannedForDay
+  ) {
+    return viewEntry.timeToGo;
   } else if (
     isContinuedTaskType(viewEntry) ||
     viewEntry.type === ScheduleViewEntryType.RepeatProjectionSplitContinued ||

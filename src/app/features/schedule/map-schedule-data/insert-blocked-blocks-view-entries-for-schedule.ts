@@ -3,7 +3,7 @@ import {
   ScheduleViewEntryRepeatProjection,
   ScheduleViewEntryRepeatProjectionSplitContinued,
   ScheduleViewEntrySplitTaskContinued,
-  ScheduleViewEntryTask,
+  ScheduleViewEntrySplitTaskStart,
 } from '../../schedule/schedule.model';
 import moment from 'moment/moment';
 import { TaskWithoutReminder } from '../../tasks/task.model';
@@ -100,16 +100,20 @@ export const insertBlockedBlocksViewEntriesForSchedule = (
 
           if (isTaskDataType(viewEntry)) {
             debug('CCC a) ' + viewEntry.type);
-            const currentViewEntry: ScheduleViewEntryTask = viewEntry as any;
-            const splitTask: TaskWithoutReminder =
-              currentViewEntry.data as TaskWithoutReminder;
 
+            const currentViewEntry: ScheduleViewEntrySplitTaskStart =
+              viewEntry as unknown as ScheduleViewEntrySplitTaskStart;
             const timeLeftOnTask = timeLeft;
             const timePlannedForSplitStart = blockedBlock.start - currentViewEntry.start;
             const timePlannedForSplitContinued =
               timeLeftOnTask - timePlannedForSplitStart;
+            currentViewEntry.timeToGo = timePlannedForSplitStart;
+
+            const splitTask: TaskWithoutReminder =
+              currentViewEntry.data as TaskWithoutReminder;
 
             // update type of current
+            currentViewEntry.timeToGo = timePlannedForSplitStart;
             currentViewEntry.type = ScheduleViewEntryType.SplitTask;
 
             const newSplitContinuedEntry: ScheduleViewEntry = createSplitTask({

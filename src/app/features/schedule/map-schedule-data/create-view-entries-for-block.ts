@@ -1,6 +1,7 @@
 import { BlockedBlock, BlockedBlockType } from '../../timeline/timeline.model';
 import { ScheduleViewEntry } from '../schedule.model';
 import { ScheduleViewEntryType } from '../schedule.const';
+import { nanoid } from 'nanoid';
 
 export const createViewEntriesForBlock = (
   blockedBlock: BlockedBlock,
@@ -27,7 +28,8 @@ export const createViewEntriesForBlock = (
       const calendarEvent = entry.data;
       viewEntriesForBock.push({
         // TODO fix
-        id: calendarEvent.title,
+        // id: calendarEvent.title,
+        id: nanoid(),
         start: entry.start,
         type: ScheduleViewEntryType.CalendarEvent,
         data: {
@@ -35,6 +37,7 @@ export const createViewEntriesForBlock = (
           icon: calendarEvent.icon || 'event',
         },
       });
+      // TODO check if needed
     } else if (entry.type === BlockedBlockType.WorkdayStartEnd) {
       // NOTE: day start and end are mixed up, because it is the opposite as the blocked range
 

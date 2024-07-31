@@ -31,10 +31,14 @@ export interface ScheduleViewEntryTask extends ScheduleViewEntryBase {
   type:
     | ScheduleViewEntryType.Task
     | ScheduleViewEntryType.TaskPlannedForDay
-    | ScheduleViewEntryType.ScheduledTask
-    | ScheduleViewEntryType.SplitTaskPlannedForDay
-    | ScheduleViewEntryType.SplitTask;
+    | ScheduleViewEntryType.ScheduledTask;
   data: TaskCopy;
+}
+
+export interface ScheduleViewEntrySplitTaskStart extends ScheduleViewEntryBase {
+  type: ScheduleViewEntryType.SplitTaskPlannedForDay | ScheduleViewEntryType.SplitTask;
+  data: TaskCopy;
+  timeToGo: number;
 }
 
 export interface ScheduleViewEntryTaskPlannedForDay extends ScheduleViewEntryBase {
@@ -125,6 +129,7 @@ interface ScheduleViewEntryLunchBreak extends ScheduleViewEntryBase {
 
 export type ScheduleViewEntry =
   | ScheduleViewEntryTask
+  | ScheduleViewEntrySplitTaskStart
   | ScheduleViewEntryTaskPlannedForDay
   | ScheduleViewEntryScheduledRepeatProjection
   | ScheduleViewEntryRepeatProjection
