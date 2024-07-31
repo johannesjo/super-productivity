@@ -24,7 +24,6 @@ interface ScheduleViewEntryBase {
   id: string;
   type: ScheduleViewEntryType;
   start: number;
-  isHideTime?: boolean;
 }
 
 export interface ScheduleViewEntryTask extends ScheduleViewEntryBase {
@@ -107,10 +106,7 @@ export interface ScheduleWorkStartEndCfg {
   endTime: string;
 }
 
-export interface ScheduleLunchBreakCfg {
-  startTime: string;
-  endTime: string;
-}
+export type ScheduleLunchBreakCfg = ScheduleWorkStartEndCfg;
 
 interface ScheduleViewEntryWorkStart extends ScheduleViewEntryBase {
   type: ScheduleViewEntryType.WorkdayStart;
@@ -140,61 +136,3 @@ export type ScheduleViewEntry =
   | ScheduleViewEntryWorkStart
   | ScheduleViewEntryWorkEnd
   | ScheduleViewEntryLunchBreak;
-
-// // -----------------
-// // BlockedBlocks
-// export enum BlockedBlockType {
-//   ScheduledTask = 'ScheduledTask',
-//   ScheduledRepeatProjection = 'ScheduledRepeatProjection',
-//   CalendarEvent = 'CalendarEvent',
-//   WorkdayStartEnd = 'WorkdayStartEnd',
-//   LunchBreak = 'LunchBreak',
-// }
-//
-// export interface BlockedBlockEntryScheduledTask {
-//   start: number;
-//   end: number;
-//   type: BlockedBlockType.ScheduledTask;
-//   data: TaskPlanned;
-// }
-//
-// export interface BlockedBlockEntryScheduledRepeatProjection {
-//   start: number;
-//   end: number;
-//   type: BlockedBlockType.ScheduledRepeatProjection;
-//   data: TaskRepeatCfg;
-// }
-//
-// export interface BlockedBlockEntryCalendarEvent {
-//   start: number;
-//   end: number;
-//   type: BlockedBlockType.CalendarEvent;
-//   data: ScheduleFromCalendarEvent;
-// }
-//
-// export interface BlockedBlockEntryWorkdayStartEnd {
-//   start: number;
-//   end: number;
-//   type: BlockedBlockType.WorkdayStartEnd;
-//   data: ScheduleWorkStartEndCfg;
-// }
-//
-// export interface BlockedBlockEntryLunchBreak {
-//   start: number;
-//   end: number;
-//   type: BlockedBlockType.LunchBreak;
-//   data: ScheduleLunchBreakCfg;
-// }
-//
-// export type BlockedBlockEntry =
-//   | BlockedBlockEntryScheduledTask
-//   | BlockedBlockEntryScheduledRepeatProjection
-//   | BlockedBlockEntryCalendarEvent
-//   | BlockedBlockEntryWorkdayStartEnd
-//   | BlockedBlockEntryLunchBreak;
-//
-// export interface BlockedBlock {
-//   start: number;
-//   end: number;
-//   entries: BlockedBlockEntry[];
-// }

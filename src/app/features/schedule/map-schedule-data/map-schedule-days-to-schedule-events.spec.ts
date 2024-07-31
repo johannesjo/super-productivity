@@ -23,7 +23,6 @@ const FAKE_TASK_ENTRY: ScheduleViewEntryTask = {
   } as Partial<TaskCopy> as TaskCopy,
   start: new Date('2020-1-1 00:00').getUTCMilliseconds(),
   type: ScheduleViewEntryType.Task,
-  isHideTime: true,
 };
 
 const fakeDay = (additional?: Partial<ScheduleDay>): ScheduleDay => {

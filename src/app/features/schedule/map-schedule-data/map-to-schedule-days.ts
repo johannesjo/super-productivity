@@ -360,17 +360,19 @@ export const createViewEntriesForDay = (
   //   }
   // }
 
-  return viewEntries.map((ve, index) => {
-    const prevEntry = viewEntries[index - 1];
+  return viewEntries;
 
-    if (prevEntry && ve.start === prevEntry.start) {
-      return {
-        ...ve,
-        isHideTime: true,
-      };
-    }
-    return ve;
-  });
+  // we could use this to group multiple
+  // return viewEntries.map((ve, index) => {
+  //   const prevEntry = viewEntries[index - 1];
+  //
+  //   if (prevEntry && ve.start === prevEntry.start) {
+  //     return {
+  //       ...ve,
+  //     };
+  //   }
+  //   return ve;
+  // });
 };
 
 const createViewEntriesForNonScheduledRepeatProjections = (
