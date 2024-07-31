@@ -119,6 +119,19 @@
         "ISSUE_NOT_FOUND": "CalDav: Похоже, что Todo \"{{issueId}}\" удален на сервере."
       }
     },
+    "CALENDARS": {
+      "BANNER": {
+        "TXT": "<strong>{{title}}</strong> начинать в <strong>{{start}}</strong>!",
+        "TXT_MULTIPLE": "<strong>{{title}}</strong> начинать в <strong>{{start}}</strong>!<br> (и {{nrOfOtherBanners}} ожидаются другие события)",
+        "TXT_PAST": "<strong>{{title}}</strong> начат в <strong>{{start}}</strong>!",
+        "TXT_PAST_MULTIPLE": "<strong>{{title}}</strong> начат в <strong>{{start}}</strong>!<br> (и {{nrOfOtherBanners}} ожидаются другие события)",
+        "ADD_AS_TASK": "Добавить как задачу",
+        "FOCUS_TASK": "Задача в фокусе"
+      },
+      "S": {
+        "CAL_PROVIDER_ERROR": "Ошибка поставщика календаря: {{errTxt}}"
+      }
+    },
     "CONFIG": {
       "S": {
         "UPDATE_SECTION": "Обновлены настройки для <strong>{{sectionKey}}</strong>"
@@ -137,6 +150,101 @@
     "FINISH_DAY_BEFORE_EXIT": {
       "C": {
         "FINISH_DAY_BEFORE_EXIT": "В вашем списке на сегодня есть {{nr}} выполненных задач, еще не перемещенных в архив. Вы действительно хотите бросить курить, не закончив свой день?"
+      }
+    },
+    "FOCUS_MODE": {
+      "BACK_TO_PLANNING": "Вернуться к планированию",
+      "CANCEL_FOCUS_SESSION": "Отменить фокус-сеанс",
+      "CONGRATS": "Поздравляю с завершением этого сеанса!",
+      "CONTINUE_FOCUS_SESSION": "Продолжить фокус-сеанс",
+      "FINISH_TASK_AND_SELECT_NEXT": "Завершить задачу и выбрать следующую",
+      "GET_READY": "Приготовьтесь к своему фокус-сеансу!",
+      "GOGOGO": "Вперёд, вперёд, вперёд!!!",
+      "GO_TO_PROCRASTINATION": "Получить помощь, когда прокрастинируешь",
+      "NEXT": "Дальше",
+      "ON": "на",
+      "OPEN_ISSUE_IN_BROWSER": "Открыть проблему в Браузере",
+      "POMODORO_BACK": "Назад",
+      "POMODORO_DISABLE": "Отключить Pomodoro",
+      "POMODORO_INFO": "Фокус-сеанс не может использоваться, когда включен таймер Pomodoro.",
+      "PREP_STRETCH": "Сделайте небольшую растяжку",
+      "PREP_SIT_UPRIGHT": "Сядьте (или встаньте) прямо",
+      "PREP_GET_MENTALLY_READY": "Будьте морально готовы к тому, чтобы быть сосредоточенным и продуктивным",
+      "SELECT_ANOTHER_TASK": "Выбрать другую задачу",
+      "SELECT_TASK": "Выбрать задачу для фокусировки",
+      "SET_FOCUS_SESSION_DURATION": "Установить длительность фокус-сеанса",
+      "SHOW_HIDE_NOTES_AND_ATTACHMENTS": "Показать/скрыть заметки о задачах и вложениях",
+      "START_FOCUS_SESSION": "Начать фокус-сеанс",
+      "START_NEXT_FOCUS_SESSION": "Начать следующий фокус-сеанс",
+      "WORKED_FOR": "Вы работаете над"
+    },
+    "GITEA": {
+      "DIALOG_INITIAL": {
+        "TITLE": "Настройка Gitea для проекта"
+      },
+      "FORM": {
+        "FILTER_USER": "Имя пользователя (чтобы отфильтровать изменения самостоятельно)",
+        "IS_AUTO_IMPORT_ISSUES": "Автоматически добавлять нерешенные проблемы из Gitea в бэклог",
+        "IS_AUTO_POLL": "Автоматически опрашивать импортированные проблемы на предмет изменений",
+        "IS_SEARCH_ISSUES_FROM_GITEA": "Show issues from git as suggestions when adding new tasks",
+        "HOST": "Host (e.g.: https://try.gitea.io)",
+        "TOKEN": "Access Token",
+        "REPO_FULL_NAME": "Username or Organization name/project",
+        "REPO_FULL_NAME_DESCRIPTION": "Can be found as part of the url, when viewing the project in the Browser.",
+        "SCOPE": "Scope",
+        "SCOPE_ALL": "All",
+        "SCOPE_ASSIGNED": "Assigned to me",
+        "SCOPE_CREATED": "Created by me"
+      },
+      "FORM_SECTION": {
+        "HELP": "<p>Here you can configure SuperProductivity to list open Gitea issues for a specific repository in the task creation panel in the daily planning view. They will be listed as suggestions and will provide a link to the issue as well as more information about it.</p> <p>In addition you can automatically add and import all open issues.</p><p>To get by usage limits and to access you can provide a an access token.",
+        "TITLE": "Gitea"
+      },
+      "ISSUE_CONTENT": {
+        "ASSIGNEE": "Assignee",
+        "AT": "at",
+        "DESCRIPTION": "Description",
+        "LABELS": "Labels",
+        "MARK_AS_CHECKED": "Mark updates as checked",
+        "PROJECT": "Project",
+        "STATUS": "Status",
+        "SUMMARY": "Summary",
+        "WRITE_A_COMMENT": "Write a comment"
+      },
+      "S": {
+        "ERR_UNKNOWN": "Gitea: Unknown error {{statusCode}} {{errorMsg}}. Api Rate limit exceeded?"
+      }
+    },
+    "REDMINE": {
+      "DIALOG_INITIAL": {
+        "TITLE": "Setup Redmine for Project"
+      },
+      "FORM": {
+        "PROJECT_ID": "Project Identifier",
+        "PROJECT_ID_DESCRIPTION": "Can be found as part of the url, when viewing the project in the Browser.",
+        "HOST": "Host (e.g.: https://redmine.org)",
+        "API_KEY": "API access key",
+        "SCOPE": "Scope",
+        "SCOPE_ALL": "All",
+        "SCOPE_ASSIGNED": "Assigned to me",
+        "SCOPE_CREATED": "Created by me",
+        "IS_AUTO_POLL": "Automatically poll imported redmine issues for changes",
+        "IS_SEARCH_ISSUES_FROM_REDMINE": "Show issues from redmine as suggestions when adding new tasks",
+        "IS_AUTO_IMPORT_ISSUES": "Automatically add open issues from redmine"
+      },
+      "FORM_SECTION": {
+        "TITLE": "Redmine",
+        "HELP": "<p>Here you can configure SuperProductivity to list open Redmine (either its the online version or a self-hosted instance) issues for a specific project in the task creation panel in the daily planning view. They will be listed as suggestions and will provide a link to the issue as well as more information about it.</p><p>In addition you can automatically import all open issues.</p>"
+      },
+      "ISSUE_CONTENT": {
+        "AUTHOR": "Author",
+        "STATUS": "Status",
+        "PRIORITY": "Priority",
+        "DESCRIPTION": "Description",
+        "MARK_AS_CHECKED": "Mark updates as checked"
+      },
+      "S": {
+        "ERR_UNKNOWN": "Redmine: Unknown error {{statusCode}} {{errorMsg}}."
       }
     },
     "GITHUB": {
