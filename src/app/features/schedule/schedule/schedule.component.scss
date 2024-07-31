@@ -101,7 +101,6 @@ header {
   align-self: end;
   font-size: 80%;
   position: relative;
-  margin-bottom: -10px;
   color: #70757a;
   padding-right: 6px;
 }
@@ -131,7 +130,7 @@ header {
 }
 
 .row {
-  border-bottom: 1px solid $grid-color;
+  border-top: 1px solid $grid-color;
 
   @include darkTheme() {
     border-color: $grid-color-dark;
@@ -293,7 +292,7 @@ header {
     line-height: 1;
     background: $light-theme-bg;
     padding: 2px 8px;
-    margin-bottom: -2px;
+    margin-bottom: -6px;
 
     @include darkTheme() {
       background: $dark-theme-bg;
@@ -306,7 +305,7 @@ header {
     bottom: auto;
     top: 100%;
     margin-bottom: 0;
-    margin-top: -8px;
+    margin-top: -16px;
   }
 }
 

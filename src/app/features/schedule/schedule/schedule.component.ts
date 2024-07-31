@@ -176,7 +176,8 @@ export class ScheduleComponent implements AfterViewInit, OnDestroy {
             // eslint-disable-next-line no-mixed-operators
             const hoursToday = startHour + startMinute / 60;
 
-            const startRow = Math.round(hoursToday * FH);
+            // NOTE: +1 cause grids start on 1
+            const startRow = Math.round(hoursToday * FH) + 1;
             const timeLeft =
               entryAfter && entryAfter.type !== ScheduleViewEntryType.WorkdayEnd
                 ? entryAfter.start - entry.start
@@ -214,8 +215,9 @@ export class ScheduleComponent implements AfterViewInit, OnDestroy {
     map((v) => {
       return (
         v && {
-          workStartRow: Math.round(FH * v.workStart),
-          workEndRow: Math.round(FH * v.workEnd),
+          // NOTE: +1 because grids start at 1
+          workStartRow: Math.round(FH * v.workStart) + 1,
+          workEndRow: Math.round(FH * v.workEnd) + 1,
         }
       );
     }),

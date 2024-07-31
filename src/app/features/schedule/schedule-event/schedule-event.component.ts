@@ -29,9 +29,17 @@ export class ScheduleEventComponent extends BaseComponent implements OnInit, OnD
   @Input({ required: true })
   set event(event: ScheduleEvent) {
     this.se = event;
-    this._elRef.nativeElement.id = 't-' + (this.se.data as any).id;
     this.startClockString = getClockStringFromHours(this.se.startHours);
     this.durationStr = (this.se.timeLeftInHours * 60).toString().substring(0, 4);
+
+    // if (
+    //   this.se.type === ScheduleViewEntryType.Task ||
+    //   this.se.type === ScheduleViewEntryType.SplitTask ||
+    //   this.se.type === ScheduleViewEntryType.TaskPlannedForDay ||
+    //   this.se.type === ScheduleViewEntryType.TaskPlannedForDay ||
+    // ) {
+    //   this._elRef.nativeElement.id = 't-' + (this.se.data as any).id;
+    // }
   }
 
   startClockString: string = '';
