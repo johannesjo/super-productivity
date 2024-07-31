@@ -49,22 +49,21 @@ export const createViewEntriesForBlock = (blockedBlock: BlockedBlock): SVE[] => 
       // TODO check if needed
     } else if (entry.type === BlockedBlockType.WorkdayStartEnd) {
       // NOTE: day start and end are mixed up, because it is the opposite as the blocked range
-
-      const workdayCfg = entry.data;
-      viewEntriesForBock.push({
-        id: 'DAY_END_' + entry.start,
-        start: entry.start,
-        type: SVEType.WorkdayEnd,
-        data: workdayCfg,
-        timeToGo: entry.end - entry.start,
-      });
-      viewEntriesForBock.push({
-        id: 'DAY_START_' + entry.end,
-        start: entry.end,
-        type: SVEType.WorkdayStart,
-        data: workdayCfg,
-        timeToGo: 0,
-      });
+      // const workdayCfg = entry.data;
+      // viewEntriesForBock.push({
+      //   id: 'DAY_END_' + entry.start,
+      //   start: entry.start,
+      //   type: SVEType.WorkdayEnd,
+      //   data: workdayCfg,
+      //   timeToGo: entry.end - entry.start,
+      // });
+      // viewEntriesForBock.push({
+      //   id: 'DAY_START_' + entry.end,
+      //   start: entry.end,
+      //   type: SVEType.WorkdayStart,
+      //   data: workdayCfg,
+      //   timeToGo: 0,
+      // });
     } else if (entry.type === BlockedBlockType.LunchBreak) {
       viewEntriesForBock.push({
         id: 'LUNCH_BREAK_' + entry.start,
