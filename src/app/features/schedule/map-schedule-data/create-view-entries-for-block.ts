@@ -1,23 +1,18 @@
 import { BlockedBlock, BlockedBlockType } from '../../timeline/timeline.model';
-import { ScheduleViewEntry } from '../schedule.model';
-import {
-  SCHEDULE_TASK_MIN_DURATION_IN_MS,
-  ScheduleViewEntryType,
-} from '../schedule.const';
+import { SVE } from '../schedule.model';
+import { SCHEDULE_TASK_MIN_DURATION_IN_MS, SVEType } from '../schedule.const';
 import { nanoid } from 'nanoid';
 import { getTimeLeftForTaskWithMinVal } from '../../../util/get-time-left-for-task';
 
-export const createViewEntriesForBlock = (
-  blockedBlock: BlockedBlock,
-): ScheduleViewEntry[] => {
-  const viewEntriesForBock: ScheduleViewEntry[] = [];
+export const createViewEntriesForBlock = (blockedBlock: BlockedBlock): SVE[] => {
+  const viewEntriesForBock: SVE[] = [];
   blockedBlock.entries.forEach((entry) => {
     if (entry.type === BlockedBlockType.ScheduledTask) {
       const scheduledTask = entry.data;
       viewEntriesForBock.push({
         id: scheduledTask.id,
         start: scheduledTask.plannedAt,
-        type: ScheduleViewEntryType.ScheduledTask,
+        type: SVEType.ScheduledTask,
         data: scheduledTask,
         timeToGo: getTimeLeftForTaskWithMinVal(
           scheduledTask,
@@ -29,7 +24,7 @@ export const createViewEntriesForBlock = (
       viewEntriesForBock.push({
         id: repeatCfg.id,
         start: entry.start,
-        type: ScheduleViewEntryType.ScheduledRepeatProjection,
+        type: SVEType.ScheduledRepeatProjection,
         data: repeatCfg,
         timeToGo: repeatCfg.defaultEstimate || 0,
       });
@@ -40,7 +35,7 @@ export const createViewEntriesForBlock = (
         // id: calendarEvent.title,
         id: nanoid(),
         start: entry.start,
-        type: ScheduleViewEntryType.CalendarEvent,
+        type: SVEType.CalendarEvent,
         data: {
           ...calendarEvent,
           icon: calendarEvent.icon || 'event',
@@ -55,14 +50,14 @@ export const createViewEntriesForBlock = (
       viewEntriesForBock.push({
         id: 'DAY_END_' + entry.start,
         start: entry.start,
-        type: ScheduleViewEntryType.WorkdayEnd,
+        type: SVEType.WorkdayEnd,
         data: workdayCfg,
         timeToGo: entry.end - entry.start,
       });
       viewEntriesForBock.push({
         id: 'DAY_START_' + entry.end,
         start: entry.end,
-        type: ScheduleViewEntryType.WorkdayStart,
+        type: SVEType.WorkdayStart,
         data: workdayCfg,
         timeToGo: 0,
       });
@@ -70,7 +65,7 @@ export const createViewEntriesForBlock = (
       viewEntriesForBock.push({
         id: 'LUNCH_BREAK_' + entry.start,
         start: entry.start,
-        type: ScheduleViewEntryType.LunchBreak,
+        type: SVEType.LunchBreak,
         data: entry.data,
         timeToGo: entry.end - entry.start,
       });

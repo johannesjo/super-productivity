@@ -1,31 +1,25 @@
-import {
-  ScheduleViewEntry,
-  ScheduleViewEntrySplitTaskContinued,
-  ScheduleViewEntryTask,
-} from '../schedule.model';
-import { SCHEDULE_MOVEABLE_TYPES, ScheduleViewEntryType } from '../schedule.const';
+import { SVE, SVESplitTaskContinued, SVETask } from '../schedule.model';
+import { SCHEDULE_MOVEABLE_TYPES, SVEType } from '../schedule.const';
 
-export const isMoveableViewEntry = (viewEntry: ScheduleViewEntry): boolean => {
+export const isMoveableVE = (viewEntry: SVE): boolean => {
   return !!SCHEDULE_MOVEABLE_TYPES.find(
     (moveableType) => moveableType === viewEntry.type,
   );
 };
-export const isTaskDataType = (
-  viewEntry: ScheduleViewEntry,
-): viewEntry is ScheduleViewEntryTask => {
+export const isTaskDataType = (viewEntry: SVE): viewEntry is SVETask => {
   return (
-    viewEntry.type === ScheduleViewEntryType.Task ||
-    viewEntry.type === ScheduleViewEntryType.SplitTask ||
-    viewEntry.type === ScheduleViewEntryType.TaskPlannedForDay ||
-    viewEntry.type === ScheduleViewEntryType.SplitTaskPlannedForDay ||
-    viewEntry.type === ScheduleViewEntryType.ScheduledTask
+    viewEntry.type === SVEType.Task ||
+    viewEntry.type === SVEType.SplitTask ||
+    viewEntry.type === SVEType.TaskPlannedForDay ||
+    viewEntry.type === SVEType.SplitTaskPlannedForDay ||
+    viewEntry.type === SVEType.ScheduledTask
   );
 };
 export const isContinuedTaskType = (
-  viewEntry: ScheduleViewEntry,
-): viewEntry is ScheduleViewEntrySplitTaskContinued => {
+  viewEntry: SVE,
+): viewEntry is SVESplitTaskContinued => {
   return (
-    viewEntry.type === ScheduleViewEntryType.SplitTaskContinued ||
-    viewEntry.type === ScheduleViewEntryType.SplitTaskContinuedLast
+    viewEntry.type === SVEType.SplitTaskContinued ||
+    viewEntry.type === SVEType.SplitTaskContinuedLast
   );
 };

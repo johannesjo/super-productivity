@@ -25,17 +25,17 @@ import { createSortedBlockerBlocks } from '../../timeline/map-timeline-data/crea
 import {
   ScheduleDay,
   ScheduleLunchBreakCfg,
-  ScheduleViewEntry,
-  ScheduleViewEntryRepeatProjection,
-  ScheduleViewEntryRepeatProjectionSplitContinued,
-  ScheduleViewEntrySplitTaskContinued,
-  ScheduleViewEntryTask,
   ScheduleWorkStartEndCfg,
+  SVE,
+  SVERepeatProjection,
+  SVERepeatProjectionSplitContinued,
+  SVESplitTaskContinued,
+  SVETask,
 } from '../schedule.model';
 import {
   SCHEDULE_TASK_MIN_DURATION_IN_MS,
   SCHEDULE_VIEW_TYPE_ORDER,
-  ScheduleViewEntryType,
+  SVEType,
 } from '../schedule.const';
 import { createScheduleViewEntriesForNormalTasks } from './create-schedule-view-entries-for-normal-tasks';
 import { insertBlockedBlocksViewEntriesForSchedule } from './insert-blocked-blocks-view-entries-for-schedule';
@@ -114,8 +114,8 @@ export const createScheduleDays = (
   now: number,
 ): ScheduleDay[] => {
   let splitTaskOrRepeatEntryForNextDay:
-    | ScheduleViewEntrySplitTaskContinued
-    | ScheduleViewEntryRepeatProjectionSplitContinued
+    | SVESplitTaskContinued
+    | SVERepeatProjectionSplitContinued
     | undefined;
   let regularTasksLeftForDay: TaskWithoutReminder[] = nonScheduledTasks;
   let beyondBudgetTasks: TaskWithoutReminder[];
@@ -153,13 +153,13 @@ export const createScheduleDays = (
       getTimeLeftForTasksWithMinVal(
         regularTasksLeftForDay,
         SCHEDULE_TASK_MIN_DURATION_IN_MS,
-      ) + (splitTaskOrRepeatEntryForNextDay?.data.timeToGo || 0);
+      ) + (splitTaskOrRepeatEntryForNextDay?.timeToGo || 0);
     const nonScheduledBudgetForDay = getBudgetLeftForDay(
       blockerBlocksForDay,
       i === 0 ? now : undefined,
     );
 
-    let viewEntries: ScheduleViewEntry[] = [];
+    let viewEntries: SVE[] = [];
 
     const timeLeftAfterRegularTasksDone = nonScheduledBudgetForDay - timeLeftForRegular;
     if (timeLeftAfterRegularTasksDone > 0) {
@@ -221,15 +221,15 @@ export const createScheduleDays = (
       beyondBudgetTasks = (plannerDayMap[dayDate] as TaskWithoutReminder[]) || [];
     }
 
-    const viewEntriesToRenderForDay: ScheduleViewEntry[] = [];
+    const viewEntriesToRenderForDay: SVE[] = [];
     splitTaskOrRepeatEntryForNextDay = undefined;
     viewEntries.forEach((entry) => {
       if (entry.start >= nextDayStart) {
         if (
-          entry.type === ScheduleViewEntryType.SplitTaskContinuedLast ||
-          entry.type === ScheduleViewEntryType.SplitTaskContinued ||
-          entry.type === ScheduleViewEntryType.RepeatProjectionSplitContinued ||
-          entry.type === ScheduleViewEntryType.RepeatProjectionSplitContinuedLast
+          entry.type === SVEType.SplitTaskContinuedLast ||
+          entry.type === SVEType.SplitTaskContinued ||
+          entry.type === SVEType.RepeatProjectionSplitContinued ||
+          entry.type === SVEType.RepeatProjectionSplitContinuedLast
         ) {
           if (splitTaskOrRepeatEntryForNextDay) {
             throw new Error('Schedule: More than one continued split task');
@@ -239,12 +239,12 @@ export const createScheduleDays = (
         }
       } else {
         if (
-          entry.type === ScheduleViewEntryType.SplitTask &&
+          entry.type === SVEType.SplitTask &&
           (entry.data as TaskWithPlannedForDayIndication).plannedForADay
         ) {
           viewEntriesToRenderForDay.push({
             ...entry,
-            type: ScheduleViewEntryType.SplitTaskPlannedForDay,
+            type: SVEType.SplitTaskPlannedForDay,
           });
         } else {
           viewEntriesToRenderForDay.push(entry);
@@ -266,7 +266,7 @@ export const createScheduleDays = (
     // });
 
     // TODO there is probably a better way to do this
-    if (viewEntries[0] && viewEntries[0].type === ScheduleViewEntryType.WorkdayEnd) {
+    if (viewEntries[0] && viewEntries[0].type === SVEType.WorkdayEnd) {
       // remove that entry
       viewEntriesToRenderForDay.shift();
     }
@@ -300,11 +300,9 @@ export const createViewEntriesForDay = (
   nonScheduledRepeatCfgsDueOnDay: TaskRepeatCfg[],
   nonScheduledTasksForDay: (TaskWithoutReminder | TaskWithPlannedForDayIndication)[],
   blockedBlocksForDay: BlockedBlock[],
-  prevDaySplitTaskEntry?:
-    | ScheduleViewEntrySplitTaskContinued
-    | ScheduleViewEntryRepeatProjectionSplitContinued,
-): ScheduleViewEntry[] => {
-  let viewEntries: ScheduleViewEntry[] = [];
+  prevDaySplitTaskEntry?: SVESplitTaskContinued | SVERepeatProjectionSplitContinued,
+): SVE[] => {
+  let viewEntries: SVE[] = [];
   let startTime = initialStartTime;
 
   if (prevDaySplitTaskEntry) {
@@ -312,7 +310,7 @@ export const createViewEntriesForDay = (
       ...prevDaySplitTaskEntry,
       start: startTime,
     });
-    startTime += prevDaySplitTaskEntry.data.timeToGo;
+    startTime += prevDaySplitTaskEntry.timeToGo;
   }
 
   const { entries, startTimeAfter } = createViewEntriesForNonScheduledRepeatProjections(
@@ -331,7 +329,7 @@ export const createViewEntriesForDay = (
   }
 
   insertBlockedBlocksViewEntriesForSchedule(
-    viewEntries as ScheduleViewEntryTask[],
+    viewEntries as SVETask[],
     blockedBlocksForDay,
     0, // TODO remove form insertBlockedBlocksViewEntries
   );
@@ -378,11 +376,11 @@ export const createViewEntriesForDay = (
 const createViewEntriesForNonScheduledRepeatProjections = (
   nonScheduledRepeatCfgsDueOnDay: TaskRepeatCfg[],
   startTime: number,
-): { entries: ScheduleViewEntry[]; startTimeAfter: number } => {
+): { entries: SVE[]; startTimeAfter: number } => {
   let lastTime: number;
   let prevRepeatCfg: TaskRepeatCfg;
 
-  const viewEntries: ScheduleViewEntryRepeatProjection[] = [];
+  const viewEntries: SVERepeatProjection[] = [];
   nonScheduledRepeatCfgsDueOnDay.forEach((taskRepeatCfg, index, arr) => {
     prevRepeatCfg = arr[index - 1];
 
@@ -400,7 +398,7 @@ const createViewEntriesForNonScheduledRepeatProjections = (
 
     viewEntries.push({
       id: taskRepeatCfg.id,
-      type: ScheduleViewEntryType.RepeatProjection,
+      type: SVEType.RepeatProjection,
       start: time,
       data: taskRepeatCfg,
       timeToGo: taskRepeatCfg.defaultEstimate || 0,

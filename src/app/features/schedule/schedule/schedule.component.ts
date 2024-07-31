@@ -40,7 +40,7 @@ import {
   selectTimelineWorkStartEndHours,
 } from '../../config/store/global-config.reducer';
 import { PlannerActions } from '../../planner/store/planner.actions';
-import { FH, ScheduleViewEntryType } from '../schedule.const';
+import { FH, SVEType } from '../schedule.const';
 import { mapToScheduleDays } from '../map-schedule-data/map-to-schedule-days';
 import { mapScheduleDaysToScheduleEvents } from '../map-schedule-data/map-schedule-days-to-schedule-events';
 
@@ -82,7 +82,7 @@ export class ScheduleComponent implements AfterViewInit, OnDestroy {
   });
 
   T: typeof T = T;
-  ScheduleViewEntryType: typeof ScheduleViewEntryType = ScheduleViewEntryType;
+  SVEType: typeof SVEType = SVEType;
 
   daysToShow$ = this._globalTrackingIntervalService.todayDateStr$.pipe(
     map(() => {
@@ -253,10 +253,10 @@ export class ScheduleComponent implements AfterViewInit, OnDestroy {
       }
       this.prevDragOverEl = targetEl;
       if (
-        targetEl.classList.contains(ScheduleViewEntryType.Task) ||
-        targetEl.classList.contains(ScheduleViewEntryType.SplitTask) ||
-        targetEl.classList.contains(ScheduleViewEntryType.SplitTaskPlannedForDay) ||
-        targetEl.classList.contains(ScheduleViewEntryType.TaskPlannedForDay)
+        targetEl.classList.contains(SVEType.Task) ||
+        targetEl.classList.contains(SVEType.SplitTask) ||
+        targetEl.classList.contains(SVEType.SplitTaskPlannedForDay) ||
+        targetEl.classList.contains(SVEType.TaskPlannedForDay)
       ) {
         this.prevDragOverEl.classList.add(DRAG_OVER_CLASS);
       } else if (targetEl.classList.contains('dropzones')) {

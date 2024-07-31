@@ -1,6 +1,6 @@
 import { mapScheduleDaysToScheduleEvents } from './map-schedule-days-to-schedule-events';
-import { FH, ScheduleViewEntryType } from '../schedule.const';
-import { ScheduleDay, ScheduleViewEntryTask } from '../schedule.model';
+import { FH, SVEType } from '../schedule.const';
+import { ScheduleDay, SVETask } from '../schedule.model';
 import { TaskCopy } from '../../tasks/task.model';
 
 const H = 60 * 60 * 1000;
@@ -11,7 +11,7 @@ const FAKE_DAY: ScheduleDay = {
   isToday: false,
   beyondBudgetTasks: [],
 };
-const FAKE_TASK_ENTRY: ScheduleViewEntryTask = {
+const FAKE_TASK_ENTRY: SVETask = {
   id: 'XXX',
   data: {
     title: 'TITLE',
@@ -23,7 +23,7 @@ const FAKE_TASK_ENTRY: ScheduleViewEntryTask = {
   } as Partial<TaskCopy> as TaskCopy,
   timeToGo: H,
   start: new Date('2020-1-1 00:00').getUTCMilliseconds(),
-  type: ScheduleViewEntryType.Task,
+  type: SVEType.Task,
 };
 
 const fakeDay = (additional?: Partial<ScheduleDay>): ScheduleDay => {
@@ -35,9 +35,9 @@ const fakeDay = (additional?: Partial<ScheduleDay>): ScheduleDay => {
 
 const fakeTaskEntry = (
   id = 'XXX',
-  additional?: Partial<ScheduleViewEntryTask>,
+  additional?: Partial<SVETask>,
   additionalTaskData?: Partial<TaskCopy>,
-): ScheduleViewEntryTask => {
+): SVETask => {
   return {
     ...FAKE_TASK_ENTRY,
     ...additional,
@@ -92,7 +92,7 @@ describe('mapScheduleDaysToScheduleEvents()', () => {
           style: 'grid-column: 2;  grid-row: 61 / span 12',
           timeLeftInHours: 1,
           title: 'AAA_TITLE',
-          type: 'Task' as ScheduleViewEntryType,
+          type: 'Task' as SVEType,
         },
         {
           data: {
@@ -108,7 +108,7 @@ describe('mapScheduleDaysToScheduleEvents()', () => {
           style: 'grid-column: 2;  grid-row: 73 / span 6',
           timeLeftInHours: 0.5,
           title: 'BBB_TITLE',
-          type: 'Task' as ScheduleViewEntryType,
+          type: 'Task' as SVEType,
         },
       ],
     });

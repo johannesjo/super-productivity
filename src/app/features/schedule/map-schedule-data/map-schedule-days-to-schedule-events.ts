@@ -1,7 +1,7 @@
 import { ScheduleDay, ScheduleEvent } from '../schedule.model';
 import { getTimeLeftForTask } from '../../../util/get-time-left-for-task';
-import { ScheduleViewEntryType } from '../schedule.const';
-import { getDurationForScheduleViewEntry } from './get-duration-for-schedule-view-entry';
+import { SVEType } from '../schedule.const';
+import { getDurationForSVE } from './get-duration-for-schedule-view-entry';
 
 export const mapScheduleDaysToScheduleEvents = (
   days: ScheduleDay[],
@@ -23,7 +23,7 @@ export const mapScheduleDaysToScheduleEvents = (
         id: taskPlannedForDay.id,
         data: taskPlannedForDay,
         title: taskPlannedForDay.title,
-        type: ScheduleViewEntryType.TaskPlannedForDay,
+        type: SVEType.TaskPlannedForDay,
         style: `height: ${rowSpan * 8}px`,
         timeLeftInHours,
         startHours: 0,
@@ -31,10 +31,7 @@ export const mapScheduleDaysToScheduleEvents = (
     });
 
     day.entries.forEach((entry, entryIndex) => {
-      if (
-        entry.type !== ScheduleViewEntryType.WorkdayEnd &&
-        entry.type !== ScheduleViewEntryType.WorkdayStart
-      ) {
+      if (entry.type !== SVEType.WorkdayEnd && entry.type !== SVEType.WorkdayStart) {
         const start = new Date(entry.start);
         const startHour = start.getHours();
         const startMinute = start.getMinutes();
@@ -43,12 +40,12 @@ export const mapScheduleDaysToScheduleEvents = (
 
         // NOTE: +1 cause grids start on 1
         const startRow = Math.round(hoursToday * FH) + 1;
-        const timeLeft = getDurationForScheduleViewEntry(entry);
+        const timeLeft = getDurationForSVE(entry);
 
         // const entryAfter = day.entries[entryIndex + 1];
-        // entryAfter && entryAfter.type !== ScheduleViewEntryType.WorkdayEnd
+        // entryAfter && entryAfter.type !== SVEType.WorkdayEnd
         //   ? entryAfter.start - entry.start
-        //   : getDurationForScheduleViewEntry(entry);
+        //   : getDurationForSVE(entry);
 
         const timeLeftInHours = timeLeft / 1000 / 60 / 60;
 
@@ -56,9 +53,9 @@ export const mapScheduleDaysToScheduleEvents = (
         eventsFlat.push({
           title:
             (entry as any)?.data?.title ||
-            (entry.type === ScheduleViewEntryType.LunchBreak ? 'Lunch Break' : 'TITLE'),
+            (entry.type === SVEType.LunchBreak ? 'Lunch Break' : 'TITLE'),
           id: (entry.data as any)?.id || entry.id,
-          type: entry.type as ScheduleViewEntryType,
+          type: entry.type as SVEType,
           startHours: hoursToday,
           timeLeftInHours,
           // title: entry.data.title,

@@ -1,19 +1,19 @@
 import {
-  ScheduleViewEntry,
-  ScheduleViewEntryRepeatProjection,
-  ScheduleViewEntryRepeatProjectionSplitContinued,
-  ScheduleViewEntrySplitTaskContinued,
-  ScheduleViewEntrySplitTaskStart,
+  SVE,
+  SVERepeatProjection,
+  SVERepeatProjectionSplitContinued,
+  SVESplitTaskContinued,
+  SVESplitTaskStart,
 } from '../../schedule/schedule.model';
 import moment from 'moment/moment';
 import { TaskWithoutReminder } from '../../tasks/task.model';
-import { ScheduleViewEntryType } from '../../schedule/schedule.const';
+import { SVEType } from '../../schedule/schedule.const';
 import { TaskRepeatCfg } from '../../task-repeat-cfg/task-repeat-cfg.model';
 import { BlockedBlock } from '../../timeline/timeline.model';
-import { getDurationForScheduleViewEntry } from './get-duration-for-schedule-view-entry';
+import { getDurationForSVE } from './get-duration-for-schedule-view-entry';
 import {
   isContinuedTaskType,
-  isMoveableViewEntry,
+  isMoveableVE,
   isTaskDataType,
 } from './is-schedule-types-type';
 import { createViewEntriesForBlock } from './create-view-entries-for-block';
@@ -22,12 +22,12 @@ import { createViewEntriesForBlock } from './create-view-entries-for-block';
 const debug = (...args: any): void => undefined;
 
 export const insertBlockedBlocksViewEntriesForSchedule = (
-  // viewEntriesIn: ScheduleViewEntryTask[],
-  viewEntriesIn: ScheduleViewEntry[],
+  // viewEntriesIn: SVETask[],
+  viewEntriesIn: SVE[],
   blockedBlocks: BlockedBlock[],
   now: number,
 ): void => {
-  const viewEntries: ScheduleViewEntry[] = viewEntriesIn;
+  const viewEntries: SVE[] = viewEntriesIn;
   let veIndex: number = 0;
   debug('################__insertBlockedBlocksViewEntries()_START__################');
   debug(blockedBlocks.length + ' BLOCKS');
@@ -36,8 +36,7 @@ export const insertBlockedBlocksViewEntriesForSchedule = (
   blockedBlocks.forEach((blockedBlock, blockIndex) => {
     debug(`**********BB:${blockIndex}***********`);
 
-    const viewEntriesToAddForBB: ScheduleViewEntry[] =
-      createViewEntriesForBlock(blockedBlock);
+    const viewEntriesToAddForBB: SVE[] = createViewEntriesForBlock(blockedBlock);
 
     if (veIndex > viewEntries.length) {
       throw new Error('INDEX TOO LARGE');
@@ -88,8 +87,8 @@ export const insertBlockedBlocksViewEntriesForSchedule = (
         debug('BBB insert and move all following entries');
         break;
       } else {
-        const timeLeft = getDurationForScheduleViewEntry(viewEntry);
-        const veEnd = viewEntry.start + getDurationForScheduleViewEntry(viewEntry);
+        const timeLeft = getDurationForSVE(viewEntry);
+        const veEnd = viewEntry.start + getDurationForSVE(viewEntry);
         debug(blockedBlock.start < veEnd, blockedBlock.start, veEnd);
 
         // NOTE: blockedBlock.start > viewEntry.start is implicated by above checks
@@ -101,22 +100,21 @@ export const insertBlockedBlocksViewEntriesForSchedule = (
           if (isTaskDataType(viewEntry)) {
             debug('CCC a) ' + viewEntry.type);
 
-            const currentViewEntry: ScheduleViewEntrySplitTaskStart =
-              viewEntry as unknown as ScheduleViewEntrySplitTaskStart;
+            const currentVE: SVESplitTaskStart =
+              viewEntry as unknown as SVESplitTaskStart;
             const timeLeftOnTask = timeLeft;
-            const timePlannedForSplitStart = blockedBlock.start - currentViewEntry.start;
+            const timePlannedForSplitStart = blockedBlock.start - currentVE.start;
             const timePlannedForSplitContinued =
               timeLeftOnTask - timePlannedForSplitStart;
-            currentViewEntry.timeToGo = timePlannedForSplitStart;
+            currentVE.timeToGo = timePlannedForSplitStart;
 
-            const splitTask: TaskWithoutReminder =
-              currentViewEntry.data as TaskWithoutReminder;
+            const splitTask: TaskWithoutReminder = currentVE.data as TaskWithoutReminder;
 
             // update type of current
-            currentViewEntry.timeToGo = timePlannedForSplitStart;
-            currentViewEntry.type = ScheduleViewEntryType.SplitTask;
+            currentVE.timeToGo = timePlannedForSplitStart;
+            currentVE.type = SVEType.SplitTask;
 
-            const newSplitContinuedEntry: ScheduleViewEntry = createSplitTask({
+            const newSplitContinuedEntry: SVE = createSplitTask({
               start: blockedBlock.end,
               taskId: splitTask.id,
               projectId: splitTask.projectId,
@@ -141,32 +139,30 @@ export const insertBlockedBlocksViewEntriesForSchedule = (
             break;
           } else if (isContinuedTaskType(viewEntry)) {
             debug('CCC b) ' + viewEntry.type);
-            const currentViewEntry: ScheduleViewEntrySplitTaskContinued =
-              viewEntry as any;
+            const currentVE: SVESplitTaskContinued = viewEntry as any;
             const timeLeftForCompleteSplitTask = timeLeft;
-            const timePlannedForSplitTaskBefore =
-              blockedBlock.start - currentViewEntry.start;
+            const timePlannedForSplitTaskBefore = blockedBlock.start - currentVE.start;
             const timePlannedForSplitTaskContinued =
               timeLeftForCompleteSplitTask - timePlannedForSplitTaskBefore;
 
             const splitInstances = viewEntries.filter(
               (entry) =>
-                (entry.type === ScheduleViewEntryType.SplitTaskContinuedLast ||
-                  entry.type === ScheduleViewEntryType.SplitTaskContinued) &&
-                entry.data.taskId === currentViewEntry.data.taskId,
+                (entry.type === SVEType.SplitTaskContinuedLast ||
+                  entry.type === SVEType.SplitTaskContinued) &&
+                entry.data.taskId === currentVE.data.taskId,
             );
             // update type of current
-            currentViewEntry.type = ScheduleViewEntryType.SplitTaskContinued;
-            currentViewEntry.data.timeToGo -= timePlannedForSplitTaskContinued;
+            currentVE.type = SVEType.SplitTaskContinued;
+            currentVE.timeToGo -= timePlannedForSplitTaskContinued;
 
             const splitIndex = splitInstances.length;
-            const newSplitContinuedEntry: ScheduleViewEntry = createSplitTask({
+            const newSplitContinuedEntry: SVE = createSplitTask({
               start: blockedBlock.end,
-              taskId: currentViewEntry.data.taskId,
-              projectId: currentViewEntry.data.projectId,
+              taskId: currentVE.data.taskId,
+              projectId: currentVE.data.projectId,
               timeToGo: timePlannedForSplitTaskContinued,
               splitIndex,
-              title: currentViewEntry.data.title,
+              title: currentVE.data.title,
             });
 
             // move entries
@@ -189,24 +185,23 @@ export const insertBlockedBlocksViewEntriesForSchedule = (
             veIndex += viewEntriesToAddForBB.length;
             break;
           } else if (
-            viewEntry.type === ScheduleViewEntryType.RepeatProjection ||
-            viewEntry.type === ScheduleViewEntryType.RepeatProjectionSplit
+            viewEntry.type === SVEType.RepeatProjection ||
+            viewEntry.type === SVEType.RepeatProjectionSplit
           ) {
             debug('CCC C) ' + viewEntry.type);
-            const currentViewEntry: ScheduleViewEntryRepeatProjection =
-              viewEntry as ScheduleViewEntryRepeatProjection;
-            const repeatCfg: TaskRepeatCfg = currentViewEntry.data as TaskRepeatCfg;
+            const currentVE: SVERepeatProjection = viewEntry as SVERepeatProjection;
+            const repeatCfg: TaskRepeatCfg = currentVE.data as TaskRepeatCfg;
 
             const timeLeftOnRepeatInstance = timeLeft;
-            const timePlannedForSplitStart = blockedBlock.start - currentViewEntry.start;
+            const timePlannedForSplitStart = blockedBlock.start - currentVE.start;
             const timePlannedForSplitContinued =
               timeLeftOnRepeatInstance - timePlannedForSplitStart;
 
             // update type of current
             // @ts-ignore
-            currentViewEntry.type = ScheduleViewEntryType.RepeatProjectionSplit;
+            currentVE.type = SVEType.RepeatProjectionSplit;
 
-            const newSplitContinuedEntry: ScheduleViewEntry = createSplitRepeat({
+            const newSplitContinuedEntry: SVE = createSplitRepeat({
               start: blockedBlock.end,
               repeatCfgId: repeatCfg.id,
               timeToGo: timePlannedForSplitContinued,
@@ -229,39 +224,37 @@ export const insertBlockedBlocksViewEntriesForSchedule = (
             veIndex += viewEntriesToAddForBB.length;
             break;
           } else if (
-            viewEntry.type === ScheduleViewEntryType.RepeatProjectionSplitContinued ||
-            viewEntry.type === ScheduleViewEntryType.RepeatProjectionSplitContinuedLast
+            viewEntry.type === SVEType.RepeatProjectionSplitContinued ||
+            viewEntry.type === SVEType.RepeatProjectionSplitContinuedLast
           ) {
             debug('CCC D) ' + viewEntry.type);
-            const currentViewEntry: ScheduleViewEntryRepeatProjectionSplitContinued =
-              viewEntry as ScheduleViewEntryRepeatProjectionSplitContinued;
+            const currentVE: SVERepeatProjectionSplitContinued =
+              viewEntry as SVERepeatProjectionSplitContinued;
             const timeLeftForCompleteSplitRepeatCfgProjection = timeLeft;
             const timePlannedForSplitRepeatCfgProjectionBefore =
-              blockedBlock.start - currentViewEntry.start;
+              blockedBlock.start - currentVE.start;
             const timePlannedForSplitRepeatCfgProjectionContinued =
               timeLeftForCompleteSplitRepeatCfgProjection -
               timePlannedForSplitRepeatCfgProjectionBefore;
 
             const splitInstances = viewEntries.filter(
               (entry) =>
-                (entry.type ===
-                  ScheduleViewEntryType.RepeatProjectionSplitContinuedLast ||
-                  entry.type === ScheduleViewEntryType.RepeatProjectionSplitContinued) &&
-                entry.data.repeatCfgId === currentViewEntry.data.repeatCfgId,
+                (entry.type === SVEType.RepeatProjectionSplitContinuedLast ||
+                  entry.type === SVEType.RepeatProjectionSplitContinued) &&
+                entry.data.repeatCfgId === currentVE.data.repeatCfgId,
             );
             // update type of current
-            currentViewEntry.type = ScheduleViewEntryType.RepeatProjectionSplitContinued;
-            currentViewEntry.data.timeToGo -=
-              timePlannedForSplitRepeatCfgProjectionContinued;
+            currentVE.type = SVEType.RepeatProjectionSplitContinued;
+            currentVE.timeToGo -= timePlannedForSplitRepeatCfgProjectionContinued;
 
             // TODO there can be multiple repeat instances on a day if they are continued to the next day
             const splitIndex = splitInstances.length;
-            const newSplitContinuedEntry: ScheduleViewEntry = createSplitRepeat({
+            const newSplitContinuedEntry: SVE = createSplitRepeat({
               start: blockedBlock.end,
-              repeatCfgId: currentViewEntry.data.repeatCfgId,
+              repeatCfgId: currentVE.data.repeatCfgId,
               timeToGo: timePlannedForSplitRepeatCfgProjectionContinued,
               splitIndex,
-              title: currentViewEntry.data.title,
+              title: currentVE.data.title,
             });
 
             // move entries
@@ -306,12 +299,12 @@ export const insertBlockedBlocksViewEntriesForSchedule = (
 };
 
 const moveAllEntriesAfterTime = (
-  viewEntries: ScheduleViewEntry[],
+  viewEntries: SVE[],
   moveBy: number,
   startTime: number = 0,
 ): void => {
   viewEntries.forEach((viewEntry: any) => {
-    if (viewEntry.start >= startTime && isMoveableViewEntry(viewEntry)) {
+    if (viewEntry.start >= startTime && isMoveableVE(viewEntry)) {
       debug(
         'MOVE_ENTRY2',
         viewEntry.data?.title,
@@ -324,13 +317,13 @@ const moveAllEntriesAfterTime = (
 };
 
 const moveEntries = (
-  viewEntries: ScheduleViewEntry[],
+  viewEntries: SVE[],
   moveBy: number,
   startIndex: number = 0,
 ): void => {
   for (let i = startIndex; i < viewEntries.length; i++) {
     const viewEntry: any = viewEntries[i];
-    if (isMoveableViewEntry(viewEntry)) {
+    if (isMoveableVE(viewEntry)) {
       debug(
         i,
         'MOVE_ENTRY',
@@ -357,15 +350,14 @@ const createSplitTask = ({
   title: string;
   splitIndex: number;
   timeToGo: number;
-}): ScheduleViewEntrySplitTaskContinued => {
+}): SVESplitTaskContinued => {
   return {
     id: `${taskId}__${splitIndex}`,
     start,
-    type: ScheduleViewEntryType.SplitTaskContinuedLast,
+    type: SVEType.SplitTaskContinuedLast,
     timeToGo,
     data: {
       title,
-      timeToGo,
       taskId,
       projectId,
       index: splitIndex,
@@ -385,15 +377,14 @@ const createSplitRepeat = ({
   title: string;
   splitIndex: number;
   timeToGo: number;
-}): ScheduleViewEntryRepeatProjectionSplitContinued => {
+}): SVERepeatProjectionSplitContinued => {
   return {
     id: `${repeatCfgId}__${splitIndex}`,
     start,
-    type: ScheduleViewEntryType.RepeatProjectionSplitContinuedLast,
+    type: SVEType.RepeatProjectionSplitContinuedLast,
     timeToGo,
     data: {
       title,
-      timeToGo,
       repeatCfgId,
       index: splitIndex,
     },

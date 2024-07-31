@@ -1,33 +1,33 @@
-import { ScheduleViewEntry } from '../schedule.model';
+import { SVE } from '../schedule.model';
 import { SCHEDULE_TASK_MIN_DURATION_IN_MS } from '../schedule.const';
 
-// const _getDurationForViewEntry = (viewEntry: ScheduleViewEntry): number => {
+// const _getDurationForVE = (viewEntry: SVE): number => {
 //   if (
-//     viewEntry.type === ScheduleViewEntryType.Task ||
-//     viewEntry.type === ScheduleViewEntryType.TaskPlannedForDay ||
-//     viewEntry.type === ScheduleViewEntryType.ScheduledTask
+//     viewEntry.type === SVEType.Task ||
+//     viewEntry.type === SVEType.TaskPlannedForDay ||
+//     viewEntry.type === SVEType.ScheduledTask
 //   ) {
 //     return getTimeLeftForTask(viewEntry.data);
 //   } else if (
-//     viewEntry.type === ScheduleViewEntryType.SplitTask ||
-//     viewEntry.type === ScheduleViewEntryType.SplitTaskPlannedForDay
+//     viewEntry.type === SVEType.SplitTask ||
+//     viewEntry.type === SVEType.SplitTaskPlannedForDay
 //   ) {
 //     return viewEntry.timeToGo;
 //   } else if (
 //     isContinuedTaskType(viewEntry) ||
-//     viewEntry.type === ScheduleViewEntryType.RepeatProjectionSplitContinued ||
-//     viewEntry.type === ScheduleViewEntryType.RepeatProjectionSplitContinuedLast
+//     viewEntry.type === SVEType.RepeatProjectionSplitContinued ||
+//     viewEntry.type === SVEType.RepeatProjectionSplitContinuedLast
 //   ) {
 //     return viewEntry.timeToGo;
 //   } else if (
-//     viewEntry.type === ScheduleViewEntryType.RepeatProjection ||
-//     viewEntry.type === ScheduleViewEntryType.RepeatProjectionSplit ||
-//     viewEntry.type === ScheduleViewEntryType.ScheduledRepeatProjection
+//     viewEntry.type === SVEType.RepeatProjection ||
+//     viewEntry.type === SVEType.RepeatProjectionSplit ||
+//     viewEntry.type === SVEType.ScheduledRepeatProjection
 //   ) {
 //     return viewEntry.data.defaultEstimate || 0;
-//   } else if (viewEntry.type === ScheduleViewEntryType.CalendarEvent) {
+//   } else if (viewEntry.type === SVEType.CalendarEvent) {
 //     return viewEntry.data.duration || 0;
-//   } else if (viewEntry.type === ScheduleViewEntryType.LunchBreak) {
+//   } else if (viewEntry.type === SVEType.LunchBreak) {
 //     const d = new Date();
 //     return (
 //       getDateTimeFromClockString(viewEntry.data.endTime, d) -
@@ -37,6 +37,6 @@ import { SCHEDULE_TASK_MIN_DURATION_IN_MS } from '../schedule.const';
 //   throw new Error('Wrong type given: ' + viewEntry.type);
 // };
 
-export const getDurationForScheduleViewEntry = (viewEntry: ScheduleViewEntry): number => {
+export const getDurationForSVE = (viewEntry: SVE): number => {
   return Math.max(viewEntry.timeToGo, SCHEDULE_TASK_MIN_DURATION_IN_MS);
 };
