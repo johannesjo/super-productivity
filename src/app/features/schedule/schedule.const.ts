@@ -53,3 +53,5 @@ export const SCHEDULE_MOVEABLE_TYPES: ScheduleViewEntryType[] = [
 ];
 
 export const SCHEDULE_TASK_MIN_DURATION_IN_MS = 10 * 60 * 1000;
+
+export const FH = 12;

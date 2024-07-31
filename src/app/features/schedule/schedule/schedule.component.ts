@@ -35,18 +35,16 @@ import {
 } from '@angular/cdk/drag-drop';
 import { GlobalTrackingIntervalService } from '../../../core/global-tracking-interval/global-tracking-interval.service';
 import { IS_TOUCH_PRIMARY } from 'src/app/util/is-mouse-primary';
-import { getTimeLeftForTask } from '../../../util/get-time-left-for-task';
 import {
   selectTimelineConfig,
   selectTimelineWorkStartEndHours,
 } from '../../config/store/global-config.reducer';
 import { PlannerActions } from '../../planner/store/planner.actions';
-import { ScheduleViewEntryType } from '../schedule.const';
+import { FH, ScheduleViewEntryType } from '../schedule.const';
 import { mapToScheduleDays } from '../map-schedule-data/map-to-schedule-days';
-import { getDurationForViewEntry } from '../map-schedule-data/insert-blocked-blocks-view-entries-for-schedule';
+import { mapScheduleDaysToScheduleEvents } from '../map-schedule-data/map-schedule-days-to-schedule-events';
 
 const DAYS_TO_SHOW = 5;
-const FH = 12;
 const D_HOURS = 24;
 const DRAG_OVER_CLASS = 'drag-over';
 const IS_DRAGGING_CLASS = 'is-dragging';
@@ -142,74 +140,7 @@ export class ScheduleComponent implements AfterViewInit, OnDestroy {
   eventsAndBeyondBudget$: Observable<{
     eventsFlat: ScheduleEvent[];
     beyondBudgetDays: ScheduleEvent[][];
-  }> = this.scheduleDays$.pipe(
-    map((days) => {
-      const eventsFlat: ScheduleEvent[] = [];
-      const beyondBudgetDays: ScheduleEvent[][] = [];
-
-      days.forEach((day, dayIndex) => {
-        beyondBudgetDays[dayIndex] = day.beyondBudgetTasks.map((taskPlannedForDay) => {
-          // eslint-disable-next-line no-mixed-operators
-          const timeLeft = getTimeLeftForTask(taskPlannedForDay);
-          const timeLeftInHours = timeLeft / 1000 / 60 / 60;
-          const rowSpan = Math.max(Math.round(timeLeftInHours * FH), 1);
-          return {
-            id: taskPlannedForDay.id,
-            data: taskPlannedForDay,
-            title: taskPlannedForDay.title,
-            type: ScheduleViewEntryType.TaskPlannedForDay,
-            style: `height: ${rowSpan * 8}px`,
-            timeLeftInHours,
-            startHours: 0,
-          };
-        });
-
-        day.entries.forEach((entry, entryIndex) => {
-          if (
-            entry.type !== ScheduleViewEntryType.WorkdayEnd &&
-            entry.type !== ScheduleViewEntryType.WorkdayStart
-          ) {
-            const entryAfter = day.entries[entryIndex + 1];
-            const start = new Date(entry.start);
-            const startHour = start.getHours();
-            const startMinute = start.getMinutes();
-            // eslint-disable-next-line no-mixed-operators
-            const hoursToday = startHour + startMinute / 60;
-
-            // NOTE: +1 cause grids start on 1
-            const startRow = Math.round(hoursToday * FH) + 1;
-            const timeLeft =
-              entryAfter && entryAfter.type !== ScheduleViewEntryType.WorkdayEnd
-                ? entryAfter.start - entry.start
-                : getDurationForViewEntry(entry);
-
-            const timeLeftInHours = timeLeft / 1000 / 60 / 60;
-
-            const rowSpan = Math.max(1, Math.round(timeLeftInHours * FH));
-            eventsFlat.push({
-              title:
-                (entry as any)?.data?.title ||
-                (entry.type === ScheduleViewEntryType.LunchBreak
-                  ? 'Lunch Break'
-                  : 'TITLE'),
-              id: (entry.data as any)?.id || entry.id,
-              // TODO fix
-              // type: entry.type as ScheduleViewEntryType,
-              type: entry.type as any as ScheduleViewEntryType,
-              startHours: hoursToday,
-              timeLeftInHours,
-              // title: entry.data.title,
-              style: `grid-column: ${dayIndex + 2};  grid-row: ${startRow} / span ${rowSpan}`,
-              data: entry.data,
-            });
-          }
-        });
-      });
-      console.log(eventsFlat);
-
-      return { eventsFlat, beyondBudgetDays };
-    }),
-  );
+  }> = this.scheduleDays$.pipe(map((days) => mapScheduleDaysToScheduleEvents(days, FH)));
 
   workStartEnd$ = this._store.pipe(select(selectTimelineWorkStartEndHours)).pipe(
     map((v) => {
