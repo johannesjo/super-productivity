@@ -16,6 +16,7 @@ import { BaseComponent } from '../../../core/base-component/base.component';
 import { MatMiniFabButton } from '@angular/material/button';
 import { getClockStringFromHours } from '../../../util/get-clock-string-from-hours';
 import { SVEType } from '../schedule.const';
+import { isDraggableSE } from '../map-schedule-data/is-schedule-types-type';
 
 @Component({
   selector: 'schedule-event',
@@ -32,14 +33,9 @@ export class ScheduleEventComponent extends BaseComponent implements OnInit, OnD
     this.startClockString = getClockStringFromHours(this.se.startHours);
     this.durationStr = (this.se.timeLeftInHours * 60).toString().substring(0, 4);
 
-    // if (
-    //   this.se.type === SVEType.Task ||
-    //   this.se.type === SVEType.SplitTask ||
-    //   this.se.type === SVEType.TaskPlannedForDay ||
-    //   this.se.type === SVEType.TaskPlannedForDay ||
-    // ) {
-    //   this._elRef.nativeElement.id = 't-' + (this.se.data as any).id;
-    // }
+    if (isDraggableSE(this.se)) {
+      this._elRef.nativeElement.id = 't-' + (this.se.data as any).id;
+    }
   }
 
   startClockString: string = '';

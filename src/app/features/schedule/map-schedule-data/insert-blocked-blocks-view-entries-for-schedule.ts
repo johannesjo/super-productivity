@@ -13,7 +13,7 @@ import { BlockedBlock } from '../../timeline/timeline.model';
 import { getDurationForSVE } from './get-duration-for-schedule-view-entry';
 import {
   isContinuedTaskType,
-  isMoveableVE,
+  isFlowableEntryVE,
   isTaskDataType,
 } from './is-schedule-types-type';
 import { createViewEntriesForBlock } from './create-view-entries-for-block';
@@ -304,7 +304,7 @@ const moveAllEntriesAfterTime = (
   startTime: number = 0,
 ): void => {
   viewEntries.forEach((viewEntry: any) => {
-    if (viewEntry.start >= startTime && isMoveableVE(viewEntry)) {
+    if (viewEntry.start >= startTime && isFlowableEntryVE(viewEntry)) {
       debug(
         'MOVE_ENTRY2',
         viewEntry.data?.title,
@@ -323,7 +323,7 @@ const moveEntries = (
 ): void => {
   for (let i = startIndex; i < viewEntries.length; i++) {
     const viewEntry: any = viewEntries[i];
-    if (isMoveableVE(viewEntry)) {
+    if (isFlowableEntryVE(viewEntry)) {
       debug(
         i,
         'MOVE_ENTRY',

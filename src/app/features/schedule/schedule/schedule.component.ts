@@ -306,7 +306,14 @@ export class ScheduleComponent implements AfterViewInit, OnDestroy {
       // const sourceTaskId = ev.source.data.data.id;
       const sourceTaskId = ev.source.element.nativeElement.id.replace('t-', '');
       const targetTaskId = target.id.replace('t-', '');
-      if (sourceTaskId && targetTaskId && sourceTaskId !== targetTaskId) {
+      console.log(sourceTaskId, targetTaskId);
+
+      if (
+        sourceTaskId &&
+        sourceTaskId.length > 0 &&
+        targetTaskId &&
+        sourceTaskId !== targetTaskId
+      ) {
         console.log('sourceTaskId', sourceTaskId, 'targetTaskId', targetTaskId);
         console.log('DISPATCH');
         this._store.dispatch(

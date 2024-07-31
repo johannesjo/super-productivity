@@ -38,7 +38,7 @@ export const SCHEDULE_VIEW_TYPE_ORDER: {
   [SVEType.LunchBreak]: 14,
 };
 
-export const SCHEDULE_MOVEABLE_TYPES: SVEType[] = [
+export const SCHEDULE_FLOW_TYPES: SVEType[] = [
   SVEType.TaskPlannedForDay,
 
   SVEType.Task,
