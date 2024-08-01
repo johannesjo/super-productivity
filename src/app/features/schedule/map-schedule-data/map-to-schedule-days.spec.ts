@@ -1,11 +1,12 @@
 import { mapToScheduleDays } from './map-to-schedule-days';
 import { TaskCopy, TaskPlanned } from '../../tasks/task.model';
+import { TaskRepeatCfg } from '../../task-repeat-cfg/task-repeat-cfg.model';
 
 const NDS = '1970-01-01';
-// const N = new Date(`${NDS} 01:00`).getTime();
 const N = Date.UTC(1970, 0, 1, 0, 0, 0, 0);
 // 86400000 ==> 24h
 const H = 60 * 60 * 1000;
+const TZ_OFFSET = new Date(NDS).getTimezoneOffset() * 60000;
 
 const FAKE_TASK: Partial<TaskCopy> = {
   tagIds: [],
@@ -18,9 +19,6 @@ const FAKE_TASK: Partial<TaskCopy> = {
 const minAfterNow = (min: number): Date => new Date(Date.UTC(1970, 0, 1, 0, min, 0, 0));
 
 const minAfterNowTs = (min: number): number => minAfterNow(min).getTime();
-
-console.log(N);
-console.log(minAfterNow(30));
 
 const fakeTaskEntry = (id = 'XXX', add?: Partial<TaskCopy>): TaskCopy => {
   return {
@@ -40,6 +38,31 @@ const fakePlannedTaskEntry = (
     plannedAt: planedAt.getTime(),
     reminderId: 'R_ID',
   } as TaskPlanned;
+};
+
+const fakeRepeatCfg = (
+  id = 'R_CFG_1',
+  startTime?: string,
+  add?: Partial<TaskRepeatCfg>,
+): TaskRepeatCfg => {
+  return {
+    startDate: '1969-01-01',
+    startTime,
+    // eslint-disable-next-line no-mixed-operators
+    lastTaskCreation: N - 24 * 60 * 60 * 1000,
+    monday: true,
+    tuesday: true,
+    wednesday: true,
+    thursday: true,
+    friday: true,
+    saturday: true,
+    sunday: true,
+    repeatCycle: 'DAILY',
+    repeatEvery: 1,
+    defaultEstimate: H,
+    ...add,
+    id,
+  } as Partial<TaskRepeatCfg> as TaskRepeatCfg;
 };
 
 describe('mapToScheduleDays()', () => {
@@ -236,5 +259,198 @@ describe('mapToScheduleDays()', () => {
     ] as any);
   });
 
-  // fit('should work for case with one of each', () => {});
+  it('should show repeat for next day', () => {
+    const r = mapToScheduleDays(
+      N,
+      [NDS, '1970-01-02'],
+      [
+        fakeTaskEntry('N1', { timeEstimate: 2 * H }),
+        // fakeTaskEntry('2', { timeEstimate: 2 * H }),
+      ],
+      [],
+      // [fakePlannedTaskEntry('S1', minAfterNow(30), { timeEstimate: H })],
+      [fakeRepeatCfg('R1', '01:00', { defaultEstimate: H })],
+      [],
+      [],
+      null,
+      {},
+      undefined,
+      undefined,
+    );
+
+    expect(r).toEqual([
+      {
+        beyondBudgetTasks: [],
+        dayDate: '1970-01-01',
+        entries: [
+          {
+            data: jasmine.any(Object),
+            id: 'N1',
+            start: 0,
+            timeToGo: H * 2,
+            type: 'Task',
+          },
+        ],
+        isToday: true,
+      },
+      {
+        beyondBudgetTasks: [],
+        dayDate: '1970-01-02',
+        entries: [
+          {
+            data: jasmine.any(Object),
+            id: 'R1',
+            start: H * 24,
+            timeToGo: H,
+            type: 'ScheduledRepeatProjection',
+          },
+        ],
+        isToday: false,
+      },
+    ] as any);
+  });
+
+  it('should spit around scheduled repeat task cases', () => {
+    const r = mapToScheduleDays(
+      N,
+      [NDS, '1970-01-02'],
+      [
+        // NOTE: takes us to the next day, since without dayStart and dayEnd it otherwise won't
+        fakeTaskEntry('N1', { timeEstimate: 24 * H }),
+        fakeTaskEntry('N2', { timeEstimate: 2 * H }),
+        // fakeTaskEntry('2', { timeEstimate: 2 * H }),
+      ],
+      [],
+      // [fakePlannedTaskEntry('S1', minAfterNow(30), { timeEstimate: H })],
+      [fakeRepeatCfg('R1', '01:00', { defaultEstimate: H })],
+      [],
+      [],
+      null,
+      {},
+      undefined,
+      undefined,
+    );
+
+    expect(r).toEqual([
+      {
+        beyondBudgetTasks: [],
+        dayDate: '1970-01-01',
+        entries: [
+          {
+            data: jasmine.any(Object),
+            id: 'N1',
+            start: 0,
+            // eslint-disable-next-line no-mixed-operators
+            timeToGo: 24 * H,
+            type: 'Task',
+          },
+        ],
+        isToday: true,
+      },
+      {
+        beyondBudgetTasks: [],
+        dayDate: '1970-01-02',
+        entries: [
+          {
+            data: jasmine.any(Object),
+            id: 'N2',
+            // eslint-disable-next-line no-mixed-operators
+            start: 24 * H + TZ_OFFSET,
+            timeToGo: H,
+            type: 'SplitTask',
+          },
+          {
+            data: jasmine.any(Object),
+            id: 'R1',
+            // eslint-disable-next-line no-mixed-operators
+            start: 25 * H + TZ_OFFSET,
+            timeToGo: H,
+            type: 'ScheduledRepeatProjection',
+          },
+          {
+            data: jasmine.any(Object),
+            id: 'N2__0',
+            // eslint-disable-next-line no-mixed-operators
+            start: 26 * H + TZ_OFFSET,
+            timeToGo: H,
+            type: 'SplitTaskContinuedLast',
+          },
+        ],
+        isToday: false,
+      },
+    ] as any);
+  });
+
+  it('should work for NON-scheduled repeat task cases', () => {
+    const r = mapToScheduleDays(
+      N,
+      [NDS, '1970-01-02'],
+      [
+        // NOTE: takes us to the next day, since without dayStart and dayEnd it otherwise won't
+        fakeTaskEntry('N1', { timeEstimate: 24 * H }),
+        fakeTaskEntry('N2', { timeEstimate: H }),
+      ],
+      [],
+      [],
+      [
+        fakeRepeatCfg('R1', undefined, {
+          defaultEstimate: 2 * H,
+          lastTaskCreation: N + 60000,
+        }),
+      ],
+      [],
+      null,
+      {},
+      undefined,
+      undefined,
+    );
+
+    expect(r).toEqual([
+      {
+        beyondBudgetTasks: [],
+        dayDate: '1970-01-01',
+        entries: [
+          {
+            data: jasmine.any(Object),
+            id: 'N1',
+            start: 0,
+            // eslint-disable-next-line no-mixed-operators
+            timeToGo: 24 * H,
+            type: 'Task',
+          },
+        ],
+        isToday: true,
+      },
+      {
+        beyondBudgetTasks: [],
+        dayDate: '1970-01-02',
+        entries: [
+          {
+            data: jasmine.any(Object),
+            id: 'R1',
+            // eslint-disable-next-line no-mixed-operators
+            start: 24 * H + TZ_OFFSET,
+            timeToGo: 2 * H,
+            type: 'RepeatProjection',
+          },
+          {
+            data: jasmine.any(Object),
+            id: 'N2',
+            // eslint-disable-next-line no-mixed-operators
+            start: 26 * H + TZ_OFFSET,
+            timeToGo: H,
+            type: 'Task',
+          },
+        ],
+        isToday: false,
+      },
+    ] as any);
+  });
+
+  // fit('should sort in planned tasks to their days', () => {
+  // })
+  // fit('should split around dayStart dayEnd', () => {
+  // })
+  // fit('should work for case with one of each', () => {
+  // })
 });
