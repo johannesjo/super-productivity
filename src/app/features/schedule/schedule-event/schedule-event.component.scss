@@ -44,8 +44,8 @@ $margin-bottom: 4px;
     border-left-color: var(--project-color);
     background: $dark-theme-bg-slightly-lighter;
     color: $dark-theme-text-color;
-    border-top-width: 1px;
-    border-top-color: $dark-theme-bg;
+    //border-top-width: 1px;
+    //border-top-color: $dark-theme-bg;
   }
 
   &.split-start {
@@ -76,10 +76,15 @@ $margin-bottom: 4px;
   justify-content: center;
   align-items: center;
   background: transparent;
+  margin-top: 2px;
 
   .title {
     flex-grow: 0;
     column-width: auto;
+  }
+
+  > mat-icon {
+    margin-top: 0;
   }
 }
 
