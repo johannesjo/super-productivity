@@ -15,6 +15,12 @@ const FAKE_TASK: Partial<TaskCopy> = {
   timeEstimate: H,
 };
 
+const h = (hr: number): number => hr * 60 * 1000 * 60;
+const hTz = (hr: number): number => h(hr) + TZ_OFFSET;
+// eslint-disable-next-line @typescript-eslint/no-unused-vars,no-mixed-operators
+const dh = (d: number = 0, hr: number): number => hr * H + d * H * 24;
+const dhTz = (d: number = 0, hr: number): number => dh(d, hr) + TZ_OFFSET;
+
 // eslint-disable-next-line no-mixed-operators
 const minAfterNow = (min: number): Date => new Date(Date.UTC(1970, 0, 1, 0, min, 0, 0));
 
@@ -537,9 +543,200 @@ describe('mapToScheduleDays()', () => {
     ] as any);
   });
 
-  // fit('should split around dayStart dayEnd', () => {
-  // })
+  fit('UNTESTED SO CHECK IF FAILING  should work for an example with all the stuff', () => {
+    const r = mapToScheduleDays(
+      N,
+      [NDS, '1970-01-02', '1970-01-03', '1970-01-04'],
+      [
+        // NOTE: takes us to the next day, since without dayStart and dayEnd it otherwise won't
+        fakeTaskEntry('N1', { timeEstimate: 2 * H }),
+      ],
+      [
+        // BEFORE WORK
+        fakePlannedTaskEntry('S1', minAfterNow(2 * 60), { timeEstimate: H }),
+        // NEXT DAY AT 10
+        fakePlannedTaskEntry('S2', minAfterNow(34 * 60), { timeEstimate: 0.5 * H }),
+      ],
+      [fakeRepeatCfg('R1', '01:00', { defaultEstimate: H })],
+      [
+        fakeRepeatCfg('R1', undefined, {
+          defaultEstimate: 2 * H,
+          lastTaskCreation: N + 60000,
+        }),
+      ],
+      [],
+      null,
+      {
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        '1970-01-02': [
+          fakeTaskEntry('FD1', { timeEstimate: 4 * H }),
+          fakeTaskEntry('FD2', { timeEstimate: 2 * H }),
+        ],
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        '1970-01-04': [
+          fakeTaskEntry('FD3', { timeEstimate: H }),
+          fakeTaskEntry('FD4', { timeEstimate: 0.5 * H }),
+        ],
+      },
+      {
+        startTime: '9:00',
+        endTime: '17:00',
+      },
+      {
+        startTime: '12:00',
+        endTime: '13:00',
+      },
+    );
 
-  // fit('should work for case with one of each', () => {
-  // })
+    expect(r[0]).toEqual({
+      beyondBudgetTasks: [],
+      dayDate: '1970-01-01',
+      entries: [
+        {
+          data: jasmine.any(Object),
+          id: 'S1',
+          start: h(2),
+          timeToGo: h(1),
+          type: 'ScheduledTask',
+        },
+        {
+          data: jasmine.any(Object),
+          id: 'N1',
+          start: hTz(9),
+          timeToGo: h(2),
+          type: 'Task',
+        },
+        {
+          data: jasmine.any(Object),
+          id: 'LUNCH_BREAK_39600000',
+          start: hTz(12),
+          timeToGo: h(1),
+          type: 'LunchBreak',
+        },
+      ],
+      isToday: true,
+    } as any);
+
+    expect(r[1]).toEqual({
+      beyondBudgetTasks: [],
+      dayDate: '1970-01-02',
+      entries: [
+        {
+          data: jasmine.any(Object),
+          id: 'R1',
+          start: dhTz(1, 9),
+          timeToGo: h(2),
+          type: 'RepeatProjection',
+        },
+        {
+          data: jasmine.any(Object),
+          id: 'S2',
+          start: dhTz(1, 11),
+          timeToGo: h(0.5),
+          type: 'ScheduledTask',
+        },
+        {
+          data: jasmine.any(Object),
+          id: 'FD1',
+          start: dhTz(1, 11.5),
+          timeToGo: h(0.5),
+          type: 'SplitTaskPlannedForDay',
+        },
+        {
+          data: jasmine.any(Object),
+          id: 'LUNCH_BREAK_126000000',
+          start: dhTz(1, 12),
+          timeToGo: h(1),
+          type: 'LunchBreak',
+        },
+        {
+          data: jasmine.any(Object),
+          id: 'FD1__0',
+          start: dhTz(1, 13),
+          timeToGo: h(3.5),
+          type: 'SplitTaskContinuedLast',
+        },
+        {
+          // TODO this needs fixing
+          data: jasmine.any(Object),
+          id: 'FD2',
+          start: dhTz(1, 16.5),
+          timeToGo: h(0.5),
+          type: 'SplitTaskPlannedForDay',
+        },
+      ],
+      isToday: false,
+    } as any);
+
+    expect(r[2]).toEqual({
+      beyondBudgetTasks: [],
+      dayDate: '1970-01-03',
+      entries: [
+        {
+          data: jasmine.any(Object),
+          id: 'FD2__0',
+          start: 201600000,
+          timeToGo: 5400000,
+          type: 'SplitTaskContinuedLast',
+        },
+        {
+          data: jasmine.any(Object),
+          id: 'R1',
+          start: 207000000,
+          timeToGo: h(2),
+          type: 'RepeatProjectionSplit',
+        },
+        {
+          data: jasmine.any(Object),
+          id: 'LUNCH_BREAK_212400000',
+          start: 212400000,
+          timeToGo: 3600000,
+          type: 'LunchBreak',
+        },
+        {
+          data: jasmine.any(Object),
+          id: 'R1__0',
+          start: 216000000,
+          timeToGo: 1800000,
+          type: 'RepeatProjectionSplitContinuedLast',
+        },
+      ],
+      isToday: false,
+    } as any);
+    expect(r[3]).toEqual({
+      beyondBudgetTasks: [],
+      dayDate: '1970-01-04',
+      entries: [
+        {
+          data: jasmine.any(Object),
+          id: 'R1',
+          start: 288000000,
+          timeToGo: h(2),
+          type: 'RepeatProjection',
+        },
+        {
+          data: jasmine.any(Object),
+          id: 'FD3',
+          start: 295200000,
+          timeToGo: 3600000,
+          type: 'TaskPlannedForDay',
+        },
+        {
+          data: jasmine.any(Object),
+          id: 'LUNCH_BREAK_298800000',
+          start: 298800000,
+          timeToGo: 3600000,
+          type: 'LunchBreak',
+        },
+        {
+          data: jasmine.any(Object),
+          id: 'FD4',
+          start: 302400000,
+          timeToGo: 1800000,
+          type: 'TaskPlannedForDay',
+        },
+      ],
+      isToday: false,
+    } as any);
+  });
 });

@@ -490,6 +490,13 @@ const createBlockedBlocksByDayMap = (
     lunchBreakCfg,
     now,
   );
+  // console.log(allBlockedBlocks);
+  console.log(
+    allBlockedBlocks.filter((block) =>
+      block.entries.find((e) => e.type === BlockedBlockType.ScheduledTask),
+    ),
+  );
+
   const blockedBlocksByDay: BlockedBlockByDayMap = {};
   allBlockedBlocks.forEach((block) => {
     const dayStartDate = getWorklogStr(block.start);
