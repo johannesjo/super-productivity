@@ -39,7 +39,7 @@ describe('createScheduleViewEntriesForNormalTasks()', () => {
         id: 'FAKE_TASK_ID',
         start: 30000000,
         type: 'Task',
-        timeToGo: 3600000,
+        duration: 3600000,
       },
       {
         data: {
@@ -53,7 +53,7 @@ describe('createScheduleViewEntriesForNormalTasks()', () => {
         id: 'FAKE_TASK_ID',
         start: 33600000,
         type: 'Task',
-        timeToGo: 1800000,
+        duration: 1800000,
       },
       {
         data: {
@@ -67,7 +67,7 @@ describe('createScheduleViewEntriesForNormalTasks()', () => {
         id: 'FAKE_TASK_ID',
         type: 'Task',
         start: 35400000,
-        timeToGo: SCHEDULE_TASK_MIN_DURATION_IN_MS,
+        duration: SCHEDULE_TASK_MIN_DURATION_IN_MS,
       },
       {
         data: {
@@ -81,7 +81,7 @@ describe('createScheduleViewEntriesForNormalTasks()', () => {
         id: 'FAKE_TASK_ID',
         type: 'Task',
         start: 36000000,
-        timeToGo: 4500000,
+        duration: 4500000,
       },
       {
         data: {
@@ -95,7 +95,7 @@ describe('createScheduleViewEntriesForNormalTasks()', () => {
         id: 'FAKE_TASK_ID',
         type: 'Task',
         start: 40500000,
-        timeToGo: SCHEDULE_TASK_MIN_DURATION_IN_MS,
+        duration: SCHEDULE_TASK_MIN_DURATION_IN_MS,
       },
     ] as any);
   });
@@ -116,7 +116,7 @@ describe('createScheduleViewEntriesForNormalTasks()', () => {
           timeEstimate: hours(1),
           timeSpent: 0,
         },
-        timeToGo: hours(1),
+        duration: hours(1),
         id: 'OTHER_TASK_ID',
 
         start: now,
@@ -143,7 +143,7 @@ describe('createScheduleViewEntriesForNormalTasks()', () => {
           timeEstimate: 3600000,
           timeSpent: 0,
         },
-        timeToGo: 3600000,
+        duration: 3600000,
         id: 'T1',
         start: now,
         type: 'Task',
@@ -157,7 +157,7 @@ describe('createScheduleViewEntriesForNormalTasks()', () => {
           timeEstimate: 7200000,
           timeSpent: 0,
         },
-        timeToGo: 7200000,
+        duration: 7200000,
         id: 'T2',
         start: now + hours(1),
         type: 'Task',

@@ -118,7 +118,7 @@ export const insertBlockedBlocksViewEntriesForSchedule = (
               start: blockedBlock.end,
               taskId: splitTask.id,
               projectId: splitTask.projectId,
-              timeToGo: timePlannedForSplitContinued,
+              duration: timePlannedForSplitContinued,
               splitIndex: 0,
               title: splitTask.title,
             });
@@ -160,7 +160,7 @@ export const insertBlockedBlocksViewEntriesForSchedule = (
               start: blockedBlock.end,
               taskId: currentVE.data.taskId,
               projectId: currentVE.data.projectId,
-              timeToGo: timePlannedForSplitTaskContinued,
+              duration: timePlannedForSplitTaskContinued,
               splitIndex,
               title: currentVE.data.title,
             });
@@ -204,7 +204,7 @@ export const insertBlockedBlocksViewEntriesForSchedule = (
             const newSplitContinuedEntry: SVE = createSplitRepeat({
               start: blockedBlock.end,
               repeatCfgId: repeatCfg.id,
-              timeToGo: timePlannedForSplitContinued,
+              duration: timePlannedForSplitContinued,
               splitIndex: 0,
               title: repeatCfg.title || 'NO_TITLE',
             });
@@ -252,7 +252,7 @@ export const insertBlockedBlocksViewEntriesForSchedule = (
             const newSplitContinuedEntry: SVE = createSplitRepeat({
               start: blockedBlock.end,
               repeatCfgId: currentVE.data.repeatCfgId,
-              timeToGo: timePlannedForSplitRepeatCfgProjectionContinued,
+              duration: timePlannedForSplitRepeatCfgProjectionContinued,
               splitIndex,
               title: currentVE.data.title,
             });
@@ -342,20 +342,20 @@ const createSplitTask = ({
   projectId,
   title,
   splitIndex,
-  timeToGo,
+  duration,
 }: {
   start: number;
   taskId: string;
   projectId: string | null;
   title: string;
   splitIndex: number;
-  timeToGo: number;
+  duration: number;
 }): SVESplitTaskContinued => {
   return {
     id: `${taskId}__${splitIndex}`,
     start,
     type: SVEType.SplitTaskContinuedLast,
-    duration: timeToGo,
+    duration,
     data: {
       title,
       taskId,
@@ -370,19 +370,19 @@ const createSplitRepeat = ({
   repeatCfgId,
   title,
   splitIndex,
-  timeToGo,
+  duration,
 }: {
   start: number;
   repeatCfgId: string;
   title: string;
   splitIndex: number;
-  timeToGo: number;
+  duration: number;
 }): SVERepeatProjectionSplitContinued => {
   return {
     id: `${repeatCfgId}__${splitIndex}`,
     start,
     type: SVEType.RepeatProjectionSplitContinuedLast,
-    duration: timeToGo,
+    duration: duration,
     data: {
       title,
       repeatCfgId,

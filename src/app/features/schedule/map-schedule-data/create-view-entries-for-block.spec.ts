@@ -112,21 +112,21 @@ describe('createViewEntriesForBlock()', () => {
         } as TaskPlanned,
         id: '1',
         start: 0,
-        timeToGo: 1000,
+        duration: 1000,
         type: SVEType.ScheduledTask,
       },
       {
         data: { defaultEstimate: 2000, id: '1' },
         id: '1',
         start: 1000,
-        timeToGo: 2000,
+        duration: 2000,
         type: 'ScheduledRepeatProjection',
       },
       {
         data: { endTime: '10:00', startTime: '9:00' },
         id: 'LUNCH_BREAK_1000',
         start: 1000,
-        timeToGo: 4000,
+        duration: 4000,
         type: 'LunchBreak',
       },
       {
@@ -140,7 +140,7 @@ describe('createViewEntriesForBlock()', () => {
         },
         id: 'calEvId1',
         start: 2000,
-        timeToGo: 3000,
+        duration: 3000,
         type: 'CalendarEvent',
       },
     ] as any);
