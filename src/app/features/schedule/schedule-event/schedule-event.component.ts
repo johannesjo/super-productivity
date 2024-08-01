@@ -32,6 +32,7 @@ export class ScheduleEventComponent extends BaseComponent implements OnInit, OnD
     this.se = event;
     this.startClockString = getClockStringFromHours(this.se.startHours);
     this.durationStr = (this.se.timeLeftInHours * 60).toString().substring(0, 4);
+    this.title = this.startClockString + ' - ' + this.durationStr + 'min';
 
     if (isDraggableSE(this.se)) {
       this._elRef.nativeElement.id = 't-' + (this.se.data as any).id;
@@ -42,6 +43,8 @@ export class ScheduleEventComponent extends BaseComponent implements OnInit, OnD
   durationStr: string = '';
 
   se!: ScheduleEvent;
+
+  @HostBinding('title') title: string = '';
 
   @HostBinding('class') get cssClass(): string {
     // console.log('CLASS');
