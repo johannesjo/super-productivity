@@ -433,7 +433,7 @@ describe('mapToScheduleDays()', () => {
         entries: [
           {
             data: jasmine.any(Object),
-            id: 'R1',
+            id: 'R1_1970-01-02',
             // eslint-disable-next-line no-mixed-operators
             start: hTz(24),
             duration: h(2),
@@ -591,7 +591,7 @@ describe('mapToScheduleDays()', () => {
               wednesday: true,
             },
             duration: h(3),
-            id: 'R1',
+            id: 'R1_1970-01-01',
             start: hTz(9),
             type: 'RepeatProjectionSplit',
           },
@@ -605,7 +605,7 @@ describe('mapToScheduleDays()', () => {
           {
             data: { index: 0, repeatCfgId: 'R1', title: 'NO_TITLE' },
             duration: h(1),
-            id: 'R1__0',
+            id: 'R1_1970-01-01__0',
             start: hTz(13),
             type: 'RepeatProjectionSplitContinuedLast',
           },
@@ -634,7 +634,7 @@ describe('mapToScheduleDays()', () => {
               wednesday: true,
             },
             duration: h(3),
-            id: 'R1',
+            id: 'R1_1970-01-02',
             start: 115200000,
             type: 'RepeatProjectionSplit',
           },
@@ -648,7 +648,7 @@ describe('mapToScheduleDays()', () => {
           {
             data: { index: 0, repeatCfgId: 'R1', title: 'NO_TITLE' },
             duration: h(1),
-            id: 'R1__0',
+            id: 'R1_1970-01-02__0',
             start: 129600000,
             type: 'RepeatProjectionSplitContinuedLast',
           },
@@ -740,7 +740,7 @@ describe('mapToScheduleDays()', () => {
       entries: [
         {
           data: jasmine.any(Object),
-          id: 'R1',
+          id: 'R1_1970-01-02',
           start: dhTz(1, 9),
           duration: h(2),
           type: 'RepeatProjection',
@@ -783,7 +783,7 @@ describe('mapToScheduleDays()', () => {
       entries: [
         {
           data: jasmine.any(Object),
-          id: 'R1',
+          id: 'R1_1970-01-03',
           start: 201600000,
           duration: 7200000,
           type: 'RepeatProjection',
@@ -804,7 +804,7 @@ describe('mapToScheduleDays()', () => {
       entries: [
         {
           data: jasmine.any(Object),
-          id: 'R1',
+          id: 'R1_1970-01-04',
           start: 288000000,
           duration: h(2),
           type: 'RepeatProjection',

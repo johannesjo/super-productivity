@@ -202,6 +202,7 @@ export const insertBlockedBlocksViewEntriesForSchedule = (
 
             const newSplitContinuedEntry: SVE = createSplitRepeat({
               start: blockedBlock.end,
+              viewEntryId: currentVE.id,
               repeatCfgId: repeatCfg.id,
               duration: timePlannedForSplitContinued,
               splitIndex: 0,
@@ -250,6 +251,7 @@ export const insertBlockedBlocksViewEntriesForSchedule = (
             const splitIndex = splitInstances.length;
             const newSplitContinuedEntry: SVE = createSplitRepeat({
               start: blockedBlock.end,
+              viewEntryId: currentVE.id,
               repeatCfgId: currentVE.data.repeatCfgId,
               duration: timePlannedForSplitRepeatCfgProjectionContinued,
               splitIndex,
@@ -366,19 +368,21 @@ const createSplitTask = ({
 
 const createSplitRepeat = ({
   start,
+  viewEntryId,
   repeatCfgId,
   title,
   splitIndex,
   duration,
 }: {
   start: number;
+  viewEntryId: string;
   repeatCfgId: string;
   title: string;
   splitIndex: number;
   duration: number;
 }): SVERepeatProjectionSplitContinued => {
   return {
-    id: `${repeatCfgId}__${splitIndex}`,
+    id: `${viewEntryId}__${splitIndex}`,
     start,
     type: SVEType.RepeatProjectionSplitContinuedLast,
     duration: duration,

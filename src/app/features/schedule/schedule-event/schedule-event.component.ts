@@ -32,7 +32,8 @@ export class ScheduleEventComponent extends BaseComponent implements OnInit, OnD
     this.se = event;
     this.startClockString = getClockStringFromHours(this.se.startHours);
     this.durationStr = (this.se.timeLeftInHours * 60).toString().substring(0, 4);
-    this.title = this.startClockString + ' - ' + this.durationStr + 'min';
+    this.title =
+      this.startClockString + ' - ' + this.durationStr + 'min: ' + this.se.title;
 
     if (isDraggableSE(this.se)) {
       this._elRef.nativeElement.id = 't-' + (this.se.data as any).id;
@@ -96,6 +97,7 @@ export class ScheduleEventComponent extends BaseComponent implements OnInit, OnD
     | 'SPLIT_CONTINUE'
     | 'LUNCH_BREAK' {
     switch (this.se?.type) {
+      case SVEType.ScheduledRepeatProjection:
       case SVEType.RepeatProjection:
       case SVEType.RepeatProjectionSplit: {
         return 'REPEAT';

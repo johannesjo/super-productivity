@@ -20,13 +20,20 @@ $total-rows: 24 * $fr;
 }
 
 .main-grid-container {
-  //border: 3px dashed palevioletred;
+  //border: 3px dashed palevioletred;   grid-auto-columns: minmax(0, 1fr);
+  grid-auto-flow: column;
   display: grid;
   grid-template-columns: $calendar-template;
+  grid-auto-columns: minmax(0, 1fr);
   grid-template-rows: repeat($total-rows, $time-height);
 
   @include mq(xs, max) {
     grid-template-rows: repeat($total-rows, $time-height-mobile);
+  }
+
+  > schedule-event {
+    // required for same size
+    overflow: hidden;
   }
 }
 

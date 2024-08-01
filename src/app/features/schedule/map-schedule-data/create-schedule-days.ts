@@ -111,6 +111,7 @@ export const createScheduleDays = (
       // console.log({ beyond, within });
 
       viewEntries = createViewEntriesForDay(
+        dayDate,
         startTime,
         nonScheduledRepeatCfgsDueOnDay,
         [...regularTasksLeftForDay, ...within],
@@ -122,6 +123,7 @@ export const createScheduleDays = (
     } else if (nonScheduledBudgetForDay - timeLeftForRegular === 0) {
       // no splitting is needed, all tasks planed for today are OVER_BUDGET
       viewEntries = createViewEntriesForDay(
+        dayDate,
         startTime,
         nonScheduledRepeatCfgsDueOnDay,
         regularTasksLeftForDay,
@@ -136,6 +138,7 @@ export const createScheduleDays = (
       // we have not enough budget left  for all remaining regular tasks, so we cut them off for the next today
       // AND we sort in the tasks that were planned for today ALL as OVER_BUDGET
       viewEntries = createViewEntriesForDay(
+        dayDate,
         startTime,
         nonScheduledRepeatCfgsDueOnDay,
         regularTasksLeftForDay,

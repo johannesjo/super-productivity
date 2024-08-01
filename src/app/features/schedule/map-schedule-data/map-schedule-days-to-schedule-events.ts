@@ -54,7 +54,7 @@ export const mapScheduleDaysToScheduleEvents = (
           title:
             (entry as any)?.data?.title ||
             (entry.type === SVEType.LunchBreak ? 'Lunch Break' : 'TITLE'),
-          id: (entry.data as any)?.id || entry.id,
+          id: entry.id,
           type: entry.type as SVEType,
           startHours: hoursToday,
           timeLeftInHours,

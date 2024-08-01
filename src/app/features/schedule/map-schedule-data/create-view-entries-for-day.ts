@@ -17,6 +17,7 @@ import { insertBlockedBlocksViewEntriesForSchedule } from './insert-blocked-bloc
 import { SCHEDULE_VIEW_TYPE_ORDER, SVEType } from '../schedule.const';
 
 export const createViewEntriesForDay = (
+  dayDate: string,
   initialStartTime: number,
   nonScheduledRepeatCfgsDueOnDay: TaskRepeatCfg[],
   nonScheduledTasksForDay: (TaskWithoutReminder | TaskWithPlannedForDayIndication)[],
@@ -36,6 +37,7 @@ export const createViewEntriesForDay = (
 
   const { entries, startTimeAfter } = createViewEntriesForNonScheduledRepeatProjections(
     nonScheduledRepeatCfgsDueOnDay,
+    dayDate,
     startTime,
   );
   if (entries.length) {
@@ -95,6 +97,7 @@ export const createViewEntriesForDay = (
 
 const createViewEntriesForNonScheduledRepeatProjections = (
   nonScheduledRepeatCfgsDueOnDay: TaskRepeatCfg[],
+  dayDate: string,
   startTime: number,
 ): { entries: SVE[]; startTimeAfter: number } => {
   let lastTime: number;
@@ -117,7 +120,7 @@ const createViewEntriesForNonScheduledRepeatProjections = (
     }
 
     viewEntries.push({
-      id: taskRepeatCfg.id,
+      id: taskRepeatCfg.id + '_' + dayDate,
       type: SVEType.RepeatProjection,
       start: time,
       data: taskRepeatCfg,
