@@ -20,6 +20,7 @@ export const createSortedBlockerBlocks = (
   workStartEndCfg?: TimelineWorkStartEndCfg,
   lunchBreakCfg?: TimelineLunchBreakCfg,
   now?: number,
+  nrOfDays: number = PROJECTION_DAYS,
 ): BlockedBlock[] => {
   if (typeof now !== 'number') {
     throw new Error('No valid now given');
@@ -29,10 +30,11 @@ export const createSortedBlockerBlocks = (
     ...createBlockerBlocksForCalendarEvents(icalEventMap),
     ...createBlockerBlocksForScheduledRepeatProjections(
       now as number,
+      nrOfDays,
       scheduledTaskRepeatCfgs,
     ),
-    ...createBlockerBlocksForWorkStartEnd(now as number, workStartEndCfg),
-    ...createBlockerBlocksForLunchBreak(now as number, lunchBreakCfg),
+    ...createBlockerBlocksForWorkStartEnd(now as number, nrOfDays, workStartEndCfg),
+    ...createBlockerBlocksForLunchBreak(now as number, nrOfDays, lunchBreakCfg),
   ];
 
   blockedBlocks = mergeBlocksRecursively(blockedBlocks);
@@ -50,12 +52,13 @@ export const createSortedBlockerBlocks = (
 
 const createBlockerBlocksForScheduledRepeatProjections = (
   now: number,
+  nrOfDays: number,
   scheduledTaskRepeatCfgs: TaskRepeatCfg[],
 ): BlockedBlock[] => {
   const blockedBlocks: BlockedBlock[] = [];
 
   let i: number = 1;
-  while (i <= PROJECTION_DAYS) {
+  while (i <= nrOfDays) {
     // eslint-disable-next-line no-mixed-operators
     const currentDayTimestamp = now + i * 24 * 60 * 60 * 1000;
     const allRepeatableTasksForDay = selectTaskRepeatCfgsDueOnDayOnly.projector(
@@ -92,6 +95,7 @@ const createBlockerBlocksForScheduledRepeatProjections = (
 
 const createBlockerBlocksForWorkStartEnd = (
   now: number,
+  nrOfDays: number,
   workStartEndCfg?: TimelineWorkStartEndCfg,
 ): BlockedBlock[] => {
   const blockedBlocks: BlockedBlock[] = [];
@@ -100,7 +104,7 @@ const createBlockerBlocksForWorkStartEnd = (
     return blockedBlocks;
   }
   let i: number = 0;
-  while (i <= PROJECTION_DAYS) {
+  while (i <= nrOfDays) {
     const start = getDateTimeFromClockString(
       workStartEndCfg.endTime,
       // prettier-ignore
@@ -131,6 +135,7 @@ const createBlockerBlocksForWorkStartEnd = (
 
 const createBlockerBlocksForLunchBreak = (
   now: number,
+  nrOfDays: number,
   lunchBreakCfg?: TimelineLunchBreakCfg,
 ): BlockedBlock[] => {
   const blockedBlocks: BlockedBlock[] = [];
@@ -139,7 +144,7 @@ const createBlockerBlocksForLunchBreak = (
     return blockedBlocks;
   }
   let i: number = 0;
-  while (i <= PROJECTION_DAYS) {
+  while (i <= nrOfDays) {
     const start = getDateTimeFromClockString(
       lunchBreakCfg.startTime,
       // prettier-ignore

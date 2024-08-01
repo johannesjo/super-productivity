@@ -9,6 +9,9 @@ import { ScheduleLunchBreakCfg, ScheduleWorkStartEndCfg } from '../schedule.mode
 import { createSortedBlockerBlocks } from '../../timeline/map-timeline-data/create-sorted-blocker-blocks';
 import { getWorklogStr } from '../../../util/get-work-log-str';
 
+// TODO improve to even better algo for createSortedBlockerBlocks
+const NR_OF_DAYS = 5;
+
 export const createBlockedBlocksByDayMap = (
   scheduledTasks: TaskPlanned[],
   scheduledTaskRepeatCfgs: TaskRepeatCfg[],
@@ -24,6 +27,7 @@ export const createBlockedBlocksByDayMap = (
     workStartEndCfg,
     lunchBreakCfg,
     now,
+    NR_OF_DAYS,
   );
   // console.log(allBlockedBlocks);
   console.log(
