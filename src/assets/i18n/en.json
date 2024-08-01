@@ -1085,7 +1085,7 @@
         "MONDAY_TO_FRIDAY_AND_TIME": "Mon-Fri, {{timeStr}}",
         "WEEKLY_CURRENT_WEEKDAY": "Weekly on {{weekdayStr}}",
         "WEEKLY_CURRENT_WEEKDAY_AND_TIME": "Weekly on {{weekdayStr}}, {{timeStr}}",
-        "YEARLY_CURRENT_DATE": "Yearly on {{dayAndMonthStr}}",
+        "YEARLY_CURRENT_DATE": "{{dayAndMonthStr}Yearly on {{dayAndMonthStr}}",
         "YEARLY_CURRENT_DATE_AND_TIME": "Yearly {{dayAndMonthStr}}, {{timeStr}}"
       },
       "D_CONFIRM_REMOVE": {
