@@ -226,18 +226,25 @@ header {
 
 .excess-entries {
   position: sticky;
-  bottom: 0;
-  max-height: 120px;
+  bottom: -2px;
+  max-height: 100px;
   padding-bottom: 30px;
-  border-top: 3px solid $c-warn;
+  border-top: 4px solid $c-warn;
   background: $light-theme-bg;
+  border: 2px solid $c-warn;
+  box-shadow: $whiteframe-shadow-6dp;
+  border-radius: 4px;
 
   @include darkTheme() {
     background: $dark-theme-bg;
   }
 
-  @media (min-height: 800px) {
+  @media (min-height: 1000px) {
     max-height: 200px;
+  }
+
+  schedule-event {
+    margin: 5px;
   }
 }
 
