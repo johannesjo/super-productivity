@@ -5,7 +5,6 @@ import {
   moveToArchive_,
   moveToOtherProject,
   restoreTask,
-  scheduleTask,
   updateTask,
   updateTaskTags,
 } from './task.actions';
@@ -25,7 +24,6 @@ import { createEmptyEntity } from '../../../util/create-empty-entity';
 import { moveProjectTaskToTodayList } from '../../project/store/project.actions';
 import { SnackService } from '../../../core/snack/snack.service';
 import { T } from '../../../t.const';
-import { isToday } from '../../../util/is-today.util';
 import { upsertTag } from '../../tag/store/tag.actions';
 import { PlannerActions } from '../../planner/store/planner.actions';
 
@@ -97,21 +95,6 @@ export class TaskRelatedModelEffects {
           updateTaskTags({
             task,
             newTagIds: unique([...task.tagIds, TODAY_TAG.id]),
-          }),
-        ),
-      ),
-    ),
-  );
-
-  autoRemoveTodayTagIfScheduledForOtherDay: any = createEffect(() =>
-    this.ifAutoAddTodayEnabled$(
-      this._actions$.pipe(
-        ofType(scheduleTask),
-        filter((a) => !a.isSkipAutoRemoveFromToday && !isToday(a.plannedAt)),
-        map(({ task }) =>
-          updateTaskTags({
-            task,
-            newTagIds: task.tagIds.filter((id) => id !== TODAY_TAG.id),
           }),
         ),
       ),
