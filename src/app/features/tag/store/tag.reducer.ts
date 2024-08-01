@@ -148,7 +148,7 @@ export const tagReducer = createReducer<TagState>(
           {
             id: TODAY_TAG.id,
             changes: {
-              taskIds,
+              taskIds: unique(taskIds),
             },
           },
           state,

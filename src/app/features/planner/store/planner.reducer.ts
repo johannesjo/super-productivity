@@ -4,6 +4,8 @@ import { moveItemInArray } from '../../../util/move-item-in-array';
 import { ADD_TASK_PANEL_ID } from '../planner.model';
 import { loadAllData } from '../../../root-store/meta/load-all-data.action';
 import { unique } from '../../../util/unique';
+import { updateTaskTags } from '../../tasks/store/task.actions';
+import { TODAY_TAG } from '../../tag/tag.const';
 
 export const plannerFeatureKey = 'planner';
 
@@ -29,6 +31,26 @@ export const plannerReducer = createReducer(
     appDataComplete.planner ? appDataComplete.planner : state,
   ),
 
+  on(updateTaskTags, (state, action) => {
+    if (!action.newTagIds.includes(TODAY_TAG.id)) {
+      return state;
+    }
+
+    const daysCopy = { ...state.days };
+    Object.keys(daysCopy).forEach((day) => {
+      const filtered = daysCopy[day].filter((id) => id !== action.task.id);
+      if (filtered.length !== daysCopy[day].length) {
+        daysCopy[day] = filtered;
+      }
+    });
+    return {
+      ...state,
+      days: {
+        ...daysCopy,
+      },
+    };
+  }),
+
   // STANDARD_ACTIONS
   // ------------
 
@@ -43,9 +65,10 @@ export const plannerReducer = createReducer(
   on(PlannerActions.removeTaskFromDays, (state, action) => {
     const daysCopy = { ...state.days };
     Object.keys(daysCopy).forEach((day) => {
-      daysCopy[day] = daysCopy[day]
-        // remove all ids that are in the new day and remove all deleted or missing
-        .filter((id) => id !== action.taskId);
+      const filtered = daysCopy[day].filter((id) => id !== action.taskId);
+      if (filtered.length !== daysCopy[day].length) {
+        daysCopy[day] = filtered;
+      }
     });
     return {
       ...state,
