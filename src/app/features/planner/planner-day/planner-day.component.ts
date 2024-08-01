@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
 import { T } from '../../../t.const';
-import { PlannerDay, ScheduleItemType } from '../planner.model';
+import { PlannerDay, ScheduleItem, ScheduleItemType } from '../planner.model';
 import { CdkDragDrop } from '@angular/cdk/drag-drop';
 import { TaskCopy } from '../../tasks/task.model';
 import { PlannerActions } from '../store/planner.actions';
@@ -40,6 +40,7 @@ export class PlannerDayComponent {
   // TODO correct type
   drop(
     targetList: 'TODO' | 'SCHEDULED',
+    allItems: TaskCopy[] | ScheduleItem[],
     ev: CdkDragDrop<string, string, TaskCopy>,
   ): void {
     const newDay = ev.container.data;
@@ -56,8 +57,8 @@ export class PlannerDayComponent {
           this._store.dispatch(
             moveTaskInTagList({
               tagId: TODAY_TAG.id,
-              fromIndex: ev.previousIndex,
-              toIndex: ev.currentIndex,
+              fromTaskId: task.id,
+              toTaskId: allItems[ev.currentIndex].id,
             }),
           );
         } else {

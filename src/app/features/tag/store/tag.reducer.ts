@@ -511,8 +511,10 @@ export const tagReducer = createReducer<TagState>(
     return tagAdapter.updateMany([...removeFrom, ...addTo], state);
   }),
 
-  on(moveTaskInTagList, (state, { tagId, toIndex, fromIndex }) => {
+  on(moveTaskInTagList, (state, { tagId, toTaskId, fromTaskId }) => {
     const tagToUpdate = state.entities[tagId] as Tag;
+    const toIndex = tagToUpdate.taskIds.indexOf(toTaskId);
+    const fromIndex = tagToUpdate.taskIds.indexOf(fromTaskId);
     return tagAdapter.updateOne(
       {
         id: tagId,

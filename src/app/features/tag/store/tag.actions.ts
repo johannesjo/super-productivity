@@ -46,5 +46,5 @@ export const addToBreakTimeForTag = createAction(
 
 export const moveTaskInTagList = createAction(
   '[Tag] Switch places of taskIds in tagList',
-  props<{ tagId: string; fromIndex: number; toIndex: number }>(),
+  props<{ tagId: string; fromTaskId: string; toTaskId: string }>(),
 );

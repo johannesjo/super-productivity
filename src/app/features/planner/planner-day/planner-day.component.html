@@ -22,7 +22,7 @@
     class="normal-tasks-items"
     cdkDropList
     [cdkDropListData]="day.dayDate"
-    (cdkDropListDropped)="drop('TODO', $event)"
+    (cdkDropListDropped)="drop('TODO', day.tasks, $event)"
   >
     @for (task of day.tasks; track task.id) {
     <planner-task
@@ -60,7 +60,7 @@
     cdkDropList
     cdkDropListSortingDisabled
     [cdkDropListData]="day.dayDate"
-    (cdkDropListDropped)="drop('SCHEDULED', $event)"
+    (cdkDropListDropped)="drop('SCHEDULED', day.scheduledIItems, $event)"
   >
     @for (scheduledItem of day.scheduledIItems; track scheduledItem.id) {
     <div

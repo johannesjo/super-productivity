@@ -45,6 +45,11 @@ export const selectPlannerDays = (
   todayStr: string,
   // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 ) => {
+  const allAllPlannedIds = allPlannedTasks.map((t) => t.id);
+  const unplannedTaskIdsToday = todayListTaskIds.filter(
+    (id) => !allAllPlannedIds.includes(id),
+  );
+
   return createSelector(
     selectTaskFeatureState,
     selectPlannerState,
@@ -61,7 +66,7 @@ export const selectPlannerDays = (
         const isToday = dayDate === todayStr;
         const currentDayDate = new Date(dayDate);
         const currentDayTimestamp = currentDayDate.getTime();
-        const tIds = isToday ? todayListTaskIds : plannerState.days[dayDate] || [];
+        const tIds = isToday ? unplannedTaskIdsToday : plannerState.days[dayDate] || [];
         const normalTasks = tIds
           .map((id) => taskState.entities[id] as TaskCopy)
           // filter out deleted tasks
