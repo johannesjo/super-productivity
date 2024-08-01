@@ -9,7 +9,7 @@ import { select, Store } from '@ngrx/store';
 import { selectTasksPlannedForRangeNotOnToday } from '../tasks/store/task.selectors';
 import { getDateRangeForDay } from '../../util/get-date-range-for-day';
 import { PlannerService } from '../planner/planner.service';
-import { first, map, tap, withLatestFrom } from 'rxjs/operators';
+import { first, map, withLatestFrom } from 'rxjs/operators';
 import { PlannerDay, ScheduleItemTask, ScheduleItemType } from '../planner/planner.model';
 import { selectTodayTaskIds } from '../work-context/store/work-context.selectors';
 import { ProjectService } from '../project/project.service';
@@ -47,18 +47,21 @@ export class AddTasksForTomorrowService {
 
   nrOfPlannerItemsForTomorrow$: Observable<number> = this.plannerDayTomorrow$.pipe(
     withLatestFrom(this._store.select(selectTodayTaskIds)),
-    tap(console.log),
     map(([day, todaysTaskIds]) =>
       day
         ? day.scheduledIItems.filter(
             (scheduledItem) =>
               scheduledItem.type !== ScheduleItemType.Task ||
               (!todaysTaskIds.includes(scheduledItem.task.id) &&
-                !todaysTaskIds.includes(scheduledItem.task.parentId)),
+                !(
+                  scheduledItem.task.parentId &&
+                  todaysTaskIds.includes(scheduledItem.task.parentId)
+                )),
           ).length +
           day.tasks.filter(
             (task) =>
-              !todaysTaskIds.includes(task.id) && !todaysTaskIds.includes(task.parentId),
+              !todaysTaskIds.includes(task.id) &&
+              !(task.parentId && todaysTaskIds.includes(task.parentId)),
           ).length +
           day.noStartTimeRepeatProjections.length
         : 0,
