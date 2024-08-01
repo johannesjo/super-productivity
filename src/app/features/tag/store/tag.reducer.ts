@@ -127,7 +127,7 @@ export const tagReducer = createReducer<TagState>(
 
   on(
     PlannerActions.transferTask,
-    (state, { task, today, targetIndex, newDay, prevDay }) => {
+    (state, { task, today, targetIndex, newDay, prevDay, targetTaskId }) => {
       if (prevDay === today && newDay !== today) {
         const tagToUpdate = state.entities[TODAY_TAG.id] as Tag;
         return tagAdapter.updateOne(
@@ -143,7 +143,10 @@ export const tagReducer = createReducer<TagState>(
       if (prevDay !== today && newDay === today) {
         const tagToUpdate = state.entities[TODAY_TAG.id] as Tag;
         const taskIds = [...tagToUpdate.taskIds];
-        taskIds.splice(targetIndex, 0, task.id);
+        const targetIndexToUse = targetTaskId
+          ? tagToUpdate.taskIds.findIndex((id) => id === targetTaskId)
+          : targetIndex;
+        taskIds.splice(targetIndexToUse, 0, task.id);
         return tagAdapter.updateOne(
           {
             id: TODAY_TAG.id,

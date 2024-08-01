@@ -17,6 +17,7 @@ export const PlannerActions = createActionGroup({
       prevDay: string | typeof ADD_TASK_PANEL_ID;
       newDay: string | typeof ADD_TASK_PANEL_ID;
       targetIndex: number;
+      targetTaskId?: string;
       today: string;
     }>(),
     'Move In List': props<{

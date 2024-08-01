@@ -78,6 +78,7 @@ export class PlannerDayComponent {
             newDay: newDay,
             targetIndex: ev.currentIndex,
             today: this._dateService.todayStr(),
+            targetTaskId: allItems[ev.currentIndex]?.id,
           }),
         );
         if (task.reminderId) {
