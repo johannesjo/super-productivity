@@ -447,10 +447,99 @@ describe('mapToScheduleDays()', () => {
     ] as any);
   });
 
-  // fit('should sort in planned tasks to their days', () => {
-  // })
+  it('should sort in planned tasks to their days', () => {
+    const r = mapToScheduleDays(
+      N,
+      [NDS, '1970-01-02', '1970-01-03', '1970-01-04'],
+      [
+        // NOTE: takes us to the next day, since without dayStart and dayEnd it otherwise won't
+        fakeTaskEntry('N1', { timeEstimate: 2 * H }),
+      ],
+      [],
+      [],
+      [],
+      [],
+      null,
+      {
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        '1970-01-02': [
+          fakeTaskEntry('FD1', { timeEstimate: H }),
+          fakeTaskEntry('FD2', { timeEstimate: 2 * H }),
+        ],
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        '1970-01-04': [
+          fakeTaskEntry('FD3', { timeEstimate: H }),
+          fakeTaskEntry('FD4', { timeEstimate: 0.5 * H }),
+        ],
+      },
+      undefined,
+      undefined,
+    );
+
+    expect(r).toEqual([
+      {
+        beyondBudgetTasks: [],
+        dayDate: '1970-01-01',
+        entries: [
+          {
+            data: jasmine.any(Object),
+            id: 'N1',
+            start: 0,
+            timeToGo: 2 * H,
+            type: 'Task',
+          },
+        ],
+        isToday: true,
+      },
+      {
+        beyondBudgetTasks: [],
+        dayDate: '1970-01-02',
+        entries: [
+          {
+            data: jasmine.any(Object),
+            id: 'FD1',
+            start: 82800000,
+            timeToGo: H,
+            type: 'TaskPlannedForDay',
+          },
+          {
+            data: jasmine.any(Object),
+            id: 'FD2',
+            start: 86400000,
+            timeToGo: 2 * H,
+            type: 'TaskPlannedForDay',
+          },
+        ],
+        isToday: false,
+      },
+      { beyondBudgetTasks: [], dayDate: '1970-01-03', entries: [], isToday: false },
+      {
+        beyondBudgetTasks: [],
+        dayDate: '1970-01-04',
+        entries: [
+          {
+            data: jasmine.any(Object),
+            id: 'FD3',
+            start: 255600000,
+            timeToGo: H,
+            type: 'TaskPlannedForDay',
+          },
+          {
+            data: jasmine.any(Object),
+            id: 'FD4',
+            start: 259200000,
+            timeToGo: 0.5 * H,
+            type: 'TaskPlannedForDay',
+          },
+        ],
+        isToday: false,
+      },
+    ] as any);
+  });
+
   // fit('should split around dayStart dayEnd', () => {
   // })
+
   // fit('should work for case with one of each', () => {
   // })
 });
