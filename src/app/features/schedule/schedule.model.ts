@@ -24,7 +24,7 @@ interface SVEBase {
   id: string;
   type: SVEType;
   start: number;
-  timeToGo: number;
+  duration: number;
 }
 
 export interface SVETask extends SVEBase {

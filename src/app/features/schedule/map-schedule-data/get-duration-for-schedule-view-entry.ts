@@ -12,13 +12,13 @@ import { SCHEDULE_TASK_MIN_DURATION_IN_MS } from '../schedule.const';
 //     viewEntry.type === SVEType.SplitTask ||
 //     viewEntry.type === SVEType.SplitTaskPlannedForDay
 //   ) {
-//     return viewEntry.timeToGo;
+//     return viewEntry.duration;
 //   } else if (
 //     isContinuedTaskType(viewEntry) ||
 //     viewEntry.type === SVEType.RepeatProjectionSplitContinued ||
 //     viewEntry.type === SVEType.RepeatProjectionSplitContinuedLast
 //   ) {
-//     return viewEntry.timeToGo;
+//     return viewEntry.duration;
 //   } else if (
 //     viewEntry.type === SVEType.RepeatProjection ||
 //     viewEntry.type === SVEType.RepeatProjectionSplit ||
@@ -38,5 +38,5 @@ import { SCHEDULE_TASK_MIN_DURATION_IN_MS } from '../schedule.const';
 // };
 
 export const getDurationForSVE = (viewEntry: SVE): number => {
-  return Math.max(viewEntry.timeToGo, SCHEDULE_TASK_MIN_DURATION_IN_MS);
+  return Math.max(viewEntry.duration, SCHEDULE_TASK_MIN_DURATION_IN_MS);
 };

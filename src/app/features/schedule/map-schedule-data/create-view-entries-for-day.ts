@@ -31,7 +31,7 @@ export const createViewEntriesForDay = (
       ...prevDaySplitTaskEntry,
       start: startTime,
     });
-    startTime += prevDaySplitTaskEntry.timeToGo;
+    startTime += prevDaySplitTaskEntry.duration;
   }
 
   const { entries, startTimeAfter } = createViewEntriesForNonScheduledRepeatProjections(
@@ -122,7 +122,7 @@ const createViewEntriesForNonScheduledRepeatProjections = (
       type: SVEType.RepeatProjection,
       start: time,
       data: taskRepeatCfg,
-      timeToGo: taskRepeatCfg.defaultEstimate || 0,
+      duration: taskRepeatCfg.defaultEstimate || 0,
     });
 
     lastTime = time;

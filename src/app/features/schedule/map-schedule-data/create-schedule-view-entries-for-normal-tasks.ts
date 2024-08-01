@@ -38,7 +38,7 @@ export const createScheduleViewEntriesForNormalTasks = (
         : SVEType.Task,
       start: time,
       data: task,
-      timeToGo: getTimeLeftForTaskWithMinVal(task, SCHEDULE_TASK_MIN_DURATION_IN_MS),
+      duration: getTimeLeftForTaskWithMinVal(task, SCHEDULE_TASK_MIN_DURATION_IN_MS),
     });
 
     lastTime = time;

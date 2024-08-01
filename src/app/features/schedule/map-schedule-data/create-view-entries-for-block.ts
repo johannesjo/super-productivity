@@ -14,8 +14,8 @@ export const createViewEntriesForBlock = (blockedBlock: BlockedBlock): SVE[] => 
         start: scheduledTask.plannedAt,
         type: SVEType.ScheduledTask,
         data: scheduledTask,
-        timeToGo: getTimeLeftForTask(scheduledTask),
-        // timeToGo: getTimeLeftForTaskWithMinVal(
+        duration: getTimeLeftForTask(scheduledTask),
+        // duration: getTimeLeftForTaskWithMinVal(
         //   scheduledTask,
         //   SCHEDULE_TASK_MIN_DURATION_IN_MS,
         // ),
@@ -27,8 +27,8 @@ export const createViewEntriesForBlock = (blockedBlock: BlockedBlock): SVE[] => 
         start: entry.start,
         type: SVEType.ScheduledRepeatProjection,
         data: repeatCfg,
-        timeToGo: repeatCfg.defaultEstimate || 0,
-        // timeToGo: Math.max(
+        duration: repeatCfg.defaultEstimate || 0,
+        // duration: Math.max(
         //   repeatCfg.defaultEstimate || 0,
         //   SCHEDULE_TASK_MIN_DURATION_IN_MS,
         // ),
@@ -43,8 +43,8 @@ export const createViewEntriesForBlock = (blockedBlock: BlockedBlock): SVE[] => 
           ...calendarEvent,
           icon: calendarEvent.icon || 'event',
         },
-        timeToGo: calendarEvent.duration,
-        // timeToGo: Math.max(calendarEvent.duration, SCHEDULE_TASK_MIN_DURATION_IN_MS),
+        duration: calendarEvent.duration,
+        // duration: Math.max(calendarEvent.duration, SCHEDULE_TASK_MIN_DURATION_IN_MS),
       });
       // TODO check if needed
     } else if (entry.type === BlockedBlockType.WorkdayStartEnd) {
@@ -55,14 +55,14 @@ export const createViewEntriesForBlock = (blockedBlock: BlockedBlock): SVE[] => 
       //   start: entry.start,
       //   type: SVEType.WorkdayEnd,
       //   data: workdayCfg,
-      //   timeToGo: entry.end - entry.start,
+      //   duration: entry.end - entry.start,
       // });
       // viewEntriesForBock.push({
       //   id: 'DAY_START_' + entry.end,
       //   start: entry.end,
       //   type: SVEType.WorkdayStart,
       //   data: workdayCfg,
-      //   timeToGo: 0,
+      //   duration: 0,
       // });
     } else if (entry.type === BlockedBlockType.LunchBreak) {
       viewEntriesForBock.push({
@@ -70,7 +70,7 @@ export const createViewEntriesForBlock = (blockedBlock: BlockedBlock): SVE[] => 
         start: entry.start,
         type: SVEType.LunchBreak,
         data: entry.data,
-        timeToGo: entry.end - entry.start,
+        duration: entry.end - entry.start,
       });
     }
   });

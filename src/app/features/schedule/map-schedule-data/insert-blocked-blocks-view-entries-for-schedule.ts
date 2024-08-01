@@ -106,12 +106,12 @@ export const insertBlockedBlocksViewEntriesForSchedule = (
             const timePlannedForSplitStart = blockedBlock.start - currentVE.start;
             const timePlannedForSplitContinued =
               timeLeftOnTask - timePlannedForSplitStart;
-            currentVE.timeToGo = timePlannedForSplitStart;
+            currentVE.duration = timePlannedForSplitStart;
 
             const splitTask: TaskWithoutReminder = currentVE.data as TaskWithoutReminder;
 
             // update type of current
-            currentVE.timeToGo = timePlannedForSplitStart;
+            currentVE.duration = timePlannedForSplitStart;
             currentVE.type = SVEType.SplitTask;
 
             const newSplitContinuedEntry: SVE = createSplitTask({
@@ -153,7 +153,7 @@ export const insertBlockedBlocksViewEntriesForSchedule = (
             );
             // update type of current
             currentVE.type = SVEType.SplitTaskContinued;
-            currentVE.timeToGo -= timePlannedForSplitTaskContinued;
+            currentVE.duration -= timePlannedForSplitTaskContinued;
 
             const splitIndex = splitInstances.length;
             const newSplitContinuedEntry: SVE = createSplitTask({
@@ -245,7 +245,7 @@ export const insertBlockedBlocksViewEntriesForSchedule = (
             );
             // update type of current
             currentVE.type = SVEType.RepeatProjectionSplitContinued;
-            currentVE.timeToGo -= timePlannedForSplitRepeatCfgProjectionContinued;
+            currentVE.duration -= timePlannedForSplitRepeatCfgProjectionContinued;
 
             // TODO there can be multiple repeat instances on a day if they are continued to the next day
             const splitIndex = splitInstances.length;
@@ -355,7 +355,7 @@ const createSplitTask = ({
     id: `${taskId}__${splitIndex}`,
     start,
     type: SVEType.SplitTaskContinuedLast,
-    timeToGo,
+    duration: timeToGo,
     data: {
       title,
       taskId,
@@ -382,7 +382,7 @@ const createSplitRepeat = ({
     id: `${repeatCfgId}__${splitIndex}`,
     start,
     type: SVEType.RepeatProjectionSplitContinuedLast,
-    timeToGo,
+    duration: timeToGo,
     data: {
       title,
       repeatCfgId,

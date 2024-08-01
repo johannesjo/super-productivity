@@ -44,7 +44,7 @@ describe('createViewEntriesForBlock()', () => {
         } as TaskPlanned,
         id: '1',
         start: 0,
-        timeToGo: 1000,
+        duration: 1000,
         type: SVEType.ScheduledTask,
       },
     ]);

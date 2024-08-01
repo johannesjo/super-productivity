@@ -79,7 +79,7 @@ export const createScheduleDays = (
         regularTasksLeftForDay,
         SCHEDULE_TASK_MIN_DURATION_IN_MS,
       ) +
-      (splitTaskOrRepeatEntryForNextDay?.timeToGo || 0) +
+      (splitTaskOrRepeatEntryForNextDay?.duration || 0) +
       timeEstimatedForNonScheduledRepeatCfgs;
     const nonScheduledBudgetForDay = getBudgetLeftForDay(
       blockerBlocksForDay,
