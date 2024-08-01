@@ -94,6 +94,8 @@ export class AddTasksForTomorrowService {
       .toPromise();
 
     if (repeatableScheduledForTomorrow.length) {
+      console.log(repeatableScheduledForTomorrow);
+
       const promises = repeatableScheduledForTomorrow
         .sort(sortRepeatableTaskCfgs)
         .map((repeatCfg) => {
@@ -102,6 +104,8 @@ export class AddTasksForTomorrowService {
             this._tomorrow,
           );
         });
+      console.log(promises);
+
       await Promise.all(promises);
     }
   }

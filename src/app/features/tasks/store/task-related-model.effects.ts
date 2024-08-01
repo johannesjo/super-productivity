@@ -107,7 +107,7 @@ export class TaskRelatedModelEffects {
     this.ifAutoAddTodayEnabled$(
       this._actions$.pipe(
         ofType(scheduleTask),
-        filter((a) => !isToday(a.plannedAt)),
+        filter((a) => !a.isSkipAutoRemoveFromToday && !isToday(a.plannedAt)),
         map(({ task }) =>
           updateTaskTags({
             task,

@@ -271,6 +271,7 @@ export class TaskRepeatCfgService {
           plannedAt: dateTime,
           remindAt: remindOptionToMilliseconds(dateTime, taskRepeatCfg.remindAt),
           isMoveToBacklog: false,
+          isSkipAutoRemoveFromToday: true,
         }),
       );
     }

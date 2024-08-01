@@ -183,6 +183,7 @@ export const scheduleTask = createAction(
     plannedAt: number;
     remindAt?: number;
     isMoveToBacklog: boolean;
+    isSkipAutoRemoveFromToday?: boolean;
   }>(),
 );
 

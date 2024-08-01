@@ -246,10 +246,6 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
     const relatedTarget: HTMLElement = ev.relatedTarget as HTMLElement;
     let isUIelement = false;
 
-    console.log(relatedTarget);
-    console.log(ev);
-    console.log(ev.target);
-
     // NOTE: related target is null for all elements that are not focusable (e.g. items without tabindex, non-buttons, non-inputs etc.)
     if (relatedTarget) {
       const { className } = relatedTarget;
