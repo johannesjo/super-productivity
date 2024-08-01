@@ -22,6 +22,8 @@ $margin-bottom: 4px;
   border: 1px solid $light-theme-separator-color;
   //border-color:var(--project-color);
   border-width: 0;
+  // has to be for after elements
+  overflow: visible !important;
 
   background: #fff;
   color: $light-theme-text-color;

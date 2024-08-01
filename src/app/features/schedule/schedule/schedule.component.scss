@@ -30,11 +30,6 @@ $total-rows: 24 * $fr;
   @include mq(xs, max) {
     grid-template-rows: repeat($total-rows, $time-height-mobile);
   }
-
-  > schedule-event {
-    // required for same size
-    overflow: hidden;
-  }
 }
 
 header {
