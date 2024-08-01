@@ -55,7 +55,8 @@
   <!--  {{se.data?.id}} __ -->
 
   @if (se.type === SVEType.SplitTaskContinuedLast || se.type ===
-  SVEType.SplitTaskContinued) { ...
+  SVEType.SplitTaskContinued || se.type === SVEType.RepeatProjectionSplitContinued ||
+  se.type === SVEType.RepeatProjectionSplitContinuedLast) { ...
   <!-- -->
   } @else { {{ se.title }} }
 </div>

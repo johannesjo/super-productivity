@@ -69,6 +69,19 @@ $margin-bottom: 4px;
     border-top-left-radius: 0;
     border-top-right-radius: 0;
   }
+
+  &.split-continued,
+  &.split-continued-last {
+    //opacity: .7;
+    .title {
+      opacity: 0.4;
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      text-align: center;
+      font-style: italic;
+    }
+  }
 }
 
 :host.LunchBreak {
@@ -127,21 +140,6 @@ $margin-bottom: 4px;
 
     .title {
       padding: 2px;
-    }
-  }
-}
-
-:host {
-  &.SplitTaskContinued,
-  &.SplitTaskContinuedLast {
-    //opacity: .7;
-    .title {
-      opacity: 0.4;
-      position: absolute;
-      left: 50%;
-      transform: translateX(-50%);
-      text-align: center;
-      font-style: italic;
     }
   }
 }
