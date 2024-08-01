@@ -25,7 +25,6 @@ export const insertBlockedBlocksViewEntriesForSchedule = (
   // viewEntriesIn: SVETask[],
   viewEntriesIn: SVE[],
   blockedBlocks: BlockedBlock[],
-  now: number,
 ): void => {
   const viewEntries: SVE[] = viewEntriesIn;
   let veIndex: number = 0;
@@ -111,7 +110,6 @@ export const insertBlockedBlocksViewEntriesForSchedule = (
             const splitTask: TaskWithoutReminder = currentVE.data as TaskWithoutReminder;
 
             // update type of current
-            currentVE.duration = timePlannedForSplitStart;
             currentVE.type = SVEType.SplitTask;
 
             const newSplitContinuedEntry: SVE = createSplitTask({
@@ -196,6 +194,7 @@ export const insertBlockedBlocksViewEntriesForSchedule = (
             const timePlannedForSplitStart = blockedBlock.start - currentVE.start;
             const timePlannedForSplitContinued =
               timeLeftOnRepeatInstance - timePlannedForSplitStart;
+            currentVE.duration = timePlannedForSplitStart;
 
             // update type of current
             // @ts-ignore

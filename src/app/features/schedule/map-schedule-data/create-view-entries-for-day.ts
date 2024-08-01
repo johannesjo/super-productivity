@@ -52,7 +52,6 @@ export const createViewEntriesForDay = (
   insertBlockedBlocksViewEntriesForSchedule(
     viewEntries as SVETask[],
     blockedBlocksForDay,
-    0, // TODO remove form insertBlockedBlocksViewEntries
   );
 
   // CLEANUP

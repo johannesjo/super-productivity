@@ -543,6 +543,121 @@ describe('mapToScheduleDays()', () => {
     ] as any);
   });
 
+  it('should calculate the right duration ofr repeat task projections', () => {
+    const r = mapToScheduleDays(
+      N,
+      [NDS, '1970-01-02'],
+      [
+        // fakeTaskEntry('N1', { timeEstimate: 2 * H }),
+        // fakeTaskEntry('2', { timeEstimate: 2 * H }),
+      ],
+      [],
+      // [fakePlannedTaskEntry('S1', minAfterNow(30), { timeEstimate: H })],
+      [],
+      [fakeRepeatCfg('R1', undefined, { defaultEstimate: h(4) })],
+      [],
+      null,
+      {},
+      {
+        startTime: '9:00',
+        endTime: '17:00',
+      },
+      {
+        startTime: '12:00',
+        endTime: '13:00',
+      },
+    );
+
+    expect(r).toEqual([
+      {
+        beyondBudgetTasks: [],
+        dayDate: '1970-01-01',
+        entries: [
+          {
+            data: {
+              defaultEstimate: h(4),
+              friday: true,
+              id: 'R1',
+              lastTaskCreation: -86400000,
+              monday: true,
+              repeatCycle: 'DAILY',
+              repeatEvery: 1,
+              saturday: true,
+              startDate: '1969-01-01',
+              startTime: undefined,
+              sunday: true,
+              thursday: true,
+              tuesday: true,
+              wednesday: true,
+            },
+            duration: h(3),
+            id: 'R1',
+            start: hTz(9),
+            type: 'RepeatProjectionSplit',
+          },
+          {
+            data: { endTime: '13:00', startTime: '12:00' },
+            duration: h(1),
+            id: 'LUNCH_BREAK_39600000',
+            start: hTz(12),
+            type: 'LunchBreak',
+          },
+          {
+            data: { index: 0, repeatCfgId: 'R1', title: 'NO_TITLE' },
+            duration: h(1),
+            id: 'R1__0',
+            start: hTz(13),
+            type: 'RepeatProjectionSplitContinuedLast',
+          },
+        ],
+        isToday: true,
+      },
+      {
+        beyondBudgetTasks: [],
+        dayDate: '1970-01-02',
+        entries: [
+          {
+            data: {
+              defaultEstimate: h(4),
+              friday: true,
+              id: 'R1',
+              lastTaskCreation: -86400000,
+              monday: true,
+              repeatCycle: 'DAILY',
+              repeatEvery: 1,
+              saturday: true,
+              startDate: '1969-01-01',
+              startTime: undefined,
+              sunday: true,
+              thursday: true,
+              tuesday: true,
+              wednesday: true,
+            },
+            duration: h(3),
+            id: 'R1',
+            start: 115200000,
+            type: 'RepeatProjectionSplit',
+          },
+          {
+            data: { endTime: '13:00', startTime: '12:00' },
+            duration: h(1),
+            id: 'LUNCH_BREAK_126000000',
+            start: 126000000,
+            type: 'LunchBreak',
+          },
+          {
+            data: { index: 0, repeatCfgId: 'R1', title: 'NO_TITLE' },
+            duration: h(1),
+            id: 'R1__0',
+            start: 129600000,
+            type: 'RepeatProjectionSplitContinuedLast',
+          },
+        ],
+        isToday: false,
+      },
+    ] as any);
+  });
+
   it('UNTESTED SO CHECK IF FAILING  should work for an example with all the stuff', () => {
     const r = mapToScheduleDays(
       N,
