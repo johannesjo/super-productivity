@@ -133,7 +133,7 @@
     "@ngrx/data": "^18.0.1",
     "@ngrx/effects": "^18.0.1",
     "@ngrx/entity": "^18.0.1",
-    "@ngrx/schematics": "^18.0.1",
+    "@ngrx/schematics": "^18.0.2",
     "@ngrx/store": "18.0.1",
     "@ngrx/store-devtools": "^18.0.1",
     "@ngx-formly/core": "6.3.6",
