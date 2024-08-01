@@ -18,7 +18,7 @@ const FAKE_TASK: Partial<TaskCopy> = {
 const h = (hr: number): number => hr * 60 * 1000 * 60;
 const hTz = (hr: number): number => h(hr) + TZ_OFFSET;
 // eslint-disable-next-line @typescript-eslint/no-unused-vars,no-mixed-operators
-const dh = (d: number = 0, hr: number): number => hr * H + d * H * 24;
+const dh = (d: number = 0, hr: number): number => hr * H + d * h(24);
 const dhTz = (d: number = 0, hr: number): number => dh(d, hr) + TZ_OFFSET;
 
 // eslint-disable-next-line no-mixed-operators
@@ -65,7 +65,7 @@ const fakeRepeatCfg = (
     sunday: true,
     repeatCycle: 'DAILY',
     repeatEvery: 1,
-    defaultEstimate: H,
+    defaultEstimate: h(1),
     ...add,
     id,
   } as Partial<TaskRepeatCfg> as TaskRepeatCfg;
@@ -84,8 +84,8 @@ describe('mapToScheduleDays()', () => {
         N,
         [NDS, '2020-1-2'],
         [
-          fakeTaskEntry('1', { timeEstimate: H }),
-          fakeTaskEntry('2', { timeEstimate: 2 * H }),
+          fakeTaskEntry('1', { timeEstimate: h(1) }),
+          fakeTaskEntry('2', { timeEstimate: h(2) }),
         ],
         [],
         [],
@@ -105,24 +105,24 @@ describe('mapToScheduleDays()', () => {
             data: {
               ...FAKE_TASK,
               id: '1',
-              timeEstimate: H,
+              timeEstimate: h(1),
               timeSpent: 0,
             },
             id: '1',
             start: 0,
-            duration: H,
+            duration: h(1),
             type: 'Task',
           },
           {
             data: {
               ...FAKE_TASK,
               id: '2',
-              timeEstimate: 2 * H,
+              timeEstimate: h(2),
               timeSpent: 0,
             },
             id: '2',
-            start: H,
-            duration: 2 * H,
+            start: h(1),
+            duration: h(2),
             type: 'Task',
           },
         ],
@@ -137,10 +137,10 @@ describe('mapToScheduleDays()', () => {
       N,
       [NDS, '1970-01-02'],
       [
-        fakeTaskEntry('N1', { timeEstimate: H }),
-        // fakeTaskEntry('2', { timeEstimate: 2 * H }),
+        fakeTaskEntry('N1', { timeEstimate: h(1) }),
+        // fakeTaskEntry('2', { timeEstimate: h(2 }),
       ],
-      [fakePlannedTaskEntry('S1', minAfterNow(30), { timeEstimate: H })],
+      [fakePlannedTaskEntry('S1', minAfterNow(30), { timeEstimate: h(1) })],
       [],
       [],
       [],
@@ -160,12 +160,12 @@ describe('mapToScheduleDays()', () => {
               id: 'N1',
               subTaskIds: [],
               tagIds: [],
-              timeEstimate: H,
+              timeEstimate: h(1),
               timeSpent: 0,
             },
             id: 'N1',
             start: 0,
-            duration: H * 0.5,
+            duration: h(0.5),
             type: 'SplitTask',
           },
           {
@@ -175,19 +175,19 @@ describe('mapToScheduleDays()', () => {
               reminderId: 'R_ID',
               subTaskIds: [],
               tagIds: [],
-              timeEstimate: H,
+              timeEstimate: h(1),
               timeSpent: 0,
             },
             id: 'S1',
             start: minAfterNowTs(30),
-            duration: H,
+            duration: h(1),
             type: 'ScheduledTask',
           },
           {
             data: { index: 0, projectId: undefined, taskId: 'N1', title: undefined },
             id: 'N1__0',
             start: minAfterNowTs(90),
-            duration: H * 0.5,
+            duration: h(0.5),
             type: 'SplitTaskContinuedLast',
           },
         ],
@@ -202,12 +202,12 @@ describe('mapToScheduleDays()', () => {
       N,
       [NDS, '1970-01-02'],
       [
-        fakeTaskEntry('N1', { timeEstimate: 2 * H }),
-        // fakeTaskEntry('2', { timeEstimate: 2 * H }),
+        fakeTaskEntry('N1', { timeEstimate: h(2) }),
+        // fakeTaskEntry('2', { timeEstimate: h(2 }),
       ],
       [
-        fakePlannedTaskEntry('S1', minAfterNow(30), { timeEstimate: 0.5 * H }),
-        fakePlannedTaskEntry('S2', minAfterNow(90), { timeEstimate: 0.5 * H }),
+        fakePlannedTaskEntry('S1', minAfterNow(30), { timeEstimate: h(0.5) }),
+        fakePlannedTaskEntry('S2', minAfterNow(90), { timeEstimate: h(0.5) }),
       ],
       [],
       [],
@@ -227,35 +227,35 @@ describe('mapToScheduleDays()', () => {
             data: jasmine.any(Object),
             id: 'N1',
             start: 0,
-            duration: H * 0.5,
+            duration: h(0.5),
             type: 'SplitTask',
           },
           {
             data: jasmine.any(Object),
             id: 'S1',
             start: minAfterNowTs(30),
-            duration: 0.5 * H,
+            duration: h(0.5),
             type: 'ScheduledTask',
           },
           {
             data: jasmine.any(Object),
             id: 'N1__0',
             start: minAfterNowTs(60),
-            duration: 0.5 * H,
+            duration: h(0.5),
             type: 'SplitTaskContinued',
           },
           {
             data: jasmine.any(Object),
             id: 'S2',
             start: minAfterNowTs(90),
-            duration: 0.5 * H,
+            duration: h(0.5),
             type: 'ScheduledTask',
           },
           {
             data: jasmine.any(Object),
             id: 'N1__1',
             start: minAfterNowTs(120),
-            duration: H,
+            duration: h(1),
             type: 'SplitTaskContinuedLast',
           },
         ],
@@ -270,12 +270,12 @@ describe('mapToScheduleDays()', () => {
       N,
       [NDS, '1970-01-02'],
       [
-        fakeTaskEntry('N1', { timeEstimate: 2 * H }),
-        // fakeTaskEntry('2', { timeEstimate: 2 * H }),
+        fakeTaskEntry('N1', { timeEstimate: h(2) }),
+        // fakeTaskEntry('2', { timeEstimate: h(2 }),
       ],
       [],
-      // [fakePlannedTaskEntry('S1', minAfterNow(30), { timeEstimate: H })],
-      [fakeRepeatCfg('R1', '01:00', { defaultEstimate: H })],
+      // [fakePlannedTaskEntry('S1', minAfterNow(30), { timeEstimate: h(1 })],
+      [fakeRepeatCfg('R1', '01:00', { defaultEstimate: h(1) })],
       [],
       [],
       null,
@@ -293,7 +293,7 @@ describe('mapToScheduleDays()', () => {
             data: jasmine.any(Object),
             id: 'N1',
             start: 0,
-            duration: H * 2,
+            duration: h(2),
             type: 'Task',
           },
         ],
@@ -306,8 +306,8 @@ describe('mapToScheduleDays()', () => {
           {
             data: jasmine.any(Object),
             id: 'R1',
-            start: H * 24,
-            duration: H,
+            start: h(24),
+            duration: h(1),
             type: 'ScheduledRepeatProjection',
           },
         ],
@@ -322,13 +322,13 @@ describe('mapToScheduleDays()', () => {
       [NDS, '1970-01-02'],
       [
         // NOTE: takes us to the next day, since without dayStart and dayEnd it otherwise won't
-        fakeTaskEntry('N1', { timeEstimate: 24 * H }),
-        fakeTaskEntry('N2', { timeEstimate: 2 * H }),
-        // fakeTaskEntry('2', { timeEstimate: 2 * H }),
+        fakeTaskEntry('N1', { timeEstimate: h(24) }),
+        fakeTaskEntry('N2', { timeEstimate: h(2) }),
+        // fakeTaskEntry('2', { timeEstimate: h(2 }),
       ],
       [],
-      // [fakePlannedTaskEntry('S1', minAfterNow(30), { timeEstimate: H })],
-      [fakeRepeatCfg('R1', '01:00', { defaultEstimate: H })],
+      // [fakePlannedTaskEntry('S1', minAfterNow(30), { timeEstimate: h(1 })],
+      [fakeRepeatCfg('R1', '01:00', { defaultEstimate: h(1) })],
       [],
       [],
       null,
@@ -347,7 +347,7 @@ describe('mapToScheduleDays()', () => {
             id: 'N1',
             start: 0,
             // eslint-disable-next-line no-mixed-operators
-            duration: 24 * H,
+            duration: h(24),
             type: 'Task',
           },
         ],
@@ -361,24 +361,24 @@ describe('mapToScheduleDays()', () => {
             data: jasmine.any(Object),
             id: 'N2',
             // eslint-disable-next-line no-mixed-operators
-            start: 24 * H + TZ_OFFSET,
-            duration: H,
+            start: hTz(24),
+            duration: h(1),
             type: 'SplitTask',
           },
           {
             data: jasmine.any(Object),
             id: 'R1',
             // eslint-disable-next-line no-mixed-operators
-            start: 25 * H + TZ_OFFSET,
-            duration: H,
+            start: hTz(25),
+            duration: h(1),
             type: 'ScheduledRepeatProjection',
           },
           {
             data: jasmine.any(Object),
             id: 'N2__0',
             // eslint-disable-next-line no-mixed-operators
-            start: 26 * H + TZ_OFFSET,
-            duration: H,
+            start: hTz(26),
+            duration: h(1),
             type: 'SplitTaskContinuedLast',
           },
         ],
@@ -393,14 +393,14 @@ describe('mapToScheduleDays()', () => {
       [NDS, '1970-01-02'],
       [
         // NOTE: takes us to the next day, since without dayStart and dayEnd it otherwise won't
-        fakeTaskEntry('N1', { timeEstimate: 24 * H }),
-        fakeTaskEntry('N2', { timeEstimate: H }),
+        fakeTaskEntry('N1', { timeEstimate: h(24) }),
+        fakeTaskEntry('N2', { timeEstimate: h(1) }),
       ],
       [],
       [],
       [
         fakeRepeatCfg('R1', undefined, {
-          defaultEstimate: 2 * H,
+          defaultEstimate: h(2),
           lastTaskCreation: N + 60000,
         }),
       ],
@@ -421,7 +421,7 @@ describe('mapToScheduleDays()', () => {
             id: 'N1',
             start: 0,
             // eslint-disable-next-line no-mixed-operators
-            duration: 24 * H,
+            duration: h(24),
             type: 'Task',
           },
         ],
@@ -435,8 +435,8 @@ describe('mapToScheduleDays()', () => {
             data: jasmine.any(Object),
             id: 'R1',
             // eslint-disable-next-line no-mixed-operators
-            start: 24 * H + TZ_OFFSET,
-            duration: 2 * H,
+            start: hTz(24),
+            duration: h(2),
             type: 'RepeatProjection',
           },
           {
@@ -444,7 +444,7 @@ describe('mapToScheduleDays()', () => {
             id: 'N2',
             // eslint-disable-next-line no-mixed-operators
             start: 26 * H + TZ_OFFSET,
-            duration: H,
+            duration: h(1),
             type: 'Task',
           },
         ],
@@ -459,7 +459,7 @@ describe('mapToScheduleDays()', () => {
       [NDS, '1970-01-02', '1970-01-03', '1970-01-04'],
       [
         // NOTE: takes us to the next day, since without dayStart and dayEnd it otherwise won't
-        fakeTaskEntry('N1', { timeEstimate: 2 * H }),
+        fakeTaskEntry('N1', { timeEstimate: h(2) }),
       ],
       [],
       [],
@@ -469,13 +469,13 @@ describe('mapToScheduleDays()', () => {
       {
         // eslint-disable-next-line @typescript-eslint/naming-convention
         '1970-01-02': [
-          fakeTaskEntry('FD1', { timeEstimate: H }),
-          fakeTaskEntry('FD2', { timeEstimate: 2 * H }),
+          fakeTaskEntry('FD1', { timeEstimate: h(1) }),
+          fakeTaskEntry('FD2', { timeEstimate: h(2) }),
         ],
         // eslint-disable-next-line @typescript-eslint/naming-convention
         '1970-01-04': [
-          fakeTaskEntry('FD3', { timeEstimate: H }),
-          fakeTaskEntry('FD4', { timeEstimate: 0.5 * H }),
+          fakeTaskEntry('FD3', { timeEstimate: h(1) }),
+          fakeTaskEntry('FD4', { timeEstimate: h(0.5) }),
         ],
       },
       undefined,
@@ -491,7 +491,7 @@ describe('mapToScheduleDays()', () => {
             data: jasmine.any(Object),
             id: 'N1',
             start: 0,
-            duration: 2 * H,
+            duration: h(2),
             type: 'Task',
           },
         ],
@@ -505,14 +505,14 @@ describe('mapToScheduleDays()', () => {
             data: jasmine.any(Object),
             id: 'FD1',
             start: 82800000,
-            duration: H,
+            duration: h(1),
             type: 'TaskPlannedForDay',
           },
           {
             data: jasmine.any(Object),
             id: 'FD2',
             start: 86400000,
-            duration: 2 * H,
+            duration: h(2),
             type: 'TaskPlannedForDay',
           },
         ],
@@ -527,14 +527,14 @@ describe('mapToScheduleDays()', () => {
             data: jasmine.any(Object),
             id: 'FD3',
             start: 255600000,
-            duration: H,
+            duration: h(1),
             type: 'TaskPlannedForDay',
           },
           {
             data: jasmine.any(Object),
             id: 'FD4',
             start: 259200000,
-            duration: 0.5 * H,
+            duration: h(0.5),
             type: 'TaskPlannedForDay',
           },
         ],
@@ -549,18 +549,18 @@ describe('mapToScheduleDays()', () => {
       [NDS, '1970-01-02', '1970-01-03', '1970-01-04'],
       [
         // NOTE: takes us to the next day, since without dayStart and dayEnd it otherwise won't
-        fakeTaskEntry('N1', { timeEstimate: 2 * H }),
+        fakeTaskEntry('N1', { timeEstimate: h(2) }),
       ],
       [
         // BEFORE WORK
-        fakePlannedTaskEntry('S1', minAfterNow(2 * 60), { timeEstimate: H }),
+        fakePlannedTaskEntry('S1', minAfterNow(2 * 60), { timeEstimate: h(1) }),
         // NEXT DAY AT 10
-        fakePlannedTaskEntry('S2', minAfterNow(34 * 60), { timeEstimate: 0.5 * H }),
+        fakePlannedTaskEntry('S2', minAfterNow(34 * 60), { timeEstimate: h(0.5) }),
       ],
-      [fakeRepeatCfg('R1', '01:00', { defaultEstimate: H })],
+      [fakeRepeatCfg('R1', '01:00', { defaultEstimate: h(1) })],
       [
         fakeRepeatCfg('R1', undefined, {
-          defaultEstimate: 2 * H,
+          defaultEstimate: h(2),
           lastTaskCreation: N + 60000,
         }),
       ],
@@ -569,13 +569,13 @@ describe('mapToScheduleDays()', () => {
       {
         // eslint-disable-next-line @typescript-eslint/naming-convention
         '1970-01-02': [
-          fakeTaskEntry('FD1', { timeEstimate: 4 * H }),
-          fakeTaskEntry('FD2', { timeEstimate: 2 * H }),
+          fakeTaskEntry('FD1', { timeEstimate: h(4) }),
+          fakeTaskEntry('FD2', { timeEstimate: h(2) }),
         ],
         // eslint-disable-next-line @typescript-eslint/naming-convention
         '1970-01-04': [
-          fakeTaskEntry('FD3', { timeEstimate: H }),
-          fakeTaskEntry('FD4', { timeEstimate: 0.5 * H }),
+          fakeTaskEntry('FD3', { timeEstimate: h(1) }),
+          fakeTaskEntry('FD4', { timeEstimate: h(0.5) }),
         ],
       },
       {
