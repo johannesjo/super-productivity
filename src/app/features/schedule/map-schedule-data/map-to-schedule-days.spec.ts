@@ -543,7 +543,7 @@ describe('mapToScheduleDays()', () => {
     ] as any);
   });
 
-  fit('UNTESTED SO CHECK IF FAILING  should work for an example with all the stuff', () => {
+  it('UNTESTED SO CHECK IF FAILING  should work for an example with all the stuff', () => {
     const r = mapToScheduleDays(
       N,
       [NDS, '1970-01-02', '1970-01-03', '1970-01-04'],
@@ -618,7 +618,9 @@ describe('mapToScheduleDays()', () => {
     } as any);
 
     expect(r[1]).toEqual({
-      beyondBudgetTasks: [],
+      beyondBudgetTasks: [
+        { id: 'FD2', subTaskIds: [], tagIds: [], timeEstimate: h(2), timeSpent: 0 },
+      ],
       dayDate: '1970-01-02',
       entries: [
         {
@@ -656,14 +658,6 @@ describe('mapToScheduleDays()', () => {
           timeToGo: h(3.5),
           type: 'SplitTaskContinuedLast',
         },
-        {
-          // TODO this needs fixing
-          data: jasmine.any(Object),
-          id: 'FD2',
-          start: dhTz(1, 16.5),
-          timeToGo: h(0.5),
-          type: 'SplitTaskPlannedForDay',
-        },
       ],
       isToday: false,
     } as any);
@@ -674,31 +668,17 @@ describe('mapToScheduleDays()', () => {
       entries: [
         {
           data: jasmine.any(Object),
-          id: 'FD2__0',
-          start: 201600000,
-          timeToGo: 5400000,
-          type: 'SplitTaskContinuedLast',
-        },
-        {
-          data: jasmine.any(Object),
           id: 'R1',
-          start: 207000000,
-          timeToGo: h(2),
-          type: 'RepeatProjectionSplit',
+          start: 201600000,
+          timeToGo: 7200000,
+          type: 'RepeatProjection',
         },
         {
-          data: jasmine.any(Object),
+          data: { endTime: '13:00', startTime: '12:00' },
           id: 'LUNCH_BREAK_212400000',
           start: 212400000,
           timeToGo: 3600000,
           type: 'LunchBreak',
-        },
-        {
-          data: jasmine.any(Object),
-          id: 'R1__0',
-          start: 216000000,
-          timeToGo: 1800000,
-          type: 'RepeatProjectionSplitContinuedLast',
         },
       ],
       isToday: false,

@@ -145,6 +145,12 @@ export const createScheduleDays = (
         dayDate: startTime,
       },
     );
+    const timeEstimatedForNonScheduledRepeatCfgs = nonScheduledRepeatCfgsDueOnDay.reduce(
+      (acc, cfg) => {
+        return acc + (cfg.defaultEstimate || 0);
+      },
+      0,
+    );
 
     const blockerBlocksForDay = blockerBlocksDayMap[dayDate] || [];
     // const taskPlannedForDay = i > 0 ? plannerDayMap[dayDate] || [] : [];
@@ -153,7 +159,9 @@ export const createScheduleDays = (
       getTimeLeftForTasksWithMinVal(
         regularTasksLeftForDay,
         SCHEDULE_TASK_MIN_DURATION_IN_MS,
-      ) + (splitTaskOrRepeatEntryForNextDay?.timeToGo || 0);
+      ) +
+      (splitTaskOrRepeatEntryForNextDay?.timeToGo || 0) +
+      timeEstimatedForNonScheduledRepeatCfgs;
     const nonScheduledBudgetForDay = getBudgetLeftForDay(
       blockerBlocksForDay,
       i === 0 ? now : undefined,
@@ -175,6 +183,7 @@ export const createScheduleDays = (
       //   timeLeftForRegular / 60 / 60 / 1000,
       // );
 
+      // TODO this needs to include repeat projections somehow
       const { beyond, within } = getTasksWithinAndBeyondBudget(
         // TODO fix type
         (plannerDayMap[dayDate] as TaskWithoutReminder[]) || [],
@@ -449,6 +458,9 @@ export const getTasksWithinAndBeyondBudget = (
       remainingBudget -= timeLeftForTask;
     }
   });
+  console.log(remainingBudget);
+
+  console.log(beyond);
 
   return { beyond, within };
 };
