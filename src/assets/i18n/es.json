@@ -1,7 +1,13 @@
 {
   "ANDROID": {
     "NOTIFICATIONS": {
-      "SYNC_CONFLICT_TITLE": "Se produjo un conflicto de sincronización"
+      "SYNC_CONFLICT_TITLE": "Se produjo un conflicto de sincronización",
+      "SYNC_CONFLICT_MSG": "Por favor revisa y decide qué hacer."
+    },
+    "PERMANENT_NOTIFICATION_MSGS": {
+      "INITIAL": "Aplicación ejecutándose en segundo plano para permitir la sincronización si está habilitada",
+      "NO_ACTIVE_TASKS": "No hay tareas activas",
+      "SYNCING": "Sincronizando"
     }
   },
   "APP": {
@@ -113,6 +119,19 @@
         "ISSUE_NOT_FOUND": "CalDav: Todo \"{{issueId}}\" parece haberse eliminado en el servidor."
       }
     },
+    "CALENDARS": {
+      "BANNER": {
+        "TXT": "<strong>{{title}}</strong> comienza a <strong>{{start}}</strong>!",
+        "TXT_MULTIPLE": "<strong>{{title}}</strong> comienza a <strong>{{start}}</strong>!<br> (y {{nrOfOtherBanners}} otros eventos están pendientes)",
+        "TXT_PAST": "<strong>{{title}}</strong> comenzó a <strong>{{start}}</strong>!",
+        "TXT_PAST_MULTIPLE": "<strong>{{title}}</strong> comenzó a <strong>{{start}}</strong>!<br> (y {{nrOfOtherBanners}} otros eventos están pendientes)",
+        "ADD_AS_TASK": "Agregar como tarea",
+        "FOCUS_TASK": "Enfocar tarea"
+      },
+      "S": {
+        "CAL_PROVIDER_ERROR": "Error del proveedor de calendario: {{errTxt}}"
+      }
+    },
     "CONFIG": {
       "S": {
         "UPDATE_SECTION": "Ajustes actualizados para <strong>{{sectionKey}}</strong>"
@@ -125,12 +144,74 @@
         "AUTH_ERROR": "Dropbox: token de acceso no válido proporcionado",
         "AUTH_ERROR_ACTION": "Cambiar Token",
         "OFFLINE": "Dropbox: no se puede sincronizar porque está desconectado",
-        "SYNC_ERROR": "Dropbox: error al sincronizar"
+        "SYNC_ERROR": "Dropbox: error al sincronizar",
+        "UNABLE_TO_GENERATE_PKCE_CHALLENGE": "Dropbox: No se pudo generar el desafío PKCE."
       }
     },
     "FINISH_DAY_BEFORE_EXIT": {
       "C": {
         "FINISH_DAY_BEFORE_EXIT": "Hay {{nr}} tareas realizadas en su lista de hoy que aún no se han movido al archivo. ¿De verdad quieres salir sin terminar tu día?"
+      }
+    },
+    "FOCUS_MODE": {
+      "BACK_TO_PLANNING": "Volver a la planificación",
+      "CANCEL_FOCUS_SESSION": "Cancelar sesión de enfoque",
+      "CONGRATS": "¡Felicidades por completar esta sesión!",
+      "CONTINUE_FOCUS_SESSION": "Continuar sesión de enfoque",
+      "FINISH_TASK_AND_SELECT_NEXT": "Finalizar tarea y seleccionar la siguiente",
+      "GET_READY": "¡Prepárate para tu sesión de enfoque!",
+      "GOGOGO": "¡Vamos, vamos, vamos!",
+      "GO_TO_PROCRASTINATION": "Busca ayuda cuando procrastines",
+      "NEXT": "Siguiente",
+      "ON": "Activado",
+      "OPEN_ISSUE_IN_BROWSER": "Abrir tarea en el navegador",
+      "POMODORO_BACK": "Volver",
+      "POMODORO_DISABLE": "Desactivar Pomodoro",
+      "POMODORO_INFO": "Las sesiones de enfoque no se pueden usar junto con el temporizador Pomodoro activado",
+      "PREP_STRETCH": "Haz algunos estiramientos suaves",
+      "PREP_SIT_UPRIGHT": "\"Sé (o mantente) erguido\"",
+      "PREP_GET_MENTALLY_READY": "Prepárate mentalmente para estar enfocado y ser productivo",
+      "SELECT_ANOTHER_TASK": "Selecciona otra tarea",
+      "SELECT_TASK": "Selecciona la tarea en la que concentrarte",
+      "SET_FOCUS_SESSION_DURATION": "Establecer la duración de la sesión de enfoque",
+      "SHOW_HIDE_NOTES_AND_ATTACHMENTS": "Mostrar/ocultar notas y adjuntos de la tarea",
+      "START_FOCUS_SESSION": "Iniciar sesión de enfoque",
+      "START_NEXT_FOCUS_SESSION": "Iniciar la siguiente sesión de enfoque",
+      "WORKED_FOR": "Trabajaste durante"
+    },
+    "GITEA": {
+      "FORM": {
+        "FILTER_USER": "Nombre de usuario (por ejemplo, para filtrar cambios realizados por ti mismo)",
+        "IS_AUTO_POLL": "Sondear automáticamente los problemas de Git importados en busca de cambios",
+        "REPO_FULL_NAME": "Nombre de usuario o nombre de la organización/proyecto",
+        "SCOPE_ALL": "Todos",
+        "SCOPE_ASSIGNED": "Asignado a mí",
+        "SCOPE_CREATED": "Creado por mí"
+      },
+      "ISSUE_CONTENT": {
+        "ASSIGNEE": "Responsable",
+        "DESCRIPTION": "Descripción",
+        "MARK_AS_CHECKED": "Marcar actualizaciones como verificadas",
+        "STATUS": "Estado",
+        "WRITE_A_COMMENT": "Escribir un comentario"
+      },
+      "S": {
+        "ERR_UNKNOWN": "Gitea: Error desconocido {statusCode} {errorMsg}. ¿Límite de tasa de la API excedido?"
+      }
+    },
+    "REDMINE": {
+      "FORM": {
+        "PROJECT_ID_DESCRIPTION": "Se puede encontrar como parte de la URL al ver el proyecto en el navegador."
+      },
+      "FORM_SECTION": {
+        "HELP": "<p>Aquí puedes configurar SuperProductivity para listar los problemas abiertos de Redmine (ya sea la versión en línea o una instancia autohospedada) para un proyecto específico en el panel de creación de tareas en la vista de planificación diaria. Se mostrarán como sugerencias y proporcionarán un enlace al problema así como más información sobre el mismo.</p><p>Además, puedes importar automáticamente todos los problemas abiertos.</p>"
+      },
+      "ISSUE_CONTENT": {
+        "DESCRIPTION": "Descripción",
+        "MARK_AS_CHECKED": "Marcar actualizaciones como revisadas"
+      },
+      "S": {
+        "ERR_UNKNOWN": "Redmine: Error desconocido {statusCode} {errorMsg}."
       }
     },
     "GITHUB": {
@@ -144,7 +225,8 @@
         "IS_SEARCH_ISSUES_FROM_GITHUB": "Mostrar problemas de git como sugerencias al agregar nuevas tareas",
         "REPO": "\"username / repositoryName\" para el repositorio de git que desea seguir",
         "TOKEN": "Token de acceso",
-        "TOKEN_DESCRIPTION": "Requerido para el acceso al repositorio privado"
+        "TOKEN_DESCRIPTION": "Requerido para el acceso al repositorio privado",
+        "IS_ASSIGNEE_FILTER": "Filtrar problemas asignados a mí"
       },
       "FORM_SECTION": {
         "HELP": "<p>Aquí puede configurar SuperProductivity para listar los problemas abiertos de GitHub para un repositorio específico en el panel de creación de tareas en la vista de planificación diaria. Se enumerarán como sugerencias y proporcionarán un enlace al problema, así como más información al respecto.</p> <p>Además, puede agregar y sincronizar automáticamente todos los problemas abiertos a su registro de tareas.</p>",
@@ -155,18 +237,26 @@
         "AT": "a",
         "DESCRIPTION": "Descripción",
         "LABELS": "Etiquetas",
+        "LOAD_DESCRIPTION_AND_ALL_COMMENTS": "Cargar descripción y todos los comentarios",
         "MARK_AS_CHECKED": "Marcar actualizaciones como verificadas",
         "STATUS": "Estado",
         "SUMMARY": "Resumen",
         "WRITE_A_COMMENT": "Escribir un comentario"
       },
       "S": {
-        "ERR_UNKNOWN": "GitHub: error desconocido {{statusCode}} {{errorMsg}}"
+        "ERR_UNKNOWN": "GitHub: error desconocido {{statusCode}} {{errorMsg}}",
+        "CONFIG_ERROR": "GitHub: Error al mapear datos. ¿Es correcto el nombre de tu repositorio?"
       }
     },
     "GITLAB": {
       "DIALOG_INITIAL": {
         "TITLE": "Configurar GitLab para Proyecto"
+      },
+      "DIALOG_SUBMIT_WORKLOG": {
+        "PAST_DAY_INFO": "La duración prellenada contiene datos no rastreados de días anteriores.",
+        "TITLE": "Enviar tiempo dedicado a los problemas a GitLab",
+        "T_TO_BE_SUBMITTED": "Por enviar",
+        "TOTAL_MSG": "Vas a enviar <em>{totalTimeToSubmit}</em> de tiempo trabajado en total para hoy a <em>{nrOfTasksToSubmit}</em> problemas diferentes."
       },
       "FORM": {
         "FILTER_USER": "Nombre de usuario (por ejemplo, para filtrar los cambios por ti mismo)",
@@ -183,7 +273,11 @@
         "SOURCE_GLOBAL": "TODOS",
         "SOURCE_GROUP": "grupo",
         "SOURCE_PROJECT": "Proyecto",
-        "TOKEN": "Token de acceso"
+        "SUBMIT_TIMELOGS": "Enviar registros de tiempo a GitLab",
+        "SUBMIT_TIMELOGS_DESCRIPTION": "Mostrar el diálogo de seguimiento de tiempo después de hacer clic en finalizar día",
+        "TOKEN": "Token de acceso",
+        "FILTER": "Filtro personalizado",
+        "FILTER_DESCRIPTION": "Consulta https://docs.gitlab.com/ee/api/issues.html#list-issues. Se pueden combinar varios utilizando &"
       },
       "FORM_SECTION": {
         "HELP": "<p> Aquí puede configurar SuperProductividad para enumerar los problemas abiertos de GitLab (ya sea la versión en línea o una instancia autohospedada) para un proyecto específico en el panel de creación de tareas en la vista de planificación diaria. Se enumerarán como sugerencias y proporcionarán un enlace al problema, así como más información al respecto. </p> <p> Además, puede agregar y sincronizar automáticamente todos los problemas abiertos a la acumulación de tareas. </p>",
@@ -204,7 +298,15 @@
         "ERR_UNKNOWN": "GitLab: error desconocido {{statusCode}} {{errorMsg}}"
       }
     },
+    "DOMINA_MODE": {
+      "FORM": {
+        "HELP": "Repite la frase configurada cada X cuando se rastrea el tiempo en una tarea.",
+        "L_INTERVAL": "Intervalo para repetir frase",
+        "L_TEXT_DESCRIPTION": "Por ejemplo: \"¡Trabaja en ${currentTaskTitle}!\""
+      }
+    },
     "ISSUE": {
+      "HOW_TO_GET_A_TOKEN": "¿Cómo obtener un token?",
       "DEFAULT": {
         "ISSUES_STR": "Problemas",
         "ISSUE_STR": "Problema"
@@ -333,6 +435,7 @@
         "ON": "en",
         "STATUS": "Estado",
         "STORY_POINTS": "Puntos de historia",
+        "SUB_TASKS": "Subtareas",
         "SUMMARY": "Resumen",
         "WORKLOG": "Registro de trabajo",
         "WRITE_A_COMMENT": "Escribir un comentario"
@@ -410,6 +513,11 @@
       "D_ADD": {
         "NOTE_LABEL": "Introduzca algún texto para guardar como nota ..."
       },
+      "D_FULLSCREEN": {
+        "VIEW_TEXT_ONLY": "Ver como texto sin procesar",
+        "VIEW_SPLIT": "Ver markdown procesado y sin procesar en vista dividida",
+        "VIEW_PARSED": "Ver como markdown procesado (no editable)"
+      },
       "NOTES_CMP": {
         "ADD_BTN": "Agregar nueva nota",
         "DROP_TO_ADD": "Suelta aquí para agregar una nueva nota",
@@ -434,6 +542,9 @@
         "SUBMIT_TIME_FOR": "Envíe el tiempo a OpenProject para",
         "TIME_SPENT": "Tiempo usado",
         "TITLE": "OpenProject: Enviar registro de trabajo"
+      },
+      "DIALOG_TRANSITION": {
+        "CURRENT_STATUS": "Estado actual:"
       },
       "FORM": {
         "FILTER_USER": "Nombre de usuario (por ejemplo, para filtrar los cambios por ti mismo)",
@@ -470,7 +581,9 @@
       },
       "S": {
         "ERR_UNKNOWN": "OpenProject: error desconocido {{statusCode}} {{errorMsg}}. ¿CORS está configurado correctamente para el servidor?",
-        "POST_TIME_SUCCESS": "OpenProject: entrada de tiempo creada correctamente para {{issueTitle}}"
+        "POST_TIME_SUCCESS": "OpenProject: entrada de tiempo creada correctamente para {{issueTitle}}",
+        "TRANSITION": "OpenProject: Establecer el problema \"{{issueKey}}\" en \"{{name}}\"",
+        "TRANSITION_SUCCESS": "OpenProject: Establecer el problema {{issueKey}} en <strong>{{chosenTransition}}</strong>"
       }
     },
     "POMODORO": {
@@ -480,11 +593,14 @@
       "FINISH_SESSION_X": "¡Has completado exitosamente la sesión <strong>{{nr}}</strong>!",
       "NOTIFICATION": {
         "BREAK_X_START": "Pomodoro: ¡Comenzó el descanso {{nr}} !",
+        "BREAK_TIME": "Pomodoro: ¡Es hora del descanso {{nr}}!",
         "NO_TASKS": "Debe agregar tareas antes de que el temporizador Pomodoro pueda comenzar.",
         "SESSION_X_START": "Pomodoro: Sesión {{nr}} comenzó!"
       },
       "S": {
-        "SESSION_X_START": "Pomodoro: Sesión {{nr}} comenzó!"
+        "SESSION_X_START": "Pomodoro: Sesión {{nr}} comenzó!",
+        "SESSION_SKIP": "Saltar al final de la Sesión Pomodoro actual",
+        "RESET": "Volver a la primera sesión Pomodoro"
       },
       "SKIP_BREAK": "Saltar descanso"
     },
@@ -864,6 +980,7 @@
         "TAG_LABEL": "Etiquetas para agregar"
       },
       "F": {
+        "C_DAY": "Día",
         "DEFAULT_ESTIMATE": "Estimación por defecto",
         "FRIDAY": "Viernes",
         "IS_ADD_TO_BOTTOM": "Mover tarea al final de la lista",
@@ -1236,8 +1353,10 @@
     "DELETE_TAG": "Eliminar etiqueta",
     "GO_TO_TASK_LIST": "Ir a la lista de tareas",
     "MANAGE_PROJECTS": "Administrar proyectos",
+    "HELP": "Ayuda",
     "METRICS": "Métrica",
     "NOTES": "Notas",
+    "NOTES_PANEL_INFO": "Las notas sólo pueden mostrarse desde la línea de tiempo y las vistas normales de la lista de tareas.",
     "PROCRASTINATE": "Procrastinar",
     "PROJECTS": "Proyectos",
     "PROJECT_MENU": "Menú de proyecto",
@@ -1280,12 +1399,14 @@
     "ROUND_UP_30M": "Redondea todas las tareas a 30 minutos",
     "ROUND_UP_5M": "Redondea todas las tareas a 5 minutos.",
     "SAVE_AND_GO_HOME": "Guardar e ir a casa",
+    "SAVE_AND_GO_HOME_TOOLTIP": "Mueve todas las tareas realizadas al archivo (worklog) y, opcionalmente, sincroniza todos los datos y cierra la aplicación.",
     "START_END": "Inicio - Fin",
     "SUMMARY_FOR": "Resumen diario de {{dayStr}}",
     "TASKS_COMPLETED": "Tareas completadas",
     "TASK_LIST": "Lista de tareas",
     "TIME_SPENT_AND_ESTIMATE_LABEL": "Tiempo empleado / estimado",
     "TIME_SPENT_ESTIMATE_TITLE": "Tiempo empleado: Tiempo total empleado hoy. Tareas archivadas no incluidas. - Tiempo estimado: tiempo estimado para las tareas en las que se trabajó hoy, menos el tiempo que ya pasó con ellas en otros días.",
+    "TIME_SPENT_TODAY_BY_TAG": "Tiempo empleado hoy por etiqueta",
     "TODAY": "Hoy",
     "WEEK": "semana"
   },
@@ -1385,6 +1506,7 @@
     "RESET_BREAK_TIMER": "Restablecer sin temporizador de pausa",
     "TIME_ESTIMATED": "Tiempo estimado:",
     "WITHOUT_BREAK": "Sin descanso:",
-    "WORKING_TODAY": "Trabajado hoy:"
+    "WORKING_TODAY": "Trabajado hoy:",
+    "WORKING_TODAY_ARCHIVED": "Tiempo trabajado hoy en tareas archivadas"
   }
 }
