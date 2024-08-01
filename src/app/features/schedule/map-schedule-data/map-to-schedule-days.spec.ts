@@ -168,5 +168,73 @@ describe('mapToScheduleDays()', () => {
     ] as any);
   });
 
+  it('should split multiple times', () => {
+    const r = mapToScheduleDays(
+      N,
+      [NDS, '1970-01-02'],
+      [
+        fakeTaskEntry('N1', { timeEstimate: 2 * H }),
+        // fakeTaskEntry('2', { timeEstimate: 2 * H }),
+      ],
+      [
+        fakePlannedTaskEntry('S1', minAfterNow(30), { timeEstimate: 0.5 * H }),
+        fakePlannedTaskEntry('S2', minAfterNow(90), { timeEstimate: 0.5 * H }),
+      ],
+      [],
+      [],
+      [],
+      null,
+      {},
+      undefined,
+      undefined,
+    );
+    expect(r[0].entries.length).toBe(5);
+    expect(r).toEqual([
+      {
+        beyondBudgetTasks: [],
+        dayDate: '1970-01-01',
+        entries: [
+          {
+            data: jasmine.any(Object),
+            id: 'N1',
+            start: 0,
+            timeToGo: H * 0.5,
+            type: 'SplitTask',
+          },
+          {
+            data: jasmine.any(Object),
+            id: 'S1',
+            start: minAfterNowTs(30),
+            timeToGo: 0.5 * H,
+            type: 'ScheduledTask',
+          },
+          {
+            data: jasmine.any(Object),
+            id: 'N1__0',
+            start: minAfterNowTs(60),
+            timeToGo: 0.5 * H,
+            type: 'SplitTaskContinued',
+          },
+          {
+            data: jasmine.any(Object),
+            id: 'S2',
+            start: minAfterNowTs(90),
+            timeToGo: 0.5 * H,
+            type: 'ScheduledTask',
+          },
+          {
+            data: jasmine.any(Object),
+            id: 'N1__1',
+            start: minAfterNowTs(120),
+            timeToGo: H,
+            type: 'SplitTaskContinuedLast',
+          },
+        ],
+        isToday: true,
+      },
+      { beyondBudgetTasks: [], dayDate: '1970-01-02', entries: [], isToday: false },
+    ] as any);
+  });
+
   // fit('should work for case with one of each', () => {});
 });
