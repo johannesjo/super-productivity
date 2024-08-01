@@ -2,19 +2,14 @@ import { Task, TaskPlanned, TaskWithoutReminder } from '../../tasks/task.model';
 import { TaskRepeatCfg } from '../../task-repeat-cfg/task-repeat-cfg.model';
 
 import { PlannerDayMap } from '../../planner/planner.model';
-import { getWorklogStr } from '../../../util/get-work-log-str';
-import {
-  BlockedBlockByDayMap,
-  BlockedBlockType,
-  TimelineCalendarMapEntry,
-} from '../../timeline/timeline.model';
-import { createSortedBlockerBlocks } from '../../timeline/map-timeline-data/create-sorted-blocker-blocks';
+import { TimelineCalendarMapEntry } from '../../timeline/timeline.model';
 import {
   ScheduleDay,
   ScheduleLunchBreakCfg,
   ScheduleWorkStartEndCfg,
 } from '../schedule.model';
 import { createScheduleDays } from './create-schedule-days';
+import { createBlockedBlocksByDayMap } from './create-blocked-blocks-by-day-map';
 
 export const mapToScheduleDays = (
   now: number,
@@ -78,63 +73,6 @@ export const mapToScheduleDays = (
   // console.log(v);
 
   return v;
-};
-
-const createBlockedBlocksByDayMap = (
-  scheduledTasks: TaskPlanned[],
-  scheduledTaskRepeatCfgs: TaskRepeatCfg[],
-  icalEventMap: TimelineCalendarMapEntry[],
-  workStartEndCfg?: ScheduleWorkStartEndCfg,
-  lunchBreakCfg?: ScheduleLunchBreakCfg,
-  now?: number,
-): BlockedBlockByDayMap => {
-  const allBlockedBlocks = createSortedBlockerBlocks(
-    scheduledTasks,
-    scheduledTaskRepeatCfgs,
-    icalEventMap,
-    workStartEndCfg,
-    lunchBreakCfg,
-    now,
-  );
-  // console.log(allBlockedBlocks);
-  console.log(
-    allBlockedBlocks.filter((block) =>
-      block.entries.find((e) => e.type === BlockedBlockType.ScheduledTask),
-    ),
-  );
-
-  const blockedBlocksByDay: BlockedBlockByDayMap = {};
-  allBlockedBlocks.forEach((block) => {
-    const dayStartDate = getWorklogStr(block.start);
-    const dayEndBoundary = new Date(block.start).setHours(24, 0, 0, 0);
-
-    if (!blockedBlocksByDay[dayStartDate]) {
-      blockedBlocksByDay[dayStartDate] = [];
-    }
-    blockedBlocksByDay[dayStartDate].push({
-      ...block,
-      end: Math.min(dayEndBoundary, block.end),
-    });
-
-    // TODO handle case when blocker block spans multiple days
-    const dayEndDate = getWorklogStr(block.end);
-    if (dayStartDate !== dayEndDate) {
-      const dayStartBoundary2 = new Date(block.end).setHours(0, 0, 0, 0);
-      const dayEndBoundary2 = new Date(block.end).setHours(24, 0, 0, 0);
-
-      if (!blockedBlocksByDay[dayEndDate]) {
-        blockedBlocksByDay[dayEndDate] = [];
-      }
-      blockedBlocksByDay[dayEndDate].push({
-        ...block,
-        entries: block.entries.filter((e) => e.type === BlockedBlockType.WorkdayStartEnd),
-        start: dayStartBoundary2,
-        end: Math.min(dayEndBoundary2, block.end),
-      });
-    }
-  });
-
-  return blockedBlocksByDay;
 };
 
 const resortTasksWithCurrentFirst = (currentId: string, tasks: Task[]): Task[] => {
