@@ -1,5 +1,5 @@
 import { mapToScheduleDays } from './map-to-schedule-days';
-import { TaskCopy } from '../../tasks/task.model';
+import { TaskCopy, TaskPlanned } from '../../tasks/task.model';
 
 const NDS = '1970-01-01';
 // const N = new Date(`${NDS} 01:00`).getTime();
@@ -17,6 +17,8 @@ const FAKE_TASK: Partial<TaskCopy> = {
 // eslint-disable-next-line no-mixed-operators
 const minAfterNow = (min: number): Date => new Date(Date.UTC(1970, 0, 1, 0, min, 0, 0));
 
+const minAfterNowTs = (min: number): number => minAfterNow(min).getTime();
+
 console.log(N);
 console.log(minAfterNow(30));
 
@@ -28,17 +30,17 @@ const fakeTaskEntry = (id = 'XXX', add?: Partial<TaskCopy>): TaskCopy => {
   } as TaskCopy;
 };
 
-// const fakePlannedTaskEntry = (
-//   id = 'XXX',
-//   planedAt: Date,
-//   add?: Partial<TaskPlanned>,
-// ): TaskPlanned => {
-//   return {
-//     ...fakeTaskEntry(id, add),
-//     plannedAt: planedAt.getUTCMilliseconds(),
-//     reminderId: 'R_ID',
-//   } as TaskPlanned;
-// };
+const fakePlannedTaskEntry = (
+  id = 'XXX',
+  planedAt: Date,
+  add?: Partial<TaskPlanned>,
+): TaskPlanned => {
+  return {
+    ...fakeTaskEntry(id, add),
+    plannedAt: planedAt.getTime(),
+    reminderId: 'R_ID',
+  } as TaskPlanned;
+};
 
 describe('mapToScheduleDays()', () => {
   it('should work for empty case', () => {
@@ -101,64 +103,70 @@ describe('mapToScheduleDays()', () => {
     ] as any);
   });
 
-  // it('should work for simple scheduled case', () => {
-  //   // TODO fix this should result in a split task
-  //   expect(
-  //     mapToScheduleDays(
-  //       N,
-  //       [NDS, '1970-01-02'],
-  //       [
-  //         fakeTaskEntry('1', { timeEstimate: 2 * H }),
-  //         // fakeTaskEntry('2', { timeEstimate: 2 * H }),
-  //       ],
-  //       [fakePlannedTaskEntry('3', minAfterNow(15), { timeEstimate: H })],
-  //       [],
-  //       [],
-  //       [],
-  //       null,
-  //       {},
-  //       undefined,
-  //       undefined,
-  //     ),
-  //   ).toEqual([
-  //     {
-  //       beyondBudgetTasks: [],
-  //       dayDate: '1970-01-01',
-  //       entries: [
-  //         {
-  //           data: {
-  //             id: '3',
-  //             plannedAt: 0,
-  //             reminderId: 'R_ID',
-  //             subTaskIds: [],
-  //             tagIds: [],
-  //             timeEstimate: 3600000,
-  //             timeSpent: 0,
-  //           },
-  //           id: '3',
-  //           start: 0,
-  //           timeToGo: 3600000,
-  //           type: 'ScheduledTask',
-  //         },
-  //         {
-  //           data: {
-  //             id: '1',
-  //             subTaskIds: [],
-  //             tagIds: [],
-  //             timeEstimate: 3600000,
-  //             timeSpent: 0,
-  //           },
-  //           id: '1',
-  //           start: 3600000,
-  //           timeToGo: 3600000,
-  //           type: 'Task',
-  //         },
-  //       ],
-  //       isToday: true,
-  //     },
-  //     { beyondBudgetTasks: [], dayDate: '1970-01-02', entries: [], isToday: false },
-  //   ] as any);
-  // });
+  it('should work for simple scheduled case', () => {
+    const r = mapToScheduleDays(
+      N,
+      [NDS, '1970-01-02'],
+      [
+        fakeTaskEntry('N1', { timeEstimate: H }),
+        // fakeTaskEntry('2', { timeEstimate: 2 * H }),
+      ],
+      [fakePlannedTaskEntry('S1', minAfterNow(30), { timeEstimate: H })],
+      [],
+      [],
+      [],
+      null,
+      {},
+      undefined,
+      undefined,
+    );
+    expect(r[0].entries.length).toBe(3);
+    expect(r).toEqual([
+      {
+        beyondBudgetTasks: [],
+        dayDate: '1970-01-01',
+        entries: [
+          {
+            data: {
+              id: 'N1',
+              subTaskIds: [],
+              tagIds: [],
+              timeEstimate: H,
+              timeSpent: 0,
+            },
+            id: 'N1',
+            start: 0,
+            timeToGo: H * 0.5,
+            type: 'SplitTask',
+          },
+          {
+            data: {
+              id: 'S1',
+              plannedAt: minAfterNowTs(30),
+              reminderId: 'R_ID',
+              subTaskIds: [],
+              tagIds: [],
+              timeEstimate: H,
+              timeSpent: 0,
+            },
+            id: 'S1',
+            start: minAfterNowTs(30),
+            timeToGo: H,
+            type: 'ScheduledTask',
+          },
+          {
+            data: { index: 0, projectId: undefined, taskId: 'N1', title: undefined },
+            id: 'N1__0',
+            start: minAfterNowTs(90),
+            timeToGo: H * 0.5,
+            type: 'SplitTaskContinuedLast',
+          },
+        ],
+        isToday: true,
+      },
+      { beyondBudgetTasks: [], dayDate: '1970-01-02', entries: [], isToday: false },
+    ] as any);
+  });
 
   // fit('should work for case with one of each', () => {});
 });
