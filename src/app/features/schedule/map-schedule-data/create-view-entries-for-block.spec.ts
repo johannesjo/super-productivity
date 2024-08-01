@@ -8,30 +8,33 @@ const ESA: string[] = [];
 
 describe('createViewEntriesForBlock()', () => {
   it('should work for empty case', () => {
-    const r = createViewEntriesForBlock({ entries: [], start: 0, end: 0 });
+    const r = createViewEntriesForBlock({ entries: [], start: 0, end: 0 }, 'DD');
     expect(r).toEqual([]);
   });
 
   it('should work for minimal case', () => {
-    const r = createViewEntriesForBlock({
-      entries: [
-        {
-          start: 0,
-          end: 1000,
-          type: BlockedBlockType.ScheduledTask,
-          data: {
-            id: '1',
-            plannedAt: 0,
-            timeSpent: 0,
-            subTaskIds: ESA,
-            tagIds: ESA,
-            timeEstimate: 1000,
-          } as TaskPlanned,
-        },
-      ],
-      start: 0,
-      end: 1000,
-    });
+    const r = createViewEntriesForBlock(
+      {
+        entries: [
+          {
+            start: 0,
+            end: 1000,
+            type: BlockedBlockType.ScheduledTask,
+            data: {
+              id: '1',
+              plannedAt: 0,
+              timeSpent: 0,
+              subTaskIds: ESA,
+              tagIds: ESA,
+              timeEstimate: 1000,
+            } as TaskPlanned,
+          },
+        ],
+        start: 0,
+        end: 1000,
+      },
+      'DD',
+    );
     expect(r).toEqual([
       {
         data: {
@@ -51,55 +54,58 @@ describe('createViewEntriesForBlock()', () => {
   });
 
   it('should work for all case', () => {
-    const r = createViewEntriesForBlock({
-      entries: [
-        {
-          start: 0,
-          end: 1000,
-          type: BlockedBlockType.ScheduledTask,
-          data: {
-            id: '1',
-            plannedAt: 0,
-            timeSpent: 0,
-            subTaskIds: ESA,
-            tagIds: ESA,
-            timeEstimate: 1000,
-          } as TaskPlanned,
-        },
-        {
-          start: 1000,
-          end: 2000,
-          type: BlockedBlockType.ScheduledRepeatProjection,
-          data: {
-            id: '1',
-            defaultEstimate: 2000,
-          } as TaskRepeatCfg,
-        },
-        {
-          start: 1000,
-          end: 5000,
-          type: BlockedBlockType.LunchBreak,
-          data: {
-            startTime: '9:00',
-            endTime: '10:00',
+    const r = createViewEntriesForBlock(
+      {
+        entries: [
+          {
+            start: 0,
+            end: 1000,
+            type: BlockedBlockType.ScheduledTask,
+            data: {
+              id: '1',
+              plannedAt: 0,
+              timeSpent: 0,
+              subTaskIds: ESA,
+              tagIds: ESA,
+              timeEstimate: 1000,
+            } as TaskPlanned,
           },
-        },
-        {
-          start: 2000,
-          end: 5000,
-          type: BlockedBlockType.CalendarEvent,
-          data: {
-            id: 'calEvId1',
-            calProviderId: 'calProvId1',
-            title: 'Title',
-            duration: 3000,
+          {
+            start: 1000,
+            end: 2000,
+            type: BlockedBlockType.ScheduledRepeatProjection,
+            data: {
+              id: '2',
+              defaultEstimate: 2000,
+            } as TaskRepeatCfg,
+          },
+          {
+            start: 1000,
+            end: 5000,
+            type: BlockedBlockType.LunchBreak,
+            data: {
+              startTime: '9:00',
+              endTime: '10:00',
+            },
+          },
+          {
             start: 2000,
+            end: 5000,
+            type: BlockedBlockType.CalendarEvent,
+            data: {
+              id: 'calEvId1',
+              calProviderId: 'calProvId1',
+              title: 'Title',
+              duration: 3000,
+              start: 2000,
+            },
           },
-        },
-      ],
-      start: 0,
-      end: 5000,
-    });
+        ],
+        start: 0,
+        end: 5000,
+      },
+      'DD',
+    );
     expect(r).toEqual([
       {
         data: {
@@ -116,15 +122,15 @@ describe('createViewEntriesForBlock()', () => {
         type: SVEType.ScheduledTask,
       },
       {
-        data: { defaultEstimate: 2000, id: '1' },
-        id: '1',
+        data: { defaultEstimate: 2000, id: '2' },
+        id: '2_DD',
         start: 1000,
         duration: 2000,
         type: 'ScheduledRepeatProjection',
       },
       {
         data: { endTime: '10:00', startTime: '9:00' },
-        id: 'LUNCH_BREAK_1000',
+        id: 'LUNCH_BREAK_DD',
         start: 1000,
         duration: 4000,
         type: 'LunchBreak',
@@ -138,7 +144,7 @@ describe('createViewEntriesForBlock()', () => {
           start: 2000,
           title: 'Title',
         },
-        id: 'calEvId1',
+        id: 'calEvId1_DD',
         start: 2000,
         duration: 3000,
         type: 'CalendarEvent',

@@ -25,6 +25,7 @@ export const insertBlockedBlocksViewEntriesForSchedule = (
   // viewEntriesIn: SVETask[],
   viewEntriesIn: SVE[],
   blockedBlocks: BlockedBlock[],
+  dayDate: string,
 ): void => {
   const viewEntries: SVE[] = viewEntriesIn;
   let veIndex: number = 0;
@@ -35,7 +36,7 @@ export const insertBlockedBlocksViewEntriesForSchedule = (
   blockedBlocks.forEach((blockedBlock, blockIndex) => {
     debug(`**********BB:${blockIndex}***********`);
 
-    const viewEntriesToAddForBB: SVE[] = createViewEntriesForBlock(blockedBlock);
+    const viewEntriesToAddForBB: SVE[] = createViewEntriesForBlock(blockedBlock, dayDate);
 
     if (veIndex > viewEntries.length) {
       throw new Error('INDEX TOO LARGE');

@@ -54,6 +54,7 @@ export const createViewEntriesForDay = (
   insertBlockedBlocksViewEntriesForSchedule(
     viewEntries as SVETask[],
     blockedBlocksForDay,
+    dayDate,
   );
 
   // CLEANUP

@@ -305,7 +305,7 @@ describe('mapToScheduleDays()', () => {
         entries: [
           {
             data: jasmine.any(Object),
-            id: 'R1',
+            id: 'R1_1970-01-02',
             start: h(24),
             duration: h(1),
             type: 'ScheduledRepeatProjection',
@@ -367,7 +367,7 @@ describe('mapToScheduleDays()', () => {
           },
           {
             data: jasmine.any(Object),
-            id: 'R1',
+            id: 'R1_1970-01-02',
             // eslint-disable-next-line no-mixed-operators
             start: hTz(25),
             duration: h(1),
@@ -598,7 +598,7 @@ describe('mapToScheduleDays()', () => {
           {
             data: { endTime: '13:00', startTime: '12:00' },
             duration: h(1),
-            id: 'LUNCH_BREAK_39600000',
+            id: 'LUNCH_BREAK_1970-01-01',
             start: hTz(12),
             type: 'LunchBreak',
           },
@@ -641,7 +641,7 @@ describe('mapToScheduleDays()', () => {
           {
             data: { endTime: '13:00', startTime: '12:00' },
             duration: h(1),
-            id: 'LUNCH_BREAK_126000000',
+            id: 'LUNCH_BREAK_1970-01-02',
             start: 126000000,
             type: 'LunchBreak',
           },
@@ -723,7 +723,7 @@ describe('mapToScheduleDays()', () => {
         },
         {
           data: jasmine.any(Object),
-          id: 'LUNCH_BREAK_39600000',
+          id: 'LUNCH_BREAK_1970-01-01',
           start: hTz(12),
           duration: h(1),
           type: 'LunchBreak',
@@ -761,7 +761,7 @@ describe('mapToScheduleDays()', () => {
         },
         {
           data: jasmine.any(Object),
-          id: 'LUNCH_BREAK_126000000',
+          id: 'LUNCH_BREAK_1970-01-02',
           start: dhTz(1, 12),
           duration: h(1),
           type: 'LunchBreak',
@@ -790,7 +790,7 @@ describe('mapToScheduleDays()', () => {
         },
         {
           data: { endTime: '13:00', startTime: '12:00' },
-          id: 'LUNCH_BREAK_212400000',
+          id: 'LUNCH_BREAK_1970-01-03',
           start: 212400000,
           duration: 3600000,
           type: 'LunchBreak',
@@ -818,7 +818,7 @@ describe('mapToScheduleDays()', () => {
         },
         {
           data: jasmine.any(Object),
-          id: 'LUNCH_BREAK_298800000',
+          id: 'LUNCH_BREAK_1970-01-04',
           start: 298800000,
           duration: 3600000,
           type: 'LunchBreak',

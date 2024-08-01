@@ -4,12 +4,16 @@ import { SVEType } from '../schedule.const';
 import { nanoid } from 'nanoid';
 import { getTimeLeftForTask } from '../../../util/get-time-left-for-task';
 
-export const createViewEntriesForBlock = (blockedBlock: BlockedBlock): SVE[] => {
+export const createViewEntriesForBlock = (
+  blockedBlock: BlockedBlock,
+  dayDate: string,
+): SVE[] => {
   const viewEntriesForBock: SVE[] = [];
   blockedBlock.entries.forEach((entry) => {
     if (entry.type === BlockedBlockType.ScheduledTask) {
       const scheduledTask = entry.data;
       viewEntriesForBock.push({
+        // NOTE: should be unique
         id: scheduledTask.id,
         start: scheduledTask.plannedAt,
         type: SVEType.ScheduledTask,
@@ -23,7 +27,7 @@ export const createViewEntriesForBlock = (blockedBlock: BlockedBlock): SVE[] => 
     } else if (entry.type === BlockedBlockType.ScheduledRepeatProjection) {
       const repeatCfg = entry.data;
       viewEntriesForBock.push({
-        id: repeatCfg.id,
+        id: repeatCfg.id + '_' + dayDate,
         start: entry.start,
         type: SVEType.ScheduledRepeatProjection,
         data: repeatCfg,
@@ -36,7 +40,7 @@ export const createViewEntriesForBlock = (blockedBlock: BlockedBlock): SVE[] => 
     } else if (entry.type === BlockedBlockType.CalendarEvent) {
       const calendarEvent = entry.data;
       viewEntriesForBock.push({
-        id: calendarEvent.id || nanoid(),
+        id: (calendarEvent.id || nanoid()) + '_' + dayDate,
         start: entry.start,
         type: SVEType.CalendarEvent,
         data: {
@@ -66,7 +70,7 @@ export const createViewEntriesForBlock = (blockedBlock: BlockedBlock): SVE[] => 
       // });
     } else if (entry.type === BlockedBlockType.LunchBreak) {
       viewEntriesForBock.push({
-        id: 'LUNCH_BREAK_' + entry.start,
+        id: 'LUNCH_BREAK' + '_' + dayDate,
         start: entry.start,
         type: SVEType.LunchBreak,
         data: entry.data,
