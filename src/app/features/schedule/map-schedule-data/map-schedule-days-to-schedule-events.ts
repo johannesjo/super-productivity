@@ -46,15 +46,15 @@ export const mapScheduleDaysToScheduleEvents = (
         const entryBefore = day.entries[entryIndex - 1];
         const diff = entry.start - entryBefore?.start;
         // const isCloseToOthers = entryBefore && diff <= 5 * 60 * 1000 && diff >= 0;
-        const isCloseToOthers = entryBefore && diff === 0;
-        console.log({
-          isCloseToOthers,
-          t: (entry.data as any)?.title,
-          tBef: (entryBefore?.data as any)?.title,
-          entry,
-          entryBefore,
-          flat: eventsFlat[eventsFlat.length - 1],
-        });
+        const isCloseToOthers = !!entryBefore && diff === 0;
+        // console.log({
+        //   isCloseToOthers,
+        //   t: (entry.data as any)?.title,
+        //   tBef: (entryBefore?.data as any)?.title,
+        //   entry,
+        //   entryBefore,
+        //   flat: eventsFlat[eventsFlat.length - 1],
+        // });
         // console.log(day.entries[entryIndex-1], eventsFlat[entryIndex-1 ]);
         if (
           isCloseToOthers &&

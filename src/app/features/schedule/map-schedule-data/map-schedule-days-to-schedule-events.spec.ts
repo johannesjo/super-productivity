@@ -93,6 +93,8 @@ describe('mapScheduleDaysToScheduleEvents()', () => {
           timeLeftInHours: 1,
           title: 'AAA_TITLE',
           type: 'Task',
+          isCloseToOthers: false,
+          isCloseToOthersFirst: false,
         },
         {
           data: {
@@ -109,6 +111,8 @@ describe('mapScheduleDaysToScheduleEvents()', () => {
           timeLeftInHours: 0.5,
           title: 'BBB_TITLE',
           type: 'Task',
+          isCloseToOthers: false,
+          isCloseToOthersFirst: false,
         },
       ],
     } as any);
