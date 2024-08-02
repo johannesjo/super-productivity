@@ -1,15 +1,15 @@
 @import '../../../../variables.scss';
 
 $time-width: 3em;
-$time-height: 12px;
-$time-height-mobile: 6px;
+$row-height: 10px;
+$row-height-mobile: 6px;
 //$grid-color: #dadce0;
 $grid-color: #dadce0;
 $grid-color-dark: rgba(255, 255, 255, 0.1);
 $calendar-template: $time-width repeat(5, 1fr);
 $current-time-color: $c-accent;
 $fr: 12;
-$total-rows: 24 * $fr;
+$total-rows: 12 * $fr;
 
 :host {
   background: $light-theme-bg;
@@ -25,10 +25,13 @@ $total-rows: 24 * $fr;
   display: grid;
   grid-template-columns: $calendar-template;
   grid-auto-columns: minmax(0, 1fr);
-  grid-template-rows: repeat($total-rows, $time-height);
+  //grid-template-rows: repeat($total-rows, $row-height);
+  grid-auto-rows: $row-height;
+  //grid-auto-rows: max-content;
 
   @include mq(xs, max) {
-    grid-template-rows: repeat($total-rows, $time-height-mobile);
+    //grid-template-rows: repeat($total-rows, $row-height-mobile);
+    grid-auto-rows: $row-height-mobile;
   }
 }
 
@@ -39,13 +42,13 @@ header {
   top: 0;
   left: 0;
   right: 0;
-  z-index: 10;
   border-top: 1px solid $light-theme-extra-border-color;
   border-bottom: 1px solid $light-theme-extra-border-color;
   background: #fff;
   color: $light-theme-text-color;
   box-shadow: $whiteframe-shadow-3dp;
   z-index: 10;
+
   @include darkTheme() {
     border-color: $dark-theme-extra-border-color;
     background: $dark-theme-bg-slightly-lighter;
