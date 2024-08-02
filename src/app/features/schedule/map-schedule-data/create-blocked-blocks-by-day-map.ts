@@ -60,7 +60,8 @@ export const createBlockedBlocksByDayMap = (
       }
       blockedBlocksByDay[dayEndDate].push({
         ...block,
-        entries: block.entries.filter((e) => e.type === BlockedBlockType.WorkdayStartEnd),
+        // entries: block.entries.filter((e) => e.type === BlockedBlockType.WorkdayStartEnd),
+        entries: block.entries,
         start: dayStartBoundary2,
         end: Math.min(dayEndBoundary2, block.end),
       });
