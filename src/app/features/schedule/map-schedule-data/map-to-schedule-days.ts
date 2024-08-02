@@ -25,6 +25,22 @@ export const mapToScheduleDays = (
   workStartEndCfg?: ScheduleWorkStartEndCfg,
   lunchBreakCfg?: ScheduleLunchBreakCfg,
 ): ScheduleDay[] => {
+  // NOTE to use for failing test cases
+  // const params = {
+  //   now,
+  //   dayDates,
+  //   tasks,
+  //   scheduledTasks,
+  //   scheduledTaskRepeatCfgs,
+  //   unScheduledTaskRepeatCfgs,
+  //   calenderWithItems,
+  //   currentId,
+  //   plannerDayMap,
+  //   workStartEndCfg,
+  //   lunchBreakCfg,
+  // };
+  // console.log(JSON.stringify(params));
+
   const plannerDayKeys = Object.keys(plannerDayMap);
   const plannerDayTasks = plannerDayKeys
     .map((key) => {
