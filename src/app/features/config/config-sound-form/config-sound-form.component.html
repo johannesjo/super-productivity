@@ -1,54 +1,55 @@
 <collapsible
   [isExpanded]="false"
   [isIconBefore]="true"
-  [title]="'Sound'"
+  [title]="title | translate"
   [formGroup]="soundForm"
 >
-  <div style="padding: 16px 16px 8px">
+  <div class="form-wrapper">
     <mat-form-field
-      style="width: 100%"
+      class="width100"
       [hideRequiredMarker]="true"
     >
-      <mat-label>Volume*</mat-label>
+      <mat-label>{{ 'GCF.SOUND.VOLUME' | translate}}</mat-label>
       <mat-slider
-        style="width: 100%"
+        class="width100"
         [min]="0"
         [max]="100"
         [step]="1"
+        [discrete]="true"
       >
         <input
           style="height: 100%"
           matInput
           matSliderThumb
-          formControlName="formC"
+          formControlName="volume"
         />
       </mat-slider>
     </mat-form-field>
-    <mat-form-field style="width: 100%">
-      <mat-label>Task marked done sound</mat-label>
+    <mat-form-field class="width100">
+      <mat-label>{{ 'GCF.SOUND.DONE_SOUND' | translate}}</mat-label>
       <mat-select formControlName="doneSound">
-        @for (sound of doneSounds; track sound) {
-        <mat-option [value]="sound">{{sound}}</mat-option>
+        @for (sound of soundOpts; track sound) {
+        <mat-option [value]="sound.value">{{sound.label}}</mat-option>
         }
       </mat-select>
     </mat-form-field>
-    <mat-form-field style="width: 100%">
+    <mat-form-field class="width100">
       <input
         hidden="true"
         matInput
       />
       <mat-slide-toggle
         matInput
-        [checked]="incCheck"
-        formControlName="increasePitch"
-        >Increase pitch for every task done</mat-slide-toggle
+        [checked]="this.config?.isIncreaseDoneSoundPitch"
+        formControlName="isIncreaseDoneSoundPitch"
+        >{{'GCF.SOUND.IS_INCREASE_DONE_PITCH' | translate}}</mat-slide-toggle
       >
     </mat-form-field>
-    <mat-form-field style="width: 100%">
-      <mat-label>Take a break reminder sound</mat-label>
-      <mat-select formControlName="breakSound">
-        @for (sound of breakSounds; track sound) {
-        <mat-option [value]="sound">{{sound}}</mat-option>
+    <mat-form-field class="width100">
+      <mat-label>{{'GCF.SOUND.BREAK_REMINDER_SOUND' | translate }}</mat-label>
+      <mat-select formControlName="breakReminderSound">
+        @for (sound of soundOpts; track sound) {
+        <mat-option [value]="sound.value">{{sound.label}}</mat-option>
         }
       </mat-select>
     </mat-form-field>
