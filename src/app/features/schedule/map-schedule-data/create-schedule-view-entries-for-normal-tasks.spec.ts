@@ -1,7 +1,6 @@
 import { getDateTimeFromClockString } from '../../../util/get-date-time-from-clock-string';
 import { TaskCopy, TaskWithoutReminder } from '../../tasks/task.model';
 import { createScheduleViewEntriesForNormalTasks } from './create-schedule-view-entries-for-normal-tasks';
-import { SCHEDULE_TASK_MIN_DURATION_IN_MS } from '../schedule.const';
 
 const FID = 'FAKE_TASK_ID';
 const FAKE_TASK: TaskCopy = {
@@ -67,7 +66,7 @@ describe('createScheduleViewEntriesForNormalTasks()', () => {
         id: 'FAKE_TASK_ID',
         type: 'Task',
         start: 35400000,
-        duration: SCHEDULE_TASK_MIN_DURATION_IN_MS,
+        duration: 0,
       },
       {
         data: {
@@ -80,7 +79,7 @@ describe('createScheduleViewEntriesForNormalTasks()', () => {
         },
         id: 'FAKE_TASK_ID',
         type: 'Task',
-        start: 36000000,
+        start: 35400000,
         duration: 4500000,
       },
       {
@@ -94,8 +93,8 @@ describe('createScheduleViewEntriesForNormalTasks()', () => {
         },
         id: 'FAKE_TASK_ID',
         type: 'Task',
-        start: 40500000,
-        duration: SCHEDULE_TASK_MIN_DURATION_IN_MS,
+        start: 39900000,
+        duration: 0,
       },
     ] as any);
   });

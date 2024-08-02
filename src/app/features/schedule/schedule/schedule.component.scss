@@ -326,6 +326,41 @@ schedule-event:active + schedule-event {
   }
 }
 
+:host ::ng-deep {
+  .close-to-others {
+    //outline: 2px solid blue;
+  }
+
+  .close-to-others-first {
+    //outline: 2px solid red !important;
+    transform: translate3d(0, 0, 0);
+  }
+
+  .close-to-others-first + .close-to-others {
+    transform: translate3d(40px, 0, 0);
+    //outline-color: palegreen !important;
+  }
+
+  .close-to-others-first + .close-to-others + .close-to-others {
+    transform: translate3d(80px, 0, 0);
+    //outline-color: orchid !important;
+  }
+
+  .close-to-others-first + .close-to-others + .close-to-others + .close-to-others {
+    transform: translate3d(120px, 0, 0);
+    //outline-color: palegoldenrod !important;
+  }
+
+  .close-to-others-first
+    + .close-to-others
+    + .close-to-others
+    + .close-to-others
+    + .close-to-others {
+    transform: translate3d(160px, 0, 0);
+    //outline-color: #5893f1 !important;
+  }
+}
+
 // TODO enable again if we want to have animations
 .cdk-drag {
   transition: none !important;

@@ -57,6 +57,12 @@ export class ScheduleEventComponent extends BaseComponent implements OnInit, OnD
     } else if (this.isSplitStart) {
       addClass = 'split-start';
     }
+    // NOTE: styled in parent because of adjacent sibling selector
+    if (this.se.isCloseToOthersFirst) {
+      addClass += ' close-to-others-first';
+    } else if (this.se.isCloseToOthers) {
+      addClass += ' close-to-others';
+    }
 
     return this.se?.type + '  ' + addClass;
   }

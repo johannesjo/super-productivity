@@ -25,6 +25,8 @@ export const mapScheduleDaysToScheduleEvents = (
         type: SVEType.TaskPlannedForDay,
         style: `height: ${rowSpan * 8}px`,
         timeLeftInHours,
+        isCloseToOthers: false,
+        isCloseToOthersFirst: false,
         startHours: 0,
       };
     });
@@ -41,10 +43,27 @@ export const mapScheduleDaysToScheduleEvents = (
         const startRow = Math.round(hoursToday * FH) + 1;
         const timeLeft = entry.duration;
 
-        // const entryAfter = day.entries[entryIndex + 1];
-        // entryAfter && entryAfter.type !== SVEType.WorkdayEnd
-        //   ? entryAfter.start - entry.start
-        //   : getDurationForSVE(entry);
+        const entryBefore = day.entries[entryIndex - 1];
+        const diff = entry.start - entryBefore?.start;
+        // const isCloseToOthers = entryBefore && diff <= 5 * 60 * 1000 && diff >= 0;
+        const isCloseToOthers = entryBefore && diff === 0;
+        console.log({
+          isCloseToOthers,
+          t: (entry.data as any)?.title,
+          tBef: (entryBefore?.data as any)?.title,
+          entry,
+          entryBefore,
+          flat: eventsFlat[eventsFlat.length - 1],
+        });
+        // console.log(day.entries[entryIndex-1], eventsFlat[entryIndex-1 ]);
+        if (
+          isCloseToOthers &&
+          eventsFlat[eventsFlat.length - 1] &&
+          !eventsFlat[eventsFlat.length - 1].isCloseToOthers
+        ) {
+          eventsFlat[eventsFlat.length - 1].isCloseToOthers = true;
+          eventsFlat[eventsFlat.length - 1].isCloseToOthersFirst = true;
+        }
 
         const timeLeftInHours = timeLeft / 1000 / 60 / 60;
 
@@ -57,6 +76,8 @@ export const mapScheduleDaysToScheduleEvents = (
           type: entry.type as SVEType,
           startHours: hoursToday,
           timeLeftInHours,
+          isCloseToOthers,
+          isCloseToOthersFirst: false,
           // title: entry.data.title,
           style: `grid-column: ${dayIndex + 2};  grid-row: ${startRow} / span ${rowSpan}`,
           data: entry.data,

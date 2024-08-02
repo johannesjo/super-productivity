@@ -81,36 +81,36 @@ describe('mapScheduleDaysToScheduleEvents()', () => {
         {
           data: {
             id: 'AAA',
-            title: 'AAA_TITLE',
             subTaskIds: [],
             tagIds: [],
             timeEstimate: 66,
             timeSpent: 0,
-          } as Partial<TaskCopy> as TaskCopy,
+            title: 'AAA_TITLE',
+          },
           id: 'AAA',
           startHours: 5,
           style: 'grid-column: 2;  grid-row: 61 / span 12',
           timeLeftInHours: 1,
           title: 'AAA_TITLE',
-          type: 'Task' as SVEType,
+          type: 'Task',
         },
         {
           data: {
-            title: 'BBB_TITLE',
             id: 'BBB',
             subTaskIds: [],
             tagIds: [],
             timeEstimate: 66,
             timeSpent: 0,
-          } as Partial<TaskCopy> as TaskCopy,
+            title: 'BBB_TITLE',
+          },
           id: 'BBB',
           startHours: 6,
           style: 'grid-column: 2;  grid-row: 73 / span 6',
           timeLeftInHours: 0.5,
           title: 'BBB_TITLE',
-          type: 'Task' as SVEType,
+          type: 'Task',
         },
       ],
-    });
+    } as any);
   });
 });

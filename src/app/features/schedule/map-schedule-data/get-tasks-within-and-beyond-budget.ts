@@ -30,8 +30,8 @@ export const getTasksWithinAndBeyondBudget = (
       remainingBudget -= timeLeftForTask;
     }
   });
-  console.log(remainingBudget);
-  console.log(beyond);
+  // console.log(remainingBudget);
+  // console.log(beyond);
 
   return { beyond, within };
 };

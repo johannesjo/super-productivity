@@ -10,6 +10,8 @@ export interface ScheduleEvent {
   style: string;
   startHours: number;
   timeLeftInHours: number;
+  isCloseToOthersFirst: boolean;
+  isCloseToOthers: boolean;
   data?: SVE['data'];
 }
 
