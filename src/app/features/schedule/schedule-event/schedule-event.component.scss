@@ -12,7 +12,7 @@ $margin-bottom: 4px;
   scroll-margin-top: 120px;
   scroll-padding-top: 120px;
   line-height: 1;
-  min-height: 16px;
+  min-height: 20px;
   display: flex;
   align-items: flex-start;
   // TODO evaluate
@@ -21,7 +21,7 @@ $margin-bottom: 4px;
 
   border: 1px solid $light-theme-separator-color;
   //border-color:var(--project-color);
-  border-width: 0;
+  //border-width: 0;
   // has to be for after elements
   overflow: visible !important;
 
@@ -41,7 +41,8 @@ $margin-bottom: 4px;
   }
 
   @include darkTheme() {
-    border-color: $dark-theme-separator-color;
+    //border-color: $dark-theme-separator-color;
+    border-color: rgba(255, 255, 255, 0.1);
     border-left-color: var(--project-color);
     background: $dark-theme-bg-slightly-lighter;
     color: $dark-theme-text-color;
@@ -91,6 +92,7 @@ $margin-bottom: 4px;
   align-items: center;
   background: transparent;
   margin-top: 2px;
+  border: none !important;
 
   .title {
     flex-grow: 0;
@@ -115,6 +117,17 @@ $margin-bottom: 4px;
   background: red;
 }
 
+:host {
+  &.TaskPlannedForDay,
+  &.Task,
+  &.SplitTask,
+  &.SplitTaskPlannedForDay,
+  &.SplitTaskContinued,
+  &.SplitTaskContinuedLast {
+    box-shadow: $whiteframe-shadow-1dp;
+  }
+}
+
 // non draggable
 :host {
   &.CalendarEvent,
@@ -126,11 +139,14 @@ $margin-bottom: 4px;
     //opacity: 0.5;
     //opacity: 0.9;
     background: $light-theme-bg;
-    border: 1px dashed $light-theme-separator-color;
+    border-width: 1px;
+    border-left-width: 3px;
+    border-style: dashed;
+    border-left-style: solid;
     //border: 1px solid $light-theme-separator-color;
 
     @include darkTheme() {
-      border-color: $dark-theme-separator-color;
+      //border-color: $dark-theme-separator-color;
       background: $dark-theme-bg;
     }
 
@@ -268,7 +284,7 @@ $margin-bottom: 4px;
 :host-context(.is-dragging.SplitTask) :host.Task {
   //background: $light-theme-bg-darker;
   //outline: 1px solid $c-accent;
-  box-shadow: $whiteframe-shadow-3dp;
+  box-shadow: $whiteframe-shadow-6dp;
 }
 
 :host-context( .isDarkTheme .is-dragging.TaskPlannedForDay) :host.TaskPlannedForDay,
