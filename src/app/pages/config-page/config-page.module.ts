@@ -9,6 +9,7 @@ import { MatSliderModule } from '@angular/material/slider';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { FormsModule } from '@angular/forms';
 import { MatInputModule } from '@angular/material/input';
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 
 @NgModule({
   imports: [
@@ -21,6 +22,7 @@ import { MatInputModule } from '@angular/material/input';
     MatInputModule,
     MatFormFieldModule,
     FormsModule,
+    MatSlideToggleModule,
   ],
   declarations: [ConfigPageComponent],
 })
