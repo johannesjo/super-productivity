@@ -64,9 +64,10 @@ export class TaskInternalEffects {
     ),
   );
 
-  setDefaultValues$: any = createEffect(() =>
+  setDefaultEstimateIfNonGiven$: any = createEffect(() =>
     this._actions$.pipe(
       ofType(addTask, addSubTask),
+      filter(({ task }) => !task.timeEstimate),
       withLatestFrom(this._store$.pipe(select(selectConfigFeatureState))),
       filter(
         ([{ task }, cfg]) =>
