@@ -9,7 +9,7 @@ $grid-color-dark: rgba(255, 255, 255, 0.1);
 $calendar-template: $time-width repeat(5, 1fr);
 $current-time-color: $c-accent;
 $fr: 12;
-$total-rows: 12 * $fr;
+$total-rows: 24 * $fr;
 
 :host {
   background: $light-theme-bg;
@@ -25,13 +25,14 @@ $total-rows: 12 * $fr;
   display: grid;
   grid-template-columns: $calendar-template;
   grid-auto-columns: minmax(0, 1fr);
-  //grid-template-rows: repeat($total-rows, $row-height);
-  grid-auto-rows: $row-height;
+  grid-template-rows: repeat($total-rows, $row-height);
+
+  //grid-auto-rows: $row-height;
   //grid-auto-rows: max-content;
 
   @include mq(xs, max) {
-    //grid-template-rows: repeat($total-rows, $row-height-mobile);
-    grid-auto-rows: $row-height-mobile;
+    grid-template-rows: repeat($total-rows, $row-height-mobile);
+    //grid-auto-rows: $row-height-mobile;
   }
 }
 
