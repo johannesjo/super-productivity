@@ -227,6 +227,7 @@ header {
 }
 
 .excess-entries {
+  z-index: 10;
   position: sticky;
   bottom: -2px;
   max-height: 100px;
