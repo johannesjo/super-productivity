@@ -179,9 +179,9 @@ $margin-bottom: 6px;
       color: $c-primary;
       font-size: 22px;
       height: 22px;
-      margin-left: 2px;
+      margin-left: 4px;
       min-width: 22px;
-      margin-top: 4px;
+      margin-top: 9px;
       opacity: 1;
       //border: 1px solid;
       //border-radius: 50%;
@@ -226,12 +226,16 @@ $margin-bottom: 6px;
   height: 14px;
   line-height: 14px;
   min-width: 14px;
-  margin-left: 4px;
-  margin-top: 5px;
+  margin-left: 6px;
+  margin-top: 10px;
   opacity: 0.6;
 
   @include mq(xs, max) {
     display: none;
+  }
+
+  :host.very-short-event & {
+    margin-top: 2px;
   }
 }
 
@@ -246,7 +250,7 @@ $margin-bottom: 6px;
   text-overflow: ellipsis;
   flex-grow: 1;
   flex-shrink: 1;
-  padding: 4px;
+  padding: 8px 6px;
   font-weight: 400;
   line-height: 1.4;
   max-height: 100%;
@@ -257,11 +261,17 @@ $margin-bottom: 6px;
   @include mq(xs, max) {
     font-size: 11px;
     line-height: 1.2;
+    padding: 4px;
   }
 
   @include mq(xxs, max) {
     font-size: 11px;
     line-height: 1.1;
+  }
+
+  :host.very-short-event & {
+    padding-top: 1px;
+    padding-bottom: 2px;
   }
 
   //&:hover {
