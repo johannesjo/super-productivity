@@ -51,20 +51,55 @@
           [isIconBefore]="true"
           [title]="'Sound'"
         >
-          <mat-form-field style="width: 100%">
-            <mat-label>Volume*</mat-label>
-            <mat-slider
+          <div style="padding: 16px 16px 8px">
+            <mat-form-field
               style="width: 100%"
-              [min]="0"
-              [max]="100"
+              [hideRequiredMarker]="true"
             >
+              <mat-label>Volume*</mat-label>
+              <mat-slider
+                style="width: 100%"
+                [min]="0"
+                [max]="100"
+                [step]="1"
+              >
+                <input
+                  style="height: 100%"
+                  matInput
+                  matSliderThumb
+                  formControlName="formC"
+                />
+              </mat-slider>
+            </mat-form-field>
+            <mat-form-field style="width: 100%">
+              <mat-label>Task marked done sound</mat-label>
+              <mat-select formControlName="doneSound">
+                @for (sound of doneSounds; track sound) {
+                <mat-option [value]="sound">{{sound}}</mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+            <mat-form-field style="width: 100%">
               <input
+                hidden="true"
                 matInput
-                matSliderThumb
-                formControlName="formC"
               />
-            </mat-slider>
-          </mat-form-field>
+              <mat-slide-toggle
+                matInput
+                [checked]="incCheck"
+                formControlName="increasePitch"
+                >Increase pitch for every task done</mat-slide-toggle
+              >
+            </mat-form-field>
+            <mat-form-field style="width: 100%">
+              <mat-label>Take a break reminder sound</mat-label>
+              <mat-select formControlName="breakSound">
+                @for (sound of breakSounds; track sound) {
+                <mat-option [value]="sound">{{sound}}</mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+          </div>
         </collapsible>
       </section>
 
