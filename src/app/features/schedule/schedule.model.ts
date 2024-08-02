@@ -12,6 +12,7 @@ export interface ScheduleEvent {
   timeLeftInHours: number;
   isCloseToOthersFirst: boolean;
   isCloseToOthers: boolean;
+  dayOfMonth: number;
   data?: SVE['data'];
 }
 

@@ -6,7 +6,7 @@ import { TaskCopy } from '../../tasks/task.model';
 const H = 60 * 60 * 1000;
 
 const FAKE_DAY: ScheduleDay = {
-  dayDate: '20/12/2020',
+  dayDate: '2020-12-12',
   entries: [],
   isToday: false,
   beyondBudgetTasks: [],
@@ -87,6 +87,7 @@ describe('mapScheduleDaysToScheduleEvents()', () => {
             timeSpent: 0,
             title: 'AAA_TITLE',
           },
+          dayOfMonth: 12,
           id: 'AAA',
           startHours: 5,
           style: 'grid-column: 2;  grid-row: 61 / span 12',
@@ -105,6 +106,7 @@ describe('mapScheduleDaysToScheduleEvents()', () => {
             timeSpent: 0,
             title: 'BBB_TITLE',
           },
+          dayOfMonth: 12,
           id: 'BBB',
           startHours: 6,
           style: 'grid-column: 2;  grid-row: 73 / span 6',

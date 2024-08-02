@@ -179,9 +179,11 @@ $margin-bottom: 6px;
       color: $c-primary;
       font-size: 22px;
       height: 22px;
-      margin-left: 4px;
       min-width: 22px;
-      margin-top: 9px;
+      line-height: 22px;
+
+      margin-left: 4px;
+      margin-top: 7px;
       opacity: 1;
       //border: 1px solid;
       //border-radius: 50%;
@@ -222,13 +224,15 @@ $margin-bottom: 6px;
 
 .fake-ico,
 .ico {
-  font-size: 14px;
-  height: 14px;
-  line-height: 14px;
-  min-width: 14px;
+  font-size: 15px;
+  height: 15px;
+  line-height: 15px;
+  min-width: 15px;
   margin-left: 6px;
   margin-top: 10px;
   opacity: 0.6;
+  text-align: center;
+  font-weight: bold;
 
   @include mq(xs, max) {
     display: none;
@@ -239,9 +243,24 @@ $margin-bottom: 6px;
   }
 }
 
-.fake-ico {
+.day-of-month {
+  position: absolute;
+  font-size: 8px;
+  top: 15px;
+  left: 8px;
+  width: 12px;
+  font-weight: 900;
+  letter-spacing: -0.6px;
   text-align: center;
-  font-weight: bold;
+  opacity: 0.7;
+
+  :host.very-short-event & {
+    top: 7px;
+  }
+
+  @include mq(xs, max) {
+    display: none;
+  }
 }
 
 .title {
@@ -273,13 +292,6 @@ $margin-bottom: 6px;
     padding-top: 1px;
     padding-bottom: 2px;
   }
-
-  //&:hover {
-  //  box-shadow: $whiteframe-shadow-3dp;
-  //  background: inherit;
-  //  //border: 1px solid $light-theme-separator-color;
-  //  border-radius: 4px;
-  //}
 
   :host.SplitTaskContinued &,
   :host.RepeatProjectionSplitContinued &,

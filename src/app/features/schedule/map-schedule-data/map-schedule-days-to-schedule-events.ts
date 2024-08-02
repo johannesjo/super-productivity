@@ -13,6 +13,7 @@ export const mapScheduleDaysToScheduleEvents = (
   const beyondBudgetDays: ScheduleEvent[][] = [];
 
   days.forEach((day, dayIndex) => {
+    const dayOfMonth = new Date(day.dayDate).getDate();
     beyondBudgetDays[dayIndex] = day.beyondBudgetTasks.map((taskPlannedForDay) => {
       // eslint-disable-next-line no-mixed-operators
       const timeLeft = getTimeLeftForTask(taskPlannedForDay);
@@ -20,6 +21,7 @@ export const mapScheduleDaysToScheduleEvents = (
       const rowSpan = Math.max(Math.round(timeLeftInHours * FH), 1);
       return {
         id: taskPlannedForDay.id,
+        dayOfMonth,
         data: taskPlannedForDay,
         title: taskPlannedForDay.title,
         type: SVEType.TaskPlannedForDay,
@@ -69,6 +71,7 @@ export const mapScheduleDaysToScheduleEvents = (
 
         const rowSpan = Math.max(1, Math.round(timeLeftInHours * FH));
         eventsFlat.push({
+          dayOfMonth,
           title:
             (entry as any)?.data?.title ||
             (entry.type === SVEType.LunchBreak ? 'Lunch Break' : 'TITLE'),
