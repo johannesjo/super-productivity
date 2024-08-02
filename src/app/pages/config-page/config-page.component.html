@@ -42,6 +42,32 @@
         ></config-section>
       </section>
 
+      <section
+        class="config-section"
+        [formGroup]="soundForm"
+      >
+        <collapsible
+          [isExpanded]="false"
+          [isIconBefore]="true"
+          [title]="'Sound'"
+        >
+          <mat-form-field style="width: 100%">
+            <mat-label>Volume*</mat-label>
+            <mat-slider
+              style="width: 100%"
+              [min]="0"
+              [max]="100"
+            >
+              <input
+                matInput
+                matSliderThumb
+                formControlName="formC"
+              />
+            </mat-slider>
+          </mat-form-field>
+        </collapsible>
+      </section>
+
       <div class="tour-productivityHelper">
         <h2
           class="mat-h2"
