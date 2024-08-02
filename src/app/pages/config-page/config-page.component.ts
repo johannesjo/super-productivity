@@ -50,7 +50,13 @@ export class ConfigPageComponent implements OnInit, OnDestroy {
 
   readonly soundForm = new FormGroup({
     formC: new FormControl(null),
+    doneSound: new FormControl(null),
+    breakSound: new FormControl(null),
+    increasePitch: new FormControl(null),
   });
+  doneSounds: Array<string> = ['sound1', 'sound2'];
+  breakSounds: Array<string> = ['sound1', 'sound2'];
+  incCheck = false;
 
   constructor(
     private readonly _cd: ChangeDetectorRef,
