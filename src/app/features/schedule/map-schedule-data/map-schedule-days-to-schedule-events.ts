@@ -1,7 +1,6 @@
 import { ScheduleDay, ScheduleEvent } from '../schedule.model';
 import { getTimeLeftForTask } from '../../../util/get-time-left-for-task';
 import { SVEType } from '../schedule.const';
-import { getDurationForSVE } from './get-duration-for-schedule-view-entry';
 
 export const mapScheduleDaysToScheduleEvents = (
   days: ScheduleDay[],
@@ -40,7 +39,7 @@ export const mapScheduleDaysToScheduleEvents = (
 
         // NOTE: +1 cause grids start on 1
         const startRow = Math.round(hoursToday * FH) + 1;
-        const timeLeft = getDurationForSVE(entry);
+        const timeLeft = entry.duration;
 
         // const entryAfter = day.entries[entryIndex + 1];
         // entryAfter && entryAfter.type !== SVEType.WorkdayEnd

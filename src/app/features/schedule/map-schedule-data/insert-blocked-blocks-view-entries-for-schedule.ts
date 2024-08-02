@@ -10,7 +10,6 @@ import { TaskWithoutReminder } from '../../tasks/task.model';
 import { SVEType } from '../../schedule/schedule.const';
 import { TaskRepeatCfg } from '../../task-repeat-cfg/task-repeat-cfg.model';
 import { BlockedBlock } from '../../timeline/timeline.model';
-import { getDurationForSVE } from './get-duration-for-schedule-view-entry';
 import {
   isContinuedTaskType,
   isFlowableEntryVE,
@@ -87,8 +86,8 @@ export const insertBlockedBlocksViewEntriesForSchedule = (
         debug('BBB insert and move all following entries');
         break;
       } else {
-        const timeLeft = getDurationForSVE(viewEntry);
-        const veEnd = viewEntry.start + getDurationForSVE(viewEntry);
+        const timeLeft = viewEntry.duration;
+        const veEnd = viewEntry.start + viewEntry.duration;
         debug(blockedBlock.start < veEnd, blockedBlock.start, veEnd);
 
         // NOTE: blockedBlock.start > viewEntry.start is implicated by above checks
