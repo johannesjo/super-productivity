@@ -27,6 +27,7 @@ import { IS_ELECTRON } from '../../app.constants';
 import { IS_ANDROID_WEB_VIEW } from '../../util/is-android-web-view';
 import { getAutomaticBackUpFormCfg } from '../../features/config/form-cfgs/automatic-backups-form.const';
 import { MatButtonToggleChange } from '@angular/material/button-toggle';
+import { FormControl, FormGroup } from '@angular/forms';
 
 @Component({
   selector: 'config-page',
@@ -46,6 +47,10 @@ export class ConfigPageComponent implements OnInit, OnDestroy {
   versions?: any = versions;
 
   private _subs: Subscription = new Subscription();
+
+  readonly soundForm = new FormGroup({
+    formC: new FormControl(null),
+  });
 
   constructor(
     private readonly _cd: ChangeDetectorRef,
