@@ -43,7 +43,10 @@
       </section>
 
       <section class="config-section">
-        <config-sound-form></config-sound-form>
+        <config-sound-form
+          [cfg]="getGlobalCfgSection('sound')"
+          (save)="saveGlobalCfg($event)"
+        ></config-sound-form>
       </section>
 
       <div class="tour-productivityHelper">
