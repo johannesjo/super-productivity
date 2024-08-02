@@ -1,7 +1,10 @@
 /*given a value of 8..5 returns '8:30'*/
 export const getClockStringFromHours = (hours: number): string => {
-  // eslint-disable-next-line no-mixed-operators
+  const minutes = Math.round((hours % 1) * 60);
+
   const parsed =
-    Math.floor(hours) + ':' + ('00' + Math.round((hours % 1) * 60)).slice(-2);
+    minutes === 60
+      ? Math.ceil(hours) + ':00'
+      : Math.floor(hours) + ':' + ('00' + minutes).slice(-2);
   return parsed.trim();
 };
