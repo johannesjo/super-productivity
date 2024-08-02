@@ -7,21 +7,10 @@
   config-form {
     display: block;
   }
+}
 
-  &.keyboard {
-    ::ng-deep formly-field > formly-group {
-      box-sizing: border-box;
-      padding: 0 $s;
-      display: grid;
-      grid: auto-flow / 1fr;
-      gap: 0;
-
-      @include mq(xs) {
-        gap: 0 $s * 2;
-        grid: auto-flow / 1fr 1fr;
-      }
-    }
-  }
+.width100 {
+  width: 100%;
 }
 
 :host {
@@ -54,30 +43,6 @@ $this-panel-padding-left-right: 12px;
   }
 }
 
-:host ::ng-deep .help-btn {
-  display: none;
-  position: absolute;
-  top: -40px;
-  right: -2px;
-}
-
-:host ::ng-deep .help-btn {
-  display: block;
-  animation: $transition-duration-m help-ico-animation $ani-standard-timing;
-}
-
 :host ::ng-deep .extra-margin-top {
   margin-top: $s * 4;
-}
-
-@keyframes help-ico-animation {
-  0% {
-    transform: scale(0);
-  }
-  50% {
-    transform: scale(1.4);
-  }
-  100% {
-    transform: scale(1);
-  }
 }

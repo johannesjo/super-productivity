@@ -19,6 +19,7 @@ import { ConfigSoundFormComponent } from './config-sound-form/config-sound-form.
 import { MatSliderModule } from '@angular/material/slider';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatInputModule } from '@angular/material/input';
+import { TranslateModule } from '@ngx-translate/core';
 
 @NgModule({
   imports: [
@@ -60,6 +61,7 @@ import { MatInputModule } from '@angular/material/input';
     MatSliderModule,
     MatSlideToggleModule,
     MatInputModule,
+    TranslateModule,
   ],
   declarations: [
     ConfigSectionComponent,
