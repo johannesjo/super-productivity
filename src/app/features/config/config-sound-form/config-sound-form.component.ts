@@ -5,6 +5,7 @@ import { ProjectCfgFormKey } from '../../project/project.model';
 import { exists } from 'src/app/util/exists';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { SOUND_OPTS } from '../form-cfgs/sound-form.const';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 const sectionKey = 'sound';
 
@@ -38,7 +39,7 @@ export class ConfigSoundFormComponent {
 
   constructor() {
     this.soundForm.valueChanges
-      .pipe(debounceTime(300), distinctUntilChanged())
+      .pipe(takeUntilDestroyed(), debounceTime(300), distinctUntilChanged())
       .subscribe((data) => {
         if (!this.isInitializing) {
           this.updateCfg({
