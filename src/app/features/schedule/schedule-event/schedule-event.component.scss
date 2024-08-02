@@ -29,7 +29,7 @@ $margin-bottom: 6px;
   color: $light-theme-text-color;
   position: relative;
   border-left: 3px solid var(--project-color);
-  box-shadow: $whiteframe-shadow-1dp;
+  //box-shadow: $whiteframe-shadow-1dp;
 
   @include mq(xs, max) {
     border-left-width: 2px;
