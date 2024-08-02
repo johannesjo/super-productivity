@@ -165,9 +165,10 @@ export const tagReducer = createReducer<TagState>(
   on(PlannerActions.moveBeforeTask, (state, { fromTask, toTaskId }) => {
     const todayTag = state.entities[TODAY_TAG.id] as Tag;
     if (todayTag.taskIds.includes(toTaskId)) {
-      const targetIndex = todayTag.taskIds.indexOf(toTaskId);
-      const taskIds = [...todayTag.taskIds];
+      const taskIds = todayTag.taskIds.filter((id) => id !== fromTask.id);
+      const targetIndex = taskIds.indexOf(toTaskId);
       taskIds.splice(targetIndex, 0, fromTask.id);
+
       return tagAdapter.updateOne(
         {
           id: TODAY_TAG.id,
