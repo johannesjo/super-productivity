@@ -1,12 +1,12 @@
 @import '../../../../variables.scss';
 
 $split-extra-border-radius: 20px;
-$margin-bottom: 4px;
+$margin-bottom: 6px;
 
 :host {
   --project-color: $light-theme-separator-color;
 
-  border-radius: 4px;
+  border-radius: 6px;
   margin-right: 10px;
   // size of sticky header
   scroll-margin-top: 120px;
@@ -21,7 +21,7 @@ $margin-bottom: 4px;
 
   border: 1px solid $light-theme-separator-color;
   //border-color:var(--project-color);
-  //border-width: 0;
+  border-width: 0;
   // has to be for after elements
   overflow: visible !important;
 
@@ -29,6 +29,7 @@ $margin-bottom: 4px;
   color: $light-theme-text-color;
   position: relative;
   border-left: 3px solid var(--project-color);
+  box-shadow: $whiteframe-shadow-1dp;
 
   @include mq(xs, max) {
     border-left-width: 2px;
@@ -93,6 +94,7 @@ $margin-bottom: 4px;
   background: transparent;
   margin-top: 2px;
   border: none !important;
+  box-shadow: none !important;
 
   .title {
     flex-grow: 0;
@@ -117,16 +119,16 @@ $margin-bottom: 4px;
   background: red;
 }
 
-:host {
-  &.TaskPlannedForDay,
-  &.Task,
-  &.SplitTask,
-  &.SplitTaskPlannedForDay,
-  &.SplitTaskContinued,
-  &.SplitTaskContinuedLast {
-    box-shadow: $whiteframe-shadow-1dp;
-  }
-}
+//:host {
+//  &.TaskPlannedForDay,
+//  &.Task,
+//  &.SplitTask,
+//  &.SplitTaskPlannedForDay,
+//  &.SplitTaskContinued,
+//  &.SplitTaskContinuedLast {
+//    box-shadow: $whiteframe-shadow-1dp;
+//  }
+//}
 
 // non draggable
 :host {
@@ -136,18 +138,24 @@ $margin-bottom: 4px;
   &.RepeatProjectionSplitContinued,
   &.RepeatProjectionSplitContinuedLast,
   &.ScheduledRepeatProjection {
-    //opacity: 0.5;
-    //opacity: 0.9;
-    background: $light-theme-bg;
-    border-width: 1px;
+    //border-width: 1px;
     border-left-width: 3px;
+    background: $light-theme-bg;
+    //background: transparent;
+    //border-left-style: solid;
     border-style: dashed;
-    border-left-style: solid;
+    //box-shadow: none!important;
+    border-radius: 8px;
+    //border-color: rgba(0, 0, 0, 0.2);
+    //opacity: 0.5;
+    opacity: 0.7;
+    //opacity: 0.9;
     //border: 1px solid $light-theme-separator-color;
 
     @include darkTheme() {
       //border-color: $dark-theme-separator-color;
       background: $dark-theme-bg;
+      background: $dark1;
     }
 
     &:hover {
@@ -156,6 +164,7 @@ $margin-bottom: 4px;
     }
 
     .title {
+      //opacity: .7;
       padding: 2px;
     }
   }
@@ -232,14 +241,14 @@ $margin-bottom: 4px;
 }
 
 .title {
-  font-size: 13px;
+  font-size: 14px;
   overflow: hidden;
   text-overflow: ellipsis;
   flex-grow: 1;
   flex-shrink: 1;
   padding: 4px;
   font-weight: 400;
-  line-height: 1.2;
+  line-height: 1.4;
   max-height: 100%;
   // somehow this fixes the cut off lines problem
   column-width: 250px;
