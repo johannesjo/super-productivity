@@ -323,7 +323,8 @@ header {
   }
 }
 
-schedule-event:active + schedule-event {
+// prevent moving out the way
+schedule-event.cdk-drag-dragging + schedule-event {
   transform: translateY(0);
 
   &:after {
