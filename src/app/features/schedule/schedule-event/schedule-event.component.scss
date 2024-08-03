@@ -53,7 +53,14 @@ $margin-bottom: 6px;
 
   &.very-short-event {
     // slightly move up to  reduce chance of overlap with next
-    margin-top: -2px;
+    //margin-top: -2px;
+    align-items: center;
+
+    .title {
+      column-width: unset;
+      line-clamp: 1;
+      max-width: 200px;
+    }
   }
 
   &.split-start {
@@ -152,6 +159,7 @@ $margin-bottom: 6px;
     border-left-width: 3px;
     background: $light-theme-bg;
     border-style: dashed;
+    border-left-style: solid;
 
     @include darkTheme() {
       //border-color: $dark-theme-separator-color;
@@ -249,7 +257,7 @@ $margin-bottom: 6px;
   }
 
   :host.very-short-event & {
-    margin-top: 2px;
+    margin-top: 0;
   }
 }
 

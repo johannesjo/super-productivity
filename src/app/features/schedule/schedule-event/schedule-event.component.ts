@@ -115,7 +115,7 @@ export class ScheduleEventComponent extends BaseComponent implements OnInit, OnD
       addClass += ' close-to-others';
     }
 
-    if (this.se.timeLeftInHours < 1 / 4) {
+    if (this.se.timeLeftInHours <= 1 / 4) {
       addClass += ' very-short-event';
     }
 
