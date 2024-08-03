@@ -157,6 +157,11 @@ $margin-bottom: 6px;
       outline: 1px solid $c-accent;
     }
 
+    :host-context(.is-dragging) &:hover {
+      opacity: initial;
+      outline: none;
+    }
+
     > * {
       opacity: 0.7;
     }
