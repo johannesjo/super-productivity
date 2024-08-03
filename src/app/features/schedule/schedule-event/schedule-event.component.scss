@@ -37,7 +37,7 @@ $margin-bottom: 6px;
   }
 
   &:hover {
-    //z-index: 3;
+    z-index: 3;
     //overflow: visible;
   }
 
@@ -143,16 +143,8 @@ $margin-bottom: 6px;
     //border-width: 1px;
     border-left-width: 3px;
     background: $light-theme-bg;
-    //background: transparent;
-    //border-left-style: solid;
     border-style: dashed;
-    //box-shadow: none!important;
     border-radius: 8px;
-    //border-color: rgba(0, 0, 0, 0.2);
-    //opacity: 0.5;
-    opacity: 0.7;
-    //opacity: 0.9;
-    //border: 1px solid $light-theme-separator-color;
 
     @include darkTheme() {
       //border-color: $dark-theme-separator-color;
@@ -163,6 +155,10 @@ $margin-bottom: 6px;
     &:hover {
       opacity: 1;
       outline: 1px solid $c-accent;
+    }
+
+    > * {
+      opacity: 0.7;
     }
 
     .title {
@@ -231,7 +227,7 @@ $margin-bottom: 6px;
   line-height: 15px;
   min-width: 15px;
   margin-left: 6px;
-  margin-top: 10px;
+  margin-top: 9px;
   opacity: 0.6;
   text-align: center;
   font-weight: bold;
@@ -271,7 +267,7 @@ $margin-bottom: 6px;
   text-overflow: ellipsis;
   flex-grow: 1;
   flex-shrink: 1;
-  padding: 8px 6px;
+  padding: 6px;
   font-weight: 400;
   line-height: 1.4;
   max-height: 100%;
