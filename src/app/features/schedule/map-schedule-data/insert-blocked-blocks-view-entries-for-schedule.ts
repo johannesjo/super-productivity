@@ -188,7 +188,7 @@ export const insertBlockedBlocksViewEntriesForSchedule = (
           ) {
             debug('CCC C) ' + viewEntry.type);
             const currentVE: SVERepeatProjection = viewEntry as SVERepeatProjection;
-            const repeatCfg: TaskRepeatCfg = currentVE.data as TaskRepeatCfg;
+            const taskRepeatCfg: TaskRepeatCfg = currentVE.data as TaskRepeatCfg;
 
             const timeLeftOnRepeatInstance = timeLeft;
             const timePlannedForSplitStart = blockedBlock.start - currentVE.start;
@@ -203,10 +203,9 @@ export const insertBlockedBlocksViewEntriesForSchedule = (
             const newSplitContinuedEntry: SVE = createSplitRepeat({
               start: blockedBlock.end,
               viewEntryId: currentVE.id,
-              repeatCfgId: repeatCfg.id,
+              taskRepeatCfg,
               duration: timePlannedForSplitContinued,
               splitIndex: 0,
-              title: repeatCfg.title || 'NO_TITLE',
             });
 
             // move entries
@@ -241,7 +240,7 @@ export const insertBlockedBlocksViewEntriesForSchedule = (
               (entry) =>
                 (entry.type === SVEType.RepeatProjectionSplitContinuedLast ||
                   entry.type === SVEType.RepeatProjectionSplitContinued) &&
-                entry.data.repeatCfgId === currentVE.data.repeatCfgId,
+                entry.data.id === currentVE.data.id,
             );
             // update type of current
             currentVE.type = SVEType.RepeatProjectionSplitContinued;
@@ -252,10 +251,9 @@ export const insertBlockedBlocksViewEntriesForSchedule = (
             const newSplitContinuedEntry: SVE = createSplitRepeat({
               start: blockedBlock.end,
               viewEntryId: currentVE.id,
-              repeatCfgId: currentVE.data.repeatCfgId,
+              taskRepeatCfg: currentVE.data,
               duration: timePlannedForSplitRepeatCfgProjectionContinued,
               splitIndex,
-              title: currentVE.data.title,
             });
 
             // move entries
@@ -369,15 +367,13 @@ const createSplitTask = ({
 const createSplitRepeat = ({
   start,
   viewEntryId,
-  repeatCfgId,
-  title,
+  taskRepeatCfg,
   splitIndex,
   duration,
 }: {
   start: number;
   viewEntryId: string;
-  repeatCfgId: string;
-  title: string;
+  taskRepeatCfg: TaskRepeatCfg;
   splitIndex: number;
   duration: number;
 }): SVERepeatProjectionSplitContinued => {
@@ -386,10 +382,7 @@ const createSplitRepeat = ({
     start,
     type: SVEType.RepeatProjectionSplitContinuedLast,
     duration: duration,
-    data: {
-      title,
-      repeatCfgId,
-      index: splitIndex,
-    },
+    splitIndex,
+    data: taskRepeatCfg,
   };
 };

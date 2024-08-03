@@ -3,6 +3,7 @@ import {
   Component,
   ElementRef,
   HostBinding,
+  HostListener,
   Input,
   OnDestroy,
   OnInit,
@@ -17,6 +18,9 @@ import { MatMiniFabButton } from '@angular/material/button';
 import { getClockStringFromHours } from '../../../util/get-clock-string-from-hours';
 import { SVEType } from '../schedule.const';
 import { isDraggableSE } from '../map-schedule-data/is-schedule-types-type';
+import { MatDialog } from '@angular/material/dialog';
+import { DialogEditTaskRepeatCfgComponent } from '../../task-repeat-cfg/dialog-edit-task-repeat-cfg/dialog-edit-task-repeat-cfg.component';
+import { TaskRepeatCfg } from '../../task-repeat-cfg/task-repeat-cfg.model';
 
 @Component({
   selector: 'schedule-event',
@@ -134,23 +138,35 @@ export class ScheduleEventComponent extends BaseComponent implements OnInit, OnD
 
   protected readonly SVEType = SVEType;
 
+  @HostListener('click') clickHandler(): void {
+    if (
+      this.se.type === SVEType.RepeatProjection ||
+      this.se.type === SVEType.RepeatProjectionSplit ||
+      this.se.type === SVEType.ScheduledRepeatProjection ||
+      this.se.type === SVEType.RepeatProjectionSplitContinued ||
+      this.se.type === SVEType.RepeatProjectionSplitContinuedLast
+    ) {
+      const repeatCfg: TaskRepeatCfg = this.se.data as TaskRepeatCfg;
+      console.log(repeatCfg);
+
+      this._matDialog.open(DialogEditTaskRepeatCfgComponent, {
+        data: {
+          repeatCfg,
+        },
+      });
+    }
+  }
+
   constructor(
     private _store: Store,
     private _elRef: ElementRef,
+    private _matDialog: MatDialog,
   ) {
     super();
   }
 
   ngOnInit(): void {
     const pid = (this.se?.data as any)?.projectId;
-    if (
-      this.se.type === SVEType.SplitTask ||
-      this.se.type === SVEType.Task ||
-      this.se.type === SVEType.SplitTaskPlannedForDay ||
-      this.se.type === SVEType.TaskPlannedForDay
-    ) {
-    }
-
     if (pid) {
       this._store
         .select(selectProjectById, { id: pid })

@@ -141,10 +141,10 @@ $margin-bottom: 6px;
   &.RepeatProjectionSplitContinuedLast,
   &.ScheduledRepeatProjection {
     //border-width: 1px;
+    cursor: pointer;
     border-left-width: 3px;
     background: $light-theme-bg;
     border-style: dashed;
-    border-radius: 8px;
 
     @include darkTheme() {
       //border-color: $dark-theme-separator-color;

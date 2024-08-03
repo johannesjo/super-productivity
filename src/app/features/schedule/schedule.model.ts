@@ -45,7 +45,7 @@ export interface SVETaskPlannedForDay extends SVEBase {
   data: TaskCopy;
 }
 
-interface SVERepeatProjectionBase extends SVEBase {
+export interface SVERepeatProjectionBase extends SVEBase {
   data: TaskRepeatCfg;
 }
 
@@ -61,15 +61,11 @@ export interface SVERepeatProjectionSplit extends SVERepeatProjectionBase {
   type: SVEType.RepeatProjectionSplit;
 }
 
-export interface SVERepeatProjectionSplitContinued extends SVEBase {
+export interface SVERepeatProjectionSplitContinued extends SVERepeatProjectionBase {
   type:
     | SVEType.RepeatProjectionSplitContinued
     | SVEType.RepeatProjectionSplitContinuedLast;
-  data: {
-    title: string;
-    repeatCfgId: string;
-    index: number;
-  };
+  splitIndex: number;
 }
 
 export interface SVESplitTaskContinued extends SVEBase {
