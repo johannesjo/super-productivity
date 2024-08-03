@@ -64,6 +64,7 @@ $margin-bottom: 6px;
     border-bottom-right-radius: 0;
     border-bottom-style: dashed;
     border-top-style: dashed;
+    min-height: 8px;
   }
 
   &.split-continued-last {
@@ -71,6 +72,7 @@ $margin-bottom: 6px;
     border-top-style: dashed;
     border-top-left-radius: 0;
     border-top-right-radius: 0;
+    min-height: 8px;
   }
 
   &.split-continued,
