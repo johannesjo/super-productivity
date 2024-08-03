@@ -101,23 +101,23 @@
       {{ T.F.TASK.CMP.PLAN_FOR_DAY|translate }}
     </button>
 
+    @if (task.isDone) {
     <button
-      *ngIf="!task.isDone"
-      (click)="markAsDone();"
-      mat-menu-item
-    >
-      <mat-icon>check</mat-icon>
-      {{ T.F.TASK.CMP.MARK_DONE|translate }}
-    </button>
-
-    <button
-      *ngIf="task.isDone"
       (click)="markAsUnDone();"
       mat-menu-item
     >
       <mat-icon>undo</mat-icon>
       {{ T.F.TASK.CMP.MARK_UNDONE|translate }}
     </button>
+    } @else {
+    <button
+      (click)="markAsDone();"
+      mat-menu-item
+    >
+      <mat-icon>check</mat-icon>
+      {{ T.F.TASK.CMP.MARK_DONE|translate }}
+    </button>
+    }
 
     <!--    <button-->
     <!--      (click)="editTags();"-->
@@ -141,7 +141,6 @@
         {{ (task.repeatCfgId ? T.F.TASK.CMP.DELETE_REPEAT_INSTANCE :
         T.F.TASK.CMP.DELETE)|translate }}
       </span>
-      <!--      <span class="keyIndicator"> {{ kb.taskDelete }} </span>-->
     </button>
   </ng-template>
 </mat-menu>

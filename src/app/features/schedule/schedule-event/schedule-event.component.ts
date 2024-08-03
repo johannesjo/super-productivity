@@ -303,7 +303,7 @@ export class ScheduleEventComponent extends BaseComponent implements OnInit, OnD
       autoFocus: false,
       data: {
         task: this.task,
-        day: getWorklogStr((this.se.data as any)?.plannedAt),
+        day: getWorklogStr(this.task?.plannedAt || undefined),
       },
     });
   }
