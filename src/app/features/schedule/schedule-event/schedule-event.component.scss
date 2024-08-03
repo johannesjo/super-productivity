@@ -51,6 +51,11 @@ $margin-bottom: 6px;
     //border-top-color: $dark-theme-bg;
   }
 
+  &.very-short-event {
+    // slightly move up to  reduce chance of overlap with next
+    margin-top: -2px;
+  }
+
   &.split-start {
     border-radius: $split-extra-border-radius;
     border-bottom-left-radius: 0;
@@ -85,6 +90,7 @@ $margin-bottom: 6px;
       transform: translateX(-50%);
       text-align: center;
       font-style: italic;
+      line-height: 0.4;
     }
   }
 }
@@ -97,6 +103,7 @@ $margin-bottom: 6px;
   margin-top: 2px;
   border: none !important;
   box-shadow: none !important;
+  pointer-events: none;
 
   .title {
     flex-grow: 0;
@@ -249,9 +256,9 @@ $margin-bottom: 6px;
 .day-of-month {
   position: absolute;
   font-size: 8px;
-  top: 15px;
-  left: 8px;
-  width: 12px;
+  top: 14px;
+  left: 7px;
+  width: 13px;
   font-weight: 900;
   letter-spacing: -0.6px;
   text-align: center;
