@@ -740,9 +740,16 @@ describe('mapToScheduleDays()', () => {
       entries: [
         {
           data: jasmine.any(Object),
+          duration: h(1),
           id: 'R1_1970-01-02',
-          start: dhTz(1, 9),
+          start: dhTz(1, 1),
+          type: 'ScheduledRepeatProjection',
+        },
+        {
+          data: jasmine.any(Object),
           duration: h(2),
+          id: 'R1_1970-01-02',
+          start: 115200000,
           type: 'RepeatProjection',
         },
         {
@@ -783,6 +790,13 @@ describe('mapToScheduleDays()', () => {
       entries: [
         {
           data: jasmine.any(Object),
+          duration: 3600000,
+          id: 'R1_1970-01-03',
+          start: 172800000,
+          type: 'ScheduledRepeatProjection',
+        },
+        {
+          data: jasmine.any(Object),
           id: 'R1_1970-01-03',
           start: 201600000,
           duration: 7200000,
@@ -802,6 +816,13 @@ describe('mapToScheduleDays()', () => {
       beyondBudgetTasks: [],
       dayDate: '1970-01-04',
       entries: [
+        {
+          data: jasmine.any(Object),
+          duration: 3600000,
+          id: 'R1_1970-01-04',
+          start: 259200000,
+          type: 'ScheduledRepeatProjection',
+        },
         {
           data: jasmine.any(Object),
           id: 'R1_1970-01-04',
