@@ -182,7 +182,8 @@ $margin-bottom: 6px;
 
     &:hover {
       opacity: 1;
-      outline: 1px solid $c-accent;
+      //outline: 1px solid $c-accent;
+      border-color: $c-accent;
 
       .ico {
         color: $c-accent;
@@ -331,31 +332,31 @@ $margin-bottom: 6px;
 }
 
 // planner tasks
-:host-context(.is-dragging.TaskPlannedForDay) :host.TaskPlannedForDay,
-:host-context(.is-dragging.TaskPlannedForDay) :host.SplitTaskPlannedForDay,
-:host-context(.is-dragging.SplitTaskPlannedForDay) :host.TaskPlannedForDay,
-:host-context(.is-dragging.SplitTaskPlannedForDay) :host.SplitTaskPlannedForDay,
-  // normal tasks
-:host-context(.is-dragging.Task) :host.Task,
-:host-context(.is-dragging.Task) :host.SplitTask,
-:host-context(.is-dragging.SplitTask) :host.SplitTask,
-:host-context(.is-dragging.SplitTask) :host.Task {
-  //background: $light-theme-bg-darker;
-  //outline: 1px solid $c-accent;
-  box-shadow: $whiteframe-shadow-6dp;
+:host-context(.is-dragging) {
+  :host.TaskPlannedForDay,
+  :host.SplitTaskPlannedForDay,
+  :host.TaskPlannedForDay,
+  :host.SplitTaskPlannedForDay,
+  :host.Task,
+  :host.SplitTask,
+  :host.SplitTask,
+  :host.Task {
+    //outline: 1px solid $c-accent;
+    box-shadow: $whiteframe-shadow-6dp;
+  }
 }
 
-:host-context( .isDarkTheme .is-dragging.TaskPlannedForDay) :host.TaskPlannedForDay,
-:host-context( .isDarkTheme .is-dragging.TaskPlannedForDay) :host.SplitTaskPlannedForDay,
-:host-context( .isDarkTheme .is-dragging.SplitTaskPlannedForDay) :host.TaskPlannedForDay,
-:host-context( .isDarkTheme .is-dragging.SplitTaskPlannedForDay) :host.SplitTaskPlannedForDay,
-  // normal tasks
-:host-context( .isDarkTheme .is-dragging.Task) :host.Task,
-:host-context( .isDarkTheme .is-dragging.Task) :host.SplitTask,
-:host-context( .isDarkTheme .is-dragging.SplitTask) :host.SplitTask,
-:host-context( .isDarkTheme .is-dragging.SplitTask) :host.Task {
-  background: $dark24;
-  outline: none;
+:host-context(.isDarkTheme .is-dragging) {
+  :host.TaskPlannedForDay,
+  :host.SplitTaskPlannedForDay,
+  :host.TaskPlannedForDay,
+  :host.SplitTaskPlannedForDay,
+  :host.Task,
+  :host.SplitTask,
+  :host.SplitTask,
+  :host.Task {
+    background: $dark24;
+  }
 }
 
 :host {
