@@ -8,11 +8,11 @@ export const getTasksWithinAndBeyondBudget = (
   tasks: TaskWithoutReminder[],
   budget: number,
 ): {
-  beyond: TaskWithoutReminder[];
-  within: TaskWithPlannedForDayIndication[];
+  beyond: (TaskWithPlannedForDayIndication | TaskWithoutReminder)[];
+  within: (TaskWithPlannedForDayIndication | TaskWithoutReminder)[];
 } => {
-  const beyond: TaskWithoutReminder[] = [];
-  const within: TaskWithPlannedForDayIndication[] = [];
+  const beyond: (TaskWithPlannedForDayIndication | TaskWithoutReminder)[] = [];
+  const within: (TaskWithPlannedForDayIndication | TaskWithoutReminder)[] = [];
 
   let remainingBudget = budget;
   // TODO probably can be optimized
@@ -30,10 +30,7 @@ export const getTasksWithinAndBeyondBudget = (
       isOverBudget = true;
       beyond.push(task);
     } else {
-      within.push({
-        ...task,
-        plannedForADay: true,
-      });
+      within.push(task);
       remainingBudget -= timeLeftForTask;
     }
   });

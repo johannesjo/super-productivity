@@ -32,6 +32,7 @@ import { msLeftToday } from '../../../util/ms-left-today';
 import { createTimelineViewEntriesForNormalTasks } from './create-timeline-view-entries-for-normal-tasks';
 import { insertBlockedBlocksViewEntries } from './map-to-timeline-view-entries';
 import { selectTaskRepeatCfgsDueOnDayOnly } from '../../task-repeat-cfg/store/task-repeat-cfg.reducer';
+import { getTasksWithinAndBeyondBudget } from '../../schedule/map-schedule-data/get-tasks-within-and-beyond-budget';
 
 export const mapToTimelineDays = (
   dayDates: string[],
@@ -229,7 +230,7 @@ export const createTimelineDays = (
       } else {
         if (
           entry.type === TimelineViewEntryType.SplitTask &&
-          (entry.data as TaskWithPlannedForDayIndication).plannedForADay
+          (entry.data as TaskWithPlannedForDayIndication).plannedForDay
         ) {
           viewEntriesToRenderForDay.push({
             ...entry,
@@ -405,36 +406,6 @@ const createViewEntriesForNonScheduledRepeatProjections = (
       ? lastTime! + (lastEntry.data.defaultEstimate || 0)
       : startTime,
   };
-};
-
-export const getTasksWithinAndBeyondBudget = (
-  tasks: TaskWithoutReminder[],
-  budget: number,
-): {
-  beyond: TaskWithoutReminder[];
-  within: TaskWithPlannedForDayIndication[];
-} => {
-  const beyond: TaskWithoutReminder[] = [];
-  const within: TaskWithPlannedForDayIndication[] = [];
-
-  let remainingBudget = budget;
-  // TODO probably can be optimized
-  tasks.forEach((task) => {
-    // console.log(remainingBudget / 60 / 60 / 1000);
-
-    const timeLeftForTask = getTimeLeftForTask(task);
-    if (timeLeftForTask > remainingBudget) {
-      beyond.push(task);
-    } else {
-      within.push({
-        ...task,
-        plannedForADay: true,
-      });
-      remainingBudget -= timeLeftForTask;
-    }
-  });
-
-  return { beyond, within };
 };
 
 // TODO unit test

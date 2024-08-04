@@ -42,11 +42,14 @@ export const mapToScheduleDays = (
   // console.log(JSON.stringify(params));
 
   const plannerDayKeys = Object.keys(plannerDayMap);
-  const plannerDayTasks = plannerDayKeys
-    .map((key) => {
-      return plannerDayMap[key];
-    })
-    .flat();
+  // const plannerDayTasks = plannerDayKeys
+  //   .map((key) => {
+  //     return plannerDayMap[key];
+  //       // .map(
+  //       // (t) => ({ ...t, plannedForDay: key }) as TaskWithPlannedForDayIndication,
+  //     // );
+  //   })
+  //   .flat();
 
   if (
     !tasks.length &&
@@ -54,7 +57,7 @@ export const mapToScheduleDays = (
     !scheduledTaskRepeatCfgs.length &&
     !unScheduledTaskRepeatCfgs.length &&
     !calenderWithItems.length &&
-    !plannerDayTasks.length
+    !plannerDayKeys.length
   ) {
     return [];
   }

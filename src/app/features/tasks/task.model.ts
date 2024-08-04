@@ -124,7 +124,7 @@ export interface TaskWithoutReminder extends Task {
 }
 
 export interface TaskWithPlannedForDayIndication extends TaskWithoutReminder {
-  plannedForADay: true;
+  plannedForDay: string;
 }
 
 export interface TaskWithSubTasks extends Task {

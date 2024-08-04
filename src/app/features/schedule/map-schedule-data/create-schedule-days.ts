@@ -70,10 +70,11 @@ export const createScheduleDays = (
 
     let viewEntries: SVE[] = [];
 
-    const flowTasksForDay = [
-      ...flowTasksLeftForDay,
-      ...((plannerDayMap[dayDate] as TaskWithoutReminder[]) || []),
-    ];
+    const plannedForDayTasks = (plannerDayMap[dayDate] || []).map((t) => ({
+      ...t,
+      plannedForDay: dayDate,
+    })) as TaskWithPlannedForDayIndication[];
+    const flowTasksForDay = [...flowTasksLeftForDay, ...plannedForDayTasks];
 
     console.log({ flowTasksForDay });
 
@@ -112,6 +113,10 @@ export const createScheduleDays = (
     const viewEntriesToRenderForDay: SVE[] = [];
     splitTaskOrRepeatEntryForNextDay = undefined;
     viewEntries.forEach((entry) => {
+      if (entry.plannedForDay && entry.type === SVEType.Task) {
+        entry.type = SVEType.TaskPlannedForDay;
+      }
+
       if (entry.start >= nextDayStart) {
         if (
           entry.type === SVEType.SplitTaskContinuedLast ||
@@ -122,13 +127,12 @@ export const createScheduleDays = (
           if (splitTaskOrRepeatEntryForNextDay) {
             throw new Error('Schedule: More than one continued split task');
           }
-          // TODO fix
-          splitTaskOrRepeatEntryForNextDay = entry as any;
+          splitTaskOrRepeatEntryForNextDay = entry;
         }
       } else {
         if (
           entry.type === SVEType.SplitTask &&
-          (entry.data as TaskWithPlannedForDayIndication).plannedForADay
+          (entry.data as TaskWithPlannedForDayIndication).plannedForDay
         ) {
           viewEntriesToRenderForDay.push({
             ...entry,

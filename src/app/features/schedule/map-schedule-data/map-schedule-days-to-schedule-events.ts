@@ -1,6 +1,7 @@
 import { ScheduleDay, ScheduleEvent } from '../schedule.model';
 import { getTimeLeftForTask } from '../../../util/get-time-left-for-task';
 import { SVEType } from '../schedule.const';
+import { TaskWithPlannedForDayIndication } from '../../tasks/task.model';
 
 export const mapScheduleDaysToScheduleEvents = (
   days: ScheduleDay[],
@@ -13,7 +14,6 @@ export const mapScheduleDaysToScheduleEvents = (
   const beyondBudgetDays: ScheduleEvent[][] = [];
 
   days.forEach((day, dayIndex) => {
-    const dayOfMonth = new Date(day.dayDate).getDate();
     beyondBudgetDays[dayIndex] = day.beyondBudgetTasks.map((taskPlannedForDay) => {
       // eslint-disable-next-line no-mixed-operators
       const timeLeft = getTimeLeftForTask(taskPlannedForDay);
@@ -21,7 +21,7 @@ export const mapScheduleDaysToScheduleEvents = (
       const rowSpan = Math.max(Math.round(timeLeftInHours * FH), 1);
       return {
         id: taskPlannedForDay.id,
-        dayOfMonth,
+        dayOfMonth: undefined,
         data: taskPlannedForDay,
         title: taskPlannedForDay.title,
         type: SVEType.TaskPlannedForDay,
@@ -71,7 +71,12 @@ export const mapScheduleDaysToScheduleEvents = (
 
         const rowSpan = Math.max(1, Math.round(timeLeftInHours * FH));
         eventsFlat.push({
-          dayOfMonth,
+          dayOfMonth:
+            ((entry.data as TaskWithPlannedForDayIndication)?.plannedForDay &&
+              new Date(
+                (entry.data as TaskWithPlannedForDayIndication)?.plannedForDay,
+              ).getDate()) ||
+            undefined,
           title:
             (entry as any)?.data?.title ||
             (entry.type === SVEType.LunchBreak ? 'Lunch Break' : 'TITLE'),

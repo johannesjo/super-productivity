@@ -31,7 +31,7 @@ export const createScheduleViewEntriesForNormalTasks = (
 
     viewEntries.push({
       id: task.id,
-      type: (task as TaskWithPlannedForDayIndication).plannedForADay
+      type: (task as TaskWithPlannedForDayIndication).plannedForDay
         ? SVEType.TaskPlannedForDay
         : SVEType.Task,
       start: time,

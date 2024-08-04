@@ -31,7 +31,7 @@ export const createTimelineViewEntriesForNormalTasks = (
 
     viewEntries.push({
       id: task.id,
-      type: (task as TaskWithPlannedForDayIndication).plannedForADay
+      type: (task as TaskWithPlannedForDayIndication).plannedForDay
         ? TimelineViewEntryType.TaskPlannedForDay
         : TimelineViewEntryType.Task,
       start: time,

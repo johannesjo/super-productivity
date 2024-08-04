@@ -12,7 +12,7 @@ export interface ScheduleEvent {
   timeLeftInHours: number;
   isCloseToOthersFirst: boolean;
   isCloseToOthers: boolean;
-  dayOfMonth: number;
+  dayOfMonth?: number;
   data?: SVE['data'];
 }
 
@@ -28,6 +28,7 @@ interface SVEBase {
   type: SVEType;
   start: number;
   duration: number;
+  plannedForDay?: string;
 }
 
 export interface SVETask extends SVEBase {
