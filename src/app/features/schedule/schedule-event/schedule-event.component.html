@@ -42,10 +42,16 @@
 }
 <!--- -->
 
+@if (se.type === SVEType.ScheduledTask || se.type === SVEType.ScheduledRepeatProjection) {
+<div class="time-badge">{{ scheduledClockStr }}</div>
+}
+<!-- -->
+
 <div class="title">
-  <!--  {{ startClockString }}-->
+  <!--  {{ scheduledClockStr }}-->
   <!--  {{se.id}} __ {{se.data?.id}} __-->
   <!-- -->
+
   @if (se.type === SVEType.SplitTaskContinuedLast || se.type ===
   SVEType.SplitTaskContinued || se.type === SVEType.RepeatProjectionSplitContinued ||
   se.type === SVEType.RepeatProjectionSplitContinuedLast) { ...

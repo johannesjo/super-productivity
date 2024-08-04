@@ -72,9 +72,11 @@ export class ScheduleEventComponent extends BaseComponent implements OnInit, OnD
     );
     // this.durationStr = (this.se.timeLeftInHours * 60).toString().substring(0, 4);
     this.title = startClockStr + ' - ' + endClockStr + '  ' + this.se.title;
+    // this.scheduledClockStr = startClockStr + ' - ' + endClockStr;
+    this.scheduledClockStr = startClockStr;
 
     if (isDraggableSE(this.se)) {
-      this._elRef.nativeElement.id = 't-' + (this.se.data as any).id;
+      this._elRef.nativeElement.id = 't - ' + (this.se.data as any).id;
     }
 
     if (
@@ -89,6 +91,7 @@ export class ScheduleEventComponent extends BaseComponent implements OnInit, OnD
   }
 
   se!: ScheduleEvent;
+  scheduledClockStr: string = '';
   task!: TaskCopy;
 
   contextMenuPosition: { x: string; y: string } = { x: '0px', y: '0px' };
