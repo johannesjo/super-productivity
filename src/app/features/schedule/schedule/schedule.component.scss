@@ -183,7 +183,8 @@ header {
 .dropzones {
   display: none;
   padding: 0 7px;
-  top: 80px;
+  //top: 80px;
+  top: 32px;
   position: sticky;
   line-height: 1.2;
   justify-content: stretch;
@@ -194,6 +195,11 @@ header {
   flex-direction: column;
   pointer-events: all;
   border: 1px dashed $c-primary;
+  background: $light-theme-bg;
+
+  @include darkTheme() {
+    background: $dark-theme-bg;
+  }
 
   .is-dragging & {
     display: flex;
@@ -206,7 +212,7 @@ header {
   > div {
     pointer-events: none;
     padding: 8px;
-    height: 40px;
+    height: 60px;
     display: flex;
     justify-content: center;
     align-items: center;
