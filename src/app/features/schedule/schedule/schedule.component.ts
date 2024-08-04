@@ -7,12 +7,12 @@ import {
   ViewChild,
 } from '@angular/core';
 import { UiModule } from '../../../ui/ui.module';
-import { combineLatest, Observable } from 'rxjs';
+import { combineLatest, fromEvent, Observable } from 'rxjs';
 import { select, Store } from '@ngrx/store';
 import { selectTimelineTasks } from '../../work-context/store/work-context.selectors';
 import { selectTaskRepeatCfgsWithAndWithoutStartTime } from '../../task-repeat-cfg/store/task-repeat-cfg.reducer';
 import { selectPlannerDayMap } from '../../planner/store/planner.selectors';
-import { debounceTime, map, tap } from 'rxjs/operators';
+import { debounceTime, map, startWith, switchMap, tap } from 'rxjs/operators';
 import { getTomorrow } from '../../../util/get-tomorrow';
 import { TaskService } from '../../tasks/task.service';
 import { LayoutService } from '../../../core-ui/layout/layout.service';
@@ -43,8 +43,9 @@ import { PlannerActions } from '../../planner/store/planner.actions';
 import { FH, SVEType } from '../schedule.const';
 import { mapToScheduleDays } from '../map-schedule-data/map-to-schedule-days';
 import { mapScheduleDaysToScheduleEvents } from '../map-schedule-data/map-schedule-days-to-schedule-events';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
-const DAYS_TO_SHOW = 5;
+// const DAYS_TO_SHOW = 5;
 const D_HOURS = 24;
 const DRAG_OVER_CLASS = 'drag-over';
 const IS_DRAGGING_CLASS = 'is-dragging';
@@ -85,18 +86,39 @@ export class ScheduleComponent implements AfterViewInit, OnDestroy {
   SVEType: typeof SVEType = SVEType;
 
   daysToShow$ = this._globalTrackingIntervalService.todayDateStr$.pipe(
-    map(() => {
-      return this._getDaysToShow();
+    switchMap(() => {
+      return fromEvent(window, 'resize').pipe(
+        startWith(window.innerWidth),
+        debounceTime(50),
+        map(() => {
+          const width = window.innerWidth;
+          if (width < 600) {
+            return 3;
+          } else if (width < 900) {
+            return 4;
+          } else if (width < 1900) {
+            return 5;
+          } else if (width < 2200) {
+            return 7;
+          } else {
+            return 10;
+          }
+        }),
+        tap(console.log),
+        map((nrOfDaysToShow) => this._getDaysToShow(nrOfDaysToShow)),
+      );
     }),
   );
+  daysToShow: string[] = [];
 
   scheduleDays$: Observable<ScheduleDay[]> = combineLatest([
     this._store.pipe(select(selectTimelineTasks)),
     this._store.pipe(select(selectTaskRepeatCfgsWithAndWithoutStartTime)),
-    this.taskService.currentTaskId$,
     this._store.pipe(select(selectTimelineConfig)),
     this._calendarIntegrationService.icalEvents$,
     this._store.pipe(select(selectPlannerDayMap)),
+    // because typing messes up if there are more than 6
+    combineLatest([this.taskService.currentTaskId$, this.daysToShow$]),
   ]).pipe(
     debounceTime(50),
     // debounceTime(1250),
@@ -104,14 +126,14 @@ export class ScheduleComponent implements AfterViewInit, OnDestroy {
       ([
         { planned, unPlanned },
         { withStartTime, withoutStartTime },
-        currentId,
         timelineCfg,
         icalEvents,
         plannerDayMap,
+        [currentId, daysToShow],
       ]) =>
         mapToScheduleDays(
           Date.now(),
-          this._getDaysToShow(),
+          daysToShow,
           unPlanned,
           planned,
           withStartTime,
@@ -183,6 +205,7 @@ export class ScheduleComponent implements AfterViewInit, OnDestroy {
   isDragging = false;
   containerExtraClass = '';
   prevDragOverEl: HTMLElement | null = null;
+
   @ViewChild('gridContainer') gridContainer!: ElementRef;
 
   private _scrollTopFirstElTimeout: number | undefined;
@@ -196,12 +219,18 @@ export class ScheduleComponent implements AfterViewInit, OnDestroy {
     private _store: Store,
     private _dateService: DateService,
     private _globalTrackingIntervalService: GlobalTrackingIntervalService,
+    private _elRef: ElementRef,
   ) {
     if (!localStorage.getItem(LS.WAS_TIMELINE_INITIAL_DIALOG_SHOWN)) {
       this._matDialog.open(DialogTimelineSetupComponent, {
         data: { isInfoShownInitially: true },
       });
     }
+
+    this.daysToShow$.pipe(takeUntilDestroyed()).subscribe((days) => {
+      this.daysToShow = days;
+      this._elRef.nativeElement.style.setProperty('--nr-of-days', days.length);
+    });
   }
 
   ngAfterViewInit(): void {
@@ -355,8 +384,7 @@ export class ScheduleComponent implements AfterViewInit, OnDestroy {
     }, 100);
   }
 
-  private _getDaysToShow(): string[] {
-    const nrOfDaysToShow = DAYS_TO_SHOW;
+  private _getDaysToShow(nrOfDaysToShow: number): string[] {
     const today = new Date().getTime();
     const daysToShow: string[] = [];
     for (let i = 0; i < nrOfDaysToShow; i++) {

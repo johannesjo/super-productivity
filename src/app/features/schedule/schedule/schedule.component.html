@@ -32,7 +32,7 @@
   <div class="days">
     <div class="filler"><!--for time --></div>
 
-    @for (day of daysToShow$|async; track $index) {
+    @for (day of daysToShow; track $index) {
     <div class="day">
       <div class="day-num">{{ day|date:'d' }}</div>
       <div class="day-day">{{ day|date:'EEE' }}</div>
@@ -56,7 +56,7 @@
   </div>
   }
   <!-- Grid Cols -->
-  @for (day of daysToShow$|async; track $index) {
+  @for (day of daysToShow; track $index) {
   <div
     class="col"
     style="grid-column: {{ $index + 2 }}"

@@ -6,27 +6,33 @@ $row-height-mobile: 6px;
 //$grid-color: #dadce0;
 $grid-color: #dadce0;
 $grid-color-dark: rgba(255, 255, 255, 0.1);
-$calendar-template: $time-width repeat(5, 1fr);
 $current-time-color: $c-accent;
 $fr: 12;
 $total-rows: 24 * $fr;
 
 :host {
   background: $light-theme-bg;
+  --nr-of-days: 5;
 
   @include darkTheme() {
     background: $dark-theme-bg;
   }
 }
 
-.main-grid-container {
-  //border: 3px dashed palevioletred;   grid-auto-columns: minmax(0, 1fr);
+.main-grid-container,
+.days {
   grid-auto-flow: column;
   display: grid;
-  grid-template-columns: $calendar-template;
+  place-content: center;
+  text-align: center;
   grid-auto-columns: minmax(0, 1fr);
-  grid-template-rows: repeat($total-rows, $row-height);
+  //grid-template-columns: $time-width repeat(5, 1fr);
+  grid-template-columns: $time-width repeat(var(--nr-of-days), 1fr);
+}
 
+.main-grid-container {
+  //border: 3px dashed palevioletred;   grid-auto-columns: minmax(0, 1fr);
+  grid-template-rows: repeat($total-rows, $row-height);
   //grid-auto-rows: $row-height;
   //grid-auto-rows: max-content;
 
@@ -67,13 +73,6 @@ header {
   @include darkTheme() {
     border-color: $dark-theme-extra-border-color;
   }
-}
-
-.days {
-  display: grid;
-  place-content: center;
-  text-align: center;
-  grid-template-columns: $calendar-template;
 }
 
 .day {
@@ -280,7 +279,7 @@ header {
 .work-start {
   border-top: 2px dashed $light-theme-separator-color;
   min-width: 100px;
-  grid-column: 2 / 7;
+  grid-column: 2 / -1;
   position: relative;
   color: $light-theme-text-color;
 
