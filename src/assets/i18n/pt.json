@@ -2,7 +2,7 @@
   "ANDROID": {
     "NOTIFICATIONS": {
       "SYNC_CONFLICT_TITLE": "Houve um conflito de sincronização",
-      "SYNC_CONFLICT_MSG": "Por favor, cheque de decida oque fazer."
+      "SYNC_CONFLICT_MSG": "Por favor, revise e decida o que fazer."
     },
     "PERMANENT_NOTIFICATION_MSGS": {
       "INITIAL": "Aplicativo sendo executado em segundo plano para permitir a sincronização, se ativado",
@@ -119,6 +119,19 @@
         "ISSUE_NOT_FOUND": "CalDav: Todo \"{{issueId}}\" parece ter sido excluído do servidor."
       }
     },
+    "CALENDARS": {
+      "BANNER": {
+        "TXT": "<strong>{{title}}</strong> começa em <strong>{{start}}</strong>!",
+        "TXT_MULTIPLE": "<strong>{{title}}</strong> começa em <strong>{{start}}</strong>!<br> (e {{nrOfOtherBanners}} outros eventos estão pendentes)",
+        "TXT_PAST": "<strong>{{title}}</strong> iniciou em <strong>{{start}}</strong>!",
+        "TXT_PAST_MULTIPLE": "<strong>{{title}}</strong> iniciou em <strong>{{start}}</strong>!<br> (e {{nrOfOtherBanners}} outros eventos estão pendentes)",
+        "ADD_AS_TASK": "Adicionar como Tarefa",
+        "FOCUS_TASK": "Tarefa focada"
+      },
+      "S": {
+        "CAL_PROVIDER_ERROR": "Erro no provedor de calendário: {{errTxt}}"
+      }
+    },
     "CONFIG": {
       "S": {
         "UPDATE_SECTION": "Configurações atualizadas para <strong>{{sectionKey}}</strong>"
@@ -131,13 +144,40 @@
         "AUTH_ERROR": "Dropbox: token de acesso inválido fornecido",
         "AUTH_ERROR_ACTION": "Mudar Token",
         "OFFLINE": "Dropbox: não é possível sincronizar, porque off-line",
-        "SYNC_ERROR": "Dropbox: erro ao sincronizar"
+        "SYNC_ERROR": "Dropbox: erro ao sincronizar",
+        "UNABLE_TO_GENERATE_PKCE_CHALLENGE": "Dropbox: Não foi possível gerar o desafio PKCE."
       }
     },
     "FINISH_DAY_BEFORE_EXIT": {
       "C": {
         "FINISH_DAY_BEFORE_EXIT": "Existem {{nr}} tarefas concluídas na sua lista de hoje que ainda não foram movidas para o arquivo. Quer mesmo parar sem terminar o dia?"
       }
+    },
+    "FOCUS_MODE": {
+      "BACK_TO_PLANNING": "Retornar ao Planejamento",
+      "CANCEL_FOCUS_SESSION": "Cancelar Sessão de Foco",
+      "CONGRATS": "Parabéns por completar essa sessão!",
+      "CONTINUE_FOCUS_SESSION": "Continuar Sessão de Foco",
+      "FINISH_TASK_AND_SELECT_NEXT": "Finalizar tarefa e selecionar a próxima",
+      "GET_READY": "Prepare-se para sua sessão de foco!",
+      "GOGOGO": "Vamos, vamos, vamos!",
+      "GO_TO_PROCRASTINATION": "Busque ajuda quando procrastinar",
+      "NEXT": "Próxima",
+      "ON": "Ativado",
+      "OPEN_ISSUE_IN_BROWSER": "Abrir tarefa em um navegador",
+      "POMODORO_BACK": "Retornar",
+      "POMODORO_DISABLE": "Desativar Pomodoro",
+      "POMODORO_INFO": "As sessões de foco não podem ser usadas com o Pomodoro ativado",
+      "PREP_STRETCH": "Faça alguns suaves alongamentos ",
+      "PREP_SIT_UPRIGHT": "Corrija sua postura (sentado ou em pé)",
+      "PREP_GET_MENTALLY_READY": "Prepare-se mentalmente para focar e ser produtivo",
+      "SELECT_ANOTHER_TASK": "Selecione outra tarefa",
+      "SELECT_TASK": "Selecione a tarefa que irá focar",
+      "SET_FOCUS_SESSION_DURATION": "Definir duração de sessão",
+      "SHOW_HIDE_NOTES_AND_ATTACHMENTS": "Mostrar/ocultar notas e anexos da tarefa",
+      "START_FOCUS_SESSION": "Iniciar Sessão de Foco",
+      "START_NEXT_FOCUS_SESSION": "Iniciar próxima Sessão de Foco",
+      "WORKED_FOR": "Você trabalhou por"
     },
     "GITEA": {
       "DIALOG_INITIAL": {
@@ -249,6 +289,14 @@
       "DIALOG_INITIAL": {
         "TITLE": "Configurar GitLab para Projeto"
       },
+      "DIALOG_SUBMIT_WORKLOG": {
+        "PAST_DAY_INFO": "A duração pré-preenchida contém dados não rastreados de dias anteriores.",
+        "TITLE": "Enviar tempo gasto em problemas para o GitLab",
+        "T_ALREADY_TRACKED": "Já rastreado",
+        "T_TITLE": "Título",
+        "T_TO_BE_SUBMITTED": "A ser enviado",
+        "TOTAL_MSG": "Você enviará o total de tempo trabalhado hoje <em>{{totalTimeToSubmit}}</em> para <em>{{nrOfTasksToSubmit}}</em> diferentes questões."
+      },
       "FORM": {
         "FILTER_USER": "Nome de usuário (ex.: para filtrar as alterações sozinho)",
         "GITLAB_BASE_URL": "URL base GitLab personalizado",
@@ -264,6 +312,8 @@
         "SOURCE_GLOBAL": "Todos",
         "SOURCE_GROUP": "grupo",
         "SOURCE_PROJECT": "projeto",
+        "SUBMIT_TIMELOGS": "Enviar registros de tempo para o Gitlab",
+        "SUBMIT_TIMELOGS_DESCRIPTION": "Mostrar a caixa de diálogo de controle de tempo após clicar no dia de término",
         "TOKEN": "Token de acesso",
         "FILTER": "Filtro customizado",
         "FILTER_DESCRIPTION": "Consulte https://docs.gitlab.com/ee/api/issues.html#list-issues. Vários podem ser combinados por &"
@@ -297,6 +347,7 @@
       }
     },
     "ISSUE": {
+      "HOW_TO_GET_A_TOKEN": "Como obter um token?",
       "DEFAULT": {
         "ISSUES_STR": "Problemas",
         "ISSUE_STR": "Questão"
@@ -638,6 +689,12 @@
         "PROCRASTINATION_TRIGGERS_TEXT": "Outro método muito eficaz é registrar o que desencadeou sua vontade de procrastinar. Por exemplo, muitas vezes tenho vontade de ir rapidamente para o Reddit ou para o meu site de notícias favorito sempre que a janela do meu navegador entra em foco. Desde que comecei a escrever meus gatilhos em um simples documento de texto vazio, percebi como esse padrão estava arraigado e isso me ajudou a experimentar diferentes contra-medidas."
       },
       "H1": "Dê uma folga!",
+      "INTRO": {
+        "AVOIDING": "Fugindo da tarefa",
+        "FEAR": "Medo de falhar",
+        "STRESSED": "Estressado por não conseguir concluir as tarefas",
+        "TITLE": "Introdução"
+      },
       "P1": "Antes de tudo, relaxe! Todo mundo faz isso de vez em quando. E se você não estiver fazendo o que deveria, pelo menos aproveite! Em seguida, verifique as seções abaixo para obter algo útil.",
       "P2": "Lembre-se: a procrastinação é um problema de regulação emocional, não um problema de gerenciamento de tempo.",
       "REFRAME": {
@@ -661,9 +718,11 @@
         "SETUP_GIT": "Configurar integração com GitHub ",
         "SETUP_GITLAB": "Configurar integração com GitLab ",
         "SETUP_JIRA": "Configurar integração com Jira ",
-        "SETUP_OPEN_PROJECT": "Configurar integração com OpenProject"
+        "SETUP_OPEN_PROJECT": "Configurar integração com OpenProject",
+        "SETUP_REDMINE_PROJECT": "Configurar Integração com Redmine"
       },
       "FORM_BASIC": {
+        "L_ENABLE_BACKLOG": "Habilitar Backlog do Projeto",
         "L_IS_HIDDEN_FROM_MENU": "Ocultar projeto do menu",
         "L_TITLE": "Nome do Projeto",
         "TITLE": "Configurações básicas"
@@ -703,7 +762,11 @@
       "WEEK_TITLE": "Semana {{nr}} ({{timeSpent}})"
     },
     "REMINDER": {
-      "S_REMINDER_ERR": "Erro na interface do lembrete"
+      "S_REMINDER_ERR": "Erro na interface do lembrete",
+      "COUNTDOWN_BANNER": {
+        "START_NOW": "Iniciar agora",
+        "HIDE": "Esconder"
+      }
     },
     "SEARCH_BAR": {
       "INFO": "Clique no ícone da lista para procurar tarefas arquivadas",
@@ -764,6 +827,16 @@
         "USE_LOCAL": "Use local",
         "USE_REMOTE": "Usar controle remoto"
       },
+      "D_INCOMPLETE_SYNC": {
+        "T1": "A última atualização foi incompleta!",
+        "T3": "Você tem 2 opções:",
+        "BTN_CLOSE_APP": "Fechar Aplicativo",
+        "BTN_DOWNLOAD_BACKUP": "Baixar Cópia local"
+      },
+      "D_PERMISSION": {
+        "DISABLE_SYNC": "Desabilitar sincronização",
+        "PERM_FILE": "Dar Permissão"
+      },
       "FORM": {
         "DROPBOX": {
           "L_ACCESS_TOKEN": "Token de acesso (gerado a partir do código de autenticação)"
@@ -772,6 +845,14 @@
           "L_SYNC_FILE_NAME": "Nome do arquivo de sincronização",
           "L_IS_COMPRESS_DATA": "Comprimir dados"
         },
+        "LOCAL_FILE": {
+          "L_SYNC_FOLDER_PATH": "Sincronizar caminho de pasta",
+          "L_SYNC_FILE_PATH_PERMISSION_VALIDATION": "Necessário permissão de acesso ao arquivo",
+          "L_SYNC_FILE_PATH": "Caminho do arquivo de sincronização",
+          "L_SYNC_FILE_PATH_DESCRIPTION": "Caminho absoluto para o arquivo que deve ser usado para sincronização (será criado)."
+        },
+        "L_ENABLE_COMPRESSION": "Habilitar compressão de dados (envio mais rápido)",
+        "L_ENABLE_ENCRYPTION": "Habilitar criptografia ponta-a-ponta (experimental) - Torna seus dados inelegíveis ao provedor sincronizado",
         "L_ENABLE_SYNCING": "Habilitar Sincronização",
         "L_SYNC_INTERVAL": "Intervalo de sincronização",
         "L_SYNC_PROVIDER": "Provedor de sincronização",
@@ -782,13 +863,10 @@
           "L_PASSWORD": "Senha",
           "L_USER_NAME": "Nome de usuário",
           "L_SYNC_FILE_PATH": "Caminho do arquivo de sincronização"
-        },
-        "LOCAL_FILE": {
-          "L_SYNC_FILE_PATH": "Caminho do arquivo de sincronização",
-          "L_SYNC_FILE_PATH_DESCRIPTION": "Caminho absoluto para o arquivo que deve ser usado para sincronização (será criado)."
         }
       },
       "S": {
+        "ALREADY_IN_SYNC": "Já sincronizado",
         "ERROR_FALLBACK_TO_BACKUP": "Algo deu errado ao importar os dados. Retornando ao backup local.",
         "ERROR_INVALID_DATA": "Erro ao sincronizar. Dados inválidos",
         "IMPORTING": "Importando dados",
@@ -836,7 +914,8 @@
         "REPEAT": "Repetir",
         "SCHEDULE_TASK": "Agendar Tarefa",
         "SUB_TASKS": "Subtarefas ({{nr}})",
-        "TIME": "Tempo"
+        "TIME": "Tempo",
+        "TITLE_PLACEHOLDER": "Insira um título"
       },
       "ADD_TASK_BAR": {
         "ADD_EXISTING_TASK": "Adicionar tarefa existente \"{{taskTitle}}\"",
@@ -881,6 +960,12 @@
         "TRACK_TIME": "Comece a rastrear o tempo",
         "TRACK_TIME_STOP": "Pausar o tempo de rastreamento",
         "UPDATE_ISSUE_DATA": "Atualizar dados da issue"
+      },
+      "D_CONFIRM_SHORT_SYNTAX_NEW_TAG": {
+        "OK": "Criar Tag"
+      },
+      "D_CONFIRM_SHORT_SYNTAX_NEW_TAGS": {
+        "OK": "Criar Tags"
       },
       "D_REMINDER_ADD": {
         "CONFIRM_REPEAT_OK": "Cronograma",
@@ -957,9 +1042,33 @@
       }
     },
     "TASK_REPEAT": {
+      "ADD_INFO_PANEL": {
+        "CUSTOM": "Configurar repetição personalizada",
+        "CUSTOM_AND_TIME": "Personalizada, {{timeStr}}",
+        "CUSTOM_WEEKLY": "{{daysStr}}",
+        "CUSTOM_WEEKLY_AND_TIME": "{{daysStr}}, {{timeStr}}",
+        "DAILY": "Todos os dias",
+        "DAILY_AND_TIME": "Todos os días, {{timeStr}}",
+        "EVERY_X_DAILY": "Cada {{x}} dia(s)",
+        "EVERY_X_DAILY_AND_TIME": "Cada {{x}} dia(s), {{timeStr}}",
+        "EVERY_X_MONTHLY": "Cada {{x}} mês",
+        "EVERY_X_MONTHLY_AND_TIME": "Cada {{x}} mês, {{timeStr}}",
+        "EVERY_X_YEARLY": "Cada {{x}} ano(s)",
+        "EVERY_X_YEARLY_AND_TIME": "Cada {{x}} ano(s), {{timeStr}}",
+        "MONTHLY_CURRENT_DATE": "Mensalmente no dia {{dateDayStr}}",
+        "MONTHLY_CURRENT_DATE_AND_TIME": "Mensalmente no dia {{dateDayStr}}, {{timeStr}}",
+        "MONDAY_TO_FRIDAY": "Seg. a Sex",
+        "MONDAY_TO_FRIDAY_AND_TIME": "Seg. a Sex, {{timeStr}}",
+        "WEEKLY_CURRENT_WEEKDAY": "Semanalmente {{weekdayStr}",
+        "YEARLY_CURRENT_DATE_AND_TIME": "Anualmente no {{dayAndMonthStr}}, {{timeStr}}"
+      },
       "D_CONFIRM_REMOVE": {
         "MSG": "A remoção da configuração de repetição converterá todas as instâncias anteriores desta tarefa em apenas tarefas regulares. Tem certeza de que deseja continuar?",
         "OK": "Remover completamente"
+      },
+      "D_CONFIRM_UPDATE_INSTANCES": {
+        "CANCEL": "Somente tarefas futuras",
+        "OK": "Atualizar todas as instancias"
       },
       "D_EDIT": {
         "ADD": "Adicionar configuração de repetição de tarefas",
@@ -971,15 +1080,25 @@
         "TAG_LABEL": "Tags para adicionar"
       },
       "F": {
+        "C_DAY": "Dia",
+        "C_MONTH": "Mês",
+        "C_WEEK": "Semana",
+        "C_YEAR": "Ano",
         "DEFAULT_ESTIMATE": "Estimativa padrão",
         "FRIDAY": "Sexta-feira",
         "IS_ADD_TO_BOTTOM": "Mover a tarefa para o final da lista",
         "MONDAY": "Segunda-feira",
+        "NOTES": "Notas padrão",
         "ORDER": "Ordem",
         "ORDER_DESCRIPTION": "Ordem de criação de tarefas repetíveis. Afeta apenas tarefas repetíveis criadas ao mesmo tempo. Um valor mais baixo significa que uma tarefa será criada mais acima na lista, um número menor que estará mais abaixo. Um valor maior que 0 significa que os itens são criados na parte inferior das tarefas normais.",
+        "Q_DAILY": "Todos os dias",
+        "Q_MONDAY_TO_FRIDAY": "De segunda a sexta",
         "REMIND_AT": "Lembre-se em",
         "REMIND_AT_PLACEHOLDER": "Selecione quando lembrar",
+        "REPEAT_CYCLE": "Repetir ciclo",
+        "REPEAT_EVERY": "Repetir cada",
         "SATURDAY": "Sábado",
+        "START_DATE": "Data de inicio",
         "START_TIME": "Horário de início agendado",
         "START_TIME_DESCRIPTION": "Por exemplo. 15:00. Deixe em branco para uma tarefa de dia inteiro",
         "SUNDAY": "Domingo",
@@ -1129,6 +1248,7 @@
     "ENABLED": "Ativado",
     "EXAMPLE_VAL": "Clique para editar",
     "EXTENSION_INFO": "Por favor <a target=\"_blank\" href=\"https://chrome.google.com/webstore/detail/super-productivity/ljkbjodfmekklcoibdnhahlaalhihmlb\"> faça o download da extensão chrome</a> para permitir a comunicação com o Jira Api e o Idle Time Handling. Observe que isso não funciona para dispositivos móveis.",
+    "HIDE": "Esconder",
     "LOGIN": "Login",
     "LOGOUT": "Sair",
     "MINUTES": "{{m}} minutos",
@@ -1140,7 +1260,9 @@
     "REMOVE": "Remover",
     "RESET": "Restabelecer",
     "SAVE": "Salvar",
+    "SUBMIT": "Enviar",
     "TITLE": "Título",
+    "TODAY_TAG_TITLE": "Hoje",
     "UNDO": "Desfazer",
     "UPDATE": "Atualizar",
     "WITHOUT_PROJECT": "Sem Projeto",
@@ -1153,9 +1275,15 @@
       "LOCATION_INFO": "Os backups são salvos em:",
       "TITLE": "Backups automáticos"
     },
+    "CALENDARS": {
+      "TITLE": "Calendários"
+    },
     "EVALUATION": {
       "IS_HIDE_EVALUATION_SHEET": "Ocultar folha de avaliação no resumo diário",
       "TITLE": "Avaliação e Métricas"
+    },
+    "FOCUS_MODE": {
+      "TITLE": "Modo de Foco"
     },
     "IDLE": {
       "HELP": "<div><p>Quando a manipulação de tempo ocioso estiver ativada, uma caixa de diálogo será aberta após um período especificado para verificar se e em qual tarefa você deseja acompanhar seu tempo, quando você estiver ocioso.</p></div>",
@@ -1191,6 +1319,7 @@
       "MOVE_TO_BACKLOG": "Mover tarefa para o backlog de tarefas",
       "MOVE_TO_TODAYS_TASKS": "Mover tarefa para a lista de tarefas de hoje",
       "OPEN_PROJECT_NOTES": "Mostrar / ocultar notas do projeto",
+      "SAVE_NOTE": "Salvar nota",
       "SELECT_NEXT_TASK": "Selecione a próxima tarefa",
       "SELECT_PREVIOUS_TASK": "Selecionar tarefa anterior",
       "SHOW_SEARCH_BAR": "Mostrar barra de pesquisa",
@@ -1249,7 +1378,7 @@
       "IS_CONFIRM_BEFORE_EXIT": "Confirme antes de sair do aplicativo",
       "IS_CONFIRM_BEFORE_EXIT_WITHOUT_FINISH_DAY": "Confirme antes de sair do aplicativo sem terminar o dia primeiro",
       "IS_DARK_MODE": "Modo escuro",
-      "IS_DISABLE_ANIMATIONS": "Desativat todas as animações",
+      "IS_DISABLE_ANIMATIONS": "Desativar todas as animações",
       "IS_HIDE_NAV": "Ocultar a navegação até passar o mouse no cabeçalho principal (somente na área de trabalho)",
       "IS_MINIMIZE_TO_TRAY": "Minimize para a bandeja (somente desktop)",
       "IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "Notificar quando a estimativa de tempo foi excedida",
@@ -1272,6 +1401,9 @@
       "IS_STOP_TRACKING_ON_BREAK": "Parar o rastreamento do tempo para tarefas em pausa",
       "LONGER_BREAK_DURATION": "Duração de pausas mais longas",
       "TITLE": "Configurações do Pomodoro"
+    },
+    "REMINDER": {
+      "TITLE": "Lembretes"
     },
     "SOUND": {
       "DONE_SOUND": "Som de tarefa concluída",
@@ -1302,6 +1434,10 @@
       "L_WORK_START": "Início do dia de trabalho",
       "TITLE": "Timeline",
       "WORK_START_END_DESCRIPTION": "por exemplo. 17:00",
+      "L_IS_LUNCH_BREAK_ENABLED": "Ativar o intervalo de almoço",
+      "L_LUNCH_BREAK_END": "Fim do intervalo de almoço",
+      "L_LUNCH_BREAK_START": "Inicio do intervalo de almoço",
+      "LUNCH_BREAK_START_END_DESCRIPTION": "ex: 13:00",
       "CAL_PROVIDERS": "Provedores de calendário (experimental e opcional)",
       "CAL_PROVIDERS_ADD": "Adicionar fonte ical",
       "CAL_PROVIDERS_INFO": "Você pode opcionalmente configurar a linha do tempo para também carregar e exibir dados do iCal (por exemplo, Google Agenda).",
@@ -1333,6 +1469,7 @@
     "DBX_UPLOAD": "Dropbox: Carregar arquivo ...",
     "GITHUB_LOAD_ISSUE": "GitHub: Carregar dados do problema ...",
     "JIRA_LOAD_ISSUE": "Jira: Carregar dados do problema ...",
+    "SYNC": "Sincronizando dados...",
     "UNKNOWN": "Carregando dados remotos",
     "WEB_DAV_DOWNLOAD": "WebDAV: Baixando dados ...",
     "WEB_DAV_UPLOAD": "WebDAV: Carregando dados ...",
@@ -1345,7 +1482,14 @@
     "CREATE_TAG": "Criar tag",
     "DELETE_TAG": "Excluir tag",
     "GO_TO_TASK_LIST": "Ir para a lista de tarefas",
+    "HM": {
+      "CONTRIBUTE": "Contribuir",
+      "GET_HELP_ONLINE": "Buscar ajuda online",
+      "REPORT_A_PROBLEM": "Reportar um problema",
+      "REDDIT_COMMUNITY": "Comunidade no Reddit"
+    },
     "MANAGE_PROJECTS": "Gerenciar projetos",
+    "HELP": "Ajuda",
     "METRICS": "Métricas",
     "NOTES": "Notas",
     "PROCRASTINATE": "Procrastinar",
