@@ -166,18 +166,13 @@ $margin-bottom: 6px;
       background: $dark1;
     }
 
-    :host-context(.is-dragging) &:hover {
-      opacity: initial;
-      outline: none;
-    }
-
     > * {
       opacity: 0.7;
     }
   }
 }
 
-:host {
+:host-context(.is-not-dragging) {
   &.CalendarEvent,
   &.RepeatProjection,
   &.RepeatProjectionSplit,

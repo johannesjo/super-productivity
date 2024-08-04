@@ -49,6 +49,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 const D_HOURS = 24;
 const DRAG_OVER_CLASS = 'drag-over';
 const IS_DRAGGING_CLASS = 'is-dragging';
+const IS_NOT_DRAGGING_CLASS = 'is-not-dragging';
 
 @Component({
   selector: 'schedule',
@@ -203,7 +204,7 @@ export class ScheduleComponent implements AfterViewInit, OnDestroy {
   now: number = Date.now();
   tomorrow: number = getTomorrow(0).getTime();
   isDragging = false;
-  containerExtraClass = '';
+  containerExtraClass = IS_NOT_DRAGGING_CLASS;
   prevDragOverEl: HTMLElement | null = null;
 
   @ViewChild('gridContainer') gridContainer!: ElementRef;
@@ -310,7 +311,7 @@ export class ScheduleComponent implements AfterViewInit, OnDestroy {
 
     ev.source.element.nativeElement.style.pointerEvents = '';
     this.isDragging = false;
-    this.containerExtraClass = '';
+    this.containerExtraClass = IS_NOT_DRAGGING_CLASS;
     if (this.prevDragOverEl) {
       this.prevDragOverEl.classList.remove(DRAG_OVER_CLASS);
     }
