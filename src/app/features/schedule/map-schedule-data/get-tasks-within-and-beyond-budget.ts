@@ -16,11 +16,18 @@ export const getTasksWithinAndBeyondBudget = (
 
   let remainingBudget = budget;
   // TODO probably can be optimized
+  let isOverBudget = false;
   tasks.forEach((task) => {
     // console.log(remainingBudget / 60 / 60 / 1000);
 
+    if (isOverBudget) {
+      beyond.push(task);
+      return;
+    }
+
     const timeLeftForTask = getTimeLeftForTask(task);
     if (timeLeftForTask > remainingBudget) {
+      isOverBudget = true;
       beyond.push(task);
     } else {
       within.push({
