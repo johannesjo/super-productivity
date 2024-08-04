@@ -3,6 +3,8 @@ import {
   ChangeDetectionStrategy,
   Component,
   ElementRef,
+  Inject,
+  LOCALE_ID,
   OnDestroy,
   ViewChild,
 } from '@angular/core';
@@ -105,7 +107,6 @@ export class ScheduleComponent implements AfterViewInit, OnDestroy {
             return 10;
           }
         }),
-        tap(console.log),
         map((nrOfDaysToShow) => this._getDaysToShow(nrOfDaysToShow)),
       );
     }),
@@ -196,6 +197,19 @@ export class ScheduleComponent implements AfterViewInit, OnDestroy {
       return `grid-column: ${2};  grid-row: ${row} / span ${1}`;
     }),
   );
+  currentTimeSpan$: Observable<{ from: string; to: string }> = this.daysToShow$.pipe(
+    map((days) => {
+      const from = new Date(days[0]);
+      const to = new Date(days[days.length - 1]);
+      return {
+        // from: isToday(from)
+        //   ? 'Today'
+        //   : from.toLocaleDateString(this.locale, { day: 'numeric', month: 'numeric' }),
+        from: from.toLocaleDateString(this.locale, { day: 'numeric', month: 'numeric' }),
+        to: to.toLocaleDateString(this.locale, { day: 'numeric', month: 'numeric' }),
+      };
+    }),
+  );
 
   // timelineDays$: Observable<ScheduleDay[]> = this.timelineEntries$.pipe(
   //   map((entries) => mapTimelineEntriesToDays(entries)),
@@ -221,6 +235,7 @@ export class ScheduleComponent implements AfterViewInit, OnDestroy {
     private _dateService: DateService,
     private _globalTrackingIntervalService: GlobalTrackingIntervalService,
     private _elRef: ElementRef,
+    @Inject(LOCALE_ID) private locale: string,
   ) {
     if (!localStorage.getItem(LS.WAS_TIMELINE_INITIAL_DIALOG_SHOWN)) {
       this._matDialog.open(DialogTimelineSetupComponent, {

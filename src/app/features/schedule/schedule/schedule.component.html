@@ -1,33 +1,38 @@
 <!--  <div class="title">February 2019 Week 6</div>-->
 
 <header>
-  <div class="main-controls">
-    <button
-      mat-icon-button
-      [disabled]="true"
-    >
-      <mat-icon>chevron_left</mat-icon>
-    </button>
-    <div>Current Week</div>
-    <button mat-icon-button>
-      <mat-icon>chevron_right</mat-icon>
-    </button>
+  <!--  <div class="main-controls">-->
+  <!--    <button-->
+  <!--      mat-icon-button-->
+  <!--      [disabled]="true"-->
+  <!--    >-->
+  <!--      <mat-icon>chevron_left</mat-icon>-->
+  <!--    </button>-->
+  <!--    <div-->
+  <!--      *ngIf="currentTimeSpan$|async as currentTimeSpan"-->
+  <!--      style="margin-right: 16px"-->
+  <!--    >-->
+  <!--      {{currentTimeSpan.from}} - {{currentTimeSpan.to}}-->
+  <!--    </div>-->
+  <!--    <button mat-icon-button>-->
+  <!--      <mat-icon>chevron_right</mat-icon>-->
+  <!--    </button>-->
 
-    <div><strong>~</strong>Flow source:</div>
-    <!--    <div><mat-icon>airwave</mat-icon> Flow from:</div>-->
-
-    <button
-      mat-button
-      [matMenuTriggerFor]="menu"
-    >
-      <mat-icon>wb_sunny</mat-icon>
-      Today
-    </button>
-    <mat-menu #menu="matMenu">
-      <button mat-menu-item>Only show appointments</button>
-      <button mat-menu-item>Show tasks from X</button>
-    </mat-menu>
-  </div>
+  <!--    <div><strong>~</strong>Flow source:</div>-->
+  <!--    <div><strong>~</strong></div>-->
+  <!--    <div><mat-icon>airwave</mat-icon> Flow from:</div>-->
+  <!--    <button-->
+  <!--      mat-button-->
+  <!--      [matMenuTriggerFor]="menu"-->
+  <!--    >-->
+  <!--      <mat-icon>wb_sunny</mat-icon>-->
+  <!--      Today-->
+  <!--    </button>-->
+  <!--    <mat-menu #menu="matMenu">-->
+  <!--      <button mat-menu-item>Only show appointments</button>-->
+  <!--      <button mat-menu-item>Show tasks from X</button>-->
+  <!--    </mat-menu>-->
+  <!--  </div>-->
 
   <div class="days">
     <div class="filler"><!--for time --></div>
