@@ -155,7 +155,6 @@ $margin-bottom: 6px;
   &.RepeatProjectionSplitContinuedLast,
   &.ScheduledRepeatProjection {
     //border-width: 1px;
-    cursor: pointer;
     border-left-width: 3px;
     background: $light-theme-bg;
     border-style: dashed;
@@ -167,11 +166,6 @@ $margin-bottom: 6px;
       background: $dark1;
     }
 
-    &:hover {
-      opacity: 1;
-      outline: 1px solid $c-accent;
-    }
-
     :host-context(.is-dragging) &:hover {
       opacity: initial;
       outline: none;
@@ -180,16 +174,33 @@ $margin-bottom: 6px;
     > * {
       opacity: 0.7;
     }
+  }
+}
 
-    .title {
-      //opacity: .7;
-      //padding: 2px;
+:host {
+  &.CalendarEvent,
+  &.RepeatProjection,
+  &.RepeatProjectionSplit,
+  &.ScheduledRepeatProjection {
+    cursor: pointer;
+
+    &:hover {
+      opacity: 1;
+      outline: 1px solid $c-accent;
+
+      .ico {
+        color: $c-accent;
+      }
     }
   }
 }
 
 //  scheduable tasks
 :host {
+  &.ScheduledRepeatProjection .ico {
+    color: $c-primary;
+  }
+
   &.ScheduledTask {
     border-radius: 0;
 
@@ -199,9 +210,10 @@ $margin-bottom: 6px;
       height: 22px;
       min-width: 22px;
       line-height: 22px;
+      font-weight: normal;
 
       margin-left: 4px;
-      margin-top: 7px;
+      margin-top: 4px;
       opacity: 1;
       //border: 1px solid;
       //border-radius: 50%;

@@ -98,8 +98,6 @@ export class ScheduleEventComponent extends BaseComponent implements OnInit, OnD
   @HostBinding('title') title: string = '';
 
   @HostBinding('class') get cssClass(): string {
-    // console.log('CLASS');
-
     let addClass = '';
     if (this.isSplitContinued) {
       addClass = 'split-continued';
@@ -189,9 +187,7 @@ export class ScheduleEventComponent extends BaseComponent implements OnInit, OnD
     if (
       this.se.type === SVEType.RepeatProjection ||
       this.se.type === SVEType.RepeatProjectionSplit ||
-      this.se.type === SVEType.ScheduledRepeatProjection ||
-      this.se.type === SVEType.RepeatProjectionSplitContinued ||
-      this.se.type === SVEType.RepeatProjectionSplitContinuedLast
+      this.se.type === SVEType.ScheduledRepeatProjection
     ) {
       const repeatCfg: TaskRepeatCfg = this.se.data as TaskRepeatCfg;
       console.log(repeatCfg);
