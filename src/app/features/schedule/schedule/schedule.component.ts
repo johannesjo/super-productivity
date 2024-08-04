@@ -42,7 +42,7 @@ import {
   selectTimelineWorkStartEndHours,
 } from '../../config/store/global-config.reducer';
 import { PlannerActions } from '../../planner/store/planner.actions';
-import { FH, SVEType } from '../schedule.const';
+import { FH, SVEType, T_ID_PREFIX } from '../schedule.const';
 import { mapToScheduleDays } from '../map-schedule-data/map-to-schedule-days';
 import { mapScheduleDaysToScheduleEvents } from '../map-schedule-data/map-schedule-days-to-schedule-events';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -350,8 +350,8 @@ export class ScheduleComponent implements AfterViewInit, OnDestroy {
       }
     } else if (target.tagName.toLowerCase() === 'schedule-event') {
       // const sourceTaskId = ev.source.data.data.id;
-      const sourceTaskId = ev.source.element.nativeElement.id.replace('t-', '');
-      const targetTaskId = target.id.replace('t-', '');
+      const sourceTaskId = ev.source.element.nativeElement.id.replace(T_ID_PREFIX, '');
+      const targetTaskId = target.id.replace(T_ID_PREFIX, '');
       console.log(sourceTaskId, targetTaskId);
 
       if (

@@ -55,3 +55,5 @@ export const SCHEDULE_FLOW_TYPES: SVEType[] = [
 export const SCHEDULE_TASK_MIN_DURATION_IN_MS = 10 * 60 * 1000;
 
 export const FH = 12;
+
+export const T_ID_PREFIX = 't-' as const;

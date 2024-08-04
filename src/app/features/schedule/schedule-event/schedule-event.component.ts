@@ -1,23 +1,23 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  DestroyRef,
   ElementRef,
   HostBinding,
   HostListener,
+  inject,
   Input,
-  OnDestroy,
   OnInit,
   ViewChild,
 } from '@angular/core';
 import { ScheduleEvent } from '../schedule.model';
 import { MatIcon } from '@angular/material/icon';
-import { delay, first, takeUntil } from 'rxjs/operators';
+import { delay, first } from 'rxjs/operators';
 import { Store } from '@ngrx/store';
 import { selectProjectById } from '../../project/store/project.selectors';
-import { BaseComponent } from '../../../core/base-component/base.component';
 import { MatMiniFabButton } from '@angular/material/button';
 import { getClockStringFromHours } from '../../../util/get-clock-string-from-hours';
-import { SVEType } from '../schedule.const';
+import { SVEType, T_ID_PREFIX } from '../schedule.const';
 import { isDraggableSE } from '../map-schedule-data/is-schedule-types-type';
 import { MatDialog } from '@angular/material/dialog';
 import { DialogEditTaskRepeatCfgComponent } from '../../task-repeat-cfg/dialog-edit-task-repeat-cfg/dialog-edit-task-repeat-cfg.component';
@@ -41,6 +41,7 @@ import { DialogAddTaskReminderComponent } from '../../tasks/dialog-add-task-remi
 import { AddTaskReminderInterface } from '../../tasks/dialog-add-task-reminder/add-task-reminder-interface';
 import { DialogPlanForDayComponent } from '../../planner/dialog-plan-for-day/dialog-plan-for-day.component';
 import { getWorklogStr } from '../../../util/get-work-log-str';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'schedule-event',
@@ -60,7 +61,7 @@ import { getWorklogStr } from '../../../util/get-work-log-str';
   styleUrl: './schedule-event.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class ScheduleEventComponent extends BaseComponent implements OnInit, OnDestroy {
+export class ScheduleEventComponent implements OnInit {
   T: typeof T = T;
 
   @Input({ required: true })
@@ -76,7 +77,7 @@ export class ScheduleEventComponent extends BaseComponent implements OnInit, OnD
     this.scheduledClockStr = startClockStr;
 
     if (isDraggableSE(this.se)) {
-      this._elRef.nativeElement.id = 't - ' + (this.se.data as any).id;
+      this._elRef.nativeElement.id = T_ID_PREFIX + (this.se.data as any).id;
     }
 
     if (
@@ -186,6 +187,7 @@ export class ScheduleEventComponent extends BaseComponent implements OnInit, OnD
   }
 
   protected readonly SVEType = SVEType;
+  destroyRef = inject(DestroyRef);
 
   @HostListener('click') clickHandler(): void {
     if (this.se.type === SVEType.ScheduledTask) {
@@ -215,19 +217,15 @@ export class ScheduleEventComponent extends BaseComponent implements OnInit, OnD
     private _store: Store,
     private _elRef: ElementRef,
     private _matDialog: MatDialog,
-  ) {
-    super();
-  }
+  ) {}
 
   ngOnInit(): void {
     const pid = (this.se?.data as any)?.projectId;
     if (pid) {
       this._store
         .select(selectProjectById, { id: pid })
-        .pipe(takeUntil(this.onDestroy$))
+        .pipe(takeUntilDestroyed(this.destroyRef))
         .subscribe((p) => {
-          console.log('SET COLOR');
-
           this._elRef.nativeElement.style.setProperty('--project-color', p.theme.primary);
         });
     }
@@ -249,7 +247,6 @@ export class ScheduleEventComponent extends BaseComponent implements OnInit, OnD
       .select(selectTaskByIdWithSubTaskData, { id: this.task.id })
       .pipe(
         first(),
-        takeUntil(this.onDestroy$),
         // NOTE without the delay selectTaskByIdWithSubTaskData triggers twice for unknown reasons
         delay(50),
       )
