@@ -173,6 +173,7 @@ $margin-bottom: 6px;
 }
 
 :host-context(.is-not-dragging) {
+  &.ScheduledTask,
   &.CalendarEvent,
   &.RepeatProjection,
   &.RepeatProjectionSplit,

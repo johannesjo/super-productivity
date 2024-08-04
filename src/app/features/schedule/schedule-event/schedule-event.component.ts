@@ -81,7 +81,8 @@ export class ScheduleEventComponent extends BaseComponent implements OnInit, OnD
       this.se.type === SVEType.Task ||
       this.se.type === SVEType.SplitTask ||
       this.se.type === SVEType.TaskPlannedForDay ||
-      this.se.type === SVEType.SplitTaskPlannedForDay
+      this.se.type === SVEType.SplitTaskPlannedForDay ||
+      this.se.type === SVEType.ScheduledTask
     ) {
       this.task = this.se.data as TaskCopy;
     }
@@ -184,14 +185,14 @@ export class ScheduleEventComponent extends BaseComponent implements OnInit, OnD
   protected readonly SVEType = SVEType;
 
   @HostListener('click') clickHandler(): void {
-    if (
+    if (this.se.type === SVEType.ScheduledTask) {
+      this.editReminder();
+    } else if (
       this.se.type === SVEType.RepeatProjection ||
       this.se.type === SVEType.RepeatProjectionSplit ||
       this.se.type === SVEType.ScheduledRepeatProjection
     ) {
       const repeatCfg: TaskRepeatCfg = this.se.data as TaskRepeatCfg;
-      console.log(repeatCfg);
-
       this._matDialog.open(DialogEditTaskRepeatCfgComponent, {
         data: {
           repeatCfg,

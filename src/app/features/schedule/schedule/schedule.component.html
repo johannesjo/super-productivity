@@ -113,8 +113,7 @@
   @for (ev of (events$|async); track ev.id) {
   <!-- -->
   @if (ev.type === SVEType.Task || ev.type === SVEType.SplitTask || ev.type ===
-  SVEType.TaskPlannedForDay || ev.type === SVEType.SplitTaskPlannedForDay || ev.type ===
-  SVEType.ScheduledTask) {
+  SVEType.TaskPlannedForDay || ev.type === SVEType.SplitTaskPlannedForDay) {
   <schedule-event
     class="draggable"
     cdkDrag
