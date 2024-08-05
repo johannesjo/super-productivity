@@ -58,9 +58,10 @@ export const mapScheduleDaysToScheduleEvents = (
           eventsFlat[eventsFlat.length - 1].isCloseToOthersFirst = true;
         }
 
-        const timeLeftInHours = timeLeft / 1000 / 60 / 60;
-
+        // NOTE since we only use getMinutes we also need to floor the minutes for timeLeftInHours
+        const timeLeftInHours = Math.floor(timeLeft / 1000 / 60) / 60;
         const rowSpan = Math.max(1, Math.round(timeLeftInHours * FH));
+
         eventsFlat.push({
           dayOfMonth:
             ((entry.data as TaskWithPlannedForDayIndication)?.plannedForDay &&
