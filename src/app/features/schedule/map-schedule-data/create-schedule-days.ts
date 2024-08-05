@@ -149,6 +149,9 @@ export const createScheduleDays = (
       viewEntries,
       viewEntriesToRenderForDay,
       nonScheduledBudgetForDay2: nonScheduledBudgetForDay / 60 / 60 / 1000,
+      within,
+      beyond,
+      isSomeTimeLeftForLastOverBudget,
     });
 
     // TODO there is probably a better way to do this
