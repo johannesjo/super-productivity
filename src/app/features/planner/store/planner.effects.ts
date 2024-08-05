@@ -28,6 +28,8 @@ export class PlannerEffects {
           PlannerActions.transferTask,
           PlannerActions.removeTaskFromDays,
           PlannerActions.planTaskForDay,
+          PlannerActions.moveBeforeTask,
+          updateTaskTags,
         ),
         withLatestFrom(this._store.pipe(select(selectPlannerState))),
         tap(([, plannerState]) => this._saveToLs(plannerState, true)),
