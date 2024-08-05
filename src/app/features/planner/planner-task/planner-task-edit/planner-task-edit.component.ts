@@ -27,7 +27,6 @@ export class PlannerTaskEditComponent implements AfterViewInit {
   constructor(private _el: ElementRef) {}
 
   ngAfterViewInit(): void {
-    console.log('ngAfterViewInit');
     if (this._el.nativeElement) {
       this._el.nativeElement.querySelector('textarea').focus();
     }

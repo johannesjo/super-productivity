@@ -1,7 +1,6 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { MatDialogRef } from '@angular/material/dialog';
 import { T } from 'src/app/t.const';
-import { TaskService } from '../../tasks/task.service';
 import { PlannerActions } from '../store/planner.actions';
 import { select, Store } from '@ngrx/store';
 import { first, map, switchMap, withLatestFrom } from 'rxjs/operators';
@@ -17,6 +16,8 @@ import { DateService } from '../../../core/date/date.service';
 import { PlannerService } from '../planner.service';
 import { combineLatest } from 'rxjs';
 import { getAllMissingPlannedTaskIdsForDay } from '../util/get-all-missing-planned-task-ids-for-day';
+import { TODAY_TAG } from '../../tag/tag.const';
+import { updateTaskTags } from '../../tasks/store/task.actions';
 
 @Component({
   selector: 'dialog-add-planned-tasks',
@@ -55,7 +56,6 @@ export class DialogAddPlannedTasksComponent {
   constructor(
     private _matDialogRef: MatDialogRef<DialogAddPlannedTasksComponent>,
     private _plannerService: PlannerService,
-    private _taskService: TaskService,
     private _store: Store,
     private _dateService: DateService,
   ) {
@@ -81,7 +81,9 @@ export class DialogAddPlannedTasksComponent {
   async addTasksToToday(): Promise<void> {
     const missingTasks = await this._missingTasks$.pipe(first()).toPromise();
     missingTasks.reverse().forEach((task) => {
-      this._taskService.addTodayTag(task);
+      this._store.dispatch(
+        updateTaskTags({ task, newTagIds: [TODAY_TAG.id, ...task.tagIds] }),
+      );
     });
     this._close();
   }
