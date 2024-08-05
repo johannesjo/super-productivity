@@ -1,5 +1,6 @@
 import {
   ChangeDetectionStrategy,
+  ChangeDetectorRef,
   Component,
   DestroyRef,
   ElementRef,
@@ -121,6 +122,9 @@ export class ScheduleEventComponent implements OnInit {
     }
 
     // SPLIT STUFF
+    this.isSplitStart = false;
+    this.isSplitContinued = false;
+    this.isSplitContinuedLast = false;
     if (
       this.se.type === SVEType.SplitTask ||
       this.se.type === SVEType.RepeatProjectionSplit ||
@@ -165,6 +169,7 @@ export class ScheduleEventComponent implements OnInit {
 
     // ICO TYPE
     this.icoType = this._getIcoType();
+    this._cd.detectChanges();
   }
 
   @HostListener('click') clickHandler(): void {
@@ -195,6 +200,7 @@ export class ScheduleEventComponent implements OnInit {
     private _store: Store,
     private _elRef: ElementRef,
     private _matDialog: MatDialog,
+    private _cd: ChangeDetectorRef,
   ) {}
 
   ngOnInit(): void {
