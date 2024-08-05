@@ -22,7 +22,10 @@ export const mapToScheduleDays = (
   calenderWithItems: TimelineCalendarMapEntry[],
   currentId: string | null,
   plannerDayMap: PlannerDayMap,
-  workStartEndCfg?: ScheduleWorkStartEndCfg,
+  workStartEndCfg: ScheduleWorkStartEndCfg = {
+    startTime: '0:00',
+    endTime: '23:59',
+  },
   lunchBreakCfg?: ScheduleLunchBreakCfg,
 ): ScheduleDay[] => {
   // NOTE to use for failing test cases
