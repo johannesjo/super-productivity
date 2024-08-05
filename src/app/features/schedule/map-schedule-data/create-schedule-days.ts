@@ -71,9 +71,6 @@ export const createScheduleDays = (
       plannedForDay: dayDate,
     })) as TaskWithPlannedForDayIndication[];
     const flowTasksForDay = [...flowTasksLeftAfterDay, ...plannedForDayTasks];
-    console.log({ flowTasksLeftAfterDay });
-    console.log({ flowTasksForDay });
-
     const { beyond, within, isSomeTimeLeftForLastOverBudget } =
       getTasksWithinAndBeyondBudget(flowTasksForDay, nonScheduledBudgetForDay);
 
@@ -87,8 +84,6 @@ export const createScheduleDays = (
       }
       return beyond;
     })();
-
-    console.log(isSomeTimeLeftForLastOverBudget);
 
     viewEntries = createViewEntriesForDay(
       dayDate,
@@ -105,13 +100,6 @@ export const createScheduleDays = (
     // flowTasksLeftAfterDay = allBeyondButFirst.filter(
     //   (task) => !viewEntries.find((e) => (e.data as any)?.id === task.id),
     // );
-    console.log({
-      within,
-      beyond,
-      nonSplitBeyondTasks,
-      flowTasksLeftAfterDay,
-      viewEntries,
-    });
 
     const viewEntriesToRenderForDay: SVE[] = [];
     splitTaskOrRepeatEntryForNextDay = undefined;
@@ -136,7 +124,7 @@ export const createScheduleDays = (
           splitTaskOrRepeatEntryForNextDay = entry;
         } else {
           console.log(entry);
-          console.warn('Schedule: View Entry for current not available');
+          console.warn('Entry start time after next day start', entry);
         }
       } else {
         if (
@@ -179,8 +167,6 @@ export const createScheduleDays = (
       beyondBudgetTasks: beyondBudgetTasks,
     };
   });
-
-  console.log({ v });
 
   return v;
 };

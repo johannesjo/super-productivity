@@ -44,7 +44,6 @@ export const createViewEntriesForDay = (
       createScheduleViewEntriesForNormalTasks(startTime, nonScheduledTasksForDay),
     );
   }
-  console.log(viewEntries);
 
   insertBlockedBlocksViewEntriesForSchedule(
     viewEntries as SVETask[],
@@ -60,7 +59,6 @@ export const createViewEntriesForDay = (
     }
     return a.start - b.start;
   });
-  console.log(viewEntries);
 
   // TODO add current handling
   // Move current always first and let it appear as now

@@ -2,7 +2,6 @@ import { TaskPlanned } from '../../tasks/task.model';
 import { TaskRepeatCfg } from '../../task-repeat-cfg/task-repeat-cfg.model';
 import {
   BlockedBlockByDayMap,
-  BlockedBlockType,
   TimelineCalendarMapEntry,
 } from '../../timeline/timeline.model';
 import { ScheduleLunchBreakCfg, ScheduleWorkStartEndCfg } from '../schedule.model';
@@ -28,12 +27,6 @@ export const createBlockedBlocksByDayMap = (
     lunchBreakCfg,
     now,
     NR_OF_DAYS,
-  );
-  // console.log(allBlockedBlocks);
-  console.log(
-    allBlockedBlocks.filter((block) =>
-      block.entries.find((e) => e.type === BlockedBlockType.ScheduledTask),
-    ),
   );
 
   const blockedBlocksByDay: BlockedBlockByDayMap = {};

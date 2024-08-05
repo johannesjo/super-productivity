@@ -81,7 +81,6 @@ export const mapToScheduleDays = (
     lunchBreakCfg,
     now,
   );
-  // console.log({ blockerBlocksDayMap });
 
   const v = createScheduleDays(
     nonScheduledTasks,
@@ -92,7 +91,6 @@ export const mapToScheduleDays = (
     workStartEndCfg,
     now,
   );
-  // console.log(v);
 
   return v;
 };
