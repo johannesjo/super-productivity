@@ -63,6 +63,30 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 })
 export class ScheduleEventComponent implements OnInit {
   T: typeof T = T;
+  @HostBinding('title') title: string = '';
+  @HostBinding('class') cssClass: string = '';
+  @HostBinding('style') style: string = '';
+
+  se!: ScheduleEvent;
+  task!: TaskCopy;
+  scheduledClockStr: string = '';
+  isSplitStart: boolean = false;
+  isSplitContinued: boolean = false;
+  isSplitContinuedLast: boolean = false;
+  icoType:
+    | 'REPEAT'
+    | 'FLOW'
+    | 'SCHEDULED_TASK'
+    | 'PLANNED_FOR_DAY'
+    | 'CAL_PROJECTION'
+    | 'SPLIT_CONTINUE'
+    | 'LUNCH_BREAK' = 'SPLIT_CONTINUE';
+
+  contextMenuPosition: { x: string; y: string } = { x: '0px', y: '0px' };
+  @ViewChild('contextMenuTriggerEl', { static: false, read: MatMenuTrigger })
+  contextMenu!: MatMenuTrigger;
+  protected readonly SVEType = SVEType;
+  destroyRef = inject(DestroyRef);
 
   @Input({ required: true })
   set event(event: ScheduleEvent) {
@@ -80,6 +104,7 @@ export class ScheduleEventComponent implements OnInit {
       this._elRef.nativeElement.id = T_ID_PREFIX + (this.se.data as any).id;
     }
 
+    // SET TASK IF OF TYPE
     if (
       this.se.type === SVEType.Task ||
       this.se.type === SVEType.SplitTask ||
@@ -89,20 +114,27 @@ export class ScheduleEventComponent implements OnInit {
     ) {
       this.task = this.se.data as TaskCopy;
     }
-  }
 
-  se!: ScheduleEvent;
-  scheduledClockStr: string = '';
-  task!: TaskCopy;
+    // SPLIT STUFF
+    if (
+      this.se.type === SVEType.SplitTask ||
+      this.se.type === SVEType.RepeatProjectionSplit ||
+      this.se.type === SVEType.SplitTaskPlannedForDay
+    ) {
+      this.isSplitStart = true;
+    } else if (
+      this.se.type === SVEType.SplitTaskContinued ||
+      this.se.type === SVEType.RepeatProjectionSplitContinued
+    ) {
+      this.isSplitContinued = true;
+    } else if (
+      this.se.type === SVEType.SplitTaskContinuedLast ||
+      this.se.type === SVEType.RepeatProjectionSplitContinuedLast
+    ) {
+      this.isSplitContinuedLast = true;
+    }
 
-  contextMenuPosition: { x: string; y: string } = { x: '0px', y: '0px' };
-
-  @ViewChild('contextMenuTriggerEl', { static: false, read: MatMenuTrigger })
-  contextMenu!: MatMenuTrigger;
-
-  @HostBinding('title') title: string = '';
-
-  @HostBinding('class') get cssClass(): string {
+    // CSS CLASS
     let addClass = '';
     if (this.isSplitContinued) {
       addClass = 'split-continued';
@@ -121,73 +153,14 @@ export class ScheduleEventComponent implements OnInit {
     if (this.se.timeLeftInHours <= 1 / 4) {
       addClass += ' very-short-event';
     }
+    this.cssClass = this.se.type + '  ' + addClass;
 
-    return this.se?.type + '  ' + addClass;
+    // STYLE
+    this.style = this.se.style;
+
+    // ICO TYPE
+    this.icoType = this._getIcoType();
   }
-
-  @HostBinding('style') get style(): string {
-    return this.se?.style;
-  }
-
-  get isSplitStart(): boolean {
-    return (
-      this.se?.type === SVEType.SplitTask ||
-      this.se?.type === SVEType.RepeatProjectionSplit ||
-      this.se?.type === SVEType.SplitTaskPlannedForDay
-    );
-  }
-
-  get isSplitContinued(): boolean {
-    return (
-      this.se?.type === SVEType.SplitTaskContinued ||
-      this.se?.type === SVEType.RepeatProjectionSplitContinued
-    );
-  }
-
-  get isSplitContinuedLast(): boolean {
-    return (
-      this.se?.type === SVEType.SplitTaskContinuedLast ||
-      this.se?.type === SVEType.RepeatProjectionSplitContinuedLast
-    );
-  }
-
-  get icoType():
-    | 'REPEAT'
-    | 'FLOW'
-    | 'SCHEDULED_TASK'
-    | 'PLANNED_FOR_DAY'
-    | 'CAL_PROJECTION'
-    | 'SPLIT_CONTINUE'
-    | 'LUNCH_BREAK' {
-    switch (this.se?.type) {
-      case SVEType.ScheduledRepeatProjection:
-      case SVEType.RepeatProjection:
-      case SVEType.RepeatProjectionSplit: {
-        return 'REPEAT';
-      }
-      case SVEType.TaskPlannedForDay:
-      case SVEType.SplitTaskPlannedForDay: {
-        return 'PLANNED_FOR_DAY';
-      }
-      case SVEType.Task:
-      case SVEType.SplitTask: {
-        return 'FLOW';
-      }
-      case SVEType.CalendarEvent: {
-        return 'CAL_PROJECTION';
-      }
-      case SVEType.ScheduledTask: {
-        return 'SCHEDULED_TASK';
-      }
-      case SVEType.LunchBreak: {
-        return 'LUNCH_BREAK';
-      }
-    }
-    return 'SPLIT_CONTINUE';
-  }
-
-  protected readonly SVEType = SVEType;
-  destroyRef = inject(DestroyRef);
 
   @HostListener('click') clickHandler(): void {
     if (this.se.type === SVEType.ScheduledTask) {
@@ -303,5 +276,40 @@ export class ScheduleEventComponent implements OnInit {
         day: getWorklogStr(this.task?.plannedAt || undefined),
       },
     });
+  }
+
+  private _getIcoType():
+    | 'REPEAT'
+    | 'FLOW'
+    | 'SCHEDULED_TASK'
+    | 'PLANNED_FOR_DAY'
+    | 'CAL_PROJECTION'
+    | 'SPLIT_CONTINUE'
+    | 'LUNCH_BREAK' {
+    switch (this.se.type) {
+      case SVEType.ScheduledRepeatProjection:
+      case SVEType.RepeatProjection:
+      case SVEType.RepeatProjectionSplit: {
+        return 'REPEAT';
+      }
+      case SVEType.TaskPlannedForDay:
+      case SVEType.SplitTaskPlannedForDay: {
+        return 'PLANNED_FOR_DAY';
+      }
+      case SVEType.Task:
+      case SVEType.SplitTask: {
+        return 'FLOW';
+      }
+      case SVEType.CalendarEvent: {
+        return 'CAL_PROJECTION';
+      }
+      case SVEType.ScheduledTask: {
+        return 'SCHEDULED_TASK';
+      }
+      case SVEType.LunchBreak: {
+        return 'LUNCH_BREAK';
+      }
+    }
+    return 'SPLIT_CONTINUE';
   }
 }
