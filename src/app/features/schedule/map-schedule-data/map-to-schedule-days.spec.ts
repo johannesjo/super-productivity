@@ -661,7 +661,7 @@ describe('mapToScheduleDays()', () => {
     ] as any);
   });
 
-  xit('UNTESTED SO CHECK IF FAILING  should work for an example with all the stuff', () => {
+  it('UNTESTED SO CHECK IF FAILING  should work for an example with all the stuff', () => {
     const r = mapToScheduleDays(
       N,
       [NDS, '1970-01-02', '1970-01-03', '1970-01-04'],
@@ -673,7 +673,7 @@ describe('mapToScheduleDays()', () => {
         // BEFORE WORK
         fakePlannedTaskEntry('S1', minAfterNow(2 * 60), { timeEstimate: h(1) }),
         // NEXT DAY AT 10
-        fakePlannedTaskEntry('S2', minAfterNow(34 * 60), { timeEstimate: h(0.5) }),
+        fakePlannedTaskEntry('S2', minAfterNow((10 + 24) * 60), { timeEstimate: h(0.5) }),
       ],
       [fakeRepeatCfg('R1', '01:00', { defaultEstimate: h(1) })],
       [
@@ -736,9 +736,7 @@ describe('mapToScheduleDays()', () => {
     } as any);
 
     expect(r[1]).toEqual({
-      beyondBudgetTasks: [
-        { id: 'FD2', subTaskIds: [], tagIds: [], timeEstimate: h(2), timeSpent: 0 },
-      ],
+      beyondBudgetTasks: [],
       dayDate: '1970-01-02',
       entries: [
         {
@@ -752,7 +750,7 @@ describe('mapToScheduleDays()', () => {
           data: jasmine.any(Object),
           duration: h(2),
           id: 'R1_1970-01-02',
-          start: 115200000,
+          start: dhTz(1, 9),
           type: 'RepeatProjection',
         },
         {
@@ -778,10 +776,17 @@ describe('mapToScheduleDays()', () => {
         },
         {
           data: jasmine.any(Object),
-          id: 'FD1__0',
+          id: 'FD1_1970-01-02_0',
           start: dhTz(1, 13),
           duration: h(3.5),
           type: 'SplitTaskContinuedLast',
+        },
+        {
+          data: jasmine.any(Object),
+          duration: h(0.5),
+          id: 'FD2',
+          start: dhTz(1, 16.5),
+          type: 'SplitTaskPlannedForDay',
         },
       ],
       isToday: false,
@@ -792,70 +797,290 @@ describe('mapToScheduleDays()', () => {
       dayDate: '1970-01-03',
       entries: [
         {
-          data: jasmine.any(Object),
-          duration: 3600000,
+          data: {
+            defaultEstimate: 3600000,
+            friday: true,
+            id: 'R1',
+            lastTaskCreation: -86400000,
+            monday: true,
+            repeatCycle: 'DAILY',
+            repeatEvery: 1,
+            saturday: true,
+            startDate: '1969-01-01',
+            startTime: '01:00',
+            sunday: true,
+            thursday: true,
+            tuesday: true,
+            wednesday: true,
+          },
+          duration: h(1),
           id: 'R1_1970-01-03',
-          start: 172800000,
+          start: dhTz(2, 1),
           type: 'ScheduledRepeatProjection',
         },
         {
-          data: jasmine.any(Object),
+          data: { index: 0, projectId: undefined, taskId: 'FD2', title: undefined },
+          duration: h(1.5),
+          id: 'FD2_1970-01-02_0',
+          start: dhTz(2, 9),
+          type: 'SplitTaskContinuedLast',
+        },
+        {
+          data: {
+            defaultEstimate: 7200000,
+            friday: true,
+            id: 'R1',
+            lastTaskCreation: 60000,
+            monday: true,
+            repeatCycle: 'DAILY',
+            repeatEvery: 1,
+            saturday: true,
+            startDate: '1969-01-01',
+            startTime: undefined,
+            sunday: true,
+            thursday: true,
+            tuesday: true,
+            wednesday: true,
+          },
+          duration: 5400000,
           id: 'R1_1970-01-03',
-          start: 201600000,
-          duration: 7200000,
-          type: 'RepeatProjection',
+          // start: dhTz(2, 9),
+          start: 207000000,
+          type: 'RepeatProjectionSplit',
         },
         {
           data: { endTime: '13:00', startTime: '12:00' },
+          duration: h(1),
           id: 'LUNCH_BREAK_1970-01-03',
-          start: 212400000,
-          duration: 3600000,
-          type: 'LunchBreak',
-        },
-      ],
-      isToday: false,
-    } as any);
-    expect(r[3]).toEqual({
-      beyondBudgetTasks: [],
-      dayDate: '1970-01-04',
-      entries: [
-        {
-          data: jasmine.any(Object),
-          duration: 3600000,
-          id: 'R1_1970-01-04',
-          start: 259200000,
-          type: 'ScheduledRepeatProjection',
-        },
-        {
-          data: jasmine.any(Object),
-          id: 'R1_1970-01-04',
-          start: 288000000,
-          duration: h(2),
-          type: 'RepeatProjection',
-        },
-        {
-          data: jasmine.any(Object),
-          id: 'FD3',
-          start: 295200000,
-          duration: 3600000,
-          type: 'TaskPlannedForDay',
-        },
-        {
-          data: jasmine.any(Object),
-          id: 'LUNCH_BREAK_1970-01-04',
-          start: 298800000,
-          duration: 3600000,
+          // start: 212400000,
+          start: dhTz(2, 12),
           type: 'LunchBreak',
         },
         {
-          data: jasmine.any(Object),
-          id: 'FD4',
-          start: 302400000,
-          duration: 1800000,
-          type: 'TaskPlannedForDay',
+          data: {
+            defaultEstimate: 7200000,
+            friday: true,
+            id: 'R1',
+            lastTaskCreation: 60000,
+            monday: true,
+            repeatCycle: 'DAILY',
+            repeatEvery: 1,
+            saturday: true,
+            startDate: '1969-01-01',
+            startTime: undefined,
+            sunday: true,
+            thursday: true,
+            tuesday: true,
+            wednesday: true,
+          },
+          duration: h(0.5),
+          id: 'R1_1970-01-03_0',
+          splitIndex: 0,
+          start: dhTz(2, 13),
+          type: 'RepeatProjectionSplitContinuedLast',
         },
       ],
       isToday: false,
     } as any);
   });
+
+  // TODO we can use this for testing the beyond budget tasks mode
+  //
+  // it('UNTESTED SO CHECK IF FAILING  should work for an example with all the stuff', () => {
+  //   const r = mapToScheduleDays(
+  //     N,
+  //     [NDS, '1970-01-02', '1970-01-03', '1970-01-04'],
+  //     [
+  //       // NOTE: takes us to the next day, since without dayStart and dayEnd it otherwise won't
+  //       fakeTaskEntry('N1', { timeEstimate: h(2) }),
+  //     ],
+  //     [
+  //       // BEFORE WORK
+  //       fakePlannedTaskEntry('S1', minAfterNow(2 * 60), { timeEstimate: h(1) }),
+  //       // NEXT DAY AT 10
+  //       fakePlannedTaskEntry('S2', minAfterNow(34 * 60), { timeEstimate: h(0.5) }),
+  //     ],
+  //     [fakeRepeatCfg('R1', '01:00', { defaultEstimate: h(1) })],
+  //     [
+  //       fakeRepeatCfg('R1', undefined, {
+  //         defaultEstimate: h(2),
+  //         lastTaskCreation: N + 60000,
+  //       }),
+  //     ],
+  //     [],
+  //     null,
+  //     {
+  //       // eslint-disable-next-line @typescript-eslint/naming-convention
+  //       '1970-01-02': [
+  //         fakeTaskEntry('FD1', { timeEstimate: h(4) }),
+  //         fakeTaskEntry('FD2', { timeEstimate: h(2) }),
+  //       ],
+  //       // eslint-disable-next-line @typescript-eslint/naming-convention
+  //       '1970-01-04': [
+  //         fakeTaskEntry('FD3', { timeEstimate: h(1) }),
+  //         fakeTaskEntry('FD4', { timeEstimate: h(0.5) }),
+  //       ],
+  //     },
+  //     {
+  //       startTime: '9:00',
+  //       endTime: '17:00',
+  //     },
+  //     {
+  //       startTime: '12:00',
+  //       endTime: '13:00',
+  //     },
+  //   );
+  //
+  //   expect(r[0]).toEqual({
+  //     beyondBudgetTasks: [],
+  //     dayDate: '1970-01-01',
+  //     entries: [
+  //       {
+  //         data: jasmine.any(Object),
+  //         id: 'S1',
+  //         start: h(2),
+  //         duration: h(1),
+  //         type: 'ScheduledTask',
+  //       },
+  //       {
+  //         data: jasmine.any(Object),
+  //         id: 'N1',
+  //         start: hTz(9),
+  //         duration: h(2),
+  //         type: 'Task',
+  //       },
+  //       {
+  //         data: jasmine.any(Object),
+  //         id: 'LUNCH_BREAK_1970-01-01',
+  //         start: hTz(12),
+  //         duration: h(1),
+  //         type: 'LunchBreak',
+  //       },
+  //     ],
+  //     isToday: true,
+  //   } as any);
+  //
+  //   expect(r[1]).toEqual({
+  //     beyondBudgetTasks: [
+  //       { id: 'FD2', subTaskIds: [], tagIds: [], timeEstimate: h(2), timeSpent: 0 },
+  //     ],
+  //     dayDate: '1970-01-02',
+  //     entries: [
+  //       {
+  //         data: jasmine.any(Object),
+  //         duration: h(1),
+  //         id: 'R1_1970-01-02',
+  //         start: dhTz(1, 1),
+  //         type: 'ScheduledRepeatProjection',
+  //       },
+  //       {
+  //         data: jasmine.any(Object),
+  //         duration: h(2),
+  //         id: 'R1_1970-01-02',
+  //         start: 115200000,
+  //         type: 'RepeatProjection',
+  //       },
+  //       {
+  //         data: jasmine.any(Object),
+  //         id: 'S2',
+  //         start: dhTz(1, 11),
+  //         duration: h(0.5),
+  //         type: 'ScheduledTask',
+  //       },
+  //       {
+  //         data: jasmine.any(Object),
+  //         id: 'FD1',
+  //         start: dhTz(1, 11.5),
+  //         duration: h(0.5),
+  //         type: 'SplitTaskPlannedForDay',
+  //       },
+  //       {
+  //         data: jasmine.any(Object),
+  //         id: 'LUNCH_BREAK_1970-01-02',
+  //         start: dhTz(1, 12),
+  //         duration: h(1),
+  //         type: 'LunchBreak',
+  //       },
+  //       {
+  //         data: jasmine.any(Object),
+  //         id: 'FD1__0',
+  //         start: dhTz(1, 13),
+  //         duration: h(3.5),
+  //         type: 'SplitTaskContinuedLast',
+  //       },
+  //     ],
+  //     isToday: false,
+  //   } as any);
+  //
+  //   expect(r[2]).toEqual({
+  //     beyondBudgetTasks: [],
+  //     dayDate: '1970-01-03',
+  //     entries: [
+  //       {
+  //         data: jasmine.any(Object),
+  //         duration: 3600000,
+  //         id: 'R1_1970-01-03',
+  //         start: 172800000,
+  //         type: 'ScheduledRepeatProjection',
+  //       },
+  //       {
+  //         data: jasmine.any(Object),
+  //         id: 'R1_1970-01-03',
+  //         start: 201600000,
+  //         duration: 7200000,
+  //         type: 'RepeatProjection',
+  //       },
+  //       {
+  //         data: { endTime: '13:00', startTime: '12:00' },
+  //         id: 'LUNCH_BREAK_1970-01-03',
+  //         start: 212400000,
+  //         duration: 3600000,
+  //         type: 'LunchBreak',
+  //       },
+  //     ],
+  //     isToday: false,
+  //   } as any);
+  //   expect(r[3]).toEqual({
+  //     beyondBudgetTasks: [],
+  //     dayDate: '1970-01-04',
+  //     entries: [
+  //       {
+  //         data: jasmine.any(Object),
+  //         duration: 3600000,
+  //         id: 'R1_1970-01-04',
+  //         start: 259200000,
+  //         type: 'ScheduledRepeatProjection',
+  //       },
+  //       {
+  //         data: jasmine.any(Object),
+  //         id: 'R1_1970-01-04',
+  //         start: 288000000,
+  //         duration: h(2),
+  //         type: 'RepeatProjection',
+  //       },
+  //       {
+  //         data: jasmine.any(Object),
+  //         id: 'FD3',
+  //         start: 295200000,
+  //         duration: 3600000,
+  //         type: 'TaskPlannedForDay',
+  //       },
+  //       {
+  //         data: jasmine.any(Object),
+  //         id: 'LUNCH_BREAK_1970-01-04',
+  //         start: 298800000,
+  //         duration: 3600000,
+  //         type: 'LunchBreak',
+  //       },
+  //       {
+  //         data: jasmine.any(Object),
+  //         id: 'FD4',
+  //         start: 302400000,
+  //         duration: 1800000,
+  //         type: 'TaskPlannedForDay',
+  //       },
+  //     ],
+  //     isToday: false,
+  //   } as any);
+  // });
 });
