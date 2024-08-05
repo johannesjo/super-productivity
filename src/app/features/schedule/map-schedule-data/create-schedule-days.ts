@@ -27,7 +27,7 @@ export const createScheduleDays = (
   workStartEndCfg: ScheduleWorkStartEndCfg | undefined,
   now: number,
 ): ScheduleDay[] => {
-  let splitTaskOrRepeatEntryForNextDay: SVEEntryForNextDay | undefined;
+  let viewEntriesPushedToNextDay: SVEEntryForNextDay[];
   let flowTasksLeftAfterDay: TaskWithoutReminder[] = nonScheduledTasks;
   let beyondBudgetTasks: TaskWithoutReminder[];
 
@@ -91,7 +91,7 @@ export const createScheduleDays = (
       nonScheduledRepeatCfgsDueOnDay,
       within,
       blockerBlocksForDay,
-      splitTaskOrRepeatEntryForNextDay,
+      viewEntriesPushedToNextDay,
     );
     // beyondBudgetTasks = beyond;
     beyondBudgetTasks = [];
@@ -102,7 +102,7 @@ export const createScheduleDays = (
     // );
 
     const viewEntriesToRenderForDay: SVE[] = [];
-    splitTaskOrRepeatEntryForNextDay = undefined;
+    viewEntriesPushedToNextDay = [];
     viewEntries.forEach((entry) => {
       if (entry.plannedForDay && entry.type === SVEType.Task) {
         entry.type = SVEType.TaskPlannedForDay;
@@ -118,10 +118,7 @@ export const createScheduleDays = (
           entry.type === SVEType.RepeatProjectionSplitContinued ||
           entry.type === SVEType.RepeatProjectionSplitContinuedLast
         ) {
-          if (splitTaskOrRepeatEntryForNextDay) {
-            throw new Error('Schedule: More than one continued split task');
-          }
-          splitTaskOrRepeatEntryForNextDay = entry;
+          viewEntriesPushedToNextDay.push(entry);
         } else {
           console.log(entry);
           console.warn('Entry start time after next day start', entry);
@@ -144,7 +141,7 @@ export const createScheduleDays = (
     console.log({
       dayDate,
       startTime: new Date(startTime),
-      splitTaskOrRepeatEntryForNextDay,
+      viewEntriesPushedToNextDay,
       flowTasksLeftAfterDay,
       blockerBlocksForDay,
       nonScheduledBudgetForDay,

@@ -454,6 +454,94 @@ describe('mapToScheduleDays()', () => {
     ] as any);
   });
 
+  it('should work for for tasks spanning multiple days', () => {
+    const r = mapToScheduleDays(
+      N,
+      [NDS, '1970-01-02', '1970-01-03'],
+      [
+        // NOTE: takes us to the next day, since without dayStart and dayEnd it otherwise won't
+        fakeTaskEntry('N1', { timeEstimate: h(16) }),
+      ],
+      [],
+      [
+        fakeRepeatCfg('R1', undefined, {
+          defaultEstimate: h(2),
+          startTime: '9:00',
+          lastTaskCreation: N + 60000,
+        }),
+      ],
+      [],
+      [],
+      null,
+      {},
+      {
+        startTime: '9:00',
+        endTime: '17:00',
+      },
+      undefined,
+    );
+
+    expect(r[0]).toEqual({
+      beyondBudgetTasks: [],
+      dayDate: '1970-01-01',
+      entries: [
+        {
+          data: jasmine.any(Object),
+          id: 'N1',
+          start: dhTz(0, 9),
+          // eslint-disable-next-line no-mixed-operators
+          duration: h(8),
+          type: 'SplitTask',
+        },
+      ],
+      isToday: true,
+    } as any);
+
+    expect(r[1]).toEqual({
+      beyondBudgetTasks: [],
+      dayDate: '1970-01-02',
+      entries: [
+        {
+          data: jasmine.any(Object),
+          duration: h(2),
+          id: 'R1_1970-01-02',
+          start: dhTz(1, 9),
+          type: 'ScheduledRepeatProjection',
+        },
+        {
+          data: jasmine.any(Object),
+          duration: h(6),
+          id: 'N1_1970-01-01_0',
+          start: dhTz(1, 11),
+          type: 'SplitTaskContinued',
+        },
+      ],
+      isToday: false,
+    } as any);
+
+    expect(r[2]).toEqual({
+      beyondBudgetTasks: [],
+      dayDate: '1970-01-03',
+      entries: [
+        {
+          data: jasmine.any(Object),
+          duration: h(2),
+          id: 'R1_1970-01-03',
+          start: dhTz(2, 9),
+          type: 'ScheduledRepeatProjection',
+        },
+        {
+          data: jasmine.any(Object),
+          duration: h(2),
+          id: 'N1_1970-01-02_1',
+          start: dhTz(2, 11),
+          type: 'SplitTaskContinuedLast',
+        },
+      ],
+      isToday: false,
+    } as any);
+  });
+
   it('should sort in planned tasks to their days', () => {
     const r = mapToScheduleDays(
       N,
@@ -661,7 +749,7 @@ describe('mapToScheduleDays()', () => {
     ] as any);
   });
 
-  it('UNTESTED SO CHECK IF FAILING  should work for an example with all the stuff', () => {
+  it('should work for an example with all the stuff', () => {
     const r = mapToScheduleDays(
       N,
       [NDS, '1970-01-02', '1970-01-03', '1970-01-04'],

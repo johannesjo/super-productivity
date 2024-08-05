@@ -16,17 +16,19 @@ export const createViewEntriesForDay = (
   nonScheduledRepeatCfgsDueOnDay: TaskRepeatCfg[],
   nonScheduledTasksForDay: (TaskWithoutReminder | TaskWithPlannedForDayIndication)[],
   blockedBlocksForDay: BlockedBlock[],
-  prevDaySplitTaskEntry?: SVEEntryForNextDay,
+  viewEntriesPushedToNextDay: SVEEntryForNextDay[],
 ): SVE[] => {
   let viewEntries: SVE[] = [];
   let startTime = initialStartTime;
 
-  if (prevDaySplitTaskEntry) {
-    viewEntries.push({
-      ...prevDaySplitTaskEntry,
-      start: startTime,
+  if (viewEntriesPushedToNextDay) {
+    viewEntriesPushedToNextDay.forEach((ve) => {
+      viewEntries.push({
+        ...ve,
+        start: startTime,
+      });
+      startTime += ve.duration;
     });
-    startTime += prevDaySplitTaskEntry.duration;
   }
 
   const { entries, startTimeAfter } = createViewEntriesForNonScheduledRepeatProjections(
