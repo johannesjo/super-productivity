@@ -239,7 +239,7 @@ describe('mapToScheduleDays()', () => {
           },
           {
             data: jasmine.any(Object),
-            id: 'N1__0',
+            id: 'N1_1970-01-01_0',
             start: minAfterNowTs(60),
             duration: h(0.5),
             type: 'SplitTaskContinued',
@@ -253,7 +253,7 @@ describe('mapToScheduleDays()', () => {
           },
           {
             data: jasmine.any(Object),
-            id: 'N1__1',
+            id: 'N1_1970-01-01_1',
             start: minAfterNowTs(120),
             duration: h(1),
             type: 'SplitTaskContinuedLast',
@@ -322,6 +322,7 @@ describe('mapToScheduleDays()', () => {
       [NDS, '1970-01-02'],
       [
         // NOTE: takes us to the next day, since without dayStart and dayEnd it otherwise won't
+        // NOTE2: it is 23 since we're at 1:00 in the current time zone
         fakeTaskEntry('N1', { timeEstimate: h(23) - 60000 }),
         fakeTaskEntry('N2', { timeEstimate: h(2) }),
         // fakeTaskEntry('2', { timeEstimate: h(2 }),
@@ -393,7 +394,7 @@ describe('mapToScheduleDays()', () => {
       [NDS, '1970-01-02'],
       [
         // NOTE: takes us to the next day, since without dayStart and dayEnd it otherwise won't
-        fakeTaskEntry('N1', { timeEstimate: h(24) }),
+        fakeTaskEntry('N1', { timeEstimate: hTz(24) - 60000 }),
         fakeTaskEntry('N2', { timeEstimate: h(1) }),
       ],
       [],
@@ -421,7 +422,7 @@ describe('mapToScheduleDays()', () => {
             id: 'N1',
             start: 0,
             // eslint-disable-next-line no-mixed-operators
-            duration: h(24),
+            duration: h(23) - 60000,
             type: 'Task',
           },
         ],

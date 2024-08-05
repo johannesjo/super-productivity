@@ -204,7 +204,7 @@ const getBudgetLeftForDay = (
   blockerBlocksForDay: BlockedBlock[],
   nowIfToday?: number,
 ): number => {
-  if (nowIfToday) {
+  if (typeof nowIfToday === 'number') {
     return blockerBlocksForDay.reduce((acc, currentValue) => {
       const diff =
         Math.max(nowIfToday, currentValue.end) - Math.max(nowIfToday, currentValue.start);
