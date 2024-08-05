@@ -6,7 +6,7 @@ import {
   SVESplitTaskStart,
 } from '../../schedule/schedule.model';
 import moment from 'moment/moment';
-import { TaskWithoutReminder } from '../../tasks/task.model';
+import { TaskCopy, TaskWithoutReminder } from '../../tasks/task.model';
 import { SVEType } from '../../schedule/schedule.const';
 import { TaskRepeatCfg } from '../../task-repeat-cfg/task-repeat-cfg.model';
 import { BlockedBlock } from '../../timeline/timeline.model';
@@ -115,8 +115,7 @@ export const insertBlockedBlocksViewEntriesForSchedule = (
             const newSplitContinuedEntry: SVE = createSplitTask({
               start: blockedBlock.end,
               dayDate,
-              taskId: splitTask.id,
-              projectId: splitTask.projectId,
+              task: splitTask,
               duration: timePlannedForSplitContinued,
               splitIndex: 0,
             });
@@ -147,7 +146,7 @@ export const insertBlockedBlocksViewEntriesForSchedule = (
               (entry) =>
                 (entry.type === SVEType.SplitTaskContinuedLast ||
                   entry.type === SVEType.SplitTaskContinued) &&
-                entry.data.taskId === currentVE.data.taskId,
+                entry.data.id === currentVE.data.id,
             );
             // update type of current
             currentVE.type = SVEType.SplitTaskContinued;
@@ -156,9 +155,8 @@ export const insertBlockedBlocksViewEntriesForSchedule = (
             const splitIndex = splitInstances.length;
             const newSplitContinuedEntry: SVE = createSplitTask({
               start: blockedBlock.end,
-              taskId: currentVE.data.taskId,
+              task: currentVE.data,
               dayDate,
-              projectId: currentVE.data.projectId,
               duration: timePlannedForSplitTaskContinued,
               splitIndex,
             });
@@ -202,7 +200,6 @@ export const insertBlockedBlocksViewEntriesForSchedule = (
 
             const newSplitContinuedEntry: SVE = createSplitRepeat({
               start: blockedBlock.end,
-              viewEntryId: currentVE.id,
               dayDate,
               taskRepeatCfg,
               duration: timePlannedForSplitContinued,
@@ -252,7 +249,6 @@ export const insertBlockedBlocksViewEntriesForSchedule = (
             const newSplitContinuedEntry: SVE = createSplitRepeat({
               start: blockedBlock.end,
               dayDate,
-              viewEntryId: currentVE.id,
               taskRepeatCfg: currentVE.data,
               duration: timePlannedForSplitRepeatCfgProjectionContinued,
               splitIndex,
@@ -340,42 +336,34 @@ const moveEntries = (
 const createSplitTask = ({
   start,
   dayDate,
-  taskId,
-  projectId,
+  task,
   splitIndex,
   duration,
 }: {
   start: number;
   dayDate: string;
-  taskId: string;
-  projectId: string | null;
+  task: TaskCopy;
   splitIndex: number;
   duration: number;
 }): SVESplitTaskContinued => {
   return {
-    id: `${taskId}_${dayDate}_${splitIndex}`,
+    id: `${task.id}_${dayDate}_${splitIndex}`,
     start,
     type: SVEType.SplitTaskContinuedLast,
     duration,
-    data: {
-      taskId,
-      projectId,
-      index: splitIndex,
-    },
+    data: task,
   };
 };
 
 const createSplitRepeat = ({
   start,
   dayDate,
-  viewEntryId,
   taskRepeatCfg,
   splitIndex,
   duration,
 }: {
   start: number;
   dayDate: string;
-  viewEntryId: string;
   taskRepeatCfg: TaskRepeatCfg;
   splitIndex: number;
   duration: number;

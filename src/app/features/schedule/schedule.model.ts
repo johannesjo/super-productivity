@@ -70,11 +70,7 @@ export interface SVERepeatProjectionSplitContinued extends SVERepeatProjectionBa
 
 export interface SVESplitTaskContinued extends SVEBase {
   type: SVEType.SplitTaskContinued | SVEType.SplitTaskContinuedLast;
-  data: {
-    taskId: string;
-    projectId: string | null;
-    index: number;
-  };
+  data: TaskCopy;
 }
 
 export interface ScheduleFromCalendarEvent extends CalendarIntegrationEvent {
