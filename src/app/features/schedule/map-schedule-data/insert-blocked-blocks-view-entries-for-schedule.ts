@@ -386,7 +386,7 @@ const createSplitRepeat = ({
   duration: number;
 }): SVERepeatProjectionSplitContinued => {
   return {
-    id: `${viewEntryId}_${dayDate}_${splitIndex}`,
+    id: `${taskRepeatCfg.id}_${dayDate}_${splitIndex}`,
     start,
     type: SVEType.RepeatProjectionSplitContinuedLast,
     duration: duration,

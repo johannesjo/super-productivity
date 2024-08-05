@@ -5,13 +5,7 @@ import {
   TaskWithPlannedForDayIndication,
 } from '../../tasks/task.model';
 import { BlockedBlock } from '../../timeline/timeline.model';
-import {
-  SVE,
-  SVERepeatProjection,
-  SVERepeatProjectionSplitContinued,
-  SVESplitTaskContinued,
-  SVETask,
-} from '../schedule.model';
+import { SVE, SVEEntryForNextDay, SVERepeatProjection, SVETask } from '../schedule.model';
 import { createScheduleViewEntriesForNormalTasks } from './create-schedule-view-entries-for-normal-tasks';
 import { insertBlockedBlocksViewEntriesForSchedule } from './insert-blocked-blocks-view-entries-for-schedule';
 import { SCHEDULE_VIEW_TYPE_ORDER, SVEType } from '../schedule.const';
@@ -22,7 +16,7 @@ export const createViewEntriesForDay = (
   nonScheduledRepeatCfgsDueOnDay: TaskRepeatCfg[],
   nonScheduledTasksForDay: (TaskWithoutReminder | TaskWithPlannedForDayIndication)[],
   blockedBlocksForDay: BlockedBlock[],
-  prevDaySplitTaskEntry?: SVESplitTaskContinued | SVERepeatProjectionSplitContinued,
+  prevDaySplitTaskEntry?: SVEEntryForNextDay,
 ): SVE[] => {
   let viewEntries: SVE[] = [];
   let startTime = initialStartTime;
@@ -50,6 +44,7 @@ export const createViewEntriesForDay = (
       createScheduleViewEntriesForNormalTasks(startTime, nonScheduledTasksForDay),
     );
   }
+  console.log(viewEntries);
 
   insertBlockedBlocksViewEntriesForSchedule(
     viewEntries as SVETask[],
@@ -65,6 +60,7 @@ export const createViewEntriesForDay = (
     }
     return a.start - b.start;
   });
+  console.log(viewEntries);
 
   // TODO add current handling
   // Move current always first and let it appear as now

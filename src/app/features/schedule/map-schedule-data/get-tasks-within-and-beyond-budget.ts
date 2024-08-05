@@ -10,7 +10,10 @@ export const getTasksWithinAndBeyondBudget = (
 ): {
   beyond: (TaskWithPlannedForDayIndication | TaskWithoutReminder)[];
   within: (TaskWithPlannedForDayIndication | TaskWithoutReminder)[];
+  isSomeTimeLeftForLastOverBudget: boolean;
 } => {
+  console.log(budget / 60 / 60 / 1000);
+
   const beyond: (TaskWithPlannedForDayIndication | TaskWithoutReminder)[] = [];
   const within: (TaskWithPlannedForDayIndication | TaskWithoutReminder)[] = [];
 
@@ -31,11 +34,14 @@ export const getTasksWithinAndBeyondBudget = (
       beyond.push(task);
     } else {
       within.push(task);
+      console.log(timeLeftForTask / 60 / 60 / 1000);
+
       remainingBudget -= timeLeftForTask;
+      console.log(remainingBudget);
     }
   });
   // console.log(remainingBudget);
   // console.log(beyond);
 
-  return { beyond, within };
+  return { beyond, within, isSomeTimeLeftForLastOverBudget: remainingBudget > 0 };
 };

@@ -9,8 +9,7 @@ import {
   ScheduleDay,
   ScheduleWorkStartEndCfg,
   SVE,
-  SVERepeatProjectionSplitContinued,
-  SVESplitTaskContinued,
+  SVEEntryForNextDay,
 } from '../schedule.model';
 import { getDateTimeFromClockString } from '../../../util/get-date-time-from-clock-string';
 import { selectTaskRepeatCfgsDueOnDayOnly } from '../../task-repeat-cfg/store/task-repeat-cfg.reducer';
@@ -28,11 +27,8 @@ export const createScheduleDays = (
   workStartEndCfg: ScheduleWorkStartEndCfg | undefined,
   now: number,
 ): ScheduleDay[] => {
-  let splitTaskOrRepeatEntryForNextDay:
-    | SVESplitTaskContinued
-    | SVERepeatProjectionSplitContinued
-    | undefined;
-  let flowTasksLeftForDay: TaskWithoutReminder[] = nonScheduledTasks;
+  let splitTaskOrRepeatEntryForNextDay: SVEEntryForNextDay | undefined;
+  let flowTasksLeftAfterDay: TaskWithoutReminder[] = nonScheduledTasks;
   let beyondBudgetTasks: TaskWithoutReminder[];
 
   const v: ScheduleDay[] = dayDates.map((dayDate, i) => {
@@ -74,19 +70,25 @@ export const createScheduleDays = (
       ...t,
       plannedForDay: dayDate,
     })) as TaskWithPlannedForDayIndication[];
-    const flowTasksForDay = [...flowTasksLeftForDay, ...plannedForDayTasks];
-
+    const flowTasksForDay = [...flowTasksLeftAfterDay, ...plannedForDayTasks];
+    console.log({ flowTasksLeftAfterDay });
     console.log({ flowTasksForDay });
 
-    const { beyond, within } = getTasksWithinAndBeyondBudget(
-      flowTasksForDay,
-      nonScheduledBudgetForDay,
-    );
-    const firstBeyond = beyond[0];
-    const allBeyondButFirst = beyond.slice(1);
-    if (firstBeyond) {
-      within.push(firstBeyond as any);
-    }
+    const { beyond, within, isSomeTimeLeftForLastOverBudget } =
+      getTasksWithinAndBeyondBudget(flowTasksForDay, nonScheduledBudgetForDay);
+
+    const nonSplitBeyondTasks = (() => {
+      if (isSomeTimeLeftForLastOverBudget) {
+        const firstBeyond = beyond[0];
+        if (firstBeyond) {
+          within.push(firstBeyond as any);
+        }
+        return beyond.slice(1);
+      }
+      return beyond;
+    })();
+
+    console.log(isSomeTimeLeftForLastOverBudget);
 
     viewEntries = createViewEntriesForDay(
       dayDate,
@@ -98,16 +100,17 @@ export const createScheduleDays = (
     );
     // beyondBudgetTasks = beyond;
     beyondBudgetTasks = [];
-    flowTasksLeftForDay = allBeyondButFirst.filter(
-      (task) => !viewEntries.find((e) => (e.data as any)?.id === task.id),
-    );
+    // TODO check if filter can be removed, when all tests are written
+    flowTasksLeftAfterDay = [...nonSplitBeyondTasks];
+    // flowTasksLeftAfterDay = allBeyondButFirst.filter(
+    //   (task) => !viewEntries.find((e) => (e.data as any)?.id === task.id),
+    // );
     console.log({
       within,
       beyond,
-      allBeyondButFirst,
-      flowTasksLeftForDay,
+      nonSplitBeyondTasks,
+      flowTasksLeftAfterDay,
       viewEntries,
-      firstBeyond,
     });
 
     const viewEntriesToRenderForDay: SVE[] = [];
@@ -119,6 +122,9 @@ export const createScheduleDays = (
 
       if (entry.start >= nextDayStart) {
         if (
+          entry.type === SVEType.Task ||
+          entry.type === SVEType.SplitTask ||
+          entry.type === SVEType.TaskPlannedForDay ||
           entry.type === SVEType.SplitTaskContinuedLast ||
           entry.type === SVEType.SplitTaskContinued ||
           entry.type === SVEType.RepeatProjectionSplitContinued ||
@@ -128,6 +134,9 @@ export const createScheduleDays = (
             throw new Error('Schedule: More than one continued split task');
           }
           splitTaskOrRepeatEntryForNextDay = entry;
+        } else {
+          console.log(entry);
+          console.warn('Schedule: View Entry for current not available');
         }
       } else {
         if (
@@ -147,11 +156,13 @@ export const createScheduleDays = (
     console.log({
       dayDate,
       startTime: new Date(startTime),
-      viewEntriesForNextDay: splitTaskOrRepeatEntryForNextDay,
-      flowTasksLeftForDay,
+      splitTaskOrRepeatEntryForNextDay,
+      flowTasksLeftAfterDay,
       blockerBlocksForDay,
       nonScheduledBudgetForDay,
       beyondBudgetTasks,
+      viewEntries,
+      viewEntriesToRenderForDay,
       nonScheduledBudgetForDay2: nonScheduledBudgetForDay / 60 / 60 / 1000,
     });
 
@@ -168,6 +179,9 @@ export const createScheduleDays = (
       beyondBudgetTasks: beyondBudgetTasks,
     };
   });
+
+  console.log({ v });
+
   return v;
 };
 

@@ -115,6 +115,12 @@ interface SVELunchBreak extends SVEBase {
   data: ScheduleLunchBreakCfg;
 }
 
+export type SVEEntryForNextDay =
+  | SVETask
+  | SVESplitTaskStart
+  | SVESplitTaskContinued
+  | SVERepeatProjectionSplitContinued;
+
 export type SVE =
   | SVETask
   | SVESplitTaskStart

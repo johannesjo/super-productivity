@@ -70,7 +70,7 @@ export const mapToScheduleDays = (
     : tasks;
 
   const nonScheduledTasks: TaskWithoutReminder[] = initialTasks.filter(
-    (task) => !(task.reminderId && task.plannedAt),
+    (task) => !(task.reminderId && typeof task.plannedAt === 'number'),
   ) as TaskWithoutReminder[];
 
   const blockerBlocksDayMap = createBlockedBlocksByDayMap(
