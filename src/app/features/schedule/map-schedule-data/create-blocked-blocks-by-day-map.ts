@@ -18,6 +18,7 @@ export const createBlockedBlocksByDayMap = (
   workStartEndCfg?: ScheduleWorkStartEndCfg,
   lunchBreakCfg?: ScheduleLunchBreakCfg,
   now?: number,
+  nrOfDays: number = NR_OF_DAYS,
 ): BlockedBlockByDayMap => {
   const allBlockedBlocks = createSortedBlockerBlocks(
     scheduledTasks,
@@ -26,7 +27,7 @@ export const createBlockedBlocksByDayMap = (
     workStartEndCfg,
     lunchBreakCfg,
     now,
-    NR_OF_DAYS,
+    nrOfDays,
   );
 
   const blockedBlocksByDay: BlockedBlockByDayMap = {};
@@ -40,6 +41,8 @@ export const createBlockedBlocksByDayMap = (
     blockedBlocksByDay[dayStartDate].push({
       ...block,
       end: Math.min(dayEndBoundary, block.end),
+      entries: block.entries.filter((e) => e.start < dayEndBoundary),
+      // ...({ type: 'START' } as any),
     });
 
     // TODO handle case when blocker block spans multiple days
@@ -54,9 +57,11 @@ export const createBlockedBlocksByDayMap = (
       blockedBlocksByDay[dayEndDate].push({
         ...block,
         // entries: block.entries.filter((e) => e.type === BlockedBlockType.WorkdayStartEnd),
-        entries: block.entries,
+        entries: block.entries.filter((e) => e.end > dayStartBoundary2),
+        // entries: block.entries,
         start: dayStartBoundary2,
         end: Math.min(dayEndBoundary2, block.end),
+        // ...({ type: 'END' } as any),
       });
     }
   });
