@@ -63,10 +63,11 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 })
 export class ScheduleEventComponent implements OnInit {
   T: typeof T = T;
-  @HostBinding('title') title: string = '';
+  @HostBinding('title') hoverTitle: string = '';
   @HostBinding('class') cssClass: string = '';
   @HostBinding('style') style: string = '';
 
+  title: string = '';
   se!: ScheduleEvent;
   task!: TaskCopy;
   scheduledClockStr: string = '';
@@ -91,12 +92,16 @@ export class ScheduleEventComponent implements OnInit {
   @Input({ required: true })
   set event(event: ScheduleEvent) {
     this.se = event;
+    this.title =
+      (this.se as any)?.data?.title ||
+      (this.se.type === SVEType.LunchBreak ? 'Lunch Break' : 'TITLE');
+
     const startClockStr = getClockStringFromHours(this.se.startHours);
     const endClockStr = getClockStringFromHours(
       this.se.startHours + this.se.timeLeftInHours,
     );
     // this.durationStr = (this.se.timeLeftInHours * 60).toString().substring(0, 4);
-    this.title = startClockStr + ' - ' + endClockStr + '  ' + this.se.title;
+    this.hoverTitle = startClockStr + ' - ' + endClockStr + '  ' + this.title;
     // this.scheduledClockStr = startClockStr + ' - ' + endClockStr;
     this.scheduledClockStr = startClockStr;
 

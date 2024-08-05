@@ -119,7 +119,6 @@ export const insertBlockedBlocksViewEntriesForSchedule = (
               projectId: splitTask.projectId,
               duration: timePlannedForSplitContinued,
               splitIndex: 0,
-              title: splitTask.title,
             });
 
             // move entries
@@ -162,7 +161,6 @@ export const insertBlockedBlocksViewEntriesForSchedule = (
               projectId: currentVE.data.projectId,
               duration: timePlannedForSplitTaskContinued,
               splitIndex,
-              title: currentVE.data.title,
             });
 
             // move entries
@@ -344,7 +342,6 @@ const createSplitTask = ({
   dayDate,
   taskId,
   projectId,
-  title,
   splitIndex,
   duration,
 }: {
@@ -352,7 +349,6 @@ const createSplitTask = ({
   dayDate: string;
   taskId: string;
   projectId: string | null;
-  title: string;
   splitIndex: number;
   duration: number;
 }): SVESplitTaskContinued => {
@@ -362,7 +358,6 @@ const createSplitTask = ({
     type: SVEType.SplitTaskContinuedLast,
     duration,
     data: {
-      title,
       taskId,
       projectId,
       index: splitIndex,

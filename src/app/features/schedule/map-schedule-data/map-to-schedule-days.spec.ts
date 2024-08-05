@@ -184,7 +184,7 @@ describe('mapToScheduleDays()', () => {
             type: 'ScheduledTask',
           },
           {
-            data: { index: 0, projectId: undefined, taskId: 'N1', title: undefined },
+            data: { index: 0, projectId: undefined, taskId: 'N1' },
             id: 'N1_1970-01-01_0',
             start: minAfterNowTs(90),
             duration: h(0.5),
@@ -907,7 +907,7 @@ describe('mapToScheduleDays()', () => {
           type: 'ScheduledRepeatProjection',
         },
         {
-          data: { index: 0, projectId: undefined, taskId: 'FD2', title: undefined },
+          data: { index: 0, projectId: undefined, taskId: 'FD2' },
           duration: h(1.5),
           id: 'FD2_1970-01-02_0',
           start: dhTz(2, 9),

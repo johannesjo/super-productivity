@@ -5,7 +5,6 @@ import { CalendarIntegrationEvent } from '../calendar-integration/calendar-integ
 
 export interface ScheduleEvent {
   id: string;
-  title: string;
   type: SVEType;
   style: string;
   startHours: number;
@@ -72,7 +71,6 @@ export interface SVERepeatProjectionSplitContinued extends SVERepeatProjectionBa
 export interface SVESplitTaskContinued extends SVEBase {
   type: SVEType.SplitTaskContinued | SVEType.SplitTaskContinuedLast;
   data: {
-    title: string;
     taskId: string;
     projectId: string | null;
     index: number;

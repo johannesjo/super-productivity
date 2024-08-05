@@ -23,7 +23,6 @@ export const mapScheduleDaysToScheduleEvents = (
         id: taskPlannedForDay.id,
         dayOfMonth: undefined,
         data: taskPlannedForDay,
-        title: taskPlannedForDay.title,
         type: SVEType.TaskPlannedForDay,
         style: `height: ${rowSpan * 8}px`,
         timeLeftInHours,
@@ -69,9 +68,6 @@ export const mapScheduleDaysToScheduleEvents = (
                 (entry.data as TaskWithPlannedForDayIndication)?.plannedForDay,
               ).getDate()) ||
             undefined,
-          title:
-            (entry as any)?.data?.title ||
-            (entry.type === SVEType.LunchBreak ? 'Lunch Break' : 'TITLE'),
           id: entry.id,
           type: entry.type as SVEType,
           startHours: hoursToday,
