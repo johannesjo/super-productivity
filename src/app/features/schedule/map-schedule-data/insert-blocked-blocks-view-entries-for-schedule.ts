@@ -114,6 +114,7 @@ export const insertBlockedBlocksViewEntriesForSchedule = (
 
             const newSplitContinuedEntry: SVE = createSplitTask({
               start: blockedBlock.end,
+              dayDate,
               taskId: splitTask.id,
               projectId: splitTask.projectId,
               duration: timePlannedForSplitContinued,
@@ -157,6 +158,7 @@ export const insertBlockedBlocksViewEntriesForSchedule = (
             const newSplitContinuedEntry: SVE = createSplitTask({
               start: blockedBlock.end,
               taskId: currentVE.data.taskId,
+              dayDate,
               projectId: currentVE.data.projectId,
               duration: timePlannedForSplitTaskContinued,
               splitIndex,
@@ -203,6 +205,7 @@ export const insertBlockedBlocksViewEntriesForSchedule = (
             const newSplitContinuedEntry: SVE = createSplitRepeat({
               start: blockedBlock.end,
               viewEntryId: currentVE.id,
+              dayDate,
               taskRepeatCfg,
               duration: timePlannedForSplitContinued,
               splitIndex: 0,
@@ -250,6 +253,7 @@ export const insertBlockedBlocksViewEntriesForSchedule = (
             const splitIndex = splitInstances.length;
             const newSplitContinuedEntry: SVE = createSplitRepeat({
               start: blockedBlock.end,
+              dayDate,
               viewEntryId: currentVE.id,
               taskRepeatCfg: currentVE.data,
               duration: timePlannedForSplitRepeatCfgProjectionContinued,
@@ -337,6 +341,7 @@ const moveEntries = (
 
 const createSplitTask = ({
   start,
+  dayDate,
   taskId,
   projectId,
   title,
@@ -344,6 +349,7 @@ const createSplitTask = ({
   duration,
 }: {
   start: number;
+  dayDate: string;
   taskId: string;
   projectId: string | null;
   title: string;
@@ -351,7 +357,7 @@ const createSplitTask = ({
   duration: number;
 }): SVESplitTaskContinued => {
   return {
-    id: `${taskId}__${splitIndex}`,
+    id: `${taskId}_${dayDate}_${splitIndex}`,
     start,
     type: SVEType.SplitTaskContinuedLast,
     duration,
@@ -366,19 +372,21 @@ const createSplitTask = ({
 
 const createSplitRepeat = ({
   start,
+  dayDate,
   viewEntryId,
   taskRepeatCfg,
   splitIndex,
   duration,
 }: {
   start: number;
+  dayDate: string;
   viewEntryId: string;
   taskRepeatCfg: TaskRepeatCfg;
   splitIndex: number;
   duration: number;
 }): SVERepeatProjectionSplitContinued => {
   return {
-    id: `${viewEntryId}__${splitIndex}`,
+    id: `${viewEntryId}_${dayDate}_${splitIndex}`,
     start,
     type: SVEType.RepeatProjectionSplitContinuedLast,
     duration: duration,
