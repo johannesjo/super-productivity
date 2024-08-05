@@ -9,7 +9,7 @@ import { createSortedBlockerBlocks } from '../../timeline/map-timeline-data/crea
 import { getWorklogStr } from '../../../util/get-work-log-str';
 
 // TODO improve to even better algo for createSortedBlockerBlocks
-const NR_OF_DAYS = 5;
+const NR_OF_DAYS = 10;
 
 export const createBlockedBlocksByDayMap = (
   scheduledTasks: TaskPlanned[],
