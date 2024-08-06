@@ -1,3 +1,4 @@
+@use 'angular-material-css-vars' as mat-css-vars;
 @import '../../../../variables.scss';
 
 $time-width: 3em;
@@ -121,7 +122,10 @@ header {
 
   &.drag-over {
     //background: $c-primary !important;
-    background: $light-theme-bg-drag-col !important;
+    background: mat-css-vars.mat-css-color-accent($opacity: 0.2);
+    @include darkTheme() {
+      background: mat-css-vars.mat-css-color-accent($opacity: 0.2);
+    }
   }
 }
 
@@ -182,7 +186,8 @@ header {
   display: none;
   padding: 0 7px;
   //top: 80px;
-  top: 32px;
+  //top: 32px;
+  bottom: 0;
   position: sticky;
   line-height: 1.2;
   justify-content: stretch;

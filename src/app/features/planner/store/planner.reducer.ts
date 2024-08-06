@@ -6,6 +6,7 @@ import { loadAllData } from '../../../root-store/meta/load-all-data.action';
 import { unique } from '../../../util/unique';
 import { updateTaskTags } from '../../tasks/store/task.actions';
 import { TODAY_TAG } from '../../tag/tag.const';
+import { getWorklogStr } from '../../../util/get-work-log-str';
 
 export const plannerFeatureKey = 'planner';
 
@@ -188,15 +189,20 @@ export const plannerReducer = createReducer(
     Object.keys(daysCopy).forEach((dayI) => {
       daysCopy[dayI] = daysCopy[dayI].filter((id) => id !== task.id);
     });
+    const isPlannedForToday = day === getWorklogStr();
     return {
       ...state,
       days: {
         ...daysCopy,
-        [day]: unique(
-          isAddToTop
-            ? [task.id, ...(daysCopy[day] || [])]
-            : [...(daysCopy[day] || []), task.id],
-        ),
+        ...(isPlannedForToday
+          ? {}
+          : {
+              [day]: unique(
+                isAddToTop
+                  ? [task.id, ...(daysCopy[day] || [])]
+                  : [...(daysCopy[day] || []), task.id],
+              ),
+            }),
       },
     };
   }),

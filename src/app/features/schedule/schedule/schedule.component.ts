@@ -305,15 +305,11 @@ export class ScheduleComponent implements AfterViewInit, OnDestroy {
         targetEl.classList.contains(SVEType.TaskPlannedForDay)
       ) {
         this.prevDragOverEl.classList.add(DRAG_OVER_CLASS);
-      } else if (targetEl.classList.contains('dropzones')) {
-        this.prevDragOverEl.classList.add(DRAG_OVER_CLASS);
       } else if (targetEl.classList.contains('col')) {
         this.prevDragOverEl.classList.add(DRAG_OVER_CLASS);
       }
     }
   }
-
-  dropzones;
 
   dragStarted(ev: CdkDragStart<ScheduleEvent>): void {
     console.log('dragStart', ev);
@@ -335,10 +331,8 @@ export class ScheduleComponent implements AfterViewInit, OnDestroy {
       this.prevDragOverEl.classList.remove(DRAG_OVER_CLASS);
     }
     const target = ev.event.target as HTMLElement;
-    if (
-      target.tagName.toLowerCase() === 'div' &&
-      target.classList.contains('dropzones')
-    ) {
+    if (target.tagName.toLowerCase() === 'div' && target.classList.contains('col')) {
+      const isMoveToEndOfDay = target.classList.contains('end-of-day');
       const targetDay = (target as any).day || target.getAttribute('data-day');
       console.log(targetDay);
       if (targetDay) {
@@ -346,6 +340,7 @@ export class ScheduleComponent implements AfterViewInit, OnDestroy {
           PlannerActions.planTaskForDay({
             task: ev.source.data.data,
             day: targetDay,
+            isAddToTop: !isMoveToEndOfDay,
           }),
         );
 

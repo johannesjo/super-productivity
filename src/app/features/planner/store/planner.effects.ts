@@ -11,9 +11,6 @@ import {
   unScheduleTask,
   updateTaskTags,
 } from '../../tasks/store/task.actions';
-import { TODAY_TAG } from '../../tag/tag.const';
-import { unique } from '../../../util/unique';
-import { getWorklogStr } from '../../../util/get-work-log-str';
 
 @Injectable()
 export class PlannerEffects {
@@ -37,34 +34,6 @@ export class PlannerEffects {
     },
     { dispatch: false },
   );
-
-  // PLAN TASK FOR DAY
-  // ---------------
-  addTodayTagIfPlanedForToday$ = createEffect(() => {
-    return this._actions$.pipe(
-      ofType(PlannerActions.planTaskForDay),
-      filter((action) => action.day === getWorklogStr()),
-      map(({ task }) => {
-        return updateTaskTags({
-          task,
-          newTagIds: unique([TODAY_TAG.id, ...task.tagIds]),
-        });
-      }),
-    );
-  });
-
-  removeFromTodayIfPlannedForOtherDay$ = createEffect(() => {
-    return this._actions$.pipe(
-      ofType(PlannerActions.planTaskForDay),
-      filter(({ task, day }) => day !== getWorklogStr()),
-      map(({ task }) => {
-        return updateTaskTags({
-          task,
-          newTagIds: task.tagIds.filter((id) => id !== TODAY_TAG.id),
-        });
-      }),
-    );
-  });
 
   // SCHEDULE RELATED
   // ---------------

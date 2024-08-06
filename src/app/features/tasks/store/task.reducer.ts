@@ -70,6 +70,7 @@ import { MODEL_VERSION_KEY } from '../../../app.constants';
 import { MODEL_VERSION } from '../../../core/model-version';
 import { PlannerActions } from '../../planner/store/planner.actions';
 import { TODAY_TAG } from '../../tag/tag.const';
+import { getWorklogStr } from '../../../util/get-work-log-str';
 
 export const TASK_FEATURE_NAME = 'tasks';
 
@@ -668,6 +669,33 @@ export const taskReducer = createReducer<TaskState>(
         state,
       );
     }
+    return state;
+  }),
+
+  on(PlannerActions.planTaskForDay, (state, { task, day }) => {
+    const todayStr = getWorklogStr();
+    if (day === todayStr && !task.tagIds.includes(TODAY_TAG.id)) {
+      return taskAdapter.updateOne(
+        {
+          id: task.id,
+          changes: {
+            tagIds: unique([TODAY_TAG.id, ...task.tagIds]),
+          },
+        },
+        state,
+      );
+    } else if (day !== todayStr && task.tagIds.includes(TODAY_TAG.id)) {
+      return taskAdapter.updateOne(
+        {
+          id: task.id,
+          changes: {
+            tagIds: task.tagIds.filter((id) => id !== TODAY_TAG.id),
+          },
+        },
+        state,
+      );
+    }
+
     return state;
   }),
 

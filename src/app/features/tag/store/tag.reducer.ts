@@ -48,6 +48,7 @@ import {
 import { roundTsToMinutes } from '../../../util/round-ts-to-minutes';
 import { moveItemInArray } from '../../../util/move-item-in-array';
 import { PlannerActions } from '../../planner/store/planner.actions';
+import { getWorklogStr } from '../../../util/get-work-log-str';
 
 export const TAG_FEATURE_NAME = 'tag';
 const WORK_CONTEXT_TYPE: WorkContextType = WorkContextType.TAG;
@@ -161,6 +162,39 @@ export const tagReducer = createReducer<TagState>(
       return state;
     },
   ),
+
+  on(PlannerActions.planTaskForDay, (state, { task, day, isAddToTop }) => {
+    const todayStr = getWorklogStr();
+    const tagToUpdate = state.entities[TODAY_TAG.id] as Tag;
+
+    if (day === todayStr) {
+      return tagAdapter.updateOne(
+        {
+          id: TODAY_TAG.id,
+          changes: {
+            taskIds: unique(
+              isAddToTop
+                ? [task.id, ...tagToUpdate.taskIds]
+                : [...tagToUpdate.taskIds, task.id],
+            ),
+          },
+        },
+        state,
+      );
+    } else if (day !== todayStr && tagToUpdate.taskIds.includes(task.id)) {
+      return tagAdapter.updateOne(
+        {
+          id: TODAY_TAG.id,
+          changes: {
+            taskIds: tagToUpdate.taskIds.filter((id) => id !== task.id),
+          },
+        },
+        state,
+      );
+    }
+
+    return state;
+  }),
 
   on(PlannerActions.moveBeforeTask, (state, { fromTask, toTaskId }) => {
     const todayTag = state.entities[TODAY_TAG.id] as Tag;
