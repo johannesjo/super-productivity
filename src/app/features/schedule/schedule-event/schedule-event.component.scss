@@ -119,7 +119,7 @@ $margin-right: 10px;
     column-width: auto;
   }
 
-  > mat-icon {
+  .ico-wrapper {
     margin-top: 0;
   }
 }
@@ -285,7 +285,7 @@ $margin-right: 10px;
 .ico-wrapper {
   position: relative;
   margin-left: 6px;
-  margin-top: 9px;
+  margin-top: 7px;
 
   :host.very-short-event & {
     margin-top: 0;
