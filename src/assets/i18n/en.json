@@ -1171,11 +1171,11 @@
     "SCHEDULE": {
       "CONTINUED": "continued",
       "D_INITIAL": {
-        "TEXT": "<p>The idea of the Timeline is to provide a better picture of how one's planned tasks play out over time. It is automatically generated from your Tasks and distinguishes two different things: <strong>Scheduled Tasks</strong>, which are shown at their planned time and <strong>Regular Tasks</strong> which should flow around those fixed events. All tasks consider the time estimates you have assigned to them.</p><p>In addition to this you can also provide a work start and end time. If configured regular tasks will never show up outside of these. Please note that the timeline only includes the upcoming 30 days.</p>",
-        "TITLE": "Timeline"
+        "TEXT": "<p>The idea of the Schedule is to provide a better picture of how one's planned tasks play out over time. It is automatically generated from your Tasks and distinguishes two different things: <strong>Scheduled Tasks</strong>, which are shown at their planned time and <strong>Regular Tasks</strong> which should flow around those fixed events. All tasks consider the time estimates you have assigned to them.</p><p>In addition to this you can also provide a work start and end time. If configured regular tasks will never show up outside of these. Please note that the schedule only includes the upcoming 30 days.</p>",
+        "TITLE": "Schedule"
       },
       "END": "Work End",
-      "MENU_TITLE": "Timeline",
+      "MENU_TITLE": "Schedule",
       "NOW": "Now",
       "NO_TASKS": "Currently there are no tasks. Please add some tasks via the + Button in the top bar.",
       "START": "Work Start",
@@ -1322,11 +1322,11 @@
       "CAL_PATH": "Url of the iCal source",
       "CAL_PROVIDERS": "Calendar providers (experimental and optional)",
       "CAL_PROVIDERS_ADD": "Add Calendar iCal source",
-      "CAL_PROVIDERS_INFO": "You can load calendar data as iCal (e.g. <a href=\"https://support.google.com/calendar/answer/37648?hl=en#zippy=%2Csync-your-google-calendar-view-edit%2Cget-your-calendar-view-only\">Google Calendar</a>, <a href=\"https://support.pushpay.com/s/article/How-do-I-get-an-iCal-link-from-Office-365\">Outlook 365</a>). The data will be integrated in the timeline and you will be prompted to create tasks for calendar events, if they are due.",
+      "CAL_PROVIDERS_INFO": "You can load calendar data as iCal (e.g. <a href=\"https://support.google.com/calendar/answer/37648?hl=en#zippy=%2Csync-your-google-calendar-view-edit%2Cget-your-calendar-view-only\">Google Calendar</a>, <a href=\"https://support.pushpay.com/s/article/How-do-I-get-an-iCal-link-from-Office-365\">Outlook 365</a>). The data will be integrated in the schedule and you will be prompted to create tasks for calendar events, if they are due.",
       "CHECK_UPDATES": "Check for remote updates every X",
       "DEFAULT_PROJECT": "Default Project for added calendar tasks",
       "HELP": "You can integrate calendars to be reminded and add them as tasks within Super Productivity. The integration works by using the iCal format. For this to work your calendars need to be accessible either over the internet or via file system.",
-      "ICON": "Icon for Timeline",
+      "ICON": "Icon for Schedule",
       "SHOW_BANNER_THRESHOLD": "Show a notification X before the event (blank for disabled)",
       "TITLE": "Calendars"
     },
@@ -1365,7 +1365,7 @@
       "GO_TO_FOCUS_MODE": "Enter Focus Mode",
       "GO_TO_SCHEDULED_VIEW": "Go to scheduled Tasks",
       "GO_TO_SETTINGS": "Go to Settings",
-      "GO_TO_SCHEDULE": "Go to Timeline",
+      "GO_TO_SCHEDULE": "Go to Schedule",
       "GO_TO_WORK_VIEW": "Go to Work View and focus first task",
       "HELP": "<p>Here you can configure all keyboard shortcuts.</p> <p>Click on the text input and enter the desired keyboard combination. Hit enter to save and Escape to abort.</p> <p>There are three types of shortcuts:</p> <ul> <li> <strong>Global shortcuts:</strong> When the app is running it will trigger the action from every other application. </li> <li> <strong>Application level shortcuts:</strong> Will trigger from every screen of the application, but not if you're currently editing a text field. </li> <li> <strong>Task level shortcuts:</strong> They will only trigger if you have selected a task via mouse or keyboard and usually trigger an action specifically related to that one task. </li> </ul><p>You can <strong>press Escape to remove a shortcut.</strong>",
       "MOVE_TASK_DOWN": "Move Task down in List",
@@ -1490,11 +1490,11 @@
       "TITLE": "Break Reminder"
     },
     "SCHEDULE": {
-      "HELP": "The timeline feature should provide you with a quick overview over how your planned tasks play out over time. You can find it in the left hand menu under <a href='#/timeline'>'Timeline'</a>. ",
+      "HELP": "The schedule feature should provide you with a quick overview over how your planned tasks play out over time. You can find it in the left hand menu under <a href='#/schedule'>'Schedule'</a>. ",
       "L_IS_WORK_START_END_ENABLED": "Limit unscheduled task flow to specific work times",
       "L_WORK_END": "Work Day End",
       "L_WORK_START": "Work Day Start",
-      "TITLE": "Timeline",
+      "TITLE": "Schedule",
       "WORK_START_END_DESCRIPTION": "e.g. 17:00",
       "L_IS_LUNCH_BREAK_ENABLED": "Enable lunch break",
       "L_LUNCH_BREAK_END": "Lunch break end",
@@ -1558,7 +1558,7 @@
     "HELP": "Help",
     "METRICS": "Metrics",
     "NOTES": "Notes",
-    "NOTES_PANEL_INFO": "Notes can only be shown from the timeline and the regular task list views.",
+    "NOTES_PANEL_INFO": "Notes can only be shown from the schedule and the regular task list views.",
     "PLANNER": "Plan",
     "PROCRASTINATE": "Procrastinate",
     "PROJECTS": "Projects",

@@ -1,8 +1,8 @@
 import { createViewEntriesForBlock } from './create-view-entries-for-block';
-import { BlockedBlockType } from '../../timeline/timeline.model';
 import { TaskPlanned } from '../../tasks/task.model';
 import { SVEType } from '../schedule.const';
 import { TaskRepeatCfg } from '../../task-repeat-cfg/task-repeat-cfg.model';
+import { BlockedBlockType } from '../schedule.model';
 
 const ESA: string[] = [];
 

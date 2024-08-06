@@ -1,15 +1,16 @@
 import { TaskPlanned } from '../../tasks/task.model';
-import {
-  BlockedBlock,
-  BlockedBlockType,
-  TimelineLunchBreakCfg,
-  TimelineWorkStartEndCfg,
-} from '../timeline.model';
+
 import { getTimeLeftForTask } from '../../../util/get-time-left-for-task';
 import { getDateTimeFromClockString } from '../../../util/get-date-time-from-clock-string';
 import { TaskRepeatCfg } from '../../task-repeat-cfg/task-repeat-cfg.model';
 import { selectTaskRepeatCfgsDueOnDayOnly } from '../../task-repeat-cfg/store/task-repeat-cfg.reducer';
-import { ScheduleCalendarMapEntry } from '../../schedule/schedule.model';
+import {
+  BlockedBlock,
+  BlockedBlockType,
+  ScheduleCalendarMapEntry,
+  ScheduleLunchBreakCfg,
+  ScheduleWorkStartEndCfg,
+} from '../schedule.model';
 
 const PROJECTION_DAYS: number = 30;
 
@@ -17,8 +18,8 @@ export const createSortedBlockerBlocks = (
   scheduledTasks: TaskPlanned[],
   scheduledTaskRepeatCfgs: TaskRepeatCfg[],
   icalEventMap: ScheduleCalendarMapEntry[],
-  workStartEndCfg?: TimelineWorkStartEndCfg,
-  lunchBreakCfg?: TimelineLunchBreakCfg,
+  workStartEndCfg?: ScheduleWorkStartEndCfg,
+  lunchBreakCfg?: ScheduleLunchBreakCfg,
   now: number = Date.now(),
   nrOfDays: number = PROJECTION_DAYS,
 ): BlockedBlock[] => {
@@ -98,7 +99,7 @@ const createBlockerBlocksForScheduledRepeatProjections = (
 const createBlockerBlocksForWorkStartEnd = (
   now: number,
   nrOfDays: number,
-  workStartEndCfg?: TimelineWorkStartEndCfg,
+  workStartEndCfg?: ScheduleWorkStartEndCfg,
 ): BlockedBlock[] => {
   const blockedBlocks: BlockedBlock[] = [];
 
@@ -138,7 +139,7 @@ const createBlockerBlocksForWorkStartEnd = (
 const createBlockerBlocksForLunchBreak = (
   now: number,
   nrOfDays: number,
-  lunchBreakCfg?: TimelineLunchBreakCfg,
+  lunchBreakCfg?: ScheduleLunchBreakCfg,
 ): BlockedBlock[] => {
   const blockedBlocks: BlockedBlock[] = [];
 

@@ -1,13 +1,12 @@
 import { createSortedBlockerBlocks } from './create-sorted-blocker-blocks';
 import { TaskReminderOptionId, TaskWithReminder } from '../../tasks/task.model';
 import { getDateTimeFromClockString } from '../../../util/get-date-time-from-clock-string';
-import { BlockedBlockType } from '../timeline.model';
 import {
   DEFAULT_TASK_REPEAT_CFG,
   TaskRepeatCfg,
 } from '../../task-repeat-cfg/task-repeat-cfg.model';
 import { getWorklogStr } from '../../../util/get-work-log-str';
-import { ScheduleCalendarMapEntry } from '../../schedule/schedule.model';
+import { BlockedBlockType, ScheduleCalendarMapEntry } from '../schedule.model';
 /* eslint-disable @typescript-eslint/naming-convention */
 
 const minutes = (n: number): number => n * 60 * 1000;

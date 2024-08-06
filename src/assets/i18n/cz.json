@@ -1411,7 +1411,7 @@
       "TITLE": "Připomenutí o přestávce"
     },
     "SCHEDULE": {
-      "HELP": "Funkce časové osy by vám měla poskytnout rychlý přehled o tom, jak se plánované úkoly vyvíjejí v čase. Najdete ji v levém bočním menu pod <a href='#/timeline'>‘Časová osa’</a>.",
+      "HELP": "Funkce časové osy by vám měla poskytnout rychlý přehled o tom, jak se plánované úkoly vyvíjejí v čase. Najdete ji v levém bočním menu pod <a href='#/schedule'>‘Časová osa’</a>.",
       "L_IS_WORK_START_END_ENABLED": "Omezit tok nerozvržených úkolů na konkrétní pracovní časy",
       "L_WORK_END": "Konec pracovního dne",
       "L_WORK_START": "Začátek pracovního dne",

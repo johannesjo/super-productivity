@@ -59,28 +59,8 @@
   >
     <mat-icon>calendar_view_week</mat-icon>
     <!--    <span class="text">{{ T.MH.PLANNER|translate }}</span>-->
-    <span class="text">Schedule</span>
+    <span class="text">{{ T.F.SCHEDULE.MENU_TITLE|translate }}</span>
   </button>
-
-  <!-- class title missleading, but works ;) -->
-  <div class="tag">
-    <button
-      class="route-link"
-      mat-menu-item
-      routerLink="timeline"
-      routerLinkActive="isActiveRoute"
-    >
-      <mat-icon>filter_list</mat-icon>
-      <span class="text">{{ T.F.SCHEDULE.MENU_TITLE|translate }}</span>
-    </button>
-    <button
-      (click)="openTimelineSettings()"
-      class="tag-settings-btn"
-      mat-icon-button
-    >
-      <mat-icon>settings</mat-icon>
-    </button>
-  </div>
 
   <button
     #menuEntry

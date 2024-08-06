@@ -1299,7 +1299,7 @@
       "TITLE": "Recordatorio de descanso"
     },
     "SCHEDULE": {
-      "HELP": "La función de línea de tiempo debe proporcionarle una descripción general rápida de cómo se desarrollan sus tareas planificadas a lo largo del tiempo. Puede encontrarlo en el menú de la izquierda en <a href='#/timeline'>\"Cronología\"</a>.",
+      "HELP": "La función de línea de tiempo debe proporcionarle una descripción general rápida de cómo se desarrollan sus tareas planificadas a lo largo del tiempo. Puede encontrarlo en el menú de la izquierda en <a href='#/schedule'>\"Cronología\"</a>.",
       "L_IS_WORK_START_END_ENABLED": "Limite el flujo de tareas no programadas a tiempos de trabajo específicos",
       "L_WORK_END": "Fin del día laboral",
       "L_WORK_START": "Inicio del día laboral",

@@ -1145,7 +1145,7 @@
       "TASK_PROJECTION_INFO": "Zukunftsprojektion einer geplanten wiederkehrenden Aufgabe",
       "LUNCH_BREAK": "Mittagspause",
       "S": {
-        "CAL_PROVIDER_ERROR": "Fehler beim Timeline-Kal.-Anbieter: {{errTxt}}"
+        "CAL_PROVIDER_ERROR": "Fehler beim Schedule-Kal.-Anbieter: {{errTxt}}"
       }
     },
     "TIME_TRACKING": {
@@ -1488,7 +1488,7 @@
       "TITLE": "Pausenerinnerung"
     },
     "SCHEDULE": {
-      "HELP": "Die Timeline-Funktion soll Ihnen einen schnellen Überblick darüber geben, wie sich Ihre geplanten Aufgaben im Laufe der Zeit entwickeln. Sie finden es im Menü auf der linken Seite unter <a href='#/timeline'>'Timeline'</a>.",
+      "HELP": "Die Schedule-Funktion soll Ihnen einen schnellen Überblick darüber geben, wie sich Ihre geplanten Aufgaben im Laufe der Zeit entwickeln. Sie finden es im Menü auf der linken Seite unter <a href='#/schedule'>'Schedule'</a>.",
       "L_IS_WORK_START_END_ENABLED": "Beschränken Sie ungeplante Aufgaben auf bestimmte Arbeitszeiten",
       "L_WORK_END": "Ende des Arbeitstages",
       "L_WORK_START": "Beginn des Arbeitstages",
@@ -1552,7 +1552,7 @@
     "HELP": "Hilfe",
     "METRICS": "Metriken",
     "NOTES": "Anmerkungen",
-    "NOTES_PANEL_INFO": "Notizen können nur von der Timeline und der normalen Aufgabenliste angezeigt werden.",
+    "NOTES_PANEL_INFO": "Notizen können nur von der Schedule und der normalen Aufgabenliste angezeigt werden.",
     "PROCRASTINATE": "Prokrastination",
     "PROJECTS": "Projekte",
     "PROJECT_MENU": "Projektmenü",

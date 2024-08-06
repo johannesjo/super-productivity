@@ -1,5 +1,5 @@
 import { SVEType } from './schedule.const';
-import { TaskCopy } from '../tasks/task.model';
+import { TaskCopy, TaskPlanned } from '../tasks/task.model';
 import { TaskRepeatCfg } from '../task-repeat-cfg/task-repeat-cfg.model';
 import { CalendarIntegrationEvent } from '../calendar-integration/calendar-integration.model';
 
@@ -136,4 +136,66 @@ export interface ScheduleFromCalendarEvent extends CalendarIntegrationEvent {
 export interface ScheduleCalendarMapEntry {
   icon: string;
   items: ScheduleFromCalendarEvent[];
+}
+
+// -----------------
+// BlockedBlocks
+export enum BlockedBlockType {
+  ScheduledTask = 'ScheduledTask',
+  ScheduledRepeatProjection = 'ScheduledRepeatProjection',
+  CalendarEvent = 'CalendarEvent',
+  WorkdayStartEnd = 'WorkdayStartEnd',
+  LunchBreak = 'LunchBreak',
+}
+
+export interface BlockedBlockEntryScheduledTask {
+  start: number;
+  end: number;
+  type: BlockedBlockType.ScheduledTask;
+  data: TaskPlanned;
+}
+
+export interface BlockedBlockEntryScheduledRepeatProjection {
+  start: number;
+  end: number;
+  type: BlockedBlockType.ScheduledRepeatProjection;
+  data: TaskRepeatCfg;
+}
+
+export interface BlockedBlockEntryCalendarEvent {
+  start: number;
+  end: number;
+  type: BlockedBlockType.CalendarEvent;
+  data: ScheduleFromCalendarEvent;
+}
+
+export interface BlockedBlockEntryWorkdayStartEnd {
+  start: number;
+  end: number;
+  type: BlockedBlockType.WorkdayStartEnd;
+  data: ScheduleWorkStartEndCfg;
+}
+
+export interface BlockedBlockEntryLunchBreak {
+  start: number;
+  end: number;
+  type: BlockedBlockType.LunchBreak;
+  data: ScheduleLunchBreakCfg;
+}
+
+export type BlockedBlockEntry =
+  | BlockedBlockEntryScheduledTask
+  | BlockedBlockEntryScheduledRepeatProjection
+  | BlockedBlockEntryCalendarEvent
+  | BlockedBlockEntryWorkdayStartEnd
+  | BlockedBlockEntryLunchBreak;
+
+export interface BlockedBlock {
+  start: number;
+  end: number;
+  entries: BlockedBlockEntry[];
+}
+
+export interface BlockedBlockByDayMap {
+  [dayDate: string]: BlockedBlock[];
 }

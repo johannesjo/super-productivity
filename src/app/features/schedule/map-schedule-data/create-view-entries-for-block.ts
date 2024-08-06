@@ -1,5 +1,4 @@
-import { BlockedBlock, BlockedBlockType } from '../../timeline/timeline.model';
-import { SVE } from '../schedule.model';
+import { BlockedBlock, BlockedBlockType, SVE } from '../schedule.model';
 import { SVEType } from '../schedule.const';
 import { nanoid } from 'nanoid';
 import { getTimeLeftForTask } from '../../../util/get-time-left-for-task';

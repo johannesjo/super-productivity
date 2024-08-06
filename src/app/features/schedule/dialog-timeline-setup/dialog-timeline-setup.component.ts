@@ -9,12 +9,17 @@ import { T } from '../../../t.const';
 import { GlobalConfigService } from '../../config/global-config.service';
 import { Subscription } from 'rxjs';
 import { LS } from '../../../core/persistence/storage-keys.const';
+import { UiModule } from '../../../ui/ui.module';
+import { CommonModule } from '@angular/common';
+import { TranslateModule } from '@ngx-translate/core';
 
 @Component({
   selector: 'dialog-schedule-setup',
   templateUrl: './dialog-timeline-setup.component.html',
   styleUrls: ['./dialog-timeline-setup.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true,
+  imports: [UiModule, CommonModule, TranslateModule],
 })
 export class DialogTimelineSetupComponent implements OnDestroy {
   T: typeof T = T;

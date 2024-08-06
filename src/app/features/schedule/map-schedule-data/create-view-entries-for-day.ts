@@ -3,8 +3,13 @@ import {
   TaskWithoutReminder,
   TaskWithPlannedForDayIndication,
 } from '../../tasks/task.model';
-import { BlockedBlock } from '../../timeline/timeline.model';
-import { SVE, SVEEntryForNextDay, SVERepeatProjection, SVETask } from '../schedule.model';
+import {
+  BlockedBlock,
+  SVE,
+  SVEEntryForNextDay,
+  SVERepeatProjection,
+  SVETask,
+} from '../schedule.model';
 import { createScheduleViewEntriesForNormalTasks } from './create-schedule-view-entries-for-normal-tasks';
 import { insertBlockedBlocksViewEntriesForSchedule } from './insert-blocked-blocks-view-entries-for-schedule';
 import { SCHEDULE_VIEW_TYPE_ORDER, SVEType } from '../schedule.const';

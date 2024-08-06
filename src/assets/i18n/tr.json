@@ -1394,7 +1394,7 @@
       "TITLE": "Mola Hatırlatması"
     },
     "SCHEDULE": {
-      "HELP": "Zaman çizelgesi özelliği, planlanan görevlerinizin zaman içinde nasıl oynandığına dair size hızlı bir genel bakış sağlamalıdır. Bunu sol taraftaki menüde <a href='#/timeline'>\"Zaman çizelgesi\"</a>altında bulabilirsiniz.",
+      "HELP": "Zaman çizelgesi özelliği, planlanan görevlerinizin zaman içinde nasıl oynandığına dair size hızlı bir genel bakış sağlamalıdır. Bunu sol taraftaki menüde <a href='#/schedule'>\"Zaman çizelgesi\"</a>altında bulabilirsiniz.",
       "L_IS_WORK_START_END_ENABLED": "Planlanmamış görev akışını belirli çalışma süreleriyle sınırlandırın",
       "L_WORK_END": "İş Günü Sonu",
       "L_WORK_START": "İş Günü Başlangıcı",

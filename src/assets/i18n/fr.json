@@ -1289,7 +1289,7 @@
       "TITLE": "Rappel de pause"
     },
     "SCHEDULE": {
-      "HELP": "La fonction de chronologie devrait vous fournir un aperçu rapide de la façon dont vos tâches planifiées se déroulent au fil du temps. Vous pouvez le trouver dans le menu de gauche sous <a href='#/timeline'>\"Chronologie\"</a>.",
+      "HELP": "La fonction de chronologie devrait vous fournir un aperçu rapide de la façon dont vos tâches planifiées se déroulent au fil du temps. Vous pouvez le trouver dans le menu de gauche sous <a href='#/schedule'>\"Chronologie\"</a>.",
       "L_IS_WORK_START_END_ENABLED": "Limitez le flux de tâches non planifiées à des heures de travail spécifiques",
       "L_WORK_END": "Fin de la journée de travail",
       "L_WORK_START": "Début de la journée de travail",

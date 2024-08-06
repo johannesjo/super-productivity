@@ -1,4 +1,5 @@
 import {
+  BlockedBlock,
   SVE,
   SVERepeatProjection,
   SVERepeatProjectionSplitContinued,
@@ -9,7 +10,6 @@ import moment from 'moment/moment';
 import { TaskCopy, TaskWithoutReminder } from '../../tasks/task.model';
 import { SVEType } from '../../schedule/schedule.const';
 import { TaskRepeatCfg } from '../../task-repeat-cfg/task-repeat-cfg.model';
-import { BlockedBlock } from '../../timeline/timeline.model';
 import {
   isContinuedTaskType,
   isFlowableEntryVE,

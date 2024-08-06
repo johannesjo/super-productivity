@@ -1112,10 +1112,10 @@
       "CONTINUED": "Contínuo",
       "D_INITIAL": {
         "TEXT": "<p>A ideia da linha do tempo é fornecer uma imagem melhor de como as tarefas planejadas de alguém funcionam ao longo do tempo. Ele é gerado automaticamente a partir de suas tarefas e distingue duas coisas diferentes: <strong>Tarefas agendadas</strong>, que são mostradas no tempo planejado e <strong>Tarefas regulares</strong> que devem fluir em torno desses eventos fixos. Todas as tarefas consideram as estimativas de tempo que você atribuiu a elas.</p><p>Além disso, você também pode fornecer os horários de início e término do trabalho. Se configuradas, as tarefas regulares nunca aparecerão fora delas. Observe que o cronograma inclui apenas os próximos 30 dias.</p>",
-        "TITLE": "Timeline"
+        "TITLE": "Schedule"
       },
       "END": "Fim do trabalho",
-      "MENU_TITLE": "Timeline",
+      "MENU_TITLE": "Schedule",
       "NOW": "agora",
       "NO_TASKS": "Atualmente não há tarefas. Adicione algumas tarefas através do botão + na barra superior.",
       "START": "Início do Trabalho",
@@ -1428,11 +1428,11 @@
       "TITLE": "Lembrete de Pausa"
     },
     "SCHEDULE": {
-      "HELP": "O recurso de linha do tempo deve fornecer uma visão geral rápida sobre como suas tarefas planejadas se desenrolam ao longo do tempo. Você pode encontrá-lo no menu à esquerda em <a href='#/timeline'>'Linha do tempo'</a>.",
+      "HELP": "O recurso de linha do tempo deve fornecer uma visão geral rápida sobre como suas tarefas planejadas se desenrolam ao longo do tempo. Você pode encontrá-lo no menu à esquerda em <a href='#/schedule'>'Linha do tempo'</a>.",
       "L_IS_WORK_START_END_ENABLED": "Limite o fluxo de tarefas não programadas a horários de trabalho específicos",
       "L_WORK_END": "Fim do dia de trabalho",
       "L_WORK_START": "Início do dia de trabalho",
-      "TITLE": "Timeline",
+      "TITLE": "Schedule",
       "WORK_START_END_DESCRIPTION": "por exemplo. 17:00",
       "L_IS_LUNCH_BREAK_ENABLED": "Ativar o intervalo de almoço",
       "L_LUNCH_BREAK_END": "Fim do intervalo de almoço",

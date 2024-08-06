@@ -1,12 +1,12 @@
 import { TaskPlanned } from '../../tasks/task.model';
 import { TaskRepeatCfg } from '../../task-repeat-cfg/task-repeat-cfg.model';
-import { BlockedBlockByDayMap } from '../../timeline/timeline.model';
 import {
+  BlockedBlockByDayMap,
   ScheduleCalendarMapEntry,
   ScheduleLunchBreakCfg,
   ScheduleWorkStartEndCfg,
 } from '../schedule.model';
-import { createSortedBlockerBlocks } from '../../timeline/map-timeline-data/create-sorted-blocker-blocks';
+import { createSortedBlockerBlocks } from './create-sorted-blocker-blocks';
 import { getWorklogStr } from '../../../util/get-work-log-str';
 
 // TODO improve to even better algo for createSortedBlockerBlocks

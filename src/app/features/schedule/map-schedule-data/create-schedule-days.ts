@@ -4,8 +4,9 @@ import {
 } from '../../tasks/task.model';
 import { TaskRepeatCfg } from '../../task-repeat-cfg/task-repeat-cfg.model';
 import { PlannerDayMap } from '../../planner/planner.model';
-import { BlockedBlock, BlockedBlockByDayMap } from '../../timeline/timeline.model';
 import {
+  BlockedBlock,
+  BlockedBlockByDayMap,
   ScheduleDay,
   ScheduleWorkStartEndCfg,
   SVE,

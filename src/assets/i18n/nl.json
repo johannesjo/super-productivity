@@ -1330,7 +1330,7 @@
       "TITLE": "Pauzeherinnering"
     },
     "SCHEDULE": {
-      "HELP": "De tijdlijnfunctie zou u een snel overzicht moeten geven van hoe uw geplande taken in de loop van de tijd verlopen. U vindt het in het menu aan de linkerkant onder <a href='#/timeline'>'Tijdlijn'</a>.",
+      "HELP": "De tijdlijnfunctie zou u een snel overzicht moeten geven van hoe uw geplande taken in de loop van de tijd verlopen. U vindt het in het menu aan de linkerkant onder <a href='#/schedule'>'Tijdlijn'</a>.",
       "L_IS_WORK_START_END_ENABLED": "Beperk ongeplande taakstroom tot specifieke werktijden",
       "L_WORK_END": "Einde van de werkdag",
       "L_WORK_START": "Start van de werkdag",
