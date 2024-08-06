@@ -88,6 +88,10 @@ export class ScheduleComponent implements AfterViewInit, OnDestroy {
   T: typeof T = T;
   SVEType: typeof SVEType = SVEType;
 
+  endOfDayColRowStart: number = D_HOURS * 0.5 * FH;
+  currentTimeRow: number = 0;
+  totalRows: number = D_HOURS * FH;
+
   daysToShow$ = this._globalTrackingIntervalService.todayDateStr$.pipe(
     switchMap(() => {
       return fromEvent(window, 'resize').pipe(
@@ -178,6 +182,7 @@ export class ScheduleComponent implements AfterViewInit, OnDestroy {
       );
     }),
   );
+  workStartEnd: { workStartRow: number; workEndRow: number } | null = null;
 
   events$: Observable<ScheduleEvent[]> = this.eventsAndBeyondBudget$.pipe(
     map(({ eventsFlat }) => eventsFlat),
@@ -186,7 +191,7 @@ export class ScheduleComponent implements AfterViewInit, OnDestroy {
     map(({ beyondBudgetDays }) => beyondBudgetDays),
   );
 
-  currentTimeStyle$ = this.scheduleDays$.pipe(
+  currentTimeRow$ = this.scheduleDays$.pipe(
     map((days) => {
       const now = new Date();
       const hours = now.getHours();
@@ -194,9 +199,10 @@ export class ScheduleComponent implements AfterViewInit, OnDestroy {
       // eslint-disable-next-line no-mixed-operators
       const hoursToday = hours + minutes / 60;
       const row = Math.round(hoursToday * FH);
-      return `grid-column: ${2};  grid-row: ${row} / span ${1}`;
+      return row;
     }),
   );
+
   currentTimeSpan$: Observable<{ from: string; to: string }> = this.daysToShow$.pipe(
     map((days) => {
       const from = new Date(days[0]);
@@ -246,6 +252,12 @@ export class ScheduleComponent implements AfterViewInit, OnDestroy {
     this.daysToShow$.pipe(takeUntilDestroyed()).subscribe((days) => {
       this.daysToShow = days;
       this._elRef.nativeElement.style.setProperty('--nr-of-days', days.length);
+    });
+    this.workStartEnd$.pipe(takeUntilDestroyed()).subscribe((v) => {
+      this.workStartEnd = v;
+    });
+    this.currentTimeRow$.pipe(takeUntilDestroyed()).subscribe((v) => {
+      this.currentTimeRow = v;
     });
   }
 

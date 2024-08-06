@@ -73,33 +73,31 @@
   <div
     class="col"
     [attr.data-day]="day"
-    style="grid-column: {{ $index + 2 }}; grid-row: 1 / span 112"
+    style="grid-column: {{ $index + 2 }}; grid-row: 1 / span {{($index === 0 ? currentTimeRow :workStartEnd.workStartRow) -1}}"
   ></div>
 
   <div
     class="col end-of-day"
     [attr.data-day]="day"
-    style="grid-column: {{ $index + 2 }}; grid-row: 113 / span 176"
+    style="grid-column: {{ $index + 2 }}; grid-row: {{($index === 0 ? currentTimeRow :workStartEnd.workStartRow)}} / span {{totalRows - ($index === 0 ? currentTimeRow :workStartEnd.workStartRow)}}"
   ></div>
   }
 
   <!-- Work Start and End -->
-  <ng-container *ngIf="(workStartEnd$|async) as workStartEnd">
-    @if (workStartEnd) {
-    <div
-      class="work-start"
-      style="grid-row: {{workStartEnd.workStartRow}}"
-    >
-      <div>Work Start</div>
-    </div>
-    <div
-      class="work-end"
-      style="grid-row: {{workStartEnd.workEndRow}}"
-    >
-      <div>Work End</div>
-    </div>
-    }
-  </ng-container>
+  @if (workStartEnd) {
+  <div
+    class="work-start"
+    style="grid-row: {{workStartEnd.workStartRow}}"
+  >
+    <div>Work Start</div>
+  </div>
+  <div
+    class="work-end"
+    style="grid-row: {{workStartEnd.workEndRow}}"
+  >
+    <div>Work End</div>
+  </div>
+  }
 
   <!-- Events -->
   @for (ev of (events$|async); track ev.id) {
@@ -155,7 +153,7 @@
 
   <div
     class="current-time"
-    [style]="currentTimeStyle$|async"
+    style="grid-column: 2;  grid-row: {{currentTimeRow}} / span 1"
   >
     <div class="circle"></div>
   </div>
