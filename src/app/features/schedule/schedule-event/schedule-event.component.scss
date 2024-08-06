@@ -5,7 +5,6 @@ $margin-bottom: 6px;
 $margin-right: 10px;
 
 :host {
-  --project-color: $light-theme-separator-color;
   border-radius: 6px;
   margin-right: $margin-right;
   // size of sticky header
@@ -22,7 +21,7 @@ $margin-right: 10px;
   color: $light-theme-text-color;
   position: relative;
   z-index: 2;
-  border-left: 3px solid var(--project-color);
+  border-left: 3px solid var(--project-color, $light-theme-separator-color);
   user-select: none;
   // has to be for after elements
   overflow: visible !important;
@@ -36,13 +35,10 @@ $margin-right: 10px;
   }
 
   @include darkTheme() {
-    //border-color: $dark-theme-separator-color;
     border-color: rgba(255, 255, 255, 0.1);
-    border-left-color: var(--project-color);
+    border-left-color: var(--project-color, $dark-theme-separator-color);
     background: $dark-theme-bg-slightly-lighter;
     color: $dark-theme-text-color;
-    //border-top-width: 1px;
-    //border-top-color: $dark-theme-bg;
   }
 
   &.very-short-event {
