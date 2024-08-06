@@ -118,6 +118,11 @@ header {
   @include darkTheme() {
     border-color: $grid-color-dark;
   }
+
+  &.drag-over {
+    //background: $c-primary !important;
+    background: $light-theme-bg-drag-col !important;
+  }
 }
 
 .filler-col {
@@ -173,13 +178,6 @@ header {
   pointer-events: none;
 }
 
-.col.drag-over {
-  //background: $c-primary !important;
-  //border-right: 5px solid $c-accent !important;
-  //outline: 5px solid $c-accent !important;
-  //color: $c-contrast !important;
-}
-
 .dropzones {
   display: none;
   padding: 0 7px;
@@ -207,6 +205,7 @@ header {
 
   &.drag-over {
     background: $c-accent;
+    color: $c-contrast;
   }
 
   > div {

@@ -60,6 +60,14 @@
     {{ time }}
   </div>
   }
+  <!-- Grid Rows -->
+  @for (row of rowsByNr; track $index) {
+  <div
+    class="row"
+    style="grid-row: {{ row + 1 }}"
+  ></div>
+  }
+
   <!-- Grid Cols -->
   @for (day of daysToShow; track $index) {
   <div
@@ -81,14 +89,6 @@
       <!--      </div>-->
     </div>
   </div>
-  }
-
-  <!-- Grid Rows -->
-  @for (row of rowsByNr; track $index) {
-  <div
-    class="row"
-    style="grid-row: {{ row + 1 }}"
-  ></div>
   }
 
   <!-- Work Start and End -->

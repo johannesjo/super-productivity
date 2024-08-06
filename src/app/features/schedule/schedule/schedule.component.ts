@@ -307,9 +307,13 @@ export class ScheduleComponent implements AfterViewInit, OnDestroy {
         this.prevDragOverEl.classList.add(DRAG_OVER_CLASS);
       } else if (targetEl.classList.contains('dropzones')) {
         this.prevDragOverEl.classList.add(DRAG_OVER_CLASS);
+      } else if (targetEl.classList.contains('col')) {
+        this.prevDragOverEl.classList.add(DRAG_OVER_CLASS);
       }
     }
   }
+
+  dropzones;
 
   dragStarted(ev: CdkDragStart<ScheduleEvent>): void {
     console.log('dragStart', ev);

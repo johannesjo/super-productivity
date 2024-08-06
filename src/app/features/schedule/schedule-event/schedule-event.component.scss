@@ -2,12 +2,13 @@
 
 $split-extra-border-radius: 20px;
 $margin-bottom: 6px;
+$margin-right: 10px;
 
 :host {
   --project-color: $light-theme-separator-color;
 
   border-radius: 6px;
-  margin-right: 10px;
+  margin-right: $margin-right;
   // size of sticky header
   scroll-margin-top: 120px;
   scroll-padding-top: 120px;
@@ -32,10 +33,10 @@ $margin-bottom: 6px;
   border-left: 3px solid var(--project-color);
   //box-shadow: $whiteframe-shadow-1dp;
 
-  @include mq(xs, max) {
-    border-left-width: 2px;
-    margin-right: 5px;
-  }
+  //@include mq(xs, max) {
+  //  border-left-width: 2px;
+  //  margin-right: 5px;
+  //}
 
   &:hover {
     //z-index: 3;
@@ -111,7 +112,6 @@ $margin-bottom: 6px;
   margin-top: 2px;
   border: none !important;
   box-shadow: none !important;
-  pointer-events: none;
   z-index: 1;
 
   .title {
@@ -128,13 +128,13 @@ $margin-bottom: 6px;
   // NOTE: there are some styles in the parent component since host:active + :host  is not working
   content: '';
   position: absolute;
-  top: 100%;
-  height: $margin-bottom;
+  top: 0;
+  bottom: -1 * ($margin-bottom + 10);
   left: 0;
-  right: 0;
+  right: -1 * ($margin-right + 4);
   z-index: 3;
   opacity: 0;
-  background: red;
+  background: rgba(255, 0, 0, 0.1);
 }
 
 // non draggable
