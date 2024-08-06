@@ -27,6 +27,9 @@ $margin-right: 10px;
   // has to be for after elements
   overflow: visible !important;
 
+  &.no-project {
+  }
+
   &:hover {
     //z-index: 3;
     //overflow: visible;
@@ -132,8 +135,6 @@ $margin-right: 10px;
   &.RepeatProjectionSplitContinued,
   &.RepeatProjectionSplitContinuedLast,
   &.ScheduledRepeatProjection {
-    //border-width: 1px;
-    border-left-width: 3px;
     background: $light-theme-bg;
     border-style: dashed;
     border-left-style: solid;
@@ -148,6 +149,20 @@ $margin-right: 10px;
       opacity: 0.7;
     }
   }
+}
+
+:host.CalendarEvent {
+  border-left-width: 1px;
+  border-left-color: $light-theme-extra-border-color;
+
+  @include darkTheme() {
+    border-left-color: $dark-theme-extra-border-color;
+  }
+}
+
+:host-context(.is-not-dragging) :host.CalendarEvent:hover {
+  border-color: $c-accent;
+  color: $c-accent;
 }
 
 :host-context(.is-not-dragging) {
@@ -276,6 +291,24 @@ $margin-right: 10px;
 
   @include mq(xs, max) {
     margin-top: 2px;
+  }
+
+  mat-icon {
+    display: block;
+  }
+
+  mat-icon + mat-icon {
+    display: none;
+  }
+
+  :host:hover & {
+    mat-icon:first-child:not(:last-child) {
+      display: none;
+    }
+
+    mat-icon:nth-child(2) {
+      display: block;
+    }
   }
 }
 

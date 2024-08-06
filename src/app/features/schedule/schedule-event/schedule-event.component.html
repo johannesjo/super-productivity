@@ -33,6 +33,9 @@
     inline="true"
     >restaurant
   </mat-icon>
+  } @case ('CAL_PROJECTION') {
+  <mat-icon>{{ se.data.icon || 'event' }}</mat-icon>
+  <mat-icon>add</mat-icon>
   }
   <!--- --->
   @default { }

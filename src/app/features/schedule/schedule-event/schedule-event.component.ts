@@ -11,7 +11,7 @@ import {
   OnInit,
   ViewChild,
 } from '@angular/core';
-import { ScheduleEvent } from '../schedule.model';
+import { ScheduleEvent, ScheduleFromCalendarEvent } from '../schedule.model';
 import { MatIcon } from '@angular/material/icon';
 import { delay, first } from 'rxjs/operators';
 import { Store } from '@ngrx/store';
@@ -43,6 +43,8 @@ import { AddTaskReminderInterface } from '../../tasks/dialog-add-task-reminder/a
 import { DialogPlanForDayComponent } from '../../planner/dialog-plan-for-day/dialog-plan-for-day.component';
 import { getWorklogStr } from '../../../util/get-work-log-str';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { selectCalendarProviderById } from '../../config/store/global-config.reducer';
+import { TaskService } from '../../tasks/task.service';
 
 @Component({
   selector: 'schedule-event',
@@ -89,6 +91,7 @@ export class ScheduleEventComponent implements OnInit {
   contextMenu!: MatMenuTrigger;
   protected readonly SVEType = SVEType;
   destroyRef = inject(DestroyRef);
+  private _isBeingSubmitted: boolean = false;
 
   @Input({ required: true })
   set event(event: ScheduleEvent) {
@@ -159,6 +162,10 @@ export class ScheduleEventComponent implements OnInit {
       addClass += ' close-to-others';
     }
 
+    // if (!(this.se.data as any).projectId) {
+    //   addClass += ' no-project';
+    // }
+
     if (this.se.timeLeftInHours <= 1 / 4) {
       addClass += ' very-short-event';
     }
@@ -172,7 +179,8 @@ export class ScheduleEventComponent implements OnInit {
     this._cd.detectChanges();
   }
 
-  @HostListener('click') clickHandler(): void {
+  @HostListener('click')
+  async clickHandler(): Promise<void> {
     if (this.se.type === SVEType.ScheduledTask) {
       this.editReminder();
     } else if (
@@ -186,6 +194,31 @@ export class ScheduleEventComponent implements OnInit {
           repeatCfg,
         },
       });
+    } else if (this.se.type === SVEType.CalendarEvent) {
+      if (this._isBeingSubmitted) {
+        return;
+      }
+
+      const data = this.se.data as ScheduleFromCalendarEvent;
+      this._isBeingSubmitted = true;
+      const getCalProvider = data.calProviderId
+        ? await this._store
+            .select(selectCalendarProviderById, { id: data.calProviderId })
+            .pipe(first())
+            .toPromise()
+        : undefined;
+
+      this._taskService.addAndSchedule(
+        data.title,
+        {
+          projectId: getCalProvider?.defaultProjectId || null,
+          issueId: data.id,
+          issueProviderId: data.calProviderId,
+          issueType: 'CALENDAR',
+          timeEstimate: data.duration,
+        },
+        data.start,
+      );
     }
   }
 
@@ -201,6 +234,7 @@ export class ScheduleEventComponent implements OnInit {
     private _elRef: ElementRef,
     private _matDialog: MatDialog,
     private _cd: ChangeDetectorRef,
+    private _taskService: TaskService,
   ) {}
 
   ngOnInit(): void {
@@ -230,7 +264,7 @@ export class ScheduleEventComponent implements OnInit {
     this.contextMenu.openMenu();
   }
 
-  deleteTask(isClick: boolean = false): void {
+  deleteTask(): void {
     this._store
       .select(selectTaskByIdWithSubTaskData, { id: this.task.id })
       .pipe(
