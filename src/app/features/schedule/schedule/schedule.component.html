@@ -74,13 +74,16 @@
     class="col"
     [attr.data-day]="day"
     style="grid-column: {{ $index + 2 }}; grid-row: 1 / span {{($index === 0 ? currentTimeRow :workStartEnd.workStartRow) -1}}"
-  ></div>
-
+  >
+    <div class="drop-label">Drop to plan at start of day</div>
+  </div>
   <div
     class="col end-of-day"
     [attr.data-day]="day"
     style="grid-column: {{ $index + 2 }}; grid-row: {{($index === 0 ? currentTimeRow :workStartEnd.workStartRow)}} / span {{totalRows - ($index === 0 ? currentTimeRow :workStartEnd.workStartRow)}}"
-  ></div>
+  >
+    <div class="drop-label">Drop to plan at end of day</div>
+  </div>
   }
 
   <!-- Work Start and End -->

@@ -122,9 +122,9 @@ header {
 
   &.drag-over {
     //background: $c-primary !important;
-    background: mat-css-vars.mat-css-color-accent($opacity: 0.2);
+    background: mat-css-vars.mat-css-color-primary($opacity: 0.2);
     @include darkTheme() {
-      background: mat-css-vars.mat-css-color-accent($opacity: 0.2);
+      background: mat-css-vars.mat-css-color-primary($opacity: 0.2);
     }
   }
 }
@@ -182,14 +182,12 @@ header {
   pointer-events: none;
 }
 
-.dropzones {
+.drop-label {
   display: none;
-  padding: 0 7px;
-  //top: 80px;
-  //top: 32px;
-  bottom: 0;
+  top: 40px;
   position: sticky;
   line-height: 1.2;
+  padding: 4px 4px;
   justify-content: stretch;
   align-self: start;
   z-index: 33;
@@ -199,43 +197,22 @@ header {
   pointer-events: all;
   border: 1px dashed $c-primary;
   background: $light-theme-bg;
+  background: $c-primary;
+  color: $c-contrast;
 
   @include darkTheme() {
     background: $dark-theme-bg;
+    background: $c-primary;
   }
 
-  .is-dragging & {
+  .drag-over & {
     display: flex;
   }
 
-  &.drag-over {
-    background: $c-accent;
-    color: $c-contrast;
-  }
-
-  > div {
-    pointer-events: none;
-    padding: 8px;
-    height: 60px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    //color: $c-contrast;
-    //color: $c-contrast;
-    text-align: center;
-    margin-bottom: 4px;
-
-    > mat-icon {
-      @include mq(xs) {
-        margin-right: 8px;
-      }
-    }
-  }
-
-  div > div {
-    @include mq(xs, max) {
-      display: none;
-    }
+  .end-of-day & {
+    //top: auto;
+    //bottom: 100px;
+    //outline: 1px dashed red;
   }
 }
 
