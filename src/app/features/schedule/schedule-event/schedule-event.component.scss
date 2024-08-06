@@ -6,7 +6,6 @@ $margin-right: 10px;
 
 :host {
   --project-color: $light-theme-separator-color;
-
   border-radius: 6px;
   margin-right: $margin-right;
   // size of sticky header
@@ -16,27 +15,17 @@ $margin-right: 10px;
   min-height: 20px;
   display: flex;
   align-items: flex-start;
-  // TODO evaluate
-  // TODO find better workaround
   margin-bottom: $margin-bottom;
-
   border: 1px solid $light-theme-separator-color;
-  //border-color:var(--project-color);
-  //border-width: 0;
-  // has to be for after elements
-  overflow: visible !important;
-
+  //box-shadow: $whiteframe-shadow-1dp;
   background: #fff;
   color: $light-theme-text-color;
   position: relative;
   z-index: 2;
   border-left: 3px solid var(--project-color);
-  //box-shadow: $whiteframe-shadow-1dp;
-
-  //@include mq(xs, max) {
-  //  border-left-width: 2px;
-  //  margin-right: 5px;
-  //}
+  user-select: none;
+  // has to be for after elements
+  overflow: visible !important;
 
   &:hover {
     //z-index: 3;
@@ -91,7 +80,6 @@ $margin-right: 10px;
 
   &.split-continued,
   &.split-continued-last {
-    //opacity: .7;
     .title {
       opacity: 0.4;
       position: absolute;
@@ -374,7 +362,6 @@ $margin-right: 10px;
   :host.SplitTask,
   :host.SplitTask,
   :host.Task {
-    //outline: 1px solid $c-accent;
     box-shadow: $whiteframe-shadow-6dp;
   }
 }
@@ -393,8 +380,6 @@ $margin-right: 10px;
 }
 
 :host.drag-over {
-  //background: $c-accent !important;
-  //color: $c-contrast !important;
   transform: translateY(40px);
   z-index: 3;
 
@@ -408,7 +393,6 @@ $margin-right: 10px;
     left: 0;
     right: -1 * ($margin-right + 4);
     z-index: 3;
-    opacity: 0;
     //border: 1px solid red;
   }
 }
