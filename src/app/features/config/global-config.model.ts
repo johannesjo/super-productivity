@@ -132,7 +132,7 @@ export type CalendarProvider = Readonly<{
   showBannerBeforeThreshold: null | number;
 }>;
 
-export type TimelineConfig = Readonly<{
+export type ScheduleConfig = Readonly<{
   isWorkStartEndEnabled: boolean;
   workStart: string;
   workEnd: string;
@@ -178,7 +178,7 @@ export type GlobalConfigState = Readonly<{
   timeTracking: TimeTrackingConfig;
   calendarIntegration: CalendarIntegrationConfig;
   reminder: ReminderConfig;
-  timeline: TimelineConfig;
+  schedule: ScheduleConfig;
   dominaMode: DominaModeConfig;
   focusMode: FocusModeConfig;
 
@@ -194,7 +194,7 @@ export type GlobalSectionConfig =
   | PomodoroConfig
   | KeyboardConfig
   | CalendarIntegrationConfig
-  | TimelineConfig
+  | ScheduleConfig
   | ReminderConfig
   | SyncConfig;
 type Omit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>;

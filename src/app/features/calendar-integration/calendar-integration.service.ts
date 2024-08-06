@@ -8,7 +8,7 @@ import {
   switchMap,
   tap,
 } from 'rxjs/operators';
-import { getRelevantEventsForCalendarIntegrationFromIcal } from '../timeline/ical/get-relevant-events-from-ical';
+import { getRelevantEventsForCalendarIntegrationFromIcal } from '../schedule/ical/get-relevant-events-from-ical';
 import { CalendarProvider } from '../config/global-config.model';
 import { forkJoin, Observable, of } from 'rxjs';
 import { T } from '../../t.const';

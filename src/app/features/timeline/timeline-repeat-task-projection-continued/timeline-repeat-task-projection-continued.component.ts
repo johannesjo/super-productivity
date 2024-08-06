@@ -3,7 +3,7 @@ import { TimelineViewEntryRepeatProjectionSplitContinued } from '../timeline.mod
 import { T } from 'src/app/t.const';
 
 @Component({
-  selector: 'timeline-repeat-task-projection-continued',
+  selector: 'schedule-repeat-task-projection-continued',
   templateUrl: './timeline-repeat-task-projection-continued.component.html',
   styleUrl: './timeline-repeat-task-projection-continued.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

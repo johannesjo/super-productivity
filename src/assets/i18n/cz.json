@@ -1094,7 +1094,7 @@
         "WEDNESDAY": "Středa"
       }
     },
-    "TIMELINE": {
+    "SCHEDULE": {
       "CONTINUED": "pokračovalo",
       "D_INITIAL": {
         "TEXT": "<p>Myšlenkou časové osy je poskytnout lepší přehled o tom, jak se plánované úkoly vyvíjejí v čase. Automaticky vychází z vašich úkolů a rozlišuje dvě různé věci: <strong>naplánované úkoly</strong>, které jsou zobrazeny v jejich plánovaný čas, a <strong>běžné úkoly</strong>, které by se měly pohybovat kolem těchto pevných událostí. Všechny úkoly zohledňují časové odhady, které jim přiřadíte.</p><p>Kromě toho můžete zadat čas začátku a konce práce. Pokud jsou nakonfigurovány, běžné úkoly se nikdy nezobrazí mimo tyto časy. Všimněte si, že časová osa zahrnuje pouze příštích 30 dnů.</p>",
@@ -1292,7 +1292,7 @@
       "GO_TO_FOCUS_MODE": "Vstoupit do režimu zaměření",
       "GO_TO_SCHEDULED_VIEW": "Přejít na naplánované úkoly",
       "GO_TO_SETTINGS": "Přejít do nastavení",
-      "GO_TO_TIMELINE": "Přejít na časovou osu",
+      "GO_TO_SCHEDULE": "Přejít na časovou osu",
       "GO_TO_WORK_VIEW": "Přejít na pracovní pohled",
       "HELP": "<p>Zde můžete konfigurovat všechny klávesové zkratky.</p> <p>Klikněte na vstupní text a zadejte požadovanou kombinaci kláves. Stiskněte Enter pro uložení a Escape pro zrušení.</p> <p>Existují tři typy zkratk:</p> <ul> <li> <strong>Globální zkratky:</strong> Když je aplikace spuštěna, spustí akci z jakékoliv jiné aplikace. </li> <li> <strong>Zkratky na úrovni aplikace:</strong> Spustí se z libovolné obrazovky aplikace, pokud právě neupravujete textové pole. </li> <li> <strong>Zkratky na úrovni úkolu:</strong> Spustí se pouze tehdy, pokud jste vybrali úkol pomocí myši nebo klávesnice a obvykle spustí akci specifickou pro tento úkol. </li> </ul><p>Můžete <strong>stisknout Escape k odebrání zkratky.</strong></p>",
       "MOVE_TASK_DOWN": "Přesunout úkol dolů v seznamu",
@@ -1410,7 +1410,7 @@
       "SNOOZE_TIME": "Doba odložení, když máte přestávku",
       "TITLE": "Připomenutí o přestávce"
     },
-    "TIMELINE": {
+    "SCHEDULE": {
       "HELP": "Funkce časové osy by vám měla poskytnout rychlý přehled o tom, jak se plánované úkoly vyvíjejí v čase. Najdete ji v levém bočním menu pod <a href='#/timeline'>‘Časová osa’</a>.",
       "L_IS_WORK_START_END_ENABLED": "Omezit tok nerozvržených úkolů na konkrétní pracovní časy",
       "L_WORK_END": "Konec pracovního dne",

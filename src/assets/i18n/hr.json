@@ -1119,7 +1119,7 @@
         "WEDNESDAY": "Srijeda"
       }
     },
-    "TIMELINE": {
+    "SCHEDULE": {
       "CONTINUED": "nastavljeno",
       "D_INITIAL": {
         "TEXT": "<p>Ideja vremenske trake je pružiti bolju sliku o tome kako se nečiji terminirani zadaci odvijaju tijekom vremena. Automatski se generira iz tvojih zadataka i razlikuje dvije stvari: <strong>terminirane zadatke</strong> koji se prikazuju u planirano vrijeme i <strong>redovne zadatke</strong> koji bi se trebali odvijati oko tih fiksnih događaja. Svi zadaci uzimaju u obzir dodijejene procjene vremena.</p><p>Osim toga moguće je navesti vrijeme početka i kraja rada. Ako su konfigurirani, redovni zadaci se nikada neće pojaviti izvan njih. Imaj na umu da vremenska traka uključuje samo idućih 30 dana.</p>",
@@ -1316,7 +1316,7 @@
       "GO_TO_FOCUS_MODE": "Idi na modus fokusa",
       "GO_TO_SCHEDULED_VIEW": "Idi na terminirane zadatke",
       "GO_TO_SETTINGS": "Idi na postavke",
-      "GO_TO_TIMELINE": "Idi na vremensku traku",
+      "GO_TO_SCHEDULE": "Idi na vremensku traku",
       "GO_TO_WORK_VIEW": "Idi na prikaz rada",
       "HELP": "<p>Ovdje možeš konfigurirati sve tipkovne prečace.</p> <p>Pritisni na unos teksta i upiši željenu kombinaciju tipkovnice. Pritisni enter za spremanje i Escape za prekidanje.</p> <p>Postoje tri vrste prečaca:</p> <ul> <li> <strong>Globalni prečaci:</strong> Kad se program pokrene, pokrenut će radnju iz svakog drugog programa. </li> <li> <strong>Prečaci na razini programa:</strong> Pokrenut će se iz svakog ekrana programa, ali ne ako trenutačno uređuješ tekstualno polje. </li> <li> <strong>Prečaci na razini zadatka:</strong> Pokrenut će se samo ako se zadatak odabere putem miša ili tipkovnice i obično pokreću radnju koja je posebno povezana s tim zadatkom. </li> </ul><p><strong>Pritisni Escape za uklanjanje prečaca.</strong>",
       "MOVE_TASK_DOWN": "Premjesti zadatak prema dolje u popisu",
@@ -1439,7 +1439,7 @@
       "SNOOZE_TIME": "Odgodi mjerenje vremena kad te program zatraži da pauziraš",
       "TITLE": "Podsjetnik za pauzu"
     },
-    "TIMELINE": {
+    "SCHEDULE": {
       "HELP": "Vremenska traka omogućuje brzi pregled kako se tvoji terminirani zadaci odvijaju tijekom vremena. Nalazi se u lijevom izborniku pod <a href='#/timeline'>„Vremenska traka”</a>. ",
       "L_IS_WORK_START_END_ENABLED": "Ograniči tijek neterminiranog zadatka na određena radna vremena",
       "L_WORK_END": "Kraj radnog dana",

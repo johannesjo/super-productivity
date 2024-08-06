@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
 import { TimelineCustomEvent } from '../timeline.model';
 
 @Component({
-  selector: 'timeline-custom-event',
+  selector: 'schedule-custom-event',
   templateUrl: './timeline-custom-event.component.html',
   styleUrls: ['./timeline-custom-event.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,

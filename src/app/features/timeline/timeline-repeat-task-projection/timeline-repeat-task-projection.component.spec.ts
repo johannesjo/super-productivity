@@ -1,6 +1,6 @@
 // import { ComponentFixture, TestBed } from '@angular/core/testing';
 //
-// import { TimelineRepeatTaskProjectionComponent } from './timeline-repeat-task-projection.component';
+// import { TimelineRepeatTaskProjectionComponent } from './schedule-repeat-task-projection.component';
 //
 // describe('TimelineCustomEventComponent', () => {
 //   let component: TimelineRepeatTaskProjectionComponent;

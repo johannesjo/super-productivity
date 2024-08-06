@@ -1,6 +1,6 @@
 // import { ComponentFixture, TestBed } from '@angular/core/testing';
 //
-// import { TimelineRepeatTaskProjectionContinuedComponent } from './timeline-repeat-task-projection-continued.component';
+// import { TimelineRepeatTaskProjectionContinuedComponent } from './schedule-repeat-task-projection-continued.component';
 //
 // describe('TimelineRepeatTaskProjectionContinuedComponent', () => {
 //   let component: TimelineRepeatTaskProjectionContinuedComponent;

@@ -9,10 +9,10 @@ import {
   GlobalSectionConfig,
   IdleConfig,
   MiscConfig,
+  ScheduleConfig,
   SoundConfig,
   SyncConfig,
   TakeABreakConfig,
-  TimelineConfig,
 } from './global-config.model';
 import {
   selectConfigFeatureState,
@@ -62,7 +62,7 @@ export class GlobalConfigService {
     shareReplay(1),
   );
 
-  timelineCfg$: Observable<TimelineConfig> = this._store.pipe(
+  timelineCfg$: Observable<ScheduleConfig> = this._store.pipe(
     select(selectTimelineConfig),
   );
 

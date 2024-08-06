@@ -8,7 +8,7 @@ import { GlobalConfigService } from '../../config/global-config.service';
 import { MatDialog } from '@angular/material/dialog';
 import { CalendarIntegrationService } from '../../calendar-integration/calendar-integration.service';
 import { LS } from '../../../core/persistence/storage-keys.const';
-import { DialogTimelineSetupComponent } from '../dialog-timeline-setup/dialog-timeline-setup.component';
+import { DialogTimelineSetupComponent } from '../../schedule/dialog-timeline-setup/dialog-timeline-setup.component';
 import { TimelineViewEntryType } from '../timeline.const';
 import { T } from 'src/app/t.const';
 import { LayoutService } from '../../../core-ui/layout/layout.service';
@@ -20,7 +20,7 @@ import { DateService } from '../../../core/date/date.service';
 import { selectTaskRepeatCfgsWithAndWithoutStartTime } from '../../task-repeat-cfg/store/task-repeat-cfg.reducer';
 
 @Component({
-  selector: 'timeline-days',
+  selector: 'schedule-days',
   templateUrl: './timeline-days.component.html',
   styleUrl: './timeline-days.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -92,7 +92,7 @@ export class TimelineDaysComponent {
     private _store: Store,
     private _dateService: DateService,
   ) {
-    if (!localStorage.getItem(LS.WAS_TIMELINE_INITIAL_DIALOG_SHOWN)) {
+    if (!localStorage.getItem(LS.WAS_SCHEDULE_INITIAL_DIALOG_SHOWN)) {
       this._matDialog.open(DialogTimelineSetupComponent, {
         data: { isInfoShownInitially: true },
       });

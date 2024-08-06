@@ -15,8 +15,8 @@ import { createSortedBlockerBlocks } from './create-sorted-blocker-blocks';
 import { getTimeLeftForTask } from '../../../util/get-time-left-for-task';
 import { createTimelineViewEntriesForNormalTasks } from './create-timeline-view-entries-for-normal-tasks';
 import {
-  TIMELINE_MOVEABLE_TYPES,
-  TIMELINE_VIEW_TYPE_ORDER,
+  SCHEDULE_MOVEABLE_TYPES,
+  SCHEDULE_VIEW_TYPE_ORDER,
   TimelineViewEntryType,
 } from '../timeline.const';
 import moment from 'moment';
@@ -95,7 +95,7 @@ export const mapToTimelineViewEntries = (
   // -------
   viewEntries.sort((a, b) => {
     if (a.start - b.start === 0) {
-      return TIMELINE_VIEW_TYPE_ORDER[a.type] - TIMELINE_VIEW_TYPE_ORDER[b.type];
+      return SCHEDULE_VIEW_TYPE_ORDER[a.type] - SCHEDULE_VIEW_TYPE_ORDER[b.type];
     }
     return a.start - b.start;
   });
@@ -750,7 +750,7 @@ const isContinuedTaskType = (viewEntry: TimelineViewEntry): boolean => {
 };
 
 const isMoveableViewEntry = (viewEntry: TimelineViewEntry): boolean => {
-  return !!TIMELINE_MOVEABLE_TYPES.find(
+  return !!SCHEDULE_MOVEABLE_TYPES.find(
     (moveableType) => moveableType === viewEntry.type,
   );
 };

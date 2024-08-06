@@ -999,7 +999,7 @@
         "WEDNESDAY": "Miércoles"
       }
     },
-    "TIMELINE": {
+    "SCHEDULE": {
       "CONTINUED": "Continuado",
       "D_INITIAL": {
         "TEXT": "<p>La idea de la línea de tiempo es proporcionar una mejor imagen de cómo se desarrollan las tareas planificadas a lo largo del tiempo. Se genera automáticamente a partir de sus Tareas y distingue dos cosas diferentes: <strong>Tareas programadas</strong>, que se muestran en el momento planificado y <strong>Tareas regulares</strong> que deberían fluir alrededor de esos eventos fijos. Todas las tareas tienen en cuenta las estimaciones de tiempo que les ha asignado.</p><p>Además de esto, también puede proporcionar una hora de inicio y finalización del trabajo. Si se configuran, las tareas regulares nunca aparecerán fuera de estas. Tenga en cuenta que el cronograma solo incluye los próximos 30 días.</p>",
@@ -1193,7 +1193,7 @@
       "GO_TO_FOCUS_MODE": "Ir al Modo de Enfoque",
       "GO_TO_SCHEDULED_VIEW": "Ir a tareas programadas",
       "GO_TO_SETTINGS": "Ir a Ajustes",
-      "GO_TO_TIMELINE": "Ir a la cronología",
+      "GO_TO_SCHEDULE": "Ir a la cronología",
       "GO_TO_WORK_VIEW": "Ir a la Vista de Trabajo",
       "HELP": "<p>Aquí puedes configurar todos los atajos del teclado.</p> <p>Haga clic en la entrada de texto e ingrese la combinación de teclas deseada. Pulsa Enter para guardar y Escape para abortar.</p> <p>Hay tres tipos de atajos:</p> <ul> <li> <strong>Atajos globales:</strong> Cuando la aplicación se está ejecutando, se activará la acción desde cualquier otra aplicación. </li> <li> <strong>Atajos de nivel de aplicación:</strong> Se activará desde todas las pantallas de la aplicación, pero no si está editando un campo de texto. </li> <li> <strong>Atajos de nivel de tarea:</strong> Solo se activarán si ha seleccionado una tarea mediante el mouse o el teclado y, por lo general, activará una acción relacionada específicamente con esa tarea. </li> </ul>",
       "MOVE_TASK_DOWN": "Mueve la tarea hacia abajo en la lista",
@@ -1298,7 +1298,7 @@
       "SNOOZE_TIME": "Posponer el tiempo cuando se le solicite tomar un descanso",
       "TITLE": "Recordatorio de descanso"
     },
-    "TIMELINE": {
+    "SCHEDULE": {
       "HELP": "La función de línea de tiempo debe proporcionarle una descripción general rápida de cómo se desarrollan sus tareas planificadas a lo largo del tiempo. Puede encontrarlo en el menú de la izquierda en <a href='#/timeline'>\"Cronología\"</a>.",
       "L_IS_WORK_START_END_ENABLED": "Limite el flujo de tareas no programadas a tiempos de trabajo específicos",
       "L_WORK_END": "Fin del día laboral",

@@ -1035,7 +1035,7 @@
         "WEDNESDAY": "Rabu"
       }
     },
-    "TIMELINE": {
+    "SCHEDULE": {
       "CONTINUED": "lanjutan",
       "D_INITIAL": {
         "TEXT": "<p>Ide Timeline adalah untuk memberikan gambaran yang lebih baik tentang bagaimana tugas yang direncanakan seseorang bermain dari waktu ke waktu. Ini dibuat secara otomatis dari Tugas Anda dan membedakan dua hal yang berbeda: <strong>Tugas Terjadwal</strong>, yang ditampilkan pada waktu yang direncanakan dan <strong>Tugas Biasa</strong> yang harus mengalir di sekitar peristiwa tetap tersebut. Semua tugas mempertimbangkan perkiraan waktu yang telah Anda tetapkan untuk mereka.</p><p>Selain itu, Anda juga dapat memberikan waktu mulai dan selesai pekerjaan. Jika dikonfigurasi, tugas rutin tidak akan pernah muncul di luar ini. Harap dicatat bahwa timeline hanya mencakup 30 hari mendatang.</p>",
@@ -1246,7 +1246,7 @@
       "GO_TO_FOCUS_MODE": "Pergi ke Mode Fokus",
       "GO_TO_SCHEDULED_VIEW": "Buka Tugas terjadwal",
       "GO_TO_SETTINGS": "Pergi ke pengaturan",
-      "GO_TO_TIMELINE": "Pergi ke Linimasa",
+      "GO_TO_SCHEDULE": "Pergi ke Linimasa",
       "GO_TO_WORK_VIEW": "Pergi ke Tampilan Kerja",
       "HELP": "<p>Di sini Anda dapat mengonfigurasi semua pintasan keyboard.</p> <p>Klik input teks dan masukkan kombinasi keyboard yang diinginkan. Tekan enter untuk menyimpan dan Escape untuk membatalkan.</p> <p>Ada tiga jenis pintasan:</p> <ul> <li> <strong>Pintasan global:</strong> Saat aplikasi dijalankan, aplikasi akan memicu tindakan dari setiap aplikasi lain. </li> <li> <strong>Pintasan tingkat aplikasi:</strong> Akan dipicu dari setiap layar aplikasi, tetapi tidak jika Anda sedang mengedit bidang teks. </li> <li> <strong>Pintasan tingkat tugas:</strong> Pintasan ini hanya akan dipicu jika Anda telah memilih tugas melalui mouse atau keyboard dan biasanya memicu tindakan yang secara khusus terkait dengan satu tugas tersebut. </li> </ul><p>Anda dapat <strong>menekan Escape untuk menghapus pintasan.</strong>",
       "MOVE_TASK_DOWN": "Pindahkan Tugas ke bawah dalam Daftar",
@@ -1358,7 +1358,7 @@
       "TITLE": "Pengingat istirahat",
       "MOTIVATIONAL_IMG": "Gambar motivasi (url web)"
     },
-    "TIMELINE": {
+    "SCHEDULE": {
       "HELP": "Fitur garis waktu akan memberi Anda gambaran singkat tentang bagaimana tugas yang Anda rencanakan berjalan dari waktu ke waktu. Anda dapat menemukannya di menu sebelah kiri di bawah <a href='#/timeline'>'Timeline'</a>. ",
       "L_IS_WORK_START_END_ENABLED": "Batasi alur tugas yang tidak terjadwal ke waktu kerja tertentu",
       "L_WORK_END": "Hari Kerja Berakhir",

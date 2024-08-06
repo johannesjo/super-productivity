@@ -1030,7 +1030,7 @@
         "WEDNESDAY": "woensdag"
       }
     },
-    "TIMELINE": {
+    "SCHEDULE": {
       "CONTINUED": "vervolgd",
       "D_INITIAL": {
         "TEXT": "<p>Het idee van de tijdlijn is om een beter beeld te geven van hoe iemands geplande taken zich in de loop van de tijd afspelen. Het wordt automatisch gegenereerd op basis van uw taken en onderscheidt twee verschillende dingen: <strong>geplande taken</strong>, die op hun geplande tijd worden weergegeven, en <strong>gewone taken</strong> die rond die vaste gebeurtenissen zouden moeten stromen. Bij alle taken wordt rekening gehouden met de tijdschattingen die u eraan hebt toegewezen.</p><p>Daarnaast kunt u ook een begin- en eindtijd van het werk opgeven. Als geconfigureerde reguliere taken daarbuiten nooit verschijnen. Houd er rekening mee dat de tijdlijn alleen de komende 30 dagen omvat.</p>",
@@ -1224,7 +1224,7 @@
       "GO_TO_FOCUS_MODE": "Ga naar Focus Mode",
       "GO_TO_SCHEDULED_VIEW": "Ga naar geplande taken",
       "GO_TO_SETTINGS": "Ga naar Instellingen",
-      "GO_TO_TIMELINE": "Ga naar de tijdlijn",
+      "GO_TO_SCHEDULE": "Ga naar de tijdlijn",
       "GO_TO_WORK_VIEW": "Ga naar Work View",
       "HELP": "<p>Hier kunt u alle sneltoetsen configureren.</p> <p>Klik op de tekstinvoer en voer de gewenste toetsenbordcombinatie in. Druk op enter om op te slaan en op Escape om af te breken.</p> <p>Er zijn drie soorten sneltoetsen:</p> <ul> <li><strong>Wereldwijde snelkoppelingen:</strong> wanneer de app wordt uitgevoerd, wordt de actie vanuit elke andere app geactiveerd.</li> <li><strong>Sneltoetsen op applicatieniveau:</strong> wordt geactiveerd vanuit elk scherm van de applicatie, maar niet als u momenteel een tekstveld bewerkt.</li> <li><strong>Sneltoetsen op taakniveau:</strong> Ze worden alleen geactiveerd als u een taak via muis of toetsenbord hebt geselecteerd en activeren meestal een actie die specifiek betrekking heeft op die ene taak.</li> </ul>",
       "MOVE_TASK_DOWN": "Verplaats taak naar beneden in lijst",
@@ -1329,7 +1329,7 @@
       "SNOOZE_TIME": "Snoozetijd wanneer u wordt gevraagd om een pauze te nemen",
       "TITLE": "Pauzeherinnering"
     },
-    "TIMELINE": {
+    "SCHEDULE": {
       "HELP": "De tijdlijnfunctie zou u een snel overzicht moeten geven van hoe uw geplande taken in de loop van de tijd verlopen. U vindt het in het menu aan de linkerkant onder <a href='#/timeline'>'Tijdlijn'</a>.",
       "L_IS_WORK_START_END_ENABLED": "Beperk ongeplande taakstroom tot specifieke werktijden",
       "L_WORK_END": "Einde van de werkdag",

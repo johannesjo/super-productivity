@@ -1,6 +1,6 @@
 <h1 mat-dialog-title>
   <mat-icon>filter_list</mat-icon>
-  <span style="margin-left: 8px">{{T.F.TIMELINE.D_INITIAL.TITLE|translate}}</span>
+  <span style="margin-left: 8px">{{ T.F.SCHEDULE.D_INITIAL.TITLE|translate }}</span>
 </h1>
 
 <form
@@ -11,12 +11,12 @@
     <div
       *ngIf="data?.isInfoShownInitially"
       class="text"
-      [innerHTML]="T.F.TIMELINE.D_INITIAL.TEXT|translate"
+      [innerHTML]="T.F.SCHEDULE.D_INITIAL.TEXT|translate"
     ></div>
 
     <help-section *ngIf="!data?.isInfoShownInitially">
       <div
-        [innerHTML]="T.F.TIMELINE.D_INITIAL.TEXT|translate"
+        [innerHTML]="T.F.SCHEDULE.D_INITIAL.TEXT|translate"
         class="side-info"
       ></div>
     </help-section>

@@ -12,7 +12,7 @@ import { TIME_TRACKING_FORM_CFG } from './form-cfgs/time-tracking-form.const';
 import { SYNC_FORM } from './form-cfgs/sync-form.const';
 import { IS_ELECTRON } from '../../app.constants';
 import { IS_ANDROID_WEB_VIEW } from '../../util/is-android-web-view';
-import { TIMELINE_FORM_CFG } from './form-cfgs/timeline-form.const';
+import { SCHEDULE_FORM_CFG } from './form-cfgs/schedule-form.const';
 import { DOMINA_MODE_FORM } from './form-cfgs/domina-mode-form.const';
 import { FOCUS_MODE_FORM_CFG } from './form-cfgs/focus-mode-form.const';
 import { IS_FIREFOX } from '../../util/is-firefox';
@@ -34,7 +34,7 @@ export const GLOBAL_CONFIG_FORM_CONFIG: ConfigFormConfig = [
   TIME_TRACKING_FORM_CFG,
   CALENDAR_FORM_CFG,
   REMINDER_FORM_CFG,
-  TIMELINE_FORM_CFG,
+  SCHEDULE_FORM_CFG,
 ].filter(filterGlobalConfigForm);
 
 export const GLOBAL_SYNC_FORM_CONFIG: ConfigFormConfig = [

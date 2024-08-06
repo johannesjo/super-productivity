@@ -1,6 +1,6 @@
 // import { ComponentFixture, TestBed } from '@angular/core/testing';
 //
-// import { TimelineContinuedTaskComponent } from './timeline-continued-task.component';
+// import { TimelineContinuedTaskComponent } from './schedule-continued-task.component';
 //
 // describe('TimelineContinuedTaskComponent', () => {
 //   let component: TimelineContinuedTaskComponent;

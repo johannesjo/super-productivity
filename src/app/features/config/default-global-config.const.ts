@@ -147,7 +147,7 @@ export const DEFAULT_GLOBAL_CONFIG: GlobalConfigState = {
     isCountdownBannerEnabled: true,
     countdownDuration: minute * 10,
   },
-  timeline: {
+  schedule: {
     isWorkStartEndEnabled: true,
     workStart: DEFAULT_DAY_START,
     workEnd: '17:00',

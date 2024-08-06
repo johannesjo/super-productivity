@@ -34,6 +34,8 @@ export const migrateGlobalConfigState = (
 
   globalConfigState = _migrateMotivationalImg(globalConfigState);
 
+  globalConfigState = _migrateTimelineToSchedule(globalConfigState);
+
   globalConfigState = _fixDefaultProjectId(globalConfigState);
 
   // NOTE: absolutely needs to come last as otherwise the previous defaults won't work
@@ -140,6 +142,14 @@ const _migrateUndefinedShortcutsToNull = (
   return {
     ...config,
     keyboard: keyboardCopy,
+  };
+};
+
+const _migrateTimelineToSchedule = (config: GlobalConfigState): GlobalConfigState => {
+  return {
+    ...config,
+    schedule:
+      config.schedule || (config as any).timeline || DEFAULT_GLOBAL_CONFIG.schedule,
   };
 };
 
@@ -273,9 +283,9 @@ const _migrateSyncCfg = (config: GlobalConfigState): GlobalConfigState => {
 const _migrateTimelineCalendarsToCalendarIntegration = (
   config: GlobalConfigState,
 ): GlobalConfigState => {
-  if ((config.timeline as any)?.calendarProviders?.length) {
+  if ((config.schedule as any)?.calendarProviders?.length) {
     const convertedCalendars: CalendarProvider[] = (
-      config.timeline as any
+      config.schedule as any
     ).calendarProviders.map((oldCalProvider) => ({
       isEnabled: oldCalProvider.isEnabled,
       icalUrl: oldCalProvider.icalUrl,
@@ -285,11 +295,11 @@ const _migrateTimelineCalendarsToCalendarIntegration = (
       showBannerBeforeThreshold: 15 * 60 * 1000,
     }));
 
-    delete (config.timeline as any).calendarProviders;
+    delete (config.schedule as any).calendarProviders;
     return {
       ...config,
-      timeline: {
-        ...config.timeline,
+      schedule: {
+        ...config.schedule,
         ...({ calendarProviders: undefined } as any),
       },
       calendarIntegration: {

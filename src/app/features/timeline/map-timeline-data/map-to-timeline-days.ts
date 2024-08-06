@@ -22,7 +22,7 @@ import { PlannerDayMap } from '../../planner/planner.model';
 import { getDateTimeFromClockString } from '../../../util/get-date-time-from-clock-string';
 import { createSortedBlockerBlocks } from './create-sorted-blocker-blocks';
 import { getWorklogStr } from '../../../util/get-work-log-str';
-import { TIMELINE_VIEW_TYPE_ORDER, TimelineViewEntryType } from '../timeline.const';
+import { SCHEDULE_VIEW_TYPE_ORDER, TimelineViewEntryType } from '../timeline.const';
 import {
   getTimeLeftForTask,
   getTimeLeftForTasks,
@@ -330,7 +330,7 @@ export const createViewEntriesForDay = (
   // -------
   viewEntries.sort((a, b) => {
     if (a.start - b.start === 0) {
-      return TIMELINE_VIEW_TYPE_ORDER[a.type] - TIMELINE_VIEW_TYPE_ORDER[b.type];
+      return SCHEDULE_VIEW_TYPE_ORDER[a.type] - SCHEDULE_VIEW_TYPE_ORDER[b.type];
     }
     return a.start - b.start;
   });

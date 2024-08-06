@@ -1168,7 +1168,7 @@
         "WEDNESDAY": "Wednesday"
       }
     },
-    "TIMELINE": {
+    "SCHEDULE": {
       "CONTINUED": "continued",
       "D_INITIAL": {
         "TEXT": "<p>The idea of the Timeline is to provide a better picture of how one's planned tasks play out over time. It is automatically generated from your Tasks and distinguishes two different things: <strong>Scheduled Tasks</strong>, which are shown at their planned time and <strong>Regular Tasks</strong> which should flow around those fixed events. All tasks consider the time estimates you have assigned to them.</p><p>In addition to this you can also provide a work start and end time. If configured regular tasks will never show up outside of these. Please note that the timeline only includes the upcoming 30 days.</p>",
@@ -1365,7 +1365,7 @@
       "GO_TO_FOCUS_MODE": "Enter Focus Mode",
       "GO_TO_SCHEDULED_VIEW": "Go to scheduled Tasks",
       "GO_TO_SETTINGS": "Go to Settings",
-      "GO_TO_TIMELINE": "Go to Timeline",
+      "GO_TO_SCHEDULE": "Go to Timeline",
       "GO_TO_WORK_VIEW": "Go to Work View and focus first task",
       "HELP": "<p>Here you can configure all keyboard shortcuts.</p> <p>Click on the text input and enter the desired keyboard combination. Hit enter to save and Escape to abort.</p> <p>There are three types of shortcuts:</p> <ul> <li> <strong>Global shortcuts:</strong> When the app is running it will trigger the action from every other application. </li> <li> <strong>Application level shortcuts:</strong> Will trigger from every screen of the application, but not if you're currently editing a text field. </li> <li> <strong>Task level shortcuts:</strong> They will only trigger if you have selected a task via mouse or keyboard and usually trigger an action specifically related to that one task. </li> </ul><p>You can <strong>press Escape to remove a shortcut.</strong>",
       "MOVE_TASK_DOWN": "Move Task down in List",
@@ -1489,7 +1489,7 @@
       "SNOOZE_TIME": "Snooze time when prompted to take a break",
       "TITLE": "Break Reminder"
     },
-    "TIMELINE": {
+    "SCHEDULE": {
       "HELP": "The timeline feature should provide you with a quick overview over how your planned tasks play out over time. You can find it in the left hand menu under <a href='#/timeline'>'Timeline'</a>. ",
       "L_IS_WORK_START_END_ENABLED": "Limit unscheduled task flow to specific work times",
       "L_WORK_END": "Work Day End",

@@ -8,7 +8,7 @@
         *ngIf="!timelineEntries.length"
         class="no-tasks-msg"
       >
-        {{T.F.TIMELINE.NO_TASKS|translate}}
+        {{ T.F.SCHEDULE.NO_TASKS|translate }}
       </div>
 
       <div
@@ -22,11 +22,11 @@
         >
           <div *ngIf="!row.isHideTime">
             <div>
-              {{ row.start <= now ? (T.F.TIMELINE.NOW|translate) :
+              {{ row.start <= now ? (T.F.SCHEDULE.NOW|translate) :
               (row.start|roundDuration|date:'HH:mm')}}
             </div>
             <!--            <div *ngIf="row.start>= tomorrow" class="date">-->
-            <!--              {{ row.start <= now ? (T.F.TIMELINE.NOW|translate) :-->
+            <!--              {{ row.start <= now ? (T.F.SCHEDULE.NOW|translate) :-->
             <!--              (row.start|date:'shortDate')}}-->
             <!--            </div>-->
           </div>
@@ -102,10 +102,10 @@
             </div>
           </div>
 
-          <!--          <timeline-custom-event-->
+          <!--          <schedule-custom-event-->
           <!--            *ngSwitchCase="TimelineViewEntryType.CustomEvent"-->
           <!--            [event]="row.data"-->
-          <!--          ></timeline-custom-event>-->
+          <!--          ></schedule-custom-event>-->
 
           <timeline-calendar-event
             *ngSwitchCase="TimelineViewEntryType.CalendarEvent"
@@ -114,7 +114,7 @@
           ></timeline-calendar-event>
 
           <timeline-task-repeat-projection
-            [title]="T.F.TIMELINE.TASK_PROJECTION_INFO|translate"
+            [title]="T.F.SCHEDULE.TASK_PROJECTION_INFO|translate"
             *ngSwitchCase="TimelineViewEntryType.ScheduledRepeatProjection"
             [repeatCfg]="row.data"
           ></timeline-task-repeat-projection>
@@ -124,7 +124,7 @@
             [title]="row.start|date:'medium'"
             class="work-start"
           >
-            {{T.F.TIMELINE.START|translate}}
+            {{ T.F.SCHEDULE.START|translate }}
           </div>
 
           <div
@@ -132,14 +132,14 @@
             [title]="row.start|date:'medium'"
             class="work-end"
           >
-            {{T.F.TIMELINE.END|translate}}
+            {{ T.F.SCHEDULE.END|translate }}
           </div>
 
           <div
             *ngSwitchCase="TimelineViewEntryType.LunchBreak"
             class="lunch-break"
           >
-            {{T.F.TIMELINE.LUNCH_BREAK|translate}}
+            {{ T.F.SCHEDULE.LUNCH_BREAK|translate }}
           </div>
 
           <div

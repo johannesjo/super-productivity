@@ -860,7 +860,7 @@
         "WEDNESDAY": "چهارشنبه"
       }
     },
-    "TIMELINE": {
+    "SCHEDULE": {
       "CONTINUED": "ادامه داد",
       "D_INITIAL": {
         "TEXT": "<p>ایده جدول زمانی ارائه تصویر بهتری از نحوه انجام کارهای برنامه ریزی شده فرد در طول زمان است. این به طور خودکار از وظایف شما تولید می شود و دو چیز مختلف را از هم متمایز می کند: <strong>کارهای برنامه ریزی شده</strong>، که در زمان برنامه ریزی شده آنها نشان داده می شود و <strong>کارهای منظم</strong> که باید حول آن وقایع ثابت باشند. همه کارها تخمین زمانی را که به آنها اختصاص داده اید در نظر می گیرند.</p><p>علاوه بر این می توانید زمان شروع و پایان کار را نیز ارائه دهید. اگر کارهای منظم پیکربندی شده هرگز خارج از اینها نشان داده نشود. لطفاً توجه داشته باشید که این جدول زمانی فقط شامل 30 روز آینده است.</p>",
@@ -1054,7 +1054,7 @@
       "GO_TO_FOCUS_MODE": "رفتن به حالت تمرکز",
       "GO_TO_SCHEDULED_VIEW": "رفتن به وظایف برنامه ریزی شده",
       "GO_TO_SETTINGS": "رفتن به تنظیمات",
-      "GO_TO_TIMELINE": "به جدول زمانی بروید",
+      "GO_TO_SCHEDULE": "به جدول زمانی بروید",
       "GO_TO_WORK_VIEW": "رفتن به نمای کار",
       "HELP": "<p>Here you can configure all keyboard shortcuts.</p> <p>Click on the text input and enter the desired keyboard combination. Hit enter to save and Escape to abort.</p> <p>There are three types of shortcuts:</p> <ul> <li> <strong>Global shortcuts:</strong> When the app is running it will trigger the action from every other application. </li> <li> <strong>Application level shortcuts:</strong> Will trigger from every screen of the application, but not if you're currently editing a text field. </li> <li> <strong>Task level shortcuts:</strong> They will only trigger if you have selected a task via mouse or keyboard and usually trigger an action specifically related to that one task. </li> </ul>",
       "MOVE_TASK_DOWN": "Move Task down in List",
@@ -1159,7 +1159,7 @@
       "SNOOZE_TIME": "زمان استراحت را به تعویق بیندازید",
       "TITLE": "یادآوری استراحت"
     },
-    "TIMELINE": {
+    "SCHEDULE": {
       "HELP": "ویژگی جدول زمانی باید مروری سریع درباره چگونگی انجام کارهای برنامه ریزی شده شما در طول زمان داشته باشد. می توانید آن را در فهرست سمت چپ در زیر <a href='#/timeline'>'Timeline'</a>پیدا کنید.",
       "L_IS_WORK_START_END_ENABLED": "جریان کار بدون برنامه را به زمانهای خاص کار محدود کنید",
       "L_WORK_END": "پایان روز کار",

@@ -10,10 +10,10 @@ import {
   MiscConfig,
   PomodoroConfig,
   ReminderConfig,
+  ScheduleConfig,
   SoundConfig,
   SyncConfig,
   TakeABreakConfig,
-  TimelineConfig,
 } from '../global-config.model';
 import { DEFAULT_GLOBAL_CONFIG } from '../default-global-config.const';
 import { loadAllData } from '../../../root-store/meta/load-all-data.action';
@@ -51,7 +51,7 @@ export const selectTakeABreakConfig = createSelector(
 );
 export const selectTimelineConfig = createSelector(
   selectConfigFeatureState,
-  (cfg): TimelineConfig => cfg.timeline,
+  (cfg): ScheduleConfig => cfg.schedule,
 );
 
 export const selectIsDominaModeConfig = createSelector(
@@ -119,12 +119,12 @@ export const selectTimelineWorkStartEndHours = createSelector(
     workStart: number;
     workEnd: number;
   } | null => {
-    if (!cfg.timeline.isWorkStartEndEnabled) {
+    if (!cfg.schedule.isWorkStartEndEnabled) {
       return null;
     }
     return {
-      workStart: getHoursFromClockString(cfg.timeline.workStart),
-      workEnd: getHoursFromClockString(cfg.timeline.workEnd),
+      workStart: getHoursFromClockString(cfg.schedule.workStart),
+      workEnd: getHoursFromClockString(cfg.schedule.workEnd),
     };
   },
 );

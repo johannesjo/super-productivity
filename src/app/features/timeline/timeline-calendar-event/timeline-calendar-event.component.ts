@@ -6,7 +6,7 @@ import { first } from 'rxjs/operators';
 import { ScheduleFromCalendarEvent } from '../../schedule/schedule.model';
 
 @Component({
-  selector: 'timeline-calendar-event',
+  selector: 'schedule-calendar-event',
   templateUrl: './timeline-calendar-event.component.html',
   styleUrls: ['./timeline-calendar-event.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,

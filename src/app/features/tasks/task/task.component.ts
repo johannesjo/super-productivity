@@ -927,7 +927,7 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
     if (checkKeyCombo(ev, keys.moveToBacklog) && this.task.projectId) {
       if (!this.task.parentId) {
         ev.preventDefault();
-        // same default shortcut as timeline so we stop propagation
+        // same default shortcut as schedule so we stop propagation
         ev.stopPropagation();
         this.focusPrevious(true);
         this.moveToBacklog();
@@ -937,7 +937,7 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
     if (checkKeyCombo(ev, keys.moveToTodaysTasks) && this.task.projectId) {
       if (!this.task.parentId) {
         ev.preventDefault();
-        // same default shortcut as timeline so we stop propagation
+        // same default shortcut as schedule so we stop propagation
         ev.stopPropagation();
         this.focusNext(true, true);
         this.moveToToday();

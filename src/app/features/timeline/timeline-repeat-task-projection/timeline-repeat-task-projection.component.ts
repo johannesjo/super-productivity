@@ -4,7 +4,7 @@ import { DialogEditTaskRepeatCfgComponent } from '../../task-repeat-cfg/dialog-e
 import { MatDialog } from '@angular/material/dialog';
 
 @Component({
-  selector: 'timeline-task-repeat-projection',
+  selector: 'schedule-task-repeat-projection',
   templateUrl: './timeline-repeat-task-projection.component.html',
   styleUrls: ['./timeline-repeat-task-projection.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,

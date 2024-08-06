@@ -1085,7 +1085,7 @@
         "WEDNESDAY": "Çarşamba"
       }
     },
-    "TIMELINE": {
+    "SCHEDULE": {
       "CONTINUED": "Devam eden",
       "D_INITIAL": {
         "TEXT": "<p>Zaman Çizelgesi'nin amacı, planlanan görevlerin zaman içinde nasıl sonuçlanacağına dair daha iyi bir resim sağlamaktır. Görevlerinizden otomatik olarak oluşturulur ve iki farklı şeyi ayırt eder: Planlandıkları zamanda gösterilen <strong>Zamanlanmış Görevler</strong>ve bu sabit olayların etrafında akması gereken <strong>Normal Görevler</strong> . Tüm görevler, onlara atadığınız zaman tahminlerini dikkate alır.</p><p>Buna ek olarak, bir iş başlangıç ve bitiş zamanı da sağlayabilirsiniz. Yapılandırılmışsa, normal görevler asla bunların dışında görünmez. Zaman çizelgesinin yalnızca önümüzdeki 30 günü içerdiğini lütfen unutmayın.</p>",
@@ -1279,7 +1279,7 @@
       "GO_TO_FOCUS_MODE": "Odak Moduna Git",
       "GO_TO_SCHEDULED_VIEW": "Planlanmış Görevlere git",
       "GO_TO_SETTINGS": "Ayarlara git",
-      "GO_TO_TIMELINE": "Zaman Çizelgesine git",
+      "GO_TO_SCHEDULE": "Zaman Çizelgesine git",
       "GO_TO_WORK_VIEW": "İş Görünümüne Git",
       "HELP": "<p>Burada tüm klavye kısayollarını yapılandırabilirsiniz.</p> <p>Metin girişine tıklayın ve istediğiniz klavye kombinasyonunu girin. Kaydetmek için Enter'a, iptal etmek için Escape'e basın.</p> <p>Üç tür kısayol vardır:</p> <ul> <li> <strong>Genel kısayollar:</strong> Uygulama çalışırken, uygulama diğer tüm uygulamalardan eylemi tetikler. </li> <li> <strong>Uygulama düzeyinde kısayollar:</strong> Uygulamanın her ekranından tetiklenir, ancak şu anda bir metin alanı düzenliyorsanız değil. </li> <li> <strong>Görev seviyesi kısayolları:</strong> Yalnızca fare veya klavye yoluyla bir görev seçtiyseniz tetiklenirler ve genellikle bu görevle ilgili bir eylemi tetiklerler. </li> </ul>",
       "MOVE_TASK_DOWN": "Görevi Listede Aşağı Taşı",
@@ -1393,7 +1393,7 @@
       "SNOOZE_TIME": "Mola vermeniz istendiğinde zamanı ertele",
       "TITLE": "Mola Hatırlatması"
     },
-    "TIMELINE": {
+    "SCHEDULE": {
       "HELP": "Zaman çizelgesi özelliği, planlanan görevlerinizin zaman içinde nasıl oynandığına dair size hızlı bir genel bakış sağlamalıdır. Bunu sol taraftaki menüde <a href='#/timeline'>\"Zaman çizelgesi\"</a>altında bulabilirsiniz.",
       "L_IS_WORK_START_END_ENABLED": "Planlanmamış görev akışını belirli çalışma süreleriyle sınırlandırın",
       "L_WORK_END": "İş Günü Sonu",

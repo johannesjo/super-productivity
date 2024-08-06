@@ -1,6 +1,6 @@
 // import { ComponentFixture, TestBed } from '@angular/core/testing';
 //
-// import { TimelineDaysComponent } from './timeline-days.component';
+// import { TimelineDaysComponent } from './schedule-days.component';
 //
 // describe('TimelineDaysComponent', () => {
 //   let component: TimelineDaysComponent;

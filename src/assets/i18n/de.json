@@ -1131,7 +1131,7 @@
         "WEDNESDAY": "Mittwoch"
       }
     },
-    "TIMELINE": {
+    "SCHEDULE": {
       "CONTINUED": "fortgesetzt",
       "D_INITIAL": {
         "TEXT": "<p>Die Idee der Zeitleiste ist es, ein besseres Bild davon zu liefern, wie sich die geplanten Aufgaben im Laufe der Zeit entwickeln. Es wird automatisch aus Ihren Aufgaben generiert und unterscheidet zwei verschiedene Dinge: <strong>Geplante Aufgaben</strong>, die zum geplanten Zeitpunkt angezeigt werden, und <strong>reguläre Aufgaben</strong>, die außerhalb dieser fixen Aufgaben angezeigt werden. Alle Aufgaben berücksichtigen die Zeitschätzungen, die Sie ihnen zugewiesen haben.</p><p>Zusätzlich können Sie eine Arbeitsstart- und -endzeit angeben. Wenn konfiguriert, werden reguläre Aufgaben niemals außerhalb dieser angezeigt. Bitte beachten Sie, dass die Zeitleiste nur die kommenden 30 Tage enthält.</p>",
@@ -1363,7 +1363,7 @@
       "GO_TO_FOCUS_MODE": "Wechseln Sie in den Fokusmodus",
       "GO_TO_SCHEDULED_VIEW": "Gehen Sie zu geplanten Aufgaben",
       "GO_TO_SETTINGS": "Gehen Sie zu den Einstellungen",
-      "GO_TO_TIMELINE": "Gehen Sie zur Zeitleiste",
+      "GO_TO_SCHEDULE": "Gehen Sie zur Zeitleiste",
       "GO_TO_WORK_VIEW": "Gehen Sie zur Arbeitsansicht",
       "HELP": "<p>Hier können Sie alle Tastaturkürzel konfigurieren.</p> <p>Klicken Sie auf die Texteingabe und geben Sie die gewünschte Tastaturkombination ein. Drücken Sie die Eingabetaste, um zu speichern und die Escape-Taste, um den Vorgang abzubrechen.</p> <p>Es gibt drei Arten von Verknüpfungen:</p> <ul> <li> <strong>Globale Verknüpfungen:</strong> Wenn die App ausgeführt wird, wird die Aktion von jeder anderen Anwendung ausgelöst. </li> <li> <strong>Verknüpfungen auf Anwendungsebene:</strong> Wird von jedem Bildschirm der Anwendung ausgelöst, jedoch nicht, wenn Sie gerade ein Textfeld bearbeiten. </li> <li> <strong>Schnellzugriffe auf Aufgabenebene:</strong> Sie werden nur ausgelöst, wenn Sie eine Aufgabe mit der Maus oder der Tastatur ausgewählt haben und normalerweise eine Aktion auslösen, die sich speziell auf diese eine Aufgabe bezieht. </li> </ul>",
       "MOVE_TASK_DOWN": "Aufgabe in Liste nach unten verschieben",
@@ -1487,7 +1487,7 @@
       "SNOOZE_TIME": "Schlummern, wenn Sie aufgefordert werden, eine Pause einzulegen",
       "TITLE": "Pausenerinnerung"
     },
-    "TIMELINE": {
+    "SCHEDULE": {
       "HELP": "Die Timeline-Funktion soll Ihnen einen schnellen Überblick darüber geben, wie sich Ihre geplanten Aufgaben im Laufe der Zeit entwickeln. Sie finden es im Menü auf der linken Seite unter <a href='#/timeline'>'Timeline'</a>.",
       "L_IS_WORK_START_END_ENABLED": "Beschränken Sie ungeplante Aufgaben auf bestimmte Arbeitszeiten",
       "L_WORK_END": "Ende des Arbeitstages",

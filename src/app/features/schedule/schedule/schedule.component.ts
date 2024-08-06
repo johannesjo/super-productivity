@@ -22,7 +22,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { CalendarIntegrationService } from '../../calendar-integration/calendar-integration.service';
 import { DateService } from '../../../core/date/date.service';
 import { LS } from '../../../core/persistence/storage-keys.const';
-import { DialogTimelineSetupComponent } from '../../timeline/dialog-timeline-setup/dialog-timeline-setup.component';
+import { DialogTimelineSetupComponent } from '../dialog-timeline-setup/dialog-timeline-setup.component';
 import { T } from 'src/app/t.const';
 import { AsyncPipe, DatePipe, NgClass, NgIf, NgStyle } from '@angular/common';
 import { StuckDirective } from '../../../ui/stuck/stuck.directive';
@@ -244,7 +244,7 @@ export class ScheduleComponent implements AfterViewInit, OnDestroy {
     private _elRef: ElementRef,
     @Inject(LOCALE_ID) private locale: string,
   ) {
-    if (!localStorage.getItem(LS.WAS_TIMELINE_INITIAL_DIALOG_SHOWN)) {
+    if (!localStorage.getItem(LS.WAS_SCHEDULE_INITIAL_DIALOG_SHOWN)) {
       this._matDialog.open(DialogTimelineSetupComponent, {
         data: { isInfoShownInitially: true },
       });

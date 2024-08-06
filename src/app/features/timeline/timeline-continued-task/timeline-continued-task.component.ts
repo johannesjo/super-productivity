@@ -3,7 +3,7 @@ import { TimelineViewEntrySplitTaskContinued } from '../timeline.model';
 import { T } from 'src/app/t.const';
 
 @Component({
-  selector: 'timeline-continued-task',
+  selector: 'schedule-continued-task',
   templateUrl: './timeline-continued-task.component.html',
   styleUrl: './timeline-continued-task.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

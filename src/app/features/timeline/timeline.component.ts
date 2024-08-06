@@ -18,7 +18,7 @@ import { TimelineViewEntryType } from './timeline.const';
 import { GlobalConfigService } from '../config/global-config.service';
 import { MatDialog } from '@angular/material/dialog';
 import { LS } from '../../core/persistence/storage-keys.const';
-import { DialogTimelineSetupComponent } from './dialog-timeline-setup/dialog-timeline-setup.component';
+import { DialogTimelineSetupComponent } from '../schedule/dialog-timeline-setup/dialog-timeline-setup.component';
 import { TaskRepeatCfgService } from '../task-repeat-cfg/task-repeat-cfg.service';
 import { Task, TaskPlanned } from '../tasks/task.model';
 import { DialogAddTaskReminderComponent } from '../tasks/dialog-add-task-reminder/dialog-add-task-reminder.component';
@@ -34,7 +34,7 @@ import { selectTimelineTasks } from '../work-context/store/work-context.selector
 import { ScheduleCalendarMapEntry } from '../schedule/schedule.model';
 
 @Component({
-  selector: 'timeline',
+  selector: 'schedule',
   templateUrl: './timeline.component.html',
   styleUrls: ['./timeline.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -84,7 +84,7 @@ export class TimelineComponent implements OnDestroy {
                 ),
             ).pipe(
               tap((val) => {
-                saveToRealLs(LS.TIMELINE_CACHE, val);
+                saveToRealLs(LS.SCHEDULE_CACHE, val);
               }),
             )
           : of([] as any);
@@ -139,7 +139,7 @@ export class TimelineComponent implements OnDestroy {
     private _store: Store,
     private _calendarIntegrationService: CalendarIntegrationService,
   ) {
-    if (!localStorage.getItem(LS.WAS_TIMELINE_INITIAL_DIALOG_SHOWN)) {
+    if (!localStorage.getItem(LS.WAS_SCHEDULE_INITIAL_DIALOG_SHOWN)) {
       this._matDialog.open(DialogTimelineSetupComponent, {
         data: { isInfoShownInitially: true },
       });
@@ -195,7 +195,7 @@ export class TimelineComponent implements OnDestroy {
   private _getCalProviderFromCache(): ScheduleCalendarMapEntry[] {
     const now = Date.now();
     return (
-      ((loadFromRealLs(LS.TIMELINE_CACHE) as ScheduleCalendarMapEntry[]) || [])
+      ((loadFromRealLs(LS.SCHEDULE_CACHE) as ScheduleCalendarMapEntry[]) || [])
         // filter out cached past entries
         .map((provider) => ({
           ...provider,

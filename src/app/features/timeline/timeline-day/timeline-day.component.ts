@@ -9,11 +9,11 @@ import { AddTaskReminderInterface } from '../../tasks/dialog-add-task-reminder/a
 import { TaskService } from '../../tasks/task.service';
 import { MatDialog } from '@angular/material/dialog';
 import { LS } from '../../../core/persistence/storage-keys.const';
-import { DialogTimelineSetupComponent } from '../dialog-timeline-setup/dialog-timeline-setup.component';
+import { DialogTimelineSetupComponent } from '../../schedule/dialog-timeline-setup/dialog-timeline-setup.component';
 import { DialogPlanForDayComponent } from '../../planner/dialog-plan-for-day/dialog-plan-for-day.component';
 
 @Component({
-  selector: 'timeline-day',
+  selector: 'schedule-day',
   templateUrl: './timeline-day.component.html',
   styleUrl: './timeline-day.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -31,7 +31,7 @@ export class TimelineDayComponent {
     public taskService: TaskService,
     private _matDialog: MatDialog,
   ) {
-    if (!localStorage.getItem(LS.WAS_TIMELINE_INITIAL_DIALOG_SHOWN)) {
+    if (!localStorage.getItem(LS.WAS_SCHEDULE_INITIAL_DIALOG_SHOWN)) {
       this._matDialog.open(DialogTimelineSetupComponent, {
         data: { isInfoShownInitially: true },
       });

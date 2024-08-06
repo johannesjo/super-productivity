@@ -19,7 +19,7 @@ export enum TimelineViewEntryType {
   LunchBreak = 'LunchBreak',
 }
 
-export const TIMELINE_VIEW_TYPE_ORDER: {
+export const SCHEDULE_VIEW_TYPE_ORDER: {
   [key: string]: number;
 } = {
   [TimelineViewEntryType.WorkdayStart]: 1,
@@ -41,7 +41,7 @@ export const TIMELINE_VIEW_TYPE_ORDER: {
   [TimelineViewEntryType.LunchBreak]: 14,
 };
 
-export const TIMELINE_MOVEABLE_TYPES: TimelineViewEntryType[] = [
+export const SCHEDULE_MOVEABLE_TYPES: TimelineViewEntryType[] = [
   TimelineViewEntryType.TaskPlannedForDay,
 
   TimelineViewEntryType.Task,

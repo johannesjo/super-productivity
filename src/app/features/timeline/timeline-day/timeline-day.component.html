@@ -11,7 +11,7 @@
       *ngIf="!timelineDay.entries.length"
       class="no-tasks-msg"
     >
-      <!--      {{ T.F.TIMELINE.NO_TASKS|translate }}-->
+      <!--      {{ T.F.SCHEDULE.NO_TASKS|translate }}-->
       It is time to stop working and to relax!
     </div>
 
@@ -26,7 +26,7 @@
       >
         <div *ngIf="!row.isHideTime ">
           <div class="time-val">
-            {{ row.start <= now ? (T.F.TIMELINE.NOW|translate) :
+            {{ row.start <= now ? (T.F.SCHEDULE.NOW|translate) :
             (row.start|roundDuration|date:'HH:mm') }}
           </div>
         </div>
@@ -136,18 +136,18 @@
         ></planner-calendar-event>
         } @case (TimelineViewEntryType.ScheduledRepeatProjection) {
         <planner-repeat-projection
-          [title]="T.F.TIMELINE.TASK_PROJECTION_INFO|translate"
+          [title]="T.F.SCHEDULE.TASK_PROJECTION_INFO|translate"
           [repeatCfg]="row.data"
         ></planner-repeat-projection>
         } @case (TimelineViewEntryType.RepeatProjection) {
         <planner-repeat-projection
-          [title]="T.F.TIMELINE.TASK_PROJECTION_INFO|translate"
+          [title]="T.F.SCHEDULE.TASK_PROJECTION_INFO|translate"
           [repeatCfg]="row.data"
         ></planner-repeat-projection>
         } @case (TimelineViewEntryType.RepeatProjectionSplit) {
         <planner-repeat-projection
           class="split-item"
-          [title]="T.F.TIMELINE.TASK_PROJECTION_INFO|translate"
+          [title]="T.F.SCHEDULE.TASK_PROJECTION_INFO|translate"
           [overWriteTimeEstimate]="timelineDay.entries[index+1]?.start - row.start"
           [repeatCfg]="row.data"
         ></planner-repeat-projection>
@@ -159,7 +159,7 @@
           <!--          {{ row.start|date:'d.M.' }} -->
           <!--          <mat-icon>start</mat-icon>-->
           <!--          <mat-icon>flag</mat-icon>-->
-          {{ T.F.TIMELINE.START|translate }}
+          {{ T.F.SCHEDULE.START|translate }}
         </div>
         } @case (TimelineViewEntryType.WorkdayEnd) {
         <div
@@ -168,12 +168,12 @@
         >
           <!--          <mat-icon>landscape_2</mat-icon>-->
           <!--          {{ row.start|date:'d.M.' }} -->
-          {{ T.F.TIMELINE.END|translate }}
+          {{ T.F.SCHEDULE.END|translate }}
         </div>
         } @case (TimelineViewEntryType.LunchBreak) {
         <div class="lunch-break">
           <mat-icon>restaurant</mat-icon>
-          {{ T.F.TIMELINE.LUNCH_BREAK|translate }}
+          {{ T.F.SCHEDULE.LUNCH_BREAK|translate }}
         </div>
         } @case (TimelineViewEntryType.DayCrossing) {
         <div class="day-crossing separator">
@@ -192,7 +192,7 @@
       class="beyond-budget"
     >
       <div class="beyond-budget-title">
-        <!--        {{ T.F.TIMELINE.BEYOND_BUDGET|translate }}-->
+        <!--        {{ T.F.SCHEDULE.BEYOND_BUDGET|translate }}-->
         tasks planned for day, but not enough time to complete
       </div>
 
