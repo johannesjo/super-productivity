@@ -34,7 +34,7 @@
     >restaurant
   </mat-icon>
   } @case ('CAL_PROJECTION') {
-  <mat-icon>{{ se.data.icon || 'event' }}</mat-icon>
+  <mat-icon>{{ $any(se.data)?.icon || 'event' }}</mat-icon>
   <mat-icon>add</mat-icon>
   }
   <!--- --->
@@ -142,7 +142,7 @@
     <!--    </button>-->
 
     <button
-      (click)="deleteTask(true)"
+      (click)="deleteTask()"
       class="color-warn"
       mat-menu-item
     >
