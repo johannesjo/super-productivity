@@ -365,7 +365,7 @@ schedule-event.cdk-drag-dragging + schedule-event {
   }
 }
 
-// TODO enable again if we want to have animations
+// no animation feels slicker and is less error prone
 .cdk-drag {
   transition: none !important;
 }

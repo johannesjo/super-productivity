@@ -95,11 +95,7 @@ export const createScheduleDays = (
     );
     // beyondBudgetTasks = beyond;
     beyondBudgetTasks = [];
-    // TODO check if filter can be removed, when all tests are written
     flowTasksLeftAfterDay = [...nonSplitBeyondTasks];
-    // flowTasksLeftAfterDay = allBeyondButFirst.filter(
-    //   (task) => !viewEntries.find((e) => (e.data as any)?.id === task.id),
-    // );
 
     const viewEntriesToRenderForDay: SVE[] = [];
     viewEntriesPushedToNextDay = [];
@@ -185,7 +181,6 @@ export const createScheduleDays = (
 //   });
 // };
 
-// TODO unit test
 const getBudgetLeftForDay = (
   blockerBlocksForDay: BlockedBlock[],
   nowIfToday?: number,

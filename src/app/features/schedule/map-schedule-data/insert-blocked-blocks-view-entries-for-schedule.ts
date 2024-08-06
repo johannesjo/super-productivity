@@ -244,7 +244,6 @@ export const insertBlockedBlocksViewEntriesForSchedule = (
             currentVE.type = SVEType.RepeatProjectionSplitContinued;
             currentVE.duration -= timePlannedForSplitRepeatCfgProjectionContinued;
 
-            // TODO there can be multiple repeat instances on a day if they are continued to the next day
             const splitIndex = splitInstances.length;
             const newSplitContinuedEntry: SVE = createSplitRepeat({
               start: blockedBlock.end,

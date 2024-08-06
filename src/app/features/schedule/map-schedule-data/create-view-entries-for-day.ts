@@ -1,4 +1,3 @@
-// TODO extract to own file
 import { TaskRepeatCfg } from '../../task-repeat-cfg/task-repeat-cfg.model';
 import {
   TaskWithoutReminder,

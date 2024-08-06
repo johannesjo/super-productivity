@@ -19,10 +19,6 @@ export const createViewEntriesForBlock = (
         type: SVEType.ScheduledTask,
         data: scheduledTask,
         duration: getTimeLeftForTask(scheduledTask),
-        // duration: getTimeLeftForTaskWithMinVal(
-        //   scheduledTask,
-        //   SCHEDULE_TASK_MIN_DURATION_IN_MS,
-        // ),
       });
     } else if (entry.type === BlockedBlockType.ScheduledRepeatProjection) {
       const repeatCfg = entry.data;
@@ -32,10 +28,6 @@ export const createViewEntriesForBlock = (
         type: SVEType.ScheduledRepeatProjection,
         data: repeatCfg,
         duration: repeatCfg.defaultEstimate || 0,
-        // duration: Math.max(
-        //   repeatCfg.defaultEstimate || 0,
-        //   SCHEDULE_TASK_MIN_DURATION_IN_MS,
-        // ),
       });
     } else if (entry.type === BlockedBlockType.CalendarEvent) {
       const calendarEvent = entry.data;
@@ -48,26 +40,7 @@ export const createViewEntriesForBlock = (
           icon: calendarEvent.icon || 'event',
         },
         duration: calendarEvent.duration,
-        // duration: Math.max(calendarEvent.duration, SCHEDULE_TASK_MIN_DURATION_IN_MS),
       });
-      // TODO check if needed
-    } else if (entry.type === BlockedBlockType.WorkdayStartEnd) {
-      // NOTE: day start and end are mixed up, because it is the opposite as the blocked range
-      // const workdayCfg = entry.data;
-      // viewEntriesForBock.push({
-      //   id: 'DAY_END_' + entry.start,
-      //   start: entry.start,
-      //   type: SVEType.WorkdayEnd,
-      //   data: workdayCfg,
-      //   duration: entry.end - entry.start,
-      // });
-      // viewEntriesForBock.push({
-      //   id: 'DAY_START_' + entry.end,
-      //   start: entry.end,
-      //   type: SVEType.WorkdayStart,
-      //   data: workdayCfg,
-      //   duration: 0,
-      // });
     } else if (entry.type === BlockedBlockType.LunchBreak) {
       viewEntriesForBock.push({
         id: 'LUNCH_BREAK' + '_' + dayDate,
