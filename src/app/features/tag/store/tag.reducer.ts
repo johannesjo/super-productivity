@@ -175,7 +175,7 @@ export const tagReducer = createReducer<TagState>(
             taskIds: unique(
               isAddToTop
                 ? [task.id, ...tagToUpdate.taskIds]
-                : [...tagToUpdate.taskIds, task.id],
+                : [...tagToUpdate.taskIds.filter((tid) => tid !== task.id), task.id],
             ),
           },
         },
