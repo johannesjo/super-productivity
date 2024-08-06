@@ -203,6 +203,31 @@ describe('mapToScheduleDays()', () => {
     ] as any);
   });
 
+  it('should work for very long scheduled tasks', () => {
+    const r = mapToScheduleDays(
+      N,
+      [NDS, '1970-01-02'],
+      [fakeTaskEntry('N1', { timeEstimate: h(1) })],
+      [fakePlannedTaskEntry('S1', new Date(dhTz(0, 9)), { timeEstimate: h(9) })],
+      [],
+      [],
+      [],
+      null,
+      {},
+      { startTime: '9:00', endTime: '18:00' },
+      undefined,
+    );
+    expect(r.length).toBe(2);
+
+    expect(r[0].entries.length).toBe(1);
+    expect(r[0].entries[0].start).toBe(dhTz(0, 9));
+    expect(r[0].entries[0].duration).toBe(h(9));
+
+    expect(r[1].entries.length).toBe(1);
+    expect(r[1].entries[0].start).toBe(dhTz(1, 9));
+    expect(r[1].entries[0].duration).toBe(h(1));
+  });
+
   it('should split multiple times', () => {
     const r = mapToScheduleDays(
       N,
