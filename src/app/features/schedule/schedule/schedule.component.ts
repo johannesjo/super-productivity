@@ -255,6 +255,7 @@ export class ScheduleComponent implements AfterViewInit, OnDestroy {
     });
     this.workStartEnd$.pipe(takeUntilDestroyed()).subscribe((v) => {
       this.workStartEnd = v;
+      this.endOfDayColRowStart = v?.workStartRow || D_HOURS * 0.5 * FH;
     });
     this.currentTimeRow$.pipe(takeUntilDestroyed()).subscribe((v) => {
       this.currentTimeRow = v;
