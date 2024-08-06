@@ -2,7 +2,6 @@ import { TaskPlanned } from '../../tasks/task.model';
 import {
   BlockedBlock,
   BlockedBlockType,
-  TimelineCalendarMapEntry,
   TimelineLunchBreakCfg,
   TimelineWorkStartEndCfg,
 } from '../timeline.model';
@@ -10,13 +9,14 @@ import { getTimeLeftForTask } from '../../../util/get-time-left-for-task';
 import { getDateTimeFromClockString } from '../../../util/get-date-time-from-clock-string';
 import { TaskRepeatCfg } from '../../task-repeat-cfg/task-repeat-cfg.model';
 import { selectTaskRepeatCfgsDueOnDayOnly } from '../../task-repeat-cfg/store/task-repeat-cfg.reducer';
+import { ScheduleCalendarMapEntry } from '../../schedule/schedule.model';
 
 const PROJECTION_DAYS: number = 30;
 
 export const createSortedBlockerBlocks = (
   scheduledTasks: TaskPlanned[],
   scheduledTaskRepeatCfgs: TaskRepeatCfg[],
-  icalEventMap: TimelineCalendarMapEntry[],
+  icalEventMap: ScheduleCalendarMapEntry[],
   workStartEndCfg?: TimelineWorkStartEndCfg,
   lunchBreakCfg?: TimelineLunchBreakCfg,
   now: number = Date.now(),
@@ -220,7 +220,7 @@ const createBlockerBlocksForScheduledTasks = (
 };
 
 const createBlockerBlocksForCalendarEvents = (
-  icalEventMap: TimelineCalendarMapEntry[],
+  icalEventMap: ScheduleCalendarMapEntry[],
 ): BlockedBlock[] => {
   const blockedBlocks: BlockedBlock[] = [];
   icalEventMap.forEach((icalMapEntry) => {

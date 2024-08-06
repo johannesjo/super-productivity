@@ -2,7 +2,6 @@ import { Task, TaskPlanned, TaskWithoutReminder } from '../../tasks/task.model';
 import {
   BlockedBlock,
   BlockedBlockType,
-  TimelineCalendarMapEntry,
   TimelineLunchBreakCfg,
   TimelineViewEntry,
   TimelineViewEntryRepeatProjection,
@@ -22,6 +21,7 @@ import {
 } from '../timeline.const';
 import moment from 'moment';
 import { TaskRepeatCfg } from '../../task-repeat-cfg/task-repeat-cfg.model';
+import { ScheduleCalendarMapEntry } from '../../schedule/schedule.model';
 
 // const debug = (...args: any): void => console.log(...args);
 const debug = (...args: any): void => undefined;
@@ -30,7 +30,7 @@ export const mapToTimelineViewEntries = (
   tasks: Task[],
   scheduledTasks: TaskPlanned[],
   scheduledTaskRepeatCfgs: TaskRepeatCfg[],
-  calenderWithItems: TimelineCalendarMapEntry[],
+  calenderWithItems: ScheduleCalendarMapEntry[],
   currentId: string | null,
   workStartEndCfg?: TimelineWorkStartEndCfg,
   lunchBreakCfg?: TimelineLunchBreakCfg,

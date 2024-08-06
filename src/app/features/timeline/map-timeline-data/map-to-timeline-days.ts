@@ -9,7 +9,6 @@ import {
   BlockedBlock,
   BlockedBlockByDayMap,
   BlockedBlockType,
-  TimelineCalendarMapEntry,
   TimelineDay,
   TimelineLunchBreakCfg,
   TimelineViewEntry,
@@ -33,6 +32,7 @@ import { createTimelineViewEntriesForNormalTasks } from './create-timeline-view-
 import { insertBlockedBlocksViewEntries } from './map-to-timeline-view-entries';
 import { selectTaskRepeatCfgsDueOnDayOnly } from '../../task-repeat-cfg/store/task-repeat-cfg.reducer';
 import { getTasksWithinAndBeyondBudget } from '../../schedule/map-schedule-data/get-tasks-within-and-beyond-budget';
+import { ScheduleCalendarMapEntry } from '../../schedule/schedule.model';
 
 export const mapToTimelineDays = (
   dayDates: string[],
@@ -40,7 +40,7 @@ export const mapToTimelineDays = (
   scheduledTasks: TaskPlanned[],
   scheduledTaskRepeatCfgs: TaskRepeatCfg[],
   unScheduledTaskRepeatCfgs: TaskRepeatCfg[],
-  calenderWithItems: TimelineCalendarMapEntry[],
+  calenderWithItems: ScheduleCalendarMapEntry[],
   currentId: string | null,
   plannerDayMap: PlannerDayMap,
   workStartEndCfg?: TimelineWorkStartEndCfg,
@@ -432,7 +432,7 @@ export const getBudgetLeftForDay = (
 const createBlockedBlocksByDayMap = (
   scheduledTasks: TaskPlanned[],
   scheduledTaskRepeatCfgs: TaskRepeatCfg[],
-  icalEventMap: TimelineCalendarMapEntry[],
+  icalEventMap: ScheduleCalendarMapEntry[],
   workStartEndCfg?: TimelineWorkStartEndCfg,
   lunchBreakCfg?: TimelineLunchBreakCfg,
   now?: number,

@@ -1,7 +1,7 @@
 import { TaskCopy, TaskPlanned } from '../tasks/task.model';
 import { TimelineViewEntryType } from './timeline.const';
 import { TaskRepeatCfg } from '../task-repeat-cfg/task-repeat-cfg.model';
-import { CalendarIntegrationEvent } from '../calendar-integration/calendar-integration.model';
+import { ScheduleFromCalendarEvent } from '../schedule/schedule.model';
 
 export interface TimelineDay {
   dayDate: string;
@@ -78,12 +78,8 @@ export interface TimelineViewEntrySplitTaskContinued extends TimelineViewEntryBa
   };
 }
 
-export interface TimelineFromCalendarEvent extends CalendarIntegrationEvent {
-  icon?: string;
-}
-
 export interface TimelineCustomEvent
-  extends Omit<TimelineFromCalendarEvent, 'calProviderId'> {
+  extends Omit<ScheduleFromCalendarEvent, 'calProviderId'> {
   icon: string;
 }
 
@@ -170,7 +166,7 @@ export interface BlockedBlockEntryCalendarEvent {
   start: number;
   end: number;
   type: BlockedBlockType.CalendarEvent;
-  data: TimelineFromCalendarEvent;
+  data: ScheduleFromCalendarEvent;
 }
 
 export interface BlockedBlockEntryWorkdayStartEnd {
@@ -198,9 +194,4 @@ export interface BlockedBlock {
   start: number;
   end: number;
   entries: BlockedBlockEntry[];
-}
-
-export interface TimelineCalendarMapEntry {
-  icon: string;
-  items: TimelineFromCalendarEvent[];
 }

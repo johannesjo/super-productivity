@@ -12,11 +12,11 @@ import {
 } from '../planner.model';
 import { TaskCopy, TaskPlanned } from '../../tasks/task.model';
 import { TaskRepeatCfg } from '../../task-repeat-cfg/task-repeat-cfg.model';
-import { TimelineCalendarMapEntry } from '../../timeline/timeline.model';
 import { selectTaskRepeatCfgsDueOnDayOnly } from '../../task-repeat-cfg/store/task-repeat-cfg.reducer';
 import { getDateTimeFromClockString } from '../../../util/get-date-time-from-clock-string';
 import { isSameDay } from '../../../util/is-same-day';
 import { getTimeLeftForTask } from '../../../util/get-time-left-for-task';
+import { ScheduleCalendarMapEntry } from '../../schedule/schedule.model';
 
 export const selectPlannerState = createFeatureSelector<fromPlanner.PlannerState>(
   fromPlanner.plannerFeatureKey,
@@ -40,7 +40,7 @@ export const selectPlannerDays = (
   taskRepeatCfgs: TaskRepeatCfg[],
   todayListTaskIds: string[],
   // TODO replace with better type
-  icalEvents: TimelineCalendarMapEntry[],
+  icalEvents: ScheduleCalendarMapEntry[],
   allPlannedTasks: TaskPlanned[],
   todayStr: string,
   // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
@@ -205,7 +205,7 @@ const getScheduledTaskItems = (
     });
 
 const getIcalEventsForDay = (
-  icalEvents: TimelineCalendarMapEntry[],
+  icalEvents: ScheduleCalendarMapEntry[],
   currentDayDate: Date,
 ): ScheduleItemEvent[] => {
   const icalEventsForDay: ScheduleItemEvent[] = [];

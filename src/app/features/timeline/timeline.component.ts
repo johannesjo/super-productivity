@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, OnDestroy } from '@angular/core';
-import { TimelineCalendarMapEntry, TimelineViewEntry } from './timeline.model';
+import { TimelineViewEntry } from './timeline.model';
 import {
   debounceTime,
   distinctUntilChanged,
@@ -31,6 +31,7 @@ import { selectAllCalendarTaskEventIds } from '../tasks/store/task.selectors';
 import { CalendarIntegrationEvent } from '../calendar-integration/calendar-integration.model';
 import { distinctUntilChangedObject } from '../../util/distinct-until-changed-object';
 import { selectTimelineTasks } from '../work-context/store/work-context.selectors';
+import { ScheduleCalendarMapEntry } from '../schedule/schedule.model';
 
 @Component({
   selector: 'timeline',
@@ -48,7 +49,7 @@ export class TimelineComponent implements OnDestroy {
     unPlanned: Task[];
   }> = this._store.pipe(select(selectTimelineTasks));
 
-  icalEvents$: Observable<TimelineCalendarMapEntry[]> = this._store
+  icalEvents$: Observable<ScheduleCalendarMapEntry[]> = this._store
     .select(selectCalendarProviders)
     .pipe(
       switchMap((calendarProviders) =>
@@ -191,10 +192,10 @@ export class TimelineComponent implements OnDestroy {
     });
   }
 
-  private _getCalProviderFromCache(): TimelineCalendarMapEntry[] {
+  private _getCalProviderFromCache(): ScheduleCalendarMapEntry[] {
     const now = Date.now();
     return (
-      ((loadFromRealLs(LS.TIMELINE_CACHE) as TimelineCalendarMapEntry[]) || [])
+      ((loadFromRealLs(LS.TIMELINE_CACHE) as ScheduleCalendarMapEntry[]) || [])
         // filter out cached past entries
         .map((provider) => ({
           ...provider,

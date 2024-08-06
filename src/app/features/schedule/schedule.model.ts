@@ -128,3 +128,12 @@ export type SVE =
   | SVEWorkStart
   | SVEWorkEnd
   | SVELunchBreak;
+
+export interface ScheduleFromCalendarEvent extends CalendarIntegrationEvent {
+  icon?: string;
+}
+
+export interface ScheduleCalendarMapEntry {
+  icon: string;
+  items: ScheduleFromCalendarEvent[];
+}

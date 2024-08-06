@@ -16,13 +16,13 @@ import { SnackService } from '../../core/snack/snack.service';
 import { getStartOfDayTimestamp } from '../../util/get-start-of-day-timestamp';
 import { getEndOfDayTimestamp } from '../../util/get-end-of-day-timestamp';
 import { CalendarIntegrationEvent } from './calendar-integration.model';
-import { TimelineCalendarMapEntry } from '../timeline/timeline.model';
 import { selectCalendarProviders } from '../config/store/global-config.reducer';
 import { fastArrayCompare } from '../../util/fast-array-compare';
 import { selectAllCalendarTaskEventIds } from '../tasks/store/task.selectors';
 import { loadFromRealLs, saveToRealLs } from '../../core/persistence/local-storage';
 import { LS } from '../../core/persistence/storage-keys.const';
 import { Store } from '@ngrx/store';
+import { ScheduleCalendarMapEntry } from '../schedule/schedule.model';
 
 const TWO_MONTHS = 60 * 60 * 1000 * 24 * 62;
 
@@ -30,7 +30,7 @@ const TWO_MONTHS = 60 * 60 * 1000 * 24 * 62;
   providedIn: 'root',
 })
 export class CalendarIntegrationService {
-  icalEvents$: Observable<TimelineCalendarMapEntry[]> = this._store
+  icalEvents$: Observable<ScheduleCalendarMapEntry[]> = this._store
     .select(selectCalendarProviders)
     .pipe(
       // tap(() => console.log('selectCalendarProviders')),
@@ -64,7 +64,7 @@ export class CalendarIntegrationService {
                         items: itemsForProvider.filter(
                           (calEv) => !allCalendarTaskEventIds.includes(calEv.id),
                         ),
-                      } as TimelineCalendarMapEntry;
+                      } as ScheduleCalendarMapEntry;
                     });
                   }),
                 ),
@@ -74,7 +74,7 @@ export class CalendarIntegrationService {
                 saveToRealLs(LS.CAL_EVENTS_CACHE, val);
               }),
             )
-          : (of([]) as Observable<TimelineCalendarMapEntry[]>);
+          : (of([]) as Observable<ScheduleCalendarMapEntry[]>);
       }),
       startWith(this._getCalProviderFromCache()),
     );
@@ -119,10 +119,10 @@ export class CalendarIntegrationService {
     );
   }
 
-  private _getCalProviderFromCache(): TimelineCalendarMapEntry[] {
+  private _getCalProviderFromCache(): ScheduleCalendarMapEntry[] {
     const now = Date.now();
     return (
-      ((loadFromRealLs(LS.CAL_EVENTS_CACHE) as TimelineCalendarMapEntry[]) || [])
+      ((loadFromRealLs(LS.CAL_EVENTS_CACHE) as ScheduleCalendarMapEntry[]) || [])
         // filter out cached past entries
         .map((provider) => ({
           ...provider,

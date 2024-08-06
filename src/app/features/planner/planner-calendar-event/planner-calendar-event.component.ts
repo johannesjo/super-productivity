@@ -5,11 +5,11 @@ import {
   HostListener,
   Input,
 } from '@angular/core';
-import { TimelineFromCalendarEvent } from '../../timeline/timeline.model';
 import { selectCalendarProviderById } from '../../config/store/global-config.reducer';
 import { first } from 'rxjs/operators';
 import { TaskService } from '../../tasks/task.service';
 import { Store } from '@ngrx/store';
+import { ScheduleFromCalendarEvent } from '../../schedule/schedule.model';
 
 @Component({
   selector: 'planner-calendar-event',
@@ -18,7 +18,7 @@ import { Store } from '@ngrx/store';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class PlannerCalendarEventComponent {
-  @Input({ required: true }) calendarEvent!: TimelineFromCalendarEvent;
+  @Input({ required: true }) calendarEvent!: ScheduleFromCalendarEvent;
   isBeingSubmitted = false;
 
   @HostBinding('attr.title') title = `Convert to task`;

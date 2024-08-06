@@ -1,9 +1,9 @@
 import { ChangeDetectionStrategy, Component, HostListener, Input } from '@angular/core';
-import { TimelineFromCalendarEvent } from '../timeline.model';
 import { TaskService } from '../../tasks/task.service';
 import { Store } from '@ngrx/store';
 import { selectCalendarProviderById } from '../../config/store/global-config.reducer';
 import { first } from 'rxjs/operators';
+import { ScheduleFromCalendarEvent } from '../../schedule/schedule.model';
 
 @Component({
   selector: 'timeline-calendar-event',
@@ -12,7 +12,7 @@ import { first } from 'rxjs/operators';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TimelineCalendarEventComponent {
-  @Input() calendarEvent?: TimelineFromCalendarEvent;
+  @Input() calendarEvent?: ScheduleFromCalendarEvent;
 
   @HostListener('click', ['$event'])
   async onClick(): Promise<void> {
