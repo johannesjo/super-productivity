@@ -337,6 +337,14 @@ export class ScheduleComponent implements AfterViewInit, OnDestroy {
 
     this.isDragging = false;
     ev.source.element.nativeElement.style.pointerEvents = '';
+    ev.source.element.nativeElement.style.opacity = '0';
+
+    setTimeout(() => {
+      if (ev.source.element?.nativeElement?.style) {
+        ev.source.element.nativeElement.style.opacity = '';
+      }
+    }, 40);
+
     this.containerExtraClass = IS_NOT_DRAGGING_CLASS;
 
     // for very short drags prevDragOverEl is undefined. For desktop only the event.target can be used instead
