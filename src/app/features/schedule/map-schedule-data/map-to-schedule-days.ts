@@ -18,7 +18,7 @@ export const mapToScheduleDays = (
   scheduledTasks: TaskPlanned[],
   scheduledTaskRepeatCfgs: TaskRepeatCfg[],
   unScheduledTaskRepeatCfgs: TaskRepeatCfg[],
-  // TODO replace
+  // TODO replace with no timeline type
   calenderWithItems: TimelineCalendarMapEntry[],
   currentId: string | null,
   plannerDayMap: PlannerDayMap,

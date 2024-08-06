@@ -16,12 +16,14 @@ export const getTasksWithinAndBeyondBudget = (
   const within: (TaskWithPlannedForDayIndication | TaskWithoutReminder)[] = [];
 
   let remainingBudget = budget;
-  // TODO probably can be optimized
   let isOverBudget = false;
-  tasks.forEach((task) => {
+
+  // NOTE: for loops can sometimes be faster than forEach
+  for (let i = 0; i < tasks.length; i++) {
+    const task = tasks[i];
     if (isOverBudget) {
       beyond.push(task);
-      return;
+      continue;
     }
 
     const timeLeftForTask = getTimeLeftForTask(task);
@@ -32,7 +34,7 @@ export const getTasksWithinAndBeyondBudget = (
       within.push(task);
       remainingBudget -= timeLeftForTask;
     }
-  });
+  }
 
   return { beyond, within, isSomeTimeLeftForLastOverBudget: remainingBudget > 0 };
 };

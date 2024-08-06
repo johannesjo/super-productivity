@@ -38,7 +38,6 @@ export const createScheduleDays = (
     const todayStart = new Date(dayDate);
     todayStart.setHours(0, 0, 0, 0);
 
-    // TODO can all be optimized in terms of performance
     let startTime = i == 0 ? now : todayStart.getTime();
     if (workStartEndCfg) {
       const startTimeToday = getDateTimeFromClockString(
@@ -150,12 +149,6 @@ export const createScheduleDays = (
       isSomeTimeLeftForLastOverBudget,
     });
 
-    // TODO there is probably a better way to do this
-    if (viewEntries[0] && viewEntries[0].type === SVEType.WorkdayEnd) {
-      // remove that entry
-      viewEntriesToRenderForDay.shift();
-    }
-
     return {
       dayDate,
       entries: viewEntriesToRenderForDay,
@@ -166,20 +159,6 @@ export const createScheduleDays = (
 
   return v;
 };
-
-// const getRemainingTasks = (
-//   nonScheduledTasks: TaskWithoutReminder[],
-//   budget: number,
-// ): TaskWithoutReminder[] => {
-//   let count = 0;
-//   return nonScheduledTasks.filter((task) => {
-//     if (count < budget) {
-//       count += getTimeLeftForTask(task);
-//       return false;
-//     }
-//     return true;
-//   });
-// };
 
 const getBudgetLeftForDay = (
   blockerBlocksForDay: BlockedBlock[],
