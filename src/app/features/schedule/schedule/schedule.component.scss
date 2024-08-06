@@ -194,11 +194,11 @@ header {
   box-shadow: $whiteframe-shadow-4dp;
   width: inherit;
   flex-direction: column;
-  pointer-events: all;
   border: 1px dashed $c-primary;
   background: $light-theme-bg;
   background: $c-primary;
   color: $c-contrast;
+  pointer-events: none;
 
   @include darkTheme() {
     background: $dark-theme-bg;

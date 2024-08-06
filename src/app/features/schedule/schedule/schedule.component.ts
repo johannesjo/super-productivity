@@ -298,7 +298,6 @@ export class ScheduleComponent implements AfterViewInit, OnDestroy {
       ev.pointerPosition.x,
       ev.pointerPosition.y,
     ) as HTMLElement;
-    // ev.source.element.nativeElement.style.pointerEvents = '';
     if (!targetEl) {
       return;
     }
@@ -336,17 +335,22 @@ export class ScheduleComponent implements AfterViewInit, OnDestroy {
       ev,
     });
 
-    ev.source.element.nativeElement.style.pointerEvents = '';
     this.isDragging = false;
+    ev.source.element.nativeElement.style.pointerEvents = '';
     this.containerExtraClass = IS_NOT_DRAGGING_CLASS;
+
+    // for very short drags prevDragOverEl is undefined. For desktop only the event.target can be used instead
+    const target = (this.prevDragOverEl || ev.event.target) as HTMLElement;
+
     if (this.prevDragOverEl) {
       this.prevDragOverEl.classList.remove(DRAG_OVER_CLASS);
+      this.prevDragOverEl = null;
     }
-    const target = ev.event.target as HTMLElement;
+
     if (target.tagName.toLowerCase() === 'div' && target.classList.contains('col')) {
       const isMoveToEndOfDay = target.classList.contains('end-of-day');
       const targetDay = (target as any).day || target.getAttribute('data-day');
-      console.log(targetDay);
+      console.log({ targetDay });
       if (targetDay) {
         this._store.dispatch(
           PlannerActions.planTaskForDay({
@@ -363,7 +367,7 @@ export class ScheduleComponent implements AfterViewInit, OnDestroy {
       // const sourceTaskId = ev.source.data.data.id;
       const sourceTaskId = ev.source.element.nativeElement.id.replace(T_ID_PREFIX, '');
       const targetTaskId = target.id.replace(T_ID_PREFIX, '');
-      console.log(sourceTaskId, targetTaskId);
+      console.log(sourceTaskId === targetTaskId, sourceTaskId, targetTaskId);
 
       if (
         sourceTaskId &&
@@ -372,7 +376,6 @@ export class ScheduleComponent implements AfterViewInit, OnDestroy {
         sourceTaskId !== targetTaskId
       ) {
         console.log('sourceTaskId', sourceTaskId, 'targetTaskId', targetTaskId);
-        console.log('DISPATCH');
         this._store.dispatch(
           PlannerActions.moveBeforeTask({
             fromTask: ev.source.data.data,

@@ -75,14 +75,14 @@
     [attr.data-day]="day"
     style="grid-column: {{ $index + 2 }}; grid-row: 1 / span {{($index === 0 ? currentTimeRow :workStartEnd.workStartRow) -1}}"
   >
-    <div class="drop-label">Drop to plan at start of day</div>
+    <div class="drop-label">Plan at start of day</div>
   </div>
   <div
     class="col end-of-day"
     [attr.data-day]="day"
     style="grid-column: {{ $index + 2 }}; grid-row: {{($index === 0 ? currentTimeRow :workStartEnd.workStartRow)}} / span {{totalRows - ($index === 0 ? currentTimeRow :workStartEnd.workStartRow)}}"
   >
-    <div class="drop-label">Drop to plan at end of day</div>
+    <div class="drop-label">Plan at end of day</div>
   </div>
   }
 
@@ -114,7 +114,7 @@
     (cdkDragMoved)="dragMoved($event)"
     (cdkDragStarted)="dragStarted($event)"
     (cdkDragReleased)="dragReleased($event)"
-    [cdkDragStartDelay]="IS_TOUCH_PRIMARY ? 100 : 0"
+    [cdkDragStartDelay]="IS_TOUCH_PRIMARY ? 50 : 0"
     [event]="ev"
   ></schedule-event>
   } @else {
@@ -146,7 +146,7 @@
       (cdkDragMoved)="dragMoved($event)"
       (cdkDragStarted)="dragStarted($event)"
       (cdkDragReleased)="dragReleased($event)"
-      [cdkDragStartDelay]="IS_TOUCH_PRIMARY ? 100 : 0"
+      [cdkDragStartDelay]="IS_TOUCH_PRIMARY ? 75 : 0"
     ></schedule-event>
     }
   </div>
