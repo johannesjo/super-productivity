@@ -226,6 +226,7 @@ export class ScheduleComponent implements AfterViewInit, OnDestroy {
   isDragging = false;
   containerExtraClass = IS_NOT_DRAGGING_CLASS;
   prevDragOverEl: HTMLElement | null = null;
+  dragCloneEl: HTMLElement | null = null;
 
   @ViewChild('gridContainer') gridContainer!: ElementRef;
 
@@ -327,6 +328,15 @@ export class ScheduleComponent implements AfterViewInit, OnDestroy {
     console.log('dragStart', ev);
     this.isDragging = true;
     this.containerExtraClass = IS_DRAGGING_CLASS + '  ' + ev.source.data.type;
+
+    const cur = ev.source.element.nativeElement;
+    if (this.dragCloneEl) {
+      this.dragCloneEl.remove();
+    }
+    this.dragCloneEl = cur.cloneNode(true) as HTMLElement;
+    this.dragCloneEl.style.transform = 'translateY(0)';
+    this.dragCloneEl.style.opacity = '.1';
+    cur.parentNode?.insertBefore(this.dragCloneEl, cur);
   }
 
   dragReleased(ev: CdkDragRelease): void {
@@ -336,6 +346,10 @@ export class ScheduleComponent implements AfterViewInit, OnDestroy {
       ev,
     });
 
+    if (this.dragCloneEl) {
+      this.dragCloneEl.remove();
+    }
+
     this.isDragging = false;
     ev.source.element.nativeElement.style.pointerEvents = '';
     ev.source.element.nativeElement.style.opacity = '0';
@@ -344,7 +358,7 @@ export class ScheduleComponent implements AfterViewInit, OnDestroy {
       if (ev.source.element?.nativeElement?.style) {
         ev.source.element.nativeElement.style.opacity = '';
       }
-    }, 40);
+    }, 60);
 
     this.containerExtraClass = IS_NOT_DRAGGING_CLASS;
 
