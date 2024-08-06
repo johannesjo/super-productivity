@@ -179,6 +179,10 @@ $margin-right: 10px;
       .ico {
         color: $c-accent;
       }
+
+      > * {
+        opacity: 1;
+      }
     }
   }
 }
@@ -260,7 +264,7 @@ $margin-right: 10px;
     margin-top: -4px;
   }
 
-  :host:hover & {
+  :host-context(.is-not-dragging):hover & {
     border-color: $c-accent;
     color: $c-accent;
   }
@@ -387,11 +391,6 @@ $margin-right: 10px;
   :host.Task {
     background: $dark24;
   }
-}
-
-:host {
-  transition: 200ms transform;
-  position: relative;
 }
 
 :host.drag-over {
