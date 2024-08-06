@@ -302,7 +302,7 @@ $margin-right: 10px;
   }
 
   :host:hover & {
-    mat-icon:first-child:not(:last-child) {
+    mat-icon:first-of-type:not(:last-of-type) {
       display: none;
     }
 
