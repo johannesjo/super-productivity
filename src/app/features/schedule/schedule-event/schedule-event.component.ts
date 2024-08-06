@@ -219,10 +219,14 @@ export class ScheduleEventComponent implements OnInit {
     event.preventDefault();
     event.stopPropagation();
     event.stopImmediatePropagation();
-    this.contextMenuPosition.x =
-      ('touches' in event ? event.touches[0].clientX : event.clientX) + 'px';
-    this.contextMenuPosition.y =
-      ('touches' in event ? event.touches[0].clientY : event.clientY) + 'px';
+
+    // for some reason that fixes the menu position for very short events
+    if (!this.se.isCloseToOthers && !this.se.isCloseToOthersFirst) {
+      this.contextMenuPosition.x =
+        ('touches' in event ? event.touches[0].clientX : event.clientX) + 'px';
+      this.contextMenuPosition.y =
+        ('touches' in event ? event.touches[0].clientY : event.clientY) + 'px';
+    }
     this.contextMenu.openMenu();
   }
 
