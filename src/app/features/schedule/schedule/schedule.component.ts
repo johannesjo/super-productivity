@@ -358,7 +358,7 @@ export class ScheduleComponent implements AfterViewInit, OnDestroy {
       if (ev.source.element?.nativeElement?.style) {
         ev.source.element.nativeElement.style.opacity = '';
       }
-    }, 60);
+    }, 100);
 
     this.containerExtraClass = IS_NOT_DRAGGING_CLASS;
 
