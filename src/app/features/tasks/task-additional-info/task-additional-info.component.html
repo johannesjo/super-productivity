@@ -1,6 +1,6 @@
 <div class="wrapper">
   <header
-    *ngIf="isOver|| IS_TOUCH_PRIMARY"
+    *ngIf="isForceShowTitleAndSubTasks||isOver|| IS_TOUCH_PRIMARY"
     class="task-title-wrapper"
   >
     <inline-multiline-input
@@ -18,7 +18,7 @@
   <task-additional-info-item
     (collapseParent)="collapseParent()"
     (keyPress)="onItemKeyPress($event)"
-    *ngIf="!task.parentId && (layoutService.isRightPanelOver$|async)"
+    *ngIf="!task.parentId && (layoutService.isRightPanelOver$|async) || isForceShowTitleAndSubTasks"
     [expanded]="task.subTasks?.length > 0"
     [type]="'panel'"
   >

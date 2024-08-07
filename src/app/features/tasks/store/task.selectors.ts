@@ -137,7 +137,6 @@ export const selectSelectedTask = createSelector(
   selectTaskFeatureState,
   (s): TaskWithSubTasks => {
     // @ts-ignore
-    // @ts-ignore
     return s.selectedTaskId && mapSubTasksToTask(s.entities[s.selectedTaskId], s);
   },
 );

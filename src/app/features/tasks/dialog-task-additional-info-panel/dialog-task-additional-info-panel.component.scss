@@ -1,0 +1,56 @@
+@import '../../../../variables';
+
+:host {
+  mat-dialog-content {
+    padding: 0;
+    border-radius: 4px;
+
+    @include darkTheme() {
+      background: rgb(39, 39, 39) !important;
+    }
+
+    @include mq(xs) {
+      min-width: 450px;
+    }
+  }
+
+  &::ng-deep {
+    .task-title-wrapper {
+      //background: transparent !important;
+      //background: var(--mdc-dialog-container-color, white) !important;
+      //background: #fff !important;
+      border-bottom: 2px solid $c-primary !important;
+      //border-bottom: 2px solid $light-theme-separator-color !important;
+      top: 0;
+      border-top-left-radius: 8px;
+      border-top-right-radius: 8px;
+      //border-radius: 8px;
+
+      @include darkTheme() {
+        //background: $dark24 !important;
+        //border-bottom-color: $dark-theme-separator-color;
+      }
+
+      inline-multiline-input {
+        margin-top: 0;
+        color: $light-theme-text-color;
+
+        @include darkTheme() {
+          color: $dark-theme-text-color;
+        }
+
+        textarea {
+          font-weight: bold !important;
+        }
+      }
+    }
+
+    task .hover-controls {
+      display: none !important;
+    }
+
+    .wrapper {
+      //padding: 0;
+    }
+  }
+}

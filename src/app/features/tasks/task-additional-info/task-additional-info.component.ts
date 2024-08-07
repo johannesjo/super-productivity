@@ -94,6 +94,7 @@ interface IssueDataAndType {
 })
 export class TaskAdditionalInfoComponent implements AfterViewInit, OnDestroy {
   @Input() isOver: boolean = false;
+  @Input() isForceShowTitleAndSubTasks: boolean = false;
 
   @ViewChildren(TaskAdditionalInfoItemComponent)
   itemEls?: QueryList<TaskAdditionalInfoItemComponent>;
