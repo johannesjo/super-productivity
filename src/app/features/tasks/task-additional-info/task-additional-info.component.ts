@@ -77,6 +77,7 @@ import { IS_TOUCH_PRIMARY } from '../../../util/is-mouse-primary';
 import { PlannerService } from '../../planner/planner.service';
 import { DialogPlanForDayComponent } from '../../planner/dialog-plan-for-day/dialog-plan-for-day.component';
 import { getWorklogStr } from '../../../util/get-work-log-str';
+import { DragulaService } from 'ng2-dragula';
 
 interface IssueAndType {
   id: string | number | null;
@@ -237,6 +238,7 @@ export class TaskAdditionalInfoComponent implements AfterViewInit, OnDestroy {
     public readonly plannerService: PlannerService,
     private readonly _attachmentService: TaskAttachmentService,
     private _translateService: TranslateService,
+    private _dragulaService: DragulaService,
     @Inject(LOCALE_ID) private locale: string,
     private _cd: ChangeDetectorRef,
   ) {
@@ -284,6 +286,17 @@ export class TaskAdditionalInfoComponent implements AfterViewInit, OnDestroy {
     // this.issueIdAndType$.subscribe((v) => console.log('issueIdAndType$', v));
     // this.issueDataTrigger$.subscribe((v) => console.log('issueDataTrigger$', v));
     // this.issueData$.subscribe((v) => console.log('issueData$', v));
+
+    // NOTE: check work-view component for more info
+    const sub = this._dragulaService.find('SUB');
+    if (!sub) {
+      this._dragulaService.createGroup('SUB', {
+        direction: 'vertical',
+        moves: (el, container, handle) => {
+          return false;
+        },
+      });
+    }
   }
 
   get task(): TaskWithSubTasks {
