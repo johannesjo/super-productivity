@@ -132,8 +132,8 @@ export class PlannerTaskComponent extends BaseComponent implements OnInit, OnDes
     }
   }
 
+  // NOTE: this prevents dragging on mobile for no touch area
   onTouchStart(event: TouchEvent): void {
-    console.log(event);
     event.stopPropagation();
     event.stopImmediatePropagation();
   }
