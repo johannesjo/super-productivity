@@ -277,16 +277,16 @@ $margin-right: 10px;
   margin-left: 6px;
   margin-top: 7px;
 
+  @include mq(xs, max) {
+    margin-top: 3px;
+  }
+
   :host.very-short-event & {
     margin-top: 0;
   }
 
   :host.ScheduledRepeatProjection & {
     margin-right: 2px;
-  }
-
-  @include mq(xs, max) {
-    margin-top: 2px;
   }
 
   mat-icon {
