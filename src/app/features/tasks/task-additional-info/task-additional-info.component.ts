@@ -94,7 +94,7 @@ interface IssueDataAndType {
 })
 export class TaskAdditionalInfoComponent implements AfterViewInit, OnDestroy {
   @Input() isOver: boolean = false;
-  @Input() isForceShowTitleAndSubTasks: boolean = false;
+  @Input() isDialogMode: boolean = false;
 
   @ViewChildren(TaskAdditionalInfoItemComponent)
   itemEls?: QueryList<TaskAdditionalInfoItemComponent>;
@@ -443,9 +443,11 @@ export class TaskAdditionalInfoComponent implements AfterViewInit, OnDestroy {
   }
 
   collapseParent(): void {
-    this.taskService.setSelectedId(null);
-    // NOTE: it might not always be possible to focus task since it might gone from the screen
-    this.taskService.focusTaskIfPossible(this.task.id);
+    if (!this.isDialogMode) {
+      this.taskService.setSelectedId(null);
+      // NOTE: it might not always be possible to focus task since it might gone from the screen
+      this.taskService.focusTaskIfPossible(this.task.id);
+    }
   }
 
   onItemKeyPress(ev: KeyboardEvent): void {

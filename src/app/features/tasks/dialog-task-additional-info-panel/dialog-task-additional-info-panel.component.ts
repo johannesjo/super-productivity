@@ -34,10 +34,6 @@ import { skipWhile } from 'rxjs/operators';
 export class DialogTaskAdditionalInfoPanelComponent {
   T: typeof T = T;
   task$ = this._store.select(selectSelectedTask).pipe(skipWhile((v) => !v));
-  // TODO switch to selected task
-  // task$ = this._store.select(selectTaskByIdWithSubTaskData, {
-  //   id: this.data.taskId,
-  // });
 
   constructor(
     @Inject(MAT_DIALOG_DATA) public data: { taskId: string },
