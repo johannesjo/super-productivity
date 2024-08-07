@@ -8,12 +8,13 @@ import {
   MatDialogRef,
 } from '@angular/material/dialog';
 import { Store } from '@ngrx/store';
-import { selectTaskByIdWithSubTaskData } from '../store/task.selectors';
+import { selectSelectedTask } from '../store/task.selectors';
 import { T } from 'src/app/t.const';
 import { TranslateModule } from '@ngx-translate/core';
 import { UiModule } from '../../../ui/ui.module';
 import { setSelectedTask } from '../store/task.actions';
 import { TaskAdditionalInfoTargetPanel } from '../task.model';
+import { skipWhile } from 'rxjs/operators';
 
 @Component({
   selector: 'dialog-task-additional-info-panel',
@@ -32,11 +33,11 @@ import { TaskAdditionalInfoTargetPanel } from '../task.model';
 })
 export class DialogTaskAdditionalInfoPanelComponent {
   T: typeof T = T;
-  // task$ = this._store.select(selectSelectedTask);
+  task$ = this._store.select(selectSelectedTask).pipe(skipWhile((v) => !v));
   // TODO switch to selected task
-  task$ = this._store.select(selectTaskByIdWithSubTaskData, {
-    id: this.data.taskId,
-  });
+  // task$ = this._store.select(selectTaskByIdWithSubTaskData, {
+  //   id: this.data.taskId,
+  // });
 
   constructor(
     @Inject(MAT_DIALOG_DATA) public data: { taskId: string },

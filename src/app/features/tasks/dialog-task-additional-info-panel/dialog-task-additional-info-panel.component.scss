@@ -4,6 +4,7 @@
   mat-dialog-content {
     padding: 0;
     border-radius: 4px;
+    max-width: 450px;
 
     @include darkTheme() {
       background: rgb(39, 39, 39) !important;
