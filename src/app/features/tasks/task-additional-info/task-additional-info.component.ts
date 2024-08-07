@@ -74,6 +74,9 @@ import { shareReplayUntil } from '../../../util/share-replay-until';
 import { TranslateService } from '@ngx-translate/core';
 import { getTaskRepeatInfoText } from './get-task-repeat-info-text.util';
 import { IS_TOUCH_PRIMARY } from '../../../util/is-mouse-primary';
+import { PlannerService } from '../../planner/planner.service';
+import { DialogPlanForDayComponent } from '../../planner/dialog-plan-for-day/dialog-plan-for-day.component';
+import { getWorklogStr } from '../../../util/get-work-log-str';
 
 interface IssueAndType {
   id: string | number | null;
@@ -231,6 +234,7 @@ export class TaskAdditionalInfoComponent implements AfterViewInit, OnDestroy {
     private _taskRepeatCfgService: TaskRepeatCfgService,
     private _matDialog: MatDialog,
     private _projectService: ProjectService,
+    public readonly plannerService: PlannerService,
     private readonly _attachmentService: TaskAttachmentService,
     private _translateService: TranslateService,
     @Inject(LOCALE_ID) private locale: string,
@@ -411,6 +415,15 @@ export class TaskAdditionalInfoComponent implements AfterViewInit, OnDestroy {
     this._matDialog.open(DialogAddTaskReminderComponent, {
       restoreFocus: true,
       data: { task: this.task } as AddTaskReminderInterface,
+    });
+  }
+
+  planForDay(): void {
+    this._matDialog.open(DialogPlanForDayComponent, {
+      // we focus inside dialog instead
+      autoFocus: false,
+      restoreFocus: true,
+      data: { task: this.task, day: getWorklogStr(this.task?.plannedAt || undefined) },
     });
   }
 
