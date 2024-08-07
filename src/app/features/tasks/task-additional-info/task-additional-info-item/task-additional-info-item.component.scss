@@ -191,6 +191,11 @@ mat-expansion-panel::ng-deep .mat-expansion-panel-header:not(.mat-expanded),
   align-items: center;
   height: 48px;
   cursor: pointer;
+  color: $light-theme-text-color;
+
+  @include darkTheme() {
+    color: $dark-theme-text-color;
+  }
 
   &.--estimate {
     progress-bar {
@@ -227,6 +232,7 @@ mat-expansion-panel::ng-deep .mat-expansion-panel-header:not(.mat-expanded),
   flex-grow: 0;
   display: flex;
   align-items: center;
+  margin-right: $s * 3;
 
   &,
   ::ng-deep span {
@@ -262,10 +268,13 @@ mat-expansion-panel::ng-deep .mat-expansion-panel-header:not(.mat-expanded),
 }
 
 .input-item__edit-btn {
+  //opacity: 0;
+  margin-left: $s * -3;
   margin-right: $s;
-  opacity: 0;
+  display: none !important;
 
   .input-item:hover & {
-    opacity: 1;
+    //opacity: 1;
+    display: block !important;
   }
 }
