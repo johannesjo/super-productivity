@@ -58,7 +58,6 @@ export const createBlockedBlocksByDayMap = (
     blockedBlocksByDay[dayStartDateStr].push({
       ...block,
       end: Math.min(startDayEndBoundaryTs, block.end),
-      // TODO save split entries if needed
       entries: splitEntriesBlockStart.entriesBeforeEnd,
     });
 
@@ -110,8 +109,6 @@ const createEntriesForDay = (
         entriesAfterEnd.push(entry);
       } else if (entry.type === 'LunchBreak') {
         throw new Error('Lunch breaks should never span into next day');
-      } else if (entry.type === 'CalendarEvent') {
-        // TODO (for now we just ignore and hide these
       } else {
         const { before, after } = splitEntry(entry, dayEnd);
         entriesBeforeEnd.push(before);
@@ -134,13 +131,16 @@ const splitEntry = (
 ): { before: BlockedBlockEntry; after: BlockedBlockEntry } => {
   const afterType = (() => {
     switch (entry.type) {
+      case BlockedBlockType.WorkdayStartEnd:
+        return BlockedBlockType.WorkdayStartEnd;
       case BlockedBlockType.ScheduledTask:
       case BlockedBlockType.ScheduledTaskSplit:
-        // return BlockedBlockType.ScheduledTask;
         return BlockedBlockType.ScheduledTaskSplit;
       case BlockedBlockType.ScheduledRepeatProjection:
       case BlockedBlockType.ScheduledRepeatProjectionSplit:
         return BlockedBlockType.ScheduledRepeatProjectionSplit;
+      case BlockedBlockType.CalendarEvent:
+        return BlockedBlockType.CalendarEvent;
       default: {
         throw new Error('Unknown entry type');
       }

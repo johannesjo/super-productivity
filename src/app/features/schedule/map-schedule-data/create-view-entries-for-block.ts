@@ -1,7 +1,6 @@
 import { BlockedBlock, BlockedBlockType, SVE } from '../schedule.model';
 import { SVEType } from '../schedule.const';
 import { nanoid } from 'nanoid';
-import { getTimeLeftForTask } from '../../../util/get-time-left-for-task';
 
 export const createViewEntriesForBlock = (
   blockedBlock: BlockedBlock,
@@ -12,12 +11,12 @@ export const createViewEntriesForBlock = (
     if (entry.type === BlockedBlockType.ScheduledTask) {
       const scheduledTask = entry.data;
       viewEntriesForBock.push({
-        // NOTE: should be unique
+        // NOTE: first should be unique
         id: scheduledTask.id,
-        start: scheduledTask.plannedAt,
+        start: entry.start,
         type: SVEType.ScheduledTask,
         data: scheduledTask,
-        duration: getTimeLeftForTask(scheduledTask),
+        duration: entry.end - entry.start,
       });
     } else if (entry.type === BlockedBlockType.ScheduledRepeatProjection) {
       const repeatCfg = entry.data;
@@ -46,6 +45,25 @@ export const createViewEntriesForBlock = (
         start: entry.start,
         type: SVEType.LunchBreak,
         data: entry.data,
+        duration: entry.end - entry.start,
+      });
+    } else if (entry.type === BlockedBlockType.ScheduledTaskSplit) {
+      const scheduledTask = entry.data;
+      viewEntriesForBock.push({
+        id: scheduledTask.id + '_' + dayDate,
+        start: entry.start,
+        type: SVEType.SplitTaskContinuedLast,
+        data: scheduledTask,
+        duration: entry.end - entry.start,
+      });
+    } else if (entry.type === BlockedBlockType.ScheduledRepeatProjectionSplit) {
+      const repeatCfg = entry.data;
+      viewEntriesForBock.push({
+        id: repeatCfg.id + '_' + dayDate,
+        splitIndex: 0,
+        start: entry.start,
+        type: SVEType.RepeatProjectionSplitContinuedLast,
+        data: repeatCfg,
         duration: entry.end - entry.start,
       });
     }
