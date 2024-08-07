@@ -164,7 +164,7 @@
     (collapseParent)="collapseParent()"
     (keyPress)="onItemKeyPress($event)"
     *ngIf="task.issueId && task.issueType !=='CALENDAR'"
-    [expanded]="isExpandedIssuePanel"
+    [expanded]="isExpandedIssuePanel && !isDialogMode"
     [type]="'panel'"
   >
     <ng-container panel-header>
@@ -191,7 +191,7 @@
     (collapseParent)="collapseParent()"
     (editActionTriggered)="isFocusNotes=true"
     (keyPress)="onItemKeyPress($event)"
-    [expanded]="isExpandedNotesPanel"
+    [expanded]="isExpandedNotesPanel && !isDialogMode"
     [type]="'panel'"
   >
     <ng-container panel-header>
@@ -218,7 +218,7 @@
     (collapseParent)="collapseParent()"
     (keyPress)="onItemKeyPress($event)"
     *ngIf="issueAttachments?.length || localAttachments?.length"
-    [expanded]="isExpandedAttachmentPanel"
+    [expanded]="isExpandedAttachmentPanel && !isDialogMode"
     [type]="'panel'"
   >
     <ng-container panel-header>
