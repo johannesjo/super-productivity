@@ -61,6 +61,7 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
   @Input() isAddToBottom: boolean = false;
   @Input() isDoubleEnterMode: boolean = false;
   @Input() isElevated: boolean = false;
+  @Input() isHideTagTitles: boolean = false;
   @Input() isDisableAutoFocus: boolean = false;
   @Input() planForDay?: string;
   @Output() blurred: EventEmitter<any> = new EventEmitter();

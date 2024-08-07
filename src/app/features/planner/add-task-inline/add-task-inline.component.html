@@ -12,6 +12,7 @@
 <add-task-bar
   *ngIf="isShowAddTask"
   [isElevated]="true "
+  [isHideTagTitles]="true "
   (blurred)="isShowAddTask = false"
   (done)="isShowAddTask = false"
   [planForDay]="planForDay"

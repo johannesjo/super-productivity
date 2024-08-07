@@ -141,6 +141,7 @@
       <tag
         *ngIf="item.ctx"
         [tag]="item.ctx"
+        [isHideTitle]="isHideTagTitles"
       ></tag>
       <span [innerHTML]="item?.titleHighlighted||item?.title"></span>
     </mat-option>
