@@ -48,6 +48,7 @@ export class DialogTaskAdditionalInfoPanelComponent {
       setSelectedTask({
         id: data.taskId,
         taskAdditionalInfoTargetPanel: TaskAdditionalInfoTargetPanel.Default,
+        isSkipToggle: true,
       }),
     );
     // this.task$.subscribe((v) => console.log(`task$`, v));

@@ -60,6 +60,7 @@ export const setSelectedTask = createAction(
   props<{
     id: string | null;
     taskAdditionalInfoTargetPanel?: TaskAdditionalInfoTargetPanel;
+    isSkipToggle?: boolean;
   }>(),
 );
 

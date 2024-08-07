@@ -140,7 +140,14 @@ export const taskReducer = createReducer<TaskState>(
     return { ...state, currentTaskId: null, lastCurrentTaskId: state.currentTaskId };
   }),
 
-  on(setSelectedTask, (state, { id, taskAdditionalInfoTargetPanel }) => {
+  on(setSelectedTask, (state, { id, taskAdditionalInfoTargetPanel, isSkipToggle }) => {
+    if (isSkipToggle) {
+      return {
+        ...state,
+        taskAdditionalInfoTargetPanel: taskAdditionalInfoTargetPanel || null,
+        selectedTaskId: id,
+      };
+    }
     return {
       ...state,
       taskAdditionalInfoTargetPanel:
