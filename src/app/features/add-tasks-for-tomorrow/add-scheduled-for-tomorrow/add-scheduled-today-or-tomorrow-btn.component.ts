@@ -9,7 +9,7 @@ import { TaskService } from '../../tasks/task.service';
 import { AddTasksForTomorrowService } from '../add-tasks-for-tomorrow.service';
 
 @Component({
-  selector: 'add-scheduled-for-tomorrow',
+  selector: 'add-scheduled-today-or-tomorrow-btn',
   standalone: true,
   imports: [AsyncPipe, MatButton, MatIcon, NgIf, TranslateModule],
   templateUrl: './add-scheduled-today-or-tomorrow-btn.component.html',

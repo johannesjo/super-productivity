@@ -168,7 +168,9 @@
             [isDoubleEnterMode]="true"
           ></add-task-bar>
 
-          <add-scheduled-for-tomorrow></add-scheduled-for-tomorrow>
+          <add-scheduled-today-or-tomorrow-btn
+            [isAlwaysShowIfAny]="true"
+          ></add-scheduled-today-or-tomorrow-btn>
 
           <button
             (click)="startWork()"
