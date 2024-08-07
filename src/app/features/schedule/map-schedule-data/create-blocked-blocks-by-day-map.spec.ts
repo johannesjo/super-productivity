@@ -59,16 +59,16 @@ describe('createBlockedBlocksByDayMap()', () => {
     expect(r).toEqual({
       '1970-01-01': [
         {
-          end: 82800000,
+          start: dhTz(0, 17),
+          end: dhTz(0, 24),
           entries: [
             {
               data: { endTime: '17:00', startTime: '9:00' },
               end: 115200000,
-              start: 57600000,
+              start: dhTz(0, 17),
               type: 'WorkdayStartEnd',
             },
           ],
-          start: 57600000,
         },
       ],
       '1970-01-02': [
@@ -77,8 +77,8 @@ describe('createBlockedBlocksByDayMap()', () => {
           entries: [
             {
               data: { endTime: '17:00', startTime: '9:00' },
-              end: 115200000,
-              start: 57600000,
+              start: dhTz(0, 17),
+              end: dhTz(1, 9),
               type: 'WorkdayStartEnd',
             },
           ],
@@ -168,5 +168,128 @@ describe('createBlockedBlocksByDayMap()', () => {
         },
       ],
     } as any);
+  });
+
+  it('should work for very long scheduled tasks', () => {
+    const r = createBlockedBlocksByDayMap(
+      [fakePlannedTaskEntry('S1', new Date(dhTz(1, 18)), { timeEstimate: h(48) })],
+      [],
+      [],
+      { startTime: '9:00', endTime: '17:00' },
+      undefined,
+      0,
+      2,
+    );
+    expect(Object.keys(r).length).toBe(4);
+    expect(Object.keys(r)).toEqual([
+      '1970-01-01',
+      '1970-01-02',
+      '1970-01-03',
+      '1970-01-04',
+    ]);
+    expect(r['1970-01-01']).toEqual([
+      {
+        start: dhTz(0, 17),
+        end: dhTz(0, 24),
+        entries: [
+          {
+            data: { endTime: '17:00', startTime: '9:00' },
+            start: dhTz(0, 17),
+            end: dhTz(1, 9),
+            type: 'WorkdayStartEnd',
+          },
+        ],
+      },
+    ] as any);
+    expect(r['1970-01-02']).toEqual([
+      {
+        start: dhTz(1, 0),
+        end: dhTz(1, 9),
+        entries: [
+          {
+            data: { endTime: '17:00', startTime: '9:00' },
+            end: dhTz(1, 9),
+            start: dhTz(0, 17),
+            type: 'WorkdayStartEnd',
+          },
+        ],
+      },
+      {
+        start: dhTz(1, 17),
+        end: dhTz(1, 24),
+        entries: [
+          {
+            data: {
+              id: 'S1',
+              plannedAt: dhTz(1, 18),
+              reminderId: 'R_ID',
+              subTaskIds: [],
+              tagIds: [],
+              timeEstimate: 172800000,
+              timeSpent: 0,
+            },
+            start: dhTz(1, 18),
+            end: dhTz(1, 24),
+            type: 'ScheduledTask',
+          },
+          {
+            data: { endTime: '17:00', startTime: '9:00' },
+            start: dhTz(1, 17),
+            end: dhTz(2, 9),
+            type: 'WorkdayStartEnd',
+          },
+        ] as any,
+      },
+    ]);
+    expect(r['1970-01-03']).toEqual([
+      {
+        start: dhTz(2, 0),
+        end: dhTz(2, 24),
+        entries: [
+          {
+            data: {
+              id: 'S1',
+              plannedAt: 147600000,
+              reminderId: 'R_ID',
+              subTaskIds: [],
+              tagIds: [],
+              timeEstimate: 172800000,
+              timeSpent: 0,
+            },
+            start: dhTz(2, 0),
+            end: dhTz(2, 24),
+            type: 'ScheduledTaskSplit',
+          },
+          {
+            data: { endTime: '17:00', startTime: '9:00' },
+            start: dhTz(1, 17),
+            end: dhTz(2, 9),
+            type: 'WorkdayStartEnd',
+          },
+        ],
+      },
+    ] as any);
+    expect(r['1970-01-04']).toEqual([
+      {
+        start: dhTz(3, 0),
+        end: dhTz(3, 18),
+        entries: [
+          {
+            data: {
+              id: 'S1',
+              plannedAt: 147600000,
+              reminderId: 'R_ID',
+              subTaskIds: [],
+              tagIds: [],
+              timeEstimate: 172800000,
+              timeSpent: 0,
+            },
+            start: dhTz(3, 0),
+            end: dhTz(3, 18),
+            type: 'ScheduledTaskSplit',
+          },
+        ],
+      },
+    ] as any);
   });
 });

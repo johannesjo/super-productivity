@@ -142,7 +142,9 @@ export interface ScheduleCalendarMapEntry {
 // BlockedBlocks
 export enum BlockedBlockType {
   ScheduledTask = 'ScheduledTask',
+  ScheduledTaskSplit = 'ScheduledTaskSplit',
   ScheduledRepeatProjection = 'ScheduledRepeatProjection',
+  ScheduledRepeatProjectionSplit = 'ScheduledRepeatProjectionSplit',
   CalendarEvent = 'CalendarEvent',
   WorkdayStartEnd = 'WorkdayStartEnd',
   LunchBreak = 'LunchBreak',
@@ -151,14 +153,16 @@ export enum BlockedBlockType {
 export interface BlockedBlockEntryScheduledTask {
   start: number;
   end: number;
-  type: BlockedBlockType.ScheduledTask;
+  type: BlockedBlockType.ScheduledTask | BlockedBlockType.ScheduledTaskSplit;
   data: TaskPlanned;
 }
 
 export interface BlockedBlockEntryScheduledRepeatProjection {
   start: number;
   end: number;
-  type: BlockedBlockType.ScheduledRepeatProjection;
+  type:
+    | BlockedBlockType.ScheduledRepeatProjection
+    | BlockedBlockType.ScheduledRepeatProjectionSplit;
   data: TaskRepeatCfg;
 }
 
@@ -193,6 +197,7 @@ export type BlockedBlockEntry =
 export interface BlockedBlock {
   start: number;
   end: number;
+  isBlockedWholeDay?: true;
   entries: BlockedBlockEntry[];
 }
 

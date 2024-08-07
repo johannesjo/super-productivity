@@ -2,12 +2,15 @@ import { TaskPlanned } from '../../tasks/task.model';
 import { TaskRepeatCfg } from '../../task-repeat-cfg/task-repeat-cfg.model';
 import {
   BlockedBlockByDayMap,
+  BlockedBlockEntry,
+  BlockedBlockType,
   ScheduleCalendarMapEntry,
   ScheduleLunchBreakCfg,
   ScheduleWorkStartEndCfg,
 } from '../schedule.model';
 import { createSortedBlockerBlocks } from './create-sorted-blocker-blocks';
 import { getWorklogStr } from '../../../util/get-work-log-str';
+import { getDiffInDays } from '../../../util/get-diff-in-days';
 
 // TODO improve to even better algo for createSortedBlockerBlocks
 const NR_OF_DAYS = 10;
@@ -30,42 +33,128 @@ export const createBlockedBlocksByDayMap = (
     now,
     nrOfDays,
   );
+  console.log(allBlockedBlocks);
 
   const blockedBlocksByDay: BlockedBlockByDayMap = {};
-  allBlockedBlocks.forEach((block) => {
-    const dayStartDate = getWorklogStr(block.start);
-    const dayEndBoundary = new Date(block.start).setHours(24, 0, 0, 0);
 
-    if (!blockedBlocksByDay[dayStartDate]) {
-      blockedBlocksByDay[dayStartDate] = [];
+  allBlockedBlocks.forEach((block) => {
+    const dayStartDateStr = getWorklogStr(block.start);
+    const startDayEndBoundaryTs = new Date(block.start).setHours(24, 0, 0, 0);
+
+    if (!blockedBlocksByDay[dayStartDateStr]) {
+      blockedBlocksByDay[dayStartDateStr] = [];
     }
-    blockedBlocksByDay[dayStartDate].push({
+    const nrOfExtraDaysToSpawn = getDiffInDays(
+      new Date(block.start),
+      new Date(block.end),
+    );
+
+    const splitEntriesBlockStart = createEntriesForDay(
+      block.entries,
+      startDayEndBoundaryTs,
+    );
+
+    // cut off block to fit into dayEND boundary
+    blockedBlocksByDay[dayStartDateStr].push({
       ...block,
-      end: Math.min(dayEndBoundary, block.end),
-      entries: block.entries.filter((e) => e.start < dayEndBoundary),
-      // ...({ type: 'START' } as any),
+      end: Math.min(startDayEndBoundaryTs, block.end),
+      // TODO save split entries if needed
+      entries: splitEntriesBlockStart.entriesBeforeEnd,
     });
 
-    // TODO handle case when blocker block spans multiple days
-    const dayEndDate = getWorklogStr(block.end);
-    if (dayStartDate !== dayEndDate) {
-      const dayStartBoundary2 = new Date(block.end).setHours(0, 0, 0, 0);
-      const dayEndBoundary2 = new Date(block.end).setHours(24, 0, 0, 0);
+    // spawn an extra day if needed
+    if (nrOfExtraDaysToSpawn > 0) {
+      let entriesForNextDay: BlockedBlockEntry[] = splitEntriesBlockStart.entriesAfterEnd;
+      for (let i = 0; i < nrOfExtraDaysToSpawn; i++) {
+        const curDateTs = new Date(block.start).setDate(
+          new Date(block.start).getDate() + i + 1,
+        );
+        const dayStr = getWorklogStr(curDateTs);
+        const dayStartBoundaryTs = new Date(curDateTs).setHours(0, 0, 0, 0);
+        const dayEndBoundaryTs = new Date(curDateTs).setHours(24, 0, 0, 0);
 
-      if (!blockedBlocksByDay[dayEndDate]) {
-        blockedBlocksByDay[dayEndDate] = [];
+        if (!blockedBlocksByDay[dayStr]) {
+          blockedBlocksByDay[dayStr] = [];
+        }
+        const { entriesBeforeEnd, entriesAfterEnd } = createEntriesForDay(
+          entriesForNextDay,
+          dayEndBoundaryTs,
+        );
+        entriesForNextDay = entriesAfterEnd;
+        blockedBlocksByDay[dayStr].push({
+          ...block,
+          entries: entriesBeforeEnd,
+          start: dayStartBoundaryTs,
+          end: Math.min(dayEndBoundaryTs, block.end),
+        });
       }
-      blockedBlocksByDay[dayEndDate].push({
-        ...block,
-        // entries: block.entries.filter((e) => e.type === BlockedBlockType.WorkdayStartEnd),
-        entries: block.entries.filter((e) => e.end > dayStartBoundary2),
-        // entries: block.entries,
-        start: dayStartBoundary2,
-        end: Math.min(dayEndBoundary2, block.end),
-        // ...({ type: 'END' } as any),
-      });
     }
   });
 
   return blockedBlocksByDay;
+};
+const createEntriesForDay = (
+  entries: BlockedBlockEntry[],
+  dayEnd: number,
+): {
+  entriesBeforeEnd: BlockedBlockEntry[];
+  entriesAfterEnd: BlockedBlockEntry[];
+} => {
+  const entriesBeforeEnd: BlockedBlockEntry[] = [];
+  const entriesAfterEnd: BlockedBlockEntry[] = [];
+
+  entries.forEach((entry) => {
+    if (entry.start < dayEnd && entry.end > dayEnd) {
+      if (entry.type === 'WorkdayStartEnd') {
+        entriesBeforeEnd.push(entry);
+        entriesAfterEnd.push(entry);
+      } else if (entry.type === 'LunchBreak') {
+        throw new Error('Lunch breaks should never span into next day');
+      } else if (entry.type === 'CalendarEvent') {
+        // TODO (for now we just ignore and hide these
+      } else {
+        const { before, after } = splitEntry(entry, dayEnd);
+        entriesBeforeEnd.push(before);
+        entriesAfterEnd.push(after);
+      }
+    } else if (entry.start < dayEnd) {
+      entriesBeforeEnd.push(entry);
+    } else {
+      entriesAfterEnd.push(entry);
+    }
+  });
+
+  return { entriesBeforeEnd, entriesAfterEnd };
+};
+
+// TODO maybe create a split scheduled type
+const splitEntry = (
+  entry: BlockedBlockEntry,
+  splitAt: number,
+): { before: BlockedBlockEntry; after: BlockedBlockEntry } => {
+  const afterType = (() => {
+    switch (entry.type) {
+      case BlockedBlockType.ScheduledTask:
+      case BlockedBlockType.ScheduledTaskSplit:
+        // return BlockedBlockType.ScheduledTask;
+        return BlockedBlockType.ScheduledTaskSplit;
+      case BlockedBlockType.ScheduledRepeatProjection:
+      case BlockedBlockType.ScheduledRepeatProjectionSplit:
+        return BlockedBlockType.ScheduledRepeatProjectionSplit;
+      default: {
+        throw new Error('Unknown entry type');
+      }
+    }
+  })();
+  return {
+    before: {
+      ...entry,
+      end: splitAt,
+    },
+    after: {
+      ...entry,
+      start: splitAt,
+      type: afterType,
+    } as BlockedBlockEntry,
+  };
 };

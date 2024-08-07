@@ -332,7 +332,7 @@ const moveEntries = (
   }
 };
 
-const createSplitTask = ({
+export const createSplitTask = ({
   start,
   dayDate,
   task,
@@ -354,7 +354,7 @@ const createSplitTask = ({
   };
 };
 
-const createSplitRepeat = ({
+export const createSplitRepeat = ({
   start,
   dayDate,
   taskRepeatCfg,
