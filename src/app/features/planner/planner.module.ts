@@ -28,7 +28,6 @@ import { DialogAddPlannedTasksComponent } from './dialog-add-planned-tasks/dialo
 import { AddTaskInlineComponent } from './add-task-inline/add-task-inline.component';
 import { PlannerDayComponent } from './planner-day/planner-day.component';
 import { BetterSimpleDrawerComponent } from '../../ui/better-simple-drawer/better-simple-drawer.component';
-import { PlannerTaskEditComponent } from './planner-task/planner-task-edit/planner-task-edit.component';
 import { PlannerInitialDialogEffects } from './store/planner-initial-dialog.effects';
 
 @NgModule({
@@ -37,7 +36,6 @@ import { PlannerInitialDialogEffects } from './store/planner-initial-dialog.effe
     PlannerPlanViewComponent,
     AddTaskPanelComponent,
     PlannerTaskComponent,
-    PlannerTaskEditComponent,
     PlannerDayComponent,
     PlannerRepeatProjectionComponent,
     PlannerCalendarEventComponent,

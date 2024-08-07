@@ -1,7 +1,8 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { TasksModule } from '../tasks.module';
 import {
+  MAT_DIALOG_DATA,
   MatDialogActions,
   MatDialogContent,
   MatDialogRef,
@@ -11,6 +12,8 @@ import { selectTaskByIdWithSubTaskData } from '../store/task.selectors';
 import { T } from 'src/app/t.const';
 import { TranslateModule } from '@ngx-translate/core';
 import { UiModule } from '../../../ui/ui.module';
+import { setSelectedTask } from '../store/task.actions';
+import { TaskAdditionalInfoTargetPanel } from '../task.model';
 
 @Component({
   selector: 'dialog-task-additional-info-panel',
@@ -30,18 +33,26 @@ import { UiModule } from '../../../ui/ui.module';
 export class DialogTaskAdditionalInfoPanelComponent {
   T: typeof T = T;
   // task$ = this._store.select(selectSelectedTask);
+  // TODO switch to selected task
   task$ = this._store.select(selectTaskByIdWithSubTaskData, {
-    id: 'nsDUzWEBKJSjTlx7b912N',
+    id: this.data.taskId,
   });
 
   constructor(
+    @Inject(MAT_DIALOG_DATA) public data: { taskId: string },
     private _matDialogRef: MatDialogRef<DialogTaskAdditionalInfoPanelComponent>,
     private _store: Store,
   ) {
-    this.task$.subscribe((v) => console.log(`task$`, v));
+    this._store.dispatch(
+      setSelectedTask({
+        id: data.taskId,
+        taskAdditionalInfoTargetPanel: TaskAdditionalInfoTargetPanel.Default,
+      }),
+    );
+    // this.task$.subscribe((v) => console.log(`task$`, v));
   }
 
-  close(): void {
-    this._matDialogRef.close();
-  }
+  // close(): void {
+  //   this._matDialogRef.close();
+  // }
 }

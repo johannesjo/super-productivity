@@ -48,7 +48,6 @@
   (longPressIOS)="openContextMenu($event)"
   (contextmenu)="openContextMenu($event)"
   (touchstart)="onTouchStart($event)"
-  (dblclick)="isEditTitleMode = true"
 >
   <div class="wrap">
     <div
@@ -58,19 +57,7 @@
       {{ parentTitle }}
     </div>
 
-    <div
-      class="title"
-      [style.overflow]="isEditTitleMode ? 'visible' : ''"
-    >
-      {{ task.title }}
-
-      <planner-task-edit
-        *ngIf="isEditTitleMode"
-        [value]="task.title"
-        (cancel)="isEditTitleMode = false"
-        (valueChange)="updateTaskTitleIfChanged($event)"
-      ></planner-task-edit>
-    </div>
+    <div class="title">{{ task.title }}</div>
 
     <tag-list
       [isDisableEdit]="true"
@@ -110,17 +97,6 @@
   (close)="focusSelf()"
 >
   <ng-template matMenuContent>
-    <button
-      (click)="isEditTitleMode = true"
-      mat-menu-item
-    >
-      <span class="menuItemLeft">
-        <mat-icon>edit</mat-icon>
-        {{ T.F.TASK.CMP.EDIT_TASK_TITLE|translate }}
-      </span>
-      <!--      <span class="keyIndicator"> {{ kb.taskOpenEstimationDialog }} </span>-->
-    </button>
-
     <button
       (click)="estimateTime()"
       *ngIf="!task.subTaskIds?.length"

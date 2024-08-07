@@ -3,6 +3,7 @@ import {
   ChangeDetectorRef,
   Component,
   HostBinding,
+  HostListener,
   Input,
   OnDestroy,
   OnInit,
@@ -30,6 +31,7 @@ import { Store } from '@ngrx/store';
 import { selectTaskByIdWithSubTaskData } from '../../tasks/store/task.selectors';
 import { updateTask } from '../../tasks/store/task.actions';
 import { DialogPlanForDayComponent } from '../dialog-plan-for-day/dialog-plan-for-day.component';
+import { DialogTaskAdditionalInfoPanelComponent } from '../../tasks/dialog-task-additional-info-panel/dialog-task-additional-info-panel.component';
 
 @Component({
   selector: 'planner-task',
@@ -49,8 +51,6 @@ export class PlannerTaskComponent extends BaseComponent implements OnInit, OnDes
   parentTitle: string | null = null;
   issueUrl$!: Observable<string | null>;
 
-  isEditTitleMode = false;
-
   moveToProjectList$!: Observable<Project[]>;
   contextMenuPosition: { x: string; y: string } = { x: '0px', y: '0px' };
 
@@ -66,6 +66,24 @@ export class PlannerTaskComponent extends BaseComponent implements OnInit, OnDes
   get isCurrent(): boolean {
     return this.task.id === this._taskService.currentTaskId;
   }
+
+  @HostListener('click', ['$event'])
+  async clickHandler(): Promise<void> {
+    if (this.task) {
+      this._matDialog.open(DialogTaskAdditionalInfoPanelComponent, {
+        data: { taskId: this.task.id },
+      });
+    }
+  }
+
+  // @HostListener('dblclick', ['$event'])
+  // async dblClickHandler(): Promise<void> {
+  //   if (this.task) {
+  //     this._matDialog.open(DialogTaskAdditionalInfoPanelComponent, {
+  //       data: { taskId: this.task.id },
+  //     });
+  //   }
+  // }
 
   get timeEstimate(): number {
     const t = this.task;
@@ -168,14 +186,6 @@ export class PlannerTaskComponent extends BaseComponent implements OnInit, OnDes
         },
       }),
     );
-  }
-
-  updateTaskTitleIfChanged(title: string): void {
-    if (this.task.title !== title) {
-      this._taskService.update(this.task.id, { title });
-      // this.focusSelf();
-    }
-    this.isEditTitleMode = false;
   }
 
   // TODO implement with keyboard support

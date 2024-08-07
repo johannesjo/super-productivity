@@ -45,6 +45,7 @@ import { getWorklogStr } from '../../../util/get-work-log-str';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { selectCalendarProviderById } from '../../config/store/global-config.reducer';
 import { TaskService } from '../../tasks/task.service';
+import { DialogTaskAdditionalInfoPanelComponent } from '../../tasks/dialog-task-additional-info-panel/dialog-task-additional-info-panel.component';
 
 @Component({
   selector: 'schedule-event',
@@ -179,10 +180,21 @@ export class ScheduleEventComponent implements OnInit {
     this._cd.detectChanges();
   }
 
+  // @HostListener('dblclick', ['$event'])
+  // async dblClickHandler(): Promise<void> {
+  //   if (this.task) {
+  //     this._matDialog.open(DialogTaskAdditionalInfoPanelComponent, {
+  //       data: { taskId: this.task.id },
+  //     });
+  //   }
+  // }
+
   @HostListener('click')
   async clickHandler(): Promise<void> {
-    if (this.se.type === SVEType.ScheduledTask) {
-      this.editReminder();
+    if (this.task) {
+      this._matDialog.open(DialogTaskAdditionalInfoPanelComponent, {
+        data: { taskId: this.task.id },
+      });
     } else if (
       this.se.type === SVEType.RepeatProjection ||
       this.se.type === SVEType.RepeatProjectionSplit ||
