@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, Inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Inject, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { TasksModule } from '../tasks.module';
 import {
@@ -31,7 +31,7 @@ import { skipWhile } from 'rxjs/operators';
   styleUrl: './dialog-task-additional-info-panel.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class DialogTaskAdditionalInfoPanelComponent {
+export class DialogTaskAdditionalInfoPanelComponent implements OnDestroy {
   T: typeof T = T;
   task$ = this._store.select(selectSelectedTask).pipe(skipWhile((v) => !v));
 
@@ -53,4 +53,11 @@ export class DialogTaskAdditionalInfoPanelComponent {
   // close(): void {
   //   this._matDialogRef.close();
   // }
+  ngOnDestroy(): void {
+    this._store.dispatch(
+      setSelectedTask({
+        id: null,
+      }),
+    );
+  }
 }
