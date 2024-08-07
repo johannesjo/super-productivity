@@ -19,7 +19,7 @@
     (collapseParent)="collapseParent()"
     (keyPress)="onItemKeyPress($event)"
     *ngIf="!task.parentId && (layoutService.isRightPanelOver$|async) || isDialogMode"
-    [expanded]="task.subTasks?.length > 0"
+    [expanded]="task.subTasks?.length > 0 && !isDialogMode"
     [type]="'panel'"
   >
     <ng-container panel-header>

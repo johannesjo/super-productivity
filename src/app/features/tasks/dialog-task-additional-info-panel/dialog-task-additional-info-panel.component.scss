@@ -51,7 +51,17 @@
     }
 
     .wrapper {
-      //padding: 0;
+      //padding: 16px;
+    }
+
+    task-additional-info-item {
+      margin-left: $s;
+      margin-right: $s;
+
+      @include mq(xxs) {
+        margin-left: $s * 1.5;
+        margin-right: $s * 1.5;
+      }
     }
   }
 }
