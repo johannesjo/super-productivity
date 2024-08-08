@@ -5,11 +5,11 @@ plugins {
 }
 
 android {
-    compileSdkVersion 33
     defaultConfig {
         applicationId "com.superproductivity.superproductivity"
         minSdkVersion 23
         targetSdkVersion 34
+        compileSdk 34
         versionCode 21
         versionName "21.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
