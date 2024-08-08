@@ -3,6 +3,7 @@ package com.superproductivity.superproductivity
 import android.app.AlertDialog
 import android.content.Intent
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.webkit.JsResult
@@ -15,6 +16,7 @@ import android.webkit.WebView
 import android.webkit.WebViewClient
 import android.widget.FrameLayout
 import android.widget.Toast
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import com.anggrayudi.storage.SimpleStorageHelper
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
@@ -69,6 +71,7 @@ class FullscreenActivity : AppCompatActivity() {
         }
     }
 
+    @RequiresApi(Build.VERSION_CODES.N)
     private fun initWebView() {
         webView = (application as App).wv
         val appUrl: String
@@ -96,7 +99,8 @@ class FullscreenActivity : AppCompatActivity() {
         }
 
         val swController = ServiceWorkerController.getInstance()
-        swController.setServiceWorkerClient(object : ServiceWorkerClient() {
+        swController.setServiceWorkerClient(@RequiresApi(Build.VERSION_CODES.N)
+        object : ServiceWorkerClient() {
             override fun shouldInterceptRequest(request: WebResourceRequest): WebResourceResponse? {
                 return interceptRequest(request)
             }
@@ -227,18 +231,9 @@ class FullscreenActivity : AppCompatActivity() {
 
 
     private fun interceptRequest(request: WebResourceRequest?): WebResourceResponse? {
-        Log.v("TW", "interceptRequest mf:${request?.isForMainFrame.toString()} ${request?.url}")
         if (request == null || request.isForMainFrame) {
             return null
         }
-        if (request.url.toString()
-                .contains("super-productivity.com") || request.url.toString()
-                .contains("10.0.2.2:4200")
-        ) {
-            return null
-        }
-
-        Log.v("TW", "interceptRequest ${request.method} ${request.url}")
 
         if (request.url?.path?.contains("assets/icons/favicon") == true) {
             try {
@@ -248,6 +243,18 @@ class FullscreenActivity : AppCompatActivity() {
             }
         }
 
+        if (request.url.toString()
+                .contains("app.super-productivity.com") || request.url.toString()
+                .contains("10.0.2.2:4200")
+        ) {
+            return null
+        }
+        Log.v(
+            "TW",
+            "interceptRequest mf:${request?.isForMainFrame.toString()} ${request.method} ${request?.url}"
+        )
+
+
         if (request.method?.uppercase() === "OPTIONS") {
             return OptionsAllowResponse.build();
         }
@@ -255,7 +262,6 @@ class FullscreenActivity : AppCompatActivity() {
         val client = OkHttpClient()
         val newRequest = Request.Builder()
             .url(request.url.toString())
-            .addHeader("Access-Control-Allow-Origin", "*")
             .method(
                 request.method, if (request.method == "POST") {
                     val mediaType = "application/json; charset=utf-8".toMediaTypeOrNull()
@@ -275,7 +281,14 @@ class FullscreenActivity : AppCompatActivity() {
             val headers = response.headers.names()
                 .associateWith { response.headers(it)?.joinToString() }
                 .toMutableMap()
+
+            val keysToRemove =
+                headers.keys.filter { it.equals("Access-Control-Allow-Origin", ignoreCase = true) }
+            for (key in keysToRemove) {
+                headers.remove(key)
+            }
             headers["Access-Control-Allow-Origin"] = "*"
+
             val contentType = response.header("Content-Type", "text/plain")
             val contentEncoding = response.header("Content-Encoding", "utf-8")
             val inputStream = ByteArrayInputStream(response.body?.bytes())
