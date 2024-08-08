@@ -3,7 +3,6 @@ package com.superproductivity.superproductivity
 import android.app.AlertDialog
 import android.content.Intent
 import android.net.Uri
-import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.webkit.*
@@ -11,6 +10,12 @@ import android.widget.FrameLayout
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.anggrayudi.storage.SimpleStorageHelper
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import okhttp3.RequestBody
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import java.io.ByteArrayInputStream
+
 
 /**
  * An example full-screen activity that shows and hides the system UI (i.e.
@@ -60,9 +65,9 @@ class FullscreenActivity : AppCompatActivity() {
         webView = (application as App).wv
         val url: String
         if (BuildConfig.DEBUG) {
-            url = "https://test-app.super-productivity.com/"
+//            url = "https://test-app.super-productivity.com/"
             // for debugging locally run web server
-//            url = "http://10.0.2.2:4200"
+            url = "http://10.0.2.2:4200"
             Toast.makeText(this, "DEBUG: $url", Toast.LENGTH_SHORT).show()
             webView.clearCache(true)
             webView.clearHistory()
@@ -70,6 +75,8 @@ class FullscreenActivity : AppCompatActivity() {
         } else {
             url = "https://app.super-productivity.com"
         }
+        webView.settings.mixedContentMode = WebSettings.MIXED_CONTENT_ALWAYS_ALLOW
+
         webView.loadUrl(url)
         supportActionBar?.hide()
         javaScriptInterface = JavaScriptInterface(this)
@@ -104,14 +111,69 @@ class FullscreenActivity : AppCompatActivity() {
                 view: WebView?,
                 request: WebResourceRequest?
             ): WebResourceResponse? {
-                if (request?.isForMainFrame == false && request.url?.path?.contains("assets/icons/favicon") == true) {
+                if (request == null || request.isForMainFrame) {
+                    return null
+                }
+                if (request.url.toString()
+                        .contains("super-productivity.com") || request.url.toString()
+                        .contains("10.0.2.2:4200")
+                ) {
+                    return null
+                }
+
+                Log.v("TW", "shouldInterceptRequest ${request?.url}")
+                Log.v("TW", "method ${request?.method}")
+
+                if (request.url?.path?.contains("assets/icons/favicon") == true) {
                     try {
                         return WebResourceResponse("image/png", null, null)
                     } catch (e: Exception) {
                         e.printStackTrace()
                     }
                 }
-                return null
+
+                if (request.method?.uppercase() === "OPTIONS") {
+                    return OptionsAllowResponse.build();
+                }
+
+                val client = OkHttpClient()
+                val newRequest = Request.Builder()
+                    .url(request.url.toString())
+                    .addHeader("Access-Control-Allow-Origin", "*")
+                    .method(
+                        request.method, if (request.method == "POST") {
+                            val mediaType = "application/json; charset=utf-8".toMediaTypeOrNull()
+                            RequestBody.create(
+                                mediaType,
+                                request.requestHeaders["Content"].toString()
+                            )
+                        } else {
+                            null
+                        }
+                    )
+                    .build()
+
+                Log.v("TW", "exec request ${request.url}")
+                return client.newCall(newRequest).execute().use { response ->
+                    Log.v("TW", "response ${response.code} ${response.message}")
+                    val headers = response.headers.names()
+                        .associateWith { response.headers(it)?.joinToString() }
+                        .toMutableMap()
+                    headers["Access-Control-Allow-Origin"] = "*"
+                    val contentType = response.header("Content-Type", "text/plain")
+                    val contentEncoding = response.header("Content-Encoding", "utf-8")
+                    val inputStream = ByteArrayInputStream(response.body?.bytes())
+                    val reasonPhrase =
+                        response.message.ifEmpty { "OK" } // provide a default value if the message is null or empty
+                    return WebResourceResponse(
+                        contentType,
+                        contentEncoding,
+                        response.code,
+                        reasonPhrase,
+                        headers,
+                        inputStream
+                    )
+                }
             }
         }
 
@@ -200,7 +262,11 @@ class FullscreenActivity : AppCompatActivity() {
         storageHelper.onRestoreInstanceState(savedInstanceState)
     }
 
-    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<String>,
+        grantResults: IntArray
+    ) {
         // Restore scoped storage permission on Android 10+
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         // Mandatory for Activity, but not for Fragment & ComponentActivity

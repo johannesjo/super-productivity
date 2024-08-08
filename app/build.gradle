@@ -49,7 +49,7 @@ android {
 }
 
 dependencies {
-
+    implementation 'com.squareup.okhttp3:okhttp:4.9.1'
     implementation "androidx.appcompat:appcompat:1.5.1"
     implementation "com.google.androidbrowserhelper:androidbrowserhelper:2.4.0"
     implementation "com.google.code.gson:gson:2.10"
