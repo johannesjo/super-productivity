@@ -5,15 +5,22 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.util.Log
-import android.webkit.*
+import android.webkit.JsResult
+import android.webkit.ServiceWorkerClient
+import android.webkit.ServiceWorkerController
+import android.webkit.WebChromeClient
+import android.webkit.WebResourceRequest
+import android.webkit.WebResourceResponse
+import android.webkit.WebView
+import android.webkit.WebViewClient
 import android.widget.FrameLayout
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.anggrayudi.storage.SimpleStorageHelper
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody
-import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import java.io.ByteArrayInputStream
 
 
@@ -26,7 +33,8 @@ class FullscreenActivity : AppCompatActivity() {
     private lateinit var webView: WebView
     private lateinit var wvContainer: FrameLayout
     var isInForeground: Boolean = false
-    val storageHelper = SimpleStorageHelper(this) // for scoped storage permission management on Android 10+
+    val storageHelper =
+        SimpleStorageHelper(this) // for scoped storage permission management on Android 10+
 
     @Suppress("ReplaceCallWithBinaryOperator")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -63,21 +71,21 @@ class FullscreenActivity : AppCompatActivity() {
 
     private fun initWebView() {
         webView = (application as App).wv
-        val url: String
+        val appUrl: String
         if (BuildConfig.DEBUG) {
-//            url = "https://test-app.super-productivity.com/"
+            appUrl = "https://test-app.super-productivity.com/"
             // for debugging locally run web server
-            url = "http://10.0.2.2:4200"
-            Toast.makeText(this, "DEBUG: $url", Toast.LENGTH_SHORT).show()
+//            appUrl = "http://10.0.2.2:4200"
+
+            Toast.makeText(this, "DEBUG: $appUrl", Toast.LENGTH_SHORT).show()
             webView.clearCache(true)
             webView.clearHistory()
             WebView.setWebContentsDebuggingEnabled(true); // necessary to enable chrome://inspect of webviews on physical remote Android devices, but not for AVD emulator, as the latter automatically enables debug build features
         } else {
-            url = "https://app.super-productivity.com"
+            appUrl = "https://app.super-productivity.com"
         }
-        webView.settings.mixedContentMode = WebSettings.MIXED_CONTENT_ALWAYS_ALLOW
 
-        webView.loadUrl(url)
+        webView.loadUrl(appUrl)
         supportActionBar?.hide()
         javaScriptInterface = JavaScriptInterface(this)
         webView.addJavascriptInterface(javaScriptInterface, WINDOW_INTERFACE_PROPERTY)
@@ -86,12 +94,18 @@ class FullscreenActivity : AppCompatActivity() {
             // not ready in time, that's why we create a second JS interface just to fill the prop
             // callJavaScriptFunction("window.$WINDOW_PROPERTY_F_DROID=true")
         }
-        webView.webViewClient = object : WebViewClient() {
 
+        val swController = ServiceWorkerController.getInstance()
+        swController.setServiceWorkerClient(object : ServiceWorkerClient() {
+            override fun shouldInterceptRequest(request: WebResourceRequest): WebResourceResponse? {
+                return interceptRequest(request)
+            }
+        })
+
+        webView.webViewClient = object : WebViewClient() {
             @Deprecated("Deprecated in Java")
             override fun shouldOverrideUrlLoading(view: WebView, url: String): Boolean {
                 Log.v("TW", url)
-
                 return if (url.startsWith("http://") || url.startsWith("https://")) {
                     if (url.contains("super-productivity.com") || url.contains("localhost") || url.contains(
                             "10.0.2.2:4200"
@@ -111,69 +125,7 @@ class FullscreenActivity : AppCompatActivity() {
                 view: WebView?,
                 request: WebResourceRequest?
             ): WebResourceResponse? {
-                if (request == null || request.isForMainFrame) {
-                    return null
-                }
-                if (request.url.toString()
-                        .contains("super-productivity.com") || request.url.toString()
-                        .contains("10.0.2.2:4200")
-                ) {
-                    return null
-                }
-
-                Log.v("TW", "shouldInterceptRequest ${request?.url}")
-                Log.v("TW", "method ${request?.method}")
-
-                if (request.url?.path?.contains("assets/icons/favicon") == true) {
-                    try {
-                        return WebResourceResponse("image/png", null, null)
-                    } catch (e: Exception) {
-                        e.printStackTrace()
-                    }
-                }
-
-                if (request.method?.uppercase() === "OPTIONS") {
-                    return OptionsAllowResponse.build();
-                }
-
-                val client = OkHttpClient()
-                val newRequest = Request.Builder()
-                    .url(request.url.toString())
-                    .addHeader("Access-Control-Allow-Origin", "*")
-                    .method(
-                        request.method, if (request.method == "POST") {
-                            val mediaType = "application/json; charset=utf-8".toMediaTypeOrNull()
-                            RequestBody.create(
-                                mediaType,
-                                request.requestHeaders["Content"].toString()
-                            )
-                        } else {
-                            null
-                        }
-                    )
-                    .build()
-
-                Log.v("TW", "exec request ${request.url}")
-                return client.newCall(newRequest).execute().use { response ->
-                    Log.v("TW", "response ${response.code} ${response.message}")
-                    val headers = response.headers.names()
-                        .associateWith { response.headers(it)?.joinToString() }
-                        .toMutableMap()
-                    headers["Access-Control-Allow-Origin"] = "*"
-                    val contentType = response.header("Content-Type", "text/plain")
-                    val contentEncoding = response.header("Content-Encoding", "utf-8")
-                    val inputStream = ByteArrayInputStream(response.body?.bytes())
-                    val reasonPhrase =
-                        response.message.ifEmpty { "OK" } // provide a default value if the message is null or empty
-                    return WebResourceResponse(
-                        contentType,
-                        contentEncoding,
-                        response.code,
-                        reasonPhrase,
-                        headers,
-                        inputStream
-                    )
-                }
+                return interceptRequest(request)
             }
         }
 
@@ -271,5 +223,72 @@ class FullscreenActivity : AppCompatActivity() {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         // Mandatory for Activity, but not for Fragment & ComponentActivity
         //storageHelper.onRequestPermissionsResult(requestCode, permissions, grantResults)
+    }
+
+
+    private fun interceptRequest(request: WebResourceRequest?): WebResourceResponse? {
+        Log.v("TW", "interceptRequest mf:${request?.isForMainFrame.toString()} ${request?.url}")
+        if (request == null || request.isForMainFrame) {
+            return null
+        }
+        if (request.url.toString()
+                .contains("super-productivity.com") || request.url.toString()
+                .contains("10.0.2.2:4200")
+        ) {
+            return null
+        }
+
+        Log.v("TW", "interceptRequest ${request.method} ${request.url}")
+
+        if (request.url?.path?.contains("assets/icons/favicon") == true) {
+            try {
+                return WebResourceResponse("image/png", null, null)
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+
+        if (request.method?.uppercase() === "OPTIONS") {
+            return OptionsAllowResponse.build();
+        }
+
+        val client = OkHttpClient()
+        val newRequest = Request.Builder()
+            .url(request.url.toString())
+            .addHeader("Access-Control-Allow-Origin", "*")
+            .method(
+                request.method, if (request.method == "POST") {
+                    val mediaType = "application/json; charset=utf-8".toMediaTypeOrNull()
+                    RequestBody.create(
+                        mediaType,
+                        request.requestHeaders["Content"].toString()
+                    )
+                } else {
+                    null
+                }
+            )
+            .build()
+
+        Log.v("TW", "exec request ${request.url}")
+        client.newCall(newRequest).execute().use { response ->
+            Log.v("TW", "response ${response.code} ${response.message}")
+            val headers = response.headers.names()
+                .associateWith { response.headers(it)?.joinToString() }
+                .toMutableMap()
+            headers["Access-Control-Allow-Origin"] = "*"
+            val contentType = response.header("Content-Type", "text/plain")
+            val contentEncoding = response.header("Content-Encoding", "utf-8")
+            val inputStream = ByteArrayInputStream(response.body?.bytes())
+            val reasonPhrase =
+                response.message.ifEmpty { "OK" } // provide a default value if the message is null or empty
+            return WebResourceResponse(
+                contentType,
+                contentEncoding,
+                response.code,
+                reasonPhrase,
+                headers,
+                inputStream
+            )
+        }
     }
 }

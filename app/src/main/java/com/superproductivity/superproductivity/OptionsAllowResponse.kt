@@ -1,6 +1,7 @@
 package com.superproductivity.superproductivity
 
 import android.annotation.TargetApi
+import android.util.Log
 import android.webkit.WebResourceResponse
 import java.text.SimpleDateFormat
 import java.util.*
@@ -11,6 +12,7 @@ class OptionsAllowResponse {
 
         @TargetApi(21)
         fun build(): WebResourceResponse {
+            Log.v("TW", "OptionsAllowResponse: build ")
             val date = Date()
             val dateString = formatter.format(date)
 
@@ -18,7 +20,7 @@ class OptionsAllowResponse {
                 "Connection" to "close",
                 "Content-Type" to "text/plain",
                 "Date" to "$dateString GMT",
-                "Access-Control-Allow-Origin" to "app.super-productivity.com",
+                "Access-Control-Allow-Origin" to "*",
                 "Access-Control-Allow-Methods" to "GET, POST, DELETE, PUT, OPTIONS",
                 "Access-Control-Max-Age" to "600",
                 "Access-Control-Allow-Credentials" to "true",
