@@ -2,7 +2,9 @@ import {
   AfterViewInit,
   ChangeDetectionStrategy,
   Component,
+  DestroyRef,
   ElementRef,
+  inject,
   Inject,
   LOCALE_ID,
   OnDestroy,
@@ -14,7 +16,15 @@ import { select, Store } from '@ngrx/store';
 import { selectTimelineTasks } from '../../work-context/store/work-context.selectors';
 import { selectTaskRepeatCfgsWithAndWithoutStartTime } from '../../task-repeat-cfg/store/task-repeat-cfg.reducer';
 import { selectPlannerDayMap } from '../../planner/store/planner.selectors';
-import { debounceTime, map, startWith, switchMap, tap } from 'rxjs/operators';
+import {
+  debounceTime,
+  delay,
+  first,
+  map,
+  startWith,
+  switchMap,
+  tap,
+} from 'rxjs/operators';
 import { getTomorrow } from '../../../util/get-tomorrow';
 import { TaskService } from '../../tasks/task.service';
 import { LayoutService } from '../../../core-ui/layout/layout.service';
@@ -227,10 +237,10 @@ export class ScheduleComponent implements AfterViewInit, OnDestroy {
   containerExtraClass = IS_NOT_DRAGGING_CLASS;
   prevDragOverEl: HTMLElement | null = null;
   dragCloneEl: HTMLElement | null = null;
+  destroyRef = inject(DestroyRef);
 
   @ViewChild('gridContainer') gridContainer!: ElementRef;
 
-  private _scrollTopFirstElTimeout: number | undefined;
   private _currentAniTimeout: number | undefined;
 
   constructor(
@@ -264,33 +274,25 @@ export class ScheduleComponent implements AfterViewInit, OnDestroy {
   }
 
   ngAfterViewInit(): void {
-    this._scrollTopFirstElTimeout = window.setTimeout(() => {
-      this.scrollToTopElement();
-    }, 400);
+    this.workStartEnd$
+      .pipe(
+        takeUntilDestroyed(this.destroyRef),
+        first(),
+        delay(300),
+        // switchMap((wCfg) => timer(300, 300).pipe(mapTo(wCfg))),
+        // take(2),
+      )
+      .subscribe((workStartCfg) => {
+        if (workStartCfg) {
+          document
+            .querySelector('.work-start')
+            ?.scrollIntoView({ behavior: 'auto', block: 'start' });
+        }
+      });
   }
 
   ngOnDestroy(): void {
-    window.clearTimeout(this._scrollTopFirstElTimeout);
     window.clearTimeout(this._currentAniTimeout);
-  }
-
-  scrollToTopElement(): void {
-    const container: HTMLElement = this.gridContainer.nativeElement;
-    let topElement: HTMLElement | null = null;
-    let minOffsetTop = Number.MAX_SAFE_INTEGER;
-
-    for (const child of Array.from(container.children)) {
-      const childEl = child as HTMLElement;
-      if (
-        childEl.tagName.toLowerCase() === 'schedule-event' &&
-        childEl.offsetTop < minOffsetTop
-      ) {
-        minOffsetTop = childEl.offsetTop;
-        topElement = childEl;
-      }
-    }
-
-    topElement?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 
   dragMoved(ev: CdkDragMove<ScheduleEvent>): void {

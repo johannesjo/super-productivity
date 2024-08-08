@@ -264,6 +264,7 @@ header {
 
 .work-end,
 .work-start {
+  scroll-margin-top: 80px;
   border-top: 2px dashed $light-theme-separator-color;
   min-width: 100px;
   grid-column: 2 / -1;
