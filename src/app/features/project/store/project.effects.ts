@@ -252,9 +252,21 @@ export class ProjectEffects {
           this._removeAllRepeatingTasksForProject(id);
 
           // we also might need to account for this unlikely but very nasty scenario
-          const misc = await this._globalConfigService.misc$.pipe(take(1)).toPromise();
-          if (id === misc.defaultProjectId) {
+          const cfg = await this._globalConfigService.cfg$.pipe(take(1)).toPromise();
+          if (id === cfg.misc.defaultProjectId) {
             this._globalConfigService.updateSection('misc', { defaultProjectId: null });
+          }
+          if (
+            cfg.calendarIntegration.calendarProviders.find(
+              (p) => p.defaultProjectId === id,
+            )
+          ) {
+            this._globalConfigService.updateSection('calendarIntegration', {
+              ...cfg.calendarIntegration,
+              calendarProviders: cfg.calendarIntegration.calendarProviders.map((p) =>
+                p.defaultProjectId === id ? { ...p, defaultProjectId: null } : p,
+              ),
+            });
           }
         }),
       ),
