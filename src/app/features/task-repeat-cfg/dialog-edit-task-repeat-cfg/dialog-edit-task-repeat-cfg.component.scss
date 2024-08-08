@@ -28,12 +28,19 @@ help-section {
   display: flex;
   flex-wrap: wrap;
   gap: 0 $s;
+
+  > * {
+    width: auto;
+    max-width: 48%;
+    min-width: 0;
+  }
 }
 :host::ng-deep .repeat-cycle {
   display: flex;
 
   > * {
     width: 100%;
+    min-width: 0;
     margin-left: $s * 2;
 
     &:first-child {
