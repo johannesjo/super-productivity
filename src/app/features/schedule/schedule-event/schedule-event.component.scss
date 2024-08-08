@@ -278,7 +278,7 @@ $margin-right: 10px;
   margin-top: 7px;
 
   @include mq(xs, max) {
-    margin-top: 3px;
+    margin-top: 4px;
   }
 
   :host.very-short-event & {
@@ -317,10 +317,10 @@ $margin-right: 10px;
   text-align: center;
 
   @include mq(xs, max) {
-    font-size: 13px;
-    height: 13px;
-    line-height: 13px;
-    min-width: 13px;
+    font-size: 12px;
+    height: 12px;
+    line-height: 12px;
+    min-width: 12px;
   }
 }
 
