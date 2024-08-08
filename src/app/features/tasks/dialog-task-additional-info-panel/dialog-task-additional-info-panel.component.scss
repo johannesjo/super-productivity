@@ -6,12 +6,16 @@
     border-radius: 4px;
     max-width: 450px;
     max-height: 75vh;
+    min-width: 340px;
 
     @include darkTheme() {
       background: rgb(39, 39, 39) !important;
       border: 2px solid $dark24;
     }
 
+    @include mq(xxxs) {
+      min-width: 380px;
+    }
     @include mq(xs) {
       min-width: 450px;
       max-height: 85vh;
@@ -24,6 +28,7 @@
       top: 0;
       border-top-left-radius: 8px;
       border-top-right-radius: 8px;
+      padding-right: 8px !important;
 
       @include darkTheme() {
         //background: $dark24 !important;
