@@ -3,7 +3,8 @@
     *ngIf="(workContextService.mainWorkContext$|async) as mainContext"
     [class.hasTasks]="mainContext.taskIds.length"
     [class.isActiveContext]="mainContext.id===activeWorkContextId"
-    class="tag"
+    routerLinkActive="isActiveRoute"
+    class="tag today-tag"
   >
     <div
       [style.background]="mainContext.theme.primary"

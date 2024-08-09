@@ -230,6 +230,14 @@ section {
   font-weight: bold;
 }
 
+.tag.today-tag.isActiveContext button {
+  font-weight: normal;
+
+  &.isActiveRoute {
+    font-weight: bold;
+  }
+}
+
 .route-link.isActiveRoute,
 .route-link.isActiveRoute mat-icon,
 .tag.isActiveContext mat-icon,
