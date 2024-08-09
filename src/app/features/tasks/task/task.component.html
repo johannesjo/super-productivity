@@ -355,6 +355,22 @@
             </button>
 
             <button
+              (click)="toggleTaskDone()"
+              *ngIf="IS_TOUCH_PRIMARY"
+              mat-menu-item
+            >
+              <span class="menuItemLeft">
+                @if (task.isDone) {
+                <mat-icon>undo</mat-icon>
+                } @else {
+                <mat-icon>check</mat-icon>
+                } {{ (task.isDone ? T.F.TASK.CMP.MARK_DONE :
+                T.F.TASK.CMP.MARK_DONE)|translate }}
+              </span>
+              <span class="key-i">{{ kb.taskToggleDone }}</span>
+            </button>
+
+            <button
               (click)="removeFromMyDay()"
               *ngIf="IS_TOUCH_PRIMARY && !task.parentId && !task.isDone && isTodayTag && (task.projectId || task.tagIds?.length > 1)"
               mat-menu-item
