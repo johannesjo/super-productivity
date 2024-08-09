@@ -43,9 +43,8 @@ import { AddTaskReminderInterface } from '../../tasks/dialog-add-task-reminder/a
 import { DialogPlanForDayComponent } from '../../planner/dialog-plan-for-day/dialog-plan-for-day.component';
 import { getWorklogStr } from '../../../util/get-work-log-str';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { selectCalendarProviderById } from '../../config/store/global-config.reducer';
-import { TaskService } from '../../tasks/task.service';
 import { DialogTaskAdditionalInfoPanelComponent } from '../../tasks/dialog-task-additional-info-panel/dialog-task-additional-info-panel.component';
+import { CalendarIntegrationService } from '../../calendar-integration/calendar-integration.service';
 
 @Component({
   selector: 'schedule-event',
@@ -210,27 +209,10 @@ export class ScheduleEventComponent implements OnInit {
       if (this._isBeingSubmitted) {
         return;
       }
+      this._isBeingSubmitted = true;
 
       const data = this.se.data as ScheduleFromCalendarEvent;
-      this._isBeingSubmitted = true;
-      const getCalProvider = data.calProviderId
-        ? await this._store
-            .select(selectCalendarProviderById, { id: data.calProviderId })
-            .pipe(first())
-            .toPromise()
-        : undefined;
-
-      this._taskService.addAndSchedule(
-        data.title,
-        {
-          projectId: getCalProvider?.defaultProjectId || null,
-          issueId: data.id,
-          issueProviderId: data.calProviderId,
-          issueType: 'CALENDAR',
-          timeEstimate: data.duration,
-        },
-        data.start,
-      );
+      this._calendarIntegrationService.addEventAsTask(data);
     }
   }
 
@@ -246,7 +228,7 @@ export class ScheduleEventComponent implements OnInit {
     private _elRef: ElementRef,
     private _matDialog: MatDialog,
     private _cd: ChangeDetectorRef,
-    private _taskService: TaskService,
+    private _calendarIntegrationService: CalendarIntegrationService,
   ) {}
 
   ngOnInit(): void {

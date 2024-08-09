@@ -5,11 +5,8 @@ import {
   HostListener,
   Input,
 } from '@angular/core';
-import { selectCalendarProviderById } from '../../config/store/global-config.reducer';
-import { first } from 'rxjs/operators';
-import { TaskService } from '../../tasks/task.service';
-import { Store } from '@ngrx/store';
 import { ScheduleFromCalendarEvent } from '../../schedule/schedule.model';
+import { CalendarIntegrationService } from '../../calendar-integration/calendar-integration.service';
 
 @Component({
   selector: 'planner-calendar-event',
@@ -35,28 +32,8 @@ export class PlannerCalendarEventComponent {
     }
 
     this.isBeingSubmitted = true;
-    const getCalProvider = this.calendarEvent.calProviderId
-      ? await this._store
-          .select(selectCalendarProviderById, { id: this.calendarEvent.calProviderId })
-          .pipe(first())
-          .toPromise()
-      : undefined;
-
-    this._taskService.addAndSchedule(
-      this.calendarEvent.title,
-      {
-        projectId: getCalProvider?.defaultProjectId || null,
-        issueId: this.calendarEvent.id,
-        issueProviderId: this.calendarEvent.calProviderId,
-        issueType: 'CALENDAR',
-        timeEstimate: this.calendarEvent.duration,
-      },
-      this.calendarEvent.start,
-    );
+    this._calendarIntegrationService.addEventAsTask(this.calendarEvent);
   }
 
-  constructor(
-    private _taskService: TaskService,
-    private _store: Store,
-  ) {}
+  constructor(private _calendarIntegrationService: CalendarIntegrationService) {}
 }
