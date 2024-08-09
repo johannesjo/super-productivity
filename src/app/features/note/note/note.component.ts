@@ -52,7 +52,7 @@ export class NoteComponent implements OnChanges {
               distinctUntilChanged(),
               switchMap((pId) =>
                 pId
-                  ? this._projectService.getByIdOnce$(pId).pipe(
+                  ? this._projectService.getByIdOnceCatchError$(pId).pipe(
                       map(
                         (project) =>
                           project && {

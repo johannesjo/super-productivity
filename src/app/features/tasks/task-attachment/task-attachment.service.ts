@@ -67,7 +67,11 @@ export class TaskAttachmentService {
 
     // don't intervene with text inputs
     const targetEl = ev.target as HTMLElement;
-    if (targetEl.tagName === 'INPUT' || targetEl.tagName === 'TEXTAREA') {
+    if (
+      targetEl.tagName === 'INPUT' ||
+      (targetEl.tagName === 'TEXTAREA' &&
+        targetEl.parentElement?.tagName.toLowerCase() !== 'inline-multiline-input')
+    ) {
       return;
     }
 

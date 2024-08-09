@@ -8,7 +8,6 @@ import { IMEX_FORM } from './form-cfgs/imex-form.const';
 import { LANGUAGE_SELECTION_FORM_FORM } from './form-cfgs/language-selection-form.const';
 import { EVALUATION_SETTINGS_FORM_CFG } from './form-cfgs/evaluation-settings-form.const';
 import { SIMPLE_COUNTER_FORM } from './form-cfgs/simple-counter-form.const';
-import { SOUND_FORM_CFG } from './form-cfgs/sound-form.const';
 import { TRACKING_REMINDER_FORM_CFG } from './form-cfgs/tracking-reminder-form.const';
 import { SYNC_FORM } from './form-cfgs/sync-form.const';
 import { IS_ELECTRON } from '../../app.constants';
@@ -36,7 +35,6 @@ export const GLOBAL_CONFIG_FORM_CONFIG: ConfigFormConfig = [
   CALENDAR_FORM_CFG,
   REMINDER_FORM_CFG,
   TIMELINE_FORM_CFG,
-  SOUND_FORM_CFG,
 ].filter(filterGlobalConfigForm);
 
 export const GLOBAL_SYNC_FORM_CONFIG: ConfigFormConfig = [

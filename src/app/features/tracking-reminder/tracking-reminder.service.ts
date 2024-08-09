@@ -47,7 +47,7 @@ export class TrackingReminderService {
 
   remindCounter$: Observable<number> = this._cfg$.pipe(
     switchMap((cfg) =>
-      !cfg.isEnabled || (!cfg.isShowOnMobile && IS_TOUCH_ONLY)
+      !cfg?.isEnabled || (!cfg.isShowOnMobile && IS_TOUCH_ONLY)
         ? EMPTY
         : combineLatest([
             this._taskService.currentTaskId$,

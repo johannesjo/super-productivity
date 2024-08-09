@@ -15,6 +15,11 @@ import { IconInputComponent } from './icon-input/icon-input.component';
 import { SelectProjectComponent } from './select-project/select-project.component';
 import { RepeatSectionTypeComponent } from './repeat-section-type/repeat-section-type.component';
 import { FormlyMatSliderModule } from '@ngx-formly/material/slider';
+import { ConfigSoundFormComponent } from './config-sound-form/config-sound-form.component';
+import { MatSliderModule } from '@angular/material/slider';
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
+import { MatInputModule } from '@angular/material/input';
+import { TranslateModule } from '@ngx-translate/core';
 
 @NgModule({
   imports: [
@@ -53,6 +58,10 @@ import { FormlyMatSliderModule } from '@ngx-formly/material/slider';
     EffectsModule.forFeature([GlobalConfigEffects]),
     UiModule,
     FileImexModule,
+    MatSliderModule,
+    MatSlideToggleModule,
+    MatInputModule,
+    TranslateModule,
   ],
   declarations: [
     ConfigSectionComponent,
@@ -61,7 +70,8 @@ import { FormlyMatSliderModule } from '@ngx-formly/material/slider';
     IconInputComponent,
     SelectProjectComponent,
     RepeatSectionTypeComponent,
+    ConfigSoundFormComponent,
   ],
-  exports: [ConfigSectionComponent, ConfigFormComponent],
+  exports: [ConfigSectionComponent, ConfigFormComponent, ConfigSoundFormComponent],
 })
 export class ConfigModule {}
