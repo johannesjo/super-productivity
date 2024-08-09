@@ -8,7 +8,7 @@ import { IssueIntegrationCfg, IssueProviderKey } from '../issue/issue.model';
 import { JiraCfg } from '../issue/providers/jira/jira.model';
 import { GithubCfg } from '../issue/providers/github/github.model';
 import { Actions, ofType } from '@ngrx/effects';
-import { map, shareReplay, switchMap, take } from 'rxjs/operators';
+import { catchError, map, shareReplay, switchMap, take } from 'rxjs/operators';
 import { isValidProjectExport } from './util/is-valid-project-export';
 import { SnackService } from '../../core/snack/snack.service';
 import { T } from '../../t.const';
@@ -52,6 +52,7 @@ import {
 import { OpenProjectCfg } from '../issue/providers/open-project/open-project.model';
 import { GiteaCfg } from '../issue/providers/gitea/gitea.model';
 import { RedmineCfg } from '../issue/providers/redmine/redmine.model';
+import { devError } from '../../util/dev-error';
 
 @Injectable({
   providedIn: 'root',
@@ -172,6 +173,20 @@ export class ProjectService {
       throw new Error('No id given');
     }
     return this._store$.pipe(select(selectProjectById, { id }), take(1));
+  }
+
+  getByIdOnceCatchError$(id: string): Observable<Project | null> {
+    if (!id) {
+      throw new Error('No id given');
+    }
+    return this._store$.pipe(
+      select(selectProjectById, { id }),
+      take(1),
+      catchError((err) => {
+        devError(err);
+        return of(null);
+      }),
+    );
   }
 
   getByIdLive$(id: string): Observable<Project> {
