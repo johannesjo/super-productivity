@@ -149,7 +149,7 @@
             *ngSwitchCase="TimelineViewEntryType.DayCrossing"
             class="day-crossing separator"
           >
-            {{row.start|date:'d.M.'}} <span class="day">{{row.start|date:'(EEE)'}}</span>
+            {{row.start|date:'d/M'}} <span class="day">{{row.start|date:'(EEE)'}}</span>
           </div>
 
           <div *ngSwitchDefault>------------------</div>
