@@ -68,6 +68,8 @@ import {
   updateNoteOrder,
 } from '../../note/store/note.actions';
 import { DateService } from 'src/app/core/date/date.service';
+import { selectAllNotes } from '../../note/store/note.reducer';
+import { Note } from '../../note/note.model';
 
 @Injectable()
 export class ProjectEffects {
@@ -250,6 +252,7 @@ export class ProjectEffects {
           this._removeAllNonArchiveTasksForProject(id);
           this._removeAllArchiveTasksForProject(id);
           this._removeAllRepeatingTasksForProject(id);
+          this._removeAlNotesForProject(id);
 
           // we also might need to account for this unlikely but very nasty scenario
           const cfg = await this._globalConfigService.cfg$.pipe(take(1)).toPromise();
@@ -523,6 +526,19 @@ export class ProjectEffects {
     if (cfgsToUpdate.length > 0) {
       this._taskRepeatCfgService.updateTaskRepeatCfgs(cfgsToUpdate, { projectId: null });
     }
+  }
+
+  private async _removeAlNotesForProject(projectIdToDelete: string): Promise<any> {
+    const notes: Note[] = await this._store$
+      .select(selectAllNotes)
+      .pipe(first())
+      .toPromise();
+    const allNoteIdsForProject = notes.filter(
+      (cfg) => cfg.projectId === projectIdToDelete,
+    );
+    allNoteIdsForProject.forEach((note) => {
+      this._noteService.remove(note);
+    });
   }
 
   private saveToLs$(isSyncModelChange: boolean): Observable<unknown> {
