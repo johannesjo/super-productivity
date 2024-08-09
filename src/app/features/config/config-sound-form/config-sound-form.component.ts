@@ -6,6 +6,8 @@ import { exists } from 'src/app/util/exists';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { SOUND_OPTS } from '../form-cfgs/sound-form.const';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { playSound } from '../../../util/play-sound';
+import { playDoneSound } from '../../tasks/util/play-done-sound';
 
 const sectionKey = 'sound';
 
@@ -79,6 +81,15 @@ export class ConfigSoundFormComponent {
   updateCfg(cfg: SoundConfig): void {
     if (!cfg) {
       throw new Error('No config for ' + sectionKey);
+    }
+
+    if (
+      cfg.breakReminderSound !== this.config?.breakReminderSound &&
+      cfg.breakReminderSound
+    ) {
+      playSound(cfg.breakReminderSound, cfg.volume);
+    } else {
+      playDoneSound(cfg);
     }
 
     this.config = cfg;
