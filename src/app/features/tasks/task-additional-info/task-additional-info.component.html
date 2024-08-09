@@ -18,7 +18,7 @@
   <task-additional-info-item
     (collapseParent)="collapseParent()"
     (keyPress)="onItemKeyPress($event)"
-    *ngIf="!task.parentId && (layoutService.isRightPanelOver$|async) || isDialogMode"
+    *ngIf="!task.parentId && ((layoutService.isRightPanelOver$|async) || isDialogMode)"
     [expanded]="task.subTasks?.length > 0 && !isDialogMode"
     [type]="'panel'"
   >
