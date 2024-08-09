@@ -19,10 +19,8 @@ import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import com.anggrayudi.storage.SimpleStorageHelper
-import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.OkHttpClient
 import okhttp3.Request
-import okhttp3.RequestBody
 import java.io.ByteArrayInputStream
 
 
@@ -255,22 +253,38 @@ class FullscreenActivity : AppCompatActivity() {
             "interceptRequest mf:${request?.isForMainFrame.toString()} ${request.method} ${request?.url}"
         )
 
+        // since we currently don't have a way to also post the body, we only handle GET and OPTIONS requests
+        // see https://github.com/KonstantinSchubert/request_data_webviewclient for a possible solution
+        if (request.method.uppercase() != "GET" && request.method.uppercase() != "OPTIONS") {
+            return null
+        }
+
+        // remove user agent header in the hopes that we're treated better by the remotes :D
         val keysToRemove =
             request.requestHeaders.keys.filter { it.equals("User-Agent", ignoreCase = true) }
         for (key in keysToRemove) {
             request.requestHeaders.remove(key)
         }
 
+        val client = OkHttpClient()
+        val newRequestBuilder = Request.Builder()
+            .url(request.url.toString())
+            .method(request.method, null)
+
+        // Add each header from the original request to the new request
+        for ((key, value) in request.requestHeaders) {
+            newRequestBuilder.addHeader(key, value)
+        }
+        val newRequest = newRequestBuilder.build()
+
+        // currently we can't handle POST requests since everything
         if (request.method.uppercase() == "OPTIONS") {
             Log.v("TW", "OPTIONS request triggered")
-            val client = OkHttpClient()
-            val newRequest = Request.Builder()
-                .url(request.url.toString())
-                .method(request.method, null)
-                .build()
-
             client.newCall(newRequest).execute().use { response ->
-                Log.v("TW", "OPTIONS original response: ${response.code} ${response.message} ${response.body?.string()}")
+                Log.v(
+                    "TW",
+                    "OPTIONS original response: ${response.code} ${response.message} ${response.body?.string()}"
+                )
                 if (response.code != 200) {
                     Log.v("TW", "OPTIONS overwrite")
                     return OptionsAllowResponse.build()
@@ -278,35 +292,20 @@ class FullscreenActivity : AppCompatActivity() {
             }
         }
 
-        val client = OkHttpClient()
-        val newRequest = Request.Builder()
-            .url(request.url.toString())
-            .method(
-                request.method, if (request.method == "POST") {
-                    val mediaType = "application/json; charset=utf-8".toMediaTypeOrNull()
-                    RequestBody.create(
-                        mediaType,
-                        request.requestHeaders["Content"].toString()
-                    )
-                } else {
-                    null
-                }
-            )
-            .build()
 
         Log.v("TW", "exec request ${request.url}")
         client.newCall(newRequest).execute().use { response ->
             Log.v("TW", "response ${response.code} ${response.message}")
-            val headers = response.headers.names()
+            val responseHeaders = response.headers.names()
                 .associateWith { response.headers(it)?.joinToString() }
                 .toMutableMap()
 
-            val keysToRemove =
-                headers.keys.filter { it.equals("Access-Control-Allow-Origin", ignoreCase = true) }
-            for (key in keysToRemove) {
-                headers.remove(key)
+            val keysToRemoveI =
+                responseHeaders.keys.filter { it.equals("Access-Control-Allow-Origin", ignoreCase = true) }
+            for (key in keysToRemoveI) {
+                responseHeaders.remove(key)
             }
-            headers["Access-Control-Allow-Origin"] = "*"
+            responseHeaders["Access-Control-Allow-Origin"] = "*"
 
             val contentType = response.header("Content-Type", "text/plain")
             val contentEncoding = response.header("Content-Encoding", "utf-8")
@@ -318,7 +317,7 @@ class FullscreenActivity : AppCompatActivity() {
                 contentEncoding,
                 response.code,
                 reasonPhrase,
-                headers,
+                responseHeaders,
                 inputStream
             )
         }
