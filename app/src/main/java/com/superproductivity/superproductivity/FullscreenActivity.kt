@@ -255,6 +255,12 @@ class FullscreenActivity : AppCompatActivity() {
             "interceptRequest mf:${request?.isForMainFrame.toString()} ${request.method} ${request?.url}"
         )
 
+        val keysToRemove =
+            request.requestHeaders.keys.filter { it.equals("User-Agent", ignoreCase = true) }
+        for (key in keysToRemove) {
+            request.requestHeaders.remove(key)
+        }
+
         if (request.method.uppercase() == "OPTIONS") {
             Log.v("TW", "OPTIONS request triggered")
             val client = OkHttpClient()
@@ -264,7 +270,7 @@ class FullscreenActivity : AppCompatActivity() {
                 .build()
 
             client.newCall(newRequest).execute().use { response ->
-                Log.v("TW", "OPTIONS original response: ${response.code} ${response.message}")
+                Log.v("TW", "OPTIONS original response: ${response.code} ${response.message} ${response.body?.string()}")
                 if (response.code != 200) {
                     Log.v("TW", "OPTIONS overwrite")
                     return OptionsAllowResponse.build()
