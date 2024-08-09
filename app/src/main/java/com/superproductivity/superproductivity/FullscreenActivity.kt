@@ -249,14 +249,27 @@ class FullscreenActivity : AppCompatActivity() {
         ) {
             return null
         }
+
         Log.v(
             "TW",
             "interceptRequest mf:${request?.isForMainFrame.toString()} ${request.method} ${request?.url}"
         )
 
+        if (request.method.uppercase() == "OPTIONS") {
+            Log.v("TW", "OPTIONS request triggered")
+            val client = OkHttpClient()
+            val newRequest = Request.Builder()
+                .url(request.url.toString())
+                .method(request.method, null)
+                .build()
 
-        if (request.method?.uppercase() === "OPTIONS") {
-            return OptionsAllowResponse.build();
+            client.newCall(newRequest).execute().use { response ->
+                Log.v("TW", "OPTIONS original response: ${response.code} ${response.message}")
+                if (response.code != 200) {
+                    Log.v("TW", "OPTIONS overwrite")
+                    return OptionsAllowResponse.build()
+                }
+            }
         }
 
         val client = OkHttpClient()
