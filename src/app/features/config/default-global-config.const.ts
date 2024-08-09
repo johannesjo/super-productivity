@@ -12,9 +12,7 @@ export const DEFAULT_GLOBAL_CONFIG: GlobalConfigState = {
     darkMode: 'system',
     isConfirmBeforeExit: false,
     isConfirmBeforeExitWithoutFinishDay: true,
-    isNotifyWhenTimeEstimateExceeded: true,
     isAutMarkParentAsDone: false,
-    isAutoStartNextTask: false,
     isTurnOffMarkdown: false,
     isAutoAddWorkedOnToToday: true,
     isMinimizeToTray: false,
@@ -104,6 +102,7 @@ export const DEFAULT_GLOBAL_CONFIG: GlobalConfigState = {
     taskEditTitle: null,
     taskToggleAdditionalInfoOpen: 'i',
     taskOpenEstimationDialog: 't',
+    taskPlanForDay: 'v',
     taskSchedule: 's',
     taskToggleDone: 'd',
     taskAddSubTask: 'a',
@@ -132,10 +131,14 @@ export const DEFAULT_GLOBAL_CONFIG: GlobalConfigState = {
     doneSound: 'done2.mp3',
     breakReminderSound: null,
   },
-  trackingReminder: {
-    isEnabled: true,
-    isShowOnMobile: false,
-    minTime: minute * 2,
+  timeTracking: {
+    defaultEstimate: 0,
+    defaultEstimateSubTasks: 0,
+    isNotifyWhenTimeEstimateExceeded: true,
+    isAutoStartNextTask: false,
+    isTrackingReminderEnabled: true,
+    isTrackingReminderShowOnMobile: false,
+    trackingReminderMinTime: 2 * minute,
   },
   calendarIntegration: {
     calendarProviders: [],
@@ -144,7 +147,7 @@ export const DEFAULT_GLOBAL_CONFIG: GlobalConfigState = {
     isCountdownBannerEnabled: true,
     countdownDuration: minute * 10,
   },
-  timeline: {
+  schedule: {
     isWorkStartEndEnabled: true,
     workStart: DEFAULT_DAY_START,
     workEnd: '17:00',

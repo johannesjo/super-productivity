@@ -1,0 +1,18 @@
+<mat-dialog-content>
+  <!--  <h1>XXX {{(task$|async)?.id}}</h1>-->
+  <task-additional-info
+    *ngIf="task$|async as task"
+    [task]="task"
+    [isDialogMode]="true"
+  ></task-additional-info>
+</mat-dialog-content>
+
+<!--<mat-dialog-actions align="center">-->
+<!--  <button-->
+<!--    mat-flat-button-->
+<!--    color="primary"-->
+<!--    mat-dialog-close-->
+<!--  >-->
+<!--    <mat-icon>close</mat-icon> {{T.G.CLOSE|translate}}-->
+<!--  </button>-->
+<!--</mat-dialog-actions>-->

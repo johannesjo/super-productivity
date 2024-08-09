@@ -12,11 +12,13 @@ import { SyncProvider } from './sync-provider.model';
 import { ProjectState } from '../../features/project/project.model';
 import { BookmarkState } from '../../features/bookmark/bookmark.model';
 import { NoteState } from '../../features/note/note.model';
+import { PlannerState } from '../../features/planner/store/planner.reducer';
 
 export interface AppBaseWithoutLastSyncModelChange {
   project: ProjectState;
   globalConfig: GlobalConfigState;
   reminders: Reminder[];
+  planner: PlannerState;
   note: NoteState;
 
   // Metric models

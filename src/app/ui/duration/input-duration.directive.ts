@@ -35,6 +35,8 @@ export const INPUT_DURATION_VALIDATORS: any = {
   multi: true,
 };
 
+const ZERO_VAL = '0m';
+
 /* eslint-enable */
 
 @Directive({
@@ -52,6 +54,7 @@ export class InputDurationDirective
 {
   @Input() isAllowSeconds: boolean = false;
   @Input() isValidate: boolean = true;
+  @Input() isShowZeroVal: boolean = true;
 
   // by the Control Value Accessor
   // @ts-ignore
@@ -136,7 +139,11 @@ export class InputDurationDirective
       value = '';
     }
     const toStr = this._msToString.transform(value, this.isAllowSeconds, true);
-    this._renderer.setProperty(this._elementRef.nativeElement, 'value', toStr);
+    this._renderer.setProperty(
+      this._elementRef.nativeElement,
+      'value',
+      this.isShowZeroVal ? toStr || ZERO_VAL : toStr,
+    );
   }
 
   private _parseValidatorFn(): ValidationErrors | null {

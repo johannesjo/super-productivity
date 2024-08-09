@@ -1,0 +1,459 @@
+@import '../../../../variables.scss';
+
+$split-extra-border-radius: 20px;
+$margin-bottom: 6px;
+$margin-right: 10px;
+
+:host {
+  border-radius: 6px;
+  margin-right: $margin-right;
+  // size of sticky header
+  scroll-margin-top: 120px;
+  scroll-padding-top: 120px;
+  line-height: 1;
+  min-height: 20px;
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: $margin-bottom;
+  border: 1px solid $light-theme-separator-color;
+  //box-shadow: $whiteframe-shadow-1dp;
+  background: #fff;
+  color: $light-theme-text-color;
+  position: relative;
+  z-index: 2;
+  border-left: 3px solid var(--project-color, $light-theme-separator-color);
+  user-select: none;
+  // has to be for after elements
+  overflow: visible !important;
+
+  &.no-project {
+  }
+
+  &:hover {
+    //z-index: 3;
+    //overflow: visible;
+  }
+
+  @include darkTheme() {
+    border-color: rgba(255, 255, 255, 0.1);
+    border-left-color: var(--project-color, $dark-theme-separator-color);
+    background: $dark-theme-bg-slightly-lighter;
+    color: $dark-theme-text-color;
+  }
+
+  &.very-short-event {
+    // slightly move up to  reduce chance of overlap with next
+    //margin-top: -2px;
+    align-items: center;
+
+    //.title {
+    //  column-width: unset;
+    //  line-clamp: 1;
+    //  max-width: 200px;
+    //}
+  }
+
+  &.split-start {
+    border-radius: $split-extra-border-radius;
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+    border-bottom-style: dashed;
+  }
+
+  &.split-continued {
+    border-radius: $split-extra-border-radius;
+    border-top-left-radius: 0;
+    border-bottom-right-radius: 0;
+    border-bottom-style: dashed;
+    border-top-style: dashed;
+    min-height: 8px;
+  }
+
+  &.split-continued-last {
+    border-radius: $split-extra-border-radius;
+    border-top-style: dashed;
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+    min-height: 8px;
+  }
+
+  &.split-continued,
+  &.split-continued-last {
+    .title {
+      opacity: 0.4;
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      text-align: center;
+      font-style: italic;
+      line-height: 0.4;
+    }
+  }
+}
+
+:host.LunchBreak {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: transparent;
+  margin-top: 2px;
+  border: none !important;
+  box-shadow: none !important;
+  z-index: 1;
+
+  .title {
+    flex-grow: 0;
+    column-width: auto;
+  }
+
+  .ico-wrapper {
+    margin-top: 0;
+  }
+}
+
+:host::before {
+  // NOTE: there are some styles in the parent component since host:active + :host  is not working
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: -1 * ($margin-bottom + 10);
+  left: 0;
+  right: -1 * ($margin-right + 4);
+  z-index: 3;
+  //background: rgba(255, 0, 0, 0.1);
+}
+
+// non draggable
+:host {
+  &.CalendarEvent,
+  &.RepeatProjection,
+  &.RepeatProjectionSplit,
+  &.RepeatProjectionSplitContinued,
+  &.RepeatProjectionSplitContinuedLast,
+  &.ScheduledRepeatProjection {
+    background: $light-theme-bg;
+    border-style: dashed;
+    border-left-style: solid;
+
+    @include darkTheme() {
+      //border-color: $dark-theme-separator-color;
+      background: $dark-theme-bg;
+      background: $dark1;
+    }
+
+    > * {
+      opacity: 0.7;
+    }
+  }
+}
+
+:host.CalendarEvent {
+  border-left-width: 1px;
+  border-left-color: $light-theme-extra-border-color;
+
+  @include darkTheme() {
+    border-left-color: $dark-theme-extra-border-color;
+  }
+}
+
+:host-context(.is-not-dragging) :host.CalendarEvent:hover {
+  border-color: $c-accent;
+  color: $c-accent;
+}
+
+:host-context(.is-not-dragging) {
+  &.ScheduledTask,
+  &.CalendarEvent,
+  &.RepeatProjection,
+  &.RepeatProjectionSplit,
+  &.ScheduledRepeatProjection {
+    cursor: pointer;
+
+    &:hover {
+      opacity: 1;
+      //outline: 1px solid $c-accent;
+      border-color: $c-accent;
+
+      .ico {
+        color: $c-accent;
+      }
+
+      > * {
+        opacity: 1;
+      }
+    }
+  }
+}
+
+//  scheduable tasks
+:host {
+  &.ScheduledRepeatProjection .ico {
+    color: $c-primary;
+  }
+
+  &.ScheduledTask {
+    border-radius: 0;
+
+    .ico {
+      color: $c-primary;
+      font-size: 24px;
+      height: 24px;
+      min-width: 24px;
+      line-height: 24px;
+      font-weight: normal;
+      opacity: 1;
+    }
+
+    .ico-wrapper {
+      margin-left: 6px;
+      margin-top: 4px;
+      margin-right: 4px;
+      opacity: 1;
+
+      @include mq(xs, max) {
+        margin-left: 1px;
+        margin-top: 1px;
+      }
+    }
+
+    .time-badge {
+      color: $light-theme-text-color;
+      border-color: $c-primary;
+      //color: $c-primary;
+      @include darkTheme() {
+        color: $dark-theme-text-color;
+        border-color: $c-primary;
+      }
+    }
+  }
+}
+
+.time-badge {
+  opacity: 1 !important;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  bottom: 0;
+  transform: translate(-50%, 0);
+  font-size: 10px;
+  z-index: 1;
+  line-height: 1;
+  height: 13px;
+  text-align: center;
+  padding: 1px;
+  border: 1px solid $light-theme-extra-border-color;
+  background: #fff;
+  border-radius: $card-border-radius;
+  color: #000;
+
+  @include mq(xs, max) {
+    font-size: 9px;
+    height: 11px;
+  }
+
+  @include darkTheme() {
+    color: $dark-theme-text-color;
+    border-color: $dark-theme-extra-border-color;
+    background: $dark-theme-bg-lighter;
+  }
+
+  :host.very-short-event & {
+    //bottom: 4px
+    margin-top: -4px;
+  }
+
+  :host-context(.is-not-dragging):hover & {
+    border-color: $c-accent;
+    color: $c-accent;
+  }
+}
+
+:host > * {
+  pointer-events: none;
+}
+
+.ico-wrapper {
+  position: relative;
+  margin-left: 6px;
+  margin-top: 8px;
+
+  @include mq(xs, max) {
+    margin-top: 4px;
+  }
+
+  :host.very-short-event & {
+    margin-top: 0;
+  }
+
+  :host.ScheduledRepeatProjection & {
+    margin-right: 2px;
+  }
+
+  mat-icon {
+    display: block;
+  }
+
+  mat-icon + mat-icon {
+    display: none;
+  }
+
+  :host:hover & {
+    mat-icon:first-of-type:not(:last-of-type) {
+      display: none;
+    }
+
+    mat-icon:nth-child(2) {
+      display: block;
+    }
+  }
+}
+
+.ico {
+  font-size: 15px;
+  height: 15px;
+  line-height: 15px;
+  min-width: 15px;
+  opacity: 0.6;
+  text-align: center;
+
+  @include mq(xs, max) {
+    font-size: 12px;
+    height: 12px;
+    line-height: 12px;
+    min-width: 12px;
+  }
+}
+
+.day-of-month {
+  z-index: 1;
+  text-align: center;
+  padding-top: 1px;
+  font-size: 9px;
+  line-height: 10px;
+  min-width: 14px;
+  width: auto;
+  font-weight: 900;
+  color: $light-theme-text-color-muted;
+  border: 1px solid $light-theme-text-color-muted;
+  border-top-width: 3px;
+  border-radius: 2px;
+  position: relative;
+
+  @include darkTheme() {
+    color: $dark-theme-text-color-muted;
+    border-color: $dark-theme-text-color-muted;
+  }
+
+  @include mq(xs, max) {
+    border-radius: 1px;
+    border-left: 0;
+    border-right: 0;
+    min-width: 12px;
+    font-size: 8px;
+    line-height: 8px;
+    border-top-width: 2px;
+  }
+}
+
+.title {
+  font-size: 14px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex-grow: 1;
+  flex-shrink: 1;
+  padding: 6px;
+  font-weight: 400;
+  line-height: 1.4;
+  max-height: 100%;
+  text-align: left;
+  // somehow this fixes the cut off lines problem
+  column-width: 250px;
+  //font-weight: bold;
+
+  @include mq(xs, max) {
+    column-width: 120px;
+    font-size: 11px;
+    line-height: 1.3;
+    padding: 4px;
+  }
+
+  @include mq(xxs, max) {
+    font-size: 10px;
+    line-height: 1.3;
+    padding: 4px;
+  }
+
+  :host.very-short-event & {
+    padding-top: 1px;
+    padding-bottom: 2px;
+  }
+
+  :host.SplitTaskContinued &,
+  :host.RepeatProjectionSplitContinued &,
+  :host.SplitTaskContinuedLast &,
+  :host.RepeatProjectionSplitContinuedLast {
+    //white-space: nowrap;
+    //max-width: 100%;
+    line-clamp: 1;
+  }
+}
+
+// planner tasks
+:host-context(.is-dragging) {
+  :host.TaskPlannedForDay,
+  :host.SplitTaskPlannedForDay,
+  :host.TaskPlannedForDay,
+  :host.SplitTaskPlannedForDay,
+  :host.Task,
+  :host.SplitTask,
+  :host.SplitTask,
+  :host.Task {
+    box-shadow: $whiteframe-shadow-6dp;
+  }
+}
+
+:host-context(.isDarkTheme .is-dragging) {
+  :host.TaskPlannedForDay,
+  :host.SplitTaskPlannedForDay,
+  :host.TaskPlannedForDay,
+  :host.SplitTaskPlannedForDay,
+  :host.Task,
+  :host.SplitTask,
+  :host.SplitTask,
+  :host.Task {
+    background: $dark24;
+  }
+}
+
+:host.drag-over {
+  transform: translateY(40px);
+  z-index: 3;
+
+  &:after {
+    // NOTE: there are some styles in the parent component since host:active + :host  is not working
+    content: '';
+    position: absolute;
+    transform: translateY(-40px);
+    top: -1 * $margin-bottom;
+    height: 40px + $margin-bottom;
+    left: 0;
+    right: -1 * ($margin-right + 4);
+    z-index: 3;
+    //border: 1px solid red;
+  }
+}
+
+:host.draggable {
+  cursor: grab;
+
+  &:active {
+    cursor: grabbing;
+    transition: none;
+  }
+}
+
+.menuItemLeft {
+  text-align: left;
+  display: flex;
+  align-items: center;
+}

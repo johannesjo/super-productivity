@@ -69,7 +69,7 @@ export class TaskUiEffects {
     () =>
       this._store$.pipe(select(selectConfigFeatureState)).pipe(
         switchMap((globalCfg) =>
-          globalCfg && globalCfg.misc.isNotifyWhenTimeEstimateExceeded
+          globalCfg && globalCfg.timeTracking.isNotifyWhenTimeEstimateExceeded
             ? // reset whenever the current taskId changes (but no the task data, which is polled afterwards)
               this._store$.pipe(select(selectCurrentTaskId)).pipe(
                 distinctUntilChanged(),
@@ -100,7 +100,7 @@ export class TaskUiEffects {
     () =>
       this._store$.pipe(select(selectConfigFeatureState)).pipe(
         switchMap((globalCfg) =>
-          globalCfg && globalCfg.misc.isNotifyWhenTimeEstimateExceeded
+          globalCfg && globalCfg.timeTracking.isNotifyWhenTimeEstimateExceeded
             ? this._bannerService.activeBanner$.pipe(
                 switchMap((activeBanner) =>
                   activeBanner?.id === BannerId.TimeEstimateExceeded

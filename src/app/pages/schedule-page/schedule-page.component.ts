@@ -56,10 +56,9 @@ export class SchedulePageComponent {
       this._taskService.updateTags(
         task,
         task.tagIds.filter((id) => id !== TODAY_TAG.id),
-        task.tagIds,
       );
     } else {
-      this._taskService.updateTags(task, [TODAY_TAG.id, ...task.tagIds], task.tagIds);
+      this._taskService.updateTags(task, [TODAY_TAG.id, ...task.tagIds]);
     }
   }
 

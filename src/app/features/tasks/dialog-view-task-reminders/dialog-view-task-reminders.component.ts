@@ -94,14 +94,10 @@ export class DialogViewTaskRemindersComponent implements OnDestroy {
         .getByIdOnce$(task.parentId)
         .pipe(first())
         .toPromise();
-      this._taskService.updateTags(
-        parent,
-        [TODAY_TAG.id, ...parent.tagIds],
-        parent.tagIds,
-      );
+      this._taskService.updateTags(parent, [TODAY_TAG.id, ...parent.tagIds]);
       this.dismiss(task);
     } else {
-      this._taskService.updateTags(task, [TODAY_TAG.id, ...task.tagIds], task.tagIds);
+      this._taskService.updateTags(task, [TODAY_TAG.id, ...task.tagIds]);
       this.dismiss(task);
     }
   }
@@ -210,7 +206,7 @@ export class DialogViewTaskRemindersComponent implements OnDestroy {
     const updateTagTasks = uniqueByProp<Task>([...parents, ...mainTasks], 'id');
 
     updateTagTasks.forEach((task) => {
-      this._taskService.updateTags(task, [TODAY_TAG.id, ...task.tagIds], task.tagIds);
+      this._taskService.updateTags(task, [TODAY_TAG.id, ...task.tagIds]);
     });
     tasksToDismiss.forEach((task: TaskWithReminderData) => {
       this.dismiss(task);

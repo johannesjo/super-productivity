@@ -29,7 +29,7 @@ import { LayoutService } from '../layout/layout.service';
 import { TaskService } from '../../features/tasks/task.service';
 import { LS } from '../../core/persistence/storage-keys.const';
 import { TODAY_TAG } from '../../features/tag/tag.const';
-import { DialogTimelineSetupComponent } from '../../features/timeline/dialog-timeline-setup/dialog-timeline-setup.component';
+import { DialogTimelineSetupComponent } from '../../features/schedule/dialog-timeline-setup/dialog-timeline-setup.component';
 import { TourId } from '../../features/shepherd/shepherd-steps.const';
 import { ShepherdService } from '../../features/shepherd/shepherd.service';
 import { getGithubErrorUrl } from 'src/app/core/error-handler/global-error-handler.util';
@@ -69,9 +69,9 @@ export class SideNavComponent implements OnDestroy {
   tagList$: Observable<Tag[]> = this.isTagsExpanded$.pipe(
     switchMap((isExpanded) =>
       isExpanded
-        ? this.tagService.tagsNoMyDay$
+        ? this.tagService.tagsNoMyDayAndNoList$
         : combineLatest([
-            this.tagService.tagsNoMyDay$,
+            this.tagService.tagsNoMyDayAndNoList$,
             this.workContextService.activeWorkContextId$,
           ]).pipe(map(([tags, id]) => tags.filter((t) => t.id === id))),
     ),

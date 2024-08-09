@@ -58,6 +58,8 @@ import { SnackService } from '../../../core/snack/snack.service';
 import { isToday } from '../../../util/is-today.util';
 import { IS_TOUCH_PRIMARY } from '../../../util/is-mouse-primary';
 import { KeyboardConfig } from '../../config/keyboard-config.model';
+import { DialogPlanForDayComponent } from '../../planner/dialog-plan-for-day/dialog-plan-for-day.component';
+import { PlannerService } from '../../planner/planner.service';
 
 @Component({
   selector: 'task',
@@ -100,6 +102,8 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
   // @see ngOnInit
   @HostBinding('class.isCurrent') isCurrent: boolean = false;
   @HostBinding('class.isSelected') isSelected: boolean = false;
+  @HostBinding('class.hasNoSubTasks') hasNoSubTasks: boolean = true;
+
   private _task$: ReplaySubject<TaskWithSubTasks> = new ReplaySubject(1);
   issueUrl$: Observable<string | null> = this._task$.pipe(
     switchMap((v) => {
@@ -152,6 +156,7 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
     private readonly _renderer: Renderer2,
     private readonly _cd: ChangeDetectorRef,
     private readonly _projectService: ProjectService,
+    public readonly plannerService: PlannerService,
     public readonly workContextService: WorkContextService,
   ) {}
 
@@ -161,6 +166,7 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
     this.progress = v && v.timeEstimate && (v.timeSpent / v.timeEstimate) * 100;
     this.taskIdWithPrefix = 't-' + this.task.id;
     this.isDone = v.isDone;
+    this.hasNoSubTasks = !v.subTaskIds.length;
     this.isRepeatTaskCreatedToday = !!(this.task.repeatCfgId && isToday(v.created));
 
     const isTodayTag = v.tagIds.includes(TODAY_TAG.id);
@@ -284,6 +290,27 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
       .afterClosed()
       .pipe(takeUntil(this._destroy$))
       .subscribe(() => this.focusSelf());
+  }
+
+  async planForDay(): Promise<void> {
+    const plannedDayForTask = (
+      await this.plannerService.plannedTaskDayMap$.pipe(first()).toPromise()
+    )[this.task.id];
+    this._matDialog
+      .open(DialogPlanForDayComponent, {
+        // we focus inside dialog instead
+        autoFocus: false,
+        data: { task: this.task, day: plannedDayForTask },
+      })
+      .afterClosed()
+      // .pipe(takeUntil(this._destroy$))
+      .subscribe((isPlanned) => {
+        if (isPlanned) {
+          this.focusNext(true);
+        } else {
+          this.focusSelf();
+        }
+      });
   }
 
   updateIssueData(): void {
@@ -554,7 +581,7 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   onTagsUpdated(tagIds: string[]): void {
-    this._taskService.updateTags(this.task, tagIds, this.task.tagIds);
+    this._taskService.updateTags(this.task, tagIds);
   }
 
   onPanStart(ev: any): void {
@@ -610,7 +637,7 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
             if (this.task.repeatCfgId) {
               this.editTaskRepeatCfg();
             } else {
-              this.editReminder();
+              this.planForDay();
             }
           } else {
             if (this.task.parentId) {
@@ -861,6 +888,9 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
     if (checkKeyCombo(ev, keys.taskSchedule)) {
       this.editReminder();
     }
+    if (checkKeyCombo(ev, keys.taskPlanForDay)) {
+      this.planForDay();
+    }
     if (checkKeyCombo(ev, keys.taskToggleDone)) {
       this.toggleDoneKeyboard();
     }
@@ -897,7 +927,7 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
     if (checkKeyCombo(ev, keys.moveToBacklog) && this.task.projectId) {
       if (!this.task.parentId) {
         ev.preventDefault();
-        // same default shortcut as timeline so we stop propagation
+        // same default shortcut as schedule so we stop propagation
         ev.stopPropagation();
         this.focusPrevious(true);
         this.moveToBacklog();
@@ -907,7 +937,7 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
     if (checkKeyCombo(ev, keys.moveToTodaysTasks) && this.task.projectId) {
       if (!this.task.parentId) {
         ev.preventDefault();
-        // same default shortcut as timeline so we stop propagation
+        // same default shortcut as schedule so we stop propagation
         ev.stopPropagation();
         this.focusNext(true, true);
         this.moveToToday();

@@ -44,6 +44,9 @@ import { blendInOutAnimation } from 'src/app/ui/animations/blend-in-out.ani';
 import { fadeAnimation } from '../../../ui/animations/fade.ani';
 import { SS } from '../../../core/persistence/storage-keys.const';
 import { IS_ANDROID_WEB_VIEW } from '../../../util/is-android-web-view';
+import { Store } from '@ngrx/store';
+import { PlannerActions } from '../../planner/store/planner.actions';
+import { getWorklogStr } from '../../../util/get-work-log-str';
 
 @Component({
   selector: 'add-task-bar',
@@ -58,7 +61,9 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
   @Input() isAddToBottom: boolean = false;
   @Input() isDoubleEnterMode: boolean = false;
   @Input() isElevated: boolean = false;
+  @Input() isHideTagTitles: boolean = false;
   @Input() isDisableAutoFocus: boolean = false;
+  @Input() planForDay?: string;
   @Output() blurred: EventEmitter<any> = new EventEmitter();
   @Output() done: EventEmitter<any> = new EventEmitter();
 
@@ -129,7 +134,7 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
   inputVal: string = '';
   inputVal$: Observable<string> = this.taskSuggestionsCtrl.valueChanges;
 
-  tagSuggestions$: Observable<Tag[]> = this._tagService.tagsNoMyDay$;
+  tagSuggestions$: Observable<Tag[]> = this._tagService.tagsNoMyDayAndNoList$;
   tagSuggestions: Tag[] = [];
 
   isAddToBacklogAvailable$: Observable<boolean> = this.shortSyntaxTags$.pipe(
@@ -151,7 +156,7 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
   );
 
   private _isAddInProgress?: boolean;
-  private _blurTimeout?: number;
+  private _delayBlurTimeout?: number;
   private _autofocusTimeout?: number;
   private _attachKeyDownHandlerTimeout?: number;
   private _saveTmpTodoTimeout?: number;
@@ -166,6 +171,7 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
     private _projectService: ProjectService,
     private _tagService: TagService,
     private _cd: ChangeDetectorRef,
+    private _store: Store,
   ) {
     this._subs.add(
       this.activatedIssueTask$.subscribe((v) => (this.activatedIssueTask = v)),
@@ -176,6 +182,7 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
   }
 
   ngAfterViewInit(): void {
+    this.isAddToBottom = !!this.planForDay || this.isAddToBottom;
     if (!this.isDisableAutoFocus) {
       this._focusInput();
     }
@@ -213,8 +220,8 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    if (this._blurTimeout) {
-      window.clearTimeout(this._blurTimeout);
+    if (this._delayBlurTimeout) {
+      window.clearTimeout(this._delayBlurTimeout);
     }
     if (this._attachKeyDownHandlerTimeout) {
       window.clearTimeout(this._attachKeyDownHandlerTimeout);
@@ -239,6 +246,8 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
   onBlur(ev: FocusEvent): void {
     const relatedTarget: HTMLElement = ev.relatedTarget as HTMLElement;
     let isUIelement = false;
+
+    // NOTE: related target is null for all elements that are not focusable (e.g. items without tabindex, non-buttons, non-inputs etc.)
     if (relatedTarget) {
       const { className } = relatedTarget;
       isUIelement =
@@ -253,27 +262,26 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
         (this.inputEl as ElementRef).nativeElement.value,
       );
     }
+
     if (relatedTarget && isUIelement) {
       (this.inputEl as ElementRef).nativeElement.focus();
     } else {
       // we need to wait since otherwise addTask is not working
-      this._blurTimeout = window.setTimeout(() => {
+      this._delayBlurTimeout = window.setTimeout(() => {
         if (this._isAddInProgress) {
-          this._blurTimeout = window.setTimeout(() => {
+          this._delayBlurTimeout = window.setTimeout(() => {
             this.blurred.emit(ev);
           }, 300);
+        } else {
+          this.blurred.emit(ev);
         }
-      }, 20);
+      }, 220);
     }
   }
 
   displayWith(issue?: JiraIssue): string | undefined {
     // NOTE: apparently issue can be undefined for displayWith
     return issue?.summary;
-  }
-
-  trackById(i: number, item: any): string {
-    return item.id;
   }
 
   async addTask(): Promise<void> {
@@ -301,11 +309,10 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
     } else if (item.taskId && item.isFromOtherContextAndTagOnlySearch) {
       this._lastAddedTaskId = item.taskId;
       const task = await this._taskService.getByIdOnce$(item.taskId).toPromise();
-      this._taskService.updateTags(
-        task,
-        [...task.tagIds, this._workContextService.activeWorkContextId as string],
-        task.tagIds,
-      );
+      this._taskService.updateTags(task, [
+        ...task.tagIds,
+        this._workContextService.activeWorkContextId as string,
+      ]);
 
       this._snackService.open({
         ico: 'playlist_add',
@@ -367,9 +374,36 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
       }
     }
 
+    if (this._lastAddedTaskId) {
+      this._planForDayAfterAddTaskIfConfigured(this._lastAddedTaskId);
+    }
+
+    if (this.planForDay) {
+      this.blurred.emit();
+    } else {
+      this._focusInput();
+    }
+
     this.taskSuggestionsCtrl.setValue('');
     this._isAddInProgress = false;
-    this._focusInput();
+    sessionStorage.setItem(SS.TODO_TMP, '');
+  }
+
+  private _planForDayAfterAddTaskIfConfigured(taskId: string): void {
+    const planForDay = this.planForDay;
+    if (planForDay) {
+      this._taskService.getByIdOnce$(taskId).subscribe((task) => {
+        if (getWorklogStr() !== planForDay) {
+          this._store.dispatch(
+            PlannerActions.planTaskForDay({
+              task: task,
+              day: planForDay,
+              isAddToTop: !this.isAddToBottom,
+            }),
+          );
+        }
+      });
+    }
   }
 
   private async _getCtxForTaskSuggestion({

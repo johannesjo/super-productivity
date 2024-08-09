@@ -136,7 +136,7 @@ export const KEYBOARD_SETTINGS_FORM_CFG: ConfigFormSection<KeyboardConfig> = {
       key: 'goToTimeline',
       type: 'keyboard',
       templateOptions: {
-        label: T.GCF.KEYBOARD.GO_TO_TIMELINE,
+        label: T.GCF.KEYBOARD.GO_TO_SCHEDULE,
       },
     },
     {
@@ -248,6 +248,13 @@ export const KEYBOARD_SETTINGS_FORM_CFG: ConfigFormSection<KeyboardConfig> = {
       type: 'keyboard',
       templateOptions: {
         label: T.GCF.KEYBOARD.TASK_SCHEDULE,
+      },
+    },
+    {
+      key: 'taskPlanForDay',
+      type: 'keyboard',
+      templateOptions: {
+        label: T.GCF.KEYBOARD.TASK_PLAN_FORDAY,
       },
     },
     {

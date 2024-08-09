@@ -866,10 +866,10 @@
         "WEDNESDAY": "星期三"
       }
     },
-    "TIMELINE": {
+    "SCHEDULE": {
       "CONTINUED": "continued",
       "D_INITIAL": {
-        "TEXT": "<p>The idea of the Timeline is to provide a better picture of how one's planned tasks play out over time. It is automatically generated from your Tasks and distinguishes two different things: <strong>Scheduled Tasks</strong>, which are shown at their planned time and <strong>Regular Tasks</strong> which should flow around those fixed events. All tasks consider the time estimates you have assigned to them.</p><p>In addition to this you can also provide a work start and end time. If configured regular tasks will never show up outside of these. Please note that the timeline only includes the upcoming 30 days.</p>",
+        "TEXT": "<p>The idea of the Schedule is to provide a better picture of how one's planned tasks play out over time. It is automatically generated from your Tasks and distinguishes two different things: <strong>Scheduled Tasks</strong>, which are shown at their planned time and <strong>Regular Tasks</strong> which should flow around those fixed events. All tasks consider the time estimates you have assigned to them.</p><p>In addition to this you can also provide a work start and end time. If configured regular tasks will never show up outside of these. Please note that the schedule only includes the upcoming 30 days.</p>",
         "TITLE": "時間軸"
       },
       "END": "Work End",
@@ -1036,7 +1036,7 @@
       "GO_TO_FOCUS_MODE": "進入專注模式",
       "GO_TO_SCHEDULED_VIEW": "前往計畫",
       "GO_TO_SETTINGS": "前往設置",
-      "GO_TO_TIMELINE": "前往時間軸",
+      "GO_TO_SCHEDULE": "前往時間軸",
       "GO_TO_WORK_VIEW": "轉到工作視圖",
       "HELP": "<p>您可以在此處配置所有鍵盤快捷鍵。</p> <p>單擊文本輸入並輸入所需的鍵盤組合。按Enter鍵儲存，Escape退出。</p><p> 有三種類型的捷徑：</p> <ul> <li> <strong>全域捷徑：</strong>當應用程式運行時，它將觸發其他所有應用程式的操作。 </li> <li> <strong>應用程式級捷徑： </strong>將從應用程式的每個螢幕觸發，但如果您當前正在編輯文本欄位則不會。 </li> <li> <strong> 任務級捷徑：</strong> 只有通過滑鼠或鍵盤選擇任務並且通常會觸發與該任務特定相關的操作時，它們才會觸發。  </li> </ul><p>可以 <strong>單擊 Escape移除鍵盤組合。</strong>",
       "MOVE_TASK_DOWN": "在列表中向下移動任務",
@@ -1139,8 +1139,8 @@
       "SNOOZE_TIME": "Snooze time when prompted to take a break",
       "TITLE": "休息提醒"
     },
-    "TIMELINE": {
-      "HELP": "The timeline feature should provide you with a quick overview over how your planned tasks play out over time. You can find it in the left hand menu under <a href='#/timeline'>'Timeline'</a>. ",
+    "SCHEDULE": {
+      "HELP": "The schedule feature should provide you with a quick overview over how your planned tasks play out over time. You can find it in the left hand menu under <a href='#/schedule'>'Schedule'</a>. ",
       "L_IS_WORK_START_END_ENABLED": "Limit unscheduled task flow to specific work times",
       "L_WORK_END": "Work Day End",
       "L_WORK_START": "Work Day Start",

@@ -1,0 +1,69 @@
+@import '../../../../variables';
+
+:host {
+  mat-dialog-content {
+    padding: 0;
+    border-radius: 4px;
+    max-width: 450px;
+    max-height: 75vh;
+    min-width: 340px;
+
+    @include darkTheme() {
+      background: rgb(39, 39, 39) !important;
+      border: 4px solid $dark24;
+    }
+
+    @include mq(xxxs) {
+      min-width: 380px;
+    }
+    @include mq(xs) {
+      min-width: 450px;
+      max-height: 85vh;
+    }
+  }
+
+  &::ng-deep {
+    .task-title-wrapper {
+      border-bottom: 2px solid $c-primary !important;
+      top: 0;
+      border-top-left-radius: 8px;
+      border-top-right-radius: 8px;
+      padding-right: 8px !important;
+
+      @include darkTheme() {
+        //background: $dark24 !important;
+      }
+
+      inline-multiline-input {
+        margin-top: 0;
+        color: $light-theme-text-color;
+
+        @include darkTheme() {
+          color: $dark-theme-text-color;
+        }
+
+        textarea {
+          font-weight: 600 !important;
+        }
+      }
+    }
+
+    task .hover-controls {
+      display: none !important;
+    }
+
+    .wrapper {
+      //padding: 16px;
+    }
+
+    task-additional-info-item {
+      margin-left: $s;
+      margin-right: $s;
+
+      @include mq(xxs) {
+        margin-left: $s * 1.5;
+        margin-right: $s * 1.5;
+      }
+    }
+  }
+}

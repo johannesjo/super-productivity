@@ -60,7 +60,7 @@ describe('TaskRepeatCfgService', () => {
         ]),
       );
 
-      const result = await service.getActionsForTaskRepeatCfg(taskRepeatCfg, null);
+      const result = await service.getActionsForTaskRepeatCfg(taskRepeatCfg);
 
       expect(result).toEqual([]);
     });
@@ -88,7 +88,7 @@ describe('TaskRepeatCfgService', () => {
         ]),
       );
 
-      const result = await service.getActionsForTaskRepeatCfg(taskRepeatCfg, null);
+      const result = await service.getActionsForTaskRepeatCfg(taskRepeatCfg);
 
       expect(result.length).toBeGreaterThan(0);
       expect(result[0].type).toEqual(addTask.type);

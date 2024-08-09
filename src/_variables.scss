@@ -54,6 +54,7 @@ $dark-theme-sidebar-bg: $dark8;
 
 $light-theme-bg: rgb(250, 250, 250);
 $light-theme-bg-darker: rgb(235, 235, 235);
+$light-theme-bg-drag-col: rgb(242, 242, 242);
 
 $dark-theme-text-color: rgb(235, 235, 235);
 $dark-theme-text-color-less-intense: transparentize($dark-theme-text-color, 0.1);
@@ -68,9 +69,10 @@ $light-theme-text-color-most-intense: rgb(0, 0, 0);
 
 $light-theme-selected-task-bg-color: mat-css-vars.mat-css-color-primary(100);
 $light-theme-selected-task-bg-color: #fff;
+
+// TODO refactor names or how they are used
 $light-theme-extra-border-color: #dddddd;
 $dark-theme-extra-border-color: rgba(255, 255, 255, 0.12);
-
 $light-theme-separator-color: rgba(18, 18, 18, 0.3);
 $dark-theme-separator-color: rgba(255, 255, 255, 0.3);
 
@@ -124,7 +126,8 @@ $mac-title-bar-padding: 20px;
 // INDEXES
 // -------
 $z-focus-mode-overlay: 101;
-$z-task-side-bar: 44;
+$z-side-panel-task-and-notes: 44;
+$z-side-panel-planner: $z-side-panel-task-and-notes + 2;
 $z-task-side-bar-over: 100;
 $z-main-header-wrapper: 50;
 $z-side-nav: 60;
@@ -142,6 +145,15 @@ $standard-note-fg-light: $light-theme-text-color;
 $standard-note-bg-dark: $dark-theme-bg-lighter;
 $standard-note-bg-dark-hovered: $dark-theme-bg-lightest;
 $standard-note-fg-dark: #eeeeee;
+
+$planner-item-height: 42px;
+$planner-item-ico-size: 20px;
+
+$planner-font-size: 14px;
+$planner-font-size-mobile: 13px;
+
+$planner-font-size-smaller: 11px;
+$planner-font-size-smaller-mobile: 10px;
 
 // ANIMATIONS
 // ----------

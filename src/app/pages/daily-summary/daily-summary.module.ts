@@ -10,6 +10,7 @@ import { TasksModule } from '../../features/tasks/tasks.module';
 import { PlanTasksTomorrowComponent } from './plan-tasks-tomorrow/plan-tasks-tomorrow.component';
 import { RightPanelModule } from '../../features/right-panel/right-panel.module';
 import { DialogGitlabSubmitWorklogForDayModule } from '../../features/issue/providers/gitlab/dialog-gitlab-submit-worklog-for-day/dialog-gitlab-submit-worklog-for-day.module';
+import { AddScheduledTodayOrTomorrowBtnComponent } from '../../features/add-tasks-for-tomorrow/add-scheduled-for-tomorrow/add-scheduled-today-or-tomorrow-btn.component';
 
 @NgModule({
   imports: [
@@ -22,6 +23,7 @@ import { DialogGitlabSubmitWorklogForDayModule } from '../../features/issue/prov
     TasksModule,
     RightPanelModule,
     DialogGitlabSubmitWorklogForDayModule,
+    AddScheduledTodayOrTomorrowBtnComponent,
   ],
   declarations: [DailySummaryComponent, PlanTasksTomorrowComponent],
 })

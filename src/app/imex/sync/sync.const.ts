@@ -13,6 +13,7 @@ import { initialNoteState } from '../../features/note/store/note.reducer';
 import { initialGlobalConfigState } from '../../features/config/store/global-config.reducer';
 import { MODEL_VERSION } from '../../core/model-version';
 import { MODEL_VERSION_KEY } from '../../app.constants';
+import { plannerInitialState } from '../../features/planner/store/planner.reducer';
 import { GlobalConfigState } from '../../features/config/global-config.model';
 
 export const SYNC_INITIAL_SYNC_TRIGGER = 'INITIAL_SYNC_TRIGGER';
@@ -29,6 +30,7 @@ export const DEFAULT_APP_BASE_DATA: AppBaseData = {
   archivedProjects: {},
   globalConfig: initialGlobalConfigState,
   reminders: [],
+  planner: plannerInitialState,
 
   task: initialTaskState,
   tag: initialTagState,

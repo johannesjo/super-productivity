@@ -1,0 +1,252 @@
+<div
+  class="planner-drag-place-holder-shared"
+  *cdkDragPlaceholder
+></div>
+
+<ng-content></ng-content>
+
+<div class="drag-handle">
+  <mat-icon
+    class="drag-handle-ico"
+    svgIcon="drag_handle"
+  ></mat-icon>
+  <mat-icon
+    *ngIf="isCurrent"
+    class="play-icon-indicator"
+    >play_arrow
+  </mat-icon>
+  <div class="type-ico-wrapper">
+    <div *ngIf="task.repeatCfgId">
+      <div
+        class="repeat-date-badge"
+        *ngIf="!isRepeatTaskCreatedToday"
+      >
+        {{ task.created|date:'d.M' }}
+      </div>
+      <mat-icon
+        *ngIf="task.repeatCfgId"
+        [style.transform]="isCurrent ? 'scale(1.4)': ''"
+        svgIcon="repeat"
+      >
+      </mat-icon>
+    </div>
+
+    <div *ngIf="task.issueId">
+      <div
+        *ngIf="task.issuePoints"
+        class="mini-badge bgc-primary"
+      >
+        {{ task.issuePoints }}
+      </div>
+      <mat-icon [svgIcon]="task.issueType|issueIcon"></mat-icon>
+    </div>
+  </div>
+</div>
+
+<div
+  class="no-drag"
+  (longPressIOS)="openContextMenu($event)"
+  (contextmenu)="openContextMenu($event)"
+  (touchstart)="onTouchStart($event)"
+>
+  <div class="wrap">
+    <div
+      class="parent-title"
+      *ngIf="parentTitle"
+    >
+      {{ parentTitle }}
+    </div>
+
+    <div class="title">{{ task.title }}</div>
+
+    <tag-list
+      [isDisableEdit]="true"
+      [isShowProjectTagAlways]="true"
+      [task]="task"
+    ></tag-list>
+  </div>
+
+  <div
+    (click)="estimateTime()"
+    [class.hasNoTimeSpentOrEstimate]="!task.timeSpent && !task.timeEstimate"
+    [style.pointer-events]="task.subTaskIds?.length && 'none'"
+    class="planner-time-remaining-shared"
+  >
+    <mat-icon
+      *ngIf="task.subTaskIds?.length"
+      svgIcon="estimate_remaining"
+      inline="true"
+    ></mat-icon>
+    @if (overWriteTimeEstimate > 0) { {{ overWriteTimeEstimate|msToString }} <br />
+    <span class="original-time-remaining">({{ timeEstimate|msToString }})</span>
+    <!--- -->
+    } @else { {{ timeEstimate|msToString }} }
+  </div>
+</div>
+
+<div
+  #contextMenuTriggerEl
+  [matMenuTriggerFor]="contextMenu"
+  [style.left]="contextMenuPosition.x"
+  [style.top]="contextMenuPosition.y"
+  style="visibility: hidden; position: fixed"
+></div>
+
+<mat-menu
+  #contextMenu="matMenu"
+  (close)="focusSelf()"
+>
+  <ng-template matMenuContent>
+    <button
+      (click)="estimateTime()"
+      *ngIf="!task.subTaskIds?.length"
+      class="hide-xs"
+      mat-menu-item
+    >
+      <span class="menuItemLeft">
+        <mat-icon>timer</mat-icon>
+        {{ T.F.TASK.CMP.OPEN_TIME|translate }}
+      </span>
+      <!--      <span class="keyIndicator"> {{ kb.taskOpenEstimationDialog }} </span>-->
+    </button>
+
+    <button
+      (click)="editReminder()"
+      mat-menu-item
+    >
+      <ng-container *ngIf="!task.reminderId">
+        <span>
+          <mat-icon>alarm_add</mat-icon>
+          {{ T.F.TASK.CMP.SCHEDULE|translate }}
+        </span>
+        <!--        <span class="keyIndicator"> {{ kb.taskSchedule }} </span>-->
+      </ng-container>
+      <ng-container *ngIf="task.reminderId">
+        <span>
+          <mat-icon>alarm</mat-icon>
+          {{ T.F.TASK.CMP.EDIT_REMINDER|translate }}
+        </span>
+        <!--        <span class="keyIndicator"> {{ kb.taskSchedule }} </span>-->
+      </ng-container>
+    </button>
+
+    <button
+      (click)="planForDay()"
+      mat-menu-item
+    >
+      <mat-icon>edit_calendar</mat-icon>
+      {{ T.F.TASK.CMP.PLAN_FOR_DAY|translate }}
+      <!--      <span class="keyIndicator"> {{ kb.taskPlanForDay }} </span>-->
+    </button>
+
+    <button
+      *ngIf="!task.isDone"
+      (click)="markAsDone();"
+      mat-menu-item
+    >
+      <mat-icon>check</mat-icon>
+      {{ T.F.TASK.CMP.MARK_DONE|translate }}
+    </button>
+
+    <button
+      *ngIf="task.isDone"
+      (click)="markAsUnDone();"
+      mat-menu-item
+    >
+      <mat-icon>undo</mat-icon>
+      {{ T.F.TASK.CMP.MARK_UNDONE|translate }}
+    </button>
+
+    <button
+      (click)="addAttachment();"
+      class="hide-xs"
+      mat-menu-item
+    >
+      <mat-icon>attachment</mat-icon>
+      {{ T.F.TASK.CMP.OPEN_ATTACH|translate }}
+    </button>
+
+    <a
+      *ngIf="task.issueId && task.issueType !=='CALENDAR'"
+      [href]="issueUrl$|async"
+      mat-menu-item
+      style="color: inherit"
+      target="_blank"
+    >
+      <mat-icon [svgIcon]="task.issueType|issueIcon"></mat-icon>
+      {{ T.F.TASK.CMP.OPEN_ISSUE|translate }}
+    </a>
+
+    <button
+      (click)="updateIssueData()"
+      *ngIf="task.issueId && task.issueType !=='CALENDAR'"
+      mat-menu-item
+    >
+      <mat-icon [svgIcon]="task.issueType|issueIcon"></mat-icon>
+      {{ T.F.TASK.CMP.UPDATE_ISSUE_DATA|translate }}
+    </button>
+
+    <button
+      (click)="editTags();"
+      *ngIf="!task.parentId"
+      mat-menu-item
+    >
+      <span class="menuItemLeft">
+        <mat-icon>style</mat-icon>
+        {{ T.F.TASK.CMP.EDIT_TAGS|translate }}
+      </span>
+      <!--      <span class="keyIndicator"> {{ kb.taskEditTags }} </span>-->
+    </button>
+
+    <!--    <button-->
+    <!--      *ngIf="!task.parentId && (!task.issueId || task.issueType ==='CALENDAR') && !task.repeatCfgId && (moveToProjectList$|async)?.length > 0"-->
+    <!--      [matMenuTriggerFor]="projectMenu"-->
+    <!--      mat-menu-item-->
+    <!--    >-->
+    <!--      <span class="menuItemLeft">-->
+    <!--        <mat-icon>forward</mat-icon>-->
+    <!--        {{ (task.projectId ? T.F.TASK.CMP.MOVE_TO_OTHER_PROJECT :-->
+    <!--        T.F.TASK.CMP.ADD_TO_PROJECT)|translate }}-->
+    <!--      </span>-->
+    <!--      &lt;!&ndash;      <span class="keyIndicator"> {{ kb.taskMoveToProject }} </span>&ndash;&gt;-->
+    <!--    </button>-->
+
+    <!--    <button-->
+    <!--      *ngIf="task.parentId"-->
+    <!--      (click)="convertToMainTask()"-->
+    <!--      mat-menu-item-->
+    <!--    >-->
+    <!--      <mat-icon>subdirectory_arrow_left</mat-icon>-->
+    <!--      {{ (T.F.TASK.CMP.CONVERT_TO_PARENT_TASK)|translate }}-->
+    <!--    </button>-->
+
+    <button
+      (click)="deleteTask(true)"
+      class="color-warn"
+      mat-menu-item
+    >
+      <span class="menuItemLeft">
+        <mat-icon class="color-warn-i">delete_forever</mat-icon>
+        {{ (task.repeatCfgId ? T.F.TASK.CMP.DELETE_REPEAT_INSTANCE :
+        T.F.TASK.CMP.DELETE)|translate }}
+      </span>
+      <!--      <span class="keyIndicator"> {{ kb.taskDelete }} </span>-->
+    </button>
+  </ng-template>
+</mat-menu>
+
+<!--<mat-menu-->
+<!--  #projectMenu="matMenu"-->
+<!--  (closed)="focusSelf()"-->
+<!--&gt;-->
+<!--  <ng-template matMenuContent>-->
+<!--    @for (project of (moveToProjectList$|async); track project.id) {-->
+<!--    <button-->
+<!--      (click)="moveTaskToProject(project.id)"-->
+<!--      mat-menu-item-->
+<!--    >-->
+<!--      {{ project.title }}-->
+<!--    </button>-->
+<!--    }-->
+<!--  </ng-template>-->
+<!--</mat-menu>-->

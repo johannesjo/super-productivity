@@ -895,10 +895,10 @@
         "WEDNESDAY": "Streda"
       }
     },
-    "TIMELINE": {
+    "SCHEDULE": {
       "CONTINUED": "continued",
       "D_INITIAL": {
-        "TEXT": "<p>The idea of the Timeline is to provide a better picture of how one's planned tasks play out over time. It is automatically generated from your Tasks and distinguishes two different things: <strong>Scheduled Tasks</strong>, which are shown at their planned time and <strong>Regular Tasks</strong> which should flow around those fixed events. All tasks consider the time estimates you have assigned to them.</p><p>In addition to this you can also provide a work start and end time. If configured regular tasks will never show up outside of these. Please note that the timeline only includes the upcoming 30 days.</p>",
+        "TEXT": "<p>The idea of the Schedule is to provide a better picture of how one's planned tasks play out over time. It is automatically generated from your Tasks and distinguishes two different things: <strong>Scheduled Tasks</strong>, which are shown at their planned time and <strong>Regular Tasks</strong> which should flow around those fixed events. All tasks consider the time estimates you have assigned to them.</p><p>In addition to this you can also provide a work start and end time. If configured regular tasks will never show up outside of these. Please note that the schedule only includes the upcoming 30 days.</p>",
         "TITLE": "Časová os"
       },
       "END": "Ukončenie práce",
@@ -909,7 +909,7 @@
       "TASK_PROJECTION_INFO": "Budúca projekcia naplánovanej opakovateľnej úlohy",
       "LUNCH_BREAK": "Obedová prestávka",
       "S": {
-        "CAL_PROVIDER_ERROR": "Timeline Cal Provider Error: {{errTxt}}"
+        "CAL_PROVIDER_ERROR": "Schedule Cal Provider Error: {{errTxt}}"
       }
     },
     "TIME_TRACKING": {
@@ -1106,7 +1106,7 @@
       "GO_TO_FOCUS_MODE": "Prejdite do režimu zaostrenia",
       "GO_TO_SCHEDULED_VIEW": "Prejsť na naplánované úlohy",
       "GO_TO_SETTINGS": "Prejsť na Nastavenia",
-      "GO_TO_TIMELINE": "Prejsť na časovú os",
+      "GO_TO_SCHEDULE": "Prejsť na časovú os",
       "GO_TO_WORK_VIEW": "Prejsť na pracovné zobrazenie",
       "HELP": "<p>Here you can configure all keyboard shortcuts.</p> <p>Click on the text input and enter the desired keyboard combination. Hit enter to save and Escape to abort.</p> <p>There are three types of shortcuts:</p> <ul> <li> <strong>Global shortcuts:</strong> When the app is running it will trigger the action from every other application. </li> <li> <strong>Application level shortcuts:</strong> Will trigger from every screen of the application, but not if you're currently editing a text field. </li> <li> <strong>Task level shortcuts:</strong> They will only trigger if you have selected a task via mouse or keyboard and usually trigger an action specifically related to that one task. </li> </ul><p>You can <strong>press Escape to remove a shortcut.</strong>",
       "MOVE_TASK_DOWN": "Presunúť úlohu v zozname nadol",
@@ -1214,16 +1214,16 @@
       "SNOOZE_TIME": "Snooze time when prompted to take a break",
       "TITLE": "Break Reminder"
     },
-    "TIMELINE": {
-      "HELP": "The timeline feature should provide you with a quick overview over how your planned tasks play out over time. You can find it in the left hand menu under <a href='#/timeline'>'Timeline'</a>. ",
+    "SCHEDULE": {
+      "HELP": "The schedule feature should provide you with a quick overview over how your planned tasks play out over time. You can find it in the left hand menu under <a href='#/schedule'>'Schedule'</a>. ",
       "L_IS_WORK_START_END_ENABLED": "Limit unscheduled task flow to specific work times",
       "L_WORK_END": "Work Day End",
       "L_WORK_START": "Work Day Start",
-      "TITLE": "Timeline",
+      "TITLE": "Schedule",
       "WORK_START_END_DESCRIPTION": "e.g. 17:00",
       "CAL_PROVIDERS": "Calendar providers (experimental and optional)",
       "CAL_PROVIDERS_ADD": "Add ical source",
-      "CAL_PROVIDERS_INFO": "You can optionally configure the timeline to also load and display data from iCal (e.g. Google Calendar).",
+      "CAL_PROVIDERS_INFO": "You can optionally configure the schedule to also load and display data from iCal (e.g. Google Calendar).",
       "L_CAL_PATH": "Url/File path for calendar ICAL (optional)"
     },
     "TRACKING_REMINDER": {

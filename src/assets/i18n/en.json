@@ -646,6 +646,27 @@
         "TRANSITIONS_LOADED": "Transitions loaded. Use the selects below to assign them"
       }
     },
+    "PLANNER": {
+      "NO_TASKS": "No tasks",
+      "D": {
+        "ADD_PLANNED": {
+          "ADD_TO_TODAY": "Add to Today",
+          "TITLE": "Add planned tasks to Today"
+        },
+        "PLAN_FOR_DAY": {
+          "REMINDER_WARNING": "This will remove the reminder from the task! Press Escape to cancel.",
+          "REMOVE_PLAN_DATE": "Remove plan date",
+          "TITLE": "Plan Task for Day"
+        }
+      },
+      "PLAN_VIEW": {
+        "NO_SCHEDULED_ITEMS": "No scheduled items"
+      },
+      "S": {
+        "REMOVED_PLAN_DATE": "Removed plan date for task '{{taskTitle}}'",
+        "TASK_PLANNED_FOR": "Task planned for {{date}}"
+      }
+    },
     "POMODORO": {
       "BACK_TO_WORK": "Back to work!",
       "BREAK_IS_DONE": "Your break is done!",
@@ -926,6 +947,8 @@
         "LOCAL_ATTACHMENTS": "Local Attachments",
         "NOTES": "Description",
         "PARENT": "Parent",
+        "PLANNED_ON": "Planned on",
+        "PLAN_FOR_DAY": "Plan for Day",
         "REMINDER": "Reminder",
         "REPEAT": "Repeat",
         "SCHEDULE_TASK": "Schedule Task",
@@ -960,6 +983,7 @@
         "DROP_ATTACHMENT": "Drop here to attach to \"{{title}}\"",
         "EDIT_REMINDER": "Edit reminder",
         "EDIT_TAGS": "Edit tags",
+        "EDIT_TASK_TITLE": "Edit title",
         "MARK_DONE": "Mark as done",
         "MARK_UNDONE": "Mark as undone",
         "MOVE_TO_BACKLOG": "Move to backlog",
@@ -968,6 +992,7 @@
         "OPEN_ATTACH": "Attach file or link",
         "OPEN_ISSUE": "Open in browser",
         "OPEN_TIME": "Time Tracking",
+        "PLAN_FOR_DAY": "Plan for day",
         "REMOVE_FROM_MY_DAY": "Remove from My Day",
         "REPEAT_EDIT": "Edit repeat task config",
         "SCHEDULE": "Schedule task",
@@ -1145,16 +1170,18 @@
         "WEDNESDAY": "Wednesday"
       }
     },
-    "TIMELINE": {
+    "SCHEDULE": {
       "CONTINUED": "continued",
       "D_INITIAL": {
-        "TEXT": "<p>The idea of the Timeline is to provide a better picture of how one's planned tasks play out over time. It is automatically generated from your Tasks and distinguishes two different things: <strong>Scheduled Tasks</strong>, which are shown at their planned time and <strong>Regular Tasks</strong> which should flow around those fixed events. All tasks consider the time estimates you have assigned to them.</p><p>In addition to this you can also provide a work start and end time. If configured regular tasks will never show up outside of these. Please note that the timeline only includes the upcoming 30 days.</p>",
-        "TITLE": "Timeline"
+        "TEXT": "<p>The idea of the Schedule is to provide a better picture of how one's planned tasks play out over time. It is automatically generated from your Tasks and distinguishes two different things: <strong>Scheduled Tasks</strong>, which are shown at their planned time and <strong>Regular Tasks</strong> which should flow around those fixed events. All tasks consider the time estimates you have assigned to them.</p><p>In addition to this you can also provide a work start and end time. If configured regular tasks will never show up outside of these. Please note that the schedule only includes the upcoming 30 days.</p>",
+        "TITLE": "Schedule"
       },
       "END": "Work End",
-      "MENU_TITLE": "Timeline",
+      "MENU_TITLE": "Schedule",
       "NOW": "Now",
       "NO_TASKS": "Currently there are no tasks. Please add some tasks via the + Button in the top bar.",
+      "PLAN_END_DAY": "Plan at end of day",
+      "PLAN_START_DAY": "Plan at start of day",
       "START": "Work Start",
       "TASK_PROJECTION_INFO": "Future projection of a scheduled repeatable task",
       "LUNCH_BREAK": "Lunch Break"
@@ -1256,6 +1283,7 @@
     "S_ERR_INVALID_DATA": "Import failed: Invalid JSON"
   },
   "G": {
+    "ADD": "Add",
     "CANCEL": "Cancel",
     "CLOSE": "Close",
     "DELETE": "Delete",
@@ -1298,11 +1326,11 @@
       "CAL_PATH": "Url of the iCal source",
       "CAL_PROVIDERS": "Calendar providers (experimental and optional)",
       "CAL_PROVIDERS_ADD": "Add Calendar iCal source",
-      "CAL_PROVIDERS_INFO": "You can load calendar data as iCal (e.g. <a href=\"https://support.google.com/calendar/answer/37648?hl=en#zippy=%2Csync-your-google-calendar-view-edit%2Cget-your-calendar-view-only\">Google Calendar</a>, <a href=\"https://support.pushpay.com/s/article/How-do-I-get-an-iCal-link-from-Office-365\">Outlook 365</a>). The data will be integrated in the timeline and you will be prompted to create tasks for calendar events, if they are due.",
+      "CAL_PROVIDERS_INFO": "You can load calendar data as iCal (e.g. <a href=\"https://support.google.com/calendar/answer/37648?hl=en#zippy=%2Csync-your-google-calendar-view-edit%2Cget-your-calendar-view-only\">Google Calendar</a>, <a href=\"https://support.pushpay.com/s/article/How-do-I-get-an-iCal-link-from-Office-365\">Outlook 365</a>). The data will be integrated in the schedule and you will be prompted to create tasks for calendar events, if they are due.",
       "CHECK_UPDATES": "Check for remote updates every X",
       "DEFAULT_PROJECT": "Default Project for added calendar tasks",
       "HELP": "You can integrate calendars to be reminded and add them as tasks within Super Productivity. The integration works by using the iCal format. For this to work your calendars need to be accessible either over the internet or via file system.",
-      "ICON": "Icon for Timeline",
+      "ICON": "Icon for Schedule",
       "SHOW_BANNER_THRESHOLD": "Show a notification X before the event (blank for disabled)",
       "TITLE": "Calendars"
     },
@@ -1341,7 +1369,7 @@
       "GO_TO_FOCUS_MODE": "Enter Focus Mode",
       "GO_TO_SCHEDULED_VIEW": "Go to scheduled Tasks",
       "GO_TO_SETTINGS": "Go to Settings",
-      "GO_TO_TIMELINE": "Go to Timeline",
+      "GO_TO_SCHEDULE": "Go to Schedule",
       "GO_TO_WORK_VIEW": "Go to Work View and focus first task",
       "HELP": "<p>Here you can configure all keyboard shortcuts.</p> <p>Click on the text input and enter the desired keyboard combination. Hit enter to save and Escape to abort.</p> <p>There are three types of shortcuts:</p> <ul> <li> <strong>Global shortcuts:</strong> When the app is running it will trigger the action from every other application. </li> <li> <strong>Application level shortcuts:</strong> Will trigger from every screen of the application, but not if you're currently editing a text field. </li> <li> <strong>Task level shortcuts:</strong> They will only trigger if you have selected a task via mouse or keyboard and usually trigger an action specifically related to that one task. </li> </ul><p>You can <strong>press Escape to remove a shortcut.</strong>",
       "MOVE_TASK_DOWN": "Move Task down in List",
@@ -1363,6 +1391,7 @@
       "TASK_MOVE_TO_PROJECT": "Open move task to project menu",
       "TASK_OPEN_CONTEXT_MENU": "Open task context menu",
       "TASK_OPEN_ESTIMATION_DIALOG": "Edit estimation / time spent",
+      "TASK_PLAN_FORDAY": "Plan for day",
       "TASK_SCHEDULE": "Schedule Task",
       "TASK_SHORTCUTS": "Tasks",
       "TASK_SHORTCUTS_INFO": "The following shortcuts apply for the currently selected task (selected via tab or mouse).",
@@ -1411,14 +1440,12 @@
       "HELP": "<p><strong>Not seeing Desktop Notifications?</strong> For windows you might want to check System > Notifications & actions and check if the required notifications have been enabled.</p>",
       "IS_AUTO_ADD_WORKED_ON_TO_TODAY": "Automatically add today tag to worked on tasks",
       "IS_AUTO_MARK_PARENT_AS_DONE": "Mark parent task as done, when all sub tasks are done",
-      "IS_AUTO_START_NEXT_TASK": "Start tracking next task when marking current as done",
       "IS_CONFIRM_BEFORE_EXIT": "Confirm before exiting the app",
       "IS_CONFIRM_BEFORE_EXIT_WITHOUT_FINISH_DAY": "Confirm before exiting the app without finishing day first",
       "IS_DARK_MODE": "Dark Mode",
       "IS_DISABLE_ANIMATIONS": "Disable all animations",
       "IS_HIDE_NAV": "Hide navigation until main header is hovered (desktop only)",
       "IS_MINIMIZE_TO_TRAY": "Minimize to tray (desktop only)",
-      "IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "Notify when time estimate was exceeded",
       "IS_TRAY_SHOW_CURRENT_TASK": "Show current task in the tray / status menu (desktop mac/windows only)",
       "IS_TURN_OFF_MARKDOWN": "Turn off markdown parsing for task notes",
       "TASK_NOTES_TPL": "Task description template",
@@ -1466,24 +1493,28 @@
       "SNOOZE_TIME": "Snooze time when prompted to take a break",
       "TITLE": "Break Reminder"
     },
-    "TIMELINE": {
-      "HELP": "The timeline feature should provide you with a quick overview over how your planned tasks play out over time. You can find it in the left hand menu under <a href='#/timeline'>'Timeline'</a>. ",
+    "SCHEDULE": {
+      "HELP": "The schedule feature should provide you with a quick overview over how your planned tasks play out over time. You can find it in the left hand menu under <a href='#/schedule'>'Schedule'</a>. ",
       "L_IS_WORK_START_END_ENABLED": "Limit unscheduled task flow to specific work times",
       "L_WORK_END": "Work Day End",
       "L_WORK_START": "Work Day Start",
-      "TITLE": "Timeline",
+      "TITLE": "Schedule",
       "WORK_START_END_DESCRIPTION": "e.g. 17:00",
       "L_IS_LUNCH_BREAK_ENABLED": "Enable lunch break",
       "L_LUNCH_BREAK_END": "Lunch break end",
       "L_LUNCH_BREAK_START": "Lunch break start",
       "LUNCH_BREAK_START_END_DESCRIPTION": "e.g. 13:00"
     },
-    "TRACKING_REMINDER": {
-      "HELP": "Configure a banner to show up in case you forgot to start time tracking.",
-      "L_IS_ENABLED": "Enabled",
-      "L_IS_SHOW_ON_MOBILE": "Show on mobile app",
-      "L_MIN_TIME": "Time to wait before showing Banner",
-      "TITLE": "Time Tracking Reminder"
+    "TIME_TRACKING": {
+      "HELP": "The time tracking reminder is a banner to show up in case you forgot to start time tracking.",
+      "L_DEFAULT_ESTIMATE": "Default time estimate for new tasks",
+      "L_DEFAULT_ESTIMATE_SUB_TASKS": "Default time estimate for new sub tasks",
+      "L_IS_AUTO_START_NEXT_TASK": "Start tracking next task when marking current as done",
+      "L_IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "Notify when time estimate was exceeded",
+      "L_IS_TRACKING_REMINDER_ENABLED": "Tracking Reminder Enabled",
+      "L_IS_TRACKING_REMINDER_SHOW_ON_MOBILE": "Show tracking reminder on mobile app",
+      "L_TRACKING_REMINDER_MIN_TIME": "Time to wait before showing tracking reminder Banner",
+      "TITLE": "Time Tracking"
     }
   },
   "GLOBAL_SNACK": {
@@ -1531,7 +1562,8 @@
     "HELP": "Help",
     "METRICS": "Metrics",
     "NOTES": "Notes",
-    "NOTES_PANEL_INFO": "Notes can only be shown from the timeline and the regular task list views.",
+    "NOTES_PANEL_INFO": "Notes can only be shown from the schedule and the regular task list views.",
+    "PLANNER": "Plan",
     "PROCRASTINATE": "Procrastinate",
     "PROJECTS": "Projects",
     "PROJECT_MENU": "Project Menu",

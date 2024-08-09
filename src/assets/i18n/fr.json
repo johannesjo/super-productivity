@@ -985,7 +985,7 @@
         "WEDNESDAY": "mercredi"
       }
     },
-    "TIMELINE": {
+    "SCHEDULE": {
       "CONTINUED": "A continué",
       "D_INITIAL": {
         "TEXT": "<p>L'idée de la chronologie est de fournir une meilleure image de la façon dont les tâches planifiées se déroulent au fil du temps. Il est automatiquement généré à partir de vos tâches et distingue deux choses différentes: <strong>les tâches planifiées</strong>, qui s'affichent à l'heure prévue et les <strong>tâches régulières</strong> qui doivent s'articuler autour de ces événements fixes. Toutes les tâches tiennent compte des estimations de temps que vous leur avez assignées.</p><p>En plus de cela, vous pouvez également fournir une heure de début et de fin du travail. Si elles sont configurées, les tâches régulières n'apparaîtront jamais en dehors de celles-ci. Veuillez noter que la chronologie ne comprend que les 30 jours à venir.</p>",
@@ -1179,7 +1179,7 @@
       "GO_TO_FOCUS_MODE": "Aller au mode Concentration",
       "GO_TO_SCHEDULED_VIEW": "Accéder aux tâches planifiées",
       "GO_TO_SETTINGS": "Aller aux paramètres",
-      "GO_TO_TIMELINE": "Aller à la chronologie",
+      "GO_TO_SCHEDULE": "Aller à la chronologie",
       "GO_TO_WORK_VIEW": "Aller à la vue de travail",
       "HELP": "<p>Vous pouvez configurer ici tous les raccourcis clavier.</p> <p>Cliquez sur le champ texte et entrez la combinaison de touches souhaitée. Appuyez sur Entrée pour enregistrer et sur Échap pour annuler.</p> <p>Il existe trois types de raccourcis:</p> <ul> <li> <strong>Raccourcis globaux:</strong> lorsque l'application est en cours d'exécution, elle déclenche l'action depuis n'importe quelle autre applications. </li> <li> <strong>Raccourcis au niveau de l'application:</strong> se déclenchera à partir de n'importe quel écran de l'application, mais pas si vous modifiez actuellement un champ de texte. </li> <li> <strong>Raccourcis au niveau des tâches:</strong> ils ne se déclenchent que si vous avez sélectionné une tâche à l'aide de la souris ou du clavier et déclenchent généralement une action spécifiquement liée à cette tâche. </li> </ul>",
       "MOVE_TASK_DOWN": "Descendre la tâche dans la liste",
@@ -1288,8 +1288,8 @@
       "SNOOZE_TIME": "Temps de répétition lorsque vous êtes invité à faire une pause",
       "TITLE": "Rappel de pause"
     },
-    "TIMELINE": {
-      "HELP": "La fonction de chronologie devrait vous fournir un aperçu rapide de la façon dont vos tâches planifiées se déroulent au fil du temps. Vous pouvez le trouver dans le menu de gauche sous <a href='#/timeline'>\"Chronologie\"</a>.",
+    "SCHEDULE": {
+      "HELP": "La fonction de chronologie devrait vous fournir un aperçu rapide de la façon dont vos tâches planifiées se déroulent au fil du temps. Vous pouvez le trouver dans le menu de gauche sous <a href='#/schedule'>\"Chronologie\"</a>.",
       "L_IS_WORK_START_END_ENABLED": "Limitez le flux de tâches non planifiées à des heures de travail spécifiques",
       "L_WORK_END": "Fin de la journée de travail",
       "L_WORK_START": "Début de la journée de travail",

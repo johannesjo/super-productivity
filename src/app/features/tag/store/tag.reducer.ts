@@ -10,7 +10,7 @@ import {
   restoreTask,
   updateTaskTags,
 } from '../../tasks/store/task.actions';
-import { TODAY_TAG } from '../tag.const';
+import { NO_LIST_TAG, TODAY_TAG } from '../tag.const';
 import { WorkContextType } from '../../work-context/work-context.model';
 import {
   moveTaskDownInTodayList,
@@ -37,6 +37,7 @@ import {
   addToBreakTimeForTag,
   deleteTag,
   deleteTags,
+  moveTaskInTagList,
   updateAdvancedConfigForTag,
   updateTag,
   updateTagOrder,
@@ -45,6 +46,9 @@ import {
   upsertTag,
 } from './tag.actions';
 import { roundTsToMinutes } from '../../../util/round-ts-to-minutes';
+import { moveItemInArray } from '../../../util/move-item-in-array';
+import { PlannerActions } from '../../planner/store/planner.actions';
+import { getWorklogStr } from '../../../util/get-work-log-str';
 
 export const TAG_FEATURE_NAME = 'tag';
 const WORK_CONTEXT_TYPE: WorkContextType = WorkContextType.TAG;
@@ -54,9 +58,10 @@ export const selectTagFeatureState = createFeatureSelector<TagState>(TAG_FEATURE
 export const { selectIds, selectEntities, selectAll, selectTotal } =
   tagAdapter.getSelectors();
 export const selectAllTags = createSelector(selectTagFeatureState, selectAll);
-export const selectAllTagsWithoutMyDay = createSelector(
+export const selectAllTagsWithoutMyDayAndNoList = createSelector(
   selectAllTags,
-  (tags: Tag[]): Tag[] => tags.filter((tag) => tag.id !== TODAY_TAG.id),
+  (tags: Tag[]): Tag[] =>
+    tags.filter((tag) => tag.id !== TODAY_TAG.id && tag.id !== NO_LIST_TAG.id),
 );
 
 export const selectTagById = createSelector(
@@ -121,6 +126,109 @@ export const tagReducer = createReducer<TagState>(
     ),
   ),
 
+  on(
+    PlannerActions.transferTask,
+    (state, { task, today, targetIndex, newDay, prevDay, targetTaskId }) => {
+      if (prevDay === today && newDay !== today) {
+        const tagToUpdate = state.entities[TODAY_TAG.id] as Tag;
+        return tagAdapter.updateOne(
+          {
+            id: TODAY_TAG.id,
+            changes: {
+              taskIds: tagToUpdate.taskIds.filter((id) => id !== task.id),
+            },
+          },
+          state,
+        );
+      }
+      if (prevDay !== today && newDay === today) {
+        const tagToUpdate = state.entities[TODAY_TAG.id] as Tag;
+        const taskIds = [...tagToUpdate.taskIds];
+        const targetIndexToUse = targetTaskId
+          ? tagToUpdate.taskIds.findIndex((id) => id === targetTaskId)
+          : targetIndex;
+        taskIds.splice(targetIndexToUse, 0, task.id);
+        return tagAdapter.updateOne(
+          {
+            id: TODAY_TAG.id,
+            changes: {
+              taskIds: unique(taskIds),
+            },
+          },
+          state,
+        );
+      }
+
+      return state;
+    },
+  ),
+
+  on(PlannerActions.planTaskForDay, (state, { task, day, isAddToTop }) => {
+    const todayStr = getWorklogStr();
+    const tagToUpdate = state.entities[TODAY_TAG.id] as Tag;
+
+    if (day === todayStr) {
+      return tagAdapter.updateOne(
+        {
+          id: TODAY_TAG.id,
+          changes: {
+            taskIds: unique(
+              isAddToTop
+                ? [task.id, ...tagToUpdate.taskIds]
+                : [...tagToUpdate.taskIds.filter((tid) => tid !== task.id), task.id],
+            ),
+          },
+        },
+        state,
+      );
+    } else if (day !== todayStr && tagToUpdate.taskIds.includes(task.id)) {
+      return tagAdapter.updateOne(
+        {
+          id: TODAY_TAG.id,
+          changes: {
+            taskIds: tagToUpdate.taskIds.filter((id) => id !== task.id),
+          },
+        },
+        state,
+      );
+    }
+
+    return state;
+  }),
+
+  on(PlannerActions.moveBeforeTask, (state, { fromTask, toTaskId }) => {
+    const todayTag = state.entities[TODAY_TAG.id] as Tag;
+    if (todayTag.taskIds.includes(toTaskId)) {
+      const taskIds = todayTag.taskIds.filter((id) => id !== fromTask.id);
+      const targetIndex = taskIds.indexOf(toTaskId);
+      taskIds.splice(targetIndex, 0, fromTask.id);
+
+      return tagAdapter.updateOne(
+        {
+          id: TODAY_TAG.id,
+          changes: {
+            taskIds: unique(taskIds),
+          },
+        },
+        state,
+      );
+    } else if (todayTag.taskIds.includes(fromTask.id)) {
+      return tagAdapter.updateOne(
+        {
+          id: TODAY_TAG.id,
+          changes: {
+            taskIds: todayTag.taskIds.filter((id) => id !== fromTask.id),
+          },
+        },
+        state,
+      );
+    }
+
+    return state;
+  }),
+
+  // REGULAR ACTIONS
+  // --------------------
   on(
     moveTaskInTodayList,
     (
@@ -421,8 +529,9 @@ export const tagReducer = createReducer<TagState>(
     return tagAdapter.updateMany(updates, state);
   }),
 
-  on(updateTaskTags, (state, { newTagIds = [], oldTagIds = [], task }) => {
+  on(updateTaskTags, (state, { newTagIds = [], task }) => {
     const taskId = task.id;
+    const oldTagIds = task.tagIds;
     const removedFrom: string[] = oldTagIds.filter((oldId) => !newTagIds.includes(oldId));
     const addedTo: string[] = newTagIds.filter((newId) => !oldTagIds.includes(newId));
     const removeFrom: Update<Tag>[] = removedFrom.map((tagId) => ({
@@ -434,9 +543,24 @@ export const tagReducer = createReducer<TagState>(
     const addTo: Update<Tag>[] = addedTo.map((tagId) => ({
       id: tagId,
       changes: {
-        taskIds: [taskId, ...(state.entities[tagId] as Tag).taskIds],
+        taskIds: unique([taskId, ...(state.entities[tagId] as Tag).taskIds]),
       },
     }));
     return tagAdapter.updateMany([...removeFrom, ...addTo], state);
+  }),
+
+  on(moveTaskInTagList, (state, { tagId, toTaskId, fromTaskId }) => {
+    const tagToUpdate = state.entities[tagId] as Tag;
+    const toIndex = tagToUpdate.taskIds.indexOf(toTaskId);
+    const fromIndex = tagToUpdate.taskIds.indexOf(fromTaskId);
+    return tagAdapter.updateOne(
+      {
+        id: tagId,
+        changes: {
+          taskIds: moveItemInArray(tagToUpdate.taskIds, fromIndex, toIndex),
+        },
+      },
+      state,
+    );
   }),
 );

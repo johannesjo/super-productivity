@@ -534,6 +534,24 @@
     white-space: nowrap;
   }
 
+  .time-val {
+    mat-icon {
+      vertical-align: middle;
+      height: 16px;
+      margin-right: 2px;
+      margin-top: -2px;
+
+      @include mq(xs, max) {
+        margin-right: 2px;
+        height: 14px;
+      }
+    }
+
+    span:not(:last-child) {
+      margin-right: 2px;
+    }
+  }
+
   .separator {
     padding: 0 $s * 0.5;
   }
@@ -736,22 +754,14 @@ progress-bar {
     justify-content: center;
     align-items: center;
 
-    //.first-line:hover & {
-    //  opacity: .7;
-    //}
+    @include mq(xs, max) {
+      display: none;
+    }
 
     :host.isCurrent &::ng-deep mat-icon {
       transform: scale(1.4) !important;
       transform-origin: center center;
       opacity: 0.18;
-    }
-
-    @include mq(xs, max) {
-      display: none;
-    }
-
-    a {
-      opacity: 1;
     }
   }
 

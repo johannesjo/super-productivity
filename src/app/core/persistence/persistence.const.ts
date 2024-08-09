@@ -58,11 +58,13 @@ import { migrateSimpleCounterState } from '../../features/simple-counter/migrate
 import { migrateTagState } from '../../features/tag/migrate-tag-state.util';
 import { migrateNoteState } from '../../features/note/migrate-note-state.util';
 import { AppBaseData } from '../../imex/sync/sync.model';
+import { PlannerState } from '../../features/planner/store/planner.reducer';
 
 interface PersistenceBaseModelCfgs {
   // [key: string]: PersistenceBaseModelCfg<any>;
   globalConfig: PersistenceBaseModelCfg<GlobalConfigState>;
   reminders: PersistenceBaseModelCfg<Reminder[]>;
+  planner: PersistenceBaseModelCfg<PlannerState>;
 }
 
 interface PersistenceEntityModelCfgs {
@@ -97,6 +99,12 @@ export const BASE_MODEL_CFGS: PersistenceBaseModelCfgs = {
     modelVersion: MODEL_VERSION.___NOT_USED_YET___,
     // no migrations needed yet
     migrateFn: (s: Reminder[]) => s,
+  },
+  planner: {
+    appDataKey: 'planner',
+    modelVersion: MODEL_VERSION.___NOT_USED_YET___,
+    // no migrations needed yet
+    migrateFn: (s: PlannerState): PlannerState => s,
   },
 };
 

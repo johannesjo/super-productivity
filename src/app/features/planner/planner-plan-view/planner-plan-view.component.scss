@@ -1,0 +1,20 @@
+@import '../../../../variables';
+
+:host {
+  overflow: auto;
+  display: flex;
+}
+
+.days {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
+  box-sizing: border-box;
+  padding: 24px;
+  padding-top: 0;
+  gap: 16px;
+
+  @include mq(xs) {
+    gap: 24px;
+  }
+}

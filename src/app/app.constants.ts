@@ -25,6 +25,7 @@ import '@angular/common/locales/global/nl';
 import '@angular/common/locales/global/nb';
 import '@angular/common/locales/global/hr';
 
+export const DAY_STARTS_AT_DEFAULT_H = 9;
 export const DAY_STARTS_AT: string = '9:00';
 
 export const ALL_THEMES: string[] = [

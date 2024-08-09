@@ -1,0 +1,52 @@
+@import '../../../../variables';
+
+:host {
+  display: block;
+
+  @include darkTheme() {
+    border-radius: 4px;
+    background: $dark-theme-bg !important;
+    background: rgb(39, 39, 39) !important;
+    border: 4px solid $dark24;
+  }
+
+  mat-dialog-content {
+    @include mq(xs) {
+      width: 500px;
+    }
+  }
+}
+
+:host ::ng-deep {
+  .scheduled-items,
+  .normal-tasks {
+    //pointer-events: none;
+  }
+
+  planner-day > header {
+    margin-top: 0 !important;
+  }
+
+  planner-task {
+    box-shadow: $whiteframe-shadow-2dp;
+    @include darkTheme() {
+      background: $dark12 !important;
+    }
+  }
+
+  .scheduled-items planner-calendar-event {
+    //pointer-events: auto;
+  }
+
+  .day-estimate,
+  add-task-inline,
+  .day-title {
+    //display: none;
+  }
+
+  planner-day {
+    width: 100% !important;
+    max-width: 500px !important;
+    padding-bottom: 8px;
+  }
+}

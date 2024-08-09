@@ -33,7 +33,7 @@ export class DialogAddTaskReminderComponent {
 
   isLastDateToday = true;
 
-  dateTime?: number = this.task.plannedAt || undefined;
+  dateTime?: number = this.data.initialDateTime || this.task.plannedAt || undefined;
   isMoveToBacklog: boolean = false;
   // TODO make translatable
   remindAvailableOptions: TaskReminderOption[] = TASK_REMINDER_OPTIONS;

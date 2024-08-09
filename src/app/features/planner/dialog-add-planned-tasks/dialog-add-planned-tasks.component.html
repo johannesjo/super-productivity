@@ -1,0 +1,34 @@
+<h1
+  mat-dialog-title
+  align="center"
+>
+  <mat-icon class="dialog-header-icon">edit_calendar</mat-icon>
+  <span>{{ T.F.PLANNER.D.ADD_PLANNED.TITLE|translate }}</span>
+</h1>
+
+<mat-dialog-content>
+  <planner-day
+    *ngIf="(day$|async) as day"
+    [day]="day"
+  ></planner-day>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button
+    (click)="dismiss()"
+    color="primary"
+    mat-button
+    type="button"
+  >
+    {{ T.G.DISMISS|translate }}
+  </button>
+
+  <button
+    color="primary"
+    mat-stroked-button
+    (click)="addTasksToToday()"
+  >
+    <mat-icon>wb_sunny</mat-icon>
+    {{ T.F.PLANNER.D.ADD_PLANNED.ADD_TO_TODAY|translate }}
+  </button>
+</mat-dialog-actions>

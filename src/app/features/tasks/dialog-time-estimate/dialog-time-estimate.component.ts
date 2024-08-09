@@ -1,7 +1,9 @@
 import {
+  AfterViewInit,
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
+  ElementRef,
   Inject,
 } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialog, MatDialogRef } from '@angular/material/dialog';
@@ -19,7 +21,7 @@ import { T } from '../../../t.const';
   styleUrls: ['./dialog-time-estimate.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class DialogTimeEstimateComponent {
+export class DialogTimeEstimateComponent implements AfterViewInit {
   T: typeof T = T;
   todayStr: string;
   task: Task;
@@ -31,6 +33,7 @@ export class DialogTimeEstimateComponent {
     private _matDialog: MatDialog,
     private _taskService: TaskService,
     private _cd: ChangeDetectorRef,
+    private _el: ElementRef,
     @Inject(MAT_DIALOG_DATA) public data: any,
   ) {
     this.task = this.data.task;
@@ -38,7 +41,12 @@ export class DialogTimeEstimateComponent {
     this._taskService = _taskService;
     this.taskCopy = createTaskCopy(this.task);
     this.timeSpentOnDayCopy = this.taskCopy.timeSpentOnDay || {};
-    console.log(this.timeSpentOnDayCopy);
+  }
+
+  ngAfterViewInit(): void {
+    if (this.data.isFocusEstimateOnMousePrimaryDevice) {
+      this._el.nativeElement.querySelectorAll('input')?.[1]?.focus();
+    }
   }
 
   submit(): void {

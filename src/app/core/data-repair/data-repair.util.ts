@@ -16,7 +16,8 @@ export const dataRepair = (data: AppDataComplete): AppDataComplete => {
   }
 
   // console.time('dataRepair');
-  let dataOut: AppDataComplete = data;
+  // NOTE copy is important to prevent readonly errors
+  let dataOut: AppDataComplete = { ...data };
   // let dataOut: AppDataComplete = dirtyDeepCopy(data);
   dataOut = _fixEntityStates(dataOut);
   dataOut = _removeMissingTasksFromListsOrRestoreFromArchive(dataOut);

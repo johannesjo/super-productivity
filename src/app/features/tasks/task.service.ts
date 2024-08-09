@@ -11,7 +11,6 @@ import {
   TaskAdditionalInfoTargetPanel,
   TaskArchive,
   TaskCopy,
-  TaskPlanned,
   TaskReminderOptionId,
   TaskState,
   TaskWithSubTasks,
@@ -68,7 +67,6 @@ import {
   selectTasksById,
   selectTasksByRepeatConfigId,
   selectTasksByTag,
-  selectTasksPlannedForRangeNotOnToday,
   selectTaskWithSubTasksByRepeatConfigId,
 } from './store/task.selectors';
 import { RoundTimeOption } from '../project/project.model';
@@ -85,11 +83,8 @@ import {
 } from '../work-context/store/work-context-meta.actions';
 import { Router } from '@angular/router';
 import { unique } from '../../util/unique';
-import { SnackService } from '../../core/snack/snack.service';
 import { ImexMetaService } from '../../imex/imex-meta/imex-meta.service';
 import { remindOptionToMilliseconds } from './util/remind-option-to-milliseconds';
-import { getDateRangeForDay } from '../../util/get-date-range-for-day';
-import { ProjectService } from '../project/project.service';
 import {
   moveProjectTaskDownInBacklogList,
   moveProjectTaskInBacklogList,
@@ -161,22 +156,6 @@ export class TaskService {
 
   allStartableTasks$: Observable<Task[]> = this._store.pipe(select(selectStartableTasks));
 
-  // NOTE: this should work fine as long as the user restarts the app every day
-  // if not worst case is, that the buttons don't appear or today is shown as tomorrow
-  allPlannedForTodayNotOnToday$: Observable<TaskPlanned[]> = this._store.pipe(
-    select(selectTasksPlannedForRangeNotOnToday, getDateRangeForDay(Date.now())),
-  );
-
-  // NOTE: this should work fine as long as the user restarts the app every day
-  // if not worst case is, that the buttons don't appear or today is shown as tomorrow
-  allPlannedForTomorrowNotOnToday$: Observable<TaskPlanned[]> = this._store.pipe(
-    select(
-      selectTasksPlannedForRangeNotOnToday,
-      // eslint-disable-next-line no-mixed-operators
-      getDateRangeForDay(Date.now() + 24 * 60 * 60 * 1000),
-    ),
-  );
-
   // META FIELDS
   // -----------
   currentTaskProgress$: Observable<number> = this.currentTask$.pipe(
@@ -194,8 +173,6 @@ export class TaskService {
     private readonly _tagService: TagService,
     private readonly _workContextService: WorkContextService,
     private readonly _imexMetaService: ImexMetaService,
-    private readonly _snackService: SnackService,
-    private readonly _projectService: ProjectService,
     private readonly _timeTrackingService: GlobalTrackingIntervalService,
     private readonly _dateService: DateService,
     private readonly _router: Router,
@@ -355,15 +332,14 @@ export class TaskService {
   }
 
   addTodayTag(t: Task): void {
-    this.updateTags(t, [TODAY_TAG.id, ...t.tagIds], t.tagIds);
+    this.updateTags(t, [TODAY_TAG.id, ...t.tagIds]);
   }
 
-  updateTags(task: Task, newTagIds: string[], oldTagIds: string[]): void {
+  updateTags(task: Task, newTagIds: string[]): void {
     this._store.dispatch(
       updateTaskTags({
         task,
         newTagIds: unique(newTagIds),
-        oldTagIds,
       }),
     );
   }
@@ -704,7 +680,6 @@ export class TaskService {
         this.updateTags(
           st,
           st.tagIds.filter((tid) => tid !== tagToRemove),
-          st.tagIds,
         );
       });
     }
@@ -1031,27 +1006,6 @@ export class TaskService {
       }
       return null;
     }
-  }
-
-  // NOTE: there is a duplicate of this in plan-tasks-tomorrow.component
-  async movePlannedTasksToToday(plannedTasks: TaskPlanned[]): Promise<unknown> {
-    return Promise.all(
-      plannedTasks.map(async (t) => {
-        if (t.parentId) {
-          if (t.projectId) {
-            this._projectService.moveTaskToTodayList(t.parentId, t.projectId);
-          }
-          // NOTE: no unsubscribe on purpose as we always want this to run until done
-          const parentTask = await this.getByIdOnce$(t.parentId).toPromise();
-          this.addTodayTag(parentTask);
-        } else {
-          if (t.projectId) {
-            this._projectService.moveTaskToTodayList(t.id, t.projectId);
-          }
-          this.addTodayTag(t);
-        }
-      }),
-    );
   }
 
   createNewTaskWithDefaults({

@@ -60,6 +60,7 @@ export const setSelectedTask = createAction(
   props<{
     id: string | null;
     taskAdditionalInfoTargetPanel?: TaskAdditionalInfoTargetPanel;
+    isSkipToggle?: boolean;
   }>(),
 );
 
@@ -96,7 +97,6 @@ export const updateTaskTags = createAction(
   props<{
     task: Task;
     newTagIds: string[];
-    oldTagIds: string[];
     isSkipExcludeCheck?: boolean;
   }>(),
 );
@@ -184,6 +184,7 @@ export const scheduleTask = createAction(
     plannedAt: number;
     remindAt?: number;
     isMoveToBacklog: boolean;
+    isSkipAutoRemoveFromToday?: boolean;
   }>(),
 );
 

@@ -29,7 +29,7 @@ import { T } from '../../t.const';
 import { take } from 'rxjs/operators';
 import { TaskService } from '../tasks/task.service';
 import { TODAY_TAG } from '../tag/tag.const';
-import { Task, TaskPlanned } from '../tasks/task.model';
+import { Task } from '../tasks/task.model';
 import { addTask, scheduleTask } from '../tasks/store/task.actions';
 import { WorkContextService } from '../work-context/work-context.service';
 import { WorkContextType } from '../work-context/work-context.model';
@@ -37,7 +37,6 @@ import { isValidSplitTime } from '../../util/is-valid-split-time';
 import { getDateTimeFromClockString } from '../../util/get-date-time-from-clock-string';
 import { isSameDay } from '../../util/is-same-day';
 import { remindOptionToMilliseconds } from '../tasks/util/remind-option-to-milliseconds';
-import { sortRepeatableTaskCfgs } from './sort-repeatable-task-cfg';
 import { getNewestPossibleDueDate } from './store/get-newest-possible-due-date.util';
 
 @Injectable({
@@ -57,7 +56,42 @@ export class TaskRepeatCfgService {
     private _matDialog: MatDialog,
     private _taskService: TaskService,
     private _workContextService: WorkContextService,
-  ) {}
+  ) {
+    // FOR TESTING CREATION
+    // setTimeout(() => {
+    //   this._store$.dispatch(
+    //     upsertTaskRepeatCfg({
+    //       taskRepeatCfg: {
+    //         ...DEFAULT_TASK_REPEAT_CFG,
+    //         id: 'A1',
+    //         defaultEstimate: 1000 * 60 * 60,
+    //         // eslint-disable-next-line no-mixed-operators
+    //         startDate: getWorklogStr(Date.now() - 5 * 24 * 60 * 60 * 1000),
+    //         // eslint-disable-next-line no-mixed-operators
+    //         lastTaskCreation: Date.now() - 5 * 24 * 60 * 60 * 1000,
+    //         // startTime: '10:00',
+    //         title: 'My repeating task with no schedule',
+    //       },
+    //     }),
+    //   );
+    //   this._store$.dispatch(
+    //     upsertTaskRepeatCfg({
+    //       taskRepeatCfg: {
+    //         ...DEFAULT_TASK_REPEAT_CFG,
+    //         id: 'A2',
+    //         defaultEstimate: 1000 * 60 * 60,
+    //         // eslint-disable-next-line no-mixed-operators
+    //         startDate: getWorklogStr(Date.now() - 5 * 24 * 60 * 60 * 1000),
+    //         // eslint-disable-next-line no-mixed-operators
+    //         lastTaskCreation: Date.now() - 5 * 24 * 60 * 60 * 1000,
+    //         startTime: '20:00',
+    //         remindAt: TaskReminderOptionId.AtStart,
+    //         title: 'My repeating task with schedule at 20:00',
+    //       },
+    //     }),
+    //   );
+    // }, 500);
+  }
 
   getRepeatTableTasksDueForDayOnly$(dayDate: number): Observable<TaskRepeatCfg[]> {
     // ===> taskRepeatCfgs scheduled for today and not yet created already
@@ -128,11 +162,9 @@ export class TaskRepeatCfgService {
   async createRepeatableTask(
     taskRepeatCfg: TaskRepeatCfg,
     targetDayDate: number,
-    currentTaskId: string | null,
   ): Promise<void> {
     const actionsForRepeatCfg = await this.getActionsForTaskRepeatCfg(
       taskRepeatCfg,
-      currentTaskId,
       targetDayDate,
     );
     actionsForRepeatCfg.forEach((act) => {
@@ -158,30 +190,9 @@ export class TaskRepeatCfgService {
   }
 
   // NOTE: there is a duplicate of this in plan-tasks-tomorrow.component
-  async addAllPlannedToDayAndCreateRepeatable(
-    plannedTasks: TaskPlanned[],
-    repeatableScheduledForTomorrow: TaskRepeatCfg[],
-    currentTaskId: string | null,
-    targetDay: number,
-  ): Promise<void> {
-    if (plannedTasks.length) {
-      await this._taskService.movePlannedTasksToToday(plannedTasks);
-    }
-    if (repeatableScheduledForTomorrow.length) {
-      console.log(repeatableScheduledForTomorrow.sort(sortRepeatableTaskCfgs));
-
-      const promises = repeatableScheduledForTomorrow
-        .sort(sortRepeatableTaskCfgs)
-        .map((repeatCfg) => {
-          return this.createRepeatableTask(repeatCfg, targetDay, currentTaskId);
-        });
-      await Promise.all(promises);
-    }
-  }
 
   async getActionsForTaskRepeatCfg(
     taskRepeatCfg: TaskRepeatCfg,
-    currentTaskId: string | null,
     targetDayDate: number = Date.now(),
   ): // NOTE: updateTaskRepeatCfg missing as there is no way to declare it as action type
   Promise<
@@ -260,6 +271,7 @@ export class TaskRepeatCfgService {
           plannedAt: dateTime,
           remindAt: remindOptionToMilliseconds(dateTime, taskRepeatCfg.remindAt),
           isMoveToBacklog: false,
+          isSkipAutoRemoveFromToday: true,
         }),
       );
     }

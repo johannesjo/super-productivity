@@ -1,6 +1,8 @@
 import { Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import {
+  addSubTask,
+  addTask,
   deleteTask,
   moveToArchive_,
   setCurrentTask,
@@ -11,7 +13,10 @@ import {
 import { select, Store } from '@ngrx/store';
 import { filter, map, mergeMap, withLatestFrom } from 'rxjs/operators';
 import { selectTaskFeatureState } from './task.selectors';
-import { selectMiscConfig } from '../../config/store/global-config.reducer';
+import {
+  selectConfigFeatureState,
+  selectMiscConfig,
+} from '../../config/store/global-config.reducer';
 import { Task, TaskState } from '../task.model';
 import { EMPTY, of } from 'rxjs';
 import { WorkContextService } from '../../work-context/work-context.service';
@@ -59,6 +64,32 @@ export class TaskInternalEffects {
     ),
   );
 
+  setDefaultEstimateIfNonGiven$: any = createEffect(() =>
+    this._actions$.pipe(
+      ofType(addTask, addSubTask),
+      filter(({ task }) => !task.timeEstimate),
+      withLatestFrom(this._store$.pipe(select(selectConfigFeatureState))),
+      filter(
+        ([{ task }, cfg]) =>
+          (!task.timeEstimate && cfg.timeTracking.defaultEstimate > 0) ||
+          cfg.timeTracking.defaultEstimateSubTasks > 0,
+      ),
+      map(([action, cfg]) =>
+        updateTask({
+          task: {
+            id: action.task.id,
+            changes: {
+              timeEstimate:
+                action.task.parentId || (action as any).parentId
+                  ? cfg.timeTracking.defaultEstimateSubTasks
+                  : cfg.timeTracking.defaultEstimate,
+            },
+          },
+        }),
+      ),
+    ),
+  );
+
   autoSetNextTask$: any = createEffect(() =>
     this._actions$.pipe(
       ofType(
@@ -71,13 +102,13 @@ export class TaskInternalEffects {
         moveProjectTaskToBacklogListAuto.type,
       ),
       withLatestFrom(
-        this._store$.pipe(select(selectMiscConfig)),
+        this._store$.pipe(select(selectConfigFeatureState)),
         this._store$.pipe(select(selectTaskFeatureState)),
         this._workContextSession.todaysTaskIds$,
-        (action, miscCfg, state, todaysTaskIds) => ({
+        (action, globalCfg, state, todaysTaskIds) => ({
           action,
           state,
-          isAutoStartNextTask: miscCfg.isAutoStartNextTask,
+          isAutoStartNextTask: globalCfg.timeTracking.isAutoStartNextTask,
           todaysTaskIds,
         }),
       ),

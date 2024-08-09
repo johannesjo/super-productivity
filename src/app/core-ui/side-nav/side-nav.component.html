@@ -39,31 +39,34 @@
     </mat-menu>
   </div>
 
-  <!-- class title missleading, but works ;) -->
-  <div class="tag">
-    <button
-      class="route-link"
-      mat-menu-item
-      routerLink="timeline"
-      routerLinkActive="isActiveRoute"
-    >
-      <mat-icon>filter_list</mat-icon>
-      <span class="text">{{T.F.TIMELINE.MENU_TITLE|translate}}</span>
-    </button>
-    <button
-      (click)="openTimelineSettings()"
-      class="tag-settings-btn"
-      mat-icon-button
-    >
-      <mat-icon>settings</mat-icon>
-    </button>
-  </div>
+  <button
+    #menuEntry
+    class="route-link"
+    mat-menu-item
+    routerLink="planner"
+    routerLinkActive="isActiveRoute"
+  >
+    <mat-icon>edit_calendar</mat-icon>
+    <span class="text">{{ T.MH.PLANNER|translate }}</span>
+  </button>
 
   <button
     #menuEntry
     class="route-link"
     mat-menu-item
     routerLink="schedule"
+    routerLinkActive="isActiveRoute"
+  >
+    <mat-icon>calendar_view_week</mat-icon>
+    <!--    <span class="text">{{ T.MH.PLANNER|translate }}</span>-->
+    <span class="text">{{ T.F.SCHEDULE.MENU_TITLE|translate }}</span>
+  </button>
+
+  <button
+    #menuEntry
+    class="route-link"
+    mat-menu-item
+    routerLink="scheduled"
     routerLinkActive="isActiveRoute"
   >
     <mat-icon>access_alarms</mat-icon>
@@ -117,7 +120,7 @@
         <mat-icon
           class="drag-handle"
           drag-handle
-          >list
+          >folder_special
         </mat-icon>
         <span class="text">{{project.title}}</span>
       </button>

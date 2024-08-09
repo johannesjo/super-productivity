@@ -13,7 +13,7 @@
   >
     <!--NOTE: non observable should be enough as we only need the initial value-->
     <ng-container *ngIf="workContextService.isToday">
-      <mat-icon *ngIf="!(task.repeatCfgId)">alarm</mat-icon>
+      <mat-icon *ngIf="!(task.repeatCfgId)">edit_calendar</mat-icon>
       <mat-icon
         *ngIf="(task.repeatCfgId)"
         svgIcon="repeat"
@@ -99,10 +99,7 @@
         </mat-icon>
 
         <div class="type-ico-wrapper">
-          <div
-            *ngIf="task.repeatCfgId"
-            class="task-type-ico"
-          >
+          <div *ngIf="task.repeatCfgId">
             <div
               class="repeat-date-badge"
               *ngIf="!isRepeatTaskCreatedToday"
@@ -112,16 +109,12 @@
             <mat-icon
               *ngIf="task.repeatCfgId"
               [style.transform]="isCurrent ? 'scale(1.4)': ''"
-              class="task-type-ico"
               svgIcon="repeat"
             >
             </mat-icon>
           </div>
 
-          <div
-            *ngIf="task.issueId"
-            class="task-type-ico"
-          >
+          <div *ngIf="task.issueId">
             <div
               *ngIf="task.issuePoints"
               class="mini-badge bgc-primary"
@@ -186,14 +179,21 @@
           class="time"
         >
           <div class="time-val">
-            <span>∑</span>
+            <mat-icon
+              inline="true"
+              style="margin-top: -6px"
+              >functions
+            </mat-icon>
             <span [innerHTML]="task.subTasks|subTaskTotalTimeSpent|msToString"></span>
           </div>
           <div class="separator">/</div>
-          <div
-            [innerHTML]="task.subTasks|subTaskTotalTimeEstimate|msToString"
-            class="time-val"
-          ></div>
+          <div class="time-val">
+            <mat-icon
+              svgIcon="estimate_remaining"
+              inline="true"
+            ></mat-icon>
+            {{ task.timeEstimate|msToString }}
+          </div>
         </div>
       </div>
 
@@ -300,6 +300,18 @@
         >
           <mat-icon>alarm</mat-icon>
           <div class="time-badge">{{ task.plannedAt|shortPlannedAt }}</div>
+        </button>
+
+        <button
+          (click)="planForDay()"
+          *ngIf="((plannerService.plannedTaskDayMap$|async)||{})[task.id] as plannedAtDay"
+          [title]="T.F.TASK.CMP.PLAN_FOR_DAY|translate"
+          class="ico-btn schedule-btn"
+          color=""
+          mat-icon-button
+        >
+          <mat-icon>today</mat-icon>
+          <div class="time-badge">{{ plannedAtDay|date:'d.M' }}</div>
         </button>
 
         <div>
@@ -410,6 +422,15 @@
                 </span>
                 <span class="key-i">{{ kb.taskSchedule }}</span>
               </ng-container>
+            </button>
+
+            <button
+              (click)="planForDay()"
+              mat-menu-item
+            >
+              <mat-icon>edit_calendar</mat-icon>
+              {{ T.F.TASK.CMP.PLAN_FOR_DAY|translate }}
+              <span class="key-i">{{ kb.taskPlanForDay }}</span>
             </button>
 
             <button

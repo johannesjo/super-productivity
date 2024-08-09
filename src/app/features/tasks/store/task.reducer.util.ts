@@ -1,6 +1,12 @@
 // HELPER
 // ------
-import { Task, TaskState, TaskWithSubTasks, TimeSpentOnDay } from '../task.model';
+import {
+  Task,
+  TaskCopy,
+  TaskState,
+  TaskWithSubTasks,
+  TimeSpentOnDay,
+} from '../task.model';
 import { calcTotalTimeSpent } from '../util/calc-total-time-spent';
 import { taskAdapter } from './task.adapter';
 import { filterOutId } from '../../../util/filter-out-id';
@@ -61,26 +67,40 @@ export const reCalcTimeSpentForParentIfParent = (
 export const reCalcTimeEstimateForParentIfParent = (
   parentId: string,
   state: TaskState,
+  upd?: Update<TaskCopy>,
 ): TaskState => {
-  if (parentId) {
-    const parentTask: Task = state.entities[parentId] as Task;
-    const subTasks = parentTask.subTaskIds.map((id) => state.entities[id] as Task);
+  const parentTask: Task = state.entities[parentId] as Task;
+  const subTasks = parentTask.subTaskIds.map((id) =>
+    // we do this since we also need to consider the done value of the update
+    upd && upd.id === id
+      ? { ...(state.entities[id] as Task), ...upd.changes }
+      : (state.entities[id] as Task),
+  );
+  // console.log(
+  //   subTasks.reduce((acc: number, st: Task) => {
+  //     console.log(
+  //       (st.isDone ? 0 : Math.max(0, st.timeEstimate - st.timeSpent)) / 60 / 1000,
+  //     );
+  //
+  //     return acc + (st.isDone ? 0 : Math.max(0, st.timeEstimate - st.timeSpent));
+  //   }, 0) /
+  //     60 /
+  //     1000,
+  // );
 
-    return taskAdapter.updateOne(
-      {
-        id: parentId,
-        changes: {
-          timeEstimate: subTasks.reduce(
-            (acc: number, task: Task) => acc + task.timeEstimate,
-            0,
-          ),
-        },
+  return taskAdapter.updateOne(
+    {
+      id: parentId,
+      changes: {
+        timeEstimate: subTasks.reduce(
+          (acc: number, st: Task) =>
+            acc + (st.isDone ? 0 : Math.max(0, st.timeEstimate - st.timeSpent)),
+          0,
+        ),
       },
-      state,
-    );
-  } else {
-    return state;
-  }
+    },
+    state,
+  );
 };
 
 export const updateDoneOnForTask = (upd: Update<Task>, state: TaskState): TaskState => {
@@ -133,28 +153,29 @@ export const updateTimeSpentForTask = (
 };
 
 export const updateTimeEstimateForTask = (
-  taskId: string,
+  upd: Update<TaskCopy>,
   newEstimate: number | null = null,
   state: TaskState,
 ): TaskState => {
-  if (typeof newEstimate !== 'number') {
-    return state;
+  if (typeof newEstimate === 'number' || 'isDone' in upd.changes) {
+    const task = getTaskById(upd.id as string, state);
+    const stateAfterUpdate =
+      typeof newEstimate === 'number'
+        ? taskAdapter.updateOne(
+            {
+              id: upd.id as string,
+              changes: {
+                timeEstimate: newEstimate,
+              },
+            },
+            state,
+          )
+        : state;
+    return task.parentId
+      ? reCalcTimeEstimateForParentIfParent(task.parentId, stateAfterUpdate, upd)
+      : stateAfterUpdate;
   }
-
-  const task = getTaskById(taskId, state);
-  const stateAfterUpdate = taskAdapter.updateOne(
-    {
-      id: taskId,
-      changes: {
-        timeEstimate: newEstimate,
-      },
-    },
-    state,
-  );
-
-  return task.parentId
-    ? reCalcTimeEstimateForParentIfParent(task.parentId, stateAfterUpdate)
-    : stateAfterUpdate;
+  return state;
 };
 
 export const deleteTaskHelper = (

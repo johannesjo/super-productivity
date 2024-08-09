@@ -45,7 +45,7 @@ export const DEFAULT_TAG: Tag = {
 export const NO_LIST_TAG: Tag = {
   id: 'NO_LIST',
   icon: 'question_mark',
-  title: 'not listed',
+  title: 'no list scheduled',
   color: null,
   created: Date.now(),
   taskIds: [],

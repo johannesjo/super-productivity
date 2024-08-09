@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "allowSyntheticDefaultImports": true,
     "sourceMap": true,
     "resolveJsonModule": false,
     "declaration": false,

@@ -11,7 +11,6 @@ import { EMPTY, Observable, Subscription } from 'rxjs';
 import { Task } from '../../tasks/task.model';
 import { GlobalConfigService } from '../../config/global-config.service';
 import { T } from '../../../t.const';
-import { SimpleCounterService } from '../../simple-counter/simple-counter.service';
 import { IS_ELECTRON } from '../../../app.constants';
 import { SimpleCounter } from '../../simple-counter/simple-counter.model';
 import { Store } from '@ngrx/store';
@@ -39,11 +38,9 @@ export class DialogIdleComponent implements OnInit, OnDestroy {
     : EMPTY;
 
   idleTime$ = this._store.select(selectIdleTime);
-  TakeA;
   selectedTask: Task | null = null;
   newTaskTitle?: string;
   isCreate?: boolean;
-  isSplitMode: boolean = false;
 
   simpleCounterToggleBtns: SimpleCounterIdleBtn[] = [];
   isTaskDataLoadedIfNeeded: boolean = !this.data.lastCurrentTaskId;
@@ -57,7 +54,6 @@ export class DialogIdleComponent implements OnInit, OnDestroy {
     private _matDialogRef: MatDialogRef<DialogIdleComponent, DialogIdleReturnData>,
     private _matDialog: MatDialog,
     private _store: Store,
-    private _simpleCounterService: SimpleCounterService,
     @Inject(MAT_DIALOG_DATA) public data: DialogIdlePassedData,
   ) {
     this.simpleCounterToggleBtns = (

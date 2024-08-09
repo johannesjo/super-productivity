@@ -19,7 +19,7 @@ export const migrateTaskState = (taskState: TaskState, modelType = 'Task'): Task
   });
 
   Object.keys(taskEntities).forEach((key) => {
-    taskEntities[key] = _taskEntityMigrations(taskEntities[key] as TaskCopy);
+    taskEntities[key] = _taskEntityMigrations(taskEntities[key] as TaskCopy, taskState);
   });
 
   return {
@@ -34,7 +34,7 @@ export const migrateTaskArchiveState = (taskArchiveState: TaskArchive): TaskArch
   return migrateTaskState(taskArchiveState as TaskState, 'Task Archive') as TaskArchive;
 };
 
-const _taskEntityMigrations = (task: TaskCopy): TaskCopy => {
+const _taskEntityMigrations = (task: TaskCopy, taskState: TaskState): TaskCopy => {
   task = _addNewIssueFields(task);
   task = _makeNullAndArraysConsistent(task);
   task = _replaceLegacyGitType(task);
@@ -42,11 +42,32 @@ const _taskEntityMigrations = (task: TaskCopy): TaskCopy => {
   task = _deleteUnusedFields(task);
   task = _convertToWesternArabicDateKeys(task);
   task = _updateUndefinedNoteFields(task);
+  task = _updateTimeEstimate(task, taskState);
   return task;
 };
 
 const _updateUndefinedNoteFields = (task: Task): Task => {
   return task.notes !== undefined ? task : { ...task, notes: '' };
+};
+
+const _updateTimeEstimate = (task: Task, taskState: TaskState): Task => {
+  const getTotalEstimate = (): number => {
+    const subTasks = task.subTaskIds.map((id) => taskState.entities[id]) as TaskCopy[];
+    return subTasks && subTasks.length > 0
+      ? subTasks.reduce(
+          (acc: number, st: Task) =>
+            acc + (st.isDone ? 0 : Math.max(0, st.timeEstimate - st.timeSpent)),
+          0,
+        )
+      : 0;
+  };
+
+  return task.subTaskIds.length > 0
+    ? {
+        ...task,
+        timeEstimate: getTotalEstimate(),
+      }
+    : task;
 };
 
 const _addTagIds = (task: Task): Task => {

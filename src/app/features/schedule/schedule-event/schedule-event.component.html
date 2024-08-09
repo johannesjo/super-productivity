@@ -1,0 +1,152 @@
+<div class="ico-wrapper">
+  @switch (icoType) {
+  <!-- -->
+  @case ('REPEAT') {
+  <mat-icon
+    svgIcon="repeat"
+    class="ico"
+    inline="true"
+  ></mat-icon>
+  } @case ('PLANNED_FOR_DAY') {
+  <div class="day-of-month">{{ se.dayOfMonth }}</div>
+  } @case ('SCHEDULED_TASK') {
+  <mat-icon
+    class="ico"
+    inline="true"
+    >alarm
+  </mat-icon>
+  } @case ('FLOW') {
+  <!--<div class="fake-ico">~</div>-->
+  <mat-icon
+    class="ico"
+    inline="true"
+    >wb_sunny
+  </mat-icon>
+  } @case ('LUNCH_BREAK') {
+  <mat-icon
+    class="ico"
+    inline="true"
+    >restaurant
+  </mat-icon>
+  } @case ('CAL_PROJECTION') {
+  <mat-icon>{{ $any(se.data)?.icon || 'event' }}</mat-icon>
+  <mat-icon>add</mat-icon>
+  }
+  <!--- --->
+  @default { }
+  <!--- --->
+  }
+  <!--- -->
+
+  @if (se.type === SVEType.ScheduledTask || se.type === SVEType.ScheduledRepeatProjection)
+  {
+  <div class="time-badge">{{ scheduledClockStr }}</div>
+  }
+</div>
+<!-- -->
+
+<div class="title">
+  <!--  {{ se.data['plannedForDay'] }}-->
+  <!--  {{ scheduledClockStr }}-->
+  <!--  {{se.id}} __ {{se.data?.id}} __-->
+  <!-- -->
+
+  @if (se.type === SVEType.SplitTaskContinuedLast || se.type ===
+  SVEType.SplitTaskContinued || se.type === SVEType.RepeatProjectionSplitContinued ||
+  se.type === SVEType.RepeatProjectionSplitContinuedLast) { ...
+  <!-- -->
+  } @else { {{ title }} }
+</div>
+
+@if (task) {
+<div
+  #contextMenuTriggerEl
+  [matMenuTriggerFor]="contextMenu"
+  [style.left]="contextMenuPosition.x"
+  [style.top]="contextMenuPosition.y"
+  style="visibility: hidden; position: fixed"
+></div>
+
+<mat-menu #contextMenu="matMenu">
+  <ng-template matMenuContent>
+    @if (!task.subTaskIds?.length) {
+    <button
+      (click)="estimateTime()"
+      class="hide-xs"
+      mat-menu-item
+    >
+      <span class="menuItemLeft">
+        <mat-icon>timer</mat-icon>
+        {{ T.F.TASK.CMP.OPEN_TIME|translate }}
+      </span>
+    </button>
+    }
+    <button
+      (click)="editReminder()"
+      mat-menu-item
+    >
+      @if (task.reminderId) {
+      <span>
+        <mat-icon>alarm</mat-icon>
+        {{ T.F.TASK.CMP.EDIT_REMINDER|translate }}
+      </span>
+      } @else {
+      <span>
+        <mat-icon>alarm_add</mat-icon>
+        {{ T.F.TASK.CMP.SCHEDULE|translate }}
+      </span>
+      }
+    </button>
+
+    <button
+      (click)="planForDay()"
+      mat-menu-item
+    >
+      <mat-icon>edit_calendar</mat-icon>
+      {{ T.F.TASK.CMP.PLAN_FOR_DAY|translate }}
+    </button>
+
+    @if (task.isDone) {
+    <button
+      (click)="markAsUnDone();"
+      mat-menu-item
+    >
+      <mat-icon>undo</mat-icon>
+      {{ T.F.TASK.CMP.MARK_UNDONE|translate }}
+    </button>
+    } @else {
+    <button
+      (click)="markAsDone();"
+      mat-menu-item
+    >
+      <mat-icon>check</mat-icon>
+      {{ T.F.TASK.CMP.MARK_DONE|translate }}
+    </button>
+    }
+
+    <!--    <button-->
+    <!--      (click)="editTags();"-->
+    <!--      *ngIf="!task.parentId"-->
+    <!--      mat-menu-item-->
+    <!--    >-->
+    <!--      <span class="menuItemLeft">-->
+    <!--        <mat-icon>style</mat-icon>-->
+    <!--        {{ T.F.TASK.CMP.EDIT_TAGS|translate }}-->
+    <!--      </span>-->
+    <!--      &lt;!&ndash;      <span class="keyIndicator"> {{ kb.taskEditTags }} </span>&ndash;&gt;-->
+    <!--    </button>-->
+
+    <button
+      (click)="deleteTask()"
+      class="color-warn"
+      mat-menu-item
+    >
+      <span class="menuItemLeft">
+        <mat-icon class="color-warn-i">delete_forever</mat-icon>
+        {{ (task.repeatCfgId ? T.F.TASK.CMP.DELETE_REPEAT_INSTANCE :
+        T.F.TASK.CMP.DELETE)|translate }}
+      </span>
+    </button>
+  </ng-template>
+</mat-menu>
+}

@@ -21,6 +21,7 @@ import { getDateTimeFromClockString } from '../../../util/get-date-time-from-clo
 import { DEFAULT_DAY_START } from '../../config/default-global-config.const';
 import { moveProjectTaskToBacklogListAuto } from '../../project/store/project.actions';
 import { isSameDay } from '../../../util/is-same-day';
+import { isToday } from '../../../util/is-today.util';
 
 @Injectable()
 export class TaskReminderEffects {
@@ -37,48 +38,50 @@ export class TaskReminderEffects {
           ico: 'schedule',
         }),
       ),
-      mergeMap(({ task, remindAt, plannedAt, isMoveToBacklog }) => {
-        if (isMoveToBacklog && !task.projectId) {
-          throw new Error('Move to backlog not possible for non project tasks');
-        }
-        if (typeof remindAt !== 'number') {
-          return EMPTY;
-        }
+      mergeMap(
+        ({ isSkipAutoRemoveFromToday, task, remindAt, plannedAt, isMoveToBacklog }) => {
+          if (isMoveToBacklog && !task.projectId) {
+            throw new Error('Move to backlog not possible for non project tasks');
+          }
+          if (typeof remindAt !== 'number') {
+            return EMPTY;
+          }
 
-        const reminderId = this._reminderService.addReminder(
-          'TASK',
-          task.id,
-          truncate(task.title),
-          remindAt,
-        );
+          const reminderId = this._reminderService.addReminder(
+            'TASK',
+            task.id,
+            truncate(task.title),
+            remindAt,
+          );
 
-        const isRemoveFromToday =
-          task.tagIds.includes(TODAY_TAG.id) &&
-          (!isSameDay(new Date(), plannedAt) || isMoveToBacklog);
+          const isRemoveFromToday =
+            !isSkipAutoRemoveFromToday &&
+            task.tagIds.includes(TODAY_TAG.id) &&
+            (!isToday(plannedAt) || isMoveToBacklog);
 
-        return [
-          updateTask({
-            task: { id: task.id, changes: { reminderId } },
-          }),
-          ...(isMoveToBacklog
-            ? [
-                moveProjectTaskToBacklogListAuto({
-                  taskId: task.id,
-                  projectId: task.projectId as string,
-                }),
-              ]
-            : []),
-          ...(isRemoveFromToday
-            ? [
-                updateTaskTags({
-                  task,
-                  newTagIds: task.tagIds.filter((tagId) => tagId !== TODAY_TAG.id),
-                  oldTagIds: task.tagIds,
-                }),
-              ]
-            : []),
-        ];
-      }),
+          return [
+            updateTask({
+              task: { id: task.id, changes: { reminderId } },
+            }),
+            ...(isMoveToBacklog
+              ? [
+                  moveProjectTaskToBacklogListAuto({
+                    taskId: task.id,
+                    projectId: task.projectId as string,
+                  }),
+                ]
+              : []),
+            ...(isRemoveFromToday
+              ? [
+                  updateTaskTags({
+                    task,
+                    newTagIds: task.tagIds.filter((tagId) => tagId !== TODAY_TAG.id),
+                  }),
+                ]
+              : []),
+          ];
+        },
+      ),
     ),
   );
 
@@ -128,7 +131,6 @@ export class TaskReminderEffects {
                 updateTaskTags({
                   task,
                   newTagIds: task.tagIds.filter((tagId) => tagId !== TODAY_TAG.id),
-                  oldTagIds: task.tagIds,
                 }),
               ]
             : []),
@@ -205,12 +207,12 @@ export class TaskReminderEffects {
     () =>
       this._actions$.pipe(
         ofType(updateTaskTags),
-        tap(({ task, newTagIds, oldTagIds }) => {
+        tap(({ task, newTagIds }) => {
           if (
             task.reminderId &&
             task.plannedAt &&
             newTagIds.includes(TODAY_TAG.id) &&
-            !oldTagIds.includes(TODAY_TAG.id) &&
+            !task.tagIds.includes(TODAY_TAG.id) &&
             task.plannedAt === getDateTimeFromClockString(DEFAULT_DAY_START, new Date())
           ) {
             console.log('unscheduleScheduledForDayWhenAddedToToday$ special case <3');

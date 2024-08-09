@@ -9,8 +9,8 @@ import { SchedulePageModule } from './schedule-page/schedule-page.module';
 import { ProjectSettingsPageModule } from './project-settings-page/project-settings-page.module';
 import { TagTaskPageModule } from './tag-task-page/tag-task-page.module';
 import { TagSettingsPageModule } from './tag-settings-page/tag-settings-page.module';
-import { TimelinePageModule } from './timeline-page/timeline-page.module';
 import { QuickHistoryModule } from '../features/quick-history/quick-history.module';
+import { PlannerPageModule } from './planner-page/planner-page.module';
 
 @NgModule({
   imports: [
@@ -24,7 +24,7 @@ import { QuickHistoryModule } from '../features/quick-history/quick-history.modu
     SchedulePageModule,
     TagTaskPageModule,
     TagSettingsPageModule,
-    TimelinePageModule,
+    PlannerPageModule,
     QuickHistoryModule,
   ],
   declarations: [],

@@ -190,7 +190,8 @@ async function execWithFrontendErrorHandlerInform(
       }
     });
   } else {
-    const res = await dialog.showMessageBox(null, {
+    const mainWin = getWin();
+    const res = await dialog.showMessageBox(mainWin, {
       type: 'question',
       buttons: ['Cancel', 'Yes, execute!'],
       defaultId: 2,
