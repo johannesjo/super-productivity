@@ -10,7 +10,7 @@ import { standardListAnimation } from '../../../ui/animations/standard-list.ani'
 import { Tag } from '../tag.model';
 import { TagService } from '../tag.service';
 import { BehaviorSubject, combineLatest, Observable, of, Subscription } from 'rxjs';
-import { map, switchMap } from 'rxjs/operators';
+import { catchError, map, switchMap } from 'rxjs/operators';
 import { MatDialog } from '@angular/material/dialog';
 import { Task } from '../../tasks/task.model';
 import { DialogEditTagsForTaskComponent } from '../dialog-edit-tags/dialog-edit-tags-for-task.component';
@@ -50,7 +50,15 @@ export class TagListComponent implements OnDestroy {
       !isShowProjectTagNever &&
       (isShowProjectTagAlways || activeType === WorkContextType.TAG)
         ? this._projectId$.pipe(
-            switchMap((id) => (id ? this._projectService.getByIdOnce$(id) : of(null))),
+            switchMap((id) =>
+              id
+                ? this._projectService.getByIdOnceCatchError$(id).pipe(
+                    catchError(() => {
+                      return of(null);
+                    }),
+                  )
+                : of(null),
+            ),
             map(
               (project) =>
                 project && {
