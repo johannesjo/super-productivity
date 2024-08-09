@@ -4,7 +4,7 @@ import { T } from '../../../t.const';
 import { playDoneSound } from '../../tasks/util/play-done-sound';
 import { playSound } from '../../../util/play-sound';
 
-const SOUND_OPTS = [
+export const SOUND_OPTS = [
   { label: 'NONE', value: null },
   { label: 'Sound 1', value: 'done1.mp3' },
   { label: 'Sound 2', value: 'done2.mp3' },
