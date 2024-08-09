@@ -10,7 +10,7 @@
 
     @include darkTheme() {
       background: rgb(39, 39, 39) !important;
-      border: 2px solid $dark24;
+      border: 4px solid $dark24;
     }
 
     @include mq(xxxs) {

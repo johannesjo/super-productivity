@@ -6,6 +6,12 @@
 
 // DIALOGS
 // ----------
+.mat-mdc-dialog-title.mat-mdc-dialog-title,
+.mdc-dialog__title.mdc-dialog__title {
+  margin-bottom: 0;
+  margin-top: 0;
+}
+
 .cdk-overlay-pane.mat-mdc-dialog-panel {
   @include mq(xs, max) {
     max-width: 96vw !important;

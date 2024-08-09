@@ -77,7 +77,6 @@ export class PlannerInitialDialogEffects {
                     })
                     .afterClosed()
                     .pipe(
-                      // TODO add cleanup for plannerTasks
                       map(() =>
                         PlannerActions.updatePlannerDialogLastShown({ today: todayStr }),
                       ),
@@ -108,5 +107,18 @@ export class PlannerInitialDialogEffects {
     private _matDialog: MatDialog,
     private _globalTrackingIntervalService: GlobalTrackingIntervalService,
     private _plannerService: PlannerService,
-  ) {}
+  ) {
+    // this._matDialog
+    //   .open(DialogAddPlannedTasksComponent, {
+    //     data: {
+    //       missingTasks: [],
+    //     },
+    //   })
+    //   .afterClosed()
+    //   .pipe(
+    //     map(() =>
+    //       PlannerActions.updatePlannerDialogLastShown({ today: getWorklogStr() }),
+    //     ),
+    //   );
+  }
 }
