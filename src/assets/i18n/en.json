@@ -1180,6 +1180,8 @@
       "MENU_TITLE": "Schedule",
       "NOW": "Now",
       "NO_TASKS": "Currently there are no tasks. Please add some tasks via the + Button in the top bar.",
+      "PLAN_END_DAY": "Plan at end of day",
+      "PLAN_START_DAY": "Plan at start of day",
       "START": "Work Start",
       "TASK_PROJECTION_INFO": "Future projection of a scheduled repeatable task",
       "LUNCH_BREAK": "Lunch Break"

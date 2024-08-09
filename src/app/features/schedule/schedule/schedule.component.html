@@ -75,14 +75,14 @@
     [attr.data-day]="day"
     style="grid-column: {{ $index + 2 }}; grid-row: 1 / span {{($index === 0 ? currentTimeRow :endOfDayColRowStart) -1}}"
   >
-    <div class="drop-label">Plan at start of day</div>
+    <div class="drop-label">{{ T.F.SCHEDULE.PLAN_START_DAY|translate }}</div>
   </div>
   <div
     class="col end-of-day"
     [attr.data-day]="day"
     style="grid-column: {{ $index + 2 }}; grid-row: {{($index === 0 ? currentTimeRow :endOfDayColRowStart)}} / span {{totalRows - ($index === 0 ? currentTimeRow :endOfDayColRowStart)}}"
   >
-    <div class="drop-label">Plan at end of day</div>
+    <div class="drop-label">{{ T.F.SCHEDULE.PLAN_END_DAY|translate }}</div>
   </div>
   }
 
@@ -92,13 +92,13 @@
     class="work-start"
     style="grid-row: {{workStartEnd.workStartRow}}"
   >
-    <div>Work Start</div>
+    <div>{{ T.F.SCHEDULE.START|translate }}</div>
   </div>
   <div
     class="work-end"
     style="grid-row: {{workStartEnd.workEndRow}}"
   >
-    <div>Work End</div>
+    <div>{{ T.F.SCHEDULE.END|translate }}</div>
   </div>
   }
 
