@@ -7,7 +7,7 @@ plugins {
 android {
     defaultConfig {
         applicationId "com.superproductivity.superproductivity"
-        minSdkVersion 23
+        minSdkVersion 24
         targetSdkVersion 34
         compileSdk 34
         versionCode 21
