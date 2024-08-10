@@ -43,16 +43,26 @@ export class DialogPlanForDayComponent implements AfterViewInit {
     private _datePipe: DatePipe,
   ) {
     console.log(this.data);
-    this.selectedDate = data.day || null;
+    this.selectedDate =
+      data.day ||
+      (this.data.task.tagIds.includes(TODAY_TAG.id) ? new Date().toISOString() : null);
   }
 
   ngAfterViewInit(): void {
     this.calendar.activeDate = new Date(this.selectedDate as any);
     this._cd.detectChanges();
-    (
-      document.querySelector('.mat-calendar-body-selected') as HTMLElement
-    )?.parentElement?.focus();
-    this.selectedDate = this.data.day || null;
+    this.selectedDate =
+      this.data.day ||
+      (this.data.task.tagIds.includes(TODAY_TAG.id) ? new Date().toISOString() : null);
+    if (this.selectedDate) {
+      (
+        document.querySelector('.mat-calendar-body-selected') as HTMLElement
+      )?.parentElement?.focus();
+    } else {
+      (
+        document.querySelector('.mat-calendar-body-today') as HTMLElement
+      )?.parentElement?.focus();
+    }
   }
 
   save(): void {}

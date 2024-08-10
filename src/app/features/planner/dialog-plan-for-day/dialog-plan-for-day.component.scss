@@ -42,3 +42,10 @@
   font-weight: bold;
   padding: 16px 0;
 }
+
+:host ::ng-deep .mat-calendar-body-today {
+  &:before {
+    @include materialIcon('wb_sunny');
+    top: 14px;
+  }
+}
