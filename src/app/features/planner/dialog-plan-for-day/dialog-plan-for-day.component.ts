@@ -43,8 +43,7 @@ export class DialogPlanForDayComponent implements AfterViewInit {
     private _datePipe: DatePipe,
   ) {
     console.log(this.data);
-
-    this.selectedDate = data.day || new Date().toISOString();
+    this.selectedDate = data.day || null;
   }
 
   ngAfterViewInit(): void {
@@ -53,7 +52,7 @@ export class DialogPlanForDayComponent implements AfterViewInit {
     (
       document.querySelector('.mat-calendar-body-selected') as HTMLElement
     )?.parentElement?.focus();
-    this.selectedDate = this.data.day || new Date().toISOString();
+    this.selectedDate = this.data.day || null;
   }
 
   save(): void {}
