@@ -10,7 +10,7 @@ const READY_TO_WORK_BTN = '.ready-to-work-btn';
 const TASK_SCHEDULE_BTN = '.ico-btn.schedule-btn';
 const TASK_SCHEDULE_BTN_2 = TASK_2 + ' ' + TASK_SCHEDULE_BTN;
 
-const SCHEDULE_ROUTE_BTN = 'button[routerlink="schedule"]';
+const SCHEDULE_ROUTE_BTN = 'button[routerlink="scheduled"]';
 const SCHEDULE_PAGE_CMP = 'schedule-page';
 const SCHEDULE_PAGE_TASKS = `${SCHEDULE_PAGE_CMP} .tasks mat-card`;
 const SCHEDULE_PAGE_TASK_1 = `${SCHEDULE_PAGE_TASKS}:first-of-type`;
