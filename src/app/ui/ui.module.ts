@@ -90,6 +90,7 @@ import {
   OwlDateTimeModule,
   OwlNativeDateTimeModule,
 } from './custom-datetime-picker/public_api';
+import { FormlyMatDatepickerModule } from '@ngx-formly/material/datepicker';
 
 const DIALOG_COMPONENTS = [
   DialogConfirmComponent,
@@ -205,6 +206,7 @@ const OTHER_3RD_PARTY_MODS_WITHOUT_CFG = [
     }),
     FormlyMatToggleModule,
     FormlyMaterialModule,
+    FormlyMatDatepickerModule,
     // fix https://stackoverflow.com/questions/62755093/angular-error-generic-type-modulewithproviderst-requires-1-type-arguments
     (DragulaModule as any).forRoot(),
 
