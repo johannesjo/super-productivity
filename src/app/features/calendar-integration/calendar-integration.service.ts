@@ -124,6 +124,7 @@ export class CalendarIntegrationService {
         issueProviderId: calEv.calProviderId,
         issueType: 'CALENDAR',
         timeEstimate: calEv.duration,
+        notes: calEv.description || '',
       },
       calEv.start,
     );

@@ -37,6 +37,7 @@ const getForRecurring = (
   endTimeStamp: number,
 ): CalendarIntegrationEvent[] => {
   const title: string = vevent.getFirstPropertyValue('summary');
+  const description = vevent.getFirstPropertyValue('decscription');
   const start = vevent.getFirstPropertyValue('dtstart');
   const startDate = start.toJSDate();
   const startTimeStamp = startDate.getTime();
@@ -58,6 +59,7 @@ const getForRecurring = (
         duration,
         id: baseId + '_' + next,
         calProviderId,
+        description: description || undefined,
       });
     } else if (nextTimestamp > endTimeStamp) {
       return evs;
@@ -80,6 +82,7 @@ const convertVEventToCalendarIntegrationEvent = (
   return {
     id: vevent.getFirstPropertyValue('uid'),
     title: vevent.getFirstPropertyValue('summary') || '',
+    description: vevent.getFirstPropertyValue('description') || undefined,
     start,
     duration: end - start,
     calProviderId,
