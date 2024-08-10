@@ -42,6 +42,7 @@ class FullscreenActivity : AppCompatActivity() {
 
     @Suppress("ReplaceCallWithBinaryOperator")
     override fun onCreate(savedInstanceState: Bundle?) {
+        Log.v("TW", "FullScreenActivity: onCreate")
         super.onCreate(savedInstanceState)
         initWebView()
         setContentView(R.layout.activity_fullscreen)
@@ -59,6 +60,13 @@ class FullscreenActivity : AppCompatActivity() {
         // Save scoped storage permission on Android 10+
         storageHelper.onSaveInstanceState(outState)
         webView.saveState(outState)
+    }
+
+    override fun onRestoreInstanceState(savedInstanceState: Bundle) {
+        // Restore scoped storage permission on Android 10+
+        super.onRestoreInstanceState(savedInstanceState)
+        storageHelper.onRestoreInstanceState(savedInstanceState)
+        webView.restoreState(savedInstanceState);
     }
 
     override fun onPause() {
@@ -90,8 +98,8 @@ class FullscreenActivity : AppCompatActivity() {
         webView = (application as App).wv
         if (BuildConfig.DEBUG) {
             Toast.makeText(this, "DEBUG: $appUrl", Toast.LENGTH_SHORT).show()
-            webView.clearCache(true)
-            webView.clearHistory()
+//            webView.clearCache(true)
+//            webView.clearHistory()
             WebView.setWebContentsDebuggingEnabled(true); // necessary to enable chrome://inspect of webviews on physical remote Android devices, but not for AVD emulator, as the latter automatically enables debug build features
         }
 
@@ -214,12 +222,6 @@ class FullscreenActivity : AppCompatActivity() {
         const val WINDOW_PROPERTY_F_DROID: String = "SUPFDroid"
     }
 
-
-    override fun onRestoreInstanceState(savedInstanceState: Bundle) {
-        // Restore scoped storage permission on Android 10+
-        super.onRestoreInstanceState(savedInstanceState)
-        storageHelper.onRestoreInstanceState(savedInstanceState)
-    }
 
     override fun onRequestPermissionsResult(
         requestCode: Int,
