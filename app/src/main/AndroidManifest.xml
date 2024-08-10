@@ -45,27 +45,5 @@
                 <action android:name="com.superproductivity.superproductivity.PAUSE" />
             </intent-filter>
         </activity>
-
-
-        <!-- Widget -->
-        <receiver
-            android:name=".TaskListWidget"
-            android:exported="false">
-            <intent-filter>
-                <action android:name="com.superproductivity.superproductivity.LIST_CHANGED" />
-                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
-            </intent-filter>
-
-            <meta-data
-                android:name="android.appwidget.provider"
-                android:resource="@xml/task_list_widget_info" />
-        </receiver>
-
-        <service
-            android:name=".TaskListWidgetViewsService"
-            android:exported="false"
-            android:permission="android.permission.BIND_REMOTEVIEWS" />
-
-
     </application>
 </manifest>

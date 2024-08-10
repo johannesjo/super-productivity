@@ -12,8 +12,4 @@ class App : Application() {
     val keyValStore: KeyValStore by lazy {
         KeyValStore(this)
     }
-
-    val dataHolder: TaskListDataService by lazy {
-        TaskListDataService()
-    }
 }

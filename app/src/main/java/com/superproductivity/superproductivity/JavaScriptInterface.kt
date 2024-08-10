@@ -60,11 +60,11 @@ class JavaScriptInterface(
     @JavascriptInterface
     fun updateTaskData(str: String) {
         Log.w("TW", "JavascriptInterface: updateTaskData")
-        val intent = Intent(activity.applicationContext, TaskListWidget::class.java)
-        intent.action = TaskListWidget.LIST_CHANGED
-        intent.putExtra("taskJson", str)
-        (activity.application as App).dataHolder.data = str
-        activity.sendBroadcast(intent)
+//        val intent = Intent(activity.applicationContext, TaskListWidget::class.java)
+//        intent.action = TaskListWidget.LIST_CHANGED
+//        intent.putExtra("taskJson", str)
+//        (activity.application as App).dataHolder.data = str
+//        activity.sendBroadcast(intent)
     }
 
     // TODO remove for good after a while

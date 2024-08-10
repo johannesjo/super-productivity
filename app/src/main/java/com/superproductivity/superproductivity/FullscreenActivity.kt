@@ -35,6 +35,10 @@ class FullscreenActivity : AppCompatActivity() {
     var isInForeground: Boolean = false
     val storageHelper =
         SimpleStorageHelper(this) // for scoped storage permission management on Android 10+
+    val appUrl =
+        if (BuildConfig.DEBUG) "https://test-app.super-productivity.com" else "https://app.super-productivity.com"
+//        if (BuildConfig.DEBUG) "http://10.0.2.2:4200" else "https://app.super-productivity.com"
+
 
     @Suppress("ReplaceCallWithBinaryOperator")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -43,6 +47,18 @@ class FullscreenActivity : AppCompatActivity() {
         setContentView(R.layout.activity_fullscreen)
         wvContainer = findViewById(R.id.webview_container)
         wvContainer.addView(webView)
+        if (savedInstanceState != null) {
+            webView.restoreState(savedInstanceState)
+        } else {
+            webView.loadUrl("https://app.super-productivity.com")
+        }
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        // Save scoped storage permission on Android 10+
+        storageHelper.onSaveInstanceState(outState)
+        webView.saveState(outState)
     }
 
     override fun onPause() {
@@ -72,18 +88,11 @@ class FullscreenActivity : AppCompatActivity() {
     @RequiresApi(Build.VERSION_CODES.N)
     private fun initWebView() {
         webView = (application as App).wv
-        val appUrl: String
         if (BuildConfig.DEBUG) {
-            appUrl = "https://test-app.super-productivity.com/"
-            // for debugging locally run web server
-//            appUrl = "http://10.0.2.2:4200"
-
             Toast.makeText(this, "DEBUG: $appUrl", Toast.LENGTH_SHORT).show()
             webView.clearCache(true)
             webView.clearHistory()
             WebView.setWebContentsDebuggingEnabled(true); // necessary to enable chrome://inspect of webviews on physical remote Android devices, but not for AVD emulator, as the latter automatically enables debug build features
-        } else {
-            appUrl = "https://app.super-productivity.com"
         }
 
         webView.loadUrl(appUrl)
@@ -187,6 +196,7 @@ class FullscreenActivity : AppCompatActivity() {
 
     @Deprecated("Deprecated in Java")
     override fun onBackPressed() {
+        Log.v("TW", "onBackPressed ${webView.canGoBack().toString()}")
         if (webView.canGoBack()) {
             webView.goBack()
         } else {
@@ -204,11 +214,6 @@ class FullscreenActivity : AppCompatActivity() {
         const val WINDOW_PROPERTY_F_DROID: String = "SUPFDroid"
     }
 
-    override fun onSaveInstanceState(outState: Bundle) {
-        // Save scoped storage permission on Android 10+
-        storageHelper.onSaveInstanceState(outState)
-        super.onSaveInstanceState(outState)
-    }
 
     override fun onRestoreInstanceState(savedInstanceState: Bundle) {
         // Restore scoped storage permission on Android 10+
@@ -301,7 +306,12 @@ class FullscreenActivity : AppCompatActivity() {
                 .toMutableMap()
 
             val keysToRemoveI =
-                responseHeaders.keys.filter { it.equals("Access-Control-Allow-Origin", ignoreCase = true) }
+                responseHeaders.keys.filter {
+                    it.equals(
+                        "Access-Control-Allow-Origin",
+                        ignoreCase = true
+                    )
+                }
             for (key in keysToRemoveI) {
                 responseHeaders.remove(key)
             }
