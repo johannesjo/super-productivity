@@ -79,7 +79,7 @@ const convertVEventToCalendarIntegrationEvent = (
 
   return {
     id: vevent.getFirstPropertyValue('uid'),
-    title: vevent.getFirstPropertyValue('summary'),
+    title: vevent.getFirstPropertyValue('summary') || '',
     start,
     duration: end - start,
     calProviderId,

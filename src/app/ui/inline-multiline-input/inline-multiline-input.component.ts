@@ -148,7 +148,7 @@ export class InlineMultilineInputComponent {
   }
 
   private _cleanValue(value: string = ''): string {
-    return value.replace(/\r\n|\n|\r/g, '').trim();
+    return value?.replace(/\r\n|\n|\r/g, '').trim();
   }
 
   private _setTxtHeight(): void {
