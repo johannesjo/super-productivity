@@ -110,16 +110,17 @@ section {
       z-index: 10;
       position: absolute;
       line-height: 1;
-      left: $s;
-      width: 40px;
+      right: 100%;
       text-align: center;
-      top: 50%;
-      transform: translateY(-50%);
+      bottom: 6px;
       font-size: 10px;
-      padding: 1px 0 0;
+      min-width: 18px;
+      padding: 1px 4px 0;
+      pointer-events: none;
       border: 1px solid $light-theme-extra-border-color;
       background: #fff;
-      border-radius: $card-border-radius;
+      border-radius: 12px;
+      margin-right: -49px;
 
       // avoid affecting drag handle
       pointer-events: none;
