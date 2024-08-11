@@ -117,6 +117,7 @@ export class GlobalThemeService {
       ['gitea', 'assets/icons/gitea.svg'],
       ['redmine', 'assets/icons/redmine.svg'],
       ['calendar', 'assets/icons/calendar.svg'],
+      ['early_on', 'assets/icons/early-on.svg'],
     ];
 
     icons.forEach(([name, path]) => {

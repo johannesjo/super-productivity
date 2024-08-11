@@ -16,9 +16,9 @@
       mat-menu-item
       routerLinkActive="isActiveRoute"
     >
-      <span class="badge">{{mainContext.taskIds.length}}</span>
-      <mat-icon>{{mainContext.icon}}</mat-icon>
-      <span class="text">{{mainContext.title}}</span>
+      <span class="badge">{{ mainContext.taskIds.length }}</span>
+      <mat-icon>{{ mainContext.icon }}</mat-icon>
+      <span class="text">{{ mainContext.title }}</span>
     </button>
 
     <button
@@ -44,21 +44,10 @@
     #menuEntry
     class="route-link"
     mat-menu-item
-    routerLink="planner"
-    routerLinkActive="isActiveRoute"
-  >
-    <mat-icon>edit_calendar</mat-icon>
-    <span class="text">{{ T.MH.PLANNER|translate }}</span>
-  </button>
-
-  <button
-    #menuEntry
-    class="route-link"
-    mat-menu-item
     routerLink="schedule"
     routerLinkActive="isActiveRoute"
   >
-    <mat-icon>calendar_view_week</mat-icon>
+    <mat-icon svgIcon="early_on"></mat-icon>
     <!--    <span class="text">{{ T.MH.PLANNER|translate }}</span>-->
     <span class="text">{{ T.F.SCHEDULE.MENU_TITLE|translate }}</span>
   </button>
@@ -67,11 +56,11 @@
     #menuEntry
     class="route-link"
     mat-menu-item
-    routerLink="scheduled"
+    routerLink="planner"
     routerLinkActive="isActiveRoute"
   >
-    <mat-icon>access_alarms</mat-icon>
-    <span class="text">{{T.MH.SCHEDULED|translate}}</span>
+    <mat-icon>calendar_view_week</mat-icon>
+    <span class="text">{{ T.MH.PLANNER|translate }}</span>
   </button>
 </section>
 
@@ -88,7 +77,7 @@
     class="expand-btn"
     mat-menu-item
   >
-    <span class="title">{{T.MH.PROJECTS|translate}}</span>
+    <span class="title">{{ T.MH.PROJECTS|translate }}</span>
     <mat-icon>expand_more</mat-icon>
   </button>
 
@@ -115,15 +104,15 @@
         mat-menu-item
       >
         <span class="badge"
-          >{{project.taskIds.length}}{{project.isEnableBacklog ? '/' +
-          project.backlogTaskIds.length : ''}}
+          >{{ project.taskIds.length }}{{ project.isEnableBacklog ? '/' +
+          project.backlogTaskIds.length : '' }}
         </span>
         <mat-icon
           class="drag-handle"
           drag-handle
           >folder_special
         </mat-icon>
-        <span class="text">{{project.title}}</span>
+        <span class="text">{{ project.title }}</span>
       </button>
 
       <button
@@ -155,7 +144,7 @@
     routerLinkActive="isActiveRoute"
   >
     <mat-icon>format_list_numbered_rtl</mat-icon>
-    <span class="text">{{T.MH.MANAGE_PROJECTS|translate}}</span>
+    <span class="text">{{ T.MH.MANAGE_PROJECTS|translate }}</span>
   </button>
 
   <button
@@ -166,7 +155,7 @@
     mat-menu-item
   >
     <mat-icon>add</mat-icon>
-    <span class="text">{{T.MH.CREATE_PROJECT|translate}}</span>
+    <span class="text">{{ T.MH.CREATE_PROJECT|translate }}</span>
   </button>
 </section>
 
@@ -183,7 +172,7 @@
     class="expand-btn"
     mat-menu-item
   >
-    <span class="title">{{T.MH.TAGS|translate}}</span>
+    <span class="title">{{ T.MH.TAGS|translate }}</span>
     <mat-icon>expand_more</mat-icon>
   </button>
 
@@ -209,13 +198,13 @@
         [routerLink]="['tag', tag.id, 'tasks']"
         mat-menu-item
       >
-        <span class="badge">{{tag.taskIds.length}}</span>
+        <span class="badge">{{ tag.taskIds.length }}</span>
         <mat-icon
           class="drag-handle"
           drag-handle
           >style
         </mat-icon>
-        <span class="text">{{tag.title}}</span>
+        <span class="text">{{ tag.title }}</span>
       </button>
 
       <button
@@ -241,7 +230,7 @@
     *ngIf="!tagList.length && isTagsExpanded"
     class="no-tags-info"
   >
-    {{T.MH.NO_TAG_INFO|translate}}
+    {{ T.MH.NO_TAG_INFO|translate }}
   </div>
 
   <!--  <button (click)="addTag()"-->
@@ -252,7 +241,20 @@
   <!--  </button>-->
 </section>
 
+<!--<section class="other-task-level-section">-->
+<!--</section>-->
+
 <section class="app">
+  <button
+    #menuEntry
+    class="route-link"
+    mat-menu-item
+    routerLink="scheduled"
+    routerLinkActive="isActiveRoute"
+  >
+    <mat-icon>list</mat-icon>
+    <span class="text">{{ T.MH.SCHEDULED|translate }}</span>
+  </button>
   <button
     #menuEntry
     [mat-menu-trigger-for]="helpMenu"
@@ -260,7 +262,7 @@
     mat-menu-item
   >
     <mat-icon>help_center</mat-icon>
-    <span class="text">{{T.MH.HELP|translate}}</span>
+    <span class="text">{{ T.MH.HELP|translate }}</span>
   </button>
 
   <mat-menu #helpMenu="matMenu">
@@ -271,7 +273,7 @@
         target="_blank"
       >
         <mat-icon>help_center</mat-icon>
-        <span class="text">{{T.MH.HM.GET_HELP_ONLINE|translate}}</span>
+        <span class="text">{{ T.MH.HM.GET_HELP_ONLINE|translate }}</span>
       </a>
 
       <a
@@ -281,7 +283,7 @@
         target="_blank"
       >
         <mat-icon>bug_report</mat-icon>
-        <span class="text">{{T.MH.HM.REPORT_A_PROBLEM|translate}}</span>
+        <span class="text">{{ T.MH.HM.REPORT_A_PROBLEM|translate }}</span>
       </a>
 
       <a
@@ -290,7 +292,7 @@
         target="_blank"
       >
         <mat-icon>volunteer_activism</mat-icon>
-        <span class="text">{{T.MH.HM.CONTRIBUTE|translate}}</span>
+        <span class="text">{{ T.MH.HM.CONTRIBUTE|translate }}</span>
       </a>
 
       <a
@@ -307,7 +309,7 @@
         mat-menu-item
       >
         <mat-icon>directions</mat-icon>
-        <span class="text">{{T.MH.HM.START_WELCOME|translate}}</span>
+        <span class="text">{{ T.MH.HM.START_WELCOME|translate }}</span>
       </button>
       <button
         *ngIf="IS_MOUSE_PRIMARY"
@@ -315,21 +317,21 @@
         mat-menu-item
       >
         <mat-icon>directions</mat-icon>
-        <span class="text">{{T.MH.HM.KEYBOARD|translate}}</span>
+        <span class="text">{{ T.MH.HM.KEYBOARD|translate }}</span>
       </button>
       <button
         (click)="startTour(TourId.Sync)"
         mat-menu-item
       >
         <mat-icon>directions</mat-icon>
-        <span class="text">{{T.MH.HM.SYNC|translate}}</span>
+        <span class="text">{{ T.MH.HM.SYNC|translate }}</span>
       </button>
       <button
         (click)="startTour(TourId.Calendars)"
         mat-menu-item
       >
         <mat-icon>directions</mat-icon>
-        <span class="text">{{T.MH.HM.CALENDARS|translate}}</span>
+        <span class="text">{{ T.MH.HM.CALENDARS|translate }}</span>
       </button>
     </ng-template>
   </mat-menu>
@@ -342,7 +344,7 @@
     routerLinkActive="isActiveRoute"
   >
     <mat-icon>settings</mat-icon>
-    <span class="text">{{T.MH.SETTINGS|translate}}</span>
+    <span class="text">{{ T.MH.SETTINGS|translate }}</span>
   </button>
 </section>
 
