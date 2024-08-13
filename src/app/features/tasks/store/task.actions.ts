@@ -45,7 +45,7 @@ enum TaskActionTypes {
   'MoveToOtherProject' = '[Task] Move tasks to other project',
   'ToggleStart' = '[Task] Toggle start',
   'RoundTimeSpentForDay' = '[Task] RoundTimeSpentForDay',
-  'AddNewTagsFromShortSyntax' = '[Task] Add new tags form short syntax',
+  'AddNewTagsFromShortSyntax' = '[Task] Add new tags from short syntax',
 }
 
 export const setCurrentTask = createAction(
