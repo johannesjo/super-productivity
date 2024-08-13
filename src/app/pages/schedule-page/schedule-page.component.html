@@ -4,6 +4,60 @@
 
 <div class="page-wrapper">
   <section
+    *ngIf=" (taskRepeatCfgs$|async) as taskRepeatCfgs; else spinner"
+    class="component-wrapper"
+    style="margin-top: 24px"
+  >
+    <h2>{{ T.SCHEDULE.REPEATED_TASKS|translate }}</h2>
+
+    <p
+      *ngIf="!taskRepeatCfgs?.length"
+      class="no-scheduled-tasks"
+    >
+      {{ T.SCHEDULE.NO_REPEATABLE_TASKS|translate }}
+    </p>
+
+    <div
+      [@standardList]="taskRepeatCfgs?.length"
+      class="repeat-task-cfgs"
+    >
+      <mat-card
+        appearance="outlined"
+        *ngFor="let taskRepeatCfg of taskRepeatCfgs; trackBy: trackByFn;"
+        class="repeat-task-cfg"
+      >
+        <mat-card-content>
+          <div class="repeat-task-cfg-content">
+            <div class="task-info">
+              <div class="title">
+                <inline-multiline-input
+                  (valueEdited)="updateRepeatableTitleIfChanged($event.wasChanged, $event.newVal, taskRepeatCfg)"
+                  [value]="taskRepeatCfg.title"
+                  class="task-title"
+                ></inline-multiline-input>
+
+                <tag-list
+                  [isShowProjectTagAlways]="true"
+                  [task]="taskRepeatCfg"
+                ></tag-list>
+              </div>
+
+              <div
+                (click)="editTaskRepeatCfg(taskRepeatCfg)"
+                class="repeat-text-and-icon"
+                mat-ripple
+              >
+                <div class="repeat-text">{{ getRepeatInfoText(taskRepeatCfg) }}</div>
+                <mat-icon svgIcon="repeat"></mat-icon>
+              </div>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+  </section>
+
+  <section
     *ngIf="(reminderService.isRemindersLoaded$|async) && (scheduledTaskService.allScheduledTasks$|async) as allScheduledTasks; else spinner"
     class="component-wrapper"
     style="margin-top: 24px"
@@ -106,60 +160,6 @@
                 ></mat-icon>
                 <mat-icon *ngIf="!task.tagIds.includes(TODAY_TAG.id)">wb_sunny</mat-icon>
               </button>
-            </div>
-          </div>
-        </mat-card-content>
-      </mat-card>
-    </div>
-  </section>
-
-  <section
-    *ngIf=" (taskRepeatCfgs$|async) as taskRepeatCfgs; else spinner"
-    class="component-wrapper"
-    style="margin-top: 24px"
-  >
-    <h2>{{T.SCHEDULE.REPEATED_TASKS|translate}}</h2>
-
-    <p
-      *ngIf="!taskRepeatCfgs?.length"
-      class="no-scheduled-tasks"
-    >
-      {{T.SCHEDULE.NO_REPEATABLE_TASKS|translate}}
-    </p>
-
-    <div
-      [@standardList]="taskRepeatCfgs?.length"
-      class="repeat-task-cfgs"
-    >
-      <mat-card
-        appearance="outlined"
-        *ngFor="let taskRepeatCfg of taskRepeatCfgs; trackBy: trackByFn;"
-        class="repeat-task-cfg"
-      >
-        <mat-card-content>
-          <div class="repeat-task-cfg-content">
-            <div class="task-info">
-              <div class="title">
-                <inline-multiline-input
-                  (valueEdited)="updateRepeatableTitleIfChanged($event.wasChanged, $event.newVal, taskRepeatCfg)"
-                  [value]="taskRepeatCfg.title"
-                  class="task-title"
-                ></inline-multiline-input>
-
-                <tag-list
-                  [isShowProjectTagAlways]="true"
-                  [task]="taskRepeatCfg"
-                ></tag-list>
-              </div>
-
-              <div
-                (click)="editTaskRepeatCfg(taskRepeatCfg)"
-                class="repeat-text-and-icon"
-                mat-ripple
-              >
-                <div class="repeat-text">{{ getRepeatInfoText(taskRepeatCfg)}}</div>
-                <mat-icon svgIcon="repeat"></mat-icon>
-              </div>
             </div>
           </div>
         </mat-card-content>
