@@ -1374,18 +1374,18 @@
       "HELP": "<p><strong>Não está vendo as notificações da área de trabalho?</strong> Para janelas, convém verificar Sistema> Notificações e ações, e verificar se as notificações necessárias foram ativadas.</p>",
       "IS_AUTO_ADD_WORKED_ON_TO_TODAY": "Adicionar automaticamente a tag hoje às tarefas trabalhadas",
       "IS_AUTO_MARK_PARENT_AS_DONE": "Marque a tarefa pai como concluída, quando todas as subtarefas estiverem concluídas",
-      "IS_AUTO_START_NEXT_TASK": "Comece a rastrear a próxima tarefa ao marcar atual como concluído",
       "IS_CONFIRM_BEFORE_EXIT": "Confirme antes de sair do aplicativo",
       "IS_CONFIRM_BEFORE_EXIT_WITHOUT_FINISH_DAY": "Confirme antes de sair do aplicativo sem terminar o dia primeiro",
       "IS_DARK_MODE": "Modo escuro",
       "IS_DISABLE_ANIMATIONS": "Desativar todas as animações",
       "IS_HIDE_NAV": "Ocultar a navegação até passar o mouse no cabeçalho principal (somente na área de trabalho)",
       "IS_MINIMIZE_TO_TRAY": "Minimize para a bandeja (somente desktop)",
-      "IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "Notificar quando a estimativa de tempo foi excedida",
       "IS_TRAY_SHOW_CURRENT_TASK": "Mostra a tarefa atual na bandeja / menu de status (somente desktop)",
       "IS_TURN_OFF_MARKDOWN": "Desativar a análise de markdown para anotações",
       "TASK_NOTES_TPL": "Modelo de descrição de tarefa",
-      "TITLE": "Configurações diversas"
+      "TITLE": "Configurações diversas",
+      "IS_AUTO_START_NEXT_TASK": "Comece a rastrear a próxima tarefa ao marcar atual como concluído",
+      "IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "Notificar quando a estimativa de tempo foi excedida"
     },
     "POMODORO": {
       "BREAK_DURATION": "Duração de pausas curtas",

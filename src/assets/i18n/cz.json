@@ -1360,18 +1360,18 @@
       "HELP": "<p><strong>Desktopová upozornění se nezobrazují?</strong> Pro systém Windows byste mohli zkontrolovat Systém > Upozornění a akce a zkontrolovat, zda jsou vyžadovaná upozornění povolena.</p>",
       "IS_AUTO_ADD_WORKED_ON_TO_TODAY": "Automaticky přidat značku 'Dnes' k úkolům, na kterých jste pracovali",
       "IS_AUTO_MARK_PARENT_AS_DONE": "Označit nadřazený úkol jako hotový, když jsou hotovy všechny podúkoly",
-      "IS_AUTO_START_NEXT_TASK": "Začít sledovat další úkol při označení aktuálního jako hotového",
       "IS_CONFIRM_BEFORE_EXIT": "Potvrdit před ukončením aplikace",
       "IS_CONFIRM_BEFORE_EXIT_WITHOUT_FINISH_DAY": "Potvrdit před ukončením aplikace bez dokončení dne",
       "IS_DARK_MODE": "Temný režim",
       "IS_DISABLE_ANIMATIONS": "Vypnout všechny animace",
       "IS_HIDE_NAV": "Skrýt navigaci, dokud není nadpis záhlaví aktivován (pouze pro desktop)",
       "IS_MINIMIZE_TO_TRAY": "Minimalizovat do oznamovací oblasti (pouze pro desktop)",
-      "IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "Upozornit, když byl překročen odhad času",
       "IS_TRAY_SHOW_CURRENT_TASK": "Zobrazit aktuální úkol v oznamovací oblasti/menu stavu (pouze pro desktop Mac/Windows)",
       "IS_TURN_OFF_MARKDOWN": "Vypnout zpracování markdown pro poznámky k úkolům",
       "TASK_NOTES_TPL": "Šablona popisu úkolu",
-      "TITLE": "Různá nastavení"
+      "TITLE": "Různá nastavení",
+      "IS_AUTO_START_NEXT_TASK": "Začít sledovat další úkol při označení aktuálního jako hotového",
+      "IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "Upozornit, když byl překročen odhad času"
     },
     "POMODORO": {
       "BREAK_DURATION": "Délka krátkých přestávek",

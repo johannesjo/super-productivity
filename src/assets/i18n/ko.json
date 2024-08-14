@@ -1141,17 +1141,17 @@
       "HELP": "<p><strong>데스크톱 알림이 표시되지 않습니까?</strong> 창의 경우 시스템 > 알림 및 작업을 확인하고 필요한 알림이 활성화되었는지 확인할 수 있습니다.</p>",
       "IS_AUTO_ADD_WORKED_ON_TO_TODAY": "작업에 사용할 오늘 태그를 자동으로 추가",
       "IS_AUTO_MARK_PARENT_AS_DONE": "모든 하위 작업이 완료되면 상위 작업을 완료로 표시합니다.",
-      "IS_AUTO_START_NEXT_TASK": "전류를 완료로 표시 할 때 다음 작업 추적 시작",
       "IS_CONFIRM_BEFORE_EXIT": "앱을 종료하기 전에 확인",
       "IS_CONFIRM_BEFORE_EXIT_WITHOUT_FINISH_DAY": "하루를 먼저 끝내지 않고 앱을 종료하기 전에 확인",
       "IS_DARK_MODE": "다크 모드",
       "IS_HIDE_NAV": "기본 헤더가 올라갈 때까지 탐색을 숨 깁니다 (데스크톱 만 해당).",
       "IS_MINIMIZE_TO_TRAY": "트레이로 최소화 (데스크탑만 해당)",
-      "IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "예상 시간을 초과했을 때 알림",
       "IS_TRAY_SHOW_CURRENT_TASK": "트레이 / 상태 메뉴에 현재 작업 표시 (데스크톱 전용)",
       "IS_TURN_OFF_MARKDOWN": "노트에 대한 마크 다운 파싱 끄기",
       "TASK_NOTES_TPL": "작업 설명 템플릿",
-      "TITLE": "기타 설정"
+      "TITLE": "기타 설정",
+      "IS_AUTO_START_NEXT_TASK": "전류를 완료로 표시 할 때 다음 작업 추적 시작",
+      "IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "예상 시간을 초과했을 때 알림"
     },
     "POMODORO": {
       "BREAK_DURATION": "짧은 휴식 시간",

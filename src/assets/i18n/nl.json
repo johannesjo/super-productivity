@@ -1284,17 +1284,17 @@
       "HELP": "<p><strong>Ziet u geen bureaubladmeldingen?</strong> Voor vensters wilt u misschien Systeem> Meldingen en acties controleren en controleren of de vereiste meldingen zijn ingeschakeld.</p>",
       "IS_AUTO_ADD_WORKED_ON_TO_TODAY": "Voeg automatisch de tag voor vandaag toe aan taken",
       "IS_AUTO_MARK_PARENT_AS_DONE": "Markeer de bovenliggende taak als voltooid wanneer alle subtaken zijn voltooid",
-      "IS_AUTO_START_NEXT_TASK": "Begin met het volgen van de volgende taak wanneer u de stroom als voltooid markeert",
       "IS_CONFIRM_BEFORE_EXIT": "Bevestig voordat u de app afsluit",
       "IS_CONFIRM_BEFORE_EXIT_WITHOUT_FINISH_DAY": "Bevestig voordat u de app verlaat zonder eerst de dag af te sluiten",
       "IS_DARK_MODE": "Donkere modus",
       "IS_HIDE_NAV": "Verberg navigatie totdat de hoofdkop is opgehangen (alleen desktop)",
       "IS_MINIMIZE_TO_TRAY": "Minimaliseren naar lade (alleen desktop)",
-      "IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "Informeer wanneer de geschatte tijd is overschreden",
       "IS_TRAY_SHOW_CURRENT_TASK": "Toon huidige taak in het systeemvak / statusmenu (alleen desktop)",
       "IS_TURN_OFF_MARKDOWN": "Schakel markdown-parsering voor notities uit",
       "TASK_NOTES_TPL": "Taak omschrijving template",
-      "TITLE": "Diverse instellingen"
+      "TITLE": "Diverse instellingen",
+      "IS_AUTO_START_NEXT_TASK": "Begin met het volgen van de volgende taak wanneer u de stroom als voltooid markeert",
+      "IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "Informeer wanneer de geschatte tijd is overschreden"
     },
     "POMODORO": {
       "BREAK_DURATION": "Duur van korte pauzes",

@@ -1311,18 +1311,18 @@
       "HELP": "<p><strong>Tidak melihat Pemberitahuan Desktop?</strong> Untuk windows, Anda mungkin ingin memeriksa Sistem > Pemberitahuan & tindakan dan memeriksa apakah pemberitahuan yang diperlukan telah diaktifkan.</p>",
       "IS_AUTO_ADD_WORKED_ON_TO_TODAY": "Tambahkan tag hari ini secara otomatis untuk mengerjakan tugas",
       "IS_AUTO_MARK_PARENT_AS_DONE": "Tandai tugas induk sebagai selesai, ketika semua sub tugas selesai",
-      "IS_AUTO_START_NEXT_TASK": "Mulai lacak tugas berikutnya saat menandai saat ini sebagai selesai",
       "IS_CONFIRM_BEFORE_EXIT": "Konfirmasi sebelum keluar dari aplikasi",
       "IS_CONFIRM_BEFORE_EXIT_WITHOUT_FINISH_DAY": "Konfirmasi sebelum keluar dari aplikasi tanpa menyelesaikan hari terlebih dahulu",
       "IS_DARK_MODE": "Mode Gelap",
       "IS_DISABLE_ANIMATIONS": "Nonaktifkan semua animasi",
       "IS_HIDE_NAV": "Sembunyikan navigasi hingga header utama diarahkan (khusus desktop)",
       "IS_MINIMIZE_TO_TRAY": "Minimalkan ke baki (hanya desktop)",
-      "IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "Beri tahu kapan perkiraan waktu terlampaui",
       "IS_TRAY_SHOW_CURRENT_TASK": "Tampilkan tugas saat ini di menu baki / status (khusus desktop mac/windows)",
       "IS_TURN_OFF_MARKDOWN": "Matikan penguraian penurunan harga untuk catatan tugas",
       "TASK_NOTES_TPL": "Templat deskripsi tugas",
-      "TITLE": "Pengaturan Lain-lain"
+      "TITLE": "Pengaturan Lain-lain",
+      "IS_AUTO_START_NEXT_TASK": "Mulai lacak tugas berikutnya saat menandai saat ini sebagai selesai",
+      "IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "Beri tahu kapan perkiraan waktu terlampaui"
     },
     "POMODORO": {
       "BREAK_DURATION": "Durasi istirahat pendek",

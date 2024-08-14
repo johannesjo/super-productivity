@@ -1431,18 +1431,18 @@
       "HELP": "<p><strong>Desktop-Benachrichtigungen werden nicht angezeigt?</strong> Unter Windows sollten Sie unter System -> Benachrichtigungen und Aktionen prüfen, ob die erforderlichen Benachrichtigungen aktiviert wurden.</p>",
       "IS_AUTO_ADD_WORKED_ON_TO_TODAY": "Fügen Sie heute automatisch das Tag \"Heute\" hinzu, um an Aufgaben zu arbeiten",
       "IS_AUTO_MARK_PARENT_AS_DONE": "Übergeordnete Aufgabe als erledigt markieren, wenn alle Unteraufgaben erledigt sind",
-      "IS_AUTO_START_NEXT_TASK": "Beginnen Sie mit der nächsten Aufgabe, wenn Sie die aktuelle Aufgabe als erledigt markieren",
       "IS_CONFIRM_BEFORE_EXIT": "Bestätigen, bevor die App beendet wird",
       "IS_CONFIRM_BEFORE_EXIT_WITHOUT_FINISH_DAY": "Bestätigen, bevor die App beendet wird, ohne den Tag zuerst zu beenden",
       "IS_DARK_MODE": "Dunkler Modus",
       "IS_DISABLE_ANIMATIONS": "Deaktiviere alle Animationen",
       "IS_HIDE_NAV": "Navigation verbergen, bis die Hauptüberschrift angezeigt wird (nur Desktop)",
       "IS_MINIMIZE_TO_TRAY": "Anwendung als Trayicon minimieren (nur Deskop)",
-      "IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "Benachrichtigen, wenn die geschätzte Zeit überschritten wurde",
       "IS_TRAY_SHOW_CURRENT_TASK": "Aktuelle Aufgabe im Tray / Status-Menu zeigen (nur Desktop)",
       "IS_TURN_OFF_MARKDOWN": "Deaktivieren Sie das Markdown-Parsing für Notizen",
       "TASK_NOTES_TPL": "Aufgabenbeschreibungsvorlage",
-      "TITLE": "Verschiedene Einstellungen"
+      "TITLE": "Verschiedene Einstellungen",
+      "IS_AUTO_START_NEXT_TASK": "Beginnen Sie mit der nächsten Aufgabe, wenn Sie die aktuelle Aufgabe als erledigt markieren",
+      "IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "Benachrichtigen, wenn die geschätzte Zeit überschritten wurde"
     },
     "POMODORO": {
       "BREAK_DURATION": "Dauer der kurzen Pausen",

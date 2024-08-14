@@ -1168,18 +1168,18 @@
       "HELP": "<p><strong>Not seeing Desktop Notifications?</strong> For windows you might want to check System > Notifications & actions and check if the required notifications have been enabled.</p>",
       "IS_AUTO_ADD_WORKED_ON_TO_TODAY": "Automatically add today tag to worked on tasks",
       "IS_AUTO_MARK_PARENT_AS_DONE": "Mark parent task as done, when all sub tasks are done",
-      "IS_AUTO_START_NEXT_TASK": "Start tracking next task when marking current as done",
       "IS_CONFIRM_BEFORE_EXIT": "Confirm before exiting the app",
       "IS_CONFIRM_BEFORE_EXIT_WITHOUT_FINISH_DAY": "Confirm before exiting the app without finishing day first",
       "IS_DARK_MODE": "Tmavý režim",
       "IS_DISABLE_ANIMATIONS": "Zakázať všetky animácie",
       "IS_HIDE_NAV": "Hide navigation until main header is hovered (desktop only)",
       "IS_MINIMIZE_TO_TRAY": "Minimize to tray (desktop only)",
-      "IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "Upozorniť keď sa prekročí odhadovaný čas",
       "IS_TRAY_SHOW_CURRENT_TASK": "Show current task in the tray / status menu (desktop mac/windows only)",
       "IS_TURN_OFF_MARKDOWN": "Turn off markdown parsing for task notes",
       "TASK_NOTES_TPL": "Task description template",
-      "TITLE": "Rôzne nastavenia"
+      "TITLE": "Rôzne nastavenia",
+      "IS_AUTO_START_NEXT_TASK": "Start tracking next task when marking current as done",
+      "IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "Upozorniť keď sa prekročí odhadovaný čas"
     },
     "POMODORO": {
       "BREAK_DURATION": "Dĺžka krátkych prestávok",
