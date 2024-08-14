@@ -8,4 +8,5 @@ export interface GithubCfg extends BaseIssueProviderCfg {
   repo: string | null;
   token: string | null;
   filterIssuesAssignedToMe: boolean;
+  importLabelsAsTags: boolean;
 }

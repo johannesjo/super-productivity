@@ -260,7 +260,8 @@
         "REPO": "\"Benutzername / Repositoryname\" für das Git-Repository, das Sie verfolgen möchten",
         "TOKEN": "Zugangstoken",
         "TOKEN_DESCRIPTION": "Erforderlich für den Zugriff auf private Repositories",
-        "IS_ASSIGNEE_FILTER": "Filtert die mir zugewiesenen Issues"
+        "IS_ASSIGNEE_FILTER": "Filtert die mir zugewiesenen Issues",
+        "IS_IMPORT_LABELS_AS_TAGS": "GitHub Labels als tags in SuperProductivity importieren"
       },
       "FORM_SECTION": {
         "HELP": "<p>Hier können Sie SuperProductivity so konfigurieren, dass offene GitHub-Issues für ein bestimmtes Repository im Aufgabenerstellungsbereich in der Tagesplanungsansicht aufgelistet werden. Sie werden als Vorschläge aufgeführt und enthalten einen Link zum Thema sowie weitere Informationen dazu.</p> <p>Außerdem können Sie alle offenen Issues automatisch zu Ihrem Aufgaben-Backlog hinzufügen und synchronisieren.</p>",
