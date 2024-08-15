@@ -35,11 +35,38 @@ export const selectTaskIdPlannedDayMap = createSelector(
   },
 );
 
+// Updated selectAllDuePlannedDay
+export const selectAllDuePlannedDay = (
+  taskRepeatCfgs: TaskRepeatCfg[],
+  icalEvents: ScheduleCalendarMapEntry[],
+  allPlannedTasks: TaskPlanned[],
+  todayStr: string,
+  // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+) => {
+  return createSelector(
+    selectTaskFeatureState,
+    selectPlannerState,
+    (taskState, plannerState): PlannerDay => {
+      return getPlannerDay(
+        todayStr,
+        todayStr,
+        taskState,
+        plannerState,
+        taskRepeatCfgs,
+        allPlannedTasks,
+        icalEvents,
+        false,
+      );
+      // and then map all to one single day
+    },
+  );
+};
+
+// Updated selectPlannerDays
 export const selectPlannerDays = (
   dayDates: string[],
   taskRepeatCfgs: TaskRepeatCfg[],
   todayListTaskIds: string[],
-  // TODO replace with better type
   icalEvents: ScheduleCalendarMapEntry[],
   allPlannedTasks: TaskPlanned[],
   todayStr: string,
@@ -62,49 +89,18 @@ export const selectPlannerDays = (
           .sort((a, b) => a.localeCompare(b)),
       ];
 
-      return dayDatesToUse.map((dayDate, dayIndex) => {
-        const isToday = dayDate === todayStr;
-        const currentDayDate = new Date(dayDate);
-        const currentDayTimestamp = currentDayDate.getTime();
-        const tIds = isToday ? unplannedTaskIdsToday : plannerState.days[dayDate] || [];
-        const normalTasks = tIds
-          .map((id) => taskState.entities[id] as TaskCopy)
-          // filter out deleted tasks
-          .filter((t) => !!t);
-
-        const { repeatProjectionsForDay, noStartTimeRepeatProjections } =
-          getAllRepeatableTasksForDay(taskRepeatCfgs, currentDayTimestamp);
-
-        // Inside selectPlannerDays, replace the relevant sections with:
-        const scheduledTaskItems = getScheduledTaskItems(allPlannedTasks, currentDayDate);
-        const icalEventsForDay = getIcalEventsForDay(icalEvents, currentDayDate);
-
-        const day: PlannerDay = {
-          isToday: isToday,
+      return dayDatesToUse.map((dayDate) =>
+        getPlannerDay(
           dayDate,
-          timeLimit: 0,
-          itemsTotal:
-            normalTasks.length +
-            noStartTimeRepeatProjections.length +
-            repeatProjectionsForDay.length +
-            scheduledTaskItems.length,
-          scheduledIItems: [
-            ...repeatProjectionsForDay,
-            ...icalEventsForDay,
-            ...scheduledTaskItems,
-          ].sort((a, b) => a.start - b.start),
-          tasks: normalTasks,
-          noStartTimeRepeatProjections,
-          // NOTE: calendar events are not considered
-          timeEstimate: getAllTimeSpent(
-            normalTasks,
-            repeatProjectionsForDay,
-            noStartTimeRepeatProjections,
-            scheduledTaskItems,
-          ),
-        };
-        return day;
-      });
+          todayStr,
+          taskState,
+          plannerState,
+          taskRepeatCfgs,
+          allPlannedTasks,
+          icalEvents,
+          unplannedTaskIdsToday,
+        ),
+      );
     },
   );
 };
@@ -128,6 +124,59 @@ export const selectPlannerDayMap = createSelector(
   },
 );
 
+// Extracted common function
+const getPlannerDay = (
+  dayDate: string,
+  todayStr: string,
+  taskState: any,
+  plannerState: any,
+  taskRepeatCfgs: TaskRepeatCfg[],
+  allPlannedTasks: TaskPlanned[],
+  icalEvents: ScheduleCalendarMapEntry[],
+  unplannedTaskIdsToday: string[] | false,
+): PlannerDay => {
+  const isToday = dayDate === todayStr;
+  const currentDayDate = new Date(dayDate);
+  const currentDayTimestamp = currentDayDate.getTime();
+  const tIds =
+    isToday && unplannedTaskIdsToday
+      ? unplannedTaskIdsToday
+      : plannerState.days[dayDate] || [];
+  const normalTasks = tIds
+    .map((id) => taskState.entities[id] as TaskCopy)
+    .filter((t) => !!t);
+
+  const { repeatProjectionsForDay, noStartTimeRepeatProjections } =
+    getAllRepeatableTasksForDay(taskRepeatCfgs, currentDayTimestamp);
+
+  const scheduledTaskItems = getScheduledTaskItems(allPlannedTasks, currentDayDate);
+  const icalEventsForDay = getIcalEventsForDay(icalEvents, currentDayDate);
+
+  return {
+    isToday: isToday,
+    dayDate,
+    timeLimit: 0,
+    itemsTotal:
+      normalTasks.length +
+      noStartTimeRepeatProjections.length +
+      repeatProjectionsForDay.length +
+      scheduledTaskItems.length,
+    scheduledIItems: [
+      ...repeatProjectionsForDay,
+      ...icalEventsForDay,
+      ...scheduledTaskItems,
+    ].sort((a, b) => a.start - b.start),
+    tasks: normalTasks,
+    noStartTimeRepeatProjections,
+    timeEstimate: getAllTimeSpent(
+      normalTasks,
+      repeatProjectionsForDay,
+      noStartTimeRepeatProjections,
+      scheduledTaskItems,
+    ),
+  };
+};
+
 const getAllTimeSpent = (
   normalTasks: TaskCopy[],
   taskRepeatProjections: ScheduleItemRepeatProjection[],
@@ -145,7 +194,7 @@ const getAllTimeSpent = (
   );
 };
 
-export const getAllRepeatableTasksForDay = (
+const getAllRepeatableTasksForDay = (
   taskRepeatCfgs: TaskRepeatCfg[],
   currentDayTimestamp: number,
 ): {

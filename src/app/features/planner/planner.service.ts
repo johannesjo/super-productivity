@@ -5,7 +5,11 @@ import { selectPlannedTasksById } from '../tasks/store/task.selectors';
 import { Store } from '@ngrx/store';
 import { CalendarIntegrationService } from '../calendar-integration/calendar-integration.service';
 import { PlannerDay } from './planner.model';
-import { selectPlannerDays, selectTaskIdPlannedDayMap } from './store/planner.selectors';
+import {
+  selectAllDuePlannedDay,
+  selectPlannerDays,
+  selectTaskIdPlannedDayMap,
+} from './store/planner.selectors';
 import { ReminderService } from '../reminder/reminder.service';
 import { TaskPlanned } from '../tasks/task.model';
 import { selectAllTaskRepeatCfgs } from '../task-repeat-cfg/store/task-repeat-cfg.reducer';
@@ -48,6 +52,19 @@ export class PlannerService {
       >;
     }),
     distinctUntilChanged(fastArrayCompare),
+  );
+
+  plannerDayForAllDueToday$: Observable<PlannerDay> = combineLatest([
+    this._store.select(selectAllTaskRepeatCfgs),
+    this._calendarIntegrationService.icalEvents$,
+    this.allScheduledTasks$,
+    this._globalTrackingIntervalService.todayDateStr$,
+  ]).pipe(
+    switchMap(([taskRepeatCfgs, icalEvents, allTasksPlanned, todayStr]) =>
+      this._store.select(
+        selectAllDuePlannedDay(taskRepeatCfgs, icalEvents, allTasksPlanned, todayStr),
+      ),
+    ),
   );
 
   // TODO this needs to be more performant

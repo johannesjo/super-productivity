@@ -42,17 +42,16 @@ export class PlannerInitialDialogEffects {
         switchMap((todayStr) =>
           combineLatest([
             of(todayStr),
-            this._plannerService.days$,
+            this._plannerService.plannerDayForAllDueToday$,
             this._store.pipe(select(selectTodayTaskIds)),
             this._store.pipe(select(selectPlannerState)),
           ]).pipe(first()),
         ),
-        exhaustMap(([todayStr, plannerDays, todayTaskIds, plannerState]) => {
-          const plannerDay = plannerDays.find((day) => day.dayDate === todayStr);
-
+        exhaustMap(([todayStr, plannerDay, todayTaskIds, plannerState]) => {
           if (todayStr === plannerState.addPlannedTasksDialogLastShown) {
             return EMPTY;
           }
+          console.log(plannerDay);
 
           if (!plannerDay) {
             devError('showDialogAfterAppLoad$(): No planner day found for today');
