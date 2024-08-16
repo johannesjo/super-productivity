@@ -8,13 +8,12 @@ import {
 import { WorkContextThemeCfg } from '../work-context/work-context.model';
 
 export const TODAY_TAG: Tag = {
-  id: 'TODAY',
   icon: 'wb_sunny',
-  title: 'Today',
   color: null,
   created: Date.now(),
-  taskIds: [],
   ...WORK_CONTEXT_DEFAULT_COMMON,
+  title: 'Today',
+  id: 'TODAY',
   theme: {
     ...WORK_CONTEXT_DEFAULT_THEME,
     primary: DEFAULT_TODAY_TAG_COLOR,
@@ -29,13 +28,12 @@ export const TODAY_TAG: Tag = {
 };
 
 export const DEFAULT_TAG: Tag = {
-  id: '',
   icon: null,
-  title: '',
   color: null,
   created: Date.now(),
-  taskIds: [],
   ...WORK_CONTEXT_DEFAULT_COMMON,
+  title: '',
+  id: '',
   theme: {
     ...WORK_CONTEXT_DEFAULT_THEME,
     primary: DEFAULT_TAG_COLOR,
@@ -43,13 +41,12 @@ export const DEFAULT_TAG: Tag = {
 };
 
 export const NO_LIST_TAG: Tag = {
-  id: 'NO_LIST',
   icon: 'question_mark',
-  title: 'no list scheduled',
   color: null,
   created: Date.now(),
-  taskIds: [],
   ...WORK_CONTEXT_DEFAULT_COMMON,
+  title: 'no list scheduled',
+  id: 'NO_LIST',
   theme: {
     ...WORK_CONTEXT_DEFAULT_THEME,
     primary: DEFAULT_TODAY_TAG_COLOR,

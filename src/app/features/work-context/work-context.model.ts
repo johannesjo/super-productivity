@@ -65,16 +65,16 @@ export interface WorkContextCommon {
   breakNr: BreakNr;
   advancedCfg: WorkContextAdvancedCfg;
   theme: WorkContextThemeCfg;
+  taskIds: string[];
+  id: string;
+  title: string;
 }
 
 export type WorkContextAdvancedCfgKey = keyof WorkContextAdvancedCfg;
 
 export interface WorkContextCopy extends WorkContextCommon {
-  id: string;
-  title: string;
   icon: string | null;
   routerLink: string;
-  taskIds: string[];
   isEnableBacklog?: boolean;
   backlogTaskIds?: string[];
   noteIds: string[];
