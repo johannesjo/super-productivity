@@ -2,6 +2,7 @@ import {
   ChangeDetectionStrategy,
   Component,
   ElementRef,
+  HostBinding,
   HostListener,
   OnDestroy,
   QueryList,
@@ -34,6 +35,7 @@ import { TourId } from '../../features/shepherd/shepherd-steps.const';
 import { ShepherdService } from '../../features/shepherd/shepherd.service';
 import { getGithubErrorUrl } from 'src/app/core/error-handler/global-error-handler.util';
 import { IS_MOUSE_PRIMARY } from '../../util/is-mouse-primary';
+import { GlobalConfigService } from '../../features/config/global-config.service';
 
 @Component({
   selector: 'side-nav',
@@ -86,6 +88,12 @@ export class SideNavComponent implements OnDestroy {
   private _subs: Subscription = new Subscription();
   private _cachedIssueUrl?: string;
 
+  @HostBinding('class') get cssClass(): string {
+    console.log('XXXXXXX', this._globalConfigService.cfg?.misc.isUseMinimalNav);
+
+    return this._globalConfigService.cfg?.misc.isUseMinimalNav ? 'minimal-nav' : '';
+  }
+
   constructor(
     public readonly tagService: TagService,
     public readonly projectService: ProjectService,
@@ -95,6 +103,7 @@ export class SideNavComponent implements OnDestroy {
     private readonly _taskService: TaskService,
     private readonly _dragulaService: DragulaService,
     private readonly _shepherdService: ShepherdService,
+    private readonly _globalConfigService: GlobalConfigService,
   ) {
     this._dragulaService.createGroup(this.PROJECTS_SIDE_NAV, {
       direction: 'vertical',

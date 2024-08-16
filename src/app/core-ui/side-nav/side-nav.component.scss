@@ -13,6 +13,28 @@ $spacer: $s;
   min-height: 100vh;
   // mobile viewport bug fix
   min-height: -webkit-fill-available;
+
+  &.minimal-nav {
+    max-width: 52px;
+
+    .expand-btn mat-icon {
+      margin-left: 0;
+    }
+
+    .expand-btn .title {
+      display: none;
+    }
+
+    ::ng-deep {
+      .settings-btn {
+        display: none !important;
+      }
+
+      .mat-mdc-menu-item {
+        padding: 0 13px;
+      }
+    }
+  }
 }
 
 @media (min-width: $side-nav-width-switch-l) {

@@ -119,6 +119,13 @@ export const MISC_SETTINGS_FORM_CFG: ConfigFormSection<MiscConfig> = {
       },
     },
     {
+      key: 'isUseMinimalNav',
+      type: 'checkbox',
+      templateOptions: {
+        label: T.GCF.MISC.IS_USE_MINIMAL_SIDE_NAV,
+      },
+    },
+    {
       key: 'isDisableAnimations',
       type: 'checkbox',
       templateOptions: {
