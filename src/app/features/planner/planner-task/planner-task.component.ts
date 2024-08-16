@@ -28,7 +28,7 @@ import { TaskAttachmentService } from '../../tasks/task-attachment/task-attachme
 import { Store } from '@ngrx/store';
 import { selectTaskByIdWithSubTaskData } from '../../tasks/store/task.selectors';
 import { updateTask } from '../../tasks/store/task.actions';
-import { DialogPlanForDayComponent } from '../dialog-plan-for-day/dialog-plan-for-day.component';
+import { DialogScheduleTaskComponent } from '../dialog-schedule-task/dialog-schedule-task.component';
 import { DialogTaskAdditionalInfoPanelComponent } from '../../tasks/dialog-task-additional-info-panel/dialog-task-additional-info-panel.component';
 
 @Component({
@@ -194,7 +194,7 @@ export class PlannerTaskComponent extends BaseComponent implements OnInit, OnDes
 
   scheduleTask(): void {
     this._matDialog
-      .open(DialogPlanForDayComponent, {
+      .open(DialogScheduleTaskComponent, {
         // we focus inside dialog instead
         autoFocus: false,
         data: { task: this.task, day: this.day },

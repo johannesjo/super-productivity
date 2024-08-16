@@ -73,7 +73,7 @@ import { TranslateService } from '@ngx-translate/core';
 import { getTaskRepeatInfoText } from './get-task-repeat-info-text.util';
 import { IS_TOUCH_PRIMARY } from '../../../util/is-mouse-primary';
 import { PlannerService } from '../../planner/planner.service';
-import { DialogPlanForDayComponent } from '../../planner/dialog-plan-for-day/dialog-plan-for-day.component';
+import { DialogScheduleTaskComponent } from '../../planner/dialog-schedule-task/dialog-schedule-task.component';
 import { getWorklogStr } from '../../../util/get-work-log-str';
 import { DragulaService } from 'ng2-dragula';
 
@@ -430,7 +430,7 @@ export class TaskAdditionalInfoComponent implements AfterViewInit, OnDestroy {
   }
 
   planForDay(): void {
-    this._matDialog.open(DialogPlanForDayComponent, {
+    this._matDialog.open(DialogScheduleTaskComponent, {
       // we focus inside dialog instead
       autoFocus: false,
       restoreFocus: true,

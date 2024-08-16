@@ -1,18 +1,18 @@
 // import { ComponentFixture, TestBed } from '@angular/core/testing';
 //
-// import { DialogPlanForDayComponent } from './dialog-plan-for-day.component';
+// import { DialogScheduleTaskComponent } from './dialog-plan-for-day.component';
 //
-// describe('DialogPlanForDayComponent', () => {
-//   let component: DialogPlanForDayComponent;
-//   let fixture: ComponentFixture<DialogPlanForDayComponent>;
+// describe('DialogScheduleTaskComponent', () => {
+//   let component: DialogScheduleTaskComponent;
+//   let fixture: ComponentFixture<DialogScheduleTaskComponent>;
 //
 //   beforeEach(async () => {
 //     await TestBed.configureTestingModule({
-//       imports: [DialogPlanForDayComponent]
+//       imports: [DialogScheduleTaskComponent]
 //     })
 //     .compileComponents();
 //
-//     fixture = TestBed.createComponent(DialogPlanForDayComponent);
+//     fixture = TestBed.createComponent(DialogScheduleTaskComponent);
 //     component = fixture.componentInstance;
 //     fixture.detectChanges();
 //   });

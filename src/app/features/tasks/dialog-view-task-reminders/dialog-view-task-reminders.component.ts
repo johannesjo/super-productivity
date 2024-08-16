@@ -13,7 +13,7 @@ import { unique } from '../../../util/unique';
 import { getTomorrow } from '../../../util/get-tomorrow';
 import { uniqueByProp } from '../../../util/unique-by-prop';
 import { ProjectService } from '../../project/project.service';
-import { DialogPlanForDayComponent } from '../../planner/dialog-plan-for-day/dialog-plan-for-day.component';
+import { DialogScheduleTaskComponent } from '../../planner/dialog-schedule-task/dialog-schedule-task.component';
 
 const M = 1000 * 60;
 
@@ -132,7 +132,7 @@ export class DialogViewTaskRemindersComponent implements OnDestroy {
   editReminder(task: TaskWithReminderData, isCloseAfter: boolean = false): void {
     this._subs.add(
       this._matDialog
-        .open(DialogPlanForDayComponent, {
+        .open(DialogScheduleTaskComponent, {
           restoreFocus: true,
           data: { task },
         })

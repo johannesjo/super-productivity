@@ -38,7 +38,7 @@ import { selectTaskByIdWithSubTaskData } from '../../tasks/store/task.selectors'
 import { deleteTask, updateTask } from '../../tasks/store/task.actions';
 import { DialogTimeEstimateComponent } from '../../tasks/dialog-time-estimate/dialog-time-estimate.component';
 import { IS_TOUCH_PRIMARY } from '../../../util/is-mouse-primary';
-import { DialogPlanForDayComponent } from '../../planner/dialog-plan-for-day/dialog-plan-for-day.component';
+import { DialogScheduleTaskComponent } from '../../planner/dialog-schedule-task/dialog-schedule-task.component';
 import { getWorklogStr } from '../../../util/get-work-log-str';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { DialogTaskAdditionalInfoPanelComponent } from '../../tasks/dialog-task-additional-info-panel/dialog-task-additional-info-panel.component';
@@ -303,7 +303,7 @@ export class ScheduleEventComponent implements OnInit {
   }
 
   scheduleTask(): void {
-    this._matDialog.open(DialogPlanForDayComponent, {
+    this._matDialog.open(DialogScheduleTaskComponent, {
       // we focus inside dialog instead
       autoFocus: false,
       data: {

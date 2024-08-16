@@ -24,7 +24,7 @@ import { millisecondsDiffToRemindOption } from '../../tasks/util/remind-option-t
 import { TaskService } from '../../tasks/task.service';
 import { ReminderService } from '../../reminder/reminder.service';
 import { AddTasksForTomorrowService } from '../../add-tasks-for-tomorrow/add-tasks-for-tomorrow.service';
-import { DialogPlanForDayComponent } from '../dialog-plan-for-day/dialog-plan-for-day.component';
+import { DialogScheduleTaskComponent } from '../dialog-schedule-task/dialog-schedule-task.component';
 
 @Component({
   selector: 'dialog-add-planned-tasks',
@@ -100,7 +100,7 @@ export class DialogAddPlannedTasksComponent {
       }
     }
 
-    this._matDialog.open(DialogPlanForDayComponent, {
+    this._matDialog.open(DialogScheduleTaskComponent, {
       data: {
         task,
       },

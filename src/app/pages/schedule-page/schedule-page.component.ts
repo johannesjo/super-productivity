@@ -18,7 +18,7 @@ import { TaskRepeatCfg } from '../../features/task-repeat-cfg/task-repeat-cfg.mo
 import { TranslateService } from '@ngx-translate/core';
 import { DialogEditTaskRepeatCfgComponent } from '../../features/task-repeat-cfg/dialog-edit-task-repeat-cfg/dialog-edit-task-repeat-cfg.component';
 import { TaskRepeatCfgService } from '../../features/task-repeat-cfg/task-repeat-cfg.service';
-import { DialogPlanForDayComponent } from '../../features/planner/dialog-plan-for-day/dialog-plan-for-day.component';
+import { DialogScheduleTaskComponent } from '../../features/planner/dialog-schedule-task/dialog-schedule-task.component';
 
 @Component({
   selector: 'schedule-page',
@@ -68,7 +68,7 @@ export class SchedulePageComponent {
   }
 
   editReminder(task: TaskWithReminderData): void {
-    this._matDialog.open(DialogPlanForDayComponent, {
+    this._matDialog.open(DialogScheduleTaskComponent, {
       restoreFocus: true,
       data: { task },
     });

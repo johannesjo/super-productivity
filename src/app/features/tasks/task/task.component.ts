@@ -56,7 +56,7 @@ import { SnackService } from '../../../core/snack/snack.service';
 import { isToday } from '../../../util/is-today.util';
 import { IS_TOUCH_PRIMARY } from '../../../util/is-mouse-primary';
 import { KeyboardConfig } from '../../config/keyboard-config.model';
-import { DialogPlanForDayComponent } from '../../planner/dialog-plan-for-day/dialog-plan-for-day.component';
+import { DialogScheduleTaskComponent } from '../../planner/dialog-schedule-task/dialog-schedule-task.component';
 import { PlannerService } from '../../planner/planner.service';
 
 @Component({
@@ -285,7 +285,7 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
       await this.plannerService.plannedTaskDayMap$.pipe(first()).toPromise()
     )[this.task.id];
     this._matDialog
-      .open(DialogPlanForDayComponent, {
+      .open(DialogScheduleTaskComponent, {
         // we focus inside dialog instead
         autoFocus: false,
         data: { task: this.task, day: plannedDayForTask },

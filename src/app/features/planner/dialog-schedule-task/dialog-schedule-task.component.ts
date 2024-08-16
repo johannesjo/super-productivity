@@ -35,15 +35,15 @@ import { ReminderService } from '../../reminder/reminder.service';
 import { getDateTimeFromClockString } from '../../../util/get-date-time-from-clock-string';
 
 @Component({
-  selector: 'dialog-plan-for-day',
+  selector: 'dialog-schedule-task',
   standalone: true,
   imports: [UiModule, CommonModule, FormsModule],
-  templateUrl: './dialog-plan-for-day.component.html',
-  styleUrl: './dialog-plan-for-day.component.scss',
+  templateUrl: './dialog-schedule-task.component.html',
+  styleUrl: './dialog-schedule-task.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
   animations: [expandFadeAnimation],
 })
-export class DialogPlanForDayComponent implements AfterViewInit {
+export class DialogScheduleTaskComponent implements AfterViewInit {
   T: typeof T = T;
   minDate = new Date().toISOString();
   @ViewChild(MatCalendar, { static: true }) calendar!: MatCalendar<Date>;
@@ -60,7 +60,7 @@ export class DialogPlanForDayComponent implements AfterViewInit {
 
   constructor(
     @Inject(MAT_DIALOG_DATA) public data: { task: Task; day?: string },
-    private _matDialogRef: MatDialogRef<DialogPlanForDayComponent>,
+    private _matDialogRef: MatDialogRef<DialogScheduleTaskComponent>,
     private _cd: ChangeDetectorRef,
     private _store: Store,
     private _snackService: SnackService,

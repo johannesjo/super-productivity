@@ -14,7 +14,7 @@ import { TaskService } from '../../tasks/task.service';
 import { ReminderService } from '../../reminder/reminder.service';
 import { moveTaskInTagList } from '../../tag/store/tag.actions';
 import { DateService } from '../../../core/date/date.service';
-import { DialogPlanForDayComponent } from '../dialog-plan-for-day/dialog-plan-for-day.component';
+import { DialogScheduleTaskComponent } from '../dialog-schedule-task/dialog-schedule-task.component';
 
 @Component({
   selector: 'planner-day',
@@ -98,7 +98,7 @@ export class PlannerDayComponent {
       }
     }
 
-    this._matDialog.open(DialogPlanForDayComponent, {
+    this._matDialog.open(DialogScheduleTaskComponent, {
       data: {
         task,
       },
