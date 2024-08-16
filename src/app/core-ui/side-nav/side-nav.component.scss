@@ -93,166 +93,17 @@ section {
 
 // LIST-ITEMS
 // ----------
-.tag,
-.project {
-  display: flex;
-  position: relative;
-  align-items: stretch;
-  justify-content: stretch;
 
-  button .badge {
-    display: none;
-  }
-
-  &.hasTasks {
-    button .badge {
-      display: block;
-      z-index: 10;
-      position: absolute;
-      line-height: 1;
-      right: 100%;
-      text-align: center;
-      bottom: 6px;
-      font-size: 10px;
-      min-width: 18px;
-      padding: 1px 4px 0;
-      pointer-events: none;
-      border: 1px solid $light-theme-extra-border-color;
-      background: #fff;
-      border-radius: 12px;
-      margin-right: -49px;
-
-      // avoid affecting drag handle
-      pointer-events: none;
-
-      @include darkTheme() {
-        border-color: $dark-theme-extra-border-color;
-        background: $dark-theme-bg-lighter;
-      }
-    }
-  }
-
-  &.isHidden {
-    display: none !important;
-  }
-
-  button:first-of-type {
-    flex-grow: 1;
-  }
-
-  button:last-of-type {
-    border-radius: 0;
-    align-self: stretch;
-    display: inline-flex;
-    min-width: 48px;
-    width: 40px;
-    height: 40px;
-    padding: 0;
-    align-items: center;
-    justify-content: center;
-
-    .mat-mdc-button-touch-target {
-      width: 40px;
-      height: 40px;
-    }
-
-    @include mousePrimaryDevice {
-      opacity: 0;
-      display: none;
-    }
-  }
-
-  &:focus,
-  &:hover {
-    button:last-of-type {
-      @include mousePrimaryDevice {
-        opacity: 0.8;
-        display: inline-flex;
-      }
-    }
-  }
-
-  button:last-of-type {
-    @include mousePrimaryDevice {
-      opacity: 0.8;
-      display: inline-flex;
-    }
-  }
-}
-
-// color bar left styles
-.tag,
-.project,
-.route-link {
-  .tag-color,
-  .project-color,
-  &.isActiveRoute:before {
-    content: '';
-    position: absolute;
-    left: 0;
-    top: 0;
-    bottom: 0;
-    width: $s * 0.5;
-    background-color: $c-primary;
-  }
-
-  .tag-color,
-  .project-color {
-    opacity: 0;
-  }
-
-  &.isActiveContext,
-  &:focus,
-  &:hover {
-    .tag-color,
-    .project-color {
-      opacity: 1;
-    }
-  }
-}
-
-.tag-settings-btn,
-.project-settings-btn {
-  border-radius: 0 !important;
-
-  ::ng-deep {
-    .mat-mdc-button-persistent-ripple {
-      border-radius: 0 !important;
-    }
-  }
-
-  .project-settings-btn,
-  .tag-settings-btn {
-    border-radius: 0;
-  }
-}
-
-.route-link.isActiveRoute,
-.tag.isActiveContext,
-.project.isActiveContext {
+.route-link.isActiveRoute {
   background-color: mat-css-color-primary(500, 0.04);
 }
 
-.route-link.isActiveRoute,
-.tag.isActiveContext button,
-.project.isActiveContext button {
+.route-link.isActiveRoute {
   font-weight: bold;
 }
 
-.tag.today-tag.isActiveContext button {
-  font-weight: normal;
-
-  &.isActiveRoute {
-    font-weight: bold;
-  }
-}
-
 .route-link.isActiveRoute,
-.route-link.isActiveRoute mat-icon,
-.tag.isActiveContext mat-icon,
-.tag.isActiveContext button,
-.project.isActiveContext mat-icon,
-.project.isActiveContext button {
+.route-link.isActiveRoute mat-icon {
   // does not look good for dark theme...
   @include lightTheme {
     color: $c-primary-800;
@@ -290,21 +141,6 @@ section {
 
   &.isExpanded ::ng-deep mat-icon:last-of-type {
     transform: rotate(180deg);
-  }
-}
-
-.drag-handle {
-  /* Firefox 1.5-26 */
-  position: relative;
-  @include grabCursor();
-
-  &:after {
-    content: '';
-    position: absolute;
-    top: -$s;
-    left: -$s;
-    right: -$s;
-    bottom: -$s;
   }
 }
 

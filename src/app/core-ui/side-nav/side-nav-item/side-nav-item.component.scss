@@ -9,8 +9,7 @@
   }
 }
 
-:host,
-.project {
+:host {
   display: flex;
   position: relative;
   align-items: stretch;
@@ -87,21 +86,11 @@
       }
     }
   }
-
-  button:last-of-type {
-    @include mousePrimaryDevice {
-      opacity: 0.8;
-      display: inline-flex;
-    }
-  }
 }
 
 // color bar left styles
-:host,
-.project,
-.route-link {
-  .tag-color,
-  .project-color,
+:host {
+  .color-bar,
   &.isActiveRoute:before {
     content: '';
     position: absolute;
@@ -112,23 +101,20 @@
     background-color: $c-primary;
   }
 
-  .tag-color,
-  .project-color {
+  .color-bar {
     opacity: 0;
   }
 
   &.isActiveContext,
   &:focus,
   &:hover {
-    .tag-color,
-    .project-color {
+    .color-bar {
       opacity: 1;
     }
   }
 }
 
-.tag-settings-btn,
-.project-settings-btn {
+.settings-btn {
   border-radius: 0 !important;
 
   ::ng-deep {
@@ -137,29 +123,8 @@
     }
   }
 
-  .project-settings-btn,
-  .tag-settings-btn {
+  .settings-btn {
     border-radius: 0;
-  }
-}
-
-.route-link.isActiveRoute,
-.tag.isActiveContext,
-.project.isActiveContext {
-  background-color: mat-css-color-primary(500, 0.04);
-}
-
-.route-link.isActiveRoute,
-.tag.isActiveContext button,
-.project.isActiveContext button {
-  font-weight: bold;
-}
-
-.tag.today-tag.isActiveContext button {
-  font-weight: normal;
-
-  &.isActiveRoute {
-    font-weight: bold;
   }
 }
 
@@ -173,52 +138,6 @@
     mat-icon {
       color: $c-primary-800;
     }
-  }
-}
-
-.route-link.isActiveRoute,
-.route-link.isActiveRoute mat-icon,
-.tag.isActiveContext mat-icon,
-.tag.isActiveContext button,
-.project.isActiveContext mat-icon,
-.project.isActiveContext button {
-  // does not look good for dark theme...
-  @include lightTheme {
-    color: $c-primary-800;
-  }
-}
-
-// OTHER-ITEMS
-// ----------
-
-.expand-btn {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  font-weight: bold;
-
-  &:focus,
-  &:hover {
-    @include darkTheme {
-      background: rgba(255, 255, 255, 0.1);
-    }
-    @include lightTheme {
-      background: rgba(
-        var(--palette-background-hover),
-        var(--palette-background-hover-alpha, 1)
-      );
-    }
-  }
-
-  ::ng-deep mat-icon:last-of-type {
-    margin-left: auto;
-    margin-right: 0;
-    transition: $transition-standard;
-    order: 2;
-  }
-
-  &.isExpanded ::ng-deep mat-icon:last-of-type {
-    transform: rotate(180deg);
   }
 }
 
