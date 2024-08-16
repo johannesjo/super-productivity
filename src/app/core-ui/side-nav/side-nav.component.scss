@@ -143,6 +143,9 @@ section {
   @include lightTheme {
     color: $c-primary-800;
   }
+  @include darkTheme {
+    color: $c-primary;
+  }
 }
 
 // OTHER-ITEMS
