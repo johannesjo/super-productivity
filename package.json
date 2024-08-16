@@ -208,7 +208,7 @@
     "shepherd.js": "^11.2.0",
     "stacktrace-js": "^2.0.1",
     "start-server-and-test": "^2.0.5",
-    "ts-node": "~10.9.1",
+    "ts-node": "~10.9.2",
     "tslib": "^2.4.1",
     "typescript": "~5.4.5",
     "utils-decorators": "^2.0.8",
