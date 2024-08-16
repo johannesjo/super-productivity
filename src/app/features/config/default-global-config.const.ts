@@ -137,9 +137,9 @@ export const DEFAULT_GLOBAL_CONFIG: GlobalConfigState = {
     defaultEstimateSubTasks: 0,
     isNotifyWhenTimeEstimateExceeded: true,
     isAutoStartNextTask: false,
-    isTrackingReminderEnabled: true,
+    isTrackingReminderEnabled: false,
     isTrackingReminderShowOnMobile: false,
-    trackingReminderMinTime: 2 * minute,
+    trackingReminderMinTime: 5 * minute,
   },
   calendarIntegration: {
     calendarProviders: [],
