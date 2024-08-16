@@ -62,6 +62,33 @@ export const selectAllDuePlannedDay = (
   );
 };
 
+export const selectAllDuePlannedOnDay = (
+  taskRepeatCfgs: TaskRepeatCfg[],
+  icalEvents: ScheduleCalendarMapEntry[],
+  allPlannedTasks: TaskPlanned[],
+  dayToGet: string,
+  todayStr: string,
+  // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+) => {
+  return createSelector(
+    selectTaskFeatureState,
+    selectPlannerState,
+    (taskState, plannerState): PlannerDay => {
+      return getPlannerDay(
+        dayToGet,
+        todayStr,
+        taskState,
+        plannerState,
+        taskRepeatCfgs,
+        allPlannedTasks,
+        icalEvents,
+        false,
+      );
+      // and then map all to one single day
+    },
+  );
+};
+
 // Updated selectPlannerDays
 export const selectPlannerDays = (
   dayDates: string[],

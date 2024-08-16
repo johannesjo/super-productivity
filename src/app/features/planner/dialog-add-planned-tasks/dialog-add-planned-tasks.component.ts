@@ -17,7 +17,6 @@ import { PlannerService } from '../planner.service';
 import { combineLatest } from 'rxjs';
 import { getAllMissingPlannedTaskIdsForDay } from '../util/get-all-missing-planned-task-ids-for-day';
 import { TODAY_TAG } from '../../tag/tag.const';
-import { updateTaskTags } from '../../tasks/store/task.actions';
 import { ScheduleItemType } from '../planner.model';
 import { TaskCopy } from '../../tasks/task.model';
 import { DAY_STARTS_AT_DEFAULT_H } from '../../../app.constants';
@@ -27,6 +26,7 @@ import { ReminderCopy } from '../../reminder/reminder.model';
 import { millisecondsDiffToRemindOption } from '../../tasks/util/remind-option-to-milliseconds';
 import { TaskService } from '../../tasks/task.service';
 import { ReminderService } from '../../reminder/reminder.service';
+import { AddTasksForTomorrowService } from '../../add-tasks-for-tomorrow/add-tasks-for-tomorrow.service';
 
 @Component({
   selector: 'dialog-add-planned-tasks',
@@ -62,6 +62,7 @@ export class DialogAddPlannedTasksComponent {
     private _matDialog: MatDialog,
     private _taskService: TaskService,
     private _reminderService: ReminderService,
+    private _addTasksForTomorrowService: AddTasksForTomorrowService,
   ) {
     // prevent close since it does not reappear
     _matDialogRef.disableClose = true;
@@ -84,11 +85,7 @@ export class DialogAddPlannedTasksComponent {
 
   async addTasksToToday(): Promise<void> {
     const missingTasks = await this._missingTasks$.pipe(first()).toPromise();
-    missingTasks.reverse().forEach((task) => {
-      this._store.dispatch(
-        updateTaskTags({ task, newTagIds: [TODAY_TAG.id, ...task.tagIds] }),
-      );
-    });
+    this._addTasksForTomorrowService.movePlannedTasksToToday(missingTasks);
     this._close();
   }
 

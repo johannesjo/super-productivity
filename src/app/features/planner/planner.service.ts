@@ -7,6 +7,7 @@ import { CalendarIntegrationService } from '../calendar-integration/calendar-int
 import { PlannerDay } from './planner.model';
 import {
   selectAllDuePlannedDay,
+  selectAllDuePlannedOnDay,
   selectPlannerDays,
   selectTaskIdPlannedDayMap,
 } from './store/planner.selectors';
@@ -17,6 +18,7 @@ import { DateService } from '../../core/date/date.service';
 import { fastArrayCompare } from '../../util/fast-array-compare';
 import { GlobalTrackingIntervalService } from '../../core/global-tracking-interval/global-tracking-interval.service';
 import { selectTodayTaskIds } from '../work-context/store/work-context.selectors';
+import { getWorklogStr } from '../../util/get-work-log-str';
 
 @Injectable({
   providedIn: 'root',
@@ -65,6 +67,30 @@ export class PlannerService {
         selectAllDuePlannedDay(taskRepeatCfgs, icalEvents, allTasksPlanned, todayStr),
       ),
     ),
+  );
+
+  plannerDayForAllDueTomorrow$: Observable<PlannerDay> = combineLatest([
+    this._store.select(selectAllTaskRepeatCfgs),
+    this._calendarIntegrationService.icalEvents$,
+    this.allScheduledTasks$,
+    this._globalTrackingIntervalService.todayDateStr$,
+  ]).pipe(
+    switchMap(([taskRepeatCfgs, icalEvents, allTasksPlanned, todayStr]) => {
+      const tomorrow = new Date(todayStr);
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      const tomorrowStr = getWorklogStr(tomorrow);
+      console.log('tomorrowStr', tomorrowStr);
+
+      return this._store.select(
+        selectAllDuePlannedOnDay(
+          taskRepeatCfgs,
+          icalEvents,
+          allTasksPlanned,
+          tomorrowStr,
+          todayStr,
+        ),
+      );
+    }),
   );
 
   // TODO this needs to be more performant
