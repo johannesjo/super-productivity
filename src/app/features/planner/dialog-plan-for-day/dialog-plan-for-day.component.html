@@ -1,11 +1,55 @@
-<h4>{{ T.F.PLANNER.D.PLAN_FOR_DAY.TITLE|translate }}</h4>
+<!--<h4>{{ T.F.PLANNER.D.PLAN_FOR_DAY.TITLE|translate }}</h4>-->
+<h4>Schedule Task {{ selectedTime ? 'with Time' : 'for Day' }}</h4>
 <mat-calendar
-  [(selected)]="selectedDate"
+  (keydown)="onKeyDownOnCalendar($event)"
+  [selected]="selectedDate"
   [minDate]="minDate"
+  (click)="onCalendarClick($event)"
   (selectedChange)="dateSelected($event)"
   #calendar
 ></mat-calendar>
 
+<div class="form-ctrl-wrapper">
+  <mat-form-field class="example-full-width">
+    <mat-label>Time</mat-label>
+    <mat-icon matPrefix>schedule</mat-icon>
+    <input
+      type="time"
+      (focus)="onTimeFocus()"
+      [(ngModel)]="selectedTime"
+      step="60"
+      matInput
+      (keydown)="onTimeKeyDown($event)"
+    />
+    <mat-icon
+      style="cursor: pointer"
+      *ngIf="selectedTime"
+      matSuffix
+      (click)="onTimeClear($event)"
+      >close
+    </mat-icon>
+  </mat-form-field>
+
+  <mat-form-field
+    [@expandFade]
+    *ngIf="selectedTime"
+  >
+    <mat-icon matPrefix>alarm</mat-icon>
+
+    <mat-label>{{ (T.F.TASK.D_REMINDER_ADD.REMIND_AT|translate) }}</mat-label>
+    <mat-select
+      [(ngModel)]="selectedReminderCfgId"
+      name="type"
+      required="true"
+    >
+      @for (remindOption of remindAvailableOptions; track remindOption.value) {
+      <mat-option [value]="remindOption.value">
+        {{ (remindOption.label|translate) }}
+      </mat-option>
+      }
+    </mat-select>
+  </mat-form-field>
+</div>
 <div
   class="msg"
   *ngIf="data.task.reminderId"
@@ -13,43 +57,39 @@
   {{ T.F.PLANNER.D.PLAN_FOR_DAY.REMINDER_WARNING|translate }}
 </div>
 
-@if (data.day) {
-
-<mat-dialog-actions align="center">
+<mat-dialog-actions align="end">
+  @if (data.day || data.task.plannedAt) {
   <button
     (click)="remove()"
     color="warn"
-    mat-stroked-button
+    mat-button
   >
     <mat-icon>delete_forever</mat-icon>
-    {{ T.F.PLANNER.D.PLAN_FOR_DAY.REMOVE_PLAN_DATE|translate }}
+    Remove
+    <!--    {{ T.F.PLANNER.D.PLAN_FOR_DAY.REMOVE_PLAN_DATE|translate }}-->
+  </button>
+  } @else {
+  <button
+    color="primary"
+    mat-button
+    type="button"
+    (click)="close()"
+  >
+    {{ T.G.CANCEL|translate }}
+  </button>
+  }
+
+  <button
+    color="primary"
+    mat-stroked-button
+    (click)="submit()"
+  >
+    @if (selectedTime) {
+    <mat-icon>schedule</mat-icon>
+    } @else {
+    <mat-icon>today</mat-icon>
+    } Schedule
+    <!--    {{ selectedTime ? T.F.PLANNER.D.PLAN_FOR_DAY.SCHEDULE_WITH_TIME|translate :-->
+    <!--    T.F.PLANNER.D.PLAN_FOR_DAY.SCHEDULE_FOR_DAY|translate }}-->
   </button>
 </mat-dialog-actions>
-}
-
-<!--<mat-dialog-actions align="end">-->
-<!--  <button-->
-<!--    (click)="remove()"-->
-<!--    color="warn"-->
-<!--    mat-stroked-button-->
-<!--  >-->
-<!--    <mat-icon>sync_disabled</mat-icon>-->
-<!--    {{T.F.SYNC.D_PERMISSION.DISABLE_SYNC|translate}}-->
-<!--  </button>-->
-
-<!--  <button-->
-<!--    color="primary"-->
-<!--    mat-button-->
-<!--    type="button"-->
-<!--    (click)="close()"-->
-<!--  >-->
-<!--    {{ T.G.CANCEL|translate }}-->
-<!--  </button>-->
-
-<!--  <button-->
-<!--    color="primary"-->
-<!--    mat-stroked-button-->
-<!--  >-->
-<!--    Plan for day-->
-<!--  </button>-->
-<!--</mat-dialog-actions>-->

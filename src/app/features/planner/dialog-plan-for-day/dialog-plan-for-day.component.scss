@@ -1,5 +1,26 @@
 @import '../../../../variables.scss';
 
+:host,
+:host * {
+  -webkit-tap-highlight-color: transparent;
+}
+
+:host {
+  display: flex;
+  flex-direction: column;
+  justify-content: stretch;
+  align-items: stretch;
+  user-select: none;
+
+  :host-context([dir='rtl']) {
+    direction: rtl;
+  }
+
+  mat-form-field {
+    width: 100%;
+  }
+}
+
 :host {
   min-width: 320px;
   max-width: 320px;
@@ -35,6 +56,16 @@
   padding-top: 16px;
   font-size: 14px;
   font-weight: bold;
+}
+
+.form-ctrl-wrapper {
+  margin: 0 16px;
+  margin-top: 16px;
+  //border-top: 1px solid $light-theme-separator-color;
+
+  @include darkTheme() {
+    border-color: $dark-theme-separator-color;
+  }
 }
 
 .msg {

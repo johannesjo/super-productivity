@@ -79,8 +79,6 @@ export class PlannerService {
       const tomorrow = new Date(todayStr);
       tomorrow.setDate(tomorrow.getDate() + 1);
       const tomorrowStr = getWorklogStr(tomorrow);
-      console.log('tomorrowStr', tomorrowStr);
-
       return this._store.select(
         selectAllDuePlannedOnDay(
           taskRepeatCfgs,
