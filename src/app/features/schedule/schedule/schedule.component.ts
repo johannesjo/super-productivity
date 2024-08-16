@@ -278,7 +278,7 @@ export class ScheduleComponent implements AfterViewInit, OnDestroy {
       .pipe(
         takeUntilDestroyed(this.destroyRef),
         first(),
-        delay(300),
+        delay(400),
         // switchMap((wCfg) => timer(300, 300).pipe(mapTo(wCfg))),
         // take(2),
       )
@@ -286,7 +286,7 @@ export class ScheduleComponent implements AfterViewInit, OnDestroy {
         if (workStartCfg) {
           document
             .querySelector('.work-start')
-            ?.scrollIntoView({ behavior: 'auto', block: 'start' });
+            ?.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
       });
   }
