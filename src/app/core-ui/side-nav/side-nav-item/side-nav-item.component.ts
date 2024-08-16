@@ -1,4 +1,10 @@
-import { ChangeDetectionStrategy, Component, HostBinding, input } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  HostBinding,
+  input,
+  ViewChild,
+} from '@angular/core';
 import { RouterLink, RouterModule } from '@angular/router';
 import { UiModule } from '../../../ui/ui.module';
 import { WorkContextMenuModule } from '../../work-context-menu/work-context-menu.module';
@@ -6,6 +12,7 @@ import {
   WorkContextCommon,
   WorkContextType,
 } from '../../../features/work-context/work-context.model';
+import { MatMenuTrigger } from '@angular/material/menu';
 
 @Component({
   selector: 'side-nav-item',
@@ -21,6 +28,10 @@ export class SideNavItemComponent {
   ico = input.required<string>();
   activeWorkContextId = input.required<string>();
 
+  contextMenuPosition: { x: string; y: string } = { x: '0px', y: '0px' };
+  @ViewChild('contextMenuTriggerEl', { static: true, read: MatMenuTrigger })
+  contextMenu!: MatMenuTrigger;
+
   @HostBinding('class.hasTasks')
   get workContextHasTasks(): boolean {
     return this.workContext().taskIds.length > 0;
@@ -29,5 +40,16 @@ export class SideNavItemComponent {
   @HostBinding('class.isActiveContext')
   get isActiveContext(): boolean {
     return this.workContext().id === this.activeWorkContextId();
+  }
+
+  openContextMenu(event: TouchEvent | MouseEvent): void {
+    event.preventDefault();
+    event.stopPropagation();
+    event.stopImmediatePropagation();
+    this.contextMenuPosition.x =
+      ('touches' in event ? event.touches[0].clientX : event.clientX) + 'px';
+    this.contextMenuPosition.y =
+      ('touches' in event ? event.touches[0].clientY : event.clientY) + 'px';
+    this.contextMenu.openMenu();
   }
 }

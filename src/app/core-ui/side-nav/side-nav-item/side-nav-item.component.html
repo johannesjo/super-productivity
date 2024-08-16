@@ -1,4 +1,11 @@
 <div
+  #contextMenuTriggerEl
+  [matMenuTriggerFor]="contextMenu"
+  [style.left]="contextMenuPosition.x"
+  [style.top]="contextMenuPosition.y"
+  style="visibility: hidden; position: fixed"
+></div>
+<div
   [style.background]="workContext().theme.primary"
   class="color-bar"
 ></div>
@@ -7,6 +14,8 @@
   [routerLink]="[type() ==='TAG' ? 'tag' :'project', workContext().id, 'tasks']"
   routerLinkActive="isActiveRoute"
   mat-menu-item
+  (longPressIOS)="openContextMenu($event)"
+  (contextmenu)="openContextMenu($event)"
 >
   <span class="badge">{{ workContext().taskIds.length }}</span>
   <mat-icon class="drag-handle">{{ ico() }}</mat-icon>
