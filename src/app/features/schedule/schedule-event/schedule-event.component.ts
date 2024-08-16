@@ -303,12 +303,21 @@ export class ScheduleEventComponent implements OnInit {
   }
 
   scheduleTask(): void {
+    let day: Date | undefined;
+    if (this.se.dayOfMonth) {
+      day = new Date();
+      if (this.se.dayOfMonth < day.getDate()) {
+        day.setMonth(day.getMonth() + 1);
+      }
+      day.setDate(this.se.dayOfMonth);
+    }
+
     this._matDialog.open(DialogScheduleTaskComponent, {
       // we focus inside dialog instead
       autoFocus: false,
       data: {
         task: this.task,
-        day: getWorklogStr(this.task?.plannedAt || undefined),
+        day: day ? getWorklogStr(day) : undefined,
       },
     });
   }

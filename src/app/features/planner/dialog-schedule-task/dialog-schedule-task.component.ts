@@ -49,12 +49,11 @@ export class DialogScheduleTaskComponent implements AfterViewInit {
   @ViewChild(MatCalendar, { static: true }) calendar!: MatCalendar<Date>;
 
   remindAvailableOptions: TaskReminderOption[] = TASK_REMINDER_OPTIONS;
-  isEditReminder: boolean = false;
   task: TaskCopy = this.data.task;
 
   selectedDate: Date | string | null = null;
   selectedTime: string | null = null;
-  selectedReminderCfgId: TaskReminderOptionId;
+  selectedReminderCfgId!: TaskReminderOptionId;
 
   isInitValOnTimeFocus: boolean = true;
 
@@ -67,26 +66,9 @@ export class DialogScheduleTaskComponent implements AfterViewInit {
     private _datePipe: DatePipe,
     private _taskService: TaskService,
     private _reminderService: ReminderService,
-  ) {
-    this.selectedDate =
-      data.day ||
-      (this.data.task.tagIds.includes(TODAY_TAG.id) ? new Date().toISOString() : null);
+  ) {}
 
-    this.isEditReminder = !!this.data.task.reminderId;
-
-    if (this.isEditReminder) {
-      this.selectedReminderCfgId = millisecondsDiffToRemindOption(
-        this.task.plannedAt as number,
-        // TODO make this work
-        // this.reminder?.remindAt,
-      );
-    } else {
-      this.selectedReminderCfgId = TaskReminderOptionId.AtStart;
-    }
-
-    if (this.data.task.plannedAt) {
-    }
-
+  ngAfterViewInit(): void {
     if (this.data.task.reminderId) {
       const reminder = this._reminderService.getById(this.data.task.reminderId);
       if (reminder) {
@@ -97,15 +79,40 @@ export class DialogScheduleTaskComponent implements AfterViewInit {
       } else {
         console.warn('No reminder found for task', this.data.task);
       }
+    } else {
+      this.selectedReminderCfgId = TaskReminderOptionId.AtStart;
     }
+
+    if (this.data.task.plannedAt) {
+      this.selectedDate = new Date(this.data.task.plannedAt);
+
+      this.selectedTime = new Date(this.selectedDate).toLocaleTimeString('en-GB', {
+        hour: '2-digit',
+        minute: '2-digit',
+        timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+      });
+    } else {
+      console.log(this.data.day);
+
+      this.selectedDate =
+        this.data.day ||
+        (this.data.task.tagIds.includes(TODAY_TAG.id) ? new Date().toISOString() : null);
+    }
+
+    console.log(this.selectedDate);
+
+    this.calendar.activeDate = new Date(this.selectedDate || new Date());
+    this._cd.detectChanges();
+
+    setTimeout(() => {
+      this._focusInitially();
+    });
+    setTimeout(() => {
+      this._focusInitially();
+    }, 300);
   }
 
-  ngAfterViewInit(): void {
-    this.calendar.activeDate = new Date(this.selectedDate as any);
-    this._cd.detectChanges();
-    this.selectedDate =
-      this.data.day ||
-      (this.data.task.tagIds.includes(TODAY_TAG.id) ? new Date().toISOString() : null);
+  private _focusInitially(): void {
     if (this.selectedDate) {
       (
         document.querySelector('.mat-calendar-body-selected') as HTMLElement
