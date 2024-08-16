@@ -756,7 +756,7 @@
         "CONVERT_TO_PARENT_TASK": "상위 작업으로 변환 작업",
         "DELETE": "작업 삭제",
         "DROP_ATTACHMENT": "'{{title}}'에 연결하려면 여기로 드래그하십시오.",
-        "EDIT_REMINDER": "알림 수정",
+        "EDIT_SCHEDULED": "알림 수정",
         "EDIT_TAGS": "태그 편집",
         "MARK_DONE": "완료로 표시",
         "MARK_UNDONE": "실행 취소로 표시",

@@ -936,7 +936,7 @@
         "DELETE": "Izbriši zadatak",
         "DELETE_REPEAT_INSTANCE": "Izbriši ponavljajuću instancu zadatka",
         "DROP_ATTACHMENT": "Ispusti ovdje za prilaganje naslovu „{{title}}”",
-        "EDIT_REMINDER": "Uredi podsjetnik",
+        "EDIT_SCHEDULED": "Uredi podsjetnik",
         "EDIT_TAGS": "Uredi oznake",
         "MARK_DONE": "Označi kao obavljen",
         "MARK_UNDONE": "Označi kao neobavljen",

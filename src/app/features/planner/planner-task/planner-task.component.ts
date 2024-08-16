@@ -21,8 +21,6 @@ import { ProjectService } from '../../project/project.service';
 import { MatMenuTrigger } from '@angular/material/menu';
 import { delay, first, takeUntil } from 'rxjs/operators';
 import { IssueService } from '../../issue/issue.service';
-import { DialogAddTaskReminderComponent } from '../../tasks/dialog-add-task-reminder/dialog-add-task-reminder.component';
-import { AddTaskReminderInterface } from '../../tasks/dialog-add-task-reminder/add-task-reminder-interface';
 import { BaseComponent } from '../../../core/base-component/base.component';
 import { DialogEditTaskAttachmentComponent } from '../../tasks/task-attachment/dialog-edit-attachment/dialog-edit-task-attachment.component';
 import { DialogEditTagsForTaskComponent } from '../../tag/dialog-edit-tags/dialog-edit-tags-for-task.component';
@@ -194,17 +192,7 @@ export class PlannerTaskComponent extends BaseComponent implements OnInit, OnDes
   // convertToMainTask(): void {}
   // moveTaskToProject(projectId: string): void {}
 
-  editReminder(): void {
-    this._matDialog
-      .open(DialogAddTaskReminderComponent, {
-        data: { task: this.task } as AddTaskReminderInterface,
-      })
-      .afterClosed()
-      .pipe(takeUntil(this.onDestroy$))
-      .subscribe(() => this.focusSelf());
-  }
-
-  planForDay(): void {
+  scheduleTask(): void {
     this._matDialog
       .open(DialogPlanForDayComponent, {
         // we focus inside dialog instead

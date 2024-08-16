@@ -393,7 +393,7 @@
         "SNOOZE": "Slumre",
         "TITLE": "Merk"
       },
-      "EDIT_REMINDER": "Rediger påminnelse",
+      "EDIT_SCHEDULED": "Rediger påminnelse",
       "REMOVE_REMINDER": "Fjern påminnelse",
       "S": {
         "ADDED_REMINDER": "Lagt til påminnelse for merknad",
@@ -577,7 +577,7 @@
         "CONVERT_TO_PARENT_TASK": "Konverter til foreldreoppgave",
         "DELETE": "Slett oppgave",
         "DROP_ATTACHMENT": "Slipp her for å legge ved \"{{title}}\"",
-        "EDIT_REMINDER": "Rediger påminnelse",
+        "EDIT_SCHEDULED": "Rediger påminnelse",
         "EDIT_TAGS": "Rediger koder",
         "MARK_DONE": "Marker som ferdig",
         "MARK_UNDONE": "Merk som ugjort",

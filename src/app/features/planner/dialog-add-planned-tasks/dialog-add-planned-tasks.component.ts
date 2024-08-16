@@ -19,14 +19,12 @@ import { getAllMissingPlannedTaskIdsForDay } from '../util/get-all-missing-plann
 import { TODAY_TAG } from '../../tag/tag.const';
 import { ScheduleItemType } from '../planner.model';
 import { TaskCopy } from '../../tasks/task.model';
-import { DAY_STARTS_AT_DEFAULT_H } from '../../../app.constants';
-import { DialogAddTaskReminderComponent } from '../../tasks/dialog-add-task-reminder/dialog-add-task-reminder.component';
-import { AddTaskReminderInterface } from '../../tasks/dialog-add-task-reminder/add-task-reminder-interface';
 import { ReminderCopy } from '../../reminder/reminder.model';
 import { millisecondsDiffToRemindOption } from '../../tasks/util/remind-option-to-milliseconds';
 import { TaskService } from '../../tasks/task.service';
 import { ReminderService } from '../../reminder/reminder.service';
 import { AddTasksForTomorrowService } from '../../add-tasks-for-tomorrow/add-tasks-for-tomorrow.service';
+import { DialogPlanForDayComponent } from '../dialog-plan-for-day/dialog-plan-for-day.component';
 
 @Component({
   selector: 'dialog-add-planned-tasks',
@@ -94,24 +92,18 @@ export class DialogAddPlannedTasksComponent {
   }
 
   editTaskReminderOrReScheduleIfPossible(task: TaskCopy, newDay?: string): void {
-    let initialDateTime: number;
     if (newDay) {
       const newDate = new Date(newDay);
       if (task.plannedAt && task.reminderId) {
         this._rescheduleTask(task, newDate);
         return;
-      } else {
-        newDate.setHours(DAY_STARTS_AT_DEFAULT_H, 0, 0, 0);
       }
-      initialDateTime = newDate.getTime();
     }
 
-    this._matDialog.open(DialogAddTaskReminderComponent, {
+    this._matDialog.open(DialogPlanForDayComponent, {
       data: {
         task,
-        // @ts-ignore
-        initialDateTime: initialDateTime,
-      } as AddTaskReminderInterface,
+      },
     });
   }
 

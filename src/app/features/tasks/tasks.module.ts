@@ -15,7 +15,6 @@ import { SelectTaskComponent } from './select-task/select-task.component';
 import { TaskAttachmentModule } from './task-attachment/task-attachment.module';
 import { IssueModule } from '../issue/issue.module';
 import { FilterDoneTasksPipe } from './filter-done-tasks.pipe';
-import { DialogAddTaskReminderComponent } from './dialog-add-task-reminder/dialog-add-task-reminder.component';
 import { TaskSummaryTableComponent } from './task-summary-table/task-summary-table.component';
 import { DialogAddTimeEstimateForOtherDayComponent } from './dialog-add-time-estimate-for-other-day/dialog-add-time-estimate-for-other-day.component';
 import { TaskRepeatCfgModule } from '../task-repeat-cfg/task-repeat-cfg.module';
@@ -67,7 +66,6 @@ import { InlineMultilineInputComponent } from '../../ui/inline-multiline-input/i
     AddTaskBarComponent,
     DialogTimeEstimateComponent,
     DialogViewTaskRemindersComponent,
-    DialogAddTaskReminderComponent,
     DialogAddTimeEstimateForOtherDayComponent,
     TaskAdditionalInfoComponent,
     SelectTaskComponent,

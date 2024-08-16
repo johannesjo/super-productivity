@@ -857,7 +857,7 @@
         "DELETE": "Hapus Tugas",
         "DELETE_REPEAT_INSTANCE": "Hapus Instance Tugas berulang",
         "DROP_ATTACHMENT": "Drop di sini untuk melampirkan ke \"{{title}}\"",
-        "EDIT_REMINDER": "Ubah pengingat",
+        "EDIT_SCHEDULED": "Ubah pengingat",
         "EDIT_TAGS": "Ubah tag",
         "MARK_DONE": "Tandai selesai",
         "MARK_UNDONE": "Tandai belum selesai",

@@ -111,7 +111,7 @@
     </button>
 
     <button
-      (click)="editReminder()"
+      (click)="scheduleTask()"
       mat-menu-item
     >
       <ng-container *ngIf="!task.reminderId">
@@ -124,19 +124,10 @@
       <ng-container *ngIf="task.reminderId">
         <span>
           <mat-icon>alarm</mat-icon>
-          {{ T.F.TASK.CMP.EDIT_REMINDER|translate }}
+          {{ T.F.TASK.CMP.EDIT_SCHEDULED|translate }}
         </span>
         <!--        <span class="keyIndicator"> {{ kb.taskSchedule }} </span>-->
       </ng-container>
-    </button>
-
-    <button
-      (click)="planForDay()"
-      mat-menu-item
-    >
-      <mat-icon>today</mat-icon>
-      {{ T.F.TASK.CMP.PLAN_FOR_DAY|translate }}
-      <!--      <span class="keyIndicator"> {{ kb.taskPlanForDay }} </span>-->
     </button>
 
     <button

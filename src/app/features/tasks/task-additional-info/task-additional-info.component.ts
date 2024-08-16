@@ -53,8 +53,6 @@ import { swirlAnimation } from '../../../ui/animations/swirl-in-out.ani';
 import { DialogTimeEstimateComponent } from '../dialog-time-estimate/dialog-time-estimate.component';
 import { MatDialog } from '@angular/material/dialog';
 import { isTouchOnly } from '../../../util/is-touch-only';
-import { DialogAddTaskReminderComponent } from '../dialog-add-task-reminder/dialog-add-task-reminder.component';
-import { AddTaskReminderInterface } from '../dialog-add-task-reminder/add-task-reminder-interface';
 import { ReminderCopy } from '../../reminder/reminder.model';
 import { ReminderService } from '../../reminder/reminder.service';
 import { DialogEditTaskRepeatCfgComponent } from '../../task-repeat-cfg/dialog-edit-task-repeat-cfg/dialog-edit-task-repeat-cfg.component';
@@ -425,10 +423,10 @@ export class TaskAdditionalInfoComponent implements AfterViewInit, OnDestroy {
   }
 
   editReminder(): void {
-    this._matDialog.open(DialogAddTaskReminderComponent, {
-      restoreFocus: true,
-      data: { task: this.task } as AddTaskReminderInterface,
-    });
+    // this._matDialog.open(DialogAddTaskReminderComponent, {
+    //   restoreFocus: true,
+    //   data: { task: this.task } as AddTaskReminderInterface,
+    // });
   }
 
   planForDay(): void {

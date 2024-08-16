@@ -12,7 +12,6 @@ import { BehaviorSubject, Observable } from 'rxjs';
 import { GlobalConfigService } from 'src/app/features/config/global-config.service';
 import { map, startWith } from 'rxjs/operators';
 import { DEFAULT_GLOBAL_CONFIG } from 'src/app/features/config/default-global-config.const';
-import { DateTimeAdapter } from '../../ui/custom-datetime-picker/date-time/adapter/date-time-adapter.class';
 
 @Injectable({ providedIn: 'root' })
 export class LanguageService {
@@ -25,7 +24,6 @@ export class LanguageService {
 
   constructor(
     private _translateService: TranslateService,
-    private _dateTimeAdapter: DateTimeAdapter<unknown>,
     private _dateAdapter: DateAdapter<unknown>,
     private _globalConfigService: GlobalConfigService,
   ) {
@@ -76,7 +74,6 @@ export class LanguageService {
     moment.locale(momLng);
 
     this._dateAdapter.setLocale(momLng);
-    this._dateTimeAdapter.setLocale(momLng);
   }
 
   private _isRTL(lng: LanguageCode): boolean {

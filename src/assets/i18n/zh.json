@@ -788,7 +788,7 @@
         "DELETE": "删除任务",
         "DELETE_REPEAT_INSTANCE": "删除重复任务",
         "DROP_ATTACHMENT": "放在此处以附加到“{{title}}”",
-        "EDIT_REMINDER": "编辑提醒",
+        "EDIT_SCHEDULED": "编辑提醒",
         "EDIT_TAGS": "编辑标签",
         "MARK_DONE": "标为已完成",
         "MARK_UNDONE": "标记为撤消",

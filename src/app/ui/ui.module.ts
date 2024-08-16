@@ -76,7 +76,6 @@ import { BetterDrawerModule } from './better-drawer/better-drawer.module';
 import { SortPipe } from './pipes/sort.pipe';
 import { LongPressDirective } from './longpress/longpress.directive';
 import { FormlyMatToggleModule } from '@ngx-formly/material/toggle';
-import { OwlWrapperComponent } from './owl-wrapper/owl-wrapper.component';
 import { DialogPromptComponent } from './dialog-prompt/dialog-prompt.component';
 import { RoundDurationPipe } from './pipes/round-duration.pipe';
 import { ShortPlannedAtPipe } from './pipes/short-planned-at.pipe';
@@ -86,10 +85,7 @@ import { ProgressCircleComponent } from './progress-circle/progress-circle.compo
 import { FormlyLinkWidgetComponent } from './formly-link-widget/formly-link-widget.component';
 import { MaterialCssVarsModule } from 'angular-material-css-vars';
 import { markedOptionsFactory } from './marked-options-factory';
-import {
-  OwlDateTimeModule,
-  OwlNativeDateTimeModule,
-} from './custom-datetime-picker/public_api';
+
 import { FormlyMatDatepickerModule } from '@ngx-formly/material/datepicker';
 
 const DIALOG_COMPONENTS = [
@@ -165,11 +161,7 @@ const MAT_MODULES = [
   MatTooltipModule,
 ];
 
-const OTHER_3RD_PARTY_MODS_WITHOUT_CFG = [
-  OwlDateTimeModule,
-  OwlNativeDateTimeModule,
-  TranslateModule,
-];
+const OTHER_3RD_PARTY_MODS_WITHOUT_CFG = [TranslateModule];
 
 @NgModule({
   imports: [
@@ -214,7 +206,7 @@ const OTHER_3RD_PARTY_MODS_WITHOUT_CFG = [
     ValidationModule,
     BetterDrawerModule,
   ],
-  declarations: [...COMPONENT_AND_PIPES, OwlWrapperComponent, FormlyLinkWidgetComponent],
+  declarations: [...COMPONENT_AND_PIPES, FormlyLinkWidgetComponent],
   exports: [
     ...COMPONENT_AND_PIPES,
     ...MAT_MODULES,
@@ -225,7 +217,6 @@ const OTHER_3RD_PARTY_MODS_WITHOUT_CFG = [
     MarkdownModule,
     ReactiveFormsModule,
     ValidationModule,
-    OwlWrapperComponent,
   ],
   providers: [
     provideMarkdown(),

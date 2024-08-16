@@ -50,12 +50,6 @@
     </mat-select>
   </mat-form-field>
 </div>
-<div
-  class="msg"
-  *ngIf="data.task.reminderId"
->
-  {{ T.F.PLANNER.D.PLAN_FOR_DAY.REMINDER_WARNING|translate }}
-</div>
 
 <mat-dialog-actions align="end">
   @if (data.day || data.task.plannedAt) {

@@ -103,7 +103,6 @@ export const DEFAULT_GLOBAL_CONFIG: GlobalConfigState = {
     taskEditTitle: null,
     taskToggleAdditionalInfoOpen: 'i',
     taskOpenEstimationDialog: 't',
-    taskPlanForDay: 'v',
     taskSchedule: 's',
     taskToggleDone: 'd',
     taskAddSubTask: 'a',

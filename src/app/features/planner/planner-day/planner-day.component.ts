@@ -5,8 +5,6 @@ import { CdkDragDrop } from '@angular/cdk/drag-drop';
 import { TaskCopy } from '../../tasks/task.model';
 import { PlannerActions } from '../store/planner.actions';
 import { DAY_STARTS_AT_DEFAULT_H } from '../../../app.constants';
-import { DialogAddTaskReminderComponent } from '../../tasks/dialog-add-task-reminder/dialog-add-task-reminder.component';
-import { AddTaskReminderInterface } from '../../tasks/dialog-add-task-reminder/add-task-reminder-interface';
 import { ReminderCopy } from '../../reminder/reminder.model';
 import { millisecondsDiffToRemindOption } from '../../tasks/util/remind-option-to-milliseconds';
 import { TODAY_TAG } from '../../tag/tag.const';
@@ -16,6 +14,7 @@ import { TaskService } from '../../tasks/task.service';
 import { ReminderService } from '../../reminder/reminder.service';
 import { moveTaskInTagList } from '../../tag/store/tag.actions';
 import { DateService } from '../../../core/date/date.service';
+import { DialogPlanForDayComponent } from '../dialog-plan-for-day/dialog-plan-for-day.component';
 
 @Component({
   selector: 'planner-day',
@@ -89,7 +88,6 @@ export class PlannerDayComponent {
   }
 
   editTaskReminderOrReScheduleIfPossible(task: TaskCopy, newDay?: string): void {
-    let initialDateTime: number;
     if (newDay) {
       const newDate = new Date(newDay);
       if (task.plannedAt && task.reminderId) {
@@ -98,15 +96,12 @@ export class PlannerDayComponent {
       } else {
         newDate.setHours(DAY_STARTS_AT_DEFAULT_H, 0, 0, 0);
       }
-      initialDateTime = newDate.getTime();
     }
 
-    this._matDialog.open(DialogAddTaskReminderComponent, {
+    this._matDialog.open(DialogPlanForDayComponent, {
       data: {
         task,
-        // @ts-ignore
-        initialDateTime: initialDateTime,
-      } as AddTaskReminderInterface,
+      },
     });
   }
 

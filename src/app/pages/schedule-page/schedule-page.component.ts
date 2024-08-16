@@ -5,10 +5,8 @@ import { ScheduledTaskService } from '../../features/tasks/scheduled-task.servic
 import { ReminderService } from '../../features/reminder/reminder.service';
 import { MatDialog } from '@angular/material/dialog';
 import { Task, TaskWithReminderData } from '../../features/tasks/task.model';
-import { DialogAddTaskReminderComponent } from '../../features/tasks/dialog-add-task-reminder/dialog-add-task-reminder.component';
 import { standardListAnimation } from '../../ui/animations/standard-list.ani';
 import { Router } from '@angular/router';
-import { AddTaskReminderInterface } from '../../features/tasks/dialog-add-task-reminder/add-task-reminder-interface';
 import { WorkContextService } from '../../features/work-context/work-context.service';
 import { TODAY_TAG } from '../../features/tag/tag.const';
 import { Tag } from '../../features/tag/tag.model';
@@ -20,6 +18,7 @@ import { TaskRepeatCfg } from '../../features/task-repeat-cfg/task-repeat-cfg.mo
 import { TranslateService } from '@ngx-translate/core';
 import { DialogEditTaskRepeatCfgComponent } from '../../features/task-repeat-cfg/dialog-edit-task-repeat-cfg/dialog-edit-task-repeat-cfg.component';
 import { TaskRepeatCfgService } from '../../features/task-repeat-cfg/task-repeat-cfg.service';
+import { DialogPlanForDayComponent } from '../../features/planner/dialog-plan-for-day/dialog-plan-for-day.component';
 
 @Component({
   selector: 'schedule-page',
@@ -69,9 +68,9 @@ export class SchedulePageComponent {
   }
 
   editReminder(task: TaskWithReminderData): void {
-    this._matDialog.open(DialogAddTaskReminderComponent, {
+    this._matDialog.open(DialogPlanForDayComponent, {
       restoreFocus: true,
-      data: { task } as AddTaskReminderInterface,
+      data: { task },
     });
   }
 

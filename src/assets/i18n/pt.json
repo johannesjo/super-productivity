@@ -939,7 +939,7 @@
         "CONVERT_TO_PARENT_TASK": "Converter em tarefa pai",
         "DELETE": "Excluir tarefa",
         "DROP_ATTACHMENT": "Solte aqui para anexar a \"{{title}}\"",
-        "EDIT_REMINDER": "Editar lembrete",
+        "EDIT_SCHEDULED": "Editar lembrete",
         "EDIT_TAGS": "Editar etiquetas",
         "MARK_DONE": "Marcar como concluído",
         "MARK_UNDONE": "Marcar como desfeita",

@@ -856,7 +856,7 @@
         "CONVERT_TO_PARENT_TASK": "Convertir en tâche parent",
         "DELETE": "Supprimer la tâche",
         "DROP_ATTACHMENT": "Déposer ici pour attacher à \"{{title}}\"",
-        "EDIT_REMINDER": "Modifier le rappel",
+        "EDIT_SCHEDULED": "Modifier le rappel",
         "EDIT_TAGS": "Étiquettes d'édition",
         "MARK_DONE": "marquer comme terminée",
         "MARK_UNDONE": "Marquer comme annulée",

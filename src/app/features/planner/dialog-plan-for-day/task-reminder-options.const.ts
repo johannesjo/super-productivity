@@ -1,4 +1,4 @@
-import { TaskReminderOption, TaskReminderOptionId } from '../task.model';
+import { TaskReminderOption, TaskReminderOptionId } from '../../tasks/task.model';
 import { T } from '../../../t.const';
 
 export const TASK_REMINDER_OPTIONS: TaskReminderOption[] = [

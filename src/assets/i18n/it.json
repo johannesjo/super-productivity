@@ -726,7 +726,7 @@
         "CONVERT_TO_PARENT_TASK": "Converti a task padre",
         "DELETE": "Cancella task",
         "DROP_ATTACHMENT": "Trascina qui per allegare a \"{{title}}\"",
-        "EDIT_REMINDER": "Modifica promemoria",
+        "EDIT_SCHEDULED": "Modifica promemoria",
         "EDIT_TAGS": "Modifica etichette",
         "MARK_DONE": "Segna come completato",
         "MARK_UNDONE": "Segna come non completato",

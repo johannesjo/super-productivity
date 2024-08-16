@@ -944,7 +944,7 @@
         "DELETE": "Aufgabe löschen",
         "DELETE_REPEAT_INSTANCE": "Instanz der wiederkehrenden Aufgabe löschen",
         "DROP_ATTACHMENT": "Hier ablegen und an \"{{title}}\" anhängen",
-        "EDIT_REMINDER": "Erinnerung bearbeiten",
+        "EDIT_SCHEDULED": "Erinnerung bearbeiten",
         "EDIT_TAGS": "Stichworte bearbeiten",
         "MARK_DONE": "Als erledigt markieren",
         "MARK_UNDONE": "Als offen markieren",

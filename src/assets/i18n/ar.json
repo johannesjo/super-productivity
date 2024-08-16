@@ -733,7 +733,7 @@
         "CONVERT_TO_PARENT_TASK": "تحويل إلى الأصل المهمة",
         "DELETE": "حذف المهمة",
         "DROP_ATTACHMENT": "اسقط هنا للإرفاق بـ \"{{title}}\"",
-        "EDIT_REMINDER": "تحرير تذكير",
+        "EDIT_SCHEDULED": "تحرير تذكير",
         "EDIT_TAGS": "تعديل العلامات",
         "MARK_DONE": "اعتبره منته",
         "MARK_UNDONE": "وضع علامة على التراجع",

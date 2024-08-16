@@ -731,7 +731,7 @@
         "CONVERT_TO_PARENT_TASK": "تبدیل به کار اصلی",
         "DELETE": "Delete Task",
         "DROP_ATTACHMENT": "Drop here to attach to \"{{title}}\"",
-        "EDIT_REMINDER": "ویرایش یادآوری",
+        "EDIT_SCHEDULED": "ویرایش یادآوری",
         "EDIT_TAGS": "برچسب ها را ویرایش کنید",
         "MARK_DONE": "علامت زدن به عنوان انجام شده",
         "MARK_UNDONE": "علامت زدن به عنوان انجام نشده",

@@ -718,7 +718,7 @@
         "DELETE": "Odstrániť úlohu",
         "DELETE_REPEAT_INSTANCE": "Odstránenie opakovanej inštancie úlohy",
         "DROP_ATTACHMENT": "Vložte prílohu k \"{{title}}\"",
-        "EDIT_REMINDER": "Upraviť pripomienku",
+        "EDIT_SCHEDULED": "Upraviť pripomienku",
         "EDIT_TAGS": "Upraviť štítky",
         "MARK_DONE": "Označiť ako hotové",
         "MARK_UNDONE": "Označiť ako nedokončené",

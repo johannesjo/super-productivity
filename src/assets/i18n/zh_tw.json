@@ -737,7 +737,7 @@
         "CONVERT_TO_PARENT_TASK": "轉換為父任務",
         "DELETE": "刪除任務",
         "DROP_ATTACHMENT": "放在此處以附加到\"{{title}}\"",
-        "EDIT_REMINDER": "編輯提醒",
+        "EDIT_SCHEDULED": "編輯提醒",
         "EDIT_TAGS": "編輯標籤",
         "MARK_DONE": "標記為已完成",
         "MARK_UNDONE": "標記為未完成",

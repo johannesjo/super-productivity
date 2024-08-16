@@ -915,7 +915,7 @@
         "DELETE": "Smazat úkol",
         "DELETE_REPEAT_INSTANCE": "Smazat opakující se instanci úkolu",
         "DROP_ATTACHMENT": "Přetáhněte sem pro připojení k „{{title}}“",
-        "EDIT_REMINDER": "Upravit připomenutí",
+        "EDIT_SCHEDULED": "Upravit připomenutí",
         "EDIT_TAGS": "Upravit značky",
         "MARK_DONE": "Označit jako hotové",
         "MARK_UNDONE": "Označit jako nehotové",

@@ -726,7 +726,7 @@
         "CONVERT_TO_PARENT_TASK": "親タスクに変換",
         "DELETE": "タスクを削除",
         "DROP_ATTACHMENT": "ここにドロップして\"{{title}}\"に添付",
-        "EDIT_REMINDER": "リマインダーを編集",
+        "EDIT_SCHEDULED": "リマインダーを編集",
         "EDIT_TAGS": "タグを編集",
         "MARK_DONE": "完了としてマーク",
         "MARK_UNDONE": "未完了としてマーク",

@@ -407,7 +407,7 @@
         "SNOOZE": "Snooze",
         "TITLE": "Note"
       },
-      "EDIT_REMINDER": "Edit reminder",
+      "EDIT_SCHEDULED": "Edit reminder",
       "REMOVE_REMINDER": "Remove reminder",
       "S": {
         "ADDED_REMINDER": "Added reminder for note",
@@ -664,7 +664,7 @@
         "CONVERT_TO_PARENT_TASK": "Convert to parent Task",
         "DELETE": "Delete Task",
         "DROP_ATTACHMENT": "Drop here to attach to \"{{title}}\"",
-        "EDIT_REMINDER": "Edit reminder",
+        "EDIT_SCHEDULED": "Edit reminder",
         "EDIT_TAGS": "Edit tags",
         "MARK_DONE": "Mark as done",
         "MARK_UNDONE": "Mark as undone",

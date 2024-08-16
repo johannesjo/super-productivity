@@ -868,7 +868,7 @@
         "CONVERT_TO_PARENT_TASK": "Converteren naar bovenliggende taak",
         "DELETE": "Taak verwijderen",
         "DROP_ATTACHMENT": "Zet hier neer om te koppelen aan \"{{title}}\"",
-        "EDIT_REMINDER": "Herinnering bewerken",
+        "EDIT_SCHEDULED": "Herinnering bewerken",
         "EDIT_TAGS": "Bewerk-tags",
         "MARK_DONE": "Markeer als voltooid",
         "MARK_UNDONE": "Markeren als ongedaan gemaakt",

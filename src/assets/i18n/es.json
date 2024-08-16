@@ -847,7 +847,7 @@
         "CONVERT_TO_PARENT_TASK": "Convertir a tarea principal",
         "DELETE": "Eliminar tarea",
         "DROP_ATTACHMENT": "Suelta aquí para adjuntar a \"{{title}}\"",
-        "EDIT_REMINDER": "Editar recordatorio",
+        "EDIT_SCHEDULED": "Editar recordatorio",
         "EDIT_TAGS": "Editar etiquetas",
         "MARK_DONE": "marcar como realizada",
         "MARK_UNDONE": "Marcar como no realizada",

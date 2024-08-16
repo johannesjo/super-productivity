@@ -38,8 +38,6 @@ import { selectTaskByIdWithSubTaskData } from '../../tasks/store/task.selectors'
 import { deleteTask, updateTask } from '../../tasks/store/task.actions';
 import { DialogTimeEstimateComponent } from '../../tasks/dialog-time-estimate/dialog-time-estimate.component';
 import { IS_TOUCH_PRIMARY } from '../../../util/is-mouse-primary';
-import { DialogAddTaskReminderComponent } from '../../tasks/dialog-add-task-reminder/dialog-add-task-reminder.component';
-import { AddTaskReminderInterface } from '../../tasks/dialog-add-task-reminder/add-task-reminder-interface';
 import { DialogPlanForDayComponent } from '../../planner/dialog-plan-for-day/dialog-plan-for-day.component';
 import { getWorklogStr } from '../../../util/get-work-log-str';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -304,13 +302,7 @@ export class ScheduleEventComponent implements OnInit {
     );
   }
 
-  editReminder(): void {
-    this._matDialog.open(DialogAddTaskReminderComponent, {
-      data: { task: this.task } as AddTaskReminderInterface,
-    });
-  }
-
-  planForDay(): void {
+  scheduleTask(): void {
     this._matDialog.open(DialogPlanForDayComponent, {
       // we focus inside dialog instead
       autoFocus: false,

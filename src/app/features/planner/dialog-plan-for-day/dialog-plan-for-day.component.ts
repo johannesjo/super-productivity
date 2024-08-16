@@ -24,7 +24,7 @@ import { SnackService } from '../../../core/snack/snack.service';
 import { updateTaskTags } from '../../tasks/store/task.actions';
 import { TODAY_TAG } from '../../tag/tag.const';
 import { truncate } from '../../../util/truncate';
-import { TASK_REMINDER_OPTIONS } from '../../tasks/dialog-add-task-reminder/task-reminder-options.const';
+import { TASK_REMINDER_OPTIONS } from './task-reminder-options.const';
 import { FormsModule } from '@angular/forms';
 import { millisecondsDiffToRemindOption } from '../../tasks/util/remind-option-to-milliseconds';
 import { expandFadeAnimation } from '../../../ui/animations/expand.ani';

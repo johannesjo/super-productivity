@@ -82,13 +82,13 @@
     </button>
     }
     <button
-      (click)="editReminder()"
+      (click)="scheduleTask()"
       mat-menu-item
     >
       @if (task.reminderId) {
       <span>
         <mat-icon>alarm</mat-icon>
-        {{ T.F.TASK.CMP.EDIT_REMINDER|translate }}
+        {{ T.F.TASK.CMP.EDIT_SCHEDULED|translate }}
       </span>
       } @else {
       <span>
@@ -96,14 +96,6 @@
         {{ T.F.TASK.CMP.SCHEDULE|translate }}
       </span>
       }
-    </button>
-
-    <button
-      (click)="planForDay()"
-      mat-menu-item
-    >
-      <mat-icon>today</mat-icon>
-      {{ T.F.TASK.CMP.PLAN_FOR_DAY|translate }}
     </button>
 
     @if (task.isDone) {

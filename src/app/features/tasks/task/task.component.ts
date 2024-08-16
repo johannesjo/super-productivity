@@ -40,13 +40,11 @@ import { TaskAttachmentService } from '../task-attachment/task-attachment.servic
 import { IssueService } from '../../issue/issue.service';
 import { DialogEditTaskAttachmentComponent } from '../task-attachment/dialog-edit-attachment/dialog-edit-task-attachment.component';
 import { swirlAnimation } from '../../../ui/animations/swirl-in-out.ani';
-import { DialogAddTaskReminderComponent } from '../dialog-add-task-reminder/dialog-add-task-reminder.component';
 import { DialogEditTaskRepeatCfgComponent } from '../../task-repeat-cfg/dialog-edit-task-repeat-cfg/dialog-edit-task-repeat-cfg.component';
 import { ProjectService } from '../../project/project.service';
 import { Project } from '../../project/project.model';
 import { T } from '../../../t.const';
 import { MatMenuTrigger } from '@angular/material/menu';
-import { AddTaskReminderInterface } from '../dialog-add-task-reminder/add-task-reminder-interface';
 import { TODAY_TAG } from '../../tag/tag.const';
 import { DialogEditTagsForTaskComponent } from '../../tag/dialog-edit-tags/dialog-edit-tags-for-task.component';
 import { WorkContextService } from '../../work-context/work-context.service';
@@ -282,17 +280,7 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
     window.clearTimeout(this._currentPanTimeout);
   }
 
-  editReminder(): void {
-    this._matDialog
-      .open(DialogAddTaskReminderComponent, {
-        data: { task: this.task } as AddTaskReminderInterface,
-      })
-      .afterClosed()
-      .pipe(takeUntil(this._destroy$))
-      .subscribe(() => this.focusSelf());
-  }
-
-  async planForDay(): Promise<void> {
+  async scheduleTask(): Promise<void> {
     const plannedDayForTask = (
       await this.plannerService.plannedTaskDayMap$.pipe(first()).toPromise()
     )[this.task.id];
@@ -637,7 +625,7 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
             if (this.task.repeatCfgId) {
               this.editTaskRepeatCfg();
             } else {
-              this.planForDay();
+              this.scheduleTask();
             }
           } else {
             if (this.task.parentId) {
@@ -886,10 +874,7 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
       this.estimateTime();
     }
     if (checkKeyCombo(ev, keys.taskSchedule)) {
-      this.editReminder();
-    }
-    if (checkKeyCombo(ev, keys.taskPlanForDay)) {
-      this.planForDay();
+      this.scheduleTask();
     }
     if (checkKeyCombo(ev, keys.taskToggleDone)) {
       this.toggleDoneKeyboard();
