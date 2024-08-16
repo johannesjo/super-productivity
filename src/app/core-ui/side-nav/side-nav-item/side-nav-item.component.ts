@@ -13,6 +13,7 @@ import {
   WorkContextType,
 } from '../../../features/work-context/work-context.model';
 import { MatMenuTrigger } from '@angular/material/menu';
+import { Project } from '../../../features/project/project.model';
 
 @Component({
   selector: 'side-nav-item',
@@ -40,6 +41,11 @@ export class SideNavItemComponent {
   @HostBinding('class.isActiveContext')
   get isActiveContext(): boolean {
     return this.workContext().id === this.activeWorkContextId();
+  }
+
+  @HostBinding('class.isHidden')
+  get isHidden(): boolean {
+    return (this.workContext() as Project)?.isHiddenFromMenu;
   }
 
   openContextMenu(event: TouchEvent | MouseEvent): void {
