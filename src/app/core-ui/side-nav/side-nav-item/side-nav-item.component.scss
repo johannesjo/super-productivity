@@ -1,26 +1,4 @@
-@import '../../../variables';
-
-$spacer: $s;
-
-// MAIN LAYOUT
-// -----------
-:host {
-  flex-grow: 1;
-  max-width: $side-nav-width;
-  width: $side-nav-width;
-  display: flex;
-  flex-direction: column;
-  min-height: 100vh;
-  // mobile viewport bug fix
-  min-height: -webkit-fill-available;
-}
-
-@media (min-width: $side-nav-width-switch-l) {
-  :host {
-    max-width: $side-nav-width-l;
-    width: $side-nav-width-l;
-  }
-}
+@import '../../../../variables';
 
 :host {
   a,
@@ -29,71 +7,9 @@ $spacer: $s;
     line-height: 44px !important;
     min-height: 44px !important;
   }
-
-  a {
-    color: rgba(var(--palette-foreground-text), var(--palette-foreground-text-alpha));
-
-    @include darkTheme() {
-      color: rgba(
-        var(--palette-foreground-text-dark),
-        var(--palette-foreground-text-dark-alpha)
-      );
-    }
-  }
 }
 
-section {
-  display: flex;
-  flex-direction: column;
-}
-
-.main {
-  margin-bottom: $spacer;
-  padding-bottom: $spacer;
-
-  :host-context(.isMac.isElectron) & {
-    padding-top: $mac-title-bar-padding;
-  }
-
-  &:after {
-    bottom: 0;
-  }
-}
-
-.app {
-  margin-top: auto;
-  padding-top: $spacer;
-
-  &:after {
-    top: 0;
-  }
-}
-
-.other-task-level-section,
-.main,
-.tags,
-.app {
-  position: relative;
-
-  &:after {
-    @include dividerBorderColor();
-    content: '';
-    position: absolute;
-    left: $s * 2;
-    right: $s * 2;
-    height: 0;
-  }
-}
-
-.tags,
-.projects {
-  margin-bottom: $spacer;
-  padding-bottom: $spacer;
-}
-
-// LIST-ITEMS
-// ----------
-.tag,
+:host,
 .project {
   display: flex;
   position: relative;
@@ -181,7 +97,7 @@ section {
 }
 
 // color bar left styles
-.tag,
+:host,
 .project,
 .route-link {
   .tag-color,
@@ -247,6 +163,19 @@ section {
   }
 }
 
+:host.isActiveContext button {
+  font-weight: normal;
+
+  &.isActiveRoute {
+    font-weight: bold;
+    color: $c-primary-800;
+
+    mat-icon {
+      color: $c-primary-800;
+    }
+  }
+}
+
 .route-link.isActiveRoute,
 .route-link.isActiveRoute mat-icon,
 .tag.isActiveContext mat-icon,
@@ -306,10 +235,4 @@ section {
     right: -$s;
     bottom: -$s;
   }
-}
-
-.no-tags-info {
-  padding: 4px 16px;
-  font-style: italic;
-  opacity: 0.7;
 }

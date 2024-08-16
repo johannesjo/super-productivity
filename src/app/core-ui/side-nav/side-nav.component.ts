@@ -180,7 +180,7 @@ export class SideNavComponent implements OnDestroy {
     });
   }
 
-  trackById(i: number, project: Project): string {
+  trackById(i: number, project: Project | Tag): string {
     return project.id;
   }
 
