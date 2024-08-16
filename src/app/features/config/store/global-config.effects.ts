@@ -153,9 +153,8 @@ export class GlobalConfigEffects {
         ),
         tap(({ sectionKey, sectionCfg }) => {
           this._store.dispatch(hideSideNav());
-          setTimeout(() => {
-            this._store.dispatch(toggleSideNav());
-          });
+          this._store.dispatch(toggleSideNav());
+          window.dispatchEvent(new Event('resize'));
         }),
       ),
     { dispatch: false },
