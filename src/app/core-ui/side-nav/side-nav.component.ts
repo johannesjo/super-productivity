@@ -89,8 +89,6 @@ export class SideNavComponent implements OnDestroy {
   private _cachedIssueUrl?: string;
 
   @HostBinding('class') get cssClass(): string {
-    console.log('XXXXXXX', this._globalConfigService.cfg?.misc.isUseMinimalNav);
-
     return this._globalConfigService.cfg?.misc.isUseMinimalNav ? 'minimal-nav' : '';
   }
 
