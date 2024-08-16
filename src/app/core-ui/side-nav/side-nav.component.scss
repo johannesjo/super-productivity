@@ -15,7 +15,11 @@ $spacer: $s;
   min-height: -webkit-fill-available;
 
   &.minimal-nav {
-    max-width: 52px;
+    max-width: 42px;
+
+    @include mq(xxs) {
+      max-width: 52px;
+    }
 
     .expand-btn mat-icon {
       margin-left: 0;
@@ -26,12 +30,21 @@ $spacer: $s;
     }
 
     ::ng-deep {
+      @include mq(xxs, max) {
+        .badge {
+          margin-right: -40px !important;
+        }
+      }
+
       .settings-btn {
         display: none !important;
       }
 
       .mat-mdc-menu-item {
-        padding: 0 13px;
+        padding: 0 8px;
+        @include mq(xxs) {
+          padding: 0 13px;
+        }
       }
     }
   }
