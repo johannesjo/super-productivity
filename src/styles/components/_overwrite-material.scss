@@ -108,6 +108,11 @@ mat-icon,
   vertical-align: middle;
 }
 
+mat-icon.mat-icon[svgicon] {
+  display: flex;
+  justify-content: center;
+}
+
 // AUTOCOMPLETE
 // -----------------
 .mdc-list-item__primary-text {
