@@ -422,14 +422,7 @@ export class TaskAdditionalInfoComponent implements AfterViewInit, OnDestroy {
     });
   }
 
-  editReminder(): void {
-    // this._matDialog.open(DialogAddTaskReminderComponent, {
-    //   restoreFocus: true,
-    //   data: { task: this.task } as AddTaskReminderInterface,
-    // });
-  }
-
-  planForDay(): void {
+  scheduleTask(): void {
     this._matDialog.open(DialogScheduleTaskComponent, {
       // we focus inside dialog instead
       autoFocus: false,

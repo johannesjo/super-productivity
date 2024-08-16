@@ -305,7 +305,7 @@
         <button
           (click)="scheduleTask()"
           *ngIf="((plannerService.plannedTaskDayMap$|async)||{})[task.id] as plannedAtDay"
-          [title]="T.F.TASK.CMP.PLAN_FOR_DAY|translate"
+          [title]="T.F.TASK.CMP.SCHEDULE|translate"
           class="ico-btn schedule-btn"
           color=""
           mat-icon-button

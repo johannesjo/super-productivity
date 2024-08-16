@@ -107,58 +107,42 @@
     </ng-container>
   </task-additional-info-item>
 
-  <task-additional-info-item
-    (collapseParent)="collapseParent()"
-    (editActionTriggered)="editReminder()"
-    (keyPress)="onItemKeyPress($event)"
-    [inputIcon]="task.reminderId ? 'edit': 'add'"
-    class="input-item"
-  >
-    <ng-container input-title>
-      <mat-icon>alarm</mat-icon>
-      <span *ngIf="task.reminderId">{{T.F.TASK.ADDITIONAL_INFO.REMINDER|translate}}</span>
-      <span *ngIf="!task.reminderId"
-        >{{T.F.TASK.ADDITIONAL_INFO.SCHEDULE_TASK|translate}}</span
-      >
-    </ng-container>
-    <ng-container input-value>
-      <div
-        *ngIf="reminderData$|async as reminderData"
-        [matTooltip]="reminderData.remindAt|date:'short'"
-        class="reminder-value"
-        matTooltipPosition="left"
-      >
-        {{reminderData.remindAt|humanizeTimestamp}}
-      </div>
-    </ng-container>
-  </task-additional-info-item>
-
-  <task-additional-info-item
-    (collapseParent)="collapseParent()"
-    (editActionTriggered)="planForDay()"
-    (keyPress)="onItemKeyPress($event)"
-    [inputIcon]="(plannedTaskDayMap||{})[task.id] ? 'edit': 'add'"
-    *ngIf="(plannerService.plannedTaskDayMap$|async) as plannedTaskDayMap"
-    class="input-item"
-  >
-    <ng-container input-title>
-      <mat-icon>today</mat-icon>
-      <span *ngIf="(plannedTaskDayMap||{})[task.id]"
-        >{{ T.F.TASK.ADDITIONAL_INFO.PLANNED_ON|translate }}</span
-      >
-      <span *ngIf="!(plannedTaskDayMap||{})[task.id]"
-        >{{ T.F.TASK.ADDITIONAL_INFO.PLAN_FOR_DAY|translate }}</span
-      >
-    </ng-container>
-    <ng-container input-value>
-      <div
-        *ngIf="(plannedTaskDayMap||{})[task.id]"
-        class="reminder-value"
-      >
-        {{ (plannedTaskDayMap || {})[task.id]|date:'shortDate' }}
-      </div>
-    </ng-container>
-  </task-additional-info-item>
+  <ng-container *ngIf="(plannerService.plannedTaskDayMap$|async) as plannedTaskDayMap">
+    <task-additional-info-item
+      (collapseParent)="collapseParent()"
+      (editActionTriggered)="scheduleTask()"
+      (keyPress)="onItemKeyPress($event)"
+      [inputIcon]="(task.reminderId|| (plannedTaskDayMap||{})[task.id]) ? 'edit': 'add'"
+      class="input-item"
+    >
+      <ng-container input-title>
+        <mat-icon>alarm</mat-icon>
+        <span *ngIf="(task.reminderId|| (plannedTaskDayMap||{})[task.id])"
+          >{{ T.F.TASK.ADDITIONAL_INFO.PLANNED_AT|translate }}</span
+        >
+        <span *ngIf="!(task.reminderId|| (plannedTaskDayMap||{})[task.id])"
+          >{{ T.F.TASK.ADDITIONAL_INFO.SCHEDULE_TASK|translate }}</span
+        >
+      </ng-container>
+      <ng-container input-value>
+        <ng-container *ngIf="reminderData$|async as reminderData">
+          <div
+            [matTooltip]="reminderData.remindAt|date:'short'"
+            class="reminder-value"
+            matTooltipPosition="left"
+          >
+            {{ reminderData.remindAt|date:'short' }}
+          </div>
+        </ng-container>
+        <div
+          *ngIf="(plannedTaskDayMap||{})[task.id]"
+          class="reminder-value"
+        >
+          {{ (plannedTaskDayMap || {})[task.id]|date:'shortDate' }}
+        </div>
+      </ng-container>
+    </task-additional-info-item>
+  </ng-container>
 
   <task-additional-info-item
     (collapseParent)="collapseParent()"
