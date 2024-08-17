@@ -80,3 +80,23 @@
     top: 14px;
   }
 }
+
+.quick-access {
+  display: flex;
+  justify-content: space-evenly;
+  border-bottom: 1px solid $light-theme-extra-border-color;
+  height: 48px;
+  @include darkTheme() {
+    border-color: $dark-theme-extra-border-color;
+  }
+
+  > button {
+    height: 48px;
+    flex-grow: 1;
+    border-radius: 4px !important;
+
+    ::ng-deep .mat-mdc-button-persistent-ripple {
+      border-radius: 4px !important;
+    }
+  }
+}

@@ -1,5 +1,37 @@
 <!--<h4>{{ T.F.PLANNER.D.PLAN_FOR_DAY.TITLE|translate }}</h4>-->
-<h4 class="hide-xs">Schedule Task {{ selectedTime ? 'with Time' : 'for Day' }}</h4>
+<!--<h4 class="hide-xs">Schedule Task {{ selectedTime ? 'with Time' : 'for Day' }}</h4>-->
+
+<div class="quick-access">
+  <button
+    mat-icon-button
+    (click)="quickAccessBtnClick(0)"
+    [matTooltip]="'Schedule Today'"
+  >
+    <mat-icon>wb_sunny</mat-icon>
+  </button>
+  <button
+    mat-icon-button
+    (click)="quickAccessBtnClick(1)"
+    [matTooltip]="'Schedule Tomorrow'"
+  >
+    <mat-icon>today</mat-icon>
+  </button>
+  <button
+    mat-icon-button
+    (click)="quickAccessBtnClick(2)"
+    [matTooltip]="'Schedule Next Week'"
+  >
+    <mat-icon>event</mat-icon>
+  </button>
+  <button
+    mat-icon-button
+    (click)="quickAccessBtnClick(3)"
+    [matTooltip]="'Schedule Next Month'"
+  >
+    <mat-icon>bedtime</mat-icon>
+  </button>
+</div>
+
 <mat-calendar
   (keydown)="onKeyDownOnCalendar($event)"
   [selected]="selectedDate"

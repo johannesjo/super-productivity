@@ -61,6 +61,7 @@ export class DialogScheduleTaskComponent implements AfterViewInit {
   isInitValOnTimeFocus: boolean = true;
 
   todayStr = getWorklogStr();
+  private _prevSelectedQuickAccessDate: Date | null = null;
 
   constructor(
     @Inject(MAT_DIALOG_DATA) public data: { task: Task },
@@ -131,6 +132,11 @@ export class DialogScheduleTaskComponent implements AfterViewInit {
         document.querySelector('.mat-calendar-body-today') as HTMLElement
       )?.parentElement?.focus();
     }
+    // setTimeout(() => {
+    //   (
+    //     document.querySelector('dialog-schedule-task button:nth-child(2)') as HTMLElement
+    //   )?.focus();
+    // });
   }
 
   onTimeKeyDown(ev: KeyboardEvent): void {
@@ -289,5 +295,47 @@ export class DialogScheduleTaskComponent implements AfterViewInit {
       });
     }
     this.close(true);
+  }
+
+  quickAccessBtnClick(item: number): void {
+    const tDate = new Date();
+    tDate.setMinutes(0, 0, 0);
+
+    switch (item) {
+      case 0:
+        this.selectedDate = tDate.toISOString();
+        break;
+      case 1:
+        const tomorrow = tDate;
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        this.selectedDate = tomorrow.toISOString();
+        break;
+      case 2:
+        const nextMonday = tDate;
+        nextMonday.setDate(nextMonday.getDate() + ((1 + 7 - nextMonday.getDay()) % 7));
+        this.selectedDate = nextMonday.toISOString();
+        break;
+      case 3:
+        const nextMonth = tDate;
+        nextMonth.setMonth(nextMonth.getMonth() + 1);
+        this.selectedDate = nextMonth.toISOString();
+        break;
+    }
+    // console.log(
+    //   this._prevSelectedQuickAccessDate &&
+    //     this._prevSelectedQuickAccessDate.toISOString() === this.selectedDate,
+    //   this._prevSelectedQuickAccessDate &&
+    //     this._prevSelectedQuickAccessDate.toISOString(),
+    //   this.selectedDate,
+    // );
+
+    if (
+      this._prevSelectedQuickAccessDate &&
+      this._prevSelectedQuickAccessDate.toISOString() === this.selectedDate
+    ) {
+      this.submit();
+    }
+
+    this._prevSelectedQuickAccessDate = new Date(this.selectedDate as string);
   }
 }
