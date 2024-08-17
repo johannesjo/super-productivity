@@ -51,17 +51,6 @@
 </div>
 
 <mat-dialog-actions align="end">
-  @if (data.task.plannedAt || (plannedDayForTask && plannedDayForTask !== todayStr)) {
-  <button
-    (click)="remove()"
-    color="warn"
-    mat-button
-  >
-    <mat-icon>delete_forever</mat-icon>
-    Remove
-    <!--    {{ T.F.PLANNER.D.PLAN_FOR_DAY.REMOVE_PLAN_DATE|translate }}-->
-  </button>
-  } @else {
   <button
     color="primary"
     mat-button
@@ -69,6 +58,16 @@
     (click)="close()"
   >
     {{ T.G.CANCEL|translate }}
+  </button>
+  @if (data.task.plannedAt || (plannedDayForTask && plannedDayForTask !== todayStr)) {
+  <button
+    (click)="remove()"
+    color="warn"
+    mat-stroked-button
+  >
+    <mat-icon>delete_forever</mat-icon>
+    Remove
+    <!--    {{ T.F.PLANNER.D.PLAN_FOR_DAY.REMOVE_PLAN_DATE|translate }}-->
   </button>
   }
 
