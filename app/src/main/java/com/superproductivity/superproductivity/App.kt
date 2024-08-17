@@ -5,9 +5,10 @@ import android.webkit.WebView
 
 class App : Application() {
 
-    val wv: WebView by lazy {
-        WebHelper().instanceView(this)
-    }
+    // NOTE using the web view like this causes all html5 inputs not to work
+//    val wv: WebView by lazy {
+//        WebHelper().instanceView(this)
+//    }
 
     val keyValStore: KeyValStore by lazy {
         KeyValStore(this)

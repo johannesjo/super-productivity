@@ -43,7 +43,19 @@ class FullscreenActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         Log.v("TW", "FullScreenActivity: onCreate")
         super.onCreate(savedInstanceState)
+
         initWebView()
+
+        // FOR TESTING HTML INPUTS QUICKLY
+////        webView = (application as App).wv
+//        webView = WebHelper().instanceView(this)
+////        webView = WebView(this)
+//        val data = "<html><body><h1>TEST</h1><h2>aa</h2><input type = 'color'  value='#ae1234'>"
+//        webView.settings.javaScriptEnabled = true
+//        webView.loadData(data, "text/html; charset=utf-8", "UTF-8")
+//        webView.loadDataWithBaseURL(null, data, "text/html", "UTF-8", null)
+
+
         setContentView(R.layout.activity_fullscreen)
         wvContainer = findViewById(R.id.webview_container)
         wvContainer.addView(webView)
@@ -94,7 +106,7 @@ class FullscreenActivity : AppCompatActivity() {
 
     @RequiresApi(Build.VERSION_CODES.N)
     private fun initWebView() {
-        webView = (application as App).wv
+        webView = WebHelper().instanceView(this)
         if (BuildConfig.DEBUG) {
             Toast.makeText(this, "DEBUG: $appUrl", Toast.LENGTH_SHORT).show()
 //            webView.clearCache(true)
