@@ -5,6 +5,11 @@
   --mat-menu-item-label-text-size: 14px;
 }
 
+.mat-drawer.mat-drawer-side {
+  // should be below notes panel
+  z-index: 1 !important;
+}
+
 // DIALOGS
 // ----------
 .mat-mdc-dialog-title.mat-mdc-dialog-title,
