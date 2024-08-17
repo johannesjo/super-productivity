@@ -138,17 +138,6 @@ export class DialogScheduleTaskComponent implements AfterViewInit {
     }
   }
 
-  onCalendarClick(ev: MouseEvent): void {
-    if (
-      (ev.target as HTMLElement)?.parentElement?.tagName === 'BUTTON' &&
-      (ev.target as HTMLElement)?.parentElement?.classList.contains(
-        'mat-calendar-body-active',
-      )
-    ) {
-      this._checkToSubmit();
-    }
-  }
-
   private _checkToSubmit(): void {
     // console.log(
     //   'check to submit',
