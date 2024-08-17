@@ -1,5 +1,5 @@
 <!--<h4>{{ T.F.PLANNER.D.PLAN_FOR_DAY.TITLE|translate }}</h4>-->
-<h4>Schedule Task {{ selectedTime ? 'with Time' : 'for Day' }}</h4>
+<h4 class="hide-xs">Schedule Task {{ selectedTime ? 'with Time' : 'for Day' }}</h4>
 <mat-calendar
   (keydown)="onKeyDownOnCalendar($event)"
   [selected]="selectedDate"
