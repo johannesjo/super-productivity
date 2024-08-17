@@ -13,7 +13,7 @@
   >
     <!--NOTE: non observable should be enough as we only need the initial value-->
     <ng-container *ngIf="workContextService.isToday">
-      <mat-icon *ngIf="!(task.repeatCfgId)">edit_calendar</mat-icon>
+      <mat-icon *ngIf="!(task.repeatCfgId)">alarm</mat-icon>
       <mat-icon
         *ngIf="(task.repeatCfgId)"
         svgIcon="repeat"
