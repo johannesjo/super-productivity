@@ -1,7 +1,6 @@
 import { ConfigFormSection } from '../config/global-config.model';
 import { T } from '../../t.const';
 import { Project } from './project.model';
-import { IS_ANDROID_WEB_VIEW } from '../../util/is-android-web-view';
 
 export const BASIC_PROJECT_CONFIG_FORM_CONFIG: ConfigFormSection<Project> = {
   title: T.F.PROJECT.FORM_BASIC.TITLE,
@@ -53,7 +52,7 @@ export const CREATE_PROJECT_BASIC_CONFIG_FORM_CONFIG: ConfigFormSection<Project>
       type: 'input',
       templateOptions: {
         label: T.F.PROJECT.FORM_THEME.L_THEME_COLOR,
-        type: IS_ANDROID_WEB_VIEW ? 'text' : 'color',
+        type: 'color',
       },
     },
     {

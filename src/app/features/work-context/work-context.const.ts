@@ -2,7 +2,6 @@ import { WorkContextCommon, WorkContextThemeCfg } from './work-context.model';
 import { WorklogExportSettings, WorklogGrouping } from '../worklog/worklog.model';
 import { ConfigFormSection } from '../config/global-config.model';
 import { T } from '../../t.const';
-import { IS_ANDROID_WEB_VIEW } from '../../util/is-android-web-view';
 
 export const WORKLOG_EXPORT_DEFAULTS: WorklogExportSettings = {
   cols: ['DATE', 'START', 'END', 'TIME_CLOCK', 'TITLES_INCLUDING_SUB'],
@@ -69,7 +68,7 @@ export const WORK_CONTEXT_THEME_CONFIG_FORM_CONFIG: ConfigFormSection<WorkContex
         type: 'input',
         templateOptions: {
           label: T.F.PROJECT.FORM_THEME.L_COLOR_PRIMARY,
-          type: IS_ANDROID_WEB_VIEW ? 'text' : 'color',
+          type: 'color',
         },
       },
       {
@@ -77,7 +76,7 @@ export const WORK_CONTEXT_THEME_CONFIG_FORM_CONFIG: ConfigFormSection<WorkContex
         type: 'input',
         templateOptions: {
           label: T.F.PROJECT.FORM_THEME.L_COLOR_ACCENT,
-          type: IS_ANDROID_WEB_VIEW ? 'text' : 'color',
+          type: 'color',
         },
       },
       {
@@ -85,7 +84,7 @@ export const WORK_CONTEXT_THEME_CONFIG_FORM_CONFIG: ConfigFormSection<WorkContex
         type: 'input',
         templateOptions: {
           label: T.F.PROJECT.FORM_THEME.L_COLOR_WARN,
-          type: IS_ANDROID_WEB_VIEW ? 'text' : 'color',
+          type: 'color',
         },
       },
       {

@@ -4,7 +4,6 @@ import {
 } from '../config/global-config.model';
 import { T } from '../../t.const';
 import { Tag } from './tag.model';
-import { IS_ANDROID_WEB_VIEW } from '../../util/is-android-web-view';
 
 export const BASIC_TAG_CONFIG_FORM_CONFIG: ConfigFormSection<Tag> = {
   title: T.F.TAG.FORM_BASIC.TITLE,
@@ -30,7 +29,7 @@ export const BASIC_TAG_CONFIG_FORM_CONFIG: ConfigFormSection<Tag> = {
       type: 'input',
       templateOptions: {
         label: T.F.TAG.FORM_BASIC.L_COLOR,
-        type: IS_ANDROID_WEB_VIEW ? 'text' : 'color',
+        type: 'color',
       },
     },
   ],
@@ -56,7 +55,7 @@ export const CREATE_TAG_BASIC_CONFIG_FORM_CONFIG: GenericConfigFormSection = {
       type: 'input',
       templateOptions: {
         label: T.F.PROJECT.FORM_THEME.L_THEME_COLOR,
-        type: IS_ANDROID_WEB_VIEW ? 'text' : 'color',
+        type: 'color',
       },
     },
   ],

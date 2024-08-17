@@ -89,14 +89,14 @@ export const TASK_REPEAT_CFG_FORM_CFG_BEFORE_TAGS: FormlyFieldConfig[] = [
   },
   {
     key: 'startDate',
-    type: 'datepicker',
+    type: 'input',
     hideExpression: (model: any) => model.quickSetting !== 'CUSTOM',
     defaultValue: getWorklogStr(),
     templateOptions: {
       label: T.F.TASK_REPEAT.F.START_DATE,
       required: true,
       // min: getWorklogStr() as any,
-      // type: IS_ANDROID_WEB_VIEW ? 'text' : 'date',
+      type: 'date',
     },
   },
   {
