@@ -39,7 +39,6 @@ import { deleteTask, updateTask } from '../../tasks/store/task.actions';
 import { DialogTimeEstimateComponent } from '../../tasks/dialog-time-estimate/dialog-time-estimate.component';
 import { IS_TOUCH_PRIMARY } from '../../../util/is-mouse-primary';
 import { DialogScheduleTaskComponent } from '../../planner/dialog-schedule-task/dialog-schedule-task.component';
-import { getWorklogStr } from '../../../util/get-work-log-str';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { DialogTaskAdditionalInfoPanelComponent } from '../../tasks/dialog-task-additional-info-panel/dialog-task-additional-info-panel.component';
 import { CalendarIntegrationService } from '../../calendar-integration/calendar-integration.service';
@@ -317,7 +316,6 @@ export class ScheduleEventComponent implements OnInit {
       autoFocus: false,
       data: {
         task: this.task,
-        day: day ? getWorklogStr(day) : undefined,
       },
     });
   }

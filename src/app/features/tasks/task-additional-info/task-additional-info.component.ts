@@ -74,7 +74,6 @@ import { getTaskRepeatInfoText } from './get-task-repeat-info-text.util';
 import { IS_TOUCH_PRIMARY } from '../../../util/is-mouse-primary';
 import { PlannerService } from '../../planner/planner.service';
 import { DialogScheduleTaskComponent } from '../../planner/dialog-schedule-task/dialog-schedule-task.component';
-import { getWorklogStr } from '../../../util/get-work-log-str';
 import { DragulaService } from 'ng2-dragula';
 
 interface IssueAndType {
@@ -427,7 +426,7 @@ export class TaskAdditionalInfoComponent implements AfterViewInit, OnDestroy {
       // we focus inside dialog instead
       autoFocus: false,
       restoreFocus: true,
-      data: { task: this.task, day: getWorklogStr(this.task?.plannedAt || undefined) },
+      data: { task: this.task },
     });
   }
 

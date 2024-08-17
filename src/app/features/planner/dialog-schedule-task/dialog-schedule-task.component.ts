@@ -33,6 +33,8 @@ import { isToday } from '../../../util/is-today.util';
 import { TaskService } from '../../tasks/task.service';
 import { ReminderService } from '../../reminder/reminder.service';
 import { getDateTimeFromClockString } from '../../../util/get-date-time-from-clock-string';
+import { PlannerService } from '../planner.service';
+import { first } from 'rxjs/operators';
 
 @Component({
   selector: 'dialog-schedule-task',
@@ -55,10 +57,13 @@ export class DialogScheduleTaskComponent implements AfterViewInit {
   selectedTime: string | null = null;
   selectedReminderCfgId!: TaskReminderOptionId;
 
+  plannedDayForTask: string | null = null;
   isInitValOnTimeFocus: boolean = true;
 
+  todayStr = getWorklogStr();
+
   constructor(
-    @Inject(MAT_DIALOG_DATA) public data: { task: Task; day?: string },
+    @Inject(MAT_DIALOG_DATA) public data: { task: Task },
     private _matDialogRef: MatDialogRef<DialogScheduleTaskComponent>,
     private _cd: ChangeDetectorRef,
     private _store: Store,
@@ -66,9 +71,10 @@ export class DialogScheduleTaskComponent implements AfterViewInit {
     private _datePipe: DatePipe,
     private _taskService: TaskService,
     private _reminderService: ReminderService,
+    private _plannerService: PlannerService,
   ) {}
 
-  ngAfterViewInit(): void {
+  async ngAfterViewInit(): Promise<void> {
     if (this.data.task.reminderId) {
       const reminder = this._reminderService.getById(this.data.task.reminderId);
       if (reminder) {
@@ -92,10 +98,13 @@ export class DialogScheduleTaskComponent implements AfterViewInit {
         timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
       });
     } else {
-      console.log(this.data.day);
+      const plannerTaskMap = await this._plannerService.plannedTaskDayMap$
+        .pipe(first())
+        .toPromise();
+      this.plannedDayForTask = plannerTaskMap[this.data.task.id];
 
       this.selectedDate =
-        this.data.day ||
+        this.plannedDayForTask ||
         (this.data.task.tagIds.includes(TODAY_TAG.id) ? new Date().toISOString() : null);
     }
 
@@ -172,7 +181,7 @@ export class DialogScheduleTaskComponent implements AfterViewInit {
   remove(): void {
     if (this.data.task.reminderId) {
       this._taskService.unScheduleTask(this.data.task.id, this.data.task.reminderId);
-    } else if (this.data.day === getWorklogStr()) {
+    } else if (this.plannedDayForTask === getWorklogStr()) {
       // to cover edge cases
       this._store.dispatch(
         PlannerActions.removeTaskFromDays({ taskId: this.data.task.id }),

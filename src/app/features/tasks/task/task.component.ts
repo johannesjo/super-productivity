@@ -280,15 +280,12 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
     window.clearTimeout(this._currentPanTimeout);
   }
 
-  async scheduleTask(): Promise<void> {
-    const plannedDayForTask = (
-      await this.plannerService.plannedTaskDayMap$.pipe(first()).toPromise()
-    )[this.task.id];
+  scheduleTask(): void {
     this._matDialog
       .open(DialogScheduleTaskComponent, {
         // we focus inside dialog instead
         autoFocus: false,
-        data: { task: this.task, day: plannedDayForTask },
+        data: { task: this.task },
       })
       .afterClosed()
       // .pipe(takeUntil(this._destroy$))

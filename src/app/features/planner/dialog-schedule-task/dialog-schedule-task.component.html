@@ -51,7 +51,7 @@
 </div>
 
 <mat-dialog-actions align="end">
-  @if (data.day || data.task.plannedAt) {
+  @if (data.task.plannedAt || (plannedDayForTask && plannedDayForTask !== todayStr)) {
   <button
     (click)="remove()"
     color="warn"

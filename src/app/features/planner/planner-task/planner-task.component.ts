@@ -197,7 +197,7 @@ export class PlannerTaskComponent extends BaseComponent implements OnInit, OnDes
       .open(DialogScheduleTaskComponent, {
         // we focus inside dialog instead
         autoFocus: false,
-        data: { task: this.task, day: this.day },
+        data: { task: this.task },
       })
       .afterClosed()
       .pipe(takeUntil(this.onDestroy$))
