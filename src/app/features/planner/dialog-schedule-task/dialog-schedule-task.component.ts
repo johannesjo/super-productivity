@@ -170,7 +170,9 @@ export class DialogScheduleTaskComponent implements AfterViewInit {
   }
 
   remove(): void {
-    if (this.data.day === getWorklogStr()) {
+    if (this.data.task.reminderId) {
+      this._taskService.unScheduleTask(this.data.task.id, this.data.task.reminderId);
+    } else if (this.data.day === getWorklogStr()) {
       // to cover edge cases
       this._store.dispatch(
         PlannerActions.removeTaskFromDays({ taskId: this.data.task.id }),
