@@ -134,9 +134,15 @@
   &.isActiveRoute {
     font-weight: bold;
     color: $c-primary-800;
+    @include darkTheme() {
+      color: $c-primary;
+    }
 
     mat-icon {
       color: $c-primary-800;
+      @include darkTheme() {
+        color: $c-primary;
+      }
     }
   }
 }
