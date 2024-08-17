@@ -130,8 +130,6 @@ export class SnackService {
       if (!el) {
         return;
       }
-      console.log(el);
-
       if (document.querySelector('add-task-bar.global')) {
         el.style.marginBottom = '86px';
       } else if (document.querySelector('.FAB-BTN')) {
