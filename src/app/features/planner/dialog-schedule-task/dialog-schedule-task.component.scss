@@ -27,13 +27,8 @@
   display: block;
 
   @media (min-width: 370px) {
-    min-width: 360px;
-    max-width: 360px;
-  }
-
-  @media (min-width: 390px) {
-    min-width: 380px;
-    max-width: 380px;
+    min-width: 352px;
+    max-width: 352px;
   }
 
   ::ng-deep .mat-calendar-header {
@@ -80,9 +75,18 @@
 }
 
 :host ::ng-deep mat-month-view .mat-calendar-body-today {
-  &:before {
+  color: transparent;
+
+  &:after {
     @include materialIcon('wb_sunny');
-    top: 14px;
+    color: $light-theme-text-color;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    @include darkTheme() {
+      color: $dark-theme-text-color;
+    }
   }
 }
 

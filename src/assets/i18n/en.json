@@ -1026,7 +1026,7 @@
         "RO_START": "when it starts",
         "RO_NEVER": "Never",
         "SCHEDULE": "Schedule",
-        "UNSCHEDULE": "Unschedule"
+        "UNSCHEDULE": "Remove"
       },
       "D_REMINDER_VIEW": {
         "ADD_ALL_TO_TODAY": "Add all to today",
