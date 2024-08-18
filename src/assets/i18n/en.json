@@ -980,7 +980,7 @@
         "DELETE": "Delete Task",
         "DELETE_REPEAT_INSTANCE": "Delete repeated Task Instance",
         "DROP_ATTACHMENT": "Drop here to attach to \"{{title}}\"",
-        "EDIT_SCHEDULED": "Edit Scheduled",
+        "EDIT_SCHEDULED": "Reschedule",
         "EDIT_TAGS": "Edit tags",
         "EDIT_TASK_TITLE": "Edit title",
         "MARK_DONE": "Mark as done",

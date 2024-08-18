@@ -104,8 +104,11 @@
     color="warn"
     mat-stroked-button
   >
-    <mat-icon>delete_forever</mat-icon>
-    Remove
+    @if (selectedTime) {
+    <mat-icon>alarm_off</mat-icon>
+    } @else {
+    <mat-icon>event_busy</mat-icon>
+    } Remove
     <!--    {{ T.F.PLANNER.D.PLAN_FOR_DAY.REMOVE_PLAN_DATE|translate }}-->
   </button>
   }
