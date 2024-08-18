@@ -759,7 +759,7 @@
         "TRACK_TIME_STOP": "暫停追蹤時間",
         "UPDATE_ISSUE_DATA": "更新 Issue 資料"
       },
-      "D_REMINDER_ADD": {
+      "D_SCHEDULE_TASK": {
         "CONFIRM_REPEAT_OK": "Schedule",
         "CONFIRM_REPEAT_TXT": "You're trying to schedule this repeated task to another day. Repeated tasks are usually meant to be re-created on specified days and only scheduled on that day. Do you want to proceed anyway?",
         "DATETIME_FOR": "提醒的日期時間",

@@ -962,7 +962,7 @@
         "MSG": "Želiš li stvoriti novu oznaku {{tagsTxt}}?",
         "OK": "Stvori oznaku"
       },
-      "D_REMINDER_ADD": {
+      "D_SCHEDULE_TASK": {
         "CONFIRM_REPEAT_OK": "Terminiraj",
         "CONFIRM_REPEAT_TXT": "Pokušavaš terminirati ovaj ponavljajući zadatak na jedan drugi dan. Uobičajeno je da se ponavljajući zadaci ponovo stvore na određene dane i da se terminiraju samo na taj dan. Želiš li svejedno nastaviti?",
         "DATETIME_FOR": "Datum i vrijeme za podsjetnika",

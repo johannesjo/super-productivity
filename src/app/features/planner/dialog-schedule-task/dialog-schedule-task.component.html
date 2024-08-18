@@ -1,6 +1,3 @@
-<!--<h4>{{ T.F.PLANNER.D.PLAN_FOR_DAY.TITLE|translate }}</h4>-->
-<!--<h4 class="hide-xs">Schedule Task {{ selectedTime ? 'with Time' : 'for Day' }}</h4>-->
-
 <div class="quick-access">
   <!--  <button-->
   <!--    mat-icon-button-->
@@ -12,28 +9,28 @@
   <button
     mat-icon-button
     (click)="quickAccessBtnClick(0)"
-    [matTooltip]="'Schedule Today'"
+    [matTooltip]="(T.F.TASK.D_SCHEDULE_TASK.QA_TODAY|translate)"
   >
     <mat-icon>wb_sunny</mat-icon>
   </button>
   <button
     mat-icon-button
     (click)="quickAccessBtnClick(1)"
-    [matTooltip]="'Schedule Tomorrow'"
+    [matTooltip]="(T.F.TASK.D_SCHEDULE_TASK.QA_TOMORROW|translate)"
   >
     <mat-icon svgIcon="tomorrow"></mat-icon>
   </button>
   <button
     mat-icon-button
     (click)="quickAccessBtnClick(2)"
-    [matTooltip]="'Schedule Next Week'"
+    [matTooltip]="(T.F.TASK.D_SCHEDULE_TASK.QA_NEXT_WEEK|translate)"
   >
     <mat-icon svgIcon="next_week"></mat-icon>
   </button>
   <button
     mat-icon-button
     (click)="quickAccessBtnClick(3)"
-    [matTooltip]="'Schedule Next Month'"
+    [matTooltip]="(T.F.TASK.D_SCHEDULE_TASK.QA_NEXT_MONTH|translate)"
   >
     <mat-icon>bedtime</mat-icon>
   </button>
@@ -74,7 +71,7 @@
   >
     <mat-icon matPrefix>alarm</mat-icon>
 
-    <mat-label>{{ (T.F.TASK.D_REMINDER_ADD.REMIND_AT|translate) }}</mat-label>
+    <mat-label>{{ (T.F.TASK.D_SCHEDULE_TASK.REMIND_AT|translate) }}</mat-label>
     <mat-select
       [(ngModel)]="selectedReminderCfgId"
       name="type"
@@ -108,8 +105,7 @@
     <mat-icon>alarm_off</mat-icon>
     } @else {
     <mat-icon>event_busy</mat-icon>
-    } Remove
-    <!--    {{ T.F.PLANNER.D.PLAN_FOR_DAY.REMOVE_PLAN_DATE|translate }}-->
+    } {{ T.F.TASK.D_SCHEDULE_TASK.UNSCHEDULE|translate }}
   </button>
   }
 
@@ -122,8 +118,6 @@
     <mat-icon>alarm</mat-icon>
     } @else {
     <mat-icon>today</mat-icon>
-    } Schedule
-    <!--    {{ selectedTime ? T.F.PLANNER.D.PLAN_FOR_DAY.SCHEDULE_WITH_TIME|translate :-->
-    <!--    T.F.PLANNER.D.PLAN_FOR_DAY.SCHEDULE_FOR_DAY|translate }}-->
+    } {{ T.F.TASK.D_SCHEDULE_TASK.SCHEDULE|translate }}
   </button>
 </mat-dialog-actions>

@@ -1011,13 +1011,13 @@
         "MSG": "Do you want to create the new tags {{tagsTxt}}?",
         "OK": "Create tags"
       },
-      "D_REMINDER_ADD": {
-        "CONFIRM_REPEAT_OK": "Schedule",
-        "CONFIRM_REPEAT_TXT": "You're trying to schedule this repeated task to another day. Repeated tasks are usually meant to be re-created on specified days and only scheduled on that day. Do you want to proceed anyway?",
-        "DATETIME_FOR": "Datetime for reminder",
-        "EDIT": "Edit Reminder",
+      "D_SCHEDULE_TASK": {
         "MOVE_TO_BACKLOG": "Move task to backlog until scheduled",
         "REMIND_AT": "Remind at",
+        "QA_NEXT_MONTH": "Schedule next Month",
+        "QA_NEXT_WEEK": "Schedule next Week",
+        "QA_TODAY": "Schedule Today",
+        "QA_TOMORROW": "Schedule Tomorrow",
         "RO_10M": "10 minutes before it starts",
         "RO_15M": "15 minutes before it starts",
         "RO_1H": "1 hour before it starts",

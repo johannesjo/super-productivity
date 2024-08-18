@@ -810,7 +810,7 @@
         "TRACK_TIME_STOP": "暂停记录时间",
         "UPDATE_ISSUE_DATA": "更新 Issue 数据"
       },
-      "D_REMINDER_ADD": {
+      "D_SCHEDULE_TASK": {
         "CONFIRM_REPEAT_OK": "时间表",
         "CONFIRM_REPEAT_TXT": "您正在尝试将此重复任务安排到另一天。重复的任务通常意味着在指定的日期重新创建并且只安排在当天。您仍要继续吗？",
         "DATETIME_FOR": "提醒的日期时间",

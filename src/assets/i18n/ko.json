@@ -778,7 +778,7 @@
         "TRACK_TIME_STOP": "추적 시간 일시 중지",
         "UPDATE_ISSUE_DATA": "문제 데이터 업데이트"
       },
-      "D_REMINDER_ADD": {
+      "D_SCHEDULE_TASK": {
         "CONFIRM_REPEAT_OK": "시간표",
         "CONFIRM_REPEAT_TXT": "이 반복 작업을 다른 날짜로 예약하려고 합니다. 반복되는 작업은 일반적으로 지정된 날짜에 다시 생성되고 해당 날짜에만 예약됩니다. 그래도 계속하시겠습니까?",
         "DATETIME_FOR": "알림 시간",

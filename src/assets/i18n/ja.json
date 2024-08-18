@@ -748,7 +748,7 @@
         "TRACK_TIME_STOP": "タイムトラッキングを一時停止",
         "UPDATE_ISSUE_DATA": "課題データを更新"
       },
-      "D_REMINDER_ADD": {
+      "D_SCHEDULE_TASK": {
         "CONFIRM_REPEAT_OK": "スケジュール",
         "CONFIRM_REPEAT_TXT": "この繰り返されるタスクを別の日にスケジュールしようとしています。繰り返されるタスクは通常、指定された日に再作成され、その日にのみスケジュールされることを意味します。とにかく続行しますか？",
         "DATETIME_FOR": "リマインダーの日時",

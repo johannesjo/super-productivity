@@ -686,7 +686,7 @@
         "TRACK_TIME_STOP": "Pause tracking time",
         "UPDATE_ISSUE_DATA": "Update issue data"
       },
-      "D_REMINDER_ADD": {
+      "D_SCHEDULE_TASK": {
         "DATETIME_FOR": "Datetime for reminder",
         "EDIT": "Edit Reminder",
         "MOVE_TO_BACKLOG": "Move task to backlog until scheduled",

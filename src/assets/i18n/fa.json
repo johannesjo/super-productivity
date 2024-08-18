@@ -753,7 +753,7 @@
         "TRACK_TIME_STOP": "Pause tracking time",
         "UPDATE_ISSUE_DATA": "Update issue data"
       },
-      "D_REMINDER_ADD": {
+      "D_SCHEDULE_TASK": {
         "CONFIRM_REPEAT_OK": "برنامه",
         "CONFIRM_REPEAT_TXT": "شما سعی می کنید این کار مکرر را برای یک روز دیگر برنامه ریزی کنید. وظایف مکرر معمولاً در روزهای معین ایجاد می شوند و فقط در آن روز برنامه ریزی می شوند. آیا به هر حال می خواهید ادامه دهید؟",
         "DATETIME_FOR": "تاریخ و زمان برای یادآوری",

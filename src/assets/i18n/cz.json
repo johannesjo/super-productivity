@@ -937,7 +937,7 @@
         "TRACK_TIME_STOP": "Pozastavit sledování času",
         "UPDATE_ISSUE_DATA": "Aktualizovat údaje o problému"
       },
-      "D_REMINDER_ADD": {
+      "D_SCHEDULE_TASK": {
         "CONFIRM_REPEAT_OK": "Naplánovat",
         "CONFIRM_REPEAT_TXT": "Zkoušíte naplánovat tento opakující se úkol na jiný den. Opakující se úkoly jsou obvykle určeny k opětovnému vytvoření ve stanovené dny a jsou naplánovány pouze v tento den. Chcete přesto pokračovat?",
         "DATETIME_FOR": "Datum a čas pro připomenutí",

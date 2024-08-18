@@ -599,7 +599,7 @@
         "TRACK_TIME_STOP": "Sett sporingstid på pause",
         "UPDATE_ISSUE_DATA": "Oppdater data om problemet"
       },
-      "D_REMINDER_ADD": {
+      "D_SCHEDULE_TASK": {
         "DATETIME_FOR": "Datotid for påminnelse",
         "EDIT": "Rediger påminnelse",
         "MOVE_TO_BACKLOG": "Flytt oppgaven til backlogg helt til planlagt",

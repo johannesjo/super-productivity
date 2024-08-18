@@ -967,7 +967,7 @@
       "D_CONFIRM_SHORT_SYNTAX_NEW_TAGS": {
         "OK": "Criar Tags"
       },
-      "D_REMINDER_ADD": {
+      "D_SCHEDULE_TASK": {
         "CONFIRM_REPEAT_OK": "Cronograma",
         "CONFIRM_REPEAT_TXT": "Você está tentando agendar essa tarefa repetida para outro dia. Normalmente, as tarefas repetidas devem ser recriadas em dias específicos e agendadas apenas nesse dia. Você deseja continuar mesmo assim?",
         "DATETIME_FOR": "Data e hora para lembrete",

@@ -890,7 +890,7 @@
         "TRACK_TIME_STOP": "Pauzeer de volgtijd",
         "UPDATE_ISSUE_DATA": "Update probleemgegevens"
       },
-      "D_REMINDER_ADD": {
+      "D_SCHEDULE_TASK": {
         "CONFIRM_REPEAT_OK": "Planning",
         "CONFIRM_REPEAT_TXT": "U probeert deze herhaalde taak op een andere dag te plannen. Herhaalde taken zijn meestal bedoeld om op bepaalde dagen opnieuw te worden gemaakt en alleen op die dag te worden gepland. Wil je toch doorgaan?",
         "DATETIME_FOR": "Datetime voor herinnering",

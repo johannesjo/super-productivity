@@ -879,7 +879,7 @@
         "TRACK_TIME_STOP": "Jeda waktu pelacakan",
         "UPDATE_ISSUE_DATA": "Perbarui data masalah"
       },
-      "D_REMINDER_ADD": {
+      "D_SCHEDULE_TASK": {
         "CONFIRM_REPEAT_OK": "Jadwalkan",
         "CONFIRM_REPEAT_TXT": "Anda mencoba menjadwalkan tugas berulang ini ke hari lain. Tugas yang berulang biasanya dimaksudkan untuk dibuat ulang pada hari tertentu dan hanya dijadwalkan pada hari itu. Tetap ingin melanjutkan?",
         "DATETIME_FOR": "Tanggal untuk pengingat",

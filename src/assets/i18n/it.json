@@ -748,7 +748,7 @@
         "TRACK_TIME_STOP": "Pausa tracciamento del tempo",
         "UPDATE_ISSUE_DATA": "Aggiorna dati dell'issue"
       },
-      "D_REMINDER_ADD": {
+      "D_SCHEDULE_TASK": {
         "CONFIRM_REPEAT_OK": "programma",
         "CONFIRM_REPEAT_TXT": "Stai cercando di programmare questa attività ripetuta per un altro giorno. Le attività ripetute in genere devono essere ricreate in giorni specificati e pianificate solo in quel giorno. Vuoi procedere comunque?",
         "DATETIME_FOR": "Data e ora per promemoria",

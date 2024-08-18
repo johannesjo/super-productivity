@@ -974,7 +974,7 @@
         "MSG": "Möchten Sie die neuen Tags {{tagsTxt}} erstellen?",
         "OK": "Tags erstellen "
       },
-      "D_REMINDER_ADD": {
+      "D_SCHEDULE_TASK": {
         "CONFIRM_REPEAT_OK": "Zeitplan",
         "CONFIRM_REPEAT_TXT": "Sie versuchen, diese wiederkehrende Aufgabe auf einen anderen Tag zu verschieben. Wiederkehrende Aufgaben sollen normalerweise an bestimmten Tagen neu erstellt und nur an diesem Tag geplant werden. Möchten Sie trotzdem fortfahren?",
         "DATETIME_FOR": "Datum und Uhrzeit zur Erinnerung",

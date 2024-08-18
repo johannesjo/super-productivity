@@ -931,7 +931,7 @@
         "TRACK_TIME_STOP": "İzleme zamanını duraklat",
         "UPDATE_ISSUE_DATA": "Sorun verilerini güncelle"
       },
-      "D_REMINDER_ADD": {
+      "D_SCHEDULE_TASK": {
         "CONFIRM_REPEAT_OK": "Planla",
         "CONFIRM_REPEAT_TXT": "Bu tekrarlanan görevi başka bir güne planlamaya çalışıyorsunuz. Tekrarlanan görevler genellikle belirli günlerde yeniden oluşturulur ve yalnızca o gün planlanır. Yine de devam etmek istiyor musun?",
         "DATETIME_FOR": "Hatırlatma için tarih-saat",

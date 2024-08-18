@@ -878,7 +878,7 @@
         "TRACK_TIME_STOP": "Mettre en pause le suivi du temps",
         "UPDATE_ISSUE_DATA": "Mettre à jour les données du ticket"
       },
-      "D_REMINDER_ADD": {
+      "D_SCHEDULE_TASK": {
         "CONFIRM_REPEAT_OK": "Programme",
         "CONFIRM_REPEAT_TXT": "Vous essayez de programmer cette tâche répétée à un autre jour. Les tâches répétées sont généralement destinées à être recréées à des jours spécifiés et planifiées uniquement ce jour-là. Voulez-vous continuer malgré tout ?",
         "DATETIME_FOR": "Date et heure du rappel",
