@@ -43,6 +43,41 @@ $total-rows: 24 * $fr;
   }
 }
 
+// grid list approach 1
+//:host {
+//  .main-grid-container,
+//  .days {
+//    grid-template-rows: auto !important;
+//    grid-auto-rows: auto !important;
+//  }
+//
+//  schedule-event {
+//    align-self: start; // Align items to the start of the row
+//    grid-row-start: auto !important;
+//    grid-row: auto!important;
+//    grid-row-end: auto !important;
+//  }
+//
+//  .close-to-others-first.close-to-others-first.close-to-others-first.close-to-others-first.close-to-others-first.close-to-others-first.close-to-others-first,
+//  .close-to-others.close-to-others.close-to-others.close-to-others.close-to-others {
+//    transform: translate3d(0, 0, 0);
+//  }
+//
+//  schedule-event.SplitTaskContinued,
+//  schedule-event.SplitTaskContinuedLast,
+//  schedule-event.RepeatProjectionSplitContinuedLast,
+//  schedule-event.RepeatProjectionSplitContinued,
+//  schedule-event.SplitTaskContinued,
+//  schedule-event.LunchBreak,
+//  .work-end,
+//  .current-time,
+//  .work-start,
+//  .time,
+//  .row {
+//    display: none !important;
+//  }
+//}
+
 header {
   display: flex;
   flex-direction: column;
