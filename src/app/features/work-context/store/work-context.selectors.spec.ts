@@ -45,7 +45,7 @@ describe('workContext selectors', () => {
           taskIds: [],
           theme: {
             accent: '#ff4081',
-            backgroundImageDark: 'assets/bg/NIGHT_manuel-will.jpg',
+            backgroundImageDark: '',
             backgroundImageLight: null,
             hueAccent: '500',
             huePrimary: '500',
