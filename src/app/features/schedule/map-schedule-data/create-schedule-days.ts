@@ -108,6 +108,7 @@ export const createScheduleDays = (
         if (
           entry.type === SVEType.Task ||
           entry.type === SVEType.SplitTask ||
+          entry.type === SVEType.RepeatProjection ||
           entry.type === SVEType.TaskPlannedForDay ||
           entry.type === SVEType.SplitTaskContinuedLast ||
           entry.type === SVEType.SplitTaskContinued ||
@@ -116,7 +117,7 @@ export const createScheduleDays = (
         ) {
           viewEntriesPushedToNextDay.push(entry);
         } else {
-          console.log(entry);
+          console.log('entry Start:', new Date(entry.start), { entry });
           console.warn('Entry start time after next day start', entry);
         }
       } else {
