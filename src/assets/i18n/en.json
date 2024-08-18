@@ -947,7 +947,7 @@
         "LOCAL_ATTACHMENTS": "Local Attachments",
         "NOTES": "Description",
         "PARENT": "Parent",
-        "PLANNED_AT": "Planned at",
+        "SCHEDULED_AT": "Scheduled at",
         "REMINDER": "Reminder",
         "REPEAT": "Repeat",
         "SCHEDULE_TASK": "Schedule Task",

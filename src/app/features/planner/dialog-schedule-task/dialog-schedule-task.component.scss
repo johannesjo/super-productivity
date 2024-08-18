@@ -6,22 +6,10 @@
 }
 
 :host {
-  display: flex;
   flex-direction: column;
   justify-content: stretch;
   align-items: stretch;
   user-select: none;
-
-  :host-context([dir='rtl']) {
-    direction: rtl;
-  }
-
-  mat-form-field {
-    width: 100%;
-  }
-}
-
-:host {
   min-width: 320px;
   max-width: 320px;
   display: block;
@@ -31,23 +19,38 @@
     max-width: 352px;
   }
 
-  ::ng-deep .mat-calendar-header {
-    padding-top: 0;
+  :host-context([dir='rtl']) {
+    direction: rtl;
   }
 
-  ::ng-deep .mat-calendar-body-active {
+  mat-form-field {
+    width: 100%;
   }
 
-  ::ng-deep .mat-calendar-body-cell-content {
-    background: transparent !important;
-  }
+  ::ng-deep {
+    .mat-calendar-header {
+      padding-top: 0;
+    }
 
-  ::ng-deep .mat-calendar-body-cell:focus .mat-calendar-body-cell-content {
-    outline: 2px solid $c-accent;
-  }
+    .mat-calendar-body-active {
+    }
 
-  ::ng-deep .mat-calendar-body-selected {
-    background: $c-primary !important;
+    .mat-calendar-body-cell-content {
+      background: transparent !important;
+    }
+
+    .mat-calendar-body-cell:focus .mat-calendar-body-cell-content {
+      outline: 2px solid $c-accent;
+    }
+
+    .mat-calendar-body-selected {
+      background: $c-primary !important;
+    }
+
+    .mat-calendar-controls {
+      margin-top: 8px;
+      margin-bottom: 8px;
+    }
   }
 }
 
