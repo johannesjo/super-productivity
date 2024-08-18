@@ -134,21 +134,21 @@ export const createScheduleDays = (
       }
     });
 
-    console.log({
-      dayDate,
-      startTime: new Date(startTime),
-      viewEntriesPushedToNextDay,
-      flowTasksLeftAfterDay,
-      blockerBlocksForDay,
-      nonScheduledBudgetForDay,
-      beyondBudgetTasks,
-      viewEntries,
-      viewEntriesToRenderForDay,
-      nonScheduledBudgetForDay2: nonScheduledBudgetForDay / 60 / 60 / 1000,
-      within,
-      beyond,
-      isSomeTimeLeftForLastOverBudget,
-    });
+    // console.log({
+    //   dayDate,
+    //   startTime: new Date(startTime),
+    //   viewEntriesPushedToNextDay,
+    //   flowTasksLeftAfterDay,
+    //   blockerBlocksForDay,
+    //   nonScheduledBudgetForDay,
+    //   beyondBudgetTasks,
+    //   viewEntries,
+    //   viewEntriesToRenderForDay,
+    //   nonScheduledBudgetForDay2: nonScheduledBudgetForDay / 60 / 60 / 1000,
+    //   within,
+    //   beyond,
+    //   isSomeTimeLeftForLastOverBudget,
+    // });
 
     return {
       dayDate,

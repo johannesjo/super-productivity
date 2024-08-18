@@ -49,7 +49,7 @@ export class CalendarIntegrationEffects {
                 // timer(0, 10000).pipe(
                 tap(() => console.log('REQUEST CALENDAR', calProvider)),
                 switchMap(() =>
-                  this._calendarIntegrationService.requestEvents(calProvider),
+                  this._calendarIntegrationService.requestEvents$(calProvider),
                 ),
                 switchMap((allEventsToday) =>
                   timer(0, CHECK_TO_SHOW_INTERVAL).pipe(
@@ -58,7 +58,7 @@ export class CalendarIntegrationEffects {
                         isCalenderEventDue(
                           calEv,
                           calProvider,
-                          this._calendarIntegrationService.skippedEventIds,
+                          this._calendarIntegrationService.skippedEventIds$.getValue(),
                           now,
                         ),
                       );
