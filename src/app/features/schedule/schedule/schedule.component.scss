@@ -12,11 +12,12 @@ $fr: 12;
 $total-rows: 24 * $fr;
 
 :host {
-  background: $light-theme-bg;
+  //background: $light-theme-bg;
   --nr-of-days: 5;
 
   @include darkTheme() {
     background: $dark-theme-bg;
+    background: transparent;
   }
 }
 

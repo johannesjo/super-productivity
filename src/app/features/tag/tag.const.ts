@@ -17,7 +17,8 @@ export const TODAY_TAG: Tag = {
   theme: {
     ...WORK_CONTEXT_DEFAULT_THEME,
     primary: DEFAULT_TODAY_TAG_COLOR,
-    backgroundImageDark: 'assets/bg/NIGHT_manuel-will.jpg',
+    // backgroundImageDark: 'assets/bg/NIGHT_manuel-will.jpg',
+    backgroundImageDark: '',
 
     ...((window.matchMedia('(prefers-color-scheme: dark)').matches
       ? {

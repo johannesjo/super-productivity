@@ -1,3 +1,4 @@
+@use 'angular-material-css-vars' as mat-css-vars;
 @import '../_variables.scss';
 
 html,
@@ -53,6 +54,7 @@ body {
 
   &.isLightTheme {
     color: $light-theme-text-color;
+    background: $light-theme-bg;
 
     &.isDisableBackgroundGradient {
       background: $light-theme-bg;
@@ -67,11 +69,22 @@ body {
         $c-primary-100 85%,
         $c-primary-200 100%
       );
+      background: linear-gradient(
+        180deg,
+        rgba(250, 250, 250, 1) 0,
+        //rgba(250, 250, 250, 1) 50%,
+        mat-css-vars.mat-css-color(50, 1) 10%,
+        mat-css-vars.mat-css-color(100, 0.7) 90%,
+        mat-css-vars.mat-css-color(100, 0.9) 100%
+      );
     }
   }
 
   &.isDarkTheme {
     color: $dark-theme-text-color;
+    //background: $dark-theme-bg;
+    //background: rgb(10, 10, 10);
+    background: #000;
 
     &.isDisableBackgroundGradient {
       background: $dark-theme-bg;
@@ -80,23 +93,12 @@ body {
     &:before {
       content: '';
       opacity: 1;
-      filter: brightness(0.7) saturate(0.6);
-      //background: linear-gradient(
-      //  180deg,
-      //  $dark-theme-bg 0,
-      //  $c-primary-900 20%,
-      //  $c-primary-800 50%,
-      //  $c-primary-700 100%
-      //);
       background: linear-gradient(
         180deg,
-        $dark-theme-bg 0,
-        $c-primary-900 20%,
-        $c-primary-800 100%
+        mat-css-vars.mat-css-color(900, 0.02) 10%,
+        mat-css-vars.mat-css-color(900, 0.05) 50%,
+        mat-css-vars.mat-css-color(900, 0.2) 100%
       );
-
-      //background: linear-gradient(180deg, $c-primary-700 0, $c-primary-800 20%, $c-primary-900 30%, $dark-theme-bg 100%);
-      //background: linear-gradient(180deg, $c-primary-900 0, $c-primary-800 80%, $c-primary-700 90%, $c-primary-600 100%);
     }
   }
 
