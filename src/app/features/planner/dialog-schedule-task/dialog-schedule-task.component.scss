@@ -99,4 +99,11 @@
       border-radius: 4px !important;
     }
   }
+
+  button + button {
+    border-left: 1px solid $light-theme-extra-border-color;
+    @include darkTheme() {
+      border-color: $dark-theme-extra-border-color;
+    }
+  }
 }

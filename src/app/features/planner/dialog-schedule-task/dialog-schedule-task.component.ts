@@ -61,7 +61,8 @@ export class DialogScheduleTaskComponent implements AfterViewInit {
   isInitValOnTimeFocus: boolean = true;
 
   todayStr = getWorklogStr();
-  private _prevSelectedQuickAccessDate: Date | null = null;
+  // private _prevSelectedQuickAccessDate: Date | null = null;
+  // private _prevQuickAccessAction: number | null = null;
 
   constructor(
     @Inject(MAT_DIALOG_DATA) public data: { task: Task },
@@ -329,13 +330,15 @@ export class DialogScheduleTaskComponent implements AfterViewInit {
     //   this.selectedDate,
     // );
 
-    if (
-      this._prevSelectedQuickAccessDate &&
-      this._prevSelectedQuickAccessDate.toISOString() === this.selectedDate
-    ) {
-      this.submit();
-    }
+    // if (
+    //   this._prevSelectedQuickAccessDate &&
+    //   this._prevQuickAccessAction === item &&
+    //   this._prevSelectedQuickAccessDate.toISOString() === this.selectedDate
+    // ) {
+    this.submit();
+    // }
 
-    this._prevSelectedQuickAccessDate = new Date(this.selectedDate as string);
+    // this._prevSelectedQuickAccessDate = new Date(this.selectedDate as string);
+    // this._prevQuickAccessAction = item;
   }
 }

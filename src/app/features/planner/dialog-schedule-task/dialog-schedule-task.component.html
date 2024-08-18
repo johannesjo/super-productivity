@@ -2,6 +2,13 @@
 <!--<h4 class="hide-xs">Schedule Task {{ selectedTime ? 'with Time' : 'for Day' }}</h4>-->
 
 <div class="quick-access">
+  <!--  <button-->
+  <!--    mat-icon-button-->
+  <!--    (click)="quickAccessBtnClick(0)"-->
+  <!--    [matTooltip]="'Schedule Today'"-->
+  <!--  >-->
+  <!--    <mat-icon>history</mat-icon>-->
+  <!--  </button>-->
   <button
     mat-icon-button
     (click)="quickAccessBtnClick(0)"
@@ -14,14 +21,14 @@
     (click)="quickAccessBtnClick(1)"
     [matTooltip]="'Schedule Tomorrow'"
   >
-    <mat-icon>today</mat-icon>
+    <mat-icon svgIcon="tomorrow"></mat-icon>
   </button>
   <button
     mat-icon-button
     (click)="quickAccessBtnClick(2)"
     [matTooltip]="'Schedule Next Week'"
   >
-    <mat-icon>event</mat-icon>
+    <mat-icon svgIcon="next_week"></mat-icon>
   </button>
   <button
     mat-icon-button

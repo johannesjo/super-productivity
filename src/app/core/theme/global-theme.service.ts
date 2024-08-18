@@ -118,6 +118,8 @@ export class GlobalThemeService {
       ['redmine', 'assets/icons/redmine.svg'],
       ['calendar', 'assets/icons/calendar.svg'],
       ['early_on', 'assets/icons/early-on.svg'],
+      ['tomorrow', 'assets/icons/tomorrow.svg'],
+      ['next_week', 'assets/icons/next-week.svg'],
     ];
 
     icons.forEach(([name, path]) => {
