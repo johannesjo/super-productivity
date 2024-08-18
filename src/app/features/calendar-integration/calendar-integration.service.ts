@@ -5,13 +5,20 @@ import {
   distinctUntilChanged,
   first,
   map,
-  startWith,
   switchMap,
   tap,
 } from 'rxjs/operators';
 import { getRelevantEventsForCalendarIntegrationFromIcal } from '../schedule/ical/get-relevant-events-from-ical';
 import { CalendarProvider } from '../config/global-config.model';
-import { BehaviorSubject, combineLatest, forkJoin, Observable, of } from 'rxjs';
+import {
+  BehaviorSubject,
+  combineLatest,
+  defer,
+  forkJoin,
+  merge,
+  Observable,
+  of,
+} from 'rxjs';
 import { T } from '../../t.const';
 import { SnackService } from '../../core/snack/snack.service';
 import { getStartOfDayTimestamp } from '../../util/get-start-of-day-timestamp';
@@ -36,9 +43,10 @@ const ONE_MONTHS = 60 * 60 * 1000 * 24 * 31;
   providedIn: 'root',
 })
 export class CalendarIntegrationService {
-  icalEvents$: Observable<ScheduleCalendarMapEntry[]> = this._store
-    .select(selectCalendarProviders)
-    .pipe(
+  icalEvents$: Observable<ScheduleCalendarMapEntry[]> = merge(
+    // NOTE: we're using this rather than startWith since we want to use the freshest available cached value
+    defer(() => of(this._getCalProviderFromCache())),
+    this._store.select(selectCalendarProviders).pipe(
       distinctUntilChanged(fastArrayCompare),
       switchMap((calendarProviders) => {
         return calendarProviders && calendarProviders.length
@@ -87,9 +95,9 @@ export class CalendarIntegrationService {
             )
           : (of([]) as Observable<ScheduleCalendarMapEntry[]>);
       }),
-      startWith(this._getCalProviderFromCache()),
       // shareReplay(1),
-    );
+    ),
+  );
 
   public readonly skippedEventIds$ = new BehaviorSubject<string[]>([]);
 
