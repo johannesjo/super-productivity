@@ -40,14 +40,19 @@
     padding-top: 0;
   }
 
-  ::ng-deep .mat-calendar-body-selected {
-    //background: transparent;
-    //background: rgba(0,0,0,.1);
+  ::ng-deep .mat-calendar-body-active {
+  }
+
+  ::ng-deep .mat-calendar-body-cell-content {
+    background: transparent !important;
   }
 
   ::ng-deep .mat-calendar-body-cell:focus .mat-calendar-body-cell-content {
     outline: 2px solid $c-accent;
-    background: $c-primary;
+  }
+
+  ::ng-deep .mat-calendar-body-selected {
+    background: $c-primary !important;
   }
 }
 
@@ -74,7 +79,7 @@
   padding: 16px 0;
 }
 
-:host ::ng-deep .mat-calendar-body-today {
+:host ::ng-deep mat-month-view .mat-calendar-body-today {
   &:before {
     @include materialIcon('wb_sunny');
     top: 14px;
