@@ -64,13 +64,7 @@ body {
       opacity: 1;
       filter: saturate(0.8);
       background: linear-gradient(
-        180deg,
-        $c-primary-50 0,
-        $c-primary-100 85%,
-        $c-primary-200 100%
-      );
-      background: linear-gradient(
-        180deg,
+        0deg,
         rgba(250, 250, 250, 1) 0,
         //rgba(250, 250, 250, 1) 50%,
         mat-css-vars.mat-css-color(50, 1) 10%,
@@ -95,9 +89,9 @@ body {
       opacity: 1;
       background: linear-gradient(
         180deg,
-        mat-css-vars.mat-css-color(900, 0.02) 10%,
-        mat-css-vars.mat-css-color(900, 0.05) 50%,
-        mat-css-vars.mat-css-color(900, 0.2) 100%
+        mat-css-vars.mat-css-color(900, 0.35) 0%,
+        mat-css-vars.mat-css-color(900, 0.12) 140px,
+        mat-css-vars.mat-css-color(900, 0.02) 100%
       );
     }
   }
