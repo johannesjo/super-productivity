@@ -90,7 +90,7 @@ header {
   border-bottom: 1px solid $light-theme-extra-border-color;
   background: #fff;
   color: $light-theme-text-color;
-  box-shadow: $whiteframe-shadow-3dp;
+  box-shadow: $whiteframe-shadow-1dp;
   z-index: 10;
 
   @include darkTheme() {
