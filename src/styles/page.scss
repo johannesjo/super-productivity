@@ -64,12 +64,12 @@ body {
       opacity: 1;
       filter: saturate(0.8);
       background: linear-gradient(
-        0deg,
-        rgba(250, 250, 250, 1) 0,
-        //rgba(250, 250, 250, 1) 50%,
-        mat-css-vars.mat-css-color(50, 1) 10%,
-        mat-css-vars.mat-css-color(100, 0.7) 90%,
-        mat-css-vars.mat-css-color(100, 0.9) 100%
+        180deg,
+        mat-css-vars.mat-css-color(100, 1) 0%,
+        //mat-css-vars.mat-css-color(100, 0.7) 140px,
+        //mat-css-vars.mat-css-color(50, 1) 50%,
+        mat-css-vars.mat-css-color(50, 1) 140px,
+        $light-theme-bg 100%
       );
     }
   }
