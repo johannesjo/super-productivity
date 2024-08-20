@@ -36,7 +36,7 @@
 
       @include darkTheme {
         box-shadow: $whiteframe-shadow-1dp;
-        background: $dark12 !important;
+        background: $dark16 !important;
       }
     }
   }
@@ -73,7 +73,7 @@
   }
 
   @include darkTheme() {
-    background: $dark6;
+    background: $dark10;
     box-shadow: $whiteframe-shadow-1dp;
     //border-color: $dark-theme-separator-color;
   }
@@ -157,17 +157,14 @@ mat-expansion-panel::ng-deep .mat-expansion-panel-header:not(.mat-expanded),
       }
       @include darkTheme() {
         border-radius: $card-border-radius;
-        background: $dark-theme-bg-lighter;
+        background: $dark-theme-bg-lightest;
+        box-shadow: $whiteframe-shadow-1dp;
       }
     }
 
     &.isFocused .markdown-wrapper {
       box-shadow: $whiteframe-shadow-3dp !important;
       border-color: transparent;
-
-      @include darkTheme() {
-        background: $dark-theme-bg-lightest;
-      }
     }
 
     .markdown-unparsed,

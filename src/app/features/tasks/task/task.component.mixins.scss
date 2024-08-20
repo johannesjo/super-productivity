@@ -56,6 +56,24 @@ $task-c-drag-drop-bg-dark: $dark12;
 $task-c-selected-bg-light: $light-theme-selected-task-bg-color;
 $task-c-selected-bg-dark: $dark4;
 
+//// new colors a bit darker
+//$task-c-bg-dark: $dark2;
+//$sub-task-c-bg-dark-done: $dark3;
+//$sub-task-c-bg-dark: $dark4;
+//$task-c-selected-bg-dark: $dark6;
+//$sub-task-c-bg-dark-in-selected: $dark8;
+//$task-c-current-bg-dark: $dark12;
+
+////// new colors
+$task-c-bg-dark: $dark3;
+$sub-task-c-bg-dark: $dark4_5;
+$task-c-selected-bg-dark: $dark6;
+$sub-task-c-bg-dark-in-selected: $dark10;
+$task-c-current-bg-dark: $dark12;
+
+$task-c-bg-done-dark: $dark1;
+$sub-task-c-bg-dark-done: $dark2;
+
 @mixin isDone($direct-parent-only-sel: false) {
   @if $direct-parent-only-sel {
     .inner-wrapper.isDone > #{$direct-parent-only-sel} > & {

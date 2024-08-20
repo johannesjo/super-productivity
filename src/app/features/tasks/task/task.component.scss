@@ -82,7 +82,7 @@
   }
 
   :host-context(.isDarkTheme).isDone & {
-    background: $dark05;
+    background: $task-c-bg-done-dark;
   }
 
   :host-context(.isDarkTheme).isSelected.isSelected & {

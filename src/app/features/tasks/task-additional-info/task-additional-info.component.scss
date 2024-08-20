@@ -13,11 +13,6 @@
   }
 }
 
-::ng-deep task .box {
-  @include darkTheme() {
-  }
-}
-
 progress-bar {
   position: absolute !important;
   bottom: 0;
@@ -47,23 +42,12 @@ progress-bar {
   @include mq(xs) {
     padding: 0 $s;
   }
-
-  @include lightTheme() {
-    background: #fff;
-    //border-bottom: 1px solid $c-primary;
-  }
-  @include darkTheme() {
-    background: $dark-theme-bg-slightly-lighter;
-    //border-bottom: 1px solid $c-primary;
-  }
 }
 
 .task-title.task-title {
   @include taskTitle;
   font-weight: bold;
   transform-origin: top center;
-  padding-top: $s;
-  padding-bottom: $s;
   padding: $s;
   font-size: 17px;
   margin: 0;

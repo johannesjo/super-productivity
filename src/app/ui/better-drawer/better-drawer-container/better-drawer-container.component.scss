@@ -53,6 +53,7 @@ $z-this-backdrop: -1 + $z-task-side-bar-over;
 
   @include darkTheme() {
     background: $dark-theme-bg-slightly-lighter;
+    background: $dark6;
     //border-color: $dark-theme-extra-border-color;
   }
 
