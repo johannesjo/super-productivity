@@ -66,31 +66,18 @@ body {
       background: linear-gradient(
         180deg,
         mat-css-vars.mat-css-color(100, 1) 0%,
-        //mat-css-vars.mat-css-color(100, 0.7) 140px,
-        //mat-css-vars.mat-css-color(50, 1) 50%,
         mat-css-vars.mat-css-color(50, 1) 140px,
         $light-theme-bg 100%
       );
-      //box-shadow: inset 0 0 4px 0 mat-css-vars.mat-css-color(500, 0.75);
     }
   }
 
   &.isDarkTheme {
     color: $dark-theme-text-color;
-    //background: $dark-theme-bg;
-    //background: rgb(10, 10, 10);
     background: #000;
-
-    mat-sidenav-content {
-      box-shadow: inset 0 0 24px 0 mat-css-vars.mat-css-color(800, 0.45);
-    }
 
     &.isDisableBackgroundGradient {
       background: $dark-theme-bg;
-
-      mat-sidenav-content {
-        box-shadow: none;
-      }
     }
 
     &:before {
@@ -98,14 +85,10 @@ body {
       opacity: 1;
       background: linear-gradient(
         180deg,
-        mat-css-vars.mat-css-color(900, 0.35) 0%,
-        mat-css-vars.mat-css-color(900, 0.12) 140px,
+        mat-css-vars.mat-css-color(800, 0.35) 0%,
+        mat-css-vars.mat-css-color(900, 0.1) 140px,
         mat-css-vars.mat-css-color(900, 0.02) 100%
       );
-    }
-
-    mat-sidenav-content {
-      box-shadow: inset 0 0 12px 0 mat-css-vars.mat-css-color(800, 0.35);
     }
   }
 
