@@ -87,6 +87,7 @@ import { MaterialCssVarsModule } from 'angular-material-css-vars';
 import { markedOptionsFactory } from './marked-options-factory';
 
 import { FormlyMatDatepickerModule } from '@ngx-formly/material/datepicker';
+import { LocalDateStrPipe } from './pipes/local-date-str.pipe';
 
 const DIALOG_COMPONENTS = [
   DialogConfirmComponent,
@@ -128,6 +129,7 @@ const COMPONENT_AND_PIPES = [
   SortPipe,
   RoundDurationPipe,
   ShortPlannedAtPipe,
+  LocalDateStrPipe,
 ];
 
 const MAT_MODULES = [
