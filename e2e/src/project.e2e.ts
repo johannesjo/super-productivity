@@ -9,10 +9,10 @@ const CREATE_PROJECT_BTN = `${SIDENAV} section.projects .mat-mdc-menu-item:last-
 const PROJECT_NAME_INPUT = `dialog-create-project input:first-of-type`;
 const SUBMIT_BTN = `dialog-create-project button[type=submit]:enabled`;
 
-const PROJECT = `${SIDENAV} section.projects .project`;
+const PROJECT = `${SIDENAV} section.projects side-nav-item`;
 const DEFAULT_PROJECT = `${PROJECT}:nth-of-type(1)`;
 const DEFAULT_PROJECT_BTN = `${DEFAULT_PROJECT} .mat-mdc-menu-item`;
-const DEFAULT_PROJECT_ADV_BTN = `${DEFAULT_PROJECT} .project-settings-btn`;
+const DEFAULT_PROJECT_ADV_BTN = `${DEFAULT_PROJECT} .settings-btn`;
 
 const WORK_CTX_MENU = `work-context-menu`;
 const WORK_CTX_TITLE = `.current-work-context-title`;
