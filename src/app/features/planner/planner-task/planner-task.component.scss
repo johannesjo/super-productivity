@@ -121,6 +121,10 @@ $h: $planner-item-height;
       background: $light-theme-bg-darker;
     }
   }
+
+  mat-icon {
+    display: inline-flex;
+  }
 }
 
 .drag-handle {
