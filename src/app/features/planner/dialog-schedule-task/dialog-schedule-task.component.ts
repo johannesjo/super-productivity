@@ -35,6 +35,7 @@ import { ReminderService } from '../../reminder/reminder.service';
 import { getDateTimeFromClockString } from '../../../util/get-date-time-from-clock-string';
 import { PlannerService } from '../planner.service';
 import { first } from 'rxjs/operators';
+import { fadeAnimation } from '../../../ui/animations/fade.ani';
 
 @Component({
   selector: 'dialog-schedule-task',
@@ -43,7 +44,7 @@ import { first } from 'rxjs/operators';
   templateUrl: './dialog-schedule-task.component.html',
   styleUrl: './dialog-schedule-task.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  animations: [expandFadeAnimation],
+  animations: [expandFadeAnimation, fadeAnimation],
 })
 export class DialogScheduleTaskComponent implements AfterViewInit {
   T: typeof T = T;
@@ -60,9 +61,11 @@ export class DialogScheduleTaskComponent implements AfterViewInit {
   plannedDayForTask: string | null = null;
   isInitValOnTimeFocus: boolean = true;
 
+  isShowEnterMsg = false;
   todayStr = getWorklogStr();
   // private _prevSelectedQuickAccessDate: Date | null = null;
   // private _prevQuickAccessAction: number | null = null;
+  private _timeCheckVal: string | null = null;
 
   constructor(
     @Inject(MAT_DIALOG_DATA) public data: { task: Task },
@@ -140,35 +143,42 @@ export class DialogScheduleTaskComponent implements AfterViewInit {
     // });
   }
 
-  onTimeKeyDown(ev: KeyboardEvent): void {
-    console.log('ev.key!', ev.key);
-
-    if (ev.key === 'Enter') {
-      this._checkToSubmit();
-    }
-  }
-
   onKeyDownOnCalendar(ev: KeyboardEvent): void {
-    if (ev.key === 'Enter') {
-      this._checkToSubmit();
+    this._timeCheckVal = null;
+    // console.log(ev.key, ev.keyCode);
+    if (ev.key === 'Enter' || ev.keyCode === 32) {
+      this.isShowEnterMsg = true;
+      // console.log(
+      //   'check to submit',
+      //   this.selectedDate &&
+      //     new Date(this.selectedDate).getTime() ===
+      //       new Date(this.calendar.activeDate).getTime(),
+      //   this.selectedDate,
+      //   this.calendar.activeDate,
+      // );
+      if (
+        this.selectedDate &&
+        new Date(this.selectedDate).getTime() ===
+          new Date(this.calendar.activeDate).getTime()
+      ) {
+        this.submit();
+      }
+    } else {
+      this.isShowEnterMsg = false;
     }
   }
 
-  private _checkToSubmit(): void {
-    // console.log(
-    //   'check to submit',
-    //   this.selectedDate &&
-    //     new Date(this.selectedDate).getTime() ===
-    //       new Date(this.calendar.activeDate).getTime(),
-    //   this.selectedDate,
-    //   this.calendar.activeDate,
-    // );
-    if (
-      this.selectedDate &&
-      new Date(this.selectedDate).getTime() ===
-        new Date(this.calendar.activeDate).getTime()
-    ) {
-      this.submit();
+  onTimeKeyDown(ev: KeyboardEvent): void {
+    // console.log('ev.key!', ev.key);
+    if (ev.key === 'Enter') {
+      this.isShowEnterMsg = true;
+
+      if (this._timeCheckVal === this.selectedTime) {
+        this.submit();
+      }
+      this._timeCheckVal = this.selectedTime;
+    } else {
+      this.isShowEnterMsg = false;
     }
   }
 

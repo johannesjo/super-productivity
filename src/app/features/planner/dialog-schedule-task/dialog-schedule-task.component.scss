@@ -71,10 +71,23 @@
   }
 }
 
-.msg {
+.press-enter-msg {
   text-align: center;
   font-weight: bold;
-  padding: 16px 0;
+  padding: 4px 12px;
+  position: absolute;
+  left: 50%;
+  z-index: 11;
+  background: $light-theme-bg;
+  box-shadow: $whiteframe-shadow-1dp;
+  border-radius: 8px;
+  margin-top: -12px;
+  white-space: nowrap;
+  transform: translateX(-50%);
+
+  @include darkTheme() {
+    background: rgb(80, 80, 80);
+  }
 }
 
 :host ::ng-deep mat-month-view .mat-calendar-body-today {

@@ -44,6 +44,14 @@
   #calendar
 ></mat-calendar>
 
+<div
+  class="press-enter-msg"
+  *ngIf="isShowEnterMsg"
+  @fade
+>
+  {{ T.DATETIME_SCHEDULE.PRESS_ENTER_AGAIN|translate }}
+</div>
+
 <div class="form-ctrl-wrapper">
   <mat-form-field class="example-full-width">
     <mat-label>Time</mat-label>
