@@ -1345,27 +1345,6 @@
       "ZOOM_IN": "Mais zoom (somente para computador)",
       "ZOOM_OUT": "Diminuir o zoom (somente para computador)"
     },
-    "LANG": {
-      "AR": "Árabe",
-      "DE": "Alemão",
-      "EN": "Inglês",
-      "ES": "Espanhol",
-      "FA": "Persa",
-      "FR": "Francês",
-      "IT": "Italiano",
-      "JA": "Japonês",
-      "KO": "Coreano",
-      "LABEL": "Por favor escolha um idioma",
-      "NB": "Bokmål norueguês",
-      "NL": "Holandês",
-      "PL": "Polonês",
-      "PT": "Português",
-      "RU": "Russo",
-      "TITLE": "Idioma",
-      "TR": "Turco",
-      "ZH": "Chinês Simplificado",
-      "ZH_TW": "Chinês Tradicional"
-    },
     "MISC": {
       "DEFAULT_PROJECT": "Projeto padrão a ser usado para tarefas se nenhum for especificado",
       "FIRST_DAY_OF_WEEK": "Primeiro dia da semana",

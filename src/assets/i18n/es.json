@@ -1226,27 +1226,6 @@
       "ZOOM_IN": "Acercar (solo para escritorio)",
       "ZOOM_OUT": "Alejar (solo para escritorio)"
     },
-    "LANG": {
-      "AR": "Árabe",
-      "DE": "Alemán",
-      "EN": "Inglés",
-      "ES": "Español",
-      "FA": "Farsi",
-      "FR": "Francés",
-      "IT": "Italiano",
-      "JA": "Japonés",
-      "KO": "Coreano",
-      "LABEL": "Selecciona un idioma",
-      "NB": "Noruego bokmål",
-      "NL": "Holandés",
-      "PL": "Polaco",
-      "PT": "Portugués",
-      "RU": "Ruso",
-      "TITLE": "Idioma",
-      "TR": "Turco",
-      "ZH": "Chino simplificado",
-      "ZH_TW": "Chino tradicional"
-    },
     "MISC": {
       "DEFAULT_PROJECT": "Proyecto predeterminado a usar para las tareas si no se especifica ninguno",
       "FIRST_DAY_OF_WEEK": "Primer dia de la semana",

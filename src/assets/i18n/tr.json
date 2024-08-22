@@ -1314,27 +1314,6 @@
       "ZOOM_IN": "Yakınlaştır (Yalnızca masaüstü)",
       "ZOOM_OUT": "Uzaklaştır (Yalnızca masaüstü)"
     },
-    "LANG": {
-      "AR": "Arapça",
-      "DE": "Almanca",
-      "EN": "ingilizce",
-      "ES": "İspanyol",
-      "FA": "Farsça",
-      "FR": "Fransızca",
-      "IT": "İtalyan",
-      "JA": "Japonca",
-      "KO": "Korece",
-      "LABEL": "Lütfen bir dil seçin",
-      "NB": "Norveççe Bokmål",
-      "NL": "Flemenkçe",
-      "PL": "Lehçe",
-      "PT": "Portekizce",
-      "RU": "Rusça",
-      "TITLE": "dil",
-      "TR": "Türkçe",
-      "ZH": "Çince (Basitleştirilmiş)",
-      "ZH_TW": "Çince (Geleneksel)"
-    },
     "MISC": {
       "DEFAULT_PROJECT": "Proje belirtilmezse görevler için kullanılacak varsayılan proje",
       "FIRST_DAY_OF_WEEK": "Haftanın ilk günü",

@@ -1000,26 +1000,6 @@
       "ZOOM_IN": "Zoom in (Desktop only)",
       "ZOOM_OUT": "Zoom out (Desktop only)"
     },
-    "LANG": {
-      "AR": "Arabski",
-      "DE": "Niemiecki",
-      "EN": "Angielski",
-      "ES": "Hiszpański",
-      "FA": "Farsi",
-      "FR": "Francuski",
-      "IT": "Włoski",
-      "JA": "Japoński",
-      "KO": "Koreański",
-      "LABEL": "Proszę wybrać język",
-      "NB": "Norweski Bokmål",
-      "NL": "Duński",
-      "PT": "Portugalski",
-      "RU": "Rosyjski",
-      "TITLE": "Język",
-      "TR": "Turecki",
-      "ZH": "Chiński (uproszczony)",
-      "ZH_TW": "Chiński (tradycyjny)"
-    },
     "MISC": {
       "DEFAULT_PROJECT": "Domyślny projekt dla niezdefiniowanych zadań",
       "FIRST_DAY_OF_WEEK": "Pierwszy dzień tygodnia",

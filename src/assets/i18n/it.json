@@ -1082,27 +1082,6 @@
       "ZOOM_IN": "Zoom in (solo Desktop)",
       "ZOOM_OUT": "Zoom out (solo Desktop)"
     },
-    "LANG": {
-      "AR": "Arabo",
-      "DE": "Tedesco",
-      "EN": "Inglese",
-      "ES": "Spagnolo",
-      "FA": "Persiano",
-      "FR": "Francese",
-      "IT": "Italiano",
-      "JA": "Giapponese",
-      "KO": "Coreano",
-      "LABEL": "Seleziona la lingua",
-      "NB": "Norvegese Bokmål",
-      "NL": "Olandese",
-      "PL": "Polacco",
-      "PT": "Portoguese",
-      "RU": "Russo",
-      "TITLE": "Lingua",
-      "TR": "Turco",
-      "ZH": "Cinese semplificato",
-      "ZH_TW": "Cinese tradizionale"
-    },
     "MISC": {
       "DEFAULT_PROJECT": "Progetto predefinito da utilizzare per le attività se non ne viene specificato nessuno",
       "FIRST_DAY_OF_WEEK": "Primo giorno della settimana",

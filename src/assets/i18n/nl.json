@@ -1257,27 +1257,6 @@
       "ZOOM_IN": "Inzoomen (alleen desktop)",
       "ZOOM_OUT": "Uitzoomen (alleen desktop)"
     },
-    "LANG": {
-      "AR": "Arabisch",
-      "DE": "Duitse",
-      "EN": "Engels",
-      "ES": "Spaans",
-      "FA": "Perzisch",
-      "FR": "Frans",
-      "IT": "Italiaans",
-      "JA": "Japans",
-      "KO": "Koreaans",
-      "LABEL": "Selecteer een taal",
-      "NB": "Noors Bokmål",
-      "NL": "Nederlands",
-      "PL": "Polere",
-      "PT": "Portugees",
-      "RU": "Russisch",
-      "TITLE": "Taal",
-      "TR": "Turks",
-      "ZH": "Chinees (vereenvoudigd)",
-      "ZH_TW": "Chinees (traditioneel)"
-    },
     "MISC": {
       "DEFAULT_PROJECT": "Standaardproject om te gebruiken voor taken als er geen is opgegeven",
       "FIRST_DAY_OF_WEEK": "Eerste dag van de week",
