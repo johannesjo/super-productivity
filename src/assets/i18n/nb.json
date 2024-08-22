@@ -923,27 +923,6 @@
       "ZOOM_IN": "Zoom inn (bare skrivebordet)",
       "ZOOM_OUT": "Zoom ut (bare skrivebordet)"
     },
-    "LANG": {
-      "AR": "Arabisk",
-      "DE": "Tysk",
-      "EN": "Engelsk",
-      "ES": "Spansk",
-      "FA": "Farsi",
-      "FR": "Fransk",
-      "IT": "Italiensk",
-      "JA": "Japansk",
-      "KO": "Koreansk",
-      "LABEL": "Velg et språk",
-      "NB": "Norsk Bokmål",
-      "NL": "Nederlandsk",
-      "PL": "Pusse",
-      "PT": "Portugisisk",
-      "RU": "Russisk",
-      "TITLE": "Språk",
-      "TR": "Tyrkisk",
-      "ZH": "Kinesisk (forenklet)",
-      "ZH_TW": "Kinesisk (traditionelt)"
-    },
     "MISC": {
       "DEFAULT_PROJECT": "Standard prosjekt som skal brukes til oppgaver hvis ingen er spesifisert",
       "FIRST_DAY_OF_WEEK": "Første ukedag",

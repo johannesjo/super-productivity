@@ -1212,27 +1212,6 @@
       "ZOOM_IN": "Zoom avant (bureau uniquement)",
       "ZOOM_OUT": "Zoom arrière (bureau uniquement)"
     },
-    "LANG": {
-      "AR": "Arabe",
-      "DE": "Allemand",
-      "EN": "Anglais",
-      "ES": "Espanol",
-      "FA": "Farsi",
-      "FR": "français",
-      "IT": "Italien",
-      "JA": "japonais",
-      "KO": "coréen",
-      "LABEL": "Veuillez sélectionner une langue",
-      "NB": "Norvégien bokmål",
-      "NL": "Néerlandais",
-      "PL": "Polonais",
-      "PT": "Portugais",
-      "RU": "russe",
-      "TITLE": "Langue",
-      "TR": "Turc",
-      "ZH": "Chinois simplifié",
-      "ZH_TW": "Chinois traditionnel"
-    },
     "MISC": {
       "DEFAULT_PROJECT": "Projet par défaut à utiliser pour les tâches si aucun n'est spécifié",
       "FIRST_DAY_OF_WEEK": "Premier jour de la semaine",
