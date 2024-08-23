@@ -53,7 +53,7 @@ export const GITHUB_CONFIG_FORM: LimitedFormlyFieldConfig<GithubCfg>[] = [
     type: 'link',
     hideExpression: (model: any) => !model.isEnabled,
     templateOptions: {
-      url: 'https://docs.github.com/en/enterprise-server@3.9/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens',
+      url: 'https://github.com/johannesjo/super-productivity/blob/master/docs/github-access-token-instructions.md',
       txt: T.F.ISSUE.HOW_TO_GET_A_TOKEN,
     },
   },
