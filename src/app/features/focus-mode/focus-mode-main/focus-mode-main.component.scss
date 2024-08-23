@@ -30,6 +30,10 @@
   margin-bottom: $s * 3;
   border-radius: 8px;
 
+  ::ng-deep textarea {
+    text-align: center;
+  }
+
   &.is-focused {
     outline: 2px solid $c-accent;
   }
