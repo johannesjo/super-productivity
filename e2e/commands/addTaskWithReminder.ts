@@ -1,7 +1,7 @@
 import { AddTaskWithReminderParams, NBrowser } from '../n-browser-interface';
 
 const TASK = 'task';
-const SCHEDULE_TASK_ITEM = 'task-additional-info-item:nth-child(2)';
+const SCHEDULE_TASK_ITEM = 'task-detail-item:nth-child(2)';
 const DIALOG = 'mat-dialog-container';
 const DIALOG_SUBMIT = `${DIALOG} mat-dialog-actions button:last-of-type`;
 
