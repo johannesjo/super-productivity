@@ -158,11 +158,12 @@ export const JIRA_CREDENTIALS_FORM_CFG: LimitedFormlyFieldConfig<JiraCfg>[] = [
     },
   },
   {
-    type: 'link',
+    type: 'input',
     hideExpression: (model: any) => !model.isEnabled,
     templateOptions: {
       url: 'https://confluence.atlassian.com/cloud/api-tokens-938839638.html',
       txt: T.F.ISSUE.HOW_TO_GET_A_TOKEN,
+      type: 'url',
     },
   },
   {
