@@ -263,7 +263,7 @@
           <button
             (click)="toggleShowAdditionalInfoOpen()"
             *ngIf="!task.notes && (!task.issueId||task.issueType==='CALENDAR') && !isSelected"
-            title="{{T.F.TASK.CMP.TOGGLE_ADDITIONAL|translate}} {{kb.taskToggleAdditionalInfoOpen?'['+kb.taskToggleAdditionalInfoOpen+']':''}}"
+            title="{{T.F.TASK.CMP.TOGGLE_DETAIL_PANEL|translate}} {{kb.taskToggleDetailPanelOpen?'['+kb.taskToggleDetailPanelOpen+']':''}}"
             class="ico-btn show-additional-info-btn"
             color=""
             mat-icon-button
@@ -318,7 +318,7 @@
           <button
             (click)="toggleShowAdditionalInfoOpen()"
             *ngIf="task.notes|| (task.issueId&&task.issueType!=='CALENDAR') || isSelected"
-            title="{{T.F.TASK.CMP.TOGGLE_ADDITIONAL|translate}}  {{kb.taskToggleAdditionalInfoOpen?'['+kb.taskToggleAdditionalInfoOpen+']':''}}"
+            title="{{T.F.TASK.CMP.TOGGLE_DETAIL_PANEL|translate}}  {{kb.taskToggleDetailPanelOpen?'['+kb.taskToggleDetailPanelOpen+']':''}}"
             [class.closeBtn]="!task.issueWasUpdated && isSelected"
             class="ico-btn show-additional-info-btn"
             color=""

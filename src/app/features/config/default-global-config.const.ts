@@ -101,7 +101,7 @@ export const DEFAULT_GLOBAL_CONFIG: GlobalConfigState = {
     saveNote: 'Ctrl+s',
     triggerSync: 'Ctrl+s',
     taskEditTitle: null,
-    taskToggleAdditionalInfoOpen: 'i',
+    taskToggleDetailPanelOpen: 'i',
     taskOpenEstimationDialog: 't',
     taskSchedule: 's',
     taskToggleDone: 'd',

@@ -1,10 +1,10 @@
 <mat-dialog-content>
   <!--  <h1>XXX {{(task$|async)?.id}}</h1>-->
-  <task-additional-info
+  <task-detail-panel
     *ngIf="task$|async as task"
     [task]="task"
     [isDialogMode]="true"
-  ></task-additional-info>
+  ></task-detail-panel>
 </mat-dialog-content>
 
 <!--<mat-dialog-actions align="center">-->

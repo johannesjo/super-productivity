@@ -6,7 +6,7 @@ import { TaskService } from '../tasks/task.service';
 import { LayoutService } from '../../core-ui/layout/layout.service';
 import { slideInFromTopAni } from '../../ui/animations/slide-in-from-top.ani';
 import { slideInFromRightAni } from '../../ui/animations/slide-in-from-right.ani';
-import { taskAdditionalInfoTaskChangeAnimation } from '../tasks/task-additional-info/task-additional-info.ani';
+import { taskDetailPanelTaskChangeAnimation } from '../tasks/task-detail-panel/task-detail-panel.ani';
 
 @Component({
   selector: 'right-panel',
@@ -14,7 +14,7 @@ import { taskAdditionalInfoTaskChangeAnimation } from '../tasks/task-additional-
   styleUrls: ['./right-panel.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   animations: [
-    taskAdditionalInfoTaskChangeAnimation,
+    taskDetailPanelTaskChangeAnimation,
     slideInFromTopAni,
     slideInFromRightAni,
   ],

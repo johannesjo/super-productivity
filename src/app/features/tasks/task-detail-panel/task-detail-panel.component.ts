@@ -12,11 +12,7 @@ import {
   ViewChild,
   ViewChildren,
 } from '@angular/core';
-import {
-  ShowSubTasksMode,
-  TaskAdditionalInfoTargetPanel,
-  TaskWithSubTasks,
-} from '../task.model';
+import { ShowSubTasksMode, TaskDetailTargetPanel, TaskWithSubTasks } from '../task.model';
 import { IssueService } from '../../issue/issue.service';
 import { TaskAttachmentService } from '../task-attachment/task-attachment.service';
 import {
@@ -58,7 +54,7 @@ import { ReminderService } from '../../reminder/reminder.service';
 import { DialogEditTaskRepeatCfgComponent } from '../../task-repeat-cfg/dialog-edit-task-repeat-cfg/dialog-edit-task-repeat-cfg.component';
 import { TaskRepeatCfgService } from '../../task-repeat-cfg/task-repeat-cfg.service';
 import { DialogEditTaskAttachmentComponent } from '../task-attachment/dialog-edit-attachment/dialog-edit-task-attachment.component';
-import { TaskAdditionalInfoItemComponent } from './task-additional-info-item/task-additional-info-item.component';
+import { TaskDetailItemComponent } from './task-additional-info-item/task-detail-item.component';
 import { IssueData, IssueProviderKey } from '../../issue/issue.model';
 import { JIRA_TYPE } from '../../issue/issue.const';
 import { ProjectService } from '../../project/project.service';
@@ -87,20 +83,20 @@ interface IssueDataAndType {
 }
 
 @Component({
-  selector: 'task-additional-info',
-  templateUrl: './task-additional-info.component.html',
-  styleUrls: ['./task-additional-info.component.scss'],
+  selector: 'task-detail-panel',
+  templateUrl: './task-detail-panel.component.html',
+  styleUrls: ['./task-detail-panel.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   animations: [expandAnimation, expandFadeInOnlyAnimation, fadeAnimation, swirlAnimation],
 })
-export class TaskAdditionalInfoComponent implements AfterViewInit, OnDestroy {
+export class TaskDetailPanelComponent implements AfterViewInit, OnDestroy {
   @Input() isOver: boolean = false;
   @Input() isDialogMode: boolean = false;
 
-  @ViewChildren(TaskAdditionalInfoItemComponent)
-  itemEls?: QueryList<TaskAdditionalInfoItemComponent>;
+  @ViewChildren(TaskDetailItemComponent)
+  itemEls?: QueryList<TaskDetailItemComponent>;
   @ViewChild('attachmentPanelElRef')
-  attachmentPanelElRef?: TaskAdditionalInfoItemComponent;
+  attachmentPanelElRef?: TaskDetailItemComponent;
   IS_TOUCH_PRIMARY = IS_TOUCH_PRIMARY;
 
   _onDestroy$ = new Subject<void>();
@@ -375,7 +371,7 @@ export class TaskAdditionalInfoComponent implements AfterViewInit, OnDestroy {
   }
 
   ngAfterViewInit(): void {
-    this.taskService.taskAdditionalInfoTargetPanel$
+    this.taskService.taskDetailPanelTargetPanel$
       .pipe(
         takeUntil(this._onDestroy$),
         // hacky but we need a minimal delay to make sure selectedTaskId is ready
@@ -385,7 +381,7 @@ export class TaskAdditionalInfoComponent implements AfterViewInit, OnDestroy {
         // delay(100),
       )
       .subscribe(([v]) => {
-        if (v === TaskAdditionalInfoTargetPanel.Attachments) {
+        if (v === TaskDetailTargetPanel.Attachments) {
           if (!this.attachmentPanelElRef) {
             devError('this.attachmentPanelElRef not ready');
             this._focusFirst();
@@ -483,10 +479,7 @@ export class TaskAdditionalInfoComponent implements AfterViewInit, OnDestroy {
     }
   }
 
-  focusItem(
-    cmpInstance: TaskAdditionalInfoItemComponent,
-    timeoutDuration: number = 150,
-  ): void {
+  focusItem(cmpInstance: TaskDetailItemComponent, timeoutDuration: number = 150): void {
     window.clearTimeout(this._focusTimeout);
     this._focusTimeout = window.setTimeout(() => {
       if (!this.itemEls) {

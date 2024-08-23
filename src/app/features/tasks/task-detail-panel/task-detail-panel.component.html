@@ -15,7 +15,7 @@
     <!--    </button>-->
   </header>
 
-  <task-additional-info-item
+  <task-detail-item
     (collapseParent)="collapseParent()"
     (keyPress)="onItemKeyPress($event)"
     *ngIf="!task.parentId && ((layoutService.isRightPanelOver$|async) || isDialogMode)"
@@ -56,9 +56,9 @@
         </button>
       </div>
     </ng-container>
-  </task-additional-info-item>
+  </task-detail-item>
 
-  <task-additional-info-item
+  <task-detail-item
     (collapseParent)="collapseParent()"
     (editActionTriggered)="taskService.setSelectedIdToParentAndSwitchContextIfNecessary(task)"
     (keyPress)="onItemKeyPress($event)"
@@ -77,9 +77,9 @@
       ></mat-icon>
       <span>{{(taskService.getByIdOnce$(task.parentId)|async)?.title}}</span>
     </ng-container>
-  </task-additional-info-item>
+  </task-detail-item>
 
-  <task-additional-info-item
+  <task-detail-item
     (collapseParent)="collapseParent()"
     (editActionTriggered)="estimateTime()"
     (keyPress)="onItemKeyPress($event)"
@@ -105,10 +105,10 @@
         <progress-bar [progress]="progress"></progress-bar>
       </ng-container>
     </ng-container>
-  </task-additional-info-item>
+  </task-detail-item>
 
   <ng-container *ngIf="(plannerService.plannedTaskDayMap$|async) as plannedTaskDayMap">
-    <task-additional-info-item
+    <task-detail-item
       (collapseParent)="collapseParent()"
       (editActionTriggered)="scheduleTask()"
       (keyPress)="onItemKeyPress($event)"
@@ -141,10 +141,10 @@
           {{ (plannedTaskDayMap || {})[task.id]|date:'shortDate' }}
         </div>
       </ng-container>
-    </task-additional-info-item>
+    </task-detail-item>
   </ng-container>
 
-  <task-additional-info-item
+  <task-detail-item
     (collapseParent)="collapseParent()"
     (keyPress)="onItemKeyPress($event)"
     *ngIf="task.issueId && task.issueType !=='CALENDAR'"
@@ -168,9 +168,9 @@
         class="panel-content-wrapper issue-content-wrapper"
       ></issue-content>
     </ng-container>
-  </task-additional-info-item>
+  </task-detail-item>
 
-  <task-additional-info-item
+  <task-detail-item
     #noteWrapperElRef
     (collapseParent)="collapseParent()"
     (editActionTriggered)="isFocusNotes=true"
@@ -195,9 +195,9 @@
         [model]="task.notes|| defaultTaskNotes"
       ></inline-markdown>
     </ng-container>
-  </task-additional-info-item>
+  </task-detail-item>
 
-  <task-additional-info-item
+  <task-detail-item
     #attachmentPanelElRef
     (collapseParent)="collapseParent()"
     (keyPress)="onItemKeyPress($event)"
@@ -248,9 +248,9 @@
         </div>
       </div>
     </ng-container>
-  </task-additional-info-item>
+  </task-detail-item>
 
-  <task-additional-info-item
+  <task-detail-item
     (collapseParent)="collapseParent()"
     (editActionTriggered)="addAttachment()"
     (keyPress)="onItemKeyPress($event)"
@@ -263,9 +263,9 @@
       <span>{{T.F.TASK.ADDITIONAL_INFO.ADD_ATTACHMENT|translate}}</span>
     </ng-container>
     <ng-container input-value></ng-container>
-  </task-additional-info-item>
+  </task-detail-item>
 
-  <task-additional-info-item
+  <task-detail-item
     (collapseParent)="collapseParent()"
     (editActionTriggered)="editTaskRepeatCfg()"
     (keyPress)="onItemKeyPress($event)"
@@ -286,7 +286,7 @@
         {{repeatCfgLabel}}
       </div>
     </ng-container>
-  </task-additional-info-item>
+  </task-detail-item>
 
   <div class="date-info">
     <div>Created on {{task?.created|date:'short'}}</div>

@@ -230,10 +230,10 @@ export const KEYBOARD_SETTINGS_FORM_CFG: ConfigFormSection<KeyboardConfig> = {
       },
     },
     {
-      key: 'taskToggleAdditionalInfoOpen',
+      key: 'taskToggleDetailPanelOpen',
       type: 'keyboard',
       templateOptions: {
-        label: T.GCF.KEYBOARD.TASK_TOGGLE_ADDITIONAL_INFO_OPEN,
+        label: T.GCF.KEYBOARD.TASK_TOGGLE_DETAIL_PANEL_OPEN,
       },
     },
     {

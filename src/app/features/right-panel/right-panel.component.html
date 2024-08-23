@@ -14,13 +14,13 @@
         *ngIf="!(selectedTaskWithDelayForNone$|async) "
         [@slideInFromRight]
       ></notes>
-      <task-additional-info
+      <task-detail-panel
         [isOver]="isAlwaysOver || (layoutService.isRightPanelOver$|async)"
-        [@taskAdditionalInfoTaskChange]=" selectedTaskWithDelayForNone?.id"
+        [@taskDetailPanelTaskChange]=" selectedTaskWithDelayForNone?.id"
         [@.disabled]="isDisableTaskPanelAni"
         *ngIf="selectedTaskWithDelayForNone$|async as selectedTaskWithDelayForNone"
         [task]="selectedTaskWithDelayForNone"
-      ></task-additional-info>
+      ></task-detail-panel>
     </div>
   </ng-container>
 </better-drawer-container>

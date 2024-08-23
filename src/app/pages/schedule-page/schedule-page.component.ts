@@ -8,7 +8,7 @@ import { TODAY_TAG } from '../../features/tag/tag.const';
 import { Tag } from '../../features/tag/tag.model';
 import { Store } from '@ngrx/store';
 import { selectTaskRepeatCfgsSortedByTitleAndProject } from '../../features/task-repeat-cfg/store/task-repeat-cfg.reducer';
-import { getTaskRepeatInfoText } from '../../features/tasks/task-additional-info/get-task-repeat-info-text.util';
+import { getTaskRepeatInfoText } from '../../features/tasks/task-detail-panel/get-task-repeat-info-text.util';
 import { TaskRepeatCfg } from '../../features/task-repeat-cfg/task-repeat-cfg.model';
 import { TranslateService } from '@ngx-translate/core';
 import { DialogEditTaskRepeatCfgComponent } from '../../features/task-repeat-cfg/dialog-edit-task-repeat-cfg/dialog-edit-task-repeat-cfg.component';

@@ -13,7 +13,7 @@ import { T } from 'src/app/t.const';
 import { TranslateModule } from '@ngx-translate/core';
 import { UiModule } from '../../../ui/ui.module';
 import { setSelectedTask } from '../store/task.actions';
-import { TaskAdditionalInfoTargetPanel } from '../task.model';
+import { TaskDetailTargetPanel } from '../task.model';
 import { skipWhile } from 'rxjs/operators';
 
 @Component({
@@ -43,7 +43,7 @@ export class DialogTaskAdditionalInfoPanelComponent implements OnDestroy {
     this._store.dispatch(
       setSelectedTask({
         id: data.taskId,
-        taskAdditionalInfoTargetPanel: TaskAdditionalInfoTargetPanel.Default,
+        taskAdditionalInfoTargetPanel: TaskDetailTargetPanel.Default,
         isSkipToggle: true,
       }),
     );

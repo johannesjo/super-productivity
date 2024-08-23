@@ -6,7 +6,7 @@ const ANI = [
   animate(ANI_ENTER_TIMING, style({ opacity: 1, transform: 'translateX(0)' })),
 ];
 
-export const taskAdditionalInfoTaskChangeAnimation = trigger(
-  'taskAdditionalInfoTaskChange',
-  [transition('* <=> *', ANI), transition(':enter', [])],
-);
+export const taskDetailPanelTaskChangeAnimation = trigger('taskDetailPanelTaskChange', [
+  transition('* <=> *', ANI),
+  transition(':enter', []),
+]);

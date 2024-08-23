@@ -10,12 +10,12 @@ import {
 } from '@angular/core';
 
 @Component({
-  selector: 'task-additional-info-item',
-  templateUrl: './task-additional-info-item.component.html',
-  styleUrls: ['./task-additional-info-item.component.scss'],
+  selector: 'task-detail-item',
+  templateUrl: './task-detail-item.component.html',
+  styleUrls: ['./task-detail-item.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class TaskAdditionalInfoItemComponent {
+export class TaskDetailItemComponent {
   @Input() type: 'input' | 'panel' = 'input';
   @Input() expanded: boolean = false;
   @Input() inputIcon?: string;

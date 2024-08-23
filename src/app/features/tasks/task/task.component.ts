@@ -16,8 +16,8 @@ import { TaskService } from '../task.service';
 import { EMPTY, forkJoin, Observable, of, ReplaySubject, Subject } from 'rxjs';
 import {
   ShowSubTasksMode,
-  TaskAdditionalInfoTargetPanel,
   TaskCopy,
+  TaskDetailTargetPanel,
   TaskWithSubTasks,
 } from '../task.model';
 import { MatDialog } from '@angular/material/dialog';
@@ -423,10 +423,7 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   toggleShowAttachments(): void {
-    this._taskService.setSelectedId(
-      this.task.id,
-      TaskAdditionalInfoTargetPanel.Attachments,
-    );
+    this._taskService.setSelectedId(this.task.id, TaskDetailTargetPanel.Attachments);
     this.focusSelf();
   }
 
@@ -864,7 +861,7 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
       // prevent blur
       ev.preventDefault();
     }
-    if (checkKeyCombo(ev, keys.taskToggleAdditionalInfoOpen)) {
+    if (checkKeyCombo(ev, keys.taskToggleDetailPanelOpen)) {
       this.toggleShowAdditionalInfoOpen();
     }
     if (checkKeyCombo(ev, keys.taskOpenEstimationDialog)) {

@@ -10,7 +10,7 @@ export enum ShowSubTasksMode {
   Show = 2,
 }
 
-export enum TaskAdditionalInfoTargetPanel {
+export enum TaskDetailTargetPanel {
   Default = 'Default',
   Attachments = 'Attachments',
 }
@@ -174,7 +174,7 @@ export interface TaskState extends EntityState<Task> {
   // additional entities state properties
   currentTaskId: string | null;
   selectedTaskId: string | null;
-  taskAdditionalInfoTargetPanel: TaskAdditionalInfoTargetPanel | null;
+  taskAdditionalInfoTargetPanel: TaskDetailTargetPanel | null;
   lastCurrentTaskId: string | null;
   isDataLoaded: boolean;
 

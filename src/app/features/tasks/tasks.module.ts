@@ -10,7 +10,7 @@ import { DialogTimeEstimateComponent } from './dialog-time-estimate/dialog-time-
 import { StoreModule } from '@ngrx/store';
 import { EffectsModule } from '@ngrx/effects';
 import { TASK_FEATURE_NAME, taskReducer } from './store/task.reducer';
-import { TaskAdditionalInfoComponent } from './task-additional-info/task-additional-info.component';
+import { TaskDetailPanelComponent } from './task-detail-panel/task-detail-panel.component';
 import { SelectTaskComponent } from './select-task/select-task.component';
 import { TaskAttachmentModule } from './task-attachment/task-attachment.module';
 import { IssueModule } from '../issue/issue.module';
@@ -25,7 +25,7 @@ import { TaskReminderEffects } from './store/task-reminder.effects';
 import { TaskUiEffects } from './store/task-ui.effects';
 import { TaskElectronEffects } from './store/task-electron.effects';
 import { SubTaskTotalTimeSpentPipe } from './pipes/sub-task-total-time-spent.pipe';
-import { TaskAdditionalInfoItemComponent } from './task-additional-info/task-additional-info-item/task-additional-info-item.component';
+import { TaskDetailItemComponent } from './task-detail-panel/task-additional-info-item/task-detail-item.component';
 import { BetterDrawerModule } from '../../ui/better-drawer/better-drawer.module';
 import { TagModule } from '../tag/tag.module';
 import { TagService } from '../tag/tag.service';
@@ -67,12 +67,12 @@ import { InlineMultilineInputComponent } from '../../ui/inline-multiline-input/i
     DialogTimeEstimateComponent,
     DialogViewTaskRemindersComponent,
     DialogAddTimeEstimateForOtherDayComponent,
-    TaskAdditionalInfoComponent,
+    TaskDetailPanelComponent,
     SelectTaskComponent,
     FilterDoneTasksPipe,
     TaskSummaryTableComponent,
     SubTaskTotalTimeSpentPipe,
-    TaskAdditionalInfoItemComponent,
+    TaskDetailItemComponent,
     TaskSummaryTablesComponent,
     TasksByTagComponent,
   ],
@@ -83,7 +83,7 @@ import { InlineMultilineInputComponent } from '../../ui/inline-multiline-input/i
     SelectTaskComponent,
     TaskSummaryTableComponent,
     TaskSummaryTablesComponent,
-    TaskAdditionalInfoComponent,
+    TaskDetailPanelComponent,
     TasksByTagComponent,
   ],
   providers: [TagService],

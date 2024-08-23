@@ -8,9 +8,9 @@ import {
   DropListModelSource,
   ShowSubTasksMode,
   Task,
-  TaskAdditionalInfoTargetPanel,
   TaskArchive,
   TaskCopy,
+  TaskDetailTargetPanel,
   TaskReminderOptionId,
   TaskState,
   TaskWithSubTasks,
@@ -133,7 +133,7 @@ export class TaskService {
       map((tasks) => tasks[0]),
     );
 
-  taskAdditionalInfoTargetPanel$: Observable<TaskAdditionalInfoTargetPanel | null> =
+  taskDetailPanelTargetPanel$: Observable<TaskDetailTargetPanel | null> =
     this._store.pipe(
       select(selectTaskAdditionalInfoTargetPanel),
       // NOTE: we can't use share here, as we need the last emitted value
@@ -222,7 +222,7 @@ export class TaskService {
 
   setSelectedId(
     id: string | null,
-    taskAdditionalInfoTargetPanel: TaskAdditionalInfoTargetPanel = TaskAdditionalInfoTargetPanel.Default,
+    taskAdditionalInfoTargetPanel: TaskDetailTargetPanel = TaskDetailTargetPanel.Default,
   ): void {
     this._store.dispatch(setSelectedTask({ id, taskAdditionalInfoTargetPanel }));
   }
@@ -255,7 +255,7 @@ export class TaskService {
     this._store.dispatch(
       setSelectedTask({
         id: task.parentId,
-        taskAdditionalInfoTargetPanel: TaskAdditionalInfoTargetPanel.Default,
+        taskAdditionalInfoTargetPanel: TaskDetailTargetPanel.Default,
       }),
     );
   }

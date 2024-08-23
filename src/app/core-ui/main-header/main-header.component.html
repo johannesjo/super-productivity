@@ -219,10 +219,10 @@
 
     <button
       class="toggle-notes-btn"
-      [title]="!(isRouteWithAdditionalInfoPanel$|async) ? (T.MH.NOTES_PANEL_INFO|translate) : ''"
-      [disabled]="!(isRouteWithAdditionalInfoPanel$|async)"
+      [title]="!(isRouteWithSidePanel$|async) ? (T.MH.NOTES_PANEL_INFO|translate) : ''"
+      [disabled]="!(isRouteWithSidePanel$|async)"
       [class.isActive]="(layoutService.isShowNotes$|async)"
-      [class.isRouteWithRightPanel]="(isRouteWithSplitAddtionalInfoPanel$|async)"
+      [class.isRouteWithRightPanel]="(isRouteWithRightPanel$|async)"
       (click)="layoutService.toggleNotes()"
       mat-icon-button
       matTooltip="{{T.MH.TOGGLE_SHOW_NOTES|translate}} {{kb.openProjectNotes?'['+kb.openProjectNotes+']':''}}"
