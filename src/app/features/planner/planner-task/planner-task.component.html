@@ -100,7 +100,7 @@
 >
   <ng-template matMenuContent>
     <button
-      (click)="estimateTime()"
+      (click)="estimateTime($event)"
       *ngIf="!task.subTaskIds?.length"
       class="hide-xs"
       mat-menu-item
