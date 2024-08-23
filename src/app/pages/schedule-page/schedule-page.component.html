@@ -21,6 +21,7 @@
       [@standardList]="taskRepeatCfgs?.length"
       class="repeat-task-cfgs"
     >
+      @for (taskRepeatCfg of taskRepeatCfgs; track taskRepeatCfg.id) {
       <mat-card
         appearance="outlined"
         *ngFor="let taskRepeatCfg of taskRepeatCfgs; trackBy: trackByFn;"
@@ -54,116 +55,87 @@
           </div>
         </mat-card-content>
       </mat-card>
+      }
     </div>
   </section>
 
   <section
-    *ngIf="(reminderService.isRemindersLoaded$|async) && (scheduledTaskService.allScheduledTasks$|async) as allScheduledTasks; else spinner"
+    *ngIf=" (scheduledTaskService.allScheduledTasks$|async) as allScheduledTasks; else spinner"
     class="component-wrapper"
     style="margin-top: 24px"
   >
-    <h2>{{T.SCHEDULE.SCHEDULED_TASKS|translate}}</h2>
+    <!--    <h2>{{ T.SCHEDULE.SCHEDULED_TASKS|translate }}</h2>-->
+    <h2>Scheduled Tasks with Reminder</h2>
 
     <p
       *ngIf="!allScheduledTasks?.length"
       class="no-scheduled-tasks"
     >
-      {{T.SCHEDULE.NO_SCHEDULED|translate}}
+      {{ T.SCHEDULE.NO_SCHEDULED|translate }}
     </p>
 
     <div
       [@standardList]="allScheduledTasks?.length"
       class="tasks"
     >
-      <mat-card
-        appearance="outlined"
-        *ngFor="let task of allScheduledTasks; trackBy: trackByFn;"
-        class="scheduled-task"
-      >
-        <mat-card-content>
-          <div class="scheduled-task-content">
-            <div class="task-info">
-              <div class="title">
-                <inline-multiline-input
-                  [resetToLastExternalValueTrigger]="task"
-                  (valueEdited)="updateTaskTitleIfChanged($event.wasChanged, $event.newVal, task)"
-                  [value]="task.title"
-                  class="task-title"
-                ></inline-multiline-input>
-                <tag-list
-                  [isShowProjectTagAlways]="true"
-                  [task]="task"
-                ></tag-list>
-              </div>
-
-              <div
-                (click)="editReminder(task)"
-                class="due-date"
-                mat-ripple
-              >
-                <div class="date-and-time-left">
-                  <div class="date hide-xs">
-                    {{task.reminderData.remindAt|date:'EE, d MMM, '}}
-                    {{task.reminderData.remindAt|date:'shortTime'}}
-                  </div>
-                  <div class="date show-xs-only">
-                    {{task.reminderData.remindAt|date:'d MMM, '}},
-                    {{task.reminderData.remindAt|date:'shortTime'}}
-                  </div>
-
-                  <div class="time-left">
-                    ({{task.reminderData.remindAt|humanizeTimestamp}})
-                  </div>
-                </div>
-                <mat-icon>alarm</mat-icon>
-              </div>
-
-              <button
-                (click)="startTask(task)"
-                [matTooltip]="T.SCHEDULE.START_TASK|translate"
-                class="action-btn hide-xs"
-                mat-icon-button
-              >
-                <mat-icon svgIcon="play"></mat-icon>
-              </button>
-
-              <button
-                (click)="toggleToday(task.parentData)"
-                *ngIf="task.parentId && task.parentData"
-                [matTooltip]="(task.parentData.tagIds.includes(TODAY_TAG.id)
-                    ?T.F.TASK.CMP.REMOVE_FROM_MY_DAY
-                    :T.F.TASK.CMP.ADD_TO_MY_DAY)|translate"
-                class="action-btn"
-                mat-icon-button
-              >
-                <mat-icon
-                  *ngIf="task.parentData.tagIds.includes(TODAY_TAG.id)"
-                  svgIcon="remove_today"
-                ></mat-icon>
-                <mat-icon *ngIf="!task.parentData.tagIds.includes(TODAY_TAG.id)"
-                  >wb_sunny
-                </mat-icon>
-              </button>
-
-              <button
-                (click)="toggleToday(task)"
-                *ngIf="!task.parentId"
-                [matTooltip]="(task.tagIds.includes(TODAY_TAG.id)
-                    ?T.F.TASK.CMP.REMOVE_FROM_MY_DAY
-                    :T.F.TASK.CMP.ADD_TO_MY_DAY)|translate"
-                class="action-btn"
-                mat-icon-button
-              >
-                <mat-icon
-                  *ngIf="task.tagIds.includes(TODAY_TAG.id)"
-                  svgIcon="remove_today"
-                ></mat-icon>
-                <mat-icon *ngIf="!task.tagIds.includes(TODAY_TAG.id)">wb_sunny</mat-icon>
-              </button>
+      @for (task of allScheduledTasks; track task.id) {
+      <planner-task [task]="task">
+        <div
+          (click)="editReminder(task, $event)"
+          class="due-date"
+          mat-ripple
+        >
+          <div class="date-and-time-left">
+            <div class="date hide-xs">
+              {{ task.plannedAt|date:'EE, d MMM, ' }} {{ task.plannedAt|date:'shortTime'
+              }}
             </div>
+            <div class="date show-xs-only">
+              {{ task.plannedAt|date:'d MMM, ' }}, {{ task.plannedAt|date:'shortTime' }}
+            </div>
+
+            <div class="time-left">({{ task.plannedAt|humanizeTimestamp }})</div>
           </div>
-        </mat-card-content>
-      </mat-card>
+          <mat-icon>alarm</mat-icon>
+        </div>
+      </planner-task>
+      }
+    </div>
+  </section>
+
+  <section
+    *ngIf="(tasksPlannedForDays$|async) as allScheduledTasks; else spinner"
+    class="component-wrapper"
+    style="margin-top: 24px"
+  >
+    <h2>Scheduled Tasks for Day</h2>
+
+    <p
+      *ngIf="!allScheduledTasks?.length"
+      class="no-scheduled-tasks"
+    >
+      {{ T.SCHEDULE.NO_SCHEDULED|translate }}
+    </p>
+
+    <div
+      [@standardList]="allScheduledTasks?.length"
+      class="tasks"
+    >
+      @for (task of allScheduledTasks; track task.id) {
+      <planner-task [task]="task">
+        <div
+          (click)="editReminder(task, $event)"
+          class="due-date"
+          mat-ripple
+        >
+          <div class="date-and-time-left">
+            <div class="date">{{ task.plannedDay|date:'EE, d MMM' }}</div>
+            <div class="time-left">({{ task.plannedDay|humanizeTimestamp }})</div>
+          </div>
+          <mat-icon>alarm</mat-icon>
+        </div>
+      </planner-task>
+      }
     </div>
   </section>
 </div>

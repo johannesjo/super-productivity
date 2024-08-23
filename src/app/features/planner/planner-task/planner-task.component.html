@@ -66,8 +66,10 @@
     ></tag-list>
   </div>
 
+  <ng-content></ng-content>
+
   <div
-    (click)="estimateTime()"
+    (click)="estimateTime($event)"
     [class.hasNoTimeSpentOrEstimate]="!task.timeSpent && !task.timeEstimate"
     [style.pointer-events]="task.subTaskIds?.length && 'none'"
     class="planner-time-remaining-shared"

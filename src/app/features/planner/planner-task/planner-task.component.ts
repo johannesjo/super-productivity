@@ -147,7 +147,9 @@ export class PlannerTaskComponent extends BaseComponent implements OnInit, OnDes
     this.contextMenu.openMenu();
   }
 
-  estimateTime(): void {
+  estimateTime(ev: MouseEvent): void {
+    ev.preventDefault();
+    ev.stopPropagation();
     this._matDialog.open(DialogTimeEstimateComponent, {
       data: { task: this.task, isFocusEstimateOnMousePrimaryDevice: true },
       autoFocus: !IS_TOUCH_PRIMARY,

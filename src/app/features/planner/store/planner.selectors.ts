@@ -10,7 +10,7 @@ import {
   ScheduleItemTask,
   ScheduleItemType,
 } from '../planner.model';
-import { TaskCopy, TaskPlanned } from '../../tasks/task.model';
+import { TaskCopy, TaskPlanned, TaskWithPlannedDay } from '../../tasks/task.model';
 import { TaskRepeatCfg } from '../../task-repeat-cfg/task-repeat-cfg.model';
 import { selectTaskRepeatCfgsDueOnDayOnly } from '../../task-repeat-cfg/store/task-repeat-cfg.reducer';
 import { getDateTimeFromClockString } from '../../../util/get-date-time-from-clock-string';
@@ -22,6 +22,24 @@ export const selectPlannerState = createFeatureSelector<fromPlanner.PlannerState
   fromPlanner.plannerFeatureKey,
 );
 
+export const selectAllTasksWithPlannedDay = createSelector(
+  selectTaskFeatureState,
+  selectPlannerState,
+  (taskState, plannerState): TaskWithPlannedDay[] => {
+    return Object.keys(plannerState.days)
+      .sort()
+      .reduce<TaskWithPlannedDay[]>(
+        (acc, dateStr) => [
+          ...acc,
+          ...plannerState.days[dateStr].map((id) => ({
+            ...(taskState.entities[id] as TaskWithPlannedDay),
+            plannedDay: dateStr,
+          })),
+        ],
+        [],
+      );
+  },
+);
 export const selectTaskIdPlannedDayMap = createSelector(
   selectPlannerState,
   (state): { [taskId: string]: string } => {

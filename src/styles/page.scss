@@ -17,6 +17,10 @@ app-root,
 }
 
 html {
+  overflow: hidden !important;
+}
+
+html {
   button,
   a {
     -webkit-app-region: no-drag !important;

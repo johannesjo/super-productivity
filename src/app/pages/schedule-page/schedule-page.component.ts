@@ -1,16 +1,11 @@
 import { ChangeDetectionStrategy, Component, Inject, LOCALE_ID } from '@angular/core';
 import { T } from '../../t.const';
-import { TaskService } from '../../features/tasks/task.service';
 import { ScheduledTaskService } from '../../features/tasks/scheduled-task.service';
-import { ReminderService } from '../../features/reminder/reminder.service';
 import { MatDialog } from '@angular/material/dialog';
-import { Task, TaskWithReminderData } from '../../features/tasks/task.model';
+import { TaskCopy, TaskWithReminderData } from '../../features/tasks/task.model';
 import { standardListAnimation } from '../../ui/animations/standard-list.ani';
-import { Router } from '@angular/router';
-import { WorkContextService } from '../../features/work-context/work-context.service';
 import { TODAY_TAG } from '../../features/tag/tag.const';
 import { Tag } from '../../features/tag/tag.model';
-import { ProjectService } from '../../features/project/project.service';
 import { Store } from '@ngrx/store';
 import { selectTaskRepeatCfgsSortedByTitleAndProject } from '../../features/task-repeat-cfg/store/task-repeat-cfg.reducer';
 import { getTaskRepeatInfoText } from '../../features/tasks/task-additional-info/get-task-repeat-info-text.util';
@@ -19,6 +14,7 @@ import { TranslateService } from '@ngx-translate/core';
 import { DialogEditTaskRepeatCfgComponent } from '../../features/task-repeat-cfg/dialog-edit-task-repeat-cfg/dialog-edit-task-repeat-cfg.component';
 import { TaskRepeatCfgService } from '../../features/task-repeat-cfg/task-repeat-cfg.service';
 import { DialogScheduleTaskComponent } from '../../features/planner/dialog-schedule-task/dialog-schedule-task.component';
+import { selectAllTasksWithPlannedDay } from '../../features/planner/store/planner.selectors';
 
 @Component({
   selector: 'schedule-page',
@@ -31,43 +27,20 @@ export class SchedulePageComponent {
   T: typeof T = T;
   TODAY_TAG: Tag = TODAY_TAG;
   taskRepeatCfgs$ = this._store.select(selectTaskRepeatCfgsSortedByTitleAndProject);
+  tasksPlannedForDays$ = this._store.select(selectAllTasksWithPlannedDay);
 
   constructor(
     public scheduledTaskService: ScheduledTaskService,
-    public reminderService: ReminderService,
-    private _workContextService: WorkContextService,
-    private _taskService: TaskService,
-    private _projectService: ProjectService,
     private _matDialog: MatDialog,
-    private _router: Router,
     private _store: Store,
     private _translateService: TranslateService,
     private _taskRepeatCfgService: TaskRepeatCfgService,
     @Inject(LOCALE_ID) private locale: string,
   ) {}
 
-  startTask(task: TaskWithReminderData): void {
-    this._startTask(task);
-  }
-
-  toggleToday(task: TaskWithReminderData | Task): void {
-    if (task.tagIds.includes(TODAY_TAG.id)) {
-      this._taskService.updateTags(
-        task,
-        task.tagIds.filter((id) => id !== TODAY_TAG.id),
-      );
-    } else {
-      this._taskService.updateTags(task, [TODAY_TAG.id, ...task.tagIds]);
-    }
-  }
-
-  removeReminder(task: TaskWithReminderData): void {
-    if (task.reminderId) {
-      this._taskService.unScheduleTask(task.id, task.reminderId);
-    }
-  }
-
-  editReminder(task: TaskWithReminderData): void {
+  editReminder(task: TaskCopy, ev: MouseEvent): void {
+    ev.preventDefault();
+    ev.stopPropagation();
     this._matDialog.open(DialogScheduleTaskComponent, {
       restoreFocus: true,
       data: { task },
@@ -81,12 +54,6 @@ export class SchedulePageComponent {
         repeatCfg,
       },
     });
-  }
-
-  updateTaskTitleIfChanged(isChanged: boolean, newTitle: string, task: Task): void {
-    if (isChanged && newTitle !== task.title) {
-      this._taskService.update(task.id, { title: newTitle });
-    }
   }
 
   updateRepeatableTitleIfChanged(
@@ -112,21 +79,5 @@ export class SchedulePageComponent {
   getRepeatInfoText(repeatCfg: TaskRepeatCfg): string {
     const [key, params] = getTaskRepeatInfoText(repeatCfg, this.locale);
     return this._translateService.instant(key, params);
-  }
-
-  private _startTask(task: TaskWithReminderData): void {
-    // NOTE: reminder needs to be deleted first to avoid problems with "Missing reminder" devError
-    if (!!task.reminderId) {
-      this._taskService.unScheduleTask(task.id, task.reminderId);
-    }
-    if (task.projectId) {
-      if (!!task.parentId) {
-        this._projectService.moveTaskToTodayList(task.parentId, task.projectId, true);
-      } else {
-        this._projectService.moveTaskToTodayList(task.id, task.projectId, true);
-      }
-    }
-    this._taskService.setCurrentId(task.id);
-    this._router.navigate(['/active/tasks']);
   }
 }
