@@ -36,8 +36,8 @@ class FullscreenActivity : AppCompatActivity() {
     val storageHelper =
         SimpleStorageHelper(this) // for scoped storage permission management on Android 10+
     val appUrl =
-//        if (BuildConfig.DEBUG) "https://test-app.super-productivity.com" else "https://app.super-productivity.com"
-        if (BuildConfig.DEBUG) "http://10.0.2.2:4200" else "https://app.super-productivity.com"
+        if (BuildConfig.DEBUG) "https://test-app.super-productivity.com" else "https://app.super-productivity.com"
+//        if (BuildConfig.DEBUG) "http://10.0.2.2:4200" else "https://app.super-productivity.com"
 
     @Suppress("ReplaceCallWithBinaryOperator")
     override fun onCreate(savedInstanceState: Bundle?) {
