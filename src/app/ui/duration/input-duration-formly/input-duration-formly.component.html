@@ -1,13 +1,20 @@
 <input
-  [errorStateMatcher]="errorStateMatcher"
-  [formControl]="formControl"
-  [formlyAttributes]="field"
   [id]="id"
   [isAllowSeconds]="field.templateOptions?.isAllowSeconds"
   [isShowZeroVal]="field.templateOptions?.isShowZeroVal"
-  [placeholder]="to.placeholder"
   [type]="'text'"
   [isValidate]="field.templateOptions?.required"
+  [name]="field.name"
+  [readonly]="props.readonly"
+  [required]="required"
+  [errorStateMatcher]="errorStateMatcher"
+  [value]="formControl.value"
+  [formControl]="formControl"
+  (change)="onInputValueChange($event)"
+  (keydown)="onKeyDown($event)"
+  [formlyAttributes]="field"
+  [tabIndex]="props.tabindex"
+  [placeholder]="props.placeholder"
   inputDuration
   matInput
 />
