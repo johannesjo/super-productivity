@@ -65,7 +65,7 @@ export class TagListComponent implements OnDestroy {
               (project) =>
                 project && {
                   ...project,
-                  icon: project.icon || 'list',
+                  icon: project.icon || 'folder_special',
                 },
             ),
           )
