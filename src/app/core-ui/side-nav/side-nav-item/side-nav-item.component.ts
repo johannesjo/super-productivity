@@ -1,6 +1,7 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  ElementRef,
   HostBinding,
   input,
   ViewChild,
@@ -30,8 +31,12 @@ export class SideNavItemComponent {
   activeWorkContextId = input.required<string>();
 
   contextMenuPosition: { x: string; y: string } = { x: '0px', y: '0px' };
+
   @ViewChild('contextMenuTriggerEl', { static: true, read: MatMenuTrigger })
   contextMenu!: MatMenuTrigger;
+
+  @ViewChild('routeBtn', { static: true, read: ElementRef })
+  routeBtn!: ElementRef;
 
   @HostBinding('class.hasTasks')
   get workContextHasTasks(): boolean {
@@ -57,5 +62,9 @@ export class SideNavItemComponent {
     this.contextMenuPosition.y =
       ('touches' in event ? event.touches[0].clientY : event.clientY) + 'px';
     this.contextMenu.openMenu();
+  }
+
+  focus(): void {
+    this.routeBtn.nativeElement.focus();
   }
 }

@@ -55,6 +55,7 @@
     [dragula]="PROJECTS_SIDE_NAV"
   >
     <side-nav-item
+      #menuEntry
       (keydown)="checkFocusProject($event)"
       *ngFor="let project of projectList; trackBy: trackById;"
       [workContext]="project"
@@ -112,6 +113,7 @@
     [dragula]="TAG_SIDE_NAV"
   >
     <side-nav-item
+      #menuEntry
       (keydown)="checkFocusTag($event)"
       *ngFor="let tag of tagList; trackBy: trackById;"
       [workContext]="tag"
