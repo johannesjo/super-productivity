@@ -15,6 +15,13 @@ export const BASIC_PROJECT_CONFIG_FORM_CONFIG: ConfigFormSection<Project> = {
       },
     },
     {
+      key: 'icon',
+      type: 'icon',
+      templateOptions: {
+        label: T.F.TAG.FORM_BASIC.L_ICON,
+      },
+    },
+    {
       key: 'isEnableBacklog',
       type: 'checkbox',
       templateOptions: {
@@ -53,6 +60,13 @@ export const CREATE_PROJECT_BASIC_CONFIG_FORM_CONFIG: ConfigFormSection<Project>
       templateOptions: {
         label: T.F.PROJECT.FORM_THEME.L_THEME_COLOR,
         type: 'color',
+      },
+    },
+    {
+      key: 'icon',
+      type: 'icon',
+      templateOptions: {
+        label: T.F.TAG.FORM_BASIC.L_ICON,
       },
     },
     {

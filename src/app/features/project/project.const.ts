@@ -26,6 +26,7 @@ export const FIRST_PROJECT: Project = {
   ...DEFAULT_PROJECT,
   id: DEFAULT_PROJECT_ID,
   title: 'Inbox',
+  icon: 'inbox',
   workStart: {},
   workEnd: {},
 };

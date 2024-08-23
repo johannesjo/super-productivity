@@ -4,11 +4,6 @@
   class="tags-container"
 >
   <div class="tags">
-    <mat-icon
-      *ngIf="issueProviderType"
-      [svgIcon]="issueProviderType|issueIcon"
-    ></mat-icon>
-
     <tag
       (click)="editTags()"
       *ngIf=" projectTag"

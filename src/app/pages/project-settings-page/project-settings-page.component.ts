@@ -138,6 +138,7 @@ export class ProjectSettingsPageComponent implements OnInit, OnDestroy {
         title: $event.config.title,
         isHiddenFromMenu: $event.config.isHiddenFromMenu,
         isEnableBacklog: $event.config.isEnableBacklog,
+        icon: $event.config.icon,
       });
     }
   }

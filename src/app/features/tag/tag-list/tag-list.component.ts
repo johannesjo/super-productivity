@@ -19,7 +19,6 @@ import { WorkContextService } from '../../work-context/work-context.service';
 import { WorkContextType } from '../../work-context/work-context.model';
 import { TagComponentTag } from '../tag/tag.component';
 import { expandFadeAnimation } from '../../../ui/animations/expand.ani';
-import { IssueProviderKey } from '../../issue/issue.model';
 import { NO_LIST_TAG } from '../tag.const';
 
 @Component({
@@ -31,7 +30,6 @@ import { NO_LIST_TAG } from '../tag.const';
 })
 export class TagListComponent implements OnDestroy {
   @Input() isDisableEdit: boolean = false;
-  @Input() issueProviderType?: IssueProviderKey;
   @Output() addedTagsToTask: EventEmitter<string[]> = new EventEmitter();
   @Output() removedTagsFromTask: EventEmitter<string[]> = new EventEmitter();
   @Output() replacedTagForTask: EventEmitter<string[]> = new EventEmitter();
@@ -67,7 +65,7 @@ export class TagListComponent implements OnDestroy {
               (project) =>
                 project && {
                   ...project,
-                  icon: 'list',
+                  icon: project.icon || 'list',
                 },
             ),
           )
