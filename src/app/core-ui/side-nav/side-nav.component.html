@@ -2,7 +2,7 @@
   <side-nav-item
     *ngIf="(workContextService.mainWorkContext$|async) as mainContext"
     [type]="WorkContextType.TAG"
-    [ico]="mainContext.icon"
+    [defaultIcon]="mainContext.icon"
     [workContext]="mainContext"
     [activeWorkContextId]="activeWorkContextId"
   ></side-nav-item>
@@ -60,7 +60,7 @@
       *ngFor="let project of projectList; trackBy: trackById;"
       [workContext]="project"
       [type]="WorkContextType.PROJECT"
-      [ico]="'folder_special'"
+      [defaultIcon]="'folder_special'"
       [activeWorkContextId]="activeWorkContextId"
     ></side-nav-item>
   </div>
@@ -118,7 +118,7 @@
       *ngFor="let tag of tagList; trackBy: trackById;"
       [workContext]="tag"
       [type]="WorkContextType.TAG"
-      [ico]="'style'"
+      [defaultIcon]="'style'"
       [activeWorkContextId]="activeWorkContextId"
     ></side-nav-item>
   </div>

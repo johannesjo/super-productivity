@@ -27,7 +27,7 @@ import { Project } from '../../../features/project/project.model';
 export class SideNavItemComponent {
   workContext = input.required<WorkContextCommon>();
   type = input.required<WorkContextType>();
-  ico = input.required<string>();
+  defaultIcon = input.required<string>();
   activeWorkContextId = input.required<string>();
 
   contextMenuPosition: { x: string; y: string } = { x: '0px', y: '0px' };

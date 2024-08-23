@@ -65,6 +65,7 @@ export interface WorkContextCommon {
   breakNr: BreakNr;
   advancedCfg: WorkContextAdvancedCfg;
   theme: WorkContextThemeCfg;
+  icon: string | null;
   taskIds: string[];
   id: string;
   title: string;

@@ -18,7 +18,7 @@
   (contextmenu)="openContextMenu($event)"
 >
   <span class="badge">{{ workContext().taskIds.length }}</span>
-  <mat-icon class="drag-handle">{{ ico() }}</mat-icon>
+  <mat-icon class="drag-handle">{{ workContext().icon || defaultIcon() }}</mat-icon>
   <span class="text">{{ workContext().title }}</span>
 </button>
 

@@ -8,10 +8,10 @@ import {
 import { WorkContextThemeCfg } from '../work-context/work-context.model';
 
 export const TODAY_TAG: Tag = {
-  icon: 'wb_sunny',
   color: null,
   created: Date.now(),
   ...WORK_CONTEXT_DEFAULT_COMMON,
+  icon: 'wb_sunny',
   title: 'Today',
   id: 'TODAY',
   theme: {
@@ -29,10 +29,10 @@ export const TODAY_TAG: Tag = {
 };
 
 export const DEFAULT_TAG: Tag = {
-  icon: null,
   color: null,
   created: Date.now(),
   ...WORK_CONTEXT_DEFAULT_COMMON,
+  icon: null,
   title: '',
   id: '',
   theme: {
@@ -42,10 +42,10 @@ export const DEFAULT_TAG: Tag = {
 };
 
 export const NO_LIST_TAG: Tag = {
-  icon: 'question_mark',
   color: null,
   created: Date.now(),
   ...WORK_CONTEXT_DEFAULT_COMMON,
+  icon: 'question_mark',
   title: 'no list scheduled',
   id: 'NO_LIST',
   theme: {

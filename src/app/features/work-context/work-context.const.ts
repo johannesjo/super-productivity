@@ -40,6 +40,7 @@ export const WORK_CONTEXT_DEFAULT_COMMON: WorkContextCommon = {
   breakTime: {},
   breakNr: {},
   taskIds: [],
+  icon: null,
   id: '',
   title: '',
 };
