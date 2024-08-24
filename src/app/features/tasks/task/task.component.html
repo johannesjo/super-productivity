@@ -441,8 +441,11 @@
               class="hide-xs"
               mat-menu-item
             >
-              <mat-icon>attachment</mat-icon>
-              {{ T.F.TASK.CMP.OPEN_ATTACH|translate }}
+              <span class="menuItemLeft">
+                <mat-icon>attachment</mat-icon>
+                {{ T.F.TASK.CMP.OPEN_ATTACH|translate }}
+              </span>
+              <span class="key-i">{{ kb.taskAddAttachment }}</span>
             </button>
 
             <!--TODO maybe handle dynamically -->
