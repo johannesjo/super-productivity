@@ -222,11 +222,14 @@ export class ScheduleComponent implements AfterViewInit, OnDestroy {
     style: string;
     time: string;
     date: string;
-  } | null>({
-    style: 'grid-row: 149 / span 4; grid-column: 4 / span 1',
-    time: '12:00',
-    date: '11/11/2021',
-  });
+  } | null>(
+    null,
+    //   {
+    //   style: 'grid-row: 149 / span 4; grid-column: 4 / span 1',
+    //   time: '12:00',
+    //   date: '11/11/2021',
+    // }
+  );
 
   // currentTimeSpan$: Observable<{ from: string; to: string }> = this.daysToShow$.pipe(
   //   map((days) => {
@@ -432,6 +435,8 @@ export class ScheduleComponent implements AfterViewInit, OnDestroy {
     setTimeout(() => {
       if (ev.source.element?.nativeElement?.style) {
         ev.source.element.nativeElement.style.opacity = '';
+        // NOTE: doing this again fixes the issue that the element remains in the wrong state sometimes
+        ev.source.element.nativeElement.style.pointerEvents = '';
       }
     }, 100);
 
