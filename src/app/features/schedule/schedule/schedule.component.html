@@ -53,6 +53,8 @@
 <div
   #gridContainer
   class="main-grid-container {{containerExtraClass}}"
+  (click)="onGridClick($event)"
+  (mousemove)="onGridClick($event)"
 >
   <!-- Time -->
   @for (time of times; track $index) {
@@ -162,6 +164,18 @@
     style="grid-column: 2;  grid-row: {{currentTimeRow}} / span 1"
   >
     <div class="circle"></div>
+  </div>
+
+  <div
+    *ngIf="newTaskPlaceholder$|async as newTaskPlaceholder"
+    class="new-task-place-holder"
+    [style]="newTaskPlaceholder.style"
+  >
+    <div class="time">+ {{ newTaskPlaceholder.time }}</div>
+    <textarea
+      autofocus="autofocus"
+      (blur)="newTaskPlaceholder$.next(null)"
+    ></textarea>
   </div>
 </div>
 <!--</div>-->

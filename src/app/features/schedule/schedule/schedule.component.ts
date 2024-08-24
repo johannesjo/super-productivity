@@ -11,7 +11,7 @@ import {
   ViewChild,
 } from '@angular/core';
 import { UiModule } from '../../../ui/ui.module';
-import { combineLatest, fromEvent, Observable } from 'rxjs';
+import { BehaviorSubject, combineLatest, fromEvent, Observable } from 'rxjs';
 import { select, Store } from '@ngrx/store';
 import { selectTimelineTasks } from '../../work-context/store/work-context.selectors';
 import { selectTaskRepeatCfgsWithAndWithoutStartTime } from '../../task-repeat-cfg/store/task-repeat-cfg.reducer';
@@ -56,6 +56,7 @@ import { FH, SVEType, T_ID_PREFIX } from '../schedule.const';
 import { mapToScheduleDays } from '../map-schedule-data/map-to-schedule-days';
 import { mapScheduleDaysToScheduleEvents } from '../map-schedule-data/map-schedule-days-to-schedule-events';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { InlineMultilineInputComponent } from '../../../ui/inline-multiline-input/inline-multiline-input.component';
 
 // const DAYS_TO_SHOW = 5;
 const D_HOURS = 24;
@@ -77,6 +78,7 @@ const IS_NOT_DRAGGING_CLASS = 'is-not-dragging';
     CdkDropList,
     DatePipe,
     NgIf,
+    InlineMultilineInputComponent,
   ],
   templateUrl: './schedule.component.html',
   styleUrl: './schedule.component.scss',
@@ -213,6 +215,11 @@ export class ScheduleComponent implements AfterViewInit, OnDestroy {
     }),
   );
 
+  newTaskPlaceholder$ = new BehaviorSubject<{ style: string; time: string } | null>({
+    style: 'grid-row: 149 / span 4; grid-column: 4 / span 1',
+    time: '12:00',
+  });
+
   currentTimeSpan$: Observable<{ from: string; to: string }> = this.daysToShow$.pipe(
     map((days) => {
       const from = new Date(days[0]);
@@ -293,6 +300,27 @@ export class ScheduleComponent implements AfterViewInit, OnDestroy {
 
   ngOnDestroy(): void {
     window.clearTimeout(this._currentAniTimeout);
+  }
+
+  onGridClick(ev: MouseEvent): void {
+    console.log(ev);
+    if (ev.target instanceof HTMLElement && ev.target.classList.contains('col')) {
+      // console.log(ev.target);
+
+      const targetColRowOffset = ev.target.style.gridRowStart;
+      const targetColColOffset = ev.target.style.gridColumnStart;
+      const rowStart = +targetColRowOffset + Math.floor(ev.offsetY / FH);
+      console.log(ev.offsetY, targetColRowOffset, '+', Math.floor(ev.offsetY / FH));
+
+      const hours = Math.floor(rowStart / FH);
+      const minutes = Math.floor((rowStart % FH) * (60 / FH));
+      const time = `${hours}:${minutes.toString().padStart(2, '0')}`;
+
+      this.newTaskPlaceholder$.next({
+        style: `grid-row: ${rowStart + 2} / span 4; grid-column: ${targetColColOffset} / span 1`,
+        time,
+      });
+    }
   }
 
   dragMoved(ev: CdkDragMove<ScheduleEvent>): void {
