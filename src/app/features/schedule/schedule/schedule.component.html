@@ -39,6 +39,9 @@
 
     @for (day of daysToShow; track $index) {
     <div class="day">
+      @if ($index === 0) {
+      <mat-icon>wb_sunny</mat-icon>
+      }
       <div class="day-num">{{ day|date:'d' }}</div>
       <div class="day-day">{{ day|date:'EEE' }}</div>
     </div>
