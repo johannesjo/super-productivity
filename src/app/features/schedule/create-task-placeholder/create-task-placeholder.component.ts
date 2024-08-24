@@ -9,17 +9,22 @@ import {
   input,
   OnDestroy,
   output,
+  signal,
   Signal,
   ViewChild,
 } from '@angular/core';
 import { MatIcon } from '@angular/material/icon';
 import { TaskService } from '../../tasks/task.service';
 import { TaskReminderOptionId } from '../../tasks/task.model';
+import { DatePipe } from '@angular/common';
+import { PlannerActions } from '../../planner/store/planner.actions';
+import { Store } from '@ngrx/store';
+import { getWorklogStr } from '../../../util/get-work-log-str';
 
 @Component({
   selector: 'create-task-placeholder',
   standalone: true,
-  imports: [MatIcon],
+  imports: [MatIcon, DatePipe],
   templateUrl: './create-task-placeholder.component.html',
   styleUrl: './create-task-placeholder.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -28,6 +33,7 @@ export class CreateTaskPlaceholderComponent implements OnDestroy {
   isEditMode = input.required<boolean>();
   time = input<string>();
   date = input<string>();
+  isForDayMode = signal<boolean>(false);
   plannedAt: Signal<number> = computed(() => {
     if (this.date() && this.time()) {
       // console.log(this.date(), this.time());
@@ -58,7 +64,10 @@ export class CreateTaskPlaceholderComponent implements OnDestroy {
     window.clearTimeout(this._editEndTimeout);
   }
 
-  constructor(private _taskService: TaskService) {
+  constructor(
+    private _taskService: TaskService,
+    private _store: Store,
+  ) {
     effect(() => {
       if (this.isEditMode()) {
         this.textAreaElement?.nativeElement.focus();
@@ -75,23 +84,42 @@ export class CreateTaskPlaceholderComponent implements OnDestroy {
     this._editEndTimeout = window.setTimeout(() => this.editEnd.emit(), 200);
   }
 
-  onKeyDown(event: KeyboardEvent): void {
+  async onKeyDown(event: KeyboardEvent): Promise<void> {
     if (
       event.key === 'Enter' &&
       typeof this.plannedAt() === 'number' &&
       this.textAreaElement?.nativeElement.value
     ) {
-      console.log(this.plannedAt());
-
       this.editEnd.emit();
-      this._taskService.addAndSchedule(
-        this.textAreaElement?.nativeElement.value || '',
-        {
-          timeEstimate: 30 * 60 * 1000,
-        },
-        this.plannedAt(),
-        TaskReminderOptionId.AtStart,
-      );
+      if (this.isForDayMode()) {
+        const id = this._taskService.add(
+          this.textAreaElement?.nativeElement.value || '',
+          false,
+          {
+            timeEstimate: 30 * 60 * 1000,
+          },
+        );
+        const task = await this._taskService.getByIdOnce$(id).toPromise();
+        this._store.dispatch(
+          PlannerActions.planTaskForDay({
+            task: task,
+            day: getWorklogStr(this.plannedAt()),
+          }),
+        );
+      } else {
+        this._taskService.addAndSchedule(
+          this.textAreaElement?.nativeElement.value || '',
+          {
+            timeEstimate: 30 * 60 * 1000,
+          },
+          this.plannedAt(),
+          TaskReminderOptionId.AtStart,
+        );
+      }
+    } else if (event.key === 'Escape') {
+      this.editEnd.emit();
+    } else if (event.key === '1' && event.ctrlKey) {
+      this.isForDayMode.set(!this.isForDayMode());
     }
   }
 

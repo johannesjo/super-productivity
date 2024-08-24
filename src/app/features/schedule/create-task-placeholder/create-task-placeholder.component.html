@@ -1,6 +1,16 @@
-<div class="time">
+<div
+  class="time"
+  (click)="isForDayMode.set(!isForDayMode())"
+>
+  @if (!isForDayMode()) {
   <mat-icon>alarm</mat-icon>
   {{ time() }}
+  <!---->
+  } @else {
+  <mat-icon>today</mat-icon>
+  {{ date()|date:'shortDate' }}
+  <!---->
+  }
 </div>
 
 @if (!isEditMode()) {
