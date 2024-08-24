@@ -906,6 +906,7 @@
       "SELECT_PREVIOUS_TASK": "Velg forrige oppgave",
       "SYSTEM_SHORTCUTS": "Globale snarveier (hele systemet)",
       "TASK_ADD_SUB_TASK": "Legg til underoppgave",
+      "TASK_ADD_ATTACHMENT": "Legg ved fil eller lenke",
       "TASK_DELETE": "Slett oppgave",
       "TASK_EDIT_TITLE": "Rediger tittel",
       "TASK_MOVE_TO_PROJECT": "Åpne flytt oppgave til prosjektmeny",

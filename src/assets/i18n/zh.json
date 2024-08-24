@@ -1202,6 +1202,7 @@
       "SHOW_SEARCH_BAR": "显示搜索栏",
       "SYSTEM_SHORTCUTS": "全局快捷方式（全系统）",
       "TASK_ADD_SUB_TASK": "添加子任务",
+      "TASK_ADD_ATTACHMENT": "附加文件或链接",
       "TASK_DELETE": "删除任务",
       "TASK_EDIT_TAGS": "编辑标签",
       "TASK_EDIT_TITLE": "编辑标题",
