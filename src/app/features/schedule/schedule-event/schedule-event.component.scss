@@ -425,21 +425,34 @@ $margin-right: 10px;
   }
 }
 
+$offset: 40px;
 :host.drag-over {
-  transform: translateY(40px);
+  transform: translateY($offset);
   z-index: 3;
 
   &:after {
     // NOTE: there are some styles in the parent component since host:active + :host  is not working
     content: '';
     position: absolute;
-    transform: translateY(-40px);
+    transform: translateY(-$offset);
     top: -1 * $margin-bottom;
-    height: 40px + $margin-bottom;
+    height: $offset + $margin-bottom;
     left: 0;
     right: -1 * ($margin-right + 4);
     z-index: 3;
     //border: 1px solid red;
+    //background: rgba(255, 0, 0, 0.2);
+  }
+}
+
+$offsetShortEvent: 15px;
+:host.very-short-event.drag-over {
+  transform: translateY($offsetShortEvent);
+  z-index: 3;
+
+  &:after {
+    transform: translateY(-$offsetShortEvent);
+    height: $offsetShortEvent + $margin-bottom;
   }
 }
 

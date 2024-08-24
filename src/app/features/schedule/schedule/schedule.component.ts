@@ -305,6 +305,7 @@ export class ScheduleComponent implements AfterViewInit, OnDestroy {
     if (!targetEl) {
       return;
     }
+    // console.log(targetEl.id, targetEl);
 
     if (targetEl !== this.prevDragOverEl) {
       console.log('dragMoved targetElChanged', targetEl);
@@ -319,9 +320,9 @@ export class ScheduleComponent implements AfterViewInit, OnDestroy {
         targetEl.classList.contains(SVEType.SplitTaskPlannedForDay) ||
         targetEl.classList.contains(SVEType.TaskPlannedForDay)
       ) {
-        this.prevDragOverEl.classList.add(DRAG_OVER_CLASS);
+        targetEl.classList.add(DRAG_OVER_CLASS);
       } else if (targetEl.classList.contains('col')) {
-        this.prevDragOverEl.classList.add(DRAG_OVER_CLASS);
+        targetEl.classList.add(DRAG_OVER_CLASS);
       }
     }
   }
@@ -338,6 +339,8 @@ export class ScheduleComponent implements AfterViewInit, OnDestroy {
     this.dragCloneEl = cur.cloneNode(true) as HTMLElement;
     this.dragCloneEl.style.transform = 'translateY(0)';
     this.dragCloneEl.style.opacity = '.1';
+    // NOTE: important as otherwise this interferes with the drag over class
+    this.dragCloneEl.style.pointerEvents = 'none';
     cur.parentNode?.insertBefore(this.dragCloneEl, cur);
   }
 
