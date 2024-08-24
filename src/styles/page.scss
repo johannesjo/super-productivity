@@ -53,6 +53,7 @@ body {
   &.isEnabledBackgroundGradient {
     &:before {
       display: block;
+      opacity: 1;
     }
   }
 
@@ -62,10 +63,14 @@ body {
 
     &.isDisableBackgroundGradient {
       background: $light-theme-bg;
+      //&:before {
+      //  display: block;
+      //  opacity: .3;
+      //  background: mat-css-vars.mat-css-color(50, 1);
+      //}
     }
 
     &:before {
-      opacity: 1;
       filter: saturate(0.8);
       background: linear-gradient(
         180deg,
@@ -85,8 +90,7 @@ body {
     }
 
     &:before {
-      content: '';
-      opacity: 1;
+      filter: saturate(0.8);
       background: linear-gradient(
         180deg,
         mat-css-vars.mat-css-color(800, 0.35) 0%,
