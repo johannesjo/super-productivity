@@ -1094,6 +1094,7 @@
       "SHOW_SEARCH_BAR": "검색창 표시",
       "SYSTEM_SHORTCUTS": "글로벌 단축키 (시스템 전체)",
       "TASK_ADD_SUB_TASK": "하위 작업 추가",
+      "TASK_ADD_ATTACHMENT": "파일 또는 링크 첨부",
       "TASK_DELETE": "작업 삭제",
       "TASK_EDIT_TAGS": "태그 편집",
       "TASK_EDIT_TITLE": "제목 수정",

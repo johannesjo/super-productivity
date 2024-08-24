@@ -1325,6 +1325,7 @@
       "SHOW_SEARCH_BAR": "Mostrar barra de pesquisa",
       "SYSTEM_SHORTCUTS": "Atalhos globais (todo o sistema)",
       "TASK_ADD_SUB_TASK": "Adicionar subtarefa",
+      "TASK_ADD_ATTACHMENT": "Anexar arquivo ou link",
       "TASK_DELETE": "Excluir tarefa",
       "TASK_EDIT_TAGS": "Editar etiquetas",
       "TASK_EDIT_TITLE": "Editar título",
