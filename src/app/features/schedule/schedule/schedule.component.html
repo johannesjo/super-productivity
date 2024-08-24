@@ -53,8 +53,8 @@
 <div
   #gridContainer
   class="main-grid-container {{containerExtraClass}}"
-  (click)="onGridClick($event)"
-  (mousemove)="onGridClick($event)"
+  (click)="onMoveOverGrid($event)"
+  (mousemove)="onMoveOverGrid($event)"
 >
   <!-- Time -->
   @for (time of times; track $index) {

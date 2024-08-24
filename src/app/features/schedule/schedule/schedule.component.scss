@@ -201,6 +201,10 @@ header {
   grid-column: 4 / span 2;
   box-shadow: $whiteframe-shadow-4dp;
   background: #fff;
+  pointer-events: none;
+  z-index: 33;
+  opacity: 0.5;
+
   @include darkTheme() {
     border-color: $current-time-color;
     background: $dark-theme-bg-lightest;

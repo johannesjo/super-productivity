@@ -57,6 +57,7 @@ import { mapToScheduleDays } from '../map-schedule-data/map-to-schedule-days';
 import { mapScheduleDaysToScheduleEvents } from '../map-schedule-data/map-schedule-days-to-schedule-events';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { InlineMultilineInputComponent } from '../../../ui/inline-multiline-input/inline-multiline-input.component';
+import { throttle } from 'helpful-decorators';
 
 // const DAYS_TO_SHOW = 5;
 const D_HOURS = 24;
@@ -302,27 +303,52 @@ export class ScheduleComponent implements AfterViewInit, OnDestroy {
     window.clearTimeout(this._currentAniTimeout);
   }
 
-  onGridClick(ev: MouseEvent): void {
-    console.log(ev);
+  @throttle(30)
+  onMoveOverGrid(ev: MouseEvent): void {
+    if (this.isDragging) {
+      return;
+    }
+
+    // console.log(ev);
     if (ev.target instanceof HTMLElement && ev.target.classList.contains('col')) {
-      // console.log(ev.target);
+      const gridContainer = this.gridContainer.nativeElement;
+      const gridStyles = window.getComputedStyle(gridContainer);
 
-      const targetColRowOffset = ev.target.style.gridRowStart;
-      const targetColColOffset = ev.target.style.gridColumnStart;
-      const rowStart = +targetColRowOffset + Math.floor(ev.offsetY / FH);
-      console.log(ev.offsetY, targetColRowOffset, '+', Math.floor(ev.offsetY / FH));
+      const rowSizes = gridStyles.gridTemplateRows
+        .split(' ')
+        .map((size) => parseFloat(size));
 
-      const hours = Math.floor(rowStart / FH);
-      const minutes = Math.floor((rowStart % FH) * (60 / FH));
+      let rowIndex = 0;
+      let yOffset = ev.offsetY;
+
+      for (let i = 0; i < rowSizes.length; i++) {
+        if (yOffset < rowSizes[i]) {
+          rowIndex = i + 1;
+          break;
+        }
+        yOffset -= rowSizes[i];
+      }
+
+      const targetColRowOffset = +ev.target.style.gridRowStart - 2;
+      const targetColColOffset = +ev.target.style.gridColumnStart;
+      // const rowStart = +targetColRowOffset + Math.floor(ev.offsetY / FH);
+      console.log(ev.offsetY, targetColRowOffset, targetColColOffset, rowIndex);
+
+      const row = rowIndex + targetColRowOffset;
+      const hours = Math.floor((row - 1) / FH);
+      const minutes = Math.floor(((row - 1) % FH) * (60 / FH));
       const time = `${hours}:${minutes.toString().padStart(2, '0')}`;
 
       this.newTaskPlaceholder$.next({
-        style: `grid-row: ${rowStart + 2} / span 4; grid-column: ${targetColColOffset} / span 1`,
+        style: `grid-row: ${row} / span 6; grid-column: ${targetColColOffset} / span 1`,
         time,
       });
+    } else {
+      this.newTaskPlaceholder$.next(null);
     }
   }
 
+  @throttle(30)
   dragMoved(ev: CdkDragMove<ScheduleEvent>): void {
     // console.log('dragMoved', ev);
     ev.source.element.nativeElement.style.pointerEvents = 'none';
