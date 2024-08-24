@@ -52,7 +52,8 @@ export const SCHEDULE_FLOW_TYPES: SVEType[] = [
   SVEType.RepeatProjectionSplitContinuedLast,
 ];
 
-export const SCHEDULE_TASK_MIN_DURATION_IN_MS = 10 * 60 * 1000;
+// eslint-disable-next-line no-mixed-operators
+export const SCHEDULE_TASK_MIN_DURATION_IN_MS = 10 * 60 * 1000 + 1;
 
 export const FH = 12;
 
