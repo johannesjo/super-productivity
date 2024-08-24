@@ -792,6 +792,7 @@ export const SHEPHERD_STEPS = (
           <li>${KEY_COMBO('taskDelete')}: Delete Task</li>
           <li>${KEY_COMBO('taskToggleDone')}: Toggle done</li>
           <li>${KEY_COMBO('taskAddSubTask')}: Add new sub task</li>
+          <li>${KEY_COMBO('taskAddAttachment')}: Attach a file or link to the task</li>
           <li>${KEY_COMBO('togglePlay')}: Toggle tracking</li>
           </ul>
 

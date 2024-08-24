@@ -876,6 +876,9 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
     if (checkKeyCombo(ev, keys.taskAddSubTask)) {
       this.addSubTask();
     }
+    if (checkKeyCombo(ev, keys.taskAddAttachment)) {
+      this.addAttachment();
+    }
     if (!this.task.parentId && checkKeyCombo(ev, keys.taskMoveToProject)) {
       if (!this.projectMenuTrigger) {
         throw new Error('No el');
