@@ -193,55 +193,6 @@ header {
   top: calc(50% - 1px);
 }
 
-.new-task-place-holder {
-  border: 2px dashed $c-accent;
-  border-radius: 8px;
-  position: relative;
-  grid-row: 149 / span 2;
-  grid-column: 4 / span 2;
-  box-shadow: $whiteframe-shadow-4dp;
-  background: #fff;
-  pointer-events: none;
-  z-index: 33;
-  opacity: 0.5;
-
-  @include darkTheme() {
-    border-color: $current-time-color;
-    background: $dark-theme-bg-lightest;
-  }
-
-  .time {
-    position: absolute;
-    bottom: 100%;
-    border: 1px solid $c-accent;
-    background: inherit;
-    left: 50%;
-    transform: translateX(-50%);
-    font-weight: bold;
-    font-size: 14px;
-    text-align: center;
-    border-top-left-radius: 4px;
-    border-top-right-radius: 4px;
-    color: #fff;
-    border-bottom: 0;
-    padding: 2px;
-  }
-
-  textarea {
-    padding: 4px;
-    resize: none;
-    border: 0;
-    outline: none;
-    position: absolute;
-    background: transparent;
-    inset: 0;
-    color: $light-theme-text-color;
-    @include darkTheme() {
-      color: $dark-theme-text-color;
-    }
-  }
-}
-
 .circle {
   width: 12px;
   height: 12px;

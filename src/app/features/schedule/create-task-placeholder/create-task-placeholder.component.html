@@ -1,0 +1,17 @@
+<div class="time">
+  <mat-icon>alarm</mat-icon>
+  {{ time() }}
+</div>
+
+@if (!isEditMode()) {
+<div class="msg">
+  <mat-icon>add</mat-icon>
+  click to create task
+</div>
+}
+
+<textarea
+  (blur)="onBlur()"
+  (keydown)="onKeyDown($event)"
+  #textAreaElement
+></textarea>

@@ -58,6 +58,7 @@ import { mapScheduleDaysToScheduleEvents } from '../map-schedule-data/map-schedu
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { InlineMultilineInputComponent } from '../../../ui/inline-multiline-input/inline-multiline-input.component';
 import { throttle } from 'helpful-decorators';
+import { CreateTaskPlaceholderComponent } from '../create-task-placeholder/create-task-placeholder.component';
 
 // const DAYS_TO_SHOW = 5;
 const D_HOURS = 24;
@@ -80,6 +81,7 @@ const IS_NOT_DRAGGING_CLASS = 'is-not-dragging';
     DatePipe,
     NgIf,
     InlineMultilineInputComponent,
+    CreateTaskPlaceholderComponent,
   ],
   templateUrl: './schedule.component.html',
   styleUrl: './schedule.component.scss',
@@ -216,25 +218,29 @@ export class ScheduleComponent implements AfterViewInit, OnDestroy {
     }),
   );
 
-  newTaskPlaceholder$ = new BehaviorSubject<{ style: string; time: string } | null>({
+  newTaskPlaceholder$ = new BehaviorSubject<{
+    style: string;
+    time: string;
+    date: string;
+  } | null>({
     style: 'grid-row: 149 / span 4; grid-column: 4 / span 1',
     time: '12:00',
+    date: '11/11/2021',
   });
 
-  currentTimeSpan$: Observable<{ from: string; to: string }> = this.daysToShow$.pipe(
-    map((days) => {
-      const from = new Date(days[0]);
-      const to = new Date(days[days.length - 1]);
-      return {
-        // from: isToday(from)
-        //   ? 'Today'
-        //   : from.toLocaleDateString(this.locale, { day: 'numeric', month: 'numeric' }),
-        from: from.toLocaleDateString(this.locale, { day: 'numeric', month: 'numeric' }),
-        to: to.toLocaleDateString(this.locale, { day: 'numeric', month: 'numeric' }),
-      };
-    }),
-  );
-
+  // currentTimeSpan$: Observable<{ from: string; to: string }> = this.daysToShow$.pipe(
+  //   map((days) => {
+  //     const from = new Date(days[0]);
+  //     const to = new Date(days[days.length - 1]);
+  //     return {
+  //       // from: isToday(from)
+  //       //   ? 'Today'
+  //       //   : from.toLocaleDateString(this.locale, { day: 'numeric', month: 'numeric' }),
+  //       from: from.toLocaleDateString(this.locale, { day: 'numeric', month: 'numeric' }),
+  //       to: to.toLocaleDateString(this.locale, { day: 'numeric', month: 'numeric' }),
+  //     };
+  //   }),
+  // );
   // timelineDays$: Observable<ScheduleDay[]> = this.timelineEntries$.pipe(
   //   map((entries) => mapTimelineEntriesToDays(entries)),
   // );
@@ -242,6 +248,7 @@ export class ScheduleComponent implements AfterViewInit, OnDestroy {
   now: number = Date.now();
   tomorrow: number = getTomorrow(0).getTime();
   isDragging = false;
+  isCreateTaskActive = false;
   containerExtraClass = IS_NOT_DRAGGING_CLASS;
   prevDragOverEl: HTMLElement | null = null;
   dragCloneEl: HTMLElement | null = null;
@@ -303,9 +310,18 @@ export class ScheduleComponent implements AfterViewInit, OnDestroy {
     window.clearTimeout(this._currentAniTimeout);
   }
 
+  onGridClick(ev: MouseEvent): void {
+    if (ev.target instanceof HTMLElement && ev.target.classList.contains('col')) {
+      this.isCreateTaskActive = true;
+    }
+  }
+
   @throttle(30)
   onMoveOverGrid(ev: MouseEvent): void {
     if (this.isDragging) {
+      return;
+    }
+    if (this.isCreateTaskActive) {
       return;
     }
 
@@ -331,8 +347,7 @@ export class ScheduleComponent implements AfterViewInit, OnDestroy {
 
       const targetColRowOffset = +ev.target.style.gridRowStart - 2;
       const targetColColOffset = +ev.target.style.gridColumnStart;
-      // const rowStart = +targetColRowOffset + Math.floor(ev.offsetY / FH);
-      console.log(ev.offsetY, targetColRowOffset, targetColColOffset, rowIndex);
+      // console.log(ev.offsetY, targetColRowOffset, targetColColOffset, rowIndex);
 
       const row = rowIndex + targetColRowOffset;
       const hours = Math.floor((row - 1) / FH);
@@ -342,6 +357,7 @@ export class ScheduleComponent implements AfterViewInit, OnDestroy {
       this.newTaskPlaceholder$.next({
         style: `grid-row: ${row} / span 6; grid-column: ${targetColColOffset} / span 1`,
         time,
+        date: this.daysToShow[targetColColOffset - 2],
       });
     } else {
       this.newTaskPlaceholder$.next(null);

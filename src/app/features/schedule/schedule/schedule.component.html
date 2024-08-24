@@ -53,7 +53,7 @@
 <div
   #gridContainer
   class="main-grid-container {{containerExtraClass}}"
-  (click)="onMoveOverGrid($event)"
+  (click)="onGridClick($event)"
   (mousemove)="onMoveOverGrid($event)"
 >
   <!-- Time -->
@@ -166,17 +166,15 @@
     <div class="circle"></div>
   </div>
 
-  <div
+  <create-task-placeholder
     *ngIf="newTaskPlaceholder$|async as newTaskPlaceholder"
-    class="new-task-place-holder"
+    [isEditMode]="isCreateTaskActive"
+    [time]="newTaskPlaceholder.time"
+    [date]="newTaskPlaceholder.date"
+    (editEnd)="isCreateTaskActive = false; this.newTaskPlaceholder$.next(null)"
     [style]="newTaskPlaceholder.style"
   >
-    <div class="time">+ {{ newTaskPlaceholder.time }}</div>
-    <textarea
-      autofocus="autofocus"
-      (blur)="newTaskPlaceholder$.next(null)"
-    ></textarea>
-  </div>
+  </create-task-placeholder>
 </div>
 <!--</div>-->
 
