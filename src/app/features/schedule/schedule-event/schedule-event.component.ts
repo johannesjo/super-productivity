@@ -40,7 +40,7 @@ import { DialogTimeEstimateComponent } from '../../tasks/dialog-time-estimate/di
 import { IS_TOUCH_PRIMARY } from '../../../util/is-mouse-primary';
 import { DialogScheduleTaskComponent } from '../../planner/dialog-schedule-task/dialog-schedule-task.component';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { DialogTaskAdditionalInfoPanelComponent } from '../../tasks/dialog-task-additional-info-panel/dialog-task-additional-info-panel.component';
+import { DialogTaskDetailPanelComponent } from '../../tasks/dialog-task-additional-info-panel/dialog-task-detail-panel.component';
 import { CalendarIntegrationService } from '../../calendar-integration/calendar-integration.service';
 
 @Component({
@@ -188,7 +188,7 @@ export class ScheduleEventComponent implements OnInit {
   @HostListener('click')
   async clickHandler(): Promise<void> {
     if (this.task) {
-      this._matDialog.open(DialogTaskAdditionalInfoPanelComponent, {
+      this._matDialog.open(DialogTaskDetailPanelComponent, {
         data: { taskId: this.task.id },
       });
     } else if (

@@ -129,9 +129,9 @@ export const selectSelectedTaskId = createSelector(
   selectTaskFeatureState,
   (state) => state.selectedTaskId,
 );
-export const selectTaskAdditionalInfoTargetPanel = createSelector(
+export const selectTaskDetailTargetPanel = createSelector(
   selectTaskFeatureState,
-  (state: TaskState) => state.taskAdditionalInfoTargetPanel,
+  (state: TaskState) => state.taskDetailTargetPanel,
 );
 export const selectSelectedTask = createSelector(
   selectTaskFeatureState,

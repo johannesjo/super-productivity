@@ -17,7 +17,7 @@ import { TaskDetailTargetPanel } from '../task.model';
 import { skipWhile } from 'rxjs/operators';
 
 @Component({
-  selector: 'dialog-task-additional-info-panel',
+  selector: 'dialog-task-detail-panel',
   standalone: true,
   imports: [
     CommonModule,
@@ -27,23 +27,23 @@ import { skipWhile } from 'rxjs/operators';
     MatDialogContent,
     MatDialogActions,
   ],
-  templateUrl: './dialog-task-additional-info-panel.component.html',
-  styleUrl: './dialog-task-additional-info-panel.component.scss',
+  templateUrl: './dialog-task-detail-panel.component.html',
+  styleUrl: './dialog-task-detail-panel.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class DialogTaskAdditionalInfoPanelComponent implements OnDestroy {
+export class DialogTaskDetailPanelComponent implements OnDestroy {
   T: typeof T = T;
   task$ = this._store.select(selectSelectedTask).pipe(skipWhile((v) => !v));
 
   constructor(
     @Inject(MAT_DIALOG_DATA) public data: { taskId: string },
-    private _matDialogRef: MatDialogRef<DialogTaskAdditionalInfoPanelComponent>,
+    private _matDialogRef: MatDialogRef<DialogTaskDetailPanelComponent>,
     private _store: Store,
   ) {
     this._store.dispatch(
       setSelectedTask({
         id: data.taskId,
-        taskAdditionalInfoTargetPanel: TaskDetailTargetPanel.Default,
+        taskDetailTargetPanel: TaskDetailTargetPanel.Default,
         isSkipToggle: true,
       }),
     );

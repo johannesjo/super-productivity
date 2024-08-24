@@ -29,7 +29,7 @@ import { Store } from '@ngrx/store';
 import { selectTaskByIdWithSubTaskData } from '../../tasks/store/task.selectors';
 import { updateTask } from '../../tasks/store/task.actions';
 import { DialogScheduleTaskComponent } from '../dialog-schedule-task/dialog-schedule-task.component';
-import { DialogTaskAdditionalInfoPanelComponent } from '../../tasks/dialog-task-additional-info-panel/dialog-task-additional-info-panel.component';
+import { DialogTaskDetailPanelComponent } from '../../tasks/dialog-task-additional-info-panel/dialog-task-detail-panel.component';
 
 @Component({
   selector: 'planner-task',
@@ -68,7 +68,7 @@ export class PlannerTaskComponent extends BaseComponent implements OnInit, OnDes
   @HostListener('click', ['$event'])
   async clickHandler(): Promise<void> {
     if (this.task) {
-      this._matDialog.open(DialogTaskAdditionalInfoPanelComponent, {
+      this._matDialog.open(DialogTaskDetailPanelComponent, {
         data: { taskId: this.task.id },
       });
     }

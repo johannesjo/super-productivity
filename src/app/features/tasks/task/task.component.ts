@@ -400,17 +400,17 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
     }
   }
 
-  showAdditionalInfos(): void {
+  showDetailPanel(): void {
     this._taskService.setSelectedId(this.task.id);
     this.focusSelf();
   }
 
-  hideAdditionalInfos(): void {
+  hideDetailPanel(): void {
     this._taskService.setSelectedId(this.task.id);
     this.focusSelf();
   }
 
-  toggleShowAdditionalInfoOpen(ev?: MouseEvent): void {
+  toggleShowDetailPanel(ev?: MouseEvent): void {
     if (this.isSelected) {
       this._taskService.setSelectedId(null);
     } else {
@@ -862,7 +862,7 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
       ev.preventDefault();
     }
     if (checkKeyCombo(ev, keys.taskToggleDetailPanelOpen)) {
-      this.toggleShowAdditionalInfoOpen();
+      this.toggleShowDetailPanel();
     }
     if (checkKeyCombo(ev, keys.taskOpenEstimationDialog)) {
       this.estimateTime();
@@ -927,7 +927,7 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
     if (ev.key === 'ArrowLeft' || checkKeyCombo(ev, keys.collapseSubTasks)) {
       const hasSubTasks = this.task.subTasks && (this.task.subTasks as any).length > 0;
       if (this.isSelected) {
-        this.hideAdditionalInfos();
+        this.hideDetailPanel();
       } else if (
         hasSubTasks &&
         this.task._showSubTasksMode !== ShowSubTasksMode.HideAll
@@ -947,7 +947,7 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
       if (hasSubTasks && this.task._showSubTasksMode !== ShowSubTasksMode.Show) {
         this._taskService.toggleSubTaskMode(this.task.id, false, false);
       } else if (!this.isSelected) {
-        this.showAdditionalInfos();
+        this.showDetailPanel();
       } else {
         this.focusNext();
       }

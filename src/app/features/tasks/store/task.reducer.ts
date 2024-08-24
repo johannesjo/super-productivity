@@ -78,7 +78,7 @@ export const initialTaskState: TaskState = taskAdapter.getInitialState({
   // TODO maybe at least move those properties to an ui property
   currentTaskId: null,
   selectedTaskId: null,
-  taskAdditionalInfoTargetPanel: TaskDetailTargetPanel.Default,
+  taskDetailTargetPanel: TaskDetailTargetPanel.Default,
   lastCurrentTaskId: null,
   isDataLoaded: false,
   [MODEL_VERSION_KEY]: MODEL_VERSION.TASK,
@@ -135,18 +135,18 @@ export const taskReducer = createReducer<TaskState>(
     return { ...state, currentTaskId: null, lastCurrentTaskId: state.currentTaskId };
   }),
 
-  on(setSelectedTask, (state, { id, taskAdditionalInfoTargetPanel, isSkipToggle }) => {
+  on(setSelectedTask, (state, { id, taskDetailTargetPanel, isSkipToggle }) => {
     if (isSkipToggle) {
       return {
         ...state,
-        taskAdditionalInfoTargetPanel: taskAdditionalInfoTargetPanel || null,
+        taskDetailTargetPanel: taskDetailTargetPanel || null,
         selectedTaskId: id,
       };
     }
     return {
       ...state,
-      taskAdditionalInfoTargetPanel:
-        !id || id === state.selectedTaskId ? null : taskAdditionalInfoTargetPanel || null,
+      taskDetailTargetPanel:
+        !id || id === state.selectedTaskId ? null : taskDetailTargetPanel || null,
       selectedTaskId: id === state.selectedTaskId ? null : id,
     };
   }),
