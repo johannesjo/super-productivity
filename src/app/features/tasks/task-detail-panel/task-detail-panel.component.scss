@@ -38,9 +38,35 @@ progress-bar {
   // NOTE make space for close button
   padding-right: 50px;
   z-index: 44;
+  border-bottom: 2px solid $c-primary !important;
+  border-top-left-radius: 8px;
+  border-top-right-radius: 8px;
+
+  @include lightTheme() {
+    background: #fff;
+    //border-bottom: 1px solid $c-primary;
+  }
+  @include darkTheme() {
+    background: $dark-theme-bg-slightly-lighter;
+    //border-bottom: 1px solid $c-primary;
+  }
 
   @include mq(xs) {
     padding: 0 $s;
+  }
+
+  ::ng-deep textarea {
+    border: 2px solid red;
+    font-weight: 600 !important;
+  }
+
+  inline-multiline-input {
+    margin-top: 0;
+    color: $light-theme-text-color;
+
+    @include darkTheme() {
+      color: $dark-theme-text-color;
+    }
   }
 }
 
