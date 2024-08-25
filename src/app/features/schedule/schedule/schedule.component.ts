@@ -353,7 +353,10 @@ export class ScheduleComponent implements AfterViewInit, OnDestroy {
       const targetColColOffset = +ev.target.style.gridColumnStart;
       // console.log(ev.offsetY, targetColRowOffset, targetColColOffset, rowIndex);
 
-      const row = rowIndex + targetColRowOffset;
+      // for mobile, we use blocks of 15 minutes
+      // eslint-disable-next-line no-mixed-operators
+      const targetRow = IS_TOUCH_PRIMARY ? Math.floor(rowIndex / 3) * 3 - 1 : rowIndex;
+      const row = targetRow + targetColRowOffset;
       const hours = Math.floor((row - 1) / FH);
       const minutes = Math.floor(((row - 1) % FH) * (60 / FH));
       const time = `${hours}:${minutes.toString().padStart(2, '0')}`;
