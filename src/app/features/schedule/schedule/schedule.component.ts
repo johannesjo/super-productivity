@@ -437,13 +437,14 @@ export class ScheduleComponent implements AfterViewInit, OnDestroy {
       dragOverEl: this.prevDragOverEl,
     });
 
-    if (this.dragCloneEl) {
-      this.dragCloneEl.remove();
-    }
-
+    // for very short drags prevDragOverEl is undefined. For desktop only the event.target can be used instead
+    const target = (this.prevDragOverEl || ev.event.target) as HTMLElement;
     if (this.prevDragOverEl) {
       this.prevDragOverEl.classList.remove(DRAG_OVER_CLASS);
       this.prevDragOverEl = null;
+    }
+    if (this.dragCloneEl) {
+      this.dragCloneEl.remove();
     }
 
     this.isDragging = false;
@@ -459,9 +460,6 @@ export class ScheduleComponent implements AfterViewInit, OnDestroy {
     }, 100);
 
     this.containerExtraClass = IS_NOT_DRAGGING_CLASS;
-
-    // for very short drags prevDragOverEl is undefined. For desktop only the event.target can be used instead
-    const target = (this.prevDragOverEl || ev.event.target) as HTMLElement;
 
     if (target.tagName.toLowerCase() === 'div' && target.classList.contains('col')) {
       const isMoveToEndOfDay = target.classList.contains('end-of-day');
