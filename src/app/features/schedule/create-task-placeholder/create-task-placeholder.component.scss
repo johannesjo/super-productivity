@@ -76,6 +76,10 @@
     background: transparent;
     inset: 0;
     color: inherit;
+
+    @include mq(xs, max) {
+      font-size: 10px;
+    }
   }
 }
 
