@@ -18,7 +18,11 @@ import { Store } from '@ngrx/store';
 import { selectProjectById } from '../../project/store/project.selectors';
 import { MatMiniFabButton } from '@angular/material/button';
 import { getClockStringFromHours } from '../../../util/get-clock-string-from-hours';
-import { SVEType, T_ID_PREFIX } from '../schedule.const';
+import {
+  SCHEDULE_TASK_MIN_DURATION_IN_MS,
+  SVEType,
+  T_ID_PREFIX,
+} from '../schedule.const';
 import { isDraggableSE } from '../map-schedule-data/is-schedule-types-type';
 import { MatDialog } from '@angular/material/dialog';
 import { DialogEditTaskRepeatCfgComponent } from '../../task-repeat-cfg/dialog-edit-task-repeat-cfg/dialog-edit-task-repeat-cfg.component';
@@ -40,7 +44,7 @@ import { DialogTimeEstimateComponent } from '../../tasks/dialog-time-estimate/di
 import { IS_TOUCH_PRIMARY } from '../../../util/is-mouse-primary';
 import { DialogScheduleTaskComponent } from '../../planner/dialog-schedule-task/dialog-schedule-task.component';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { DialogTaskAdditionalInfoPanelComponent } from '../../tasks/dialog-task-additional-info-panel/dialog-task-additional-info-panel.component';
+import { DialogTaskDetailPanelComponent } from '../../tasks/dialog-task-additional-info-panel/dialog-task-detail-panel.component';
 import { CalendarIntegrationService } from '../../calendar-integration/calendar-integration.service';
 
 @Component({
@@ -119,6 +123,15 @@ export class ScheduleEventComponent implements OnInit {
       this.se.type === SVEType.ScheduledTask
     ) {
       this.task = this.se.data as TaskCopy;
+
+      if (
+        (this.se.type === SVEType.Task || this.se.type === SVEType.TaskPlannedForDay) &&
+        this.task.timeEstimate === SCHEDULE_TASK_MIN_DURATION_IN_MS &&
+        this.task.timeSpent === 0
+      ) {
+        // this.hoverTitle = '! default estimate was to 15min ! – ' + this.hoverTitle;
+        this.hoverTitle += '  !!!!! ESTIMATE FOR SCHEDULE WAS SET TO 10MIN !!!!!';
+      }
     }
 
     // SPLIT STUFF
@@ -188,7 +201,7 @@ export class ScheduleEventComponent implements OnInit {
   @HostListener('click')
   async clickHandler(): Promise<void> {
     if (this.task) {
-      this._matDialog.open(DialogTaskAdditionalInfoPanelComponent, {
+      this._matDialog.open(DialogTaskDetailPanelComponent, {
         data: { taskId: this.task.id },
       });
     } else if (

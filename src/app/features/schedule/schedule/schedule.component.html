@@ -39,6 +39,9 @@
 
     @for (day of daysToShow; track $index) {
     <div class="day">
+      @if ($index === 0) {
+      <mat-icon>wb_sunny</mat-icon>
+      }
       <div class="day-num">{{ day|date:'d' }}</div>
       <div class="day-day">{{ day|date:'EEE' }}</div>
     </div>
@@ -50,6 +53,8 @@
 <div
   #gridContainer
   class="main-grid-container {{containerExtraClass}}"
+  (click)="onGridClick($event)"
+  (mousemove)="onMoveOverGrid($event)"
 >
   <!-- Time -->
   @for (time of times; track $index) {
@@ -160,6 +165,16 @@
   >
     <div class="circle"></div>
   </div>
+
+  <create-task-placeholder
+    *ngIf="newTaskPlaceholder$|async as newTaskPlaceholder"
+    [isEditMode]="isCreateTaskActive"
+    [time]="newTaskPlaceholder.time"
+    [date]="newTaskPlaceholder.date"
+    (editEnd)="isCreateTaskActive = false; this.newTaskPlaceholder$.next(null)"
+    [style]="newTaskPlaceholder.style"
+  >
+  </create-task-placeholder>
 </div>
 <!--</div>-->
 

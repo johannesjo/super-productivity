@@ -980,6 +980,7 @@
       "SHOW_SEARCH_BAR": "Show search bar",
       "SYSTEM_SHORTCUTS": "Global Shortcuts (system wide)",
       "TASK_ADD_SUB_TASK": "Add sub Task",
+      "TASK_ADD_ATTACHMENT": "Attach file or link",
       "TASK_DELETE": "Delete Task",
       "TASK_EDIT_TAGS": "Edit Tags",
       "TASK_EDIT_TITLE": "Edit Title",

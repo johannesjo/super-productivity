@@ -24,28 +24,7 @@
 
   &::ng-deep {
     .task-title-wrapper {
-      border-bottom: 2px solid $c-primary !important;
-      top: 0;
-      border-top-left-radius: 8px;
-      border-top-right-radius: 8px;
       padding-right: 8px !important;
-
-      @include darkTheme() {
-        //background: $dark24 !important;
-      }
-
-      inline-multiline-input {
-        margin-top: 0;
-        color: $light-theme-text-color;
-
-        @include darkTheme() {
-          color: $dark-theme-text-color;
-        }
-
-        textarea {
-          font-weight: 600 !important;
-        }
-      }
     }
 
     task .hover-controls {

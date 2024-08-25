@@ -265,6 +265,13 @@ export const KEYBOARD_SETTINGS_FORM_CFG: ConfigFormSection<KeyboardConfig> = {
       },
     },
     {
+      key: 'taskAddAttachment',
+      type: 'keyboard',
+      templateOptions: {
+        label: T.GCF.KEYBOARD.TASK_ADD_ATTACHMENT,
+      },
+    },
+    {
       key: 'taskDelete',
       type: 'keyboard',
       templateOptions: {

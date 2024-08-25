@@ -106,6 +106,7 @@ export const DEFAULT_GLOBAL_CONFIG: GlobalConfigState = {
     taskSchedule: 's',
     taskToggleDone: 'd',
     taskAddSubTask: 'a',
+    taskAddAttachment: 'l',
     taskDelete: 'Backspace',
     taskMoveToProject: 'e',
     taskOpenContextMenu: 'q',

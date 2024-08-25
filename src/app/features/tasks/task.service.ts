@@ -60,9 +60,9 @@ import {
   selectSelectedTask,
   selectSelectedTaskId,
   selectStartableTasks,
-  selectTaskAdditionalInfoTargetPanel,
   selectTaskById,
   selectTaskByIdWithSubTaskData,
+  selectTaskDetailTargetPanel,
   selectTaskFeatureState,
   selectTasksById,
   selectTasksByRepeatConfigId,
@@ -135,7 +135,7 @@ export class TaskService {
 
   taskDetailPanelTargetPanel$: Observable<TaskDetailTargetPanel | null> =
     this._store.pipe(
-      select(selectTaskAdditionalInfoTargetPanel),
+      select(selectTaskDetailTargetPanel),
       // NOTE: we can't use share here, as we need the last emitted value
     );
 
@@ -222,9 +222,9 @@ export class TaskService {
 
   setSelectedId(
     id: string | null,
-    taskAdditionalInfoTargetPanel: TaskDetailTargetPanel = TaskDetailTargetPanel.Default,
+    taskDetailTargetPanel: TaskDetailTargetPanel = TaskDetailTargetPanel.Default,
   ): void {
-    this._store.dispatch(setSelectedTask({ id, taskAdditionalInfoTargetPanel }));
+    this._store.dispatch(setSelectedTask({ id, taskDetailTargetPanel }));
   }
 
   async setSelectedIdToParentAndSwitchContextIfNecessary(task: TaskCopy): Promise<void> {
@@ -255,7 +255,7 @@ export class TaskService {
     this._store.dispatch(
       setSelectedTask({
         id: task.parentId,
-        taskAdditionalInfoTargetPanel: TaskDetailTargetPanel.Default,
+        taskDetailTargetPanel: TaskDetailTargetPanel.Default,
       }),
     );
   }

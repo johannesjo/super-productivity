@@ -19,12 +19,7 @@ export const TODAY_TAG: Tag = {
     primary: DEFAULT_TODAY_TAG_COLOR,
     // backgroundImageDark: 'assets/bg/NIGHT_manuel-will.jpg',
     backgroundImageDark: '',
-
-    ...((window.matchMedia('(prefers-color-scheme: dark)').matches
-      ? {
-          isDisableBackgroundGradient: false,
-        }
-      : {}) as Partial<WorkContextThemeCfg>),
+    isDisableBackgroundGradient: true,
   },
 };
 

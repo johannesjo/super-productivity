@@ -51,7 +51,7 @@ describe('workContext selectors', () => {
             huePrimary: '500',
             hueWarn: '500',
             isAutoContrast: true,
-            isDisableBackgroundGradient: false,
+            isDisableBackgroundGradient: true,
             primary: '#6495ED',
             warn: '#e11826',
           },

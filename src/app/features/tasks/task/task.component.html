@@ -127,7 +127,7 @@
       </div>
 
       <div
-        (click)="IS_TOUCH_PRIMARY && (task.title.length ? toggleShowAdditionalInfoOpen($event) : focusTitleForEdit())"
+        (click)="IS_TOUCH_PRIMARY && (task.title.length ? toggleShowDetailPanel($event) : focusTitleForEdit())"
         class="title-and-tags-wrapper"
       >
         <div
@@ -261,7 +261,7 @@
           </button>
 
           <button
-            (click)="toggleShowAdditionalInfoOpen()"
+            (click)="toggleShowDetailPanel()"
             *ngIf="!task.notes && (!task.issueId||task.issueType==='CALENDAR') && !isSelected"
             title="{{T.F.TASK.CMP.TOGGLE_DETAIL_PANEL|translate}} {{kb.taskToggleDetailPanelOpen?'['+kb.taskToggleDetailPanelOpen+']':''}}"
             class="ico-btn show-additional-info-btn"
@@ -316,7 +316,7 @@
 
         <div>
           <button
-            (click)="toggleShowAdditionalInfoOpen()"
+            (click)="toggleShowDetailPanel()"
             *ngIf="task.notes|| (task.issueId&&task.issueType!=='CALENDAR') || isSelected"
             title="{{T.F.TASK.CMP.TOGGLE_DETAIL_PANEL|translate}}  {{kb.taskToggleDetailPanelOpen?'['+kb.taskToggleDetailPanelOpen+']':''}}"
             [class.closeBtn]="!task.issueWasUpdated && isSelected"
@@ -441,8 +441,11 @@
               class="hide-xs"
               mat-menu-item
             >
-              <mat-icon>attachment</mat-icon>
-              {{ T.F.TASK.CMP.OPEN_ATTACH|translate }}
+              <span class="menuItemLeft">
+                <mat-icon>attachment</mat-icon>
+                {{ T.F.TASK.CMP.OPEN_ATTACH|translate }}
+              </span>
+              <span class="key-i">{{ kb.taskAddAttachment }}</span>
             </button>
 
             <!--TODO maybe handle dynamically -->

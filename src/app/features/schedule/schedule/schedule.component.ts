@@ -11,7 +11,7 @@ import {
   ViewChild,
 } from '@angular/core';
 import { UiModule } from '../../../ui/ui.module';
-import { combineLatest, fromEvent, Observable } from 'rxjs';
+import { BehaviorSubject, combineLatest, fromEvent, Observable } from 'rxjs';
 import { select, Store } from '@ngrx/store';
 import { selectTimelineTasks } from '../../work-context/store/work-context.selectors';
 import { selectTaskRepeatCfgsWithAndWithoutStartTime } from '../../task-repeat-cfg/store/task-repeat-cfg.reducer';
@@ -56,9 +56,13 @@ import { FH, SVEType, T_ID_PREFIX } from '../schedule.const';
 import { mapToScheduleDays } from '../map-schedule-data/map-to-schedule-days';
 import { mapScheduleDaysToScheduleEvents } from '../map-schedule-data/map-schedule-days-to-schedule-events';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { InlineMultilineInputComponent } from '../../../ui/inline-multiline-input/inline-multiline-input.component';
+import { throttle } from 'helpful-decorators';
+import { CreateTaskPlaceholderComponent } from '../create-task-placeholder/create-task-placeholder.component';
 
 // const DAYS_TO_SHOW = 5;
 const D_HOURS = 24;
+const DRAG_CLONE_CLASS = 'drag-clone';
 const DRAG_OVER_CLASS = 'drag-over';
 const IS_DRAGGING_CLASS = 'is-dragging';
 const IS_NOT_DRAGGING_CLASS = 'is-not-dragging';
@@ -77,6 +81,8 @@ const IS_NOT_DRAGGING_CLASS = 'is-not-dragging';
     CdkDropList,
     DatePipe,
     NgIf,
+    InlineMultilineInputComponent,
+    CreateTaskPlaceholderComponent,
   ],
   templateUrl: './schedule.component.html',
   styleUrl: './schedule.component.scss',
@@ -213,20 +219,32 @@ export class ScheduleComponent implements AfterViewInit, OnDestroy {
     }),
   );
 
-  currentTimeSpan$: Observable<{ from: string; to: string }> = this.daysToShow$.pipe(
-    map((days) => {
-      const from = new Date(days[0]);
-      const to = new Date(days[days.length - 1]);
-      return {
-        // from: isToday(from)
-        //   ? 'Today'
-        //   : from.toLocaleDateString(this.locale, { day: 'numeric', month: 'numeric' }),
-        from: from.toLocaleDateString(this.locale, { day: 'numeric', month: 'numeric' }),
-        to: to.toLocaleDateString(this.locale, { day: 'numeric', month: 'numeric' }),
-      };
-    }),
+  newTaskPlaceholder$ = new BehaviorSubject<{
+    style: string;
+    time: string;
+    date: string;
+  } | null>(
+    null,
+    //   {
+    //   style: 'grid-row: 149 / span 4; grid-column: 4 / span 1',
+    //   time: '12:00',
+    //   date: '11/11/2021',
+    // }
   );
 
+  // currentTimeSpan$: Observable<{ from: string; to: string }> = this.daysToShow$.pipe(
+  //   map((days) => {
+  //     const from = new Date(days[0]);
+  //     const to = new Date(days[days.length - 1]);
+  //     return {
+  //       // from: isToday(from)
+  //       //   ? 'Today'
+  //       //   : from.toLocaleDateString(this.locale, { day: 'numeric', month: 'numeric' }),
+  //       from: from.toLocaleDateString(this.locale, { day: 'numeric', month: 'numeric' }),
+  //       to: to.toLocaleDateString(this.locale, { day: 'numeric', month: 'numeric' }),
+  //     };
+  //   }),
+  // );
   // timelineDays$: Observable<ScheduleDay[]> = this.timelineEntries$.pipe(
   //   map((entries) => mapTimelineEntriesToDays(entries)),
   // );
@@ -234,6 +252,7 @@ export class ScheduleComponent implements AfterViewInit, OnDestroy {
   now: number = Date.now();
   tomorrow: number = getTomorrow(0).getTime();
   isDragging = false;
+  isCreateTaskActive = false;
   containerExtraClass = IS_NOT_DRAGGING_CLASS;
   prevDragOverEl: HTMLElement | null = null;
   dragCloneEl: HTMLElement | null = null;
@@ -295,7 +314,67 @@ export class ScheduleComponent implements AfterViewInit, OnDestroy {
     window.clearTimeout(this._currentAniTimeout);
   }
 
+  onGridClick(ev: MouseEvent): void {
+    if (ev.target instanceof HTMLElement && ev.target.classList.contains('col')) {
+      this.isCreateTaskActive = true;
+    }
+  }
+
+  @throttle(30)
+  onMoveOverGrid(ev: MouseEvent): void {
+    if (this.isDragging) {
+      return;
+    }
+    if (this.isCreateTaskActive) {
+      return;
+    }
+
+    // console.log(ev);
+    if (ev.target instanceof HTMLElement && ev.target.classList.contains('col')) {
+      const gridContainer = this.gridContainer.nativeElement;
+      const gridStyles = window.getComputedStyle(gridContainer);
+
+      const rowSizes = gridStyles.gridTemplateRows
+        .split(' ')
+        .map((size) => parseFloat(size));
+
+      let rowIndex = 0;
+      let yOffset = ev.offsetY;
+
+      for (let i = 0; i < rowSizes.length; i++) {
+        if (yOffset < rowSizes[i]) {
+          rowIndex = i + 1;
+          break;
+        }
+        yOffset -= rowSizes[i];
+      }
+
+      const targetColRowOffset = +ev.target.style.gridRowStart - 2;
+      const targetColColOffset = +ev.target.style.gridColumnStart;
+      // console.log(ev.offsetY, targetColRowOffset, targetColColOffset, rowIndex);
+
+      const row = rowIndex + targetColRowOffset;
+      const hours = Math.floor((row - 1) / FH);
+      const minutes = Math.floor(((row - 1) % FH) * (60 / FH));
+      const time = `${hours}:${minutes.toString().padStart(2, '0')}`;
+
+      this.newTaskPlaceholder$.next({
+        style: `grid-row: ${row} / span 6; grid-column: ${targetColColOffset} / span 1`,
+        time,
+        date: this.daysToShow[targetColColOffset - 2],
+      });
+    } else {
+      this.newTaskPlaceholder$.next(null);
+    }
+  }
+
+  @throttle(30)
   dragMoved(ev: CdkDragMove<ScheduleEvent>): void {
+    // sometimes drag move fires after drag release, leaving elements in a drag over state, if we don't do this
+    if (!this.isDragging) {
+      return;
+    }
+
     // console.log('dragMoved', ev);
     ev.source.element.nativeElement.style.pointerEvents = 'none';
     const targetEl = document.elementFromPoint(
@@ -305,6 +384,11 @@ export class ScheduleComponent implements AfterViewInit, OnDestroy {
     if (!targetEl) {
       return;
     }
+    // the clone element should be ignored for drag over class
+    if (targetEl.classList.contains(DRAG_CLONE_CLASS)) {
+      return;
+    }
+    // console.log(targetEl.id, targetEl);
 
     if (targetEl !== this.prevDragOverEl) {
       console.log('dragMoved targetElChanged', targetEl);
@@ -313,15 +397,16 @@ export class ScheduleComponent implements AfterViewInit, OnDestroy {
         this.prevDragOverEl.classList.remove(DRAG_OVER_CLASS);
       }
       this.prevDragOverEl = targetEl;
+
       if (
         targetEl.classList.contains(SVEType.Task) ||
         targetEl.classList.contains(SVEType.SplitTask) ||
         targetEl.classList.contains(SVEType.SplitTaskPlannedForDay) ||
         targetEl.classList.contains(SVEType.TaskPlannedForDay)
       ) {
-        this.prevDragOverEl.classList.add(DRAG_OVER_CLASS);
+        targetEl.classList.add(DRAG_OVER_CLASS);
       } else if (targetEl.classList.contains('col')) {
-        this.prevDragOverEl.classList.add(DRAG_OVER_CLASS);
+        targetEl.classList.add(DRAG_OVER_CLASS);
       }
     }
   }
@@ -338,6 +423,9 @@ export class ScheduleComponent implements AfterViewInit, OnDestroy {
     this.dragCloneEl = cur.cloneNode(true) as HTMLElement;
     this.dragCloneEl.style.transform = 'translateY(0)';
     this.dragCloneEl.style.opacity = '.1';
+    // NOTE: used to avoid interfering with  the drag over class
+    this.dragCloneEl.classList.add(DRAG_CLONE_CLASS);
+    // this.dragCloneEl.style.pointerEvents = 'none';
     cur.parentNode?.insertBefore(this.dragCloneEl, cur);
   }
 
@@ -346,8 +434,15 @@ export class ScheduleComponent implements AfterViewInit, OnDestroy {
       target: ev.event.target,
       source: ev.source.element.nativeElement,
       ev,
+      dragOverEl: this.prevDragOverEl,
     });
 
+    // for very short drags prevDragOverEl is undefined. For desktop only the event.target can be used instead
+    const target = (this.prevDragOverEl || ev.event.target) as HTMLElement;
+    if (this.prevDragOverEl) {
+      this.prevDragOverEl.classList.remove(DRAG_OVER_CLASS);
+      this.prevDragOverEl = null;
+    }
     if (this.dragCloneEl) {
       this.dragCloneEl.remove();
     }
@@ -359,18 +454,12 @@ export class ScheduleComponent implements AfterViewInit, OnDestroy {
     setTimeout(() => {
       if (ev.source.element?.nativeElement?.style) {
         ev.source.element.nativeElement.style.opacity = '';
+        // NOTE: doing this again fixes the issue that the element remains in the wrong state sometimes
+        ev.source.element.nativeElement.style.pointerEvents = '';
       }
     }, 100);
 
     this.containerExtraClass = IS_NOT_DRAGGING_CLASS;
-
-    // for very short drags prevDragOverEl is undefined. For desktop only the event.target can be used instead
-    const target = (this.prevDragOverEl || ev.event.target) as HTMLElement;
-
-    if (this.prevDragOverEl) {
-      this.prevDragOverEl.classList.remove(DRAG_OVER_CLASS);
-      this.prevDragOverEl = null;
-    }
 
     if (target.tagName.toLowerCase() === 'div' && target.classList.contains('col')) {
       const isMoveToEndOfDay = target.classList.contains('end-of-day');

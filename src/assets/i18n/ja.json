@@ -1062,6 +1062,7 @@
       "SHOW_SEARCH_BAR": "検索バーを表示する",
       "SYSTEM_SHORTCUTS": "グローバルショートカット（システム全体）",
       "TASK_ADD_SUB_TASK": "サブタスクを追加",
+      "TASK_ADD_ATTACHMENT": "ファイルまたはリンクを添付",
       "TASK_DELETE": "タスクを削除",
       "TASK_EDIT_TAGS": "タグを編集",
       "TASK_EDIT_TITLE": "タイトルを編集",

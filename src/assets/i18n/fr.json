@@ -1192,6 +1192,7 @@
       "SHOW_SEARCH_BAR": "Afficher la barre de recherche",
       "SYSTEM_SHORTCUTS": "Raccourcis globaux (à l'échelle du système)",
       "TASK_ADD_SUB_TASK": "Ajouter une sous-tâche",
+      "TASK_ADD_ATTACHMENT": "Joindre un fichier ou un lien",
       "TASK_DELETE": "Supprimer la tâche",
       "TASK_EDIT_TAGS": "Étiquettes d'édition",
       "TASK_EDIT_TITLE": "Modifier le titre",

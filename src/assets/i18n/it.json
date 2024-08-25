@@ -1382,6 +1382,7 @@
       "SHOW_SEARCH_BAR": "Mostra barra di ricerca",
       "SYSTEM_SHORTCUTS": "Scorciatoie globali (a livello di sistema)",
       "TASK_ADD_SUB_TASK": "Aggiungi sotto-task",
+      "TASK_ADD_ATTACHMENT": "Allega file o link",
       "TASK_DELETE": "Cancella task",
       "TASK_EDIT_TAGS": "Modificare i tag",
       "TASK_EDIT_TITLE": "Modifica titolo",
