@@ -116,17 +116,12 @@ $margin-right: 10px;
   content: '';
   position: absolute;
   top: 0;
-  bottom: -1 * ($margin-bottom + 10);
+  bottom: -1 * ($margin-bottom + 1);
   left: 0;
   right: -1 * ($margin-right + 4);
   z-index: 3;
   //background: rgba(255, 0, 0, 0.1);
-
-  display: none;
-
-  :host-context(.is-dragging) & {
-    display: block;
-  }
+  display: block;
 }
 
 // non draggable
