@@ -12,6 +12,8 @@
   z-index: 33;
   opacity: 0.2;
   color: $light-theme-text-color;
+  // NOTE: to be consistent with scheduled event
+  margin-bottom: 6px;
 
   @include darkTheme() {
     color: $dark-theme-text-color;
