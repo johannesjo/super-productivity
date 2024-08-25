@@ -124,7 +124,7 @@ $margin-right: 10px;
 
   display: none;
 
-  :host-context(.is-dragging) {
+  :host-context(.is-dragging) & {
     display: block;
   }
 }

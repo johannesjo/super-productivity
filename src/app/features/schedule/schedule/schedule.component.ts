@@ -62,6 +62,7 @@ import { CreateTaskPlaceholderComponent } from '../create-task-placeholder/creat
 
 // const DAYS_TO_SHOW = 5;
 const D_HOURS = 24;
+const DRAG_CLONE_CLASS = 'drag-clone';
 const DRAG_OVER_CLASS = 'drag-over';
 const IS_DRAGGING_CLASS = 'is-dragging';
 const IS_NOT_DRAGGING_CLASS = 'is-not-dragging';
@@ -369,6 +370,11 @@ export class ScheduleComponent implements AfterViewInit, OnDestroy {
 
   @throttle(30)
   dragMoved(ev: CdkDragMove<ScheduleEvent>): void {
+    // sometimes drag move fires after drag release, leaving elements in a drag over state, if we don't do this
+    if (!this.isDragging) {
+      return;
+    }
+
     // console.log('dragMoved', ev);
     ev.source.element.nativeElement.style.pointerEvents = 'none';
     const targetEl = document.elementFromPoint(
@@ -376,6 +382,10 @@ export class ScheduleComponent implements AfterViewInit, OnDestroy {
       ev.pointerPosition.y,
     ) as HTMLElement;
     if (!targetEl) {
+      return;
+    }
+    // the clone element should be ignored for drag over class
+    if (targetEl.classList.contains(DRAG_CLONE_CLASS)) {
       return;
     }
     // console.log(targetEl.id, targetEl);
@@ -387,6 +397,7 @@ export class ScheduleComponent implements AfterViewInit, OnDestroy {
         this.prevDragOverEl.classList.remove(DRAG_OVER_CLASS);
       }
       this.prevDragOverEl = targetEl;
+
       if (
         targetEl.classList.contains(SVEType.Task) ||
         targetEl.classList.contains(SVEType.SplitTask) ||
@@ -412,8 +423,9 @@ export class ScheduleComponent implements AfterViewInit, OnDestroy {
     this.dragCloneEl = cur.cloneNode(true) as HTMLElement;
     this.dragCloneEl.style.transform = 'translateY(0)';
     this.dragCloneEl.style.opacity = '.1';
-    // NOTE: important as otherwise this interferes with the drag over class
-    this.dragCloneEl.style.pointerEvents = 'none';
+    // NOTE: used to avoid interfering with  the drag over class
+    this.dragCloneEl.classList.add(DRAG_CLONE_CLASS);
+    // this.dragCloneEl.style.pointerEvents = 'none';
     cur.parentNode?.insertBefore(this.dragCloneEl, cur);
   }
 
@@ -422,10 +434,16 @@ export class ScheduleComponent implements AfterViewInit, OnDestroy {
       target: ev.event.target,
       source: ev.source.element.nativeElement,
       ev,
+      dragOverEl: this.prevDragOverEl,
     });
 
     if (this.dragCloneEl) {
       this.dragCloneEl.remove();
+    }
+
+    if (this.prevDragOverEl) {
+      this.prevDragOverEl.classList.remove(DRAG_OVER_CLASS);
+      this.prevDragOverEl = null;
     }
 
     this.isDragging = false;
@@ -444,11 +462,6 @@ export class ScheduleComponent implements AfterViewInit, OnDestroy {
 
     // for very short drags prevDragOverEl is undefined. For desktop only the event.target can be used instead
     const target = (this.prevDragOverEl || ev.event.target) as HTMLElement;
-
-    if (this.prevDragOverEl) {
-      this.prevDragOverEl.classList.remove(DRAG_OVER_CLASS);
-      this.prevDragOverEl = null;
-    }
 
     if (target.tagName.toLowerCase() === 'div' && target.classList.contains('col')) {
       const isMoveToEndOfDay = target.classList.contains('end-of-day');
