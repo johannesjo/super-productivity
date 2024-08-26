@@ -870,10 +870,6 @@
         "UPDATE_ISSUE_DATA": "Actualizar datos de problemas"
       },
       "D_SCHEDULE_TASK": {
-        "CONFIRM_REPEAT_OK": "Programar",
-        "CONFIRM_REPEAT_TXT": "Estás intentando programar esta tarea repetida para otro día. Las tareas repetidas generalmente están destinadas a ser recreadas en días específicos y solo programadas para ese día. ¿Quieres continuar de todos modos?",
-        "DATETIME_FOR": "Fecha y hora para recordatorio",
-        "EDIT": "Editar recordatorio",
         "MOVE_TO_BACKLOG": "Mover la tarea al registro de trabajos hasta que sea programado",
         "REMIND_AT": "Recordar en",
         "RO_10M": "10 minutos antes de que comience",
@@ -884,7 +880,11 @@
         "RO_START": "cuando empieza",
         "RO_NEVER": "Nunca",
         "SCHEDULE": "Programar",
-        "UNSCHEDULE": "Desprogramar"
+        "UNSCHEDULE": "Desprogramar",
+        "CONFIRM_REPEAT_OK": "Programar",
+        "CONFIRM_REPEAT_TXT": "Estás intentando programar esta tarea repetida para otro día. Las tareas repetidas generalmente están destinadas a ser recreadas en días específicos y solo programadas para ese día. ¿Quieres continuar de todos modos?",
+        "DATETIME_FOR": "Fecha y hora para recordatorio",
+        "EDIT": "Editar recordatorio"
       },
       "D_REMINDER_VIEW": {
         "ADD_ALL_TO_TODAY": "Agregar todo a hoy",
@@ -1233,17 +1233,17 @@
       "HELP": "<p><strong>¿No se ven las notificaciones de escritorio?</strong> En Windows, puedes revisar en Sistema> Notificaciones y acciones, y verificar si se han habilitado las notificaciones requeridas.</p>",
       "IS_AUTO_ADD_WORKED_ON_TO_TODAY": "Agregar automáticamente la etiqueta de hoy a las tareas completadas",
       "IS_AUTO_MARK_PARENT_AS_DONE": "Marcar la tarea principal como realizada, cuando se completen todas las subtareas",
-      "IS_AUTO_START_NEXT_TASK": "Comenzar a rastrear la siguiente tarea cuando se marque la tarea actual como completa",
       "IS_CONFIRM_BEFORE_EXIT": "Confirmar antes de salir de la aplicación",
       "IS_CONFIRM_BEFORE_EXIT_WITHOUT_FINISH_DAY": "Confirme antes de salir de la aplicación sin terminar el día primero",
       "IS_DARK_MODE": "Modo Oscuro",
       "IS_HIDE_NAV": "Ocultar la navegación hasta que se desplace sobre el encabezado principal (solo para escritorio)",
       "IS_MINIMIZE_TO_TRAY": "Minimizar a la bandeja (solo escritorio)",
-      "IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "Notificar cuando se excede el tiempo estimado",
       "IS_TRAY_SHOW_CURRENT_TASK": "Mostrar la tarea actual en el menú de bandeja / estado (solo escritorio)",
       "IS_TURN_OFF_MARKDOWN": "Desactivar la sintaxis markdown para las notas",
       "TASK_NOTES_TPL": "Plantilla de descripción de la tarea",
-      "TITLE": "Ajustes Variados"
+      "TITLE": "Ajustes Variados",
+      "IS_AUTO_START_NEXT_TASK": "Comenzar a rastrear la siguiente tarea cuando se marque la tarea actual como completa",
+      "IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "Notificar cuando se excede el tiempo estimado"
     },
     "POMODORO": {
       "BREAK_DURATION": "Duración de las pausas breves",
@@ -1365,10 +1365,8 @@
       "OK": "¡Ey ey! ¡Apagar!"
     },
     "ESTIMATE_TOTAL": "Estimación total:",
-    "EVALUATION": "Evaluación",
     "EXPORT_TASK_LIST": "Exporta Lista de tareas",
     "NO_TASKS": "No hay tareas para este día.",
-    "PLAN": "plan",
     "ROUND_15M": "Redondear todas las tareas a 15 minutos.",
     "ROUND_30M": "Redondear todas las tareas a 30 minutos.",
     "ROUND_5M": "Redondear todas las tareas a 5 minutos.",
@@ -1383,12 +1381,14 @@
     "START_END": "Inicio - Fin",
     "SUMMARY_FOR": "Resumen diario de {{dayStr}}",
     "TASKS_COMPLETED": "Tareas completadas",
-    "TASK_LIST": "Lista de tareas",
     "TIME_SPENT_AND_ESTIMATE_LABEL": "Tiempo empleado / estimado",
     "TIME_SPENT_ESTIMATE_TITLE": "Tiempo empleado: Tiempo total empleado hoy. Tareas archivadas no incluidas. - Tiempo estimado: tiempo estimado para las tareas en las que se trabajó hoy, menos el tiempo que ya pasó con ellas en otros días.",
     "TIME_SPENT_TODAY_BY_TAG": "Tiempo empleado hoy por etiqueta",
-    "TODAY": "Hoy",
-    "WEEK": "semana"
+    "WEEK": "semana",
+    "EVALUATION": "Evaluación",
+    "PLAN": "plan",
+    "TASK_LIST": "Lista de tareas",
+    "TODAY": "Hoy"
   },
   "PM": {
     "TITLE": "Métricas del proyecto"

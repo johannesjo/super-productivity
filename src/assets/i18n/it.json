@@ -749,10 +749,6 @@
         "UPDATE_ISSUE_DATA": "Aggiorna dati dell'issue"
       },
       "D_SCHEDULE_TASK": {
-        "CONFIRM_REPEAT_OK": "programma",
-        "CONFIRM_REPEAT_TXT": "Stai cercando di programmare questa attività ripetuta per un altro giorno. Le attività ripetute in genere devono essere ricreate in giorni specificati e pianificate solo in quel giorno. Vuoi procedere comunque?",
-        "DATETIME_FOR": "Data e ora per promemoria",
-        "EDIT": "Modifica promemoria",
         "MOVE_TO_BACKLOG": "Sposta il task nel backlog fino alla pianificazione",
         "REMIND_AT": "Ricorda a",
         "RO_10M": "10 minuti prima che inizi",
@@ -763,7 +759,11 @@
         "RO_START": "quando inizia",
         "RO_NEVER": "Mai",
         "SCHEDULE": "Pianifica",
-        "UNSCHEDULE": "Rimuovi pianificazione"
+        "UNSCHEDULE": "Rimuovi pianificazione",
+        "CONFIRM_REPEAT_OK": "programma",
+        "CONFIRM_REPEAT_TXT": "Stai cercando di programmare questa attività ripetuta per un altro giorno. Le attività ripetute in genere devono essere ricreate in giorni specificati e pianificate solo in quel giorno. Vuoi procedere comunque?",
+        "DATETIME_FOR": "Data e ora per promemoria",
+        "EDIT": "Modifica promemoria"
       },
       "D_REMINDER_VIEW": {
         "ADD_ALL_TO_TODAY": "Aggiungi tutto a oggi",
@@ -1089,17 +1089,17 @@
       "HELP": "<p><strong>Non vedi le notifiche desktop?</strong>Per Windows controlla Sistema > Notifiche & azioni e controlla se le notifiche richieste sono abilitate.</p>",
       "IS_AUTO_ADD_WORKED_ON_TO_TODAY": "Aggiungi automaticamente il tag oggi alle attività lavorate",
       "IS_AUTO_MARK_PARENT_AS_DONE": "Segna il task padre come completato, quando tutti i sotto-task sono completati",
-      "IS_AUTO_START_NEXT_TASK": "Inizia a tracciare l'attività successiva quando si contrassegna corrente come fatto",
       "IS_CONFIRM_BEFORE_EXIT": "Conferma prima di uscire dall'applicazione",
       "IS_CONFIRM_BEFORE_EXIT_WITHOUT_FINISH_DAY": "Conferma prima di uscire dall'app senza prima terminare il giorno",
       "IS_DARK_MODE": "Tema scuro",
       "IS_HIDE_NAV": "Nascondi la navigazione mentre il cursore è sull'header principale (solo Desktop)",
       "IS_MINIMIZE_TO_TRAY": "Riduci a icona nel vassoio (solo desktop)",
-      "IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "Notificami quando il tempo stimato viene superato",
       "IS_TRAY_SHOW_CURRENT_TASK": "Mostra l'attività corrente nella barra delle applicazioni / menu di stato (solo desktop)",
       "IS_TURN_OFF_MARKDOWN": "Disattiva markdown per le note",
       "TASK_NOTES_TPL": "Modello di descrizione dell'attività",
-      "TITLE": "Impostazioni varie"
+      "TITLE": "Impostazioni varie",
+      "IS_AUTO_START_NEXT_TASK": "Inizia a tracciare l'attività successiva quando si contrassegna corrente come fatto",
+      "IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "Notificami quando il tempo stimato viene superato"
     },
     "POMODORO": {
       "BREAK_DURATION": "Durata delle pause brevi",
@@ -1215,10 +1215,8 @@
       "OK": "Agli ordini! Spegnimento!"
     },
     "ESTIMATE_TOTAL": "Stima totale:",
-    "EVALUATION": "Valutazione",
     "EXPORT_TASK_LIST": "Esporta lista dei task",
     "NO_TASKS": "Non ci sono task in questa giornata",
-    "PLAN": "Pianifica",
     "ROUND_15M": "Arrotonda tutti i task a 15 minuti",
     "ROUND_30M": "Arrotonda tutti i task a 30 minuti",
     "ROUND_5M": "Arrotonda tutti i task a 5 minuti",
@@ -1232,11 +1230,13 @@
     "START_END": "Inizio – File",
     "SUMMARY_FOR": "Riepilogo giornaliero per {{dayStr}}",
     "TASKS_COMPLETED": "Task completati",
-    "TASK_LIST": "Lista dei task",
     "TIME_SPENT_AND_ESTIMATE_LABEL": "Tempo impiegato /  stimato",
     "TIME_SPENT_ESTIMATE_TITLE": "Tempo Impiegato: Tempo totale impiegato oggi. Task archiviati non inclusi. – Tempo stimato: Tempo stimato per le attività fatte oggi meno il tempo già speso in queste attività negli altri giorni.",
-    "TODAY": "Oggi",
-    "WEEK": "Settimana"
+    "WEEK": "Settimana",
+    "EVALUATION": "Valutazione",
+    "PLAN": "Pianifica",
+    "TASK_LIST": "Lista dei task",
+    "TODAY": "Oggi"
   },
   "PM": {
     "TITLE": "Metriche di progetto"

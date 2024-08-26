@@ -975,10 +975,6 @@
         "OK": "Tags erstellen "
       },
       "D_SCHEDULE_TASK": {
-        "CONFIRM_REPEAT_OK": "Zeitplan",
-        "CONFIRM_REPEAT_TXT": "Sie versuchen, diese wiederkehrende Aufgabe auf einen anderen Tag zu verschieben. Wiederkehrende Aufgaben sollen normalerweise an bestimmten Tagen neu erstellt und nur an diesem Tag geplant werden. Möchten Sie trotzdem fortfahren?",
-        "DATETIME_FOR": "Datum und Uhrzeit zur Erinnerung",
-        "EDIT": "Erinnerung bearbeiten",
         "MOVE_TO_BACKLOG": "Verschieben Sie die Aufgabe in das Backlog, bis sie geplant ist",
         "REMIND_AT": "Erinnern an",
         "RO_10M": "10 Minuten bevor es losgeht",
@@ -989,7 +985,11 @@
         "RO_START": "wenn es beginnt",
         "RO_NEVER": "Nie",
         "SCHEDULE": "Planen",
-        "UNSCHEDULE": "Planung entfernen"
+        "UNSCHEDULE": "Planung entfernen",
+        "CONFIRM_REPEAT_OK": "Zeitplan",
+        "CONFIRM_REPEAT_TXT": "Sie versuchen, diese wiederkehrende Aufgabe auf einen anderen Tag zu verschieben. Wiederkehrende Aufgaben sollen normalerweise an bestimmten Tagen neu erstellt und nur an diesem Tag geplant werden. Möchten Sie trotzdem fortfahren?",
+        "DATETIME_FOR": "Datum und Uhrzeit zur Erinnerung",
+        "EDIT": "Erinnerung bearbeiten"
       },
       "D_REMINDER_VIEW": {
         "ADD_ALL_TO_TODAY": "Fügen Sie alles zu heute hinzu",
@@ -1407,18 +1407,18 @@
       "HELP": "<p><strong>Desktop-Benachrichtigungen werden nicht angezeigt?</strong> Unter Windows sollten Sie unter System -> Benachrichtigungen und Aktionen prüfen, ob die erforderlichen Benachrichtigungen aktiviert wurden.</p>",
       "IS_AUTO_ADD_WORKED_ON_TO_TODAY": "Fügen Sie heute automatisch das Tag \"Heute\" hinzu, um an Aufgaben zu arbeiten",
       "IS_AUTO_MARK_PARENT_AS_DONE": "Übergeordnete Aufgabe als erledigt markieren, wenn alle Unteraufgaben erledigt sind",
-      "IS_AUTO_START_NEXT_TASK": "Beginnen Sie mit der nächsten Aufgabe, wenn Sie die aktuelle Aufgabe als erledigt markieren",
       "IS_CONFIRM_BEFORE_EXIT": "Bestätigen, bevor die App beendet wird",
       "IS_CONFIRM_BEFORE_EXIT_WITHOUT_FINISH_DAY": "Bestätigen, bevor die App beendet wird, ohne den Tag zuerst zu beenden",
       "IS_DARK_MODE": "Dunkler Modus",
       "IS_DISABLE_ANIMATIONS": "Deaktiviere alle Animationen",
       "IS_HIDE_NAV": "Navigation verbergen, bis die Hauptüberschrift angezeigt wird (nur Desktop)",
       "IS_MINIMIZE_TO_TRAY": "Anwendung als Trayicon minimieren (nur Deskop)",
-      "IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "Benachrichtigen, wenn die geschätzte Zeit überschritten wurde",
       "IS_TRAY_SHOW_CURRENT_TASK": "Aktuelle Aufgabe im Tray / Status-Menu zeigen (nur Desktop)",
       "IS_TURN_OFF_MARKDOWN": "Deaktivieren Sie das Markdown-Parsing für Notizen",
       "TASK_NOTES_TPL": "Aufgabenbeschreibungsvorlage",
-      "TITLE": "Verschiedene Einstellungen"
+      "TITLE": "Verschiedene Einstellungen",
+      "IS_AUTO_START_NEXT_TASK": "Beginnen Sie mit der nächsten Aufgabe, wenn Sie die aktuelle Aufgabe als erledigt markieren",
+      "IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "Benachrichtigen, wenn die geschätzte Zeit überschritten wurde"
     },
     "POMODORO": {
       "BREAK_DURATION": "Dauer der kurzen Pausen",
@@ -1557,10 +1557,8 @@
       "OK": "Aye Aye! Ausschalten!"
     },
     "ESTIMATE_TOTAL": "Gesamtschätzung:",
-    "EVALUATION": "Auswertung",
     "EXPORT_TASK_LIST": "Aufgabenliste exportieren",
     "NO_TASKS": "Für diesen Tag gibt es keine Aufgaben",
-    "PLAN": "Planen",
     "ROUND_15M": "Runden auf 15 Minuten",
     "ROUND_30M": "Runden auf 30 Minuten",
     "ROUND_5M": "Runden auf 5 Minuten",
@@ -1575,12 +1573,14 @@
     "START_END": "Start - Ende",
     "SUMMARY_FOR": "Zusammenfassung für {{dayStr}}",
     "TASKS_COMPLETED": "Aufgaben erledigt",
-    "TASK_LIST": "Aufgabenliste",
     "TIME_SPENT_AND_ESTIMATE_LABEL": "Zeitaufwand / Geschätzt",
     "TIME_SPENT_ESTIMATE_TITLE": "Aufgewandte Zeit: Gesamtzeit, die heute verbracht wurde. Archivierte Aufgaben nicht enthalten. - Geschätzte Zeit: Geschätzte Zeit für Aufgaben, die heute bearbeitet wurden, abzüglich der Zeit, die bereits an anderen Tagen mit ihnen verbracht wurde.",
     "TIME_SPENT_TODAY_BY_TAG": "Heute verbrachte Zeit nach #Tag",
-    "TODAY": "Heute",
-    "WEEK": "Woche"
+    "WEEK": "Woche",
+    "EVALUATION": "Auswertung",
+    "PLAN": "Planen",
+    "TASK_LIST": "Aufgabenliste",
+    "TODAY": "Heute"
   },
   "PM": {
     "TITLE": "Projektmetriken"

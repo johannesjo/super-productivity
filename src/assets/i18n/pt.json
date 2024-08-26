@@ -968,10 +968,6 @@
         "OK": "Criar Tags"
       },
       "D_SCHEDULE_TASK": {
-        "CONFIRM_REPEAT_OK": "Cronograma",
-        "CONFIRM_REPEAT_TXT": "Você está tentando agendar essa tarefa repetida para outro dia. Normalmente, as tarefas repetidas devem ser recriadas em dias específicos e agendadas apenas nesse dia. Você deseja continuar mesmo assim?",
-        "DATETIME_FOR": "Data e hora para lembrete",
-        "EDIT": "Editar lembrete",
         "MOVE_TO_BACKLOG": "Mova a tarefa para backlog até que seja agendada",
         "REMIND_AT": "Lembre-se em",
         "RO_10M": "10 minutos antes de começar",
@@ -982,7 +978,11 @@
         "RO_START": "quando começa",
         "RO_NEVER": "Nunca",
         "SCHEDULE": "Agendar",
-        "UNSCHEDULE": "Cancelar agendamento"
+        "UNSCHEDULE": "Cancelar agendamento",
+        "CONFIRM_REPEAT_OK": "Cronograma",
+        "CONFIRM_REPEAT_TXT": "Você está tentando agendar essa tarefa repetida para outro dia. Normalmente, as tarefas repetidas devem ser recriadas em dias específicos e agendadas apenas nesse dia. Você deseja continuar mesmo assim?",
+        "DATETIME_FOR": "Data e hora para lembrete",
+        "EDIT": "Editar lembrete"
       },
       "D_REMINDER_VIEW": {
         "ADD_ALL_TO_TODAY": "Adicionar tudo hoje",
@@ -1354,18 +1354,18 @@
       "HELP": "<p><strong>Não está vendo as notificações da área de trabalho?</strong> Para janelas, convém verificar Sistema> Notificações e ações, e verificar se as notificações necessárias foram ativadas.</p>",
       "IS_AUTO_ADD_WORKED_ON_TO_TODAY": "Adicionar automaticamente a tag hoje às tarefas trabalhadas",
       "IS_AUTO_MARK_PARENT_AS_DONE": "Marque a tarefa pai como concluída, quando todas as subtarefas estiverem concluídas",
-      "IS_AUTO_START_NEXT_TASK": "Comece a rastrear a próxima tarefa ao marcar atual como concluído",
       "IS_CONFIRM_BEFORE_EXIT": "Confirme antes de sair do aplicativo",
       "IS_CONFIRM_BEFORE_EXIT_WITHOUT_FINISH_DAY": "Confirme antes de sair do aplicativo sem terminar o dia primeiro",
       "IS_DARK_MODE": "Modo escuro",
       "IS_DISABLE_ANIMATIONS": "Desativar todas as animações",
       "IS_HIDE_NAV": "Ocultar a navegação até passar o mouse no cabeçalho principal (somente na área de trabalho)",
       "IS_MINIMIZE_TO_TRAY": "Minimize para a bandeja (somente desktop)",
-      "IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "Notificar quando a estimativa de tempo foi excedida",
       "IS_TRAY_SHOW_CURRENT_TASK": "Mostra a tarefa atual na bandeja / menu de status (somente desktop)",
       "IS_TURN_OFF_MARKDOWN": "Desativar a análise de markdown para anotações",
       "TASK_NOTES_TPL": "Modelo de descrição de tarefa",
-      "TITLE": "Configurações diversas"
+      "TITLE": "Configurações diversas",
+      "IS_AUTO_START_NEXT_TASK": "Comece a rastrear a próxima tarefa ao marcar atual como concluído",
+      "IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "Notificar quando a estimativa de tempo foi excedida"
     },
     "POMODORO": {
       "BREAK_DURATION": "Duração de pausas curtas",
@@ -1500,10 +1500,8 @@
       "OK": "Sim, sim! Desligar!"
     },
     "ESTIMATE_TOTAL": "Estimativa total:",
-    "EVALUATION": "Avaliação",
     "EXPORT_TASK_LIST": "Exportar lista de tarefas",
     "NO_TASKS": "Não há tarefas para este dia",
-    "PLAN": "Plano",
     "ROUND_15M": "Arredonde todas as tarefas para 15 minutos",
     "ROUND_30M": "Arredonde todas as tarefas para 30 minutos",
     "ROUND_5M": "Arredonde todas as tarefas para 5 minutos",
@@ -1517,11 +1515,13 @@
     "START_END": "Começar – Fim",
     "SUMMARY_FOR": "Resumo diário para {{dayStr}}",
     "TASKS_COMPLETED": "Tarefas concluídas",
-    "TASK_LIST": "Lista de tarefas",
     "TIME_SPENT_AND_ESTIMATE_LABEL": "Tempo gasto / Estimado",
     "TIME_SPENT_ESTIMATE_TITLE": "Tempo gasto: Tempo total gasto hoje. Tarefas arquivadas não incluídas. – Tempo estimado: Tempo estimado para tarefas trabalhadas hoje menos o tempo já gasto com elas em outros dias.",
-    "TODAY": "Hoje",
-    "WEEK": "Semana"
+    "WEEK": "Semana",
+    "EVALUATION": "Avaliação",
+    "PLAN": "Plano",
+    "TASK_LIST": "Lista de tarefas",
+    "TODAY": "Hoje"
   },
   "PM": {
     "TITLE": "Métricas do projeto"

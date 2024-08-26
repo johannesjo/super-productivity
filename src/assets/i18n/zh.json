@@ -171,6 +171,11 @@
       "START_NEXT_FOCUS_SESSION": "开始下一个聚焦会话",
       "WORKED_FOR": "您正在进行"
     },
+    "GITEA": {
+      "DIALOG_INITIAL": {
+        "TITLE": "为项目设置Gitea"
+      }
+    },
     "GITHUB": {
       "DIALOG_INITIAL": {
         "TITLE": "为项目设置 GitHub"
@@ -663,14 +668,19 @@
       }
     },
     "SYNC": {
+      "A": {
+        "ARCHIVE_ONLY_UPLOADED": "数据仅部分上传，请稍后再试！否则将无法与其他设备同步你的数据。",
+        "POSSIBLE_LEGACY_DATA": "Super Productivity目前通过使用两个文件（而不是一个）来改进同步，大幅减少了数据的传输量。推荐更新所有Super Productivity应用，并从数据最新的应用端开始初次同步。如果这是来自您本地设备的数据，请忽略本警告并通过确认下一个对话框继续上传。"
+      },
       "C": {
         "EMPTY_SYNC": "您正在尝试同步一个空的数据对象。这是您（几乎）原始应用程序的第一次同步吗？",
-        "FORCE_IMPORT": "无论如何,导入远程数据？",
+        "FORCE_IMPORT": "无论如何，导入远程数据？",
         "FORCE_UPLOAD": "仍要上传本地数据吗？",
         "FORCE_UPLOAD_AFTER_ERROR": "上载本地数据时发生错误。尝试强制更新？",
         "MIGRATE_LEGACY": "导入时检测到旧数据，是否要尝试迁移它？",
         "NO_REMOTE_DATA": "找不到远程数据。本地上传到远程吗？",
-        "TRY_LOAD_REMOTE_AGAIN": "尝试再次从远程重新加载数据？"
+        "TRY_LOAD_REMOTE_AGAIN": "尝试再次从远程重新加载数据？",
+        "UNABLE_TO_LOAD_REMOTE_DATA": "无法加载远程数据。您想用本地数据覆盖远程数据吗？所有远程数据将会丢失。"
       },
       "D_AUTH_CODE": {
         "FOLLOW_LINK": "请打开以下链接，并将此处提供的身份验证代码复制到下面的输入字段中。",
@@ -689,6 +699,18 @@
         "USE_LOCAL": "使用本地",
         "USE_REMOTE": "使用远程"
       },
+      "D_INCOMPLETE_SYNC": {
+        "T1": "最后一次同步没有完成！",
+        "T2": "您的归档数据在上次同步中未能成功上传：",
+        "T3": "您有两种选择：",
+        "T4": "1. 在您的其他设备上完成同步",
+        "T5": "2. 或者您可以使用本地数据覆盖远程数据。所有远程的更改会丢失！"
+      },
+      "D_PERMISSION": {
+        "DISABLE_SYNC": "禁用同步",
+        "TEXT": "<p>您用于本地同步的文件权限已被撤销。</p>",
+        "TITLE": "同步：本地文件权限不足"
+      },
       "FORM": {
         "DROPBOX": {
           "L_ACCESS_TOKEN": "访问令牌（从身份验证代码生成）"
@@ -697,6 +719,7 @@
           "L_SYNC_FILE_NAME": "同步文件名"
         },
         "LOCAL_FILE": {
+          "L_SYNC_FOLDER_PATH": "同步文件夹路径",
           "L_SYNC_FILE_PATH_PERMISSION_VALIDATION": "需要文件访问权限",
           "L_SYNC_FILE_PATH": "同步文件路径",
           "L_SYNC_FILE_PATH_DESCRIPTION": "应该用于同步的文件的绝对路径（将被创建）。"
@@ -704,6 +727,8 @@
         "L_ENABLE_COMPRESSION": "启用压缩（加快传输速度）",
         "L_ENABLE_ENCRYPTION": "启用端对端加密（实验性功能）——使你的数据无法被同步提供者访问",
         "L_ENABLE_SYNCING": "启用同步",
+        "L_ENCRYPTION_NOTES": "注意：<strong>在下次同步开始前</strong>，您需要在其他设备上设置同样的密码才能让同步正常工作。请选择一个安全的密码。此外，<strong>如果您忘记了密码，将*无法*访问您的数据，且*没有*办法恢复数据</strong>，因为只有您拥有密码。加密措施应该足以防住绝大多数攻击者，但<strong>不做保证</strong>。",
+        "L_ENCRYPTION_PASSWORD": "加密用密码<strong>（请勿忘记）</strong>",
         "L_SYNC_INTERVAL": "同步间隔",
         "L_SYNC_PROVIDER": "同步提供者",
         "TITLE": "同步",
@@ -711,13 +736,17 @@
           "CORS_INFO": "<strong>实验！！</strong> 为了完成这项工作，您需要为Nextcloud实例禁用或限制CORS，这可能会对安全性造成负面影响！请 <a href='https://github.com/nextcloud/server/issues/3131'>参考该线程</a> 以获取更多信息。使用风险自负！",
           "L_BASE_URL": "基本网址",
           "L_PASSWORD": "密码",
+          "L_SYNC_FOLDER_PATH": "同步文件夹路径",
           "L_USER_NAME": "用户名",
           "L_SYNC_FILE_PATH": "同步文件路径"
         }
       },
       "S": {
+        "ALREADY_IN_SYNC": "已经同步",
+        "ALREADY_IN_SYNC_NO_LOCAL_CHANGES": "本地数据无变化 - 已经同步",
         "ERROR_FALLBACK_TO_BACKUP": "导入数据时出错了。回到本地备份。",
         "ERROR_INVALID_DATA": "同步时出错。无效数据",
+        "ERROR_UNABLE_TO_READ_REMOTE_DATA": "同步时出错，无法读取远程数据。可能启用了加密且本地密码无法与用于加密远程数据的密码匹配？",
         "IMPORTING": "导入数据",
         "INCOMPLETE_CFG": "同步身份验证失败。请检查您的配置！",
         "INITIAL_SYNC_ERROR": "初始同步失败",
@@ -811,10 +840,6 @@
         "UPDATE_ISSUE_DATA": "更新 Issue 数据"
       },
       "D_SCHEDULE_TASK": {
-        "CONFIRM_REPEAT_OK": "时间表",
-        "CONFIRM_REPEAT_TXT": "您正在尝试将此重复任务安排到另一天。重复的任务通常意味着在指定的日期重新创建并且只安排在当天。您仍要继续吗？",
-        "DATETIME_FOR": "提醒的日期时间",
-        "EDIT": "编辑提醒",
         "MOVE_TO_BACKLOG": "在计划时间到来后将任务移至待办事项",
         "REMIND_AT": "提醒在",
         "RO_10M": "开始前10分钟",
@@ -825,7 +850,11 @@
         "RO_START": "当它开始的时候",
         "RO_NEVER": "Never",
         "SCHEDULE": "计划时间",
-        "UNSCHEDULE": "取消计划"
+        "UNSCHEDULE": "取消计划",
+        "CONFIRM_REPEAT_OK": "时间表",
+        "CONFIRM_REPEAT_TXT": "您正在尝试将此重复任务安排到另一天。重复的任务通常意味着在指定的日期重新创建并且只安排在当天。您仍要继续吗？",
+        "DATETIME_FOR": "提醒的日期时间",
+        "EDIT": "编辑提醒"
       },
       "D_REMINDER_VIEW": {
         "ADD_ALL_TO_TODAY": "全部添加到今天",
@@ -1231,18 +1260,18 @@
       "HELP": "<p><strong>没有看到桌面通知？</strong>对于Windows，您可能需要检查 系统>通知和操作 ，并检查是否已启用所需的通知。</p>",
       "IS_AUTO_ADD_WORKED_ON_TO_TODAY": "自动添加今日标签以处理任务",
       "IS_AUTO_MARK_PARENT_AS_DONE": "完成所有子任务后，将父任务标记为已完成",
-      "IS_AUTO_START_NEXT_TASK": "将当前标记为已完成时，开始记录下一个任务",
       "IS_CONFIRM_BEFORE_EXIT": "退出应用前确认",
       "IS_CONFIRM_BEFORE_EXIT_WITHOUT_FINISH_DAY": "在没有先完成一天的情况下退出应用程序之前确认",
       "IS_DARK_MODE": "深色模式",
       "IS_DISABLE_ANIMATIONS": "禁用所有动画",
       "IS_HIDE_NAV": "隐藏导航，直到主标题悬停（仅限桌面）",
       "IS_MINIMIZE_TO_TRAY": "最小化到托盘（仅限桌面）",
-      "IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "在超出时间估算时发送通知",
       "IS_TRAY_SHOW_CURRENT_TASK": "在任务栏/状态菜单中显示当前任务（仅限桌面）",
       "IS_TURN_OFF_MARKDOWN": "停止在任务备注中解析Markdown",
       "TASK_NOTES_TPL": "任务描述模板",
-      "TITLE": "其他设置"
+      "TITLE": "其他设置",
+      "IS_AUTO_START_NEXT_TASK": "将当前标记为已完成时，开始记录下一个任务",
+      "IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "在超出时间估算时发送通知"
     },
     "POMODORO": {
       "BREAK_DURATION": "短休息时长",
@@ -1369,10 +1398,8 @@
       "OK": "好的！结束程序！"
     },
     "ESTIMATE_TOTAL": "总估计数：",
-    "EVALUATION": "评估",
     "EXPORT_TASK_LIST": "导出任务列表",
     "NO_TASKS": "今天没有任务",
-    "PLAN": "计划",
     "ROUND_15M": "将所有任务舍入到15分钟",
     "ROUND_30M": "将所有任务舍入到30分钟",
     "ROUND_5M": "将所有任务舍入到5分钟",
@@ -1387,11 +1414,13 @@
     "START_END": "开始 - 结束",
     "SUMMARY_FOR": " {{dayStr}}的每日摘要",
     "TASKS_COMPLETED": "任务已完成",
-    "TASK_LIST": "任务列表",
     "TIME_SPENT_AND_ESTIMATE_LABEL": "花费时间/估计",
     "TIME_SPENT_ESTIMATE_TITLE": "花费的时间：今天花费的总时间。存档的任务不包括在内。 - 估计时间：今天工作的任务估计时间减去其他日子已经花费的时间。",
-    "TODAY": "今天",
-    "WEEK": "周"
+    "WEEK": "周",
+    "EVALUATION": "评估",
+    "PLAN": "计划",
+    "TASK_LIST": "任务列表",
+    "TODAY": "今天"
   },
   "PM": {
     "TITLE": "项目指标"

@@ -779,10 +779,6 @@
         "UPDATE_ISSUE_DATA": "문제 데이터 업데이트"
       },
       "D_SCHEDULE_TASK": {
-        "CONFIRM_REPEAT_OK": "시간표",
-        "CONFIRM_REPEAT_TXT": "이 반복 작업을 다른 날짜로 예약하려고 합니다. 반복되는 작업은 일반적으로 지정된 날짜에 다시 생성되고 해당 날짜에만 예약됩니다. 그래도 계속하시겠습니까?",
-        "DATETIME_FOR": "알림 시간",
-        "EDIT": "알림 수정",
         "MOVE_TO_BACKLOG": "예약 될 때까지 작업을 백 로그로 이동하십시오.",
         "REMIND_AT": "에 알림",
         "RO_10M": "시작하기 10 분 전",
@@ -793,7 +789,11 @@
         "RO_START": "시작될 때",
         "RO_NEVER": "Never",
         "SCHEDULE": "시간표",
-        "UNSCHEDULE": "일정 잡기"
+        "UNSCHEDULE": "일정 잡기",
+        "CONFIRM_REPEAT_OK": "시간표",
+        "CONFIRM_REPEAT_TXT": "이 반복 작업을 다른 날짜로 예약하려고 합니다. 반복되는 작업은 일반적으로 지정된 날짜에 다시 생성되고 해당 날짜에만 예약됩니다. 그래도 계속하시겠습니까?",
+        "DATETIME_FOR": "알림 시간",
+        "EDIT": "알림 수정"
       },
       "D_REMINDER_VIEW": {
         "ADD_ALL_TO_TODAY": "오늘 모두 추가",
@@ -1121,17 +1121,17 @@
       "HELP": "<p><strong>데스크톱 알림이 표시되지 않습니까?</strong> 창의 경우 시스템 > 알림 및 작업을 확인하고 필요한 알림이 활성화되었는지 확인할 수 있습니다.</p>",
       "IS_AUTO_ADD_WORKED_ON_TO_TODAY": "작업에 사용할 오늘 태그를 자동으로 추가",
       "IS_AUTO_MARK_PARENT_AS_DONE": "모든 하위 작업이 완료되면 상위 작업을 완료로 표시합니다.",
-      "IS_AUTO_START_NEXT_TASK": "전류를 완료로 표시 할 때 다음 작업 추적 시작",
       "IS_CONFIRM_BEFORE_EXIT": "앱을 종료하기 전에 확인",
       "IS_CONFIRM_BEFORE_EXIT_WITHOUT_FINISH_DAY": "하루를 먼저 끝내지 않고 앱을 종료하기 전에 확인",
       "IS_DARK_MODE": "다크 모드",
       "IS_HIDE_NAV": "기본 헤더가 올라갈 때까지 탐색을 숨 깁니다 (데스크톱 만 해당).",
       "IS_MINIMIZE_TO_TRAY": "트레이로 최소화 (데스크탑만 해당)",
-      "IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "예상 시간을 초과했을 때 알림",
       "IS_TRAY_SHOW_CURRENT_TASK": "트레이 / 상태 메뉴에 현재 작업 표시 (데스크톱 전용)",
       "IS_TURN_OFF_MARKDOWN": "노트에 대한 마크 다운 파싱 끄기",
       "TASK_NOTES_TPL": "작업 설명 템플릿",
-      "TITLE": "기타 설정"
+      "TITLE": "기타 설정",
+      "IS_AUTO_START_NEXT_TASK": "전류를 완료로 표시 할 때 다음 작업 추적 시작",
+      "IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "예상 시간을 초과했을 때 알림"
     },
     "POMODORO": {
       "BREAK_DURATION": "짧은 휴식 시간",
@@ -1247,10 +1247,8 @@
       "OK": "네 네! 일시 휴업!"
     },
     "ESTIMATE_TOTAL": "총 견적:",
-    "EVALUATION": "평가",
     "EXPORT_TASK_LIST": "작업 목록 내보내기",
     "NO_TASKS": "오늘은 아무 작업도 없습니다.",
-    "PLAN": "계획",
     "ROUND_15M": "모든 작업을 15 분으로 반올림",
     "ROUND_30M": "모든 작업을 30 분으로 반올림",
     "ROUND_5M": "모든 작업을 5 분으로 반올림",
@@ -1264,11 +1262,13 @@
     "START_END": "시작 - 끝",
     "SUMMARY_FOR": " {{dayStr}}의 일일 요약",
     "TASKS_COMPLETED": "완료된 작업",
-    "TASK_LIST": "작업 목록",
     "TIME_SPENT_AND_ESTIMATE_LABEL": "소요 시간 / 예상",
     "TIME_SPENT_ESTIMATE_TITLE": "소요 시간 : 오늘 보낸 총 시간. 아카이브 된 태스크는 포함되지 않습니다. - 예상 시간 : 오늘 작업 한 작업에 대한 예상 시간에서 다른 날에 이미 소비 한 시간을 뺀 시간입니다.",
-    "TODAY": "오늘",
-    "WEEK": "주"
+    "WEEK": "주",
+    "EVALUATION": "평가",
+    "PLAN": "계획",
+    "TASK_LIST": "작업 목록",
+    "TODAY": "오늘"
   },
   "PM": {
     "TITLE": "프로젝트 측정 항목"

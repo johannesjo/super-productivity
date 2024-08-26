@@ -880,10 +880,6 @@
         "UPDATE_ISSUE_DATA": "Perbarui data masalah"
       },
       "D_SCHEDULE_TASK": {
-        "CONFIRM_REPEAT_OK": "Jadwalkan",
-        "CONFIRM_REPEAT_TXT": "Anda mencoba menjadwalkan tugas berulang ini ke hari lain. Tugas yang berulang biasanya dimaksudkan untuk dibuat ulang pada hari tertentu dan hanya dijadwalkan pada hari itu. Tetap ingin melanjutkan?",
-        "DATETIME_FOR": "Tanggal untuk pengingat",
-        "EDIT": "Ubah Pengingat",
         "MOVE_TO_BACKLOG": "Pindahkan tugas ke backlog hingga dijadwalkan",
         "REMIND_AT": "Ingatkan di",
         "RO_10M": "10 menit sebelum dimulai",
@@ -894,7 +890,11 @@
         "RO_START": "ketika itu dimulai",
         "RO_NEVER": "Never",
         "SCHEDULE": "Jadwalkan",
-        "UNSCHEDULE": "Batalkan jadwal"
+        "UNSCHEDULE": "Batalkan jadwal",
+        "CONFIRM_REPEAT_OK": "Jadwalkan",
+        "CONFIRM_REPEAT_TXT": "Anda mencoba menjadwalkan tugas berulang ini ke hari lain. Tugas yang berulang biasanya dimaksudkan untuk dibuat ulang pada hari tertentu dan hanya dijadwalkan pada hari itu. Tetap ingin melanjutkan?",
+        "DATETIME_FOR": "Tanggal untuk pengingat",
+        "EDIT": "Ubah Pengingat"
       },
       "D_REMINDER_VIEW": {
         "ADD_ALL_TO_TODAY": "Tambahkan semua ke hari ini",
@@ -1288,18 +1288,18 @@
       "HELP": "<p><strong>Tidak melihat Pemberitahuan Desktop?</strong> Untuk windows, Anda mungkin ingin memeriksa Sistem > Pemberitahuan & tindakan dan memeriksa apakah pemberitahuan yang diperlukan telah diaktifkan.</p>",
       "IS_AUTO_ADD_WORKED_ON_TO_TODAY": "Tambahkan tag hari ini secara otomatis untuk mengerjakan tugas",
       "IS_AUTO_MARK_PARENT_AS_DONE": "Tandai tugas induk sebagai selesai, ketika semua sub tugas selesai",
-      "IS_AUTO_START_NEXT_TASK": "Mulai lacak tugas berikutnya saat menandai saat ini sebagai selesai",
       "IS_CONFIRM_BEFORE_EXIT": "Konfirmasi sebelum keluar dari aplikasi",
       "IS_CONFIRM_BEFORE_EXIT_WITHOUT_FINISH_DAY": "Konfirmasi sebelum keluar dari aplikasi tanpa menyelesaikan hari terlebih dahulu",
       "IS_DARK_MODE": "Mode Gelap",
       "IS_DISABLE_ANIMATIONS": "Nonaktifkan semua animasi",
       "IS_HIDE_NAV": "Sembunyikan navigasi hingga header utama diarahkan (khusus desktop)",
       "IS_MINIMIZE_TO_TRAY": "Minimalkan ke baki (hanya desktop)",
-      "IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "Beri tahu kapan perkiraan waktu terlampaui",
       "IS_TRAY_SHOW_CURRENT_TASK": "Tampilkan tugas saat ini di menu baki / status (khusus desktop mac/windows)",
       "IS_TURN_OFF_MARKDOWN": "Matikan penguraian penurunan harga untuk catatan tugas",
       "TASK_NOTES_TPL": "Templat deskripsi tugas",
-      "TITLE": "Pengaturan Lain-lain"
+      "TITLE": "Pengaturan Lain-lain",
+      "IS_AUTO_START_NEXT_TASK": "Mulai lacak tugas berikutnya saat menandai saat ini sebagai selesai",
+      "IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "Beri tahu kapan perkiraan waktu terlampaui"
     },
     "POMODORO": {
       "BREAK_DURATION": "Durasi istirahat pendek",
@@ -1417,10 +1417,8 @@
       "OK": "Ya, ya! Matikan!"
     },
     "ESTIMATE_TOTAL": "Total perkiraan:",
-    "EVALUATION": "Evaluasi",
     "EXPORT_TASK_LIST": "Ekspor Daftar Tugas",
     "NO_TASKS": "Tidak ada tugas untuk hari ini",
-    "PLAN": "Rencana",
     "ROUND_15M": "Bulatkan semua tugas menjadi 15 menit",
     "ROUND_30M": "Bulatkan semua tugas menjadi 30 menit",
     "ROUND_5M": "Bulatkan semua tugas menjadi 5 menit",
@@ -1435,11 +1433,13 @@
     "START_END": "Mulai – Akhir",
     "SUMMARY_FOR": "Ringkasan Harian untuk {{dayStr}}",
     "TASKS_COMPLETED": "Tugas Selesai",
-    "TASK_LIST": "Daftar Tugas",
     "TIME_SPENT_AND_ESTIMATE_LABEL": "Waktu yang Dihabiskan / Perkiraan",
     "TIME_SPENT_ESTIMATE_TITLE": "Waktu yang Dihabiskan: Total waktu yang dihabiskan hari ini. Tugas yang diarsipkan tidak disertakan. – Perkiraan Waktu: Perkiraan waktu untuk tugas yang dikerjakan hari ini dikurangi waktu yang telah dihabiskan bersama mereka di hari lain.",
-    "TODAY": "Hari ini",
-    "WEEK": "Minggu"
+    "WEEK": "Minggu",
+    "EVALUATION": "Evaluasi",
+    "PLAN": "Rencana",
+    "TASK_LIST": "Daftar Tugas",
+    "TODAY": "Hari ini"
   },
   "PM": {
     "TITLE": "Proyek Metrik"
